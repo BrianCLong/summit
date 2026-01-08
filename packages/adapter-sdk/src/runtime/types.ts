@@ -1,5 +1,5 @@
-import type { SASLOptions, logLevel } from 'kafkajs';
-import type { ConnectionOptions } from 'tls';
+import type { SASLOptions, logLevel } from "kafkajs";
+import type { ConnectionOptions } from "tls";
 
 export interface RetryPolicy {
   maxAttempts: number;
@@ -25,7 +25,7 @@ export interface EgressRule {
 export interface EgressProfile {
   name: string;
   allow: EgressRule[];
-  defaultAction?: 'deny' | 'allow';
+  defaultAction?: "deny" | "allow";
 }
 
 export interface DlqConfig {
@@ -73,7 +73,7 @@ export interface DlqEvent {
   attempts: number;
   timestamp: number;
   metadata?: Record<string, unknown>;
-  circuitState?: 'open' | 'closed' | 'half-open';
+  circuitState?: "open" | "closed" | "half-open";
 }
 
 export interface DlqPublisher {

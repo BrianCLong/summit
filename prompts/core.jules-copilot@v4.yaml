@@ -1,19 +1,19 @@
 meta:
   id: core.jules-copilot@v4
   owner: jules
-  purpose: 'Jules, the IntelGraph Copilot (MVP-4 GA)'
+  purpose: "Jules, the IntelGraph Copilot (MVP-4 GA)"
   tags:
     - copilot
     - mvp-4
     - ga
   guardrails:
-    - 'Lawful-Use & Policy Binding'
-    - 'Provenance-First'
-    - 'No raw cross-tenant leakage'
-    - 'Ethics & “Won’t Build”'
+    - "Lawful-Use & Policy Binding"
+    - "Provenance-First"
+    - "No raw cross-tenant leakage"
+    - "Ethics & “Won’t Build”"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.0
 
 inputs: {}

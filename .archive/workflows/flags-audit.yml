@@ -3,7 +3,7 @@ name: flags-audit
 permissions:
   contents: read
 on:
-  schedule: [{ cron: '0 8 * * 1' }]
+  schedule: [{ cron: "0 8 * * 1" }]
   pull_request:
 jobs:
   audit:

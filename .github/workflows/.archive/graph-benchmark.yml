@@ -6,26 +6,26 @@ on:
       - main
       - develop
     paths:
-      - 'server/src/services/GraphRAGService.ts'
-      - 'server/src/services/GraphAnalyticsService.js'
-      - 'server/src/services/PathRankingService.ts'
-      - 'server/src/repos/EntityRepo.ts'
-      - 'server/src/repos/RelationshipRepo.ts'
-      - 'server/src/db/neo4j.ts'
-      - 'server/src/ai/nl-to-cypher/**'
-      - 'benchmarks/graph/**'
-      - 'docker-compose.neo4j.yml'
-      - '.github/workflows/graph-benchmark.yml'
+      - "server/src/services/GraphRAGService.ts"
+      - "server/src/services/GraphAnalyticsService.js"
+      - "server/src/services/PathRankingService.ts"
+      - "server/src/repos/EntityRepo.ts"
+      - "server/src/repos/RelationshipRepo.ts"
+      - "server/src/db/neo4j.ts"
+      - "server/src/ai/nl-to-cypher/**"
+      - "benchmarks/graph/**"
+      - "docker-compose.neo4j.yml"
+      - ".github/workflows/graph-benchmark.yml"
   workflow_dispatch:
     inputs:
       size:
-        description: 'Dataset size(s)'
+        description: "Dataset size(s)"
         required: false
-        default: 'small,medium'
+        default: "small,medium"
       scenarios:
-        description: 'Scenario group'
+        description: "Scenario group"
         required: false
-        default: 'ci'
+        default: "ci"
 
 concurrency:
   group: graph-benchmark-${{ github.event.pull_request.number || github.sha }}
@@ -62,8 +62,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install benchmark dependencies
         run: npm ci

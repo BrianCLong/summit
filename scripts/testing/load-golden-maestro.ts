@@ -1,7 +1,7 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { MaestroConductor } from '../../ga-graphai/packages/maestro-conductor/src/maestro-conductor.js';
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { MaestroConductor } from "../../ga-graphai/packages/maestro-conductor/src/maestro-conductor.js";
 import type {
   AssetDescriptor,
   DiscoveryProvider,
@@ -11,13 +11,13 @@ import type {
   ResponseStrategy,
   SelfHealingAction,
   SelfHealingContext,
-} from '../../ga-graphai/packages/maestro-conductor/src/types.js';
+} from "../../ga-graphai/packages/maestro-conductor/src/types.js";
 
 interface PolicyRuleDefinition {
   id: string;
   description?: string;
   rules: Array<{
-    type: 'require-tag';
+    type: "require-tag";
     metadataKey: string;
     requiredTag: string;
   }>;
@@ -25,7 +25,7 @@ interface PolicyRuleDefinition {
 
 interface ResponseActionDefinition {
   type: string;
-  impact: 'low' | 'medium' | 'high';
+  impact: "low" | "medium" | "high";
   payload?: Record<string, unknown>;
   runbook?: string;
 }
@@ -42,9 +42,9 @@ interface GoldenRun {
   id: string;
   assetId: string;
   type: string;
-  priority: JobSpec['priority'];
+  priority: JobSpec["priority"];
   requiredCapabilities: string[];
-  requirements?: JobSpec['requirements'];
+  requirements?: JobSpec["requirements"];
   metadata?: Record<string, unknown>;
   result: string;
   startedAt: string;
@@ -56,7 +56,7 @@ interface GoldenMaestroScenario {
   assets: AssetDescriptor[];
   policyHooks: PolicyRuleDefinition[];
   responseStrategies: ResponseStrategyDefinition[];
-  healthSignals: Array<Omit<HealthSignal, 'timestamp'> & { timestamp: string }>;
+  healthSignals: Array<Omit<HealthSignal, "timestamp"> & { timestamp: string }>;
   runs: GoldenRun[];
 }
 
@@ -72,23 +72,23 @@ interface LoadOptions {
 }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const FIXTURE_PATH = path.resolve(__dirname, '../../testdata/maestro/golden-runs.json');
+const FIXTURE_PATH = path.resolve(__dirname, "../../testdata/maestro/golden-runs.json");
 
 let cachedDataset: GoldenMaestroDataset | undefined;
 
 function readDataset(): GoldenMaestroDataset {
   if (!cachedDataset) {
-    const raw = fs.readFileSync(FIXTURE_PATH, 'utf-8');
+    const raw = fs.readFileSync(FIXTURE_PATH, "utf-8");
     cachedDataset = JSON.parse(raw) as GoldenMaestroDataset;
   }
   return cachedDataset;
 }
 
 function assertTestEnv(): void {
-  const env = process.env.NODE_ENV ?? '';
-  const allow = process.env.ALLOW_GOLDEN_FIXTURES === 'true';
-  if (env.toLowerCase() === 'production' && !allow) {
-    throw new Error('Golden fixtures must not be loaded in production');
+  const env = process.env.NODE_ENV ?? "";
+  const allow = process.env.ALLOW_GOLDEN_FIXTURES === "true";
+  if (env.toLowerCase() === "production" && !allow) {
+    throw new Error("Golden fixtures must not be loaded in production");
   }
 }
 
@@ -98,24 +98,24 @@ function buildPolicyHook(definition: PolicyRuleDefinition): PolicyHook {
     description: definition.description,
     evaluate: ({ asset, job }) => {
       for (const rule of definition.rules) {
-        if (rule.type === 'require-tag') {
+        if (rule.type === "require-tag") {
           const isSensitive = Boolean(job?.metadata?.[rule.metadataKey]);
           if (isSensitive) {
-            const compliance = asset.labels?.compliance ?? '';
+            const compliance = asset.labels?.compliance ?? "";
             if (!compliance.includes(rule.requiredTag)) {
               return { allowed: false, reason: `${rule.requiredTag} required` };
             }
           }
         }
       }
-      return { allowed: true, reason: 'policy:approved' };
+      return { allowed: true, reason: "policy:approved" };
     },
   };
 }
 
 function buildResponseStrategy(
   definition: ResponseStrategyDefinition,
-  executionLog: string[],
+  executionLog: string[]
 ): ResponseStrategy {
   return {
     id: definition.id,
@@ -124,7 +124,7 @@ function buildResponseStrategy(
       const metadataKey = definition.supports.metadataKey;
       return metadataKey ? Boolean(asset.metadata?.[metadataKey]) : true;
     },
-    shouldTrigger: (context: SelfHealingContext) => context.anomaly.severity !== 'low',
+    shouldTrigger: (context: SelfHealingContext) => context.anomaly.severity !== "low",
     async execute(context: SelfHealingContext) {
       const metadataKey = definition.supports.metadataKey;
       const target = metadataKey
@@ -137,7 +137,7 @@ function buildResponseStrategy(
         estimatedImpact: action.impact,
         runbook: action.runbook,
       }));
-      executionLog.push(`${context.asset.id}->${target ?? 'none'}:${definition.id}`);
+      executionLog.push(`${context.asset.id}->${target ?? "none"}:${definition.id}`);
       return {
         strategyId: definition.id,
         executed: true,
@@ -165,12 +165,16 @@ export function listGoldenMaestroScenarios(): string[] {
 }
 
 export async function loadGoldenMaestro(
-  options: LoadOptions = {},
-): Promise<{ conductor: MaestroConductor; scenario: GoldenMaestroScenario; executionLog: string[]; jobs: JobSpec[] }>
-{
+  options: LoadOptions = {}
+): Promise<{
+  conductor: MaestroConductor;
+  scenario: GoldenMaestroScenario;
+  executionLog: string[];
+  jobs: JobSpec[];
+}> {
   assertTestEnv();
   const dataset = readDataset();
-  const key = options.scenario ?? 'control-loop';
+  const key = options.scenario ?? "control-loop";
   const scenario = dataset.scenarios[key];
   if (!scenario) {
     throw new Error(`Unknown Maestro scenario: ${key}`);
@@ -194,14 +198,19 @@ export async function loadGoldenMaestro(
     id: `${key}-fixture-provider`,
     description: scenario.description,
     async scan(): Promise<AssetDescriptor[]> {
-      return scenario.assets.map((asset) => ({ ...asset, lastSeen: new Date(scenario.healthSignals[0]?.timestamp ?? Date.now()) }));
+      return scenario.assets.map((asset) => ({
+        ...asset,
+        lastSeen: new Date(scenario.healthSignals[0]?.timestamp ?? Date.now()),
+      }));
     },
   };
 
   conductor.registerDiscoveryProvider(provider);
-  scenario.policyHooks.forEach((definition) => conductor.registerPolicyHook(buildPolicyHook(definition)));
+  scenario.policyHooks.forEach((definition) =>
+    conductor.registerPolicyHook(buildPolicyHook(definition))
+  );
   scenario.responseStrategies.forEach((definition) =>
-    conductor.registerResponseStrategy(buildResponseStrategy(definition, executionLog)),
+    conductor.registerResponseStrategy(buildResponseStrategy(definition, executionLog))
   );
 
   await conductor.scanAssets();

@@ -31,9 +31,9 @@ version: latest
 **`scripts/bots/link-doctor.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const map = JSON.parse(fs.readFileSync('docs/_meta/link-map.json', 'utf8'));
+const fs = require("fs");
+const path = require("path");
+const map = JSON.parse(fs.readFileSync("docs/_meta/link-map.json", "utf8"));
 let changes = 0;
 (function walk(d) {
   for (const f of fs.readdirSync(d)) {
@@ -41,10 +41,10 @@ let changes = 0;
     const s = fs.statSync(p);
     if (s.isDirectory()) walk(p);
     else if (/\.mdx?$/.test(f)) {
-      let src = fs.readFileSync(p, 'utf8');
+      let src = fs.readFileSync(p, "utf8");
       let out = src;
       for (const [from, to] of Object.entries(map)) {
-        const rx = new RegExp(from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+        const rx = new RegExp(from.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g");
         out = out.replace(rx, to);
       }
       if (out !== src) {
@@ -53,8 +53,8 @@ let changes = 0;
       }
     }
   }
-})('docs');
-console.log('Link doctor changes:', changes);
+})("docs");
+console.log("Link doctor changes:", changes);
 ```
 
 **Workflow** `.github/workflows/bot-link-doctor.yml`
@@ -62,7 +62,7 @@ console.log('Link doctor changes:', changes);
 ```yaml
 name: Bot • Link Doctor
 on:
-  schedule: [{ cron: '0 7 * * 1' }]
+  schedule: [{ cron: "0 7 * * 1" }]
   workflow_dispatch:
 jobs:
   fix:
@@ -83,13 +83,13 @@ jobs:
 **`scripts/bots/anchor-check.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 const rx = /\]\(([^)#]+)#([^\)]+)\)/g; // [text](/path#anchor)
 const anchors = new Map(); // path -> Set(anchors)
 // Load built anchor index if available
 try {
-  const idx = JSON.parse(fs.readFileSync('docs/ops/meta/anchors.json', 'utf8'));
+  const idx = JSON.parse(fs.readFileSync("docs/ops/meta/anchors.json", "utf8"));
   for (const [p, list] of Object.entries(idx)) anchors.set(p, new Set(list));
 } catch {}
 let missing = [];
@@ -99,23 +99,20 @@ let missing = [];
     const s = fs.statSync(p);
     s.isDirectory() ? walk(p) : /\.mdx?$/.test(f) && scan(p);
   }
-})('docs');
+})("docs");
 function scan(p) {
-  const md = fs.readFileSync(p, 'utf8');
+  const md = fs.readFileSync(p, "utf8");
   let m;
   while ((m = rx.exec(md))) {
-    const to = m[1].replace(/\.mdx?$/, '');
+    const to = m[1].replace(/\.mdx?$/, "");
     const a = m[2].toLowerCase();
     const set = anchors.get(to) || new Set();
     if (!set.has(a)) missing.push({ from: p, to, a });
   }
 }
-fs.mkdirSync('docs/ops/meta', { recursive: true });
-fs.writeFileSync(
-  'docs/ops/meta/missing-anchors.json',
-  JSON.stringify(missing, null, 2),
-);
-console.log('Missing anchors:', missing.length);
+fs.mkdirSync("docs/ops/meta", { recursive: true });
+fs.writeFileSync("docs/ops/meta/missing-anchors.json", JSON.stringify(missing, null, 2));
+console.log("Missing anchors:", missing.length);
 if (missing.length) process.exit(1);
 ```
 
@@ -127,7 +124,7 @@ if (missing.length) process.exit(1);
 name: Bot • Sync Code Regions
 on:
   push:
-    paths: ['packages/**', 'src/**']
+    paths: ["packages/**", "src/**"]
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -168,7 +165,7 @@ jobs:
 **`src/components/PyPlayground.tsx`**
 
 ```tsx
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from "react";
 
 export default function PyPlayground({
   code,
@@ -178,28 +175,25 @@ export default function PyPlayground({
   requirements?: string[];
 }) {
   const [ready, setReady] = useState(false);
-  const [out, setOut] = useState('');
+  const [out, setOut] = useState("");
   const py = useRef<any>(null);
   useEffect(() => {
     (async () => {
       // Load Pyodide
       // @ts-ignore
-      const { loadPyodide } = await import(
-        'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.mjs'
-      );
+      const { loadPyodide } =
+        await import("https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.mjs");
       py.current = await loadPyodide({
-        stdout: (t: string) => setOut((o) => o + t + '\n'),
+        stdout: (t: string) => setOut((o) => o + t + "\n"),
       });
       for (const r of requirements) {
-        await py.current.runPythonAsync(
-          `import micropip; await micropip.install('${r}')`,
-        );
+        await py.current.runPythonAsync(`import micropip; await micropip.install('${r}')`);
       }
       setReady(true);
     })();
   }, []);
   const run = async () => {
-    setOut('');
+    setOut("");
     try {
       await py.current.runPythonAsync(code);
     } catch (e: any) {
@@ -208,15 +202,11 @@ export default function PyPlayground({
   };
   return (
     <div className="card padding--md">
-      <button
-        disabled={!ready}
-        className="button button--primary"
-        onClick={run}
-      >
-        {ready ? 'Run Python' : 'Loading…'}
+      <button disabled={!ready} className="button button--primary" onClick={run}>
+        {ready ? "Run Python" : "Loading…"}
       </button>
       <pre aria-live="polite">
-        <code>{out || '\n'}</code>
+        <code>{out || "\n"}</code>
       </pre>
     </div>
   );
@@ -226,7 +216,7 @@ export default function PyPlayground({
 **Usage in MDX**
 
 ```mdx
-import PyPlayground from '@site/src/components/PyPlayground';
+import PyPlayground from "@site/src/components/PyPlayground";
 
 <PyPlayground code={`\nprint('hello from Pyodide')\n`} requirements={[]} />
 ```
@@ -272,22 +262,22 @@ import PyPlayground from '@site/src/components/PyPlayground';
 **`scripts/publish/print-pdf.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const puppeteer = require('puppeteer');
+const fs = require("fs");
+const path = require("path");
+const puppeteer = require("puppeteer");
 (async () => {
-  const base = process.env.BASE_URL || 'http://localhost:3000';
-  const pages = ['/', '/how-to/zip-export', '/releases/v24'];
-  const outDir = 'docs/ops/exports/pdf';
+  const base = process.env.BASE_URL || "http://localhost:3000";
+  const pages = ["/", "/how-to/zip-export", "/releases/v24"];
+  const outDir = "docs/ops/exports/pdf";
   fs.mkdirSync(outDir, { recursive: true });
-  const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+  const browser = await puppeteer.launch({ args: ["--no-sandbox"] });
   const page = await browser.newPage();
   for (const p of pages) {
-    await page.goto(base + p, { waitUntil: 'networkidle0' });
-    await page.addStyleTag({ path: 'docs-site/src/css/print.css' });
+    await page.goto(base + p, { waitUntil: "networkidle0" });
+    await page.addStyleTag({ path: "docs-site/src/css/print.css" });
     await page.pdf({
-      path: `${outDir}${p.replace(/\/$/, '') || '/home'}.pdf`,
-      format: 'A4',
+      path: `${outDir}${p.replace(/\/$/, "") || "/home"}.pdf`,
+      format: "A4",
       printBackground: true,
     });
   }
@@ -354,10 +344,10 @@ facets:
 **`scripts/docs/check-taxonomy.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const yaml = require('js-yaml');
-const tax = yaml.load(fs.readFileSync('docs/_meta/taxonomy.yml', 'utf8'));
+const fs = require("fs");
+const path = require("path");
+const yaml = require("js-yaml");
+const tax = yaml.load(fs.readFileSync("docs/_meta/taxonomy.yml", "utf8"));
 const allowed = new Set(Object.values(tax.facets).flat());
 let fail = 0;
 (function walk(d) {
@@ -366,17 +356,15 @@ let fail = 0;
     const s = fs.statSync(p);
     s.isDirectory() ? walk(p) : /\.mdx?$/.test(f) && check(p);
   }
-})('docs');
+})("docs");
 function check(p) {
-  const src = fs.readFileSync(p, 'utf8');
+  const src = fs.readFileSync(p, "utf8");
   const m = src.match(/\ntags:\s*\[(.*?)\]/);
   if (!m) return;
-  const tags = m[1]
-    .split(',')
-    .map((x) => x.trim().replace(/^area:|^role:|^edition:/, ''));
+  const tags = m[1].split(",").map((x) => x.trim().replace(/^area:|^role:|^edition:/, ""));
   for (const t of tags) {
     if (t && !allowed.has(t)) {
-      console.error('Unknown tag', t, 'in', p);
+      console.error("Unknown tag", t, "in", p);
       fail = 1;
     }
   }
@@ -389,15 +377,10 @@ process.exit(fail);
 **`scripts/docs/export-synonyms.js`**
 
 ```js
-const fs = require('fs');
-const syn = JSON.parse(
-  fs.readFileSync('docs-site/algolia.synonyms.json', 'utf8'),
-);
-fs.mkdirSync('docs/ops/search', { recursive: true });
-fs.writeFileSync(
-  'docs/ops/search/typesense.synonyms.json',
-  JSON.stringify(syn, null, 2),
-);
+const fs = require("fs");
+const syn = JSON.parse(fs.readFileSync("docs-site/algolia.synonyms.json", "utf8"));
+fs.mkdirSync("docs/ops/search", { recursive: true });
+fs.writeFileSync("docs/ops/search/typesense.synonyms.json", JSON.stringify(syn, null, 2));
 ```
 
 **Acceptance**
@@ -413,9 +396,9 @@ fs.writeFileSync(
 **`scripts/docs/score-pages.js`**
 
 ````js
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
+const fs = require("fs");
+const path = require("path");
+const matter = require("gray-matter");
 const staleCut = 90; // days
 function daysAgo(d) {
   return Math.floor((Date.now() - new Date(d || 0).getTime()) / 86400000);
@@ -427,7 +410,7 @@ const rows = [];
     const s = fs.statSync(p);
     s.isDirectory() ? walk(p) : /\.mdx?$/.test(f) && score(p);
   }
-})('docs');
+})("docs");
 function score(p) {
   const g = matter.read(p);
   const body = g.content;
@@ -435,10 +418,7 @@ function score(p) {
   const hasNext = /##\s*Next steps/i.test(body);
   const hasImgAlt = /!\[[^\]]+\]\(/.test(body);
   const hasCode = /```/.test(body);
-  const stale = Math.max(
-    0,
-    Math.min(1, daysAgo(g.data.lastUpdated) / staleCut),
-  );
+  const stale = Math.max(0, Math.min(1, daysAgo(g.data.lastUpdated) / staleCut));
   const base =
     50 +
     (hasSee ? 10 : 0) +
@@ -447,12 +427,12 @@ function score(p) {
     (hasCode ? 10 : 0) -
     Math.round(stale * 20);
   rows.push({
-    path: p.replace(/^docs\//, ''),
+    path: p.replace(/^docs\//, ""),
     score: Math.max(0, Math.min(100, base)),
   });
 }
-fs.mkdirSync('docs/ops/quality', { recursive: true });
-fs.writeFileSync('docs/ops/quality/scores.json', JSON.stringify(rows, null, 2));
+fs.mkdirSync("docs/ops/quality", { recursive: true });
+fs.writeFileSync("docs/ops/quality/scores.json", JSON.stringify(rows, null, 2));
 ````
 
 ## E2) Dashboard component
@@ -483,8 +463,8 @@ export default function DocsQualityCard(){
 name: Docs Quality Score
 on:
   pull_request:
-    paths: ['docs/**', 'scripts/docs/score-pages.js']
-  schedule: [{ cron: '0 5 * * 1' }]
+    paths: ["docs/**", "scripts/docs/score-pages.js"]
+  schedule: [{ cron: "0 5 * * 1" }]
 jobs:
   score:
     runs-on: ubuntu-latest

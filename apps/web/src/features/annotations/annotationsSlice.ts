@@ -38,7 +38,9 @@ export const getInitialAnnotationState = (): AnnotationState => ({
   restoreCandidate: loadDraftFromStorage() ?? null,
 })
 
-const annotateTarget = (context?: AnnotationContext): AnnotationTargetRef | undefined => {
+const annotateTarget = (
+  context?: AnnotationContext
+): AnnotationTargetRef | undefined => {
   if (context?.timelineEvent) {
     return {
       kind: 'event',
@@ -69,7 +71,10 @@ const slice = createSlice({
   reducers: {
     startDraft(
       state,
-      action: PayloadAction<{ type?: AnnotationType; context?: AnnotationContext }>
+      action: PayloadAction<{
+        type?: AnnotationType
+        context?: AnnotationContext
+      }>
     ) {
       const now = new Date().toISOString()
       state.activeDraft = {
@@ -91,7 +96,10 @@ const slice = createSlice({
       state.activeDraft.status = 'draft'
       saveDraftToStorage(state.activeDraft)
     },
-    setDraftTarget(state, action: PayloadAction<AnnotationTargetRef | undefined>) {
+    setDraftTarget(
+      state,
+      action: PayloadAction<AnnotationTargetRef | undefined>
+    ) {
       if (!state.activeDraft) return
       state.activeDraft.targetRef = action.payload
       state.activeDraft.updatedAt = new Date().toISOString()
@@ -125,7 +133,11 @@ const slice = createSlice({
     },
     updateAnnotation(
       state,
-      action: PayloadAction<{ id: string; body?: string; targetRef?: AnnotationTargetRef }>
+      action: PayloadAction<{
+        id: string
+        body?: string
+        targetRef?: AnnotationTargetRef
+      }>
     ) {
       const annotation = state.annotations.find(a => a.id === action.payload.id)
       if (!annotation) return

@@ -1,4 +1,4 @@
-import qutip from 'qutip';
+import qutip from "qutip";
 
 export function entropyBalancer(config) {
   const balance = qutip.balance({ entropy: config.collaborationIntensity });

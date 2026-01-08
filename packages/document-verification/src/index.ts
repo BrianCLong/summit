@@ -5,4 +5,4 @@
  * MRZ parsing, chip authentication, and cross-database validation.
  */
 
-export * from './types.js';
+export * from "./types.js";

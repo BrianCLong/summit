@@ -5,7 +5,7 @@
  * enforcement engine combining all four Summit capability layers.
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 
 // ============================================================================
 // CORE TYPES
@@ -21,7 +21,7 @@ interface RawInformation {
 
 interface SourceMetadata {
   source_id: string;
-  source_type: 'automated_system' | 'human_operator' | 'external_api' | 'ai_model';
+  source_type: "automated_system" | "human_operator" | "external_api" | "ai_model";
   source_age_days: number;
   authority_score?: number;
 }
@@ -57,16 +57,16 @@ interface TruthOpsMetadata {
     verification_depth: number;
   };
   threat_classes_detected: ThreatClass[];
-  integrity_zone: 'HIGH' | 'MEDIUM' | 'LOW';
+  integrity_zone: "HIGH" | "MEDIUM" | "LOW";
   containment_required: boolean;
 }
 
 type ThreatClass =
-  | 'NOISE_ATTACK'
-  | 'POISONING_ATTACK'
-  | 'NARRATIVE_ATTACK'
-  | 'TIMING_ATTACK'
-  | 'AUTHORITY_ATTACK';
+  | "NOISE_ATTACK"
+  | "POISONING_ATTACK"
+  | "NARRATIVE_ATTACK"
+  | "TIMING_ATTACK"
+  | "AUTHORITY_ATTACK";
 
 interface PolicyMetadata {
   compliant: boolean;
@@ -76,7 +76,7 @@ interface PolicyMetadata {
 
 interface PolicyViolation {
   rule: string;
-  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM';
+  severity: "CRITICAL" | "HIGH" | "MEDIUM";
   message: string;
 }
 
@@ -108,13 +108,13 @@ interface AuditEntry {
 
 interface EnforcementAction {
   timestamp: Date;
-  action: 'APPROVED' | 'DENIED' | 'QUARANTINED' | 'WARNING';
+  action: "APPROVED" | "DENIED" | "QUARANTINED" | "WARNING";
   reason: string;
   layer: string;
 }
 
 interface ProcessingResult {
-  status: 'APPROVED' | 'DENIED' | 'QUARANTINED' | 'SOVEREIGNTY_WARNING';
+  status: "APPROVED" | "DENIED" | "QUARANTINED" | "SOVEREIGNTY_WARNING";
   reason: string;
   metadata?: SummitMetadata;
   allow_with_warning?: boolean;
@@ -143,7 +143,7 @@ interface LayerResult {
 
 interface DecisionContext {
   domain: string;
-  criticality: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  criticality: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   ai_assisted: boolean;
   operator_id?: string;
 }
@@ -153,7 +153,7 @@ interface DecisionContext {
 // ============================================================================
 
 class InformationHygieneLayer implements ILayer {
-  name = 'hygiene';
+  name = "hygiene";
 
   async assess(info: RawInformation, context: LayerContext): Promise<LayerResult> {
     // Quality scoring
@@ -165,7 +165,7 @@ class InformationHygieneLayer implements ILayer {
     // Check certifications
     const certifications = await this.checkCertifications(info);
 
-    const passed = quality_score >= 0.70 && provenance_verified;
+    const passed = quality_score >= 0.7 && provenance_verified;
 
     return {
       passed,
@@ -175,7 +175,7 @@ class InformationHygieneLayer implements ILayer {
         certifications,
         lineage_depth: await this.calculateLineageDepth(info),
       },
-      reason: passed ? undefined : 'Quality or provenance check failed',
+      reason: passed ? undefined : "Quality or provenance check failed",
     };
   }
 
@@ -193,7 +193,7 @@ class InformationHygieneLayer implements ILayer {
 
   private async checkCertifications(info: RawInformation): Promise<string[]> {
     // Simplified: Real implementation would check against certification database
-    return ['ISO-27001', 'SOC2'];
+    return ["ISO-27001", "SOC2"];
   }
 
   private async calculateLineageDepth(info: RawInformation): Promise<number> {
@@ -203,7 +203,7 @@ class InformationHygieneLayer implements ILayer {
 }
 
 class TruthOperationsLayer implements ILayer {
-  name = 'truth_ops';
+  name = "truth_ops";
 
   async assess(info: RawInformation, context: LayerContext): Promise<LayerResult> {
     // Calculate integrity score
@@ -220,7 +220,7 @@ class TruthOperationsLayer implements ILayer {
     const integrity_zone = this.determineIntegrityZone(integrity_score);
 
     // Check if containment required
-    const containment_required = integrity_zone === 'LOW';
+    const containment_required = integrity_zone === "LOW";
 
     const passed = !containment_required;
 
@@ -234,7 +234,9 @@ class TruthOperationsLayer implements ILayer {
         integrity_zone,
         containment_required,
       },
-      reason: passed ? undefined : `Low integrity (${integrity_score.toFixed(2)}) - containment required`,
+      reason: passed
+        ? undefined
+        : `Low integrity (${integrity_score.toFixed(2)}) - containment required`,
     };
   }
 
@@ -243,9 +245,9 @@ class TruthOperationsLayer implements ILayer {
     return {
       source_volatility: 0.85,
       correlation_independence: 0.75,
-      historical_adversarial_behavior: 0.90,
-      narrative_shift_velocity: 0.80,
-      verification_depth: 0.70,
+      historical_adversarial_behavior: 0.9,
+      narrative_shift_velocity: 0.8,
+      verification_depth: 0.7,
     };
   }
 
@@ -253,10 +255,10 @@ class TruthOperationsLayer implements ILayer {
     // Geometric mean as specified in truth-defense docs
     const weights = {
       source_volatility: 0.15,
-      correlation_independence: 0.30,
-      historical_adversarial_behavior: 0.20,
+      correlation_independence: 0.3,
+      historical_adversarial_behavior: 0.2,
       narrative_shift_velocity: 0.15,
-      verification_depth: 0.20,
+      verification_depth: 0.2,
     };
 
     const weighted_product =
@@ -280,27 +282,27 @@ class TruthOperationsLayer implements ILayer {
     const threats: ThreatClass[] = [];
 
     // Check for various threat indicators
-    if (integrity.correlation_independence < 0.30) {
-      threats.push('NARRATIVE_ATTACK'); // Coordinated messaging
+    if (integrity.correlation_independence < 0.3) {
+      threats.push("NARRATIVE_ATTACK"); // Coordinated messaging
     }
 
-    if (integrity.source_volatility < 0.50) {
-      threats.push('AUTHORITY_ATTACK'); // Source compromise
+    if (integrity.source_volatility < 0.5) {
+      threats.push("AUTHORITY_ATTACK"); // Source compromise
     }
 
     // Simplified: Real implementation would have comprehensive threat detection
     return threats;
   }
 
-  private determineIntegrityZone(score: number): 'HIGH' | 'MEDIUM' | 'LOW' {
-    if (score >= 0.70) return 'HIGH';
-    if (score >= 0.40) return 'MEDIUM';
-    return 'LOW';
+  private determineIntegrityZone(score: number): "HIGH" | "MEDIUM" | "LOW" {
+    if (score >= 0.7) return "HIGH";
+    if (score >= 0.4) return "MEDIUM";
+    return "LOW";
   }
 }
 
 class DecisionEnforcementLayer implements ILayer {
-  name = 'policy';
+  name = "policy";
 
   async assess(info: RawInformation, context: LayerContext): Promise<LayerResult> {
     const violations: PolicyViolation[] = [];
@@ -310,30 +312,30 @@ class DecisionEnforcementLayer implements ILayer {
     const hygiene = context.previous_layers?.hygiene;
 
     // Rule: High confidence without high integrity triggers warning
-    if (truth_ops?.confidence > 0.80 && truth_ops?.integrity_score < 0.60) {
+    if (truth_ops?.confidence > 0.8 && truth_ops?.integrity_score < 0.6) {
       warnings.push({
-        rule: 'confidence_integrity_mismatch',
-        message: 'High confidence but medium/low integrity - escalation required',
+        rule: "confidence_integrity_mismatch",
+        message: "High confidence but medium/low integrity - escalation required",
       });
     }
 
     // Rule: Critical decisions require high integrity
-    if (context.decision_context?.criticality === 'CRITICAL') {
-      if (truth_ops?.integrity_score < 0.70) {
+    if (context.decision_context?.criticality === "CRITICAL") {
+      if (truth_ops?.integrity_score < 0.7) {
         violations.push({
-          rule: 'critical_decision_integrity_requirement',
-          severity: 'CRITICAL',
-          message: 'Critical decisions require integrity ≥ 0.70',
+          rule: "critical_decision_integrity_requirement",
+          severity: "CRITICAL",
+          message: "Critical decisions require integrity ≥ 0.70",
         });
       }
     }
 
     // Rule: Quality must meet minimum
-    if (hygiene?.quality_score < 0.60) {
+    if (hygiene?.quality_score < 0.6) {
       violations.push({
-        rule: 'minimum_quality_requirement',
-        severity: 'HIGH',
-        message: 'Information quality below minimum threshold',
+        rule: "minimum_quality_requirement",
+        severity: "HIGH",
+        message: "Information quality below minimum threshold",
       });
     }
 
@@ -346,32 +348,26 @@ class DecisionEnforcementLayer implements ILayer {
         violations,
         warnings,
       },
-      reason: passed ? undefined : violations.map((v) => v.message).join('; '),
+      reason: passed ? undefined : violations.map((v) => v.message).join("; "),
     };
   }
 }
 
 class EpistemicSovereigntyLayer implements ILayer {
-  name = 'sovereignty';
+  name = "sovereignty";
 
   private ai_decision_tracker = new Map<string, number>();
   private total_decision_tracker = new Map<string, number>();
 
   async assess(info: RawInformation, context: LayerContext): Promise<LayerResult> {
-    const domain = context.decision_context?.domain || 'default';
+    const domain = context.decision_context?.domain || "default";
     const ai_assisted = context.decision_context?.ai_assisted || false;
 
     // Track decision counts
-    this.total_decision_tracker.set(
-      domain,
-      (this.total_decision_tracker.get(domain) || 0) + 1
-    );
+    this.total_decision_tracker.set(domain, (this.total_decision_tracker.get(domain) || 0) + 1);
 
     if (ai_assisted) {
-      this.ai_decision_tracker.set(
-        domain,
-        (this.ai_decision_tracker.get(domain) || 0) + 1
-      );
+      this.ai_decision_tracker.set(domain, (this.ai_decision_tracker.get(domain) || 0) + 1);
     }
 
     // Calculate current AI ratio
@@ -380,17 +376,14 @@ class EpistemicSovereigntyLayer implements ILayer {
     const current_ai_ratio = ai_count / total;
 
     // Check quota (max 80% AI-assisted)
-    const MAX_AI_RATIO = 0.80;
+    const MAX_AI_RATIO = 0.8;
     const quota_exceeded = current_ai_ratio >= MAX_AI_RATIO && ai_assisted;
 
     // Calculate independence impact
-    const independence_impact = this.calculateIndependenceImpact(
-      current_ai_ratio,
-      ai_assisted
-    );
+    const independence_impact = this.calculateIndependenceImpact(current_ai_ratio, ai_assisted);
 
     // Determine if contributes to capture risk
-    const contributes_to_capture = current_ai_ratio > 0.60;
+    const contributes_to_capture = current_ai_ratio > 0.6;
 
     const quota_status: QuotaStatus = {
       current_ai_ratio,
@@ -409,7 +402,7 @@ class EpistemicSovereigntyLayer implements ILayer {
         independence_impact,
         quota_status,
       },
-      reason: passed ? undefined : 'AI consultation quota exceeded - must decide without AI',
+      reason: passed ? undefined : "AI consultation quota exceeded - must decide without AI",
     };
   }
 
@@ -425,7 +418,7 @@ class EpistemicSovereigntyLayer implements ILayer {
 
   private calculateDecisionsUntilReset(domain: string, current_ratio: number): number {
     // Simplified: Calculate how many non-AI decisions needed to drop below quota
-    const MAX_AI_RATIO = 0.80;
+    const MAX_AI_RATIO = 0.8;
     const total = this.total_decision_tracker.get(domain) || 1;
     const ai_count = this.ai_decision_tracker.get(domain) || 0;
 
@@ -487,7 +480,7 @@ export class SummitIntegrationRuntime extends EventEmitter {
         audit_trail.push({
           timestamp: new Date(),
           layer: layer.name,
-          event: result.passed ? 'PASSED' : 'FAILED',
+          event: result.passed ? "PASSED" : "FAILED",
           details: {
             processing_time_ms: processing_time,
             metadata: result.metadata,
@@ -502,8 +495,8 @@ export class SummitIntegrationRuntime extends EventEmitter {
         // Record enforcement action
         const action: EnforcementAction = {
           timestamp: new Date(),
-          action: result.passed ? 'APPROVED' : 'DENIED',
-          reason: result.reason || 'Layer assessment passed',
+          action: result.passed ? "APPROVED" : "DENIED",
+          reason: result.reason || "Layer assessment passed",
           layer: layer.name,
         };
         enforcement_actions.push(action);
@@ -511,17 +504,17 @@ export class SummitIntegrationRuntime extends EventEmitter {
         // If layer failed, determine response
         if (!result.passed) {
           // Emit event for monitoring
-          this.emit('layer_failed', {
+          this.emit("layer_failed", {
             layer: layer.name,
             info,
             result,
           });
 
           // Handle based on layer
-          if (layer.name === 'truth_ops' && result.metadata.containment_required) {
+          if (layer.name === "truth_ops" && result.metadata.containment_required) {
             return {
-              status: 'QUARANTINED',
-              reason: result.reason || 'Truth operations containment required',
+              status: "QUARANTINED",
+              reason: result.reason || "Truth operations containment required",
               metadata: this.assembleFinalMetadata(
                 info,
                 layer_metadata,
@@ -529,10 +522,10 @@ export class SummitIntegrationRuntime extends EventEmitter {
                 enforcement_actions
               ),
             };
-          } else if (layer.name === 'sovereignty') {
+          } else if (layer.name === "sovereignty") {
             return {
-              status: 'SOVEREIGNTY_WARNING',
-              reason: result.reason || 'Epistemic sovereignty constraint violated',
+              status: "SOVEREIGNTY_WARNING",
+              reason: result.reason || "Epistemic sovereignty constraint violated",
               metadata: this.assembleFinalMetadata(
                 info,
                 layer_metadata,
@@ -543,7 +536,7 @@ export class SummitIntegrationRuntime extends EventEmitter {
             };
           } else {
             return {
-              status: 'DENIED',
+              status: "DENIED",
               reason: result.reason || `Failed ${layer.name} layer`,
               metadata: this.assembleFinalMetadata(
                 info,
@@ -556,7 +549,7 @@ export class SummitIntegrationRuntime extends EventEmitter {
         }
 
         // Emit progress event
-        this.emit('layer_passed', {
+        this.emit("layer_passed", {
           layer: layer.name,
           info,
           processing_time,
@@ -566,20 +559,20 @@ export class SummitIntegrationRuntime extends EventEmitter {
         audit_trail.push({
           timestamp: new Date(),
           layer: layer.name,
-          event: 'ERROR',
+          event: "ERROR",
           details: {
             error: error instanceof Error ? error.message : String(error),
           },
         });
 
-        this.emit('layer_error', {
+        this.emit("layer_error", {
           layer: layer.name,
           info,
           error,
         });
 
         return {
-          status: 'DENIED',
+          status: "DENIED",
           reason: `Error in ${layer.name} layer: ${error}`,
         };
       }
@@ -593,15 +586,15 @@ export class SummitIntegrationRuntime extends EventEmitter {
       enforcement_actions
     );
 
-    this.emit('processing_complete', {
+    this.emit("processing_complete", {
       info,
-      status: 'APPROVED',
+      status: "APPROVED",
       metadata,
     });
 
     return {
-      status: 'APPROVED',
-      reason: 'All layers passed',
+      status: "APPROVED",
+      reason: "All layers passed",
       metadata,
     };
   }
@@ -640,7 +633,7 @@ export class SummitIntegrationRuntime extends EventEmitter {
     for (const layer of this.layers) {
       // Simplified: Real implementation would have comprehensive health checks
       layer_health[layer.name] = {
-        status: 'HEALTHY',
+        status: "HEALTHY",
       };
     }
 
@@ -659,21 +652,21 @@ async function example() {
   const runtime = new SummitIntegrationRuntime();
 
   // Monitor events
-  runtime.on('layer_passed', (event) => {
+  runtime.on("layer_passed", (event) => {
     console.log(`✓ ${event.layer} passed (${event.processing_time}ms)`);
   });
 
-  runtime.on('layer_failed', (event) => {
+  runtime.on("layer_failed", (event) => {
     console.log(`✗ ${event.layer} failed: ${event.result.reason}`);
   });
 
   // Process information
   const info: RawInformation = {
-    id: 'claim_12345',
-    content: 'Database CPU usage at 95%',
+    id: "claim_12345",
+    content: "Database CPU usage at 95%",
     source: {
-      source_id: 'monitoring-system-alpha',
-      source_type: 'automated_system',
+      source_id: "monitoring-system-alpha",
+      source_type: "automated_system",
       source_age_days: 90,
       authority_score: 0.91,
     },
@@ -682,21 +675,21 @@ async function example() {
   };
 
   const decision_context: DecisionContext = {
-    domain: 'infrastructure',
-    criticality: 'HIGH',
+    domain: "infrastructure",
+    criticality: "HIGH",
     ai_assisted: true,
-    operator_id: 'operator_alice',
+    operator_id: "operator_alice",
   };
 
   const result = await runtime.processInformation(info, decision_context);
 
-  console.log('\nProcessing Result:', result.status);
-  console.log('Reason:', result.reason);
+  console.log("\nProcessing Result:", result.status);
+  console.log("Reason:", result.reason);
 
   if (result.metadata) {
-    console.log('\nIntegrity Score:', result.metadata.truth_ops.integrity_score);
-    console.log('Independence Impact:', result.metadata.sovereignty.independence_impact);
-    console.log('Policy Compliant:', result.metadata.policy.compliant);
+    console.log("\nIntegrity Score:", result.metadata.truth_ops.integrity_score);
+    console.log("Independence Impact:", result.metadata.sovereignty.independence_impact);
+    console.log("Policy Compliant:", result.metadata.policy.compliant);
   }
 }
 

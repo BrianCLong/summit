@@ -149,8 +149,20 @@
           "config": {
             "columns": [
               { "id": "name", "label": "Product", "field": "name", "sortable": true },
-              { "id": "sales", "label": "Sales", "field": "sales", "sortable": true, "format": "currency" },
-              { "id": "growth", "label": "Growth", "field": "growth", "sortable": true, "format": "percentage" }
+              {
+                "id": "sales",
+                "label": "Sales",
+                "field": "sales",
+                "sortable": true,
+                "format": "currency"
+              },
+              {
+                "id": "growth",
+                "label": "Growth",
+                "field": "growth",
+                "sortable": true,
+                "format": "percentage"
+              }
             ],
             "sortable": true,
             "filterable": false,

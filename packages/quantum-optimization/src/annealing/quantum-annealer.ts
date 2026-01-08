@@ -73,7 +73,9 @@ export class QuantumAnnealer {
   }
 
   private initializeSolution(numVars: number): number[] {
-    return Array(numVars).fill(0).map(() => Math.random() < 0.5 ? 0 : 1);
+    return Array(numVars)
+      .fill(0)
+      .map(() => (Math.random() < 0.5 ? 0 : 1));
   }
 
   private proposeSolution(current: number[]): number[] {

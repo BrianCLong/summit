@@ -2,14 +2,14 @@
  * Inference Rule Engine
  */
 
-import { Driver } from 'neo4j-driver';
-import { v4 as uuidv4 } from 'uuid';
+import { Driver } from "neo4j-driver";
+import { v4 as uuidv4 } from "uuid";
 import {
   InferenceRule,
   InferenceRuleSchema,
   InferredFact,
   InferredFactSchema,
-} from '../types/inference.js';
+} from "../types/inference.js";
 
 export class InferenceEngine {
   constructor(private driver: Driver) {}
@@ -18,7 +18,7 @@ export class InferenceEngine {
    * Create an inference rule
    */
   async createRule(
-    rule: Omit<InferenceRule, 'id' | 'createdAt' | 'updatedAt'>,
+    rule: Omit<InferenceRule, "id" | "createdAt" | "updatedAt">
   ): Promise<InferenceRule> {
     const now = new Date().toISOString();
     const fullRule: InferenceRule = {
@@ -62,7 +62,7 @@ export class InferenceEngine {
           metadata: JSON.stringify(validated.metadata || {}),
           createdAt: validated.createdAt,
           updatedAt: validated.updatedAt,
-        },
+        }
       );
 
       return validated;
@@ -83,14 +83,14 @@ export class InferenceEngine {
         MATCH (r:InferenceRule {enabled: true})
         RETURN r
         ORDER BY r.priority DESC
-        `,
+        `
       );
 
       const rules = rulesResult.records.map((record) => {
-        const props = record.get('r').properties;
+        const props = record.get("r").properties;
         return InferenceRuleSchema.parse({
           ...props,
-          metadata: JSON.parse(props.metadata || '{}'),
+          metadata: JSON.parse(props.metadata || "{}"),
         });
       });
 
@@ -120,7 +120,7 @@ export class InferenceEngine {
       // This is a simplified implementation
       // In production, parse and execute the pattern/conclusion properly
 
-      if (rule.ruleType === 'transitive') {
+      if (rule.ruleType === "transitive") {
         // Example: Apply transitive closure
         // If A-[:REL]->B and B-[:REL]->C, then create A-[:REL]->C
         const result = await session.run(
@@ -141,25 +141,25 @@ export class InferenceEngine {
             id: uuidv4(),
             confidence: rule.confidence,
             ruleId: rule.id,
-          },
+          }
         );
 
         for (const record of result.records) {
           inferredFacts.push({
             id: uuidv4(),
-            factType: 'relationship',
+            factType: "relationship",
             sourceRuleId: rule.id,
             sourceRuleName: rule.name,
             confidence: rule.confidence,
-            premises: [record.get('sourceId'), record.get('targetId')],
+            premises: [record.get("sourceId"), record.get("targetId")],
             conclusion: {
-              relationshipId: record.get('relId'),
+              relationshipId: record.get("relId"),
             },
             derivationChain: [rule.id],
             createdAt: new Date().toISOString(),
           });
         }
-      } else if (rule.ruleType === 'symmetric') {
+      } else if (rule.ruleType === "symmetric") {
         // Example: If A knows B, then B knows A
         const result = await session.run(
           `
@@ -179,19 +179,19 @@ export class InferenceEngine {
             id: uuidv4(),
             confidence: rule.confidence,
             ruleId: rule.id,
-          },
+          }
         );
 
         for (const record of result.records) {
           inferredFacts.push({
             id: uuidv4(),
-            factType: 'relationship',
+            factType: "relationship",
             sourceRuleId: rule.id,
             sourceRuleName: rule.name,
             confidence: rule.confidence,
-            premises: [record.get('sourceId'), record.get('targetId')],
+            premises: [record.get("sourceId"), record.get("targetId")],
             conclusion: {
-              relationshipId: record.get('relId'),
+              relationshipId: record.get("relId"),
             },
             derivationChain: [rule.id],
             createdAt: new Date().toISOString(),
@@ -226,10 +226,10 @@ export class InferenceEngine {
           createdAt: datetime()
         }]->(b)
         RETURN count(r) as closureCount
-        `,
+        `
       );
 
-      return result.records[0]?.get('closureCount').toNumber() || 0;
+      return result.records[0]?.get("closureCount").toNumber() || 0;
     } finally {
       await session.close();
     }
@@ -267,7 +267,7 @@ export class InferenceEngine {
           conclusion: JSON.stringify(validated.conclusion),
           derivationChain: JSON.stringify(validated.derivationChain),
           createdAt: validated.createdAt,
-        },
+        }
       );
     } finally {
       await session.close();
@@ -285,14 +285,14 @@ export class InferenceEngine {
         MATCH (r:InferenceRule)
         RETURN r
         ORDER BY r.priority DESC
-        `,
+        `
       );
 
       return result.records.map((record) => {
-        const props = record.get('r').properties;
+        const props = record.get("r").properties;
         return InferenceRuleSchema.parse({
           ...props,
-          metadata: JSON.parse(props.metadata || '{}'),
+          metadata: JSON.parse(props.metadata || "{}"),
         });
       });
     } finally {
@@ -312,10 +312,10 @@ export class InferenceEngine {
         DELETE r
         RETURN count(r) as deleted
         `,
-        { ruleId },
+        { ruleId }
       );
 
-      return result.records[0].get('deleted').toNumber() > 0;
+      return result.records[0].get("deleted").toNumber() > 0;
     } finally {
       await session.close();
     }
@@ -327,6 +327,6 @@ export class InferenceEngine {
   private extractRelType(pattern: string): string {
     // Simple extraction - in production, use proper pattern parsing
     const match = pattern.match(/:(\w+)/);
-    return match ? match[1] : 'RELATED_TO';
+    return match ? match[1] : "RELATED_TO";
   }
 }

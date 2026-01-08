@@ -1,7 +1,7 @@
-import { CommunityStore } from '../store.js';
-import type { BadgeDefinition, ContributionSummary } from '../types.js';
-import { ContributionTracker } from './contributionTracker.js';
-import { createId } from '../utils.js';
+import { CommunityStore } from "../store.js";
+import type { BadgeDefinition, ContributionSummary } from "../types.js";
+import { ContributionTracker } from "./contributionTracker.js";
+import { createId } from "../utils.js";
 
 export interface AwardContext {
   readonly userId: string;
@@ -12,14 +12,14 @@ export interface AwardContext {
 export class GamificationService {
   public constructor(
     private readonly store: CommunityStore,
-    private readonly tracker: ContributionTracker,
+    private readonly tracker: ContributionTracker
   ) {}
 
   public registerBadge(
-    input: Omit<BadgeDefinition, 'id'> & { readonly id?: string },
+    input: Omit<BadgeDefinition, "id"> & { readonly id?: string }
   ): BadgeDefinition {
     const badge: BadgeDefinition = {
-      id: input.id ?? createId('bdg'),
+      id: input.id ?? createId("bdg"),
       label: input.label,
       description: input.description,
       points: input.points,

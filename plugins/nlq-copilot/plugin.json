@@ -3,10 +3,7 @@
   "name": "NL Graph Querying Copilot",
   "version": "1.0.0",
   "description": "Natural language to Cypher query compiler with RAG mode and evidence-first citations",
-  "permissions": [
-    "graph:read",
-    "schema:read"
-  ],
+  "permissions": ["graph:read", "schema:read"],
   "entrypoints": {
     "job": "./dist/index.js",
     "ui": "./dist/ui/index.js"

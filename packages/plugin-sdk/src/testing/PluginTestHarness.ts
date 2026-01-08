@@ -8,7 +8,7 @@
  */
 
 /* eslint-disable require-await, @typescript-eslint/no-non-null-assertion */
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 
 // ============================================================================
 // Types and Interfaces
@@ -78,7 +78,7 @@ export interface MockLogger {
  * Log entry
  */
 export interface LogEntry {
-  level: 'debug' | 'info' | 'warn' | 'error';
+  level: "debug" | "info" | "warn" | "error";
   message: string;
   meta?: Record<string, unknown>;
   error?: Error;
@@ -114,7 +114,7 @@ export interface MockAPI {
  * Request options
  */
 export interface RequestOptions {
-  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   headers?: Record<string, string>;
   body?: unknown;
 }
@@ -123,7 +123,7 @@ export interface RequestOptions {
  * Request history entry
  */
 export interface RequestHistoryEntry {
-  type: 'rest' | 'graphql';
+  type: "rest" | "graphql";
   endpoint?: string;
   query?: string;
   options?: RequestOptions;
@@ -170,7 +170,7 @@ export interface MockSecrets {
  */
 export interface SecretAccessEntry {
   key: string;
-  action: 'get' | 'set' | 'delete';
+  action: "get" | "set" | "delete";
   timestamp: Date;
 }
 
@@ -190,7 +190,7 @@ export interface MockMetrics {
  * Metric entry
  */
 export interface MetricEntry {
-  type: 'counter' | 'gauge' | 'histogram' | 'timing';
+  type: "counter" | "gauge" | "histogram" | "timing";
   name: string;
   value: number;
   tags?: Record<string, string>;
@@ -251,12 +251,13 @@ function createMockLogger(): MockLogger {
   const logs: LogEntry[] = [];
 
   return {
-    debug: (message, meta) => logs.push({ level: 'debug', message, meta, timestamp: new Date() }),
-    info: (message, meta) => logs.push({ level: 'info', message, meta, timestamp: new Date() }),
-    warn: (message, meta) => logs.push({ level: 'warn', message, meta, timestamp: new Date() }),
-    error: (message, error, meta) => logs.push({ level: 'error', message, error, meta, timestamp: new Date() }),
+    debug: (message, meta) => logs.push({ level: "debug", message, meta, timestamp: new Date() }),
+    info: (message, meta) => logs.push({ level: "info", message, meta, timestamp: new Date() }),
+    warn: (message, meta) => logs.push({ level: "warn", message, meta, timestamp: new Date() }),
+    error: (message, error, meta) =>
+      logs.push({ level: "error", message, error, meta, timestamp: new Date() }),
     getLogs: () => [...logs],
-    clear: () => logs.length = 0,
+    clear: () => (logs.length = 0),
   };
 }
 
@@ -269,7 +270,9 @@ function createMockStorage(): MockStorage {
   return {
     get: async <T>(key: string): Promise<T | null> => {
       const entry = store.get(key);
-      if (!entry) {return null;}
+      if (!entry) {
+        return null;
+      }
       if (entry.expiry && Date.now() > entry.expiry) {
         store.delete(key);
         return null;
@@ -287,7 +290,9 @@ function createMockStorage(): MockStorage {
     },
     has: async (key: string): Promise<boolean> => {
       const entry = store.get(key);
-      if (!entry) {return false;}
+      if (!entry) {
+        return false;
+      }
       if (entry.expiry && Date.now() > entry.expiry) {
         store.delete(key);
         return false;
@@ -320,7 +325,7 @@ function createMockAPI(): MockAPI {
 
   return {
     request: async <T>(endpoint: string, options?: RequestOptions): Promise<T> => {
-      history.push({ type: 'rest', endpoint, options, timestamp: new Date() });
+      history.push({ type: "rest", endpoint, options, timestamp: new Date() });
       const response = mockResponses.get(endpoint);
       if (response !== undefined) {
         return response as T;
@@ -328,7 +333,7 @@ function createMockAPI(): MockAPI {
       return { success: true, data: {} } as T;
     },
     graphql: async <T>(query: string, variables?: Record<string, unknown>): Promise<T> => {
-      history.push({ type: 'graphql', query, variables, timestamp: new Date() });
+      history.push({ type: "graphql", query, variables, timestamp: new Date() });
       // Extract operation name from query
       const match = query.match(/(?:query|mutation)\s+(\w+)/);
       const operationName = match?.[1];
@@ -347,7 +352,7 @@ function createMockAPI(): MockAPI {
       mockGraphQLResponses.set(operationName, response);
     },
     getRequestHistory: () => [...history],
-    clearHistory: () => history.length = 0,
+    clearHistory: () => (history.length = 0),
   };
 }
 
@@ -393,7 +398,7 @@ function createMockEventBus(): MockEventBus {
       handlers.forEach((set, event) => result.set(event, set.size));
       return result;
     },
-    clearHistory: () => emittedEvents.length = 0,
+    clearHistory: () => (emittedEvents.length = 0),
   };
 }
 
@@ -406,15 +411,15 @@ function createMockSecrets(): MockSecrets {
 
   return {
     get: async (key: string): Promise<string | null> => {
-      accessLog.push({ key, action: 'get', timestamp: new Date() });
+      accessLog.push({ key, action: "get", timestamp: new Date() });
       return secrets.get(key) ?? null;
     },
     set: (key: string, value: string): void => {
-      accessLog.push({ key, action: 'set', timestamp: new Date() });
+      accessLog.push({ key, action: "set", timestamp: new Date() });
       secrets.set(key, value);
     },
     delete: (key: string): void => {
-      accessLog.push({ key, action: 'delete', timestamp: new Date() });
+      accessLog.push({ key, action: "delete", timestamp: new Date() });
       secrets.delete(key);
     },
     getAccessLog: () => [...accessLog],
@@ -428,12 +433,16 @@ function createMockMetrics(): MockMetrics {
   const metrics: MetricEntry[] = [];
 
   return {
-    counter: (name, value = 1, tags) => metrics.push({ type: 'counter', name, value, tags, timestamp: new Date() }),
-    gauge: (name, value, tags) => metrics.push({ type: 'gauge', name, value, tags, timestamp: new Date() }),
-    histogram: (name, value, tags) => metrics.push({ type: 'histogram', name, value, tags, timestamp: new Date() }),
-    timing: (name, duration, tags) => metrics.push({ type: 'timing', name, value: duration, tags, timestamp: new Date() }),
+    counter: (name, value = 1, tags) =>
+      metrics.push({ type: "counter", name, value, tags, timestamp: new Date() }),
+    gauge: (name, value, tags) =>
+      metrics.push({ type: "gauge", name, value, tags, timestamp: new Date() }),
+    histogram: (name, value, tags) =>
+      metrics.push({ type: "histogram", name, value, tags, timestamp: new Date() }),
+    timing: (name, duration, tags) =>
+      metrics.push({ type: "timing", name, value: duration, tags, timestamp: new Date() }),
     getMetrics: () => [...metrics],
-    clear: () => metrics.length = 0,
+    clear: () => (metrics.length = 0),
   };
 }
 
@@ -451,8 +460,8 @@ export class PluginTestHarness extends EventEmitter {
   constructor(options: HarnessOptions = {}) {
     super();
     this.options = {
-      pluginId: options.pluginId || 'test-plugin',
-      version: options.version || '1.0.0',
+      pluginId: options.pluginId || "test-plugin",
+      version: options.version || "1.0.0",
       config: options.config || {},
       timeout: options.timeout || 5000,
       isolateStorage: options.isolateStorage ?? true,
@@ -482,7 +491,7 @@ export class PluginTestHarness extends EventEmitter {
    */
   public async load(plugin: TestablePlugin): Promise<void> {
     this.plugin = plugin;
-    this.emit('plugin:loaded', { pluginId: this.options.pluginId });
+    this.emit("plugin:loaded", { pluginId: this.options.pluginId });
   }
 
   /**
@@ -490,18 +499,15 @@ export class PluginTestHarness extends EventEmitter {
    */
   public async initialize(): Promise<void> {
     if (!this.plugin) {
-      throw new Error('No plugin loaded');
+      throw new Error("No plugin loaded");
     }
     if (this.initialized) {
-      throw new Error('Plugin already initialized');
+      throw new Error("Plugin already initialized");
     }
 
-    await this.withTimeout(
-      this.plugin.initialize(this.context),
-      'Plugin initialization timed out'
-    );
+    await this.withTimeout(this.plugin.initialize(this.context), "Plugin initialization timed out");
     this.initialized = true;
-    this.emit('plugin:initialized');
+    this.emit("plugin:initialized");
   }
 
   /**
@@ -509,18 +515,15 @@ export class PluginTestHarness extends EventEmitter {
    */
   public async start(): Promise<void> {
     if (!this.initialized) {
-      throw new Error('Plugin not initialized');
+      throw new Error("Plugin not initialized");
     }
     if (this.started) {
-      throw new Error('Plugin already started');
+      throw new Error("Plugin already started");
     }
 
-    await this.withTimeout(
-      this.plugin!.start(),
-      'Plugin start timed out'
-    );
+    await this.withTimeout(this.plugin!.start(), "Plugin start timed out");
     this.started = true;
-    this.emit('plugin:started');
+    this.emit("plugin:started");
   }
 
   /**
@@ -528,15 +531,12 @@ export class PluginTestHarness extends EventEmitter {
    */
   public async stop(): Promise<void> {
     if (!this.started) {
-      throw new Error('Plugin not started');
+      throw new Error("Plugin not started");
     }
 
-    await this.withTimeout(
-      this.plugin!.stop(),
-      'Plugin stop timed out'
-    );
+    await this.withTimeout(this.plugin!.stop(), "Plugin stop timed out");
     this.started = false;
-    this.emit('plugin:stopped');
+    this.emit("plugin:stopped");
   }
 
   /**
@@ -548,15 +548,12 @@ export class PluginTestHarness extends EventEmitter {
     }
 
     if (this.initialized && this.plugin) {
-      await this.withTimeout(
-        this.plugin.destroy(),
-        'Plugin destroy timed out'
-      );
+      await this.withTimeout(this.plugin.destroy(), "Plugin destroy timed out");
     }
 
     this.initialized = false;
     this.plugin = null;
-    this.emit('plugin:destroyed');
+    this.emit("plugin:destroyed");
   }
 
   /**
@@ -569,18 +566,18 @@ export class PluginTestHarness extends EventEmitter {
     try {
       // Initialize
       await this.initialize();
-      assertions.push({ description: 'Plugin initializes successfully', passed: true });
+      assertions.push({ description: "Plugin initializes successfully", passed: true });
 
       // Start
       await this.start();
-      assertions.push({ description: 'Plugin starts successfully', passed: true });
+      assertions.push({ description: "Plugin starts successfully", passed: true });
 
       // Health check
       if (this.plugin?.healthCheck) {
         const health = await this.plugin.healthCheck();
         const passed = health.healthy;
         assertions.push({
-          description: 'Plugin health check passes',
+          description: "Plugin health check passes",
           passed,
           expected: true,
           actual: health.healthy,
@@ -589,21 +586,21 @@ export class PluginTestHarness extends EventEmitter {
 
       // Stop
       await this.stop();
-      assertions.push({ description: 'Plugin stops successfully', passed: true });
+      assertions.push({ description: "Plugin stops successfully", passed: true });
 
       // Destroy
       await this.destroy();
-      assertions.push({ description: 'Plugin destroys successfully', passed: true });
+      assertions.push({ description: "Plugin destroys successfully", passed: true });
 
       return {
-        name: 'Lifecycle Test',
+        name: "Lifecycle Test",
         passed: assertions.every((a) => a.passed),
         duration: Date.now() - start,
         assertions,
       };
     } catch (error) {
       return {
-        name: 'Lifecycle Test',
+        name: "Lifecycle Test",
         passed: false,
         duration: Date.now() - start,
         error: error instanceof Error ? error : new Error(String(error)),
@@ -617,7 +614,7 @@ export class PluginTestHarness extends EventEmitter {
    */
   public async simulateEvent(event: string, payload?: unknown): Promise<void> {
     if (!this.started) {
-      throw new Error('Plugin not started');
+      throw new Error("Plugin not started");
     }
 
     await this.context.events.emit(event, payload);
@@ -632,11 +629,11 @@ export class PluginTestHarness extends EventEmitter {
    */
   public async simulateRequest(request: PluginRequest): Promise<PluginResponse> {
     if (!this.started) {
-      throw new Error('Plugin not started');
+      throw new Error("Plugin not started");
     }
 
     if (!this.plugin?.handleRequest) {
-      throw new Error('Plugin does not handle requests');
+      throw new Error("Plugin does not handle requests");
     }
 
     return this.plugin.handleRequest(request);
@@ -687,10 +684,10 @@ export class PluginTestHarness extends EventEmitter {
   /**
    * Assert log contains message
    */
-  public assertLogContains(level: LogEntry['level'], message: string): boolean {
-    return this.context.logger.getLogs().some(
-      (log) => log.level === level && log.message.includes(message)
-    );
+  public assertLogContains(level: LogEntry["level"], message: string): boolean {
+    return this.context.logger
+      .getLogs()
+      .some((log) => log.level === level && log.message.includes(message));
   }
 
   /**
@@ -699,7 +696,9 @@ export class PluginTestHarness extends EventEmitter {
   public assertEventEmitted(event: string, payload?: unknown): boolean {
     const events = this.context.events.getEmittedEvents();
     return events.some((e) => {
-      if (e.event !== event) {return false;}
+      if (e.event !== event) {
+        return false;
+      }
       if (payload !== undefined) {
         return JSON.stringify(e.payload) === JSON.stringify(payload);
       }
@@ -717,10 +716,14 @@ export class PluginTestHarness extends EventEmitter {
   /**
    * Assert metric was recorded
    */
-  public assertMetricRecorded(name: string, type?: MetricEntry['type']): boolean {
+  public assertMetricRecorded(name: string, type?: MetricEntry["type"]): boolean {
     return this.context.metrics.getMetrics().some((m) => {
-      if (m.name !== name) {return false;}
-      if (type !== undefined && m.type !== type) {return false;}
+      if (m.name !== name) {
+        return false;
+      }
+      if (type !== undefined && m.type !== type) {
+        return false;
+      }
       return true;
     });
   }

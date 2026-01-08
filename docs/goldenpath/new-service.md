@@ -22,6 +22,7 @@
 7.  [ ] **CI**: Ensure `pnpm test` and `pnpm build` work from the service root.
 
 ## Anti-Patterns
-*   Do not add logic to `server/` unless it is a core platform change.
-*   Do not hardcode secrets.
-*   Do not bypass the API Gateway for external access.
+
+- Do not add logic to `server/` unless it is a core platform change.
+- Do not hardcode secrets.
+- Do not bypass the API Gateway for external access.

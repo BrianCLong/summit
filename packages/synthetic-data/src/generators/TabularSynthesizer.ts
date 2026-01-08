@@ -3,14 +3,14 @@
  * Supports statistical methods, GANs (CTGAN, TVAE), and correlation preservation
  */
 
-import { mean, std, cov } from 'simple-statistics';
-import { clone, sampleSize, random } from 'lodash';
-import { create, all } from 'mathjs';
+import { mean, std, cov } from "simple-statistics";
+import { clone, sampleSize, random } from "lodash";
+import { create, all } from "mathjs";
 
 const math = create(all);
 
 export interface SynthesisConfig {
-  method: 'statistical' | 'ctgan' | 'tvae' | 'copula' | 'bayesian';
+  method: "statistical" | "ctgan" | "tvae" | "copula" | "bayesian";
   numSamples: number;
   preserveCorrelations: boolean;
   preserveDistributions: boolean;
@@ -24,7 +24,7 @@ export interface TabularData {
   columns: string[];
   data: any[][];
   metadata?: {
-    types: Record<string, 'categorical' | 'numerical' | 'datetime'>;
+    types: Record<string, "categorical" | "numerical" | "datetime">;
     distributions?: Record<string, any>;
     correlations?: number[][];
   };
@@ -72,19 +72,19 @@ export class TabularSynthesizer {
 
     // Fit based on selected method
     switch (this.config.method) {
-      case 'statistical':
+      case "statistical":
         this.fittedParams = await this.fitStatistical(data, analysis);
         break;
-      case 'ctgan':
+      case "ctgan":
         this.fittedParams = await this.fitCTGAN(data, analysis);
         break;
-      case 'tvae':
+      case "tvae":
         this.fittedParams = await this.fitTVAE(data, analysis);
         break;
-      case 'copula':
+      case "copula":
         this.fittedParams = await this.fitCopula(data, analysis);
         break;
-      case 'bayesian':
+      case "bayesian":
         this.fittedParams = await this.fitBayesian(data, analysis);
         break;
       default:
@@ -97,7 +97,7 @@ export class TabularSynthesizer {
    */
   async generate(numSamples?: number): Promise<SynthesisResult> {
     if (!this.fittedParams || !this.originalData) {
-      throw new Error('Synthesizer must be fitted before generating data');
+      throw new Error("Synthesizer must be fitted before generating data");
     }
 
     const n = numSamples || this.config.numSamples;
@@ -105,19 +105,19 @@ export class TabularSynthesizer {
     let syntheticData: TabularData;
 
     switch (this.config.method) {
-      case 'statistical':
+      case "statistical":
         syntheticData = await this.generateStatistical(n);
         break;
-      case 'ctgan':
+      case "ctgan":
         syntheticData = await this.generateCTGAN(n);
         break;
-      case 'tvae':
+      case "tvae":
         syntheticData = await this.generateTVAE(n);
         break;
-      case 'copula':
+      case "copula":
         syntheticData = await this.generateCopula(n);
         break;
-      case 'bayesian':
+      case "bayesian":
         syntheticData = await this.generateBayesian(n);
         break;
       default:
@@ -135,7 +135,7 @@ export class TabularSynthesizer {
     return {
       syntheticData,
       quality,
-      privacyMetrics
+      privacyMetrics,
     };
   }
 
@@ -148,22 +148,22 @@ export class TabularSynthesizer {
       numRows: rows.length,
       numCols: columns.length,
       columnStats: {},
-      correlations: null
+      correlations: null,
     };
 
     // Compute statistics for each column
     columns.forEach((col, idx) => {
-      const values = rows.map(row => row[idx]);
-      const numericValues = values.filter(v => typeof v === 'number' && !isNaN(v));
+      const values = rows.map((row) => row[idx]);
+      const numericValues = values.filter((v) => typeof v === "number" && !isNaN(v));
 
       if (numericValues.length > 0) {
         analysis.columnStats[col] = {
-          type: 'numerical',
+          type: "numerical",
           mean: mean(numericValues),
           std: std(numericValues),
           min: Math.min(...numericValues),
           max: Math.max(...numericValues),
-          quantiles: this.computeQuantiles(numericValues)
+          quantiles: this.computeQuantiles(numericValues),
         };
       } else {
         // Categorical column
@@ -171,10 +171,10 @@ export class TabularSynthesizer {
         const valueCounts = this.countValues(values);
 
         analysis.columnStats[col] = {
-          type: 'categorical',
+          type: "categorical",
           uniqueValues,
           valueCounts,
-          distribution: valueCounts
+          distribution: valueCounts,
         };
       }
     });
@@ -192,10 +192,10 @@ export class TabularSynthesizer {
    */
   private async fitStatistical(data: TabularData, analysis: any): Promise<any> {
     return {
-      method: 'statistical',
+      method: "statistical",
       columnStats: analysis.columnStats,
       correlations: analysis.correlations,
-      numRows: analysis.numRows
+      numRows: analysis.numRows,
     };
   }
 
@@ -206,11 +206,11 @@ export class TabularSynthesizer {
     // CTGAN implementation would use a neural network library
     // For this implementation, we'll use a statistical approximation
     return {
-      method: 'ctgan',
+      method: "ctgan",
       columnStats: analysis.columnStats,
       correlations: analysis.correlations,
       discriminatorWeights: null, // Would be trained GAN weights
-      generatorWeights: null
+      generatorWeights: null,
     };
   }
 
@@ -219,11 +219,11 @@ export class TabularSynthesizer {
    */
   private async fitTVAE(data: TabularData, analysis: any): Promise<any> {
     return {
-      method: 'tvae',
+      method: "tvae",
       columnStats: analysis.columnStats,
       encoderWeights: null, // Would be trained VAE weights
       decoderWeights: null,
-      latentDim: 128
+      latentDim: 128,
     };
   }
 
@@ -232,10 +232,10 @@ export class TabularSynthesizer {
    */
   private async fitCopula(data: TabularData, analysis: any): Promise<any> {
     return {
-      method: 'copula',
+      method: "copula",
       columnStats: analysis.columnStats,
       correlations: analysis.correlations,
-      marginalDistributions: analysis.columnStats
+      marginalDistributions: analysis.columnStats,
     };
   }
 
@@ -247,9 +247,9 @@ export class TabularSynthesizer {
     const structure = this.learnBayesianStructure(data);
 
     return {
-      method: 'bayesian',
+      method: "bayesian",
       structure,
-      columnStats: analysis.columnStats
+      columnStats: analysis.columnStats,
     };
   }
 
@@ -262,8 +262,8 @@ export class TabularSynthesizer {
     const syntheticRows: any[][] = [];
 
     // Generate correlated numerical data
-    const numericalCols = columns.filter(col => columnStats[col].type === 'numerical');
-    const categoricalCols = columns.filter(col => columnStats[col].type === 'categorical');
+    const numericalCols = columns.filter((col) => columnStats[col].type === "numerical");
+    const categoricalCols = columns.filter((col) => columnStats[col].type === "categorical");
 
     for (let i = 0; i < numSamples; i++) {
       const row: any[] = [];
@@ -271,7 +271,7 @@ export class TabularSynthesizer {
       // Generate numerical values with correlation preservation
       if (numericalCols.length > 0 && correlations) {
         const numericalValues = this.generateCorrelatedNormal(
-          numericalCols.map(col => columnStats[col]),
+          numericalCols.map((col) => columnStats[col]),
           correlations
         );
 
@@ -281,7 +281,7 @@ export class TabularSynthesizer {
       }
 
       // Generate categorical values
-      categoricalCols.forEach(col => {
+      categoricalCols.forEach((col) => {
         const stats = columnStats[col];
         const value = this.sampleFromDistribution(stats.distribution);
         row[columns.indexOf(col)] = value;
@@ -296,8 +296,8 @@ export class TabularSynthesizer {
       metadata: {
         types: this.getColumnTypes(columnStats),
         distributions: columnStats,
-        correlations
-      }
+        correlations,
+      },
     };
   }
 
@@ -341,7 +341,7 @@ export class TabularSynthesizer {
         const colIdx = columns.indexOf(node.column);
         const stats = columnStats[node.column];
 
-        if (stats.type === 'numerical') {
+        if (stats.type === "numerical") {
           row[colIdx] = this.generateNormal(stats.mean, stats.std);
         } else {
           row[colIdx] = this.sampleFromDistribution(stats.distribution);
@@ -355,8 +355,8 @@ export class TabularSynthesizer {
       columns,
       data: syntheticRows,
       metadata: {
-        types: this.getColumnTypes(columnStats)
-      }
+        types: this.getColumnTypes(columnStats),
+      },
     };
   }
 
@@ -365,7 +365,7 @@ export class TabularSynthesizer {
    */
   private computeQualityMetrics(syntheticData: TabularData): QualityMetrics {
     if (!this.originalData) {
-      throw new Error('Original data not available for comparison');
+      throw new Error("Original data not available for comparison");
     }
 
     const distributionSimilarity = this.computeDistributionSimilarity(
@@ -377,10 +377,7 @@ export class TabularSynthesizer {
       ? this.computeCorrelationPreservation(this.originalData, syntheticData)
       : 1.0;
 
-    const statisticalFidelity = this.computeStatisticalFidelity(
-      this.originalData,
-      syntheticData
-    );
+    const statisticalFidelity = this.computeStatisticalFidelity(this.originalData, syntheticData);
 
     const diversityScore = this.computeDiversityScore(syntheticData);
 
@@ -388,7 +385,7 @@ export class TabularSynthesizer {
       distributionSimilarity,
       correlationPreservation,
       statisticalFidelity,
-      diversityScore
+      diversityScore,
     };
   }
 
@@ -404,7 +401,7 @@ export class TabularSynthesizer {
     return {
       privacyLoss,
       reidentificationRisk,
-      membershipInferenceRisk
+      membershipInferenceRisk,
     };
   }
 
@@ -412,7 +409,7 @@ export class TabularSynthesizer {
 
   private computeQuantiles(values: number[]): number[] {
     const sorted = [...values].sort((a, b) => a - b);
-    return [0.25, 0.5, 0.75].map(q => {
+    return [0.25, 0.5, 0.75].map((q) => {
       const idx = Math.floor(sorted.length * q);
       return sorted[idx];
     });
@@ -420,7 +417,7 @@ export class TabularSynthesizer {
 
   private countValues(values: any[]): Record<string, number> {
     const counts: Record<string, number> = {};
-    values.forEach(v => {
+    values.forEach((v) => {
       const key = String(v);
       counts[key] = (counts[key] || 0) + 1;
     });
@@ -430,7 +427,9 @@ export class TabularSynthesizer {
   private computeCorrelationMatrix(data: TabularData): number[][] {
     // Simplified correlation computation
     const numCols = data.columns.length;
-    const matrix: number[][] = Array(numCols).fill(0).map(() => Array(numCols).fill(0));
+    const matrix: number[][] = Array(numCols)
+      .fill(0)
+      .map(() => Array(numCols).fill(0));
 
     // Placeholder - would compute actual Pearson correlation
     for (let i = 0; i < numCols; i++) {
@@ -478,14 +477,14 @@ export class TabularSynthesizer {
 
   private learnBayesianStructure(data: TabularData): any[] {
     // Simplified Bayesian structure learning
-    return data.columns.map(col => ({
+    return data.columns.map((col) => ({
       column: col,
-      parents: []
+      parents: [],
     }));
   }
 
-  private getColumnTypes(columnStats: any): Record<string, 'categorical' | 'numerical'> {
-    const types: Record<string, 'categorical' | 'numerical'> = {};
+  private getColumnTypes(columnStats: any): Record<string, "categorical" | "numerical"> {
+    const types: Record<string, "categorical" | "numerical"> = {};
     Object.entries(columnStats).forEach(([col, stats]: [string, any]) => {
       types[col] = stats.type;
     });

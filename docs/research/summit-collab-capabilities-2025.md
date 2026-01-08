@@ -1,6 +1,7 @@
 # Summit Human–AI Collaborative Intelligence: 2025 Capability Bets
 
 ## Capability 1: Graph-native Copilot for IntelGraph Interrogation (GraphRAG + structured grounding)
+
 - **Value proposition:** Analysts ask NL questions and receive sourced, graph-grounded answers with path visualizations, making IntelGraph the shared truth layer.
 - **Why now:** GraphRAG and threat-KG patterns are proving higher factuality for CTI/OSINT than vanilla RAG; competitors are adding agentic graph copilots but lack transparent pathing.
 - **Concrete v0/v1 (4–8 weeks):**
@@ -17,6 +18,7 @@
   - Abuse guardrails: rate-limit `askGraph` per analyst; detect mass-surveillance patterns (broad selectors) and require justification.
 
 ## Capability 2: Misinformation/Deepfake Lineage Tracker with Narrative Impact Scoring
+
 - **Value proposition:** Track how suspect media and narratives propagate across sources, score their projected impact, and feed them into the narrative simulator for what-if defenses.
 - **Why now:** 2024–2025 OSINT tools race to add deepfake/inauthentic-behavior detection; pairing lineage with narrative sims is still rare and differentiating.
 - **Concrete v0/v1 (4–8 weeks):**
@@ -33,6 +35,7 @@
   - Abuse prevention: detect mass attribution against individuals; require supervisor approval for person-centric tracking.
 
 ## Capability 3: Analyst–Agent Workcells with Task Exchange and Explainable Plans
+
 - **Value proposition:** Workcells pair analysts with small agent teams that propose/execute OSINT/CTI playbooks, with explicit task splits and review checkpoints.
 - **Why now:** “Work companion” research shows humans+agents outperform solo when tasks are decomposed with transparent plans; market tools are shipping generic agents without plan/approval ergonomics.
 - **Concrete v0/v1 (4–8 weeks):**
@@ -49,6 +52,7 @@
   - Abuse prevention: cap autonomous breadth (query scope/time); block scraping of protected populations.
 
 ## Capability 4: Cross-Source Pattern Radar with Graph + Time Anomaly Detection
+
 - **Value proposition:** Detect emerging TTPs, bot clusters, and infrastructure reuse by fusing graph motifs with time-series anomalies, surfacing early warnings.
 - **Why now:** Threat intel platforms are converging on automated pattern detection; graph-motif + temporal anomaly stacking is a leading signal with low vendor penetration.
 - **Concrete v0/v1 (4–8 weeks):**
@@ -65,6 +69,7 @@
   - Abuse prevention: monitor for broad “bulk surveillance” patterns and require supervisor sign-off.
 
 ## Capability 5: Provenance-First Intel Products with Adaptive Transparency Levels
+
 - **Value proposition:** Generate briefs that auto-tune transparency (citations, methods, model caveats) based on audience and sensitivity, maintaining trust and deployability in high-governance settings.
 - **Why now:** Customers demand AI-generated intel with verifiable provenance; transparency/learning effects improve human trust and are becoming a differentiator in regulated OSINT/CTI.
 - **Concrete v0/v1 (4–8 weeks):**
@@ -81,11 +86,13 @@
   - Abuse prevention: watermark AI-generated content; detect “specious certainty” (overconfident language) and require edits.
 
 ## Phased Roadmap
+
 - **Phase 1 (table-stakes differentiation):** Capabilities 1, 3, and 5 — focus on graph-grounded copilot, workcell ergonomics, and provenance-first intel products to beat generic LLM copilots; emphasize governance primitives.
 - **Phase 2 (graph+LLM and sim amplifiers):** Capability 2 and 4 — misinformation lineage + narrative impact loops and pattern radar; deepen moat with graph+time analytics and simulator integration.
 - **Phase 3 (high-beta, gated):** Extend Capability 3 into semi-autonomous collection agents with bounded scopes; cross-tenant/trend models with strict tenancy isolation; opt-in federated learnings for motif detection; attach enhanced oversight (kill-switches, bias/abuse monitors) before GA.
 
 ## Key Trade-offs & Deployment Notes
+
 - **Models:** prefer on-prem open-weight LLM/vision where governance demands; allow hosted fallback with strict logging; expect higher latency but better explainability.
 - **Explainability vs. cost/latency:** expose template/Cypher previews and feature importances even if slightly slower; cache stable templates and motif scores to offset cost.
 - **Data residency:** ensure pgvector/Timescale shards respect tenant boundaries; graph exports behind RBAC and purpose justification.

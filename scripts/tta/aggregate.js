@@ -1,8 +1,8 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 const byDay = {};
-if (!fs.existsSync('docs/ops/tta/log.ndjson')) process.exit(0);
-fs.readFileSync('docs/ops/tta/log.ndjson', 'utf8')
+if (!fs.existsSync("docs/ops/tta/log.ndjson")) process.exit(0);
+fs.readFileSync("docs/ops/tta/log.ndjson", "utf8")
   .trim()
   .split(/\n/)
   .forEach((line) => {
@@ -10,9 +10,9 @@ fs.readFileSync('docs/ops/tta/log.ndjson', 'utf8')
     const r = JSON.parse(line);
     const day = new Date(r.ts).toISOString().slice(0, 10);
     byDay[day] ||= { searches: 0, clicks: 0, successes: 0, tta_ms: [] };
-    if (r.ev === 'search_input') byDay[day].searches++;
-    if (r.ev === 'doc_click') byDay[day].clicks++;
-    if (r.ev === 'doc_success' && r.attrs?.tta_ms) {
+    if (r.ev === "search_input") byDay[day].searches++;
+    if (r.ev === "doc_click") byDay[day].clicks++;
+    if (r.ev === "doc_success" && r.attrs?.tta_ms) {
       byDay[day].successes++;
       byDay[day].tta_ms.push(r.attrs.tta_ms);
     }
@@ -31,5 +31,5 @@ function p(arr, q) {
   const i = Math.max(0, Math.min(a.length - 1, Math.floor(q * (a.length - 1))));
   return a[i];
 }
-fs.mkdirSync('docs/ops/tta', { recursive: true });
-fs.writeFileSync('docs/ops/tta/summary.json', JSON.stringify(out, null, 2));
+fs.mkdirSync("docs/ops/tta", { recursive: true });
+fs.writeFileSync("docs/ops/tta/summary.json", JSON.stringify(out, null, 2));

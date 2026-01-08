@@ -2,17 +2,17 @@ name: 🏗️ Mega PR Excavator - Mass Recovery
 
 on:
   schedule:
-    - cron: '0 */3 * * *'  # Every 3 hours (2x faster)
+    - cron: "0 */3 * * *" # Every 3 hours (2x faster)
   workflow_dispatch:
     inputs:
       max_prs:
-        description: 'Max PRs to recover per run'
+        description: "Max PRs to recover per run"
         required: false
-        default: '50'
+        default: "50"
       recovery_mode:
-        description: 'Recovery mode'
+        description: "Recovery mode"
         required: false
-        default: 'aggressive'
+        default: "aggressive"
         type: choice
         options:
           - smart

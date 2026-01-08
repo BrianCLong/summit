@@ -1,9 +1,9 @@
 ---
-name: 'Issue #2: Real-Time Collaboration Delta Sync Latency'
+name: "Issue #2: Real-Time Collaboration Delta Sync Latency"
 about: Reduce latency in collaborative annotation syncing
-title: 'Issue #2: Real-Time Collaboration Delta Sync Latency'
-labels: 'bug, performance, collaboration, backend, frontend'
-assignees: ''
+title: "Issue #2: Real-Time Collaboration Delta Sync Latency"
+labels: "bug, performance, collaboration, backend, frontend"
+assignees: ""
 ---
 
 **Branch**: `feature/collab-delta-sync`
@@ -99,32 +99,28 @@ class CollaborationClient {
     this.ws = new WebSocket(wsUrl);
 
     this.ws.onopen = () => {
-      console.log(
-        `Connected to collaboration server for graph ${this.graphId}`,
-      );
+      console.log(`Connected to collaboration server for graph ${this.graphId}`);
     };
 
     this.ws.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      console.log('Received message:', message);
-      if (message.type === 'initial_state') {
+      console.log("Received message:", message);
+      if (message.type === "initial_state") {
         // Apply initial state
         this.onUpdateCallback(message.data, true);
-      } else if (message.type === 'annotation_update') {
+      } else if (message.type === "annotation_update") {
         // Apply delta update
         this.onUpdateCallback(message.payload, false);
       }
     };
 
     this.ws.onclose = () => {
-      console.log(
-        'Disconnected from collaboration server. Reconnecting in 5s...',
-      );
+      console.log("Disconnected from collaboration server. Reconnecting in 5s...");
       setTimeout(() => this.connect(), 5000);
     };
 
     this.ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
+      console.error("WebSocket error:", error);
     };
   }
 
@@ -132,12 +128,12 @@ class CollaborationClient {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(
         JSON.stringify({
-          type: 'annotation_update',
+          type: "annotation_update",
           payload: annotationData,
-        }),
+        })
       );
     } else {
-      console.warn('WebSocket not open. Cannot send update.');
+      console.warn("WebSocket not open. Cannot send update.");
     }
   }
 }

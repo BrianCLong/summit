@@ -1,6 +1,6 @@
-import React from 'react';
-import { gql, useLazyQuery } from '@apollo/client';
-import { Drawer, List, ListItem, ListItemText, Button } from '@mui/material';
+import React from "react";
+import { gql, useLazyQuery } from "@apollo/client";
+import { Drawer, List, ListItem, ListItemText, Button } from "@mui/material";
 
 const Q = gql`
   query ($id: ID!, $k: Int!) {
@@ -39,10 +39,7 @@ export default function SimilarDrawer({ open, onClose, entityId, cy }) {
                 }
               }}
             >
-              <ListItemText
-                primary={s.id}
-                secondary={`Score ${(s.score * 100).toFixed(1)}%`}
-              />
+              <ListItemText primary={s.id} secondary={`Score ${(s.score * 100).toFixed(1)}%`} />
             </ListItem>
           ))}
         <Button onClick={onClose}>Close</Button>

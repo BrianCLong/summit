@@ -121,9 +121,9 @@ Observability: Notify QoS panels; Motif job dashboards; error budgets.
 
 ```tsx
 // apps/web/src/features/case-space/presence.tsx
-import React, { useEffect, useState } from 'react';
-import $ from 'jquery';
-import io from 'socket.io-client';
+import React, { useEffect, useState } from "react";
+import $ from "jquery";
+import io from "socket.io-client";
 
 export default function Presence({
   caseId,
@@ -135,18 +135,16 @@ export default function Presence({
   const [users, setUsers] = useState<any[]>([]);
   const [typing, setTyping] = useState<Record<string, boolean>>({});
   useEffect(() => {
-    const sock = io('/ws/case', { query: { caseId } });
-    sock.emit('join', { caseId });
-    sock.on('presence:update', (list: any[]) => setUsers(list));
-    $(document).on('ig:typing', (_e, st) => {
-      sock.emit('typing', { caseId, state: st });
+    const sock = io("/ws/case", { query: { caseId } });
+    sock.emit("join", { caseId });
+    sock.on("presence:update", (list: any[]) => setUsers(list));
+    $(document).on("ig:typing", (_e, st) => {
+      sock.emit("typing", { caseId, state: st });
     });
-    sock.on('typing', ({ userId, state }) =>
-      setTyping((t) => ({ ...t, [userId]: state })),
-    );
+    sock.on("typing", ({ userId, state }) => setTyping((t) => ({ ...t, [userId]: state })));
     return () => {
       sock.disconnect();
-      $(document).off('ig:typing');
+      $(document).off("ig:typing");
     };
   }, [caseId]);
   return (
@@ -158,9 +156,7 @@ export default function Presence({
           className="w-8 h-8 rounded-full bg-gray-200 border shadow relative"
         >
           {typing[u.id] && (
-            <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-xs">
-              …
-            </span>
+            <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-xs">…</span>
           )}
         </div>
       ))}
@@ -173,28 +169,22 @@ export default function Presence({
 
 ```tsx
 // apps/web/src/features/case-space/comments.tsx
-import React, { useEffect, useState } from 'react';
-import $ from 'jquery';
-import io from 'socket.io-client';
+import React, { useEffect, useState } from "react";
+import $ from "jquery";
+import io from "socket.io-client";
 
-export default function Comments({
-  caseId,
-  targetId,
-}: {
-  caseId: string;
-  targetId: string;
-}) {
+export default function Comments({ caseId, targetId }: { caseId: string; targetId: string }) {
   const [items, setItems] = useState<any[]>([]);
   useEffect(() => {
-    const sock = io('/ws/case', { query: { caseId } });
-    sock.on('comment:new', (c: any) => setItems((a) => [...a, c]));
+    const sock = io("/ws/case", { query: { caseId } });
+    sock.on("comment:new", (c: any) => setItems((a) => [...a, c]));
     return () => sock.disconnect();
   }, [caseId]);
   function send(text: string) {
     $.ajax({
-      url: '/api/case/comment',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/api/case/comment",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({ caseId, targetId, text }),
     });
   }
@@ -209,9 +199,9 @@ export default function Comments({
         className="rounded-2xl p-2 shadow w-full"
         placeholder="Write a comment… @mention"
         onKeyDown={(e: any) => {
-          if (e.key === 'Enter') {
+          if (e.key === "Enter") {
             send(e.target.value);
-            e.target.value = '';
+            e.target.value = "";
           }
         }}
       />
@@ -224,16 +214,16 @@ export default function Comments({
 
 ```ts
 // server/src/notify/index.ts
-import { Server } from 'socket.io';
-import fetch from 'node-fetch';
+import { Server } from "socket.io";
+import fetch from "node-fetch";
 export function createNotifier(io: Server) {
   async function notifyWS(userId: string, payload: any) {
-    io.to(`user:${userId}`).emit('notify', payload);
+    io.to(`user:${userId}`).emit("notify", payload);
   }
   async function notifyEmail(webhook: string, payload: any) {
     await fetch(webhook, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      method: "POST",
+      headers: { "content-type": "application/json" },
       body: JSON.stringify(payload),
     });
   }
@@ -245,7 +235,7 @@ export function createNotifier(io: Server) {
 
 ```ts
 // server/src/analytics/motifs/temporal_triangles.ts
-import dayjs from 'dayjs';
+import dayjs from "dayjs";
 export type Triangle = {
   a: string;
   b: string;
@@ -256,23 +246,16 @@ export type Triangle = {
 };
 export async function findTemporalTriangles(
   events: { when: string; src: string; dst: string; venue?: string }[],
-  days: number,
+  days: number
 ): Promise<Triangle[]> {
-  const cutoff = dayjs().subtract(days, 'day');
+  const cutoff = dayjs().subtract(days, "day");
   const E = events.filter((e) => dayjs(e.when).isAfter(cutoff));
   // naive O(n^2) → replace with indexed approach
   const tri: Triangle[] = [];
   for (let i = 0; i < E.length; i++)
     for (let j = i + 1; j < E.length; j++)
       for (let k = j + 1; k < E.length; k++) {
-        const s = new Set([
-          E[i].src,
-          E[i].dst,
-          E[j].src,
-          E[j].dst,
-          E[k].src,
-          E[k].dst,
-        ]);
+        const s = new Set([E[i].src, E[i].dst, E[j].src, E[j].dst, E[k].src, E[k].dst]);
         if (s.size === 3)
           tri.push({
             a: [...s][0] as string,
@@ -280,7 +263,7 @@ export async function findTemporalTriangles(
             c: [...s][2] as string,
             windowDays: days,
             score: 0.8,
-            why: '3‑cycle within window',
+            why: "3‑cycle within window",
           });
       }
   return tri.slice(0, 50);
@@ -291,8 +274,8 @@ export async function findTemporalTriangles(
 
 ```tsx
 // apps/web/src/features/tri-pane/motif-chips.tsx
-import React from 'react';
-import $ from 'jquery';
+import React from "react";
+import $ from "jquery";
 export default function MotifChips({ motifs }: { motifs: any[] }) {
   return (
     <div className="absolute top-2 left-2 flex flex-wrap gap-2">
@@ -300,7 +283,7 @@ export default function MotifChips({ motifs }: { motifs: any[] }) {
         <button
           key={m.name}
           className="rounded-2xl px-3 py-1 shadow"
-          onClick={() => $(document).trigger('ig:motif:select', m)}
+          onClick={() => $(document).trigger("ig:motif:select", m)}
         >
           {m.name} • {Math.round((m.score || 0) * 100)}
         </button>
@@ -329,11 +312,7 @@ def build_clusters(pairs):
 
 ```ts
 // server/src/graph/unmerge_boundary.ts
-export function withinBoundary(
-  clusterId: string,
-  nodeA: string,
-  nodeB: string,
-) {
+export function withinBoundary(clusterId: string, nodeA: string, nodeB: string) {
   // placeholder boundary rule
   return nodeA.startsWith(clusterId) && nodeB.startsWith(clusterId);
 }
@@ -409,7 +388,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: '3.12' }
+        with: { python-version: "3.12" }
       - run: pip install networkx pytest
       - run: pytest -q er-service/cluster
 ```
@@ -424,10 +403,10 @@ features:
   presence: true
   comments: true
   mentions: true
-  motifs: ['temporal_triangles', 'venue_cooccur', 'cross_channel_bursts']
+  motifs: ["temporal_triangles", "venue_cooccur", "cross_channel_bursts"]
 notify:
   wsEnabled: true
-  emailWebhook: '${NOTIFY_WEBHOOK}'
+  emailWebhook: "${NOTIFY_WEBHOOK}"
 ```
 
 ---

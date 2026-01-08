@@ -2,11 +2,11 @@ name: Golden Path Deploy (Stage -> Prod)
 
 on:
   push:
-    tags: ['v*'] # Deploy on version tag
+    tags: ["v*"] # Deploy on version tag
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to deploy'
+        description: "Version to deploy"
         required: true
 
 jobs:

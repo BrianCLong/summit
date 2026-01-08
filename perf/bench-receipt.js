@@ -1,9 +1,9 @@
-import { createHash } from 'node:crypto';
-import os from 'node:os';
-import { performance } from 'node:perf_hooks';
-import { execSync } from 'node:child_process';
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
+import { createHash } from "node:crypto";
+import os from "node:os";
+import { performance } from "node:perf_hooks";
+import { execSync } from "node:child_process";
+import Ajv from "ajv";
+import addFormats from "ajv-formats";
 
 /**
  * @typedef {Object} RawReceiptInput
@@ -50,32 +50,42 @@ addFormats(ajv);
 
 /** @type {import('ajv').JSONSchemaType<RawReceiptInput>} */
 const receiptSchema = {
-  type: 'object',
+  type: "object",
   properties: {
-    adapterId: { type: 'string', minLength: 1 },
-    runId: { type: 'string', minLength: 1 },
-    action: { type: 'string', minLength: 1 },
-    decision: { type: 'string', enum: ['allow', 'deny', 'defer'] },
-    subject: { type: 'object' },
-    resource: { type: 'object' },
-    context: { type: 'object' },
-    retries: { type: 'integer', minimum: 0 },
-    obligations: { type: 'array', items: { type: 'object' }, nullable: true, default: [] },
-    issuedAt: { type: 'string', format: 'date-time', nullable: true },
+    adapterId: { type: "string", minLength: 1 },
+    runId: { type: "string", minLength: 1 },
+    action: { type: "string", minLength: 1 },
+    decision: { type: "string", enum: ["allow", "deny", "defer"] },
+    subject: { type: "object" },
+    resource: { type: "object" },
+    context: { type: "object" },
+    retries: { type: "integer", minimum: 0 },
+    obligations: { type: "array", items: { type: "object" }, nullable: true, default: [] },
+    issuedAt: { type: "string", format: "date-time", nullable: true },
   },
-  required: ['adapterId', 'runId', 'action', 'decision', 'subject', 'resource', 'context', 'retries'],
+  required: [
+    "adapterId",
+    "runId",
+    "action",
+    "decision",
+    "subject",
+    "resource",
+    "context",
+    "retries",
+  ],
   additionalProperties: false,
 };
 
 const validateReceipt = ajv.compile(receiptSchema);
 
 function hashJson(obj) {
-  return createHash('sha256').update(JSON.stringify(obj)).digest('hex');
+  return createHash("sha256").update(JSON.stringify(obj)).digest("hex");
 }
 
 function emitDecisionReceipt(options) {
   const retries = options.retries ?? 0;
-  const id = options.stepId || `decision-${options.adapterId ? `${options.adapterId}-` : ''}${Date.now()}`;
+  const id =
+    options.stepId || `decision-${options.adapterId ? `${options.adapterId}-` : ""}${Date.now()}`;
 
   const receipt = {
     id,
@@ -106,29 +116,31 @@ function normalizeReceiptPayload(raw) {
     retries: raw.retries,
     obligations: raw.obligations,
     stepId: `${raw.runId}-${hashJson(raw.subject).slice(0, 8)}`,
-    note: 'receipt benchmark',
+    note: "receipt benchmark",
   };
 }
 
 function defaultPayload(seed, overrides = {}) {
   const baseIssuedAt = overrides.issuedAt ?? new Date().toISOString();
   return {
-    adapterId: overrides.adapterId ?? 'adapter.perf',
+    adapterId: overrides.adapterId ?? "adapter.perf",
     runId: overrides.runId ?? `run-${seed}`,
-    action: overrides.action ?? 'execute',
-    decision: overrides.decision ?? 'allow',
-    subject: overrides.subject ?? { userId: `user-${seed % 10}`, region: 'us-east-1' },
-    resource: overrides.resource ?? { type: 'dataset', id: `ds-${seed % 5}` },
-    context: overrides.context ?? { traceId: `trace-${seed}`, path: '/ingest' },
+    action: overrides.action ?? "execute",
+    decision: overrides.decision ?? "allow",
+    subject: overrides.subject ?? { userId: `user-${seed % 10}`, region: "us-east-1" },
+    resource: overrides.resource ?? { type: "dataset", id: `ds-${seed % 5}` },
+    context: overrides.context ?? { traceId: `trace-${seed}`, path: "/ingest" },
     retries: overrides.retries ?? 0,
-    obligations: overrides.obligations ?? [{ type: 'header', requirement: 'x-perf-check' }],
+    obligations: overrides.obligations ?? [{ type: "header", requirement: "x-perf-check" }],
     issuedAt: baseIssuedAt,
   };
 }
 
 function getGitCommit() {
   try {
-    return execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+    return execSync("git rev-parse --short HEAD", { stdio: ["ignore", "pipe", "ignore"] })
+      .toString()
+      .trim();
   } catch (error) {
     return undefined;
   }
@@ -136,7 +148,7 @@ function getGitCommit() {
 
 async function getPackageVersion() {
   try {
-    const pkg = await import('../package.json', { assert: { type: 'json' } });
+    const pkg = await import("../package.json", { assert: { type: "json" } });
     return pkg.default?.version ?? pkg.version;
   } catch (error) {
     return undefined;
@@ -148,14 +160,14 @@ async function getPackageVersion() {
  * @returns {Promise<ReceiptBenchmarkReport>}
  */
 export async function runReceiptBenchmark(options = {}) {
-  const smokeMode = options.smoke ?? process.env.SMOKE === '1';
+  const smokeMode = options.smoke ?? process.env.SMOKE === "1";
   const iterations = options.iterations ?? (smokeMode ? 250 : 2500);
   if (iterations <= 0) {
-    throw new Error('iterations must be greater than zero');
+    throw new Error("iterations must be greater than zero");
   }
 
   const startedAt = performance.now();
-  let sampleReceiptId = '';
+  let sampleReceiptId = "";
 
   for (let i = 0; i < iterations; i += 1) {
     const payload = defaultPayload(i, options.payload);
@@ -173,11 +185,11 @@ export async function runReceiptBenchmark(options = {}) {
   const opsPerSec = Math.round((iterations / durationMs) * 1000);
 
   return {
-    benchmark: 'receipt-validation',
+    benchmark: "receipt-validation",
     iterations,
     durationMs: Number(durationMs.toFixed(2)),
     opsPerSec,
-    mode: smokeMode ? 'smoke' : 'standard',
+    mode: smokeMode ? "smoke" : "standard",
     environment: {
       node: process.version,
       platform: os.platform(),
@@ -193,9 +205,9 @@ export async function runReceiptBenchmark(options = {}) {
 
 async function main() {
   const args = new Set(process.argv.slice(2));
-  const iterationsArg = [...args].find((arg) => arg.startsWith('--iterations='))?.split('=')[1];
+  const iterationsArg = [...args].find((arg) => arg.startsWith("--iterations="))?.split("=")[1];
   const iterations = iterationsArg ? Number.parseInt(iterationsArg, 10) : undefined;
-  const smoke = args.has('--smoke');
+  const smoke = args.has("--smoke");
 
   const report = await runReceiptBenchmark({ iterations, smoke });
   console.log(JSON.stringify(report, null, 2));

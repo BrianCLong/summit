@@ -111,9 +111,9 @@ estimated_effort: 3-5 days
 complexity: medium
 
 related_prompts:
-  - OPS-001  # Runbook Engine
-  - GOV-001  # Policy Change Simulator
-  - XAI-001  # XAI Integrity Overlays
+  - OPS-001 # Runbook Engine
+  - GOV-001 # Policy Change Simulator
+  - XAI-001 # XAI Integrity Overlays
 
 blueprint_path: ../blueprints/templates/dq-dashboard
 
@@ -137,43 +137,44 @@ notes: |
 
 ### Required Fields
 
-| Field | Type | Description | Example |
-|-------|------|-------------|---------|
-| `id` | string | Unique identifier (CATEGORY-NNN) | `DQ-001` |
-| `name` | string | Human-readable prompt name | `Data Quality Dashboard` |
-| `category` | enum | Primary category | `ops`, `governance`, `security` |
-| `priority` | enum | Implementation priority | `high`, `medium`, `low` |
-| `status` | enum | Prompt readiness | `ready`, `draft`, `deprecated` |
-| `description` | string | Brief description (1-3 sentences) | See example |
-| `objective` | string | What this prompt delivers | See example |
-| `deliverables` | array | List of artifacts produced | See schema |
-| `acceptance_criteria` | array | Validation requirements | See schema |
+| Field                 | Type   | Description                       | Example                         |
+| --------------------- | ------ | --------------------------------- | ------------------------------- |
+| `id`                  | string | Unique identifier (CATEGORY-NNN)  | `DQ-001`                        |
+| `name`                | string | Human-readable prompt name        | `Data Quality Dashboard`        |
+| `category`            | enum   | Primary category                  | `ops`, `governance`, `security` |
+| `priority`            | enum   | Implementation priority           | `high`, `medium`, `low`         |
+| `status`              | enum   | Prompt readiness                  | `ready`, `draft`, `deprecated`  |
+| `description`         | string | Brief description (1-3 sentences) | See example                     |
+| `objective`           | string | What this prompt delivers         | See example                     |
+| `deliverables`        | array  | List of artifacts produced        | See schema                      |
+| `acceptance_criteria` | array  | Validation requirements           | See schema                      |
 
 ### Optional Fields
 
-| Field | Type | Description | Default |
-|-------|------|-------------|---------|
-| `slug` | string | URL-friendly identifier | Derived from name |
-| `subcategory` | string | Secondary categorization | `null` |
-| `version` | semver | Prompt version | `1.0.0` |
-| `created` | date | Creation date (ISO 8601) | Current date |
-| `updated` | date | Last update date | `created` |
-| `author` | string | Prompt author | `Engineering Team` |
-| `tags` | array[string] | Searchable tags | `[]` |
-| `dependencies` | object | Service/package deps | `{}` |
-| `prerequisites` | array[string] | Setup requirements | `[]` |
-| `test_fixtures` | array | Golden test data | `[]` |
-| `integration_points` | array | How this integrates | `[]` |
-| `estimated_effort` | string | Time estimate | `null` |
-| `complexity` | enum | Implementation complexity | `medium` |
-| `related_prompts` | array[string] | Related prompt IDs | `[]` |
-| `blueprint_path` | string | Path to blueprint template | `null` |
-| `references` | array | External links/docs | `[]` |
-| `notes` | string | Additional context | `null` |
+| Field                | Type          | Description                | Default            |
+| -------------------- | ------------- | -------------------------- | ------------------ |
+| `slug`               | string        | URL-friendly identifier    | Derived from name  |
+| `subcategory`        | string        | Secondary categorization   | `null`             |
+| `version`            | semver        | Prompt version             | `1.0.0`            |
+| `created`            | date          | Creation date (ISO 8601)   | Current date       |
+| `updated`            | date          | Last update date           | `created`          |
+| `author`             | string        | Prompt author              | `Engineering Team` |
+| `tags`               | array[string] | Searchable tags            | `[]`               |
+| `dependencies`       | object        | Service/package deps       | `{}`               |
+| `prerequisites`      | array[string] | Setup requirements         | `[]`               |
+| `test_fixtures`      | array         | Golden test data           | `[]`               |
+| `integration_points` | array         | How this integrates        | `[]`               |
+| `estimated_effort`   | string        | Time estimate              | `null`             |
+| `complexity`         | enum          | Implementation complexity  | `medium`           |
+| `related_prompts`    | array[string] | Related prompt IDs         | `[]`               |
+| `blueprint_path`     | string        | Path to blueprint template | `null`             |
+| `references`         | array         | External links/docs        | `[]`               |
+| `notes`              | string        | Additional context         | `null`             |
 
 ## Enumerated Values
 
 ### Category
+
 - `ops` - Operations & Reliability
 - `governance` - Compliance, Audit, Policy
 - `analytics` - Graph, Geo, Temporal Analysis
@@ -182,16 +183,19 @@ notes: |
 - `integration` - Federation, Interop, Migration
 
 ### Priority
+
 - `high` - Critical capability, implement first
 - `medium` - Important but not blocking
 - `low` - Nice-to-have, future consideration
 
 ### Status
+
 - `ready` - Fully specified, ready for implementation
 - `draft` - Work in progress, may have gaps
 - `deprecated` - Superseded by newer prompt
 
 ### Complexity
+
 - `low` - 1-2 days, straightforward
 - `medium` - 3-5 days, moderate integration
 - `high` - 1-2 weeks, complex dependencies
@@ -220,10 +224,11 @@ Each criterion should include:
 ```yaml
 - description: What must be validated
   validation: How to verify (command, test, inspection)
-  priority: optional | required  # defaults to required
+  priority: optional | required # defaults to required
 ```
 
 Example:
+
 ```yaml
 acceptance_criteria:
   - description: Service starts successfully
@@ -242,7 +247,7 @@ integration_points:
   - service: Service name or @package/name
     type: graphql | rest | grpc | event-bus | database
     description: How they integrate
-    required: true | false  # defaults to true
+    required: true | false # defaults to true
 ```
 
 ## Test Fixture Structure
@@ -251,20 +256,20 @@ integration_points:
 test_fixtures:
   - path: Relative path from repo root
     description: What this fixture contains
-    type: json | sql | csv | cypher  # optional
+    type: json | sql | csv | cypher # optional
 ```
 
 ## Dependency Structure
 
 ```yaml
 dependencies:
-  services:          # Docker services, Kubernetes deployments
+  services: # Docker services, Kubernetes deployments
     - service-name
-  packages:          # Internal @intelgraph/* packages
+  packages: # Internal @intelgraph/* packages
     - "@intelgraph/package"
-  external:          # npm/pip packages with versions
+  external: # npm/pip packages with versions
     - "package@^1.0.0"
-  infrastructure:    # Cloud resources, clusters
+  infrastructure: # Cloud resources, clusters
     - "k8s-cluster"
 ```
 
@@ -273,6 +278,7 @@ dependencies:
 Format: `{CATEGORY_CODE}-{SEQUENCE}`
 
 Category codes:
+
 - `DQ` - Data Quality (ops)
 - `OPS` - Operations
 - `MIG` - Migration (governance)
@@ -287,6 +293,7 @@ Category codes:
 Sequence: Zero-padded 3-digit number (001, 002, etc.)
 
 Examples:
+
 - `DQ-001` - Data Quality Dashboard
 - `SEC-001` - Model Abuse Watchtower
 - `GOV-002` - Retention & Purge Engine
@@ -325,18 +332,23 @@ category: ops
 ## Validation
 
 ### Required Field Validation
+
 All `required` fields must be present and non-empty.
 
 ### ID Uniqueness
+
 Each `id` must be unique across the entire prompt library.
 
 ### Dependency Resolution
+
 All referenced prompts in `related_prompts` must exist.
 
 ### Blueprint Path
+
 If specified, `blueprint_path` must point to an existing directory.
 
 ### Acceptance Criteria
+
 At least one acceptance criterion is required.
 
 ## Automated Tooling

@@ -16,11 +16,11 @@ roles:
   - Observability Engineer
   - Repo Maintainer / Arborist
 objectives:
-  - 'Multi-region readiness: active/active for stateless services; active/passive for stateful with controlled failover.'
-  - 'Policy-as-code maturity: org-wide OPA bundles with version pinning and staged rollout.'
-  - 'Incident excellence: SLO error-budget policies, on-call runbooks, and postmortem automation.'
-  - 'Data egress controls: tokenized exports, watermarking, and download rate governance.'
-  - 'Developer velocity: ephemeral data sandboxes, faster CI via caching and test shards; <15m median PR→preview.'
+  - "Multi-region readiness: active/active for stateless services; active/passive for stateful with controlled failover."
+  - "Policy-as-code maturity: org-wide OPA bundles with version pinning and staged rollout."
+  - "Incident excellence: SLO error-budget policies, on-call runbooks, and postmortem automation."
+  - "Data egress controls: tokenized exports, watermarking, and download rate governance."
+  - "Developer velocity: ephemeral data sandboxes, faster CI via caching and test shards; <15m median PR→preview."
 ---
 
 # Sprint 27 Plan — Multi-Region Readiness & Operational Excellence
@@ -201,9 +201,9 @@ spec:
           image: alpine:3
           args:
             [
-              '/bin/sh',
-              '-c',
-              'wget -O /pol/policy.tgz $BUNDLE_URL && wget -O /pol/policy.sig $BUNDLE_SIG && cosign verify-blob --signature /pol/policy.sig /pol/policy.tgz && tar -xzf /pol/policy.tgz -C /pol && sleep 3600',
+              "/bin/sh",
+              "-c",
+              "wget -O /pol/policy.tgz $BUNDLE_URL && wget -O /pol/policy.sig $BUNDLE_SIG && cosign verify-blob --signature /pol/policy.sig /pol/policy.tgz && tar -xzf /pol/policy.tgz -C /pol && sleep 3600",
             ]
           volumeMounts: [{ name: pol, mountPath: /pol }]
       volumes: [{ name: pol, emptyDir: {} }]
@@ -236,7 +236,7 @@ name: postmortem-bot
 on:
   workflow_dispatch:
     inputs:
-      incident: { description: 'INC-123 link', required: true }
+      incident: { description: "INC-123 link", required: true }
 jobs:
   create:
     runs-on: ubuntu-latest
@@ -252,20 +252,20 @@ jobs:
 **Path:** `services/docs-api/src/exports.ts`
 
 ```ts
-import crypto from 'crypto';
+import crypto from "crypto";
 export function issueExportToken(userId: string, scope: string) {
   const exp = Math.floor(Date.now() / 1000) + 600; // 10m
   const payload = JSON.stringify({ sub: userId, scope, exp });
   const sig = crypto
-    .createHmac('sha256', process.env.EXPORT_SECRET!)
+    .createHmac("sha256", process.env.EXPORT_SECRET!)
     .update(payload)
-    .digest('base64url');
-  return Buffer.from(payload).toString('base64url') + '.' + sig;
+    .digest("base64url");
+  return Buffer.from(payload).toString("base64url") + "." + sig;
 }
 export function watermarkHeaders(res, userId: string, exportId: string) {
-  res.set('X-Export-User', userId);
-  res.set('X-Export-Id', exportId);
-  res.set('X-Export-Timestamp', new Date().toISOString());
+  res.set("X-Export-User", userId);
+  res.set("X-Export-Id", exportId);
+  res.set("X-Export-Timestamp", new Date().toISOString());
 }
 ```
 
@@ -278,16 +278,16 @@ apiVersion: v1
 kind: ConfigMap
 metadata: { name: dl-limits }
 data:
-  limit_rate: '1m' # ~1MB/s default
+  limit_rate: "1m" # ~1MB/s default
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: downloads
   annotations:
-    nginx.ingress.kubernetes.io/limit-rate: '1048576'
-    nginx.ingress.kubernetes.io/limit-rps: '20'
-    nginx.ingress.kubernetes.io/limit-burst-multiplier: '5'
+    nginx.ingress.kubernetes.io/limit-rate: "1048576"
+    nginx.ingress.kubernetes.io/limit-rps: "20"
+    nginx.ingress.kubernetes.io/limit-burst-multiplier: "5"
 ```
 
 ### 5.8 CI Speedups — Cache & Shards
@@ -322,7 +322,7 @@ spec:
       containers:
         - name: migrate
           image: ghcr.io/your-org/migrator:latest
-          args: ['--if-needed']
+          args: ["--if-needed"]
       restartPolicy: OnFailure
 ```
 

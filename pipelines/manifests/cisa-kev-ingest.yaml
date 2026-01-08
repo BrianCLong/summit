@@ -16,7 +16,7 @@ metadata:
 
 spec:
   schedule:
-    cron: "0 */6 * * *"  # Every 6 hours
+    cron: "0 */6 * * *" # Every 6 hours
     timezone: UTC
     enabled: true
 
@@ -105,7 +105,7 @@ spec:
         module: data_pipelines.quality
         function: validate_kev_quality
       params:
-        min_records: 900  # KEV catalog typically has 900+ entries
+        min_records: 900 # KEV catalog typically has 900+ entries
         check_duplicates: true
       timeout: 5m
 
@@ -113,7 +113,7 @@ spec:
     budget:
       per_run_usd: 1.00
     slo:
-      latency_p95_ms: 600000  # 10 minutes
+      latency_p95_ms: 600000 # 10 minutes
       success_rate_percent: 99.5
     policies:
       - public-data-retention

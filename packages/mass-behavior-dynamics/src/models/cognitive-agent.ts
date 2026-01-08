@@ -8,7 +8,7 @@
  * - Information evaluation heuristics
  */
 
-import { Psychographics, CognitiveProfile, MediaSource } from '../index.js';
+import { Psychographics, CognitiveProfile, MediaSource } from "../index.js";
 
 export interface CognitiveAgent {
   id: string;
@@ -111,13 +111,10 @@ export class CognitiveAgentSimulator {
   /**
    * Simulate agent's response to new information
    */
-  processInformation(
-    agent: CognitiveAgent,
-    information: InformationStimulus
-  ): BeliefUpdateResult {
+  processInformation(agent: CognitiveAgent, information: InformationStimulus): BeliefUpdateResult {
     // Step 1: Attention filter
     if (!this.passesAttentionFilter(agent, information)) {
-      return { updated: false, reason: 'FILTERED_OUT' };
+      return { updated: false, reason: "FILTERED_OUT" };
     }
 
     // Step 2: Source credibility evaluation
@@ -144,17 +141,13 @@ export class CognitiveAgentSimulator {
     return this.applyBeliefUpdate(agent, information, updateStrength);
   }
 
-  private passesAttentionFilter(
-    agent: CognitiveAgent,
-    info: InformationStimulus
-  ): boolean {
+  private passesAttentionFilter(agent: CognitiveAgent, info: InformationStimulus): boolean {
     // Salience, novelty, and relevance check
     const salience = this.calculateSalience(agent, info);
     const novelty = this.calculateNovelty(agent, info);
     const relevance = this.calculateRelevance(agent, info);
 
-    const attentionThreshold =
-      0.3 + agent.state.cognitiveLoad * 0.2;
+    const attentionThreshold = 0.3 + agent.state.cognitiveLoad * 0.2;
 
     return salience + novelty + relevance > attentionThreshold;
   }
@@ -178,23 +171,16 @@ export class CognitiveAgentSimulator {
     return credibility;
   }
 
-  private calculateMotivatedReasoning(
-    agent: CognitiveAgent,
-    info: InformationStimulus
-  ): number {
+  private calculateMotivatedReasoning(agent: CognitiveAgent, info: InformationStimulus): number {
     // How much will motivated reasoning affect processing?
     const beliefThreat = this.assessBeliefThreat(agent, info);
     const identityThreat = this.assessIdentityThreat(agent, info);
 
     // Higher values = more defensive processing
-    return (beliefThreat + identityThreat) / 2 *
-      (1 - agent.cognition.epistemiChastity);
+    return ((beliefThreat + identityThreat) / 2) * (1 - agent.cognition.epistemiChastity);
   }
 
-  private calculateSocialProof(
-    agent: CognitiveAgent,
-    info: InformationStimulus
-  ): number {
+  private calculateSocialProof(agent: CognitiveAgent, info: InformationStimulus): number {
     // Social proof from in-group adoption
     const ingroupAdoption = info.socialSignals?.ingroupEndorsements || 0;
     const identityStrength = agent.socialIdentity.identityStrength;
@@ -205,7 +191,7 @@ export class CognitiveAgentSimulator {
   private determineProcessingDepth(
     agent: CognitiveAgent,
     info: InformationStimulus
-  ): 'SYSTEM_1' | 'SYSTEM_2' {
+  ): "SYSTEM_1" | "SYSTEM_2" {
     const analyticalTendency = agent.cognition.analyticalThinking;
     const cognitiveLoad = agent.state.cognitiveLoad;
     const emotionalArousal = agent.state.currentEmotion.arousal;
@@ -214,14 +200,14 @@ export class CognitiveAgentSimulator {
     const system2Probability =
       analyticalTendency * (1 - cognitiveLoad) * (1 - emotionalArousal * 0.5);
 
-    return Math.random() < system2Probability ? 'SYSTEM_2' : 'SYSTEM_1';
+    return Math.random() < system2Probability ? "SYSTEM_2" : "SYSTEM_1";
   }
 
   private calculateUpdateStrength(
     sourceCredibility: number,
     motivatedReasoning: number,
     socialProof: number,
-    processingDepth: 'SYSTEM_1' | 'SYSTEM_2'
+    processingDepth: "SYSTEM_1" | "SYSTEM_2"
   ): number {
     let base = sourceCredibility * 0.4 + socialProof * 0.3;
 
@@ -229,7 +215,7 @@ export class CognitiveAgentSimulator {
     base *= 1 - motivatedReasoning * 0.5;
 
     // System 2 processing is more calibrated
-    if (processingDepth === 'SYSTEM_2') {
+    if (processingDepth === "SYSTEM_2") {
       base = base * 0.8 + sourceCredibility * 0.2;
     }
 
@@ -254,7 +240,7 @@ export class CognitiveAgentSimulator {
         lastUpdated: new Date(),
         resistance: 0.2,
       });
-      return { updated: true, reason: 'NEW_BELIEF' };
+      return { updated: true, reason: "NEW_BELIEF" };
     }
 
     // Existing belief update (Bayesian-ish)
@@ -286,19 +272,19 @@ export class CognitiveAgentSimulator {
 
     return {
       updated: true,
-      reason: alignmentWithBelief > 0 ? 'CONFIRMATION' : 'DISCONFIRMATION',
+      reason: alignmentWithBelief > 0 ? "CONFIRMATION" : "DISCONFIRMATION",
       delta: newConfidence - oldConfidence,
     };
   }
 
   private calculateSalience(agent: CognitiveAgent, info: InformationStimulus): number {
-    return info.emotionalIntensity * 0.5 + (agent.state.attentionFocus.includes(info.topic) ? 0.5 : 0);
+    return (
+      info.emotionalIntensity * 0.5 + (agent.state.attentionFocus.includes(info.topic) ? 0.5 : 0)
+    );
   }
 
   private calculateNovelty(agent: CognitiveAgent, info: InformationStimulus): number {
-    const recent = agent.state.recentExposures.filter(
-      (e) => e.content === info.claim
-    ).length;
+    const recent = agent.state.recentExposures.filter((e) => e.content === info.claim).length;
     return Math.max(0, 1 - recent * 0.3);
   }
 
@@ -312,7 +298,9 @@ export class CognitiveAgentSimulator {
 
   private assessBeliefThreat(agent: CognitiveAgent, info: InformationStimulus): number {
     const belief = agent.beliefs.beliefs.get(info.topic);
-    if (!belief) {return 0;}
+    if (!belief) {
+      return 0;
+    }
     return belief.valence !== info.valence ? belief.confidence : 0;
   }
 

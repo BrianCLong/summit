@@ -6,7 +6,7 @@
  * SOC 2 Controls: PI1.1, PI1.2, PI1.4, C1.2
  */
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   DataEnvelope,
   DataClassification,
@@ -14,14 +14,14 @@ import {
   getClassificationColor,
   formatProvenance,
   isAIGenerated,
-} from '../utils/data-envelope-validator';
+} from "../utils/data-envelope-validator";
 
 /**
  * Props for confidence indicator
  */
 export interface ConfidenceIndicatorProps {
   confidence?: number;
-  size?: 'small' | 'medium' | 'large';
+  size?: "small" | "medium" | "large";
   showLabel?: boolean;
 }
 
@@ -30,7 +30,7 @@ export interface ConfidenceIndicatorProps {
  */
 export const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
   confidence,
-  size = 'medium',
+  size = "medium",
   showLabel = true,
 }) => {
   if (confidence === undefined || confidence === null) {
@@ -41,16 +41,16 @@ export const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
   const percentage = Math.round(confidence * 100);
 
   const colors = {
-    high: '#10b981',
-    medium: '#f59e0b',
-    low: '#ef4444',
-    none: '#6b7280',
+    high: "#10b981",
+    medium: "#f59e0b",
+    low: "#ef4444",
+    none: "#6b7280",
   };
 
   const sizeClasses = {
-    small: 'w-16 h-2',
-    medium: 'w-24 h-3',
-    large: 'w-32 h-4',
+    small: "w-16 h-2",
+    medium: "w-24 h-3",
+    large: "w-32 h-4",
   };
 
   return (
@@ -82,7 +82,7 @@ export const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
  */
 export interface SimulationBadgeProps {
   isSimulated: boolean;
-  size?: 'small' | 'medium' | 'large';
+  size?: "small" | "medium" | "large";
 }
 
 /**
@@ -90,16 +90,16 @@ export interface SimulationBadgeProps {
  */
 export const SimulationBadge: React.FC<SimulationBadgeProps> = ({
   isSimulated,
-  size = 'medium',
+  size = "medium",
 }) => {
   if (!isSimulated) {
     return null;
   }
 
   const sizeClasses = {
-    small: 'text-xs px-2 py-0.5',
-    medium: 'text-sm px-3 py-1',
-    large: 'text-base px-4 py-1.5',
+    small: "text-xs px-2 py-0.5",
+    medium: "text-sm px-3 py-1",
+    large: "text-base px-4 py-1.5",
   };
 
   return (
@@ -129,7 +129,7 @@ export const SimulationBadge: React.FC<SimulationBadgeProps> = ({
  */
 export interface ClassificationBadgeProps {
   classification: DataClassification;
-  size?: 'small' | 'medium' | 'large';
+  size?: "small" | "medium" | "large";
 }
 
 /**
@@ -137,14 +137,14 @@ export interface ClassificationBadgeProps {
  */
 export const ClassificationBadge: React.FC<ClassificationBadgeProps> = ({
   classification,
-  size = 'medium',
+  size = "medium",
 }) => {
   const color = getClassificationColor(classification);
 
   const sizeClasses = {
-    small: 'text-xs px-2 py-0.5',
-    medium: 'text-sm px-3 py-1',
-    large: 'text-base px-4 py-1.5',
+    small: "text-xs px-2 py-0.5",
+    medium: "text-sm px-3 py-1",
+    large: "text-base px-4 py-1.5",
   };
 
   return (
@@ -183,9 +183,7 @@ export const ProvenanceDisplay: React.FC<ProvenanceDisplayProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <div className="text-sm font-semibold text-gray-700">Data Provenance</div>
-          <div className="text-xs text-gray-600 mt-1">
-            {formatProvenance(envelope.provenance)}
-          </div>
+          <div className="text-xs text-gray-600 mt-1">{formatProvenance(envelope.provenance)}</div>
         </div>
         {expandable && (
           <button
@@ -193,7 +191,7 @@ export const ProvenanceDisplay: React.FC<ProvenanceDisplayProps> = ({
             className="text-blue-600 text-sm hover:text-blue-800"
             aria-expanded={expanded}
           >
-            {expanded ? 'Hide Details' : 'Show Details'}
+            {expanded ? "Hide Details" : "Show Details"}
           </button>
         )}
       </div>
@@ -201,7 +199,7 @@ export const ProvenanceDisplay: React.FC<ProvenanceDisplayProps> = ({
       {expanded && (
         <div className="mt-3 space-y-2 text-xs">
           <div>
-            <span className="font-semibold">Provenance ID:</span>{' '}
+            <span className="font-semibold">Provenance ID:</span>{" "}
             <code className="bg-gray-200 px-1 rounded">{envelope.provenance.provenanceId}</code>
           </div>
 
@@ -216,7 +214,7 @@ export const ProvenanceDisplay: React.FC<ProvenanceDisplayProps> = ({
           )}
 
           <div>
-            <span className="font-semibold">Data Hash:</span>{' '}
+            <span className="font-semibold">Data Hash:</span>{" "}
             <code className="bg-gray-200 px-1 rounded text-xs break-all">
               {envelope.dataHash.substring(0, 16)}...
             </code>
@@ -261,7 +259,10 @@ export const DataEnvelopeCard: React.FC<DataEnvelopeCardProps> = ({
   showProvenance = true,
 }) => {
   return (
-    <div className="data-envelope-card border-2 border-gray-300 rounded-lg" data-testid="envelope-card">
+    <div
+      className="data-envelope-card border-2 border-gray-300 rounded-lg"
+      data-testid="envelope-card"
+    >
       {/* Header with badges */}
       <div className="bg-gray-100 px-4 py-3 border-b border-gray-300 flex items-center justify-between">
         <div className="flex items-center space-x-2">
@@ -279,11 +280,7 @@ export const DataEnvelopeCard: React.FC<DataEnvelopeCardProps> = ({
         <div className="bg-yellow-50 border-b border-yellow-200 px-4 py-2">
           {envelope.warnings.map((warning, index) => (
             <div key={index} className="text-sm text-yellow-800 flex items-start">
-              <svg
-                className="w-5 h-5 mr-2 flex-shrink-0"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
+              <svg className="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path
                   fillRule="evenodd"
                   d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
@@ -315,16 +312,16 @@ export const DataEnvelopeCard: React.FC<DataEnvelopeCardProps> = ({
 // eslint-disable-next-line react-refresh/only-export-components
 export function useDataEnvelopeValidation<T>(envelope: DataEnvelope<T>) {
   const [isValid, setIsValid] = React.useEffect(() => {
-    const { validateDataEnvelope } = require('../utils/data-envelope-validator');
+    const { validateDataEnvelope } = require("../utils/data-envelope-validator");
     const validation = validateDataEnvelope(envelope);
     setIsValid(validation.valid);
 
     if (!validation.valid) {
-      console.error('[Data Envelope] Validation failed:', validation.errors);
+      console.error("[Data Envelope] Validation failed:", validation.errors);
     }
 
     if (validation.warnings.length > 0) {
-      console.warn('[Data Envelope] Validation warnings:', validation.warnings);
+      console.warn("[Data Envelope] Validation warnings:", validation.warnings);
     }
 
     return validation;
@@ -351,7 +348,7 @@ export class DataEnvelopeErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('[Data Envelope] Error caught:', error, errorInfo);
+    console.error("[Data Envelope] Error caught:", error, errorInfo);
   }
 
   render() {

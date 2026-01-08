@@ -3,13 +3,13 @@ name: Helm Digest Policy Check
 on:
   pull_request:
     paths:
-      - 'charts/**'
-      - 'tools/policy/**'
-      - '.github/workflows/policy-helm-digest.yml'
+      - "charts/**"
+      - "tools/policy/**"
+      - ".github/workflows/policy-helm-digest.yml"
   push:
     branches: [main]
     paths:
-      - 'charts/**'
+      - "charts/**"
 
 permissions:
   contents: read
@@ -25,7 +25,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install dependencies
         run: |

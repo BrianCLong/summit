@@ -1,6 +1,6 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import {
   OrchestrationKnowledgeGraph,
   type CostSignalRecord,
@@ -9,8 +9,8 @@ import {
   type PipelineRecord,
   type PolicyConnector,
   type ServiceRecord,
-} from '../../ga-graphai/packages/knowledge-graph/src/index.js';
-import type { PolicyRule } from '@ga-graphai/common-types';
+} from "../../ga-graphai/packages/knowledge-graph/src/index.js";
+import type { PolicyRule } from "@ga-graphai/common-types";
 
 interface GoldenGraphScenario {
   description: string;
@@ -45,23 +45,23 @@ interface LoadOptions {
 }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const FIXTURE_PATH = path.resolve(__dirname, '../../testdata/intelgraph/golden-graph.json');
+const FIXTURE_PATH = path.resolve(__dirname, "../../testdata/intelgraph/golden-graph.json");
 
 let cachedDataset: GoldenGraphDataset | undefined;
 
 function readDataset(): GoldenGraphDataset {
   if (!cachedDataset) {
-    const raw = fs.readFileSync(FIXTURE_PATH, 'utf-8');
+    const raw = fs.readFileSync(FIXTURE_PATH, "utf-8");
     cachedDataset = JSON.parse(raw) as GoldenGraphDataset;
   }
   return cachedDataset;
 }
 
 function assertTestEnv(): void {
-  const env = process.env.NODE_ENV ?? '';
-  const allow = process.env.ALLOW_GOLDEN_FIXTURES === 'true';
-  if (env.toLowerCase() === 'production' && !allow) {
-    throw new Error('Golden fixtures must not be loaded in production');
+  const env = process.env.NODE_ENV ?? "";
+  const allow = process.env.ALLOW_GOLDEN_FIXTURES === "true";
+  if (env.toLowerCase() === "production" && !allow) {
+    throw new Error("Golden fixtures must not be loaded in production");
   }
 }
 
@@ -71,12 +71,11 @@ export function listGoldenGraphScenarios(): string[] {
 }
 
 export async function loadGoldenIntelGraph(
-  options: LoadOptions = {},
-): Promise<{ graph: OrchestrationKnowledgeGraph; scenario: GoldenGraphScenario }>
-{
+  options: LoadOptions = {}
+): Promise<{ graph: OrchestrationKnowledgeGraph; scenario: GoldenGraphScenario }> {
   assertTestEnv();
   const dataset = readDataset();
-  const key = options.scenario ?? 'realistic-medium';
+  const key = options.scenario ?? "realistic-medium";
   const scenario = dataset.scenarios[key];
   if (!scenario) {
     throw new Error(`Unknown IntelGraph scenario: ${key}`);

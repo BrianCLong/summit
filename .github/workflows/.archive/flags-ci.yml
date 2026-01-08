@@ -3,18 +3,18 @@ name: Feature Flags CI
 on:
   pull_request:
     paths:
-      - 'flags/**'
-      - 'libs/flags/**'
-      - 'tools/flagctl/**'
-      - '.ci/policies/**'
-      - '.github/workflows/flags-ci.yml'
+      - "flags/**"
+      - "libs/flags/**"
+      - "tools/flagctl/**"
+      - ".ci/policies/**"
+      - ".github/workflows/flags-ci.yml"
   push:
     branches: [main]
     paths:
-      - 'flags/**'
-      - 'libs/flags/**'
-      - 'tools/flagctl/**'
-      - '.ci/policies/**'
+      - "flags/**"
+      - "libs/flags/**"
+      - "tools/flagctl/**"
+      - ".ci/policies/**"
 
 jobs:
   lint-flags:
@@ -24,7 +24,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
       - name: Validate catalog metadata
         run: python tools/flagctl/flagctl.py lint
       - name: Validate targets reference catalog

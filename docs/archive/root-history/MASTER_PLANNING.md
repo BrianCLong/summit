@@ -28,16 +28,16 @@
 
 ### Key Metrics (As of November 2025)
 
-| Metric | Status |
-|--------|--------|
-| **Production Status** | ✅ GA Ready |
-| **System Validation** | 86% (36/42 tests) |
-| **Security Score** | 100% |
-| **Service Availability** | 100% |
-| **Average Response Time** | 42ms |
-| **Sprint Completion** | 100+ sprints executed |
-| **Cost Savings Achieved** | $4K-5.5K annually |
-| **Vulnerability Reduction** | 21% improvement |
+| Metric                      | Status                |
+| --------------------------- | --------------------- |
+| **Production Status**       | ✅ GA Ready           |
+| **System Validation**       | 86% (36/42 tests)     |
+| **Security Score**          | 100%                  |
+| **Service Availability**    | 100%                  |
+| **Average Response Time**   | 42ms                  |
+| **Sprint Completion**       | 100+ sprints executed |
+| **Cost Savings Achieved**   | $4K-5.5K annually     |
+| **Vulnerability Reduction** | 21% improvement       |
 
 ### Mission-Critical Use Case
 
@@ -113,15 +113,15 @@ Summit is an **open intelligence graph platform** for security, risk, and invest
 
 ### Core Services
 
-| Service | Purpose | Technology | Status |
-|---------|---------|------------|--------|
-| **graph-core** | Entity/relationship storage | Neo4j 5.x | ✅ Production |
-| **case-metadata** | Investigation management | PostgreSQL 15+ | ✅ Production |
-| **prov-ledger** | Chain-of-custody tracking | PostgreSQL + S3 | ✅ Production |
-| **policy-engine** | Authorization enforcement | OPA + ABAC | ✅ Production |
-| **maestro-conductor** | Workflow orchestration | Node.js + DAG engine | ✅ Production |
-| **ingestion-pipeline** | Data ETL and enrichment | Kafka + NiFi | ✅ Production |
-| **ai-copilot** | Natural language interface | LiteLLM + GraphRAG | ✅ Production |
+| Service                | Purpose                     | Technology           | Status        |
+| ---------------------- | --------------------------- | -------------------- | ------------- |
+| **graph-core**         | Entity/relationship storage | Neo4j 5.x            | ✅ Production |
+| **case-metadata**      | Investigation management    | PostgreSQL 15+       | ✅ Production |
+| **prov-ledger**        | Chain-of-custody tracking   | PostgreSQL + S3      | ✅ Production |
+| **policy-engine**      | Authorization enforcement   | OPA + ABAC           | ✅ Production |
+| **maestro-conductor**  | Workflow orchestration      | Node.js + DAG engine | ✅ Production |
+| **ingestion-pipeline** | Data ETL and enrichment     | Kafka + NiFi         | ✅ Production |
+| **ai-copilot**         | Natural language interface  | LiteLLM + GraphRAG   | ✅ Production |
 
 ### Data Model
 
@@ -165,6 +165,7 @@ Core capability sprints with descriptive names:
 Time-boxed two-week sprints from Sep 2025 through Jun 2026:
 
 **2025 Timeline:**
+
 - Sep 8-19: Alert triage v2, SOAR connector
 - Sep 22-Oct 3: Policy Intelligence pilot
 - Oct 6-17: Graph UI enhancements
@@ -175,6 +176,7 @@ Time-boxed two-week sprints from Sep 2025 through Jun 2026:
 - Dec 15-23: Year-end hardening
 
 **2026 Timeline:**
+
 - Jan-Feb: Federation v2, privacy enhancements
 - Mar-Apr: Advanced analytics, XAI improvements
 - May-Jun: Scale and performance optimization
@@ -202,20 +204,25 @@ All sprints follow a consistent structure:
 
 ```markdown
 ## Sprint Goal
+
 SMART objective with success metrics
 
 ## Scope
+
 - Must-have (P0)
 - Should-have (P1)
 - Stretch (P2)
 - Out-of-scope
 
 ## Epic Breakdown
+
 Epic A: Feature X (13 points)
-  - Story A1: Component Y (5 points)
-  - Story A2: Integration Z (8 points)
+
+- Story A1: Component Y (5 points)
+- Story A2: Integration Z (8 points)
 
 ## Definition of Done
+
 - [ ] All acceptance criteria met
 - [ ] Unit + integration tests passing
 - [ ] Security review completed
@@ -223,10 +230,12 @@ Epic A: Feature X (13 points)
 - [ ] Demo prepared
 
 ## Risk Register
+
 | Risk | Impact | Probability | Mitigation |
-|------|--------|-------------|------------|
+| ---- | ------ | ----------- | ---------- |
 
 ## Day-by-Day Plan
+
 Day 1-2: Epic A kick-off
 Day 3-5: Implementation
 Day 6-8: Testing and refinement
@@ -276,65 +285,65 @@ Day 10: Retrospective
 
 ### Frontend Stack
 
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| **Framework** | React 18 | UI components with hooks/context |
-| **UI Library** | Material-UI v5 | Design system and components |
-| **State Management** | Redux Toolkit | Global state with RTK Query |
-| **Graph Visualization** | Cytoscape.js | Interactive network graphs |
-| **Map Rendering** | Mapbox GL JS | Geospatial visualization |
-| **Timeline** | vis-timeline | Temporal event sequences |
-| **Build Tool** | Vite | Fast HMR and bundling |
-| **Testing** | Jest + RTL + Playwright | Unit, integration, E2E tests |
+| Component               | Technology              | Purpose                          |
+| ----------------------- | ----------------------- | -------------------------------- |
+| **Framework**           | React 18                | UI components with hooks/context |
+| **UI Library**          | Material-UI v5          | Design system and components     |
+| **State Management**    | Redux Toolkit           | Global state with RTK Query      |
+| **Graph Visualization** | Cytoscape.js            | Interactive network graphs       |
+| **Map Rendering**       | Mapbox GL JS            | Geospatial visualization         |
+| **Timeline**            | vis-timeline            | Temporal event sequences         |
+| **Build Tool**          | Vite                    | Fast HMR and bundling            |
+| **Testing**             | Jest + RTL + Playwright | Unit, integration, E2E tests     |
 
 ### Backend Stack
 
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| **Runtime** | Node.js 20+ | JavaScript execution |
-| **Language** | TypeScript | Type-safe development |
-| **Framework** | Express.js | HTTP server with middleware |
-| **API** | Apollo Server v4 | GraphQL with federation |
-| **WebSocket** | Socket.io | Real-time bidirectional communication |
-| **Authentication** | JWT + OIDC | Identity and access management |
-| **Authorization** | OPA + ABAC | Policy-based access control |
-| **Message Queue** | Kafka | Event streaming and processing |
+| Component          | Technology       | Purpose                               |
+| ------------------ | ---------------- | ------------------------------------- |
+| **Runtime**        | Node.js 20+      | JavaScript execution                  |
+| **Language**       | TypeScript       | Type-safe development                 |
+| **Framework**      | Express.js       | HTTP server with middleware           |
+| **API**            | Apollo Server v4 | GraphQL with federation               |
+| **WebSocket**      | Socket.io        | Real-time bidirectional communication |
+| **Authentication** | JWT + OIDC       | Identity and access management        |
+| **Authorization**  | OPA + ABAC       | Policy-based access control           |
+| **Message Queue**  | Kafka            | Event streaming and processing        |
 
 ### Data Layer
 
-| Database | Use Case | Technology |
-|----------|----------|------------|
-| **Graph Database** | Entity relationships | Neo4j 5.x with temporal support |
-| **Metadata Store** | Case management | PostgreSQL 15+ with pgvector |
-| **Time-Series** | Metrics and events | TimescaleDB 2 |
-| **Cache/Session** | Performance optimization | Redis 7 with pub/sub |
-| **Object Storage** | Evidence artifacts | S3-compatible (MinIO/AWS) |
+| Database           | Use Case                 | Technology                      |
+| ------------------ | ------------------------ | ------------------------------- |
+| **Graph Database** | Entity relationships     | Neo4j 5.x with temporal support |
+| **Metadata Store** | Case management          | PostgreSQL 15+ with pgvector    |
+| **Time-Series**    | Metrics and events       | TimescaleDB 2                   |
+| **Cache/Session**  | Performance optimization | Redis 7 with pub/sub            |
+| **Object Storage** | Evidence artifacts       | S3-compatible (MinIO/AWS)       |
 
 ### Infrastructure & DevOps
 
-| Layer | Technology | Purpose |
-|-------|------------|---------|
-| **Containers** | Docker + multi-stage builds | Application packaging |
-| **Orchestration** | Kubernetes + Helm | Production deployment |
-| **IaC** | Terraform | Infrastructure provisioning |
-| **CI/CD** | GitHub Actions | Automated testing and deployment |
-| **Service Mesh** | Istio + Cilium | mTLS and L7 policy enforcement |
-| **Observability** | OTEL + Prometheus + Grafana | Metrics, traces, logs |
-| **Security Scanning** | Trivy + CodeQL + Snyk | Vulnerability detection |
-| **Secret Management** | HashiCorp Vault + Sealed Secrets | Credential storage |
+| Layer                 | Technology                       | Purpose                          |
+| --------------------- | -------------------------------- | -------------------------------- |
+| **Containers**        | Docker + multi-stage builds      | Application packaging            |
+| **Orchestration**     | Kubernetes + Helm                | Production deployment            |
+| **IaC**               | Terraform                        | Infrastructure provisioning      |
+| **CI/CD**             | GitHub Actions                   | Automated testing and deployment |
+| **Service Mesh**      | Istio + Cilium                   | mTLS and L7 policy enforcement   |
+| **Observability**     | OTEL + Prometheus + Grafana      | Metrics, traces, logs            |
+| **Security Scanning** | Trivy + CodeQL + Snyk            | Vulnerability detection          |
+| **Secret Management** | HashiCorp Vault + Sealed Secrets | Credential storage               |
 
 ### AI/ML Stack
 
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| **NLP** | spaCy + Transformers | Entity extraction and sentiment |
-| **Computer Vision** | YOLO v8 + MTCNN | Object and face detection |
-| **Speech** | OpenAI Whisper | Transcription and diarization |
-| **Vector DB** | pgvector + FAISS | Semantic similarity search |
-| **LLM Gateway** | LiteLLM | Multi-provider routing (GPT-4, Claude, etc.) |
-| **Local Models** | Ollama | On-premise inference (Llama, Qwen, DeepSeek) |
-| **Graph ML** | GraphSAGE + DGL | Relationship inference |
-| **RAG System** | DuckDB + embeddings | Context-aware retrieval |
+| Component           | Technology           | Purpose                                      |
+| ------------------- | -------------------- | -------------------------------------------- |
+| **NLP**             | spaCy + Transformers | Entity extraction and sentiment              |
+| **Computer Vision** | YOLO v8 + MTCNN      | Object and face detection                    |
+| **Speech**          | OpenAI Whisper       | Transcription and diarization                |
+| **Vector DB**       | pgvector + FAISS     | Semantic similarity search                   |
+| **LLM Gateway**     | LiteLLM              | Multi-provider routing (GPT-4, Claude, etc.) |
+| **Local Models**    | Ollama               | On-premise inference (Llama, Qwen, DeepSeek) |
+| **Graph ML**        | GraphSAGE + DGL      | Relationship inference                       |
+| **RAG System**      | DuckDB + embeddings  | Context-aware retrieval                      |
 
 ---
 
@@ -384,13 +393,13 @@ Day 10: Retrospective
 
 ### Compliance Standards
 
-| Standard | Status | Coverage |
-|----------|--------|----------|
-| **NIST 800-53** | ✅ Implemented | Security controls |
-| **CIS Kubernetes Benchmark** | ✅ Level 1 | Container security |
-| **SOC 2 Type II** | ✅ Ready | Operational controls |
-| **GDPR** | ✅ Compliant | Data portability/deletion |
-| **OWASP Top 10** | ✅ Mitigated | Application security |
+| Standard                     | Status         | Coverage                  |
+| ---------------------------- | -------------- | ------------------------- |
+| **NIST 800-53**              | ✅ Implemented | Security controls         |
+| **CIS Kubernetes Benchmark** | ✅ Level 1     | Container security        |
+| **SOC 2 Type II**            | ✅ Ready       | Operational controls      |
+| **GDPR**                     | ✅ Compliant   | Data portability/deletion |
+| **OWASP Top 10**             | ✅ Mitigated   | Application security      |
 
 ### Security Validation
 
@@ -420,24 +429,24 @@ Day 10: Retrospective
 
 #### AI Integration Plugins
 
-| Plugin | Providers | Purpose |
-|--------|-----------|---------|
-| **LiteLLM** | GPT-4, Claude, Gemini, Grok | Multi-provider routing with cost optimization |
-| **Ollama** | Qwen, Llama, DeepSeek | Local model execution with GPU awareness |
-| **Web Scraper** | Custom | Robots.txt compliant scraping with rate limiting |
-| **RAG System** | DuckDB | Semantic search with embeddings |
+| Plugin          | Providers                   | Purpose                                          |
+| --------------- | --------------------------- | ------------------------------------------------ |
+| **LiteLLM**     | GPT-4, Claude, Gemini, Grok | Multi-provider routing with cost optimization    |
+| **Ollama**      | Qwen, Llama, DeepSeek       | Local model execution with GPU awareness         |
+| **Web Scraper** | Custom                      | Robots.txt compliant scraping with rate limiting |
+| **RAG System**  | DuckDB                      | Semantic search with embeddings                  |
 
 #### AI Symphony Orchestra (Agent Roles)
 
 The system employs specialized AI agents, each with distinct responsibilities:
 
-| Agent | Role | Specialization |
-|-------|------|----------------|
-| **Guy** | Architect | Design decisions and code quality |
-| **Elara** | Research | Context gathering and analysis |
-| **Aegis** | Security | Security review and compliance |
-| **Orion** | Data/Graph | Neo4j, Cypher, data flows |
-| **Hermes** | CI/CD | Deployments and automation |
+| Agent      | Role       | Specialization                    |
+| ---------- | ---------- | --------------------------------- |
+| **Guy**    | Architect  | Design decisions and code quality |
+| **Elara**  | Research   | Context gathering and analysis    |
+| **Aegis**  | Security   | Security review and compliance    |
+| **Orion**  | Data/Graph | Neo4j, Cypher, data flows         |
+| **Hermes** | CI/CD      | Deployments and automation        |
 
 #### Intelligence Analysis Pipeline
 
@@ -485,6 +494,7 @@ The system employs specialized AI agents, each with distinct responsibilities:
 #### 1. Local Development
 
 **Quick Start:**
+
 ```bash
 make bootstrap && make up && make smoke
 # or
@@ -492,12 +502,14 @@ make bootstrap && make up && make smoke
 ```
 
 **Docker Compose Profiles:**
+
 - `make up` - Core services (minimal hardware)
 - `make up-ai` - Core + AI processing
 - `make up-kafka` - Core + Kafka streaming
 - `make up-full` - All services
 
 **Requirements:**
+
 - 8GB RAM minimum (16GB recommended)
 - Docker Desktop or Docker Engine 20+
 - Node.js 20+ for local development
@@ -505,6 +517,7 @@ make bootstrap && make up && make smoke
 #### 2. Kubernetes Production
 
 **Helm Deployment:**
+
 ```bash
 helm upgrade --install intelgraph ./helm/intelgraph \
   --namespace intelgraph --create-namespace \
@@ -512,6 +525,7 @@ helm upgrade --install intelgraph ./helm/intelgraph \
 ```
 
 **Production Configuration:**
+
 - High availability (3+ replicas)
 - Horizontal Pod Autoscaling
 - Network policies (default deny)
@@ -547,13 +561,13 @@ Investigation → Entities → Relationships → Copilot → Results
 
 **Health Probes:**
 
-| Endpoint | Purpose | Use Case |
-|----------|---------|----------|
-| `/health` | Basic status | Quick check |
-| `/health/detailed` | Comprehensive status | Debugging |
-| `/health/ready` | Readiness probe | Kubernetes |
-| `/health/live` | Liveness probe | Kubernetes |
-| `/metrics` | Prometheus metrics | Monitoring |
+| Endpoint           | Purpose              | Use Case    |
+| ------------------ | -------------------- | ----------- |
+| `/health`          | Basic status         | Quick check |
+| `/health/detailed` | Comprehensive status | Debugging   |
+| `/health/ready`    | Readiness probe      | Kubernetes  |
+| `/health/live`     | Liveness probe       | Kubernetes  |
+| `/metrics`         | Prometheus metrics   | Monitoring  |
 
 ### Observability & SRE
 
@@ -567,22 +581,22 @@ Investigation → Entities → Relationships → Copilot → Results
 
 #### Dashboards (Grafana)
 
-| Dashboard | Purpose | Key Metrics |
-|-----------|---------|-------------|
-| **Summit Golden Path** | Core workflow metrics | Investigation creation, query success rate |
-| **IntelGraph Maestro** | Orchestration performance | DAG execution time, retry rates |
-| **SLO Core** | Service level objectives | p95 latency with trace exemplars |
-| **System Overview** | Infrastructure health | CPU, memory, disk, network |
+| Dashboard              | Purpose                   | Key Metrics                                |
+| ---------------------- | ------------------------- | ------------------------------------------ |
+| **Summit Golden Path** | Core workflow metrics     | Investigation creation, query success rate |
+| **IntelGraph Maestro** | Orchestration performance | DAG execution time, retry rates            |
+| **SLO Core**           | Service level objectives  | p95 latency with trace exemplars           |
+| **System Overview**    | Infrastructure health     | CPU, memory, disk, network                 |
 
 #### Alerting Rules
 
-| Alert | Severity | Threshold | Response |
-|-------|----------|-----------|----------|
-| **Service Down** | Critical | < 50% healthy pods | Immediate escalation |
-| **Database Connection Failure** | Critical | > 5 failures/min | Page on-call |
-| **High Error Rate** | Critical | > 5% of requests | Investigate logs |
-| **Elevated Response Time** | Warning | p95 > 2s | Review traces |
-| **Queue Backlog** | Warning | > 1000 messages | Scale consumers |
+| Alert                           | Severity | Threshold          | Response             |
+| ------------------------------- | -------- | ------------------ | -------------------- |
+| **Service Down**                | Critical | < 50% healthy pods | Immediate escalation |
+| **Database Connection Failure** | Critical | > 5 failures/min   | Page on-call         |
+| **High Error Rate**             | Critical | > 5% of requests   | Investigate logs     |
+| **Elevated Response Time**      | Warning  | p95 > 2s           | Review traces        |
+| **Queue Backlog**               | Warning  | > 1000 messages    | Scale consumers      |
 
 ---
 
@@ -592,18 +606,19 @@ Investigation → Entities → Relationships → Copilot → Results
 
 #### Validation Metrics (November 2025)
 
-| Component | Status | Score |
-|-----------|--------|-------|
-| **System Validation** | ✅ Passing | 86% (36/42 tests) |
+| Component                | Status       | Score                          |
+| ------------------------ | ------------ | ------------------------------ |
+| **System Validation**    | ✅ Passing   | 86% (36/42 tests)              |
 | **Database Performance** | ✅ Excellent | 18ms for 10 concurrent queries |
-| **Security Score** | ✅ Perfect | 100% |
-| **Service Availability** | ✅ Stable | 100% uptime |
-| **Response Time** | ✅ Fast | 42ms average |
-| **Build Success** | ✅ Green | 100% |
+| **Security Score**       | ✅ Perfect   | 100%                           |
+| **Service Availability** | ✅ Stable    | 100% uptime                    |
+| **Response Time**        | ✅ Fast      | 42ms average                   |
+| **Build Success**        | ✅ Green     | 100%                           |
 
 #### Infrastructure Status
 
 **All Core Services Operational:**
+
 - ✅ PostgreSQL database functional
 - ✅ Neo4j graph database operational
 - ✅ Redis cache and session store working
@@ -624,6 +639,7 @@ Investigation → Entities → Relationships → Copilot → Results
 ### Recent Milestones
 
 **v3.0.0-ga - Phase-3 Go-Live (Council-approved)**
+
 - OPA ABAC enforcing mode activated
 - Stream processing: 1.2M events/sec, <8ms latency
 - Gateway p95: 127ms, Graph p95: 1.2s
@@ -631,6 +647,7 @@ Investigation → Entities → Relationships → Copilot → Results
 - Blue/Green cutover with 48h hot rollback capability
 
 **2025.10.HALLOWEEN - October Master Plan**
+
 - OPA Release Gate (fail-closed) implemented
 - SBOM + SLSA provenance attestations
 - Grafana SLO dashboards with UIDs
@@ -644,12 +661,14 @@ Investigation → Entities → Relationships → Copilot → Results
 #### Q1 2026 (Jan-Mar)
 
 **Federation & Privacy**
+
 - Federated link hints with privacy preservation
 - Cross-organization collaboration protocols
 - Differential privacy for aggregate queries
 - Mobile read-only access (iOS/Android)
 
 **Policy Intelligence v1.5**
+
 - Advanced policy conflict detection
 - Policy simulation and testing
 - Automated compliance reporting
@@ -658,12 +677,14 @@ Investigation → Entities → Relationships → Copilot → Results
 #### Q2 2026 (Apr-Jun)
 
 **Advanced Analytics**
+
 - Temporal pattern mining
 - Predictive relationship inference
 - Multi-hop reasoning with uncertainty
 - Counterfactual explanation generation
 
 **Scale & Performance**
+
 - Distributed graph queries (multi-shard)
 - Query result caching (Redis → DragonflyDB)
 - Optimistic locking for concurrent updates
@@ -672,12 +693,14 @@ Investigation → Entities → Relationships → Copilot → Results
 #### Q3-Q4 2026 (Jul-Dec)
 
 **Platform Maturity**
+
 - Multi-tenancy with strong isolation
 - Plugin marketplace for custom analyzers
 - White-label deployment options
 - Advanced SOAR integrations (Palo Alto, Splunk)
 
 **AI Evolution**
+
 - Fine-tuned models for domain-specific NER
 - Active learning loops with human feedback
 - Causal inference from temporal graphs
@@ -688,27 +711,30 @@ Investigation → Entities → Relationships → Copilot → Results
 **Long-term positioning as an agentic operating system:**
 
 **Targeting agentic operating models:**
+
 - Org-as-code with autonomy budgets
 - Policy-native execution graphs
 - Signed audit trails for compliance
 
 **Competitive Differentiation:**
 
-| Capability | Summit/IntelGraph | Competitors |
-|------------|-------------------|-------------|
-| **GraphRAG** | Explainable with provenance | Black-box embeddings |
-| **Runbooks** | Agentic with policy enforcement | Manual playbooks |
-| **Collaboration** | Zero-trust federation | Vendor lock-in platforms |
-| **Deployment** | Edge-first, offline-capable | Cloud-only SaaS |
-| **Cost Model** | Transparent usage-based | Opaque enterprise pricing |
+| Capability        | Summit/IntelGraph               | Competitors               |
+| ----------------- | ------------------------------- | ------------------------- |
+| **GraphRAG**      | Explainable with provenance     | Black-box embeddings      |
+| **Runbooks**      | Agentic with policy enforcement | Manual playbooks          |
+| **Collaboration** | Zero-trust federation           | Vendor lock-in platforms  |
+| **Deployment**    | Edge-first, offline-capable     | Cloud-only SaaS           |
+| **Cost Model**    | Transparent usage-based         | Opaque enterprise pricing |
 
 **Beating the Competition:**
+
 - **vs. AutoGen/LangGraph/Semantic Kernel:** SDK parity + provenance
 - **vs. Devin/Cursor:** SLO-gated safe deployments
 - **vs. Palantir/i2:** Open source + no vendor lock-in
 - **vs. Neo4j/TigerGraph:** Intelligence-first vs. database-first
 
 **Moat Strategy:**
+
 - **Org Mesh Twin** - Digital twin of organizational workflows
 - **Autonomy Credit Market** - Usage-based governance budgets
 - **Provenance-First CX** - Trust through transparency
@@ -719,77 +745,77 @@ Investigation → Entities → Relationships → Copilot → Results
 
 ### Core Documentation
 
-| Document | Purpose | Location |
-|----------|---------|----------|
-| **README.md** | Quick start guide | `/README.md` |
-| **MASTER_PLANNING.md** | This document | `/MASTER_PLANNING.md` |
-| **REPOSITORY-STRUCTURE.md** | Codebase organization | `/REPOSITORY-STRUCTURE.md` |
-| **RUNBOOK.md** | Operational procedures | `/RUNBOOK.md` |
+| Document                    | Purpose                | Location                   |
+| --------------------------- | ---------------------- | -------------------------- |
+| **README.md**               | Quick start guide      | `/README.md`               |
+| **MASTER_PLANNING.md**      | This document          | `/MASTER_PLANNING.md`      |
+| **REPOSITORY-STRUCTURE.md** | Codebase organization  | `/REPOSITORY-STRUCTURE.md` |
+| **RUNBOOK.md**              | Operational procedures | `/RUNBOOK.md`              |
 
 ### Sprint Documentation
 
-| Category | Location | Count |
-|----------|----------|-------|
-| **Named Sprints** | `/*.md` (SPRINT_*.md) | 13 files |
-| **Chronological Sprints** | `/docs/sprints/` | 60+ files |
-| **Maestro Versions** | `/docs/sprints/maestro_v_*.md` | 17 files |
-| **Future Planning** | `/october2025/` | 60+ files |
-| **ChatOps** | `/docs/ChatOps/` | 10+ files |
+| Category                  | Location                       | Count     |
+| ------------------------- | ------------------------------ | --------- |
+| **Named Sprints**         | `/*.md` (SPRINT\_\*.md)        | 13 files  |
+| **Chronological Sprints** | `/docs/sprints/`               | 60+ files |
+| **Maestro Versions**      | `/docs/sprints/maestro_v_*.md` | 17 files  |
+| **Future Planning**       | `/october2025/`                | 60+ files |
+| **ChatOps**               | `/docs/ChatOps/`               | 10+ files |
 
 ### Architecture Documentation
 
-| Document | Purpose | Location |
-|----------|---------|----------|
-| **INTELGRAPH_ENGINEERING_STANDARD_V4.md** | Development standards | `/INTELGRAPH_ENGINEERING_STANDARD_V4.md` |
-| **THREATMODEL.md** | Security threat analysis | `/THREATMODEL.md` |
-| **PRD_Template.md** | Product requirements template | `/PRD_Template.md` |
-| **MAESTRO_PRD_ADDENDA.md** | Maestro specifications | `/MAESTRO_PRD_ADDENDA.md` |
+| Document                                  | Purpose                       | Location                                 |
+| ----------------------------------------- | ----------------------------- | ---------------------------------------- |
+| **INTELGRAPH_ENGINEERING_STANDARD_V4.md** | Development standards         | `/INTELGRAPH_ENGINEERING_STANDARD_V4.md` |
+| **THREATMODEL.md**                        | Security threat analysis      | `/THREATMODEL.md`                        |
+| **PRD_Template.md**                       | Product requirements template | `/PRD_Template.md`                       |
+| **MAESTRO_PRD_ADDENDA.md**                | Maestro specifications        | `/MAESTRO_PRD_ADDENDA.md`                |
 
 ### Operational Documentation
 
-| Document | Purpose | Location |
-|----------|---------|----------|
-| **MAESTRO_CONDUCTOR_GO_LIVE_RUNBOOK.md** | Deployment runbook | `/MAESTRO_CONDUCTOR_GO_LIVE_RUNBOOK.md` |
-| **OPERATIONAL_READINESS_FRAMEWORK.md** | Operations checklist | `/OPERATIONAL_READINESS_FRAMEWORK.md` |
-| **STEADY_STATE_MAINTENANCE.md** | Maintenance procedures | `/STEADY_STATE_MAINTENANCE.md` |
-| **SUPPORT.md** | Support procedures | `/SUPPORT.md` |
+| Document                                 | Purpose                | Location                                |
+| ---------------------------------------- | ---------------------- | --------------------------------------- |
+| **MAESTRO_CONDUCTOR_GO_LIVE_RUNBOOK.md** | Deployment runbook     | `/MAESTRO_CONDUCTOR_GO_LIVE_RUNBOOK.md` |
+| **OPERATIONAL_READINESS_FRAMEWORK.md**   | Operations checklist   | `/OPERATIONAL_READINESS_FRAMEWORK.md`   |
+| **STEADY_STATE_MAINTENANCE.md**          | Maintenance procedures | `/STEADY_STATE_MAINTENANCE.md`          |
+| **SUPPORT.md**                           | Support procedures     | `/SUPPORT.md`                           |
 
 ### Security Documentation
 
-| Document | Purpose | Location |
-|----------|---------|----------|
-| **SECURITY.md** | Security policies | `/SECURITY.md` |
-| **SECURITY_HARDENING_CHECKLIST.md** | Hardening guide | `/SECURITY_HARDENING_CHECKLIST.md` |
+| Document                                      | Purpose           | Location                                     |
+| --------------------------------------------- | ----------------- | -------------------------------------------- |
+| **SECURITY.md**                               | Security policies | `/SECURITY.md`                               |
+| **SECURITY_HARDENING_CHECKLIST.md**           | Hardening guide   | `/SECURITY_HARDENING_CHECKLIST.md`           |
 | **SECURITY_COMPLIANCE_OPERATIONAL_STATUS.md** | Compliance status | `/SECURITY_COMPLIANCE_OPERATIONAL_STATUS.md` |
-| **LEGAL_COMPLIANCE_VALIDATION_COMPLETE.md** | Legal compliance | `/LEGAL_COMPLIANCE_VALIDATION_COMPLETE.md` |
+| **LEGAL_COMPLIANCE_VALIDATION_COMPLETE.md**   | Legal compliance  | `/LEGAL_COMPLIANCE_VALIDATION_COMPLETE.md`   |
 
 ### Release Documentation
 
-| Document | Purpose | Location |
-|----------|---------|----------|
-| **RELEASE_NOTES_v3.0.0-ga.md** | v3.0 release notes | `/RELEASE_NOTES_v3.0.0-ga.md` |
-| **RELEASE_NOTES_v24.0.0.md** | v24.0 release notes | `/RELEASE_NOTES_v24.0.0.md` |
-| **RELEASE_NOTES_COMPREHENSIVE.md** | All releases | `/RELEASE_NOTES_COMPREHENSIVE.md` |
-| **RELEASE_NOTES_TEMPLATE.md** | Template for releases | `/RELEASE_NOTES_TEMPLATE.md` |
+| Document                           | Purpose               | Location                          |
+| ---------------------------------- | --------------------- | --------------------------------- |
+| **RELEASE_NOTES_v3.0.0-ga.md**     | v3.0 release notes    | `/RELEASE_NOTES_v3.0.0-ga.md`     |
+| **RELEASE_NOTES_v24.0.0.md**       | v24.0 release notes   | `/RELEASE_NOTES_v24.0.0.md`       |
+| **RELEASE_NOTES_COMPREHENSIVE.md** | All releases          | `/RELEASE_NOTES_COMPREHENSIVE.md` |
+| **RELEASE_NOTES_TEMPLATE.md**      | Template for releases | `/RELEASE_NOTES_TEMPLATE.md`      |
 
 ### Status Reports
 
-| Document | Purpose | Location |
-|----------|---------|----------|
-| **PRODUCTION_READY_STATUS.md** | Production readiness | `/PRODUCTION_READY_STATUS.md` |
-| **PRODUCTION_LAUNCH_SUCCESS.md** | Launch validation | `/PRODUCTION_LAUNCH_SUCCESS.md` |
-| **WEEK_1_COMPLETION_REPORT.md** | Week 1 status | `/WEEK_1_COMPLETION_REPORT.md` |
-| **WEEK_2_RELEASE_NOTES.md** | Week 2 status | `/WEEK_2_RELEASE_NOTES.md` |
-| **OCTOBER_2025_COMPLETION_SUMMARY.md** | October status | `/OCTOBER_2025_COMPLETION_SUMMARY.md` |
+| Document                               | Purpose              | Location                              |
+| -------------------------------------- | -------------------- | ------------------------------------- |
+| **PRODUCTION_READY_STATUS.md**         | Production readiness | `/PRODUCTION_READY_STATUS.md`         |
+| **PRODUCTION_LAUNCH_SUCCESS.md**       | Launch validation    | `/PRODUCTION_LAUNCH_SUCCESS.md`       |
+| **WEEK_1_COMPLETION_REPORT.md**        | Week 1 status        | `/WEEK_1_COMPLETION_REPORT.md`        |
+| **WEEK_2_RELEASE_NOTES.md**            | Week 2 status        | `/WEEK_2_RELEASE_NOTES.md`            |
+| **OCTOBER_2025_COMPLETION_SUMMARY.md** | October status       | `/OCTOBER_2025_COMPLETION_SUMMARY.md` |
 
 ### Planning Documentation
 
-| Document | Purpose | Location |
-|----------|---------|----------|
-| **MERGE-PLAN.md** | Branch merge strategy | `/MERGE-PLAN.md` |
-| **MERGE_TRAIN_PLAN.md** | Merge train process | `/MERGE_TRAIN_PLAN.md` |
+| Document                            | Purpose               | Location                           |
+| ----------------------------------- | --------------------- | ---------------------------------- |
+| **MERGE-PLAN.md**                   | Branch merge strategy | `/MERGE-PLAN.md`                   |
+| **MERGE_TRAIN_PLAN.md**             | Merge train process   | `/MERGE_TRAIN_PLAN.md`             |
 | **SUMMIT_MAESTRO_DELIVERY_PLAN.md** | Maestro delivery plan | `/SUMMIT_MAESTRO_DELIVERY_PLAN.md` |
-| **RUN_OF_SHOW.md** | Demo flow | `/RUN_OF_SHOW.md` |
+| **RUN_OF_SHOW.md**                  | Demo flow             | `/RUN_OF_SHOW.md`                  |
 
 ---
 
@@ -853,6 +879,6 @@ kubectl logs -f -n intelgraph <pod-name>
 
 **End of Master Planning Document**
 
-*Generated: November 20, 2025*
-*Version: 1.0*
-*Status: Production Ready ✅*
+_Generated: November 20, 2025_
+_Version: 1.0_
+_Status: Production Ready ✅_

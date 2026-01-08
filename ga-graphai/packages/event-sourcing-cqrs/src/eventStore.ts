@@ -1,10 +1,10 @@
-import { randomUUID } from 'crypto';
-import type { DomainEvent, EventEnvelope } from './types.js';
+import { randomUUID } from "crypto";
+import type { DomainEvent, EventEnvelope } from "./types.js";
 
 export class ConcurrencyError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'ConcurrencyError';
+    this.name = "ConcurrencyError";
   }
 }
 
@@ -12,7 +12,7 @@ export interface EventStore {
   append(
     streamId: string,
     events: DomainEvent[],
-    expectedVersion?: number,
+    expectedVersion?: number
   ): Promise<EventEnvelope[]>;
   loadStream(streamId: string, fromVersion?: number): Promise<EventEnvelope[]>;
   loadSince(timestamp: string): Promise<EventEnvelope[]>;
@@ -24,14 +24,14 @@ export class InMemoryEventStore implements EventStore {
   async append(
     streamId: string,
     events: DomainEvent[],
-    expectedVersion: number = -1,
+    expectedVersion: number = -1
   ): Promise<EventEnvelope[]> {
     const currentEvents = this.streams.get(streamId) ?? [];
     const lastVersion = currentEvents.at(-1)?.version ?? -1;
 
     if (expectedVersion !== -2 && expectedVersion !== lastVersion) {
       throw new ConcurrencyError(
-        `Version mismatch for ${streamId}: expected ${expectedVersion}, actual ${lastVersion}`,
+        `Version mismatch for ${streamId}: expected ${expectedVersion}, actual ${lastVersion}`
       );
     }
 

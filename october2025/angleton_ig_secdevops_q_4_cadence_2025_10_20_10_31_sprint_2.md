@@ -65,22 +65,12 @@ spec:
           any:
             [
               {
-                resources:
-                  {
-                    kinds:
-                      [
-                        'Deployment',
-                        'StatefulSet',
-                        'DaemonSet',
-                        'Job',
-                        'CronJob',
-                      ],
-                  },
+                resources: { kinds: ["Deployment", "StatefulSet", "DaemonSet", "Job", "CronJob"] },
               },
             ],
         }
       verifyImages:
-        - imageReferences: ['ghcr.io/companyos/*']
+        - imageReferences: ["ghcr.io/companyos/*"]
           attestations:
             - type: cosign.sigstore.dev/attestation
           mutateDigest: false
@@ -89,8 +79,8 @@ spec:
             - attestors:
                 - entries:
                     - keyless:
-                        issuer: 'https://token.actions.githubusercontent.com'
-                        subject: 'repo:companyos/*:ref:refs/heads/main'
+                        issuer: "https://token.actions.githubusercontent.com"
+                        subject: "repo:companyos/*:ref:refs/heads/main"
 ```
 
 **NEW (ArgoCD image policy via OPA Gatekeeper alternative):** `deploy/policies/gatekeeper-image-digest.yaml`
@@ -101,20 +91,18 @@ kind: K8sAllowedRepos
 metadata:
   name: only-ghcr-companyos
 spec:
-  match:
-    { kinds: [{ apiGroups: ['apps'], kinds: ['Deployment', 'StatefulSet'] }] }
+  match: { kinds: [{ apiGroups: ["apps"], kinds: ["Deployment", "StatefulSet"] }] }
   parameters:
-    repos: ['ghcr.io/companyos/']
+    repos: ["ghcr.io/companyos/"]
 ---
 apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: K8sRequiredLabels
 metadata:
   name: require-image-digest
 spec:
-  match:
-    { kinds: [{ apiGroups: ['apps'], kinds: ['Deployment', 'StatefulSet'] }] }
+  match: { kinds: [{ apiGroups: ["apps"], kinds: ["Deployment", "StatefulSet"] }] }
   parameters:
-    labels: [{ key: 'imageDigest', allowedRegex: '^sha256:[a-f0-9]{64}$' }]
+    labels: [{ key: "imageDigest", allowedRegex: "^sha256:[a-f0-9]{64}$" }]
 ```
 
 **NEW (ArgoCD app project policy snippet):** `deploy/argocd/projects/switchboard-project.yaml`
@@ -125,12 +113,11 @@ kind: AppProject
 metadata:
   name: switchboard
 spec:
-  sourceRepos: ['https://github.com/companyos/*']
-  destinations:
-    [{ server: 'https://kubernetes.default.svc', namespace: 'switchboard' }]
+  sourceRepos: ["https://github.com/companyos/*"]
+  destinations: [{ server: "https://kubernetes.default.svc", namespace: "switchboard" }]
   signatureKeys:
-    - keyID: 'https://token.actions.githubusercontent.com'
-  clusterResourceWhitelist: [{ group: '*', kind: '*' }]
+    - keyID: "https://token.actions.githubusercontent.com"
+  clusterResourceWhitelist: [{ group: "*", kind: "*" }]
 ```
 
 ### 3.2 CI: verify on deploy, hash logs, produce lineage
@@ -142,7 +129,7 @@ name: deploy.verify
 on:
   workflow_dispatch:
   push:
-    tags: ['app/switchboard-v*.*.*']
+    tags: ["app/switchboard-v*.*.*"]
 permissions:
   contents: read
   id-token: write
@@ -158,7 +145,7 @@ jobs:
         uses: sigstore/cosign-installer@v3
       - name: Verify image and attestations (keyless)
         env:
-          COSIGN_EXPERIMENTAL: '1'
+          COSIGN_EXPERIMENTAL: "1"
         run: |
           IMAGE="ghcr.io/companyos/switchboard@${{ inputs.digest || env.DIGEST }}"
           cosign verify --certificate-identity "repo:companyos/switchboard:ref:refs/heads/main" \
@@ -263,15 +250,15 @@ containerSecurityContext:
   allowPrivilegeEscalation: false
   readOnlyRootFilesystem: true
   capabilities:
-    drop: ['ALL']
+    drop: ["ALL"]
 resources:
-  requests: { cpu: '100m', memory: '128Mi' }
-  limits: { cpu: '500m', memory: '512Mi' }
+  requests: { cpu: "100m", memory: "128Mi" }
+  limits: { cpu: "500m", memory: "512Mi" }
 networkPolicy:
   enabled: true
   ingress:
     - from:
-        - podSelector: { matchLabels: { app: 'gateway' } }
+        - podSelector: { matchLabels: { app: "gateway" } }
       ports: [{ port: 8080 }]
 pdb:
   enabled: true
@@ -319,19 +306,19 @@ jobs:
 **NEW:** `tests/k6/smoke.js`
 
 ```js
-import http from 'k6/http';
-import { sleep, check } from 'k6';
+import http from "k6/http";
+import { sleep, check } from "k6";
 export const options = {
   vus: 5,
-  duration: '2m',
+  duration: "2m",
   thresholds: {
-    http_req_failed: ['rate<0.01'],
-    http_req_duration: ['p(95)<400'],
+    http_req_failed: ["rate<0.01"],
+    http_req_duration: ["p(95)<400"],
   },
 };
 export default function () {
   const res = http.get(`${__ENV.BASE_URL}/health`);
-  check(res, { 'status 200': (r) => r.status === 200 });
+  check(res, { "status 200": (r) => r.status === 200 });
   sleep(1);
 }
 ```
@@ -356,17 +343,17 @@ jobs:
 **NEW:** `apps/web/e2e/stepup.spec.ts`
 
 ```ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test('step-up required for manage_policy', async ({ page }) => {
+test("step-up required for manage_policy", async ({ page }) => {
   await page.goto(process.env.BASE_URL!);
-  await page.click('text=Login');
-  await page.fill('#username', 'demo');
-  await page.fill('#password', 'demo');
-  await page.click('text=Continue');
+  await page.click("text=Login");
+  await page.fill("#username", "demo");
+  await page.fill("#password", "demo");
+  await page.click("text=Continue");
   // Expect step-up prompt before sensitive action
-  await page.click('text=Manage Policy');
-  await expect(page.getByText('Use your security key')).toBeVisible();
+  await page.click("text=Manage Policy");
+  await expect(page.getByText("Use your security key")).toBeVisible();
 });
 ```
 

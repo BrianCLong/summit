@@ -7,7 +7,7 @@ const caseId = 'case-1'
 const paramsHash = 'hash-1'
 
 const setJobStatus = (status: ExportJobLifecycle) => {
-  useExportJobsStore.setState((state) => {
+  useExportJobsStore.setState(state => {
     const job = Object.values(state.jobs)[0]
     if (!job) return state
     return {
@@ -24,7 +24,13 @@ const setJobStatus = (status: ExportJobLifecycle) => {
 
 describe('exportJobsStore', () => {
   it('creates and updates a job lifecycle', () => {
-    const job = createJobEntry({ tenantId, caseId, paramsHash, jobId: 'job-1', idempotencyKey: 'key-1' })
+    const job = createJobEntry({
+      tenantId,
+      caseId,
+      paramsHash,
+      jobId: 'job-1',
+      idempotencyKey: 'key-1',
+    })
     const key = `${tenantId}::${caseId}::${paramsHash}`
 
     useExportJobsStore.getState().upsertJob(key, job)
@@ -33,7 +39,12 @@ describe('exportJobsStore', () => {
     setJobStatus('in_progress')
     expect(useExportJobsStore.getState().jobs[key].status).toBe('in_progress')
 
-    useExportJobsStore.getState().updateStatus(key, 'ready', { progress: 100, downloadUrl: 'http://example.com' })
+    useExportJobsStore
+      .getState()
+      .updateStatus(key, 'ready', {
+        progress: 100,
+        downloadUrl: 'http://example.com',
+      })
     expect(useExportJobsStore.getState().jobs[key].status).toBe('ready')
     expect(useExportJobsStore.getState().jobs[key].progress).toBe(100)
 
@@ -42,11 +53,23 @@ describe('exportJobsStore', () => {
   })
 
   it('dedupes jobs by key', () => {
-    const jobA = createJobEntry({ tenantId, caseId, paramsHash, jobId: 'job-dedupe', idempotencyKey: 'key-a' })
+    const jobA = createJobEntry({
+      tenantId,
+      caseId,
+      paramsHash,
+      jobId: 'job-dedupe',
+      idempotencyKey: 'key-a',
+    })
     const key = `${tenantId}::${caseId}::${paramsHash}`
 
     useExportJobsStore.getState().upsertJob(key, jobA)
-    const jobB = createJobEntry({ tenantId, caseId, paramsHash, jobId: 'job-dedupe', idempotencyKey: 'key-b' })
+    const jobB = createJobEntry({
+      tenantId,
+      caseId,
+      paramsHash,
+      jobId: 'job-dedupe',
+      idempotencyKey: 'key-b',
+    })
     useExportJobsStore.getState().upsertJob(key, jobB)
 
     expect(Object.keys(useExportJobsStore.getState().jobs)).toHaveLength(1)

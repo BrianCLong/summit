@@ -153,7 +153,7 @@ defaults:
   temperature: 0.2
 
 routes:
-  - when: { task: 'code' }
+  - when: { task: "code" }
     then: { model: local/llama-cpu, temperature: 0.1 }
 ```
 
@@ -316,6 +316,6 @@ Modify routing rules in `orchestration.yml`:
 
 ```yaml
 routes:
-  - when: { task: 'mytask' }
+  - when: { task: "mytask" }
     then: { model: mymodel, temperature: 0.5 }
 ```

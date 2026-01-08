@@ -1,6 +1,6 @@
-import crypto from 'node:crypto';
-import zlib from 'node:zlib';
-import { ResourceOptimizationEngine } from './index.js';
+import crypto from "node:crypto";
+import zlib from "node:zlib";
+import { ResourceOptimizationEngine } from "./index.js";
 import type {
   CacheConfig,
   CacheEntry,
@@ -19,11 +19,11 @@ import type {
   TelemetrySignal,
   ReleaseMarker,
   CacheRetrieval,
-} from './types.js';
+} from "./types.js";
 
 const DEFAULT_JOURNEY_TARGETS: JourneyStepTarget[] = [
   {
-    journey: 'case_search_load',
+    journey: "case_search_load",
     steps: {
       search_api: 600,
       graph_fetch: 450,
@@ -33,7 +33,7 @@ const DEFAULT_JOURNEY_TARGETS: JourneyStepTarget[] = [
     },
   },
   {
-    journey: 'entity_create_link',
+    journey: "entity_create_link",
     steps: {
       form_submit: 500,
       relationship_write: 350,
@@ -41,7 +41,7 @@ const DEFAULT_JOURNEY_TARGETS: JourneyStepTarget[] = [
     },
   },
   {
-    journey: 'investigation_timeline',
+    journey: "investigation_timeline",
     steps: {
       timeline_query: 700,
       media_fetch: 800,
@@ -49,7 +49,7 @@ const DEFAULT_JOURNEY_TARGETS: JourneyStepTarget[] = [
     },
   },
   {
-    journey: 'export_report',
+    journey: "export_report",
     steps: {
       request_ack: 200,
       job_enqueue: 100,
@@ -58,7 +58,7 @@ const DEFAULT_JOURNEY_TARGETS: JourneyStepTarget[] = [
     },
   },
   {
-    journey: 'copilot_suggestion',
+    journey: "copilot_suggestion",
     steps: {
       prompt_pipeline: 1200,
       model_call: 800,
@@ -96,22 +96,22 @@ export class PerformanceBudgetGate {
 
   evaluate(sample: JourneyTelemetrySample): PerformanceBudgetResult {
     if (!sample.journey || !sample.step) {
-      throw new Error('Journey telemetry must include journey and step.');
+      throw new Error("Journey telemetry must include journey and step.");
     }
 
     const stepTargets = this.targets.get(sample.journey);
     const targetMs = stepTargets?.get(sample.step);
     if (!targetMs) {
       return {
-        status: 'warn',
-        reason: 'No target registered; record for follow-up.',
+        status: "warn",
+        reason: "No target registered; record for follow-up.",
         targetMs: 0,
         observedMs: sample.p95,
         annotations: {
           journey: sample.journey,
           step: sample.step,
           cacheHit: sample.cacheHit,
-          tenant: sample.tenant ?? 'unknown',
+          tenant: sample.tenant ?? "unknown",
           sampleRate: sample.sampleRate,
         },
       };
@@ -125,7 +125,7 @@ export class PerformanceBudgetGate {
 
     if (violatesLatency || violatesErrors || violatesPayload) {
       return {
-        status: 'breach',
+        status: "breach",
         reason: this.buildReason(sample, targetMs, {
           violatesLatency,
           violatesErrors,
@@ -139,22 +139,22 @@ export class PerformanceBudgetGate {
           errorRate: sample.errorRate,
           payloadBytes: sample.payloadBytes,
           cacheHit: sample.cacheHit,
-          tenant: sample.tenant ?? 'unknown',
+          tenant: sample.tenant ?? "unknown",
           sampleRate: sample.sampleRate,
         },
       };
     }
 
     return {
-      status: 'pass',
-      reason: 'Within p95, payload, and error budgets.',
+      status: "pass",
+      reason: "Within p95, payload, and error budgets.",
       targetMs,
       observedMs: sample.p95,
       annotations: {
         journey: sample.journey,
         step: sample.step,
         cacheHit: sample.cacheHit,
-        tenant: sample.tenant ?? 'unknown',
+        tenant: sample.tenant ?? "unknown",
       },
     };
   }
@@ -162,21 +162,23 @@ export class PerformanceBudgetGate {
   private buildReason(
     sample: JourneyTelemetrySample,
     targetMs: number,
-    violations: { violatesLatency: boolean; violatesErrors: boolean; violatesPayload: boolean },
+    violations: { violatesLatency: boolean; violatesErrors: boolean; violatesPayload: boolean }
   ): string {
     const reasons: string[] = [];
     if (violations.violatesLatency) {
       reasons.push(
-        `p95 ${sample.p95}ms exceeds target ${targetMs}ms for ${sample.journey}/${sample.step}`,
+        `p95 ${sample.p95}ms exceeds target ${targetMs}ms for ${sample.journey}/${sample.step}`
       );
     }
     if (violations.violatesErrors) {
       reasons.push(`error rate ${Math.round(sample.errorRate * 100)}% above threshold`);
     }
     if (violations.violatesPayload) {
-      reasons.push(`payload ${sample.payloadBytes} bytes exceeds budget (cacheHit=${sample.cacheHit})`);
+      reasons.push(
+        `payload ${sample.payloadBytes} bytes exceeds budget (cacheHit=${sample.cacheHit})`
+      );
     }
-    return reasons.join('; ');
+    return reasons.join("; ");
   }
 }
 
@@ -201,9 +203,9 @@ export class TopOffenderBoard {
 
   snapshot(): OffenderBoard {
     return {
-      slowestEndpoints: this.offenders.get('endpoint') ?? [],
-      slowestQueries: this.offenders.get('query') ?? [],
-      slowestPages: this.offenders.get('page') ?? [],
+      slowestEndpoints: this.offenders.get("endpoint") ?? [],
+      slowestQueries: this.offenders.get("query") ?? [],
+      slowestPages: this.offenders.get("page") ?? [],
     };
   }
 
@@ -224,7 +226,7 @@ export class CacheManager<TValue = unknown> {
   async getOrLoad(
     key: string,
     tenantId: string,
-    loader: () => Promise<CacheRetrieval<TValue>>,
+    loader: () => Promise<CacheRetrieval<TValue>>
   ): Promise<CacheEntry<TValue>> {
     const cacheKey = this.buildKey(key, tenantId);
     const now = Date.now();
@@ -279,16 +281,14 @@ export class CacheManager<TValue = unknown> {
   }
 
   private checksum(value: unknown): string {
-    return crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex');
+    return crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex");
   }
 }
 
 export class ResponseShaper {
   shape(payload: Record<string, unknown>, options: ResponseShapeOptions): ShapedResponse {
     const allowedFields = new Set(options.allowedFields);
-    const filteredEntries = Object.entries(payload).filter(([field]) =>
-      allowedFields.has(field),
-    );
+    const filteredEntries = Object.entries(payload).filter(([field]) => allowedFields.has(field));
     const filtered = Object.fromEntries(filteredEntries);
 
     const limit = this.enforcePagination(options);
@@ -298,16 +298,20 @@ export class ResponseShaper {
       version: options.version,
       partial: options.partial ?? false,
       data: paginated,
-      pagination: { offset, limit, total: Array.isArray(payload.data) ? payload.data.length : undefined },
+      pagination: {
+        offset,
+        limit,
+        total: Array.isArray(payload.data) ? payload.data.length : undefined,
+      },
     } as ShapedResponse;
 
     const serialized = JSON.stringify(envelope);
-    envelope.checksum = crypto.createHash('sha256').update(serialized).digest('hex');
+    envelope.checksum = crypto.createHash("sha256").update(serialized).digest("hex");
 
     if (Buffer.byteLength(serialized) > options.compressionThresholdBytes) {
       const compressed = zlib.brotliCompressSync(Buffer.from(serialized));
       envelope.compressed = compressed;
-      envelope.encoding = 'brotli';
+      envelope.encoding = "brotli";
     }
 
     return envelope;
@@ -318,11 +322,11 @@ export class ResponseShaper {
     return Math.min(options.pageSizeLimit, tierLimit, options.limit ?? options.pageSizeLimit);
   }
 
-  private tierLimit(tier: ResponseShapeOptions['tenantTier']): number {
+  private tierLimit(tier: ResponseShapeOptions["tenantTier"]): number {
     switch (tier) {
-      case 'strategic':
+      case "strategic":
         return 500;
-      case 'premium':
+      case "premium":
         return 200;
       default:
         return 100;
@@ -332,7 +336,7 @@ export class ResponseShaper {
   private applyPagination(
     payload: Record<string, unknown>,
     offset: number,
-    limit: number,
+    limit: number
   ): Record<string, unknown> {
     if (!Array.isArray(payload.data)) return payload;
     return {
@@ -388,7 +392,7 @@ export class AsyncJobManager {
       const execution: JobExecutionResult = {
         id: job.idempotencyKey,
         tenantId: job.tenantId,
-        status: 'success',
+        status: "success",
         durationMs: Date.now() - startedAt,
         classification: job.classification,
         result,
@@ -419,15 +423,14 @@ export class AsyncJobManager {
   private lookupProcessed(idempotencyKey: string): JobExecutionResult | undefined {
     const processed = this.processed.get(idempotencyKey);
     if (!processed) return undefined;
-    const expired =
-      Date.now() - processed.durationMs > this.config.dedupeWindowMs;
+    const expired = Date.now() - processed.durationMs > this.config.dedupeWindowMs;
     return expired ? undefined : processed;
   }
 }
 
 export class TelemetryCostController {
   private readonly config: TelemetryBudgetConfig;
-  private readonly counters: Record<'logs' | 'metrics' | 'traces', number> = {
+  private readonly counters: Record<"logs" | "metrics" | "traces", number> = {
     logs: 0,
     metrics: 0,
     traces: 0,
@@ -446,8 +449,8 @@ export class TelemetryCostController {
       if (this.labelCardinality.size > this.config.cardinalityLimit) {
         return {
           accepted: false,
-          action: 'reject',
-          reason: 'High-cardinality labels blocked.',
+          action: "reject",
+          reason: "High-cardinality labels blocked.",
         };
       }
     }
@@ -458,12 +461,12 @@ export class TelemetryCostController {
     if (this.counters[kind] > budget) {
       return {
         accepted: false,
-        action: 'throttle',
+        action: "throttle",
         reason: `${kind} budget exceeded (${this.counters[kind]} > ${budget}).`,
       };
     }
 
-    return { accepted: true, action: 'allow', reason: 'Within telemetry budget.' };
+    return { accepted: true, action: "allow", reason: "Within telemetry budget." };
   }
 
   reset(): void {
@@ -473,9 +476,9 @@ export class TelemetryCostController {
     this.labelCardinality.clear();
   }
 
-  private budgetFor(kind: TelemetrySignal['kind']): number {
-    if (kind === 'logs') return this.config.logsPerMinute;
-    if (kind === 'metrics') return this.config.metricsPerMinute;
+  private budgetFor(kind: TelemetrySignal["kind"]): number {
+    if (kind === "logs") return this.config.logsPerMinute;
+    if (kind === "metrics") return this.config.metricsPerMinute;
     return this.config.tracesPerMinute;
   }
 }
@@ -526,8 +529,4 @@ export class PerformanceCostOperatingSystem {
   }
 }
 
-export {
-  DEFAULT_CACHE_CONFIG,
-  DEFAULT_JOURNEY_TARGETS,
-  DEFAULT_BUDGETS,
-};
+export { DEFAULT_CACHE_CONFIG, DEFAULT_JOURNEY_TARGETS, DEFAULT_BUDGETS };

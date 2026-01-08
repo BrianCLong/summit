@@ -1,7 +1,7 @@
 meta:
   id: plan.anomaly-detection@v1
-  owner: 'platform-engineering'
-  purpose: 'Implement simple anomaly detection on metrics for proactive alerting'
+  owner: "platform-engineering"
+  purpose: "Implement simple anomaly detection on metrics for proactive alerting"
   tags:
     - observability
     - anomaly-detection
@@ -9,13 +9,13 @@ meta:
     - ml
     - proactive
   guardrails:
-    - 'Minimize false positives'
-    - 'Alerts must be actionable'
-    - 'Explanation must accompany detection'
-    - 'Feedback loop for tuning'
+    - "Minimize false positives"
+    - "Alerts must be actionable"
+    - "Explanation must accompany detection"
+    - "Feedback loop for tuning"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -255,15 +255,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'metric-anomaly-detection'
+  - name: "metric-anomaly-detection"
     inputs:
-      target_metrics: 'Request rate, latency p99, error rate, DB connections'
-      current_alerting: 'Static thresholds, many false positives during traffic changes'
-      false_positive_tolerance: '< 5% of alerts'
-      response_requirements: 'Detect within 5 minutes, actionable alerts'
-      ml_infrastructure: 'Python available, can run lightweight models'
+      target_metrics: "Request rate, latency p99, error rate, DB connections"
+      current_alerting: "Static thresholds, many false positives during traffic changes"
+      false_positive_tolerance: "< 5% of alerts"
+      response_requirements: "Detect within 5 minutes, actionable alerts"
+      ml_infrastructure: "Python available, can run lightweight models"
     expected_contains:
-      - 'Detection Strategy'
-      - 'Metric-Specific'
-      - 'Alerting Integration'
-      - 'Feedback Loop'
+      - "Detection Strategy"
+      - "Metric-Specific"
+      - "Alerting Integration"
+      - "Feedback Loop"

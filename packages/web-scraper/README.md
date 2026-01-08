@@ -26,20 +26,20 @@ pnpm install @intelgraph/web-scraper
 ### Basic Static Scraping
 
 ```typescript
-import { ScraperEngine } from '@intelgraph/web-scraper';
+import { ScraperEngine } from "@intelgraph/web-scraper";
 
 const engine = new ScraperEngine();
 await engine.initialize();
 
 const result = await engine.scrape({
-  id: 'task-1',
-  url: 'https://example.com',
-  method: 'static',
+  id: "task-1",
+  url: "https://example.com",
+  method: "static",
   options: {
     extractLinks: true,
     extractImages: true,
-    extractMetadata: true
-  }
+    extractMetadata: true,
+  },
 });
 
 console.log(result.content.title);
@@ -50,29 +50,29 @@ console.log(result.links.length);
 
 ```typescript
 const result = await engine.scrape({
-  id: 'task-2',
-  url: 'https://spa-app.com',
-  method: 'dynamic',
+  id: "task-2",
+  url: "https://spa-app.com",
+  method: "dynamic",
   options: {
     renderJavaScript: true,
-    waitForSelector: '.content-loaded',
-    screenshot: true
-  }
+    waitForSelector: ".content-loaded",
+    screenshot: true,
+  },
 });
 ```
 
 ### Change Detection
 
 ```typescript
-import { ChangeDetector } from '@intelgraph/web-scraper';
+import { ChangeDetector } from "@intelgraph/web-scraper";
 
 const detector = new ChangeDetector();
 
 const changes = await detector.detectChanges(url, newContent);
 if (changes.changed) {
-  console.log('Page changed!');
-  console.log('Added lines:', changes.diff.added.length);
-  console.log('Removed lines:', changes.diff.removed.length);
+  console.log("Page changed!");
+  console.log("Added lines:", changes.diff.added.length);
+  console.log("Removed lines:", changes.diff.removed.length);
 }
 ```
 
@@ -80,9 +80,9 @@ if (changes.changed) {
 
 ```typescript
 const result = await engine.scrape({
-  id: 'task-3',
-  url: 'https://old-site.com',
-  method: 'archive'
+  id: "task-3",
+  url: "https://old-site.com",
+  method: "archive",
 });
 
 // Get all snapshots
@@ -93,12 +93,12 @@ const snapshots = await archiveScraper.getSnapshots(url);
 ### Technology Detection
 
 ```typescript
-import { TechnologyDetector } from '@intelgraph/web-scraper';
+import { TechnologyDetector } from "@intelgraph/web-scraper";
 
 const detector = new TechnologyDetector();
 const technologies = detector.detect(html, headers);
 
-technologies.forEach(tech => {
+technologies.forEach((tech) => {
   console.log(`${tech.name} (${tech.category}): ${tech.confidence}`);
 });
 ```
@@ -106,7 +106,7 @@ technologies.forEach(tech => {
 ### Link Analysis
 
 ```typescript
-import { LinkAnalyzer } from '@intelgraph/web-scraper';
+import { LinkAnalyzer } from "@intelgraph/web-scraper";
 
 const analyzer = new LinkAnalyzer();
 const analysis = analyzer.analyze(result.links);
@@ -114,24 +114,24 @@ const analysis = analyzer.analyze(result.links);
 console.log(`Total: ${analysis.totalLinks}`);
 console.log(`Internal: ${analysis.internalLinks}`);
 console.log(`External: ${analysis.externalLinks}`);
-console.log(`Domains: ${analysis.uniqueDomains.join(', ')}`);
+console.log(`Domains: ${analysis.uniqueDomains.join(", ")}`);
 ```
 
 ### Metadata Extraction
 
 ```typescript
-import { MetadataExtractor } from '@intelgraph/web-scraper';
+import { MetadataExtractor } from "@intelgraph/web-scraper";
 
 const extractor = new MetadataExtractor();
 const contact = extractor.extractContactInfo(text, html);
 
-console.log('Emails:', contact.emails);
-console.log('Phones:', contact.phones);
-console.log('Social Media:', contact.socialMedia);
+console.log("Emails:", contact.emails);
+console.log("Phones:", contact.phones);
+console.log("Social Media:", contact.socialMedia);
 
 const crypto = extractor.extractCryptoAddresses(text);
-console.log('Bitcoin addresses:', crypto.bitcoin);
-console.log('Ethereum addresses:', crypto.ethereum);
+console.log("Bitcoin addresses:", crypto.bitcoin);
+console.log("Ethereum addresses:", crypto.ethereum);
 ```
 
 ## API Reference
@@ -141,6 +141,7 @@ console.log('Ethereum addresses:', crypto.ethereum);
 Main scraping orchestrator.
 
 **Methods:**
+
 - `initialize()`: Initialize browser pool
 - `scrape(task)`: Scrape a single URL
 - `scrapeBatch(urls, options)`: Scrape multiple URLs
@@ -151,6 +152,7 @@ Main scraping orchestrator.
 Manages Playwright browser instances.
 
 **Methods:**
+
 - `acquire()`: Get a browser from pool
 - `release(browser)`: Return browser to pool
 - `createPage()`: Create a new page
@@ -161,6 +163,7 @@ Manages Playwright browser instances.
 Detects changes in web pages.
 
 **Methods:**
+
 - `detectChanges(url, content)`: Check for changes
 - `clear()`: Clear all tracked pages
 - `remove(url)`: Remove specific URL

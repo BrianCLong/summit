@@ -2,7 +2,7 @@
  * Network Analyzer - Analyzes social network structures and relationships
  */
 
-import type { SocialNetwork, NetworkNode, NetworkEdge, NetworkMetrics } from '../types/index.js';
+import type { SocialNetwork, NetworkNode, NetworkEdge, NetworkMetrics } from "../types/index.js";
 
 export class NetworkAnalyzer {
   /**
@@ -12,18 +12,18 @@ export class NetworkAnalyzer {
     profiles: Array<{ username: string; platform: string }>,
     relationships: Array<{ from: string; to: string; type: string }>
   ): SocialNetwork {
-    const nodes: NetworkNode[] = profiles.map(profile => ({
+    const nodes: NetworkNode[] = profiles.map((profile) => ({
       id: `${profile.platform}:${profile.username}`,
       username: profile.username,
       platform: profile.platform,
-      type: 'user'
+      type: "user",
     }));
 
-    const edges: NetworkEdge[] = relationships.map(rel => ({
+    const edges: NetworkEdge[] = relationships.map((rel) => ({
       source: rel.from,
       target: rel.to,
       type: rel.type as any,
-      weight: 1
+      weight: 1,
     }));
 
     const metrics = this.calculateMetrics({ nodes, edges });
@@ -31,7 +31,7 @@ export class NetworkAnalyzer {
     return {
       nodes,
       edges,
-      metrics
+      metrics,
     };
   }
 
@@ -49,9 +49,7 @@ export class NetworkAnalyzer {
     // Average degree
     const degrees = this.calculateDegrees(network);
     const avgDegree =
-      degrees.size > 0
-        ? Array.from(degrees.values()).reduce((a, b) => a + b, 0) / degrees.size
-        : 0;
+      degrees.size > 0 ? Array.from(degrees.values()).reduce((a, b) => a + b, 0) / degrees.size : 0;
 
     // Clustering coefficient (simplified)
     const clustering = this.calculateClustering(network);
@@ -65,7 +63,7 @@ export class NetworkAnalyzer {
       density,
       averageDegree: avgDegree,
       clustering,
-      influencers
+      influencers,
     };
   }
 
@@ -79,10 +77,10 @@ export class NetworkAnalyzer {
     const degrees = new Map<string, number>();
 
     // Initialize
-    network.nodes.forEach(node => degrees.set(node.id, 0));
+    network.nodes.forEach((node) => degrees.set(node.id, 0));
 
     // Count edges
-    network.edges.forEach(edge => {
+    network.edges.forEach((edge) => {
       degrees.set(edge.source, (degrees.get(edge.source) || 0) + 1);
       degrees.set(edge.target, (degrees.get(edge.target) || 0) + 1);
     });
@@ -93,17 +91,12 @@ export class NetworkAnalyzer {
   /**
    * Calculate clustering coefficient
    */
-  private calculateClustering(network: {
-    nodes: NetworkNode[];
-    edges: NetworkEdge[];
-  }): number {
+  private calculateClustering(network: { nodes: NetworkNode[]; edges: NetworkEdge[] }): number {
     // Simplified clustering calculation
     // In production, would use proper graph algorithms
     const degrees = this.calculateDegrees(network);
     const avgDegree =
-      degrees.size > 0
-        ? Array.from(degrees.values()).reduce((a, b) => a + b, 0) / degrees.size
-        : 0;
+      degrees.size > 0 ? Array.from(degrees.values()).reduce((a, b) => a + b, 0) / degrees.size : 0;
 
     // Approximate clustering based on average degree
     return Math.min(1, avgDegree / network.nodes.length);
@@ -121,9 +114,9 @@ export class NetworkAnalyzer {
     // Simple influence score based on degree and edge weights
     const scores = new Map<string, number>();
 
-    network.nodes.forEach(node => {
+    network.nodes.forEach((node) => {
       const degree = degrees.get(node.id) || 0;
-      const incomingEdges = network.edges.filter(e => e.target === node.id);
+      const incomingEdges = network.edges.filter((e) => e.target === node.id);
       const weightedDegree = incomingEdges.reduce((sum, edge) => sum + (edge.weight || 1), 0);
 
       scores.set(node.id, degree + weightedDegree * 2);
@@ -136,7 +129,7 @@ export class NetworkAnalyzer {
       .map(([nodeId, score], index) => ({
         nodeId,
         score,
-        rank: index + 1
+        rank: index + 1,
       }));
 
     return sorted;
@@ -153,12 +146,12 @@ export class NetworkAnalyzer {
     let communityId = 0;
 
     // Start each node in its own community
-    network.nodes.forEach(node => {
+    network.nodes.forEach((node) => {
       communities.set(`community-${communityId++}`, new Set([node.id]));
     });
 
     // Merge communities based on edges
-    network.edges.forEach(edge => {
+    network.edges.forEach((edge) => {
       const sourceCommunity = this.findCommunity(edge.source, communities);
       const targetCommunity = this.findCommunity(edge.target, communities);
 
@@ -168,10 +161,10 @@ export class NetworkAnalyzer {
         const targetSet = communities.get(targetCommunity)!;
 
         if (sourceSet.size < targetSet.size) {
-          sourceSet.forEach(node => targetSet.add(node));
+          sourceSet.forEach((node) => targetSet.add(node));
           communities.delete(sourceCommunity);
         } else {
-          targetSet.forEach(node => sourceSet.add(node));
+          targetSet.forEach((node) => sourceSet.add(node));
           communities.delete(targetCommunity);
         }
       }
@@ -184,7 +177,7 @@ export class NetworkAnalyzer {
         id: `community-${index}`,
         nodes: nodeArray,
         size: nodeArray.length,
-        density: this.calculateCommunityDensity(nodeArray, network.edges)
+        density: this.calculateCommunityDensity(nodeArray, network.edges),
       };
     });
 
@@ -194,10 +187,7 @@ export class NetworkAnalyzer {
   /**
    * Find which community a node belongs to
    */
-  private findCommunity(
-    nodeId: string,
-    communities: Map<string, Set<string>>
-  ): string | null {
+  private findCommunity(nodeId: string, communities: Map<string, Set<string>>): string | null {
     for (const [communityId, nodes] of communities.entries()) {
       if (nodes.has(nodeId)) {
         return communityId;
@@ -211,7 +201,7 @@ export class NetworkAnalyzer {
    */
   private calculateCommunityDensity(nodeIds: string[], edges: NetworkEdge[]): number {
     const communityEdges = edges.filter(
-      edge => nodeIds.includes(edge.source) && nodeIds.includes(edge.target)
+      (edge) => nodeIds.includes(edge.source) && nodeIds.includes(edge.target)
     );
 
     const n = nodeIds.length;

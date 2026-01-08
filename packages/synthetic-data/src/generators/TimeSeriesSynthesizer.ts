@@ -4,16 +4,16 @@
  */
 
 export interface TimeSeriesConfig {
-  method: 'arima' | 'lstm' | 'gan' | 'vae' | 'statistical';
+  method: "arima" | "lstm" | "gan" | "vae" | "statistical";
   length: number;
-  frequency: 'daily' | 'hourly' | 'minute' | 'second';
+  frequency: "daily" | "hourly" | "minute" | "second";
   seasonality?: {
     enabled: boolean;
     period?: number;
   };
   trend?: {
     enabled: boolean;
-    type?: 'linear' | 'exponential' | 'polynomial';
+    type?: "linear" | "exponential" | "polynomial";
   };
   anomalies?: {
     enabled: boolean;
@@ -59,7 +59,7 @@ export class TimeSeriesSynthesizer {
       trend: decomposition.trend,
       seasonal: decomposition.seasonal,
       residual: decomposition.residual,
-      statistics: this.computeStatistics(timeSeries)
+      statistics: this.computeStatistics(timeSeries),
     };
   }
 
@@ -68,7 +68,7 @@ export class TimeSeriesSynthesizer {
    */
   async generate(): Promise<TimeSeries> {
     const { length, frequency, seasonality, trend, anomalies } = this.config;
-    const numSeries = this.config.multivariate ? (this.config.numSeries || 1) : 1;
+    const numSeries = this.config.multivariate ? this.config.numSeries || 1 : 1;
 
     // Generate timestamps
     const timestamps = this.generateTimestamps(length, frequency);
@@ -81,16 +81,13 @@ export class TimeSeriesSynthesizer {
 
       // Add trend component
       if (trend?.enabled) {
-        const trendComponent = this.generateTrend(length, trend.type || 'linear');
+        const trendComponent = this.generateTrend(length, trend.type || "linear");
         series = series.map((v, idx) => v + trendComponent[idx]);
       }
 
       // Add seasonal component
       if (seasonality?.enabled) {
-        const seasonalComponent = this.generateSeasonality(
-          length,
-          seasonality.period || 24
-        );
+        const seasonalComponent = this.generateSeasonality(length, seasonality.period || 24);
         series = series.map((v, idx) => v + seasonalComponent[idx]);
       }
 
@@ -113,7 +110,7 @@ export class TimeSeriesSynthesizer {
     // Transpose for proper shape
     const transposed: number[][] = [];
     for (let i = 0; i < length; i++) {
-      transposed.push(values.map(series => series[i]));
+      transposed.push(values.map((series) => series[i]));
     }
 
     return {
@@ -124,8 +121,8 @@ export class TimeSeriesSynthesizer {
         frequency,
         hasSeasonality: seasonality?.enabled || false,
         hasTrend: trend?.enabled || false,
-        hasAnomalies: anomalies?.enabled || false
-      }
+        hasAnomalies: anomalies?.enabled || false,
+      },
     };
   }
 
@@ -140,7 +137,7 @@ export class TimeSeriesSynthesizer {
 
     return {
       ...baseSeries,
-      values: correlatedValues
+      values: correlatedValues,
     };
   }
 
@@ -148,7 +145,7 @@ export class TimeSeriesSynthesizer {
 
   private decomposeTimeSeries(timeSeries: TimeSeries): any {
     // STL decomposition (Seasonal and Trend decomposition using Loess)
-    const values = timeSeries.values.map(row => row[0]); // First series
+    const values = timeSeries.values.map((row) => row[0]); // First series
 
     const trend = this.extractTrend(values);
     const seasonal = this.extractSeasonality(values, trend);
@@ -206,11 +203,11 @@ export class TimeSeriesSynthesizer {
       counts[idx]++;
     });
 
-    return pattern.map((sum, i) => counts[i] > 0 ? sum / counts[i] : 0);
+    return pattern.map((sum, i) => (counts[i] > 0 ? sum / counts[i] : 0));
   }
 
   private computeStatistics(timeSeries: TimeSeries): any {
-    const values = timeSeries.values.map(row => row[0]);
+    const values = timeSeries.values.map((row) => row[0]);
     const mean = values.reduce((a, b) => a + b, 0) / values.length;
     const variance = values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / values.length;
 
@@ -218,7 +215,7 @@ export class TimeSeriesSynthesizer {
       mean,
       variance,
       min: Math.min(...values),
-      max: Math.max(...values)
+      max: Math.max(...values),
     };
   }
 
@@ -228,16 +225,16 @@ export class TimeSeriesSynthesizer {
     let interval = 3600000; // 1 hour default
 
     switch (frequency) {
-      case 'minute':
+      case "minute":
         interval = 60000;
         break;
-      case 'hourly':
+      case "hourly":
         interval = 3600000;
         break;
-      case 'daily':
+      case "daily":
         interval = 86400000;
         break;
-      case 'second':
+      case "second":
         interval = 1000;
         break;
     }
@@ -257,13 +254,13 @@ export class TimeSeriesSynthesizer {
       const t = i / length;
 
       switch (type) {
-        case 'linear':
+        case "linear":
           value = t * 10;
           break;
-        case 'exponential':
+        case "exponential":
           value = Math.exp(t * 2) - 1;
           break;
-        case 'polynomial':
+        case "polynomial":
           value = Math.pow(t, 2) * 10;
           break;
       }
@@ -280,9 +277,9 @@ export class TimeSeriesSynthesizer {
     for (let i = 0; i < length; i++) {
       // Combine multiple harmonics
       const value =
-        5 * Math.sin(2 * Math.PI * i / period) +
-        2 * Math.sin(4 * Math.PI * i / period) +
-        1 * Math.sin(6 * Math.PI * i / period);
+        5 * Math.sin((2 * Math.PI * i) / period) +
+        2 * Math.sin((4 * Math.PI * i) / period) +
+        1 * Math.sin((6 * Math.PI * i) / period);
       seasonal.push(value);
     }
 
@@ -303,11 +300,7 @@ export class TimeSeriesSynthesizer {
     return noise;
   }
 
-  private injectAnomalies(
-    series: number[],
-    frequency: number,
-    magnitude: number
-  ): number[] {
+  private injectAnomalies(series: number[], frequency: number, magnitude: number): number[] {
     const anomalous = [...series];
     const numAnomalies = Math.floor(series.length * frequency);
 
@@ -318,11 +311,9 @@ export class TimeSeriesSynthesizer {
     }
 
     // Inject anomalies
-    positions.forEach(pos => {
+    positions.forEach((pos) => {
       const direction = Math.random() > 0.5 ? 1 : -1;
-      const std = Math.sqrt(
-        series.reduce((sum, v) => sum + Math.pow(v, 2), 0) / series.length
-      );
+      const std = Math.sqrt(series.reduce((sum, v) => sum + Math.pow(v, 2), 0) / series.length);
       anomalous[pos] += direction * magnitude * std;
     });
 

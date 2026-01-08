@@ -36,32 +36,32 @@ export interface VisualizationOutput {
   title: string;
   description: string;
   data: any;
-  format: 'svg' | 'png' | 'json' | 'html';
+  format: "svg" | "png" | "json" | "html";
   interactivity: boolean;
 }
 
 export enum VisualizationType {
-  HEATMAP = 'heatmap',
-  ATTENTION_MAP = 'attention_map',
-  SALIENCY_MAP = 'saliency_map',
-  GRADIENT_CAM = 'gradient_cam',
-  LIME_EXPLANATION = 'lime',
-  SHAP_VALUES = 'shap',
-  DECISION_TREE = 'decision_tree',
-  FEATURE_IMPORTANCE_CHART = 'feature_importance',
-  TEMPORAL_ANALYSIS = 'temporal',
-  FREQUENCY_SPECTRUM = 'frequency_spectrum',
-  DIFFERENCE_MAP = 'difference_map',
-  ARTIFACT_OVERLAY = 'artifact_overlay',
-  CONFIDENCE_DISTRIBUTION = 'confidence_distribution',
-  EMBEDDING_PROJECTION = 'embedding_projection',
+  HEATMAP = "heatmap",
+  ATTENTION_MAP = "attention_map",
+  SALIENCY_MAP = "saliency_map",
+  GRADIENT_CAM = "gradient_cam",
+  LIME_EXPLANATION = "lime",
+  SHAP_VALUES = "shap",
+  DECISION_TREE = "decision_tree",
+  FEATURE_IMPORTANCE_CHART = "feature_importance",
+  TEMPORAL_ANALYSIS = "temporal",
+  FREQUENCY_SPECTRUM = "frequency_spectrum",
+  DIFFERENCE_MAP = "difference_map",
+  ARTIFACT_OVERLAY = "artifact_overlay",
+  CONFIDENCE_DISTRIBUTION = "confidence_distribution",
+  EMBEDDING_PROJECTION = "embedding_projection",
 }
 
 export interface FeatureContribution {
   featureName: string;
   featureValue: number | string;
   contribution: number;
-  direction: 'positive' | 'negative' | 'neutral';
+  direction: "positive" | "negative" | "neutral";
   importance: number;
   explanation: string;
 }
@@ -114,11 +114,11 @@ export class ExplainableAI {
   }
 
   private initializeModels(): void {
-    this.modelRegistry.set('deepfake_detector', {
-      name: 'DeepfakeDetector',
-      version: '3.0',
-      inputType: 'image',
-      explainability: ['grad_cam', 'lime', 'shap'],
+    this.modelRegistry.set("deepfake_detector", {
+      name: "DeepfakeDetector",
+      version: "3.0",
+      inputType: "image",
+      explainability: ["grad_cam", "lime", "shap"],
     });
   }
 
@@ -126,7 +126,7 @@ export class ExplainableAI {
    * Generate comprehensive explanation for detection result
    */
   async explain(detection: {
-    type: 'image' | 'audio' | 'video' | 'text';
+    type: "image" | "audio" | "video" | "text";
     input: Buffer | string;
     prediction: boolean;
     confidence: number;
@@ -155,10 +155,10 @@ export class ExplainableAI {
     // Create audit entry
     const auditEntry: AuditEntry = {
       timestamp: new Date(),
-      operation: 'explain_detection',
+      operation: "explain_detection",
       input: detection.type,
-      output: detection.prediction ? 'deceptive' : 'authentic',
-      modelVersion: '3.0',
+      output: detection.prediction ? "deceptive" : "authentic",
+      modelVersion: "3.0",
       reproducible: true,
     };
 
@@ -184,7 +184,7 @@ export class ExplainableAI {
     // Analyze key factors
     if (detection.confidence > 0.8) {
       keyFindings.push({
-        description: 'High confidence detection of manipulation',
+        description: "High confidence detection of manipulation",
         importance: 0.9,
         evidence: `Confidence score: ${(detection.confidence * 100).toFixed(1)}%`,
       });
@@ -197,13 +197,14 @@ export class ExplainableAI {
 
     const technicalDetails = this.generateTechnicalDetails(detection);
 
-    const confidenceDescription = detection.confidence > 0.9
-      ? 'Very high confidence - strong evidence of manipulation'
-      : detection.confidence > 0.7
-        ? 'High confidence - multiple indicators detected'
-        : detection.confidence > 0.5
-          ? 'Moderate confidence - some indicators present'
-          : 'Low confidence - few or weak indicators';
+    const confidenceDescription =
+      detection.confidence > 0.9
+        ? "Very high confidence - strong evidence of manipulation"
+        : detection.confidence > 0.7
+          ? "High confidence - multiple indicators detected"
+          : detection.confidence > 0.5
+            ? "Moderate confidence - some indicators present"
+            : "Low confidence - few or weak indicators";
 
     return {
       summary,
@@ -211,19 +212,19 @@ export class ExplainableAI {
       technicalDetails,
       confidence: confidenceDescription,
       limitations: [
-        'Detection accuracy depends on input quality',
-        'Novel manipulation techniques may evade detection',
-        'Results should be verified by human experts for critical decisions',
+        "Detection accuracy depends on input quality",
+        "Novel manipulation techniques may evade detection",
+        "Results should be verified by human experts for critical decisions",
       ],
       recommendations: detection.prediction
         ? [
-            'Verify content with original source',
-            'Check for additional manipulation indicators',
-            'Consider forensic analysis for confirmation',
+            "Verify content with original source",
+            "Check for additional manipulation indicators",
+            "Consider forensic analysis for confirmation",
           ]
         : [
-            'Monitor for updates to detection models',
-            'Perform periodic re-analysis if content is critical',
+            "Monitor for updates to detection models",
+            "Perform periodic re-analysis if content is critical",
           ],
     };
   }
@@ -232,14 +233,14 @@ export class ExplainableAI {
     const details: string[] = [];
 
     details.push(`Input Type: ${detection.type}`);
-    details.push(`Prediction: ${detection.prediction ? 'Manipulated' : 'Authentic'}`);
+    details.push(`Prediction: ${detection.prediction ? "Manipulated" : "Authentic"}`);
     details.push(`Confidence: ${(detection.confidence * 100).toFixed(2)}%`);
 
     if (detection.rawOutput) {
       details.push(`Raw Score: ${JSON.stringify(detection.rawOutput).slice(0, 100)}...`);
     }
 
-    return details.join('\n');
+    return details.join("\n");
   }
 
   /**
@@ -249,68 +250,68 @@ export class ExplainableAI {
     const visualizations: VisualizationOutput[] = [];
 
     switch (detection.type) {
-      case 'image':
+      case "image":
         // Gradient-CAM visualization
         visualizations.push({
           type: VisualizationType.GRADIENT_CAM,
-          title: 'Region Attention Map',
-          description: 'Highlights regions that contributed most to the detection decision',
+          title: "Region Attention Map",
+          description: "Highlights regions that contributed most to the detection decision",
           data: await this.generateGradCAM(detection.input),
-          format: 'png',
+          format: "png",
           interactivity: false,
         });
 
         // Saliency map
         visualizations.push({
           type: VisualizationType.SALIENCY_MAP,
-          title: 'Saliency Analysis',
-          description: 'Shows pixel-level importance for the detection',
+          title: "Saliency Analysis",
+          description: "Shows pixel-level importance for the detection",
           data: await this.generateSaliencyMap(detection.input),
-          format: 'png',
+          format: "png",
           interactivity: false,
         });
 
         // Artifact overlay
         visualizations.push({
           type: VisualizationType.ARTIFACT_OVERLAY,
-          title: 'Detected Artifacts',
-          description: 'Highlights detected manipulation artifacts',
+          title: "Detected Artifacts",
+          description: "Highlights detected manipulation artifacts",
           data: await this.generateArtifactOverlay(detection.input),
-          format: 'png',
+          format: "png",
           interactivity: true,
         });
 
         // Frequency spectrum
         visualizations.push({
           type: VisualizationType.FREQUENCY_SPECTRUM,
-          title: 'Frequency Domain Analysis',
-          description: 'Shows frequency components that indicate manipulation',
+          title: "Frequency Domain Analysis",
+          description: "Shows frequency components that indicate manipulation",
           data: await this.generateFrequencySpectrum(detection.input),
-          format: 'svg',
+          format: "svg",
           interactivity: true,
         });
         break;
 
-      case 'audio':
+      case "audio":
         // Spectrogram with annotations
         visualizations.push({
           type: VisualizationType.TEMPORAL_ANALYSIS,
-          title: 'Audio Spectrogram Analysis',
-          description: 'Time-frequency representation with anomaly markers',
+          title: "Audio Spectrogram Analysis",
+          description: "Time-frequency representation with anomaly markers",
           data: await this.generateAudioSpectrogram(detection.input),
-          format: 'svg',
+          format: "svg",
           interactivity: true,
         });
         break;
 
-      case 'text':
+      case "text":
         // Token importance
         visualizations.push({
           type: VisualizationType.ATTENTION_MAP,
-          title: 'Token Importance',
-          description: 'Highlights words that contributed to detection',
+          title: "Token Importance",
+          description: "Highlights words that contributed to detection",
           data: await this.generateTokenImportance(detection.input),
-          format: 'html',
+          format: "html",
           interactivity: true,
         });
         break;
@@ -319,20 +320,20 @@ export class ExplainableAI {
     // Feature importance chart (common to all)
     visualizations.push({
       type: VisualizationType.FEATURE_IMPORTANCE_CHART,
-      title: 'Feature Importance',
-      description: 'Ranking of features by contribution to decision',
+      title: "Feature Importance",
+      description: "Ranking of features by contribution to decision",
       data: await this.generateFeatureImportanceChart(detection),
-      format: 'svg',
+      format: "svg",
       interactivity: true,
     });
 
     // Confidence distribution
     visualizations.push({
       type: VisualizationType.CONFIDENCE_DISTRIBUTION,
-      title: 'Confidence Distribution',
-      description: 'Distribution of model confidence across detection components',
+      title: "Confidence Distribution",
+      description: "Distribution of model confidence across detection components",
       data: await this.generateConfidenceDistribution(detection),
-      format: 'svg',
+      format: "svg",
       interactivity: false,
     });
 
@@ -347,7 +348,7 @@ export class ExplainableAI {
       width: 512,
       height: 512,
       heatmap: new Array(512 * 512).fill(0).map(() => Math.random()),
-      colormap: 'jet',
+      colormap: "jet",
     };
   }
 
@@ -368,8 +369,8 @@ export class ExplainableAI {
 
     return {
       artifacts: [
-        { type: 'boundary_artifact', bbox: { x: 100, y: 100, w: 200, h: 200 }, confidence: 0.85 },
-        { type: 'texture_inconsistency', bbox: { x: 150, y: 120, w: 50, h: 50 }, confidence: 0.72 },
+        { type: "boundary_artifact", bbox: { x: 100, y: 100, w: 200, h: 200 }, confidence: 0.85 },
+        { type: "texture_inconsistency", bbox: { x: 150, y: 120, w: 50, h: 50 }, confidence: 0.72 },
       ],
     };
   }
@@ -394,7 +395,7 @@ export class ExplainableAI {
       timeSteps: 100,
       frequencyBins: 128,
       data: new Array(100 * 128).fill(0).map(() => Math.random()),
-      anomalies: [{ start: 20, end: 30, description: 'Spectral anomaly' }],
+      anomalies: [{ start: 20, end: 30, description: "Spectral anomaly" }],
     };
   }
 
@@ -416,11 +417,11 @@ export class ExplainableAI {
 
     return {
       features: [
-        { name: 'Facial Consistency', importance: 0.85 },
-        { name: 'Temporal Coherence', importance: 0.72 },
-        { name: 'Frequency Artifacts', importance: 0.68 },
-        { name: 'Compression Patterns', importance: 0.55 },
-        { name: 'Lighting Analysis', importance: 0.42 },
+        { name: "Facial Consistency", importance: 0.85 },
+        { name: "Temporal Coherence", importance: 0.72 },
+        { name: "Frequency Artifacts", importance: 0.68 },
+        { name: "Compression Patterns", importance: 0.55 },
+        { name: "Lighting Analysis", importance: 0.42 },
       ],
     };
   }
@@ -430,10 +431,10 @@ export class ExplainableAI {
 
     return {
       distribution: [
-        { component: 'Face Analysis', confidence: 0.88 },
-        { component: 'Voice Analysis', confidence: 0.75 },
-        { component: 'Temporal Analysis', confidence: 0.82 },
-        { component: 'Artifact Detection', confidence: 0.79 },
+        { component: "Face Analysis", confidence: 0.88 },
+        { component: "Voice Analysis", confidence: 0.75 },
+        { component: "Temporal Analysis", confidence: 0.82 },
+        { component: "Artifact Detection", confidence: 0.79 },
       ],
     };
   }
@@ -446,13 +447,13 @@ export class ExplainableAI {
 
     // Generate SHAP-style feature contributions
     const features = [
-      { name: 'facial_boundary_consistency', value: 0.72, baseline: 0.85 },
-      { name: 'temporal_coherence_score', value: 0.65, baseline: 0.80 },
-      { name: 'frequency_artifact_level', value: 0.45, baseline: 0.20 },
-      { name: 'lighting_consistency', value: 0.78, baseline: 0.90 },
-      { name: 'compression_uniformity', value: 0.55, baseline: 0.70 },
-      { name: 'blink_rate_naturalness', value: 0.60, baseline: 0.85 },
-      { name: 'lip_sync_accuracy', value: 0.70, baseline: 0.95 },
+      { name: "facial_boundary_consistency", value: 0.72, baseline: 0.85 },
+      { name: "temporal_coherence_score", value: 0.65, baseline: 0.8 },
+      { name: "frequency_artifact_level", value: 0.45, baseline: 0.2 },
+      { name: "lighting_consistency", value: 0.78, baseline: 0.9 },
+      { name: "compression_uniformity", value: 0.55, baseline: 0.7 },
+      { name: "blink_rate_naturalness", value: 0.6, baseline: 0.85 },
+      { name: "lip_sync_accuracy", value: 0.7, baseline: 0.95 },
     ];
 
     for (const feature of features) {
@@ -460,10 +461,10 @@ export class ExplainableAI {
       const absContribution = Math.abs(contribution);
 
       contributions.push({
-        featureName: feature.name.replace(/_/g, ' '),
+        featureName: feature.name.replace(/_/g, " "),
         featureValue: feature.value.toFixed(2),
         contribution: absContribution,
-        direction: contribution > 0 ? 'positive' : contribution < 0 ? 'negative' : 'neutral',
+        direction: contribution > 0 ? "positive" : contribution < 0 ? "negative" : "neutral",
         importance: absContribution,
         explanation: this.generateFeatureExplanation(feature.name, feature.value, contribution),
       });
@@ -475,11 +476,15 @@ export class ExplainableAI {
     return contributions;
   }
 
-  private generateFeatureExplanation(featureName: string, value: number, contribution: number): string {
-    const direction = contribution > 0 ? 'increases' : 'decreases';
-    const magnitude = Math.abs(contribution) > 0.1 ? 'significantly' : 'slightly';
+  private generateFeatureExplanation(
+    featureName: string,
+    value: number,
+    contribution: number
+  ): string {
+    const direction = contribution > 0 ? "increases" : "decreases";
+    const magnitude = Math.abs(contribution) > 0.1 ? "significantly" : "slightly";
 
-    return `The ${featureName.replace(/_/g, ' ')} (${value.toFixed(2)}) ${magnitude} ${direction} the likelihood of manipulation.`;
+    return `The ${featureName.replace(/_/g, " ")} (${value.toFixed(2)}) ${magnitude} ${direction} the likelihood of manipulation.`;
   }
 
   /**
@@ -489,37 +494,43 @@ export class ExplainableAI {
     // Build tree-like decision path showing reasoning
 
     const rootNode: DecisionPathNode = {
-      nodeId: 'root',
-      condition: 'Start Analysis',
-      outcome: 'Proceed to feature extraction',
+      nodeId: "root",
+      condition: "Start Analysis",
+      outcome: "Proceed to feature extraction",
       confidence: 1.0,
       children: [
         {
-          nodeId: 'face_check',
-          condition: 'Face detected?',
-          outcome: 'Yes - proceed to facial analysis',
+          nodeId: "face_check",
+          condition: "Face detected?",
+          outcome: "Yes - proceed to facial analysis",
           confidence: 0.95,
           children: [
             {
-              nodeId: 'boundary_check',
-              condition: 'Boundary artifacts present?',
-              outcome: detection.prediction ? 'Yes - suspicious artifacts detected' : 'No - boundaries appear natural',
+              nodeId: "boundary_check",
+              condition: "Boundary artifacts present?",
+              outcome: detection.prediction
+                ? "Yes - suspicious artifacts detected"
+                : "No - boundaries appear natural",
               confidence: 0.85,
               children: [],
             },
             {
-              nodeId: 'temporal_check',
-              condition: 'Temporal consistency normal?',
-              outcome: detection.prediction ? 'No - inconsistencies detected' : 'Yes - consistent across frames',
+              nodeId: "temporal_check",
+              condition: "Temporal consistency normal?",
+              outcome: detection.prediction
+                ? "No - inconsistencies detected"
+                : "Yes - consistent across frames",
               confidence: 0.82,
               children: [],
             },
           ],
         },
         {
-          nodeId: 'frequency_check',
-          condition: 'Frequency anomalies detected?',
-          outcome: detection.prediction ? 'Yes - GAN artifacts present' : 'No - natural frequency distribution',
+          nodeId: "frequency_check",
+          condition: "Frequency anomalies detected?",
+          outcome: detection.prediction
+            ? "Yes - GAN artifacts present"
+            : "No - natural frequency distribution",
           confidence: 0.78,
           children: [],
         },
@@ -538,23 +549,23 @@ export class ExplainableAI {
     if (detection.prediction) {
       // What would need to change for authentic classification?
       counterfactuals.push({
-        description: 'Improve facial boundary consistency',
+        description: "Improve facial boundary consistency",
         originalValue: 0.72,
-        counterfactualValue: 0.90,
+        counterfactualValue: 0.9,
         impact: 0.25,
         feasibility: 0.3,
       });
 
       counterfactuals.push({
-        description: 'Reduce frequency artifacts',
+        description: "Reduce frequency artifacts",
         originalValue: 0.45,
         counterfactualValue: 0.15,
-        impact: 0.20,
+        impact: 0.2,
         feasibility: 0.4,
       });
 
       counterfactuals.push({
-        description: 'Improve temporal coherence',
+        description: "Improve temporal coherence",
         originalValue: 0.65,
         counterfactualValue: 0.85,
         impact: 0.15,
@@ -563,10 +574,10 @@ export class ExplainableAI {
     } else {
       // What would need to change for manipulated classification?
       counterfactuals.push({
-        description: 'Degraded facial boundaries',
-        originalValue: 0.90,
-        counterfactualValue: 0.60,
-        impact: 0.30,
+        description: "Degraded facial boundaries",
+        originalValue: 0.9,
+        counterfactualValue: 0.6,
+        impact: 0.3,
         feasibility: 0.8,
       });
     }
@@ -609,7 +620,10 @@ export class ExplainableAI {
   /**
    * Generate LIME explanation
    */
-  async generateLIMEExplanation(input: Buffer | string, prediction: boolean): Promise<{
+  async generateLIMEExplanation(
+    input: Buffer | string,
+    prediction: boolean
+  ): Promise<{
     localInterpretation: Array<{ feature: string; weight: number }>;
     fidelity: number;
   }> {
@@ -617,11 +631,11 @@ export class ExplainableAI {
     // Perturb input and fit linear model to understand local decision boundary
 
     const localInterpretation = [
-      { feature: 'Region 1 (face)', weight: 0.35 },
-      { feature: 'Region 2 (background)', weight: 0.05 },
-      { feature: 'Region 3 (hair)', weight: 0.15 },
-      { feature: 'Texture consistency', weight: 0.25 },
-      { feature: 'Edge sharpness', weight: 0.20 },
+      { feature: "Region 1 (face)", weight: 0.35 },
+      { feature: "Region 2 (background)", weight: 0.05 },
+      { feature: "Region 3 (hair)", weight: 0.15 },
+      { feature: "Texture consistency", weight: 0.25 },
+      { feature: "Edge sharpness", weight: 0.2 },
     ];
 
     return {
@@ -634,7 +648,7 @@ export class ExplainableAI {
    * Generate natural language report
    */
   async generateReport(explanation: ExplainableDetectionResult): Promise<string> {
-    let report = '# Deception Detection Analysis Report\n\n';
+    let report = "# Deception Detection Analysis Report\n\n";
 
     report += `## Summary\n${explanation.explanation.summary}\n\n`;
 
@@ -646,14 +660,15 @@ export class ExplainableAI {
       report += `- **${finding.description}** (Importance: ${(finding.importance * 100).toFixed(0)}%)\n`;
       report += `  - Evidence: ${finding.evidence}\n`;
     }
-    report += '\n';
+    report += "\n";
 
     report += `## Top Contributing Factors\n`;
     for (const feature of explanation.featureImportance.slice(0, 5)) {
-      const arrow = feature.direction === 'positive' ? '↑' : feature.direction === 'negative' ? '↓' : '→';
+      const arrow =
+        feature.direction === "positive" ? "↑" : feature.direction === "negative" ? "↓" : "→";
       report += `- ${arrow} ${feature.featureName}: ${feature.explanation}\n`;
     }
-    report += '\n';
+    report += "\n";
 
     report += `## Uncertainty Analysis\n`;
     report += `- Total Uncertainty: ${(explanation.uncertaintyAnalysis.totalUncertainty * 100).toFixed(1)}%\n`;
@@ -663,7 +678,7 @@ export class ExplainableAI {
     for (const limitation of explanation.explanation.limitations) {
       report += `- ${limitation}\n`;
     }
-    report += '\n';
+    report += "\n";
 
     report += `## Recommendations\n`;
     for (const rec of explanation.explanation.recommendations) {

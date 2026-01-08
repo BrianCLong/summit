@@ -36,13 +36,7 @@ export const Modal: React.FC<ModalProps> = ({
   ...props
 }) => {
   return (
-    <RNModal
-      visible={open}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-      {...props}
-    >
+    <RNModal visible={open} transparent animationType="fade" onRequestClose={onClose} {...props}>
       <TouchableWithoutFeedback onPress={closeOnBackdrop ? onClose : undefined}>
         <View className="flex-1 bg-black/60 justify-center items-center px-4">
           <TouchableWithoutFeedback>
@@ -55,9 +49,7 @@ export const Modal: React.FC<ModalProps> = ({
               {(title || showCloseButton) && (
                 <View className="flex-row items-center justify-between p-4 border-b border-dark-border">
                   <View className="flex-1">
-                    {title && (
-                      <Text className="text-lg font-semibold text-white">{title}</Text>
-                    )}
+                    {title && <Text className="text-lg font-semibold text-white">{title}</Text>}
                     {description && (
                       <Text className="text-sm text-dark-muted mt-1">{description}</Text>
                     )}
@@ -101,12 +93,7 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({
   variant = 'default',
 }) => {
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      showCloseButton={false}
-      closeOnBackdrop={false}
-    >
+    <Modal open={open} onClose={onClose} showCloseButton={false} closeOnBackdrop={false}>
       <View className="items-center">
         <Text className="text-lg font-semibold text-white text-center">{title}</Text>
         {description && (

@@ -42,9 +42,9 @@ Update your main GraphQL server configuration:
 
 ```typescript
 // server/src/graphql/schema.ts
-import { mergeResolvers } from '@graphql-tools/merge';
-import { v040Resolvers } from './resolvers/v040';
-import { existingResolvers } from './resolvers';
+import { mergeResolvers } from "@graphql-tools/merge";
+import { v040Resolvers } from "./resolvers/v040";
+import { existingResolvers } from "./resolvers";
 
 const resolvers = mergeResolvers([existingResolvers, v040Resolvers]);
 
@@ -55,12 +55,12 @@ export { resolvers };
 
 ```typescript
 // server/src/graphql/typeDefs.ts
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync } from "fs";
+import { join } from "path";
 
 const v040Schema = readFileSync(
-  join(__dirname, '../../../graphql/v040/mc-admin.v040.graphql'),
-  'utf8',
+  join(__dirname, "../../../graphql/v040/mc-admin.v040.graphql"),
+  "utf8"
 );
 
 export const typeDefs = [
@@ -168,22 +168,19 @@ SANDBOX_CONFIG = {
 
 ```typescript
 // server/src/services/SandboxService.ts
-import { spawn } from 'child_process';
-import { writeFile } from 'fs/promises';
-import path from 'path';
+import { spawn } from "child_process";
+import { writeFile } from "fs/promises";
+import path from "path";
 
 export class SandboxService {
   async validateProposal(proposal: EvolutionProposal): Promise<SandboxResults> {
-    const sandboxPath = path.join(
-      process.cwd(),
-      'ops/sandbox/evolution_sandbox.py',
-    );
+    const sandboxPath = path.join(process.cwd(), "ops/sandbox/evolution_sandbox.py");
     const inputFile = `/tmp/proposal-${proposal.id}.json`;
 
     await writeFile(inputFile, JSON.stringify(proposal));
 
     return new Promise((resolve, reject) => {
-      const child = spawn('python3', [sandboxPath, inputFile]);
+      const child = spawn("python3", [sandboxPath, inputFile]);
       // Handle execution and response
     });
   }
@@ -212,31 +209,31 @@ python3 scripts/import-grafana-dashboard.py \
 ```yaml
 # monitoring/alertmanager/v040-routes.yml
 route:
-  group_by: ['alertname', 'version']
+  group_by: ["alertname", "version"]
   group_wait: 10s
   group_interval: 10s
   repeat_interval: 1h
-  receiver: 'v040-alerts'
+  receiver: "v040-alerts"
   routes:
     - match:
         version: v0.4.0
         severity: critical
-      receiver: 'v040-critical'
+      receiver: "v040-critical"
       group_wait: 0s
       repeat_interval: 5m
 
 receivers:
-  - name: 'v040-alerts'
+  - name: "v040-alerts"
     slack_configs:
-      - api_url: '${SLACK_WEBHOOK_URL}'
-        channel: '#mc-platform-v040'
-        title: 'MC Platform v0.4.0 Alert'
-        text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+      - api_url: "${SLACK_WEBHOOK_URL}"
+        channel: "#mc-platform-v040"
+        title: "MC Platform v0.4.0 Alert"
+        text: "{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}"
 
-  - name: 'v040-critical'
+  - name: "v040-critical"
     pagerduty_configs:
-      - service_key: '${PAGERDUTY_SERVICE_KEY}'
-        description: 'CRITICAL: {{ .GroupLabels.alertname }}'
+      - service_key: "${PAGERDUTY_SERVICE_KEY}"
+        description: "CRITICAL: {{ .GroupLabels.alertname }}"
 ```
 
 ### 5. Deployment

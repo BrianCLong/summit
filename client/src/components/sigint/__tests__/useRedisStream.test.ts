@@ -1,12 +1,12 @@
 /**
  * @jest-environment jsdom
  */
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { io } from 'socket.io-client';
-import { useRedisStream } from '../hooks/useRedisStream';
+import { renderHook, act, waitFor } from "@testing-library/react";
+import { io } from "socket.io-client";
+import { useRedisStream } from "../hooks/useRedisStream";
 
 // Mock socket.io-client
-jest.mock('socket.io-client');
+jest.mock("socket.io-client");
 
 const mockSocket = {
   on: jest.fn(),
@@ -16,7 +16,7 @@ const mockSocket = {
 
 (io as jest.Mock).mockReturnValue(mockSocket);
 
-describe('useRedisStream', () => {
+describe("useRedisStream", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
@@ -26,10 +26,8 @@ describe('useRedisStream', () => {
     jest.useRealTimers();
   });
 
-  it('initializes with disconnected state', () => {
-    const { result } = renderHook(() =>
-      useRedisStream({ streamKey: 'test:stream' })
-    );
+  it("initializes with disconnected state", () => {
+    const { result } = renderHook(() => useRedisStream({ streamKey: "test:stream" }));
 
     expect(result.current.isConnected).toBe(false);
     expect(result.current.samples).toEqual([]);
@@ -37,37 +35,33 @@ describe('useRedisStream', () => {
     expect(result.current.error).toBeNull();
   });
 
-  it('creates socket connection with correct options', () => {
-    renderHook(() => useRedisStream({ streamKey: 'test:stream' }));
+  it("creates socket connection with correct options", () => {
+    renderHook(() => useRedisStream({ streamKey: "test:stream" }));
 
     expect(io).toHaveBeenCalledWith({
-      path: '/api/sigint/stream',
-      transports: ['websocket'],
+      path: "/api/sigint/stream",
+      transports: ["websocket"],
       reconnection: true,
       reconnectionDelay: 3000,
     });
   });
 
-  it('sets up event listeners on mount', () => {
-    renderHook(() => useRedisStream({ streamKey: 'test:stream' }));
+  it("sets up event listeners on mount", () => {
+    renderHook(() => useRedisStream({ streamKey: "test:stream" }));
 
-    expect(mockSocket.on).toHaveBeenCalledWith('connect', expect.any(Function));
-    expect(mockSocket.on).toHaveBeenCalledWith('disconnect', expect.any(Function));
-    expect(mockSocket.on).toHaveBeenCalledWith('error', expect.any(Function));
-    expect(mockSocket.on).toHaveBeenCalledWith('sigint:sample', expect.any(Function));
-    expect(mockSocket.on).toHaveBeenCalledWith('sigint:stream', expect.any(Function));
-    expect(mockSocket.on).toHaveBeenCalledWith('sigint:streams', expect.any(Function));
+    expect(mockSocket.on).toHaveBeenCalledWith("connect", expect.any(Function));
+    expect(mockSocket.on).toHaveBeenCalledWith("disconnect", expect.any(Function));
+    expect(mockSocket.on).toHaveBeenCalledWith("error", expect.any(Function));
+    expect(mockSocket.on).toHaveBeenCalledWith("sigint:sample", expect.any(Function));
+    expect(mockSocket.on).toHaveBeenCalledWith("sigint:stream", expect.any(Function));
+    expect(mockSocket.on).toHaveBeenCalledWith("sigint:streams", expect.any(Function));
   });
 
-  it('updates isConnected on connect event', () => {
-    const { result } = renderHook(() =>
-      useRedisStream({ streamKey: 'test:stream' })
-    );
+  it("updates isConnected on connect event", () => {
+    const { result } = renderHook(() => useRedisStream({ streamKey: "test:stream" }));
 
     // Simulate connect event
-    const connectHandler = mockSocket.on.mock.calls.find(
-      ([event]) => event === 'connect'
-    )?.[1];
+    const connectHandler = mockSocket.on.mock.calls.find(([event]) => event === "connect")?.[1];
 
     act(() => {
       connectHandler?.();
@@ -76,38 +70,32 @@ describe('useRedisStream', () => {
     expect(result.current.isConnected).toBe(true);
   });
 
-  it('emits join on connect', () => {
-    renderHook(() => useRedisStream({ streamKey: 'test:stream' }));
+  it("emits join on connect", () => {
+    renderHook(() => useRedisStream({ streamKey: "test:stream" }));
 
-    const connectHandler = mockSocket.on.mock.calls.find(
-      ([event]) => event === 'connect'
-    )?.[1];
+    const connectHandler = mockSocket.on.mock.calls.find(([event]) => event === "connect")?.[1];
 
     act(() => {
       connectHandler?.();
     });
 
-    expect(mockSocket.emit).toHaveBeenCalledWith('sigint:join', {
-      streamKey: 'test:stream',
+    expect(mockSocket.emit).toHaveBeenCalledWith("sigint:join", {
+      streamKey: "test:stream",
     });
   });
 
-  it('updates isConnected on disconnect event', () => {
-    const { result } = renderHook(() =>
-      useRedisStream({ streamKey: 'test:stream' })
-    );
+  it("updates isConnected on disconnect event", () => {
+    const { result } = renderHook(() => useRedisStream({ streamKey: "test:stream" }));
 
     // Connect first
-    const connectHandler = mockSocket.on.mock.calls.find(
-      ([event]) => event === 'connect'
-    )?.[1];
+    const connectHandler = mockSocket.on.mock.calls.find(([event]) => event === "connect")?.[1];
     act(() => {
       connectHandler?.();
     });
 
     // Then disconnect
     const disconnectHandler = mockSocket.on.mock.calls.find(
-      ([event]) => event === 'disconnect'
+      ([event]) => event === "disconnect"
     )?.[1];
     act(() => {
       disconnectHandler?.();
@@ -116,29 +104,25 @@ describe('useRedisStream', () => {
     expect(result.current.isConnected).toBe(false);
   });
 
-  it('handles error events', () => {
-    const { result } = renderHook(() =>
-      useRedisStream({ streamKey: 'test:stream' })
-    );
+  it("handles error events", () => {
+    const { result } = renderHook(() => useRedisStream({ streamKey: "test:stream" }));
 
-    const errorHandler = mockSocket.on.mock.calls.find(
-      ([event]) => event === 'error'
-    )?.[1];
+    const errorHandler = mockSocket.on.mock.calls.find(([event]) => event === "error")?.[1];
 
     act(() => {
-      errorHandler?.(new Error('Connection failed'));
+      errorHandler?.(new Error("Connection failed"));
     });
 
-    expect(result.current.error).toBe('Connection failed');
+    expect(result.current.error).toBe("Connection failed");
   });
 
-  it('processes incoming samples', async () => {
+  it("processes incoming samples", async () => {
     const { result } = renderHook(() =>
-      useRedisStream({ streamKey: 'test:stream', maxLatency: 10000 })
+      useRedisStream({ streamKey: "test:stream", maxLatency: 10000 })
     );
 
     const sampleHandler = mockSocket.on.mock.calls.find(
-      ([event]) => event === 'sigint:sample'
+      ([event]) => event === "sigint:sample"
     )?.[1];
 
     const sample = {
@@ -161,13 +145,13 @@ describe('useRedisStream', () => {
     expect(result.current.samples.length).toBeGreaterThan(0);
   });
 
-  it('drops samples with high latency', () => {
+  it("drops samples with high latency", () => {
     const { result } = renderHook(() =>
-      useRedisStream({ streamKey: 'test:stream', maxLatency: 100 })
+      useRedisStream({ streamKey: "test:stream", maxLatency: 100 })
     );
 
     const sampleHandler = mockSocket.on.mock.calls.find(
-      ([event]) => event === 'sigint:sample'
+      ([event]) => event === "sigint:sample"
     )?.[1];
 
     const oldSample = {
@@ -189,25 +173,23 @@ describe('useRedisStream', () => {
     expect(result.current.samples.length).toBe(0);
   });
 
-  it('handles stream list updates', () => {
-    const { result } = renderHook(() =>
-      useRedisStream({ streamKey: 'test:stream' })
-    );
+  it("handles stream list updates", () => {
+    const { result } = renderHook(() => useRedisStream({ streamKey: "test:stream" }));
 
     const streamsHandler = mockSocket.on.mock.calls.find(
-      ([event]) => event === 'sigint:streams'
+      ([event]) => event === "sigint:streams"
     )?.[1];
 
     const streams = [
       {
-        id: 'stream-1',
-        name: 'Test Stream',
-        band: 'VHF',
+        id: "stream-1",
+        name: "Test Stream",
+        band: "VHF",
         centerFrequency: 150e6,
         bandwidth: 25000,
         sampleRate: 48000,
-        modulation: 'FM',
-        confidence: 'HIGH',
+        modulation: "FM",
+        confidence: "HIGH",
         samples: [],
         active: true,
       },
@@ -220,64 +202,52 @@ describe('useRedisStream', () => {
     expect(result.current.streams).toEqual(streams);
   });
 
-  it('provides subscribe function', () => {
-    const { result } = renderHook(() =>
-      useRedisStream({ streamKey: 'test:stream' })
-    );
+  it("provides subscribe function", () => {
+    const { result } = renderHook(() => useRedisStream({ streamKey: "test:stream" }));
 
     // Connect first
-    const connectHandler = mockSocket.on.mock.calls.find(
-      ([event]) => event === 'connect'
-    )?.[1];
+    const connectHandler = mockSocket.on.mock.calls.find(([event]) => event === "connect")?.[1];
     act(() => {
       connectHandler?.();
     });
 
     act(() => {
-      result.current.subscribe('stream-123');
+      result.current.subscribe("stream-123");
     });
 
-    expect(mockSocket.emit).toHaveBeenCalledWith('sigint:subscribe', {
-      streamId: 'stream-123',
+    expect(mockSocket.emit).toHaveBeenCalledWith("sigint:subscribe", {
+      streamId: "stream-123",
     });
   });
 
-  it('provides unsubscribe function', () => {
-    const { result } = renderHook(() =>
-      useRedisStream({ streamKey: 'test:stream' })
-    );
+  it("provides unsubscribe function", () => {
+    const { result } = renderHook(() => useRedisStream({ streamKey: "test:stream" }));
 
     // Connect first
-    const connectHandler = mockSocket.on.mock.calls.find(
-      ([event]) => event === 'connect'
-    )?.[1];
+    const connectHandler = mockSocket.on.mock.calls.find(([event]) => event === "connect")?.[1];
     act(() => {
       connectHandler?.();
     });
 
     // Subscribe first
     act(() => {
-      result.current.subscribe('stream-123');
+      result.current.subscribe("stream-123");
     });
 
     // Then unsubscribe
     act(() => {
-      result.current.unsubscribe('stream-123');
+      result.current.unsubscribe("stream-123");
     });
 
-    expect(mockSocket.emit).toHaveBeenCalledWith('sigint:unsubscribe', {
-      streamId: 'stream-123',
+    expect(mockSocket.emit).toHaveBeenCalledWith("sigint:unsubscribe", {
+      streamId: "stream-123",
     });
   });
 
-  it('re-subscribes on reconnect', () => {
-    const { result } = renderHook(() =>
-      useRedisStream({ streamKey: 'test:stream' })
-    );
+  it("re-subscribes on reconnect", () => {
+    const { result } = renderHook(() => useRedisStream({ streamKey: "test:stream" }));
 
-    const connectHandler = mockSocket.on.mock.calls.find(
-      ([event]) => event === 'connect'
-    )?.[1];
+    const connectHandler = mockSocket.on.mock.calls.find(([event]) => event === "connect")?.[1];
 
     // First connect
     act(() => {
@@ -286,7 +256,7 @@ describe('useRedisStream', () => {
 
     // Subscribe to a stream
     act(() => {
-      result.current.subscribe('stream-123');
+      result.current.subscribe("stream-123");
     });
 
     // Clear emit calls
@@ -298,28 +268,26 @@ describe('useRedisStream', () => {
     });
 
     // Should re-subscribe
-    expect(mockSocket.emit).toHaveBeenCalledWith('sigint:subscribe', {
-      streamId: 'stream-123',
+    expect(mockSocket.emit).toHaveBeenCalledWith("sigint:subscribe", {
+      streamId: "stream-123",
     });
   });
 
-  it('disconnects socket on unmount', () => {
-    const { unmount } = renderHook(() =>
-      useRedisStream({ streamKey: 'test:stream' })
-    );
+  it("disconnects socket on unmount", () => {
+    const { unmount } = renderHook(() => useRedisStream({ streamKey: "test:stream" }));
 
     unmount();
 
     expect(mockSocket.disconnect).toHaveBeenCalled();
   });
 
-  it('tracks performance metrics', async () => {
+  it("tracks performance metrics", async () => {
     const { result } = renderHook(() =>
-      useRedisStream({ streamKey: 'test:stream', maxLatency: 10000 })
+      useRedisStream({ streamKey: "test:stream", maxLatency: 10000 })
     );
 
     const sampleHandler = mockSocket.on.mock.calls.find(
-      ([event]) => event === 'sigint:sample'
+      ([event]) => event === "sigint:sample"
     )?.[1];
 
     // Send several samples
@@ -344,13 +312,13 @@ describe('useRedisStream', () => {
     expect(result.current.metrics.bufferUtilization).toBeGreaterThan(0);
   });
 
-  it('uses custom buffer size', () => {
+  it("uses custom buffer size", () => {
     const { result } = renderHook(() =>
-      useRedisStream({ streamKey: 'test:stream', bufferSize: 512, maxLatency: 10000 })
+      useRedisStream({ streamKey: "test:stream", bufferSize: 512, maxLatency: 10000 })
     );
 
     const sampleHandler = mockSocket.on.mock.calls.find(
-      ([event]) => event === 'sigint:sample'
+      ([event]) => event === "sigint:sample"
     )?.[1];
 
     // Send more samples than buffer size

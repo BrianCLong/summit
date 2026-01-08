@@ -5,12 +5,7 @@ import { gql } from '@apollo/client';
 // ============================================
 
 export const GET_ENTITIES = gql`
-  query GetEntities(
-    $filter: EntityFilter
-    $search: String
-    $first: Int
-    $after: String
-  ) {
+  query GetEntities($filter: EntityFilter, $search: String, $first: Int, $after: String) {
     entities(filter: $filter, search: $search, first: $first, after: $after) {
       edges {
         node {
@@ -107,11 +102,7 @@ export const UPDATE_ENTITY = gql`
 // ============================================
 
 export const GET_INVESTIGATIONS = gql`
-  query GetInvestigations(
-    $filter: InvestigationFilter
-    $first: Int
-    $after: String
-  ) {
+  query GetInvestigations($filter: InvestigationFilter, $first: Int, $after: String) {
     investigations(filter: $filter, first: $first, after: $after) {
       edges {
         node {
@@ -180,12 +171,7 @@ export const GET_INVESTIGATION = gql`
 // ============================================
 
 export const GET_ALERTS = gql`
-  query GetAlerts(
-    $filter: AlertFilter
-    $priority: Priority
-    $first: Int
-    $after: String
-  ) {
+  query GetAlerts($filter: AlertFilter, $priority: Priority, $first: Int, $after: String) {
     alerts(filter: $filter, priority: $priority, first: $first, after: $after) {
       edges {
         node {
@@ -241,11 +227,7 @@ export const MARK_ALERT_READ = gql`
 // ============================================
 
 export const GET_GEOINT_FEATURES = gql`
-  query GetGEOINTFeatures(
-    $bounds: BoundsInput
-    $filter: GEOINTFilter
-    $first: Int
-  ) {
+  query GetGEOINTFeatures($bounds: BoundsInput, $filter: GEOINTFilter, $first: Int) {
     geointFeatures(bounds: $bounds, filter: $filter, first: $first) {
       id
       type

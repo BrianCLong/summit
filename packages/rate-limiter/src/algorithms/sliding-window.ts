@@ -5,7 +5,7 @@
  * Copyright (c) 2025 IntelGraph
  */
 
-import type { IRateLimitStore, RateLimitState } from '../types.js';
+import type { IRateLimitStore, RateLimitState } from "../types.js";
 
 export class SlidingWindowLimiter {
   private store: IRateLimitStore;
@@ -17,11 +17,7 @@ export class SlidingWindowLimiter {
   /**
    * Check and consume a request using sliding window algorithm
    */
-  async consume(
-    key: string,
-    max: number,
-    windowMs: number,
-  ): Promise<RateLimitState> {
+  async consume(key: string, max: number, windowMs: number): Promise<RateLimitState> {
     // Increment request count and get current state
     const state = await this.store.increment(key, windowMs);
 

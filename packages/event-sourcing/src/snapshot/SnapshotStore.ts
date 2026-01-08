@@ -4,9 +4,9 @@
  * Store and retrieve aggregate snapshots to optimize loading
  */
 
-import { Pool } from 'pg';
-import pino from 'pino';
-import type { Snapshot, EventStoreConfig } from '../store/types.js';
+import { Pool } from "pg";
+import pino from "pino";
+import type { Snapshot, EventStoreConfig } from "../store/types.js";
 
 export class SnapshotStore {
   private pool: Pool;
@@ -14,10 +14,10 @@ export class SnapshotStore {
   private schema: string;
 
   constructor(config: EventStoreConfig) {
-    this.schema = config.schema || 'public';
-    this.logger = pino({ name: 'SnapshotStore' });
+    this.schema = config.schema || "public";
+    this.logger = pino({ name: "SnapshotStore" });
     this.pool = new Pool({
-      connectionString: config.connectionString
+      connectionString: config.connectionString,
     });
   }
 
@@ -36,22 +36,20 @@ export class SnapshotStore {
         snapshot.aggregateType,
         snapshot.version,
         snapshot.timestamp,
-        JSON.stringify(snapshot.state)
+        JSON.stringify(snapshot.state),
       ]
     );
 
     this.logger.debug(
       { aggregateId: snapshot.aggregateId, version: snapshot.version },
-      'Snapshot saved'
+      "Snapshot saved"
     );
   }
 
   /**
    * Get latest snapshot for an aggregate
    */
-  async getLatestSnapshot<T = any>(
-    aggregateId: string
-  ): Promise<Snapshot<T> | null> {
+  async getLatestSnapshot<T = any>(aggregateId: string): Promise<Snapshot<T> | null> {
     const result = await this.pool.query(
       `SELECT aggregate_id, aggregate_type, version, timestamp, state
        FROM ${this.schema}.snapshots
@@ -71,17 +69,14 @@ export class SnapshotStore {
       aggregateType: row.aggregate_type,
       version: row.version,
       timestamp: row.timestamp,
-      state: row.state
+      state: row.state,
     };
   }
 
   /**
    * Get snapshot at specific version
    */
-  async getSnapshot<T = any>(
-    aggregateId: string,
-    version: number
-  ): Promise<Snapshot<T> | null> {
+  async getSnapshot<T = any>(aggregateId: string, version: number): Promise<Snapshot<T> | null> {
     const result = await this.pool.query(
       `SELECT aggregate_id, aggregate_type, version, timestamp, state
        FROM ${this.schema}.snapshots
@@ -101,7 +96,7 @@ export class SnapshotStore {
       aggregateType: row.aggregate_type,
       version: row.version,
       timestamp: row.timestamp,
-      state: row.state
+      state: row.state,
     };
   }
 
@@ -109,19 +104,19 @@ export class SnapshotStore {
    * Delete snapshots for an aggregate
    */
   async deleteSnapshots(aggregateId: string): Promise<void> {
-    await this.pool.query(
-      `DELETE FROM ${this.schema}.snapshots WHERE aggregate_id = $1`,
-      [aggregateId]
-    );
+    await this.pool.query(`DELETE FROM ${this.schema}.snapshots WHERE aggregate_id = $1`, [
+      aggregateId,
+    ]);
 
-    this.logger.debug({ aggregateId }, 'Snapshots deleted');
+    this.logger.debug({ aggregateId }, "Snapshots deleted");
   }
 
   /**
    * Delete old snapshots (keep only N latest per aggregate)
    */
   async pruneSnapshots(keepCount: number = 3): Promise<number> {
-    const result = await this.pool.query(`
+    const result = await this.pool.query(
+      `
       WITH ranked_snapshots AS (
         SELECT aggregate_id, version,
                ROW_NUMBER() OVER (
@@ -135,10 +130,12 @@ export class SnapshotStore {
         FROM ranked_snapshots
         WHERE rn > $1
       )
-    `, [keepCount]);
+    `,
+      [keepCount]
+    );
 
     const deletedCount = result.rowCount || 0;
-    this.logger.info({ deletedCount, keepCount }, 'Snapshots pruned');
+    this.logger.info({ deletedCount, keepCount }, "Snapshots pruned");
 
     return deletedCount;
   }
@@ -148,6 +145,6 @@ export class SnapshotStore {
    */
   async close(): Promise<void> {
     await this.pool.end();
-    this.logger.info('SnapshotStore closed');
+    this.logger.info("SnapshotStore closed");
   }
 }

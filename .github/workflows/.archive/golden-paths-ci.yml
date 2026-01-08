@@ -3,11 +3,11 @@ name: golden-paths
 on:
   pull_request:
     paths:
-      - 'observability/golden_paths.yaml'
-      - 'tools/synth-probe/**'
-      - '.github/workflows/golden-paths-ci.yml'
+      - "observability/golden_paths.yaml"
+      - "tools/synth-probe/**"
+      - ".github/workflows/golden-paths-ci.yml"
   schedule:
-    - cron: '0 6 * * *'
+    - cron: "0 6 * * *"
   workflow_dispatch:
 
 jobs:
@@ -18,7 +18,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
       - name: Install probe
         run: |
           python -m pip install --upgrade pip

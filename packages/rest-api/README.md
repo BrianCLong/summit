@@ -26,26 +26,30 @@ npm install @intelgraph/rest-api
 ## Quick Start
 
 ```typescript
-import { createAPI } from '@intelgraph/rest-api';
+import { createAPI } from "@intelgraph/rest-api";
 
 const api = createAPI({
-  version: '1.0.0',
-  title: 'My API',
-  basePath: '/api/v1',
+  version: "1.0.0",
+  title: "My API",
+  basePath: "/api/v1",
 });
 
-api.router.get('/users', async (req, res) => {
-  const users = await db.users.find();
-  res.success(users);
-}, {
-  openapi: {
-    summary: 'List users',
-    tags: ['users'],
-    responses: {
-      '200': { description: 'List of users' }
-    }
+api.router.get(
+  "/users",
+  async (req, res) => {
+    const users = await db.users.find();
+    res.success(users);
+  },
+  {
+    openapi: {
+      summary: "List users",
+      tags: ["users"],
+      responses: {
+        "200": { description: "List of users" },
+      },
+    },
   }
-});
+);
 
 api.listen(3000);
 ```

@@ -344,7 +344,7 @@ metadata:
   name: drift-detection
   namespace: enhancements
 spec:
-  schedule: '0 6 * * *' # Daily at 6 AM
+  schedule: "0 6 * * *" # Daily at 6 AM
   jobTemplate:
     spec:
       template:
@@ -380,7 +380,7 @@ metadata:
   name: drift-detector
   namespace: enhancements
   annotations:
-    eks.amazonaws.com/role-arn: 'arn:aws:iam::ACCOUNT:role/DriftDetectionRole'
+    eks.amazonaws.com/role-arn: "arn:aws:iam::ACCOUNT:role/DriftDetectionRole"
 
 ---
 # AWS Config Rules (Free Tier: 2000 evaluations/month)
@@ -563,7 +563,7 @@ metadata:
   name: ssl-monitoring
   namespace: enhancements
 spec:
-  schedule: '0 12 * * 0' # Weekly on Sunday at noon
+  schedule: "0 12 * * 0" # Weekly on Sunday at noon
   jobTemplate:
     spec:
       template:
@@ -609,7 +609,7 @@ metadata:
   name: trusted-advisor-check
   namespace: enhancements
 spec:
-  schedule: '0 8 * * 1' # Weekly on Monday at 8 AM
+  schedule: "0 8 * * 1" # Weekly on Monday at 8 AM
   jobTemplate:
     spec:
       template:
@@ -656,4 +656,4 @@ metadata:
   name: trusted-advisor
   namespace: enhancements
   annotations:
-    eks.amazonaws.com/role-arn: 'arn:aws:iam::ACCOUNT:role/TrustedAdvisorRole'
+    eks.amazonaws.com/role-arn: "arn:aws:iam::ACCOUNT:role/TrustedAdvisorRole"

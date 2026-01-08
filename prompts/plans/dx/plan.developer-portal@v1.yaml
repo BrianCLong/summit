@@ -1,7 +1,7 @@
 meta:
   id: plan.developer-portal@v1
-  owner: 'platform-engineering'
-  purpose: 'Create a central portal for developer documentation, APIs, and onboarding'
+  owner: "platform-engineering"
+  purpose: "Create a central portal for developer documentation, APIs, and onboarding"
   tags:
     - dx
     - documentation
@@ -9,13 +9,13 @@ meta:
     - onboarding
     - api-docs
   guardrails:
-    - 'Portal must be easy to maintain'
-    - 'Documentation must stay in sync with code'
-    - 'Search must be fast and accurate'
-    - 'Mobile-friendly for quick reference'
+    - "Portal must be easy to maintain"
+    - "Documentation must stay in sync with code"
+    - "Search must be fast and accurate"
+    - "Mobile-friendly for quick reference"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -328,15 +328,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'developer-portal'
+  - name: "developer-portal"
     inputs:
-      documentation_sources: 'Markdown in docs/, OpenAPI specs, GraphQL schema'
-      api_specs: 'OpenAPI 3.0 for REST, GraphQL SDL'
-      target_audiences: 'Integration developers, administrators, contributors'
-      existing_docs: '100+ markdown files, scattered across repos'
-      hosting_preferences: 'Vercel or Netlify, custom domain'
+      documentation_sources: "Markdown in docs/, OpenAPI specs, GraphQL schema"
+      api_specs: "OpenAPI 3.0 for REST, GraphQL SDL"
+      target_audiences: "Integration developers, administrators, contributors"
+      existing_docs: "100+ markdown files, scattered across repos"
+      hosting_preferences: "Vercel or Netlify, custom domain"
     expected_contains:
-      - 'Portal Architecture'
-      - 'Content Structure'
-      - 'Navigation Map'
-      - 'Onboarding'
+      - "Portal Architecture"
+      - "Content Structure"
+      - "Navigation Map"
+      - "Onboarding"

@@ -1,5 +1,5 @@
-import React, { PropsWithChildren } from 'react';
-import { render, act as rtlAct } from '@testing-library/react';
+import React, { PropsWithChildren } from "react";
+import { render, act as rtlAct } from "@testing-library/react";
 
 type RenderHookResult<T> = {
   result: { current: T };

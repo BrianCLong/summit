@@ -132,7 +132,7 @@ premium:
 compliance:
   enabled: true
   auditTrail: true
-  policyDecisionPoint: 'http://pdp.security:8181'
+  policyDecisionPoint: "http://pdp.security:8181"
 
 monitoring:
   metrics: true

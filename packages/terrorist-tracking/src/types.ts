@@ -19,39 +19,39 @@ export interface TerroristOrganization {
 }
 
 export enum OrganizationType {
-  PRIMARY = 'PRIMARY',
-  AFFILIATE = 'AFFILIATE',
-  FRANCHISE = 'FRANCHISE',
-  SPLINTER = 'SPLINTER',
-  CELL = 'CELL',
-  NETWORK = 'NETWORK'
+  PRIMARY = "PRIMARY",
+  AFFILIATE = "AFFILIATE",
+  FRANCHISE = "FRANCHISE",
+  SPLINTER = "SPLINTER",
+  CELL = "CELL",
+  NETWORK = "NETWORK",
 }
 
 export enum Ideology {
-  RELIGIOUS_EXTREMISM = 'RELIGIOUS_EXTREMISM',
-  NATIONALIST = 'NATIONALIST',
-  SEPARATIST = 'SEPARATIST',
-  ETHNO_NATIONALIST = 'ETHNO_NATIONALIST',
-  FAR_RIGHT = 'FAR_RIGHT',
-  FAR_LEFT = 'FAR_LEFT',
-  ANARCHIST = 'ANARCHIST',
-  SINGLE_ISSUE = 'SINGLE_ISSUE',
-  MIXED = 'MIXED'
+  RELIGIOUS_EXTREMISM = "RELIGIOUS_EXTREMISM",
+  NATIONALIST = "NATIONALIST",
+  SEPARATIST = "SEPARATIST",
+  ETHNO_NATIONALIST = "ETHNO_NATIONALIST",
+  FAR_RIGHT = "FAR_RIGHT",
+  FAR_LEFT = "FAR_LEFT",
+  ANARCHIST = "ANARCHIST",
+  SINGLE_ISSUE = "SINGLE_ISSUE",
+  MIXED = "MIXED",
 }
 
 export enum OrganizationStatus {
-  ACTIVE = 'ACTIVE',
-  WEAKENED = 'WEAKENED',
-  DORMANT = 'DORMANT',
-  DEFUNCT = 'DEFUNCT',
-  REORGANIZING = 'REORGANIZING',
-  MERGED = 'MERGED'
+  ACTIVE = "ACTIVE",
+  WEAKENED = "WEAKENED",
+  DORMANT = "DORMANT",
+  DEFUNCT = "DEFUNCT",
+  REORGANIZING = "REORGANIZING",
+  MERGED = "MERGED",
 }
 
 export interface OrganizationLeadership {
   organizationId: string;
   members: LeadershipMember[];
-  hierarchyType: 'HIERARCHICAL' | 'CELL_BASED' | 'NETWORK' | 'HYBRID';
+  hierarchyType: "HIERARCHICAL" | "CELL_BASED" | "NETWORK" | "HYBRID";
   commandStructure: CommandNode[];
 }
 
@@ -61,7 +61,7 @@ export interface LeadershipMember {
   aliases: string[];
   role: string;
   rank?: string;
-  status: 'ACTIVE' | 'DETAINED' | 'DECEASED' | 'UNKNOWN';
+  status: "ACTIVE" | "DETAINED" | "DECEASED" | "UNKNOWN";
   joinDate?: Date;
   responsibilities: string[];
   knownAssociates: string[];
@@ -88,27 +88,27 @@ export interface FundingSource {
   type: FundingType;
   description: string;
   estimatedAmount?: number;
-  frequency: 'ONGOING' | 'PERIODIC' | 'ONE_TIME';
+  frequency: "ONGOING" | "PERIODIC" | "ONE_TIME";
   region?: string;
   verified: boolean;
 }
 
 export enum FundingType {
-  STATE_SPONSORSHIP = 'STATE_SPONSORSHIP',
-  DONATIONS = 'DONATIONS',
-  CRIMINAL_ACTIVITY = 'CRIMINAL_ACTIVITY',
-  DRUG_TRAFFICKING = 'DRUG_TRAFFICKING',
-  KIDNAPPING = 'KIDNAPPING',
-  EXTORTION = 'EXTORTION',
-  LEGITIMATE_BUSINESS = 'LEGITIMATE_BUSINESS',
-  LOOTING = 'LOOTING',
-  CRYPTOCURRENCY = 'CRYPTOCURRENCY',
-  UNKNOWN = 'UNKNOWN'
+  STATE_SPONSORSHIP = "STATE_SPONSORSHIP",
+  DONATIONS = "DONATIONS",
+  CRIMINAL_ACTIVITY = "CRIMINAL_ACTIVITY",
+  DRUG_TRAFFICKING = "DRUG_TRAFFICKING",
+  KIDNAPPING = "KIDNAPPING",
+  EXTORTION = "EXTORTION",
+  LEGITIMATE_BUSINESS = "LEGITIMATE_BUSINESS",
+  LOOTING = "LOOTING",
+  CRYPTOCURRENCY = "CRYPTOCURRENCY",
+  UNKNOWN = "UNKNOWN",
 }
 
 export interface FinancialNetwork {
   id: string;
-  type: 'HAWALA' | 'BANKING' | 'CRYPTOCURRENCY' | 'CASH_COURIER' | 'TRADE_BASED';
+  type: "HAWALA" | "BANKING" | "CRYPTOCURRENCY" | "CASH_COURIER" | "TRADE_BASED";
   nodes: string[];
   regions: string[];
 }
@@ -122,9 +122,9 @@ export interface RecruitmentNetwork {
 }
 
 export interface RecruitmentMethod {
-  type: 'ONLINE' | 'IN_PERSON' | 'PRISON' | 'RELIGIOUS_INSTITUTION' | 'COMMUNITY' | 'FAMILY';
+  type: "ONLINE" | "IN_PERSON" | "PRISON" | "RELIGIOUS_INSTITUTION" | "COMMUNITY" | "FAMILY";
   description: string;
-  effectiveness: 'HIGH' | 'MEDIUM' | 'LOW';
+  effectiveness: "HIGH" | "MEDIUM" | "LOW";
   active: boolean;
 }
 
@@ -148,8 +148,8 @@ export interface TrainingFacility {
   id: string;
   organizationId: string;
   location: Location;
-  type: 'TRAINING_CAMP' | 'SAFE_HOUSE' | 'WEAPONS_CACHE' | 'COMMAND_CENTER';
-  status: 'ACTIVE' | 'ABANDONED' | 'DESTROYED' | 'SUSPECTED';
+  type: "TRAINING_CAMP" | "SAFE_HOUSE" | "WEAPONS_CACHE" | "COMMAND_CENTER";
+  status: "ACTIVE" | "ABANDONED" | "DESTROYED" | "SUSPECTED";
   capacity?: number;
   discovered?: Date;
   features: string[];
@@ -175,7 +175,7 @@ export interface SupplyNetwork {
 export interface Supplier {
   id: string;
   name?: string;
-  type: 'WEAPONS' | 'EXPLOSIVES' | 'COMMUNICATIONS' | 'LOGISTICS' | 'MEDICAL' | 'FOOD';
+  type: "WEAPONS" | "EXPLOSIVES" | "COMMUNICATIONS" | "LOGISTICS" | "MEDICAL" | "FOOD";
   location: string;
   active: boolean;
 }
@@ -185,7 +185,7 @@ export interface SupplyRoute {
   origin: string;
   destination: string;
   waypoints: string[];
-  type: 'LAND' | 'SEA' | 'AIR';
+  type: "LAND" | "SEA" | "AIR";
   frequency?: string;
   lastUsed?: Date;
 }
@@ -211,22 +211,22 @@ export interface TimelineEvent {
   location?: Location;
   casualties?: CasualtyCount;
   participants?: string[];
-  significance: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  significance: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
   sources: string[];
 }
 
 export enum EventType {
-  FOUNDING = 'FOUNDING',
-  ATTACK = 'ATTACK',
-  LEADERSHIP_CHANGE = 'LEADERSHIP_CHANGE',
-  MERGER = 'MERGER',
-  SPLIT = 'SPLIT',
-  TERRITORY_GAIN = 'TERRITORY_GAIN',
-  TERRITORY_LOSS = 'TERRITORY_LOSS',
-  MAJOR_OPERATION = 'MAJOR_OPERATION',
-  FOREIGN_INTERVENTION = 'FOREIGN_INTERVENTION',
-  PEACE_AGREEMENT = 'PEACE_AGREEMENT',
-  DESIGNATION = 'DESIGNATION'
+  FOUNDING = "FOUNDING",
+  ATTACK = "ATTACK",
+  LEADERSHIP_CHANGE = "LEADERSHIP_CHANGE",
+  MERGER = "MERGER",
+  SPLIT = "SPLIT",
+  TERRITORY_GAIN = "TERRITORY_GAIN",
+  TERRITORY_LOSS = "TERRITORY_LOSS",
+  MAJOR_OPERATION = "MAJOR_OPERATION",
+  FOREIGN_INTERVENTION = "FOREIGN_INTERVENTION",
+  PEACE_AGREEMENT = "PEACE_AGREEMENT",
+  DESIGNATION = "DESIGNATION",
 }
 
 export interface CasualtyCount {
@@ -257,7 +257,7 @@ export interface TrackingResult {
 export interface ThreatIndicator {
   organizationId: string;
   type: string;
-  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  severity: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
   description: string;
   detected: Date;
   confidence: number;
@@ -272,7 +272,7 @@ export interface NetworkAnalysis {
 
 export interface NetworkNode {
   id: string;
-  type: 'PERSON' | 'ORGANIZATION' | 'LOCATION' | 'EVENT';
+  type: "PERSON" | "ORGANIZATION" | "LOCATION" | "EVENT";
   label: string;
   attributes: Record<string, unknown>;
 }

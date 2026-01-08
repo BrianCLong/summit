@@ -2,7 +2,7 @@
  * Star Schema Implementation for Data Warehousing
  */
 
-import { Pool } from 'pg';
+import { Pool } from "pg";
 
 export interface DimensionTable {
   name: string;
@@ -25,10 +25,10 @@ export class StarSchema {
   async createDimensionTable(dimension: DimensionTable): Promise<void> {
     const columnDefs = dimension.columns
       .map((c) => {
-        const pk = c.isPrimaryKey ? 'PRIMARY KEY' : '';
+        const pk = c.isPrimaryKey ? "PRIMARY KEY" : "";
         return `${c.name} ${c.type} ${pk}`.trim();
       })
-      .join(',\n  ');
+      .join(",\n  ");
 
     await this.pool.query(`
       CREATE TABLE ${dimension.name} (
@@ -50,23 +50,19 @@ export class StarSchema {
     if (dimension.naturalKey) {
       await this.pool.query(`
         CREATE INDEX idx_${dimension.name}_natural
-        ON ${dimension.name}(${dimension.naturalKey.join(', ')})
+        ON ${dimension.name}(${dimension.naturalKey.join(", ")})
       `);
     }
   }
 
   async createFactTable(fact: FactTable): Promise<void> {
-    const measureDefs = fact.measures
-      .map((m) => `${m.name} ${m.type}`)
-      .join(',\n  ');
+    const measureDefs = fact.measures.map((m) => `${m.name} ${m.type}`).join(",\n  ");
 
     const dimensionKeys = fact.dimensions
       .map((d) => `${d}_key BIGINT REFERENCES ${d}(${d}_id)`)
-      .join(',\n  ');
+      .join(",\n  ");
 
-    const partitionClause = fact.partitionKey
-      ? `PARTITION BY RANGE(${fact.partitionKey})`
-      : '';
+    const partitionClause = fact.partitionKey ? `PARTITION BY RANGE(${fact.partitionKey})` : "";
 
     await this.pool.query(`
       CREATE TABLE ${fact.name} (
@@ -90,22 +86,22 @@ export class StarSchema {
     factTable: string,
     dimensions: string[],
     measures: string[],
-    filters?: Record<string, any>,
+    filters?: Record<string, any>
   ): Promise<any[]> {
     const joins = dimensions
       .map((d) => `LEFT JOIN ${d} ON ${factTable}.${d}_key = ${d}.${d}_id`)
-      .join('\n');
+      .join("\n");
 
     const selectCols = [
       ...dimensions.map((d) => `${d}.*`),
       ...measures.map((m) => `${factTable}.${m}`),
-    ].join(', ');
+    ].join(", ");
 
     const whereClause = filters
       ? `WHERE ${Object.entries(filters)
           .map(([k, v]) => `${k} = '${v}'`)
-          .join(' AND ')}`
-      : '';
+          .join(" AND ")}`
+      : "";
 
     const query = `
       SELECT ${selectCols}

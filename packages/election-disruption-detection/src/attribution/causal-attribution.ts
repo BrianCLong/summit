@@ -15,7 +15,7 @@ import {
   ActorProfile,
   AttributionMethod,
   AlternativeHypothesis,
-} from '../index.js';
+} from "../index.js";
 
 export interface AttributionConfig {
   minConfidenceThreshold: number;
@@ -25,7 +25,7 @@ export interface AttributionConfig {
 }
 
 export interface TechnicalIndicator {
-  type: 'IP' | 'DOMAIN' | 'MALWARE_HASH' | 'TTP' | 'INFRASTRUCTURE';
+  type: "IP" | "DOMAIN" | "MALWARE_HASH" | "TTP" | "INFRASTRUCTURE";
   value: string;
   confidence: number;
   historicalAssociation?: string;
@@ -68,31 +68,29 @@ export class CausalAttributionEngine {
     );
   }
 
-  private async performAttribution(
-    threat: ElectionThreatSignal
-  ): Promise<AttributionAssessment> {
+  private async performAttribution(threat: ElectionThreatSignal): Promise<AttributionAssessment> {
     const assessments: MethodAttribution[] = [];
 
     // Technical forensics
-    if (this.config.methods.includes('TECHNICAL_FORENSICS')) {
+    if (this.config.methods.includes("TECHNICAL_FORENSICS")) {
       const technical = await this.technicalAnalyzer.analyze(threat);
       assessments.push(technical);
     }
 
     // Behavioral analysis
-    if (this.config.methods.includes('BEHAVIORAL_ANALYSIS')) {
+    if (this.config.methods.includes("BEHAVIORAL_ANALYSIS")) {
       const behavioral = await this.behavioralAnalyzer.analyze(threat);
       assessments.push(behavioral);
     }
 
     // Linguistic analysis
-    if (this.config.methods.includes('LINGUISTIC_FINGERPRINT')) {
+    if (this.config.methods.includes("LINGUISTIC_FINGERPRINT")) {
       const linguistic = await this.linguisticAnalyzer.analyze(threat);
       assessments.push(linguistic);
     }
 
     // Historical pattern matching
-    if (this.config.methods.includes('OPERATIONAL_PATTERN')) {
+    if (this.config.methods.includes("OPERATIONAL_PATTERN")) {
       const historical = await this.historicalMatcher.match(threat);
       assessments.push(historical);
     }
@@ -105,7 +103,7 @@ export class CausalAttributionEngine {
     // Identify candidate actors
     const actorScores = new Map<string, number>();
     const actorProfiles = new Map<string, ActorProfile>();
-    const indicators: AttributionAssessment['indicators'] = [];
+    const indicators: AttributionAssessment["indicators"] = [];
 
     for (const assessment of assessments) {
       if (assessment.actor) {
@@ -148,14 +146,15 @@ export class CausalAttributionEngine {
 
     // Calculate overall confidence
     const methodCount = assessments.filter((a) => a.confidence > 0.3).length;
-    const confidence = this.config.requireMultipleMethods && methodCount < 2
-      ? Math.min(0.5, highestScore)
-      : Math.min(0.95, highestScore);
+    const confidence =
+      this.config.requireMultipleMethods && methodCount < 2
+        ? Math.min(0.5, highestScore)
+        : Math.min(0.95, highestScore);
 
     return {
       primaryActor,
       confidence,
-      methodology: 'MULTI_INT_FUSION',
+      methodology: "MULTI_INT_FUSION",
       indicators,
       alternativeHypotheses: alternatives,
     };
@@ -178,13 +177,13 @@ interface MethodAttribution {
   method: AttributionMethod;
   actor: ActorProfile | null;
   confidence: number;
-  indicators: AttributionAssessment['indicators'];
+  indicators: AttributionAssessment["indicators"];
 }
 
 class TechnicalAnalyzer {
   async analyze(threat: ElectionThreatSignal): Promise<MethodAttribution> {
     return {
-      method: 'TECHNICAL_FORENSICS',
+      method: "TECHNICAL_FORENSICS",
       actor: null,
       confidence: 0,
       indicators: [],
@@ -195,7 +194,7 @@ class TechnicalAnalyzer {
 class BehavioralAnalyzer {
   async analyze(threat: ElectionThreatSignal): Promise<MethodAttribution> {
     return {
-      method: 'BEHAVIORAL_ANALYSIS',
+      method: "BEHAVIORAL_ANALYSIS",
       actor: null,
       confidence: 0,
       indicators: [],
@@ -206,7 +205,7 @@ class BehavioralAnalyzer {
 class LinguisticAnalyzer {
   async analyze(threat: ElectionThreatSignal): Promise<MethodAttribution> {
     return {
-      method: 'LINGUISTIC_FINGERPRINT',
+      method: "LINGUISTIC_FINGERPRINT",
       actor: null,
       confidence: 0,
       indicators: [],
@@ -217,7 +216,7 @@ class LinguisticAnalyzer {
 class HistoricalMatcher {
   async match(threat: ElectionThreatSignal): Promise<MethodAttribution> {
     return {
-      method: 'OPERATIONAL_PATTERN',
+      method: "OPERATIONAL_PATTERN",
       actor: null,
       confidence: 0,
       indicators: [],

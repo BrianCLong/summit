@@ -250,18 +250,8 @@ type GraphNeighborhood {
 
 type Query {
   entity(id: ID!, tenant: String!): Entity
-  searchEntities(
-    q: String!
-    type: String
-    tenant: String!
-    limit: Int = 25
-  ): [Entity!]!
-  neighbors(
-    id: ID!
-    tenant: String!
-    depth: Int = 2
-    limit: Int = 5000
-  ): GraphNeighborhood!
+  searchEntities(q: String!, type: String, tenant: String!, limit: Int = 25): [Entity!]!
+  neighbors(id: ID!, tenant: String!, depth: Int = 2, limit: Int = 5000): GraphNeighborhood!
   paths(src: ID!, dst: ID!, tenant: String!, maxDepth: Int = 5): [Entity!]!
 }
 
@@ -393,13 +383,13 @@ deny {
 **k6 SLO Test (sketch)**
 
 ```js
-import http from 'k6/http';
-import { check } from 'k6';
+import http from "k6/http";
+import { check } from "k6";
 export const options = {
   stages: [
-    { duration: '2m', target: 50 },
-    { duration: '3m', target: 50 },
-    { duration: '1m', target: 0 },
+    { duration: "2m", target: 50 },
+    { duration: "3m", target: 50 },
+    { duration: "1m", target: 0 },
   ],
 };
 const query = `query Neighborhood($tenant:String!, $id:ID!){ neighbors(tenant:$tenant, id:$id, depth:2){ neighbors{ id } } }`;
@@ -408,18 +398,18 @@ export default function () {
     __ENV.GRAPHQL_URL,
     JSON.stringify({
       query,
-      variables: { tenant: __ENV.TENANT || 'demo', id: 'seed-node' },
+      variables: { tenant: __ENV.TENANT || "demo", id: "seed-node" },
     }),
     {
       headers: {
-        'Content-Type': 'application/json',
-        'X-Persisted-Query': 'true',
+        "Content-Type": "application/json",
+        "X-Persisted-Query": "true",
       },
-    },
+    }
   );
   check(res, {
-    'status 200': (r) => r.status === 200,
-    'latency p95 ok': (r) => r.timings.waiting < 350,
+    "status 200": (r) => r.status === 200,
+    "latency p95 ok": (r) => r.timings.waiting < 350,
   });
 }
 ```

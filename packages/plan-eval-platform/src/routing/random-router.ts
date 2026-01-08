@@ -1,10 +1,5 @@
-import { BaseRouter } from './base-router.js';
-import type {
-  RoutingConfig,
-  RoutingDecision,
-  ToolCandidate,
-  ScenarioStep,
-} from '../types.js';
+import { BaseRouter } from "./base-router.js";
+import type { RoutingConfig, RoutingDecision, ToolCandidate, ScenarioStep } from "../types.js";
 
 /**
  * RandomRouter - Baseline router that randomly selects from candidates
@@ -17,7 +12,7 @@ export class RandomRouter extends BaseRouter {
 
   constructor(config?: Partial<RoutingConfig>) {
     super({
-      type: 'random',
+      type: "random",
       costWeight: 0,
       latencyBudgetMs: 5000,
       fallbackEnabled: true,
@@ -31,31 +26,26 @@ export class RandomRouter extends BaseRouter {
   async route(
     step: ScenarioStep,
     candidates: ToolCandidate[],
-    context?: Record<string, unknown>,
+    context?: Record<string, unknown>
   ): Promise<RoutingDecision> {
     if (candidates.length === 0) {
-      throw new Error('No candidates available for routing');
+      throw new Error("No candidates available for routing");
     }
 
     // Filter by latency budget if configured
-    let eligibleCandidates = this.filterByLatency(
-      candidates,
-      this.config.latencyBudgetMs,
-    );
+    let eligibleCandidates = this.filterByLatency(candidates, this.config.latencyBudgetMs);
 
     // Fall back to all candidates if none meet latency budget
     if (eligibleCandidates.length === 0) {
       if (this.config.fallbackEnabled) {
         eligibleCandidates = candidates;
       } else {
-        throw new Error('No candidates meet latency requirements');
+        throw new Error("No candidates meet latency requirements");
       }
     }
 
     // Random selection
-    const randomIndex = Math.floor(
-      Math.random() * eligibleCandidates.length,
-    );
+    const randomIndex = Math.floor(Math.random() * eligibleCandidates.length);
     const selected = eligibleCandidates[randomIndex];
 
     // Track selections for analysis
@@ -74,7 +64,7 @@ export class RandomRouter extends BaseRouter {
       Math.random(), // Random score for baseline
       reasoning,
       eligibleCandidates,
-      this.config.latencyBudgetMs,
+      this.config.latencyBudgetMs
     );
   }
 
@@ -96,8 +86,6 @@ export class RandomRouter extends BaseRouter {
 /**
  * Create a random router
  */
-export function createRandomRouter(
-  config?: Partial<RoutingConfig>,
-): RandomRouter {
+export function createRandomRouter(config?: Partial<RoutingConfig>): RandomRouter {
   return new RandomRouter(config);
 }

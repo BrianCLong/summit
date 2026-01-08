@@ -1,10 +1,10 @@
-import { ExtensionPoint } from '../ExtensionPoint.js';
+import { ExtensionPoint } from "../ExtensionPoint.js";
 
 /**
  * Export format extension point
  */
 export interface ExportExtension extends ExtensionPoint<ExportInput, ExportResult> {
-  type: 'export';
+  type: "export";
   format: string;
   mimeType: string;
   fileExtension: string;
@@ -15,7 +15,7 @@ export interface ExportInput {
   options?: {
     includeMetadata?: boolean;
     compress?: boolean;
-    formatting?: 'compact' | 'pretty';
+    formatting?: "compact" | "pretty";
     [key: string]: any;
   };
 }
@@ -27,7 +27,7 @@ export interface ExportResult {
 }
 
 export abstract class BaseExportExtension implements ExportExtension {
-  readonly type = 'export' as const;
+  readonly type = "export" as const;
 
   constructor(
     public readonly id: string,

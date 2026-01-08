@@ -12,20 +12,24 @@
 You are Claude Code, an AI software engineer for Topicality.
 
 Context:
+
 - Governance is critical: we use attribute-based access control (ABAC) via OPA (Open Policy Agent).
 - We want a small layer that bridges application code to OPA policies, enforcing least privilege and reason-for-access prompts.
 
 Goal:
 Implement an "OPA ABAC adapter" that our services (IntelGraph, Maestro, etc.) can use to:
+
 - Evaluate access decisions against OPA,
 - Standardize input attributes,
 - Enforce reason-for-access when required.
 
 Assumptions:
+
 - Services are HTTP-based; OPA can be called via its HTTP API.
 - Use TypeScript/Node OR Python, consistent with other services.
 
 Requirements:
+
 1. ABAC input model
    - Subject attributes: user_id, roles, org_id/tenant_id, auth_strength (e.g., password_only, webauthn), purpose (reason_for_access).
    - Resource attributes: resource_type (entity, claim, run, artifact), resource_id, policy_labels (origin, sensitivity, legal_basis).
@@ -57,6 +61,7 @@ Requirements:
      - How to extend with new attributes.
 
 Deliverables:
+
 - Adapter library.
 - Example Rego policies.
 - Tests and README.

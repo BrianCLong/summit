@@ -3,8 +3,8 @@
  * MDM analytics and reporting
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import type { QualityMetrics } from '@intelgraph/mdm-core';
+import { v4 as uuidv4 } from "uuid";
+import type { QualityMetrics } from "@intelgraph/mdm-core";
 
 export interface MDMDashboard {
   id: string;
@@ -18,7 +18,7 @@ export interface MDMDashboard {
 
 export interface DashboardWidget {
   id: string;
-  type: 'chart' | 'metric' | 'table' | 'trend';
+  type: "chart" | "metric" | "table" | "trend";
   title: string;
   dataSource: string;
   configuration: Record<string, any>;
@@ -40,14 +40,14 @@ export interface ReportMetric {
   name: string;
   value: number;
   change: number;
-  trend: 'up' | 'down' | 'stable';
+  trend: "up" | "down" | "stable";
   unit?: string;
 }
 
 export interface Insight {
-  type: 'warning' | 'info' | 'success';
+  type: "warning" | "info" | "success";
   message: string;
-  impact: 'high' | 'medium' | 'low';
+  impact: "high" | "medium" | "low";
   recommendation?: string;
 }
 
@@ -75,7 +75,7 @@ export class AnalyticsEngine {
       widgets,
       refreshInterval: 300, // 5 minutes
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.dashboards.set(dashboard.id, dashboard);
@@ -99,20 +99,20 @@ export class AnalyticsEngine {
       period,
       metrics: [
         {
-          name: 'Total Records',
+          name: "Total Records",
           value: 0,
           change: 0,
-          trend: 'stable'
+          trend: "stable",
         },
         {
-          name: 'Quality Score',
+          name: "Quality Score",
           value: 0,
           change: 0,
-          trend: 'stable'
-        }
+          trend: "stable",
+        },
       ],
       insights: [],
-      generatedAt: new Date()
+      generatedAt: new Date(),
     };
 
     this.reports.set(report.id, report);

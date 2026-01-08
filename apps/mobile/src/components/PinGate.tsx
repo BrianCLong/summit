@@ -12,12 +12,7 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
-import {
-  Fingerprint,
-  Backspace,
-  Security,
-  LockOutlined,
-} from '@mui/icons-material';
+import { Fingerprint, Backspace, Security, LockOutlined } from '@mui/icons-material';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface PinGateProps {
@@ -75,7 +70,9 @@ export function PinGate({ children }: PinGateProps) {
     try {
       const success = await verifyPin(pinToVerify);
       if (!success) {
-        setError(`Incorrect PIN. ${securityConfig.maxFailedAttempts - pinAttempts - 1} attempts remaining.`);
+        setError(
+          `Incorrect PIN. ${securityConfig.maxFailedAttempts - pinAttempts - 1} attempts remaining.`,
+        );
         setPin('');
       }
     } catch (err) {
@@ -239,9 +236,7 @@ export function PinGate({ children }: PinGateProps) {
       )}
 
       {/* Loading indicator */}
-      {isVerifying && (
-        <CircularProgress sx={{ mb: 3 }} />
-      )}
+      {isVerifying && <CircularProgress sx={{ mb: 3 }} />}
 
       {/* PIN dots */}
       {!isVerifying && renderPinDots()}

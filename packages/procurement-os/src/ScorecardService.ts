@@ -1,4 +1,4 @@
-import { VendorScorecard, RiskTier } from './types';
+import { VendorScorecard, RiskTier } from "./types";
 
 export class ScorecardService {
   buildScorecard(
@@ -18,7 +18,10 @@ export class ScorecardService {
     const normalizedBusinessValue = this.normalize(metrics.businessValue);
 
     const score =
-      normalizedUsage * 0.2 + normalizedReliability * 0.25 + normalizedRisk * 0.25 + normalizedBusinessValue * 0.3;
+      normalizedUsage * 0.2 +
+      normalizedReliability * 0.25 +
+      normalizedRisk * 0.25 +
+      normalizedBusinessValue * 0.3;
 
     return {
       vendor,
@@ -39,10 +42,10 @@ export class ScorecardService {
     return value / 100;
   }
 
-  private recommendation(score: number, tier: RiskTier): VendorScorecard['renewalRecommendation'] {
-    if (score >= 0.8 && tier >= 2) return 'renew';
-    if (score >= 0.6) return 're-negotiate';
-    if (score >= 0.4) return 'replace';
-    return 'retire';
+  private recommendation(score: number, tier: RiskTier): VendorScorecard["renewalRecommendation"] {
+    if (score >= 0.8 && tier >= 2) return "renew";
+    if (score >= 0.6) return "re-negotiate";
+    if (score >= 0.4) return "replace";
+    return "retire";
   }
 }

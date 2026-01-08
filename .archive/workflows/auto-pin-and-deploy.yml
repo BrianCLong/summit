@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       dry_run_first:
-        description: 'Run dry-run first (true/false)'
+        description: "Run dry-run first (true/false)"
         required: false
-        default: 'true'
+        default: "true"
 
 permissions:
   contents: write
@@ -34,13 +34,13 @@ jobs:
       - name: Dry-run auto-pin (optional)
         if: inputs.dry_run_first == 'true'
         env:
-          DRY_RUN: 'true'
+          DRY_RUN: "true"
         run: |
           bash scripts/ci/auto-pin-images.sh || true
 
       - name: Run auto-pin
         env:
-          DRY_RUN: 'false'
+          DRY_RUN: "false"
         run: |
           bash scripts/ci/auto-pin-images.sh
           git status --porcelain | tee /tmp/changes.txt
@@ -52,8 +52,8 @@ jobs:
         id: cpr
         uses: peter-evans/create-pull-request@v6
         with:
-          commit-message: 'chore(ci): auto-pin images to immutable digests'
-          title: 'chore(ci): auto-pin images to immutable digests'
+          commit-message: "chore(ci): auto-pin images to immutable digests"
+          title: "chore(ci): auto-pin images to immutable digests"
           body: |
             - Auto-pinned unpinned or :latest image references to @sha256 digests
             - Updated Maestro placeholders where applicable

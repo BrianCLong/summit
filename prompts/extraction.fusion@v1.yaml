@@ -1,17 +1,17 @@
 meta:
   id: extraction.fusion@v1
-  owner: 'product-fusion'
-  purpose: 'Extract entities and relationships for multimodal fusion'
+  owner: "product-fusion"
+  purpose: "Extract entities and relationships for multimodal fusion"
   guardrails:
-    - 'Extract only explicit information'
-    - 'Normalize entity types'
-    - 'Output valid JSON'
+    - "Extract only explicit information"
+    - "Normalize entity types"
+    - "Output valid JSON"
 
 modelConfig:
-  model: 'gpt-4o'
+  model: "gpt-4o"
   temperature: 0.0
   maxTokens: 4000
-  responseFormat: 'json_object'
+  responseFormat: "json_object"
 
 inputs:
   text: string

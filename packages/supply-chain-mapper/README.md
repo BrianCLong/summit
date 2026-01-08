@@ -21,8 +21,8 @@ pnpm add @intelgraph/supply-chain-mapper
 ### Network Analysis
 
 ```typescript
-import { NetworkAnalyzer } from '@intelgraph/supply-chain-mapper';
-import { SupplyChainNode, SupplyChainRelationship } from '@intelgraph/supply-chain-types';
+import { NetworkAnalyzer } from "@intelgraph/supply-chain-mapper";
+import { SupplyChainNode, SupplyChainRelationship } from "@intelgraph/supply-chain-types";
 
 const analyzer = new NetworkAnalyzer();
 
@@ -31,13 +31,8 @@ const topology = analyzer.analyzeTopology(nodes, relationships);
 console.log(`Network has ${topology.totalNodes} nodes with density ${topology.networkDensity}`);
 
 // Find critical paths
-const criticalPath = analyzer.findCriticalPaths(
-  sourceNodeId,
-  targetNodeId,
-  nodes,
-  relationships
-);
-console.log(`Critical path: ${criticalPath.path.join(' -> ')}`);
+const criticalPath = analyzer.findCriticalPaths(sourceNodeId, targetNodeId, nodes, relationships);
+console.log(`Critical path: ${criticalPath.path.join(" -> ")}`);
 console.log(`Lead time: ${criticalPath.totalLeadTime} days`);
 
 // Analyze dependencies
@@ -46,11 +41,7 @@ console.log(`Node has ${deps.totalDependencies} upstream dependencies`);
 console.log(`Impact score: ${deps.impactScore}/100`);
 
 // Analyze diversification
-const diversification = analyzer.analyzeDiversification(
-  componentId,
-  nodes,
-  relationships
-);
+const diversification = analyzer.analyzeDiversification(componentId, nodes, relationships);
 console.log(`Component has ${diversification.supplierCount} suppliers`);
 console.log(`Concentration risk: ${diversification.concentrationRisk}`);
 ```
@@ -58,7 +49,7 @@ console.log(`Concentration risk: ${diversification.concentrationRisk}`);
 ### Visualization
 
 ```typescript
-import { VisualizationService } from '@intelgraph/supply-chain-mapper';
+import { VisualizationService } from "@intelgraph/supply-chain-mapper";
 
 const visService = new VisualizationService();
 
@@ -66,7 +57,7 @@ const visService = new VisualizationService();
 const graph = visService.toVisualizationGraph(
   nodes,
   relationships,
-  'hierarchical' // or 'force', 'geographic', 'circular'
+  "hierarchical" // or 'force', 'geographic', 'circular'
 );
 
 // Get geographic distribution

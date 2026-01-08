@@ -23,21 +23,17 @@ async function getOrCreateEncryptionKey(): Promise<CryptoKey> {
     // Try to retrieve existing key
     const storedKey = await get(KEYS.ENCRYPTION_KEY);
     if (storedKey) {
-      return await crypto.subtle.importKey(
-        'raw',
-        storedKey,
-        { name: 'AES-GCM' },
-        false,
-        ['encrypt', 'decrypt']
-      );
+      return await crypto.subtle.importKey('raw', storedKey, { name: 'AES-GCM' }, false, [
+        'encrypt',
+        'decrypt',
+      ]);
     }
 
     // Generate new key
-    const key = await crypto.subtle.generateKey(
-      { name: 'AES-GCM', length: 256 },
-      true,
-      ['encrypt', 'decrypt']
-    );
+    const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, [
+      'encrypt',
+      'decrypt',
+    ]);
 
     // Export and store
     const exportedKey = await crypto.subtle.exportKey('raw', key);
@@ -55,11 +51,7 @@ async function encrypt(data: string): Promise<string> {
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const encoded = new TextEncoder().encode(data);
 
-  const encrypted = await crypto.subtle.encrypt(
-    { name: 'AES-GCM', iv },
-    key,
-    encoded
-  );
+  const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
 
   // Combine IV and encrypted data
   const combined = new Uint8Array(iv.length + encrypted.byteLength);
@@ -77,18 +69,14 @@ async function decrypt(encryptedData: string): Promise<string> {
   const combined = new Uint8Array(
     atob(encryptedData)
       .split('')
-      .map((c) => c.charCodeAt(0))
+      .map((c) => c.charCodeAt(0)),
   );
 
   // Extract IV and data
   const iv = combined.slice(0, 12);
   const data = combined.slice(12);
 
-  const decrypted = await crypto.subtle.decrypt(
-    { name: 'AES-GCM', iv },
-    key,
-    data
-  );
+  const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
 
   return new TextDecoder().decode(decrypted);
 }

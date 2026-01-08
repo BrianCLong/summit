@@ -28,9 +28,7 @@
           "artifactHash": "aab3238922bcc25a6f606eb525ffdc56d58f495dad7f9d95a0f8a3c99f9f0f48",
           "ledgerSequence": 1,
           "artifactUri": "s3://black-cell/raw/entity-123.json",
-          "transformChain": [
-            "collect:radio-spectrum"
-          ]
+          "transformChain": ["collect:radio-spectrum"]
         },
         {
           "evidenceId": "evidence-transform",
@@ -38,10 +36,7 @@
           "artifactHash": "0f343b0931126a20f133d67c2b018a3b2f8732d9cb01eb3a7ddc3a8a12ef1b52",
           "ledgerSequence": 2,
           "artifactUri": "s3://black-cell/stage/entity-123/graph.json",
-          "transformChain": [
-            "dedupe@1.4.2",
-            "graph-augment@2.0.0"
-          ]
+          "transformChain": ["dedupe@1.4.2", "graph-augment@2.0.0"]
         },
         {
           "evidenceId": "evidence-delivery",

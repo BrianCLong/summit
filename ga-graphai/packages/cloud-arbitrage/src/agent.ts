@@ -1,10 +1,10 @@
-import { STRATEGIES } from './strategies.js';
+import { STRATEGIES } from "./strategies.js";
 import type {
   CompositeMarketSnapshot,
   StrategyRecommendation,
   StrategySummary,
   WorkloadProfile,
-} from './types.js';
+} from "./types.js";
 
 export interface RecommendationOptions {
   topN?: number;
@@ -14,25 +14,20 @@ export interface RecommendationOptions {
 export class ArbitrageAgent {
   constructor(private readonly strategies = STRATEGIES) {}
 
-  evaluate(
-    snapshot: CompositeMarketSnapshot,
-    profile: WorkloadProfile,
-  ): StrategyRecommendation[] {
+  evaluate(snapshot: CompositeMarketSnapshot, profile: WorkloadProfile): StrategyRecommendation[] {
     return this.strategies.flatMap((strategy) =>
-      strategy.evaluate({ snapshot, workloadProfile: profile }),
+      strategy.evaluate({ snapshot, workloadProfile: profile })
     );
   }
 
   recommendPortfolio(
     snapshot: CompositeMarketSnapshot,
     profile: WorkloadProfile,
-    options: RecommendationOptions = {},
+    options: RecommendationOptions = {}
   ): StrategySummary[] {
     const recommendations = this.evaluate(snapshot, profile);
     const minScore = options.minScore ?? 0.6;
-    const filtered = recommendations.filter(
-      (rec) => rec.totalScore >= minScore,
-    );
+    const filtered = recommendations.filter((rec) => rec.totalScore >= minScore);
 
     const ranked = [...filtered].sort((a, b) => {
       const priceDelta = a.expectedUnitPrice - b.expectedUnitPrice;

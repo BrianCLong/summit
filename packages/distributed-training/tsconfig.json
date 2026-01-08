@@ -12,8 +12,5 @@
     "allowImportingTsExtensions": false
   },
   "include": ["src"],
-  "references": [
-    { "path": "../deep-learning-core" },
-    { "path": "../types" }
-  ]
+  "references": [{ "path": "../deep-learning-core" }, { "path": "../types" }]
 }

@@ -8,7 +8,7 @@ spec:
   tasks:
     - id: warn
       uses: tasks/notify.slack@0.1.0
-      with: { text: 'Chaos drill starting' }
+      with: { text: "Chaos drill starting" }
     - id: sleep
       uses: tasks/wait.sleep@0.1.0
       needs: [warn]
@@ -16,4 +16,4 @@ spec:
     - id: approve
       uses: ops/approval.gate@0.1.0
       needs: [sleep]
-      with: { approved: true, approver: 'sre-oncall' }
+      with: { approved: true, approver: "sre-oncall" }

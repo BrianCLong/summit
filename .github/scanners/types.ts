@@ -5,7 +5,7 @@
 
 // SBOM Types
 export interface SBOMComponent {
-  type: 'library' | 'framework' | 'application' | 'container' | 'operating-system';
+  type: "library" | "framework" | "application" | "container" | "operating-system";
   name: string;
   version: string;
   purl?: string;
@@ -20,7 +20,7 @@ export interface SBOMComponent {
 }
 
 export interface SBOMDocument {
-  bomFormat: 'CycloneDX' | 'SPDX';
+  bomFormat: "CycloneDX" | "SPDX";
   specVersion: string;
   serialNumber: string;
   version: number;
@@ -37,7 +37,7 @@ export interface SBOMDocument {
 }
 
 // Vulnerability Types
-export type VulnerabilitySeverity = 'critical' | 'high' | 'medium' | 'low' | 'unknown';
+export type VulnerabilitySeverity = "critical" | "high" | "medium" | "low" | "unknown";
 
 export interface Vulnerability {
   id: string;
@@ -64,7 +64,7 @@ export interface VulnerabilityScanResult {
   scanner: string;
   scannerVersion: string;
   target: string;
-  targetType: 'image' | 'filesystem' | 'repository' | 'sbom';
+  targetType: "image" | "filesystem" | "repository" | "sbom";
   vulnerabilities: Vulnerability[];
   summary: {
     total: number;
@@ -143,7 +143,7 @@ export interface FixSuggestion {
   package: string;
   currentVersion: string;
   fixedVersion: string;
-  confidence: 'high' | 'medium' | 'low';
+  confidence: "high" | "medium" | "low";
   breakingChange: boolean;
   automatable: boolean;
   commands?: string[];
@@ -209,8 +209,8 @@ export interface ScanHistoryEntry {
   timestamp: string;
   target: string;
   scanner: string;
-  status: 'success' | 'failed' | 'partial';
-  summary: VulnerabilityScanResult['summary'];
+  status: "success" | "failed" | "partial";
+  summary: VulnerabilityScanResult["summary"];
   duration: number;
 }
 
@@ -222,19 +222,19 @@ export interface VulnerabilityPolicy {
 }
 
 export interface ServicePolicy {
-  exposure: 'internet-facing' | 'internal' | 'private';
+  exposure: "internet-facing" | "internal" | "private";
   severityThresholds: {
-    critical: 'block' | 'warn' | 'ignore';
-    high: 'block' | 'warn' | 'ignore';
-    medium: 'block' | 'warn' | 'ignore';
-    low: 'block' | 'warn' | 'ignore';
+    critical: "block" | "warn" | "ignore";
+    high: "block" | "warn" | "ignore";
+    medium: "block" | "warn" | "ignore";
+    low: "block" | "warn" | "ignore";
   };
   allowedVulnerabilities: string[];
-  scanSchedule: 'on_push' | 'daily' | 'weekly';
+  scanSchedule: "on_push" | "daily" | "weekly";
 }
 
 export interface GlobalPolicy {
-  defaultSeverityThresholds: ServicePolicy['severityThresholds'];
+  defaultSeverityThresholds: ServicePolicy["severityThresholds"];
   emergencyBypassEnabled: boolean;
   waiverExpiryDays: number;
   notificationChannels: string[];
@@ -251,15 +251,15 @@ export interface PolicyEvaluationResult {
 // Scanner Configuration
 export interface ScannerConfig {
   syft: {
-    outputFormat: 'cyclonedx-json' | 'spdx-json' | 'json';
-    scope: 'all-layers' | 'squashed';
+    outputFormat: "cyclonedx-json" | "spdx-json" | "json";
+    scope: "all-layers" | "squashed";
     excludePatterns?: string[];
   };
   trivy: {
     severity: VulnerabilitySeverity[];
     ignoreUnfixed: boolean;
     timeout: string;
-    scanners: ('vuln' | 'misconfig' | 'secret' | 'license')[];
+    scanners: ("vuln" | "misconfig" | "secret" | "license")[];
     offlineDb?: string;
   };
   cosign: {

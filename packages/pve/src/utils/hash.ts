@@ -6,27 +6,21 @@
  * @module pve/utils/hash
  */
 
-import crypto from 'node:crypto';
+import crypto from "node:crypto";
 
-export type HashAlgorithm = 'sha256' | 'sha512' | 'md5';
+export type HashAlgorithm = "sha256" | "sha512" | "md5";
 
 /**
  * Hash a string using the specified algorithm
  */
-export function hashString(
-  content: string,
-  algorithm: HashAlgorithm = 'sha256',
-): string {
-  return crypto.createHash(algorithm).update(content, 'utf-8').digest('hex');
+export function hashString(content: string, algorithm: HashAlgorithm = "sha256"): string {
+  return crypto.createHash(algorithm).update(content, "utf-8").digest("hex");
 }
 
 /**
  * Hash an object by serializing it to JSON first
  */
-export function hashObject(
-  obj: unknown,
-  algorithm: HashAlgorithm = 'sha256',
-): string {
+export function hashObject(obj: unknown, algorithm: HashAlgorithm = "sha256"): string {
   const serialized = JSON.stringify(obj, Object.keys(obj as object).sort());
   return hashString(serialized, algorithm);
 }
@@ -37,7 +31,7 @@ export function hashObject(
 export function shortHash(
   content: string,
   length: number = 8,
-  algorithm: HashAlgorithm = 'sha256',
+  algorithm: HashAlgorithm = "sha256"
 ): string {
   return hashString(content, algorithm).slice(0, length);
 }
@@ -64,11 +58,8 @@ export function generateContentId(content: string): string {
 export function verifyHash(
   content: string,
   expectedHash: string,
-  algorithm: HashAlgorithm = 'sha256',
+  algorithm: HashAlgorithm = "sha256"
 ): boolean {
   const actualHash = hashString(content, algorithm);
-  return crypto.timingSafeEqual(
-    Buffer.from(actualHash, 'hex'),
-    Buffer.from(expectedHash, 'hex'),
-  );
+  return crypto.timingSafeEqual(Buffer.from(actualHash, "hex"), Buffer.from(expectedHash, "hex"));
 }

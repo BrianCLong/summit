@@ -5,22 +5,22 @@ on:
   pull_request:
     branches: [main, develop]
     paths:
-      - 'server/**'
-      - 'client/**'
-      - 'apps/**'
-      - 'services/**'
-      - 'packages/**'
+      - "server/**"
+      - "client/**"
+      - "apps/**"
+      - "services/**"
+      - "packages/**"
   push:
     branches: [main]
   schedule:
-    - cron: '0 2 * * *' # Daily at 2 AM UTC
+    - cron: "0 2 * * *" # Daily at 2 AM UTC
   workflow_dispatch:
     inputs:
       baseline-ref:
-        description: 'Baseline ref to compare against (commit SHA or branch)'
+        description: "Baseline ref to compare against (commit SHA or branch)"
         required: false
         type: string
-        default: 'main'
+        default: "main"
 
 concurrency:
   group: perf-${{ github.workflow }}-${{ github.ref }}
@@ -32,8 +32,8 @@ permissions:
   checks: write
 
 env:
-  NODE_VERSION: '20.x'
-  PNPM_VERSION: '9.12.0'
+  NODE_VERSION: "20.x"
+  PNPM_VERSION: "9.12.0"
 
 jobs:
   benchmark:
@@ -58,7 +58,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

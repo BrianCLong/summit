@@ -3,14 +3,14 @@ name: Validate Canary Configuration
 on:
   pull_request:
     paths:
-      - 'config/canary-params-*.json'
-      - '.github/workflows/canary-*.yml'
-      - '.github/workflows/deployment-*.yml'
-      - 'tools/validate-canary-config.py'
+      - "config/canary-params-*.json"
+      - ".github/workflows/canary-*.yml"
+      - ".github/workflows/deployment-*.yml"
+      - "tools/validate-canary-config.py"
   push:
     branches: [main, release/*]
     paths:
-      - 'config/canary-params-*.json'
+      - "config/canary-params-*.json"
 
 jobs:
   validate-canary-config:
@@ -24,7 +24,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |

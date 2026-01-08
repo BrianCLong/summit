@@ -6,10 +6,10 @@ This directory documents the **Budget, Risk, and Operational Framework** for all
 
 Before deploying any agent, review the mandatory governance standards:
 
-*   **[Agent Budgets](./agent-budgets.md)**: Canonical budget dimensions, agent classes (Tier 0-4), and resource limits.
-*   **[Risk Scoring Model](./risk-scoring.md)**: How agent risk is calculated based on files touched, permissions, and scope.
-*   **[Budget Enforcement](./budget-enforcement.md)**: Mechanisms for invocation-time checks, runtime throttling, and kill switches.
-*   **[Telemetry & Audit](./agent-telemetry.md)**: Required metrics, audit logs, and anomaly detection schemas.
+- **[Agent Budgets](./agent-budgets.md)**: Canonical budget dimensions, agent classes (Tier 0-4), and resource limits.
+- **[Risk Scoring Model](./risk-scoring.md)**: How agent risk is calculated based on files touched, permissions, and scope.
+- **[Budget Enforcement](./budget-enforcement.md)**: Mechanisms for invocation-time checks, runtime throttling, and kill switches.
+- **[Telemetry & Audit](./agent-telemetry.md)**: Required metrics, audit logs, and anomaly detection schemas.
 
 ---
 
@@ -29,8 +29,8 @@ Specific implementations of the seven defensive agents:
 
 ## Operational Resources
 
-*   **Guardrails**: Anonymization, Zero-trust (ABAC), Provenance bundles.
-*   **Feature Flags**: Enable/disable per agent via env `FEATURE_AGENT_{NAME}`.
-*   **Prompts**:
-    *   [Link Analysis Canvas Orchestrator](./link-analysis-canvas-master-prompt.md)
-    *   [Agent Variant Superprompts](./variants/README.md) (Claude, Codex, Jules, etc.)
+- **Guardrails**: Anonymization, Zero-trust (ABAC), Provenance bundles.
+- **Feature Flags**: Enable/disable per agent via env `FEATURE_AGENT_{NAME}`.
+- **Prompts**:
+  - [Link Analysis Canvas Orchestrator](./link-analysis-canvas-master-prompt.md)
+  - [Agent Variant Superprompts](./variants/README.md) (Claude, Codex, Jules, etc.)

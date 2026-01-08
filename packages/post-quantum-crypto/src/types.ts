@@ -4,20 +4,20 @@
  */
 
 export enum PQCAlgorithm {
-  KYBER_512 = 'kyber-512',
-  KYBER_768 = 'kyber-768',
-  KYBER_1024 = 'kyber-1024',
-  DILITHIUM_2 = 'dilithium-2',
-  DILITHIUM_3 = 'dilithium-3',
-  DILITHIUM_5 = 'dilithium-5',
-  FALCON_512 = 'falcon-512',
-  FALCON_1024 = 'falcon-1024',
-  SPHINCS_PLUS_128F = 'sphincs-plus-128f',
-  SPHINCS_PLUS_128S = 'sphincs-plus-128s',
-  SPHINCS_PLUS_192F = 'sphincs-plus-192f',
-  SPHINCS_PLUS_192S = 'sphincs-plus-192s',
-  SPHINCS_PLUS_256F = 'sphincs-plus-256f',
-  SPHINCS_PLUS_256S = 'sphincs-plus-256s',
+  KYBER_512 = "kyber-512",
+  KYBER_768 = "kyber-768",
+  KYBER_1024 = "kyber-1024",
+  DILITHIUM_2 = "dilithium-2",
+  DILITHIUM_3 = "dilithium-3",
+  DILITHIUM_5 = "dilithium-5",
+  FALCON_512 = "falcon-512",
+  FALCON_1024 = "falcon-1024",
+  SPHINCS_PLUS_128F = "sphincs-plus-128f",
+  SPHINCS_PLUS_128S = "sphincs-plus-128s",
+  SPHINCS_PLUS_192F = "sphincs-plus-192f",
+  SPHINCS_PLUS_192S = "sphincs-plus-192s",
+  SPHINCS_PLUS_256F = "sphincs-plus-256f",
+  SPHINCS_PLUS_256S = "sphincs-plus-256s",
 }
 
 export enum SecurityLevel {
@@ -74,7 +74,7 @@ export interface HybridScheme {
 
 export interface PQCBenchmark {
   algorithm: PQCAlgorithm;
-  operation: 'keygen' | 'encapsulate' | 'decapsulate' | 'sign' | 'verify';
+  operation: "keygen" | "encapsulate" | "decapsulate" | "sign" | "verify";
   iterations: number;
   averageTime: number;
   minTime: number;
@@ -87,7 +87,7 @@ export interface MigrationMetadata {
   sourceAlgorithm: string;
   targetAlgorithm: PQCAlgorithm;
   migrationDate: Date;
-  status: 'pending' | 'in-progress' | 'completed' | 'failed';
+  status: "pending" | "in-progress" | "completed" | "failed";
   rollbackPlan?: string;
   validationResults?: Record<string, unknown>;
 }

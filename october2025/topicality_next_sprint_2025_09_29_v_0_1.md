@@ -292,7 +292,7 @@ jobs:
       run_risk_assessment: true
       dpa_dpia_required: false
       rollback_plan_required: true
-      canary_slice: '10%'
+      canary_slice: "10%"
       success_criteria: |
         error_rate<=1%
         latency_p95_ms<=300
@@ -424,7 +424,7 @@ body:
 name: connector-cert
 on:
   push:
-    paths: ['connectors/**']
+    paths: ["connectors/**"]
 jobs:
   cert:
     runs-on: ubuntu-latest

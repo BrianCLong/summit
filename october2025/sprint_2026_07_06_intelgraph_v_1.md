@@ -99,11 +99,7 @@
 
 ```ts
 // server/src/lineage/resolve.ts
-export async function lineageFor(
-  nodeId: string,
-  ctx: any,
-  window?: { from: string; to: string },
-) {
+export async function lineageFor(nodeId: string, ctx: any, window?: { from: string; to: string }) {
   const cy = `MATCH path=(s)-[r*..6]->(t) WHERE id(s)=$id AND (all(rel IN r WHERE rel.at >= datetime($from) AND rel.at <= datetime($to)) OR $from IS NULL)
              WITH nodes(path) AS ns, relationships(path) AS rs
              UNWIND ns AS n UNWIND rs AS rel
@@ -115,7 +111,7 @@ export async function lineageFor(
     to: window?.to || null,
   });
   const row = res.records[0];
-  return { nodes: row.get('nodes'), rels: row.get('rels') };
+  return { nodes: row.get("nodes"), rels: row.get("rels") };
 }
 ```
 ````
@@ -124,28 +120,26 @@ export async function lineageFor(
 
 ```ts
 // server/src/dsar/discover.ts
-import duckdb from 'duckdb';
+import duckdb from "duckdb";
 export async function discoverSubject(
   ids: { email?: string; phone?: string; name?: string },
-  ctx: any,
+  ctx: any
 ) {
   const hot = await ctx.driver.executeQuery(
-    'MATCH (p:Person) WHERE p.email=$e OR p.phone=$p OR p.name CONTAINS $n RETURN p LIMIT 10000',
-    { e: ids.email || null, p: ids.phone || null, n: ids.name || '' },
+    "MATCH (p:Person) WHERE p.email=$e OR p.phone=$p OR p.name CONTAINS $n RETURN p LIMIT 10000",
+    { e: ids.email || null, p: ids.phone || null, n: ids.name || "" }
   );
   const cold = await scanCold(ids);
   return mergeHotCold(
-    hot.records.map((r: any) => r.get('p').properties),
-    cold,
+    hot.records.map((r: any) => r.get("p").properties),
+    cold
   );
 }
 async function scanCold(ids: any) {
-  const db = new duckdb.Database(':memory:');
+  const db = new duckdb.Database(":memory:");
   const c = db.connect();
-  const q = `SELECT * FROM read_parquet('s3://ig/cold/person/*.parquet') WHERE email='${ids.email || ''}' OR phone='${ids.phone || ''}' OR name ILIKE '%${ids.name || ''}%' LIMIT 100000`;
-  const rows = await new Promise<any[]>((res, rej) =>
-    c.all(q, (e, r) => (e ? rej(e) : res(r))),
-  );
+  const q = `SELECT * FROM read_parquet('s3://ig/cold/person/*.parquet') WHERE email='${ids.email || ""}' OR phone='${ids.phone || ""}' OR name ILIKE '%${ids.name || ""}%' LIMIT 100000`;
+  const rows = await new Promise<any[]>((res, rej) => c.all(q, (e, r) => (e ? rej(e) : res(r))));
   c.close();
   return rows;
 }
@@ -155,21 +149,21 @@ async function scanCold(ids: any) {
 
 ```ts
 // server/src/dsar/pack.ts
-import crypto from 'crypto';
+import crypto from "crypto";
 export function buildManifest(items: any[]) {
   return {
     createdAt: new Date().toISOString(),
-    purpose: 'DSAR',
+    purpose: "DSAR",
     items: items.map((x) => ({
       id: x.id,
       hash: sha256(JSON.stringify(x)),
       kind: x.kind,
     })),
-    signer: 'IntelGraph',
+    signer: "IntelGraph",
   };
 }
 function sha256(s: string) {
-  return crypto.createHash('sha256').update(s).digest('hex');
+  return crypto.createHash("sha256").update(s).digest("hex");
 }
 ```
 
@@ -179,19 +173,19 @@ function sha256(s: string) {
 // server/src/rtbf/execute.ts
 export async function eraseSubject(subjectId: string, ctx: any) {
   // Hot graph
-  await ctx.driver.executeQuery('MATCH (p:Person {id:$id}) DETACH DELETE p', {
+  await ctx.driver.executeQuery("MATCH (p:Person {id:$id}) DETACH DELETE p", {
     id: subjectId,
   });
   // Cold snapshots (rewrite plan registered)
-  await ctx.queue.enqueue('snapshot-rewrite', {
-    table: 'person',
+  await ctx.queue.enqueue("snapshot-rewrite", {
+    table: "person",
     predicate: { id: subjectId },
   });
   // Tombstone
-  await ctx.db.insert('tombstones', {
+  await ctx.db.insert("tombstones", {
     id: subjectId,
     at: Date.now(),
-    reason: 'RTBF',
+    reason: "RTBF",
   });
 }
 ```
@@ -250,28 +244,28 @@ CREATE TABLE IF NOT EXISTS dp_ledger (
 ```js
 // apps/web/src/features/privacy/jquery-dsar.js
 $(function () {
-  $('#dsar-run').on('click', function () {
+  $("#dsar-run").on("click", function () {
     const ids = {
-      email: $('#email').val(),
-      phone: $('#phone').val(),
-      name: $('#name').val(),
+      email: $("#email").val(),
+      phone: $("#phone").val(),
+      name: $("#name").val(),
     };
     $.ajax({
-      url: '/graphql',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/graphql",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({
         query: `mutation{ dsarDiscover(ids:${JSON.stringify(ids)}){ count token } }`,
       }),
     });
   });
-  $('#rtbf-run').on('click', function () {
+  $("#rtbf-run").on("click", function () {
     $.ajax({
-      url: '/graphql',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/graphql",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({
-        query: `mutation{ rtbf(subjectId:"${$('#sid').val()}"){ ok } }`,
+        query: `mutation{ rtbf(subjectId:"${$("#sid").val()}"){ ok } }`,
       }),
     });
   });

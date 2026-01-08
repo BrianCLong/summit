@@ -30,14 +30,16 @@ export function sum<T>(selector: (value: T) => number): AggregateFunction<T, num
   };
 }
 
-export function average<T>(selector: (value: T) => number): AggregateFunction<T, { sum: number; count: number }, number> {
+export function average<T>(
+  selector: (value: T) => number
+): AggregateFunction<T, { sum: number; count: number }, number> {
   return {
     createAccumulator: () => ({ sum: 0, count: 0 }),
     add: (value, accumulator) => ({
       sum: accumulator.sum + selector(value),
       count: accumulator.count + 1,
     }),
-    getResult: (accumulator) => accumulator.count > 0 ? accumulator.sum / accumulator.count : 0,
+    getResult: (accumulator) => (accumulator.count > 0 ? accumulator.sum / accumulator.count : 0),
     merge: (acc1, acc2) => ({
       sum: acc1.sum + acc2.sum,
       count: acc1.count + acc2.count,

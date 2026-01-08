@@ -4,8 +4,8 @@
  * Pre-built integrations for Summit platform services.
  */
 
-import type { EvaluationContext } from './evaluator';
-import type { Operation } from './schema/policy.schema';
+import type { EvaluationContext } from "./evaluator";
+import type { Operation } from "./schema/policy.schema";
 
 // -----------------------------------------------------------------------------
 // GraphQL Integration
@@ -16,31 +16,43 @@ import type { Operation } from './schema/policy.schema';
  */
 export function getOperationFromGraphQL(info: any): Operation {
   const operationType = info.operation?.operation;
-  const fieldName = info.fieldName?.toLowerCase() || '';
+  const fieldName = info.fieldName?.toLowerCase() || "";
 
   // Map GraphQL operations to policy operations
-  if (operationType === 'mutation') {
-    if (fieldName.startsWith('create')) {return 'CREATE';}
-    if (fieldName.startsWith('update')) {return 'UPDATE';}
-    if (fieldName.startsWith('delete')) {return 'DELETE';}
-    if (fieldName.includes('export')) {return 'EXPORT';}
-    if (fieldName.includes('share')) {return 'SHARE';}
-    return 'UPDATE'; // Default for mutations
+  if (operationType === "mutation") {
+    if (fieldName.startsWith("create")) {
+      return "CREATE";
+    }
+    if (fieldName.startsWith("update")) {
+      return "UPDATE";
+    }
+    if (fieldName.startsWith("delete")) {
+      return "DELETE";
+    }
+    if (fieldName.includes("export")) {
+      return "EXPORT";
+    }
+    if (fieldName.includes("share")) {
+      return "SHARE";
+    }
+    return "UPDATE"; // Default for mutations
   }
 
-  if (operationType === 'subscription') {
-    return 'READ';
+  if (operationType === "subscription") {
+    return "READ";
   }
 
   // Query operations
-  if (fieldName.includes('copilot') || fieldName.includes('ai')) {return 'COPILOT';}
-  return 'READ';
+  if (fieldName.includes("copilot") || fieldName.includes("ai")) {
+    return "COPILOT";
+  }
+  return "READ";
 }
 
 /**
  * Extract resource context from GraphQL resolver info
  */
-export function getResourceFromGraphQL(info: any, args: any): EvaluationContext['resource'] {
+export function getResourceFromGraphQL(info: any, args: any): EvaluationContext["resource"] {
   const returnType = info.returnType?.ofType?.name || info.returnType?.name;
 
   return {
@@ -55,7 +67,7 @@ export function getResourceFromGraphQL(info: any, args: any): EvaluationContext[
  */
 export function createGraphQLAuthorityContext(evaluator: any) {
   return {
-    async authorize(operation: Operation, resource: EvaluationContext['resource']) {
+    async authorize(operation: Operation, resource: EvaluationContext["resource"]) {
       // This would be called from resolvers
       return evaluator.evaluate({
         user: this.user,
@@ -64,7 +76,7 @@ export function createGraphQLAuthorityContext(evaluator: any) {
         request: {
           timestamp: new Date(),
           ip: this.req?.ip,
-          userAgent: this.req?.get?.('User-Agent'),
+          userAgent: this.req?.get?.("User-Agent"),
         },
       });
     },
@@ -80,28 +92,31 @@ export function createGraphQLAuthorityContext(evaluator: any) {
  */
 export function httpMethodToOperation(method: string): Operation {
   switch (method.toUpperCase()) {
-    case 'GET':
-    case 'HEAD':
-    case 'OPTIONS':
-      return 'READ';
-    case 'POST':
-      return 'CREATE';
-    case 'PUT':
-    case 'PATCH':
-      return 'UPDATE';
-    case 'DELETE':
-      return 'DELETE';
+    case "GET":
+    case "HEAD":
+    case "OPTIONS":
+      return "READ";
+    case "POST":
+      return "CREATE";
+    case "PUT":
+    case "PATCH":
+      return "UPDATE";
+    case "DELETE":
+      return "DELETE";
     default:
-      return 'READ';
+      return "READ";
   }
 }
 
 /**
  * Extract resource from REST request path
  */
-export function getResourceFromPath(path: string, params: Record<string, string>): EvaluationContext['resource'] {
+export function getResourceFromPath(
+  path: string,
+  params: Record<string, string>
+): EvaluationContext["resource"] {
   // Parse path segments to determine resource type
-  const segments = path.split('/').filter(Boolean);
+  const segments = path.split("/").filter(Boolean);
 
   // Common patterns:
   // /api/entities/:id -> entityType: 'Entity', entityId: params.id
@@ -109,16 +124,16 @@ export function getResourceFromPath(path: string, params: Record<string, string>
   // /api/persons/:id -> entityType: 'Person', entityId: params.id
 
   const resourceMap: Record<string, string> = {
-    entities: 'Entity',
-    persons: 'Person',
-    organizations: 'Organization',
-    assets: 'Asset',
-    locations: 'Location',
-    events: 'Event',
-    documents: 'Document',
-    claims: 'Claim',
-    cases: 'Case',
-    investigations: 'Investigation',
+    entities: "Entity",
+    persons: "Person",
+    organizations: "Organization",
+    assets: "Asset",
+    locations: "Location",
+    events: "Event",
+    documents: "Document",
+    claims: "Claim",
+    cases: "Case",
+    investigations: "Investigation",
   };
 
   let entityType: string | undefined;
@@ -136,7 +151,7 @@ export function getResourceFromPath(path: string, params: Record<string, string>
       }
     }
 
-    if (segment === 'investigations' && nextSegment) {
+    if (segment === "investigations" && nextSegment) {
       investigationId = nextSegment;
     }
   }
@@ -173,7 +188,7 @@ export interface CopilotAuthorityContext {
  */
 export function createCopilotAuthorityContext(
   evaluator: any,
-  user: EvaluationContext['user'],
+  user: EvaluationContext["user"],
   auditLogger: any
 ): CopilotAuthorityContext {
   let cachedDecision: any = null;
@@ -186,7 +201,7 @@ export function createCopilotAuthorityContext(
     async canAccessInvestigation(investigationId: string) {
       const decision = await evaluator.evaluate({
         user,
-        operation: 'COPILOT',
+        operation: "COPILOT",
         resource: { investigationId },
         request: { timestamp: new Date() },
       });
@@ -204,7 +219,7 @@ export function createCopilotAuthorityContext(
 
     async logAccess(query: string, resultCount: number) {
       await auditLogger?.log({
-        action: 'COPILOT_QUERY',
+        action: "COPILOT_QUERY",
         userId: user.id,
         query: query.substring(0, 500), // Truncate for audit
         resultCount,
@@ -245,7 +260,7 @@ export function createConnectorAuthorityContext(
 ): ConnectorAuthorityContext {
   return {
     tenantId: config.tenantId,
-    defaultClassification: config.defaultClassification || 'UNCLASSIFIED',
+    defaultClassification: config.defaultClassification || "UNCLASSIFIED",
     compartments: config.compartments || [],
     canIngest: true, // Would evaluate against policy
     canRead: true,
@@ -288,15 +303,15 @@ export interface ExportAuthorityContext {
  */
 export async function evaluateExportAuthority(
   evaluator: any,
-  user: EvaluationContext['user'],
+  user: EvaluationContext["user"],
   entityIds: string[],
   investigationId?: string
 ): Promise<ExportAuthorityContext> {
   const decision = await evaluator.evaluate({
     user,
-    operation: 'EXPORT',
+    operation: "EXPORT",
     resource: {
-      entityType: 'Export',
+      entityType: "Export",
       investigationId,
     },
     request: { timestamp: new Date() },
@@ -318,9 +333,7 @@ export async function evaluateExportAuthority(
 /**
  * Build vector search filter from authority context
  */
-export function buildRAGAuthorityFilter(
-  user: EvaluationContext['user']
-): Record<string, any> {
+export function buildRAGAuthorityFilter(user: EvaluationContext["user"]): Record<string, any> {
   const filters: any = {
     tenant_id: user.tenantId,
   };
@@ -333,13 +346,13 @@ export function buildRAGAuthorityFilter(
   // Add classification filter based on clearance
   if (user.clearance) {
     const clearanceLevels: Record<string, string[]> = {
-      UNCLASSIFIED: ['UNCLASSIFIED'],
-      CUI: ['UNCLASSIFIED', 'CUI'],
-      CONFIDENTIAL: ['UNCLASSIFIED', 'CUI', 'CONFIDENTIAL'],
-      SECRET: ['UNCLASSIFIED', 'CUI', 'CONFIDENTIAL', 'SECRET'],
-      TOP_SECRET: ['UNCLASSIFIED', 'CUI', 'CONFIDENTIAL', 'SECRET', 'TOP_SECRET'],
+      UNCLASSIFIED: ["UNCLASSIFIED"],
+      CUI: ["UNCLASSIFIED", "CUI"],
+      CONFIDENTIAL: ["UNCLASSIFIED", "CUI", "CONFIDENTIAL"],
+      SECRET: ["UNCLASSIFIED", "CUI", "CONFIDENTIAL", "SECRET"],
+      TOP_SECRET: ["UNCLASSIFIED", "CUI", "CONFIDENTIAL", "SECRET", "TOP_SECRET"],
     };
-    filters.classification = { $in: clearanceLevels[user.clearance] || ['UNCLASSIFIED'] };
+    filters.classification = { $in: clearanceLevels[user.clearance] || ["UNCLASSIFIED"] };
   }
 
   return filters;

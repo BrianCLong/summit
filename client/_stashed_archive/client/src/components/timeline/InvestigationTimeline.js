@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -25,7 +25,7 @@ import {
   FormControlLabel,
   Badge,
   Divider,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Timeline,
   TimelineItem,
@@ -34,7 +34,7 @@ import {
   TimelineContent,
   TimelineDot,
   TimelineOppositeContent,
-} from '@mui/lab';
+} from "@mui/lab";
 import {
   Timeline as TimelineIcon,
   Event as EventIcon,
@@ -55,7 +55,7 @@ import {
   Psychology as AIIcon,
   TrendingUp as TrendingIcon,
   Schedule as ScheduleIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 // Advanced temporal analysis algorithms
 const TemporalAnalysisEngine = {
@@ -66,23 +66,21 @@ const TemporalAnalysisEngine = {
     // Frequency analysis
     const timeIntervals = [];
     for (let i = 1; i < events.length; i++) {
-      const interval =
-        new Date(events[i].timestamp) - new Date(events[i - 1].timestamp);
+      const interval = new Date(events[i].timestamp) - new Date(events[i - 1].timestamp);
       timeIntervals.push(interval);
     }
 
-    const avgInterval =
-      timeIntervals.reduce((a, b) => a + b, 0) / timeIntervals.length;
+    const avgInterval = timeIntervals.reduce((a, b) => a + b, 0) / timeIntervals.length;
     const regularIntervals = timeIntervals.filter(
-      (interval) => Math.abs(interval - avgInterval) < avgInterval * 0.3,
+      (interval) => Math.abs(interval - avgInterval) < avgInterval * 0.3
     );
 
     if (regularIntervals.length > timeIntervals.length * 0.6) {
       patterns.push({
-        type: 'REGULAR_PATTERN',
+        type: "REGULAR_PATTERN",
         confidence: 0.85,
         description: `Regular activity pattern detected (${(avgInterval / (1000 * 60 * 60)).toFixed(1)}h intervals)`,
-        impact: 'medium',
+        impact: "medium",
       });
     }
 
@@ -94,18 +92,15 @@ const TemporalAnalysisEngine = {
     });
 
     const maxActivity = Math.max(...Object.values(hourlyActivity));
-    const avgActivity =
-      Object.values(hourlyActivity).reduce((a, b) => a + b, 0) / 24;
+    const avgActivity = Object.values(hourlyActivity).reduce((a, b) => a + b, 0) / 24;
 
     if (maxActivity > avgActivity * 3) {
-      const peakHour = Object.keys(hourlyActivity).find(
-        (h) => hourlyActivity[h] === maxActivity,
-      );
+      const peakHour = Object.keys(hourlyActivity).find((h) => hourlyActivity[h] === maxActivity);
       patterns.push({
-        type: 'ACTIVITY_BURST',
+        type: "ACTIVITY_BURST",
         confidence: 0.78,
         description: `Activity burst detected at ${peakHour}:00 (${maxActivity} events)`,
-        impact: 'high',
+        impact: "high",
       });
     }
 
@@ -120,10 +115,10 @@ const TemporalAnalysisEngine = {
 
     if (weekendRatio > 0.4) {
       patterns.push({
-        type: 'WEEKEND_ACTIVITY',
+        type: "WEEKEND_ACTIVITY",
         confidence: 0.72,
         description: `High weekend activity detected (${(weekendRatio * 100).toFixed(0)}% of events)`,
-        impact: 'medium',
+        impact: "medium",
       });
     }
 
@@ -137,8 +132,7 @@ const TemporalAnalysisEngine = {
     // Gap analysis
     const gaps = [];
     for (let i = 1; i < events.length; i++) {
-      const gap =
-        new Date(events[i].timestamp) - new Date(events[i - 1].timestamp);
+      const gap = new Date(events[i].timestamp) - new Date(events[i - 1].timestamp);
       gaps.push(gap);
     }
 
@@ -147,11 +141,10 @@ const TemporalAnalysisEngine = {
 
     if (largeGaps.length > 0) {
       anomalies.push({
-        type: 'COMMUNICATION_GAP',
-        severity: 'high',
+        type: "COMMUNICATION_GAP",
+        severity: "high",
         description: `${largeGaps.length} unusual communication gap(s) detected`,
-        recommendation:
-          'Investigate periods of silence for operational significance',
+        recommendation: "Investigate periods of silence for operational significance",
       });
     }
 
@@ -163,16 +156,15 @@ const TemporalAnalysisEngine = {
     });
 
     const eventCounts = Object.values(hourlyEvents);
-    const avgHourlyEvents =
-      eventCounts.reduce((a, b) => a + b, 0) / eventCounts.length;
+    const avgHourlyEvents = eventCounts.reduce((a, b) => a + b, 0) / eventCounts.length;
     const spikes = eventCounts.filter((count) => count > avgHourlyEvents * 4);
 
     if (spikes.length > 0) {
       anomalies.push({
-        type: 'ACTIVITY_SPIKE',
-        severity: 'medium',
+        type: "ACTIVITY_SPIKE",
+        severity: "medium",
         description: `${spikes.length} unusual activity spike(s) detected`,
-        recommendation: 'Analyze coordinated behavior during peak periods',
+        recommendation: "Analyze coordinated behavior during peak periods",
       });
     }
 
@@ -191,24 +183,16 @@ const TemporalAnalysisEngine = {
     });
 
     const peakDay = Object.keys(weeklyActivity).reduce((a, b) =>
-      weeklyActivity[a] > weeklyActivity[b] ? a : b,
+      weeklyActivity[a] > weeklyActivity[b] ? a : b
     );
 
-    const dayNames = [
-      'Sunday',
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-    ];
+    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
     predictions.push({
-      type: 'WEEKLY_PREDICTION',
+      type: "WEEKLY_PREDICTION",
       confidence: 0.82,
       description: `Next peak activity likely on ${dayNames[peakDay]}`,
-      timeframe: '7 days',
+      timeframe: "7 days",
       probability: 0.82,
     });
 
@@ -218,10 +202,10 @@ const TemporalAnalysisEngine = {
 
     if (recentEvents.length > olderEvents.length) {
       predictions.push({
-        type: 'GROWTH_TREND',
+        type: "GROWTH_TREND",
         confidence: 0.75,
-        description: 'Activity trend shows increasing frequency',
-        timeframe: '30 days',
+        description: "Activity trend shows increasing frequency",
+        timeframe: "30 days",
         probability: 0.75,
       });
     }
@@ -234,52 +218,50 @@ const TemporalAnalysisEngine = {
 const generateSampleEvents = () => {
   const eventTypes = [
     {
-      type: 'communication',
+      type: "communication",
       icon: <PhoneIcon />,
-      color: '#2196F3',
-      label: 'Phone Call',
+      color: "#2196F3",
+      label: "Phone Call",
     },
     {
-      type: 'meeting',
+      type: "meeting",
       icon: <EventIcon />,
-      color: '#FF9800',
-      label: 'Meeting',
+      color: "#FF9800",
+      label: "Meeting",
     },
     {
-      type: 'transaction',
+      type: "transaction",
       icon: <MoneyIcon />,
-      color: '#4CAF50',
-      label: 'Financial Transaction',
+      color: "#4CAF50",
+      label: "Financial Transaction",
     },
     {
-      type: 'document',
+      type: "document",
       icon: <DocumentIcon />,
-      color: '#9C27B0',
-      label: 'Document Created',
+      color: "#9C27B0",
+      label: "Document Created",
     },
     {
-      type: 'travel',
+      type: "travel",
       icon: <LocationIcon />,
-      color: '#F44336',
-      label: 'Location Change',
+      color: "#F44336",
+      label: "Location Change",
     },
     {
-      type: 'email',
+      type: "email",
       icon: <EmailIcon />,
-      color: '#607D8B',
-      label: 'Email Exchange',
+      color: "#607D8B",
+      label: "Email Exchange",
     },
   ];
 
   const events = [];
-  const startDate = new Date('2024-01-01');
+  const startDate = new Date("2024-01-01");
 
   for (let i = 0; i < 25; i++) {
     const eventType = eventTypes[Math.floor(Math.random() * eventTypes.length)];
     const timestamp = new Date(
-      startDate.getTime() +
-        i * 24 * 60 * 60 * 1000 +
-        Math.random() * 12 * 60 * 60 * 1000,
+      startDate.getTime() + i * 24 * 60 * 60 * 1000 + Math.random() * 12 * 60 * 60 * 1000
     );
 
     events.push({
@@ -294,10 +276,10 @@ const generateSampleEvents = () => {
         `Person ${Math.floor(Math.random() * 5) + 1}`,
         `Entity ${Math.floor(Math.random() * 3) + 1}`,
       ],
-      location: ['San Francisco', 'New York', 'Chicago', 'Los Angeles'][
+      location: ["San Francisco", "New York", "Chicago", "Los Angeles"][
         Math.floor(Math.random() * 4)
       ],
-      significance: ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)],
+      significance: ["Low", "Medium", "High"][Math.floor(Math.random() * 3)],
       verified: Math.random() > 0.3,
     });
   }
@@ -311,7 +293,7 @@ export default function InvestigationTimeline() {
   const [patterns, setPatterns] = useState([]);
   const [anomalies, setAnomalies] = useState([]);
   const [predictions, setPredictions] = useState([]);
-  const [filterType, setFilterType] = useState('all');
+  const [filterType, setFilterType] = useState("all");
   const [autoAnalysis, setAutoAnalysis] = useState(true);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [currentEventIndex, setCurrentEventIndex] = useState(events.length);
@@ -323,12 +305,9 @@ export default function InvestigationTimeline() {
     // Simulate analysis delay
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    const detectedPatterns =
-      TemporalAnalysisEngine.detectTemporalPatterns(events);
-    const detectedAnomalies =
-      TemporalAnalysisEngine.detectTimelineAnomalies(events);
-    const futurePredictions =
-      TemporalAnalysisEngine.predictFutureActivity(events);
+    const detectedPatterns = TemporalAnalysisEngine.detectTemporalPatterns(events);
+    const detectedAnomalies = TemporalAnalysisEngine.detectTimelineAnomalies(events);
+    const futurePredictions = TemporalAnalysisEngine.predictFutureActivity(events);
 
     setPatterns(detectedPatterns);
     setAnomalies(detectedAnomalies);
@@ -343,32 +322,32 @@ export default function InvestigationTimeline() {
   }, [events, autoAnalysis]);
 
   const filteredEvents = events
-    .filter((event) => filterType === 'all' || event.type === filterType)
+    .filter((event) => filterType === "all" || event.type === filterType)
     .slice(0, currentEventIndex);
 
   const getSignificanceColor = (significance) => {
     switch (significance) {
-      case 'High':
-        return 'error';
-      case 'Medium':
-        return 'warning';
-      case 'Low':
-        return 'info';
+      case "High":
+        return "error";
+      case "Medium":
+        return "warning";
+      case "Low":
+        return "info";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
       {/* Header */}
       <Card sx={{ mb: 2 }}>
         <CardContent>
           <Box
             sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
             <Box>
@@ -379,20 +358,13 @@ export default function InvestigationTimeline() {
                 Temporal analysis and pattern detection in investigation events
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', gap: 1 }}>
+            <Box sx={{ display: "flex", gap: 1 }}>
               <Tooltip title="Run Analysis">
-                <IconButton
-                  onClick={runTemporalAnalysis}
-                  disabled={isAnalyzing}
-                  color="primary"
-                >
+                <IconButton onClick={runTemporalAnalysis} disabled={isAnalyzing} color="primary">
                   <RefreshIcon />
                 </IconButton>
               </Tooltip>
-              <Badge
-                badgeContent={patterns.length + anomalies.length}
-                color="secondary"
-              >
+              <Badge badgeContent={patterns.length + anomalies.length} color="secondary">
                 <AIIcon />
               </Badge>
             </Box>
@@ -403,7 +375,7 @@ export default function InvestigationTimeline() {
       <Grid container spacing={2} sx={{ flexGrow: 1 }}>
         {/* Controls */}
         <Grid item xs={12} lg={3}>
-          <Card sx={{ height: '100%' }}>
+          <Card sx={{ height: "100%" }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
                 🎛️ Timeline Controls
@@ -442,19 +414,15 @@ export default function InvestigationTimeline() {
               <Typography variant="subtitle2" gutterBottom>
                 📊 Timeline Stats
               </Typography>
+              <Typography variant="body2">Total Events: {events.length}</Typography>
+              <Typography variant="body2">Filtered: {filteredEvents.length}</Typography>
               <Typography variant="body2">
-                Total Events: {events.length}
-              </Typography>
-              <Typography variant="body2">
-                Filtered: {filteredEvents.length}
-              </Typography>
-              <Typography variant="body2">
-                Time Span:{' '}
+                Time Span:{" "}
                 {Math.floor(
                   (new Date(events[events.length - 1]?.timestamp) -
                     new Date(events[0]?.timestamp)) /
-                    (1000 * 60 * 60 * 24),
-                )}{' '}
+                    (1000 * 60 * 60 * 24)
+                )}{" "}
                 days
               </Typography>
 
@@ -469,8 +437,8 @@ export default function InvestigationTimeline() {
 
         {/* Timeline */}
         <Grid item xs={12} lg={6}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent sx={{ height: '100%', overflow: 'auto' }}>
+          <Card sx={{ height: "100%" }}>
+            <CardContent sx={{ height: "100%", overflow: "auto" }}>
               <Typography variant="h6" gutterBottom>
                 📅 Event Timeline
               </Typography>
@@ -478,10 +446,7 @@ export default function InvestigationTimeline() {
               <Timeline>
                 {filteredEvents.map((event, index) => (
                   <TimelineItem key={event.id}>
-                    <TimelineOppositeContent
-                      color="text.secondary"
-                      sx={{ flex: 0.3 }}
-                    >
+                    <TimelineOppositeContent color="text.secondary" sx={{ flex: 0.3 }}>
                       <Typography variant="caption">
                         {new Date(event.timestamp).toLocaleDateString()}
                       </Typography>
@@ -491,51 +456,35 @@ export default function InvestigationTimeline() {
                     </TimelineOppositeContent>
 
                     <TimelineSeparator>
-                      <TimelineDot sx={{ bgcolor: event.color }}>
-                        {event.icon}
-                      </TimelineDot>
-                      {index < filteredEvents.length - 1 && (
-                        <TimelineConnector />
-                      )}
+                      <TimelineDot sx={{ bgcolor: event.color }}>{event.icon}</TimelineDot>
+                      {index < filteredEvents.length - 1 && <TimelineConnector />}
                     </TimelineSeparator>
 
                     <TimelineContent>
                       <Box sx={{ pb: 2 }}>
                         <Box
                           sx={{
-                            display: 'flex',
-                            alignItems: 'center',
+                            display: "flex",
+                            alignItems: "center",
                             gap: 1,
                             mb: 1,
                           }}
                         >
-                          <Typography variant="subtitle2">
-                            {event.title}
-                          </Typography>
+                          <Typography variant="subtitle2">{event.title}</Typography>
                           <Chip
                             label={event.significance}
                             size="small"
                             color={getSignificanceColor(event.significance)}
                           />
-                          {event.verified && (
-                            <Chip
-                              label="Verified"
-                              size="small"
-                              color="success"
-                            />
-                          )}
+                          {event.verified && <Chip label="Verified" size="small" color="success" />}
                         </Box>
 
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ mb: 1 }}
-                        >
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                           {event.description}
                         </Typography>
 
                         <Typography variant="caption" display="block">
-                          📍 {event.location} | 👥 {event.entities.join(', ')}
+                          📍 {event.location} | 👥 {event.entities.join(", ")}
                         </Typography>
                       </Box>
                     </TimelineContent>
@@ -548,7 +497,7 @@ export default function InvestigationTimeline() {
 
         {/* Analysis Panel */}
         <Grid item xs={12} lg={3}>
-          <Card sx={{ height: '100%' }}>
+          <Card sx={{ height: "100%" }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
                 🧠 Temporal Analysis
@@ -556,9 +505,7 @@ export default function InvestigationTimeline() {
 
               <Accordion defaultExpanded>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Typography variant="subtitle2">
-                    🎯 Patterns ({patterns.length})
-                  </Typography>
+                  <Typography variant="subtitle2">🎯 Patterns ({patterns.length})</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <List dense>
@@ -569,10 +516,7 @@ export default function InvestigationTimeline() {
                         </ListItemIcon>
                         <ListItemText
                           primary={
-                            <Typography
-                              variant="body2"
-                              sx={{ fontSize: '0.85rem' }}
-                            >
+                            <Typography variant="body2" sx={{ fontSize: "0.85rem" }}>
                               {pattern.description}
                             </Typography>
                           }
@@ -586,9 +530,7 @@ export default function InvestigationTimeline() {
 
               <Accordion>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Typography variant="subtitle2">
-                    ⚠️ Anomalies ({anomalies.length})
-                  </Typography>
+                  <Typography variant="subtitle2">⚠️ Anomalies ({anomalies.length})</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <List dense>
@@ -599,10 +541,7 @@ export default function InvestigationTimeline() {
                         </ListItemIcon>
                         <ListItemText
                           primary={
-                            <Typography
-                              variant="body2"
-                              sx={{ fontSize: '0.85rem' }}
-                            >
+                            <Typography variant="body2" sx={{ fontSize: "0.85rem" }}>
                               {anomaly.description}
                             </Typography>
                           }
@@ -616,9 +555,7 @@ export default function InvestigationTimeline() {
 
               <Accordion>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Typography variant="subtitle2">
-                    🔮 Predictions ({predictions.length})
-                  </Typography>
+                  <Typography variant="subtitle2">🔮 Predictions ({predictions.length})</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <List dense>
@@ -629,10 +566,7 @@ export default function InvestigationTimeline() {
                         </ListItemIcon>
                         <ListItemText
                           primary={
-                            <Typography
-                              variant="body2"
-                              sx={{ fontSize: '0.85rem' }}
-                            >
+                            <Typography variant="body2" sx={{ fontSize: "0.85rem" }}>
                               {prediction.description}
                             </Typography>
                           }
@@ -644,11 +578,11 @@ export default function InvestigationTimeline() {
                 </AccordionDetails>
               </Accordion>
 
-              <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+              <Box sx={{ mt: 2, p: 2, bgcolor: "grey.50", borderRadius: 1 }}>
                 <Typography variant="caption" color="text.secondary">
-                  🔬 <strong>Temporal AI Engine:</strong> Advanced algorithms
-                  analyze event sequences, detect patterns, and predict future
-                  activity with machine learning models.
+                  🔬 <strong>Temporal AI Engine:</strong> Advanced algorithms analyze event
+                  sequences, detect patterns, and predict future activity with machine learning
+                  models.
                 </Typography>
               </Box>
             </CardContent>

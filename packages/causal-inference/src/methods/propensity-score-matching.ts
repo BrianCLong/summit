@@ -2,7 +2,7 @@
  * Propensity Score Matching
  */
 
-import type { TreatmentEffect, PropensityScore } from '../types/index.js';
+import type { TreatmentEffect, PropensityScore } from "../types/index.js";
 
 export class PropensityScoreMatcher {
   /**
@@ -35,10 +35,7 @@ export class PropensityScoreMatcher {
 
     // Calculate confidence interval
     const se = this.standardError(effects);
-    const confidence: [number, number] = [
-      ate - 1.96 * se,
-      ate + 1.96 * se,
-    ];
+    const confidence: [number, number] = [ate - 1.96 * se, ate + 1.96 * se];
 
     const pValue = this.calculatePValue(ate, se);
 
@@ -75,12 +72,9 @@ export class PropensityScoreMatcher {
   /**
    * Match treated units to control units
    */
-  private matchUnits(
-    scores: PropensityScore[],
-    treatment: boolean[]
-  ): PropensityScore[] {
-    const treated = scores.filter(s => s.treatment);
-    const control = scores.filter(s => !s.treatment);
+  private matchUnits(scores: PropensityScore[], treatment: boolean[]): PropensityScore[] {
+    const treated = scores.filter((s) => s.treatment);
+    const control = scores.filter((s) => !s.treatment);
 
     const matched: PropensityScore[] = [];
 
@@ -117,13 +111,13 @@ export class PropensityScoreMatcher {
 
   private standardError(effects: number[]): number {
     const mean = effects.reduce((a, b) => a + b, 0) / effects.length;
-    const variance = effects.reduce((sum, e) =>
-      sum + Math.pow(e - mean, 2), 0) / (effects.length - 1);
+    const variance =
+      effects.reduce((sum, e) => sum + Math.pow(e - mean, 2), 0) / (effects.length - 1);
     return Math.sqrt(variance / effects.length);
   }
 
   private calculatePValue(effect: number, se: number): number {
     const zScore = Math.abs(effect / se);
-    return zScore > 1.96 ? 0.05 : 0.10;
+    return zScore > 1.96 ? 0.05 : 0.1;
   }
 }

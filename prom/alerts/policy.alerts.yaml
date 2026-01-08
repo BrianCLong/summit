@@ -9,7 +9,7 @@ groups:
           severity: page
           service: policy-enforcer
         annotations:
-          summary: 'Policy decision latency p95 above 150ms'
+          summary: "Policy decision latency p95 above 150ms"
           description: |
             Policy decision latency p95 is {{ $value | printf "%.0f" }}ms for 10m, breaching the 150ms SLO.
           runbook_url: https://docs.intelgraph.com/runbooks/policy-latency
@@ -22,7 +22,7 @@ groups:
           severity: warn
           service: policy-enforcer
         annotations:
-          summary: 'Policy deny rate exceeds 5%'
+          summary: "Policy deny rate exceeds 5%"
           description: |
             Deny decisions exceed 5% of total traffic for 10m. Validate policies, appeals, and cache health.
           runbook_url: https://docs.intelgraph.com/runbooks/policy-deny-rate
@@ -35,7 +35,7 @@ groups:
           severity: page
           service: policy-receipts
         annotations:
-          summary: 'Receipt coverage below 98% of policy decisions'
+          summary: "Receipt coverage below 98% of policy decisions"
           description: |
             Receipt writes fell below 98% of policy decisions over 15m. Investigate provenance pipeline and backlog.
           runbook_url: https://docs.intelgraph.com/runbooks/policy-receipts
@@ -48,7 +48,7 @@ groups:
           severity: warn
           service: policy-receipts
         annotations:
-          summary: 'More than 50 decision receipts missing over 30m'
+          summary: "More than 50 decision receipts missing over 30m"
           description: |
             Receipt backlog is growing ({{ $value | printf "%.0f" }} decisions without receipts in 30m). Check ledger ingestion and retry queues.
           runbook_url: https://docs.intelgraph.com/runbooks/policy-receipts

@@ -8,10 +8,7 @@
   },
   "vars": {},
   "guardrails": {
-    "tags": [
-      "agentic",
-      "legacy"
-    ]
+    "tags": ["agentic", "legacy"]
   },
   "template_path": "template.md"
 }

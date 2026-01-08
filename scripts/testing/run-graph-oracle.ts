@@ -21,15 +21,25 @@
  * @module scripts/testing/run-graph-oracle
  */
 
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+import * as fs from "node:fs";
+import * as path from "node:path";
 
 // =============================================================================
 // TYPES
 // =============================================================================
 
 interface ValidationRule {
-  type: 'exact' | 'contains' | 'set' | 'ordered' | 'null' | 'notNull' | 'gte' | 'lte' | 'allMatch' | 'descending';
+  type:
+    | "exact"
+    | "contains"
+    | "set"
+    | "ordered"
+    | "null"
+    | "notNull"
+    | "gte"
+    | "lte"
+    | "allMatch"
+    | "descending";
   field: string;
   value?: unknown;
   values?: unknown[];
@@ -48,7 +58,7 @@ interface OracleScenario {
   description: string;
   enabled: boolean;
   query: {
-    type: 'graphql' | 'rest';
+    type: "graphql" | "rest";
     operation: string;
     document: string;
     variables: Record<string, unknown>;
@@ -92,7 +102,7 @@ interface ScenarioResult {
   id: string;
   name: string;
   category: string;
-  status: 'PASS' | 'FAIL' | 'SKIP' | 'ERROR';
+  status: "PASS" | "FAIL" | "SKIP" | "ERROR";
   latencyMs: number;
   validationResults: Array<{
     rule: ValidationRule;
@@ -117,12 +127,15 @@ interface OracleReport {
     successRate: number;
   };
   resultsByCategory: Record<string, ScenarioResult[]>;
-  performanceSummary: Record<string, {
-    avgMs: number;
-    p95Ms: number;
-    p99Ms: number;
-    maxMs: number;
-  }>;
+  performanceSummary: Record<
+    string,
+    {
+      avgMs: number;
+      p95Ms: number;
+      p99Ms: number;
+      maxMs: number;
+    }
+  >;
   failures: ScenarioResult[];
 }
 
@@ -131,10 +144,10 @@ interface OracleReport {
 // =============================================================================
 
 const DEFAULT_CONFIG = {
-  apiUrl: process.env.GRAPHQL_API_URL || 'http://localhost:4000/graphql',
-  scenariosPath: 'testdata/intelgraph/oracle-scenarios.json',
-  goldenDatasetPath: 'data/golden-path/demo-investigation.json',
-  reportDir: 'reports',
+  apiUrl: process.env.GRAPHQL_API_URL || "http://localhost:4000/graphql",
+  scenariosPath: "testdata/intelgraph/oracle-scenarios.json",
+  goldenDatasetPath: "data/golden-path/demo-investigation.json",
+  reportDir: "reports",
   timeout: 10000,
   verbose: false,
   skipSetup: false,
@@ -152,28 +165,28 @@ function parseArgs(): typeof DEFAULT_CONFIG {
 
   for (let i = 0; i < args.length; i++) {
     switch (args[i]) {
-      case '--api-url':
+      case "--api-url":
         config.apiUrl = args[++i];
         break;
-      case '--scenario':
+      case "--scenario":
         config.scenario = args[++i];
         break;
-      case '--category':
+      case "--category":
         config.category = args[++i];
         break;
-      case '--verbose':
+      case "--verbose":
         config.verbose = true;
         break;
-      case '--report-dir':
+      case "--report-dir":
         config.reportDir = args[++i];
         break;
-      case '--skip-setup':
+      case "--skip-setup":
         config.skipSetup = true;
         break;
-      case '--timeout':
+      case "--timeout":
         config.timeout = parseInt(args[++i], 10);
         break;
-      case '--help':
+      case "--help":
         printHelp();
         process.exit(0);
     }
@@ -213,7 +226,7 @@ function log(message: string, verbose = false): void {
 }
 
 function getValueAtPath(obj: unknown, path: string): unknown {
-  const parts = path.split('.');
+  const parts = path.split(".");
   let current = obj;
 
   for (const part of parts) {
@@ -231,9 +244,9 @@ function getValueAtPath(obj: unknown, path: string): unknown {
         return undefined;
       }
 
-      if (index === '*') {
+      if (index === "*") {
         // Return array of values at this path
-        const remaining = parts.slice(parts.indexOf(part) + 1).join('.');
+        const remaining = parts.slice(parts.indexOf(part) + 1).join(".");
         if (remaining) {
           return current.map((item) => getValueAtPath(item, remaining));
         }
@@ -260,7 +273,7 @@ function validateRule(
   const actual = getValueAtPath(response, rule.field);
 
   switch (rule.type) {
-    case 'exact':
+    case "exact":
       if (actual === rule.value) {
         return { passed: true, message: `${rule.field} equals ${JSON.stringify(rule.value)}` };
       }
@@ -271,7 +284,7 @@ function validateRule(
         expected: rule.value,
       };
 
-    case 'null':
+    case "null":
       if (actual === null || actual === undefined) {
         return { passed: true, message: `${rule.field} is null/undefined` };
       }
@@ -282,7 +295,7 @@ function validateRule(
         expected: null,
       };
 
-    case 'notNull':
+    case "notNull":
       if (actual !== null && actual !== undefined) {
         return { passed: true, message: `${rule.field} is not null` };
       }
@@ -290,11 +303,11 @@ function validateRule(
         passed: false,
         message: `${rule.field} expected non-null value`,
         actual,
-        expected: 'non-null',
+        expected: "non-null",
       };
 
-    case 'gte':
-      if (typeof actual === 'number' && actual >= (rule.value as number)) {
+    case "gte":
+      if (typeof actual === "number" && actual >= (rule.value as number)) {
         return { passed: true, message: `${rule.field} >= ${rule.value}` };
       }
       return {
@@ -304,8 +317,8 @@ function validateRule(
         expected: `>= ${rule.value}`,
       };
 
-    case 'lte':
-      if (typeof actual === 'number' && actual <= (rule.value as number)) {
+    case "lte":
+      if (typeof actual === "number" && actual <= (rule.value as number)) {
         return { passed: true, message: `${rule.field} <= ${rule.value}` };
       }
       return {
@@ -315,7 +328,7 @@ function validateRule(
         expected: `<= ${rule.value}`,
       };
 
-    case 'contains':
+    case "contains":
       if (Array.isArray(actual) && rule.values) {
         const missing = rule.values.filter((v) => !actual.includes(v));
         if (missing.length === 0) {
@@ -335,12 +348,12 @@ function validateRule(
         expected: rule.values,
       };
 
-    case 'set':
+    case "set":
       if (Array.isArray(actual) && rule.values) {
         const actualSet = new Set(actual);
         const expectedSet = new Set(rule.values);
-        const matches = actualSet.size === expectedSet.size &&
-          [...actualSet].every((v) => expectedSet.has(v));
+        const matches =
+          actualSet.size === expectedSet.size && [...actualSet].every((v) => expectedSet.has(v));
         if (matches) {
           return { passed: true, message: `${rule.field} matches expected set` };
         }
@@ -358,7 +371,7 @@ function validateRule(
         expected: rule.values,
       };
 
-    case 'ordered':
+    case "ordered":
       if (Array.isArray(actual) && rule.values) {
         const matches = JSON.stringify(actual) === JSON.stringify(rule.values);
         if (matches) {
@@ -378,11 +391,14 @@ function validateRule(
         expected: rule.values,
       };
 
-    case 'allMatch':
+    case "allMatch":
       if (Array.isArray(actual)) {
         const allMatch = actual.every((v) => v === rule.value);
         if (allMatch) {
-          return { passed: true, message: `${rule.field} all values match ${JSON.stringify(rule.value)}` };
+          return {
+            passed: true,
+            message: `${rule.field} all values match ${JSON.stringify(rule.value)}`,
+          };
         }
         const nonMatching = actual.filter((v) => v !== rule.value);
         return {
@@ -399,7 +415,7 @@ function validateRule(
         expected: rule.value,
       };
 
-    case 'descending':
+    case "descending":
       if (Array.isArray(actual)) {
         let isDescending = true;
         for (let i = 1; i < actual.length; i++) {
@@ -415,14 +431,14 @@ function validateRule(
           passed: false,
           message: `${rule.field} is not in descending order`,
           actual,
-          expected: 'descending order',
+          expected: "descending order",
         };
       }
       return {
         passed: false,
         message: `${rule.field} is not an array`,
         actual,
-        expected: 'array in descending order',
+        expected: "array in descending order",
       };
 
     default:
@@ -450,9 +466,9 @@ async function executeGraphQL(
 
   try {
     const response = await fetch(apiUrl, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         query: document,
@@ -474,7 +490,7 @@ async function executeGraphQL(
     clearTimeout(timeoutId);
     const latencyMs = Date.now() - startTime;
 
-    if (error instanceof Error && error.name === 'AbortError') {
+    if (error instanceof Error && error.name === "AbortError") {
       throw new Error(`Query timeout after ${timeout}ms`);
     }
     throw error;
@@ -487,13 +503,13 @@ async function executeGraphQL(
 
 function loadScenarios(scenariosPath: string): OracleScenariosFile {
   const fullPath = path.resolve(process.cwd(), scenariosPath);
-  const content = fs.readFileSync(fullPath, 'utf-8');
+  const content = fs.readFileSync(fullPath, "utf-8");
   return JSON.parse(content);
 }
 
 function loadGoldenDataset(datasetPath: string): GoldenDataset {
   const fullPath = path.resolve(process.cwd(), datasetPath);
-  const content = fs.readFileSync(fullPath, 'utf-8');
+  const content = fs.readFileSync(fullPath, "utf-8");
   return JSON.parse(content);
 }
 
@@ -504,7 +520,7 @@ async function setupGoldenData(
 ): Promise<Map<string, string>> {
   const entityIdMap = new Map<string, string>();
 
-  log('Loading golden dataset into graph...');
+  log("Loading golden dataset into graph...");
 
   // Create entities
   for (let i = 0; i < dataset.entities.length; i++) {
@@ -524,18 +540,18 @@ async function setupGoldenData(
       entityType: entity.type,
       label: entity.name,
       properties: entity.properties,
-      tenantId: 'oracle-test',
+      tenantId: "oracle-test",
       confidence: 1.0,
-      source: 'oracle-runner',
-      createdBy: 'oracle-runner',
+      source: "oracle-runner",
+      createdBy: "oracle-runner",
       policyLabels: {
-        origin: 'oracle-test',
-        sensitivity: 'INTERNAL',
-        clearance: 'AUTHORIZED',
-        legalBasis: 'testing',
+        origin: "oracle-test",
+        sensitivity: "INTERNAL",
+        clearance: "AUTHORIZED",
+        legalBasis: "testing",
         needToKnow: [],
-        purposeLimitation: ['testing'],
-        retentionClass: 'TRANSIENT',
+        purposeLimitation: ["testing"],
+        retentionClass: "TRANSIENT",
       },
     };
 
@@ -575,18 +591,18 @@ async function setupGoldenData(
       fromEntityId: fromId,
       toEntityId: toId,
       properties: rel.properties,
-      tenantId: 'oracle-test',
+      tenantId: "oracle-test",
       confidence: 1.0,
-      source: 'oracle-runner',
-      createdBy: 'oracle-runner',
+      source: "oracle-runner",
+      createdBy: "oracle-runner",
       policyLabels: {
-        origin: 'oracle-test',
-        sensitivity: 'INTERNAL',
-        clearance: 'AUTHORIZED',
-        legalBasis: 'testing',
+        origin: "oracle-test",
+        sensitivity: "INTERNAL",
+        clearance: "AUTHORIZED",
+        legalBasis: "testing",
         needToKnow: [],
-        purposeLimitation: ['testing'],
-        retentionClass: 'TRANSIENT',
+        purposeLimitation: ["testing"],
+        retentionClass: "TRANSIENT",
       },
     };
 
@@ -613,7 +629,7 @@ function interpolateVariables(
   const result: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(variables)) {
-    if (typeof value === 'string' && value.startsWith('{{') && value.endsWith('}}')) {
+    if (typeof value === "string" && value.startsWith("{{") && value.endsWith("}}")) {
       const ref = value.slice(2, -2);
       const match = ref.match(/^entities\.(\w+)\.id$/);
       if (match) {
@@ -628,12 +644,8 @@ function interpolateVariables(
       } else {
         result[key] = value;
       }
-    } else if (typeof value === 'object' && value !== null) {
-      result[key] = interpolateVariables(
-        value as Record<string, unknown>,
-        entityIdMap,
-        entityRefs
-      );
+    } else if (typeof value === "object" && value !== null) {
+      result[key] = interpolateVariables(value as Record<string, unknown>, entityIdMap, entityRefs);
     } else {
       result[key] = value;
     }
@@ -652,23 +664,19 @@ async function runScenario(
     id: scenario.id,
     name: scenario.name,
     category: scenario.category,
-    status: 'SKIP',
+    status: "SKIP",
     latencyMs: 0,
     validationResults: [],
   };
 
   if (!scenario.enabled) {
-    result.status = 'SKIP';
+    result.status = "SKIP";
     return result;
   }
 
   try {
     // Interpolate variables with entity IDs
-    const variables = interpolateVariables(
-      scenario.query.variables,
-      entityIdMap,
-      entityRefs
-    );
+    const variables = interpolateVariables(scenario.query.variables, entityIdMap, entityRefs);
 
     log(`  Running scenario ${scenario.id}: ${scenario.name}`, true);
     log(`    Query: ${scenario.query.operation}`, true);
@@ -687,7 +695,7 @@ async function runScenario(
 
     // Check for GraphQL errors
     if (response.errors && response.errors.length > 0 && !scenario.expected.noError) {
-      result.status = 'FAIL';
+      result.status = "FAIL";
       result.error = `GraphQL errors: ${JSON.stringify(response.errors)}`;
       return result;
     }
@@ -709,7 +717,11 @@ async function runScenario(
     if (scenario.expected.performance?.maxLatencyMs) {
       if (result.latencyMs > scenario.expected.performance.maxLatencyMs) {
         result.validationResults.push({
-          rule: { type: 'lte', field: 'latency', value: scenario.expected.performance.maxLatencyMs },
+          rule: {
+            type: "lte",
+            field: "latency",
+            value: scenario.expected.performance.maxLatencyMs,
+          },
           passed: false,
           message: `Latency ${result.latencyMs}ms exceeded max ${scenario.expected.performance.maxLatencyMs}ms`,
           actual: result.latencyMs,
@@ -719,9 +731,9 @@ async function runScenario(
       }
     }
 
-    result.status = allPassed ? 'PASS' : 'FAIL';
+    result.status = allPassed ? "PASS" : "FAIL";
   } catch (error) {
-    result.status = 'ERROR';
+    result.status = "ERROR";
     result.error = error instanceof Error ? error.message : String(error);
   }
 
@@ -732,30 +744,25 @@ async function runScenario(
 // REPORT GENERATION
 // =============================================================================
 
-function generateReport(
-  results: ScenarioResult[],
-  config: typeof DEFAULT_CONFIG
-): OracleReport {
+function generateReport(results: ScenarioResult[], config: typeof DEFAULT_CONFIG): OracleReport {
   const report: OracleReport = {
     timestamp: new Date().toISOString(),
     apiUrl: config.apiUrl,
     summary: {
       total: results.length,
-      passed: results.filter((r) => r.status === 'PASS').length,
-      failed: results.filter((r) => r.status === 'FAIL').length,
-      skipped: results.filter((r) => r.status === 'SKIP').length,
-      errors: results.filter((r) => r.status === 'ERROR').length,
+      passed: results.filter((r) => r.status === "PASS").length,
+      failed: results.filter((r) => r.status === "FAIL").length,
+      skipped: results.filter((r) => r.status === "SKIP").length,
+      errors: results.filter((r) => r.status === "ERROR").length,
       successRate: 0,
     },
     resultsByCategory: {},
     performanceSummary: {},
-    failures: results.filter((r) => r.status === 'FAIL' || r.status === 'ERROR'),
+    failures: results.filter((r) => r.status === "FAIL" || r.status === "ERROR"),
   };
 
   report.summary.successRate =
-    report.summary.total > 0
-      ? Math.round((report.summary.passed / report.summary.total) * 100)
-      : 0;
+    report.summary.total > 0 ? Math.round((report.summary.passed / report.summary.total) * 100) : 0;
 
   // Group by category
   for (const result of results) {
@@ -768,7 +775,7 @@ function generateReport(
   // Calculate performance summary by category
   for (const [category, categoryResults] of Object.entries(report.resultsByCategory)) {
     const latencies = categoryResults
-      .filter((r) => r.status === 'PASS' || r.status === 'FAIL')
+      .filter((r) => r.status === "PASS" || r.status === "FAIL")
       .map((r) => r.latencyMs)
       .sort((a, b) => a - b);
 
@@ -787,13 +794,13 @@ function generateReport(
 
 function generateMarkdownReport(report: OracleReport): string {
   const lines: string[] = [
-    '# Graph Query Oracle Report',
-    '',
+    "# Graph Query Oracle Report",
+    "",
     `**Generated:** ${report.timestamp}`,
     `**API URL:** ${report.apiUrl}`,
-    '',
-    '## Summary',
-    '',
+    "",
+    "## Summary",
+    "",
     `| Metric | Value |`,
     `|--------|-------|`,
     `| Total Scenarios | ${report.summary.total} |`,
@@ -802,43 +809,50 @@ function generateMarkdownReport(report: OracleReport): string {
     `| Skipped | ${report.summary.skipped} |`,
     `| Errors | ${report.summary.errors} |`,
     `| Success Rate | ${report.summary.successRate}% |`,
-    '',
+    "",
   ];
 
   // Results by category
-  lines.push('## Results by Category', '');
+  lines.push("## Results by Category", "");
 
   for (const [category, results] of Object.entries(report.resultsByCategory)) {
-    lines.push(`### ${category.charAt(0).toUpperCase() + category.slice(1)}`, '');
-    lines.push('| Scenario | Status | Latency (ms) | Details |');
-    lines.push('|----------|--------|--------------|---------|');
+    lines.push(`### ${category.charAt(0).toUpperCase() + category.slice(1)}`, "");
+    lines.push("| Scenario | Status | Latency (ms) | Details |");
+    lines.push("|----------|--------|--------------|---------|");
 
     for (const result of results) {
-      const status = result.status === 'PASS' ? '✅ PASS' :
-                     result.status === 'FAIL' ? '❌ FAIL' :
-                     result.status === 'SKIP' ? '⏭️ SKIP' : '⚠️ ERROR';
-      const details = result.error ? result.error.substring(0, 50) :
-                      result.validationResults.filter((v) => !v.passed).length > 0 ?
-                      `${result.validationResults.filter((v) => !v.passed).length} validation(s) failed` : '-';
+      const status =
+        result.status === "PASS"
+          ? "✅ PASS"
+          : result.status === "FAIL"
+            ? "❌ FAIL"
+            : result.status === "SKIP"
+              ? "⏭️ SKIP"
+              : "⚠️ ERROR";
+      const details = result.error
+        ? result.error.substring(0, 50)
+        : result.validationResults.filter((v) => !v.passed).length > 0
+          ? `${result.validationResults.filter((v) => !v.passed).length} validation(s) failed`
+          : "-";
       lines.push(`| ${result.id}: ${result.name} | ${status} | ${result.latencyMs} | ${details} |`);
     }
-    lines.push('');
+    lines.push("");
   }
 
   // Failures detail
   if (report.failures.length > 0) {
-    lines.push('## Failures', '');
+    lines.push("## Failures", "");
 
     for (const failure of report.failures) {
-      lines.push(`### ${failure.id}: ${failure.name}`, '');
+      lines.push(`### ${failure.id}: ${failure.name}`, "");
 
       if (failure.error) {
-        lines.push(`**Error:** ${failure.error}`, '');
+        lines.push(`**Error:** ${failure.error}`, "");
       }
 
       const failedValidations = failure.validationResults.filter((v) => !v.passed);
       if (failedValidations.length > 0) {
-        lines.push('**Failed Validations:**', '');
+        lines.push("**Failed Validations:**", "");
         for (const v of failedValidations) {
           lines.push(`- ${v.message}`);
           if (v.expected !== undefined) {
@@ -848,28 +862,28 @@ function generateMarkdownReport(report: OracleReport): string {
             lines.push(`  - Actual: \`${JSON.stringify(v.actual)}\``);
           }
         }
-        lines.push('');
+        lines.push("");
       }
     }
   }
 
   // Performance summary
   if (Object.keys(report.performanceSummary).length > 0) {
-    lines.push('## Performance Summary', '');
-    lines.push('| Category | Avg (ms) | P95 (ms) | P99 (ms) | Max (ms) |');
-    lines.push('|----------|----------|----------|----------|----------|');
+    lines.push("## Performance Summary", "");
+    lines.push("| Category | Avg (ms) | P95 (ms) | P99 (ms) | Max (ms) |");
+    lines.push("|----------|----------|----------|----------|----------|");
 
     for (const [category, perf] of Object.entries(report.performanceSummary)) {
       lines.push(`| ${category} | ${perf.avgMs} | ${perf.p95Ms} | ${perf.p99Ms} | ${perf.maxMs} |`);
     }
-    lines.push('');
+    lines.push("");
   }
 
   // Footer
-  lines.push('---', '');
-  lines.push('*Generated by Graph Query Oracle Runner*');
+  lines.push("---", "");
+  lines.push("*Generated by Graph Query Oracle Runner*");
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 // =============================================================================
@@ -879,12 +893,12 @@ function generateMarkdownReport(report: OracleReport): string {
 async function main(): Promise<void> {
   const config = parseArgs();
 
-  console.log('='.repeat(60));
-  console.log('Graph Query Correctness Oracle');
-  console.log('='.repeat(60));
+  console.log("=".repeat(60));
+  console.log("Graph Query Correctness Oracle");
+  console.log("=".repeat(60));
   console.log(`API URL: ${config.apiUrl}`);
   console.log(`Scenarios: ${config.scenariosPath}`);
-  console.log('');
+  console.log("");
 
   // Load scenarios
   let scenarios: OracleScenariosFile;
@@ -914,7 +928,7 @@ async function main(): Promise<void> {
       console.log(`Setup complete: ${entityIdMap.size} entities created`);
     } catch (error) {
       console.warn(`Warning: Failed to setup golden data: ${error}`);
-      console.warn('Continuing with existing data...');
+      console.warn("Continuing with existing data...");
       // Create mock entity IDs for scenarios that reference them
       for (let i = 0; i < goldenDataset.entities.length; i++) {
         entityIdMap.set(`entity_${i}`, `mock-entity-${i}`);
@@ -932,22 +946,22 @@ async function main(): Promise<void> {
   }
 
   console.log(`\nRunning ${scenariosToRun.length} scenarios...`);
-  console.log('-'.repeat(60));
+  console.log("-".repeat(60));
 
   // Run scenarios
   const results: ScenarioResult[] = [];
   for (const scenario of scenariosToRun) {
-    const result = await runScenario(
-      scenario,
-      config,
-      entityIdMap,
-      scenarios.entityReferences
-    );
+    const result = await runScenario(scenario, config, entityIdMap, scenarios.entityReferences);
     results.push(result);
 
-    const statusIcon = result.status === 'PASS' ? '✅' :
-                       result.status === 'FAIL' ? '❌' :
-                       result.status === 'SKIP' ? '⏭️' : '⚠️';
+    const statusIcon =
+      result.status === "PASS"
+        ? "✅"
+        : result.status === "FAIL"
+          ? "❌"
+          : result.status === "SKIP"
+            ? "⏭️"
+            : "⚠️";
     console.log(`${statusIcon} ${result.id}: ${result.name} (${result.latencyMs}ms)`);
 
     if (config.verbose && result.validationResults.some((v) => !v.passed)) {
@@ -957,7 +971,7 @@ async function main(): Promise<void> {
     }
   }
 
-  console.log('-'.repeat(60));
+  console.log("-".repeat(60));
 
   // Generate report
   const report = generateReport(results, config);
@@ -969,19 +983,19 @@ async function main(): Promise<void> {
     fs.mkdirSync(reportDir, { recursive: true });
   }
 
-  const reportPath = path.join(reportDir, 'graph-oracle-report.md');
+  const reportPath = path.join(reportDir, "graph-oracle-report.md");
   fs.writeFileSync(reportPath, markdownReport);
   console.log(`\nReport saved to: ${reportPath}`);
 
   // Also save JSON report
-  const jsonReportPath = path.join(reportDir, 'graph-oracle-report.json');
+  const jsonReportPath = path.join(reportDir, "graph-oracle-report.json");
   fs.writeFileSync(jsonReportPath, JSON.stringify(report, null, 2));
   console.log(`JSON report saved to: ${jsonReportPath}`);
 
   // Summary
-  console.log('\n' + '='.repeat(60));
-  console.log('Summary');
-  console.log('='.repeat(60));
+  console.log("\n" + "=".repeat(60));
+  console.log("Summary");
+  console.log("=".repeat(60));
   console.log(`Total: ${report.summary.total}`);
   console.log(`Passed: ${report.summary.passed}`);
   console.log(`Failed: ${report.summary.failed}`);
@@ -991,15 +1005,15 @@ async function main(): Promise<void> {
 
   // Exit with error code if any failures
   if (report.summary.failed > 0 || report.summary.errors > 0) {
-    console.log('\n❌ Oracle validation FAILED');
+    console.log("\n❌ Oracle validation FAILED");
     process.exit(1);
   }
 
-  console.log('\n✅ Oracle validation PASSED');
+  console.log("\n✅ Oracle validation PASSED");
   process.exit(0);
 }
 
 main().catch((error) => {
-  console.error('Fatal error:', error);
+  console.error("Fatal error:", error);
   process.exit(1);
 });

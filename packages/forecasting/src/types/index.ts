@@ -28,7 +28,7 @@ export interface SeasonalityConfig {
   period: number;
   fourierOrder?: number;
   priorScale?: number;
-  mode?: 'additive' | 'multiplicative';
+  mode?: "additive" | "multiplicative";
 }
 
 export interface HolidayConfig {
@@ -60,8 +60,8 @@ export interface ExponentialSmoothingParams {
   beta?: number; // Trend smoothing
   gamma?: number; // Seasonal smoothing
   seasonalPeriods?: number;
-  trendType?: 'additive' | 'multiplicative' | 'none';
-  seasonalType?: 'additive' | 'multiplicative' | 'none';
+  trendType?: "additive" | "multiplicative" | "none";
+  seasonalType?: "additive" | "multiplicative" | "none";
   dampedTrend?: boolean;
 }
 
@@ -77,11 +77,11 @@ export interface LSTMConfig {
 export interface EnsembleConfig {
   models: ForecastModel[];
   weights?: number[];
-  method: 'average' | 'weighted' | 'stacking';
+  method: "average" | "weighted" | "stacking";
 }
 
 export interface ForecastModel {
-  type: 'arima' | 'sarima' | 'exponential' | 'prophet' | 'lstm' | 'gru' | 'tft';
+  type: "arima" | "sarima" | "exponential" | "prophet" | "lstm" | "gru" | "tft";
   params: ARIMAParams | ExponentialSmoothingParams | LSTMConfig | Record<string, unknown>;
   name?: string;
 }

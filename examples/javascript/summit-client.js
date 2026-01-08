@@ -2,23 +2,23 @@
  * Summit Platform JavaScript Client Example
  */
 
-const axios = require('axios');
+const axios = require("axios");
 
 class SummitClient {
-  constructor(baseUrl = 'http://localhost:4000', token = null) {
+  constructor(baseUrl = "http://localhost:4000", token = null) {
     this.baseUrl = baseUrl;
-    this.graphqlUrl = baseUrl + '/graphql';
+    this.graphqlUrl = baseUrl + "/graphql";
     this.token = token;
-    
+
     this.client = axios.create({
       baseURL: baseUrl,
       headers: {
-        'Content-Type': 'application/json'
-      }
+        "Content-Type": "application/json",
+      },
     });
-    
+
     if (token) {
-      this.client.defaults.headers.Authorization = 'Bearer ' + token;
+      this.client.defaults.headers.Authorization = "Bearer " + token;
     }
   }
 
@@ -36,7 +36,7 @@ class SummitClient {
     const response = await this.executeQuery(query, { email, password }, false);
     if (response.login) {
       this.token = response.login.token;
-      this.client.defaults.headers.Authorization = 'Bearer ' + this.token;
+      this.client.defaults.headers.Authorization = "Bearer " + this.token;
     }
     return response;
   }
@@ -70,14 +70,14 @@ class SummitClient {
       const payload = { query };
       if (variables) payload.variables = variables;
 
-      const config = { headers: { 'Content-Type': 'application/json' } };
+      const config = { headers: { "Content-Type": "application/json" } };
       if (authRequired && this.token) {
-        config.headers.Authorization = 'Bearer ' + this.token;
+        config.headers.Authorization = "Bearer " + this.token;
       }
 
       const response = await axios.post(this.graphqlUrl, payload, config);
       if (response.data.errors) {
-        throw new Error('GraphQL Error: ' + JSON.stringify(response.data.errors));
+        throw new Error("GraphQL Error: " + JSON.stringify(response.data.errors));
       }
       return response.data.data;
     } catch (error) {

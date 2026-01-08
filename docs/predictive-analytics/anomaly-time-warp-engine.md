@@ -7,7 +7,7 @@
 
 ## Executive Summary
 
-The **Anomaly Time-Warp Engine™** is a temporal anomaly prediction system that determines not just *that* anomalies will occur, but *when* they will be detectable and what their precursor signals are. By analyzing time-series patterns with dynamic temporal warping, the engine identifies early warning indicators and provides actionable time windows for preventive intervention.
+The **Anomaly Time-Warp Engine™** is a temporal anomaly prediction system that determines not just _that_ anomalies will occur, but _when_ they will be detectable and what their precursor signals are. By analyzing time-series patterns with dynamic temporal warping, the engine identifies early warning indicators and provides actionable time windows for preventive intervention.
 
 ### Key Capabilities
 
@@ -31,14 +31,17 @@ Traditional anomaly detection is **reactive** - it identifies anomalies after th
 ### Real-World Scenarios
 
 **Intelligence Analysis**:
+
 - Network intrusion attempts show characteristic precursor patterns (port scanning, authentication probing) hours before the main attack
 - Financial fraud exhibits micro-patterns in transaction timing before large-scale theft
 
 **Infrastructure Monitoring**:
+
 - Server failures are often preceded by subtle CPU/memory oscillations 15-30 minutes prior
 - Database performance degradation shows query pattern changes before critical slowdowns
 
 **Operational Security**:
+
 - Insider threats demonstrate behavioral shifts (access pattern changes, data download patterns) days before incidents
 - Supply chain compromises show communication pattern anomalies weeks before discovery
 
@@ -76,9 +79,11 @@ Traditional anomaly detection is **reactive** - it identifies anomalies after th
 ### Core Components
 
 #### 1. Anomaly Predictor
+
 **Purpose**: Forecasts when anomalies will occur based on historical patterns
 
 **Techniques**:
+
 - **ARIMA/SARIMA**: Seasonal trend analysis for periodic anomalies
 - **LSTM Networks**: Deep learning for complex temporal dependencies
 - **Prophet**: Facebook's forecasting library for business-critical patterns
@@ -87,9 +92,11 @@ Traditional anomaly detection is **reactive** - it identifies anomalies after th
 **Output**: Predicted anomaly onset windows with confidence scores
 
 #### 2. Precursor Extractor
+
 **Purpose**: Identifies leading indicators that precede anomalies
 
 **Techniques**:
+
 - **Granger Causality**: Statistical test for temporal precedence
 - **Cross-Correlation Analysis**: Finds lagged correlations between signals
 - **Wavelet Transform**: Multi-resolution analysis for different time scales
@@ -98,9 +105,11 @@ Traditional anomaly detection is **reactive** - it identifies anomalies after th
 **Output**: Ranked list of precursor signals with lead times
 
 #### 3. Timeline Warper
+
 **Purpose**: Dynamically stretches/compresses time to reveal hidden patterns
 
 **Techniques**:
+
 - **Dynamic Time Warping (DTW)**: Aligns similar patterns at different speeds
 - **Shapelet Discovery**: Finds characteristic sub-sequences
 - **Temporal Attention**: Learns which time segments are most important
@@ -109,9 +118,11 @@ Traditional anomaly detection is **reactive** - it identifies anomalies after th
 **Output**: Time-warped timelines showing aligned patterns
 
 #### 4. Intervention Planner
+
 **Purpose**: Recommends preventive actions based on predictions
 
 **Strategies**:
+
 - **Alert Escalation**: Notify appropriate teams within action windows
 - **Automated Mitigation**: Trigger defensive measures (rate limiting, circuit breakers)
 - **Resource Preallocation**: Scale systems before predicted load spikes
@@ -128,6 +139,7 @@ Traditional anomaly detection is **reactive** - it identifies anomalies after th
 **Input**: Time-series data with historical anomaly labels
 
 **Process**:
+
 ```python
 1. Extract Features:
    - Statistical moments (mean, variance, skewness, kurtosis)
@@ -152,6 +164,7 @@ Traditional anomaly detection is **reactive** - it identifies anomalies after th
 ```
 
 **Output**:
+
 ```typescript
 {
   anomalyId: string,
@@ -171,6 +184,7 @@ Traditional anomaly detection is **reactive** - it identifies anomalies after th
 **Input**: Multi-variate time-series with target anomaly events
 
 **Process**:
+
 ```python
 1. Identify Candidate Signals:
    - All metrics that exist before anomaly onset
@@ -194,6 +208,7 @@ Traditional anomaly detection is **reactive** - it identifies anomalies after th
 ```
 
 **Output**:
+
 ```typescript
 {
   signalId: string,
@@ -216,6 +231,7 @@ Traditional anomaly detection is **reactive** - it identifies anomalies after th
 **Input**: Multiple time-series to align and compare
 
 **Process**:
+
 ```python
 1. Normalize Timelines:
    - Z-score normalization for amplitude
@@ -239,6 +255,7 @@ Traditional anomaly detection is **reactive** - it identifies anomalies after th
 ```
 
 **Output**:
+
 ```typescript
 {
   originalTimeline: TimeSeries,
@@ -262,6 +279,7 @@ Traditional anomaly detection is **reactive** - it identifies anomalies after th
 **Input**: Anomaly prediction with precursor signals
 
 **Process**:
+
 ```python
 1. Calculate Action Window:
    - Start: When first precursor crosses warning threshold
@@ -287,6 +305,7 @@ Traditional anomaly detection is **reactive** - it identifies anomalies after th
 ```
 
 **Output**:
+
 ```typescript
 {
   interventionId: string,
@@ -455,60 +474,39 @@ type Query {
   """
   Get precursor signals for a predicted anomaly
   """
-  getPrecursors(
-    anomalyPredictionId: ID!
-    minReliability: Float = 0.6
-  ): [PrecursorSignal!]!
+  getPrecursors(anomalyPredictionId: ID!, minReliability: Float = 0.6): [PrecursorSignal!]!
 
   """
   Generate time-warped timeline aligning current pattern with historical anomalies
   """
-  getWarpedTimeline(
-    entityId: ID!
-    referenceAnomalyId: ID!
-    timeWindowMs: Int!
-  ): WarpedTimeline!
+  getWarpedTimeline(entityId: ID!, referenceAnomalyId: ID!, timeWindowMs: Int!): WarpedTimeline!
 
   """
   Get intervention plan for a predicted anomaly
   """
-  planIntervention(
-    anomalyPredictionId: ID!
-  ): PreventiveIntervention!
+  planIntervention(anomalyPredictionId: ID!): PreventiveIntervention!
 
   """
   Get active interventions requiring attention
   """
-  getActiveInterventions(
-    status: InterventionStatus
-  ): [PreventiveIntervention!]!
+  getActiveInterventions(status: InterventionStatus): [PreventiveIntervention!]!
 }
 
 type Mutation {
   """
   Start monitoring an entity for anomalies
   """
-  monitorForAnomalies(
-    entityId: ID!
-    monitoringConfig: MonitoringConfig!
-  ): MonitoringSession!
+  monitorForAnomalies(entityId: ID!, monitoringConfig: MonitoringConfig!): MonitoringSession!
 
   """
   Update detection window parameters
   """
-  setDetectionWindow(
-    sessionId: ID!
-    lookaheadMs: Int!
-    minConfidence: Float!
-  ): MonitoringSession!
+  setDetectionWindow(sessionId: ID!, lookaheadMs: Int!, minConfidence: Float!): MonitoringSession!
 
   """
   Execute a planned intervention
   """
-  executeIntervention(
-    interventionId: ID!
-    actions: [String!]
-  ): InterventionExecution!
+  executeIntervention(interventionId: ID!, actions: [String!]): InterventionExecution!
 
   """
   Record intervention outcome for learning
@@ -655,6 +653,7 @@ SELECT add_retention_policy('hourly_metric_aggregates', INTERVAL '1 year');
 ### Query Patterns
 
 **1. Recent Predictions**:
+
 ```sql
 SELECT * FROM anomaly_predictions
 WHERE entity_id = $1
@@ -665,6 +664,7 @@ LIMIT 10;
 ```
 
 **2. Precursor Signals**:
+
 ```sql
 SELECT ps.*
 FROM precursor_signals ps
@@ -675,6 +675,7 @@ ORDER BY ps.lead_time_ms DESC;
 ```
 
 **3. Time-Series Window**:
+
 ```sql
 SELECT * FROM time_series_metrics
 WHERE entity_id = $1
@@ -765,11 +766,13 @@ GET /health/timewarp
 **Scenario**: Predict DDoS attack 15 minutes before traffic spike
 
 **Precursor Signals**:
+
 - Gradual increase in connection rate (10 min lead)
 - Geographic diversity of source IPs (12 min lead)
 - Unusual port scanning patterns (15 min lead)
 
 **Intervention**:
+
 - Activate rate limiting at network edge
 - Scale up load balancers
 - Alert security operations center
@@ -779,11 +782,13 @@ GET /health/timewarp
 **Scenario**: Predict query timeout cascade 20 minutes before critical slowdown
 
 **Precursor Signals**:
+
 - Increasing query execution time variance (25 min lead)
 - Connection pool saturation rising (20 min lead)
 - Lock wait time trending upward (18 min lead)
 
 **Intervention**:
+
 - Preemptively scale read replicas
 - Activate query result caching
 - Notify DBA team for investigation
@@ -793,11 +798,13 @@ GET /health/timewarp
 **Scenario**: Predict data exfiltration attempt 48 hours before execution
 
 **Precursor Signals**:
+
 - Gradual increase in after-hours access (72 hours lead)
 - Unusual file access patterns (60 hours lead)
 - Network traffic to external storage sites (48 hours lead)
 
 **Intervention**:
+
 - Increase audit logging for user
 - Require additional authentication factors
 - Alert security team for investigation
@@ -807,16 +814,19 @@ GET /health/timewarp
 ## Future Enhancements
 
 ### Phase 2: Adaptive Learning
+
 - Continuously update models based on intervention outcomes
 - Learn entity-specific anomaly signatures
 - Personalized lead time predictions
 
 ### Phase 3: Causal Analysis
+
 - Identify root causes from precursor graph
 - Simulate intervention outcomes before execution
 - Generate explanations for predictions
 
 ### Phase 4: Cross-Entity Correlation
+
 - Detect anomaly propagation across related entities
 - Predict cascading failures
 - Global intervention orchestration

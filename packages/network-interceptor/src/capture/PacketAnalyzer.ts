@@ -3,7 +3,7 @@
  * TRAINING/SIMULATION ONLY - No actual packet capture
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid } from "uuid";
 
 export interface PacketHeader {
   timestamp: Date;
@@ -99,9 +99,9 @@ export class PacketAnalyzer {
       header: {
         timestamp: new Date(),
         captureLength: rawData.length,
-        originalLength: rawData.length
+        originalLength: rawData.length,
       },
-      isSimulated: true
+      isSimulated: true,
     };
 
     // Parse Ethernet frame (first 14 bytes)
@@ -176,7 +176,7 @@ export class PacketAnalyzer {
 
   private generateRandomPacket(): Uint8Array {
     // Generate realistic-looking packet data
-    const protocols = ['http', 'https', 'dns', 'smtp', 'ssh'];
+    const protocols = ["http", "https", "dns", "smtp", "ssh"];
     const protocol = protocols[Math.floor(Math.random() * protocols.length)];
 
     const size = 64 + Math.floor(Math.random() * 1400);
@@ -194,7 +194,7 @@ export class PacketAnalyzer {
     data[14] = 0x45; // Version + IHL
     data[15] = 0x00; // DSCP
     data[16] = (size - 14) >> 8;
-    data[17] = (size - 14) & 0xFF;
+    data[17] = (size - 14) & 0xff;
     data[22] = 64; // TTL
 
     // Protocol
@@ -217,16 +217,16 @@ export class PacketAnalyzer {
     const ports = this.getPortsForProtocol(protocol);
     if (isTcp) {
       data[34] = ports.src >> 8;
-      data[35] = ports.src & 0xFF;
+      data[35] = ports.src & 0xff;
       data[36] = ports.dst >> 8;
-      data[37] = ports.dst & 0xFF;
+      data[37] = ports.dst & 0xff;
       data[46] = 0x50; // Data offset
       data[47] = 0x18; // Flags (PSH+ACK)
     } else {
       data[34] = ports.src >> 8;
-      data[35] = ports.src & 0xFF;
+      data[35] = ports.src & 0xff;
       data[36] = ports.dst >> 8;
-      data[37] = ports.dst & 0xFF;
+      data[37] = ports.dst & 0xff;
     }
 
     // Simulated payload
@@ -246,42 +246,44 @@ export class PacketAnalyzer {
       dns: 53,
       smtp: 25,
       ssh: 22,
-      ftp: 21
+      ftp: 21,
     };
 
     return {
       src: 1024 + Math.floor(Math.random() * 64000),
-      dst: portMap[protocol] || 80
+      dst: portMap[protocol] || 80,
     };
   }
 
   private parseEthernet(data: Uint8Array): EthernetFrame {
     return {
       destinationMAC: Array.from(data.slice(0, 6))
-        .map(b => b.toString(16).padStart(2, '0')).join(':'),
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join(":"),
       sourceMAC: Array.from(data.slice(6, 12))
-        .map(b => b.toString(16).padStart(2, '0')).join(':'),
-      etherType: (data[12] << 8) | data[13]
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join(":"),
+      etherType: (data[12] << 8) | data[13],
     };
   }
 
   private parseIPv4(data: Uint8Array): IPPacket {
     return {
       version: 4,
-      headerLength: data[0] & 0x0F,
+      headerLength: data[0] & 0x0f,
       dscp: data[1] >> 2,
       totalLength: (data[2] << 8) | data[3],
       identification: (data[4] << 8) | data[5],
       flags: {
         dontFragment: (data[6] & 0x40) !== 0,
-        moreFragments: (data[6] & 0x20) !== 0
+        moreFragments: (data[6] & 0x20) !== 0,
       },
-      fragmentOffset: ((data[6] & 0x1F) << 8) | data[7],
+      fragmentOffset: ((data[6] & 0x1f) << 8) | data[7],
       ttl: data[8],
       protocol: data[9],
       checksum: (data[10] << 8) | data[11],
       sourceIP: `${data[12]}.${data[13]}.${data[14]}.${data[15]}`,
-      destinationIP: `${data[16]}.${data[17]}.${data[18]}.${data[19]}`
+      destinationIP: `${data[16]}.${data[17]}.${data[18]}.${data[19]}`,
     };
   }
 
@@ -298,11 +300,11 @@ export class PacketAnalyzer {
         rst: (data[13] & 0x04) !== 0,
         psh: (data[13] & 0x08) !== 0,
         ack: (data[13] & 0x10) !== 0,
-        urg: (data[13] & 0x20) !== 0
+        urg: (data[13] & 0x20) !== 0,
       },
       windowSize: (data[14] << 8) | data[15],
       checksum: (data[16] << 8) | data[17],
-      urgentPointer: (data[18] << 8) | data[19]
+      urgentPointer: (data[18] << 8) | data[19],
     };
   }
 
@@ -311,27 +313,38 @@ export class PacketAnalyzer {
       sourcePort: (data[0] << 8) | data[1],
       destinationPort: (data[2] << 8) | data[3],
       length: (data[4] << 8) | data[5],
-      checksum: (data[6] << 8) | data[7]
+      checksum: (data[6] << 8) | data[7],
     };
   }
 
   private identifyApplicationProtocol(srcPort: number, dstPort: number): string {
     const wellKnownPorts: Record<number, string> = {
-      20: 'FTP-DATA', 21: 'FTP', 22: 'SSH', 23: 'TELNET',
-      25: 'SMTP', 53: 'DNS', 80: 'HTTP', 110: 'POP3',
-      143: 'IMAP', 443: 'HTTPS', 993: 'IMAPS', 995: 'POP3S',
-      3389: 'RDP', 5060: 'SIP', 5061: 'SIPS'
+      20: "FTP-DATA",
+      21: "FTP",
+      22: "SSH",
+      23: "TELNET",
+      25: "SMTP",
+      53: "DNS",
+      80: "HTTP",
+      110: "POP3",
+      143: "IMAP",
+      443: "HTTPS",
+      993: "IMAPS",
+      995: "POP3S",
+      3389: "RDP",
+      5060: "SIP",
+      5061: "SIPS",
     };
 
-    return wellKnownPorts[dstPort] || wellKnownPorts[srcPort] || 'UNKNOWN';
+    return wellKnownPorts[dstPort] || wellKnownPorts[srcPort] || "UNKNOWN";
   }
 
   private getPayloadPreview(payload: Uint8Array): string {
     const maxLength = 100;
     const preview = Array.from(payload.slice(0, maxLength))
-      .map(b => (b >= 32 && b <= 126) ? String.fromCharCode(b) : '.')
-      .join('');
-    return preview + (payload.length > maxLength ? '...' : '');
+      .map((b) => (b >= 32 && b <= 126 ? String.fromCharCode(b) : "."))
+      .join("");
+    return preview + (payload.length > maxLength ? "..." : "");
   }
 
   /**
@@ -346,7 +359,7 @@ export class PacketAnalyzer {
       topDestinations: [],
       topPorts: [],
       packetsPerSecond: 0,
-      bytesPerSecond: 0
+      bytesPerSecond: 0,
     };
 
     const sourceCounts = new Map<string, { count: number; bytes: number }>();
@@ -357,7 +370,7 @@ export class PacketAnalyzer {
       stats.totalBytes += packet.header.originalLength;
 
       // Protocol distribution
-      const proto = packet.applicationProtocol || 'UNKNOWN';
+      const proto = packet.applicationProtocol || "UNKNOWN";
       stats.protocolDistribution[proto] = (stats.protocolDistribution[proto] || 0) + 1;
 
       // Source counts

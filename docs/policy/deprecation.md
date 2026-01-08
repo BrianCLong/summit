@@ -11,18 +11,21 @@ This policy defines how we deprecate and remove features, APIs, and configuratio
 ## Process
 
 ### 1. Mark as Deprecated
-*   **Code**: Use the `@deprecated` JSDoc tag with a message explaining what to use instead.
-*   **Runtime**: Use the `deprecate()` utility to log a warning when the feature is used.
-*   **API**: Add `Deprecation` header (draft-ietf-httpapi-deprecation-header) or `X-Deprecated` header.
-*   **GraphQL**: Use `@deprecated(reason: "...")` directive.
+
+- **Code**: Use the `@deprecated` JSDoc tag with a message explaining what to use instead.
+- **Runtime**: Use the `deprecate()` utility to log a warning when the feature is used.
+- **API**: Add `Deprecation` header (draft-ietf-httpapi-deprecation-header) or `X-Deprecated` header.
+- **GraphQL**: Use `@deprecated(reason: "...")` directive.
 
 ### 2. Announce
-*   Include in the "Deprecations" section of the Release Notes.
-*   Notify consumers (if internal).
+
+- Include in the "Deprecations" section of the Release Notes.
+- Notify consumers (if internal).
 
 ### 3. Remove
-*   After the support window expires, the feature can be removed.
-*   This constitutes a **Breaking Change** and requires a major version bump (SemVer).
+
+- After the support window expires, the feature can be removed.
+- This constitutes a **Breaking Change** and requires a major version bump (SemVer).
 
 ## Usage Examples
 
@@ -33,7 +36,7 @@ This policy defines how we deprecate and remove features, APIs, and configuratio
  * @deprecated Use `newMethod()` instead.
  */
 function oldMethod() {
-  deprecate('oldMethod is deprecated. Use newMethod instead.');
+  deprecate("oldMethod is deprecated. Use newMethod instead.");
   // ...
 }
 ```

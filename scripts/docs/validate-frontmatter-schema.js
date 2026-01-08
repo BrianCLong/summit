@@ -1,11 +1,9 @@
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
-const Ajv = require('ajv').default;
-const addFormats = require('ajv-formats');
-const schema = JSON.parse(
-  fs.readFileSync('docs/_meta/frontmatter.schema.json', 'utf8'),
-);
+const fs = require("fs");
+const path = require("path");
+const matter = require("gray-matter");
+const Ajv = require("ajv").default;
+const addFormats = require("ajv-formats");
+const schema = JSON.parse(fs.readFileSync("docs/_meta/frontmatter.schema.json", "utf8"));
 const ajv = new Ajv({ allErrors: true, strict: false });
 addFormats(ajv);
 const validate = ajv.compile(schema);
@@ -23,5 +21,5 @@ let fail = 0;
       }
     }
   }
-})('docs');
+})("docs");
 process.exit(fail);

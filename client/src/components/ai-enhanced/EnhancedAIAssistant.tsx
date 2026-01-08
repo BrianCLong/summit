@@ -3,7 +3,7 @@
  * Advanced AI interface for IntelGraph with conversation capabilities
  */
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   Box,
   Paper,
@@ -17,7 +17,7 @@ import {
   Button,
   Switch,
   FormControlLabel,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Send,
   SmartToy,
@@ -28,13 +28,13 @@ import {
   Settings,
   Mic,
   MicOff,
-} from '@mui/icons-material';
-import { useHoldToTalk } from './hooks/useHoldToTalk'; // Correct relative path
+} from "@mui/icons-material";
+import { useHoldToTalk } from "./hooks/useHoldToTalk"; // Correct relative path
 
 // Types
 interface Message {
   id: string;
-  type: 'user' | 'assistant' | 'system';
+  type: "user" | "assistant" | "system";
   content: string;
   timestamp: Date;
   metadata?: {
@@ -44,10 +44,10 @@ interface Message {
 }
 
 export type AssistantEvent =
-  | { type: 'status'; value: 'idle' | 'thinking' | 'streaming' | 'error' }
-  | { type: 'token'; value: string }
-  | { type: 'done' }
-  | { type: 'error'; error: Error };
+  | { type: "status"; value: "idle" | "thinking" | "streaming" | "error" }
+  | { type: "token"; value: string }
+  | { type: "done" }
+  | { type: "error"; error: Error };
 
 export interface AssistantTransport {
   send: (input: string, signal: AbortSignal) => void;
@@ -80,20 +80,12 @@ interface EnhancedAIAssistantProps {
 const generateResponse = async (userMessage: string): Promise<Message> => {
   await new Promise((resolve) => setTimeout(resolve, 1500));
 
-  const queryKeywords = [
-    'find',
-    'show',
-    'search',
-    'query',
-    'get',
-    'list',
-    'analyze',
-  ];
+  const queryKeywords = ["find", "show", "search", "query", "get", "list", "analyze"];
   const containsQueryRequest = queryKeywords.some((keyword) =>
-    userMessage.toLowerCase().includes(keyword),
+    userMessage.toLowerCase().includes(keyword)
   );
 
-  let response = '';
+  let response = "";
   let confidence = 0.85;
 
   if (containsQueryRequest) {
@@ -101,7 +93,7 @@ const generateResponse = async (userMessage: string): Promise<Message> => {
 
 Would you like me to generate a specific Cypher query for this?`;
     confidence = 0.92;
-  } else if (userMessage.toLowerCase().includes('help')) {
+  } else if (userMessage.toLowerCase().includes("help")) {
     response = `I'm here to help you navigate and analyze your intelligence data. I can assist with:
 
 🔍 Query Generation: Convert natural language to optimized Cypher queries
@@ -117,12 +109,12 @@ Let me provide some targeted recommendations based on your query history.`;
 
   return {
     id: `msg-${Date.now()}`,
-    type: 'assistant',
+    type: "assistant",
     content: response,
     timestamp: new Date(),
     metadata: {
       confidence,
-      sources: ['Knowledge Base', 'Query History', 'Context Analysis'],
+      sources: ["Knowledge Base", "Query History", "Context Analysis"],
     },
   };
 };
@@ -144,39 +136,33 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
 
   const [messages, setMessages] = useState<Message[]>([
     {
-      id: 'welcome',
-      type: 'assistant',
+      id: "welcome",
+      type: "assistant",
       content: `Hello! I'm IntelBot, your Intelligence Analysis Assistant. I'm here to help you with intelligent data analysis and navigation. How can I assist you today?`,
       timestamp: new Date(),
       metadata: {
         confidence: 1.0,
-        sources: ['System'],
+        sources: ["System"],
       },
     },
   ]);
 
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(enableVoice);
   const [isListening, setIsListening] = useState(false);
-  const [status, setStatus] = useState<
-    'idle' | 'thinking' | 'streaming' | 'error'
-  >('idle');
-  const [streamBuf, setStreamBuf] = useState('');
+  const [status, setStatus] = useState<"idle" | "thinking" | "streaming" | "error">("idle");
+  const [streamBuf, setStreamBuf] = useState("");
   // Ref to avoid TDZ/closure issues when callbacks reference handlers defined later
-  const handleSendMessageRef = useRef<(text?: string) => void>(() => { });
+  const handleSendMessageRef = useRef<(text?: string) => void>(() => {});
 
   // Voice control logic
   const startVoice = useCallback(() => {
     if (!voiceEnabled) return;
     setIsListening(true);
-    if (
-      (window as any).SpeechRecognition ||
-      (window as any).webkitSpeechRecognition
-    ) {
+    if ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) {
       const SpeechRecognition =
-        (window as any).SpeechRecognition ||
-        (window as any).webkitSpeechRecognition;
+        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       const recognition = new SpeechRecognition();
       recognition.onstart = () => setIsListening(true);
       recognition.onresult = (event: any) => {
@@ -191,13 +177,9 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
   const stopVoice = useCallback(() => {
     setIsListening(false);
     // Abort any ongoing recognition if needed
-    if (
-      (window as any).SpeechRecognition ||
-      (window as any).webkitSpeechRecognition
-    ) {
+    if ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) {
       const SpeechRecognition =
-        (window as any).SpeechRecognition ||
-        (window as any).webkitSpeechRecognition;
+        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       const recognition = new SpeechRecognition(); // Need to get the active instance if possible
       // For simplicity, we'll just stop the current listening state.
       // A more robust solution would involve storing the recognition instance.
@@ -208,13 +190,13 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
   const holdRef = useHoldToTalk(startVoice, stopVoice); // Integrate the hook
 
   // 🔒 keep a ref to the latest stream buffer so the event handler sees fresh data
-  const streamBufRef = useRef('');
+  const streamBufRef = useRef("");
 
   // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollTo({
       top: messagesEndRef.current.scrollHeight,
-      behavior: 'smooth',
+      behavior: "smooth",
     });
   }, [messages]);
 
@@ -222,50 +204,50 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
   useEffect(() => {
     if (!transport) return;
     const unsubscribe = transport.on((evt) => {
-      console.log('TRANS-EVT:', evt.type, evt.type === 'token' ? evt.value : '');
+      console.log("TRANS-EVT:", evt.type, evt.type === "token" ? evt.value : "");
       if (abortRef.current?.signal.aborted) {
-        console.log('EVENT DROPPED - ABORTED');
+        console.log("EVENT DROPPED - ABORTED");
         return;
       }
 
       switch (evt.type) {
-        case 'status':
+        case "status":
           setStatus(evt.value);
-          setIsTyping(evt.value === 'thinking' || evt.value === 'streaming');
+          setIsTyping(evt.value === "thinking" || evt.value === "streaming");
           break;
-        case 'token':
-          setStatus('streaming');
+        case "token":
+          setStatus("streaming");
           setIsTyping(true);
           const nextBuf = streamBufRef.current + evt.value;
           streamBufRef.current = nextBuf;
           setStreamBuf(nextBuf);
           break;
-        case 'done': {
+        case "done": {
           const final = streamBufRef.current;
-          console.log('DONE RECEIVED. BUFFER:', final);
+          console.log("DONE RECEIVED. BUFFER:", final);
           if (final) {
             setMessages((m) => [
               ...m,
               {
                 id: `msg-${clock.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                type: 'assistant',
+                type: "assistant",
                 content: final,
                 timestamp: new Date(),
                 metadata: {
                   confidence: 0.85,
-                  sources: ['AI Assistant'],
+                  sources: ["AI Assistant"],
                 },
               },
             ]);
-            setStreamBuf('');
-            streamBufRef.current = '';
+            setStreamBuf("");
+            streamBufRef.current = "";
           }
-          setStatus('Online');
+          setStatus("Online");
           setIsTyping(false);
           break;
         }
-        case 'error':
-          setStatus('error');
+        case "error":
+          setStatus("error");
           setIsTyping(false);
           break;
       }
@@ -293,27 +275,27 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
 
       const userMessage: Message = {
         id: `msg-${clock.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        type: 'user',
+        type: "user",
         content: messageText,
         timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, userMessage]);
-      if (!text) setInputValue(''); // Only clear if using current input
+      if (!text) setInputValue(""); // Only clear if using current input
 
       if (transport) {
         // Use transport for testable async behavior
         const id = clock.setTimeout(() => {
           abortRef.current?.abort();
           abortRef.current = new AbortController();
-          setStatus('thinking');
+          setStatus("thinking");
           setIsTyping(true);
 
           // Typing indicator delay – purely cosmetic, test-controlled
           pushTimer(
             clock.setTimeout(() => {
-              if (!abortRef.current?.signal.aborted) setStatus('streaming');
-            }, typingDelayMs),
+              if (!abortRef.current?.signal.aborted) setStatus("streaming");
+            }, typingDelayMs)
           );
 
           transport.send(messageText, abortRef.current.signal);
@@ -330,13 +312,13 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
             ...prev,
             {
               id: `error-${clock.now()}`,
-              type: 'assistant',
+              type: "assistant",
               content:
-                'I apologize, but I encountered an error processing your request. Please try again.',
+                "I apologize, but I encountered an error processing your request. Please try again.",
               timestamp: new Date(),
               metadata: {
                 confidence: 0,
-                sources: ['Error Handler'],
+                sources: ["Error Handler"],
               },
             },
           ]);
@@ -345,7 +327,7 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
         }
       }
     },
-    [inputValue, transport, clock, typingDelayMs, debounceMs],
+    [inputValue, transport, clock, typingDelayMs, debounceMs]
   );
 
   // Keep ref in sync for callbacks defined earlier
@@ -354,7 +336,7 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
   }, [handleSendMessage]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
@@ -365,24 +347,24 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
   };
 
   const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
-    const isUser = message.type === 'user';
-    const isSystem = message.type === 'system';
+    const isUser = message.type === "user";
+    const isSystem = message.type === "system";
 
     return (
       <Box
         sx={{
-          display: 'flex',
-          flexDirection: isUser ? 'row-reverse' : 'row',
+          display: "flex",
+          flexDirection: isUser ? "row-reverse" : "row",
           gap: 1,
           mb: 2,
-          alignItems: 'flex-start',
+          alignItems: "flex-start",
         }}
       >
         <Avatar
           sx={{
             width: 32,
             height: 32,
-            bgcolor: isUser ? 'primary.main' : 'secondary.main',
+            bgcolor: isUser ? "primary.main" : "secondary.main",
           }}
         >
           {isUser ? <Person fontSize="small" /> : <SmartToy fontSize="small" />}
@@ -392,13 +374,13 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
           elevation={1}
           sx={{
             p: 2,
-            maxWidth: '70%',
-            bgcolor: isUser ? 'primary.main' : 'background.paper',
-            color: isUser ? 'primary.contrastText' : 'text.primary',
-            borderRadius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+            maxWidth: "70%",
+            bgcolor: isUser ? "primary.main" : "background.paper",
+            color: isUser ? "primary.contrastText" : "text.primary",
+            borderRadius: isUser ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
           }}
         >
-          <Typography variant="body1" sx={{ mb: 1, whiteSpace: 'pre-wrap' }}>
+          <Typography variant="body1" sx={{ mb: 1, whiteSpace: "pre-wrap" }}>
             {message.content}
           </Typography>
 
@@ -415,23 +397,21 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
             </Box>
           )}
 
-          {message.type === 'assistant' && (
-            <Box
-              sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 1 }}
-            >
+          {message.type === "assistant" && (
+            <Box sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 1 }}>
               {/* Follow-up Actions */}
-              <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+              <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
                 <Button
                   size="small"
                   variant="outlined"
-                  onClick={() => alert('Generate query clicked!')}
+                  onClick={() => alert("Generate query clicked!")}
                 >
                   Generate Query
                 </Button>
                 <Button
                   size="small"
                   variant="outlined"
-                  onClick={() => alert('Export analysis clicked!')}
+                  onClick={() => alert("Export analysis clicked!")}
                 >
                   Export Analysis
                 </Button>
@@ -440,9 +420,9 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
               {/* Feedback (Thumbs/Labels) */}
               <Box
                 sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
                   mt: 1,
                 }}
               >
@@ -451,10 +431,7 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
                 </Typography>
 
                 <Stack direction="row" spacing={1}>
-                  <IconButton
-                    size="small"
-                    onClick={() => handleCopy(message.content)}
-                  >
+                  <IconButton size="small" onClick={() => handleCopy(message.content)}>
                     <ContentCopy fontSize="small" />
                   </IconButton>
 
@@ -463,14 +440,11 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
                       <IconButton
                         size="small"
                         color="success"
-                        onClick={() => alert('Feedback: Thumbs Up!')}
+                        onClick={() => alert("Feedback: Thumbs Up!")}
                       >
                         <ThumbUp fontSize="small" />
                       </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={() => alert('Feedback: Thumbs Down!')}
-                      >
+                      <IconButton size="small" onClick={() => alert("Feedback: Thumbs Down!")}>
                         <ThumbDown fontSize="small" />
                       </IconButton>
                     </>
@@ -485,18 +459,18 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
   };
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
       {/* Header */}
-      <Paper elevation={1} sx={{ p: 2, borderRadius: '12px 12px 0 0' }}>
+      <Paper elevation={1} sx={{ p: 2, borderRadius: "12px 12px 0 0" }}>
         <Box
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Avatar sx={{ bgcolor: 'secondary.main' }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Avatar sx={{ bgcolor: "secondary.main" }}>
               <SmartToy />
             </Avatar>
 
@@ -510,14 +484,14 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
                 role="status"
                 aria-label="assistant-status"
               >
-                Intelligence Analysis Assistant •{' '}
-                {status === 'thinking'
-                  ? 'Thinking...'
-                  : status === 'streaming'
-                    ? 'Typing...'
-                    : status === 'error'
-                      ? 'Error'
-                      : 'Online'}
+                Intelligence Analysis Assistant •{" "}
+                {status === "thinking"
+                  ? "Thinking..."
+                  : status === "streaming"
+                    ? "Typing..."
+                    : status === "error"
+                      ? "Error"
+                      : "Online"}
               </Typography>
             </Box>
           </Box>
@@ -525,7 +499,7 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
           <Stack direction="row" spacing={1}>
             <IconButton
               ref={holdRef} // Attach the ref here
-              color={isListening ? 'primary' : 'default'}
+              color={isListening ? "primary" : "default"}
               // onClick is now handled by the useHoldToTalk hook's onStart/onEnd
               // We'll keep a simplified onClick for direct toggling if needed, or remove if only hold-to-talk
               onClick={() => {
@@ -538,7 +512,7 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
                 }
               }}
               disabled={!voiceEnabled}
-              aria-label={isListening ? 'Stop Voice' : 'Start Voice'}
+              aria-label={isListening ? "Stop Voice" : "Start Voice"}
             >
               {isListening ? <Mic /> : <MicOff />}
             </IconButton>
@@ -554,9 +528,9 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
       <Box
         sx={{
           flex: 1,
-          overflow: 'auto',
+          overflow: "auto",
           p: 2,
-          bgcolor: 'background.default',
+          bgcolor: "background.default",
         }}
         role="log"
         aria-live="polite"
@@ -570,14 +544,11 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
 
         {streamBuf && (
           <div role="article" aria-label="assistant">
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+              <Avatar sx={{ width: 32, height: 32, bgcolor: "secondary.main" }}>
                 <SmartToy fontSize="small" />
               </Avatar>
-              <Paper
-                elevation={1}
-                sx={{ p: 2, borderRadius: '16px 16px 16px 4px' }}
-              >
+              <Paper elevation={1} sx={{ p: 2, borderRadius: "16px 16px 16px 4px" }}>
                 <Typography variant="body2">{streamBuf}</Typography>
               </Paper>
             </Box>
@@ -585,14 +556,11 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
         )}
 
         {isTyping && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-            <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+            <Avatar sx={{ width: 32, height: 32, bgcolor: "secondary.main" }}>
               <SmartToy fontSize="small" />
             </Avatar>
-            <Paper
-              elevation={1}
-              sx={{ p: 2, borderRadius: '16px 16px 16px 4px' }}
-            >
+            <Paper elevation={1} sx={{ p: 2, borderRadius: "16px 16px 16px 4px" }}>
               <Typography variant="body2">Typing...</Typography>
             </Paper>
           </Box>
@@ -602,8 +570,8 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
       </Box>
 
       {/* Input Area */}
-      <Paper elevation={1} sx={{ p: 2, borderRadius: '0 0 12px 12px' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <Paper elevation={1} sx={{ p: 2, borderRadius: "0 0 12px 12px" }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <TextField
             ref={inputRef}
             fullWidth
@@ -614,10 +582,10 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
             onKeyPress={handleKeyPress}
             disabled={isTyping}
             inputProps={{
-              'aria-label': 'assistant-input',
+              "aria-label": "assistant-input",
             }}
             sx={{
-              '& .MuiOutlinedInput-root': {
+              "& .MuiOutlinedInput-root": {
                 borderRadius: 3,
               },
             }}

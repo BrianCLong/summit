@@ -3,6 +3,7 @@
 This document defines the initial reliability objectives for Summit's most visible capabilities. Targets are intentionally opinionated but small in scope to make them actionable. SLIs are derived from the current telemetry stack (Prometheus, Grafana, CloudWatch metrics where applicable) and should be iterated as new signals land.
 
 ## Scope and measurement
+
 - **Measurement window:** Rolling 30 days.
 - **Data sources:**
   - Prometheus scrape targets exposed via the existing monitoring-setup (see `docs/ops/monitoring-alerting-setup.md` for exporters).
@@ -16,6 +17,7 @@ This document defines the initial reliability objectives for Summit's most visib
 ## SLOs
 
 ### 1) Graph query availability
+
 - **User capability:** Users can successfully execute read queries via the primary API.
 - **SLI:** Ratio of `2xx/3xx` responses over all query requests (`http_request_total{route="/graph/query"}`) excluding client `4xx`.
 - **SLO:** **≥ 99.0% success** over 30 days.
@@ -24,6 +26,7 @@ This document defines the initial reliability objectives for Summit's most visib
 - **Notes:** Backends should emit `graph_query_failure_total` counter for more granular diagnostics.
 
 ### 2) Workflow completion latency (Maestro/Conductor)
+
 - **User capability:** Orchestrated jobs complete promptly after submission.
 - **SLI:** P95 of end-to-end job latency (`workflow_completed_seconds` histogram) from enqueue to terminal status.
 - **SLO:** **P95 ≤ 10 seconds** over 30 days.
@@ -32,6 +35,7 @@ This document defines the initial reliability objectives for Summit's most visib
 - **Notes:** Consider segmenting by tenant to avoid one noisy customer burning the global budget.
 
 ### 3) Incident notification responsiveness
+
 - **User capability:** On-call is notified and acknowledges customer-impacting incidents rapidly.
 - **SLI:** Time from first SEV1/SEV2 alert to on-call acknowledgement in Slack/PagerDuty (`incident_ack_seconds` distribution, or Slack bot timestamp diff if manual).
 - **SLO:** **Median ack ≤ 5 minutes; 90th percentile ≤ 10 minutes** over 30 days.
@@ -49,6 +53,7 @@ This document defines the initial reliability objectives for Summit's most visib
 - **Exit criteria:** Resume normal change cadence when the SLO has been met for two consecutive weeks and burn rate is <10% of monthly budget per week.
 
 ## Reporting cadence
+
 - **Weekly ops review:** Present SLO trendlines, burn rate, and top incidents that consumed budget.
 - **Monthly health check:** Confirm whether SLOs were met, whether error budgets reset, and whether changes are needed (targets, SLIs, alert thresholds).
 - **Post-incident:** Each SEV1/SEV2 postmortem should note which SLO budgets were impacted and estimate burn.

@@ -4,7 +4,7 @@
  * Creates verifiable export packages with hash trees and chain-of-custody evidence.
  */
 
-import { createHash } from 'crypto';
+import { createHash } from "crypto";
 
 // -----------------------------------------------------------------------------
 // Types
@@ -12,7 +12,7 @@ import { createHash } from 'crypto';
 
 export interface ExportManifest {
   /** Manifest version */
-  version: '1.0';
+  version: "1.0";
   /** Export ID */
   exportId: string;
   /** Export timestamp */
@@ -62,14 +62,14 @@ export interface MerkleTree {
   /** Leaf hashes (entity/relationship hashes) */
   leaves: string[];
   /** Algorithm used */
-  algorithm: 'sha256';
+  algorithm: "sha256";
 }
 
 export interface ExportSignature {
   /** Signer ID */
   signerId: string;
   /** Signature algorithm */
-  algorithm: 'RS256' | 'ES256';
+  algorithm: "RS256" | "ES256";
   /** Signature value (base64) */
   signature: string;
   /** Signed at */
@@ -82,7 +82,7 @@ export interface CustodyEvent {
   /** Event ID */
   eventId: string;
   /** Event type */
-  eventType: 'created' | 'accessed' | 'transferred' | 'verified' | 'revoked';
+  eventType: "created" | "accessed" | "transferred" | "verified" | "revoked";
   /** Actor */
   actor: string;
   /** Timestamp */
@@ -147,7 +147,7 @@ export class ExportManifestBuilder {
 
     const exportId = this.generateId();
     const manifest: ExportManifest = {
-      version: '1.0',
+      version: "1.0",
       exportId,
       exportedAt: new Date(),
       exportedBy: options.exportedBy,
@@ -158,16 +158,15 @@ export class ExportManifestBuilder {
         entityCount: this.entityHashes.length,
         relationshipCount: this.relationshipHashes.length,
         entityTypes: Array.from(this.entityTypes),
-        dateRange: this.minDate && this.maxDate
-          ? { from: this.minDate, to: this.maxDate }
-          : undefined,
+        dateRange:
+          this.minDate && this.maxDate ? { from: this.minDate, to: this.maxDate } : undefined,
       },
       hashTree,
       signatures: [],
       chainOfCustody: [
         {
           eventId: this.generateId(),
-          eventType: 'created',
+          eventType: "created",
           actor: options.exportedBy,
           timestamp: new Date(),
           manifestHash: hashTree.rootHash,
@@ -187,7 +186,7 @@ export class ExportManifestBuilder {
       type: entity.type,
       props: entity.props,
     });
-    return createHash('sha256').update(data).digest('hex');
+    return createHash("sha256").update(data).digest("hex");
   }
 
   /**
@@ -200,7 +199,7 @@ export class ExportManifestBuilder {
       to: rel.to,
       type: rel.type,
     });
-    return createHash('sha256').update(data).digest('hex');
+    return createHash("sha256").update(data).digest("hex");
   }
 
   /**
@@ -209,10 +208,10 @@ export class ExportManifestBuilder {
   private buildMerkleTree(leaves: string[]): MerkleTree {
     if (leaves.length === 0) {
       return {
-        rootHash: createHash('sha256').update('empty').digest('hex'),
+        rootHash: createHash("sha256").update("empty").digest("hex"),
         depth: 0,
         leaves: [],
-        algorithm: 'sha256',
+        algorithm: "sha256",
       };
     }
 
@@ -224,9 +223,9 @@ export class ExportManifestBuilder {
       for (let i = 0; i < currentLevel.length; i += 2) {
         const left = currentLevel[i];
         const right = currentLevel[i + 1] || left; // Duplicate last if odd
-        const combined = createHash('sha256')
+        const combined = createHash("sha256")
           .update(left + right)
-          .digest('hex');
+          .digest("hex");
         nextLevel.push(combined);
       }
       currentLevel = nextLevel;
@@ -237,7 +236,7 @@ export class ExportManifestBuilder {
       rootHash: currentLevel[0],
       depth,
       leaves,
-      algorithm: 'sha256',
+      algorithm: "sha256",
     };
   }
 
@@ -269,33 +268,40 @@ export class ExportManifestVerifier {
   /**
    * Verify manifest integrity
    */
-  verifyIntegrity(manifest: ExportManifest, data: {
-    entities: any[];
-    relationships: any[];
-  }): ManifestVerificationResult {
+  verifyIntegrity(
+    manifest: ExportManifest,
+    data: {
+      entities: any[];
+      relationships: any[];
+    }
+  ): ManifestVerificationResult {
     const errors: string[] = [];
     const warnings: string[] = [];
 
     // Verify entity count
     if (data.entities.length !== manifest.contents.entityCount) {
-      errors.push(`Entity count mismatch: expected ${manifest.contents.entityCount}, got ${data.entities.length}`);
+      errors.push(
+        `Entity count mismatch: expected ${manifest.contents.entityCount}, got ${data.entities.length}`
+      );
     }
 
     // Verify relationship count
     if (data.relationships.length !== manifest.contents.relationshipCount) {
-      errors.push(`Relationship count mismatch: expected ${manifest.contents.relationshipCount}, got ${data.relationships.length}`);
+      errors.push(
+        `Relationship count mismatch: expected ${manifest.contents.relationshipCount}, got ${data.relationships.length}`
+      );
     }
 
     // Recompute leaf hashes
     const entityHashes = data.entities.map((e) =>
-      createHash('sha256')
+      createHash("sha256")
         .update(JSON.stringify({ id: e.id, type: e.type, props: e.props }))
-        .digest('hex')
+        .digest("hex")
     );
     const relHashes = data.relationships.map((r) =>
-      createHash('sha256')
+      createHash("sha256")
         .update(JSON.stringify({ id: r.id, from: r.from, to: r.to, type: r.type }))
-        .digest('hex')
+        .digest("hex")
     );
 
     const allHashes = [...entityHashes, ...relHashes];
@@ -311,12 +317,14 @@ export class ExportManifestVerifier {
     // Recompute Merkle root
     const recomputedTree = this.computeMerkleRoot(allHashes);
     if (recomputedTree !== manifest.hashTree.rootHash) {
-      errors.push('Merkle root hash mismatch - data has been tampered with');
+      errors.push("Merkle root hash mismatch - data has been tampered with");
     }
 
     // Check revocation
     if (manifest.revocation?.revoked) {
-      warnings.push(`Manifest was revoked on ${manifest.revocation.revokedAt}: ${manifest.revocation.reason}`);
+      warnings.push(
+        `Manifest was revoked on ${manifest.revocation.revokedAt}: ${manifest.revocation.reason}`
+      );
     }
 
     return {
@@ -342,7 +350,7 @@ export class ExportManifestVerifier {
    */
   private computeMerkleRoot(leaves: string[]): string {
     if (leaves.length === 0) {
-      return createHash('sha256').update('empty').digest('hex');
+      return createHash("sha256").update("empty").digest("hex");
     }
 
     let currentLevel = [...leaves];
@@ -352,7 +360,9 @@ export class ExportManifestVerifier {
         const left = currentLevel[i];
         const right = currentLevel[i + 1] || left;
         nextLevel.push(
-          createHash('sha256').update(left + right).digest('hex')
+          createHash("sha256")
+            .update(left + right)
+            .digest("hex")
         );
       }
       currentLevel = nextLevel;
@@ -378,14 +388,10 @@ export class ChainOfCustodyManager {
   /**
    * Record access event
    */
-  recordAccess(
-    manifest: ExportManifest,
-    actor: string,
-    details?: Record<string, unknown>
-  ): void {
+  recordAccess(manifest: ExportManifest, actor: string, details?: Record<string, unknown>): void {
     manifest.chainOfCustody.push({
       eventId: this.generateId(),
-      eventType: 'accessed',
+      eventType: "accessed",
       actor,
       timestamp: new Date(),
       details,
@@ -404,7 +410,7 @@ export class ChainOfCustodyManager {
   ): void {
     manifest.chainOfCustody.push({
       eventId: this.generateId(),
-      eventType: 'transferred',
+      eventType: "transferred",
       actor: fromActor,
       timestamp: new Date(),
       details: { ...details, transferredTo: toActor },
@@ -415,11 +421,7 @@ export class ChainOfCustodyManager {
   /**
    * Revoke manifest
    */
-  revoke(
-    manifest: ExportManifest,
-    actor: string,
-    reason: string
-  ): void {
+  revoke(manifest: ExportManifest, actor: string, reason: string): void {
     manifest.revocation = {
       revoked: true,
       revokedAt: new Date(),
@@ -429,7 +431,7 @@ export class ChainOfCustodyManager {
 
     manifest.chainOfCustody.push({
       eventId: this.generateId(),
-      eventType: 'revoked',
+      eventType: "revoked",
       actor,
       timestamp: new Date(),
       details: { reason },

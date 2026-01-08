@@ -1,5 +1,5 @@
-import React from 'react';
-import { PrivacyBudgetDisplay } from './PrivacyBudgetDisplay';
+import React from 'react'
+import { PrivacyBudgetDisplay } from './PrivacyBudgetDisplay'
 
 export const PrivacySettingsPane = () => {
   return (
@@ -12,9 +12,11 @@ export const PrivacySettingsPane = () => {
         <div className="text-sm text-gray-600">
           <p>Mechanism: Laplace / Gaussian</p>
           <p>Epsilon (ε): 10.0 (Daily)</p>
-          <p>Status: <span className="text-green-600 font-bold">Active</span></p>
+          <p>
+            Status: <span className="text-green-600 font-bold">Active</span>
+          </p>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

@@ -84,14 +84,14 @@ npx ts-node .github/scanners/index.ts generate-sbom ghcr.io/org/image:tag
 #### Programmatic Usage
 
 ```typescript
-import { createSBOMGenerator } from '.github/scanners';
+import { createSBOMGenerator } from ".github/scanners";
 
 const generator = createSBOMGenerator();
 
 const result = await generator.generateSBOM({
-  target: '.',
-  outputPath: 'sbom.cdx.json',
-  format: 'cyclonedx-json',
+  target: ".",
+  outputPath: "sbom.cdx.json",
+  format: "cyclonedx-json",
   signWithCosign: true,
 });
 
@@ -101,6 +101,7 @@ console.log(`Generated SBOM with ${result.componentCount} components`);
 ### CI Integration
 
 The `sbom-vuln-scan.yml` workflow automatically:
+
 1. Generates SBOM on every push to `main`
 2. Signs SBOM with keyless Cosign
 3. Uploads to GitHub Dependency Graph
@@ -116,12 +117,12 @@ Vulnerability scanning is powered by [Trivy](https://github.com/aquasecurity/tri
 
 ### Scan Types
 
-| Type | Description | Use Case |
-|------|-------------|----------|
+| Type         | Description                        | Use Case        |
+| ------------ | ---------------------------------- | --------------- |
 | `filesystem` | Scans local files and dependencies | Development, CI |
-| `image` | Scans container images | Pre-deployment |
-| `sbom` | Scans existing SBOM files | Post-generation |
-| `repository` | Scans git repositories | Remote analysis |
+| `image`      | Scans container images             | Pre-deployment  |
+| `sbom`       | Scans existing SBOM files          | Post-generation |
+| `repository` | Scans git repositories             | Remote analysis |
 
 ### Policy Configuration
 
@@ -130,16 +131,16 @@ Policies are defined per-service in `.github/scanners/config.ts`:
 ```typescript
 const policy = {
   services: {
-    'intelgraph-server': {
-      exposure: 'internet-facing',
+    "intelgraph-server": {
+      exposure: "internet-facing",
       severityThresholds: {
-        critical: 'block',
-        high: 'block',
-        medium: 'block',
-        low: 'warn',
+        critical: "block",
+        high: "block",
+        medium: "block",
+        low: "warn",
       },
-      allowedVulnerabilities: ['CVE-2024-WAIVED'],
-      scanSchedule: 'on_push',
+      allowedVulnerabilities: ["CVE-2024-WAIVED"],
+      scanSchedule: "on_push",
     },
   },
 };
@@ -147,27 +148,27 @@ const policy = {
 
 ### Severity Actions
 
-| Action | Description |
-|--------|-------------|
-| `block` | Fails CI pipeline, blocks deployment |
-| `warn` | Logs warning, allows pipeline to continue |
-| `ignore` | No action taken |
+| Action   | Description                               |
+| -------- | ----------------------------------------- |
+| `block`  | Fails CI pipeline, blocks deployment      |
+| `warn`   | Logs warning, allows pipeline to continue |
+| `ignore` | No action taken                           |
 
 ### Usage
 
 ```typescript
-import { createTrivyScanner } from '.github/scanners';
+import { createTrivyScanner } from ".github/scanners";
 
 const scanner = createTrivyScanner();
 
 const result = await scanner.scan({
-  target: '.',
-  severity: ['critical', 'high'],
-  scanners: ['vuln', 'secret'],
+  target: ".",
+  severity: ["critical", "high"],
+  scanners: ["vuln", "secret"],
 });
 
 if (!result.policyResult?.allowed) {
-  console.error('Policy violations:', result.policyResult?.blockedVulnerabilities);
+  console.error("Policy violations:", result.policyResult?.blockedVulnerabilities);
   process.exit(1);
 }
 ```
@@ -182,13 +183,13 @@ SLSA (Supply-chain Levels for Software Artifacts) Level 3 attestations provide c
 
 ### SLSA-3 Requirements Met
 
-| Requirement | Implementation |
-|-------------|----------------|
-| ✅ Build from version-controlled source | GitHub repository |
-| ✅ Scripted build | GitHub Actions workflow |
-| ✅ Build service integrity | GitHub-hosted runners |
-| ✅ Non-falsifiable provenance | Cosign keyless signing |
-| ✅ Isolated build environment | Ephemeral runners |
+| Requirement                             | Implementation          |
+| --------------------------------------- | ----------------------- |
+| ✅ Build from version-controlled source | GitHub repository       |
+| ✅ Scripted build                       | GitHub Actions workflow |
+| ✅ Build service integrity              | GitHub-hosted runners   |
+| ✅ Non-falsifiable provenance           | Cosign keyless signing  |
+| ✅ Isolated build environment           | Ephemeral runners       |
 
 ### Provenance Format
 
@@ -219,16 +220,14 @@ Provenance follows the [SLSA v1.0 specification](https://slsa.dev/provenance/v1)
 ### Verification
 
 ```typescript
-import { createSLSA3Attestor } from '.github/scanners';
+import { createSLSA3Attestor } from ".github/scanners";
 
 const attestor = createSLSA3Attestor();
 
 const result = await attestor.verifyProvenance({
-  bundlePath: 'provenance.json',
-  artifactPath: 'artifact.tar.gz',
-  trustedBuilders: [
-    'https://github.com/slsa-framework/slsa-github-generator/...',
-  ],
+  bundlePath: "provenance.json",
+  artifactPath: "artifact.tar.gz",
+  trustedBuilders: ["https://github.com/slsa-framework/slsa-github-generator/..."],
 });
 
 console.log(`SLSA Level: ${result.level}`); // SLSA_3
@@ -245,21 +244,21 @@ The auto-fix system automatically creates pull requests to remediate fixable vul
 
 ### Confidence Levels
 
-| Level | Criteria | Risk |
-|-------|----------|------|
-| **High** | Patch version bump (1.0.0 → 1.0.1) | Low |
-| **Medium** | Minor version bump (1.0.0 → 1.1.0) | Medium |
-| **Low** | Major version bump (1.0.0 → 2.0.0) | High (breaking) |
+| Level      | Criteria                           | Risk            |
+| ---------- | ---------------------------------- | --------------- |
+| **High**   | Patch version bump (1.0.0 → 1.0.1) | Low             |
+| **Medium** | Minor version bump (1.0.0 → 1.1.0) | Medium          |
+| **Low**    | Major version bump (1.0.0 → 2.0.0) | High (breaking) |
 
 ### Configuration
 
 ```typescript
 const result = await autoFixer.applyFixes({
   scanResult,
-  dryRun: false,           // Actually apply changes
-  createPR: true,          // Create pull request
-  maxFixes: 10,            // Limit number of fixes
-  minConfidence: 'medium', // Skip low-confidence fixes
+  dryRun: false, // Actually apply changes
+  createPR: true, // Create pull request
+  maxFixes: 10, // Limit number of fixes
+  minConfidence: "medium", // Skip low-confidence fixes
   excludeBreakingChanges: true, // Skip major version bumps
 });
 ```
@@ -267,6 +266,7 @@ const result = await autoFixer.applyFixes({
 ### Workflow
 
 The `auto-fix-vulnerabilities.yml` workflow:
+
 1. Runs weekly (Monday 9 AM UTC)
 2. Scans for fixable vulnerabilities
 3. Applies safe fixes (patch/minor versions)
@@ -284,12 +284,14 @@ For air-gapped or disconnected environments, the system supports offline operati
 ### Setup
 
 1. **Download vulnerability database**:
+
    ```bash
    trivy image --download-db-only
    cp -r ~/.cache/trivy/db /secure-storage/trivy-db
    ```
 
 2. **Configure environment**:
+
    ```bash
    export AIRGAP_MODE=true
    export VULN_DB_PATH=/secure-storage/trivy-db
@@ -298,13 +300,11 @@ For air-gapped or disconnected environments, the system supports offline operati
    ```
 
 3. **Run scans**:
-   ```typescript
-   const scanner = createTrivyScanner(
-     undefined,
-     { enabled: true, offlineMode: true }
-   );
 
-   await scanner.scanAirGapped({ target: '.' });
+   ```typescript
+   const scanner = createTrivyScanner(undefined, { enabled: true, offlineMode: true });
+
+   await scanner.scanAirGapped({ target: "." });
    ```
 
 ### Database Updates
@@ -345,13 +345,13 @@ Navigate to: `/security/vulnerabilities`
 
 ### API Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/security/dashboard` | GET | Dashboard summary |
-| `/api/security/vulnerabilities` | GET | Search vulnerabilities |
-| `/api/security/sboms` | GET/POST | SBOM management |
-| `/api/security/scans` | GET/POST | Scan history |
-| `/api/security/compliance-report` | GET | Generate report |
+| Endpoint                          | Method   | Description            |
+| --------------------------------- | -------- | ---------------------- |
+| `/api/security/dashboard`         | GET      | Dashboard summary      |
+| `/api/security/vulnerabilities`   | GET      | Search vulnerabilities |
+| `/api/security/sboms`             | GET/POST | SBOM management        |
+| `/api/security/scans`             | GET/POST | Scan history           |
+| `/api/security/compliance-report` | GET      | Generate report        |
 
 ---
 
@@ -359,14 +359,14 @@ Navigate to: `/security/vulnerabilities`
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `AIRGAP_MODE` | Enable air-gapped mode | `false` |
-| `VULN_DB_PATH` | Path to Trivy database | `/var/lib/trivy/db` |
-| `SBOM_STORE_PATH` | SBOM storage location | `/var/lib/sbom` |
-| `COSIGN_KEY_PATH` | Path to signing key | (keyless) |
-| `SLSA3_ENABLED` | Enable SLSA verification | `true` |
-| `EMERGENCY_BYPASS` | Allow policy bypass | `false` |
+| Variable           | Description              | Default             |
+| ------------------ | ------------------------ | ------------------- |
+| `AIRGAP_MODE`      | Enable air-gapped mode   | `false`             |
+| `VULN_DB_PATH`     | Path to Trivy database   | `/var/lib/trivy/db` |
+| `SBOM_STORE_PATH`  | SBOM storage location    | `/var/lib/sbom`     |
+| `COSIGN_KEY_PATH`  | Path to signing key      | (keyless)           |
+| `SLSA3_ENABLED`    | Enable SLSA verification | `true`              |
+| `EMERGENCY_BYPASS` | Allow policy bypass      | `false`             |
 
 ### Scanner Configuration
 
@@ -375,14 +375,14 @@ Edit `.github/scanners/config.ts`:
 ```typescript
 export const DEFAULT_SCANNER_CONFIG = {
   syft: {
-    outputFormat: 'cyclonedx-json',
-    scope: 'all-layers',
+    outputFormat: "cyclonedx-json",
+    scope: "all-layers",
   },
   trivy: {
-    severity: ['critical', 'high', 'medium'],
+    severity: ["critical", "high", "medium"],
     ignoreUnfixed: false,
-    timeout: '15m',
-    scanners: ['vuln', 'secret'],
+    timeout: "15m",
+    scanners: ["vuln", "secret"],
   },
   cosign: {
     keylessEnabled: true,
@@ -400,11 +400,11 @@ export const DEFAULT_SCANNER_CONFIG = {
 
 ### Workflows
 
-| Workflow | Trigger | Description |
-|----------|---------|-------------|
-| `sbom-vuln-scan.yml` | Push, PR, Daily | SBOM + Vuln scan |
-| `slsa-attestation.yml` | Release | SLSA-3 attestation |
-| `auto-fix-vulnerabilities.yml` | Weekly, Manual | Auto-remediation |
+| Workflow                       | Trigger         | Description        |
+| ------------------------------ | --------------- | ------------------ |
+| `sbom-vuln-scan.yml`           | Push, PR, Daily | SBOM + Vuln scan   |
+| `slsa-attestation.yml`         | Release         | SLSA-3 attestation |
+| `auto-fix-vulnerabilities.yml` | Weekly, Manual  | Auto-remediation   |
 
 ### Required Secrets
 
@@ -414,6 +414,7 @@ export const DEFAULT_SCANNER_CONFIG = {
 ### Branch Protection
 
 Recommended settings:
+
 - ✅ Require `policy-gate` to pass
 - ✅ Require signed commits
 - ✅ Require linear history
@@ -451,6 +452,7 @@ Error: getting signer: no key provided
 #### Policy violations blocking merge
 
 **Solution**: Either:
+
 1. Fix the vulnerabilities
 2. Add to waiver list (requires security approval)
 3. Use `EMERGENCY_BYPASS=true` (emergencies only)

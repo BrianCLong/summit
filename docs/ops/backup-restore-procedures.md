@@ -15,7 +15,7 @@ metadata:
   name: pg-backup
   namespace: intelgraph
 spec:
-  schedule: '0 2 * * *' # daily 02:00
+  schedule: "0 2 * * *" # daily 02:00
   jobTemplate:
     spec:
       template:
@@ -29,7 +29,7 @@ spec:
                     secretKeyRef:
                       name: ig-secrets
                       key: POSTGRES_PASSWORD
-              command: ['/bin/sh', '-c']
+              command: ["/bin/sh", "-c"]
               args:
                 - |
                   ts=$(date +%F-%H%M%S);

@@ -3,7 +3,7 @@
  * Core business logic for organization tracking
  */
 
-import { CriminalOrganization, ComplianceValidator } from '../models/CriminalOrganization';
+import { CriminalOrganization, ComplianceValidator } from "../models/CriminalOrganization";
 
 export class OrganizationService {
   /**
@@ -18,11 +18,11 @@ export class OrganizationService {
   ): Promise<CriminalOrganization> {
     // Validate legal authority exists
     if (!data.legalAuthorities || data.legalAuthorities.length === 0) {
-      throw new Error('At least one legal authority required');
+      throw new Error("At least one legal authority required");
     }
 
     // Validate each authority
-    data.legalAuthorities.forEach(auth => {
+    data.legalAuthorities.forEach((auth) => {
       ComplianceValidator.validateLegalAuthority(auth);
     });
 
@@ -32,18 +32,18 @@ export class OrganizationService {
       id: data.id || generateId(),
       auditLog: [],
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     } as CriminalOrganization;
 
     // Log creation
     ComplianceValidator.logAccess(
       organization,
       userId,
-      'CREATE',
+      "CREATE",
       justification,
       legalAuthorityRef,
-      'system',
-      'OrganizationService'
+      "system",
+      "OrganizationService"
     );
 
     return organization;
@@ -62,25 +62,20 @@ export class OrganizationService {
     const organization = await fetchOrganization(organizationId);
 
     if (!organization) {
-      throw new Error('Organization not found');
+      throw new Error("Organization not found");
     }
 
     // Validate access
-    ComplianceValidator.validateDataAccess(
-      organization,
-      userId,
-      'VIEW',
-      justification
-    );
+    ComplianceValidator.validateDataAccess(organization, userId, "VIEW", justification);
 
     // Log access
     ComplianceValidator.logAccess(
       organization,
       userId,
-      'VIEW',
+      "VIEW",
       justification,
       legalAuthorityRef,
-      'system'
+      "system"
     );
 
     return organization;
@@ -106,17 +101,17 @@ export class OrganizationService {
     const updated: CriminalOrganization = {
       ...organization,
       ...updates,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     // Log update
     ComplianceValidator.logAccess(
       updated,
       userId,
-      'UPDATE',
+      "UPDATE",
       justification,
       legalAuthorityRef,
-      'system'
+      "system"
     );
 
     return updated;

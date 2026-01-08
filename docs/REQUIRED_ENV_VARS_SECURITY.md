@@ -19,6 +19,7 @@ This document lists all **required** environment variables that must be set in p
 **Format:** 32+ character random string
 
 **Generation:**
+
 ```bash
 openssl rand -hex 32
 ```
@@ -26,6 +27,7 @@ openssl rand -hex 32
 **Production Requirement:** MANDATORY - Application throws error if not set
 
 **Example:**
+
 ```bash
 export SWARM_SECRET="a1b2c3d4e5f6...64-char-hex-string"
 ```
@@ -41,6 +43,7 @@ export SWARM_SECRET="a1b2c3d4e5f6...64-char-hex-string"
 **Format:** 32+ character random string
 
 **Generation:**
+
 ```bash
 openssl rand -hex 32
 ```
@@ -52,6 +55,7 @@ openssl rand -hex 32
 **Key Rotation:** Recommended every 90 days. Use versioned keys for historical verification.
 
 **Example:**
+
 ```bash
 export AUDIT_SIGNING_KEY="x1y2z3...64-char-hex-string"
 ```
@@ -67,6 +71,7 @@ export AUDIT_SIGNING_KEY="x1y2z3...64-char-hex-string"
 **Format:** 32+ character random string
 
 **Generation:**
+
 ```bash
 openssl rand -hex 32
 ```
@@ -76,11 +81,13 @@ openssl rand -hex 32
 **Compliance Impact:** Required for encrypting PII in audit logs (GDPR, CCPA)
 
 **Key Management:**
+
 - Store in Vault/KMS
 - Enable automatic rotation
 - Maintain key history for data recovery
 
 **Example:**
+
 ```bash
 export AUDIT_ENCRYPTION_KEY="p1q2r3...64-char-hex-string"
 ```
@@ -96,6 +103,7 @@ export AUDIT_ENCRYPTION_KEY="p1q2r3...64-char-hex-string"
 **Format:** 32+ character random string
 
 **Generation:**
+
 ```bash
 openssl rand -hex 32
 ```
@@ -105,6 +113,7 @@ openssl rand -hex 32
 **Usage:** Signs billing exports to prevent tampering and verify authenticity
 
 **Example:**
+
 ```bash
 export BILLING_ENABLED="true"
 export BILLING_HMAC_SECRET="m1n2o3...64-char-hex-string"
@@ -125,10 +134,12 @@ export BILLING_HMAC_SECRET="m1n2o3...64-char-hex-string"
 **Production Requirement:** MANDATORY - Mobile app throws error if not set
 
 **Platform-Specific:**
+
 - **iOS:** Consider using iOS Keychain for runtime key retrieval
 - **Android:** Consider using Android Keystore for runtime key retrieval
 
 **Example (react-native-config):**
+
 ```bash
 # .env.production
 MMKV_ENCRYPTION_KEY=k1l2m3n4o5p6q7r8
@@ -193,15 +204,18 @@ ENV=production
 ### Development Mode
 
 **Behavior:**
+
 - Application warns about missing secrets
 - Falls back to clearly labeled insecure defaults
 - Continues to run (fail-open)
 
 **Purpose:**
+
 - Enable local development without complex setup
 - Clear warnings prevent accidental production deployment
 
 **Example Warning:**
+
 ```
 WARN: AUDIT_SIGNING_KEY not set - using insecure defaults for development only.
 NEVER use these defaults in production!
@@ -210,16 +224,19 @@ NEVER use these defaults in production!
 ### Production Mode
 
 **Behavior:**
+
 - Application checks `NODE_ENV=production` or `ENV=production`
 - Throws error if any required secret is missing
 - Application fails to start (fail-closed)
 
 **Purpose:**
+
 - Prevent deployment with insecure defaults
 - Force explicit secret configuration
 - Reduce attack surface
 
 **Example Error:**
+
 ```
 Error: AUDIT_SIGNING_KEY and AUDIT_ENCRYPTION_KEY environment variables must be set in production.
 These keys are critical for audit trail integrity and compliance.
@@ -268,15 +285,16 @@ kubectl logs deployment/intelgraph -n production | grep "Audit system initialize
 
 ## Compliance Mapping
 
-| Variable | SOX | GDPR | HIPAA | PCI-DSS |
-|----------|-----|------|-------|---------|
-| AUDIT_SIGNING_KEY | ✅ | ✅ | ✅ | ✅ |
-| AUDIT_ENCRYPTION_KEY | ✅ | ✅ | ✅ | ✅ |
-| BILLING_HMAC_SECRET | ✅ | ✅ | ⚠️ | ✅ |
-| SWARM_SECRET | ⚠️ | ⚠️ | ⚠️ | ⚠️ |
-| MMKV_ENCRYPTION_KEY | ❌ | ✅ | ✅ | ⚠️ |
+| Variable             | SOX | GDPR | HIPAA | PCI-DSS |
+| -------------------- | --- | ---- | ----- | ------- |
+| AUDIT_SIGNING_KEY    | ✅  | ✅   | ✅    | ✅      |
+| AUDIT_ENCRYPTION_KEY | ✅  | ✅   | ✅    | ✅      |
+| BILLING_HMAC_SECRET  | ✅  | ✅   | ⚠️    | ✅      |
+| SWARM_SECRET         | ⚠️  | ⚠️   | ⚠️    | ⚠️      |
+| MMKV_ENCRYPTION_KEY  | ❌  | ✅   | ✅    | ⚠️      |
 
 **Legend:**
+
 - ✅ Required for compliance
 - ⚠️ Recommended for compliance
 - ❌ Not applicable

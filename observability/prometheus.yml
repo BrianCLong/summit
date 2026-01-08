@@ -5,12 +5,12 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
   external_labels:
-    cluster: 'intelgraph-dev'
-    environment: 'development'
+    cluster: "intelgraph-dev"
+    environment: "development"
 
 # Load and evaluate rules
 rule_files:
-  - 'alert-rules.yml'
+  - "alert-rules.yml"
 
 # Alert manager configuration
 alerting:
@@ -22,25 +22,25 @@ alerting:
 # Scrape configuration
 scrape_configs:
   # Prometheus self-monitoring
-  - job_name: 'prometheus'
+  - job_name: "prometheus"
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: ["localhost:9090"]
     scrape_interval: 30s
     metrics_path: /metrics
 
   # IntelGraph main server (includes conductor metrics)
-  - job_name: 'intelgraph-server'
+  - job_name: "intelgraph-server"
     static_configs:
-      - targets: ['server:4000']
+      - targets: ["server:4000"]
     scrape_interval: 15s
     metrics_path: /metrics
     scrape_timeout: 10s
     honor_labels: true
 
   # Conductor-specific metrics endpoint (if separate)
-  - job_name: 'conductor'
+  - job_name: "conductor"
     static_configs:
-      - targets: ['server:4000']
+      - targets: ["server:4000"]
     scrape_interval: 10s
     metrics_path: /metrics/conductor
     scrape_timeout: 5s
@@ -48,90 +48,90 @@ scrape_configs:
     metric_relabel_configs:
       # Ensure conductor metrics have proper labels
       - source_labels: [__name__]
-        regex: 'conductor_.*'
+        regex: "conductor_.*"
         target_label: service
-        replacement: 'conductor'
+        replacement: "conductor"
 
   # MCP GraphOps server
-  - job_name: 'mcp-graphops'
+  - job_name: "mcp-graphops"
     static_configs:
-      - targets: ['mcp-graphops:8081']
+      - targets: ["mcp-graphops:8081"]
     scrape_interval: 15s
     metrics_path: /metrics
     scrape_timeout: 5s
     metric_relabel_configs:
       - target_label: mcp_server
-        replacement: 'graphops'
+        replacement: "graphops"
 
   # MCP Files server
-  - job_name: 'mcp-files'
+  - job_name: "mcp-files"
     static_configs:
-      - targets: ['mcp-files:8082']
+      - targets: ["mcp-files:8082"]
     scrape_interval: 15s
     metrics_path: /metrics
     scrape_timeout: 5s
     metric_relabel_configs:
       - target_label: mcp_server
-        replacement: 'files'
+        replacement: "files"
 
   # Neo4j database metrics
-  - job_name: 'neo4j'
+  - job_name: "neo4j"
     static_configs:
-      - targets: ['neo4j:2004']
+      - targets: ["neo4j:2004"]
     scrape_interval: 30s
     metrics_path: /metrics
     scrape_timeout: 10s
 
   # PostgreSQL metrics (via postgres_exporter if available)
-  - job_name: 'postgres'
+  - job_name: "postgres"
     static_configs:
-      - targets: ['postgres-exporter:9187']
+      - targets: ["postgres-exporter:9187"]
     scrape_interval: 30s
     scrape_timeout: 10s
 
   # Redis metrics (via redis_exporter if available)
-  - job_name: 'redis'
+  - job_name: "redis"
     static_configs:
-      - targets: ['redis-exporter:9121']
+      - targets: ["redis-exporter:9121"]
     scrape_interval: 30s
     scrape_timeout: 5s
 
   # OPA metrics
-  - job_name: 'opa'
+  - job_name: "opa"
     static_configs:
-      - targets: ['opa:8181']
+      - targets: ["opa:8181"]
     scrape_interval: 30s
     metrics_path: /metrics
     scrape_timeout: 5s
 
   # Node.js application metrics (if using prom-client)
-  - job_name: 'node-app'
+  - job_name: "node-app"
     static_configs:
-      - targets: ['server:4000']
+      - targets: ["server:4000"]
     scrape_interval: 15s
     metrics_path: /metrics/nodejs
     scrape_timeout: 5s
     metric_relabel_configs:
       - source_labels: [__name__]
-        regex: 'nodejs_.*'
+        regex: "nodejs_.*"
         target_label: component
-        replacement: 'nodejs'
+        replacement: "nodejs"
 
   # Predictive Threat Suite - Forecasting & Simulation
-  - job_name: 'predictive-suite'
+  - job_name: "predictive-suite"
     static_configs:
-      - targets: ['predictive-forecasting:8091']
+      - targets: ["predictive-forecasting:8091"]
     scrape_interval: 15s
     metrics_path: /metrics
     scrape_timeout: 10s
     metric_relabel_configs:
       - source_labels: [__name__]
-        regex: 'predictive_.*'
+        regex: "predictive_.*"
         target_label: component
-        replacement: 'predictive-suite'
+        replacement: "predictive-suite"
       - source_labels: [__address__]
         target_label: instance
-        replacement: 'predictive-suite'
+        replacement: "predictive-suite"
     # Alternative targets for different deployment scenarios
     # If running standalone: ['localhost:8091']
     # If in Kubernetes: ['predictive-forecasting.predictive-suite.svc.cluster.local:8091']

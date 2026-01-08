@@ -2,10 +2,10 @@
  * Domain Intelligence Collector - Collects domain and IP intelligence
  */
 
-import { CollectorBase } from '../core/CollectorBase.js';
-import type { CollectionTask, DomainIntelligence } from '../types/index.js';
-import { lookup as whoisLookup } from 'whois';
-import { promises as dns } from 'dns';
+import { CollectorBase } from "../core/CollectorBase.js";
+import type { CollectionTask, DomainIntelligence } from "../types/index.js";
+import { lookup as whoisLookup } from "whois";
+import { promises as dns } from "dns";
 
 export class DomainIntelCollector extends CollectorBase {
   protected async onInitialize(): Promise<void> {
@@ -32,19 +32,19 @@ export class DomainIntelCollector extends CollectorBase {
     const [whoisData, dnsRecords, ipAddresses] = await Promise.allSettled([
       this.getWhoisData(domain),
       this.getDNSRecords(domain),
-      this.resolveIPs(domain)
+      this.resolveIPs(domain),
     ]);
 
     const intel: DomainIntelligence = {
       domain,
-      ipAddresses: ipAddresses.status === 'fulfilled' ? ipAddresses.value : []
+      ipAddresses: ipAddresses.status === "fulfilled" ? ipAddresses.value : [],
     };
 
-    if (whoisData.status === 'fulfilled') {
+    if (whoisData.status === "fulfilled") {
       Object.assign(intel, this.parseWhoisData(whoisData.value));
     }
 
-    if (dnsRecords.status === 'fulfilled') {
+    if (dnsRecords.status === "fulfilled") {
       intel.dnsRecords = dnsRecords.value;
     }
 
@@ -89,8 +89,11 @@ export class DomainIntelCollector extends CollectorBase {
     // Parse nameservers
     const nameservers = whoisText.match(/Name Server:\s*(.+)/gi);
     if (nameservers) {
-      result.nameservers = nameservers.map(ns =>
-        ns.replace(/Name Server:\s*/i, '').trim().toLowerCase()
+      result.nameservers = nameservers.map((ns) =>
+        ns
+          .replace(/Name Server:\s*/i, "")
+          .trim()
+          .toLowerCase()
       );
     }
 
@@ -106,7 +109,7 @@ export class DomainIntelCollector extends CollectorBase {
     try {
       // A records
       const aRecords = await dns.resolve4(domain);
-      records['A'] = aRecords;
+      records["A"] = aRecords;
     } catch (e) {
       // Ignore
     }
@@ -114,7 +117,7 @@ export class DomainIntelCollector extends CollectorBase {
     try {
       // AAAA records
       const aaaaRecords = await dns.resolve6(domain);
-      records['AAAA'] = aaaaRecords;
+      records["AAAA"] = aaaaRecords;
     } catch (e) {
       // Ignore
     }
@@ -122,7 +125,7 @@ export class DomainIntelCollector extends CollectorBase {
     try {
       // MX records
       const mxRecords = await dns.resolveMx(domain);
-      records['MX'] = mxRecords.map(mx => `${mx.priority} ${mx.exchange}`);
+      records["MX"] = mxRecords.map((mx) => `${mx.priority} ${mx.exchange}`);
     } catch (e) {
       // Ignore
     }
@@ -130,7 +133,7 @@ export class DomainIntelCollector extends CollectorBase {
     try {
       // TXT records
       const txtRecords = await dns.resolveTxt(domain);
-      records['TXT'] = txtRecords.map(txt => txt.join(''));
+      records["TXT"] = txtRecords.map((txt) => txt.join(""));
     } catch (e) {
       // Ignore
     }
@@ -138,7 +141,7 @@ export class DomainIntelCollector extends CollectorBase {
     try {
       // NS records
       const nsRecords = await dns.resolveNs(domain);
-      records['NS'] = nsRecords;
+      records["NS"] = nsRecords;
     } catch (e) {
       // Ignore
     }
@@ -146,7 +149,7 @@ export class DomainIntelCollector extends CollectorBase {
     try {
       // CNAME records
       const cnameRecords = await dns.resolveCname(domain);
-      records['CNAME'] = cnameRecords;
+      records["CNAME"] = cnameRecords;
     } catch (e) {
       // Ignore
     }

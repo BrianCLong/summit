@@ -5,7 +5,7 @@
 export class ReleaseBundleError extends Error {
   constructor(code, message, details) {
     super(message);
-    this.name = 'ReleaseBundleError';
+    this.name = "ReleaseBundleError";
     this.code = code;
     this.details = details;
   }

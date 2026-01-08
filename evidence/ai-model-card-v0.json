@@ -7,16 +7,9 @@
     "purpose": "Entity resolution and link scoring for intelligence analysis"
   },
   "intended_use": {
-    "primary_uses": [
-      "Entity deduplication",
-      "Link prediction",
-      "Similarity scoring"
-    ],
+    "primary_uses": ["Entity deduplication", "Link prediction", "Similarity scoring"],
     "primary_users": ["Intelligence analysts", "Data scientists"],
-    "out_of_scope": [
-      "Real-time critical decisions",
-      "Automated actions without human review"
-    ]
+    "out_of_scope": ["Real-time critical decisions", "Automated actions without human review"]
   },
   "performance": {
     "entity_resolution": {

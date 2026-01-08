@@ -1,6 +1,7 @@
 # Nuclear Capability Monitoring
 
 ## Objective
+
 Monitor nuclear programs for proliferation risks and compliance with international non-proliferation regimes, supporting diplomatic engagement and verification efforts.
 
 ## Analysis Framework
@@ -38,6 +39,7 @@ Monitor nuclear programs for proliferation risks and compliance with internation
 ### Proliferation Risk Indicators
 
 **Technical Indicators:**
+
 - Uranium enrichment activity
 - Plutonium reprocessing capability
 - Weaponization research (implosion, miniaturization)
@@ -45,6 +47,7 @@ Monitor nuclear programs for proliferation risks and compliance with internation
 - Testing activities (nuclear, missile)
 
 **Behavioral Indicators:**
+
 - IAEA cooperation level
 - Declaration accuracy and completeness
 - Access granted to inspectors
@@ -52,6 +55,7 @@ Monitor nuclear programs for proliferation risks and compliance with internation
 - Secrecy and concealment efforts
 
 **Strategic Indicators:**
+
 - Security threat perceptions
 - Regional rival capabilities
 - Alliance reliability doubts
@@ -59,7 +63,9 @@ Monitor nuclear programs for proliferation risks and compliance with internation
 - Domestic political factors
 
 ### Breakout Timeline Assessment
+
 For states with enrichment capability:
+
 - Current enrichment level and capacity
 - Fissile material quantity
 - Weaponization technical capability
@@ -72,6 +78,7 @@ This analysis supports diplomatic prevention and verification, NOT military targ
 ### Verification and Compliance
 
 **IAEA Safeguards:**
+
 - Safeguards agreement type (Comprehensive, AP)
 - Inspection frequency and findings
 - Outstanding issues or violations
@@ -79,6 +86,7 @@ This analysis supports diplomatic prevention and verification, NOT military targ
 - Voluntary transparency measures
 
 **Treaty Compliance:**
+
 - NPT commitments
 - CTBT signature/ratification
 - Regional nuclear-weapon-free zones
@@ -88,6 +96,7 @@ This analysis supports diplomatic prevention and verification, NOT military targ
 ### Diplomatic Engagement Strategies
 
 **Prevention:**
+
 - Security assurances and guarantees
 - Incentives for restraint
 - Regional security dialogues
@@ -95,6 +104,7 @@ This analysis supports diplomatic prevention and verification, NOT military targ
 - Sanctions and pressure (calibrated)
 
 **Crisis Management:**
+
 - Diplomatic negotiations
 - Verification mechanisms
 - Confidence-building measures
@@ -102,6 +112,7 @@ This analysis supports diplomatic prevention and verification, NOT military targ
 - De-escalation pathways
 
 **Long-term Solutions:**
+
 - Regional security frameworks
 - Denuclearization roadmaps
 - Verification protocols
@@ -111,18 +122,21 @@ This analysis supports diplomatic prevention and verification, NOT military targ
 ### Risk Scenarios
 
 **Peaceful Resolution:**
+
 - Diplomatic breakthrough
 - Verified denuclearization
 - Security framework established
 - Economic normalization
 
 **Status Quo:**
+
 - Continued standoff
 - Limited progress
 - Managed tensions
 - Incremental capability growth
 
 **Escalation:**
+
 - Verification breakdown
 - Accelerated weaponization
 - Regional arms race
@@ -131,12 +145,14 @@ This analysis supports diplomatic prevention and verification, NOT military targ
 ### Arms Control and Disarmament
 
 **Existing Treaties:**
+
 - NPT: 191 parties, cornerstone of non-proliferation
 - CTBT: Not entered into force, testing moratorium
 - New START: US-Russia strategic arms limits
 - Regional NWFZs: Latin America, Africa, Southeast Asia, etc.
 
 **Future Priorities:**
+
 - NPT strengthening and universalization
 - CTBT entry into force
 - Fissile Material Cut-off Treaty (FMCT)
@@ -145,6 +161,7 @@ This analysis supports diplomatic prevention and verification, NOT military targ
 - Emerging technologies (cyber, AI, hypersonics)
 
 ### Ethical Framework
+
 - Support non-proliferation and disarmament
 - Promote peaceful uses of nuclear energy
 - Verification not targeting
@@ -153,11 +170,13 @@ This analysis supports diplomatic prevention and verification, NOT military targ
 - Universal and non-discriminatory approaches
 
 ### Monitoring Indicators
+
 - Quarterly: IAEA reports, procurement activities, site imagery
 - Annually: National intelligence assessments, policy changes
 - Ongoing: Academic analysis, think tank reports, open source intelligence
 
 ### Applications
+
 - Non-proliferation policy development
 - Diplomatic strategy and negotiations
 - IAEA safeguards planning

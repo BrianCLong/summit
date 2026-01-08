@@ -1,5 +1,5 @@
-import React from 'react';
-import { useQuery, gql } from '@apollo/client';
+import React from "react";
+import { useQuery, gql } from "@apollo/client";
 
 const GET_HEALTH_SCORE = gql`
   query GetHealthScore {

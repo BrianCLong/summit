@@ -12,48 +12,56 @@ This document tracks the developer experience improvements made to reduce paperc
 ## 📊 Friction Points Identified
 
 ### 1. **Cryptic Environment Variable Errors**
+
 **Before**: Missing env vars just listed names
 **After**: Contextual help with examples and links to docs
 
 **Impact**: Reduces time debugging configuration issues from ~15min to ~2min
 
 ### 2. **Silent Health Check Failures**
+
 **Before**: Health endpoint swallowed exceptions, showed "unhealthy" with no context
 **After**: Logs failures with service name, error message, and timestamps
 
 **Impact**: Operations can now debug production health issues without digging through code
 
 ### 3. **Generic Database Connection Errors**
+
 **Before**: "Connection failed" with no recovery steps
 **After**: Detailed error with service name, port info, and troubleshooting steps
 
 **Impact**: Developers can self-service database connection issues
 
 ### 4. **Missing Preflight Checks**
+
 **Before**: `make up` failed halfway through with cryptic Docker errors
 **After**: Validates Docker running + Node version before attempting build
 
 **Impact**: Saves ~5 minutes per failed attempt by failing fast with clear guidance
 
 ### 5. **Inconsistent Script Naming**
+
 **Before**: Confusion between `pnpm smoke` vs `make smoke`, multiple ways to do same thing
 **After**: Canonical command reference document with clear guidance
 
 **Impact**: Reduces confusion for new developers, improves documentation consistency
 
 ### 6. **Poor Makefile Help**
+
 **Before**: No help target, developers had to read Makefile
 **After**: `make help` shows all commands with descriptions and prerequisites
 
 **Impact**: Faster onboarding, self-service for common tasks
 
 ### 7. **Unclear Smoke Test Failures**
+
 **Before**: Generic "tests failed" with no guidance
 **After**: Structured failure output with troubleshooting steps and debug commands
 
 **Impact**: Developers can fix failures without asking for help
 
 ### 8. **wait-for-stack.sh Timeout with No Diagnostics**
+
 **Before**: "Stack failed health checks" after 40 attempts
 **After**: Shows which services are unhealthy, port status, and next steps
 
@@ -68,6 +76,7 @@ This document tracks the developer experience improvements made to reduce paperc
 **File**: `Makefile`
 
 **Changes**:
+
 - ✅ Added `make help` target with usage documentation
 - ✅ Added `preflight` checks for Docker + Node version
 - ✅ Added detailed error messages with troubleshooting steps
@@ -94,6 +103,7 @@ ERROR: Docker daemon not running. Start Docker Desktop and try again.
 **File**: `server/src/routes/health.ts`
 
 **Changes**:
+
 - ✅ Added logging for all health check failures
 - ✅ Added error details in response (service, message, timestamp)
 - ✅ Improved readiness probe to show which services failed
@@ -125,6 +135,7 @@ ERROR: Docker daemon not running. Start Docker Desktop and try again.
 **File**: `server/src/config.ts`
 
 **Changes**:
+
 - ✅ Added environment variable documentation lookup
 - ✅ Added help text for each missing variable
 - ✅ Added example values and format guidance
@@ -157,6 +168,7 @@ How to fix:
 **File**: `scripts/wait-for-stack.sh`
 
 **Changes**:
+
 - ✅ Added service name mapping (port → service name)
 - ✅ Added colored output (errors in red, warnings in yellow)
 - ✅ Added progress indicators every 5 attempts
@@ -201,6 +213,7 @@ Next steps:
 **File**: `docs/COMMAND_REFERENCE.md` (NEW)
 
 **Contents**:
+
 - Canonical command table for all common workflows
 - Aliases and when to use them
 - Common workflow examples
@@ -215,6 +228,7 @@ Next steps:
 **File**: `docs/ONBOARDING.md`
 
 **Changes**:
+
 - ✅ Added troubleshooting section
 - ✅ Added reference to command guide
 - ✅ Added `make help` tip
@@ -226,13 +240,13 @@ Next steps:
 
 ### Time Savings (Estimated)
 
-| Scenario | Before | After | Savings |
-|----------|--------|-------|---------|
-| First-time setup with error | 30-45 min | 10-15 min | **~25 min** |
-| Debug health check failure | 15-20 min | 2-5 min | **~13 min** |
-| Find the right command | 5-10 min | 1 min | **~7 min** |
-| Fix config error | 10-15 min | 2-3 min | **~10 min** |
-| Diagnose stack startup failure | 20-30 min | 5-7 min | **~20 min** |
+| Scenario                       | Before    | After     | Savings     |
+| ------------------------------ | --------- | --------- | ----------- |
+| First-time setup with error    | 30-45 min | 10-15 min | **~25 min** |
+| Debug health check failure     | 15-20 min | 2-5 min   | **~13 min** |
+| Find the right command         | 5-10 min  | 1 min     | **~7 min**  |
+| Fix config error               | 10-15 min | 2-3 min   | **~10 min** |
+| Diagnose stack startup failure | 20-30 min | 5-7 min   | **~20 min** |
 
 **Total estimated savings per developer per week**: ~2-3 hours
 
@@ -305,6 +319,7 @@ Next steps:
 ### 2025-11-20 - Initial Ergonomics Pass
 
 **Added**:
+
 - `make help` command
 - `make preflight` checks
 - `docs/COMMAND_REFERENCE.md`
@@ -314,12 +329,14 @@ Next steps:
 - Troubleshooting section in ONBOARDING.md
 
 **Improved**:
+
 - Makefile error messages with next steps
 - Health endpoint error details
 - Stack startup failure diagnostics
 - Environment variable validation messages
 
 **Changed**:
+
 - All Makefile targets now show progress
 - Failed commands provide troubleshooting steps
 - Health checks log failures to server logs
@@ -329,6 +346,7 @@ Next steps:
 ## 🙏 Acknowledgments
 
 Ergonomics improvements based on:
+
 - Developer feedback from #summit-dev
 - Bug bash friction points
 - CI failure patterns

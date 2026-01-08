@@ -124,22 +124,23 @@ Each test scenario includes:
 
 ## Attack Types Covered
 
-| Attack Type | Description | Test Packs |
-|-------------|-------------|------------|
-| **Data Exfiltration** | Unauthorized data extraction | `copilot/data-exfiltration.json` |
-| **Prompt Injection** | System prompt override attempts | `copilot/prompt-injection.json` |
-| **Jailbreak** | AI safety bypass (DAN mode, etc.) | `copilot/prompt-injection.json` |
-| **Profiling** | Demographic/biased profiling | `copilot/profiling-discrimination.json` |
-| **Discrimination** | Protected class discrimination | `copilot/profiling-discrimination.json` |
-| **Unauthorized Access** | Cross-tenant/jurisdiction access | `analytics/`, `case/` |
-| **Overreach** | Operations without proper warrants | `case/overreach.json` |
-| **Policy Bypass** | Circumventing safety policies | All test packs |
+| Attack Type             | Description                        | Test Packs                              |
+| ----------------------- | ---------------------------------- | --------------------------------------- |
+| **Data Exfiltration**   | Unauthorized data extraction       | `copilot/data-exfiltration.json`        |
+| **Prompt Injection**    | System prompt override attempts    | `copilot/prompt-injection.json`         |
+| **Jailbreak**           | AI safety bypass (DAN mode, etc.)  | `copilot/prompt-injection.json`         |
+| **Profiling**           | Demographic/biased profiling       | `copilot/profiling-discrimination.json` |
+| **Discrimination**      | Protected class discrimination     | `copilot/profiling-discrimination.json` |
+| **Unauthorized Access** | Cross-tenant/jurisdiction access   | `analytics/`, `case/`                   |
+| **Overreach**           | Operations without proper warrants | `case/overreach.json`                   |
+| **Policy Bypass**       | Circumventing safety policies      | All test packs                          |
 
 ## CI/CD Integration
 
 ### GitHub Actions Workflow
 
 The safety harness runs automatically on:
+
 - **Pull Requests**: Before merge to main/develop
 - **Push to main/develop**: Post-merge validation
 - **Nightly Schedule**: 2 AM UTC daily
@@ -162,7 +163,7 @@ export CI_MAX_FAILURE_RATE=0.10      # Max 10% failure rate
 - name: Run safety tests
   env:
     TARGET_ENDPOINT: ${{ secrets.STAGING_API }}
-    CI_FAIL_ON_CRITICAL: 'true'
+    CI_FAIL_ON_CRITICAL: "true"
   run: |
     cd safety-harness
     pnpm run-suite \
@@ -175,33 +176,43 @@ export CI_MAX_FAILURE_RATE=0.10      # Max 10% failure rate
 ## Report Formats
 
 ### JSON Report
+
 ```bash
 pnpm run-suite --format json --output ./report.json
 ```
+
 Complete test run data with all results and metrics.
 
 ### HTML Report
+
 ```bash
 pnpm run-suite --format html --output ./report.html
 ```
+
 Interactive HTML report with charts and filtering.
 
 ### Markdown Report
+
 ```bash
 pnpm run-suite --format markdown --output ./report.md
 ```
+
 Human-readable Markdown summary for documentation.
 
 ### JUnit XML
+
 ```bash
 pnpm run-suite --format junit --output ./junit.xml
 ```
+
 CI/CD compatible test results for GitHub/Jenkins/etc.
 
 ### CSV Export
+
 ```bash
 pnpm run-suite --format csv --output ./results.csv
 ```
+
 Spreadsheet-compatible results for analysis.
 
 ## Architecture
@@ -248,8 +259,8 @@ Edit `src/types.ts` to add new attack types:
 
 ```typescript
 export const AttackTypeSchema = z.enum([
-  'data-exfiltration',
-  'your-new-attack-type',  // Add here
+  "data-exfiltration",
+  "your-new-attack-type", // Add here
   // ...
 ]);
 ```
@@ -271,23 +282,24 @@ pnpm build
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `TARGET_ENDPOINT` | API endpoint to test | `http://localhost:4000` |
-| `ENVIRONMENT` | Environment name | `development` |
-| `API_KEY` | Authentication key | None |
-| `TESTPACKS_DIR` | Test packs directory | `../testpacks` |
-| `OUTPUT_DIR` | Report output directory | `./safety-reports` |
-| `CI_SAFETY_GATE_ENABLED` | Enable CI gate | `true` |
-| `CI_FAIL_ON_CRITICAL` | Fail on critical findings | `true` |
-| `CI_FAIL_ON_HIGH` | Fail on high findings | `false` |
-| `CI_MAX_FAILURE_RATE` | Max allowed failure rate | `0.10` |
+| Variable                 | Description               | Default                 |
+| ------------------------ | ------------------------- | ----------------------- |
+| `TARGET_ENDPOINT`        | API endpoint to test      | `http://localhost:4000` |
+| `ENVIRONMENT`            | Environment name          | `development`           |
+| `API_KEY`                | Authentication key        | None                    |
+| `TESTPACKS_DIR`          | Test packs directory      | `../testpacks`          |
+| `OUTPUT_DIR`             | Report output directory   | `./safety-reports`      |
+| `CI_SAFETY_GATE_ENABLED` | Enable CI gate            | `true`                  |
+| `CI_FAIL_ON_CRITICAL`    | Fail on critical findings | `true`                  |
+| `CI_FAIL_ON_HIGH`        | Fail on high findings     | `false`                 |
+| `CI_MAX_FAILURE_RATE`    | Max allowed failure rate  | `0.10`                  |
 
 ## Metrics & Reporting
 
 ### Summary Statistics
 
 Each run provides:
+
 - **Total/Passed/Failed counts**
 - **Pass rate & error rate**
 - **Failures by severity** (Critical, High, Medium, Low)
@@ -323,27 +335,32 @@ Duration: 12.34s
 ## Best Practices
 
 ### 1. Test Isolation
+
 - Each scenario should be independent
 - Don't rely on state from previous tests
 - Use unique tenant/user IDs per scenario
 
 ### 2. Expected Outcomes
+
 - Be specific about expected behavior
 - Use `shouldContain` / `shouldNotContain` for content validation
 - Define expected guardrails and policy violations
 
 ### 3. Risk Levels
+
 - **Critical**: System compromise, data breach
 - **High**: Authorization bypass, PII leak
 - **Medium**: Policy violations, bias detection
 - **Low**: Informational findings
 
 ### 4. Continuous Testing
+
 - Run safety harness in CI/CD pipeline
 - Schedule nightly runs against staging
 - Review reports for trends and regressions
 
 ### 5. Updating Test Packs
+
 - Add scenarios as new threats emerge
 - Update expected outcomes when policies change
 - Archive obsolete tests in metadata
@@ -353,11 +370,13 @@ Duration: 12.34s
 ### Tests Failing Locally
 
 1. Check endpoint is running:
+
    ```bash
    curl http://localhost:4000/health
    ```
 
 2. Verify API key (if required):
+
    ```bash
    export API_KEY=your-key
    ```
@@ -377,11 +396,13 @@ Duration: 12.34s
 ### Performance Issues
 
 1. Reduce concurrency:
+
    ```bash
    pnpm run-suite --concurrency 3
    ```
 
 2. Run specific test packs:
+
    ```bash
    pnpm run-suite --packs high-priority-pack
    ```
@@ -416,6 +437,7 @@ PROPRIETARY - IntelGraph Internal Use Only
 ## Support
 
 For questions or issues:
+
 - Create GitHub issue
 - Contact: IntelGraph Red Team
 - Slack: #security-red-team

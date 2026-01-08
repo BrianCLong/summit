@@ -13,7 +13,7 @@ import type {
   BarrierCheckResult,
   BarrierViolation,
   BarrierType,
-} from './types';
+} from "./types";
 
 export interface BarrierEnforcerConfig {
   opaEndpoint: string;
@@ -80,7 +80,7 @@ export class BarrierEnforcer {
 
   constructor(config: BarrierEnforcerConfig) {
     this.config = {
-      opaPolicy: 'dlp/barriers',
+      opaPolicy: "dlp/barriers",
       cacheEnabled: true,
       cacheTtl: 300000, // 5 minutes
       strictMode: true,
@@ -110,7 +110,7 @@ export class BarrierEnforcer {
         allowed: false,
         barrierViolation: true,
         violations: localViolations,
-        barriersChecked: ['tenant_isolation', 'environment_boundary'],
+        barriersChecked: ["tenant_isolation", "environment_boundary"],
         auditEventId: this.generateAuditId(),
       };
 
@@ -145,9 +145,9 @@ export class BarrierEnforcer {
           barrierViolation: true,
           violations: [
             {
-              type: 'POLICY_EVALUATION_ERROR',
-              message: `Failed to evaluate policy: ${error instanceof Error ? error.message : 'Unknown error'}`,
-              severity: 'CRITICAL',
+              type: "POLICY_EVALUATION_ERROR",
+              message: `Failed to evaluate policy: ${error instanceof Error ? error.message : "Unknown error"}`,
+              severity: "CRITICAL",
             },
           ],
           barriersChecked: [],
@@ -156,7 +156,7 @@ export class BarrierEnforcer {
       }
 
       // Fail open in non-strict mode (with logging)
-      console.error('Barrier check failed, allowing with warning:', error);
+      console.error("Barrier check failed, allowing with warning:", error);
       return {
         allowed: true,
         barrierViolation: false,
@@ -176,13 +176,13 @@ export class BarrierEnforcer {
     // Tenant isolation - always enforced
     if (
       request.source.tenantId !== request.target.tenantId &&
-      request.source.tenantId !== 'PLATFORM' &&
-      request.target.tenantId !== 'PLATFORM'
+      request.source.tenantId !== "PLATFORM" &&
+      request.target.tenantId !== "PLATFORM"
     ) {
       violations.push({
-        type: 'TENANT_ISOLATION',
+        type: "TENANT_ISOLATION",
         message: `Cross-tenant data flow blocked: ${request.source.tenantId} -> ${request.target.tenantId}`,
-        severity: 'CRITICAL',
+        severity: "CRITICAL",
         sourceContext: { tenantId: request.source.tenantId },
         targetContext: { tenantId: request.target.tenantId },
       });
@@ -192,15 +192,15 @@ export class BarrierEnforcer {
     if (
       request.resource.containsPii &&
       !request.resource.anonymized &&
-      request.target.environment !== 'production' &&
-      request.target.environment !== 'audit'
+      request.target.environment !== "production" &&
+      request.target.environment !== "audit"
     ) {
       violations.push({
-        type: 'ENVIRONMENT',
+        type: "ENVIRONMENT",
         message: `PII not allowed in ${request.target.environment} environment`,
-        severity: 'CRITICAL',
+        severity: "CRITICAL",
         targetContext: { environment: request.target.environment },
-        remediation: 'Use anonymized or synthetic data for non-production environments',
+        remediation: "Use anonymized or synthetic data for non-production environments",
       });
     }
 
@@ -222,14 +222,14 @@ export class BarrierEnforcer {
     };
 
     const dataLevel = classificationLevels[request.resource.classification] || 0;
-    const actorLevel = clearanceLevels[request.actor.clearance || 'NONE'] || 0;
+    const actorLevel = clearanceLevels[request.actor.clearance || "NONE"] || 0;
 
     if (dataLevel > actorLevel && !request.actor.stepUpVerified) {
       violations.push({
-        type: 'ROLE_BASED',
-        message: `Insufficient clearance: actor has ${request.actor.clearance || 'NONE'}, data requires ${request.resource.classification}`,
-        severity: 'HIGH',
-        remediation: 'Request elevated access or complete step-up authentication',
+        type: "ROLE_BASED",
+        message: `Insufficient clearance: actor has ${request.actor.clearance || "NONE"}, data requires ${request.resource.classification}`,
+        severity: "HIGH",
+        remediation: "Request elevated access or complete step-up authentication",
       });
     }
 
@@ -242,13 +242,16 @@ export class BarrierEnforcer {
   private async evaluateOPA(request: BarrierCheckRequest): Promise<OPADecision> {
     const input = this.mapToOPAInput(request);
 
-    const response = await fetch(`${this.config.opaEndpoint}/v1/data/${this.config.opaPolicy}/decision`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ input }),
-    });
+    const response = await fetch(
+      `${this.config.opaEndpoint}/v1/data/${this.config.opaPolicy}/decision`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ input }),
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`OPA request failed: ${response.status} ${response.statusText}`);
@@ -313,7 +316,7 @@ export class BarrierEnforcer {
       violations: opaResult.violations.map((v) => ({
         type: v.type as BarrierType,
         message: v.message,
-        severity: v.severity as 'HIGH' | 'CRITICAL',
+        severity: v.severity as "HIGH" | "CRITICAL",
         remediation: v.remediation as string | undefined,
       })),
       barriersChecked: opaResult.barriers_checked as BarrierType[],

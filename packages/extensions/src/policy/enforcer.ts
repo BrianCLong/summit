@@ -4,7 +4,7 @@
  * Enforces permission-based access control for extensions via OPA.
  */
 
-import { ExtensionPermission } from '../types.js';
+import { ExtensionPermission } from "../types.js";
 
 export interface PolicyDecision {
   allowed: boolean;
@@ -14,7 +14,7 @@ export interface PolicyDecision {
 export class PolicyEnforcer {
   private opaUrl: string;
 
-  constructor(opaUrl: string = 'http://localhost:8181') {
+  constructor(opaUrl: string = "http://localhost:8181") {
     this.opaUrl = opaUrl;
   }
 
@@ -27,9 +27,7 @@ export class PolicyEnforcer {
   ): Promise<boolean> {
     // If no OPA service, allow by default (dev mode)
     if (!this.isOPAAvailable()) {
-      console.warn(
-        `OPA not available, allowing extension ${extensionName} by default (dev mode)`
-      );
+      console.warn(`OPA not available, allowing extension ${extensionName} by default (dev mode)`);
       return true;
     }
 
@@ -47,7 +45,7 @@ export class PolicyEnforcer {
       if (!decision.result?.allowed) {
         console.warn(
           `Extension ${extensionName} denied by policy:`,
-          decision.result?.reason || 'No reason provided'
+          decision.result?.reason || "No reason provided"
         );
         return false;
       }
@@ -63,11 +61,7 @@ export class PolicyEnforcer {
   /**
    * Check if a specific action is allowed for an extension
    */
-  async checkAction(
-    extensionName: string,
-    action: string,
-    resource?: string
-  ): Promise<boolean> {
+  async checkAction(extensionName: string, action: string, resource?: string): Promise<boolean> {
     if (!this.isOPAAvailable()) {
       return true;
     }
@@ -96,9 +90,9 @@ export class PolicyEnforcer {
    */
   private async queryOPA(input: any): Promise<any> {
     const response = await fetch(`${this.opaUrl}/v1/data/summit/extensions/allow`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(input),
     });
@@ -116,7 +110,7 @@ export class PolicyEnforcer {
   private isOPAAvailable(): boolean {
     // In production, this should actually check connectivity
     // For now, check if OPA_URL is configured
-    return process.env.OPA_URL !== undefined || this.opaUrl !== 'http://localhost:8181';
+    return process.env.OPA_URL !== undefined || this.opaUrl !== "http://localhost:8181";
   }
 
   /**
@@ -124,9 +118,9 @@ export class PolicyEnforcer {
    */
   async loadPolicy(policyRego: string): Promise<void> {
     const response = await fetch(`${this.opaUrl}/v1/policies/summit-extensions`, {
-      method: 'PUT',
+      method: "PUT",
       headers: {
-        'Content-Type': 'text/plain',
+        "Content-Type": "text/plain",
       },
       body: policyRego,
     });
@@ -147,6 +141,6 @@ export class PolicyEnforcer {
     }
 
     const data = (await response.json()) as { result?: { raw?: string } };
-    return data.result?.raw || '';
+    return data.result?.raw || "";
   }
 }

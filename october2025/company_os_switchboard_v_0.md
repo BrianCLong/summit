@@ -89,51 +89,32 @@ A local‑first, zero‑trust command center that gives you instant access to **
 
 ```tsx
 // app/components/Switchboard.tsx
-'use client';
-import { useState } from 'react';
-import {
-  Command,
-  CommandInput,
-  CommandList,
-  CommandItem,
-} from '@/components/ui/command';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Mic,
-  PhoneCall,
-  Video,
-  MessageSquare,
-  Rocket,
-  Activity,
-  Users,
-  Brain,
-} from 'lucide-react';
-import { motion } from 'framer-motion';
+"use client";
+import { useState } from "react";
+import { Command, CommandInput, CommandList, CommandItem } from "@/components/ui/command";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Mic, PhoneCall, Video, MessageSquare, Rocket, Activity, Users, Brain } from "lucide-react";
+import { motion } from "framer-motion";
 
 const agents = [
-  { id: 'maestro', name: 'Maestro Conductor', tags: ['router', 'exec'] },
-  { id: 'codex', name: 'CodeGen Codex', tags: ['dev', 'test'] },
-  { id: 'sentinel', name: 'Sentinel CI', tags: ['sec', 'policy'] },
-  { id: 'scribe', name: 'Scribe', tags: ['notes', 'transcribe'] },
+  { id: "maestro", name: "Maestro Conductor", tags: ["router", "exec"] },
+  { id: "codex", name: "CodeGen Codex", tags: ["dev", "test"] },
+  { id: "sentinel", name: "Sentinel CI", tags: ["sec", "policy"] },
+  { id: "scribe", name: "Scribe", tags: ["notes", "transcribe"] },
 ];
 
 const tiles = [
   {
-    id: 'status',
-    title: 'System Status',
-    metric: 'OK',
-    desc: 'All lanes green',
+    id: "status",
+    title: "System Status",
+    metric: "OK",
+    desc: "All lanes green",
   },
-  { id: 'incidents', title: 'Incidents', metric: '0', desc: 'No active' },
-  { id: 'deploys', title: 'Deploys', metric: '3', desc: 'prod canary live' },
-  { id: 'cost', title: 'LLM Spend', metric: '$42', desc: '24h window' },
+  { id: "incidents", title: "Incidents", metric: "0", desc: "No active" },
+  { id: "deploys", title: "Deploys", metric: "3", desc: "prod canary live" },
+  { id: "cost", title: "LLM Spend", metric: "$42", desc: "24h window" },
 ];
 
 export default function Switchboard() {
@@ -154,20 +135,13 @@ export default function Switchboard() {
           </CardHeader>
           <CardContent className="space-y-2">
             {agents.map((a) => (
-              <div
-                key={a.id}
-                className="flex items-center justify-between p-2 rounded-xl bg-muted"
-              >
+              <div key={a.id} className="flex items-center justify-between p-2 rounded-xl bg-muted">
                 <div>
                   <p className="font-medium">{a.name}</p>
-                  <p className="text-xs opacity-70">{a.tags.join(' • ')}</p>
+                  <p className="text-xs opacity-70">{a.tags.join(" • ")}</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => setOpen(true)}
-                  >
+                  <Button size="sm" variant="secondary" onClick={() => setOpen(true)}>
                     <MessageSquare className="h-4 w-4" />
                   </Button>
                   <Button size="sm" variant="secondary">
@@ -191,11 +165,7 @@ export default function Switchboard() {
       <main className="col-span-6 space-y-3">
         <div className="grid grid-cols-2 gap-3">
           {tiles.map((t) => (
-            <motion.div
-              key={t.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
+            <motion.div key={t.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
               <Card className="rounded-2xl">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -221,9 +191,7 @@ export default function Switchboard() {
                 Live WebRTC Stage
               </div>
             ) : (
-              <Button onClick={() => setMeeting(true)}>
-                Start Local Meeting
-              </Button>
+              <Button onClick={() => setMeeting(true)}>Start Local Meeting</Button>
             )}
           </CardContent>
         </Card>
@@ -247,8 +215,7 @@ export default function Switchboard() {
               <Button variant="secondary">Present</Button>
             </div>
             <div className="text-xs opacity-70">
-              Context loaded: org, agenda, metrics. Actions will be
-              policy‑checked.
+              Context loaded: org, agenda, metrics. Actions will be policy‑checked.
             </div>
           </CardContent>
         </Card>
@@ -274,12 +241,8 @@ export default function Switchboard() {
             <Command>
               <CommandInput placeholder="/call maestro | /present deck | /join room | /status api" />
               <CommandList>
-                <CommandItem onSelect={() => setMeeting(true)}>
-                  Start meeting
-                </CommandItem>
-                <CommandItem onSelect={() => setOpen(true)}>
-                  Message Scribe
-                </CommandItem>
+                <CommandItem onSelect={() => setMeeting(true)}>Start meeting</CommandItem>
+                <CommandItem onSelect={() => setOpen(true)}>Message Scribe</CommandItem>
                 <CommandItem>Open Graph View</CommandItem>
               </CommandList>
             </Command>
@@ -297,7 +260,7 @@ export default function Switchboard() {
 
 ```yaml
 # deploy/local/docker-compose.switchboard.yml (MVP local stack)
-version: '3.8'
+version: "3.8"
 services:
   sfu:
     image: ghcr.io/companyos/media-sfu:latest # or livekit/mediasoup build
@@ -308,26 +271,17 @@ services:
     image: coturn/coturn:latest
     network_mode: host
     command:
-      [
-        '-n',
-        '--no-cli',
-        '--no-tls',
-        '--no-dtls',
-        '--min-port',
-        '49160',
-        '--max-port',
-        '49200',
-      ]
+      ["-n", "--no-cli", "--no-tls", "--no-dtls", "--min-port", "49160", "--max-port", "49200"]
   signaling:
     image: ghcr.io/companyos/signaling:latest
-    ports: ['8080:8080']
+    ports: ["8080:8080"]
   nats:
     image: nats:2
-    command: ['-js']
-    ports: ['4222:4222', '8222:8222']
+    command: ["-js"]
+    ports: ["4222:4222", "8222:8222"]
   opa:
     image: openpolicyagent/opa:latest
-    command: ['run', '--server', '/policies']
+    command: ["run", "--server", "/policies"]
     volumes:
       - ./policies:/policies:ro
   agent-gateway:
@@ -335,7 +289,7 @@ services:
     environment:
       - NATS_URL=nats://nats:4222
       - OPA_URL=http://opa:8181
-    ports: ['7070:7070']
+    ports: ["7070:7070"]
 ```
 
 ---
@@ -351,16 +305,16 @@ paths:
     get:
       summary: List registered agents
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
   /actions/dispatch:
     post:
       summary: Send structured action to agent with policy check
       requestBody: { required: true }
-      responses: { '202': { description: Accepted } }
+      responses: { "202": { description: Accepted } }
   /meetings/token:
     post:
       summary: Mint ephemeral meeting token
-      responses: { '200': { description: OK } }
+      responses: { "200": { description: OK } }
 ```
 
 ---

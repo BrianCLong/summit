@@ -3,19 +3,19 @@
  * High-performance analytics table format
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import { BaseTable } from './base-table.js';
+import { v4 as uuidv4 } from "uuid";
+import { BaseTable } from "./base-table.js";
 import {
   TableConfig,
   Transaction,
   Snapshot,
   TimeTravel,
   DataFile,
-  OptimizeResult
-} from '../types.js';
-import pino from 'pino';
+  OptimizeResult,
+} from "../types.js";
+import pino from "pino";
 
-const logger = pino({ name: 'iceberg' });
+const logger = pino({ name: "iceberg" });
 
 export class IcebergTable extends BaseTable {
   private transactions: Map<string, Transaction>;
@@ -32,11 +32,11 @@ export class IcebergTable extends BaseTable {
     this.dataFiles = [];
     this.manifestLists = [];
 
-    logger.info({ table: config.name }, 'Iceberg table initialized');
+    logger.info({ table: config.name }, "Iceberg table initialized");
   }
 
   async beginTransaction(
-    operation: 'insert' | 'update' | 'delete' | 'merge'
+    operation: "insert" | "update" | "delete" | "merge"
   ): Promise<Transaction> {
     const transaction: Transaction = {
       id: uuidv4(),
@@ -44,12 +44,12 @@ export class IcebergTable extends BaseTable {
       operation,
       timestamp: new Date(),
       version: this.currentVersion + 1,
-      status: 'pending',
-      metadata: { icebergVersion: '2' }
+      status: "pending",
+      metadata: { icebergVersion: "2" },
     };
 
     this.transactions.set(transaction.id, transaction);
-    logger.info({ transactionId: transaction.id, operation }, 'Iceberg transaction started');
+    logger.info({ transactionId: transaction.id, operation }, "Iceberg transaction started");
 
     return transaction;
   }
@@ -60,7 +60,7 @@ export class IcebergTable extends BaseTable {
       throw new Error(`Transaction ${transaction.id} not found`);
     }
 
-    tx.status = 'committed';
+    tx.status = "committed";
     this.currentVersion++;
 
     // Create new snapshot
@@ -68,15 +68,15 @@ export class IcebergTable extends BaseTable {
 
     logger.info(
       { transactionId: transaction.id, version: this.currentVersion },
-      'Iceberg transaction committed'
+      "Iceberg transaction committed"
     );
   }
 
   async abortTransaction(transaction: Transaction): Promise<void> {
     const tx = this.transactions.get(transaction.id);
     if (tx) {
-      tx.status = 'aborted';
-      logger.info({ transactionId: transaction.id }, 'Iceberg transaction aborted');
+      tx.status = "aborted";
+      logger.info({ transactionId: transaction.id }, "Iceberg transaction aborted");
     }
   }
 
@@ -89,24 +89,24 @@ export class IcebergTable extends BaseTable {
       tableId: this.metadata.id,
       version: this.currentVersion,
       timestamp: new Date(),
-      operation: 'append',
+      operation: "append",
       manifestFiles: this.manifestLists,
       summary: {
         totalRecords: this.dataFiles.reduce((sum, f) => sum + f.recordCount, 0),
         totalFiles: this.dataFiles.length,
-        totalSize: this.dataFiles.reduce((sum, f) => sum + f.fileSizeBytes, 0)
-      }
+        totalSize: this.dataFiles.reduce((sum, f) => sum + f.fileSizeBytes, 0),
+      },
     };
 
     this.snapshots.push(snapshot);
     this.metadata.currentSnapshotId = snapshot.id;
 
-    logger.info({ snapshotId: snapshot.id }, 'Iceberg snapshot created');
+    logger.info({ snapshotId: snapshot.id }, "Iceberg snapshot created");
     return snapshot;
   }
 
   async getSnapshot(snapshotId: string): Promise<Snapshot> {
-    const snapshot = this.snapshots.find(s => s.id === snapshotId);
+    const snapshot = this.snapshots.find((s) => s.id === snapshotId);
     if (!snapshot) {
       throw new Error(`Snapshot ${snapshotId} not found`);
     }
@@ -121,7 +121,7 @@ export class IcebergTable extends BaseTable {
     const snapshot = await this.getSnapshot(snapshotId);
     this.currentVersion = snapshot.version;
     this.metadata.currentSnapshotId = snapshotId;
-    logger.info({ snapshotId }, 'Rolled back to Iceberg snapshot');
+    logger.info({ snapshotId }, "Rolled back to Iceberg snapshot");
   }
 
   async readAtVersion(timeTravel: TimeTravel): Promise<any[]> {
@@ -131,12 +131,12 @@ export class IcebergTable extends BaseTable {
       targetSnapshot = await this.getSnapshot(timeTravel.snapshotId);
     } else if (timeTravel.timestamp) {
       targetSnapshot = this.snapshots
-        .filter(s => s.timestamp <= timeTravel.timestamp!)
+        .filter((s) => s.timestamp <= timeTravel.timestamp!)
         .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())[0];
     }
 
     if (!targetSnapshot) {
-      throw new Error('No snapshot found for time travel');
+      throw new Error("No snapshot found for time travel");
     }
 
     // Would read from manifest files here
@@ -149,7 +149,7 @@ export class IcebergTable extends BaseTable {
 
   async addDataFiles(files: DataFile[]): Promise<void> {
     this.dataFiles.push(...files);
-    logger.info({ fileCount: files.length }, 'Iceberg data files added');
+    logger.info({ fileCount: files.length }, "Iceberg data files added");
   }
 
   async listDataFiles(): Promise<DataFile[]> {
@@ -157,13 +157,13 @@ export class IcebergTable extends BaseTable {
   }
 
   async deleteDataFiles(paths: string[]): Promise<void> {
-    this.dataFiles = this.dataFiles.filter(f => !paths.includes(f.path));
-    logger.info({ deletedCount: paths.length }, 'Iceberg data files deleted');
+    this.dataFiles = this.dataFiles.filter((f) => !paths.includes(f.path));
+    logger.info({ deletedCount: paths.length }, "Iceberg data files deleted");
   }
 
   async optimize(targetFileSize: number = 128 * 1024 * 1024): Promise<OptimizeResult> {
     const startTime = Date.now();
-    logger.info('Starting Iceberg optimization');
+    logger.info("Starting Iceberg optimization");
 
     // Bin-packing algorithm for optimal file layout
     const result: OptimizeResult = {
@@ -171,10 +171,10 @@ export class IcebergTable extends BaseTable {
       filesRemoved: 0,
       bytesAdded: 0,
       bytesRemoved: 0,
-      duration: Date.now() - startTime
+      duration: Date.now() - startTime,
     };
 
-    logger.info({ result }, 'Iceberg optimization completed');
+    logger.info({ result }, "Iceberg optimization completed");
     return result;
   }
 
@@ -184,19 +184,19 @@ export class IcebergTable extends BaseTable {
 
   async vacuum(olderThan: Date): Promise<number> {
     const initialCount = this.snapshots.length;
-    this.snapshots = this.snapshots.filter(s => s.timestamp >= olderThan);
+    this.snapshots = this.snapshots.filter((s) => s.timestamp >= olderThan);
     const removed = initialCount - this.snapshots.length;
 
-    logger.info({ removedSnapshots: removed }, 'Iceberg vacuum completed');
+    logger.info({ removedSnapshots: removed }, "Iceberg vacuum completed");
     return removed;
   }
 
   async updateSchema(newSchema: any): Promise<void> {
     this.metadata.schema = newSchema;
-    logger.info('Iceberg schema updated');
+    logger.info("Iceberg schema updated");
   }
 
   async evolveSchema(changes: any): Promise<void> {
-    logger.info({ changes }, 'Iceberg schema evolution applied');
+    logger.info({ changes }, "Iceberg schema evolution applied");
   }
 }

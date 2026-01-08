@@ -50,7 +50,7 @@ export interface AdapterManifest {
 }
 
 export interface BundleBuildOptions {
-  manifest: Omit<AdapterManifest, 'artifacts' | 'checksums' | 'compatibility' | 'createdAt'> & {
+  manifest: Omit<AdapterManifest, "artifacts" | "checksums" | "compatibility" | "createdAt"> & {
     createdAt?: string;
   };
   compatibility: AdapterCompatibilityMatrix;
@@ -90,6 +90,6 @@ export interface BundleVerificationResult {
 export class BundleValidationError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'BundleValidationError';
+    this.name = "BundleValidationError";
   }
 }

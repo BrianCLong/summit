@@ -9,23 +9,23 @@
  */
 export const SOURCE_TYPES = {
   /** Recruited asset with ongoing relationship */
-  ASSET: 'ASSET',
+  ASSET: "ASSET",
   /** Foreign liaison partner */
-  LIAISON: 'LIAISON',
+  LIAISON: "LIAISON",
   /** Unsolicited volunteer providing information */
-  WALK_IN: 'WALK_IN',
+  WALK_IN: "WALK_IN",
   /** One-time contact with specific information */
-  CASUAL_CONTACT: 'CASUAL_CONTACT',
+  CASUAL_CONTACT: "CASUAL_CONTACT",
   /** Unwitting provider of information */
-  UNWITTING: 'UNWITTING',
+  UNWITTING: "UNWITTING",
   /** Defector from adversary organization */
-  DEFECTOR: 'DEFECTOR',
+  DEFECTOR: "DEFECTOR",
   /** Technical consultant or expert */
-  CONSULTANT: 'CONSULTANT',
+  CONSULTANT: "CONSULTANT",
   /** Official cover officer */
-  OFFICIAL_COVER: 'OFFICIAL_COVER',
+  OFFICIAL_COVER: "OFFICIAL_COVER",
   /** Non-official cover officer */
-  NOC: 'NOC',
+  NOC: "NOC",
 } as const;
 
 export type SourceType = (typeof SOURCE_TYPES)[keyof typeof SOURCE_TYPES];
@@ -35,12 +35,12 @@ export type SourceType = (typeof SOURCE_TYPES)[keyof typeof SOURCE_TYPES];
  * Evaluates the reliability of the source
  */
 export const CREDIBILITY_RATINGS = {
-  A: { code: 'A', label: 'Completely Reliable', score: 100 },
-  B: { code: 'B', label: 'Usually Reliable', score: 80 },
-  C: { code: 'C', label: 'Fairly Reliable', score: 60 },
-  D: { code: 'D', label: 'Not Usually Reliable', score: 40 },
-  E: { code: 'E', label: 'Unreliable', score: 20 },
-  F: { code: 'F', label: 'Cannot Be Judged', score: 0 },
+  A: { code: "A", label: "Completely Reliable", score: 100 },
+  B: { code: "B", label: "Usually Reliable", score: 80 },
+  C: { code: "C", label: "Fairly Reliable", score: 60 },
+  D: { code: "D", label: "Not Usually Reliable", score: 40 },
+  E: { code: "E", label: "Unreliable", score: 20 },
+  F: { code: "F", label: "Cannot Be Judged", score: 0 },
 } as const;
 
 export type CredibilityRating = keyof typeof CREDIBILITY_RATINGS;
@@ -50,12 +50,12 @@ export type CredibilityRating = keyof typeof CREDIBILITY_RATINGS;
  * Evaluates the reliability of the information itself
  */
 export const INFORMATION_RATINGS = {
-  '1': { code: '1', label: 'Confirmed by other sources', score: 100 },
-  '2': { code: '2', label: 'Probably true', score: 80 },
-  '3': { code: '3', label: 'Possibly true', score: 60 },
-  '4': { code: '4', label: 'Doubtfully true', score: 40 },
-  '5': { code: '5', label: 'Improbable', score: 20 },
-  '6': { code: '6', label: 'Cannot be judged', score: 0 },
+  "1": { code: "1", label: "Confirmed by other sources", score: 100 },
+  "2": { code: "2", label: "Probably true", score: 80 },
+  "3": { code: "3", label: "Possibly true", score: 60 },
+  "4": { code: "4", label: "Doubtfully true", score: 40 },
+  "5": { code: "5", label: "Improbable", score: 20 },
+  "6": { code: "6", label: "Cannot be judged", score: 0 },
 } as const;
 
 export type InformationRating = keyof typeof INFORMATION_RATINGS;
@@ -65,21 +65,21 @@ export type InformationRating = keyof typeof INFORMATION_RATINGS;
  */
 export const SOURCE_STATUS = {
   /** Source is actively providing intelligence */
-  ACTIVE: 'ACTIVE',
+  ACTIVE: "ACTIVE",
   /** Source is temporarily inactive */
-  DORMANT: 'DORMANT',
+  DORMANT: "DORMANT",
   /** Source relationship is terminated */
-  TERMINATED: 'TERMINATED',
+  TERMINATED: "TERMINATED",
   /** Source is suspected of being compromised */
-  COMPROMISED: 'COMPROMISED',
+  COMPROMISED: "COMPROMISED",
   /** Source is being developed/recruited */
-  DEVELOPMENTAL: 'DEVELOPMENTAL',
+  DEVELOPMENTAL: "DEVELOPMENTAL",
   /** Source is under evaluation */
-  EVALUATION: 'EVALUATION',
+  EVALUATION: "EVALUATION",
   /** Source has been relocated/resettled */
-  RESETTLED: 'RESETTLED',
+  RESETTLED: "RESETTLED",
   /** Source is deceased */
-  DECEASED: 'DECEASED',
+  DECEASED: "DECEASED",
 } as const;
 
 export type SourceStatus = (typeof SOURCE_STATUS)[keyof typeof SOURCE_STATUS];
@@ -89,21 +89,21 @@ export type SourceStatus = (typeof SOURCE_STATUS)[keyof typeof SOURCE_STATUS];
  */
 export const DEBRIEF_TYPES = {
   /** Regular scheduled meeting */
-  SCHEDULED: 'SCHEDULED',
+  SCHEDULED: "SCHEDULED",
   /** Emergency contact initiated by source */
-  EMERGENCY: 'EMERGENCY',
+  EMERGENCY: "EMERGENCY",
   /** Initial recruitment/evaluation meeting */
-  INITIAL: 'INITIAL',
+  INITIAL: "INITIAL",
   /** Follow-up on specific intelligence */
-  FOLLOW_UP: 'FOLLOW_UP',
+  FOLLOW_UP: "FOLLOW_UP",
   /** Tasking delivery session */
-  TASKING: 'TASKING',
+  TASKING: "TASKING",
   /** Operational security review */
-  SECURITY_REVIEW: 'SECURITY_REVIEW',
+  SECURITY_REVIEW: "SECURITY_REVIEW",
   /** Final termination meeting */
-  TERMINATION: 'TERMINATION',
+  TERMINATION: "TERMINATION",
   /** Polygraph examination */
-  POLYGRAPH: 'POLYGRAPH',
+  POLYGRAPH: "POLYGRAPH",
 } as const;
 
 export type DebriefType = (typeof DEBRIEF_TYPES)[keyof typeof DEBRIEF_TYPES];
@@ -113,19 +113,19 @@ export type DebriefType = (typeof DEBRIEF_TYPES)[keyof typeof DEBRIEF_TYPES];
  */
 export const DEBRIEF_STATUS = {
   /** Debrief is planned but not yet conducted */
-  PLANNED: 'PLANNED',
+  PLANNED: "PLANNED",
   /** Debrief is currently in progress */
-  IN_PROGRESS: 'IN_PROGRESS',
+  IN_PROGRESS: "IN_PROGRESS",
   /** Debrief completed, pending review */
-  PENDING_REVIEW: 'PENDING_REVIEW',
+  PENDING_REVIEW: "PENDING_REVIEW",
   /** Debrief approved by supervisor */
-  APPROVED: 'APPROVED',
+  APPROVED: "APPROVED",
   /** Intelligence disseminated */
-  DISSEMINATED: 'DISSEMINATED',
+  DISSEMINATED: "DISSEMINATED",
   /** Debrief was cancelled */
-  CANCELLED: 'CANCELLED',
+  CANCELLED: "CANCELLED",
   /** Debrief requires further action */
-  ACTION_REQUIRED: 'ACTION_REQUIRED',
+  ACTION_REQUIRED: "ACTION_REQUIRED",
 } as const;
 
 export type DebriefStatus = (typeof DEBRIEF_STATUS)[keyof typeof DEBRIEF_STATUS];
@@ -135,19 +135,19 @@ export type DebriefStatus = (typeof DEBRIEF_STATUS)[keyof typeof DEBRIEF_STATUS]
  */
 export const ACCESS_TYPES = {
   /** Direct personal access to target */
-  DIRECT: 'DIRECT',
+  DIRECT: "DIRECT",
   /** Access through intermediaries */
-  INDIRECT: 'INDIRECT',
+  INDIRECT: "INDIRECT",
   /** Access to physical locations */
-  PHYSICAL: 'PHYSICAL',
+  PHYSICAL: "PHYSICAL",
   /** Access to digital/technical systems */
-  TECHNICAL: 'TECHNICAL',
+  TECHNICAL: "TECHNICAL",
   /** Access to documents/records */
-  DOCUMENTARY: 'DOCUMENTARY',
+  DOCUMENTARY: "DOCUMENTARY",
   /** Social access to target networks */
-  SOCIAL: 'SOCIAL',
+  SOCIAL: "SOCIAL",
   /** Institutional/organizational access */
-  INSTITUTIONAL: 'INSTITUTIONAL',
+  INSTITUTIONAL: "INSTITUTIONAL",
 } as const;
 
 export type AccessType = (typeof ACCESS_TYPES)[keyof typeof ACCESS_TYPES];
@@ -156,12 +156,12 @@ export type AccessType = (typeof ACCESS_TYPES)[keyof typeof ACCESS_TYPES];
  * Risk Levels - Operational security risk assessment
  */
 export const RISK_LEVELS = {
-  MINIMAL: { code: 'MINIMAL', score: 1, label: 'Minimal Risk' },
-  LOW: { code: 'LOW', score: 2, label: 'Low Risk' },
-  MODERATE: { code: 'MODERATE', score: 3, label: 'Moderate Risk' },
-  ELEVATED: { code: 'ELEVATED', score: 4, label: 'Elevated Risk' },
-  HIGH: { code: 'HIGH', score: 5, label: 'High Risk' },
-  CRITICAL: { code: 'CRITICAL', score: 6, label: 'Critical Risk' },
+  MINIMAL: { code: "MINIMAL", score: 1, label: "Minimal Risk" },
+  LOW: { code: "LOW", score: 2, label: "Low Risk" },
+  MODERATE: { code: "MODERATE", score: 3, label: "Moderate Risk" },
+  ELEVATED: { code: "ELEVATED", score: 4, label: "Elevated Risk" },
+  HIGH: { code: "HIGH", score: 5, label: "High Risk" },
+  CRITICAL: { code: "CRITICAL", score: 6, label: "Critical Risk" },
 } as const;
 
 export type RiskLevel = keyof typeof RISK_LEVELS;
@@ -170,11 +170,11 @@ export type RiskLevel = keyof typeof RISK_LEVELS;
  * Classification Levels - Security classification
  */
 export const CLASSIFICATION_LEVELS = {
-  UNCLASSIFIED: 'UNCLASSIFIED',
-  CONFIDENTIAL: 'CONFIDENTIAL',
-  SECRET: 'SECRET',
-  TOP_SECRET: 'TOP_SECRET',
-  TOP_SECRET_SCI: 'TOP_SECRET_SCI',
+  UNCLASSIFIED: "UNCLASSIFIED",
+  CONFIDENTIAL: "CONFIDENTIAL",
+  SECRET: "SECRET",
+  TOP_SECRET: "TOP_SECRET",
+  TOP_SECRET_SCI: "TOP_SECRET_SCI",
 } as const;
 
 export type ClassificationLevel =
@@ -184,18 +184,17 @@ export type ClassificationLevel =
  * Handling Caveats - Special handling requirements
  */
 export const HANDLING_CAVEATS = {
-  NOFORN: 'NOFORN',
-  ORCON: 'ORCON',
-  PROPIN: 'PROPIN',
-  REL_TO: 'REL_TO',
-  WAIVED: 'WAIVED',
-  LIMDIS: 'LIMDIS',
-  EXDIS: 'EXDIS',
-  NODIS: 'NODIS',
+  NOFORN: "NOFORN",
+  ORCON: "ORCON",
+  PROPIN: "PROPIN",
+  REL_TO: "REL_TO",
+  WAIVED: "WAIVED",
+  LIMDIS: "LIMDIS",
+  EXDIS: "EXDIS",
+  NODIS: "NODIS",
 } as const;
 
-export type HandlingCaveat =
-  (typeof HANDLING_CAVEATS)[keyof typeof HANDLING_CAVEATS];
+export type HandlingCaveat = (typeof HANDLING_CAVEATS)[keyof typeof HANDLING_CAVEATS];
 
 /**
  * Validation Thresholds
@@ -218,29 +217,29 @@ export const VALIDATION_THRESHOLDS = {
  */
 export const HUMINT_RELATIONSHIP_TYPES = {
   /** Source provides information about target */
-  REPORTS_ON: 'REPORTS_ON',
+  REPORTS_ON: "REPORTS_ON",
   /** Source has access to target */
-  HAS_ACCESS_TO: 'HAS_ACCESS_TO',
+  HAS_ACCESS_TO: "HAS_ACCESS_TO",
   /** Handler manages source */
-  HANDLES: 'HANDLES',
+  HANDLES: "HANDLES",
   /** Debrief session with source */
-  DEBRIEFED_BY: 'DEBRIEFED_BY',
+  DEBRIEFED_BY: "DEBRIEFED_BY",
   /** Intelligence derived from source */
-  DERIVED_FROM_SOURCE: 'DERIVED_FROM_SOURCE',
+  DERIVED_FROM_SOURCE: "DERIVED_FROM_SOURCE",
   /** Source corroborates other source */
-  CORROBORATES: 'CORROBORATES',
+  CORROBORATES: "CORROBORATES",
   /** Source contradicts other source */
-  CONTRADICTS: 'CONTRADICTS',
+  CONTRADICTS: "CONTRADICTS",
   /** Source recruited by another source */
-  RECRUITED_BY: 'RECRUITED_BY',
+  RECRUITED_BY: "RECRUITED_BY",
   /** Source associated with organization */
-  AFFILIATED_WITH: 'AFFILIATED_WITH',
+  AFFILIATED_WITH: "AFFILIATED_WITH",
   /** Source located at location */
-  OPERATES_IN: 'OPERATES_IN',
+  OPERATES_IN: "OPERATES_IN",
   /** Payment to source */
-  COMPENSATED_BY: 'COMPENSATED_BY',
+  COMPENSATED_BY: "COMPENSATED_BY",
   /** Tasking assigned to source */
-  TASKED_WITH: 'TASKED_WITH',
+  TASKED_WITH: "TASKED_WITH",
 } as const;
 
 export type HumintRelationshipType =

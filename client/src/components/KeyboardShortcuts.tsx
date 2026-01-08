@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from "react";
 
 interface ShortcutAction {
   keys: string[];
@@ -13,31 +13,26 @@ interface KeyboardShortcutsProps {
   enabled?: boolean;
 }
 
-const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({
-  shortcuts,
-  enabled = true,
-}) => {
+const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({ shortcuts, enabled = true }) => {
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (!enabled) return;
 
       const pressedKeys = [];
-      if (event.ctrlKey || event.metaKey) pressedKeys.push('ctrl');
-      if (event.shiftKey) pressedKeys.push('shift');
-      if (event.altKey) pressedKeys.push('alt');
+      if (event.ctrlKey || event.metaKey) pressedKeys.push("ctrl");
+      if (event.shiftKey) pressedKeys.push("shift");
+      if (event.altKey) pressedKeys.push("alt");
 
       const key = event.key.toLowerCase();
-      if (!['control', 'shift', 'alt', 'meta'].includes(key)) {
+      if (!["control", "shift", "alt", "meta"].includes(key)) {
         pressedKeys.push(key);
       }
 
-      const pressedKeyString = pressedKeys.join('+');
+      const pressedKeyString = pressedKeys.join("+");
 
       // Find matching shortcut
       const matchingShortcut = shortcuts.find((shortcut) =>
-        shortcut.keys.some(
-          (keyCombo) => keyCombo.toLowerCase() === pressedKeyString,
-        ),
+        shortcut.keys.some((keyCombo) => keyCombo.toLowerCase() === pressedKeyString)
       );
 
       if (matchingShortcut) {
@@ -45,16 +40,16 @@ const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({
         const activeElement = document.activeElement as HTMLElement | null;
         const isInputElement =
           activeElement &&
-          (activeElement.tagName === 'INPUT' ||
-            activeElement.tagName === 'TEXTAREA' ||
-            activeElement.contentEditable === 'true');
+          (activeElement.tagName === "INPUT" ||
+            activeElement.tagName === "TEXTAREA" ||
+            activeElement.contentEditable === "true");
 
         // Allow some shortcuts even in input fields
-        const alwaysAllowed = ['escape', 'ctrl+k', 'ctrl+/'];
+        const alwaysAllowed = ["escape", "ctrl+k", "ctrl+/"];
         const shouldExecute =
           !isInputElement ||
           alwaysAllowed.some((allowed) =>
-            matchingShortcut.keys.some((key) => key.toLowerCase() === allowed),
+            matchingShortcut.keys.some((key) => key.toLowerCase() === allowed)
           );
 
         if (shouldExecute) {
@@ -64,14 +59,14 @@ const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({
         }
       }
     },
-    [shortcuts, enabled],
+    [shortcuts, enabled]
   );
 
   useEffect(() => {
     if (!enabled) return;
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown, enabled]);
 
   return null; // This component doesn't render anything
@@ -79,45 +74,40 @@ const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({
 
 // Hook for managing keyboard shortcuts
 // eslint-disable-next-line react-refresh/only-export-components
-export const useKeyboardShortcuts = (
-  shortcuts: ShortcutAction[],
-  enabled = true,
-) => {
+export const useKeyboardShortcuts = (shortcuts: ShortcutAction[], enabled = true) => {
   useEffect(() => {
     if (!enabled) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
       const pressedKeys = [];
-      if (event.ctrlKey || event.metaKey) pressedKeys.push('ctrl');
-      if (event.shiftKey) pressedKeys.push('shift');
-      if (event.altKey) pressedKeys.push('alt');
+      if (event.ctrlKey || event.metaKey) pressedKeys.push("ctrl");
+      if (event.shiftKey) pressedKeys.push("shift");
+      if (event.altKey) pressedKeys.push("alt");
 
       const key = event.key.toLowerCase();
-      if (!['control', 'shift', 'alt', 'meta'].includes(key)) {
+      if (!["control", "shift", "alt", "meta"].includes(key)) {
         pressedKeys.push(key);
       }
 
-      const pressedKeyString = pressedKeys.join('+');
+      const pressedKeyString = pressedKeys.join("+");
 
       const matchingShortcut = shortcuts.find((shortcut) =>
-        shortcut.keys.some(
-          (keyCombo) => keyCombo.toLowerCase() === pressedKeyString,
-        ),
+        shortcut.keys.some((keyCombo) => keyCombo.toLowerCase() === pressedKeyString)
       );
 
       if (matchingShortcut) {
         const activeElement = document.activeElement as HTMLElement | null;
         const isInputElement =
           activeElement &&
-          (activeElement.tagName === 'INPUT' ||
-            activeElement.tagName === 'TEXTAREA' ||
-            activeElement.contentEditable === 'true');
+          (activeElement.tagName === "INPUT" ||
+            activeElement.tagName === "TEXTAREA" ||
+            activeElement.contentEditable === "true");
 
-        const alwaysAllowed = ['escape', 'ctrl+k', 'ctrl+/'];
+        const alwaysAllowed = ["escape", "ctrl+k", "ctrl+/"];
         const shouldExecute =
           !isInputElement ||
           alwaysAllowed.some((allowed) =>
-            matchingShortcut.keys.some((key) => key.toLowerCase() === allowed),
+            matchingShortcut.keys.some((key) => key.toLowerCase() === allowed)
           );
 
         if (shouldExecute) {
@@ -128,8 +118,8 @@ export const useKeyboardShortcuts = (
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [shortcuts, enabled]);
 };
 
@@ -137,34 +127,34 @@ export const useKeyboardShortcuts = (
 // eslint-disable-next-line react-refresh/only-export-components
 export const formatKeyCombo = (keys: string): string => {
   return keys
-    .split('+')
+    .split("+")
     .map((key) => {
       switch (key.toLowerCase()) {
-        case 'ctrl':
-          return '⌘'; // On Mac, show Cmd symbol
-        case 'shift':
-          return '⇧';
-        case 'alt':
-          return '⌥';
-        case 'escape':
-          return 'Esc';
-        case 'enter':
-          return '↵';
-        case 'space':
-          return 'Space';
-        case 'arrowup':
-          return '↑';
-        case 'arrowdown':
-          return '↓';
-        case 'arrowleft':
-          return '←';
-        case 'arrowright':
-          return '→';
+        case "ctrl":
+          return "⌘"; // On Mac, show Cmd symbol
+        case "shift":
+          return "⇧";
+        case "alt":
+          return "⌥";
+        case "escape":
+          return "Esc";
+        case "enter":
+          return "↵";
+        case "space":
+          return "Space";
+        case "arrowup":
+          return "↑";
+        case "arrowdown":
+          return "↓";
+        case "arrowleft":
+          return "←";
+        case "arrowright":
+          return "→";
         default:
           return key.toUpperCase();
       }
     })
-    .join('');
+    .join("");
 };
 
 // Component to display available shortcuts
@@ -174,20 +164,16 @@ interface ShortcutsHelpProps {
   onClose: () => void;
 }
 
-export const ShortcutsHelp: React.FC<ShortcutsHelpProps> = ({
-  shortcuts,
-  isVisible,
-  onClose,
-}) => {
+export const ShortcutsHelp: React.FC<ShortcutsHelpProps> = ({ shortcuts, isVisible, onClose }) => {
   // Group shortcuts by category
   const groupedShortcuts = shortcuts.reduce(
     (acc, shortcut) => {
-      const category = shortcut.category || 'General';
+      const category = shortcut.category || "General";
       if (!acc[category]) acc[category] = [];
       acc[category].push(shortcut);
       return acc;
     },
-    {} as Record<string, ShortcutAction[]>,
+    {} as Record<string, ShortcutAction[]>
   );
 
   if (!isVisible) return null;
@@ -197,53 +183,40 @@ export const ShortcutsHelp: React.FC<ShortcutsHelpProps> = ({
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-80vh overflow-hidden">
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-xl font-semibold">Keyboard Shortcuts</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             ✕
           </button>
         </div>
 
         <div className="p-4 overflow-y-auto max-h-96">
-          {Object.entries(groupedShortcuts).map(
-            ([category, categoryShortcuts]) => (
-              <div key={category} className="mb-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-3">
-                  {category}
-                </h3>
-                <div className="space-y-2">
-                  {categoryShortcuts.map((shortcut, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between py-2"
-                    >
-                      <span className="text-gray-700">
-                        {shortcut.description}
-                      </span>
-                      <div className="flex gap-1">
-                        {shortcut.keys.map((keyCombo, keyIndex) => (
-                          <kbd
-                            key={keyIndex}
-                            className="px-2 py-1 bg-gray-100 border border-gray-300 rounded text-sm font-mono"
-                          >
-                            {formatKeyCombo(keyCombo)}
-                          </kbd>
-                        ))}
-                      </div>
+          {Object.entries(groupedShortcuts).map(([category, categoryShortcuts]) => (
+            <div key={category} className="mb-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-3">{category}</h3>
+              <div className="space-y-2">
+                {categoryShortcuts.map((shortcut, index) => (
+                  <div key={index} className="flex items-center justify-between py-2">
+                    <span className="text-gray-700">{shortcut.description}</span>
+                    <div className="flex gap-1">
+                      {shortcut.keys.map((keyCombo, keyIndex) => (
+                        <kbd
+                          key={keyIndex}
+                          className="px-2 py-1 bg-gray-100 border border-gray-300 rounded text-sm font-mono"
+                        >
+                          {formatKeyCombo(keyCombo)}
+                        </kbd>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
-            ),
-          )}
+            </div>
+          ))}
         </div>
 
         <div className="px-4 py-3 bg-gray-50 border-t">
           <p className="text-sm text-gray-600">
-            Press{' '}
-            <kbd className="px-1 py-0.5 bg-gray-200 rounded text-xs">?</kbd> to
-            toggle this help
+            Press <kbd className="px-1 py-0.5 bg-gray-200 rounded text-xs">?</kbd> to toggle this
+            help
           </p>
         </div>
       </div>
@@ -256,129 +229,129 @@ export const ShortcutsHelp: React.FC<ShortcutsHelpProps> = ({
 export const defaultShortcuts: ShortcutAction[] = [
   // Global Navigation
   {
-    keys: ['ctrl+1'],
-    description: 'Go to Overview tab',
+    keys: ["ctrl+1"],
+    description: "Go to Overview tab",
     action: () => {
       /* Will be implemented by parent component */
     },
-    category: 'Navigation',
+    category: "Navigation",
     global: true,
   },
   {
-    keys: ['ctrl+2'],
-    description: 'Go to Investigations tab',
+    keys: ["ctrl+2"],
+    description: "Go to Investigations tab",
     action: () => {},
-    category: 'Navigation',
+    category: "Navigation",
     global: true,
   },
   {
-    keys: ['ctrl+3'],
-    description: 'Go to Search tab',
+    keys: ["ctrl+3"],
+    description: "Go to Search tab",
     action: () => {},
-    category: 'Navigation',
+    category: "Navigation",
     global: true,
   },
   {
-    keys: ['ctrl+4'],
-    description: 'Go to Export tab',
+    keys: ["ctrl+4"],
+    description: "Go to Export tab",
     action: () => {},
-    category: 'Navigation',
+    category: "Navigation",
     global: true,
   },
   {
-    keys: ['ctrl+k'],
-    description: 'Quick search',
+    keys: ["ctrl+k"],
+    description: "Quick search",
     action: () => {},
-    category: 'Navigation',
+    category: "Navigation",
     global: true,
   },
   {
-    keys: ['?'],
-    description: 'Show keyboard shortcuts',
+    keys: ["?"],
+    description: "Show keyboard shortcuts",
     action: () => {},
-    category: 'Help',
+    category: "Help",
     global: true,
   },
   {
-    keys: ['escape'],
-    description: 'Close modals and panels',
+    keys: ["escape"],
+    description: "Close modals and panels",
     action: () => {},
-    category: 'General',
+    category: "General",
     global: true,
   },
 
   // Search
   {
-    keys: ['/'],
-    description: 'Focus search box',
+    keys: ["/"],
+    description: "Focus search box",
     action: () => {},
-    category: 'Search',
+    category: "Search",
   },
   {
-    keys: ['enter'],
-    description: 'Execute search',
+    keys: ["enter"],
+    description: "Execute search",
     action: () => {},
-    category: 'Search',
+    category: "Search",
   },
   {
-    keys: ['ctrl+shift+f'],
-    description: 'Toggle advanced filters',
+    keys: ["ctrl+shift+f"],
+    description: "Toggle advanced filters",
     action: () => {},
-    category: 'Search',
+    category: "Search",
   },
 
   // Graph
   {
-    keys: ['space'],
-    description: 'Pause/resume graph simulation',
+    keys: ["space"],
+    description: "Pause/resume graph simulation",
     action: () => {},
-    category: 'Graph',
+    category: "Graph",
   },
   {
-    keys: ['f'],
-    description: 'Fit graph to screen',
+    keys: ["f"],
+    description: "Fit graph to screen",
     action: () => {},
-    category: 'Graph',
+    category: "Graph",
   },
   {
-    keys: ['r'],
-    description: 'Reset graph view',
+    keys: ["r"],
+    description: "Reset graph view",
     action: () => {},
-    category: 'Graph',
+    category: "Graph",
   },
   {
-    keys: ['ctrl+a'],
-    description: 'Select all nodes',
+    keys: ["ctrl+a"],
+    description: "Select all nodes",
     action: () => {},
-    category: 'Graph',
+    category: "Graph",
   },
 
   // Investigation Management
   {
-    keys: ['ctrl+n'],
-    description: 'New investigation',
+    keys: ["ctrl+n"],
+    description: "New investigation",
     action: () => {},
-    category: 'Investigations',
+    category: "Investigations",
   },
   {
-    keys: ['ctrl+s'],
-    description: 'Save investigation',
+    keys: ["ctrl+s"],
+    description: "Save investigation",
     action: () => {},
-    category: 'Investigations',
+    category: "Investigations",
   },
 
   // Export
   {
-    keys: ['ctrl+e'],
-    description: 'Quick export',
+    keys: ["ctrl+e"],
+    description: "Quick export",
     action: () => {},
-    category: 'Export',
+    category: "Export",
   },
   {
-    keys: ['ctrl+p'],
-    description: 'Print current view',
+    keys: ["ctrl+p"],
+    description: "Print current view",
     action: () => {},
-    category: 'Export',
+    category: "Export",
   },
 ];
 

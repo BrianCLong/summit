@@ -1,4 +1,4 @@
-import { AdapterLifecycleIntent, AdapterLifecycleStage } from './lifecycle';
+import { AdapterLifecycleIntent, AdapterLifecycleStage } from "./lifecycle";
 
 export interface PolicyPreflightInput {
   intent: AdapterLifecycleIntent;
@@ -22,5 +22,5 @@ export interface PolicyDecision {
 }
 
 export type PolicyEvaluator = (
-  input: PolicyPreflightInput,
+  input: PolicyPreflightInput
 ) => Promise<PolicyDecision> | PolicyDecision;

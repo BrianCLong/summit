@@ -15,19 +15,13 @@ const SENSITIVE_PATTERNS = [
  * Redacts sensitive information from text
  */
 export const redactSensitive = (text, options = {}) => {
-  const {
-    showFirst = 0,
-    showLast = 0,
-    replacement = '***REDACTED***',
-  } = options;
+  const { showFirst = 0, showLast = 0, replacement = "***REDACTED***" } = options;
   let redacted = text;
   SENSITIVE_PATTERNS.forEach((pattern) => {
     redacted = redacted.replace(pattern, (match, captured) => {
       if (captured) {
         const start = captured.substring(0, showFirst);
-        const end = captured.substring(
-          Math.max(showFirst, captured.length - showLast),
-        );
+        const end = captured.substring(Math.max(showFirst, captured.length - showLast));
         return match.replace(captured, `${start}${replacement}${end}`);
       }
       return replacement;
@@ -47,11 +41,11 @@ export const containsSensitive = (text) => {
 export const maskSecret = (secret, options = {}) => {
   const { showFirst = 4, showLast = 4 } = options;
   if (secret.length <= showFirst + showLast) {
-    return '***';
+    return "***";
   }
   const start = secret.substring(0, showFirst);
   const end = secret.substring(secret.length - showLast);
-  const middle = '*'.repeat(Math.min(12, secret.length - showFirst - showLast));
+  const middle = "*".repeat(Math.min(12, secret.length - showFirst - showLast));
   return `${start}${middle}${end}`;
 };
 /**
@@ -61,7 +55,7 @@ export const createSecureCopy = (value, onCopy) => {
   return async () => {
     if (containsSensitive(value)) {
       const confirmed = window.confirm(
-        'This value may contain sensitive information. Are you sure you want to copy it to clipboard?',
+        "This value may contain sensitive information. Are you sure you want to copy it to clipboard?"
       );
       if (!confirmed) return;
     }
@@ -69,15 +63,15 @@ export const createSecureCopy = (value, onCopy) => {
       await navigator.clipboard.writeText(value);
       onCopy?.();
     } catch (error) {
-      console.error('Failed to copy to clipboard:', error);
+      console.error("Failed to copy to clipboard:", error);
       // Fallback for older browsers
-      const textArea = document.createElement('textarea');
+      const textArea = document.createElement("textarea");
       textArea.value = value;
-      textArea.style.position = 'fixed';
-      textArea.style.opacity = '0';
+      textArea.style.position = "fixed";
+      textArea.style.opacity = "0";
       document.body.appendChild(textArea);
       textArea.select();
-      document.execCommand('copy');
+      document.execCommand("copy");
       document.body.removeChild(textArea);
       onCopy?.();
     }
@@ -96,27 +90,27 @@ export const validateSecretStrength = (secret) => {
   const issues = [];
   let score = 0;
   if (secret.length < 12) {
-    issues.push('Secret should be at least 12 characters long');
+    issues.push("Secret should be at least 12 characters long");
   } else {
     score += 2;
   }
   if (!/[A-Z]/.test(secret)) {
-    issues.push('Secret should contain uppercase letters');
+    issues.push("Secret should contain uppercase letters");
   } else {
     score += 1;
   }
   if (!/[a-z]/.test(secret)) {
-    issues.push('Secret should contain lowercase letters');
+    issues.push("Secret should contain lowercase letters");
   } else {
     score += 1;
   }
   if (!/\d/.test(secret)) {
-    issues.push('Secret should contain numbers');
+    issues.push("Secret should contain numbers");
   } else {
     score += 1;
   }
   if (!/[^A-Za-z0-9]/.test(secret)) {
-    issues.push('Secret should contain special characters');
+    issues.push("Secret should contain special characters");
   } else {
     score += 1;
   }
@@ -128,7 +122,7 @@ export const validateSecretStrength = (secret) => {
     /(.)\1{3,}/, // Repeated characters
   ];
   if (commonPatterns.some((pattern) => pattern.test(secret))) {
-    issues.push('Secret contains common patterns');
+    issues.push("Secret contains common patterns");
     score -= 2;
   }
   return {

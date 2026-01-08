@@ -5,6 +5,7 @@
 We have unified our prompt management into a single "Prompt Pack" structure located in `prompts/packs/`. This replaces scattered configurations in `.grok`, `.claude`, `agents/`, etc.
 
 Each prompt pack is a directory containing:
+
 1.  `manifest.json` (or `.yaml`): Defines the metadata, roles, variables, and tests.
 2.  `template.md` (Optional): A monolithic template if distinct roles are not used.
 
@@ -14,6 +15,7 @@ Each prompt pack is a directory containing:
 2.  Create `manifest.json`.
 
 Example `manifest.json`:
+
 ```json
 {
   "id": "my-feature.task@v1",
@@ -68,13 +70,16 @@ The migration script `scripts/migrate_prompt_dirs.py` creates new Prompt Packs i
 **Important:** This is a non-destructive operation. The original files (in `.claude/`, `agents/`, etc.) remain in place to prevent breaking existing application logic.
 
 ### Phase 1: Creation (Current)
+
 - Run `python3 scripts/migrate_prompt_dirs.py` to generate packs.
 - Verify packs with `promptpack-lint`.
 
 ### Phase 2: Application Update (Next)
+
 - Update application code (`PromptRegistry`, `Agent` classes) to load prompts from `prompts/packs/` instead of legacy paths.
 - Verify application behavior.
 
 ### Phase 3: Cleanup
+
 - Once application code is updated, delete the legacy files (`agents/*/prompt.md`, `.claude/prompts/*.md`, etc.).
 - Remove the `legacy-import` tag from `manifest.json`.

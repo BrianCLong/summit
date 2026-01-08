@@ -1,13 +1,11 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ include "intelgraph-api.fullname" . }}
-  labels:
-    {{- include "intelgraph-api.labels" . | nindent 4 }}
+  name: { { include "intelgraph-api.fullname" . } }
+  labels: { { - include "intelgraph-api.labels" . | nindent 4 } }
 spec:
   podSelector:
-    matchLabels:
-      {{- include "intelgraph-api.selectorLabels" . | nindent 6 }}
+    matchLabels: { { - include "intelgraph-api.selectorLabels" . | nindent 6 } }
   policyTypes:
     - Ingress
     - Egress
@@ -19,7 +17,7 @@ spec:
               name: ingress-nginx # Adjust based on actual ingress namespace label
       ports:
         - protocol: TCP
-          port: {{ .Values.service.port }}
+          port: { { .Values.service.port } }
     # Allow traffic from Prometheus (Monitoring)
     - from:
         - namespaceSelector:
@@ -27,7 +25,7 @@ spec:
               name: monitoring
       ports:
         - protocol: TCP
-          port: {{ .Values.service.port }} # Metric port
+          port: { { .Values.service.port } } # Metric port
   egress:
     # Allow egress to DNS
     - to:

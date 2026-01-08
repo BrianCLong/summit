@@ -54,18 +54,13 @@ interface CognitiveProcessingEngine {
 ```typescript
 interface FederatedLearningCoordinator {
   // Federated training orchestration
-  coordinateFederatedTraining(
-    participants: FederatedParticipant[],
-  ): TrainingSession;
+  coordinateFederatedTraining(participants: FederatedParticipant[]): TrainingSession;
 
   // Privacy-preserving aggregation
   aggregateUpdates(updates: EncryptedUpdate[]): GlobalModel;
 
   // Model distribution
-  distributeModel(
-    model: GlobalModel,
-    participants: FederatedParticipant[],
-  ): DistributionResult;
+  distributeModel(model: GlobalModel, participants: FederatedParticipant[]): DistributionResult;
 
   // Performance monitoring
   monitorFederatedPerformance(): FederatedMetrics;

@@ -5,88 +5,82 @@
  * Uses Playwright for visual regression testing
  */
 
-import { chromium } from 'playwright';
-import {
-  readFileSync,
-  writeFileSync,
-  existsSync,
-  mkdirSync,
-  readdirSync,
-} from 'fs';
-import { join, resolve } from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { chromium } from "playwright";
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from "fs";
+import { join, resolve } from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const root = resolve(__dirname, '..');
+const root = resolve(__dirname, "..");
 
 class VisualTesting {
-  constructor(baseUrl = 'http://localhost:5173') {
+  constructor(baseUrl = "http://localhost:5173") {
     this.baseUrl = baseUrl;
     this.browser = null;
-    this.screenshotDir = join(root, 'test-results', 'screenshots');
-    this.baselineDir = join(this.screenshotDir, 'baseline');
-    this.currentDir = join(this.screenshotDir, 'current');
-    this.diffDir = join(this.screenshotDir, 'diff');
+    this.screenshotDir = join(root, "test-results", "screenshots");
+    this.baselineDir = join(this.screenshotDir, "baseline");
+    this.currentDir = join(this.screenshotDir, "current");
+    this.diffDir = join(this.screenshotDir, "diff");
 
     this.testCases = [
       {
-        name: 'maestro-login',
-        url: '/maestro/login',
+        name: "maestro-login",
+        url: "/maestro/login",
         viewport: { width: 1280, height: 720 },
       },
       {
-        name: 'maestro-dashboard',
-        url: '/maestro',
-        viewport: { width: 1280, height: 720 },
-        requireAuth: true,
-      },
-      {
-        name: 'maestro-runs-list',
-        url: '/maestro/runs',
+        name: "maestro-dashboard",
+        url: "/maestro",
         viewport: { width: 1280, height: 720 },
         requireAuth: true,
       },
       {
-        name: 'maestro-observability',
-        url: '/maestro/observability',
+        name: "maestro-runs-list",
+        url: "/maestro/runs",
         viewport: { width: 1280, height: 720 },
         requireAuth: true,
       },
       {
-        name: 'maestro-routing-studio',
-        url: '/maestro/routing',
+        name: "maestro-observability",
+        url: "/maestro/observability",
+        viewport: { width: 1280, height: 720 },
+        requireAuth: true,
+      },
+      {
+        name: "maestro-routing-studio",
+        url: "/maestro/routing",
         viewport: { width: 1280, height: 720 },
         requireAuth: true,
       },
       // Mobile viewports
       {
-        name: 'maestro-dashboard-mobile',
-        url: '/maestro',
+        name: "maestro-dashboard-mobile",
+        url: "/maestro",
         viewport: { width: 375, height: 667 },
         requireAuth: true,
       },
       {
-        name: 'maestro-runs-mobile',
-        url: '/maestro/runs',
+        name: "maestro-runs-mobile",
+        url: "/maestro/runs",
         viewport: { width: 375, height: 667 },
         requireAuth: true,
       },
       // Dark mode variants
       {
-        name: 'maestro-dashboard-dark',
-        url: '/maestro',
+        name: "maestro-dashboard-dark",
+        url: "/maestro",
         viewport: { width: 1280, height: 720 },
         requireAuth: true,
-        colorScheme: 'dark',
+        colorScheme: "dark",
       },
     ];
   }
 
   async setup() {
     console
-      .log('🎭 Setting up visual testing...')
+      .log("🎭 Setting up visual testing...")
 
       [
         // Create directories
@@ -101,10 +95,10 @@ class VisualTesting {
     this.browser = await chromium.launch({
       headless: true,
       args: [
-        '--disable-web-security',
-        '--disable-features=VizDisplayCompositor',
-        '--font-render-hinting=none',
-        '--disable-font-subpixel-positioning',
+        "--disable-web-security",
+        "--disable-features=VizDisplayCompositor",
+        "--font-render-hinting=none",
+        "--disable-font-subpixel-positioning",
       ],
     });
   }
@@ -112,51 +106,51 @@ class VisualTesting {
   async mockAuthentication(page) {
     // Mock authentication for testing
     await page.addInitScript(() => {
-      localStorage.setItem('maestro_auth_access_token', 'mock-jwt-token');
-      localStorage.setItem('maestro_auth_id_token', 'mock-id-token');
+      localStorage.setItem("maestro_auth_access_token", "mock-jwt-token");
+      localStorage.setItem("maestro_auth_id_token", "mock-id-token");
 
       // Mock user data
       window.__USER_MOCK__ = {
-        id: 'user-123',
-        email: 'test@example.com',
-        name: 'Test User',
-        roles: ['user', 'operator'],
-        permissions: ['runs:read', 'pipelines:read'],
-        tenant: 'test-corp',
+        id: "user-123",
+        email: "test@example.com",
+        name: "Test User",
+        roles: ["user", "operator"],
+        permissions: ["runs:read", "pipelines:read"],
+        tenant: "test-corp",
       };
     });
 
     // Mock API responses
-    await page.route('**/api/**', async (route) => {
+    await page.route("**/api/**", async (route) => {
       const url = route.request().url();
 
       // Mock different endpoints with appropriate responses
-      if (url.includes('/summary')) {
+      if (url.includes("/summary")) {
         await route.fulfill({
-          contentType: 'application/json',
+          contentType: "application/json",
           body: JSON.stringify({
             data: {
               autonomy: { level: 3, canary: 0.15 },
               health: { success: 0.997, p95: 150, burn: 1.2 },
               budgets: { remaining: 15000, cap: 50000 },
               runs: [
-                { id: 'run-123', status: 'running' },
-                { id: 'run-124', status: 'completed' },
+                { id: "run-123", status: "running" },
+                { id: "run-124", status: "completed" },
               ],
             },
           }),
         });
-      } else if (url.includes('/runs')) {
+      } else if (url.includes("/runs")) {
         await route.fulfill({
-          contentType: 'application/json',
+          contentType: "application/json",
           body: JSON.stringify({
             data: {
               runs: [
                 {
-                  id: 'run-123',
-                  pipeline: 'main-build',
-                  status: 'running',
-                  createdAt: '2025-01-15T10:00:00Z',
+                  id: "run-123",
+                  pipeline: "main-build",
+                  status: "running",
+                  createdAt: "2025-01-15T10:00:00Z",
                   duration: 120,
                 },
               ],
@@ -165,7 +159,7 @@ class VisualTesting {
         });
       } else {
         await route.fulfill({
-          contentType: 'application/json',
+          contentType: "application/json",
           body: JSON.stringify({ data: {} }),
         });
       }
@@ -173,7 +167,7 @@ class VisualTesting {
   }
 
   async captureScreenshots() {
-    console.log('📸 Capturing screenshots for all test cases...');
+    console.log("📸 Capturing screenshots for all test cases...");
 
     const results = [];
 
@@ -183,7 +177,7 @@ class VisualTesting {
       try {
         const context = await this.browser.newContext({
           viewport: testCase.viewport,
-          colorScheme: testCase.colorScheme || 'light',
+          colorScheme: testCase.colorScheme || "light",
         });
 
         const page = await context.newPage();
@@ -195,7 +189,7 @@ class VisualTesting {
 
         // Navigate to page
         await page.goto(`${this.baseUrl}${testCase.url}`, {
-          waitUntil: 'networkidle',
+          waitUntil: "networkidle",
         });
 
         // Wait for page to be fully loaded
@@ -223,24 +217,22 @@ class VisualTesting {
         await page.screenshot({
           path: screenshotPath,
           fullPage: true,
-          animations: 'disabled',
+          animations: "disabled",
         });
 
         results.push({
           name: testCase.name,
-          status: 'captured',
+          status: "captured",
           path: screenshotPath,
           viewport: testCase.viewport,
         });
 
         await context.close();
       } catch (error) {
-        console.log(
-          `    ❌ Failed to capture ${testCase.name}: ${error.message}`,
-        );
+        console.log(`    ❌ Failed to capture ${testCase.name}: ${error.message}`);
         results.push({
           name: testCase.name,
-          status: 'failed',
+          status: "failed",
           error: error.message,
         });
       }
@@ -250,15 +242,13 @@ class VisualTesting {
   }
 
   async compareWithBaseline() {
-    console.log('🔍 Comparing screenshots with baseline...');
+    console.log("🔍 Comparing screenshots with baseline...");
 
     const results = [];
-    const currentFiles = readdirSync(this.currentDir).filter((f) =>
-      f.endsWith('.png'),
-    );
+    const currentFiles = readdirSync(this.currentDir).filter((f) => f.endsWith(".png"));
 
     for (const filename of currentFiles) {
-      const name = filename.replace('.png', '');
+      const name = filename.replace(".png", "");
       const currentPath = join(this.currentDir, filename);
       const baselinePath = join(this.baselineDir, filename);
       const diffPath = join(this.diffDir, filename);
@@ -272,8 +262,8 @@ class VisualTesting {
 
         results.push({
           name,
-          status: 'new_baseline',
-          message: 'Created new baseline image',
+          status: "new_baseline",
+          message: "Created new baseline image",
         });
         continue;
       }
@@ -293,14 +283,14 @@ class VisualTesting {
         if (isIdentical) {
           results.push({
             name,
-            status: 'passed',
-            message: 'Screenshots match',
+            status: "passed",
+            message: "Screenshots match",
           });
         } else {
           results.push({
             name,
-            status: 'failed',
-            message: 'Screenshots differ',
+            status: "failed",
+            message: "Screenshots differ",
             diffPath,
           });
 
@@ -311,7 +301,7 @@ class VisualTesting {
       } catch (error) {
         results.push({
           name,
-          status: 'error',
+          status: "error",
           message: error.message,
         });
       }
@@ -321,11 +311,9 @@ class VisualTesting {
   }
 
   async updateBaselines() {
-    console.log('🔄 Updating baseline screenshots...');
+    console.log("🔄 Updating baseline screenshots...");
 
-    const currentFiles = readdirSync(this.currentDir).filter((f) =>
-      f.endsWith('.png'),
-    );
+    const currentFiles = readdirSync(this.currentDir).filter((f) => f.endsWith(".png"));
     let updated = 0;
 
     for (const filename of currentFiles) {
@@ -341,32 +329,28 @@ class VisualTesting {
   }
 
   async generateReport(captureResults, compareResults) {
-    console.log('📄 Generating visual testing report...');
+    console.log("📄 Generating visual testing report...");
 
     const report = {
       timestamp: new Date().toISOString(),
       summary: {
         total: captureResults.length,
-        captured: captureResults.filter((r) => r.status === 'captured').length,
-        failed: captureResults.filter((r) => r.status === 'failed').length,
-        passed: compareResults.filter((r) => r.status === 'passed').length,
-        newBaselines: compareResults.filter((r) => r.status === 'new_baseline')
-          .length,
-        diffs: compareResults.filter((r) => r.status === 'failed').length,
+        captured: captureResults.filter((r) => r.status === "captured").length,
+        failed: captureResults.filter((r) => r.status === "failed").length,
+        passed: compareResults.filter((r) => r.status === "passed").length,
+        newBaselines: compareResults.filter((r) => r.status === "new_baseline").length,
+        diffs: compareResults.filter((r) => r.status === "failed").length,
       },
       captures: captureResults,
       comparisons: compareResults,
     };
 
     // Write JSON report
-    writeFileSync(
-      join(this.screenshotDir, 'visual-report.json'),
-      JSON.stringify(report, null, 2),
-    );
+    writeFileSync(join(this.screenshotDir, "visual-report.json"), JSON.stringify(report, null, 2));
 
     // Write HTML report
     const htmlReport = this.generateHTMLReport(report);
-    writeFileSync(join(this.screenshotDir, 'visual-report.html'), htmlReport);
+    writeFileSync(join(this.screenshotDir, "visual-report.html"), htmlReport);
 
     return report;
   }
@@ -424,35 +408,33 @@ class VisualTesting {
         <div class="test-grid">
             ${report.captures
               .map((capture) => {
-                const comparison = report.comparisons.find(
-                  (c) => c.name === capture.name,
-                );
-                const status = comparison ? comparison.status : 'unknown';
+                const comparison = report.comparisons.find((c) => c.name === capture.name);
+                const status = comparison ? comparison.status : "unknown";
                 const statusClass =
-                  status === 'passed'
-                    ? 'status-passed'
-                    : status === 'failed'
-                      ? 'status-failed'
-                      : status === 'new_baseline'
-                        ? 'status-new'
-                        : '';
+                  status === "passed"
+                    ? "status-passed"
+                    : status === "failed"
+                      ? "status-failed"
+                      : status === "new_baseline"
+                        ? "status-new"
+                        : "";
 
                 return `
                 <div class="test-card">
                     <div class="test-header">
                         <span>${capture.name}</span>
                         <span class="${statusClass}">
-                            ${status === 'passed' ? '✅' : status === 'failed' ? '❌' : status === 'new_baseline' ? '🆕' : '❓'}
+                            ${status === "passed" ? "✅" : status === "failed" ? "❌" : status === "new_baseline" ? "🆕" : "❓"}
                             ${status.toUpperCase()}
                         </span>
                     </div>
                     ${
-                      capture.status === 'captured'
+                      capture.status === "captured"
                         ? `
                         <img src="current/${capture.name}.png" alt="${capture.name}" class="test-image">
                         <div class="test-info">
                             Viewport: ${capture.viewport.width}×${capture.viewport.height}
-                            ${comparison ? `<br>Result: ${comparison.message}` : ''}
+                            ${comparison ? `<br>Result: ${comparison.message}` : ""}
                         </div>
                     `
                         : `
@@ -465,7 +447,7 @@ class VisualTesting {
                 </div>
               `;
               })
-              .join('')}
+              .join("")}
         </div>
     </div>
 </body>
@@ -492,19 +474,14 @@ class VisualTesting {
         compareResults = await this.compareWithBaseline();
       } else {
         await this.updateBaselines();
-        console.log('✅ Baselines updated successfully');
+        console.log("✅ Baselines updated successfully");
       }
 
       if (generateReport) {
-        const report = await this.generateReport(
-          captureResults,
-          compareResults,
-        );
+        const report = await this.generateReport(captureResults, compareResults);
 
-        console.log('\n📋 Visual Testing Summary:');
-        console.log(
-          '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
-        );
+        console.log("\n📋 Visual Testing Summary:");
+        console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
         console.log(`  Total Screenshots:  ${report.summary.total}`);
         console.log(`  Captured:           ${report.summary.captured}`);
         console.log(`  Passed:             ${report.summary.passed}`);
@@ -513,12 +490,8 @@ class VisualTesting {
         console.log(`  Failed Captures:    ${report.summary.failed}`);
 
         if (report.summary.diffs > 0) {
-          console.log(
-            '\n⚠️  Visual differences detected. Review the report for details.',
-          );
-          console.log(
-            `📄 Report: ${join(this.screenshotDir, 'visual-report.html')}`,
-          );
+          console.log("\n⚠️  Visual differences detected. Review the report for details.");
+          console.log(`📄 Report: ${join(this.screenshotDir, "visual-report.html")}`);
         }
       }
     } finally {
@@ -531,11 +504,10 @@ class VisualTesting {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const args = process.argv.slice(2);
   const options = {
-    updateBaselines: args.includes('--update-baselines'),
-    generateReport: !args.includes('--no-report'),
+    updateBaselines: args.includes("--update-baselines"),
+    generateReport: !args.includes("--no-report"),
     baseUrl:
-      args.find((arg) => arg.startsWith('--base-url='))?.split('=')[1] ||
-      'http://localhost:5173',
+      args.find((arg) => arg.startsWith("--base-url="))?.split("=")[1] || "http://localhost:5173",
   };
 
   const visualTesting = new VisualTesting(options.baseUrl);

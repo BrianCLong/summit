@@ -128,13 +128,17 @@ provenance_source: "migration_from_legacy_v2"
 ```
 
 Implement mapping engine:
+
 ```typescript
 interface MappingEngine {
   // Load mapping configuration
   loadMapping(config: MappingConfig): Promise<void>;
 
   // Transform legacy record to canonical
-  transform(legacyRecord: any, recordType: string): Promise<CanonicalEntity | CanonicalRelationship>;
+  transform(
+    legacyRecord: any,
+    recordType: string
+  ): Promise<CanonicalEntity | CanonicalRelationship>;
 
   // Validate transformed record
   validate(record: any): Promise<ValidationResult>;
@@ -168,7 +172,7 @@ interface MigrationDiff {
   dataQualityIssues: Array<{
     recordId: string;
     issue: string;
-    severity: 'error' | 'warning';
+    severity: "error" | "warning";
   }>;
   analyticalEquivalence: {
     queriesRun: number;
@@ -184,10 +188,7 @@ interface MigrationDiff {
 }
 
 // CLI: Generate diff
-async function generateDiff(
-  legacyExport: string,
-  canonicalDb: string
-): Promise<MigrationDiff> {
+async function generateDiff(legacyExport: string, canonicalDb: string): Promise<MigrationDiff> {
   // 1. Load legacy data
   const legacyData = await loadLegacy(legacyExport);
 
@@ -205,7 +206,9 @@ async function generateDiff(
 
   // 6. Generate report
   return {
-    summary: { /* ... */ },
+    summary: {
+      /* ... */
+    },
     recordCounts: counts,
     analyticalEquivalence: queryResults,
     // ...
@@ -223,8 +226,8 @@ interface ERReplay {
   queries: Array<{
     name: string;
     description: string;
-    legacyQuery: string;  // SQL or legacy API call
-    canonicalQuery: string;  // Cypher query
+    legacyQuery: string; // SQL or legacy API call
+    canonicalQuery: string; // Cypher query
     equivalenceCheck: (legacyResult: any, canonicalResult: any) => boolean;
   }>;
 }
@@ -250,10 +253,10 @@ const replayQueries: ERReplay = {
       equivalenceCheck: (legacy, canonical) => {
         // Allow for minor count differences (<5%)
         const legacyIds = legacy.map((r: any) => r.entity_id);
-        const canonicalIds = canonical.map((r: any) => r['e.id']);
+        const canonicalIds = canonical.map((r: any) => r["e.id"]);
         const intersection = legacyIds.filter((id: string) => canonicalIds.includes(id));
         return intersection.length >= 8; // 80% overlap acceptable
-      }
+      },
     },
     {
       name: "Shortest path between two entities",
@@ -265,9 +268,9 @@ const replayQueries: ERReplay = {
       `,
       equivalenceCheck: (legacy, canonical) => {
         return legacy.pathLength === canonical.pathLength;
-      }
-    }
-  ]
+      },
+    },
+  ],
 };
 
 // Run all replay queries and report divergences
@@ -281,10 +284,10 @@ async function runERReplay(replayDef: ERReplay): Promise<ReplayResult> {
       query: query.name,
       equivalent: isEquivalent,
       legacyResult,
-      canonicalResult
+      canonicalResult,
     });
   }
-  return { results, allPassed: results.every(r => r.equivalent) };
+  return { results, allPassed: results.every((r) => r.equivalent) };
 }
 ```
 
@@ -314,21 +317,21 @@ const syntheticProv: ProvenanceEntry = {
     description: `Migrated from ${metadata.sourceSystem}`,
     timestamp: metadata.migrationDate,
     actor: "migration_service",
-    jobId: metadata.migrationJobId
+    jobId: metadata.migrationJobId,
   },
   entity: {
     id: entity.id,
-    type: entity.type
+    type: entity.type,
   },
   wasAttributedTo: {
     agent: metadata.sourceSystem,
-    role: "source_system"
+    role: "source_system",
   },
   wasDerivedFrom: {
     entity: metadata.originalRecordId,
-    system: metadata.sourceSystem
+    system: metadata.sourceSystem,
   },
-  signature: "...",  // Sign with migration service key
+  signature: "...", // Sign with migration service key
 };
 ```
 
@@ -337,8 +340,9 @@ const syntheticProv: ProvenanceEntry = {
 Implement adapters for common CTI formats:
 
 **STIX 2.1 Adapter**:
+
 ```typescript
-import { Bundle, STIXObject } from 'stix2';
+import { Bundle, STIXObject } from "stix2";
 
 interface STIXAdapter {
   // Import STIX bundle
@@ -361,15 +365,16 @@ function mapSTIXThreatActor(ta: ThreatActor): CanonicalEntity {
       aliases: ta.aliases,
       sophistication: ta.sophistication,
       resourceLevel: ta.resource_level,
-      primaryMotivation: ta.primary_motivation
+      primaryMotivation: ta.primary_motivation,
     },
     validFrom: ta.valid_from,
-    validTo: ta.valid_until
+    validTo: ta.valid_until,
   };
 }
 ```
 
 **TAXII 2.1 Client**:
+
 ```typescript
 interface TAXIIClient {
   // Discover TAXII server collections
@@ -384,6 +389,7 @@ interface TAXIIClient {
 ```
 
 **MISP Adapter**:
+
 ```typescript
 interface MISPAdapter {
   // Import MISP event
@@ -415,8 +421,12 @@ Generate verifiable manifest:
     "warnings": 1200
   },
   "mappingConfigHash": "sha256:abc123...",
-  "diff": { /* MigrationDiff object */ },
-  "erReplay": { /* ReplayResult object */ },
+  "diff": {
+    /* MigrationDiff object */
+  },
+  "erReplay": {
+    /* ReplayResult object */
+  },
   "provenanceBackfill": {
     "recordsBackfilled": 49500,
     "provenanceChainIds": ["prov-chain-1", "prov-chain-2", "..."]
@@ -442,6 +452,7 @@ Generate verifiable manifest:
 ### Technical Specifications
 
 **CLI Tool**:
+
 ```bash
 # Migrate legacy export
 migrate import \
@@ -475,6 +486,7 @@ migrate import-taxii \
 ```
 
 **Service Structure**:
+
 ```
 services/migration-verifier/
 ├── src/

@@ -15,8 +15,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: "18"
+          cache: "npm"
           cache-dependency-path: server/package-lock.json
 
       - name: Install Dependencies
@@ -45,13 +45,13 @@ jobs:
       - name: Run Trivy FS Scan (SAST/SCA)
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
+          scan-type: "fs"
+          scan-ref: "."
           trivy-config: trivy.yaml
-          format: 'table'
-          exit-code: '1' # Fail on vulnerabilities
+          format: "table"
+          exit-code: "1" # Fail on vulnerabilities
           ignore-unfixed: true
-          severity: 'CRITICAL,HIGH'
+          severity: "CRITICAL,HIGH"
 
   sbom-generation:
     runs-on: ubuntu-latest

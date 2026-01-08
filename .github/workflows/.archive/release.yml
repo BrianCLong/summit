@@ -5,7 +5,7 @@ on:
   push:
     branches: [main]
     paths:
-      - '**/package.json'
+      - "**/package.json"
       - pnpm-lock.yaml
       - Makefile
       - docker-compose*.yml
@@ -33,7 +33,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: "pnpm"
       - name: Cache pnpm store
         uses: actions/cache@v4
         with:

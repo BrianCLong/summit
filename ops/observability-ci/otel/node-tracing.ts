@@ -1,7 +1,7 @@
-import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
-import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
-import { ConsoleSpanExporter } from '@opentelemetry/sdk-trace-base';
-import { registerInstrumentations } from '@opentelemetry/instrumentation';
+import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
+import { SimpleSpanProcessor } from "@opentelemetry/sdk-trace-base";
+import { ConsoleSpanExporter } from "@opentelemetry/sdk-trace-base";
+import { registerInstrumentations } from "@opentelemetry/instrumentation";
 
 export function initTracing(serviceName: string) {
   const provider = new NodeTracerProvider();

@@ -16,8 +16,8 @@ The process is structured into four weeks of focused work, followed by a period 
 
 This directory provides two templates to standardize the QOC process:
 
-*   **[`QOC_HYPOTHESES.md.template`](./QOC_HYPOTHESES.md.template):** At the beginning of each quarter, create a copy of this file named `QOC_<YYYY_QN>_HYPOTHESES.md` (e.g., `QOC_2025_Q4_HYPOTHESES.md`). Use it to document the signals and define the hypotheses for the cycle.
+- **[`QOC_HYPOTHESES.md.template`](./QOC_HYPOTHESES.md.template):** At the beginning of each quarter, create a copy of this file named `QOC_<YYYY_QN>_HYPOTHESES.md` (e.g., `QOC_2025_Q4_HYPOTHESES.md`). Use it to document the signals and define the hypotheses for the cycle.
 
-*   **[`QOC_RESULTS.md.template`](./QOC_RESULTS.md.template):** At the end of each quarter, create a copy of this file named `QOC_<YYYY_QN>_RESULTS.md`. Use it to document the final outcomes, report on the required metrics, and attest that all exit criteria have been met.
+- **[`QOC_RESULTS.md.template`](./QOC_RESULTS.md.template):** At the end of each quarter, create a copy of this file named `QOC_<YYYY_QN>_RESULTS.md`. Use it to document the final outcomes, report on the required metrics, and attest that all exit criteria have been met.
 
 The goal is to create a durable, auditable record of every optimization cycle, ensuring that each quarter makes the system measurably better.

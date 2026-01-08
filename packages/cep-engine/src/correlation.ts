@@ -1,8 +1,8 @@
-import { EventEmitter } from 'eventemitter3';
-import pino from 'pino';
-import { CorrelationCriteria } from './types';
+import { EventEmitter } from "eventemitter3";
+import pino from "pino";
+import { CorrelationCriteria } from "./types";
 
-const logger = pino({ name: 'event-correlator' });
+const logger = pino({ name: "event-correlator" });
 
 /**
  * Event correlator for cross-stream correlation

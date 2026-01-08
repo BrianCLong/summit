@@ -1,5 +1,5 @@
-import { SelfEditRegistry } from '@ga-graphai/prov-ledger';
-import type { SelfEditRecord, SelfEditScorecard } from 'common-types';
+import { SelfEditRegistry } from "@ga-graphai/prov-ledger";
+import type { SelfEditRecord, SelfEditScorecard } from "common-types";
 
 export interface SelfEditEvaluationPlanItem {
   record: SelfEditRecord;
@@ -27,7 +27,7 @@ const STATUS_WEIGHTS: Record<string, number> = {
 
 export function buildSelfEditEvaluationPlan(
   registry: SelfEditRegistry,
-  options: SelfEditEvaluationPlanOptions = {},
+  options: SelfEditEvaluationPlanOptions = {}
 ): SelfEditEvaluationPlanItem[] {
   const maxPerDomain = options.maxPerDomain ?? 3;
   const includeRejected = options.includeRejected ?? false;
@@ -38,10 +38,10 @@ export function buildSelfEditEvaluationPlan(
   const candidates = registry
     .list()
     .filter((record) => {
-      if (!includeRejected && record.status === 'rejected') {
+      if (!includeRejected && record.status === "rejected") {
         return false;
       }
-      if (record.status === 'applied' || record.status === 'expired') {
+      if (record.status === "applied" || record.status === "expired") {
         return false;
       }
       return true;
@@ -51,7 +51,7 @@ export function buildSelfEditEvaluationPlan(
         threshold,
         minVerifierCount,
       });
-      const domain = record.domain ?? 'general';
+      const domain = record.domain ?? "general";
       const priority = computePriority(record, scorecard, now);
       return { record, scorecard, domain, priority };
     });
@@ -83,26 +83,13 @@ export function buildSelfEditEvaluationPlan(
   return selections;
 }
 
-function computePriority(
-  record: SelfEditRecord,
-  scorecard: SelfEditScorecard,
-  now: Date,
-): number {
+function computePriority(record: SelfEditRecord, scorecard: SelfEditScorecard, now: Date): number {
   const statusWeight = STATUS_WEIGHTS[record.status] ?? 0;
   const readyBoost = scorecard.ready ? 150 : 0;
   const reviewBoost = record.approval ? 40 : 0;
-  const freshnessMinutes = Math.max(
-    0,
-    (now.getTime() - Date.parse(record.updatedAt)) / 60000,
-  );
+  const freshnessMinutes = Math.max(0, (now.getTime() - Date.parse(record.updatedAt)) / 60000);
   const freshnessPenalty = Math.min(100, freshnessMinutes);
   const averageScore = scorecard.averageScore ?? 0;
 
-  return (
-    statusWeight +
-    readyBoost +
-    reviewBoost +
-    averageScore * 100 -
-    freshnessPenalty
-  );
+  return statusWeight + readyBoost + reviewBoost + averageScore * 100 - freshnessPenalty;
 }

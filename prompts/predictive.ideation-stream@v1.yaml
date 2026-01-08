@@ -1,14 +1,14 @@
 meta:
   id: predictive.ideation-stream@v1
   owner: innovation
-  purpose: 'Forecasts future ideas, innovations, or conceptual trends.'
-  tags: ['predictive', 'ideation', 'innovation']
+  purpose: "Forecasts future ideas, innovations, or conceptual trends."
+  tags: ["predictive", "ideation", "innovation"]
   guardrails:
-    - 'Focus on emerging concepts and trends.'
-    - 'Provide actionable investment advice.'
+    - "Focus on emerging concepts and trends."
+    - "Provide actionable investment advice."
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.5
 
 inputs:

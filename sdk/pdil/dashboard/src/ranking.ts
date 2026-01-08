@@ -9,7 +9,9 @@ export function rankOutcomes(report: ReplayReport): RankedOutcome[] {
 function toRankedOutcome(outcome: OutcomeSummary): RankedOutcome {
   const taxonomy = outcome.candidate.taxonomy ?? "passed";
   const regressionPenalty = outcome.baseline.passed && !outcome.candidate.passed ? 1.5 : 1;
-  const failurePenalty = outcome.candidate.passed ? 0 : outcome.candidate.severity * regressionPenalty;
+  const failurePenalty = outcome.candidate.passed
+    ? 0
+    : outcome.candidate.severity * regressionPenalty;
   const coveragePenalty = outcome.coverage_delta < 0 ? Math.abs(outcome.coverage_delta) * 5 : 0;
   const riskContribution = (failurePenalty + coveragePenalty) * outcome.business_impact;
   return {

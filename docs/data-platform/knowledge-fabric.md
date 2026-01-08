@@ -6,10 +6,10 @@ This document describes the unified data platform for Summit, handling ingestion
 
 The core data model consists of:
 
-*   **Entities**: First-class objects (Person, Organization, Location, etc.) with a `kind` and `properties`.
-*   **Edges**: Typed relationships between entities (`owns`, `linked_to`, etc.).
-*   **Documents**: Text-heavy content (PDFs, emails, reports) with `text` and `metadata`.
-*   **Document Chunks**: Vectorized segments of documents for RAG.
+- **Entities**: First-class objects (Person, Organization, Location, etc.) with a `kind` and `properties`.
+- **Edges**: Typed relationships between entities (`owns`, `linked_to`, etc.).
+- **Documents**: Text-heavy content (PDFs, emails, reports) with `text` and `metadata`.
+- **Document Chunks**: Vectorized segments of documents for RAG.
 
 All data is strictly multi-tenant using a `tenant_id` column and Row Level Security (RLS) patterns.
 
@@ -52,14 +52,16 @@ POST /api/ingestion/pipelines/corp-data-daily/run
 
 New connectors implement the `SourceConnector` interface.
 Standard connectors provided:
-*   `file`: Local filesystem or mount.
-*   `api`: Generic HTTP poller with pagination.
+
+- `file`: Local filesystem or mount.
+- `api`: Generic HTTP poller with pagination.
 
 ## RAG & Retrieval
 
 The platform maintains a synchronized vector index for all ingested documents.
 
 **Retrieval API**:
+
 ```json
 POST /api/ingestion/search/retrieve
 {
@@ -70,5 +72,5 @@ POST /api/ingestion/search/retrieve
 
 ## Governance
 
-*   **DLQ**: Failed records are sent to the Dead Letter Queue (`ingestion_dlq` table) and can be inspected via API (`GET /api/ingestion/dlq`).
-*   **Lineage**: All entities and edges track `sourceIds` to trace back to the pipeline run that created them.
+- **DLQ**: Failed records are sent to the Dead Letter Queue (`ingestion_dlq` table) and can be inspected via API (`GET /api/ingestion/dlq`).
+- **Lineage**: All entities and edges track `sourceIds` to trace back to the pipeline run that created them.

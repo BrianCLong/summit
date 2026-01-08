@@ -3,7 +3,7 @@ name: DR Verify Workflow
 on:
   workflow_dispatch: # Allows manual triggering
   schedule:
-    - cron: '0 0 * * MON' # Run every Monday at midnight UTC
+    - cron: "0 0 * * MON" # Run every Monday at midnight UTC
 
 jobs:
   dr-verify:

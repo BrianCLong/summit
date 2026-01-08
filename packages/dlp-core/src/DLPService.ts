@@ -7,10 +7,10 @@
  * @package dlp-core
  */
 
-import { DetectionEngine } from './DetectionEngine';
-import { RedactionEngine } from './RedactionEngine';
-import { BarrierEnforcer } from './BarrierEnforcer';
-import { createHash } from 'crypto';
+import { DetectionEngine } from "./DetectionEngine";
+import { RedactionEngine } from "./RedactionEngine";
+import { BarrierEnforcer } from "./BarrierEnforcer";
+import { createHash } from "crypto";
 import type {
   DLPServiceConfig,
   ContentScanRequest,
@@ -24,7 +24,7 @@ import type {
   DLPEventType,
   Obligation,
   PolicyViolation,
-} from './types';
+} from "./types";
 
 export class DLPService {
   private detectionEngine: DetectionEngine;
@@ -58,9 +58,7 @@ export class DLPService {
 
     // Convert content to string if Buffer
     const contentString =
-      typeof request.content === 'string'
-        ? request.content
-        : request.content.toString('utf-8');
+      typeof request.content === "string" ? request.content : request.content.toString("utf-8");
 
     // Run detection
     const detection = await this.detectionEngine.detect(contentString, request.context);
@@ -75,13 +73,13 @@ export class DLPService {
         timestamp: new Date().toISOString(),
         eventType: this.getEventType(request),
         actor: {
-          userId: request.context.actor?.id || 'unknown',
-          tenantId: request.context.actor?.tenantId || 'unknown',
+          userId: request.context.actor?.id || "unknown",
+          tenantId: request.context.actor?.tenantId || "unknown",
           roles: request.context.actor?.roles || [],
         },
         content: {
           resourceType: request.contentType,
-          resourceId: request.metadata?.resourceId as string || 'unknown',
+          resourceId: (request.metadata?.resourceId as string) || "unknown",
           contentHash: this.hashContent(contentString),
           size: contentString.length,
           classification: detection.classification,
@@ -102,8 +100,8 @@ export class DLPService {
           action: policyResult.action,
         },
         auditChain: {
-          previousHash: '',
-          currentHash: '',
+          previousHash: "",
+          currentHash: "",
         },
       });
     }
@@ -138,7 +136,7 @@ export class DLPService {
    */
   private async evaluateContentPolicy(
     request: ContentScanRequest,
-    detection: ContentScanResult['detection']
+    detection: ContentScanResult["detection"]
   ): Promise<{
     allowed: boolean;
     action: ScanAction;
@@ -147,69 +145,65 @@ export class DLPService {
   }> {
     const violations: PolicyViolation[] = [];
     const obligations: Obligation[] = [];
-    let action: ScanAction = 'ALLOW';
+    let action: ScanAction = "ALLOW";
 
     // Check for high-risk data types
-    const highRiskTypes = ['SSN', 'CREDIT_CARD', 'API_KEY', 'PASSWORD', 'PHI'];
-    const hasHighRisk = detection.detections.some((d) =>
-      highRiskTypes.includes(d.type)
-    );
+    const highRiskTypes = ["SSN", "CREDIT_CARD", "API_KEY", "PASSWORD", "PHI"];
+    const hasHighRisk = detection.detections.some((d) => highRiskTypes.includes(d.type));
 
     // Check for moderate-risk data types
-    const moderateRiskTypes = ['EMAIL', 'PHONE', 'DATE_OF_BIRTH', 'ADDRESS'];
-    const hasModerateRisk = detection.detections.some((d) =>
-      moderateRiskTypes.includes(d.type)
-    );
+    const moderateRiskTypes = ["EMAIL", "PHONE", "DATE_OF_BIRTH", "ADDRESS"];
+    const hasModerateRisk = detection.detections.some((d) => moderateRiskTypes.includes(d.type));
 
     // Determine action based on context and detection
-    const operation = request.context.purpose || 'READ';
-    const isExport = ['EXPORT', 'DOWNLOAD', 'EXTERNAL_TRANSFER'].includes(operation);
+    const operation = request.context.purpose || "READ";
+    const isExport = ["EXPORT", "DOWNLOAD", "EXTERNAL_TRANSFER"].includes(operation);
     const isBulk = (request.metadata?.recordCount as number) > 100;
 
     if (hasHighRisk) {
       if (isExport) {
-        action = 'BLOCK';
+        action = "BLOCK";
         violations.push({
-          type: 'HIGH_RISK_EXPORT',
-          message: 'Export of high-risk data types is blocked by default',
-          severity: 'CRITICAL',
-          remediation: 'Request an exception or redact sensitive data before export',
+          type: "HIGH_RISK_EXPORT",
+          message: "Export of high-risk data types is blocked by default",
+          severity: "CRITICAL",
+          remediation: "Request an exception or redact sensitive data before export",
         });
       } else {
-        action = 'REDACT';
+        action = "REDACT";
         obligations.push({
-          type: 'REDACT',
-          config: { strategy: 'FULL_MASK' },
+          type: "REDACT",
+          config: { strategy: "FULL_MASK" },
         });
       }
     } else if (hasModerateRisk) {
       if (isExport && isBulk) {
-        action = 'REQUIRE_JUSTIFICATION';
+        action = "REQUIRE_JUSTIFICATION";
         obligations.push({
-          type: 'JUSTIFICATION_REQUIRED',
-          message: 'Bulk export of PII requires justification',
+          type: "JUSTIFICATION_REQUIRED",
+          message: "Bulk export of PII requires justification",
         });
       } else if (isExport) {
-        action = 'WARN';
+        action = "WARN";
         obligations.push({
-          type: 'USER_ACKNOWLEDGMENT',
-          message: 'You are exporting data that may contain personal information',
+          type: "USER_ACKNOWLEDGMENT",
+          message: "You are exporting data that may contain personal information",
           timeout: 30,
         });
       } else {
-        action = 'ALLOW';
+        action = "ALLOW";
       }
     }
 
     // Add audit obligation for any detected sensitive data
     if (detection.hasDetections) {
       obligations.push({
-        type: 'AUDIT_ENHANCED',
+        type: "AUDIT_ENHANCED",
       });
     }
 
     return {
-      allowed: !['BLOCK'].includes(action),
+      allowed: !["BLOCK"].includes(action),
       action,
       violations,
       obligations,
@@ -220,15 +214,15 @@ export class DLPService {
    * Get event type based on request context
    */
   private getEventType(request: ContentScanRequest): DLPEventType {
-    const purpose = request.context.purpose?.toUpperCase() || '';
+    const purpose = request.context.purpose?.toUpperCase() || "";
 
-    if (purpose.includes('EXPORT') || purpose.includes('DOWNLOAD')) {
-      return 'EGRESS_SCAN';
+    if (purpose.includes("EXPORT") || purpose.includes("DOWNLOAD")) {
+      return "EGRESS_SCAN";
     }
-    if (purpose.includes('TRANSFER')) {
-      return 'TRANSFER_SCAN';
+    if (purpose.includes("TRANSFER")) {
+      return "TRANSFER_SCAN";
     }
-    return 'INGESTION_SCAN';
+    return "INGESTION_SCAN";
   }
 
   /**
@@ -242,7 +236,7 @@ export class DLPService {
    * Hash content for audit
    */
   private hashContent(content: string): string {
-    return createHash('sha256').update(content).digest('hex');
+    return createHash("sha256").update(content).digest("hex");
   }
 
   /**
@@ -250,8 +244,8 @@ export class DLPService {
    */
   private async logAuditEvent(event: DLPAuditEvent): Promise<void> {
     // In production, this would send to audit service
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[DLP Audit]', JSON.stringify(event, null, 2));
+    if (process.env.NODE_ENV === "development") {
+      console.log("[DLP Audit]", JSON.stringify(event, null, 2));
     }
   }
 }

@@ -1,7 +1,7 @@
-import Redis from 'ioredis';
-import { EventEmitter } from 'events';
+import Redis from "ioredis";
+import { EventEmitter } from "events";
 
-const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
+const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
 
 class RealtimeManager extends EventEmitter {
   private redisSubscriber: Redis;
@@ -15,19 +15,19 @@ class RealtimeManager extends EventEmitter {
 
   private async start() {
     try {
-      await this.redisSubscriber.subscribe('realtime:fanout');
-      this.redisSubscriber.on('message', (channel, message) => {
-        if (channel === 'realtime:fanout') {
+      await this.redisSubscriber.subscribe("realtime:fanout");
+      this.redisSubscriber.on("message", (channel, message) => {
+        if (channel === "realtime:fanout") {
           try {
             const event = JSON.parse(message);
-            this.emit('event', event);
+            this.emit("event", event);
           } catch (e) {
-            console.error('Error parsing event', e);
+            console.error("Error parsing event", e);
           }
         }
       });
     } catch (e) {
-      console.error('RealtimeManager error', e);
+      console.error("RealtimeManager error", e);
     }
   }
 }

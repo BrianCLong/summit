@@ -5,7 +5,7 @@ metadata:
   version: 0.4.0
   owner: sre@summit
   allowList:
-    roles: ['sre']
+    roles: ["sre"]
 spec:
   inputs:
     - name: note

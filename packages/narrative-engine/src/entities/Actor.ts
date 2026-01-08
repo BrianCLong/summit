@@ -1,4 +1,4 @@
-import { Relationship } from './Relationship.js';
+import { Relationship } from "./Relationship.js";
 
 export interface ActorSnapshot {
   id: string;
@@ -7,7 +7,7 @@ export interface ActorSnapshot {
   mood: number;
   resilience: number;
   influence: number;
-  relationships: ReturnType<Actor['getRelationships']>;
+  relationships: ReturnType<Actor["getRelationships"]>;
 }
 
 export class Actor {
@@ -72,9 +72,7 @@ export class Actor {
   }
 
   getRelationships(): Relationship[] {
-    return Array.from(this.relationships.values()).map((relationship) =>
-      relationship.clone(),
-    );
+    return Array.from(this.relationships.values()).map((relationship) => relationship.clone());
   }
 
   snapshot(): ActorSnapshot {

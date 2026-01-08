@@ -8,8 +8,8 @@ import type {
   NetworkAnalysis,
   NetworkNode,
   NetworkEdge,
-  Community
-} from './types.js';
+  Community,
+} from "./types.js";
 
 export class NetworkAnalyzer {
   /**
@@ -23,14 +23,14 @@ export class NetworkAnalyzer {
     for (const org of organizations) {
       nodes.push({
         id: org.id,
-        type: 'ORGANIZATION',
+        type: "ORGANIZATION",
         label: org.name,
         attributes: {
           type: org.type,
           ideology: org.ideology,
           status: org.status,
-          regions: org.operatingRegions
-        }
+          regions: org.operatingRegions,
+        },
       });
 
       // Create edges for affiliates
@@ -38,8 +38,8 @@ export class NetworkAnalyzer {
         edges.push({
           source: org.id,
           target: affiliateId,
-          type: 'AFFILIATE',
-          weight: 0.8
+          type: "AFFILIATE",
+          weight: 0.8,
         });
       }
 
@@ -48,8 +48,8 @@ export class NetworkAnalyzer {
         edges.push({
           source: org.id,
           target: org.parentOrganization,
-          type: 'PARENT',
-          weight: 0.9
+          type: "PARENT",
+          weight: 0.9,
         });
       }
     }
@@ -64,7 +64,7 @@ export class NetworkAnalyzer {
       nodes,
       edges,
       communities,
-      centralFigures
+      centralFigures,
     };
   }
 
@@ -77,7 +77,7 @@ export class NetworkAnalyzer {
     // Degree centrality - number of connections
     for (const node of network.nodes) {
       const connections = network.edges.filter(
-        e => e.source === node.id || e.target === node.id
+        (e) => e.source === node.id || e.target === node.id
       ).length;
       centrality.set(node.id, connections);
     }
@@ -88,11 +88,7 @@ export class NetworkAnalyzer {
   /**
    * Find shortest path between two nodes
    */
-  findShortestPath(
-    network: NetworkAnalysis,
-    startId: string,
-    endId: string
-  ): string[] | null {
+  findShortestPath(network: NetworkAnalysis, startId: string, endId: string): string[] | null {
     const adjacency = this.buildAdjacencyList(network);
     const queue: string[][] = [[startId]];
     const visited = new Set<string>([startId]);
@@ -165,42 +161,35 @@ export class NetworkAnalyzer {
     removedEdges: NetworkEdge[];
     growthRate: number;
   } {
-    const prevNodeIds = new Set(previousNetwork.nodes.map(n => n.id));
-    const currNodeIds = new Set(currentNetwork.nodes.map(n => n.id));
+    const prevNodeIds = new Set(previousNetwork.nodes.map((n) => n.id));
+    const currNodeIds = new Set(currentNetwork.nodes.map((n) => n.id));
 
-    const newNodes = currentNetwork.nodes
-      .filter(n => !prevNodeIds.has(n.id))
-      .map(n => n.id);
+    const newNodes = currentNetwork.nodes.filter((n) => !prevNodeIds.has(n.id)).map((n) => n.id);
 
     const removedNodes = previousNetwork.nodes
-      .filter(n => !currNodeIds.has(n.id))
-      .map(n => n.id);
+      .filter((n) => !currNodeIds.has(n.id))
+      .map((n) => n.id);
 
-    const prevEdgeKeys = new Set(
-      previousNetwork.edges.map(e => `${e.source}-${e.target}`)
-    );
-    const currEdgeKeys = new Set(
-      currentNetwork.edges.map(e => `${e.source}-${e.target}`)
-    );
+    const prevEdgeKeys = new Set(previousNetwork.edges.map((e) => `${e.source}-${e.target}`));
+    const currEdgeKeys = new Set(currentNetwork.edges.map((e) => `${e.source}-${e.target}`));
 
     const newEdges = currentNetwork.edges.filter(
-      e => !prevEdgeKeys.has(`${e.source}-${e.target}`)
+      (e) => !prevEdgeKeys.has(`${e.source}-${e.target}`)
     );
 
     const removedEdges = previousNetwork.edges.filter(
-      e => !currEdgeKeys.has(`${e.source}-${e.target}`)
+      (e) => !currEdgeKeys.has(`${e.source}-${e.target}`)
     );
 
     const growthRate =
-      (currentNetwork.nodes.length - previousNetwork.nodes.length) /
-      previousNetwork.nodes.length;
+      (currentNetwork.nodes.length - previousNetwork.nodes.length) / previousNetwork.nodes.length;
 
     return {
       newNodes,
       removedNodes,
       newEdges,
       removedEdges,
-      growthRate
+      growthRate,
     };
   }
 
@@ -211,7 +200,9 @@ export class NetworkAnalyzer {
     const n = network.nodes.length;
     const e = network.edges.length;
 
-    if (n <= 1) {return 0;}
+    if (n <= 1) {
+      return 0;
+    }
 
     const maxEdges = (n * (n - 1)) / 2;
     return e / maxEdges;
@@ -246,7 +237,7 @@ export class NetworkAnalyzer {
         communities.push({
           id: `community-${communityId++}`,
           members: community,
-          cohesion: this.calculateCohesion(community, edges)
+          cohesion: this.calculateCohesion(community, edges),
         });
       }
     }
@@ -282,7 +273,7 @@ export class NetworkAnalyzer {
   private calculateCohesion(members: string[], edges: NetworkEdge[]): number {
     const memberSet = new Set(members);
     const internalEdges = edges.filter(
-      e => memberSet.has(e.source) && memberSet.has(e.target)
+      (e) => memberSet.has(e.source) && memberSet.has(e.target)
     ).length;
 
     const maxPossibleEdges = (members.length * (members.length - 1)) / 2;
@@ -293,9 +284,7 @@ export class NetworkAnalyzer {
     const centrality = new Map<string, number>();
 
     for (const node of nodes) {
-      const connections = edges.filter(
-        e => e.source === node.id || e.target === node.id
-      ).length;
+      const connections = edges.filter((e) => e.source === node.id || e.target === node.id).length;
       centrality.set(node.id, connections);
     }
 
@@ -324,7 +313,9 @@ export class NetworkAnalyzer {
   }
 
   private calculateThreshold(values: number[]): number {
-    if (values.length === 0) {return 0;}
+    if (values.length === 0) {
+      return 0;
+    }
     const sum = values.reduce((a, b) => a + b, 0);
     return sum / values.length;
   }

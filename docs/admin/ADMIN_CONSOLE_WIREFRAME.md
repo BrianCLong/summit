@@ -56,9 +56,11 @@
 ## Flow: Dangerous Action (e.g., Delete Tenant)
 
 **Step 1: Initiation**
+
 > User clicks [ DELETE ] in Dangerous Zone.
 
 **Step 2: Friction Modal**
+
 ```
 +---------------------------------------------------------------+
 |  ⚠️ DANGER: Delete Tenant 'Acme Corp'?                        |
@@ -77,6 +79,7 @@
 ```
 
 **Step 3: Approval / MFA**
+
 ```
 +---------------------------------------------------------------+
 |  🔒 Security Verification                                     |
@@ -107,8 +110,8 @@
 
 ## Module: Intelligence & Search (Cross-Linking)
 
-*   **Global Search Bar**: Supports queries like `user:email@domain.com`, `tenant:t-123`, `trace:request-id`.
-*   **Contextual Links**:
-    *   From a User Profile -> Link to "View in Graph" (Intelligence Fabric).
-    *   From an Alert -> Link to "View Traces" (Observability).
-    *   From a Policy Violation -> Link to "OPA Playground" with the failing input.
+- **Global Search Bar**: Supports queries like `user:email@domain.com`, `tenant:t-123`, `trace:request-id`.
+- **Contextual Links**:
+  - From a User Profile -> Link to "View in Graph" (Intelligence Fabric).
+  - From an Alert -> Link to "View Traces" (Observability).
+  - From a Policy Violation -> Link to "OPA Playground" with the failing input.

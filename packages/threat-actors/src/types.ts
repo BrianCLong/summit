@@ -1,34 +1,34 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Threat Actor Types
  */
 export const threatActorTypeEnum = z.enum([
-  'NATION_STATE',
-  'APT',
-  'CYBERCRIMINAL',
-  'HACKTIVIST',
-  'INSIDER',
-  'TERRORIST',
-  'UNKNOWN',
+  "NATION_STATE",
+  "APT",
+  "CYBERCRIMINAL",
+  "HACKTIVIST",
+  "INSIDER",
+  "TERRORIST",
+  "UNKNOWN",
 ]);
 
 export const sophisticationLevelEnum = z.enum([
-  'NOVICE',
-  'INTERMEDIATE',
-  'ADVANCED',
-  'EXPERT',
-  'STRATEGIC',
+  "NOVICE",
+  "INTERMEDIATE",
+  "ADVANCED",
+  "EXPERT",
+  "STRATEGIC",
 ]);
 
 export const motivationEnum = z.enum([
-  'ESPIONAGE',
-  'FINANCIAL_GAIN',
-  'SABOTAGE',
-  'IDEOLOGY',
-  'REVENGE',
-  'NOTORIETY',
-  'UNKNOWN',
+  "ESPIONAGE",
+  "FINANCIAL_GAIN",
+  "SABOTAGE",
+  "IDEOLOGY",
+  "REVENGE",
+  "NOTORIETY",
+  "UNKNOWN",
 ]);
 
 /**
@@ -66,43 +66,57 @@ export const threatActorSchema = z.object({
   procedures: z.array(z.string()).default([]),
 
   // MITRE ATT&CK mapping
-  mitreAttackTactics: z.array(z.object({
-    id: z.string(),
-    name: z.string(),
-    url: z.string().optional(),
-  })).default([]),
+  mitreAttackTactics: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        url: z.string().optional(),
+      })
+    )
+    .default([]),
 
-  mitreAttackTechniques: z.array(z.object({
-    id: z.string(),
-    name: z.string(),
-    url: z.string().optional(),
-    subtechniques: z.array(z.string()).default([]),
-  })).default([]),
+  mitreAttackTechniques: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        url: z.string().optional(),
+        subtechniques: z.array(z.string()).default([]),
+      })
+    )
+    .default([]),
 
   // Tools and infrastructure
   tools: z.array(z.string()).default([]),
   malwareFamilies: z.array(z.string()).default([]),
-  infrastructure: z.array(z.object({
-    type: z.enum(['C2', 'HOSTING', 'VPN', 'PROXY', 'DNS']),
-    value: z.string(),
-    active: z.boolean(),
-    firstSeen: z.string().datetime(),
-    lastSeen: z.string().datetime(),
-  })).default([]),
+  infrastructure: z
+    .array(
+      z.object({
+        type: z.enum(["C2", "HOSTING", "VPN", "PROXY", "DNS"]),
+        value: z.string(),
+        active: z.boolean(),
+        firstSeen: z.string().datetime(),
+        lastSeen: z.string().datetime(),
+      })
+    )
+    .default([]),
 
   // Campaigns
   campaigns: z.array(z.string()).default([]),
 
   // Capability assessment
-  capabilities: z.object({
-    reconnaissance: z.number().min(0).max(100),
-    weaponization: z.number().min(0).max(100),
-    delivery: z.number().min(0).max(100),
-    exploitation: z.number().min(0).max(100),
-    installation: z.number().min(0).max(100),
-    commandControl: z.number().min(0).max(100),
-    actionsOnObjectives: z.number().min(0).max(100),
-  }).optional(),
+  capabilities: z
+    .object({
+      reconnaissance: z.number().min(0).max(100),
+      weaponization: z.number().min(0).max(100),
+      delivery: z.number().min(0).max(100),
+      exploitation: z.number().min(0).max(100),
+      installation: z.number().min(0).max(100),
+      commandControl: z.number().min(0).max(100),
+      actionsOnObjectives: z.number().min(0).max(100),
+    })
+    .optional(),
 
   // Activity
   active: z.boolean().default(true),
@@ -113,11 +127,15 @@ export const threatActorSchema = z.object({
   confidence: z.number().min(0).max(100),
 
   // References
-  references: z.array(z.object({
-    title: z.string(),
-    url: z.string().url(),
-    date: z.string().datetime().optional(),
-  })).default([]),
+  references: z
+    .array(
+      z.object({
+        title: z.string(),
+        url: z.string().url(),
+        date: z.string().datetime().optional(),
+      })
+    )
+    .default([]),
 
   tenantId: z.string(),
   createdAt: z.string().datetime(),
@@ -139,11 +157,15 @@ export const campaignSchema = z.object({
 
   // Objectives
   objectives: z.array(z.string()).default([]),
-  targets: z.array(z.object({
-    sector: z.string(),
-    country: z.string().optional(),
-    organization: z.string().optional(),
-  })).default([]),
+  targets: z
+    .array(
+      z.object({
+        sector: z.string(),
+        country: z.string().optional(),
+        organization: z.string().optional(),
+      })
+    )
+    .default([]),
 
   // TTPs
   tactics: z.array(z.string()).default([]),
@@ -178,7 +200,7 @@ export const ttpSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string(),
-  type: z.enum(['TACTIC', 'TECHNIQUE', 'PROCEDURE']),
+  type: z.enum(["TACTIC", "TECHNIQUE", "PROCEDURE"]),
 
   // MITRE ATT&CK
   mitreId: z.string().optional(),
@@ -238,7 +260,9 @@ export const diamondModelSchema = z.object({
   timestamp: z.string().datetime(),
   phase: z.string().optional(),
   result: z.string().optional(),
-  direction: z.enum(['ADVERSARY_TO_INFRASTRUCTURE', 'INFRASTRUCTURE_TO_VICTIM', 'ADVERSARY_TO_VICTIM']).optional(),
+  direction: z
+    .enum(["ADVERSARY_TO_INFRASTRUCTURE", "INFRASTRUCTURE_TO_VICTIM", "ADVERSARY_TO_VICTIM"])
+    .optional(),
   methodology: z.string().optional(),
   resources: z.array(z.string()).default([]),
 

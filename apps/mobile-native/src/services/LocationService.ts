@@ -1,8 +1,8 @@
-import { Platform, PermissionsAndroid } from 'react-native';
+import {Platform, PermissionsAndroid} from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 import BackgroundGeolocation from 'react-native-background-geolocation';
 
-import { storeLocationUpdate } from './Database';
+import {storeLocationUpdate} from './Database';
 
 export interface Location {
   latitude: number;
@@ -29,10 +29,8 @@ export const requestLocationPermission = async (): Promise<boolean> => {
       ]);
 
       return (
-        granted['android.permission.ACCESS_FINE_LOCATION'] ===
-        PermissionsAndroid.RESULTS.GRANTED ||
-        granted['android.permission.ACCESS_COARSE_LOCATION'] ===
-        PermissionsAndroid.RESULTS.GRANTED
+        granted['android.permission.ACCESS_FINE_LOCATION'] === PermissionsAndroid.RESULTS.GRANTED ||
+        granted['android.permission.ACCESS_COARSE_LOCATION'] === PermissionsAndroid.RESULTS.GRANTED
       );
     }
 
@@ -69,7 +67,7 @@ export const requestBackgroundLocationPermission = async (): Promise<boolean> =>
 export const getCurrentLocation = (): Promise<Location> => {
   return new Promise((resolve, reject) => {
     Geolocation.getCurrentPosition(
-      (position) => {
+      position => {
         resolve({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
@@ -80,7 +78,7 @@ export const getCurrentLocation = (): Promise<Location> => {
           timestamp: position.timestamp,
         });
       },
-      (error) => {
+      error => {
         console.error('Failed to get current location:', error);
         reject(error);
       },
@@ -96,7 +94,7 @@ export const getCurrentLocation = (): Promise<Location> => {
 // Watch location changes
 export const watchLocation = (callback: (location: Location) => void): number => {
   return Geolocation.watchPosition(
-    (position) => {
+    position => {
       callback({
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
@@ -107,7 +105,7 @@ export const watchLocation = (callback: (location: Location) => void): number =>
         timestamp: position.timestamp,
       });
     },
-    (error) => {
+    error => {
       console.error('Location watch error:', error);
     },
     {
@@ -147,7 +145,7 @@ export const initializeBackgroundGeolocation = async (): Promise<void> => {
 
     // Location event listener
     BackgroundGeolocation.onLocation(
-      async (location) => {
+      async location => {
         console.log('[BackgroundGeolocation] Location:', location);
 
         const loc: Location = {
@@ -163,18 +161,18 @@ export const initializeBackgroundGeolocation = async (): Promise<void> => {
         // Store location in local database
         await storeLocationUpdate(loc);
       },
-      (error) => {
+      error => {
         console.error('[BackgroundGeolocation] Error:', error);
       },
     );
 
     // Motion change event
-    BackgroundGeolocation.onMotionChange((event) => {
+    BackgroundGeolocation.onMotionChange(event => {
       console.log('[BackgroundGeolocation] Motion change:', event.isMoving);
     });
 
     // Geofence event
-    BackgroundGeolocation.onGeofence(async (geofence) => {
+    BackgroundGeolocation.onGeofence(async geofence => {
       console.log('[BackgroundGeolocation] Geofence:', geofence);
       // Handle geofence events
     });

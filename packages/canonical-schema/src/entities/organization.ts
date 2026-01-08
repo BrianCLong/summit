@@ -3,11 +3,11 @@
  * Canonical organization entity type with business identity attributes
  */
 
-import { CanonicalEntityBase, CanonicalEntityType } from '../core/base';
+import { CanonicalEntityBase, CanonicalEntityType } from "../core/base";
 
 export interface OrganizationName {
   value: string;
-  type: 'legal' | 'dba' | 'former' | 'alias' | 'abbreviation';
+  type: "legal" | "dba" | "former" | "alias" | "abbreviation";
   script?: string;
   confidence: number;
   validFrom?: Date;
@@ -15,7 +15,7 @@ export interface OrganizationName {
 }
 
 export interface OrganizationIdentifier {
-  type: 'lei' | 'duns' | 'tax_id' | 'ein' | 'vat' | 'swift' | 'registration_number' | 'custom';
+  type: "lei" | "duns" | "tax_id" | "ein" | "vat" | "swift" | "registration_number" | "custom";
   value: string;
   country?: string;
   issuedDate?: Date;
@@ -24,7 +24,7 @@ export interface OrganizationIdentifier {
 }
 
 export interface OrganizationAddress {
-  type: 'headquarters' | 'registered' | 'branch' | 'mailing';
+  type: "headquarters" | "registered" | "branch" | "mailing";
   street?: string;
   city?: string;
   state?: string;
@@ -37,7 +37,7 @@ export interface OrganizationAddress {
 }
 
 export interface OrganizationContact {
-  type: 'email' | 'phone' | 'fax' | 'website';
+  type: "email" | "phone" | "fax" | "website";
   value: string;
   primary: boolean;
   confidence: number;
@@ -46,20 +46,20 @@ export interface OrganizationContact {
 export interface OrganizationDetails {
   industry?: string;
   industryCodes?: Array<{
-    system: 'NAICS' | 'SIC' | 'ISIC';
+    system: "NAICS" | "SIC" | "ISIC";
     code: string;
   }>;
   dateOfIncorporation?: Date;
   dateOfDissolution?: Date;
   jurisdiction?: string;
-  legalForm?: string;                  // e.g., "LLC", "Corporation"
+  legalForm?: string; // e.g., "LLC", "Corporation"
   employeeCount?: number;
   revenue?: number;
   currency?: string;
 }
 
 export interface OrganizationScreeningResult {
-  list: string;                        // e.g., "OFAC SDN", "EU Sanctions"
+  list: string; // e.g., "OFAC SDN", "EU Sanctions"
   matched: boolean;
   score: number;
   matchedAt: Date;
@@ -92,31 +92,28 @@ export class OrganizationEntityHelpers {
    * Get the primary legal name
    */
   static getLegalName(org: OrganizationEntity): OrganizationName | undefined {
-    return org.names.find(n => n.type === 'legal');
+    return org.names.find((n) => n.type === "legal");
   }
 
   /**
    * Get headquarters address
    */
   static getHeadquarters(org: OrganizationEntity): OrganizationAddress | undefined {
-    return org.addresses.find(a => a.type === 'headquarters');
+    return org.addresses.find((a) => a.type === "headquarters");
   }
 
   /**
    * Get primary website
    */
   static getWebsite(org: OrganizationEntity): string | undefined {
-    return org.contactInfo.find(c => c.type === 'website' && c.primary)?.value;
+    return org.contactInfo.find((c) => c.type === "website" && c.primary)?.value;
   }
 
   /**
    * Check if organization has a specific identifier type
    */
-  static hasIdentifier(
-    org: OrganizationEntity,
-    type: OrganizationIdentifier['type']
-  ): boolean {
-    return org.identifiers.some(id => id.type === type);
+  static hasIdentifier(org: OrganizationEntity, type: OrganizationIdentifier["type"]): boolean {
+    return org.identifiers.some((id) => id.type === type);
   }
 
   /**
@@ -124,9 +121,9 @@ export class OrganizationEntityHelpers {
    */
   static getIdentifier(
     org: OrganizationEntity,
-    type: OrganizationIdentifier['type']
+    type: OrganizationIdentifier["type"]
   ): OrganizationIdentifier | undefined {
-    return org.identifiers.find(id => id.type === type);
+    return org.identifiers.find((id) => id.type === type);
   }
 
   /**
@@ -157,9 +154,9 @@ export class OrganizationEntityHelpers {
     return name
       .toLowerCase()
       .trim()
-      .replace(/\s+/g, ' ')            // Collapse whitespace
-      .replace(/\b(inc|llc|ltd|corp|corporation|company|co)\b\.?/gi, '') // Remove legal suffixes
-      .replace(/[^\w\s]/g, '')         // Remove special chars
+      .replace(/\s+/g, " ") // Collapse whitespace
+      .replace(/\b(inc|llc|ltd|corp|corporation|company|co)\b\.?/gi, "") // Remove legal suffixes
+      .replace(/[^\w\s]/g, "") // Remove special chars
       .trim();
   }
 }

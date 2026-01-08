@@ -1,12 +1,12 @@
-import type { AudioBuffer } from '@intelgraph/audio-processing';
+import type { AudioBuffer } from "@intelgraph/audio-processing";
 import type {
   STTConfig,
   StreamingRecognitionConfig,
   TranscriptionResult,
   TranscriptionSegment,
   LanguageDetectionResult,
-  SpeakerInfo
-} from './types.js';
+  SpeakerInfo,
+} from "./types.js";
 
 /**
  * Interface for speech-to-text providers
@@ -95,7 +95,10 @@ export interface ISpeakerDiarizer {
   /**
    * Identify speakers in audio
    */
-  identifySpeakers(audio: AudioBuffer, knownSpeakers?: SpeakerProfile[]): Promise<SpeakerIdentification[]>;
+  identifySpeakers(
+    audio: AudioBuffer,
+    knownSpeakers?: SpeakerProfile[]
+  ): Promise<SpeakerIdentification[]>;
 }
 
 export interface DiarizationResult {
@@ -198,10 +201,7 @@ export interface IKeywordSpotter {
   /**
    * Spot keywords in transcription
    */
-  spotKeywords(
-    result: TranscriptionResult,
-    keywords: string[]
-  ): Promise<KeywordMatch[]>;
+  spotKeywords(result: TranscriptionResult, keywords: string[]): Promise<KeywordMatch[]>;
 }
 
 export interface KeywordMatch {

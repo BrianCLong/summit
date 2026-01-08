@@ -1,20 +1,20 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const ROOT_DIR = path.resolve(__dirname, '../../');
+const ROOT_DIR = path.resolve(__dirname, "../../");
 
-const EXCEPTION_REGISTER_PATH = path.join(ROOT_DIR, 'docs/governance/EXCEPTION_REGISTER.md');
+const EXCEPTION_REGISTER_PATH = path.join(ROOT_DIR, "docs/governance/EXCEPTION_REGISTER.md");
 
 const SKIP_PATTERNS = [
-  'test.skip',
-  'describe.skip',
-  'it.skip',
-  'pytest.skip',
-  '// @ts-ignore',
-  'eslint-disable',
+  "test.skip",
+  "describe.skip",
+  "it.skip",
+  "pytest.skip",
+  "// @ts-ignore",
+  "eslint-disable",
 ];
 
 interface Finding {
@@ -27,8 +27,14 @@ interface Finding {
 function scanDir(dir: string, fileList: string[] = []) {
   const files = fs.readdirSync(dir);
 
-  files.forEach(file => {
-    if (file.startsWith('.') || file === 'node_modules' || file === 'dist' || file === 'build' || file === 'coverage') {
+  files.forEach((file) => {
+    if (
+      file.startsWith(".") ||
+      file === "node_modules" ||
+      file === "dist" ||
+      file === "build" ||
+      file === "coverage"
+    ) {
       return;
     }
 
@@ -38,7 +44,13 @@ function scanDir(dir: string, fileList: string[] = []) {
     if (stat.isDirectory()) {
       scanDir(filePath, fileList);
     } else {
-      if (file.endsWith('.ts') || file.endsWith('.js') || file.endsWith('.py') || file.endsWith('.tsx') || file.endsWith('.jsx')) {
+      if (
+        file.endsWith(".ts") ||
+        file.endsWith(".js") ||
+        file.endsWith(".py") ||
+        file.endsWith(".tsx") ||
+        file.endsWith(".jsx")
+      ) {
         fileList.push(filePath);
       }
     }
@@ -48,8 +60,8 @@ function scanDir(dir: string, fileList: string[] = []) {
 }
 
 function scanFile(filePath: string): Finding[] {
-  const content = fs.readFileSync(filePath, 'utf-8');
-  const lines = content.split('\n');
+  const content = fs.readFileSync(filePath, "utf-8");
+  const lines = content.split("\n");
   const findings: Finding[] = [];
 
   lines.forEach((line, index) => {
@@ -59,7 +71,7 @@ function scanFile(filePath: string): Finding[] {
           file: path.relative(ROOT_DIR, filePath),
           line: index + 1,
           content: line.trim(),
-          pattern
+          pattern,
         });
         break; // Count once per line
       }
@@ -77,22 +89,25 @@ interface ExistingEntry {
 
 function parseExistingRegister(content: string): Map<string, ExistingEntry> {
   const map = new Map<string, ExistingEntry>();
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   let inTable = false;
 
   for (const line of lines) {
-    if (line.includes('| File | Line | Pattern |')) {
+    if (line.includes("| File | Line | Pattern |")) {
       inTable = true;
       continue;
     }
     if (!inTable) continue;
-    if (line.trim().startsWith('|--')) continue;
-    if (!line.trim().startsWith('|')) break;
+    if (line.trim().startsWith("|--")) continue;
+    if (!line.trim().startsWith("|")) break;
 
-    const parts = line.split('|').map(s => s.trim()).filter(s => s !== '');
+    const parts = line
+      .split("|")
+      .map((s) => s.trim())
+      .filter((s) => s !== "");
     if (parts.length >= 5) {
       // Expected format: | `file` | line | `pattern` | justification | sunset |
-      const file = parts[0].replace(/`/g, '');
+      const file = parts[0].replace(/`/g, "");
       const lineNum = parts[1];
       const justification = parts[3];
       const sunset = parts[4];
@@ -105,7 +120,7 @@ function parseExistingRegister(content: string): Map<string, ExistingEntry> {
 }
 
 function generateMarkdown(findings: Finding[], existingData: Map<string, ExistingEntry>): string {
-  const date = new Date().toISOString().split('T')[0];
+  const date = new Date().toISOString().split("T")[0];
 
   let md = `# Exception Register\n\n`;
   md += `**Last Updated:** ${date}\n\n`;
@@ -117,14 +132,14 @@ function generateMarkdown(findings: Finding[], existingData: Map<string, Existin
   md += `| :--- | :---: |\n`;
 
   const stats = new Map<string, number>();
-  SKIP_PATTERNS.forEach(p => stats.set(p, 0));
+  SKIP_PATTERNS.forEach((p) => stats.set(p, 0));
 
-  findings.forEach(f => {
+  findings.forEach((f) => {
     const current = stats.get(f.pattern) || 0;
     stats.set(f.pattern, current + 1);
   });
 
-  SKIP_PATTERNS.forEach(p => {
+  SKIP_PATTERNS.forEach((p) => {
     md += `| \`${p}\` | ${stats.get(p)} |\n`;
   });
   md += `| **Total** | **${findings.length}** |\n\n`;
@@ -133,12 +148,12 @@ function generateMarkdown(findings: Finding[], existingData: Map<string, Existin
   md += `| File | Line | Pattern | Justification | Sunset Condition |\n`;
   md += `| :--- | :---: | :--- | :--- | :--- |\n`;
 
-  findings.forEach(f => {
+  findings.forEach((f) => {
     const key = `${f.file}:${f.line}`;
     const existing = existingData.get(key);
 
-    const justification = existing ? existing.justification : '_Pending_';
-    const sunset = existing ? existing.sunset : '_TBD_';
+    const justification = existing ? existing.justification : "_Pending_";
+    const sunset = existing ? existing.sunset : "_TBD_";
 
     md += `| \`${f.file}\` | ${f.line} | \`${f.pattern}\` | ${justification} | ${sunset} |\n`;
   });
@@ -151,20 +166,20 @@ function generateMarkdown(findings: Finding[], existingData: Map<string, Existin
 }
 
 function main() {
-  console.log('Scanning codebase for soft spots...');
+  console.log("Scanning codebase for soft spots...");
 
   // Load existing data if available
   let existingData = new Map<string, ExistingEntry>();
   if (fs.existsSync(EXCEPTION_REGISTER_PATH)) {
-    console.log('Loading existing register to preserve metadata...');
-    const content = fs.readFileSync(EXCEPTION_REGISTER_PATH, 'utf-8');
+    console.log("Loading existing register to preserve metadata...");
+    const content = fs.readFileSync(EXCEPTION_REGISTER_PATH, "utf-8");
     existingData = parseExistingRegister(content);
   }
 
   const allFiles = scanDir(ROOT_DIR);
   let allFindings: Finding[] = [];
 
-  allFiles.forEach(file => {
+  allFiles.forEach((file) => {
     allFindings = allFindings.concat(scanFile(file));
   });
 

@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from "crypto";
 
 export interface PgStatStatementRow {
   query: string;
@@ -41,7 +41,7 @@ export interface ObservedQueryStats {
   calls: number;
 }
 
-export type BudgetMetric = 'mean_exec_time' | 'total_time_share' | 'calls';
+export type BudgetMetric = "mean_exec_time" | "total_time_share" | "calls";
 
 export interface BudgetViolation {
   id: string;
@@ -63,9 +63,7 @@ export interface BudgetEvaluationResult {
 }
 
 function stripSqlComments(sql: string): string {
-  return sql
-    .replace(/--.*$/gm, '')
-    .replace(/\/\*[\s\S]*?\*\//g, '');
+  return sql.replace(/--.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "");
 }
 
 export function normalizeQuery(sql: string): { normalized: string; fingerprint: string } {
@@ -73,30 +71,26 @@ export function normalizeQuery(sql: string): { normalized: string; fingerprint: 
 
   const replacedLiterals = withoutComments
     // Replace single-quoted strings
-    .replace(/'(?:''|[^'])*'/g, '?')
+    .replace(/'(?:''|[^'])*'/g, "?")
     // Replace numeric literals (including decimals)
-    .replace(/\b\d+(?:\.\d+)?\b/g, '?')
+    .replace(/\b\d+(?:\.\d+)?\b/g, "?")
     // Replace positional parameters ($1, $2, ?)
-    .replace(/\$\d+|\?/g, '?')
+    .replace(/\$\d+|\?/g, "?")
     // Remove quoted identifiers while keeping the identifier
-    .replace(/"([^"]+)"/g, '$1');
+    .replace(/"([^"]+)"/g, "$1");
 
   // Collapse whitespace and lowercase for stability
   let normalized = replacedLiterals
-    .replace(/\s+/g, ' ')
-    .replace(/\s*,\s*/g, ', ')
+    .replace(/\s+/g, " ")
+    .replace(/\s*,\s*/g, ", ")
     .trim()
     .toLowerCase();
 
   // Normalize alias noise (helps ORM-generated SQL)
-  normalized = normalized.replace(/\s+as\s+[a-z_][\w$]*/gi, ' as _');
-  normalized = normalized.replace(/\s+[a-z_][\w$]*\s+on\s+/gi, ' _ on ');
+  normalized = normalized.replace(/\s+as\s+[a-z_][\w$]*/gi, " as _");
+  normalized = normalized.replace(/\s+[a-z_][\w$]*\s+on\s+/gi, " _ on ");
 
-  const fingerprint = crypto
-    .createHash('sha256')
-    .update(normalized)
-    .digest('hex')
-    .slice(0, 16);
+  const fingerprint = crypto.createHash("sha256").update(normalized).digest("hex").slice(0, 16);
 
   return { normalized, fingerprint };
 }
@@ -149,15 +143,11 @@ export function evaluateBudgets(
     meanTimeMs: row.mean_exec_time ?? 0,
     totalTimeMs: row.total_exec_time ?? row.total_time ?? 0,
     totalTimeShare:
-      totalTimeMs > 0
-        ? (row.total_exec_time ?? row.total_time ?? 0) / totalTimeMs
-        : 0,
+      totalTimeMs > 0 ? (row.total_exec_time ?? row.total_time ?? 0) / totalTimeMs : 0,
     calls: row.calls,
   }));
 
-  const observedByFingerprint = new Map(
-    observed.map((item) => [item.fingerprint, item])
-  );
+  const observedByFingerprint = new Map(observed.map((item) => [item.fingerprint, item]));
 
   const violations: BudgetViolation[] = [];
   const missingFingerprints: string[] = [];
@@ -170,23 +160,18 @@ export function evaluateBudgets(
       continue;
     }
 
-    if (
-      budget.maxMeanTimeMs !== undefined &&
-      observedStats.meanTimeMs > budget.maxMeanTimeMs
-    ) {
+    if (budget.maxMeanTimeMs !== undefined && observedStats.meanTimeMs > budget.maxMeanTimeMs) {
       const overage = observedStats.meanTimeMs - budget.maxMeanTimeMs;
       violations.push({
         id: budget.id,
         fingerprint: budget.fingerprint!,
-        metric: 'mean_exec_time',
+        metric: "mean_exec_time",
         limit: budget.maxMeanTimeMs,
         actual: observedStats.meanTimeMs,
-        regressionPct: budget.maxMeanTimeMs
-          ? (overage / budget.maxMeanTimeMs) * 100
-          : 0,
+        regressionPct: budget.maxMeanTimeMs ? (overage / budget.maxMeanTimeMs) * 100 : 0,
         description: budget.description,
         suggestion:
-          'Inspect EXPLAIN ANALYZE; add or adjust indexes on filter columns; confirm row estimates.',
+          "Inspect EXPLAIN ANALYZE; add or adjust indexes on filter columns; confirm row estimates.",
         observed: observedStats,
       });
     }
@@ -199,36 +184,29 @@ export function evaluateBudgets(
       violations.push({
         id: budget.id,
         fingerprint: budget.fingerprint!,
-        metric: 'total_time_share',
+        metric: "total_time_share",
         limit: budget.maxTotalTimeShare,
         actual: observedStats.totalTimeShare,
-        regressionPct: budget.maxTotalTimeShare
-          ? (overage / budget.maxTotalTimeShare) * 100
-          : 0,
+        regressionPct: budget.maxTotalTimeShare ? (overage / budget.maxTotalTimeShare) * 100 : 0,
         description: budget.description,
         suggestion:
-          'Consider caching hot paths, materializing heavy views, or adding covering indexes.',
+          "Consider caching hot paths, materializing heavy views, or adding covering indexes.",
         observed: observedStats,
       });
     }
 
-    if (
-      budget.maxCalls !== undefined &&
-      observedStats.calls > budget.maxCalls
-    ) {
+    if (budget.maxCalls !== undefined && observedStats.calls > budget.maxCalls) {
       const overage = observedStats.calls - budget.maxCalls;
       violations.push({
         id: budget.id,
         fingerprint: budget.fingerprint!,
-        metric: 'calls',
+        metric: "calls",
         limit: budget.maxCalls,
         actual: observedStats.calls,
-        regressionPct: budget.maxCalls
-          ? (overage / budget.maxCalls) * 100
-          : 0,
+        regressionPct: budget.maxCalls ? (overage / budget.maxCalls) * 100 : 0,
         description: budget.description,
         suggestion:
-          'Batch or cache upstream requests; ensure pagination is applied for list endpoints.',
+          "Batch or cache upstream requests; ensure pagination is applied for list endpoints.",
         observed: observedStats,
       });
     }
@@ -244,55 +222,48 @@ export function evaluateBudgets(
 
 export function formatBudgetDiff(result: BudgetEvaluationResult): string {
   if (!result.violations.length) {
-    return '✅ Query budgets respected for sampled workload.';
+    return "✅ Query budgets respected for sampled workload.";
   }
 
   const lines = [
-    '⚠️  Query budget regressions detected:',
-    '',
+    "⚠️  Query budget regressions detected:",
+    "",
     ...result.violations.map((violation) => {
       const base = `- ${violation.id} (${violation.metric}) exceeded: ${violation.actual.toFixed(
         2
       )} > ${violation.limit}`;
       const regression = violation.regressionPct
         ? ` (+${violation.regressionPct.toFixed(1)}%)`
-        : '';
+        : "";
       const share =
-        violation.metric === 'total_time_share'
+        violation.metric === "total_time_share"
           ? ` (workload share: ${(violation.observed.totalTimeShare * 100).toFixed(1)}%)`
-          : '';
+          : "";
       const mean =
-        violation.metric === 'mean_exec_time'
+        violation.metric === "mean_exec_time"
           ? ` (mean ${violation.observed.meanTimeMs.toFixed(2)} ms)`
-          : '';
-      const calls =
-        violation.metric === 'calls'
-          ? ` (calls ${violation.observed.calls})`
-          : '';
+          : "";
+      const calls = violation.metric === "calls" ? ` (calls ${violation.observed.calls})` : "";
 
       return `${base}${regression}${share}${mean}${calls}\n  Fingerprint: ${
         violation.fingerprint
-      }\n  Query: ${violation.observed.normalizedQuery}\n  Suggestion: ${
-        violation.suggestion
-      }`;
+      }\n  Query: ${violation.observed.normalizedQuery}\n  Suggestion: ${violation.suggestion}`;
     }),
   ];
 
   if (result.missingFingerprints.length) {
     lines.push(
-      '',
-      `Missing fingerprints (not observed in sample): ${result.missingFingerprints.join(
-        ', '
-      )}`
+      "",
+      `Missing fingerprints (not observed in sample): ${result.missingFingerprints.join(", ")}`
     );
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
-export async function pgStatStatementsAvailable(
-  client: { query: (sql: string) => Promise<{ rows: Array<{ extname: string }> }> }
-): Promise<boolean> {
+export async function pgStatStatementsAvailable(client: {
+  query: (sql: string) => Promise<{ rows: Array<{ extname: string }> }>;
+}): Promise<boolean> {
   try {
     const res = await client.query(
       "SELECT extname FROM pg_extension WHERE extname = 'pg_stat_statements'"

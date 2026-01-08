@@ -18,6 +18,7 @@
 **Trigger:** > 50% error rate on primary region ingress or total availability zone failure.
 
 **Procedure:**
+
 1. **Verify Outage:** Check AWS/Cloud status page and internal dashboards (`summit-system-health`).
 2. **Declare Incident:** Open SEV-1 ticket. Notify stakeholders via `#outage-alerts`.
 3. **Stop Ingress:** Update DNS (Route53) to point to maintenance page or secondary region (read-only mode initially).
@@ -39,6 +40,7 @@
 **Trigger:** Neo4j cluster unavailable or leader election loop.
 
 **Procedure:**
+
 1. **Check Logs:** `kubectl logs -l app=neo4j`.
 2. **Restart Core Members:** Rolling restart.
    ```bash
@@ -56,6 +58,7 @@
 **Trigger:** Neo4j and Postgres out of sync (Counts differ > 1%).
 
 **Procedure:**
+
 1. **Identify Delta:** Run reconciliation script.
    ```bash
    npm run task:reconcile-ledger -- --dry-run

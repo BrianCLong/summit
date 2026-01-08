@@ -71,7 +71,7 @@ export type {
   ArchetypeConfig,
   AuditEvent,
   ObservabilityContract,
-} from './types/index.js';
+} from "./types/index.js";
 
 // =============================================================================
 // METRICS EXPORTS
@@ -126,7 +126,7 @@ export {
   Histogram,
   Gauge,
   Summary,
-} from './metrics/index.js';
+} from "./metrics/index.js";
 
 // =============================================================================
 // LOGGING EXPORTS
@@ -147,7 +147,7 @@ export {
   type LoggerOptions,
   type LoggingConfig,
   type ErrorLogContext,
-} from './logging/index.js';
+} from "./logging/index.js";
 
 // =============================================================================
 // TRACING EXPORTS
@@ -178,7 +178,7 @@ export {
   Tracer,
   Context,
   SpanStatusCode,
-} from './tracing/index.js';
+} from "./tracing/index.js";
 
 // =============================================================================
 // SLO EXPORTS
@@ -196,7 +196,7 @@ export {
   generateRecordingRules,
   generateAlertRules,
   generateSloConfig,
-} from './slo/index.js';
+} from "./slo/index.js";
 
 // =============================================================================
 // HEALTH CHECK EXPORTS
@@ -217,7 +217,7 @@ export {
   createDiskHealthCheck,
   createHealthRoutes,
   type HealthRouteHandlers,
-} from './health/index.js';
+} from "./health/index.js";
 
 // =============================================================================
 // MIDDLEWARE EXPORTS
@@ -233,16 +233,16 @@ export {
   setupObservability,
   type ObservabilityMiddlewareConfig,
   type ObservabilityMiddleware,
-} from './middleware/index.js';
+} from "./middleware/index.js";
 
 // =============================================================================
 // INITIALIZATION HELPER
 // =============================================================================
 
-import { initializeMetrics, type MetricsConfig } from './metrics/index.js';
-import { initializeTracing, type TracingInitConfig } from './tracing/index.js';
-import { initializeHealth } from './health/index.js';
-import type { ServiceConfig, ServiceArchetype } from './types/index.js';
+import { initializeMetrics, type MetricsConfig } from "./metrics/index.js";
+import { initializeTracing, type TracingInitConfig } from "./tracing/index.js";
+import { initializeHealth } from "./health/index.js";
+import type { ServiceConfig, ServiceArchetype } from "./types/index.js";
 
 export interface ObservabilityConfig {
   service: ServiceConfig;
@@ -296,6 +296,6 @@ export async function initializeObservability(config: ObservabilityConfig): Prom
  * Graceful shutdown of all observability systems
  */
 export async function shutdownObservability(): Promise<void> {
-  const { shutdownTracing } = await import('./tracing/index.js');
+  const { shutdownTracing } = await import("./tracing/index.js");
   await shutdownTracing();
 }

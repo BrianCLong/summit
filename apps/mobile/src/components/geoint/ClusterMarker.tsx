@@ -1,10 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  withSpring,
-  useSharedValue,
-} from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, withSpring, useSharedValue } from 'react-native-reanimated';
 import { cn } from '@/utils/cn';
 
 interface ClusterMarkerProps {
@@ -89,10 +85,7 @@ export const ClusterMarker: React.FC<ClusterMarkerProps> = ({
         ]}
         className="items-center justify-center border-2 border-white shadow-lg"
       >
-        <Text
-          className="text-white font-bold"
-          style={{ fontSize: size < 50 ? 12 : 14 }}
-        >
+        <Text className="text-white font-bold" style={{ fontSize: size < 50 ? 12 : 14 }}>
           {formatCount(count)}
         </Text>
       </Animated.View>

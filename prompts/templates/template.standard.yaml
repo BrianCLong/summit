@@ -1,12 +1,12 @@
 meta:
   id: template.standard@v1
   owner: jules
-  purpose: 'Template for creating new prompts using the Unified Architecture'
+  purpose: "Template for creating new prompts using the Unified Architecture"
   guardrails:
-    - 'Must use role and safety partials.'
+    - "Must use role and safety partials."
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.1
 
 inputs:

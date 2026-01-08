@@ -10,28 +10,28 @@ The core data model is defined in `server/src/policy-engine/proposal-types.ts` u
 
 ### `PolicyChangeProposal`
 
-| Field | Type | Description |
-| :--- | :--- | :--- |
-| `id` | `string` | Unique identifier (UUID or deterministic hash). |
-| `createdAt` | `datetime` | ISO 8601 timestamp. |
-| `createdBy` | `string` | Identity of the creator (e.g., `system:policy-engine`). |
-| `inputEvidenceRefs` | `string[]` | References to the alerts, incidents, or logs that triggered this proposal. |
-| `rationale` | `string` | Human-readable explanation of *why* this change is proposed. |
-| `machineRationale` | `object` | Structured data used by the engine (trigger type, confidence score, feature vectors). |
-| `proposedChanges` | `ProposedChange[]` | List of specific mutations to configuration files. |
-| `riskAssessment` | `RiskAssessment` | Evaluation of potential downside (blast radius, false positives). |
-| `verification` | `Verification` | Instructions on how to verify the change works as expected. |
-| `status` | `enum` | `proposed`, `approved`, `rejected`, `applied`. |
+| Field               | Type               | Description                                                                           |
+| :------------------ | :----------------- | :------------------------------------------------------------------------------------ |
+| `id`                | `string`           | Unique identifier (UUID or deterministic hash).                                       |
+| `createdAt`         | `datetime`         | ISO 8601 timestamp.                                                                   |
+| `createdBy`         | `string`           | Identity of the creator (e.g., `system:policy-engine`).                               |
+| `inputEvidenceRefs` | `string[]`         | References to the alerts, incidents, or logs that triggered this proposal.            |
+| `rationale`         | `string`           | Human-readable explanation of _why_ this change is proposed.                          |
+| `machineRationale`  | `object`           | Structured data used by the engine (trigger type, confidence score, feature vectors). |
+| `proposedChanges`   | `ProposedChange[]` | List of specific mutations to configuration files.                                    |
+| `riskAssessment`    | `RiskAssessment`   | Evaluation of potential downside (blast radius, false positives).                     |
+| `verification`      | `Verification`     | Instructions on how to verify the change works as expected.                           |
+| `status`            | `enum`             | `proposed`, `approved`, `rejected`, `applied`.                                        |
 
 ### `ProposedChange`
 
-| Field | Type | Description |
-| :--- | :--- | :--- |
-| `target` | `string` | Relative path to the file being modified (e.g., `policy/allowlist.yaml`). |
-| `keyPath` | `string` | Dot-notation path to the specific key (e.g., `exceptions[4]`). |
-| `operation` | `enum` | `add`, `remove`, `replace`. |
-| `value` | `any` | The new value to insert or set. |
-| `originalValue` | `any` | (Optional) The value being replaced, for safety checks. |
+| Field           | Type     | Description                                                               |
+| :-------------- | :------- | :------------------------------------------------------------------------ |
+| `target`        | `string` | Relative path to the file being modified (e.g., `policy/allowlist.yaml`). |
+| `keyPath`       | `string` | Dot-notation path to the specific key (e.g., `exceptions[4]`).            |
+| `operation`     | `enum`   | `add`, `remove`, `replace`.                                               |
+| `value`         | `any`    | The new value to insert or set.                                           |
+| `originalValue` | `any`    | (Optional) The value being replaced, for safety checks.                   |
 
 ## Workflow
 
@@ -45,11 +45,12 @@ The core data model is defined in `server/src/policy-engine/proposal-types.ts` u
 ## Verification & Rollback
 
 Every proposal must include:
-*   **Verification Commands**: e.g., `curl -X POST ...` to confirm the new allowlist entry works.
-*   **Rollback Steps**: Instructions to revert the change (usually `git revert`).
+
+- **Verification Commands**: e.g., `curl -X POST ...` to confirm the new allowlist entry works.
+- **Rollback Steps**: Instructions to revert the change (usually `git revert`).
 
 ## Constraints
 
-*   **Deterministic**: Running the engine on the same evidence must produce the same proposal ID and content.
-*   **Safe**: Proposals cannot target protected files (e.g., source code, secrets).
-*   **Auditable**: The chain of evidence from Alert -> Proposal -> Approval -> PR must be preserved.
+- **Deterministic**: Running the engine on the same evidence must produce the same proposal ID and content.
+- **Safe**: Proposals cannot target protected files (e.g., source code, secrets).
+- **Auditable**: The chain of evidence from Alert -> Proposal -> Approval -> PR must be preserved.

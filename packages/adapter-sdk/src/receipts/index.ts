@@ -2,7 +2,7 @@ export interface ReceiptPayload {
   adapterId: string;
   runId: string;
   lifecycle: string;
-  decision: 'allow' | 'deny';
+  decision: "allow" | "deny";
   inputsDigest: string;
   outputsDigest?: string;
   retries: number;
@@ -27,5 +27,5 @@ export function summarizeReceipt(receipt: ReceiptPayload): string {
     receipt.outputsDigest ? `outputsDigest=${receipt.outputsDigest}` : null,
   ]
     .filter(Boolean)
-    .join(' ');
+    .join(" ");
 }

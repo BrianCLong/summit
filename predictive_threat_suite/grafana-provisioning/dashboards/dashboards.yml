@@ -3,9 +3,9 @@
 apiVersion: 1
 
 providers:
-  - name: 'Predictive Suite Dashboards'
+  - name: "Predictive Suite Dashboards"
     orgId: 1
-    folder: 'Predictive Suite'
+    folder: "Predictive Suite"
     type: file
     disableDeletion: false
     updateIntervalSeconds: 30

@@ -1,9 +1,9 @@
-import { stableHash } from '../canonical/canonicalizer.js';
-import { EventLog } from '../eventlog/eventLog.js';
+import { stableHash } from "../canonical/canonicalizer.js";
+import { EventLog } from "../eventlog/eventLog.js";
 
 export interface ProvenanceStamp {
   source: string;
-  ingress: 'api' | 'database' | 'message-broker' | string;
+  ingress: "api" | "database" | "message-broker" | string;
   observedAt: string;
   traceId?: string;
   runId?: string;
@@ -24,7 +24,7 @@ export interface LineageTrackerOptions {
 
 export interface IngressContext {
   source: string;
-  ingress: ProvenanceStamp['ingress'];
+  ingress: ProvenanceStamp["ingress"];
   traceId?: string;
   runId?: string;
   observedAt?: string;
@@ -34,7 +34,7 @@ export interface IngressContext {
 
 export interface HopContext {
   source?: string;
-  ingress?: ProvenanceStamp['ingress'];
+  ingress?: ProvenanceStamp["ingress"];
   observedAt?: string;
   attributes?: Record<string, unknown>;
 }
@@ -72,7 +72,7 @@ export class LineageTracker {
 
     this.ledger.append({
       id: `${context.source}:${checksum}`,
-      type: 'lineage.ingress',
+      type: "lineage.ingress",
       scope: context.source,
       actor: context.ingress,
       timestamp: observedAt,
@@ -84,7 +84,7 @@ export class LineageTracker {
 
   propagate<TPayload>(
     envelope: LineageEnvelope<TPayload>,
-    hop: HopContext,
+    hop: HopContext
   ): LineageEnvelope<TPayload> {
     const checksum = stableHash(envelope.payload);
     const observedAt = hop.observedAt ?? new Date().toISOString();
@@ -98,12 +98,14 @@ export class LineageTracker {
       checksum,
       chain,
       attributes,
-      signature: this.options.signer ? this.options.signer(checksum) : envelope.provenance.signature,
+      signature: this.options.signer
+        ? this.options.signer(checksum)
+        : envelope.provenance.signature,
     };
 
     this.ledger.append({
       id: `${provenance.source}:${checksum}`,
-      type: 'lineage.hop',
+      type: "lineage.hop",
       scope: provenance.source,
       actor: provenance.ingress,
       timestamp: observedAt,
@@ -116,45 +118,48 @@ export class LineageTracker {
   asHeaders(envelope: LineageEnvelope<unknown>): Record<string, string> {
     const { provenance } = envelope;
     const headers: Record<string, string> = {
-      'x-lineage-source': provenance.source,
-      'x-lineage-ingress': provenance.ingress,
-      'x-lineage-observed-at': provenance.observedAt,
-      'x-lineage-checksum': provenance.checksum,
+      "x-lineage-source": provenance.source,
+      "x-lineage-ingress": provenance.ingress,
+      "x-lineage-observed-at": provenance.observedAt,
+      "x-lineage-checksum": provenance.checksum,
     };
-    if (provenance.traceId) headers['x-trace-id'] = provenance.traceId;
-    if (provenance.runId) headers['x-run-id'] = provenance.runId;
-    if (provenance.signature) headers['x-lineage-signature'] = provenance.signature;
-    if (provenance.chain?.length) headers['x-lineage-chain'] = provenance.chain.join(',');
+    if (provenance.traceId) headers["x-trace-id"] = provenance.traceId;
+    if (provenance.runId) headers["x-run-id"] = provenance.runId;
+    if (provenance.signature) headers["x-lineage-signature"] = provenance.signature;
+    if (provenance.chain?.length) headers["x-lineage-chain"] = provenance.chain.join(",");
     if (provenance.attributes) {
-      headers['x-lineage-attributes'] = JSON.stringify(provenance.attributes);
+      headers["x-lineage-attributes"] = JSON.stringify(provenance.attributes);
     }
     return headers;
   }
 
-  fromHeaders<TPayload>(payload: TPayload, headers: Record<string, string>): LineageEnvelope<TPayload> {
-    const observedAt = headers['x-lineage-observed-at'] ?? new Date().toISOString();
-    const checksum = headers['x-lineage-checksum'] ?? stableHash(payload);
-    const chain = headers['x-lineage-chain']?.split(',').filter(Boolean) ?? [];
-    const attributes = headers['x-lineage-attributes']
-      ? JSON.parse(headers['x-lineage-attributes'])
+  fromHeaders<TPayload>(
+    payload: TPayload,
+    headers: Record<string, string>
+  ): LineageEnvelope<TPayload> {
+    const observedAt = headers["x-lineage-observed-at"] ?? new Date().toISOString();
+    const checksum = headers["x-lineage-checksum"] ?? stableHash(payload);
+    const chain = headers["x-lineage-chain"]?.split(",").filter(Boolean) ?? [];
+    const attributes = headers["x-lineage-attributes"]
+      ? JSON.parse(headers["x-lineage-attributes"])
       : undefined;
     const provenance: ProvenanceStamp = {
-      source: headers['x-lineage-source'] ?? 'unknown',
-      ingress: headers['x-lineage-ingress'] ?? 'api',
+      source: headers["x-lineage-source"] ?? "unknown",
+      ingress: headers["x-lineage-ingress"] ?? "api",
       observedAt,
-      traceId: headers['x-trace-id'],
-      runId: headers['x-run-id'],
+      traceId: headers["x-trace-id"],
+      runId: headers["x-run-id"],
       checksum,
       chain,
       attributes,
-      signature: headers['x-lineage-signature'],
+      signature: headers["x-lineage-signature"],
     };
     return { payload, provenance };
   }
 
   validate(
     envelope: LineageEnvelope<unknown>,
-    expectations: Partial<Pick<ProvenanceStamp, 'source' | 'ingress'>> = {},
+    expectations: Partial<Pick<ProvenanceStamp, "source" | "ingress">> = {}
   ): ValidationResult {
     const expectedChecksum = stableHash(envelope.payload);
     const hashMatches = expectedChecksum === envelope.provenance.checksum;

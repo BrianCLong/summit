@@ -4,8 +4,8 @@ export {
   requirePermission,
   checkPermission,
   TenantActions,
-} from './authContext.js';
-export type { AccessDecision } from './authContext.js';
+} from "./authContext.js";
+export type { AccessDecision } from "./authContext.js";
 export {
   httpMetrics,
   metricsHandler,
@@ -13,4 +13,4 @@ export {
   recordFeatureFlagEvaluation,
   metrics,
   METRICS,
-} from './metrics.js';
+} from "./metrics.js";

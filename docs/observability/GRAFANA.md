@@ -68,11 +68,13 @@ docker-compose -f docker-compose.observability.yml ps
 3. **Access Grafana:**
 
 Open your browser and navigate to:
+
 ```
 http://localhost:3001
 ```
 
 Default credentials:
+
 - Username: `admin`
 - Password: `admin` (change on first login)
 
@@ -123,12 +125,14 @@ NEO4J_PASSWORD=your_password
 - **GraphQL Error Rate**: Percentage of failed GraphQL operations
 
 **Use Cases:**
+
 - Monitor API SLA compliance
 - Identify slow endpoints
 - Detect error spikes
 - Analyze GraphQL query performance
 
 **Recommended Alerts:**
+
 - API error rate > 5% for 5 minutes
 - p95 latency > 2 seconds for 5 minutes
 - p99 latency > 5 seconds for 5 minutes
@@ -148,12 +152,14 @@ NEO4J_PASSWORD=your_password
 - **Container Resource Usage**: CPU and memory per container
 
 **Use Cases:**
+
 - Monitor infrastructure health
 - Detect resource exhaustion
 - Track database performance
 - Optimize cache configuration
 
 **Recommended Alerts:**
+
 - CPU usage > 85% for 10 minutes
 - Memory usage > 90% for 5 minutes
 - Cache hit rate < 80% for 10 minutes
@@ -300,6 +306,7 @@ rate(investigations_total[5m])
 ### Common Query Patterns
 
 **Rate calculations:**
+
 ```promql
 # Request rate per second
 rate(http_requests_total[5m])
@@ -310,6 +317,7 @@ rate(http_requests_total[5m]) * 100
 ```
 
 **Aggregations:**
+
 ```promql
 # Sum across all instances
 sum(rate(http_requests_total[5m]))
@@ -322,6 +330,7 @@ topk(5, histogram_quantile(0.95, rate(graphql_request_duration_seconds_bucket[5m
 ```
 
 **Histograms and percentiles:**
+
 ```promql
 # p50 latency
 histogram_quantile(0.50, rate(http_request_duration_seconds_bucket[5m]))
@@ -343,11 +352,13 @@ histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))
    - Check for scrape errors
 
 2. **Verify metrics endpoint:**
+
 ```bash
 curl http://localhost:4000/metrics
 ```
 
 3. **Check service logs:**
+
 ```bash
 docker-compose -f docker-compose.observability.yml logs prometheus
 docker-compose -f docker-compose.observability.yml logs otel-collector
@@ -376,12 +387,12 @@ docker-compose -f docker-compose.observability.yml logs otel-collector
 ### Adding Metrics to Your Code
 
 ```typescript
-import { recordHttpRequest, recordGraphQLOperation } from './metrics';
+import { recordHttpRequest, recordGraphQLOperation } from "./metrics";
 
 // HTTP middleware
 app.use((req, res, next) => {
   const start = Date.now();
-  res.on('finish', () => {
+  res.on("finish", () => {
     const duration = (Date.now() - start) / 1000;
     recordHttpRequest(req.method, req.route?.path || req.path, res.statusCode, duration);
   });
@@ -395,19 +406,19 @@ const metricsPlugin = {
     return {
       async willSendResponse(requestContext) {
         const duration = (Date.now() - start) / 1000;
-        const operation = requestContext.operationName || 'unknown';
-        const operationType = requestContext.operation?.operation || 'unknown';
+        const operation = requestContext.operationName || "unknown";
+        const operationType = requestContext.operation?.operation || "unknown";
         recordGraphQLOperation(operation, operationType, duration, requestContext.errors?.[0]);
-      }
+      },
     };
-  }
+  },
 };
 ```
 
 ### Database Query Instrumentation
 
 ```typescript
-import { recordDatabaseQuery } from './metrics';
+import { recordDatabaseQuery } from "./metrics";
 
 // Neo4j query wrapper
 async function runNeo4jQuery(query: string, params: any) {
@@ -415,11 +426,11 @@ async function runNeo4jQuery(query: string, params: any) {
   try {
     const result = await session.run(query, params);
     const duration = (Date.now() - start) / 1000;
-    recordDatabaseQuery('neo4j', 'read', duration, true);
+    recordDatabaseQuery("neo4j", "read", duration, true);
     return result;
   } catch (error) {
     const duration = (Date.now() - start) / 1000;
-    recordDatabaseQuery('neo4j', 'read', duration, false);
+    recordDatabaseQuery("neo4j", "read", duration, false);
     throw error;
   }
 }
@@ -438,6 +449,7 @@ OpenTelemetry Collector is configured in `monitoring/otel/collector-config.yml`:
 ### Sending Traces
 
 The application can send traces to the OTel Collector at:
+
 - gRPC: `http://otel-collector:4317`
 - HTTP: `http://otel-collector:4318`
 

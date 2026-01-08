@@ -1,17 +1,16 @@
-import * as React from 'react';
-import { cn } from '@/lib/utils';
+import * as React from 'react'
+import { cn } from '@/lib/utils'
 
-export interface SliderProps
-  extends Omit<
-    React.InputHTMLAttributes<HTMLInputElement>,
-    'type' | 'value' | 'defaultValue' | 'max' | 'min' | 'step'
-  > {
-  value?: number[];
-  defaultValue?: number[];
-  onValueChange?: (value: number[]) => void;
-  max?: number;
-  min?: number;
-  step?: number;
+export interface SliderProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  'type' | 'value' | 'defaultValue' | 'max' | 'min' | 'step'
+> {
+  value?: number[]
+  defaultValue?: number[]
+  onValueChange?: (value: number[]) => void
+  max?: number
+  min?: number
+  step?: number
 }
 
 const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
@@ -31,20 +30,20 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
   ) => {
     const [internalValue, setInternalValue] = React.useState(
       value?.[0] ?? defaultValue?.[0] ?? min
-    );
+    )
 
-    const currentValue = value?.[0] ?? internalValue;
+    const currentValue = value?.[0] ?? internalValue
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = Number(event.target.value);
-      setInternalValue(newValue);
+      const newValue = Number(event.target.value)
+      setInternalValue(newValue)
       if (onChange) {
-        onChange(event);
+        onChange(event)
       }
       if (onValueChange) {
-        onValueChange([newValue]);
+        onValueChange([newValue])
       }
-    };
+    }
 
     return (
       <input
@@ -61,9 +60,9 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
         step={step}
         {...props}
       />
-    );
+    )
   }
-);
-Slider.displayName = 'Slider';
+)
+Slider.displayName = 'Slider'
 
-export { Slider };
+export { Slider }

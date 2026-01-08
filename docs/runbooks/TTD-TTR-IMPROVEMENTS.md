@@ -3,6 +3,7 @@
 **Purpose**: Reduce incident detection and recovery time through observability and automation improvements
 
 **Target Metrics**:
+
 - **TTD**: < 5 minutes (currently ~10-15 minutes based on manual observation)
 - **TTR**: < 30 minutes for SEV1, < 60 minutes for SEV2
 
@@ -12,16 +13,17 @@
 
 ### Existing Gaps
 
-| Area | Current State | Impact on TTD/TTR |
-|------|---------------|-------------------|
-| **Alert Coverage** | Basic health checks, some Prometheus alerts | TTD: 10-15 min (missing early warning signals) |
-| **Alert Granularity** | Service-level only | TTR: +20 min (hard to pinpoint root cause) |
-| **Distributed Tracing** | Limited/none | TTR: +30 min (no cross-service visibility) |
-| **Synthetic Monitoring** | Manual smoke tests only | TTD: Depends on user reports |
-| **Runbook Integration** | Alerts don't link to runbooks | TTR: +10 min (searching for procedures) |
-| **Auto-Remediation** | None | TTR: +15 min (manual steps for known issues) |
+| Area                     | Current State                               | Impact on TTD/TTR                              |
+| ------------------------ | ------------------------------------------- | ---------------------------------------------- |
+| **Alert Coverage**       | Basic health checks, some Prometheus alerts | TTD: 10-15 min (missing early warning signals) |
+| **Alert Granularity**    | Service-level only                          | TTR: +20 min (hard to pinpoint root cause)     |
+| **Distributed Tracing**  | Limited/none                                | TTR: +30 min (no cross-service visibility)     |
+| **Synthetic Monitoring** | Manual smoke tests only                     | TTD: Depends on user reports                   |
+| **Runbook Integration**  | Alerts don't link to runbooks               | TTR: +10 min (searching for procedures)        |
+| **Auto-Remediation**     | None                                        | TTR: +15 min (manual steps for known issues)   |
 
 **Baseline**:
+
 - **Average TTD**: 12 minutes
 - **Average TTR**: 45 minutes (SEV1), 90 minutes (SEV2)
 
@@ -30,12 +32,15 @@
 ## Improvement #1: SLO-Based Alerting with Error Budgets
 
 ### Problem
+
 Current alerts fire on absolute thresholds (e.g., "error rate > 5%"), which:
+
 - Cause alert fatigue during expected spikes
 - Don't account for error budget consumption
 - Fire too late (after SLO already violated)
 
 ### Solution
+
 Implement multi-window multi-burn-rate alerting:
 
 ```yaml
@@ -77,11 +82,13 @@ Implement multi-window multi-burn-rate alerting:
 ```
 
 **Impact**:
+
 - **TTD**: -5 minutes (early warning before SLO breach)
 - **TTR**: -10 minutes (alerts include error budget context, prioritization is clearer)
 - **Reduces**: Alert fatigue by 60% (fewer false positives)
 
 **Implementation**:
+
 1. Add to `observability/prometheus/alerts/slo-burn-alerts.yaml`
 2. Update Grafana dashboard to show error budget consumption
 3. Train team on error budget interpretation
@@ -91,7 +98,9 @@ Implement multi-window multi-burn-rate alerting:
 ## Improvement #2: Automatic Runbook Links in Alerts
 
 ### Problem
+
 When an alert fires, responders must:
+
 1. Identify the alert
 2. Search for relevant runbook
 3. Determine which section applies
@@ -99,6 +108,7 @@ When an alert fires, responders must:
 This adds 5-10 minutes to TTR.
 
 ### Solution
+
 Embed runbook links and quick-start commands in alert annotations:
 
 ```yaml
@@ -125,6 +135,7 @@ Embed runbook links and quick-start commands in alert annotations:
 ```
 
 **Alertmanager Template** (Slack notification):
+
 ```go
 {{ range .Alerts }}
 🚨 {{ .Labels.severity | toUpper }}: {{ .Annotations.summary }}
@@ -134,7 +145,9 @@ Embed runbook links and quick-start commands in alert annotations:
 
 Quick check:
 ```
+
 {{ .Annotations.quick_check }}
+
 ```
 
 Time: {{ .StartsAt | since }}
@@ -142,11 +155,13 @@ Time: {{ .StartsAt | since }}
 ```
 
 **Impact**:
+
 - **TTD**: No change
 - **TTR**: -8 minutes (immediate access to procedures and commands)
 - **Reduces**: Context switching, searching for docs
 
 **Implementation**:
+
 1. Update all alerts in `observability/prometheus/alerts/` with runbook links
 2. Configure Alertmanager template for Slack
 3. Add dashboard links for all component alerts
@@ -156,15 +171,17 @@ Time: {{ .StartsAt | since }}
 ## Improvement #3: Synthetic Monitoring for Golden Path
 
 ### Problem
+
 Golden path failures are only detected when users report issues or alerts fire based on aggregate metrics. By then, multiple users are already affected.
 
 ### Solution
+
 Run continuous synthetic monitoring that executes the golden path every 60 seconds:
 
 ```typescript
 // services/synthetic-monitor/golden-path-monitor.ts
 
-import { recordGoldenPathSuccess, recordGoldenPathError } from '../metrics';
+import { recordGoldenPathSuccess, recordGoldenPathError } from "../metrics";
 
 async function runGoldenPathTest(): Promise<void> {
   const testId = `synthetic-${Date.now()}`;
@@ -176,7 +193,7 @@ async function runGoldenPathTest(): Promise<void> {
       mutation: CREATE_INVESTIGATION,
       variables: { name: `Synthetic Test ${testId}` },
     });
-    recordGoldenPathSuccess('create_investigation', Date.now() - start);
+    recordGoldenPathSuccess("create_investigation", Date.now() - start);
 
     // Step 2: Add entity
     const entityStart = Date.now();
@@ -185,10 +202,10 @@ async function runGoldenPathTest(): Promise<void> {
       variables: {
         investigationId: investigation.id,
         name: `Test Entity ${testId}`,
-        type: 'Person',
+        type: "Person",
       },
     });
-    recordGoldenPathSuccess('add_entity', Date.now() - entityStart);
+    recordGoldenPathSuccess("add_entity", Date.now() - entityStart);
 
     // Step 3: Add relationship
     const relStart = Date.now();
@@ -197,10 +214,10 @@ async function runGoldenPathTest(): Promise<void> {
       variables: {
         fromEntityId: entity.id,
         toEntityId: entity.id,
-        type: 'knows',
+        type: "knows",
       },
     });
-    recordGoldenPathSuccess('add_relationship', Date.now() - relStart);
+    recordGoldenPathSuccess("add_relationship", Date.now() - relStart);
 
     // Step 4: Copilot query
     const copilotStart = Date.now();
@@ -208,10 +225,10 @@ async function runGoldenPathTest(): Promise<void> {
       query: ASK_COPILOT,
       variables: {
         investigationId: investigation.id,
-        question: 'Summarize this investigation',
+        question: "Summarize this investigation",
       },
     });
-    recordGoldenPathSuccess('copilot_query', Date.now() - copilotStart);
+    recordGoldenPathSuccess("copilot_query", Date.now() - copilotStart);
 
     // Step 5: View results
     const resultsStart = Date.now();
@@ -219,14 +236,13 @@ async function runGoldenPathTest(): Promise<void> {
       query: GET_INVESTIGATION_RESULTS,
       variables: { investigationId: investigation.id },
     });
-    recordGoldenPathSuccess('view_results', Date.now() - resultsStart);
+    recordGoldenPathSuccess("view_results", Date.now() - resultsStart);
 
     // Cleanup
     await graphqlClient.mutate({
       mutation: DELETE_INVESTIGATION,
       variables: { id: investigation.id },
     });
-
   } catch (error) {
     const step = determineFailedStep(error);
     recordGoldenPathError(step, error.name);
@@ -239,6 +255,7 @@ setInterval(runGoldenPathTest, 60_000);
 ```
 
 **Alert Rule**:
+
 ```yaml
 - alert: SyntheticGoldenPathFailing
   expr: |
@@ -254,11 +271,13 @@ setInterval(runGoldenPathTest, 60_000);
 ```
 
 **Impact**:
+
 - **TTD**: -10 minutes (detect issues before user reports)
 - **TTR**: -5 minutes (clear indication of which step is failing)
 - **Reduces**: User-reported incidents by 70%
 
 **Implementation**:
+
 1. Create `services/synthetic-monitor` service
 2. Add synthetic test source label to golden path metrics
 3. Configure alert for synthetic test failures
@@ -269,7 +288,9 @@ setInterval(runGoldenPathTest, 60_000);
 ## Improvement #4: Auto-Remediation for Known Issues
 
 ### Problem
+
 Many incidents require the same remediation steps:
+
 - Restart pod
 - Rollback deployment
 - Scale up service
@@ -278,37 +299,39 @@ Many incidents require the same remediation steps:
 Manual execution adds 10-15 minutes to TTR.
 
 ### Solution
+
 Implement auto-remediation for common scenarios with safety checks:
 
 ```yaml
 # Alertmanager config with webhook receiver
 receivers:
-  - name: 'auto-remediate'
+  - name: "auto-remediate"
     webhook_configs:
-      - url: 'http://remediation-service:8080/webhook'
+      - url: "http://remediation-service:8080/webhook"
         send_resolved: true
 
 route:
-  receiver: 'auto-remediate'
-  group_by: ['alertname']
+  receiver: "auto-remediate"
+  group_by: ["alertname"]
   group_wait: 30s
   group_interval: 5m
   repeat_interval: 4h
   routes:
     - match:
         auto_remediate: "true"
-      receiver: 'auto-remediate'
+      receiver: "auto-remediate"
 ```
 
 **Remediation Service**:
+
 ```typescript
 // services/remediation-service/handlers/graphql-high-latency.ts
 
-import { execSync } from 'child_process';
-import { recordRemediation } from '../metrics';
+import { execSync } from "child_process";
+import { recordRemediation } from "../metrics";
 
 interface Alert {
-  labels: { alertname: string; operation?: string; };
+  labels: { alertname: string; operation?: string };
   annotations: Record<string, string>;
   startsAt: string;
 }
@@ -318,58 +341,66 @@ export async function handleGraphQLHighLatency(alert: Alert): Promise<void> {
 
   // Safety checks
   if (await isRecentDeployment()) {
-    console.log('Recent deployment detected, attempting rollback...');
-    execSync('kubectl rollout undo deployment/graphql-gateway');
-    recordRemediation('graphql_high_latency', 'rollback');
+    console.log("Recent deployment detected, attempting rollback...");
+    execSync("kubectl rollout undo deployment/graphql-gateway");
+    recordRemediation("graphql_high_latency", "rollback");
     return;
   }
 
   if (await isDatabaseSlow()) {
-    console.log('Database latency high, scaling read replicas...');
-    execSync('kubectl scale deployment/neo4j-replica --replicas=3');
-    recordRemediation('graphql_high_latency', 'scale_db');
+    console.log("Database latency high, scaling read replicas...");
+    execSync("kubectl scale deployment/neo4j-replica --replicas=3");
+    recordRemediation("graphql_high_latency", "scale_db");
     return;
   }
 
   if (await isPodMemoryHigh()) {
-    console.log('High memory usage, restarting pod...');
-    execSync('kubectl delete pod -l app=graphql-gateway --field-selector=status.phase=Running | head -1');
-    recordRemediation('graphql_high_latency', 'restart_pod');
+    console.log("High memory usage, restarting pod...");
+    execSync(
+      "kubectl delete pod -l app=graphql-gateway --field-selector=status.phase=Running | head -1"
+    );
+    recordRemediation("graphql_high_latency", "restart_pod");
     return;
   }
 
   // If no auto-remediation applies, page human
-  console.log('No auto-remediation available, escalating to on-call');
-  recordRemediation('graphql_high_latency', 'manual_escalation');
+  console.log("No auto-remediation available, escalating to on-call");
+  recordRemediation("graphql_high_latency", "manual_escalation");
 }
 
 // Safety checks
 async function isRecentDeployment(): Promise<boolean> {
-  const result = execSync('kubectl rollout history deployment/graphql-gateway | tail -1').toString();
+  const result = execSync(
+    "kubectl rollout history deployment/graphql-gateway | tail -1"
+  ).toString();
   const deployTime = parseDeploymentTime(result);
   return Date.now() - deployTime < 15 * 60 * 1000; // Within last 15 minutes
 }
 
 async function isDatabaseSlow(): Promise<boolean> {
   // Query Prometheus for Neo4j latency
-  const latency = await queryPrometheus('histogram_quantile(0.95, sum(rate(neo4j_query_duration_ms_bucket[5m])) by (le))');
+  const latency = await queryPrometheus(
+    "histogram_quantile(0.95, sum(rate(neo4j_query_duration_ms_bucket[5m])) by (le))"
+  );
   return latency > 500; // ms
 }
 
 async function isPodMemoryHigh(): Promise<boolean> {
-  const result = execSync('kubectl top pods -l app=graphql-gateway --no-headers').toString();
+  const result = execSync("kubectl top pods -l app=graphql-gateway --no-headers").toString();
   const memoryUsage = parseMemoryUsage(result);
   return memoryUsage > 85; // percent
 }
 ```
 
 **Safeguards**:
+
 - Only auto-remediate alerts with `auto_remediate: true` label
 - Maximum 3 auto-remediation attempts per incident
 - Notify #incident-response channel of all auto-remediations
 - Disable auto-remediation during change freeze
 
 **Alert Configuration** (with auto-remediation):
+
 ```yaml
 - alert: GraphQLHighLatency
   expr: |
@@ -377,18 +408,20 @@ async function isPodMemoryHigh(): Promise<boolean> {
   for: 5m
   labels:
     severity: critical
-    auto_remediate: "true"  # Enable auto-remediation
+    auto_remediate: "true" # Enable auto-remediation
   annotations:
     summary: "GraphQL API p95 latency > 2s"
     # ... other annotations
 ```
 
 **Impact**:
+
 - **TTD**: No change
 - **TTR**: -12 minutes for auto-remediable issues (40% of incidents)
 - **Reduces**: Mean time to repair (MTTR) by 30%
 
 **Implementation**:
+
 1. Create `services/remediation-service`
 2. Configure Alertmanager webhook receiver
 3. Implement handlers for top 5 recurring incidents
@@ -400,14 +433,17 @@ async function isPodMemoryHigh(): Promise<boolean> {
 ## Improvement #5: Incident Command Center Dashboard
 
 ### Problem
+
 During incidents, responders check multiple dashboards, logs, and tools to gather context. This adds 5-10 minutes to TTR.
 
 ### Solution
+
 Create a unified "Incident Command Center" dashboard that shows all critical information in one place:
 
 **Grafana Dashboard**: `observability/grafana/dashboards/incident-command-center.json`
 
 **Panels**:
+
 1. **Active Alerts** (top-left)
    - Current firing alerts by severity
    - Time since fired
@@ -439,16 +475,19 @@ Create a unified "Incident Command Center" dashboard that shows all critical inf
    - Links to Jaeger
 
 **Dashboard URL**:
+
 - Auto-included in all alert notifications
 - Displayed on incident response TV monitors
 - Linked from incident Slack channels
 
 **Impact**:
+
 - **TTD**: -2 minutes (single dashboard to check during on-call)
 - **TTR**: -8 minutes (all context in one place)
 - **Reduces**: Tool-switching overhead
 
 **Implementation**:
+
 1. Create Grafana dashboard with above panels
 2. Add to alert annotations
 3. Configure as default homepage for on-call engineers
@@ -458,18 +497,19 @@ Create a unified "Incident Command Center" dashboard that shows all critical inf
 
 ## Summary of Improvements
 
-| Improvement | TTD Impact | TTR Impact | Implementation Effort | Priority |
-|-------------|-----------|-----------|----------------------|----------|
-| #1: SLO-Based Alerting | -5 min | -10 min | Medium (2-3 days) | High |
-| #2: Runbook Links in Alerts | 0 min | -8 min | Low (1 day) | High |
-| #3: Synthetic Monitoring | -10 min | -5 min | Medium (3-4 days) | High |
-| #4: Auto-Remediation | 0 min | -12 min* | High (1-2 weeks) | Medium |
-| #5: Command Center Dashboard | -2 min | -8 min | Low (2 days) | High |
-| **TOTAL** | **-17 min** | **-43 min*** | **2-3 weeks** | — |
+| Improvement                  | TTD Impact  | TTR Impact    | Implementation Effort | Priority |
+| ---------------------------- | ----------- | ------------- | --------------------- | -------- |
+| #1: SLO-Based Alerting       | -5 min      | -10 min       | Medium (2-3 days)     | High     |
+| #2: Runbook Links in Alerts  | 0 min       | -8 min        | Low (1 day)           | High     |
+| #3: Synthetic Monitoring     | -10 min     | -5 min        | Medium (3-4 days)     | High     |
+| #4: Auto-Remediation         | 0 min       | -12 min\*     | High (1-2 weeks)      | Medium   |
+| #5: Command Center Dashboard | -2 min      | -8 min        | Low (2 days)          | High     |
+| **TOTAL**                    | **-17 min** | **-43 min\*** | **2-3 weeks**         | —        |
 
-*Auto-remediation only affects 40% of incidents
+\*Auto-remediation only affects 40% of incidents
 
 **New Target Metrics** (after implementation):
+
 - **TTD**: < 3 minutes (currently ~12 min)
 - **TTR**: < 20 minutes for SEV1 (currently ~45 min), < 40 minutes for SEV2
 
@@ -478,16 +518,19 @@ Create a unified "Incident Command Center" dashboard that shows all critical inf
 ## Implementation Roadmap
 
 ### Phase 1 (Week 1): Quick Wins
+
 - [ ] **Day 1-2**: Implement #2 (Runbook Links in Alerts)
 - [ ] **Day 3-5**: Create #5 (Incident Command Center Dashboard)
 - [ ] **Day 5**: Train team on new dashboard
 
 ### Phase 2 (Week 2): SLO & Synthetic Monitoring
+
 - [ ] **Day 1-3**: Implement #1 (SLO-Based Alerting)
 - [ ] **Day 4-5**: Build #3 (Synthetic Monitoring service)
 - [ ] **Day 5**: Deploy synthetic monitoring to prod
 
 ### Phase 3 (Weeks 3-4): Auto-Remediation
+
 - [ ] **Week 3**: Design auto-remediation framework
 - [ ] **Week 3**: Implement handlers for top 3 incident types
 - [ ] **Week 4**: Test in staging, deploy to prod with kill switch
@@ -498,6 +541,7 @@ Create a unified "Incident Command Center" dashboard that shows all critical inf
 ## Success Metrics
 
 **Measure before and after implementation**:
+
 ```promql
 # Average TTD (time from first error to alert fired)
 avg_over_time(
@@ -514,6 +558,7 @@ sum(remediation_success_total) / sum(remediation_attempts_total) * 100
 ```
 
 **Target**:
+
 - 70% reduction in TTD
 - 60% reduction in TTR
 - 80%+ auto-remediation success rate for enabled alerts

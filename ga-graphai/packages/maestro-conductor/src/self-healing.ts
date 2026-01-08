@@ -3,7 +3,7 @@ import type {
   SelfHealingContext,
   SelfHealingPlan,
   SelfHealingResult,
-} from './types';
+} from "./types";
 
 export interface SelfHealingOrchestratorOptions {
   defaultCooldownMs?: number;
@@ -64,11 +64,7 @@ export class SelfHealingOrchestrator {
     return { results, plans };
   }
 
-  private startCooldown(
-    assetId: string,
-    strategyId: string,
-    override?: number,
-  ): void {
+  private startCooldown(assetId: string, strategyId: string, override?: number): void {
     const key = `${assetId}:${strategyId}`;
     const duration = override ?? this.options.defaultCooldownMs;
     this.cooldowns.set(key, Date.now() + duration);

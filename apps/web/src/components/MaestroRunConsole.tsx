@@ -1,9 +1,9 @@
 // src/components/MaestroRunConsole.tsx
 
-import * as React from 'react';
-import { useState } from 'react';
-import { useMaestroRun } from '@/hooks/useMaestroRun';
-import type { MaestroRunResponse, TaskResult } from '@/types/maestro';
+import * as React from 'react'
+import { useState } from 'react'
+import { useMaestroRun } from '@/hooks/useMaestroRun'
+import type { MaestroRunResponse, TaskResult } from '@/types/maestro'
 
 import {
   Play,
@@ -16,80 +16,80 @@ import {
   XCircle,
   CheckCircle2,
   Clock,
-} from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/Badge';
-import { ScrollArea } from '@/components/ui/ScrollArea';
+} from 'lucide-react'
+import { Button } from '@/components/ui/Button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/Badge'
+import { ScrollArea } from '@/components/ui/ScrollArea'
 
 interface MaestroRunConsoleProps {
   /** Current user id or workspace/user surrogate */
-  userId: string;
+  userId: string
 }
 
 export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
   userId,
 }) => {
-  const [input, setInput] = useState('');
-  const { state, run, reset } = useMaestroRun(userId);
+  const [input, setInput] = useState('')
+  const { state, run, reset } = useMaestroRun(userId)
 
   const QUICK_PROMPTS = [
     'Analyze the last 3 PRs for security risks',
     'Summarize recent deployment failures',
     'Draft a release note for the latest commit',
-  ];
+  ]
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) {
-      e.preventDefault();
+      e.preventDefault()
     }
     if (!input.trim()) {
-      return;
+      return
     }
-    await run(input);
-  };
+    await run(input)
+  }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-      e.preventDefault();
-      handleSubmit();
+      e.preventDefault()
+      handleSubmit()
     }
-  };
+  }
 
   const handleReset = () => {
-    setInput('');
-    reset();
-  };
+    setInput('')
+    reset()
+  }
 
   const renderTaskStatus = (status: string) => {
     let variant: 'default' | 'secondary' | 'destructive' | 'outline' =
-      'secondary';
-    let text = status;
-    let icon = null;
+      'secondary'
+    let text = status
+    let icon = null
 
     switch (status) {
       case 'queued':
-        variant = 'outline';
-        text = 'Queued';
-        icon = <Clock className="mr-1.5 h-3 w-3" />;
-        break;
+        variant = 'outline'
+        text = 'Queued'
+        icon = <Clock className="mr-1.5 h-3 w-3" />
+        break
       case 'running':
-        variant = 'secondary';
-        text = 'Running';
-        icon = <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />;
-        break;
+        variant = 'secondary'
+        text = 'Running'
+        icon = <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
+        break
       case 'succeeded':
-        variant = 'default';
-        text = 'Succeeded';
-        icon = <CheckCircle2 className="mr-1.5 h-3 w-3" />;
-        break;
+        variant = 'default'
+        text = 'Succeeded'
+        icon = <CheckCircle2 className="mr-1.5 h-3 w-3" />
+        break
       case 'failed':
-        variant = 'destructive';
-        text = 'Failed';
-        icon = <XCircle className="mr-1.5 h-3 w-3" />;
-        break;
+        variant = 'destructive'
+        text = 'Failed'
+        icon = <XCircle className="mr-1.5 h-3 w-3" />
+        break
     }
 
     return (
@@ -97,13 +97,13 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
         {icon}
         {text}
       </Badge>
-    );
-  };
+    )
+  }
 
-  const selectedRun: MaestroRunResponse | null = state.data;
+  const selectedRun: MaestroRunResponse | null = state.data
 
   const findResultForTask = (taskId: string): TaskResult | undefined =>
-    selectedRun?.results.find(r => r.task.id === taskId);
+    selectedRun?.results.find(r => r.task.id === taskId)
 
   return (
     <div className="flex flex-col gap-4 md:gap-6">
@@ -228,9 +228,7 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
                       Created At
                     </span>
                     <span className="text-xs">
-                      {new Date(
-                        selectedRun.run.createdAt,
-                      ).toLocaleString()}
+                      {new Date(selectedRun.run.createdAt).toLocaleString()}
                     </span>
                   </div>
                 </div>
@@ -242,8 +240,7 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
                       Estimated Cost
                     </span>
                     <span className="font-semibold text-sm">
-                      $
-                      {selectedRun.costSummary.totalCostUSD.toFixed(4)}
+                      ${selectedRun.costSummary.totalCostUSD.toFixed(4)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-xs text-slate-300">
@@ -276,8 +273,7 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
                               {model}
                             </span>
                             <span className="text-[11px] text-slate-500">
-                              in:{' '}
-                              {stats.inputTokens.toLocaleString()} • out:{' '}
+                              in: {stats.inputTokens.toLocaleString()} • out:{' '}
                               {stats.outputTokens.toLocaleString()}
                             </span>
                           </div>
@@ -285,7 +281,7 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
                             ${stats.costUSD.toFixed(4)}
                           </span>
                         </div>
-                      ),
+                      )
                     )}
                     {Object.keys(selectedRun.costSummary.byModel).length ===
                       0 && (
@@ -322,7 +318,7 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
 
                 {selectedRun &&
                   selectedRun.tasks.map(task => {
-                    const result = findResultForTask(task.id);
+                    const result = findResultForTask(task.id)
 
                     return (
                       <div key={task.id} className="p-4 flex flex-col gap-1">
@@ -344,7 +340,7 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
                           </p>
                         )}
                       </div>
-                    );
+                    )
                   })}
               </div>
             </ScrollArea>
@@ -406,40 +402,34 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
         </Card>
       </div>
     </div>
-  );
-};
+  )
+}
 
 // Helper to pretty-print artifact data
 function formatArtifactData(data: unknown): string {
   if (typeof data === 'string') {
-    return data;
+    return data
   }
   try {
-    return JSON.stringify(data, null, 2);
+    return JSON.stringify(data, null, 2)
   } catch {
-    return String(data);
+    return String(data)
   }
 }
 
-function CopyButton({
-  text,
-  className,
-}: {
-  text: string;
-  className?: string;
-}) {
-  const [copied, setCopied] = useState(false);
+function CopyButton({ text, className }: { text: string; className?: string }) {
+  const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error('Failed to copy text', err);
+      console.error('Failed to copy text', err)
     }
-  };
+  }
 
   return (
     <Button
@@ -450,7 +440,11 @@ function CopyButton({
       aria-label={copied ? 'Copied' : 'Copy to clipboard'}
       title={copied ? 'Copied!' : 'Copy to clipboard'}
     >
-      {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+      {copied ? (
+        <Check className="h-3.5 w-3.5" />
+      ) : (
+        <Copy className="h-3.5 w-3.5" />
+      )}
     </Button>
-  );
+  )
 }

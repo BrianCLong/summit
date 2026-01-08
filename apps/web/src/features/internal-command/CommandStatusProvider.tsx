@@ -10,10 +10,18 @@ export interface CommandStatusContextValue {
   refresh: () => void
 }
 
-const CommandStatusContext = React.createContext<CommandStatusContextValue | undefined>(undefined)
+const CommandStatusContext = React.createContext<
+  CommandStatusContextValue | undefined
+>(undefined)
 
-const fetchStatus = async (key: StatusKey, signal?: AbortSignal): Promise<StatusResponse> => {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : undefined
+const fetchStatus = async (
+  key: StatusKey,
+  signal?: AbortSignal
+): Promise<StatusResponse> => {
+  const token =
+    typeof window !== 'undefined'
+      ? localStorage.getItem('auth_token')
+      : undefined
   const response = await fetch(statusEndpoints[key], {
     signal,
     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
@@ -30,14 +38,18 @@ export function CommandStatusProvider({ children }: PropsWithChildren) {
 
   const load = React.useCallback(() => {
     const controller = new AbortController()
-    dispatch({ type: 'FETCH_START' })
-
-    (Object.keys(statusEndpoints) as StatusKey[]).forEach(async key => {
+    dispatch({ type: 'FETCH_START' })(
+      Object.keys(statusEndpoints) as StatusKey[]
+    ).forEach(async key => {
       try {
         const payload = await fetchStatus(key, controller.signal)
         dispatch({ type: 'FETCH_SUCCESS', key, payload })
       } catch (error) {
-        dispatch({ type: 'FETCH_FAILURE', key, error: (error as Error)?.message || 'Unknown error' })
+        dispatch({
+          type: 'FETCH_FAILURE',
+          key,
+          error: (error as Error)?.message || 'Unknown error',
+        })
       }
     })
 
@@ -51,13 +63,19 @@ export function CommandStatusProvider({ children }: PropsWithChildren) {
 
   const value = React.useMemo(() => ({ state, refresh: load }), [state, load])
 
-  return <CommandStatusContext.Provider value={value}>{children}</CommandStatusContext.Provider>
+  return (
+    <CommandStatusContext.Provider value={value}>
+      {children}
+    </CommandStatusContext.Provider>
+  )
 }
 
 export const useCommandStatusContext = () => {
   const ctx = React.useContext(CommandStatusContext)
   if (!ctx) {
-    throw new Error('useCommandStatusContext must be used within CommandStatusProvider')
+    throw new Error(
+      'useCommandStatusContext must be used within CommandStatusProvider'
+    )
   }
   return ctx
 }

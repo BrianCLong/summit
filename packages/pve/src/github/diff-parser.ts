@@ -6,7 +6,7 @@
  * @module pve/github/diff-parser
  */
 
-import type { PRFile } from '../types/index.js';
+import type { PRFile } from "../types/index.js";
 
 export interface DiffHunk {
   oldStart: number;
@@ -17,7 +17,7 @@ export interface DiffHunk {
 }
 
 export interface DiffLine {
-  type: 'context' | 'addition' | 'deletion';
+  type: "context" | "addition" | "deletion";
   content: string;
   oldLineNumber?: number;
   newLineNumber?: number;
@@ -31,7 +31,7 @@ export interface ParsedDiff {
 export interface ParsedFile {
   path: string;
   previousPath?: string;
-  status: 'added' | 'modified' | 'deleted' | 'renamed';
+  status: "added" | "modified" | "deleted" | "renamed";
   hunks: DiffHunk[];
   additions: number;
   deletions: number;
@@ -48,7 +48,7 @@ export interface DiffStats {
  * Parse a unified diff string into structured data
  */
 export function parseDiff(diffString: string): ParsedDiff {
-  const lines = diffString.split('\n');
+  const lines = diffString.split("\n");
   const files: ParsedFile[] = [];
   let currentFile: ParsedFile | null = null;
   let currentHunk: DiffHunk | null = null;
@@ -59,13 +59,13 @@ export function parseDiff(diffString: string): ParsedDiff {
     const line = lines[i];
 
     // New file header
-    if (line.startsWith('diff --git')) {
+    if (line.startsWith("diff --git")) {
       if (currentFile) {
         files.push(currentFile);
       }
       currentFile = {
-        path: '',
-        status: 'modified',
+        path: "",
+        status: "modified",
         hunks: [],
         additions: 0,
         deletions: 0,
@@ -78,40 +78,40 @@ export function parseDiff(diffString: string): ParsedDiff {
     if (!currentFile) continue;
 
     // File paths
-    if (line.startsWith('--- ')) {
+    if (line.startsWith("--- ")) {
       const path = line.slice(4);
-      if (path === '/dev/null') {
-        currentFile.status = 'added';
+      if (path === "/dev/null") {
+        currentFile.status = "added";
       } else {
-        currentFile.previousPath = path.replace(/^[ab]\//, '');
+        currentFile.previousPath = path.replace(/^[ab]\//, "");
       }
       continue;
     }
 
-    if (line.startsWith('+++ ')) {
+    if (line.startsWith("+++ ")) {
       const path = line.slice(4);
-      if (path === '/dev/null') {
-        currentFile.status = 'deleted';
+      if (path === "/dev/null") {
+        currentFile.status = "deleted";
       } else {
-        currentFile.path = path.replace(/^[ab]\//, '');
+        currentFile.path = path.replace(/^[ab]\//, "");
       }
       continue;
     }
 
     // Rename detection
-    if (line.startsWith('rename from ')) {
+    if (line.startsWith("rename from ")) {
       currentFile.previousPath = line.slice(12);
-      currentFile.status = 'renamed';
+      currentFile.status = "renamed";
       continue;
     }
 
-    if (line.startsWith('rename to ')) {
+    if (line.startsWith("rename to ")) {
       currentFile.path = line.slice(10);
       continue;
     }
 
     // Binary file
-    if (line.includes('Binary files')) {
+    if (line.includes("Binary files")) {
       currentFile.isBinary = true;
       continue;
     }
@@ -121,9 +121,9 @@ export function parseDiff(diffString: string): ParsedDiff {
     if (hunkMatch) {
       currentHunk = {
         oldStart: parseInt(hunkMatch[1], 10),
-        oldLines: parseInt(hunkMatch[2] || '1', 10),
+        oldLines: parseInt(hunkMatch[2] || "1", 10),
         newStart: parseInt(hunkMatch[3], 10),
-        newLines: parseInt(hunkMatch[4] || '1', 10),
+        newLines: parseInt(hunkMatch[4] || "1", 10),
         lines: [],
       };
       currentFile.hunks.push(currentHunk);
@@ -133,16 +133,16 @@ export function parseDiff(diffString: string): ParsedDiff {
     }
 
     // Diff content
-    if (currentHunk && (line.startsWith('+') || line.startsWith('-') || line.startsWith(' '))) {
+    if (currentHunk && (line.startsWith("+") || line.startsWith("-") || line.startsWith(" "))) {
       const diffLine: DiffLine = {
-        type: line.startsWith('+') ? 'addition' : line.startsWith('-') ? 'deletion' : 'context',
+        type: line.startsWith("+") ? "addition" : line.startsWith("-") ? "deletion" : "context",
         content: line.slice(1),
       };
 
-      if (diffLine.type === 'addition') {
+      if (diffLine.type === "addition") {
         diffLine.newLineNumber = newLineNum++;
         currentFile.additions++;
-      } else if (diffLine.type === 'deletion') {
+      } else if (diffLine.type === "deletion") {
         diffLine.oldLineNumber = oldLineNum++;
         currentFile.deletions++;
       } else {
@@ -189,16 +189,14 @@ function formatPatch(hunks: DiffHunk[]): string {
   const lines: string[] = [];
 
   for (const hunk of hunks) {
-    lines.push(
-      `@@ -${hunk.oldStart},${hunk.oldLines} +${hunk.newStart},${hunk.newLines} @@`,
-    );
+    lines.push(`@@ -${hunk.oldStart},${hunk.oldLines} +${hunk.newStart},${hunk.newLines} @@`);
     for (const line of hunk.lines) {
-      const prefix = line.type === 'addition' ? '+' : line.type === 'deletion' ? '-' : ' ';
+      const prefix = line.type === "addition" ? "+" : line.type === "deletion" ? "-" : " ";
       lines.push(`${prefix}${line.content}`);
     }
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
@@ -211,7 +209,7 @@ export function getChangedLines(diff: ParsedDiff): Map<string, number[]> {
     const lines: number[] = [];
     for (const hunk of file.hunks) {
       for (const line of hunk.lines) {
-        if (line.type === 'addition' && line.newLineNumber !== undefined) {
+        if (line.type === "addition" && line.newLineNumber !== undefined) {
           lines.push(line.newLineNumber);
         }
       }
@@ -232,13 +230,13 @@ export function extractNewContent(parsed: ParsedFile): string {
 
   for (const hunk of parsed.hunks) {
     for (const line of hunk.lines) {
-      if (line.type === 'addition' || line.type === 'context') {
+      if (line.type === "addition" || line.type === "context") {
         lines.push(line.content);
       }
     }
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
@@ -247,7 +245,7 @@ export function extractNewContent(parsed: ParsedFile): string {
 export function isWhitespaceOnly(parsed: ParsedFile): boolean {
   for (const hunk of parsed.hunks) {
     for (const line of hunk.lines) {
-      if (line.type !== 'context') {
+      if (line.type !== "context") {
         const content = line.content.trim();
         if (content.length > 0) {
           return false;

@@ -2,11 +2,11 @@ name: License Compliance
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   schedule:
-    - cron: '0 5 * * 1' # Weekly on Mondays
+    - cron: "0 5 * * 1" # Weekly on Mondays
 
 jobs:
   license-scan:
@@ -20,7 +20,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2

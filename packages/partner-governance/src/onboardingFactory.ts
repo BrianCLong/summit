@@ -1,12 +1,12 @@
-import { v4 as uuid } from 'uuid';
-import dayjs from 'dayjs';
+import { v4 as uuid } from "uuid";
+import dayjs from "dayjs";
 import {
   IntakeProfile,
   OnboardingState,
   PartnerSegment,
   SecurityQuestionnaireResult,
   TechnicalOnboardingChecklist,
-} from './types';
+} from "./types";
 
 interface OnboardingConfig {
   strategicSlaMinutes: number;
@@ -22,9 +22,9 @@ const DEFAULT_CONFIG: OnboardingConfig = {
 
 export class OnboardingFactory {
   private onboardings: Map<string, OnboardingState> = new Map();
-  constructor(private readonly config: OnboardingConfig = DEFAULT_CONFIG) { }
+  constructor(private readonly config: OnboardingConfig = DEFAULT_CONFIG) {}
 
-  startIntake(profile: Omit<IntakeProfile, 'partnerId'>): OnboardingState {
+  startIntake(profile: Omit<IntakeProfile, "partnerId">): OnboardingState {
     const partnerId = uuid();
     const intake: IntakeProfile = { ...profile, partnerId };
     const initialSecurity: SecurityQuestionnaireResult = {
@@ -46,7 +46,7 @@ export class OnboardingFactory {
       intake,
       security: initialSecurity,
       technical,
-      certificationStatus: 'pending',
+      certificationStatus: "pending",
       enablementKitIssued: false,
       portalAccountIssued: false,
       createdAt: new Date(),
@@ -55,20 +55,34 @@ export class OnboardingFactory {
     return state;
   }
 
-  applySecurityQuestionnaire(partnerId: string, result: SecurityQuestionnaireResult): OnboardingState {
+  applySecurityQuestionnaire(
+    partnerId: string,
+    result: SecurityQuestionnaireResult
+  ): OnboardingState {
     const state = this.requireState(partnerId);
-    const passThreshold = result.controlsTotal === 0 ? 0 : result.controlsMet / result.controlsTotal;
+    const passThreshold =
+      result.controlsTotal === 0 ? 0 : result.controlsMet / result.controlsTotal;
     if (passThreshold < 0.8) {
-      throw new Error(`Security questionnaire failed: ${result.failingControls.join(', ')}`);
+      throw new Error(`Security questionnaire failed: ${result.failingControls.join(", ")}`);
     }
     const updated = { ...state, security: result };
     this.onboardings.set(partnerId, updated);
     return updated;
   }
 
-  completeTechnicalChecklist(partnerId: string, checklist: TechnicalOnboardingChecklist): OnboardingState {
-    if (!checklist.sandboxIssued || !checklist.apiKeysIssued || !checklist.webhooksConfigured || !checklist.replayProtectionEnabled) {
-      throw new Error('Technical onboarding must provision sandbox, keys, webhooks, and replay protection.');
+  completeTechnicalChecklist(
+    partnerId: string,
+    checklist: TechnicalOnboardingChecklist
+  ): OnboardingState {
+    if (
+      !checklist.sandboxIssued ||
+      !checklist.apiKeysIssued ||
+      !checklist.webhooksConfigured ||
+      !checklist.replayProtectionEnabled
+    ) {
+      throw new Error(
+        "Technical onboarding must provision sandbox, keys, webhooks, and replay protection."
+      );
     }
     const state = this.requireState(partnerId);
     const updated: OnboardingState = { ...state, technical: checklist };
@@ -83,12 +97,16 @@ export class OnboardingFactory {
     return updated;
   }
 
-  markCertification(partnerId: string, status: 'passed' | 'failed', achievedAt = new Date()): OnboardingState {
+  markCertification(
+    partnerId: string,
+    status: "passed" | "failed",
+    achievedAt = new Date()
+  ): OnboardingState {
     const state = this.requireState(partnerId);
-    if (status === 'passed') {
-      return this.markFirstSuccess({ ...state, certificationStatus: 'passed' }, achievedAt);
+    if (status === "passed") {
+      return this.markFirstSuccess({ ...state, certificationStatus: "passed" }, achievedAt);
     }
-    const updated: OnboardingState = { ...state, certificationStatus: 'failed' };
+    const updated: OnboardingState = { ...state, certificationStatus: "failed" };
     this.onboardings.set(partnerId, updated);
     return updated;
   }
@@ -115,7 +133,7 @@ export class OnboardingFactory {
   timeToFirstSuccessMinutes(partnerId: string): number | undefined {
     const state = this.requireState(partnerId);
     if (!state.firstSuccessAt) return undefined;
-    return dayjs(state.firstSuccessAt).diff(dayjs(state.createdAt), 'minute');
+    return dayjs(state.firstSuccessAt).diff(dayjs(state.createdAt), "minute");
   }
 
   private requireState(partnerId: string): OnboardingState {

@@ -1,13 +1,13 @@
 meta:
   id: code.critic@v1
   owner: platform-ai
-  purpose: 'Summarize semantic diff, compute risk, and propose tests'
+  purpose: "Summarize semantic diff, compute risk, and propose tests"
   guardrails:
-    - 'Do not approve missing tests for changed logic.'
-    - 'Never include license-incompatible code.'
+    - "Do not approve missing tests for changed logic."
+    - "Never include license-incompatible code."
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.1
 
 inputs:

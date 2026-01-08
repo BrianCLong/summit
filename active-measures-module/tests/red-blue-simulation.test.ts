@@ -1,17 +1,13 @@
-import {
-  runRedBlueSimulation,
-  RedAction,
-  BlueControl,
-} from '../src/ai/red-blue-simulation';
+import { runRedBlueSimulation, RedAction, BlueControl } from "../src/ai/red-blue-simulation";
 
-describe('runRedBlueSimulation', () => {
-  test('detects attack when control covers tactic', () => {
+describe("runRedBlueSimulation", () => {
+  test("detects attack when control covers tactic", () => {
     const actions: RedAction[] = [
-      { id: 'a1', tactic: 'initial-access', timestamp: 0, success: true },
-      { id: 'a2', tactic: 'execution', timestamp: 10, success: true },
+      { id: "a1", tactic: "initial-access", timestamp: 0, success: true },
+      { id: "a2", tactic: "execution", timestamp: 10, success: true },
     ];
     const controls: BlueControl[] = [
-      { id: 'c1', name: 'edr', detects: ['execution'], effectiveness: 1 },
+      { id: "c1", name: "edr", detects: ["execution"], effectiveness: 1 },
     ];
 
     const result = runRedBlueSimulation(actions, controls);

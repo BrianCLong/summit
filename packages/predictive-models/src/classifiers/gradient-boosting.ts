@@ -3,7 +3,7 @@
  * Gradient Boosting Classifier (XGBoost-style)
  */
 
-import type { Dataset, PredictionResult, ModelPerformance } from '../types/index.js';
+import type { Dataset, PredictionResult, ModelPerformance } from "../types/index.js";
 
 export interface GradientBoostingConfig {
   nEstimators: number;
@@ -46,9 +46,7 @@ export class GradientBoostingClassifier {
     this.classes = [...new Set(labels)];
 
     // Convert labels to numeric for binary classification
-    const numericLabels = labels.map(l =>
-      l === this.classes[0] ? 0 : 1
-    );
+    const numericLabels = labels.map((l) => (l === this.classes[0] ? 0 : 1));
 
     // Initialize predictions with base score
     this.baseScore = numericLabels.reduce((a, b) => a + b, 0) / numericLabels.length;
@@ -65,9 +63,9 @@ export class GradientBoostingClassifier {
 
       // Subsample data
       const subsampleIndices = this.subsample(features.length);
-      const subsampledFeatures = subsampleIndices.map(idx => features[idx]);
-      const subsampledGradients = subsampleIndices.map(idx => gradients[idx]);
-      const subsampledHessians = subsampleIndices.map(idx => hessians[idx]);
+      const subsampledFeatures = subsampleIndices.map((idx) => features[idx]);
+      const subsampledGradients = subsampleIndices.map((idx) => gradients[idx]);
+      const subsampledHessians = subsampleIndices.map((idx) => hessians[idx]);
 
       // Build tree
       const tree = new BoostingTree(this.config);
@@ -83,7 +81,7 @@ export class GradientBoostingClassifier {
       // Early stopping
       if (validationData && this.config.earlyStoppingRounds) {
         const validationLoss = this.calculateLoss(
-          validationData.labels.map(l => l === this.classes[0] ? 0 : 1),
+          validationData.labels.map((l) => (l === this.classes[0] ? 0 : 1)),
           this.predictRaw(validationData.features)
         );
 
@@ -107,12 +105,12 @@ export class GradientBoostingClassifier {
    */
   predict(features: number[][]): PredictionResult[] {
     if (!this.fitted) {
-      throw new Error('Model must be fitted before prediction');
+      throw new Error("Model must be fitted before prediction");
     }
 
     const rawPredictions = this.predictRaw(features);
 
-    return rawPredictions.map(raw => {
+    return rawPredictions.map((raw) => {
       const probability = this.sigmoid(raw);
       const prediction = probability >= 0.5 ? this.classes[1] : this.classes[0];
 
@@ -128,7 +126,7 @@ export class GradientBoostingClassifier {
    * Predict raw scores (before sigmoid)
    */
   private predictRaw(features: number[][]): number[] {
-    return features.map(sample => {
+    return features.map((sample) => {
       let prediction = this.baseScore;
 
       for (const tree of this.trees) {
@@ -153,7 +151,7 @@ export class GradientBoostingClassifier {
    * Calculate hessians (second derivative of log loss)
    */
   private calculateHessians(predictions: number[]): number[] {
-    return predictions.map(pred => {
+    return predictions.map((pred) => {
       const prob = this.sigmoid(pred);
       return prob * (1 - prob);
     });
@@ -167,8 +165,7 @@ export class GradientBoostingClassifier {
 
     for (let i = 0; i < labels.length; i++) {
       const prob = this.sigmoid(predictions[i]);
-      loss -= labels[i] * Math.log(prob + 1e-15) +
-              (1 - labels[i]) * Math.log(1 - prob + 1e-15);
+      loss -= labels[i] * Math.log(prob + 1e-15) + (1 - labels[i]) * Math.log(1 - prob + 1e-15);
     }
 
     return loss / labels.length;
@@ -202,7 +199,7 @@ export class GradientBoostingClassifier {
    */
   evaluate(testDataset: Dataset): ModelPerformance {
     const predictions = this.predict(testDataset.features);
-    const predicted = predictions.map(p => p.prediction);
+    const predicted = predictions.map((p) => p.prediction);
     const actual = testDataset.labels;
 
     let correct = 0;
@@ -232,11 +229,11 @@ class BoostingTree {
   }
 
   predict(features: number[][]): number[] {
-    return features.map(sample => this.predictSample(sample));
+    return features.map((sample) => this.predictSample(sample));
   }
 
   predictSample(sample: number[]): number {
-    if (!this.root) throw new Error('Tree not fitted');
+    if (!this.root) throw new Error("Tree not fitted");
 
     let node = this.root;
     while (!node.isLeaf) {
@@ -257,19 +254,12 @@ class BoostingTree {
     depth: number
   ): BoostingNode {
     // Check stopping criteria
-    if (
-      features.length < this.config.minSamplesSplit ||
-      depth >= this.config.maxDepth
-    ) {
+    if (features.length < this.config.minSamplesSplit || depth >= this.config.maxDepth) {
       return this.createLeaf(gradients, hessians);
     }
 
     // Find best split
-    const { featureIndex, threshold, gain } = this.findBestSplit(
-      features,
-      gradients,
-      hessians
-    );
+    const { featureIndex, threshold, gain } = this.findBestSplit(features, gradients, hessians);
 
     if (gain <= 0) {
       return this.createLeaf(gradients, hessians);
@@ -279,13 +269,13 @@ class BoostingTree {
     const { leftIndices, rightIndices } = this.splitData(features, featureIndex, threshold);
 
     // Recursively build subtrees
-    const leftFeatures = leftIndices.map(i => features[i]);
-    const leftGradients = leftIndices.map(i => gradients[i]);
-    const leftHessians = leftIndices.map(i => hessians[i]);
+    const leftFeatures = leftIndices.map((i) => features[i]);
+    const leftGradients = leftIndices.map((i) => gradients[i]);
+    const leftHessians = leftIndices.map((i) => hessians[i]);
 
-    const rightFeatures = rightIndices.map(i => features[i]);
-    const rightGradients = rightIndices.map(i => gradients[i]);
-    const rightHessians = rightIndices.map(i => hessians[i]);
+    const rightFeatures = rightIndices.map((i) => features[i]);
+    const rightGradients = rightIndices.map((i) => gradients[i]);
+    const rightHessians = rightIndices.map((i) => hessians[i]);
 
     return {
       isLeaf: false,
@@ -323,7 +313,7 @@ class BoostingTree {
     const featureIndices = this.randomFeatureSubset(nFeatures, numFeaturesToTry);
 
     for (const featureIndex of featureIndices) {
-      const values = features.map(f => f[featureIndex]);
+      const values = features.map((f) => f[featureIndex]);
       const uniqueValues = [...new Set(values)].sort((a, b) => a - b);
 
       for (let i = 0; i < uniqueValues.length - 1; i++) {

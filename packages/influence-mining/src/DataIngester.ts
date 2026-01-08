@@ -1,5 +1,5 @@
-import fs from 'node:fs';
-import path from 'node:path';
+import fs from "node:fs";
+import path from "node:path";
 
 import {
   Entity,
@@ -8,8 +8,8 @@ import {
   SocialPost,
   SourceData,
   TextDocument,
-} from './types.js';
-import { RelationshipDetector } from './RelationshipDetector.js';
+} from "./types.js";
+import { RelationshipDetector } from "./RelationshipDetector.js";
 
 export class DataIngester {
   constructor(private readonly relationshipDetector: RelationshipDetector) {}
@@ -24,7 +24,7 @@ export class DataIngester {
     const relationships: Relationship[] = [];
 
     for (const source of sources) {
-      if (source.kind === 'social') {
+      if (source.kind === "social") {
         const sourcePosts: SocialPost[] = [];
         for (const post of source.posts) {
           const normalized = this.normalizePost(post);
@@ -32,7 +32,7 @@ export class DataIngester {
           posts.push(normalized);
           entities.set(normalized.author.toLowerCase(), {
             id: normalized.author.toLowerCase(),
-            type: 'actor',
+            type: "actor",
             label: normalized.author,
           });
 
@@ -40,7 +40,7 @@ export class DataIngester {
           for (const mention of mentions) {
             entities.set(mention.toLowerCase(), {
               id: mention.toLowerCase(),
-              type: 'actor',
+              type: "actor",
               label: mention,
             });
           }
@@ -48,7 +48,7 @@ export class DataIngester {
           if (normalized.inReplyTo) {
             entities.set(normalized.inReplyTo.toLowerCase(), {
               id: normalized.inReplyTo.toLowerCase(),
-              type: 'actor',
+              type: "actor",
               label: normalized.inReplyTo,
             });
           }
@@ -56,16 +56,14 @@ export class DataIngester {
           if (normalized.sharedFrom) {
             entities.set(normalized.sharedFrom.toLowerCase(), {
               id: normalized.sharedFrom.toLowerCase(),
-              type: 'actor',
+              type: "actor",
               label: normalized.sharedFrom,
             });
           }
         }
 
-        relationships.push(
-          ...this.relationshipDetector.detectFromSocial(sourcePosts),
-        );
-      } else if (source.kind === 'text') {
+        relationships.push(...this.relationshipDetector.detectFromSocial(sourcePosts));
+      } else if (source.kind === "text") {
         for (const doc of source.documents) {
           const normalizedDoc: TextDocument = {
             ...doc,
@@ -76,19 +74,17 @@ export class DataIngester {
           documents.push(normalizedDoc);
           entities.set(normalizedDoc.primaryActor, {
             id: normalizedDoc.primaryActor,
-            type: 'actor',
+            type: "actor",
             label: doc.primaryActor,
           });
-          const textRelationships = this.relationshipDetector.detectFromText(
-            doc.text,
-          );
+          const textRelationships = this.relationshipDetector.detectFromText(doc.text);
           relationships.push(...textRelationships);
           for (const rel of textRelationships) {
             if (!entities.has(rel.from)) {
-              entities.set(rel.from, { id: rel.from, type: 'actor' });
+              entities.set(rel.from, { id: rel.from, type: "actor" });
             }
             if (!entities.has(rel.to)) {
-              entities.set(rel.to, { id: rel.to, type: 'actor' });
+              entities.set(rel.to, { id: rel.to, type: "actor" });
             }
           }
         }
@@ -107,7 +103,7 @@ export class DataIngester {
 
   loadSocialPostsFromFile(filePath: string): SocialPost[] {
     const resolved = path.resolve(filePath);
-    const raw = fs.readFileSync(resolved, 'utf-8');
+    const raw = fs.readFileSync(resolved, "utf-8");
     const data = JSON.parse(raw) as SocialPost[];
     return data.map((post) => this.normalizePost(post));
   }
@@ -115,9 +111,7 @@ export class DataIngester {
   private normalizePost(post: SocialPost): SocialPost {
     const mentions =
       post.mentions ??
-      [...post.text.matchAll(/@([a-zA-Z0-9_\-]+)/g)].map((match) =>
-        match[1].toLowerCase(),
-      );
+      [...post.text.matchAll(/@([a-zA-Z0-9_\-]+)/g)].map((match) => match[1].toLowerCase());
     return {
       ...post,
       author: post.author.toLowerCase(),

@@ -9,7 +9,7 @@ jobs:
   evidence:
     runs-on: ubuntu-latest
     env:
-      FC_MOCK: '1'
+      FC_MOCK: "1"
       REPLAY_ENGINE_URL: http://localhost:8081
     steps:
       - uses: actions/checkout@v4

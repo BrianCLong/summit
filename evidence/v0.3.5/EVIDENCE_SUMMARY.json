@@ -55,10 +55,7 @@
     "e4_autonomy_expansion": {
       "status": "FRAMEWORK_READY",
       "note": "Building on v0.3.4 autonomy foundation",
-      "planned_features": [
-        "TENANT_006 shadow mode",
-        "TENANT_007 readiness assessment"
-      ]
+      "planned_features": ["TENANT_006 shadow mode", "TENANT_007 readiness assessment"]
     }
   },
   "technical_excellence": {

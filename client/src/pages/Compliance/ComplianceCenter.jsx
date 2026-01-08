@@ -8,7 +8,7 @@
  * @module pages/Compliance/ComplianceCenter
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Container,
@@ -40,7 +40,7 @@ import {
   ListItemIcon,
   ListItemText,
   Divider,
-} from '@mui/material';
+} from "@mui/material";
 import {
   CheckCircle,
   Error,
@@ -50,23 +50,23 @@ import {
   Description,
   Category,
   Timeline,
-} from '@mui/icons-material';
-import { ComplianceAPI } from '../../services/compliance-api';
+} from "@mui/icons-material";
+import { ComplianceAPI } from "../../services/compliance-api";
 
 // Status colors
 const statusColors = {
-  compliant: 'success',
-  non_compliant: 'error',
-  partial: 'warning',
-  not_assessed: 'default',
+  compliant: "success",
+  non_compliant: "error",
+  partial: "warning",
+  not_assessed: "default",
 };
 
 // Readiness colors
 const readinessColors = {
-  ready: 'success',
-  mostly_ready: 'info',
-  needs_work: 'warning',
-  not_ready: 'error',
+  ready: "success",
+  mostly_ready: "info",
+  needs_work: "warning",
+  not_ready: "error",
 };
 
 // Tab Panel
@@ -107,7 +107,7 @@ function ComplianceSummary({ framework }) {
         const response = await ComplianceAPI.getSummary(framework);
         setSummary(response.data);
       } catch (err) {
-        console.error('Failed to fetch summary:', err);
+        console.error("Failed to fetch summary:", err);
       } finally {
         setLoading(false);
       }
@@ -122,26 +122,26 @@ function ComplianceSummary({ framework }) {
     <Grid container spacing={3}>
       {/* Overall Score */}
       <Grid item xs={12} md={4}>
-        <Card sx={{ height: '100%' }}>
-          <CardContent sx={{ textAlign: 'center' }}>
-            <Box sx={{ position: 'relative', display: 'inline-flex', mb: 2 }}>
+        <Card sx={{ height: "100%" }}>
+          <CardContent sx={{ textAlign: "center" }}>
+            <Box sx={{ position: "relative", display: "inline-flex", mb: 2 }}>
               <CircularProgress
                 variant="determinate"
                 value={summary.overallScore}
                 size={120}
                 thickness={4}
-                color={summary.status === 'compliant' ? 'success' : 'warning'}
+                color={summary.status === "compliant" ? "success" : "warning"}
               />
               <Box
                 sx={{
-                  position: 'absolute',
+                  position: "absolute",
                   top: 0,
                   left: 0,
                   bottom: 0,
                   right: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
                 <Typography variant="h3">{summary.overallScore}%</Typography>
@@ -151,7 +151,7 @@ function ComplianceSummary({ framework }) {
               Overall Compliance
             </Typography>
             <Chip
-              label={summary.status.replace('_', ' ').toUpperCase()}
+              label={summary.status.replace("_", " ").toUpperCase()}
               color={statusColors[summary.status]}
             />
           </CardContent>
@@ -160,7 +160,7 @@ function ComplianceSummary({ framework }) {
 
       {/* Control Summary */}
       <Grid item xs={12} md={4}>
-        <Card sx={{ height: '100%' }}>
+        <Card sx={{ height: "100%" }}>
           <CardContent>
             <Typography variant="h6" gutterBottom>
               Control Summary
@@ -170,33 +170,25 @@ function ComplianceSummary({ framework }) {
                 <ListItemIcon>
                   <CheckCircle color="success" />
                 </ListItemIcon>
-                <ListItemText
-                  primary={`${summary.controlSummary.compliant} Compliant`}
-                />
+                <ListItemText primary={`${summary.controlSummary.compliant} Compliant`} />
               </ListItem>
               <ListItem>
                 <ListItemIcon>
                   <Warning color="warning" />
                 </ListItemIcon>
-                <ListItemText
-                  primary={`${summary.controlSummary.partial} Partial`}
-                />
+                <ListItemText primary={`${summary.controlSummary.partial} Partial`} />
               </ListItem>
               <ListItem>
                 <ListItemIcon>
                   <Error color="error" />
                 </ListItemIcon>
-                <ListItemText
-                  primary={`${summary.controlSummary.nonCompliant} Non-Compliant`}
-                />
+                <ListItemText primary={`${summary.controlSummary.nonCompliant} Non-Compliant`} />
               </ListItem>
               <ListItem>
                 <ListItemIcon>
                   <Category color="disabled" />
                 </ListItemIcon>
-                <ListItemText
-                  primary={`${summary.controlSummary.notAssessed} Not Assessed`}
-                />
+                <ListItemText primary={`${summary.controlSummary.notAssessed} Not Assessed`} />
               </ListItem>
             </List>
           </CardContent>
@@ -205,15 +197,15 @@ function ComplianceSummary({ framework }) {
 
       {/* Category Breakdown */}
       <Grid item xs={12} md={4}>
-        <Card sx={{ height: '100%' }}>
+        <Card sx={{ height: "100%" }}>
           <CardContent>
             <Typography variant="h6" gutterBottom>
               By Category
             </Typography>
             {summary.categoryBreakdown?.slice(0, 4).map((cat) => (
               <Box key={cat.category} sx={{ mb: 2 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                  <Typography variant="body2" noWrap sx={{ maxWidth: '60%' }}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
+                  <Typography variant="body2" noWrap sx={{ maxWidth: "60%" }}>
                     {cat.category}
                   </Typography>
                   <Typography variant="body2">{cat.score}%</Typography>
@@ -221,7 +213,7 @@ function ComplianceSummary({ framework }) {
                 <LinearProgress
                   variant="determinate"
                   value={cat.score}
-                  color={cat.score >= 80 ? 'success' : cat.score >= 50 ? 'warning' : 'error'}
+                  color={cat.score >= 80 ? "success" : cat.score >= 50 ? "warning" : "error"}
                 />
               </Box>
             ))}
@@ -245,7 +237,7 @@ function AuditReadiness({ framework }) {
         const response = await ComplianceAPI.getReadiness(framework);
         setReadiness(response.data);
       } catch (err) {
-        console.error('Failed to fetch readiness:', err);
+        console.error("Failed to fetch readiness:", err);
       } finally {
         setLoading(false);
       }
@@ -266,10 +258,10 @@ function AuditReadiness({ framework }) {
               <Typography variant="h5" gutterBottom>
                 Audit Readiness
               </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 <Typography variant="h2">{readiness.overallScore}%</Typography>
                 <Chip
-                  label={readiness.readinessLevel.replace('_', ' ').toUpperCase()}
+                  label={readiness.readinessLevel.replace("_", " ").toUpperCase()}
                   color={readinessColors[readiness.readinessLevel]}
                   size="large"
                 />
@@ -320,7 +312,7 @@ function AuditReadiness({ framework }) {
                       </TableCell>
                       <TableCell>
                         <Chip
-                          label={gap.gapType.replace('_', ' ')}
+                          label={gap.gapType.replace("_", " ")}
                           size="small"
                           variant="outlined"
                         />
@@ -330,11 +322,11 @@ function AuditReadiness({ framework }) {
                           label={gap.severity}
                           size="small"
                           color={
-                            gap.severity === 'critical'
-                              ? 'error'
-                              : gap.severity === 'high'
-                              ? 'warning'
-                              : 'default'
+                            gap.severity === "critical"
+                              ? "error"
+                              : gap.severity === "high"
+                                ? "warning"
+                                : "default"
                           }
                         />
                       </TableCell>
@@ -376,7 +368,7 @@ function ControlsList({ framework }) {
       });
       setAssessments(assessmentMap);
     } catch (err) {
-      console.error('Failed to fetch controls:', err);
+      console.error("Failed to fetch controls:", err);
     } finally {
       setLoading(false);
     }
@@ -392,7 +384,7 @@ function ControlsList({ framework }) {
       await ComplianceAPI.assessControl(framework, controlId);
       await fetchData();
     } catch (err) {
-      console.error('Failed to assess control:', err);
+      console.error("Failed to assess control:", err);
     } finally {
       setAssessing(null);
     }
@@ -438,28 +430,22 @@ function ControlsList({ framework }) {
                 </TableCell>
                 <TableCell>
                   <Chip
-                    label={assessment?.status || 'not_assessed'}
+                    label={assessment?.status || "not_assessed"}
                     size="small"
-                    color={statusColors[assessment?.status] || 'default'}
+                    color={statusColors[assessment?.status] || "default"}
                   />
                 </TableCell>
-                <TableCell>
-                  {assessment ? `${assessment.score}%` : '-'}
-                </TableCell>
+                <TableCell>{assessment ? `${assessment.score}%` : "-"}</TableCell>
                 <TableCell align="right">
                   <Button
                     size="small"
                     onClick={() => handleAssess(control.id)}
                     disabled={assessing === control.id}
                     startIcon={
-                      assessing === control.id ? (
-                        <CircularProgress size={16} />
-                      ) : (
-                        <Assessment />
-                      )
+                      assessing === control.id ? <CircularProgress size={16} /> : <Assessment />
                     }
                   >
-                    {assessing === control.id ? 'Assessing...' : 'Assess'}
+                    {assessing === control.id ? "Assessing..." : "Assess"}
                   </Button>
                 </TableCell>
               </TableRow>
@@ -474,7 +460,7 @@ function ControlsList({ framework }) {
 // Main Component
 export default function ComplianceCenter() {
   const [frameworks, setFrameworks] = useState([]);
-  const [selectedFramework, setSelectedFramework] = useState('SOC2');
+  const [selectedFramework, setSelectedFramework] = useState("SOC2");
   const [tabValue, setTabValue] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -484,7 +470,7 @@ export default function ComplianceCenter() {
         const response = await ComplianceAPI.getFrameworks();
         setFrameworks(response.data || []);
       } catch (err) {
-        console.error('Failed to fetch frameworks:', err);
+        console.error("Failed to fetch frameworks:", err);
       } finally {
         setLoading(false);
       }
@@ -496,7 +482,7 @@ export default function ComplianceCenter() {
 
   return (
     <Container maxWidth="xl">
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box sx={{ mb: 3, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Box>
           <Typography variant="h4" gutterBottom>
             Compliance Center
@@ -512,7 +498,7 @@ export default function ComplianceCenter() {
         />
       </Box>
 
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+      <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}>
         <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)}>
           <Tab icon={<Assessment />} label="Overview" iconPosition="start" />
           <Tab icon={<Timeline />} label="Audit Readiness" iconPosition="start" />

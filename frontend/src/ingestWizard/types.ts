@@ -1,4 +1,4 @@
-export type SourceType = 'csv' | 'json' | 'elasticsearch' | 'esri' | 'api';
+export type SourceType = "csv" | "json" | "elasticsearch" | "esri" | "api";
 
 export interface LicenseRestrictions {
   commercial_use: boolean;
@@ -10,7 +10,7 @@ export interface LicenseRestrictions {
 
 export interface CustomLicense {
   name: string;
-  type: 'commercial' | 'open_source' | 'proprietary' | 'restricted';
+  type: "commercial" | "open_source" | "proprietary" | "restricted";
   restrictions: LicenseRestrictions;
 }
 
@@ -30,7 +30,7 @@ export interface DataSourceConfig {
 export interface FieldPreview {
   name: string;
   type: string;
-  pii?: 'none' | 'low' | 'medium' | 'high' | 'critical';
+  pii?: "none" | "low" | "medium" | "high" | "critical";
   required?: boolean;
   example?: string;
 }
@@ -50,13 +50,13 @@ export interface SchemaMappingState {
   autoMappedFields: string[];
 }
 
-export type ValidationStatus = 'idle' | 'pending' | 'passed' | 'failed';
+export type ValidationStatus = "idle" | "pending" | "passed" | "failed";
 
 export interface ValidationIssue {
   id: string;
   field?: string;
   message: string;
-  severity: 'info' | 'warning' | 'error';
+  severity: "info" | "warning" | "error";
   suggestion?: string;
 }
 

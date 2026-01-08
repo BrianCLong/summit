@@ -1,11 +1,6 @@
-import { BaseRouter } from './base-router.js';
-import { GreedyCostRouter } from './greedy-cost-router.js';
-import type {
-  RoutingConfig,
-  RoutingDecision,
-  ToolCandidate,
-  ScenarioStep,
-} from '../types.js';
+import { BaseRouter } from "./base-router.js";
+import { GreedyCostRouter } from "./greedy-cost-router.js";
+import type { RoutingConfig, RoutingDecision, ToolCandidate, ScenarioStep } from "../types.js";
 
 /**
  * AdaptiveRouter - Learns routing policy from evaluation outcomes
@@ -32,7 +27,7 @@ export class AdaptiveRouter extends BaseRouter {
 
   constructor(config?: Partial<RoutingConfig>) {
     super({
-      type: 'adaptive',
+      type: "adaptive",
       costWeight: 0.5,
       latencyBudgetMs: 5000,
       fallbackEnabled: true,
@@ -50,25 +45,22 @@ export class AdaptiveRouter extends BaseRouter {
   async route(
     step: ScenarioStep,
     candidates: ToolCandidate[],
-    context?: Record<string, unknown>,
+    context?: Record<string, unknown>
   ): Promise<RoutingDecision> {
     if (candidates.length === 0) {
-      throw new Error('No candidates available for routing');
+      throw new Error("No candidates available for routing");
     }
 
-    const category = (context?.category as string) ?? 'default';
+    const category = (context?.category as string) ?? "default";
 
     // Apply latency filter
-    let eligibleCandidates = this.filterByLatency(
-      candidates,
-      this.config.latencyBudgetMs,
-    );
+    let eligibleCandidates = this.filterByLatency(candidates, this.config.latencyBudgetMs);
 
     if (eligibleCandidates.length === 0) {
       if (this.config.fallbackEnabled) {
         eligibleCandidates = candidates;
       } else {
-        throw new Error('No candidates meet latency requirements');
+        throw new Error("No candidates meet latency requirements");
       }
     }
 
@@ -81,18 +73,14 @@ export class AdaptiveRouter extends BaseRouter {
     scoredCandidates.sort((a, b) => b.score - a.score);
 
     const selected = scoredCandidates[0];
-    const reasoning = this.buildAdaptiveReasoning(
-      selected.candidate,
-      selected.score,
-      category,
-    );
+    const reasoning = this.buildAdaptiveReasoning(selected.candidate, selected.score, category);
 
     return this.buildDecision(
       selected.candidate,
       selected.score,
       reasoning,
       eligibleCandidates,
-      this.config.latencyBudgetMs,
+      this.config.latencyBudgetMs
     );
   }
 
@@ -108,8 +96,7 @@ export class AdaptiveRouter extends BaseRouter {
 
     // Apply category-specific weight
     const categoryWeights = this.categoryWeights.get(category);
-    const categoryToolWeight =
-      categoryWeights?.get(candidate.toolId) ?? 1.0;
+    const categoryToolWeight = categoryWeights?.get(candidate.toolId) ?? 1.0;
 
     // Combined adaptive score
     return baseScore * toolWeight * categoryToolWeight;
@@ -124,7 +111,7 @@ export class AdaptiveRouter extends BaseRouter {
     success: boolean,
     cost: number,
     latencyMs: number,
-    qualityScore: number,
+    qualityScore: number
   ): void {
     // Record in history
     this.outcomeHistory.push({
@@ -142,9 +129,7 @@ export class AdaptiveRouter extends BaseRouter {
     // Reward success, penalize failure
     // Also factor in cost efficiency
     const costEfficiency = 1 / (1 + cost * 100);
-    const outcome = success
-      ? 1 + costEfficiency * 0.5
-      : 0.5 - costEfficiency * 0.25;
+    const outcome = success ? 1 + costEfficiency * 0.5 : 0.5 - costEfficiency * 0.25;
 
     const newWeight = currentWeight * (1 - α) + outcome * α;
     this.toolWeights.set(toolId, Math.max(0.1, Math.min(2.0, newWeight)));
@@ -172,10 +157,8 @@ export class AdaptiveRouter extends BaseRouter {
 
     // Calculate recent success rate and cost
     const recent = this.outcomeHistory.slice(-50);
-    const successRate =
-      recent.filter((o) => o.success).length / recent.length;
-    const avgCost =
-      recent.reduce((sum, o) => sum + o.cost, 0) / recent.length;
+    const successRate = recent.filter((o) => o.success).length / recent.length;
+    const avgCost = recent.reduce((sum, o) => sum + o.cost, 0) / recent.length;
 
     // If success rate is low, reduce cost weight (prioritize quality)
     // If costs are high but success is good, increase cost weight
@@ -183,16 +166,10 @@ export class AdaptiveRouter extends BaseRouter {
 
     if (successRate < 0.7) {
       // Need more quality
-      this.config.costWeight = Math.max(
-        0,
-        this.config.costWeight - α * 0.1,
-      );
+      this.config.costWeight = Math.max(0, this.config.costWeight - α * 0.1);
     } else if (successRate > 0.9 && avgCost > 0.005) {
       // Success is high, can afford to optimize cost more
-      this.config.costWeight = Math.min(
-        1,
-        this.config.costWeight + α * 0.05,
-      );
+      this.config.costWeight = Math.min(1, this.config.costWeight + α * 0.05);
     }
   }
 
@@ -202,11 +179,10 @@ export class AdaptiveRouter extends BaseRouter {
   private buildAdaptiveReasoning(
     selected: ToolCandidate,
     score: number,
-    category: string,
+    category: string
   ): string[] {
     const toolWeight = this.toolWeights.get(selected.toolId) ?? 1.0;
-    const catWeight =
-      this.categoryWeights.get(category)?.get(selected.toolId) ?? 1.0;
+    const catWeight = this.categoryWeights.get(category)?.get(selected.toolId) ?? 1.0;
 
     return [
       `Adaptive routing (learned weights)`,
@@ -231,10 +207,7 @@ export class AdaptiveRouter extends BaseRouter {
     return {
       toolWeights: new Map(this.toolWeights),
       categoryWeights: new Map(
-        Array.from(this.categoryWeights.entries()).map(([k, v]) => [
-          k,
-          new Map(v),
-        ]),
+        Array.from(this.categoryWeights.entries()).map(([k, v]) => [k, new Map(v)])
       ),
       costWeight: this.config.costWeight,
       sampleCount: this.outcomeHistory.length,
@@ -248,10 +221,7 @@ export class AdaptiveRouter extends BaseRouter {
     return JSON.stringify({
       toolWeights: Object.fromEntries(this.toolWeights),
       categoryWeights: Object.fromEntries(
-        Array.from(this.categoryWeights.entries()).map(([k, v]) => [
-          k,
-          Object.fromEntries(v),
-        ]),
+        Array.from(this.categoryWeights.entries()).map(([k, v]) => [k, Object.fromEntries(v)])
       ),
       costWeight: this.config.costWeight,
       outcomeCount: this.outcomeHistory.length,
@@ -297,8 +267,6 @@ export class AdaptiveRouter extends BaseRouter {
 /**
  * Create an adaptive router
  */
-export function createAdaptiveRouter(
-  config?: Partial<RoutingConfig>,
-): AdaptiveRouter {
+export function createAdaptiveRouter(config?: Partial<RoutingConfig>): AdaptiveRouter {
   return new AdaptiveRouter(config);
 }

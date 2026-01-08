@@ -1,7 +1,7 @@
-import { EventEmitter } from 'eventemitter3';
-import { Subject, Observable } from 'rxjs';
-import { StreamMessage } from '@intelgraph/kafka-integration';
-import pino from 'pino';
+import { EventEmitter } from "eventemitter3";
+import { Subject, Observable } from "rxjs";
+import { StreamMessage } from "@intelgraph/kafka-integration";
+import pino from "pino";
 import {
   WindowSpec,
   WindowType,
@@ -9,9 +9,9 @@ import {
   Window,
   WindowedMessage,
   AggregateFunction,
-} from './types';
+} from "./types";
 
-const logger = pino({ name: 'window-manager' });
+const logger = pino({ name: "window-manager" });
 
 /**
  * Window manager for handling windowing operations
@@ -132,7 +132,7 @@ export class WindowManager<T = unknown> extends EventEmitter {
    */
   private createGlobalWindow(): Window {
     return {
-      id: 'global',
+      id: "global",
       start: 0,
       end: Number.MAX_SAFE_INTEGER,
       type: WindowType.GLOBAL,
@@ -155,7 +155,7 @@ export class WindowManager<T = unknown> extends EventEmitter {
     state.messages.push(message);
     state.lastUpdate = Date.now();
 
-    this.emit('message-added', { window, message });
+    this.emit("message-added", { window, message });
   }
 
   /**
@@ -165,7 +165,7 @@ export class WindowManager<T = unknown> extends EventEmitter {
     const state = this.windows.get(windowId);
 
     if (!state) {
-      logger.warn({ windowId }, 'Window not found');
+      logger.warn({ windowId }, "Window not found");
       return;
     }
 
@@ -178,7 +178,7 @@ export class WindowManager<T = unknown> extends EventEmitter {
     };
 
     this.windowSubject.next(windowed);
-    this.emit('window-triggered', windowed);
+    this.emit("window-triggered", windowed);
 
     // Remove window after triggering (for tumbling/sliding)
     if (state.window.type !== WindowType.GLOBAL) {
@@ -196,7 +196,9 @@ export class WindowManager<T = unknown> extends EventEmitter {
   /**
    * Aggregate function over windows
    */
-  aggregate<A, R>(aggregateFunction: AggregateFunction<T, A, R>): Observable<{
+  aggregate<A, R>(
+    aggregateFunction: AggregateFunction<T, A, R>
+  ): Observable<{
     window: Window;
     result: R;
   }> {

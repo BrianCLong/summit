@@ -2,7 +2,7 @@ name: unquarantine
 
 permissions:
   contents: read
-on: { schedule: [{ cron: '0 8 * * 1' }] }
+on: { schedule: [{ cron: "0 8 * * 1" }] }
 jobs:
   try:
     runs-on: ubuntu-latest

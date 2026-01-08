@@ -6,7 +6,7 @@ services:
     name: policy
     url: https://policy.intelgraph.local
     headers:
-      Authorization: 'Bearer ${POLICY_SERVICE_TOKEN}'
+      Authorization: "Bearer ${POLICY_SERVICE_TOKEN}"
 
 bundles:
   conductor:
@@ -18,17 +18,17 @@ bundles:
     # Bundle signature verification
     # Public key must be mounted at /etc/opa/keys/conductor-policy.pem
     signing:
-      keyid: 'conductor-policy'
+      keyid: "conductor-policy"
       scope: bundle
       exclude_files:
-        - '*.md'
-        - 'test_*'
+        - "*.md"
+        - "test_*"
 
 decision_logs:
   console: false
   service: policy
   resource: logs/decisions
-  partition_name: 'conductor-${HOSTNAME}'
+  partition_name: "conductor-${HOSTNAME}"
 
 status:
   console: false
@@ -43,7 +43,7 @@ persistence:
 bundle_service:
   credentials:
     bearer:
-      token: '${POLICY_SERVICE_TOKEN}'
+      token: "${POLICY_SERVICE_TOKEN}"
 
 # Performance tuning
 nd_builtin_cache: true

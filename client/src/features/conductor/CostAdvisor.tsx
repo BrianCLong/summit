@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 interface CostAdvice {
   savedUsd?: number;
 }
 
 export default function CostAdvisor() {
-  const [yaml, setYaml] = useState('');
+  const [yaml, setYaml] = useState("");
   const [res, setRes] = useState<CostAdvice | null>(null);
   async function advise() {
-    const r = await fetch('/graphql', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
+    const r = await fetch("/graphql", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({
         query: `{ costAdvice(runbookYaml:${JSON.stringify(yaml)}) }`,
       }),
@@ -31,7 +31,7 @@ export default function CostAdvisor() {
         Advise
       </button>
       <div className="mt-3 text-sm">
-        {res ? `Estimated save $${Number(res.savedUsd || 0).toFixed(2)}` : ''}
+        {res ? `Estimated save $${Number(res.savedUsd || 0).toFixed(2)}` : ""}
       </div>
     </div>
   );

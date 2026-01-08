@@ -3,15 +3,15 @@
  * Manages golden record lifecycle including creation, updates, merging, and certification
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 import type {
   MasterRecord,
   SourceRecord,
   SurvivorshipRule,
   CertificationStatus,
   MergeEvent,
-  CrossReference
-} from '@intelgraph/mdm-core';
+  CrossReference,
+} from "@intelgraph/mdm-core";
 
 export interface GoldenRecordConfig {
   domain: string;
@@ -48,13 +48,15 @@ export class GoldenRecordManager {
     context: GoldenRecordContextOptions = {}
   ): Promise<MasterRecord> {
     if (sourceRecords.length === 0) {
-      throw new Error('At least one source record required');
+      throw new Error("At least one source record required");
     }
 
     // Check if any source records already linked to golden record
     const existingMasterIds = this.findExistingMasterRecords(sourceRecords);
     if (existingMasterIds.length > 0) {
-      throw new Error(`Source records already linked to master records: ${existingMasterIds.join(', ')}`);
+      throw new Error(
+        `Source records already linked to master records: ${existingMasterIds.join(", ")}`
+      );
     }
 
     // Apply survivorship rules
@@ -76,7 +78,7 @@ export class GoldenRecordManager {
       id: {
         id: masterId,
         domain: this.config.domain,
-        version: 1
+        version: 1,
       },
       domain: this.config.domain,
       data: goldenData,
@@ -85,29 +87,29 @@ export class GoldenRecordManager {
       qualityScore,
       certificationStatus,
       lineage: {
-        sourceOperations: sourceRecords.map(sr => ({
+        sourceOperations: sourceRecords.map((sr) => ({
           operationId: uuidv4(),
-          operationType: 'create' as const,
+          operationType: "create" as const,
           timestamp: sr.lastModified,
-          user: 'system',
+          user: "system",
           sourceSystem: sr.sourceSystem,
-          changes: []
+          changes: [],
         })),
         transformations: [],
         matchingHistory: [],
-        mergeHistory: []
+        mergeHistory: [],
       },
       metadata: {
         tags: context.tags ?? [],
         classifications: context.classifications ?? [],
-        sensitivity: 'internal',
+        sensitivity: "internal",
         recordType: context.recordType,
         tenantId: context.tenantId,
-        customAttributes: {}
+        customAttributes: {},
       },
       createdAt: new Date(),
       updatedAt: new Date(),
-      version: 1
+      version: 1,
     };
 
     // Store record
@@ -164,19 +166,19 @@ export class GoldenRecordManager {
         classifications: context.classifications ?? existingRecord.metadata.classifications,
       },
       updatedAt: new Date(),
-      version: existingRecord.version + 1
+      version: existingRecord.version + 1,
     };
 
     // Update lineage
     if (this.config.enableLineageTracking) {
       updatedRecord.lineage.sourceOperations.push(
-        ...newSourceRecords.map(sr => ({
+        ...newSourceRecords.map((sr) => ({
           operationId: uuidv4(),
-          operationType: 'update' as const,
+          operationType: "update" as const,
           timestamp: new Date(),
-          user: 'system',
+          user: "system",
           sourceSystem: sr.sourceSystem,
-          changes: this.detectChanges(existingRecord.data, goldenData)
+          changes: this.detectChanges(existingRecord.data, goldenData),
         }))
       );
     }
@@ -193,27 +195,24 @@ export class GoldenRecordManager {
   /**
    * Merge multiple golden records
    */
-  async mergeGoldenRecords(
-    recordIds: string[],
-    mergedBy: string
-  ): Promise<MasterRecord> {
+  async mergeGoldenRecords(recordIds: string[], mergedBy: string): Promise<MasterRecord> {
     if (recordIds.length < 2) {
-      throw new Error('At least two records required for merge');
+      throw new Error("At least two records required for merge");
     }
 
     const records = recordIds
-      .map(id => this.records.get(id))
+      .map((id) => this.records.get(id))
       .filter((r): r is MasterRecord => r !== undefined);
 
     if (records.length !== recordIds.length) {
-      throw new Error('One or more master records not found');
+      throw new Error("One or more master records not found");
     }
 
     // Combine all source records
-    const allSourceRecords = records.flatMap(r => r.sourceRecords);
+    const allSourceRecords = records.flatMap((r) => r.sourceRecords);
 
     // Combine cross-references
-    const allCrossRefs = records.flatMap(r => r.crossReferences);
+    const allCrossRefs = records.flatMap((r) => r.crossReferences);
 
     // Apply survivorship
     const mergedData = this.applySurvivorshipRules(allSourceRecords);
@@ -229,7 +228,7 @@ export class GoldenRecordManager {
       survivorshipRules: this.config.survivorshipRules,
       conflicts: [],
       timestamp: new Date(),
-      mergedBy
+      mergedBy,
     };
 
     // Create merged record (using first record as base)
@@ -241,7 +240,7 @@ export class GoldenRecordManager {
       qualityScore,
       certificationStatus: this.determineCertificationStatus(qualityScore),
       updatedAt: new Date(),
-      version: records[0].version + 1
+      version: records[0].version + 1,
     };
 
     // Update lineage
@@ -251,10 +250,10 @@ export class GoldenRecordManager {
     this.records.set(mergedRecord.id.id, mergedRecord);
 
     // Archive other records
-    recordIds.slice(1).forEach(id => {
+    recordIds.slice(1).forEach((id) => {
       const record = this.records.get(id);
       if (record) {
-        record.certificationStatus = 'archived';
+        record.certificationStatus = "archived";
         record.updatedAt = new Date();
       }
     });
@@ -278,7 +277,7 @@ export class GoldenRecordManager {
       throw new Error(`Master record ${recordId} not found`);
     }
 
-    record.certificationStatus = certificationLevel || 'certified';
+    record.certificationStatus = certificationLevel || "certified";
     record.metadata.lastCertifiedAt = new Date();
     record.metadata.lastCertifiedBy = certifiedBy;
     record.updatedAt = new Date();
@@ -324,33 +323,33 @@ export class GoldenRecordManager {
     if (!attributeName) return undefined;
 
     const values = sourceRecords
-      .map(sr => ({ value: sr.data[attributeName], record: sr }))
-      .filter(v => v.value !== undefined && v.value !== null);
+      .map((sr) => ({ value: sr.data[attributeName], record: sr }))
+      .filter((v) => v.value !== undefined && v.value !== null);
 
     if (values.length === 0) return undefined;
 
     switch (rule.strategy) {
-      case 'most_recent':
-        return values.sort((a, b) =>
-          b.record.lastModified.getTime() - a.record.lastModified.getTime()
+      case "most_recent":
+        return values.sort(
+          (a, b) => b.record.lastModified.getTime() - a.record.lastModified.getTime()
         )[0].value;
 
-      case 'most_trusted_source':
+      case "most_trusted_source":
         return values.sort((a, b) => b.record.priority - a.record.priority)[0].value;
 
-      case 'highest_quality':
+      case "highest_quality":
         return values.sort((a, b) => b.record.confidence - a.record.confidence)[0].value;
 
-      case 'most_complete':
+      case "most_complete":
         return values.sort((a, b) => {
           const aLen = String(a.value).length;
           const bLen = String(b.value).length;
           return bLen - aLen;
         })[0].value;
 
-      case 'custom':
+      case "custom":
         if (rule.customLogic) {
-          return Function('sourceRecords', rule.customLogic)(sourceRecords);
+          return Function("sourceRecords", rule.customLogic)(sourceRecords);
         }
         return values[0].value;
 
@@ -370,7 +369,7 @@ export class GoldenRecordManager {
     const consistency = this.calculateConsistency(sourceRecords);
     const recency = this.calculateRecency(sourceRecords);
 
-    return (completeness * 0.4 + consistency * 0.3 + recency * 0.3);
+    return completeness * 0.4 + consistency * 0.3 + recency * 0.3;
   }
 
   /**
@@ -380,8 +379,9 @@ export class GoldenRecordManager {
     const total = Object.keys(data).length;
     if (total === 0) return 0;
 
-    const populated = Object.values(data)
-      .filter(v => v !== null && v !== undefined && v !== '').length;
+    const populated = Object.values(data).filter(
+      (v) => v !== null && v !== undefined && v !== ""
+    ).length;
 
     return populated / total;
   }
@@ -393,14 +393,12 @@ export class GoldenRecordManager {
     if (sourceRecords.length <= 1) return 1;
 
     const allFields = new Set<string>();
-    sourceRecords.forEach(sr => Object.keys(sr.data).forEach(k => allFields.add(k)));
+    sourceRecords.forEach((sr) => Object.keys(sr.data).forEach((k) => allFields.add(k)));
 
     let consistent = 0;
-    allFields.forEach(field => {
+    allFields.forEach((field) => {
       const values = new Set(
-        sourceRecords
-          .map(sr => JSON.stringify(sr.data[field]))
-          .filter(v => v !== undefined)
+        sourceRecords.map((sr) => JSON.stringify(sr.data[field])).filter((v) => v !== undefined)
       );
       if (values.size <= 1) consistent++;
     });
@@ -415,7 +413,7 @@ export class GoldenRecordManager {
     if (sourceRecords.length === 0) return 0;
 
     const now = Date.now();
-    const mostRecent = Math.max(...sourceRecords.map(sr => sr.lastModified.getTime()));
+    const mostRecent = Math.max(...sourceRecords.map((sr) => sr.lastModified.getTime()));
     const daysSince = (now - mostRecent) / (1000 * 60 * 60 * 24);
 
     return Math.exp(-daysSince / 30);
@@ -428,11 +426,11 @@ export class GoldenRecordManager {
     const threshold = this.config.qualityCertificationThreshold || 0.9;
 
     if (qualityScore >= threshold) {
-      return 'certified';
+      return "certified";
     } else if (qualityScore >= threshold * 0.7) {
-      return 'pending_review';
+      return "pending_review";
     } else {
-      return 'draft';
+      return "draft";
     }
   }
 
@@ -444,18 +442,20 @@ export class GoldenRecordManager {
     sourceRecords: SourceRecord[],
     existingCrossReferences: CrossReference[] = []
   ): CrossReference[] {
-    const seen = new Set(existingCrossReferences.map(ref => `${ref.sourceSystem}:${ref.sourceRecordId}`));
+    const seen = new Set(
+      existingCrossReferences.map((ref) => `${ref.sourceSystem}:${ref.sourceRecordId}`)
+    );
 
     const newRefs = sourceRecords
-      .filter(sr => !seen.has(`${sr.sourceSystem}:${sr.sourceRecordId}`))
-      .map(sr => ({
+      .filter((sr) => !seen.has(`${sr.sourceSystem}:${sr.sourceRecordId}`))
+      .map((sr) => ({
         sourceSystem: sr.sourceSystem,
         sourceRecordId: sr.sourceRecordId,
         masterRecordId,
-        linkType: 'exact' as const,
+        linkType: "exact" as const,
         confidence: sr.confidence,
         createdAt: new Date(),
-        createdBy: 'system'
+        createdBy: "system",
       }));
 
     return [...existingCrossReferences, ...newRefs];
@@ -494,7 +494,13 @@ export class GoldenRecordManager {
   private detectChanges(
     oldData: Record<string, unknown>,
     newData: Record<string, unknown>
-  ): Array<{ fieldName: string; oldValue: unknown; newValue: unknown; source: string; confidence: number }> {
+  ): Array<{
+    fieldName: string;
+    oldValue: unknown;
+    newValue: unknown;
+    source: string;
+    confidence: number;
+  }> {
     const changes: Array<{
       fieldName: string;
       oldValue: unknown;
@@ -514,8 +520,8 @@ export class GoldenRecordManager {
           fieldName: field,
           oldValue,
           newValue,
-          source: 'system',
-          confidence: 1.0
+          source: "system",
+          confidence: 1.0,
         });
       }
     }
@@ -533,10 +539,7 @@ export class GoldenRecordManager {
   /**
    * Find golden record by source record
    */
-  findBySourceRecord(
-    sourceSystem: string,
-    sourceRecordId: string
-  ): MasterRecord | undefined {
+  findBySourceRecord(sourceSystem: string, sourceRecordId: string): MasterRecord | undefined {
     const key = `${sourceSystem}:${sourceRecordId}`;
     const masterId = this.sourceIndex.get(key);
     return masterId ? this.records.get(masterId) : undefined;

@@ -9,4 +9,4 @@ services:
     volumes:
       - ./infra/keycloak/realm-export:/opt/keycloak/data/import
     ports:
-      - '8080:8080'
+      - "8080:8080"

@@ -1,21 +1,21 @@
-import { describe, it, expect, vi } from 'vitest';
-import { createBenchmarkSuite, BenchmarkSuite } from '../suite.js';
-import type { BenchmarkReporter, BenchmarkSuiteConfig } from '../types.js';
+import { describe, it, expect, vi } from "vitest";
+import { createBenchmarkSuite, BenchmarkSuite } from "../suite.js";
+import type { BenchmarkReporter, BenchmarkSuiteConfig } from "../types.js";
 
-describe('BenchmarkSuite', () => {
+describe("BenchmarkSuite", () => {
   const defaultConfig: BenchmarkSuiteConfig = {
-    name: 'Test Suite',
-    description: 'Test benchmark suite',
+    name: "Test Suite",
+    description: "Test benchmark suite",
     defaultIterations: 50,
     defaultWarmupIterations: 5,
   };
 
-  it('should create a benchmark suite', () => {
+  it("should create a benchmark suite", () => {
     const suite = createBenchmarkSuite(defaultConfig);
     expect(suite).toBeInstanceOf(BenchmarkSuite);
   });
 
-  it('should add and run benchmarks', async () => {
+  it("should add and run benchmarks", async () => {
     const suite = createBenchmarkSuite(defaultConfig);
     suite.clearReporters();
 
@@ -24,14 +24,20 @@ describe('BenchmarkSuite', () => {
     let fnCalled = 0;
 
     suite.add({
-      name: 'test-benchmark',
-      setup: () => { setupCalled = true; },
-      teardown: () => { teardownCalled = true; },
-      fn: () => { fnCalled++; },
+      name: "test-benchmark",
+      setup: () => {
+        setupCalled = true;
+      },
+      teardown: () => {
+        teardownCalled = true;
+      },
+      fn: () => {
+        fnCalled++;
+      },
       config: {
-        subsystem: 'api',
-        language: 'typescript',
-        workloadType: 'cpu',
+        subsystem: "api",
+        language: "typescript",
+        workloadType: "cpu",
       },
     });
 
@@ -41,33 +47,37 @@ describe('BenchmarkSuite', () => {
     expect(setupCalled).toBe(true);
     expect(teardownCalled).toBe(true);
     expect(fnCalled).toBeGreaterThan(0);
-    expect(results[0].config.name).toBe('test-benchmark');
+    expect(results[0].config.name).toBe("test-benchmark");
   });
 
-  it('should run multiple benchmarks', async () => {
+  it("should run multiple benchmarks", async () => {
     const suite = createBenchmarkSuite(defaultConfig);
     suite.clearReporters();
 
     suite.add({
-      name: 'benchmark-1',
-      fn: () => { let x = 1 + 1; },
-      config: { subsystem: 'api', language: 'typescript', workloadType: 'cpu' },
+      name: "benchmark-1",
+      fn: () => {
+        let x = 1 + 1;
+      },
+      config: { subsystem: "api", language: "typescript", workloadType: "cpu" },
     });
 
     suite.add({
-      name: 'benchmark-2',
-      fn: () => { let x = 2 + 2; },
-      config: { subsystem: 'graph', language: 'typescript', workloadType: 'cpu' },
+      name: "benchmark-2",
+      fn: () => {
+        let x = 2 + 2;
+      },
+      config: { subsystem: "graph", language: "typescript", workloadType: "cpu" },
     });
 
     const results = await suite.run();
 
     expect(results).toHaveLength(2);
-    expect(results[0].config.name).toBe('benchmark-1');
-    expect(results[1].config.name).toBe('benchmark-2');
+    expect(results[0].config.name).toBe("benchmark-1");
+    expect(results[1].config.name).toBe("benchmark-2");
   });
 
-  it('should call reporter methods', async () => {
+  it("should call reporter methods", async () => {
     const suite = createBenchmarkSuite(defaultConfig);
     suite.clearReporters();
 
@@ -82,9 +92,9 @@ describe('BenchmarkSuite', () => {
     suite.addReporter(mockReporter);
 
     suite.add({
-      name: 'test',
+      name: "test",
       fn: () => {},
-      config: { subsystem: 'api', language: 'typescript', workloadType: 'cpu' },
+      config: { subsystem: "api", language: "typescript", workloadType: "cpu" },
     });
 
     await suite.run();
@@ -96,7 +106,7 @@ describe('BenchmarkSuite', () => {
     expect(mockReporter.onError).not.toHaveBeenCalled();
   });
 
-  it('should handle benchmark errors', async () => {
+  it("should handle benchmark errors", async () => {
     const suite = createBenchmarkSuite(defaultConfig);
     suite.clearReporters();
 
@@ -111,34 +121,36 @@ describe('BenchmarkSuite', () => {
     suite.addReporter(mockReporter);
 
     suite.add({
-      name: 'failing-benchmark',
-      fn: () => { throw new Error('Test error'); },
-      config: { subsystem: 'api', language: 'typescript', workloadType: 'cpu' },
+      name: "failing-benchmark",
+      fn: () => {
+        throw new Error("Test error");
+      },
+      config: { subsystem: "api", language: "typescript", workloadType: "cpu" },
     });
 
     const results = await suite.run();
 
     expect(results).toHaveLength(1);
     expect(results[0].passed).toBe(false);
-    expect(results[0].error).toBe('Test error');
+    expect(results[0].error).toBe("Test error");
     expect(mockReporter.onError).toHaveBeenCalled();
   });
 
-  it('should check if all benchmarks passed', async () => {
+  it("should check if all benchmarks passed", async () => {
     const suite = createBenchmarkSuite(defaultConfig);
     suite.clearReporters();
 
     suite.add({
-      name: 'passing',
+      name: "passing",
       fn: () => {},
-      config: { subsystem: 'api', language: 'typescript', workloadType: 'cpu' },
+      config: { subsystem: "api", language: "typescript", workloadType: "cpu" },
     });
 
     await suite.run();
     expect(suite.allPassed()).toBe(true);
   });
 
-  it('should support beforeEach and afterEach', async () => {
+  it("should support beforeEach and afterEach", async () => {
     const suite = createBenchmarkSuite(defaultConfig);
     suite.clearReporters();
 
@@ -146,11 +158,15 @@ describe('BenchmarkSuite', () => {
     let afterEachCount = 0;
 
     suite.add({
-      name: 'with-hooks',
-      beforeEach: () => { beforeEachCount++; },
-      afterEach: () => { afterEachCount++; },
+      name: "with-hooks",
+      beforeEach: () => {
+        beforeEachCount++;
+      },
+      afterEach: () => {
+        afterEachCount++;
+      },
       fn: () => {},
-      config: { subsystem: 'api', language: 'typescript', workloadType: 'cpu' },
+      config: { subsystem: "api", language: "typescript", workloadType: "cpu" },
     });
 
     await suite.run();

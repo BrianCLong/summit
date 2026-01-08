@@ -1,6 +1,6 @@
-import tar from 'tar-stream';
-import { createGzip } from 'zlib';
-import { Manifest } from '../ledger';
+import tar from "tar-stream";
+import { createGzip } from "zlib";
+import { Manifest } from "../ledger";
 
 export interface ReceiptRecord {
   id: string;
@@ -14,7 +14,7 @@ export interface ReceiptRecord {
 
 export interface PolicyDecisionRecord {
   id: string;
-  decision: 'allow' | 'deny' | 'review';
+  decision: "allow" | "deny" | "review";
   rationale: string;
   policy: string;
   createdAt: string;
@@ -58,15 +58,13 @@ function scrubValue(
   value: any,
   rules: RedactionRules,
   meta: { redacted: Set<string>; masked: Set<string> },
-  path: string,
+  path: string
 ): any {
   if (Array.isArray(value)) {
-    return value.map((entry, idx) =>
-      scrubValue(entry, rules, meta, `${path}[${idx}]`),
-    );
+    return value.map((entry, idx) => scrubValue(entry, rules, meta, `${path}[${idx}]`));
   }
 
-  if (value && typeof value === 'object') {
+  if (value && typeof value === "object") {
     const next: Record<string, any> = {};
     for (const [key, val] of Object.entries(value)) {
       const currentPath = path ? `${path}.${key}` : key;
@@ -76,7 +74,7 @@ function scrubValue(
       }
       if (rules.maskFields?.includes(key) || rules.maskFields?.includes(currentPath)) {
         meta.masked.add(currentPath);
-        next[key] = '[REDACTED]';
+        next[key] = "[REDACTED]";
         continue;
       }
       next[key] = scrubValue(val, rules, meta, currentPath);
@@ -89,7 +87,7 @@ function scrubValue(
 
 function applyRedaction<T extends Record<string, any>>(
   records: T[],
-  rules: RedactionRules,
+  rules: RedactionRules
 ): { data: T[]; metadata: RedactionMetadata } {
   const allowed =
     rules.allowReceiptIds && rules.allowReceiptIds.length > 0
@@ -97,22 +95,17 @@ function applyRedaction<T extends Record<string, any>>(
       : records;
   const droppedReceipts =
     rules.allowReceiptIds && rules.allowReceiptIds.length > 0
-      ? records
-          .filter((r: any) => !rules.allowReceiptIds?.includes(r.id))
-          .map((r: any) => r.id)
+      ? records.filter((r: any) => !rules.allowReceiptIds?.includes(r.id)).map((r: any) => r.id)
       : [];
 
   const redacted = new Set<string>();
   const masked = new Set<string>();
   const cleaned = allowed.map((record) =>
-    scrubValue(clone(record), rules, { redacted, masked }, ''),
+    scrubValue(clone(record), rules, { redacted, masked }, "")
   );
 
   const metadata: RedactionMetadata = {
-    applied:
-      droppedReceipts.length > 0 ||
-      redacted.size > 0 ||
-      masked.size > 0,
+    applied: droppedReceipts.length > 0 || redacted.size > 0 || masked.size > 0,
     droppedReceipts,
     redactedFields: Array.from(redacted).sort(),
     maskedFields: Array.from(masked).sort(),
@@ -121,9 +114,7 @@ function applyRedaction<T extends Record<string, any>>(
   return { data: cleaned, metadata };
 }
 
-export function assembleExportBundle(
-  input: ExportBundleInput,
-): {
+export function assembleExportBundle(input: ExportBundleInput): {
   stream: NodeJS.ReadableStream;
   metadata: BundleMetadata;
   manifest: Manifest & Record<string, any>;
@@ -139,20 +130,13 @@ export function assembleExportBundle(
   });
 
   const redaction: RedactionMetadata = {
-    applied:
-      receiptResult.metadata.applied || policyResult.metadata.applied,
+    applied: receiptResult.metadata.applied || policyResult.metadata.applied,
     droppedReceipts: receiptResult.metadata.droppedReceipts,
     redactedFields: Array.from(
-      new Set([
-        ...receiptResult.metadata.redactedFields,
-        ...policyResult.metadata.redactedFields,
-      ]),
+      new Set([...receiptResult.metadata.redactedFields, ...policyResult.metadata.redactedFields])
     ).sort(),
     maskedFields: Array.from(
-      new Set([
-        ...receiptResult.metadata.maskedFields,
-        ...policyResult.metadata.maskedFields,
-      ]),
+      new Set([...receiptResult.metadata.maskedFields, ...policyResult.metadata.maskedFields])
     ).sort(),
   };
 
@@ -175,16 +159,10 @@ export function assembleExportBundle(
   };
 
   const pack = tar.pack();
-  pack.entry({ name: 'manifest.json' }, JSON.stringify(manifest, null, 2));
-  pack.entry(
-    { name: 'receipts.json' },
-    JSON.stringify(receiptResult.data, null, 2),
-  );
-  pack.entry(
-    { name: 'policy-decisions.json' },
-    JSON.stringify(policyResult.data, null, 2),
-  );
-  pack.entry({ name: 'metadata.json' }, JSON.stringify(metadata, null, 2));
+  pack.entry({ name: "manifest.json" }, JSON.stringify(manifest, null, 2));
+  pack.entry({ name: "receipts.json" }, JSON.stringify(receiptResult.data, null, 2));
+  pack.entry({ name: "policy-decisions.json" }, JSON.stringify(policyResult.data, null, 2));
+  pack.entry({ name: "metadata.json" }, JSON.stringify(metadata, null, 2));
   if (input.attachments) {
     for (const [name, content] of Object.entries(input.attachments)) {
       pack.entry({ name }, JSON.stringify(content, null, 2));

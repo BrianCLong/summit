@@ -9,6 +9,7 @@
 Synthetic Future Persona Models (SFPM) are digital twins that evolve over time based on predicted futures and simulated behaviors. Unlike traditional static entity profiles, SFPM generates multiple probabilistic future states for entities, allowing analysts to explore "what-if" scenarios and anticipate behavioral trajectories before they manifest.
 
 **Key Capabilities**:
+
 - **Multi-timeline Simulation**: Generate divergent future personas across different scenario branches
 - **Behavioral Evolution**: Model how entities adapt behaviors under environmental pressures
 - **Trajectory Likelihood Scoring**: Quantify probability of different future paths
@@ -67,27 +68,35 @@ Intelligence analysts face critical challenges in entity trajectory prediction:
 ### Core Components
 
 #### 1. Persona Generator
+
 Creates initial synthetic personas from seed entities with configurable parameters:
+
 - **Baseline Extraction**: Derives current behavioral profile from entity history
 - **Parameter Initialization**: Sets mutation rates, stability coefficients, pressure sensitivities
 - **Branching Factor**: Determines how many divergent futures to generate
 
 #### 2. Trajectory Simulator
+
 Projects personas forward through time under different scenarios:
+
 - **Time Horizons**: T+3mo, T+6mo, T+1yr, T+2yr, T+5yr
 - **Scenario Branches**: Optimistic, pessimistic, baseline, custom pressure profiles
 - **State Transitions**: Models discrete behavioral shifts at decision points
 - **Relationship Dynamics**: Predicts future connections, severed ties, alliance shifts
 
 #### 3. Behavior Evolver
+
 Applies environmental pressures to mutate behavioral profiles:
+
 - **Pressure Vectors**: Economic, political, social, technological, operational pressures
 - **Adaptation Rules**: How entities respond to sustained or acute pressure
 - **Learning Models**: Bayesian updating of behavioral priors based on simulated experiences
 - **Capability Drift**: Skills, resources, and capabilities evolve over time
 
 #### 4. Likelihood Scorer
+
 Quantifies probability of each future trajectory:
+
 - **Historical Anchoring**: Scores based on similarity to observed historical patterns
 - **Coherence Checking**: Penalizes internally inconsistent persona states
 - **Regression to Mean**: Models tendency toward average behaviors absent strong pressures
@@ -98,10 +107,7 @@ Quantifies probability of each future trajectory:
 ### Persona Generation Algorithm
 
 ```typescript
-function generateSyntheticPersona(
-  seedEntity: Entity,
-  config: PersonaConfig
-): SyntheticPersona {
+function generateSyntheticPersona(seedEntity: Entity, config: PersonaConfig): SyntheticPersona {
   // 1. Extract baseline behavioral profile
   const baseline = extractBehavioralProfile(seedEntity);
 
@@ -113,7 +119,7 @@ function generateSyntheticPersona(
     mutationRate: config.mutationRate || 0.15,
     stabilityCoefficient: calculateStability(seedEntity),
     createdAt: Date.now(),
-    validUntil: Date.now() + config.validityWindow
+    validUntil: Date.now() + config.validityWindow,
   };
 
   // 3. Generate divergent branches
@@ -147,7 +153,7 @@ function simulateTrajectory(
       time: t,
       state: nextState,
       pressuresApplied: pressures,
-      deltaFromBaseline: calculateDelta(nextState, persona.baselineProfile)
+      deltaFromBaseline: calculateDelta(nextState, persona.baselineProfile),
     });
 
     currentState = nextState;
@@ -162,7 +168,7 @@ function simulateTrajectory(
     timeHorizon,
     steps,
     finalState: currentState,
-    likelihood
+    likelihood,
   };
 }
 ```
@@ -185,24 +191,24 @@ function evolveBehavior(
 
     // Mutate relevant behavioral dimensions
     switch (pressure.type) {
-      case 'ECONOMIC':
+      case "ECONOMIC":
         evolved.resourceSeeking += magnitude;
         evolved.riskTolerance -= magnitude * 0.5;
         break;
-      case 'POLITICAL':
+      case "POLITICAL":
         evolved.alignmentShift += magnitude;
-        evolved.operationalTempo *= (1 + magnitude);
+        evolved.operationalTempo *= 1 + magnitude;
         break;
-      case 'SOCIAL':
+      case "SOCIAL":
         evolved.networkExpansion += magnitude;
-        evolved.trustRadius *= (1 - magnitude * 0.3);
+        evolved.trustRadius *= 1 - magnitude * 0.3;
         break;
-      case 'TECHNOLOGICAL':
+      case "TECHNOLOGICAL":
         evolved.capabilityAcquisition += magnitude;
         evolved.tacticalInnovation += magnitude * 0.7;
         break;
-      case 'OPERATIONAL':
-        evolved.activityLevel *= (1 + magnitude);
+      case "OPERATIONAL":
+        evolved.activityLevel *= 1 + magnitude;
         evolved.riskTolerance += magnitude * 0.3;
         break;
     }
@@ -222,19 +228,13 @@ function scoreTrajectoryLikelihood(
   historicalData: HistoricalPattern[]
 ): number {
   // 1. Historical similarity score
-  const historicalScore = calculateHistoricalSimilarity(
-    trajectory.steps,
-    historicalData
-  );
+  const historicalScore = calculateHistoricalSimilarity(trajectory.steps, historicalData);
 
   // 2. Internal coherence score
   const coherenceScore = calculateCoherence(trajectory.steps);
 
   // 3. Pressure-response realism score
-  const realismScore = calculatePressureRealism(
-    trajectory.steps,
-    persona.baselineProfile
-  );
+  const realismScore = calculatePressureRealism(trajectory.steps, persona.baselineProfile);
 
   // 4. Regression-to-mean penalty for extreme divergence
   const divergencePenalty = calculateDivergencePenalty(
@@ -246,8 +246,8 @@ function scoreTrajectoryLikelihood(
   return (
     historicalScore * 0.35 +
     coherenceScore * 0.25 +
-    realismScore * 0.30 +
-    (1 - divergencePenalty) * 0.10
+    realismScore * 0.3 +
+    (1 - divergencePenalty) * 0.1
   );
 }
 ```
@@ -296,23 +296,23 @@ interface FutureTrajectory {
 ```typescript
 interface BehavioralProfile {
   // Operational dimensions
-  activityLevel: number;          // 0.0 - 1.0
-  operationalTempo: number;        // events per month
-  riskTolerance: number;           // 0.0 - 1.0
+  activityLevel: number; // 0.0 - 1.0
+  operationalTempo: number; // events per month
+  riskTolerance: number; // 0.0 - 1.0
 
   // Strategic dimensions
-  alignmentShift: number;          // -1.0 (opposed) to 1.0 (aligned)
-  resourceSeeking: number;         // 0.0 - 1.0
-  capabilityAcquisition: number;   // rate of new capability adoption
+  alignmentShift: number; // -1.0 (opposed) to 1.0 (aligned)
+  resourceSeeking: number; // 0.0 - 1.0
+  capabilityAcquisition: number; // rate of new capability adoption
 
   // Social dimensions
-  networkExpansion: number;        // rate of new connections
-  trustRadius: number;             // size of trusted network
-  influenceSeeking: number;        // 0.0 - 1.0
+  networkExpansion: number; // rate of new connections
+  trustRadius: number; // size of trusted network
+  influenceSeeking: number; // 0.0 - 1.0
 
   // Adaptive dimensions
-  tacticalInnovation: number;      // rate of behavior change
-  stabilityCoefficient: number;    // resistance to change (0.0 - 1.0)
+  tacticalInnovation: number; // rate of behavior change
+  stabilityCoefficient: number; // resistance to change (0.0 - 1.0)
 }
 ```
 
@@ -320,12 +320,12 @@ interface BehavioralProfile {
 
 ```typescript
 interface PressureVector {
-  type: 'ECONOMIC' | 'POLITICAL' | 'SOCIAL' | 'TECHNOLOGICAL' | 'OPERATIONAL';
-  strength: number;        // magnitude of pressure
-  duration: number;        // months of sustained pressure
-  decay: number;           // rate of pressure dissipation
-  source?: string;         // entity or event causing pressure
-  onset: number;           // when pressure begins (months from T0)
+  type: "ECONOMIC" | "POLITICAL" | "SOCIAL" | "TECHNOLOGICAL" | "OPERATIONAL";
+  strength: number; // magnitude of pressure
+  duration: number; // months of sustained pressure
+  decay: number; // rate of pressure dissipation
+  source?: string; // entity or event causing pressure
+  onset: number; // when pressure begins (months from T0)
 }
 ```
 
@@ -488,18 +488,22 @@ ORDER BY fs.timeOffset
 ## Future Enhancements
 
 ### Phase 2: Multi-Entity Scenarios
+
 - Simulate interactions between multiple evolving personas
 - Model network-level future states (e.g., alliance formation, group fragmentation)
 
 ### Phase 3: Counterfactual Analysis
+
 - "What-if" tool: Apply hypothetical interventions and observe trajectory changes
 - Policy impact assessment
 
 ### Phase 4: Reinforcement Learning
+
 - Learn optimal pressure responses from real-world entity adaptations
 - Continuous model improvement as predictions are validated/falsified
 
 ### Phase 5: Temporal Knowledge Graphs
+
 - Full temporal graph database with versioned entity histories
 - Time-travel queries: "What did we predict in 2024 vs. what actually happened?"
 
@@ -547,6 +551,7 @@ scenarios:
 ### Appendix B: Calibration Dataset
 
 Validation requires historical entity trajectories:
+
 - Minimum 50 entities with 2+ years of observed behavior
 - Ground truth behavioral measurements at T0, T+6mo, T+12mo, T+24mo
 - Known environmental pressures during observation period

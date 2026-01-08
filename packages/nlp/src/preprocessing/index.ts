@@ -3,7 +3,7 @@
  * Handles text cleaning, normalization, and preparation for NLP tasks
  */
 
-import type { PreprocessingOptions, Document } from '../types';
+import type { PreprocessingOptions, Document } from "../types";
 
 export class TextPreprocessor {
   private options: Required<PreprocessingOptions>;
@@ -66,16 +66,16 @@ export class TextPreprocessor {
 
     // Remove numbers
     if (this.options.removeNumbers) {
-      processed = processed.replace(/\d+/g, '');
+      processed = processed.replace(/\d+/g, "");
     }
 
     // Remove punctuation
     if (this.options.removePunctuation) {
-      processed = processed.replace(/[^\w\s]|_/g, '');
+      processed = processed.replace(/[^\w\s]|_/g, "");
     }
 
     // Normalize whitespace
-    processed = processed.replace(/\s+/g, ' ').trim();
+    processed = processed.replace(/\s+/g, " ").trim();
 
     return processed;
   }
@@ -85,9 +85,9 @@ export class TextPreprocessor {
    */
   private removeHtml(text: string): string {
     return text
-      .replace(/<[^>]*>/g, '') // Remove tags
-      .replace(/&nbsp;/g, ' ') // Replace nbsp
-      .replace(/&[a-z]+;/gi, ''); // Remove entities
+      .replace(/<[^>]*>/g, "") // Remove tags
+      .replace(/&nbsp;/g, " ") // Replace nbsp
+      .replace(/&[a-z]+;/gi, ""); // Remove entities
   }
 
   /**
@@ -96,7 +96,7 @@ export class TextPreprocessor {
   private removeUrls(text: string): string {
     return text.replace(
       /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi,
-      ''
+      ""
     );
   }
 
@@ -104,14 +104,14 @@ export class TextPreprocessor {
    * Remove email addresses
    */
   private removeEmails(text: string): string {
-    return text.replace(/[\w.-]+@[\w.-]+\.\w+/gi, '');
+    return text.replace(/[\w.-]+@[\w.-]+\.\w+/gi, "");
   }
 
   /**
    * Normalize unicode characters
    */
   private normalizeUnicode(text: string): string {
-    return text.normalize('NFKC');
+    return text.normalize("NFKC");
   }
 
   /**
@@ -121,10 +121,10 @@ export class TextPreprocessor {
     let cleaned = text;
 
     // Remove control characters
-    cleaned = cleaned.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
+    cleaned = cleaned.replace(/[\x00-\x1F\x7F-\x9F]/g, "");
 
     // Remove excessive whitespace
-    cleaned = cleaned.replace(/\s+/g, ' ');
+    cleaned = cleaned.replace(/\s+/g, " ");
 
     // Remove leading/trailing whitespace
     cleaned = cleaned.trim();
@@ -147,34 +147,60 @@ export const preprocessing = {
   /**
    * Remove stopwords from text
    */
-  removeStopwords(text: string, language: string = 'en'): string {
+  removeStopwords(text: string, language: string = "en"): string {
     // This is a simplified implementation
     // In production, use a library like 'stopword'
     const stopwords = new Set([
-      'a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for', 'from',
-      'has', 'he', 'in', 'is', 'it', 'its', 'of', 'on', 'that', 'the',
-      'to', 'was', 'will', 'with', 'this', 'but', 'they', 'have', 'had',
+      "a",
+      "an",
+      "and",
+      "are",
+      "as",
+      "at",
+      "be",
+      "by",
+      "for",
+      "from",
+      "has",
+      "he",
+      "in",
+      "is",
+      "it",
+      "its",
+      "of",
+      "on",
+      "that",
+      "the",
+      "to",
+      "was",
+      "will",
+      "with",
+      "this",
+      "but",
+      "they",
+      "have",
+      "had",
     ]);
 
     return text
       .split(/\s+/)
       .filter((word) => !stopwords.has(word.toLowerCase()))
-      .join(' ');
+      .join(" ");
   },
 
   /**
    * Remove punctuation
    */
   removePunctuation(text: string): string {
-    return text.replace(/[^\w\s]|_/g, '');
+    return text.replace(/[^\w\s]|_/g, "");
   },
 
   /**
    * Normalize whitespace
    */
   normalizeWhitespace(text: string): string {
-    return text.replace(/\s+/g, ' ').trim();
+    return text.replace(/\s+/g, " ").trim();
   },
 };
 
-export * from './pipeline';
+export * from "./pipeline";

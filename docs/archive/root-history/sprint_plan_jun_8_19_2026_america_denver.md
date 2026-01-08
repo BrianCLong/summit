@@ -65,18 +65,18 @@ By **Jun 19, 2026**, deliver cross-tenant analytics that stay aggregate-only, sh
 
 ## 5) Backlog (Ready for Sprint)
 
-| ID         | Title                                             | Owner         | Est | Dependencies | Acceptance Criteria (summary)                          |
-| ---------- | ------------------------------------------------- | ------------- | --: | ------------ | ------------------------------------------------------ |
-| ANA-201    | Privacy Guardrails & Receipts                     | BE+Policy     |   5 | —            | k-min + low-cardinality rules; time buckets; receipts  |
-| ANA-211    | Analytics Data Products (Funnel/Health/SLO/COGS)  | Data+BE       |   5 | ANA-201      | Aggregates only; cohort thresholds; benchmark buckets  |
-| ANA-221    | Analytics API (`POST /analytics/query`)           | BE+API        |   5 | ANA-201      | Schema validation; policy gating; aggregated output    |
-| ISO-231    | Isolation Detection & Correlation                 | BE+SecOps     |   5 | —            | Denial/RLS/object violations logged with actor/IP/time |
-| ISO-241    | Isolation Health Dashboard                        | FE+SecOps     |   5 | ISO-231      | Rates, top denied actions, spikes, runbook links       |
-| BYOK-251   | KMS Integration for Evidence & Receipts           | BE+Platform   |   5 | —            | Encrypt new artifacts/payloads with tenant keys        |
-| BYOK-261   | BYOK Lifecycle (Enable/Rotate/Disable) + Receipts | BE+Platform   |   5 | BYOK-251     | Validate, dual-control, rotation for new writes        |
-| GOV-271    | Governance Receipts & Trust Report Export         | BE+Docs       |   4 | ANA-221      | Schema hash; privacy decisions; quarterly bundle       |
-| COM-281    | BYOK Entitlement, Metering, Invoice Line Item     | BE+Finance    |   3 | BYOK-251     | Entitlement gate; metering; invoice sample             |
-| ANA-291*   | Stretch: Opt-in Backfill Encryption/DP            | BE+Data       |   3 | BYOK-251     | Backfill tooling or DP noise flag with guardrails      |
+| ID        | Title                                             | Owner       | Est | Dependencies | Acceptance Criteria (summary)                          |
+| --------- | ------------------------------------------------- | ----------- | --: | ------------ | ------------------------------------------------------ |
+| ANA-201   | Privacy Guardrails & Receipts                     | BE+Policy   |   5 | —            | k-min + low-cardinality rules; time buckets; receipts  |
+| ANA-211   | Analytics Data Products (Funnel/Health/SLO/COGS)  | Data+BE     |   5 | ANA-201      | Aggregates only; cohort thresholds; benchmark buckets  |
+| ANA-221   | Analytics API (`POST /analytics/query`)           | BE+API      |   5 | ANA-201      | Schema validation; policy gating; aggregated output    |
+| ISO-231   | Isolation Detection & Correlation                 | BE+SecOps   |   5 | —            | Denial/RLS/object violations logged with actor/IP/time |
+| ISO-241   | Isolation Health Dashboard                        | FE+SecOps   |   5 | ISO-231      | Rates, top denied actions, spikes, runbook links       |
+| BYOK-251  | KMS Integration for Evidence & Receipts           | BE+Platform |   5 | —            | Encrypt new artifacts/payloads with tenant keys        |
+| BYOK-261  | BYOK Lifecycle (Enable/Rotate/Disable) + Receipts | BE+Platform |   5 | BYOK-251     | Validate, dual-control, rotation for new writes        |
+| GOV-271   | Governance Receipts & Trust Report Export         | BE+Docs     |   4 | ANA-221      | Schema hash; privacy decisions; quarterly bundle       |
+| COM-281   | BYOK Entitlement, Metering, Invoice Line Item     | BE+Finance  |   3 | BYOK-251     | Entitlement gate; metering; invoice sample             |
+| ANA-291\* | Stretch: Opt-in Backfill Encryption/DP            | BE+Data     |   3 | BYOK-251     | Backfill tooling or DP noise flag with guardrails      |
 
 > **Planned:** 42 pts with stretch optional.
 

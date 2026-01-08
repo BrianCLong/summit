@@ -1,6 +1,6 @@
-import { GovernanceDecision, RiskCategory } from '@intelgraph/governance-kernel';
+import { GovernanceDecision, RiskCategory } from "@intelgraph/governance-kernel";
 
-export type TaskStatus = 'PENDING' | 'RUNNING' | 'COMPLETED' | 'FAILED' | 'BLOCKED_BY_GOVERNANCE';
+export type TaskStatus = "PENDING" | "RUNNING" | "COMPLETED" | "FAILED" | "BLOCKED_BY_GOVERNANCE";
 
 export interface Task {
   id: string;

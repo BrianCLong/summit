@@ -170,10 +170,10 @@ This dashboard integrates with existing Prometheus alerting rules:
 
 The dashboard tracks these Service Level Objectives:
 
-| Service | Metric | SLO | Panel |
-|---------|--------|-----|-------|
-| API Availability | Non-5xx ratio | 99% | Panel 8 |
-| AI Copilot Success | Non-error ratio | 99% | Panel 9 |
+| Service                  | Metric           | SLO  | Panel   |
+| ------------------------ | ---------------- | ---- | ------- |
+| API Availability         | Non-5xx ratio    | 99%  | Panel 8 |
+| AI Copilot Success       | Non-error ratio  | 99%  | Panel 9 |
 | AI Copilot Latency (p95) | Request duration | < 5s | Panel 6 |
 | AI Copilot Latency (p99) | Request duration | < 8s | Panel 6 |
 
@@ -214,6 +214,7 @@ Edit `fieldConfig.defaults.thresholds.steps` in panel definition:
 **Issue**: Panels show "No data"
 **Cause**: Missing metrics or incorrect datasource
 **Solution**:
+
 - Verify Prometheus/Loki datasources configured
 - Check metric names match instrumentation
 - Verify time range contains data
@@ -223,6 +224,7 @@ Edit `fieldConfig.defaults.thresholds.steps` in panel definition:
 **Issue**: Logs panel empty when filtering by correlation ID
 **Cause**: Logs not indexed or correlation ID not in logs
 **Solution**:
+
 - Verify structured logging enabled
 - Check correlation middleware is active
 - Confirm correlation ID is valid UUID
@@ -232,6 +234,7 @@ Edit `fieldConfig.defaults.thresholds.steps` in panel definition:
 **Issue**: Dashboard slow to load
 **Cause**: Too many high-cardinality queries
 **Solution**:
+
 - Increase refresh interval
 - Reduce time range
 - Add additional label filters
@@ -258,6 +261,7 @@ This dashboard supports:
 ### Version Control
 
 Dashboard JSON is stored in:
+
 - **Evidence**: `/audit/ga-evidence/ops/dashboards/`
 - **Helm**: `/helm/monitoring/values.yaml`
 - **Git**: Track changes in version control
@@ -273,4 +277,5 @@ Dashboard JSON is stored in:
 ---
 
 **Document History:**
+
 - 2025-12-27: Initial version (v1.0) - GA hardening initiative

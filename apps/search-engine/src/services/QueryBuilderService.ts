@@ -1,4 +1,4 @@
-import { SearchFilters, QueryBuilder, SearchQuery } from '../types';
+import { SearchFilters, QueryBuilder, SearchQuery } from "../types";
 
 export class QueryBuilderService {
   private synonyms: Map<string, string[]> = new Map();
@@ -10,59 +10,20 @@ export class QueryBuilderService {
   }
 
   private initializeSynonyms(): void {
-    this.synonyms.set('person', ['individual', 'human', 'people', 'personnel']);
-    this.synonyms.set('organization', [
-      'company',
-      'corp',
-      'enterprise',
-      'business',
-      'org',
-    ]);
-    this.synonyms.set('location', [
-      'place',
-      'address',
-      'geo',
-      'position',
-      'site',
-    ]);
-    this.synonyms.set('event', [
-      'incident',
-      'occurrence',
-      'happening',
-      'activity',
-    ]);
-    this.synonyms.set('threat', [
-      'danger',
-      'risk',
-      'vulnerability',
-      'attack',
-      'malware',
-    ]);
-    this.synonyms.set('document', [
-      'file',
-      'report',
-      'paper',
-      'record',
-      'publication',
-    ]);
+    this.synonyms.set("person", ["individual", "human", "people", "personnel"]);
+    this.synonyms.set("organization", ["company", "corp", "enterprise", "business", "org"]);
+    this.synonyms.set("location", ["place", "address", "geo", "position", "site"]);
+    this.synonyms.set("event", ["incident", "occurrence", "happening", "activity"]);
+    this.synonyms.set("threat", ["danger", "risk", "vulnerability", "attack", "malware"]);
+    this.synonyms.set("document", ["file", "report", "paper", "record", "publication"]);
   }
 
   private initializeFieldMappings(): void {
-    this.fieldMappings.set('name', ['title', 'label', 'identifier', 'alias']);
-    this.fieldMappings.set('description', [
-      'content',
-      'summary',
-      'details',
-      'notes',
-    ]);
-    this.fieldMappings.set('date', [
-      'timestamp',
-      'created',
-      'modified',
-      'updated',
-    ]);
-    this.fieldMappings.set('type', ['category', 'classification', 'kind']);
-    this.fieldMappings.set('source', ['origin', 'provider', 'system', 'feed']);
+    this.fieldMappings.set("name", ["title", "label", "identifier", "alias"]);
+    this.fieldMappings.set("description", ["content", "summary", "details", "notes"]);
+    this.fieldMappings.set("date", ["timestamp", "created", "modified", "updated"]);
+    this.fieldMappings.set("type", ["category", "classification", "kind"]);
+    this.fieldMappings.set("source", ["origin", "provider", "system", "feed"]);
   }
 
   buildQuery(naturalLanguageQuery: string): SearchQuery {
@@ -76,7 +37,7 @@ export class QueryBuilderService {
       pagination: { page: 1, size: 20 },
       facets: analyzed.facets,
       highlight: {
-        fields: ['title', 'content', 'description'],
+        fields: ["title", "content", "description"],
         fragmentSize: 150,
         numberOfFragments: 3,
       },
@@ -85,7 +46,7 @@ export class QueryBuilderService {
 
   private analyzeQuery(query: string): {
     mainQuery: string;
-    searchType: 'fulltext' | 'semantic' | 'hybrid' | 'fuzzy';
+    searchType: "fulltext" | "semantic" | "hybrid" | "fuzzy";
     filters: SearchFilters;
     sort?: any;
     facets: string[];
@@ -94,7 +55,7 @@ export class QueryBuilderService {
     const processed = this.processTokens(tokens);
 
     return {
-      mainQuery: processed.mainTerms.join(' '),
+      mainQuery: processed.mainTerms.join(" "),
       searchType: this.determineSearchType(query, processed),
       filters: this.extractFilters(processed),
       sort: this.extractSortCriteria(processed),
@@ -105,7 +66,7 @@ export class QueryBuilderService {
   private tokenizeQuery(query: string): string[] {
     return query
       .toLowerCase()
-      .replace(/[^\w\s-]/g, ' ')
+      .replace(/[^\w\s-]/g, " ")
       .split(/\s+/)
       .filter((token) => token.length > 0);
   }
@@ -126,59 +87,48 @@ export class QueryBuilderService {
     };
 
     const stopWords = new Set([
-      'the',
-      'a',
-      'an',
-      'and',
-      'or',
-      'but',
-      'in',
-      'on',
-      'at',
-      'to',
-      'for',
-      'of',
-      'with',
-      'by',
+      "the",
+      "a",
+      "an",
+      "and",
+      "or",
+      "but",
+      "in",
+      "on",
+      "at",
+      "to",
+      "for",
+      "of",
+      "with",
+      "by",
     ]);
     const entityTypeTerms = new Set([
-      'person',
-      'people',
-      'organization',
-      'company',
-      'location',
-      'event',
-      'document',
-      'threat',
+      "person",
+      "people",
+      "organization",
+      "company",
+      "location",
+      "event",
+      "document",
+      "threat",
     ]);
     const dateTerms = new Set([
-      'today',
-      'yesterday',
-      'week',
-      'month',
-      'year',
-      'recent',
-      'latest',
-      'since',
-      'before',
-      'after',
+      "today",
+      "yesterday",
+      "week",
+      "month",
+      "year",
+      "recent",
+      "latest",
+      "since",
+      "before",
+      "after",
     ]);
-    const operatorTerms = new Set(['and', 'or', 'not', 'near', 'within']);
-    const modifierTerms = new Set([
-      'similar',
-      'like',
-      'related',
-      'associated',
-      'connected',
-    ]);
+    const operatorTerms = new Set(["and", "or", "not", "near", "within"]);
+    const modifierTerms = new Set(["similar", "like", "related", "associated", "connected"]);
 
     tokens.forEach((token) => {
-      if (
-        stopWords.has(token) &&
-        token !== 'and' &&
-        token !== 'or' &&
-        token !== 'not'
-      ) {
+      if (stopWords.has(token) && token !== "and" && token !== "or" && token !== "not") {
         return;
       }
 
@@ -200,35 +150,24 @@ export class QueryBuilderService {
 
   private determineSearchType(
     originalQuery: string,
-    processed: any,
-  ): 'fulltext' | 'semantic' | 'hybrid' | 'fuzzy' {
-    const semanticIndicators = [
-      'similar',
-      'like',
-      'related',
-      'associated',
-      'meaning',
-      'concept',
-    ];
-    const fuzzyIndicators = ['approximate', 'fuzzy', 'close', 'near'];
+    processed: any
+  ): "fulltext" | "semantic" | "hybrid" | "fuzzy" {
+    const semanticIndicators = ["similar", "like", "related", "associated", "meaning", "concept"];
+    const fuzzyIndicators = ["approximate", "fuzzy", "close", "near"];
 
-    if (
-      semanticIndicators.some((indicator) => originalQuery.includes(indicator))
-    ) {
-      return 'semantic';
+    if (semanticIndicators.some((indicator) => originalQuery.includes(indicator))) {
+      return "semantic";
     }
 
-    if (
-      fuzzyIndicators.some((indicator) => originalQuery.includes(indicator))
-    ) {
-      return 'fuzzy';
+    if (fuzzyIndicators.some((indicator) => originalQuery.includes(indicator))) {
+      return "fuzzy";
     }
 
     if (processed.modifiers.length > 0) {
-      return 'hybrid';
+      return "hybrid";
     }
 
-    return 'fulltext';
+    return "fulltext";
   }
 
   private extractFilters(processed: any): SearchFilters {
@@ -261,51 +200,29 @@ export class QueryBuilderService {
 
     dateExpressions.forEach((expr) => {
       switch (expr) {
-        case 'today':
-          from = new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            now.getDate(),
-          ).toISOString();
-          to = new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            now.getDate() + 1,
-          ).toISOString();
+        case "today":
+          from = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+          to = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString();
           break;
-        case 'yesterday':
-          from = new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            now.getDate() - 1,
-          ).toISOString();
-          to = new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            now.getDate(),
-          ).toISOString();
+        case "yesterday":
+          from = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).toISOString();
+          to = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
           break;
-        case 'week':
-        case 'recent':
-          from = new Date(
-            now.getTime() - 7 * 24 * 60 * 60 * 1000,
-          ).toISOString();
+        case "week":
+        case "recent":
+          from = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
           break;
-        case 'month':
-          from = new Date(
-            now.getTime() - 30 * 24 * 60 * 60 * 1000,
-          ).toISOString();
+        case "month":
+          from = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
           break;
-        case 'year':
-          from = new Date(
-            now.getTime() - 365 * 24 * 60 * 60 * 1000,
-          ).toISOString();
+        case "year":
+          from = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000).toISOString();
           break;
       }
     });
 
     return {
-      field: 'createdAt',
+      field: "createdAt",
       from,
       to,
     };
@@ -313,24 +230,24 @@ export class QueryBuilderService {
 
   private extractSortCriteria(processed: any): any {
     if (
-      processed.dateExpressions.includes('latest') ||
-      processed.dateExpressions.includes('recent')
+      processed.dateExpressions.includes("latest") ||
+      processed.dateExpressions.includes("recent")
     ) {
-      return { field: 'createdAt', order: 'desc' };
+      return { field: "createdAt", order: "desc" };
     }
 
     return undefined;
   }
 
   private suggestFacets(processed: any): string[] {
-    const facets = ['entityTypes', 'sources'];
+    const facets = ["entityTypes", "sources"];
 
     if (processed.entityTypes.length > 0) {
-      facets.push('tags');
+      facets.push("tags");
     }
 
     if (processed.dateExpressions.length > 0) {
-      facets.push('dateHistogram');
+      facets.push("dateHistogram");
     }
 
     return facets;
@@ -342,26 +259,20 @@ export class QueryBuilderService {
 
   private convertQueryBuilderToElastic(qb: QueryBuilder): any {
     switch (qb.type) {
-      case 'bool':
+      case "bool":
         return {
           bool: {
             ...(qb.must && {
               must: qb.must.map((q) => this.convertQueryBuilderToElastic(q)),
             }),
             ...(qb.should && {
-              should: qb.should.map((q) =>
-                this.convertQueryBuilderToElastic(q),
-              ),
+              should: qb.should.map((q) => this.convertQueryBuilderToElastic(q)),
             }),
             ...(qb.must_not && {
-              must_not: qb.must_not.map((q) =>
-                this.convertQueryBuilderToElastic(q),
-              ),
+              must_not: qb.must_not.map((q) => this.convertQueryBuilderToElastic(q)),
             }),
             ...(qb.filter && {
-              filter: qb.filter.map((q) =>
-                this.convertQueryBuilderToElastic(q),
-              ),
+              filter: qb.filter.map((q) => this.convertQueryBuilderToElastic(q)),
             }),
             ...(qb.minimum_should_match && {
               minimum_should_match: qb.minimum_should_match,
@@ -369,18 +280,18 @@ export class QueryBuilderService {
           },
         };
 
-      case 'match':
+      case "match":
         return {
           match: {
             [qb.field!]: {
               query: qb.value,
-              operator: qb.operator || 'or',
+              operator: qb.operator || "or",
               ...(qb.boost && { boost: qb.boost }),
             },
           },
         };
 
-      case 'term':
+      case "term":
         return {
           term: {
             [qb.field!]: {
@@ -390,7 +301,7 @@ export class QueryBuilderService {
           },
         };
 
-      case 'range':
+      case "range":
         return {
           range: {
             [qb.field!]: {
@@ -400,7 +311,7 @@ export class QueryBuilderService {
           },
         };
 
-      case 'wildcard':
+      case "wildcard":
         return {
           wildcard: {
             [qb.field!]: {
@@ -410,18 +321,18 @@ export class QueryBuilderService {
           },
         };
 
-      case 'fuzzy':
+      case "fuzzy":
         return {
           fuzzy: {
             [qb.field!]: {
               value: qb.value,
-              fuzziness: 'AUTO',
+              fuzziness: "AUTO",
               ...(qb.boost && { boost: qb.boost }),
             },
           },
         };
 
-      case 'nested':
+      case "nested":
         return {
           nested: {
             path: qb.field!,
@@ -430,7 +341,7 @@ export class QueryBuilderService {
           },
         };
 
-      case 'geo_distance':
+      case "geo_distance":
         return {
           geo_distance: {
             distance: qb.value.distance,
@@ -457,7 +368,7 @@ export class QueryBuilderService {
       }
     });
 
-    return expandedWords.join(' ');
+    return expandedWords.join(" ");
   }
 
   suggestCorrections(query: string): string[] {
@@ -470,7 +381,7 @@ export class QueryBuilderService {
       for (const [key, synonyms] of this.synonyms.entries()) {
         const allTerms = [key, ...synonyms];
         const closeMatches = allTerms.filter(
-          (term) => this.levenshteinDistance(word.toLowerCase(), term) <= 2,
+          (term) => this.levenshteinDistance(word.toLowerCase(), term) <= 2
         );
 
         if (closeMatches.length > 0) {
@@ -499,7 +410,7 @@ export class QueryBuilderService {
         matrix[j][i] = Math.min(
           matrix[j][i - 1] + 1,
           matrix[j - 1][i] + 1,
-          matrix[j - 1][i - 1] + substitutionCost,
+          matrix[j - 1][i - 1] + substitutionCost
         );
       }
     }
@@ -510,12 +421,11 @@ export class QueryBuilderService {
   parseFilterExpression(expression: string): SearchFilters {
     const filters: SearchFilters = {};
 
-    const dateRangeRegex =
-      /date\s*:\s*(\d{4}-\d{2}-\d{2})\s*to\s*(\d{4}-\d{2}-\d{2})/i;
+    const dateRangeRegex = /date\s*:\s*(\d{4}-\d{2}-\d{2})\s*to\s*(\d{4}-\d{2}-\d{2})/i;
     const dateMatch = expression.match(dateRangeRegex);
     if (dateMatch) {
       filters.dateRange = {
-        field: 'createdAt',
+        field: "createdAt",
         from: dateMatch[1],
         to: dateMatch[2],
       };
@@ -553,16 +463,13 @@ export class QueryBuilderService {
 
   generateSearchTemplates(): Record<string, string> {
     return {
-      'threat-intelligence':
-        'type:threat AND (malware OR vulnerability OR attack) AND date:{{date_range}}',
-      'entity-relationships': 'entity:"{{entity_name}}" AND related:true',
-      'case-documents':
-        'type:document AND case:"{{case_id}}" AND date:{{date_range}}',
-      'recent-events':
-        'type:event AND date:last_{{days}}_days ORDER BY date DESC',
-      'high-confidence': 'confidence:0.8_to_1.0 AND verified:true',
-      geospatial:
-        'location:within_{{distance}}_of_{{coordinates}} AND type:{{entity_type}}',
+      "threat-intelligence":
+        "type:threat AND (malware OR vulnerability OR attack) AND date:{{date_range}}",
+      "entity-relationships": 'entity:"{{entity_name}}" AND related:true',
+      "case-documents": 'type:document AND case:"{{case_id}}" AND date:{{date_range}}',
+      "recent-events": "type:event AND date:last_{{days}}_days ORDER BY date DESC",
+      "high-confidence": "confidence:0.8_to_1.0 AND verified:true",
+      geospatial: "location:within_{{distance}}_of_{{coordinates}} AND type:{{entity_type}}",
     };
   }
 }

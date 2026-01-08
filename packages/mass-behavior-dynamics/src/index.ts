@@ -31,10 +31,10 @@
  *    - Resilience hotspot detection
  */
 
-export * from './models/index.js';
-export * from './simulation/index.js';
-export * from './contagion/index.js';
-export * from './collective/index.js';
+export * from "./models/index.js";
+export * from "./simulation/index.js";
+export * from "./contagion/index.js";
+export * from "./collective/index.js";
 
 // ============================================================================
 // CORE TYPE DEFINITIONS
@@ -127,7 +127,7 @@ export interface MediaConsumption {
 }
 
 export interface MediaSource {
-  type: 'MAINSTREAM' | 'ALTERNATIVE' | 'SOCIAL' | 'PEER' | 'OFFICIAL';
+  type: "MAINSTREAM" | "ALTERNATIVE" | "SOCIAL" | "PEER" | "OFFICIAL";
   outlets: string[];
   trustLevel: number;
   frequency: number;
@@ -232,7 +232,7 @@ export interface EmotionState {
   emotion: string;
   intensity: number;
   targets: string[];
-  trend: 'RISING' | 'STABLE' | 'DECLINING';
+  trend: "RISING" | "STABLE" | "DECLINING";
 }
 
 export interface InformationEnvironment {
@@ -273,12 +273,12 @@ export interface ContagionModel {
 }
 
 export type ContagionType =
-  | 'SIMPLE_CONTAGION' // Single exposure sufficient
-  | 'COMPLEX_CONTAGION' // Multiple exposures required
-  | 'THRESHOLD_MODEL' // Granovetter threshold dynamics
-  | 'CASCADE_MODEL' // Information cascade with Bayesian updating
-  | 'EMOTIONAL_CONTAGION' // Affect-based spreading
-  | 'HYBRID_CONTAGION'; // Combined mechanisms
+  | "SIMPLE_CONTAGION" // Single exposure sufficient
+  | "COMPLEX_CONTAGION" // Multiple exposures required
+  | "THRESHOLD_MODEL" // Granovetter threshold dynamics
+  | "CASCADE_MODEL" // Information cascade with Bayesian updating
+  | "EMOTIONAL_CONTAGION" // Affect-based spreading
+  | "HYBRID_CONTAGION"; // Combined mechanisms
 
 export interface ContagionParameters {
   // Basic epidemic parameters
@@ -318,12 +318,12 @@ export interface PhaseTransitionIndicator {
 }
 
 export type TransitionType =
-  | 'MASS_MOBILIZATION'
-  | 'OPINION_SHIFT'
-  | 'TRUST_COLLAPSE'
-  | 'NARRATIVE_DOMINANCE'
-  | 'VIOLENCE_THRESHOLD'
-  | 'INSTITUTIONAL_CRISIS';
+  | "MASS_MOBILIZATION"
+  | "OPINION_SHIFT"
+  | "TRUST_COLLAPSE"
+  | "NARRATIVE_DOMINANCE"
+  | "VIOLENCE_THRESHOLD"
+  | "INSTITUTIONAL_CRISIS";
 
 export interface EarlyWarningSignal {
   signal: string;
@@ -427,10 +427,7 @@ export class MassBehaviorEngine {
     objective: InterventionObjective
   ): Promise<InterventionPoint[]> {
     // Identify network-level interventions
-    const networkInterventions = this.analyzeNetworkInterventions(
-      state.networkTopology,
-      objective
-    );
+    const networkInterventions = this.analyzeNetworkInterventions(state.networkTopology, objective);
 
     // Identify narrative interventions
     const narrativeInterventions = this.analyzeNarrativeInterventions(
@@ -444,8 +441,9 @@ export class MassBehaviorEngine {
       objective
     );
 
-    return [...networkInterventions, ...narrativeInterventions, ...institutionalInterventions]
-      .sort((a, b) => b.expectedImpact - a.expectedImpact);
+    return [...networkInterventions, ...narrativeInterventions, ...institutionalInterventions].sort(
+      (a, b) => b.expectedImpact - a.expectedImpact
+    );
   }
 
   /**
@@ -480,7 +478,7 @@ export class MassBehaviorEngine {
     for (const segment of state.segments) {
       if (segment.susceptibilityProfile.disinformation > 0.7) {
         vulnerabilities.push({
-          type: 'SEGMENT_SUSCEPTIBILITY',
+          type: "SEGMENT_SUSCEPTIBILITY",
           target: segment.id,
           severity: segment.susceptibilityProfile.disinformation,
           description: `Segment ${segment.name} has high disinformation susceptibility`,
@@ -491,10 +489,10 @@ export class MassBehaviorEngine {
     // Network vulnerabilities
     if (state.networkTopology.modularityScore > 0.8) {
       vulnerabilities.push({
-        type: 'ECHO_CHAMBER_RISK',
-        target: 'network',
+        type: "ECHO_CHAMBER_RISK",
+        target: "network",
         severity: state.networkTopology.modularityScore,
-        description: 'High network modularity indicates echo chamber formation',
+        description: "High network modularity indicates echo chamber formation",
       });
     }
 
@@ -502,10 +500,10 @@ export class MassBehaviorEngine {
     const avgTrust = this.calculateAverageTrust(state.segments);
     if (avgTrust < 0.3) {
       vulnerabilities.push({
-        type: 'INSTITUTIONAL_TRUST_DEFICIT',
-        target: 'institutional',
+        type: "INSTITUTIONAL_TRUST_DEFICIT",
+        target: "institutional",
         severity: 1 - avgTrust,
-        description: 'Low institutional trust creates vulnerability to alternative narratives',
+        description: "Low institutional trust creates vulnerability to alternative narratives",
       });
     }
 
@@ -541,14 +539,22 @@ export class MassBehaviorEngine {
   private getRecommendedActions(indicator: PhaseTransitionIndicator): string[] {
     const actions: string[] = [];
     switch (indicator.type) {
-      case 'MASS_MOBILIZATION':
-        actions.push('Monitor key organizers', 'Prepare counter-messaging', 'Engage moderates');
+      case "MASS_MOBILIZATION":
+        actions.push("Monitor key organizers", "Prepare counter-messaging", "Engage moderates");
         break;
-      case 'TRUST_COLLAPSE':
-        actions.push('Increase transparency', 'Empower trusted intermediaries', 'Address grievances');
+      case "TRUST_COLLAPSE":
+        actions.push(
+          "Increase transparency",
+          "Empower trusted intermediaries",
+          "Address grievances"
+        );
         break;
-      case 'NARRATIVE_DOMINANCE':
-        actions.push('Deploy counter-narratives', 'Amplify alternative voices', 'Fact-check prominently');
+      case "NARRATIVE_DOMINANCE":
+        actions.push(
+          "Deploy counter-narratives",
+          "Amplify alternative voices",
+          "Fact-check prominently"
+        );
         break;
     }
     return actions;
@@ -563,12 +569,12 @@ export class MassBehaviorEngine {
     objective: InterventionObjective
   ): InterventionPoint[] {
     return topology.bridges.map((bridge) => ({
-      type: 'NETWORK',
+      type: "NETWORK",
       target: bridge.id,
-      mechanism: 'Bridge node engagement',
+      mechanism: "Bridge node engagement",
       expectedImpact: bridge.informationFlowCapacity * 0.5,
-      cost: 'MEDIUM',
-      timeToEffect: 'DAYS',
+      cost: "MEDIUM",
+      timeToEffect: "DAYS",
     }));
   }
 
@@ -577,12 +583,12 @@ export class MassBehaviorEngine {
     objective: InterventionObjective
   ): InterventionPoint[] {
     return beliefs.contestedTopics.map((topic) => ({
-      type: 'NARRATIVE',
+      type: "NARRATIVE",
       target: topic,
-      mechanism: 'Counter-narrative injection',
+      mechanism: "Counter-narrative injection",
       expectedImpact: 0.4,
-      cost: 'LOW',
-      timeToEffect: 'WEEKS',
+      cost: "LOW",
+      timeToEffect: "WEEKS",
     }));
   }
 
@@ -593,12 +599,12 @@ export class MassBehaviorEngine {
     return segments
       .filter((s) => s.psychographics.institutionalTrust.government < 0.3)
       .map((segment) => ({
-        type: 'INSTITUTIONAL',
+        type: "INSTITUTIONAL",
         target: segment.id,
-        mechanism: 'Trust-building engagement',
+        mechanism: "Trust-building engagement",
         expectedImpact: 0.3,
-        cost: 'HIGH',
-        timeToEffect: 'MONTHS',
+        cost: "HIGH",
+        timeToEffect: "MONTHS",
       }));
   }
 
@@ -606,7 +612,7 @@ export class MassBehaviorEngine {
     params: ContagionParameters,
     topology: NetworkTopology
   ): number {
-    return params.transmissionRate * topology.averageDegree / params.recoveryRate;
+    return (params.transmissionRate * topology.averageDegree) / params.recoveryRate;
   }
 
   private adjustForImmunity(R0: number, state: PopulationState): number {
@@ -624,9 +630,13 @@ export class MassBehaviorEngine {
     currentPenetration: number,
     criticalMass: number
   ): number {
-    if (R0 < 1) {return 0.1;}
-    if (currentPenetration > criticalMass) {return 0.9;}
-    return Math.min(0.9, R0 * currentPenetration / criticalMass);
+    if (R0 < 1) {
+      return 0.1;
+    }
+    if (currentPenetration > criticalMass) {
+      return 0.9;
+    }
+    return Math.min(0.9, (R0 * currentPenetration) / criticalMass);
   }
 
   private estimateTimeToSaturation(narrative: Narrative, state: PopulationState): number {
@@ -637,9 +647,7 @@ export class MassBehaviorEngine {
     narrative: Narrative,
     segments: PopulationSegment[]
   ): string[] {
-    return segments
-      .filter((s) => s.susceptibilityProfile.disinformation > 0.5)
-      .map((s) => s.id);
+    return segments.filter((s) => s.susceptibilityProfile.disinformation > 0.5).map((s) => s.id);
   }
 
   private assessAmplificationRisk(narrative: Narrative, state: PopulationState): number {
@@ -660,7 +668,10 @@ class PopulationModel {
 
 class ContagionEngine {
   constructor(private config: unknown) {}
-  async detectPatterns(state: PopulationState, shocks: ExternalShock[]): Promise<ContagionPattern[]> {
+  async detectPatterns(
+    state: PopulationState,
+    shocks: ExternalShock[]
+  ): Promise<ContagionPattern[]> {
     return [];
   }
   estimateParameters(narrative: Narrative, state: PopulationState): ContagionParameters {
@@ -758,7 +769,7 @@ export interface InterventionOpportunity {
 }
 
 export interface InterventionPoint {
-  type: 'NETWORK' | 'NARRATIVE' | 'INSTITUTIONAL';
+  type: "NETWORK" | "NARRATIVE" | "INSTITUTIONAL";
   target: string;
   mechanism: string;
   expectedImpact: number;

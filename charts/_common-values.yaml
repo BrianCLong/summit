@@ -11,18 +11,18 @@ opentelemetry:
   # OTEL Collector endpoint
   collector:
     endpoint: "otel-collector.observability.svc.cluster.local:4317"
-    protocol: grpc  # grpc or http
+    protocol: grpc # grpc or http
 
   # Sampling configuration
   sampling:
     type: "parentbased_traceidratio"
-    ratio: 1.0  # 100% in dev, reduce in prod
+    ratio: 1.0 # 100% in dev, reduce in prod
 
   # Resource attributes
   resource:
     attributes:
       service.namespace: "summit"
-      deployment.environment: "dev"  # Override per environment
+      deployment.environment: "dev" # Override per environment
 
   # Instrumentation
   instrumentation:
@@ -230,7 +230,7 @@ secrets:
   # External Secrets Operator
   externalSecrets:
     enabled: true
-    backend: "aws-secretsmanager"  # aws-secretsmanager, vault, gcpsm, azure-keyvault
+    backend: "aws-secretsmanager" # aws-secretsmanager, vault, gcpsm, azure-keyvault
 
     # AWS Secrets Manager
     awsSecretsManager:
@@ -334,11 +334,11 @@ resources:
 # ============================================================================
 serviceMesh:
   enabled: false
-  type: "istio"  # istio, linkerd, consul
+  type: "istio" # istio, linkerd, consul
 
   # Istio configuration
   istio:
-    injection: enabled  # Label for automatic sidecar injection
+    injection: enabled # Label for automatic sidecar injection
     mtls:
       mode: STRICT
 
@@ -351,6 +351,6 @@ serviceMesh:
 # ============================================================================
 backup:
   enabled: false
-  schedule: "0 2 * * *"  # 2 AM daily
-  retention: 30  # days
+  schedule: "0 2 * * *" # 2 AM daily
+  retention: 30 # days
   destination: "s3://backups/summit"

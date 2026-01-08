@@ -10,10 +10,10 @@ The Mobile Field Kit is an offline-first Progressive Web Application (PWA) desig
     - Uses IndexedDB (via `idb` wrapper) for persistent storage of Cases, Notes, and Media on the client device.
     - Ensures data is available immediately without network access.
     - Data Model:
-        - `FieldCaseSnapshot`: A subset of a case downloaded for a mission.
-        - `FieldNote`: Textual observations linked to a case.
-        - `FieldMediaCapture`: Photos/Videos/Audio (stored as Blobs).
-        - `SyncQueue`: An operation log for changes made while offline.
+      - `FieldCaseSnapshot`: A subset of a case downloaded for a mission.
+      - `FieldNote`: Textual observations linked to a case.
+      - `FieldMediaCapture`: Photos/Videos/Audio (stored as Blobs).
+      - `SyncQueue`: An operation log for changes made while offline.
 
 2.  **Sync Engine (`lib/sync-engine.ts`)**:
     - Monitors network connectivity (`navigator.onLine`).
@@ -32,12 +32,12 @@ The Mobile Field Kit is an offline-first Progressive Web Application (PWA) desig
 
 - **Data Encryption**: Platform-level encryption (FileVault/BitLocker on laptops, iOS/Android encryption for mobile devices) is relied upon.
 - **Session Management (`lib/security.ts`)**:
-    - Implements a 15-minute inactivity timeout.
-    - Locks the interface requiring a PIN (or re-auth) to resume.
-    - Clears sensitive data from memory when locked (where possible).
+  - Implements a 15-minute inactivity timeout.
+  - Locks the interface requiring a PIN (or re-auth) to resume.
+  - Clears sensitive data from memory when locked (where possible).
 - **Remote Wipe**:
-    - The `SecurityManager` polls for a "kill pill" signal (simulated via local storage flag for now).
-    - If received, the local IndexedDB is purged immediately and the application resets.
+  - The `SecurityManager` polls for a "kill pill" signal (simulated via local storage flag for now).
+  - If received, the local IndexedDB is purged immediately and the application resets.
 
 ### Workflows
 
@@ -66,5 +66,6 @@ The Mobile Field Kit is an offline-first Progressive Web Application (PWA) desig
 ## Integration
 
 The Field Kit integrates with the main IntelGraph platform via the `Ingestion Service` API.
+
 - **Notes** -> Ingested as `Report` entities linked to the Case.
 - **Media** -> Uploaded to Object Storage, metadata ingested as `Evidence` nodes.

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect } from "react";
 // import { useApolloClient } from '@apollo/client';
 // TODO: Re-enable when GraphQL schema is available
 // import {
@@ -18,7 +18,7 @@ export function useDashboardPrefetch() {
 
   useEffect(() => {
     // Placeholder - no prefetching until GraphQL is available
-    console.log('🚀 Dashboard prefetch: GraphQL schema not available');
+    console.log("🚀 Dashboard prefetch: GraphQL schema not available");
   }, []);
 }
 
@@ -32,7 +32,7 @@ export function useGraphWorkbenchPrefetch(investigationId?: string) {
   useEffect(() => {
     if (!investigationId) return;
     // Placeholder - no prefetching until GraphQL is available
-    console.log('🚀 GraphWorkbench prefetch: GraphQL schema not available');
+    console.log("🚀 GraphWorkbench prefetch: GraphQL schema not available");
   }, [investigationId]);
 }
 
@@ -45,6 +45,6 @@ export function useIntelligentPrefetch() {
 
   useEffect(() => {
     // Placeholder - no prefetching until GraphQL is available
-    console.log('🚀 Intelligent prefetch: GraphQL schema not available');
+    console.log("🚀 Intelligent prefetch: GraphQL schema not available");
   }, []);
 }

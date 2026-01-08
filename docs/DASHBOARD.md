@@ -134,27 +134,23 @@ For a fully containerized development environment, you will need to update your 
 **Example `docker-compose.dev.yml` snippet (updated):**
 
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   neo4j:
     image: neo4j:5.17.0-community
     hostname: neo4j
     ports:
-      - '7474:7474'
-      - '7687:7687'
+      - "7474:7474"
+      - "7687:7687"
     environment:
       NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-password}
       NEO4J_db_tx__log_rotation__size: 100M
-      NEO4J_ACCEPT_LICENSE_AGREEMENT: 'yes'
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
     volumes:
       - neo4j_data:/data
       - neo4j_logs:/logs
     healthcheck:
-      test:
-        [
-          'CMD-SHELL',
-          'wget --no-verbose --tries=1 --spider localhost:7474 || exit 1',
-        ]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:7474 || exit 1"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -163,9 +159,9 @@ services:
     image: redis:7.0-alpine
     hostname: redis
     ports:
-      - '6379:6379'
+      - "6379:6379"
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -174,12 +170,12 @@ services:
     image: confluentinc/cp-zookeeper:7.5.0
     hostname: zookeeper
     ports:
-      - '2181:2181'
+      - "2181:2181"
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     healthcheck:
-      test: ['CMD-SHELL', 'echo stat | nc localhost 2181']
+      test: ["CMD-SHELL", "echo stat | nc localhost 2181"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -188,8 +184,8 @@ services:
     image: confluentinc/cp-kafka:7.5.0
     hostname: kafka
     ports:
-      - '9092:9092'
-      - '9093:9093' # For internal communication
+      - "9092:9092"
+      - "9093:9093" # For internal communication
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -201,8 +197,7 @@ services:
     depends_on:
       - zookeeper
     healthcheck:
-      test:
-        ['CMD-SHELL', 'kafka-topics --bootstrap-server localhost:9092 --list']
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -212,7 +207,7 @@ services:
       context: ./api
       dockerfile: Dockerfile.api # Assuming you create this Dockerfile
     ports:
-      - '8000:8000'
+      - "8000:8000"
     environment:
       NEO4J_URI: bolt://neo4j:7687
       NEO4J_USER: ${NEO4J_USER:-neo4j}
@@ -228,7 +223,7 @@ services:
       - ./api:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:8000/health']
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -238,7 +233,7 @@ services:
       context: ./server
       dockerfile: Dockerfile.server # Assuming you create this Dockerfile
     ports:
-      - '4000:4000'
+      - "4000:4000"
     environment:
       NEO4J_URI: bolt://neo4j:7687
       NEO4J_USER: ${NEO4J_USER:-neo4j}
@@ -260,7 +255,7 @@ services:
       - ./server:/app
     command: npm run dev
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:4000/health']
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -270,7 +265,7 @@ services:
       context: ./client
       dockerfile: Dockerfile.client # Assuming you create this Dockerfile
     ports:
-      - '3000:3000'
+      - "3000:3000"
     environment:
       VITE_GRAPHQL_URI: http://localhost:4000/graphql
     depends_on:
@@ -280,7 +275,7 @@ services:
       - ./client:/app
     command: npm run dev
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:3000']
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
       interval: 10s
       timeout: 5s
       retries: 5

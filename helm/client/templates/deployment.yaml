@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: client
-          image: '{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}'
+          image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           imagePullPolicy: { { .Values.image.pullPolicy } }
           ports:
             - name: http

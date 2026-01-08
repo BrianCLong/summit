@@ -4,7 +4,7 @@
  * Collects API metrics and analytics
  */
 
-import type { Request, Response, NextFunction, RequestMetrics } from '../types';
+import type { Request, Response, NextFunction, RequestMetrics } from "../types";
 
 export interface MetricsCollector {
   record(metrics: RequestMetrics): void | Promise<void>;
@@ -32,25 +32,28 @@ class MemoryMetricsCollector implements MetricsCollector {
 
   getStats() {
     const now = Date.now();
-    const lastHour = this.metrics.filter(
-      (m) => now - m.timestamp.getTime() < 3600000
-    );
+    const lastHour = this.metrics.filter((m) => now - m.timestamp.getTime() < 3600000);
 
     const totalRequests = lastHour.length;
     const errorRequests = lastHour.filter((m) => m.statusCode >= 400).length;
-    const avgDuration =
-      lastHour.reduce((sum, m) => sum + m.duration, 0) / totalRequests || 0;
+    const avgDuration = lastHour.reduce((sum, m) => sum + m.duration, 0) / totalRequests || 0;
 
-    const statusCodes = lastHour.reduce((acc, m) => {
-      acc[m.statusCode] = (acc[m.statusCode] || 0) + 1;
-      return acc;
-    }, {} as Record<number, number>);
+    const statusCodes = lastHour.reduce(
+      (acc, m) => {
+        acc[m.statusCode] = (acc[m.statusCode] || 0) + 1;
+        return acc;
+      },
+      {} as Record<number, number>
+    );
 
-    const endpoints = lastHour.reduce((acc, m) => {
-      const key = `${m.method} ${m.path}`;
-      acc[key] = (acc[key] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const endpoints = lastHour.reduce(
+      (acc, m) => {
+        const key = `${m.method} ${m.path}`;
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     return {
       totalRequests,
@@ -74,11 +77,11 @@ export function metricsMiddleware(collector?: MetricsCollector) {
     const startTime = Date.now();
 
     // Capture response
-    res.on('finish', () => {
+    res.on("finish", () => {
       const duration = Date.now() - startTime;
 
       const metrics: RequestMetrics = {
-        requestId: req.context?.requestId || 'unknown',
+        requestId: req.context?.requestId || "unknown",
         method: req.method,
         path: req.path,
         statusCode: res.statusCode,
@@ -86,7 +89,7 @@ export function metricsMiddleware(collector?: MetricsCollector) {
         timestamp: new Date(),
         userId: req.context?.user?.id,
         apiVersion: req.context?.apiVersion,
-        userAgent: req.get('user-agent'),
+        userAgent: req.get("user-agent"),
         ip: req.ip || req.socket.remoteAddress,
       };
 

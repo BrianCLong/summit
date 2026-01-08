@@ -1,9 +1,9 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { useState, useCallback } from 'react';
-import Toast, { ToastProps } from './Toast';
+import React, { useState, useCallback } from "react";
+import Toast, { ToastProps } from "./Toast";
 
 interface ToastContextType {
-  addToast: (toast: Omit<ToastProps, 'id' | 'onDismiss'>) => string;
+  addToast: (toast: Omit<ToastProps, "id" | "onDismiss">) => string;
   removeToast: (id: string) => void;
   clearAllToasts: () => void;
   success: (title: string, message?: string) => string;
@@ -17,7 +17,7 @@ export const ToastContext = React.createContext<ToastContextType | null>(null);
 export const useToast = (): ToastContextType => {
   const context = React.useContext(ToastContext);
   if (!context) {
-    throw new Error('useToast must be used within ToastProvider');
+    throw new Error("useToast must be used within ToastProvider");
   }
   return context;
 };
@@ -25,20 +25,18 @@ export const useToast = (): ToastContextType => {
 interface ToastProviderProps {
   children: React.ReactNode;
   maxToasts?: number;
-  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+  position?: "top-right" | "top-left" | "bottom-right" | "bottom-left";
 }
 
 export const ToastProvider: React.FC<ToastProviderProps> = ({
   children,
   maxToasts = 5,
-  position = 'top-right',
+  position = "top-right",
 }) => {
-  const [toasts, setToasts] = useState<(ToastProps & { timestamp: number })[]>(
-    [],
-  );
+  const [toasts, setToasts] = useState<(ToastProps & { timestamp: number })[]>([]);
 
   const addToast = useCallback(
-    (toastData: Omit<ToastProps, 'id' | 'onDismiss'>) => {
+    (toastData: Omit<ToastProps, "id" | "onDismiss">) => {
       const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       const newToast = {
         ...toastData,
@@ -58,7 +56,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
 
       return id;
     },
-    [maxToasts],
+    [maxToasts]
   );
 
   const removeToast = useCallback((id: string) => {
@@ -71,14 +69,14 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
 
   const getPositionClasses = () => {
     switch (position) {
-      case 'top-left':
-        return 'top-4 left-4';
-      case 'bottom-right':
-        return 'bottom-4 right-4';
-      case 'bottom-left':
-        return 'bottom-4 left-4';
+      case "top-left":
+        return "top-4 left-4";
+      case "bottom-right":
+        return "bottom-4 right-4";
+      case "bottom-left":
+        return "bottom-4 left-4";
       default:
-        return 'top-4 right-4';
+        return "top-4 right-4";
     }
   };
 
@@ -86,14 +84,10 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
     addToast,
     removeToast,
     clearAllToasts,
-    success: (title: string, message?: string) =>
-      addToast({ type: 'success', title, message }),
-    error: (title: string, message?: string) =>
-      addToast({ type: 'error', title, message }),
-    warning: (title: string, message?: string) =>
-      addToast({ type: 'warning', title, message }),
-    info: (title: string, message?: string) =>
-      addToast({ type: 'info', title, message }),
+    success: (title: string, message?: string) => addToast({ type: "success", title, message }),
+    error: (title: string, message?: string) => addToast({ type: "error", title, message }),
+    warning: (title: string, message?: string) => addToast({ type: "warning", title, message }),
+    info: (title: string, message?: string) => addToast({ type: "info", title, message }),
   };
 
   return (
@@ -120,16 +114,12 @@ export const useToastHelpers = () => {
   const { addToast } = useToast();
 
   return {
-    success: (title: string, message?: string) =>
-      addToast({ type: 'success', title, message }),
+    success: (title: string, message?: string) => addToast({ type: "success", title, message }),
 
-    error: (title: string, message?: string) =>
-      addToast({ type: 'error', title, message }),
+    error: (title: string, message?: string) => addToast({ type: "error", title, message }),
 
-    warning: (title: string, message?: string) =>
-      addToast({ type: 'warning', title, message }),
+    warning: (title: string, message?: string) => addToast({ type: "warning", title, message }),
 
-    info: (title: string, message?: string) =>
-      addToast({ type: 'info', title, message }),
+    info: (title: string, message?: string) => addToast({ type: "info", title, message }),
   };
 };

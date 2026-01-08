@@ -81,7 +81,7 @@ root
 
 ```ts
 // server/graphql/plugins/costGuard.ts
-import { GraphQLRequestContext } from '@apollo/server';
+import { GraphQLRequestContext } from "@apollo/server";
 const TENANT_BUDGET = new Map<string, number>();
 
 export const costGuard = {
@@ -93,8 +93,8 @@ export const costGuard = {
         const est = ctx.operation?.selectionSet.selections.length || 1;
         const budget = TENANT_BUDGET.get(tenant) ?? 1000;
         if (est > budget) {
-          throw Object.assign(new Error('Query over budget'), {
-            extensions: { code: 'BUDGET_EXCEEDED', est, budget },
+          throw Object.assign(new Error("Query over budget"), {
+            extensions: { code: "BUDGET_EXCEEDED", est, budget },
           });
         }
       },
@@ -113,20 +113,20 @@ export const costGuard = {
 **GraphQL resolver with OPA check**
 
 ```ts
-import fetch from 'node-fetch';
+import fetch from "node-fetch";
 async function abac(ctx: any, resource: any, fields: string[]) {
   const payload = {
     input: { sub: ctx.user, tenant: ctx.tenantId, resource, fields },
   };
-  const r = await fetch(process.env.OPA_URL + '/v1/data/intelgraph/allow', {
-    method: 'POST',
+  const r = await fetch(process.env.OPA_URL + "/v1/data/intelgraph/allow", {
+    method: "POST",
     body: JSON.stringify(payload),
   });
   const { result } = await r.json();
   if (!result.allow) {
-    const msg = result.explanation || 'Access denied by policy';
+    const msg = result.explanation || "Access denied by policy";
     const err: any = new Error(msg);
-    err.name = 'AccessDenied';
+    err.name = "AccessDenied";
     // include reason for access prompt id if present
     // ctx.audit(...)
     throw err;
@@ -136,11 +136,7 @@ async function abac(ctx: any, resource: any, fields: string[]) {
 export const resolvers = {
   Query: {
     entity: async (_: any, { id }: any, ctx: any) => {
-      await abac(ctx, { type: 'Entity', id }, [
-        'name',
-        'selectors',
-        'sensitivity',
-      ]);
+      await abac(ctx, { type: "Entity", id }, ["name", "selectors", "sensitivity"]);
       return ctx.ds.entities.get(id);
     },
   },
@@ -175,13 +171,13 @@ explanation := msg {
 **Provenance manifest generator (Node)**
 
 ```ts
-import { createHash } from 'crypto';
-import fs from 'fs';
+import { createHash } from "crypto";
+import fs from "fs";
 
 export function sha256(p: string) {
-  const h = createHash('sha256');
+  const h = createHash("sha256");
   h.update(fs.readFileSync(p));
-  return h.digest('hex');
+  return h.digest("hex");
 }
 export function merkle(paths: string[]) {
   let layer = paths.map(sha256);
@@ -191,9 +187,9 @@ export function merkle(paths: string[]) {
       const a = layer[i],
         b = layer[i + 1] || layer[i];
       next.push(
-        createHash('sha256')
+        createHash("sha256")
           .update(a + b)
-          .digest('hex'),
+          .digest("hex")
       );
     }
     layer = next;
@@ -206,34 +202,34 @@ export function merkle(paths: string[]) {
 
 ```ts
 #!/usr/bin/env node
-import fs from 'fs';
-import { merkle } from '../lib/merkle';
-const manifest = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+import fs from "fs";
+import { merkle } from "../lib/merkle";
+const manifest = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
 const files = manifest.files.map((f: any) => f.path);
 const root = merkle(files);
 if (root === manifest.root) {
-  console.log('OK');
+  console.log("OK");
   process.exit(0);
 }
-console.error('FAIL: root mismatch');
+console.error("FAIL: root mismatch");
 process.exit(1);
 ```
 
 **NL→Cypher UI (React + jQuery action)**
 
 ```tsx
-import $ from 'jquery';
+import $ from "jquery";
 export default function NL2CypherPanel() {
   function runSandbox() {
-    $('#runStatus').text('Running in sandbox...');
+    $("#runStatus").text("Running in sandbox...");
     $.ajax({
-      url: '/ai/nl2cypher/execute',
-      method: 'POST',
+      url: "/ai/nl2cypher/execute",
+      method: "POST",
       data: JSON.stringify({ sandbox: true }),
-      contentType: 'application/json',
+      contentType: "application/json",
     })
-      .done(() => $('#runStatus').text('Done'))
-      .fail((e) => $('#runStatus').text('Error: ' + e.responseText));
+      .done(() => $("#runStatus").text("Done"))
+      .fail((e) => $("#runStatus").text("Error: " + e.responseText));
   }
   return (
     <div className="p-4 rounded-2xl shadow">
@@ -248,11 +244,7 @@ export default function NL2CypherPanel() {
       <div className="text-sm">
         Estimated rows: <span id="estRows">~12,340</span>
       </div>
-      <button
-        id="runBtn"
-        onClick={runSandbox}
-        className="mt-3 px-3 py-2 rounded-2xl shadow"
-      >
+      <button id="runBtn" onClick={runSandbox} className="mt-3 px-3 py-2 rounded-2xl shadow">
         Run in Sandbox
       </button>
       <div id="runStatus" className="text-xs mt-2" />
@@ -264,13 +256,13 @@ export default function NL2CypherPanel() {
 **Jest example for manifest**
 
 ```ts
-import fs from 'fs';
-import { merkle } from '../lib/merkle';
+import fs from "fs";
+import { merkle } from "../lib/merkle";
 
-test('manifest root changes on tamper', () => {
-  const a = merkle(['fixtures/a.txt', 'fixtures/b.txt']);
-  fs.writeFileSync('fixtures/a.txt', 'tampered');
-  const b = merkle(['fixtures/a.txt', 'fixtures/b.txt']);
+test("manifest root changes on tamper", () => {
+  const a = merkle(["fixtures/a.txt", "fixtures/b.txt"]);
+  fs.writeFileSync("fixtures/a.txt", "tampered");
+  const b = merkle(["fixtures/a.txt", "fixtures/b.txt"]);
   expect(a).not.toEqual(b);
 });
 ```

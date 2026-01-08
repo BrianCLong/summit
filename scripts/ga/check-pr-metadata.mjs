@@ -1,34 +1,35 @@
+import { readFileSync } from "fs";
+import { join } from "path";
 
-import { readFileSync } from 'fs';
-import { join } from 'path';
-
-const contractPath = join(process.cwd(), 'agent-contract.json');
+const contractPath = join(process.cwd(), "agent-contract.json");
 let contract;
 
 try {
-  contract = JSON.parse(readFileSync(contractPath, 'utf8'));
+  contract = JSON.parse(readFileSync(contractPath, "utf8"));
 } catch (e) {
-  console.error('Failed to parse agent-contract.json:', e);
+  console.error("Failed to parse agent-contract.json:", e);
   process.exit(1);
 }
 
-const prBody = process.env.PR_BODY || '';
+const prBody = process.env.PR_BODY || "";
 const metadataRegex = /<!-- AGENT-METADATA:START -->([\s\S]*?)<!-- AGENT-METADATA:END -->/;
 const match = prBody.match(metadataRegex);
 
 if (!match) {
-  console.error('Missing AGENT-METADATA block in PR body.');
-  console.error('Please include a block like this:');
-  console.error('<!-- AGENT-METADATA:START -->\n{\n  "promptId": "...",\n  "taskId": "...",\n  "tags": ["..."]\n}\n<!-- AGENT-METADATA:END -->');
+  console.error("Missing AGENT-METADATA block in PR body.");
+  console.error("Please include a block like this:");
+  console.error(
+    '<!-- AGENT-METADATA:START -->\n{\n  "promptId": "...",\n  "taskId": "...",\n  "tags": ["..."]\n}\n<!-- AGENT-METADATA:END -->'
+  );
   process.exit(1);
 }
 
 try {
   const metadata = JSON.parse(match[1]);
-  console.log('AGENT-METADATA found and valid:', metadata);
+  console.log("AGENT-METADATA found and valid:", metadata);
 } catch (e) {
-  console.error('Failed to parse AGENT-METADATA content as JSON:', e);
+  console.error("Failed to parse AGENT-METADATA content as JSON:", e);
   process.exit(1);
 }
 
-console.log('PR metadata check passed.');
+console.log("PR metadata check passed.");

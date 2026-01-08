@@ -106,6 +106,7 @@ policy-sim simulate \
 ```
 
 Diff format:
+
 ```json
 {
   "queryId": "q-12345",
@@ -137,7 +138,7 @@ sources:
     license:
       type: proprietary
       terms:
-        - no_export: true  # Cannot export data externally
+        - no_export: true # Cannot export data externally
         - internal_use_only: true
         - attribution_required: true
         - time_limited: "2025-12-31"
@@ -215,16 +216,16 @@ interface LicenseEnforcer {
 }
 
 interface Action {
-  type: 'query' | 'export' | 'share';
+  type: "query" | "export" | "share";
   user: User;
-  dataSources: string[];  // IDs of accessed sources
+  dataSources: string[]; // IDs of accessed sources
   query?: string;
   exportFormat?: string;
 }
 
 interface EnforcementResult {
   allowed: boolean;
-  blockedBy?: string[];  // License IDs that blocked
+  blockedBy?: string[]; // License IDs that blocked
   rationale: string;
   appealable: boolean;
   quotaRemaining?: {
@@ -239,20 +240,18 @@ interface EnforcementResult {
 async function entityResolver(parent, args, context) {
   const dataSources = await identifyDataSources(args);
   const action: Action = {
-    type: 'query',
+    type: "query",
     user: context.user,
     dataSources,
-    query: context.query
+    query: context.query,
   };
 
   const enforcement = await licenseEnforcer.checkAction(action);
 
   if (!enforcement.allowed) {
-    throw new ApolloError(
-      enforcement.rationale,
-      'LICENSE_VIOLATION',
-      { appealable: enforcement.appealable }
-    );
+    throw new ApolloError(enforcement.rationale, "LICENSE_VIOLATION", {
+      appealable: enforcement.appealable,
+    });
   }
 
   // Proceed with query
@@ -296,6 +295,7 @@ extend type Mutation {
 ```
 
 UI flow:
+
 1. User attempts export → blocked
 2. Error message includes "This action is appealable. Click here to submit justification."
 3. User writes justification: "Needed for court testimony in ongoing case XYZ"
@@ -336,6 +336,7 @@ CREATE TABLE policy_exemptions (
 ### Technical Specifications
 
 **Service Structure**:
+
 ```
 services/policy-simulator/
 ├── src/
@@ -395,6 +396,7 @@ services/policy-simulator/
 ### Policy Regression Testing
 
 Maintain golden query set:
+
 ```yaml
 # policy-regression-tests.yml
 tests:
@@ -412,6 +414,7 @@ tests:
 ```
 
 Run on every policy change:
+
 ```bash
 policy-sim test --tests policy-regression-tests.yml
 ```

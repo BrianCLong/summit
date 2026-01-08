@@ -3,7 +3,7 @@
  * Enforces spending limits and circuit breakers for workflow executions
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 
 export interface BudgetLimits {
   max_cost_usd?: number;
@@ -27,12 +27,12 @@ export interface BudgetConfig {
   run_id?: string;
   limits: BudgetLimits;
   soft_limit_threshold: number; // Percentage (0.8 = 80%)
-  hard_limit_action: 'stop' | 'alert' | 'continue';
+  hard_limit_action: "stop" | "alert" | "continue";
   alert_webhooks?: string[];
 }
 
 export interface BudgetAlert {
-  type: 'soft_limit' | 'hard_limit' | 'rate_spike';
+  type: "soft_limit" | "hard_limit" | "rate_spike";
   tenant_id: string;
   run_id?: string;
   metric: string;
@@ -56,7 +56,7 @@ export class BudgetManager extends EventEmitter {
   private circuitBreakers = new Map<
     string,
     {
-      state: 'closed' | 'open' | 'half-open';
+      state: "closed" | "open" | "half-open";
       failures: number;
       last_failure: Date;
       config: CircuitBreakerConfig;
@@ -91,7 +91,7 @@ export class BudgetManager extends EventEmitter {
       });
     }
 
-    this.emit('budget:set', {
+    this.emit("budget:set", {
       tenant_id: config.tenant_id,
       run_id: config.run_id,
       config,
@@ -101,7 +101,7 @@ export class BudgetManager extends EventEmitter {
   async checkBudget(
     tenant_id: string,
     run_id?: string,
-    proposed_usage?: Partial<BudgetUsage>,
+    proposed_usage?: Partial<BudgetUsage>
   ): Promise<{
     allowed: boolean;
     reason?: string;
@@ -115,7 +115,7 @@ export class BudgetManager extends EventEmitter {
     if (!budget || !current_usage) {
       return {
         allowed: true,
-        reason: 'No budget configured',
+        reason: "No budget configured",
         current_usage: current_usage || this.getEmptyUsage(),
         limits: {},
       };
@@ -125,39 +125,26 @@ export class BudgetManager extends EventEmitter {
     const projected_usage = proposed_usage
       ? {
           cost_usd: current_usage.cost_usd + (proposed_usage.cost_usd || 0),
-          duration_ms:
-            current_usage.duration_ms + (proposed_usage.duration_ms || 0),
-          steps_completed:
-            current_usage.steps_completed +
-            (proposed_usage.steps_completed || 0),
-          llm_tokens_used:
-            current_usage.llm_tokens_used +
-            (proposed_usage.llm_tokens_used || 0),
-          api_calls_made:
-            current_usage.api_calls_made + (proposed_usage.api_calls_made || 0),
+          duration_ms: current_usage.duration_ms + (proposed_usage.duration_ms || 0),
+          steps_completed: current_usage.steps_completed + (proposed_usage.steps_completed || 0),
+          llm_tokens_used: current_usage.llm_tokens_used + (proposed_usage.llm_tokens_used || 0),
+          api_calls_made: current_usage.api_calls_made + (proposed_usage.api_calls_made || 0),
           updated_at: new Date(),
         }
       : current_usage;
 
     // Check each limit
-    const violations = this.checkLimitViolations(
-      projected_usage,
-      budget.limits,
-    );
+    const violations = this.checkLimitViolations(projected_usage, budget.limits);
 
     if (violations.length > 0) {
       const violation = violations[0]; // Report first violation
 
       // Check if this is a hard limit violation
-      const isHardLimit = this.isHardLimitViolation(
-        projected_usage,
-        current_usage,
-        budget,
-      );
+      const isHardLimit = this.isHardLimitViolation(projected_usage, current_usage, budget);
 
-      if (isHardLimit && budget.hard_limit_action === 'stop') {
+      if (isHardLimit && budget.hard_limit_action === "stop") {
         this.emitBudgetAlert({
-          type: 'hard_limit',
+          type: "hard_limit",
           tenant_id,
           run_id,
           metric: violation.metric,
@@ -180,7 +167,7 @@ export class BudgetManager extends EventEmitter {
       const percentage = (violation.current / violation.limit) * 100;
       if (percentage >= budget.soft_limit_threshold * 100) {
         this.emitBudgetAlert({
-          type: 'soft_limit',
+          type: "soft_limit",
           tenant_id,
           run_id,
           metric: violation.metric,
@@ -203,7 +190,7 @@ export class BudgetManager extends EventEmitter {
   updateUsage(
     tenant_id: string,
     run_id: string | undefined,
-    usage_delta: Partial<BudgetUsage>,
+    usage_delta: Partial<BudgetUsage>
   ): void {
     const key = this.getBudgetKey(tenant_id, run_id);
     const current = this.usage.get(key) || this.getEmptyUsage();
@@ -211,12 +198,9 @@ export class BudgetManager extends EventEmitter {
     const updated: BudgetUsage = {
       cost_usd: current.cost_usd + (usage_delta.cost_usd || 0),
       duration_ms: current.duration_ms + (usage_delta.duration_ms || 0),
-      steps_completed:
-        current.steps_completed + (usage_delta.steps_completed || 0),
-      llm_tokens_used:
-        current.llm_tokens_used + (usage_delta.llm_tokens_used || 0),
-      api_calls_made:
-        current.api_calls_made + (usage_delta.api_calls_made || 0),
+      steps_completed: current.steps_completed + (usage_delta.steps_completed || 0),
+      llm_tokens_used: current.llm_tokens_used + (usage_delta.llm_tokens_used || 0),
+      api_calls_made: current.api_calls_made + (usage_delta.api_calls_made || 0),
       updated_at: new Date(),
     };
 
@@ -225,7 +209,7 @@ export class BudgetManager extends EventEmitter {
     // Check for rate spikes
     this.checkRateSpikes(tenant_id, run_id, usage_delta);
 
-    this.emit('budget:usage_updated', {
+    this.emit("budget:usage_updated", {
       tenant_id,
       run_id,
       usage: updated,
@@ -238,14 +222,12 @@ export class BudgetManager extends EventEmitter {
     return this.usage.get(key) || null;
   }
 
-  getAllTenantUsage(
-    tenant_id: string,
-  ): Array<{ run_id?: string; usage: BudgetUsage }> {
+  getAllTenantUsage(tenant_id: string): Array<{ run_id?: string; usage: BudgetUsage }> {
     const results: Array<{ run_id?: string; usage: BudgetUsage }> = [];
 
     for (const [key, usage] of this.usage.entries()) {
       if (key.startsWith(`${tenant_id}:`)) {
-        const run_id = key.split(':')[1] || undefined;
+        const run_id = key.split(":")[1] || undefined;
         results.push({ run_id, usage });
       }
     }
@@ -253,12 +235,9 @@ export class BudgetManager extends EventEmitter {
     return results;
   }
 
-  setCircuitBreaker(
-    tenant_id: string,
-    config: Partial<CircuitBreakerConfig> = {},
-  ): void {
+  setCircuitBreaker(tenant_id: string, config: Partial<CircuitBreakerConfig> = {}): void {
     this.circuitBreakers.set(tenant_id, {
-      state: 'closed',
+      state: "closed",
       failures: 0,
       last_failure: new Date(),
       config: { ...this.defaultCircuitBreakerConfig, ...config },
@@ -273,34 +252,34 @@ export class BudgetManager extends EventEmitter {
     const breaker = this.circuitBreakers.get(tenant_id);
 
     if (!breaker) {
-      return { allowed: true, state: 'none' };
+      return { allowed: true, state: "none" };
     }
 
     const now = Date.now();
     const timeSinceFailure = now - breaker.last_failure.getTime();
 
     switch (breaker.state) {
-      case 'closed':
-        return { allowed: true, state: 'closed' };
+      case "closed":
+        return { allowed: true, state: "closed" };
 
-      case 'open':
+      case "open":
         if (timeSinceFailure >= breaker.config.recovery_timeout_ms) {
           // Transition to half-open
-          breaker.state = 'half-open';
-          this.emit('circuit_breaker:half_open', { tenant_id });
-          return { allowed: true, state: 'half-open' };
+          breaker.state = "half-open";
+          this.emit("circuit_breaker:half_open", { tenant_id });
+          return { allowed: true, state: "half-open" };
         }
         return {
           allowed: false,
           reason: `Circuit breaker open for ${tenant_id}`,
-          state: 'open',
+          state: "open",
         };
 
-      case 'half-open':
-        return { allowed: true, state: 'half-open' };
+      case "half-open":
+        return { allowed: true, state: "half-open" };
 
       default:
-        return { allowed: true, state: 'unknown' };
+        return { allowed: true, state: "unknown" };
     }
   }
 
@@ -314,17 +293,14 @@ export class BudgetManager extends EventEmitter {
     breaker.failures++;
     breaker.last_failure = new Date();
 
-    if (breaker.state === 'half-open') {
+    if (breaker.state === "half-open") {
       // Failure during half-open, go back to open
-      breaker.state = 'open';
-      this.emit('circuit_breaker:opened', { tenant_id, error: error.message });
-    } else if (
-      breaker.failures >= breaker.config.failure_threshold &&
-      breaker.state === 'closed'
-    ) {
+      breaker.state = "open";
+      this.emit("circuit_breaker:opened", { tenant_id, error: error.message });
+    } else if (breaker.failures >= breaker.config.failure_threshold && breaker.state === "closed") {
       // Trip the breaker
-      breaker.state = 'open';
-      this.emit('circuit_breaker:tripped', {
+      breaker.state = "open";
+      this.emit("circuit_breaker:tripped", {
         tenant_id,
         failures: breaker.failures,
         error: error.message,
@@ -339,11 +315,11 @@ export class BudgetManager extends EventEmitter {
       return;
     }
 
-    if (breaker.state === 'half-open') {
+    if (breaker.state === "half-open") {
       // Success during half-open, close the breaker
-      breaker.state = 'closed';
+      breaker.state = "closed";
       breaker.failures = 0;
-      this.emit('circuit_breaker:closed', { tenant_id });
+      this.emit("circuit_breaker:closed", { tenant_id });
     }
   }
 
@@ -352,11 +328,11 @@ export class BudgetManager extends EventEmitter {
     this.budgets.delete(key);
     this.usage.delete(key);
 
-    this.emit('budget:cleared', { tenant_id, run_id });
+    this.emit("budget:cleared", { tenant_id, run_id });
   }
 
   private getBudgetKey(tenant_id: string, run_id?: string): string {
-    return `${tenant_id}:${run_id || 'tenant'}`;
+    return `${tenant_id}:${run_id || "tenant"}`;
   }
 
   private getEmptyUsage(): BudgetUsage {
@@ -372,7 +348,7 @@ export class BudgetManager extends EventEmitter {
 
   private checkLimitViolations(
     usage: BudgetUsage,
-    limits: BudgetLimits,
+    limits: BudgetLimits
   ): Array<{
     metric: string;
     current: number;
@@ -382,7 +358,7 @@ export class BudgetManager extends EventEmitter {
 
     if (limits.max_cost_usd && usage.cost_usd >= limits.max_cost_usd) {
       violations.push({
-        metric: 'cost_usd',
+        metric: "cost_usd",
         current: usage.cost_usd,
         limit: limits.max_cost_usd,
       });
@@ -390,7 +366,7 @@ export class BudgetManager extends EventEmitter {
 
     if (limits.max_duration_ms && usage.duration_ms >= limits.max_duration_ms) {
       violations.push({
-        metric: 'duration_ms',
+        metric: "duration_ms",
         current: usage.duration_ms,
         limit: limits.max_duration_ms,
       });
@@ -398,18 +374,15 @@ export class BudgetManager extends EventEmitter {
 
     if (limits.max_steps && usage.steps_completed >= limits.max_steps) {
       violations.push({
-        metric: 'steps',
+        metric: "steps",
         current: usage.steps_completed,
         limit: limits.max_steps,
       });
     }
 
-    if (
-      limits.max_llm_tokens &&
-      usage.llm_tokens_used >= limits.max_llm_tokens
-    ) {
+    if (limits.max_llm_tokens && usage.llm_tokens_used >= limits.max_llm_tokens) {
       violations.push({
-        metric: 'llm_tokens',
+        metric: "llm_tokens",
         current: usage.llm_tokens_used,
         limit: limits.max_llm_tokens,
       });
@@ -417,7 +390,7 @@ export class BudgetManager extends EventEmitter {
 
     if (limits.max_api_calls && usage.api_calls_made >= limits.max_api_calls) {
       violations.push({
-        metric: 'api_calls',
+        metric: "api_calls",
         current: usage.api_calls_made,
         limit: limits.max_api_calls,
       });
@@ -429,7 +402,7 @@ export class BudgetManager extends EventEmitter {
   private isHardLimitViolation(
     projected: BudgetUsage,
     current: BudgetUsage,
-    budget: BudgetConfig,
+    budget: BudgetConfig
   ): boolean {
     // A hard limit violation is when we exceed 100% of any limit
     const violations = this.checkLimitViolations(projected, budget.limits);
@@ -439,7 +412,7 @@ export class BudgetManager extends EventEmitter {
   private checkRateSpikes(
     tenant_id: string,
     run_id: string | undefined,
-    delta: Partial<BudgetUsage>,
+    delta: Partial<BudgetUsage>
   ): void {
     const breaker = this.circuitBreakers.get(tenant_id);
 
@@ -460,10 +433,10 @@ export class BudgetManager extends EventEmitter {
 
     if (delta.cost_usd > spikeThreshold) {
       this.emitBudgetAlert({
-        type: 'rate_spike',
+        type: "rate_spike",
         tenant_id,
         run_id,
-        metric: 'cost_usd_rate',
+        metric: "cost_usd_rate",
         current_usage: delta.cost_usd,
         limit: spikeThreshold,
         percentage: (delta.cost_usd / spikeThreshold) * 100,
@@ -474,7 +447,7 @@ export class BudgetManager extends EventEmitter {
   }
 
   private emitBudgetAlert(alert: BudgetAlert): void {
-    this.emit('budget:alert', alert);
+    this.emit("budget:alert", alert);
 
     // Send to configured webhooks
     const key = this.getBudgetKey(alert.tenant_id, alert.run_id);
@@ -487,31 +460,25 @@ export class BudgetManager extends EventEmitter {
     }
   }
 
-  private async sendWebhookAlert(
-    webhook: string,
-    alert: BudgetAlert,
-  ): Promise<void> {
+  private async sendWebhookAlert(webhook: string, alert: BudgetAlert): Promise<void> {
     try {
-      const axios = require('axios');
+      const axios = require("axios");
       await axios.post(webhook, alert, {
         timeout: 5000,
         headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': 'Maestro-Budget-Manager/1.0',
+          "Content-Type": "application/json",
+          "User-Agent": "Maestro-Budget-Manager/1.0",
         },
       });
     } catch (error) {
-      console.error(
-        `Failed to send budget alert webhook to ${webhook}:`,
-        error,
-      );
+      console.error(`Failed to send budget alert webhook to ${webhook}:`, error);
     }
   }
 
   private startMonitoringLoop(): void {
     // Monitor budget usage and circuit breaker states every minute
     setInterval(() => {
-      this.emit('budget:monitoring_tick', {
+      this.emit("budget:monitoring_tick", {
         budgets: this.budgets.size,
         active_usage: this.usage.size,
         circuit_breakers: this.circuitBreakers.size,

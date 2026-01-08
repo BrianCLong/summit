@@ -11,6 +11,7 @@ This document describes the comprehensive performance optimization and scaling i
 **Purpose:** Horizontal database sharding for massive data volumes
 
 **Key Features:**
+
 - **Shard Key Strategies:**
   - Hash-based with consistent hashing (150 virtual nodes)
   - Range-based for time-series data
@@ -21,6 +22,7 @@ This document describes the comprehensive performance optimization and scaling i
 - **Connection Pooling:** Per-shard connection pools with health checks
 
 **Usage Example:**
+
 ```typescript
 import { ShardManager, ShardRouter, QueryDistributor } from '@intelgraph/database-sharding';
 
@@ -65,6 +67,7 @@ const crossShardResult = await distributor.broadcast({
 ```
 
 **Performance Characteristics:**
+
 - **Throughput:** 100K+ queries/sec across shards
 - **Latency:** p95 < 10ms for single-shard queries
 - **Scalability:** Linear scaling with additional shards
@@ -77,11 +80,13 @@ const crossShardResult = await distributor.broadcast({
 **Purpose:** Minimize database load and reduce latency
 
 **Architecture:**
+
 - **L1 Cache:** In-memory LRU cache (per-process)
 - **L2 Cache:** Redis distributed cache
 - **L3 Cache:** CDN edge caching (CloudFront/Cloudflare)
 
 **Key Features:**
+
 - **Cache Warming:** Proactive preloading of hot data
 - **Stampede Prevention:** Distributed locks to prevent cache stampede
 - **Smart Invalidation:** Tag-based and dependency-based invalidation
@@ -89,8 +94,9 @@ const crossShardResult = await distributor.broadcast({
 - **Compression:** Automatic compression for large values
 
 **Usage Example:**
+
 ```typescript
-import { MultiTierCache, CacheWarmer, CacheInvalidator } from '@intelgraph/advanced-caching';
+import { MultiTierCache, CacheWarmer, CacheInvalidator } from "@intelgraph/advanced-caching";
 
 const cache = new MultiTierCache({
   l1: { enabled: true, maxSize: 10000, ttl: 300 },
@@ -103,27 +109,28 @@ const cache = new MultiTierCache({
 const user = await cache.getOrSet(
   `user:${userId}`,
   async () => {
-    return await db.query('SELECT * FROM users WHERE id = $1', [userId]);
+    return await db.query("SELECT * FROM users WHERE id = $1", [userId]);
   },
-  { ttl: 1800, tags: ['users'] }
+  { ttl: 1800, tags: ["users"] }
 );
 
 // Cache warming
 const warmer = new CacheWarmer(cache);
-warmer.registerStrategy('popular-entities', {
+warmer.registerStrategy("popular-entities", {
   keys: await getPopularEntityIds(),
   loader: async (id) => await fetchEntity(id),
-  schedule: '0 */6 * * *', // Every 6 hours
+  schedule: "0 */6 * * *", // Every 6 hours
   parallel: 10,
 });
 
 // Smart invalidation
 const invalidator = new CacheInvalidator(cache, redisClient);
-invalidator.registerDependency('investigation:123', 'entity:456');
-await invalidator.invalidateByTag('users'); // Invalidate all user caches
+invalidator.registerDependency("investigation:123", "entity:456");
+await invalidator.invalidateByTag("users"); // Invalidate all user caches
 ```
 
 **Performance Characteristics:**
+
 - **L1 Hit Rate:** 70-80%
 - **L2 Hit Rate:** 15-20%
 - **L3 Hit Rate:** 5-10%
@@ -137,12 +144,14 @@ await invalidator.invalidateByTag('users'); // Invalidate all user caches
 **Purpose:** Reliable async processing and event streaming
 
 **Components:**
+
 - **Kafka:** High-throughput event streaming (1M+ msg/sec)
 - **RabbitMQ:** Reliable task queuing with retry logic
 - **Dead Letter Queue:** Failed message handling
 - **Event Sourcing Store:** PostgreSQL-based event store
 
 **Key Features:**
+
 - **Exactly-once delivery semantics**
 - **Automatic retry with exponential backoff**
 - **Dead letter queue for failed messages**
@@ -150,31 +159,36 @@ await invalidator.invalidateByTag('users'); // Invalidate all user caches
 - **Message prioritization**
 
 **Usage Example:**
+
 ```typescript
-import { KafkaEventStream, RabbitMQQueue, EventSourcingStore } from '@intelgraph/message-queue-enhanced';
+import {
+  KafkaEventStream,
+  RabbitMQQueue,
+  EventSourcingStore,
+} from "@intelgraph/message-queue-enhanced";
 
 // Kafka for event streaming
 const kafka = new KafkaEventStream({
-  clientId: 'intelgraph',
-  brokers: ['kafka-1:9092', 'kafka-2:9092'],
-  groupId: 'investigation-processor',
+  clientId: "intelgraph",
+  brokers: ["kafka-1:9092", "kafka-2:9092"],
+  groupId: "investigation-processor",
 });
 
-await kafka.subscribe('investigation-created', async (message) => {
+await kafka.subscribe("investigation-created", async (message) => {
   await processInvestigation(message.payload);
 });
 
 // RabbitMQ for task queuing
 const queue = new RabbitMQQueue({
-  url: 'amqp://rabbitmq:5672',
+  url: "amqp://rabbitmq:5672",
   prefetch: 10,
 });
 
-await queue.publish('document-processing', {
-  id: 'task-123',
-  topic: 'document-processing',
-  payload: { documentId: 'doc-456', action: 'extract-entities' },
-  priority: 'high',
+await queue.publish("document-processing", {
+  id: "task-123",
+  topic: "document-processing",
+  payload: { documentId: "doc-456", action: "extract-entities" },
+  priority: "high",
   maxRetries: 3,
 });
 
@@ -182,17 +196,18 @@ await queue.publish('document-processing', {
 const eventStore = new EventSourcingStore(pgPool);
 
 await eventStore.append({
-  id: 'event-789',
-  aggregateId: 'investigation-123',
-  aggregateType: 'Investigation',
-  eventType: 'EntityAdded',
-  data: { entityId: 'entity-456', addedBy: 'user-789' },
+  id: "event-789",
+  aggregateId: "investigation-123",
+  aggregateType: "Investigation",
+  eventType: "EntityAdded",
+  data: { entityId: "entity-456", addedBy: "user-789" },
   version: 5,
   timestamp: Date.now(),
 });
 ```
 
 **Performance Characteristics:**
+
 - **Kafka Throughput:** 1M+ messages/sec
 - **RabbitMQ Throughput:** 50K+ messages/sec
 - **Message Latency:** p95 < 100ms
@@ -205,11 +220,13 @@ await eventStore.append({
 **Purpose:** Dynamic scaling based on load
 
 **Components:**
+
 - **Horizontal Pod Autoscaler (HPA):** Scale pods based on CPU, memory, custom metrics
 - **Vertical Pod Autoscaler (VPA):** Adjust resource requests/limits
 - **Cluster Autoscaler:** Add/remove nodes based on demand
 
 **Configuration:**
+
 ```yaml
 # HPA for API pods
 apiVersion: autoscaling/v2
@@ -220,33 +237,34 @@ spec:
   minReplicas: 3
   maxReplicas: 50
   metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        averageUtilization: 70
-  - type: Pods
-    pods:
-      metric:
-        name: http_requests_per_second
-      target:
-        averageValue: "1000"
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          averageUtilization: 70
+    - type: Pods
+      pods:
+        metric:
+          name: http_requests_per_second
+        target:
+          averageValue: "1000"
   behavior:
     scaleUp:
       stabilizationWindowSeconds: 0
       policies:
-      - type: Percent
-        value: 100
-        periodSeconds: 15
+        - type: Percent
+          value: 100
+          periodSeconds: 15
     scaleDown:
       stabilizationWindowSeconds: 300
       policies:
-      - type: Percent
-        value: 10
-        periodSeconds: 60
+        - type: Percent
+          value: 10
+          periodSeconds: 60
 ```
 
 **Scaling Behavior:**
+
 - **Scale Up:** Aggressive (double pods every 15 seconds under load)
 - **Scale Down:** Conservative (10% reduction every 60 seconds)
 - **Metrics:** CPU, memory, request rate, query latency
@@ -258,6 +276,7 @@ spec:
 **Purpose:** Advanced traffic management and resilience
 
 **Features:**
+
 - **Circuit Breakers:** Prevent cascading failures
 - **Retry Logic:** Automatic retry on transient failures
 - **Traffic Splitting:** Canary deployments (90% stable, 10% canary)
@@ -265,6 +284,7 @@ spec:
 - **Fault Injection:** Chaos testing
 
 **Configuration:**
+
 ```yaml
 apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
@@ -295,6 +315,7 @@ spec:
 **Purpose:** Layer 7 load balancing with advanced routing
 
 **Features:**
+
 - **Weighted routing:** A/B testing
 - **Rate limiting:** Per-client rate limits
 - **Request hedging:** Tail latency optimization
@@ -308,6 +329,7 @@ spec:
 **Purpose:** Eliminate N+1 query problem in GraphQL
 
 **Features:**
+
 - **Batch Loading:** Group multiple queries into one
 - **Caching:** Per-request caching
 - **Entity Loader:** For single entities
@@ -315,18 +337,23 @@ spec:
 - **Aggregate Loader:** For count/sum/avg queries
 
 **Usage Example:**
+
 ```typescript
-import { createEntityLoader, createRelationshipLoader, DataLoaderRegistry } from '@intelgraph/graphql-dataloader';
+import {
+  createEntityLoader,
+  createRelationshipLoader,
+  DataLoaderRegistry,
+} from "@intelgraph/graphql-dataloader";
 
 // Create loaders
 const userLoader = createEntityLoader(async (ids) => {
-  const users = await db.query('SELECT * FROM users WHERE id = ANY($1)', [ids]);
-  return ids.map(id => users.find(u => u.id === id));
+  const users = await db.query("SELECT * FROM users WHERE id = ANY($1)", [ids]);
+  return ids.map((id) => users.find((u) => u.id === id));
 });
 
 const postsByUserLoader = createRelationshipLoader(async (userIds) => {
-  const posts = await db.query('SELECT * FROM posts WHERE user_id = ANY($1)', [userIds]);
-  return userIds.map(id => posts.filter(p => p.user_id === id));
+  const posts = await db.query("SELECT * FROM posts WHERE user_id = ANY($1)", [userIds]);
+  return userIds.map((id) => posts.filter((p) => p.user_id === id));
 });
 
 // In GraphQL resolver
@@ -343,6 +370,7 @@ const resolvers = {
 ```
 
 **Performance Impact:**
+
 - **Query Reduction:** 100+ queries → 5-10 batched queries
 - **Latency Reduction:** 2-3 seconds → 100-200ms
 - **Database Load:** 90% reduction
@@ -352,6 +380,7 @@ const resolvers = {
 ## Performance Testing
 
 ### Load Testing (K6)
+
 ```bash
 # Run load test
 k6 run scripts/performance-testing/load-test.js
@@ -361,6 +390,7 @@ k6 run scripts/performance-testing/load-test.js
 ```
 
 ### Chaos Engineering
+
 ```bash
 # Run chaos tests
 ./scripts/performance-testing/chaos-test.sh
@@ -369,6 +399,7 @@ k6 run scripts/performance-testing/load-test.js
 ```
 
 ### Benchmarking
+
 ```bash
 # Run full benchmark suite
 ./scripts/performance-testing/benchmark.sh
@@ -381,23 +412,27 @@ k6 run scripts/performance-testing/load-test.js
 ## Performance Targets
 
 ### Latency
+
 - **p50:** < 50ms
 - **p95:** < 200ms
 - **p99:** < 500ms
 - **p99.9:** < 1s
 
 ### Throughput
+
 - **GraphQL Queries:** 100K+ req/sec
 - **Database Queries:** 500K+ queries/sec (across shards)
 - **Cache Operations:** 1M+ ops/sec
 
 ### Scalability
+
 - **Concurrent Users:** 100K+
 - **Daily Active Users:** 1M+
 - **Data Volume:** Petabytes
 - **Geographic Regions:** Global deployment
 
 ### Availability
+
 - **Uptime:** 99.99% (52 minutes downtime/year)
 - **RTO:** < 1 minute
 - **RPO:** < 5 minutes
@@ -407,6 +442,7 @@ k6 run scripts/performance-testing/load-test.js
 ## Monitoring and Observability
 
 ### Metrics (Prometheus + Grafana)
+
 - Request rate, latency, error rate (RED method)
 - Resource utilization (CPU, memory, disk, network)
 - Cache hit rates
@@ -414,11 +450,13 @@ k6 run scripts/performance-testing/load-test.js
 - Queue depth and processing time
 
 ### Tracing (Jaeger + OpenTelemetry)
+
 - End-to-end request tracing
 - Cross-service dependencies
 - Performance bottleneck identification
 
 ### Logging (Pino + ELK)
+
 - Structured JSON logging
 - Error tracking and alerting
 - Audit logs
@@ -428,16 +466,19 @@ k6 run scripts/performance-testing/load-test.js
 ## Cost Optimization
 
 ### Resource Efficiency
+
 - **Autoscaling:** Scale down during low traffic
 - **Spot Instances:** 70% cost savings for batch jobs
 - **Reserved Instances:** 40% savings for baseline capacity
 - **Right-sizing:** VPA ensures optimal resource allocation
 
 ### Caching Strategy
+
 - **Cache Hit Rate:** 90%+ reduces database load by 90%
 - **CDN:** Offload static assets to edge locations
 
 ### Database Optimization
+
 - **Read Replicas:** Offload read queries from primary
 - **Query Optimization:** Indexes, materialized views
 - **Connection Pooling:** Reduce connection overhead
@@ -447,14 +488,17 @@ k6 run scripts/performance-testing/load-test.js
 ## Deployment Strategy
 
 ### Blue-Green Deployment
+
 - Zero-downtime deployments
 - Instant rollback capability
 
 ### Canary Deployment
+
 - Gradual rollout (10% → 50% → 100%)
 - Automatic rollback on errors
 
 ### Rolling Updates
+
 - Update pods incrementally
 - Maintain service availability
 
@@ -463,11 +507,13 @@ k6 run scripts/performance-testing/load-test.js
 ## Disaster Recovery
 
 ### Backup Strategy
+
 - **Database:** Continuous WAL archiving + daily snapshots
 - **Object Storage:** Cross-region replication
 - **Configuration:** Git-based infrastructure as code
 
 ### Recovery Procedures
+
 - **Automated failover:** < 1 minute
 - **Manual recovery:** < 15 minutes
 - **Full disaster recovery:** < 4 hours
@@ -477,16 +523,19 @@ k6 run scripts/performance-testing/load-test.js
 ## Security Considerations
 
 ### Network Security
+
 - **mTLS:** Service-to-service encryption
 - **Network Policies:** Pod-level firewall rules
 - **DDoS Protection:** Cloudflare/AWS Shield
 
 ### Data Security
+
 - **Encryption at rest:** Database and object storage
 - **Encryption in transit:** TLS 1.3
 - **Secrets Management:** Kubernetes secrets + Vault
 
 ### Access Control
+
 - **RBAC:** Role-based access control
 - **Service Accounts:** Least privilege principle
 - **Audit Logging:** All access logged

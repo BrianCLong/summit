@@ -2,9 +2,9 @@
  * Time Series Feature Engineering Tests
  */
 
-import { TimeSeriesFeatureExtractor } from '../index.js';
+import { TimeSeriesFeatureExtractor } from "../index.js";
 
-describe('TimeSeriesFeatureExtractor', () => {
+describe("TimeSeriesFeatureExtractor", () => {
   // Generate sample time series data
   const generateData = (length: number): number[] => {
     const data: number[] = [];
@@ -14,8 +14,8 @@ describe('TimeSeriesFeatureExtractor', () => {
     return data;
   };
 
-  describe('extractStatisticalFeatures', () => {
-    it('should extract basic statistical features', () => {
+  describe("extractStatisticalFeatures", () => {
+    it("should extract basic statistical features", () => {
       const data = generateData(100);
       const features = TimeSeriesFeatureExtractor.extractStatisticalFeatures(data);
 
@@ -29,7 +29,7 @@ describe('TimeSeriesFeatureExtractor', () => {
       expect(features.iqr).toBeDefined();
     });
 
-    it('should calculate valid statistics', () => {
+    it("should calculate valid statistics", () => {
       const data = [1, 2, 3, 4, 5];
       const features = TimeSeriesFeatureExtractor.extractStatisticalFeatures(data);
 
@@ -40,15 +40,15 @@ describe('TimeSeriesFeatureExtractor', () => {
     });
   });
 
-  describe('extractTrendFeatures', () => {
-    it('should detect positive trend', () => {
+  describe("extractTrendFeatures", () => {
+    it("should detect positive trend", () => {
       const data = Array.from({ length: 50 }, (_, i) => i * 2 + Math.random());
       const features = TimeSeriesFeatureExtractor.extractTrendFeatures(data);
 
       expect(features.trend_slope).toBeGreaterThan(0);
     });
 
-    it('should detect negative trend', () => {
+    it("should detect negative trend", () => {
       const data = Array.from({ length: 50 }, (_, i) => 100 - i * 2 + Math.random());
       const features = TimeSeriesFeatureExtractor.extractTrendFeatures(data);
 
@@ -56,8 +56,8 @@ describe('TimeSeriesFeatureExtractor', () => {
     });
   });
 
-  describe('extractSeasonalityFeatures', () => {
-    it('should extract autocorrelation features', () => {
+  describe("extractSeasonalityFeatures", () => {
+    it("should extract autocorrelation features", () => {
       const data = generateData(100);
       const features = TimeSeriesFeatureExtractor.extractSeasonalityFeatures(data);
 
@@ -66,8 +66,8 @@ describe('TimeSeriesFeatureExtractor', () => {
     });
   });
 
-  describe('extractComplexityFeatures', () => {
-    it('should calculate entropy', () => {
+  describe("extractComplexityFeatures", () => {
+    it("should calculate entropy", () => {
       const data = generateData(100);
       const features = TimeSeriesFeatureExtractor.extractComplexityFeatures(data);
 
@@ -76,8 +76,8 @@ describe('TimeSeriesFeatureExtractor', () => {
     });
   });
 
-  describe('extractPeakFeatures', () => {
-    it('should detect peaks in data', () => {
+  describe("extractPeakFeatures", () => {
+    it("should detect peaks in data", () => {
       // Data with clear peaks
       const data = [1, 2, 5, 2, 1, 2, 8, 2, 1, 2, 3, 2, 1];
       const features = TimeSeriesFeatureExtractor.extractPeakFeatures(data);
@@ -86,12 +86,10 @@ describe('TimeSeriesFeatureExtractor', () => {
     });
   });
 
-  describe('extractFeatures', () => {
-    it('should combine all features', () => {
+  describe("extractFeatures", () => {
+    it("should combine all features", () => {
       const data = generateData(100);
-      const timestamps = Array.from({ length: 100 }, (_, i) =>
-        new Date(Date.now() + i * 3600000)
-      );
+      const timestamps = Array.from({ length: 100 }, (_, i) => new Date(Date.now() + i * 3600000));
 
       const features = TimeSeriesFeatureExtractor.extractFeatures(data, timestamps);
 

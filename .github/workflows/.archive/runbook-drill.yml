@@ -2,7 +2,7 @@ name: Runbook Drill
 
 on:
   schedule:
-    - cron: '0 10 1 * *' # Monthly, on the 1st at 10am
+    - cron: "0 10 1 * *" # Monthly, on the 1st at 10am
   workflow_dispatch:
 
 jobs:
@@ -14,7 +14,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |
@@ -23,8 +23,8 @@ jobs:
       - name: Select Alerts for Drill
         id: select-alerts
         run: |
-            # Simplistic selection: pick 3 random alerts from catalog
-            python -c 'import yaml, random, os; catalog = yaml.safe_load(open("observability/alerts/catalog.yaml")); alerts = ",".join([a["id"] for a in random.sample(catalog, min(len(catalog), 3))]);  with open(os.environ["GITHUB_OUTPUT"], "a") as f: f.write(f"alerts={alerts}\n")'
+          # Simplistic selection: pick 3 random alerts from catalog
+          python -c 'import yaml, random, os; catalog = yaml.safe_load(open("observability/alerts/catalog.yaml")); alerts = ",".join([a["id"] for a in random.sample(catalog, min(len(catalog), 3))]);  with open(os.environ["GITHUB_OUTPUT"], "a") as f: f.write(f"alerts={alerts}\n")'
 
       - name: Create Drill Issue
         uses: actions/github-script@v6

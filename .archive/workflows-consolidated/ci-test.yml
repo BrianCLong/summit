@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: ['18.x', '20.x']
+        node: ["18.x", "20.x"]
     services:
       postgres:
         image: postgres:13
@@ -30,7 +30,7 @@ jobs:
         image: neo4j:4.4-enterprise
         env:
           NEO4J_AUTH: neo4j/test_password
-          NEO4J_ACCEPT_LICENSE_AGREEMENT: 'yes'
+          NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
           NEO4J_apoc_export_file_enabled: true
           NEO4J_apoc_import_file_enabled: true
           NEO4J_dbms_security_procedures_unrestricted: apoc.*
@@ -73,7 +73,7 @@ jobs:
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4
         with:
           node-version: ${{ matrix.node }}
-          cache: 'npm'
+          cache: "npm"
           cache-dependency-path: |
             package-lock.json
             server/package-lock.json
@@ -148,7 +148,7 @@ jobs:
         if: steps.changes.outputs.python == 'true'
         uses: actions/setup-python@824a62378795d7a63864050674956c050c8c0868 # v4
         with:
-          python-version: '3.12'
+          python-version: "3.12"
       - name: Install Poetry
         if: steps.changes.outputs.python == 'true'
         run: pip install poetry
@@ -206,7 +206,7 @@ jobs:
         if: always()
         with:
           name: Test Results
-          path: 'server/junit.xml,client/junit.xml'
+          path: "server/junit.xml,client/junit.xml"
           reporter: jest-junit
           fail-on-error: true
           list-suites: true

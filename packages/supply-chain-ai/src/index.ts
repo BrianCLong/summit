@@ -6,6 +6,6 @@
  * learning optimization, causal inference, and explainable AI.
  */
 
-export * from './types';
-export * from './AIIntelligenceEngine';
-export { AIIntelligenceEngine, aiEngine } from './AIIntelligenceEngine';
+export * from "./types";
+export * from "./AIIntelligenceEngine";
+export { AIIntelligenceEngine, aiEngine } from "./AIIntelligenceEngine";

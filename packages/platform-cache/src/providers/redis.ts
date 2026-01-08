@@ -1,5 +1,5 @@
-import Redis from 'ioredis';
-import type { CacheProvider } from '../types.js';
+import Redis from "ioredis";
+import type { CacheProvider } from "../types.js";
 
 /**
  * Redis provider options
@@ -29,12 +29,12 @@ export interface RedisProviderOptions {
  * Redis cache provider
  */
 export class RedisProvider implements CacheProvider {
-  readonly name = 'redis';
+  readonly name = "redis";
   private client: Redis;
   private keyPrefix: string;
 
   constructor(options: RedisProviderOptions = {}) {
-    this.keyPrefix = options.keyPrefix ?? '';
+    this.keyPrefix = options.keyPrefix ?? "";
 
     if (options.url) {
       this.client = new Redis(options.url, {
@@ -45,7 +45,7 @@ export class RedisProvider implements CacheProvider {
       });
     } else {
       this.client = new Redis({
-        host: options.host ?? 'localhost',
+        host: options.host ?? "localhost",
         port: options.port ?? 6379,
         password: options.password,
         db: options.db ?? 0,
@@ -57,8 +57,8 @@ export class RedisProvider implements CacheProvider {
     }
 
     // Handle errors
-    this.client.on('error', (err) => {
-      console.error('Redis error:', err.message);
+    this.client.on("error", (err) => {
+      console.error("Redis error:", err.message);
     });
   }
 
@@ -106,15 +106,15 @@ export class RedisProvider implements CacheProvider {
 
   async deletePattern(pattern: string): Promise<number> {
     const prefixedPattern = this.prefixKey(pattern);
-    let cursor = '0';
+    let cursor = "0";
     let count = 0;
 
     do {
       const [newCursor, keys] = await this.client.scan(
         cursor,
-        'MATCH',
+        "MATCH",
         prefixedPattern,
-        'COUNT',
+        "COUNT",
         100
       );
       cursor = newCursor;
@@ -123,7 +123,7 @@ export class RedisProvider implements CacheProvider {
         const deleted = await this.client.del(...keys);
         count += deleted;
       }
-    } while (cursor !== '0');
+    } while (cursor !== "0");
 
     return count;
   }
@@ -133,10 +133,10 @@ export class RedisProvider implements CacheProvider {
       return [];
     }
 
-    const prefixedKeys = keys.map(k => this.prefixKey(k));
+    const prefixedKeys = keys.map((k) => this.prefixKey(k));
     const values = await this.client.mget(...prefixedKeys);
 
-    return values.map(v => {
+    return values.map((v) => {
       if (v === null) return null;
       try {
         return JSON.parse(v) as T;

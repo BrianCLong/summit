@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Box,
   Card,
@@ -18,23 +18,14 @@ import {
   Select,
   Chip,
   LinearProgress,
-} from '@mui/material';
-import Grid from '@mui/material/Grid';
-import {
-  MoreVert,
-  FilterList,
-  FileDownload,
-  ZoomIn,
-  Info,
-} from '@mui/icons-material';
-import { useQuery } from '@apollo/client';
-import { gql } from '@apollo/client';
+} from "@mui/material";
+import Grid from "@mui/material/Grid";
+import { MoreVert, FilterList, FileDownload, ZoomIn, Info } from "@mui/icons-material";
+import { useQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
 
 const ATTACK_COVERAGE_QUERY = gql`
-  query GetAttackCoverage(
-    $timeRange: String!
-    $filters: AttackCoverageFilters
-  ) {
+  query GetAttackCoverage($timeRange: String!, $filters: AttackCoverageFilters) {
     attackCoverage(timeRange: $timeRange, filters: $filters) {
       tactics {
         id
@@ -77,14 +68,14 @@ interface AttackTechnique {
   coverage: {
     detectionRules: number;
     alertCount: number;
-    severity: 'low' | 'medium' | 'high' | 'critical';
+    severity: "low" | "medium" | "high" | "critical";
     lastDetected?: string;
     falsePositiveRate: number;
   };
   alerts: {
     count: number;
-    severity: 'low' | 'medium' | 'high' | 'critical';
-    trend: 'up' | 'down' | 'stable';
+    severity: "low" | "medium" | "high" | "critical";
+    trend: "up" | "down" | "stable";
   };
 }
 
@@ -101,22 +92,22 @@ interface AttackHeatmapWidgetProps {
 }
 
 const MITRE_TACTICS = [
-  'Initial Access',
-  'Execution',
-  'Persistence',
-  'Privilege Escalation',
-  'Defense Evasion',
-  'Credential Access',
-  'Discovery',
-  'Lateral Movement',
-  'Collection',
-  'Command and Control',
-  'Exfiltration',
-  'Impact',
+  "Initial Access",
+  "Execution",
+  "Persistence",
+  "Privilege Escalation",
+  "Defense Evasion",
+  "Credential Access",
+  "Discovery",
+  "Lateral Movement",
+  "Collection",
+  "Command and Control",
+  "Exfiltration",
+  "Impact",
 ];
 
 export default function AttackHeatmapWidget({
-  timeRange = '7d',
+  timeRange = "7d",
   height = 600,
   onTechniqueClick,
 }: AttackHeatmapWidgetProps) {
@@ -125,14 +116,13 @@ export default function AttackHeatmapWidget({
   const [selectedFilters, setSelectedFilters] = useState<{
     tactics: string[];
     severity: string[];
-    hasAlerts: false,
+    hasAlerts: false;
   }>({
     tactics: [],
     severity: [],
     hasAlerts: false,
   });
-  const [selectedTechnique, setSelectedTechnique] =
-    useState<AttackTechnique | null>(null);
+  const [selectedTechnique, setSelectedTechnique] = useState<AttackTechnique | null>(null);
   const [techniqueDialogOpen, setTechniqueDialogOpen] = useState(false);
 
   const { data, loading, error } = useQuery(ATTACK_COVERAGE_QUERY, {
@@ -162,10 +152,10 @@ export default function AttackHeatmapWidget({
     };
 
     const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-      type: 'application/json',
+      type: "application/json",
     });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `attack-coverage-${timeRange}-${Date.now()}.json`;
     document.body.appendChild(a);
@@ -180,18 +170,18 @@ export default function AttackHeatmapWidget({
     const { coverage, alerts } = technique;
 
     if (alerts.count === 0 && coverage.detectionRules === 0) {
-      return '#f5f5f5'; // No coverage
+      return "#f5f5f5"; // No coverage
     }
 
     if (alerts.count > 0) {
       // Color based on alert severity and count
       const intensity = Math.min(alerts.count / 10, 1); // Cap at 10 alerts
       switch (alerts.severity) {
-        case 'critical':
+        case "critical":
           return `rgba(211, 47, 47, ${0.3 + intensity * 0.7})`;
-        case 'high':
+        case "high":
           return `rgba(245, 124, 0, ${0.3 + intensity * 0.7})`;
-        case 'medium':
+        case "medium":
           return `rgba(255, 193, 7, ${0.3 + intensity * 0.7})`;
         default:
           return `rgba(76, 175, 80, ${0.3 + intensity * 0.7})`;
@@ -204,7 +194,7 @@ export default function AttackHeatmapWidget({
       return `rgba(63, 81, 181, ${0.2 + intensity * 0.5})`;
     }
 
-    return '#e0e0e0';
+    return "#e0e0e0";
   };
 
   const getTechniqueTooltip = (technique: AttackTechnique) => {
@@ -214,19 +204,14 @@ export default function AttackHeatmapWidget({
         <Typography variant="subtitle2" gutterBottom>
           {technique.id}: {technique.name}
         </Typography>
-        <Typography variant="body2">
-          Detection Rules: {coverage.detectionRules}
-        </Typography>
+        <Typography variant="body2">Detection Rules: {coverage.detectionRules}</Typography>
         <Typography variant="body2">Recent Alerts: {alerts.count}</Typography>
         {alerts.count > 0 && (
-          <Typography variant="body2">
-            Severity: {alerts.severity.toUpperCase()}
-          </Typography>
+          <Typography variant="body2">Severity: {alerts.severity.toUpperCase()}</Typography>
         )}
         {coverage.lastDetected && (
           <Typography variant="body2">
-            Last Detected:{' '}
-            {new Date(coverage.lastDetected).toLocaleDateString()}
+            Last Detected: {new Date(coverage.lastDetected).toLocaleDateString()}
           </Typography>
         )}
         <Typography variant="body2">
@@ -247,29 +232,25 @@ export default function AttackHeatmapWidget({
   const renderHeatmapCell = (
     technique: AttackTechnique,
     tacticIndex: number,
-    techniqueIndex: number,
+    techniqueIndex: number
   ) => (
-    <Tooltip
-      key={`${technique.id}`}
-      title={getTechniqueTooltip(technique)}
-      arrow
-    >
+    <Tooltip key={`${technique.id}`} title={getTechniqueTooltip(technique)} arrow>
       <Box
         sx={{
           width: 40,
           height: 30,
           backgroundColor: getCoverageColor(technique),
-          border: '1px solid #ddd',
-          cursor: 'pointer',
-          borderRadius: '2px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '10px',
-          fontWeight: 'bold',
-          color: technique.alerts.count > 0 ? '#fff' : '#666',
-          '&:hover': {
-            transform: 'scale(1.1)',
+          border: "1px solid #ddd",
+          cursor: "pointer",
+          borderRadius: "2px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "10px",
+          fontWeight: "bold",
+          color: technique.alerts.count > 0 ? "#fff" : "#666",
+          "&:hover": {
+            transform: "scale(1.1)",
             zIndex: 1,
             boxShadow: 2,
           },
@@ -277,8 +258,8 @@ export default function AttackHeatmapWidget({
         onClick={() => handleTechniqueClick(technique)}
       >
         {technique.alerts.count > 0 && technique.alerts.count}
-        {technique.alerts.trend === 'up' && (
-          <Box component="span" sx={{ fontSize: '8px', ml: 0.5 }}>
+        {technique.alerts.trend === "up" && (
+          <Box component="span" sx={{ fontSize: "8px", ml: 0.5 }}>
             ↗
           </Box>
         )}
@@ -289,75 +270,75 @@ export default function AttackHeatmapWidget({
   const renderLegend = () => (
     <Box
       sx={{
-        display: 'flex',
-        alignItems: 'center',
+        display: "flex",
+        alignItems: "center",
         gap: 2,
         mt: 2,
-        flexWrap: 'wrap',
+        flexWrap: "wrap",
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
         <Box
           sx={{
             width: 16,
             height: 16,
-            backgroundColor: '#f5f5f5',
-            border: '1px solid #ddd',
+            backgroundColor: "#f5f5f5",
+            border: "1px solid #ddd",
           }}
         />
         <Typography variant="caption">No Coverage</Typography>
       </Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
         <Box
           sx={{
             width: 16,
             height: 16,
-            backgroundColor: 'rgba(63, 81, 181, 0.5)',
-            border: '1px solid #ddd',
+            backgroundColor: "rgba(63, 81, 181, 0.5)",
+            border: "1px solid #ddd",
           }}
         />
         <Typography variant="caption">Detection Only</Typography>
       </Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
         <Box
           sx={{
             width: 16,
             height: 16,
-            backgroundColor: 'rgba(76, 175, 80, 0.7)',
-            border: '1px solid #ddd',
+            backgroundColor: "rgba(76, 175, 80, 0.7)",
+            border: "1px solid #ddd",
           }}
         />
         <Typography variant="caption">Low Alerts</Typography>
       </Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
         <Box
           sx={{
             width: 16,
             height: 16,
-            backgroundColor: 'rgba(255, 193, 7, 0.7)',
-            border: '1px solid #ddd',
+            backgroundColor: "rgba(255, 193, 7, 0.7)",
+            border: "1px solid #ddd",
           }}
         />
         <Typography variant="caption">Medium Alerts</Typography>
       </Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
         <Box
           sx={{
             width: 16,
             height: 16,
-            backgroundColor: 'rgba(245, 124, 0, 0.7)',
-            border: '1px solid #ddd',
+            backgroundColor: "rgba(245, 124, 0, 0.7)",
+            border: "1px solid #ddd",
           }}
         />
         <Typography variant="caption">High Alerts</Typography>
       </Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
         <Box
           sx={{
             width: 16,
             height: 16,
-            backgroundColor: 'rgba(211, 47, 47, 0.7)',
-            border: '1px solid #ddd',
+            backgroundColor: "rgba(211, 47, 47, 0.7)",
+            border: "1px solid #ddd",
           }}
         />
         <Typography variant="caption">Critical Alerts</Typography>
@@ -374,13 +355,13 @@ export default function AttackHeatmapWidget({
           </Typography>
           <Box
             sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: '50%',
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "50%",
             }}
           >
-            <LinearProgress sx={{ width: '50%' }} />
+            <LinearProgress sx={{ width: "50%" }} />
           </Box>
         </CardContent>
       </Card>
@@ -411,28 +392,24 @@ export default function AttackHeatmapWidget({
           {/* Header */}
           <Box
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
               mb: 2,
             }}
           >
             <Box>
               <Typography variant="h6">ATT&CK Coverage Heatmap</Typography>
               <Typography variant="body2" color="text.secondary">
-                {summary.coveragePercentage}% technique coverage (
-                {summary.coveredTechniques}/{summary.totalTechniques})
+                {summary.coveragePercentage}% technique coverage ({summary.coveredTechniques}/
+                {summary.totalTechniques})
               </Typography>
             </Box>
             <Box>
               <IconButton onClick={handleMenuClick}>
                 <MoreVert />
               </IconButton>
-              <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleMenuClose}
-              >
+              <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
                 <MenuItem onClick={() => setFilterDialogOpen(true)}>
                   <FilterList sx={{ mr: 1 }} />
                   Filter
@@ -448,7 +425,7 @@ export default function AttackHeatmapWidget({
           {/* Summary Stats */}
           <Grid container spacing={2} sx={{ mb: 3 }}>
             <Grid xs={3}>
-              <Box sx={{ textAlign: 'center' }}>
+              <Box sx={{ textAlign: "center" }}>
                 <Typography variant="h4" color="primary">
                   {summary.totalTechniques || 0}
                 </Typography>
@@ -456,7 +433,7 @@ export default function AttackHeatmapWidget({
               </Box>
             </Grid>
             <Grid xs={3}>
-              <Box sx={{ textAlign: 'center' }}>
+              <Box sx={{ textAlign: "center" }}>
                 <Typography variant="h4" color="success.main">
                   {summary.coveredTechniques || 0}
                 </Typography>
@@ -464,7 +441,7 @@ export default function AttackHeatmapWidget({
               </Box>
             </Grid>
             <Grid xs={3}>
-              <Box sx={{ textAlign: 'center' }}>
+              <Box sx={{ textAlign: "center" }}>
                 <Typography variant="h4" color="warning.main">
                   {summary.recentActivity || 0}
                 </Typography>
@@ -472,7 +449,7 @@ export default function AttackHeatmapWidget({
               </Box>
             </Grid>
             <Grid xs={3}>
-              <Box sx={{ textAlign: 'center' }}>
+              <Box sx={{ textAlign: "center" }}>
                 <Typography variant="h4" color="info.main">
                   {(summary.coveragePercentage || 0).toFixed(0)}%
                 </Typography>
@@ -482,25 +459,25 @@ export default function AttackHeatmapWidget({
           </Grid>
 
           {/* Heatmap Grid */}
-          <Box sx={{ overflowX: 'auto', maxHeight: height - 200 }}>
+          <Box sx={{ overflowX: "auto", maxHeight: height - 200 }}>
             <Box sx={{ minWidth: 800 }}>
               {/* Tactic Headers */}
-              <Box sx={{ display: 'flex', mb: 1 }}>
+              <Box sx={{ display: "flex", mb: 1 }}>
                 <Box sx={{ width: 150 }} /> {/* Space for technique labels */}
                 {MITRE_TACTICS.map((tactic, index) => (
                   <Box
                     key={tactic}
                     sx={{
                       width: 120,
-                      textAlign: 'center',
-                      fontSize: '12px',
-                      fontWeight: 'bold',
-                      transform: 'rotate(-45deg)',
-                      transformOrigin: 'center',
+                      textAlign: "center",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      transform: "rotate(-45deg)",
+                      transformOrigin: "center",
                       height: 60,
-                      display: 'flex',
-                      alignItems: 'flex-end',
-                      justifyContent: 'center',
+                      display: "flex",
+                      alignItems: "flex-end",
+                      justifyContent: "center",
                     }}
                   >
                     {tactic}
@@ -510,46 +487,41 @@ export default function AttackHeatmapWidget({
 
               {/* Technique Rows */}
               {tactics.map((tactic: AttackTactic) =>
-                tactic.techniques.map(
-                  (technique: AttackTechnique, techIndex: number) => (
+                tactic.techniques.map((technique: AttackTechnique, techIndex: number) => (
+                  <Box key={technique.id} sx={{ display: "flex", alignItems: "center", mb: 0.5 }}>
                     <Box
-                      key={technique.id}
-                      sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}
+                      sx={{
+                        width: 150,
+                        fontSize: "11px",
+                        pr: 1,
+                        textAlign: "right",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
                     >
+                      <Tooltip title={technique.name}>
+                        <span>{technique.id}</span>
+                      </Tooltip>
+                    </Box>
+                    {MITRE_TACTICS.map((tacticName, tacticIndex) => (
                       <Box
+                        key={`${technique.id}-${tacticName}`}
                         sx={{
-                          width: 150,
-                          fontSize: '11px',
-                          pr: 1,
-                          textAlign: 'right',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
+                          width: 120,
+                          display: "flex",
+                          justifyContent: "center",
                         }}
                       >
-                        <Tooltip title={technique.name}>
-                          <span>{technique.id}</span>
-                        </Tooltip>
+                        {tactic.name === tacticName ? (
+                          renderHeatmapCell(technique, tacticIndex, techIndex)
+                        ) : (
+                          <Box sx={{ width: 40, height: 30 }} />
+                        )}
                       </Box>
-                      {MITRE_TACTICS.map((tacticName, tacticIndex) => (
-                        <Box
-                          key={`${technique.id}-${tacticName}`}
-                          sx={{
-                            width: 120,
-                            display: 'flex',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          {tactic.name === tacticName ? (
-                            renderHeatmapCell(technique, tacticIndex, techIndex)
-                          ) : (
-                            <Box sx={{ width: 40, height: 30 }} />
-                          )}
-                        </Box>
-                      ))}
-                    </Box>
-                  ),
-                ),
+                    ))}
+                  </Box>
+                ))
               )}
             </Box>
           </Box>
@@ -568,7 +540,7 @@ export default function AttackHeatmapWidget({
         {selectedTechnique && (
           <>
             <DialogTitle>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Typography variant="h6">
                   {selectedTechnique.id}: {selectedTechnique.name}
                 </Typography>
@@ -576,11 +548,11 @@ export default function AttackHeatmapWidget({
                   size="small"
                   label={selectedTechnique.alerts.severity}
                   color={
-                    selectedTechnique.alerts.severity === 'critical'
-                      ? 'error'
-                      : selectedTechnique.alerts.severity === 'high'
-                        ? 'warning'
-                        : 'default'
+                    selectedTechnique.alerts.severity === "critical"
+                      ? "error"
+                      : selectedTechnique.alerts.severity === "high"
+                        ? "warning"
+                        : "default"
                   }
                 />
               </Box>
@@ -595,18 +567,13 @@ export default function AttackHeatmapWidget({
                     Rules: {selectedTechnique.coverage.detectionRules}
                   </Typography>
                   <Typography variant="body2">
-                    False Positive Rate:{' '}
-                    {(
-                      selectedTechnique.coverage.falsePositiveRate * 100
-                    ).toFixed(1)}
-                    %
+                    False Positive Rate:{" "}
+                    {(selectedTechnique.coverage.falsePositiveRate * 100).toFixed(1)}%
                   </Typography>
                   {selectedTechnique.coverage.lastDetected && (
                     <Typography variant="body2">
-                      Last Detection:{' '}
-                      {new Date(
-                        selectedTechnique.coverage.lastDetected,
-                      ).toLocaleString()}
+                      Last Detection:{" "}
+                      {new Date(selectedTechnique.coverage.lastDetected).toLocaleString()}
                     </Typography>
                   )}
                 </Grid>
@@ -627,9 +594,7 @@ export default function AttackHeatmapWidget({
               </Grid>
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setTechniqueDialogOpen(false)}>
-                Close
-              </Button>
+              <Button onClick={() => setTechniqueDialogOpen(false)}>Close</Button>
               <Button variant="contained" startIcon={<ZoomIn />}>
                 View Details
               </Button>
@@ -661,7 +626,7 @@ export default function AttackHeatmapWidget({
                     })
                   }
                   renderValue={(selected) => (
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                       {(selected as string[]).map((value) => (
                         <Chip key={value} label={value} size="small" />
                       ))}
@@ -689,14 +654,14 @@ export default function AttackHeatmapWidget({
                     })
                   }
                   renderValue={(selected) => (
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                       {(selected as string[]).map((value) => (
                         <Chip key={value} label={value} size="small" />
                       ))}
                     </Box>
                   )}
                 >
-                  {['low', 'medium', 'high', 'critical'].map((severity) => (
+                  {["low", "medium", "high", "critical"].map((severity) => (
                     <MenuItem key={severity} value={severity}>
                       {severity.toUpperCase()}
                     </MenuItem>

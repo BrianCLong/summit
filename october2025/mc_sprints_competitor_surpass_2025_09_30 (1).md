@@ -341,14 +341,14 @@ CREATE TABLE invoices (
 ```yaml
 # fixtures/daily_ai_brief.yaml
 inputs:
-  topic: 'AI policy and research'
+  topic: "AI policy and research"
   sources:
     - rss: https://example.com/ai.xml
 expectations:
   summary_length: 200-400
   contains_keywords:
-    - 'policy'
-    - 'research'
+    - "policy"
+    - "research"
 policy:
   retention: short-30d
   license: OPEN_DATA_OK
@@ -357,27 +357,27 @@ policy:
 ### 7.2 Playwright e2e (Creator Flow)
 
 ```ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test('build-and-publish-daily-brief', async ({ page }) => {
-  await page.goto('/studio');
-  await page.getByRole('button', { name: 'Create from Template' }).click();
-  await page.getByText('Daily AI Brief').click();
-  await page.getByRole('button', { name: 'Run with Fixture' }).click();
-  await expect(page.getByText('Run Succeeded')).toBeVisible();
-  await page.getByRole('button', { name: 'Export Evidence' }).click();
-  await page.getByRole('button', { name: 'Publish' }).click();
-  await expect(page.getByText('Policy Scan Passed')).toBeVisible();
+test("build-and-publish-daily-brief", async ({ page }) => {
+  await page.goto("/studio");
+  await page.getByRole("button", { name: "Create from Template" }).click();
+  await page.getByText("Daily AI Brief").click();
+  await page.getByRole("button", { name: "Run with Fixture" }).click();
+  await expect(page.getByText("Run Succeeded")).toBeVisible();
+  await page.getByRole("button", { name: "Export Evidence" }).click();
+  await page.getByRole("button", { name: "Publish" }).click();
+  await expect(page.getByText("Policy Scan Passed")).toBeVisible();
 });
 ```
 
 ### 7.3 k6 Load (Router Policy)
 
 ```js
-import http from 'k6/http';
-import { check, sleep } from 'k6';
+import http from "k6/http";
+import { check, sleep } from "k6";
 
-export const options = { vus: 50, duration: '2m' };
+export const options = { vus: 50, duration: "2m" };
 
 export default function () {
   const res = http.post(
@@ -388,12 +388,12 @@ export default function () {
     }),
     {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${__ENV.TOKEN}`,
       },
-    },
+    }
   );
-  check(res, { 'status 200': (r) => r.status === 200 });
+  check(res, { "status 200": (r) => r.status === 200 });
   sleep(1);
 }
 ```
@@ -401,10 +401,10 @@ export default function () {
 ### 7.4 Jest Unit (Provenance Signatures)
 
 ```ts
-import { sign, verify } from '../crypto';
+import { sign, verify } from "../crypto";
 
-test('evidence signatures verify', () => {
-  const claim = { in: 'h1', out: 'h2', model: 'x', cost: 0.001 };
+test("evidence signatures verify", () => {
+  const claim = { in: "h1", out: "h2", model: "x", cost: 0.001 };
   const sig = sign(claim);
   expect(verify(claim, sig)).toBe(true);
 });
@@ -502,8 +502,8 @@ Each ships with: fixtures, e2e tests, policy notes, cost estimates, and evidence
 orchestrator:
   replicas: 3
   resources:
-    requests: { cpu: '500m', memory: '1Gi' }
-    limits: { cpu: '2', memory: '4Gi' }
+    requests: { cpu: "500m", memory: "1Gi" }
+    limits: { cpu: "2", memory: "4Gi" }
   env:
     OPA_URL: http://opa:8181
     OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
@@ -601,7 +601,7 @@ run: 1a2b-3c4d
 flow: daily-brief@1.0.0
 claims:
   - node: rss
-    in: '-'
+    in: "-"
     out: 1a1a1a
     latency_ms: 120
     sig: abcd...

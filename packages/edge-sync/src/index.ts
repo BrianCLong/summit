@@ -3,6 +3,6 @@
  * Edge-to-cloud synchronization with conflict resolution
  */
 
-export * from './sync/SyncManager';
+export * from "./sync/SyncManager";
 
-export const VERSION = '1.0.0';
+export const VERSION = "1.0.0";

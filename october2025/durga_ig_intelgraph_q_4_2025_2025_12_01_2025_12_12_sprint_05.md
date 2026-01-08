@@ -141,15 +141,15 @@ X-Signature: sha256=<hmac>
 ### 2) Webhook Verify (Express) — `apps/proof-portal/server/webhook.js`
 
 ```javascript
-import crypto from 'crypto';
+import crypto from "crypto";
 export function verify(req, res, next) {
-  const sig = req.get('X-Signature')?.split('=')[1];
-  const ts = req.get('X-Timestamp');
+  const sig = req.get("X-Signature")?.split("=")[1];
+  const ts = req.get("X-Timestamp");
   if (Date.now() - Number(ts) > 5 * 60 * 1000) return res.status(401).end();
   const mac = crypto
-    .createHmac('sha256', process.env.PARTNER_SECRET)
+    .createHmac("sha256", process.env.PARTNER_SECRET)
     .update(req.rawBody)
-    .digest('hex');
+    .digest("hex");
   if (mac !== sig) return res.status(401).end();
   next();
 }
@@ -161,7 +161,7 @@ export function verify(req, res, next) {
 name: Continuous Compliance
 on: [schedule]
 schedule:
-  - cron: '0 3 * * *'
+  - cron: "0 3 * * *"
 jobs:
   controls:
     runs-on: ubuntu-latest
@@ -188,11 +188,11 @@ jobs:
 ```yaml
 paths:
   /subject/export:
-    post: { responses: { '202': { description: accepted } } }
+    post: { responses: { "202": { description: accepted } } }
   /subject/erase:
-    post: { responses: { '202': { description: accepted } } }
+    post: { responses: { "202": { description: accepted } } }
   /subject/status/{id}:
-    get: { responses: { '200': { description: ok } } }
+    get: { responses: { "200": { description: ok } } }
 ```
 
 ### 6) Subject Rights Worker — `services/registry/worker.py`

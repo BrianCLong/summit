@@ -125,7 +125,7 @@ The Maestro orchestrator implementation successfully addresses **all P0 function
 ```typescript
 // packages/maestro-core/src/plugins/openapi-plugin.ts
 export class OpenAPIPlugin implements StepPlugin {
-  name = 'openapi';
+  name = "openapi";
 
   async execute(context, step, execution) {
     // Load OpenAPI spec

@@ -9,14 +9,14 @@ Chronos Aeternum is an AI-native orchestration initiative that blends determinis
 
 Subdirectories:
 
-| Path | Description |
-| --- | --- |
-| `packages/intent-engine` | TypeScript compiler, CLI, and schema validators for authoring workflows. |
-| `runtime/` | Go runtime responsible for executing IR graphs deterministically with retries, telemetry, and persistence. |
-| `deploy/` | Container and docker-compose manifests for local development. |
-| `examples/` | Example YAML workflows used in smoke tests and documentation. |
-| `ops/` | Operational assets such as OPA policies. |
-| `.github/workflows/` | Automation for CI, linting, and nightly NL→DAG→execute checks. |
+| Path                     | Description                                                                                                |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `packages/intent-engine` | TypeScript compiler, CLI, and schema validators for authoring workflows.                                   |
+| `runtime/`               | Go runtime responsible for executing IR graphs deterministically with retries, telemetry, and persistence. |
+| `deploy/`                | Container and docker-compose manifests for local development.                                              |
+| `examples/`              | Example YAML workflows used in smoke tests and documentation.                                              |
+| `ops/`                   | Operational assets such as OPA policies.                                                                   |
+| `.github/workflows/`     | Automation for CI, linting, and nightly NL→DAG→execute checks.                                             |
 
 ## Getting Started
 
@@ -67,4 +67,3 @@ Subdirectories:
 
 - **Phase 3** will extend the state graph into Neo4j, add richer provenance bundles, and introduce predictive scheduling agents.
 - Future iterations will integrate additional adapters, distributed scheduling, conversational explainability, and GitOps workflows.
-

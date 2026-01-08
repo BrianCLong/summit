@@ -3,14 +3,14 @@
  * Solves combinatorial optimization problems using quantum circuits
  */
 
-import { QuantumCircuit, QuantumSimulator } from '@intelgraph/quantum-simulation';
-import { CircuitBuilder } from '@intelgraph/quantum-simulation';
+import { QuantumCircuit, QuantumSimulator } from "@intelgraph/quantum-simulation";
+import { CircuitBuilder } from "@intelgraph/quantum-simulation";
 
 export interface QAOAParams {
   numQubits: number;
   p: number; // Number of QAOA layers
   costHamiltonian: CostHamiltonian;
-  mixer?: 'x' | 'xy'; // Mixer Hamiltonian type
+  mixer?: "x" | "xy"; // Mixer Hamiltonian type
 }
 
 export interface CostHamiltonian {
@@ -39,12 +39,16 @@ export class QAOAOptimizer {
 
   async optimize(maxIterations: number = 100): Promise<QAOAResult> {
     // Initialize parameters randomly
-    let gamma = Array(this.params.p).fill(0).map(() => Math.random() * Math.PI);
-    let beta = Array(this.params.p).fill(0).map(() => Math.random() * Math.PI);
+    let gamma = Array(this.params.p)
+      .fill(0)
+      .map(() => Math.random() * Math.PI);
+    let beta = Array(this.params.p)
+      .fill(0)
+      .map(() => Math.random() * Math.PI);
 
     const convergence: number[] = [];
     let bestValue = -Infinity;
-    let bestSolution = '';
+    let bestSolution = "";
 
     for (let iter = 0; iter < maxIterations; iter++) {
       // Build QAOA circuit with current parameters
@@ -87,7 +91,7 @@ export class QAOAOptimizer {
     const builder = new CircuitBuilder(this.params.numQubits);
 
     // Initial state: equal superposition
-    builder.applyToAll('h');
+    builder.applyToAll("h");
 
     // Apply QAOA layers
     for (let layer = 0; layer < this.params.p; layer++) {
@@ -125,7 +129,7 @@ export class QAOAOptimizer {
   }
 
   private applyMixerHamiltonian(builder: CircuitBuilder, beta: number): void {
-    if (this.params.mixer === 'xy') {
+    if (this.params.mixer === "xy") {
       // XY mixer (for constrained optimization)
       for (let i = 0; i < this.params.numQubits - 1; i++) {
         builder.rx(i, 2 * beta);
@@ -144,7 +148,7 @@ export class QAOAOptimizer {
   }
 
   private evaluateCost(counts: Record<string, number>): { solution: string; value: number } {
-    let bestSolution = '';
+    let bestSolution = "";
     let bestValue = -Infinity;
 
     for (const [bitstring, count] of Object.entries(counts)) {
@@ -165,15 +169,15 @@ export class QAOAOptimizer {
 
     // Evaluate edge terms
     for (const edge of this.params.costHamiltonian.edges) {
-      const zi = bitstring[edge.i] === '1' ? 1 : -1;
-      const zj = bitstring[edge.j] === '1' ? 1 : -1;
+      const zi = bitstring[edge.i] === "1" ? 1 : -1;
+      const zj = bitstring[edge.j] === "1" ? 1 : -1;
       value += edge.weight * zi * zj;
     }
 
     // Evaluate bias terms
     if (this.params.costHamiltonian.bias) {
       for (let i = 0; i < this.params.numQubits; i++) {
-        const zi = bitstring[i] === '1' ? 1 : -1;
+        const zi = bitstring[i] === "1" ? 1 : -1;
         value += (this.params.costHamiltonian.bias[i] || 0) * zi;
       }
     }
@@ -181,7 +185,10 @@ export class QAOAOptimizer {
     return value;
   }
 
-  private async estimateGradient(gamma: number[], beta: number[]): Promise<{ gamma: number[]; beta: number[] }> {
+  private async estimateGradient(
+    gamma: number[],
+    beta: number[]
+  ): Promise<{ gamma: number[]; beta: number[] }> {
     const epsilon = 0.01;
     const gradGamma: number[] = [];
     const gradBeta: number[] = [];
@@ -232,6 +239,9 @@ export class QAOAOptimizer {
   }
 }
 
-export function createQAOAOptimizer(params: QAOAParams, simulator: QuantumSimulator): QAOAOptimizer {
+export function createQAOAOptimizer(
+  params: QAOAParams,
+  simulator: QuantumSimulator
+): QAOAOptimizer {
   return new QAOAOptimizer(params, simulator);
 }

@@ -14,9 +14,9 @@
  *   2 - Script error
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import * as crypto from 'crypto';
+import * as fs from "fs";
+import * as path from "path";
+import * as crypto from "crypto";
 
 // ============================================================================
 // Types
@@ -43,26 +43,26 @@ interface DiffResult {
 
 interface Change {
   type: ChangeType;
-  category: 'graphql' | 'openapi';
+  category: "graphql" | "openapi";
   location: string;
-  severity: 'critical' | 'high' | 'medium' | 'low';
+  severity: "critical" | "high" | "medium" | "low";
   message: string;
   oldValue?: string;
   newValue?: string;
 }
 
 type ChangeType =
-  | 'field_removed'
-  | 'field_type_changed'
-  | 'field_made_required'
-  | 'type_removed'
-  | 'enum_value_removed'
-  | 'endpoint_removed'
-  | 'method_changed'
-  | 'field_added'
-  | 'type_added'
-  | 'endpoint_added'
-  | 'field_deprecated';
+  | "field_removed"
+  | "field_type_changed"
+  | "field_made_required"
+  | "type_removed"
+  | "enum_value_removed"
+  | "endpoint_removed"
+  | "method_changed"
+  | "field_added"
+  | "type_added"
+  | "endpoint_added"
+  | "field_deprecated";
 
 interface SchemaHashes {
   graphql: string;
@@ -74,10 +74,10 @@ interface SchemaHashes {
 // ============================================================================
 
 const CONFIG = {
-  schemaDir: path.join(__dirname, '../api-schemas'),
-  currentGraphQL: path.join(__dirname, '../graphql/schema.graphql'),
-  currentOpenAPI: path.join(__dirname, '../api-schemas/v1/openapi-spec-v1.json'), // This would be generated
-  outputDir: path.join(__dirname, '../audit/ga-evidence/api-contracts/diff-reports'),
+  schemaDir: path.join(__dirname, "../api-schemas"),
+  currentGraphQL: path.join(__dirname, "../graphql/schema.graphql"),
+  currentOpenAPI: path.join(__dirname, "../api-schemas/v1/openapi-spec-v1.json"), // This would be generated
+  outputDir: path.join(__dirname, "../audit/ga-evidence/api-contracts/diff-reports"),
 };
 
 // ============================================================================
@@ -95,8 +95,8 @@ class GraphQLDiffer {
       return changes;
     }
 
-    const current = fs.readFileSync(currentPath, 'utf-8');
-    const snapshot = fs.readFileSync(snapshotPath, 'utf-8');
+    const current = fs.readFileSync(currentPath, "utf-8");
+    const snapshot = fs.readFileSync(snapshotPath, "utf-8");
 
     // Parse schemas into structured format
     const currentSchema = this.parseSchema(current);
@@ -106,10 +106,10 @@ class GraphQLDiffer {
     for (const [typeName, typeInfo] of Object.entries(snapshotSchema.types)) {
       if (!currentSchema.types[typeName]) {
         changes.push({
-          type: 'type_removed',
-          category: 'graphql',
+          type: "type_removed",
+          category: "graphql",
           location: `Type.${typeName}`,
-          severity: 'critical',
+          severity: "critical",
           message: `Type '${typeName}' was removed from schema`,
           oldValue: typeInfo.definition,
           newValue: undefined,
@@ -127,10 +127,10 @@ class GraphQLDiffer {
 
         if (!currentField) {
           changes.push({
-            type: 'field_removed',
-            category: 'graphql',
+            type: "field_removed",
+            category: "graphql",
             location: `${typeName}.${fieldName}`,
-            severity: 'critical',
+            severity: "critical",
             message: `Field '${fieldName}' was removed from type '${typeName}'`,
             oldValue: fieldInfo.type,
             newValue: undefined,
@@ -139,10 +139,10 @@ class GraphQLDiffer {
           // Type changed
           if (this.isBreakingTypeChange(fieldInfo.type, currentField.type)) {
             changes.push({
-              type: 'field_type_changed',
-              category: 'graphql',
+              type: "field_type_changed",
+              category: "graphql",
               location: `${typeName}.${fieldName}`,
-              severity: 'high',
+              severity: "high",
               message: `Field '${fieldName}' type changed from '${fieldInfo.type}' to '${currentField.type}'`,
               oldValue: fieldInfo.type,
               newValue: currentField.type,
@@ -151,26 +151,26 @@ class GraphQLDiffer {
         } else if (!fieldInfo.required && currentField.required) {
           // Made required
           changes.push({
-            type: 'field_made_required',
-            category: 'graphql',
+            type: "field_made_required",
+            category: "graphql",
             location: `${typeName}.${fieldName}`,
-            severity: 'high',
+            severity: "high",
             message: `Field '${fieldName}' is now required (was optional)`,
-            oldValue: 'optional',
-            newValue: 'required',
+            oldValue: "optional",
+            newValue: "required",
           });
         }
 
         // Check for deprecation
         if (currentField.deprecated && !fieldInfo.deprecated) {
           changes.push({
-            type: 'field_deprecated',
-            category: 'graphql',
+            type: "field_deprecated",
+            category: "graphql",
             location: `${typeName}.${fieldName}`,
-            severity: 'low',
+            severity: "low",
             message: `Field '${fieldName}' is now deprecated`,
-            oldValue: 'active',
-            newValue: 'deprecated',
+            oldValue: "active",
+            newValue: "deprecated",
           });
         }
       }
@@ -180,10 +180,10 @@ class GraphQLDiffer {
     for (const [typeName, typeInfo] of Object.entries(currentSchema.types)) {
       if (!snapshotSchema.types[typeName]) {
         changes.push({
-          type: 'type_added',
-          category: 'graphql',
+          type: "type_added",
+          category: "graphql",
           location: `Type.${typeName}`,
-          severity: 'low',
+          severity: "low",
           message: `New type '${typeName}' added`,
           oldValue: undefined,
           newValue: typeInfo.definition,
@@ -198,7 +198,13 @@ class GraphQLDiffer {
    * Parse GraphQL schema into structured format
    */
   private static parseSchema(schema: string): {
-    types: Record<string, { definition: string; fields: Record<string, { type: string; required: boolean; deprecated: boolean }> }>;
+    types: Record<
+      string,
+      {
+        definition: string;
+        fields: Record<string, { type: string; required: boolean; deprecated: boolean }>;
+      }
+    >;
   } {
     const types: Record<string, any> = {};
 
@@ -216,7 +222,7 @@ class GraphQLDiffer {
         const [, fieldName, fieldType, requiredMarker] = fieldMatch;
         fields[fieldName] = {
           type: fieldType,
-          required: requiredMarker === '!',
+          required: requiredMarker === "!",
           deprecated: fieldBlock.includes(`@deprecated`) && fieldBlock.includes(fieldName),
         };
       }
@@ -235,8 +241,8 @@ class GraphQLDiffer {
    */
   private static isBreakingTypeChange(oldType: string, newType: string): boolean {
     // Non-null to nullable is safe, nullable to non-null is breaking
-    const oldNullable = !oldType.endsWith('!');
-    const newNullable = !newType.endsWith('!');
+    const oldNullable = !oldType.endsWith("!");
+    const newNullable = !newType.endsWith("!");
 
     if (!oldNullable && newNullable) {
       return false; // Made nullable - safe
@@ -246,8 +252,8 @@ class GraphQLDiffer {
     }
 
     // Different base types is breaking
-    const oldBase = oldType.replace(/!/g, '');
-    const newBase = newType.replace(/!/g, '');
+    const oldBase = oldType.replace(/!/g, "");
+    const newBase = newType.replace(/!/g, "");
 
     return oldBase !== newBase;
   }
@@ -268,17 +274,17 @@ class OpenAPIDiffer {
       return changes;
     }
 
-    const current = JSON.parse(fs.readFileSync(currentPath, 'utf-8'));
-    const snapshot = JSON.parse(fs.readFileSync(snapshotPath, 'utf-8'));
+    const current = JSON.parse(fs.readFileSync(currentPath, "utf-8"));
+    const snapshot = JSON.parse(fs.readFileSync(snapshotPath, "utf-8"));
 
     // Check for removed endpoints
     for (const [path, methods] of Object.entries(snapshot.paths || {})) {
       if (!current.paths || !current.paths[path]) {
         changes.push({
-          type: 'endpoint_removed',
-          category: 'openapi',
+          type: "endpoint_removed",
+          category: "openapi",
           location: `paths.${path}`,
-          severity: 'critical',
+          severity: "critical",
           message: `Endpoint '${path}' was removed`,
           oldValue: path,
           newValue: undefined,
@@ -288,14 +294,14 @@ class OpenAPIDiffer {
 
       // Check for removed methods
       for (const method of Object.keys(methods as any)) {
-        if (method === 'parameters') continue; // Skip common parameters
+        if (method === "parameters") continue; // Skip common parameters
 
         if (!(current.paths[path] as any)[method]) {
           changes.push({
-            type: 'method_changed',
-            category: 'openapi',
+            type: "method_changed",
+            category: "openapi",
             location: `paths.${path}.${method}`,
-            severity: 'critical',
+            severity: "critical",
             message: `Method '${method.toUpperCase()}' removed from endpoint '${path}'`,
             oldValue: method,
             newValue: undefined,
@@ -308,10 +314,10 @@ class OpenAPIDiffer {
     for (const [path, methods] of Object.entries(current.paths || {})) {
       if (!snapshot.paths || !snapshot.paths[path]) {
         changes.push({
-          type: 'endpoint_added',
-          category: 'openapi',
+          type: "endpoint_added",
+          category: "openapi",
           location: `paths.${path}`,
-          severity: 'low',
+          severity: "low",
           message: `New endpoint '${path}' added`,
           oldValue: undefined,
           newValue: path,
@@ -333,7 +339,7 @@ class SchemaDiffEngine {
   /**
    * Run full schema diff against specified version
    */
-  static async run(version: string = 'v1'): Promise<DiffResult> {
+  static async run(version: string = "v1"): Promise<DiffResult> {
     const versionDir = path.join(CONFIG.schemaDir, version);
 
     if (!fs.existsSync(versionDir)) {
@@ -352,14 +358,22 @@ class SchemaDiffEngine {
 
     // Categorize changes
     const breaking = allChanges.filter((c) =>
-      ['field_removed', 'field_type_changed', 'field_made_required', 'type_removed', 'enum_value_removed', 'endpoint_removed', 'method_changed'].includes(c.type)
+      [
+        "field_removed",
+        "field_type_changed",
+        "field_made_required",
+        "type_removed",
+        "enum_value_removed",
+        "endpoint_removed",
+        "method_changed",
+      ].includes(c.type)
     );
 
     const nonBreaking = allChanges.filter((c) =>
-      ['field_added', 'type_added', 'endpoint_added'].includes(c.type)
+      ["field_added", "type_added", "endpoint_added"].includes(c.type)
     );
 
-    const deprecated = allChanges.filter((c) => c.type === 'field_deprecated');
+    const deprecated = allChanges.filter((c) => c.type === "field_deprecated");
 
     // Generate recommendations
     const recommendations = this.generateRecommendations(breaking, nonBreaking, deprecated);
@@ -404,38 +418,22 @@ class SchemaDiffEngine {
       recommendations.push(
         `⚠️  BREAKING CHANGES DETECTED: ${breaking.length} breaking change(s) found`
       );
-      recommendations.push(
-        'Action required: Create new major version (e.g., v2)'
-      );
-      recommendations.push(
-        'Update /api-schemas/VERSION_POLICY.md with migration guide'
-      );
-      recommendations.push(
-        'Consider implementing compatibility layer for gradual migration'
-      );
+      recommendations.push("Action required: Create new major version (e.g., v2)");
+      recommendations.push("Update /api-schemas/VERSION_POLICY.md with migration guide");
+      recommendations.push("Consider implementing compatibility layer for gradual migration");
     } else if (nonBreaking.length > 0) {
       recommendations.push(
         `✅ Non-breaking changes only: ${nonBreaking.length} additive change(s)`
       );
-      recommendations.push(
-        'Safe to merge - no version bump required'
-      );
-      recommendations.push(
-        'Update API documentation to reflect new features'
-      );
+      recommendations.push("Safe to merge - no version bump required");
+      recommendations.push("Update API documentation to reflect new features");
     } else {
-      recommendations.push(
-        '✅ No API changes detected - schemas are identical'
-      );
+      recommendations.push("✅ No API changes detected - schemas are identical");
     }
 
     if (deprecated.length > 0) {
-      recommendations.push(
-        `ℹ️  ${deprecated.length} field(s) marked as deprecated`
-      );
-      recommendations.push(
-        'Document deprecation timeline in changelog'
-      );
+      recommendations.push(`ℹ️  ${deprecated.length} field(s) marked as deprecated`);
+      recommendations.push("Document deprecation timeline in changelog");
     }
 
     return recommendations;
@@ -446,9 +444,9 @@ class SchemaDiffEngine {
    */
   private static calculateHashes(graphqlPath: string, openApiPath: string): SchemaHashes {
     const hashFile = (filepath: string): string => {
-      if (!fs.existsSync(filepath)) return 'N/A';
+      if (!fs.existsSync(filepath)) return "N/A";
       const content = fs.readFileSync(filepath);
-      return 'sha256:' + crypto.createHash('sha256').update(content).digest('hex');
+      return "sha256:" + crypto.createHash("sha256").update(content).digest("hex");
     };
 
     return {
@@ -461,28 +459,28 @@ class SchemaDiffEngine {
    * Load snapshot hashes from metadata
    */
   private static loadSnapshotHashes(versionDir: string): SchemaHashes {
-    const metadataPath = path.join(versionDir, 'version-metadata.json');
+    const metadataPath = path.join(versionDir, "version-metadata.json");
     if (!fs.existsSync(metadataPath)) {
-      return { graphql: 'N/A', openapi: 'N/A' };
+      return { graphql: "N/A", openapi: "N/A" };
     }
 
-    const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf-8'));
-    return metadata.schemaHash || { graphql: 'N/A', openapi: 'N/A' };
+    const metadata = JSON.parse(fs.readFileSync(metadataPath, "utf-8"));
+    return metadata.schemaHash || { graphql: "N/A", openapi: "N/A" };
   }
 
   /**
    * Save diff report to file
    */
-  static saveDiffReport(result: DiffResult, outputFormat: 'json' | 'text' = 'json'): string {
+  static saveDiffReport(result: DiffResult, outputFormat: "json" | "text" = "json"): string {
     // Ensure output directory exists
     if (!fs.existsSync(CONFIG.outputDir)) {
       fs.mkdirSync(CONFIG.outputDir, { recursive: true });
     }
 
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     const filename = `schema-diff-${result.baseVersion}-${timestamp}`;
 
-    if (outputFormat === 'json') {
+    if (outputFormat === "json") {
       const filepath = path.join(CONFIG.outputDir, `${filename}.json`);
       fs.writeFileSync(filepath, JSON.stringify(result, null, 2));
       return filepath;
@@ -500,74 +498,74 @@ class SchemaDiffEngine {
   private static formatTextReport(result: DiffResult): string {
     const lines: string[] = [];
 
-    lines.push('='.repeat(80));
-    lines.push('API SCHEMA DIFF REPORT');
-    lines.push('='.repeat(80));
-    lines.push('');
+    lines.push("=".repeat(80));
+    lines.push("API SCHEMA DIFF REPORT");
+    lines.push("=".repeat(80));
+    lines.push("");
     lines.push(`Timestamp:     ${result.timestamp}`);
     lines.push(`Base Version:  ${result.baseVersion}`);
-    lines.push(`Status:        ${result.hasBreakingChanges ? '⚠️  BREAKING CHANGES' : '✅ SAFE'}`);
-    lines.push('');
-    lines.push('Summary:');
+    lines.push(`Status:        ${result.hasBreakingChanges ? "⚠️  BREAKING CHANGES" : "✅ SAFE"}`);
+    lines.push("");
+    lines.push("Summary:");
     lines.push(`  Breaking Changes:     ${result.summary.breaking}`);
     lines.push(`  Non-Breaking Changes: ${result.summary.nonBreaking}`);
     lines.push(`  Deprecated Fields:    ${result.summary.deprecated}`);
-    lines.push('');
+    lines.push("");
 
     if (result.breakingChanges.length > 0) {
-      lines.push('-'.repeat(80));
-      lines.push('BREAKING CHANGES:');
-      lines.push('-'.repeat(80));
+      lines.push("-".repeat(80));
+      lines.push("BREAKING CHANGES:");
+      lines.push("-".repeat(80));
       for (const change of result.breakingChanges) {
-        lines.push('');
+        lines.push("");
         lines.push(`[${change.severity.toUpperCase()}] ${change.type}`);
         lines.push(`  Location: ${change.location}`);
         lines.push(`  Message:  ${change.message}`);
         if (change.oldValue) lines.push(`  Old:      ${change.oldValue}`);
         if (change.newValue) lines.push(`  New:      ${change.newValue}`);
       }
-      lines.push('');
+      lines.push("");
     }
 
     if (result.nonBreakingChanges.length > 0) {
-      lines.push('-'.repeat(80));
-      lines.push('NON-BREAKING CHANGES:');
-      lines.push('-'.repeat(80));
+      lines.push("-".repeat(80));
+      lines.push("NON-BREAKING CHANGES:");
+      lines.push("-".repeat(80));
       for (const change of result.nonBreakingChanges) {
         lines.push(`  [${change.type}] ${change.location}: ${change.message}`);
       }
-      lines.push('');
+      lines.push("");
     }
 
     if (result.deprecatedChanges.length > 0) {
-      lines.push('-'.repeat(80));
-      lines.push('DEPRECATIONS:');
-      lines.push('-'.repeat(80));
+      lines.push("-".repeat(80));
+      lines.push("DEPRECATIONS:");
+      lines.push("-".repeat(80));
       for (const change of result.deprecatedChanges) {
         lines.push(`  ${change.location}: ${change.message}`);
       }
-      lines.push('');
+      lines.push("");
     }
 
-    lines.push('-'.repeat(80));
-    lines.push('RECOMMENDATIONS:');
-    lines.push('-'.repeat(80));
+    lines.push("-".repeat(80));
+    lines.push("RECOMMENDATIONS:");
+    lines.push("-".repeat(80));
     for (const rec of result.recommendations) {
       lines.push(`  ${rec}`);
     }
-    lines.push('');
+    lines.push("");
 
-    lines.push('-'.repeat(80));
-    lines.push('SCHEMA HASHES:');
-    lines.push('-'.repeat(80));
+    lines.push("-".repeat(80));
+    lines.push("SCHEMA HASHES:");
+    lines.push("-".repeat(80));
     lines.push(`Current GraphQL:  ${result.schemaHashes.current.graphql}`);
     lines.push(`Snapshot GraphQL: ${result.schemaHashes.snapshot.graphql}`);
     lines.push(`Current OpenAPI:  ${result.schemaHashes.current.openapi}`);
     lines.push(`Snapshot OpenAPI: ${result.schemaHashes.snapshot.openapi}`);
-    lines.push('');
-    lines.push('='.repeat(80));
+    lines.push("");
+    lines.push("=".repeat(80));
 
-    return lines.join('\n');
+    return lines.join("\n");
   }
 }
 
@@ -578,34 +576,34 @@ class SchemaDiffEngine {
 async function main() {
   try {
     const args = process.argv.slice(2);
-    const versionArg = args.find((a) => a.startsWith('--version='));
-    const outputArg = args.find((a) => a.startsWith('--output='));
-    const strictMode = args.includes('--strict');
+    const versionArg = args.find((a) => a.startsWith("--version="));
+    const outputArg = args.find((a) => a.startsWith("--output="));
+    const strictMode = args.includes("--strict");
 
-    const version = versionArg ? versionArg.split('=')[1] : 'v1';
-    const outputFormat = (outputArg ? outputArg.split('=')[1] : 'json') as 'json' | 'text';
+    const version = versionArg ? versionArg.split("=")[1] : "v1";
+    const outputFormat = (outputArg ? outputArg.split("=")[1] : "json") as "json" | "text";
 
-    console.log('🔍 Running API schema diff...');
+    console.log("🔍 Running API schema diff...");
     console.log(`   Version: ${version}`);
     console.log(`   Output:  ${outputFormat}`);
-    console.log('');
+    console.log("");
 
     const result = await SchemaDiffEngine.run(version);
 
     // Save report
     const reportPath = SchemaDiffEngine.saveDiffReport(result, outputFormat);
     console.log(`📄 Report saved: ${reportPath}`);
-    console.log('');
+    console.log("");
 
     // Print summary
-    console.log('Summary:');
+    console.log("Summary:");
     console.log(`  Breaking:     ${result.summary.breaking}`);
     console.log(`  Non-Breaking: ${result.summary.nonBreaking}`);
     console.log(`  Deprecated:   ${result.summary.deprecated}`);
-    console.log('');
+    console.log("");
 
     // Print recommendations
-    console.log('Recommendations:');
+    console.log("Recommendations:");
     for (const rec of result.recommendations) {
       console.log(`  ${rec}`);
     }
@@ -613,23 +611,23 @@ async function main() {
     // Exit with appropriate code
     if (result.hasBreakingChanges) {
       if (strictMode) {
-        console.error('');
-        console.error('❌ FAILED: Breaking changes detected in strict mode');
+        console.error("");
+        console.error("❌ FAILED: Breaking changes detected in strict mode");
         process.exit(1);
       } else {
-        console.log('');
-        console.log('⚠️  WARNING: Breaking changes detected');
-        console.log('   Review changes and consider creating a new API version');
+        console.log("");
+        console.log("⚠️  WARNING: Breaking changes detected");
+        console.log("   Review changes and consider creating a new API version");
         process.exit(0); // Don't fail in non-strict mode
       }
     } else {
-      console.log('');
-      console.log('✅ SUCCESS: No breaking changes detected');
+      console.log("");
+      console.log("✅ SUCCESS: No breaking changes detected");
       process.exit(0);
     }
   } catch (error) {
-    console.error('');
-    console.error('❌ ERROR:', error instanceof Error ? error.message : String(error));
+    console.error("");
+    console.error("❌ ERROR:", error instanceof Error ? error.message : String(error));
     process.exit(2);
   }
 }

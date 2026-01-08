@@ -2,7 +2,7 @@ name: Pipeline - Nightly Security
 
 on:
   schedule:
-    - cron: '0 2 * * *' # 2 AM UTC daily
+    - cron: "0 2 * * *" # 2 AM UTC daily
   workflow_dispatch:
 
 jobs:
@@ -16,17 +16,17 @@ jobs:
       - name: Trivy FS Scan
         uses: aquasecurity/trivy-action@0.24.0
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH'
+          scan-type: "fs"
+          scan-ref: "."
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "CRITICAL,HIGH"
 
       - name: Upload Trivy Results to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: "trivy-results.sarif"
           category: trivy
 
       # Check for License Compliance
@@ -38,7 +38,7 @@ jobs:
       - name: Scan Staging Image
         uses: aquasecurity/trivy-action@0.24.0
         with:
-          image-ref: 'ghcr.io/${{ github.repository }}-server:latest' # Assuming latest matches staging
-          format: 'table'
-          severity: 'CRITICAL,HIGH'
+          image-ref: "ghcr.io/${{ github.repository }}-server:latest" # Assuming latest matches staging
+          format: "table"
+          severity: "CRITICAL,HIGH"
         continue-on-error: true

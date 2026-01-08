@@ -62,9 +62,9 @@ name: org.release.hardened
 on:
   workflow_call:
     inputs:
-      language: { required: true, type: string, description: 'node|python|go' }
-      build: { required: true, type: string, description: 'build command' }
-      artifact_glob: { required: false, type: string, default: 'dist/**/*' }
+      language: { required: true, type: string, description: "node|python|go" }
+      build: { required: true, type: string, description: "build command" }
+      artifact_glob: { required: false, type: string, default: "dist/**/*" }
     secrets:
       MAESTRO_TOKEN: { required: false }
 
@@ -81,7 +81,7 @@ jobs:
       - name: Setup language
         if: ${{ inputs.language == 'node' }}
         uses: actions/setup-node@v4
-        with: { node-version: '20', cache: 'pnpm' }
+        with: { node-version: "20", cache: "pnpm" }
       - name: Install & build
         run: |
           if [ "${{ inputs.language }}" = node ]; then corepack enable && pnpm i --frozen-lockfile && ${{ inputs.build }}; fi
@@ -113,13 +113,7 @@ jobs:
         with: { sbom: sbom.json, output: osv.json }
       - name: Trivy SBOM
         uses: aquasecurity/trivy-action@0.22.0
-        with:
-          {
-            scan-type: 'sbom',
-            input: 'sbom.json',
-            format: 'json',
-            output: 'trivy.json',
-          }
+        with: { scan-type: "sbom", input: "sbom.json", format: "json", output: "trivy.json" }
       - name: Cosign attest & verify (keyless)
         run: |
           cosign attest --predicate sbom.json --type cyclonedx $GITHUB_REF_NAME --yes
@@ -255,17 +249,16 @@ Static site that lists repos, latest tag, and attached evidence (SBOM, provenanc
     <h1>Releases & Evidence</h1>
     <div id="app"></div>
     <script type="module">
-      const repos = await (await fetch('repos.json')).json();
-      const app = document.getElementById('app');
+      const repos = await (await fetch("repos.json")).json();
+      const app = document.getElementById("app");
       for (const r of repos) {
-        const rel = await fetch(
-          `https://api.github.com/repos/${r}/releases/latest`,
-        ).then((r) => r.json());
-        const files =
-          rel.assets?.map((a) => `<li>${a.name}</li>`).join('') || '';
+        const rel = await fetch(`https://api.github.com/repos/${r}/releases/latest`).then((r) =>
+          r.json()
+        );
+        const files = rel.assets?.map((a) => `<li>${a.name}</li>`).join("") || "";
         app.insertAdjacentHTML(
-          'beforeend',
-          `<section><h2>${r} — ${rel.tag_name || 'n/a'}</h2><ul>${files}</ul></section>`,
+          "beforeend",
+          `<section><h2>${r} — ${rel.tag_name || "n/a"}</h2><ul>${files}</ul></section>`
         );
       }
     </script>

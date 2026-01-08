@@ -1,4 +1,4 @@
-export type EpicStatus = 'not_started' | 'in_progress' | 'completed' | 'blocked';
+export type EpicStatus = "not_started" | "in_progress" | "completed" | "blocked";
 
 export interface EpicTaskState {
   id: string;

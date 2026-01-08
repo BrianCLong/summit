@@ -1,51 +1,70 @@
-import React, { useEffect, useState } from 'react';
-import { CheckCircle, Circle, ArrowRight } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react'
+import { CheckCircle, Circle, ArrowRight } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import { Button } from '@/components/ui/Button'
+import { useNavigate } from 'react-router-dom'
 
 interface Step {
-  id: string;
-  label: string;
-  path: string;
-  completed: boolean;
+  id: string
+  label: string
+  path: string
+  completed: boolean
 }
 
 export const ActivationProgressTile: React.FC = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
   const [steps, setSteps] = useState<Step[]>([
     { id: 'signup', label: 'Sign Up', path: '/', completed: true }, // Assumed true if seeing this
-    { id: 'tenant_created', label: 'Create Tenant', path: '/admin', completed: false },
-    { id: 'first_ingest', label: 'Ingest Data', path: '/datasources', completed: false },
-    { id: 'first_export', label: 'Export Report', path: '/reports', completed: false },
-  ]);
+    {
+      id: 'tenant_created',
+      label: 'Create Tenant',
+      path: '/admin',
+      completed: false,
+    },
+    {
+      id: 'first_ingest',
+      label: 'Ingest Data',
+      path: '/datasources',
+      completed: false,
+    },
+    {
+      id: 'first_export',
+      label: 'Export Report',
+      path: '/reports',
+      completed: false,
+    },
+  ])
 
   useEffect(() => {
     const checkProgress = () => {
-      const progress = JSON.parse(localStorage.getItem('activation_progress') || '{}');
-      setSteps(prev => prev.map(step => ({
-        ...step,
-        completed: step.id === 'signup' ? true : !!progress[step.id]
-      })));
-    };
+      const progress = JSON.parse(
+        localStorage.getItem('activation_progress') || '{}'
+      )
+      setSteps(prev =>
+        prev.map(step => ({
+          ...step,
+          completed: step.id === 'signup' ? true : !!progress[step.id],
+        }))
+      )
+    }
 
-    checkProgress();
+    checkProgress()
     // Listen for storage events to update in real-time if multiple tabs
-    window.addEventListener('storage', checkProgress);
+    window.addEventListener('storage', checkProgress)
     // Custom event for same-tab updates
-    window.addEventListener('activation_updated', checkProgress);
+    window.addEventListener('activation_updated', checkProgress)
 
     return () => {
-      window.removeEventListener('storage', checkProgress);
-      window.removeEventListener('activation_updated', checkProgress);
-    };
-  }, []);
+      window.removeEventListener('storage', checkProgress)
+      window.removeEventListener('activation_updated', checkProgress)
+    }
+  }, [])
 
-  const nextStep = steps.find(s => !s.completed);
-  const completedCount = steps.filter(s => s.completed).length;
-  const progressPercent = (completedCount / steps.length) * 100;
+  const nextStep = steps.find(s => !s.completed)
+  const completedCount = steps.filter(s => s.completed).length
+  const progressPercent = (completedCount / steps.length) * 100
 
-  if (completedCount === steps.length) return null; // Hide when done
+  if (completedCount === steps.length) return null // Hide when done
 
   return (
     <Card className="mb-6 border-blue-500/20 bg-blue-500/5">
@@ -77,7 +96,9 @@ export const ActivationProgressTile: React.FC = () => {
                     {idx + 1}
                   </div>
                 )}
-                <span className={`text-sm ${step.completed ? 'text-slate-900 font-medium' : 'text-slate-500'}`}>
+                <span
+                  className={`text-sm ${step.completed ? 'text-slate-900 font-medium' : 'text-slate-500'}`}
+                >
                   {step.label}
                 </span>
               </div>
@@ -95,5 +116,5 @@ export const ActivationProgressTile: React.FC = () => {
         </div>
       </CardContent>
     </Card>
-  );
-};
+  )
+}

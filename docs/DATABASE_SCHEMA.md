@@ -9,7 +9,9 @@ The data model is centered around **Entities** and **Relationships** with suppor
 ## Nodes (Labels)
 
 ### `Entity`
+
 The base label for all domain objects.
+
 - **Properties**:
   - `id` (String, UUID): Unique identifier.
   - `type` (String): e.g., "Person", "Organization".
@@ -18,6 +20,7 @@ The base label for all domain objects.
   - `confidence` (Float): 0.0 - 1.0.
 
 ### Specific Entity Labels
+
 - `Person`
 - `Organization`
 - `Location`
@@ -25,12 +28,16 @@ The base label for all domain objects.
 - `Document`
 
 ### `Agent`
+
 Represents an actor (user or AI) that performed an action.
+
 - `id`: Agent ID.
 - `lastActive`: Timestamp.
 
 ### `Entry` (Provenance)
+
 Represents a write operation or data source event.
+
 - `id`: Ledger Entry ID.
 - `action`: Type of action (e.g., "ingest", "edit").
 - `timestamp`: When it happened.
@@ -39,7 +46,9 @@ Represents a write operation or data source event.
 ## Relationships
 
 ### Domain Relationships
+
 Dynamic relationships between entities.
+
 - **Type**: Variable (e.g., `WORKS_FOR`, `LOCATED_IN`, `KNOWS`).
 - **Properties**:
   - `start` (DateTime): Validity start.
@@ -48,6 +57,7 @@ Dynamic relationships between entities.
   - `evidenceRef` (String): Pointer to source evidence.
 
 ### System Relationships
+
 - `(Agent)-[:GENERATED]->(Entry)`: Who created the entry.
 - `(Entry)-[:EVIDENCED]->(Entity)`: Which entry supports the entity.
 

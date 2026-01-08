@@ -115,26 +115,24 @@ package.json
 ### `tests/contract/workflow_manifest.test.ts`
 
 ```ts
-import fs from 'node:fs';
-import path from 'node:path';
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
+import fs from "node:fs";
+import path from "node:path";
+import Ajv from "ajv";
+import addFormats from "ajv-formats";
 
 const ajv = new Ajv({ allErrors: true, allowUnionTypes: true });
 addFormats(ajv);
-const schema = JSON.parse(
-  fs.readFileSync(path.join('contracts', 'workflow.schema.json'), 'utf8'),
-);
+const schema = JSON.parse(fs.readFileSync(path.join("contracts", "workflow.schema.json"), "utf8"));
 
 function loadYaml(file: string) {
   // Minimal YAML loader stub; replace with 'yaml' pkg if desired
-  const { parse } = require('yaml');
-  return parse(fs.readFileSync(file, 'utf8'));
+  const { parse } = require("yaml");
+  return parse(fs.readFileSync(file, "utf8"));
 }
 
-describe('Workflow manifest schema', () => {
-  it('validates example manifest', () => {
-    const manifest = loadYaml('examples/workflows/ingest-enrich-handoff.yaml');
+describe("Workflow manifest schema", () => {
+  it("validates example manifest", () => {
+    const manifest = loadYaml("examples/workflows/ingest-enrich-handoff.yaml");
     const validate = ajv.compile(schema);
     const ok = validate(manifest);
     if (!ok) {
@@ -143,11 +141,11 @@ describe('Workflow manifest schema', () => {
     expect(ok).toBe(true);
   });
 
-  it('fails on missing policy fields', () => {
+  it("fails on missing policy fields", () => {
     const m = {
-      apiVersion: 'maestro/v1',
-      kind: 'Workflow',
-      metadata: { name: 'x', version: '1.0.0' },
+      apiVersion: "maestro/v1",
+      kind: "Workflow",
+      metadata: { name: "x", version: "1.0.0" },
       spec: { tasks: [] },
     } as any;
     const validate = ajv.compile(schema);
@@ -159,22 +157,17 @@ describe('Workflow manifest schema', () => {
 ### `tests/contract/runbook_manifest.test.ts`
 
 ```ts
-import fs from 'node:fs';
-import path from 'node:path';
-import Ajv from 'ajv';
+import fs from "node:fs";
+import path from "node:path";
+import Ajv from "ajv";
 
 const ajv = new Ajv({ allErrors: true });
-const schema = JSON.parse(
-  fs.readFileSync(path.join('contracts', 'runbook.schema.json'), 'utf8'),
-);
+const schema = JSON.parse(fs.readFileSync(path.join("contracts", "runbook.schema.json"), "utf8"));
 
-describe('Runbook manifest schema', () => {
-  it('validates example runbook', () => {
+describe("Runbook manifest schema", () => {
+  it("validates example runbook", () => {
     const rb = JSON.parse(
-      fs.readFileSync(
-        'examples/runbooks/backfill-entity-resolver.json',
-        'utf8',
-      ),
+      fs.readFileSync("examples/runbooks/backfill-entity-resolver.json", "utf8")
     );
     const validate = ajv.compile(schema);
     expect(validate(rb)).toBe(true);
@@ -185,37 +178,33 @@ describe('Runbook manifest schema', () => {
 ### `tests/contract/sig_api.test.ts`
 
 ```ts
-import nock from 'nock';
+import nock from "nock";
 
 // Configure base
-const SIG_BASE = 'https://sig.example.internal';
+const SIG_BASE = "https://sig.example.internal";
 
 function maestroIngestBatch(payload: any) {
   // Replace with actual client call
   return fetch(`${SIG_BASE}/ingest/batch`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    method: "POST",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify(payload),
   });
 }
 
-describe('SIG API contracts', () => {
+describe("SIG API contracts", () => {
   afterEach(() => nock.cleanAll());
 
-  it('POST /ingest/batch sends required fields and handles receipts', async () => {
+  it("POST /ingest/batch sends required fields and handles receipts", async () => {
     const scope = nock(SIG_BASE)
-      .post('/ingest/batch', (body) => {
+      .post("/ingest/batch", (body) => {
         // Validate shape
-        return (
-          body &&
-          Array.isArray(body.items) &&
-          body.items.every((i: any) => i.id && i.payload)
-        );
+        return body && Array.isArray(body.items) && body.items.every((i: any) => i.id && i.payload);
       })
-      .reply(200, { jobId: 'job-123', receipts: [{ id: 'i‑1', hash: 'abc' }] });
+      .reply(200, { jobId: "job-123", receipts: [{ id: "i‑1", hash: "abc" }] });
 
     const res = await maestroIngestBatch({
-      items: [{ id: 'i‑1', payload: {} }],
+      items: [{ id: "i‑1", payload: {} }],
     });
     expect(res.status).toBe(200);
     const json = await res.json();
@@ -224,26 +213,23 @@ describe('SIG API contracts', () => {
     scope.done();
   });
 
-  it('POST /policy/evaluate enforces purpose/authority/license', async () => {
+  it("POST /policy/evaluate enforces purpose/authority/license", async () => {
     const policy = nock(SIG_BASE)
-      .post(
-        '/policy/evaluate',
-        (body) => body && body.purpose && body.authority && body.license,
-      )
-      .reply(200, { decision: 'allow', reason: 'ok' });
+      .post("/policy/evaluate", (body) => body && body.purpose && body.authority && body.license)
+      .reply(200, { decision: "allow", reason: "ok" });
 
     const res = await fetch(`${SIG_BASE}/policy/evaluate`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      method: "POST",
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        purpose: 'ingest',
-        authority: 'tasking:ops',
-        license: 'internal',
+        purpose: "ingest",
+        authority: "tasking:ops",
+        license: "internal",
       }),
     });
     expect(res.status).toBe(200);
     const json = await res.json();
-    expect(json.decision).toBe('allow');
+    expect(json.decision).toBe("allow");
     policy.done();
   });
 });
@@ -252,20 +238,20 @@ describe('SIG API contracts', () => {
 ### `tests/contract/sig_trigger_api.test.ts`
 
 ```ts
-import nock from 'nock';
+import nock from "nock";
 
-const MAESTRO_BASE = 'https://maestro.internal';
+const MAESTRO_BASE = "https://maestro.internal";
 
-describe('Runbooks trigger API (allow‑listed)', () => {
+describe("Runbooks trigger API (allow‑listed)", () => {
   afterEach(() => nock.cleanAll());
 
-  it('rejects non‑allow‑listed runbook', async () => {
+  it("rejects non‑allow‑listed runbook", async () => {
     const scope = nock(MAESTRO_BASE)
-      .post('/runbooks/trigger')
-      .reply(403, { error: 'runbook not allow‑listed' });
+      .post("/runbooks/trigger")
+      .reply(403, { error: "runbook not allow‑listed" });
 
     const res = await fetch(`${MAESTRO_BASE}/runbooks/trigger`, {
-      method: 'POST',
+      method: "POST",
     });
     expect(res.status).toBe(403);
     scope.done();

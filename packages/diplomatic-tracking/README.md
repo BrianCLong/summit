@@ -24,28 +24,28 @@ Comprehensive tracking and analysis of diplomatic events, state visits, summits,
 ## Usage
 
 ```typescript
-import { DiplomaticEventTracker, DiplomaticEventType } from '@intelgraph/diplomatic-tracking';
+import { DiplomaticEventTracker, DiplomaticEventType } from "@intelgraph/diplomatic-tracking";
 
 const tracker = new DiplomaticEventTracker();
 
 // Track a state visit
 tracker.trackStateVisit({
-  id: 'sv-001',
+  id: "sv-001",
   type: DiplomaticEventType.STATE_VISIT,
-  title: 'State Visit to France',
+  title: "State Visit to France",
   // ... other details
 });
 
 // Analyze diplomatic activity
-const analysis = tracker.analyzeDiplomaticActivity('USA', 90);
+const analysis = tracker.analyzeDiplomaticActivity("USA", 90);
 console.log(`Total events: ${analysis.totalEvents}`);
 console.log(`Activity trend: ${analysis.activityTrend}`);
 
 // Get bilateral events
-const bilateralEvents = tracker.getBilateralEvents('USA', 'China');
+const bilateralEvents = tracker.getBilateralEvents("USA", "China");
 
 // Detect engagement patterns
-const patterns = tracker.detectEngagementPatterns('USA');
+const patterns = tracker.detectEngagementPatterns("USA");
 console.log(`Diplomatic style: ${patterns.diplomaticStyle}`);
 ```
 

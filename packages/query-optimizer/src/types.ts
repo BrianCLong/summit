@@ -18,7 +18,7 @@ export interface PlanNode {
 }
 
 export interface OptimizationHint {
-  type: 'FORCE_INDEX' | 'IGNORE_INDEX' | 'AVOID_CROSS_TENANT' | 'USE_IMS';
+  type: "FORCE_INDEX" | "IGNORE_INDEX" | "AVOID_CROSS_TENANT" | "USE_IMS";
   target?: string;
   parameters?: any;
 }
@@ -26,7 +26,7 @@ export interface OptimizationHint {
 export interface SubgraphViewDefinition {
   name: string;
   cypherQuery: string;
-  refreshStrategy: 'incremental' | 'full' | 'hybrid';
+  refreshStrategy: "incremental" | "full" | "hybrid";
   dependencies: string[]; // Entity types or edge types
   policyTags: string[];
 }

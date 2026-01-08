@@ -2,15 +2,15 @@
  * Smart Contract Executor - Sandboxed execution environment
  */
 
-import { VM } from 'vm2';
-import { Logger } from 'pino';
+import { VM } from "vm2";
+import { Logger } from "pino";
 import {
   SmartContract,
   ContractExecutionContext,
   ContractExecutionResult,
   ContractLog,
   StateChange,
-} from '../contracts/types.js';
+} from "../contracts/types.js";
 
 export class SmartContractExecutor {
   private logger: Logger;
@@ -32,14 +32,11 @@ export class SmartContractExecutor {
       // Store contract
       this.contracts.set(contract.address, contract);
 
-      this.logger.info(
-        { address: contract.address, name: contract.name },
-        'Contract deployed'
-      );
+      this.logger.info({ address: contract.address, name: contract.name }, "Contract deployed");
 
       return contract.address;
     } catch (error) {
-      this.logger.error({ error }, 'Failed to deploy contract');
+      this.logger.error({ error }, "Failed to deploy contract");
       throw error;
     }
   }
@@ -86,7 +83,7 @@ export class SmartContractExecutor {
           },
           console: {
             log: (...args: any[]) => {
-              this.logger.debug({ contract: contractAddress, args }, 'Contract log');
+              this.logger.debug({ contract: contractAddress, args }, "Contract log");
               gasUsed += 10;
             },
           },
@@ -121,7 +118,7 @@ export class SmartContractExecutor {
           gasUsed,
           executionTime,
         },
-        'Contract executed successfully'
+        "Contract executed successfully"
       );
 
       return {
@@ -134,7 +131,7 @@ export class SmartContractExecutor {
     } catch (error) {
       this.logger.error(
         { error, contract: contractAddress, function: functionName },
-        'Contract execution failed'
+        "Contract execution failed"
       );
 
       return {
@@ -168,23 +165,23 @@ export class SmartContractExecutor {
    */
   private validateContract(contract: SmartContract): void {
     if (!contract.address || !contract.name || !contract.code) {
-      throw new Error('Invalid contract: missing required fields');
+      throw new Error("Invalid contract: missing required fields");
     }
 
     // Basic code validation
-    if (contract.code.includes('require(') && contract.code.includes('native')) {
-      throw new Error('Contract cannot use native modules');
+    if (contract.code.includes("require(") && contract.code.includes("native")) {
+      throw new Error("Contract cannot use native modules");
     }
 
     // Check for dangerous patterns
     const dangerousPatterns = [
-      'eval(',
-      'Function(',
-      'import ',
-      'require(',
-      'process',
-      '__dirname',
-      '__filename',
+      "eval(",
+      "Function(",
+      "import ",
+      "require(",
+      "process",
+      "__dirname",
+      "__filename",
     ];
 
     for (const pattern of dangerousPatterns) {

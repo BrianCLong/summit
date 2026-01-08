@@ -1,9 +1,9 @@
-import { randomUUID } from 'node:crypto';
-import { TraceBuilder } from '../runtime/trace-schema.js';
-import { TelemetryClient } from '../runtime/telemetry-client.js';
-import { CostModel } from '../runtime/cost-model.js';
-import { ScenarioLoader } from './scenario-loader.js';
-import { MetricsCollector } from './metrics.js';
+import { randomUUID } from "node:crypto";
+import { TraceBuilder } from "../runtime/trace-schema.js";
+import { TelemetryClient } from "../runtime/telemetry-client.js";
+import { CostModel } from "../runtime/cost-model.js";
+import { ScenarioLoader } from "./scenario-loader.js";
+import { MetricsCollector } from "./metrics.js";
 import type {
   Scenario,
   ScenarioResult,
@@ -13,7 +13,7 @@ import type {
   RoutingConfig,
   SafetyConfig,
   Trace,
-} from '../types.js';
+} from "../types.js";
 
 export interface EvalRunnerConfig {
   scenariosPath: string;
@@ -26,16 +26,16 @@ export interface EvalRunnerConfig {
 }
 
 const DEFAULT_CONFIG: EvalRunnerConfig = {
-  scenariosPath: './scenarios',
-  outputPath: './experiments/traces.jsonl',
+  scenariosPath: "./scenarios",
+  outputPath: "./experiments/traces.jsonl",
   routingConfig: {
-    type: 'greedy_cost',
+    type: "greedy_cost",
     costWeight: 0.5,
     latencyBudgetMs: 5000,
     fallbackEnabled: true,
   },
   safetyConfig: {
-    enabledChecks: ['jailbreak_detection', 'pii_detection', 'harmful_content'],
+    enabledChecks: ["jailbreak_detection", "pii_detection", "harmful_content"],
     blockOnViolation: true,
     logViolations: true,
   },
@@ -62,11 +62,9 @@ export class EvalRunner {
   private readonly metricsCollector: MetricsCollector;
   private router?: (
     step: ScenarioStep,
-    scenario: Scenario,
+    scenario: Scenario
   ) => Promise<{ tool: string; score: number; reasoning: string[] }>;
-  private safetyChecker?: (
-    input: unknown,
-  ) => Promise<{ passed: boolean; violations: string[] }>;
+  private safetyChecker?: (input: unknown) => Promise<{ passed: boolean; violations: string[] }>;
 
   constructor(config: Partial<EvalRunnerConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -84,8 +82,8 @@ export class EvalRunner {
   setRouter(
     router: (
       step: ScenarioStep,
-      scenario: Scenario,
-    ) => Promise<{ tool: string; score: number; reasoning: string[] }>,
+      scenario: Scenario
+    ) => Promise<{ tool: string; score: number; reasoning: string[] }>
   ): void {
     this.router = router;
   }
@@ -94,9 +92,7 @@ export class EvalRunner {
    * Set a custom safety checker implementation
    */
   setSafetyChecker(
-    checker: (
-      input: unknown,
-    ) => Promise<{ passed: boolean; violations: string[] }>,
+    checker: (input: unknown) => Promise<{ passed: boolean; violations: string[] }>
   ): void {
     this.safetyChecker = checker;
   }
@@ -119,9 +115,7 @@ export class EvalRunner {
     // Run with concurrency limit
     const chunks = this.chunkArray(scenarios, this.config.maxConcurrency);
     for (const chunk of chunks) {
-      const chunkResults = await Promise.all(
-        chunk.map((s) => this.executeScenario(s)),
-      );
+      const chunkResults = await Promise.all(chunk.map((s) => this.executeScenario(s)));
       results.push(...chunkResults);
     }
 
@@ -131,9 +125,7 @@ export class EvalRunner {
   /**
    * Run scenarios by category
    */
-  async runByCategory(
-    category: Scenario['category'],
-  ): Promise<ScenarioResult[]> {
+  async runByCategory(category: Scenario["category"]): Promise<ScenarioResult[]> {
     const scenarios = this.scenarioLoader.loadByCategory(category);
     return Promise.all(scenarios.map((s) => this.executeScenario(s)));
   }
@@ -144,11 +136,11 @@ export class EvalRunner {
   private async executeScenario(scenario: Scenario): Promise<ScenarioResult> {
     const runId = randomUUID();
     const trace = new TraceBuilder(scenario.id, runId);
-    const errors: ScenarioResult['errors'] = [];
-    const assertions: ScenarioResult['assertions'] = [];
+    const errors: ScenarioResult["errors"] = [];
+    const assertions: ScenarioResult["assertions"] = [];
 
     // Start request trace
-    const requestEventId = trace.startEvent('request_start', scenario.name, {
+    const requestEventId = trace.startEvent("request_start", scenario.name, {
       scenarioId: scenario.id,
       category: scenario.category,
       difficulty: scenario.difficulty,
@@ -167,18 +159,17 @@ export class EvalRunner {
       }
     } catch (err) {
       const error = err as Error;
-      trace.recordError('execution_error', error.message, error.stack);
+      trace.recordError("execution_error", error.message, error.stack);
       errors.push({
-        step: 'scenario',
+        step: "scenario",
         error: error.message,
         recoverable: false,
       });
     }
 
     // End request trace
-    const success =
-      errors.length === 0 && assertions.every((a) => a.passed);
-    trace.endEvent(requestEventId, success ? 'success' : 'failure', {
+    const success = errors.length === 0 && assertions.every((a) => a.passed);
+    trace.endEvent(requestEventId, success ? "success" : "failure", {
       durationMs: Date.now() - Date.parse(trace.build().startTime),
     });
 
@@ -207,9 +198,9 @@ export class EvalRunner {
     step: ScenarioStep,
     scenario: Scenario,
     trace: TraceBuilder,
-    errors: ScenarioResult['errors'],
+    errors: ScenarioResult["errors"]
   ): Promise<void> {
-    const stepEventId = trace.startEvent('tool_call_start', step.id, {
+    const stepEventId = trace.startEvent("tool_call_start", step.id, {
       type: step.type,
       allowedTools: step.allowedTools,
     });
@@ -221,16 +212,14 @@ export class EvalRunner {
       if (this.safetyChecker && step.input) {
         const safetyResult = await this.safetyChecker(step.input);
         trace.recordSafetyCheck(
-          'input_check',
+          "input_check",
           safetyResult.passed,
-          safetyResult.passed ? 'low' : 'high',
-          safetyResult.violations.join(', '),
+          safetyResult.passed ? "low" : "high",
+          safetyResult.violations.join(", ")
         );
 
         if (!safetyResult.passed && this.config.safetyConfig.blockOnViolation) {
-          throw new Error(
-            `Safety violation: ${safetyResult.violations.join(', ')}`,
-          );
+          throw new Error(`Safety violation: ${safetyResult.violations.join(", ")}`);
         }
       }
 
@@ -241,7 +230,7 @@ export class EvalRunner {
           routingDecision.tool,
           routingDecision.score,
           routingDecision.reasoning,
-          [],
+          []
         );
       }
 
@@ -265,7 +254,7 @@ export class EvalRunner {
         });
       }
 
-      trace.endEvent(stepEventId, 'success', {
+      trace.endEvent(stepEventId, "success", {
         durationMs: elapsed,
         latencyMs: elapsed,
       });
@@ -273,9 +262,9 @@ export class EvalRunner {
       const error = err as Error;
       trace.endEvent(
         stepEventId,
-        'failure',
+        "failure",
         { durationMs: Date.now() - startTime },
-        { code: 'step_error', message: error.message },
+        { code: "step_error", message: error.message }
       );
       errors.push({
         step: step.id,
@@ -292,37 +281,32 @@ export class EvalRunner {
     // Simulate some latency
     const baseLatency = 100;
     const variance = Math.random() * 200;
-    await new Promise((resolve) =>
-      setTimeout(resolve, baseLatency + variance),
-    );
+    await new Promise((resolve) => setTimeout(resolve, baseLatency + variance));
   }
 
   /**
    * Evaluate success criteria
    */
-  private async evaluateCriteria(
-    criteria: SuccessCriteria,
-    trace: TraceBuilder,
-  ): Promise<boolean> {
+  private async evaluateCriteria(criteria: SuccessCriteria, trace: TraceBuilder): Promise<boolean> {
     // Build trace to get current state
     const builtTrace = trace.build();
 
     switch (criteria.type) {
-      case 'exact_match':
+      case "exact_match":
         return builtTrace.summary?.success === criteria.value;
 
-      case 'contains':
+      case "contains":
         return JSON.stringify(builtTrace).includes(String(criteria.value));
 
-      case 'regex':
+      case "regex":
         const regex = new RegExp(String(criteria.value));
         return regex.test(JSON.stringify(builtTrace));
 
-      case 'semantic_similarity':
+      case "semantic_similarity":
         // Placeholder - would use embedding comparison
         return true;
 
-      case 'custom':
+      case "custom":
         // Placeholder - would evaluate custom function
         return true;
 
@@ -360,16 +344,12 @@ export class EvalRunner {
       toolCallCount: summary.toolCallCount,
       toolSuccessRate: summary.errorCount === 0 ? 1 : 0,
       avgToolLatencyMs:
-        summary.toolCallCount > 0
-          ? summary.totalDurationMs / summary.toolCallCount
-          : 0,
+        summary.toolCallCount > 0 ? summary.totalDurationMs / summary.toolCallCount : 0,
       safetyViolationCount: summary.safetyViolations,
       safetyViolationRate: summary.safetyViolations > 0 ? 1 : 0,
       jailbreakAttempts: 0,
       jailbreakSuccesses: 0,
-      routingDecisionCount: trace.events.filter(
-        (e) => e.type === 'routing_decision',
-      ).length,
+      routingDecisionCount: trace.events.filter((e) => e.type === "routing_decision").length,
       routingAccuracy: 1,
       costSavingsVsBaseline: 0,
     };
@@ -412,8 +392,6 @@ export class EvalRunner {
 /**
  * Create an eval runner with default config
  */
-export function createEvalRunner(
-  config?: Partial<EvalRunnerConfig>,
-): EvalRunner {
+export function createEvalRunner(config?: Partial<EvalRunnerConfig>): EvalRunner {
   return new EvalRunner(config);
 }

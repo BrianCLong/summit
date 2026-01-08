@@ -16,7 +16,7 @@ const PRODUCTION_URL_PATTERNS = [
   /\.gov$/i,
 ];
 
-const BLOCKED_ACTIONS = ['DELETE', 'TRUNCATE', 'DROP'];
+const BLOCKED_ACTIONS = ["DELETE", "TRUNCATE", "DROP"];
 
 export class SafetyGuard {
   constructor(private config: SafetyConfig) {}
@@ -31,9 +31,7 @@ export class SafetyGuard {
 
     for (const pattern of PRODUCTION_URL_PATTERNS) {
       if (pattern.test(url)) {
-        throw new Error(
-          `SAFETY: Harness cannot run against production URL: ${url}`,
-        );
+        throw new Error(`SAFETY: Harness cannot run against production URL: ${url}`);
       }
     }
 
@@ -42,17 +40,15 @@ export class SafetyGuard {
     const hostname = urlObj.hostname.toLowerCase();
 
     if (
-      !hostname.includes('localhost') &&
-      !hostname.includes('127.0.0.1') &&
-      !hostname.includes('test') &&
-      !hostname.includes('dev') &&
-      !hostname.includes('staging')
+      !hostname.includes("localhost") &&
+      !hostname.includes("127.0.0.1") &&
+      !hostname.includes("test") &&
+      !hostname.includes("dev") &&
+      !hostname.includes("staging")
     ) {
+      console.warn(`WARNING: Running harness against non-standard URL: ${url}`);
       console.warn(
-        `WARNING: Running harness against non-standard URL: ${url}`,
-      );
-      console.warn(
-        'Expected localhost, test, dev, or staging in hostname. Proceeding with caution...',
+        "Expected localhost, test, dev, or staging in hostname. Proceeding with caution..."
       );
     }
   }
@@ -66,12 +62,12 @@ export class SafetyGuard {
     }
 
     if (
-      !tenantId.startsWith('test-') &&
-      !tenantId.startsWith('sim-') &&
-      !tenantId.startsWith('harness-')
+      !tenantId.startsWith("test-") &&
+      !tenantId.startsWith("sim-") &&
+      !tenantId.startsWith("harness-")
     ) {
       throw new Error(
-        `SAFETY: Tenant ID must start with 'test-', 'sim-', or 'harness-' prefix. Got: ${tenantId}`,
+        `SAFETY: Tenant ID must start with 'test-', 'sim-', or 'harness-' prefix. Got: ${tenantId}`
       );
     }
   }
@@ -83,7 +79,7 @@ export class SafetyGuard {
     const totalSize = entityCount + relationshipCount;
     if (totalSize > this.config.maxDataSize) {
       throw new Error(
-        `SAFETY: Scenario size (${totalSize}) exceeds maximum allowed (${this.config.maxDataSize})`,
+        `SAFETY: Scenario size (${totalSize}) exceeds maximum allowed (${this.config.maxDataSize})`
       );
     }
   }
@@ -96,7 +92,7 @@ export class SafetyGuard {
     for (const action of BLOCKED_ACTIONS) {
       if (upperQuery.includes(action)) {
         throw new Error(
-          `SAFETY: Query contains blocked action: ${action}. Harness only supports read and write operations, not destructive operations.`,
+          `SAFETY: Query contains blocked action: ${action}. Harness only supports read and write operations, not destructive operations.`
         );
       }
     }

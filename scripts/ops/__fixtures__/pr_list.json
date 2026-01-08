@@ -6,6 +6,6 @@
     "labels": [],
     "headRefName": "fix/green",
     "statusCheckRollup": { "state": "SUCCESS" },
-    "files": [{"path": "packages/ui/index.ts"}]
+    "files": [{ "path": "packages/ui/index.ts" }]
   }
 ]

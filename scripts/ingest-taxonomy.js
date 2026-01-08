@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
-import yaml from 'js-yaml';
-import { getNeo4jDriver } from '../server/src/db/neo4j.js';
+import { readFileSync } from "fs";
+import { resolve } from "path";
+import yaml from "js-yaml";
+import { getNeo4jDriver } from "../server/src/db/neo4j.js";
 
-const TAXONOMY_FILE_PATH = resolve(process.cwd(), 'docs/master-document-taxonomy.yaml');
-const TENANT_ID = 'system'; // Using a system-level tenant for the taxonomy
+const TAXONOMY_FILE_PATH = resolve(process.cwd(), "docs/master-document-taxonomy.yaml");
+const TENANT_ID = "system"; // Using a system-level tenant for the taxonomy
 
 /**
  * Parses the taxonomy from the YAML file.
  * @returns {Object} An object containing the parsed categories and relationships.
  */
 export function parseTaxonomy() {
-  const content = readFileSync(TAXONOMY_FILE_PATH, 'utf-8');
+  const content = readFileSync(TAXONOMY_FILE_PATH, "utf-8");
   return yaml.load(content);
 }
 
@@ -22,7 +22,7 @@ export function parseTaxonomy() {
  * @param {Object} taxonomy The parsed taxonomy, containing categories and relationships.
  */
 export async function ingestTaxonomy(taxonomy) {
-  console.log('Ingesting taxonomy into the database...');
+  console.log("Ingesting taxonomy into the database...");
   const driver = getNeo4jDriver();
   const session = driver.session();
 
@@ -30,7 +30,7 @@ export async function ingestTaxonomy(taxonomy) {
     // Ingest categories and documents
     for (const category of taxonomy.categories) {
       for (const doc of category.documents) {
-        const variants = doc.name.split(' / ').map(v => v.trim());
+        const variants = doc.name.split(" / ").map((v) => v.trim());
         await session.run(
           `
           MERGE (c:Entity:DocumentCategory { name: $categoryName, tenantId: $tenantId })
@@ -52,10 +52,10 @@ export async function ingestTaxonomy(taxonomy) {
         );
       }
     }
-    console.log('Finished ingesting categories and documents.');
+    console.log("Finished ingesting categories and documents.");
 
     // Ingest relationships
-    console.log('Ingesting inter-document relationships...');
+    console.log("Ingesting inter-document relationships...");
     for (const rel of taxonomy.relationships) {
       await session.run(
         `
@@ -71,8 +71,8 @@ export async function ingestTaxonomy(taxonomy) {
         }
       );
     }
-    console.log('Finished ingesting relationships.');
-    console.log('Taxonomy ingestion complete.');
+    console.log("Finished ingesting relationships.");
+    console.log("Taxonomy ingestion complete.");
   } finally {
     await session.close();
     await driver.close();
@@ -84,7 +84,7 @@ async function main() {
     const taxonomy = parseTaxonomy();
     await ingestTaxonomy(taxonomy);
   } catch (error) {
-    console.error('Failed to ingest taxonomy:', error);
+    console.error("Failed to ingest taxonomy:", error);
     process.exit(1);
   }
 }

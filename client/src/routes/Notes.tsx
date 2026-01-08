@@ -1,28 +1,20 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
+import React, { useState } from "react";
+import { Box, Button, Card, CardContent, Stack, TextField, Typography } from "@mui/material";
 
 export default function Notes() {
-  const [title, setTitle] = useState('');
-  const [body, setBody] = useState('');
-  const [tag, setTag] = useState('');
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [tag, setTag] = useState("");
 
   const handleSave = () => {
     if (!title.trim()) return;
-    setBody('');
-    setTitle('');
-    setTag('');
+    setBody("");
+    setTitle("");
+    setTag("");
   };
 
   return (
-    <Box sx={{ maxWidth: 720, mx: 'auto', py: 2 }}>
+    <Box sx={{ maxWidth: 720, mx: "auto", py: 2 }}>
       <Typography variant="h4" gutterBottom>
         Notes
       </Typography>
@@ -34,7 +26,7 @@ export default function Notes() {
               value={title}
               autoFocus
               onChange={(event) => setTitle(event.target.value)}
-              inputProps={{ 'aria-label': 'Note title' }}
+              inputProps={{ "aria-label": "Note title" }}
             />
             <TextField
               label="Tags"

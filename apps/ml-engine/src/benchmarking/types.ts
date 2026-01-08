@@ -1,20 +1,14 @@
-import { TrainingMetrics } from '../training/TrainingPipeline.js';
+import { TrainingMetrics } from "../training/TrainingPipeline.js";
 
 export type ModelEngine =
-  | 'entity-resolution'
-  | 'object-detection/yolo'
-  | 'speech-to-text/whisper'
-  | 'nlp/spacy'
-  | 'multimodal/clip'
+  | "entity-resolution"
+  | "object-detection/yolo"
+  | "speech-to-text/whisper"
+  | "nlp/spacy"
+  | "multimodal/clip"
   | string;
 
-type InputModality =
-  | 'graph'
-  | 'image'
-  | 'audio'
-  | 'text'
-  | 'video'
-  | 'multimodal';
+type InputModality = "graph" | "image" | "audio" | "text" | "video" | "multimodal";
 
 export interface PerformanceSnapshot {
   accuracy: number;
@@ -70,7 +64,7 @@ export interface ABTestConfig {
   description?: string;
   modelType: ModelEngine;
   variants: ABTestVariant[];
-  status?: 'active' | 'paused' | 'completed';
+  status?: "active" | "paused" | "completed";
   metadata?: Record<string, any>;
 }
 
@@ -90,20 +84,20 @@ export interface ABTestOutcome {
 export interface HyperparameterSearchSpace {
   [parameter: string]:
     | {
-        type: 'int';
+        type: "int";
         min: number;
         max: number;
         step?: number;
       }
     | {
-        type: 'float';
+        type: "float";
         min: number;
         max: number;
         step?: number;
         log?: boolean;
       }
     | {
-        type: 'categorical';
+        type: "categorical";
         choices: (string | number | boolean)[];
       };
 }
@@ -123,7 +117,7 @@ export interface HyperparameterOptimizationResult {
   studySummary?: Record<string, any>;
 }
 
-export interface RegisteredModel extends Omit<TrainingMetrics, 'trainingTime'> {
+export interface RegisteredModel extends Omit<TrainingMetrics, "trainingTime"> {
   id: string;
   version: string;
   modelType: ModelEngine;

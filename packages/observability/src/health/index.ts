@@ -5,7 +5,7 @@
  * following Kubernetes probe conventions.
  */
 
-import type { HealthStatus, HealthCheck, HealthReport, ServiceConfig } from '../types/index.js';
+import type { HealthStatus, HealthCheck, HealthReport, ServiceConfig } from "../types/index.js";
 
 // =============================================================================
 // HEALTH CHECK REGISTRY
@@ -48,7 +48,7 @@ export function unregisterHealthCheck(name: string): void {
  */
 export async function runHealthChecks(): Promise<HealthReport> {
   const checks: HealthCheck[] = [];
-  let overallStatus: HealthStatus = 'healthy';
+  let overallStatus: HealthStatus = "healthy";
 
   for (const [name, checkFn] of healthChecks) {
     try {
@@ -56,33 +56,33 @@ export async function runHealthChecks(): Promise<HealthReport> {
       const result = await Promise.race([
         checkFn(),
         new Promise<HealthCheck>((_, reject) =>
-          setTimeout(() => reject(new Error('Health check timeout')), 5000)
+          setTimeout(() => reject(new Error("Health check timeout")), 5000)
         ),
       ]);
       result.latency_ms = Date.now() - start;
       result.lastCheck = new Date().toISOString();
       checks.push(result);
 
-      if (result.status === 'unhealthy') {
-        overallStatus = 'unhealthy';
-      } else if (result.status === 'degraded' && overallStatus !== 'unhealthy') {
-        overallStatus = 'degraded';
+      if (result.status === "unhealthy") {
+        overallStatus = "unhealthy";
+      } else if (result.status === "degraded" && overallStatus !== "unhealthy") {
+        overallStatus = "degraded";
       }
     } catch (error) {
       checks.push({
         name,
-        status: 'unhealthy',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        status: "unhealthy",
+        message: error instanceof Error ? error.message : "Unknown error",
         lastCheck: new Date().toISOString(),
       });
-      overallStatus = 'unhealthy';
+      overallStatus = "unhealthy";
     }
   }
 
   return {
     status: overallStatus,
-    service: serviceConfig?.name || 'unknown',
-    version: serviceConfig?.version || 'unknown',
+    service: serviceConfig?.name || "unknown",
+    version: serviceConfig?.version || "unknown",
     uptime_seconds: Math.floor((Date.now() - startTime) / 1000),
     checks,
     timestamp: new Date().toISOString(),
@@ -92,8 +92,8 @@ export async function runHealthChecks(): Promise<HealthReport> {
 /**
  * Simple liveness check (is the process running?)
  */
-export function livenessCheck(): { status: 'ok' } {
-  return { status: 'ok' };
+export function livenessCheck(): { status: "ok" } {
+  return { status: "ok" };
 }
 
 /**
@@ -112,17 +112,17 @@ export async function readinessCheck(): Promise<HealthReport> {
  */
 export function createPostgresHealthCheck(
   pool: { query: (sql: string) => Promise<unknown> },
-  name: string = 'postgres'
+  name: string = "postgres"
 ): HealthCheckFn {
   return async (): Promise<HealthCheck> => {
     try {
-      await pool.query('SELECT 1');
-      return { name, status: 'healthy' };
+      await pool.query("SELECT 1");
+      return { name, status: "healthy" };
     } catch (error) {
       return {
         name,
-        status: 'unhealthy',
-        message: error instanceof Error ? error.message : 'Connection failed',
+        status: "unhealthy",
+        message: error instanceof Error ? error.message : "Connection failed",
       };
     }
   };
@@ -133,20 +133,20 @@ export function createPostgresHealthCheck(
  */
 export function createRedisHealthCheck(
   client: { ping: () => Promise<string> },
-  name: string = 'redis'
+  name: string = "redis"
 ): HealthCheckFn {
   return async (): Promise<HealthCheck> => {
     try {
       const result = await client.ping();
-      if (result === 'PONG') {
-        return { name, status: 'healthy' };
+      if (result === "PONG") {
+        return { name, status: "healthy" };
       }
-      return { name, status: 'degraded', message: `Unexpected response: ${result}` };
+      return { name, status: "degraded", message: `Unexpected response: ${result}` };
     } catch (error) {
       return {
         name,
-        status: 'unhealthy',
-        message: error instanceof Error ? error.message : 'Connection failed',
+        status: "unhealthy",
+        message: error instanceof Error ? error.message : "Connection failed",
       };
     }
   };
@@ -157,17 +157,17 @@ export function createRedisHealthCheck(
  */
 export function createNeo4jHealthCheck(
   driver: { verifyConnectivity: () => Promise<unknown> },
-  name: string = 'neo4j'
+  name: string = "neo4j"
 ): HealthCheckFn {
   return async (): Promise<HealthCheck> => {
     try {
       await driver.verifyConnectivity();
-      return { name, status: 'healthy' };
+      return { name, status: "healthy" };
     } catch (error) {
       return {
         name,
-        status: 'unhealthy',
-        message: error instanceof Error ? error.message : 'Connection failed',
+        status: "unhealthy",
+        message: error instanceof Error ? error.message : "Connection failed",
       };
     }
   };
@@ -189,26 +189,26 @@ export function createHttpHealthCheck(
       const timeoutId = setTimeout(() => controller.abort(), timeout);
 
       const response = await fetch(url, {
-        method: 'GET',
+        method: "GET",
         signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
 
       if (response.status === expectedStatus) {
-        return { name, status: 'healthy' };
+        return { name, status: "healthy" };
       }
 
       return {
         name,
-        status: 'degraded',
+        status: "degraded",
         message: `Unexpected status: ${response.status}`,
       };
     } catch (error) {
       return {
         name,
-        status: 'unhealthy',
-        message: error instanceof Error ? error.message : 'Request failed',
+        status: "unhealthy",
+        message: error instanceof Error ? error.message : "Request failed",
       };
     }
   };
@@ -219,7 +219,7 @@ export function createHttpHealthCheck(
  */
 export function createMemoryHealthCheck(
   thresholdPercent: number = 90,
-  name: string = 'memory'
+  name: string = "memory"
 ): HealthCheckFn {
   return async (): Promise<HealthCheck> => {
     const used = process.memoryUsage();
@@ -228,12 +228,12 @@ export function createMemoryHealthCheck(
     if (heapUsedPercent > thresholdPercent) {
       return {
         name,
-        status: 'degraded',
+        status: "degraded",
         message: `Heap usage at ${heapUsedPercent.toFixed(1)}% (threshold: ${thresholdPercent}%)`,
       };
     }
 
-    return { name, status: 'healthy' };
+    return { name, status: "healthy" };
   };
 }
 
@@ -241,20 +241,20 @@ export function createMemoryHealthCheck(
  * Create a disk space health check
  */
 export function createDiskHealthCheck(
-  path: string = '/',
+  path: string = "/",
   thresholdPercent: number = 90,
-  name: string = 'disk'
+  name: string = "disk"
 ): HealthCheckFn {
   return async (): Promise<HealthCheck> => {
     try {
       // This would need a proper disk check implementation
       // For now, return healthy as a placeholder
-      return { name, status: 'healthy' };
+      return { name, status: "healthy" };
     } catch (error) {
       return {
         name,
-        status: 'unhealthy',
-        message: error instanceof Error ? error.message : 'Disk check failed',
+        status: "unhealthy",
+        message: error instanceof Error ? error.message : "Disk check failed",
       };
     }
   };
@@ -265,9 +265,18 @@ export function createDiskHealthCheck(
 // =============================================================================
 
 export interface HealthRouteHandlers {
-  liveness: (req: unknown, res: { status: (code: number) => { json: (body: unknown) => void } }) => void;
-  readiness: (req: unknown, res: { status: (code: number) => { json: (body: unknown) => void } }) => Promise<void>;
-  detailed: (req: unknown, res: { status: (code: number) => { json: (body: unknown) => void } }) => Promise<void>;
+  liveness: (
+    req: unknown,
+    res: { status: (code: number) => { json: (body: unknown) => void } }
+  ) => void;
+  readiness: (
+    req: unknown,
+    res: { status: (code: number) => { json: (body: unknown) => void } }
+  ) => Promise<void>;
+  detailed: (
+    req: unknown,
+    res: { status: (code: number) => { json: (body: unknown) => void } }
+  ) => Promise<void>;
 }
 
 /**
@@ -281,13 +290,15 @@ export function createHealthRoutes(): HealthRouteHandlers {
 
     readiness: async (_req, res) => {
       const report = await readinessCheck();
-      const statusCode = report.status === 'healthy' ? 200 : report.status === 'degraded' ? 200 : 503;
+      const statusCode =
+        report.status === "healthy" ? 200 : report.status === "degraded" ? 200 : 503;
       res.status(statusCode).json(report);
     },
 
     detailed: async (_req, res) => {
       const report = await runHealthChecks();
-      const statusCode = report.status === 'healthy' ? 200 : report.status === 'degraded' ? 200 : 503;
+      const statusCode =
+        report.status === "healthy" ? 200 : report.status === "degraded" ? 200 : 503;
       res.status(statusCode).json(report);
     },
   };

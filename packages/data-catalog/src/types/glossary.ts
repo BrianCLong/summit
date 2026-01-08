@@ -59,20 +59,20 @@ export interface GlossaryTerm {
  * Term Status
  */
 export enum TermStatus {
-  DRAFT = 'DRAFT',
-  PUBLISHED = 'PUBLISHED',
-  DEPRECATED = 'DEPRECATED',
-  ARCHIVED = 'ARCHIVED',
+  DRAFT = "DRAFT",
+  PUBLISHED = "PUBLISHED",
+  DEPRECATED = "DEPRECATED",
+  ARCHIVED = "ARCHIVED",
 }
 
 /**
  * Approval Status
  */
 export enum ApprovalStatus {
-  PENDING = 'PENDING',
-  APPROVED = 'APPROVED',
-  REJECTED = 'REJECTED',
-  CHANGES_REQUESTED = 'CHANGES_REQUESTED',
+  PENDING = "PENDING",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
+  CHANGES_REQUESTED = "CHANGES_REQUESTED",
 }
 
 /**
@@ -92,20 +92,20 @@ export interface BusinessRule {
  * Business Rule Type
  */
 export enum BusinessRuleType {
-  VALIDATION = 'VALIDATION',
-  CALCULATION = 'CALCULATION',
-  CONSTRAINT = 'CONSTRAINT',
-  POLICY = 'POLICY',
+  VALIDATION = "VALIDATION",
+  CALCULATION = "CALCULATION",
+  CONSTRAINT = "CONSTRAINT",
+  POLICY = "POLICY",
 }
 
 /**
  * Rule Severity
  */
 export enum RuleSeverity {
-  INFO = 'INFO',
-  WARNING = 'WARNING',
-  ERROR = 'ERROR',
-  CRITICAL = 'CRITICAL',
+  INFO = "INFO",
+  WARNING = "WARNING",
+  ERROR = "ERROR",
+  CRITICAL = "CRITICAL",
 }
 
 /**
@@ -176,8 +176,8 @@ export interface ApprovalComment {
  * Approval Action
  */
 export enum ApprovalAction {
-  COMMENT = 'COMMENT',
-  APPROVE = 'APPROVE',
-  REJECT = 'REJECT',
-  REQUEST_CHANGES = 'REQUEST_CHANGES',
+  COMMENT = "COMMENT",
+  APPROVE = "APPROVE",
+  REJECT = "REJECT",
+  REQUEST_CHANGES = "REQUEST_CHANGES",
 }

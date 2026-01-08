@@ -1,6 +1,6 @@
-import type { EventStore } from './eventStore.js';
-import type { Projection } from './queryModel.js';
-import type { EventEnvelope } from './types.js';
+import type { EventStore } from "./eventStore.js";
+import type { Projection } from "./queryModel.js";
+import type { EventEnvelope } from "./types.js";
 
 interface ConsumerState {
   projection: Projection<unknown>;
@@ -24,11 +24,7 @@ export class EventualConsistencyCoordinator {
     }
   }
 
-  private applyEvents(
-    consumer: ConsumerState,
-    streamId: string,
-    events: EventEnvelope[],
-  ): void {
+  private applyEvents(consumer: ConsumerState, streamId: string, events: EventEnvelope[]): void {
     for (const event of events) {
       consumer.projection.apply(event);
       consumer.offsets.set(streamId, event.version);

@@ -17,11 +17,11 @@ export function generateManifest(config: {
     author: {
       name: config.author,
     },
-    license: 'MIT',
+    license: "MIT",
     category: config.category,
-    main: './dist/index.js',
-    engineVersion: '>=1.0.0',
-    permissions: ['read:data', 'write:data'],
+    main: "./dist/index.js",
+    engineVersion: ">=1.0.0",
+    permissions: ["read:data", "write:data"],
     resources: {
       maxMemoryMB: 256,
       maxCpuPercent: 50,

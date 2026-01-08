@@ -1,19 +1,19 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import './SocialNetworkAnalysis.css';
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import "./SocialNetworkAnalysis.css";
 
 // Social Network Analysis Interfaces
 interface SocialNode {
   id: string;
   label: string;
   type:
-    | 'person'
-    | 'organization'
-    | 'location'
-    | 'event'
-    | 'document'
-    | 'communication'
-    | 'financial'
-    | 'digital_asset';
+    | "person"
+    | "organization"
+    | "location"
+    | "event"
+    | "document"
+    | "communication"
+    | "financial"
+    | "digital_asset";
   properties: {
     name: string;
     aliases?: string[];
@@ -47,18 +47,18 @@ interface SocialEdge {
   source: string;
   target: string;
   type:
-    | 'communication'
-    | 'financial'
-    | 'social'
-    | 'professional'
-    | 'familial'
-    | 'location'
-    | 'digital'
-    | 'temporal';
+    | "communication"
+    | "financial"
+    | "social"
+    | "professional"
+    | "familial"
+    | "location"
+    | "digital"
+    | "temporal";
   properties: {
     label: string;
     strength: number; // 0-1
-    direction: 'directed' | 'undirected';
+    direction: "directed" | "undirected";
     frequency: number;
     confidence: number; // 0-1
     firstSeen: Date;
@@ -80,7 +80,7 @@ interface SocialCommunity {
     cohesion: number;
     centralization: number;
     modularity: number;
-    riskLevel: 'low' | 'medium' | 'high' | 'critical';
+    riskLevel: "low" | "medium" | "high" | "critical";
     primaryActivity: string;
     description: string;
     tags: string[];
@@ -103,7 +103,7 @@ interface NetworkPath {
     length: number;
     strength: number;
     riskScore: number;
-    pathType: 'shortest' | 'strongest' | 'trusted' | 'suspicious';
+    pathType: "shortest" | "strongest" | "trusted" | "suspicious";
     confidence: number;
     metadata: Record<string, any>;
   };
@@ -111,14 +111,14 @@ interface NetworkPath {
 
 interface AnalysisQuery {
   type:
-    | 'centrality'
-    | 'community'
-    | 'path'
-    | 'influence'
-    | 'anomaly'
-    | 'pattern'
-    | 'flow'
-    | 'temporal';
+    | "centrality"
+    | "community"
+    | "path"
+    | "influence"
+    | "anomaly"
+    | "pattern"
+    | "flow"
+    | "temporal";
   parameters: Record<string, any>;
   filters?: {
     nodeTypes?: string[];
@@ -156,23 +156,20 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
   const [communities, setCommunities] = useState<SocialCommunity[]>([]);
   const [selectedNode, setSelectedNode] = useState<SocialNode | null>(null);
   const [selectedEdge, setSelectedEdge] = useState<SocialEdge | null>(null);
-  const [selectedCommunity, setSelectedCommunity] =
-    useState<SocialCommunity | null>(null);
+  const [selectedCommunity, setSelectedCommunity] = useState<SocialCommunity | null>(null);
   const [analysisResults, setAnalysisResults] = useState<any>(null);
 
   // UI State
   const [activeTab, setActiveTab] = useState<
-    'network' | 'analysis' | 'communities' | 'paths' | 'metrics'
-  >('network');
+    "network" | "analysis" | "communities" | "paths" | "metrics"
+  >("network");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<string>('all');
-  const [layoutMode, setLayoutMode] = useState<
-    'force' | 'circular' | 'hierarchical' | 'grid'
-  >('force');
-  const [viewMode, setViewMode] = useState<'graph' | 'matrix' | 'list'>(
-    'graph',
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState<string>("all");
+  const [layoutMode, setLayoutMode] = useState<"force" | "circular" | "hierarchical" | "grid">(
+    "force"
   );
+  const [viewMode, setViewMode] = useState<"graph" | "matrix" | "list">("graph");
 
   // Analysis State
   const [currentQuery, setCurrentQuery] = useState<AnalysisQuery | null>(null);
@@ -187,19 +184,18 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
   const generateMockData = useCallback(() => {
     const mockNodes: SocialNode[] = [
       {
-        id: 'person-1',
-        label: 'John Smith',
-        type: 'person',
+        id: "person-1",
+        label: "John Smith",
+        type: "person",
         properties: {
-          name: 'John Smith',
-          aliases: ['Johnny S.', 'J.Smith'],
-          description:
-            'Financial analyst with connections to offshore accounts',
+          name: "John Smith",
+          aliases: ["Johnny S.", "J.Smith"],
+          description: "Financial analyst with connections to offshore accounts",
           importance: 85,
           riskScore: 72,
           verified: true,
-          tags: ['finance', 'analyst', 'high-priority'],
-          metadata: { occupation: 'Financial Analyst', location: 'NYC' },
+          tags: ["finance", "analyst", "high-priority"],
+          metadata: { occupation: "Financial Analyst", location: "NYC" },
         },
         metrics: {
           centrality: {
@@ -212,20 +208,20 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
           influence: 0.73,
           connectivity: 0.68,
         },
-        group: 'financial',
+        group: "financial",
       },
       {
-        id: 'org-1',
-        label: 'Pacific Holdings Ltd',
-        type: 'organization',
+        id: "org-1",
+        label: "Pacific Holdings Ltd",
+        type: "organization",
         properties: {
-          name: 'Pacific Holdings Ltd',
-          description: 'Offshore investment company',
+          name: "Pacific Holdings Ltd",
+          description: "Offshore investment company",
           importance: 92,
           riskScore: 88,
           verified: false,
-          tags: ['offshore', 'investment', 'suspicious'],
-          metadata: { jurisdiction: 'Cayman Islands', established: '2018' },
+          tags: ["offshore", "investment", "suspicious"],
+          metadata: { jurisdiction: "Cayman Islands", established: "2018" },
         },
         metrics: {
           centrality: {
@@ -238,22 +234,21 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
           influence: 0.89,
           connectivity: 0.85,
         },
-        group: 'financial',
+        group: "financial",
       },
       {
-        id: 'person-2',
-        label: 'Maria Rodriguez',
-        type: 'person',
+        id: "person-2",
+        label: "Maria Rodriguez",
+        type: "person",
         properties: {
-          name: 'Maria Rodriguez',
-          aliases: ['M.Rodriguez'],
-          description:
-            'Corporate lawyer specializing in international transactions',
+          name: "Maria Rodriguez",
+          aliases: ["M.Rodriguez"],
+          description: "Corporate lawyer specializing in international transactions",
           importance: 78,
           riskScore: 45,
           verified: true,
-          tags: ['legal', 'international', 'professional'],
-          metadata: { occupation: 'Lawyer', location: 'Miami' },
+          tags: ["legal", "international", "professional"],
+          metadata: { occupation: "Lawyer", location: "Miami" },
         },
         metrics: {
           centrality: {
@@ -266,23 +261,22 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
           influence: 0.54,
           connectivity: 0.48,
         },
-        group: 'legal',
+        group: "legal",
       },
       {
-        id: 'location-1',
-        label: 'Zurich Office Complex',
-        type: 'location',
+        id: "location-1",
+        label: "Zurich Office Complex",
+        type: "location",
         properties: {
-          name: 'Zurich Office Complex',
-          description:
-            'High-security commercial building housing multiple shell companies',
+          name: "Zurich Office Complex",
+          description: "High-security commercial building housing multiple shell companies",
           importance: 65,
           riskScore: 73,
           verified: true,
-          tags: ['meeting-place', 'commercial', 'high-security'],
+          tags: ["meeting-place", "commercial", "high-security"],
           metadata: {
-            address: 'Bahnhofstrasse 45, Zurich',
-            type: 'Commercial Building',
+            address: "Bahnhofstrasse 45, Zurich",
+            type: "Commercial Building",
           },
         },
         metrics: {
@@ -296,24 +290,23 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
           influence: 0.67,
           connectivity: 0.55,
         },
-        group: 'location',
+        group: "location",
       },
       {
-        id: 'digital-1',
-        label: 'Account #78429X',
-        type: 'digital_asset',
+        id: "digital-1",
+        label: "Account #78429X",
+        type: "digital_asset",
         properties: {
-          name: 'Cryptocurrency Wallet #78429X',
-          description:
-            'High-value Bitcoin wallet with suspicious transaction patterns',
+          name: "Cryptocurrency Wallet #78429X",
+          description: "High-value Bitcoin wallet with suspicious transaction patterns",
           importance: 71,
           riskScore: 91,
           verified: true,
-          tags: ['cryptocurrency', 'bitcoin', 'suspicious-activity'],
+          tags: ["cryptocurrency", "bitcoin", "suspicious-activity"],
           metadata: {
-            blockchain: 'Bitcoin',
-            balance: '127.5 BTC',
-            lastTx: '2024-01-15',
+            blockchain: "Bitcoin",
+            balance: "127.5 BTC",
+            lastTx: "2024-01-15",
           },
         },
         metrics: {
@@ -327,129 +320,127 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
           influence: 0.78,
           connectivity: 0.42,
         },
-        group: 'digital',
+        group: "digital",
       },
     ];
 
     const mockEdges: SocialEdge[] = [
       {
-        id: 'edge-1',
-        source: 'person-1',
-        target: 'org-1',
-        type: 'financial',
+        id: "edge-1",
+        source: "person-1",
+        target: "org-1",
+        type: "financial",
         properties: {
-          label: 'Board Member',
+          label: "Board Member",
           strength: 0.85,
-          direction: 'directed',
+          direction: "directed",
           frequency: 156,
           confidence: 0.92,
-          firstSeen: new Date('2019-03-15'),
-          lastSeen: new Date('2024-01-20'),
-          tags: ['board-member', 'financial-control'],
-          metadata: { role: 'Board Member', appointed: '2019-03-15' },
+          firstSeen: new Date("2019-03-15"),
+          lastSeen: new Date("2024-01-20"),
+          tags: ["board-member", "financial-control"],
+          metadata: { role: "Board Member", appointed: "2019-03-15" },
         },
       },
       {
-        id: 'edge-2',
-        source: 'person-2',
-        target: 'org-1',
-        type: 'professional',
+        id: "edge-2",
+        source: "person-2",
+        target: "org-1",
+        type: "professional",
         properties: {
-          label: 'Legal Counsel',
+          label: "Legal Counsel",
           strength: 0.78,
-          direction: 'directed',
+          direction: "directed",
           frequency: 89,
           confidence: 0.87,
-          firstSeen: new Date('2018-11-22'),
-          lastSeen: new Date('2024-01-18'),
-          tags: ['legal-counsel', 'professional-services'],
-          metadata: { relationship: 'Legal Counsel', retainer: 'Active' },
+          firstSeen: new Date("2018-11-22"),
+          lastSeen: new Date("2024-01-18"),
+          tags: ["legal-counsel", "professional-services"],
+          metadata: { relationship: "Legal Counsel", retainer: "Active" },
         },
       },
       {
-        id: 'edge-3',
-        source: 'person-1',
-        target: 'location-1',
-        type: 'location',
+        id: "edge-3",
+        source: "person-1",
+        target: "location-1",
+        type: "location",
         properties: {
-          label: 'Frequent Visitor',
+          label: "Frequent Visitor",
           strength: 0.64,
-          direction: 'undirected',
+          direction: "undirected",
           frequency: 47,
           confidence: 0.73,
-          firstSeen: new Date('2019-01-08'),
-          lastSeen: new Date('2024-01-12'),
-          tags: ['frequent-visits', 'business-meetings'],
-          metadata: { visitFrequency: 'Weekly', purpose: 'Business Meetings' },
+          firstSeen: new Date("2019-01-08"),
+          lastSeen: new Date("2024-01-12"),
+          tags: ["frequent-visits", "business-meetings"],
+          metadata: { visitFrequency: "Weekly", purpose: "Business Meetings" },
         },
       },
       {
-        id: 'edge-4',
-        source: 'org-1',
-        target: 'digital-1',
-        type: 'financial',
+        id: "edge-4",
+        source: "org-1",
+        target: "digital-1",
+        type: "financial",
         properties: {
-          label: 'Asset Controller',
+          label: "Asset Controller",
           strength: 0.92,
-          direction: 'directed',
+          direction: "directed",
           frequency: 203,
           confidence: 0.95,
-          firstSeen: new Date('2020-06-10'),
-          lastSeen: new Date('2024-01-21'),
-          tags: ['asset-control', 'cryptocurrency', 'high-value'],
-          metadata: { controlType: 'Primary Wallet', totalValue: '127.5 BTC' },
+          firstSeen: new Date("2020-06-10"),
+          lastSeen: new Date("2024-01-21"),
+          tags: ["asset-control", "cryptocurrency", "high-value"],
+          metadata: { controlType: "Primary Wallet", totalValue: "127.5 BTC" },
         },
       },
     ];
 
     const mockCommunities: SocialCommunity[] = [
       {
-        id: 'community-1',
-        name: 'Financial Network',
-        nodes: ['person-1', 'org-1', 'digital-1'],
+        id: "community-1",
+        name: "Financial Network",
+        nodes: ["person-1", "org-1", "digital-1"],
         properties: {
           size: 3,
           density: 0.89,
           cohesion: 0.76,
           centralization: 0.82,
           modularity: 0.68,
-          riskLevel: 'high',
-          primaryActivity: 'Offshore Financial Operations',
-          description:
-            'Tightly connected network involved in offshore financial operations',
-          tags: ['financial', 'offshore', 'high-risk'],
+          riskLevel: "high",
+          primaryActivity: "Offshore Financial Operations",
+          description: "Tightly connected network involved in offshore financial operations",
+          tags: ["financial", "offshore", "high-risk"],
         },
         metrics: {
           internalConnections: 4,
           externalConnections: 2,
-          bridgeNodes: ['person-1'],
-          influentialNodes: ['org-1', 'person-1'],
+          bridgeNodes: ["person-1"],
+          influentialNodes: ["org-1", "person-1"],
         },
-        color: '#ff6b6b',
+        color: "#ff6b6b",
       },
       {
-        id: 'community-2',
-        name: 'Legal-Professional',
-        nodes: ['person-2', 'location-1'],
+        id: "community-2",
+        name: "Legal-Professional",
+        nodes: ["person-2", "location-1"],
         properties: {
           size: 2,
           density: 0.67,
           cohesion: 0.54,
           centralization: 0.61,
           modularity: 0.45,
-          riskLevel: 'medium',
-          primaryActivity: 'Legal and Professional Services',
-          description:
-            'Professional services network with international connections',
-          tags: ['legal', 'professional', 'international'],
+          riskLevel: "medium",
+          primaryActivity: "Legal and Professional Services",
+          description: "Professional services network with international connections",
+          tags: ["legal", "professional", "international"],
         },
         metrics: {
           internalConnections: 1,
           externalConnections: 3,
-          bridgeNodes: ['person-2'],
-          influentialNodes: ['person-2'],
+          bridgeNodes: ["person-2"],
+          influentialNodes: ["person-2"],
         },
-        color: '#4ecdc4',
+        color: "#4ecdc4",
       },
     ];
 
@@ -469,15 +460,15 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
         averagePathLength: 2.3,
       },
       centrality: {
-        mostCentral: 'org-1',
-        mostInfluential: 'org-1',
-        keyBridgeNodes: ['person-1', 'person-2'],
+        mostCentral: "org-1",
+        mostInfluential: "org-1",
+        keyBridgeNodes: ["person-1", "person-2"],
         isolatedNodes: [],
       },
       risk: {
-        highRiskNodes: ['org-1', 'digital-1'],
-        suspiciousConnections: ['edge-4'],
-        anomalousPatterns: ['circular-transactions', 'rapid-asset-movement'],
+        highRiskNodes: ["org-1", "digital-1"],
+        suspiciousConnections: ["edge-4"],
+        anomalousPatterns: ["circular-transactions", "rapid-asset-movement"],
       },
     };
 
@@ -503,9 +494,9 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
       let results: any = {};
 
       switch (query.type) {
-        case 'centrality':
+        case "centrality":
           results = {
-            type: 'centrality',
+            type: "centrality",
             results: nodes
               .map((node) => ({
                 nodeId: node.id,
@@ -513,87 +504,82 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
                 centralityScores: node.metrics.centrality,
                 rank: Math.floor(Math.random() * nodes.length) + 1,
               }))
-              .sort(
-                (a, b) =>
-                  b.centralityScores.eigenvector -
-                  a.centralityScores.eigenvector,
-              ),
+              .sort((a, b) => b.centralityScores.eigenvector - a.centralityScores.eigenvector),
           };
           break;
 
-        case 'community':
+        case "community":
           results = {
-            type: 'community',
+            type: "community",
             results: {
               communities: communities,
               modularity: 0.68,
               totalCommunities: communities.length,
               largestCommunity: communities.reduce((max, c) =>
-                c.properties.size > max.properties.size ? c : max,
+                c.properties.size > max.properties.size ? c : max
               ),
             },
           };
           break;
 
-        case 'path':
+        case "path":
           const mockPaths: NetworkPath[] = [
             {
-              id: 'path-1',
+              id: "path-1",
               source: query.parameters.source,
               target: query.parameters.target,
-              path: ['person-1', 'org-1', 'digital-1'],
+              path: ["person-1", "org-1", "digital-1"],
               properties: {
                 length: 3,
                 strength: 0.85,
                 riskScore: 0.78,
-                pathType: 'shortest',
+                pathType: "shortest",
                 confidence: 0.92,
-                metadata: { analysis: 'Direct financial control path' },
+                metadata: { analysis: "Direct financial control path" },
               },
             },
           ];
           setPathAnalysis(mockPaths);
-          results = { type: 'path', results: mockPaths };
+          results = { type: "path", results: mockPaths };
           break;
 
-        case 'anomaly':
+        case "anomaly":
           const mockAnomalies = [
             {
-              id: 'anomaly-1',
-              type: 'unusual-centrality',
-              nodeId: 'org-1',
-              description:
-                'Unexpectedly high betweenness centrality for organization type',
-              severity: 'high',
+              id: "anomaly-1",
+              type: "unusual-centrality",
+              nodeId: "org-1",
+              description: "Unexpectedly high betweenness centrality for organization type",
+              severity: "high",
               confidence: 0.87,
               details: { expected: 0.45, observed: 0.82, deviation: 2.3 },
             },
             {
-              id: 'anomaly-2',
-              type: 'temporal-cluster',
-              edgeIds: ['edge-1', 'edge-4'],
-              description: 'Simultaneous activation of dormant connections',
-              severity: 'medium',
+              id: "anomaly-2",
+              type: "temporal-cluster",
+              edgeIds: ["edge-1", "edge-4"],
+              description: "Simultaneous activation of dormant connections",
+              severity: "medium",
               confidence: 0.73,
               details: {
-                timeWindow: '2024-01-15 to 2024-01-21',
+                timeWindow: "2024-01-15 to 2024-01-21",
                 connections: 2,
               },
             },
           ];
           setAnomalies(mockAnomalies);
-          results = { type: 'anomaly', results: mockAnomalies };
+          results = { type: "anomaly", results: mockAnomalies };
           break;
 
         default:
-          results = { type: query.type, results: 'Analysis completed' };
+          results = { type: query.type, results: "Analysis completed" };
       }
 
       setAnalysisResults(results);
       setIsAnalyzing(false);
       onAnalysisComplete?.(results);
     },
-    [nodes, communities, onAnalysisComplete],
+    [nodes, communities, onAnalysisComplete]
   );
 
   // Node Selection Handler
@@ -602,7 +588,7 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
       setSelectedNode(node);
       onNodeSelect?.(node);
     },
-    [onNodeSelect],
+    [onNodeSelect]
   );
 
   // Edge Selection Handler
@@ -611,7 +597,7 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
       setSelectedEdge(edge);
       onEdgeSelect?.(edge);
     },
-    [onEdgeSelect],
+    [onEdgeSelect]
   );
 
   // Community Selection Handler
@@ -620,27 +606,23 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
       setSelectedCommunity(community);
       onCommunitySelect?.(community);
     },
-    [onCommunitySelect],
+    [onCommunitySelect]
   );
 
   // Filtered Data
   const filteredNodes = nodes.filter((node) => {
     const matchesSearch =
-      searchTerm === '' ||
+      searchTerm === "" ||
       node.properties.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      node.properties.tags.some((tag) =>
-        tag.toLowerCase().includes(searchTerm.toLowerCase()),
-      );
-    const matchesType = filterType === 'all' || node.type === filterType;
+      node.properties.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesType = filterType === "all" || node.type === filterType;
     return matchesSearch && matchesType;
   });
 
   const filteredEdges = edges.filter((edge) => {
     const sourceNode = nodes.find((n) => n.id === edge.source);
     const targetNode = nodes.find((n) => n.id === edge.target);
-    return (
-      filteredNodes.includes(sourceNode!) && filteredNodes.includes(targetNode!)
-    );
+    return filteredNodes.includes(sourceNode!) && filteredNodes.includes(targetNode!);
   });
 
   // Canvas Drawing (Simplified Network Visualization)
@@ -648,7 +630,7 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     // Clear canvas
@@ -667,24 +649,24 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
       // Color based on risk score
       const riskColor =
         node.properties.riskScore > 75
-          ? '#ff4757'
+          ? "#ff4757"
           : node.properties.riskScore > 50
-            ? '#ffa726'
-            : '#26c6da';
+            ? "#ffa726"
+            : "#26c6da";
       ctx.fillStyle = riskColor;
       ctx.fill();
 
       // Border for selected node
       if (selectedNode?.id === node.id) {
-        ctx.strokeStyle = '#2f3542';
+        ctx.strokeStyle = "#2f3542";
         ctx.lineWidth = 3;
         ctx.stroke();
       }
 
       // Node label
-      ctx.fillStyle = '#2f3542';
-      ctx.font = '12px Arial';
-      ctx.textAlign = 'center';
+      ctx.fillStyle = "#2f3542";
+      ctx.font = "12px Arial";
+      ctx.textAlign = "center";
       ctx.fillText(node.label, x, y + size + 15);
     });
 
@@ -703,7 +685,7 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
       ctx.beginPath();
       ctx.moveTo(sourceX, sourceY);
       ctx.lineTo(targetX, targetY);
-      ctx.strokeStyle = selectedEdge?.id === edge.id ? '#2f3542' : '#a4b0be';
+      ctx.strokeStyle = selectedEdge?.id === edge.id ? "#2f3542" : "#a4b0be";
       ctx.lineWidth = edge.properties.strength * 3 + 1;
       ctx.stroke();
     });
@@ -762,32 +744,32 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
       {/* Tab Navigation */}
       <div className="sna-tabs">
         <button
-          className={`tab-button ${activeTab === 'network' ? 'active' : ''}`}
-          onClick={() => setActiveTab('network')}
+          className={`tab-button ${activeTab === "network" ? "active" : ""}`}
+          onClick={() => setActiveTab("network")}
         >
           🌐 Network
         </button>
         <button
-          className={`tab-button ${activeTab === 'analysis' ? 'active' : ''}`}
-          onClick={() => setActiveTab('analysis')}
+          className={`tab-button ${activeTab === "analysis" ? "active" : ""}`}
+          onClick={() => setActiveTab("analysis")}
         >
           🔍 Analysis
         </button>
         <button
-          className={`tab-button ${activeTab === 'communities' ? 'active' : ''}`}
-          onClick={() => setActiveTab('communities')}
+          className={`tab-button ${activeTab === "communities" ? "active" : ""}`}
+          onClick={() => setActiveTab("communities")}
         >
           👥 Communities
         </button>
         <button
-          className={`tab-button ${activeTab === 'paths' ? 'active' : ''}`}
-          onClick={() => setActiveTab('paths')}
+          className={`tab-button ${activeTab === "paths" ? "active" : ""}`}
+          onClick={() => setActiveTab("paths")}
         >
           🛤️ Paths
         </button>
         <button
-          className={`tab-button ${activeTab === 'metrics' ? 'active' : ''}`}
-          onClick={() => setActiveTab('metrics')}
+          className={`tab-button ${activeTab === "metrics" ? "active" : ""}`}
+          onClick={() => setActiveTab("metrics")}
         >
           📊 Metrics
         </button>
@@ -795,7 +777,7 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
 
       <div className="sna-content">
         {/* Network Tab */}
-        {activeTab === 'network' && (
+        {activeTab === "network" && (
           <div className="network-tab">
             <div className="network-main">
               <div className="network-canvas-container">
@@ -813,9 +795,7 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
                     filteredNodes.forEach((node, index) => {
                       const nodeX = (index % 4) * 180 + 100;
                       const nodeY = Math.floor(index / 4) * 120 + 80;
-                      const distance = Math.sqrt(
-                        (x - nodeX) ** 2 + (y - nodeY) ** 2,
-                      );
+                      const distance = Math.sqrt((x - nodeX) ** 2 + (y - nodeY) ** 2);
 
                       if (distance < 30) {
                         handleNodeSelect(node);
@@ -836,24 +816,15 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
                 <h4>Legend</h4>
                 <div className="legend-items">
                   <div className="legend-item">
-                    <div
-                      className="legend-color"
-                      style={{ backgroundColor: '#ff4757' }}
-                    ></div>
+                    <div className="legend-color" style={{ backgroundColor: "#ff4757" }}></div>
                     <span>High Risk (75+)</span>
                   </div>
                   <div className="legend-item">
-                    <div
-                      className="legend-color"
-                      style={{ backgroundColor: '#ffa726' }}
-                    ></div>
+                    <div className="legend-color" style={{ backgroundColor: "#ffa726" }}></div>
                     <span>Medium Risk (50-75)</span>
                   </div>
                   <div className="legend-item">
-                    <div
-                      className="legend-color"
-                      style={{ backgroundColor: '#26c6da' }}
-                    ></div>
+                    <div className="legend-color" style={{ backgroundColor: "#26c6da" }}></div>
                     <span>Low Risk (0-50)</span>
                   </div>
                 </div>
@@ -883,42 +854,38 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
                       <span
                         className={`risk-badge ${
                           selectedNode.properties.riskScore > 75
-                            ? 'high'
+                            ? "high"
                             : selectedNode.properties.riskScore > 50
-                              ? 'medium'
-                              : 'low'
+                              ? "medium"
+                              : "low"
                         }`}
                       >
                         {selectedNode.properties.riskScore}
                       </span>
                     </div>
                     <div className="property-item">
-                      <strong>Importance:</strong>{' '}
-                      {selectedNode.properties.importance}
+                      <strong>Importance:</strong> {selectedNode.properties.importance}
                     </div>
                     <div className="property-item">
-                      <strong>Tags:</strong>{' '}
-                      {selectedNode.properties.tags.join(', ')}
+                      <strong>Tags:</strong> {selectedNode.properties.tags.join(", ")}
                     </div>
                   </div>
 
                   <div className="info-section">
                     <h4>Network Metrics</h4>
                     <div className="property-item">
-                      <strong>Degree Centrality:</strong>{' '}
-                      {selectedNode.metrics.centrality.degree}
+                      <strong>Degree Centrality:</strong> {selectedNode.metrics.centrality.degree}
                     </div>
                     <div className="property-item">
-                      <strong>Betweenness:</strong>{' '}
+                      <strong>Betweenness:</strong>{" "}
                       {selectedNode.metrics.centrality.betweenness.toFixed(3)}
                     </div>
                     <div className="property-item">
-                      <strong>Closeness:</strong>{' '}
+                      <strong>Closeness:</strong>{" "}
                       {selectedNode.metrics.centrality.closeness.toFixed(3)}
                     </div>
                     <div className="property-item">
-                      <strong>Influence:</strong>{' '}
-                      {selectedNode.metrics.influence.toFixed(3)}
+                      <strong>Influence:</strong> {selectedNode.metrics.influence.toFixed(3)}
                     </div>
                   </div>
                 </div>
@@ -928,25 +895,21 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
         )}
 
         {/* Analysis Tab */}
-        {activeTab === 'analysis' && (
+        {activeTab === "analysis" && (
           <div className="analysis-tab">
             <div className="analysis-controls">
               <h3>Network Analysis Tools</h3>
               <div className="analysis-buttons">
                 <button
                   className="analysis-button"
-                  onClick={() =>
-                    runNetworkAnalysis({ type: 'centrality', parameters: {} })
-                  }
+                  onClick={() => runNetworkAnalysis({ type: "centrality", parameters: {} })}
                   disabled={isAnalyzing}
                 >
                   🎯 Centrality Analysis
                 </button>
                 <button
                   className="analysis-button"
-                  onClick={() =>
-                    runNetworkAnalysis({ type: 'community', parameters: {} })
-                  }
+                  onClick={() => runNetworkAnalysis({ type: "community", parameters: {} })}
                   disabled={isAnalyzing}
                 >
                   👥 Community Detection
@@ -955,8 +918,8 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
                   className="analysis-button"
                   onClick={() =>
                     runNetworkAnalysis({
-                      type: 'path',
-                      parameters: { source: 'person-1', target: 'digital-1' },
+                      type: "path",
+                      parameters: { source: "person-1", target: "digital-1" },
                     })
                   }
                   disabled={isAnalyzing}
@@ -965,9 +928,7 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
                 </button>
                 <button
                   className="analysis-button"
-                  onClick={() =>
-                    runNetworkAnalysis({ type: 'anomaly', parameters: {} })
-                  }
+                  onClick={() => runNetworkAnalysis({ type: "anomaly", parameters: {} })}
                   disabled={isAnalyzing}
                 >
                   🚨 Anomaly Detection
@@ -985,7 +946,7 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
             {analysisResults && (
               <div className="analysis-results">
                 <h3>Analysis Results</h3>
-                {analysisResults.type === 'centrality' && (
+                {analysisResults.type === "centrality" && (
                   <div className="centrality-results">
                     <h4>Node Centrality Rankings</h4>
                     <div className="results-table">
@@ -1000,53 +961,34 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
                           </tr>
                         </thead>
                         <tbody>
-                          {analysisResults.results
-                            .slice(0, 5)
-                            .map((result: any, index: number) => (
-                              <tr key={result.nodeId}>
-                                <td>{index + 1}</td>
-                                <td>{result.name}</td>
-                                <td>
-                                  {result.centralityScores.eigenvector.toFixed(
-                                    3,
-                                  )}
-                                </td>
-                                <td>
-                                  {result.centralityScores.betweenness.toFixed(
-                                    3,
-                                  )}
-                                </td>
-                                <td>
-                                  {result.centralityScores.closeness.toFixed(3)}
-                                </td>
-                              </tr>
-                            ))}
+                          {analysisResults.results.slice(0, 5).map((result: any, index: number) => (
+                            <tr key={result.nodeId}>
+                              <td>{index + 1}</td>
+                              <td>{result.name}</td>
+                              <td>{result.centralityScores.eigenvector.toFixed(3)}</td>
+                              <td>{result.centralityScores.betweenness.toFixed(3)}</td>
+                              <td>{result.centralityScores.closeness.toFixed(3)}</td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
                   </div>
                 )}
 
-                {analysisResults.type === 'anomaly' && (
+                {analysisResults.type === "anomaly" && (
                   <div className="anomaly-results">
                     <h4>Detected Anomalies</h4>
                     <div className="anomaly-list">
                       {analysisResults.results.map((anomaly: any) => (
-                        <div
-                          key={anomaly.id}
-                          className={`anomaly-item ${anomaly.severity}`}
-                        >
+                        <div key={anomaly.id} className={`anomaly-item ${anomaly.severity}`}>
                           <div className="anomaly-header">
                             <span className="anomaly-type">{anomaly.type}</span>
-                            <span
-                              className={`severity-badge ${anomaly.severity}`}
-                            >
+                            <span className={`severity-badge ${anomaly.severity}`}>
                               {anomaly.severity}
                             </span>
                           </div>
-                          <div className="anomaly-description">
-                            {anomaly.description}
-                          </div>
+                          <div className="anomaly-description">{anomaly.description}</div>
                           <div className="anomaly-confidence">
                             Confidence: {(anomaly.confidence * 100).toFixed(1)}%
                           </div>
@@ -1061,14 +1003,14 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
         )}
 
         {/* Communities Tab */}
-        {activeTab === 'communities' && (
+        {activeTab === "communities" && (
           <div className="communities-tab">
             <h3>Network Communities</h3>
             <div className="communities-grid">
               {communities.map((community) => (
                 <div
                   key={community.id}
-                  className={`community-card ${selectedCommunity?.id === community.id ? 'selected' : ''}`}
+                  className={`community-card ${selectedCommunity?.id === community.id ? "selected" : ""}`}
                   onClick={() => handleCommunitySelect(community)}
                 >
                   <div className="community-header">
@@ -1077,9 +1019,7 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
                       style={{ backgroundColor: community.color }}
                     ></div>
                     <h4>{community.name}</h4>
-                    <span
-                      className={`risk-level ${community.properties.riskLevel}`}
-                    >
+                    <span className={`risk-level ${community.properties.riskLevel}`}>
                       {community.properties.riskLevel}
                     </span>
                   </div>
@@ -1089,18 +1029,14 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
                       <strong>Size:</strong> {community.properties.size} nodes
                     </div>
                     <div className="stat-item">
-                      <strong>Density:</strong>{' '}
-                      {community.properties.density.toFixed(2)}
+                      <strong>Density:</strong> {community.properties.density.toFixed(2)}
                     </div>
                     <div className="stat-item">
-                      <strong>Cohesion:</strong>{' '}
-                      {community.properties.cohesion.toFixed(2)}
+                      <strong>Cohesion:</strong> {community.properties.cohesion.toFixed(2)}
                     </div>
                   </div>
 
-                  <div className="community-description">
-                    {community.properties.description}
-                  </div>
+                  <div className="community-description">{community.properties.description}</div>
 
                   <div className="community-tags">
                     {community.properties.tags.map((tag) => (
@@ -1121,19 +1057,19 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
                     <h4>Key Metrics</h4>
                     <div className="metrics-grid">
                       <div className="metric">
-                        <strong>Internal Connections:</strong>{' '}
+                        <strong>Internal Connections:</strong>{" "}
                         {selectedCommunity.metrics.internalConnections}
                       </div>
                       <div className="metric">
-                        <strong>External Connections:</strong>{' '}
+                        <strong>External Connections:</strong>{" "}
                         {selectedCommunity.metrics.externalConnections}
                       </div>
                       <div className="metric">
-                        <strong>Modularity:</strong>{' '}
+                        <strong>Modularity:</strong>{" "}
                         {selectedCommunity.properties.modularity.toFixed(3)}
                       </div>
                       <div className="metric">
-                        <strong>Centralization:</strong>{' '}
+                        <strong>Centralization:</strong>{" "}
                         {selectedCommunity.properties.centralization.toFixed(3)}
                       </div>
                     </div>
@@ -1145,34 +1081,27 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
                       <div className="node-group">
                         <strong>Bridge Nodes:</strong>
                         <div className="node-list">
-                          {selectedCommunity.metrics.bridgeNodes.map(
-                            (nodeId) => {
-                              const node = nodes.find((n) => n.id === nodeId);
-                              return node ? (
-                                <span key={nodeId} className="node-chip">
-                                  {node.label}
-                                </span>
-                              ) : null;
-                            },
-                          )}
+                          {selectedCommunity.metrics.bridgeNodes.map((nodeId) => {
+                            const node = nodes.find((n) => n.id === nodeId);
+                            return node ? (
+                              <span key={nodeId} className="node-chip">
+                                {node.label}
+                              </span>
+                            ) : null;
+                          })}
                         </div>
                       </div>
                       <div className="node-group">
                         <strong>Influential Nodes:</strong>
                         <div className="node-list">
-                          {selectedCommunity.metrics.influentialNodes.map(
-                            (nodeId) => {
-                              const node = nodes.find((n) => n.id === nodeId);
-                              return node ? (
-                                <span
-                                  key={nodeId}
-                                  className="node-chip influential"
-                                >
-                                  {node.label}
-                                </span>
-                              ) : null;
-                            },
-                          )}
+                          {selectedCommunity.metrics.influentialNodes.map((nodeId) => {
+                            const node = nodes.find((n) => n.id === nodeId);
+                            return node ? (
+                              <span key={nodeId} className="node-chip influential">
+                                {node.label}
+                              </span>
+                            ) : null;
+                          })}
                         </div>
                       </div>
                     </div>
@@ -1184,7 +1113,7 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
         )}
 
         {/* Paths Tab */}
-        {activeTab === 'paths' && (
+        {activeTab === "paths" && (
           <div className="paths-tab">
             <div className="paths-controls">
               <h3>Path Analysis</h3>
@@ -1216,24 +1145,20 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
                   {pathAnalysis.map((path) => (
                     <div key={path.id} className="path-item">
                       <div className="path-header">
-                        <span
-                          className={`path-type ${path.properties.pathType}`}
-                        >
+                        <span className={`path-type ${path.properties.pathType}`}>
                           {path.properties.pathType}
                         </span>
-                        <span className="path-length">
-                          Length: {path.properties.length}
-                        </span>
+                        <span className="path-length">Length: {path.properties.length}</span>
                         <span className="path-strength">
                           Strength: {path.properties.strength.toFixed(2)}
                         </span>
                         <span
                           className={`path-risk ${
                             path.properties.riskScore > 0.75
-                              ? 'high'
+                              ? "high"
                               : path.properties.riskScore > 0.5
-                                ? 'medium'
-                                : 'low'
+                                ? "medium"
+                                : "low"
                           }`}
                         >
                           Risk: {(path.properties.riskScore * 100).toFixed(0)}%
@@ -1255,8 +1180,7 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
                       </div>
 
                       <div className="path-details">
-                        <strong>Analysis:</strong>{' '}
-                        {path.properties.metadata.analysis}
+                        <strong>Analysis:</strong> {path.properties.metadata.analysis}
                       </div>
                     </div>
                   ))}
@@ -1267,7 +1191,7 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
         )}
 
         {/* Metrics Tab */}
-        {activeTab === 'metrics' && (
+        {activeTab === "metrics" && (
           <div className="metrics-tab">
             <h3>Network Metrics Overview</h3>
 
@@ -1277,21 +1201,15 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
                   <h4>📊 Network Overview</h4>
                   <div className="metrics-grid">
                     <div className="metric-card">
-                      <div className="metric-value">
-                        {metrics.overview?.totalNodes}
-                      </div>
+                      <div className="metric-value">{metrics.overview?.totalNodes}</div>
                       <div className="metric-label">Total Nodes</div>
                     </div>
                     <div className="metric-card">
-                      <div className="metric-value">
-                        {metrics.overview?.totalEdges}
-                      </div>
+                      <div className="metric-value">{metrics.overview?.totalEdges}</div>
                       <div className="metric-label">Total Edges</div>
                     </div>
                     <div className="metric-card">
-                      <div className="metric-value">
-                        {metrics.overview?.totalCommunities}
-                      </div>
+                      <div className="metric-value">{metrics.overview?.totalCommunities}</div>
                       <div className="metric-label">Communities</div>
                     </div>
                     <div className="metric-card">
@@ -1309,36 +1227,26 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
                     <div className="info-item">
                       <strong>Most Central Entity:</strong>
                       <span className="entity-name">
-                        {
-                          nodes.find(
-                            (n) => n.id === metrics.centrality?.mostCentral,
-                          )?.label
-                        }
+                        {nodes.find((n) => n.id === metrics.centrality?.mostCentral)?.label}
                       </span>
                     </div>
                     <div className="info-item">
                       <strong>Most Influential:</strong>
                       <span className="entity-name">
-                        {
-                          nodes.find(
-                            (n) => n.id === metrics.centrality?.mostInfluential,
-                          )?.label
-                        }
+                        {nodes.find((n) => n.id === metrics.centrality?.mostInfluential)?.label}
                       </span>
                     </div>
                     <div className="info-item">
                       <strong>Key Bridge Nodes:</strong>
                       <div className="bridge-nodes">
-                        {metrics.centrality?.keyBridgeNodes?.map(
-                          (nodeId: string) => {
-                            const node = nodes.find((n) => n.id === nodeId);
-                            return node ? (
-                              <span key={nodeId} className="bridge-node">
-                                {node.label}
-                              </span>
-                            ) : null;
-                          },
-                        )}
+                        {metrics.centrality?.keyBridgeNodes?.map((nodeId: string) => {
+                          const node = nodes.find((n) => n.id === nodeId);
+                          return node ? (
+                            <span key={nodeId} className="bridge-node">
+                              {node.label}
+                            </span>
+                          ) : null;
+                        })}
                       </div>
                     </div>
                   </div>
@@ -1363,13 +1271,11 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
                     <div className="risk-item">
                       <strong>Suspicious Patterns:</strong>
                       <div className="risk-patterns">
-                        {metrics.risk?.anomalousPatterns?.map(
-                          (pattern: string, index: number) => (
-                            <span key={index} className="pattern-tag">
-                              {pattern}
-                            </span>
-                          ),
-                        )}
+                        {metrics.risk?.anomalousPatterns?.map((pattern: string, index: number) => (
+                          <span key={index} className="pattern-tag">
+                            {pattern}
+                          </span>
+                        ))}
                       </div>
                     </div>
                   </div>

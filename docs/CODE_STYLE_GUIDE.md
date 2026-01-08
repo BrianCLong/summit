@@ -39,33 +39,33 @@ The Summit/IntelGraph platform uses automated tooling to enforce consistent code
 
 ### TypeScript/JavaScript
 
-| Tool | Purpose | Configuration |
-|------|---------|---------------|
-| **ESLint** | Linting and code quality checks | `eslint.config.js`, `.eslintrc.cjs` |
-| **Prettier** | Code formatting | `.prettierrc`, `.prettierignore` |
-| **TypeScript** | Type checking | `tsconfig.base.json`, `tsconfig.build.json` |
+| Tool           | Purpose                         | Configuration                               |
+| -------------- | ------------------------------- | ------------------------------------------- |
+| **ESLint**     | Linting and code quality checks | `eslint.config.js`, `.eslintrc.cjs`         |
+| **Prettier**   | Code formatting                 | `.prettierrc`, `.prettierignore`            |
+| **TypeScript** | Type checking                   | `tsconfig.base.json`, `tsconfig.build.json` |
 
 ### Python
 
-| Tool | Purpose | Configuration |
-|------|---------|---------------|
-| **Ruff** | Fast Python linter and formatter | `ruff.toml` |
+| Tool     | Purpose                          | Configuration |
+| -------- | -------------------------------- | ------------- |
+| **Ruff** | Fast Python linter and formatter | `ruff.toml`   |
 
 ### Git
 
-| Tool | Purpose | Configuration |
-|------|---------|---------------|
-| **Husky** | Git hooks management | `.husky/` directory |
-| **lint-staged** | Run linters on staged files | `package.json` |
-| **commitlint** | Enforce commit message conventions | `commitlint.config.cjs` |
-| **Gitleaks** | Secret scanning | Built-in config |
+| Tool            | Purpose                            | Configuration           |
+| --------------- | ---------------------------------- | ----------------------- |
+| **Husky**       | Git hooks management               | `.husky/` directory     |
+| **lint-staged** | Run linters on staged files        | `package.json`          |
+| **commitlint**  | Enforce commit message conventions | `commitlint.config.cjs` |
+| **Gitleaks**    | Secret scanning                    | Built-in config         |
 
 ### Editor
 
-| Tool | Purpose | Configuration |
-|------|---------|---------------|
-| **EditorConfig** | Editor-agnostic formatting rules | `.editorconfig` |
-| **VS Code** | IDE settings | `.vscode/settings.json` |
+| Tool             | Purpose                          | Configuration           |
+| ---------------- | -------------------------------- | ----------------------- |
+| **EditorConfig** | Editor-agnostic formatting rules | `.editorconfig`         |
+| **VS Code**      | IDE settings                     | `.vscode/settings.json` |
 
 ---
 
@@ -74,6 +74,7 @@ The Summit/IntelGraph platform uses automated tooling to enforce consistent code
 ### Visual Studio Code (Recommended)
 
 1. **Install Required Extensions**:
+
    ```bash
    # Essential extensions
    code --install-extension esbenp.prettier-vscode
@@ -236,6 +237,7 @@ git push --no-verify
 ```
 
 **Key Rules**:
+
 - Semicolons required
 - Single quotes for strings
 - 80-character line width
@@ -245,6 +247,7 @@ git push --no-verify
 ### `eslint.config.js` - ESLint Configuration
 
 **Key Rules**:
+
 - `no-console`: warn (use proper logging)
 - `no-debugger`: error
 - `no-var`: error (use `const` or `let`)
@@ -256,6 +259,7 @@ git push --no-verify
 ### `ruff.toml` - Python Configuration
 
 **Key Settings**:
+
 - Line length: 100 characters
 - Target: Python 3.11+
 - Enabled rules: pycodestyle, Pyflakes, isort, pep8-naming, pyupgrade
@@ -290,6 +294,7 @@ Enforces [Conventional Commits](https://www.conventionalcommits.org/):
 **Types**: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `ci`, `build`, `revert`
 
 **Examples**:
+
 ```
 feat(api): add entity search endpoint
 fix(graph): resolve neo4j connection timeout
@@ -304,17 +309,18 @@ chore(deps): update dependencies
 ### TypeScript/JavaScript
 
 1. **Import Order** (enforced by ESLint):
+
    ```typescript
    // 1. External dependencies
-   import React from 'react';
-   import { ApolloClient } from '@apollo/client';
+   import React from "react";
+   import { ApolloClient } from "@apollo/client";
 
    // 2. Internal packages
-   import { EntityType } from '@intelgraph/types';
+   import { EntityType } from "@intelgraph/types";
 
    // 3. Relative imports
-   import { EntityCard } from './components/EntityCard';
-   import { useGraphData } from '../hooks/useGraphData';
+   import { EntityCard } from "./components/EntityCard";
+   import { useGraphData } from "../hooks/useGraphData";
    ```
 
 2. **Naming Conventions**:
@@ -333,6 +339,7 @@ chore(deps): update dependencies
 ### Python
 
 1. **Import Order** (enforced by Ruff):
+
    ```python
    # 1. Standard library
    import os
@@ -367,6 +374,7 @@ chore(deps): update dependencies
    - Arguments: `camelCase`
 
 2. **Example**:
+
    ```graphql
    type Entity {
      id: ID!
@@ -422,6 +430,7 @@ pnpm exec eslint-config-prettier eslint.config.js
 
 1. **Review the error messages** - they usually indicate what's wrong
 2. **Fix the issues**:
+
    ```bash
    # Auto-fix linting issues
    pnpm run lint:fix
@@ -432,6 +441,7 @@ pnpm exec eslint-config-prettier eslint.config.js
    # Check type errors
    pnpm run typecheck
    ```
+
 3. **Stage the fixes and commit again**:
    ```bash
    git add .

@@ -116,7 +116,7 @@ spec:
         - SURVEILLANCE
       dataTypes:
         accessible:
-          - ALL  # Compliance can access all for monitoring
+          - ALL # Compliance can access all for monitoring
 
     # Risk Management
     risk:
@@ -154,7 +154,7 @@ spec:
           requires:
             - COMPLIANCE_APPROVAL
             - BROUGHT_OVER_WALL_DOCUMENTATION
-          maxDuration: 30  # days
+          maxDuration: 30 # days
           monitoring: ENHANCED
 
     # Wall: Trading vs Research
@@ -170,9 +170,9 @@ spec:
         blocked:
           - RATINGS_CHANGES
           - PRICE_TARGETS
-          - RESEARCH_REPORTS  # Before publication
+          - RESEARCH_REPORTS # Before publication
       timing:
-        embargoBeforePublication: 24  # hours
+        embargoBeforePublication: 24 # hours
         postPublicationRelease: true
 
     # Wall: Investment Banking vs Trading
@@ -239,7 +239,7 @@ spec:
 
         - step: COMPLIANCE_REVIEW
           reviewer: COMPLIANCE_OFFICER
-          sla: 4  # hours
+          sla: 4 # hours
           checks:
             - conflict_of_interest
             - restricted_list
@@ -396,7 +396,7 @@ spec:
       channels:
         - EMAIL
         - INSTANT_MESSAGE
-        - VOICE  # If available
+        - VOICE # If available
       crossWallPatterns:
         - unit_to_unit_communication
         - keyword_detection
@@ -467,7 +467,7 @@ spec:
   audit:
     enabled: true
     level: COMPREHENSIVE
-    retention: 10  # years (regulatory requirement)
+    retention: 10 # years (regulatory requirement)
     fields:
       - timestamp
       - actor_id
@@ -488,7 +488,7 @@ spec:
     # Daily compliance report
     daily:
       name: daily-wall-activity
-      schedule: "0 6 * * *"  # 6 AM daily
+      schedule: "0 6 * * *" # 6 AM daily
       recipients:
         - compliance-team
       content:

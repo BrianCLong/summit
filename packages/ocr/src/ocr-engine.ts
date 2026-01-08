@@ -3,8 +3,8 @@
  * Tesseract, PaddleOCR, document analysis
  */
 
-import { spawn } from 'child_process';
-import { IOCREngine, ModelConfig, BaseComputerVisionModel } from '@intelgraph/computer-vision';
+import { spawn } from "child_process";
+import { IOCREngine, ModelConfig, BaseComputerVisionModel } from "@intelgraph/computer-vision";
 
 export interface OCRResult {
   text: string;
@@ -19,7 +19,7 @@ export interface TextBlock {
   confidence: number;
   bbox: { x: number; y: number; width: number; height: number };
   words?: Word[];
-  block_type?: 'paragraph' | 'line' | 'word';
+  block_type?: "paragraph" | "line" | "word";
 }
 
 export interface Word {
@@ -32,7 +32,7 @@ export interface DocumentLayout {
   text_regions: TextBlock[];
   tables: TableRegion[];
   images: ImageRegion[];
-  layout_type: 'document' | 'receipt' | 'invoice' | 'form';
+  layout_type: "document" | "receipt" | "invoice" | "form";
 }
 
 export interface TableRegion {
@@ -48,12 +48,12 @@ export interface ImageRegion {
 
 export class OCREngine extends BaseComputerVisionModel implements IOCREngine {
   private pythonScriptPath: string;
-  private engine: 'tesseract' | 'paddleocr';
+  private engine: "tesseract" | "paddleocr";
 
-  constructor(engine: 'tesseract' | 'paddleocr' = 'tesseract', config?: Partial<ModelConfig>) {
+  constructor(engine: "tesseract" | "paddleocr" = "tesseract", config?: Partial<ModelConfig>) {
     super({
       model_name: engine,
-      device: config?.device || 'cpu',
+      device: config?.device || "cpu",
       batch_size: config?.batch_size || 1,
       confidence_threshold: config?.confidence_threshold || 0.6,
       nms_threshold: config?.nms_threshold || 0.4,
@@ -64,8 +64,8 @@ export class OCREngine extends BaseComputerVisionModel implements IOCREngine {
     } as ModelConfig);
 
     this.engine = engine;
-    this.pythonScriptPath = process.env.OCR_SCRIPT_PATH ||
-      '/home/user/summit/server/src/ai/models/ocr_engine.py';
+    this.pythonScriptPath =
+      process.env.OCR_SCRIPT_PATH || "/home/user/summit/server/src/ai/models/ocr_engine.py";
   }
 
   async initialize(): Promise<void> {
@@ -77,33 +77,45 @@ export class OCREngine extends BaseComputerVisionModel implements IOCREngine {
     return this.extractText(imagePath, options);
   }
 
-  async extractText(imagePath: string, options?: {
-    languages?: string[];
-    confidenceThreshold?: number;
-    wordLevel?: boolean;
-  }): Promise<OCRResult> {
+  async extractText(
+    imagePath: string,
+    options?: {
+      languages?: string[];
+      confidenceThreshold?: number;
+      wordLevel?: boolean;
+    }
+  ): Promise<OCRResult> {
     this.ensureInitialized();
     const startTime = Date.now();
 
-    const languages = options?.languages?.join('+') || 'eng';
+    const languages = options?.languages?.join("+") || "eng";
     const args = [
       this.pythonScriptPath,
-      '--image', imagePath,
-      '--engine', this.engine,
-      '--languages', languages,
-      '--confidence', String(options?.confidenceThreshold || this.config.confidence_threshold),
-      '--word-level', String(options?.wordLevel !== false),
+      "--image",
+      imagePath,
+      "--engine",
+      this.engine,
+      "--languages",
+      languages,
+      "--confidence",
+      String(options?.confidenceThreshold || this.config.confidence_threshold),
+      "--word-level",
+      String(options?.wordLevel !== false),
     ];
 
     return new Promise((resolve, reject) => {
-      const python = spawn('python3', args);
-      let stdout = '';
-      let stderr = '';
+      const python = spawn("python3", args);
+      let stdout = "";
+      let stderr = "";
 
-      python.stdout.on('data', (data) => { stdout += data.toString(); });
-      python.stderr.on('data', (data) => { stderr += data.toString(); });
+      python.stdout.on("data", (data) => {
+        stdout += data.toString();
+      });
+      python.stderr.on("data", (data) => {
+        stderr += data.toString();
+      });
 
-      python.on('close', (code) => {
+      python.on("close", (code) => {
         if (code !== 0) {
           reject(new Error(`OCR failed: ${stderr}`));
           return;
@@ -112,9 +124,9 @@ export class OCREngine extends BaseComputerVisionModel implements IOCREngine {
         try {
           const result = JSON.parse(stdout);
           resolve({
-            text: result.text || '',
+            text: result.text || "",
             confidence: result.confidence || 0,
-            language: result.language || 'unknown',
+            language: result.language || "unknown",
             blocks: result.blocks || [],
             processing_time_ms: Date.now() - startTime,
           });
@@ -130,16 +142,20 @@ export class OCREngine extends BaseComputerVisionModel implements IOCREngine {
     return result.blocks;
   }
 
-  async extractStructuredData(imagePath: string, documentType: string, options?: any): Promise<any> {
+  async extractStructuredData(
+    imagePath: string,
+    documentType: string,
+    options?: any
+  ): Promise<any> {
     // Extract structured data from documents (receipts, invoices, etc.)
     const result = await this.extractText(imagePath, options);
 
     switch (documentType) {
-      case 'receipt':
+      case "receipt":
         return this.parseReceipt(result);
-      case 'invoice':
+      case "invoice":
         return this.parseInvoice(result);
-      case 'license_plate':
+      case "license_plate":
         return this.parseLicensePlate(result);
       default:
         return result;
@@ -154,7 +170,7 @@ export class OCREngine extends BaseComputerVisionModel implements IOCREngine {
       text_regions: result.blocks,
       tables: [],
       images: [],
-      layout_type: 'document',
+      layout_type: "document",
     };
   }
 
@@ -170,10 +186,12 @@ export class OCREngine extends BaseComputerVisionModel implements IOCREngine {
 
   async recognizeMath(imagePath: string): Promise<string> {
     // Mathematical formula recognition
-    return '';
+    return "";
   }
 
-  async detectLogos(imagePath: string): Promise<Array<{ name: string; bbox: any; confidence: number }>> {
+  async detectLogos(
+    imagePath: string
+  ): Promise<Array<{ name: string; bbox: any; confidence: number }>> {
     // Logo and brand detection
     return [];
   }
@@ -181,8 +199,8 @@ export class OCREngine extends BaseComputerVisionModel implements IOCREngine {
   private parseReceipt(ocrResult: OCRResult): any {
     // Parse receipt data
     return {
-      merchant: '',
-      date: '',
+      merchant: "",
+      date: "",
       total: 0,
       items: [],
       raw_text: ocrResult.text,
@@ -192,8 +210,8 @@ export class OCREngine extends BaseComputerVisionModel implements IOCREngine {
   private parseInvoice(ocrResult: OCRResult): any {
     // Parse invoice data
     return {
-      invoice_number: '',
-      date: '',
+      invoice_number: "",
+      date: "",
       total: 0,
       items: [],
       raw_text: ocrResult.text,
@@ -203,15 +221,32 @@ export class OCREngine extends BaseComputerVisionModel implements IOCREngine {
   private parseLicensePlate(ocrResult: OCRResult): any {
     // Parse license plate
     return {
-      plate_number: ocrResult.text.replace(/\s/g, '').toUpperCase(),
+      plate_number: ocrResult.text.replace(/\s/g, "").toUpperCase(),
       confidence: ocrResult.confidence,
     };
   }
 
   getSupportedLanguages(): string[] {
     return [
-      'eng', 'spa', 'fra', 'deu', 'ita', 'por', 'rus', 'chi_sim', 'chi_tra',
-      'jpn', 'kor', 'ara', 'hin', 'tha', 'vie', 'heb', 'tur', 'pol', 'nld',
+      "eng",
+      "spa",
+      "fra",
+      "deu",
+      "ita",
+      "por",
+      "rus",
+      "chi_sim",
+      "chi_tra",
+      "jpn",
+      "kor",
+      "ara",
+      "hin",
+      "tha",
+      "vie",
+      "heb",
+      "tur",
+      "pol",
+      "nld",
       // ... 100+ languages supported
     ];
   }

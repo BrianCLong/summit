@@ -1,8 +1,6 @@
 {
   "id": "did:web:consent.summit.example",
-  "assertionMethod": [
-    "did:web:consent.summit.example#keys-1"
-  ],
+  "assertionMethod": ["did:web:consent.summit.example#keys-1"],
   "verificationMethod": [
     {
       "id": "did:web:consent.summit.example#keys-1",

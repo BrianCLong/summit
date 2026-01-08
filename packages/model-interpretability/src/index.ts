@@ -3,11 +3,11 @@
  * Neural network interpretability and explainability tools
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // Saliency map generation
 export interface SaliencyMapConfig {
-  method: 'vanilla' | 'smoothgrad' | 'integrated_gradients';
+  method: "vanilla" | "smoothgrad" | "integrated_gradients";
   numSamples?: number;
 }
 
@@ -21,13 +21,20 @@ export class SaliencyMapGenerator {
 
 // GradCAM for CNNs
 export class GradCAM {
-  generateHeatmap(model: any, input: number[], targetLayer: string): {
+  generateHeatmap(
+    model: any,
+    input: number[],
+    targetLayer: string
+  ): {
     heatmap: number[][];
     overlayImage?: string;
   } {
     console.log(`Generating GradCAM for layer: ${targetLayer}`);
     return {
-      heatmap: [[0.5, 0.8], [0.3, 0.9]],
+      heatmap: [
+        [0.5, 0.8],
+        [0.3, 0.9],
+      ],
     };
   }
 }
@@ -35,7 +42,7 @@ export class GradCAM {
 // SHAP values
 export interface SHAPConfig {
   numSamples: number;
-  method: 'kernel' | 'tree' | 'deep';
+  method: "kernel" | "tree" | "deep";
 }
 
 export class SHAPExplainer {
@@ -47,7 +54,7 @@ export class SHAPExplainer {
 
   explain(model: any, input: Record<string, any>): Record<string, number> {
     const explanations: Record<string, number> = {};
-    
+
     Object.keys(input).forEach((key) => {
       explanations[key] = Math.random() * 2 - 1; // Random SHAP value between -1 and 1
     });
@@ -59,7 +66,7 @@ export class SHAPExplainer {
 // Layer-wise relevance propagation
 export class LRPExplainer {
   propagateRelevance(model: any, input: number[]): number[] {
-    console.log('Propagating relevance through layers');
+    console.log("Propagating relevance through layers");
     return input.map(() => Math.random());
   }
 }
@@ -75,9 +82,13 @@ export interface AttentionVisualization {
 export class AttentionVisualizer {
   visualizeAttention(model: any, input: string[]): AttentionVisualization {
     const n = input.length;
-    const weights = Array(n).fill(0).map(() => 
-      Array(n).fill(0).map(() => Math.random())
-    );
+    const weights = Array(n)
+      .fill(0)
+      .map(() =>
+        Array(n)
+          .fill(0)
+          .map(() => Math.random())
+      );
 
     return {
       layer: 0,
@@ -97,7 +108,7 @@ export class CounterfactualGenerator {
     maxIterations = 100
   ): Array<{ input: Record<string, any>; prediction: number; distance: number }> {
     console.log(`Generating counterfactuals for target class: ${targetClass}`);
-    
+
     // Placeholder: Return sample counterfactuals
     return [
       { input: { ...input }, prediction: targetClass, distance: 0.1 },
@@ -113,11 +124,19 @@ export class DecisionBoundaryVisualizer {
     featureIndices: [number, number],
     resolution = 100
   ): { x: number[]; y: number[]; predictions: number[][] } {
-    const x = Array(resolution).fill(0).map((_, i) => i / resolution);
-    const y = Array(resolution).fill(0).map((_, i) => i / resolution);
-    const predictions = Array(resolution).fill(0).map(() =>
-      Array(resolution).fill(0).map(() => Math.random())
-    );
+    const x = Array(resolution)
+      .fill(0)
+      .map((_, i) => i / resolution);
+    const y = Array(resolution)
+      .fill(0)
+      .map((_, i) => i / resolution);
+    const predictions = Array(resolution)
+      .fill(0)
+      .map(() =>
+        Array(resolution)
+          .fill(0)
+          .map(() => Math.random())
+      );
 
     return { x, y, predictions };
   }

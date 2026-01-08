@@ -27,10 +27,10 @@
  * @module @summit/sdk
  */
 
-export { SummitClient } from './client.js';
-export { GovernanceClient } from './governance.js';
-export { ComplianceClient } from './compliance.js';
-export * from './types.js';
+export { SummitClient } from "./client.js";
+export { GovernanceClient } from "./governance.js";
+export { ComplianceClient } from "./compliance.js";
+export * from "./types.js";
 
 // Default export
-export { SummitClient as default } from './client.js';
+export { SummitClient as default } from "./client.js";

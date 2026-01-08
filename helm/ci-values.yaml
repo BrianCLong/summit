@@ -14,7 +14,7 @@ service:
 
 ingress:
   enabled: false
-  className: ''
+  className: ""
   hosts:
     - host: chart.example.local
       paths:

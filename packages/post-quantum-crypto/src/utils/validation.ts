@@ -3,7 +3,7 @@
  * Ensures correctness of post-quantum cryptographic implementations
  */
 
-import { KeyEncapsulationMechanism, DigitalSignatureScheme } from '../types';
+import { KeyEncapsulationMechanism, DigitalSignatureScheme } from "../types";
 
 export class PQCValidator {
   /**
@@ -17,7 +17,9 @@ export class PQCValidator {
         const keyPair = await kem.generateKeyPair();
 
         // Encapsulate
-        const { ciphertext, sharedSecret: encapsulatedSecret } = await kem.encapsulate(keyPair.publicKey);
+        const { ciphertext, sharedSecret: encapsulatedSecret } = await kem.encapsulate(
+          keyPair.publicKey
+        );
 
         // Decapsulate
         const decapsulatedSecret = await kem.decapsulate(ciphertext, keyPair.privateKey);
@@ -65,7 +67,9 @@ export class PQCValidator {
         const isInvalid = await dss.verify(wrongMessage, signature, keyPair.publicKey);
 
         if (isInvalid) {
-          console.error(`Signature validation failed on iteration ${i + 1}: accepted invalid signature`);
+          console.error(
+            `Signature validation failed on iteration ${i + 1}: accepted invalid signature`
+          );
           return false;
         }
       } catch (error) {
@@ -96,13 +100,13 @@ export class PQCValidator {
       const isValid = await dss.verify(message, signature, otherKeyPair.publicKey);
 
       if (isValid) {
-        console.error('Non-repudiation test failed: signature verified with wrong public key');
+        console.error("Non-repudiation test failed: signature verified with wrong public key");
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('Non-repudiation test failed:', error);
+      console.error("Non-repudiation test failed:", error);
       return false;
     }
   }
@@ -111,7 +115,10 @@ export class PQCValidator {
    * Test KEM shared secret uniqueness
    * Ensures each encapsulation produces unique secrets
    */
-  async testKEMUniqueness(kem: KeyEncapsulationMechanism, iterations: number = 100): Promise<boolean> {
+  async testKEMUniqueness(
+    kem: KeyEncapsulationMechanism,
+    iterations: number = 100
+  ): Promise<boolean> {
     try {
       const keyPair = await kem.generateKeyPair();
       const secrets = new Set<string>();
@@ -130,16 +137,20 @@ export class PQCValidator {
 
       return true;
     } catch (error) {
-      console.error('KEM uniqueness test failed:', error);
+      console.error("KEM uniqueness test failed:", error);
       return false;
     }
   }
 
   private compareUint8Arrays(a: Uint8Array, b: Uint8Array): boolean {
-    if (a.length !== b.length) {return false;}
+    if (a.length !== b.length) {
+      return false;
+    }
 
     for (let i = 0; i < a.length; i++) {
-      if (a[i] !== b[i]) {return false;}
+      if (a[i] !== b[i]) {
+        return false;
+      }
     }
 
     return true;
@@ -147,8 +158,8 @@ export class PQCValidator {
 
   private uint8ArrayToHex(arr: Uint8Array): string {
     return Array.from(arr)
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
   }
 }
 

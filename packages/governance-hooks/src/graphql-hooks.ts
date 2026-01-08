@@ -4,10 +4,20 @@
  * Hooks for integrating governance into Apollo Server GraphQL resolvers.
  */
 
-import type { GraphQLResolveInfo } from 'graphql';
+import type { GraphQLResolveInfo } from "graphql";
 
 // Types from authority-compiler (would import in production)
-type Operation = 'READ' | 'CREATE' | 'UPDATE' | 'DELETE' | 'EXPORT' | 'SHARE' | 'COPILOT' | 'QUERY' | 'ANNOTATE' | 'LINK';
+type Operation =
+  | "READ"
+  | "CREATE"
+  | "UPDATE"
+  | "DELETE"
+  | "EXPORT"
+  | "SHARE"
+  | "COPILOT"
+  | "QUERY"
+  | "ANNOTATE"
+  | "LINK";
 
 // -----------------------------------------------------------------------------
 // Types
@@ -96,13 +106,13 @@ export interface PIIConfig {
   patterns: Array<{
     name: string;
     regex: RegExp;
-    action: 'redact' | 'mask' | 'block' | 'log';
+    action: "redact" | "mask" | "block" | "log";
   }>;
   redactionText?: string;
 }
 
 export function createPIIDetectionHook(config: PIIConfig): GovernancePlugin {
-  const { patterns, redactionText = '[REDACTED]' } = config;
+  const { patterns, redactionText = "[REDACTED]" } = config;
 
   return {
     async afterResolve(ctx: ResolverContext, result: unknown) {
@@ -111,16 +121,18 @@ export function createPIIDetectionHook(config: PIIConfig): GovernancePlugin {
   };
 }
 
-function redactPII(data: unknown, patterns: PIIConfig['patterns'], redactionText: string): unknown {
-  if (data === null || data === undefined) {return data;}
+function redactPII(data: unknown, patterns: PIIConfig["patterns"], redactionText: string): unknown {
+  if (data === null || data === undefined) {
+    return data;
+  }
 
-  if (typeof data === 'string') {
+  if (typeof data === "string") {
     let result = data;
     for (const pattern of patterns) {
-      if (pattern.action === 'redact') {
+      if (pattern.action === "redact") {
         result = result.replace(pattern.regex, redactionText);
-      } else if (pattern.action === 'mask') {
-        result = result.replace(pattern.regex, (match) => '*'.repeat(match.length));
+      } else if (pattern.action === "mask") {
+        result = result.replace(pattern.regex, (match) => "*".repeat(match.length));
       }
     }
     return result;
@@ -130,7 +142,7 @@ function redactPII(data: unknown, patterns: PIIConfig['patterns'], redactionText
     return data.map((item) => redactPII(item, patterns, redactionText));
   }
 
-  if (typeof data === 'object') {
+  if (typeof data === "object") {
     const result: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(data)) {
       result[key] = redactPII(value, patterns, redactionText);
@@ -142,13 +154,17 @@ function redactPII(data: unknown, patterns: PIIConfig['patterns'], redactionText
 }
 
 // Default PII patterns
-export const DEFAULT_PII_PATTERNS: PIIConfig['patterns'] = [
-  { name: 'SSN', regex: /\b\d{3}-?\d{2}-?\d{4}\b/g, action: 'redact' },
-  { name: 'Credit Card', regex: /\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b/g, action: 'redact' },
-  { name: 'Email', regex: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, action: 'mask' },
-  { name: 'Phone', regex: /\b(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b/g, action: 'mask' },
-  { name: 'Passport', regex: /\b[A-Z]{1,2}\d{6,9}\b/g, action: 'redact' },
-  { name: 'IP Address', regex: /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g, action: 'mask' },
+export const DEFAULT_PII_PATTERNS: PIIConfig["patterns"] = [
+  { name: "SSN", regex: /\b\d{3}-?\d{2}-?\d{4}\b/g, action: "redact" },
+  { name: "Credit Card", regex: /\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b/g, action: "redact" },
+  { name: "Email", regex: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, action: "mask" },
+  {
+    name: "Phone",
+    regex: /\b(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b/g,
+    action: "mask",
+  },
+  { name: "Passport", regex: /\b[A-Z]{1,2}\d{6,9}\b/g, action: "redact" },
+  { name: "IP Address", regex: /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g, action: "mask" },
 ];
 
 // -----------------------------------------------------------------------------
@@ -178,7 +194,7 @@ export function createAuditHook(logger: AuditLogger): GovernancePlugin {
   return {
     async afterResolve(ctx: ResolverContext, result: unknown) {
       await logger.log({
-        eventType: 'graphql_resolve',
+        eventType: "graphql_resolve",
         userId: ctx.context.user.id,
         tenantId: ctx.context.user.tenantId,
         operation: ctx.operation,
@@ -194,7 +210,7 @@ export function createAuditHook(logger: AuditLogger): GovernancePlugin {
 
     async onError(ctx: ResolverContext, error: Error) {
       await logger.log({
-        eventType: 'graphql_error',
+        eventType: "graphql_error",
         userId: ctx.context.user.id,
         tenantId: ctx.context.user.tenantId,
         operation: ctx.operation,
@@ -232,7 +248,7 @@ export function createProvenanceHook(recorder: ProvenanceRecorder): GovernancePl
   return {
     async afterResolve(ctx: ResolverContext, result: unknown) {
       // Only record for mutations
-      if (!['CREATE', 'UPDATE', 'DELETE', 'LINK'].includes(ctx.operation)) {
+      if (!["CREATE", "UPDATE", "DELETE", "LINK"].includes(ctx.operation)) {
         return result;
       }
 
@@ -254,15 +270,17 @@ export function createProvenanceHook(recorder: ProvenanceRecorder): GovernancePl
 }
 
 function extractEntityIds(result: unknown): string[] {
-  if (!result) {return [];}
+  if (!result) {
+    return [];
+  }
 
   if (Array.isArray(result)) {
     return result.flatMap((item) => extractEntityIds(item));
   }
 
-  if (typeof result === 'object' && result !== null) {
+  if (typeof result === "object" && result !== null) {
     const obj = result as Record<string, unknown>;
-    if (typeof obj.id === 'string') {
+    if (typeof obj.id === "string") {
       return [obj.id];
     }
   }
@@ -273,11 +291,11 @@ function extractEntityIds(result: unknown): string[] {
 function sanitizeArgs(args: Record<string, unknown>): Record<string, unknown> {
   // Remove sensitive fields from args before logging
   const sanitized = { ...args };
-  const sensitiveKeys = ['password', 'secret', 'token', 'apiKey', 'authorization'];
+  const sensitiveKeys = ["password", "secret", "token", "apiKey", "authorization"];
 
   for (const key of sensitiveKeys) {
     if (key in sanitized) {
-      sanitized[key] = '[REDACTED]';
+      sanitized[key] = "[REDACTED]";
     }
   }
 
@@ -321,17 +339,19 @@ export function createFieldRedactionHook(): GovernancePlugin {
 }
 
 function redactFields(data: unknown, fields: string[]): unknown {
-  if (data === null || data === undefined) {return data;}
+  if (data === null || data === undefined) {
+    return data;
+  }
 
   if (Array.isArray(data)) {
     return data.map((item) => redactFields(item, fields));
   }
 
-  if (typeof data === 'object') {
+  if (typeof data === "object") {
     const result: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(data)) {
       if (fields.includes(key)) {
-        result[key] = '[REDACTED]';
+        result[key] = "[REDACTED]";
       } else {
         result[key] = redactFields(value, fields);
       }
@@ -381,8 +401,11 @@ export function composeHooks(...hooks: GovernancePlugin[]): GovernancePlugin {
 // -----------------------------------------------------------------------------
 
 export class AuthorizationError extends Error {
-  constructor(message: string, public auditId?: string) {
+  constructor(
+    message: string,
+    public auditId?: string
+  ) {
     super(message);
-    this.name = 'AuthorizationError';
+    this.name = "AuthorizationError";
   }
 }

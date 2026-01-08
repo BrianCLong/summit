@@ -4,23 +4,32 @@
 
 export class NamedEntityGenerator {
   private personNames = {
-    first: ['John', 'Jane', 'Michael', 'Emily', 'David', 'Sarah', 'Robert', 'Lisa'],
-    last: ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis']
+    first: ["John", "Jane", "Michael", "Emily", "David", "Sarah", "Robert", "Lisa"],
+    last: ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis"],
   };
 
   private organizations = [
-    'TechCorp', 'DataSystems Inc', 'Innovation Labs', 'Global Solutions',
-    'Digital Ventures', 'NextGen Technologies', 'Cloud Services Ltd'
+    "TechCorp",
+    "DataSystems Inc",
+    "Innovation Labs",
+    "Global Solutions",
+    "Digital Ventures",
+    "NextGen Technologies",
+    "Cloud Services Ltd",
   ];
 
   private locations = {
-    cities: ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix', 'Philadelphia'],
-    countries: ['United States', 'Canada', 'United Kingdom', 'Germany', 'Japan', 'Australia']
+    cities: ["New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia"],
+    countries: ["United States", "Canada", "United Kingdom", "Germany", "Japan", "Australia"],
   };
 
   private products = [
-    'Pro Suite', 'Enterprise Platform', 'Cloud Solution', 'Analytics Tool',
-    'Data Manager', 'Business Intelligence System'
+    "Pro Suite",
+    "Enterprise Platform",
+    "Cloud Solution",
+    "Analytics Tool",
+    "Data Manager",
+    "Business Intelligence System",
   ];
 
   /**
@@ -42,8 +51,8 @@ export class NamedEntityGenerator {
   /**
    * Generate location
    */
-  generateLocation(type: 'city' | 'country' = 'city'): string {
-    return this.randomItem(this.locations[type === 'city' ? 'cities' : 'countries']);
+  generateLocation(type: "city" | "country" = "city"): string {
+    return this.randomItem(this.locations[type === "city" ? "cities" : "countries"]);
   }
 
   /**
@@ -76,8 +85,14 @@ export class NamedEntityGenerator {
    */
   generateEvent(): string {
     const events = [
-      'Annual Conference', 'Product Launch', 'Summit', 'Workshop',
-      'Symposium', 'Exhibition', 'Forum', 'Meeting'
+      "Annual Conference",
+      "Product Launch",
+      "Summit",
+      "Workshop",
+      "Symposium",
+      "Exhibition",
+      "Forum",
+      "Meeting",
     ];
     return this.randomItem(events);
   }

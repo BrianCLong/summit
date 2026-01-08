@@ -267,32 +267,30 @@ Gremlin is an imperative graph traversal language. Summit provides Gremlin-compa
 ### Basic Traversals
 
 ```typescript
-import { QueryEngine } from '@intelgraph/graph-query';
+import { QueryEngine } from "@intelgraph/graph-query";
 
 const queryEngine = new QueryEngine(storage);
 
 // Start with all vertices
 const result = queryEngine.executeGremlin({
-  steps: [
-    { type: 'V', args: [] }
-  ]
+  steps: [{ type: "V", args: [] }],
 });
 
 // Filter by property
 const filtered = queryEngine.executeGremlin({
   steps: [
-    { type: 'V', args: [] },
-    { type: 'has', args: ['role', 'analyst'] }
-  ]
+    { type: "V", args: [] },
+    { type: "has", args: ["role", "analyst"] },
+  ],
 });
 
 // Traverse outgoing edges
 const outgoing = queryEngine.executeGremlin({
   steps: [
-    { type: 'V', args: [] },
-    { type: 'has', args: ['name', 'John Doe'] },
-    { type: 'out', args: [] }
-  ]
+    { type: "V", args: [] },
+    { type: "has", args: ["name", "John Doe"] },
+    { type: "out", args: [] },
+  ],
 });
 ```
 
@@ -340,30 +338,30 @@ const outgoing = queryEngine.executeGremlin({
 // Find all analysts and their supervisors
 const analystsAndSupervisors = queryEngine.executeGremlin({
   steps: [
-    { type: 'V', args: [] },
-    { type: 'has', args: ['role', 'analyst'] },
-    { type: 'out', args: ['REPORTS_TO'] },
-    { type: 'values', args: ['name'] }
-  ]
+    { type: "V", args: [] },
+    { type: "has", args: ["role", "analyst"] },
+    { type: "out", args: ["REPORTS_TO"] },
+    { type: "values", args: ["name"] },
+  ],
 });
 
 // Count nodes by type
 const counts = queryEngine.executeGremlin({
   steps: [
-    { type: 'V', args: [] },
-    { type: 'groupCount', args: ['label'] }
-  ]
+    { type: "V", args: [] },
+    { type: "groupCount", args: ["label"] },
+  ],
 });
 
 // Path traversal
 const paths = queryEngine.executeGremlin({
   steps: [
-    { type: 'V', args: [] },
-    { type: 'has', args: ['name', 'Alice'] },
-    { type: 'repeat', args: [{ type: 'out', args: [] }] },
-    { type: 'times', args: [3] },
-    { type: 'path', args: [] }
-  ]
+    { type: "V", args: [] },
+    { type: "has", args: ["name", "Alice"] },
+    { type: "repeat", args: [{ type: "out", args: [] }] },
+    { type: "times", args: [3] },
+    { type: "path", args: [] },
+  ],
 });
 ```
 
@@ -445,11 +443,11 @@ const query = `
   RETURN supervisor.name, COUNT(p) AS analysts
 `;
 
-const plan = queryEngine.explain(query, 'cypher');
+const plan = queryEngine.explain(query, "cypher");
 
-console.log('Steps:', plan.steps);
-console.log('Estimated cost:', plan.estimatedCost);
-console.log('Estimated rows:', plan.estimatedRows);
+console.log("Steps:", plan.steps);
+console.log("Estimated cost:", plan.estimatedCost);
+console.log("Estimated rows:", plan.estimatedRows);
 ```
 
 ### Query Plan Output
@@ -573,7 +571,7 @@ const query = `
   RETURN p
 `;
 
-queryEngine.executeCypher(query, { name: 'John Doe' });
+queryEngine.executeCypher(query, { name: "John Doe" });
 
 // Bad: String concatenation (SQL injection risk)
 const query = `
@@ -583,7 +581,7 @@ const query = `
 `;
 ```
 
-### 5. Avoid SELECT *
+### 5. Avoid SELECT \*
 
 ```cypher
 -- Good: Select specific properties
@@ -663,13 +661,13 @@ RETURN p.name,
 
 ## Performance Benchmarks
 
-| Query Type | Small Graph | Medium Graph | Large Graph |
-|------------|-------------|--------------|-------------|
-| Simple match | < 1ms | < 10ms | < 100ms |
-| 1-hop expand | < 5ms | < 50ms | < 500ms |
-| 3-hop expand | < 100ms | < 1s | < 10s |
-| Aggregation | < 10ms | < 100ms | < 1s |
-| Shortest path | < 50ms | < 500ms | < 5s |
+| Query Type    | Small Graph | Medium Graph | Large Graph |
+| ------------- | ----------- | ------------ | ----------- |
+| Simple match  | < 1ms       | < 10ms       | < 100ms     |
+| 1-hop expand  | < 5ms       | < 50ms       | < 500ms     |
+| 3-hop expand  | < 100ms     | < 1s         | < 10s       |
+| Aggregation   | < 10ms      | < 100ms      | < 1s        |
+| Shortest path | < 50ms      | < 500ms      | < 5s        |
 
 Note: Times are approximate and depend on graph structure and hardware.
 

@@ -1,4 +1,4 @@
-import { CompiledModelCard } from './types.js';
+import { CompiledModelCard } from "./types.js";
 
 export interface InvocationContext {
   purpose: string;

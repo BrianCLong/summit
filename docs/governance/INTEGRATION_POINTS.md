@@ -17,16 +17,17 @@ This document identifies the specific files and code locations where governance 
 **Current State:** Basic JWT validation and role checking
 
 **Integration Points:**
+
 ```typescript
 // Add authority compiler evaluation
-import { PolicyEvaluator } from '@intelgraph/authority-compiler';
+import { PolicyEvaluator } from "@intelgraph/authority-compiler";
 
 // Before resolver execution:
 const decision = await evaluator.evaluate({
   user: context.user,
   operation: getOperationFromResolver(info),
   resource: { entityType: info.returnType.name },
-  request: { timestamp: new Date(), ip: context.req.ip }
+  request: { timestamp: new Date(), ip: context.req.ip },
 });
 
 if (!decision.allowed) {
@@ -43,6 +44,7 @@ if (!decision.allowed) {
 **Current State:** Query cost calculation and limits
 
 **Integration Points:**
+
 - Add tenant-specific budget tracking
 - Integrate with cost guard service
 - Add provenance for budget consumption events
@@ -56,6 +58,7 @@ if (!decision.allowed) {
 **Current State:** Basic SSN pattern detection
 
 **Integration Points:**
+
 ```typescript
 // Enhance PII detection patterns
 const PII_PATTERNS = {
@@ -69,7 +72,7 @@ const PII_PATTERNS = {
 
 // Add redaction based on user clearance
 if (decision.redactedFields?.includes(fieldName)) {
-  return '[REDACTED]';
+  return "[REDACTED]";
 }
 ```
 
@@ -82,9 +85,10 @@ if (decision.redactedFields?.includes(fieldName)) {
 **Current State:** Basic audit logging
 
 **Integration Points:**
+
 ```typescript
 // Link audit logs to provenance ledger
-import { recordStep } from '@intelgraph/prov-ledger';
+import { recordStep } from "@intelgraph/prov-ledger";
 
 // After operation completion:
 await recordStep({
@@ -107,6 +111,7 @@ await recordStep({
 **Current State:** Basic tracing
 
 **Integration Points:**
+
 - Add policy decision attributes to spans
 - Track PII detection events
 - Add provenance step IDs to traces
@@ -256,6 +261,7 @@ async transform(entity: ConnectorEntity): Promise<TransformedEntity> {
 **File:** `services/feed-processor/src/`
 
 **Integration Points:**
+
 - Add license validation for external feeds
 - Track data lineage from feed to entities
 - Validate source credibility
@@ -435,16 +441,19 @@ async createExportPackage(request: ExportRequest): Promise<ExportPackage> {
 ## 8. Testing Strategy
 
 ### Unit Tests
+
 - Mock policy evaluator for each integration point
 - Test PII detection patterns
 - Verify provenance step recording
 
 ### Integration Tests
+
 - End-to-end policy enforcement
 - Cross-service provenance chain
 - Export manifest verification
 
 ### Security Tests
+
 - Authority bypass attempts
 - PII leak detection
 - Compartment isolation verification

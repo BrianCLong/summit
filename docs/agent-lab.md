@@ -24,6 +24,7 @@ pnpm agent-lab judge --run <runId>
 ```
 
 CLI commands:
+
 - `agent-lab run --workflow <path> [--targets <file|csv>] [--lab] [--dry-run]` to execute a workflow
 - `agent-lab judge --run <runId>` to rescore a completed run
 - `agent-lab tools list` to view built-ins
@@ -36,6 +37,7 @@ Workflows live under `examples/agent-lab/workflows/` and follow the JSON Schema 
 ## Evidence Bundles
 
 Evidence is written under `artifacts/agent-lab/runs/<runId>/`:
+
 - `run.json`: run summary
 - `evidence/evidence.ndjson`: append-only artifacts with hashes and policy decisions
 - `raw/`: raw tool outputs

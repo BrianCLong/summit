@@ -46,14 +46,12 @@ After a component completes an asynchronous operation (e.g., streaming a respons
 **Usage Example:**
 
 ```typescript
-import { waitForIdle } from '../test-utils/wait';
+import { waitForIdle } from "../test-utils/wait";
 
-test('async operation completes and component becomes idle', async () => {
+test("async operation completes and component becomes idle", async () => {
   // ... trigger async operation ...
   await waitForIdle();
-  expect(
-    screen.getByRole('status', { name: /assistant-status/i }),
-  ).toHaveTextContent(/Online/); // Or whatever your "idle" status text is
+  expect(screen.getByRole("status", { name: /assistant-status/i })).toHaveTextContent(/Online/); // Or whatever your "idle" status text is
 });
 ```
 
@@ -67,11 +65,11 @@ For components integrating with `SpeechRecognition`, we use a mock that allows t
 **Usage Example:**
 
 ```typescript
-import { emitSpeechResult } from '../test-utils/voice';
+import { emitSpeechResult } from "../test-utils/voice";
 
-test('voice input processes transcript', async () => {
+test("voice input processes transcript", async () => {
   // ... activate voice input in component ...
-  emitSpeechResult('Hello, how are you?');
+  emitSpeechResult("Hello, how are you?");
   // ... assert component's reaction to the transcript ...
 });
 ```
@@ -85,10 +83,10 @@ For components that use the `fetch` API for streaming responses, this mock provi
 **Usage Example:**
 
 ```typescript
-import { installStreamingFetchMock } from '../test-utils/fetch';
+import { installStreamingFetchMock } from "../test-utils/fetch";
 
-test('component handles streaming fetch response', async () => {
-  installStreamingFetchMock(['data chunk 1', 'data chunk 2', 'final data']);
+test("component handles streaming fetch response", async () => {
+  installStreamingFetchMock(["data chunk 1", "data chunk 2", "final data"]);
   // ... trigger fetch in component ...
   // ... assert component's state as data streams or after completion ...
 });
@@ -103,13 +101,13 @@ To prevent accidental mixing of fake timers with `userEvent` (which can lead to 
 **Usage Example:**
 
 ```typescript
-import { withUser } from '../../test-utils/user'; // Adjust path as needed
+import { withUser } from "../../test-utils/user"; // Adjust path as needed
 
-test('user interaction triggers expected behavior', async () => {
-  const input = screen.getByRole('textbox');
+test("user interaction triggers expected behavior", async () => {
+  const input = screen.getByRole("textbox");
   await withUser(async (u) => {
-    await u.type(input, 'My message');
-    await u.click(screen.getByRole('button', { name: /send/i }));
+    await u.type(input, "My message");
+    await u.click(screen.getByRole("button", { name: /send/i }));
   });
   // ... assert outcomes ...
 });
@@ -126,15 +124,12 @@ These helpers provide more resilient ways to assert text content in the DOM, han
 **Usage Example:**
 
 ```typescript
-import {
-  expectTextAcrossElements,
-  expectLastAssistantMessageToContain,
-} from '../test-utils/text';
+import { expectTextAcrossElements, expectLastAssistantMessageToContain } from "../test-utils/text";
 
-test('message content is correct', async () => {
-  const log = screen.getByTestId('message-log');
+test("message content is correct", async () => {
+  const log = screen.getByTestId("message-log");
   await expectTextAcrossElements(log, /Expected message content/i);
-  await expectLastAssistantMessageToContain('Final response text');
+  await expectLastAssistantMessageToContain("Final response text");
 });
 ```
 

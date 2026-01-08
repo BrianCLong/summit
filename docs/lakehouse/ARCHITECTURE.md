@@ -18,18 +18,19 @@ The storage layer uses object storage (S3, Azure Blob, GCS) as the foundation:
 
 \`\`\`
 ┌─────────────────────────────────────┐
-│      Object Storage (S3/Blob/GCS)   │
-│  ┌───────────────────────────────┐  │
-│  │  Data Files (Parquet/ORC)     │  │
-│  ├───────────────────────────────┤  │
-│  │  Metadata Files (JSON/Avro)   │  │
-│  ├───────────────────────────────┤  │
-│  │  Transaction Logs             │  │
-│  └───────────────────────────────┘  │
+│ Object Storage (S3/Blob/GCS) │
+│ ┌───────────────────────────────┐ │
+│ │ Data Files (Parquet/ORC) │ │
+│ ├───────────────────────────────┤ │
+│ │ Metadata Files (JSON/Avro) │ │
+│ ├───────────────────────────────┤ │
+│ │ Transaction Logs │ │
+│ └───────────────────────────────┘ │
 └─────────────────────────────────────┘
 \`\`\`
 
 **Features:**
+
 - Columnar file formats for efficient queries
 - Partitioned data for partition pruning
 - Compressed files for storage optimization
@@ -41,26 +42,27 @@ The metadata layer tracks table schemas, partitions, and transactions:
 
 \`\`\`
 ┌─────────────────────────────────────┐
-│        Lakehouse Catalog            │
-│  ┌───────────────────────────────┐  │
-│  │  Table Metadata               │  │
-│  │  - Schema versions            │  │
-│  │  - Partition specs            │  │
-│  │  - Table properties           │  │
-│  ├───────────────────────────────┤  │
-│  │  Snapshots                    │  │
-│  │  - Version history            │  │
-│  │  - Manifest files             │  │
-│  │  - Statistics                 │  │
-│  ├───────────────────────────────┤  │
-│  │  Transaction Log              │  │
-│  │  - Commit history             │  │
-│  │  - Operations                 │  │
-│  └───────────────────────────────┘  │
+│ Lakehouse Catalog │
+│ ┌───────────────────────────────┐ │
+│ │ Table Metadata │ │
+│ │ - Schema versions │ │
+│ │ - Partition specs │ │
+│ │ - Table properties │ │
+│ ├───────────────────────────────┤ │
+│ │ Snapshots │ │
+│ │ - Version history │ │
+│ │ - Manifest files │ │
+│ │ - Statistics │ │
+│ ├───────────────────────────────┤ │
+│ │ Transaction Log │ │
+│ │ - Commit history │ │
+│ │ - Operations │ │
+│ └───────────────────────────────┘ │
 └─────────────────────────────────────┘
 \`\`\`
 
 **Capabilities:**
+
 - Schema registry for all tables
 - Version tracking for time travel
 - Statistics for query optimization
@@ -72,24 +74,25 @@ The query layer provides SQL and analytics capabilities:
 
 \`\`\`
 ┌─────────────────────────────────────┐
-│      Unified Analytics Engine       │
-│  ┌───────────────────────────────┐  │
-│  │  SQL Parser                   │  │
-│  ├───────────────────────────────┤  │
-│  │  Query Optimizer              │  │
-│  │  - Cost-based optimization    │  │
-│  │  - Predicate pushdown         │  │
-│  │  - Partition pruning          │  │
-│  ├───────────────────────────────┤  │
-│  │  Execution Engine             │  │
-│  │  - Vectorized execution       │  │
-│  │  - Parallel processing        │  │
-│  │  - Result caching             │  │
-│  └───────────────────────────────┘  │
+│ Unified Analytics Engine │
+│ ┌───────────────────────────────┐ │
+│ │ SQL Parser │ │
+│ ├───────────────────────────────┤ │
+│ │ Query Optimizer │ │
+│ │ - Cost-based optimization │ │
+│ │ - Predicate pushdown │ │
+│ │ - Partition pruning │ │
+│ ├───────────────────────────────┤ │
+│ │ Execution Engine │ │
+│ │ - Vectorized execution │ │
+│ │ - Parallel processing │ │
+│ │ - Result caching │ │
+│ └───────────────────────────────┘ │
 └─────────────────────────────────────┘
 \`\`\`
 
 **Optimizations:**
+
 - Adaptive query execution
 - Columnar processing
 - Data skipping with statistics
@@ -101,23 +104,23 @@ The governance layer ensures security and compliance:
 
 \`\`\`
 ┌─────────────────────────────────────┐
-│       Governance Manager            │
-│  ┌───────────────────────────────┐  │
-│  │  Access Control               │  │
-│  │  - Row-level security         │  │
-│  │  - Column-level security      │  │
-│  │  - Dynamic masking            │  │
-│  ├───────────────────────────────┤  │
-│  │  Audit Logging                │  │
-│  │  - All data access            │  │
-│  │  - Schema changes             │  │
-│  │  - Policy updates             │  │
-│  ├───────────────────────────────┤  │
-│  │  Compliance                   │  │
-│  │  - GDPR/CCPA automation       │  │
-│  │  - PII detection              │  │
-│  │  - Data classification        │  │
-│  └───────────────────────────────┘  │
+│ Governance Manager │
+│ ┌───────────────────────────────┐ │
+│ │ Access Control │ │
+│ │ - Row-level security │ │
+│ │ - Column-level security │ │
+│ │ - Dynamic masking │ │
+│ ├───────────────────────────────┤ │
+│ │ Audit Logging │ │
+│ │ - All data access │ │
+│ │ - Schema changes │ │
+│ │ - Policy updates │ │
+│ ├───────────────────────────────┤ │
+│ │ Compliance │ │
+│ │ - GDPR/CCPA automation │ │
+│ │ - PII detection │ │
+│ │ - Data classification │ │
+│ └───────────────────────────────┘ │
 └─────────────────────────────────────┘
 \`\`\`
 
@@ -128,6 +131,7 @@ The governance layer ensures security and compliance:
 **Best for:** Streaming workloads, frequent updates
 
 **Features:**
+
 - Transaction log for ACID guarantees
 - Time travel with snapshot isolation
 - Schema enforcement and evolution
@@ -136,11 +140,11 @@ The governance layer ensures security and compliance:
 **Architecture:**
 \`\`\`
 table_root/
-├── _delta_log/
-│   ├── 00000000000000000000.json  # Transaction 0
-│   ├── 00000000000000000001.json  # Transaction 1
-│   └── ...
-├── part-00000-xxx.parquet         # Data files
+├── \_delta_log/
+│ ├── 00000000000000000000.json # Transaction 0
+│ ├── 00000000000000000001.json # Transaction 1
+│ └── ...
+├── part-00000-xxx.parquet # Data files
 ├── part-00001-xxx.parquet
 └── ...
 \`\`\`
@@ -150,6 +154,7 @@ table_root/
 **Best for:** Analytics workloads, large tables
 
 **Features:**
+
 - Hidden partitioning
 - Partition evolution
 - Efficient metadata operations
@@ -159,12 +164,12 @@ table_root/
 \`\`\`
 table_root/
 ├── metadata/
-│   ├── v1.metadata.json           # Table metadata
-│   ├── snap-001.avro              # Snapshot manifest
-│   └── manifest-list-001.avro     # Manifest list
+│ ├── v1.metadata.json # Table metadata
+│ ├── snap-001.avro # Snapshot manifest
+│ └── manifest-list-001.avro # Manifest list
 ├── data/
-│   ├── part-00000.parquet
-│   └── ...
+│ ├── part-00000.parquet
+│ └── ...
 \`\`\`
 
 ### Apache Hudi
@@ -172,6 +177,7 @@ table_root/
 **Best for:** CDC pipelines, incremental processing
 
 **Features:**
+
 - Upserts and deletes
 - Incremental queries
 - Copy-on-write or merge-on-read
@@ -181,11 +187,11 @@ table_root/
 \`\`\`
 table_root/
 ├── .hoodie/
-│   ├── 20240101120000.commit      # Commit files
-│   └── ...
-├── 2024/01/01/                    # Partitioned data
-│   ├── xxx.parquet                # Base file
-│   └── .xxx.log                   # Log file (MOR)
+│ ├── 20240101120000.commit # Commit files
+│ └── ...
+├── 2024/01/01/ # Partitioned data
+│ ├── xxx.parquet # Base file
+│ └── .xxx.log # Log file (MOR)
 \`\`\`
 
 ## ACID Transactions
@@ -228,11 +234,11 @@ Every change creates a new snapshot:
 \`\`\`typescript
 // Query historical data
 const data = await table.readAtVersion({
-  timestamp: new Date('2024-01-01'),
-  // OR
-  version: 42,
-  // OR
-  snapshotId: 'snap-abc123'
+timestamp: new Date('2024-01-01'),
+// OR
+version: 42,
+// OR
+snapshotId: 'snap-abc123'
 });
 \`\`\`
 
@@ -257,19 +263,19 @@ const data = await table.readAtVersion({
 \`\`\`typescript
 // Original schema
 {
-  columns: [
-    { name: 'id', type: 'string' },
-    { name: 'value', type: 'int' }
-  ]
+columns: [
+{ name: 'id', type: 'string' },
+{ name: 'value', type: 'int' }
+]
 }
 
 // Evolved schema
 {
-  columns: [
-    { name: 'id', type: 'string' },
-    { name: 'value', type: 'bigint' },  // Widened
-    { name: 'timestamp', type: 'timestamp' }  // Added
-  ]
+columns: [
+{ name: 'id', type: 'string' },
+{ name: 'value', type: 'bigint' }, // Widened
+{ name: 'timestamp', type: 'timestamp' } // Added
+]
 }
 \`\`\`
 
@@ -301,6 +307,7 @@ await table.zOrder(['user_id', 'timestamp']);
 \`\`\`
 
 **Effect:**
+
 - Co-locates related data
 - Improves data skipping
 - Reduces scan volume by 50-90%
@@ -311,9 +318,9 @@ Skips entire partitions based on filters:
 
 \`\`\`sql
 -- Only scans 2024/01/15 partition
-SELECT * FROM events
+SELECT \* FROM events
 WHERE date = '2024-01-15'
-  AND user_id = 'abc123'
+AND user_id = 'abc123'
 \`\`\`
 
 ### 4. Data Skipping
@@ -332,20 +339,20 @@ Result: Skip File 1, read File 2
 
 ### Read Performance
 
-| Operation | Latency | Throughput |
-|-----------|---------|------------|
-| Partition scan | 100ms | 1 GB/s |
-| Full scan | 1s | 500 MB/s |
-| Point query | 50ms | - |
-| Time travel | 200ms | 500 MB/s |
+| Operation      | Latency | Throughput |
+| -------------- | ------- | ---------- |
+| Partition scan | 100ms   | 1 GB/s     |
+| Full scan      | 1s      | 500 MB/s   |
+| Point query    | 50ms    | -          |
+| Time travel    | 200ms   | 500 MB/s   |
 
 ### Write Performance
 
-| Operation | Latency | Throughput |
-|-----------|---------|------------|
-| Append | 1s | 100 MB/s |
-| Upsert | 5s | 50 MB/s |
-| Compaction | 30s | 200 MB/s |
+| Operation  | Latency | Throughput |
+| ---------- | ------- | ---------- |
+| Append     | 1s      | 100 MB/s   |
+| Upsert     | 5s      | 50 MB/s    |
+| Compaction | 30s     | 200 MB/s   |
 
 ## Scalability
 
@@ -372,23 +379,23 @@ Result: Skip File 1, read File 2
 
 ### vs Traditional Data Warehouse
 
-| Feature | Lakehouse | Warehouse |
-|---------|-----------|-----------|
-| Storage cost | Lower | Higher |
-| Flexibility | Higher | Lower |
-| Performance | Good | Excellent |
-| ACID | Yes | Yes |
-| Vendor lock-in | None | High |
+| Feature        | Lakehouse | Warehouse |
+| -------------- | --------- | --------- |
+| Storage cost   | Lower     | Higher    |
+| Flexibility    | Higher    | Lower     |
+| Performance    | Good      | Excellent |
+| ACID           | Yes       | Yes       |
+| Vendor lock-in | None      | High      |
 
 ### vs Data Lake
 
-| Feature | Lakehouse | Data Lake |
-|---------|-----------|-----------|
-| ACID transactions | Yes | No |
-| Schema enforcement | Yes | Optional |
-| Query performance | Excellent | Poor |
-| Time travel | Yes | No |
-| Complexity | Medium | Low |
+| Feature            | Lakehouse | Data Lake |
+| ------------------ | --------- | --------- |
+| ACID transactions  | Yes       | No        |
+| Schema enforcement | Yes       | Optional  |
+| Query performance  | Excellent | Poor      |
+| Time travel        | Yes       | No        |
+| Complexity         | Medium    | Low       |
 
 ## Future Enhancements
 

@@ -11,14 +11,14 @@ A wrapper component that catches JavaScript errors anywhere in its child compone
 **Usage:**
 
 ```tsx
-import { ErrorBoundary } from '@/components/error';
+import { ErrorBoundary } from '@/components/error'
 
 function App() {
   return (
     <ErrorBoundary>
       <MyComponent />
     </ErrorBoundary>
-  );
+  )
 }
 ```
 

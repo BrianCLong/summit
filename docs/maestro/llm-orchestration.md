@@ -1,7 +1,7 @@
-
 # LLM Orchestration & Routing
 
 ## Overview
+
 The LLM Orchestration layer provides a unified, reliable, and policy-driven way for the Maestro system to interact with Large Language Models. It abstracts away the complexity of multiple providers (OpenAI, Anthropic, etc.), handles cost and latency optimization, and enforces safety guardrails.
 
 ## Architecture
@@ -28,25 +28,26 @@ The LLM Orchestration layer provides a unified, reliable, and policy-driven way 
 
 Configuration is defined in `server/src/config/llm-router.config.ts`. It includes:
 
--   **Providers**: List of enabled providers, their API keys (env vars), and model mappings.
--   **Routing**: Default policy and task-specific overrides.
--   **Budgets**: Global and per-tenant cost limits (future implementation).
+- **Providers**: List of enabled providers, their API keys (env vars), and model mappings.
+- **Routing**: Default policy and task-specific overrides.
+- **Budgets**: Global and per-tenant cost limits (future implementation).
 
 Example:
+
 ```typescript
 export const llmRouterConfig: LLMRouterConfig = {
   providers: [
     {
-      name: 'openai',
-      type: 'openai',
-      apiKeyEnv: 'OPENAI_API_KEY',
-      models: { 'analysis': 'gpt-4o' }
-    }
+      name: "openai",
+      type: "openai",
+      apiKeyEnv: "OPENAI_API_KEY",
+      models: { analysis: "gpt-4o" },
+    },
   ],
   routing: {
-    defaultPolicy: 'cost-control',
-    overrides: { 'code': 'latency' }
-  }
+    defaultPolicy: "cost-control",
+    overrides: { code: "latency" },
+  },
 };
 ```
 
@@ -55,23 +56,23 @@ export const llmRouterConfig: LLMRouterConfig = {
 Use the `MaestroLLMService` singleton to make calls:
 
 ```typescript
-import { MaestroLLMService } from '@/services/llm/MaestroLLMService';
+import { MaestroLLMService } from "@/services/llm/MaestroLLMService";
 
 const result = await MaestroLLMService.getInstance().executeTaskLLM({
-    taskType: 'analysis',
-    prompt: 'Analyze this data...',
-    tenantId: 'tenant-123'
+  taskType: "analysis",
+  prompt: "Analyze this data...",
+  tenantId: "tenant-123",
 });
 
 if (result.ok) {
-    console.log(result.text);
+  console.log(result.text);
 } else {
-    console.error(result.error);
+  console.error(result.error);
 }
 ```
 
 ## Extensibility
 
--   **New Provider**: Implement the `LLMProvider` interface and add to config.
--   **New Policy**: Implement `RoutingPolicy` and register in `LLMRouter`.
--   **New Guardrail**: Implement `SafetyGuardrail` and add to `LLMRouter` pipeline.
+- **New Provider**: Implement the `LLMProvider` interface and add to config.
+- **New Policy**: Implement `RoutingPolicy` and register in `LLMRouter`.
+- **New Guardrail**: Implement `SafetyGuardrail` and add to `LLMRouter` pipeline.

@@ -6,7 +6,7 @@ precedenceRules:
   - id: eu-sensitive
     priority: 90
     match:
-      jurisdictions: [DE,FR,ES]
+      jurisdictions: [DE, FR, ES]
       dataClasses: [sensitive]
   - id: marketing-allow
     priority: 40

@@ -2,19 +2,19 @@ name: entity-resolution-train
 
 on:
   schedule:
-    - cron: '0 0 * * 0' # Weekly training
+    - cron: "0 0 * * 0" # Weekly training
   pull_request:
     paths:
-      - 'ml/**'
-      - 'services/entity-resolution/**'
-      - 'server/src/services/EntityResolutionService.ts'
-      - 'server/src/graphql/schema.er.gql'
+      - "ml/**"
+      - "services/entity-resolution/**"
+      - "server/src/services/EntityResolutionService.ts"
+      - "server/src/graphql/schema.er.gql"
   workflow_dispatch: # Manual trigger
     inputs:
       force_retrain:
-        description: 'Force model retraining'
+        description: "Force model retraining"
         required: false
-        default: 'false'
+        default: "false"
         type: boolean
 
 jobs:
@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000 # v3
       - uses: actions/setup-python@824a62378795d7a63864050674956c050c8c0868 # v4
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Cache Python dependencies
         uses: actions/cache@472344d9f2b813a837232a7c024785b999549191 # v3

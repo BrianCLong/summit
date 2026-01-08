@@ -1,4 +1,4 @@
-export type RelationshipType = 'mention' | 'reply' | 'share' | string;
+export type RelationshipType = "mention" | "reply" | "share" | string;
 
 export interface Entity {
   id: string;
@@ -88,8 +88,8 @@ export interface TextDocument {
 }
 
 export type SourceData =
-  | { kind: 'social'; posts: SocialPost[] }
-  | { kind: 'text'; documents: TextDocument[] };
+  | { kind: "social"; posts: SocialPost[] }
+  | { kind: "text"; documents: TextDocument[] };
 
 export interface IngestResult {
   posts: SocialPost[];

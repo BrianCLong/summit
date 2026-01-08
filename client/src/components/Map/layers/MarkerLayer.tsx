@@ -3,10 +3,10 @@
  * Marker Layer Component
  */
 
-import React, { useEffect, useRef } from 'react';
-import L from 'leaflet';
-import { useMap } from '../MapContainer';
-import type { GeoPoint } from '@intelgraph/geospatial';
+import React, { useEffect, useRef } from "react";
+import L from "leaflet";
+import { useMap } from "../MapContainer";
+import type { GeoPoint } from "@intelgraph/geospatial";
 
 export interface MarkerProps {
   position: GeoPoint;
@@ -45,10 +45,10 @@ export const Marker: React.FC<MarkerProps> = ({
 
     // Add popup if provided
     if (popup) {
-      if (typeof popup === 'string') {
+      if (typeof popup === "string") {
         marker.bindPopup(popup);
       } else {
-        const popupDiv = document.createElement('div');
+        const popupDiv = document.createElement("div");
         marker.bindPopup(popupDiv);
         // For React components, you'd need to render using ReactDOM
       }
@@ -56,12 +56,12 @@ export const Marker: React.FC<MarkerProps> = ({
 
     // Click handler
     if (onClick) {
-      marker.on('click', onClick);
+      marker.on("click", onClick);
     }
 
     // Drag end handler
     if (onDragEnd) {
-      marker.on('dragend', (e) => {
+      marker.on("dragend", (e) => {
         const newPos = e.target.getLatLng();
         onDragEnd({ latitude: newPos.lat, longitude: newPos.lng });
       });
@@ -75,7 +75,7 @@ export const Marker: React.FC<MarkerProps> = ({
         markerRef.current.remove();
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, position.latitude, position.longitude]);
 
   // Update marker position
@@ -136,7 +136,7 @@ export const MarkerClusterLayer: React.FC<MarkerClusterLayerProps> = ({
       const leafletMarker = L.marker([marker.position.latitude, marker.position.longitude]);
 
       if (onMarkerClick) {
-        leafletMarker.on('click', () => onMarkerClick(marker.id, marker.data));
+        leafletMarker.on("click", () => onMarkerClick(marker.id, marker.data));
       }
 
       leafletMarker.addTo(layerGroupRef.current!);

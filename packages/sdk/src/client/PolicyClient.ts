@@ -8,7 +8,7 @@
  */
 
 /* eslint-disable require-await */
-import type { SummitClient, PaginatedResponse } from './SummitClient.js';
+import type { SummitClient, PaginatedResponse } from "./SummitClient.js";
 
 // ============================================================================
 // Types and Interfaces
@@ -17,12 +17,12 @@ import type { SummitClient, PaginatedResponse } from './SummitClient.js';
 /**
  * Policy status
  */
-export type PolicyStatus = 'draft' | 'active' | 'archived' | 'deprecated';
+export type PolicyStatus = "draft" | "active" | "archived" | "deprecated";
 
 /**
  * Policy effect
  */
-export type PolicyEffect = 'allow' | 'deny' | 'audit';
+export type PolicyEffect = "allow" | "deny" | "audit";
 
 /**
  * Policy definition
@@ -62,7 +62,7 @@ export interface PolicyRule {
  */
 export interface PolicyCondition {
   field: string;
-  operator: 'eq' | 'neq' | 'in' | 'nin' | 'gt' | 'gte' | 'lt' | 'lte' | 'contains' | 'matches';
+  operator: "eq" | "neq" | "in" | "nin" | "gt" | "gte" | "lt" | "lte" | "contains" | "matches";
   value: unknown;
 }
 
@@ -95,7 +95,7 @@ export interface EvaluationResult {
   evaluationTimeMs: number;
   reason: string;
   governanceVerdict: {
-    result: 'ALLOW' | 'DENY' | 'FLAG' | 'REVIEW_REQUIRED';
+    result: "ALLOW" | "DENY" | "FLAG" | "REVIEW_REQUIRED";
     reason: string;
     riskScore: number;
   };
@@ -123,7 +123,7 @@ export interface SimulationResult {
     comparison?: {
       currentResult: EvaluationResult;
       changed: boolean;
-      impact: 'none' | 'relaxed' | 'restricted';
+      impact: "none" | "relaxed" | "restricted";
     };
   }>;
   summary: {
@@ -152,7 +152,7 @@ export interface CreatePolicyRequest {
   name: string;
   description?: string;
   effect: PolicyEffect;
-  rules: Omit<PolicyRule, 'id'>[];
+  rules: Omit<PolicyRule, "id">[];
   conditions?: PolicyCondition[];
   priority?: number;
   tags?: string[];
@@ -166,7 +166,7 @@ export interface UpdatePolicyRequest {
   name?: string;
   description?: string;
   effect?: PolicyEffect;
-  rules?: Omit<PolicyRule, 'id'>[];
+  rules?: Omit<PolicyRule, "id">[];
   conditions?: PolicyCondition[];
   priority?: number;
   tags?: string[];
@@ -184,8 +184,8 @@ export interface ListPoliciesOptions {
   effect?: PolicyEffect;
   search?: string;
   tags?: string[];
-  sortBy?: 'name' | 'priority' | 'createdAt' | 'updatedAt';
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: "name" | "priority" | "createdAt" | "updatedAt";
+  sortOrder?: "asc" | "desc";
 }
 
 // ============================================================================
@@ -194,7 +194,7 @@ export interface ListPoliciesOptions {
 
 export class PolicyClient {
   private client: SummitClient;
-  private basePath = '/api/v1/policies';
+  private basePath = "/api/v1/policies";
 
   constructor(client: SummitClient) {
     this.client = client;
@@ -214,7 +214,7 @@ export class PolicyClient {
       status: options.status,
       effect: options.effect,
       search: options.search,
-      tags: options.tags?.join(','),
+      tags: options.tags?.join(","),
       sortBy: options.sortBy,
       sortOrder: options.sortOrder,
     });
@@ -296,21 +296,19 @@ export class PolicyClient {
    * Batch evaluate multiple requests
    */
   public async batchEvaluate(requests: EvaluationRequest[]): Promise<EvaluationResult[]> {
-    const response = await this.client.post<EvaluationResult[]>(`${this.basePath}/evaluate/batch`, { requests });
+    const response = await this.client.post<EvaluationResult[]>(`${this.basePath}/evaluate/batch`, {
+      requests,
+    });
     return response.data;
   }
 
   /**
    * Check if action is allowed (simplified evaluation)
    */
-  public async isAllowed(
-    subjectId: string,
-    resourceId: string,
-    action: string
-  ): Promise<boolean> {
+  public async isAllowed(subjectId: string, resourceId: string, action: string): Promise<boolean> {
     const result = await this.evaluate({
-      subject: { id: subjectId, type: 'user', attributes: {} },
-      resource: { id: resourceId, type: 'resource', attributes: {} },
+      subject: { id: subjectId, type: "user", attributes: {} },
+      resource: { id: resourceId, type: "resource", attributes: {} },
       action,
     });
     return result.allowed;
@@ -359,7 +357,9 @@ export class PolicyClient {
    * Get a specific version of a policy
    */
   public async getVersion(id: string, version: number): Promise<PolicyVersion> {
-    const response = await this.client.get<PolicyVersion>(`${this.basePath}/${id}/versions/${version}`);
+    const response = await this.client.get<PolicyVersion>(
+      `${this.basePath}/${id}/versions/${version}`
+    );
     return response.data;
   }
 
@@ -409,9 +409,7 @@ export class PolicyClient {
   /**
    * Export policies to JSON
    */
-  public async export(
-    options: { status?: PolicyStatus; tags?: string[] } = {}
-  ): Promise<Policy[]> {
+  public async export(options: { status?: PolicyStatus; tags?: string[] } = {}): Promise<Policy[]> {
     const response = await this.client.get<Policy[]>(`${this.basePath}/export`, options);
     return response.data;
   }
@@ -455,8 +453,8 @@ export class PolicyClient {
    */
   public async getRecommendations(id: string): Promise<{
     recommendations: Array<{
-      type: 'optimization' | 'security' | 'coverage';
-      severity: 'low' | 'medium' | 'high';
+      type: "optimization" | "security" | "coverage";
+      severity: "low" | "medium" | "high";
       message: string;
       suggestion: string;
     }>;

@@ -3,14 +3,14 @@ name: Provenance Bundle Verifier
 on:
   push:
     paths:
-      - 'packages/prov-ledger-verifier/**'
-      - '.github/workflows/prov-ledger-verifier.yml'
-      - 'pnpm-lock.yaml'
+      - "packages/prov-ledger-verifier/**"
+      - ".github/workflows/prov-ledger-verifier.yml"
+      - "pnpm-lock.yaml"
   pull_request:
     paths:
-      - 'packages/prov-ledger-verifier/**'
-      - '.github/workflows/prov-ledger-verifier.yml'
-      - 'pnpm-lock.yaml'
+      - "packages/prov-ledger-verifier/**"
+      - ".github/workflows/prov-ledger-verifier.yml"
+      - "pnpm-lock.yaml"
 
 jobs:
   verify:
@@ -27,7 +27,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: "20.x"
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 

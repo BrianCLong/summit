@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Modal,
-  FlatList,
-  SafeAreaView,
-} from 'react-native';
+import { View, Text, TouchableOpacity, Modal, FlatList, SafeAreaView } from 'react-native';
 import { cn } from '@/utils/cn';
 import { ChevronDown, Check, X } from 'lucide-react-native';
 
@@ -49,9 +42,7 @@ export const Select: React.FC<SelectProps> = ({
 
   return (
     <View className={cn('w-full', className)}>
-      {label && (
-        <Text className="mb-1.5 text-sm font-medium text-white">{label}</Text>
-      )}
+      {label && <Text className="mb-1.5 text-sm font-medium text-white">{label}</Text>}
 
       <TouchableOpacity
         onPress={() => !disabled && setIsOpen(true)}
@@ -81,9 +72,7 @@ export const Select: React.FC<SelectProps> = ({
           <View className="flex-1 justify-end">
             <View className="bg-dark-surface rounded-t-3xl max-h-[70%]">
               <View className="flex-row items-center justify-between p-4 border-b border-dark-border">
-                <Text className="text-lg font-semibold text-white">
-                  {label || 'Select Option'}
-                </Text>
+                <Text className="text-lg font-semibold text-white">{label || 'Select Option'}</Text>
                 <TouchableOpacity onPress={() => setIsOpen(false)}>
                   <X size={24} color="#fff" />
                 </TouchableOpacity>

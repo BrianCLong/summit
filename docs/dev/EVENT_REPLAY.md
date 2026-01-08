@@ -1,6 +1,7 @@
 # Event Replay Runner
 
 The Event Replay Runner is a deterministic tool for re-processing historical events through the system's event handlers and regenerating provenance trails. This is useful for:
+
 - Auditing and verification
 - Regression testing
 - generating deterministic datasets for analysis
@@ -27,11 +28,11 @@ Create a JSONL file (newline-delimited JSON) containing the sequence of events t
 Use the `replayEvents` function in a script or test:
 
 ```typescript
-import { replayEvents } from 'server/src/replay/run-events';
+import { replayEvents } from "server/src/replay/run-events";
 
-const result = await replayEvents('path/to/events.jsonl', {
+const result = await replayEvents("path/to/events.jsonl", {
   seed: 12345,
-  startTime: 1672531200000 // Optional start timestamp
+  startTime: 1672531200000, // Optional start timestamp
 });
 
 console.log(`Processed ${result.processedCount} events`);
@@ -41,6 +42,7 @@ console.log(`Generated ${result.rows.length} ledger entries`);
 ### 3. Verification
 
 The runner returns the state of the simulated ledger (`result.rows`). You can assert against this state to verify:
+
 - Correct number of entries
 - Correct `actionType` and `resourceType` sequences
 - Valid hash chaining (`previous_hash` matches `current_hash` of previous entry)

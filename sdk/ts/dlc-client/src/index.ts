@@ -1,6 +1,4 @@
-export type RowScope =
-  | { kind: "all" }
-  | { kind: "explicit"; rows: string[] };
+export type RowScope = { kind: "all" } | { kind: "explicit"; rows: string[] };
 
 export interface LeaseSpec {
   datasetId: string;

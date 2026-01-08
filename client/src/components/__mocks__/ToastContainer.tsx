@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 export const useToast = () => ({
   addToast: jest.fn(),
@@ -7,10 +7,12 @@ export const useToast = () => ({
 });
 
 export const useToastHelpers = () => ({
-  success: () => 'mock-toast',
-  error: () => 'mock-toast',
-  warning: () => 'mock-toast',
-  info: () => 'mock-toast',
+  success: () => "mock-toast",
+  error: () => "mock-toast",
+  warning: () => "mock-toast",
+  info: () => "mock-toast",
 });
 
-export const ToastProvider: React.FC<{ children: React.ReactNode }>= ({ children }) => <>{children}</>;
+export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <>{children}</>
+);

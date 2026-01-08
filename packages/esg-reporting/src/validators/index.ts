@@ -2,4 +2,4 @@
  * ESG Validators - Public API
  */
 
-export * from './esg-validators.js';
+export * from "./esg-validators.js";

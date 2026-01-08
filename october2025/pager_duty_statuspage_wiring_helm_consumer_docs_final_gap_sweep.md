@@ -22,7 +22,7 @@ apiVersion: v1
 kind: Secret
 metadata: { name: alertmanager-pagerduty, namespace: observability }
 stringData:
-  routing_key: '$PAGERDUTY_ROUTING_KEY'
+  routing_key: "$PAGERDUTY_ROUTING_KEY"
 ```
 
 Apply with your real key substituted by your secret manager or `envsubst`.
@@ -57,11 +57,7 @@ data:
 ---
 apiVersion: apps/v1
 kind: StatefulSet
-metadata:
-  {
-    name: alertmanager-kube-prometheus-stack-alertmanager,
-    namespace: observability,
-  }
+metadata: { name: alertmanager-kube-prometheus-stack-alertmanager, namespace: observability }
 # NOTE: if using Helm, patch via values instead of editing manifest
 spec:
   template:
@@ -92,7 +88,7 @@ Prometheus rules from earlier pack (`synthetics-rules.prom`) will now notify PD.
 name: statuspage-bridge
 on:
   workflow_run:
-    workflows: ['synthetics-check']
+    workflows: ["synthetics-check"]
     types: [requested, completed]
 jobs:
   incident:

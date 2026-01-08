@@ -1,5 +1,5 @@
-import axios, { AxiosInstance } from 'axios';
-import { IOC, IOCType } from './types.js';
+import axios, { AxiosInstance } from "axios";
+import { IOC, IOCType } from "./types.js";
 
 /**
  * IOC Enrichment Service
@@ -55,17 +55,17 @@ export class IOCEnrichmentService {
    */
   private async enrichWithProvider(ioc: IOC, provider: string): Promise<any> {
     switch (provider.toUpperCase()) {
-      case 'VIRUSTOTAL':
+      case "VIRUSTOTAL":
         return this.enrichWithVirusTotal(ioc);
-      case 'ALIENVAULT_OTX':
+      case "ALIENVAULT_OTX":
         return this.enrichWithAlienVaultOTX(ioc);
-      case 'ABUSEIPDB':
+      case "ABUSEIPDB":
         return this.enrichWithAbuseIPDB(ioc);
-      case 'SHODAN':
+      case "SHODAN":
         return this.enrichWithShodan(ioc);
-      case 'WHOIS':
+      case "WHOIS":
         return this.enrichWithWhois(ioc);
-      case 'GEOIP':
+      case "GEOIP":
         return this.enrichWithGeoIP(ioc);
       default:
         console.warn(`Unknown provider: ${provider}`);
@@ -77,28 +77,28 @@ export class IOCEnrichmentService {
    * Enrich with VirusTotal
    */
   private async enrichWithVirusTotal(ioc: IOC): Promise<any> {
-    const apiKey = this.apiKeys.get('VIRUSTOTAL');
+    const apiKey = this.apiKeys.get("VIRUSTOTAL");
     if (!apiKey) {
-      throw new Error('VirusTotal API key not configured');
+      throw new Error("VirusTotal API key not configured");
     }
 
-    let endpoint = '';
+    let endpoint = "";
     let identifier = ioc.value;
 
     switch (ioc.type) {
-      case 'FILE_HASH_MD5':
-      case 'FILE_HASH_SHA1':
-      case 'FILE_HASH_SHA256':
+      case "FILE_HASH_MD5":
+      case "FILE_HASH_SHA1":
+      case "FILE_HASH_SHA256":
         endpoint = `https://www.virustotal.com/api/v3/files/${identifier}`;
         break;
-      case 'DOMAIN':
+      case "DOMAIN":
         endpoint = `https://www.virustotal.com/api/v3/domains/${identifier}`;
         break;
-      case 'IP_ADDRESS':
+      case "IP_ADDRESS":
         endpoint = `https://www.virustotal.com/api/v3/ip_addresses/${identifier}`;
         break;
-      case 'URL':
-        const urlId = Buffer.from(identifier).toString('base64url');
+      case "URL":
+        const urlId = Buffer.from(identifier).toString("base64url");
         endpoint = `https://www.virustotal.com/api/v3/urls/${urlId}`;
         break;
       default:
@@ -107,7 +107,7 @@ export class IOCEnrichmentService {
 
     const response = await this.httpClient.get(endpoint, {
       headers: {
-        'x-apikey': apiKey,
+        "x-apikey": apiKey,
       },
     });
 
@@ -124,27 +124,27 @@ export class IOCEnrichmentService {
    * Enrich with AlienVault OTX
    */
   private async enrichWithAlienVaultOTX(ioc: IOC): Promise<any> {
-    const apiKey = this.apiKeys.get('ALIENVAULT_OTX');
+    const apiKey = this.apiKeys.get("ALIENVAULT_OTX");
     if (!apiKey) {
-      throw new Error('AlienVault OTX API key not configured');
+      throw new Error("AlienVault OTX API key not configured");
     }
 
-    let endpoint = '';
-    const baseUrl = 'https://otx.alienvault.com/api/v1/indicators';
+    let endpoint = "";
+    const baseUrl = "https://otx.alienvault.com/api/v1/indicators";
 
     switch (ioc.type) {
-      case 'IP_ADDRESS':
+      case "IP_ADDRESS":
         endpoint = `${baseUrl}/IPv4/${ioc.value}/general`;
         break;
-      case 'DOMAIN':
+      case "DOMAIN":
         endpoint = `${baseUrl}/domain/${ioc.value}/general`;
         break;
-      case 'FILE_HASH_MD5':
-      case 'FILE_HASH_SHA1':
-      case 'FILE_HASH_SHA256':
+      case "FILE_HASH_MD5":
+      case "FILE_HASH_SHA1":
+      case "FILE_HASH_SHA256":
         endpoint = `${baseUrl}/file/${ioc.value}/general`;
         break;
-      case 'URL':
+      case "URL":
         endpoint = `${baseUrl}/url/${encodeURIComponent(ioc.value)}/general`;
         break;
       default:
@@ -153,7 +153,7 @@ export class IOCEnrichmentService {
 
     const response = await this.httpClient.get(endpoint, {
       headers: {
-        'X-OTX-API-KEY': apiKey,
+        "X-OTX-API-KEY": apiKey,
       },
     });
 
@@ -168,23 +168,23 @@ export class IOCEnrichmentService {
    * Enrich with AbuseIPDB
    */
   private async enrichWithAbuseIPDB(ioc: IOC): Promise<any> {
-    if (ioc.type !== 'IP_ADDRESS') {
-      throw new Error('AbuseIPDB only supports IP addresses');
+    if (ioc.type !== "IP_ADDRESS") {
+      throw new Error("AbuseIPDB only supports IP addresses");
     }
 
-    const apiKey = this.apiKeys.get('ABUSEIPDB');
+    const apiKey = this.apiKeys.get("ABUSEIPDB");
     if (!apiKey) {
-      throw new Error('AbuseIPDB API key not configured');
+      throw new Error("AbuseIPDB API key not configured");
     }
 
-    const response = await this.httpClient.get('https://api.abuseipdb.com/api/v2/check', {
+    const response = await this.httpClient.get("https://api.abuseipdb.com/api/v2/check", {
       params: {
         ipAddress: ioc.value,
         maxAgeInDays: 90,
       },
       headers: {
-        'Key': apiKey,
-        'Accept': 'application/json',
+        Key: apiKey,
+        Accept: "application/json",
       },
     });
 
@@ -203,13 +203,13 @@ export class IOCEnrichmentService {
    * Enrich with Shodan
    */
   private async enrichWithShodan(ioc: IOC): Promise<any> {
-    if (ioc.type !== 'IP_ADDRESS') {
-      throw new Error('Shodan only supports IP addresses');
+    if (ioc.type !== "IP_ADDRESS") {
+      throw new Error("Shodan only supports IP addresses");
     }
 
-    const apiKey = this.apiKeys.get('SHODAN');
+    const apiKey = this.apiKeys.get("SHODAN");
     if (!apiKey) {
-      throw new Error('Shodan API key not configured');
+      throw new Error("Shodan API key not configured");
     }
 
     const response = await this.httpClient.get(`https://api.shodan.io/shodan/host/${ioc.value}`, {
@@ -237,17 +237,20 @@ export class IOCEnrichmentService {
    * Enrich with WHOIS
    */
   private async enrichWithWhois(ioc: IOC): Promise<any> {
-    if (ioc.type !== 'DOMAIN' && ioc.type !== 'IP_ADDRESS') {
-      throw new Error('WHOIS only supports domains and IP addresses');
+    if (ioc.type !== "DOMAIN" && ioc.type !== "IP_ADDRESS") {
+      throw new Error("WHOIS only supports domains and IP addresses");
     }
 
     // Simple WHOIS implementation using a public API
-    const response = await this.httpClient.get(`https://www.whoisxmlapi.com/whoisserver/WhoisService`, {
-      params: {
-        domainName: ioc.value,
-        outputFormat: 'JSON',
-      },
-    });
+    const response = await this.httpClient.get(
+      `https://www.whoisxmlapi.com/whoisserver/WhoisService`,
+      {
+        params: {
+          domainName: ioc.value,
+          outputFormat: "JSON",
+        },
+      }
+    );
 
     return {
       registrar: response.data.WhoisRecord?.registrarName,
@@ -263,8 +266,8 @@ export class IOCEnrichmentService {
    * Enrich with GeoIP
    */
   private async enrichWithGeoIP(ioc: IOC): Promise<any> {
-    if (ioc.type !== 'IP_ADDRESS') {
-      throw new Error('GeoIP only supports IP addresses');
+    if (ioc.type !== "IP_ADDRESS") {
+      throw new Error("GeoIP only supports IP addresses");
     }
 
     // Using ipapi.co for GeoIP lookup
@@ -290,7 +293,7 @@ export class IOCEnrichmentService {
     const merged: any = {};
 
     // GeoIP data
-    const geoipData = enrichments['GEOIP'] || enrichments['ABUSEIPDB'] || enrichments['SHODAN'];
+    const geoipData = enrichments["GEOIP"] || enrichments["ABUSEIPDB"] || enrichments["SHODAN"];
     if (geoipData) {
       merged.geoip = {
         country: geoipData.country || geoipData.countryCode,
@@ -303,42 +306,43 @@ export class IOCEnrichmentService {
     }
 
     // WHOIS data
-    if (enrichments['WHOIS']) {
-      merged.whois = enrichments['WHOIS'];
+    if (enrichments["WHOIS"]) {
+      merged.whois = enrichments["WHOIS"];
     }
 
     // Reputation data
     const reputationProviders: any[] = [];
 
-    if (enrichments['VIRUSTOTAL']) {
-      const vt = enrichments['VIRUSTOTAL'];
+    if (enrichments["VIRUSTOTAL"]) {
+      const vt = enrichments["VIRUSTOTAL"];
       reputationProviders.push({
-        name: 'VirusTotal',
+        name: "VirusTotal",
         score: this.calculateVirusTotalScore(vt),
-        verdict: vt.malicious > 0 ? 'malicious' : 'clean',
+        verdict: vt.malicious > 0 ? "malicious" : "clean",
       });
     }
 
-    if (enrichments['ALIENVAULT_OTX']) {
-      const otx = enrichments['ALIENVAULT_OTX'];
+    if (enrichments["ALIENVAULT_OTX"]) {
+      const otx = enrichments["ALIENVAULT_OTX"];
       reputationProviders.push({
-        name: 'AlienVault OTX',
+        name: "AlienVault OTX",
         score: otx.threatScore || 0,
-        verdict: otx.pulseCount > 0 ? 'suspicious' : 'unknown',
+        verdict: otx.pulseCount > 0 ? "suspicious" : "unknown",
       });
     }
 
-    if (enrichments['ABUSEIPDB']) {
-      const abuseipdb = enrichments['ABUSEIPDB'];
+    if (enrichments["ABUSEIPDB"]) {
+      const abuseipdb = enrichments["ABUSEIPDB"];
       reputationProviders.push({
-        name: 'AbuseIPDB',
+        name: "AbuseIPDB",
         score: 100 - abuseipdb.abuseConfidenceScore,
-        verdict: abuseipdb.abuseConfidenceScore > 50 ? 'malicious' : 'clean',
+        verdict: abuseipdb.abuseConfidenceScore > 50 ? "malicious" : "clean",
       });
     }
 
     if (reputationProviders.length > 0) {
-      const avgScore = reputationProviders.reduce((sum, p) => sum + p.score, 0) / reputationProviders.length;
+      const avgScore =
+        reputationProviders.reduce((sum, p) => sum + p.score, 0) / reputationProviders.length;
       merged.reputation = {
         score: Math.round(avgScore),
         providers: reputationProviders,

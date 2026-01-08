@@ -46,8 +46,8 @@
 
 ## Sign-off
 
-| Role | Name | Date | Signature |
-|------|------|------|-----------|
-| Platform Lead | | | |
-| Engineering Manager | | | |
-| Director of Engineering | | | |
+| Role                    | Name | Date | Signature |
+| ----------------------- | ---- | ---- | --------- |
+| Platform Lead           |      |      |           |
+| Engineering Manager     |      |      |           |
+| Director of Engineering |      |      |           |

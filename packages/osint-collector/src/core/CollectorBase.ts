@@ -2,8 +2,8 @@
  * Base class for all OSINT collectors
  */
 
-import { EventEmitter } from 'events';
-import type { CollectionTask, CollectionResult, CollectorConfig } from '../types/index.js';
+import { EventEmitter } from "events";
+import type { CollectionTask, CollectionResult, CollectorConfig } from "../types/index.js";
 
 export abstract class CollectorBase extends EventEmitter {
   protected config: CollectorConfig;
@@ -36,7 +36,7 @@ export abstract class CollectorBase extends EventEmitter {
     const startTime = Date.now();
 
     try {
-      this.emit('collection:start', { taskId: task.id, collector: this.config.name });
+      this.emit("collection:start", { taskId: task.id, collector: this.config.name });
 
       const data = await this.performCollection(task);
       const duration = Date.now() - startTime;
@@ -48,17 +48,17 @@ export abstract class CollectorBase extends EventEmitter {
         data,
         metadata: {
           duration,
-          recordCount: this.countRecords(data)
-        }
+          recordCount: this.countRecords(data),
+        },
       };
 
-      this.emit('collection:complete', result);
+      this.emit("collection:complete", result);
       return result;
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.emit('collection:error', {
+      this.emit("collection:error", {
         taskId: task.id,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
 
       throw error;
@@ -82,7 +82,7 @@ export abstract class CollectorBase extends EventEmitter {
     return {
       name: this.config.name,
       enabled: this.config.enabled,
-      running: this.isRunning
+      running: this.isRunning,
     };
   }
 

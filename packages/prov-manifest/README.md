@@ -43,9 +43,9 @@ The library provides two functions: `generateManifest` and `verifyManifest`.
 The `generateManifest` function creates a manifest for a given directory.
 
 ```typescript
-import { generateManifest } from '@intelgraph/prov-manifest';
+import { generateManifest } from "@intelgraph/prov-manifest";
 
-const manifest = await generateManifest('/path/to/export/dir', {
+const manifest = await generateManifest("/path/to/export/dir", {
   // Optional metadata
 });
 ```
@@ -55,14 +55,14 @@ const manifest = await generateManifest('/path/to/export/dir', {
 The `verifyManifest` function verifies the integrity of a manifest and its associated files.
 
 ```typescript
-import { verifyManifest } from '@intelgraph/prov-manifest';
+import { verifyManifest } from "@intelgraph/prov-manifest";
 
-const result = await verifyManifest('/path/to/manifest.json', '/path/to/export/dir');
+const result = await verifyManifest("/path/to/manifest.json", "/path/to/export/dir");
 
 if (result.success) {
-  console.log('Manifest verification successful!');
+  console.log("Manifest verification successful!");
 } else {
-  console.error('Manifest verification failed:');
+  console.error("Manifest verification failed:");
   result.errors.forEach((error) => console.error(`- ${error}`));
 }
 ```

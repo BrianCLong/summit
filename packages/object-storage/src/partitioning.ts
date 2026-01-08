@@ -3,15 +3,15 @@
  * Optimize data layout for query performance
  */
 
-import pino from 'pino';
+import pino from "pino";
 
-const logger = pino({ name: 'partitioning' });
+const logger = pino({ name: "partitioning" });
 
 export enum PartitioningStrategy {
-  HIVE = 'hive',
-  DATE_BASED = 'date',
-  HASH = 'hash',
-  RANGE = 'range'
+  HIVE = "hive",
+  DATE_BASED = "date",
+  HASH = "hash",
+  RANGE = "range",
 }
 
 export interface PartitionKey {
@@ -33,8 +33,8 @@ export class PartitionManager {
         case PartitioningStrategy.DATE_BASED:
           const date = new Date(value);
           parts.push(`year=${date.getFullYear()}`);
-          parts.push(`month=${String(date.getMonth() + 1).padStart(2, '0')}`);
-          parts.push(`day=${String(date.getDate()).padStart(2, '0')}`);
+          parts.push(`month=${String(date.getMonth() + 1).padStart(2, "0")}`);
+          parts.push(`day=${String(date.getDate()).padStart(2, "0")}`);
           break;
         case PartitioningStrategy.HASH:
           const buckets = key.params?.buckets || 16;
@@ -44,7 +44,7 @@ export class PartitionManager {
       }
     }
 
-    return parts.join('/');
+    return parts.join("/");
   }
 
   private hashValue(value: any, buckets: number): number {

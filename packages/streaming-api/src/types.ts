@@ -2,7 +2,7 @@
  * Streaming API Type Definitions
  */
 
-import type { WebSocket } from 'ws';
+import type { WebSocket } from "ws";
 
 // ===== WebSocket Types =====
 
@@ -66,7 +66,7 @@ export interface StreamFilter {
 export interface BackpressureOptions {
   enabled: boolean;
   highWaterMark?: number;
-  strategy?: 'drop' | 'buffer' | 'throttle';
+  strategy?: "drop" | "buffer" | "throttle";
   bufferSize?: number;
 }
 
@@ -122,30 +122,30 @@ export type ClientMessage =
   | QueryMessage;
 
 export interface SubscribeMessage {
-  type: 'subscribe';
+  type: "subscribe";
   id: string;
   topic: string;
   filter?: StreamFilter;
 }
 
 export interface UnsubscribeMessage {
-  type: 'unsubscribe';
+  type: "unsubscribe";
   id: string;
   topic: string;
 }
 
 export interface AckMessage {
-  type: 'ack';
+  type: "ack";
   messageId: string;
 }
 
 export interface PingMessage {
-  type: 'ping';
+  type: "ping";
   timestamp: number;
 }
 
 export interface QueryMessage {
-  type: 'query';
+  type: "query";
   id: string;
   query: string;
   stream?: boolean;
@@ -163,30 +163,30 @@ export type ServerMessage =
   | PingMessage;
 
 export interface DataMessage {
-  type: 'data';
+  type: "data";
   subscriptionId: string;
   event: StreamEvent;
 }
 
 export interface ErrorMessage {
-  type: 'error';
+  type: "error";
   error: StreamError;
   subscriptionId?: string;
 }
 
 export interface AckResponseMessage {
-  type: 'ack_response';
+  type: "ack_response";
   messageId: string;
-  status: 'success' | 'error';
+  status: "success" | "error";
 }
 
 export interface PongMessage {
-  type: 'pong';
+  type: "pong";
   timestamp: number;
 }
 
 export interface QueryResultMessage {
-  type: 'query_result';
+  type: "query_result";
   queryId: string;
   data: any;
   complete: boolean;
@@ -194,20 +194,20 @@ export interface QueryResultMessage {
 }
 
 export interface ConnectedMessage {
-  type: 'connected';
+  type: "connected";
   id: string;
   timestamp: string;
 }
 
 export interface SubscribedResponseMessage {
-  type: 'subscribed';
+  type: "subscribed";
   id: string;
   topic: string;
   timestamp: string;
 }
 
 export interface UnsubscribedResponseMessage {
-  type: 'unsubscribed';
+  type: "unsubscribed";
   id: string;
   topic: string;
   timestamp: string;
@@ -222,15 +222,15 @@ export interface ProtocolVersion {
 }
 
 export interface HandshakeMessage {
-  type: 'handshake';
+  type: "handshake";
   version: ProtocolVersion;
   authentication?: AuthenticationOptions;
   capabilities?: string[];
 }
 
 export interface HandshakeResponse {
-  type: 'handshake_response';
-  status: 'accepted' | 'rejected';
+  type: "handshake_response";
+  status: "accepted" | "rejected";
   version: ProtocolVersion;
   sessionId: string;
   error?: StreamError;

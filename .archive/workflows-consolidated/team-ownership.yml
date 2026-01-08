@@ -3,7 +3,7 @@ name: Team Ownership
 on:
   pull_request:
     paths-ignore:
-      - '**/*.md'
+      - "**/*.md"
 
 jobs:
   check:

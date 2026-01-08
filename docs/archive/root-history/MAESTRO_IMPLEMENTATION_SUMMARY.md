@@ -41,6 +41,7 @@ summit/
 ### 1. Domain Models (`maestro/models.py`)
 
 **Run Model:**
+
 - Tracks computational workflows
 - Links to IntelGraph entities and decisions via UUID lists
 - Status tracking: pending → running → succeeded/failed
@@ -48,6 +49,7 @@ summit/
 - 116 lines of code
 
 **Artifact Model:**
+
 - Represents build outputs, SBOMs, provenance files, etc.
 - Governance metadata with three boolean flags:
   - `sbom_present`
@@ -57,6 +59,7 @@ summit/
 - 81 lines of code
 
 **DisclosurePack Model:**
+
 - Summarizes a run with artifact manifest
 - Links to multiple artifacts
 - Provides human-readable summary
@@ -67,6 +70,7 @@ summit/
 ### 2. Storage Layer (`maestro/storage.py`)
 
 In-memory storage implementation with:
+
 - Full CRUD operations for runs, artifacts, and disclosure packs
 - Filtering and listing capabilities
 - No database dependencies (easy to swap for PostgreSQL/Neo4j later)
@@ -75,12 +79,14 @@ In-memory storage implementation with:
 ### 3. Release Gate Validation (`maestro/checks.py`)
 
 **Release Gate Logic:**
+
 - Validates run is in `succeeded` status
 - Ensures at least one artifact has all three compliance flags set
 - Returns structured result with pass/fail status
 - Generates detailed compliance reports
 
 **Functions:**
+
 - `check_release_gate()` - Main validation function
 - `check_artifact_compliance()` - Per-artifact validation
 - `generate_compliance_report()` - Detailed reporting
@@ -91,26 +97,27 @@ In-memory storage implementation with:
 
 **Endpoints Implemented:**
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/maestro/runs` | POST | Create new run |
-| `/maestro/runs` | GET | List runs (filterable) |
-| `/maestro/runs/{id}` | GET | Get run by ID |
-| `/maestro/runs/{id}` | PATCH | Update run |
-| `/maestro/runs/{id}/manifest` | GET | Complete run manifest |
-| `/maestro/runs/{id}/release-gate` | GET | Check release gate |
-| `/maestro/artifacts` | POST | Create artifact |
-| `/maestro/artifacts` | GET | List artifacts (filterable) |
-| `/maestro/artifacts/{id}` | GET | Get artifact by ID |
-| `/maestro/disclosure-packs` | POST | Create disclosure pack |
-| `/maestro/disclosure-packs` | GET | List disclosure packs |
-| `/maestro/disclosure-packs/{id}` | GET | Get disclosure pack by ID |
+| Endpoint                          | Method | Purpose                     |
+| --------------------------------- | ------ | --------------------------- |
+| `/maestro/runs`                   | POST   | Create new run              |
+| `/maestro/runs`                   | GET    | List runs (filterable)      |
+| `/maestro/runs/{id}`              | GET    | Get run by ID               |
+| `/maestro/runs/{id}`              | PATCH  | Update run                  |
+| `/maestro/runs/{id}/manifest`     | GET    | Complete run manifest       |
+| `/maestro/runs/{id}/release-gate` | GET    | Check release gate          |
+| `/maestro/artifacts`              | POST   | Create artifact             |
+| `/maestro/artifacts`              | GET    | List artifacts (filterable) |
+| `/maestro/artifacts/{id}`         | GET    | Get artifact by ID          |
+| `/maestro/disclosure-packs`       | POST   | Create disclosure pack      |
+| `/maestro/disclosure-packs`       | GET    | List disclosure packs       |
+| `/maestro/disclosure-packs/{id}`  | GET    | Get disclosure pack by ID   |
 
 **Total**: 12 endpoints, ~250 lines of code
 
 ### 5. FastAPI Application (`maestro/app.py`)
 
 Standalone FastAPI app that:
+
 - Initializes MaestroStore in app state
 - Includes maestro router
 - Provides health check endpoint
@@ -123,6 +130,7 @@ Standalone FastAPI app that:
 Comprehensive pytest test suite with 18 test cases:
 
 **TestRunOperations** (5 tests):
+
 - ✓ test_create_run
 - ✓ test_get_run
 - ✓ test_list_runs
@@ -130,15 +138,18 @@ Comprehensive pytest test suite with 18 test cases:
 - ✓ test_update_run
 
 **TestArtifactOperations** (3 tests):
+
 - ✓ test_create_artifact
 - ✓ test_create_artifact_nonexistent_run
 - ✓ test_list_artifacts
 
 **TestDisclosurePackOperations** (2 tests):
+
 - ✓ test_create_disclosure_pack
 - ✓ test_get_run_manifest
 
 **TestReleaseGate** (8 tests):
+
 - ✓ test_release_gate_passes
 - ✓ test_release_gate_fails_no_artifacts
 - ✓ test_release_gate_fails_incomplete_metadata
@@ -151,6 +162,7 @@ Comprehensive pytest test suite with 18 test cases:
 ### 7. Documentation
 
 **`docs/maestro_minimal.md`** - Comprehensive documentation:
+
 - Architecture diagrams
 - Data model specifications
 - API endpoint reference
@@ -163,6 +175,7 @@ Comprehensive pytest test suite with 18 test cases:
 **Total**: ~450 lines (4000+ words)
 
 **`maestro/README.md`** - Quick reference:
+
 - File tree
 - Quick start commands
 - Complete workflow examples
@@ -187,6 +200,7 @@ Run(
 ```
 
 **Current Implementation:**
+
 - IDs stored as string lists
 - No foreign key enforcement (by design for MVP)
 - Future: Add validation against IntelGraph stores
@@ -204,6 +218,7 @@ ArtifactMetadata(
 ```
 
 **Release Gate Logic:**
+
 - Run must be `succeeded`
 - At least one artifact must have **all three flags** = `true`
 - This ensures governance compliance before release
@@ -223,6 +238,7 @@ maestro-api:
 ```
 
 Also updated:
+
 - `.PHONY` declaration
 - `make help` output to document new targets
 
@@ -264,6 +280,7 @@ curl http://localhost:8001/maestro/runs/$RUN_ID/release-gate | jq
 ```
 
 **Expected Output:**
+
 ```json
 {
   "run_id": "abc-123-def-456",
@@ -327,35 +344,39 @@ maestro-test: DONE ✓
 
 ## Code Statistics
 
-| Component | Files | Lines of Code | Purpose |
-|-----------|-------|---------------|---------|
-| Domain Models | 1 | ~230 | Data structures |
-| Storage Layer | 1 | ~89 | In-memory CRUD |
-| Release Gate | 1 | ~150 | Validation logic |
-| API Router | 1 | ~250 | HTTP endpoints |
-| FastAPI App | 1 | ~40 | Application setup |
-| Tests | 2 | ~350 | Test coverage |
-| Documentation | 2 | ~700 | User guides |
-| **Total** | **9** | **~1,800** | **Complete MVP** |
+| Component     | Files | Lines of Code | Purpose           |
+| ------------- | ----- | ------------- | ----------------- |
+| Domain Models | 1     | ~230          | Data structures   |
+| Storage Layer | 1     | ~89           | In-memory CRUD    |
+| Release Gate  | 1     | ~150          | Validation logic  |
+| API Router    | 1     | ~250          | HTTP endpoints    |
+| FastAPI App   | 1     | ~40           | Application setup |
+| Tests         | 2     | ~350          | Test coverage     |
+| Documentation | 2     | ~700          | User guides       |
+| **Total**     | **9** | **~1,800**    | **Complete MVP**  |
 
 ## Next Steps for Deployment
 
 1. **Install Dependencies:**
+
    ```bash
    pip install -r maestro/requirements.txt
    ```
 
 2. **Run Tests:**
+
    ```bash
    make maestro-test
    ```
 
 3. **Start API Server:**
+
    ```bash
    make maestro-api
    ```
 
 4. **Test Endpoints:**
+
    ```bash
    # Visit interactive docs
    open http://localhost:8001/docs
@@ -372,18 +393,21 @@ maestro-test: DONE ✓
 ## Future Enhancements
 
 ### Phase 2 (Next Sprint):
+
 - [ ] PostgreSQL persistence (replace in-memory storage)
 - [ ] Foreign key validation against IntelGraph
 - [ ] SBOM/SLSA file parsers (auto-extract metadata)
 - [ ] Webhook notifications on run completion
 
 ### Phase 3 (Following Sprints):
+
 - [ ] Cost tracking integration with cloud billing
 - [ ] S3/GCS direct artifact storage
 - [ ] Audit trail for artifact transformations
 - [ ] Configurable release gate policies
 
 ### Long-term:
+
 - [ ] Multi-tenant support with RBAC
 - [ ] DAG-based workflow orchestration
 - [ ] Automated downstream triggers on gate passage
@@ -392,18 +416,21 @@ maestro-test: DONE ✓
 ## Technical Decisions
 
 ### Why In-Memory Storage?
+
 - Rapid MVP iteration
 - No database setup complexity
 - Easy to swap for PostgreSQL/Neo4j later
 - Sufficient for 2-week value slice
 
 ### Why Standalone FastAPI App?
+
 - Independent deployment
 - Can run alongside IntelGraph MVP
 - Clear separation of concerns
 - Easy to merge later if desired
 
 ### Why Three Compliance Flags?
+
 - Matches industry standards (SBOM, SLSA, risk)
 - Simple to understand and validate
 - Extensible for future requirements
@@ -422,6 +449,7 @@ httpx>=0.25.0           # HTTP client for TestClient
 ## Conclusion
 
 ✅ **All requirements completed:**
+
 - ✅ Domain models for Run, Artifact, DisclosurePack
 - ✅ IntelGraph integration via related_entity_ids and related_decision_ids
 - ✅ FastAPI router with 12 endpoints
@@ -432,12 +460,14 @@ httpx>=0.25.0           # HTTP client for TestClient
 - ✅ Example commands and workflows
 
 **Ready for:**
+
 - Dependency installation
 - Test execution
 - API deployment
 - Integration with IntelGraph MVP
 
 **Contact:**
+
 - See `docs/maestro_minimal.md` for full documentation
 - See `maestro/README.md` for quick reference
 - Run `make help` to see available commands

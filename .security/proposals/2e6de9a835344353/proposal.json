@@ -2,9 +2,7 @@
   "id": "2e6de9a835344353",
   "createdAt": "2023-10-27T10:00:00Z",
   "createdBy": "policy-auto-tuning-engine",
-  "inputEvidenceRefs": [
-    "ev-1"
-  ],
+  "inputEvidenceRefs": ["ev-1"],
   "rationale": "High volume of denials (100) detected for service-a. Proposing temporary exception.",
   "machineRationale": {
     "trigger": "deny_spike",
@@ -31,17 +29,11 @@
   "riskAssessment": {
     "blastRadius": "low",
     "falsePositiveRisk": "medium",
-    "rollbackSteps": [
-      "Remove the entry from policy/allowlist.yaml"
-    ]
+    "rollbackSteps": ["Remove the entry from policy/allowlist.yaml"]
   },
   "verification": {
-    "commands": [
-      "curl -X POST http://localhost:4000/verify-access -d '{\"user\": \"service-a\"}'"
-    ],
-    "expectedSignals": [
-      "200 OK"
-    ]
+    "commands": ["curl -X POST http://localhost:4000/verify-access -d '{\"user\": \"service-a\"}'"],
+    "expectedSignals": ["200 OK"]
   },
   "status": "proposed"
 }

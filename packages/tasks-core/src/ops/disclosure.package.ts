@@ -1,9 +1,9 @@
 // @ts-nocheck
-import { defineTask } from '@intelgraph/maestro-sdk';
-import fs from 'node:fs';
-import path from 'node:path';
-import archiver from 'archiver';
-import { sha256 } from '../util/hash.js';
+import { defineTask } from "@intelgraph/maestro-sdk";
+import fs from "node:fs";
+import path from "node:path";
+import archiver from "archiver";
+import { sha256 } from "../util/hash.js";
 
 interface ClassificationMarking {
   level: string;
@@ -56,7 +56,7 @@ interface DisclosureManifest {
     recipients: string[];
     description?: string;
   }>;
-  redactionRules: Array<Omit<RedactionRule, 'pattern'>>;
+  redactionRules: Array<Omit<RedactionRule, "pattern">>;
   views: RecipientView[];
 }
 
@@ -73,10 +73,10 @@ function applyRedactions(
   content: Buffer,
   rules: RedactionRule[],
   recipient: string,
-  sourcePath: string,
+  sourcePath: string
 ): { content: Buffer; applied: string[] } {
   const applied: string[] = [];
-  let current = content.toString('utf8');
+  let current = content.toString("utf8");
   for (const rule of rules) {
     if (rule.appliesTo && !rule.appliesTo.includes(recipient)) {
       continue;
@@ -85,12 +85,12 @@ function applyRedactions(
       continue;
     }
     const before = current;
-    current = current.replace(new RegExp(rule.pattern, 'g'), rule.replacement);
+    current = current.replace(new RegExp(rule.pattern, "g"), rule.replacement);
     if (before !== current) {
       applied.push(rule.id);
     }
   }
-  return { content: Buffer.from(current, 'utf8'), applied };
+  return { content: Buffer.from(current, "utf8"), applied };
 }
 
 export default defineTask<In, { bundle: string; manifest: DisclosureManifest }>({
@@ -121,7 +121,7 @@ export default defineTask<In, { bundle: string; manifest: DisclosureManifest }>(
     };
 
     const out = fs.createWriteStream(payload.outPath);
-    const archive = archiver('zip', { zlib: { level: 9 } });
+    const archive = archiver("zip", { zlib: { level: 9 } });
     archive.pipe(out);
 
     for (const recipient of payload.recipients) {
@@ -132,13 +132,8 @@ export default defineTask<In, { bundle: string; manifest: DisclosureManifest }>(
           continue;
         }
         const rawContent = fs.readFileSync(file.path);
-        const { content, applied } = applyRedactions(
-          rawContent,
-          redactions,
-          recipient,
-          file.path,
-        );
-        const packagedAs = path.posix.join('views', recipient, path.basename(file.path));
+        const { content, applied } = applyRedactions(rawContent, redactions, recipient, file.path);
+        const packagedAs = path.posix.join("views", recipient, path.basename(file.path));
         archive.append(content, { name: packagedAs });
         viewFiles.push({
           originalPath: file.path,
@@ -157,7 +152,7 @@ export default defineTask<In, { bundle: string; manifest: DisclosureManifest }>(
       });
     }
 
-    archive.append(JSON.stringify(manifest, null, 2), { name: 'manifest.json' });
+    archive.append(JSON.stringify(manifest, null, 2), { name: "manifest.json" });
 
     await archive.finalize();
 

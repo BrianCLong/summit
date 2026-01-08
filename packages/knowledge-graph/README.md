@@ -28,38 +28,35 @@ pnpm add @intelgraph/knowledge-graph
 ## Quick Start
 
 ```typescript
-import neo4j from 'neo4j-driver';
+import neo4j from "neo4j-driver";
 import {
   OntologyManager,
   KnowledgeGraphManager,
   GraphEmbeddings,
   TemporalKnowledgeGraph,
-} from '@intelgraph/knowledge-graph';
+} from "@intelgraph/knowledge-graph";
 
 // Initialize Neo4j driver
-const driver = neo4j.driver(
-  'bolt://localhost:7687',
-  neo4j.auth.basic('neo4j', 'password')
-);
+const driver = neo4j.driver("bolt://localhost:7687", neo4j.auth.basic("neo4j", "password"));
 
 // Create ontology
 const ontologyManager = new OntologyManager(driver);
-const ontology = await ontologyManager.importStandardOntology('FOAF');
+const ontology = await ontologyManager.importStandardOntology("FOAF");
 
 // Create entities
 const kgManager = new KnowledgeGraphManager(driver);
 const entity = await kgManager.createEntity({
-  type: 'Person',
-  namespace: 'http://xmlns.com/foaf/0.1/',
-  labels: ['Person', 'Entity'],
+  type: "Person",
+  namespace: "http://xmlns.com/foaf/0.1/",
+  labels: ["Person", "Entity"],
   properties: {
-    name: 'John Smith',
-    email: 'john@example.com',
+    name: "John Smith",
+    email: "john@example.com",
   },
   confidence: 0.95,
   provenance: {
-    sourceId: 'document-123',
-    sourceType: 'document',
+    sourceId: "document-123",
+    sourceType: "document",
     extractedAt: new Date().toISOString(),
   },
 });
@@ -75,11 +72,10 @@ const node2vec = await embeddings.generateNode2Vec({
 
 // Create temporal snapshot
 const temporal = new TemporalKnowledgeGraph(driver);
-await temporal.createTemporalSnapshot(
-  entity.id,
-  new Date().toISOString(),
-  { role: 'Analyst', department: 'Intelligence' }
-);
+await temporal.createTemporalSnapshot(entity.id, new Date().toISOString(), {
+  role: "Analyst",
+  department: "Intelligence",
+});
 ```
 
 ## Documentation

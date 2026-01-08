@@ -7,6 +7,7 @@ This project uses automated tools to manage dependency vulnerabilities. We enfor
 ## Automated Scanning
 
 ### CI/CD Pipeline
+
 - **npm audit**: Runs on every Pull Request and Push to main. Fails if any Critical or High vulnerabilities are found.
 - **Dependency Review**: GitHub's Dependency Review Action runs on PRs to highlight new vulnerabilities introduced by dependency changes.
 
@@ -15,21 +16,25 @@ This project uses automated tools to manage dependency vulnerabilities. We enfor
 When a vulnerability is detected:
 
 1.  **Identify**: Run `pnpm audit` locally to see details.
+
     ```bash
     pnpm audit
     ```
 
 2.  **Fix Automatic**: Try running the auto-fix command.
+
     ```bash
     pnpm audit --fix
     ```
 
 3.  **Manual Upgrade**: If auto-fix fails, identify the parent package and upgrade it.
+
     ```bash
     pnpm update <package_name>
     ```
 
 4.  **Overrides/Resolutions**: If a nested dependency cannot be upgraded (e.g., waiting on upstream), use `pnpm.overrides` (or `resolutions` in package.json) to force a secure version.
+
     ```json
     "pnpm": {
       "overrides": {

@@ -19,14 +19,14 @@ export interface ChemicalWeapon {
 }
 
 export enum ChemicalAgentType {
-  NERVE_AGENT = 'nerve_agent',
-  BLISTER_AGENT = 'blister_agent',
-  CHOKING_AGENT = 'choking_agent',
-  BLOOD_AGENT = 'blood_agent',
-  INCAPACITATING = 'incapacitating',
-  RIOT_CONTROL = 'riot_control',
-  PRECURSOR = 'precursor',
-  UNKNOWN = 'unknown'
+  NERVE_AGENT = "nerve_agent",
+  BLISTER_AGENT = "blister_agent",
+  CHOKING_AGENT = "choking_agent",
+  BLOOD_AGENT = "blood_agent",
+  INCAPACITATING = "incapacitating",
+  RIOT_CONTROL = "riot_control",
+  PRECURSOR = "precursor",
+  UNKNOWN = "unknown",
 }
 
 export interface ChemicalFacility {
@@ -44,12 +44,12 @@ export interface ChemicalFacility {
 }
 
 export enum ChemicalFacilityType {
-  PRODUCTION = 'production',
-  STORAGE = 'storage',
-  DESTRUCTION = 'destruction',
-  RESEARCH = 'research',
-  DUAL_USE = 'dual_use',
-  PRECURSOR_PRODUCTION = 'precursor_production'
+  PRODUCTION = "production",
+  STORAGE = "storage",
+  DESTRUCTION = "destruction",
+  RESEARCH = "research",
+  DUAL_USE = "dual_use",
+  PRECURSOR_PRODUCTION = "precursor_production",
 }
 
 export interface BiologicalThreat {
@@ -68,29 +68,29 @@ export interface BiologicalThreat {
 }
 
 export enum PathogenType {
-  BACTERIA = 'bacteria',
-  VIRUS = 'virus',
-  TOXIN = 'toxin',
-  FUNGUS = 'fungus',
-  PRION = 'prion',
-  UNKNOWN = 'unknown'
+  BACTERIA = "bacteria",
+  VIRUS = "virus",
+  TOXIN = "toxin",
+  FUNGUS = "fungus",
+  PRION = "prion",
+  UNKNOWN = "unknown",
 }
 
 export enum WeaponizationLevel {
-  RESEARCH = 'research',
-  PRODUCTION = 'production',
-  STOCKPILE = 'stockpile',
-  WEAPONIZED = 'weaponized',
-  DEPLOYED = 'deployed',
-  NONE = 'none'
+  RESEARCH = "research",
+  PRODUCTION = "production",
+  STOCKPILE = "stockpile",
+  WEAPONIZED = "weaponized",
+  DEPLOYED = "deployed",
+  NONE = "none",
 }
 
 export enum ThreatLevel {
-  CRITICAL = 'critical',
-  HIGH = 'high',
-  MODERATE = 'moderate',
-  LOW = 'low',
-  MINIMAL = 'minimal'
+  CRITICAL = "critical",
+  HIGH = "high",
+  MODERATE = "moderate",
+  LOW = "low",
+  MINIMAL = "minimal",
 }
 
 export interface BioLabFacility {
@@ -108,17 +108,17 @@ export interface BioLabFacility {
 }
 
 export enum SecurityLevel {
-  MAXIMUM = 'maximum',
-  HIGH = 'high',
-  MEDIUM = 'medium',
-  LOW = 'low',
-  INADEQUATE = 'inadequate'
+  MAXIMUM = "maximum",
+  HIGH = "high",
+  MEDIUM = "medium",
+  LOW = "low",
+  INADEQUATE = "inadequate",
 }
 
 export interface WeaponsDevelopment {
   id: string;
   country: string;
-  program_type: 'nuclear' | 'chemical' | 'biological' | 'radiological';
+  program_type: "nuclear" | "chemical" | "biological" | "radiological";
   program_name?: string;
   status: ProgramStatus;
   start_date?: string;
@@ -131,13 +131,13 @@ export interface WeaponsDevelopment {
 }
 
 export enum ProgramStatus {
-  ACTIVE = 'active',
-  SUSPENDED = 'suspended',
-  ABANDONED = 'abandoned',
-  DECLARED_ENDED = 'declared_ended',
-  COVERT = 'covert',
-  SUSPECTED = 'suspected',
-  UNKNOWN = 'unknown'
+  ACTIVE = "active",
+  SUSPENDED = "suspended",
+  ABANDONED = "abandoned",
+  DECLARED_ENDED = "declared_ended",
+  COVERT = "covert",
+  SUSPECTED = "suspected",
+  UNKNOWN = "unknown",
 }
 
 export interface DevelopmentMilestone {
@@ -154,19 +154,19 @@ export interface TechnicalCapability {
   testing_capability: boolean;
   deployment_capability: boolean;
   miniaturization: boolean;
-  overall_assessment: 'advanced' | 'intermediate' | 'basic' | 'nascent';
+  overall_assessment: "advanced" | "intermediate" | "basic" | "nascent";
 }
 
 export interface StockpileEstimate {
   country: string;
-  weapon_type: 'nuclear' | 'chemical' | 'biological';
+  weapon_type: "nuclear" | "chemical" | "biological";
   total_weapons?: number;
   weapon_breakdown?: Record<string, number>;
   material_quantity?: number;
   material_unit?: string;
   delivery_systems: string[];
   operational_readiness: number; // percentage
-  modernization_status: 'active' | 'limited' | 'none';
+  modernization_status: "active" | "limited" | "none";
   estimate_date: string;
   confidence: ConfidenceLevel;
   sources: string[];
@@ -180,33 +180,33 @@ export interface CommandAndControl {
   early_warning: boolean;
   fail_safe_mechanisms: string[];
   delegated_authority: boolean;
-  crisis_stability: 'high' | 'medium' | 'low';
+  crisis_stability: "high" | "medium" | "low";
 }
 
 export enum ConfidenceLevel {
-  CONFIRMED = 'confirmed',
-  HIGH = 'high',
-  MODERATE = 'moderate',
-  LOW = 'low',
-  SUSPECTED = 'suspected'
+  CONFIRMED = "confirmed",
+  HIGH = "high",
+  MODERATE = "moderate",
+  LOW = "low",
+  SUSPECTED = "suspected",
 }
 
 export enum FacilityStatus {
-  OPERATIONAL = 'operational',
-  UNDER_CONSTRUCTION = 'under_construction',
-  PLANNED = 'planned',
-  SUSPENDED = 'suspended',
-  SHUTDOWN = 'shutdown',
-  DECOMMISSIONED = 'decommissioned'
+  OPERATIONAL = "operational",
+  UNDER_CONSTRUCTION = "under_construction",
+  PLANNED = "planned",
+  SUSPENDED = "suspended",
+  SHUTDOWN = "shutdown",
+  DECOMMISSIONED = "decommissioned",
 }
 
 export enum StorageCondition {
-  WEAPONIZED = 'weaponized',
-  BULK_STORAGE = 'bulk_storage',
-  PRECURSOR_FORM = 'precursor_form',
-  BINARY = 'binary',
-  DESTRUCTION_QUEUE = 'destruction_queue',
-  UNKNOWN = 'unknown'
+  WEAPONIZED = "weaponized",
+  BULK_STORAGE = "bulk_storage",
+  PRECURSOR_FORM = "precursor_form",
+  BINARY = "binary",
+  DESTRUCTION_QUEUE = "destruction_queue",
+  UNKNOWN = "unknown",
 }
 
 export interface GeoLocation {
@@ -217,8 +217,8 @@ export interface GeoLocation {
 
 export interface WMDIncident {
   id: string;
-  incident_type: 'use' | 'threat' | 'proliferation' | 'theft' | 'accident';
-  weapon_type: 'chemical' | 'biological' | 'nuclear' | 'radiological';
+  incident_type: "use" | "threat" | "proliferation" | "theft" | "accident";
+  weapon_type: "chemical" | "biological" | "nuclear" | "radiological";
   location: GeoLocation;
   country: string;
   date: string;

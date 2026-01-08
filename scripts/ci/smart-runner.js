@@ -1,11 +1,11 @@
-import { spawn } from 'child_process';
-import fs from 'fs';
-import path from 'path';
+import { spawn } from "child_process";
+import fs from "fs";
+import path from "path";
 
 const args = process.argv.slice(2);
-const commandIdx = args.indexOf('--command');
-const nameIdx = args.indexOf('--name');
-const retryIdx = args.indexOf('--retry');
+const commandIdx = args.indexOf("--command");
+const nameIdx = args.indexOf("--name");
+const retryIdx = args.indexOf("--retry");
 
 if (commandIdx === -1 || nameIdx === -1) {
   console.error('Usage: node smart-runner.js --command "cmd" --name "Step Name" [--retry 2]');
@@ -25,38 +25,35 @@ const RETRIABLE_PATTERNS = [
   /ENOSPC/,
   /JavaScript heap out of memory/,
   /npm ERR! network/,
-  /Database is locked/
+  /Database is locked/,
 ];
 
 const ERROR_CATEGORIES = {
   INFRASTRUCTURE: [/ETIMEDOUT/, /ECONNRESET/, /ENOSPC/, /npm ERR! network/],
   CODE_QUALITY: [/lint/, /typecheck/, /TS\d+/, /eslint/],
   TEST_FAILURE: [/failed/, /failing/],
-  BUILD_ERROR: [/build failed/, /compilation error/]
+  BUILD_ERROR: [/build failed/, /compilation error/],
 };
 
 // Basic warning patterns for ESLint, TSC, etc.
-const WARNING_PATTERNS = [
-  /warning:/i,
-  /WARNING:/
-];
+const WARNING_PATTERNS = [/warning:/i, /WARNING:/];
 
 function classifyError(output) {
   for (const [cat, patterns] of Object.entries(ERROR_CATEGORIES)) {
-    if (patterns.some(p => p.test(output))) return cat;
+    if (patterns.some((p) => p.test(output))) return cat;
   }
-  return 'UNKNOWN';
+  return "UNKNOWN";
 }
 
 function isRetriable(output) {
-  return RETRIABLE_PATTERNS.some(p => p.test(output));
+  return RETRIABLE_PATTERNS.some((p) => p.test(output));
 }
 
 function countWarnings(output) {
   let count = 0;
-  const lines = output.split('\n');
+  const lines = output.split("\n");
   for (const line of lines) {
-    if (WARNING_PATTERNS.some(p => p.test(line))) {
+    if (WARNING_PATTERNS.some((p) => p.test(line))) {
       count++;
     }
   }
@@ -71,11 +68,14 @@ function writeMetrics(name, duration, status, category, attempts, warnings) {
     category,
     attempts,
     warnings,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
-  const dir = path.join(process.cwd(), 'ci-metrics');
+  const dir = path.join(process.cwd(), "ci-metrics");
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(dir, `${name.replace(/\s+/g, '_')}.json`), JSON.stringify(metrics, null, 2));
+  fs.writeFileSync(
+    path.join(dir, `${name.replace(/\s+/g, "_")}.json`),
+    JSON.stringify(metrics, null, 2)
+  );
 }
 
 async function run(attempt = 1) {
@@ -84,29 +84,29 @@ async function run(attempt = 1) {
 
   return new Promise((resolve) => {
     // shell: true allows command to be a string like "pnpm run test"
-    const child = spawn(command, { shell: true, stdio: 'pipe' });
+    const child = spawn(command, { shell: true, stdio: "pipe" });
 
     // Limit buffer size to ~1MB to prevent heap overflow on massive logs
     const MAX_BUFFER = 1024 * 1024;
-    let stdout = '';
-    let stderr = '';
+    let stdout = "";
+    let stderr = "";
 
-    child.stdout.on('data', d => {
-        process.stdout.write(d);
-        if (stdout.length < MAX_BUFFER) stdout += d.toString();
+    child.stdout.on("data", (d) => {
+      process.stdout.write(d);
+      if (stdout.length < MAX_BUFFER) stdout += d.toString();
     });
-    child.stderr.on('data', d => {
-        process.stderr.write(d);
-        if (stderr.length < MAX_BUFFER) stderr += d.toString();
+    child.stderr.on("data", (d) => {
+      process.stderr.write(d);
+      if (stderr.length < MAX_BUFFER) stderr += d.toString();
     });
 
-    child.on('close', async (code) => {
+    child.on("close", async (code) => {
       const duration = Date.now() - startTime;
       const combinedOutput = stdout + stderr;
       const warningCount = countWarnings(combinedOutput);
 
       if (code === 0) {
-        writeMetrics(stepName, duration, 'SUCCESS', 'NONE', attempt, warningCount);
+        writeMetrics(stepName, duration, "SUCCESS", "NONE", attempt, warningCount);
         resolve(0);
       } else {
         const category = classifyError(combinedOutput);
@@ -114,10 +114,10 @@ async function run(attempt = 1) {
 
         if (attempt <= maxRetries && isRetriable(combinedOutput)) {
           console.log(`[SmartRunner] Detected retriable error. Retrying...`);
-          await new Promise(r => setTimeout(r, attempt * 1000));
+          await new Promise((r) => setTimeout(r, attempt * 1000));
           resolve(run(attempt + 1));
         } else {
-          writeMetrics(stepName, duration, 'FAILURE', category, attempt, warningCount);
+          writeMetrics(stepName, duration, "FAILURE", category, attempt, warningCount);
           resolve(code);
         }
       }
@@ -125,4 +125,4 @@ async function run(attempt = 1) {
   });
 }
 
-run().then(code => process.exit(code));
+run().then((code) => process.exit(code));

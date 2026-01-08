@@ -1,4 +1,5 @@
 # Test Coverage Improvement Plan
+
 ## Summit/IntelGraph Platform
 
 > **Generated**: 2025-11-23
@@ -9,6 +10,7 @@
 ## Executive Summary
 
 ### Current State
+
 - **Total Test Files**: ~350+ test files across the monorepo
 - **Server Test Files**: 119 tests
 - **Critical Coverage Gaps**: Significant gaps in repositories, services, middleware, and GraphQL resolvers
@@ -17,13 +19,16 @@
   - Critical paths: 90% (middleware, resolvers, repos, services)
 
 ### Key Findings
+
 1. **Repositories**: 2/6 core repos have tests (33% coverage)
 2. **Services**: ~11/100+ services have tests (<11% coverage)
 3. **Middleware**: 6/60+ middleware have tests (~10% coverage)
 4. **GraphQL Resolvers**: Minimal coverage (<5%)
 
 ### Strategic Approach
+
 Focus on **high-risk, high-impact** areas first:
+
 - Core business logic (repos, services)
 - Security-critical paths (auth, authorization, rate limiting)
 - Golden path workflows (Investigation → Entities → Relationships → Copilot → Results)
@@ -34,10 +39,12 @@ Focus on **high-risk, high-impact** areas first:
 ## Priority Classification
 
 ### Priority 1: CRITICAL (Immediate - Week 1-2)
+
 **Impact**: Production failures, data loss, security breaches
 **Risk**: High
 
 #### 1.1 Repository Layer (Data Access)
+
 - ❌ **RelationshipRepo.ts** (407 LOC) - NO TESTS
   - CRUD operations for relationships
   - Graph database interactions
@@ -56,6 +63,7 @@ Focus on **high-risk, high-impact** areas first:
   - Evidence integrity
 
 #### 1.2 Security Middleware
+
 - ❌ **opa-enforcer.ts** (466 LOC) - NO TESTS
   - Authorization enforcement
   - Policy evaluation
@@ -73,6 +81,7 @@ Focus on **high-risk, high-impact** areas first:
   - Data consistency
 
 #### 1.3 Core Services
+
 - ❌ **CopilotOrchestrationService.js** (1,298 LOC) - NO TESTS
   - AI copilot workflow orchestration
   - Critical user flow
@@ -82,10 +91,12 @@ Focus on **high-risk, high-impact** areas first:
   - Data retention policies
 
 ### Priority 2: HIGH (Week 3-4)
+
 **Impact**: Feature failures, degraded UX, data inconsistencies
 **Risk**: Medium-High
 
 #### 2.1 GraphQL Resolvers
+
 - ❌ **resolvers.er.ts** (Entity/Relationship) - NO TESTS
   - Core domain operations
   - Golden path critical
@@ -99,6 +110,7 @@ Focus on **high-risk, high-impact** areas first:
   - Complex business logic
 
 #### 2.2 Business Logic Services
+
 - ❌ **AdvancedAnalyticsService.js** (1,584 LOC) - NO TESTS
   - Analytics calculations
   - Reporting accuracy
@@ -112,6 +124,7 @@ Focus on **high-risk, high-impact** areas first:
   - Graph rendering logic
 
 #### 2.3 Rate Limiting & Abuse Prevention
+
 - ❌ **TieredRateLimitMiddleware.ts** (575 LOC) - NO TESTS
   - Rate limiting enforcement
   - DoS prevention
@@ -121,10 +134,12 @@ Focus on **high-risk, high-impact** areas first:
   - Abuse detection
 
 ### Priority 3: MEDIUM (Week 5-6)
+
 **Impact**: Technical debt, maintenance burden
 **Risk**: Medium
 
 #### 3.1 Data Processing Services
+
 - ❌ **ReportingService.js** (1,858 LOC) - NO TESTS
 - ❌ **SimulationEngineService.js** (1,558 LOC) - NO TESTS
 - ❌ **RTBFAuditService.ts** (1,454 LOC) - NO TESTS
@@ -132,12 +147,14 @@ Focus on **high-risk, high-impact** areas first:
 - ❌ **TenantSLOService.ts** (1,511 LOC) - NO TESTS
 
 #### 3.2 Security Hardening Middleware
+
 - ❌ **graphql-hardening.ts** (475 LOC) - NO TESTS
 - ❌ **spiffe-auth.ts** (492 LOC) - NO TESTS
 - ❌ **dlpMiddleware.ts** (419 LOC) - NO TESTS
 - ❌ **governance.ts** (442 LOC) - NO TESTS
 
 ### Priority 4: LOW (Ongoing)
+
 **Impact**: Edge cases, nice-to-have coverage
 **Risk**: Low
 
@@ -150,9 +167,11 @@ Focus on **high-risk, high-impact** areas first:
 ## Test Implementation Strategy
 
 ### Phase 1: Foundation (Week 1-2)
+
 **Goal**: Cover critical data layer and security
 
 #### Week 1: Repository Layer
+
 - [ ] **RelationshipRepo.ts** - Full CRUD coverage
   - Create relationship tests
   - Read/query tests (with filters)
@@ -175,6 +194,7 @@ Focus on **high-risk, high-impact** areas first:
   - Batch operations
 
 #### Week 2: Security Middleware
+
 - [ ] **opa-enforcer.ts** - Authorization coverage
   - Policy evaluation tests
   - Allow/deny scenarios
@@ -195,9 +215,11 @@ Focus on **high-risk, high-impact** areas first:
   - Error resilience
 
 ### Phase 2: Business Logic (Week 3-4)
+
 **Goal**: Cover core services and GraphQL API
 
 #### Week 3: GraphQL Resolvers
+
 - [ ] **resolvers.er.ts** - Entity/Relationship API
   - Entity mutations (create, update, delete)
   - Relationship mutations
@@ -212,6 +234,7 @@ Focus on **high-risk, high-impact** areas first:
   - Error states
 
 #### Week 4: Core Services
+
 - [ ] **CopilotOrchestrationService.js** - Orchestration coverage
   - Workflow tests (happy path)
   - Step execution
@@ -226,9 +249,11 @@ Focus on **high-risk, high-impact** areas first:
   - GDPR operations (DSAR, erasure)
 
 ### Phase 3: Performance & Resilience (Week 5-6)
+
 **Goal**: Cover rate limiting, abuse prevention, analytics
 
 #### Week 5: Rate Limiting & Protection
+
 - [ ] **TieredRateLimitMiddleware.ts**
   - Rate limit enforcement
   - Tier-based limits
@@ -242,6 +267,7 @@ Focus on **high-risk, high-impact** areas first:
   - Block/allow list
 
 #### Week 6: Analytics & Reporting
+
 - [ ] **AdvancedAnalyticsService.js**
   - Calculation accuracy tests
   - Aggregation tests
@@ -257,6 +283,7 @@ Focus on **high-risk, high-impact** areas first:
 ## Testing Best Practices
 
 ### Unit Test Structure
+
 ```typescript
 describe('ServiceName', () => {
   describe('methodName', () => {
@@ -293,13 +320,16 @@ describe('ServiceName', () => {
 ```
 
 ### Test Coverage Goals
+
 - **Line Coverage**: 80% minimum, 90% for critical paths
 - **Branch Coverage**: 75% minimum, 85% for critical paths
 - **Function Coverage**: 80% minimum, 90% for critical paths
 - **Statement Coverage**: 80% minimum, 90% for critical paths
 
 ### What to Test
+
 ✅ **DO TEST**:
+
 - Business logic and calculations
 - Data validation and sanitization
 - Error handling and edge cases
@@ -310,6 +340,7 @@ describe('ServiceName', () => {
 - Critical user workflows
 
 ❌ **DON'T TEST** (or low priority):
+
 - Third-party library internals
 - Simple getters/setters
 - Configuration files
@@ -317,6 +348,7 @@ describe('ServiceName', () => {
 - Generated code
 
 ### Mocking Strategy
+
 - **Database**: Mock at client level (pg, neo4j-driver)
 - **External Services**: Mock HTTP clients (axios, fetch)
 - **Caching**: Mock Redis client
@@ -324,6 +356,7 @@ describe('ServiceName', () => {
 - **File System**: Use in-memory implementations
 
 ### Test Data Management
+
 - **Fixtures**: Store in `__fixtures__/` directories
 - **Builders**: Use test data builders for complex objects
 - **Factories**: Use factories for generating test data
@@ -334,9 +367,11 @@ describe('ServiceName', () => {
 ## Golden Path Testing
 
 ### Critical User Flow
+
 **Investigation → Entities → Relationships → Copilot → Results**
 
 #### Integration Test Coverage
+
 - [ ] Create investigation (E2E)
 - [ ] Add entities to investigation (E2E)
 - [ ] Create relationships between entities (E2E)
@@ -344,6 +379,7 @@ describe('ServiceName', () => {
 - [ ] View and export results (E2E)
 
 #### Unit Test Coverage
+
 - [ ] Investigation creation service
 - [ ] Entity creation service
 - [ ] Relationship creation service
@@ -355,12 +391,14 @@ describe('ServiceName', () => {
 ## Implementation Checklist
 
 ### Before Writing Tests
+
 - [ ] Review existing test files for patterns
 - [ ] Identify dependencies to mock
 - [ ] Prepare test data fixtures
 - [ ] Set up test database/services if needed
 
 ### Writing Tests
+
 - [ ] Write failing test first (TDD)
 - [ ] Implement minimum code to pass
 - [ ] Refactor for clarity
@@ -369,6 +407,7 @@ describe('ServiceName', () => {
 - [ ] Verify coverage meets threshold
 
 ### After Writing Tests
+
 - [ ] Run tests locally: `pnpm test`
 - [ ] Check coverage: `pnpm run test:coverage`
 - [ ] Run linting: `pnpm lint`
@@ -381,6 +420,7 @@ describe('ServiceName', () => {
 ## Success Metrics
 
 ### Quantitative Goals
+
 - **Repository Coverage**: 33% → 100% (6/6 repos with tests)
 - **Service Coverage**: 11% → 60% (60/100 services with tests)
 - **Middleware Coverage**: 10% → 80% (48/60 middleware with tests)
@@ -388,6 +428,7 @@ describe('ServiceName', () => {
 - **Overall Line Coverage**: Unknown → 80%+
 
 ### Qualitative Goals
+
 - Reduced production bugs related to covered areas
 - Faster development with confidence to refactor
 - Improved documentation through test cases
@@ -398,6 +439,7 @@ describe('ServiceName', () => {
 ## Risk Mitigation
 
 ### Risks
+
 1. **Time Constraints**: Ambitious timeline for comprehensive coverage
    - **Mitigation**: Prioritize by risk/impact, defer low-priority items
 
@@ -415,19 +457,24 @@ describe('ServiceName', () => {
 ## Appendix: Test File Locations
 
 ### Repository Tests
+
 - `/home/user/summit/server/src/repos/__tests__/`
 
 ### Service Tests
+
 - `/home/user/summit/server/src/services/__tests__/`
 
 ### Middleware Tests
+
 - `/home/user/summit/server/src/middleware/__tests__/`
 
 ### Resolver Tests
+
 - `/home/user/summit/server/src/graphql/resolvers/__tests__/`
 - `/home/user/summit/server/src/resolvers/__tests__/`
 
 ### Integration Tests
+
 - `/home/user/summit/__tests__/e2e/`
 - `/home/user/summit/e2e/`
 

@@ -1,10 +1,10 @@
-import { readFile } from 'node:fs/promises';
-import { basename, extname, join } from 'node:path';
-import { CompatibilityReport, SchemaDefinition } from './types.js';
-import { compareSchemas } from './rules.js';
+import { readFile } from "node:fs/promises";
+import { basename, extname, join } from "node:path";
+import { CompatibilityReport, SchemaDefinition } from "./types.js";
+import { compareSchemas } from "./rules.js";
 
 function sortVersion(a: string, b: string): number {
-  const normalize = (value: string) => value.replace(/^v/, '');
+  const normalize = (value: string) => value.replace(/^v/, "");
   return Number.parseInt(normalize(a), 10) - Number.parseInt(normalize(b), 10);
 }
 
@@ -24,7 +24,7 @@ export class SchemaRegistry {
 
   list(schema: string): SchemaDefinition[] {
     return Array.from(this.definitions.get(schema)?.values() ?? []).sort((a, b) =>
-      sortVersion(a.version, b.version),
+      sortVersion(a.version, b.version)
     );
   }
 
@@ -55,14 +55,14 @@ export class SchemaRegistry {
   }
 
   static async fromDirectory(schemaDir: string): Promise<SchemaRegistry> {
-    const fs = await import('node:fs/promises');
+    const fs = await import("node:fs/promises");
     const entries = await fs.readdir(schemaDir);
     const registry = new SchemaRegistry();
     for (const entry of entries) {
-      if (extname(entry) !== '.json') {
+      if (extname(entry) !== ".json") {
         continue;
       }
-      const contents = await readFile(join(schemaDir, entry), 'utf8');
+      const contents = await readFile(join(schemaDir, entry), "utf8");
       const definition = JSON.parse(contents) as SchemaDefinition;
       if (!definition.name || !definition.version || !definition.fields) {
         throw new Error(`Invalid schema definition in ${entry}`);
@@ -81,6 +81,6 @@ export class SchemaRegistry {
 
 export function versionFromFilename(filename: string): string {
   const base = basename(filename, extname(filename));
-  const parts = base.split('.');
+  const parts = base.split(".");
   return parts.at(-1) ?? base;
 }

@@ -1,12 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 export default function WatchlistManager() {
   const [lists, setLists] = useState<any[]>([]);
-  const add = () =>
-    setLists([
-      ...lists,
-      { id: Date.now().toString(), name: 'New', members: [] },
-    ]);
+  const add = () => setLists([...lists, { id: Date.now().toString(), name: "New", members: [] }]);
   return (
     <div>
       <button onClick={add}>New Watchlist</button>

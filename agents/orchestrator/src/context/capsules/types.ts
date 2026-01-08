@@ -7,32 +7,32 @@
  * @see docs/adr/ADR-010_invariant_carrying_context_capsules.md
  */
 
-import { ContextSegment } from '../provenance/types.js';
+import { ContextSegment } from "../provenance/types.js";
 
 /**
  * Invariant types supported by the capsule system
  */
 export type InvariantType =
-  | 'reasoning_constraint'  // Limits what model can reason about
-  | 'data_usage'            // Controls how data can be used
-  | 'output_class'          // Restricts output format/content
-  | 'authority_scope';      // Defines permitted operations
+  | "reasoning_constraint" // Limits what model can reason about
+  | "data_usage" // Controls how data can be used
+  | "output_class" // Restricts output format/content
+  | "authority_scope"; // Defines permitted operations
 
 /**
  * Severity levels for invariant violations
  */
-export type InvariantSeverity = 'info' | 'warn' | 'block';
+export type InvariantSeverity = "info" | "warn" | "block";
 
 /**
  * Rule definitions for different invariant types
  */
 export type InvariantRule =
-  | { kind: 'forbid_topics'; topics: string[] }
-  | { kind: 'require_clearance'; level: string }
-  | { kind: 'output_must_match'; schema: JSONSchema }
-  | { kind: 'no_external_calls'; strict: boolean }
-  | { kind: 'data_retention'; maxDays: number }
-  | { kind: 'custom_expression'; expr: string; language: 'rego' | 'cel' };
+  | { kind: "forbid_topics"; topics: string[] }
+  | { kind: "require_clearance"; level: string }
+  | { kind: "output_must_match"; schema: JSONSchema }
+  | { kind: "no_external_calls"; strict: boolean }
+  | { kind: "data_retention"; maxDays: number }
+  | { kind: "custom_expression"; expr: string; language: "rego" | "cel" };
 
 /**
  * JSON Schema definition (simplified)
@@ -115,14 +115,14 @@ export interface ContextCapsule {
  * Violation types
  */
 export type ViolationType =
-  | 'hash_mismatch'         // Capsule content tampered with
-  | 'invalid_signature'     // Signature verification failed
-  | 'invariant_violated'    // Specific invariant rule broken
-  | 'expired'               // Capsule past validUntil
-  | 'insufficient_clearance' // Execution context lacks required clearance
-  | 'forbidden_topic'       // Reasoning constraint violated
-  | 'unauthorized_operation' // Authority scope exceeded
-  | 'trust_tier_mismatch';  // Cross-agent trust level incompatible
+  | "hash_mismatch" // Capsule content tampered with
+  | "invalid_signature" // Signature verification failed
+  | "invariant_violated" // Specific invariant rule broken
+  | "expired" // Capsule past validUntil
+  | "insufficient_clearance" // Execution context lacks required clearance
+  | "forbidden_topic" // Reasoning constraint violated
+  | "unauthorized_operation" // Authority scope exceeded
+  | "trust_tier_mismatch"; // Cross-agent trust level incompatible
 
 /**
  * Invariant violation record
@@ -161,7 +161,7 @@ export interface ValidationResult {
   violations: InvariantViolation[];
 
   /** Action to take */
-  action: 'permit' | 'deny_execution' | 'redact' | 'flag';
+  action: "permit" | "deny_execution" | "redact" | "flag";
 
   /** Optional additional context */
   metadata?: Record<string, unknown>;
@@ -230,7 +230,7 @@ export interface AcceptanceDecision {
   reason: string;
 
   /** Any required transformations */
-  requiredTransformations?: ('redact' | 'strip_signature' | 'downgrade_tier')[];
+  requiredTransformations?: ("redact" | "strip_signature" | "downgrade_tier")[];
 }
 
 /**

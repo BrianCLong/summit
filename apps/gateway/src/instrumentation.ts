@@ -3,30 +3,26 @@
  * Provides comprehensive tracing and metrics for Apollo Federation
  */
 
-import { NodeSDK } from '@opentelemetry/sdk-node';
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
-import {
-  PeriodicExportingMetricReader,
-  MeterProvider,
-} from '@opentelemetry/sdk-metrics';
-import * as resources from '@opentelemetry/resources';
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
+import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-http";
+import { PeriodicExportingMetricReader, MeterProvider } from "@opentelemetry/sdk-metrics";
+import * as resources from "@opentelemetry/resources";
 import {
   SemanticResourceAttributes,
   SEMRESATTRS_SERVICE_NAME,
   SEMRESATTRS_SERVICE_VERSION,
   SEMRESATTRS_DEPLOYMENT_ENVIRONMENT,
-} from '@opentelemetry/semantic-conventions';
-import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
+} from "@opentelemetry/semantic-conventions";
+import { PrometheusExporter } from "@opentelemetry/exporter-prometheus";
 
-const environment = process.env.NODE_ENV || 'development';
-const serviceName = 'graphql-gateway';
-const serviceVersion = process.env.SERVICE_VERSION || '0.1.0';
+const environment = process.env.NODE_ENV || "development";
+const serviceName = "graphql-gateway";
+const serviceVersion = process.env.SERVICE_VERSION || "0.1.0";
 
 // OTLP collector endpoint (from docker-compose.observability.yml)
-const otlpEndpoint =
-  process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://otel-collector:4318';
+const otlpEndpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT || "http://otel-collector:4318";
 
 // Resource attributes
 const resource = new (resources as any).Resource({
@@ -41,9 +37,7 @@ const prometheusExporter = new PrometheusExporter(
     port: 9464, // Metrics endpoint on /metrics
   },
   () => {
-    console.log(
-      `Prometheus metrics available at http://localhost:9464/metrics`
-    );
+    console.log(`Prometheus metrics available at http://localhost:9464/metrics`);
   }
 );
 
@@ -69,15 +63,15 @@ export const sdk = new NodeSDK({
   metricReader,
   instrumentations: [
     getNodeAutoInstrumentations({
-      '@opentelemetry/instrumentation-http': {
+      "@opentelemetry/instrumentation-http": {
         enabled: true,
         ignoreIncomingRequestHook: (req) => {
           // Don't trace health checks
-          return req.url?.startsWith('/health') ?? false;
+          return req.url?.startsWith("/health") ?? false;
         },
       },
-      '@opentelemetry/instrumentation-express': { enabled: true },
-      '@opentelemetry/instrumentation-graphql': {
+      "@opentelemetry/instrumentation-express": { enabled: true },
+      "@opentelemetry/instrumentation-graphql": {
         enabled: true,
         mergeItems: true,
         allowValues: false, // Don't log variable values (PII risk)
@@ -87,12 +81,12 @@ export const sdk = new NodeSDK({
 });
 
 // Graceful shutdown
-process.on('SIGTERM', async () => {
+process.on("SIGTERM", async () => {
   try {
     await sdk.shutdown();
-    console.log('OpenTelemetry SDK shut down successfully');
+    console.log("OpenTelemetry SDK shut down successfully");
   } catch (error) {
-    console.error('Error shutting down OpenTelemetry SDK', error);
+    console.error("Error shutting down OpenTelemetry SDK", error);
   }
 });
 

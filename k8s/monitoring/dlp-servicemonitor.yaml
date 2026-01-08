@@ -18,7 +18,7 @@ spec:
       metricRelabelings:
         # Collect DLP-specific metrics
         - sourceLabels: [__name__]
-          regex: 'dlp_.*'
+          regex: "dlp_.*"
           targetLabel: component
           replacement: dlp
 
@@ -42,8 +42,8 @@ spec:
             severity: warning
             component: dlp
           annotations:
-            summary: 'High DLP violation rate detected'
-            description: 'DLP violation rate is {{ $value }} violations per second, above threshold of 0.1/sec'
+            summary: "High DLP violation rate detected"
+            description: "DLP violation rate is {{ $value }} violations per second, above threshold of 0.1/sec"
 
         - alert: DLPCriticalViolation
           expr: increase(dlp_violations_total{severity="critical"}[1m]) > 0
@@ -52,8 +52,8 @@ spec:
             severity: critical
             component: dlp
           annotations:
-            summary: 'Critical DLP violation detected'
-            description: 'Critical DLP violation detected in tenant {{ $labels.tenant_id }}'
+            summary: "Critical DLP violation detected"
+            description: "Critical DLP violation detected in tenant {{ $labels.tenant_id }}"
 
         - alert: DLPServiceDown
           expr: up{job="intelgraph-server"} == 0 and on() dlp_enabled == 1
@@ -62,8 +62,8 @@ spec:
             severity: critical
             component: dlp
           annotations:
-            summary: 'DLP service is down'
-            description: 'DLP service monitoring indicates the service is down'
+            summary: "DLP service is down"
+            description: "DLP service monitoring indicates the service is down"
 
         - alert: DLPScanLatencyHigh
           expr: histogram_quantile(0.95, rate(dlp_scan_duration_seconds_bucket[5m])) > 5
@@ -72,8 +72,8 @@ spec:
             severity: warning
             component: dlp
           annotations:
-            summary: 'DLP scan latency is high'
-            description: '95th percentile DLP scan latency is {{ $value }}s, above 5s threshold'
+            summary: "DLP scan latency is high"
+            description: "95th percentile DLP scan latency is {{ $value }}s, above 5s threshold"
 
         - alert: DLPPolicyDisabled
           expr: dlp_policy_enabled{policy_id=~"pii-detection|credentials-detection"} == 0
@@ -82,8 +82,8 @@ spec:
             severity: warning
             component: dlp
           annotations:
-            summary: 'Critical DLP policy disabled'
-            description: 'Critical DLP policy {{ $labels.policy_id }} has been disabled'
+            summary: "Critical DLP policy disabled"
+            description: "Critical DLP policy {{ $labels.policy_id }} has been disabled"
 
         - alert: DLPBlockedRequestsHigh
           expr: rate(dlp_requests_blocked_total[5m]) > 0.05
@@ -92,8 +92,8 @@ spec:
             severity: warning
             component: dlp
           annotations:
-            summary: 'High rate of DLP blocked requests'
-            description: '{{ $value }} requests per second are being blocked by DLP policies'
+            summary: "High rate of DLP blocked requests"
+            description: "{{ $value }} requests per second are being blocked by DLP policies"
 
         - alert: DLPCircuitBreakerOpen
           expr: dlp_circuit_breaker_state == 2
@@ -102,8 +102,8 @@ spec:
             severity: critical
             component: dlp
           annotations:
-            summary: 'DLP circuit breaker is open'
-            description: 'DLP service circuit breaker is open due to consecutive failures'
+            summary: "DLP circuit breaker is open"
+            description: "DLP service circuit breaker is open due to consecutive failures"
 
         - alert: DLPRedisConnectionFailed
           expr: increase(dlp_redis_connection_errors_total[5m]) > 3
@@ -112,8 +112,8 @@ spec:
             severity: warning
             component: dlp
           annotations:
-            summary: 'DLP Redis connection issues'
-            description: 'DLP service is experiencing Redis connection failures'
+            summary: "DLP Redis connection issues"
+            description: "DLP service is experiencing Redis connection failures"
 
 ---
 apiVersion: v1
@@ -122,7 +122,7 @@ metadata:
   name: dlp-grafana-dashboard
   namespace: intelgraph-production
   labels:
-    grafana_dashboard: '1'
+    grafana_dashboard: "1"
     app.kubernetes.io/name: intelgraph
     app.kubernetes.io/component: dlp
 data:

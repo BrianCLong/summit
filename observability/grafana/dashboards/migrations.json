@@ -5,30 +5,22 @@
     {
       "type": "graph",
       "title": "Dual Write Errors",
-      "targets": [
-        { "expr": "sum(rate(db_dual_write_errors_total[5m])) by (service, table)" }
-      ]
+      "targets": [{ "expr": "sum(rate(db_dual_write_errors_total[5m])) by (service, table)" }]
     },
     {
       "type": "graph",
       "title": "Shadow Read Mismatch Ratio",
-      "targets": [
-        { "expr": "avg(db_shadow_read_mismatch_ratio) by (service, table)" }
-      ]
+      "targets": [{ "expr": "avg(db_shadow_read_mismatch_ratio) by (service, table)" }]
     },
     {
       "type": "graph",
       "title": "Backfill Progress",
-      "targets": [
-        { "expr": "avg(db_backfill_progress_ratio) by (service, table)" }
-      ]
+      "targets": [{ "expr": "avg(db_backfill_progress_ratio) by (service, table)" }]
     },
     {
       "type": "graph",
       "title": "Backfill Lag",
-      "targets": [
-        { "expr": "max(db_backfill_lag_seconds) by (service, table)" }
-      ]
+      "targets": [{ "expr": "max(db_backfill_lag_seconds) by (service, table)" }]
     }
   ]
 }

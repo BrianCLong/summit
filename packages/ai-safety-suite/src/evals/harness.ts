@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs from "fs";
 
 export interface EvalFixture {
   name: string;
@@ -20,14 +20,17 @@ export interface EvalReport {
 }
 
 function normalize(value: unknown): string {
-  if (value && typeof value === 'object' && !Array.isArray(value)) {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
     const keys = Object.keys(value as Record<string, unknown>).sort();
     return JSON.stringify(value, keys);
   }
   return JSON.stringify(value);
 }
 
-export function runEvals(fixtures: EvalFixture[], options: { planOnly?: boolean; reportPath?: string; seed?: number } = {}): EvalReport {
+export function runEvals(
+  fixtures: EvalFixture[],
+  options: { planOnly?: boolean; reportPath?: string; seed?: number } = {}
+): EvalReport {
   const report: EvalReport = {
     seed: options.seed ?? 1234,
     config: { planOnly: options.planOnly ?? false },
@@ -35,17 +38,19 @@ export function runEvals(fixtures: EvalFixture[], options: { planOnly?: boolean;
   };
 
   for (const fixture of fixtures) {
-    const normalizedExpected = normalize(fixture.expected.toolPlan ?? fixture.expected.outputSchema);
+    const normalizedExpected = normalize(
+      fixture.expected.toolPlan ?? fixture.expected.outputSchema
+    );
     const normalizedActual = normalize(fixture.expected.toolPlan ?? fixture.expected.outputSchema);
     const passed = normalizedExpected === normalizedActual;
     report.results.push({
       name: fixture.name,
       passed,
-      details: passed ? 'stable output' : 'output drift detected',
+      details: passed ? "stable output" : "output drift detected",
     });
   }
 
-  const path = options.reportPath ?? 'eval_report.json';
+  const path = options.reportPath ?? "eval_report.json";
   fs.writeFileSync(path, JSON.stringify(report, null, 2));
   return report;
 }

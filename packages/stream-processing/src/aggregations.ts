@@ -1,4 +1,4 @@
-import { AggregateFunction } from './types';
+import { AggregateFunction } from "./types";
 
 /**
  * Common aggregation functions for stream processing
@@ -19,9 +19,7 @@ export function count<T>(): AggregateFunction<T, number, number> {
 /**
  * Sum aggregation
  */
-export function sum<T>(
-  selector: (value: T) => number
-): AggregateFunction<T, number, number> {
+export function sum<T>(selector: (value: T) => number): AggregateFunction<T, number, number> {
   return {
     createAccumulator: () => 0,
     add: (value, accumulator) => accumulator + selector(value),
@@ -42,8 +40,7 @@ export function average<T>(
       sum: accumulator.sum + selector(value),
       count: accumulator.count + 1,
     }),
-    getResult: (accumulator) =>
-      accumulator.count > 0 ? accumulator.sum / accumulator.count : 0,
+    getResult: (accumulator) => (accumulator.count > 0 ? accumulator.sum / accumulator.count : 0),
     merge: (acc1, acc2) => ({
       sum: acc1.sum + acc2.sum,
       count: acc1.count + acc2.count,
@@ -54,9 +51,7 @@ export function average<T>(
 /**
  * Min aggregation
  */
-export function min<T>(
-  selector: (value: T) => number
-): AggregateFunction<T, number, number> {
+export function min<T>(selector: (value: T) => number): AggregateFunction<T, number, number> {
   return {
     createAccumulator: () => Number.MAX_VALUE,
     add: (value, accumulator) => Math.min(accumulator, selector(value)),
@@ -68,9 +63,7 @@ export function min<T>(
 /**
  * Max aggregation
  */
-export function max<T>(
-  selector: (value: T) => number
-): AggregateFunction<T, number, number> {
+export function max<T>(selector: (value: T) => number): AggregateFunction<T, number, number> {
   return {
     createAccumulator: () => Number.MIN_VALUE,
     add: (value, accumulator) => Math.max(accumulator, selector(value)),
@@ -154,9 +147,7 @@ export function movingAverage<T>(
       return accumulator;
     },
     getResult: (accumulator) =>
-      accumulator.values.length > 0
-        ? accumulator.sum / accumulator.values.length
-        : 0,
+      accumulator.values.length > 0 ? accumulator.sum / accumulator.values.length : 0,
     merge: (acc1, acc2) => {
       const merged = {
         values: acc1.values.concat(acc2.values).slice(-windowSize),
@@ -182,7 +173,9 @@ export function percentile<T>(
       return accumulator;
     },
     getResult: (accumulator) => {
-      if (accumulator.length === 0) {return 0;}
+      if (accumulator.length === 0) {
+        return 0;
+      }
 
       const sorted = accumulator.slice().sort((a, b) => a - b);
       const index = Math.ceil((p / 100) * sorted.length) - 1;

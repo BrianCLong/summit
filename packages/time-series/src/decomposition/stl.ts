@@ -2,7 +2,7 @@
  * STL (Seasonal and Trend decomposition using Loess)
  */
 
-import type { TimeSeriesPoint, SeasonalDecomposition } from '../types/index.js';
+import type { TimeSeriesPoint, SeasonalDecomposition } from "../types/index.js";
 
 export class STLDecomposer {
   private period: number;
@@ -19,7 +19,7 @@ export class STLDecomposer {
    * Decompose time series into trend, seasonal, and residual components
    */
   decompose(data: TimeSeriesPoint[]): SeasonalDecomposition {
-    const values = data.map(d => d.value);
+    const values = data.map((d) => d.value);
     const n = values.length;
 
     // Initialize components
@@ -48,7 +48,7 @@ export class STLDecomposer {
       trend,
       seasonal,
       residual,
-      timestamps: data.map(d => d.timestamp),
+      timestamps: data.map((d) => d.timestamp),
     };
   }
 
@@ -78,7 +78,7 @@ export class STLDecomposer {
 
     // Remove mean from seasonal component
     const seasonalMean = seasonal.reduce((a, b) => a + b, 0) / n;
-    return seasonal.map(s => s - seasonalMean);
+    return seasonal.map((s) => s - seasonalMean);
   }
 
   /**

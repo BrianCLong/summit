@@ -1,14 +1,14 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { Provider } from 'react-redux';
-import store from '../../../store/index';
-import Dashboard from '../index';
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import { Provider } from "react-redux";
+import store from "../../../store/index";
+import Dashboard from "../index";
 
-test('renders dashboard skeletons then content', async () => {
+test("renders dashboard skeletons then content", async () => {
   render(
     <Provider store={store}>
       <Dashboard />
-    </Provider>,
+    </Provider>
   );
-  expect(screen.getByRole('status')).toBeInTheDocument();
+  expect(screen.getByRole("status")).toBeInTheDocument();
 });

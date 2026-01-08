@@ -5,7 +5,7 @@ permissions:
 
 on:
   workflow_run:
-    workflows: ['CD Pipeline']
+    workflows: ["CD Pipeline"]
     types: [completed]
 
 jobs:
@@ -24,7 +24,7 @@ jobs:
       - name: Setup kubectl
         uses: azure/setup-kubectl@v4
         with:
-          version: 'v1.30.0'
+          version: "v1.30.0"
 
       - name: Setup kubectl-argo-rollouts
         run: |

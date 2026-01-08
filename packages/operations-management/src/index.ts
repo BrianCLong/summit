@@ -5,48 +5,42 @@
  * for intelligence operations with full lifecycle support.
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================================================
 // Core Operation Types
 // ============================================================================
 
 export const OperationStatusSchema = z.enum([
-  'PLANNING',
-  'APPROVED',
-  'ACTIVE',
-  'SUSPENDED',
-  'COMPLETED',
-  'CANCELLED',
-  'FAILED'
+  "PLANNING",
+  "APPROVED",
+  "ACTIVE",
+  "SUSPENDED",
+  "COMPLETED",
+  "CANCELLED",
+  "FAILED",
 ]);
 
-export const OperationPrioritySchema = z.enum([
-  'CRITICAL',
-  'HIGH',
-  'MEDIUM',
-  'LOW',
-  'ROUTINE'
-]);
+export const OperationPrioritySchema = z.enum(["CRITICAL", "HIGH", "MEDIUM", "LOW", "ROUTINE"]);
 
 export const OperationClassificationSchema = z.enum([
-  'UNCLASSIFIED',
-  'CONFIDENTIAL',
-  'SECRET',
-  'TOP_SECRET',
-  'TOP_SECRET_SCI'
+  "UNCLASSIFIED",
+  "CONFIDENTIAL",
+  "SECRET",
+  "TOP_SECRET",
+  "TOP_SECRET_SCI",
 ]);
 
 export const OperationTypeSchema = z.enum([
-  'RECONNAISSANCE',
-  'SURVEILLANCE',
-  'TARGETING',
-  'COLLECTION',
-  'ANALYSIS',
-  'COUNTER_INTELLIGENCE',
-  'SPECIAL_OPERATIONS',
-  'CYBER_OPERATIONS',
-  'MULTI_DISCIPLINE'
+  "RECONNAISSANCE",
+  "SURVEILLANCE",
+  "TARGETING",
+  "COLLECTION",
+  "ANALYSIS",
+  "COUNTER_INTELLIGENCE",
+  "SPECIAL_OPERATIONS",
+  "CYBER_OPERATIONS",
+  "MULTI_DISCIPLINE",
 ]);
 
 // ============================================================================
@@ -58,26 +52,28 @@ export const IntelligenceRequirementSchema = z.object({
   operationId: z.string(),
   priority: OperationPrioritySchema,
   type: z.enum([
-    'ESSENTIAL_ELEMENT',
-    'PRIORITY_REQUIREMENT',
-    'SUPPORTING_REQUIREMENT',
-    'STANDING_REQUIREMENT'
+    "ESSENTIAL_ELEMENT",
+    "PRIORITY_REQUIREMENT",
+    "SUPPORTING_REQUIREMENT",
+    "STANDING_REQUIREMENT",
   ]),
   description: z.string(),
   rationale: z.string(),
   targetEntity: z.string().optional(),
-  targetLocation: z.object({
-    lat: z.number(),
-    lon: z.number(),
-    radius: z.number().optional(),
-    name: z.string().optional()
-  }).optional(),
+  targetLocation: z
+    .object({
+      lat: z.number(),
+      lon: z.number(),
+      radius: z.number().optional(),
+      name: z.string().optional(),
+    })
+    .optional(),
   deadline: z.string(),
-  status: z.enum(['ACTIVE', 'SATISFIED', 'PARTIAL', 'CANCELLED']),
+  status: z.enum(["ACTIVE", "SATISFIED", "PARTIAL", "CANCELLED"]),
   collectionGuidance: z.string(),
   disseminationRestrictions: z.array(z.string()),
   relatedRequirements: z.array(z.string()),
-  metadata: z.record(z.string(), z.unknown())
+  metadata: z.record(z.string(), z.unknown()),
 });
 
 export const MissionPlanSchema = z.object({
@@ -93,11 +89,13 @@ export const MissionPlanSchema = z.object({
   status: OperationStatusSchema,
 
   // Planning details
-  planningTeam: z.array(z.object({
-    userId: z.string(),
-    role: z.string(),
-    clearanceLevel: z.string()
-  })),
+  planningTeam: z.array(
+    z.object({
+      userId: z.string(),
+      role: z.string(),
+      clearanceLevel: z.string(),
+    })
+  ),
 
   // Intelligence requirements
   requirements: z.array(IntelligenceRequirementSchema),
@@ -107,84 +105,98 @@ export const MissionPlanSchema = z.object({
     assets: z.array(z.string()),
     platforms: z.array(z.string()),
     sensors: z.array(z.string()),
-    timelines: z.array(z.object({
-      assetId: z.string(),
-      startTime: z.string(),
-      endTime: z.string(),
-      taskDescription: z.string()
-    })),
-    deconflictions: z.array(z.object({
-      assetId: z.string(),
-      conflictWith: z.string(),
-      resolution: z.string()
-    }))
+    timelines: z.array(
+      z.object({
+        assetId: z.string(),
+        startTime: z.string(),
+        endTime: z.string(),
+        taskDescription: z.string(),
+      })
+    ),
+    deconflictions: z.array(
+      z.object({
+        assetId: z.string(),
+        conflictWith: z.string(),
+        resolution: z.string(),
+      })
+    ),
   }),
 
   // Resource allocation
   resources: z.object({
-    personnel: z.array(z.object({
-      userId: z.string(),
-      role: z.string(),
-      allocation: z.number() // Percentage
-    })),
+    personnel: z.array(
+      z.object({
+        userId: z.string(),
+        role: z.string(),
+        allocation: z.number(), // Percentage
+      })
+    ),
     budget: z.object({
       allocated: z.number(),
       spent: z.number(),
-      currency: z.string()
+      currency: z.string(),
     }),
-    equipment: z.array(z.object({
-      equipmentId: z.string(),
-      quantity: z.number(),
-      status: z.string()
-    }))
+    equipment: z.array(
+      z.object({
+        equipmentId: z.string(),
+        quantity: z.number(),
+        status: z.string(),
+      })
+    ),
   }),
 
   // Timeline and milestones
   timeline: z.object({
     startDate: z.string(),
     endDate: z.string(),
-    milestones: z.array(z.object({
-      id: z.string(),
-      name: z.string(),
-      description: z.string(),
-      dueDate: z.string(),
-      completed: z.boolean(),
-      dependencies: z.array(z.string())
-    }))
+    milestones: z.array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        description: z.string(),
+        dueDate: z.string(),
+        completed: z.boolean(),
+        dependencies: z.array(z.string()),
+      })
+    ),
   }),
 
   // Risk management
-  risks: z.array(z.object({
-    id: z.string(),
-    category: z.enum([
-      'OPERATIONAL',
-      'SECURITY',
-      'TECHNICAL',
-      'POLITICAL',
-      'LEGAL',
-      'ENVIRONMENTAL'
-    ]),
-    description: z.string(),
-    likelihood: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
-    impact: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
-    mitigation: z.string(),
-    contingency: z.string(),
-    owner: z.string(),
-    status: z.enum(['IDENTIFIED', 'MITIGATED', 'ACCEPTED', 'OCCURRED'])
-  })),
+  risks: z.array(
+    z.object({
+      id: z.string(),
+      category: z.enum([
+        "OPERATIONAL",
+        "SECURITY",
+        "TECHNICAL",
+        "POLITICAL",
+        "LEGAL",
+        "ENVIRONMENTAL",
+      ]),
+      description: z.string(),
+      likelihood: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
+      impact: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
+      mitigation: z.string(),
+      contingency: z.string(),
+      owner: z.string(),
+      status: z.enum(["IDENTIFIED", "MITIGATED", "ACCEPTED", "OCCURRED"]),
+    })
+  ),
 
   // Legal and policy compliance
   compliance: z.object({
     legalAuthority: z.array(z.string()),
     policyReferences: z.array(z.string()),
-    approvals: z.array(z.object({
-      authority: z.string(),
-      approver: z.string(),
-      date: z.string(),
-      conditions: z.array(z.string())
-    })),
+    approvals: z.array(
+      z.object({
+        authority: z.string(),
+        approver: z.string(),
+        date: z.string(),
+        conditions: z.array(z.string()),
+      })
+    ),
     restrictions: z.array(z.string()),
-    reviewDates: z.array(z.string())
+    reviewDates: z.array(z.string()),
   }),
 
   // OPSEC
@@ -193,27 +205,31 @@ export const MissionPlanSchema = z.object({
     indicators: z.array(z.string()),
     threats: z.array(z.string()),
     vulnerabilities: z.array(z.string()),
-    countermeasures: z.array(z.object({
-      measure: z.string(),
-      implementation: z.string(),
-      responsible: z.string()
-    })),
-    coverPlan: z.string().optional()
+    countermeasures: z.array(
+      z.object({
+        measure: z.string(),
+        implementation: z.string(),
+        responsible: z.string(),
+      })
+    ),
+    coverPlan: z.string().optional(),
   }),
 
   // Contingency planning
-  contingencies: z.array(z.object({
-    scenario: z.string(),
-    triggerConditions: z.array(z.string()),
-    response: z.string(),
-    resources: z.array(z.string()),
-    decisionAuthority: z.string()
-  })),
+  contingencies: z.array(
+    z.object({
+      scenario: z.string(),
+      triggerConditions: z.array(z.string()),
+      response: z.string(),
+      resources: z.array(z.string()),
+      decisionAuthority: z.string(),
+    })
+  ),
 
   createdAt: z.string(),
   updatedAt: z.string(),
   createdBy: z.string(),
-  metadata: z.record(z.string(), z.unknown())
+  metadata: z.record(z.string(), z.unknown()),
 });
 
 // ============================================================================
@@ -224,43 +240,40 @@ export const WorkflowStepSchema = z.object({
   id: z.string(),
   name: z.string(),
   type: z.enum([
-    'APPROVAL',
-    'REVIEW',
-    'EXECUTION',
-    'ANALYSIS',
-    'COORDINATION',
-    'DECISION',
-    'NOTIFICATION'
+    "APPROVAL",
+    "REVIEW",
+    "EXECUTION",
+    "ANALYSIS",
+    "COORDINATION",
+    "DECISION",
+    "NOTIFICATION",
   ]),
-  status: z.enum(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'FAILED', 'SKIPPED']),
+  status: z.enum(["PENDING", "IN_PROGRESS", "COMPLETED", "FAILED", "SKIPPED"]),
   assignedTo: z.array(z.string()),
   requiredApprovals: z.number(),
-  approvals: z.array(z.object({
-    userId: z.string(),
-    decision: z.enum(['APPROVED', 'REJECTED', 'CONDITIONAL']),
-    timestamp: z.string(),
-    comments: z.string()
-  })),
+  approvals: z.array(
+    z.object({
+      userId: z.string(),
+      decision: z.enum(["APPROVED", "REJECTED", "CONDITIONAL"]),
+      timestamp: z.string(),
+      comments: z.string(),
+    })
+  ),
   dependencies: z.array(z.string()),
   deadline: z.string().optional(),
-  metadata: z.record(z.string(), z.unknown())
+  metadata: z.record(z.string(), z.unknown()),
 });
 
 export const OperationWorkflowSchema = z.object({
   id: z.string(),
   operationId: z.string(),
-  type: z.enum([
-    'MISSION_PLANNING',
-    'APPROVAL_CHAIN',
-    'EXECUTION',
-    'AFTER_ACTION_REVIEW'
-  ]),
+  type: z.enum(["MISSION_PLANNING", "APPROVAL_CHAIN", "EXECUTION", "AFTER_ACTION_REVIEW"]),
   steps: z.array(WorkflowStepSchema),
   currentStep: z.string(),
-  status: z.enum(['ACTIVE', 'COMPLETED', 'FAILED', 'CANCELLED']),
+  status: z.enum(["ACTIVE", "COMPLETED", "FAILED", "CANCELLED"]),
   startedAt: z.string(),
   completedAt: z.string().optional(),
-  metadata: z.record(z.string(), z.unknown())
+  metadata: z.record(z.string(), z.unknown()),
 });
 
 // ============================================================================
@@ -278,92 +291,95 @@ export const AfterActionReviewSchema = z.object({
     endDate: z.string(),
     actualDuration: z.number(), // hours
     plannedDuration: z.number(), // hours
-    objectives: z.array(z.object({
-      objective: z.string(),
-      achieved: z.boolean(),
-      percentComplete: z.number(),
-      notes: z.string()
-    }))
+    objectives: z.array(
+      z.object({
+        objective: z.string(),
+        achieved: z.boolean(),
+        percentComplete: z.number(),
+        notes: z.string(),
+      })
+    ),
   }),
 
   // Performance assessment
   performance: z.object({
-    overall: z.enum(['EXCELLENT', 'GOOD', 'SATISFACTORY', 'POOR']),
+    overall: z.enum(["EXCELLENT", "GOOD", "SATISFACTORY", "POOR"]),
     collection: z.object({
-      rating: z.enum(['EXCELLENT', 'GOOD', 'SATISFACTORY', 'POOR']),
+      rating: z.enum(["EXCELLENT", "GOOD", "SATISFACTORY", "POOR"]),
       coverageAchieved: z.number(), // percentage
       qualityScore: z.number(), // 0-100
-      timeliness: z.enum(['ON_TIME', 'DELAYED', 'EARLY'])
+      timeliness: z.enum(["ON_TIME", "DELAYED", "EARLY"]),
     }),
     analysis: z.object({
-      rating: z.enum(['EXCELLENT', 'GOOD', 'SATISFACTORY', 'POOR']),
+      rating: z.enum(["EXCELLENT", "GOOD", "SATISFACTORY", "POOR"]),
       accuracy: z.number(), // percentage
-      depth: z.enum(['COMPREHENSIVE', 'ADEQUATE', 'LIMITED']),
-      timelyDelivery: z.boolean()
+      depth: z.enum(["COMPREHENSIVE", "ADEQUATE", "LIMITED"]),
+      timelyDelivery: z.boolean(),
     }),
     dissemination: z.object({
-      rating: z.enum(['EXCELLENT', 'GOOD', 'SATISFACTORY', 'POOR']),
+      rating: z.enum(["EXCELLENT", "GOOD", "SATISFACTORY", "POOR"]),
       reach: z.number(), // number of recipients
-      timeliness: z.enum(['ON_TIME', 'DELAYED', 'EARLY']),
-      feedback: z.array(z.string())
-    })
+      timeliness: z.enum(["ON_TIME", "DELAYED", "EARLY"]),
+      feedback: z.array(z.string()),
+    }),
   }),
 
   // Lessons learned
-  lessonsLearned: z.array(z.object({
-    category: z.enum([
-      'PLANNING',
-      'COLLECTION',
-      'ANALYSIS',
-      'COORDINATION',
-      'TECHNOLOGY',
-      'PERSONNEL',
-      'PROCEDURES'
-    ]),
-    observation: z.string(),
-    impact: z.enum(['POSITIVE', 'NEGATIVE', 'NEUTRAL']),
-    recommendation: z.string(),
-    priority: OperationPrioritySchema,
-    actionable: z.boolean()
-  })),
+  lessonsLearned: z.array(
+    z.object({
+      category: z.enum([
+        "PLANNING",
+        "COLLECTION",
+        "ANALYSIS",
+        "COORDINATION",
+        "TECHNOLOGY",
+        "PERSONNEL",
+        "PROCEDURES",
+      ]),
+      observation: z.string(),
+      impact: z.enum(["POSITIVE", "NEGATIVE", "NEUTRAL"]),
+      recommendation: z.string(),
+      priority: OperationPrioritySchema,
+      actionable: z.boolean(),
+    })
+  ),
 
   // Issues and challenges
-  issues: z.array(z.object({
-    type: z.enum([
-      'TECHNICAL',
-      'OPERATIONAL',
-      'COORDINATION',
-      'RESOURCE',
-      'SECURITY',
-      'LEGAL'
-    ]),
-    description: z.string(),
-    impact: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
-    resolution: z.string(),
-    preventativeMeasures: z.array(z.string())
-  })),
+  issues: z.array(
+    z.object({
+      type: z.enum(["TECHNICAL", "OPERATIONAL", "COORDINATION", "RESOURCE", "SECURITY", "LEGAL"]),
+      description: z.string(),
+      impact: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
+      resolution: z.string(),
+      preventativeMeasures: z.array(z.string()),
+    })
+  ),
 
   // Recommendations
-  recommendations: z.array(z.object({
-    area: z.string(),
-    recommendation: z.string(),
-    priority: OperationPrioritySchema,
-    implementationCost: z.enum(['LOW', 'MEDIUM', 'HIGH']),
-    expectedBenefit: z.string(),
-    timeline: z.string()
-  })),
+  recommendations: z.array(
+    z.object({
+      area: z.string(),
+      recommendation: z.string(),
+      priority: OperationPrioritySchema,
+      implementationCost: z.enum(["LOW", "MEDIUM", "HIGH"]),
+      expectedBenefit: z.string(),
+      timeline: z.string(),
+    })
+  ),
 
   // Participants
-  participants: z.array(z.object({
-    userId: z.string(),
-    role: z.string(),
-    contribution: z.string()
-  })),
+  participants: z.array(
+    z.object({
+      userId: z.string(),
+      role: z.string(),
+      contribution: z.string(),
+    })
+  ),
 
   reviewedBy: z.string(),
   reviewDate: z.string(),
   approved: z.boolean(),
-  metadata: z.record(z.string(), z.unknown())
+  metadata: z.record(z.string(), z.unknown()),
 });
 
 // ============================================================================
@@ -431,13 +447,13 @@ export class OperationsManager {
     let plans = Array.from(this.missions.values());
 
     if (filter?.status) {
-      plans = plans.filter(p => p.status === filter.status);
+      plans = plans.filter((p) => p.status === filter.status);
     }
     if (filter?.type) {
-      plans = plans.filter(p => p.type === filter.type);
+      plans = plans.filter((p) => p.type === filter.type);
     }
     if (filter?.priority) {
-      plans = plans.filter(p => p.priority === filter.priority);
+      plans = plans.filter((p) => p.priority === filter.priority);
     }
 
     return plans;
@@ -461,9 +477,9 @@ export class OperationsManager {
       throw new Error(`Workflow ${workflowId} not found`);
     }
 
-    const currentStepIndex = workflow.steps.findIndex(s => s.id === workflow.currentStep);
+    const currentStepIndex = workflow.steps.findIndex((s) => s.id === workflow.currentStep);
     if (currentStepIndex === -1 || currentStepIndex === workflow.steps.length - 1) {
-      throw new Error('Cannot advance workflow');
+      throw new Error("Cannot advance workflow");
     }
 
     const nextStep = workflow.steps[currentStepIndex + 1];
@@ -498,9 +514,11 @@ export class OperationsManager {
     }
 
     const totalMilestones = mission.timeline.milestones.length;
-    if (totalMilestones === 0) { return 0; }
+    if (totalMilestones === 0) {
+      return 0;
+    }
 
-    const completedMilestones = mission.timeline.milestones.filter(m => m.completed).length;
+    const completedMilestones = mission.timeline.milestones.filter((m) => m.completed).length;
     return (completedMilestones / totalMilestones) * 100;
   }
 
@@ -508,7 +526,7 @@ export class OperationsManager {
    * Assess mission risk level
    */
   assessMissionRisk(missionId: string): {
-    overall: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+    overall: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
     activeRisks: number;
     criticalRisks: number;
   } {
@@ -517,27 +535,27 @@ export class OperationsManager {
       throw new Error(`Mission ${missionId} not found`);
     }
 
-    const activeRisks = mission.risks.filter(r =>
-      r.status === 'IDENTIFIED' || r.status === 'OCCURRED'
+    const activeRisks = mission.risks.filter(
+      (r) => r.status === "IDENTIFIED" || r.status === "OCCURRED"
     );
 
-    const criticalRisks = activeRisks.filter(r =>
-      r.likelihood === 'CRITICAL' || r.impact === 'CRITICAL'
+    const criticalRisks = activeRisks.filter(
+      (r) => r.likelihood === "CRITICAL" || r.impact === "CRITICAL"
     );
 
-    let overall: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' = 'LOW';
+    let overall: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" = "LOW";
     if (criticalRisks.length > 0) {
-      overall = 'CRITICAL';
+      overall = "CRITICAL";
     } else if (activeRisks.length > 5) {
-      overall = 'HIGH';
+      overall = "HIGH";
     } else if (activeRisks.length > 2) {
-      overall = 'MEDIUM';
+      overall = "MEDIUM";
     }
 
     return {
       overall,
       activeRisks: activeRisks.length,
-      criticalRisks: criticalRisks.length
+      criticalRisks: criticalRisks.length,
     };
   }
 }

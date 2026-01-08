@@ -55,52 +55,52 @@ pnpm start
 ### 2. Basic Collection
 
 ```typescript
-import { SocialMediaCollector } from '@intelgraph/osint-collector';
+import { SocialMediaCollector } from "@intelgraph/osint-collector";
 
 const collector = new SocialMediaCollector({
-  name: 'twitter-collector',
-  type: 'social_media',
-  enabled: true
+  name: "twitter-collector",
+  type: "social_media",
+  enabled: true,
 });
 
 await collector.initialize();
 
 const result = await collector.collect({
-  id: 'task-1',
-  type: 'social_media',
-  source: 'twitter',
-  target: '#osint',
+  id: "task-1",
+  type: "social_media",
+  source: "twitter",
+  target: "#osint",
   priority: 5,
   scheduledAt: new Date(),
-  status: 'pending',
-  config: { platform: 'twitter' }
+  status: "pending",
+  config: { platform: "twitter" },
 });
 ```
 
 ### 3. Web Scraping
 
 ```typescript
-import { ScraperEngine } from '@intelgraph/web-scraper';
+import { ScraperEngine } from "@intelgraph/web-scraper";
 
 const engine = new ScraperEngine();
 await engine.initialize();
 
 const result = await engine.scrape({
-  id: 'scrape-1',
-  url: 'https://example.com',
-  method: 'dynamic',
+  id: "scrape-1",
+  url: "https://example.com",
+  method: "dynamic",
   options: {
     renderJavaScript: true,
     screenshot: true,
-    extractLinks: true
-  }
+    extractLinks: true,
+  },
 });
 ```
 
 ### 4. Social Media Analysis
 
 ```typescript
-import { SentimentAnalyzer, BotDetector } from '@intelgraph/social-media-intel';
+import { SentimentAnalyzer, BotDetector } from "@intelgraph/social-media-intel";
 
 // Sentiment analysis
 const sentimentAnalyzer = new SentimentAnalyzer();
@@ -114,10 +114,10 @@ const botScore = botDetector.analyze(profile, posts);
 ### 5. Attribution
 
 ```typescript
-import { AttributionEngine } from '@intelgraph/attribution-engine';
+import { AttributionEngine } from "@intelgraph/attribution-engine";
 
 const engine = new AttributionEngine();
-const result = await engine.attributeIdentity('username@example.com');
+const result = await engine.attributeIdentity("username@example.com");
 
 console.log(`Found ${result.accounts.length} accounts`);
 console.log(`Related identifiers:`, result.identifiers);
@@ -157,25 +157,25 @@ TWITTER_BEARER_TOKEN=your_token
 
 ```typescript
 const collectorConfig = {
-  name: 'my-collector',
-  type: 'social_media',
+  name: "my-collector",
+  type: "social_media",
   enabled: true,
   rateLimit: {
     requests: 100,
-    period: 60000 // 1 minute
+    period: 60000, // 1 minute
   },
   timeout: 30000,
   retryPolicy: {
     maxRetries: 3,
-    backoff: 'exponential',
-    initialDelay: 1000
+    backoff: "exponential",
+    initialDelay: 1000,
   },
   authentication: {
-    type: 'api_key',
+    type: "api_key",
     credentials: {
-      apiKey: process.env.TWITTER_API_KEY
-    }
-  }
+      apiKey: process.env.TWITTER_API_KEY,
+    },
+  },
 };
 ```
 
@@ -186,20 +186,20 @@ const collectorConfig = {
 Monitor social media for specific keywords, hashtags, or accounts:
 
 ```typescript
-import { CollectionScheduler } from '@intelgraph/osint-collector';
+import { CollectionScheduler } from "@intelgraph/osint-collector";
 
 const scheduler = new CollectionScheduler();
 
 // Monitor hashtag every hour
 scheduler.addSchedule({
-  id: 'monitor-cybersecurity',
-  name: 'Cybersecurity Hashtag Monitor',
-  cronExpression: '0 * * * *', // Every hour
-  type: 'social_media',
-  source: 'twitter',
-  target: '#cybersecurity',
+  id: "monitor-cybersecurity",
+  name: "Cybersecurity Hashtag Monitor",
+  cronExpression: "0 * * * *", // Every hour
+  type: "social_media",
+  source: "twitter",
+  target: "#cybersecurity",
   priority: 5,
-  enabled: true
+  enabled: true,
 });
 ```
 
@@ -208,7 +208,7 @@ scheduler.addSchedule({
 Monitor websites for changes:
 
 ```typescript
-import { ChangeDetector, ScraperEngine } from '@intelgraph/web-scraper';
+import { ChangeDetector, ScraperEngine } from "@intelgraph/web-scraper";
 
 const engine = new ScraperEngine();
 const detector = new ChangeDetector();
@@ -218,17 +218,14 @@ await engine.initialize();
 setInterval(async () => {
   const result = await engine.scrape({
     id: `check-${Date.now()}`,
-    url: 'https://target-site.com',
-    method: 'static'
+    url: "https://target-site.com",
+    method: "static",
   });
 
-  const changes = await detector.detectChanges(
-    result.url,
-    result.content.html || ''
-  );
+  const changes = await detector.detectChanges(result.url, result.content.html || "");
 
   if (changes.changed) {
-    console.log('Site changed!', changes.diff);
+    console.log("Site changed!", changes.diff);
   }
 }, 3600000); // Check every hour
 ```
@@ -238,14 +235,14 @@ setInterval(async () => {
 Investigate a person across multiple platforms:
 
 ```typescript
-import { AttributionEngine } from '@intelgraph/attribution-engine';
-import { AccountCorrelator } from '@intelgraph/social-media-intel';
+import { AttributionEngine } from "@intelgraph/attribution-engine";
+import { AccountCorrelator } from "@intelgraph/social-media-intel";
 
 const attribution = new AttributionEngine();
 const correlator = new AccountCorrelator();
 
 // Start with one identifier
-const footprint = await attribution.buildDigitalFootprint('target@example.com');
+const footprint = await attribution.buildDigitalFootprint("target@example.com");
 
 // Find related accounts
 const correlations = correlator.correlateAccounts(footprint.accounts);
@@ -262,19 +259,19 @@ for (const correlation of correlations) {
 Find and rank influencers in a specific domain:
 
 ```typescript
-import { InfluencerScorer } from '@intelgraph/social-media-intel';
+import { InfluencerScorer } from "@intelgraph/social-media-intel";
 
 const scorer = new InfluencerScorer();
 
-const profiles = [/* array of profiles */];
-const scores = profiles.map(profile =>
-  scorer.scoreInfluencer(profile, recentPosts)
-);
+const profiles = [
+  /* array of profiles */
+];
+const scores = profiles.map((profile) => scorer.scoreInfluencer(profile, recentPosts));
 
 const ranked = scorer.rankInfluencers(scores);
 
-console.log('Top 10 Influencers:');
-ranked.slice(0, 10).forEach(score => {
+console.log("Top 10 Influencers:");
+ranked.slice(0, 10).forEach((score) => {
   console.log(`${score.rank}. ${score.username} - Score: ${score.overallScore}`);
 });
 ```
@@ -286,12 +283,12 @@ ranked.slice(0, 10).forEach(score => {
 Always configure appropriate rate limits to avoid being blocked:
 
 ```typescript
-import { RateLimiter } from '@intelgraph/osint-collector';
+import { RateLimiter } from "@intelgraph/osint-collector";
 
 const limiter = new RateLimiter();
-limiter.createLimiter('twitter', 15, 900); // 15 requests per 15 minutes
+limiter.createLimiter("twitter", 15, 900); // 15 requests per 15 minutes
 
-await limiter.consume('twitter');
+await limiter.consume("twitter");
 ```
 
 ### 2. Robots.txt Compliance
@@ -299,11 +296,11 @@ await limiter.consume('twitter');
 Respect robots.txt when scraping:
 
 ```typescript
-import { checkRobotsTxt } from '@intelgraph/web-scraper';
+import { checkRobotsTxt } from "@intelgraph/web-scraper";
 
-const allowed = await checkRobotsTxt(url, 'IntelGraphBot');
+const allowed = await checkRobotsTxt(url, "IntelGraphBot");
 if (!allowed) {
-  console.log('Scraping not allowed by robots.txt');
+  console.log("Scraping not allowed by robots.txt");
   return;
 }
 ```
@@ -313,11 +310,11 @@ if (!allowed) {
 Implement proper error handling and retry logic:
 
 ```typescript
-import { retryWithBackoff } from '@intelgraph/osint-collector';
+import { retryWithBackoff } from "@intelgraph/osint-collector";
 
 const result = await retryWithBackoff(
   async () => await collector.collect(task),
-  3,  // maxRetries
+  3, // maxRetries
   1000 // initialDelay
 );
 ```

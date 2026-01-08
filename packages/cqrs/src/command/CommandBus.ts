@@ -4,17 +4,17 @@
  * Central command bus with validation, middleware, and error handling
  */
 
-import { EventEmitter } from 'events';
-import { v4 as uuidv4 } from 'uuid';
-import pino from 'pino';
+import { EventEmitter } from "events";
+import { v4 as uuidv4 } from "uuid";
+import pino from "pino";
 import type {
   Command,
   CommandHandler,
   CommandResult,
   CommandValidator,
   CommandMiddleware,
-  CommandHandlerRegistration
-} from './types.js';
+  CommandHandlerRegistration,
+} from "./types.js";
 
 export class CommandBus extends EventEmitter {
   private handlers: Map<string, CommandHandlerRegistration> = new Map();
@@ -24,7 +24,7 @@ export class CommandBus extends EventEmitter {
 
   constructor() {
     super();
-    this.logger = pino({ name: 'CommandBus' });
+    this.logger = pino({ name: "CommandBus" });
   }
 
   /**
@@ -32,17 +32,12 @@ export class CommandBus extends EventEmitter {
    */
   register(registration: CommandHandlerRegistration): void {
     if (this.handlers.has(registration.commandType)) {
-      throw new Error(
-        `Handler already registered for command type: ${registration.commandType}`
-      );
+      throw new Error(`Handler already registered for command type: ${registration.commandType}`);
     }
 
     this.handlers.set(registration.commandType, registration);
 
-    this.logger.debug(
-      { commandType: registration.commandType },
-      'Command handler registered'
-    );
+    this.logger.debug({ commandType: registration.commandType }, "Command handler registered");
   }
 
   /**
@@ -72,7 +67,7 @@ export class CommandBus extends EventEmitter {
       commandType,
       payload,
       metadata,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     return this.send(command);
@@ -84,21 +79,21 @@ export class CommandBus extends EventEmitter {
   async send<T = any>(command: Command): Promise<CommandResult<T>> {
     this.logger.info(
       { commandId: command.commandId, commandType: command.commandType },
-      'Processing command'
+      "Processing command"
     );
 
-    this.emit('command:received', command);
+    this.emit("command:received", command);
 
     try {
       // Validate command
       const validationResult = await this.validateCommand(command);
       if (!validationResult.valid) {
-        const error = validationResult.errors?.join(', ') || 'Validation failed';
-        this.emit('command:validation-failed', { command, errors: validationResult.errors });
+        const error = validationResult.errors?.join(", ") || "Validation failed";
+        this.emit("command:validation-failed", { command, errors: validationResult.errors });
 
         return {
           success: false,
-          error
+          error,
         };
       }
 
@@ -106,45 +101,35 @@ export class CommandBus extends EventEmitter {
       const registration = this.handlers.get(command.commandType);
       if (!registration) {
         const error = `No handler registered for command type: ${command.commandType}`;
-        this.emit('command:no-handler', command);
+        this.emit("command:no-handler", command);
 
         return {
           success: false,
-          error
+          error,
         };
       }
 
       // Build middleware chain
-      const middleware = [
-        ...this.globalMiddleware,
-        ...(registration.middleware || [])
-      ];
+      const middleware = [...this.globalMiddleware, ...(registration.middleware || [])];
 
       // Execute with middleware
-      const result = await this.executeWithMiddleware(
-        command,
-        registration.handler,
-        middleware
-      );
+      const result = await this.executeWithMiddleware(command, registration.handler, middleware);
 
       if (result.success) {
-        this.emit('command:succeeded', { command, result });
+        this.emit("command:succeeded", { command, result });
       } else {
-        this.emit('command:failed', { command, result });
+        this.emit("command:failed", { command, result });
       }
 
       return result;
     } catch (err: any) {
-      this.logger.error(
-        { err, commandId: command.commandId },
-        'Command execution error'
-      );
+      this.logger.error({ err, commandId: command.commandId }, "Command execution error");
 
-      this.emit('command:error', { command, error: err });
+      this.emit("command:error", { command, error: err });
 
       return {
         success: false,
-        error: err.message || 'Command execution failed'
+        error: err.message || "Command execution failed",
       };
     }
   }
@@ -176,7 +161,7 @@ export class CommandBus extends EventEmitter {
 
     return {
       valid: errors.length === 0,
-      errors: errors.length > 0 ? errors : undefined
+      errors: errors.length > 0 ? errors : undefined,
     };
   }
 

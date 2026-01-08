@@ -42,14 +42,18 @@ pnpm test:connector-contracts
   "rateLimits": { "requestsPerMinute": 60, "concurrency": 1 },
   "license": { "classification": "internal", "terms": "demo-only" },
   "pii": {
-    "fields": [
-      { "field": "email", "category": "high", "policy": "mask" }
-    ]
+    "fields": [{ "field": "email", "category": "high", "policy": "mask" }]
   },
   "mapping": {
     "handler": "./mapper.js",
     "hints": [
-      { "source": "records[].id", "targetType": "Entity", "idField": "id", "nameField": "name", "provenanceTag": "row" }
+      {
+        "source": "records[].id",
+        "targetType": "Entity",
+        "idField": "id",
+        "nameField": "name",
+        "provenanceTag": "row"
+      }
     ]
   },
   "fixtures": {
@@ -83,7 +87,7 @@ module.exports.buildNormalizedOutput = (fixture, manifest, fixturePath) => ({
   outputSchemaVersion: manifest.contracts.outputSchemaVersion,
   entities: [],
   relationships: [],
-  provenance: []
+  provenance: [],
 });
 ```
 

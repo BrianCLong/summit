@@ -3,13 +3,13 @@
  * Signals Intelligence analysis dashboard with real-time waveforms,
  * MASINT overlays, and agentic demodulation capabilities.
  */
-import React, { useState, useCallback, useMemo } from 'react';
-import { WaveformRenderer } from './visualizations/WaveformRenderer';
-import { SpectrumAnalyzer } from './visualizations/SpectrumAnalyzer';
-import { MASINTOverlayPanel } from './MASINTOverlayPanel';
-import { AgenticDemodulationPanel } from './AgenticDemodulationPanel';
-import { SignalStreamList } from './SignalStreamList';
-import { useRedisStream } from './hooks/useRedisStream';
+import React, { useState, useCallback, useMemo } from "react";
+import { WaveformRenderer } from "./visualizations/WaveformRenderer";
+import { SpectrumAnalyzer } from "./visualizations/SpectrumAnalyzer";
+import { MASINTOverlayPanel } from "./MASINTOverlayPanel";
+import { AgenticDemodulationPanel } from "./AgenticDemodulationPanel";
+import { SignalStreamList } from "./SignalStreamList";
+import { useRedisStream } from "./hooks/useRedisStream";
 import type {
   SignalStream,
   MASINTOverlay,
@@ -17,7 +17,7 @@ import type {
   DemodulationResult,
   PerformanceMetrics,
   SIGINTFilters,
-} from './types';
+} from "./types";
 
 interface SIGINTDashboardProps {
   streamKey?: string;
@@ -26,58 +26,58 @@ interface SIGINTDashboardProps {
   className?: string;
 }
 
-type ViewMode = 'waveform' | 'spectrum' | 'waterfall' | 'combined';
-type PanelLayout = 'default' | 'analysis' | 'monitoring';
+type ViewMode = "waveform" | "spectrum" | "waterfall" | "combined";
+type PanelLayout = "default" | "analysis" | "monitoring";
 
 // Demo data generators for testing
 const generateDemoStreams = (): SignalStream[] => [
   {
-    id: 'sig-001',
-    name: 'SAT-COMM Alpha',
-    band: 'UHF',
+    id: "sig-001",
+    name: "SAT-COMM Alpha",
+    band: "UHF",
     centerFrequency: 450e6,
     bandwidth: 25e3,
     sampleRate: 48000,
-    modulation: 'FM',
-    confidence: 'HIGH',
+    modulation: "FM",
+    confidence: "HIGH",
     samples: [],
     active: true,
     geolocation: { lat: 38.8977, lng: -77.0365, accuracy: 50 },
   },
   {
-    id: 'sig-002',
-    name: 'HF-BROADCAST Beta',
-    band: 'HF',
+    id: "sig-002",
+    name: "HF-BROADCAST Beta",
+    band: "HF",
     centerFrequency: 15e6,
     bandwidth: 6e3,
     sampleRate: 44100,
-    modulation: 'AM',
-    confidence: 'MEDIUM',
+    modulation: "AM",
+    confidence: "MEDIUM",
     samples: [],
     active: true,
   },
   {
-    id: 'sig-003',
-    name: 'MILSAT Gamma',
-    band: 'SHF',
+    id: "sig-003",
+    name: "MILSAT Gamma",
+    band: "SHF",
     centerFrequency: 8e9,
     bandwidth: 36e6,
     sampleRate: 100000,
-    modulation: 'PSK',
-    confidence: 'HIGH',
+    modulation: "PSK",
+    confidence: "HIGH",
     samples: [],
     active: true,
     geolocation: { lat: 51.5074, lng: -0.1278, accuracy: 100 },
   },
   {
-    id: 'sig-004',
-    name: 'Unknown Emitter',
-    band: 'VHF',
+    id: "sig-004",
+    name: "Unknown Emitter",
+    band: "VHF",
     centerFrequency: 156.8e6,
     bandwidth: 16e3,
     sampleRate: 48000,
-    modulation: 'UNKNOWN',
-    confidence: 'LOW',
+    modulation: "UNKNOWN",
+    confidence: "LOW",
     samples: [],
     active: false,
   },
@@ -85,96 +85,93 @@ const generateDemoStreams = (): SignalStream[] => [
 
 const generateDemoMASINT = (): MASINTOverlay[] => [
   {
-    id: 'masint-radar-01',
-    sensorType: 'RADAR',
+    id: "masint-radar-01",
+    sensorType: "RADAR",
     coverage: { center: { lat: 38.9, lng: -77.0 }, radiusKm: 150 },
     detections: [
       {
-        id: 'det-001',
+        id: "det-001",
         timestamp: Date.now() - 60000,
-        type: 'AIRCRAFT',
+        type: "AIRCRAFT",
         location: { lat: 39.1, lng: -76.8 },
         confidence: 0.92,
-        classification: 'Commercial Aircraft',
+        classification: "Commercial Aircraft",
         metadata: { altitude: 35000, speed: 450 },
       },
     ],
-    status: 'ACTIVE',
+    status: "ACTIVE",
     lastUpdate: Date.now(),
   },
   {
-    id: 'masint-acoustic-01',
-    sensorType: 'ACOUSTIC',
+    id: "masint-acoustic-01",
+    sensorType: "ACOUSTIC",
     coverage: { center: { lat: 36.8, lng: -76.0 }, radiusKm: 50 },
     detections: [
       {
-        id: 'det-002',
+        id: "det-002",
         timestamp: Date.now() - 120000,
-        type: 'VESSEL',
+        type: "VESSEL",
         location: { lat: 36.85, lng: -75.95 },
         confidence: 0.78,
-        classification: 'Submarine Contact',
+        classification: "Submarine Contact",
         metadata: { bearing: 45, range: 12 },
       },
     ],
-    status: 'ACTIVE',
+    status: "ACTIVE",
     lastUpdate: Date.now() - 30000,
   },
   {
-    id: 'masint-seismic-01',
-    sensorType: 'SEISMIC',
+    id: "masint-seismic-01",
+    sensorType: "SEISMIC",
     coverage: { center: { lat: 37.2, lng: -115.8 }, radiusKm: 200 },
     detections: [],
-    status: 'DEGRADED',
+    status: "DEGRADED",
     lastUpdate: Date.now() - 300000,
   },
 ];
 
 const generateDemoTasks = (): DemodulationTask[] => [
   {
-    id: 'task-001',
-    signalId: 'sig-001',
-    status: 'DEMODULATING',
+    id: "task-001",
+    signalId: "sig-001",
+    status: "DEMODULATING",
     progress: 0.67,
     startedAt: Date.now() - 45000,
-    agentId: 'agent-demod-alpha',
+    agentId: "agent-demod-alpha",
   },
   {
-    id: 'task-002',
-    signalId: 'sig-002',
-    status: 'COMPLETED',
+    id: "task-002",
+    signalId: "sig-002",
+    status: "COMPLETED",
     progress: 1,
     startedAt: Date.now() - 180000,
     completedAt: Date.now() - 120000,
-    agentId: 'agent-demod-beta',
+    agentId: "agent-demod-beta",
     result: {
-      modulation: 'AM',
+      modulation: "AM",
       symbolRate: 8000,
       carrierFrequency: 15e6,
       confidence: 0.94,
       decodedPayload: {
-        format: 'RTTY',
-        content: '[ENCRYPTED TRAFFIC]',
+        format: "RTTY",
+        content: "[ENCRYPTED TRAFFIC]",
         checksum: true,
       },
       spectralSignature: [],
-      recommendations: [
-        'Signal matches known broadcast pattern',
-        'Recommend continued monitoring',
-      ],
+      recommendations: ["Signal matches known broadcast pattern", "Recommend continued monitoring"],
     },
   },
 ];
 
 export const SIGINTDashboard: React.FC<SIGINTDashboardProps> = ({
-  streamKey = 'sigint:primary',
+  streamKey = "sigint:primary",
   initialFilters: _initialFilters,
   onDemodulationComplete,
   className,
 }) => {
   // State
-  const [viewMode, setViewMode] = useState<ViewMode>('combined');
-  const [panelLayout, setPanelLayout] = useState<PanelLayout>('default');
+  const [viewMode, setViewMode] = useState<ViewMode>("combined");
+  const [panelLayout, setPanelLayout] = useState<PanelLayout>("default");
   const [selectedStreamId, setSelectedStreamId] = useState<string | null>(null);
   const [subscribedIds, setSubscribedIds] = useState<Set<string>>(new Set());
   const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
@@ -256,7 +253,7 @@ export const SIGINTDashboard: React.FC<SIGINTDashboardProps> = ({
     const newTask: DemodulationTask = {
       id: `task-${Date.now()}`,
       signalId: streamId,
-      status: 'QUEUED',
+      status: "QUEUED",
       progress: 0,
       startedAt: Date.now(),
       agentId: `agent-demod-${Math.random().toString(36).slice(2, 8)}`,
@@ -276,9 +273,7 @@ export const SIGINTDashboard: React.FC<SIGINTDashboardProps> = ({
   );
 
   return (
-    <div
-      className={`flex flex-col h-full bg-slate-950 text-slate-100 ${className || ''}`}
-    >
+    <div className={`flex flex-col h-full bg-slate-950 text-slate-100 ${className || ""}`}>
       {/* Top bar */}
       <header className="flex items-center justify-between px-4 py-2 bg-slate-900 border-b border-slate-800">
         <div className="flex items-center gap-3">
@@ -287,17 +282,15 @@ export const SIGINTDashboard: React.FC<SIGINTDashboardProps> = ({
           </h1>
           <span
             className={`flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded ${
-              isConnected
-                ? 'bg-green-500/20 text-green-400'
-                : 'bg-red-500/20 text-red-400'
+              isConnected ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
             }`}
           >
             <span
               className={`w-1.5 h-1.5 rounded-full ${
-                isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'
+                isConnected ? "bg-green-500 animate-pulse" : "bg-red-500"
               }`}
             />
-            {isConnected ? 'Connected' : 'Disconnected'}
+            {isConnected ? "Connected" : "Disconnected"}
           </span>
           {metrics && (
             <span className="text-xs text-slate-400 font-mono">
@@ -309,14 +302,12 @@ export const SIGINTDashboard: React.FC<SIGINTDashboardProps> = ({
         <div className="flex items-center gap-2">
           {/* View mode selector */}
           <div className="flex items-center bg-slate-800 rounded-md p-0.5">
-            {(['waveform', 'spectrum', 'combined'] as ViewMode[]).map((mode) => (
+            {(["waveform", "spectrum", "combined"] as ViewMode[]).map((mode) => (
               <button
                 key={mode}
                 onClick={() => setViewMode(mode)}
                 className={`px-3 py-1 text-xs font-medium rounded transition-colors ${
-                  viewMode === mode
-                    ? 'bg-cyan-600 text-white'
-                    : 'text-slate-400 hover:text-white'
+                  viewMode === mode ? "bg-cyan-600 text-white" : "text-slate-400 hover:text-white"
                 }`}
               >
                 {mode.charAt(0).toUpperCase() + mode.slice(1)}
@@ -355,10 +346,10 @@ export const SIGINTDashboard: React.FC<SIGINTDashboardProps> = ({
         {/* Center - Visualizations */}
         <main className="flex-1 flex flex-col overflow-hidden p-4 gap-4">
           {/* Waveform display */}
-          {(viewMode === 'waveform' || viewMode === 'combined') && (
+          {(viewMode === "waveform" || viewMode === "combined") && (
             <div
               className={`bg-slate-900 rounded-lg border border-slate-800 overflow-hidden ${
-                viewMode === 'combined' ? 'flex-1' : 'h-full'
+                viewMode === "combined" ? "flex-1" : "h-full"
               }`}
             >
               <div className="px-4 py-2 bg-slate-800/50 border-b border-slate-700 flex items-center justify-between">
@@ -367,7 +358,7 @@ export const SIGINTDashboard: React.FC<SIGINTDashboardProps> = ({
                 </span>
                 {selectedStream && (
                   <span className="text-xs text-slate-400">
-                    {(selectedStream.centerFrequency / 1e6).toFixed(3)} MHz |{' '}
+                    {(selectedStream.centerFrequency / 1e6).toFixed(3)} MHz |{" "}
                     {selectedStream.modulation}
                   </span>
                 )}
@@ -377,9 +368,9 @@ export const SIGINTDashboard: React.FC<SIGINTDashboardProps> = ({
                   samples={displaySamples}
                   onMetrics={setMetrics}
                   config={{
-                    backgroundColor: '#0f172a',
-                    waveformColor: '#22d3ee',
-                    gridColor: '#334155',
+                    backgroundColor: "#0f172a",
+                    waveformColor: "#22d3ee",
+                    gridColor: "#334155",
                     showGrid: true,
                   }}
                 />
@@ -388,21 +379,17 @@ export const SIGINTDashboard: React.FC<SIGINTDashboardProps> = ({
           )}
 
           {/* Spectrum analyzer */}
-          {(viewMode === 'spectrum' || viewMode === 'combined') && (
+          {(viewMode === "spectrum" || viewMode === "combined") && (
             <div
               className={`bg-slate-900 rounded-lg border border-slate-800 overflow-hidden ${
-                viewMode === 'combined' ? 'h-48 flex-shrink-0' : 'h-full'
+                viewMode === "combined" ? "h-48 flex-shrink-0" : "h-full"
               }`}
             >
               <div className="px-4 py-2 bg-slate-800/50 border-b border-slate-700">
                 <span className="text-sm font-medium">Spectrum Analysis</span>
               </div>
               <div className="h-[calc(100%-40px)]">
-                <SpectrumAnalyzer
-                  samples={displaySamples}
-                  showPeaks={true}
-                  smoothing={0.85}
-                />
+                <SpectrumAnalyzer samples={displaySamples} showPeaks={true} smoothing={0.85} />
               </div>
             </div>
           )}
@@ -433,19 +420,21 @@ export const SIGINTDashboard: React.FC<SIGINTDashboardProps> = ({
       <footer className="flex items-center justify-between px-4 py-1.5 bg-slate-900 border-t border-slate-800 text-xs text-slate-400">
         <div className="flex items-center gap-4">
           <span>
-            <span className="text-cyan-400 font-medium">{streams.filter((s) => s.active).length}</span>{' '}
+            <span className="text-cyan-400 font-medium">
+              {streams.filter((s) => s.active).length}
+            </span>{" "}
             active streams
           </span>
           <span>
             <span className="text-amber-400 font-medium">
               {masintOverlays.reduce((sum, o) => sum + o.detections.length, 0)}
-            </span>{' '}
+            </span>{" "}
             MASINT detections
           </span>
           <span>
             <span className="text-purple-400 font-medium">
-              {demodTasks.filter((t) => t.status !== 'COMPLETED' && t.status !== 'FAILED').length}
-            </span>{' '}
+              {demodTasks.filter((t) => t.status !== "COMPLETED" && t.status !== "FAILED").length}
+            </span>{" "}
             demod tasks running
           </span>
         </div>

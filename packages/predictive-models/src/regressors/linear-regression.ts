@@ -3,7 +3,7 @@
  * Linear Regression and Regularized Variants
  */
 
-import type { Dataset, ModelPerformance } from '../types/index.js';
+import type { Dataset, ModelPerformance } from "../types/index.js";
 
 export interface RegressionConfig {
   fitIntercept: boolean;
@@ -28,7 +28,7 @@ export class LinearRegression {
    */
   fit(dataset: Dataset): void {
     const { features, labels } = dataset;
-    const X = features.map(row => [...row]);
+    const X = features.map((row) => [...row]);
     const y = labels as number[];
 
     // Normalize features if requested
@@ -38,7 +38,7 @@ export class LinearRegression {
 
     // Add intercept column if needed
     if (this.config.fitIntercept) {
-      X.forEach(row => row.unshift(1));
+      X.forEach((row) => row.unshift(1));
     }
 
     // Solve using normal equations: β = (X'X)^(-1)X'y
@@ -61,10 +61,10 @@ export class LinearRegression {
    */
   predict(features: number[][]): number[] {
     if (!this.fitted) {
-      throw new Error('Model must be fitted before prediction');
+      throw new Error("Model must be fitted before prediction");
     }
 
-    return features.map(sample => {
+    return features.map((sample) => {
       let prediction = this.intercept;
 
       for (let i = 0; i < this.coefficients.length; i++) {
@@ -102,7 +102,7 @@ export class LinearRegression {
     const n = X[0].length;
 
     for (let j = 0; j < n; j++) {
-      const column = X.map(row => row[j]);
+      const column = X.map((row) => row[j]);
       const mean = column.reduce((a, b) => a + b, 0) / column.length;
       const std = Math.sqrt(
         column.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / column.length
@@ -138,16 +138,14 @@ export class LinearRegression {
    * Matrix transpose
    */
   private transpose(matrix: number[][]): number[][] {
-    return matrix[0].map((_, colIndex) => matrix.map(row => row[colIndex]));
+    return matrix[0].map((_, colIndex) => matrix.map((row) => row[colIndex]));
   }
 
   /**
    * Matrix-vector multiplication
    */
   private matrixVectorMultiply(A: number[][], v: number[]): number[] {
-    return A.map(row =>
-      row.reduce((sum, val, i) => sum + val * v[i], 0)
-    );
+    return A.map((row) => row.reduce((sum, val, i) => sum + val * v[i], 0));
   }
 
   /**
@@ -195,7 +193,8 @@ export class LinearRegression {
    */
   private calculateMetrics(actual: number[], predicted: number[]): ModelPerformance {
     const n = actual.length;
-    let mae = 0, mse = 0;
+    let mae = 0,
+      mse = 0;
 
     for (let i = 0; i < n; i++) {
       const error = actual[i] - predicted[i];
@@ -211,7 +210,7 @@ export class LinearRegression {
     const meanActual = actual.reduce((a, b) => a + b, 0) / n;
     const ssTotal = actual.reduce((sum, val) => sum + Math.pow(val - meanActual, 2), 0);
     const ssResidual = actual.reduce((sum, val, i) => sum + Math.pow(val - predicted[i], 2), 0);
-    const r2 = 1 - (ssResidual / ssTotal);
+    const r2 = 1 - ssResidual / ssTotal;
 
     return { mae, rmse, r2 };
   }
@@ -233,11 +232,11 @@ export class RidgeRegression extends LinearRegression {
    */
   override fit(dataset: Dataset): void {
     const { features, labels } = dataset;
-    const X = features.map(row => [...row]);
+    const X = features.map((row) => [...row]);
     const y = labels as number[];
 
     // Add intercept column
-    X.forEach(row => row.unshift(1));
+    X.forEach((row) => row.unshift(1));
 
     // Solve: β = (X'X + αI)^(-1)X'y
     const XtX = this.matrixMultiply(this.transpose(X), X);
@@ -250,9 +249,9 @@ export class RidgeRegression extends LinearRegression {
     const Xty = this.matrixVectorMultiply(this.transpose(X), y);
     const beta = this.solveLinearSystem(XtX, Xty);
 
-    this['intercept'] = beta[0];
-    this['coefficients'] = beta.slice(1);
-    this['fitted'] = true;
+    this["intercept"] = beta[0];
+    this["coefficients"] = beta.slice(1);
+    this["fitted"] = true;
   }
 
   private matrixMultiply(A: number[][], B: number[][]): number[][] {
@@ -271,13 +270,11 @@ export class RidgeRegression extends LinearRegression {
   }
 
   private transpose(matrix: number[][]): number[][] {
-    return matrix[0].map((_, colIndex) => matrix.map(row => row[colIndex]));
+    return matrix[0].map((_, colIndex) => matrix.map((row) => row[colIndex]));
   }
 
   private matrixVectorMultiply(A: number[][], v: number[]): number[] {
-    return A.map(row =>
-      row.reduce((sum, val, i) => sum + val * v[i], 0)
-    );
+    return A.map((row) => row.reduce((sum, val, i) => sum + val * v[i], 0));
   }
 
   private solveLinearSystem(A: number[][], b: number[]): number[] {
@@ -325,11 +322,7 @@ export class LassoRegression {
   private tolerance: number;
   private fitted: boolean = false;
 
-  constructor(
-    alpha: number = 1.0,
-    maxIterations: number = 1000,
-    tolerance: number = 1e-4
-  ) {
+  constructor(alpha: number = 1.0, maxIterations: number = 1000, tolerance: number = 1e-4) {
     this.alpha = alpha;
     this.maxIterations = maxIterations;
     this.tolerance = tolerance;
@@ -379,9 +372,7 @@ export class LassoRegression {
       }
 
       // Check convergence
-      const maxChange = Math.max(
-        ...this.coefficients.map((c, i) => Math.abs(c - oldCoeffs[i]))
-      );
+      const maxChange = Math.max(...this.coefficients.map((c, i) => Math.abs(c - oldCoeffs[i])));
 
       if (maxChange < this.tolerance) {
         break;
@@ -396,10 +387,10 @@ export class LassoRegression {
    */
   predict(features: number[][]): number[] {
     if (!this.fitted) {
-      throw new Error('Model must be fitted before prediction');
+      throw new Error("Model must be fitted before prediction");
     }
 
-    return features.map(sample => {
+    return features.map((sample) => {
       let prediction = this.intercept;
       for (let i = 0; i < this.coefficients.length; i++) {
         prediction += this.coefficients[i] * sample[i];
@@ -414,6 +405,6 @@ export class LassoRegression {
   getSparseCoefficients(): Array<{ index: number; value: number }> {
     return this.coefficients
       .map((coef, i) => ({ index: i, value: coef }))
-      .filter(c => Math.abs(c.value) > 1e-10);
+      .filter((c) => Math.abs(c.value) > 1e-10);
   }
 }

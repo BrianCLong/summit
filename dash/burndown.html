@@ -68,22 +68,18 @@
 
     <script>
       const fmt = (n) =>
-        n == null
-          ? '—'
-          : typeof n === 'number'
-            ? n.toFixed(3).replace(/\.?0+$/, '')
-            : n;
-      const pct = (x) => (x == null ? '—' : Math.round(x * 100) + '%');
-      const rel = (s) => (s ? new Date(s).toLocaleTimeString() : '—');
+        n == null ? "—" : typeof n === "number" ? n.toFixed(3).replace(/\.?0+$/, "") : n;
+      const pct = (x) => (x == null ? "—" : Math.round(x * 100) + "%");
+      const rel = (s) => (s ? new Date(s).toLocaleTimeString() : "—");
 
       function meterRow(name, used, cap, extra) {
         const frac = cap && cap > 0 ? Math.min(1, used / cap) : null;
         const w = frac == null ? 0 : Math.round(frac * 100);
         return `
   <div class="row">
-    <div><b>${name}</b> ${cap ? `<span class="muted">(cap ${cap})</span>` : ''} ${extra || ''}</div>
+    <div><b>${name}</b> ${cap ? `<span class="muted">(cap ${cap})</span>` : ""} ${extra || ""}</div>
     <div class="bar"><div class="fill" style="width:${w}%"></div></div>
-    <div class="muted mono">${used} used ${cap ? `/ ${cap} (${w}%)` : ''}</div>
+    <div class="muted mono">${used} used ${cap ? `/ ${cap} (${w}%)` : ""}</div>
   </div>`;
       }
 
@@ -96,13 +92,12 @@
           const names = Object.keys(per).sort();
           names.forEach((m) => {
             const v = per[m];
-            const cap =
-              v.caps && v.caps.minute_rpm_cap ? v.caps.minute_rpm_cap : null;
+            const cap = v.caps && v.caps.minute_rpm_cap ? v.caps.minute_rpm_cap : null;
             html += meterRow(
               m,
               v.req,
               cap,
-              `<span class="muted">p50 ${fmt(v.p50_ms)}ms · p95 ${fmt(v.p95_ms)}ms · tok ${v.tokens}</span>`,
+              `<span class="muted">p50 ${fmt(v.p50_ms)}ms · p95 ${fmt(v.p95_ms)}ms · tok ${v.tokens}</span>`
             );
           });
           el.innerHTML = html || '<div class="muted">No data.</div>';
@@ -110,7 +105,7 @@
       }
 
       function renderPerf(d) {
-        const el = document.getElementById('perf');
+        const el = document.getElementById("perf");
         el.innerHTML = `
     <b>Instant Perf (last 60s)</b><br/>
     RPS: <span class="mono">${fmt(d.perf.rps_last_60s)}</span> &nbsp;·&nbsp;
@@ -121,7 +116,7 @@
       }
 
       function renderBudgets(d) {
-        const el = document.getElementById('budgets');
+        const el = document.getElementById("budgets");
         const B = d.budgets || {};
         const names = Object.keys(B);
         if (!names.length) {
@@ -131,8 +126,7 @@
         el.innerHTML = names
           .map((p) => {
             const b = B[p];
-            const frac =
-              b.fraction_used == null ? 0 : Math.round(b.fraction_used * 100);
+            const frac = b.fraction_used == null ? 0 : Math.round(b.fraction_used * 100);
             return `
       <div class="row">
         <div><b>${p}</b> <span class="muted">resets ${rel(b.resets_at)}</span></div>
@@ -140,17 +134,17 @@
         <div class="muted mono">${fmt(b.spent_usd)} / ${fmt(b.daily_budget_usd)} (${frac}%)</div>
       </div>`;
           })
-          .join('');
+          .join("");
       }
 
       async function tick() {
         try {
-          const r = await fetch('/status/burndown.json?_=' + Date.now());
+          const r = await fetch("/status/burndown.json?_=" + Date.now());
           const d = await r.json();
           renderPerf(d);
-          modelBlock('m1')(d);
-          modelBlock('h1')(d);
-          modelBlock('d1')(d);
+          modelBlock("m1")(d);
+          modelBlock("h1")(d);
+          modelBlock("d1")(d);
           renderBudgets(d);
         } catch (e) {
           console.error(e);

@@ -2,17 +2,17 @@
  * ThreatHuntingDashboard Tests
  */
 
-import React from 'react';
-import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { ThreatHuntingDashboard } from '../ThreatHuntingDashboard';
+import React from "react";
+import { describe, it, expect, jest, beforeEach, afterEach } from "@jest/globals";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { ThreatHuntingDashboard } from "../ThreatHuntingDashboard";
 
 // Mock fetch
 const mockFetch = jest.fn();
 global.fetch = mockFetch;
 
-describe('ThreatHuntingDashboard', () => {
+describe("ThreatHuntingDashboard", () => {
   beforeEach(() => {
     mockFetch.mockClear();
   });
@@ -21,49 +21,49 @@ describe('ThreatHuntingDashboard', () => {
     jest.clearAllMocks();
   });
 
-  describe('Rendering', () => {
-    it('should render the dashboard title', () => {
+  describe("Rendering", () => {
+    it("should render the dashboard title", () => {
       render(<ThreatHuntingDashboard />);
 
-      expect(screen.getByText('Threat Hunting Platform')).toBeInTheDocument();
+      expect(screen.getByText("Threat Hunting Platform")).toBeInTheDocument();
     });
 
-    it('should render the start hunt button', () => {
+    it("should render the start hunt button", () => {
       render(<ThreatHuntingDashboard />);
 
-      expect(screen.getByRole('button', { name: /start hunt/i })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /start hunt/i })).toBeInTheDocument();
     });
 
-    it('should render tabs for findings, IOCs, remediation, and report', () => {
+    it("should render tabs for findings, IOCs, remediation, and report", () => {
       render(<ThreatHuntingDashboard />);
 
-      expect(screen.getByRole('tab', { name: /findings/i })).toBeInTheDocument();
-      expect(screen.getByRole('tab', { name: /iocs/i })).toBeInTheDocument();
-      expect(screen.getByRole('tab', { name: /remediation/i })).toBeInTheDocument();
-      expect(screen.getByRole('tab', { name: /report/i })).toBeInTheDocument();
+      expect(screen.getByRole("tab", { name: /findings/i })).toBeInTheDocument();
+      expect(screen.getByRole("tab", { name: /iocs/i })).toBeInTheDocument();
+      expect(screen.getByRole("tab", { name: /remediation/i })).toBeInTheDocument();
+      expect(screen.getByRole("tab", { name: /report/i })).toBeInTheDocument();
     });
 
-    it('should show empty state when no findings', () => {
+    it("should show empty state when no findings", () => {
       render(<ThreatHuntingDashboard />);
 
       expect(screen.getByText(/no findings yet/i)).toBeInTheDocument();
     });
   });
 
-  describe('Configuration Dialog', () => {
-    it('should open configuration dialog when settings button is clicked', async () => {
+  describe("Configuration Dialog", () => {
+    it("should open configuration dialog when settings button is clicked", async () => {
       render(<ThreatHuntingDashboard />);
 
-      const settingsButton = screen.getByRole('button', { name: /configuration/i });
+      const settingsButton = screen.getByRole("button", { name: /configuration/i });
       await userEvent.click(settingsButton);
 
-      expect(screen.getByText('Hunt Configuration')).toBeInTheDocument();
+      expect(screen.getByText("Hunt Configuration")).toBeInTheDocument();
     });
 
-    it('should have default configuration values', async () => {
+    it("should have default configuration values", async () => {
       render(<ThreatHuntingDashboard />);
 
-      const settingsButton = screen.getByRole('button', { name: /configuration/i });
+      const settingsButton = screen.getByRole("button", { name: /configuration/i });
       await userEvent.click(settingsButton);
 
       // Check for time window input
@@ -71,57 +71,57 @@ describe('ThreatHuntingDashboard', () => {
       expect(timeWindowInput).toHaveValue(24);
     });
 
-    it('should close configuration dialog on cancel', async () => {
+    it("should close configuration dialog on cancel", async () => {
       render(<ThreatHuntingDashboard />);
 
-      const settingsButton = screen.getByRole('button', { name: /configuration/i });
+      const settingsButton = screen.getByRole("button", { name: /configuration/i });
       await userEvent.click(settingsButton);
 
-      const cancelButton = screen.getByRole('button', { name: /cancel/i });
+      const cancelButton = screen.getByRole("button", { name: /cancel/i });
       await userEvent.click(cancelButton);
 
       await waitFor(() => {
-        expect(screen.queryByText('Hunt Configuration')).not.toBeInTheDocument();
+        expect(screen.queryByText("Hunt Configuration")).not.toBeInTheDocument();
       });
     });
   });
 
-  describe('Starting a Hunt', () => {
-    it('should call API to start hunt when button is clicked', async () => {
+  describe("Starting a Hunt", () => {
+    it("should call API to start hunt when button is clicked", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () =>
           Promise.resolve({
-            huntId: 'test-hunt-123',
-            status: 'initializing',
+            huntId: "test-hunt-123",
+            status: "initializing",
             estimatedDuration: 120000,
           }),
       });
 
       render(<ThreatHuntingDashboard />);
 
-      const startButton = screen.getByRole('button', { name: /start hunt/i });
+      const startButton = screen.getByRole("button", { name: /start hunt/i });
       await userEvent.click(startButton);
 
       await waitFor(() => {
-        expect(mockFetch).toHaveBeenCalledWith('/api/v1/hunt/start', expect.any(Object));
+        expect(mockFetch).toHaveBeenCalledWith("/api/v1/hunt/start", expect.any(Object));
       });
     });
 
-    it('should show hunt status after starting', async () => {
+    it("should show hunt status after starting", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () =>
           Promise.resolve({
-            huntId: 'test-hunt-123',
-            status: 'initializing',
+            huntId: "test-hunt-123",
+            status: "initializing",
             estimatedDuration: 120000,
           }),
       });
 
       render(<ThreatHuntingDashboard />);
 
-      const startButton = screen.getByRole('button', { name: /start hunt/i });
+      const startButton = screen.getByRole("button", { name: /start hunt/i });
       await userEvent.click(startButton);
 
       await waitFor(() => {
@@ -129,50 +129,50 @@ describe('ThreatHuntingDashboard', () => {
       });
     });
 
-    it('should show cancel button when hunt is active', async () => {
+    it("should show cancel button when hunt is active", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () =>
           Promise.resolve({
-            huntId: 'test-hunt-123',
-            status: 'initializing',
+            huntId: "test-hunt-123",
+            status: "initializing",
             estimatedDuration: 120000,
           }),
       });
 
       render(<ThreatHuntingDashboard />);
 
-      const startButton = screen.getByRole('button', { name: /start hunt/i });
+      const startButton = screen.getByRole("button", { name: /start hunt/i });
       await userEvent.click(startButton);
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /cancel hunt/i })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /cancel hunt/i })).toBeInTheDocument();
       });
     });
 
-    it('should show error alert on API failure', async () => {
-      mockFetch.mockRejectedValueOnce(new Error('Failed to start hunt'));
+    it("should show error alert on API failure", async () => {
+      mockFetch.mockRejectedValueOnce(new Error("Failed to start hunt"));
 
       render(<ThreatHuntingDashboard />);
 
-      const startButton = screen.getByRole('button', { name: /start hunt/i });
+      const startButton = screen.getByRole("button", { name: /start hunt/i });
       await userEvent.click(startButton);
 
       await waitFor(() => {
-        expect(screen.getByRole('alert')).toBeInTheDocument();
+        expect(screen.getByRole("alert")).toBeInTheDocument();
       });
     });
   });
 
-  describe('Hunt Progress', () => {
-    it('should display progress bar during hunt', async () => {
+  describe("Hunt Progress", () => {
+    it("should display progress bar during hunt", async () => {
       mockFetch
         .mockResolvedValueOnce({
           ok: true,
           json: () =>
             Promise.resolve({
-              huntId: 'test-hunt-123',
-              status: 'initializing',
+              huntId: "test-hunt-123",
+              status: "initializing",
               estimatedDuration: 120000,
             }),
         })
@@ -180,10 +180,10 @@ describe('ThreatHuntingDashboard', () => {
           ok: true,
           json: () =>
             Promise.resolve({
-              huntId: 'test-hunt-123',
-              status: 'executing_queries',
+              huntId: "test-hunt-123",
+              status: "executing_queries",
               progress: 50,
-              currentPhase: 'Executing Graph Queries',
+              currentPhase: "Executing Graph Queries",
               findingsCount: 5,
               elapsedTimeMs: 30000,
               estimatedRemainingMs: 30000,
@@ -192,53 +192,53 @@ describe('ThreatHuntingDashboard', () => {
 
       render(<ThreatHuntingDashboard />);
 
-      const startButton = screen.getByRole('button', { name: /start hunt/i });
+      const startButton = screen.getByRole("button", { name: /start hunt/i });
       await userEvent.click(startButton);
 
       await waitFor(() => {
-        expect(screen.getByRole('progressbar')).toBeInTheDocument();
+        expect(screen.getByRole("progressbar")).toBeInTheDocument();
       });
     });
   });
 
-  describe('Tab Navigation', () => {
-    it('should switch to IOCs tab when clicked', async () => {
+  describe("Tab Navigation", () => {
+    it("should switch to IOCs tab when clicked", async () => {
       render(<ThreatHuntingDashboard />);
 
-      const iocsTab = screen.getByRole('tab', { name: /iocs/i });
+      const iocsTab = screen.getByRole("tab", { name: /iocs/i });
       await userEvent.click(iocsTab);
 
       expect(screen.getByText(/no iocs discovered yet/i)).toBeInTheDocument();
     });
 
-    it('should switch to remediation tab when clicked', async () => {
+    it("should switch to remediation tab when clicked", async () => {
       render(<ThreatHuntingDashboard />);
 
-      const remediationTab = screen.getByRole('tab', { name: /remediation/i });
+      const remediationTab = screen.getByRole("tab", { name: /remediation/i });
       await userEvent.click(remediationTab);
 
       expect(screen.getByText(/remediation actions will appear here/i)).toBeInTheDocument();
     });
 
-    it('should switch to report tab when clicked', async () => {
+    it("should switch to report tab when clicked", async () => {
       render(<ThreatHuntingDashboard />);
 
-      const reportTab = screen.getByRole('tab', { name: /report/i });
+      const reportTab = screen.getByRole("tab", { name: /report/i });
       await userEvent.click(reportTab);
 
       expect(screen.getByText(/report will be generated/i)).toBeInTheDocument();
     });
   });
 
-  describe('Metrics Display', () => {
-    it('should display metrics after hunt completion', async () => {
+  describe("Metrics Display", () => {
+    it("should display metrics after hunt completion", async () => {
       jest
         .mockResolvedValueOnce({
           ok: true,
           json: () =>
             Promise.resolve({
-              huntId: 'test-hunt-123',
-              status: 'completed',
+              huntId: "test-hunt-123",
+              status: "completed",
               estimatedDuration: 120000,
             }),
         })
@@ -246,10 +246,10 @@ describe('ThreatHuntingDashboard', () => {
           ok: true,
           json: () =>
             Promise.resolve({
-              huntId: 'test-hunt-123',
-              status: 'completed',
+              huntId: "test-hunt-123",
+              status: "completed",
               progress: 100,
-              currentPhase: 'Hunt Complete',
+              currentPhase: "Hunt Complete",
               findingsCount: 10,
               elapsedTimeMs: 60000,
               estimatedRemainingMs: 0,
@@ -261,16 +261,16 @@ describe('ThreatHuntingDashboard', () => {
             Promise.resolve({
               findings: [
                 {
-                  id: 'finding-1',
-                  severity: 'HIGH',
+                  id: "finding-1",
+                  severity: "HIGH",
                   confidence: 0.85,
-                  classification: 'LATERAL_MOVEMENT',
+                  classification: "LATERAL_MOVEMENT",
                   entitiesInvolved: [],
                   iocsIdentified: [],
                   ttpsMatched: [],
                   recommendedActions: [],
                   autoRemediationEligible: false,
-                  evidenceSummary: 'Test finding',
+                  evidenceSummary: "Test finding",
                 },
               ],
               metrics: {
@@ -286,7 +286,7 @@ describe('ThreatHuntingDashboard', () => {
 
       render(<ThreatHuntingDashboard />);
 
-      const startButton = screen.getByRole('button', { name: /start hunt/i });
+      const startButton = screen.getByRole("button", { name: /start hunt/i });
       await userEvent.click(startButton);
 
       // Wait for metrics to appear (would need to wait for status polling)
@@ -294,28 +294,28 @@ describe('ThreatHuntingDashboard', () => {
     });
   });
 
-  describe('Severity Colors', () => {
-    it('should apply correct colors for severity chips', () => {
+  describe("Severity Colors", () => {
+    it("should apply correct colors for severity chips", () => {
       // This is a visual test - would need visual regression testing
       // or snapshot testing to fully verify
       expect(true).toBe(true);
     });
   });
 
-  describe('Accessibility', () => {
-    it('should have proper ARIA labels', () => {
+  describe("Accessibility", () => {
+    it("should have proper ARIA labels", () => {
       render(<ThreatHuntingDashboard />);
 
       // Check for tab roles
-      const tabs = screen.getAllByRole('tab');
+      const tabs = screen.getAllByRole("tab");
       expect(tabs.length).toBeGreaterThan(0);
 
       // Check for button roles
-      const buttons = screen.getAllByRole('button');
+      const buttons = screen.getAllByRole("button");
       expect(buttons.length).toBeGreaterThan(0);
     });
 
-    it('should be keyboard navigable', async () => {
+    it("should be keyboard navigable", async () => {
       render(<ThreatHuntingDashboard />);
 
       // Tab to first focusable element
@@ -327,30 +327,30 @@ describe('ThreatHuntingDashboard', () => {
   });
 });
 
-describe('HuntQueryBuilder', () => {
-  const { HuntQueryBuilder } = require('../HuntQueryBuilder');
+describe("HuntQueryBuilder", () => {
+  const { HuntQueryBuilder } = require("../HuntQueryBuilder");
 
-  it('should render the query builder', () => {
+  it("should render the query builder", () => {
     render(<HuntQueryBuilder />);
 
-    expect(screen.getByText('Hunt Query Builder')).toBeInTheDocument();
+    expect(screen.getByText("Hunt Query Builder")).toBeInTheDocument();
   });
 
-  it('should have template categories', () => {
+  it("should have template categories", () => {
     render(<HuntQueryBuilder />);
 
-    expect(screen.getByRole('tab', { name: /lateral movement/i })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /lateral movement/i })).toBeInTheDocument();
   });
 
-  it('should have a query editor', () => {
+  it("should have a query editor", () => {
     render(<HuntQueryBuilder />);
 
-    expect(screen.getByText('Query Editor')).toBeInTheDocument();
+    expect(screen.getByText("Query Editor")).toBeInTheDocument();
   });
 
-  it('should have a run query button', () => {
+  it("should have a run query button", () => {
     render(<HuntQueryBuilder />);
 
-    expect(screen.getByRole('button', { name: /run query/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /run query/i })).toBeInTheDocument();
   });
 });

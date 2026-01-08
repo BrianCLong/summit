@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-const fs = require('fs');
+const fs = require("fs");
 let ok = true;
 const dirs = process.argv.slice(2);
 if (dirs.length === 0) {
-  console.warn('No coverage directories provided');
+  console.warn("No coverage directories provided");
   process.exit(0);
 }
 for (const dir of dirs) {
@@ -13,7 +13,7 @@ for (const dir of dirs) {
     ok = false;
     continue;
   }
-  const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+  const data = JSON.parse(fs.readFileSync(file, "utf8"));
   const pct = data.total.lines.pct;
   if (pct < 90) {
     console.error(`Coverage for ${dir} is ${pct}% (<90%)`);

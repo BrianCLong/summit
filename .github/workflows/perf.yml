@@ -3,11 +3,11 @@ name: Performance Baseline (k6)
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 2 * * *' # Run nightly at 2 AM
+    - cron: "0 2 * * *" # Run nightly at 2 AM
   pull_request:
     paths:
-      - 'k6/**'
-      - '.github/workflows/perf.yml'
+      - "k6/**"
+      - ".github/workflows/perf.yml"
 
 jobs:
   perf:

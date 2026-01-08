@@ -6,7 +6,7 @@
  * @module pve/utils/logger
  */
 
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+export type LogLevel = "debug" | "info" | "warn" | "error";
 
 export interface LogEntry {
   level: LogLevel;
@@ -26,7 +26,7 @@ export interface LoggerConfig {
   level: LogLevel;
   prefix?: string;
   silent?: boolean;
-  format?: 'json' | 'text';
+  format?: "json" | "text";
 }
 
 const LOG_LEVELS: Record<LogLevel, number> = {
@@ -36,15 +36,11 @@ const LOG_LEVELS: Record<LogLevel, number> = {
   error: 3,
 };
 
-export function createLogger(config: LoggerConfig = { level: 'info' }): Logger {
-  const { level, prefix = '[PVE]', silent = false, format = 'text' } = config;
+export function createLogger(config: LoggerConfig = { level: "info" }): Logger {
+  const { level, prefix = "[PVE]", silent = false, format = "text" } = config;
   const minLevel = LOG_LEVELS[level];
 
-  function log(
-    logLevel: LogLevel,
-    message: string,
-    context?: Record<string, unknown>,
-  ): void {
+  function log(logLevel: LogLevel, message: string, context?: Record<string, unknown>): void {
     if (silent || LOG_LEVELS[logLevel] < minLevel) {
       return;
     }
@@ -56,42 +52,39 @@ export function createLogger(config: LoggerConfig = { level: 'info' }): Logger {
       context,
     };
 
-    const output =
-      format === 'json'
-        ? JSON.stringify(entry)
-        : formatTextLog(entry, prefix);
+    const output = format === "json" ? JSON.stringify(entry) : formatTextLog(entry, prefix);
 
     switch (logLevel) {
-      case 'debug':
-      case 'info':
+      case "debug":
+      case "info":
         console.log(output);
         break;
-      case 'warn':
+      case "warn":
         console.warn(output);
         break;
-      case 'error':
+      case "error":
         console.error(output);
         break;
     }
   }
 
   return {
-    debug: (message, context) => log('debug', message, context),
-    info: (message, context) => log('info', message, context),
-    warn: (message, context) => log('warn', message, context),
-    error: (message, context) => log('error', message, context),
+    debug: (message, context) => log("debug", message, context),
+    info: (message, context) => log("info", message, context),
+    warn: (message, context) => log("warn", message, context),
+    error: (message, context) => log("error", message, context),
   };
 }
 
 function formatTextLog(entry: LogEntry, prefix: string): string {
   const levelColors: Record<LogLevel, string> = {
-    debug: '\x1b[36m', // cyan
-    info: '\x1b[32m', // green
-    warn: '\x1b[33m', // yellow
-    error: '\x1b[31m', // red
+    debug: "\x1b[36m", // cyan
+    info: "\x1b[32m", // green
+    warn: "\x1b[33m", // yellow
+    error: "\x1b[31m", // red
   };
 
-  const reset = '\x1b[0m';
+  const reset = "\x1b[0m";
   const color = levelColors[entry.level];
   const levelStr = entry.level.toUpperCase().padEnd(5);
 

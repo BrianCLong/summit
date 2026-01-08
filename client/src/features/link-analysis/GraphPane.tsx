@@ -1,18 +1,10 @@
-import React, { useEffect } from 'react';
-import ReactFlow, { Background, Controls, MiniMap } from 'reactflow';
-import 'reactflow/dist/style.css';
-import { useAnalysisStore } from './store';
+import React, { useEffect } from "react";
+import ReactFlow, { Background, Controls, MiniMap } from "reactflow";
+import "reactflow/dist/style.css";
+import { useAnalysisStore } from "./store";
 
 export const GraphPane: React.FC = () => {
-  const {
-    timeRange,
-    streaming,
-    startStream,
-    stopStream,
-    nodes,
-    edges,
-    error,
-  } = useAnalysisStore();
+  const { timeRange, streaming, startStream, stopStream, nodes, edges, error } = useAnalysisStore();
 
   useEffect(() => {
     startStream();
@@ -20,7 +12,7 @@ export const GraphPane: React.FC = () => {
   }, [startStream, stopStream]);
 
   return (
-    <div data-testid="graph-pane" style={{ height: '100%', position: 'relative' }}>
+    <div data-testid="graph-pane" style={{ height: "100%", position: "relative" }}>
       <div className="flex items-center justify-between px-4 py-2 text-sm bg-slate-900 text-slate-100">
         <div className="flex items-center gap-3">
           <span className="font-semibold">Streaming graph</span>

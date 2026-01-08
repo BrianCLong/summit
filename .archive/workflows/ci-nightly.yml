@@ -1,7 +1,7 @@
 name: nightly-health
 on:
   schedule:
-    - cron: '0 6 * * *'
+    - cron: "0 6 * * *"
 jobs:
   e2e:
     uses: ./.github/workflows/ci-reusable-test.yml

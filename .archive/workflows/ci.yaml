@@ -19,7 +19,7 @@ jobs:
           version: 8
 
       - uses: actions/setup-node@v4
-        with: { node-version: '20', cache: 'pnpm' }
+        with: { node-version: "20", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint && pnpm test -- --ci --reporters=default
       - name: Build image
@@ -29,10 +29,10 @@ jobs:
         uses: aquasecurity/trivy-action@0.24.0
         with:
           image-ref: ${{ env.IMAGE_NAME }}:${{ github.sha }}
-          exit-code: '1'
+          exit-code: "1"
           ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
+          vuln-type: "os,library"
+          severity: "CRITICAL,HIGH"
       - name: SBOM (Syft)
         uses: anchore/sbom-action@v0
         with:

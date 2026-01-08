@@ -25,6 +25,7 @@ This report identifies **8 security vulnerabilities** (1 critical, 5 high, 2 mod
 ### 🔴 CRITICAL Severity
 
 #### 1. parse-url - Server-Side Request Forgery (SSRF)
+
 - **CVE:** CVE-2022-2900
 - **Current Version:** 6.0.5
 - **Patched Version:** ≥8.1.0
@@ -39,6 +40,7 @@ This report identifies **8 security vulnerabilities** (1 critical, 5 high, 2 mod
 ### 🟠 HIGH Severity
 
 #### 2. parse-path - Authorization Bypass
+
 - **CVE:** CVE-2022-0624
 - **Current Version:** 4.0.4
 - **Patched Version:** ≥5.0.0
@@ -49,6 +51,7 @@ This report identifies **8 security vulnerabilities** (1 critical, 5 high, 2 mod
 - **Challenge:** Transitive dependency
 
 #### 3. parse-url - URL Parsing Vulnerability
+
 - **CVE:** CVE-2022-3224
 - **Current Version:** 6.0.5
 - **Patched Version:** ≥8.1.0
@@ -58,6 +61,7 @@ This report identifies **8 security vulnerabilities** (1 critical, 5 high, 2 mod
 - **Recommendation:** Same fix as CRITICAL item #1
 
 #### 4. xlsx - Prototype Pollution
+
 - **CVE:** CVE-2023-30533
 - **Current Version:** 0.18.5
 - **Patched Version:** ≥0.19.3 (NOT on npm)
@@ -71,6 +75,7 @@ This report identifies **8 security vulnerabilities** (1 critical, 5 high, 2 mod
   3. Remove dependency if not actively used
 
 #### 5. xlsx - Regular Expression Denial of Service
+
 - **CVE:** CVE-2024-22363
 - **Current Version:** 0.18.5
 - **Patched Version:** ≥0.20.2 (NOT on npm)
@@ -80,6 +85,7 @@ This report identifies **8 security vulnerabilities** (1 critical, 5 high, 2 mod
 - **Recommendation:** Same as #4 - package abandoned
 
 #### 6. moment - Inefficient Regular Expression Complexity
+
 - **CVE:** CVE-2022-31129
 - **Current Version:** 2.29.3
 - **Patched Version:** ≥2.29.4
@@ -92,6 +98,7 @@ This report identifies **8 security vulnerabilities** (1 critical, 5 high, 2 mod
   - Native `Temporal` API (future standard)
 
 #### 7. glob - Command Injection
+
 - **CVE:** CVE-2025-64756
 - **Current Version:** 11.0.3
 - **Patched Version:** ≥11.1.0
@@ -106,6 +113,7 @@ This report identifies **8 security vulnerabilities** (1 critical, 5 high, 2 mod
 ### 🟡 MODERATE Severity
 
 #### 8. esbuild - CORS Vulnerability in Dev Server
+
 - **CVE:** GHSA-67mh-4wv8-2f99
 - **Current Version:** 0.18.20
 - **Patched Version:** ≥0.25.0
@@ -121,14 +129,14 @@ This report identifies **8 security vulnerabilities** (1 critical, 5 high, 2 mod
 
 ### Root Workspace
 
-| Package | Current | Latest | Type | Priority |
-|---------|---------|--------|------|----------|
-| @swc/core | 1.15.2 | 1.15.3 | dev | Medium |
-| @typescript-eslint/eslint-plugin | 8.46.4 | 8.47.0 | dev | Low |
-| @typescript-eslint/parser | 8.46.4 | 8.47.0 | dev | Low |
-| typescript-eslint | 8.46.4 | 8.47.0 | dev | Low |
-| eslint-plugin-jest | 29.1.0 | 29.2.0 | dev | Low |
-| markdownlint-cli | 0.45.0 | 0.46.0 | dev | Low |
+| Package                          | Current | Latest | Type | Priority |
+| -------------------------------- | ------- | ------ | ---- | -------- |
+| @swc/core                        | 1.15.2  | 1.15.3 | dev  | Medium   |
+| @typescript-eslint/eslint-plugin | 8.46.4  | 8.47.0 | dev  | Low      |
+| @typescript-eslint/parser        | 8.46.4  | 8.47.0 | dev  | Low      |
+| typescript-eslint                | 8.46.4  | 8.47.0 | dev  | Low      |
+| eslint-plugin-jest               | 29.1.0  | 29.2.0 | dev  | Low      |
+| markdownlint-cli                 | 0.45.0  | 0.46.0 | dev  | Low      |
 
 ### Server Workspace
 
@@ -171,8 +179,10 @@ This report identifies **8 security vulnerabilities** (1 critical, 5 high, 2 mod
 **🎯 Goal:** Eliminate critical and high-severity vulnerabilities
 
 #### 1.1 Fix parse-url / parse-path SSRF & Authorization Bypass
+
 - **Approach:** Update transitive dependency chain
 - **Commands:**
+
   ```bash
   # Option A: Update apollo package (if available)
   pnpm update apollo --recursive
@@ -188,14 +198,17 @@ This report identifies **8 security vulnerabilities** (1 critical, 5 high, 2 mod
     }
   }
   ```
+
 - **Testing:** Full smoke test, verify apollo/git-url-parse functionality
 - **Risk:** Low - patch-level security fixes
 
 #### 1.2 Fix xlsx Vulnerabilities
+
 - **Approach:** Replace with maintained alternative OR download from CDN
 - **Recommended Path:** Replace with `exceljs`
 - **Analysis Needed:** Verify `node-nlp` usage of xlsx
 - **Commands:**
+
   ```bash
   # Check if node-nlp actually uses xlsx features
   grep -r "xlsx" server/node_modules/node-nlp/
@@ -208,10 +221,12 @@ This report identifies **8 security vulnerabilities** (1 critical, 5 high, 2 mod
   # Option A: Manually download xlsx 0.20.2+ from https://cdn.sheetjs.com/
   # Option B: Use pnpm overrides with vendored version
   ```
+
 - **Testing:** Verify NLP features, integration tests
 - **Risk:** Medium - requires dependency analysis
 
 #### 1.3 Fix glob Command Injection
+
 - **Approach:** Direct update
 - **Commands:**
   ```bash
@@ -221,11 +236,13 @@ This report identifies **8 security vulnerabilities** (1 critical, 5 high, 2 mod
 - **Risk:** Low - backwards-compatible
 
 #### 1.4 Fix moment ReDoS
+
 - **Approach Option A (Quick):** Patch upgrade
   ```bash
   pnpm update moment@^2.29.4 --recursive
   ```
 - **Approach Option B (Recommended):** Migrate to modern alternative
+
   ```bash
   # Replace with date-fns or dayjs
   pnpm remove moment --filter client
@@ -233,6 +250,7 @@ This report identifies **8 security vulnerabilities** (1 critical, 5 high, 2 mod
 
   # Refactor code using moment -> date-fns
   ```
+
 - **Testing:** Date parsing, formatting, locale functionality
 - **Risk:** Low (patch) / Medium (migration)
 
@@ -243,6 +261,7 @@ This report identifies **8 security vulnerabilities** (1 critical, 5 high, 2 mod
 **🎯 Goal:** Update outdated packages and replace deprecated dependencies
 
 #### 2.1 Update Development Dependencies
+
 ```bash
 # TypeScript ESLint tooling
 pnpm update @typescript-eslint/eslint-plugin@^8.47.0 --filter "."
@@ -256,10 +275,12 @@ pnpm update @swc/core@^1.15.3 --filter "."
 pnpm update eslint-plugin-jest@^29.2.0 --filter "."
 pnpm update markdownlint-cli@^0.46.0 --filter "."
 ```
+
 - **Testing:** Run `pnpm lint`, `pnpm typecheck`, `pnpm build`
 - **Risk:** Very Low - dev dependencies
 
 #### 2.2 Fix esbuild CORS Vulnerability
+
 ```bash
 # Update via storybook
 pnpm update esbuild@^0.25.0 --recursive
@@ -274,10 +295,12 @@ pnpm update esbuild@^0.25.0 --recursive
   }
 }
 ```
+
 - **Testing:** Verify dev server, Storybook functionality
 - **Risk:** Low - dev environment only
 
 #### 2.3 Migrate apollo-server-express
+
 - **Follow:** https://www.apollographql.com/docs/apollo-server/migration
 - **Steps:**
   1. Install `@apollo/server` and `@as-integrations/express4`
@@ -288,6 +311,7 @@ pnpm update esbuild@^0.25.0 --recursive
 - **Risk:** Medium - core functionality
 
 #### 2.4 Remove Deprecated Type Packages
+
 ```bash
 # Remove deprecated type packages
 pnpm remove @types/express-rate-limit @types/pino-http @types/uuid --filter server
@@ -295,6 +319,7 @@ pnpm remove @types/express-rate-limit @types/pino-http @types/uuid --filter serv
 # Ensure parent packages are updated
 pnpm update express-rate-limit pino-http uuid --filter server
 ```
+
 - **Testing:** TypeScript compilation
 - **Risk:** Very Low
 
@@ -305,6 +330,7 @@ pnpm update express-rate-limit pino-http uuid --filter server
 **🎯 Goal:** Comprehensive dependency modernization
 
 #### 3.1 Audit All Transitive Dependencies
+
 ```bash
 # Generate full dependency tree
 pnpm list --depth=Infinity --json > dependency-tree.json
@@ -314,6 +340,7 @@ pnpm audit --recursive --json > full-audit.json
 ```
 
 #### 3.2 Update All Patch/Minor Versions
+
 ```bash
 # Update all patch versions (safest)
 pnpm update --recursive
@@ -323,6 +350,7 @@ pnpm outdated --recursive
 ```
 
 #### 3.3 Establish Dependency Health Monitoring
+
 - **Tool:** Dependabot (already configured?)
 - **Cadence:** Weekly security scans, monthly dependency updates
 - **CI Integration:** Fail on high/critical vulnerabilities
@@ -334,15 +362,18 @@ pnpm outdated --recursive
 **🎯 Goal:** Maintain healthy dependency ecosystem
 
 #### 4.1 Lock File Hygiene
+
 - Review pnpm-lock.yaml changes in PRs
 - Regenerate lock file quarterly: `pnpm install --force`
 
 #### 4.2 Dependency Update Policy
+
 - **Security patches:** Immediate (within 24-48 hours)
 - **Minor updates:** Monthly review and batch update
 - **Major updates:** Quarterly evaluation, planned migration
 
 #### 4.3 Deprecation Monitoring
+
 - Quarterly review of deprecated packages
 - Proactive migration before EOL
 
@@ -353,6 +384,7 @@ pnpm outdated --recursive
 ### For Each Phase
 
 1. **Pre-Update Baseline**
+
    ```bash
    make smoke
    pnpm test
@@ -366,6 +398,7 @@ pnpm outdated --recursive
    - Update code if necessary
 
 3. **Post-Update Validation**
+
    ```bash
    # Clean install
    rm -rf node_modules pnpm-lock.yaml
@@ -398,16 +431,19 @@ pnpm outdated --recursive
 ### Quick Wins - Safe to Implement Now
 
 1. **Update glob** (fixes command injection, low risk)
+
    ```bash
    pnpm update glob@^11.1.0 --recursive
    ```
 
 2. **Update moment** (fixes ReDoS, low risk)
+
    ```bash
    pnpm update moment@^2.29.4 --recursive
    ```
 
 3. **Update dev dependencies** (no runtime impact)
+
    ```bash
    pnpm update @swc/core@^1.15.3 \
                @typescript-eslint/eslint-plugin@^8.47.0 \
@@ -447,17 +483,20 @@ pnpm outdated --recursive
 ## Risk Assessment
 
 ### Low Risk (✅ Implement immediately)
+
 - glob update (11.0.3 → 11.1.0)
 - moment update (2.29.3 → 2.29.4)
 - All dev dependency updates
 - esbuild update via override
 
 ### Medium Risk (⚠️ Test thoroughly)
+
 - parse-url/parse-path override
 - apollo-server-express migration
 - Removing deprecated @types packages
 
 ### High Risk (🔍 Requires analysis)
+
 - xlsx vulnerability (abandoned package)
 - node-nlp dependency chain
 
@@ -485,18 +524,21 @@ pnpm outdated --recursive
 ## Success Criteria
 
 ### Phase 1 Complete When:
+
 - ✅ Zero critical vulnerabilities
 - ✅ Zero high-severity vulnerabilities
 - ✅ All golden path tests pass
 - ✅ No regressions in core functionality
 
 ### Phase 2 Complete When:
+
 - ✅ All dev dependencies updated
 - ✅ apollo-server-express migrated
 - ✅ All deprecated packages removed
 - ✅ Full test suite passes
 
 ### Phase 3 Complete When:
+
 - ✅ <5 moderate vulnerabilities (transitive only)
 - ✅ All direct dependencies on latest stable
 - ✅ Dependency monitoring automated
@@ -524,6 +566,7 @@ pnpm outdated --recursive
 ### Alternative Approaches
 
 #### For xlsx (Abandoned Package)
+
 1. **Vendor the fixed version** from cdn.sheetjs.com
 2. **Fork and maintain** (high effort, not recommended)
 3. **Replace with exceljs** (modern, maintained, similar API)
@@ -531,6 +574,7 @@ pnpm outdated --recursive
 5. **Find alternative NLP library** without xlsx dependency
 
 #### For moment (Maintenance Mode)
+
 1. **Patch to 2.29.4** (quick fix, but still in maintenance mode)
 2. **Migrate to date-fns** (tree-shakeable, modern)
 3. **Migrate to dayjs** (moment-compatible API, smaller bundle)
@@ -541,6 +585,7 @@ pnpm outdated --recursive
 ## Contact & Support
 
 For questions or assistance with this upgrade plan:
+
 - **Created by:** Claude (AI Assistant)
 - **Date:** 2025-11-20
 - **Session:** claude/dependency-health-check-01GCzSDgwRVoPwkg1XBEqox4

@@ -3,13 +3,13 @@ on:
   workflow_dispatch:
     inputs:
       chart:
-        description: 'Chart path (e.g., charts/maestro)'
+        description: "Chart path (e.g., charts/maestro)"
         required: true
       namespace:
-        description: 'K8s namespace'
+        description: "K8s namespace"
         required: true
       release:
-        description: 'Helm release name'
+        description: "Helm release name"
         required: true
 permissions:
   contents: read

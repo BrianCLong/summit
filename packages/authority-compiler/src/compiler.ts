@@ -5,7 +5,7 @@
  * Supports hot-reloading of policy updates.
  */
 
-import { PolicyBundle, Authority, PolicyDecision, Operation } from './schema/policy.schema';
+import { PolicyBundle, Authority, PolicyDecision, Operation } from "./schema/policy.schema";
 
 export interface CompilerOptions {
   /** Enable strict mode - reject policies with warnings */
@@ -127,7 +127,7 @@ export class AuthorityCompiler {
         const sharedPerms = a.permissions.filter((p) => b.permissions.includes(p));
         if (sharedPerms.length > 0) {
           warnings.push(
-            `Authorities ${a.id} and ${b.id} have overlapping permissions: ${sharedPerms.join(', ')}`
+            `Authorities ${a.id} and ${b.id} have overlapping permissions: ${sharedPerms.join(", ")}`
           );
         }
       }

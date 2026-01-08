@@ -65,6 +65,7 @@ This document describes the architecture for IntelGraph's deepfake and synthetic
 
 **Technology**: TypeScript, BullMQ, Sharp, FFmpeg
 **Responsibilities**:
+
 - Accept media uploads via GraphQL mutations
 - Validate file formats and sizes
 - Extract metadata (duration, resolution, codec, EXIF)
@@ -73,6 +74,7 @@ This document describes the architecture for IntelGraph's deepfake and synthetic
 - Enqueue detection jobs
 
 **Key Files**:
+
 - `services/media-ingestion-worker/src/ingestion.service.ts`
 - `services/media-ingestion-worker/src/media-processor.ts`
 - `services/media-ingestion-worker/src/storage.service.ts`
@@ -81,6 +83,7 @@ This document describes the architecture for IntelGraph's deepfake and synthetic
 
 **Technology**: Python 3.11, FastAPI, PyTorch, OpenCV, Librosa
 **Responsibilities**:
+
 - Load and manage ML models
 - Perform inference on media files
 - Generate confidence scores and explanations
@@ -89,14 +92,15 @@ This document describes the architecture for IntelGraph's deepfake and synthetic
 
 **Detection Models**:
 
-| Model Type | Architecture | Input | Output |
-|------------|--------------|-------|--------|
-| Video Face Manipulation | EfficientNet-B7 + LSTM | Video frames (256x256) | Confidence score (0-1) |
-| Audio Deepfake | Spectrogram CNN + RNN | Mel spectrogram | Confidence score (0-1) |
-| Image Manipulation | XceptionNet | Image (299x299) | Confidence score (0-1) |
-| Ensemble | Weighted voting | All detector outputs | Final confidence + breakdown |
+| Model Type              | Architecture           | Input                  | Output                       |
+| ----------------------- | ---------------------- | ---------------------- | ---------------------------- |
+| Video Face Manipulation | EfficientNet-B7 + LSTM | Video frames (256x256) | Confidence score (0-1)       |
+| Audio Deepfake          | Spectrogram CNN + RNN  | Mel spectrogram        | Confidence score (0-1)       |
+| Image Manipulation      | XceptionNet            | Image (299x299)        | Confidence score (0-1)       |
+| Ensemble                | Weighted voting        | All detector outputs   | Final confidence + breakdown |
 
 **Key Files**:
+
 - `services/deepfake-detection-service/src/api.py` (FastAPI app)
 - `services/deepfake-detection-service/src/detectors/video_detector.py`
 - `services/deepfake-detection-service/src/detectors/audio_detector.py`
@@ -107,6 +111,7 @@ This document describes the architecture for IntelGraph's deepfake and synthetic
 
 **Technology**: TypeScript, BullMQ, GraphQL
 **Responsibilities**:
+
 - Coordinate multi-stage detection workflow
 - Route jobs to appropriate detectors
 - Aggregate results from multiple detectors
@@ -115,12 +120,14 @@ This document describes the architecture for IntelGraph's deepfake and synthetic
 - Update Neo4j graph with detection results
 
 **Workflow**:
+
 ```
 Media Ingested → Extract Features → Detect (Video/Audio/Image)
     → Ensemble Scoring → Store Results → Check Thresholds → Alert
 ```
 
 **Key Files**:
+
 - `services/detection-pipeline-orchestrator/src/orchestrator.service.ts`
 - `services/detection-pipeline-orchestrator/src/workflow.engine.ts`
 - `services/detection-pipeline-orchestrator/src/graph.service.ts`
@@ -129,6 +136,7 @@ Media Ingested → Extract Features → Detect (Video/Audio/Image)
 
 **Technology**: TypeScript, PostgreSQL, MinIO
 **Responsibilities**:
+
 - Store model metadata (version, training date, metrics)
 - Manage model binaries in object storage
 - Support A/B testing and canary deployments
@@ -136,6 +144,7 @@ Media Ingested → Extract Features → Detect (Video/Audio/Image)
 - Trigger retraining when drift detected
 
 **Key Files**:
+
 - `services/model-registry-service/src/registry.service.ts`
 - `services/model-registry-service/src/versioning.service.ts`
 - `services/model-registry-service/src/drift-detector.ts`
@@ -144,6 +153,7 @@ Media Ingested → Extract Features → Detect (Video/Audio/Image)
 
 **Technology**: TypeScript, EventEmitter, WebSockets
 **Responsibilities**:
+
 - Consume detection results from orchestrator
 - Apply alert rules (confidence thresholds, severity)
 - Notify via multiple channels (UI, email, webhook)
@@ -151,6 +161,7 @@ Media Ingested → Extract Features → Detect (Video/Audio/Image)
 - Integrate with investigation workflow
 
 **Key Files**:
+
 - `services/alert-service/src/alert.service.ts`
 - `services/alert-service/src/rules.engine.ts`
 - `services/alert-service/src/notifiers/`
@@ -588,20 +599,12 @@ type Query {
   ): [DeepfakeAlert!]!
 
   # Model registry
-  models(
-    modelType: String
-    status: String
-    limit: Int = 20
-  ): [MLModel!]!
+  models(modelType: String, status: String, limit: Int = 20): [MLModel!]!
 
   model(id: ID!): MLModel
 
   # Performance metrics
-  modelPerformance(
-    modelId: ID!
-    startDate: DateTime
-    endDate: DateTime
-  ): [ModelPerformanceMetric!]!
+  modelPerformance(modelId: ID!, startDate: DateTime, endDate: DateTime): [ModelPerformanceMetric!]!
 }
 
 # Mutations
@@ -611,17 +614,11 @@ type Mutation {
   uploadMedia(input: UploadMediaInput!): Media!
 
   # Trigger detection on existing media
-  detectDeepfake(
-    mediaId: ID!
-    config: DetectionConfigInput
-  ): DeepfakeDetection!
+  detectDeepfake(mediaId: ID!, config: DetectionConfigInput): DeepfakeDetection!
 
   # Alert management
   acknowledgeAlert(alertId: ID!): DeepfakeAlert!
-  resolveAlert(
-    alertId: ID!
-    resolutionNotes: String
-  ): DeepfakeAlert!
+  resolveAlert(alertId: ID!, resolutionNotes: String): DeepfakeAlert!
   markAlertFalsePositive(alertId: ID!): DeepfakeAlert!
 
   # Analyst feedback
@@ -653,22 +650,26 @@ type Subscription {
 **Architecture**: EfficientNet-B7 (feature extraction) + LSTM (temporal coherence)
 
 **Input**:
+
 - Video frames sampled at 1 FPS
 - Faces detected and cropped to 256x256
 - Normalized to [-1, 1]
 
 **Output**:
+
 - Per-frame confidence scores
 - Temporal consistency score
 - Final aggregate score
 
 **Training Data**:
+
 - FaceForensics++ (FF++)
 - Celeb-DF
 - DFDC (Deepfake Detection Challenge)
 - ~500k real + 500k fake videos
 
 **Performance**:
+
 - Accuracy: 94.2% on held-out test set
 - AUC-ROC: 0.978
 - False Positive Rate: 3.8% @ 95% recall
@@ -679,21 +680,25 @@ type Subscription {
 **Architecture**: ResNet-34 on Mel spectrograms + BiLSTM
 
 **Input**:
+
 - Audio resampled to 16 kHz
 - Mel spectrogram (128 bins, 256 frames)
 - Augmented with time/frequency masking
 
 **Output**:
+
 - Per-segment confidence scores (5-second segments)
 - Aggregate score via weighted average
 
 **Training Data**:
+
 - ASVspoof 2019 dataset
 - FakeAVCeleb
 - In-the-wild scraped data
 - ~200k real + 200k fake audio clips
 
 **Performance**:
+
 - Equal Error Rate (EER): 2.1%
 - AUC-ROC: 0.991
 - Inference time: ~0.8 sec/minute of audio
@@ -703,21 +708,25 @@ type Subscription {
 **Architecture**: XceptionNet fine-tuned on manipulation datasets
 
 **Input**:
+
 - Images resized to 299x299
 - RGB color space
 - Data augmentation: rotation, flip, color jitter
 
 **Output**:
+
 - Manipulation probability
 - Heatmap of manipulated regions (Grad-CAM)
 
 **Training Data**:
+
 - CASIA v2.0
 - Columbia dataset
 - Synthetic manipulations via Photoshop automation
 - ~150k real + 150k manipulated images
 
 **Performance**:
+
 - Accuracy: 96.7%
 - AUC-ROC: 0.989
 - Inference time: ~0.3 sec/image
@@ -727,12 +736,14 @@ type Subscription {
 **Strategy**: Weighted voting based on modality-specific confidence
 
 **Weights**:
+
 - Video (face): 0.4
 - Audio: 0.35
 - Image: 0.25
 - (Adjusted if modality not present)
 
 **Combination**:
+
 ```
 final_score = (w_video * s_video + w_audio * s_audio + w_image * s_image) / sum(weights)
 is_synthetic = final_score > threshold (default: 0.5)
@@ -744,30 +755,34 @@ is_synthetic = final_score > threshold (default: 0.5)
 
 ### Throughput Targets
 
-| Media Type | Target Throughput | Latency (P95) |
-|------------|-------------------|---------------|
-| Image | 100 images/sec | < 1 sec |
-| Audio (1 min) | 50 clips/sec | < 3 sec |
-| Video (30 sec) | 10 videos/sec | < 10 sec |
+| Media Type     | Target Throughput | Latency (P95) |
+| -------------- | ----------------- | ------------- |
+| Image          | 100 images/sec    | < 1 sec       |
+| Audio (1 min)  | 50 clips/sec      | < 3 sec       |
+| Video (30 sec) | 10 videos/sec     | < 10 sec      |
 
 ### Scaling Strategy
 
 **Horizontal Scaling**:
+
 - Detection service runs as multiple replicas (HPA)
 - Target CPU utilization: 70%
 - Min replicas: 2, Max replicas: 20
 
 **GPU Acceleration**:
+
 - NVIDIA Tesla T4 GPUs for inference
 - Batch inference (batch size: 8)
 - TensorRT optimization for 2x speedup
 
 **Caching**:
+
 - Redis cache for recently processed media (TTL: 24 hours)
 - Cache key: SHA-256(media_url + model_version)
 - Cache hit rate target: > 30%
 
 **Async Processing**:
+
 - BullMQ job queue with Redis backend
 - Priority queues: critical (P1), high (P2), normal (P3), low (P4)
 - Retry strategy: exponential backoff, max 3 retries
@@ -775,11 +790,13 @@ is_synthetic = final_score > threshold (default: 0.5)
 ### Resource Requirements
 
 **Per Detection Service Pod**:
+
 - CPU: 2 cores (request), 4 cores (limit)
 - Memory: 4 GB (request), 8 GB (limit)
 - GPU: 1 Tesla T4 (optional, 3x speedup)
 
 **Storage**:
+
 - PostgreSQL: ~100 GB (1M detections @ ~100 KB each)
 - MinIO: 10 TB initial (media files)
 - Neo4j: 50 GB (graph data)
@@ -805,6 +822,7 @@ is_synthetic = final_score > threshold (default: 0.5)
 ### Audit Logging
 
 All operations logged to `audit_svc`:
+
 - Media uploads (who, when, source)
 - Detection requests (user, media, config)
 - Alert actions (acknowledge, resolve, false positive)
@@ -821,6 +839,7 @@ All operations logged to `audit_svc`:
 ### Metrics (Prometheus)
 
 **Detection Service**:
+
 - `deepfake_detection_requests_total{detector_type, status}`
 - `deepfake_detection_duration_seconds{detector_type, percentile}`
 - `deepfake_confidence_score{detector_type}` (histogram)
@@ -828,16 +847,19 @@ All operations logged to `audit_svc`:
 - `deepfake_gpu_utilization_percent`
 
 **Orchestrator**:
+
 - `deepfake_jobs_queued{priority}`
 - `deepfake_jobs_completed_total{status}`
 - `deepfake_jobs_processing_duration_seconds{percentile}`
 
 **Alerts**:
+
 - `deepfake_alerts_created_total{severity}`
 - `deepfake_alerts_resolved_total{resolution_type}`
 - `deepfake_alert_time_to_resolution_seconds{severity, percentile}`
 
 **Model Performance**:
+
 - `deepfake_model_accuracy{model_name, version}`
 - `deepfake_model_drift_score{model_name, drift_type}`
 
@@ -870,11 +892,13 @@ All operations logged to `audit_svc`:
 ### Tracing (OpenTelemetry)
 
 Distributed traces for:
+
 - End-to-end detection workflow (upload → detect → alert)
 - Multi-detector ensemble operations
 - Database queries and external API calls
 
 Trace attributes:
+
 - `media.id`, `media.type`, `media.size_bytes`
 - `detector.type`, `model.version`
 - `confidence.score`, `is_synthetic`
@@ -882,6 +906,7 @@ Trace attributes:
 ### Alerting Rules
 
 Prometheus alerts:
+
 - `DeepfakeDetectionServiceDown` - Service unavailable > 5 min
 - `DeepfakeQueueBacklog` - Jobs queued > 1000 for > 15 min
 - `DeepfakeHighFalsePositiveRate` - FPR > 10% over 1 hour
@@ -908,6 +933,7 @@ make up-deepfake
 ```
 
 **Endpoints**:
+
 - Detection API: http://localhost:8000 (Swagger docs: /docs)
 - Model Registry: http://localhost:8001
 - MinIO Console: http://localhost:9001
@@ -934,6 +960,7 @@ helm install deepfake-detection ./helm/deepfake-detection \
 ```
 
 **Health Checks**:
+
 - Liveness: `/health/live` (every 10s)
 - Readiness: `/health/ready` (every 5s)
 - Startup: `/health/startup` (initial delay: 30s)
@@ -941,6 +968,7 @@ helm install deepfake-detection ./helm/deepfake-detection \
 ### Model Deployment
 
 **Model Storage**:
+
 ```
 s3://intelgraph-models/deepfake/
 ├── video-detector/
@@ -959,6 +987,7 @@ s3://intelgraph-models/deepfake/
 ```
 
 **Deployment Process**:
+
 1. Upload model to S3 via `model-registry-service` API
 2. Create model metadata in PostgreSQL
 3. Mark model as `testing` status
@@ -973,6 +1002,7 @@ s3://intelgraph-models/deepfake/
 ### Unit Tests
 
 **Detection Service** (`pytest`):
+
 - Model loading and initialization
 - Inference on sample inputs
 - Ensemble voting logic
@@ -980,6 +1010,7 @@ s3://intelgraph-models/deepfake/
 - Error handling (corrupt files, OOM)
 
 **Orchestrator** (`jest`):
+
 - Job queue operations
 - Workflow state machine
 - Result aggregation
@@ -990,6 +1021,7 @@ s3://intelgraph-models/deepfake/
 ### Integration Tests
 
 **End-to-End Workflow**:
+
 1. Upload test video (known deepfake)
 2. Verify detection job created
 3. Wait for job completion
@@ -998,6 +1030,7 @@ s3://intelgraph-models/deepfake/
 6. Verify Neo4j graph updated
 
 **Database Integration**:
+
 - PostgreSQL: CRUD operations on detections
 - Neo4j: Provenance chain creation
 - Redis: Job queue reliability
@@ -1005,12 +1038,14 @@ s3://intelgraph-models/deepfake/
 ### Performance Tests
 
 **Load Testing** (`k6`):
+
 - Ramp up to 100 concurrent uploads
 - Sustain 50 req/sec for 10 minutes
 - Verify P95 latency < 15 sec
 - Verify no errors
 
 **Stress Testing**:
+
 - Large file uploads (500 MB video)
 - Burst of 1000 requests in 1 second
 - Service restart under load
@@ -1018,11 +1053,13 @@ s3://intelgraph-models/deepfake/
 ### Model Validation
 
 **Benchmark Suite**:
+
 - Run model on standardized test set (10k samples)
 - Verify accuracy, precision, recall within 2% of training metrics
 - Check for bias (demographic parity)
 
 **Adversarial Testing**:
+
 - Test on adversarially perturbed samples
 - Verify robustness to common evasion techniques
 
@@ -1055,12 +1092,14 @@ s3://intelgraph-models/deepfake/
 ### Incident Response
 
 **Severity Levels**:
+
 - **P0**: Detection service completely down → Page on-call
 - **P1**: High error rate (> 10%) → Alert team channel
 - **P2**: Elevated latency (P95 > 30s) → Create ticket
 - **P3**: Model drift detected → Schedule review
 
 **Escalation**:
+
 1. On-call engineer investigates (< 15 min)
 2. If not resolved in 30 min, escalate to team lead
 3. If not resolved in 1 hour, escalate to engineering manager
@@ -1068,11 +1107,13 @@ s3://intelgraph-models/deepfake/
 ### Maintenance Windows
 
 **Model Retraining**:
+
 - Frequency: Monthly (or when drift detected)
 - Duration: 4-6 hours
 - Requires: Labeled data from analyst feedback
 
 **Infrastructure Updates**:
+
 - Frequency: Quarterly
 - Duration: 2 hours
 - Requires: Blue/green deployment
@@ -1151,6 +1192,7 @@ This deepfake detection system provides IntelGraph with:
 ✅ **Future-proof architecture** for continuous improvement
 
 **Next Steps**:
+
 1. Deploy to staging environment
 2. Run validation suite on production data samples
 3. Conduct red team exercises

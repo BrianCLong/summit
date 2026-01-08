@@ -1,6 +1,7 @@
 # Key Rotation Runbook
 
 ## Overview
+
 This runbook details the procedure for rotating the Ed25519 signing keys used by the Prov-Ledger service.
 
 ## Procedure
@@ -21,5 +22,6 @@ This runbook details the procedure for rotating the Ed25519 signing keys used by
     - Rotate the verifier trust set in all consumer services.
 
 ## Verification
+
 - Verify that new signatures are valid against the new public key.
 - Verify that old signatures are still verifiable (if retention policy allows) or rejected as expected.

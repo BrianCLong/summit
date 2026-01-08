@@ -1,4 +1,4 @@
-export type Severity = 'error' | 'warning';
+export type Severity = "error" | "warning";
 
 export interface Position {
   line: number;
@@ -38,7 +38,7 @@ export interface InterpolationPolicy {
   /** Provide fallback values when env vars are missing. */
   defaults?: Record<string, string>;
   /** How to behave when env vars are missing. */
-  onMissing?: 'error' | 'warn' | 'ignore';
+  onMissing?: "error" | "warn" | "ignore";
   /** Require all variables referenced to be in allowList. */
   requireAllowList?: boolean;
 }

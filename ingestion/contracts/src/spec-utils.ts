@@ -1,4 +1,4 @@
-import { ContractSpec, ConformanceResult, ContractField } from './types.js';
+import { ContractSpec, ConformanceResult, ContractField } from "./types.js";
 
 export function normalizeSpec(spec: ContractSpec): string {
   const sortedFields = [...spec.fields].sort((a, b) => a.name.localeCompare(b.name));
@@ -10,14 +10,18 @@ export function normalizeSpec(spec: ContractSpec): string {
 }
 
 function validateType(field: ContractField, value: unknown): boolean {
-  if (field.type === 'array') {return Array.isArray(value);}
-  if (field.type === 'object') {return typeof value === 'object' && value !== null && !Array.isArray(value);}
+  if (field.type === "array") {
+    return Array.isArray(value);
+  }
+  if (field.type === "object") {
+    return typeof value === "object" && value !== null && !Array.isArray(value);
+  }
   return typeof value === field.type;
 }
 
 export function validateConformance(
   spec: ContractSpec,
-  payload: Record<string, unknown>,
+  payload: Record<string, unknown>
 ): ConformanceResult {
   const missingFields: string[] = [];
   const nullabilityViolations: string[] = [];
@@ -41,11 +45,15 @@ export function validateConformance(
   });
 
   const totalChecks = spec.fields.length * 2;
-  const passedChecks = totalChecks - missingFields.length - nullabilityViolations.length - typeViolations.length;
+  const passedChecks =
+    totalChecks - missingFields.length - nullabilityViolations.length - typeViolations.length;
   const score = Math.max(0, Math.round((passedChecks / totalChecks) * 100));
 
   return {
-    conforms: missingFields.length === 0 && nullabilityViolations.length === 0 && typeViolations.length === 0,
+    conforms:
+      missingFields.length === 0 &&
+      nullabilityViolations.length === 0 &&
+      typeViolations.length === 0,
     missingFields,
     nullabilityViolations,
     typeViolations,
@@ -66,10 +74,15 @@ export function diffSpecs(previous: ContractSpec, current: ContractSpec): string
       return;
     }
     const updated = currentMap.get(name)!;
-    if (field.type !== updated.type) {diffs.push(`Field ${name} type changed: ${field.type} -> ${updated.type}`);}
-    if (field.nullable !== updated.nullable)
-      {diffs.push(`Field ${name} nullability changed: ${field.nullable} -> ${updated.nullable}`);}
-    if (field.unit !== updated.unit) {diffs.push(`Field ${name} unit changed: ${field.unit} -> ${updated.unit}`);}
+    if (field.type !== updated.type) {
+      diffs.push(`Field ${name} type changed: ${field.type} -> ${updated.type}`);
+    }
+    if (field.nullable !== updated.nullable) {
+      diffs.push(`Field ${name} nullability changed: ${field.nullable} -> ${updated.nullable}`);
+    }
+    if (field.unit !== updated.unit) {
+      diffs.push(`Field ${name} unit changed: ${field.unit} -> ${updated.unit}`);
+    }
   });
 
   currentMap.forEach((field, name) => {

@@ -18,10 +18,7 @@ import {ErrorBoundary} from './components/ErrorBoundary';
 import {SplashScreen} from './screens/SplashScreen';
 
 // Ignore specific warnings
-LogBox.ignoreLogs([
-  'Non-serializable values were found in the navigation state',
-  'Require cycle:',
-]);
+LogBox.ignoreLogs(['Non-serializable values were found in the navigation state', 'Require cycle:']);
 
 // Create React Query client
 const queryClient = new QueryClient({

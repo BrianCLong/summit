@@ -1,5 +1,5 @@
-import { Plugin, PluginManifest } from '../types/plugin.js';
-import { PluginSandbox } from './PluginSandbox.js';
+import { Plugin, PluginManifest } from "../types/plugin.js";
+import { PluginSandbox } from "./PluginSandbox.js";
 
 /**
  * Plugin loader with sandboxing and isolation
@@ -42,9 +42,7 @@ export class DefaultPluginLoader {
 
     // Validate version if specified
     if (version && manifest.version !== version) {
-      throw new Error(
-        `Version mismatch: requested ${version}, found ${manifest.version}`
-      );
+      throw new Error(`Version mismatch: requested ${version}, found ${manifest.version}`);
     }
 
     // Load plugin code in sandbox
@@ -121,9 +119,7 @@ export class DefaultPluginLoader {
       const { default: manifest } = await import(manifestPath);
       return manifest;
     } catch (error) {
-      throw new Error(
-        `Failed to load plugin manifest from ${pluginPath}: ${error}`
-      );
+      throw new Error(`Failed to load plugin manifest from ${pluginPath}: ${error}`);
     }
   }
 
@@ -132,9 +128,7 @@ export class DefaultPluginLoader {
    */
   private clearRequireCache(pluginPath: string): void {
     // Find all cached modules from this plugin
-    const cacheKeys = Object.keys(require.cache).filter(key =>
-      key.startsWith(pluginPath)
-    );
+    const cacheKeys = Object.keys(require.cache).filter((key) => key.startsWith(pluginPath));
 
     // Delete from cache
     for (const key of cacheKeys) {

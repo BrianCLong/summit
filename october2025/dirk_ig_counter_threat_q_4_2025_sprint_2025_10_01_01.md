@@ -207,8 +207,8 @@ description: Detects deploys missing SBOM/provenance/signatures
 logsource: { product: ci, service: conductor }
 detection:
   selection:
-    policy_decision: 'deny'
-    event: 'release_gate.evaluate'
+    policy_decision: "deny"
+    event: "release_gate.evaluate"
   condition: selection
 level: high
 tags: [policy, release, slsa, sbom]

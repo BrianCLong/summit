@@ -87,7 +87,9 @@ export function GraphCanvas({
       frameCountRef.current++
       if (time - lastTimeRef.current >= 1000) {
         setFps(
-          Math.round((frameCountRef.current * 1000) / (time - lastTimeRef.current))
+          Math.round(
+            (frameCountRef.current * 1000) / (time - lastTimeRef.current)
+          )
         )
         frameCountRef.current = 0
         lastTimeRef.current = time
@@ -114,7 +116,9 @@ export function GraphCanvas({
   }, [])
 
   useEffect(() => {
-    if (!svgRef.current || entities.length === 0) {return}
+    if (!svgRef.current || entities.length === 0) {
+      return
+    }
 
     const svg = select(svgRef.current)
     svg.selectAll('*').remove()
@@ -276,7 +280,9 @@ export function GraphCanvas({
       .call(
         drag<SVGGElement, GraphNode>()
           .on('start', (event, d) => {
-            if (!event.active) {simulation.alphaTarget(0.3).restart()}
+            if (!event.active) {
+              simulation.alphaTarget(0.3).restart()
+            }
             d.fx = d.x
             d.fy = d.y
           })
@@ -285,7 +291,9 @@ export function GraphCanvas({
             d.fy = event.y
           })
           .on('end', (event, d) => {
-            if (!event.active) {simulation.alphaTarget(0)}
+            if (!event.active) {
+              simulation.alphaTarget(0)
+            }
             d.fx = null
             d.fy = null
           })
@@ -325,7 +333,7 @@ export function GraphCanvas({
       .style('pointer-events', 'none')
       .text(d =>
         d.entity.name.length > 15
-          ? `${d.entity.name.slice(0, 15)  }...`
+          ? `${d.entity.name.slice(0, 15)}...`
           : d.entity.name
       )
 

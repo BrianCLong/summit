@@ -2,7 +2,7 @@ export interface HealthSnapshot {
   overallScore: number;
   workstreams: {
     name: string;
-    status: 'healthy' | 'degraded' | 'incident';
+    status: "healthy" | "degraded" | "incident";
     score: number;
   }[];
   activeAlerts: Alert[];
@@ -11,7 +11,7 @@ export interface HealthSnapshot {
 export interface Alert {
   id: string;
   title: string;
-  severity: 'critical' | 'warning' | 'info';
+  severity: "critical" | "warning" | "info";
   timestamp: string;
 }
 
@@ -27,8 +27,8 @@ export interface DashboardStats {
 export interface AutonomicLoop {
   id: string;
   name: string;
-  type: 'reliability' | 'cost' | 'performance' | 'safety';
-  status: 'active' | 'paused';
+  type: "reliability" | "cost" | "performance" | "safety";
+  status: "active" | "paused";
   lastDecision: string;
   lastRun: string;
   config: Record<string, any>;
@@ -47,7 +47,7 @@ export interface DashboardData {
 export interface Run {
   id: string;
   pipeline: string;
-  status: 'queued' | 'running' | 'succeeded' | 'failed' | 'cancelled';
+  status: "queued" | "running" | "succeeded" | "failed" | "cancelled";
   started_at: string;
   duration_ms: number;
   cost: number;
@@ -59,7 +59,7 @@ export interface AgentProfile {
   name: string;
   role: string;
   model: string;
-  status: 'healthy' | 'degraded';
+  status: "healthy" | "degraded";
   metrics: {
     successRate: number;
     latencyP95: number;
@@ -70,7 +70,7 @@ export interface AgentProfile {
 
 export interface MergeTrain {
   id: string;
-  status: 'active' | 'paused' | 'locked';
+  status: "active" | "paused" | "locked";
   queueLength: number;
   throughput: number;
   activePRs: PullRequest[];
@@ -80,7 +80,7 @@ export interface PullRequest {
   number: number;
   title: string;
   author: string;
-  status: 'queued' | 'running' | 'passed' | 'failed' | 'manual_check';
+  status: "queued" | "running" | "passed" | "failed" | "manual_check";
   url: string;
 }
 
@@ -91,5 +91,5 @@ export interface AuditEvent {
   action: string;
   resource: string;
   details: string;
-  status: 'allowed' | 'denied';
+  status: "allowed" | "denied";
 }

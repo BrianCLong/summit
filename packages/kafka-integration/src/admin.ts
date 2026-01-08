@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment, @typescript-eslint/no-non-null-assertion */
 // @ts-nocheck
-import { Kafka, Admin, ITopicConfig } from 'kafkajs';
-import pino from 'pino';
-import { KafkaClusterConfig, TopicConfig } from './types';
+import { Kafka, Admin, ITopicConfig } from "kafkajs";
+import pino from "pino";
+import { KafkaClusterConfig, TopicConfig } from "./types";
 
-const logger = pino({ name: 'kafka-admin' });
+const logger = pino({ name: "kafka-admin" });
 
 /**
  * Kafka administration client for topic and cluster management
@@ -31,7 +31,7 @@ export class KafkaAdmin {
   async connect(): Promise<void> {
     this.admin = this.kafka.admin();
     await this.admin.connect();
-    logger.info('Kafka admin connected');
+    logger.info("Kafka admin connected");
   }
 
   /**
@@ -39,7 +39,7 @@ export class KafkaAdmin {
    */
   async createTopic(config: TopicConfig): Promise<boolean> {
     if (!this.admin) {
-      throw new Error('Admin not connected');
+      throw new Error("Admin not connected");
     }
 
     try {
@@ -52,42 +52,42 @@ export class KafkaAdmin {
 
       if (config.retentionMs) {
         topicConfig.configEntries!.push({
-          name: 'retention.ms',
+          name: "retention.ms",
           value: String(config.retentionMs),
         });
       }
 
       if (config.cleanupPolicy) {
         topicConfig.configEntries!.push({
-          name: 'cleanup.policy',
+          name: "cleanup.policy",
           value: config.cleanupPolicy,
         });
       }
 
       if (config.compressionType) {
         topicConfig.configEntries!.push({
-          name: 'compression.type',
+          name: "compression.type",
           value: config.compressionType,
         });
       }
 
       if (config.minInsyncReplicas) {
         topicConfig.configEntries!.push({
-          name: 'min.insync.replicas',
+          name: "min.insync.replicas",
           value: String(config.minInsyncReplicas),
         });
       }
 
       if (config.segmentMs) {
         topicConfig.configEntries!.push({
-          name: 'segment.ms',
+          name: "segment.ms",
           value: String(config.segmentMs),
         });
       }
 
       if (config.segmentBytes) {
         topicConfig.configEntries!.push({
-          name: 'segment.bytes',
+          name: "segment.bytes",
           value: String(config.segmentBytes),
         });
       }
@@ -97,14 +97,14 @@ export class KafkaAdmin {
         waitForLeaders: true,
       });
 
-      logger.info({ topic: config.name }, 'Topic created');
+      logger.info({ topic: config.name }, "Topic created");
       return true;
     } catch (error: any) {
-      if (error.message.includes('already exists')) {
-        logger.warn({ topic: config.name }, 'Topic already exists');
+      if (error.message.includes("already exists")) {
+        logger.warn({ topic: config.name }, "Topic already exists");
         return false;
       }
-      logger.error({ error, topic: config.name }, 'Failed to create topic');
+      logger.error({ error, topic: config.name }, "Failed to create topic");
       throw error;
     }
   }
@@ -114,7 +114,7 @@ export class KafkaAdmin {
    */
   async deleteTopic(topic: string): Promise<void> {
     if (!this.admin) {
-      throw new Error('Admin not connected');
+      throw new Error("Admin not connected");
     }
 
     try {
@@ -122,9 +122,9 @@ export class KafkaAdmin {
         topics: [topic],
       });
 
-      logger.info({ topic }, 'Topic deleted');
+      logger.info({ topic }, "Topic deleted");
     } catch (error) {
-      logger.error({ error, topic }, 'Failed to delete topic');
+      logger.error({ error, topic }, "Failed to delete topic");
       throw error;
     }
   }
@@ -134,14 +134,14 @@ export class KafkaAdmin {
    */
   async listTopics(): Promise<string[]> {
     if (!this.admin) {
-      throw new Error('Admin not connected');
+      throw new Error("Admin not connected");
     }
 
     try {
       const topics = await this.admin.listTopics();
       return topics;
     } catch (error) {
-      logger.error({ error }, 'Failed to list topics');
+      logger.error({ error }, "Failed to list topics");
       throw error;
     }
   }
@@ -151,7 +151,7 @@ export class KafkaAdmin {
    */
   async getTopicMetadata(topic: string): Promise<any> {
     if (!this.admin) {
-      throw new Error('Admin not connected');
+      throw new Error("Admin not connected");
     }
 
     try {
@@ -160,7 +160,7 @@ export class KafkaAdmin {
       });
       return metadata.topics[0];
     } catch (error) {
-      logger.error({ error, topic }, 'Failed to get topic metadata');
+      logger.error({ error, topic }, "Failed to get topic metadata");
       throw error;
     }
   }
@@ -170,7 +170,7 @@ export class KafkaAdmin {
    */
   async createPartitions(topic: string, count: number): Promise<void> {
     if (!this.admin) {
-      throw new Error('Admin not connected');
+      throw new Error("Admin not connected");
     }
 
     try {
@@ -183,9 +183,9 @@ export class KafkaAdmin {
         ],
       });
 
-      logger.info({ topic, count }, 'Partitions created');
+      logger.info({ topic, count }, "Partitions created");
     } catch (error) {
-      logger.error({ error, topic }, 'Failed to create partitions');
+      logger.error({ error, topic }, "Failed to create partitions");
       throw error;
     }
   }
@@ -195,7 +195,7 @@ export class KafkaAdmin {
    */
   async getConsumerGroupOffsets(groupId: string): Promise<any> {
     if (!this.admin) {
-      throw new Error('Admin not connected');
+      throw new Error("Admin not connected");
     }
 
     try {
@@ -204,7 +204,7 @@ export class KafkaAdmin {
       });
       return offsets;
     } catch (error) {
-      logger.error({ error, groupId }, 'Failed to get consumer group offsets');
+      logger.error({ error, groupId }, "Failed to get consumer group offsets");
       throw error;
     }
   }
@@ -219,7 +219,7 @@ export class KafkaAdmin {
     offset: string
   ): Promise<void> {
     if (!this.admin) {
-      throw new Error('Admin not connected');
+      throw new Error("Admin not connected");
     }
 
     try {
@@ -229,9 +229,9 @@ export class KafkaAdmin {
         partitions: [{ partition, offset }],
       });
 
-      logger.info({ groupId, topic, partition, offset }, 'Offsets reset');
+      logger.info({ groupId, topic, partition, offset }, "Offsets reset");
     } catch (error) {
-      logger.error({ error, groupId }, 'Failed to reset offsets');
+      logger.error({ error, groupId }, "Failed to reset offsets");
       throw error;
     }
   }
@@ -243,7 +243,7 @@ export class KafkaAdmin {
     if (this.admin) {
       await this.admin.disconnect();
       this.admin = null;
-      logger.info('Kafka admin disconnected');
+      logger.info("Kafka admin disconnected");
     }
   }
 }

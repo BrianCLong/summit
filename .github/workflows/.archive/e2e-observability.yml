@@ -4,22 +4,22 @@ on:
   workflow_dispatch:
     inputs:
       collect_traces:
-        description: 'Collect OpenTelemetry traces'
+        description: "Collect OpenTelemetry traces"
         type: boolean
         default: true
       benchmark_mode:
-        description: 'Run in benchmark mode (multiple iterations)'
+        description: "Run in benchmark mode (multiple iterations)"
         type: boolean
         default: false
   schedule:
     # Run observability metrics collection every 6 hours
-    - cron: '0 */6 * * *'
+    - cron: "0 */6 * * *"
   pull_request:
     paths:
-      - 'e2e/**'
-      - 'client/tests/**'
-      - 'observability/**'
-      - '.github/workflows/e2e*.yml'
+      - "e2e/**"
+      - "client/tests/**"
+      - "observability/**"
+      - ".github/workflows/e2e*.yml"
 
 env:
   OTEL_EXPORTER_OTLP_ENDPOINT: http://localhost:4317
@@ -78,7 +78,7 @@ jobs:
         with:
           node-version: 18
           cache: npm
-          cache-dependency-path: '**/package-lock.json'
+          cache-dependency-path: "**/package-lock.json"
 
       - name: Install dependencies
         run: |

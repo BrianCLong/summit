@@ -15,8 +15,8 @@ import type {
   PropagandaCampaign,
   AnalysisQuery,
   AnalysisResult,
-  CounterNarrativeOpportunity
-} from './types.js';
+  CounterNarrativeOpportunity,
+} from "./types.js";
 
 export class PropagandaAnalyzer {
   private content: Map<string, PropagandaContent> = new Map();
@@ -101,29 +101,27 @@ export class PropagandaAnalyzer {
     let filtered = Array.from(this.content.values());
 
     if (query.organizations && query.organizations.length > 0) {
-      filtered = filtered.filter(c =>
-        c.organization && query.organizations!.includes(c.organization)
+      filtered = filtered.filter(
+        (c) => c.organization && query.organizations!.includes(c.organization)
       );
     }
 
     if (query.contentTypes && query.contentTypes.length > 0) {
-      filtered = filtered.filter(c => query.contentTypes!.includes(c.type));
+      filtered = filtered.filter((c) => query.contentTypes!.includes(c.type));
     }
 
     if (query.themes && query.themes.length > 0) {
-      filtered = filtered.filter(c =>
-        c.narrative.themes.some(t => query.themes!.includes(t.type))
+      filtered = filtered.filter((c) =>
+        c.narrative.themes.some((t) => query.themes!.includes(t.type))
       );
     }
 
     if (query.languages && query.languages.length > 0) {
-      filtered = filtered.filter(c => query.languages!.includes(c.language));
+      filtered = filtered.filter((c) => query.languages!.includes(c.language));
     }
 
     if (query.minReach !== undefined) {
-      filtered = filtered.filter(c =>
-        c.distribution.reach >= query.minReach!
-      );
+      filtered = filtered.filter((c) => c.distribution.reach >= query.minReach!);
     }
 
     const opportunities = this.identifyCounterNarrativeOpportunities(filtered);
@@ -134,7 +132,7 @@ export class PropagandaAnalyzer {
       campaigns: Array.from(this.campaigns.values()),
       narratives: Array.from(this.narratives.values()),
       trends: this.calculateTrends(filtered),
-      counterNarrativeOpportunities: opportunities
+      counterNarrativeOpportunities: opportunities,
     };
   }
 
@@ -158,11 +156,11 @@ export class PropagandaAnalyzer {
    */
   async trackRemoval(contentId: string, platform: string): Promise<void> {
     const content = this.content.get(contentId);
-    if (!content) {return;}
+    if (!content) {
+      return;
+    }
 
-    const platformDist = content.distribution.platforms.find(
-      p => p.platform === platform
-    );
+    const platformDist = content.distribution.platforms.find((p) => p.platform === platform);
     if (platformDist) {
       platformDist.removed = new Date();
       platformDist.active = false;
@@ -179,20 +177,20 @@ export class PropagandaAnalyzer {
   }> {
     const evolution = this.narratives.get(organization);
     if (!evolution) {
-      return { shifts: 0, direction: 'UNKNOWN', recentChanges: [] };
+      return { shifts: 0, direction: "UNKNOWN", recentChanges: [] };
     }
 
     const recentChanges = evolution.timeline
-      .filter(t => {
+      .filter((t) => {
         const daysAgo = (Date.now() - t.date.getTime()) / (1000 * 60 * 60 * 24);
         return daysAgo <= 90;
       })
-      .map(t => t.description);
+      .map((t) => t.description);
 
     return {
       shifts: evolution.timeline.length,
       direction: evolution.trajectory,
-      recentChanges
+      recentChanges,
     };
   }
 
@@ -211,10 +209,9 @@ export class PropagandaAnalyzer {
     }
 
     const reach = Math.min(content.distribution.reach / 100000, 1.0);
-    const engagement =
-      Math.min(content.distribution.engagement.views / 50000, 1.0);
+    const engagement = Math.min(content.distribution.engagement.views / 50000, 1.0);
     const impact = content.impact.influence;
-    const overall = (reach * 0.3 + engagement * 0.3 + impact * 0.4);
+    const overall = reach * 0.3 + engagement * 0.3 + impact * 0.4;
 
     return { reach, engagement, impact, overall };
   }
@@ -224,7 +221,7 @@ export class PropagandaAnalyzer {
    */
   async identifyHighImpactContent(): Promise<PropagandaContent[]> {
     return Array.from(this.content.values())
-      .filter(c => c.impact.influence >= 0.7)
+      .filter((c) => c.impact.influence >= 0.7)
       .sort((a, b) => b.impact.influence - a.impact.influence);
   }
 
@@ -249,23 +246,23 @@ export class PropagandaAnalyzer {
       if (c.impact.influence >= 0.6 && !c.removed) {
         opportunities.push({
           contentId: c.id,
-          vulnerability: 'High reach with potential for counter-messaging',
-          suggestedApproach: 'Develop targeted counter-narrative',
-          priority: 'HIGH',
+          vulnerability: "High reach with potential for counter-messaging",
+          suggestedApproach: "Develop targeted counter-narrative",
+          priority: "HIGH",
           targetAudience: {
             demographics: {
               ageRange: [18, 35],
               locations: [c.language],
-              languages: [c.language]
+              languages: [c.language],
             },
             psychographics: {
               interests: [],
               grievances: c.narrative.grievances,
               values: [],
-              beliefs: []
+              beliefs: [],
             },
-            vulnerabilities: ['Susceptible to extremist messaging']
-          }
+            vulnerabilities: ["Susceptible to extremist messaging"],
+          },
         });
       }
     }
@@ -276,12 +273,12 @@ export class PropagandaAnalyzer {
   private calculateTrends(content: PropagandaContent[]) {
     return [
       {
-        type: 'Propaganda Production',
-        direction: 'STABLE' as const,
+        type: "Propaganda Production",
+        direction: "STABLE" as const,
         magnitude: content.length,
-        period: '30-days',
-        description: `${content.length} propaganda items analyzed`
-      }
+        period: "30-days",
+        description: `${content.length} propaganda items analyzed`,
+      },
     ];
   }
 }

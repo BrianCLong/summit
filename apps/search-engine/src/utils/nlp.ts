@@ -1,8 +1,8 @@
-import compromise from 'compromise';
-import * as natural from 'natural';
-import stopword from 'stopword';
+import compromise from "compromise";
+import * as natural from "natural";
+import stopword from "stopword";
 
-const stopwordModule = stopword as typeof import('stopword');
+const stopwordModule = stopword as typeof import("stopword");
 const { en, removeStopwords } = stopwordModule;
 
 export class NLPProcessor {
@@ -15,9 +15,9 @@ export class NLPProcessor {
     this.tokenizer = new natural.WordTokenizer();
     this.stemmer = natural.PorterStemmer;
     this.sentimentAnalyzer = new natural.SentimentAnalyzer(
-      'English',
+      "English",
       natural.PorterStemmer,
-      'afinn',
+      "afinn"
     );
     this.classifier = new natural.LogisticRegressionClassifier();
     this.initializeClassifier();
@@ -25,14 +25,14 @@ export class NLPProcessor {
 
   private initializeClassifier(): void {
     const trainingData = [
-      { text: 'threat malware attack vulnerability', label: 'security' },
-      { text: 'person individual human people', label: 'entity' },
-      { text: 'location address place geography', label: 'geographic' },
-      { text: 'document file report paper', label: 'document' },
-      { text: 'event incident occurrence happening', label: 'temporal' },
+      { text: "threat malware attack vulnerability", label: "security" },
+      { text: "person individual human people", label: "entity" },
+      { text: "location address place geography", label: "geographic" },
+      { text: "document file report paper", label: "document" },
+      { text: "event incident occurrence happening", label: "temporal" },
       {
-        text: 'organization company business enterprise',
-        label: 'organization',
+        text: "organization company business enterprise",
+        label: "organization",
       },
     ];
 
@@ -47,7 +47,7 @@ export class NLPProcessor {
     return this.tokenizer.tokenize(text.toLowerCase()) || [];
   }
 
-  removeStopwords(tokens: string[], language: string = 'en'): string[] {
+  removeStopwords(tokens: string[], language: string = "en"): string[] {
     const languageList: Record<string, string[]> = { en };
     return removeStopwords(tokens, languageList[language] || en);
   }
@@ -66,11 +66,11 @@ export class NLPProcessor {
     const doc = compromise(text);
 
     return {
-      people: doc.people().out('array'),
-      places: doc.places().out('array'),
-      organizations: doc.organizations().out('array'),
-      dates: (doc as any).dates?.().out('array') ?? [],
-      misc: doc.topics().out('array'),
+      people: doc.people().out("array"),
+      places: doc.places().out("array"),
+      organizations: doc.organizations().out("array"),
+      dates: (doc as any).dates?.().out("array") ?? [],
+      misc: doc.topics().out("array"),
     };
   }
 
@@ -87,16 +87,12 @@ export class NLPProcessor {
       .map(([phrase]) => phrase);
   }
 
-  private generateNGrams(
-    tokens: string[],
-    minN: number,
-    maxN: number,
-  ): string[] {
+  private generateNGrams(tokens: string[], minN: number, maxN: number): string[] {
     const nGrams: string[] = [];
 
     for (let n = minN; n <= maxN; n++) {
       for (let i = 0; i <= tokens.length - n; i++) {
-        const nGram = tokens.slice(i, i + n).join(' ');
+        const nGram = tokens.slice(i, i + n).join(" ");
         nGrams.push(nGram);
       }
     }
@@ -117,19 +113,19 @@ export class NLPProcessor {
   analyzeSentiment(text: string): {
     score: number;
     comparative: number;
-    classification: 'positive' | 'negative' | 'neutral';
+    classification: "positive" | "negative" | "neutral";
   } {
     const tokens = this.tokenize(text);
     const cleanTokens = this.removeStopwords(tokens);
     const score = this.sentimentAnalyzer.getSentiment(cleanTokens);
 
-    let classification: 'positive' | 'negative' | 'neutral';
+    let classification: "positive" | "negative" | "neutral";
     if (score > 0.1) {
-      classification = 'positive';
+      classification = "positive";
     } else if (score < -0.1) {
-      classification = 'negative';
+      classification = "negative";
     } else {
-      classification = 'neutral';
+      classification = "neutral";
     }
 
     return {
@@ -141,7 +137,7 @@ export class NLPProcessor {
 
   classifyIntent(text: string): string {
     const features = this.extractFeatures(text);
-    return this.classifier.classify(features.join(' '));
+    return this.classifier.classify(features.join(" "));
   }
 
   private extractFeatures(text: string): string[] {
@@ -154,24 +150,24 @@ export class NLPProcessor {
 
   expandAcronyms(text: string): string {
     const acronymMap: Record<string, string> = {
-      IOC: 'Indicator of Compromise',
-      TTPs: 'Tactics Techniques Procedures',
-      APT: 'Advanced Persistent Threat',
-      STIX: 'Structured Threat Information eXpression',
-      TAXII: 'Trusted Automated eXchange of Indicator Information',
-      CVE: 'Common Vulnerabilities and Exposures',
-      CVSS: 'Common Vulnerability Scoring System',
-      MITRE: 'MITRE ATT&CK Framework',
-      TLP: 'Traffic Light Protocol',
-      OSINT: 'Open Source Intelligence',
-      HUMINT: 'Human Intelligence',
-      SIGINT: 'Signals Intelligence',
-      GEOINT: 'Geospatial Intelligence',
+      IOC: "Indicator of Compromise",
+      TTPs: "Tactics Techniques Procedures",
+      APT: "Advanced Persistent Threat",
+      STIX: "Structured Threat Information eXpression",
+      TAXII: "Trusted Automated eXchange of Indicator Information",
+      CVE: "Common Vulnerabilities and Exposures",
+      CVSS: "Common Vulnerability Scoring System",
+      MITRE: "MITRE ATT&CK Framework",
+      TLP: "Traffic Light Protocol",
+      OSINT: "Open Source Intelligence",
+      HUMINT: "Human Intelligence",
+      SIGINT: "Signals Intelligence",
+      GEOINT: "Geospatial Intelligence",
     };
 
     let expandedText = text;
     Object.entries(acronymMap).forEach(([acronym, expansion]) => {
-      const regex = new RegExp(`\\b${acronym}\\b`, 'gi');
+      const regex = new RegExp(`\\b${acronym}\\b`, "gi");
       expandedText = expandedText.replace(regex, `${acronym} (${expansion})`);
     });
 
@@ -179,29 +175,17 @@ export class NLPProcessor {
   }
 
   detectLanguage(text: string): string {
-    const languages = [
-      'english',
-      'spanish',
-      'french',
-      'german',
-      'italian',
-      'portuguese',
-    ];
+    const languages = ["english", "spanish", "french", "german", "italian", "portuguese"];
     const scores: Record<string, number> = {};
 
     languages.forEach((lang) => {
-      const langStopwords =
-        stopwordModule[lang as keyof typeof stopwordModule] || [];
+      const langStopwords = stopwordModule[lang as keyof typeof stopwordModule] || [];
       const tokens = this.tokenize(text);
-      const stopwordCount = tokens.filter((token) =>
-        langStopwords.includes(token),
-      ).length;
+      const stopwordCount = tokens.filter((token) => langStopwords.includes(token)).length;
       scores[lang] = stopwordCount / tokens.length;
     });
 
-    return Object.entries(scores).reduce((a, b) =>
-      scores[a[0]] > scores[b[0]] ? a : b,
-    )[0];
+    return Object.entries(scores).reduce((a, b) => (scores[a[0]] > scores[b[0]] ? a : b))[0];
   }
 
   calculateTextSimilarity(text1: string, text2: string): number {
@@ -236,7 +220,7 @@ export class NLPProcessor {
         .sort((a, b) => b.score - a.score)
         .slice(0, maxSentences)
         .map((item) => item.sentence)
-        .join('. ') + '.'
+        .join(". ") + "."
     );
   }
 
@@ -282,7 +266,7 @@ export class NLPProcessor {
   private normalizeDate(dateText: string): string {
     try {
       const date = new Date(dateText);
-      return date.toISOString().split('T')[0];
+      return date.toISOString().split("T")[0];
     } catch {
       return dateText;
     }

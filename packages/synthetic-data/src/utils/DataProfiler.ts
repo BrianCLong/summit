@@ -2,7 +2,7 @@
  * DataProfiler - Analyze and profile datasets for synthesis
  */
 
-import { TabularData } from '../generators/TabularSynthesizer';
+import { TabularData } from "../generators/TabularSynthesizer";
 
 export interface DataProfile {
   numRows: number;
@@ -14,7 +14,7 @@ export interface DataProfile {
 
 export interface ColumnProfile {
   name: string;
-  type: 'numerical' | 'categorical' | 'datetime' | 'text';
+  type: "numerical" | "categorical" | "datetime" | "text";
   nullCount: number;
   nullPercentage: number;
   uniqueCount: number;
@@ -64,7 +64,10 @@ export class DataProfiler {
     const { columns, data: rows } = data;
 
     const columnProfiles = columns.map((col, idx) => {
-      return this.profileColumn(col, rows.map(row => row[idx]));
+      return this.profileColumn(
+        col,
+        rows.map((row) => row[idx])
+      );
     });
 
     const correlations = this.computeCorrelations(data, columnProfiles);
@@ -75,7 +78,7 @@ export class DataProfiler {
       numColumns: columns.length,
       columns: columnProfiles,
       correlations,
-      quality
+      quality,
     };
   }
 
@@ -83,8 +86,8 @@ export class DataProfiler {
    * Profile a single column
    */
   private static profileColumn(name: string, values: any[]): ColumnProfile {
-    const nullCount = values.filter(v => v === null || v === undefined).length;
-    const nonNullValues = values.filter(v => v !== null && v !== undefined);
+    const nullCount = values.filter((v) => v === null || v === undefined).length;
+    const nonNullValues = values.filter((v) => v !== null && v !== undefined);
     const uniqueCount = new Set(nonNullValues).size;
 
     // Determine column type
@@ -96,15 +99,13 @@ export class DataProfiler {
       nullCount,
       nullPercentage: (nullCount / values.length) * 100,
       uniqueCount,
-      uniquePercentage: (uniqueCount / values.length) * 100
+      uniquePercentage: (uniqueCount / values.length) * 100,
     };
 
     // Add type-specific statistics
-    if (type === 'numerical') {
-      profile.statistics = this.computeNumericalStatistics(
-        nonNullValues as number[]
-      );
-    } else if (type === 'categorical') {
+    if (type === "numerical") {
+      profile.statistics = this.computeNumericalStatistics(nonNullValues as number[]);
+    } else if (type === "categorical") {
       profile.distribution = this.computeCategoricalDistribution(nonNullValues);
     }
 
@@ -114,39 +115,39 @@ export class DataProfiler {
   /**
    * Infer column type
    */
-  private static inferColumnType(
-    values: any[]
-  ): 'numerical' | 'categorical' | 'datetime' | 'text' {
-    if (values.length === 0) {return 'categorical';}
+  private static inferColumnType(values: any[]): "numerical" | "categorical" | "datetime" | "text" {
+    if (values.length === 0) {
+      return "categorical";
+    }
 
     // Check if numerical
-    const numericValues = values.filter(v => typeof v === 'number' && !isNaN(v));
+    const numericValues = values.filter((v) => typeof v === "number" && !isNaN(v));
     if (numericValues.length / values.length > 0.8) {
-      return 'numerical';
+      return "numerical";
     }
 
     // Check if datetime
-    const dateValues = values.filter(v => v instanceof Date || this.isDateString(v));
+    const dateValues = values.filter((v) => v instanceof Date || this.isDateString(v));
     if (dateValues.length / values.length > 0.8) {
-      return 'datetime';
+      return "datetime";
     }
 
     // Check if text (long strings)
-    const textValues = values.filter(
-      v => typeof v === 'string' && v.length > 50
-    );
+    const textValues = values.filter((v) => typeof v === "string" && v.length > 50);
     if (textValues.length / values.length > 0.5) {
-      return 'text';
+      return "text";
     }
 
-    return 'categorical';
+    return "categorical";
   }
 
   /**
    * Check if string is a date
    */
   private static isDateString(value: any): boolean {
-    if (typeof value !== 'string') {return false;}
+    if (typeof value !== "string") {
+      return false;
+    }
     const date = new Date(value);
     return !isNaN(date.getTime());
   }
@@ -179,19 +180,17 @@ export class DataProfiler {
       q25,
       q75,
       skewness,
-      kurtosis
+      kurtosis,
     };
   }
 
   /**
    * Compute categorical distribution
    */
-  private static computeCategoricalDistribution(
-    values: any[]
-  ): CategoricalDistribution {
+  private static computeCategoricalDistribution(values: any[]): CategoricalDistribution {
     const counts = new Map<string, number>();
 
-    values.forEach(v => {
+    values.forEach((v) => {
       const key = String(v);
       counts.set(key, (counts.get(key) || 0) + 1);
     });
@@ -204,7 +203,7 @@ export class DataProfiler {
     const topValues = sorted.map(([value, count]) => ({
       value,
       count,
-      percentage: (count / values.length) * 100
+      percentage: (count / values.length) * 100,
     }));
 
     // Compute entropy
@@ -212,7 +211,7 @@ export class DataProfiler {
 
     return {
       topValues,
-      entropy
+      entropy,
     };
   }
 
@@ -223,12 +222,12 @@ export class DataProfiler {
     data: TabularData,
     profiles: ColumnProfile[]
   ): CorrelationMatrix {
-    const numericalColumns = profiles
-      .filter(p => p.type === 'numerical')
-      .map(p => p.name);
+    const numericalColumns = profiles.filter((p) => p.type === "numerical").map((p) => p.name);
 
     const n = numericalColumns.length;
-    const matrix: number[][] = Array(n).fill(0).map(() => Array(n).fill(0));
+    const matrix: number[][] = Array(n)
+      .fill(0)
+      .map(() => Array(n).fill(0));
 
     // Compute Pearson correlation
     for (let i = 0; i < n; i++) {
@@ -239,8 +238,8 @@ export class DataProfiler {
           const colI = data.columns.indexOf(numericalColumns[i]);
           const colJ = data.columns.indexOf(numericalColumns[j]);
 
-          const valuesI = data.data.map(row => row[colI]).filter(v => typeof v === 'number');
-          const valuesJ = data.data.map(row => row[colJ]).filter(v => typeof v === 'number');
+          const valuesI = data.data.map((row) => row[colI]).filter((v) => typeof v === "number");
+          const valuesJ = data.data.map((row) => row[colJ]).filter((v) => typeof v === "number");
 
           matrix[i][j] = this.pearsonCorrelation(valuesI, valuesJ);
           matrix[j][i] = matrix[i][j];
@@ -250,7 +249,7 @@ export class DataProfiler {
 
     return {
       columns: numericalColumns,
-      matrix
+      matrix,
     };
   }
 
@@ -264,8 +263,7 @@ export class DataProfiler {
     const completeness = ((totalCells - nullCells) / totalCells) * 100;
 
     // Uniqueness: average uniqueness across columns
-    const uniqueness =
-      profiles.reduce((sum, p) => sum + p.uniquePercentage, 0) / profiles.length;
+    const uniqueness = profiles.reduce((sum, p) => sum + p.uniquePercentage, 0) / profiles.length;
 
     // Validity: placeholder (would check against business rules)
     const validity = 95.0;
@@ -280,7 +278,7 @@ export class DataProfiler {
       uniqueness,
       validity,
       consistency,
-      overallScore
+      overallScore,
     };
   }
 
@@ -295,8 +293,10 @@ export class DataProfiler {
   private static computeKurtosis(values: number[], mean: number, std: number): number {
     const n = values.length;
     const sum = values.reduce((s, v) => s + Math.pow((v - mean) / std, 4), 0);
-    return (n * (n + 1) / ((n - 1) * (n - 2) * (n - 3))) * sum -
-           (3 * Math.pow(n - 1, 2) / ((n - 2) * (n - 3)));
+    return (
+      ((n * (n + 1)) / ((n - 1) * (n - 2) * (n - 3))) * sum -
+      (3 * Math.pow(n - 1, 2)) / ((n - 2) * (n - 3))
+    );
   }
 
   private static computeEntropy(counts: number[], total: number): number {
@@ -308,7 +308,9 @@ export class DataProfiler {
 
   private static pearsonCorrelation(x: number[], y: number[]): number {
     const n = Math.min(x.length, y.length);
-    if (n === 0) {return 0;}
+    if (n === 0) {
+      return 0;
+    }
 
     const meanX = x.reduce((sum, v) => sum + v, 0) / n;
     const meanY = y.reduce((sum, v) => sum + v, 0) / n;

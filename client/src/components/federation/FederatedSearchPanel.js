@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -10,27 +10,27 @@ import {
   FormControlLabel,
   Checkbox,
   Grid,
-} from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
-import { apiFetch } from '../../services/api';
+} from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
+import { apiFetch } from "../../services/api";
 
 export default function FederatedSearchPanel() {
   const [query, setQuery] = useState(
-    `query Entities($limit:Int){\n  __schema { types { name } }\n}`,
+    `query Entities($limit:Int){\n  __schema { types { name } }\n}`
   );
-  const [variables, setVariables] = useState('{}');
+  const [variables, setVariables] = useState("{}");
   const [busy, setBusy] = useState(false);
-  const [output, setOutput] = useState('');
+  const [output, setOutput] = useState("");
   const [instances, setInstances] = useState([]);
   const [selected, setSelected] = useState({});
   const [rows, setRows] = useState([]);
   const [columns, setColumns] = useState([]);
-  const [presetName, setPresetName] = useState('');
+  const [presetName, setPresetName] = useState("");
 
   useEffect(() => {
     (async () => {
       try {
-        const res = await apiFetch('/api/federation/instances');
+        const res = await apiFetch("/api/federation/instances");
         const inst = (res.instances || []).map((i) => ({
           id: i.id,
           name: i.name,
@@ -44,10 +44,10 @@ export default function FederatedSearchPanel() {
   const run = async () => {
     setBusy(true);
     try {
-      const res = await apiFetch('/api/federation/search', {
-        method: 'POST',
+      const res = await apiFetch("/api/federation/search", {
+        method: "POST",
         body: JSON.stringify({
-          query: { graphql: query, variables: JSON.parse(variables || '{}') },
+          query: { graphql: query, variables: JSON.parse(variables || "{}") },
           instances: Object.keys(selected).filter((k) => selected[k]),
           aggregateResults: true,
         }),
@@ -58,7 +58,7 @@ export default function FederatedSearchPanel() {
       let items = [];
       if (Array.isArray(data)) items = data;
       else if (Array.isArray(data?.items)) items = data.items;
-      if (items.length && typeof items[0] === 'object') {
+      if (items.length && typeof items[0] === "object") {
         const cols = Object.keys(items[0])
           .slice(0, 8)
           .map((k) => ({ field: k, headerName: k, width: 180 }));
@@ -104,7 +104,7 @@ export default function FederatedSearchPanel() {
                 onChange={(e) => setVariables(e.target.value)}
               />
               <Button variant="contained" onClick={run} disabled={busy}>
-                {busy ? 'Running…' : 'Run Federated Search'}
+                {busy ? "Running…" : "Run Federated Search"}
               </Button>
             </Grid>
             <Grid item xs={12} md={4}>
@@ -118,9 +118,7 @@ export default function FederatedSearchPanel() {
                     control={
                       <Checkbox
                         checked={!!selected[i.id]}
-                        onChange={(e) =>
-                          setSelected({ ...selected, [i.id]: e.target.checked })
-                        }
+                        onChange={(e) => setSelected({ ...selected, [i.id]: e.target.checked })}
                       />
                     }
                     label={i.name || i.id}
@@ -135,19 +133,14 @@ export default function FederatedSearchPanel() {
                 value={presetName}
                 onChange={(e) => setPresetName(e.target.value)}
               />
-              <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+              <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
                 <Button
                   size="small"
                   onClick={() => {
                     if (!presetName) return;
-                    const presets = JSON.parse(
-                      localStorage.getItem('fed_presets') || '{}',
-                    );
+                    const presets = JSON.parse(localStorage.getItem("fed_presets") || "{}");
                     presets[presetName] = { query, variables, selected };
-                    localStorage.setItem(
-                      'fed_presets',
-                      JSON.stringify(presets),
-                    );
+                    localStorage.setItem("fed_presets", JSON.stringify(presets));
                   }}
                 >
                   Save Preset
@@ -155,9 +148,7 @@ export default function FederatedSearchPanel() {
                 <Button
                   size="small"
                   onClick={() => {
-                    const presets = JSON.parse(
-                      localStorage.getItem('fed_presets') || '{}',
-                    );
+                    const presets = JSON.parse(localStorage.getItem("fed_presets") || "{}");
                     const p = presets[presetName];
                     if (p) {
                       setQuery(p.query);
@@ -179,7 +170,7 @@ export default function FederatedSearchPanel() {
             <Typography variant="h6" sx={{ mb: 1 }}>
               Results
             </Typography>
-            <div style={{ height: 420, width: '100%' }}>
+            <div style={{ height: 420, width: "100%" }}>
               <DataGrid
                 rows={rows}
                 columns={columns}
@@ -193,7 +184,7 @@ export default function FederatedSearchPanel() {
         <Card>
           <CardContent>
             <Typography variant="h6">Output</Typography>
-            <pre style={{ whiteSpace: 'pre-wrap' }}>{output}</pre>
+            <pre style={{ whiteSpace: "pre-wrap" }}>{output}</pre>
           </CardContent>
         </Card>
       ) : null}

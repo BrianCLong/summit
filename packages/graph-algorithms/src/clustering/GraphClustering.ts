@@ -3,7 +3,7 @@
  * Triangle counting, clustering coefficient, clique detection
  */
 
-import type { GraphStorage } from '@intelgraph/graph-database';
+import type { GraphStorage } from "@intelgraph/graph-database";
 
 export interface ClusteringMetrics {
   globalClusteringCoefficient: number;
@@ -30,9 +30,7 @@ export class GraphClustering {
 
     // For each node
     for (const node of nodes) {
-      const neighbors = new Set(
-        this.storage.getNeighbors(node.id, 'both').map(n => n.id)
-      );
+      const neighbors = new Set(this.storage.getNeighbors(node.id, "both").map((n) => n.id));
 
       // Check each pair of neighbors
       const neighborArray = Array.from(neighbors);
@@ -42,9 +40,7 @@ export class GraphClustering {
           const n2 = neighborArray[j];
 
           // Check if there's an edge between n1 and n2
-          const n1Neighbors = new Set(
-            this.storage.getNeighbors(n1, 'both').map(n => n.id)
-          );
+          const n1Neighbors = new Set(this.storage.getNeighbors(n1, "both").map((n) => n.id));
 
           if (n1Neighbors.has(n2)) {
             triangles++;
@@ -61,17 +57,19 @@ export class GraphClustering {
    * Calculate local clustering coefficient for each node
    */
   localClusteringCoefficient(nodeId: string): number {
-    const neighbors = this.storage.getNeighbors(nodeId, 'both');
+    const neighbors = this.storage.getNeighbors(nodeId, "both");
     const k = neighbors.length;
 
-    if (k < 2) {return 0;}
+    if (k < 2) {
+      return 0;
+    }
 
     // Count edges between neighbors
     let edgeCount = 0;
-    const neighborIds = new Set(neighbors.map(n => n.id));
+    const neighborIds = new Set(neighbors.map((n) => n.id));
 
     for (const neighbor of neighbors) {
-      const neighborNeighbors = this.storage.getNeighbors(neighbor.id, 'both');
+      const neighborNeighbors = this.storage.getNeighbors(neighbor.id, "both");
 
       for (const nn of neighborNeighbors) {
         if (neighborIds.has(nn.id) && nn.id !== neighbor.id) {
@@ -120,7 +118,9 @@ export class GraphClustering {
     const coefficients = this.allClusteringCoefficients();
     const values = Array.from(coefficients.values());
 
-    if (values.length === 0) {return 0;}
+    if (values.length === 0) {
+      return 0;
+    }
 
     const sum = values.reduce((acc, val) => acc + val, 0);
     return sum / values.length;
@@ -134,7 +134,7 @@ export class GraphClustering {
       triangleCount: this.countTriangles(),
       localClusteringCoefficients: this.allClusteringCoefficients(),
       globalClusteringCoefficient: this.globalClusteringCoefficient(),
-      averageClusteringCoefficient: this.averageClusteringCoefficient()
+      averageClusteringCoefficient: this.averageClusteringCoefficient(),
     };
   }
 
@@ -148,7 +148,7 @@ export class GraphClustering {
     const cliques: Clique[] = [];
 
     const R = new Set<string>();
-    const P = new Set(nodes.map(n => n.id));
+    const P = new Set(nodes.map((n) => n.id));
     const X = new Set<string>();
 
     this.bronKerbosch(R, P, X, cliques);
@@ -161,7 +161,7 @@ export class GraphClustering {
    */
   findKCliques(k: number): Clique[] {
     const allCliques = this.findMaximalCliques();
-    return allCliques.filter(clique => clique.size >= k);
+    return allCliques.filter((clique) => clique.size >= k);
   }
 
   /**
@@ -183,16 +183,16 @@ export class GraphClustering {
 
     // Sort nodes by degree (descending)
     const sortedNodes = nodes.sort((a, b) => {
-      const degreeA = this.storage.getDegree(a.id, 'both');
-      const degreeB = this.storage.getDegree(b.id, 'both');
+      const degreeA = this.storage.getDegree(a.id, "both");
+      const degreeB = this.storage.getDegree(b.id, "both");
       return degreeB - degreeA;
     });
 
     for (const node of sortedNodes) {
       // Get colors of neighbors
-      const neighbors = this.storage.getNeighbors(node.id, 'both');
+      const neighbors = this.storage.getNeighbors(node.id, "both");
       const neighborColors = new Set(
-        neighbors.map(n => colors.get(n.id)).filter(c => c !== undefined)
+        neighbors.map((n) => colors.get(n.id)).filter((c) => c !== undefined)
       );
 
       // Find smallest available color
@@ -221,7 +221,7 @@ export class GraphClustering {
    */
   kCore(k: number): Set<string> {
     const exported = this.storage.exportGraph();
-    const remaining = new Set(exported.nodes.map(n => n.id));
+    const remaining = new Set(exported.nodes.map((n) => n.id));
 
     let changed = true;
     while (changed) {
@@ -230,8 +230,8 @@ export class GraphClustering {
 
       for (const nodeId of remaining) {
         // Count neighbors in remaining set
-        const neighbors = this.storage.getNeighbors(nodeId, 'both');
-        const neighborCount = neighbors.filter(n => remaining.has(n.id)).length;
+        const neighbors = this.storage.getNeighbors(nodeId, "both");
+        const neighborCount = neighbors.filter((n) => remaining.has(n.id)).length;
 
         if (neighborCount < k) {
           toRemove.push(nodeId);
@@ -261,9 +261,7 @@ export class GraphClustering {
     }
 
     // Find maximum possible k
-    const maxDegree = Math.max(
-      ...nodes.map(n => this.storage.getDegree(n.id, 'both'))
-    );
+    const maxDegree = Math.max(...nodes.map((n) => this.storage.getDegree(n.id, "both")));
 
     // Compute k-cores for increasing k
     for (let k = 1; k <= maxDegree; k++) {
@@ -273,7 +271,9 @@ export class GraphClustering {
         coreNumbers.set(nodeId, k);
       }
 
-      if (core.size === 0) {break;}
+      if (core.size === 0) {
+        break;
+      }
     }
 
     return coreNumbers;
@@ -287,7 +287,7 @@ export class GraphClustering {
     let triplets = 0;
 
     for (const node of nodes) {
-      const degree = this.storage.getDegree(node.id, 'both');
+      const degree = this.storage.getDegree(node.id, "both");
       if (degree >= 2) {
         triplets += (degree * (degree - 1)) / 2;
       }
@@ -296,18 +296,13 @@ export class GraphClustering {
     return triplets;
   }
 
-  private bronKerbosch(
-    R: Set<string>,
-    P: Set<string>,
-    X: Set<string>,
-    cliques: Clique[]
-  ): void {
+  private bronKerbosch(R: Set<string>, P: Set<string>, X: Set<string>, cliques: Clique[]): void {
     if (P.size === 0 && X.size === 0) {
       // Found maximal clique
       if (R.size > 0) {
         cliques.push({
           nodes: new Set(R),
-          size: R.size
+          size: R.size,
         });
       }
       return;
@@ -318,16 +313,14 @@ export class GraphClustering {
     const pivotNeighbors = pivot ? this.getNeighborSet(pivot) : new Set<string>();
 
     // Iterate over P \ N(pivot)
-    const candidates = new Set(
-      Array.from(P).filter(v => !pivotNeighbors.has(v))
-    );
+    const candidates = new Set(Array.from(P).filter((v) => !pivotNeighbors.has(v)));
 
     for (const v of candidates) {
       const vNeighbors = this.getNeighborSet(v);
 
       const newR = new Set([...R, v]);
-      const newP = new Set(Array.from(P).filter(x => vNeighbors.has(x)));
-      const newX = new Set(Array.from(X).filter(x => vNeighbors.has(x)));
+      const newP = new Set(Array.from(P).filter((x) => vNeighbors.has(x)));
+      const newX = new Set(Array.from(X).filter((x) => vNeighbors.has(x)));
 
       this.bronKerbosch(newR, newP, newX, cliques);
 
@@ -344,7 +337,7 @@ export class GraphClustering {
 
     for (const node of union) {
       const neighbors = this.getNeighborSet(node);
-      const degree = Array.from(P).filter(v => neighbors.has(v)).length;
+      const degree = Array.from(P).filter((v) => neighbors.has(v)).length;
 
       if (degree > maxDegree) {
         maxDegree = degree;
@@ -356,7 +349,7 @@ export class GraphClustering {
   }
 
   private getNeighborSet(nodeId: string): Set<string> {
-    const neighbors = this.storage.getNeighbors(nodeId, 'both');
-    return new Set(neighbors.map(n => n.id));
+    const neighbors = this.storage.getNeighbors(nodeId, "both");
+    return new Set(neighbors.map((n) => n.id));
   }
 }

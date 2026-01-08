@@ -1,46 +1,40 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Indicator of Compromise (IOC) Types
  */
 export const iocTypeEnum = z.enum([
-  'IP_ADDRESS',
-  'DOMAIN',
-  'URL',
-  'FILE_HASH_MD5',
-  'FILE_HASH_SHA1',
-  'FILE_HASH_SHA256',
-  'EMAIL_ADDRESS',
-  'PHONE_NUMBER',
-  'SSL_CERT_FINGERPRINT',
-  'YARA_RULE',
-  'CVE',
-  'MUTEX',
-  'REGISTRY_KEY',
-  'USER_AGENT',
-  'ASN',
-  'CIDR',
-  'MAC_ADDRESS',
-  'BITCOIN_ADDRESS',
-  'SSDEEP',
-  'IMPHASH',
+  "IP_ADDRESS",
+  "DOMAIN",
+  "URL",
+  "FILE_HASH_MD5",
+  "FILE_HASH_SHA1",
+  "FILE_HASH_SHA256",
+  "EMAIL_ADDRESS",
+  "PHONE_NUMBER",
+  "SSL_CERT_FINGERPRINT",
+  "YARA_RULE",
+  "CVE",
+  "MUTEX",
+  "REGISTRY_KEY",
+  "USER_AGENT",
+  "ASN",
+  "CIDR",
+  "MAC_ADDRESS",
+  "BITCOIN_ADDRESS",
+  "SSDEEP",
+  "IMPHASH",
 ]);
 
 export const iocStatusEnum = z.enum([
-  'ACTIVE',
-  'EXPIRED',
-  'WHITELISTED',
-  'UNDER_REVIEW',
-  'FALSE_POSITIVE',
+  "ACTIVE",
+  "EXPIRED",
+  "WHITELISTED",
+  "UNDER_REVIEW",
+  "FALSE_POSITIVE",
 ]);
 
-export const iocSeverityEnum = z.enum([
-  'CRITICAL',
-  'HIGH',
-  'MEDIUM',
-  'LOW',
-  'INFO',
-]);
+export const iocSeverityEnum = z.enum(["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"]);
 
 /**
  * IOC Schema
@@ -49,7 +43,7 @@ export const iocSchema = z.object({
   id: z.string(),
   type: iocTypeEnum,
   value: z.string(),
-  status: iocStatusEnum.default('ACTIVE'),
+  status: iocStatusEnum.default("ACTIVE"),
   severity: iocSeverityEnum,
   confidence: z.number().min(0).max(100),
 
@@ -67,12 +61,16 @@ export const iocSchema = z.object({
   context: z.string().optional(),
 
   // Sources
-  sources: z.array(z.object({
-    name: z.string(),
-    url: z.string().url().optional(),
-    confidence: z.number().min(0).max(100),
-    timestamp: z.string().datetime(),
-  })).default([]),
+  sources: z
+    .array(
+      z.object({
+        name: z.string(),
+        url: z.string().url().optional(),
+        confidence: z.number().min(0).max(100),
+        timestamp: z.string().datetime(),
+      })
+    )
+    .default([]),
 
   // Relationships
   relatedIocs: z.array(z.string()).default([]),
@@ -84,34 +82,42 @@ export const iocSchema = z.object({
   mitreTechniques: z.array(z.string()).default([]),
 
   // Enrichment
-  enrichment: z.object({
-    whois: z.record(z.string(), z.unknown()).optional(),
-    geoip: z.object({
-      country: z.string().optional(),
-      city: z.string().optional(),
-      lat: z.number().optional(),
-      lon: z.number().optional(),
-      asn: z.string().optional(),
-      org: z.string().optional(),
-    }).optional(),
-    reputation: z.object({
-      score: z.number().min(0).max(100),
-      providers: z.array(z.object({
-        name: z.string(),
-        score: z.number(),
-        verdict: z.string(),
-      })),
-    }).optional(),
-    malwareFamily: z.string().optional(),
-    threatActor: z.string().optional(),
-  }).optional(),
+  enrichment: z
+    .object({
+      whois: z.record(z.string(), z.unknown()).optional(),
+      geoip: z
+        .object({
+          country: z.string().optional(),
+          city: z.string().optional(),
+          lat: z.number().optional(),
+          lon: z.number().optional(),
+          asn: z.string().optional(),
+          org: z.string().optional(),
+        })
+        .optional(),
+      reputation: z
+        .object({
+          score: z.number().min(0).max(100),
+          providers: z.array(
+            z.object({
+              name: z.string(),
+              score: z.number(),
+              verdict: z.string(),
+            })
+          ),
+        })
+        .optional(),
+      malwareFamily: z.string().optional(),
+      threatActor: z.string().optional(),
+    })
+    .optional(),
 
   // False positive tracking
   falsePositiveReports: z.number().int().default(0),
   falsePositiveReason: z.string().optional(),
 
   // Metadata
-  tlp: z.enum(['RED', 'AMBER_STRICT', 'AMBER', 'GREEN', 'WHITE', 'CLEAR']).default('AMBER'),
+  tlp: z.enum(["RED", "AMBER_STRICT", "AMBER", "GREEN", "WHITE", "CLEAR"]).default("AMBER"),
   tenantId: z.string(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
@@ -160,7 +166,7 @@ export const iocFeedSchema = z.object({
   id: z.string(),
   name: z.string(),
   url: z.string().url().optional(),
-  format: z.enum(['JSON', 'CSV', 'STIX', 'TXT', 'XML']),
+  format: z.enum(["JSON", "CSV", "STIX", "TXT", "XML"]),
   enabled: z.boolean().default(true),
   refreshInterval: z.number().int().positive(),
   lastSync: z.string().datetime().optional(),
@@ -172,10 +178,12 @@ export const iocFeedSchema = z.object({
 
   // Authentication
   apiKey: z.string().optional(),
-  credentials: z.object({
-    username: z.string(),
-    password: z.string(),
-  }).optional(),
+  credentials: z
+    .object({
+      username: z.string(),
+      password: z.string(),
+    })
+    .optional(),
 
   tenantId: z.string(),
   createdAt: z.string().datetime(),
@@ -187,21 +195,23 @@ export const iocFeedSchema = z.object({
  */
 export const iocEnrichmentRequestSchema = z.object({
   iocId: z.string(),
-  providers: z.array(z.enum([
-    'VIRUSTOTAL',
-    'ALIENVAULT_OTX',
-    'ABUSEIPDB',
-    'SHODAN',
-    'CENSYS',
-    'HYBRID_ANALYSIS',
-    'URLSCAN',
-    'WHOIS',
-    'GEOIP',
-    'PASSIVETOTAL',
-    'THREATCROWD',
-    'THREATMINER',
-  ])),
-  priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']).default('MEDIUM'),
+  providers: z.array(
+    z.enum([
+      "VIRUSTOTAL",
+      "ALIENVAULT_OTX",
+      "ABUSEIPDB",
+      "SHODAN",
+      "CENSYS",
+      "HYBRID_ANALYSIS",
+      "URLSCAN",
+      "WHOIS",
+      "GEOIP",
+      "PASSIVETOTAL",
+      "THREATCROWD",
+      "THREATMINER",
+    ])
+  ),
+  priority: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]).default("MEDIUM"),
   tenantId: z.string(),
   createdAt: z.string().datetime(),
 });
@@ -232,7 +242,7 @@ export const iocDeduplicationResultSchema = z.object({
   duplicatesFound: z.number().int(),
   uniqueIocs: z.number().int(),
   merged: z.number().int(),
-  deduplicationMethod: z.enum(['EXACT', 'FUZZY', 'NORMALIZED']),
+  deduplicationMethod: z.enum(["EXACT", "FUZZY", "NORMALIZED"]),
   timestamp: z.string().datetime(),
 });
 

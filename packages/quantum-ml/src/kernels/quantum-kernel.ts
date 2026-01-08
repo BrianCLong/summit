@@ -3,11 +3,11 @@
  * Implements quantum feature maps and kernel estimation
  */
 
-import { QuantumCircuit, QuantumSimulator, CircuitBuilder } from '@intelgraph/quantum-simulation';
+import { QuantumCircuit, QuantumSimulator, CircuitBuilder } from "@intelgraph/quantum-simulation";
 
 export interface QuantumKernelParams {
   numQubits: number;
-  featureMap: 'zz' | 'pauli' | 'custom';
+  featureMap: "zz" | "pauli" | "custom";
   reps: number;
 }
 
@@ -22,7 +22,9 @@ export class QuantumKernel {
 
   async computeKernelMatrix(X: number[][]): Promise<number[][]> {
     const n = X.length;
-    const kernelMatrix: number[][] = Array(n).fill(0).map(() => Array(n).fill(0));
+    const kernelMatrix: number[][] = Array(n)
+      .fill(0)
+      .map(() => Array(n).fill(0));
 
     for (let i = 0; i < n; i++) {
       for (let j = i; j < n; j++) {
@@ -52,9 +54,9 @@ export class QuantumKernel {
     const builder = new CircuitBuilder(this.params.numQubits);
 
     for (let rep = 0; rep < this.params.reps; rep++) {
-      if (this.params.featureMap === 'zz') {
+      if (this.params.featureMap === "zz") {
         this.applyZZFeatureMap(builder, features);
-      } else if (this.params.featureMap === 'pauli') {
+      } else if (this.params.featureMap === "pauli") {
         this.applyPauliFeatureMap(builder, features);
       }
     }
@@ -64,7 +66,7 @@ export class QuantumKernel {
 
   private applyZZFeatureMap(builder: CircuitBuilder, features: number[]): void {
     // Hadamard layer
-    builder.applyToAll('h');
+    builder.applyToAll("h");
 
     // Encoding layer
     for (let i = 0; i < Math.min(features.length, this.params.numQubits); i++) {
@@ -101,6 +103,9 @@ export class QuantumKernel {
   }
 }
 
-export function createQuantumKernel(params: QuantumKernelParams, simulator: QuantumSimulator): QuantumKernel {
+export function createQuantumKernel(
+  params: QuantumKernelParams,
+  simulator: QuantumSimulator
+): QuantumKernel {
   return new QuantumKernel(params, simulator);
 }

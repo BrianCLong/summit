@@ -20,16 +20,16 @@ export interface PropagandaContent {
 }
 
 export enum ContentType {
-  VIDEO = 'VIDEO',
-  AUDIO = 'AUDIO',
-  ARTICLE = 'ARTICLE',
-  MAGAZINE = 'MAGAZINE',
-  POSTER = 'POSTER',
-  SOCIAL_MEDIA_POST = 'SOCIAL_MEDIA_POST',
-  NASHEED = 'NASHEED',
-  SERMON = 'SERMON',
-  STATEMENT = 'STATEMENT',
-  MANIFESTO = 'MANIFESTO'
+  VIDEO = "VIDEO",
+  AUDIO = "AUDIO",
+  ARTICLE = "ARTICLE",
+  MAGAZINE = "MAGAZINE",
+  POSTER = "POSTER",
+  SOCIAL_MEDIA_POST = "SOCIAL_MEDIA_POST",
+  NASHEED = "NASHEED",
+  SERMON = "SERMON",
+  STATEMENT = "STATEMENT",
+  MANIFESTO = "MANIFESTO",
 }
 
 export interface NarrativeAnalysis {
@@ -45,24 +45,24 @@ export interface NarrativeAnalysis {
 export interface Theme {
   type: ThemeType;
   description: string;
-  prominence: 'HIGH' | 'MEDIUM' | 'LOW';
+  prominence: "HIGH" | "MEDIUM" | "LOW";
 }
 
 export enum ThemeType {
-  MARTYRDOM = 'MARTYRDOM',
-  VICTIMIZATION = 'VICTIMIZATION',
-  CONSPIRACY = 'CONSPIRACY',
-  RELIGIOUS_DUTY = 'RELIGIOUS_DUTY',
-  REVENGE = 'REVENGE',
-  HEROISM = 'HEROISM',
-  UTOPIA = 'UTOPIA',
-  APOCALYPSE = 'APOCALYPSE',
-  ENEMY_DEHUMANIZATION = 'ENEMY_DEHUMANIZATION',
-  IN_GROUP_SOLIDARITY = 'IN_GROUP_SOLIDARITY'
+  MARTYRDOM = "MARTYRDOM",
+  VICTIMIZATION = "VICTIMIZATION",
+  CONSPIRACY = "CONSPIRACY",
+  RELIGIOUS_DUTY = "RELIGIOUS_DUTY",
+  REVENGE = "REVENGE",
+  HEROISM = "HEROISM",
+  UTOPIA = "UTOPIA",
+  APOCALYPSE = "APOCALYPSE",
+  ENEMY_DEHUMANIZATION = "ENEMY_DEHUMANIZATION",
+  IN_GROUP_SOLIDARITY = "IN_GROUP_SOLIDARITY",
 }
 
 export interface EmotionalAppeal {
-  type: 'ANGER' | 'FEAR' | 'PRIDE' | 'GUILT' | 'HOPE' | 'SOLIDARITY';
+  type: "ANGER" | "FEAR" | "PRIDE" | "GUILT" | "HOPE" | "SOLIDARITY";
   intensity: number;
   target: string;
 }
@@ -87,14 +87,14 @@ export interface DistributionPlatform {
 
 export interface DistributionNetwork {
   id: string;
-  type: 'SOCIAL_MEDIA' | 'MESSAGING_APP' | 'FORUM' | 'FILE_SHARING' | 'DEDICATED_SITE';
+  type: "SOCIAL_MEDIA" | "MESSAGING_APP" | "FORUM" | "FILE_SHARING" | "DEDICATED_SITE";
   nodes: NetworkNode[];
   reach: number;
 }
 
 export interface NetworkNode {
   id: string;
-  type: 'ACCOUNT' | 'GROUP' | 'CHANNEL' | 'WEBSITE';
+  type: "ACCOUNT" | "GROUP" | "CHANNEL" | "WEBSITE";
   platform: string;
   followers?: number;
   active: boolean;
@@ -136,9 +136,9 @@ export interface MediaProduction {
 }
 
 export enum ProductionQuality {
-  PROFESSIONAL = 'PROFESSIONAL',
-  SEMI_PROFESSIONAL = 'SEMI_PROFESSIONAL',
-  AMATEUR = 'AMATEUR'
+  PROFESSIONAL = "PROFESSIONAL",
+  SEMI_PROFESSIONAL = "SEMI_PROFESSIONAL",
+  AMATEUR = "AMATEUR",
 }
 
 export interface MediaSpokesperson {
@@ -158,7 +158,7 @@ export interface Statement {
   type: string;
   content: string;
   medium: string;
-  significance: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  significance: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
   verified: boolean;
 }
 
@@ -166,7 +166,7 @@ export interface NarrativeEvolution {
   organization: string;
   timeline: NarrativeChange[];
   currentNarrative: NarrativeAnalysis;
-  trajectory: 'ESCALATING' | 'MODERATING' | 'STABLE';
+  trajectory: "ESCALATING" | "MODERATING" | "STABLE";
 }
 
 export interface NarrativeChange {
@@ -174,7 +174,7 @@ export interface NarrativeChange {
   type: string;
   description: string;
   catalysts: string[];
-  impact: 'HIGH' | 'MEDIUM' | 'LOW';
+  impact: "HIGH" | "MEDIUM" | "LOW";
 }
 
 export interface RecruitmentMessaging {
@@ -208,7 +208,7 @@ export interface Psychographics {
 export interface RecruitmentTactic {
   type: string;
   description: string;
-  effectiveness: 'HIGH' | 'MEDIUM' | 'LOW';
+  effectiveness: "HIGH" | "MEDIUM" | "LOW";
 }
 
 export interface CounterNarrative {
@@ -226,7 +226,7 @@ export interface LanguageAnalysis {
   language: string;
   dialect?: string;
   translator?: string;
-  quality: 'NATIVE' | 'FLUENT' | 'COMPETENT' | 'POOR';
+  quality: "NATIVE" | "FLUENT" | "COMPETENT" | "POOR";
   regionalMarkers: string[];
   targetRegions: string[];
 }
@@ -243,7 +243,7 @@ export interface SentimentAnalysis {
   positive: number;
   negative: number;
   neutral: number;
-  dominant: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL';
+  dominant: "POSITIVE" | "NEGATIVE" | "NEUTRAL";
 }
 
 export interface PropagandaCampaign {
@@ -282,7 +282,7 @@ export interface AnalysisResult {
 
 export interface PropagandaTrend {
   type: string;
-  direction: 'INCREASING' | 'DECREASING' | 'STABLE';
+  direction: "INCREASING" | "DECREASING" | "STABLE";
   magnitude: number;
   period: string;
   description: string;
@@ -292,6 +292,6 @@ export interface CounterNarrativeOpportunity {
   contentId: string;
   vulnerability: string;
   suggestedApproach: string;
-  priority: 'HIGH' | 'MEDIUM' | 'LOW';
+  priority: "HIGH" | "MEDIUM" | "LOW";
   targetAudience: TargetAudience;
 }

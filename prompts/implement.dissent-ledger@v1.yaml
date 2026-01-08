@@ -1,17 +1,17 @@
 meta:
   id: implement.dissent-ledger@v1
-  owner: 'intelgraph-advisory-committee'
-  purpose: 'Build dissent capture system with sealed timestamps, ombuds queues, and mandatory resolution before publish'
-  tags: ['ethics', 'dissent', 'ombuds', 'governance', 'compliance']
+  owner: "intelgraph-advisory-committee"
+  purpose: "Build dissent capture system with sealed timestamps, ombuds queues, and mandatory resolution before publish"
+  tags: ["ethics", "dissent", "ombuds", "governance", "compliance"]
   guardrails:
-    - 'High-risk actions must capture dissent before execution'
-    - 'No publish without dissent resolution or explicit override with reasons'
-    - 'Dissent timestamps must be cryptographically sealed (immutable)'
-    - 'Ombuds queues must be independent from operational chains'
-    - 'Audit trail must include dissent excerpts in briefs'
+    - "High-risk actions must capture dissent before execution"
+    - "No publish without dissent resolution or explicit override with reasons"
+    - "Dissent timestamps must be cryptographically sealed (immutable)"
+    - "Ombuds queues must be independent from operational chains"
+    - "Audit trail must include dissent excerpts in briefs"
 
 modelConfig:
-  model: 'claude-sonnet-4-5'
+  model: "claude-sonnet-4-5"
   temperature: 0.2
   maxTokens: 6000
 
@@ -538,25 +538,25 @@ template: |
   Remember: **Dissent is a feature, not a bug.** Ethics require visible disagreement.
 
 examples:
-  - name: 'rfc3161-high-24h'
+  - name: "rfc3161-high-24h"
     inputs:
-      timestamp_service: 'RFC3161'
-      risk_threshold: '75'
-      ombuds_escalation_hours: '24'
+      timestamp_service: "RFC3161"
+      risk_threshold: "75"
+      ombuds_escalation_hours: "24"
     expected_contains:
-      - 'RFC3161'
-      - 'sealed timestamp'
-      - 'ombuds'
-      - '24'
-      - 'publish gate'
+      - "RFC3161"
+      - "sealed timestamp"
+      - "ombuds"
+      - "24"
+      - "publish gate"
 
-  - name: 'custom-critical-8h'
+  - name: "custom-critical-8h"
     inputs:
-      timestamp_service: 'Custom TSA'
-      risk_threshold: '80'
-      ombuds_escalation_hours: '8'
+      timestamp_service: "Custom TSA"
+      risk_threshold: "80"
+      ombuds_escalation_hours: "8"
     expected_contains:
-      - 'Custom TSA'
-      - 'critical'
-      - 'override'
-      - 'audit trail'
+      - "Custom TSA"
+      - "critical"
+      - "override"
+      - "audit trail"

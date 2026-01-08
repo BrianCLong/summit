@@ -28,13 +28,13 @@ Allows burst traffic while maintaining average rate. Tokens refill at a constant
 
 ## User Tiers
 
-| Tier | Requests/Min | Requests/Hour | Burst Size | GraphQL Complexity |
-|------|-------------|---------------|------------|-------------------|
-| **Free** | 10 | 500 | 15 | 100 |
-| **Basic** | 30 | 1,500 | 50 | 300 |
-| **Premium** | 100 | 5,000 | 150 | 1,000 |
-| **Enterprise** | 500 | 25,000 | 1,000 | 5,000 |
-| **Internal** | 10,000 | 500,000 | 10,000 | 50,000 |
+| Tier           | Requests/Min | Requests/Hour | Burst Size | GraphQL Complexity |
+| -------------- | ------------ | ------------- | ---------- | ------------------ |
+| **Free**       | 10           | 500           | 15         | 100                |
+| **Basic**      | 30           | 1,500         | 50         | 300                |
+| **Premium**    | 100          | 5,000         | 150        | 1,000              |
+| **Enterprise** | 500          | 25,000        | 1,000      | 5,000              |
+| **Internal**   | 10,000       | 500,000       | 10,000     | 50,000             |
 
 ## Endpoint-Specific Limits
 
@@ -55,29 +55,29 @@ pnpm add @intelgraph/rate-limiter
 ### Express Middleware
 
 ```typescript
-import { createRateLimiter } from '@intelgraph/rate-limiter';
+import { createRateLimiter } from "@intelgraph/rate-limiter";
 
 const limiter = createRateLimiter({
-  algorithm: 'sliding-window',
+  algorithm: "sliding-window",
   windowMs: 60000, // 1 minute
   max: 100,
   keyGenerator: (req) => req.user?.id || req.ip,
 });
 
-app.use('/api', limiter);
+app.use("/api", limiter);
 ```
 
 ### GraphQL Plugin
 
 ```typescript
-import { createGraphQLRateLimitPlugin } from '@intelgraph/rate-limiter';
+import { createGraphQLRateLimitPlugin } from "@intelgraph/rate-limiter";
 
 const server = new ApolloServer({
   typeDefs,
   resolvers,
   plugins: [
     createGraphQLRateLimitPlugin({
-      algorithm: 'token-bucket',
+      algorithm: "token-bucket",
       capacity: 100,
       refillRate: 10,
     }),

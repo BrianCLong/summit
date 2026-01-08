@@ -1,4 +1,4 @@
-import { Redis } from 'ioredis';
+import { Redis } from "ioredis";
 
 export interface CacheConfig {
   l1?: L1CacheConfig;
@@ -27,7 +27,7 @@ export interface L2CacheConfig {
 
 export interface L3CacheConfig {
   enabled: boolean;
-  provider: 'cloudfront' | 'cloudflare' | 'fastly';
+  provider: "cloudfront" | "cloudflare" | "fastly";
   distributionId?: string;
   apiKey?: string;
   zone?: string;
@@ -80,15 +80,15 @@ export interface TierStats {
 }
 
 export interface InvalidationStrategy {
-  type: 'immediate' | 'lazy' | 'scheduled';
+  type: "immediate" | "lazy" | "scheduled";
   delay?: number;
-  cascadeToTier?: 'l1' | 'l2' | 'l3' | 'all';
+  cascadeToTier?: "l1" | "l2" | "l3" | "all";
 }
 
 export interface WarmingStrategy {
   keys: string[];
   loader: (key: string) => Promise<any>;
-  priority?: 'high' | 'normal' | 'low';
+  priority?: "high" | "normal" | "low";
   schedule?: string; // Cron expression
   parallel?: number;
 }

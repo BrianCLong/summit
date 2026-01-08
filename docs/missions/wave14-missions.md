@@ -20,6 +20,7 @@ integration safe across stacks. Cross-cutting standards for every module:
   reporting feeds (`safety-console`, `fairness-lab`, `meta-monitor`).
 
 ## 105. `persona-sim/` — Adversary Persona & Attack Simulation Engine
+
 - **Purpose:** Generate deterministic, labeled adversarial and borderline interaction sequences (malicious, insider, non-
   compliant) against non-prod environments via public entry points only.
 - **Schemas:**
@@ -41,6 +42,7 @@ integration safe across stacks. Cross-cutting standards for every module:
   to keep core engine stable.
 
 ## 106. `doc2graph/` — Unstructured Doc → Graph Mapper & Schema-Hint Engine
+
 - **Purpose:** Convert PDFs/emails/text into staged graph deltas with provenance and schema hints—never writing directly to the
   canonical graph.
 - **Pipeline:** Ingest via `assets/` URIs or uploads, run OCR as needed, call existing NLP services for entity/relation
@@ -59,6 +61,7 @@ integration safe across stacks. Cross-cutting standards for every module:
   privacy-engine before leaving ingestion boundary.
 
 ## 107. `case-linker/` — Cross-Case Linker & Meta-Case Aggregation
+
 - **Purpose:** Detect related/duplicate cases and manage meta-cases that roll multiple incidents into campaigns.
 - **Signals:** Shared ER entities, overlapping timelines, location proximity, ontology tags, event motifs, and analyst
   interactions; configurable thresholds for “possible”, “likely”, and “duplicate”.
@@ -74,6 +77,7 @@ integration safe across stacks. Cross-cutting standards for every module:
   changes; scheduled rescoring jobs on major ER/time updates.
 
 ## 108. `evidence-rank/` — Evidence Ranking & “Most Important First” Engine
+
 - **Purpose:** Prioritize evidence for cases and specific hypotheses with transparent rationales.
 - **Signals:** Provenance ledger (claim strength, contradictions), graph analytics (centrality/motifs), copilot citations,
   analyst interaction telemetry, recency, and policy risk flags.
@@ -88,6 +92,7 @@ integration safe across stacks. Cross-cutting standards for every module:
   fairness checks for bias in ranking across entities/roles.
 
 ## 109. `dev-sandbox-data/` — Developer Data Sandbox & Safe Prod-Like Test Data
+
 - **Purpose:** Provide masked/synthetic datasets with referential integrity and production-like distributions for dev/CI
   without exposing real PII.
 - **Data Paths:** Governed exports → tokenization/scrambling → optional synthesis → validation. Snapshots per service (ingest,
@@ -102,6 +107,7 @@ integration safe across stacks. Cross-cutting standards for every module:
   datasets; audit logs capture lineage of synthetic exports; TTL-based cleanup for stale sandboxes.
 
 ## 110. `user-feedback/` — Survey / NPS / Qualitative Feedback Aggregator
+
 - **Purpose:** Capture explicit human feedback (NPS/CSAT/surveys/free-text) and align with tenant/role/feature usage for
   roadmap and risk signals.
 - **Data Model:** Feedback artifacts with score/type, text, optional anonymity, tenant/role/feature linkage, timestamps, and
@@ -116,6 +122,7 @@ integration safe across stacks. Cross-cutting standards for every module:
   tests to prevent leakage into non-governed channels; replay-safe anonymization tests.
 
 ## 111. `copilot-redteam/` — Copilot Red-Team Orchestrator & Adversarial Suite
+
 - **Purpose:** Systematically attack copilot/XAI endpoints with adversarial prompts, detect policy bypasses/leakage, and turn
   failures into regression tests.
 - **Assets:** Versioned adversarial prompt suites (policy bypass, obfuscation, multilingual, prompt injection chains) stored as
@@ -133,6 +140,7 @@ integration safe across stacks. Cross-cutting standards for every module:
   loops against downstream models.
 
 ## 112. `timeline-narrator/` — Natural-Language Timeline Narrator
+
 - **Purpose:** Turn structured event sequences into audience-tailored chronological narratives anchored to evidence and
   privacy constraints.
 - **Inputs:** Events with timestamps, actors, locations, evidence IDs from time-engine/case/storyboard/sim-engine.
@@ -148,6 +156,7 @@ integration safe across stacks. Cross-cutting standards for every module:
   state; scheduled regenerations when source timelines change materially.
 
 ## How to Use Wave 14 Missions
+
 - **Parallelization:** Each module is API-first, data-driven, and isolated from prod writes. Persona libraries, adversarial
   suites, and scoring configs evolve via data changes, keeping core engines stable.
 - **Safety & Isolation:** All test traffic carries sandbox headers/tenants; no direct schema mutations in dependent systems.

@@ -206,14 +206,7 @@ policy-diff \
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://intelgraph.example/schemas/prov-manifest.json",
   "type": "object",
-  "required": [
-    "bundleId",
-    "createdAt",
-    "evidence",
-    "transforms",
-    "licenses",
-    "signatures"
-  ],
+  "required": ["bundleId", "createdAt", "evidence", "transforms", "licenses", "signatures"],
   "properties": {
     "bundleId": { "type": "string", "format": "uuid" },
     "createdAt": { "type": "string", "format": "date-time" },
@@ -253,13 +246,13 @@ policy-diff \
 
 ```ts
 // tools/prov-verify/src/index.ts
-import { readFileSync } from 'fs';
-import { createHash } from 'crypto';
+import { readFileSync } from "fs";
+import { createHash } from "crypto";
 
-const manifest = JSON.parse(readFileSync(process.argv[2], 'utf8'));
+const manifest = JSON.parse(readFileSync(process.argv[2], "utf8"));
 
 function sha256(buf: Buffer) {
-  return createHash('sha256').update(buf).digest('hex');
+  return createHash("sha256").update(buf).digest("hex");
 }
 
 // verify evidence hashes
@@ -268,7 +261,7 @@ for (const ev of manifest.evidence) {
   const sum = sha256(bytes);
   if (sum !== ev.sha256) throw new Error(`Hash mismatch: ${ev.id}`);
 }
-console.log('evidence ok');
+console.log("evidence ok");
 // TODO: verify Merkle root + signatures
 ```
 
@@ -309,7 +302,7 @@ ALTER TABLE audit_events
 ```yaml
 name: weekly-chaos
 on:
-  schedule: [{ cron: '0 9 * * 1' }] # Mondays 09:00 UTC
+  schedule: [{ cron: "0 9 * * 1" }] # Mondays 09:00 UTC
 jobs:
   kill-broker:
     runs-on: ubuntu-latest

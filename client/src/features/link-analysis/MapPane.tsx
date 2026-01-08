@@ -1,5 +1,5 @@
-import React from 'react';
-import { useAnalysisStore } from './store';
+import React from "react";
+import { useAnalysisStore } from "./store";
 // Placeholder for Mapbox GL map
 // In a full implementation, mapbox-gl would render a map synchronized with timeRange
 

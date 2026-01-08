@@ -1,6 +1,7 @@
 # Multi-Tenant MaaS v1 Architecture
 
 ## Overview
+
 Manages tenant identity, onboarding, and isolation. It acts as the gatekeeper for new organizations entering the platform.
 
 ## Workflow
@@ -12,4 +13,5 @@ Manages tenant identity, onboarding, and isolation. It acts as the gatekeeper fo
 5. **Onboarding Task**: Triggers Maestro `TENANT_ONBOARDING` task to provision resources.
 
 ## Isolation
+
 All downstream operations (Maestro Tasks, IntelGraph queries) require `tenantId`.

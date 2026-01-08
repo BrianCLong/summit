@@ -13,52 +13,50 @@
  * @module rules
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
-import { AlertSeverity, AlertType } from './alert.js';
-import { SignalTypeIdSchema } from './signal-types.js';
+import { AlertSeverity, AlertType } from "./alert.js";
+import { SignalTypeIdSchema } from "./signal-types.js";
 
 /**
  * Comparison operators for threshold rules
  */
 export const ComparisonOperator = {
-  EQ: 'eq',
-  NE: 'ne',
-  GT: 'gt',
-  GTE: 'gte',
-  LT: 'lt',
-  LTE: 'lte',
-  IN: 'in',
-  NOT_IN: 'not_in',
-  CONTAINS: 'contains',
-  NOT_CONTAINS: 'not_contains',
-  MATCHES: 'matches',
-  EXISTS: 'exists',
-  NOT_EXISTS: 'not_exists',
+  EQ: "eq",
+  NE: "ne",
+  GT: "gt",
+  GTE: "gte",
+  LT: "lt",
+  LTE: "lte",
+  IN: "in",
+  NOT_IN: "not_in",
+  CONTAINS: "contains",
+  NOT_CONTAINS: "not_contains",
+  MATCHES: "matches",
+  EXISTS: "exists",
+  NOT_EXISTS: "not_exists",
 } as const;
 
-export type ComparisonOperatorType =
-  (typeof ComparisonOperator)[keyof typeof ComparisonOperator];
+export type ComparisonOperatorType = (typeof ComparisonOperator)[keyof typeof ComparisonOperator];
 
 /**
  * Logical operators for combining conditions
  */
 export const LogicalOperator = {
-  AND: 'and',
-  OR: 'or',
-  NOT: 'not',
+  AND: "and",
+  OR: "or",
+  NOT: "not",
 } as const;
 
-export type LogicalOperatorType =
-  (typeof LogicalOperator)[keyof typeof LogicalOperator];
+export type LogicalOperatorType = (typeof LogicalOperator)[keyof typeof LogicalOperator];
 
 /**
  * Window types for temporal operations
  */
 export const WindowType = {
-  TUMBLING: 'tumbling',
-  SLIDING: 'sliding',
-  SESSION: 'session',
+  TUMBLING: "tumbling",
+  SLIDING: "sliding",
+  SESSION: "session",
 } as const;
 
 export type WindowTypeType = (typeof WindowType)[keyof typeof WindowType];
@@ -67,10 +65,10 @@ export type WindowTypeType = (typeof WindowType)[keyof typeof WindowType];
  * Rule status
  */
 export const RuleStatus = {
-  ACTIVE: 'active',
-  INACTIVE: 'inactive',
-  TESTING: 'testing',
-  DEPRECATED: 'deprecated',
+  ACTIVE: "active",
+  INACTIVE: "inactive",
+  TESTING: "testing",
+  DEPRECATED: "deprecated",
 } as const;
 
 export type RuleStatusType = (typeof RuleStatus)[keyof typeof RuleStatus];
@@ -83,7 +81,7 @@ export type RuleStatusType = (typeof RuleStatus)[keyof typeof RuleStatus];
  * Simple condition (field comparison)
  */
 export const SimpleConditionSchema = z.object({
-  type: z.literal('simple'),
+  type: z.literal("simple"),
   field: z.string().min(1),
   operator: z.enum([
     ComparisonOperator.EQ,
@@ -110,20 +108,14 @@ export type SimpleCondition = z.infer<typeof SimpleConditionSchema>;
  */
 export const CompoundConditionSchema: z.ZodType<CompoundCondition> = z.lazy(() =>
   z.object({
-    type: z.literal('compound'),
-    operator: z.enum([
-      LogicalOperator.AND,
-      LogicalOperator.OR,
-      LogicalOperator.NOT,
-    ]),
-    conditions: z.array(
-      z.union([SimpleConditionSchema, CompoundConditionSchema]),
-    ),
-  }),
+    type: z.literal("compound"),
+    operator: z.enum([LogicalOperator.AND, LogicalOperator.OR, LogicalOperator.NOT]),
+    conditions: z.array(z.union([SimpleConditionSchema, CompoundConditionSchema])),
+  })
 );
 
 export interface CompoundCondition {
-  type: 'compound';
+  type: "compound";
   operator: LogicalOperatorType;
   conditions: (SimpleCondition | CompoundCondition)[];
 }
@@ -131,10 +123,7 @@ export interface CompoundCondition {
 /**
  * Union of all condition types
  */
-export const ConditionSchema = z.union([
-  SimpleConditionSchema,
-  CompoundConditionSchema,
-]);
+export const ConditionSchema = z.union([SimpleConditionSchema, CompoundConditionSchema]);
 
 export type Condition = SimpleCondition | CompoundCondition;
 
@@ -220,7 +209,7 @@ export type RuleBase = z.infer<typeof RuleBaseSchema>;
  * Threshold rule - triggers when a value crosses a threshold
  */
 export const ThresholdRuleSchema = RuleBaseSchema.extend({
-  ruleType: z.literal('threshold'),
+  ruleType: z.literal("threshold"),
   alertType: z.literal(AlertType.THRESHOLD),
 
   config: z.object({
@@ -241,7 +230,7 @@ export type ThresholdRule = z.infer<typeof ThresholdRuleSchema>;
  * Pattern rule - triggers when a sequence of events matches
  */
 export const PatternRuleSchema = RuleBaseSchema.extend({
-  ruleType: z.literal('pattern'),
+  ruleType: z.literal("pattern"),
   alertType: z.literal(AlertType.PATTERN),
 
   config: z.object({
@@ -261,7 +250,7 @@ export const PatternRuleSchema = RuleBaseSchema.extend({
             max: z.number().positive().optional(),
           })
           .optional(),
-      }),
+      })
     ),
 
     /** Time constraint for the entire pattern */
@@ -281,7 +270,7 @@ export type PatternRule = z.infer<typeof PatternRuleSchema>;
  * Temporal rule - triggers based on time-based conditions
  */
 export const TemporalRuleSchema = RuleBaseSchema.extend({
-  ruleType: z.literal('temporal'),
+  ruleType: z.literal("temporal"),
   alertType: z.literal(AlertType.TEMPORAL),
 
   config: z.object({
@@ -298,7 +287,7 @@ export const TemporalRuleSchema = RuleBaseSchema.extend({
 
     /** Aggregation to perform */
     aggregation: z.object({
-      type: z.enum(['count', 'sum', 'avg', 'min', 'max']),
+      type: z.enum(["count", "sum", "avg", "min", "max"]),
       field: z.string().optional(), // Required for sum/avg/min/max
     }),
 
@@ -325,7 +314,7 @@ export type TemporalRule = z.infer<typeof TemporalRuleSchema>;
  * Rate rule - triggers based on event rate/frequency
  */
 export const RateRuleSchema = RuleBaseSchema.extend({
-  ruleType: z.literal('rate'),
+  ruleType: z.literal("rate"),
   alertType: z.literal(AlertType.RATE),
 
   config: z.object({
@@ -355,7 +344,7 @@ export type RateRule = z.infer<typeof RateRuleSchema>;
  * Absence rule - triggers when expected signals are missing
  */
 export const AbsenceRuleSchema = RuleBaseSchema.extend({
-  ruleType: z.literal('absence'),
+  ruleType: z.literal("absence"),
   alertType: z.literal(AlertType.ABSENCE),
 
   config: z.object({
@@ -382,7 +371,7 @@ export type AbsenceRule = z.infer<typeof AbsenceRuleSchema>;
  * Anomaly rule - triggers on statistical anomalies
  */
 export const AnomalyRuleSchema = RuleBaseSchema.extend({
-  ruleType: z.literal('anomaly'),
+  ruleType: z.literal("anomaly"),
   alertType: z.literal(AlertType.ANOMALY),
 
   config: z.object({
@@ -390,7 +379,7 @@ export const AnomalyRuleSchema = RuleBaseSchema.extend({
     field: z.string(),
 
     /** Anomaly detection method */
-    method: z.enum(['zscore', 'mad', 'iqr', 'isolation_forest']),
+    method: z.enum(["zscore", "mad", "iqr", "isolation_forest"]),
 
     /** Sensitivity (number of standard deviations, etc.) */
     sensitivity: z.number().positive().default(3),
@@ -415,7 +404,7 @@ export type AnomalyRule = z.infer<typeof AnomalyRuleSchema>;
  * Correlation rule - triggers on cross-signal correlations
  */
 export const CorrelationRuleSchema = RuleBaseSchema.extend({
-  ruleType: z.literal('correlation'),
+  ruleType: z.literal("correlation"),
   alertType: z.literal(AlertType.CORRELATION),
 
   config: z.object({
@@ -432,7 +421,7 @@ export const CorrelationRuleSchema = RuleBaseSchema.extend({
         condition: ConditionSchema,
         /** Required count of secondary signals */
         minCount: z.number().positive().default(1),
-      }),
+      })
     ),
 
     /** Correlation field (e.g., entity ID, IP address) */
@@ -451,7 +440,7 @@ export type CorrelationRule = z.infer<typeof CorrelationRuleSchema>;
 /**
  * Union of all rule types
  */
-export const RuleSchema = z.discriminatedUnion('ruleType', [
+export const RuleSchema = z.discriminatedUnion("ruleType", [
   ThresholdRuleSchema,
   PatternRuleSchema,
   TemporalRuleSchema,
@@ -519,12 +508,12 @@ export type RuleEvaluationResult = z.infer<typeof RuleEvaluationResultSchema>;
  * Create a simple threshold rule
  */
 export function createThresholdRule(
-  params: Omit<ThresholdRule, 'ruleType' | 'alertType' | 'createdAt' | 'updatedAt'>,
+  params: Omit<ThresholdRule, "ruleType" | "alertType" | "createdAt" | "updatedAt">
 ): ThresholdRule {
   const now = Date.now();
   return {
     ...params,
-    ruleType: 'threshold',
+    ruleType: "threshold",
     alertType: AlertType.THRESHOLD,
     createdAt: now,
     updatedAt: now,
@@ -535,12 +524,12 @@ export function createThresholdRule(
  * Create a pattern rule
  */
 export function createPatternRule(
-  params: Omit<PatternRule, 'ruleType' | 'alertType' | 'createdAt' | 'updatedAt'>,
+  params: Omit<PatternRule, "ruleType" | "alertType" | "createdAt" | "updatedAt">
 ): PatternRule {
   const now = Date.now();
   return {
     ...params,
-    ruleType: 'pattern',
+    ruleType: "pattern",
     alertType: AlertType.PATTERN,
     createdAt: now,
     updatedAt: now,
@@ -551,12 +540,12 @@ export function createPatternRule(
  * Create a rate rule
  */
 export function createRateRule(
-  params: Omit<RateRule, 'ruleType' | 'alertType' | 'createdAt' | 'updatedAt'>,
+  params: Omit<RateRule, "ruleType" | "alertType" | "createdAt" | "updatedAt">
 ): RateRule {
   const now = Date.now();
   return {
     ...params,
-    ruleType: 'rate',
+    ruleType: "rate",
     alertType: AlertType.RATE,
     createdAt: now,
     updatedAt: now,
@@ -567,12 +556,12 @@ export function createRateRule(
  * Create an absence rule
  */
 export function createAbsenceRule(
-  params: Omit<AbsenceRule, 'ruleType' | 'alertType' | 'createdAt' | 'updatedAt'>,
+  params: Omit<AbsenceRule, "ruleType" | "alertType" | "createdAt" | "updatedAt">
 ): AbsenceRule {
   const now = Date.now();
   return {
     ...params,
-    ruleType: 'absence',
+    ruleType: "absence",
     alertType: AlertType.ABSENCE,
     createdAt: now,
     updatedAt: now,
@@ -589,10 +578,7 @@ export function validateRule(input: unknown): z.SafeParseReturnType<unknown, Rul
 /**
  * Check if a rule applies to a signal type
  */
-export function ruleAppliesToSignalType(
-  rule: Rule,
-  signalType: string,
-): boolean {
+export function ruleAppliesToSignalType(rule: Rule, signalType: string): boolean {
   return rule.signalTypes.includes(signalType as any);
 }
 

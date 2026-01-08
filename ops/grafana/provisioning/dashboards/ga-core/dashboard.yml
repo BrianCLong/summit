@@ -1,6 +1,6 @@
 apiVersion: 1
 providers:
-  - name: 'ga-core'
+  - name: "ga-core"
     type: file
     disableDeletion: false
     editable: true

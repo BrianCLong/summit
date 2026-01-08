@@ -3,16 +3,16 @@
  * Track and optimize cloud spending across providers
  */
 
-import { CloudProvider, CloudCostMetrics } from './types.js';
-import pino from 'pino';
+import { CloudProvider, CloudCostMetrics } from "./types.js";
+import pino from "pino";
 
-const logger = pino({ name: 'cost-manager' });
+const logger = pino({ name: "cost-manager" });
 
 export interface CostAlert {
   id: string;
   provider: CloudProvider;
-  type: 'budget' | 'anomaly' | 'forecast';
-  severity: 'low' | 'medium' | 'high';
+  type: "budget" | "anomaly" | "forecast";
+  severity: "low" | "medium" | "high";
   message: string;
   currentCost: number;
   threshold: number;
@@ -37,7 +37,7 @@ export class CloudCostManager {
 
   setBudget(budget: CostBudget): void {
     this.budgets.set(budget.provider, budget);
-    logger.info({ provider: budget.provider, limit: budget.monthlyLimit }, 'Budget set');
+    logger.info({ provider: budget.provider, limit: budget.monthlyLimit }, "Budget set");
   }
 
   addCostMetrics(metrics: CloudCostMetrics): void {
@@ -62,9 +62,9 @@ export class CloudCostManager {
             provider: metrics.provider,
             current: monthlyTotal,
             threshold: thresholdAmount,
-            limit: budget.monthlyLimit
+            limit: budget.monthlyLimit,
           },
-          'Budget threshold reached'
+          "Budget threshold reached"
         );
       }
     }
@@ -72,7 +72,7 @@ export class CloudCostManager {
 
   getMonthlyTotal(provider: CloudProvider, month: number): number {
     return this.historicalCosts
-      .filter(m => m.provider === provider && m.billingPeriod.start.getMonth() === month)
+      .filter((m) => m.provider === provider && m.billingPeriod.start.getMonth() === month)
       .reduce((sum, m) => sum + m.costUSD, 0);
   }
 
@@ -81,7 +81,7 @@ export class CloudCostManager {
     cutoffDate.setDate(cutoffDate.getDate() - days);
 
     return this.historicalCosts
-      .filter(m => m.provider === provider && m.billingPeriod.start >= cutoffDate)
+      .filter((m) => m.provider === provider && m.billingPeriod.start >= cutoffDate)
       .sort((a, b) => a.billingPeriod.start.getTime() - b.billingPeriod.start.getTime());
   }
 
@@ -99,12 +99,12 @@ export class CloudCostManager {
       alerts.push({
         id: `anomaly-${provider}-${Date.now()}`,
         provider,
-        type: 'anomaly',
-        severity: 'high',
+        type: "anomaly",
+        severity: "high",
         message: `Cost spike detected: ${latest.costUSD.toFixed(2)} vs average ${average.toFixed(2)}`,
         currentCost: latest.costUSD,
         threshold: average * 1.5,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
 
@@ -131,19 +131,19 @@ export class CloudCostManager {
       compute: trends.reduce((sum, m) => sum + m.breakdown.compute, 0) / trends.length,
       storage: trends.reduce((sum, m) => sum + m.breakdown.storage, 0) / trends.length,
       network: trends.reduce((sum, m) => sum + m.breakdown.network, 0) / trends.length,
-      other: trends.reduce((sum, m) => sum + m.breakdown.other, 0) / trends.length
+      other: trends.reduce((sum, m) => sum + m.breakdown.other, 0) / trends.length,
     };
 
     if (avgBreakdown.compute > 50) {
-      suggestions.push('High compute costs: Consider reserved instances or spot instances');
+      suggestions.push("High compute costs: Consider reserved instances or spot instances");
     }
 
     if (avgBreakdown.storage > 30) {
-      suggestions.push('High storage costs: Implement data lifecycle policies and compression');
+      suggestions.push("High storage costs: Implement data lifecycle policies and compression");
     }
 
     if (avgBreakdown.network > 20) {
-      suggestions.push('High network costs: Optimize data transfer and use CDN where appropriate');
+      suggestions.push("High network costs: Optimize data transfer and use CDN where appropriate");
     }
 
     return suggestions;
@@ -153,8 +153,8 @@ export class CloudCostManager {
     const costsByRegion = new Map<string, number>();
 
     this.historicalCosts
-      .filter(m => m.provider === provider)
-      .forEach(metrics => {
+      .filter((m) => m.provider === provider)
+      .forEach((metrics) => {
         const current = costsByRegion.get(metrics.region) || 0;
         costsByRegion.set(metrics.region, current + metrics.costUSD);
       });

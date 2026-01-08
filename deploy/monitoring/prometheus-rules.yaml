@@ -137,9 +137,9 @@ spec:
             service: intelgraph-api
             slo: availability
           annotations:
-            summary: 'IntelGraph API availability SLO violation'
-            description: 'API availability is {{ $value | humanizePercentage }} which violates the 99.9% SLO'
-            runbook_url: 'https://docs.intelgraph.io/runbooks/availability-slo'
+            summary: "IntelGraph API availability SLO violation"
+            description: "API availability is {{ $value | humanizePercentage }} which violates the 99.9% SLO"
+            runbook_url: "https://docs.intelgraph.io/runbooks/availability-slo"
 
         - alert: IntelGraphAPILatencySLOViolation
           expr: |
@@ -150,8 +150,8 @@ spec:
             service: intelgraph-api
             slo: latency
           annotations:
-            summary: 'IntelGraph API latency SLO violation'
-            description: 'API p95 latency is {{ $value }}s which violates the 1.5s SLO'
+            summary: "IntelGraph API latency SLO violation"
+            description: "API p95 latency is {{ $value }}s which violates the 1.5s SLO"
 
         - alert: IntelGraphGraphQueryLatencySLOViolation
           expr: |
@@ -162,8 +162,8 @@ spec:
             service: intelgraph-graph
             slo: latency
           annotations:
-            summary: 'IntelGraph graph query latency SLO violation'
-            description: 'Graph query p95 latency is {{ $value }}s which exceeds the 1.2s threshold'
+            summary: "IntelGraph graph query latency SLO violation"
+            description: "Graph query p95 latency is {{ $value }}s which exceeds the 1.2s threshold"
 
         # Cost Budget Alerts
         - alert: IntelGraphCostBudgetWarning
@@ -174,8 +174,8 @@ spec:
             severity: warning
             service: intelgraph-cost
           annotations:
-            summary: 'IntelGraph cost budget utilization high'
-            description: 'Tenant {{ $labels.tenant_id }} has used {{ $value | humanizePercentage }} of their budget'
+            summary: "IntelGraph cost budget utilization high"
+            description: "Tenant {{ $labels.tenant_id }} has used {{ $value | humanizePercentage }} of their budget"
 
         - alert: IntelGraphCostBudgetCritical
           expr: |
@@ -185,8 +185,8 @@ spec:
             severity: critical
             service: intelgraph-cost
           annotations:
-            summary: 'IntelGraph cost budget utilization critical'
-            description: 'Tenant {{ $labels.tenant_id }} has used {{ $value | humanizePercentage }} of their budget'
+            summary: "IntelGraph cost budget utilization critical"
+            description: "Tenant {{ $labels.tenant_id }} has used {{ $value | humanizePercentage }} of their budget"
 
         # Connector Health Alerts
         - alert: IntelGraphConnectorErrors
@@ -197,8 +197,8 @@ spec:
             severity: warning
             service: intelgraph-connectors
           annotations:
-            summary: 'IntelGraph connector errors'
-            description: 'Connector {{ $labels.connector_type }} has {{ $value }} errors/second'
+            summary: "IntelGraph connector errors"
+            description: "Connector {{ $labels.connector_type }} has {{ $value }} errors/second"
 
         # Policy Engine Alerts
         - alert: IntelGraphPolicyEngineLatency
@@ -209,8 +209,8 @@ spec:
             severity: warning
             service: intelgraph-policy
           annotations:
-            summary: 'IntelGraph policy engine latency high'
-            description: 'Policy decision p95 latency is {{ $value }}ms'
+            summary: "IntelGraph policy engine latency high"
+            description: "Policy decision p95 latency is {{ $value }}ms"
 
         - alert: IntelGraphExportBlocks
           expr: |
@@ -220,8 +220,8 @@ spec:
             severity: info
             service: intelgraph-exports
           annotations:
-            summary: 'High number of blocked exports'
-            description: '{{ $value }} exports/second are being blocked by policy'
+            summary: "High number of blocked exports"
+            description: "{{ $value }} exports/second are being blocked by policy"
 
         # Provenance Ledger Alerts
         - alert: IntelGraphProvenanceWriteErrors
@@ -232,8 +232,8 @@ spec:
             severity: warning
             service: intelgraph-provenance
           annotations:
-            summary: 'IntelGraph provenance write errors'
-            description: '{{ $value }} provenance writes/second are failing'
+            summary: "IntelGraph provenance write errors"
+            description: "{{ $value }} provenance writes/second are failing"
 
         # Slow Query Detection
         - alert: IntelGraphSlowQueries
@@ -244,8 +244,8 @@ spec:
             severity: warning
             service: intelgraph-graph
           annotations:
-            summary: 'IntelGraph slow queries detected'
-            description: 'Graph query p95 latency is {{ $value }}ms, indicating slow queries'
+            summary: "IntelGraph slow queries detected"
+            description: "Graph query p95 latency is {{ $value }}ms, indicating slow queries"
 
         # NL→Cypher Quality Alerts
         - alert: IntelGraphNLQValidityLow
@@ -256,5 +256,5 @@ spec:
             severity: warning
             service: intelgraph-nlq
           annotations:
-            summary: 'IntelGraph NL→Cypher validity low'
-            description: 'NL→Cypher validity is {{ $value | humanizePercentage }}, below 90% threshold'
+            summary: "IntelGraph NL→Cypher validity low"
+            description: "NL→Cypher validity is {{ $value | humanizePercentage }}, below 90% threshold"

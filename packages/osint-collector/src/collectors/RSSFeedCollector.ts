@@ -3,9 +3,9 @@
  * RSS Feed Collector - Monitors RSS/Atom feeds for news and updates
  */
 
-import { CollectorBase } from '../core/CollectorBase.js';
-import type { CollectionTask } from '../types/index.js';
-import Parser from 'rss-parser';
+import { CollectorBase } from "../core/CollectorBase.js";
+import type { CollectionTask } from "../types/index.js";
+import Parser from "rss-parser";
 
 export interface RSSItem {
   title: string;
@@ -31,8 +31,8 @@ export class RSSFeedCollector extends CollectorBase {
     super(config);
     this.parser = new Parser({
       customFields: {
-        item: ['media:content', 'media:thumbnail']
-      }
+        item: ["media:content", "media:thumbnail"],
+      },
     });
   }
 
@@ -67,23 +67,21 @@ export class RSSFeedCollector extends CollectorBase {
   async fetchFeed(url: string, since?: Date): Promise<RSSItem[]> {
     try {
       const feed = await this.parser.parseURL(url);
-      let items = feed.items.map(item => ({
-        title: item.title || '',
-        link: item.link || '',
+      let items = feed.items.map((item) => ({
+        title: item.title || "",
+        link: item.link || "",
         pubDate: item.pubDate ? new Date(item.pubDate) : undefined,
         author: item.creator || item.author,
         content: item.content,
         contentSnippet: item.contentSnippet,
         guid: item.guid,
         categories: item.categories,
-        enclosure: item.enclosure
+        enclosure: item.enclosure,
       }));
 
       // Filter by date if specified
       if (since) {
-        items = items.filter(item =>
-          item.pubDate && item.pubDate > since
-        );
+        items = items.filter((item) => item.pubDate && item.pubDate > since);
       }
 
       return items;
@@ -99,7 +97,7 @@ export class RSSFeedCollector extends CollectorBase {
     const results = new Map<string, RSSItem[]>();
 
     await Promise.all(
-      urls.map(async url => {
+      urls.map(async (url) => {
         try {
           const items = await this.fetchFeed(url);
           results.set(url, items);
@@ -119,7 +117,7 @@ export class RSSFeedCollector extends CollectorBase {
   searchItems(items: RSSItem[], keyword: string): RSSItem[] {
     const lowerKeyword = keyword.toLowerCase();
     return items.filter(
-      item =>
+      (item) =>
         item.title.toLowerCase().includes(lowerKeyword) ||
         item.contentSnippet?.toLowerCase().includes(lowerKeyword) ||
         item.content?.toLowerCase().includes(lowerKeyword)
@@ -131,9 +129,9 @@ export class RSSFeedCollector extends CollectorBase {
    */
   filterByCategory(items: RSSItem[], category: string): RSSItem[] {
     return items.filter(
-      item =>
+      (item) =>
         item.categories &&
-        item.categories.some(cat => cat.toLowerCase().includes(category.toLowerCase()))
+        item.categories.some((cat) => cat.toLowerCase().includes(category.toLowerCase()))
     );
   }
 }

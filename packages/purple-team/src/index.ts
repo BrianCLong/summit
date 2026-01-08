@@ -10,14 +10,10 @@
  */
 
 // Types
-export * from './types';
+export * from "./types";
 
 // Exercise Management
-export { ExerciseManager } from './exercise/exercise-manager';
+export { ExerciseManager } from "./exercise/exercise-manager";
 
 // Detection Validation
-export {
-  SIEMRuleValidator,
-  IOCGenerator,
-  ControlAssessor
-} from './detection/detection-validator';
+export { SIEMRuleValidator, IOCGenerator, ControlAssessor } from "./detection/detection-validator";

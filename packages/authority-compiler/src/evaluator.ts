@@ -5,14 +5,9 @@
  * Integrates with OPA for complex policy evaluation.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import {
-  PolicyDecision,
-  Operation,
-  ClassificationLevel,
-  Authority,
-} from './schema/policy.schema';
-import { CompiledPolicy } from './compiler';
+import { v4 as uuidv4 } from "uuid";
+import { PolicyDecision, Operation, ClassificationLevel, Authority } from "./schema/policy.schema";
+import { CompiledPolicy } from "./compiler";
 
 export interface EvaluationContext {
   /** User making the request */
@@ -94,7 +89,7 @@ export class PolicyEvaluator {
       }
     }
 
-    return this.deny(auditId, 'No matching authority found for this request');
+    return this.deny(auditId, "No matching authority found for this request");
   }
 
   /**
@@ -113,7 +108,7 @@ export class PolicyEvaluator {
     // Check subject match
     const subjectMatch = this.matchSubjects(authority, context);
     if (!subjectMatch) {
-      return { matches: false, reason: 'Subject does not match' };
+      return { matches: false, reason: "Subject does not match" };
     }
 
     // Check resource match
@@ -145,7 +140,9 @@ export class PolicyEvaluator {
     // Check role match
     if (subjects.roles && subjects.roles.length > 0) {
       const hasRole = subjects.roles.some((role) => context.user.roles.includes(role));
-      if (hasRole) {return true;}
+      if (hasRole) {
+        return true;
+      }
     }
 
     // Check user match
@@ -156,7 +153,9 @@ export class PolicyEvaluator {
     // Check group match
     if (subjects.groups && context.user.groups) {
       const hasGroup = subjects.groups.some((group) => context.user.groups?.includes(group));
-      if (hasGroup) {return true;}
+      if (hasGroup) {
+        return true;
+      }
     }
 
     // Check tenant match
@@ -180,8 +179,14 @@ export class PolicyEvaluator {
 
     // Check entity type
     if (resources.entityTypes && resources.entityTypes.length > 0) {
-      if (context.resource.entityType && !resources.entityTypes.includes(context.resource.entityType)) {
-        return { matches: false, reason: `Entity type ${context.resource.entityType} not permitted` };
+      if (
+        context.resource.entityType &&
+        !resources.entityTypes.includes(context.resource.entityType)
+      ) {
+        return {
+          matches: false,
+          reason: `Entity type ${context.resource.entityType} not permitted`,
+        };
       }
     }
 
@@ -189,7 +194,10 @@ export class PolicyEvaluator {
     if (resources.classifications && resources.classifications.length > 0) {
       if (context.resource.classification) {
         if (!resources.classifications.includes(context.resource.classification)) {
-          return { matches: false, reason: `Classification ${context.resource.classification} not permitted` };
+          return {
+            matches: false,
+            reason: `Classification ${context.resource.classification} not permitted`,
+          };
         }
       }
     }
@@ -201,7 +209,7 @@ export class PolicyEvaluator {
           resources.compartments?.includes(c)
         );
         if (!hasCompartment) {
-          return { matches: false, reason: 'Required compartment access not granted' };
+          return { matches: false, reason: "Required compartment access not granted" };
         }
       }
     }
@@ -210,7 +218,7 @@ export class PolicyEvaluator {
     if (resources.investigations && resources.investigations.length > 0) {
       if (context.resource.investigationId) {
         if (!resources.investigations.includes(context.resource.investigationId)) {
-          return { matches: false, reason: 'Not authorized for this investigation' };
+          return { matches: false, reason: "Not authorized for this investigation" };
         }
       }
     }
@@ -239,18 +247,18 @@ export class PolicyEvaluator {
 
     // Check MFA requirement
     if (conditions.requireMFA && !context.request.mfaVerified) {
-      return { satisfied: false, reason: 'MFA verification required' };
+      return { satisfied: false, reason: "MFA verification required" };
     }
 
     // Check justification requirement
     if (conditions.requireJustification && !context.request.justification) {
-      pendingConditions.push('Justification required');
+      pendingConditions.push("Justification required");
     }
 
     // Check IP allowlist
     if (conditions.ipAllowlist && conditions.ipAllowlist.length > 0) {
       if (context.request.ip && !conditions.ipAllowlist.includes(context.request.ip)) {
-        return { satisfied: false, reason: 'IP address not in allowlist' };
+        return { satisfied: false, reason: "IP address not in allowlist" };
       }
     }
 
@@ -261,11 +269,11 @@ export class PolicyEvaluator {
       const day = now.getUTCDay();
 
       if (hour < conditions.timeWindow.startHour || hour >= conditions.timeWindow.endHour) {
-        return { satisfied: false, reason: 'Access not permitted at this time' };
+        return { satisfied: false, reason: "Access not permitted at this time" };
       }
 
       if (conditions.timeWindow.daysOfWeek && !conditions.timeWindow.daysOfWeek.includes(day)) {
-        return { satisfied: false, reason: 'Access not permitted on this day' };
+        return { satisfied: false, reason: "Access not permitted on this day" };
       }
     }
 
@@ -273,14 +281,14 @@ export class PolicyEvaluator {
     if (conditions.validFrom) {
       const validFrom = new Date(conditions.validFrom);
       if (context.request.timestamp < validFrom) {
-        return { satisfied: false, reason: 'Authority not yet effective' };
+        return { satisfied: false, reason: "Authority not yet effective" };
       }
     }
 
     if (conditions.validTo) {
       const validTo = new Date(conditions.validTo);
       if (context.request.timestamp > validTo) {
-        return { satisfied: false, reason: 'Authority has expired' };
+        return { satisfied: false, reason: "Authority has expired" };
       }
     }
 

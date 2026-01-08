@@ -1,7 +1,7 @@
 name: artifact-retention
 on:
   schedule:
-    - cron: '42 2 * * 1' # weekly
+    - cron: "42 2 * * 1" # weekly
   workflow_dispatch: {}
 permissions:
   actions: write

@@ -1,7 +1,7 @@
 meta:
   id: plan.accessibility-automation@v1
-  owner: 'platform-engineering'
-  purpose: 'Expand accessibility automation to documentation and API docs'
+  owner: "platform-engineering"
+  purpose: "Expand accessibility automation to documentation and API docs"
   tags:
     - accessibility
     - a11y
@@ -9,13 +9,13 @@ meta:
     - automation
     - wcag
   guardrails:
-    - 'WCAG 2.1 AA compliance minimum'
-    - 'Automation must not create false sense of security'
-    - 'Manual testing still required for UX'
-    - 'All public-facing content must be checked'
+    - "WCAG 2.1 AA compliance minimum"
+    - "Automation must not create false sense of security"
+    - "Manual testing still required for UX"
+    - "All public-facing content must be checked"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -285,15 +285,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'docs-a11y'
+  - name: "docs-a11y"
     inputs:
-      documentation_types: 'Markdown docs, MkDocs site, Storybook'
-      api_documentation: 'OpenAPI 3.0, GraphQL schema'
-      current_a11y_tooling: 'axe-core for React components only'
-      compliance_target: 'WCAG 2.1 AA'
-      content_volume: '200+ pages, 50+ API endpoints'
+      documentation_types: "Markdown docs, MkDocs site, Storybook"
+      api_documentation: "OpenAPI 3.0, GraphQL schema"
+      current_a11y_tooling: "axe-core for React components only"
+      compliance_target: "WCAG 2.1 AA"
+      content_volume: "200+ pages, 50+ API endpoints"
     expected_contains:
-      - 'Documentation Checks'
-      - 'API Documentation'
-      - 'CI Integration'
-      - 'Remediation'
+      - "Documentation Checks"
+      - "API Documentation"
+      - "CI Integration"
+      - "Remediation"

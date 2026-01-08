@@ -394,10 +394,10 @@ intelgraph/
 
 ```ts
 type PolicyLabel = {
-  sensitivity: 'public' | 'internal' | 'restricted' | 'secret';
+  sensitivity: "public" | "internal" | "restricted" | "secret";
   legalBasis?: string;
   purpose?: string;
-  retention?: 'short' | 'std' | 'long';
+  retention?: "short" | "std" | "long";
 };
 
 interface NodeFacet {
@@ -427,13 +427,13 @@ interface SerializedGraph {
 ```ts
 export const tokens = {
   color: {
-    bg: { base: '#0b0f14', raised: '#10151c' },
-    fg: { base: '#dbe7ff', muted: '#9bb0c9' },
-    accent: { primary: '#79ffe1', warn: '#ffd166', danger: '#ef476f' },
-    policy: { restricted: '#ff6b6b', secret: '#ffd166', internal: '#118ab2' },
+    bg: { base: "#0b0f14", raised: "#10151c" },
+    fg: { base: "#dbe7ff", muted: "#9bb0c9" },
+    accent: { primary: "#79ffe1", warn: "#ffd166", danger: "#ef476f" },
+    policy: { restricted: "#ff6b6b", secret: "#ffd166", internal: "#118ab2" },
   },
   radius: { sm: 6, md: 12, lg: 20 },
-  focus: { ring: '2px solid #79ffe1' },
+  focus: { ring: "2px solid #79ffe1" },
 };
 ```
 

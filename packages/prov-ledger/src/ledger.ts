@@ -1,7 +1,7 @@
-import { createHash, randomUUID } from 'crypto';
-import * as fs from 'fs';
-import * as path from 'path';
-import { Evidence, Claim, Transformation, Manifest, LedgerConfig } from './types';
+import { createHash, randomUUID } from "crypto";
+import * as fs from "fs";
+import * as path from "path";
+import { Evidence, Claim, Transformation, Manifest, LedgerConfig } from "./types";
 
 export class Ledger {
   private config: LedgerConfig;
@@ -25,12 +25,14 @@ export class Ledger {
   }
 
   private append(filename: string, data: any) {
-    if (!this.config.enabled) {return;}
+    if (!this.config.enabled) {
+      return;
+    }
     const filePath = path.join(this.config.dataDir, filename);
-    fs.appendFileSync(filePath, `${JSON.stringify(data)  }\n`);
+    fs.appendFileSync(filePath, `${JSON.stringify(data)}\n`);
   }
 
-  public registerEvidence(evidence: Omit<Evidence, 'id' | 'timestamp' | 'hash'>): Evidence {
+  public registerEvidence(evidence: Omit<Evidence, "id" | "timestamp" | "hash">): Evidence {
     const id = randomUUID();
     const timestamp = new Date().toISOString();
 
@@ -42,9 +44,9 @@ export class Ledger {
       source: evidence.source,
       transforms: evidence.transforms,
       timestamp,
-      metadata: evidence.metadata
+      metadata: evidence.metadata,
     });
-    const hash = createHash('sha256').update(contentToHash).digest('hex');
+    const hash = createHash("sha256").update(contentToHash).digest("hex");
 
     const record: Evidence = {
       ...evidence,
@@ -53,11 +55,13 @@ export class Ledger {
       hash,
     };
     this.evidenceStore.set(id, record);
-    this.append('evidence.jsonl', record);
+    this.append("evidence.jsonl", record);
     return record;
   }
 
-  public registerTransformation(transform: Omit<Transformation, 'id' | 'timestamp' | 'hash'>): Transformation {
+  public registerTransformation(
+    transform: Omit<Transformation, "id" | "timestamp" | "hash">
+  ): Transformation {
     const id = randomUUID();
     const timestamp = new Date().toISOString();
 
@@ -69,9 +73,9 @@ export class Ledger {
       params: transform.params,
       inputHash: transform.inputHash,
       outputHash: transform.outputHash,
-      timestamp
+      timestamp,
     });
-    const hash = createHash('sha256').update(contentToHash).digest('hex');
+    const hash = createHash("sha256").update(contentToHash).digest("hex");
 
     const record: Transformation = {
       ...transform,
@@ -80,18 +84,18 @@ export class Ledger {
       hash,
     };
     this.transformStore.set(id, record);
-    this.append('transforms.jsonl', record);
+    this.append("transforms.jsonl", record);
     return record;
   }
 
-  public createClaim(claim: Omit<Claim, 'id' | 'timestamp' | 'hash'>): Claim {
+  public createClaim(claim: Omit<Claim, "id" | "timestamp" | "hash">): Claim {
     const id = randomUUID();
     const hashContent = JSON.stringify({
       text: claim.text,
       evidenceIds: claim.evidenceIds,
-      transformChainIds: claim.transformChainIds
+      transformChainIds: claim.transformChainIds,
     });
-    const hash = createHash('sha256').update(hashContent).digest('hex');
+    const hash = createHash("sha256").update(hashContent).digest("hex");
 
     const record: Claim = {
       ...claim,
@@ -100,7 +104,7 @@ export class Ledger {
       hash,
     };
     this.claimStore.set(id, record);
-    this.append('claims.jsonl', record);
+    this.append("claims.jsonl", record);
     return record;
   }
 
@@ -121,36 +125,40 @@ export class Ledger {
       const claim = this.claimStore.get(id);
       if (claim) {
         claims.push(claim);
-        claim.evidenceIds.forEach(eid => evidenceSet.add(eid));
-        claim.transformChainIds.forEach(tid => transformSet.add(tid));
+        claim.evidenceIds.forEach((eid) => evidenceSet.add(eid));
+        claim.transformChainIds.forEach((tid) => transformSet.add(tid));
       }
     }
 
     const evidence: Evidence[] = [];
-    evidenceSet.forEach(eid => {
+    evidenceSet.forEach((eid) => {
       const e = this.evidenceStore.get(eid);
-      if (e) {evidence.push(e);}
+      if (e) {
+        evidence.push(e);
+      }
     });
 
     const transformations: Transformation[] = [];
-    transformSet.forEach(tid => {
+    transformSet.forEach((tid) => {
       const t = this.transformStore.get(tid);
-      if (t) {transformations.push(t);}
+      if (t) {
+        transformations.push(t);
+      }
     });
 
     // Compute Merkle Root
     const allHashes = [
-      ...claims.map(c => c.hash),
-      ...evidence.map(e => e.hash),
-      ...transformations.map(t => t.hash)
+      ...claims.map((c) => c.hash),
+      ...evidence.map((e) => e.hash),
+      ...transformations.map((t) => t.hash),
     ].sort();
 
     const merkleRoot = this.computeMerkleRoot(allHashes);
 
     const manifest: Manifest = {
-      version: '1.0.0',
+      version: "1.0.0",
       timestamp: new Date().toISOString(),
-      generatedBy: 'prov-ledger',
+      generatedBy: "prov-ledger",
       merkleRoot,
       claims,
       evidence,
@@ -158,35 +166,39 @@ export class Ledger {
     };
 
     // Stub signature
-    const manifestHash = createHash('sha256').update(JSON.stringify(manifest)).digest('hex');
+    const manifestHash = createHash("sha256").update(JSON.stringify(manifest)).digest("hex");
     manifest.signature = `stub-sig-${manifestHash}`;
 
     return manifest;
   }
 
   private computeMerkleRoot(hashes: string[]): string {
-    if (hashes.length === 0) {return '';}
+    if (hashes.length === 0) {
+      return "";
+    }
     let current = hashes;
     while (current.length > 1) {
       const next: string[] = [];
       for (let i = 0; i < current.length; i += 2) {
         const left = current[i];
-        if (left === undefined) {continue;}
+        if (left === undefined) {
+          continue;
+        }
 
         if (i + 1 < current.length) {
-          const right = current[i+1];
+          const right = current[i + 1];
           if (right === undefined) {
-             next.push(left);
-             continue;
+            next.push(left);
+            continue;
           }
           const combined = left + right;
-          next.push(createHash('sha256').update(combined).digest('hex'));
+          next.push(createHash("sha256").update(combined).digest("hex"));
         } else {
           next.push(left);
         }
       }
       current = next;
     }
-    return current[0] || '';
+    return current[0] || "";
   }
 }

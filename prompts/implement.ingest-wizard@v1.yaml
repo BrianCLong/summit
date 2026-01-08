@@ -1,17 +1,17 @@
 meta:
   id: implement.ingest-wizard@v1
-  owner: 'intelgraph-advisory-committee'
-  purpose: 'Build schema-aware ETL wizard with policy enforcement and automated lineage tracking'
-  tags: ['etl', 'data-ingest', 'policy', 'dpia', 'license-compliance']
+  owner: "intelgraph-advisory-committee"
+  purpose: "Build schema-aware ETL wizard with policy enforcement and automated lineage tracking"
+  tags: ["etl", "data-ingest", "policy", "dpia", "license-compliance"]
   guardrails:
-    - 'All data sources must pass license and TOS validation'
-    - 'PII detection must run before any storage'
-    - 'DPIA checklists required for high-risk data'
-    - 'Redaction options must be presented for sensitive fields'
-    - 'Complete lineage must be tracked from source to Neo4j'
+    - "All data sources must pass license and TOS validation"
+    - "PII detection must run before any storage"
+    - "DPIA checklists required for high-risk data"
+    - "Redaction options must be presented for sensitive fields"
+    - "Complete lineage must be tracked from source to Neo4j"
 
 modelConfig:
-  model: 'claude-sonnet-4-5'
+  model: "claude-sonnet-4-5"
   temperature: 0.2
   maxTokens: 8000
 
@@ -518,25 +518,25 @@ template: |
   Remember: **License and DPIA gates are non-negotiable.** If validation fails, the wizard must block export and clearly explain why.
 
 examples:
-  - name: 'nextjs-node-worker'
+  - name: "nextjs-node-worker"
     inputs:
-      frontend_framework: 'Next.js'
-      worker_runtime: 'Node.js'
-      sample_dataset_size: '10000'
+      frontend_framework: "Next.js"
+      worker_runtime: "Node.js"
+      sample_dataset_size: "10000"
     expected_contains:
-      - 'Next.js'
-      - 'Cypress'
-      - 'PII detection'
-      - 'license validation'
-      - '10,000 rows'
+      - "Next.js"
+      - "Cypress"
+      - "PII detection"
+      - "license validation"
+      - "10,000 rows"
 
-  - name: 'react-python-worker'
+  - name: "react-python-worker"
     inputs:
-      frontend_framework: 'React'
-      worker_runtime: 'Python'
-      sample_dataset_size: '50000'
+      frontend_framework: "React"
+      worker_runtime: "Python"
+      sample_dataset_size: "50000"
     expected_contains:
-      - 'React'
-      - 'DPIA'
-      - 'redaction'
-      - 'Python'
+      - "React"
+      - "DPIA"
+      - "redaction"
+      - "Python"

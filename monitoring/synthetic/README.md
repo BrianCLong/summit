@@ -11,6 +11,7 @@ This directory contains scripts and configuration for synthetic monitoring of th
 To deploy the synthetic check as a Kubernetes CronJob:
 
 1. Create a ConfigMap with the script:
+
    ```bash
    kubectl create configmap synthetic-scripts --from-file=business_flow.js -n monitoring
    ```

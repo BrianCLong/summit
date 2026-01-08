@@ -2,4 +2,4 @@
  * ESG Reporting Types - Public API
  */
 
-export * from './esg-models.js';
+export * from "./esg-models.js";

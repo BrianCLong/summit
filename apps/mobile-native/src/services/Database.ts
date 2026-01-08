@@ -1,9 +1,9 @@
 // @ts-nocheck
 import SQLite from 'react-native-sqlite-storage';
-import { MMKV } from 'react-native-mmkv';
+import {MMKV} from 'react-native-mmkv';
 import Config from 'react-native-config';
 
-import type { Location } from './LocationService';
+import type {Location} from './LocationService';
 
 // Enable debugging for SQLite
 SQLite.enablePromise(true);
@@ -25,14 +25,14 @@ const getEncryptionKey = (): string => {
   if (Config.ENV === 'production') {
     throw new Error(
       'MMKV_ENCRYPTION_KEY not configured. Mobile app encryption keys must be ' +
-      'provisioned through react-native-config or device secure storage (Keychain/Keystore).'
+        'provisioned through react-native-config or device secure storage (Keychain/Keystore).',
     );
   }
 
   // Development fallback - log warning
   console.warn(
     'MMKV_ENCRYPTION_KEY not set - using insecure key for development only. ' +
-    'NEVER deploy to production without proper key management!'
+      'NEVER deploy to production without proper key management!',
   );
   return 'dev-insecure-key-do-not-use-in-production';
 };
@@ -144,10 +144,7 @@ const createTables = async (): Promise<void> => {
 };
 
 // Store pending mutation
-export const storePendingMutation = async (
-  operation: string,
-  variables: any,
-): Promise<number> => {
+export const storePendingMutation = async (operation: string, variables: any): Promise<number> => {
   if (!db) throw new Error('Database not initialized');
 
   const result = await db.executeSql(

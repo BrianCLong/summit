@@ -27,9 +27,9 @@ version: latest
 
 ```js
 const params = new URLSearchParams(location.search);
-const from = params.get('from');
+const from = params.get("from");
 // ... inside success emit
-post('doc_success', {
+post("doc_success", {
   path: location.pathname,
   tta_ms: t0 ? Math.round(now() - t0) : null,
   from,
@@ -43,30 +43,30 @@ post('doc_success', {
 **`scripts/roi/deflection-report.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 const parse = (s) =>
   s
     .split(/\r?\n/)
     .slice(1)
     .filter(Boolean)
     .map((l) => {
-      const [id, created, subject, tag, resolved, doc_url] = l.split(',');
+      const [id, created, subject, tag, resolved, doc_url] = l.split(",");
       return {
         id,
         created,
         subject,
         tag,
-        resolved: resolved === 'true',
+        resolved: resolved === "true",
         doc_url,
       };
     });
-const tickets = fs.existsSync('support/tickets.csv')
-  ? parse(fs.readFileSync('support/tickets.csv', 'utf8'))
+const tickets = fs.existsSync("support/tickets.csv")
+  ? parse(fs.readFileSync("support/tickets.csv", "utf8"))
   : [];
 const tta = (function () {
   try {
-    return JSON.parse(fs.readFileSync('docs/ops/tta/summary.json', 'utf8'));
+    return JSON.parse(fs.readFileSync("docs/ops/tta/summary.json", "utf8"));
   } catch {
     return [];
   }
@@ -74,7 +74,7 @@ const tta = (function () {
 const last = tta[tta.length - 1] || {};
 const linked = tickets.filter((t) => t.doc_url);
 const deflected = linked.filter(
-  (t) => /\b(resolved|answer found)\b/i.test(t.subject) || t.resolved,
+  (t) => /\b(resolved|answer found)\b/i.test(t.subject) || t.resolved
 );
 const roi = {
   period: new Date().toISOString().slice(0, 10),
@@ -83,9 +83,9 @@ const roi = {
   deflected: deflected.length,
   tta_p50: last.tta_p50 || null,
 };
-fs.mkdirSync('docs/ops/roi', { recursive: true });
-fs.writeFileSync('docs/ops/roi/deflection.json', JSON.stringify(roi, null, 2));
-console.log('ROI', roi);
+fs.mkdirSync("docs/ops/roi", { recursive: true });
+fs.writeFileSync("docs/ops/roi/deflection.json", JSON.stringify(roi, null, 2));
+console.log("ROI", roi);
 ```
 
 **Workflow** `.github/workflows/docs-roi.yml`
@@ -93,7 +93,7 @@ console.log('ROI', roi);
 ```yaml
 name: Docs ROI/Deflection
 on:
-  schedule: [{ cron: '0 11 * * 1' }]
+  schedule: [{ cron: "0 11 * * 1" }]
   workflow_dispatch:
 jobs:
   roi:
@@ -130,15 +130,15 @@ jobs:
 **`scripts/brands/apply-brand.js`**
 
 ```js
-const fs = require('fs');
-const brand = process.env.BRAND || 'base';
-const cfg = JSON.parse(fs.readFileSync(`brands/${brand}.json`, 'utf8'));
+const fs = require("fs");
+const brand = process.env.BRAND || "base";
+const cfg = JSON.parse(fs.readFileSync(`brands/${brand}.json`, "utf8"));
 const css = `:root{ --ig-primary:${cfg.primary}; }`;
-fs.mkdirSync('docs-site/src/css', { recursive: true });
-fs.writeFileSync('docs-site/src/css/brand.css', css);
+fs.mkdirSync("docs-site/src/css", { recursive: true });
+fs.writeFileSync("docs-site/src/css/brand.css", css);
 const dcfg = `module.exports = { themeConfig:{ navbar:{ title: '${cfg.name}' } } }`;
-fs.writeFileSync('docs-site/brand.config.js', dcfg);
-console.log('Applied brand', brand);
+fs.writeFileSync("docs-site/brand.config.js", dcfg);
+console.log("Applied brand", brand);
 ```
 
 **Patch** `docusaurus.config.js` to merge `brand.config.js` if present.
@@ -192,27 +192,25 @@ jobs:
 **`scripts/learn/issue-badge.js`**
 
 ```js
-const fs = require('fs');
-const cls = JSON.parse(
-  fs.readFileSync('docs/learn/badges/badge-classes.json', 'utf8'),
-);
-const id = process.argv[2] || 'user-essentials';
-const email = process.argv[3] || 'user@example.com';
+const fs = require("fs");
+const cls = JSON.parse(fs.readFileSync("docs/learn/badges/badge-classes.json", "utf8"));
+const id = process.argv[2] || "user-essentials";
+const email = process.argv[3] || "user@example.com";
 const badge = cls[id];
-if (!badge) throw new Error('Unknown badge ' + id);
+if (!badge) throw new Error("Unknown badge " + id);
 const assertion = {
-  '@context': 'https://w3id.org/openbadges/v2',
-  type: 'Assertion',
+  "@context": "https://w3id.org/openbadges/v2",
+  type: "Assertion",
   id: `${badge.id}/assertions/${Date.now()}`,
-  recipient: { type: 'email', identity: email },
+  recipient: { type: "email", identity: email },
   badge: badge.id,
-  verification: { type: 'HostedBadge' },
+  verification: { type: "HostedBadge" },
   issuedOn: new Date().toISOString(),
 };
 const out = `docs/learn/badges/assertions/${id}-${Date.now()}.json`;
-fs.mkdirSync('docs/learn/badges/assertions', { recursive: true });
+fs.mkdirSync("docs/learn/badges/assertions", { recursive: true });
 fs.writeFileSync(out, JSON.stringify(assertion, null, 2));
-console.log('Wrote', out);
+console.log("Wrote", out);
 ```
 
 **Acceptance**: Badge class JSON exists; script generates hosted assertions (for private or demo use).
@@ -293,36 +291,33 @@ PY
 **`scripts/search/click-rank.js`**
 
 ```js
-const fs = require('fs');
+const fs = require("fs");
 function safe(p) {
   try {
-    return JSON.parse(fs.readFileSync(p, 'utf8'));
+    return JSON.parse(fs.readFileSync(p, "utf8"));
   } catch {
     return [];
   }
 }
-const tta = safe('docs/ops/tta/summary.json');
+const tta = safe("docs/ops/tta/summary.json");
 // Placeholder: in production, aggregate per query; here, output simple boosts for high‑success pages
 const rules = [
   {
-    objectID: 'boost-zip',
-    condition: { context: 'query', pattern: 'zip|cert' },
-    consequence: { promote: [{ objectID: '/how-to/zip-export', position: 1 }] },
+    objectID: "boost-zip",
+    condition: { context: "query", pattern: "zip|cert" },
+    consequence: { promote: [{ objectID: "/how-to/zip-export", position: 1 }] },
   },
   {
-    objectID: 'boost-upgrade',
-    condition: { context: 'query', pattern: 'upgrade|v24' },
+    objectID: "boost-upgrade",
+    condition: { context: "query", pattern: "upgrade|v24" },
     consequence: {
-      promote: [{ objectID: '/how-to/upgrade-to-v24', position: 1 }],
+      promote: [{ objectID: "/how-to/upgrade-to-v24", position: 1 }],
     },
   },
 ];
-fs.mkdirSync('docs/ops/search', { recursive: true });
-fs.writeFileSync(
-  'docs/ops/search/algolia.rules.json',
-  JSON.stringify(rules, null, 2),
-);
-console.log('Wrote rules');
+fs.mkdirSync("docs/ops/search", { recursive: true });
+fs.writeFileSync("docs/ops/search/algolia.rules.json", JSON.stringify(rules, null, 2));
+console.log("Wrote rules");
 ```
 
 ## E2) Workflow stub to upload rules (requires keys)

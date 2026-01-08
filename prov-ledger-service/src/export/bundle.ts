@@ -1,7 +1,7 @@
-import { createHash, randomUUID } from 'crypto';
-import tar from 'tar-stream';
-import { createGzip, createGunzip } from 'zlib';
-import { merkleRoot } from '../ledger';
+import { createHash, randomUUID } from "crypto";
+import tar from "tar-stream";
+import { createGzip, createGunzip } from "zlib";
+import { merkleRoot } from "../ledger";
 
 export interface Receipt {
   id: string;
@@ -14,7 +14,7 @@ export interface Receipt {
 export interface PolicyDecision {
   id: string;
   rule: string;
-  outcome: 'allow' | 'deny' | 'redact' | string;
+  outcome: "allow" | "deny" | "redact" | string;
   issuedAt: string;
   rationale?: string[];
   subjectId?: string;
@@ -74,14 +74,12 @@ function deepClone<T>(value: T): T {
 }
 
 function hashEntity(entity: unknown): string {
-  return createHash('sha256')
-    .update(JSON.stringify(entity))
-    .digest('hex');
+  return createHash("sha256").update(JSON.stringify(entity)).digest("hex");
 }
 
 function redactEntity<T extends object>(
   entity: T,
-  fields?: string[],
+  fields?: string[]
 ): { redacted: T; removed: string[] } {
   if (!fields || fields.length === 0) {
     return { redacted: entity, removed: [] };
@@ -100,10 +98,7 @@ function redactEntity<T extends object>(
   return { redacted: workingCopy as T, removed };
 }
 
-function filterByIds<T extends { id: string }>(
-  items: T[],
-  allowedIds?: string[],
-): T[] {
+function filterByIds<T extends { id: string }>(items: T[], allowedIds?: string[]): T[] {
   if (!allowedIds || allowedIds.length === 0) {
     return items;
   }
@@ -116,31 +111,25 @@ async function gzipPack(pack: tar.Pack): Promise<Buffer> {
   const gzip = createGzip();
 
   return new Promise<Buffer>((resolve, reject) => {
-    gzip.on('data', (chunk) => chunks.push(chunk as Buffer));
-    gzip.on('end', () => resolve(Buffer.concat(chunks)));
-    gzip.on('error', reject);
-    pack.on('error', reject);
+    gzip.on("data", (chunk) => chunks.push(chunk as Buffer));
+    gzip.on("end", () => resolve(Buffer.concat(chunks)));
+    gzip.on("error", reject);
+    pack.on("error", reject);
     pack.pipe(gzip);
   });
 }
 
 export async function assembleReceiptBundle(
-  input: BundleAssemblyInput,
+  input: BundleAssemblyInput
 ): Promise<BundleAssemblyResult> {
   const redaction = input.redaction || {};
   const selectiveDisclosure = input.selectiveDisclosure;
 
   const receipts = filterByIds(input.receipts, selectiveDisclosure?.receiptIds);
-  const decisions = filterByIds(
-    input.policyDecisions,
-    selectiveDisclosure?.decisionIds,
-  );
+  const decisions = filterByIds(input.policyDecisions, selectiveDisclosure?.decisionIds);
 
   const receiptRecords = receipts.map((receipt) => {
-    const { redacted, removed } = redactEntity(
-      deepClone(receipt),
-      redaction.receipts,
-    );
+    const { redacted, removed } = redactEntity(deepClone(receipt), redaction.receipts);
     return {
       record: redacted,
       hash: hashEntity(redacted),
@@ -149,10 +138,7 @@ export async function assembleReceiptBundle(
   });
 
   const decisionRecords = decisions.map((decision) => {
-    const { redacted, removed } = redactEntity(
-      deepClone(decision),
-      redaction.policyDecisions,
-    );
+    const { redacted, removed } = redactEntity(deepClone(decision), redaction.policyDecisions);
     return {
       record: redacted,
       hash: hashEntity(redacted),
@@ -162,7 +148,7 @@ export async function assembleReceiptBundle(
 
   const manifest: ReceiptBundleManifest = {
     id: input.manifest?.id || randomUUID(),
-    version: '1.0.0',
+    version: "1.0.0",
     generatedAt: new Date().toISOString(),
     receiptCount: receiptRecords.length,
     policyDecisionCount: decisionRecords.length,
@@ -184,10 +170,11 @@ export async function assembleReceiptBundle(
     ...input.manifest,
   };
 
-  const { redacted: manifestForBundle, removed: removedManifestFields } =
-    redactEntity(manifest, redaction.manifest);
-  const manifestWithRedactions =
-    manifestForBundle as unknown as ReceiptBundleManifest;
+  const { redacted: manifestForBundle, removed: removedManifestFields } = redactEntity(
+    manifest,
+    redaction.manifest
+  );
+  const manifestWithRedactions = manifestForBundle as unknown as ReceiptBundleManifest;
 
   manifestWithRedactions.redactionsApplied = {
     ...redaction,
@@ -196,25 +183,22 @@ export async function assembleReceiptBundle(
 
   const pack = tar.pack();
   pack.entry(
-    { name: 'receipts.json' },
+    { name: "receipts.json" },
     JSON.stringify(
       receiptRecords.map((r) => r.record),
       null,
-      2,
-    ),
+      2
+    )
   );
   pack.entry(
-    { name: 'policy-decisions.json' },
+    { name: "policy-decisions.json" },
     JSON.stringify(
       decisionRecords.map((d) => d.record),
       null,
-      2,
-    ),
+      2
+    )
   );
-  pack.entry(
-    { name: 'manifest.json' },
-    JSON.stringify(manifestWithRedactions, null, 2),
-  );
+  pack.entry({ name: "manifest.json" }, JSON.stringify(manifestWithRedactions, null, 2));
 
   const bundlePromise = gzipPack(pack);
   pack.finalize();
@@ -228,28 +212,26 @@ export async function assembleReceiptBundle(
   };
 }
 
-export async function unpackBundle(
-  bundle: Buffer,
-): Promise<Record<string, string>> {
+export async function unpackBundle(bundle: Buffer): Promise<Record<string, string>> {
   const extract = tar.extract();
   const gunzip = createGunzip();
   const files: Record<string, string> = {};
 
   return new Promise<Record<string, string>>((resolve, reject) => {
-    extract.on('entry', (header, stream, next) => {
+    extract.on("entry", (header, stream, next) => {
       const chunks: Buffer[] = [];
-      stream.on('data', (chunk) => chunks.push(chunk as Buffer));
-      stream.on('end', () => {
-        files[header.name] = Buffer.concat(chunks).toString('utf8');
+      stream.on("data", (chunk) => chunks.push(chunk as Buffer));
+      stream.on("end", () => {
+        files[header.name] = Buffer.concat(chunks).toString("utf8");
         next();
       });
-      stream.on('error', reject);
+      stream.on("error", reject);
       stream.resume();
     });
 
-    extract.on('finish', () => resolve(files));
-    extract.on('error', reject);
-    gunzip.on('error', reject);
+    extract.on("finish", () => resolve(files));
+    extract.on("error", reject);
+    gunzip.on("error", reject);
 
     gunzip.pipe(extract);
 

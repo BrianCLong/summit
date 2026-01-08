@@ -1,8 +1,8 @@
-import fs from 'fs';
-import path from 'path';
-import crypto from 'crypto';
-import { execSync } from 'child_process';
-import yaml from 'js-yaml';
+import fs from "fs";
+import path from "path";
+import crypto from "crypto";
+import { execSync } from "child_process";
+import yaml from "js-yaml";
 
 interface EvidenceEntry {
   id: string;
@@ -25,32 +25,32 @@ interface ControlEntry {
   owner: string;
 }
 
-const ROOT = path.resolve(__dirname, '..', '..');
-const OUTPUT_BASE = path.join(ROOT, 'audit-packs');
-const CONTROL_MAP = path.join(ROOT, 'audit', 'control-map.yaml');
-const EVIDENCE_REGISTRY = path.join(ROOT, 'audit', 'evidence-registry.yaml');
-const EXCEPTIONS = path.join(ROOT, 'audit', 'exceptions.yaml');
+const ROOT = path.resolve(__dirname, "..", "..");
+const OUTPUT_BASE = path.join(ROOT, "audit-packs");
+const CONTROL_MAP = path.join(ROOT, "audit", "control-map.yaml");
+const EVIDENCE_REGISTRY = path.join(ROOT, "audit", "evidence-registry.yaml");
+const EXCEPTIONS = path.join(ROOT, "audit", "exceptions.yaml");
 const ADDITIONAL_DOCS = [
-  path.join(ROOT, 'docs', 'audit', 'CONTROL-MAP.md'),
-  path.join(ROOT, 'docs', 'audit', 'EVIDENCE.md'),
-  path.join(ROOT, 'docs', 'audit', 'EXCEPTIONS.md'),
-  path.join(ROOT, 'docs', 'audit', 'AGENT-GOVERNANCE.md'),
-  path.join(ROOT, 'docs', 'audit', 'AUDIT-QUERIES.md'),
+  path.join(ROOT, "docs", "audit", "CONTROL-MAP.md"),
+  path.join(ROOT, "docs", "audit", "EVIDENCE.md"),
+  path.join(ROOT, "docs", "audit", "EXCEPTIONS.md"),
+  path.join(ROOT, "docs", "audit", "AGENT-GOVERNANCE.md"),
+  path.join(ROOT, "docs", "audit", "AUDIT-QUERIES.md"),
 ];
 
 function loadYaml<T>(file: string): T {
-  const raw = fs.readFileSync(file, 'utf-8');
+  const raw = fs.readFileSync(file, "utf-8");
   return yaml.load(raw) as T;
 }
 
 function sha256(file: string): string {
-  const hash = crypto.createHash('sha256');
+  const hash = crypto.createHash("sha256");
   hash.update(fs.readFileSync(file));
-  return hash.digest('hex');
+  return hash.digest("hex");
 }
 
 function timestampFolder(): string {
-  const iso = new Date().toISOString().replace(/[-:]/g, '').split('.')[0];
+  const iso = new Date().toISOString().replace(/[-:]/g, "").split(".")[0];
   return path.join(OUTPUT_BASE, iso);
 }
 
@@ -62,14 +62,20 @@ function copyIfExists(source: string, targetDir: string, artifacts: any[]) {
   if (!fs.existsSync(source)) return;
   const target = path.join(targetDir, path.basename(source));
   fs.cpSync(source, target, { recursive: true });
-  artifacts.push({ source: path.relative(ROOT, source), target: path.relative(ROOT, target), hash: sha256(source) });
+  artifacts.push({
+    source: path.relative(ROOT, source),
+    target: path.relative(ROOT, target),
+    hash: sha256(source),
+  });
 }
 
 function gitHistory(limit = 25): string {
   try {
-    return execSync(`git log -n ${limit} --pretty=format:%h|%ad|%an|%s --date=iso`, { cwd: ROOT }).toString();
+    return execSync(`git log -n ${limit} --pretty=format:%h|%ad|%an|%s --date=iso`, {
+      cwd: ROOT,
+    }).toString();
   } catch (error) {
-    return 'git log unavailable';
+    return "git log unavailable";
   }
 }
 
@@ -79,7 +85,7 @@ function gatherEvidenceCopies(evidence: EvidenceEntry[], outputDir: string, arti
     if (fs.existsSync(candidate)) {
       const destination = path.join(outputDir, path.basename(candidate));
       fs.cpSync(candidate, destination, { recursive: true });
-      const hash = fs.statSync(candidate).isFile() ? sha256(candidate) : 'directory';
+      const hash = fs.statSync(candidate).isFile() ? sha256(candidate) : "directory";
       artifacts.push({
         evidence_id: entry.id,
         source: path.relative(ROOT, candidate),
@@ -100,7 +106,9 @@ function main() {
   const exceptions = loadYaml<{ exceptions: any[] }>(EXCEPTIONS);
 
   const artifacts: any[] = [];
-  [CONTROL_MAP, EVIDENCE_REGISTRY, EXCEPTIONS, ...ADDITIONAL_DOCS].forEach((file) => copyIfExists(file, outDir, artifacts));
+  [CONTROL_MAP, EVIDENCE_REGISTRY, EXCEPTIONS, ...ADDITIONAL_DOCS].forEach((file) =>
+    copyIfExists(file, outDir, artifacts)
+  );
   gatherEvidenceCopies(evidenceRegistry.evidence, outDir, artifacts);
 
   const manifest = {
@@ -109,11 +117,11 @@ function main() {
     controls: controlMap.controls,
     evidenceRegistry: evidenceRegistry.evidence,
     exceptions: exceptions.exceptions,
-    changeHistory: gitHistory(30).split('\n'),
+    changeHistory: gitHistory(30).split("\n"),
     artifacts,
   };
 
-  fs.writeFileSync(path.join(outDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
+  fs.writeFileSync(path.join(outDir, "manifest.json"), JSON.stringify(manifest, null, 2));
   console.log(`Audit pack generated at ${path.relative(ROOT, outDir)}`);
 }
 

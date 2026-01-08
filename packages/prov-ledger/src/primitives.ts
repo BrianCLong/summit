@@ -1,10 +1,6 @@
-import { createHash } from 'crypto';
+import { createHash } from "crypto";
 
-export type ProvenanceStepType =
-  | 'ingest'
-  | 'transform'
-  | 'policy-check'
-  | 'export';
+export type ProvenanceStepType = "ingest" | "transform" | "policy-check" | "export";
 
 export interface ProvenanceStep {
   id: string;
@@ -34,17 +30,14 @@ export interface RecordStepOptions {
 }
 
 export function hashContent(data: string | Buffer): string {
-  return createHash('sha256').update(data).digest('hex');
+  return createHash("sha256").update(data).digest("hex");
 }
 
 export function hashJson(obj: unknown): string {
   return hashContent(JSON.stringify(obj));
 }
 
-export function recordStep(
-  manifest: ProvenanceManifest,
-  opts: RecordStepOptions,
-): ProvenanceStep {
+export function recordStep(manifest: ProvenanceManifest, opts: RecordStepOptions): ProvenanceStep {
   const step: ProvenanceStep = {
     id: opts.id,
     type: opts.type,
@@ -67,7 +60,7 @@ export interface ManifestSignature {
 export function verifyManifestSignature(
   _manifest: ProvenanceManifest,
   _signature: ManifestSignature,
-  _publicKey: Buffer | string,
+  _publicKey: Buffer | string
 ): boolean {
   // TODO: Implement real signature verification
   return true;
@@ -75,7 +68,7 @@ export function verifyManifestSignature(
 
 export function verifyManifest(
   _manifest: ProvenanceManifest,
-  _artifacts: Record<string, Buffer>,
+  _artifacts: Record<string, Buffer>
 ): boolean {
   // TODO: Implement real manifest chain verification
   return true;

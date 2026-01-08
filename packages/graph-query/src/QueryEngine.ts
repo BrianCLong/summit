@@ -3,9 +3,9 @@
  * Unified query interface supporting multiple query languages
  */
 
-import { errorFactory } from '@intelgraph/errors';
-import type { GraphStorage } from '@intelgraph/graph-database';
-import type { Node, Edge, Path } from '@intelgraph/graph-database';
+import { errorFactory } from "@intelgraph/errors";
+import type { GraphStorage } from "@intelgraph/graph-database";
+import type { Node, Edge, Path } from "@intelgraph/graph-database";
 
 export interface QueryResult {
   columns: string[];
@@ -27,7 +27,7 @@ export interface QueryPlan {
 }
 
 export interface QueryStep {
-  type: 'scan' | 'filter' | 'expand' | 'aggregate' | 'sort' | 'limit';
+  type: "scan" | "filter" | "expand" | "aggregate" | "sort" | "limit";
   description: string;
   estimatedCost: number;
 }
@@ -41,10 +41,10 @@ export class QueryEngine {
   executeCypher(query: string): QueryResult {
     if (!query?.trim()) {
       throw errorFactory.validation({
-        errorCode: 'GRAPH_QUERY_EMPTY',
-        humanMessage: 'Query text is required.',
-        developerMessage: 'Received empty Cypher query input.',
-        suggestedAction: 'Provide a valid Cypher statement to execute.',
+        errorCode: "GRAPH_QUERY_EMPTY",
+        humanMessage: "Query text is required.",
+        developerMessage: "Received empty Cypher query input.",
+        suggestedAction: "Provide a valid Cypher statement to execute.",
       });
     }
 
@@ -56,16 +56,16 @@ export class QueryEngine {
       return {
         ...result,
         stats: {
-          executionTime: Date.now() - startTime
-        }
+          executionTime: Date.now() - startTime,
+        },
       };
     } catch (error) {
       throw errorFactory.fromUnknown(error, {
-        category: 'internal',
-        errorCode: 'GRAPH_QUERY_FAILURE',
-        humanMessage: 'Graph query execution failed.',
-        suggestedAction: 'Inspect the Cypher statement for syntax or data issues.',
-        context: { language: 'cypher', query },
+        category: "internal",
+        errorCode: "GRAPH_QUERY_FAILURE",
+        humanMessage: "Graph query execution failed.",
+        suggestedAction: "Inspect the Cypher statement for syntax or data issues.",
+        context: { language: "cypher", query },
       });
     }
   }
@@ -76,10 +76,10 @@ export class QueryEngine {
   executeGremlin(traversal: GremlinTraversal): QueryResult {
     if (!traversal) {
       throw errorFactory.validation({
-        errorCode: 'GRAPH_TRAVERSAL_EMPTY',
-        humanMessage: 'Traversal definition is required.',
-        developerMessage: 'Received undefined Gremlin traversal.',
-        suggestedAction: 'Provide a traversal pipeline before execution.',
+        errorCode: "GRAPH_TRAVERSAL_EMPTY",
+        humanMessage: "Traversal definition is required.",
+        developerMessage: "Received undefined Gremlin traversal.",
+        suggestedAction: "Provide a traversal pipeline before execution.",
       });
     }
 
@@ -88,19 +88,19 @@ export class QueryEngine {
       const result = this.executeTraversal(traversal);
 
       return {
-        columns: ['result'],
-        rows: result.map(r => [r]),
+        columns: ["result"],
+        rows: result.map((r) => [r]),
         stats: {
-          executionTime: Date.now() - startTime
-        }
+          executionTime: Date.now() - startTime,
+        },
       };
     } catch (error) {
       throw errorFactory.fromUnknown(error, {
-        category: 'internal',
-        errorCode: 'GRAPH_QUERY_FAILURE',
-        humanMessage: 'Graph traversal execution failed.',
-        suggestedAction: 'Review Gremlin traversal and retry.',
-        context: { language: 'gremlin' },
+        category: "internal",
+        errorCode: "GRAPH_QUERY_FAILURE",
+        humanMessage: "Graph traversal execution failed.",
+        suggestedAction: "Review Gremlin traversal and retry.",
+        context: { language: "gremlin" },
       });
     }
   }
@@ -111,10 +111,10 @@ export class QueryEngine {
   executeSPARQL(query: string): QueryResult {
     if (!query?.trim()) {
       throw errorFactory.validation({
-        errorCode: 'GRAPH_QUERY_EMPTY',
-        humanMessage: 'Query text is required.',
-        developerMessage: 'Received empty SPARQL query input.',
-        suggestedAction: 'Provide a valid SPARQL statement to execute.',
+        errorCode: "GRAPH_QUERY_EMPTY",
+        humanMessage: "Query text is required.",
+        developerMessage: "Received empty SPARQL query input.",
+        suggestedAction: "Provide a valid SPARQL statement to execute.",
       });
     }
 
@@ -126,16 +126,16 @@ export class QueryEngine {
       return {
         ...result,
         stats: {
-          executionTime: Date.now() - startTime
-        }
+          executionTime: Date.now() - startTime,
+        },
       };
     } catch (error) {
       throw errorFactory.fromUnknown(error, {
-        category: 'internal',
-        errorCode: 'GRAPH_QUERY_FAILURE',
-        humanMessage: 'Graph query execution failed.',
-        suggestedAction: 'Inspect the SPARQL statement for syntax or data issues.',
-        context: { language: 'sparql', query },
+        category: "internal",
+        errorCode: "GRAPH_QUERY_FAILURE",
+        humanMessage: "Graph query execution failed.",
+        suggestedAction: "Inspect the SPARQL statement for syntax or data issues.",
+        context: { language: "sparql", query },
       });
     }
   }
@@ -143,22 +143,22 @@ export class QueryEngine {
   /**
    * Generate query execution plan
    */
-  explain(query: string, language: 'cypher' | 'gremlin' | 'sparql' = 'cypher'): QueryPlan {
+  explain(query: string, language: "cypher" | "gremlin" | "sparql" = "cypher"): QueryPlan {
     if (!query?.trim()) {
       throw errorFactory.validation({
-        errorCode: 'GRAPH_QUERY_EMPTY',
-        humanMessage: 'Query text is required to generate a plan.',
-        developerMessage: 'Received empty query input for explain().',
-        suggestedAction: 'Provide a representative query to analyze.',
+        errorCode: "GRAPH_QUERY_EMPTY",
+        humanMessage: "Query text is required to generate a plan.",
+        developerMessage: "Received empty query input for explain().",
+        suggestedAction: "Provide a representative query to analyze.",
       });
     }
 
     switch (language) {
-      case 'cypher':
+      case "cypher":
         return this.explainCypher(query);
-      case 'gremlin':
+      case "gremlin":
         return this.explainGremlin(query);
-      case 'sparql':
+      case "sparql":
         return this.explainSPARQL(query);
     }
   }
@@ -194,7 +194,7 @@ export class QueryEngine {
       where: whereMatch ? this.parseWhereClause(whereMatch[1]) : [],
       return: returnMatch ? this.parseReturnClause(returnMatch[1]) : [],
       orderBy: orderByMatch ? this.parseOrderBy(orderByMatch[1]) : [],
-      limit: limitMatch ? parseInt(limitMatch[1]) : undefined
+      limit: limitMatch ? parseInt(limitMatch[1]) : undefined,
     };
   }
 
@@ -209,18 +209,16 @@ export class QueryEngine {
       patterns.push({
         sourceNode: { var: match[1], label: match[2] || undefined },
         edge: { var: match[3], type: match[4] || undefined },
-        targetNode: { var: match[5], label: match[6] || undefined }
+        targetNode: { var: match[5], label: match[6] || undefined },
       });
     }
 
     // Simple node pattern: (n:Label)
     const nodePattern = /\((\w+):?(\w*)\)/g;
     while ((match = nodePattern.exec(pattern)) !== null) {
-      if (!patterns.some(p =>
-        p.sourceNode.var === match[1] || p.targetNode?.var === match[1]
-      )) {
+      if (!patterns.some((p) => p.sourceNode.var === match[1] || p.targetNode?.var === match[1])) {
         patterns.push({
-          sourceNode: { var: match[1], label: match[2] || undefined }
+          sourceNode: { var: match[1], label: match[2] || undefined },
         });
       }
     }
@@ -240,7 +238,7 @@ export class QueryEngine {
         var: match[1],
         property: match[2],
         operator: match[3] as ComparisonOperator,
-        value: this.parseValue(match[4])
+        value: this.parseValue(match[4]),
       });
     }
 
@@ -248,7 +246,7 @@ export class QueryEngine {
   }
 
   private parseReturnClause(clause: string): ReturnItem[] {
-    return clause.split(',').map(item => {
+    return clause.split(",").map((item) => {
       const trimmed = item.trim();
       const asMatch = trimmed.match(/(.+)\s+as\s+(\w+)/i);
 
@@ -261,18 +259,18 @@ export class QueryEngine {
   }
 
   private parseOrderBy(clause: string): OrderByItem[] {
-    return clause.split(',').map(item => {
+    return clause.split(",").map((item) => {
       const trimmed = item.trim();
       const descMatch = trimmed.match(/(.+)\s+(desc|asc)/i);
 
       if (descMatch) {
         return {
           expression: descMatch[1].trim(),
-          direction: descMatch[2].toLowerCase() as 'asc' | 'desc'
+          direction: descMatch[2].toLowerCase() as "asc" | "desc",
         };
       }
 
-      return { expression: trimmed, direction: 'asc' };
+      return { expression: trimmed, direction: "asc" };
     });
   }
 
@@ -283,20 +281,28 @@ export class QueryEngine {
     }
 
     // Remove quotes from strings
-    if ((value.startsWith("'") && value.endsWith("'")) ||
-        (value.startsWith('"') && value.endsWith('"'))) {
+    if (
+      (value.startsWith("'") && value.endsWith("'")) ||
+      (value.startsWith('"') && value.endsWith('"'))
+    ) {
       return value.slice(1, -1);
     }
 
     // Boolean
-    if (value === 'true') {return true;}
-    if (value === 'false') {return false;}
-    if (value === 'null') {return null;}
+    if (value === "true") {
+      return true;
+    }
+    if (value === "false") {
+      return false;
+    }
+    if (value === "null") {
+      return null;
+    }
 
     return value;
   }
 
-  private executeParsedQuery(query: CypherQuery): Omit<QueryResult, 'stats'> {
+  private executeParsedQuery(query: CypherQuery): Omit<QueryResult, "stats"> {
     const bindings: Map<string, Node | Edge>[] = [];
 
     // Start with all nodes if no specific pattern
@@ -313,8 +319,8 @@ export class QueryEngine {
     // Apply WHERE filters
     let filteredBindings = bindings;
     if (query.where.length > 0) {
-      filteredBindings = bindings.filter(binding =>
-        query.where.every(condition => this.evaluateCondition(condition, binding))
+      filteredBindings = bindings.filter((binding) =>
+        query.where.every((condition) => this.evaluateCondition(condition, binding))
       );
     }
 
@@ -329,9 +335,9 @@ export class QueryEngine {
     }
 
     // Project results
-    const columns = query.return.map(r => r.alias || r.expression);
-    const rows = filteredBindings.map(binding =>
-      query.return.map(r => this.evaluateExpression(r.expression, binding))
+    const columns = query.return.map((r) => r.alias || r.expression);
+    const rows = filteredBindings.map((binding) =>
+      query.return.map((r) => this.evaluateExpression(r.expression, binding))
     );
 
     return { columns, rows };
@@ -377,10 +383,11 @@ export class QueryEngine {
             }
 
             const targetNode = this.storage.getNode(edge.targetId);
-            if (!targetNode) {continue;}
+            if (!targetNode) {
+              continue;
+            }
 
-            if (pattern.targetNode.label &&
-                !targetNode.labels.includes(pattern.targetNode.label)) {
+            if (pattern.targetNode.label && !targetNode.labels.includes(pattern.targetNode.label)) {
               continue;
             }
 
@@ -407,22 +414,34 @@ export class QueryEngine {
 
   private evaluateCondition(condition: WhereCondition, binding: Map<string, Node | Edge>): boolean {
     const entity = binding.get(condition.var);
-    if (!entity) {return false;}
+    if (!entity) {
+      return false;
+    }
 
-    const value = this.isNode(entity) || this.isEdge(entity)
-      ? entity.properties[condition.property]
-      : undefined;
+    const value =
+      this.isNode(entity) || this.isEdge(entity)
+        ? entity.properties[condition.property]
+        : undefined;
 
-    if (value === undefined) {return false;}
+    if (value === undefined) {
+      return false;
+    }
 
     switch (condition.operator) {
-      case '=': return value === condition.value;
-      case '!=': return value !== condition.value;
-      case '>': return value > condition.value;
-      case '<': return value < condition.value;
-      case '>=': return value >= condition.value;
-      case '<=': return value <= condition.value;
-      default: return false;
+      case "=":
+        return value === condition.value;
+      case "!=":
+        return value !== condition.value;
+      case ">":
+        return value > condition.value;
+      case "<":
+        return value < condition.value;
+      case ">=":
+        return value >= condition.value;
+      case "<=":
+        return value <= condition.value;
+      default:
+        return false;
     }
   }
 
@@ -435,8 +454,12 @@ export class QueryEngine {
         const aVal = this.evaluateExpression(order.expression, a);
         const bVal = this.evaluateExpression(order.expression, b);
 
-        if (aVal < bVal) {return order.direction === 'asc' ? -1 : 1;}
-        if (aVal > bVal) {return order.direction === 'asc' ? 1 : -1;}
+        if (aVal < bVal) {
+          return order.direction === "asc" ? -1 : 1;
+        }
+        if (aVal > bVal) {
+          return order.direction === "asc" ? 1 : -1;
+        }
       }
       return 0;
     });
@@ -462,11 +485,13 @@ export class QueryEngine {
   }
 
   private isNode(entity: unknown): entity is Node {
-    return typeof entity === 'object' && entity !== null && 'labels' in entity;
+    return typeof entity === "object" && entity !== null && "labels" in entity;
   }
 
   private isEdge(entity: unknown): entity is Edge {
-    return typeof entity === 'object' && entity !== null && 'sourceId' in entity && 'targetId' in entity;
+    return (
+      typeof entity === "object" && entity !== null && "sourceId" in entity && "targetId" in entity
+    );
   }
 
   // ==================== Gremlin Implementation ====================
@@ -483,22 +508,22 @@ export class QueryEngine {
 
   private executeGremlinStep(step: GremlinStep, input: unknown[]): unknown[] {
     switch (step.type) {
-      case 'V':
+      case "V":
         // Start with vertices
         return this.getAllNodes();
-      case 'E':
+      case "E":
         // Start with edges
         return this.getAllEdges();
-      case 'has':
-        return input.filter(item => this.hasProperty(item, step.args));
-      case 'out':
+      case "has":
+        return input.filter((item) => this.hasProperty(item, step.args));
+      case "out":
         return this.expandOut(input);
-      case 'in':
+      case "in":
         return this.expandIn(input);
-      case 'both':
+      case "both":
         return this.expandBoth(input);
-      case 'values':
-        return input.map(item => this.getValues(item, step.args));
+      case "values":
+        return input.map((item) => this.getValues(item, step.args));
       default:
         return input;
     }
@@ -515,7 +540,9 @@ export class QueryEngine {
   }
 
   private hasProperty(item: unknown, args: unknown[]): boolean {
-    if (!this.isNode(item) && !this.isEdge(item)) {return false;}
+    if (!this.isNode(item) && !this.isEdge(item)) {
+      return false;
+    }
 
     if (args.length === 1) {
       const key = String(args[0]);
@@ -533,7 +560,7 @@ export class QueryEngine {
 
     for (const item of items) {
       if (this.isNode(item)) {
-        const neighbors = this.storage.getNeighbors(item.id, 'out');
+        const neighbors = this.storage.getNeighbors(item.id, "out");
         results.push(...neighbors);
       }
     }
@@ -546,7 +573,7 @@ export class QueryEngine {
 
     for (const item of items) {
       if (this.isNode(item)) {
-        const neighbors = this.storage.getNeighbors(item.id, 'in');
+        const neighbors = this.storage.getNeighbors(item.id, "in");
         results.push(...neighbors);
       }
     }
@@ -559,7 +586,7 @@ export class QueryEngine {
 
     for (const item of items) {
       if (this.isNode(item)) {
-        const neighbors = this.storage.getNeighbors(item.id, 'both');
+        const neighbors = this.storage.getNeighbors(item.id, "both");
         results.push(...neighbors);
       }
     }
@@ -568,7 +595,9 @@ export class QueryEngine {
   }
 
   private getValues(item: unknown, args: unknown[]): unknown {
-    if (!this.isNode(item) && !this.isEdge(item)) {return null;}
+    if (!this.isNode(item) && !this.isEdge(item)) {
+      return null;
+    }
 
     if (args.length === 0) {
       return Object.values(item.properties);
@@ -584,15 +613,15 @@ export class QueryEngine {
     return {
       select: [],
       where: [],
-      limit: undefined
+      limit: undefined,
     };
   }
 
-  private executeTriplePattern(query: SPARQLQuery): Omit<QueryResult, 'stats'> {
+  private executeTriplePattern(query: SPARQLQuery): Omit<QueryResult, "stats"> {
     // Simplified implementation
     return {
       columns: query.select,
-      rows: []
+      rows: [],
     };
   }
 
@@ -608,18 +637,18 @@ export class QueryEngine {
       for (const pattern of parsed.match) {
         if (pattern.sourceNode.label) {
           steps.push({
-            type: 'scan',
+            type: "scan",
             description: `Node label scan: ${pattern.sourceNode.label}`,
-            estimatedCost: 10
+            estimatedCost: 10,
           });
           estimatedCost += 10;
         }
 
         if (pattern.edge) {
           steps.push({
-            type: 'expand',
-            description: `Expand edges: ${pattern.edge.type || 'all'}`,
-            estimatedCost: 100
+            type: "expand",
+            description: `Expand edges: ${pattern.edge.type || "all"}`,
+            estimatedCost: 100,
           });
           estimatedCost += 100;
         }
@@ -629,9 +658,9 @@ export class QueryEngine {
     // Where step
     if (parsed.where.length > 0) {
       steps.push({
-        type: 'filter',
+        type: "filter",
         description: `Filter: ${parsed.where.length} conditions`,
-        estimatedCost: 5 * parsed.where.length
+        estimatedCost: 5 * parsed.where.length,
       });
       estimatedCost += 5 * parsed.where.length;
     }
@@ -639,9 +668,9 @@ export class QueryEngine {
     // Order by step
     if (parsed.orderBy.length > 0) {
       steps.push({
-        type: 'sort',
+        type: "sort",
         description: `Sort by ${parsed.orderBy.length} expressions`,
-        estimatedCost: 50
+        estimatedCost: 50,
       });
       estimatedCost += 50;
     }
@@ -649,9 +678,9 @@ export class QueryEngine {
     // Limit step
     if (parsed.limit !== undefined) {
       steps.push({
-        type: 'limit',
+        type: "limit",
         description: `Limit: ${parsed.limit}`,
-        estimatedCost: 1
+        estimatedCost: 1,
       });
       estimatedCost += 1;
     }
@@ -659,7 +688,7 @@ export class QueryEngine {
     return {
       steps,
       estimatedCost,
-      estimatedRows: parsed.limit || 1000
+      estimatedRows: parsed.limit || 1000,
     };
   }
 
@@ -667,7 +696,7 @@ export class QueryEngine {
     return {
       steps: [],
       estimatedCost: 0,
-      estimatedRows: 0
+      estimatedRows: 0,
     };
   }
 
@@ -675,7 +704,7 @@ export class QueryEngine {
     return {
       steps: [],
       estimatedCost: 0,
-      estimatedRows: 0
+      estimatedRows: 0,
     };
   }
 }
@@ -703,7 +732,7 @@ interface WhereCondition {
   value: unknown;
 }
 
-type ComparisonOperator = '=' | '!=' | '>' | '<' | '>=' | '<=';
+type ComparisonOperator = "=" | "!=" | ">" | "<" | ">=" | "<=";
 
 interface ReturnItem {
   expression: string;
@@ -712,7 +741,7 @@ interface ReturnItem {
 
 interface OrderByItem {
   expression: string;
-  direction: 'asc' | 'desc';
+  direction: "asc" | "desc";
 }
 
 interface GremlinTraversal {

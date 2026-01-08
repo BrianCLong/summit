@@ -1,12 +1,12 @@
-import { clamp, createDecisionRecord } from 'common-types';
-import { PolicyEngine } from 'policy';
-import { ProvenanceLedger } from 'prov-ledger';
+import { clamp, createDecisionRecord } from "common-types";
+import { PolicyEngine } from "policy";
+import { ProvenanceLedger } from "prov-ledger";
 
-import { BudgetGuardian } from './budget.js';
-import { DiscoveryEngine } from './discovery.js';
-import { MetricsRecorder } from './metrics.js';
-import { OptimizationManager } from './optimizations.js';
-import { ValueDensityRouter } from './router.js';
+import { BudgetGuardian } from "./budget.js";
+import { DiscoveryEngine } from "./discovery.js";
+import { MetricsRecorder } from "./metrics.js";
+import { OptimizationManager } from "./optimizations.js";
+import { ValueDensityRouter } from "./router.js";
 
 function simulateActual(pred, optimized) {
   const drift = (Math.random() - 0.5) * 0.05;
@@ -19,14 +19,13 @@ function simulateActual(pred, optimized) {
 export class ZeroSpendOrchestrator {
   constructor(options) {
     this.baselineCandidate = options.baselineCandidate;
-    this.policyEngine =
-      options.policyEngine ?? new PolicyEngine(options.policyConfig);
+    this.policyEngine = options.policyEngine ?? new PolicyEngine(options.policyConfig);
     this.discovery = new DiscoveryEngine({
       sources: options.discoverySources ?? [],
       policyEngine: this.policyEngine,
     });
     this.router = new ValueDensityRouter({
-      baselineArmId: this.baselineCandidate?.id ?? 'baseline',
+      baselineArmId: this.baselineCandidate?.id ?? "baseline",
       qualityDeltaMin: this.policyEngine.config.qualityDeltaMin,
     });
     this.budgetGuardian = new BudgetGuardian(options.budget ?? {});
@@ -35,23 +34,18 @@ export class ZeroSpendOrchestrator {
       kvCache: options.kvCache,
       memoCache: options.memoCache,
     });
-    this.ledger =
-      options.ledger ?? new ProvenanceLedger({ namespace: 'zero-spend' });
+    this.ledger = options.ledger ?? new ProvenanceLedger({ namespace: "zero-spend" });
     this.metrics = new MetricsRecorder();
     this.concurrentLimit = options.N ?? 1;
     this.inFlight = 0;
     this.queue = [];
-    this.provenanceBaseUri =
-      options.provenanceBaseUri ?? 's3://zero-spend-ledger';
+    this.provenanceBaseUri = options.provenanceBaseUri ?? "s3://zero-spend-ledger";
   }
 
   async bootstrap() {
     await this.discovery.sync();
     if (this.baselineCandidate) {
-      this.discovery.catalog.set(
-        this.baselineCandidate.id,
-        this.baselineCandidate,
-      );
+      this.discovery.catalog.set(this.baselineCandidate.id, this.baselineCandidate);
     }
   }
 
@@ -84,8 +78,8 @@ export class ZeroSpendOrchestrator {
     if (cacheResult.hit) {
       const decision = createDecisionRecord({
         taskId: task.id,
-        arms: [{ id: 'cache', V: Infinity }],
-        chosen: 'cache',
+        arms: [{ id: "cache", V: Infinity }],
+        chosen: "cache",
         pred: {
           quality: cacheResult.value.quality,
           lat: cacheResult.value.latency,
@@ -107,7 +101,7 @@ export class ZeroSpendOrchestrator {
         cacheHit: true,
       });
       const entry = this.ledger.record(decision, {
-        policyTags: ['cache-hit'],
+        policyTags: ["cache-hit"],
         savingsUSD: cacheResult.value.cost,
       });
       return entry;
@@ -115,9 +109,7 @@ export class ZeroSpendOrchestrator {
 
     const candidates = this.discovery.getBySkills(task.skills);
     if (
-      !candidates.find(
-        (candidate) => candidate.id === this.baselineCandidate?.id,
-      ) &&
+      !candidates.find((candidate) => candidate.id === this.baselineCandidate?.id) &&
       this.baselineCandidate
     ) {
       candidates.push(this.baselineCandidate);
@@ -125,12 +117,11 @@ export class ZeroSpendOrchestrator {
     const budgetStatus = this.budgetGuardian.status();
     const decision = this.router.choose(task, candidates, budgetStatus);
     const candidate =
-      candidates.find((item) => item.id === decision.chosen) ??
-      this.baselineCandidate;
+      candidates.find((item) => item.id === decision.chosen) ?? this.baselineCandidate;
     const enforcement = this.policyEngine.enforceTaskPolicy(task, candidate);
     const optimized = this.optimizations.apply(
       { cost: decision.pred.cost, latency: decision.pred.latency },
-      task,
+      task
     );
     const actual = simulateActual(decision.pred, optimized);
     this.router.registerOutcome(candidate.id, {
@@ -155,8 +146,7 @@ export class ZeroSpendOrchestrator {
       quality: actual.quality,
       cacheHit: false,
     });
-    const baselineCost =
-      this.baselineCandidate?.cost?.estimate ?? decision.pred.cost;
+    const baselineCost = this.baselineCandidate?.cost?.estimate ?? decision.pred.cost;
     const budgetDeltaUSD = actual.cost - baselineCost;
     const ledgerEntry = this.ledger.record(
       createDecisionRecord({
@@ -175,7 +165,7 @@ export class ZeroSpendOrchestrator {
       {
         policyTags: enforcement.tags,
         savingsUSD: optimized.savingsUSD,
-      },
+      }
     );
     return ledgerEntry;
   }

@@ -5,16 +5,10 @@
  * based on circuit breaker state, model capabilities, and cost optimization.
  */
 
-import { EventEmitter } from 'eventemitter3';
-import { CircuitBreaker, CircuitBreakerRegistry } from './CircuitBreaker.js';
-import { BaseLLMProvider, ProviderRegistry, MODEL_CAPABILITIES } from '../providers/index.js';
-import {
-  LLMProvider,
-  LLMModel,
-  LLMRequest,
-  LLMResponse,
-  ChainContext,
-} from '../types/index.js';
+import { EventEmitter } from "eventemitter3";
+import { CircuitBreaker, CircuitBreakerRegistry } from "./CircuitBreaker.js";
+import { BaseLLMProvider, ProviderRegistry, MODEL_CAPABILITIES } from "../providers/index.js";
+import { LLMProvider, LLMModel, LLMRequest, LLMResponse, ChainContext } from "../types/index.js";
 
 export interface RoutingConfig {
   preferredProvider?: LLMProvider;
@@ -51,18 +45,18 @@ export class FallbackRouter extends EventEmitter {
   constructor(
     providerRegistry: ProviderRegistry,
     circuitRegistry: CircuitBreakerRegistry,
-    config: Partial<RoutingConfig> = {},
+    config: Partial<RoutingConfig> = {}
   ) {
     super();
     this.providerRegistry = providerRegistry;
     this.circuitRegistry = circuitRegistry;
     this.config = {
       fallbackOrder: config.fallbackOrder ?? [
-        'claude-3-5-sonnet-20241022',
-        'gpt-4o',
-        'claude-3-haiku-20240307',
-        'gpt-4o-mini',
-        'o1-mini',
+        "claude-3-5-sonnet-20241022",
+        "gpt-4o",
+        "claude-3-haiku-20240307",
+        "gpt-4o-mini",
+        "o1-mini",
       ],
       maxFallbackAttempts: config.maxFallbackAttempts ?? 3,
       costOptimization: config.costOptimization ?? true,
@@ -94,13 +88,13 @@ export class FallbackRouter extends EventEmitter {
       const circuitBreaker = this.circuitRegistry.getOrCreate(providerId);
 
       if (!circuitBreaker.canExecute()) {
-        this.emit('provider:unavailable', { model, providerId, reason: 'circuit-open' });
+        this.emit("provider:unavailable", { model, providerId, reason: "circuit-open" });
         continue;
       }
 
       const provider = this.providerRegistry.getByModel(model);
       if (!provider) {
-        this.emit('provider:unavailable', { model, providerId, reason: 'not-registered' });
+        this.emit("provider:unavailable", { model, providerId, reason: "not-registered" });
         continue;
       }
 
@@ -108,14 +102,14 @@ export class FallbackRouter extends EventEmitter {
       const decision: RoutingDecision = {
         provider: capabilities.provider,
         model,
-        reason: totalAttempts === 1 ? 'primary' : 'fallback',
+        reason: totalAttempts === 1 ? "primary" : "fallback",
         isFallback: totalAttempts > 1,
         fallbackLevel: totalAttempts - 1,
         estimatedCost: this.estimateCost(model, request),
       };
 
       try {
-        this.emit('routing:attempt', { decision, attempt: totalAttempts });
+        this.emit("routing:attempt", { decision, attempt: totalAttempts });
 
         const response = await provider.complete({
           ...request,
@@ -124,7 +118,7 @@ export class FallbackRouter extends EventEmitter {
 
         circuitBreaker.recordSuccess();
 
-        this.emit('routing:success', { decision, response });
+        this.emit("routing:success", { decision, response });
 
         return {
           success: true,
@@ -137,7 +131,7 @@ export class FallbackRouter extends EventEmitter {
         circuitBreaker.recordFailure(error as Error);
         fallbacksUsed.push(decision);
 
-        this.emit('routing:failure', {
+        this.emit("routing:failure", {
           decision,
           error: (error as Error).message,
           willRetry: totalAttempts < this.config.maxFallbackAttempts,
@@ -148,16 +142,16 @@ export class FallbackRouter extends EventEmitter {
     return {
       success: false,
       decision: fallbacksUsed[0] || {
-        provider: 'claude',
-        model: 'claude-3-5-sonnet-20241022',
-        reason: 'no-available-providers',
+        provider: "claude",
+        model: "claude-3-5-sonnet-20241022",
+        reason: "no-available-providers",
         isFallback: false,
         fallbackLevel: 0,
         estimatedCost: 0,
       },
       fallbacksUsed,
       totalAttempts,
-      error: 'All providers exhausted or unavailable',
+      error: "All providers exhausted or unavailable",
     };
   }
 
@@ -201,9 +195,7 @@ export class FallbackRouter extends EventEmitter {
     candidates.push(...filteredFallbacks);
 
     // Add remaining models if preferred provider didn't work
-    const remaining = this.config.fallbackOrder.filter(
-      (model) => !candidates.includes(model),
-    );
+    const remaining = this.config.fallbackOrder.filter((model) => !candidates.includes(model));
     candidates.push(...remaining);
 
     return candidates;
@@ -214,22 +206,19 @@ export class FallbackRouter extends EventEmitter {
    */
   private estimateCost(model: LLMModel, request: LLMRequest): number {
     // Rough estimation based on message content
-    const totalChars = request.messages.reduce(
-      (sum, msg) => sum + msg.content.length,
-      0,
-    );
+    const totalChars = request.messages.reduce((sum, msg) => sum + msg.content.length, 0);
     const estimatedTokens = Math.ceil(totalChars / 4); // ~4 chars per token
 
     const pricing: Record<string, { input: number; output: number }> = {
-      'claude-3-5-sonnet-20241022': { input: 0.003, output: 0.015 },
-      'claude-3-opus-20240229': { input: 0.015, output: 0.075 },
-      'claude-3-haiku-20240307': { input: 0.00025, output: 0.00125 },
-      'gpt-4-turbo': { input: 0.01, output: 0.03 },
-      'gpt-4o': { input: 0.005, output: 0.015 },
-      'gpt-4o-mini': { input: 0.00015, output: 0.0006 },
-      'o1-preview': { input: 0.015, output: 0.06 },
-      'o1-mini': { input: 0.003, output: 0.012 },
-      'local-llama': { input: 0, output: 0 },
+      "claude-3-5-sonnet-20241022": { input: 0.003, output: 0.015 },
+      "claude-3-opus-20240229": { input: 0.015, output: 0.075 },
+      "claude-3-haiku-20240307": { input: 0.00025, output: 0.00125 },
+      "gpt-4-turbo": { input: 0.01, output: 0.03 },
+      "gpt-4o": { input: 0.005, output: 0.015 },
+      "gpt-4o-mini": { input: 0.00015, output: 0.0006 },
+      "o1-preview": { input: 0.015, output: 0.06 },
+      "o1-mini": { input: 0.003, output: 0.012 },
+      "local-llama": { input: 0, output: 0 },
     };
 
     const modelPricing = pricing[model] || { input: 0.01, output: 0.03 };
@@ -268,7 +257,7 @@ export class FallbackRouter extends EventEmitter {
 
       status[model] = {
         available: circuitBreaker?.canExecute() ?? true,
-        state: circuitBreaker?.getState().state ?? 'unknown',
+        state: circuitBreaker?.getState().state ?? "unknown",
       };
     }
 

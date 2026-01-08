@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from "crypto";
 
 export type SecretRecord = {
   id: string;
@@ -21,10 +21,10 @@ export class SecretVault {
       key,
       value,
       version: 1,
-      createdAt: Date.now()
+      createdAt: Date.now(),
     };
     this.secrets.set(connectorId, [record]);
-    this.auditTrail.push({ id: randomUUID(), action: 'set', connectorId, timestamp: Date.now() });
+    this.auditTrail.push({ id: randomUUID(), action: "set", connectorId, timestamp: Date.now() });
     return record;
   }
 
@@ -38,10 +38,15 @@ export class SecretVault {
       value,
       version,
       createdAt: existing.at(-1)?.createdAt ?? Date.now(),
-      rotatedAt: Date.now()
+      rotatedAt: Date.now(),
     };
     this.secrets.set(connectorId, [...existing, record]);
-    this.auditTrail.push({ id: randomUUID(), action: 'rotate', connectorId, timestamp: Date.now() });
+    this.auditTrail.push({
+      id: randomUUID(),
+      action: "rotate",
+      connectorId,
+      timestamp: Date.now(),
+    });
     return record;
   }
 

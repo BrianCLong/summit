@@ -2,8 +2,8 @@
  * Semantic Search Engine
  */
 
-import { Driver } from 'neo4j-driver';
-import { SimilarityResult, SimilarityResultSchema, Concept } from '../types/semantic.js';
+import { Driver } from "neo4j-driver";
+import { SimilarityResult, SimilarityResultSchema, Concept } from "../types/semantic.js";
 
 export interface SearchQuery {
   text: string;
@@ -42,21 +42,21 @@ export class SemanticSearch {
       };
 
       if (query.filters?.entityTypes && query.filters.entityTypes.length > 0) {
-        filters.push('e.type IN $entityTypes');
+        filters.push("e.type IN $entityTypes");
         params.entityTypes = query.filters.entityTypes;
       }
 
       if (query.filters?.minConfidence !== undefined) {
-        filters.push('e.confidence >= $minConfidence');
+        filters.push("e.confidence >= $minConfidence");
         params.minConfidence = query.filters.minConfidence;
       }
 
       if (query.filters?.namespace) {
-        filters.push('e.namespace = $namespace');
+        filters.push("e.namespace = $namespace");
         params.namespace = query.filters.namespace;
       }
 
-      const whereClause = filters.length > 0 ? `WHERE ${  filters.join(' AND ')}` : '';
+      const whereClause = filters.length > 0 ? `WHERE ${filters.join(" AND ")}` : "";
 
       // Simple text search (in production, use full-text indexes or vector search)
       const result = await session.run(
@@ -73,15 +73,15 @@ export class SemanticSearch {
         SKIP $offset
         LIMIT $limit
         `,
-        params,
+        params
       );
 
       return result.records.map((record) => ({
-        entityId: record.get('entityId'),
-        score: record.get('confidence'),
-        snippet: JSON.stringify(record.get('properties')).substring(0, 200),
+        entityId: record.get("entityId"),
+        score: record.get("confidence"),
+        snippet: JSON.stringify(record.get("properties")).substring(0, 200),
         highlights: [],
-        metadata: JSON.parse(record.get('metadata') || '{}'),
+        metadata: JSON.parse(record.get("metadata") || "{}"),
       }));
     } finally {
       await session.close();
@@ -107,15 +107,15 @@ export class SemanticSearch {
         ORDER BY e.confidence DESC
         LIMIT $limit
         `,
-        { conceptId, limit },
+        { conceptId, limit }
       );
 
       return result.records.map((record) => ({
-        entityId: record.get('entityId'),
-        score: record.get('confidence'),
-        snippet: JSON.stringify(record.get('properties')).substring(0, 200),
+        entityId: record.get("entityId"),
+        score: record.get("confidence"),
+        snippet: JSON.stringify(record.get("properties")).substring(0, 200),
         highlights: [],
-        metadata: JSON.parse(record.get('metadata') || '{}'),
+        metadata: JSON.parse(record.get("metadata") || "{}"),
       }));
     } finally {
       await session.close();
@@ -128,13 +128,13 @@ export class SemanticSearch {
   async computeSimilarity(
     entity1Id: string,
     entity2Id: string,
-    type: 'semantic' | 'structural' | 'contextual' = 'semantic',
+    type: "semantic" | "structural" | "contextual" = "semantic"
   ): Promise<SimilarityResult> {
     const session = this.driver.session();
     try {
       let score = 0;
 
-      if (type === 'structural') {
+      if (type === "structural") {
         // Compute structural similarity based on graph structure
         const result = await session.run(
           `
@@ -151,13 +151,13 @@ export class SemanticSearch {
                  neighbors2,
                  toFloat(commonNeighbors) / (neighbors1 + neighbors2 - commonNeighbors) as jaccardSimilarity
           `,
-          { entity1Id, entity2Id },
+          { entity1Id, entity2Id }
         );
 
         if (result.records.length > 0) {
-          score = result.records[0].get('jaccardSimilarity') || 0;
+          score = result.records[0].get("jaccardSimilarity") || 0;
         }
-      } else if (type === 'semantic') {
+      } else if (type === "semantic") {
         // Compute semantic similarity based on shared concepts/types
         const result = await session.run(
           `
@@ -168,11 +168,11 @@ export class SemanticSearch {
                CASE WHEN e1.namespace = e2.namespace THEN 0.3 ELSE 0 END as namespaceSimilarity
           RETURN typeSimilarity + namespaceSimilarity as similarity
           `,
-          { entity1Id, entity2Id },
+          { entity1Id, entity2Id }
         );
 
         if (result.records.length > 0) {
-          score = result.records[0].get('similarity') || 0;
+          score = result.records[0].get("similarity") || 0;
         }
       }
 
@@ -196,7 +196,7 @@ export class SemanticSearch {
   async findSimilarEntities(
     entityId: string,
     limit = 10,
-    minSimilarity = 0.5,
+    minSimilarity = 0.5
   ): Promise<Array<{ entityId: string; similarity: number }>> {
     const session = this.driver.session();
     try {
@@ -220,12 +220,12 @@ export class SemanticSearch {
         ORDER BY similarity DESC
         LIMIT $limit
         `,
-        { entityId, minSimilarity, limit },
+        { entityId, minSimilarity, limit }
       );
 
       return result.records.map((record) => ({
-        entityId: record.get('entityId'),
-        similarity: record.get('similarity'),
+        entityId: record.get("entityId"),
+        similarity: record.get("similarity"),
       }));
     } finally {
       await session.close();
@@ -238,7 +238,7 @@ export class SemanticSearch {
   async traverseGraph(
     startEntityId: string,
     traversalPattern: string,
-    maxDepth = 3,
+    maxDepth = 3
   ): Promise<any[]> {
     const session = this.driver.session();
     try {
@@ -250,16 +250,16 @@ export class SemanticSearch {
         RETURN path, end
         LIMIT 100
         `,
-        { startEntityId },
+        { startEntityId }
       );
 
       return result.records.map((record) => ({
-        path: record.get('path'),
-        endNode: record.get('end').properties,
+        path: record.get("path"),
+        endNode: record.get("end").properties,
       }));
     } catch (error) {
       // Handle invalid patterns
-      console.error('Traversal error:', error);
+      console.error("Traversal error:", error);
       return [];
     } finally {
       await session.close();

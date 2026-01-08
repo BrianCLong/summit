@@ -12,9 +12,7 @@
     },
     "types": ["jest", "node"]
   },
-  "include": [
-    "src"
-  ],
+  "include": ["src"],
   "references": [
     {
       "path": "../types"

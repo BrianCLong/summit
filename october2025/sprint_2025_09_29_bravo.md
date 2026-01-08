@@ -13,10 +13,10 @@ roles:
   - Repo Maintainer / Arborist
   - Merge & Release Captain
 objectives:
-  - 'Ship progressive delivery & rollback automation end-to-end across dev→stage→prod.'
-  - 'Tighten security/compliance gates (SBOM, SCA/SAST, secret scanning) to fail-fast.'
-  - 'Raise observability baseline: OTEL traces+metrics, p95 < 1.5s for key paths, SLO burn alerts.'
-  - 'Instantiate DR drill and verify RTO/RPO for primary data stores.'
+  - "Ship progressive delivery & rollback automation end-to-end across dev→stage→prod."
+  - "Tighten security/compliance gates (SBOM, SCA/SAST, secret scanning) to fail-fast."
+  - "Raise observability baseline: OTEL traces+metrics, p95 < 1.5s for key paths, SLO burn alerts."
+  - "Instantiate DR drill and verify RTO/RPO for primary data stores."
 ---
 
 # Sprint Plan — DevOps • CI/CD • Deployment (Royalcrown IG)
@@ -233,25 +233,25 @@ apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: K8sRequiredProbes
 metadata: { name: require-probes }
 spec:
-  match: { kinds: [{ apiGroups: [''], kinds: ['Pod'] }] }
+  match: { kinds: [{ apiGroups: [""], kinds: ["Pod"] }] }
   parameters: { livenessProbe: true, readinessProbe: true }
 ---
 apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: DisallowLatestTag
 metadata: { name: disallow-latest }
 spec:
-  match: { kinds: [{ apiGroups: ['apps'], kinds: ['Deployment'] }] }
+  match: { kinds: [{ apiGroups: ["apps"], kinds: ["Deployment"] }] }
 ```
 
 ### 4.5 k6 perf smoke (thresholds on trends)
 
 ```js
-import http from 'k6/http';
-import { check, sleep } from 'k6';
-export const options = { thresholds: { http_req_duration: ['p(95)<1500'] } };
+import http from "k6/http";
+import { check, sleep } from "k6";
+export const options = { thresholds: { http_req_duration: ["p(95)<1500"] } };
 export default function () {
   const r = http.get(`${__ENV.BASE_URL}/health`);
-  check(r, { 'status 200': (res) => res.status === 200 });
+  check(r, { "status 200": (res) => res.status === 200 });
   sleep(1);
 }
 ```

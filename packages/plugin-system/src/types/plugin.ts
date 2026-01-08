@@ -3,21 +3,21 @@ import {
   PluginSignatureSchema,
   type PluginManifest,
   type PluginSignature,
-} from '../manifest/schema.js';
-import { PluginPermission } from './permissions.js';
+} from "../manifest/schema.js";
+import { PluginPermission } from "./permissions.js";
 
 /**
  * Plugin lifecycle states
  */
 export enum PluginState {
-  UNLOADED = 'unloaded',
-  LOADING = 'loading',
-  LOADED = 'loaded',
-  INITIALIZING = 'initializing',
-  ACTIVE = 'active',
-  PAUSED = 'paused',
-  ERROR = 'error',
-  UNLOADING = 'unloading',
+  UNLOADED = "unloaded",
+  LOADING = "loading",
+  LOADED = "loaded",
+  INITIALIZING = "initializing",
+  ACTIVE = "active",
+  PAUSED = "paused",
+  ERROR = "error",
+  UNLOADING = "unloading",
 }
 
 export { PluginManifestSchema, PluginSignatureSchema, PluginPermission };
@@ -67,7 +67,7 @@ export interface PluginAPI {
 }
 
 export interface RequestOptions {
-  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   headers?: Record<string, string>;
   body?: any;
   timeout?: number;
@@ -195,7 +195,7 @@ export interface CompatibilityResult {
 }
 
 export interface CompatibilityIssue {
-  type: 'version-mismatch' | 'missing-dependency' | 'conflict' | 'unsupported-platform';
+  type: "version-mismatch" | "missing-dependency" | "conflict" | "unsupported-platform";
   message: string;
-  severity: 'error' | 'warning';
+  severity: "error" | "warning";
 }

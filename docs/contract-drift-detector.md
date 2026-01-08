@@ -28,6 +28,7 @@ node --loader ts-node/esm scripts/api/contract-drift.ts --autofix --no-fail
 ```
 
 Autofix will:
+
 - Add missing route stubs to the OpenAPI file with placeholder 200 responses.
 - Create `openapi-schemas.generated.ts` in the service `src` directory for schemas present in OpenAPI but missing in code.
 - Ensure a reusable `AnyValue` schema is available in the OpenAPI spec for placeholder references.

@@ -9,10 +9,12 @@ This runbook provides troubleshooting steps for the Maestro Orchestration system
 ### 1. Stuck Runs
 
 **Symptoms:**
+
 - A run remains in `RUNNING` state for an extended period without progress.
 - No logs are being generated for the run.
 
 **Diagnosis:**
+
 1. Check the `runs` table in PostgreSQL:
    ```sql
    SELECT id, status, current_step, updated_at FROM runs WHERE status = 'RUNNING';
@@ -23,6 +25,7 @@ This runbook provides troubleshooting steps for the Maestro Orchestration system
    - Check for stalled jobs.
 
 **Resolution:**
+
 - **Restart the Orchestrator:**
   ```bash
   npm run maestro:restart
@@ -36,28 +39,34 @@ This runbook provides troubleshooting steps for the Maestro Orchestration system
 ### 2. Task Execution Failures
 
 **Symptoms:**
+
 - Specific steps in a workflow fail repeatedly.
 - Error logs indicate "Worker timeout" or "Connection refused".
 
 **Diagnosis:**
+
 - Check the worker logs for the specific step type.
 - Verify connectivity to dependent services (e.g., ML Inference, Database).
 
 **Resolution:**
+
 - Increase the timeout for the specific step type in the workflow definition.
 - Verify the health of the downstream service.
 
 ### 3. Queue Congestion
 
 **Symptoms:**
+
 - New runs are queued but not starting.
 - High latency in task processing.
 
 **Diagnosis:**
+
 - Monitor the queue length metric `maestro_queue_length`.
 - Check worker CPU/Memory usage.
 
 **Resolution:**
+
 - Scale up the number of worker pods/instances.
 - Check for "poison pill" tasks that are crashing workers.
 

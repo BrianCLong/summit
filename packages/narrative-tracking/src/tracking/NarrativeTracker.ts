@@ -9,7 +9,7 @@ import type {
   NarrativeVersion,
   DivergencePoint,
   ConvergencePoint,
-} from '../extraction/types.js';
+} from "../extraction/types.js";
 
 export class NarrativeTracker {
   private narratives: Map<string, Narrative> = new Map();
@@ -44,7 +44,7 @@ export class NarrativeTracker {
           {
             version: 1,
             timestamp,
-            changes: ['Initial version'],
+            changes: ["Initial version"],
             narrative,
           },
         ],
@@ -64,7 +64,7 @@ export class NarrativeTracker {
 
   getActiveNarratives(timeWindow: number = 24 * 60 * 60 * 1000): Narrative[] {
     const now = new Date();
-    return this.getAllNarratives().filter(narrative => {
+    return this.getAllNarratives().filter((narrative) => {
       const timeDiff = now.getTime() - narrative.lastSeen.getTime();
       return timeDiff <= timeWindow;
     });
@@ -95,11 +95,7 @@ export class NarrativeTracker {
     return similar;
   }
 
-  detectDivergence(
-    narrativeId: string,
-    newVersion: Narrative,
-    timestamp: Date = new Date()
-  ): void {
+  detectDivergence(narrativeId: string, newVersion: Narrative, timestamp: Date = new Date()): void {
     const evolution = this.evolutions.get(narrativeId);
     if (!evolution) return;
 
@@ -111,7 +107,7 @@ export class NarrativeTracker {
         timestamp,
         originalVersion: currentVersion.version,
         newBranches: [newVersion.id],
-        reason: changes.join(', '),
+        reason: changes.join(", "),
       };
 
       evolution.divergencePoints.push(divergencePoint);
@@ -181,7 +177,7 @@ export class NarrativeTracker {
     // Theme overlap
     const themes1 = new Set(narrative1.themes);
     const themes2 = new Set(narrative2.themes);
-    const themeOverlap = [...themes1].filter(t => themes2.has(t)).length;
+    const themeOverlap = [...themes1].filter((t) => themes2.has(t)).length;
     const themeUnion = new Set([...themes1, ...themes2]).size;
 
     if (themeUnion > 0) {

@@ -53,7 +53,6 @@ Demonstrates how the `intelgraph.policy.export.enhanced` OPA policy enforces dua
    ```
 
 3. Review generated artifacts under `.demo/policy-dual-control/`:
-
    - `request.single-approver.json` — missing second approval and step-up verification.
    - `request.dual-control.json` — dual approvals + step-up ready to ship.
    - `decision.*.json` — policy decisions for each request.

@@ -6,13 +6,13 @@ on:
       - main
       - develop
     paths:
-      - 'ml/**'
+      - "ml/**"
   pull_request:
     branches:
       - main
       - develop
     paths:
-      - 'ml/**'
+      - "ml/**"
 
 jobs:
   build-and-test:
@@ -25,7 +25,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.9' # Assuming Python 3.9, adjust as needed
+          python-version: "3.9" # Assuming Python 3.9, adjust as needed
 
       - name: Install dependencies
         run: pip install .

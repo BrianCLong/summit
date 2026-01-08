@@ -1,7 +1,7 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { execSync } from 'node:child_process';
-import yaml from 'js-yaml';
+import fs from "node:fs";
+import path from "node:path";
+import { execSync } from "node:child_process";
+import yaml from "js-yaml";
 
 interface LedgerMetadata {
   description?: string;
@@ -12,8 +12,8 @@ interface LedgerMetadata {
 interface LedgerIssue {
   id: string;
   title: string;
-  severity: 'P0' | 'P1' | 'P2';
-  status: 'open' | 'closed';
+  severity: "P0" | "P1" | "P2";
+  status: "open" | "closed";
   rationale: string;
   owner_agent: string;
   introduced_in: string;
@@ -27,7 +27,7 @@ interface SeverityLedger {
   issues: LedgerIssue[];
 }
 
-const SEVERITY_ORDER: Record<LedgerIssue['severity'], number> = {
+const SEVERITY_ORDER: Record<LedgerIssue["severity"], number> = {
   P0: 3,
   P1: 2,
   P2: 1,
@@ -37,8 +37,8 @@ function parseArgs() {
   const args = process.argv.slice(2);
   const options: Record<string, string> = {};
   for (let i = 0; i < args.length; i += 1) {
-    const [rawKey, rawValue] = args[i].split('=');
-    const key = rawKey.replace(/^--/, '');
+    const [rawKey, rawValue] = args[i].split("=");
+    const key = rawKey.replace(/^--/, "");
     if (rawValue === undefined) {
       const next = args[i + 1];
       if (next) {
@@ -51,21 +51,21 @@ function parseArgs() {
   }
 
   return {
-    ledgerPath: options.ledger ?? 'governance/severity-ledger.yaml',
-    baseRef: options.base ?? process.env.GITHUB_BASE_REF ?? 'origin/main',
-    reportPath: options.report ?? 'artifacts/severity-ledger-report.json',
+    ledgerPath: options.ledger ?? "governance/severity-ledger.yaml",
+    baseRef: options.base ?? process.env.GITHUB_BASE_REF ?? "origin/main",
+    reportPath: options.report ?? "artifacts/severity-ledger-report.json",
   };
 }
 
 function readLedgerContent(source: string): SeverityLedger {
   const parsed = yaml.load(source);
-  if (!parsed || typeof parsed !== 'object') {
-    throw new Error('Ledger content is empty or not an object');
+  if (!parsed || typeof parsed !== "object") {
+    throw new Error("Ledger content is empty or not an object");
   }
 
   const ledger = parsed as SeverityLedger;
   if (!Array.isArray(ledger.issues)) {
-    throw new Error('Ledger must contain an issues array');
+    throw new Error("Ledger must contain an issues array");
   }
 
   return ledger;
@@ -73,14 +73,17 @@ function readLedgerContent(source: string): SeverityLedger {
 
 function loadLedgerFromFile(filePath: string): SeverityLedger {
   const absolute = path.resolve(process.cwd(), filePath);
-  const content = fs.readFileSync(absolute, 'utf8');
+  const content = fs.readFileSync(absolute, "utf8");
   return readLedgerContent(content);
 }
 
 function loadLedgerFromGit(ref: string, ledgerPath: string): SeverityLedger | null {
   const target = `${ref}:${ledgerPath}`;
   try {
-    const content = execSync(`git show ${target}`, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+    const content = execSync(`git show ${target}`, {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    });
     return readLedgerContent(content);
   } catch (error) {
     return null;
@@ -97,35 +100,40 @@ function ensureReportDir(reportPath: string) {
 function validateIssue(issue: LedgerIssue): string[] {
   const failures: string[] = [];
   const requiredStringFields: Array<keyof LedgerIssue> = [
-    'id',
-    'title',
-    'severity',
-    'status',
-    'rationale',
-    'owner_agent',
-    'introduced_in',
+    "id",
+    "title",
+    "severity",
+    "status",
+    "rationale",
+    "owner_agent",
+    "introduced_in",
   ];
 
   requiredStringFields.forEach((field) => {
     const value = issue[field];
-    if (typeof value !== 'string' || value.trim().length === 0) {
-      failures.push(`Field ${field} must be a non-empty string for issue ${issue.id ?? '<unknown>'}`);
+    if (typeof value !== "string" || value.trim().length === 0) {
+      failures.push(
+        `Field ${field} must be a non-empty string for issue ${issue.id ?? "<unknown>"}`
+      );
     }
   });
 
-  if (!['P0', 'P1', 'P2'].includes(issue.severity)) {
+  if (!["P0", "P1", "P2"].includes(issue.severity)) {
     failures.push(`Invalid severity ${issue.severity} for issue ${issue.id}`);
   }
 
-  if (!['open', 'closed'].includes(issue.status)) {
+  if (!["open", "closed"].includes(issue.status)) {
     failures.push(`Invalid status ${issue.status} for issue ${issue.id}`);
   }
 
-  if (issue.status === 'closed' && (!issue.resolved_in || issue.resolved_in.trim().length === 0)) {
+  if (issue.status === "closed" && (!issue.resolved_in || issue.resolved_in.trim().length === 0)) {
     failures.push(`Closed issue ${issue.id} must include resolved_in`);
   }
 
-  if (issue.evidence && issue.evidence.some((entry) => typeof entry !== 'string' || entry.trim().length === 0)) {
+  if (
+    issue.evidence &&
+    issue.evidence.some((entry) => typeof entry !== "string" || entry.trim().length === 0)
+  ) {
     failures.push(`Evidence entries must be non-empty strings for issue ${issue.id}`);
   }
 
@@ -144,9 +152,11 @@ function buildIssueMap(ledger: SeverityLedger): Map<string, LedgerIssue> {
 }
 
 function detectOpenIssues(ledger: SeverityLedger): string[] {
-  const openIssues = ledger.issues.filter((issue) => issue.status !== 'closed');
+  const openIssues = ledger.issues.filter((issue) => issue.status !== "closed");
   if (openIssues.length === 0) return [];
-  return openIssues.map((issue) => `Open ${issue.severity} issue detected: ${issue.id} (${issue.title})`);
+  return openIssues.map(
+    (issue) => `Open ${issue.severity} issue detected: ${issue.id} (${issue.title})`
+  );
 }
 
 function detectSeverityDrift(current: SeverityLedger, base?: SeverityLedger | null): string[] {
@@ -161,7 +171,7 @@ function detectSeverityDrift(current: SeverityLedger, base?: SeverityLedger | nu
     const currentRank = SEVERITY_ORDER[issue.severity];
     if (currentRank < previousRank) {
       failures.push(
-        `Severity downgrade detected for ${issue.id}: ${previous.severity} -> ${issue.severity}. Add explicit rationale and governance approval.`,
+        `Severity downgrade detected for ${issue.id}: ${previous.severity} -> ${issue.severity}. Add explicit rationale and governance approval.`
       );
     }
   });
@@ -169,21 +179,28 @@ function detectSeverityDrift(current: SeverityLedger, base?: SeverityLedger | nu
   baseMap.forEach((issue, id) => {
     const present = current.issues.find((candidate) => candidate.id === id);
     if (!present) {
-      failures.push(`Issue ${id} removed from ledger without closure record (status: ${issue.status}).`);
+      failures.push(
+        `Issue ${id} removed from ledger without closure record (status: ${issue.status}).`
+      );
     }
   });
 
   return failures;
 }
 
-function detectNewIssuesWithoutBaseline(current: SeverityLedger, base?: SeverityLedger | null): string[] {
+function detectNewIssuesWithoutBaseline(
+  current: SeverityLedger,
+  base?: SeverityLedger | null
+): string[] {
   if (!base) return [];
   const baseIds = new Set(base.issues.map((issue) => issue.id));
   const failures: string[] = [];
 
   current.issues.forEach((issue) => {
-    if (!baseIds.has(issue.id) && issue.status !== 'closed') {
-      failures.push(`New issue ${issue.id} added as ${issue.severity} but is not closed; zero-tolerance gate blocks merge.`);
+    if (!baseIds.has(issue.id) && issue.status !== "closed") {
+      failures.push(
+        `New issue ${issue.id} added as ${issue.severity} but is not closed; zero-tolerance gate blocks merge.`
+      );
     }
   });
 
@@ -192,7 +209,7 @@ function detectNewIssuesWithoutBaseline(current: SeverityLedger, base?: Severity
 
 function writeReport(reportPath: string, payload: unknown) {
   ensureReportDir(reportPath);
-  fs.writeFileSync(reportPath, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
+  fs.writeFileSync(reportPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
 }
 
 function main() {
@@ -215,11 +232,11 @@ function main() {
   const report = {
     ledgerPath,
     baseRef,
-    status: failures.length === 0 ? 'pass' : 'fail',
+    status: failures.length === 0 ? "pass" : "fail",
     failures,
     advisories,
     totalIssues: ledger.issues.length,
-    openIssues: ledger.issues.filter((issue) => issue.status !== 'closed').length,
+    openIssues: ledger.issues.filter((issue) => issue.status !== "closed").length,
     timestamp: new Date().toISOString(),
   };
 
@@ -236,7 +253,9 @@ function main() {
     return;
   }
 
-  console.log(`[severity-ledger] Ledger validated successfully with ${ledger.issues.length} issues.`);
+  console.log(
+    `[severity-ledger] Ledger validated successfully with ${ledger.issues.length} issues.`
+  );
   console.log(`[severity-ledger] Report written to ${reportPath}`);
 }
 

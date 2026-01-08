@@ -51,18 +51,18 @@ version: latest
 **`scripts/rag/build-doccards.js`**
 
 ````js
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
-const crypto = require('crypto');
+const fs = require("fs");
+const path = require("path");
+const matter = require("gray-matter");
+const crypto = require("crypto");
 
 function mdToPlain(md) {
   return md
-    .replace(/```[\s\S]*?```/g, (m) => m.replace(/`/g, '')) // keep code text
-    .replace(/<[^>]+>/g, '')
-    .replace(/^>\s?/gm, '') // strip blockquotes
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1') // links -> text
-    .replace(/\!\[[^\]]*\]\([^)]*\)/g, ''); // images
+    .replace(/```[\s\S]*?```/g, (m) => m.replace(/`/g, "")) // keep code text
+    .replace(/<[^>]+>/g, "")
+    .replace(/^>\s?/gm, "") // strip blockquotes
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1") // links -> text
+    .replace(/\!\[[^\]]*\]\([^)]*\)/g, ""); // images
 }
 
 function chunkText(text, max = 900) {
@@ -74,18 +74,18 @@ function chunkText(text, max = 900) {
     cur.push(w);
     len += w.length + 1;
     if (len > max) {
-      chunks.push(cur.join(' '));
+      chunks.push(cur.join(" "));
       cur = [];
       len = 0;
     }
   }
-  if (cur.length) chunks.push(cur.join(' '));
+  if (cur.length) chunks.push(cur.join(" "));
   return chunks.filter((c) => c.trim().length > 0);
 }
 
-const outDir = 'docs/ops/rag';
+const outDir = "docs/ops/rag";
 fs.mkdirSync(outDir, { recursive: true });
-const outPath = path.join(outDir, 'doccards.jsonl');
+const outPath = path.join(outDir, "doccards.jsonl");
 const fp = fs.createWriteStream(outPath);
 let count = 0;
 (function walk(d) {
@@ -95,14 +95,14 @@ let count = 0;
     if (s.isDirectory()) walk(p);
     else if (/\.mdx?$/.test(f)) emit(p);
   }
-})('docs');
+})("docs");
 
 function emit(p) {
-  const raw = fs.readFileSync(p, 'utf8');
+  const raw = fs.readFileSync(p, "utf8");
   const g = matter(raw);
-  const slug = p.replace(/^docs\//, '').replace(/\.mdx?$/, '');
+  const slug = p.replace(/^docs\//, "").replace(/\.mdx?$/, "");
   const title = g.data.title || path.basename(p);
-  const version = g.data.version || 'latest';
+  const version = g.data.version || "latest";
   const tags = g.data.tags || [];
   const plain = mdToPlain(g.content);
   const paragraphs = plain
@@ -114,7 +114,7 @@ function emit(p) {
     const chunks = chunkText(para, 900);
     for (const c of chunks) {
       const id = `${slug}#c${ordinal++}`;
-      const hash = crypto.createHash('sha256').update(c).digest('hex');
+      const hash = crypto.createHash("sha256").update(c).digest("hex");
       const rec = {
         id,
         slug,
@@ -127,7 +127,7 @@ function emit(p) {
         tokens: Math.ceil(c.length / 4),
         tags,
       };
-      fp.write(JSON.stringify(rec) + '\n');
+      fp.write(JSON.stringify(rec) + "\n");
       count++;
     }
   }
@@ -135,10 +135,10 @@ function emit(p) {
 
 fp.end(() => {
   fs.writeFileSync(
-    path.join(outDir, 'manifest.json'),
-    JSON.stringify({ created: new Date().toISOString(), count }, null, 2),
+    path.join(outDir, "manifest.json"),
+    JSON.stringify({ created: new Date().toISOString(), count }, null, 2)
   );
-  console.log('DocCards:', count);
+  console.log("DocCards:", count);
 });
 ````
 
@@ -156,21 +156,16 @@ fp.end(() => {
 **`scripts/rag/delta.js`**
 
 ```js
-const fs = require('fs');
-const { execSync } = require('child_process');
-const base = process.env.GITHUB_BASE_REF
-  ? `origin/${process.env.GITHUB_BASE_REF}`
-  : 'origin/main';
+const fs = require("fs");
+const { execSync } = require("child_process");
+const base = process.env.GITHUB_BASE_REF ? `origin/${process.env.GITHUB_BASE_REF}` : "origin/main";
 const changed = execSync(`git diff --name-only ${base}... -- docs`, {
-  encoding: 'utf8',
+  encoding: "utf8",
 })
   .trim()
-  .split('\n')
+  .split("\n")
   .filter(Boolean);
-fs.writeFileSync(
-  'docs/ops/rag/delta.json',
-  JSON.stringify({ changed }, null, 2),
-);
+fs.writeFileSync("docs/ops/rag/delta.json", JSON.stringify({ changed }, null, 2));
 ```
 
 **Acceptance**
@@ -186,7 +181,7 @@ fs.writeFileSync(
 **`src/components/AnswerCard.tsx`**
 
 ```tsx
-import React from 'react';
+import React from "react";
 export default function AnswerCard({
   tldr,
   steps,
@@ -231,9 +226,9 @@ export default function AnswerCard({
 **`scripts/rag/extract-answer-cards.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
+const fs = require("fs");
+const path = require("path");
+const matter = require("gray-matter");
 const pages = [];
 (function walk(d) {
   for (const f of fs.readdirSync(d)) {
@@ -241,7 +236,7 @@ const pages = [];
     const s = fs.statSync(p);
     s.isDirectory() ? walk(p) : /\.mdx?$/.test(f) && pages.push(p);
   }
-})('docs');
+})("docs");
 const out = [];
 for (const p of pages) {
   const g = matter.read(p);
@@ -250,9 +245,9 @@ for (const p of pages) {
     (body.match(/>\s*\*\*TL;DR\:\*\*\s*(.+)/i) || [])[1] ||
     body
       .split(/\n{2,}/)[0]
-      .replace(/\n/g, ' ')
+      .replace(/\n/g, " ")
       .slice(0, 240);
-  const steps = (body.match(/##\s*Steps[\s\S]*?(?:\n##|$)/i) || [''])[0]
+  const steps = (body.match(/##\s*Steps[\s\S]*?(?:\n##|$)/i) || [""])[0]
     .split(/\n\d+\.\s+/)
     .slice(1)
     .map((s) => s.trim())
@@ -261,22 +256,22 @@ for (const p of pages) {
     .map((m) => `${m[1]} — ${m[2]}`)
     .slice(0, 6);
   out.push({
-    slug: p.replace(/^docs\//, '').replace(/\.mdx?$/, ''),
+    slug: p.replace(/^docs\//, "").replace(/\.mdx?$/, ""),
     tldr,
     steps,
     facts,
   });
 }
-fs.mkdirSync('docs/ops/answers', { recursive: true });
-fs.writeFileSync('docs/ops/answers/cards.json', JSON.stringify(out, null, 2));
-console.log('Answer cards:', out.length);
+fs.mkdirSync("docs/ops/answers", { recursive: true });
+fs.writeFileSync("docs/ops/answers/cards.json", JSON.stringify(out, null, 2));
+console.log("Answer cards:", out.length);
 ```
 
 **Usage in MDX**
 
 ```mdx
-import AnswerCard from '@site/src/components/AnswerCard';
-import cards from '@site/docs/ops/answers/cards.json';
+import AnswerCard from "@site/src/components/AnswerCard";
+import cards from "@site/docs/ops/answers/cards.json";
 
 { cards.find(c=>c.slug==='how-to/zip-export') && (
 
@@ -308,10 +303,10 @@ import cards from '@site/docs/ops/answers/cards.json';
 **`src/components/Segment.tsx`**
 
 ```tsx
-import React from 'react';
+import React from "react";
 export function seg() {
-  const role = localStorage.getItem('role') || 'user';
-  const plan = localStorage.getItem('plan') || 'free';
+  const role = localStorage.getItem("role") || "user";
+  const plan = localStorage.getItem("plan") || "free";
   return `${role}-${plan}`;
 }
 export const If = ({ show, children }: { show: string; children: any }) =>
@@ -323,10 +318,10 @@ export const If = ({ show, children }: { show: string; children: any }) =>
 **`scripts/exp/bandit.js`**
 
 ```js
-const fs = require('fs');
-const path = 'docs/ops/experiments/hero.json';
+const fs = require("fs");
+const path = "docs/ops/experiments/hero.json";
 let state = { A: { a: 1, b: 1 }, B: { a: 1, b: 1 } };
-if (fs.existsSync(path)) state = JSON.parse(fs.readFileSync(path, 'utf8'));
+if (fs.existsSync(path)) state = JSON.parse(fs.readFileSync(path, "utf8"));
 function choose() {
   const r = Object.entries(state).map(([k, v]) => ({
     k,
@@ -340,17 +335,14 @@ function sampleBeta(a, b) {
   return x / (x + y);
 }
 function gamma(n) {
-  const u = Array.from({ length: 12 }, () => Math.random()).reduce(
-    (a, b) => a + b,
-    0,
-  );
+  const u = Array.from({ length: 12 }, () => Math.random()).reduce((a, b) => a + b, 0);
   return -Math.log(u - 6);
 }
 const variant = choose();
-fs.mkdirSync('docs/ops/experiments', { recursive: true });
+fs.mkdirSync("docs/ops/experiments", { recursive: true });
 fs.writeFileSync(
-  'docs/ops/experiments/choice.json',
-  JSON.stringify({ variant, at: Date.now() }, null, 2),
+  "docs/ops/experiments/choice.json",
+  JSON.stringify({ variant, at: Date.now() }, null, 2)
 );
 ```
 
@@ -369,19 +361,14 @@ fs.writeFileSync(
 **`scripts/support/generate-macros.js`**
 
 ```js
-const fs = require('fs');
-const cards = JSON.parse(
-  fs.readFileSync('docs/ops/answers/cards.json', 'utf8'),
-);
+const fs = require("fs");
+const cards = JSON.parse(fs.readFileSync("docs/ops/answers/cards.json", "utf8"));
 const macros = cards.slice(0, 50).map((c) => ({
   title: `IntelGraph: ${c.slug}`,
-  body: `TL;DR: ${c.tldr}\nSteps:\n${(c.steps || []).map((s, i) => `${i + 1}. ${s}`).join('\n')}\nSee: https://docs.intelgraph.example/${c.slug}`,
+  body: `TL;DR: ${c.tldr}\nSteps:\n${(c.steps || []).map((s, i) => `${i + 1}. ${s}`).join("\n")}\nSee: https://docs.intelgraph.example/${c.slug}`,
 }));
-fs.mkdirSync('docs/ops/support', { recursive: true });
-fs.writeFileSync(
-  'docs/ops/support/macros.json',
-  JSON.stringify(macros, null, 2),
-);
+fs.mkdirSync("docs/ops/support", { recursive: true });
+fs.writeFileSync("docs/ops/support/macros.json", JSON.stringify(macros, null, 2));
 ```
 
 ## D2) Clipboard button
@@ -389,16 +376,13 @@ fs.writeFileSync(
 **`src/components/CopyMacro.tsx`**
 
 ```tsx
-import React from 'react';
+import React from "react";
 export default function CopyMacro({ slug }: { slug: string }) {
-  const data = require('@site/docs/ops/support/macros.json');
+  const data = require("@site/docs/ops/support/macros.json");
   const m = data.find((x: any) => x.title.endsWith(slug));
   if (!m) return null;
   return (
-    <button
-      className="button button--sm"
-      onClick={() => navigator.clipboard.writeText(m.body)}
-    >
+    <button className="button button--sm" onClick={() => navigator.clipboard.writeText(m.body)}>
       Copy support macro
     </button>
   );
@@ -432,18 +416,18 @@ versions:
 **`scripts/sunset/deindex.js`**
 
 ```js
-const fs = require('fs');
-const yaml = require('js-yaml');
-const base = 'https://docs.intelgraph.example';
-const s = yaml.load(fs.readFileSync('docs/_meta/sunset.yml', 'utf8'));
+const fs = require("fs");
+const yaml = require("js-yaml");
+const base = "https://docs.intelgraph.example";
+const s = yaml.load(fs.readFileSync("docs/_meta/sunset.yml", "utf8"));
 const urls = [];
 for (const v of s.versions) {
   // naive: list common top-level paths per version; adapt to your routing
   urls.push(`${base}/docs/${v.id}/`);
 }
-const xml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map((u) => `<url><loc>${u}</loc><lastmod>${new Date().toISOString()}</lastmod></url>`).join('')}</urlset>`;
-fs.mkdirSync('docs-site/static', { recursive: true });
-fs.writeFileSync('docs-site/static/sunset-sitemap.xml', xml);
+const xml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map((u) => `<url><loc>${u}</loc><lastmod>${new Date().toISOString()}</lastmod></url>`).join("")}</urlset>`;
+fs.mkdirSync("docs-site/static", { recursive: true });
+fs.writeFileSync("docs-site/static/sunset-sitemap.xml", xml);
 ```
 
 **Banner injection rule**: when `version` is in `sunset.yml` and date < `sunsetOn`, prepend an admonition to affected pages.

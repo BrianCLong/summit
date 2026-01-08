@@ -3,7 +3,7 @@
  * Fact-checking, source credibility, and truthfulness assessment
  */
 
-export * from './blockchain/provenance-chain';
+export * from "./blockchain/provenance-chain";
 
 export interface ContentVerificationResult {
   isAuthentic: boolean;
@@ -24,14 +24,14 @@ export interface Verification {
 }
 
 export enum VerificationType {
-  FACT_CHECK = 'fact_check',
-  SOURCE_CREDIBILITY = 'source_credibility',
-  CITATION_VERIFICATION = 'citation_verification',
-  SCIENTIFIC_VALIDATION = 'scientific_validation',
-  STATISTICAL_CHECK = 'statistical_check',
-  QUOTE_VERIFICATION = 'quote_verification',
-  CONTEXT_CHECK = 'context_check',
-  SATIRE_DETECTION = 'satire_detection',
+  FACT_CHECK = "fact_check",
+  SOURCE_CREDIBILITY = "source_credibility",
+  CITATION_VERIFICATION = "citation_verification",
+  SCIENTIFIC_VALIDATION = "scientific_validation",
+  STATISTICAL_CHECK = "statistical_check",
+  QUOTE_VERIFICATION = "quote_verification",
+  CONTEXT_CHECK = "context_check",
+  SATIRE_DETECTION = "satire_detection",
 }
 
 export interface CredibilityAssessment {
@@ -52,12 +52,12 @@ export interface FactCheck {
 }
 
 export enum FactCheckVerdict {
-  TRUE = 'true',
-  MOSTLY_TRUE = 'mostly_true',
-  MIXED = 'mixed',
-  MOSTLY_FALSE = 'mostly_false',
-  FALSE = 'false',
-  UNVERIFIABLE = 'unverifiable',
+  TRUE = "true",
+  MOSTLY_TRUE = "mostly_true",
+  MIXED = "mixed",
+  MOSTLY_FALSE = "mostly_false",
+  FALSE = "false",
+  UNVERIFIABLE = "unverifiable",
 }
 
 export interface FactCheckSource {
@@ -113,7 +113,9 @@ export class ContentVerifier {
 
       verifications.push({
         type: VerificationType.FACT_CHECK,
-        passed: factCheck.verdict === FactCheckVerdict.TRUE || factCheck.verdict === FactCheckVerdict.MOSTLY_TRUE,
+        passed:
+          factCheck.verdict === FactCheckVerdict.TRUE ||
+          factCheck.verdict === FactCheckVerdict.MOSTLY_TRUE,
         confidence: factCheck.confidence,
         details: `Claim: "${claim.substring(0, 100)}..." - ${factCheck.verdict}`,
         evidence: factCheck,
@@ -133,20 +135,22 @@ export class ContentVerifier {
 
     // Calculate overall authenticity
     const passedVerifications = verifications.filter((v) => v.passed).length;
-    const overallConfidence = verifications.reduce((sum, v) => sum + (v.passed ? v.confidence : 0), 0) / verifications.length;
+    const overallConfidence =
+      verifications.reduce((sum, v) => sum + (v.passed ? v.confidence : 0), 0) /
+      verifications.length;
     const isAuthentic = passedVerifications / verifications.length > 0.6;
 
     if (!isAuthentic) {
-      recommendations.push('Content contains unverified or false information');
-      recommendations.push('Cross-check with authoritative sources');
+      recommendations.push("Content contains unverified or false information");
+      recommendations.push("Cross-check with authoritative sources");
     }
 
     if (credibility.biasScore > 0.7) {
-      recommendations.push('Source shows significant bias - verify independently');
+      recommendations.push("Source shows significant bias - verify independently");
     }
 
     if (contextAnalysis.misleading) {
-      recommendations.push('Content may be misleading due to missing context');
+      recommendations.push("Content may be misleading due to missing context");
     }
 
     return {
@@ -177,15 +181,15 @@ export class ContentVerifier {
 
     // Check against known credible sources
     const knownCredibleSources = [
-      'reuters.com',
-      'apnews.com',
-      'bbc.com',
-      'nature.com',
-      'science.org',
-      'scholar.google.com',
+      "reuters.com",
+      "apnews.com",
+      "bbc.com",
+      "nature.com",
+      "science.org",
+      "scholar.google.com",
     ];
 
-    const knownUnreliableSources = ['fakenews.com', 'conspiracy.net'];
+    const knownUnreliableSources = ["fakenews.com", "conspiracy.net"];
 
     let sourceQuality = 0.5;
     if (knownCredibleSources.some((s) => source.includes(s))) {
@@ -196,16 +200,13 @@ export class ContentVerifier {
 
     // Assess domain characteristics
     const domainAge = this.estimateDomainAge(source);
-    const hasSecureConnection = source.startsWith('https');
+    const hasSecureConnection = source.startsWith("https");
     const expertiseLevel = this.assessExpertise(source);
     const biasScore = this.assessBias(source);
     const transparency = this.assessTransparency(source);
 
     const overall =
-      sourceQuality * 0.4 +
-      expertiseLevel * 0.2 +
-      (1 - biasScore) * 0.2 +
-      transparency * 0.2;
+      sourceQuality * 0.4 + expertiseLevel * 0.2 + (1 - biasScore) * 0.2 + transparency * 0.2;
 
     return {
       overall,
@@ -224,7 +225,7 @@ export class ContentVerifier {
 
   private assessExpertise(source: string): number {
     // Check if source is in relevant domain
-    const academicDomains = ['.edu', 'scholar', 'research', 'journal'];
+    const academicDomains = [".edu", "scholar", "research", "journal"];
     const hasAcademicDomain = academicDomains.some((d) => source.includes(d));
 
     return hasAcademicDomain ? 0.9 : 0.5;
@@ -256,11 +257,11 @@ export class ContentVerifier {
     const claims = sentences.filter((s) => {
       const lower = s.toLowerCase();
       return (
-        !lower.includes('maybe') &&
-        !lower.includes('might') &&
-        !lower.includes('could') &&
-        !lower.includes('i think') &&
-        !lower.includes('in my opinion')
+        !lower.includes("maybe") &&
+        !lower.includes("might") &&
+        !lower.includes("could") &&
+        !lower.includes("i think") &&
+        !lower.includes("in my opinion")
       );
     });
 
@@ -301,7 +302,7 @@ export class ContentVerifier {
       verdict,
       confidence,
       sources,
-      reasoning: 'Based on pattern analysis and available sources',
+      reasoning: "Based on pattern analysis and available sources",
     };
   }
 
@@ -344,10 +345,10 @@ export class ContentVerifier {
     // 4. Out-of-context quotes
 
     // Detect selective quoting
-    if (text.includes('...') || text.includes('[...]')) {
+    if (text.includes("...") || text.includes("[...]")) {
       manipulation.push({
-        type: 'selective_quoting',
-        description: 'Quote may be taken out of context',
+        type: "selective_quoting",
+        description: "Quote may be taken out of context",
         severity: 0.5,
       });
     }
@@ -357,10 +358,10 @@ export class ContentVerifier {
     const hasSources = /source:|according to|reported by/i.test(text);
 
     if (hasClaims && !hasSources) {
-      missing.push('Source attribution');
+      missing.push("Source attribution");
       manipulation.push({
-        type: 'missing_attribution',
-        description: 'Claims made without source attribution',
+        type: "missing_attribution",
+        description: "Claims made without source attribution",
         severity: 0.6,
       });
     }
@@ -385,7 +386,7 @@ export class ContentVerifier {
     // 3. Exaggeration
     // 4. Humorous tone
 
-    const satireSources = ['theonion.com', 'babylonbee.com', 'clickhole.com'];
+    const satireSources = ["theonion.com", "babylonbee.com", "clickhole.com"];
     const isKnownSatire = satireSources.some((s) => source?.includes(s));
 
     const absurdPatterns = [
@@ -403,7 +404,7 @@ export class ContentVerifier {
       type: VerificationType.SATIRE_DETECTION,
       passed: !isSatire,
       confidence: isSatire ? 0.8 : 0.6,
-      details: isSatire ? 'Content appears to be satire/parody' : 'Not identified as satire',
+      details: isSatire ? "Content appears to be satire/parody" : "Not identified as satire",
       evidence: { isKnownSatire, hasAbsurdPatterns },
     };
   }
@@ -425,18 +426,12 @@ export class ContentVerifier {
     const evidence: string[] = [];
 
     // Check for red flags in scientific claims
-    const redFlags = [
-      'proven cure',
-      'doctors hate',
-      'miracle',
-      '100% effective',
-      'breakthrough',
-    ];
+    const redFlags = ["proven cure", "doctors hate", "miracle", "100% effective", "breakthrough"];
 
     const hasRedFlags = redFlags.some((flag) => claim.toLowerCase().includes(flag));
 
     if (hasRedFlags) {
-      evidence.push('Contains sensational language uncommon in scientific literature');
+      evidence.push("Contains sensational language uncommon in scientific literature");
     }
 
     return {
@@ -466,10 +461,10 @@ export class ContentVerifier {
       for (const pct of percentages) {
         const value = parseInt(pct);
         if (value > 100) {
-          issues.push('Invalid percentage over 100%');
+          issues.push("Invalid percentage over 100%");
         }
         if (value % 10 === 0 && value !== 100) {
-          issues.push('Suspiciously round percentage (may be estimated)');
+          issues.push("Suspiciously round percentage (may be estimated)");
         }
       }
     }
@@ -477,7 +472,7 @@ export class ContentVerifier {
     // Check for correlation/causation confusion
     if (/causes?|leads? to|results? in/i.test(claim) && /study|research/i.test(claim)) {
       if (!/causal|randomized|controlled/i.test(claim)) {
-        issues.push('Possible confusion of correlation with causation');
+        issues.push("Possible confusion of correlation with causation");
       }
     }
 

@@ -6,9 +6,9 @@ import {
   BlobServiceClient,
   StorageSharedKeyCredential,
   ContainerClient,
-  BlobClient
-} from '@azure/storage-blob';
-import { IStorageProvider } from './index';
+  BlobClient,
+} from "@azure/storage-blob";
+import { IStorageProvider } from "./index";
 import {
   CloudProvider,
   StorageObject,
@@ -16,8 +16,8 @@ import {
   StorageDownloadOptions,
   StorageListOptions,
   StorageListResult,
-  StorageError
-} from '../types';
+  StorageError,
+} from "../types";
 
 export class AzureStorageProvider implements IStorageProvider {
   readonly provider = CloudProvider.AZURE;
@@ -28,10 +28,7 @@ export class AzureStorageProvider implements IStorageProvider {
     const key = accountKey || process.env.AZURE_STORAGE_ACCOUNT_KEY!;
 
     const credential = new StorageSharedKeyCredential(name, key);
-    this.client = new BlobServiceClient(
-      `https://${name}.blob.core.windows.net`,
-      credential
-    );
+    this.client = new BlobServiceClient(`https://${name}.blob.core.windows.net`, credential);
   }
 
   async upload(
@@ -44,14 +41,14 @@ export class AzureStorageProvider implements IStorageProvider {
       const containerClient = this.client.getContainerClient(bucket);
       const blockBlobClient = containerClient.getBlockBlobClient(key);
 
-      const buffer = typeof data === 'string' ? Buffer.from(data) : data;
+      const buffer = typeof data === "string" ? Buffer.from(data) : data;
 
       await blockBlobClient.upload(buffer, buffer.length, {
         blobHTTPHeaders: {
-          blobContentType: options?.contentType
+          blobContentType: options?.contentType,
         },
         metadata: options?.metadata,
-        tier: options?.storageClass as any
+        tier: options?.storageClass as any,
       });
     } catch (error) {
       throw new StorageError(
@@ -62,11 +59,7 @@ export class AzureStorageProvider implements IStorageProvider {
     }
   }
 
-  async download(
-    bucket: string,
-    key: string,
-    options?: StorageDownloadOptions
-  ): Promise<Buffer> {
+  async download(bucket: string, key: string, options?: StorageDownloadOptions): Promise<Buffer> {
     try {
       const containerClient = this.client.getContainerClient(bucket);
       const blobClient = containerClient.getBlobClient(key);
@@ -106,22 +99,21 @@ export class AzureStorageProvider implements IStorageProvider {
     }
   }
 
-  async list(
-    bucket: string,
-    options?: StorageListOptions
-  ): Promise<StorageListResult> {
+  async list(bucket: string, options?: StorageListOptions): Promise<StorageListResult> {
     try {
       const containerClient = this.client.getContainerClient(bucket);
 
       const objects: StorageObject[] = [];
       let continuationToken: string | undefined;
 
-      const iterator = containerClient.listBlobsFlat({
-        prefix: options?.prefix
-      }).byPage({
-        maxPageSize: options?.maxResults,
-        continuationToken: options?.continuationToken
-      });
+      const iterator = containerClient
+        .listBlobsFlat({
+          prefix: options?.prefix,
+        })
+        .byPage({
+          maxPageSize: options?.maxResults,
+          continuationToken: options?.continuationToken,
+        });
 
       const response = await iterator.next();
       if (!response.done) {
@@ -132,7 +124,7 @@ export class AzureStorageProvider implements IStorageProvider {
             lastModified: blob.properties.lastModified!,
             etag: blob.properties.etag,
             contentType: blob.properties.contentType,
-            metadata: blob.metadata
+            metadata: blob.metadata,
           });
         }
         continuationToken = response.value.continuationToken;
@@ -141,7 +133,7 @@ export class AzureStorageProvider implements IStorageProvider {
       return {
         objects,
         continuationToken,
-        isTruncated: Boolean(continuationToken)
+        isTruncated: Boolean(continuationToken),
       };
     } catch (error) {
       throw new StorageError(
@@ -165,7 +157,7 @@ export class AzureStorageProvider implements IStorageProvider {
         lastModified: properties.lastModified!,
         etag: properties.etag,
         contentType: properties.contentType,
-        metadata: properties.metadata
+        metadata: properties.metadata,
       };
     } catch (error) {
       throw new StorageError(
@@ -192,13 +184,9 @@ export class AzureStorageProvider implements IStorageProvider {
     destKey: string
   ): Promise<void> {
     try {
-      const sourceClient = this.client
-        .getContainerClient(sourceBucket)
-        .getBlobClient(sourceKey);
+      const sourceClient = this.client.getContainerClient(sourceBucket).getBlobClient(sourceKey);
 
-      const destClient = this.client
-        .getContainerClient(destBucket)
-        .getBlobClient(destKey);
+      const destClient = this.client.getContainerClient(destBucket).getBlobClient(destKey);
 
       await destClient.beginCopyFromURL(sourceClient.url);
     } catch (error) {
@@ -214,7 +202,7 @@ export class AzureStorageProvider implements IStorageProvider {
     bucket: string,
     key: string,
     expiresIn: number,
-    operation: 'get' | 'put'
+    operation: "get" | "put"
   ): Promise<string> {
     try {
       const containerClient = this.client.getContainerClient(bucket);
@@ -224,7 +212,7 @@ export class AzureStorageProvider implements IStorageProvider {
 
       // Note: Azure SAS tokens require different permissions
       // This is a simplified implementation
-      return `${blobClient.url  }?se=${expiresOn.toISOString()}`;
+      return `${blobClient.url}?se=${expiresOn.toISOString()}`;
     } catch (error) {
       throw new StorageError(
         `Failed to generate signed URL for Azure blob: ${key}`,

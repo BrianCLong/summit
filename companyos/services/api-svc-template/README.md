@@ -11,6 +11,7 @@ pnpm dev
 ```
 
 The service listens on `PORT` (environment override) or `config/service.port` and exposes:
+
 - `GET /health` basic readiness
 - `GET /metrics` Prometheus registry
 

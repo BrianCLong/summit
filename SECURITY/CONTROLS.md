@@ -9,7 +9,9 @@ This document outlines the security guardrails and controls implemented to ensur
 **Test:** `server/tests/security/config_guardrails.test.ts`
 
 ### Mechanism
+
 On startup, if `NODE_ENV=production`:
+
 - **JWT_SECRET** and **JWT_REFRESH_SECRET** must be at least 32 characters long.
 - Secrets must not contain insecure tokens like `default`, `password`, `changeme`, `secret`, `localhost`.
 - **Database passwords** are checked for known development defaults.
@@ -23,7 +25,9 @@ If any check fails, the server process exits with code 1, preventing deployment.
 **Test:** `server/tests/security/config_guardrails.test.ts`
 
 ### Mechanism
+
 On startup, if `NODE_ENV=production`:
+
 - `CORS_ORIGIN` must be explicitly defined.
 - Wildcards (`*`) are prohibited.
 - `http://` origins are prohibited (must be `https://`).
@@ -37,18 +41,22 @@ On startup, if `NODE_ENV=production`:
 **Dashboard:** `observability/dashboards/golden-path-health.json`
 
 ### Metric
+
 We monitor the `/health/ready` endpoint availability over a rolling 7-day window.
 
 **Alert Rule:** `GoldenPathHealthLow`
+
 - **Threshold:** < 99.5% availability
 - **Window:** 7 days (evaluated every 5 minutes)
 - **Severity:** Critical
 
 ### Implementation
+
 ```yaml
 expr: sum(rate(http_request_duration_seconds_count{path="/health/ready", status="200"}[7d])) / sum(rate(http_request_duration_seconds_count{path="/health/ready"}[7d])) < 0.995
 ```
 
 ## How to Verify
+
 1.  **Run Tests:** `npm test tests/security/config_guardrails.test.ts` (Ensure `NODE_ENV` is managed by the test runner).
 2.  **View Dashboard:** Import `observability/dashboards/golden-path-health.json` into Grafana.

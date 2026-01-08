@@ -1,8 +1,8 @@
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 
-export type AssetStatus = 'active' | 'in_migration' | 'degraded' | 'retired';
+export type AssetStatus = "active" | "in_migration" | "degraded" | "retired";
 
-export type AssetCriticality = 'low' | 'medium' | 'high' | 'critical';
+export type AssetCriticality = "low" | "medium" | "high" | "critical";
 
 export interface AssetLifecycleMilestone {
   stage: string;
@@ -13,15 +13,13 @@ export interface AssetLifecycleMilestone {
 
 export interface AssetUsageEvent {
   context: string;
-  outcome?: 'success' | 'failure' | 'warning' | 'analysis' | 'maintenance';
+  outcome?: "success" | "failure" | "warning" | "analysis" | "maintenance";
   actor?: string;
   details?: Record<string, any>;
   timestamp?: Date;
 }
 
-export interface AssetRegistrationInput<
-  T extends Record<string, any> = Record<string, any>,
-> {
+export interface AssetRegistrationInput<T extends Record<string, any> = Record<string, any>> {
   id: string;
   name: string;
   type: string;
@@ -52,9 +50,7 @@ export interface ManagedAsset<
   healthScore: number;
 }
 
-export interface AssetUpdate<
-  T extends Record<string, any> = Record<string, any>,
-> {
+export interface AssetUpdate<T extends Record<string, any> = Record<string, any>> {
   name?: string;
   type?: string;
   domain?: string;
@@ -103,8 +99,7 @@ export class AssetManager<
 
   constructor(options?: { usageHistoryLimit?: number }) {
     super();
-    this.usageHistoryLimit =
-      options?.usageHistoryLimit ?? DEFAULT_HISTORY_LIMIT;
+    this.usageHistoryLimit = options?.usageHistoryLimit ?? DEFAULT_HISTORY_LIMIT;
   }
 
   registerAsset(input: AssetRegistrationInput<T>): ManagedAsset<T> {
@@ -119,10 +114,7 @@ export class AssetManager<
         domain: input.domain ?? existing.domain,
         owners: this.mergeStringArrays(existing.owners, input.owners),
         tags: this.mergeStringArrays(existing.tags, input.tags),
-        dependencies: this.mergeDependencies(
-          existing.dependencies,
-          input.dependencies,
-        ),
+        dependencies: this.mergeDependencies(existing.dependencies, input.dependencies),
         lifecycle: input.lifecycle ?? existing.lifecycle,
         metadata: { ...existing.metadata, ...(input.metadata ?? ({} as T)) },
         status: input.status ?? existing.status,
@@ -132,12 +124,9 @@ export class AssetManager<
       } satisfies ManagedAsset<T>;
 
       this.assets.set(updated.id, updated);
-      this.indexAsset(
-        updated,
-        existing.domain !== updated.domain ? existing.domain : undefined,
-      );
+      this.indexAsset(updated, existing.domain !== updated.domain ? existing.domain : undefined);
       this.updateDependencyIndex(updated.id, updated.dependencies);
-      this.emit('asset-updated', updated);
+      this.emit("asset-updated", updated);
       return updated;
     }
 
@@ -154,15 +143,15 @@ export class AssetManager<
       usage: [],
       createdAt: now,
       updatedAt: now,
-      status: input.status ?? 'active',
-      criticality: input.criticality ?? 'medium',
+      status: input.status ?? "active",
+      criticality: input.criticality ?? "medium",
       healthScore: input.healthScore ?? 100,
     };
 
     this.assets.set(record.id, record);
     this.indexAsset(record);
     this.updateDependencyIndex(record.id, record.dependencies);
-    this.emit('asset-registered', record);
+    this.emit("asset-registered", record);
     return record;
   }
 
@@ -170,10 +159,7 @@ export class AssetManager<
     return inputs.map((input) => this.registerAsset(input));
   }
 
-  updateAsset(
-    id: string,
-    updates: AssetUpdate<T>,
-  ): ManagedAsset<T> | undefined {
+  updateAsset(id: string, updates: AssetUpdate<T>): ManagedAsset<T> | undefined {
     const asset = this.assets.get(id);
     if (!asset) {
       return undefined;
@@ -194,19 +180,15 @@ export class AssetManager<
     if (updates.lifecycle) asset.lifecycle = updates.lifecycle;
     if (updates.status) asset.status = updates.status;
     if (updates.criticality) asset.criticality = updates.criticality;
-    if (typeof updates.healthScore === 'number')
-      asset.healthScore = updates.healthScore;
+    if (typeof updates.healthScore === "number") asset.healthScore = updates.healthScore;
     if (updates.metadata) {
       asset.metadata = { ...asset.metadata, ...updates.metadata };
     }
 
     asset.updatedAt = now;
     this.assets.set(id, asset);
-    this.indexAsset(
-      asset,
-      originalDomain !== asset.domain ? originalDomain : undefined,
-    );
-    this.emit('asset-updated', asset);
+    this.indexAsset(asset, originalDomain !== asset.domain ? originalDomain : undefined);
+    this.emit("asset-updated", asset);
     return asset;
   }
 
@@ -228,7 +210,7 @@ export class AssetManager<
 
     asset.updatedAt = usageEvent.timestamp ?? new Date();
     this.assets.set(assetId, asset);
-    this.emit('asset-usage-recorded', { assetId, event: usageEvent });
+    this.emit("asset-usage-recorded", { assetId, event: usageEvent });
   }
 
   linkDependency(assetId: string, dependencyId: string): void {
@@ -256,9 +238,7 @@ export class AssetManager<
       return;
     }
 
-    asset.dependencies = asset.dependencies.filter(
-      (dep) => dep !== dependencyId,
-    );
+    asset.dependencies = asset.dependencies.filter((dep) => dep !== dependencyId);
     this.updateDependencyIndex(assetId, asset.dependencies);
     this.assets.set(assetId, asset);
 
@@ -301,9 +281,7 @@ export class AssetManager<
     }
 
     if (filter?.criticality) {
-      assets = assets.filter(
-        (asset) => asset.criticality === filter.criticality,
-      );
+      assets = assets.filter((asset) => asset.criticality === filter.criticality);
     }
 
     if (filter?.tag) {
@@ -319,10 +297,7 @@ export class AssetManager<
     }));
   }
 
-  getUsageHistory(
-    assetId: string,
-    limit = this.usageHistoryLimit,
-  ): AssetUsageEvent[] {
+  getUsageHistory(assetId: string, limit = this.usageHistoryLimit): AssetUsageEvent[] {
     const asset = this.assets.get(assetId);
     if (!asset) {
       return [];
@@ -360,7 +335,7 @@ export class AssetManager<
       }
       byStatus[asset.status] += 1;
       byCriticality[asset.criticality] += 1;
-      if (typeof asset.healthScore === 'number') {
+      if (typeof asset.healthScore === "number") {
         healthAccumulator += asset.healthScore;
         healthCount += 1;
       }
@@ -372,9 +347,7 @@ export class AssetManager<
       byStatus,
       byCriticality,
       averageHealth:
-        healthCount > 0
-          ? Math.round((healthAccumulator / healthCount) * 100) / 100
-          : null,
+        healthCount > 0 ? Math.round((healthAccumulator / healthCount) * 100) / 100 : null,
       updatedAt: new Date(),
     };
   }

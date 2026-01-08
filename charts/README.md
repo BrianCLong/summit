@@ -33,12 +33,14 @@ charts/
 ## 🎯 Golden Path Features
 
 ### ✅ Observability by Default
+
 - **OpenTelemetry**: Automatic tracing and metrics collection
 - **Prometheus**: Metrics scraping and alerting
 - **Grafana**: Pre-configured dashboards
 - **Feature Flags**: Runtime configuration management
 
 ### 🔒 Security First
+
 - **Secrets Management**: External Secrets Operator integration
 - **Zero Trust**: mTLS via service mesh (Istio/Linkerd)
 - **RBAC**: Role-based access control
@@ -46,11 +48,13 @@ charts/
 - **Security Contexts**: Non-root containers, read-only filesystems
 
 ### 🏗️ Infrastructure as Code
+
 - **Terraform Modules**: Cluster, storage, DNS, secrets
 - **GitOps Ready**: ArgoCD/Flux compatible
 - **Multi-Environment**: Dev, staging, production configs
 
 ### 🔍 Health & Reliability
+
 - **Health Probes**: Liveness, readiness, and startup probes
 - **Pod Disruption Budgets**: High availability
 - **HPA**: Horizontal pod autoscaling
@@ -67,6 +71,7 @@ Each chart supports environment-specific configurations:
 ## 🧪 Validation & Testing
 
 ### Chart Linting
+
 ```bash
 # Lint all charts
 ct lint --all
@@ -79,7 +84,9 @@ helm template charts/maestro --values charts/maestro/values.dev.yaml
 ```
 
 ### Smoke Tests
+
 Post-install smoke tests validate:
+
 - ✅ All pods are running
 - ✅ Health endpoints respond
 - ✅ Services are accessible
@@ -91,6 +98,7 @@ Post-install smoke tests validate:
 **CRITICAL**: Secrets are NEVER committed to Git.
 
 ### Using External Secrets Operator
+
 ```yaml
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
@@ -108,6 +116,7 @@ spec:
 ```
 
 ### Using Sealed Secrets
+
 ```bash
 # Encrypt a secret
 kubeseal --format yaml < secret.yaml > sealed-secret.yaml
@@ -127,13 +136,17 @@ See [terraform/README.md](../terraform/README.md) for details.
 ## 📊 Observability Stack
 
 ### OpenTelemetry
+
 Every service automatically exports:
+
 - **Traces**: Distributed tracing
 - **Metrics**: Custom and runtime metrics
 - **Logs**: Structured logging
 
 ### Prometheus
+
 Metrics are scraped via ServiceMonitor CRDs:
+
 ```yaml
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -151,10 +164,11 @@ spec:
 ## 🚦 Feature Flags
 
 Configure feature flags via chart values:
+
 ```yaml
 featureFlags:
   enabled: true
-  provider: launchdarkly  # or flagd, unleash
+  provider: launchdarkly # or flagd, unleash
   sdkKey: secretRef
   flags:
     newFeature: false
@@ -164,6 +178,7 @@ featureFlags:
 ## 🔄 CI/CD Integration
 
 ### GitLab CI
+
 ```yaml
 deploy:dev:
   script:
@@ -172,6 +187,7 @@ deploy:dev:
 ```
 
 ### GitHub Actions
+
 ```yaml
 - name: Deploy to Dev
   run: |
@@ -189,6 +205,7 @@ deploy:dev:
 ## 🆘 Troubleshooting
 
 ### Debug Installation
+
 ```bash
 # Dry-run to see what will be installed
 helm install myapp charts/app --dry-run --debug
@@ -198,6 +215,7 @@ helm template myapp charts/app --values charts/app/values.dev.yaml
 ```
 
 ### Health Check Failures
+
 ```bash
 # Check pod logs
 kubectl logs -n <namespace> <pod-name>

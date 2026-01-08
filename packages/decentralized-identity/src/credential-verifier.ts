@@ -2,13 +2,9 @@
  * Credential Verifier - Verify verifiable credentials and presentations
  */
 
-import crypto from 'crypto';
-import type {
-  VerifiableCredential,
-  VerifiablePresentation,
-  DIDDocument,
-} from './types.js';
-import { DIDManager } from './did-manager.js';
+import crypto from "crypto";
+import type { VerifiableCredential, VerifiablePresentation, DIDDocument } from "./types.js";
+import { DIDManager } from "./did-manager.js";
 
 interface VerificationResult {
   valid: boolean;
@@ -49,9 +45,7 @@ export class CredentialVerifier {
 
     // Check issuer trust
     const issuerDid =
-      typeof credential.issuer === 'string'
-        ? credential.issuer
-        : credential.issuer.id;
+      typeof credential.issuer === "string" ? credential.issuer : credential.issuer.id;
 
     if (this.trustedIssuers.size > 0 && !this.trustedIssuers.has(issuerDid)) {
       errors.push(`Issuer ${issuerDid} is not trusted`);
@@ -63,7 +57,7 @@ export class CredentialVerifier {
     if (credential.expirationDate) {
       const expDate = new Date(credential.expirationDate);
       if (expDate < new Date()) {
-        errors.push('Credential has expired');
+        errors.push("Credential has expired");
       } else {
         checks.expiration = true;
       }
@@ -73,7 +67,7 @@ export class CredentialVerifier {
 
     // Check revocation
     if (credential.id && this.revokedCredentials.has(credential.id)) {
-      errors.push('Credential has been revoked');
+      errors.push("Credential has been revoked");
     } else {
       checks.revocation = true;
     }
@@ -84,10 +78,10 @@ export class CredentialVerifier {
       if (signatureValid) {
         checks.signature = true;
       } else {
-        errors.push('Invalid signature');
+        errors.push("Invalid signature");
       }
     } else {
-      errors.push('No proof attached to credential');
+      errors.push("No proof attached to credential");
     }
 
     return {
@@ -97,9 +91,7 @@ export class CredentialVerifier {
     };
   }
 
-  async verifyPresentation(
-    presentation: VerifiablePresentation,
-  ): Promise<VerificationResult> {
+  async verifyPresentation(presentation: VerifiablePresentation): Promise<VerificationResult> {
     const errors: string[] = [];
     const checks = {
       signature: false,
@@ -118,17 +110,14 @@ export class CredentialVerifier {
 
     // Verify presentation proof
     if (presentation.proof) {
-      const signatureValid = await this.verifySignature(
-        presentation,
-        presentation.holder,
-      );
+      const signatureValid = await this.verifySignature(presentation, presentation.holder);
       if (signatureValid) {
         checks.signature = true;
       } else {
-        errors.push('Invalid presentation signature');
+        errors.push("Invalid presentation signature");
       }
     } else {
-      errors.push('No proof attached to presentation');
+      errors.push("No proof attached to presentation");
     }
 
     return {
@@ -143,7 +132,7 @@ export class CredentialVerifier {
     requirements: {
       types?: string[];
       claims?: { name: string; value?: unknown }[];
-    },
+    }
   ): Promise<boolean> {
     // Check required types
     if (requirements.types) {
@@ -158,8 +147,12 @@ export class CredentialVerifier {
     if (requirements.claims) {
       for (const claim of requirements.claims) {
         const value = credential.credentialSubject[claim.name];
-        if (value === undefined) {return false;}
-        if (claim.value !== undefined && value !== claim.value) {return false;}
+        if (value === undefined) {
+          return false;
+        }
+        if (claim.value !== undefined && value !== claim.value) {
+          return false;
+        }
       }
     }
 
@@ -172,11 +165,13 @@ export class CredentialVerifier {
 
   private async verifySignature(
     data: VerifiableCredential | VerifiablePresentation,
-    signerDid: string,
+    signerDid: string
   ): Promise<boolean> {
     // Resolve DID to get public key
     const didDocument = await this.didManager.resolveDID(signerDid);
-    if (!didDocument) {return false;}
+    if (!didDocument) {
+      return false;
+    }
 
     // In production, properly verify JWS signature
     // For now, simplified verification

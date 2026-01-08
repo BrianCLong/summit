@@ -1,5 +1,5 @@
 ---
-title: 'IntelGraph + Maestro Conductor — Current State, MVP‑2 & GA PRD'
+title: "IntelGraph + Maestro Conductor — Current State, MVP‑2 & GA PRD"
 version: 0.1
 lastUpdated: 2025-09-30
 owner: docs@intelgraph.io

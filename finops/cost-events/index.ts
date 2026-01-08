@@ -1,4 +1,4 @@
-import { createHash } from 'crypto';
+import { createHash } from "crypto";
 
 // --- Data Structures ---
 
@@ -11,7 +11,7 @@ export interface CostEvent {
   timestamp: string;
   tenantHash: string; // Hashed tenant ID
   scopeHash: string; // Hashed case/project/scope ID
-  operationType: 'query' | 'ingest' | 'export' | 'storage_growth';
+  operationType: "query" | "ingest" | "export" | "storage_growth";
   units: number; // Calculated cost units
   dimensions: CostDimensions;
   correlationId: string; // ID linking to the original request
@@ -37,7 +37,7 @@ export interface CostDimensions {
  * Input for the unit calculator.
  */
 export interface CostCalculationInput {
-  operationType: CostEvent['operationType'];
+  operationType: CostEvent["operationType"];
   dimensions: CostDimensions;
   tenantId: string; // Raw tenant ID for hashing
   scopeId: string; // Raw scope ID for hashing
@@ -46,7 +46,7 @@ export interface CostCalculationInput {
 
 // --- Unit Calculator ---
 
-const LATEST_WEIGHTS_VERSION = 'v1';
+const LATEST_WEIGHTS_VERSION = "v1";
 
 const WEIGHTS = {
   v1: {
@@ -68,9 +68,9 @@ const WEIGHTS = {
       objects_written_factor: 2,
     },
     storage_growth: {
-        base: 1,
-        io_bytes_factor: 0.0001,
-    }
+      base: 1,
+      io_bytes_factor: 0.0001,
+    },
   },
 };
 
@@ -81,7 +81,7 @@ const WEIGHTS = {
  * @returns The calculated cost in units.
  */
 export function calculateCostUnits(
-  input: Omit<CostCalculationInput, 'tenantId'|'scopeId'|'correlationId'>,
+  input: Omit<CostCalculationInput, "tenantId" | "scopeId" | "correlationId">,
   version: string = LATEST_WEIGHTS_VERSION
 ): number {
   const weights = WEIGHTS[version];
@@ -93,15 +93,19 @@ export function calculateCostUnits(
   const opWeights = weights[operationType];
   let units = opWeights.base;
 
-  if (operationType === 'query') {
+  if (operationType === "query") {
     units += (dimensions.query_complexity ?? 0) * opWeights.complexity_factor;
     units += (dimensions.rows_scanned ?? 0) * opWeights.rows_scanned_factor;
     units += (dimensions.rows_returned ?? 0) * opWeights.rows_returned_factor;
     units += (dimensions.cpu_ms ?? 0) * opWeights.cpu_ms_factor;
-  } else if (operationType === 'ingest' || operationType === 'export' || operationType === 'storage_growth') {
+  } else if (
+    operationType === "ingest" ||
+    operationType === "export" ||
+    operationType === "storage_growth"
+  ) {
     units += (dimensions.io_bytes ?? 0) * opWeights.io_bytes_factor;
-    if ('objects_written_factor' in opWeights) {
-        units += (dimensions.objects_written ?? 0) * opWeights.objects_written_factor;
+    if ("objects_written_factor" in opWeights) {
+      units += (dimensions.objects_written ?? 0) * opWeights.objects_written_factor;
     }
   }
 
@@ -116,7 +120,7 @@ export function calculateCostUnits(
  * @returns A hex-encoded SHA256 hash.
  */
 function hashIdentifier(identifier: string): string {
-  return createHash('sha256').update(identifier).digest('hex');
+  return createHash("sha256").update(identifier).digest("hex");
 }
 
 /**
@@ -126,14 +130,10 @@ function hashIdentifier(identifier: string): string {
  * @param operationType - The type of operation.
  * @returns A unique, deterministic event ID.
  */
-function generateEventId(correlationId: string, operationType: CostEvent['operationType']): string {
-  const hash = createHash('sha256')
-    .update(correlationId)
-    .update(operationType)
-    .digest('hex');
+function generateEventId(correlationId: string, operationType: CostEvent["operationType"]): string {
+  const hash = createHash("sha256").update(correlationId).update(operationType).digest("hex");
   return `cost-${hash.substring(0, 16)}`;
 }
-
 
 /**
  * Constructs and "emits" a cost event.
@@ -162,5 +162,5 @@ export function emitCostEvent(input: CostCalculationInput): void {
 
   // In a real implementation, this would be a more robust emitter.
   // For now, we log to stdout in a structured JSON format.
-  console.log(JSON.stringify({ type: 'CostEvent', ...event }));
+  console.log(JSON.stringify({ type: "CostEvent", ...event }));
 }

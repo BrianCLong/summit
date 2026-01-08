@@ -3,10 +3,10 @@
  * Support Vector Machine Classifier
  */
 
-import type { Dataset, PredictionResult, ModelPerformance } from '../types/index.js';
+import type { Dataset, PredictionResult, ModelPerformance } from "../types/index.js";
 
 export interface SVMConfig {
-  kernel: 'linear' | 'rbf' | 'polynomial';
+  kernel: "linear" | "rbf" | "polynomial";
   C: number; // Regularization parameter
   gamma?: number; // RBF kernel parameter
   degree?: number; // Polynomial kernel degree
@@ -25,7 +25,7 @@ export class SVMClassifier {
 
   constructor(config: Partial<SVMConfig> = {}) {
     this.config = {
-      kernel: config.kernel || 'rbf',
+      kernel: config.kernel || "rbf",
       C: config.C || 1.0,
       gamma: config.gamma || 0.1,
       degree: config.degree || 3,
@@ -42,7 +42,7 @@ export class SVMClassifier {
     this.classes = [...new Set(labels)];
 
     // Convert to binary labels (-1, 1)
-    const y = labels.map(l => l === this.classes[0] ? -1 : 1);
+    const y = labels.map((l) => (l === this.classes[0] ? -1 : 1));
     const X = features;
     const n = X.length;
 
@@ -60,9 +60,10 @@ export class SVMClassifier {
       for (let i = 0; i < n; i++) {
         const Ei = this.predict_value(X, y, X[i]) - y[i];
 
-        if ((y[i] * Ei < -this.config.tolerance && this.alphas[i] < this.config.C) ||
-            (y[i] * Ei > this.config.tolerance && this.alphas[i] > 0)) {
-
+        if (
+          (y[i] * Ei < -this.config.tolerance && this.alphas[i] < this.config.C) ||
+          (y[i] * Ei > this.config.tolerance && this.alphas[i] > 0)
+        ) {
           // Select random j != i
           let j = Math.floor(Math.random() * n);
           while (j === i) j = Math.floor(Math.random() * n);
@@ -85,9 +86,8 @@ export class SVMClassifier {
           if (L === H) continue;
 
           // Compute eta
-          const eta = 2 * this.kernel(X[i], X[j]) -
-                      this.kernel(X[i], X[i]) -
-                      this.kernel(X[j], X[j]);
+          const eta =
+            2 * this.kernel(X[i], X[j]) - this.kernel(X[i], X[i]) - this.kernel(X[j], X[j]);
 
           if (eta >= 0) continue;
 
@@ -101,13 +101,17 @@ export class SVMClassifier {
           this.alphas[i] = alphaI_old + y[i] * y[j] * (alphaJ_old - this.alphas[j]);
 
           // Update bias
-          const b1 = this.bias - Ei -
-                     y[i] * (this.alphas[i] - alphaI_old) * this.kernel(X[i], X[i]) -
-                     y[j] * (this.alphas[j] - alphaJ_old) * this.kernel(X[i], X[j]);
+          const b1 =
+            this.bias -
+            Ei -
+            y[i] * (this.alphas[i] - alphaI_old) * this.kernel(X[i], X[i]) -
+            y[j] * (this.alphas[j] - alphaJ_old) * this.kernel(X[i], X[j]);
 
-          const b2 = this.bias - Ej -
-                     y[i] * (this.alphas[i] - alphaI_old) * this.kernel(X[i], X[j]) -
-                     y[j] * (this.alphas[j] - alphaJ_old) * this.kernel(X[j], X[j]);
+          const b2 =
+            this.bias -
+            Ej -
+            y[i] * (this.alphas[i] - alphaI_old) * this.kernel(X[i], X[j]) -
+            y[j] * (this.alphas[j] - alphaJ_old) * this.kernel(X[j], X[j]);
 
           if (0 < this.alphas[i] && this.alphas[i] < this.config.C) {
             this.bias = b1;
@@ -150,10 +154,10 @@ export class SVMClassifier {
    */
   predict(features: number[][]): PredictionResult[] {
     if (!this.fitted) {
-      throw new Error('Model must be fitted before prediction');
+      throw new Error("Model must be fitted before prediction");
     }
 
-    return features.map(sample => {
+    return features.map((sample) => {
       const decision = this.decisionFunction(sample);
       const prediction = decision >= 0 ? this.classes[1] : this.classes[0];
       const probability = this.sigmoid(decision);
@@ -184,7 +188,7 @@ export class SVMClassifier {
    */
   evaluate(testDataset: Dataset): ModelPerformance {
     const predictions = this.predict(testDataset.features);
-    const predicted = predictions.map(p => p.prediction);
+    const predicted = predictions.map((p) => p.prediction);
     const actual = testDataset.labels;
 
     let correct = 0;
@@ -202,15 +206,15 @@ export class SVMClassifier {
    */
   private kernel(x1: number[], x2: number[]): number {
     switch (this.config.kernel) {
-      case 'linear':
+      case "linear":
         return this.dotProduct(x1, x2);
 
-      case 'rbf':
+      case "rbf":
         const diff = x1.map((v, i) => v - x2[i]);
         const squaredDist = diff.reduce((sum, d) => sum + d * d, 0);
         return Math.exp(-this.config.gamma! * squaredDist);
 
-      case 'polynomial':
+      case "polynomial":
         return Math.pow(this.dotProduct(x1, x2) + 1, this.config.degree!);
 
       default:
@@ -253,7 +257,7 @@ export class SVMRegressor {
 
   constructor(config: Partial<SVMConfig & { epsilon: number }> = {}) {
     this.config = {
-      kernel: config.kernel || 'rbf',
+      kernel: config.kernel || "rbf",
       C: config.C || 1.0,
       gamma: config.gamma || 0.1,
       degree: config.degree || 3,
@@ -302,10 +306,10 @@ export class SVMRegressor {
    */
   predict(features: number[][]): number[] {
     if (!this.fitted) {
-      throw new Error('Model must be fitted before prediction');
+      throw new Error("Model must be fitted before prediction");
     }
 
-    return features.map(sample => this.predictSingle(this.supportVectors, sample));
+    return features.map((sample) => this.predictSingle(this.supportVectors, sample));
   }
 
   private predictSingle(supportVectors: number[][], sample: number[]): number {
@@ -321,15 +325,15 @@ export class SVMRegressor {
 
   private kernel(x1: number[], x2: number[]): number {
     switch (this.config.kernel) {
-      case 'linear':
+      case "linear":
         return x1.reduce((sum, val, i) => sum + val * x2[i], 0);
 
-      case 'rbf':
+      case "rbf":
         const diff = x1.map((v, i) => v - x2[i]);
         const squaredDist = diff.reduce((sum, d) => sum + d * d, 0);
         return Math.exp(-this.config.gamma! * squaredDist);
 
-      case 'polynomial':
+      case "polynomial":
         const dot = x1.reduce((sum, val, i) => sum + val * x2[i], 0);
         return Math.pow(dot + 1, this.config.degree!);
 

@@ -6,23 +6,23 @@
  * confidence scoring, and automated intelligence synthesis.
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================================================
 // Intelligence Disciplines
 // ============================================================================
 
 export const IntelligenceDisciplineSchema = z.enum([
-  'HUMINT',    // Human Intelligence
-  'SIGINT',    // Signals Intelligence
-  'IMINT',     // Imagery Intelligence
-  'MASINT',    // Measurement and Signature Intelligence
-  'GEOINT',    // Geospatial Intelligence
-  'OSINT',     // Open Source Intelligence
-  'TECHINT',   // Technical Intelligence
-  'CYBINT',    // Cyber Intelligence
-  'FININT',    // Financial Intelligence
-  'ACINT'      // Acoustic Intelligence
+  "HUMINT", // Human Intelligence
+  "SIGINT", // Signals Intelligence
+  "IMINT", // Imagery Intelligence
+  "MASINT", // Measurement and Signature Intelligence
+  "GEOINT", // Geospatial Intelligence
+  "OSINT", // Open Source Intelligence
+  "TECHINT", // Technical Intelligence
+  "CYBINT", // Cyber Intelligence
+  "FININT", // Financial Intelligence
+  "ACINT", // Acoustic Intelligence
 ]);
 
 // ============================================================================
@@ -35,8 +35,8 @@ export const IntelligenceReportSchema = z.object({
   source: z.object({
     id: z.string(),
     type: z.string(),
-    reliability: z.enum(['A', 'B', 'C', 'D', 'E', 'F']), // NATO reliability scale
-    credibility: z.enum(['1', '2', '3', '4', '5', '6']) // NATO credibility scale
+    reliability: z.enum(["A", "B", "C", "D", "E", "F"]), // NATO reliability scale
+    credibility: z.enum(["1", "2", "3", "4", "5", "6"]), // NATO credibility scale
   }),
 
   // Content
@@ -55,26 +55,30 @@ export const IntelligenceReportSchema = z.object({
   expirationDate: z.string().optional(),
 
   // Geospatial
-  location: z.object({
-    lat: z.number(),
-    lon: z.number(),
-    accuracy: z.number(), // meters
-    name: z.string().optional()
-  }).optional(),
+  location: z
+    .object({
+      lat: z.number(),
+      lon: z.number(),
+      accuracy: z.number(), // meters
+      name: z.string().optional(),
+    })
+    .optional(),
 
   // Entities mentioned
-  entities: z.array(z.object({
-    id: z.string(),
-    type: z.enum(['PERSON', 'ORGANIZATION', 'FACILITY', 'EVENT', 'EQUIPMENT']),
-    name: z.string(),
-    confidence: z.number() // 0-100
-  })),
+  entities: z.array(
+    z.object({
+      id: z.string(),
+      type: z.enum(["PERSON", "ORGANIZATION", "FACILITY", "EVENT", "EQUIPMENT"]),
+      name: z.string(),
+      confidence: z.number(), // 0-100
+    })
+  ),
 
   // Metadata
   collectionMethod: z.string(),
-  processingLevel: z.enum(['RAW', 'PROCESSED', 'ANALYZED', 'FINISHED']),
+  processingLevel: z.enum(["RAW", "PROCESSED", "ANALYZED", "FINISHED"]),
   confidence: z.number(), // 0-100
-  priority: z.enum(['ROUTINE', 'PRIORITY', 'IMMEDIATE', 'FLASH']),
+  priority: z.enum(["ROUTINE", "PRIORITY", "IMMEDIATE", "FLASH"]),
 
   // Correlation
   relatedReports: z.array(z.string()),
@@ -83,7 +87,7 @@ export const IntelligenceReportSchema = z.object({
 
   metadata: z.record(z.unknown()),
   createdAt: z.string(),
-  updatedAt: z.string()
+  updatedAt: z.string(),
 });
 
 // ============================================================================
@@ -96,77 +100,91 @@ export const FusedIntelligenceSchema = z.object({
   summary: z.string(),
 
   // Source reports
-  sourceReports: z.array(z.object({
-    reportId: z.string(),
-    discipline: IntelligenceDisciplineSchema,
-    weight: z.number(), // contribution weight 0-1
-    confidence: z.number()
-  })),
+  sourceReports: z.array(
+    z.object({
+      reportId: z.string(),
+      discipline: IntelligenceDisciplineSchema,
+      weight: z.number(), // contribution weight 0-1
+      confidence: z.number(),
+    })
+  ),
 
   // Fused assessment
   assessment: z.object({
     conclusion: z.string(),
     confidence: z.number(), // 0-100
-    reliability: z.enum(['HIGH', 'MEDIUM', 'LOW']),
-    analystConfidence: z.enum(['HIGH', 'MEDIUM', 'LOW']),
+    reliability: z.enum(["HIGH", "MEDIUM", "LOW"]),
+    analystConfidence: z.enum(["HIGH", "MEDIUM", "LOW"]),
 
     // Supporting evidence
-    supporting: z.array(z.object({
-      reportId: z.string(),
-      evidence: z.string(),
-      weight: z.number()
-    })),
+    supporting: z.array(
+      z.object({
+        reportId: z.string(),
+        evidence: z.string(),
+        weight: z.number(),
+      })
+    ),
 
     // Contradicting evidence
-    contradicting: z.array(z.object({
-      reportId: z.string(),
-      evidence: z.string(),
-      impact: z.enum(['MAJOR', 'MODERATE', 'MINOR'])
-    })),
+    contradicting: z.array(
+      z.object({
+        reportId: z.string(),
+        evidence: z.string(),
+        impact: z.enum(["MAJOR", "MODERATE", "MINOR"]),
+      })
+    ),
 
     // Intelligence gaps
     gaps: z.array(z.string()),
 
     // Alternative hypotheses
-    alternatives: z.array(z.object({
-      hypothesis: z.string(),
-      likelihood: z.number(), // 0-100
-      reasoning: z.string()
-    }))
+    alternatives: z.array(
+      z.object({
+        hypothesis: z.string(),
+        likelihood: z.number(), // 0-100
+        reasoning: z.string(),
+      })
+    ),
   }),
 
   // Timeline
-  timeline: z.array(z.object({
-    timestamp: z.string(),
-    event: z.string(),
-    sourceReportIds: z.array(z.string()),
-    confidence: z.number()
-  })),
+  timeline: z.array(
+    z.object({
+      timestamp: z.string(),
+      event: z.string(),
+      sourceReportIds: z.array(z.string()),
+      confidence: z.number(),
+    })
+  ),
 
   // Entities involved
-  entities: z.array(z.object({
-    id: z.string(),
-    type: z.string(),
-    name: z.string(),
-    role: z.string(),
-    confidence: z.number()
-  })),
+  entities: z.array(
+    z.object({
+      id: z.string(),
+      type: z.string(),
+      name: z.string(),
+      role: z.string(),
+      confidence: z.number(),
+    })
+  ),
 
   // Geospatial data
-  locations: z.array(z.object({
-    lat: z.number(),
-    lon: z.number(),
-    name: z.string(),
-    significance: z.string(),
-    confidence: z.number()
-  })),
+  locations: z.array(
+    z.object({
+      lat: z.number(),
+      lon: z.number(),
+      name: z.string(),
+      significance: z.string(),
+      confidence: z.number(),
+    })
+  ),
 
   classification: z.string(),
   producedBy: z.string(),
   producedAt: z.string(),
   validUntil: z.string().optional(),
 
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.unknown()),
 });
 
 // ============================================================================
@@ -179,7 +197,7 @@ export const EntityMentionSchema = z.object({
   discipline: IntelligenceDisciplineSchema,
 
   // Entity data
-  entityType: z.enum(['PERSON', 'ORGANIZATION', 'FACILITY', 'EVENT', 'EQUIPMENT', 'LOCATION']),
+  entityType: z.enum(["PERSON", "ORGANIZATION", "FACILITY", "EVENT", "EQUIPMENT", "LOCATION"]),
   name: z.string(),
   aliases: z.array(z.string()),
 
@@ -190,50 +208,58 @@ export const EntityMentionSchema = z.object({
   confidence: z.number(), // 0-100
 
   timestamp: z.string(),
-  location: z.object({
-    lat: z.number(),
-    lon: z.number()
-  }).optional()
+  location: z
+    .object({
+      lat: z.number(),
+      lon: z.number(),
+    })
+    .optional(),
 });
 
 export const ResolvedEntitySchema = z.object({
   id: z.string(),
-  type: z.enum(['PERSON', 'ORGANIZATION', 'FACILITY', 'EVENT', 'EQUIPMENT', 'LOCATION']),
+  type: z.enum(["PERSON", "ORGANIZATION", "FACILITY", "EVENT", "EQUIPMENT", "LOCATION"]),
 
   // Canonical identity
   canonicalName: z.string(),
   aliases: z.array(z.string()),
 
   // Attributes from fusion
-  attributes: z.record(z.object({
-    value: z.unknown(),
-    confidence: z.number(),
-    sources: z.array(z.string())
-  })),
+  attributes: z.record(
+    z.object({
+      value: z.unknown(),
+      confidence: z.number(),
+      sources: z.array(z.string()),
+    })
+  ),
 
   // Source mentions
-  mentions: z.array(z.object({
-    mentionId: z.string(),
-    reportId: z.string(),
-    discipline: IntelligenceDisciplineSchema,
-    confidence: z.number(), // confidence in the link
-    timestamp: z.string()
-  })),
+  mentions: z.array(
+    z.object({
+      mentionId: z.string(),
+      reportId: z.string(),
+      discipline: IntelligenceDisciplineSchema,
+      confidence: z.number(), // confidence in the link
+      timestamp: z.string(),
+    })
+  ),
 
   // Relationships
-  relationships: z.array(z.object({
-    targetEntityId: z.string(),
-    type: z.string(),
-    confidence: z.number(),
-    sources: z.array(z.string())
-  })),
+  relationships: z.array(
+    z.object({
+      targetEntityId: z.string(),
+      type: z.string(),
+      confidence: z.number(),
+      sources: z.array(z.string()),
+    })
+  ),
 
   // Confidence metrics
   resolutionConfidence: z.number(), // 0-100
   lastUpdated: z.string(),
   createdAt: z.string(),
 
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.unknown()),
 });
 
 // ============================================================================
@@ -252,10 +278,14 @@ export const CorrelationRuleSchema = z.object({
     entityTypes: z.array(z.string()).optional(),
     timeWindow: z.number().optional(), // hours
     spatialDistance: z.number().optional(), // km
-    attributeMatches: z.array(z.object({
-      attribute: z.string(),
-      similarity: z.number() // 0-1
-    })).optional()
+    attributeMatches: z
+      .array(
+        z.object({
+          attribute: z.string(),
+          similarity: z.number(), // 0-1
+        })
+      )
+      .optional(),
   }),
 
   // Scoring
@@ -264,11 +294,11 @@ export const CorrelationRuleSchema = z.object({
     spatialWeight: z.number(),
     entityWeight: z.number(),
     attributeWeight: z.number(),
-    minimumScore: z.number() // 0-100
+    minimumScore: z.number(), // 0-100
   }),
 
   createdAt: z.string(),
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.unknown()),
 });
 
 export const CorrelationSchema = z.object({
@@ -288,19 +318,19 @@ export const CorrelationSchema = z.object({
 
   // Correlation type
   type: z.enum([
-    'CONFIRMATION',
-    'CONTRADICTION',
-    'ELABORATION',
-    'TEMPORAL_SEQUENCE',
-    'SPATIAL_PROXIMITY',
-    'ENTITY_CO_OCCURRENCE'
+    "CONFIRMATION",
+    "CONTRADICTION",
+    "ELABORATION",
+    "TEMPORAL_SEQUENCE",
+    "SPATIAL_PROXIMITY",
+    "ENTITY_CO_OCCURRENCE",
   ]),
 
   confidence: z.number(), // 0-100
   analystReviewed: z.boolean(),
 
   createdAt: z.string(),
-  metadata: z.record(z.unknown())
+  metadata: z.record(z.unknown()),
 });
 
 // ============================================================================
@@ -310,39 +340,38 @@ export const CorrelationSchema = z.object({
 export const PatternSchema = z.object({
   id: z.string(),
   name: z.string(),
-  type: z.enum([
-    'TEMPORAL',
-    'SPATIAL',
-    'BEHAVIORAL',
-    'NETWORK',
-    'COMMUNICATION',
-    'TRANSACTION'
-  ]),
+  type: z.enum(["TEMPORAL", "SPATIAL", "BEHAVIORAL", "NETWORK", "COMMUNICATION", "TRANSACTION"]),
 
   // Pattern definition
   pattern: z.object({
     description: z.string(),
-    indicators: z.array(z.object({
-      type: z.string(),
-      criteria: z.record(z.unknown()),
-      weight: z.number()
-    })),
-    minimumConfidence: z.number()
+    indicators: z.array(
+      z.object({
+        type: z.string(),
+        criteria: z.record(z.unknown()),
+        weight: z.number(),
+      })
+    ),
+    minimumConfidence: z.number(),
   }),
 
   // Occurrences
-  occurrences: z.array(z.object({
-    id: z.string(),
-    timestamp: z.string(),
-    location: z.object({
-      lat: z.number(),
-      lon: z.number()
-    }).optional(),
-    entities: z.array(z.string()),
-    reports: z.array(z.string()),
-    confidence: z.number(),
-    metadata: z.record(z.unknown())
-  })),
+  occurrences: z.array(
+    z.object({
+      id: z.string(),
+      timestamp: z.string(),
+      location: z
+        .object({
+          lat: z.number(),
+          lon: z.number(),
+        })
+        .optional(),
+      entities: z.array(z.string()),
+      reports: z.array(z.string()),
+      confidence: z.number(),
+      metadata: z.record(z.unknown()),
+    })
+  ),
 
   // Statistics
   statistics: z.object({
@@ -350,14 +379,14 @@ export const PatternSchema = z.object({
     firstSeen: z.string(),
     lastSeen: z.string(),
     frequency: z.number(), // occurrences per day
-    trend: z.enum(['INCREASING', 'STABLE', 'DECREASING'])
+    trend: z.enum(["INCREASING", "STABLE", "DECREASING"]),
   }),
 
-  significance: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
+  significance: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
 
   metadata: z.record(z.unknown()),
   createdAt: z.string(),
-  updatedAt: z.string()
+  updatedAt: z.string(),
 });
 
 // ============================================================================
@@ -404,21 +433,23 @@ export class MultiINTFusion {
    * Create fused intelligence product
    */
   createFusedProduct(reportIds: string[], topic: string): FusedIntelligence {
-    const reports = reportIds.map(id => this.reports.get(id)).filter((r): r is IntelligenceReport => r !== undefined);
+    const reports = reportIds
+      .map((id) => this.reports.get(id))
+      .filter((r): r is IntelligenceReport => r !== undefined);
 
     if (reports.length === 0) {
-      throw new Error('No valid reports found');
+      throw new Error("No valid reports found");
     }
 
     // Calculate confidence based on source reliability
     const avgConfidence = reports.reduce((sum, r) => sum + r.confidence, 0) / reports.length;
 
     // Build source reports array
-    const sourceReports = reports.map(r => ({
+    const sourceReports = reports.map((r) => ({
       reportId: r.id,
       discipline: r.discipline,
       weight: 1 / reports.length,
-      confidence: r.confidence
+      confidence: r.confidence,
     }));
 
     // Aggregate entities
@@ -428,19 +459,19 @@ export class MultiINTFusion {
         const existing = entityMap.get(entity.id) || { count: 0, confidence: 0 };
         entityMap.set(entity.id, {
           count: existing.count + 1,
-          confidence: existing.confidence + entity.confidence
+          confidence: existing.confidence + entity.confidence,
         });
       }
     }
 
     const entities = Array.from(entityMap.entries()).map(([id, data]) => {
-      const entity = reports.flatMap(r => r.entities).find(e => e.id === id);
+      const entity = reports.flatMap((r) => r.entities).find((e) => e.id === id);
       return {
         id,
-        type: entity?.type || 'PERSON',
-        name: entity?.name || '',
-        role: '',
-        confidence: data.confidence / data.count
+        type: entity?.type || "PERSON",
+        name: entity?.name || "",
+        role: "",
+        confidence: data.confidence / data.count,
       };
     });
 
@@ -450,22 +481,22 @@ export class MultiINTFusion {
       summary: `Fused intelligence from ${reports.length} sources`,
       sourceReports,
       assessment: {
-        conclusion: '',
+        conclusion: "",
         confidence: avgConfidence,
-        reliability: avgConfidence > 75 ? 'HIGH' : avgConfidence > 50 ? 'MEDIUM' : 'LOW',
-        analystConfidence: 'MEDIUM',
+        reliability: avgConfidence > 75 ? "HIGH" : avgConfidence > 50 ? "MEDIUM" : "LOW",
+        analystConfidence: "MEDIUM",
         supporting: [],
         contradicting: [],
         gaps: [],
-        alternatives: []
+        alternatives: [],
       },
       timeline: [],
       entities,
       locations: [],
-      classification: 'SECRET',
-      producedBy: 'system',
+      classification: "SECRET",
+      producedBy: "system",
       producedAt: new Date().toISOString(),
-      metadata: {}
+      metadata: {},
     };
 
     const validated = FusedIntelligenceSchema.parse(fusedProduct);
@@ -479,8 +510,7 @@ export class MultiINTFusion {
   private resolveEntity(entityData: any, report: IntelligenceReport): void {
     // Check for existing entity with same name
     const existing = Array.from(this.entities.values()).find(
-      e => e.canonicalName === entityData.name ||
-        e.aliases.includes(entityData.name)
+      (e) => e.canonicalName === entityData.name || e.aliases.includes(entityData.name)
     );
 
     if (existing) {
@@ -490,7 +520,7 @@ export class MultiINTFusion {
         reportId: report.id,
         discipline: report.discipline,
         confidence: entityData.confidence,
-        timestamp: report.reportDate
+        timestamp: report.reportDate,
       });
       existing.lastUpdated = new Date().toISOString();
     } else {
@@ -501,18 +531,20 @@ export class MultiINTFusion {
         canonicalName: entityData.name,
         aliases: [],
         attributes: {},
-        mentions: [{
-          mentionId: `mention-${Date.now()}`,
-          reportId: report.id,
-          discipline: report.discipline,
-          confidence: entityData.confidence,
-          timestamp: report.reportDate
-        }],
+        mentions: [
+          {
+            mentionId: `mention-${Date.now()}`,
+            reportId: report.id,
+            discipline: report.discipline,
+            confidence: entityData.confidence,
+            timestamp: report.reportDate,
+          },
+        ],
         relationships: [],
         resolutionConfidence: entityData.confidence,
         lastUpdated: new Date().toISOString(),
         createdAt: new Date().toISOString(),
-        metadata: {}
+        metadata: {},
       };
 
       this.entities.set(newEntity.id, ResolvedEntitySchema.parse(newEntity));
@@ -540,7 +572,7 @@ export class MultiINTFusion {
         if (score.overall >= (options.minScore || 50)) {
           const correlation: Correlation = {
             id: `corr-${Date.now()}-${i}-${j}`,
-            ruleId: 'default',
+            ruleId: "default",
             reports: [r1.id, r2.id],
             entities: [],
             overallScore: score.overall,
@@ -548,11 +580,11 @@ export class MultiINTFusion {
             spatialScore: score.spatial,
             entityScore: score.entity,
             attributeScore: score.attribute,
-            type: 'CONFIRMATION',
+            type: "CONFIRMATION",
             confidence: score.overall,
             analystReviewed: false,
             createdAt: new Date().toISOString(),
-            metadata: {}
+            metadata: {},
           };
 
           correlations.push(CorrelationSchema.parse(correlation));
@@ -584,9 +616,9 @@ export class MultiINTFusion {
 
     // Temporal correlation
     if (options.timeWindow) {
-      const timeDiff = Math.abs(
-        new Date(r1.informationDate).getTime() - new Date(r2.informationDate).getTime()
-      ) / (1000 * 60 * 60); // hours
+      const timeDiff =
+        Math.abs(new Date(r1.informationDate).getTime() - new Date(r2.informationDate).getTime()) /
+        (1000 * 60 * 60); // hours
       temporal = Math.max(0, 100 - (timeDiff / options.timeWindow) * 100);
     }
 
@@ -602,9 +634,7 @@ export class MultiINTFusion {
     }
 
     // Entity correlation
-    const commonEntities = r1.entities.filter(e1 =>
-      r2.entities.some(e2 => e2.id === e1.id)
-    );
+    const commonEntities = r1.entities.filter((e1) => r2.entities.some((e2) => e2.id === e1.id));
     entity = (commonEntities.length / Math.max(r1.entities.length, r2.entities.length, 1)) * 100;
 
     // Overall score
@@ -623,9 +653,9 @@ export class MultiINTFusion {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(this.toRad(lat1)) *
-      Math.cos(this.toRad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+        Math.cos(this.toRad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }

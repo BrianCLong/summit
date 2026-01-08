@@ -3,52 +3,52 @@
  * Comprehensive type definitions for ML model lifecycle management
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================================================
 // Model Types
 // ============================================================================
 
 export const ModelFrameworkSchema = z.enum([
-  'tensorflow',
-  'pytorch',
-  'scikit-learn',
-  'xgboost',
-  'lightgbm',
-  'onnx',
-  'huggingface',
-  'jax',
-  'custom',
+  "tensorflow",
+  "pytorch",
+  "scikit-learn",
+  "xgboost",
+  "lightgbm",
+  "onnx",
+  "huggingface",
+  "jax",
+  "custom",
 ]);
 
 export type ModelFramework = z.infer<typeof ModelFrameworkSchema>;
 
 export const ModelTypeSchema = z.enum([
-  'classification',
-  'regression',
-  'clustering',
-  'anomaly-detection',
-  'nlp',
-  'computer-vision',
-  'reinforcement-learning',
-  'time-series',
-  'graph-neural-network',
-  'generative',
-  'custom',
+  "classification",
+  "regression",
+  "clustering",
+  "anomaly-detection",
+  "nlp",
+  "computer-vision",
+  "reinforcement-learning",
+  "time-series",
+  "graph-neural-network",
+  "generative",
+  "custom",
 ]);
 
 export type ModelType = z.infer<typeof ModelTypeSchema>;
 
 export const ModelStatusSchema = z.enum([
-  'draft',
-  'training',
-  'validating',
-  'testing',
-  'staging',
-  'production',
-  'archived',
-  'deprecated',
-  'failed',
+  "draft",
+  "training",
+  "validating",
+  "testing",
+  "staging",
+  "production",
+  "archived",
+  "deprecated",
+  "failed",
 ]);
 
 export type ModelStatus = z.infer<typeof ModelStatusSchema>;
@@ -84,20 +84,26 @@ export const ModelMetadataSchema = z.object({
   metrics: z.record(z.string(), z.number()).optional(),
 
   // Deployment info
-  deployments: z.array(z.object({
-    environment: z.string(),
-    endpoint: z.string(),
-    deployedAt: z.date(),
-    status: z.string(),
-  })).default([]),
+  deployments: z
+    .array(
+      z.object({
+        environment: z.string(),
+        endpoint: z.string(),
+        deployedAt: z.date(),
+        status: z.string(),
+      })
+    )
+    .default([]),
 
   // Governance
-  compliance: z.object({
-    approved: z.boolean(),
-    approver: z.string().optional(),
-    approvedAt: z.date().optional(),
-    reviewNotes: z.string().optional(),
-  }).optional(),
+  compliance: z
+    .object({
+      approved: z.boolean(),
+      approver: z.string().optional(),
+      approvedAt: z.date().optional(),
+      reviewNotes: z.string().optional(),
+    })
+    .optional(),
 });
 
 export type ModelMetadata = z.infer<typeof ModelMetadataSchema>;
@@ -107,12 +113,12 @@ export type ModelMetadata = z.infer<typeof ModelMetadataSchema>;
 // ============================================================================
 
 export const TrainingStatusSchema = z.enum([
-  'pending',
-  'running',
-  'completed',
-  'failed',
-  'cancelled',
-  'paused',
+  "pending",
+  "running",
+  "completed",
+  "failed",
+  "cancelled",
+  "paused",
 ]);
 
 export type TrainingStatus = z.infer<typeof TrainingStatusSchema>;
@@ -138,17 +144,19 @@ export const TrainingConfigSchema = z.object({
   resources: z.object({
     gpus: z.number().default(0),
     cpus: z.number().default(1),
-    memory: z.string().default('4Gi'),
+    memory: z.string().default("4Gi"),
     nodeSelector: z.record(z.string(), z.any()).optional(),
     tolerations: z.array(z.any()).optional(),
   }),
 
   // Distributed training
-  distributed: z.object({
-    enabled: z.boolean().default(false),
-    strategy: z.enum(['data-parallel', 'model-parallel', 'hybrid']).optional(),
-    workers: z.number().default(1),
-  }).optional(),
+  distributed: z
+    .object({
+      enabled: z.boolean().default(false),
+      strategy: z.enum(["data-parallel", "model-parallel", "hybrid"]).optional(),
+      workers: z.number().default(1),
+    })
+    .optional(),
 
   // Training parameters
   batchSize: z.number(),
@@ -164,12 +172,14 @@ export const TrainingConfigSchema = z.object({
   }),
 
   // Early stopping
-  earlyStopping: z.object({
-    enabled: z.boolean().default(false),
-    metric: z.string(),
-    patience: z.number(),
-    minDelta: z.number(),
-  }).optional(),
+  earlyStopping: z
+    .object({
+      enabled: z.boolean().default(false),
+      metric: z.string(),
+      patience: z.number(),
+      minDelta: z.number(),
+    })
+    .optional(),
 
   // Experiment tracking
   experimentTags: z.array(z.string()).default([]),
@@ -188,35 +198,47 @@ export const TrainingRunSchema = z.object({
   duration: z.number().optional(), // seconds
 
   // Metrics tracking
-  metrics: z.array(z.object({
-    epoch: z.number(),
-    step: z.number(),
-    timestamp: z.date(),
-    metrics: z.record(z.string(), z.number()),
-  })).default([]),
+  metrics: z
+    .array(
+      z.object({
+        epoch: z.number(),
+        step: z.number(),
+        timestamp: z.date(),
+        metrics: z.record(z.string(), z.number()),
+      })
+    )
+    .default([]),
 
   // Resource utilization
-  resourceUsage: z.object({
-    peakGpuMemory: z.number().optional(),
-    peakCpuUsage: z.number().optional(),
-    peakMemory: z.number().optional(),
-    totalGpuHours: z.number().optional(),
-  }).optional(),
+  resourceUsage: z
+    .object({
+      peakGpuMemory: z.number().optional(),
+      peakCpuUsage: z.number().optional(),
+      peakMemory: z.number().optional(),
+      totalGpuHours: z.number().optional(),
+    })
+    .optional(),
 
   // Artifacts
-  artifacts: z.array(z.object({
-    name: z.string(),
-    path: z.string(),
-    type: z.string(),
-    size: z.number(),
-  })).default([]),
+  artifacts: z
+    .array(
+      z.object({
+        name: z.string(),
+        path: z.string(),
+        type: z.string(),
+        size: z.number(),
+      })
+    )
+    .default([]),
 
   // Error information
-  error: z.object({
-    message: z.string(),
-    stackTrace: z.string().optional(),
-    timestamp: z.date(),
-  }).optional(),
+  error: z
+    .object({
+      message: z.string(),
+      stackTrace: z.string().optional(),
+      timestamp: z.date(),
+    })
+    .optional(),
 });
 
 export type TrainingRun = z.infer<typeof TrainingRunSchema>;
@@ -226,14 +248,14 @@ export type TrainingRun = z.infer<typeof TrainingRunSchema>;
 // ============================================================================
 
 export const FeatureTypeSchema = z.enum([
-  'int',
-  'float',
-  'string',
-  'boolean',
-  'timestamp',
-  'array',
-  'embedding',
-  'json',
+  "int",
+  "float",
+  "string",
+  "boolean",
+  "timestamp",
+  "array",
+  "embedding",
+  "json",
 ]);
 
 export type FeatureType = z.infer<typeof FeatureTypeSchema>;
@@ -251,26 +273,34 @@ export const FeatureSchema = z.object({
   version: z.number(),
 
   // Transformation
-  transformation: z.object({
-    type: z.string(),
-    config: z.record(z.string(), z.any()),
-  }).optional(),
+  transformation: z
+    .object({
+      type: z.string(),
+      config: z.record(z.string(), z.any()),
+    })
+    .optional(),
 
   // Data quality
-  constraints: z.array(z.object({
-    type: z.string(),
-    config: z.record(z.string(), z.any()),
-  })).default([]),
+  constraints: z
+    .array(
+      z.object({
+        type: z.string(),
+        config: z.record(z.string(), z.any()),
+      })
+    )
+    .default([]),
 
   // Statistics
-  statistics: z.object({
-    min: z.number().optional(),
-    max: z.number().optional(),
-    mean: z.number().optional(),
-    stddev: z.number().optional(),
-    nullCount: z.number().optional(),
-    distinctCount: z.number().optional(),
-  }).optional(),
+  statistics: z
+    .object({
+      min: z.number().optional(),
+      max: z.number().optional(),
+      mean: z.number().optional(),
+      stddev: z.number().optional(),
+      nullCount: z.number().optional(),
+      distinctCount: z.number().optional(),
+    })
+    .optional(),
 
   // Metadata
   tags: z.array(z.string()).default([]),
@@ -284,23 +314,25 @@ export type Feature = z.infer<typeof FeatureSchema>;
 export const FeatureStoreConfigSchema = z.object({
   online: z.object({
     enabled: z.boolean().default(true),
-    backend: z.enum(['redis', 'dynamodb', 'cassandra', 'bigtable']),
+    backend: z.enum(["redis", "dynamodb", "cassandra", "bigtable"]),
     ttl: z.number().optional(), // seconds
     config: z.record(z.string(), z.any()),
   }),
 
   offline: z.object({
     enabled: z.boolean().default(true),
-    backend: z.enum(['s3', 'gcs', 'azure-blob', 'postgresql', 'snowflake']),
+    backend: z.enum(["s3", "gcs", "azure-blob", "postgresql", "snowflake"]),
     config: z.record(z.string(), z.any()),
   }),
 
   // Feature materialization
-  materialization: z.object({
-    enabled: z.boolean().default(false),
-    schedule: z.string().optional(), // cron expression
-    incremental: z.boolean().default(true),
-  }).optional(),
+  materialization: z
+    .object({
+      enabled: z.boolean().default(false),
+      schedule: z.string().optional(), // cron expression
+      incremental: z.boolean().default(true),
+    })
+    .optional(),
 });
 
 export type FeatureStoreConfig = z.infer<typeof FeatureStoreConfigSchema>;
@@ -310,12 +342,12 @@ export type FeatureStoreConfig = z.infer<typeof FeatureStoreConfigSchema>;
 // ============================================================================
 
 export const DeploymentStrategySchema = z.enum([
-  'blue-green',
-  'canary',
-  'shadow',
-  'a-b-test',
-  'rolling',
-  'recreate',
+  "blue-green",
+  "canary",
+  "shadow",
+  "a-b-test",
+  "rolling",
+  "recreate",
 ]);
 
 export type DeploymentStrategy = z.infer<typeof DeploymentStrategySchema>;
@@ -330,34 +362,38 @@ export const ServingConfigSchema = z.object({
   strategyConfig: z.record(z.string(), z.any()).optional(),
 
   // Environment
-  environment: z.enum(['dev', 'staging', 'production']),
+  environment: z.enum(["dev", "staging", "production"]),
 
   // Compute resources
   resources: z.object({
     replicas: z.number().default(1),
     minReplicas: z.number().default(1),
     maxReplicas: z.number().default(10),
-    cpuRequest: z.string().default('500m'),
-    cpuLimit: z.string().default('2000m'),
-    memoryRequest: z.string().default('1Gi'),
-    memoryLimit: z.string().default('4Gi'),
+    cpuRequest: z.string().default("500m"),
+    cpuLimit: z.string().default("2000m"),
+    memoryRequest: z.string().default("1Gi"),
+    memoryLimit: z.string().default("4Gi"),
     gpuRequest: z.number().default(0),
   }),
 
   // Auto-scaling
-  autoscaling: z.object({
-    enabled: z.boolean().default(false),
-    metric: z.enum(['cpu', 'memory', 'requests-per-second', 'latency']),
-    targetValue: z.number(),
-  }).optional(),
+  autoscaling: z
+    .object({
+      enabled: z.boolean().default(false),
+      metric: z.enum(["cpu", "memory", "requests-per-second", "latency"]),
+      targetValue: z.number(),
+    })
+    .optional(),
 
   // Model optimization
-  optimization: z.object({
-    quantization: z.boolean().default(false),
-    pruning: z.boolean().default(false),
-    batchOptimization: z.boolean().default(true),
-    accelerator: z.enum(['cpu', 'gpu', 'tpu', 'neuron']).optional(),
-  }).optional(),
+  optimization: z
+    .object({
+      quantization: z.boolean().default(false),
+      pruning: z.boolean().default(false),
+      batchOptimization: z.boolean().default(true),
+      accelerator: z.enum(["cpu", "gpu", "tpu", "neuron"]).optional(),
+    })
+    .optional(),
 
   // Traffic routing
   traffic: z.object({
@@ -368,7 +404,7 @@ export const ServingConfigSchema = z.object({
   // Health checks
   healthCheck: z.object({
     enabled: z.boolean().default(true),
-    path: z.string().default('/health'),
+    path: z.string().default("/health"),
     interval: z.number().default(30), // seconds
     timeout: z.number().default(5),
     successThreshold: z.number().default(1),
@@ -383,10 +419,10 @@ export type ServingConfig = z.infer<typeof ServingConfigSchema>;
 // ============================================================================
 
 export const DriftTypeSchema = z.enum([
-  'data-drift',
-  'prediction-drift',
-  'concept-drift',
-  'feature-drift',
+  "data-drift",
+  "prediction-drift",
+  "concept-drift",
+  "feature-drift",
 ]);
 
 export type DriftType = z.infer<typeof DriftTypeSchema>;
@@ -395,7 +431,7 @@ export const DriftDetectionResultSchema = z.object({
   timestamp: z.date(),
   driftType: DriftTypeSchema,
   detected: z.boolean(),
-  severity: z.enum(['low', 'medium', 'high', 'critical']),
+  severity: z.enum(["low", "medium", "high", "critical"]),
 
   // Statistical measures
   metrics: z.object({
@@ -405,12 +441,16 @@ export const DriftDetectionResultSchema = z.object({
   }),
 
   // Affected features
-  affectedFeatures: z.array(z.object({
-    name: z.string(),
-    baseline: z.record(z.string(), z.number()),
-    current: z.record(z.string(), z.number()),
-    drift: z.number(),
-  })).optional(),
+  affectedFeatures: z
+    .array(
+      z.object({
+        name: z.string(),
+        baseline: z.record(z.string(), z.number()),
+        current: z.record(z.string(), z.number()),
+        drift: z.number(),
+      })
+    )
+    .optional(),
 
   // Recommendations
   recommendations: z.array(z.string()).default([]),
@@ -432,22 +472,31 @@ export const ModelMonitoringConfigSchema = z.object({
   // Drift detection
   driftDetection: z.object({
     enabled: z.boolean().default(true),
-    method: z.enum(['kolmogorov-smirnov', 'chi-squared', 'jensen-shannon', 'population-stability-index']),
+    method: z.enum([
+      "kolmogorov-smirnov",
+      "chi-squared",
+      "jensen-shannon",
+      "population-stability-index",
+    ]),
     threshold: z.number(),
     windowSize: z.number(), // samples
     referenceWindow: z.number().optional(), // samples from training
   }),
 
   // Performance tracking
-  performanceMetrics: z.array(z.string()).default(['latency', 'throughput', 'error_rate']),
+  performanceMetrics: z.array(z.string()).default(["latency", "throughput", "error_rate"]),
 
   // Alerting
-  alerts: z.array(z.object({
-    condition: z.string(),
-    threshold: z.number(),
-    severity: z.enum(['info', 'warning', 'error', 'critical']),
-    channels: z.array(z.string()),
-  })).default([]),
+  alerts: z
+    .array(
+      z.object({
+        condition: z.string(),
+        threshold: z.number(),
+        severity: z.enum(["info", "warning", "error", "critical"]),
+        channels: z.array(z.string()),
+      })
+    )
+    .default([]),
 
   // Data retention
   retentionPeriod: z.number().default(90), // days
@@ -460,14 +509,14 @@ export type ModelMonitoringConfig = z.infer<typeof ModelMonitoringConfigSchema>;
 // ============================================================================
 
 export const ExplainabilityMethodSchema = z.enum([
-  'shap',
-  'lime',
-  'integrated-gradients',
-  'attention-weights',
-  'feature-importance',
-  'counterfactual',
-  'anchor',
-  'partial-dependence',
+  "shap",
+  "lime",
+  "integrated-gradients",
+  "attention-weights",
+  "feature-importance",
+  "counterfactual",
+  "anchor",
+  "partial-dependence",
 ]);
 
 export type ExplainabilityMethod = z.infer<typeof ExplainabilityMethodSchema>;
@@ -480,11 +529,13 @@ export const ExplanationRequestSchema = z.object({
   input: z.record(z.string(), z.any()),
 
   // Method configuration
-  config: z.object({
-    numSamples: z.number().optional(),
-    backgroundData: z.array(z.record(z.string(), z.any())).optional(),
-    targetClass: z.number().optional(),
-  }).optional(),
+  config: z
+    .object({
+      numSamples: z.number().optional(),
+      backgroundData: z.array(z.record(z.string(), z.any())).optional(),
+      targetClass: z.number().optional(),
+    })
+    .optional(),
 });
 
 export type ExplanationRequest = z.infer<typeof ExplanationRequestSchema>;
@@ -496,26 +547,38 @@ export const ExplanationResultSchema = z.object({
   timestamp: z.date(),
 
   // Feature attributions
-  featureImportance: z.array(z.object({
-    feature: z.string(),
-    importance: z.number(),
-    direction: z.enum(['positive', 'negative', 'neutral']),
-  })),
+  featureImportance: z.array(
+    z.object({
+      feature: z.string(),
+      importance: z.number(),
+      direction: z.enum(["positive", "negative", "neutral"]),
+    })
+  ),
 
   // Global explanation
-  globalInsights: z.object({
-    topFeatures: z.array(z.string()),
-    interactions: z.array(z.object({
-      features: z.array(z.string()),
-      strength: z.number(),
-    })).optional(),
-  }).optional(),
+  globalInsights: z
+    .object({
+      topFeatures: z.array(z.string()),
+      interactions: z
+        .array(
+          z.object({
+            features: z.array(z.string()),
+            strength: z.number(),
+          })
+        )
+        .optional(),
+    })
+    .optional(),
 
   // Visualization data
-  visualizations: z.array(z.object({
-    type: z.string(),
-    data: z.record(z.string(), z.any()),
-  })).default([]),
+  visualizations: z
+    .array(
+      z.object({
+        type: z.string(),
+        data: z.record(z.string(), z.any()),
+      })
+    )
+    .default([]),
 
   // Text explanation
   textExplanation: z.string().optional(),
@@ -528,10 +591,10 @@ export type ExplanationResult = z.infer<typeof ExplanationResultSchema>;
 // ============================================================================
 
 export const ComplianceStatusSchema = z.enum([
-  'compliant',
-  'non-compliant',
-  'pending-review',
-  'exempt',
+  "compliant",
+  "non-compliant",
+  "pending-review",
+  "exempt",
 ]);
 
 export type ComplianceStatus = z.infer<typeof ComplianceStatusSchema>;
@@ -549,20 +612,26 @@ export const ModelGovernanceSchema = z.object({
   }),
 
   // Bias and fairness
-  fairness: z.object({
-    evaluated: z.boolean().default(false),
-    metrics: z.record(z.string(), z.number()).optional(),
-    protectedAttributes: z.array(z.string()).default([]),
-    mitigationStrategies: z.array(z.string()).default([]),
-  }).optional(),
+  fairness: z
+    .object({
+      evaluated: z.boolean().default(false),
+      metrics: z.record(z.string(), z.number()).optional(),
+      protectedAttributes: z.array(z.string()).default([]),
+      mitigationStrategies: z.array(z.string()).default([]),
+    })
+    .optional(),
 
   // Audit trail
-  auditLog: z.array(z.object({
-    timestamp: z.date(),
-    action: z.string(),
-    actor: z.string(),
-    details: z.record(z.string(), z.any()),
-  })).default([]),
+  auditLog: z
+    .array(
+      z.object({
+        timestamp: z.date(),
+        action: z.string(),
+        actor: z.string(),
+        details: z.record(z.string(), z.any()),
+      })
+    )
+    .default([]),
 
   // Access control
   accessControl: z.object({
@@ -572,11 +641,13 @@ export const ModelGovernanceSchema = z.object({
   }),
 
   // Documentation
-  documentation: z.object({
-    modelCard: z.string().optional(),
-    datasheets: z.array(z.string()).default([]),
-    ethicsReview: z.string().optional(),
-  }).optional(),
+  documentation: z
+    .object({
+      modelCard: z.string().optional(),
+      datasheets: z.array(z.string()).default([]),
+      ethicsReview: z.string().optional(),
+    })
+    .optional(),
 });
 
 export type ModelGovernance = z.infer<typeof ModelGovernanceSchema>;
@@ -597,18 +668,23 @@ export const AutoMLConfigSchema = z.object({
   // Search space
   searchSpace: z.object({
     algorithms: z.array(z.string()).optional(),
-    hyperparameters: z.record(z.string(), z.object({
-      type: z.enum(['categorical', 'continuous', 'discrete']),
-      values: z.array(z.any()).optional(),
-      min: z.number().optional(),
-      max: z.number().optional(),
-    })).optional(),
+    hyperparameters: z
+      .record(
+        z.string(),
+        z.object({
+          type: z.enum(["categorical", "continuous", "discrete"]),
+          values: z.array(z.any()).optional(),
+          min: z.number().optional(),
+          max: z.number().optional(),
+        })
+      )
+      .optional(),
   }),
 
   // Optimization
   optimization: z.object({
     metric: z.string(),
-    direction: z.enum(['maximize', 'minimize']),
+    direction: z.enum(["maximize", "minimize"]),
     budget: z.object({
       maxTrials: z.number(),
       maxTime: z.number().optional(), // seconds
@@ -617,13 +693,15 @@ export const AutoMLConfigSchema = z.object({
   }),
 
   // Search strategy
-  searchStrategy: z.enum(['random', 'grid', 'bayesian', 'genetic', 'hyperband']),
+  searchStrategy: z.enum(["random", "grid", "bayesian", "genetic", "hyperband"]),
 
   // Early stopping
-  earlyStopping: z.object({
-    enabled: z.boolean().default(true),
-    patience: z.number(),
-  }).optional(),
+  earlyStopping: z
+    .object({
+      enabled: z.boolean().default(true),
+      patience: z.number(),
+    })
+    .optional(),
 });
 
 export type AutoMLConfig = z.infer<typeof AutoMLConfigSchema>;
@@ -636,21 +714,21 @@ export const PipelineStageSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
   type: z.enum([
-    'data-ingestion',
-    'data-validation',
-    'data-preprocessing',
-    'feature-engineering',
-    'training',
-    'evaluation',
-    'model-validation',
-    'deployment',
-    'monitoring',
+    "data-ingestion",
+    "data-validation",
+    "data-preprocessing",
+    "feature-engineering",
+    "training",
+    "evaluation",
+    "model-validation",
+    "deployment",
+    "monitoring",
   ]),
   config: z.record(z.string(), z.any()),
   dependencies: z.array(z.string()).default([]), // stage IDs
 
   // Execution
-  status: z.enum(['pending', 'running', 'completed', 'failed', 'skipped']).optional(),
+  status: z.enum(["pending", "running", "completed", "failed", "skipped"]).optional(),
   startTime: z.date().optional(),
   endTime: z.date().optional(),
   error: z.string().optional(),
@@ -672,20 +750,26 @@ export const MLPipelineSchema = z.object({
   stages: z.array(PipelineStageSchema),
 
   // Execution
-  status: z.enum(['draft', 'active', 'paused', 'completed', 'failed']),
+  status: z.enum(["draft", "active", "paused", "completed", "failed"]),
 
   // Schedule
-  schedule: z.object({
-    enabled: z.boolean().default(false),
-    cron: z.string().optional(),
-    timezone: z.string().default('UTC'),
-  }).optional(),
+  schedule: z
+    .object({
+      enabled: z.boolean().default(false),
+      cron: z.string().optional(),
+      timezone: z.string().default("UTC"),
+    })
+    .optional(),
 
   // Triggers
-  triggers: z.array(z.object({
-    type: z.enum(['manual', 'scheduled', 'event', 'performance-degradation']),
-    config: z.record(z.string(), z.any()),
-  })).default([]),
+  triggers: z
+    .array(
+      z.object({
+        type: z.enum(["manual", "scheduled", "event", "performance-degradation"]),
+        config: z.record(z.string(), z.any()),
+      })
+    )
+    .default([]),
 
   // Metadata
   tags: z.array(z.string()).default([]),

@@ -12,7 +12,7 @@ export class DLPError extends Error {
 
   constructor(message: string, code: string, details?: Record<string, unknown>) {
     super(message);
-    this.name = 'DLPError';
+    this.name = "DLPError";
     this.code = code;
     this.details = details;
     Error.captureStackTrace(this, this.constructor);
@@ -24,8 +24,8 @@ export class DLPError extends Error {
  */
 export class DetectionError extends DLPError {
   constructor(message: string, details?: Record<string, unknown>) {
-    super(message, 'DETECTION_ERROR', details);
-    this.name = 'DetectionError';
+    super(message, "DETECTION_ERROR", details);
+    this.name = "DetectionError";
   }
 }
 
@@ -43,12 +43,12 @@ export class BarrierViolationError extends DLPError {
     sourceContext?: Record<string, string>,
     targetContext?: Record<string, string>
   ) {
-    super(message, 'BARRIER_VIOLATION', {
+    super(message, "BARRIER_VIOLATION", {
       barrierType,
       sourceContext,
       targetContext,
     });
-    this.name = 'BarrierViolationError';
+    this.name = "BarrierViolationError";
     this.barrierType = barrierType;
     this.sourceContext = sourceContext;
     this.targetContext = targetContext;
@@ -60,8 +60,8 @@ export class BarrierViolationError extends DLPError {
  */
 export class RedactionError extends DLPError {
   constructor(message: string, details?: Record<string, unknown>) {
-    super(message, 'REDACTION_ERROR', details);
-    this.name = 'RedactionError';
+    super(message, "REDACTION_ERROR", details);
+    this.name = "RedactionError";
   }
 }
 
@@ -72,8 +72,8 @@ export class PolicyEvaluationError extends DLPError {
   public readonly policyId?: string;
 
   constructor(message: string, policyId?: string, details?: Record<string, unknown>) {
-    super(message, 'POLICY_EVALUATION_ERROR', { policyId, ...details });
-    this.name = 'PolicyEvaluationError';
+    super(message, "POLICY_EVALUATION_ERROR", { policyId, ...details });
+    this.name = "PolicyEvaluationError";
     this.policyId = policyId;
   }
 }
@@ -83,8 +83,8 @@ export class PolicyEvaluationError extends DLPError {
  */
 export class ConfigurationError extends DLPError {
   constructor(message: string, details?: Record<string, unknown>) {
-    super(message, 'CONFIGURATION_ERROR', details);
-    this.name = 'ConfigurationError';
+    super(message, "CONFIGURATION_ERROR", details);
+    this.name = "ConfigurationError";
   }
 }
 
@@ -95,8 +95,8 @@ export class ExceptionError extends DLPError {
   public readonly exceptionId?: string;
 
   constructor(message: string, exceptionId?: string, details?: Record<string, unknown>) {
-    super(message, 'EXCEPTION_ERROR', { exceptionId, ...details });
-    this.name = 'ExceptionError';
+    super(message, "EXCEPTION_ERROR", { exceptionId, ...details });
+    this.name = "ExceptionError";
     this.exceptionId = exceptionId;
   }
 }

@@ -1,11 +1,11 @@
 ---
-title: 'Docs Workstream — Next Sprint Plan (IntelGraph + Maestro)'
-summary: 'Follow-on sprint to harden docs platform, expand coverage, and add automation & governance dashboards.'
-owner: 'Documentation Expert (Doc IG)'
-version: 'v0.1'
-lastUpdated: '2025-09-30'
-sprintWindow: '2025-10-13 → 2025-10-24 (America/Denver)'
-status: 'Planned — ready to start'
+title: "Docs Workstream — Next Sprint Plan (IntelGraph + Maestro)"
+summary: "Follow-on sprint to harden docs platform, expand coverage, and add automation & governance dashboards."
+owner: "Documentation Expert (Doc IG)"
+version: "v0.1"
+lastUpdated: "2025-09-30"
+sprintWindow: "2025-10-13 → 2025-10-24 (America/Denver)"
+status: "Planned — ready to start"
 ---
 
 # Docs Workstream — Sprint 02 Plan & Export Pack
@@ -81,10 +81,10 @@ name: docs-verify-schema
 on:
   pull_request:
     paths:
-      - 'schema/**'
-      - 'api/**'
-      - 'docs/**'
-      - 'scripts/**'
+      - "schema/**"
+      - "api/**"
+      - "docs/**"
+      - "scripts/**"
 
 jobs:
   gql:
@@ -107,31 +107,28 @@ jobs:
 ### 4.2 Errors Table Render — `.ci/scripts/errors-render.mjs`
 
 ```js
-import fs from 'node:fs';
-import yaml from 'js-yaml';
-const y = yaml.load(
-  fs.readFileSync('docs/latest/reference/errors/error-codes.yaml', 'utf8'),
-);
+import fs from "node:fs";
+import yaml from "js-yaml";
+const y = yaml.load(fs.readFileSync("docs/latest/reference/errors/error-codes.yaml", "utf8"));
 const rows = y.errors
   .map(
-    (e) =>
-      `| ${e.code} | ${e.layer} | ${e.message} | ${e.cause} | ${e.fix} | ${e.observability} |`,
+    (e) => `| ${e.code} | ${e.layer} | ${e.message} | ${e.cause} | ${e.fix} | ${e.observability} |`
   )
-  .join('\n');
+  .join("\n");
 const md = `# Error Catalog\n\n| Code | Layer | Message | Cause | Fix | Observability |\n|---|---|---|---|---|---|\n${rows}\n`;
-fs.writeFileSync('docs/latest/reference/errors/index.md', md);
+fs.writeFileSync("docs/latest/reference/errors/index.md", md);
 ```
 
 ### 4.3 Diagram Source Check — `.ci/scripts/diagram-source-check.mjs`
 
 ```js
-import fs from 'node:fs';
-import globby from 'globby';
-const svgs = await globby(['docs/**/*.svg']);
+import fs from "node:fs";
+import globby from "globby";
+const svgs = await globby(["docs/**/*.svg"]);
 let fail = false;
 for (const svg of svgs) {
-  const base = svg.replace(/\.svg$/, '');
-  const hasSrc = fs.existsSync(base + '.mmd') || fs.existsSync(base + '.puml');
+  const base = svg.replace(/\.svg$/, "");
+  const hasSrc = fs.existsSync(base + ".mmd") || fs.existsSync(base + ".puml");
   if (!hasSrc) {
     console.log(`❌ Missing source for ${svg}`);
     fail = true;
@@ -146,7 +143,7 @@ if (fail) process.exit(1);
 name: docs-governance-report
 on:
   schedule:
-    - cron: '0 14 * * 1' # Mondays 08:00 America/Denver
+    - cron: "0 14 * * 1" # Mondays 08:00 America/Denver
   workflow_dispatch:
 
 jobs:
@@ -170,23 +167,23 @@ jobs:
 ### 4.5 Metrics Collector — `.ci/scripts/docs-metrics.mjs`
 
 ```js
-import fs from 'node:fs';
-import globby from 'globby';
-import matter from 'gray-matter';
-const files = await globby(['docs/**/*.md']);
+import fs from "node:fs";
+import globby from "globby";
+import matter from "gray-matter";
+const files = await globby(["docs/**/*.md"]);
 let broken = 0; // optionally run linkinator here
 let missingFM = 0;
 let alt = 0;
 let totalImgs = 0;
 for (const f of files) {
-  const s = fs.readFileSync(f, 'utf8');
+  const s = fs.readFileSync(f, "utf8");
   const fm = matter(s).data || {};
   if (!fm.title || !fm.lastUpdated || !fm.owner) missingFM++;
   const imgs = [...s.matchAll(/!\[[^\]]*\]\([^\)]+\)/g)];
   totalImgs += imgs.length;
   alt += imgs.filter((m) => /^!\[[^\]]+\]/.test(m[0])).length;
 }
-const coverage = { howtos: (await globby(['docs/**/how-tos/**/*.md'])).length };
+const coverage = { howtos: (await globby(["docs/**/how-tos/**/*.md"])).length };
 console.log(
   JSON.stringify({
     timestamp: new Date().toISOString(),
@@ -194,20 +191,18 @@ console.log(
     imagesWithAlt: alt,
     imagesTotal: totalImgs,
     coverage,
-  }),
+  })
 );
 ```
 
 ### 4.6 Dashboard Renderer — `.ci/scripts/docs-dashboard-render.mjs`
 
 ```js
-import fs from 'node:fs';
-const m = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
-const pctAlt = m.imagesTotal
-  ? Math.round((100 * m.imagesWithAlt) / m.imagesTotal)
-  : 100;
+import fs from "node:fs";
+const m = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+const pctAlt = m.imagesTotal ? Math.round((100 * m.imagesWithAlt) / m.imagesTotal) : 100;
 console.log(
-  `# Docs Governance Dashboard\n\n- Generated: ${m.timestamp}\n- Pages missing front-matter: **${m.missingFrontMatter}**\n- Images with alt text: **${pctAlt}%** (${m.imagesWithAlt}/${m.imagesTotal})\n- How-tos coverage: **${m.coverage.howtos}** pages\n`,
+  `# Docs Governance Dashboard\n\n- Generated: ${m.timestamp}\n- Pages missing front-matter: **${m.missingFrontMatter}**\n- Images with alt text: **${pctAlt}%** (${m.imagesWithAlt}/${m.imagesTotal})\n- How-tos coverage: **${m.coverage.howtos}** pages\n`
 );
 ```
 
@@ -219,11 +214,11 @@ console.log(
 
 ```markdown
 ---
-title: 'Admin Guide'
-summary: 'Provision orgs, SSO, spaces, and policies.'
-owner: 'Product — Admin'
-version: '1.0'
-lastUpdated: '2025-10-13'
+title: "Admin Guide"
+summary: "Provision orgs, SSO, spaces, and policies."
+owner: "Product — Admin"
+version: "1.0"
+lastUpdated: "2025-10-13"
 ---
 
 ## Quickstart
@@ -243,11 +238,11 @@ lastUpdated: '2025-10-13'
 
 ```markdown
 ---
-title: 'Analyst Guide'
-summary: 'Run investigations, collaborate, and export.'
-owner: 'Product — Analyst'
-version: '1.0'
-lastUpdated: '2025-10-13'
+title: "Analyst Guide"
+summary: "Run investigations, collaborate, and export."
+owner: "Product — Analyst"
+version: "1.0"
+lastUpdated: "2025-10-13"
 ---
 
 ## Quickstart
@@ -261,11 +256,11 @@ lastUpdated: '2025-10-13'
 
 ```markdown
 ---
-title: 'Operator Guide'
-summary: 'Operate and observe the platform.'
-owner: 'Platform Ops'
-version: '1.0'
-lastUpdated: '2025-10-13'
+title: "Operator Guide"
+summary: "Operate and observe the platform."
+owner: "Platform Ops"
+version: "1.0"
+lastUpdated: "2025-10-13"
 ---
 
 ## Quickstart
@@ -281,11 +276,11 @@ lastUpdated: '2025-10-13'
 
 ```markdown
 ---
-title: 'Observability Overview'
-summary: 'KPIs, SLOs, alert routing, and dashboards.'
-owner: 'SRE'
-version: '1.0'
-lastUpdated: '2025-10-13'
+title: "Observability Overview"
+summary: "KPIs, SLOs, alert routing, and dashboards."
+owner: "SRE"
+version: "1.0"
+lastUpdated: "2025-10-13"
 ---
 
 ## KPIs & SLOs
@@ -306,11 +301,11 @@ lastUpdated: '2025-10-13'
 
 ```markdown
 ---
-title: 'Authority, License & Provenance'
-summary: 'Source licensing, permissible use, and export controls.'
-owner: 'Legal/PM'
-version: '1.0'
-lastUpdated: '2025-10-13'
+title: "Authority, License & Provenance"
+summary: "Source licensing, permissible use, and export controls."
+owner: "Legal/PM"
+version: "1.0"
+lastUpdated: "2025-10-13"
 ---
 
 ## Source Types

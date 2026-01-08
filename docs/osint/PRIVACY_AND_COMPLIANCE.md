@@ -17,31 +17,37 @@ This document outlines privacy, ethical, and legal compliance requirements for u
 ### Compliance Principles
 
 #### 1. Lawfulness, Fairness, and Transparency
+
 - Ensure all collection activities are lawful
 - Process data fairly and transparently
 - Document legal basis for processing
 
 #### 2. Purpose Limitation
+
 - Collect data for specified, explicit purposes
 - Do not process data beyond original purpose
 - Document investigation objectives
 
 #### 3. Data Minimization
+
 - Collect only necessary data
 - Avoid excessive data collection
 - Implement data filtering
 
 #### 4. Accuracy
+
 - Ensure data accuracy
 - Verify information from multiple sources
 - Correct inaccurate data promptly
 
 #### 5. Storage Limitation
+
 - Retain data only as long as necessary
 - Implement data retention policies
 - Securely delete expired data
 
 #### 6. Integrity and Confidentiality
+
 - Protect data with appropriate security
 - Implement access controls
 - Encrypt sensitive data
@@ -59,6 +65,7 @@ This document outlines privacy, ethical, and legal compliance requirements for u
 ### Prohibited Activities
 
 ❌ **DO NOT**:
+
 - Violate Terms of Service
 - Hack or gain unauthorized access
 - Collect data from private/protected accounts
@@ -73,6 +80,7 @@ This document outlines privacy, ethical, and legal compliance requirements for u
 ### Recommended Practices
 
 ✅ **DO**:
+
 - Respect robots.txt
 - Implement rate limiting
 - Document legal authorization
@@ -89,25 +97,25 @@ This document outlines privacy, ethical, and legal compliance requirements for u
 ### 1. Rate Limiting
 
 ```typescript
-import { RateLimiter } from '@intelgraph/osint-collector';
+import { RateLimiter } from "@intelgraph/osint-collector";
 
 const limiter = new RateLimiter();
 
 // Configure respectful limits
-limiter.createLimiter('twitter', 15, 900); // 15 requests per 15 min
-limiter.createLimiter('linkedin', 10, 600); // 10 requests per 10 min
+limiter.createLimiter("twitter", 15, 900); // 15 requests per 15 min
+limiter.createLimiter("linkedin", 10, 600); // 10 requests per 10 min
 ```
 
 ### 2. Robots.txt Compliance
 
 ```typescript
-import { checkRobotsTxt } from '@intelgraph/web-scraper';
+import { checkRobotsTxt } from "@intelgraph/web-scraper";
 
-const url = 'https://example.com/page';
-const allowed = await checkRobotsTxt(url, 'IntelGraphBot/1.0');
+const url = "https://example.com/page";
+const allowed = await checkRobotsTxt(url, "IntelGraphBot/1.0");
 
 if (!allowed) {
-  console.log('Scraping not permitted by robots.txt');
+  console.log("Scraping not permitted by robots.txt");
   return;
 }
 ```
@@ -119,14 +127,14 @@ if (!allowed) {
 const PII_PATTERNS = {
   ssn: /\d{3}-\d{2}-\d{4}/g,
   creditCard: /\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}/g,
-  email: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g
+  email: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g,
 };
 
 function redactPII(text: string): string {
   let redacted = text;
-  redacted = redacted.replace(PII_PATTERNS.ssn, '***-**-****');
-  redacted = redacted.replace(PII_PATTERNS.creditCard, '**** **** **** ****');
-  redacted = redacted.replace(PII_PATTERNS.email, '[REDACTED_EMAIL]');
+  redacted = redacted.replace(PII_PATTERNS.ssn, "***-**-****");
+  redacted = redacted.replace(PII_PATTERNS.creditCard, "**** **** **** ****");
+  redacted = redacted.replace(PII_PATTERNS.email, "[REDACTED_EMAIL]");
   return redacted;
 }
 ```
@@ -141,10 +149,10 @@ interface RetentionPolicy {
 }
 
 const RETENTION_POLICIES: RetentionPolicy[] = [
-  { dataType: 'social_media_posts', retentionDays: 90, autoDelete: true },
-  { dataType: 'web_scrapes', retentionDays: 30, autoDelete: true },
-  { dataType: 'attribution_data', retentionDays: 180, autoDelete: false },
-  { dataType: 'pii_data', retentionDays: 30, autoDelete: true }
+  { dataType: "social_media_posts", retentionDays: 90, autoDelete: true },
+  { dataType: "web_scrapes", retentionDays: 30, autoDelete: true },
+  { dataType: "attribution_data", retentionDays: 180, autoDelete: false },
+  { dataType: "pii_data", retentionDays: 30, autoDelete: true },
 ];
 
 async function enforceRetention(policy: RetentionPolicy) {
@@ -166,13 +174,13 @@ interface AuditLog {
   user: string;
   action: string;
   target: string;
-  result: 'success' | 'failure';
+  result: "success" | "failure";
   details?: string;
 }
 
 async function logAction(log: AuditLog) {
   // Log to secure audit system
-  console.log('[AUDIT]', JSON.stringify(log));
+  console.log("[AUDIT]", JSON.stringify(log));
 
   // Store in tamper-proof audit log
   await storeAuditLog(log);
@@ -181,11 +189,11 @@ async function logAction(log: AuditLog) {
 // Example usage
 await logAction({
   timestamp: new Date(),
-  user: 'analyst@example.com',
-  action: 'collect_social_media',
-  target: 'twitter:@username',
-  result: 'success',
-  details: 'Collected 50 posts'
+  user: "analyst@example.com",
+  action: "collect_social_media",
+  target: "twitter:@username",
+  result: "success",
+  details: "Collected 50 posts",
 });
 ```
 
@@ -194,15 +202,15 @@ await logAction({
 ```typescript
 interface AccessControl {
   user: string;
-  role: 'viewer' | 'analyst' | 'admin';
+  role: "viewer" | "analyst" | "admin";
   permissions: string[];
 }
 
 function checkPermission(user: AccessControl, action: string): boolean {
   const rolePermissions = {
-    viewer: ['read'],
-    analyst: ['read', 'collect', 'analyze'],
-    admin: ['read', 'collect', 'analyze', 'admin', 'delete']
+    viewer: ["read"],
+    analyst: ["read", "collect", "analyze"],
+    admin: ["read", "collect", "analyze", "admin", "delete"],
   };
 
   const allowed = rolePermissions[user.role] || [];
@@ -210,8 +218,8 @@ function checkPermission(user: AccessControl, action: string): boolean {
 }
 
 // Example usage
-if (!checkPermission(currentUser, 'collect')) {
-  throw new Error('Insufficient permissions');
+if (!checkPermission(currentUser, "collect")) {
+  throw new Error("Insufficient permissions");
 }
 ```
 
@@ -220,24 +228,28 @@ if (!checkPermission(currentUser, 'collect')) {
 ### Platform-Specific Considerations
 
 #### Twitter/X
+
 - Respect API rate limits
 - Do not create fake accounts
 - Do not scrape non-public data
 - Comply with Developer Agreement
 
 #### LinkedIn
+
 - Respect robots.txt
 - Do not use automated scraping
 - Comply with User Agreement
 - Limit data collection frequency
 
 #### Facebook/Meta
+
 - Use official API only
 - Respect privacy settings
 - Do not scrape profiles
 - Comply with Platform Terms
 
 #### Instagram
+
 - Use official API only
 - Respect private accounts
 - Do not use automation tools
@@ -257,6 +269,7 @@ if (!checkPermission(currentUser, 'collect')) {
 ### When to Conduct DPIA
 
 Conduct DPIA when:
+
 - Processing large-scale sensitive data
 - Systematic monitoring of public areas
 - Automated decision-making with legal effects
@@ -296,6 +309,7 @@ Conduct DPIA when:
 ### Required Training
 
 All users must complete:
+
 1. Legal and ethical guidelines
 2. Platform-specific compliance
 3. Data protection principles
@@ -313,6 +327,7 @@ All users must complete:
 ### Investigation Documentation
 
 Every investigation must document:
+
 - Legal authorization
 - Investigation objectives
 - Data sources accessed
@@ -357,14 +372,17 @@ Every investigation must document:
 ## Contact Information
 
 ### Compliance Officer
+
 - Email: compliance@intelgraph.com
 - Phone: [Phone Number]
 
 ### Legal Counsel
+
 - Email: legal@intelgraph.com
 - Phone: [Phone Number]
 
 ### Data Protection Officer
+
 - Email: dpo@intelgraph.com
 - Phone: [Phone Number]
 
@@ -379,7 +397,7 @@ Every investigation must document:
 
 ---
 
-*Last Updated: 2025-01-20*
-*Version: 1.0*
+_Last Updated: 2025-01-20_
+_Version: 1.0_
 
 **IMPORTANT**: This guide provides general information and is not legal advice. Consult with qualified legal counsel for specific situations.

@@ -21,7 +21,11 @@
               "purpose": { "type": "array", "items": { "type": "string" } },
               "labels": { "type": "array", "items": { "type": "string" } },
               "sensitivityAtMost": { "type": "string" },
-              "timeWindow": { "type": "object", "properties": { "start": { "type": "string" }, "end": { "type": "string" } }, "required": ["start", "end"] }
+              "timeWindow": {
+                "type": "object",
+                "properties": { "start": { "type": "string" }, "end": { "type": "string" } },
+                "required": ["start", "end"]
+              }
             },
             "additionalProperties": true
           },

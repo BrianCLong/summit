@@ -12,8 +12,8 @@ import {
   NegotiationOutcomePrediction,
   RegionalStabilityForecast,
   Indicator,
-  PredictedOutcome
-} from './types.js';
+  PredictedOutcome,
+} from "./types.js";
 
 /**
  * PredictiveDiplomacy
@@ -55,11 +55,11 @@ export class PredictiveDiplomacy {
     const trajectoryScore = (currentQuality + trendScore + indicatorScore) / 3;
 
     let predictedStatus: string;
-    if (trajectoryScore > 75) predictedStatus = 'Strategic Partnership';
-    else if (trajectoryScore > 60) predictedStatus = 'Strong Relations';
-    else if (trajectoryScore > 40) predictedStatus = 'Normal Relations';
-    else if (trajectoryScore > 25) predictedStatus = 'Strained Relations';
-    else predictedStatus = 'Tense Relations';
+    if (trajectoryScore > 75) predictedStatus = "Strategic Partnership";
+    else if (trajectoryScore > 60) predictedStatus = "Strong Relations";
+    else if (trajectoryScore > 40) predictedStatus = "Normal Relations";
+    else if (trajectoryScore > 25) predictedStatus = "Strained Relations";
+    else predictedStatus = "Tense Relations";
 
     const confidence = this.calculateConfidence(indicators.length, indicatorScore);
 
@@ -77,50 +77,46 @@ export class PredictiveDiplomacy {
       historicalPatterns: [],
       scenarios: [],
       assumptions: [
-        'No major diplomatic incidents',
-        'Current leadership remains in place',
-        'No significant external shocks'
+        "No major diplomatic incidents",
+        "Current leadership remains in place",
+        "No significant external shocks",
       ],
-      limitingFactors: ['Regional dynamics', 'Domestic politics', 'Third-party influence'],
+      limitingFactors: ["Regional dynamics", "Domestic politics", "Third-party influence"],
       outcomes: this.generateRelationshipOutcomes(trajectoryScore),
       mostLikelyOutcome: {
         outcome: predictedStatus,
         probability: 60,
         confidence,
-        timeframe: '6-12 months',
-        implications: ['May affect regional alliances', 'Trade implications likely'],
-        stakeholders: []
+        timeframe: "6-12 months",
+        implications: ["May affect regional alliances", "Trade implications likely"],
+        stakeholders: [],
       },
       worstCase: {
-        outcome: 'Tense Relations',
+        outcome: "Tense Relations",
         probability: 15,
         confidence: Confidence.MEDIUM,
-        timeframe: '3-6 months',
-        implications: ['Diplomatic friction', 'Reduced cooperation'],
-        stakeholders: []
+        timeframe: "3-6 months",
+        implications: ["Diplomatic friction", "Reduced cooperation"],
+        stakeholders: [],
       },
       bestCase: {
-        outcome: 'Strategic Partnership',
+        outcome: "Strategic Partnership",
         probability: 25,
         confidence: Confidence.MEDIUM,
-        timeframe: '12+ months',
-        implications: ['Enhanced cooperation', 'Joint initiatives'],
-        stakeholders: []
+        timeframe: "12+ months",
+        implications: ["Enhanced cooperation", "Joint initiatives"],
+        stakeholders: [],
       },
       keyEventsToWatch: [
-        'High-level visits',
-        'Trade agreement negotiations',
-        'Regional summit outcomes'
+        "High-level visits",
+        "Trade agreement negotiations",
+        "Regional summit outcomes",
       ],
-      earlyWarningSignals: [
-        'Diplomatic protests',
-        'Sanctions threats',
-        'Military posturing'
-      ],
+      earlyWarningSignals: ["Diplomatic protests", "Sanctions threats", "Military posturing"],
       verificationMilestones: [],
-      geopoliticalContext: 'Complex regional dynamics with competing interests',
+      geopoliticalContext: "Complex regional dynamics with competing interests",
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.generatePrediction(prediction);
@@ -140,11 +136,11 @@ export class PredictiveDiplomacy {
 
     let predictedPosition: string;
     if (shiftProbability > 70) {
-      predictedPosition = 'Major policy shift expected';
+      predictedPosition = "Major policy shift expected";
     } else if (shiftProbability > 40) {
-      predictedPosition = 'Tactical adjustment likely';
+      predictedPosition = "Tactical adjustment likely";
     } else {
-      predictedPosition = 'Policy continuity expected';
+      predictedPosition = "Policy continuity expected";
     }
 
     const confidence = shiftProbability > 60 ? Confidence.HIGH : Confidence.MEDIUM;
@@ -162,25 +158,39 @@ export class PredictiveDiplomacy {
       indicators,
       historicalPatterns: [],
       scenarios: [],
-      assumptions: ['Current trends continue', 'No leadership change'],
-      limitingFactors: ['Domestic constraints', 'Alliance commitments'],
+      assumptions: ["Current trends continue", "No leadership change"],
+      limitingFactors: ["Domestic constraints", "Alliance commitments"],
       outcomes: [],
       mostLikelyOutcome: {
         outcome: predictedPosition,
         probability: shiftProbability,
         confidence,
-        timeframe: '3-12 months',
+        timeframe: "3-12 months",
         implications: [],
-        stakeholders: []
+        stakeholders: [],
       },
-      worstCase: { outcome: 'No change', probability: 30, confidence: Confidence.LOW, timeframe: '12+ months', implications: [], stakeholders: [] },
-      bestCase: { outcome: 'Major shift', probability: 70, confidence: Confidence.MEDIUM, timeframe: '3-6 months', implications: [], stakeholders: [] },
-      keyEventsToWatch: ['Policy speeches', 'Legislative changes', 'International commitments'],
-      earlyWarningSignals: ['Rhetorical shifts', 'Consultation processes', 'Think tank proposals'],
+      worstCase: {
+        outcome: "No change",
+        probability: 30,
+        confidence: Confidence.LOW,
+        timeframe: "12+ months",
+        implications: [],
+        stakeholders: [],
+      },
+      bestCase: {
+        outcome: "Major shift",
+        probability: 70,
+        confidence: Confidence.MEDIUM,
+        timeframe: "3-6 months",
+        implications: [],
+        stakeholders: [],
+      },
+      keyEventsToWatch: ["Policy speeches", "Legislative changes", "International commitments"],
+      earlyWarningSignals: ["Rhetorical shifts", "Consultation processes", "Think tank proposals"],
       verificationMilestones: [],
       geopoliticalContext: `${country} navigating complex ${domain} challenges`,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.generatePrediction(prediction);
@@ -201,9 +211,7 @@ export class PredictiveDiplomacy {
     const avgRoundProgress = progress / round;
     const estimatedRoundsRemaining = Math.ceil(remainingProgress / avgRoundProgress);
 
-    const successProbability = progress > 70 ? 75 :
-                              progress > 50 ? 60 :
-                              progress > 30 ? 40 : 25;
+    const successProbability = progress > 70 ? 75 : progress > 50 ? 60 : progress > 30 ? 40 : 25;
 
     return {
       negotiationId,
@@ -214,28 +222,28 @@ export class PredictiveDiplomacy {
       successProbability,
       possibleOutcomes: [
         {
-          outcome: 'Full agreement reached',
+          outcome: "Full agreement reached",
           probability: successProbability,
           favoredParties: parties.slice(0, Math.ceil(parties.length / 2)),
-          timeToAchieve: estimatedRoundsRemaining * 30
+          timeToAchieve: estimatedRoundsRemaining * 30,
         },
         {
-          outcome: 'Partial agreement',
+          outcome: "Partial agreement",
           probability: 100 - successProbability - 15,
           favoredParties: parties,
-          timeToAchieve: (estimatedRoundsRemaining + 2) * 30
+          timeToAchieve: (estimatedRoundsRemaining + 2) * 30,
         },
         {
-          outcome: 'Negotiation collapse',
+          outcome: "Negotiation collapse",
           probability: 15,
           favoredParties: [],
-          timeToAchieve: undefined
-        }
+          timeToAchieve: undefined,
+        },
       ],
       stickingPoints: [],
       dealBreakers: [],
       sweeteners: [],
-      externalFactors: []
+      externalFactors: [],
     };
   }
 
@@ -251,36 +259,36 @@ export class PredictiveDiplomacy {
     const flashpointRisk = flashpoints.length * 10;
     const projectedStability = Math.max(0, currentStability - flashpointRisk);
 
-    let trend: 'IMPROVING' | 'STABLE' | 'DETERIORATING';
-    if (projectedStability > currentStability + 10) trend = 'IMPROVING';
-    else if (projectedStability < currentStability - 10) trend = 'DETERIORATING';
-    else trend = 'STABLE';
+    let trend: "IMPROVING" | "STABLE" | "DETERIORATING";
+    if (projectedStability > currentStability + 10) trend = "IMPROVING";
+    else if (projectedStability < currentStability - 10) trend = "DETERIORATING";
+    else trend = "STABLE";
 
     return {
       region,
       timeframe: PredictionTimeframe.MEDIUM_TERM,
       overallStability: projectedStability,
       trend,
-      flashpoints: flashpoints.map(fp => ({
+      flashpoints: flashpoints.map((fp) => ({
         location: fp.location || region,
         issue: fp.issue,
         escalationRisk: fp.severity * 10,
         parties: fp.parties || [],
-        mitigationOptions: ['Diplomatic mediation', 'Economic incentives', 'Security guarantees']
+        mitigationOptions: ["Diplomatic mediation", "Economic incentives", "Security guarantees"],
       })),
-      stabilizingFactors: ['Economic interdependence', 'Institutional frameworks'],
-      destabilizingFactors: ['Unresolved disputes', 'Arms proliferation'],
-      countryStability: countries.map(c => ({
+      stabilizingFactors: ["Economic interdependence", "Institutional frameworks"],
+      destabilizingFactors: ["Unresolved disputes", "Arms proliferation"],
+      countryStability: countries.map((c) => ({
         country: c,
         stability: currentStability + (Math.random() * 20 - 10), // Simplified
-        trend: 'STABLE' as const
+        trend: "STABLE" as const,
       })),
       spilloverRisks: [],
       recommendations: [
-        'Strengthen regional dialogue mechanisms',
-        'Address root causes of instability',
-        'Enhance early warning systems'
-      ]
+        "Strengthen regional dialogue mechanisms",
+        "Address root causes of instability",
+        "Enhance early warning systems",
+      ],
     };
   }
 
@@ -301,15 +309,16 @@ export class PredictiveDiplomacy {
     const avgRecent = recent.reduce((sum, d) => sum + d.value, 0) / recent.length;
     const avgAll = dataPoints.reduce((sum, d) => sum + d.value, 0) / dataPoints.length;
 
-    let overallTrend: TrendAnalysis['overallTrend'];
-    if (avgRecent > avgAll * 1.2) overallTrend = 'STRONGLY_POSITIVE';
-    else if (avgRecent > avgAll * 1.05) overallTrend = 'POSITIVE';
-    else if (avgRecent < avgAll * 0.8) overallTrend = 'STRONGLY_NEGATIVE';
-    else if (avgRecent < avgAll * 0.95) overallTrend = 'NEGATIVE';
-    else overallTrend = 'STABLE';
+    let overallTrend: TrendAnalysis["overallTrend"];
+    if (avgRecent > avgAll * 1.2) overallTrend = "STRONGLY_POSITIVE";
+    else if (avgRecent > avgAll * 1.05) overallTrend = "POSITIVE";
+    else if (avgRecent < avgAll * 0.8) overallTrend = "STRONGLY_NEGATIVE";
+    else if (avgRecent < avgAll * 0.95) overallTrend = "NEGATIVE";
+    else overallTrend = "STABLE";
 
     // Calculate volatility
-    const variance = dataPoints.reduce((sum, d) => sum + Math.pow(d.value - avgAll, 2), 0) / dataPoints.length;
+    const variance =
+      dataPoints.reduce((sum, d) => sum + Math.pow(d.value - avgAll, 2), 0) / dataPoints.length;
     const volatility = Math.min(100, Math.sqrt(variance));
 
     return {
@@ -317,29 +326,26 @@ export class PredictiveDiplomacy {
       domain,
       timeRange: {
         start: dataPoints[0].date,
-        end: dataPoints[dataPoints.length - 1].date
+        end: dataPoints[dataPoints.length - 1].date,
       },
       overallTrend,
-      trendStrength: Math.abs(avgRecent - avgAll) / avgAll * 100,
+      trendStrength: (Math.abs(avgRecent - avgAll) / avgAll) * 100,
       volatility,
-      dataPoints: dataPoints.map(d => ({ ...d, confidence: 0.8 })),
+      dataPoints: dataPoints.map((d) => ({ ...d, confidence: 0.8 })),
       projection: {
         shortTerm: { value: avgRecent, confidence: 0.75 },
         mediumTerm: { value: avgRecent * 1.1, confidence: 0.6 },
-        longTerm: { value: avgRecent * 1.2, confidence: 0.4 }
+        longTerm: { value: avgRecent * 1.2, confidence: 0.4 },
       },
       inflectionPoints: [],
-      drivers: []
+      drivers: [],
     };
   }
 
   /**
    * Identify opportunities
    */
-  identifyOpportunities(
-    timeframe: PredictionTimeframe,
-    domain: string
-  ): OpportunityForecast[] {
+  identifyOpportunities(timeframe: PredictionTimeframe, domain: string): OpportunityForecast[] {
     // This would integrate with other packages to identify real opportunities
     // Simplified for now
     return [];
@@ -348,10 +354,7 @@ export class PredictiveDiplomacy {
   /**
    * Assess risks
    */
-  assessRisks(
-    timeframe: PredictionTimeframe,
-    region?: string
-  ): RiskScenario[] {
+  assessRisks(timeframe: PredictionTimeframe, region?: string): RiskScenario[] {
     // This would integrate with crisis diplomacy and other packages
     // Simplified for now
     return [];
@@ -361,7 +364,7 @@ export class PredictiveDiplomacy {
    * Generate comprehensive forecast
    */
   generateForecast(
-    scope: 'BILATERAL' | 'REGIONAL' | 'GLOBAL',
+    scope: "BILATERAL" | "REGIONAL" | "GLOBAL",
     subject: string,
     timeframe: PredictionTimeframe
   ): DiplomaticForecast {
@@ -376,24 +379,20 @@ export class PredictiveDiplomacy {
       risks: [],
       opportunities: [],
       keyFindings: [
-        'Complex regional dynamics observed',
-        'Multiple competing interests identified',
-        'Opportunities for diplomatic engagement exist'
+        "Complex regional dynamics observed",
+        "Multiple competing interests identified",
+        "Opportunities for diplomatic engagement exist",
       ],
       strategicRecommendations: [
-        'Enhance bilateral dialogue',
-        'Strengthen multilateral cooperation',
-        'Monitor early warning indicators'
+        "Enhance bilateral dialogue",
+        "Strengthen multilateral cooperation",
+        "Monitor early warning indicators",
       ],
-      uncertainties: [
-        'Leadership transitions',
-        'Economic volatility',
-        'External shocks'
-      ],
+      uncertainties: ["Leadership transitions", "Economic volatility", "External shocks"],
       confidenceAssessment: {
         overall: Confidence.MEDIUM,
-        byType: {}
-      }
+        byType: {},
+      },
     };
 
     this.forecasts.set(forecast.id, forecast);
@@ -417,16 +416,17 @@ export class PredictiveDiplomacy {
 
     prediction.updates.push({
       date: new Date(),
-      reason: 'New information available',
+      reason: "New information available",
       changes: [],
       confidenceAdjustment,
-      newInformation
+      newInformation,
     });
 
     if (confidenceAdjustment) {
-      prediction.confidenceScore = Math.max(0, Math.min(100,
-        prediction.confidenceScore + confidenceAdjustment
-      ));
+      prediction.confidenceScore = Math.max(
+        0,
+        Math.min(100, prediction.confidenceScore + confidenceAdjustment)
+      );
     }
 
     prediction.updatedAt = new Date();
@@ -435,20 +435,19 @@ export class PredictiveDiplomacy {
   /**
    * Verify prediction accuracy
    */
-  verifyPrediction(
-    predictionId: string,
-    actualOutcome: string
-  ): number {
+  verifyPrediction(predictionId: string, actualOutcome: string): number {
     const prediction = this.predictions.get(predictionId);
     if (!prediction) return 0;
 
     // Calculate accuracy based on how close the prediction was
-    const accuracy = prediction.prediction.toLowerCase().includes(actualOutcome.toLowerCase()) ? 100 : 0;
+    const accuracy = prediction.prediction.toLowerCase().includes(actualOutcome.toLowerCase())
+      ? 100
+      : 0;
 
     prediction.actualOutcome = {
       outcome: actualOutcome,
       date: new Date(),
-      accuracy
+      accuracy,
     };
 
     return accuracy;
@@ -456,11 +455,16 @@ export class PredictiveDiplomacy {
 
   private calculateTrendScore(trend: string): number {
     switch (trend) {
-      case 'IMPROVING': return 80;
-      case 'STABLE': return 60;
-      case 'DETERIORATING': return 30;
-      case 'VOLATILE': return 45;
-      default: return 50;
+      case "IMPROVING":
+        return 80;
+      case "STABLE":
+        return 60;
+      case "DETERIORATING":
+        return 30;
+      case "VOLATILE":
+        return 45;
+      default:
+        return 50;
     }
   }
 
@@ -468,8 +472,8 @@ export class PredictiveDiplomacy {
     if (indicators.length === 0) return 50;
 
     const weighted = indicators.reduce((sum, ind) => {
-      const value = typeof ind.currentValue === 'number' ? ind.currentValue : 50;
-      return sum + (value * ind.weight);
+      const value = typeof ind.currentValue === "number" ? ind.currentValue : 50;
+      return sum + value * ind.weight;
     }, 0);
 
     const totalWeight = indicators.reduce((sum, ind) => sum + ind.weight, 0);
@@ -477,7 +481,7 @@ export class PredictiveDiplomacy {
   }
 
   private calculateConfidence(indicatorCount: number, score: number): Confidence {
-    const baseConfidence = Math.min(90, 40 + (indicatorCount * 10));
+    const baseConfidence = Math.min(90, 40 + indicatorCount * 10);
     const adjustedConfidence = baseConfidence * (score / 100);
 
     if (adjustedConfidence > 90) return Confidence.VERY_HIGH;
@@ -489,16 +493,21 @@ export class PredictiveDiplomacy {
 
   private confidenceToScore(confidence: Confidence): number {
     switch (confidence) {
-      case Confidence.VERY_HIGH: return 95;
-      case Confidence.HIGH: return 82;
-      case Confidence.MEDIUM: return 62;
-      case Confidence.LOW: return 37;
-      case Confidence.VERY_LOW: return 15;
+      case Confidence.VERY_HIGH:
+        return 95;
+      case Confidence.HIGH:
+        return 82;
+      case Confidence.MEDIUM:
+        return 62;
+      case Confidence.LOW:
+        return 37;
+      case Confidence.VERY_LOW:
+        return 15;
     }
   }
 
   private calculateShiftProbability(indicators: Indicator[]): number {
-    const leadingIndicators = indicators.filter(i => i.type === 'LEADING');
+    const leadingIndicators = indicators.filter((i) => i.type === "LEADING");
     if (leadingIndicators.length === 0) return 30;
 
     return this.aggregateIndicators(leadingIndicators);
@@ -507,29 +516,29 @@ export class PredictiveDiplomacy {
   private generateRelationshipOutcomes(score: number): PredictedOutcome[] {
     return [
       {
-        outcome: 'Strategic Partnership',
+        outcome: "Strategic Partnership",
         probability: score > 70 ? 60 : 20,
         confidence: score > 70 ? Confidence.HIGH : Confidence.LOW,
-        timeframe: '12+ months',
-        implications: ['Deep cooperation', 'Joint initiatives'],
-        stakeholders: []
+        timeframe: "12+ months",
+        implications: ["Deep cooperation", "Joint initiatives"],
+        stakeholders: [],
       },
       {
-        outcome: 'Normal Relations',
+        outcome: "Normal Relations",
         probability: 40,
         confidence: Confidence.MEDIUM,
-        timeframe: '6-12 months',
-        implications: ['Stable engagement', 'Limited friction'],
-        stakeholders: []
+        timeframe: "6-12 months",
+        implications: ["Stable engagement", "Limited friction"],
+        stakeholders: [],
       },
       {
-        outcome: 'Strained Relations',
+        outcome: "Strained Relations",
         probability: score < 40 ? 60 : 20,
         confidence: score < 40 ? Confidence.HIGH : Confidence.LOW,
-        timeframe: '3-6 months',
-        implications: ['Diplomatic tensions', 'Reduced cooperation'],
-        stakeholders: []
-      }
+        timeframe: "3-6 months",
+        implications: ["Diplomatic tensions", "Reduced cooperation"],
+        stakeholders: [],
+      },
     ];
   }
 
@@ -538,17 +547,17 @@ export class PredictiveDiplomacy {
       subject,
       domain,
       timeRange: { start: new Date(), end: new Date() },
-      overallTrend: 'STABLE',
+      overallTrend: "STABLE",
       trendStrength: 0,
       volatility: 0,
       dataPoints: [],
       projection: {
         shortTerm: { value: 0, confidence: 0 },
         mediumTerm: { value: 0, confidence: 0 },
-        longTerm: { value: 0, confidence: 0 }
+        longTerm: { value: 0, confidence: 0 },
       },
       inflectionPoints: [],
-      drivers: []
+      drivers: [],
     };
   }
 
@@ -558,7 +567,7 @@ export class PredictiveDiplomacy {
   getPredictionsByType(type: PredictionType): Prediction[] {
     const predictionIds = this.predictionsByType.get(type) || new Set();
     return Array.from(predictionIds)
-      .map(id => this.predictions.get(id))
+      .map((id) => this.predictions.get(id))
       .filter((p): p is Prediction => p !== undefined);
   }
 
@@ -592,7 +601,7 @@ export class PredictiveDiplomacy {
       byType,
       averageConfidence: this.predictions.size > 0 ? totalConfidence / this.predictions.size : 0,
       verifiedPredictions: verifiedCount,
-      averageAccuracy: verifiedCount > 0 ? totalAccuracy / verifiedCount : 0
+      averageAccuracy: verifiedCount > 0 ? totalAccuracy / verifiedCount : 0,
     };
   }
 }

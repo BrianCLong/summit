@@ -26,7 +26,7 @@ pnpm add @intelgraph/i18n
 ### 1. Wrap your app with I18nProvider
 
 ```tsx
-import { I18nProvider } from '@intelgraph/i18n';
+import { I18nProvider } from "@intelgraph/i18n";
 
 function App() {
   return (
@@ -40,15 +40,15 @@ function App() {
 ### 2. Use the i18n hook in components
 
 ```tsx
-import { useI18n } from '@intelgraph/i18n';
+import { useI18n } from "@intelgraph/i18n";
 
 function MyComponent() {
   const { t, locale, setLocale, formatDate, isRTL } = useI18n();
 
   return (
-    <div dir={isRTL ? 'rtl' : 'ltr'}>
-      <h1>{t('common.welcome')}</h1>
-      <p>{t('common.welcomeBack', { name: 'John' })}</p>
+    <div dir={isRTL ? "rtl" : "ltr"}>
+      <h1>{t("common.welcome")}</h1>
+      <p>{t("common.welcomeBack", { name: "John" })}</p>
       <p>{formatDate(new Date())}</p>
     </div>
   );
@@ -58,17 +58,12 @@ function MyComponent() {
 ### 3. Add language switcher
 
 ```tsx
-import { LanguageSwitcher } from '@intelgraph/i18n';
+import { LanguageSwitcher } from "@intelgraph/i18n";
 
 function Header() {
   return (
     <header>
-      <LanguageSwitcher
-        variant="dropdown"
-        showFlags
-        showNames
-        groupByRegion
-      />
+      <LanguageSwitcher variant="dropdown" showFlags showNames groupByRegion />
     </header>
   );
 }
@@ -79,6 +74,7 @@ function Header() {
 ### LTR (Left-to-Right) Languages
 
 **NATO Member Countries:**
+
 - English (US, UK)
 - French, German, Spanish, Italian, Portuguese, Dutch
 - Danish, Norwegian, Swedish, Finnish, Icelandic
@@ -88,6 +84,7 @@ function Header() {
 - Turkish, Greek, Macedonian, Albanian, Montenegrin
 
 **Asian Languages:**
+
 - Chinese (Simplified, Traditional)
 - Japanese
 - Korean
@@ -105,18 +102,18 @@ function Header() {
 
 ```tsx
 const {
-  locale,           // Current locale code
-  setLocale,        // Change locale
-  t,                // Translation function
-  formatDate,       // Format dates
-  formatNumber,     // Format numbers
-  formatCurrency,   // Format currency
+  locale, // Current locale code
+  setLocale, // Change locale
+  t, // Translation function
+  formatDate, // Format dates
+  formatNumber, // Format numbers
+  formatCurrency, // Format currency
   formatRelativeTime, // Format relative time
-  isRTL,            // Is current locale RTL?
-  direction,        // 'ltr' or 'rtl'
+  isRTL, // Is current locale RTL?
+  direction, // 'ltr' or 'rtl'
   availableLocales, // List of all locales
-  isLoading,        // Loading state
-  changeLanguage,   // Alias for setLocale
+  isLoading, // Loading state
+  changeLanguage, // Alias for setLocale
 } = useI18n();
 ```
 
@@ -124,20 +121,20 @@ const {
 
 ```tsx
 // Simple translation
-t('common.save') // "Save"
+t("common.save"); // "Save"
 
 // With parameters
-t('common.welcomeBack', { name: 'Alice' }) // "Welcome back, Alice!"
+t("common.welcomeBack", { name: "Alice" }); // "Welcome back, Alice!"
 
 // With pluralization
-t('common.item', { count: 1 }) // "1 item"
-t('common.item', { count: 5 }) // "5 items"
+t("common.item", { count: 1 }); // "1 item"
+t("common.item", { count: 5 }); // "5 items"
 
 // With context
-t('button.submit', {}, { context: 'form' })
+t("button.submit", {}, { context: "form" });
 
 // With default value
-t('custom.key', {}, { defaultValue: 'Default text' })
+t("custom.key", {}, { defaultValue: "Default text" });
 ```
 
 ### Components
@@ -145,11 +142,7 @@ t('custom.key', {}, { defaultValue: 'Default text' })
 #### I18nProvider
 
 ```tsx
-<I18nProvider
-  defaultLocale="en-US"
-  fallbackLocale="en-US"
-  debug={false}
->
+<I18nProvider defaultLocale="en-US" fallbackLocale="en-US" debug={false}>
   {children}
 </I18nProvider>
 ```
@@ -277,7 +270,7 @@ formatDate(new Date());
 // de-DE: "21.11.2025"
 
 formatDate(new Date(), {
-  dateStyle: 'full'
+  dateStyle: "full",
 });
 // en-US: "Friday, November 21, 2025"
 // es-ES: "viernes, 21 de noviembre de 2025"
@@ -299,7 +292,7 @@ formatNumber(1234567.89);
 ```tsx
 const { formatCurrency } = useI18n();
 
-formatCurrency(1234.56, 'EUR');
+formatCurrency(1234.56, "EUR");
 // en-US: "€1,234.56"
 // es-ES: "1.234,56 €"
 // de-DE: "1.234,56 €"
@@ -336,6 +329,7 @@ const { isRTL, direction } = useI18n();
 ```
 
 CSS automatically mirrors for RTL:
+
 - `margin-left` → `margin-right`
 - `padding-left` → `padding-right`
 - `left` → `right`
@@ -347,13 +341,15 @@ CSS automatically mirrors for RTL:
 ### 1. Always Use Translation Keys
 
 ❌ **Bad:**
+
 ```tsx
 <button>Save</button>
 ```
 
 ✅ **Good:**
+
 ```tsx
-<button>{t('common.save')}</button>
+<button>{t("common.save")}</button>
 ```
 
 ### 2. Organize Keys Logically
@@ -375,30 +371,35 @@ Use namespaced, descriptive keys:
 ### 3. Parameterize Dynamic Content
 
 ❌ **Bad:**
+
 ```tsx
-t('welcome') + ' ' + userName
+t("welcome") + " " + userName;
 ```
 
 ✅ **Good:**
+
 ```tsx
-t('welcomeBack', { name: userName })
+t("welcomeBack", { name: userName });
 ```
 
 ### 4. Handle Pluralization
 
 ❌ **Bad:**
+
 ```tsx
-`${count} item${count !== 1 ? 's' : ''}`
+`${count} item${count !== 1 ? "s" : ""}`;
 ```
 
 ✅ **Good:**
+
 ```tsx
-t('common.item', { count })
+t("common.item", { count });
 ```
 
 ### 5. Preserve Technical Terms
 
 Don't translate:
+
 - Entity IDs and identifiers
 - API endpoints
 - Code/file names
@@ -439,20 +440,23 @@ pnpm typecheck
 If migrating from the legacy client i18n system:
 
 1. **Install package:**
+
    ```bash
    pnpm add @intelgraph/i18n
    ```
 
 2. **Replace imports:**
+
    ```tsx
    // Old
-   import { useI18n } from '../hooks/useI18n';
+   import { useI18n } from "../hooks/useI18n";
 
    // New
-   import { useI18n } from '@intelgraph/i18n';
+   import { useI18n } from "@intelgraph/i18n";
    ```
 
 3. **Update provider:**
+
    ```tsx
    // Old
    <LocaleProvider>
@@ -511,6 +515,7 @@ Proprietary - IntelGraph Team
 ## Support
 
 For questions or issues:
+
 - Check this README
 - Review existing translations for examples
 - File an issue in the repository

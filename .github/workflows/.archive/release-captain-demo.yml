@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       demo_scenario:
-        description: 'Demo scenario to run'
+        description: "Demo scenario to run"
         required: true
         type: choice
         options:
@@ -13,7 +13,7 @@ on:
           - auto-fix-demo
           - policy-violation
       create_pr:
-        description: 'Create demo PR'
+        description: "Create demo PR"
         required: false
         default: true
         type: boolean

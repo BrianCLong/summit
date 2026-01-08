@@ -1,4 +1,4 @@
-import { AdversarialExample, AttackConfig, AdversarialAttackType } from '../types';
+import { AdversarialExample, AttackConfig, AdversarialAttackType } from "../types";
 
 /**
  * Black-box Adversarial Attacks
@@ -26,11 +26,7 @@ export class BlackBoxAttack {
 
     for (let iter = 0; iter < iterations && queryCount < queryBudget; iter++) {
       // Estimate gradients using finite differences
-      const estimatedGradients = await this.estimateGradients(
-        perturbedInput,
-        predict,
-        h
-      );
+      const estimatedGradients = await this.estimateGradients(perturbedInput, predict, h);
       queryCount += 2 * input.length; // Two queries per dimension
 
       // Update perturbation
@@ -58,9 +54,9 @@ export class BlackBoxAttack {
         epsilon,
         iterations,
         queryCount,
-        method: 'ZOO'
+        method: "ZOO",
       },
-      createdAt: new Date()
+      createdAt: new Date(),
     };
   }
 
@@ -131,9 +127,7 @@ export class BlackBoxAttack {
     }
 
     const perturbation = currentAdversarial.map((val, idx) => val - input[idx]);
-    const perturbationNorm = Math.sqrt(
-      perturbation.reduce((sum, p) => sum + p * p, 0)
-    );
+    const perturbationNorm = Math.sqrt(perturbation.reduce((sum, p) => sum + p * p, 0));
 
     return {
       id: this.generateId(),
@@ -148,9 +142,9 @@ export class BlackBoxAttack {
       metadata: {
         iterations,
         queryCount,
-        method: 'Boundary-Attack'
+        method: "Boundary-Attack",
       },
-      createdAt: new Date()
+      createdAt: new Date(),
     };
   }
 
@@ -239,9 +233,9 @@ export class BlackBoxAttack {
         iterations,
         queryCount,
         samples,
-        method: 'Score-Based'
+        method: "Score-Based",
       },
-      createdAt: new Date()
+      createdAt: new Date(),
     };
   }
 
@@ -288,10 +282,10 @@ export class BlackBoxAttack {
         epsilon,
         iterations,
         stepSize,
-        method: 'Transfer-Attack',
-        usesSubstituteModel: true
+        method: "Transfer-Attack",
+        usesSubstituteModel: true,
       },
-      createdAt: new Date()
+      createdAt: new Date(),
     };
   }
 
@@ -328,7 +322,7 @@ export class BlackBoxAttack {
 
     // Normalize
     const norm = Math.sqrt(direction.reduce((sum, d) => sum + d * d, 0));
-    return direction.map(d => d / norm);
+    return direction.map((d) => d / norm);
   }
 
   private orthogonalize(v1: number[], v2: number[]): number[] {
@@ -341,13 +335,11 @@ export class BlackBoxAttack {
 
     // Normalize
     const norm = Math.sqrt(orthogonal.reduce((sum, val) => sum + val * val, 0));
-    return orthogonal.map(val => val / (norm || 1));
+    return orthogonal.map((val) => val / (norm || 1));
   }
 
   private l2Distance(a: number[], b: number[]): number {
-    return Math.sqrt(
-      a.reduce((sum, val, idx) => sum + Math.pow(val - b[idx], 2), 0)
-    );
+    return Math.sqrt(a.reduce((sum, val, idx) => sum + Math.pow(val - b[idx], 2), 0));
   }
 
   private argmax(array: number[]): number {

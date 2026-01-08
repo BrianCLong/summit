@@ -10,9 +10,9 @@
  *   node scripts/maintainability-report.js [--output=report.md] [--json]
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+const fs = require("fs");
+const path = require("path");
+const { execSync } = require("child_process");
 
 // Configuration
 const CONFIG = {
@@ -25,47 +25,47 @@ const CONFIG = {
     minDuplicationLines: 10,
   },
   paths: {
-    source: ['server/src', 'client/src', 'apps', 'packages', 'services'],
-    exclude: ['node_modules', 'dist', 'build', 'coverage', '.turbo', 'archive'],
+    source: ["server/src", "client/src", "apps", "packages", "services"],
+    exclude: ["node_modules", "dist", "build", "coverage", ".turbo", "archive"],
   },
 };
 
 // Color codes for terminal output
 const colors = {
-  reset: '\x1b[0m',
-  red: '\x1b[31m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  blue: '\x1b[34m',
-  magenta: '\x1b[35m',
-  cyan: '\x1b[36m',
-  bold: '\x1b[1m',
+  reset: "\x1b[0m",
+  red: "\x1b[31m",
+  green: "\x1b[32m",
+  yellow: "\x1b[33m",
+  blue: "\x1b[34m",
+  magenta: "\x1b[35m",
+  cyan: "\x1b[36m",
+  bold: "\x1b[1m",
 };
 
 // Utility functions
-function log(message, color = 'reset') {
+function log(message, color = "reset") {
   console.log(`${colors[color]}${message}${colors.reset}`);
 }
 
 function exec(command) {
   try {
-    return execSync(command, { encoding: 'utf8', stdio: 'pipe' });
+    return execSync(command, { encoding: "utf8", stdio: "pipe" });
   } catch (error) {
-    return error.stdout || '';
+    return error.stdout || "";
   }
 }
 
 function countLines(filePath) {
   try {
-    const content = fs.readFileSync(filePath, 'utf8');
-    return content.split('\n').length;
+    const content = fs.readFileSync(filePath, "utf8");
+    return content.split("\n").length;
   } catch {
     return 0;
   }
 }
 
 function analyzeFileSize() {
-  log('\n📏 Analyzing File Sizes...', 'cyan');
+  log("\n📏 Analyzing File Sizes...", "cyan");
 
   const results = {
     total: 0,
@@ -73,9 +73,9 @@ function analyzeFileSize() {
     largeFiles: [],
   };
 
-  const findCommand = `find ${CONFIG.paths.source.join(' ')} -type f \\( -name "*.ts" -o -name "*.js" -o -name "*.tsx" -o -name "*.jsx" \\) ${CONFIG.paths.exclude.map(e => `-not -path "*/${e}/*"`).join(' ')} 2>/dev/null`;
+  const findCommand = `find ${CONFIG.paths.source.join(" ")} -type f \\( -name "*.ts" -o -name "*.js" -o -name "*.tsx" -o -name "*.jsx" \\) ${CONFIG.paths.exclude.map((e) => `-not -path "*/${e}/*"`).join(" ")} 2>/dev/null`;
 
-  const files = exec(findCommand).trim().split('\n').filter(Boolean);
+  const files = exec(findCommand).trim().split("\n").filter(Boolean);
   results.total = files.length;
 
   files.forEach((file) => {
@@ -100,7 +100,7 @@ function analyzeFileSize() {
 }
 
 function analyzeTechnicalDebt() {
-  log('\n💳 Analyzing Technical Debt...', 'cyan');
+  log("\n💳 Analyzing Technical Debt...", "cyan");
 
   const results = {
     todo: [],
@@ -110,17 +110,17 @@ function analyzeTechnicalDebt() {
     total: 0,
   };
 
-  const patterns = ['TODO', 'FIXME', 'HACK', 'XXX'];
+  const patterns = ["TODO", "FIXME", "HACK", "XXX"];
 
   patterns.forEach((pattern) => {
-    const grepCommand = `grep -rn "${pattern}" ${CONFIG.paths.source.join(' ')} --include="*.ts" --include="*.js" --include="*.tsx" --include="*.jsx" ${CONFIG.paths.exclude.map(e => `--exclude-dir=${e}`).join(' ')} 2>/dev/null || true`;
+    const grepCommand = `grep -rn "${pattern}" ${CONFIG.paths.source.join(" ")} --include="*.ts" --include="*.js" --include="*.tsx" --include="*.jsx" ${CONFIG.paths.exclude.map((e) => `--exclude-dir=${e}`).join(" ")} 2>/dev/null || true`;
 
     const output = exec(grepCommand);
-    const matches = output.trim().split('\n').filter(Boolean);
+    const matches = output.trim().split("\n").filter(Boolean);
 
     results[pattern.toLowerCase()] = matches.map((line) => {
-      const [location, ...comment] = line.split(':');
-      return { location, comment: comment.join(':').trim() };
+      const [location, ...comment] = line.split(":");
+      return { location, comment: comment.join(":").trim() };
     });
   });
 
@@ -131,51 +131,51 @@ function analyzeTechnicalDebt() {
 }
 
 function analyzeCodeDuplication() {
-  log('\n👯 Analyzing Code Duplication...', 'cyan');
+  log("\n👯 Analyzing Code Duplication...", "cyan");
 
   // Check if jscpd is installed
   try {
-    exec('which jscpd');
+    exec("which jscpd");
   } catch {
-    log('⚠️  jscpd not installed. Skipping duplication analysis.', 'yellow');
+    log("⚠️  jscpd not installed. Skipping duplication analysis.", "yellow");
     return { available: false };
   }
 
-  const jscpdCommand = `jscpd ${CONFIG.paths.source.join(' ')} --min-lines ${CONFIG.thresholds.minDuplicationLines} --format "javascript,typescript" --reporters "json" --output "./.jscpd-temp" --ignore "**/*.test.*,**/*.spec.*,${CONFIG.paths.exclude.map(e => `**/${e}/**`).join(',')}" 2>/dev/null || true`;
+  const jscpdCommand = `jscpd ${CONFIG.paths.source.join(" ")} --min-lines ${CONFIG.thresholds.minDuplicationLines} --format "javascript,typescript" --reporters "json" --output "./.jscpd-temp" --ignore "**/*.test.*,**/*.spec.*,${CONFIG.paths.exclude.map((e) => `**/${e}/**`).join(",")}" 2>/dev/null || true`;
 
   exec(jscpdCommand);
 
   let duplicationData = { available: true, percentage: 0, duplicates: [] };
 
   try {
-    const reportPath = './.jscpd-temp/jscpd-report.json';
+    const reportPath = "./.jscpd-temp/jscpd-report.json";
     if (fs.existsSync(reportPath)) {
-      const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+      const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
       duplicationData.percentage = report.statistics?.total?.percentage || 0;
       duplicationData.duplicates = report.duplicates || [];
     }
 
     // Cleanup temp files
-    exec('rm -rf ./.jscpd-temp 2>/dev/null || true');
+    exec("rm -rf ./.jscpd-temp 2>/dev/null || true");
   } catch (error) {
-    log(`⚠️  Error parsing duplication report: ${error.message}`, 'yellow');
+    log(`⚠️  Error parsing duplication report: ${error.message}`, "yellow");
   }
 
   return duplicationData;
 }
 
 function analyzeLinesOfCode() {
-  log('\n📊 Analyzing Lines of Code...', 'cyan');
+  log("\n📊 Analyzing Lines of Code...", "cyan");
 
   // Check if cloc is installed
   try {
-    exec('which cloc');
+    exec("which cloc");
   } catch {
-    log('⚠️  cloc not installed. Skipping LOC analysis.', 'yellow');
+    log("⚠️  cloc not installed. Skipping LOC analysis.", "yellow");
     return { available: false };
   }
 
-  const clocCommand = `cloc ${CONFIG.paths.source.join(' ')} --json ${CONFIG.paths.exclude.map(e => `--exclude-dir=${e}`).join(' ')} 2>/dev/null`;
+  const clocCommand = `cloc ${CONFIG.paths.source.join(" ")} --json ${CONFIG.paths.exclude.map((e) => `--exclude-dir=${e}`).join(" ")} 2>/dev/null`;
 
   const output = exec(clocCommand);
 
@@ -200,7 +200,7 @@ function analyzeLinesOfCode() {
 
 function generateMarkdownReport(data) {
   const timestamp = new Date().toISOString();
-  const date = timestamp.split('T')[0];
+  const date = timestamp.split("T")[0];
 
   let md = `# Maintainability Metrics Report\n\n`;
   md += `**Generated:** ${timestamp}\n\n`;
@@ -214,25 +214,21 @@ function generateMarkdownReport(data) {
 
   const fileStatus =
     data.fileSize.largeFiles.length === 0
-      ? '✅ Good'
+      ? "✅ Good"
       : data.fileSize.largeFiles.length < 50
-        ? '⚠️ Warning'
-        : '❌ Critical';
+        ? "⚠️ Warning"
+        : "❌ Critical";
 
   const debtStatus =
-    data.debt.total < 50
-      ? '✅ Good'
-      : data.debt.total < 150
-        ? '⚠️ Warning'
-        : '❌ High';
+    data.debt.total < 50 ? "✅ Good" : data.debt.total < 150 ? "⚠️ Warning" : "❌ High";
 
   const dupStatus = data.duplication.available
     ? data.duplication.percentage < 3
-      ? '✅ Good'
+      ? "✅ Good"
       : data.duplication.percentage < 5
-        ? '⚠️ Warning'
-        : '❌ High'
-    : 'N/A';
+        ? "⚠️ Warning"
+        : "❌ High"
+    : "N/A";
 
   md += `| Total Files | ${data.fileSize.total} | ℹ️ Info |\n`;
   md += `| Files > ${CONFIG.thresholds.maxFileLines} lines | ${data.fileSize.largeFiles.length} | ${fileStatus} |\n`;
@@ -263,7 +259,7 @@ function generateMarkdownReport(data) {
     md += `| File | Lines |\n`;
     md += `|------|-------|\n`;
     data.fileSize.largeFiles.slice(0, 20).forEach(({ file, lines }) => {
-      const relativePath = file.replace(/^\.\//, '');
+      const relativePath = file.replace(/^\.\//, "");
       md += `| \`${relativePath}\` | ${lines} |\n`;
     });
   }
@@ -378,7 +374,7 @@ function generateMarkdownReport(data) {
   md += `| Max Cyclomatic Complexity | ${CONFIG.thresholds.maxComplexity} | See ESLint report |\n`;
   md += `| Max Class Methods | ${CONFIG.thresholds.maxMethods} | See ESLint report |\n`;
   md += `| Max Imports | ${CONFIG.thresholds.maxImports} | See ESLint report |\n`;
-  md += `| Code Duplication | < 5% | ${data.duplication.available ? data.duplication.percentage.toFixed(2) + '%' : 'N/A'} |\n`;
+  md += `| Code Duplication | < 5% | ${data.duplication.available ? data.duplication.percentage.toFixed(2) + "%" : "N/A"} |\n`;
 
   md += `\n---\n\n`;
   md += `*Report generated by maintainability-report.js on ${date}*\n`;
@@ -388,8 +384,8 @@ function generateMarkdownReport(data) {
 
 // Main execution
 async function main() {
-  log('\n🔍 IntelGraph Platform - Maintainability Metrics Report', 'bold');
-  log('════════════════════════════════════════════════════════\n', 'bold');
+  log("\n🔍 IntelGraph Platform - Maintainability Metrics Report", "bold");
+  log("════════════════════════════════════════════════════════\n", "bold");
 
   const data = {
     fileSize: analyzeFileSize(),
@@ -398,51 +394,48 @@ async function main() {
     loc: analyzeLinesOfCode(),
   };
 
-  log('\n✅ Analysis Complete!', 'green');
+  log("\n✅ Analysis Complete!", "green");
 
   const report = generateMarkdownReport(data);
 
   // Parse command line arguments
   const args = process.argv.slice(2);
-  const outputArg = args.find((arg) => arg.startsWith('--output='));
-  const jsonFlag = args.includes('--json');
+  const outputArg = args.find((arg) => arg.startsWith("--output="));
+  const jsonFlag = args.includes("--json");
 
-  const outputFile = outputArg ? outputArg.split('=')[1] : 'maintainability-report.md';
+  const outputFile = outputArg ? outputArg.split("=")[1] : "maintainability-report.md";
 
   // Write report
-  fs.writeFileSync(outputFile, report, 'utf8');
-  log(`\n📄 Report saved to: ${outputFile}`, 'cyan');
+  fs.writeFileSync(outputFile, report, "utf8");
+  log(`\n📄 Report saved to: ${outputFile}`, "cyan");
 
   // Write JSON data if requested
   if (jsonFlag) {
-    const jsonFile = outputFile.replace('.md', '.json');
-    fs.writeFileSync(jsonFile, JSON.stringify(data, null, 2), 'utf8');
-    log(`📄 JSON data saved to: ${jsonFile}`, 'cyan');
+    const jsonFile = outputFile.replace(".md", ".json");
+    fs.writeFileSync(jsonFile, JSON.stringify(data, null, 2), "utf8");
+    log(`📄 JSON data saved to: ${jsonFile}`, "cyan");
   }
 
   // Print summary to console
-  log('\n📊 Summary:', 'bold');
-  log(`   Total Files: ${data.fileSize.total}`, 'cyan');
+  log("\n📊 Summary:", "bold");
+  log(`   Total Files: ${data.fileSize.total}`, "cyan");
   log(
     `   Files > ${CONFIG.thresholds.maxFileLines} lines: ${data.fileSize.largeFiles.length}`,
-    data.fileSize.largeFiles.length > 50 ? 'red' : 'yellow'
+    data.fileSize.largeFiles.length > 50 ? "red" : "yellow"
   );
-  log(
-    `   Technical Debt Markers: ${data.debt.total}`,
-    data.debt.total > 150 ? 'red' : 'yellow'
-  );
+  log(`   Technical Debt Markers: ${data.debt.total}`, data.debt.total > 150 ? "red" : "yellow");
 
   if (data.duplication.available) {
     log(
       `   Code Duplication: ${data.duplication.percentage.toFixed(2)}%`,
-      data.duplication.percentage > 5 ? 'red' : 'green'
+      data.duplication.percentage > 5 ? "red" : "green"
     );
   }
 
-  log('\n');
+  log("\n");
 }
 
 main().catch((error) => {
-  log(`\n❌ Error: ${error.message}`, 'red');
+  log(`\n❌ Error: ${error.message}`, "red");
   process.exit(1);
 });

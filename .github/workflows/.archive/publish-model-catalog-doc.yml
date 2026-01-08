@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'model-catalog/**'
+      - "model-catalog/**"
   workflow_dispatch:
 
 permissions:
@@ -19,7 +19,7 @@ jobs:
           persist-credentials: true
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
       - run: npm i yaml@2
       - name: Render catalog.md
         run: |

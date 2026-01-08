@@ -112,7 +112,7 @@ aws s3api put-bucket-policy \
 
 ```javascript
 // Evidence storage service
-import AWS from 'aws-sdk';
+import AWS from "aws-sdk";
 
 const s3 = new AWS.S3({
   region: process.env.AWS_REGION,
@@ -129,18 +129,18 @@ class EvidenceService {
     try {
       const result = await s3
         .putObject({
-          Bucket: 'maestro-evidence-bucket',
+          Bucket: "maestro-evidence-bucket",
           Key: key,
           Body: JSON.stringify(evidence),
-          ObjectLockMode: 'GOVERNANCE',
+          ObjectLockMode: "GOVERNANCE",
           ObjectLockRetainUntilDate: retentionDate,
-          ServerSideEncryption: 'aws:kms',
+          ServerSideEncryption: "aws:kms",
           SSEKMSKeyId: process.env.EVIDENCE_KMS_KEY_ID,
           Metadata: {
-            'run-id': runId,
-            'node-id': nodeId,
-            'evidence-type': evidence.type,
-            'created-at': new Date().toISOString(),
+            "run-id": runId,
+            "node-id": nodeId,
+            "evidence-type": evidence.type,
+            "created-at": new Date().toISOString(),
           },
         })
         .promise();
@@ -153,15 +153,15 @@ class EvidenceService {
         retentionUntil: retentionDate.toISOString(),
       };
     } catch (error) {
-      console.error('Failed to store evidence:', error);
-      throw new Error('Evidence storage failed: ' + error.message);
+      console.error("Failed to store evidence:", error);
+      throw new Error("Evidence storage failed: " + error.message);
     }
   }
 
   async retrieveEvidence(key, versionId = null) {
     try {
       const params = {
-        Bucket: 'maestro-evidence-bucket',
+        Bucket: "maestro-evidence-bucket",
         Key: key,
       };
 
@@ -180,8 +180,8 @@ class EvidenceService {
         objectLockRetainUntilDate: result.ObjectLockRetainUntilDate,
       };
     } catch (error) {
-      console.error('Failed to retrieve evidence:', error);
-      throw new Error('Evidence retrieval failed: ' + error.message);
+      console.error("Failed to retrieve evidence:", error);
+      throw new Error("Evidence retrieval failed: " + error.message);
     }
   }
 
@@ -189,9 +189,9 @@ class EvidenceService {
     try {
       const evidence = await this.retrieveEvidence(key);
       const actualHash = crypto
-        .createHash('sha256')
+        .createHash("sha256")
         .update(JSON.stringify(evidence.data))
-        .digest('hex');
+        .digest("hex");
 
       return {
         valid: actualHash === expectedHash,

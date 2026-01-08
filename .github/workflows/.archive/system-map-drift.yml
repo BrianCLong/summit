@@ -14,31 +14,31 @@ name: System Map Drift Detection
 on:
   pull_request:
     paths:
-      - 'docker-compose*.yml'
-      - '**/package.json'
-      - 'pnpm-workspace.yaml'
-      - '.github/workflows/*.yml'
-      - 'apps/**'
-      - 'services/**'
-      - 'packages/**'
+      - "docker-compose*.yml"
+      - "**/package.json"
+      - "pnpm-workspace.yaml"
+      - ".github/workflows/*.yml"
+      - "apps/**"
+      - "services/**"
+      - "packages/**"
 
   push:
     branches:
       - main
     paths:
-      - 'docker-compose*.yml'
-      - '**/package.json'
-      - 'pnpm-workspace.yaml'
-      - '.github/workflows/*.yml'
+      - "docker-compose*.yml"
+      - "**/package.json"
+      - "pnpm-workspace.yaml"
+      - ".github/workflows/*.yml"
 
   schedule:
     # Run weekly to catch gradual drift
-    - cron: '0 6 * * 1'
+    - cron: "0 6 * * 1"
 
   workflow_dispatch:
     inputs:
       force_update:
-        description: 'Force update the system map even if no drift detected'
+        description: "Force update the system map even if no drift detected"
         type: boolean
         default: false
 
@@ -63,7 +63,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2

@@ -7,8 +7,6 @@
     "moduleResolution": "node",
     "allowImportingTsExtensions": false
   },
-  "include": [
-    "src"
-  ],
+  "include": ["src"],
   "references": []
 }

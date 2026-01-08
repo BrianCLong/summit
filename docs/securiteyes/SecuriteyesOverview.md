@@ -4,17 +4,17 @@ Securiteyes is a counterintelligence and threat intelligence layer for Summit / 
 
 **Key Features:**
 
-*   **Defensive & Compliant:** Strictly defensive operations; no offensive tradecraft.
-*   **Integrated Ontology:** Extends IntelGraph with ThreatActor, Campaign, TTP, Indicator, etc.
-*   **Multi-Tenant:** Strict data isolation and RBAC.
-*   **Detection:** Rule-based, statistical, and graph-based detection engines.
-*   **Incident Response:** Automated defensive playbooks and forensic evidence bundles.
+- **Defensive & Compliant:** Strictly defensive operations; no offensive tradecraft.
+- **Integrated Ontology:** Extends IntelGraph with ThreatActor, Campaign, TTP, Indicator, etc.
+- **Multi-Tenant:** Strict data isolation and RBAC.
+- **Detection:** Rule-based, statistical, and graph-based detection engines.
+- **Incident Response:** Automated defensive playbooks and forensic evidence bundles.
 
 **Architecture:**
 
-*   **Service Layer:** `SecuriteyesService` (Core CRUD), `DetectionEngine`, `IncidentManager`, `IngestionService`.
-*   **Data Store:** Neo4j (Graph), Postgres (Audit/Logs).
-*   **API:** `/securiteyes/*` endpoints.
+- **Service Layer:** `SecuriteyesService` (Core CRUD), `DetectionEngine`, `IncidentManager`, `IngestionService`.
+- **Data Store:** Neo4j (Graph), Postgres (Audit/Logs).
+- **API:** `/securiteyes/*` endpoints.
 
 **Usage:**
 

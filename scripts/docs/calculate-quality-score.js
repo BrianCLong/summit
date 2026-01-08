@@ -5,8 +5,8 @@
  * Calculates comprehensive quality score based on multiple metrics
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
 class QualityScoreCalculator {
   constructor() {
@@ -36,28 +36,22 @@ class QualityScoreCalculator {
    * Calculate comprehensive quality score
    */
   calculate(metrics) {
-    console.log('🧮 Calculating documentation quality score...');
+    console.log("🧮 Calculating documentation quality score...");
 
     const scores = {
       styleScore: this.calculateErrorBasedScore(
         metrics.styleErrors || 0,
-        this.maxErrors.styleErrors,
+        this.maxErrors.styleErrors
       ),
-      linkScore: this.calculateErrorBasedScore(
-        metrics.linkErrors || 0,
-        this.maxErrors.linkErrors,
-      ),
+      linkScore: this.calculateErrorBasedScore(metrics.linkErrors || 0, this.maxErrors.linkErrors),
       markdownScore: this.calculateErrorBasedScore(
         metrics.markdownErrors || 0,
-        this.maxErrors.markdownErrors,
+        this.maxErrors.markdownErrors
       ),
-      yamlScore: this.calculateErrorBasedScore(
-        metrics.yamlErrors || 0,
-        this.maxErrors.yamlErrors,
-      ),
+      yamlScore: this.calculateErrorBasedScore(metrics.yamlErrors || 0, this.maxErrors.yamlErrors),
       spellScore: this.calculateErrorBasedScore(
         metrics.spellErrors || 0,
-        this.maxErrors.spellErrors,
+        this.maxErrors.spellErrors
       ),
       accessibilityScore: metrics.accessibilityScore || 100,
       performanceScore: metrics.performanceScore || 100,
@@ -85,31 +79,31 @@ class QualityScoreCalculator {
     const breakdown = {
       overall: finalScore,
       components: {
-        'Style & Grammar': {
+        "Style & Grammar": {
           score: scores.styleScore,
           weight: this.weights.styleErrors,
           contribution: scores.styleScore * this.weights.styleErrors,
           errors: metrics.styleErrors || 0,
         },
-        'Link Health': {
+        "Link Health": {
           score: scores.linkScore,
           weight: this.weights.linkHealth,
           contribution: scores.linkScore * this.weights.linkHealth,
           errors: metrics.linkErrors || 0,
         },
-        'Markdown Syntax': {
+        "Markdown Syntax": {
           score: scores.markdownScore,
           weight: this.weights.markdownSyntax,
           contribution: scores.markdownScore * this.weights.markdownSyntax,
           errors: metrics.markdownErrors || 0,
         },
-        'YAML Validation': {
+        "YAML Validation": {
           score: scores.yamlScore,
           weight: this.weights.yamlValidation,
           contribution: scores.yamlScore * this.weights.yamlValidation,
           errors: metrics.yamlErrors || 0,
         },
-        'Spell Check': {
+        "Spell Check": {
           score: scores.spellScore,
           weight: this.weights.spellCheck,
           contribution: scores.spellScore * this.weights.spellCheck,
@@ -133,13 +127,13 @@ class QualityScoreCalculator {
           contribution: scores.seoScore * this.weights.seo,
           rawScore: metrics.seoScore || 100,
         },
-        'Code Examples': {
+        "Code Examples": {
           score: scores.codeScore,
           weight: this.weights.codeExamples,
           contribution: scores.codeScore * this.weights.codeExamples,
           rawScore: metrics.codeScore || 100,
         },
-        'API Alignment': {
+        "API Alignment": {
           score: scores.apiScore,
           weight: this.weights.apiAlignment,
           contribution: scores.apiScore * this.weights.apiAlignment,
@@ -178,24 +172,24 @@ class QualityScoreCalculator {
    * Determine quality grade based on score
    */
   getQualityGrade(score) {
-    if (score >= 95) return 'A+';
-    if (score >= 90) return 'A';
-    if (score >= 85) return 'B+';
-    if (score >= 80) return 'B';
-    if (score >= 70) return 'C';
-    if (score >= 60) return 'D';
-    return 'F';
+    if (score >= 95) return "A+";
+    if (score >= 90) return "A";
+    if (score >= 85) return "B+";
+    if (score >= 80) return "B";
+    if (score >= 70) return "C";
+    if (score >= 60) return "D";
+    return "F";
   }
 
   /**
    * Get badge color for score
    */
   getBadgeColor(score) {
-    if (score >= 95) return 'brightgreen';
-    if (score >= 85) return 'green';
-    if (score >= 70) return 'yellow';
-    if (score >= 50) return 'orange';
-    return 'red';
+    if (score >= 95) return "brightgreen";
+    if (score >= 85) return "green";
+    if (score >= 70) return "yellow";
+    if (score >= 50) return "orange";
+    return "red";
   }
 
   /**
@@ -213,55 +207,52 @@ class QualityScoreCalculator {
     sortedComponents.forEach(([name, data]) => {
       if (data.score < 80) {
         switch (name) {
-          case 'Style & Grammar':
+          case "Style & Grammar":
             recommendations.push({
-              priority: 'high',
+              priority: "high",
               area: name,
               issue: `${data.errors} style/grammar violations detected`,
-              action:
-                'Run Vale with --fix flag and review style guide compliance',
+              action: "Run Vale with --fix flag and review style guide compliance",
               impact: `+${Math.round((100 - data.score) * data.weight)} points potential`,
             });
             break;
 
-          case 'Link Health':
+          case "Link Health":
             recommendations.push({
-              priority: 'high',
+              priority: "high",
               area: name,
               issue: `${data.errors} broken links found`,
-              action:
-                'Update or remove broken links, verify external link status',
+              action: "Update or remove broken links, verify external link status",
               impact: `+${Math.round((100 - data.score) * data.weight)} points potential`,
             });
             break;
 
-          case 'Accessibility':
+          case "Accessibility":
             recommendations.push({
-              priority: 'critical',
+              priority: "critical",
               area: name,
               issue: `Accessibility score: ${data.rawScore}%`,
-              action:
-                'Add alt text to images, fix heading hierarchy, improve color contrast',
+              action: "Add alt text to images, fix heading hierarchy, improve color contrast",
               impact: `+${Math.round((100 - data.score) * data.weight)} points potential`,
             });
             break;
 
-          case 'Performance':
+          case "Performance":
             recommendations.push({
-              priority: 'medium',
+              priority: "medium",
               area: name,
               issue: `Performance score: ${data.rawScore}%`,
-              action: 'Optimize images, reduce bundle size, enable caching',
+              action: "Optimize images, reduce bundle size, enable caching",
               impact: `+${Math.round((100 - data.score) * data.weight)} points potential`,
             });
             break;
 
           default:
             recommendations.push({
-              priority: 'medium',
+              priority: "medium",
               area: name,
               issue: `Score below threshold: ${data.score}%`,
-              action: 'Review and improve content quality in this area',
+              action: "Review and improve content quality in this area",
               impact: `+${Math.round((100 - data.score) * data.weight)} points potential`,
             });
         }
@@ -284,23 +275,20 @@ class QualityScoreCalculator {
       badgeColor: this.getBadgeColor(breakdown.overall),
       recommendations,
       summary: {
-        status: breakdown.overall >= 85 ? 'PASS' : 'FAIL',
+        status: breakdown.overall >= 85 ? "PASS" : "FAIL",
         message:
           breakdown.overall >= 95
-            ? 'Excellent quality!'
+            ? "Excellent quality!"
             : breakdown.overall >= 85
-              ? 'Good quality, minor improvements suggested'
+              ? "Good quality, minor improvements suggested"
               : breakdown.overall >= 70
-                ? 'Acceptable quality, improvements needed'
-                : 'Poor quality, significant improvements required',
+                ? "Acceptable quality, improvements needed"
+                : "Poor quality, significant improvements required",
       },
     };
 
     // Save detailed report
-    fs.writeFileSync(
-      'quality-score-report.json',
-      JSON.stringify(report, null, 2),
-    );
+    fs.writeFileSync("quality-score-report.json", JSON.stringify(report, null, 2));
 
     // Generate markdown summary
     this.generateMarkdownSummary(report);
@@ -316,14 +304,14 @@ class QualityScoreCalculator {
 
     let markdown = `## 📊 Quality Score: ${overall}% (${grade})\n\n`;
 
-    markdown += `**Status**: ${summary.status === 'PASS' ? '✅' : '❌'} ${summary.message}\n\n`;
+    markdown += `**Status**: ${summary.status === "PASS" ? "✅" : "❌"} ${summary.message}\n\n`;
 
     markdown += `### Component Breakdown\n\n`;
     markdown += `| Component | Score | Weight | Contribution | Status |\n`;
     markdown += `|-----------|-------|--------|--------------|--------|\n`;
 
     Object.entries(components).forEach(([name, data]) => {
-      const status = data.score >= 90 ? '🟢' : data.score >= 70 ? '🟡' : '🔴';
+      const status = data.score >= 90 ? "🟢" : data.score >= 70 ? "🟡" : "🔴";
       markdown += `| ${name} | ${data.score.toFixed(1)}% | ${(data.weight * 100).toFixed(0)}% | ${data.contribution.toFixed(1)} | ${status} |\n`;
     });
 
@@ -331,12 +319,7 @@ class QualityScoreCalculator {
       markdown += `\n### 🎯 Top Recommendations\n\n`;
 
       recommendations.slice(0, 5).forEach((rec, index) => {
-        const priority =
-          rec.priority === 'critical'
-            ? '🚨'
-            : rec.priority === 'high'
-              ? '⚠️'
-              : '💡';
+        const priority = rec.priority === "critical" ? "🚨" : rec.priority === "high" ? "⚠️" : "💡";
         markdown += `${index + 1}. ${priority} **${rec.area}**: ${rec.issue}\n`;
         markdown += `   - Action: ${rec.action}\n`;
         markdown += `   - Impact: ${rec.impact}\n\n`;
@@ -350,7 +333,7 @@ class QualityScoreCalculator {
     markdown += `- 🔴 Poor (50%+) - Significant improvements required\n`;
     markdown += `- 🔴 Critical (<50%) - Major rework needed\n`;
 
-    fs.writeFileSync('quality-score-summary.md', markdown);
+    fs.writeFileSync("quality-score-summary.md", markdown);
   }
 
   /**
@@ -359,21 +342,21 @@ class QualityScoreCalculator {
   logResults(breakdown) {
     const { overall, grade, summary } = breakdown;
 
-    console.log('\n📊 Quality Score Calculation Complete');
-    console.log('=====================================');
+    console.log("\n📊 Quality Score Calculation Complete");
+    console.log("=====================================");
     console.log(`Overall Score: ${overall}% (${grade})`);
     console.log(`Status: ${summary.status} - ${summary.message}`);
 
-    console.log('\nComponent Scores:');
+    console.log("\nComponent Scores:");
     Object.entries(breakdown.components).forEach(([name, data]) => {
-      const status = data.score >= 90 ? '🟢' : data.score >= 70 ? '🟡' : '🔴';
+      const status = data.score >= 90 ? "🟢" : data.score >= 70 ? "🟡" : "🔴";
       console.log(
-        `  ${status} ${name}: ${data.score.toFixed(1)}% (weight: ${(data.weight * 100).toFixed(0)}%)`,
+        `  ${status} ${name}: ${data.score.toFixed(1)}% (weight: ${(data.weight * 100).toFixed(0)}%)`
       );
     });
 
     if (breakdown.recommendations.length > 0) {
-      console.log('\nTop Recommendations:');
+      console.log("\nTop Recommendations:");
       breakdown.recommendations.slice(0, 3).forEach((rec, index) => {
         console.log(`  ${index + 1}. ${rec.area}: ${rec.action}`);
       });
@@ -388,16 +371,14 @@ if (require.main === module) {
 
   // Parse command line arguments
   args.forEach((arg) => {
-    const [key, value] = arg.split('=');
-    const cleanKey = key.replace('--', '');
+    const [key, value] = arg.split("=");
+    const cleanKey = key.replace("--", "");
     metrics[cleanKey] = parseFloat(value) || 0;
   });
 
   if (Object.keys(metrics).length === 0) {
-    console.error('❌ No metrics provided');
-    console.error(
-      'Usage: node calculate-quality-score.js --style-errors=5 --link-errors=2 ...',
-    );
+    console.error("❌ No metrics provided");
+    console.error("Usage: node calculate-quality-score.js --style-errors=5 --link-errors=2 ...");
     process.exit(1);
   }
 
@@ -407,9 +388,7 @@ if (require.main === module) {
   // Output for GitHub Actions
   console.log(`\n::set-output name=score::${score}`);
   console.log(`::set-output name=grade::${calculator.getQualityGrade(score)}`);
-  console.log(
-    `::set-output name=badge-color::${calculator.getBadgeColor(score)}`,
-  );
+  console.log(`::set-output name=badge-color::${calculator.getBadgeColor(score)}`);
 
   // Exit with appropriate code
   process.exit(score >= 85 ? 0 : 1);

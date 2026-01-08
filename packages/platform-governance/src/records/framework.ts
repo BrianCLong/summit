@@ -1,8 +1,8 @@
-import crypto from 'crypto';
-import { z } from 'zod';
+import crypto from "crypto";
+import { z } from "zod";
 
-export type RecordDomain = 'event' | 'object' | 'message' | 'file';
-export type ImmutabilityMode = 'append-only' | 'versioned';
+export type RecordDomain = "event" | "object" | "message" | "file";
+export type ImmutabilityMode = "append-only" | "versioned";
 
 export interface DomainDefinition {
   domain: RecordDomain;
@@ -12,13 +12,7 @@ export interface DomainDefinition {
   defaultImmutability?: ImmutabilityMode;
 }
 
-const ClassificationSchema = z.enum([
-  'public',
-  'internal',
-  'restricted',
-  'confidential',
-  'secret',
-]);
+const ClassificationSchema = z.enum(["public", "internal", "restricted", "confidential", "secret"]);
 
 export const RecordMetadataSchema = z.object({
   owner: z.string(),
@@ -37,7 +31,7 @@ export type RecordMetadata = z.infer<typeof RecordMetadataSchema>;
 
 export const RecordTemplateSchema = z.object({
   id: z.string(),
-  domain: z.enum(['event', 'object', 'message', 'file']),
+  domain: z.enum(["event", "object", "message", "file"]),
   name: z.string(),
   description: z.string(),
   defaultMetadata: RecordMetadataSchema,
@@ -67,9 +61,9 @@ export type RecordLineage = z.infer<typeof RecordLineageSchema>;
 
 export const RecordEntrySchema = z.object({
   id: z.string(),
-  domain: z.enum(['event', 'object', 'message', 'file']),
+  domain: z.enum(["event", "object", "message", "file"]),
   type: z.string(),
-  immutability: z.enum(['append-only', 'versioned']),
+  immutability: z.enum(["append-only", "versioned"]),
   metadata: RecordMetadataSchema,
   lineage: RecordLineageSchema,
   versions: z.array(RecordVersionSchema),
@@ -108,7 +102,7 @@ export interface IntegrityViolation {
 
 export interface AuditEvent {
   recordId: string;
-  action: 'create' | 'update' | 'export' | 'delete';
+  action: "create" | "update" | "export" | "delete";
   actor: string;
   timestamp: Date;
   details?: Record<string, unknown>;
@@ -117,12 +111,12 @@ export interface AuditEvent {
 }
 
 function calculateHash(payload: unknown, previousHash?: string): string {
-  const hash = crypto.createHash('sha256');
+  const hash = crypto.createHash("sha256");
   hash.update(JSON.stringify(payload));
   if (previousHash) {
     hash.update(previousHash);
   }
-  return hash.digest('hex');
+  return hash.digest("hex");
 }
 
 function diffObjects(before: any, after: any): Record<string, unknown> {
@@ -140,20 +134,20 @@ function diffObjects(before: any, after: any): Record<string, unknown> {
 
 function assertRequiredFields(required: string[], data: unknown, label: string): void {
   if (!required.length) return;
-  if (typeof data !== 'object' || data === null) {
-    throw new Error(`${label} is missing required fields: ${required.join(', ')}`);
+  if (typeof data !== "object" || data === null) {
+    throw new Error(`${label} is missing required fields: ${required.join(", ")}`);
   }
-  const missing = required.filter(key => !(key in (data as Record<string, unknown>)));
+  const missing = required.filter((key) => !(key in (data as Record<string, unknown>)));
   if (missing.length) {
-    throw new Error(`${label} is missing required fields: ${missing.join(', ')}`);
+    throw new Error(`${label} is missing required fields: ${missing.join(", ")}`);
   }
 }
 
 export class AuditTrail {
   private events: AuditEvent[] = [];
 
-  record(event: Omit<AuditEvent, 'hash' | 'previousHash'> & { previousHash?: string }): AuditEvent {
-    const previousHash = event.previousHash ?? this.events.at(-1)?.hash ?? '';
+  record(event: Omit<AuditEvent, "hash" | "previousHash"> & { previousHash?: string }): AuditEvent {
+    const previousHash = event.previousHash ?? this.events.at(-1)?.hash ?? "";
     const fullEvent: AuditEvent = {
       ...event,
       previousHash,
@@ -168,7 +162,7 @@ export class AuditTrail {
   }
 
   verifyChain(): boolean {
-    let previousHash = '';
+    let previousHash = "";
     for (const evt of this.events) {
       const recalculated = calculateHash({ ...evt, previousHash: evt.previousHash });
       if (recalculated !== evt.hash || evt.previousHash !== previousHash) {
@@ -228,7 +222,8 @@ export class RecordFramework {
       assertRequiredFields(domainDefinition.requiredFields, params.data, `Domain ${params.domain}`);
     }
 
-    const immutabilityMode = params.immutability ?? domainDefinition?.defaultImmutability ?? 'versioned';
+    const immutabilityMode =
+      params.immutability ?? domainDefinition?.defaultImmutability ?? "versioned";
 
     const version: RecordVersion = RecordVersionSchema.parse({
       versionId: crypto.randomUUID(),
@@ -251,7 +246,7 @@ export class RecordFramework {
     this.records.set(recordId, entry);
     this.auditTrail.record({
       recordId,
-      action: 'create',
+      action: "create",
       actor: params.createdBy,
       timestamp: version.timestamp,
       details: { type: params.type, domain: params.domain },
@@ -260,23 +255,30 @@ export class RecordFramework {
     return entry;
   }
 
-  applyTemplate(templateId: string, overrides: {
-    data: unknown;
-    createdBy: string;
-    type?: string;
-    lineage?: Partial<RecordLineage>;
-    metadata?: Partial<RecordMetadata>;
-  }): RecordEntry {
+  applyTemplate(
+    templateId: string,
+    overrides: {
+      data: unknown;
+      createdBy: string;
+      type?: string;
+      lineage?: Partial<RecordLineage>;
+      metadata?: Partial<RecordMetadata>;
+    }
+  ): RecordEntry {
     const template = this.templates.get(templateId);
     if (!template) {
       throw new Error(`Template ${templateId} not found`);
     }
-    const metadata = { ...template.defaultMetadata, ...overrides.metadata, templateId } as RecordMetadata;
+    const metadata = {
+      ...template.defaultMetadata,
+      ...overrides.metadata,
+      templateId,
+    } as RecordMetadata;
     assertRequiredFields(template.requiredFields, overrides.data, `Template ${templateId}`);
     return this.createRecord({
       domain: template.domain,
       type: overrides.type ?? template.name,
-      immutability: 'versioned',
+      immutability: "versioned",
       metadata,
       data: overrides.data,
       createdBy: overrides.createdBy,
@@ -288,28 +290,37 @@ export class RecordFramework {
     const parent = this.records.get(recordId);
     const child = this.records.get(childId);
     if (!parent || !child) {
-      throw new Error('Invalid lineage link');
+      throw new Error("Invalid lineage link");
     }
     parent.lineage.children.push(childId);
     child.lineage.parents.push(recordId);
   }
 
-  appendVersion(recordId: string, data: unknown, createdBy: string, reason?: string): RecordVersion {
+  appendVersion(
+    recordId: string,
+    data: unknown,
+    createdBy: string,
+    reason?: string
+  ): RecordVersion {
     const record = this.records.get(recordId);
     if (!record) {
-      throw new Error('Record not found');
+      throw new Error("Record not found");
     }
 
     const latest = record.versions.at(-1);
-    const diff = record.immutability === 'versioned'
-      ? diffObjects(latest?.data, data)
-      : undefined;
+    const diff = record.immutability === "versioned" ? diffObjects(latest?.data, data) : undefined;
 
-    if (record.immutability === 'append-only' && latest) {
+    if (record.immutability === "append-only" && latest) {
       const attemptedDiff = diffObjects(latest.data, data);
-      const breakingKeys = Object.entries(attemptedDiff).filter(([, change]) => (change as any).before !== undefined && JSON.stringify((change as any).before) !== JSON.stringify((change as any).after));
+      const breakingKeys = Object.entries(attemptedDiff).filter(
+        ([, change]) =>
+          (change as any).before !== undefined &&
+          JSON.stringify((change as any).before) !== JSON.stringify((change as any).after)
+      );
       if (breakingKeys.length) {
-        throw new Error(`Append-only records cannot modify existing fields: ${breakingKeys.map(([k]) => k).join(', ')}`);
+        throw new Error(
+          `Append-only records cannot modify existing fields: ${breakingKeys.map(([k]) => k).join(", ")}`
+        );
       }
     }
 
@@ -326,7 +337,7 @@ export class RecordFramework {
     record.versions.push(version);
     this.auditTrail.record({
       recordId,
-      action: 'update',
+      action: "update",
       actor: createdBy,
       timestamp: version.timestamp,
       details: { reason },
@@ -343,7 +354,7 @@ export class RecordFramework {
       if (query.classification && record.metadata.classification !== query.classification) continue;
       if (query.domain && record.domain !== query.domain) continue;
       if (query.type && record.type !== query.type) continue;
-      if (query.tags && !query.tags.every(tag => record.metadata.tags.includes(tag))) continue;
+      if (query.tags && !query.tags.every((tag) => record.metadata.tags.includes(tag))) continue;
 
       const createdAt = record.versions[0]?.timestamp;
       if (!createdAt) continue;
@@ -355,7 +366,7 @@ export class RecordFramework {
   }
 
   exportBundle(recordIds: string[]): ExportBundle {
-    const manifest: ExportBundle['manifest'] = [];
+    const manifest: ExportBundle["manifest"] = [];
     const payload: Record<string, unknown> = {};
 
     for (const id of recordIds) {
@@ -366,8 +377,8 @@ export class RecordFramework {
       payload[id] = { ...record, versions: record.versions };
       this.auditTrail.record({
         recordId: id,
-        action: 'export',
-        actor: 'system',
+        action: "export",
+        actor: "system",
         timestamp: new Date(),
         details: { versionId: latest.versionId },
         previousHash: this.auditTrail.getEvents().at(-1)?.hash,
@@ -380,7 +391,9 @@ export class RecordFramework {
 
   verifyIntegrity(recordId?: string): IntegrityViolation[] {
     const violations: IntegrityViolation[] = [];
-    const records = recordId ? [this.records.get(recordId)].filter(Boolean) as RecordEntry[] : [...this.records.values()];
+    const records = recordId
+      ? ([this.records.get(recordId)].filter(Boolean) as RecordEntry[])
+      : [...this.records.values()];
 
     for (const record of records) {
       let previousHash: string | undefined;
@@ -410,13 +423,13 @@ export class RecordFramework {
   deleteRecord(recordId: string, actor: string, attestation: string): void {
     const record = this.records.get(recordId);
     if (!record) {
-      throw new Error('Record not found');
+      throw new Error("Record not found");
     }
     record.deletedAt = new Date();
     record.deletionAttestation = attestation;
     this.auditTrail.record({
       recordId,
-      action: 'delete',
+      action: "delete",
       actor,
       timestamp: record.deletedAt,
       details: { attestation },
@@ -430,7 +443,7 @@ export class RecordFramework {
 
   retireLegacyPath(domain: RecordDomain): void {
     if (!this.migratedDomains.has(domain)) {
-      throw new Error('Cannot retire legacy paths before migration');
+      throw new Error("Cannot retire legacy paths before migration");
     }
     this.retiredLegacy.add(domain);
   }
@@ -459,21 +472,27 @@ export interface AccessScope {
 }
 
 export class ScopedRecordApi {
-  constructor(private readonly framework: RecordFramework, private readonly scope: AccessScope) { }
+  constructor(
+    private readonly framework: RecordFramework,
+    private readonly scope: AccessScope
+  ) {}
 
   private assertAccess(record: RecordEntry): void {
     if (this.scope.allowedDomains && !this.scope.allowedDomains.includes(record.domain)) {
-      throw new Error('Domain not permitted for actor');
+      throw new Error("Domain not permitted for actor");
     }
-    if (this.scope.allowedClassifications && !this.scope.allowedClassifications.includes(record.metadata.classification)) {
-      throw new Error('Classification not permitted for actor');
+    if (
+      this.scope.allowedClassifications &&
+      !this.scope.allowedClassifications.includes(record.metadata.classification)
+    ) {
+      throw new Error("Classification not permitted for actor");
     }
     if (this.scope.owners && !this.scope.owners.includes(record.metadata.owner)) {
-      throw new Error('Owner scope violated');
+      throw new Error("Owner scope violated");
     }
   }
 
-  create(params: Parameters<RecordFramework['createRecord']>[0]): RecordEntry {
+  create(params: Parameters<RecordFramework["createRecord"]>[0]): RecordEntry {
     const record = this.framework.createRecord(params);
     this.assertAccess(record);
     return record;
@@ -481,7 +500,7 @@ export class ScopedRecordApi {
 
   search(query: SearchQuery): RecordEntry[] {
     const results = this.framework.search(query);
-    return results.filter(r => {
+    return results.filter((r) => {
       try {
         this.assertAccess(r);
         return true;
@@ -494,7 +513,7 @@ export class ScopedRecordApi {
   append(recordId: string, data: unknown, createdBy: string, reason?: string): RecordVersion {
     const record = this.framework.getRecord(recordId);
     if (!record) {
-      throw new Error('Record not found');
+      throw new Error("Record not found");
     }
     this.assertAccess(record);
     return this.framework.appendVersion(recordId, data, createdBy, reason);
@@ -511,7 +530,7 @@ export class ScopedRecordApi {
   delete(recordId: string, actor: string, attestation: string): void {
     const record = this.framework.getRecord(recordId);
     if (!record) {
-      throw new Error('Record not found');
+      throw new Error("Record not found");
     }
     this.assertAccess(record);
     this.framework.deleteRecord(recordId, actor, attestation);
@@ -522,6 +541,9 @@ export function createRecordFramework(): RecordFramework {
   return new RecordFramework();
 }
 
-export function createScopedRecordApi(framework: RecordFramework, scope: AccessScope): ScopedRecordApi {
+export function createScopedRecordApi(
+  framework: RecordFramework,
+  scope: AccessScope
+): ScopedRecordApi {
   return new ScopedRecordApi(framework, scope);
 }

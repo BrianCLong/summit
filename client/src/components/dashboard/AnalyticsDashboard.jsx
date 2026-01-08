@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Grid,
@@ -32,7 +32,7 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-} from '@mui/material';
+} from "@mui/material";
 import {
   TrendingUp,
   TrendingDown,
@@ -62,10 +62,10 @@ import {
   Flag,
   Search,
   Wifi,
-  WifiOff
-} from '@mui/icons-material';
-import { formatDistanceToNow, format } from 'date-fns';
-import useDashboardSocket from '../../hooks/useDashboardSocket';
+  WifiOff,
+} from "@mui/icons-material";
+import { formatDistanceToNow, format } from "date-fns";
+import useDashboardSocket from "../../hooks/useDashboardSocket";
 
 // Initial Mock data
 const initialMetrics = {
@@ -94,48 +94,47 @@ const initialMetrics = {
     dailyQueries: 127,
     weeklyAnalyses: 45,
     collaborators: 12,
-    avgSessionTime: '2.3h',
+    avgSessionTime: "2.3h",
   },
 };
 
 const initialRecentActivity = [
   {
     id: 1,
-    type: 'analysis',
-    title: 'Centrality Analysis Completed',
-    description: 'Network centrality analysis identified 5 key hub entities',
+    type: "analysis",
+    title: "Centrality Analysis Completed",
+    description: "Network centrality analysis identified 5 key hub entities",
     timestamp: new Date(Date.now() - 1000 * 60 * 15),
-    user: 'John Analyst',
-    status: 'completed',
-    priority: 'medium',
+    user: "John Analyst",
+    status: "completed",
+    priority: "medium",
   },
   {
     id: 2,
-    type: 'anomaly',
-    title: 'Anomaly Detected',
-    description:
-      'Unusual connection pattern found between Organization A and Location B',
+    type: "anomaly",
+    title: "Anomaly Detected",
+    description: "Unusual connection pattern found between Organization A and Location B",
     timestamp: new Date(Date.now() - 1000 * 60 * 45),
-    user: 'AI System',
-    status: 'alert',
-    priority: 'high',
+    user: "AI System",
+    status: "alert",
+    priority: "high",
   },
 ];
 
 const initialInsights = [
   {
     id: 1,
-    title: 'Network Growth Trend',
-    description: 'Entity connections have increased by 23% this month',
+    title: "Network Growth Trend",
+    description: "Entity connections have increased by 23% this month",
     confidence: 0.89,
-    trend: 'up',
-    category: 'network',
+    trend: "up",
+    category: "network",
     actionable: true,
   },
 ];
 
 function AnalyticsDashboard() {
-  const [timeRange, setTimeRange] = useState('7d');
+  const [timeRange, setTimeRange] = useState("7d");
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   const [detailDialog, setDetailDialog] = useState(null);
@@ -156,41 +155,28 @@ function AnalyticsDashboard() {
     setRefreshing(false);
   };
 
-  const MetricCard = ({
-    title,
-    value,
-    subtitle,
-    icon,
-    trend,
-    color = 'primary',
-  }) => (
-    <Card sx={{ height: '100%' }}>
+  const MetricCard = ({ title, value, subtitle, icon, trend, color = "primary" }) => (
+    <Card sx={{ height: "100%" }}>
       <CardContent>
         <Box
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
             mb: 2,
           }}
         >
-          <Avatar sx={{ bgcolor: `${color}.main`, width: 48, height: 48 }}>
-            {icon}
-          </Avatar>
+          <Avatar sx={{ bgcolor: `${color}.main`, width: 48, height: 48 }}>{icon}</Avatar>
           {trend && (
             <Chip
-              icon={trend === 'up' ? <TrendingUp /> : <TrendingDown />}
-              label={trend === 'up' ? '+12%' : '-5%'}
-              color={trend === 'up' ? 'success' : 'warning'}
+              icon={trend === "up" ? <TrendingUp /> : <TrendingDown />}
+              label={trend === "up" ? "+12%" : "-5%"}
+              color={trend === "up" ? "success" : "warning"}
               size="small"
             />
           )}
         </Box>
-        <Typography
-          variant="h4"
-          component="div"
-          sx={{ fontWeight: 'bold', mb: 1 }}
-        >
+        <Typography variant="h4" component="div" sx={{ fontWeight: "bold", mb: 1 }}>
           {value}
         </Typography>
         <Typography variant="h6" color="text.secondary" gutterBottom>
@@ -209,32 +195,32 @@ function AnalyticsDashboard() {
     <ListItem
       sx={{
         border: 1,
-        borderColor: 'divider',
+        borderColor: "divider",
         borderRadius: 2,
         mb: 1,
-        bgcolor: 'background.paper',
+        bgcolor: "background.paper",
       }}
     >
       <ListItemIcon>
         <Avatar
           sx={{
             bgcolor:
-              activity.status === 'alert'
-                ? 'error.main'
-                : activity.status === 'completed'
-                  ? 'success.main'
-                  : activity.status === 'in-progress'
-                    ? 'warning.main'
-                    : 'info.main',
+              activity.status === "alert"
+                ? "error.main"
+                : activity.status === "completed"
+                  ? "success.main"
+                  : activity.status === "in-progress"
+                    ? "warning.main"
+                    : "info.main",
             width: 32,
             height: 32,
           }}
         >
-          {activity.type === 'analysis' ? (
+          {activity.type === "analysis" ? (
             <Analytics />
-          ) : activity.type === 'anomaly' ? (
+          ) : activity.type === "anomaly" ? (
             <BugReport />
-          ) : activity.type === 'investigation' ? (
+          ) : activity.type === "investigation" ? (
             <Search />
           ) : (
             <Group />
@@ -243,19 +229,19 @@ function AnalyticsDashboard() {
       </ListItemIcon>
       <ListItemText
         primary={
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
               {activity.title}
             </Typography>
             <Chip
               label={activity.priority}
               size="small"
               color={
-                activity.priority === 'high'
-                  ? 'error'
-                  : activity.priority === 'medium'
-                    ? 'warning'
-                    : 'default'
+                activity.priority === "high"
+                  ? "error"
+                  : activity.priority === "medium"
+                    ? "warning"
+                    : "default"
               }
               variant="outlined"
             />
@@ -267,7 +253,7 @@ function AnalyticsDashboard() {
               {activity.description}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              {activity.user} •{' '}
+              {activity.user} •{" "}
               {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
             </Typography>
           </>
@@ -281,31 +267,28 @@ function AnalyticsDashboard() {
       <CardContent>
         <Box
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
             mb: 2,
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Psychology color="primary" />
-            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
               {insight.title}
             </Typography>
           </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Chip
               label={`${(insight.confidence * 100).toFixed(0)}%`}
               size="small"
               color="primary"
               variant="outlined"
             />
-            {insight.trend !== 'neutral' && (
-              <IconButton
-                size="small"
-                color={insight.trend === 'up' ? 'success' : 'warning'}
-              >
-                {insight.trend === 'up' ? <TrendingUp /> : <TrendingDown />}
+            {insight.trend !== "neutral" && (
+              <IconButton size="small" color={insight.trend === "up" ? "success" : "warning"}>
+                {insight.trend === "up" ? <TrendingUp /> : <TrendingDown />}
               </IconButton>
             )}
           </Box>
@@ -317,9 +300,9 @@ function AnalyticsDashboard() {
 
         <Box
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
           }}
         >
           <Chip label={insight.category} size="small" variant="outlined" />
@@ -338,14 +321,14 @@ function AnalyticsDashboard() {
       {/* Header */}
       <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
           mb: 3,
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Typography variant="h4" component="h1" sx={{ fontWeight: "bold" }}>
             Analytics Dashboard
           </Typography>
           <Chip
@@ -356,7 +339,7 @@ function AnalyticsDashboard() {
             size="small"
           />
         </Box>
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: "flex", gap: 1 }}>
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>Time Range</InputLabel>
             <Select
@@ -372,9 +355,7 @@ function AnalyticsDashboard() {
           </FormControl>
           <Button
             variant="outlined"
-            startIcon={
-              refreshing ? <CircularProgress size={16} /> : <Refresh />
-            }
+            startIcon={refreshing ? <CircularProgress size={16} /> : <Refresh />}
             onClick={handleRefresh}
             disabled={refreshing}
           >
@@ -435,13 +416,13 @@ function AnalyticsDashboard() {
             <CardContent>
               <Box
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
                   mb: 2,
                 }}
               >
-                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h6" sx={{ fontWeight: "bold" }}>
                   Network Overview
                 </Typography>
                 <IconButton size="small">
@@ -459,12 +440,8 @@ function AnalyticsDashboard() {
                 {activeTab === 0 && (
                   <Grid container spacing={2}>
                     <Grid item xs={6}>
-                      <Box sx={{ textAlign: 'center', p: 2 }}>
-                        <Typography
-                          variant="h3"
-                          color="primary.main"
-                          sx={{ fontWeight: 'bold' }}
-                        >
+                      <Box sx={{ textAlign: "center", p: 2 }}>
+                        <Typography variant="h3" color="primary.main" sx={{ fontWeight: "bold" }}>
                           {displayMetrics.network.totalEdges.toLocaleString()}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -473,12 +450,8 @@ function AnalyticsDashboard() {
                       </Box>
                     </Grid>
                     <Grid item xs={6}>
-                      <Box sx={{ textAlign: 'center', p: 2 }}>
-                        <Typography
-                          variant="h3"
-                          color="secondary.main"
-                          sx={{ fontWeight: 'bold' }}
-                        >
+                      <Box sx={{ textAlign: "center", p: 2 }}>
+                        <Typography variant="h3" color="secondary.main" sx={{ fontWeight: "bold" }}>
                           {displayMetrics.network.density.toFixed(2)}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -487,12 +460,8 @@ function AnalyticsDashboard() {
                       </Box>
                     </Grid>
                     <Grid item xs={6}>
-                      <Box sx={{ textAlign: 'center', p: 2 }}>
-                        <Typography
-                          variant="h3"
-                          color="success.main"
-                          sx={{ fontWeight: 'bold' }}
-                        >
+                      <Box sx={{ textAlign: "center", p: 2 }}>
+                        <Typography variant="h3" color="success.main" sx={{ fontWeight: "bold" }}>
                           {displayMetrics.network.avgDegree.toFixed(1)}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -501,12 +470,8 @@ function AnalyticsDashboard() {
                       </Box>
                     </Grid>
                     <Grid item xs={6}>
-                      <Box sx={{ textAlign: 'center', p: 2 }}>
-                        <Typography
-                          variant="h3"
-                          color="warning.main"
-                          sx={{ fontWeight: 'bold' }}
-                        >
+                      <Box sx={{ textAlign: "center", p: 2 }}>
+                        <Typography variant="h3" color="warning.main" sx={{ fontWeight: "bold" }}>
                           {displayMetrics.network.clusters}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -518,15 +483,13 @@ function AnalyticsDashboard() {
                 )}
 
                 {activeTab === 1 && (
-                  <Box sx={{ p: 2, textAlign: 'center' }}>
+                  <Box sx={{ p: 2, textAlign: "center" }}>
                     <Alert severity="info" sx={{ mb: 2 }}>
-                      Network growth visualization would be rendered here using
-                      Chart.js or D3.js
+                      Network growth visualization would be rendered here using Chart.js or D3.js
                     </Alert>
                     <Typography variant="body1" color="text.secondary">
-                      Interactive time-series chart showing network growth
-                      patterns, entity additions, and relationship formations
-                      over time.
+                      Interactive time-series chart showing network growth patterns, entity
+                      additions, and relationship formations over time.
                     </Typography>
                   </Box>
                 )}
@@ -537,9 +500,8 @@ function AnalyticsDashboard() {
                       Cluster analysis visualization would be rendered here
                     </Alert>
                     <Typography variant="body1" color="text.secondary">
-                      Interactive cluster visualization showing community
-                      detection results, cluster sizes, and inter-cluster
-                      relationships.
+                      Interactive cluster visualization showing community detection results, cluster
+                      sizes, and inter-cluster relationships.
                     </Typography>
                   </Box>
                 )}
@@ -552,7 +514,7 @@ function AnalyticsDashboard() {
         <Grid item xs={12} lg={4}>
           <Card sx={{ height: 400 }}>
             <CardContent>
-              <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+              <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
                 Quick Statistics
               </Typography>
 
@@ -591,10 +553,7 @@ function AnalyticsDashboard() {
                   <ListItemIcon>
                     <CheckCircle color="info" />
                   </ListItemIcon>
-                  <ListItemText
-                    primary="System Health"
-                    secondary="All systems operational"
-                  />
+                  <ListItemText primary="System Health" secondary="All systems operational" />
                 </ListItem>
               </List>
 
@@ -606,22 +565,20 @@ function AnalyticsDashboard() {
               <Box sx={{ mb: 1 }}>
                 <Box
                   sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
+                    display: "flex",
+                    justifyContent: "space-between",
                     mb: 0.5,
                   }}
                 >
                   <Typography variant="caption">Active</Typography>
                   <Typography variant="caption">
-                    {displayMetrics.investigations.active}/
-                    {displayMetrics.investigations.total}
+                    {displayMetrics.investigations.active}/{displayMetrics.investigations.total}
                   </Typography>
                 </Box>
                 <LinearProgress
                   variant="determinate"
                   value={
-                    (displayMetrics.investigations.active /
-                      displayMetrics.investigations.total) *
+                    (displayMetrics.investigations.active / displayMetrics.investigations.total) *
                     100
                   }
                   sx={{ height: 8, borderRadius: 4 }}
@@ -637,13 +594,13 @@ function AnalyticsDashboard() {
             <CardContent>
               <Box
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
                   mb: 2,
                 }}
               >
-                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h6" sx={{ fontWeight: "bold" }}>
                   Recent Activity
                 </Typography>
                 <Badge badgeContent={displayActivity.length} color="primary">
@@ -651,9 +608,11 @@ function AnalyticsDashboard() {
                 </Badge>
               </Box>
 
-              <List sx={{ maxHeight: 400, overflow: 'auto' }}>
+              <List sx={{ maxHeight: 400, overflow: "auto" }}>
                 {displayActivity.length === 0 ? (
-                  <ListItem><ListItemText primary="No recent activity" /></ListItem>
+                  <ListItem>
+                    <ListItemText primary="No recent activity" />
+                  </ListItem>
                 ) : (
                   displayActivity.map((activity) => (
                     <ActivityItem key={activity.id} activity={activity} />
@@ -670,21 +629,23 @@ function AnalyticsDashboard() {
             <CardContent>
               <Box
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
                   mb: 2,
                 }}
               >
-                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h6" sx={{ fontWeight: "bold" }}>
                   AI Insights
                 </Typography>
                 <Chip label="Live" color="success" size="small" />
               </Box>
 
-              <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
+              <Box sx={{ maxHeight: 400, overflow: "auto" }}>
                 {displayInsights.length === 0 ? (
-                  <Typography variant="body2" sx={{ p: 2 }}>Waiting for insights...</Typography>
+                  <Typography variant="body2" sx={{ p: 2 }}>
+                    Waiting for insights...
+                  </Typography>
                 ) : (
                   displayInsights.map((insight) => (
                     <InsightCard key={insight.id} insight={insight} />
@@ -699,7 +660,7 @@ function AnalyticsDashboard() {
         <Grid item xs={12}>
           <Accordion>
             <AccordionSummary expandIcon={<ExpandMore />}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 <Flag color="error" />
                 <Typography variant="h6">Alert Summary</Typography>
                 <Badge badgeContent={displayMetrics.alerts.high} color="error">
@@ -713,12 +674,12 @@ function AnalyticsDashboard() {
                   <Paper
                     sx={{
                       p: 2,
-                      textAlign: 'center',
-                      bgcolor: 'error.main',
-                      color: 'error.contrastText',
+                      textAlign: "center",
+                      bgcolor: "error.main",
+                      color: "error.contrastText",
                     }}
                   >
-                    <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
+                    <Typography variant="h3" sx={{ fontWeight: "bold" }}>
                       {displayMetrics.alerts.high}
                     </Typography>
                     <Typography variant="body2">High Priority</Typography>
@@ -728,12 +689,12 @@ function AnalyticsDashboard() {
                   <Paper
                     sx={{
                       p: 2,
-                      textAlign: 'center',
-                      bgcolor: 'warning.main',
-                      color: 'warning.contrastText',
+                      textAlign: "center",
+                      bgcolor: "warning.main",
+                      color: "warning.contrastText",
                     }}
                   >
-                    <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
+                    <Typography variant="h3" sx={{ fontWeight: "bold" }}>
                       {displayMetrics.alerts.medium}
                     </Typography>
                     <Typography variant="body2">Medium Priority</Typography>
@@ -743,12 +704,12 @@ function AnalyticsDashboard() {
                   <Paper
                     sx={{
                       p: 2,
-                      textAlign: 'center',
-                      bgcolor: 'info.main',
-                      color: 'info.contrastText',
+                      textAlign: "center",
+                      bgcolor: "info.main",
+                      color: "info.contrastText",
                     }}
                   >
-                    <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
+                    <Typography variant="h3" sx={{ fontWeight: "bold" }}>
                       {displayMetrics.alerts.low}
                     </Typography>
                     <Typography variant="body2">Low Priority</Typography>

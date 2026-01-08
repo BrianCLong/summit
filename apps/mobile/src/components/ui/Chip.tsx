@@ -4,36 +4,33 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
 import { X } from 'lucide-react-native';
 
-const chipVariants = cva(
-  'flex-row items-center rounded-full px-3 py-1.5',
-  {
-    variants: {
-      variant: {
-        default: 'bg-dark-elevated',
-        primary: 'bg-intel-600/20 border border-intel-600/50',
-        secondary: 'bg-dark-muted/20 border border-dark-muted',
-        success: 'bg-green-600/20 border border-green-600/50',
-        warning: 'bg-amber-600/20 border border-amber-600/50',
-        destructive: 'bg-red-600/20 border border-red-600/50',
-      },
-      selected: {
-        true: '',
-        false: '',
-      },
+const chipVariants = cva('flex-row items-center rounded-full px-3 py-1.5', {
+  variants: {
+    variant: {
+      default: 'bg-dark-elevated',
+      primary: 'bg-intel-600/20 border border-intel-600/50',
+      secondary: 'bg-dark-muted/20 border border-dark-muted',
+      success: 'bg-green-600/20 border border-green-600/50',
+      warning: 'bg-amber-600/20 border border-amber-600/50',
+      destructive: 'bg-red-600/20 border border-red-600/50',
     },
-    compoundVariants: [
-      {
-        variant: 'default',
-        selected: true,
-        className: 'bg-intel-600',
-      },
-    ],
-    defaultVariants: {
-      variant: 'default',
-      selected: false,
+    selected: {
+      true: '',
+      false: '',
     },
   },
-);
+  compoundVariants: [
+    {
+      variant: 'default',
+      selected: true,
+      className: 'bg-intel-600',
+    },
+  ],
+  defaultVariants: {
+    variant: 'default',
+    selected: false,
+  },
+});
 
 const chipTextVariants = cva('text-sm font-medium', {
   variants: {

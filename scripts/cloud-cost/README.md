@@ -7,16 +7,19 @@ This directory contains shell scripts for analyzing AWS and Kubernetes resource 
 ### Required Tools
 
 1. **kubectl** - Kubernetes command-line tool
+
    ```bash
    kubectl version --client
    ```
 
 2. **AWS CLI v2** - AWS command-line interface
+
    ```bash
    aws --version
    ```
 
 3. **jq** - JSON processor
+
    ```bash
    jq --version
    ```
@@ -29,6 +32,7 @@ This directory contains shell scripts for analyzing AWS and Kubernetes resource 
 ### AWS Configuration
 
 Ensure your AWS credentials are configured:
+
 ```bash
 aws configure
 # Or use environment variables:
@@ -40,6 +44,7 @@ export AWS_DEFAULT_REGION="us-east-1"
 ### Kubernetes Configuration
 
 Ensure kubectl is configured to connect to your EKS cluster:
+
 ```bash
 aws eks update-kubeconfig --name your-cluster-name --region us-east-1
 kubectl get nodes  # Verify connectivity
@@ -48,6 +53,7 @@ kubectl get nodes  # Verify connectivity
 ### Kubernetes Metrics Server (for `kubectl top`)
 
 If not already installed:
+
 ```bash
 kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 ```
@@ -57,14 +63,17 @@ kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/late
 ### Compute Analysis
 
 #### 1. `eks-node-utilization.sh`
+
 Identifies under-utilized EKS nodes by analyzing CPU/memory allocation and actual usage.
 
 **Usage:**
+
 ```bash
 ./eks-node-utilization.sh
 ```
 
 **Output:**
+
 - Allocatable resources per node
 - Pod resource requests vs. available capacity
 - Nodes with <40% CPU utilization
@@ -73,14 +82,17 @@ Identifies under-utilized EKS nodes by analyzing CPU/memory allocation and actua
 ---
 
 #### 2. `gpu-utilization.sh`
+
 Monitors GPU usage across all pods requesting GPUs.
 
 **Usage:**
+
 ```bash
 ./gpu-utilization.sh
 ```
 
 **Output:**
+
 - List of GPU pods
 - GPU utilization, memory usage, and temperature
 - Recommendations for GPU optimization (e.g., K80 → T4 migration)
@@ -90,14 +102,17 @@ Monitors GPU usage across all pods requesting GPUs.
 ---
 
 #### 3. `spot-coverage.sh`
+
 Calculates the percentage of workloads running on spot instances.
 
 **Usage:**
+
 ```bash
 ./spot-coverage.sh
 ```
 
 **Output:**
+
 - Total nodes vs. spot nodes
 - Spot coverage percentage
 - Workloads not tolerating spot instances
@@ -108,14 +123,17 @@ Calculates the percentage of workloads running on spot instances.
 ### Storage Analysis
 
 #### 4. `s3-bucket-analysis.sh`
+
 Analyzes S3 bucket sizes, lifecycle policies, and storage classes.
 
 **Usage:**
+
 ```bash
 ./s3-bucket-analysis.sh
 ```
 
 **Output:**
+
 - Bucket sizes in GB
 - Lifecycle policy status
 - Versioning status
@@ -124,6 +142,7 @@ Analyzes S3 bucket sizes, lifecycle policies, and storage classes.
 - Recommendations for lifecycle optimization
 
 **Required IAM Permissions:**
+
 - `s3:ListBucket`
 - `s3:GetBucketLifecycleConfiguration`
 - `s3:GetBucketVersioning`
@@ -132,34 +151,41 @@ Analyzes S3 bucket sizes, lifecycle policies, and storage classes.
 ---
 
 #### 5. `ebs-orphaned-volumes.sh`
+
 Finds unattached EBS volumes and old snapshots.
 
 **Usage:**
+
 ```bash
 ./ebs-orphaned-volumes.sh
 ```
 
 **Output:**
+
 - List of unattached volumes with sizes and types
 - Cost estimate for unattached volumes
 - Snapshots older than 90 days
 - Recommendations for cleanup
 
 **Required IAM Permissions:**
+
 - `ec2:DescribeVolumes`
 - `ec2:DescribeSnapshots`
 
 ---
 
 #### 6. `k8s-pvc-utilization.sh`
+
 Identifies over-provisioned Persistent Volume Claims in Kubernetes.
 
 **Usage:**
+
 ```bash
 ./k8s-pvc-utilization.sh
 ```
 
 **Output:**
+
 - PVC sizes and actual disk usage
 - Orphaned PVCs (not attached to any pod)
 - Recommendations for reducing PVC sizes
@@ -171,14 +197,17 @@ Identifies over-provisioned Persistent Volume Claims in Kubernetes.
 ### Database Analysis
 
 #### 7. `rds-utilization.sh`
+
 Analyzes RDS and Aurora CPU utilization and connection counts.
 
 **Usage:**
+
 ```bash
 ./rds-utilization.sh
 ```
 
 **Output:**
+
 - Instance class, engine, storage, and Multi-AZ status
 - Average CPU utilization (7-day average)
 - Average database connections
@@ -186,6 +215,7 @@ Analyzes RDS and Aurora CPU utilization and connection counts.
 - Recommendations for right-sizing
 
 **Required IAM Permissions:**
+
 - `rds:DescribeDBInstances`
 - `rds:DescribeDBClusters`
 - `cloudwatch:GetMetricStatistics`
@@ -193,14 +223,17 @@ Analyzes RDS and Aurora CPU utilization and connection counts.
 ---
 
 #### 8. `database-pod-metrics.sh`
+
 Checks Neo4j and Redis resource usage in Kubernetes.
 
 **Usage:**
+
 ```bash
 ./database-pod-metrics.sh
 ```
 
 **Output:**
+
 - Resource requests and limits for database pods
 - Actual CPU/memory usage
 - Redis-specific memory usage (from `redis-cli`)
@@ -211,14 +244,17 @@ Checks Neo4j and Redis resource usage in Kubernetes.
 ### Networking Analysis
 
 #### 9. `nat-gateway-costs.sh`
+
 Analyzes NAT Gateway data transfer costs.
 
 **Usage:**
+
 ```bash
 ./nat-gateway-costs.sh
 ```
 
 **Output:**
+
 - NAT Gateway IDs and data processed (last 7 days)
 - Estimated data transfer costs
 - Total estimated monthly cost
@@ -226,6 +262,7 @@ Analyzes NAT Gateway data transfer costs.
 - Recommendations for reducing NAT costs
 
 **Required IAM Permissions:**
+
 - `ec2:DescribeNatGateways`
 - `ec2:DescribeVpcEndpoints`
 - `cloudwatch:GetMetricStatistics`
@@ -233,14 +270,17 @@ Analyzes NAT Gateway data transfer costs.
 ---
 
 #### 10. `inter-az-traffic.sh`
+
 Identifies pods communicating across availability zones.
 
 **Usage:**
+
 ```bash
 ./inter-az-traffic.sh
 ```
 
 **Output:**
+
 - Node distribution by availability zone
 - Pods without topology-aware scheduling
 - Services without topology-aware hints
@@ -307,23 +347,23 @@ metadata:
   name: cost-audit
   namespace: ops
 spec:
-  schedule: "0 9 * * 1"  # Every Monday at 9 AM
+  schedule: "0 9 * * 1" # Every Monday at 9 AM
   jobTemplate:
     spec:
       template:
         spec:
           serviceAccountName: cost-auditor
           containers:
-          - name: cost-audit
-            image: your-registry/cost-audit:latest
-            command:
-            - /bin/bash
-            - -c
-            - |
-              cd /scripts &&
-              ./eks-node-utilization.sh &&
-              ./gpu-utilization.sh &&
-              ./spot-coverage.sh
+            - name: cost-audit
+              image: your-registry/cost-audit:latest
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  cd /scripts &&
+                  ./eks-node-utilization.sh &&
+                  ./gpu-utilization.sh &&
+                  ./spot-coverage.sh
           restartPolicy: OnFailure
 ```
 
@@ -372,12 +412,12 @@ kind: ClusterRole
 metadata:
   name: cost-auditor
 rules:
-- apiGroups: [""]
-  resources: ["nodes", "pods", "persistentvolumeclaims", "services"]
-  verbs: ["get", "list"]
-- apiGroups: ["metrics.k8s.io"]
-  resources: ["nodes", "pods"]
-  verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["nodes", "pods", "persistentvolumeclaims", "services"]
+    verbs: ["get", "list"]
+  - apiGroups: ["metrics.k8s.io"]
+    resources: ["nodes", "pods"]
+    verbs: ["get", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -388,9 +428,9 @@ roleRef:
   kind: ClusterRole
   name: cost-auditor
 subjects:
-- kind: ServiceAccount
-  name: cost-auditor
-  namespace: ops
+  - kind: ServiceAccount
+    name: cost-auditor
+    namespace: ops
 ```
 
 ## Troubleshooting
@@ -398,6 +438,7 @@ subjects:
 ### Issue: "command not found: jq"
 
 **Solution:**
+
 ```bash
 # Ubuntu/Debian
 sudo apt-get install jq
@@ -412,6 +453,7 @@ sudo yum install jq
 ### Issue: "command not found: bc"
 
 **Solution:**
+
 ```bash
 # Ubuntu/Debian
 sudo apt-get install bc
@@ -426,6 +468,7 @@ sudo yum install bc
 ### Issue: "Unable to connect to the server"
 
 **Solution:**
+
 ```bash
 # Update kubeconfig
 aws eks update-kubeconfig --name your-cluster-name --region us-east-1
@@ -437,6 +480,7 @@ kubectl cluster-info
 ### Issue: "metrics-server not available"
 
 **Solution:**
+
 ```bash
 # Install metrics-server
 kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
@@ -448,6 +492,7 @@ kubectl wait --for=condition=ready pod -l k8s-app=metrics-server -n kube-system 
 ### Issue: AWS CLI returns "An error occurred (UnauthorizedOperation)"
 
 **Solution:**
+
 ```bash
 # Check AWS credentials
 aws sts get-caller-identity

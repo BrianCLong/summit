@@ -3,8 +3,8 @@
  * Movement pattern analysis for tracking entities over time
  */
 
-import { GeoPoint, MovementTrack } from '@intelgraph/geospatial';
-import { haversineDistance, bearing } from '@intelgraph/geospatial';
+import { GeoPoint, MovementTrack } from "@intelgraph/geospatial";
+import { haversineDistance, bearing } from "@intelgraph/geospatial";
 
 export interface TrackPoint extends GeoPoint {
   timestamp: Date;
@@ -29,7 +29,7 @@ export interface StopEvent {
 }
 
 export interface MovementPattern {
-  type: 'linear' | 'circular' | 'random' | 'stationary' | 'periodic';
+  type: "linear" | "circular" | "random" | "stationary" | "periodic";
   confidence: number;
   description: string;
 }
@@ -81,9 +81,10 @@ export class MovementAnalyzer {
       bearings.push(segmentBearing);
     }
 
-    const duration = points[points.length - 1].timestamp && points[0].timestamp
-      ? (points[points.length - 1].timestamp!.getTime() - points[0].timestamp!.getTime()) / 1000
-      : 0;
+    const duration =
+      points[points.length - 1].timestamp && points[0].timestamp
+        ? (points[points.length - 1].timestamp!.getTime() - points[0].timestamp!.getTime()) / 1000
+        : 0;
 
     const averageSpeed = speeds.length > 0 ? speeds.reduce((a, b) => a + b, 0) / speeds.length : 0;
 
@@ -124,7 +125,9 @@ export class MovementAnalyzer {
       const p1 = points[i];
       const p2 = points[i + 1];
 
-      if (!p1.timestamp || !p2.timestamp) {continue;}
+      if (!p1.timestamp || !p2.timestamp) {
+        continue;
+      }
 
       const distance = haversineDistance(p1, p2);
 
@@ -181,18 +184,18 @@ export class MovementAnalyzer {
     // Stationary pattern
     if (metrics.averageSpeed < 0.1) {
       return {
-        type: 'stationary',
+        type: "stationary",
         confidence: 0.9,
-        description: 'Entity is mostly stationary',
+        description: "Entity is mostly stationary",
       };
     }
 
     // Linear pattern (low tortuosity)
     if (metrics.tortuosity < 1.2) {
       return {
-        type: 'linear',
+        type: "linear",
         confidence: 0.8,
-        description: 'Direct, linear movement pattern',
+        description: "Direct, linear movement pattern",
       };
     }
 
@@ -203,25 +206,25 @@ export class MovementAnalyzer {
     );
     if (metrics.tortuosity > 2 && startEndDistance < metrics.totalDistance * 0.1) {
       return {
-        type: 'circular',
+        type: "circular",
         confidence: 0.7,
-        description: 'Circular or looping movement pattern',
+        description: "Circular or looping movement pattern",
       };
     }
 
     // Random pattern (high tortuosity, many direction changes)
     if (metrics.tortuosity > 2) {
       return {
-        type: 'random',
+        type: "random",
         confidence: 0.6,
-        description: 'Random or exploratory movement pattern',
+        description: "Random or exploratory movement pattern",
       };
     }
 
     return {
-      type: 'linear',
+      type: "linear",
       confidence: 0.5,
-      description: 'General movement pattern',
+      description: "General movement pattern",
     };
   }
 
@@ -273,7 +276,9 @@ export class MovementAnalyzer {
    * Calculate circular mean of angles (for bearings)
    */
   private static circularMean(angles: number[]): number {
-    if (angles.length === 0) {return 0;}
+    if (angles.length === 0) {
+      return 0;
+    }
 
     let sumSin = 0;
     let sumCos = 0;

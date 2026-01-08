@@ -2,12 +2,12 @@ name: CI Perf
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'src/intelgraph/perf/**'
-      - 'tests/test_topk_fallback.py'
+      - "src/intelgraph/perf/**"
+      - "tests/test_topk_fallback.py"
 
 jobs:
   test-perf:

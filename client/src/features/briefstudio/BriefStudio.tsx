@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 /**
  * BriefStudio is a placeholder component for composing briefs with citations and exhibits.

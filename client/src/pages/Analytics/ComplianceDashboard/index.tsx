@@ -8,7 +8,7 @@
  * @module pages/Analytics/ComplianceDashboard
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback } from "react";
 import {
   Box,
   Paper,
@@ -33,7 +33,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Refresh as RefreshIcon,
   CheckCircle as CheckIcon,
@@ -44,13 +44,13 @@ import {
   Assignment as AssignmentIcon,
   Security as SecurityIcon,
   Timeline as TimelineIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 import {
   useComplianceSummary,
   useAuditReadiness,
   useFrameworkStatus,
   useControlStatus,
-} from '../../../hooks/useAnalytics';
+} from "../../../hooks/useAnalytics";
 
 // ============================================================================
 // Helper Components
@@ -58,19 +58,19 @@ import {
 
 const AuditReadinessGauge: React.FC<{ score: number }> = ({ score }) => {
   const getColor = () => {
-    if (score >= 80) return 'success.main';
-    if (score >= 60) return 'warning.main';
-    return 'error.main';
+    if (score >= 80) return "success.main";
+    if (score >= 60) return "warning.main";
+    return "error.main";
   };
 
   const getLabel = () => {
-    if (score >= 80) return 'Ready';
-    if (score >= 60) return 'Needs Work';
-    return 'At Risk';
+    if (score >= 80) return "Ready";
+    if (score >= 60) return "Needs Work";
+    return "At Risk";
   };
 
   return (
-    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+    <Box sx={{ position: "relative", display: "inline-flex" }}>
       <CircularProgress
         variant="determinate"
         value={score}
@@ -84,11 +84,11 @@ const AuditReadinessGauge: React.FC<{ score: number }> = ({ score }) => {
           left: 0,
           bottom: 0,
           right: 0,
-          position: 'absolute',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
+          position: "absolute",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         <Typography variant="h3" component="div" fontWeight="bold">
@@ -104,11 +104,11 @@ const AuditReadinessGauge: React.FC<{ score: number }> = ({ score }) => {
 
 const StatusIcon: React.FC<{ status: string }> = ({ status }) => {
   switch (status) {
-    case 'compliant':
+    case "compliant":
       return <CheckIcon color="success" />;
-    case 'partially_compliant':
+    case "partially_compliant":
       return <WarningIcon color="warning" />;
-    case 'non_compliant':
+    case "non_compliant":
       return <ErrorIcon color="error" />;
     default:
       return <HelpIcon color="disabled" />;
@@ -123,21 +123,19 @@ const FrameworkCard: React.FC<{
   compliant: number;
 }> = ({ framework, displayName, percentage, total, compliant }) => {
   const getColor = () => {
-    if (percentage >= 80) return 'success';
-    if (percentage >= 60) return 'warning';
-    return 'error';
+    if (percentage >= 80) return "success";
+    if (percentage >= 60) return "warning";
+    return "error";
   };
 
   return (
-    <Card sx={{ height: '100%' }}>
+    <Card sx={{ height: "100%" }}>
       <CardContent>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+        <Box
+          sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}
+        >
           <Typography variant="h6">{displayName}</Typography>
-          <Chip
-            size="small"
-            label={`${percentage}%`}
-            color={getColor()}
-          />
+          <Chip size="small" label={`${percentage}%`} color={getColor()} />
         </Box>
         <LinearProgress
           variant="determinate"
@@ -176,7 +174,7 @@ const ComplianceDashboard: React.FC = () => {
   return (
     <Box sx={{ p: 3 }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
         <Box>
           <Typography variant="h4" component="h1">
             Compliance Dashboard
@@ -203,13 +201,13 @@ const ComplianceDashboard: React.FC = () => {
       <Grid container spacing={3}>
         {/* Audit Readiness Score */}
         <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3, textAlign: 'center', height: '100%' }}>
+          <Paper sx={{ p: 3, textAlign: "center", height: "100%" }}>
             <Typography variant="h6" gutterBottom>
               Audit Readiness
             </Typography>
             <AuditReadinessGauge score={readiness.data?.overallScore || 0} />
-            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center', gap: 2 }}>
-              <Box sx={{ textAlign: 'center' }}>
+            <Box sx={{ mt: 2, display: "flex", justifyContent: "center", gap: 2 }}>
+              <Box sx={{ textAlign: "center" }}>
                 <Typography variant="h5" color="primary">
                   {readiness.data?.controlCoverage || 0}%
                 </Typography>
@@ -218,7 +216,7 @@ const ComplianceDashboard: React.FC = () => {
                 </Typography>
               </Box>
               <Divider orientation="vertical" flexItem />
-              <Box sx={{ textAlign: 'center' }}>
+              <Box sx={{ textAlign: "center" }}>
                 <Typography variant="h5" color="primary">
                   {readiness.data?.evidenceCoverage || 0}%
                 </Typography>
@@ -232,14 +230,14 @@ const ComplianceDashboard: React.FC = () => {
 
         {/* Control Status Summary */}
         <Grid item xs={12} md={8}>
-          <Paper sx={{ p: 2, height: '100%' }}>
+          <Paper sx={{ p: 2, height: "100%" }}>
             <Typography variant="h6" gutterBottom>
               Control Status
             </Typography>
             <Grid container spacing={2}>
               <Grid item xs={6} sm={3}>
-                <Card sx={{ bgcolor: 'success.light', color: 'success.contrastText' }}>
-                  <CardContent sx={{ textAlign: 'center', py: 1 }}>
+                <Card sx={{ bgcolor: "success.light", color: "success.contrastText" }}>
+                  <CardContent sx={{ textAlign: "center", py: 1 }}>
                     <Typography variant="h4">
                       {summary.data?.controlsByStatus.compliant || 0}
                     </Typography>
@@ -248,8 +246,8 @@ const ComplianceDashboard: React.FC = () => {
                 </Card>
               </Grid>
               <Grid item xs={6} sm={3}>
-                <Card sx={{ bgcolor: 'warning.light', color: 'warning.contrastText' }}>
-                  <CardContent sx={{ textAlign: 'center', py: 1 }}>
+                <Card sx={{ bgcolor: "warning.light", color: "warning.contrastText" }}>
+                  <CardContent sx={{ textAlign: "center", py: 1 }}>
                     <Typography variant="h4">
                       {summary.data?.controlsByStatus.partially_compliant || 0}
                     </Typography>
@@ -258,8 +256,8 @@ const ComplianceDashboard: React.FC = () => {
                 </Card>
               </Grid>
               <Grid item xs={6} sm={3}>
-                <Card sx={{ bgcolor: 'error.light', color: 'error.contrastText' }}>
-                  <CardContent sx={{ textAlign: 'center', py: 1 }}>
+                <Card sx={{ bgcolor: "error.light", color: "error.contrastText" }}>
+                  <CardContent sx={{ textAlign: "center", py: 1 }}>
                     <Typography variant="h4">
                       {summary.data?.controlsByStatus.non_compliant || 0}
                     </Typography>
@@ -268,8 +266,8 @@ const ComplianceDashboard: React.FC = () => {
                 </Card>
               </Grid>
               <Grid item xs={6} sm={3}>
-                <Card sx={{ bgcolor: 'grey.300' }}>
-                  <CardContent sx={{ textAlign: 'center', py: 1 }}>
+                <Card sx={{ bgcolor: "grey.300" }}>
+                  <CardContent sx={{ textAlign: "center", py: 1 }}>
                     <Typography variant="h4">
                       {summary.data?.controlsByStatus.not_assessed || 0}
                     </Typography>
@@ -284,17 +282,15 @@ const ComplianceDashboard: React.FC = () => {
               <Alert
                 severity={
                   readiness.data?.criticalGaps === 0
-                    ? 'success'
+                    ? "success"
                     : readiness.data?.criticalGaps && readiness.data.criticalGaps > 3
-                    ? 'error'
-                    : 'warning'
+                      ? "error"
+                      : "warning"
                 }
               >
                 <Typography variant="body2">
                   {readiness.data?.gapCount || 0} total gaps identified
-                  {readiness.data?.criticalGaps
-                    ? ` (${readiness.data.criticalGaps} critical)`
-                    : ''}
+                  {readiness.data?.criticalGaps ? ` (${readiness.data.criticalGaps} critical)` : ""}
                 </Typography>
               </Alert>
             </Box>
@@ -322,7 +318,7 @@ const ComplianceDashboard: React.FC = () => {
                 ))
               ) : (
                 <Grid item xs={12}>
-                  <Typography color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
+                  <Typography color="text.secondary" sx={{ py: 2, textAlign: "center" }}>
                     No framework data available. Configure compliance frameworks to see status.
                   </Typography>
                 </Grid>
@@ -333,43 +329,47 @@ const ComplianceDashboard: React.FC = () => {
 
         {/* Evidence Status */}
         <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2, height: '100%' }}>
+          <Paper sx={{ p: 2, height: "100%" }}>
             <Typography variant="h6" gutterBottom>
               Evidence Status
             </Typography>
             {summary.data?.evidenceStatus ? (
               <Grid container spacing={2}>
                 <Grid item xs={6}>
-                  <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'success.light', borderRadius: 2 }}>
-                    <InventoryIcon sx={{ fontSize: 40, color: 'success.main', mb: 1 }} />
+                  <Box
+                    sx={{ textAlign: "center", p: 2, bgcolor: "success.light", borderRadius: 2 }}
+                  >
+                    <InventoryIcon sx={{ fontSize: 40, color: "success.main", mb: 1 }} />
                     <Typography variant="h4">{summary.data.evidenceStatus.current}</Typography>
                     <Typography variant="body2">Current</Typography>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
-                  <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'warning.light', borderRadius: 2 }}>
-                    <TimelineIcon sx={{ fontSize: 40, color: 'warning.main', mb: 1 }} />
+                  <Box
+                    sx={{ textAlign: "center", p: 2, bgcolor: "warning.light", borderRadius: 2 }}
+                  >
+                    <TimelineIcon sx={{ fontSize: 40, color: "warning.main", mb: 1 }} />
                     <Typography variant="h4">{summary.data.evidenceStatus.expiring}</Typography>
                     <Typography variant="body2">Expiring Soon</Typography>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
-                  <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'error.light', borderRadius: 2 }}>
-                    <ErrorIcon sx={{ fontSize: 40, color: 'error.main', mb: 1 }} />
+                  <Box sx={{ textAlign: "center", p: 2, bgcolor: "error.light", borderRadius: 2 }}>
+                    <ErrorIcon sx={{ fontSize: 40, color: "error.main", mb: 1 }} />
                     <Typography variant="h4">{summary.data.evidenceStatus.expired}</Typography>
                     <Typography variant="body2">Expired</Typography>
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
-                  <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'grey.200', borderRadius: 2 }}>
-                    <AssignmentIcon sx={{ fontSize: 40, color: 'text.secondary', mb: 1 }} />
+                  <Box sx={{ textAlign: "center", p: 2, bgcolor: "grey.200", borderRadius: 2 }}>
+                    <AssignmentIcon sx={{ fontSize: 40, color: "text.secondary", mb: 1 }} />
                     <Typography variant="h4">{summary.data.evidenceStatus.total}</Typography>
                     <Typography variant="body2">Total</Typography>
                   </Box>
                 </Grid>
               </Grid>
             ) : (
-              <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
+              <Typography color="text.secondary" sx={{ py: 4, textAlign: "center" }}>
                 No evidence data available
               </Typography>
             )}
@@ -378,7 +378,7 @@ const ComplianceDashboard: React.FC = () => {
 
         {/* Recommendations */}
         <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2, height: '100%' }}>
+          <Paper sx={{ p: 2, height: "100%" }}>
             <Typography variant="h6" gutterBottom>
               Recommendations
             </Typography>
@@ -430,9 +430,9 @@ const ComplianceDashboard: React.FC = () => {
                           <Chip size="small" label={control.framework.toUpperCase()} />
                         </TableCell>
                         <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                             <StatusIcon status={control.status} />
-                            {control.status.replace('_', ' ')}
+                            {control.status.replace("_", " ")}
                           </Box>
                         </TableCell>
                         <TableCell align="right">{control.evidenceCount}</TableCell>
@@ -440,13 +440,13 @@ const ComplianceDashboard: React.FC = () => {
                           {control.gapCount > 0 ? (
                             <Chip size="small" label={control.gapCount} color="error" />
                           ) : (
-                            '-'
+                            "-"
                           )}
                         </TableCell>
                         <TableCell>
                           {control.lastAssessed
                             ? new Date(control.lastAssessed).toLocaleDateString()
-                            : 'Never'}
+                            : "Never"}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -454,7 +454,7 @@ const ComplianceDashboard: React.FC = () => {
                 </Table>
               </TableContainer>
             ) : (
-              <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
+              <Typography color="text.secondary" sx={{ py: 4, textAlign: "center" }}>
                 No control data available. Configure compliance controls to see details.
               </Typography>
             )}

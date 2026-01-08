@@ -1,14 +1,14 @@
-import fs from 'fs';
-import path from 'path';
-import { execSync } from 'child_process';
-import yaml from 'js-yaml';
+import fs from "fs";
+import path from "path";
+import { execSync } from "child_process";
+import yaml from "js-yaml";
 
-const ROOT = path.resolve(__dirname, '..', '..');
-const EVIDENCE_REGISTRY = path.join(ROOT, 'audit', 'evidence-registry.yaml');
-const EXCEPTIONS = path.join(ROOT, 'audit', 'exceptions.yaml');
+const ROOT = path.resolve(__dirname, "..", "..");
+const EVIDENCE_REGISTRY = path.join(ROOT, "audit", "evidence-registry.yaml");
+const EXCEPTIONS = path.join(ROOT, "audit", "exceptions.yaml");
 
 function loadYaml<T>(file: string): T {
-  return yaml.load(fs.readFileSync(file, 'utf-8')) as T;
+  return yaml.load(fs.readFileSync(file, "utf-8")) as T;
 }
 
 function queryProductionChanges() {
@@ -19,44 +19,48 @@ function queryProductionChanges() {
     )
       .toString()
       .trim();
-    return log.split('\n').filter(Boolean);
+    return log.split("\n").filter(Boolean);
   } catch (error) {
-    return ['git history unavailable'];
+    return ["git history unavailable"];
   }
 }
 
 function queryUnauthorizedAgentChanges() {
-  const provenancePath = path.join(ROOT, 'audit', 'ga-evidence');
+  const provenancePath = path.join(ROOT, "audit", "ga-evidence");
   const hasLedger = fs.existsSync(provenancePath);
   return {
     ledgerPresent: hasLedger,
     message: hasLedger
-      ? 'Provenance ledger available; correlate agent entries with CODEOWNERS approvals.'
-      : 'Provenance ledger not present in workspace snapshot.',
+      ? "Provenance ledger available; correlate agent entries with CODEOWNERS approvals."
+      : "Provenance ledger not present in workspace snapshot.",
   };
 }
 
 function queryDebtTrend() {
-  const trendPath = path.join(ROOT, 'audit', 'ga-evidence', 'debt-trends');
+  const trendPath = path.join(ROOT, "audit", "ga-evidence", "debt-trends");
   const exists = fs.existsSync(trendPath);
   return {
     location: path.relative(ROOT, trendPath),
     exists,
-    note: exists ? 'Weekly debt trend reports available for monotonicity checks.' : 'No debt trend artifacts found.',
+    note: exists
+      ? "Weekly debt trend reports available for monotonicity checks."
+      : "No debt trend artifacts found.",
   };
 }
 
 function queryModelOutputProvenance() {
-  const ledger = path.join(ROOT, 'audit', 'ga-evidence');
+  const ledger = path.join(ROOT, "audit", "ga-evidence");
   return {
     ledger: path.relative(ROOT, ledger),
     available: fs.existsSync(ledger),
-    note: 'Use ledger entries to link model version, dataset fingerprint, and policy decisions to outputs.',
+    note: "Use ledger entries to link model version, dataset fingerprint, and policy decisions to outputs.",
   };
 }
 
 function queryExceptions() {
-  const exceptions = loadYaml<{ exceptions: { id: string; expires_at: string; scope: string }[] }>(EXCEPTIONS).exceptions;
+  const exceptions = loadYaml<{ exceptions: { id: string; expires_at: string; scope: string }[] }>(
+    EXCEPTIONS
+  ).exceptions;
   const now = new Date();
   return exceptions.map((entry) => ({
     id: entry.id,
@@ -67,12 +71,14 @@ function queryExceptions() {
 }
 
 function querySbom() {
-  const sbomPath = path.join(ROOT, 'sbom-mc-v0.4.5.json');
+  const sbomPath = path.join(ROOT, "sbom-mc-v0.4.5.json");
   const exists = fs.existsSync(sbomPath);
   return {
     exists,
     location: path.relative(ROOT, sbomPath),
-    attestation: exists ? 'Hash and attestation can be produced from artifact.' : 'SBOM artifact missing in snapshot.',
+    attestation: exists
+      ? "Hash and attestation can be produced from artifact."
+      : "SBOM artifact missing in snapshot.",
   };
 }
 

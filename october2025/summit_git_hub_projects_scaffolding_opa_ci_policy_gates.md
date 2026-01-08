@@ -170,7 +170,7 @@ body:
 ```yaml
 name: Feature
 labels: [feature]
-title: 'feat: <feature>'
+title: "feat: <feature>"
 body:
   - type: textarea
     id: user_story
@@ -198,7 +198,7 @@ body:
 ```yaml
 name: Task
 labels: [task]
-title: 'chore: <task>'
+title: "chore: <task>"
 body:
   - type: textarea
     id: detail
@@ -216,7 +216,7 @@ body:
 ```yaml
 name: Bug
 labels: [bug]
-title: 'bug: <symptom>'
+title: "bug: <symptom>"
 body:
   - type: textarea
     id: repro

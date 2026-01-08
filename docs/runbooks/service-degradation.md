@@ -14,6 +14,7 @@ This runbook provides step-by-step procedures for responding to service degradat
 ## Initial Response (First 5 Minutes)
 
 ### 1. Acknowledge the Alert
+
 ```bash
 # If using PagerDuty
 pd incident ack <incident-id>
@@ -23,11 +24,14 @@ opsgenie ack <alert-id>
 ```
 
 ### 2. Join Incident Channel
+
 - Join `#incident-response` Slack channel
 - Post status: "Investigating service degradation - <your-name>"
 
 ### 3. Quick Assessment
+
 Check the monitoring dashboards:
+
 ```bash
 # Open monitoring dashboards
 open https://grafana.intelgraph.com/d/production-health
@@ -35,6 +39,7 @@ open https://datadog.com/dashboard/intelgraph-production
 ```
 
 Key metrics to check:
+
 - [ ] Error rate (target: <1%)
 - [ ] Response time p95 (target: <500ms)
 - [ ] Active users count
@@ -42,6 +47,7 @@ Key metrics to check:
 - [ ] CPU/Memory utilization
 
 ### 4. Check Recent Changes
+
 ```bash
 # Check recent deployments
 kubectl get deployments -n intelgraph -o wide
@@ -58,6 +64,7 @@ helm history intelgraph -n intelgraph
 ### Step 1: Identify the Scope
 
 #### Check Service Health
+
 ```bash
 # Check all service health endpoints
 curl -f https://api.intelgraph.com/health/detailed
@@ -70,6 +77,7 @@ kubectl logs -l app=intelgraph-api -n intelgraph --tail=100 | grep -i error
 ```
 
 #### Check Infrastructure
+
 ```bash
 # Check node health
 kubectl get nodes
@@ -86,6 +94,7 @@ kubectl get pvc -n intelgraph
 ### Step 2: Check Dependencies
 
 #### Database Health
+
 ```bash
 # PostgreSQL connection test
 psql -h $POSTGRES_HOST -U $POSTGRES_USER -d intelgraph -c "SELECT 1;"
@@ -109,6 +118,7 @@ psql -h $POSTGRES_HOST -U $POSTGRES_USER -d intelgraph -c "
 ```
 
 #### Neo4j Health
+
 ```bash
 # Check Neo4j status
 cypher-shell -a bolt://$NEO4J_HOST:7687 -u neo4j -p $NEO4J_PASSWORD \
@@ -120,6 +130,7 @@ cypher-shell -a bolt://$NEO4J_HOST:7687 -u neo4j -p $NEO4J_PASSWORD \
 ```
 
 #### Redis Health
+
 ```bash
 # Check Redis connection
 redis-cli -h $REDIS_HOST -p 6379 ping
@@ -134,6 +145,7 @@ redis-cli -h $REDIS_HOST -p 6379 info memory
 ### Step 3: Check Application Logs
 
 #### API Server Logs
+
 ```bash
 # Get recent error logs
 kubectl logs -l app=intelgraph-api -n intelgraph --tail=500 | grep -i error
@@ -147,12 +159,14 @@ kubectl logs -l app=intelgraph-api -n intelgraph --tail=1000 | \
 ```
 
 #### Worker Logs
+
 ```bash
 # Check worker logs
 kubectl logs -l app=intelgraph-worker -n intelgraph --tail=200 | grep -i error
 ```
 
 #### Trace Analysis
+
 ```bash
 # Get trace ID from error response
 # Then query Jaeger
@@ -167,6 +181,7 @@ open "https://app.datadoghq.com/apm/traces?query=trace_id:<trace-id>"
 ### Strategy 1: Scale Resources
 
 If high CPU/memory usage:
+
 ```bash
 # Scale up API replicas
 kubectl scale deployment intelgraph-api -n intelgraph --replicas=6
@@ -181,6 +196,7 @@ kubectl wait --for=condition=ready pod -l app=intelgraph-api -n intelgraph --tim
 ### Strategy 2: Restart Unhealthy Pods
 
 If pods are in crash loop or unhealthy:
+
 ```bash
 # Delete unhealthy pods (they will be recreated)
 kubectl delete pod -l app=intelgraph-api -n intelgraph --field-selector='status.phase!=Running'
@@ -193,6 +209,7 @@ kubectl rollout status deployment intelgraph-api -n intelgraph
 ### Strategy 3: Database Connection Pool Adjustment
 
 If database connections are exhausted:
+
 ```bash
 # Temporarily kill idle connections
 psql -h $POSTGRES_HOST -U $POSTGRES_USER -d intelgraph -c "
@@ -211,6 +228,7 @@ kubectl set env deployment/intelgraph-api -n intelgraph \
 ### Strategy 4: Enable Circuit Breaker
 
 If external service is causing issues:
+
 ```bash
 # Enable circuit breaker for problematic service
 kubectl patch configmap intelgraph-config -n intelgraph --type merge -p '
@@ -230,6 +248,7 @@ kubectl rollout restart deployment intelgraph-api -n intelgraph
 ### Strategy 5: Rate Limiting
 
 If under unusual load or potential abuse:
+
 ```bash
 # Enable aggressive rate limiting
 kubectl patch configmap intelgraph-config -n intelgraph --type merge -p '
@@ -249,6 +268,7 @@ kubectl rollout restart deployment intelgraph-api -n intelgraph
 ### Strategy 6: Rollback Recent Deployment
 
 If degradation started after recent deployment:
+
 ```bash
 # Check recent deployments
 helm history intelgraph -n intelgraph
@@ -266,6 +286,7 @@ curl -f https://api.intelgraph.com/health
 ## Communication Templates
 
 ### Initial Status Update
+
 ```
 🚨 INCIDENT: Service Degradation Detected
 
@@ -279,6 +300,7 @@ We are actively investigating the issue. Updates every 15 minutes.
 ```
 
 ### Progress Update
+
 ```
 📊 UPDATE: Service Degradation Investigation
 
@@ -294,6 +316,7 @@ Current Metrics:
 ```
 
 ### Resolution Announcement
+
 ```
 ✅ RESOLVED: Service Degradation
 
@@ -359,11 +382,13 @@ Schedule a post-mortem meeting and document:
 ## Escalation
 
 If unable to resolve within:
+
 - **15 minutes (P0)**: Escalate to Engineering Manager
 - **30 minutes (P1)**: Escalate to VP Engineering
 - **1 hour (P2)**: Escalate to Engineering Manager
 
 Emergency Contacts:
+
 - Engineering Manager: [contact info]
 - VP Engineering: [contact info]
 - CTO: [contact info]

@@ -3,25 +3,11 @@
  * Displays policy denial with structured appeal path and reasons
  */
 
-import React, { useState } from 'react';
-import {
-  Alert,
-  Button,
-  Card,
-  Form,
-  Modal,
-  Badge,
-  Tooltip,
-} from 'react-bootstrap';
-import {
-  InfoCircle,
-  ExclamationTriangle,
-  Clock,
-  Shield,
-  FileText,
-} from 'react-bootstrap-icons';
-import { useMutation, useQuery } from '@apollo/client';
-import { SUBMIT_POLICY_APPEAL, GET_APPEAL_STATUS } from '../graphql/appeals';
+import React, { useState } from "react";
+import { Alert, Button, Card, Form, Modal, Badge, Tooltip } from "react-bootstrap";
+import { InfoCircle, ExclamationTriangle, Clock, Shield, FileText } from "react-bootstrap-icons";
+import { useMutation, useQuery } from "@apollo/client";
+import { SUBMIT_POLICY_APPEAL, GET_APPEAL_STATUS } from "../graphql/appeals";
 
 interface AppealPath {
   available: boolean;
@@ -42,7 +28,7 @@ interface PolicyDecision {
   decisionId: string;
   timestamp: string;
   metadata?: {
-    riskLevel?: 'LOW' | 'MEDIUM' | 'HIGH';
+    riskLevel?: "LOW" | "MEDIUM" | "HIGH";
     requiresJustification?: boolean;
     alternatives?: string[];
   };
@@ -66,12 +52,10 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   // Appeal form state
-  const [justification, setJustification] = useState('');
-  const [businessNeed, setBusinessNeed] = useState('');
-  const [urgency, setUrgency] = useState<
-    'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
-  >('MEDIUM');
-  const [requestedDuration, setRequestedDuration] = useState('24 hours');
+  const [justification, setJustification] = useState("");
+  const [businessNeed, setBusinessNeed] = useState("");
+  const [urgency, setUrgency] = useState<"LOW" | "MEDIUM" | "HIGH" | "CRITICAL">("MEDIUM");
+  const [requestedDuration, setRequestedDuration] = useState("24 hours");
 
   const [submitAppeal] = useMutation(SUBMIT_POLICY_APPEAL);
 
@@ -84,29 +68,29 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
 
   const getRiskLevelColor = (level?: string) => {
     switch (level) {
-      case 'HIGH':
-        return 'danger';
-      case 'MEDIUM':
-        return 'warning';
-      case 'LOW':
-        return 'info';
+      case "HIGH":
+        return "danger";
+      case "MEDIUM":
+        return "warning";
+      case "LOW":
+        return "info";
       default:
-        return 'secondary';
+        return "secondary";
     }
   };
 
   const getUrgencyColor = (urgency: string) => {
     switch (urgency) {
-      case 'CRITICAL':
-        return 'danger';
-      case 'HIGH':
-        return 'warning';
-      case 'MEDIUM':
-        return 'info';
-      case 'LOW':
-        return 'success';
+      case "CRITICAL":
+        return "danger";
+      case "HIGH":
+        return "warning";
+      case "MEDIUM":
+        return "info";
+      case "LOW":
+        return "success";
       default:
-        return 'secondary';
+        return "secondary";
     }
   };
 
@@ -128,35 +112,30 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
         setShowAppealForm(false);
       }
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Failed to submit appeal. Please try again.',
-      );
+      setError(err instanceof Error ? err.message : "Failed to submit appeal. Please try again.");
     }
   };
 
   const formatSlaTime = (hours: number) => {
     if (hours < 24) {
-      return `${hours} hour${hours !== 1 ? 's' : ''}`;
+      return `${hours} hour${hours !== 1 ? "s" : ""}`;
     }
     const days = Math.floor(hours / 24);
     const remainingHours = hours % 24;
-    return `${days} day${days !== 1 ? 's' : ''}${remainingHours > 0 ? ` ${remainingHours} hour${remainingHours !== 1 ? 's' : ''}` : ''}`;
+    return `${days} day${days !== 1 ? "s" : ""}${remainingHours > 0 ? ` ${remainingHours} hour${remainingHours !== 1 ? "s" : ""}` : ""}`;
   };
 
   // If appeal has been approved, show success message
-  if (appealStatus?.getAppealStatus?.status === 'APPROVED') {
+  if (appealStatus?.getAppealStatus?.status === "APPROVED") {
     return (
-      <Alert
-        variant="success"
-        className={`policy-denial-banner ${className || ''}`}
-      >
+      <Alert variant="success" className={`policy-denial-banner ${className || ""}`}>
         <div className="d-flex align-items-center">
           <Shield className="me-2" size={20} />
           <div className="flex-grow-1">
             <strong>Appeal Approved!</strong>
             <div className="mt-1">
-              Your access request has been approved by a Data Steward. You may
-              now retry your action.
+              Your access request has been approved by a Data Steward. You may now retry your
+              action.
               {appealStatus.getAppealStatus.responseReason && (
                 <div className="text-muted small mt-1">
                   Reason: {appealStatus.getAppealStatus.responseReason}
@@ -164,12 +143,7 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
               )}
             </div>
           </div>
-          <Button
-            variant="success"
-            size="sm"
-            onClick={onRetry}
-            className="ms-2"
-          >
+          <Button variant="success" size="sm" onClick={onRetry} className="ms-2">
             Retry Action
           </Button>
         </div>
@@ -181,7 +155,7 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
     <>
       <Alert
         variant="danger"
-        className={`policy-denial-banner ${className || ''}`}
+        className={`policy-denial-banner ${className || ""}`}
         dismissible={!!onDismiss}
         onClose={onDismiss}
       >
@@ -191,10 +165,7 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
             <div className="d-flex align-items-center mb-2">
               <strong className="me-2">Access Denied</strong>
               {decision.metadata?.riskLevel && (
-                <Badge
-                  bg={getRiskLevelColor(decision.metadata.riskLevel)}
-                  className="me-2"
-                >
+                <Badge bg={getRiskLevelColor(decision.metadata.riskLevel)} className="me-2">
                   {decision.metadata.riskLevel} Risk
                 </Badge>
               )}
@@ -204,19 +175,18 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
             <div className="mb-2">{decision.reason}</div>
 
             {/* Alternatives if available */}
-            {decision.metadata?.alternatives &&
-              decision.metadata.alternatives.length > 0 && (
-                <div className="mb-2">
-                  <small className="text-muted">
-                    <strong>Suggested alternatives:</strong>
-                  </small>
-                  <ul className="small mb-0">
-                    {decision.metadata.alternatives.map((alt, index) => (
-                      <li key={index}>{alt}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+            {decision.metadata?.alternatives && decision.metadata.alternatives.length > 0 && (
+              <div className="mb-2">
+                <small className="text-muted">
+                  <strong>Suggested alternatives:</strong>
+                </small>
+                <ul className="small mb-0">
+                  {decision.metadata.alternatives.map((alt, index) => (
+                    <li key={index}>{alt}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {/* Appeal section */}
             {decision.appeal?.available ? (
@@ -228,12 +198,9 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
                       <div>
                         <strong className="text-info">Appeal Available</strong>
                         <div className="small text-muted">
-                          Response SLA:{' '}
-                          {formatSlaTime(decision.appeal.slaHours)}
+                          Response SLA: {formatSlaTime(decision.appeal.slaHours)}
                           {decision.appeal.requiredRole && (
-                            <span className="ms-2">
-                              • Reviewer: {decision.appeal.requiredRole}
-                            </span>
+                            <span className="ms-2">• Reviewer: {decision.appeal.requiredRole}</span>
                           )}
                         </div>
                       </div>
@@ -243,19 +210,13 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
                       <div className="text-end">
                         {appealStatus?.getAppealStatus ? (
                           <div>
-                            <Badge
-                              bg={getUrgencyColor(
-                                appealStatus.getAppealStatus.urgency,
-                              )}
-                            >
+                            <Badge bg={getUrgencyColor(appealStatus.getAppealStatus.urgency)}>
                               {appealStatus.getAppealStatus.status}
                             </Badge>
                             <div className="small text-muted mt-1">
                               <Clock size={12} className="me-1" />
-                              Submitted{' '}
-                              {new Date(
-                                appealStatus.getAppealStatus.createdAt,
-                              ).toLocaleString()}
+                              Submitted{" "}
+                              {new Date(appealStatus.getAppealStatus.createdAt).toLocaleString()}
                             </div>
                           </div>
                         ) : (
@@ -263,11 +224,7 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
                         )}
                       </div>
                     ) : (
-                      <Button
-                        variant="info"
-                        size="sm"
-                        onClick={() => setShowAppealForm(true)}
-                      >
+                      <Button variant="info" size="sm" onClick={() => setShowAppealForm(true)}>
                         <FileText size={14} className="me-1" />
                         Submit Appeal
                       </Button>
@@ -276,8 +233,7 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
 
                   {decision.appeal.instructions && (
                     <div className="mt-2 small text-muted border-top pt-2">
-                      <strong>Appeal Instructions:</strong>{' '}
-                      {decision.appeal.instructions}
+                      <strong>Appeal Instructions:</strong> {decision.appeal.instructions}
                     </div>
                   )}
                 </Card.Body>
@@ -286,8 +242,7 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
               decision.appeal && (
                 <div className="mt-2 text-muted small">
                   <InfoCircle size={14} className="me-1" />
-                  {decision.appeal.instructions ||
-                    'This policy decision cannot be appealed.'}
+                  {decision.appeal.instructions || "This policy decision cannot be appealed."}
                 </div>
               )
             )}
@@ -295,19 +250,14 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
             {/* Technical details */}
             <div className="mt-2 pt-2 border-top">
               <details>
-                <summary
-                  className="small text-muted"
-                  style={{ cursor: 'pointer' }}
-                >
+                <summary className="small text-muted" style={{ cursor: "pointer" }}>
                   Technical Details
                 </summary>
                 <div className="small text-muted mt-1">
                   <div>
                     Decision ID: <code>{decision.decisionId}</code>
                   </div>
-                  <div>
-                    Timestamp: {new Date(decision.timestamp).toLocaleString()}
-                  </div>
+                  <div>Timestamp: {new Date(decision.timestamp).toLocaleString()}</div>
                   <div>
                     Policy: <code>{decision.policy}</code>
                   </div>
@@ -324,11 +274,7 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
       </Alert>
 
       {/* Appeal Form Modal */}
-      <Modal
-        show={showAppealForm}
-        onHide={() => setShowAppealForm(false)}
-        size="lg"
-      >
+      <Modal show={showAppealForm} onHide={() => setShowAppealForm(false)} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>Submit Policy Appeal</Modal.Title>
         </Modal.Header>
@@ -343,11 +289,10 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
             <div className="mb-3">
               <Alert variant="info" className="small">
                 <InfoCircle className="me-2" />
-                <strong>Response SLA:</strong>{' '}
+                <strong>Response SLA:</strong>{" "}
                 {decision.appeal && formatSlaTime(decision.appeal.slaHours)}
                 <br />
-                <strong>Reviewer:</strong>{' '}
-                {decision.appeal?.requiredRole || 'Data Steward'}
+                <strong>Reviewer:</strong> {decision.appeal?.requiredRole || "Data Steward"}
               </Alert>
             </div>
 
@@ -362,8 +307,7 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
                 required
               />
               <Form.Text className="text-muted">
-                Describe the specific business requirement that necessitates
-                this access.
+                Describe the specific business requirement that necessitates this access.
               </Form.Text>
             </Form.Group>
 
@@ -377,9 +321,7 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
                 onChange={(e: any) => setJustification(e.target.value)}
                 required
               />
-              <Form.Text className="text-muted">
-                {decision.appeal?.instructions}
-              </Form.Text>
+              <Form.Text className="text-muted">{decision.appeal?.instructions}</Form.Text>
             </Form.Group>
 
             <div className="row">
@@ -391,15 +333,9 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
                     onChange={(e: any) => setUrgency(e.target.value as any)}
                   >
                     <option value="LOW">Low - Routine work</option>
-                    <option value="MEDIUM">
-                      Medium - Standard business need
-                    </option>
-                    <option value="HIGH">
-                      High - Time-sensitive requirement
-                    </option>
-                    <option value="CRITICAL">
-                      Critical - Security incident or emergency
-                    </option>
+                    <option value="MEDIUM">Medium - Standard business need</option>
+                    <option value="HIGH">High - Time-sensitive requirement</option>
+                    <option value="CRITICAL">Critical - Security incident or emergency</option>
                   </Form.Select>
                 </Form.Group>
               </div>
@@ -422,8 +358,8 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
 
             <Alert variant="warning" className="small">
               <ExclamationTriangle className="me-2" />
-              <strong>Note:</strong> All appeals are logged and audited. Misuse
-              of the appeal process may result in access restrictions.
+              <strong>Note:</strong> All appeals are logged and audited. Misuse of the appeal
+              process may result in access restrictions.
             </Alert>
           </Form>
         </Modal.Body>

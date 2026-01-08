@@ -1,11 +1,13 @@
 # Internal Adoption, Dogfooding & Change Management
 
 ## Mission and Principles
+
 - Make CompanyOS the default operating layer for our internal operations and experimentation.
 - Dogfood every new surface with internal tenants before external GA to improve quality, UX, and operational maturity.
 - Close the loop quickly with measurable feedback, so internal experience directly sharpens the product.
 
 ## Internal Tenants & Use Cases
+
 - **Corporate Ops (Internal "Company" Tenant)**
   - Scope: HR, finance, IT, compliance, procurement, workplace, and company-wide OKRs.
   - Goals: Run core business processes end-to-end on CompanyOS; establish exemplars for workflows, access policies, and reporting.
@@ -23,6 +25,7 @@
   - Goals: Reproduce edge cases rapidly, validate migrations, and practice staged rollouts.
 
 ### Feature Adoption Lead Teams
+
 - **Platform Engineering**: first adopters for infra, authz, multi-tenant, observability, deployment orchestration.
 - **Security & GRC**: first adopters for policy as code, access reviews, data residency, audit logs.
 - **Sales Ops & CS**: first adopters for workflow automation, playbook design, and in-app guidance.
@@ -30,22 +33,27 @@
 - **Support**: first adopters for ticketing, alerts, and knowledge base authoring.
 
 ## Dogfooding Programs
+
 ### Internal GA vs External GA Criteria
+
 - **Internal GA entry**: feature flagged on in experimental tenant; functional parity with spec; baseline monitors + dashboards; rollback plan defined; data model versioned; initial docs and runbooks published.
 - **Internal GA exit / readiness for external GA**: stability SLOs met for ≥2 sprints; ≥3 internal teams actively using; Sev1/Sev2 bug rates trending down; usability survey ≥80% satisfaction; telemetry coverage mapped to success metrics; security/privacy review passed.
 
 ### Feedback Collection Loops
+
 - **Issues**: templated bug/feedback forms in CompanyOS; auto-triage to owning squad; SLA targets (24h triage, 72h action plan).
 - **Suggestions**: monthly product council with rotating internal teams; roadmap voting inside app; lightweight RFCs for larger changes.
 - **Embedded telemetry**: task completion funnels, time-to-first-value, error budgets, feature-flag exposure, satisfaction micro-surveys; dashboards visible to all internal adopters.
 - **Live sessions**: weekly dogfood hour (hands-on), monthly enablement clinics for new features.
 
 ### Reward & Recognition Patterns
+
 - "Dogfood Champion" badges for teams hitting adoption milestones (usage + actionable feedback quality).
 - Quarterly spotlight for the best internal improvement suggestion shipped.
 - Priority roadmap consideration and swag budget for teams piloting risky features first.
 
 ## Change Management & Communication
+
 - **Announcements**: bi-weekly release notes (email + in-app digest), in-app banners for tenant-specific changes, Slack #companyos-updates channel for heads-up on flags and migrations.
 - **Briefings**: 15-minute release huddles with affected teams for major changes; office hours during rollout windows.
 - **Playbooks for major behavior changes**:
@@ -56,7 +64,9 @@
 - **Metrics** (per feature and per tenant): active users, task completion rate, time-to-value, bounce/abandonment, incidents, SLA attainment, NPS/CSAT micro-surveys, and feedback-to-fix cycle time.
 
 ## Artifacts
+
 ### Internal Adoption & Dogfooding v0 Outline
+
 1. Objectives & success criteria.
 2. Tenant map (owners, data domains, risk level, flag strategy).
 3. Feature intake checklist (internal GA entry requirements).
@@ -67,6 +77,7 @@
 8. Exit criteria for external GA.
 
 ### Example Rollout Plan (Major New Feature)
+
 - **Feature**: Unified Approvals Workflow.
 - **Prep (Week 0)**: enable in Experimental/QA tenant with synthetic data; publish runbook; set alerting on latency/error budgets; create migration rollback script.
 - **Pilot (Week 1)**: enable for Platform Eng + People Ops in Engineering Quality tenant; run shadow mode vs existing approvals; daily standup checkpoint.
@@ -76,6 +87,7 @@
 - **External GA readiness**: confirm metrics vs targets, close Sev1/Sev2, finalize docs and support macros.
 
 ### Checklist: Feature is Ready for External GA If…
+
 - Stability: ≥99.5% success rate over two sprints; no open Sev1/Sev2.
 - Adoption: ≥3 internal teams using in production tenant; positive trend in task completion/time-to-value; NPS/CSAT ≥80%.
 - Observability: dashboards for latency, errors, and usage; alerting with paging rules; feature flag + rollback path validated.

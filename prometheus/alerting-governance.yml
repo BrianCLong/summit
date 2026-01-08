@@ -7,8 +7,8 @@ groups:
         labels:
           severity: page
         annotations:
-          summary: 'p99 request latency above 2s'
-          description: 'The p99 request latency exceeded 2s for 10m; investigate service saturation and error spikes.'
+          summary: "p99 request latency above 2s"
+          description: "The p99 request latency exceeded 2s for 10m; investigate service saturation and error spikes."
 
       - alert: SummitReceiptBacklogGrowing
         expr: deriv(intelgraph_job_queue_depth{queue="receipts"}[15m]) > 5
@@ -16,8 +16,8 @@ groups:
         labels:
           severity: warn
         annotations:
-          summary: 'Receipt queue depth growing'
-          description: 'Receipt queue growth rate >5 items/min for 10m; scale consumers or inspect stuck jobs.'
+          summary: "Receipt queue depth growing"
+          description: "Receipt queue growth rate >5 items/min for 10m; scale consumers or inspect stuck jobs."
 
       - alert: SummitOpaEvaluationErrors
         expr: increase(conductor_security_events_total{type="opa_evaluation_error"}[5m]) > 5
@@ -25,8 +25,8 @@ groups:
         labels:
           severity: page
         annotations:
-          summary: 'OPA evaluation errors detected'
-          description: 'OPA evaluation errors exceeded 5 in 5m; verify OPA availability and policy bundle status.'
+          summary: "OPA evaluation errors detected"
+          description: "OPA evaluation errors exceeded 5 in 5m; verify OPA availability and policy bundle status."
 
       - alert: SummitApprovalsQueueHigh
         expr: approvals_pending > 10
@@ -34,8 +34,8 @@ groups:
         labels:
           severity: warn
         annotations:
-          summary: 'Approvals queue above threshold'
-          description: 'Pending approvals >10 for 15m; engage approvers or adjust approval routing.'
+          summary: "Approvals queue above threshold"
+          description: "Pending approvals >10 for 15m; engage approvers or adjust approval routing."
 
       - alert: SummitApprovalsQueueCritical
         expr: approvals_pending > 25
@@ -43,5 +43,5 @@ groups:
         labels:
           severity: page
         annotations:
-          summary: 'Approvals queue critical'
-          description: 'Pending approvals >25 for 10m; activate escalation and throttle runs.'
+          summary: "Approvals queue critical"
+          description: "Pending approvals >25 for 10m; activate escalation and throttle runs."

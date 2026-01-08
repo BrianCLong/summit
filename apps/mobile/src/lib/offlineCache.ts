@@ -107,10 +107,7 @@ export const offlineCache = {
 
     async getAll(): Promise<Case[]> {
       const now = new Date().toISOString();
-      const items = await db.cases
-        .where('expiresAt')
-        .above(now)
-        .toArray();
+      const items = await db.cases.where('expiresAt').above(now).toArray();
 
       return items.map((item) => item.data);
     },
@@ -137,7 +134,7 @@ export const offlineCache = {
           cachedAt: now.toISOString(),
           expiresAt: new Date(now.getTime() + CACHE_TTL.cases).toISOString(),
           checksum: await generateChecksum(c),
-        }))
+        })),
       );
 
       await db.cases.bulkPut(items);
@@ -168,20 +165,14 @@ export const offlineCache = {
 
     async getUnread(): Promise<Alert[]> {
       const now = new Date().toISOString();
-      const items = await db.alerts
-        .where('expiresAt')
-        .above(now)
-        .toArray();
+      const items = await db.alerts.where('expiresAt').above(now).toArray();
 
       return items.filter((item) => !item.data.isRead).map((item) => item.data);
     },
 
     async getAll(): Promise<Alert[]> {
       const now = new Date().toISOString();
-      const items = await db.alerts
-        .where('expiresAt')
-        .above(now)
-        .toArray();
+      const items = await db.alerts.where('expiresAt').above(now).toArray();
 
       return items.map((item) => item.data);
     },
@@ -208,7 +199,7 @@ export const offlineCache = {
           cachedAt: now.toISOString(),
           expiresAt: new Date(now.getTime() + CACHE_TTL.alerts).toISOString(),
           checksum: await generateChecksum(a),
-        }))
+        })),
       );
 
       await db.alerts.bulkPut(items);
@@ -256,14 +247,9 @@ export const offlineCache = {
 
     async getPending(): Promise<Task[]> {
       const now = new Date().toISOString();
-      const items = await db.tasks
-        .where('expiresAt')
-        .above(now)
-        .toArray();
+      const items = await db.tasks.where('expiresAt').above(now).toArray();
 
-      return items
-        .filter((item) => item.data.status !== 'completed')
-        .map((item) => item.data);
+      return items.filter((item) => item.data.status !== 'completed').map((item) => item.data);
     },
 
     async set(task: Task): Promise<void> {
@@ -288,7 +274,7 @@ export const offlineCache = {
           cachedAt: now.toISOString(),
           expiresAt: new Date(now.getTime() + CACHE_TTL.tasks).toISOString(),
           checksum: await generateChecksum(t),
-        }))
+        })),
       );
 
       await db.tasks.bulkPut(items);
@@ -346,7 +332,7 @@ export const offlineCache = {
           cachedAt: now.toISOString(),
           expiresAt: new Date(now.getTime() + CACHE_TTL.entities).toISOString(),
           checksum: await generateChecksum(e),
-        }))
+        })),
       );
 
       await db.entities.bulkPut(items);
@@ -372,10 +358,7 @@ export const offlineCache = {
     },
 
     async getPending(): Promise<Note[]> {
-      return await db.notes
-        .where('syncStatus')
-        .anyOf(['pending', 'error'])
-        .toArray();
+      return await db.notes.where('syncStatus').anyOf(['pending', 'error']).toArray();
     },
 
     async create(note: Note): Promise<void> {
@@ -406,10 +389,7 @@ export const offlineCache = {
     },
 
     async getPending(): Promise<Observation[]> {
-      return await db.observations
-        .where('syncStatus')
-        .anyOf(['pending', 'error'])
-        .toArray();
+      return await db.observations.where('syncStatus').anyOf(['pending', 'error']).toArray();
     },
 
     async create(observation: Observation): Promise<void> {
@@ -432,10 +412,7 @@ export const offlineCache = {
     },
 
     async getPending(): Promise<Attachment[]> {
-      return await db.attachments
-        .where('syncStatus')
-        .anyOf(['pending', 'error'])
-        .toArray();
+      return await db.attachments.where('syncStatus').anyOf(['pending', 'error']).toArray();
     },
 
     async create(attachment: Attachment): Promise<void> {
@@ -462,10 +439,7 @@ export const offlineCache = {
     },
 
     async getPending(): Promise<SyncQueueItem[]> {
-      return await db.syncQueue
-        .where('attempts')
-        .below(5)
-        .toArray();
+      return await db.syncQueue.where('attempts').below(5).toArray();
     },
 
     async update(item: SyncQueueItem): Promise<void> {
@@ -508,10 +482,7 @@ export const offlineCache = {
     }
 
     // Clean entities
-    const expiredEntities = await db.entities
-      .where('expiresAt')
-      .below(now)
-      .toArray();
+    const expiredEntities = await db.entities.where('expiresAt').below(now).toArray();
     if (expiredEntities.length > 0) {
       await db.entities.bulkDelete(expiredEntities.map((e) => e.id));
       count += expiredEntities.length;

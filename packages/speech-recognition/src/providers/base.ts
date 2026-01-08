@@ -1,7 +1,7 @@
-import type { AudioBuffer } from '@intelgraph/audio-processing';
-import type { ISTTProvider } from '../interfaces.js';
-import type { STTConfig, TranscriptionResult, STTProvider } from '../types.js';
-import { SUPPORTED_LANGUAGES } from '../types.js';
+import type { AudioBuffer } from "@intelgraph/audio-processing";
+import type { ISTTProvider } from "../interfaces.js";
+import type { STTConfig, TranscriptionResult, STTProvider } from "../types.js";
+import { SUPPORTED_LANGUAGES } from "../types.js";
 
 /**
  * Base class for STT providers
@@ -58,7 +58,7 @@ export abstract class BaseSTTProvider implements ISTTProvider {
   protected mergeConfig(config: STTConfig): STTConfig {
     return {
       ...this.config,
-      ...config
+      ...config,
     } as STTConfig;
   }
 }

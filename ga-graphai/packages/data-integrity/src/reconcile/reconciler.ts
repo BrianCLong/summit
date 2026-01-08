@@ -1,4 +1,4 @@
-import { stableHash } from '../canonical/canonicalizer.js';
+import { stableHash } from "../canonical/canonicalizer.js";
 
 export interface StoreSnapshot {
   name: string;
@@ -24,7 +24,7 @@ export function reconcile(
   scope: string,
   storeA: StoreSnapshot,
   storeB: StoreSnapshot,
-  options: ReconciliationOptions = {},
+  options: ReconciliationOptions = {}
 ): ReconciliationReport {
   const sampleSize = options.sampleSize ?? 5;
   const seed = options.seed ?? 42;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -8,20 +8,20 @@ import {
   ListItemIcon,
   Typography,
   Divider,
-} from '@mui/material';
-import { Language as LanguageIcon } from '@mui/icons-material';
-import { useI18n, Locale } from '../../hooks/useI18n';
+} from "@mui/material";
+import { Language as LanguageIcon } from "@mui/icons-material";
+import { useI18n, Locale } from "../../hooks/useI18n";
 
 interface LocaleSelectorProps {
-  variant?: 'button' | 'menu';
+  variant?: "button" | "menu";
   showLabel?: boolean;
-  size?: 'small' | 'medium' | 'large';
+  size?: "small" | "medium" | "large";
 }
 
 export default function LocaleSelector({
-  variant = 'button',
+  variant = "button",
   showLabel = true,
-  size = 'medium',
+  size = "medium",
 }: LocaleSelectorProps) {
   const { locale, setLocale, availableLocales, t } = useI18n();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -43,17 +43,31 @@ export default function LocaleSelector({
 
   // Group locales by region
   const groupedLocales = {
-    'Western Europe': availableLocales.filter((l) =>
-      ['en-US', 'en-GB', 'fr-FR', 'de-DE', 'es-ES', 'it-IT', 'pt-PT', 'nl-NL'].includes(l.code)
+    "Western Europe": availableLocales.filter((l) =>
+      ["en-US", "en-GB", "fr-FR", "de-DE", "es-ES", "it-IT", "pt-PT", "nl-NL"].includes(l.code)
     ),
-    'Northern Europe': availableLocales.filter((l) =>
-      ['da-DK', 'no-NO', 'sv-SE', 'fi-FI', 'is-IS'].includes(l.code)
+    "Northern Europe": availableLocales.filter((l) =>
+      ["da-DK", "no-NO", "sv-SE", "fi-FI", "is-IS"].includes(l.code)
     ),
-    'Central Europe': availableLocales.filter((l) =>
-      ['pl-PL', 'cs-CZ', 'sk-SK', 'hu-HU'].includes(l.code)
+    "Central Europe": availableLocales.filter((l) =>
+      ["pl-PL", "cs-CZ", "sk-SK", "hu-HU"].includes(l.code)
     ),
-    'Eastern & Southern Europe': availableLocales.filter((l) =>
-      ['ro-RO', 'bg-BG', 'hr-HR', 'sl-SI', 'et-EE', 'lv-LV', 'lt-LT', 'mt-MT', 'tr-TR', 'el-GR', 'mk-MK', 'al-AL', 'me-ME'].includes(l.code)
+    "Eastern & Southern Europe": availableLocales.filter((l) =>
+      [
+        "ro-RO",
+        "bg-BG",
+        "hr-HR",
+        "sl-SI",
+        "et-EE",
+        "lv-LV",
+        "lt-LT",
+        "mt-MT",
+        "tr-TR",
+        "el-GR",
+        "mk-MK",
+        "al-AL",
+        "me-ME",
+      ].includes(l.code)
     ),
   };
 
@@ -63,17 +77,15 @@ export default function LocaleSelector({
         onClick={handleClick}
         startIcon={<LanguageIcon />}
         size={size}
-        variant={variant === 'button' ? 'outlined' : 'text'}
+        variant={variant === "button" ? "outlined" : "text"}
         sx={{
-          textTransform: 'none',
-          minWidth: showLabel ? 120 : 'auto',
+          textTransform: "none",
+          minWidth: showLabel ? 120 : "auto",
         }}
       >
         {currentLocaleConfig && (
           <>
-            <span style={{ fontSize: '1.2em', marginRight: 8 }}>
-              {currentLocaleConfig.flag}
-            </span>
+            <span style={{ fontSize: "1.2em", marginRight: 8 }}>{currentLocaleConfig.flag}</span>
             {showLabel && (
               <Typography variant="body2" component="span">
                 {currentLocaleConfig.name}
@@ -97,7 +109,7 @@ export default function LocaleSelector({
         {Object.entries(groupedLocales).map(([region, locales], groupIndex) => (
           <Box key={region}>
             {groupIndex > 0 && <Divider />}
-            <MenuItem disabled sx={{ opacity: 1, fontWeight: 'bold', fontSize: '0.75rem' }}>
+            <MenuItem disabled sx={{ opacity: 1, fontWeight: "bold", fontSize: "0.75rem" }}>
               {region}
             </MenuItem>
             {locales.map((localeOption) => (
@@ -107,14 +119,14 @@ export default function LocaleSelector({
                 selected={localeOption.code === locale}
                 sx={{ pl: 3 }}
               >
-                <ListItemIcon sx={{ minWidth: 36, fontSize: '1.5em' }}>
+                <ListItemIcon sx={{ minWidth: 36, fontSize: "1.5em" }}>
                   {localeOption.flag}
                 </ListItemIcon>
                 <ListItemText
                   primary={localeOption.name}
                   primaryTypographyProps={{
-                    variant: 'body2',
-                    fontWeight: localeOption.code === locale ? 'bold' : 'normal',
+                    variant: "body2",
+                    fontWeight: localeOption.code === locale ? "bold" : "normal",
                   }}
                 />
               </MenuItem>

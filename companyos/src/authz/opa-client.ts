@@ -1,10 +1,10 @@
-import { fetch } from 'undici';
-import type { SubjectAttributes } from './types.js';
+import { fetch } from "undici";
+import type { SubjectAttributes } from "./types.js";
 
 export interface DisclosureExportInput {
-  action: 'disclosure:export';
+  action: "disclosure:export";
   resource: {
-    type: 'disclosure_pack';
+    type: "disclosure_pack";
     tenant_id: string;
     residency_region: string;
   };
@@ -16,21 +16,20 @@ export interface OpaDecisionResult {
   reason?: string;
 }
 
-const DEFAULT_OPA_URL =
-  'http://localhost:8181/v1/data/companyos/authz/disclosure_export/decision';
+const DEFAULT_OPA_URL = "http://localhost:8181/v1/data/companyos/authz/disclosure_export/decision";
 
 export async function evaluateDisclosureExport(
-  input: DisclosureExportInput,
+  input: DisclosureExportInput
 ): Promise<OpaDecisionResult> {
   const opaUrl = process.env.OPA_URL ?? DEFAULT_OPA_URL;
   try {
     const res = await fetch(opaUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ input }),
     });
     if (!res.ok) {
-      return { allow: false, reason: 'opa_error' };
+      return { allow: false, reason: "opa_error" };
     }
     const body = (await res.json()) as { result?: unknown };
     const result = body.result as { allow?: boolean; reason?: string } | undefined;
@@ -39,9 +38,9 @@ export async function evaluateDisclosureExport(
       reason: result?.reason,
     };
   } catch (error) {
-    if (process.env.NODE_ENV !== 'test') {
-      console.warn('[opa] evaluation failed', (error as Error).message);
+    if (process.env.NODE_ENV !== "test") {
+      console.warn("[opa] evaluation failed", (error as Error).message);
     }
-    return { allow: false, reason: 'opa_error' };
+    return { allow: false, reason: "opa_error" };
   }
 }

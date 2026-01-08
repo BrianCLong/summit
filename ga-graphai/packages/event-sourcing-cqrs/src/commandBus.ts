@@ -1,8 +1,8 @@
-import type { SnapshotStore } from './snapshotStore.js';
-import type { EventStore } from './eventStore.js';
-import { ConcurrencyError } from './eventStore.js';
-import type { Command, DomainEvent, EventEnvelope, Snapshot } from './types.js';
-import { EventBus } from './eventBus.js';
+import type { SnapshotStore } from "./snapshotStore.js";
+import type { EventStore } from "./eventStore.js";
+import { ConcurrencyError } from "./eventStore.js";
+import type { Command, DomainEvent, EventEnvelope, Snapshot } from "./types.js";
+import { EventBus } from "./eventBus.js";
 
 export interface CommandHandlerContext {
   history: EventEnvelope[];
@@ -11,7 +11,7 @@ export interface CommandHandlerContext {
 
 export type CommandHandler = (
   command: Command,
-  context: CommandHandlerContext,
+  context: CommandHandlerContext
 ) => Promise<CommandHandlerResult> | CommandHandlerResult;
 
 export interface CommandHandlerResult {
@@ -25,7 +25,7 @@ export class CommandBus {
   constructor(
     private readonly eventStore: EventStore,
     private readonly eventBus: EventBus,
-    private readonly snapshotStore?: SnapshotStore,
+    private readonly snapshotStore?: SnapshotStore
   ) {}
 
   register(commandType: string, handler: CommandHandler): void {
@@ -51,15 +51,13 @@ export class CommandBus {
     const lastVersion = history.at(-1)?.version ?? -1;
     const expectedVersion = command.expectedVersion ?? lastVersion;
     if (expectedVersion !== lastVersion) {
-      throw new ConcurrencyError(
-        `Optimistic concurrency check failed for ${command.streamId}`,
-      );
+      throw new ConcurrencyError(`Optimistic concurrency check failed for ${command.streamId}`);
     }
 
     const envelopes = await this.eventStore.append(
       command.streamId,
       result.events,
-      expectedVersion,
+      expectedVersion
     );
 
     if (result.snapshot && this.snapshotStore) {

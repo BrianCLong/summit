@@ -1,13 +1,8 @@
-import { EventEmitter } from 'eventemitter3';
-import pino from 'pino';
-import {
-  Pattern,
-  PatternMatch,
-  MatchContext,
-  PatternElement,
-} from './types';
+import { EventEmitter } from "eventemitter3";
+import pino from "pino";
+import { Pattern, PatternMatch, MatchContext, PatternElement } from "./types";
 
-const logger = pino({ name: 'pattern-matcher' });
+const logger = pino({ name: "pattern-matcher" });
 
 /**
  * Pattern matcher for CEP
@@ -23,7 +18,7 @@ export class PatternMatcher extends EventEmitter {
   registerPattern(pattern: Pattern): void {
     this.patterns.set(pattern.id, pattern);
     this.activeMatches.set(pattern.id, []);
-    logger.info({ patternId: pattern.id, name: pattern.name }, 'Pattern registered');
+    logger.info({ patternId: pattern.id, name: pattern.name }, "Pattern registered");
   }
 
   /**
@@ -98,7 +93,7 @@ export class PatternMatcher extends EventEmitter {
           context: this.createContext(),
         });
       } else {
-        logger.warn({ patternId: pattern.id }, 'Max active matches reached');
+        logger.warn({ patternId: pattern.id }, "Max active matches reached");
       }
     }
 
@@ -108,15 +103,11 @@ export class PatternMatcher extends EventEmitter {
   /**
    * Match element against event
    */
-  private matchElement(
-    element: PatternElement,
-    event: any,
-    context: MatchContext
-  ): boolean {
+  private matchElement(element: PatternElement, event: any, context: MatchContext): boolean {
     try {
       return element.condition(event, context);
     } catch (error) {
-      logger.error({ error, element: element.name }, 'Element match error');
+      logger.error({ error, element: element.name }, "Element match error");
       return false;
     }
   }
@@ -146,9 +137,10 @@ export class PatternMatcher extends EventEmitter {
     return {
       patternId,
       activeMatches: active.length,
-      averageMatchTime: active.length > 0
-        ? active.reduce((sum, m) => sum + (Date.now() - m.startTime), 0) / active.length
-        : 0,
+      averageMatchTime:
+        active.length > 0
+          ? active.reduce((sum, m) => sum + (Date.now() - m.startTime), 0) / active.length
+          : 0,
     };
   }
 
@@ -215,7 +207,7 @@ export class PatternBuilder {
    */
   build(): Pattern {
     if (!this.pattern.id || !this.pattern.name || !this.pattern.sequence?.length) {
-      throw new Error('Pattern must have id, name, and at least one element');
+      throw new Error("Pattern must have id, name, and at least one element");
     }
 
     return this.pattern as Pattern;
@@ -227,21 +219,19 @@ export const FraudPatterns = {
   /**
    * Rapid succession of failed login attempts
    */
-  bruteForceLogin: PatternBuilder
-    .create('brute-force-login', 'Brute Force Login Attempt')
-    .where('failed-login-1', (e) => e.type === 'login' && e.success === false)
-    .where('failed-login-2', (e) => e.type === 'login' && e.success === false)
-    .where('failed-login-3', (e) => e.type === 'login' && e.success === false)
+  bruteForceLogin: PatternBuilder.create("brute-force-login", "Brute Force Login Attempt")
+    .where("failed-login-1", (e) => e.type === "login" && e.success === false)
+    .where("failed-login-2", (e) => e.type === "login" && e.success === false)
+    .where("failed-login-3", (e) => e.type === "login" && e.success === false)
     .within(60000) // Within 1 minute
     .build(),
 
   /**
    * Unusual transaction pattern
    */
-  unusualTransaction: PatternBuilder
-    .create('unusual-transaction', 'Unusual Transaction Pattern')
-    .where('small-transaction', (e) => e.type === 'transaction' && e.amount < 10)
-    .where('large-transaction', (e) => e.type === 'transaction' && e.amount > 1000)
+  unusualTransaction: PatternBuilder.create("unusual-transaction", "Unusual Transaction Pattern")
+    .where("small-transaction", (e) => e.type === "transaction" && e.amount < 10)
+    .where("large-transaction", (e) => e.type === "transaction" && e.amount > 1000)
     .within(300000) // Within 5 minutes
     .build(),
 };

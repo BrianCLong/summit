@@ -1,6 +1,6 @@
-import { Pool } from 'pg';
-import { config } from '../config';
-import { Tool } from './schemas';
+import { Pool } from "pg";
+import { config } from "../config";
+import { Tool } from "./schemas";
 
 export class ToolRetriever {
   private pool: Pool;

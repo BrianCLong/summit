@@ -3,4 +3,4 @@
  * Re-export from models for convenience
  */
 
-export { ComplianceValidator } from '../models/CriminalOrganization';
+export { ComplianceValidator } from "../models/CriminalOrganization";

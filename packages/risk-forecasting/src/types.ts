@@ -4,15 +4,15 @@
  */
 
 export type RiskCategory =
-  | 'systemic'
-  | 'geopolitical'
-  | 'economic'
-  | 'technological'
-  | 'environmental'
-  | 'societal'
-  | 'security';
+  | "systemic"
+  | "geopolitical"
+  | "economic"
+  | "technological"
+  | "environmental"
+  | "societal"
+  | "security";
 
-export type RiskSeverity = 'low' | 'medium' | 'high' | 'critical' | 'catastrophic';
+export type RiskSeverity = "low" | "medium" | "high" | "critical" | "catastrophic";
 
 export interface GlobalRisk {
   id: string;
@@ -49,7 +49,7 @@ export interface RiskTimeframe {
 
 export interface RiskInterconnection {
   connectedRiskId: string;
-  relationshipType: 'amplifies' | 'triggers' | 'mitigates' | 'correlates';
+  relationshipType: "amplifies" | "triggers" | "mitigates" | "correlates";
   strength: number; // 0-1
   bidirectional: boolean;
 }
@@ -77,9 +77,9 @@ export interface EarlyWarningIndicator {
   metric: string;
   threshold: number | string;
   currentValue: number | string;
-  trend: 'improving' | 'stable' | 'deteriorating' | 'critical';
+  trend: "improving" | "stable" | "deteriorating" | "critical";
   leadTime: number; // days
-  reliability: 'low' | 'medium' | 'high';
+  reliability: "low" | "medium" | "high";
   dataSource: string;
 }
 
@@ -87,7 +87,7 @@ export interface MitigationStrategy {
   id: string;
   strategy: string;
   effectiveness: number; // 0-100
-  cost: 'low' | 'medium' | 'high' | 'very-high';
+  cost: "low" | "medium" | "high" | "very-high";
   timeToImplement: number; // days
   stakeholders: string[];
   dependencies: string[];
@@ -106,7 +106,7 @@ export interface ResilienceAssessment {
 export interface Vulnerability {
   id: string;
   vulnerability: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   exploitability: number; // 0-100
   affectedSystems: string[];
 }
@@ -116,7 +116,7 @@ export interface TippingPoint {
   description: string;
   threshold: string;
   currentDistance: number; // proximity to threshold
-  reversibility: 'reversible' | 'partially-reversible' | 'irreversible';
+  reversibility: "reversible" | "partially-reversible" | "irreversible";
   consequences: string[];
   precursors: string[];
 }
@@ -125,9 +125,9 @@ export interface BlackSwanEvent {
   id: string;
   event: string;
   description: string;
-  probability: 'very-low' | 'extremely-low';
-  impact: 'catastrophic' | 'existential';
-  detectability: 'low' | 'very-low' | 'undetectable';
+  probability: "very-low" | "extremely-low";
+  impact: "catastrophic" | "existential";
+  detectability: "low" | "very-low" | "undetectable";
   potentialPrecursors: string[];
   scenarioAnalysis: string;
 }
@@ -149,7 +149,7 @@ export interface SystemVulnerability {
 }
 
 export interface FeedbackLoop {
-  type: 'reinforcing' | 'balancing';
+  type: "reinforcing" | "balancing";
   components: string[];
   strength: number;
   delay: number;

@@ -3,8 +3,8 @@
  * Extracts specific aspects and their associated sentiments
  */
 
-import type { AspectSentiment, SentimentScore } from '../core/types.js';
-import { BertSentimentModel } from '../models/BertSentimentModel.js';
+import type { AspectSentiment, SentimentScore } from "../core/types.js";
+import { BertSentimentModel } from "../models/BertSentimentModel.js";
 
 export class AspectBasedAnalyzer {
   private sentimentModel: BertSentimentModel;
@@ -46,24 +46,24 @@ export class AspectBasedAnalyzer {
 
     // Common domain-specific aspects for intelligence analysis
     const domainAspects = [
-      'threat',
-      'risk',
-      'security',
-      'intelligence',
-      'operation',
-      'attack',
-      'defense',
-      'vulnerability',
-      'target',
-      'source',
-      'credibility',
-      'reliability',
-      'accuracy',
-      'timeliness',
+      "threat",
+      "risk",
+      "security",
+      "intelligence",
+      "operation",
+      "attack",
+      "defense",
+      "vulnerability",
+      "target",
+      "source",
+      "credibility",
+      "reliability",
+      "accuracy",
+      "timeliness",
     ];
 
     for (const word of words) {
-      const cleanWord = word.replace(/[^\w]/g, '');
+      const cleanWord = word.replace(/[^\w]/g, "");
       if (domainAspects.includes(cleanWord)) {
         aspects.add(cleanWord);
       }
@@ -88,7 +88,7 @@ export class AspectBasedAnalyzer {
 
   private countMentions(text: string, aspect: string): number {
     const lowerText = text.toLowerCase();
-    const regex = new RegExp(aspect, 'gi');
+    const regex = new RegExp(aspect, "gi");
     const matches = lowerText.match(regex);
     return matches ? matches.length : 0;
   }

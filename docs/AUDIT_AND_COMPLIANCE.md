@@ -37,13 +37,13 @@ The Summit/IntelGraph Audit Logging & Compliance System provides comprehensive, 
 
 ### Compliance Standards Supported
 
-| Standard | Coverage | Status |
-|----------|----------|--------|
-| **GDPR** | Articles 5, 12-22, 30 | ✅ Production |
-| **HIPAA** | 164.308, 164.312, 164.502(b) | ✅ Production |
-| **SOC 2** | CC6.1, CC6.2, CC6.3 | ✅ Production |
-| **SOX** | Section 802 | ✅ Production |
-| **PCI-DSS** | Requirement 10 | 🚧 Partial |
+| Standard    | Coverage                     | Status        |
+| ----------- | ---------------------------- | ------------- |
+| **GDPR**    | Articles 5, 12-22, 30        | ✅ Production |
+| **HIPAA**   | 164.308, 164.312, 164.502(b) | ✅ Production |
+| **SOC 2**   | CC6.1, CC6.2, CC6.3          | ✅ Production |
+| **SOX**     | Section 802                  | ✅ Production |
+| **PCI-DSS** | Requirement 10               | 🚧 Partial    |
 
 ---
 
@@ -157,14 +157,10 @@ All audit logs use SHA-256 hash chains to prevent tampering:
 **Integrity Verification**:
 
 ```typescript
-import { AuditAccessLogRepo } from './repos/AuditAccessLogRepo.js';
+import { AuditAccessLogRepo } from "./repos/AuditAccessLogRepo.js";
 
 const repo = new AuditAccessLogRepo(pgPool);
-const result = await repo.verifyIntegrity(
-  'tenant-123',
-  startDate,
-  endDate
-);
+const result = await repo.verifyIntegrity("tenant-123", startDate, endDate);
 
 console.log(result);
 // {
@@ -190,15 +186,15 @@ CREATE TRIGGER prevent_audit_log_update
 ```typescript
 // Create redaction request (requires dual-control approval)
 await auditRepo.requestRedaction({
-  auditLogId: 'log-id',
-  requestedBy: 'user-123',
-  reason: 'Incorrect case ID recorded',
+  auditLogId: "log-id",
+  requestedBy: "user-123",
+  reason: "Incorrect case ID recorded",
 });
 
 // Approve redaction (requires different user)
 await auditRepo.approveRedaction({
-  redactionId: 'redaction-id',
-  approvedBy: 'supervisor-456',
+  redactionId: "redaction-id",
+  approvedBy: "supervisor-456",
 });
 ```
 
@@ -211,23 +207,23 @@ await auditRepo.approveRedaction({
 #### Right of Access (Article 15)
 
 ```typescript
-import { GDPRComplianceService } from './services/GDPRComplianceService.js';
+import { GDPRComplianceService } from "./services/GDPRComplianceService.js";
 
 const gdprService = new GDPRComplianceService(pgPool);
 
 // Create access request
 const request = await gdprService.createDataSubjectRequest({
-  tenantId: 'tenant-123',
-  subjectId: 'user-456',
-  subjectEmail: 'user@example.com',
-  subjectIdentifiers: { email: 'user@example.com', userId: 'user-456' },
-  requestType: 'access',
-  requestReason: 'User requested copy of personal data',
+  tenantId: "tenant-123",
+  subjectId: "user-456",
+  subjectEmail: "user@example.com",
+  subjectIdentifiers: { email: "user@example.com", userId: "user-456" },
+  requestType: "access",
+  requestReason: "User requested copy of personal data",
   completionDeadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
 });
 
 // Export personal data
-const personalData = await exportPersonalData('user-456');
+const personalData = await exportPersonalData("user-456");
 ```
 
 #### Right to Erasure (Article 17)
@@ -235,25 +231,22 @@ const personalData = await exportPersonalData('user-456');
 ```typescript
 // Create erasure request
 const erasureRequest = await gdprService.createDataSubjectRequest({
-  tenantId: 'tenant-123',
-  subjectId: 'user-456',
-  requestType: 'erasure',
-  requestReason: 'User exercised right to be forgotten',
+  tenantId: "tenant-123",
+  subjectId: "user-456",
+  requestType: "erasure",
+  requestReason: "User exercised right to be forgotten",
 });
 
 // Process erasure
-await gdprService.processRightToErasure(
-  erasureRequest.requestId,
-  'compliance-officer-789'
-);
+await gdprService.processRightToErasure(erasureRequest.requestId, "compliance-officer-789");
 
 // Anonymize data
 await gdprService.anonymizeData(
-  'tenant-123',
-  'user',
-  'user-456',
-  ['email', 'name', 'phone', 'address'],
-  'compliance-officer-789'
+  "tenant-123",
+  "user",
+  "user-456",
+  ["email", "name", "phone", "address"],
+  "compliance-officer-789"
 );
 ```
 
@@ -261,14 +254,14 @@ await gdprService.anonymizeData(
 
 ```typescript
 const portabilityRequest = await gdprService.createDataSubjectRequest({
-  tenantId: 'tenant-123',
-  subjectId: 'user-456',
-  requestType: 'portability',
-  requestReason: 'User requested data export in machine-readable format',
+  tenantId: "tenant-123",
+  subjectId: "user-456",
+  requestType: "portability",
+  requestReason: "User requested data export in machine-readable format",
 });
 
 // Export in JSON format
-const exportData = await exportUserDataAsJSON('user-456');
+const exportData = await exportUserDataAsJSON("user-456");
 ```
 
 ### Data Retention Policies
@@ -276,17 +269,17 @@ const exportData = await exportUserDataAsJSON('user-456');
 ```typescript
 // Define retention policy
 const policy = await gdprService.upsertRetentionPolicy({
-  policyName: 'GDPR Personal Data',
-  dataCategory: 'personal_data',
+  policyName: "GDPR Personal Data",
+  dataCategory: "personal_data",
   retentionPeriodDays: 2555, // ~7 years
-  retentionBasis: 'legal_requirement',
-  applicableJurisdictions: ['EU', 'UK'],
+  retentionBasis: "legal_requirement",
+  applicableJurisdictions: ["EU", "UK"],
   archivalAfterDays: 365,
   deletionAfterDays: 2555,
   anonymizationAfterDays: 2555,
-  regulationReferences: ['GDPR Article 5(1)(e)'],
+  regulationReferences: ["GDPR Article 5(1)(e)"],
   isActive: true,
-  createdBy: 'admin-123',
+  createdBy: "admin-123",
 });
 
 // Get active policies
@@ -309,37 +302,37 @@ const policies = await gdprService.getActiveRetentionPolicies();
 Every PHI access must be logged with justification:
 
 ```typescript
-import { HIPAAComplianceService } from './services/HIPAAComplianceService.js';
+import { HIPAAComplianceService } from "./services/HIPAAComplianceService.js";
 
 const hipaaService = new HIPAAComplianceService(pgPool);
 
 // Log PHI access
 await hipaaService.logPHIAccess({
-  tenantId: 'tenant-123',
-  phiType: 'patient_record',
-  phiId: 'patient-456',
-  phiClassification: 'PHI',
-  accessType: 'view',
-  accessPurpose: 'treatment',
-  userId: 'doctor-789',
-  userRole: 'physician',
-  userNPI: '1234567890',
-  authorizationType: 'treatment_relationship',
+  tenantId: "tenant-123",
+  phiType: "patient_record",
+  phiId: "patient-456",
+  phiClassification: "PHI",
+  accessType: "view",
+  accessPurpose: "treatment",
+  userId: "doctor-789",
+  userRole: "physician",
+  userNPI: "1234567890",
+  authorizationType: "treatment_relationship",
 
   // REQUIRED: Minimum Necessary Rule (164.502(b))
-  minimumNecessaryJustification: 'Reviewing patient history to diagnose current symptoms',
-  dataElementsAccessed: ['diagnosis', 'medications', 'lab_results'],
+  minimumNecessaryJustification: "Reviewing patient history to diagnose current symptoms",
+  dataElementsAccessed: ["diagnosis", "medications", "lab_results"],
 
   // Session context
-  ipAddress: '192.168.1.100',
-  userAgent: 'Mozilla/5.0...',
-  sessionId: 'session-123',
-  workstationId: 'workstation-clinic-5',
+  ipAddress: "192.168.1.100",
+  userAgent: "Mozilla/5.0...",
+  sessionId: "session-123",
+  workstationId: "workstation-clinic-5",
 
   // Encryption verification (164.312(a)(2)(iv))
   dataEncryptedAtRest: true,
   dataEncryptedInTransit: true,
-  encryptionAlgorithm: 'AES-256-GCM',
+  encryptionAlgorithm: "AES-256-GCM",
 });
 ```
 
@@ -351,14 +344,15 @@ The system enforces the minimum necessary rule:
 // Invalid: Insufficient justification (< 20 characters)
 await hipaaService.logPHIAccess({
   // ...
-  minimumNecessaryJustification: 'Viewing record', // ❌ TOO SHORT
+  minimumNecessaryJustification: "Viewing record", // ❌ TOO SHORT
 });
 // Error: HIPAA Minimum Necessary Rule (164.502(b)) requires proper justification
 
 // Valid: Adequate justification
 await hipaaService.logPHIAccess({
   // ...
-  minimumNecessaryJustification: 'Reviewing patient diagnosis and medication history to determine appropriate treatment plan for chronic condition', // ✅ ADEQUATE
+  minimumNecessaryJustification:
+    "Reviewing patient diagnosis and medication history to determine appropriate treatment plan for chronic condition", // ✅ ADEQUATE
 });
 ```
 
@@ -367,15 +361,15 @@ await hipaaService.logPHIAccess({
 ```typescript
 // Verify encryption compliance
 const audit = await hipaaService.verifyEncryptionCompliance({
-  tenantId: 'tenant-123',
-  resourceType: 'patient_record',
-  resourceId: 'patient-456',
+  tenantId: "tenant-123",
+  resourceType: "patient_record",
+  resourceId: "patient-456",
   encryptionAtRest: true,
   encryptionInTransit: true,
-  encryptionAlgorithm: 'AES-256-GCM',
-  keyManagementService: 'AWS KMS',
+  encryptionAlgorithm: "AES-256-GCM",
+  keyManagementService: "AWS KMS",
   auditedAt: new Date(),
-  auditedBy: 'security-officer-123',
+  auditedBy: "security-officer-123",
 });
 
 // If non-compliant, alert is created automatically
@@ -392,19 +386,19 @@ const audit = await hipaaService.verifyEncryptionCompliance({
 // - Excessive data elements accessed
 
 // Get open security incidents
-const incidents = await hipaaService.getOpenSecurityIncidents('tenant-123');
+const incidents = await hipaaService.getOpenSecurityIncidents("tenant-123");
 
 // Create manual incident
 await hipaaService.createSecurityIncident({
-  tenantId: 'tenant-123',
-  incidentType: 'unauthorized_access_attempt',
-  incidentSeverity: 'high',
-  incidentDescription: 'Multiple failed login attempts detected',
-  affectedPHIIds: ['patient-456', 'patient-789'],
-  affectedUserIds: ['user-123'],
+  tenantId: "tenant-123",
+  incidentType: "unauthorized_access_attempt",
+  incidentSeverity: "high",
+  incidentDescription: "Multiple failed login attempts detected",
+  affectedPHIIds: ["patient-456", "patient-789"],
+  affectedUserIds: ["user-123"],
   detectedAt: new Date(),
-  detectedBy: 'security-monitoring-system',
-  incidentStatus: 'open',
+  detectedBy: "security-monitoring-system",
+  incidentStatus: "open",
   breachNotificationRequired: false,
 });
 ```
@@ -416,29 +410,29 @@ await hipaaService.createSecurityIncident({
 ### Appending Events
 
 ```typescript
-import { EventSourcingService } from './services/EventSourcingService.js';
+import { EventSourcingService } from "./services/EventSourcingService.js";
 
 const eventService = new EventSourcingService(pgPool);
 
 // Append a domain event
 await eventService.appendEvent({
-  eventType: 'CaseCreated',
-  aggregateType: 'case',
-  aggregateId: 'case-123',
+  eventType: "CaseCreated",
+  aggregateType: "case",
+  aggregateId: "case-123",
   eventData: {
-    title: 'Investigation Alpha',
-    status: 'ACTIVE',
-    priority: 'HIGH',
+    title: "Investigation Alpha",
+    status: "ACTIVE",
+    priority: "HIGH",
   },
   eventMetadata: {
-    source: 'graphql_mutation',
+    source: "graphql_mutation",
   },
-  tenantId: 'tenant-123',
-  userId: 'user-456',
-  correlationId: 'correlation-789',
-  dataClassification: 'CONFIDENTIAL',
-  retentionPolicy: 'INVESTIGATION_DATA',
-  ipAddress: '192.168.1.100',
+  tenantId: "tenant-123",
+  userId: "user-456",
+  correlationId: "correlation-789",
+  dataClassification: "CONFIDENTIAL",
+  retentionPolicy: "INVESTIGATION_DATA",
+  ipAddress: "192.168.1.100",
 });
 ```
 
@@ -456,7 +450,7 @@ interface CaseState {
 
 const reducer = (state: CaseState, event: StoredEvent): CaseState => {
   switch (event.eventType) {
-    case 'CaseCreated':
+    case "CaseCreated":
       return {
         ...state,
         id: event.aggregateId,
@@ -464,7 +458,7 @@ const reducer = (state: CaseState, event: StoredEvent): CaseState => {
         status: event.eventData.status,
         priority: event.eventData.priority,
       };
-    case 'CaseUpdated':
+    case "CaseUpdated":
       return {
         ...state,
         ...event.eventData,
@@ -475,12 +469,13 @@ const reducer = (state: CaseState, event: StoredEvent): CaseState => {
   }
 };
 
-const { state, version } = await eventService.reconstructAggregate(
-  'case',
-  'case-123',
-  reducer,
-  { id: '', title: '', status: '', priority: '', history: [] }
-);
+const { state, version } = await eventService.reconstructAggregate("case", "case-123", reducer, {
+  id: "",
+  title: "",
+  status: "",
+  priority: "",
+  history: [],
+});
 ```
 
 ### Snapshots
@@ -488,18 +483,18 @@ const { state, version } = await eventService.reconstructAggregate(
 ```typescript
 // Create snapshot for optimized reconstruction
 await eventService.createSnapshot({
-  aggregateType: 'case',
-  aggregateId: 'case-123',
+  aggregateType: "case",
+  aggregateId: "case-123",
   aggregateVersion: 100,
   snapshotData: currentState,
   snapshotMetadata: {
-    createdBy: 'system',
-    reason: 'periodic_snapshot',
+    createdBy: "system",
+    reason: "periodic_snapshot",
   },
 });
 
 // Retrieve latest snapshot
-const snapshot = await eventService.getLatestSnapshot('case', 'case-123');
+const snapshot = await eventService.getLatestSnapshot("case", "case-123");
 ```
 
 ---
@@ -509,37 +504,37 @@ const snapshot = await eventService.getLatestSnapshot('case', 'case-123');
 ### Full-Text Search
 
 ```typescript
-import { ElasticsearchAuditService } from './services/ElasticsearchAuditService.js';
+import { ElasticsearchAuditService } from "./services/ElasticsearchAuditService.js";
 
 const esService = new ElasticsearchAuditService(pgPool, {
-  node: 'https://elasticsearch:9200',
+  node: "https://elasticsearch:9200",
   auth: {
-    username: 'elastic',
+    username: "elastic",
     password: process.env.ELASTICSEARCH_PASSWORD,
   },
 });
 
 // Search audit logs
 const results = await esService.searchAuditLogs({
-  tenantId: 'tenant-123',
-  query: 'case deleted',
+  tenantId: "tenant-123",
+  query: "case deleted",
   filters: {
-    eventType: ['CaseDeleted', 'CaseArchived'],
-    userId: ['user-456'],
-    startDate: new Date('2025-01-01'),
-    endDate: new Date('2025-12-31'),
-    dataClassification: ['CONFIDENTIAL', 'INTERNAL'],
+    eventType: ["CaseDeleted", "CaseArchived"],
+    userId: ["user-456"],
+    startDate: new Date("2025-01-01"),
+    endDate: new Date("2025-12-31"),
+    dataClassification: ["CONFIDENTIAL", "INTERNAL"],
   },
   sort: {
-    field: 'event_timestamp',
-    order: 'desc',
+    field: "event_timestamp",
+    order: "desc",
   },
   from: 0,
   size: 100,
 });
 
 console.log(`Found ${results.total} matching events`);
-results.hits.forEach(hit => {
+results.hits.forEach((hit) => {
   console.log(hit.source);
 });
 ```
@@ -549,30 +544,30 @@ results.hits.forEach(hit => {
 ```typescript
 // Aggregate by event type
 const aggregation = await esService.aggregateAuditData({
-  tenantId: 'tenant-123',
+  tenantId: "tenant-123",
   aggregation: {
-    type: 'terms',
-    field: 'event_type',
+    type: "terms",
+    field: "event_type",
     size: 20,
   },
 });
 
 // Time-series aggregation
 const timeSeries = await esService.aggregateAuditData({
-  tenantId: 'tenant-123',
+  tenantId: "tenant-123",
   aggregation: {
-    type: 'date_histogram',
-    field: 'event_timestamp',
-    interval: 'day',
+    type: "date_histogram",
+    field: "event_timestamp",
+    interval: "day",
   },
 });
 
 // Cardinality (unique users)
 const uniqueUsers = await esService.aggregateAuditData({
-  tenantId: 'tenant-123',
+  tenantId: "tenant-123",
   aggregation: {
-    type: 'cardinality',
-    field: 'user_id',
+    type: "cardinality",
+    field: "user_id",
   },
 });
 ```
@@ -581,7 +576,7 @@ const uniqueUsers = await esService.aggregateAuditData({
 
 ```typescript
 // Sync historical audit logs to Elasticsearch
-await esService.bulkSyncAuditLogs('tenant-123', 1000);
+await esService.bulkSyncAuditLogs("tenant-123", 1000);
 ```
 
 ---
@@ -591,14 +586,14 @@ await esService.bulkSyncAuditLogs('tenant-123', 1000);
 ### Automated Compliance Checks
 
 ```typescript
-import { ComplianceMonitoringService } from './services/ComplianceMonitoringService.js';
+import { ComplianceMonitoringService } from "./services/ComplianceMonitoringService.js";
 
 const complianceService = new ComplianceMonitoringService(pgPool);
 
 // Run all compliance checks
-const results = await complianceService.runComplianceChecks('tenant-123');
+const results = await complianceService.runComplianceChecks("tenant-123");
 
-results.forEach(result => {
+results.forEach((result) => {
   if (!result.passed) {
     console.error(`❌ ${result.checkName}: ${result.message}`);
   } else {
@@ -609,39 +604,39 @@ results.forEach(result => {
 
 ### Available Checks
 
-| Check | Regulation | Severity |
-|-------|-----------|----------|
-| `gdpr_dsr_sla` | GDPR Article 12 | Critical |
-| `gdpr_data_retention` | GDPR Article 5(1)(e) | Warning |
-| `gdpr_consent_validity` | GDPR Article 7 | Warning |
-| `hipaa_encryption` | HIPAA 164.312(a)(2)(iv) | Critical |
-| `hipaa_access_logging` | HIPAA 164.312(b) | Warning |
-| `hipaa_minimum_necessary` | HIPAA 164.502(b) | Warning |
-| `audit_coverage` | SOC 2 / SOX | Warning |
-| `audit_integrity` | SOC 2 / SOX | Critical |
-| `retention_compliance` | General | Warning |
+| Check                     | Regulation              | Severity |
+| ------------------------- | ----------------------- | -------- |
+| `gdpr_dsr_sla`            | GDPR Article 12         | Critical |
+| `gdpr_data_retention`     | GDPR Article 5(1)(e)    | Warning  |
+| `gdpr_consent_validity`   | GDPR Article 7          | Warning  |
+| `hipaa_encryption`        | HIPAA 164.312(a)(2)(iv) | Critical |
+| `hipaa_access_logging`    | HIPAA 164.312(b)        | Warning  |
+| `hipaa_minimum_necessary` | HIPAA 164.502(b)        | Warning  |
+| `audit_coverage`          | SOC 2 / SOX             | Warning  |
+| `audit_integrity`         | SOC 2 / SOX             | Critical |
+| `retention_compliance`    | General                 | Warning  |
 
 ### Alert Management
 
 ```typescript
 // Get active alerts
-const alerts = await complianceService.getActiveAlerts('tenant-123');
+const alerts = await complianceService.getActiveAlerts("tenant-123");
 
 // Acknowledge alert
-await complianceService.updateAlert('alert-123', {
-  alertStatus: 'acknowledged',
-  acknowledgedBy: 'compliance-officer-456',
+await complianceService.updateAlert("alert-123", {
+  alertStatus: "acknowledged",
+  acknowledgedBy: "compliance-officer-456",
 });
 
 // Resolve alert
-await complianceService.updateAlert('alert-123', {
-  alertStatus: 'resolved',
-  resolvedBy: 'compliance-officer-456',
-  resolutionNotes: 'Encryption re-enabled on all PHI records',
+await complianceService.updateAlert("alert-123", {
+  alertStatus: "resolved",
+  resolvedBy: "compliance-officer-456",
+  resolutionNotes: "Encryption re-enabled on all PHI records",
 });
 
 // Get SLA-breached alerts
-const breachedAlerts = await complianceService.getSLABreachedAlerts('tenant-123');
+const breachedAlerts = await complianceService.getSLABreachedAlerts("tenant-123");
 ```
 
 ### Compliance Metrics
@@ -649,22 +644,22 @@ const breachedAlerts = await complianceService.getSLABreachedAlerts('tenant-123'
 ```typescript
 // Record custom metric
 await complianceService.recordMetric({
-  tenantId: 'tenant-123',
-  metricType: 'audit_coverage',
-  metricName: 'events_per_day',
+  tenantId: "tenant-123",
+  metricType: "audit_coverage",
+  metricName: "events_per_day",
   metricValue: 1500,
-  metricUnit: 'count',
+  metricUnit: "count",
   targetValue: 1000,
-  periodStart: new Date('2025-01-01'),
-  periodEnd: new Date('2025-01-02'),
+  periodStart: new Date("2025-01-01"),
+  periodEnd: new Date("2025-01-02"),
 });
 
 // Get metrics
 const metrics = await complianceService.getMetrics(
-  'tenant-123',
-  'audit_coverage',
-  new Date('2025-01-01'),
-  new Date('2025-12-31')
+  "tenant-123",
+  "audit_coverage",
+  new Date("2025-01-01"),
+  new Date("2025-12-31")
 );
 ```
 
@@ -680,11 +675,7 @@ All GraphQL mutations are automatically captured to the event store via the `Aud
 
 ```graphql
 mutation CreateCase {
-  createCase(input: {
-    title: "Investigation Alpha"
-    status: ACTIVE
-    priority: HIGH
-  }) {
+  createCase(input: { title: "Investigation Alpha", status: ACTIVE, priority: HIGH }) {
     id
     title
   }
@@ -772,16 +763,14 @@ AUDIT_RETENTION_DAYS=2555  # ~7 years
 ### Apollo Server Integration
 
 ```typescript
-import { createAuditEventCaptureMiddleware } from './middleware/audit-event-capture-middleware.js';
+import { createAuditEventCaptureMiddleware } from "./middleware/audit-event-capture-middleware.js";
 
 const auditMiddleware = createAuditEventCaptureMiddleware(pgPool);
 
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  plugins: [
-    auditMiddleware.createApolloPlugin(),
-  ],
+  plugins: [auditMiddleware.createApolloPlugin()],
 });
 ```
 
@@ -800,22 +789,22 @@ app.use(auditMiddleware.createExpressMiddleware());
 ```typescript
 // ❌ BAD: Missing required fields
 await auditRepo.logAccess({
-  tenantId: 'tenant-123',
-  caseId: 'case-456',
-  userId: 'user-789',
-  action: 'view',
+  tenantId: "tenant-123",
+  caseId: "case-456",
+  userId: "user-789",
+  action: "view",
 });
 // Error: Reason and legal basis are required
 
 // ✅ GOOD: Complete audit entry
 await auditRepo.logAccess({
-  tenantId: 'tenant-123',
-  caseId: 'case-456',
-  userId: 'user-789',
-  action: 'view',
-  reason: 'Investigating fraud case as assigned analyst',
-  legalBasis: 'investigation',
-  correlationId: 'correlation-123',
+  tenantId: "tenant-123",
+  caseId: "case-456",
+  userId: "user-789",
+  action: "view",
+  reason: "Investigating fraud case as assigned analyst",
+  legalBasis: "investigation",
+  correlationId: "correlation-123",
 });
 ```
 
@@ -826,19 +815,19 @@ const correlationId = randomUUID();
 
 await eventService.appendEvent({
   correlationId,
-  eventType: 'CaseCreated',
+  eventType: "CaseCreated",
   // ...
 });
 
 await eventService.appendEvent({
   correlationId,
-  eventType: 'EntityCreated',
+  eventType: "EntityCreated",
   // ...
 });
 
 // Later, query all related events
 const relatedEvents = await eventService.queryEvents({
-  tenantId: 'tenant-123',
+  tenantId: "tenant-123",
   correlationId,
 });
 ```
@@ -849,8 +838,8 @@ const relatedEvents = await eventService.queryEvents({
 // Classify data appropriately
 await eventService.appendEvent({
   // ...
-  dataClassification: 'CONFIDENTIAL', // or 'PII', 'PHI', 'INTERNAL'
-  retentionPolicy: 'INVESTIGATION_DATA',
+  dataClassification: "CONFIDENTIAL", // or 'PII', 'PHI', 'INTERNAL'
+  retentionPolicy: "INVESTIGATION_DATA",
 });
 ```
 
@@ -865,12 +854,15 @@ node scripts/verify-audit-integrity.js --tenant tenant-123 --days 7
 
 ```typescript
 // Set up daily alert monitoring
-setInterval(async () => {
-  const alerts = await complianceService.getActiveAlerts('tenant-123');
-  if (alerts.length > 0) {
-    notifyComplianceTeam(alerts);
-  }
-}, 24 * 60 * 60 * 1000);
+setInterval(
+  async () => {
+    const alerts = await complianceService.getActiveAlerts("tenant-123");
+    if (alerts.length > 0) {
+      notifyComplianceTeam(alerts);
+    }
+  },
+  24 * 60 * 60 * 1000
+);
 ```
 
 ---
@@ -882,19 +874,23 @@ setInterval(async () => {
 **Symptom**: Audit logs not appearing in Elasticsearch searches
 
 **Solution**:
+
 1. Check Elasticsearch connection:
+
 ```bash
 curl -u elastic:password https://localhost:9200/_cluster/health
 ```
 
 2. Verify index templates:
+
 ```bash
 curl -u elastic:password https://localhost:9200/_index_template/audit-events
 ```
 
 3. Run bulk sync:
+
 ```typescript
-await esService.bulkSyncAuditLogs('tenant-123');
+await esService.bulkSyncAuditLogs("tenant-123");
 ```
 
 ### Issue: GDPR DSR SLA alerts firing
@@ -902,16 +898,19 @@ await esService.bulkSyncAuditLogs('tenant-123');
 **Symptom**: Alerts for overdue data subject requests
 
 **Solution**:
+
 1. List overdue requests:
+
 ```typescript
-const overdue = await gdprService.getOverdueRequests('tenant-123');
+const overdue = await gdprService.getOverdueRequests("tenant-123");
 ```
 
 2. Process or extend deadline:
+
 ```typescript
 await gdprService.updateDataSubjectRequest(requestId, {
-  requestStatus: 'in_progress',
-  assignedTo: 'compliance-officer-123',
+  requestStatus: "in_progress",
+  assignedTo: "compliance-officer-123",
 });
 ```
 
@@ -924,7 +923,8 @@ Adjust detection thresholds in `HIPAAComplianceService.ts`:
 
 ```typescript
 // Increase minimum justification length threshold
-if (access.minimumNecessaryJustification.length < 30) { // Changed from 20
+if (access.minimumNecessaryJustification.length < 30) {
+  // Changed from 20
   return true;
 }
 ```

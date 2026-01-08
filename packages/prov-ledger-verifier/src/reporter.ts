@@ -1,16 +1,16 @@
-import { VerificationReport } from './types.js';
+import { VerificationReport } from "./types.js";
 
 function formatCheckPrefix(ok: boolean): string {
-  return ok ? '✔' : '✖';
+  return ok ? "✔" : "✖";
 }
 
 export function formatReport(report: VerificationReport): string {
   const lines: string[] = [];
   lines.push(`Provenance bundle: ${report.bundlePath}`);
   lines.push(`Manifest: ${report.manifestPath}`);
-  lines.push('');
-  lines.push(`Overall: ${report.ok ? 'PASS' : 'FAIL'}`);
-  lines.push('');
+  lines.push("");
+  lines.push(`Overall: ${report.ok ? "PASS" : "FAIL"}`);
+  lines.push("");
 
   const checks = [
     report.checks.manifestStructure,
@@ -20,7 +20,7 @@ export function formatReport(report: VerificationReport): string {
     report.checks.claimReferences,
   ];
 
-  lines.push('Checks:');
+  lines.push("Checks:");
   for (const check of checks) {
     lines.push(`  ${formatCheckPrefix(check.ok)} ${check.name}`);
     for (const error of check.errors) {
@@ -31,18 +31,18 @@ export function formatReport(report: VerificationReport): string {
     }
   }
 
-  lines.push('');
-  lines.push('Summary:');
+  lines.push("");
+  lines.push("Summary:");
   lines.push(`  Evidence items: ${report.summary.evidenceCount}`);
   lines.push(`  Claims: ${report.summary.claimCount}`);
 
   if (report.summary.missingEvidence.length > 0) {
-    lines.push(`  Missing evidence: ${report.summary.missingEvidence.join(', ')}`);
+    lines.push(`  Missing evidence: ${report.summary.missingEvidence.join(", ")}`);
   }
 
   if (report.summary.hashMismatches.length > 0) {
-    lines.push(`  Hash mismatches: ${report.summary.hashMismatches.join(', ')}`);
+    lines.push(`  Hash mismatches: ${report.summary.hashMismatches.join(", ")}`);
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }

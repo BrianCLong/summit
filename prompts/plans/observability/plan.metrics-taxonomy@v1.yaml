@@ -1,7 +1,7 @@
 meta:
   id: plan.metrics-taxonomy@v1
-  owner: 'platform-engineering'
-  purpose: 'Standardize metrics naming across TS, Python, and Go subsystems'
+  owner: "platform-engineering"
+  purpose: "Standardize metrics naming across TS, Python, and Go subsystems"
   tags:
     - observability
     - metrics
@@ -9,13 +9,13 @@ meta:
     - standardization
     - monitoring
   guardrails:
-    - 'Naming must follow OpenMetrics conventions'
-    - 'Units must be clearly specified'
-    - 'Cardinality must be controlled'
-    - 'Breaking changes require migration path'
+    - "Naming must follow OpenMetrics conventions"
+    - "Units must be clearly specified"
+    - "Cardinality must be controlled"
+    - "Breaking changes require migration path"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -269,15 +269,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'unified-metrics'
+  - name: "unified-metrics"
     inputs:
-      subsystems: 'API (TS), Graph Engine (Go), ML Pipeline (Python), Workers (TS)'
-      current_metrics: 'Inconsistent naming, mix of camelCase and snake_case'
-      metric_backends: 'Prometheus, Grafana, Alertmanager'
-      dashboard_requirements: 'SLO tracking, service health, business metrics'
-      alerting_requirements: 'Latency, error rate, saturation alerts'
+      subsystems: "API (TS), Graph Engine (Go), ML Pipeline (Python), Workers (TS)"
+      current_metrics: "Inconsistent naming, mix of camelCase and snake_case"
+      metric_backends: "Prometheus, Grafana, Alertmanager"
+      dashboard_requirements: "SLO tracking, service health, business metrics"
+      alerting_requirements: "Latency, error rate, saturation alerts"
     expected_contains:
-      - 'Metrics Catalog'
-      - 'Naming Conventions'
-      - 'Language Adapters'
-      - 'Dashboard Mapping'
+      - "Metrics Catalog"
+      - "Naming Conventions"
+      - "Language Adapters"
+      - "Dashboard Mapping"

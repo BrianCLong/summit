@@ -24,6 +24,7 @@ python wizard.py
 ```
 
 The wizard will:
+
 1. Guide you through connector selection
 2. Propose field mappings automatically
 3. Show PII flags and ask for user decisions
@@ -53,12 +54,14 @@ print(f"PII detections: {results['stats']['pii_detections']}")
 Batch ingestion of CSV/TSV files with automatic PII detection.
 
 **Features:**
+
 - Large file support (up to 1GB)
 - Unicode and special character handling
 - Batch processing (1000 records/batch)
 - Automatic entity type inference
 
 **Usage:**
+
 ```bash
 cd connectors/csv_connector
 python connector.py
@@ -71,12 +74,14 @@ python connector.py
 Streaming ingestion of news feeds and threat intelligence from RSS/Atom sources.
 
 **Features:**
+
 - 60 feeds/hour rate limit
 - Full-text extraction
 - Deduplication (24-hour window)
 - NLP entity extraction
 
 **Preconfigured Feeds:**
+
 - Krebs on Security
 - SANS ISC
 - Threatpost
@@ -90,12 +95,14 @@ Streaming ingestion of news feeds and threat intelligence from RSS/Atom sources.
 Streaming ingestion of threat intelligence from STIX 2.x/TAXII 2.x servers.
 
 **Features:**
+
 - STIX 2.1 compliant
 - TLP marking support
 - Malware payload blocking
 - Conservative rate limiting (2 req/min)
 
 **Supported Objects:**
+
 - Indicators
 - Malware
 - Threat Actors
@@ -116,7 +123,7 @@ name: my-connector
 description: Description of the connector
 version: 1.0.0
 author: Your Name
-ingestion_type: batch  # or streaming, hybrid
+ingestion_type: batch # or streaming, hybrid
 
 # Required fields
 supported_formats: [csv, json]
@@ -179,6 +186,7 @@ class MyConnector(BaseConnector):
 ```
 
 The base class automatically handles:
+
 - Rate limiting
 - PII detection and redaction
 - License enforcement
@@ -188,6 +196,7 @@ The base class automatically handles:
 ### PII Detection
 
 The SDK includes automatic PII detection for:
+
 - Email addresses
 - Phone numbers
 - IP addresses
@@ -196,6 +205,7 @@ The SDK includes automatic PII detection for:
 - Person names
 
 **Redaction Policies:**
+
 - `allow` - Pass through without modification
 - `redact` - Mask sensitive portions (e.g., `jo****@example.com`)
 - `block` - Remove field entirely
@@ -214,6 +224,7 @@ license:
 ```
 
 During ingestion, blocked fields are:
+
 1. Removed from the data
 2. Logged with the reason
 3. Displayed to the user with suggested alternatives
@@ -232,8 +243,9 @@ rate_limit:
 ```
 
 **Backoff Strategies:**
+
 - `exponential` - 2^n seconds (recommended)
-- `linear` - n*2 seconds
+- `linear` - n\*2 seconds
 - `fixed` - 5 seconds
 
 ### Lineage Tracking
@@ -252,6 +264,7 @@ All ingested data includes lineage metadata stored in the provenance ledger:
 ```
 
 Query lineage using the provenance API:
+
 ```bash
 curl http://localhost:8080/export/prov
 ```
@@ -259,12 +272,14 @@ curl http://localhost:8080/export/prov
 ## Golden I/O Tests
 
 Each connector includes golden I/O tests that verify:
+
 - Correct entity mapping
 - PII detection and redaction
 - License field blocking
 - Edge case handling
 
 Run tests:
+
 ```bash
 cd connectors
 python -m pytest __tests__/test_csv_connector.py -v
@@ -275,20 +290,24 @@ python -m pytest __tests__/test_stix_parsing.py -v
 ## Acceptance Criteria
 
 ✅ **Map CSV → entities in ≤10 minutes**
+
 - CSV connector processes 1000+ records/min
 - Tested with files up to 1GB
 
 ✅ **PII flags visible**
+
 - Wizard displays all PII fields with severity
 - User prompted for decisions on `prompt` policy fields
 - Redaction applied automatically
 
 ✅ **Blocked fields show license reason**
+
 - License violations logged and displayed
 - Reasons shown with suggested alternatives
 - Fields removed before storage
 
 ✅ **Lineage recorded**
+
 - Every ingestion creates provenance receipt
 - Stored in immutable ledger with TX ID
 - Includes full metadata trail
@@ -298,17 +317,20 @@ python -m pytest __tests__/test_stix_parsing.py -v
 ### Creating a New Connector
 
 1. **Create connector directory:**
+
    ```bash
    mkdir connectors/my_connector
    ```
 
 2. **Create manifest.yaml:**
+
    ```bash
    cp connectors/SDK_MANIFEST_SCHEMA.yaml connectors/my_connector/manifest.yaml
    # Edit manifest with your connector details
    ```
 
 3. **Create schema_mapping.py:**
+
    ```python
    def map_data_to_intelgraph(raw_data):
        entities = []
@@ -318,6 +340,7 @@ python -m pytest __tests__/test_stix_parsing.py -v
    ```
 
 4. **Create connector.py:**
+
    ```python
    from sdk.base import BaseConnector
 
@@ -332,16 +355,19 @@ python -m pytest __tests__/test_stix_parsing.py -v
    ```
 
 5. **Add sample data:**
+
    ```bash
    # Create sample.csv, sample.json, etc.
    ```
 
 6. **Write golden tests:**
+
    ```bash
    # Create __tests__/test_my_connector.py
    ```
 
 7. **Validate manifest:**
+
    ```python
    from sdk.validator import validate_manifest
 
@@ -379,6 +405,7 @@ else:
 ### BaseConnector
 
 **Methods:**
+
 - `__init__(manifest_path: str)` - Initialize connector
 - `fetch_raw_data() -> Iterator[Any]` - Fetch raw data (abstract)
 - `map_to_entities(raw_data) -> tuple[List[Dict], List[Dict]]` - Map to entities (abstract)
@@ -387,6 +414,7 @@ else:
 - `get_connector_info() -> Dict` - Get connector metadata
 
 **Attributes:**
+
 - `manifest: Dict` - Parsed manifest configuration
 - `rate_limiter: RateLimiter` - Rate limiter instance
 - `pii_detector: PIIDetector` - PII detector instance
@@ -396,6 +424,7 @@ else:
 ### RateLimiter
 
 **Methods:**
+
 - `acquire() -> bool` - Acquire rate limit token
 - `wait_if_needed()` - Block until request allowed
 - `get_current_usage() -> Dict` - Get usage statistics
@@ -403,6 +432,7 @@ else:
 ### PIIDetector
 
 **Methods:**
+
 - `scan_value(value, field_name) -> Dict` - Scan value for PII
 - `apply_redaction_policy(value, field_name) -> tuple` - Apply redaction
 - `process_record(record) -> tuple` - Process full record
@@ -411,6 +441,7 @@ else:
 ### LicenseEnforcer
 
 **Methods:**
+
 - `check_use_case(use_case) -> bool` - Check if use case allowed
 - `filter_blocked_fields(record) -> tuple` - Remove blocked fields
 - `get_license_summary() -> Dict` - Get license terms
@@ -419,21 +450,25 @@ else:
 ## Troubleshooting
 
 ### "Manifest validation failed"
+
 - Check that all required fields are present in manifest.yaml
 - Verify rate_limit, pii_flags, and license sections are properly formatted
 - Use `SDK_MANIFEST_SCHEMA.yaml` as reference
 
 ### "Rate limit exceeded"
+
 - Reduce `requests_per_hour` or `requests_per_minute` in manifest
 - Increase `max_retries` to allow more backoff attempts
 - Use `burst_limit` to control rapid request patterns
 
 ### "PII detection false positives"
+
 - Adjust PII patterns in manifest `pii_flags`
 - Set `redaction_policy: allow` for fields that aren't actually PII
 - Add custom patterns to `PIIDetector.PATTERNS`
 
 ### "Lineage not recorded"
+
 - Ensure `lineage.enabled: true` in manifest
 - Check that provenance service is running
 - Verify write permissions for lineage storage

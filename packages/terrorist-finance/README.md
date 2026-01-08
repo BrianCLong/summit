@@ -19,36 +19,36 @@ Comprehensive terrorist financing tracking and analysis for disrupting financial
 ## Usage
 
 ```typescript
-import { FinanceTracker } from '@intelgraph/terrorist-finance';
+import { FinanceTracker } from "@intelgraph/terrorist-finance";
 
 const tracker = new FinanceTracker();
 
 // Track entity
 await tracker.trackEntity({
-  id: 'entity-001',
-  type: 'ORGANIZATION',
-  name: 'Example Org',
+  id: "entity-001",
+  type: "ORGANIZATION",
+  name: "Example Org",
   identifiers: [],
-  status: 'ACTIVE',
+  status: "ACTIVE",
   sanctioned: false,
-  riskScore: 0.8
+  riskScore: 0.8,
 });
 
 // Record transaction
 await tracker.recordTransaction({
-  id: 'tx-001',
-  from: 'entity-001',
-  to: 'entity-002',
+  id: "tx-001",
+  from: "entity-001",
+  to: "entity-002",
   amount: 50000,
-  currency: 'USD',
+  currency: "USD",
   date: new Date(),
-  method: 'HAWALA',
+  method: "HAWALA",
   suspicious: true,
-  flagged: true
+  flagged: true,
 });
 
 // Get funding sources
-const sources = await tracker.getFundingSources('entity-001');
+const sources = await tracker.getFundingSources("entity-001");
 ```
 
 ## License

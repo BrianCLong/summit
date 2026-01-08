@@ -4,29 +4,29 @@
 // So we must match that: no spaces, sorted keys.
 
 export function stableStringify(obj: any): string {
-    const allKeys: string[] = [];
-    JSON.stringify(obj, (key, value) => {
-        allKeys.push(key);
-        return value;
-    });
+  const allKeys: string[] = [];
+  JSON.stringify(obj, (key, value) => {
+    allKeys.push(key);
+    return value;
+  });
 
-    // This is tricky because JSON.stringify doesn't guarantee order except for non-integer keys in some engines.
-    // The reliable way is to recursively rebuild the object with sorted keys.
+  // This is tricky because JSON.stringify doesn't guarantee order except for non-integer keys in some engines.
+  // The reliable way is to recursively rebuild the object with sorted keys.
 
-    function sortObject(v: any): any {
-        if (Array.isArray(v)) {
-            return v.map(sortObject);
-        } else if (v !== null && typeof v === 'object') {
-            const sortedKeys = Object.keys(v).sort();
-            const result: any = {};
-            sortedKeys.forEach(key => {
-                result[key] = sortObject(v[key]);
-            });
-            return result;
-        }
-        return v;
+  function sortObject(v: any): any {
+    if (Array.isArray(v)) {
+      return v.map(sortObject);
+    } else if (v !== null && typeof v === "object") {
+      const sortedKeys = Object.keys(v).sort();
+      const result: any = {};
+      sortedKeys.forEach((key) => {
+        result[key] = sortObject(v[key]);
+      });
+      return result;
     }
+    return v;
+  }
 
-    const sortedObj = sortObject(obj);
-    return JSON.stringify(sortedObj);
+  const sortedObj = sortObject(obj);
+  return JSON.stringify(sortedObj);
 }

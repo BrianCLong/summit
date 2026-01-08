@@ -5,9 +5,9 @@
  * Supports multi-method ensemble detection with confidence scoring
  */
 
-import { EventEmitter } from 'events';
-import * as turf from '@turf/turf';
-import { Feature, Geometry, Polygon } from 'geojson';
+import { EventEmitter } from "events";
+import * as turf from "@turf/turf";
+import { Feature, Geometry, Polygon } from "geojson";
 import {
   SatelliteScene,
   RasterTile,
@@ -19,16 +19,16 @@ import {
   AgenticTask,
   BoundingBox,
   TileStatistics,
-} from '../types/satellite.js';
-import { GeoPoint } from '../types/geospatial.js';
+} from "../types/satellite.js";
+import { GeoPoint } from "../types/geospatial.js";
 
 export interface ChangeDetectionEvents {
-  'task:started': [AgenticTask];
-  'task:progress': [string, number, string];
-  'change:detected': [DetectedChange];
-  'task:completed': [AgenticTask, ChangeDetectionResult];
-  'task:failed': [AgenticTask, Error];
-  'alert:triggered': [DetectedChange[], string];
+  "task:started": [AgenticTask];
+  "task:progress": [string, number, string];
+  "change:detected": [DetectedChange];
+  "task:completed": [AgenticTask, ChangeDetectionResult];
+  "task:failed": [AgenticTask, Error];
+  "alert:triggered": [DetectedChange[], string];
 }
 
 export interface ChangeDetectionConfig {
@@ -82,7 +82,7 @@ export class ChangeDetectionEngine extends EventEmitter {
   constructor(config: Partial<ChangeDetectionConfig> = {}) {
     super();
     this.config = {
-      methods: config.methods ?? ['spectral_differencing', 'ndvi_differencing'],
+      methods: config.methods ?? ["spectral_differencing", "ndvi_differencing"],
       minConfidence: config.minConfidence ?? 0.6,
       minChangeMagnitude: config.minChangeMagnitude ?? 0.1,
       minAreaSqMeters: config.minAreaSqMeters ?? 100,
@@ -97,9 +97,9 @@ export class ChangeDetectionEngine extends EventEmitter {
    */
   createTask(
     aoi: Geometry,
-    taskType: AgenticTask['taskType'],
-    priority: AgenticTask['priority'],
-    parameters: AgenticTask['parameters'] = {}
+    taskType: AgenticTask["taskType"],
+    priority: AgenticTask["priority"],
+    parameters: AgenticTask["parameters"] = {}
   ): AgenticTask {
     const taskId = `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
@@ -115,7 +115,7 @@ export class ChangeDetectionEngine extends EventEmitter {
         revisitIntervalHours: parameters.revisitIntervalHours ?? 24,
         alertThreshold: parameters.alertThreshold ?? 0.7,
       },
-      status: 'queued',
+      status: "queued",
       createdAt: new Date(),
       results: [],
     };
@@ -123,7 +123,7 @@ export class ChangeDetectionEngine extends EventEmitter {
     this.activeTasks.set(taskId, task);
 
     // Schedule if it's a monitoring task
-    if (taskType === 'monitor' && task.parameters.revisitIntervalHours) {
+    if (taskType === "monitor" && task.parameters.revisitIntervalHours) {
       this.scheduleTask(task);
     }
 
@@ -137,10 +137,10 @@ export class ChangeDetectionEngine extends EventEmitter {
     const intervalMs = (task.parameters.revisitIntervalHours ?? 24) * 60 * 60 * 1000;
 
     const timer = setInterval(() => {
-      if (task.status !== 'running') {
+      if (task.status !== "running") {
         task.nextRunAt = new Date(Date.now() + intervalMs);
         // Task would be executed when new imagery is available
-        this.emit('task:started', task);
+        this.emit("task:started", task);
       }
     }, intervalMs);
 
@@ -162,9 +162,9 @@ export class ChangeDetectionEngine extends EventEmitter {
     const resultId = `cd_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     if (task) {
-      task.status = 'running';
+      task.status = "running";
       task.lastRunAt = new Date();
-      this.emit('task:started', task);
+      this.emit("task:started", task);
     }
 
     try {
@@ -175,34 +175,34 @@ export class ChangeDetectionEngine extends EventEmitter {
 
       // Run each detection method
       for (const method of this.config.methods) {
-        this.emit('task:progress', task?.taskId ?? '', 0, `Running ${method}`);
+        this.emit("task:progress", task?.taskId ?? "", 0, `Running ${method}`);
 
         let methodChanges: DetectedChange[];
 
         switch (method) {
-          case 'spectral_differencing':
+          case "spectral_differencing":
             methodChanges = await this.spectralDifferencing(
               beforeRaster,
               afterRaster,
               beforeScene.bbox
             );
             break;
-          case 'ndvi_differencing':
+          case "ndvi_differencing":
             methodChanges = await this.ndviDifferencing(
               beforeRaster,
               afterRaster,
               beforeScene.bbox
             );
             break;
-          case 'object_based':
+          case "object_based":
             methodChanges = await this.objectBasedDetection(
               beforeRaster,
               afterRaster,
               beforeScene.bbox
             );
             break;
-          case 'hybrid':
-          case 'agentic_ensemble':
+          case "hybrid":
+          case "agentic_ensemble":
             // Ensemble combines results from other methods
             continue;
           default:
@@ -213,7 +213,7 @@ export class ChangeDetectionEngine extends EventEmitter {
 
         // Emit individual changes
         for (const change of methodChanges) {
-          this.emit('change:detected', change);
+          this.emit("change:detected", change);
         }
       }
 
@@ -223,8 +223,7 @@ export class ChangeDetectionEngine extends EventEmitter {
       // Filter by confidence and area
       const filteredChanges = mergedChanges.filter(
         (c) =>
-          c.confidence >= this.config.minConfidence &&
-          c.areaSqMeters >= this.config.minAreaSqMeters
+          c.confidence >= this.config.minConfidence && c.areaSqMeters >= this.config.minAreaSqMeters
       );
 
       // Classify change types
@@ -245,7 +244,7 @@ export class ChangeDetectionEngine extends EventEmitter {
         beforeSceneId: beforeScene.id,
         afterSceneId: afterScene.id,
         detectionTimestamp: new Date(),
-        method: this.config.methods.length > 1 ? 'agentic_ensemble' : this.config.methods[0],
+        method: this.config.methods.length > 1 ? "agentic_ensemble" : this.config.methods[0],
         bbox: beforeScene.bbox,
         changes: classifiedChanges,
         overallConfidence,
@@ -256,17 +255,17 @@ export class ChangeDetectionEngine extends EventEmitter {
       this.checkAlerts(classifiedChanges, task);
 
       if (task) {
-        task.status = 'completed';
+        task.status = "completed";
         task.results = task.results ?? [];
         task.results.push(result);
-        this.emit('task:completed', task, result);
+        this.emit("task:completed", task, result);
       }
 
       return result;
     } catch (error) {
       if (task) {
-        task.status = 'failed';
-        this.emit('task:failed', task, error as Error);
+        task.status = "failed";
+        this.emit("task:failed", task, error as Error);
       }
       throw error;
     }
@@ -283,10 +282,8 @@ export class ChangeDetectionEngine extends EventEmitter {
     const changes: DetectedChange[] = [];
 
     // Use multiple bands if available
-    const bands: SpectralBand[] = ['red', 'green', 'blue', 'nir'];
-    const availableBands = bands.filter(
-      (b) => beforeRaster.has(b) && afterRaster.has(b)
-    );
+    const bands: SpectralBand[] = ["red", "green", "blue", "nir"];
+    const availableBands = bands.filter((b) => beforeRaster.has(b) && afterRaster.has(b));
 
     if (availableBands.length === 0) {
       // Fall back to first available band
@@ -332,18 +329,18 @@ export class ChangeDetectionEngine extends EventEmitter {
 
     // Need red and NIR bands
     if (
-      !beforeRaster.has('red') ||
-      !beforeRaster.has('nir') ||
-      !afterRaster.has('red') ||
-      !afterRaster.has('nir')
+      !beforeRaster.has("red") ||
+      !beforeRaster.has("nir") ||
+      !afterRaster.has("red") ||
+      !afterRaster.has("nir")
     ) {
       return [];
     }
 
-    const beforeRed = beforeRaster.get('red')!;
-    const beforeNir = beforeRaster.get('nir')!;
-    const afterRed = afterRaster.get('red')!;
-    const afterNir = afterRaster.get('nir')!;
+    const beforeRed = beforeRaster.get("red")!;
+    const beforeNir = beforeRaster.get("nir")!;
+    const afterRed = afterRaster.get("red")!;
+    const afterNir = afterRaster.get("nir")!;
 
     // Compute NDVI for both scenes
     const beforeNdvi = this.computeNDVI(beforeRed, beforeNir);
@@ -382,9 +379,9 @@ export class ChangeDetectionEngine extends EventEmitter {
         cluster.pixels.reduce((sum, p) => sum + p.difference, 0) / cluster.pixels.length;
 
       if (avgDiff > 0.1) {
-        change.type = 'vegetation_gain';
+        change.type = "vegetation_gain";
       } else if (avgDiff < -0.1) {
-        change.type = 'vegetation_loss';
+        change.type = "vegetation_loss";
       }
 
       if (change.areaSqMeters >= this.config.minAreaSqMeters) {
@@ -447,9 +444,9 @@ export class ChangeDetectionEngine extends EventEmitter {
         cluster.pixels.reduce((sum, p) => sum + p.difference, 0) / cluster.pixels.length;
 
       if (avgDiff > 0) {
-        change.type = 'construction';
+        change.type = "construction";
       } else {
-        change.type = 'demolition';
+        change.type = "demolition";
       }
 
       if (change.areaSqMeters >= this.config.minAreaSqMeters) {
@@ -463,10 +460,7 @@ export class ChangeDetectionEngine extends EventEmitter {
   /**
    * Compute pixel-wise differences
    */
-  private computePixelDifferences(
-    beforeTile: RasterTile,
-    afterTile: RasterTile
-  ): PixelChange[] {
+  private computePixelDifferences(beforeTile: RasterTile, afterTile: RasterTile): PixelChange[] {
     const changes: PixelChange[] = [];
     const length = Math.min(beforeTile.data.length, afterTile.data.length);
 
@@ -569,8 +563,7 @@ export class ChangeDetectionEngine extends EventEmitter {
         if (values.length > 0) {
           const mean = values.reduce((a, b) => a + b, 0) / values.length;
           const squaredDiffs = values.map((v) => Math.pow(v - mean, 2));
-          variance[y * tile.width + x] =
-            squaredDiffs.reduce((a, b) => a + b, 0) / values.length;
+          variance[y * tile.width + x] = squaredDiffs.reduce((a, b) => a + b, 0) / values.length;
         }
       }
     }
@@ -581,10 +574,7 @@ export class ChangeDetectionEngine extends EventEmitter {
   /**
    * Cluster nearby pixel changes using connected components
    */
-  private clusterChanges(
-    pixelChanges: PixelChange[],
-    tile: RasterTile
-  ): ChangeCluster[] {
+  private clusterChanges(pixelChanges: PixelChange[], tile: RasterTile): ChangeCluster[] {
     if (pixelChanges.length === 0) return [];
 
     // Create a map for quick lookup
@@ -640,10 +630,8 @@ export class ChangeDetectionEngine extends EventEmitter {
       }
 
       // Compute centroid
-      cluster.centroid.x =
-        cluster.pixels.reduce((sum, p) => sum + p.x, 0) / cluster.pixels.length;
-      cluster.centroid.y =
-        cluster.pixels.reduce((sum, p) => sum + p.y, 0) / cluster.pixels.length;
+      cluster.centroid.x = cluster.pixels.reduce((sum, p) => sum + p.x, 0) / cluster.pixels.length;
+      cluster.centroid.y = cluster.pixels.reduce((sum, p) => sum + p.y, 0) / cluster.pixels.length;
 
       // Only keep clusters with minimum pixels
       if (cluster.pixels.length >= 4) {
@@ -664,10 +652,8 @@ export class ChangeDetectionEngine extends EventEmitter {
   ): DetectedChange {
     // Convert pixel coordinates to geographic coordinates
     const pixelToGeo = (px: number, py: number): [number, number] => {
-      const lon =
-        bbox.minLon + (px / tile.width) * (bbox.maxLon - bbox.minLon);
-      const lat =
-        bbox.maxLat - (py / tile.height) * (bbox.maxLat - bbox.minLat);
+      const lon = bbox.minLon + (px / tile.width) * (bbox.maxLon - bbox.minLon);
+      const lat = bbox.maxLat - (py / tile.height) * (bbox.maxLat - bbox.minLat);
       return [lon, lat];
     };
 
@@ -676,7 +662,7 @@ export class ChangeDetectionEngine extends EventEmitter {
     const [maxLon, minLat] = pixelToGeo(cluster.bbox.maxX, cluster.bbox.maxY);
 
     const geometry: Polygon = {
-      type: 'Polygon',
+      type: "Polygon",
       coordinates: [
         [
           [minLon, minLat],
@@ -688,10 +674,7 @@ export class ChangeDetectionEngine extends EventEmitter {
       ],
     };
 
-    const [centroidLon, centroidLat] = pixelToGeo(
-      cluster.centroid.x,
-      cluster.centroid.y
-    );
+    const [centroidLon, centroidLat] = pixelToGeo(cluster.centroid.x, cluster.centroid.y);
 
     // Calculate area
     const areaSqMeters = turf.area(turf.polygon(geometry.coordinates));
@@ -705,7 +688,7 @@ export class ChangeDetectionEngine extends EventEmitter {
 
     return {
       id: `change_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      type: 'unknown',
+      type: "unknown",
       geometry,
       centroid: { longitude: centroidLon, latitude: centroidLat },
       areaSqMeters,
@@ -719,9 +702,7 @@ export class ChangeDetectionEngine extends EventEmitter {
   /**
    * Ensemble results from multiple methods
    */
-  private ensembleResults(
-    allChanges: Map<string, DetectedChange[]>
-  ): DetectedChange[] {
+  private ensembleResults(allChanges: Map<string, DetectedChange[]>): DetectedChange[] {
     if (allChanges.size === 0) return [];
     if (allChanges.size === 1) return Array.from(allChanges.values())[0];
 
@@ -781,7 +762,7 @@ export class ChangeDetectionEngine extends EventEmitter {
     afterRaster: Map<SpectralBand, RasterTile>
   ): Promise<DetectedChange[]> {
     return changes.map((change) => {
-      if (change.type !== 'unknown') return change;
+      if (change.type !== "unknown") return change;
 
       // Simple rule-based classification
       const beforeVals = change.beforeValues ?? [];
@@ -797,11 +778,11 @@ export class ChangeDetectionEngine extends EventEmitter {
 
       // Classify based on brightness change
       if (diff > 50) {
-        return { ...change, type: 'construction' };
+        return { ...change, type: "construction" };
       } else if (diff < -50) {
-        return { ...change, type: 'demolition' };
+        return { ...change, type: "demolition" };
       } else if (Math.abs(diff) > 20) {
-        return { ...change, type: 'activity_increase' };
+        return { ...change, type: "activity_increase" };
       }
 
       return change;
@@ -814,9 +795,7 @@ export class ChangeDetectionEngine extends EventEmitter {
   private checkAlerts(changes: DetectedChange[], task?: AgenticTask): void {
     const alertThreshold = task?.parameters.alertThreshold ?? 0.7;
 
-    const alertableChanges = changes.filter(
-      (c) => c.confidence >= alertThreshold
-    );
+    const alertableChanges = changes.filter((c) => c.confidence >= alertThreshold);
 
     if (alertableChanges.length > 0) {
       // Group by type
@@ -830,13 +809,11 @@ export class ChangeDetectionEngine extends EventEmitter {
       // Emit alerts for significant change types
       for (const [type, typeChanges] of byType) {
         const typeThreshold = this.config.alertThresholds[type] ?? 0.7;
-        const significantChanges = typeChanges.filter(
-          (c) => c.confidence >= typeThreshold
-        );
+        const significantChanges = typeChanges.filter((c) => c.confidence >= typeThreshold);
 
         if (significantChanges.length > 0) {
           this.emit(
-            'alert:triggered',
+            "alert:triggered",
             significantChanges,
             `${type}: ${significantChanges.length} high-confidence changes detected`
           );
@@ -863,16 +840,17 @@ export class ChangeDetectionEngine extends EventEmitter {
 
     // Check temporal order
     if (after.acquisitionDate <= before.acquisitionDate) {
-      throw new Error('After scene must be acquired after before scene');
+      throw new Error("After scene must be acquired after before scene");
     }
   }
 
   /**
    * Compute basic statistics
    */
-  private computeStats(
-    data: Float32Array | Uint16Array | Uint8Array
-  ): { mean: number; stdDev: number } {
+  private computeStats(data: Float32Array | Uint16Array | Uint8Array): {
+    mean: number;
+    stdDev: number;
+  } {
     let sum = 0;
     let count = 0;
 
@@ -899,7 +877,7 @@ export class ChangeDetectionEngine extends EventEmitter {
   cancelTask(taskId: string): void {
     const task = this.activeTasks.get(taskId);
     if (task) {
-      task.status = 'failed';
+      task.status = "failed";
       this.activeTasks.delete(taskId);
     }
 

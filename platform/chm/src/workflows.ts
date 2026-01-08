@@ -1,7 +1,7 @@
-import { Pool } from 'pg';
-import { v4 as uuidv4 } from 'uuid';
-import { emitEvent } from './events.js';
-import { normalizeCode } from './taxonomy.js';
+import { Pool } from "pg";
+import { v4 as uuidv4 } from "uuid";
+import { emitEvent } from "./events.js";
+import { normalizeCode } from "./taxonomy.js";
 
 export interface DowngradeRequestInput {
   documentId: string;
@@ -15,7 +15,10 @@ export interface ApprovalInput {
   approver: string;
 }
 
-export const createDowngradeRequest = async (pool: Pool, input: DowngradeRequestInput): Promise<string> => {
+export const createDowngradeRequest = async (
+  pool: Pool,
+  input: DowngradeRequestInput
+): Promise<string> => {
   const requestedCode = normalizeCode(input.requestedCode);
   const id = uuidv4();
   await pool.query(
@@ -26,7 +29,7 @@ export const createDowngradeRequest = async (pool: Pool, input: DowngradeRequest
   await pool.query(
     `INSERT INTO audit_receipts (id, document_id, action, actor, details)
      VALUES ($1, $2, $3, $4, $5)`,
-    [uuidv4(), input.documentId, 'downgrade_requested', input.actor, { requestedCode }]
+    [uuidv4(), input.documentId, "downgrade_requested", input.actor, { requestedCode }]
   );
   return id;
 };
@@ -37,10 +40,10 @@ export const approveDowngrade = async (pool: Pool, input: ApprovalInput): Promis
     [input.requestId]
   );
   if (!result.rowCount) {
-    throw new Error('Request not found');
+    throw new Error("Request not found");
   }
   const request = result.rows[0];
-  if (request.status !== 'pending') {
+  if (request.status !== "pending") {
     return request.status;
   }
 
@@ -49,11 +52,11 @@ export const approveDowngrade = async (pool: Pool, input: ApprovalInput): Promis
       `UPDATE downgrade_requests SET approver_one = $1, updated_at = NOW() WHERE id = $2`,
       [input.approver, input.requestId]
     );
-    return 'waiting_second_approval';
+    return "waiting_second_approval";
   }
 
   if (request.approver_one === input.approver) {
-    throw new Error('Dual control violation: second approver must differ');
+    throw new Error("Dual control violation: second approver must differ");
   }
 
   await pool.query(
@@ -65,16 +68,22 @@ export const approveDowngrade = async (pool: Pool, input: ApprovalInput): Promis
     [input.approver, input.requestId]
   );
 
-  emitEvent('chm.tag.downgraded', {
+  emitEvent("chm.tag.downgraded", {
     documentId: request.document_id,
     actor: input.approver,
-    details: { from: 'current', to: request.requested_code }
+    details: { from: "current", to: request.requested_code },
   });
 
   await pool.query(
     `INSERT INTO audit_receipts (id, document_id, action, actor, details)
      VALUES ($1, $2, $3, $4, $5)`,
-    [uuidv4(), request.document_id, 'downgrade_approved', input.approver, { requestedCode: request.requested_code }]
+    [
+      uuidv4(),
+      request.document_id,
+      "downgrade_approved",
+      input.approver,
+      { requestedCode: request.requested_code },
+    ]
   );
-  return 'approved';
+  return "approved";
 };

@@ -1,18 +1,13 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment, @typescript-eslint/no-unused-vars, require-await, no-return-await */
 // @ts-nocheck
-import { Kafka, Producer, ProducerRecord, RecordMetadata, CompressionTypes } from 'kafkajs';
-import { trace, context, SpanStatusCode } from '@opentelemetry/api';
-import pino from 'pino';
-import {
-  KafkaClusterConfig,
-  EOSProducerConfig,
-  StreamMessage,
-  SerializationFormat,
-} from './types';
-import { SchemaRegistryClient } from './schema-registry';
+import { Kafka, Producer, ProducerRecord, RecordMetadata, CompressionTypes } from "kafkajs";
+import { trace, context, SpanStatusCode } from "@opentelemetry/api";
+import pino from "pino";
+import { KafkaClusterConfig, EOSProducerConfig, StreamMessage, SerializationFormat } from "./types";
+import { SchemaRegistryClient } from "./schema-registry";
 
-const logger = pino({ name: 'kafka-producer' });
-const tracer = trace.getTracer('kafka-producer');
+const logger = pino({ name: "kafka-producer" });
+const tracer = trace.getTracer("kafka-producer");
 
 /**
  * High-performance Kafka producer with EOS support
@@ -50,7 +45,7 @@ export class KafkaProducer {
    * Connect and initialize producer
    */
   async connect(): Promise<void> {
-    const span = tracer.startSpan('kafka.producer.connect');
+    const span = tracer.startSpan("kafka.producer.connect");
 
     try {
       this.producer = this.kafka.producer({
@@ -62,13 +57,13 @@ export class KafkaProducer {
       await this.producer.connect();
 
       if (this.isTransactional) {
-        logger.info('Initializing transactional producer');
+        logger.info("Initializing transactional producer");
       }
 
-      logger.info('Kafka producer connected');
+      logger.info("Kafka producer connected");
       span.setStatus({ code: SpanStatusCode.OK });
     } catch (error) {
-      logger.error({ error }, 'Failed to connect producer');
+      logger.error({ error }, "Failed to connect producer");
       span.setStatus({ code: SpanStatusCode.ERROR, message: String(error) });
       throw error;
     } finally {
@@ -81,16 +76,16 @@ export class KafkaProducer {
    */
   async beginTransaction(): Promise<void> {
     if (!this.isTransactional) {
-      throw new Error('Producer not configured for transactions');
+      throw new Error("Producer not configured for transactions");
     }
 
     if (!this.producer) {
-      throw new Error('Producer not connected');
+      throw new Error("Producer not connected");
     }
 
     await this.producer.transaction();
     this.inTransaction = true;
-    logger.debug('Transaction started');
+    logger.debug("Transaction started");
   }
 
   /**
@@ -98,12 +93,12 @@ export class KafkaProducer {
    */
   async commitTransaction(): Promise<void> {
     if (!this.inTransaction) {
-      throw new Error('No active transaction');
+      throw new Error("No active transaction");
     }
 
     // Transaction is committed when the transaction() callback completes
     this.inTransaction = false;
-    logger.debug('Transaction committed');
+    logger.debug("Transaction committed");
   }
 
   /**
@@ -111,12 +106,12 @@ export class KafkaProducer {
    */
   async abortTransaction(): Promise<void> {
     if (!this.inTransaction) {
-      throw new Error('No active transaction');
+      throw new Error("No active transaction");
     }
 
     // Transaction is aborted by throwing error in transaction() callback
     this.inTransaction = false;
-    logger.debug('Transaction aborted');
+    logger.debug("Transaction aborted");
   }
 
   /**
@@ -130,20 +125,20 @@ export class KafkaProducer {
       partition?: number;
       headers?: Record<string, string>;
       schemaSubject?: string;
-      compression?: 'gzip' | 'snappy' | 'lz4' | 'zstd';
+      compression?: "gzip" | "snappy" | "lz4" | "zstd";
     }
   ): Promise<RecordMetadata[]> {
-    const span = tracer.startSpan('kafka.producer.send', {
+    const span = tracer.startSpan("kafka.producer.send", {
       attributes: {
-        'messaging.system': 'kafka',
-        'messaging.destination': topic,
-        'messaging.message_id': message.metadata.eventId,
+        "messaging.system": "kafka",
+        "messaging.destination": topic,
+        "messaging.message_id": message.metadata.eventId,
       },
     });
 
     try {
       if (!this.producer) {
-        throw new Error('Producer not connected');
+        throw new Error("Producer not connected");
       }
 
       let value: Buffer | string;
@@ -165,9 +160,9 @@ export class KafkaProducer {
             headers: {
               ...message.headers,
               ...options?.headers,
-              'event-id': message.metadata.eventId,
-              'event-type': message.metadata.eventType,
-              'correlation-id': message.metadata.correlationId || '',
+              "event-id": message.metadata.eventId,
+              "event-type": message.metadata.eventType,
+              "correlation-id": message.metadata.correlationId || "",
             },
             timestamp: String(message.metadata.timestamp),
           },
@@ -184,13 +179,13 @@ export class KafkaProducer {
           partition: metadata[0].partition,
           offset: metadata[0].offset,
         },
-        'Message sent'
+        "Message sent"
       );
 
       span.setStatus({ code: SpanStatusCode.OK });
       return metadata;
     } catch (error) {
-      logger.error({ error, topic }, 'Failed to send message');
+      logger.error({ error, topic }, "Failed to send message");
       span.setStatus({ code: SpanStatusCode.ERROR, message: String(error) });
       throw error;
     } finally {
@@ -205,21 +200,21 @@ export class KafkaProducer {
     topic: string,
     messages: StreamMessage<T>[],
     options?: {
-      compression?: 'gzip' | 'snappy' | 'lz4' | 'zstd';
+      compression?: "gzip" | "snappy" | "lz4" | "zstd";
       schemaSubject?: string;
     }
   ): Promise<RecordMetadata[]> {
-    const span = tracer.startSpan('kafka.producer.sendBatch', {
+    const span = tracer.startSpan("kafka.producer.sendBatch", {
       attributes: {
-        'messaging.system': 'kafka',
-        'messaging.destination': topic,
-        'messaging.batch.message_count': messages.length,
+        "messaging.system": "kafka",
+        "messaging.destination": topic,
+        "messaging.batch.message_count": messages.length,
       },
     });
 
     try {
       if (!this.producer) {
-        throw new Error('Producer not connected');
+        throw new Error("Producer not connected");
       }
 
       const encodedMessages = await Promise.all(
@@ -236,8 +231,8 @@ export class KafkaProducer {
             value,
             headers: {
               ...message.headers,
-              'event-id': message.metadata.eventId,
-              'event-type': message.metadata.eventType,
+              "event-id": message.metadata.eventId,
+              "event-type": message.metadata.eventType,
             },
             timestamp: String(message.metadata.timestamp),
           };
@@ -252,15 +247,12 @@ export class KafkaProducer {
 
       const metadata = await this.producer.send(record);
 
-      logger.info(
-        { topic, count: messages.length },
-        'Batch sent'
-      );
+      logger.info({ topic, count: messages.length }, "Batch sent");
 
       span.setStatus({ code: SpanStatusCode.OK });
       return metadata;
     } catch (error) {
-      logger.error({ error, topic }, 'Failed to send batch');
+      logger.error({ error, topic }, "Failed to send batch");
       span.setStatus({ code: SpanStatusCode.ERROR, message: String(error) });
       throw error;
     } finally {
@@ -271,14 +263,12 @@ export class KafkaProducer {
   /**
    * Execute operation within transaction
    */
-  async executeInTransaction<T>(
-    operation: (producer: Producer) => Promise<T>
-  ): Promise<T> {
+  async executeInTransaction<T>(operation: (producer: Producer) => Promise<T>): Promise<T> {
     if (!this.isTransactional || !this.producer) {
-      throw new Error('Transactional producer not available');
+      throw new Error("Transactional producer not available");
     }
 
-    const span = tracer.startSpan('kafka.producer.transaction');
+    const span = tracer.startSpan("kafka.producer.transaction");
 
     try {
       const result = await this.producer.transaction(async (tx) => {
@@ -288,7 +278,7 @@ export class KafkaProducer {
       span.setStatus({ code: SpanStatusCode.OK });
       return result;
     } catch (error) {
-      logger.error({ error }, 'Transaction failed');
+      logger.error({ error }, "Transaction failed");
       span.setStatus({ code: SpanStatusCode.ERROR, message: String(error) });
       throw error;
     } finally {
@@ -303,7 +293,7 @@ export class KafkaProducer {
     if (this.producer) {
       await this.producer.disconnect();
       this.producer = null;
-      logger.info('Kafka producer disconnected');
+      logger.info("Kafka producer disconnected");
     }
   }
 
@@ -311,9 +301,11 @@ export class KafkaProducer {
    * Get compression type enum
    */
   private getCompressionType(
-    compression?: 'gzip' | 'snappy' | 'lz4' | 'zstd'
+    compression?: "gzip" | "snappy" | "lz4" | "zstd"
   ): CompressionTypes | undefined {
-    if (!compression) {return undefined;}
+    if (!compression) {
+      return undefined;
+    }
 
     const compressionMap = {
       gzip: CompressionTypes.GZIP,

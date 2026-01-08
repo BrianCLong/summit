@@ -7,24 +7,25 @@ This document outlines the procedures for backing up and restoring the `summit` 
 The platform's state consists of three critical components that must be backed up together to ensure consistency:
 
 1.  **Relational Data (Postgres)**: Stores users, tenants, investigations metadata, trust scores, and risk signals.
-    *   Database: `intelgraph_dev`
-    *   Container: `postgres`
+    - Database: `intelgraph_dev`
+    - Container: `postgres`
 2.  **Graph Data (Neo4j)**: Stores the core intelligence graph (entities, relationships).
-    *   Database: `neo4j`
-    *   Container: `neo4j`
+    - Database: `neo4j`
+    - Container: `neo4j`
 3.  **Evidence Files**: File artifacts (CSVs, STIX bundles) uploaded by users.
-    *   Path: `server/uploads`
+    - Path: `server/uploads`
 
 **Note**: Redis is considered ephemeral for DR purposes (queues can be drained/reset).
 
 ## Recovery Objectives (Dev/Staging)
 
-*   **RPO (Recovery Point Objective)**: Since backups are manual/on-demand, data loss is equal to the time since the last script execution.
-*   **RTO (Recovery Time Objective)**: < 10 minutes (time to run restore script + service restart).
+- **RPO (Recovery Point Objective)**: Since backups are manual/on-demand, data loss is equal to the time since the last script execution.
+- **RTO (Recovery Time Objective)**: < 10 minutes (time to run restore script + service restart).
 
 ## Backup Procedure
 
 The backup script performs the following actions:
+
 1.  Dumps the Postgres database (`pg_dump`).
 2.  Stops Neo4j, performs an offline dump (`neo4j-admin dump`), and restarts Neo4j.
 3.  Archives the `server/uploads` directory.
@@ -38,6 +39,7 @@ The backup script performs the following actions:
 
 **Output:**
 A new directory under `backups/` containing:
+
 - `postgres.dump`
 - `neo4j.dump`
 - `uploads.tar.gz`
@@ -47,6 +49,7 @@ A new directory under `backups/` containing:
 **WARNING**: The restore procedure is **destructive**. It will overwrite the current database state and replace evidence files.
 
 The restore script performs the following actions:
+
 1.  Drops and recreates the Postgres database, then loads the dump.
 2.  Stops Neo4j, overwrites the database with the dump, and restarts Neo4j.
 3.  Replaces `server/uploads` with the archived version.
@@ -85,8 +88,8 @@ After a restore, verify the system health:
 
 For a production-grade DR strategy, the following enhancements are required:
 
-*   **Automation**: Scheduled cron jobs or Kubernetes CronJobs for periodic backups.
-*   **Off-site Storage**: Push backup artifacts to S3/GCS/Azure Blob Storage.
-*   **Encryption**: Encrypt backup artifacts at rest.
-*   **PITR**: Enable Point-In-Time Recovery for Postgres (WAL archiving).
-*   **Zero-Downtime**: Use Neo4j Enterprise Online Backup (if licensed) or causal clustering to avoid downtime during backup.
+- **Automation**: Scheduled cron jobs or Kubernetes CronJobs for periodic backups.
+- **Off-site Storage**: Push backup artifacts to S3/GCS/Azure Blob Storage.
+- **Encryption**: Encrypt backup artifacts at rest.
+- **PITR**: Enable Point-In-Time Recovery for Postgres (WAL archiving).
+- **Zero-Downtime**: Use Neo4j Enterprise Online Backup (if licensed) or causal clustering to avoid downtime during backup.

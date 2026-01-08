@@ -8,7 +8,7 @@
  * @module pages/Security/SecurityDashboard
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Container,
@@ -47,7 +47,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Key,
   Refresh,
@@ -58,20 +58,20 @@ import {
   Shield,
   Lock,
   Timeline,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 import {
   KeyManagementAPI,
   PIIDetectionAPI,
   SensitiveContextError,
-} from '../../services/security-api';
+} from "../../services/security-api";
 
 // Status colors
 const statusColors = {
-  active: 'success',
-  rotating: 'warning',
-  retired: 'default',
-  compromised: 'error',
-  destroyed: 'error',
+  active: "success",
+  rotating: "warning",
+  retired: "default",
+  compromised: "error",
+  destroyed: "error",
 };
 
 // Purpose icons
@@ -140,7 +140,11 @@ function KeyInventory() {
 
   return (
     <Box>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
       {/* Expiring Keys Warning */}
       {expiringKeys.length > 0 && (
@@ -153,9 +157,9 @@ function KeyInventory() {
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid item xs={6} sm={3}>
           <Card>
-            <CardContent sx={{ textAlign: 'center' }}>
+            <CardContent sx={{ textAlign: "center" }}>
               <Typography variant="h3" color="success.main">
-                {keys.filter((k) => k.status === 'active').length}
+                {keys.filter((k) => k.status === "active").length}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Active Keys
@@ -165,7 +169,7 @@ function KeyInventory() {
         </Grid>
         <Grid item xs={6} sm={3}>
           <Card>
-            <CardContent sx={{ textAlign: 'center' }}>
+            <CardContent sx={{ textAlign: "center" }}>
               <Typography variant="h3" color="warning.main">
                 {expiringKeys.length}
               </Typography>
@@ -177,9 +181,9 @@ function KeyInventory() {
         </Grid>
         <Grid item xs={6} sm={3}>
           <Card>
-            <CardContent sx={{ textAlign: 'center' }}>
+            <CardContent sx={{ textAlign: "center" }}>
               <Typography variant="h3" color="info.main">
-                {keys.filter((k) => k.status === 'retired').length}
+                {keys.filter((k) => k.status === "retired").length}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Retired
@@ -189,9 +193,9 @@ function KeyInventory() {
         </Grid>
         <Grid item xs={6} sm={3}>
           <Card>
-            <CardContent sx={{ textAlign: 'center' }}>
+            <CardContent sx={{ textAlign: "center" }}>
               <Typography variant="h3" color="error.main">
-                {keys.filter((k) => k.status === 'compromised').length}
+                {keys.filter((k) => k.status === "compromised").length}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Compromised
@@ -202,12 +206,8 @@ function KeyInventory() {
       </Grid>
 
       {/* Actions */}
-      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between' }}>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={() => setGenerateOpen(true)}
-        >
+      <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between" }}>
+        <Button variant="contained" startIcon={<Add />} onClick={() => setGenerateOpen(true)}>
           Generate Key
         </Button>
         <Button startIcon={<Refresh />} onClick={fetchKeys}>
@@ -233,7 +233,7 @@ function KeyInventory() {
             {keys.map((key) => (
               <TableRow key={key.id} hover>
                 <TableCell>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     {purposeIcons[key.purpose] || <Key />}
                     <Typography variant="body2">{key.purpose}</Typography>
                   </Box>
@@ -241,33 +241,22 @@ function KeyInventory() {
                 <TableCell>{key.algorithm}</TableCell>
                 <TableCell>v{key.version}</TableCell>
                 <TableCell>
-                  <Chip
-                    label={key.status}
-                    size="small"
-                    color={statusColors[key.status]}
-                  />
+                  <Chip label={key.status} size="small" color={statusColors[key.status]} />
                 </TableCell>
-                <TableCell>
-                  {new Date(key.createdAt).toLocaleDateString()}
-                </TableCell>
+                <TableCell>{new Date(key.createdAt).toLocaleDateString()}</TableCell>
                 <TableCell>
                   {key.expiresAt ? (
                     <Tooltip title={new Date(key.expiresAt).toLocaleString()}>
-                      <span>
-                        {new Date(key.expiresAt).toLocaleDateString()}
-                      </span>
+                      <span>{new Date(key.expiresAt).toLocaleDateString()}</span>
                     </Tooltip>
                   ) : (
-                    '-'
+                    "-"
                   )}
                 </TableCell>
                 <TableCell align="right">
-                  {key.status === 'active' && (
+                  {key.status === "active" && (
                     <Tooltip title="Rotate Key">
-                      <IconButton
-                        size="small"
-                        onClick={() => setRotateKey(key)}
-                      >
+                      <IconButton size="small" onClick={() => setRotateKey(key)}>
                         <RotateRight />
                       </IconButton>
                     </Tooltip>
@@ -299,8 +288,8 @@ function KeyInventory() {
 
 // Generate Key Dialog
 function GenerateKeyDialog({ open, onClose, onSuccess }) {
-  const [purpose, setPurpose] = useState('encryption');
-  const [algorithm, setAlgorithm] = useState('AES-256-GCM');
+  const [purpose, setPurpose] = useState("encryption");
+  const [algorithm, setAlgorithm] = useState("AES-256-GCM");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -321,16 +310,16 @@ function GenerateKeyDialog({ open, onClose, onSuccess }) {
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>Generate New Encryption Key</DialogTitle>
       <DialogContent>
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}>
           <FormControl fullWidth>
             <InputLabel>Purpose</InputLabel>
-            <Select
-              value={purpose}
-              label="Purpose"
-              onChange={(e) => setPurpose(e.target.value)}
-            >
+            <Select value={purpose} label="Purpose" onChange={(e) => setPurpose(e.target.value)}>
               <MenuItem value="encryption">Encryption</MenuItem>
               <MenuItem value="signing">Signing</MenuItem>
               <MenuItem value="authentication">Authentication</MenuItem>
@@ -371,7 +360,7 @@ function GenerateKeyDialog({ open, onClose, onSuccess }) {
 
 // Rotate Key Dialog
 function RotateKeyDialog({ open, keyData, onClose, onRotate }) {
-  const [reason, setReason] = useState('');
+  const [reason, setReason] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleRotate = async () => {
@@ -424,17 +413,17 @@ function RotateKeyDialog({ open, keyData, onClose, onRotate }) {
 
 // PII Scanner Component
 function PIIScanner() {
-  const [inputData, setInputData] = useState('');
-  const [scanType, setScanType] = useState('object');
+  const [inputData, setInputData] = useState("");
+  const [scanType, setScanType] = useState("object");
   const [includeValue, setIncludeValue] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [contextModalOpen, setContextModalOpen] = useState(false);
   const [pendingPayload, setPendingPayload] = useState(null);
-  const [purpose, setPurpose] = useState('investigation');
-  const [justification, setJustification] = useState('');
-  const [caseId, setCaseId] = useState('');
+  const [purpose, setPurpose] = useState("investigation");
+  const [justification, setJustification] = useState("");
+  const [caseId, setCaseId] = useState("");
   const [accessContext, setAccessContext] = useState(null);
 
   const handleScan = async () => {
@@ -443,7 +432,7 @@ function PIIScanner() {
       setScanning(true);
       setError(null);
       setAccessContext(null);
-      if (scanType === 'object') {
+      if (scanType === "object") {
         data = JSON.parse(inputData);
       } else {
         data = inputData;
@@ -452,7 +441,7 @@ function PIIScanner() {
       if (!purpose || !justification || !caseId) {
         setPendingPayload({ scanType, includeValue, data });
         setContextModalOpen(true);
-        setError('Sensitive context required');
+        setError("Sensitive context required");
         return;
       }
 
@@ -464,7 +453,7 @@ function PIIScanner() {
       setResult(response.data);
       setAccessContext(response.accessContext || null);
     } catch (err) {
-      if (err instanceof SensitiveContextError || err?.code === 'SENSITIVE_CONTEXT_REQUIRED') {
+      if (err instanceof SensitiveContextError || err?.code === "SENSITIVE_CONTEXT_REQUIRED") {
         setPendingPayload({ scanType, includeValue, data });
         setContextModalOpen(true);
         setError(err.message);
@@ -488,7 +477,7 @@ function PIIScanner() {
           purpose,
           justification,
           caseId,
-        },
+        }
       );
       setResult(response.data);
       setAccessContext(response.accessContext || null);
@@ -512,7 +501,7 @@ function PIIScanner() {
         disablePortal
       >
         <DialogTitle>Provide access context</DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}>
           <Typography variant="body2" color="text.secondary">
             Sensitive operations require a purpose, justification, and case identifier to proceed.
           </Typography>
@@ -559,7 +548,7 @@ function PIIScanner() {
                 PII Scanner
               </Typography>
 
-              <Box sx={{ mb: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
+              <Box sx={{ mb: 2, display: "flex", gap: 2, alignItems: "center" }}>
                 <FormControl size="small" sx={{ minWidth: 120 }}>
                   <InputLabel>Type</InputLabel>
                   <Select
@@ -572,7 +561,7 @@ function PIIScanner() {
                   </Select>
                 </FormControl>
 
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
                   <Switch
                     checked={includeValue}
                     onChange={(e) => setIncludeValue(e.target.checked)}
@@ -588,14 +577,18 @@ function PIIScanner() {
                 value={inputData}
                 onChange={(e) => setInputData(e.target.value)}
                 placeholder={
-                  scanType === 'object'
+                  scanType === "object"
                     ? '{\n  "email": "john@example.com",\n  "phone": "555-123-4567"\n}'
-                    : 'Enter text to scan for PII...'
+                    : "Enter text to scan for PII..."
                 }
-                sx={{ mb: 2, fontFamily: 'monospace' }}
+                sx={{ mb: 2, fontFamily: "monospace" }}
               />
 
-              {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+              {error && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {error}
+                </Alert>
+              )}
 
               <Button
                 variant="contained"
@@ -603,7 +596,7 @@ function PIIScanner() {
                 disabled={scanning || !inputData}
                 startIcon={scanning ? <CircularProgress size={16} /> : <Search />}
               >
-                {scanning ? 'Scanning...' : 'Scan for PII'}
+                {scanning ? "Scanning..." : "Scan for PII"}
               </Button>
             </CardContent>
           </Card>
@@ -617,7 +610,7 @@ function PIIScanner() {
               </Typography>
 
               {accessContext && (
-                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1 }}>
+                <Box sx={{ display: "flex", gap: 1, alignItems: "center", mb: 1 }}>
                   <Tooltip
                     title={`Purpose: ${accessContext.purpose} • Case: ${accessContext.caseId}`}
                     placement="right"
@@ -637,8 +630,11 @@ function PIIScanner() {
               ) : (
                 <Box>
                   {/* Risk Score */}
-                  <Box sx={{ mb: 3, textAlign: 'center' }}>
-                    <Typography variant="h2" color={result.riskScore > 50 ? 'error.main' : 'success.main'}>
+                  <Box sx={{ mb: 3, textAlign: "center" }}>
+                    <Typography
+                      variant="h2"
+                      color={result.riskScore > 50 ? "error.main" : "success.main"}
+                    >
                       {Math.round(result.riskScore)}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
@@ -660,16 +656,16 @@ function PIIScanner() {
                         {result.detections.map((d, i) => (
                           <ListItem key={i}>
                             <ListItemIcon>
-                              <Warning color={d.sensitivity === 'critical' ? 'error' : 'warning'} />
+                              <Warning color={d.sensitivity === "critical" ? "error" : "warning"} />
                             </ListItemIcon>
                             <ListItemText
                               primary={
-                                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
                                   <Chip label={d.category} size="small" />
                                   <Chip
                                     label={d.sensitivity}
                                     size="small"
-                                    color={d.sensitivity === 'critical' ? 'error' : 'warning'}
+                                    color={d.sensitivity === "critical" ? "error" : "warning"}
                                   />
                                 </Box>
                               }
@@ -724,7 +720,7 @@ export default function SecurityDashboard() {
         </Typography>
       </Box>
 
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+      <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}>
         <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)}>
           <Tab icon={<Key />} label="Key Management" iconPosition="start" />
           <Tab icon={<Shield />} label="PII Scanner" iconPosition="start" />
@@ -758,7 +754,7 @@ function RotationHistory() {
         const response = await KeyManagementAPI.getRotationHistory();
         setHistory(response.data || []);
       } catch (err) {
-        console.error('Failed to fetch history:', err);
+        console.error("Failed to fetch history:", err);
       } finally {
         setLoading(false);
       }
@@ -796,29 +792,27 @@ function RotationHistory() {
                     label={event.eventType}
                     size="small"
                     color={
-                      event.eventType === 'compromised'
-                        ? 'error'
-                        : event.eventType === 'rotated'
-                        ? 'primary'
-                        : 'default'
+                      event.eventType === "compromised"
+                        ? "error"
+                        : event.eventType === "rotated"
+                          ? "primary"
+                          : "default"
                     }
                   />
                 </TableCell>
                 <TableCell>
-                  <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+                  <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
                     {event.keyId.substring(0, 8)}...
                   </Typography>
                 </TableCell>
                 <TableCell>
-                  {event.previousVersion ? `v${event.previousVersion}` : ''}
-                  {event.previousVersion && event.newVersion ? ' → ' : ''}
-                  {event.newVersion ? `v${event.newVersion}` : ''}
+                  {event.previousVersion ? `v${event.previousVersion}` : ""}
+                  {event.previousVersion && event.newVersion ? " → " : ""}
+                  {event.newVersion ? `v${event.newVersion}` : ""}
                 </TableCell>
                 <TableCell>{event.actorId}</TableCell>
-                <TableCell>{event.reason || '-'}</TableCell>
-                <TableCell>
-                  {new Date(event.timestamp).toLocaleString()}
-                </TableCell>
+                <TableCell>{event.reason || "-"}</TableCell>
+                <TableCell>{new Date(event.timestamp).toLocaleString()}</TableCell>
               </TableRow>
             ))
           )}

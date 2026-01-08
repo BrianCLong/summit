@@ -10,8 +10,8 @@ import {
   DatabaseQueryOptions,
   DatabaseQueryResult,
   DatabaseWriteOptions,
-  DatabaseError
-} from './types.js';
+  DatabaseError,
+} from "./types.js";
 
 export interface IDatabaseProvider {
   readonly provider: CloudProvider;
@@ -53,11 +53,7 @@ export interface IDatabaseProvider {
   /**
    * Batch write items
    */
-  batchWrite(
-    table: string,
-    items: DatabaseItem[],
-    options?: DatabaseWriteOptions
-  ): Promise<void>;
+  batchWrite(table: string, items: DatabaseItem[], options?: DatabaseWriteOptions): Promise<void>;
 
   /**
    * Create table
@@ -71,4 +67,10 @@ export interface IDatabaseProvider {
 }
 
 // Re-export types for convenience
-export type { DatabaseItem, DatabaseQueryOptions, DatabaseQueryResult, DatabaseWriteOptions, DatabaseError };
+export type {
+  DatabaseItem,
+  DatabaseQueryOptions,
+  DatabaseQueryResult,
+  DatabaseWriteOptions,
+  DatabaseError,
+};

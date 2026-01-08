@@ -24,11 +24,11 @@ groups:
           component: ml-observability
           service: ml-platform
         annotations:
-          summary: 'Model accuracy drift beyond threshold'
+          summary: "Model accuracy drift beyond threshold"
           description: |
             Accuracy for model {{ $labels.model }} in {{ $labels.deployment }} dropped more than 5% below target for 15 minutes.
             Investigate dataset freshness, concept drift, and retraining pipelines.
-          runbook_url: 'https://runbooks.summit.ai/ml-alerting-guide#model-accuracy-drift'
+          runbook_url: "https://runbooks.summit.ai/ml-alerting-guide#model-accuracy-drift"
       - alert: ModelInferenceLatencyHigh
         expr: |
           model:inference_latency_seconds:p95{deployment="prod"} > 0.75
@@ -38,11 +38,11 @@ groups:
           component: ml-observability
           service: ml-platform
         annotations:
-          summary: 'p95 inference latency above 750ms'
+          summary: "p95 inference latency above 750ms"
           description: |
             p95 inference latency for model {{ $labels.model }} in {{ $labels.deployment }} has exceeded 750ms for 10 minutes.
             Check feature service, hardware accelerators, and upstream dependencies.
-          runbook_url: 'https://runbooks.summit.ai/ml-alerting-guide#inference-latency'
+          runbook_url: "https://runbooks.summit.ai/ml-alerting-guide#inference-latency"
       - alert: ModelDataDriftHigh
         expr: |
           avg_over_time(ml_data_drift_score{deployment="prod"}[30m]) > 0.7
@@ -52,8 +52,8 @@ groups:
           component: ml-observability
           service: ml-platform
         annotations:
-          summary: 'Data drift score above 0.7'
+          summary: "Data drift score above 0.7"
           description: |
             Data drift score for model {{ $labels.model }} exceeded 0.7 over the last 30 minutes.
             Validate upstream data quality, feature distributions, and refresh cadence.
-          runbook_url: 'https://runbooks.summit.ai/ml-alerting-guide#data-drift'
+          runbook_url: "https://runbooks.summit.ai/ml-alerting-guide#data-drift"

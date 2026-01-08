@@ -1,11 +1,13 @@
 # Alliance Stability Tracking
 
 ## Objective
+
 Monitor the cohesion and stability of military and political alliances, identifying emerging tensions and potential fragmentation risks.
 
 ## Analysis Framework
 
 ### Alliance Cohesion Indicators
+
 1. **Military Integration**
    - Joint exercises frequency and scale
    - Interoperability development
@@ -31,6 +33,7 @@ Monitor the cohesion and stability of military and political alliances, identify
    - Strategic outlook convergence
 
 ### Warning Signs of Strain
+
 - Declining joint exercise participation
 - Public criticism among allies
 - Unilateral actions without consultation
@@ -40,6 +43,7 @@ Monitor the cohesion and stability of military and political alliances, identify
 - Leadership transitions changing priorities
 
 ### Stability Scoring (0-100)
+
 - **90-100**: High cohesion, shared vision, strong integration
 - **70-89**: Stable with minor tensions, generally aligned
 - **50-69**: Significant disagreements, cohesion weakening
@@ -47,6 +51,7 @@ Monitor the cohesion and stability of military and political alliances, identify
 - **0-24**: Alliance breakdown imminent or occurring
 
 ### Trend Analysis
+
 - 12-month trend direction
 - Key inflection points
 - Driving factors (internal vs. external)
@@ -54,13 +59,16 @@ Monitor the cohesion and stability of military and political alliances, identify
 - Geopolitical context changes
 
 ### Scenario Modeling
+
 - **Strengthening**: Factors that could enhance cohesion
 - **Status Quo**: Continued current trajectory
 - **Weakening**: Factors driving fragmentation
 - **Dissolution**: Conditions for alliance breakdown
 
 ### Impact Assessment
+
 If alliance weakens or dissolves:
+
 - Regional security implications
 - Power balance shifts
 - Opportunities for adversaries
@@ -68,12 +76,14 @@ If alliance weakens or dissolves:
 - New alignment possibilities
 
 ### Monitoring Plan
+
 - Key indicators to track monthly/quarterly
 - Data sources (public statements, exercises, budgets)
 - Early warning thresholds
 - Stakeholder notifications
 
 ### Ethical Guidelines
+
 - Analytical objectivity, no manipulation
 - Respect sovereign choices
 - Support peaceful cooperation
@@ -81,6 +91,7 @@ If alliance weakens or dissolves:
 - Focus on stability and security
 
 ### Applications
+
 - Strategic planning and forecasting
 - Diplomatic engagement prioritization
 - Defense policy development

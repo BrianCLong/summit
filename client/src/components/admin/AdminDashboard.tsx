@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState } from "react";
 import {
   Alert,
   Box,
@@ -17,8 +17,8 @@ import {
   Switch,
   TextField,
   Typography,
-} from '@mui/material';
-import Grid from '@mui/material/Grid';
+} from "@mui/material";
+import Grid from "@mui/material/Grid";
 import {
   AdminPanelSettings,
   Assessment,
@@ -28,15 +28,15 @@ import {
   ManageAccounts,
   SettingsApplications,
   Storage,
-} from '@mui/icons-material';
-import { useTheme } from '@mui/material/styles';
+} from "@mui/icons-material";
+import { useTheme } from "@mui/material/styles";
 
 type UserRecord = {
   id: string;
   name: string;
   email: string;
   roles: string[];
-  status: 'Active' | 'Suspended';
+  status: "Active" | "Suspended";
   lastActive: string;
 };
 
@@ -44,7 +44,7 @@ type AuditEntry = {
   id: string;
   actor: string;
   action: string;
-  severity: 'info' | 'warning' | 'security';
+  severity: "info" | "warning" | "security";
   timestamp: string;
 };
 
@@ -54,123 +54,123 @@ type ConfigToggle = { key: string; label: string; description?: string; enabled:
 
 const initialUsers: UserRecord[] = [
   {
-    id: 'user-1',
-    name: 'Alice Carter',
-    email: 'alice.carter@summit.gov',
-    roles: ['Administrator', 'Analyst'],
-    status: 'Active',
-    lastActive: '5m ago',
+    id: "user-1",
+    name: "Alice Carter",
+    email: "alice.carter@summit.gov",
+    roles: ["Administrator", "Analyst"],
+    status: "Active",
+    lastActive: "5m ago",
   },
   {
-    id: 'user-2',
-    name: 'Marcus Lee',
-    email: 'marcus.lee@summit.gov',
-    roles: ['Support'],
-    status: 'Active',
-    lastActive: '14m ago',
+    id: "user-2",
+    name: "Marcus Lee",
+    email: "marcus.lee@summit.gov",
+    roles: ["Support"],
+    status: "Active",
+    lastActive: "14m ago",
   },
   {
-    id: 'user-3',
-    name: 'Priya Desai',
-    email: 'priya.desai@summit.gov',
-    roles: ['Viewer'],
-    status: 'Suspended',
-    lastActive: '2d ago',
+    id: "user-3",
+    name: "Priya Desai",
+    email: "priya.desai@summit.gov",
+    roles: ["Viewer"],
+    status: "Suspended",
+    lastActive: "2d ago",
   },
 ];
 
 const auditLog: AuditEntry[] = [
   {
-    id: 'audit-1',
-    actor: 'alice.carter',
-    action: 'Updated feature flag rollout',
-    severity: 'info',
-    timestamp: '2026-02-05T12:30:00Z',
+    id: "audit-1",
+    actor: "alice.carter",
+    action: "Updated feature flag rollout",
+    severity: "info",
+    timestamp: "2026-02-05T12:30:00Z",
   },
   {
-    id: 'audit-2',
-    actor: 'system',
-    action: 'Weekly backup completed',
-    severity: 'info',
-    timestamp: '2026-02-05T11:45:00Z',
+    id: "audit-2",
+    actor: "system",
+    action: "Weekly backup completed",
+    severity: "info",
+    timestamp: "2026-02-05T11:45:00Z",
   },
   {
-    id: 'audit-3',
-    actor: 'marcus.lee',
-    action: 'Privilege escalation blocked',
-    severity: 'security',
-    timestamp: '2026-02-05T10:12:00Z',
+    id: "audit-3",
+    actor: "marcus.lee",
+    action: "Privilege escalation blocked",
+    severity: "security",
+    timestamp: "2026-02-05T10:12:00Z",
   },
   {
-    id: 'audit-4',
-    actor: 'automation',
-    action: 'Configuration baseline drift detected',
-    severity: 'warning',
-    timestamp: '2026-02-05T09:45:00Z',
+    id: "audit-4",
+    actor: "automation",
+    action: "Configuration baseline drift detected",
+    severity: "warning",
+    timestamp: "2026-02-05T09:45:00Z",
   },
 ];
 
 const defaultFeatureFlags: FeatureFlag[] = [
   {
-    key: 'copilot-insights',
-    label: 'Copilot Insights',
-    description: 'Enables analyst copilots with investigation summaries.',
+    key: "copilot-insights",
+    label: "Copilot Insights",
+    description: "Enables analyst copilots with investigation summaries.",
     enabled: true,
   },
   {
-    key: 'graph-heuristics',
-    label: 'Advanced graph heuristics',
-    description: 'Experimental path ranking and clustering.',
+    key: "graph-heuristics",
+    label: "Advanced graph heuristics",
+    description: "Experimental path ranking and clustering.",
     enabled: false,
   },
   {
-    key: 'safe-mode',
-    label: 'Safety guardrails',
-    description: 'Extra validation before executing orchestrations.',
+    key: "safe-mode",
+    label: "Safety guardrails",
+    description: "Extra validation before executing orchestrations.",
     enabled: true,
   },
 ];
 
 const defaultConfigToggles: ConfigToggle[] = [
   {
-    key: 'alerts',
-    label: 'Critical alerting',
-    description: 'Delivery of sev0 notifications to duty officers.',
+    key: "alerts",
+    label: "Critical alerting",
+    description: "Delivery of sev0 notifications to duty officers.",
     enabled: true,
   },
   {
-    key: 'geoip',
-    label: 'GeoIP enrichment',
-    description: 'IP intelligence appended to inbound events.',
+    key: "geoip",
+    label: "GeoIP enrichment",
+    description: "IP intelligence appended to inbound events.",
     enabled: true,
   },
   {
-    key: 'device-trust',
-    label: 'Device trust validation',
-    description: 'Block untrusted devices from privileged actions.',
+    key: "device-trust",
+    label: "Device trust validation",
+    description: "Block untrusted devices from privileged actions.",
     enabled: false,
   },
 ];
 
 const serviceHealth = [
-  { name: 'API Gateway', status: 'Healthy', latency: '142ms', uptime: '99.99%' },
-  { name: 'Graph Engine', status: 'Degraded', latency: '610ms', uptime: '99.1%' },
-  { name: 'Event Bus', status: 'Healthy', latency: '89ms', uptime: '100%' },
-  { name: 'Ingestion', status: 'Maintenance', latency: '—', uptime: 'n/a' },
+  { name: "API Gateway", status: "Healthy", latency: "142ms", uptime: "99.99%" },
+  { name: "Graph Engine", status: "Degraded", latency: "610ms", uptime: "99.1%" },
+  { name: "Event Bus", status: "Healthy", latency: "89ms", uptime: "100%" },
+  { name: "Ingestion", status: "Maintenance", latency: "—", uptime: "n/a" },
 ];
 
 const resourceUsage = [
-  { name: 'Application', cpu: 68, memory: 72, io: 38 },
-  { name: 'Database', cpu: 44, memory: 81, io: 55 },
-  { name: 'Analytics', cpu: 57, memory: 64, io: 41 },
+  { name: "Application", cpu: 68, memory: 72, io: 38 },
+  { name: "Database", cpu: 44, memory: 81, io: 55 },
+  { name: "Analytics", cpu: 57, memory: 64, io: 41 },
 ];
 
 const licenseDetails = {
-  plan: 'Enterprise',
+  plan: "Enterprise",
   seatsUsed: 148,
   seatsTotal: 200,
-  expiresOn: '2027-01-01',
-  compliance: ['SOC 2', 'FedRAMP Ready'],
+  expiresOn: "2027-01-01",
+  compliance: ["SOC 2", "FedRAMP Ready"],
 };
 
 function StatusChip({ status, dataTestId }: { status: string; dataTestId?: string }) {
@@ -195,7 +195,7 @@ function StatusChip({ status, dataTestId }: { status: string; dataTestId?: strin
         backgroundColor: match.bg,
         color: match.color,
         fontWeight: 600,
-        textTransform: 'capitalize',
+        textTransform: "capitalize",
       }}
       data-testid={dataTestId}
     />
@@ -231,17 +231,17 @@ export default function AdminDashboard() {
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [flags, setFlags] = useState<FeatureFlag[]>(defaultFeatureFlags);
   const [config, setConfig] = useState<ConfigToggle[]>(defaultConfigToggles);
-  const [auditSeverity, setAuditSeverity] = useState<'all' | AuditEntry['severity']>('all');
-  const [impersonatedUser, setImpersonatedUser] = useState('');
+  const [auditSeverity, setAuditSeverity] = useState<"all" | AuditEntry["severity"]>("all");
+  const [impersonatedUser, setImpersonatedUser] = useState("");
 
   const filteredAudit = useMemo(() => {
-    if (auditSeverity === 'all') return auditLog;
+    if (auditSeverity === "all") return auditLog;
     return auditLog.filter((entry) => entry.severity === auditSeverity);
   }, [auditSeverity]);
 
   const toggleUserSelection = (userId: string) => {
     setSelectedUserIds((prev) =>
-      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId],
+      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
     );
   };
 
@@ -249,23 +249,17 @@ export default function AdminDashboard() {
     setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, roles } : u)));
   };
 
-  const updateBatchStatus = (status: UserRecord['status']) => {
-    setUsers((prev) =>
-      prev.map((u) => (selectedUserIds.includes(u.id) ? { ...u, status } : u)),
-    );
+  const updateBatchStatus = (status: UserRecord["status"]) => {
+    setUsers((prev) => prev.map((u) => (selectedUserIds.includes(u.id) ? { ...u, status } : u)));
     setSelectedUserIds([]);
   };
 
   const toggleFlag = (flagKey: string) => {
-    setFlags((prev) =>
-      prev.map((f) => (f.key === flagKey ? { ...f, enabled: !f.enabled } : f)),
-    );
+    setFlags((prev) => prev.map((f) => (f.key === flagKey ? { ...f, enabled: !f.enabled } : f)));
   };
 
   const toggleConfig = (key: string) => {
-    setConfig((prev) =>
-      prev.map((c) => (c.key === key ? { ...c, enabled: !c.enabled } : c)),
-    );
+    setConfig((prev) => prev.map((c) => (c.key === key ? { ...c, enabled: !c.enabled } : c)));
   };
 
   const handleImpersonate = () => {
@@ -275,8 +269,8 @@ export default function AdminDashboard() {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Box>
           <Typography variant="h4" gutterBottom>
             Summit Admin Control Center
@@ -297,10 +291,20 @@ export default function AdminDashboard() {
         <Grid xs={12} md={7}>
           <Card variant="outlined">
             <CardHeader
-              title={<SectionHeader icon={<ManageAccounts />} title="User management" subtitle="Roles, status, and impersonation" />}
+              title={
+                <SectionHeader
+                  icon={<ManageAccounts />}
+                  title="User management"
+                  subtitle="Roles, status, and impersonation"
+                />
+              }
             />
-            <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'center' }}>
+            <CardContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={2}
+                alignItems={{ sm: "center" }}
+              >
                 <TextField
                   label="Impersonate by email"
                   value={impersonatedUser}
@@ -314,7 +318,7 @@ export default function AdminDashboard() {
                 <Button
                   variant="contained"
                   color="warning"
-                  onClick={() => updateBatchStatus('Suspended')}
+                  onClick={() => updateBatchStatus("Suspended")}
                   disabled={!selectedUserIds.length}
                 >
                   Suspend
@@ -322,7 +326,7 @@ export default function AdminDashboard() {
                 <Button
                   variant="outlined"
                   color="success"
-                  onClick={() => updateBatchStatus('Active')}
+                  onClick={() => updateBatchStatus("Active")}
                   disabled={!selectedUserIds.length}
                 >
                   Reinstate
@@ -335,14 +339,14 @@ export default function AdminDashboard() {
                 {users.map((user) => (
                   <Grid xs={12} key={user.id}>
                     <Stack
-                      direction={{ xs: 'column', sm: 'row' }}
+                      direction={{ xs: "column", sm: "row" }}
                       spacing={2}
-                      alignItems={{ sm: 'center' }}
+                      alignItems={{ sm: "center" }}
                       justifyContent="space-between"
                     >
                       <Stack direction="row" spacing={1} alignItems="center">
                         <Checkbox
-                          inputProps={{ 'aria-label': `Select ${user.name}` }}
+                          inputProps={{ "aria-label": `Select ${user.name}` }}
                           checked={selectedUserIds.includes(user.id)}
                           onChange={() => toggleUserSelection(user.id)}
                         />
@@ -354,7 +358,11 @@ export default function AdminDashboard() {
                         </Box>
                       </Stack>
 
-                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'center' }}>
+                      <Stack
+                        direction={{ xs: "column", sm: "row" }}
+                        spacing={2}
+                        alignItems={{ sm: "center" }}
+                      >
                         <FormControl size="small" sx={{ minWidth: 220 }}>
                           <InputLabel id={`roles-${user.id}`}>Roles for {user.name}</InputLabel>
                           <Select
@@ -365,13 +373,13 @@ export default function AdminDashboard() {
                             onChange={(e) =>
                               updateUserRoles(
                                 user.id,
-                                typeof e.target.value === 'string'
-                                  ? e.target.value.split(',')
-                                  : (e.target.value as string[]),
+                                typeof e.target.value === "string"
+                                  ? e.target.value.split(",")
+                                  : (e.target.value as string[])
                               )
                             }
                           >
-                            {['Administrator', 'Analyst', 'Support', 'Viewer'].map((role) => (
+                            {["Administrator", "Analyst", "Support", "Viewer"].map((role) => (
                               <MenuItem key={role} value={role}>
                                 {role}
                               </MenuItem>
@@ -397,11 +405,17 @@ export default function AdminDashboard() {
         </Grid>
 
         <Grid xs={12} md={5}>
-          <Card variant="outlined" sx={{ height: '100%' }}>
+          <Card variant="outlined" sx={{ height: "100%" }}>
             <CardHeader
-              title={<SectionHeader icon={<SettingsApplications />} title="Platform configuration" subtitle="Feature flags and guardrails" />}
+              title={
+                <SectionHeader
+                  icon={<SettingsApplications />}
+                  title="Platform configuration"
+                  subtitle="Feature flags and guardrails"
+                />
+              }
             />
-            <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <CardContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <Typography variant="subtitle2">Feature flags</Typography>
               <Stack divider={<Divider flexItem />} spacing={1}>
                 {flags.map((flag) => (
@@ -421,7 +435,7 @@ export default function AdminDashboard() {
                       )}
                     </Box>
                     <Switch
-                      inputProps={{ 'aria-label': `Feature flag: ${flag.label}` }}
+                      inputProps={{ "aria-label": `Feature flag: ${flag.label}` }}
                       checked={flag.enabled}
                       onChange={() => toggleFlag(flag.key)}
                     />
@@ -450,7 +464,7 @@ export default function AdminDashboard() {
                       )}
                     </Box>
                     <Switch
-                      inputProps={{ 'aria-label': `Config toggle: ${item.label}` }}
+                      inputProps={{ "aria-label": `Config toggle: ${item.label}` }}
                       checked={item.enabled}
                       onChange={() => toggleConfig(item.key)}
                     />
@@ -466,7 +480,13 @@ export default function AdminDashboard() {
         <Grid xs={12} md={6}>
           <Card variant="outlined">
             <CardHeader
-              title={<SectionHeader icon={<Assessment />} title="Audit log" subtitle="Filter by severity" />}
+              title={
+                <SectionHeader
+                  icon={<Assessment />}
+                  title="Audit log"
+                  subtitle="Filter by severity"
+                />
+              }
             />
             <CardContent>
               <FormControl size="small" sx={{ minWidth: 160, mb: 2 }}>
@@ -504,9 +524,15 @@ export default function AdminDashboard() {
         <Grid xs={12} md={6}>
           <Card variant="outlined">
             <CardHeader
-              title={<SectionHeader icon={<AutoGraph />} title="Usage & licensing" subtitle="Resource posture and entitlements" />}
+              title={
+                <SectionHeader
+                  icon={<AutoGraph />}
+                  title="Usage & licensing"
+                  subtitle="Resource posture and entitlements"
+                />
+              }
             />
-            <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <CardContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <Grid container spacing={1}>
                 {resourceUsage.map((item) => (
                   <Grid xs={12} sm={6} key={item.name}>
@@ -524,13 +550,18 @@ export default function AdminDashboard() {
 
               <Divider />
 
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'center' }}>
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={2}
+                alignItems={{ sm: "center" }}
+              >
                 <Box sx={{ flexGrow: 1 }}>
                   <Typography variant="subtitle1">{licenseDetails.plan} license</Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {licenseDetails.seatsUsed}/{licenseDetails.seatsTotal} seats in use · Expires {licenseDetails.expiresOn}
+                    {licenseDetails.seatsUsed}/{licenseDetails.seatsTotal} seats in use · Expires{" "}
+                    {licenseDetails.expiresOn}
                   </Typography>
-                  <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap' }}>
+                  <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: "wrap" }}>
                     {licenseDetails.compliance.map((item) => (
                       <Chip key={item} size="small" label={item} />
                     ))}
@@ -547,7 +578,13 @@ export default function AdminDashboard() {
 
       <Card variant="outlined">
         <CardHeader
-          title={<SectionHeader icon={<AdminPanelSettings />} title="System health" subtitle="Signals from core services" />}
+          title={
+            <SectionHeader
+              icon={<AdminPanelSettings />}
+              title="System health"
+              subtitle="Signals from core services"
+            />
+          }
         />
         <CardContent>
           <Grid container spacing={2}>
@@ -578,7 +615,8 @@ export default function AdminDashboard() {
             severity="info"
             sx={{ mt: 2 }}
           >
-            Capture anomalies early: schedule a quarterly disaster recovery exercise and verify backups.
+            Capture anomalies early: schedule a quarterly disaster recovery exercise and verify
+            backups.
           </Alert>
         </CardContent>
       </Card>

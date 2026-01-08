@@ -32,6 +32,7 @@ This document defines the **canary deployment strategy** for Summit MVP-4-GA. Ca
 ### 1.1 Why Canary Deployments?
 
 **Benefits**:
+
 - ✅ **Risk Mitigation**: Limit blast radius to small % of users
 - ✅ **Fast Feedback**: Detect issues before full rollout
 - ✅ **Automated Rollback**: Revert automatically on failure
@@ -39,6 +40,7 @@ This document defines the **canary deployment strategy** for Summit MVP-4-GA. Ca
 - ✅ **Confidence**: Gradual promotion builds confidence
 
 **Trade-offs**:
+
 - ⏱️ **Slower Rollout**: Full deployment takes longer
 - 🔧 **Complexity**: Requires traffic management infrastructure
 - 📊 **Monitoring**: Requires per-version metrics
@@ -68,14 +70,14 @@ This document defines the **canary deployment strategy** for Summit MVP-4-GA. Ca
 
 ### 2.1 Stage Progression
 
-| Stage | Duration | Traffic % | Success Criteria | Auto-Promote? |
-|-------|----------|-----------|------------------|---------------|
-| **0. Pre-Canary** | N/A | 0% | All gates passed | No |
-| **1. Internal** | 15 min | 0% (internal only) | No errors for 15 min | Yes |
-| **2. Canary 5%** | 30 min | 5% | Error rate < 0.1%, latency < baseline | Yes |
-| **3. Canary 25%** | 30 min | 25% | Error rate < 0.1%, latency < baseline | Yes |
-| **4. Canary 50%** | 30 min | 50% | Error rate < 0.1%, latency < baseline | Yes |
-| **5. Full Rollout** | 10 min | 100% | All metrics green | Manual |
+| Stage               | Duration | Traffic %          | Success Criteria                      | Auto-Promote? |
+| ------------------- | -------- | ------------------ | ------------------------------------- | ------------- |
+| **0. Pre-Canary**   | N/A      | 0%                 | All gates passed                      | No            |
+| **1. Internal**     | 15 min   | 0% (internal only) | No errors for 15 min                  | Yes           |
+| **2. Canary 5%**    | 30 min   | 5%                 | Error rate < 0.1%, latency < baseline | Yes           |
+| **3. Canary 25%**   | 30 min   | 25%                | Error rate < 0.1%, latency < baseline | Yes           |
+| **4. Canary 50%**   | 30 min   | 50%                | Error rate < 0.1%, latency < baseline | Yes           |
+| **5. Full Rollout** | 10 min   | 100%               | All metrics green                     | Manual        |
 
 **Total Duration**: ~2 hours (if all stages pass)
 
@@ -121,6 +123,7 @@ echo "✅ Pre-canary checks passed"
 **Goal**: Expose new version to internal users only (Summit team).
 
 **Implementation**:
+
 ```yaml
 # Kubernetes HTTPRoute (Gateway API)
 apiVersion: gateway.networking.k8s.io/v1beta1
@@ -141,10 +144,11 @@ spec:
       backendRefs:
         - name: summit-server-canary
           port: 8080
-          weight: 100  # 100% of internal traffic
+          weight: 100 # 100% of internal traffic
 ```
 
 **Verification**:
+
 ```bash
 # Internal users test the new version
 curl -H "X-Summit-Employee: true" https://internal.summit.internal/health
@@ -153,6 +157,7 @@ curl -H "X-Summit-Employee: true" https://internal.summit.internal/health
 
 **Duration**: 15 minutes
 **Success Criteria**:
+
 - [ ] Zero errors from internal users
 - [ ] No performance degradation
 - [ ] All critical features functional
@@ -164,6 +169,7 @@ curl -H "X-Summit-Employee: true" https://internal.summit.internal/health
 **Goal**: Expose 5% of production traffic to new version.
 
 **Implementation (Istio)**:
+
 ```yaml
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
@@ -194,6 +200,7 @@ spec:
 ```
 
 **Deployment**:
+
 ```bash
 #!/bin/bash
 # Script: scripts/canary/deploy-canary-5.sh
@@ -231,6 +238,7 @@ echo "✅ Canary 5% deployed"
 ### 2.5 Stage 3-4: Progressive Rollout (25%, 50%)
 
 **Progression**:
+
 ```bash
 #!/bin/bash
 # Script: scripts/canary/progressive-rollout.sh
@@ -308,6 +316,7 @@ echo "✅ Full promotion complete"
 ### 3.1 Traffic Management (Istio)
 
 **DestinationRule**:
+
 ```yaml
 apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
@@ -325,6 +334,7 @@ spec:
 ```
 
 **VirtualService** (Dynamic Weight):
+
 ```yaml
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
@@ -372,6 +382,7 @@ spec:
 ```
 
 **Usage**:
+
 ```bash
 # User opts into canary
 curl -H "X-Canary-Opt-In: true" https://api.summit.internal/entities
@@ -398,7 +409,7 @@ spec:
     port: 8080
   analysis:
     interval: 1m
-    threshold: 5  # Allow 5 consecutive failures
+    threshold: 5 # Allow 5 consecutive failures
     maxWeight: 50
     stepWeight: 5
 
@@ -563,6 +574,7 @@ echo "✅ Canary rolled back successfully"
 **Grafana Dashboard**: `https://grafana.summit.internal/d/canary`
 
 **Panels**:
+
 1. **Traffic Distribution** (Gauge)
    - Stable vs Canary traffic %
 
@@ -654,6 +666,7 @@ spec:
 ---
 
 **Document Control**:
+
 - **Version**: 1.0
 - **Owner**: Release Engineering Team
 - **Approvers**: SRE Lead, Release Captain

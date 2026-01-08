@@ -23,7 +23,7 @@ export interface ConnectorManifest {
   /** Description */
   description: string;
   /** Maturity status */
-  status: 'experimental' | 'beta' | 'stable' | 'deprecated';
+  status: "experimental" | "beta" | "stable" | "deprecated";
   /** Category */
   category: string;
   /** Supported capabilities */
@@ -51,26 +51,26 @@ export interface ConnectorManifest {
 }
 
 export type ConnectorCapability =
-  | 'pull'
-  | 'push'
-  | 'stream'
-  | 'query'
-  | 'batch'
-  | 'incremental'
-  | 'enrich'
-  | 'geocode';
+  | "pull"
+  | "push"
+  | "stream"
+  | "query"
+  | "batch"
+  | "incremental"
+  | "enrich"
+  | "geocode";
 
 export type AuthMethod =
-  | 'none'
-  | 'basic'
-  | 'api-key'
-  | 'bearer'
-  | 'oauth2'
-  | 'certificate'
-  | 'aws-credentials'
-  | 'iam-role'
-  | 'service-account'
-  | 'managed-identity';
+  | "none"
+  | "basic"
+  | "api-key"
+  | "bearer"
+  | "oauth2"
+  | "certificate"
+  | "aws-credentials"
+  | "iam-role"
+  | "service-account"
+  | "managed-identity";
 
 export interface RateLimitConfig {
   requestsPerMinute: number;

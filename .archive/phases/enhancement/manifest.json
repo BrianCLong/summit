@@ -3,9 +3,5 @@
   "status": "success",
   "archived_at": "2025-12-04T02:04:51Z",
   "archived_by": "jules",
-  "artifacts": [
-    "docs/",
-    "src/",
-    "tests/"
-  ]
+  "artifacts": ["docs/", "src/", "tests/"]
 }

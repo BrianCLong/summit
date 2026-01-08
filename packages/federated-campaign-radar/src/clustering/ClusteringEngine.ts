@@ -5,8 +5,8 @@
  * with privacy budgets and cross-tenant confidence propagation.
  */
 
-import { EventEmitter } from 'events';
-import { v4 as uuidv4 } from 'uuid';
+import { EventEmitter } from "events";
+import { v4 as uuidv4 } from "uuid";
 import {
   CampaignSignal,
   SignalType,
@@ -24,7 +24,7 @@ import {
   DifferentialPrivacyConfig,
   calculateThreatLevel,
   createClusterId,
-} from '../core/types';
+} from "../core/types";
 
 /**
  * Cluster configuration
@@ -130,7 +130,7 @@ export class ClusteringEngine extends EventEmitter {
 
     // Check privacy budget
     if (!this.checkPrivacyBudget()) {
-      this.emit('privacyBudgetExhausted');
+      this.emit("privacyBudgetExhausted");
       return Array.from(this.activeClusters.values());
     }
 
@@ -143,10 +143,7 @@ export class ClusteringEngine extends EventEmitter {
     const newClusters: CampaignCluster[] = [];
 
     for (const [signalType, signals] of signalsByType) {
-      const typeClusters = await this.clusterSignalType(
-        signalType,
-        signals,
-      );
+      const typeClusters = await this.clusterSignalType(signalType, signals);
       newClusters.push(...typeClusters);
     }
 
@@ -168,7 +165,7 @@ export class ClusteringEngine extends EventEmitter {
     this.lastClusteringRun = new Date();
 
     const duration = Date.now() - startTime;
-    this.emit('clusteringComplete', {
+    this.emit("clusteringComplete", {
       clusters: protectedClusters,
       duration,
       signalsProcessed: this.signalBuffer.length,
@@ -192,9 +189,7 @@ export class ClusteringEngine extends EventEmitter {
         ThreatLevel.CRITICAL,
       ];
       const minIndex = threatOrder.indexOf(minThreatLevel);
-      clusters = clusters.filter(
-        (c) => threatOrder.indexOf(c.threatLevel) >= minIndex,
-      );
+      clusters = clusters.filter((c) => threatOrder.indexOf(c.threatLevel) >= minIndex);
     }
 
     return clusters;
@@ -219,7 +214,7 @@ export class ClusteringEngine extends EventEmitter {
    */
   findSimilarSignals(
     signal: CampaignSignal,
-    limit: number = 10,
+    limit: number = 10
   ): { signal: SignalEmbedding; similarity: number }[] {
     const queryEmbedding = this.extractEmbedding(signal);
     const similarities: { signal: SignalEmbedding; similarity: number }[] = [];
@@ -228,19 +223,14 @@ export class ClusteringEngine extends EventEmitter {
       if (bufferSignal.signalId === queryEmbedding.signalId) continue;
       if (bufferSignal.signalType !== queryEmbedding.signalType) continue;
 
-      const similarity = this.cosineSimilarity(
-        queryEmbedding.embedding,
-        bufferSignal.embedding,
-      );
+      const similarity = this.cosineSimilarity(queryEmbedding.embedding, bufferSignal.embedding);
 
       if (similarity > this.getThresholdForType(queryEmbedding.signalType)) {
         similarities.push({ signal: bufferSignal, similarity });
       }
     }
 
-    return similarities
-      .sort((a, b) => b.similarity - a.similarity)
-      .slice(0, limit);
+    return similarities.sort((a, b) => b.similarity - a.similarity).slice(0, limit);
   }
 
   /**
@@ -271,8 +261,7 @@ export class ClusteringEngine extends EventEmitter {
       }
     }
 
-    const overlapScore =
-      indicatorOrgs.size > 0 ? sharedIndicators / indicatorOrgs.size : 0;
+    const overlapScore = indicatorOrgs.size > 0 ? sharedIndicators / indicatorOrgs.size : 0;
 
     return {
       overlapScore,
@@ -345,7 +334,7 @@ export class ClusteringEngine extends EventEmitter {
 
   private async clusterSignalType(
     signalType: SignalType,
-    signals: SignalEmbedding[],
+    signals: SignalEmbedding[]
   ): Promise<CampaignCluster[]> {
     if (signals.length < this.config.minClusterSize) {
       return [];
@@ -373,10 +362,7 @@ export class ClusteringEngine extends EventEmitter {
     }
   }
 
-  private findClusterCandidates(
-    signals: SignalEmbedding[],
-    threshold: number,
-  ): ClusterCandidate[] {
+  private findClusterCandidates(signals: SignalEmbedding[], threshold: number): ClusterCandidate[] {
     const candidates: ClusterCandidate[] = [];
     const assigned = new Set<string>();
 
@@ -392,10 +378,7 @@ export class ClusteringEngine extends EventEmitter {
       for (const other of signals) {
         if (assigned.has(other.signalId)) continue;
 
-        const similarity = this.cosineSimilarity(
-          signal.embedding,
-          other.embedding,
-        );
+        const similarity = this.cosineSimilarity(signal.embedding, other.embedding);
 
         if (similarity >= threshold) {
           clusterSignals.push(other);
@@ -404,11 +387,8 @@ export class ClusteringEngine extends EventEmitter {
       }
 
       if (clusterSignals.length >= this.config.minClusterSize) {
-        const centroid = this.computeCentroid(
-          clusterSignals.map((s) => s.embedding),
-        );
-        const crossOrgCount = new Set(clusterSignals.map((s) => s.sourceOrg))
-          .size;
+        const centroid = this.computeCentroid(clusterSignals.map((s) => s.embedding));
+        const crossOrgCount = new Set(clusterSignals.map((s) => s.sourceOrg)).size;
 
         candidates.push({
           centroid,
@@ -439,10 +419,7 @@ export class ClusteringEngine extends EventEmitter {
     return centroid.map((v) => v / norm);
   }
 
-  private computeClusterScore(
-    signals: SignalEmbedding[],
-    crossOrgCount: number,
-  ): number {
+  private computeClusterScore(signals: SignalEmbedding[], crossOrgCount: number): number {
     // Score based on size, cross-org participation, and cohesion
     const sizeScore = Math.min(1, signals.length / 50);
     const crossOrgScore = Math.min(1, crossOrgCount / 5);
@@ -452,10 +429,7 @@ export class ClusteringEngine extends EventEmitter {
     let pairs = 0;
     for (let i = 0; i < signals.length && i < 20; i++) {
       for (let j = i + 1; j < signals.length && j < 20; j++) {
-        totalSimilarity += this.cosineSimilarity(
-          signals[i].embedding,
-          signals[j].embedding,
-        );
+        totalSimilarity += this.cosineSimilarity(signals[i].embedding, signals[j].embedding);
         pairs++;
       }
     }
@@ -466,7 +440,7 @@ export class ClusteringEngine extends EventEmitter {
 
   private buildClustersFromCandidates(
     candidates: ClusterCandidate[],
-    signalType: SignalType,
+    signalType: SignalType
   ): CampaignCluster[] {
     return candidates.map((candidate) => {
       const now = new Date();
@@ -481,12 +455,11 @@ export class ClusteringEngine extends EventEmitter {
         candidate.signals.length,
         orgs.size,
         velocityMetrics,
-        candidate.score,
+        candidate.score
       );
 
       // Compute cross-tenant confidence boost
-      const crossTenantConfidence =
-        orgs.size > 1 ? 0.7 + orgs.size * 0.05 : 0.5;
+      const crossTenantConfidence = orgs.size > 1 ? 0.7 + orgs.size * 0.05 : 0.5;
 
       return {
         clusterId: createClusterId(),
@@ -505,14 +478,12 @@ export class ClusteringEngine extends EventEmitter {
         geographicSpread: this.computeGeographicSpread(candidate.signals),
         threatLevel,
         confidenceScore: candidate.score,
-        attributionHypotheses: this.generateAttributionHypotheses(
-          candidate.signals,
-        ),
+        attributionHypotheses: this.generateAttributionHypotheses(candidate.signals),
         velocityMetrics,
         growthTrajectory: this.determineGrowthTrajectory(velocityMetrics),
         crossTenantConfidence,
         privacyPreservedMetrics: {
-          aggregationMethod: 'DIFFERENTIAL_PRIVACY',
+          aggregationMethod: "DIFFERENTIAL_PRIVACY",
           epsilon: this.config.differentialPrivacy.epsilon,
           noiseAdded: true,
           minimumThreshold: this.config.minimumSignalsForAggregation,
@@ -532,17 +503,13 @@ export class ClusteringEngine extends EventEmitter {
     }
 
     // Sort by timestamp
-    const sorted = [...signals].sort(
-      (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
-    );
+    const sorted = [...signals].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
 
     const timeRangeHours =
-      (sorted[sorted.length - 1].timestamp.getTime() -
-        sorted[0].timestamp.getTime()) /
+      (sorted[sorted.length - 1].timestamp.getTime() - sorted[0].timestamp.getTime()) /
       (1000 * 60 * 60);
 
-    const signalsPerHour =
-      timeRangeHours > 0 ? signals.length / timeRangeHours : signals.length;
+    const signalsPerHour = timeRangeHours > 0 ? signals.length / timeRangeHours : signals.length;
 
     // Compute growth rate (signals in last hour vs previous hour)
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
@@ -550,7 +517,7 @@ export class ClusteringEngine extends EventEmitter {
 
     const recentSignals = signals.filter((s) => s.timestamp >= oneHourAgo).length;
     const previousSignals = signals.filter(
-      (s) => s.timestamp >= twoHoursAgo && s.timestamp < oneHourAgo,
+      (s) => s.timestamp >= twoHoursAgo && s.timestamp < oneHourAgo
     ).length;
 
     const growthRate =
@@ -578,18 +545,16 @@ export class ClusteringEngine extends EventEmitter {
   }
 
   private determineGrowthTrajectory(
-    velocity: VelocityMetrics,
-  ): 'EMERGING' | 'GROWING' | 'STABLE' | 'DECLINING' | 'DORMANT' {
-    if (velocity.signalsPerHour === 0) return 'DORMANT';
-    if (velocity.growthRate > 50) return 'EMERGING';
-    if (velocity.growthRate > 10) return 'GROWING';
-    if (velocity.growthRate > -10) return 'STABLE';
-    return 'DECLINING';
+    velocity: VelocityMetrics
+  ): "EMERGING" | "GROWING" | "STABLE" | "DECLINING" | "DORMANT" {
+    if (velocity.signalsPerHour === 0) return "DORMANT";
+    if (velocity.growthRate > 50) return "EMERGING";
+    if (velocity.growthRate > 10) return "GROWING";
+    if (velocity.growthRate > -10) return "STABLE";
+    return "DECLINING";
   }
 
-  private extractNarrativeSummaries(
-    signals: SignalEmbedding[],
-  ): NarrativeClusterSummary[] {
+  private extractNarrativeSummaries(signals: SignalEmbedding[]): NarrativeClusterSummary[] {
     // Group by indicator hash and extract dominant patterns
     const hashGroups = new Map<string, SignalEmbedding[]>();
 
@@ -619,9 +584,7 @@ export class ClusteringEngine extends EventEmitter {
     return summaries.slice(0, 5);
   }
 
-  private detectCoordinationPatterns(
-    signals: SignalEmbedding[],
-  ): CoordinationPattern[] {
+  private detectCoordinationPatterns(signals: SignalEmbedding[]): CoordinationPattern[] {
     const patterns: CoordinationPattern[] = [];
 
     // Check for synchronized posting
@@ -633,11 +596,9 @@ export class ClusteringEngine extends EventEmitter {
     }
 
     if (intervals.length > 0) {
-      const meanInterval =
-        intervals.reduce((a, b) => a + b, 0) / intervals.length;
+      const meanInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
       const variance =
-        intervals.reduce((sum, i) => sum + Math.pow(i - meanInterval, 2), 0) /
-        intervals.length;
+        intervals.reduce((sum, i) => sum + Math.pow(i - meanInterval, 2), 0) / intervals.length;
       const stdDev = Math.sqrt(variance);
       const cv = meanInterval > 0 ? stdDev / meanInterval : 1;
       const synchronicity = 1 - Math.min(1, cv);
@@ -663,8 +624,7 @@ export class ClusteringEngine extends EventEmitter {
     }
 
     const duplicateRatio =
-      Array.from(hashCounts.values()).filter((c) => c > 1).length /
-      hashCounts.size;
+      Array.from(hashCounts.values()).filter((c) => c > 1).length / hashCounts.size;
 
     if (duplicateRatio > 0.3) {
       patterns.push({
@@ -681,13 +641,11 @@ export class ClusteringEngine extends EventEmitter {
     return patterns;
   }
 
-  private computeChannelDistribution(
-    signals: SignalEmbedding[],
-  ): Record<string, number> {
+  private computeChannelDistribution(signals: SignalEmbedding[]): Record<string, number> {
     const distribution: Record<string, number> = {};
     // In a full implementation, channel info would be in metadata
     for (const signal of signals) {
-      const channel = (signal.metadata.channel as string) || 'unknown';
+      const channel = (signal.metadata.channel as string) || "unknown";
       distribution[channel] = (distribution[channel] || 0) + 1;
     }
     return distribution;
@@ -699,7 +657,7 @@ export class ClusteringEngine extends EventEmitter {
     const uniqueRegions = new Set<string>();
 
     for (const signal of signals) {
-      const region = (signal.metadata.region as string) || 'unknown';
+      const region = (signal.metadata.region as string) || "unknown";
       regions[region] = (regions[region] || 0) + 1;
       uniqueRegions.add(region);
     }
@@ -714,9 +672,7 @@ export class ClusteringEngine extends EventEmitter {
     };
   }
 
-  private generateAttributionHypotheses(
-    signals: SignalEmbedding[],
-  ): AttributionHypothesis[] {
+  private generateAttributionHypotheses(signals: SignalEmbedding[]): AttributionHypothesis[] {
     // Generate hypotheses based on patterns
     const hypotheses: AttributionHypothesis[] = [];
 
@@ -725,9 +681,9 @@ export class ClusteringEngine extends EventEmitter {
     if (orgs.size > 3 && signals.length > 50) {
       hypotheses.push({
         hypothesisId: uuidv4(),
-        actorType: 'STATE',
+        actorType: "STATE",
         confidence: 0.4,
-        supportingIndicators: ['high_volume', 'cross_org_coordination'],
+        supportingIndicators: ["high_volume", "cross_org_coordination"],
         contradictingIndicators: [],
       });
     }
@@ -735,9 +691,9 @@ export class ClusteringEngine extends EventEmitter {
     // Default unknown hypothesis
     hypotheses.push({
       hypothesisId: uuidv4(),
-      actorType: 'UNKNOWN',
+      actorType: "UNKNOWN",
       confidence: 0.6,
-      supportingIndicators: ['insufficient_data'],
+      supportingIndicators: ["insufficient_data"],
       contradictingIndicators: [],
     });
 
@@ -783,106 +739,58 @@ export class ClusteringEngine extends EventEmitter {
 
     // Check for shared narratives or patterns
     const sharedNarratives = a.dominantNarratives.filter((n) =>
-      b.dominantNarratives.some((bn) => bn.narrativeId === n.narrativeId),
+      b.dominantNarratives.some((bn) => bn.narrativeId === n.narrativeId)
     );
 
     return sharedNarratives.length > 0;
   }
 
-  private mergeTwoClusters(
-    a: CampaignCluster,
-    b: CampaignCluster,
-  ): CampaignCluster {
+  private mergeTwoClusters(a: CampaignCluster, b: CampaignCluster): CampaignCluster {
     const now = new Date();
 
     return {
       clusterId: a.clusterId, // Keep first cluster ID
-      createdAt: new Date(
-        Math.min(a.createdAt.getTime(), b.createdAt.getTime()),
-      ),
+      createdAt: new Date(Math.min(a.createdAt.getTime(), b.createdAt.getTime())),
       updatedAt: now,
       status: a.status,
       signalCount: a.signalCount + b.signalCount,
       participatingOrgs: Math.max(a.participatingOrgs, b.participatingOrgs), // Conservative estimate
       temporalRange: {
-        start: new Date(
-          Math.min(
-            a.temporalRange.start.getTime(),
-            b.temporalRange.start.getTime(),
-          ),
-        ),
-        end: new Date(
-          Math.max(
-            a.temporalRange.end.getTime(),
-            b.temporalRange.end.getTime(),
-          ),
-        ),
+        start: new Date(Math.min(a.temporalRange.start.getTime(), b.temporalRange.start.getTime())),
+        end: new Date(Math.max(a.temporalRange.end.getTime(), b.temporalRange.end.getTime())),
       },
-      dominantNarratives: [...a.dominantNarratives, ...b.dominantNarratives].slice(
-        0,
-        10,
-      ),
-      coordinationPatterns: [
-        ...a.coordinationPatterns,
-        ...b.coordinationPatterns,
-      ],
-      channelDistribution: this.mergeDistributions(
-        a.channelDistribution,
-        b.channelDistribution,
-      ),
+      dominantNarratives: [...a.dominantNarratives, ...b.dominantNarratives].slice(0, 10),
+      coordinationPatterns: [...a.coordinationPatterns, ...b.coordinationPatterns],
+      channelDistribution: this.mergeDistributions(a.channelDistribution, b.channelDistribution),
       geographicSpread: {
-        regions: this.mergeDistributions(
-          a.geographicSpread.regions,
-          b.geographicSpread.regions,
-        ),
-        spreadIndex: Math.max(
-          a.geographicSpread.spreadIndex,
-          b.geographicSpread.spreadIndex,
-        ),
+        regions: this.mergeDistributions(a.geographicSpread.regions, b.geographicSpread.regions),
+        spreadIndex: Math.max(a.geographicSpread.spreadIndex, b.geographicSpread.spreadIndex),
         primaryRegions: [
-          ...new Set([
-            ...a.geographicSpread.primaryRegions,
-            ...b.geographicSpread.primaryRegions,
-          ]),
+          ...new Set([...a.geographicSpread.primaryRegions, ...b.geographicSpread.primaryRegions]),
         ].slice(0, 5),
       },
       threatLevel:
-        this.compareThreatLevels(a.threatLevel, b.threatLevel) >= 0
-          ? a.threatLevel
-          : b.threatLevel,
+        this.compareThreatLevels(a.threatLevel, b.threatLevel) >= 0 ? a.threatLevel : b.threatLevel,
       confidenceScore: (a.confidenceScore + b.confidenceScore) / 2,
-      attributionHypotheses: [
-        ...a.attributionHypotheses,
-        ...b.attributionHypotheses,
-      ].slice(0, 5),
+      attributionHypotheses: [...a.attributionHypotheses, ...b.attributionHypotheses].slice(0, 5),
       velocityMetrics: {
-        signalsPerHour:
-          a.velocityMetrics.signalsPerHour + b.velocityMetrics.signalsPerHour,
-        growthRate: Math.max(
-          a.velocityMetrics.growthRate,
-          b.velocityMetrics.growthRate,
-        ),
+        signalsPerHour: a.velocityMetrics.signalsPerHour + b.velocityMetrics.signalsPerHour,
+        growthRate: Math.max(a.velocityMetrics.growthRate, b.velocityMetrics.growthRate),
         accelerationRate: Math.max(
           a.velocityMetrics.accelerationRate,
-          b.velocityMetrics.accelerationRate,
+          b.velocityMetrics.accelerationRate
         ),
-        peakVelocity: Math.max(
-          a.velocityMetrics.peakVelocity,
-          b.velocityMetrics.peakVelocity,
-        ),
+        peakVelocity: Math.max(a.velocityMetrics.peakVelocity, b.velocityMetrics.peakVelocity),
       },
       growthTrajectory: a.growthTrajectory,
-      crossTenantConfidence: Math.max(
-        a.crossTenantConfidence,
-        b.crossTenantConfidence,
-      ),
+      crossTenantConfidence: Math.max(a.crossTenantConfidence, b.crossTenantConfidence),
       privacyPreservedMetrics: a.privacyPreservedMetrics,
     };
   }
 
   private mergeDistributions(
     a: Record<string, number>,
-    b: Record<string, number>,
+    b: Record<string, number>
   ): Record<string, number> {
     const merged = { ...a };
     for (const [key, value] of Object.entries(b)) {
@@ -918,9 +826,7 @@ export class ClusteringEngine extends EventEmitter {
     }
 
     // Expire old clusters
-    const cutoff = new Date(
-      Date.now() - this.config.clusterTTLHours * 60 * 60 * 1000,
-    );
+    const cutoff = new Date(Date.now() - this.config.clusterTTLHours * 60 * 60 * 1000);
 
     for (const [id, cluster] of this.activeClusters) {
       if (cluster.updatedAt < cutoff) {
@@ -929,9 +835,7 @@ export class ClusteringEngine extends EventEmitter {
     }
   }
 
-  private applyPrivacyProtections(
-    clusters: CampaignCluster[],
-  ): CampaignCluster[] {
+  private applyPrivacyProtections(clusters: CampaignCluster[]): CampaignCluster[] {
     return clusters.map((cluster) => {
       // Add noise to counts if below threshold
       if (cluster.signalCount < this.config.minimumSignalsForAggregation) {
@@ -954,20 +858,11 @@ export class ClusteringEngine extends EventEmitter {
 
       return {
         ...cluster,
-        signalCount: Math.max(
-          0,
-          Math.round(cluster.signalCount + noise()),
-        ),
-        participatingOrgs: Math.max(
-          0,
-          Math.round(cluster.participatingOrgs + noise()),
-        ),
+        signalCount: Math.max(0, Math.round(cluster.signalCount + noise())),
+        participatingOrgs: Math.max(0, Math.round(cluster.participatingOrgs + noise())),
         velocityMetrics: {
           ...cluster.velocityMetrics,
-          signalsPerHour: Math.max(
-            0,
-            cluster.velocityMetrics.signalsPerHour + noise(),
-          ),
+          signalsPerHour: Math.max(0, cluster.velocityMetrics.signalsPerHour + noise()),
         },
       };
     });
@@ -975,15 +870,12 @@ export class ClusteringEngine extends EventEmitter {
 
   private performIncrementalClustering(): void {
     // Lightweight incremental update
-    this.emit('incrementalClusteringStarted');
+    this.emit("incrementalClusteringStarted");
     this.performClustering();
   }
 
   private checkPrivacyBudget(): boolean {
-    return (
-      this.privacyBudgetUsed + 0.01 <=
-      this.config.privacyBudget.totalEpsilon
-    );
+    return this.privacyBudgetUsed + 0.01 <= this.config.privacyBudget.totalEpsilon;
   }
 
   private consumePrivacyBudget(clusterCount: number): void {
@@ -991,12 +883,8 @@ export class ClusteringEngine extends EventEmitter {
   }
 
   private clearOldSignals(): void {
-    const cutoff = new Date(
-      Date.now() - this.config.temporalWindowHours * 60 * 60 * 1000,
-    );
-    this.signalBuffer = this.signalBuffer.filter(
-      (s) => s.timestamp >= cutoff,
-    );
+    const cutoff = new Date(Date.now() - this.config.temporalWindowHours * 60 * 60 * 1000);
+    this.signalBuffer = this.signalBuffer.filter((s) => s.timestamp >= cutoff);
   }
 
   private cosineSimilarity(a: number[], b: number[]): number {

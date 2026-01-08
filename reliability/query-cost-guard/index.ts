@@ -1,11 +1,11 @@
-import { isOpsGuardV1Enabled } from '../config';
-import { estimateQueryCost, QueryCost } from './cost-estimator';
-import { budgetManager } from './budget-manager';
-import { terminateSlowQuery } from './slow-query-killer';
-import { getPostgresPool, ManagedPostgresPool } from '../../server/src/db/postgres';
-import { telemetry } from '../../server/src/lib/telemetry/comprehensive-telemetry';
-import { AppError } from '../../server/src/lib/errors';
-import { QueryResult } from 'pg';
+import { isOpsGuardV1Enabled } from "../config";
+import { estimateQueryCost, QueryCost } from "./cost-estimator";
+import { budgetManager } from "./budget-manager";
+import { terminateSlowQuery } from "./slow-query-killer";
+import { getPostgresPool, ManagedPostgresPool } from "../../server/src/db/postgres";
+import { telemetry } from "../../server/src/lib/telemetry/comprehensive-telemetry";
+import { AppError } from "../../server/src/lib/errors";
+import { QueryResult } from "pg";
 
 export interface QueryCostGuardConfig {
   tenantId: string;
@@ -46,8 +46,8 @@ export class QueryCostGuard {
 
     // 2. Check budget
     if (budgetManager.willExceedBudget(tenantId, estimatedCost.totalCost)) {
-      telemetry.subsystems.database.errors.add(1, { tenantId, reason: 'budget_exceeded' });
-      throw new AppError('Query budget exceeded.', 429, { tenantId });
+      telemetry.subsystems.database.errors.add(1, { tenantId, reason: "budget_exceeded" });
+      throw new AppError("Query budget exceeded.", 429, { tenantId });
     }
 
     // 3. Execute query with a watchdog for slow queries
@@ -60,7 +60,7 @@ export class QueryCostGuard {
       budgetManager.recordCost(tenantId, estimatedCost.totalCost);
       return result;
     } catch (error) {
-      telemetry.subsystems.database.errors.add(1, { tenantId, reason: 'execution_error' });
+      telemetry.subsystems.database.errors.add(1, { tenantId, reason: "execution_error" });
       throw error;
     } finally {
       clearTimeout(watchdog);
@@ -78,12 +78,16 @@ export class QueryCostGuard {
     telemetry.queryCostEstimated.record(estimatedCost.totalCost, { tenantId });
 
     if (estimatedCost.totalCost > maxCost) {
-      telemetry.subsystems.database.errors.add(1, { tenantId, reason: 'cost_exceeded' });
-      throw new AppError(`Query cost estimate (${estimatedCost.totalCost}) exceeds the maximum of ${maxCost}.`, 400, {
-        tenantId,
-        estimatedCost: estimatedCost.totalCost,
-        maxCost,
-      });
+      telemetry.subsystems.database.errors.add(1, { tenantId, reason: "cost_exceeded" });
+      throw new AppError(
+        `Query cost estimate (${estimatedCost.totalCost}) exceeds the maximum of ${maxCost}.`,
+        400,
+        {
+          tenantId,
+          estimatedCost: estimatedCost.totalCost,
+          maxCost,
+        }
+      );
     }
 
     return estimatedCost;

@@ -1,11 +1,11 @@
-import fs from 'node:fs';
-import path from 'node:path';
+import fs from "node:fs";
+import path from "node:path";
 
 const root = process.cwd();
 
 function loadJson(relPath) {
   const filePath = path.join(root, relPath);
-  const raw = fs.readFileSync(filePath, 'utf8');
+  const raw = fs.readFileSync(filePath, "utf8");
   return JSON.parse(raw);
 }
 
@@ -14,13 +14,13 @@ function fail(message) {
   process.exitCode = 1;
 }
 
-const approvedPatterns = loadJson('partners/approved_patterns.json');
+const approvedPatterns = loadJson("partners/approved_patterns.json");
 const approvedPatternIds = new Set(approvedPatterns.patterns.map((p) => p.id));
 
-const archetypes = loadJson('partners/partner_model.json').archetypes;
-const certification = loadJson('partners/certification.json');
-const claims = loadJson('partners/claims_registry.json');
-const lifecycle = loadJson('partners/lifecycle.json');
+const archetypes = loadJson("partners/partner_model.json").archetypes;
+const certification = loadJson("partners/certification.json");
+const claims = loadJson("partners/claims_registry.json");
+const lifecycle = loadJson("partners/lifecycle.json");
 
 function validateArchetypes() {
   const seen = new Set();
@@ -56,7 +56,12 @@ function validateArchetypes() {
     });
 
     const evidence = archetype.evidence;
-    if (!evidence?.certification_target || !Array.isArray(evidence.tests) || evidence.tests.length === 0 || !evidence.audit) {
+    if (
+      !evidence?.certification_target ||
+      !Array.isArray(evidence.tests) ||
+      evidence.tests.length === 0 ||
+      !evidence.audit
+    ) {
       fail(`archetype ${archetype.id} missing evidence plan`);
     }
   });
@@ -85,7 +90,9 @@ function validatePatternsAgainstClaims() {
         fail(`claim ${claim.id} targets missing archetype ${archetypeId}`);
       }
       if (!exists.supported_patterns.includes(claim.pattern)) {
-        fail(`claim ${claim.id} maps to pattern ${claim.pattern} not supported by archetype ${archetypeId}`);
+        fail(
+          `claim ${claim.id} maps to pattern ${claim.pattern} not supported by archetype ${archetypeId}`
+        );
       }
     });
   });
@@ -93,7 +100,7 @@ function validatePatternsAgainstClaims() {
 
 function validateCertification() {
   const tiers = certification.tiers;
-  const requiredFields = ['tests', 'security_posture', 'residency_validation'];
+  const requiredFields = ["tests", "security_posture", "residency_validation"];
   tiers.forEach((tier) => {
     requiredFields.forEach((field) => {
       const entry = tier.requirements?.[field];
@@ -108,22 +115,33 @@ function validateCertification() {
 }
 
 function validateLifecycle() {
-  const exitStage = lifecycle.stages.find((stage) => stage.id === 'exit');
+  const exitStage = lifecycle.stages.find((stage) => stage.id === "exit");
   if (!exitStage) {
-    fail('lifecycle is missing exit stage');
+    fail("lifecycle is missing exit stage");
     return;
   }
-  const requiredControls = ['access removal', 'data separation', 'artifact cleanup', 'audit trail export'];
+  const requiredControls = [
+    "access removal",
+    "data separation",
+    "artifact cleanup",
+    "audit trail export",
+  ];
   requiredControls.forEach((control) => {
     if (!exitStage.controls.includes(control)) {
       fail(`exit stage missing control: ${control}`);
     }
   });
-  if (!Array.isArray(lifecycle.revocation?.mechanics) || lifecycle.revocation.mechanics.length === 0) {
-    fail('revocation mechanics are missing');
+  if (
+    !Array.isArray(lifecycle.revocation?.mechanics) ||
+    lifecycle.revocation.mechanics.length === 0
+  ) {
+    fail("revocation mechanics are missing");
   }
-  if (!Array.isArray(lifecycle.revocation?.validation) || lifecycle.revocation.validation.length === 0) {
-    fail('revocation validation steps are missing');
+  if (
+    !Array.isArray(lifecycle.revocation?.validation) ||
+    lifecycle.revocation.validation.length === 0
+  ) {
+    fail("revocation validation steps are missing");
   }
 }
 
@@ -133,8 +151,8 @@ validateCertification();
 validateLifecycle();
 
 if (process.exitCode) {
-  console.error('\u274c partner-check: failure detected');
+  console.error("\u274c partner-check: failure detected");
   process.exit(process.exitCode);
 } else {
-  console.log('\u2705 partner-check: partner operating model is valid and enforceable');
+  console.log("\u2705 partner-check: partner operating model is valid and enforceable");
 }

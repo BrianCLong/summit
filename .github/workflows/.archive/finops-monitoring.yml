@@ -5,16 +5,16 @@ name: FinOps Cost Monitoring
 on:
   schedule:
     # Run daily at 6 AM UTC for cost analysis
-    - cron: '0 6 * * *'
+    - cron: "0 6 * * *"
     # Run hourly during business hours for critical monitoring
-    - cron: '0 9-17 * * 1-5'
+    - cron: "0 9-17 * * 1-5"
 
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Target environment for analysis'
+        description: "Target environment for analysis"
         required: false
-        default: 'all'
+        default: "all"
         type: choice
         options:
           - all
@@ -23,7 +23,7 @@ on:
           - production
 
       emergency_mode:
-        description: 'Emergency cost enforcement mode'
+        description: "Emergency cost enforcement mode"
         required: false
         default: false
         type: boolean
@@ -60,8 +60,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.11.x'
-          cache: 'pnpm'
+          node-version: "20.11.x"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: |
@@ -235,7 +235,7 @@ jobs:
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ needs.cost-analysis.outputs.critical-violations > 0 && 'failure' || 'warning' }}
-          channel: '#finops-alerts'
+          channel: "#finops-alerts"
           webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
           fields: repo,message,commit,author,action,eventName,ref,workflow
           custom_payload: |

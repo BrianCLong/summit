@@ -21,26 +21,26 @@ export interface StewardshipWorkflow {
 }
 
 export type WorkflowType =
-  | 'data_certification'
-  | 'issue_resolution'
-  | 'change_request'
-  | 'quality_review'
-  | 'merge_approval'
-  | 'split_approval'
-  | 'enrichment_approval'
-  | 'custom';
+  | "data_certification"
+  | "issue_resolution"
+  | "change_request"
+  | "quality_review"
+  | "merge_approval"
+  | "split_approval"
+  | "enrichment_approval"
+  | "custom";
 
 export type WorkflowStatus =
-  | 'draft'
-  | 'submitted'
-  | 'in_review'
-  | 'approved'
-  | 'rejected'
-  | 'on_hold'
-  | 'cancelled'
-  | 'completed';
+  | "draft"
+  | "submitted"
+  | "in_review"
+  | "approved"
+  | "rejected"
+  | "on_hold"
+  | "cancelled"
+  | "completed";
 
-export type Priority = 'critical' | 'high' | 'medium' | 'low';
+export type Priority = "critical" | "high" | "medium" | "low";
 
 export interface WorkflowStage {
   id: string;
@@ -59,20 +59,15 @@ export interface WorkflowStage {
 }
 
 export type StageType =
-  | 'review'
-  | 'approval'
-  | 'validation'
-  | 'enrichment'
-  | 'notification'
-  | 'escalation'
-  | 'custom';
+  | "review"
+  | "approval"
+  | "validation"
+  | "enrichment"
+  | "notification"
+  | "escalation"
+  | "custom";
 
-export type StageStatus =
-  | 'pending'
-  | 'in_progress'
-  | 'completed'
-  | 'skipped'
-  | 'failed';
+export type StageStatus = "pending" | "in_progress" | "completed" | "skipped" | "failed";
 
 export interface StageAction {
   id: string;
@@ -85,15 +80,15 @@ export interface StageAction {
 }
 
 export type ActionType =
-  | 'approve'
-  | 'reject'
-  | 'request_changes'
-  | 'delegate'
-  | 'escalate'
-  | 'comment'
-  | 'custom';
+  | "approve"
+  | "reject"
+  | "request_changes"
+  | "delegate"
+  | "escalate"
+  | "comment"
+  | "custom";
 
-export type Decision = 'approved' | 'rejected' | 'changes_requested' | 'deferred';
+export type Decision = "approved" | "rejected" | "changes_requested" | "deferred";
 
 export interface Attachment {
   id: string;
@@ -107,7 +102,7 @@ export interface Attachment {
 
 export interface StageCondition {
   id: string;
-  conditionType: 'quality_threshold' | 'approval_count' | 'time_based' | 'custom';
+  conditionType: "quality_threshold" | "approval_count" | "time_based" | "custom";
   expression: string;
   required: boolean;
 }
@@ -138,24 +133,24 @@ export interface ChangeRequest {
 }
 
 export type StewardshipChangeType =
-  | 'create'
-  | 'update'
-  | 'delete'
-  | 'merge'
-  | 'split'
-  | 'link'
-  | 'unlink'
-  | 'certify'
-  | 'deprecate';
+  | "create"
+  | "update"
+  | "delete"
+  | "merge"
+  | "split"
+  | "link"
+  | "unlink"
+  | "certify"
+  | "deprecate";
 
 export type ChangeRequestStatus =
-  | 'draft'
-  | 'submitted'
-  | 'under_review'
-  | 'approved'
-  | 'rejected'
-  | 'implemented'
-  | 'cancelled';
+  | "draft"
+  | "submitted"
+  | "under_review"
+  | "approved"
+  | "rejected"
+  | "implemented"
+  | "cancelled";
 
 export interface ProposedChange {
   fieldName: string;
@@ -171,7 +166,7 @@ export interface ImpactAssessment {
   affectedDomains: string[];
   qualityImpact: QualityImpact;
   downstreamImpact: DownstreamImpact[];
-  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  riskLevel: "low" | "medium" | "high" | "critical";
   mitigationSteps: string[];
 }
 
@@ -183,8 +178,8 @@ export interface QualityImpact {
 
 export interface DownstreamImpact {
   system: string;
-  impactType: 'data' | 'process' | 'integration';
-  severity: 'low' | 'medium' | 'high';
+  impactType: "data" | "process" | "integration";
+  severity: "low" | "medium" | "high";
   description: string;
 }
 
@@ -215,11 +210,7 @@ export interface DataCertification {
   revokedReason?: string;
 }
 
-export type CertificationLevel =
-  | 'bronze'
-  | 'silver'
-  | 'gold'
-  | 'platinum';
+export type CertificationLevel = "bronze" | "silver" | "gold" | "platinum";
 
 export interface CertificationCriteria {
   criteriaId: string;
@@ -240,9 +231,9 @@ export interface EscalationRule {
 }
 
 export interface EscalationCondition {
-  type: 'time_based' | 'stage_based' | 'priority_based' | 'custom';
+  type: "time_based" | "stage_based" | "priority_based" | "custom";
   value: unknown;
-  operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte';
+  operator: "gt" | "lt" | "eq" | "gte" | "lte";
 }
 
 export interface PerformanceMetrics {

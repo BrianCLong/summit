@@ -1,7 +1,7 @@
-import type { AudioBuffer } from '@intelgraph/audio-processing';
-import { BaseSTTProvider } from './base.js';
-import type { STTConfig, TranscriptionResult } from '../types.js';
-import { STTProvider, SUPPORTED_LANGUAGES } from '../types.js';
+import type { AudioBuffer } from "@intelgraph/audio-processing";
+import { BaseSTTProvider } from "./base.js";
+import type { STTConfig, TranscriptionResult } from "../types.js";
+import { STTProvider, SUPPORTED_LANGUAGES } from "../types.js";
 
 /**
  * Google Cloud Speech-to-Text Provider
@@ -17,7 +17,7 @@ export class GoogleSTTProvider extends BaseSTTProvider {
   }
 
   getName(): string {
-    return 'Google Cloud Speech-to-Text';
+    return "Google Cloud Speech-to-Text";
   }
 
   async transcribe(audio: AudioBuffer, config: STTConfig): Promise<TranscriptionResult> {
@@ -28,7 +28,7 @@ export class GoogleSTTProvider extends BaseSTTProvider {
       // Prepare Google Cloud Speech request
       const request = {
         audio: {
-          content: audio.data.toString('base64')
+          content: audio.data.toString("base64"),
         },
         config: {
           encoding: this.getGoogleEncoding(audio.metadata.codec),
@@ -40,16 +40,18 @@ export class GoogleSTTProvider extends BaseSTTProvider {
           enableSpeakerDiarization: mergedConfig.enableSpeakerDiarization,
           diarizationSpeakerCount: mergedConfig.maxSpeakers,
           profanityFilter: mergedConfig.profanityFilter,
-          model: mergedConfig.model || 'latest_long'
-        }
+          model: mergedConfig.model || "latest_long",
+        },
       };
 
       // Add custom vocabulary if provided
       if (mergedConfig.customVocabulary && mergedConfig.customVocabulary.length > 0) {
-        (request.config as any).speechContexts = [{
-          phrases: mergedConfig.customVocabulary,
-          boost: 20
-        }];
+        (request.config as any).speechContexts = [
+          {
+            phrases: mergedConfig.customVocabulary,
+            boost: 20,
+          },
+        ];
       }
 
       // Make recognition request
@@ -75,15 +77,19 @@ export class GoogleSTTProvider extends BaseSTTProvider {
 
   private getGoogleEncoding(codec: string): string {
     const encodingMap: Record<string, string> = {
-      'pcm': 'LINEAR16',
-      'flac': 'FLAC',
-      'opus': 'OGG_OPUS',
-      'mp3': 'MP3'
+      pcm: "LINEAR16",
+      flac: "FLAC",
+      opus: "OGG_OPUS",
+      mp3: "MP3",
     };
-    return encodingMap[codec] || 'LINEAR16';
+    return encodingMap[codec] || "LINEAR16";
   }
 
-  private transformGoogleResponse(response: any, config: STTConfig, audio: AudioBuffer): TranscriptionResult {
+  private transformGoogleResponse(
+    response: any,
+    config: STTConfig,
+    audio: AudioBuffer
+  ): TranscriptionResult {
     // Transform Google response to our format
     const results = response.results || [];
     const segments = results.map((result: any, index: number) => {
@@ -91,18 +97,20 @@ export class GoogleSTTProvider extends BaseSTTProvider {
       return {
         text: alternative.transcript,
         startTime: alternative.words?.[0]?.startTime?.seconds || 0,
-        endTime: alternative.words?.[alternative.words.length - 1]?.endTime?.seconds || audio.metadata.duration,
+        endTime:
+          alternative.words?.[alternative.words.length - 1]?.endTime?.seconds ||
+          audio.metadata.duration,
         confidence: alternative.confidence || 1.0,
         words: alternative.words?.map((word: any) => ({
           word: word.word,
-          startTime: word.startTime.seconds + (word.startTime.nanos / 1e9),
-          endTime: word.endTime.seconds + (word.endTime.nanos / 1e9),
-          confidence: word.confidence || 1.0
-        }))
+          startTime: word.startTime.seconds + word.startTime.nanos / 1e9,
+          endTime: word.endTime.seconds + word.endTime.nanos / 1e9,
+          confidence: word.confidence || 1.0,
+        })),
       };
     });
 
-    const fullText = segments.map(seg => seg.text).join(' ');
+    const fullText = segments.map((seg) => seg.text).join(" ");
 
     return {
       text: fullText,
@@ -113,8 +121,8 @@ export class GoogleSTTProvider extends BaseSTTProvider {
       provider: STTProvider.GOOGLE,
       model: config.model,
       metadata: {
-        totalBilledTime: response.totalBilledTime
-      }
+        totalBilledTime: response.totalBilledTime,
+      },
     };
   }
 }

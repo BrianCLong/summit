@@ -61,10 +61,10 @@ jobs:
 **`scripts/deploy/hash-manifest.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
-const root = 'docs-site/build';
+const fs = require("fs");
+const path = require("path");
+const crypto = require("crypto");
+const root = "docs-site/build";
 const files = [];
 (function walk(d) {
   for (const f of fs.readdirSync(d)) {
@@ -74,19 +74,15 @@ const files = [];
   }
 })(root);
 const manifest = files.map((p) => ({
-  path: p.replace(/^docs-site\/build\//, ''),
-  sha256: crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex'),
+  path: p.replace(/^docs-site\/build\//, ""),
+  sha256: crypto.createHash("sha256").update(fs.readFileSync(p)).digest("hex"),
   bytes: fs.statSync(p).size,
 }));
 fs.writeFileSync(
-  'deploy-manifest.json',
-  JSON.stringify(
-    { created: new Date().toISOString(), files: manifest },
-    null,
-    2,
-  ),
+  "deploy-manifest.json",
+  JSON.stringify({ created: new Date().toISOString(), files: manifest }, null, 2)
 );
-console.log('Wrote deploy-manifest.json with', manifest.length, 'files');
+console.log("Wrote deploy-manifest.json with", manifest.length, "files");
 ```
 
 ## B2) Blue/green switch (stub)
@@ -144,7 +140,7 @@ done
 ```yaml
 name: CDN Parity Probe
 on:
-  schedule: [{ cron: '*/30 * * * *' }]
+  schedule: [{ cron: "*/30 * * * *" }]
   workflow_dispatch:
 jobs:
   probe:
@@ -168,9 +164,9 @@ jobs:
 **`scripts/search/gen-sitemaps.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const base = 'https://docs.intelgraph.example';
+const fs = require("fs");
+const path = require("path");
+const base = "https://docs.intelgraph.example";
 function pages(dir) {
   const out = [];
   (function walk(d) {
@@ -180,15 +176,15 @@ function pages(dir) {
       s.isDirectory() ? walk(p) : /\.mdx?$/.test(f) && out.push(p);
     }
   })(dir);
-  return out.map((p) => '/' + p.replace(/^docs\//, '').replace(/\.mdx?$/, ''));
+  return out.map((p) => "/" + p.replace(/^docs\//, "").replace(/\.mdx?$/, ""));
 }
 function xml(urls) {
-  return `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map((u) => `<url><loc>${base}${u}</loc></url>`).join('')}</urlset>`;
+  return `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map((u) => `<url><loc>${base}${u}</loc></url>`).join("")}</urlset>`;
 }
-const urls = pages('docs');
-fs.mkdirSync('docs-site/static', { recursive: true });
-fs.writeFileSync('docs-site/static/sitemap.xml', xml(urls));
-console.log('Sitemap URLs:', urls.length);
+const urls = pages("docs");
+fs.mkdirSync("docs-site/static", { recursive: true });
+fs.writeFileSync("docs-site/static/sitemap.xml", xml(urls));
+console.log("Sitemap URLs:", urls.length);
 ```
 
 ## D2) robots.txt
@@ -206,19 +202,13 @@ Sitemap: https://docs.intelgraph.example/sitemap.xml
 **`scripts/search/index-coverage.js`**
 
 ```js
-const fs = require('fs');
+const fs = require("fs");
 // Placeholder: read last production sitemap and compare to built routes
 const prodCount = Number(process.env.PROD_INDEXED || 0);
-const built =
-  fs.readFileSync('docs-site/static/sitemap.xml', 'utf8').match(/<url>/g)
-    ?.length || 0;
+const built = fs.readFileSync("docs-site/static/sitemap.xml", "utf8").match(/<url>/g)?.length || 0;
 fs.writeFileSync(
-  'docs/ops/search/coverage.json',
-  JSON.stringify(
-    { built, prodIndexed: prodCount, gap: Math.max(0, built - prodCount) },
-    null,
-    2,
-  ),
+  "docs/ops/search/coverage.json",
+  JSON.stringify({ built, prodIndexed: prodCount, gap: Math.max(0, built - prodCount) }, null, 2)
 );
 ```
 
@@ -242,28 +232,22 @@ fs.writeFileSync(
 **`scripts/finops/cdn-report.js`**
 
 ```js
-const fs = require('fs');
+const fs = require("fs");
 // Expect newline-delimited log lines or CSV at logs/cdn.csv: ts, path, bytes
 const lines = (
-  fs.existsSync('logs/cdn.csv')
-    ? fs.readFileSync('logs/cdn.csv', 'utf8').trim().split(/\n/)
-    : []
+  fs.existsSync("logs/cdn.csv") ? fs.readFileSync("logs/cdn.csv", "utf8").trim().split(/\n/) : []
 ).slice(1);
 let bytes = 0,
   reqs = 0;
 for (const l of lines) {
-  const parts = l.split(',');
+  const parts = l.split(",");
   bytes += Number(parts[2] || 0);
   reqs++;
 }
-fs.mkdirSync('docs/ops/finops', { recursive: true });
+fs.mkdirSync("docs/ops/finops", { recursive: true });
 fs.writeFileSync(
-  'docs/ops/finops/usage.json',
-  JSON.stringify(
-    { bytes, reqs, period: new Date().toISOString().slice(0, 10) },
-    null,
-    2,
-  ),
+  "docs/ops/finops/usage.json",
+  JSON.stringify({ bytes, reqs, period: new Date().toISOString().slice(0, 10) }, null, 2)
 );
 ```
 
@@ -272,8 +256,8 @@ fs.writeFileSync(
 **`scripts/finops/carbon-budget.js`**
 
 ```js
-const fs = require('fs');
-const u = JSON.parse(fs.readFileSync('docs/ops/finops/usage.json', 'utf8'));
+const fs = require("fs");
+const u = JSON.parse(fs.readFileSync("docs/ops/finops/usage.json", "utf8"));
 // simplistic: 0.5 kWh/GB data transfer; 400 gCO2e/kWh (region dependent)
 const gb = u.bytes / 1e9;
 const kwh = gb * 0.5;
@@ -281,7 +265,7 @@ const co2 = kwh * 400;
 const budget = 50000; // gCO2e/week
 const ok = co2 <= budget;
 fs.writeFileSync(
-  'docs/ops/finops/carbon.json',
+  "docs/ops/finops/carbon.json",
   JSON.stringify(
     {
       gb: Number(gb.toFixed(3)),
@@ -291,11 +275,11 @@ fs.writeFileSync(
       ok,
     },
     null,
-    2,
-  ),
+    2
+  )
 );
 if (!ok) {
-  console.error('Carbon budget exceeded');
+  console.error("Carbon budget exceeded");
   process.exit(1);
 }
 ```
@@ -307,7 +291,7 @@ if (!ok) {
 ```yaml
 name: Docs FinOps/Carbon
 on:
-  schedule: [{ cron: '0 8 * * 1' }]
+  schedule: [{ cron: "0 8 * * 1" }]
   workflow_dispatch:
 jobs:
   report:

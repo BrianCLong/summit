@@ -7,17 +7,17 @@
  * - Properties: Realistic metadata with timestamps, confidence scores
  */
 
-import crypto from 'crypto';
+import crypto from "crypto";
 
 export const DATASET_SIZES = {
   small: { nodes: 100, edges: 250 },
   medium: { nodes: 1000, edges: 3000 },
   large: { nodes: 10000, edges: 30000 },
-  xl: { nodes: 50000, edges: 150000 }
+  xl: { nodes: 50000, edges: 150000 },
 };
 
-const ENTITY_TYPES = ['Person', 'Organization', 'Asset', 'Communication'];
-const RELATIONSHIP_TYPES = ['KNOWS', 'WORKS_FOR', 'OWNS', 'COMMUNICATES_WITH', 'RELATED_TO'];
+const ENTITY_TYPES = ["Person", "Organization", "Asset", "Communication"];
+const RELATIONSHIP_TYPES = ["KNOWS", "WORKS_FOR", "OWNS", "COMMUNICATES_WITH", "RELATED_TO"];
 
 /**
  * Generate a synthetic graph dataset
@@ -25,15 +25,15 @@ const RELATIONSHIP_TYPES = ['KNOWS', 'WORKS_FOR', 'OWNS', 'COMMUNICATES_WITH', '
  * @param {string} seed - Random seed for reproducibility
  * @returns {Object} { nodes, edges, metadata }
  */
-export function generateDataset(size = 'small', seed = 'benchmark') {
+export function generateDataset(size = "small", seed = "benchmark") {
   const config = DATASET_SIZES[size];
   if (!config) {
-    throw new Error(`Invalid size: ${size}. Use: ${Object.keys(DATASET_SIZES).join(', ')}`);
+    throw new Error(`Invalid size: ${size}. Use: ${Object.keys(DATASET_SIZES).join(", ")}`);
   }
 
   const rng = seededRandom(seed);
   const investigationId = `inv-${seed}-${size}`;
-  const tenantId = 'benchmark-tenant';
+  const tenantId = "benchmark-tenant";
 
   // Generate nodes
   const nodes = [];
@@ -51,8 +51,8 @@ export function generateDataset(size = 'small', seed = 'benchmark') {
         description: `Synthetic ${type.toLowerCase()} for benchmarking`,
         createdAt: Date.now() - Math.floor(rng() * 365 * 24 * 60 * 60 * 1000),
         confidence: 0.5 + rng() * 0.5,
-        tags: generateTags(rng, 2, 5)
-      }
+        tags: generateTags(rng, 2, 5),
+      },
     });
   }
 
@@ -92,12 +92,12 @@ export function generateDataset(size = 'small', seed = 'benchmark') {
       type: relType,
       srcId: nodes[srcIdx].id,
       dstId: nodes[dstIdx].id,
-      label: relType.toLowerCase().replace(/_/g, ' '),
+      label: relType.toLowerCase().replace(/_/g, " "),
       properties: {
         createdAt: Date.now() - Math.floor(rng() * 365 * 24 * 60 * 60 * 1000),
         confidence: 0.5 + rng() * 0.5,
-        weight: rng()
-      }
+        weight: rng(),
+      },
     });
 
     nodeDegrees[srcIdx]++;
@@ -115,8 +115,8 @@ export function generateDataset(size = 'small', seed = 'benchmark') {
       nodeCount: nodes.length,
       edgeCount: edges.length,
       avgDegree: (edges.length * 2) / nodes.length,
-      generatedAt: new Date().toISOString()
-    }
+      generatedAt: new Date().toISOString(),
+    },
   };
 }
 
@@ -128,14 +128,14 @@ export function generateCypherStatements(dataset) {
 
   // Create constraints (run once)
   statements.push({
-    query: 'CREATE CONSTRAINT entity_id IF NOT EXISTS FOR (e:Entity) REQUIRE e.id IS UNIQUE',
-    params: {}
+    query: "CREATE CONSTRAINT entity_id IF NOT EXISTS FOR (e:Entity) REQUIRE e.id IS UNIQUE",
+    params: {},
   });
 
   // Clear existing data for this investigation
   statements.push({
-    query: 'MATCH (n {investigationId: $investigationId}) DETACH DELETE n',
-    params: { investigationId: dataset.metadata.investigationId }
+    query: "MATCH (n {investigationId: $investigationId}) DETACH DELETE n",
+    params: { investigationId: dataset.metadata.investigationId },
   });
 
   // Batch insert nodes (batch size 1000 for efficiency)
@@ -148,7 +148,7 @@ export function generateCypherStatements(dataset) {
         SET e = node,
             e.createdAt = timestamp()
       `,
-      params: { nodes: batch }
+      params: { nodes: batch },
     });
   }
 
@@ -164,14 +164,14 @@ export function generateCypherStatements(dataset) {
         SET r = edge,
             r.createdAt = timestamp()
       `,
-      params: { edges: batch }
+      params: { edges: batch },
     });
   }
 
   // Create indexes for performance
   statements.push({
-    query: 'CREATE INDEX entity_investigation IF NOT EXISTS FOR (e:Entity) ON (e.investigationId)',
-    params: {}
+    query: "CREATE INDEX entity_investigation IF NOT EXISTS FOR (e:Entity) ON (e.investigationId)",
+    params: {},
   });
 
   return statements;
@@ -181,7 +181,7 @@ export function generateCypherStatements(dataset) {
 
 function seededRandom(seed) {
   let value = hashCode(seed);
-  return function() {
+  return function () {
     value = (value * 9301 + 49297) % 233280;
     return value / 233280;
   };
@@ -191,7 +191,7 @@ function hashCode(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash;
   }
   return Math.abs(hash);
@@ -199,7 +199,7 @@ function hashCode(str) {
 
 function generateTags(rng, min, max) {
   const count = min + Math.floor(rng() * (max - min + 1));
-  const tags = ['financial', 'suspicious', 'verified', 'high-risk', 'domestic', 'international'];
+  const tags = ["financial", "suspicious", "verified", "high-risk", "domestic", "international"];
   return Array.from({ length: count }, () => tags[Math.floor(rng() * tags.length)]);
 }
 
@@ -208,7 +208,7 @@ function selectNodePreferential(degrees, rng) {
   let threshold = rng() * totalDegree;
 
   for (let i = 0; i < degrees.length; i++) {
-    threshold -= (degrees[i] + 1);
+    threshold -= degrees[i] + 1;
     if (threshold <= 0) return i;
   }
 
@@ -216,9 +216,10 @@ function selectNodePreferential(degrees, rng) {
 }
 
 function edgeExists(edges, srcIdx, dstIdx) {
-  return edges.some(e =>
-    (e.srcId === `entity-${srcIdx}` && e.dstId === `entity-${dstIdx}`) ||
-    (e.srcId === `entity-${dstIdx}` && e.dstId === `entity-${srcIdx}`)
+  return edges.some(
+    (e) =>
+      (e.srcId === `entity-${srcIdx}` && e.dstId === `entity-${dstIdx}`) ||
+      (e.srcId === `entity-${dstIdx}` && e.dstId === `entity-${srcIdx}`)
   );
 }
 

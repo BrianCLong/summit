@@ -163,11 +163,7 @@ type Segment {
 
 extend type Mutation {
   evidenceUploadRequest(meta: EvidenceMetaInput!): UploadTicket!
-  evidenceCommit(
-    ticket: ID!
-    blobs: [BlobInput!]!
-    transforms: [TransformInput!]!
-  ): Evidence!
+  evidenceCommit(ticket: ID!, blobs: [BlobInput!]!, transforms: [TransformInput!]!): Evidence!
 }
 ```
 ````
@@ -178,7 +174,7 @@ extend type Mutation {
 // apps/web/src/features/evidence/jquery-upload.js
 $(function () {
   let boxes = [];
-  $('#file').on('change', function () {
+  $("#file").on("change", function () {
     const f = this.files[0];
     // run face/plate/PII detection locally (WebAssembly/wasm‑simd stub)
     detectPII(f).then((b) => {
@@ -186,15 +182,15 @@ $(function () {
       renderBoxes(b);
     });
   });
-  $(document).on('click', '#blur-all', function () {
+  $(document).on("click", "#blur-all", function () {
     applyBlur(boxes);
   });
-  $(document).on('click', '#upload', function () {
+  $(document).on("click", "#upload", function () {
     const meta = collectMeta();
     $.ajax({
-      url: '/graphql',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/graphql",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({
         query: `mutation($m:EvidenceMetaInput!){ evidenceUploadRequest(meta:$m){ id, policy { requireBlur } } }`,
         variables: { m: meta },
@@ -208,13 +204,13 @@ $(function () {
 
 ```ts
 // server/src/evidence/ingest.ts
-import { createHash } from 'crypto';
-import exif from 'exifr';
+import { createHash } from "crypto";
+import exif from "exifr";
 export async function scrubAndHash(buf: Buffer) {
   // remove EXIF (store separately if allowed)
   const meta = await exif.parse(buf).catch(() => null);
   const clean = await stripExif(buf);
-  const hash = createHash('sha256').update(clean).digest('hex');
+  const hash = createHash("sha256").update(clean).digest("hex");
   return { clean, hash, exif: meta };
 }
 ```
@@ -223,11 +219,11 @@ export async function scrubAndHash(buf: Buffer) {
 
 ```ts
 // workers/ocr/index.ts
-import { createWorker } from 'tesseract.js';
+import { createWorker } from "tesseract.js";
 export async function ocrImage(buf: Buffer) {
   const worker = await createWorker({ logger: (m) => metrics.ocrProgress(m) });
-  await worker.loadLanguage('eng');
-  await worker.initialize('eng');
+  await worker.loadLanguage("eng");
+  await worker.initialize("eng");
   const { data } = await worker.recognize(buf);
   await worker.terminate();
   return data; // { text, blocks:[{bbox, text, confidence}] }
@@ -256,7 +252,7 @@ async def tag(inp: In):
 // workers/asr/index.ts
 export async function transcribe(buf: Buffer) {
   // call whisper‑cpp via child process; return segments with timecodes
-  return [{ start: 0.0, end: 2.5, text: 'hello world', speaker: 'S1' }];
+  return [{ start: 0.0, end: 2.5, text: "hello world", speaker: "S1" }];
 }
 ```
 
@@ -314,13 +310,13 @@ export async function renderEvidenceThumb(evidenceId: string) {
 ### 4.10 k6 — OCR/VLM Queue Perf
 
 ```js
-import http from 'k6/http';
-export const options = { vus: 40, duration: '3m' };
+import http from "k6/http";
+export const options = { vus: 40, duration: "3m" };
 export default function () {
   http.post(
-    'http://localhost:4000/graphql',
+    "http://localhost:4000/graphql",
     JSON.stringify({ query: 'mutation{ enqueueOcr(id:"ev1") }' }),
-    { headers: { 'Content-Type': 'application/json' } },
+    { headers: { "Content-Type": "application/json" } }
   );
 }
 ```

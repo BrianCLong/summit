@@ -495,22 +495,12 @@ Dashboards: IG Interaction (fps, zoom distribution); Saved Views adoption; MC Ad
 ```yaml
 paths:
   /api/ig/saved-views:
-    get:
-      {
-        summary: List views,
-        parameters: [{ name: q, in: query, schema: { type: string } }],
-      }
+    get: { summary: List views, parameters: [{ name: q, in: query, schema: { type: string } }] }
     post:
       {
         summary: Create view,
         requestBody:
-          {
-            content:
-              {
-                application/json:
-                  { schema: { $ref: '#/components/schemas/SavedView' } },
-              },
-          },
+          { content: { application/json: { schema: { $ref: "#/components/schemas/SavedView" } } } },
       }
   /api/ig/saved-views/{id}:
     patch: { summary: Update view }
@@ -520,13 +510,7 @@ paths:
       {
         summary: Start export,
         responses:
-          {
-            '202':
-              {
-                description: Accepted,
-                headers: { Location: { schema: { type: string } } },
-              },
-          },
+          { "202": { description: Accepted, headers: { Location: { schema: { type: string } } } } },
       }
   /api/webhooks/test:
     post:
@@ -534,16 +518,13 @@ paths:
         summary: Send test event,
         responses:
           {
-            '200':
+            "200":
               {
                 description: Result,
                 content:
                   {
                     application/json:
-                      {
-                        schema:
-                          { $ref: '#/components/schemas/WebhookTestResult' },
-                      },
+                      { schema: { $ref: "#/components/schemas/WebhookTestResult" } },
                   },
               },
           },
@@ -644,7 +625,7 @@ flags:
     variations: [{ value: true }, { value: false }]
     fallthrough: { variation: 1 }
     targets:
-      - values: ['internal']
+      - values: ["internal"]
         variation: 0
   mc_rbac_editor:
     on: false
@@ -657,27 +638,27 @@ flags:
 ## 32) E2E — Playwright Skeletons (selectors use `data-testid`)
 
 ```ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test('MC: create role and assign users', async ({ page }) => {
-  await page.goto('/mc/users');
-  await page.getByTestId('bulk-select-all').click();
-  await page.getByTestId('bulk-assign-role').click();
-  await page.getByTestId('role-editor-open').click();
-  await page.getByTestId('role-name-input').fill('Incident Commander');
-  await page.getByTestId('perm-grid-cell-users-admin').click();
-  await page.getByTestId('save-role').click();
-  await expect(page.getByText('Role created')).toBeVisible();
+test("MC: create role and assign users", async ({ page }) => {
+  await page.goto("/mc/users");
+  await page.getByTestId("bulk-select-all").click();
+  await page.getByTestId("bulk-assign-role").click();
+  await page.getByTestId("role-editor-open").click();
+  await page.getByTestId("role-name-input").fill("Incident Commander");
+  await page.getByTestId("perm-grid-cell-users-admin").click();
+  await page.getByTestId("save-role").click();
+  await expect(page.getByText("Role created")).toBeVisible();
 });
 
-test('IG: saved view share link restores filters', async ({ page }) => {
-  await page.goto('/ig');
-  await page.getByTestId('filter-add').click();
-  await page.getByTestId('filter-type').fill('host');
-  await page.getByTestId('save-view').click();
-  const url = await page.getByTestId('share-link').inputValue();
+test("IG: saved view share link restores filters", async ({ page }) => {
+  await page.goto("/ig");
+  await page.getByTestId("filter-add").click();
+  await page.getByTestId("filter-type").fill("host");
+  await page.getByTestId("save-view").click();
+  const url = await page.getByTestId("share-link").inputValue();
   await page.goto(url);
-  await expect(page.getByTestId('filters-bar')).toContainText('host');
+  await expect(page.getByTestId("filters-bar")).toContainText("host");
 });
 ```
 
@@ -686,12 +667,12 @@ test('IG: saved view share link restores filters', async ({ page }) => {
 ## 33) Performance Instrumentation (Web Vitals & Marks)
 
 ```ts
-performance.mark('graph:render:start');
+performance.mark("graph:render:start");
 // render graph
-performance.mark('graph:render:end');
-performance.measure('graph:render', 'graph:render:start', 'graph:render:end');
-const m = performance.getEntriesByName('graph:render').pop();
-track('ig_render', { duration_ms: Math.round(m.duration), nodes: n, edges: e });
+performance.mark("graph:render:end");
+performance.measure("graph:render", "graph:render:start", "graph:render:end");
+const m = performance.getEntriesByName("graph:render").pop();
+track("ig_render", { duration_ms: Math.round(m.duration), nodes: n, edges: e });
 ```
 
 **Budget checks:** assert in dev if `duration_ms > 2000` for initial render; log to console + send sample to telemetry (rate‑limited).

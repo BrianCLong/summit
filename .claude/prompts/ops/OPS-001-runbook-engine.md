@@ -163,6 +163,7 @@ steps:
 Implement a CLI tool with the following commands:
 
 **`rb test <runbook-id> --fixture <fixture-file>`**
+
 - Execute runbook against fixture data
 - Validate all assumptions met
 - Check KPIs against thresholds
@@ -170,6 +171,7 @@ Implement a CLI tool with the following commands:
 - Exit code 0 on success, 1 on failure
 
 Example:
+
 ```bash
 rb test rb-001-entity-enrichment --fixture fixtures/golden-scenarios.json
 # Output:
@@ -185,12 +187,14 @@ rb test rb-001-entity-enrichment --fixture fixtures/golden-scenarios.json
 ```
 
 **`rb replay <execution-id>`**
+
 - Fetch execution log from database
 - Re-run runbook with recorded inputs
 - Compare outputs with original execution
 - Flag any deviations
 
 Example:
+
 ```bash
 rb replay exec-2025-11-29-abc123
 # Output:
@@ -202,6 +206,7 @@ rb replay exec-2025-11-29-abc123
 ```
 
 **`rb validate <runbook-file>`**
+
 - Parse runbook YAML
 - Check DAG for cycles
 - Validate step dependencies
@@ -258,12 +263,14 @@ CREATE TABLE runbook_step_logs (
 **(f) Acceptance Packs**
 
 Each runbook must include:
+
 - `acceptance.yml`: Test scenarios and expected outcomes
 - `fixtures/`: Input data for tests
 - `expected/`: Expected outputs for validation
 - `screenshots/`: Baseline screenshots
 
 Example `acceptance.yml`:
+
 ```yaml
 scenarios:
   - name: "Happy path - 200 entities"
@@ -291,32 +298,38 @@ Generate k6 load test for each runbook:
 
 ```javascript
 // load-test.js (auto-generated)
-import http from 'k6/http';
-import { check } from 'k6';
+import http from "k6/http";
+import { check } from "k6";
 
 export let options = {
   stages: [
-    { duration: '1m', target: 10 },  // ramp-up
-    { duration: '3m', target: 50 },  // sustained load
-    { duration: '1m', target: 0 },   // ramp-down
+    { duration: "1m", target: 10 }, // ramp-up
+    { duration: "3m", target: 50 }, // sustained load
+    { duration: "1m", target: 0 }, // ramp-down
   ],
   thresholds: {
-    http_req_duration: ['p(95)<2000'], // 95% under 2s
-    http_req_failed: ['rate<0.05'],    // <5% errors
+    http_req_duration: ["p(95)<2000"], // 95% under 2s
+    http_req_failed: ["rate<0.05"], // <5% errors
   },
 };
 
 export default function () {
-  const res = http.post('http://localhost:8080/api/runbooks/execute', JSON.stringify({
-    runbook_id: 'rb-001-entity-enrichment',
-    inputs: { /* ... */ }
-  }), {
-    headers: { 'Content-Type': 'application/json' },
-  });
+  const res = http.post(
+    "http://localhost:8080/api/runbooks/execute",
+    JSON.stringify({
+      runbook_id: "rb-001-entity-enrichment",
+      inputs: {
+        /* ... */
+      },
+    }),
+    {
+      headers: { "Content-Type": "application/json" },
+    }
+  );
 
   check(res, {
-    'status is 200': (r) => r.status === 200,
-    'execution succeeded': (r) => JSON.parse(r.body).status === 'success',
+    "status is 200": (r) => r.status === 200,
+    "execution succeeded": (r) => JSON.parse(r.body).status === "success",
   });
 }
 ```
@@ -324,6 +337,7 @@ export default function () {
 ### Technical Specifications
 
 **Service Structure**:
+
 ```
 services/runbook-engine/
 ├── src/
@@ -345,6 +359,7 @@ services/runbook-engine/
 ```
 
 **GraphQL Schema**:
+
 ```graphql
 type Runbook {
   id: ID!
@@ -428,6 +443,7 @@ extend type Mutation {
 ### Step Types
 
 Implement these core step types:
+
 - `data_fetch`: HTTP API calls
 - `schema_check`: JSON schema validation
 - `api_call`: GraphQL/REST mutations

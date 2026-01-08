@@ -3,8 +3,8 @@
  * Groups similar issues together and identifies themes
  */
 
-import { TriageItem, IssueCluster } from '../types.js';
-import { ClusteringConfig } from '../config.js';
+import { TriageItem, IssueCluster } from "../types.js";
+import { ClusteringConfig } from "../config.js";
 
 /**
  * Simple TF-IDF based clustering without external dependencies
@@ -26,7 +26,7 @@ export function clusterIssues(items: TriageItem[], config: ClusteringConfig): Is
     similarityMatrix,
     config.similarityThreshold,
     config.minClusterSize,
-    config.maxClusters,
+    config.maxClusters
   );
 
   return clusters;
@@ -73,92 +73,92 @@ function computeTFIDF(items: TriageItem[]): TFIDFResult {
 function tokenize(text: string): string[] {
   return text
     .toLowerCase()
-    .replace(/[^\w\s]/g, ' ')
+    .replace(/[^\w\s]/g, " ")
     .split(/\s+/)
     .filter((word) => word.length > 2 && !isStopWord(word));
 }
 
 function isStopWord(word: string): boolean {
   const stopWords = new Set([
-    'the',
-    'is',
-    'at',
-    'which',
-    'on',
-    'and',
-    'a',
-    'an',
-    'as',
-    'are',
-    'was',
-    'were',
-    'been',
-    'be',
-    'have',
-    'has',
-    'had',
-    'do',
-    'does',
-    'did',
-    'will',
-    'would',
-    'should',
-    'could',
-    'may',
-    'might',
-    'must',
-    'can',
-    'this',
-    'that',
-    'these',
-    'those',
-    'i',
-    'you',
-    'he',
-    'she',
-    'it',
-    'we',
-    'they',
-    'what',
-    'when',
-    'where',
-    'who',
-    'why',
-    'how',
-    'all',
-    'each',
-    'every',
-    'both',
-    'few',
-    'more',
-    'most',
-    'other',
-    'some',
-    'such',
-    'than',
-    'too',
-    'very',
-    'for',
-    'with',
-    'about',
-    'into',
-    'through',
-    'during',
-    'before',
-    'after',
-    'above',
-    'below',
-    'from',
-    'up',
-    'down',
-    'in',
-    'out',
-    'off',
-    'over',
-    'under',
-    'again',
-    'then',
-    'once',
+    "the",
+    "is",
+    "at",
+    "which",
+    "on",
+    "and",
+    "a",
+    "an",
+    "as",
+    "are",
+    "was",
+    "were",
+    "been",
+    "be",
+    "have",
+    "has",
+    "had",
+    "do",
+    "does",
+    "did",
+    "will",
+    "would",
+    "should",
+    "could",
+    "may",
+    "might",
+    "must",
+    "can",
+    "this",
+    "that",
+    "these",
+    "those",
+    "i",
+    "you",
+    "he",
+    "she",
+    "it",
+    "we",
+    "they",
+    "what",
+    "when",
+    "where",
+    "who",
+    "why",
+    "how",
+    "all",
+    "each",
+    "every",
+    "both",
+    "few",
+    "more",
+    "most",
+    "other",
+    "some",
+    "such",
+    "than",
+    "too",
+    "very",
+    "for",
+    "with",
+    "about",
+    "into",
+    "through",
+    "during",
+    "before",
+    "after",
+    "above",
+    "below",
+    "from",
+    "up",
+    "down",
+    "in",
+    "out",
+    "off",
+    "over",
+    "under",
+    "again",
+    "then",
+    "once",
   ]);
   return stopWords.has(word);
 }
@@ -203,7 +203,7 @@ function hierarchicalClustering(
   similarityMatrix: number[][],
   threshold: number,
   minClusterSize: number,
-  maxClusters: number,
+  maxClusters: number
 ): IssueCluster[] {
   const n = items.length;
   const clusters: Set<number>[] = Array.from({ length: n }, (_, i) => new Set([i]));
@@ -270,7 +270,7 @@ function hierarchicalClustering(
 function averageClusterSimilarity(
   cluster1: Set<number>,
   cluster2: Set<number>,
-  similarityMatrix: number[][],
+  similarityMatrix: number[][]
 ): number {
   let sum = 0;
   let count = 0;
@@ -304,7 +304,7 @@ function extractTheme(items: TriageItem[]): string {
     .slice(0, 3)
     .map(([word]) => word);
 
-  return topWords.length > 0 ? topWords.join(' / ') : 'miscellaneous';
+  return topWords.length > 0 ? topWords.join(" / ") : "miscellaneous";
 }
 
 function extractCommonAreas(items: TriageItem[]): string[] {

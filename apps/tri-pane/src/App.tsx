@@ -1,13 +1,13 @@
-import React from 'react';
-import { CommandPalette } from './components/CommandPalette';
-import { ExplainPanel } from './components/ExplainPanel';
-import { GraphPane } from './components/GraphPane';
-import { MapPane } from './components/MapPane';
-import { SavedViewsPanel } from './components/SavedViewsPanel';
-import { Toast } from './components/Toast';
-import { TimelinePane } from './components/TimelinePane';
-import { TriPaneProvider } from './components/EventBus';
-import { featureFlags } from './config';
+import React from "react";
+import { CommandPalette } from "./components/CommandPalette";
+import { ExplainPanel } from "./components/ExplainPanel";
+import { GraphPane } from "./components/GraphPane";
+import { MapPane } from "./components/MapPane";
+import { SavedViewsPanel } from "./components/SavedViewsPanel";
+import { Toast } from "./components/Toast";
+import { TimelinePane } from "./components/TimelinePane";
+import { TriPaneProvider } from "./components/EventBus";
+import { featureFlags } from "./config";
 
 function Shell() {
   return (

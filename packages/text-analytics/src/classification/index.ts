@@ -2,7 +2,7 @@
  * Text classification
  */
 
-import type { ClassificationResult } from '../types';
+import type { ClassificationResult } from "../types";
 
 export class TextClassifier {
   private model: Map<string, string[]> = new Map();
@@ -37,7 +37,7 @@ export class TextClassifier {
    * Intent classification
    */
   classifyIntent(text: string): ClassificationResult {
-    const intents = ['question', 'statement', 'command', 'exclamation'];
+    const intents = ["question", "statement", "command", "exclamation"];
     return this.classify(text, intents);
   }
 
@@ -67,12 +67,14 @@ export class TextClassifier {
     const words = new Set(text.toLowerCase().match(/\b\w+\b/g) || []);
     const labelWords = this.model.get(label) || [];
 
-    if (labelWords.length === 0) {return Math.random() * 0.5;}
+    if (labelWords.length === 0) {
+      return Math.random() * 0.5;
+    }
 
     const matches = labelWords.filter((w) => words.has(w)).length;
     return Math.min(matches / labelWords.length, 1.0);
   }
 }
 
-export * from './spam-detection';
-export * from './toxicity';
+export * from "./spam-detection";
+export * from "./toxicity";

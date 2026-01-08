@@ -11,6 +11,7 @@ This guide provides methodologies and frameworks for assessing weapons of mass d
 A complete WMD threat assessment evaluates multiple dimensions:
 
 #### Nuclear Capability
+
 - **Fuel Cycle Status**: Mining, conversion, enrichment, fabrication
 - **Enrichment Capability**: SWU capacity, enrichment level achieved
 - **Reprocessing Capability**: Plutonium separation capability
@@ -20,6 +21,7 @@ A complete WMD threat assessment evaluates multiple dimensions:
 - **Infrastructure**: Research facilities, production facilities, test sites
 
 #### Chemical Weapons Capability
+
 - **Agent Types**: Nerve, blister, choking, blood agents
 - **Production Capacity**: Metric tons per year
 - **Stockpile Size**: Total inventory estimate
@@ -29,6 +31,7 @@ A complete WMD threat assessment evaluates multiple dimensions:
 - **Protection/Defense**: Masks, suits, countermeasures
 
 #### Biological Weapons Capability
+
 - **Pathogen Access**: BSL-3/4 facilities, culture collections
 - **Weaponization**: Aerosol delivery, stability enhancement
 - **Production Scale**: Laboratory to industrial scale
@@ -38,6 +41,7 @@ A complete WMD threat assessment evaluates multiple dimensions:
 - **Defensive Program**: Legitimate biodefense vs offensive program
 
 #### Missile and Delivery Systems
+
 - **Ballistic Missiles**: SRBM, MRBM, IRBM, ICBM inventories
 - **Cruise Missiles**: Ground, air, sea-launched
 - **Hypersonic Weapons**: Glide vehicles, cruise missiles
@@ -52,6 +56,7 @@ A complete WMD threat assessment evaluates multiple dimensions:
 Technical capability must be combined with intent assessment:
 
 #### Indicators of Weapons Intent
+
 - **Undeclared Facilities**: Hidden or misrepresented facilities
 - **Safeguards Violations**: IAEA violations, denied access
 - **Weapons-Grade Production**: HEU >90% or Pu with low burnup
@@ -62,6 +67,7 @@ Technical capability must be combined with intent assessment:
 - **Doctrine and Statements**: Official statements, military doctrine
 
 #### Peaceful Use Indicators
+
 - **Full Cooperation**: Transparent operations, IAEA access
 - **Additional Protocol**: Implementation of comprehensive safeguards
 - **Civilian Control**: Civilian energy program management
@@ -75,6 +81,7 @@ Technical capability must be combined with intent assessment:
 #### Proliferation Risk Factors
 
 **High Risk (Score 25+):**
+
 - Weapons-grade material production
 - Undeclared facilities discovered
 - Active weaponization program
@@ -84,6 +91,7 @@ Technical capability must be combined with intent assessment:
 - State sponsor of terrorism designation
 
 **Medium Risk (Score 10-24):**
+
 - HEU production capability
 - Dual-use facilities without full safeguards
 - Missile development program
@@ -92,6 +100,7 @@ Technical capability must be combined with intent assessment:
 - Concerning procurement patterns
 
 **Low Risk (Score <10):**
+
 - LEU only, full safeguards
 - Complete treaty compliance
 - No weapon-relevant activities
@@ -137,6 +146,7 @@ Minimal: 0-14
 ### High-Threat Assessment Example: North Korea
 
 **Nuclear Capability:**
+
 - Complete fuel cycle including enrichment and reprocessing
 - Estimated 40-60 nuclear weapons
 - Multiple nuclear tests (2006-2017)
@@ -144,6 +154,7 @@ Minimal: 0-14
 - Miniaturization achieved
 
 **Missile Capability:**
+
 - ICBM tested (Hwasong-14, Hwasong-15)
 - IRBM and MRBM operational (Nodong, Musudan)
 - SLBM development (Pukguksong series)
@@ -151,6 +162,7 @@ Minimal: 0-14
 - Demonstrated reentry capability
 
 **Intent Indicators:**
+
 - Withdrawn from NPT (2003)
 - No IAEA safeguards
 - Explicit weapons program
@@ -160,6 +172,7 @@ Minimal: 0-14
 **Threat Level: CRITICAL (Score: 85)**
 
 **Recommendations:**
+
 - Maximum diplomatic pressure
 - Enhanced sanctions enforcement
 - Missile defense deployment
@@ -169,6 +182,7 @@ Minimal: 0-14
 ### Moderate-Threat Assessment Example: Iran
 
 **Nuclear Capability:**
+
 - Uranium enrichment capability (<5% declared)
 - Research reactor operations
 - No reprocessing (declared)
@@ -176,6 +190,7 @@ Minimal: 0-14
 - Advanced centrifuge development
 
 **Missile Capability:**
+
 - Extensive SRBM and MRBM inventory
 - IRBM development (Khorramshahr)
 - No ICBM program (claimed)
@@ -183,12 +198,14 @@ Minimal: 0-14
 - Regional strike capability
 
 **Treaty Status:**
+
 - NPT member
 - IAEA safeguards agreement
 - JCPOA compliance contested
 - Some Additional Protocol implementation
 
 **Intent Assessment:**
+
 - Past weaponization studies (pre-2003)
 - Uranium metal production (2021)
 - Enrichment to 60% (2021-present)
@@ -198,6 +215,7 @@ Minimal: 0-14
 **Threat Level: MODERATE-HIGH (Score: 45)**
 
 **Recommendations:**
+
 - Maintain comprehensive monitoring
 - Support diplomatic engagement
 - Strengthen IAEA verification
@@ -209,6 +227,7 @@ Minimal: 0-14
 ### Satellite Imagery Analysis
 
 **Construction Activity Indicators:**
+
 - Ground clearing and excavation
 - Foundation work
 - Building construction
@@ -217,6 +236,7 @@ Minimal: 0-14
 - Transportation access
 
 **Facility Identification:**
+
 - Building dimensions and layout
 - Cooling towers or systems
 - Electrical substations
@@ -225,6 +245,7 @@ Minimal: 0-14
 - Waste handling
 
 **Change Detection:**
+
 - Compare images over time
 - Measure construction progress
 - Identify new structures
@@ -234,6 +255,7 @@ Minimal: 0-14
 ### Seismic Analysis
 
 **Nuclear Test Characteristics:**
+
 - Shallow depth (<5 km)
 - mb magnitude 4.0-6.0+ typical
 - P-wave/S-wave ratio anomalies
@@ -241,6 +263,7 @@ Minimal: 0-14
 - Location at known test sites
 
 **Yield Estimation:**
+
 - Murphy's formula: mb = 4.45 + 0.75 × log10(yield_kt)
 - Uncertainty: Factor of 2 typical
 - Validation: Radionuclide detection
@@ -248,12 +271,14 @@ Minimal: 0-14
 ### Radionuclide Analysis
 
 **Weapon Test Signatures:**
+
 - Noble gases: Xe-133, Xe-135, Kr-85
 - Fission products: I-131, Cs-137, Ba-140
 - Activation products: Ar-37
 - Ratio analysis: Isotope ratios indicate weapon vs reactor
 
 **Source Attribution:**
+
 - Backtrack atmospheric modeling
 - Isotope ratio fingerprinting
 - Timing correlation with seismic
@@ -264,6 +289,7 @@ Minimal: 0-14
 ### Network Mapping
 
 **Key Elements:**
+
 - Procurement agents
 - Front companies
 - Financial facilitators
@@ -272,6 +298,7 @@ Minimal: 0-14
 - Suppliers
 
 **Link Analysis:**
+
 - Shared personnel
 - Financial transactions
 - Communication patterns
@@ -281,6 +308,7 @@ Minimal: 0-14
 ### Procurement Pattern Analysis
 
 **Red Flags:**
+
 - Dual-use items without end-use certificates
 - Cash transactions
 - Shell companies
@@ -293,17 +321,20 @@ Minimal: 0-14
 ### Intelligence Report Structure
 
 **1. Bottom Line Up Front (BLUF)**
+
 - Key judgment in 2-3 sentences
 - Threat level assessment
 - Immediate concerns
 
 **2. Executive Summary**
+
 - Major findings (1 page)
 - Capability summary
 - Intent assessment
 - Risk evaluation
 
 **3. Detailed Analysis**
+
 - Nuclear capabilities
 - Chemical/biological capabilities
 - Missile capabilities
@@ -312,12 +343,14 @@ Minimal: 0-14
 - Confidence assessments
 
 **4. Outlook and Implications**
+
 - Future trajectory
 - Decision points
 - Warning indicators
 - Regional implications
 
 **5. Recommendations**
+
 - Intelligence gaps
 - Collection priorities
 - Policy options
@@ -334,18 +367,21 @@ Minimal: 0-14
 ### Analytic Standards
 
 **Objectivity:**
+
 - Avoid mirror imaging
 - Consider alternative hypotheses
 - Acknowledge uncertainty
 - Separate analysis from policy
 
 **Transparency:**
+
 - State assumptions clearly
 - Identify intelligence gaps
 - Describe information sources
 - Explain analytical methods
 
 **Timeliness:**
+
 - Current intelligence for tactical decisions
 - Historical context for strategic assessments
 - Warning of future developments
@@ -355,6 +391,7 @@ Minimal: 0-14
 ### Early Warning Indicators
 
 **Nuclear Testing Preparation:**
+
 - Seismic station installation
 - Test tunnel construction
 - Increased activity at test sites
@@ -362,6 +399,7 @@ Minimal: 0-14
 - Evacuation of nearby areas
 
 **Proliferation Activity:**
+
 - Surge in procurement attempts
 - Covert facility construction
 - Unusual material transfers
@@ -369,6 +407,7 @@ Minimal: 0-14
 - Denied export license attempts
 
 **Treaty Violation:**
+
 - Denied IAEA access
 - Undeclared material detected
 - Safeguards equipment tampering
@@ -378,6 +417,7 @@ Minimal: 0-14
 ### Response Coordination
 
 **Immediate Actions (24-72 hours):**
+
 - Activate crisis cell
 - Confirm and validate intelligence
 - Brief senior leadership
@@ -385,6 +425,7 @@ Minimal: 0-14
 - Prepare public messaging
 
 **Short-term Actions (1-2 weeks):**
+
 - Convene international meetings
 - Diplomatic demarches
 - UNSC consultations
@@ -392,6 +433,7 @@ Minimal: 0-14
 - Prepare sanctions packages
 
 **Medium-term Actions (1-3 months):**
+
 - IAEA Board of Governors action
 - Sanctions implementation
 - Interdiction operations
@@ -401,6 +443,7 @@ Minimal: 0-14
 ## Conclusion
 
 Effective WMD threat assessment requires:
+
 - Comprehensive technical analysis
 - Multi-source intelligence integration
 - Rigorous analytical standards

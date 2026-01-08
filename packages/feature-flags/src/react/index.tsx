@@ -12,8 +12,8 @@ import React, {
   useCallback,
   ReactNode,
   useMemo,
-} from 'react';
-import type { FlagContext, FlagVariation } from '../types.js';
+} from "react";
+import type { FlagContext, FlagVariation } from "../types.js";
 
 /**
  * Feature flag client interface (for browser)
@@ -114,7 +114,9 @@ export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({
   children,
 }) => {
   const [flags, setFlags] = useState<Record<string, FlagVariation>>(bootstrapFlags);
-  const [isLoading, setIsLoading] = useState(!bootstrapFlags || Object.keys(bootstrapFlags).length === 0);
+  const [isLoading, setIsLoading] = useState(
+    !bootstrapFlags || Object.keys(bootstrapFlags).length === 0
+  );
   const [error, setError] = useState<Error | null>(null);
   const [context, setContext] = useState<FlagContext>(initialContext as FlagContext);
   const [clientInstance, setClientInstance] = useState<FeatureFlagClient | null>(client || null);
@@ -134,9 +136,9 @@ export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({
         setFlags(allFlags);
       } else if (apiEndpoint) {
         const response = await fetch(apiEndpoint, {
-          credentials: 'include',
+          credentials: "include",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         });
 
@@ -154,7 +156,7 @@ export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({
       }
     } catch (err) {
       setError(err as Error);
-      console.error('Error fetching feature flags:', err);
+      console.error("Error fetching feature flags:", err);
     } finally {
       setIsLoading(false);
     }
@@ -195,7 +197,7 @@ export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({
       // Re-fetch flags with new context
       fetchFlags();
     },
-    [client, fetchFlags],
+    [client, fetchFlags]
   );
 
   const value = useMemo(
@@ -207,14 +209,10 @@ export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({
       context,
       updateContext,
     }),
-    [clientInstance, flags, isLoading, error, context, updateContext],
+    [clientInstance, flags, isLoading, error, context, updateContext]
   );
 
-  return (
-    <FeatureFlagContext.Provider value={value}>
-      {children}
-    </FeatureFlagContext.Provider>
-  );
+  return <FeatureFlagContext.Provider value={value}>{children}</FeatureFlagContext.Provider>;
 };
 
 /**
@@ -224,7 +222,7 @@ export function useFeatureFlags() {
   const context = useContext(FeatureFlagContext);
 
   if (!context) {
-    throw new Error('useFeatureFlags must be used within a FeatureFlagProvider');
+    throw new Error("useFeatureFlags must be used within a FeatureFlagProvider");
   }
 
   return context;
@@ -233,10 +231,7 @@ export function useFeatureFlags() {
 /**
  * Hook to check if a boolean flag is enabled
  */
-export function useFeatureFlag(
-  key: string,
-  defaultValue: boolean = false,
-): boolean {
+export function useFeatureFlag(key: string, defaultValue: boolean = false): boolean {
   const { flags, client } = useFeatureFlags();
 
   if (client) {
@@ -254,10 +249,7 @@ export function useFeatureFlag(
 /**
  * Hook to get a string flag value
  */
-export function useStringFlag(
-  key: string,
-  defaultValue: string = '',
-): string {
+export function useStringFlag(key: string, defaultValue: string = ""): string {
   const { flags, client } = useFeatureFlags();
 
   if (client) {
@@ -275,10 +267,7 @@ export function useStringFlag(
 /**
  * Hook to get a number flag value
  */
-export function useNumberFlag(
-  key: string,
-  defaultValue: number = 0,
-): number {
+export function useNumberFlag(key: string, defaultValue: number = 0): number {
   const { flags, client } = useFeatureFlags();
 
   if (client) {
@@ -296,10 +285,7 @@ export function useNumberFlag(
 /**
  * Hook to get a JSON flag value
  */
-export function useJSONFlag<T = any>(
-  key: string,
-  defaultValue: T,
-): T {
+export function useJSONFlag<T = any>(key: string, defaultValue: T): T {
   const { flags, client } = useFeatureFlags();
 
   if (client) {
@@ -326,7 +312,7 @@ export function useFeatureFlagTracker() {
         client.track(eventName, data);
       }
     },
-    [client],
+    [client]
   );
 }
 
@@ -401,10 +387,7 @@ export class SimpleFeatureFlagClient implements FeatureFlagClient {
   private context: FlagContext;
   private subscribers: Set<(flags: Record<string, FlagVariation>) => void>;
 
-  constructor(
-    initialFlags: Record<string, FlagVariation> = {},
-    initialContext: FlagContext = {},
-  ) {
+  constructor(initialFlags: Record<string, FlagVariation> = {}, initialContext: FlagContext = {}) {
     this.flags = initialFlags;
     this.context = initialContext;
     this.subscribers = new Set();
@@ -448,7 +431,7 @@ export class SimpleFeatureFlagClient implements FeatureFlagClient {
 
   track(eventName: string, data?: Record<string, any>): void {
     // Simple implementation - just log
-    console.debug('Feature flag event:', eventName, data);
+    console.debug("Feature flag event:", eventName, data);
   }
 
   updateContext(context: Partial<FlagContext>): void {

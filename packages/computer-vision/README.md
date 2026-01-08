@@ -26,11 +26,11 @@ import {
   BaseComputerVisionModel,
   calculateIoU,
   nonMaximumSuppression,
-} from '@intelgraph/computer-vision';
+} from "@intelgraph/computer-vision";
 
 // Use types
 const detection: Detection = {
-  class_name: 'person',
+  class_name: "person",
   class_id: 0,
   confidence: 0.95,
   bbox: { x: 100, y: 100, width: 200, height: 300 },

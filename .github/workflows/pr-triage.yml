@@ -2,7 +2,7 @@ name: PR Queue Stabilizer
 
 on:
   schedule:
-    - cron: '0 8 * * 1-5' # Run at 08:00 UTC, Mon-Fri
+    - cron: "0 8 * * 1-5" # Run at 08:00 UTC, Mon-Fri
   workflow_dispatch:
 
 permissions:

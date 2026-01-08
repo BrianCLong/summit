@@ -11,12 +11,12 @@ A service is **catalog-ready** when it meets all requirements for its tier. Use 
 
 ## Quick Reference
 
-| Tier | Required Sections |
-|------|------------------|
+| Tier         | Required Sections     |
+| ------------ | --------------------- |
 | **Critical** | ALL sections required |
-| **High** | Sections 1-8 required |
-| **Medium** | Sections 1-5 required |
-| **Low** | Section 1 required |
+| **High**     | Sections 1-8 required |
+| **Medium**   | Sections 1-5 required |
+| **Low**      | Section 1 required    |
 
 ---
 
@@ -25,6 +25,7 @@ A service is **catalog-ready** when it meets all requirements for its tier. Use 
 ### Service Identity
 
 - [ ] **Service ID**: Unique, kebab-case, 3-50 characters
+
   ```
   ✅ graph-core
   ✅ api-gateway
@@ -58,6 +59,7 @@ A service is **catalog-ready** when it meets all requirements for its tier. Use 
 - [ ] **Last Ownership Review**: Within past 90 days
 
 **Verification:**
+
 ```bash
 # Check ownership validity
 summit catalog validate --service=<service-id> --section=ownership
@@ -76,6 +78,7 @@ summit catalog validate --service=<service-id> --section=ownership
 - [ ] **Entry Point**: Main file path exists and is correct
 
 - [ ] **Build Passes**: Service builds successfully
+
   ```bash
   pnpm build --filter=@intelgraph/<service-id>
   ```
@@ -103,14 +106,15 @@ summit catalog validate --service=<service-id> --section=ownership
   ```yaml
   resources:
     requests:
-      cpu: 100m      # Minimum required
+      cpu: 100m # Minimum required
       memory: 256Mi
     limits:
-      cpu: 1000m     # Maximum allowed
+      cpu: 1000m # Maximum allowed
       memory: 1Gi
   ```
 
 **Verification:**
+
 ```bash
 # Test health endpoints locally
 curl http://localhost:3000/health/live
@@ -147,6 +151,7 @@ docker build -t <service-id>:test .
 - [ ] **Rate Limiting Implemented**: Returns 429 when exceeded
 
 **Verification:**
+
 ```bash
 # Check API spec
 curl http://localhost:3000/openapi.json | jq .info.version
@@ -170,6 +175,7 @@ curl -H "Authorization: Bearer <token>" http://localhost:3000/api/v1/health
 - [ ] **Circuit Breakers**: Implemented for critical sync dependencies
 
 **Verification:**
+
 ```bash
 # List actual dependencies from code
 summit catalog analyze-deps --service=<service-id>
@@ -207,6 +213,7 @@ summit catalog validate --service=<service-id> --section=dependencies
 - [ ] **Alerting**: Alerts configured for SLO breach
 
 **Verification:**
+
 ```bash
 # Check SLO metrics exist
 curl http://localhost:3000/metrics | grep -E "(http_requests_total|http_request_duration)"
@@ -250,6 +257,7 @@ summit catalog validate --service=<service-id> --section=slo
   - [ ] Resource utilization
 
 **Verification:**
+
 ```bash
 # Check metrics endpoint
 curl http://localhost:3000/metrics | head -50
@@ -293,6 +301,7 @@ curl -H "traceparent: 00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01" \
 - [ ] **Rollback Procedure**: How to rollback deployment
 
 **Verification:**
+
 ```bash
 # Check documentation exists
 ls -la docs/services/<service-id>/
@@ -320,6 +329,7 @@ summit catalog validate --service=<service-id> --section=documentation
   - [ ] Communication channels established
 
 **Verification:**
+
 ```bash
 # Check PagerDuty schedule
 summit catalog validate --service=<service-id> --section=oncall
@@ -349,6 +359,7 @@ summit catalog test-alert --service=<service-id> --severity=warning
   - [ ] RTBF support implemented
 
 **Verification:**
+
 ```bash
 # Scan for PII in logs/responses
 summit security scan-pii --service=<service-id>
@@ -381,6 +392,7 @@ summit catalog validate --service=<service-id> --section=security
 - [ ] **Output Encoding**: Prevent injection attacks
 
 **Verification:**
+
 ```bash
 # Run security scan
 trivy image <service-id>:latest
@@ -409,6 +421,7 @@ kubectl get networkpolicy -n <namespace> | grep <service-id>
 - [ ] **RTBF Support**: Right to be forgotten implemented
 
 **Verification:**
+
 ```bash
 # Check audit logs
 summit compliance audit-check --service=<service-id>
@@ -470,24 +483,28 @@ Must pass ALL sections (1-12).
 ## Critical Service Checklist
 
 ### Identity & Ownership
+
 - [ ] Service ID, name, description
 - [ ] Primary + backup + escalation owner
 - [ ] On-call schedule (PagerDuty)
 - [ ] Ownership review < 90 days
 
 ### Technical & Deployment
+
 - [ ] Build + tests pass
 - [ ] Container builds
 - [ ] Health endpoints work
 - [ ] Resource limits set
 
 ### Interfaces & Dependencies
+
 - [ ] API spec available
 - [ ] Auth configured
 - [ ] All dependencies documented
 - [ ] Circuit breakers implemented
 
 ### SLOs & Observability
+
 - [ ] Availability SLO (99.9%+)
 - [ ] Latency SLO (P50, P95, P99)
 - [ ] Prometheus metrics
@@ -495,11 +512,13 @@ Must pass ALL sections (1-12).
 - [ ] Distributed tracing
 
 ### Documentation & Runbooks
+
 - [ ] README + architecture docs
 - [ ] Runbooks for all failure modes
 - [ ] API documentation
 
 ### Security & Compliance
+
 - [ ] Security review completed
 - [ ] Vulnerability scanning
 - [ ] Audit logging
@@ -523,15 +542,15 @@ Must pass Section 1.
 
 ## Common Failures & Fixes
 
-| Failure | Fix |
-|---------|-----|
-| Missing primary owner | Add `ownership.primary_owner` with valid team ID |
-| Stale ownership review | Update `ownership.last_ownership_review` date |
-| No health endpoint | Add `/health/live` and `/health/ready` endpoints |
-| Missing SLO targets | Define `slo.availability.target` and latency targets |
-| No metrics endpoint | Add Prometheus middleware at `/metrics` |
-| Missing runbook | Create runbook in `/runbooks/<service-id>/` |
-| No PagerDuty schedule | Create schedule and add `ownership.oncall_schedule` |
+| Failure                   | Fix                                                  |
+| ------------------------- | ---------------------------------------------------- |
+| Missing primary owner     | Add `ownership.primary_owner` with valid team ID     |
+| Stale ownership review    | Update `ownership.last_ownership_review` date        |
+| No health endpoint        | Add `/health/live` and `/health/ready` endpoints     |
+| Missing SLO targets       | Define `slo.availability.target` and latency targets |
+| No metrics endpoint       | Add Prometheus middleware at `/metrics`              |
+| Missing runbook           | Create runbook in `/runbooks/<service-id>/`          |
+| No PagerDuty schedule     | Create schedule and add `ownership.oncall_schedule`  |
 | Dependencies not declared | Run `summit catalog analyze-deps` and add to catalog |
 
 ---

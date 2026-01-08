@@ -4,15 +4,15 @@
  * Parses tokenized SummitQL queries into an Abstract Syntax Tree (AST)
  */
 
-import { CstParser, IToken } from 'chevrotain';
-import * as T from './lexer';
-import type { Query, FilterExpression, FieldSelection } from '../types';
+import { CstParser, IToken } from "chevrotain";
+import * as T from "./lexer";
+import type { Query, FilterExpression, FieldSelection } from "../types";
 
 export class SummitQLParser extends CstParser {
   constructor() {
     super(T.allTokens, {
       recoveryEnabled: true,
-      nodeLocationTracking: 'full',
+      nodeLocationTracking: "full",
     });
 
     this.performSelfAnalysis();
@@ -20,7 +20,7 @@ export class SummitQLParser extends CstParser {
 
   // ===== Entry Point =====
 
-  public query = this.RULE('query', () => {
+  public query = this.RULE("query", () => {
     this.CONSUME(T.Query);
     this.CONSUME(T.LBrace);
 
@@ -43,7 +43,7 @@ export class SummitQLParser extends CstParser {
 
   // ===== Resource Clause =====
 
-  private resourceClause = this.RULE('resourceClause', () => {
+  private resourceClause = this.RULE("resourceClause", () => {
     this.CONSUME(T.From);
     this.CONSUME(T.Colon);
     this.CONSUME(T.Identifier);
@@ -51,7 +51,7 @@ export class SummitQLParser extends CstParser {
 
   // ===== Field Selection =====
 
-  private fieldSelection = this.RULE('fieldSelection', () => {
+  private fieldSelection = this.RULE("fieldSelection", () => {
     this.CONSUME(T.Select);
     this.CONSUME(T.Colon);
     this.CONSUME(T.LBracket);
@@ -59,7 +59,7 @@ export class SummitQLParser extends CstParser {
     this.CONSUME(T.RBracket);
   });
 
-  private fieldList = this.RULE('fieldList', () => {
+  private fieldList = this.RULE("fieldList", () => {
     this.SUBRULE(this.field);
     this.MANY(() => {
       this.CONSUME(T.Comma);
@@ -67,7 +67,7 @@ export class SummitQLParser extends CstParser {
     });
   });
 
-  private field = this.RULE('field', () => {
+  private field = this.RULE("field", () => {
     this.CONSUME(T.Identifier);
 
     // Optional alias
@@ -93,17 +93,17 @@ export class SummitQLParser extends CstParser {
 
   // ===== Where Clause =====
 
-  private whereClause = this.RULE('whereClause', () => {
+  private whereClause = this.RULE("whereClause", () => {
     this.CONSUME(T.Where);
     this.CONSUME(T.Colon);
     this.SUBRULE(this.filterExpression);
   });
 
-  private filterExpression = this.RULE('filterExpression', () => {
+  private filterExpression = this.RULE("filterExpression", () => {
     this.SUBRULE(this.logicalOrExpression);
   });
 
-  private logicalOrExpression = this.RULE('logicalOrExpression', () => {
+  private logicalOrExpression = this.RULE("logicalOrExpression", () => {
     this.SUBRULE(this.logicalAndExpression);
     this.MANY(() => {
       this.CONSUME(T.Or);
@@ -111,7 +111,7 @@ export class SummitQLParser extends CstParser {
     });
   });
 
-  private logicalAndExpression = this.RULE('logicalAndExpression', () => {
+  private logicalAndExpression = this.RULE("logicalAndExpression", () => {
     this.SUBRULE(this.logicalNotExpression);
     this.MANY(() => {
       this.CONSUME(T.And);
@@ -119,7 +119,7 @@ export class SummitQLParser extends CstParser {
     });
   });
 
-  private logicalNotExpression = this.RULE('logicalNotExpression', () => {
+  private logicalNotExpression = this.RULE("logicalNotExpression", () => {
     this.OR([
       {
         ALT: () => {
@@ -135,7 +135,7 @@ export class SummitQLParser extends CstParser {
     ]);
   });
 
-  private primaryFilterExpression = this.RULE('primaryFilterExpression', () => {
+  private primaryFilterExpression = this.RULE("primaryFilterExpression", () => {
     this.OR([
       { ALT: () => this.SUBRULE(this.comparisonExpression) },
       { ALT: () => this.SUBRULE(this.fullTextSearch) },
@@ -151,7 +151,7 @@ export class SummitQLParser extends CstParser {
     ]);
   });
 
-  private comparisonExpression = this.RULE('comparisonExpression', () => {
+  private comparisonExpression = this.RULE("comparisonExpression", () => {
     this.CONSUME(T.Identifier); // field
 
     this.OR([
@@ -169,7 +169,7 @@ export class SummitQLParser extends CstParser {
     this.SUBRULE(this.value);
   });
 
-  private fullTextSearch = this.RULE('fullTextSearch', () => {
+  private fullTextSearch = this.RULE("fullTextSearch", () => {
     this.CONSUME(T.Search);
     this.CONSUME(T.LParen);
     this.CONSUME(T.Identifier); // fields
@@ -182,7 +182,7 @@ export class SummitQLParser extends CstParser {
     this.CONSUME(T.RParen);
   });
 
-  private geoFilterExpression = this.RULE('geoFilterExpression', () => {
+  private geoFilterExpression = this.RULE("geoFilterExpression", () => {
     this.OR([
       { ALT: () => this.CONSUME(T.Within) },
       { ALT: () => this.CONSUME(T.Intersects) },
@@ -200,7 +200,7 @@ export class SummitQLParser extends CstParser {
     this.CONSUME(T.RParen);
   });
 
-  private existsExpression = this.RULE('existsExpression', () => {
+  private existsExpression = this.RULE("existsExpression", () => {
     this.CONSUME(T.Exists);
     this.CONSUME(T.LParen);
     this.CONSUME(T.Identifier);
@@ -209,7 +209,7 @@ export class SummitQLParser extends CstParser {
 
   // ===== Join Clause =====
 
-  private joinClause = this.RULE('joinClause', () => {
+  private joinClause = this.RULE("joinClause", () => {
     this.OR([
       { ALT: () => this.CONSUME(T.Join) },
       { ALT: () => this.CONSUME(T.LeftJoin) },
@@ -240,18 +240,15 @@ export class SummitQLParser extends CstParser {
     this.CONSUME(T.RBrace);
   });
 
-  private joinCondition = this.RULE('joinCondition', () => {
+  private joinCondition = this.RULE("joinCondition", () => {
     this.CONSUME(T.Identifier); // left field
-    this.OR([
-      { ALT: () => this.CONSUME(T.Equals) },
-      { ALT: () => this.CONSUME(T.NotEquals) },
-    ]);
+    this.OR([{ ALT: () => this.CONSUME(T.Equals) }, { ALT: () => this.CONSUME(T.NotEquals) }]);
     this.CONSUME1(T.Identifier); // right field
   });
 
   // ===== Order By Clause =====
 
-  private orderByClause = this.RULE('orderByClause', () => {
+  private orderByClause = this.RULE("orderByClause", () => {
     this.CONSUME(T.OrderBy);
     this.CONSUME(T.Colon);
     this.CONSUME(T.LBracket);
@@ -259,7 +256,7 @@ export class SummitQLParser extends CstParser {
     this.CONSUME(T.RBracket);
   });
 
-  private sortList = this.RULE('sortList', () => {
+  private sortList = this.RULE("sortList", () => {
     this.SUBRULE(this.sortClause);
     this.MANY(() => {
       this.CONSUME(T.Comma);
@@ -267,31 +264,25 @@ export class SummitQLParser extends CstParser {
     });
   });
 
-  private sortClause = this.RULE('sortClause', () => {
+  private sortClause = this.RULE("sortClause", () => {
     this.CONSUME(T.Identifier);
-    this.OR([
-      { ALT: () => this.CONSUME(T.Asc) },
-      { ALT: () => this.CONSUME(T.Desc) },
-    ]);
+    this.OR([{ ALT: () => this.CONSUME(T.Asc) }, { ALT: () => this.CONSUME(T.Desc) }]);
 
     this.OPTION(() => {
       this.CONSUME(T.Nulls);
-      this.OR1([
-        { ALT: () => this.CONSUME(T.First) },
-        { ALT: () => this.CONSUME(T.Last) },
-      ]);
+      this.OR1([{ ALT: () => this.CONSUME(T.First) }, { ALT: () => this.CONSUME(T.Last) }]);
     });
   });
 
   // ===== Limit and Offset =====
 
-  private limitClause = this.RULE('limitClause', () => {
+  private limitClause = this.RULE("limitClause", () => {
     this.CONSUME(T.Limit);
     this.CONSUME(T.Colon);
     this.CONSUME(T.NumberLiteral);
   });
 
-  private offsetClause = this.RULE('offsetClause', () => {
+  private offsetClause = this.RULE("offsetClause", () => {
     this.CONSUME(T.Offset);
     this.CONSUME(T.Colon);
     this.CONSUME(T.NumberLiteral);
@@ -299,7 +290,7 @@ export class SummitQLParser extends CstParser {
 
   // ===== Aggregate Clause =====
 
-  private aggregateClause = this.RULE('aggregateClause', () => {
+  private aggregateClause = this.RULE("aggregateClause", () => {
     this.CONSUME(T.Aggregate);
     this.CONSUME(T.Colon);
     this.CONSUME(T.LBracket);
@@ -307,7 +298,7 @@ export class SummitQLParser extends CstParser {
     this.CONSUME(T.RBracket);
   });
 
-  private aggregationList = this.RULE('aggregationList', () => {
+  private aggregationList = this.RULE("aggregationList", () => {
     this.SUBRULE(this.aggregation);
     this.MANY(() => {
       this.CONSUME(T.Comma);
@@ -315,7 +306,7 @@ export class SummitQLParser extends CstParser {
     });
   });
 
-  private aggregation = this.RULE('aggregation', () => {
+  private aggregation = this.RULE("aggregation", () => {
     this.OR([
       { ALT: () => this.CONSUME(T.Count) },
       { ALT: () => this.CONSUME(T.Sum) },
@@ -340,15 +331,12 @@ export class SummitQLParser extends CstParser {
 
   // ===== Temporal Clause =====
 
-  private temporalClause = this.RULE('temporalClause', () => {
+  private temporalClause = this.RULE("temporalClause", () => {
     this.CONSUME(T.Temporal);
     this.CONSUME(T.Colon);
     this.CONSUME(T.LBrace);
 
-    this.OR([
-      { ALT: () => this.CONSUME(T.PointInTime) },
-      { ALT: () => this.CONSUME(T.TimeRange) },
-    ]);
+    this.OR([{ ALT: () => this.CONSUME(T.PointInTime) }, { ALT: () => this.CONSUME(T.TimeRange) }]);
 
     this.CONSUME1(T.Colon);
     this.SUBRULE(this.value);
@@ -358,7 +346,7 @@ export class SummitQLParser extends CstParser {
 
   // ===== Geospatial Clause =====
 
-  private geospatialClause = this.RULE('geospatialClause', () => {
+  private geospatialClause = this.RULE("geospatialClause", () => {
     this.CONSUME(T.Geospatial);
     this.CONSUME(T.Colon);
     this.CONSUME(T.LBrace);
@@ -368,7 +356,7 @@ export class SummitQLParser extends CstParser {
 
   // ===== Values and Literals =====
 
-  private value = this.RULE('value', () => {
+  private value = this.RULE("value", () => {
     this.OR([
       { ALT: () => this.CONSUME(T.StringLiteral) },
       { ALT: () => this.CONSUME(T.NumberLiteral) },
@@ -380,7 +368,7 @@ export class SummitQLParser extends CstParser {
     ]);
   });
 
-  private arrayLiteral = this.RULE('arrayLiteral', () => {
+  private arrayLiteral = this.RULE("arrayLiteral", () => {
     this.CONSUME(T.LBracket);
     this.OPTION(() => {
       this.SUBRULE(this.value);
@@ -392,7 +380,7 @@ export class SummitQLParser extends CstParser {
     this.CONSUME(T.RBracket);
   });
 
-  private objectLiteral = this.RULE('objectLiteral', () => {
+  private objectLiteral = this.RULE("objectLiteral", () => {
     this.CONSUME(T.LBrace);
     this.OPTION(() => {
       this.SUBRULE(this.objectProperty);
@@ -404,7 +392,7 @@ export class SummitQLParser extends CstParser {
     this.CONSUME(T.RBrace);
   });
 
-  private objectProperty = this.RULE('objectProperty', () => {
+  private objectProperty = this.RULE("objectProperty", () => {
     this.OR([
       { ALT: () => this.CONSUME(T.Identifier) },
       { ALT: () => this.CONSUME(T.StringLiteral) },
@@ -413,7 +401,7 @@ export class SummitQLParser extends CstParser {
     this.SUBRULE(this.value);
   });
 
-  private argumentList = this.RULE('argumentList', () => {
+  private argumentList = this.RULE("argumentList", () => {
     this.SUBRULE(this.argument);
     this.MANY(() => {
       this.CONSUME(T.Comma);
@@ -421,7 +409,7 @@ export class SummitQLParser extends CstParser {
     });
   });
 
-  private argument = this.RULE('argument', () => {
+  private argument = this.RULE("argument", () => {
     this.CONSUME(T.Identifier);
     this.CONSUME(T.Colon);
     this.SUBRULE(this.value);
@@ -439,9 +427,7 @@ export function parse(tokens: IToken[]) {
   const cst = parserInstance.query();
 
   if (parserInstance.errors.length > 0) {
-    throw new Error(
-      `Parser errors:\n${parserInstance.errors.map((e) => e.message).join('\n')}`
-    );
+    throw new Error(`Parser errors:\n${parserInstance.errors.map((e) => e.message).join("\n")}`);
   }
 
   return cst;

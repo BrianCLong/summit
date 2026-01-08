@@ -6,8 +6,8 @@ import {
   type WeaponsDevelopment,
   ProgramStatus,
   type DevelopmentMilestone,
-  type TechnicalCapability
-} from './types.js';
+  type TechnicalCapability,
+} from "./types.js";
 
 export class WeaponsDevelopmentTracker {
   private programs: Map<string, WeaponsDevelopment>;
@@ -29,12 +29,13 @@ export class WeaponsDevelopmentTracker {
   }
 
   getProgramsByCountry(country: string): WeaponsDevelopment[] {
-    return Array.from(this.programs.values()).filter(p => p.country === country);
+    return Array.from(this.programs.values()).filter((p) => p.country === country);
   }
 
   getActivePrograms(): WeaponsDevelopment[] {
-    return Array.from(this.programs.values())
-      .filter(p => p.status === ProgramStatus.ACTIVE || p.status === ProgramStatus.COVERT);
+    return Array.from(this.programs.values()).filter(
+      (p) => p.status === ProgramStatus.ACTIVE || p.status === ProgramStatus.COVERT
+    );
   }
 
   assessProgramMaturity(programId: string): {
@@ -48,14 +49,14 @@ export class WeaponsDevelopmentTracker {
       return { maturity_level: 0, achieved_milestones: 0, total_milestones: 0 };
     }
 
-    const achieved = program.milestones.filter(m => m.achieved).length;
+    const achieved = program.milestones.filter((m) => m.achieved).length;
     const total = program.milestones.length;
     const maturity = total > 0 ? (achieved / total) * 100 : 0;
 
     return {
       maturity_level: maturity,
       achieved_milestones: achieved,
-      total_milestones: total
+      total_milestones: total,
     };
   }
 
@@ -66,16 +67,19 @@ export class WeaponsDevelopmentTracker {
     const capabilities: string[] = [];
     const tech = program.technical_capability;
 
-    if (tech.design_capability) capabilities.push('Design');
-    if (tech.production_capability) capabilities.push('Production');
-    if (tech.testing_capability) capabilities.push('Testing');
-    if (tech.deployment_capability) capabilities.push('Deployment');
-    if (tech.miniaturization) capabilities.push('Miniaturization');
+    if (tech.design_capability) capabilities.push("Design");
+    if (tech.production_capability) capabilities.push("Production");
+    if (tech.testing_capability) capabilities.push("Testing");
+    if (tech.deployment_capability) capabilities.push("Deployment");
+    if (tech.miniaturization) capabilities.push("Miniaturization");
 
     return capabilities;
   }
 
-  comparePrograms(programId1: string, programId2: string): {
+  comparePrograms(
+    programId1: string,
+    programId2: string
+  ): {
     more_advanced: string;
     capability_gap: string[];
   } {
@@ -83,17 +87,17 @@ export class WeaponsDevelopmentTracker {
     const p2 = this.programs.get(programId2);
 
     if (!p1 || !p2) {
-      return { more_advanced: 'unknown', capability_gap: [] };
+      return { more_advanced: "unknown", capability_gap: [] };
     }
 
     const caps1 = this.identifyKeyCapabilities(programId1);
     const caps2 = this.identifyKeyCapabilities(programId2);
 
-    const gap = caps1.filter(c => !caps2.includes(c));
+    const gap = caps1.filter((c) => !caps2.includes(c));
 
     return {
       more_advanced: caps1.length > caps2.length ? programId1 : programId2,
-      capability_gap: gap
+      capability_gap: gap,
     };
   }
 }

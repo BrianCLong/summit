@@ -74,16 +74,16 @@ paths:
                   type: boolean
                   default: false
       responses:
-        '200':
+        "200":
           description: Login successful
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthResponse'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '422':
-          $ref: '#/components/responses/ValidationError'
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "422":
+          $ref: "#/components/responses/ValidationError"
 
   /auth/refresh:
     post:
@@ -102,14 +102,14 @@ paths:
                   type: string
                   example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
       responses:
-        '200':
+        "200":
           description: Token refreshed successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthResponse'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
 
   /auth/logout:
     post:
@@ -117,7 +117,7 @@ paths:
       summary: User logout
       description: Invalidate current JWT token and refresh token
       responses:
-        '200':
+        "200":
           description: Logout successful
           content:
             application/json:
@@ -161,7 +161,7 @@ paths:
               type: string
           description: Filter by tags
       responses:
-        '200':
+        "200":
           description: List of graphs
           content:
             application/json:
@@ -171,9 +171,9 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/GraphSummary'
+                      $ref: "#/components/schemas/GraphSummary"
                   pagination:
-                    $ref: '#/components/schemas/Pagination'
+                    $ref: "#/components/schemas/Pagination"
 
     post:
       tags: [Graph Analytics]
@@ -184,16 +184,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateGraphRequest'
+              $ref: "#/components/schemas/CreateGraphRequest"
       responses:
-        '201':
+        "201":
           description: Graph created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Graph'
-        '422':
-          $ref: '#/components/responses/ValidationError'
+                $ref: "#/components/schemas/Graph"
+        "422":
+          $ref: "#/components/responses/ValidationError"
 
   /graphs/{graphId}:
     get:
@@ -208,14 +208,14 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
+        "200":
           description: Graph details
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Graph'
-        '404':
-          $ref: '#/components/responses/NotFoundError'
+                $ref: "#/components/schemas/Graph"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
 
     put:
       tags: [Graph Analytics]
@@ -233,18 +233,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateGraphRequest'
+              $ref: "#/components/schemas/UpdateGraphRequest"
       responses:
-        '200':
+        "200":
           description: Graph updated successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Graph'
-        '404':
-          $ref: '#/components/responses/NotFoundError'
-        '422':
-          $ref: '#/components/responses/ValidationError'
+                $ref: "#/components/schemas/Graph"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "422":
+          $ref: "#/components/responses/ValidationError"
 
     delete:
       tags: [Graph Analytics]
@@ -258,10 +258,10 @@ paths:
             type: string
             format: uuid
       responses:
-        '204':
+        "204":
           description: Graph deleted successfully
-        '404':
-          $ref: '#/components/responses/NotFoundError'
+        "404":
+          $ref: "#/components/responses/NotFoundError"
 
   /graphs/{graphId}/query:
     post:
@@ -285,25 +285,25 @@ paths:
               properties:
                 query:
                   type: string
-                  example: 'MATCH (n:Entity) RETURN n LIMIT 10'
+                  example: "MATCH (n:Entity) RETURN n LIMIT 10"
                 parameters:
                   type: object
                   additionalProperties: true
-                  example: { 'limit': 10 }
+                  example: { "limit": 10 }
                 includeMetrics:
                   type: boolean
                   default: false
       responses:
-        '200':
+        "200":
           description: Query executed successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/QueryResult'
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '404':
-          $ref: '#/components/responses/NotFoundError'
+                $ref: "#/components/schemas/QueryResult"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
 
   /graphs/{graphId}/entities:
     get:
@@ -340,7 +340,7 @@ paths:
             maximum: 100
             default: 20
       responses:
-        '200':
+        "200":
           description: List of entities
           content:
             application/json:
@@ -350,9 +350,9 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Entity'
+                      $ref: "#/components/schemas/Entity"
                   pagination:
-                    $ref: '#/components/schemas/Pagination'
+                    $ref: "#/components/schemas/Pagination"
 
     post:
       tags: [Entities]
@@ -370,14 +370,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateEntityRequest'
+              $ref: "#/components/schemas/CreateEntityRequest"
       responses:
-        '201':
+        "201":
           description: Entity created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Entity'
+                $ref: "#/components/schemas/Entity"
 
   /graphs/{graphId}/relationships:
     get:
@@ -407,14 +407,14 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
+        "200":
           description: List of relationships
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Relationship'
+                  $ref: "#/components/schemas/Relationship"
 
     post:
       tags: [Relationships]
@@ -432,14 +432,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateRelationshipRequest'
+              $ref: "#/components/schemas/CreateRelationshipRequest"
       responses:
-        '201':
+        "201":
           description: Relationship created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Relationship'
+                $ref: "#/components/schemas/Relationship"
 
   /graphs/{graphId}/insights:
     get:
@@ -468,14 +468,14 @@ paths:
             enum: [low, medium, high, critical]
           description: Filter insights by severity
       responses:
-        '200':
+        "200":
           description: Graph insights retrieved
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GraphInsightsResponse'
-        '404':
-          $ref: '#/components/responses/NotFoundError'
+                $ref: "#/components/schemas/GraphInsightsResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
 
   /graphs/{graphId}/exports:
     post:
@@ -494,16 +494,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GraphExportRequest'
+              $ref: "#/components/schemas/GraphExportRequest"
       responses:
-        '202':
+        "202":
           description: Export job accepted
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GraphExportJob'
-        '404':
-          $ref: '#/components/responses/NotFoundError'
+                $ref: "#/components/schemas/GraphExportJob"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
 
   /graphs/{graphId}/exports/{exportId}:
     get:
@@ -524,14 +524,14 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
+        "200":
           description: Export job status
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GraphExportJob'
-        '404':
-          $ref: '#/components/responses/NotFoundError'
+                $ref: "#/components/schemas/GraphExportJob"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
 
   # AI Enhancement Endpoints
   /ai/analyze:
@@ -563,15 +563,15 @@ paths:
                 parameters:
                   type: object
                   additionalProperties: true
-                  example: { 'algorithm': 'louvain', 'resolution': 1.0 }
+                  example: { "algorithm": "louvain", "resolution": 1.0 }
       responses:
-        '200':
+        "200":
           description: Analysis completed successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AnalysisResult'
-        '202':
+                $ref: "#/components/schemas/AnalysisResult"
+        "202":
           description: Analysis started, check status using job ID
           content:
             application/json:
@@ -598,12 +598,12 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
+        "200":
           description: Job status and results
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/JobStatus'
+                $ref: "#/components/schemas/JobStatus"
 
   # Real-time Collaboration
   /graphs/{graphId}/collaborators:
@@ -619,14 +619,14 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
+        "200":
           description: List of collaborators
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Collaborator'
+                  $ref: "#/components/schemas/Collaborator"
 
     post:
       tags: [Collaboration]
@@ -655,12 +655,12 @@ paths:
                   enum: [viewer, editor, admin]
                   example: editor
       responses:
-        '201':
+        "201":
           description: Collaborator added successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Collaborator'
+                $ref: "#/components/schemas/Collaborator"
 
   # System Health and Monitoring
   /health:
@@ -670,12 +670,12 @@ paths:
       description: System health status
       security: []
       responses:
-        '200':
+        "200":
           description: System is healthy
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HealthStatus'
+                $ref: "#/components/schemas/HealthStatus"
 
   /metrics:
     get:
@@ -684,7 +684,7 @@ paths:
       description: Prometheus-compatible metrics endpoint
       security: []
       responses:
-        '200':
+        "200":
           description: Metrics data
           content:
             text/plain:
@@ -718,7 +718,7 @@ components:
           description: Token expiration time in seconds
           example: 3600
         user:
-          $ref: '#/components/schemas/User'
+          $ref: "#/components/schemas/User"
 
     User:
       type: object
@@ -753,10 +753,10 @@ components:
           format: uuid
         name:
           type: string
-          example: 'Threat Analysis Q4 2024'
+          example: "Threat Analysis Q4 2024"
         description:
           type: string
-          example: 'Comprehensive threat landscape analysis'
+          example: "Comprehensive threat landscape analysis"
         nodeCount:
           type: integer
           example: 1250
@@ -767,7 +767,7 @@ components:
           type: array
           items:
             type: string
-          example: ['threat-intel', 'q4-2024']
+          example: ["threat-intel", "q4-2024"]
         createdAt:
           type: string
           format: date-time
@@ -797,7 +797,7 @@ components:
 
     Graph:
       allOf:
-        - $ref: '#/components/schemas/GraphSummary'
+        - $ref: "#/components/schemas/GraphSummary"
         - type: object
           properties:
             configuration:
@@ -827,7 +827,7 @@ components:
                   type: number
                   format: float
             governance:
-              $ref: '#/components/schemas/GraphGovernance'
+              $ref: "#/components/schemas/GraphGovernance"
 
     GraphGovernance:
       type: object
@@ -853,7 +853,7 @@ components:
           type: array
           items:
             type: string
-          example: ['gdpr', 'cmmc']
+          example: ["gdpr", "cmmc"]
         dataQuality:
           type: object
           properties:
@@ -878,16 +878,16 @@ components:
           type: string
           minLength: 1
           maxLength: 255
-          example: 'New Investigation'
+          example: "New Investigation"
         description:
           type: string
           maxLength: 1000
-          example: 'Investigation into recent security incidents'
+          example: "Investigation into recent security incidents"
         tags:
           type: array
           items:
             type: string
-          example: ['security', 'investigation']
+          example: ["security", "investigation"]
         configuration:
           type: object
           properties:
@@ -921,20 +921,20 @@ components:
           format: uuid
         type:
           type: string
-          example: 'Person'
+          example: "Person"
         properties:
           type: object
           additionalProperties: true
           example:
-            name: 'John Doe'
-            email: 'john.doe@example.com'
-            department: 'Engineering'
+            name: "John Doe"
+            email: "john.doe@example.com"
+            department: "Engineering"
         metadata:
           type: object
           properties:
             source:
               type: string
-              example: 'OSINT'
+              example: "OSINT"
             confidence:
               type: number
               format: float
@@ -955,7 +955,7 @@ components:
           items:
             type: string
           description: Domain-specific labels applied to the entity
-          example: ['VIP', 'watchlist']
+          example: ["VIP", "watchlist"]
 
     CreateEntityRequest:
       type: object
@@ -963,13 +963,13 @@ components:
       properties:
         type:
           type: string
-          example: 'Person'
+          example: "Person"
         properties:
           type: object
           additionalProperties: true
           example:
-            name: 'John Doe'
-            email: 'john.doe@example.com'
+            name: "John Doe"
+            email: "john.doe@example.com"
         metadata:
           type: object
           properties:
@@ -989,7 +989,7 @@ components:
           format: uuid
         type:
           type: string
-          example: 'KNOWS'
+          example: "KNOWS"
         sourceId:
           type: string
           format: uuid
@@ -1000,8 +1000,8 @@ components:
           type: object
           additionalProperties: true
           example:
-            relationship_type: 'colleague'
-            since: '2020-01-15'
+            relationship_type: "colleague"
+            since: "2020-01-15"
         metadata:
           type: object
           properties:
@@ -1022,7 +1022,7 @@ components:
       properties:
         type:
           type: string
-          example: 'KNOWS'
+          example: "KNOWS"
         sourceId:
           type: string
           format: uuid
@@ -1068,10 +1068,10 @@ components:
           format: uuid
         summary:
           type: string
-          example: 'Community detection identified 4 cohesive clusters with high internal density.'
+          example: "Community detection identified 4 cohesive clusters with high internal density."
         analysisType:
           type: string
-          example: 'community_detection'
+          example: "community_detection"
         results:
           type: object
           additionalProperties: true
@@ -1088,7 +1088,7 @@ components:
               description:
                 type: string
         coverage:
-          $ref: '#/components/schemas/GraphCoverage'
+          $ref: "#/components/schemas/GraphCoverage"
         qualityScore:
           type: number
           format: float
@@ -1143,10 +1143,10 @@ components:
           format: uuid
         title:
           type: string
-          example: 'Coordinated activity between high-risk accounts'
+          example: "Coordinated activity between high-risk accounts"
         summary:
           type: string
-          example: 'Detected a tightly connected cluster of high-risk accounts sharing devices and network infrastructure.'
+          example: "Detected a tightly connected cluster of high-risk accounts sharing devices and network infrastructure."
         severity:
           type: string
           enum: [low, medium, high, critical]
@@ -1159,14 +1159,14 @@ components:
           type: array
           items:
             type: string
-          example: ['fraud', 'network', 'priority']
+          example: ["fraud", "network", "priority"]
         relatedEntities:
           type: array
           items:
-            $ref: '#/components/schemas/GraphInsightEntityRef'
+            $ref: "#/components/schemas/GraphInsightEntityRef"
         remediation:
           type: string
-          example: 'Quarantine devices and rerun enrichment checks on linked accounts.'
+          example: "Quarantine devices and rerun enrichment checks on linked accounts."
         generatedAt:
           type: string
           format: date-time
@@ -1180,9 +1180,9 @@ components:
         insights:
           type: array
           items:
-            $ref: '#/components/schemas/GraphInsight'
+            $ref: "#/components/schemas/GraphInsight"
         coverage:
-          $ref: '#/components/schemas/GraphCoverage'
+          $ref: "#/components/schemas/GraphCoverage"
         generatedAt:
           type: string
           format: date-time
@@ -1219,7 +1219,7 @@ components:
           type: boolean
           default: true
         filters:
-          $ref: '#/components/schemas/GraphExportFilters'
+          $ref: "#/components/schemas/GraphExportFilters"
         notificationEmail:
           type: string
           format: email
@@ -1255,7 +1255,7 @@ components:
         recordCount:
           type: integer
         filters:
-          $ref: '#/components/schemas/GraphExportFilters'
+          $ref: "#/components/schemas/GraphExportFilters"
         message:
           type: string
 
@@ -1274,7 +1274,7 @@ components:
           minimum: 0
           maximum: 1
         results:
-          $ref: '#/components/schemas/AnalysisResult'
+          $ref: "#/components/schemas/AnalysisResult"
         error:
           type: string
         createdAt:
@@ -1320,11 +1320,11 @@ components:
           type: object
           properties:
             database:
-              $ref: '#/components/schemas/ServiceHealth'
+              $ref: "#/components/schemas/ServiceHealth"
             redis:
-              $ref: '#/components/schemas/ServiceHealth'
+              $ref: "#/components/schemas/ServiceHealth"
             neo4j:
-              $ref: '#/components/schemas/ServiceHealth'
+              $ref: "#/components/schemas/ServiceHealth"
 
     ServiceHealth:
       type: object
@@ -1384,36 +1384,36 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           example:
             error:
               code: UNAUTHORIZED
               message: Invalid or expired token
-            timestamp: '2024-01-15T10:30:00Z'
+            timestamp: "2024-01-15T10:30:00Z"
 
     ForbiddenError:
       description: Insufficient permissions
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           example:
             error:
               code: FORBIDDEN
               message: Insufficient permissions to access this resource
-            timestamp: '2024-01-15T10:30:00Z'
+            timestamp: "2024-01-15T10:30:00Z"
 
     NotFoundError:
       description: Resource not found
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           example:
             error:
               code: NOT_FOUND
               message: The requested resource was not found
-            timestamp: '2024-01-15T10:30:00Z'
+            timestamp: "2024-01-15T10:30:00Z"
 
     ValidationError:
       description: Validation error in request data
@@ -1421,7 +1421,7 @@ components:
         application/json:
           schema:
             allOf:
-              - $ref: '#/components/schemas/Error'
+              - $ref: "#/components/schemas/Error"
               - type: object
                 properties:
                   error:
@@ -1444,31 +1444,31 @@ components:
                   message: must be a valid email address
                 - field: password
                   message: must be at least 8 characters long
-            timestamp: '2024-01-15T10:30:00Z'
+            timestamp: "2024-01-15T10:30:00Z"
 
     BadRequestError:
       description: Bad request
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           example:
             error:
               code: BAD_REQUEST
               message: Invalid request format or parameters
-            timestamp: '2024-01-15T10:30:00Z'
+            timestamp: "2024-01-15T10:30:00Z"
 
     InternalServerError:
       description: Internal server error
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           example:
             error:
               code: INTERNAL_SERVER_ERROR
               message: An unexpected error occurred
-            timestamp: '2024-01-15T10:30:00Z'
+            timestamp: "2024-01-15T10:30:00Z"
 
 tags:
   - name: Authentication

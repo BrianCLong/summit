@@ -85,23 +85,26 @@ export function CanvasGraphRenderer({
   // Worker Initialization
   useEffect(() => {
     if (!workerRef.current) {
-      workerRef.current = new Worker(new URL('./simulation.worker.ts', import.meta.url), {
-        type: 'module',
-      })
+      workerRef.current = new Worker(
+        new URL('./simulation.worker.ts', import.meta.url),
+        {
+          type: 'module',
+        }
+      )
 
-      workerRef.current.onmessage = (event) => {
+      workerRef.current.onmessage = event => {
         if (event.data.type === 'tick') {
-            const updatedNodes = event.data.nodes as WorkerNode[]
-            const updateMap = new Map(updatedNodes.map(n => [n.id, n]))
+          const updatedNodes = event.data.nodes as WorkerNode[]
+          const updateMap = new Map(updatedNodes.map(n => [n.id, n]))
 
-            nodesRef.current.forEach(node => {
-                const updated = updateMap.get(node.id)
-                if (updated) {
-                    node.x = updated.x
-                    node.y = updated.y
-                }
-            })
-            requestAnimationFrame(render)
+          nodesRef.current.forEach(node => {
+            const updated = updateMap.get(node.id)
+            if (updated) {
+              node.x = updated.x
+              node.y = updated.y
+            }
+          })
+          requestAnimationFrame(render)
         }
       }
     }
@@ -109,30 +112,40 @@ export function CanvasGraphRenderer({
     const { width, height } = dimensions
 
     // Send init message
-    const workerNodes = nodesRef.current.map(n => ({ id: n.id, x: n.x, y: n.y }))
+    const workerNodes = nodesRef.current.map(n => ({
+      id: n.id,
+      x: n.x,
+      y: n.y,
+    }))
     const workerLinks = relationships.map(r => ({
-        id: r.id,
-        source: r.sourceId,
-        target: r.targetId
+      id: r.id,
+      source: r.sourceId,
+      target: r.targetId,
     }))
 
     workerRef.current.postMessage({
-        type: 'init',
-        nodes: workerNodes,
-        links: workerLinks,
-        width,
-        height,
-        layoutType: layout.type
+      type: 'init',
+      nodes: workerNodes,
+      links: workerLinks,
+      width,
+      height,
+      layoutType: layout.type,
     })
 
     return () => {
-        // Fix: Terminate worker to prevent memory leak
-        if (workerRef.current) {
-            workerRef.current.terminate()
-            workerRef.current = null
-        }
+      // Fix: Terminate worker to prevent memory leak
+      if (workerRef.current) {
+        workerRef.current.terminate()
+        workerRef.current = null
+      }
     }
-  }, [entitiesHash, relationships.length, layout.type, dimensions.width, dimensions.height])
+  }, [
+    entitiesHash,
+    relationships.length,
+    layout.type,
+    dimensions.width,
+    dimensions.height,
+  ])
 
   // Calculate FPS
   useEffect(() => {
@@ -141,7 +154,11 @@ export function CanvasGraphRenderer({
     const loop = (time: number) => {
       frameCountRef.current++
       if (time - lastTimeRef.current >= 1000) {
-        setFps(Math.round((frameCountRef.current * 1000) / (time - lastTimeRef.current)))
+        setFps(
+          Math.round(
+            (frameCountRef.current * 1000) / (time - lastTimeRef.current)
+          )
+        )
         frameCountRef.current = 0
         lastTimeRef.current = time
       }
@@ -190,51 +207,58 @@ export function CanvasGraphRenderer({
     ctx.globalAlpha = 0.6
 
     if (transform.k > 0.5) {
-        ctx.beginPath()
-        currentProps.relationships.forEach(rel => {
-            const source = nodeMapRef.current.get(rel.sourceId)
-            const target = nodeMapRef.current.get(rel.targetId)
-            if (source && target && source.x && target.x) {
-                ctx.moveTo(source.x, source.y)
-                ctx.lineTo(target.x, target.y)
-            }
-        })
-        ctx.stroke()
+      ctx.beginPath()
+      currentProps.relationships.forEach(rel => {
+        const source = nodeMapRef.current.get(rel.sourceId)
+        const target = nodeMapRef.current.get(rel.targetId)
+        if (source && target && source.x && target.x) {
+          ctx.moveTo(source.x, source.y)
+          ctx.lineTo(target.x, target.y)
+        }
+      })
+      ctx.stroke()
     }
     ctx.globalAlpha = 1.0
 
     // Nodes
     nodesRef.current.forEach(node => {
-        if (!node.x) return
+      if (!node.x) return
 
-        const screenX = node.x * transform.k + transform.x
-        const screenY = node.y * transform.k + transform.y
-        if (screenX < -50 || screenX > width + 50 || screenY < -50 || screenY > height + 50) return
+      const screenX = node.x * transform.k + transform.x
+      const screenY = node.y * transform.k + transform.y
+      if (
+        screenX < -50 ||
+        screenX > width + 50 ||
+        screenY < -50 ||
+        screenY > height + 50
+      )
+        return
 
-        const r = 15 + (node.entity.confidence || 0) * 10
-        const isSelected = selectedEntityId === node.id
+      const r = 15 + (node.entity.confidence || 0) * 10
+      const isSelected = selectedEntityId === node.id
 
-        ctx.beginPath()
-        ctx.arc(node.x, node.y, r, 0, 2 * Math.PI)
-        ctx.fillStyle = ENTITY_COLORS[node.entity.type] || ENTITY_COLORS.DEFAULT
-        ctx.fill()
+      ctx.beginPath()
+      ctx.arc(node.x, node.y, r, 0, 2 * Math.PI)
+      ctx.fillStyle = ENTITY_COLORS[node.entity.type] || ENTITY_COLORS.DEFAULT
+      ctx.fill()
 
-        if (isSelected) {
-            ctx.strokeStyle = '#fbbf24'
-            ctx.lineWidth = 3
-            ctx.stroke()
-        }
+      if (isSelected) {
+        ctx.strokeStyle = '#fbbf24'
+        ctx.lineWidth = 3
+        ctx.stroke()
+      }
 
-        if (transform.k > 0.8 || nodesRef.current.length < 500 || isSelected) {
-            ctx.fillStyle = '#333'
-            ctx.font = 'bold 11px sans-serif'
-            ctx.textAlign = 'center'
-            ctx.textBaseline = 'middle'
-            const label = node.entity.name.length > 15
-                ? `${node.entity.name.slice(0, 15)}...`
-                : node.entity.name
-            ctx.fillText(label, node.x, node.y + r + 12)
-        }
+      if (transform.k > 0.8 || nodesRef.current.length < 500 || isSelected) {
+        ctx.fillStyle = '#333'
+        ctx.font = 'bold 11px sans-serif'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        const label =
+          node.entity.name.length > 15
+            ? `${node.entity.name.slice(0, 15)}...`
+            : node.entity.name
+        ctx.fillText(label, node.x, node.y + r + 12)
+      }
     })
 
     ctx.restore()
@@ -244,7 +268,6 @@ export function CanvasGraphRenderer({
     requestAnimationFrame(render)
   }, [selectedEntityId])
 
-
   // Interaction Setup
   useEffect(() => {
     if (!canvasRef.current) return
@@ -253,7 +276,7 @@ export function CanvasGraphRenderer({
     // Zoom
     const zoomBehavior = zoom<HTMLCanvasElement, unknown>()
       .scaleExtent([0.1, 4])
-      .on('zoom', (event) => {
+      .on('zoom', event => {
         transformRef.current = event.transform
         requestAnimationFrame(render)
       })
@@ -281,61 +304,63 @@ export function CanvasGraphRenderer({
 
     // Drag behavior
     const dragBehavior = drag<HTMLCanvasElement, unknown>()
-        .subject((event) => {
-            const rect = canvas.getBoundingClientRect()
-            const transform = transformRef.current
-            const x = (event.sourceEvent.clientX - rect.left - transform.x) / transform.k
-            const y = (event.sourceEvent.clientY - rect.top - transform.y) / transform.k
+      .subject(event => {
+        const rect = canvas.getBoundingClientRect()
+        const transform = transformRef.current
+        const x =
+          (event.sourceEvent.clientX - rect.left - transform.x) / transform.k
+        const y =
+          (event.sourceEvent.clientY - rect.top - transform.y) / transform.k
 
-             for (let i = nodesRef.current.length - 1; i >= 0; i--) {
-                const node = nodesRef.current[i]
-                const r = 15 + (node.entity.confidence || 0) * 10
-                const dx = x - node.x
-                const dy = y - node.y
-                if (dx * dx + dy * dy < r * r) {
-                    return node
-                }
-            }
-            return null
-        })
-        .on('start', (event) => {
-             if (event.subject) {
-                 workerRef.current?.postMessage({
-                     type: 'drag',
-                     nodeId: event.subject.id,
-                     x: event.subject.x,
-                     y: event.subject.y
-                 })
-             }
-        })
-        .on('drag', (event) => {
-            if (event.subject) {
-                const transform = transformRef.current
+        for (let i = nodesRef.current.length - 1; i >= 0; i--) {
+          const node = nodesRef.current[i]
+          const r = 15 + (node.entity.confidence || 0) * 10
+          const dx = x - node.x
+          const dy = y - node.y
+          if (dx * dx + dy * dy < r * r) {
+            return node
+          }
+        }
+        return null
+      })
+      .on('start', event => {
+        if (event.subject) {
+          workerRef.current?.postMessage({
+            type: 'drag',
+            nodeId: event.subject.id,
+            x: event.subject.x,
+            y: event.subject.y,
+          })
+        }
+      })
+      .on('drag', event => {
+        if (event.subject) {
+          const transform = transformRef.current
 
-                // Fix: Adjust drag delta by zoom scale to move at correct speed
-                event.subject.x += event.dx / transform.k
-                event.subject.y += event.dy / transform.k
+          // Fix: Adjust drag delta by zoom scale to move at correct speed
+          event.subject.x += event.dx / transform.k
+          event.subject.y += event.dy / transform.k
 
-                requestAnimationFrame(render)
+          requestAnimationFrame(render)
 
-                workerRef.current?.postMessage({
-                     type: 'drag',
-                     nodeId: event.subject.id,
-                     x: event.subject.x,
-                     y: event.subject.y
-                 })
-            }
-        })
-        .on('end', (event) => {
-             if (event.subject) {
-                  workerRef.current?.postMessage({
-                     type: 'drag',
-                     nodeId: event.subject.id,
-                     x: null,
-                     y: null
-                 })
-             }
-        })
+          workerRef.current?.postMessage({
+            type: 'drag',
+            nodeId: event.subject.id,
+            x: event.subject.x,
+            y: event.subject.y,
+          })
+        }
+      })
+      .on('end', event => {
+        if (event.subject) {
+          workerRef.current?.postMessage({
+            type: 'drag',
+            nodeId: event.subject.id,
+            x: null,
+            y: null,
+          })
+        }
+      })
 
     select(canvas).call(dragBehavior)
     canvas.addEventListener('click', handleClick)
@@ -351,11 +376,12 @@ export function CanvasGraphRenderer({
         ref={canvasRef}
         className="block w-full h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800"
         style={{
-            background: 'radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.05) 0%, transparent 50%)'
+          background:
+            'radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.05) 0%, transparent 50%)',
         }}
       />
-       {/* Debug overlay */}
-       <div className="absolute top-4 right-4 flex flex-col gap-2 pointer-events-none">
+      {/* Debug overlay */}
+      <div className="absolute top-4 right-4 flex flex-col gap-2 pointer-events-none">
         <div className="bg-background/90 backdrop-blur-sm border rounded-lg p-2 shadow-sm pointer-events-auto">
           <div className="flex justify-between items-center mb-1 gap-2">
             <div className="text-xs font-medium text-muted-foreground">

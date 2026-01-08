@@ -3,6 +3,7 @@
 This document outlines the architecture and implementation plan to deliver the Switchboard graph, workflow, and compliance capabilities requested in Tracks A–G. The goal is to stage the work into incremental, testable slices that respect the existing Summit/IntelGraph patterns.
 
 ## Scope Highlights
+
 - Graph entities for people, roles, systems, approvals, changes, and incidents with PostgreSQL migrations plus Neo4j alignment.
 - Switchboard UI surfaces: approvals inbox, timeline, and graph slice view.
 - Workflow pipeline: intake (form + chat), OPA policy evaluation, multi-approval, execution hooks (webhooks/scripts/tickets), receipt generation, and event-bus fanout.
@@ -12,12 +13,14 @@ This document outlines the architecture and implementation plan to deliver the S
 - Trust Pack evidence/receipt schema, pricing telemetry, developer SDK alignment, and golden-path install/readiness expectations.
 
 ## Delivery Principles
+
 - **Event-first**: emit immutable workflow events and receipts to the provenance ledger, then project to read models for Switchboard surfaces.
 - **Policy-first**: centralize OPA bundles and ABAC enforcement for both runtime execution and Flow Studio edits.
 - **Testable slices**: each track adds unit, integration, and e2e coverage plus seed data to enable smoke validation.
 - **SLO-backed**: instrument latency/error-rate metrics with Prometheus/Grafana alerts; ensure dashboards ship with defaults.
 
 ## Near-Term Implementation Steps
+
 1. **Schema foundation (Track A)**
    - Add PostgreSQL migrations under `server/db/migrations/postgres` for entities: `entities_people`, `entities_roles`, `entities_systems`, `workflow_changes`, `workflow_approvals`, `incidents`, and junction tables for relationships.
    - Extend `server/db/seeds` with representative graph slices for approvals and incidents.
@@ -67,11 +70,13 @@ This document outlines the architecture and implementation plan to deliver the S
    - Add examples, quickstart, and 60-minute validation script/workshop.
 
 ## Testing & Observability
+
 - Add unit tests for schema models, policy resolution, and connector health checks.
 - Integration/e2e coverage for Switchboard flows, Flow Studio build/edit/simulate, and playbook installs.
 - Prometheus/Grafana configs under `observability/infrastructure` to track p95 latency (<1.5s) and p99 error rate (<0.5%) with alerts.
 - Receipt integrity tests and compliance checks for audit queries.
 
 ## Forward-Looking Enhancements
+
 - Introduce verifiable compute receipts using signed Merkle proofs per workflow step to strengthen provable-audit guarantees.
 - Consider WASM sandboxing for execution hooks to harden multi-tenant isolation while preserving extension velocity.

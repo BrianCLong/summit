@@ -5,24 +5,24 @@
 
 export class SarcasmDetector {
   private sarcasmIndicators = [
-    'yeah right',
-    'oh great',
-    'just what i needed',
-    'perfect timing',
-    'brilliant',
-    'genius',
-    'wonderful',
-    'fantastic',
-    'terrific',
-    'amazing',
-    'incredible',
-    'outstanding',
+    "yeah right",
+    "oh great",
+    "just what i needed",
+    "perfect timing",
+    "brilliant",
+    "genius",
+    "wonderful",
+    "fantastic",
+    "terrific",
+    "amazing",
+    "incredible",
+    "outstanding",
   ];
 
   private punctuationPatterns = [
-    /!{2,}/,  // Multiple exclamation marks
-    /\?{2,}/,  // Multiple question marks
-    /\.{3,}/,  // Ellipsis
+    /!{2,}/, // Multiple exclamation marks
+    /\?{2,}/, // Multiple question marks
+    /\.{3,}/, // Ellipsis
   ];
 
   async detectSarcasm(text: string, sentimentScore: number): Promise<number> {
@@ -30,14 +30,14 @@ export class SarcasmDetector {
     const lowerText = text.toLowerCase();
 
     // Check for sarcasm indicators
-    const indicatorCount = this.sarcasmIndicators.filter(
-      indicator => lowerText.includes(indicator)
+    const indicatorCount = this.sarcasmIndicators.filter((indicator) =>
+      lowerText.includes(indicator)
     ).length;
     sarcasmScore += indicatorCount * 0.15;
 
     // Check for excessive punctuation
-    const punctuationCount = this.punctuationPatterns.filter(
-      pattern => pattern.test(text)
+    const punctuationCount = this.punctuationPatterns.filter((pattern) =>
+      pattern.test(text)
     ).length;
     sarcasmScore += punctuationCount * 0.1;
 
@@ -79,18 +79,18 @@ export class SarcasmDetector {
   }
 
   private hasPositiveWords(text: string): boolean {
-    const positiveWords = ['great', 'excellent', 'wonderful', 'fantastic', 'perfect', 'brilliant'];
-    return positiveWords.some(word => text.includes(word));
+    const positiveWords = ["great", "excellent", "wonderful", "fantastic", "perfect", "brilliant"];
+    return positiveWords.some((word) => text.includes(word));
   }
 
   private hasExaggeration(text: string): boolean {
-    const exaggerationWords = ['absolutely', 'totally', 'completely', 'utterly', 'extremely'];
-    return exaggerationWords.some(word => text.includes(word));
+    const exaggerationWords = ["absolutely", "totally", "completely", "utterly", "extremely"];
+    return exaggerationWords.some((word) => text.includes(word));
   }
 
   private hasContradiction(text: string): boolean {
-    const contradictionWords = ['but', 'however', 'although', 'despite', 'yet', 'nevertheless'];
-    return contradictionWords.some(word => text.includes(word));
+    const contradictionWords = ["but", "however", "although", "despite", "yet", "nevertheless"];
+    return contradictionWords.some((word) => text.includes(word));
   }
 
   private hasUnexpectedPositivity(text: string, sentimentScore: number): boolean {

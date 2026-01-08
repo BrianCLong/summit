@@ -1,11 +1,11 @@
-import express, { Request, Response } from 'express';
-import bodyParser from 'body-parser';
+import express, { Request, Response } from "express";
+import bodyParser from "body-parser";
 
 export interface HumanReviewTask {
   taskId: string;
   workflowId: string;
   data: unknown; // Data to be reviewed
-  status: 'pending' | 'approved' | 'rejected';
+  status: "pending" | "approved" | "rejected";
   reviewerId?: string;
   decision?: string; // Reason for decision
 }
@@ -16,13 +16,13 @@ export class HITLOrchestrator {
 
   constructor() {
     this.app = express();
-    this.app.use(bodyParser.json({ limit: '1mb' }));
+    this.app.use(bodyParser.json({ limit: "1mb" }));
     this.tasks = new Map();
 
-    this.app.post('/tasks/create', this.createTask.bind(this));
-    this.app.post('/tasks/review/:taskId', this.reviewTask.bind(this));
-    this.app.get('/tasks/:taskId', this.getTask.bind(this));
-    this.app.get('/tasks', this.getAllTasks.bind(this));
+    this.app.post("/tasks/create", this.createTask.bind(this));
+    this.app.post("/tasks/review/:taskId", this.reviewTask.bind(this));
+    this.app.get("/tasks/:taskId", this.getTask.bind(this));
+    this.app.get("/tasks", this.getAllTasks.bind(this));
   }
 
   private createTask(req: Request, res: Response) {
@@ -32,7 +32,7 @@ export class HITLOrchestrator {
       taskId,
       workflowId,
       data,
-      status: 'pending',
+      status: "pending",
     };
     this.tasks.set(taskId, newTask);
     res.status(201).json(newTask);
@@ -44,12 +44,12 @@ export class HITLOrchestrator {
     const task = this.tasks.get(taskId);
 
     if (!task) {
-      return res.status(404).send('Task not found');
+      return res.status(404).send("Task not found");
     }
 
     task.reviewerId = reviewerId;
     task.decision = decision;
-    task.status = decision === 'approved' ? 'approved' : 'rejected';
+    task.status = decision === "approved" ? "approved" : "rejected";
     res.status(200).json(task);
   }
 
@@ -57,7 +57,7 @@ export class HITLOrchestrator {
     const { taskId } = req.params;
     const task = this.tasks.get(taskId);
     if (!task) {
-      return res.status(404).send('Task not found');
+      return res.status(404).send("Task not found");
     }
     res.status(200).json(task);
   }

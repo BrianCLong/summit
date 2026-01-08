@@ -4,34 +4,34 @@
  * PII detection, masking, and anonymization utilities
  */
 
-import { createHash } from 'node:crypto';
-import { z } from 'zod';
+import { createHash } from "node:crypto";
+import { z } from "zod";
 
 /**
  * PII types that can be detected and anonymized
  */
 export type PIIType =
-  | 'email'
-  | 'phone'
-  | 'ssn'
-  | 'credit_card'
-  | 'ip_address'
-  | 'name'
-  | 'address'
-  | 'date_of_birth'
-  | 'passport'
-  | 'drivers_license';
+  | "email"
+  | "phone"
+  | "ssn"
+  | "credit_card"
+  | "ip_address"
+  | "name"
+  | "address"
+  | "date_of_birth"
+  | "passport"
+  | "drivers_license";
 
 /**
  * Anonymization strategy
  */
 export type AnonymizationStrategy =
-  | 'hash'
-  | 'mask'
-  | 'redact'
-  | 'generalize'
-  | 'pseudonymize'
-  | 'tokenize';
+  | "hash"
+  | "mask"
+  | "redact"
+  | "generalize"
+  | "pseudonymize"
+  | "tokenize";
 
 /**
  * PII detection result
@@ -62,14 +62,14 @@ export interface AnonymizationRule {
  * Default anonymization rules
  */
 export const DEFAULT_RULES: AnonymizationRule[] = [
-  { type: 'email', strategy: 'mask', options: { preserveFormat: true } },
-  { type: 'phone', strategy: 'mask', options: { preserveLength: true, maskChar: '*' } },
-  { type: 'ssn', strategy: 'redact' },
-  { type: 'credit_card', strategy: 'mask', options: { preserveLength: true } },
-  { type: 'ip_address', strategy: 'generalize' },
-  { type: 'name', strategy: 'pseudonymize' },
-  { type: 'address', strategy: 'generalize' },
-  { type: 'date_of_birth', strategy: 'generalize' },
+  { type: "email", strategy: "mask", options: { preserveFormat: true } },
+  { type: "phone", strategy: "mask", options: { preserveLength: true, maskChar: "*" } },
+  { type: "ssn", strategy: "redact" },
+  { type: "credit_card", strategy: "mask", options: { preserveLength: true } },
+  { type: "ip_address", strategy: "generalize" },
+  { type: "name", strategy: "pseudonymize" },
+  { type: "address", strategy: "generalize" },
+  { type: "date_of_birth", strategy: "generalize" },
 ];
 
 /**
@@ -82,7 +82,8 @@ const PII_PATTERNS: Record<PIIType, RegExp> = {
   credit_card: /\b(?:\d{4}[-\s]?){3}\d{4}\b/g,
   ip_address: /\b(?:\d{1,3}\.){3}\d{1,3}\b/g,
   name: /\b[A-Z][a-z]+\s+[A-Z][a-z]+\b/g,
-  address: /\d+\s+[\w\s]+(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Drive|Dr|Lane|Ln|Way|Court|Ct)\b/gi,
+  address:
+    /\d+\s+[\w\s]+(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Drive|Dr|Lane|Ln|Way|Court|Ct)\b/gi,
   date_of_birth: /\b(?:\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}|\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2})\b/g,
   passport: /\b[A-Z]{1,2}\d{6,9}\b/g,
   drivers_license: /\b[A-Z]{1,2}\d{5,8}\b/g,
@@ -119,10 +120,10 @@ export function detectPII(text: string, types?: PIIType[]): PIIDetection[] {
 /**
  * Hash a value for pseudonymization
  */
-export function hashValue(value: string, salt = ''): string {
-  return createHash('sha256')
+export function hashValue(value: string, salt = ""): string {
+  return createHash("sha256")
     .update(value + salt)
-    .digest('hex')
+    .digest("hex")
     .substring(0, 16);
 }
 
@@ -138,12 +139,7 @@ export function maskValue(
     preserveEnd?: number;
   } = {}
 ): string {
-  const {
-    maskChar = '*',
-    preserveLength = true,
-    preserveStart = 0,
-    preserveEnd = 0,
-  } = options;
+  const { maskChar = "*", preserveLength = true, preserveStart = 0, preserveEnd = 0 } = options;
 
   if (value.length <= preserveStart + preserveEnd) {
     return maskChar.repeat(value.length);
@@ -151,9 +147,7 @@ export function maskValue(
 
   const start = value.substring(0, preserveStart);
   const end = value.substring(value.length - preserveEnd);
-  const maskLength = preserveLength
-    ? value.length - preserveStart - preserveEnd
-    : 8;
+  const maskLength = preserveLength ? value.length - preserveStart - preserveEnd : 8;
 
   return start + maskChar.repeat(maskLength) + end;
 }
@@ -162,14 +156,14 @@ export function maskValue(
  * Mask an email address
  */
 export function maskEmail(email: string): string {
-  const [local, domain] = email.split('@');
+  const [local, domain] = email.split("@");
   if (!domain) return maskValue(email);
 
   const maskedLocal = maskValue(local, { preserveStart: 1, preserveEnd: 1 });
-  const [domainName, tld] = domain.split('.');
+  const [domainName, tld] = domain.split(".");
   const maskedDomain = domainName ? maskValue(domainName, { preserveStart: 1 }) : domain;
 
-  return `${maskedLocal}@${maskedDomain}.${tld || 'com'}`;
+  return `${maskedLocal}@${maskedDomain}.${tld || "com"}`;
 }
 
 /**
@@ -177,30 +171,30 @@ export function maskEmail(email: string): string {
  */
 export function generalizeValue(value: string, type: PIIType): string {
   switch (type) {
-    case 'ip_address': {
-      const parts = value.split('.');
+    case "ip_address": {
+      const parts = value.split(".");
       if (parts.length === 4) {
         return `${parts[0]}.${parts[1]}.0.0`;
       }
       return value;
     }
 
-    case 'date_of_birth': {
+    case "date_of_birth": {
       // Keep only the year
       const yearMatch = value.match(/\d{4}/);
       if (yearMatch) {
         return `${yearMatch[0]}-XX-XX`;
       }
-      return 'XXXX-XX-XX';
+      return "XXXX-XX-XX";
     }
 
-    case 'address': {
+    case "address": {
       // Keep only city-level
-      return '[Address Generalized]';
+      return "[Address Generalized]";
     }
 
     default:
-      return '[Generalized]';
+      return "[Generalized]";
   }
 }
 
@@ -233,14 +227,14 @@ export function anonymizeValue(
   value: string,
   type: PIIType,
   strategy: AnonymizationStrategy,
-  options: AnonymizationRule['options'] = {}
+  options: AnonymizationRule["options"] = {}
 ): string {
   switch (strategy) {
-    case 'hash':
+    case "hash":
       return hashValue(value, options.salt);
 
-    case 'mask':
-      if (type === 'email') {
+    case "mask":
+      if (type === "email") {
         return maskEmail(value);
       }
       return maskValue(value, {
@@ -250,20 +244,20 @@ export function anonymizeValue(
         preserveEnd: 2,
       });
 
-    case 'redact':
+    case "redact":
       return `[REDACTED-${type.toUpperCase()}]`;
 
-    case 'generalize':
+    case "generalize":
       return generalizeValue(value, type);
 
-    case 'pseudonymize':
+    case "pseudonymize":
       return `Person_${hashValue(value, options.salt).substring(0, 8)}`;
 
-    case 'tokenize':
+    case "tokenize":
       return tokenizeValue(value, type);
 
     default:
-      return '[ANONYMIZED]';
+      return "[ANONYMIZED]";
   }
 }
 
@@ -274,7 +268,7 @@ export class DataAnonymizer {
   private rules: Map<PIIType, AnonymizationRule>;
 
   constructor(rules: AnonymizationRule[] = DEFAULT_RULES) {
-    this.rules = new Map(rules.map(r => [r.type, r]));
+    this.rules = new Map(rules.map((r) => [r.type, r]));
   }
 
   /**
@@ -330,7 +324,7 @@ export class DataAnonymizer {
     const result = { ...obj };
 
     for (const [key, value] of Object.entries(result)) {
-      if (typeof value === 'string') {
+      if (typeof value === "string") {
         // Check if field has explicit rule
         const piiType = fieldRules?.[key];
         if (piiType) {
@@ -347,18 +341,18 @@ export class DataAnonymizer {
           // Auto-detect and anonymize
           (result as Record<string, unknown>)[key] = this.anonymizeText(value);
         }
-      } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      } else if (typeof value === "object" && value !== null && !Array.isArray(value)) {
         (result as Record<string, unknown>)[key] = this.anonymizeObject(
           value as Record<string, unknown>,
           fieldRules
         );
       } else if (Array.isArray(value)) {
-        (result as Record<string, unknown>)[key] = value.map(item =>
-          typeof item === 'string'
+        (result as Record<string, unknown>)[key] = value.map((item) =>
+          typeof item === "string"
             ? this.anonymizeText(item)
-            : typeof item === 'object' && item !== null
-            ? this.anonymizeObject(item as Record<string, unknown>, fieldRules)
-            : item
+            : typeof item === "object" && item !== null
+              ? this.anonymizeObject(item as Record<string, unknown>, fieldRules)
+              : item
         );
       }
     }
@@ -386,11 +380,8 @@ export class DataAnonymizer {
       strategy: AnonymizationStrategy;
     }> = [];
 
-    const processField = (
-      value: unknown,
-      path: string
-    ): unknown => {
-      if (typeof value === 'string') {
+    const processField = (value: unknown, path: string): unknown => {
+      if (typeof value === "string") {
         const detections = detectPII(value);
         for (const detection of detections) {
           const rule = this.rules.get(detection.type);
@@ -405,11 +396,9 @@ export class DataAnonymizer {
         return this.anonymizeText(value);
       }
 
-      if (typeof value === 'object' && value !== null) {
+      if (typeof value === "object" && value !== null) {
         if (Array.isArray(value)) {
-          return value.map((item, index) =>
-            processField(item, `${path}[${index}]`)
-          );
+          return value.map((item, index) => processField(item, `${path}[${index}]`));
         }
         const result: Record<string, unknown> = {};
         for (const [key, val] of Object.entries(value)) {
@@ -421,7 +410,7 @@ export class DataAnonymizer {
       return value;
     };
 
-    const data = processField(obj, '') as T;
+    const data = processField(obj, "") as T;
 
     return { data, audit };
   }

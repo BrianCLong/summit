@@ -61,15 +61,15 @@ The Identity & Policy Fabric provides unified identity management, authenticatio
 
 ### 2.1 Critical Assets
 
-| Asset | Sensitivity | Description |
-|-------|-------------|-------------|
-| Identity Credentials | HIGH | Passwords, API keys, tokens |
-| Session Tokens | HIGH | JWT access/refresh tokens |
-| Policy Bundles | HIGH | Authorization logic |
-| Clearance Data | HIGH | User security clearances |
-| Audit Logs | MEDIUM | Authentication/authorization events |
-| Tenant Configuration | MEDIUM | Tenant settings and quotas |
-| User Profiles | MEDIUM | PII and organizational data |
+| Asset                | Sensitivity | Description                         |
+| -------------------- | ----------- | ----------------------------------- |
+| Identity Credentials | HIGH        | Passwords, API keys, tokens         |
+| Session Tokens       | HIGH        | JWT access/refresh tokens           |
+| Policy Bundles       | HIGH        | Authorization logic                 |
+| Clearance Data       | HIGH        | User security clearances            |
+| Audit Logs           | MEDIUM      | Authentication/authorization events |
+| Tenant Configuration | MEDIUM      | Tenant settings and quotas          |
+| User Profiles        | MEDIUM      | PII and organizational data         |
 
 ### 2.2 Data Classification
 
@@ -86,20 +86,20 @@ The Identity & Policy Fabric provides unified identity management, authenticatio
 
 ### 3.1 External Threats
 
-| Actor | Capability | Motivation |
-|-------|------------|------------|
-| Nation-State APT | HIGH | Espionage, data exfiltration |
-| Cybercriminal | MEDIUM | Financial gain, ransomware |
-| Hacktivists | LOW-MEDIUM | Disruption, data leaks |
-| Script Kiddies | LOW | Notoriety |
+| Actor            | Capability | Motivation                   |
+| ---------------- | ---------- | ---------------------------- |
+| Nation-State APT | HIGH       | Espionage, data exfiltration |
+| Cybercriminal    | MEDIUM     | Financial gain, ransomware   |
+| Hacktivists      | LOW-MEDIUM | Disruption, data leaks       |
+| Script Kiddies   | LOW        | Notoriety                    |
 
 ### 3.2 Internal Threats
 
-| Actor | Capability | Motivation |
-|-------|------------|------------|
-| Malicious Insider | HIGH | Data theft, sabotage |
-| Compromised Account | MEDIUM | Pivot point for external actor |
-| Negligent User | LOW | Accidental data exposure |
+| Actor               | Capability | Motivation                     |
+| ------------------- | ---------- | ------------------------------ |
+| Malicious Insider   | HIGH       | Data theft, sabotage           |
+| Compromised Account | MEDIUM     | Pivot point for external actor |
+| Negligent User      | LOW        | Accidental data exposure       |
 
 ---
 
@@ -108,6 +108,7 @@ The Identity & Policy Fabric provides unified identity management, authenticatio
 ### 4.1 Authentication Threats
 
 #### T-AUTH-001: Credential Stuffing
+
 - **Description**: Attacker uses leaked credentials from other breaches
 - **Impact**: Account takeover, unauthorized access
 - **Likelihood**: HIGH
@@ -119,6 +120,7 @@ The Identity & Policy Fabric provides unified identity management, authenticatio
   - Risk-based authentication
 
 #### T-AUTH-002: Session Hijacking
+
 - **Description**: Attacker steals or forges session tokens
 - **Impact**: Identity impersonation
 - **Likelihood**: MEDIUM
@@ -129,6 +131,7 @@ The Identity & Policy Fabric provides unified identity management, authenticatio
   - Token rotation on privilege escalation
 
 #### T-AUTH-003: MFA Bypass
+
 - **Description**: Attacker bypasses multi-factor authentication
 - **Impact**: Unauthorized access to sensitive resources
 - **Likelihood**: LOW-MEDIUM
@@ -139,6 +142,7 @@ The Identity & Policy Fabric provides unified identity management, authenticatio
   - MFA fatigue detection
 
 #### T-AUTH-004: OIDC/SAML Token Manipulation
+
 - **Description**: Attacker forges or manipulates SSO tokens
 - **Impact**: Authentication bypass
 - **Likelihood**: LOW
@@ -151,6 +155,7 @@ The Identity & Policy Fabric provides unified identity management, authenticatio
 ### 4.2 Authorization Threats
 
 #### T-AUTHZ-001: Privilege Escalation
+
 - **Description**: User gains permissions beyond their role
 - **Impact**: Unauthorized data access, admin takeover
 - **Likelihood**: MEDIUM
@@ -161,6 +166,7 @@ The Identity & Policy Fabric provides unified identity management, authenticatio
   - Audit logging of permission changes
 
 #### T-AUTHZ-002: Tenant Isolation Bypass
+
 - **Description**: User accesses data from another tenant
 - **Impact**: Data breach across tenants
 - **Likelihood**: LOW-MEDIUM
@@ -171,6 +177,7 @@ The Identity & Policy Fabric provides unified identity management, authenticatio
   - Cross-tenant access audit
 
 #### T-AUTHZ-003: Policy Tampering
+
 - **Description**: Attacker modifies authorization policies
 - **Impact**: Complete security bypass
 - **Likelihood**: LOW
@@ -181,6 +188,7 @@ The Identity & Policy Fabric provides unified identity management, authenticatio
   - Policy change audit trail
 
 #### T-AUTHZ-004: TOCTOU Race Condition
+
 - **Description**: Permission check and resource access have gap
 - **Impact**: Access to unauthorized resources
 - **Likelihood**: LOW
@@ -192,6 +200,7 @@ The Identity & Policy Fabric provides unified identity management, authenticatio
 ### 4.3 Data Protection Threats
 
 #### T-DATA-001: Data Exfiltration
+
 - **Description**: Unauthorized bulk data export
 - **Impact**: Mass data breach
 - **Likelihood**: MEDIUM
@@ -202,6 +211,7 @@ The Identity & Policy Fabric provides unified identity management, authenticatio
   - Anomaly detection on exports
 
 #### T-DATA-002: Residency Violation
+
 - **Description**: Data moved outside allowed regions
 - **Impact**: Regulatory violation, legal liability
 - **Likelihood**: LOW-MEDIUM
@@ -212,6 +222,7 @@ The Identity & Policy Fabric provides unified identity management, authenticatio
   - Cross-region access audit
 
 #### T-DATA-003: Clearance Violation
+
 - **Description**: User accesses data above their clearance
 - **Impact**: Unauthorized disclosure
 - **Likelihood**: LOW
@@ -222,6 +233,7 @@ The Identity & Policy Fabric provides unified identity management, authenticatio
   - Mandatory audit logging
 
 #### T-DATA-004: Insufficient Redaction
+
 - **Description**: Sensitive data exposed in logs or exports
 - **Impact**: Data breach through side channels
 - **Likelihood**: MEDIUM
@@ -234,6 +246,7 @@ The Identity & Policy Fabric provides unified identity management, authenticatio
 ### 4.4 Service Threats
 
 #### T-SVC-001: Service Account Compromise
+
 - **Description**: Service credentials are stolen
 - **Impact**: Lateral movement, data access
 - **Likelihood**: MEDIUM
@@ -244,6 +257,7 @@ The Identity & Policy Fabric provides unified identity management, authenticatio
   - Scope-limited service accounts
 
 #### T-SVC-002: Man-in-the-Middle
+
 - **Description**: Attacker intercepts service communication
 - **Impact**: Data interception, credential theft
 - **Likelihood**: LOW
@@ -254,6 +268,7 @@ The Identity & Policy Fabric provides unified identity management, authenticatio
   - Network segmentation
 
 #### T-SVC-003: OPA Denial of Service
+
 - **Description**: Policy engine overloaded or unavailable
 - **Impact**: Authorization failures, service outage
 - **Likelihood**: LOW-MEDIUM
@@ -269,50 +284,50 @@ The Identity & Policy Fabric provides unified identity management, authenticatio
 
 ### 5.1 Spoofing
 
-| Threat | Component | Risk | Mitigation |
-|--------|-----------|------|------------|
-| Identity spoofing | Auth Service | HIGH | MFA, device binding |
-| Token forgery | Session Mgmt | HIGH | Cryptographic signing |
-| Service impersonation | S2S Auth | MEDIUM | mTLS, SPIFFE |
+| Threat                | Component    | Risk   | Mitigation            |
+| --------------------- | ------------ | ------ | --------------------- |
+| Identity spoofing     | Auth Service | HIGH   | MFA, device binding   |
+| Token forgery         | Session Mgmt | HIGH   | Cryptographic signing |
+| Service impersonation | S2S Auth     | MEDIUM | mTLS, SPIFFE          |
 
 ### 5.2 Tampering
 
-| Threat | Component | Risk | Mitigation |
-|--------|-----------|------|------------|
-| Policy modification | OPA Bundles | HIGH | Signed bundles |
-| Session tampering | Token Store | MEDIUM | Integrity checks |
-| Audit log tampering | Audit Service | HIGH | Append-only logs |
+| Threat              | Component     | Risk   | Mitigation       |
+| ------------------- | ------------- | ------ | ---------------- |
+| Policy modification | OPA Bundles   | HIGH   | Signed bundles   |
+| Session tampering   | Token Store   | MEDIUM | Integrity checks |
+| Audit log tampering | Audit Service | HIGH   | Append-only logs |
 
 ### 5.3 Repudiation
 
-| Threat | Component | Risk | Mitigation |
-|--------|-----------|------|------------|
-| Action denial | All | MEDIUM | Comprehensive audit |
-| False attribution | Auth Service | LOW | Session binding |
+| Threat            | Component    | Risk   | Mitigation          |
+| ----------------- | ------------ | ------ | ------------------- |
+| Action denial     | All          | MEDIUM | Comprehensive audit |
+| False attribution | Auth Service | LOW    | Session binding     |
 
 ### 5.4 Information Disclosure
 
-| Threat | Component | Risk | Mitigation |
-|--------|-----------|------|------------|
-| Credential exposure | Auth Service | HIGH | Encryption at rest |
-| Token leakage | Session Mgmt | HIGH | Short TTL, rotation |
-| Policy disclosure | OPA | LOW | Access control |
+| Threat              | Component    | Risk | Mitigation          |
+| ------------------- | ------------ | ---- | ------------------- |
+| Credential exposure | Auth Service | HIGH | Encryption at rest  |
+| Token leakage       | Session Mgmt | HIGH | Short TTL, rotation |
+| Policy disclosure   | OPA          | LOW  | Access control      |
 
 ### 5.5 Denial of Service
 
-| Threat | Component | Risk | Mitigation |
-|--------|-----------|------|------------|
-| Auth service overload | Auth Service | MEDIUM | Rate limiting |
-| OPA exhaustion | Policy Service | MEDIUM | Caching, sidecars |
-| Session store exhaustion | Session Mgmt | LOW | TTL, cleanup |
+| Threat                   | Component      | Risk   | Mitigation        |
+| ------------------------ | -------------- | ------ | ----------------- |
+| Auth service overload    | Auth Service   | MEDIUM | Rate limiting     |
+| OPA exhaustion           | Policy Service | MEDIUM | Caching, sidecars |
+| Session store exhaustion | Session Mgmt   | LOW    | TTL, cleanup      |
 
 ### 5.6 Elevation of Privilege
 
-| Threat | Component | Risk | Mitigation |
-|--------|-----------|------|------------|
-| Role escalation | RBAC | HIGH | Strict role hierarchy |
-| Clearance bypass | ABAC | HIGH | Mandatory checks |
-| Admin takeover | Auth Service | HIGH | Step-up, MFA |
+| Threat           | Component    | Risk | Mitigation            |
+| ---------------- | ------------ | ---- | --------------------- |
+| Role escalation  | RBAC         | HIGH | Strict role hierarchy |
+| Clearance bypass | ABAC         | HIGH | Mandatory checks      |
+| Admin takeover   | Auth Service | HIGH | Step-up, MFA          |
 
 ---
 
@@ -320,31 +335,31 @@ The Identity & Policy Fabric provides unified identity management, authenticatio
 
 ### 6.1 Preventive Controls
 
-| Control | Description | Threats Addressed |
-|---------|-------------|-------------------|
-| MFA | Multi-factor authentication | T-AUTH-001, T-AUTH-002 |
-| OPA Policies | Attribute-based access control | T-AUTHZ-001, T-AUTHZ-002 |
-| mTLS | Mutual TLS for services | T-SVC-002 |
-| Rate Limiting | Request throttling | T-AUTH-001, DoS |
-| Input Validation | Request sanitization | Injection attacks |
+| Control          | Description                    | Threats Addressed        |
+| ---------------- | ------------------------------ | ------------------------ |
+| MFA              | Multi-factor authentication    | T-AUTH-001, T-AUTH-002   |
+| OPA Policies     | Attribute-based access control | T-AUTHZ-001, T-AUTHZ-002 |
+| mTLS             | Mutual TLS for services        | T-SVC-002                |
+| Rate Limiting    | Request throttling             | T-AUTH-001, DoS          |
+| Input Validation | Request sanitization           | Injection attacks        |
 
 ### 6.2 Detective Controls
 
-| Control | Description | Threats Addressed |
-|---------|-------------|-------------------|
-| Audit Logging | All auth/authz events | All threats |
-| Anomaly Detection | Behavioral analysis | T-AUTH-001, T-DATA-001 |
-| Policy Violation Alerts | Real-time monitoring | T-AUTHZ-002, T-DATA-002 |
-| Session Monitoring | Active session tracking | T-AUTH-002 |
+| Control                 | Description             | Threats Addressed       |
+| ----------------------- | ----------------------- | ----------------------- |
+| Audit Logging           | All auth/authz events   | All threats             |
+| Anomaly Detection       | Behavioral analysis     | T-AUTH-001, T-DATA-001  |
+| Policy Violation Alerts | Real-time monitoring    | T-AUTHZ-002, T-DATA-002 |
+| Session Monitoring      | Active session tracking | T-AUTH-002              |
 
 ### 6.3 Corrective Controls
 
-| Control | Description | Threats Addressed |
-|---------|-------------|-------------------|
-| Account Lockout | Automatic lockout | T-AUTH-001 |
-| Session Revocation | Force logout | T-AUTH-002 |
-| Token Rotation | Credential refresh | T-SVC-001 |
-| Failsafe Deny | Default deny on failure | T-AUTHZ-003 |
+| Control            | Description             | Threats Addressed |
+| ------------------ | ----------------------- | ----------------- |
+| Account Lockout    | Automatic lockout       | T-AUTH-001        |
+| Session Revocation | Force logout            | T-AUTH-002        |
+| Token Rotation     | Credential refresh      | T-SVC-001         |
+| Failsafe Deny      | Default deny on failure | T-AUTHZ-003       |
 
 ---
 
@@ -352,16 +367,16 @@ The Identity & Policy Fabric provides unified identity management, authenticatio
 
 ### 7.1 Risk Matrix
 
-| Risk | Impact | Likelihood | Score | Priority |
-|------|--------|------------|-------|----------|
-| Tenant isolation bypass | HIGH | LOW | MEDIUM | P1 |
-| Credential stuffing | MEDIUM | HIGH | MEDIUM | P1 |
-| Policy tampering | CRITICAL | LOW | HIGH | P1 |
-| Session hijacking | HIGH | MEDIUM | HIGH | P1 |
-| Data exfiltration | HIGH | MEDIUM | HIGH | P1 |
-| Privilege escalation | HIGH | MEDIUM | HIGH | P2 |
-| Service account compromise | MEDIUM | MEDIUM | MEDIUM | P2 |
-| MFA bypass | HIGH | LOW | MEDIUM | P2 |
+| Risk                       | Impact   | Likelihood | Score  | Priority |
+| -------------------------- | -------- | ---------- | ------ | -------- |
+| Tenant isolation bypass    | HIGH     | LOW        | MEDIUM | P1       |
+| Credential stuffing        | MEDIUM   | HIGH       | MEDIUM | P1       |
+| Policy tampering           | CRITICAL | LOW        | HIGH   | P1       |
+| Session hijacking          | HIGH     | MEDIUM     | HIGH   | P1       |
+| Data exfiltration          | HIGH     | MEDIUM     | HIGH   | P1       |
+| Privilege escalation       | HIGH     | MEDIUM     | HIGH   | P2       |
+| Service account compromise | MEDIUM   | MEDIUM     | MEDIUM | P2       |
+| MFA bypass                 | HIGH     | LOW        | MEDIUM | P2       |
 
 ### 7.2 Residual Risk
 
@@ -400,14 +415,14 @@ After implementing all controls:
 
 ## 9. Compliance Mapping
 
-| Requirement | Control | Status |
-|-------------|---------|--------|
-| SOC 2 CC6.1 | Access control policies | ✓ Implemented |
-| SOC 2 CC6.2 | Role-based access | ✓ Implemented |
-| SOC 2 CC6.3 | Multi-factor authentication | ✓ Implemented |
-| NIST 800-53 AC-2 | Account management | ✓ Implemented |
-| NIST 800-53 AC-3 | Access enforcement | ✓ Implemented |
-| NIST 800-53 AU-2 | Audit events | ✓ Implemented |
+| Requirement      | Control                           | Status        |
+| ---------------- | --------------------------------- | ------------- |
+| SOC 2 CC6.1      | Access control policies           | ✓ Implemented |
+| SOC 2 CC6.2      | Role-based access                 | ✓ Implemented |
+| SOC 2 CC6.3      | Multi-factor authentication       | ✓ Implemented |
+| NIST 800-53 AC-2 | Account management                | ✓ Implemented |
+| NIST 800-53 AC-3 | Access enforcement                | ✓ Implemented |
+| NIST 800-53 AU-2 | Audit events                      | ✓ Implemented |
 | FedRAMP Moderate | All above + continuous monitoring | ⚠ In Progress |
 
 ---
@@ -486,9 +501,9 @@ Data Exfiltration [OR]
 
 ### B.2 Test Frequency
 
-| Test Type | Frequency |
-|-----------|-----------|
-| Automated security scans | Daily |
-| Policy regression tests | Every deployment |
-| Penetration testing | Quarterly |
-| Red team exercise | Annually |
+| Test Type                | Frequency        |
+| ------------------------ | ---------------- |
+| Automated security scans | Daily            |
+| Policy regression tests  | Every deployment |
+| Penetration testing      | Quarterly        |
+| Red team exercise        | Annually         |

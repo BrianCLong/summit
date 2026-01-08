@@ -1,8 +1,8 @@
-import { z } from 'zod';
-import crypto from 'crypto';
-import { RecordEntry, RecordFramework } from '../records/framework.js';
+import { z } from "zod";
+import crypto from "crypto";
+import { RecordEntry, RecordFramework } from "../records/framework.js";
 
-export const RetentionTierSchema = z.enum(['regulatory', 'operational', 'analytics', 'backup']);
+export const RetentionTierSchema = z.enum(["regulatory", "operational", "analytics", "backup"]);
 export type RetentionTier = z.infer<typeof RetentionTierSchema>;
 
 export const RetentionPolicySchema = z.object({
@@ -10,7 +10,7 @@ export const RetentionPolicySchema = z.object({
   recordType: z.string(),
   tier: RetentionTierSchema,
   durationDays: z.number().positive(),
-  deletionMode: z.enum(['soft', 'hard']).default('soft'),
+  deletionMode: z.enum(["soft", "hard"]).default("soft"),
   propagateToDerived: z.boolean().default(true),
 });
 
@@ -64,7 +64,7 @@ export class RetentionEngine {
   private holds: Map<string, LegalHold> = new Map();
   private retentionClassDefaults: Map<string, RetentionPolicy> = new Map();
 
-  constructor(private framework: RecordFramework) { }
+  constructor(private framework: RecordFramework) {}
 
   private collectDerived(record: RecordEntry, accumulator: Set<string>): void {
     for (const childId of record.lineage.children) {
@@ -87,7 +87,7 @@ export class RetentionEngine {
     this.retentionClassDefaults.set(retentionClass, validated);
   }
 
-  placeLegalHold(hold: Omit<LegalHold, 'createdAt'>): LegalHold {
+  placeLegalHold(hold: Omit<LegalHold, "createdAt">): LegalHold {
     const validated = LegalHoldSchema.parse({ ...hold, createdAt: now() });
     this.holds.set(validated.id, validated);
     return validated;
@@ -106,7 +106,7 @@ export class RetentionEngine {
   }
 
   private policyFor(record: RecordEntry): RetentionPolicy | undefined {
-    const direct = [...this.policies.values()].find(p => p.recordType === record.type);
+    const direct = [...this.policies.values()].find((p) => p.recordType === record.type);
     if (direct) return direct;
     return this.retentionClassDefaults.get(record.metadata.retentionClass);
   }
@@ -151,7 +151,10 @@ export class RetentionEngine {
         skipped.push(id);
         continue;
       }
-      const attestation = crypto.createHash('sha256').update(`${id}:${actor}:${now().toISOString()}`).digest('hex');
+      const attestation = crypto
+        .createHash("sha256")
+        .update(`${id}:${actor}:${now().toISOString()}`)
+        .digest("hex");
       this.framework.deleteRecord(id, actor, attestation);
       deleted.push(id);
       if (policy.propagateToDerived) {
@@ -172,12 +175,16 @@ export class RetentionEngine {
     const matches = this.framework.search({ tags: [subjectId] });
     const propagation: string[] = [];
     const seen = new Set<string>();
-    const records: DsarResponse['records'] = [];
+    const records: DsarResponse["records"] = [];
 
     for (const record of matches) {
       if (seen.has(record.id)) continue;
       seen.add(record.id);
-      records.push({ id: record.id, type: record.type, metadata: record.metadata as Record<string, unknown> });
+      records.push({
+        id: record.id,
+        type: record.type,
+        metadata: record.metadata as Record<string, unknown>,
+      });
       if (!includeDerived) continue;
       const derived = new Set<string>();
       this.collectDerived(record, derived);
@@ -187,7 +194,11 @@ export class RetentionEngine {
         if (child) {
           seen.add(childId);
           propagation.push(childId);
-          records.push({ id: child.id, type: child.type, metadata: child.metadata as Record<string, unknown> });
+          records.push({
+            id: child.id,
+            type: child.type,
+            metadata: child.metadata as Record<string, unknown>,
+          });
         }
       }
 
@@ -197,7 +208,11 @@ export class RetentionEngine {
         if (parent) {
           seen.add(parentId);
           propagation.push(parentId);
-          records.push({ id: parent.id, type: parent.type, metadata: parent.metadata as Record<string, unknown> });
+          records.push({
+            id: parent.id,
+            type: parent.type,
+            metadata: parent.metadata as Record<string, unknown>,
+          });
         }
       }
     }

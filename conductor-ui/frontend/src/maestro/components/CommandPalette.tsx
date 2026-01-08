@@ -1,32 +1,24 @@
-import React from 'react';
-import { useFocusTrap } from '../utils/useFocusTrap';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { useFocusTrap } from "../utils/useFocusTrap";
+import { Link } from "react-router-dom";
 
-export default function CommandPalette({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
+export default function CommandPalette({ open, onClose }: { open: boolean; onClose: () => void }) {
   const ref = React.useRef<HTMLDivElement>(null);
   useFocusTrap(ref, open, onClose);
-  const [q, setQ] = React.useState('');
+  const [q, setQ] = React.useState("");
   const items = [
-    { label: 'Go: Home', href: '/maestro/' },
-    { label: 'Go: Runs', href: '/maestro/runs' },
-    { label: 'Go: Pipelines', href: '/maestro/pipelines' },
-    { label: 'Go: Autonomy & Guardrails', href: '/maestro/autonomy' },
-    { label: 'Go: Recipes', href: '/maestro/recipes' },
-    { label: 'Go: Observability & SLOs', href: '/maestro/observability' },
-    { label: 'Go: Costs & Budgets', href: '/maestro/cost' },
-    { label: 'Go: CI/CD & Environments', href: '/maestro/cicd' },
-    { label: 'Go: Tickets', href: '/maestro/tickets' },
-    { label: 'Go: Admin Studio', href: '/maestro/admin' },
+    { label: "Go: Home", href: "/maestro/" },
+    { label: "Go: Runs", href: "/maestro/runs" },
+    { label: "Go: Pipelines", href: "/maestro/pipelines" },
+    { label: "Go: Autonomy & Guardrails", href: "/maestro/autonomy" },
+    { label: "Go: Recipes", href: "/maestro/recipes" },
+    { label: "Go: Observability & SLOs", href: "/maestro/observability" },
+    { label: "Go: Costs & Budgets", href: "/maestro/cost" },
+    { label: "Go: CI/CD & Environments", href: "/maestro/cicd" },
+    { label: "Go: Tickets", href: "/maestro/tickets" },
+    { label: "Go: Admin Studio", href: "/maestro/admin" },
   ];
-  const filtered = items.filter((i) =>
-    i.label.toLowerCase().includes(q.toLowerCase()),
-  );
+  const filtered = items.filter((i) => i.label.toLowerCase().includes(q.toLowerCase()));
   if (!open) return null;
   return (
     <div
@@ -64,9 +56,7 @@ export default function CommandPalette({
             </li>
           ))}
           {filtered.length === 0 && (
-            <li className="px-3 py-6 text-center text-sm text-slate-500">
-              No matches
-            </li>
+            <li className="px-3 py-6 text-center text-sm text-slate-500">No matches</li>
           )}
         </ul>
         <div className="border-t px-3 py-1 text-[11px] text-slate-500">

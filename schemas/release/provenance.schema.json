@@ -3,9 +3,7 @@
   "$id": "https://intelgraph.com/schemas/release/provenance.schema.json",
   "title": "Release Provenance",
   "type": "object",
-  "required": [
-    "schemaVersion"
-  ],
+  "required": ["schemaVersion"],
   "additionalProperties": true,
   "properties": {
     "schemaVersion": {

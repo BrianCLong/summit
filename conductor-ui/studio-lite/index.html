@@ -161,80 +161,75 @@
       const M_CONDUCT = `mutation($i: ConductInput!){ conduct(input:$i){ expertId cost latencyMs auditId } }`;
 
       function setPreset(v) {
-        const t = $('task');
-        if (v === 'cypher') t.value = 'MATCH (n) RETURN count(n)';
-        else if (v === 'qa')
-          t.value =
-            'Summarize the key connections between entity A and B in three bullets.';
+        const t = $("task");
+        if (v === "cypher") t.value = "MATCH (n) RETURN count(n)";
+        else if (v === "qa")
+          t.value = "Summarize the key connections between entity A and B in three bullets.";
         else
           t.value =
-            'Write a detailed risk assessment for a hypothetical APT campaign leveraging lateral movement within a corporate graph.';
+            "Write a detailed risk assessment for a hypothetical APT campaign leveraging lateral movement within a corporate graph.";
       }
-      $('preset').addEventListener('change', (e) => setPreset(e.target.value));
+      $("preset").addEventListener("change", (e) => setPreset(e.target.value));
 
       async function ping() {
         try {
-          const res = await fetch($('endpoint').value, {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ query: '{ _health }' }),
+          const res = await fetch($("endpoint").value, {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ query: "{ _health }" }),
           });
-          $('status').textContent = res.ok ? 'connected' : 'error';
-          $('status').style.background = res.ok ? '#153e22' : '#3e1515';
+          $("status").textContent = res.ok ? "connected" : "error";
+          $("status").style.background = res.ok ? "#153e22" : "#3e1515";
         } catch {
-          $('status').textContent = 'error';
-          $('status').style.background = '#3e1515';
+          $("status").textContent = "error";
+          $("status").style.background = "#3e1515";
         }
       }
 
       async function post(query, variables) {
-        const ep = $('endpoint').value.trim();
+        const ep = $("endpoint").value.trim();
         const body = JSON.stringify({ query, variables });
         const res = await fetch(ep, {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
+          method: "POST",
+          headers: { "content-type": "application/json" },
           body,
         });
-        const json = await res.json().catch(() => ({ error: 'Invalid JSON' }));
+        const json = await res.json().catch(() => ({ error: "Invalid JSON" }));
         if (!res.ok) throw new Error(JSON.stringify(json));
         return json;
       }
 
-      $('btnPreview').onclick = async () => {
+      $("btnPreview").onclick = async () => {
         const input = {
-          task: $('task').value,
-          maxLatencyMs: parseInt($('lat').value, 10) || 2000,
-          sensitivity: $('sens').value,
+          task: $("task").value,
+          maxLatencyMs: parseInt($("lat").value, 10) || 2000,
+          sensitivity: $("sens").value,
         };
-        $('outPreview').textContent = '…';
+        $("outPreview").textContent = "…";
         try {
           const j = await post(Q_PREVIEW, { i: input });
-          $('outPreview').textContent = JSON.stringify(
-            j.data.previewRouting,
-            null,
-            2,
-          );
+          $("outPreview").textContent = JSON.stringify(j.data.previewRouting, null, 2);
         } catch (e) {
-          $('outPreview').textContent = e.message;
+          $("outPreview").textContent = e.message;
         }
       };
 
-      $('btnRun').onclick = async () => {
+      $("btnRun").onclick = async () => {
         const input = {
-          task: $('task').value,
-          maxLatencyMs: parseInt($('lat').value, 10) || 2000,
-          sensitivity: $('sens').value,
+          task: $("task").value,
+          maxLatencyMs: parseInt($("lat").value, 10) || 2000,
+          sensitivity: $("sens").value,
         };
-        $('outRun').textContent = '…';
+        $("outRun").textContent = "…";
         try {
           const j = await post(M_CONDUCT, { i: input });
-          $('outRun').textContent = JSON.stringify(j.data.conduct, null, 2);
+          $("outRun").textContent = JSON.stringify(j.data.conduct, null, 2);
         } catch (e) {
-          $('outRun').textContent = e.message;
+          $("outRun").textContent = e.message;
         }
       };
 
-      setPreset('cypher');
+      setPreset("cypher");
       ping();
     </script>
   </body>

@@ -1,8 +1,7 @@
-import { Pool } from 'pg';
+import { Pool } from "pg";
 
 const connectionString =
-  process.env.COMPANYOS_DB_URL ??
-  'postgres://companyos:companyos@companyos-db:5432/companyos';
+  process.env.COMPANYOS_DB_URL ?? "postgres://companyos:companyos@companyos-db:5432/companyos";
 
 export const pool = new Pool({
   connectionString,

@@ -1,27 +1,23 @@
-import { Tenant } from './types.js';
-import { randomUUID } from 'crypto';
-import { evaluateGovernancePolicy } from '@intelgraph/governance-kernel';
-import { GraphPersistenceAdapter } from '@intelgraph/core';
+import { Tenant } from "./types.js";
+import { randomUUID } from "crypto";
+import { evaluateGovernancePolicy } from "@intelgraph/governance-kernel";
+import { GraphPersistenceAdapter } from "@intelgraph/core";
 
 export class TenantRegistry {
   private tenants: Map<string, Tenant> = new Map();
 
   constructor(private graphAdapter: GraphPersistenceAdapter) {}
 
-  async createTenant(
-    name: string,
-    modules: string[],
-    region: string
-  ): Promise<Tenant | null> {
+  async createTenant(name: string, modules: string[], region: string): Promise<Tenant | null> {
     // Governance Check: Tenant Onboarding
-    const govDecision = evaluateGovernancePolicy('analytics', {
-      tenantId: 'system',
-      action: 'CREATE_TENANT',
+    const govDecision = evaluateGovernancePolicy("analytics", {
+      tenantId: "system",
+      action: "CREATE_TENANT",
       resource: name,
-      params: { region, modules }
+      params: { region, modules },
     });
 
-    if (govDecision.outcome === 'DENIED') {
+    if (govDecision.outcome === "DENIED") {
       throw new Error(`Tenant creation denied: ${govDecision.reason}`);
     }
 
@@ -30,8 +26,8 @@ export class TenantRegistry {
       name,
       modules,
       region,
-      slaTier: 'STANDARD',
-      createdAt: new Date()
+      slaTier: "STANDARD",
+      createdAt: new Date(),
     };
 
     this.tenants.set(tenant.id, tenant);
@@ -39,8 +35,8 @@ export class TenantRegistry {
     // Add to Graph
     await this.graphAdapter.addNode({
       id: tenant.id,
-      label: 'Tenant',
-      properties: { name: tenant.name, region: tenant.region }
+      label: "Tenant",
+      properties: { name: tenant.name, region: tenant.region },
     });
 
     return tenant;

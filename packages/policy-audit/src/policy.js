@@ -1,9 +1,9 @@
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
 function loadPolicies() {
-  const file = path.resolve('contracts/policy/abac.rego');
-  const data = fs.readFileSync(file, 'utf8');
+  const file = path.resolve("contracts/policy/abac.rego");
+  const data = fs.readFileSync(file, "utf8");
   return JSON.parse(data);
 }
 
@@ -19,8 +19,8 @@ export function evaluate(input, policies = loadPolicies()) {
       (!rule.action || rule.action === input.action) &&
       matches(rule.context, input.context)
     ) {
-      return { allow: rule.decision === 'allow', reason: rule.reason };
+      return { allow: rule.decision === "allow", reason: rule.reason };
     }
   }
-  return { allow: false, reason: 'no matching policy' };
+  return { allow: false, reason: "no matching policy" };
 }

@@ -11,6 +11,7 @@ pnpm build
 ## CLI Commands
 
 ### Run Scenario Evaluation
+
 ```bash
 # Basic run
 pnpm run-scenario run --scenario fraud-ring
@@ -30,22 +31,24 @@ pnpm run-scenario run \
 ```
 
 ### List Available Scenarios
+
 ```bash
 pnpm run-scenario list-scenarios
 ```
 
 ### Generate Scenario Data Only
+
 ```bash
 pnpm run-scenario generate --scenario fraud-ring --output scenario.json
 ```
 
 ## Built-in Scenarios
 
-| Name | Type | Entities | Use Case |
-|------|------|----------|----------|
-| `fraud-ring` | Financial crime | 50 | Shell companies, layered transactions |
-| `terror-cell` | Security threat | 30 | Communication patterns, safe houses |
-| `corruption-network` | Government corruption | 40 | Bribes, contracts, shell companies |
+| Name                 | Type                  | Entities | Use Case                              |
+| -------------------- | --------------------- | -------- | ------------------------------------- |
+| `fraud-ring`         | Financial crime       | 50       | Shell companies, layered transactions |
+| `terror-cell`        | Security threat       | 30       | Communication patterns, safe houses   |
+| `corruption-network` | Government corruption | 40       | Bribes, contracts, shell companies    |
 
 ## Scenario Sizes
 
@@ -71,34 +74,37 @@ export API_TOKEN=your-token
 ## Programmatic Usage
 
 ### Generate Scenario
+
 ```typescript
-import { ScenarioGenerator } from '@intelgraph/sim-harness';
+import { ScenarioGenerator } from "@intelgraph/sim-harness";
 
 const generator = new ScenarioGenerator({
-  template: 'fraud-ring',
-  params: { seed: 42 }
+  template: "fraud-ring",
+  params: { seed: 42 },
 });
 
 const scenario = await generator.generate();
 ```
 
 ### Run Ghost Analyst
+
 ```typescript
-import { GhostAnalyst } from '@intelgraph/sim-harness';
+import { GhostAnalyst } from "@intelgraph/sim-harness";
 
 const analyst = new GhostAnalyst({
-  apiUrl: 'http://localhost:4000/graphql',
-  tenantId: 'test-001',
+  apiUrl: "http://localhost:4000/graphql",
+  tenantId: "test-001",
   script: workflow,
-  verbose: true
+  verbose: true,
 });
 
 const session = await analyst.run({ scenario });
 ```
 
 ### Collect Metrics
+
 ```typescript
-import { MetricsCollector, HtmlReporter } from '@intelgraph/sim-harness';
+import { MetricsCollector, HtmlReporter } from "@intelgraph/sim-harness";
 
 const collector = new MetricsCollector();
 collector.addSession(session);
@@ -106,7 +112,7 @@ collector.addSession(session);
 const report = await collector.generateReport();
 
 const html = new HtmlReporter().generate(report);
-fs.writeFileSync('report.html', html);
+fs.writeFileSync("report.html", html);
 ```
 
 ## Testing
@@ -129,12 +135,14 @@ pnpm lint
 ## Common Workflows
 
 ### Quick Smoke Test
+
 ```bash
 make up
 pnpm run-scenario run --scenario fraud-ring --size small --sessions 1
 ```
 
 ### Regression Testing
+
 ```bash
 # Run baseline
 pnpm run-scenario run --scenario fraud-ring --seed 42 --sessions 10 --output baseline/
@@ -146,6 +154,7 @@ pnpm run-scenario run --scenario fraud-ring --seed 42 --sessions 10 --output can
 ```
 
 ### CI Integration
+
 ```yaml
 - name: Run scenario tests
   run: |
@@ -157,6 +166,7 @@ pnpm run-scenario run --scenario fraud-ring --seed 42 --sessions 10 --output can
 ## Troubleshooting
 
 ### API Connection Refused
+
 ```bash
 # Ensure stack is running
 make up
@@ -164,18 +174,21 @@ curl http://localhost:4000/health
 ```
 
 ### Safety Error: Tenant ID
+
 ```bash
 # Use test- prefix
 pnpm run-scenario run --tenant-id test-my-harness
 ```
 
 ### Slow Performance
+
 ```bash
 # Reduce scenario size or sessions
 pnpm run-scenario run --size small --sessions 1
 ```
 
 ### TypeScript Errors
+
 ```bash
 # Rebuild
 pnpm clean
@@ -230,7 +243,7 @@ interface GeneratedScenario {
 interface AnalystSession {
   id: string;
   scenarioId: string;
-  status: 'completed' | 'failed' | 'timeout';
+  status: "completed" | "failed" | "timeout";
   metrics: SessionMetrics;
 }
 

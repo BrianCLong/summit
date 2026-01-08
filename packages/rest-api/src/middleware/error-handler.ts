@@ -4,9 +4,9 @@
  * Normalizes errors into the platform-wide envelope
  */
 
-import { errorFactory, isSummitError, SummitError } from '@intelgraph/errors';
+import { errorFactory, isSummitError, SummitError } from "@intelgraph/errors";
 
-import type { Request, Response, NextFunction } from '../types';
+import type { Request, Response, NextFunction } from "../types";
 
 function toSummitError(err: Error, req: Request): SummitError {
   if (isSummitError(err)) {
@@ -14,8 +14,8 @@ function toSummitError(err: Error, req: Request): SummitError {
   }
 
   return errorFactory.internal({
-    errorCode: 'INTERNAL_UNHANDLED',
-    humanMessage: 'An unexpected error occurred.',
+    errorCode: "INTERNAL_UNHANDLED",
+    humanMessage: "An unexpected error occurred.",
     developerMessage: err.message,
     traceId: req.context?.traceId,
     context: {
@@ -29,8 +29,8 @@ function toSummitError(err: Error, req: Request): SummitError {
 function buildMetadata(req: Request) {
   return {
     timestamp: new Date().toISOString(),
-    version: req.context?.apiVersion || '1.0',
-    requestId: req.context?.requestId || 'unknown',
+    version: req.context?.apiVersion || "1.0",
+    requestId: req.context?.requestId || "unknown",
     traceId: req.context?.traceId,
   };
 }
@@ -55,7 +55,7 @@ export function errorHandler(options?: {
       },
     };
 
-    if (options?.includeStack && process.env.NODE_ENV !== 'production') {
+    if (options?.includeStack && process.env.NODE_ENV !== "production") {
       payload.error = {
         ...payload.error,
         context: {
@@ -71,9 +71,9 @@ export function errorHandler(options?: {
 
 export function notFoundHandler(req: Request, res: Response) {
   const summitError = errorFactory.validation({
-    errorCode: 'ROUTE_NOT_FOUND',
+    errorCode: "ROUTE_NOT_FOUND",
     humanMessage: `Route ${req.method} ${req.path} not found`,
-    developerMessage: 'Requested route is not registered in the router',
+    developerMessage: "Requested route is not registered in the router",
     traceId: req.context?.traceId,
     context: { path: req.path, method: req.method },
     statusCode: 404,
@@ -92,12 +92,12 @@ export function notFoundHandler(req: Request, res: Response) {
 export class ValidationException extends SummitError {
   constructor(message: string, context?: Record<string, any>) {
     const error = errorFactory.validation({
-      errorCode: 'VALIDATION_ERROR',
+      errorCode: "VALIDATION_ERROR",
       humanMessage: message,
       developerMessage: message,
       context,
     });
     super(error.envelope, error.statusCode, null);
-    this.name = 'ValidationException';
+    this.name = "ValidationException";
   }
 }

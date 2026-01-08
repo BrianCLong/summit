@@ -32,14 +32,14 @@ High-performance Kafka integration with enterprise features:
 ```typescript
 const producer = new KafkaProducer(
   {
-    brokers: ['kafka-1:9092', 'kafka-2:9093', 'kafka-3:9094'],
-    clientId: 'intelgraph-producer',
+    brokers: ["kafka-1:9092", "kafka-2:9093", "kafka-3:9094"],
+    clientId: "intelgraph-producer",
   },
   {
-    transactionalId: 'tx-producer-1',
+    transactionalId: "tx-producer-1",
     idempotent: true,
     acks: -1,
-    compression: 'snappy',
+    compression: "snappy",
     batchSize: 16384,
     lingerMs: 10,
   }
@@ -163,11 +163,10 @@ Temporal pattern detection with:
 Example fraud detection pattern:
 
 ```typescript
-const bruteForcePattern = PatternBuilder
-  .create('brute-force-login', 'Brute Force Login Attempt')
-  .where('failed-1', (e) => e.type === 'login' && !e.success)
-  .where('failed-2', (e) => e.type === 'login' && !e.success)
-  .where('failed-3', (e) => e.type === 'login' && !e.success)
+const bruteForcePattern = PatternBuilder.create("brute-force-login", "Brute Force Login Attempt")
+  .where("failed-1", (e) => e.type === "login" && !e.success)
+  .where("failed-2", (e) => e.type === "login" && !e.success)
+  .where("failed-3", (e) => e.type === "login" && !e.success)
   .within(60000) // Within 1 minute
   .build();
 ```
@@ -178,16 +177,16 @@ Workflow tracking with state transitions:
 
 ```typescript
 const stateMachine = {
-  id: 'order-processing',
-  initialState: 'pending',
+  id: "order-processing",
+  initialState: "pending",
   states: new Map([
-    ['pending', { type: 'normal' }],
-    ['processing', { type: 'normal' }],
-    ['completed', { type: 'final' }],
+    ["pending", { type: "normal" }],
+    ["processing", { type: "normal" }],
+    ["completed", { type: "final" }],
   ]),
   transitions: [
-    { from: 'pending', to: 'processing', trigger: 'start' },
-    { from: 'processing', to: 'completed', trigger: 'finish' },
+    { from: "pending", to: "processing", trigger: "start" },
+    { from: "processing", to: "completed", trigger: "finish" },
   ],
 };
 ```
@@ -198,8 +197,8 @@ Priority-based rule evaluation:
 
 ```typescript
 ruleEngine.addRule({
-  id: 'high-value-transaction',
-  name: 'High Value Transaction Alert',
+  id: "high-value-transaction",
+  name: "High Value Transaction Alert",
   priority: 100,
   condition: (event) => event.amount > 10000,
   action: async (event) => {
@@ -215,7 +214,7 @@ Cross-stream correlation:
 
 ```typescript
 const correlator = new EventCorrelator({
-  streams: ['stream-a', 'stream-b', 'stream-c'],
+  streams: ["stream-a", "stream-b", "stream-c"],
   correlationKey: (event) => event.userId,
   timeWindow: 300000, // 5 minutes
   minimumMatches: 2,
@@ -385,14 +384,13 @@ pm2 monit
 ### Basic Stream Processing
 
 ```typescript
-import { DataStream } from '@intelgraph/stream-processing';
-import { sum, average } from '@intelgraph/stream-analytics';
+import { DataStream } from "@intelgraph/stream-processing";
+import { sum, average } from "@intelgraph/stream-analytics";
 
-const stream = new DataStream<SensorReading>('sensor-stream');
+const stream = new DataStream<SensorReading>("sensor-stream");
 
 // Filter out invalid readings
-const validReadings = stream
-  .filter((reading) => reading.value >= 0 && reading.value <= 100);
+const validReadings = stream.filter((reading) => reading.value >= 0 && reading.value <= 100);
 
 // Calculate moving average
 const averages = validReadings
@@ -413,45 +411,46 @@ averages.subscribe((result) => {
 ### Pattern Detection
 
 ```typescript
-import { PatternMatcher, PatternBuilder } from '@intelgraph/cep-engine';
+import { PatternMatcher, PatternBuilder } from "@intelgraph/cep-engine";
 
 const matcher = new PatternMatcher();
 
 // Define attack pattern
-const sqlInjectionPattern = PatternBuilder
-  .create('sql-injection', 'SQL Injection Attack')
-  .where('probe', (e) => e.url.includes('UNION SELECT'))
-  .where('exploit', (e) => e.statusCode === 200)
+const sqlInjectionPattern = PatternBuilder.create("sql-injection", "SQL Injection Attack")
+  .where("probe", (e) => e.url.includes("UNION SELECT"))
+  .where("exploit", (e) => e.statusCode === 200)
   .within(30000)
   .build();
 
 matcher.registerPattern(sqlInjectionPattern);
 
 // Process events
-matcher.on('match', (match) => {
-  console.log('SQL injection detected!', match);
+matcher.on("match", (match) => {
+  console.log("SQL injection detected!", match);
 });
 ```
 
 ### Real-Time Alerts
 
 ```typescript
-import { AlertManager, AlertSeverity } from '@intelgraph/alert-engine';
+import { AlertManager, AlertSeverity } from "@intelgraph/alert-engine";
 
 const alertManager = new AlertManager(redisUrl);
 
 // Define alert rule
 alertManager.addRule({
-  id: 'fraud-detection',
-  name: 'Potential Fraud Detected',
+  id: "fraud-detection",
+  name: "Potential Fraud Detected",
   condition: (event) => {
-    return event.type === 'transaction' &&
-           event.amount > 10000 &&
-           event.location !== event.user.homeLocation;
+    return (
+      event.type === "transaction" &&
+      event.amount > 10000 &&
+      event.location !== event.user.homeLocation
+    );
   },
   severity: AlertSeverity.CRITICAL,
   enabled: true,
-  notificationChannels: ['slack', 'pagerduty'],
+  notificationChannels: ["slack", "pagerduty"],
 });
 
 // Process events

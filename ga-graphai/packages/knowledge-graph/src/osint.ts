@@ -1,6 +1,6 @@
-import crypto from 'node:crypto';
+import crypto from "node:crypto";
 
-export type OsintFeedType = 'rss' | 'http';
+export type OsintFeedType = "rss" | "http";
 
 export interface OsintFeedProfile {
   id: string;
@@ -46,12 +46,12 @@ export interface OsintFetchOptions {
 }
 
 function extractTag(block: string, tag: string): string | undefined {
-  const regex = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`, 'i');
+  const regex = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`, "i");
   const match = block.match(regex);
   if (!match) {
     return undefined;
   }
-  return match[1].replace(/<!\\[CDATA\\[|\\]\\]>/g, '').trim();
+  return match[1].replace(/<!\\[CDATA\\[|\\]\\]>/g, "").trim();
 }
 
 export function parseRss(xml: string): OsintFeedItem[] {
@@ -60,10 +60,10 @@ export function parseRss(xml: string): OsintFeedItem[] {
   const blocks = items.length > 0 ? items : entries;
   return blocks
     .map((block) => {
-      const title = extractTag(block, 'title') ?? 'Untitled';
-      const link = extractTag(block, 'link') ?? extractTag(block, 'id') ?? '';
-      const summary = extractTag(block, 'description') ?? extractTag(block, 'summary');
-      const publishedAt = extractTag(block, 'pubDate') ?? extractTag(block, 'updated');
+      const title = extractTag(block, "title") ?? "Untitled";
+      const link = extractTag(block, "link") ?? extractTag(block, "id") ?? "";
+      const summary = extractTag(block, "description") ?? extractTag(block, "summary");
+      const publishedAt = extractTag(block, "pubDate") ?? extractTag(block, "updated");
       return {
         title,
         link,
@@ -76,14 +76,14 @@ export function parseRss(xml: string): OsintFeedItem[] {
 
 function contentHash(item: OsintFeedItem): string {
   return crypto
-    .createHash('sha256')
-    .update([item.title, item.link, item.summary ?? ''].join('|'))
-    .digest('hex');
+    .createHash("sha256")
+    .update([item.title, item.link, item.summary ?? ""].join("|"))
+    .digest("hex");
 }
 
 export function normalizeOsintRecords(
   profile: OsintFeedProfile,
-  items: OsintFeedItem[],
+  items: OsintFeedItem[]
 ): OsintRecord[] {
   const fetchedAt = new Date().toISOString();
   return items.map((item) => {
@@ -113,7 +113,7 @@ async function sleep(ms: number): Promise<void> {
 
 export async function fetchOsintFeed(
   profile: OsintFeedProfile,
-  options: OsintFetchOptions = {},
+  options: OsintFetchOptions = {}
 ): Promise<OsintRecord[]> {
   const fetchFn = options.fetchFn ?? fetch;
   const maxRetries = options.maxRetries ?? 3;
@@ -131,8 +131,7 @@ export async function fetchOsintFeed(
         throw new Error(`OSINT fetch failed with ${response.status}`);
       }
       const body = await response.text();
-      const items =
-        profile.type === 'rss' ? parseRss(body) : (JSON.parse(body) as OsintFeedItem[]);
+      const items = profile.type === "rss" ? parseRss(body) : (JSON.parse(body) as OsintFeedItem[]);
       return normalizeOsintRecords(profile, items);
     } catch (error) {
       lastError = error as Error;
@@ -141,5 +140,5 @@ export async function fetchOsintFeed(
       }
     }
   }
-  throw lastError ?? new Error('OSINT fetch failed');
+  throw lastError ?? new Error("OSINT fetch failed");
 }

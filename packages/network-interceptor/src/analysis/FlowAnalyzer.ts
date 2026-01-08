@@ -3,7 +3,7 @@
  * TRAINING/SIMULATION ONLY
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid } from "uuid";
 
 export interface NetworkFlow {
   id: string;
@@ -11,7 +11,7 @@ export interface NetworkFlow {
   sourcePort: number;
   destinationIP: string;
   destinationPort: number;
-  protocol: 'TCP' | 'UDP' | 'ICMP' | 'OTHER';
+  protocol: "TCP" | "UDP" | "ICMP" | "OTHER";
 
   // Metrics
   startTime: Date;
@@ -46,7 +46,7 @@ export interface NetworkFlow {
 }
 
 export interface FlowClassification {
-  category: 'normal' | 'suspicious' | 'malicious' | 'unknown';
+  category: "normal" | "suspicious" | "malicious" | "unknown";
   subcategory?: string;
   confidence: number;
   indicators: string[];
@@ -105,7 +105,7 @@ export class FlowAnalyzer {
     }
 
     // Update TCP flags
-    if (flow.protocol === 'TCP' && packet.tcpFlags !== undefined) {
+    if (flow.protocol === "TCP" && packet.tcpFlags !== undefined) {
       if (!flow.flags) {
         flow.flags = { syn: 0, ack: 0, fin: 0, rst: 0, psh: 0 };
       }
@@ -146,10 +146,10 @@ export class FlowAnalyzer {
   }
 
   private createSimulatedFlow(): NetworkFlow {
-    const protocols = ['TCP', 'UDP'] as const;
+    const protocols = ["TCP", "UDP"] as const;
     const protocol = protocols[Math.floor(Math.random() * protocols.length)];
 
-    const appProtocols = ['HTTP', 'HTTPS', 'DNS', 'SSH', 'SMTP', 'UNKNOWN'];
+    const appProtocols = ["HTTP", "HTTPS", "DNS", "SSH", "SMTP", "UNKNOWN"];
     const appProtocol = appProtocols[Math.floor(Math.random() * appProtocols.length)];
 
     const duration = Math.floor(Math.random() * 300000); // up to 5 minutes
@@ -172,24 +172,24 @@ export class FlowAnalyzer {
       byteCount,
       packets: {
         forward: Math.floor(packetCount * forwardRatio),
-        reverse: Math.floor(packetCount * (1 - forwardRatio))
+        reverse: Math.floor(packetCount * (1 - forwardRatio)),
       },
       bytes: {
         forward: Math.floor(byteCount * forwardRatio),
-        reverse: Math.floor(byteCount * (1 - forwardRatio))
+        reverse: Math.floor(byteCount * (1 - forwardRatio)),
       },
       applicationProtocol: appProtocol,
       anomalyScore: Math.random() * 0.3, // Mostly normal
-      isSimulated: true
+      isSimulated: true,
     };
 
-    if (protocol === 'TCP') {
+    if (protocol === "TCP") {
       flow.flags = {
         syn: 1,
         ack: Math.floor(packetCount * 0.9),
         fin: 1,
         rst: 0,
-        psh: Math.floor(packetCount * 0.3)
+        psh: Math.floor(packetCount * 0.3),
       };
     }
 
@@ -204,9 +204,9 @@ export class FlowAnalyzer {
       HTTPS: 443,
       DNS: 53,
       SSH: 22,
-      SMTP: 25
+      SMTP: 25,
     };
-    return ports[appProtocol] || (1024 + Math.floor(Math.random() * 64000));
+    return ports[appProtocol] || 1024 + Math.floor(Math.random() * 64000);
   }
 
   private createFlow(packet: {
@@ -218,10 +218,10 @@ export class FlowAnalyzer {
     protocol: number;
     bytes: number;
   }): NetworkFlow {
-    let protocol: NetworkFlow['protocol'] = 'OTHER';
-    if (packet.protocol === 6) protocol = 'TCP';
-    else if (packet.protocol === 17) protocol = 'UDP';
-    else if (packet.protocol === 1) protocol = 'ICMP';
+    let protocol: NetworkFlow["protocol"] = "OTHER";
+    if (packet.protocol === 6) protocol = "TCP";
+    else if (packet.protocol === 17) protocol = "UDP";
+    else if (packet.protocol === 1) protocol = "ICMP";
 
     return {
       id: uuid(),
@@ -237,7 +237,7 @@ export class FlowAnalyzer {
       packets: { forward: 0, reverse: 0 },
       bytes: { forward: 0, reverse: 0 },
       anomalyScore: 0,
-      isSimulated: true
+      isSimulated: true,
     };
   }
 
@@ -266,43 +266,43 @@ export class FlowAnalyzer {
    */
   private classifyFlow(flow: NetworkFlow): FlowClassification {
     const indicators: string[] = [];
-    let category: FlowClassification['category'] = 'normal';
+    let category: FlowClassification["category"] = "normal";
     let confidence = 0.8;
 
     // Check for suspicious patterns
     if (flow.packetCount > 0 && flow.byteCount / flow.packetCount < 60) {
-      indicators.push('Small packets - possible scan');
+      indicators.push("Small packets - possible scan");
     }
 
     if (flow.packets.reverse === 0 && flow.packets.forward > 100) {
-      indicators.push('One-way traffic - possible exfiltration');
+      indicators.push("One-way traffic - possible exfiltration");
     }
 
     if (flow.flags?.syn && flow.flags.syn > 5 && flow.flags.ack === 0) {
-      indicators.push('SYN flood pattern');
-      category = 'suspicious';
+      indicators.push("SYN flood pattern");
+      category = "suspicious";
     }
 
     if (flow.flags?.rst && flow.flags.rst > flow.packetCount * 0.5) {
-      indicators.push('High RST ratio - possible scan');
-      category = 'suspicious';
+      indicators.push("High RST ratio - possible scan");
+      category = "suspicious";
     }
 
     // Check for known malicious ports
     const maliciousPorts = [4444, 5555, 6666, 31337];
     if (maliciousPorts.includes(flow.destinationPort)) {
-      indicators.push('Known malicious port');
-      category = 'suspicious';
+      indicators.push("Known malicious port");
+      category = "suspicious";
     }
 
     if (indicators.length === 0) {
-      indicators.push('No anomalies detected');
+      indicators.push("No anomalies detected");
     }
 
     return {
       category,
       confidence,
-      indicators
+      indicators,
     };
   }
 
@@ -326,7 +326,8 @@ export class FlowAnalyzer {
     // Asymmetry
     const totalPackets = flow.packets.forward + flow.packets.reverse;
     if (totalPackets > 10) {
-      const ratio = Math.min(flow.packets.forward, flow.packets.reverse) /
+      const ratio =
+        Math.min(flow.packets.forward, flow.packets.reverse) /
         Math.max(flow.packets.forward, flow.packets.reverse);
       if (ratio < 0.1) {
         score += 0.2;
@@ -395,8 +396,10 @@ export class FlowAnalyzer {
         talkerCounts.set(ip, talkerData);
       }
 
-      if (flow.classification?.category === 'suspicious' ||
-        flow.classification?.category === 'malicious') {
+      if (
+        flow.classification?.category === "suspicious" ||
+        flow.classification?.category === "malicious"
+      ) {
         suspiciousCount++;
       }
     }
@@ -415,7 +418,7 @@ export class FlowAnalyzer {
         .map(([ip, data]) => ({ ip, ...data }))
         .sort((a, b) => b.bytes - a.bytes)
         .slice(0, 10),
-      suspiciousFlows: suspiciousCount
+      suspiciousFlows: suspiciousCount,
     };
   }
 
@@ -428,9 +431,10 @@ export class FlowAnalyzer {
   }
 
   getSuspiciousFlows(): NetworkFlow[] {
-    return [...this.flows.values(), ...this.completedFlows]
-      .filter(f => f.classification?.category === 'suspicious' ||
-        f.classification?.category === 'malicious');
+    return [...this.flows.values(), ...this.completedFlows].filter(
+      (f) =>
+        f.classification?.category === "suspicious" || f.classification?.category === "malicious"
+    );
   }
 
   clear(): void {

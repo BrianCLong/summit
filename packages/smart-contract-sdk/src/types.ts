@@ -15,7 +15,7 @@ export interface TransactionReceipt {
   blockNumber: number;
   blockHash: string;
   gasUsed: number;
-  status: 'success' | 'reverted';
+  status: "success" | "reverted";
   logs: ContractEvent[];
   timestamp: Date;
 }

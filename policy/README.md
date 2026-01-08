@@ -22,6 +22,7 @@ We use semantic versioning for policy bundles.
 3. Run `./release.sh`.
 
 The script will:
+
 - Run all tests.
 - Create a distribution bundle in `dist/`.
 - Generate a manifest with compatibility notes.

@@ -3,11 +3,11 @@
  * Schema-driven API integration with automatic client generation
  */
 
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
-import yaml from 'js-yaml';
-import { StepPlugin, RunContext, WorkflowStep, StepExecution } from '../engine';
+import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
+import { readFileSync } from "fs";
+import { resolve } from "path";
+import yaml from "js-yaml";
+import { StepPlugin, RunContext, WorkflowStep, StepExecution } from "../engine";
 
 export interface OpenAPIStepConfig {
   spec: string; // Path to OpenAPI spec file or URL
@@ -16,12 +16,12 @@ export interface OpenAPIStepConfig {
   request_body?: any; // Request body for POST/PUT operations
   headers?: Record<string, string>; // Additional headers
   auth?: {
-    type: 'bearer' | 'api_key' | 'oauth2' | 'basic';
+    type: "bearer" | "api_key" | "oauth2" | "basic";
     token?: string; // For bearer token auth
     api_key?: {
       name: string; // Header or query parameter name
       value: string; // API key value
-      in: 'header' | 'query';
+      in: "header" | "query";
     };
     basic?: {
       username: string;
@@ -74,7 +74,7 @@ interface OpenAPIOperation {
   description?: string;
   parameters?: Array<{
     name: string;
-    in: 'query' | 'header' | 'path' | 'cookie';
+    in: "query" | "header" | "path" | "cookie";
     required?: boolean;
     schema: any;
   }>;
@@ -100,23 +100,20 @@ interface APIResponse {
 }
 
 export class OpenAPIPlugin implements StepPlugin {
-  name = 'openapi';
+  name = "openapi";
   private specCache = new Map<string, OpenAPISpec>();
   private responseCache = new Map<string, { data: any; timestamp: number }>();
-  private authTokenCache = new Map<
-    string,
-    { token: string; expires: number }
-  >();
+  private authTokenCache = new Map<string, { token: string; expires: number }>();
 
   validate(config: any): void {
     const stepConfig = config as OpenAPIStepConfig;
 
     if (!stepConfig.spec) {
-      throw new Error('OpenAPI step requires spec configuration');
+      throw new Error("OpenAPI step requires spec configuration");
     }
 
     if (!stepConfig.operation_id) {
-      throw new Error('OpenAPI step requires operation_id configuration');
+      throw new Error("OpenAPI step requires operation_id configuration");
     }
 
     // Validate auth configuration
@@ -127,10 +124,10 @@ export class OpenAPIPlugin implements StepPlugin {
     // Validate retry configuration
     if (stepConfig.retry) {
       if (stepConfig.retry.max_attempts < 1) {
-        throw new Error('retry.max_attempts must be >= 1');
+        throw new Error("retry.max_attempts must be >= 1");
       }
       if (stepConfig.retry.backoff_ms < 0) {
-        throw new Error('retry.backoff_ms must be >= 0');
+        throw new Error("retry.backoff_ms must be >= 0");
       }
     }
   }
@@ -138,7 +135,7 @@ export class OpenAPIPlugin implements StepPlugin {
   async execute(
     context: RunContext,
     step: WorkflowStep,
-    execution: StepExecution,
+    execution: StepExecution
   ): Promise<{
     output?: any;
     cost_usd?: number;
@@ -155,9 +152,7 @@ export class OpenAPIPlugin implements StepPlugin {
       // Find the operation
       const operation = this.findOperation(spec, stepConfig.operation_id);
       if (!operation) {
-        throw new Error(
-          `Operation ${stepConfig.operation_id} not found in spec`,
-        );
+        throw new Error(`Operation ${stepConfig.operation_id} not found in spec`);
       }
 
       // Validate parameters against schema
@@ -218,7 +213,7 @@ export class OpenAPIPlugin implements StepPlugin {
   async compensate(
     context: RunContext,
     step: WorkflowStep,
-    execution: StepExecution,
+    execution: StepExecution
   ): Promise<void> {
     const stepConfig = step.config as OpenAPIStepConfig;
 
@@ -228,9 +223,7 @@ export class OpenAPIPlugin implements StepPlugin {
       this.responseCache.delete(cacheKey);
     }
 
-    console.log(
-      `OpenAPI compensation completed for ${stepConfig.operation_id}`,
-    );
+    console.log(`OpenAPI compensation completed for ${stepConfig.operation_id}`);
   }
 
   private async loadSpec(specPath: string): Promise<OpenAPISpec> {
@@ -240,16 +233,14 @@ export class OpenAPIPlugin implements StepPlugin {
 
     let specContent: string;
 
-    if (specPath.startsWith('http://') || specPath.startsWith('https://')) {
+    if (specPath.startsWith("http://") || specPath.startsWith("https://")) {
       // Load from URL
       const response = await axios.get(specPath, { timeout: 10000 });
       specContent =
-        typeof response.data === 'string'
-          ? response.data
-          : JSON.stringify(response.data);
+        typeof response.data === "string" ? response.data : JSON.stringify(response.data);
     } else {
       // Load from file
-      specContent = readFileSync(resolve(specPath), 'utf8');
+      specContent = readFileSync(resolve(specPath), "utf8");
     }
 
     let spec: OpenAPISpec;
@@ -263,9 +254,9 @@ export class OpenAPIPlugin implements StepPlugin {
     }
 
     // Validate OpenAPI version
-    if (!spec.openapi || !spec.openapi.startsWith('3.')) {
+    if (!spec.openapi || !spec.openapi.startsWith("3.")) {
       throw new Error(
-        `Unsupported OpenAPI version: ${spec.openapi}. Only OpenAPI 3.x is supported.`,
+        `Unsupported OpenAPI version: ${spec.openapi}. Only OpenAPI 3.x is supported.`
       );
     }
 
@@ -275,7 +266,7 @@ export class OpenAPIPlugin implements StepPlugin {
 
   private findOperation(
     spec: OpenAPISpec,
-    operationId: string,
+    operationId: string
   ): {
     operation: OpenAPIOperation;
     method: string;
@@ -285,7 +276,7 @@ export class OpenAPIPlugin implements StepPlugin {
     for (const [path, pathItem] of Object.entries(spec.paths)) {
       for (const [method, operation] of Object.entries(pathItem)) {
         if (operation.operationId === operationId) {
-          const baseUrl = spec.servers?.[0]?.url || '';
+          const baseUrl = spec.servers?.[0]?.url || "";
           return {
             operation,
             method: method.toLowerCase(),
@@ -299,10 +290,7 @@ export class OpenAPIPlugin implements StepPlugin {
     return null;
   }
 
-  private validateParameters(
-    operation: OpenAPIOperation,
-    parameters: Record<string, any>,
-  ): void {
+  private validateParameters(operation: OpenAPIOperation, parameters: Record<string, any>): void {
     if (!operation.parameters) {
       return;
     }
@@ -317,15 +305,15 @@ export class OpenAPIPlugin implements StepPlugin {
         const value = parameters[param.name];
         const schema = param.schema;
 
-        if (schema.type === 'integer' && !Number.isInteger(Number(value))) {
+        if (schema.type === "integer" && !Number.isInteger(Number(value))) {
           throw new Error(`Parameter ${param.name} must be an integer`);
         }
 
-        if (schema.type === 'number' && isNaN(Number(value))) {
+        if (schema.type === "number" && isNaN(Number(value))) {
           throw new Error(`Parameter ${param.name} must be a number`);
         }
 
-        if (schema.type === 'boolean' && typeof value !== 'boolean') {
+        if (schema.type === "boolean" && typeof value !== "boolean") {
           throw new Error(`Parameter ${param.name} must be a boolean`);
         }
       }
@@ -340,7 +328,7 @@ export class OpenAPIPlugin implements StepPlugin {
       path: string;
       baseUrl: string;
     },
-    config: OpenAPIStepConfig,
+    config: OpenAPIStepConfig
   ): Promise<APIResponse> {
     const maxAttempts = config.retry?.max_attempts || 1;
     let lastError: Error;
@@ -352,7 +340,7 @@ export class OpenAPIPlugin implements StepPlugin {
         lastError = error as Error;
 
         // Don't retry on client errors (4xx)
-        if (error instanceof Error && error.message.includes('status code 4')) {
+        if (error instanceof Error && error.message.includes("status code 4")) {
           break;
         }
 
@@ -374,7 +362,7 @@ export class OpenAPIPlugin implements StepPlugin {
       path: string;
       baseUrl: string;
     },
-    config: OpenAPIStepConfig,
+    config: OpenAPIStepConfig
   ): Promise<APIResponse> {
     const startTime = Date.now();
 
@@ -391,13 +379,13 @@ export class OpenAPIPlugin implements StepPlugin {
         const value = config.parameters[param.name];
         if (value !== undefined) {
           switch (param.in) {
-            case 'path':
+            case "path":
               pathParams[param.name] = value;
               break;
-            case 'query':
+            case "query":
               queryParams[param.name] = value;
               break;
-            case 'header':
+            case "header":
               headerParams[param.name] = String(value);
               break;
           }
@@ -424,15 +412,12 @@ export class OpenAPIPlugin implements StepPlugin {
     };
 
     // Add request body for POST/PUT/PATCH
-    if (
-      ['post', 'put', 'patch'].includes(operation.method) &&
-      config.request_body
-    ) {
+    if (["post", "put", "patch"].includes(operation.method) && config.request_body) {
       requestConfig.data = config.request_body;
 
       // Set content type if not specified
-      if (!requestConfig.headers!['Content-Type']) {
-        requestConfig.headers!['Content-Type'] = 'application/json';
+      if (!requestConfig.headers!["Content-Type"]) {
+        requestConfig.headers!["Content-Type"] = "application/json";
       }
     }
 
@@ -465,18 +450,18 @@ export class OpenAPIPlugin implements StepPlugin {
 
   private async addAuthentication(
     requestConfig: AxiosRequestConfig,
-    auth: NonNullable<OpenAPIStepConfig['auth']>,
+    auth: NonNullable<OpenAPIStepConfig["auth"]>
   ): Promise<void> {
     switch (auth.type) {
-      case 'bearer':
+      case "bearer":
         if (auth.token) {
-          requestConfig.headers!['Authorization'] = `Bearer ${auth.token}`;
+          requestConfig.headers!["Authorization"] = `Bearer ${auth.token}`;
         }
         break;
 
-      case 'api_key':
+      case "api_key":
         if (auth.api_key) {
-          if (auth.api_key.in === 'header') {
+          if (auth.api_key.in === "header") {
             requestConfig.headers![auth.api_key.name] = auth.api_key.value;
           } else {
             requestConfig.params = requestConfig.params || {};
@@ -485,50 +470,46 @@ export class OpenAPIPlugin implements StepPlugin {
         }
         break;
 
-      case 'basic':
+      case "basic":
         if (auth.basic) {
-          const credentials = Buffer.from(
-            `${auth.basic.username}:${auth.basic.password}`,
-          ).toString('base64');
-          requestConfig.headers!['Authorization'] = `Basic ${credentials}`;
+          const credentials = Buffer.from(`${auth.basic.username}:${auth.basic.password}`).toString(
+            "base64"
+          );
+          requestConfig.headers!["Authorization"] = `Basic ${credentials}`;
         }
         break;
 
-      case 'oauth2':
+      case "oauth2":
         if (auth.oauth2) {
           const token = await this.getOAuth2Token(auth.oauth2);
-          requestConfig.headers!['Authorization'] = `Bearer ${token}`;
+          requestConfig.headers!["Authorization"] = `Bearer ${token}`;
         }
         break;
     }
   }
 
-  private normalizeHeaders(
-    headers: unknown,
-  ): Record<string, string> {
+  private normalizeHeaders(headers: unknown): Record<string, string> {
     if (!headers) {
       return {};
     }
 
     const source =
-      typeof (headers as any).toJSON === 'function'
-        ? (headers as any).toJSON()
-        : headers;
+      typeof (headers as any).toJSON === "function" ? (headers as any).toJSON() : headers;
 
     return Object.entries(source as Record<string, unknown>).reduce(
       (acc, [key, value]) => {
-        if (typeof value === 'undefined' || value === null) {
+        if (typeof value === "undefined" || value === null) {
           return acc;
         }
-        acc[key] = Array.isArray(value) ? value.join(', ') : String(value);
+        acc[key] = Array.isArray(value) ? value.join(", ") : String(value);
         return acc;
       },
-      {} as Record<string, string>,
+      {} as Record<string, string>
     );
   }
 
   private async getOAuth2Token(
-    oauth2: NonNullable<NonNullable<OpenAPIStepConfig['auth']>['oauth2']>,
+    oauth2: NonNullable<NonNullable<OpenAPIStepConfig["auth"]>["oauth2"]>
   ): Promise<string> {
     const cacheKey = `${oauth2.client_id}:${oauth2.token_url}`;
     const cached = this.authTokenCache.get(cacheKey);
@@ -541,14 +522,14 @@ export class OpenAPIPlugin implements StepPlugin {
     const response = await axios.post(
       oauth2.token_url,
       {
-        grant_type: 'client_credentials',
+        grant_type: "client_credentials",
         client_id: oauth2.client_id,
         client_secret: oauth2.client_secret,
         scope: oauth2.scope,
       },
       {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      },
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      }
     );
 
     const tokenData = response.data;
@@ -564,8 +545,8 @@ export class OpenAPIPlugin implements StepPlugin {
   }
 
   private calculateRetryDelay(
-    retry: NonNullable<OpenAPIStepConfig['retry']> | undefined,
-    attempt: number,
+    retry: NonNullable<OpenAPIStepConfig["retry"]> | undefined,
+    attempt: number
   ): number {
     if (!retry) {
       return 1000;
@@ -586,7 +567,7 @@ export class OpenAPIPlugin implements StepPlugin {
       request_body: config.request_body,
     };
 
-    return Buffer.from(JSON.stringify(key)).toString('base64');
+    return Buffer.from(JSON.stringify(key)).toString("base64");
   }
 
   private checkCache(cacheKey: string, ttlSeconds: number): any | null {
@@ -606,11 +587,7 @@ export class OpenAPIPlugin implements StepPlugin {
     return { ...cached.data, cached: true };
   }
 
-  private updateCache(
-    cacheKey: string,
-    response: APIResponse,
-    ttlSeconds: number,
-  ): void {
+  private updateCache(cacheKey: string, response: APIResponse, ttlSeconds: number): void {
     this.responseCache.set(cacheKey, {
       data: response,
       timestamp: Date.now(),
@@ -627,10 +604,7 @@ export class OpenAPIPlugin implements StepPlugin {
     }, ttlSeconds * 1000);
   }
 
-  private calculateCost(
-    response: APIResponse,
-    config: OpenAPIStepConfig,
-  ): number {
+  private calculateCost(response: APIResponse, config: OpenAPIStepConfig): number {
     // Basic cost calculation based on request/response size and duration
     const baseCost = 0.001; // $0.001 per API call
     const durationCost = (response.duration_ms / 1000) * 0.0001; // $0.0001 per second
@@ -645,37 +619,29 @@ export class OpenAPIPlugin implements StepPlugin {
     return baseCost + durationCost + dataCost;
   }
 
-  private validateAuthConfig(
-    auth: NonNullable<OpenAPIStepConfig['auth']>,
-  ): void {
+  private validateAuthConfig(auth: NonNullable<OpenAPIStepConfig["auth"]>): void {
     switch (auth.type) {
-      case 'bearer':
+      case "bearer":
         if (!auth.token) {
-          throw new Error('Bearer auth requires token');
+          throw new Error("Bearer auth requires token");
         }
         break;
 
-      case 'api_key':
+      case "api_key":
         if (!auth.api_key?.name || !auth.api_key?.value) {
-          throw new Error('API key auth requires name and value');
+          throw new Error("API key auth requires name and value");
         }
         break;
 
-      case 'basic':
+      case "basic":
         if (!auth.basic?.username || !auth.basic?.password) {
-          throw new Error('Basic auth requires username and password');
+          throw new Error("Basic auth requires username and password");
         }
         break;
 
-      case 'oauth2':
-        if (
-          !auth.oauth2?.client_id ||
-          !auth.oauth2?.client_secret ||
-          !auth.oauth2?.token_url
-        ) {
-          throw new Error(
-            'OAuth2 auth requires client_id, client_secret, and token_url',
-          );
+      case "oauth2":
+        if (!auth.oauth2?.client_id || !auth.oauth2?.client_secret || !auth.oauth2?.token_url) {
+          throw new Error("OAuth2 auth requires client_id, client_secret, and token_url");
         }
         break;
 

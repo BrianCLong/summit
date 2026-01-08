@@ -10,8 +10,8 @@
  * @module identity-fabric/policy
  */
 
-import { EventEmitter } from 'events';
-import crypto from 'crypto';
+import { EventEmitter } from "events";
+import crypto from "crypto";
 
 // ============================================================================
 // BUNDLE TYPES
@@ -141,30 +141,30 @@ export interface BundleSignature {
  */
 
 export const BUNDLE_STRUCTURE = {
-  'access-control': {
-    description: 'ABAC/RBAC access control policies',
-    policies: ['abac.rego', 'rbac.rego', 'tenant.rego', 'clearance.rego'],
-    data: ['roles.json', 'permissions.json', 'clearance.json'],
+  "access-control": {
+    description: "ABAC/RBAC access control policies",
+    policies: ["abac.rego", "rbac.rego", "tenant.rego", "clearance.rego"],
+    data: ["roles.json", "permissions.json", "clearance.json"],
   },
-  'data-residency': {
-    description: 'Data residency and sovereignty policies',
-    policies: ['residency.rego', 'export.rego', 'sovereignty.rego'],
-    data: ['regions.json', 'export_rules.json'],
+  "data-residency": {
+    description: "Data residency and sovereignty policies",
+    policies: ["residency.rego", "export.rego", "sovereignty.rego"],
+    data: ["regions.json", "export_rules.json"],
   },
-  'dlp': {
-    description: 'Data loss prevention policies',
-    policies: ['classification.rego', 'pii.rego', 'secrets.rego'],
-    data: ['patterns.json', 'classifications.json'],
+  dlp: {
+    description: "Data loss prevention policies",
+    policies: ["classification.rego", "pii.rego", "secrets.rego"],
+    data: ["patterns.json", "classifications.json"],
   },
-  'redaction': {
-    description: 'Data redaction and masking policies',
-    policies: ['redact.rego', 'masking.rego'],
-    data: ['redaction_rules.json'],
+  redaction: {
+    description: "Data redaction and masking policies",
+    policies: ["redact.rego", "masking.rego"],
+    data: ["redaction_rules.json"],
   },
-  'step-up-auth': {
-    description: 'Step-up authentication and risk policies',
-    policies: ['stepup.rego', 'risk.rego'],
-    data: ['sensitive_ops.json', 'risk_thresholds.json'],
+  "step-up-auth": {
+    description: "Step-up authentication and risk policies",
+    policies: ["stepup.rego", "risk.rego"],
+    data: ["sensitive_ops.json", "risk_thresholds.json"],
   },
 };
 
@@ -183,8 +183,8 @@ export interface BundleManagerConfig {
 }
 
 const DEFAULT_CONFIG: BundleManagerConfig = {
-  bundleDir: './bundles',
-  opaUrl: 'http://localhost:8181',
+  bundleDir: "./bundles",
+  opaUrl: "http://localhost:8181",
   verifySignatures: true,
   autoReload: true,
   reloadIntervalMs: 60000,
@@ -223,7 +223,7 @@ export class PolicyBundleManager extends EventEmitter {
         const bundle = await this.loadBundle(bundleName);
         bundles.set(bundleName, bundle);
       } catch (error) {
-        this.emit('bundle:error', {
+        this.emit("bundle:error", {
           bundle: bundleName,
           error: error instanceof Error ? error.message : String(error),
         });
@@ -273,7 +273,7 @@ export class PolicyBundleManager extends EventEmitter {
     if (this.config.testBeforeLoad) {
       const testResult = await this.runBundleTests(bundlePath);
       if (!testResult.passed) {
-        throw new Error(`Bundle ${bundleName} tests failed: ${testResult.failures.join(', ')}`);
+        throw new Error(`Bundle ${bundleName} tests failed: ${testResult.failures.join(", ")}`);
       }
     }
 
@@ -284,7 +284,7 @@ export class PolicyBundleManager extends EventEmitter {
     this.loadedBundles.set(bundleName, bundle);
     this.bundleVersions.set(bundleName, revision);
 
-    this.emit('bundle:loaded', {
+    this.emit("bundle:loaded", {
       bundle: bundleName,
       version: manifest.metadata.version,
       revision,
@@ -325,19 +325,19 @@ export class PolicyBundleManager extends EventEmitter {
 
     // Remove from OPA
     for (const policy of bundle.policies) {
-      const policyPath = policy.path.replace('.rego', '').replace(/\//g, '.');
+      const policyPath = policy.path.replace(".rego", "").replace(/\//g, ".");
       await this.deleteFromOPA(`/v1/policies/${policyPath}`);
     }
 
     for (const dataFile of bundle.data) {
-      const dataPath = dataFile.path.replace('.json', '').replace(/\//g, '/');
+      const dataPath = dataFile.path.replace(".json", "").replace(/\//g, "/");
       await this.deleteFromOPA(`/v1/data/${dataPath}`);
     }
 
     this.loadedBundles.delete(bundleName);
     this.bundleVersions.delete(bundleName);
 
-    this.emit('bundle:unloaded', { bundle: bundleName });
+    this.emit("bundle:unloaded", { bundle: bundleName });
   }
 
   // ==========================================================================
@@ -353,13 +353,13 @@ export class PolicyBundleManager extends EventEmitter {
     data: Array<{ path: string; content: unknown }>,
     metadata: Partial<BundleMetadata>
   ): PolicyBundle {
-    const policyFiles: PolicyFile[] = policies.map(p => ({
+    const policyFiles: PolicyFile[] = policies.map((p) => ({
       path: p.path,
       content: p.content,
       hash: this.hashContent(p.content),
     }));
 
-    const dataFiles: DataFile[] = data.map(d => ({
+    const dataFiles: DataFile[] = data.map((d) => ({
       path: d.path,
       content: d.content,
       hash: this.hashContent(JSON.stringify(d.content)),
@@ -372,12 +372,12 @@ export class PolicyBundleManager extends EventEmitter {
       roots: [name],
       metadata: {
         name,
-        version: metadata.version || '1.0.0',
-        description: metadata.description || '',
-        author: metadata.author || 'companyos',
+        version: metadata.version || "1.0.0",
+        description: metadata.description || "",
+        author: metadata.author || "companyos",
         createdAt: new Date().toISOString(),
-        environment: metadata.environment || ['development', 'staging', 'production'],
-        classification: metadata.classification || 'internal',
+        environment: metadata.environment || ["development", "staging", "production"],
+        classification: metadata.classification || "internal",
         tags: metadata.tags || [],
       },
       dependencies: [],
@@ -399,12 +399,12 @@ export class PolicyBundleManager extends EventEmitter {
    */
   async signBundle(bundle: PolicyBundle, privateKey: string): Promise<PolicyBundle> {
     const content = this.getBundleSigningContent(bundle);
-    const signature = crypto.sign('sha256', Buffer.from(content), privateKey).toString('base64');
+    const signature = crypto.sign("sha256", Buffer.from(content), privateKey).toString("base64");
 
     return {
       ...bundle,
       signature: {
-        algorithm: 'RS256',
+        algorithm: "RS256",
         keyId: this.getKeyId(privateKey),
         signature,
         signedAt: new Date().toISOString(),
@@ -426,8 +426,8 @@ export class PolicyBundleManager extends EventEmitter {
     try {
       // Use OPA test command
       const response = await fetch(`${this.config.opaUrl}/v1/data/test`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ input: { path: testPath } }),
       });
 
@@ -441,13 +441,15 @@ export class PolicyBundleManager extends EventEmitter {
 
       for (const test of testResults) {
         if (!test.pass) {
-          failures.push(`${test.name}: ${test.message || 'failed'}`);
+          failures.push(`${test.name}: ${test.message || "failed"}`);
         }
       }
 
       return { passed: failures.length === 0, failures };
     } catch (error) {
-      failures.push(`Test execution error: ${error instanceof Error ? error.message : String(error)}`);
+      failures.push(
+        `Test execution error: ${error instanceof Error ? error.message : String(error)}`
+      );
       return { passed: false, failures };
     }
   }
@@ -459,35 +461,35 @@ export class PolicyBundleManager extends EventEmitter {
     const errors: string[] = [];
 
     if (!bundle.name) {
-      errors.push('Bundle name is required');
+      errors.push("Bundle name is required");
     }
 
     if (!bundle.version) {
-      errors.push('Bundle version is required');
+      errors.push("Bundle version is required");
     }
 
     if (!bundle.policies || bundle.policies.length === 0) {
-      errors.push('Bundle must contain at least one policy');
+      errors.push("Bundle must contain at least one policy");
     }
 
     for (const policy of bundle.policies) {
-      if (!policy.path.endsWith('.rego')) {
+      if (!policy.path.endsWith(".rego")) {
         errors.push(`Invalid policy file extension: ${policy.path}`);
       }
 
       // Basic Rego syntax check
-      if (!policy.content.includes('package ')) {
+      if (!policy.content.includes("package ")) {
         errors.push(`Policy ${policy.path} missing package declaration`);
       }
     }
 
     for (const dataFile of bundle.data) {
-      if (!dataFile.path.endsWith('.json')) {
+      if (!dataFile.path.endsWith(".json")) {
         errors.push(`Invalid data file extension: ${dataFile.path}`);
       }
 
       try {
-        if (typeof dataFile.content === 'string') {
+        if (typeof dataFile.content === "string") {
           JSON.parse(dataFile.content);
         }
       } catch {
@@ -508,27 +510,27 @@ export class PolicyBundleManager extends EventEmitter {
   private async pushToOPA(bundle: PolicyBundle): Promise<void> {
     // Push policies
     for (const policy of bundle.policies) {
-      const policyId = `${bundle.name}/${policy.path}`.replace(/\//g, '_').replace('.rego', '');
+      const policyId = `${bundle.name}/${policy.path}`.replace(/\//g, "_").replace(".rego", "");
       await fetch(`${this.config.opaUrl}/v1/policies/${policyId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'text/plain' },
+        method: "PUT",
+        headers: { "Content-Type": "text/plain" },
         body: policy.content,
       });
     }
 
     // Push data
     for (const dataFile of bundle.data) {
-      const dataPath = `${bundle.name}/${dataFile.path}`.replace('.json', '').replace(/\//g, '/');
+      const dataPath = `${bundle.name}/${dataFile.path}`.replace(".json", "").replace(/\//g, "/");
       await fetch(`${this.config.opaUrl}/v1/data/${dataPath}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dataFile.content),
       });
     }
   }
 
   private async deleteFromOPA(path: string): Promise<void> {
-    await fetch(`${this.config.opaUrl}${path}`, { method: 'DELETE' });
+    await fetch(`${this.config.opaUrl}${path}`, { method: "DELETE" });
   }
 
   // ==========================================================================
@@ -539,16 +541,16 @@ export class PolicyBundleManager extends EventEmitter {
     // In a real implementation, this would read from filesystem
     // For now, return a default manifest
     return {
-      revision: '',
+      revision: "",
       roots: [],
       metadata: {
-        name: bundlePath.split('/').pop() || 'unknown',
-        version: '1.0.0',
-        description: '',
-        author: 'companyos',
+        name: bundlePath.split("/").pop() || "unknown",
+        version: "1.0.0",
+        description: "",
+        author: "companyos",
         createdAt: new Date().toISOString(),
-        environment: ['development', 'staging', 'production'],
-        classification: 'internal',
+        environment: ["development", "staging", "production"],
+        classification: "internal",
         tags: [],
       },
       dependencies: [],
@@ -566,12 +568,12 @@ export class PolicyBundleManager extends EventEmitter {
   }
 
   private calculateRevision(policies: PolicyFile[], data: DataFile[]): string {
-    const hashes = [...policies.map(p => p.hash), ...data.map(d => d.hash)].sort();
-    return crypto.createHash('sha256').update(hashes.join('')).digest('hex').substring(0, 16);
+    const hashes = [...policies.map((p) => p.hash), ...data.map((d) => d.hash)].sort();
+    return crypto.createHash("sha256").update(hashes.join("")).digest("hex").substring(0, 16);
   }
 
   private hashContent(content: string): string {
-    return crypto.createHash('sha256').update(content).digest('hex');
+    return crypto.createHash("sha256").update(content).digest("hex");
   }
 
   private async verifySignature(bundle: PolicyBundle): Promise<boolean> {
@@ -589,13 +591,13 @@ export class PolicyBundleManager extends EventEmitter {
       version: bundle.version,
       revision: bundle.revision,
       roots: bundle.roots,
-      policies: bundle.policies.map(p => ({ path: p.path, hash: p.hash })),
-      data: bundle.data.map(d => ({ path: d.path, hash: d.hash })),
+      policies: bundle.policies.map((p) => ({ path: p.path, hash: p.hash })),
+      data: bundle.data.map((d) => ({ path: d.path, hash: d.hash })),
     });
   }
 
   private getKeyId(privateKey: string): string {
-    return crypto.createHash('sha256').update(privateKey).digest('hex').substring(0, 8);
+    return crypto.createHash("sha256").update(privateKey).digest("hex").substring(0, 8);
   }
 
   private startAutoReload(): void {
@@ -604,10 +606,10 @@ export class PolicyBundleManager extends EventEmitter {
         try {
           const reloaded = await this.reloadBundle(bundleName);
           if (reloaded) {
-            this.emit('bundle:reloaded', { bundle: bundleName });
+            this.emit("bundle:reloaded", { bundle: bundleName });
           }
         } catch (error) {
-          this.emit('bundle:error', {
+          this.emit("bundle:error", {
             bundle: bundleName,
             error: error instanceof Error ? error.message : String(error),
           });
@@ -630,7 +632,7 @@ export class PolicyBundleManager extends EventEmitter {
    * Get loaded bundle info.
    */
   getLoadedBundles(): Array<{ name: string; version: string; revision: string }> {
-    return Array.from(this.loadedBundles.values()).map(b => ({
+    return Array.from(this.loadedBundles.values()).map((b) => ({
       name: b.name,
       version: b.version,
       revision: b.revision,

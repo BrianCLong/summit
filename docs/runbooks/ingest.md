@@ -19,6 +19,7 @@
 ## Overview
 
 The ingest pipeline processes data from multiple sources (S3, Kafka, webhooks, SFTP) with:
+
 - **Backpressure control**: Token bucket rate limiting, concurrency semaphores
 - **Idempotency**: SHA-256 dedupe keys for exactly-once semantics
 - **Retry with backoff**: Exponential backoff with jitter, bounded retries
@@ -27,12 +28,12 @@ The ingest pipeline processes data from multiple sources (S3, Kafka, webhooks, S
 
 ### Key Metrics
 
-| Metric | Description | SLO |
-|--------|-------------|-----|
-| `ingest_lag_seconds` | Time from source to sink commit | p95 ≤ 60s |
-| `ingest_dlq_total` | Records sent to DLQ | <0.5% of total |
-| `ingest_records_total` | Total records processed | N/A |
-| `ingest_backpressure_state` | Current backpressure state | Normal |
+| Metric                      | Description                     | SLO            |
+| --------------------------- | ------------------------------- | -------------- |
+| `ingest_lag_seconds`        | Time from source to sink commit | p95 ≤ 60s      |
+| `ingest_dlq_total`          | Records sent to DLQ             | <0.5% of total |
+| `ingest_records_total`      | Total records processed         | N/A            |
+| `ingest_backpressure_state` | Current backpressure state      | Normal         |
 
 ---
 
@@ -160,6 +161,7 @@ dlqtriage purge --older-than 7 --reason OLDER_REVISION
 **Impact**: Data freshness degraded, downstream consumers see stale data
 
 **Steps**:
+
 1. Check dashboard for affected tenants/sources
 2. Identify if lag is global or tenant-specific
 3. Check sink health (Postgres, Neo4j, Typesense)
@@ -182,6 +184,7 @@ curl -s http://postgres-exporter:9187/metrics | grep pg_stat_activity
 **Impact**: Severe data staleness, potential SLO breach
 
 **Steps**:
+
 1. **Page on-call if not already paged**
 2. Enable brownout to reduce load: `curl -X POST http://ingest-service:8080/admin/brownout`
 3. Identify root cause:
@@ -198,6 +201,7 @@ curl -s http://postgres-exporter:9187/metrics | grep pg_stat_activity
 **Impact**: Data loss risk, potential data quality issues
 
 **Steps**:
+
 1. Identify dominant DLQ reason: `dlqtriage summary --tenant <tenant>`
 2. For SCHEMA_DRIFT:
    - Check recent schema changes in source systems
@@ -216,6 +220,7 @@ curl -s http://postgres-exporter:9187/metrics | grep pg_stat_activity
 **Alert**: `IngestDLQSpike` - >100 DLQ records in 10 minutes
 
 **Steps**:
+
 1. Identify the reason code from alert
 2. If SCHEMA_DRIFT or VALIDATION_FAIL: likely source data issue
 3. If CONNECTION_ERROR or SINK_TIMEOUT: check downstream health
@@ -226,6 +231,7 @@ curl -s http://postgres-exporter:9187/metrics | grep pg_stat_activity
 **Alert**: `IngestBackpressureStuck` - brownout for >30 minutes
 
 **Steps**:
+
 1. Check why backpressure triggered (queue depth, concurrency)
 2. Check sink health and latency
 3. If sink is healthy, may need to scale workers
@@ -239,6 +245,7 @@ curl -s http://postgres-exporter:9187/metrics | grep pg_stat_activity
 **Impact**: Records to affected sink are failing immediately
 
 **Steps**:
+
 1. Identify which sink's circuit is open
 2. Check sink health and connectivity
 3. Check for recent sink deployments/changes
@@ -366,23 +373,23 @@ redis-cli INFO keyspace | grep ingest_idempotency
 
 ### DLQ Reason Codes
 
-| Code | Description | Retryable |
-|------|-------------|-----------|
-| `SCHEMA_DRIFT` | Input doesn't match expected schema | No |
-| `VALIDATION_FAIL` | Data validation failed | No |
-| `OLDER_REVISION` | Record has older revision than existing | No |
-| `SINK_TIMEOUT` | Sink operation timed out | Yes |
-| `CONSTRAINT_VIOLATION` | Database constraint violation | No |
-| `CONNECTION_ERROR` | Network/connection failure | Yes |
-| `RATE_LIMITED` | Rate limit exceeded | Yes |
-| `CIRCUIT_OPEN` | Circuit breaker is open | Yes |
+| Code                   | Description                             | Retryable |
+| ---------------------- | --------------------------------------- | --------- |
+| `SCHEMA_DRIFT`         | Input doesn't match expected schema     | No        |
+| `VALIDATION_FAIL`      | Data validation failed                  | No        |
+| `OLDER_REVISION`       | Record has older revision than existing | No        |
+| `SINK_TIMEOUT`         | Sink operation timed out                | Yes       |
+| `CONSTRAINT_VIOLATION` | Database constraint violation           | No        |
+| `CONNECTION_ERROR`     | Network/connection failure              | Yes       |
+| `RATE_LIMITED`         | Rate limit exceeded                     | Yes       |
+| `CIRCUIT_OPEN`         | Circuit breaker is open                 | Yes       |
 
 ### Backpressure States
 
-| State | Description | Action |
-|-------|-------------|--------|
-| `normal` | Operating normally | None |
-| `throttled` | Rate limiting active | Monitor |
-| `brownout` | Dropping low-priority records | Investigate |
-| `drain` | Finishing in-flight, rejecting new | Wait for drain |
-| `paused` | All processing paused | Manual resume needed |
+| State       | Description                        | Action               |
+| ----------- | ---------------------------------- | -------------------- |
+| `normal`    | Operating normally                 | None                 |
+| `throttled` | Rate limiting active               | Monitor              |
+| `brownout`  | Dropping low-priority records      | Investigate          |
+| `drain`     | Finishing in-flight, rejecting new | Wait for drain       |
+| `paused`    | All processing paused              | Manual resume needed |

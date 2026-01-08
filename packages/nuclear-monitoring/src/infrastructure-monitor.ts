@@ -4,7 +4,7 @@
  * Tracks overall nuclear infrastructure development and capabilities.
  */
 
-import { type NuclearInfrastructure, FuelCycleStage, TechnologyLevel } from './types.js';
+import { type NuclearInfrastructure, FuelCycleStage, TechnologyLevel } from "./types.js";
 
 export class NuclearInfrastructureMonitor {
   private infrastructures: Map<string, NuclearInfrastructure>;
@@ -25,7 +25,7 @@ export class NuclearInfrastructureMonitor {
     has_complete_fuel_cycle: boolean;
     enrichment_capable: boolean;
     reprocessing_capable: boolean;
-    weapons_potential: 'high' | 'medium' | 'low' | 'none';
+    weapons_potential: "high" | "medium" | "low" | "none";
   } {
     const infra = this.getInfrastructure(country);
     if (!infra) {
@@ -33,7 +33,7 @@ export class NuclearInfrastructureMonitor {
         has_complete_fuel_cycle: false,
         enrichment_capable: false,
         reprocessing_capable: false,
-        weapons_potential: 'none'
+        weapons_potential: "none",
       };
     }
 
@@ -41,26 +41,29 @@ export class NuclearInfrastructureMonitor {
     const hasEnrichment = infra.fuel_cycle_stage.includes(FuelCycleStage.ENRICHMENT);
     const hasReprocessing = infra.fuel_cycle_stage.includes(FuelCycleStage.REPROCESSING);
 
-    let weapons_potential: 'high' | 'medium' | 'low' | 'none';
+    let weapons_potential: "high" | "medium" | "low" | "none";
     if (hasEnrichment && hasReprocessing && infra.technology_level === TechnologyLevel.ADVANCED) {
-      weapons_potential = 'high';
+      weapons_potential = "high";
     } else if (hasEnrichment || hasReprocessing) {
-      weapons_potential = 'medium';
+      weapons_potential = "medium";
     } else if (infra.indigenous_capability) {
-      weapons_potential = 'low';
+      weapons_potential = "low";
     } else {
-      weapons_potential = 'none';
+      weapons_potential = "none";
     }
 
     return {
       has_complete_fuel_cycle: hasCycle,
       enrichment_capable: hasEnrichment,
       reprocessing_capable: hasReprocessing,
-      weapons_potential
+      weapons_potential,
     };
   }
 
-  compareInfrastructures(country1: string, country2: string): {
+  compareInfrastructures(
+    country1: string,
+    country2: string
+  ): {
     more_advanced: string;
     capability_gap: number;
   } {
@@ -68,7 +71,7 @@ export class NuclearInfrastructureMonitor {
     const infra2 = this.getInfrastructure(country2);
 
     if (!infra1 || !infra2) {
-      return { more_advanced: 'unknown', capability_gap: 0 };
+      return { more_advanced: "unknown", capability_gap: 0 };
     }
 
     const score1 = infra1.fuel_cycle_stage.length;
@@ -76,7 +79,7 @@ export class NuclearInfrastructureMonitor {
 
     return {
       more_advanced: score1 > score2 ? country1 : country2,
-      capability_gap: Math.abs(score1 - score2)
+      capability_gap: Math.abs(score1 - score2),
     };
   }
 }

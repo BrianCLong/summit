@@ -1,4 +1,4 @@
-import type { SafetyCheckResult, SafetyCheckType, SafetyConfig } from '../types.js';
+import type { SafetyCheckResult, SafetyCheckType, SafetyConfig } from "../types.js";
 
 /**
  * SafetyChecker - Red-team and safety validation for eval runs
@@ -61,10 +61,10 @@ export class SafetyChecker {
   constructor(config?: Partial<SafetyConfig>) {
     this.config = {
       enabledChecks: config?.enabledChecks ?? [
-        'jailbreak_detection',
-        'pii_detection',
-        'harmful_content',
-        'injection_attack',
+        "jailbreak_detection",
+        "pii_detection",
+        "harmful_content",
+        "injection_attack",
       ],
       blockOnViolation: config?.blockOnViolation ?? true,
       logViolations: config?.logViolations ?? true,
@@ -98,12 +98,7 @@ export class SafetyChecker {
 
     // Check custom patterns
     for (const custom of this.config.customPatterns ?? []) {
-      const result = this.checkPattern(
-        inputStr,
-        custom.pattern,
-        custom.name,
-        custom.severity,
-      );
+      const result = this.checkPattern(inputStr, custom.pattern, custom.name, custom.severity);
       results.push(result);
       if (!result.passed) {
         violations.push(`${custom.name}: ${result.details}`);
@@ -113,9 +108,7 @@ export class SafetyChecker {
       }
     }
 
-    const passed =
-      !this.config.blockOnViolation ||
-      results.every((r) => r.passed);
+    const passed = !this.config.blockOnViolation || results.every((r) => r.passed);
 
     return { passed, results, violations };
   }
@@ -123,27 +116,24 @@ export class SafetyChecker {
   /**
    * Run a specific safety check
    */
-  private async runCheck(
-    type: SafetyCheckType,
-    input: string,
-  ): Promise<SafetyCheckResult> {
+  private async runCheck(type: SafetyCheckType, input: string): Promise<SafetyCheckResult> {
     switch (type) {
-      case 'jailbreak_detection':
+      case "jailbreak_detection":
         return this.checkJailbreak(input);
-      case 'pii_detection':
+      case "pii_detection":
         return this.checkPII(input);
-      case 'harmful_content':
+      case "harmful_content":
         return this.checkHarmfulContent(input);
-      case 'injection_attack':
+      case "injection_attack":
         return this.checkInjection(input);
-      case 'data_exfiltration':
+      case "data_exfiltration":
         return this.checkDataExfiltration(input);
       default:
         return {
           type,
           passed: true,
-          severity: 'low',
-          details: 'Unknown check type',
+          severity: "low",
+          details: "Unknown check type",
           confidence: 0,
         };
     }
@@ -157,10 +147,10 @@ export class SafetyChecker {
       const match = input.match(pattern);
       if (match) {
         return {
-          type: 'jailbreak_detection',
+          type: "jailbreak_detection",
           passed: false,
-          severity: 'critical',
-          details: 'Jailbreak attempt detected',
+          severity: "critical",
+          details: "Jailbreak attempt detected",
           confidence: 0.9,
           flaggedContent: match[0],
         };
@@ -168,10 +158,10 @@ export class SafetyChecker {
     }
 
     return {
-      type: 'jailbreak_detection',
+      type: "jailbreak_detection",
       passed: true,
-      severity: 'low',
-      details: 'No jailbreak patterns detected',
+      severity: "low",
+      details: "No jailbreak patterns detected",
       confidence: 0.95,
     };
   }
@@ -184,10 +174,10 @@ export class SafetyChecker {
       const match = input.match(pattern);
       if (match) {
         return {
-          type: 'pii_detection',
+          type: "pii_detection",
           passed: false,
-          severity: 'high',
-          details: 'Potential PII detected',
+          severity: "high",
+          details: "Potential PII detected",
           confidence: 0.85,
           flaggedContent: this.redact(match[0]),
         };
@@ -195,10 +185,10 @@ export class SafetyChecker {
     }
 
     return {
-      type: 'pii_detection',
+      type: "pii_detection",
       passed: true,
-      severity: 'low',
-      details: 'No PII patterns detected',
+      severity: "low",
+      details: "No PII patterns detected",
       confidence: 0.9,
     };
   }
@@ -211,10 +201,10 @@ export class SafetyChecker {
       const match = input.match(pattern);
       if (match) {
         return {
-          type: 'harmful_content',
+          type: "harmful_content",
           passed: false,
-          severity: 'critical',
-          details: 'Potentially harmful content detected',
+          severity: "critical",
+          details: "Potentially harmful content detected",
           confidence: 0.88,
           flaggedContent: match[0],
         };
@@ -222,10 +212,10 @@ export class SafetyChecker {
     }
 
     return {
-      type: 'harmful_content',
+      type: "harmful_content",
       passed: true,
-      severity: 'low',
-      details: 'No harmful content patterns detected',
+      severity: "low",
+      details: "No harmful content patterns detected",
       confidence: 0.92,
     };
   }
@@ -238,10 +228,10 @@ export class SafetyChecker {
       const match = input.match(pattern);
       if (match) {
         return {
-          type: 'injection_attack',
+          type: "injection_attack",
           passed: false,
-          severity: 'high',
-          details: 'Potential injection attack detected',
+          severity: "high",
+          details: "Potential injection attack detected",
           confidence: 0.87,
           flaggedContent: match[0],
         };
@@ -249,10 +239,10 @@ export class SafetyChecker {
     }
 
     return {
-      type: 'injection_attack',
+      type: "injection_attack",
       passed: true,
-      severity: 'low',
-      details: 'No injection patterns detected',
+      severity: "low",
+      details: "No injection patterns detected",
       confidence: 0.93,
     };
   }
@@ -272,10 +262,10 @@ export class SafetyChecker {
       const match = input.match(pattern);
       if (match) {
         return {
-          type: 'data_exfiltration',
+          type: "data_exfiltration",
           passed: false,
-          severity: 'critical',
-          details: 'Potential data exfiltration attempt',
+          severity: "critical",
+          details: "Potential data exfiltration attempt",
           confidence: 0.82,
           flaggedContent: match[0],
         };
@@ -283,10 +273,10 @@ export class SafetyChecker {
     }
 
     return {
-      type: 'data_exfiltration',
+      type: "data_exfiltration",
       passed: true,
-      severity: 'low',
-      details: 'No exfiltration patterns detected',
+      severity: "low",
+      details: "No exfiltration patterns detected",
       confidence: 0.9,
     };
   }
@@ -298,14 +288,14 @@ export class SafetyChecker {
     input: string,
     patternStr: string,
     name: string,
-    severity: SafetyCheckResult['severity'],
+    severity: SafetyCheckResult["severity"]
   ): SafetyCheckResult {
-    const pattern = new RegExp(patternStr, 'i');
+    const pattern = new RegExp(patternStr, "i");
     const match = input.match(pattern);
 
     if (match) {
       return {
-        type: 'harmful_content', // Custom patterns fall under harmful content
+        type: "harmful_content", // Custom patterns fall under harmful content
         passed: false,
         severity,
         details: `Custom pattern '${name}' matched`,
@@ -315,9 +305,9 @@ export class SafetyChecker {
     }
 
     return {
-      type: 'harmful_content',
+      type: "harmful_content",
       passed: true,
-      severity: 'low',
+      severity: "low",
       details: `Custom pattern '${name}' not matched`,
       confidence: 0.85,
     };
@@ -364,7 +354,7 @@ export class SafetyChecker {
    * Stringify input for pattern matching
    */
   private stringify(input: unknown): string {
-    if (typeof input === 'string') {
+    if (typeof input === "string") {
       return input;
     }
     return JSON.stringify(input);
@@ -375,17 +365,15 @@ export class SafetyChecker {
    */
   private redact(content: string): string {
     if (content.length <= 4) {
-      return '****';
+      return "****";
     }
-    return content.slice(0, 2) + '*'.repeat(content.length - 4) + content.slice(-2);
+    return content.slice(0, 2) + "*".repeat(content.length - 4) + content.slice(-2);
   }
 }
 
 /**
  * Create a safety checker with default config
  */
-export function createSafetyChecker(
-  config?: Partial<SafetyConfig>,
-): SafetyChecker {
+export function createSafetyChecker(config?: Partial<SafetyConfig>): SafetyChecker {
   return new SafetyChecker(config);
 }

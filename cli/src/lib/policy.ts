@@ -5,11 +5,11 @@
  * In CI mode, policy must be present (fail-closed).
  */
 
-import { spawnSync } from 'child_process';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as crypto from 'crypto';
-import { z } from 'zod';
+import { spawnSync } from "child_process";
+import * as fs from "fs";
+import * as path from "path";
+import * as crypto from "crypto";
+import { z } from "zod";
 
 // Exit code for policy/configuration errors
 export const POLICY_EXIT_CODE = 2;
@@ -17,28 +17,28 @@ export const POLICY_EXIT_CODE = 2;
 /**
  * Action types that can be evaluated by policy
  */
-export type ActionType = 'write_patch' | 'read_file' | 'exec_tool' | 'network';
+export type ActionType = "write_patch" | "read_file" | "exec_tool" | "network";
 
 /**
  * Policy action schema
  */
-export const PolicyActionSchema = z.discriminatedUnion('type', [
+export const PolicyActionSchema = z.discriminatedUnion("type", [
   z.object({
-    type: z.literal('write_patch'),
+    type: z.literal("write_patch"),
     files: z.array(z.string()),
     diff_bytes: z.number(),
   }),
   z.object({
-    type: z.literal('read_file'),
+    type: z.literal("read_file"),
     path: z.string(),
   }),
   z.object({
-    type: z.literal('exec_tool'),
+    type: z.literal("exec_tool"),
     tool: z.string(),
     args: z.array(z.string()),
   }),
   z.object({
-    type: z.literal('network'),
+    type: z.literal("network"),
     kind: z.string(),
   }),
 ]);
@@ -67,10 +67,12 @@ export type PolicyInput = z.infer<typeof PolicyInputSchema>;
 export const PolicyDecisionSchema = z.object({
   allow: z.boolean(),
   deny_reasons: z.array(z.string()).optional().default([]),
-  limits: z.object({
-    max_files: z.number().optional(),
-    max_diff_bytes: z.number().optional(),
-  }).optional(),
+  limits: z
+    .object({
+      max_files: z.number().optional(),
+      max_diff_bytes: z.number().optional(),
+    })
+    .optional(),
 });
 
 export type PolicyDecision = z.infer<typeof PolicyDecisionSchema>;
@@ -95,43 +97,45 @@ export function stableStringify(obj: unknown): string {
  * Sort actions deterministically for policy evaluation
  */
 export function sortActions(actions: PolicyAction[]): PolicyAction[] {
-  return [...actions].sort((a, b) => {
-    // First sort by type
-    const typeCompare = a.type.localeCompare(b.type);
-    if (typeCompare !== 0) return typeCompare;
+  return [...actions]
+    .sort((a, b) => {
+      // First sort by type
+      const typeCompare = a.type.localeCompare(b.type);
+      if (typeCompare !== 0) return typeCompare;
 
-    // Then sort by type-specific fields
-    switch (a.type) {
-      case 'write_patch':
-        return (a as { files: string[] }).files.join(',').localeCompare(
-          (b as { files: string[] }).files.join(',')
-        );
-      case 'read_file':
-        return (a as { path: string }).path.localeCompare((b as { path: string }).path);
-      case 'exec_tool':
-        return (a as { tool: string }).tool.localeCompare((b as { tool: string }).tool);
-      case 'network':
-        return (a as { kind: string }).kind.localeCompare((b as { kind: string }).kind);
-      default:
-        return 0;
-    }
-  }).map(action => {
-    // Sort files arrays within write_patch actions
-    if (action.type === 'write_patch') {
-      return {
-        ...action,
-        files: [...action.files].sort(),
-      };
-    }
-    // Sort args arrays within exec_tool actions
-    if (action.type === 'exec_tool') {
-      return {
-        ...action,
-        args: [...action.args].sort(),
-      };
-    }
-    return action;
-  });
+      // Then sort by type-specific fields
+      switch (a.type) {
+        case "write_patch":
+          return (a as { files: string[] }).files
+            .join(",")
+            .localeCompare((b as { files: string[] }).files.join(","));
+        case "read_file":
+          return (a as { path: string }).path.localeCompare((b as { path: string }).path);
+        case "exec_tool":
+          return (a as { tool: string }).tool.localeCompare((b as { tool: string }).tool);
+        case "network":
+          return (a as { kind: string }).kind.localeCompare((b as { kind: string }).kind);
+        default:
+          return 0;
+      }
+    })
+    .map((action) => {
+      // Sort files arrays within write_patch actions
+      if (action.type === "write_patch") {
+        return {
+          ...action,
+          files: [...action.files].sort(),
+        };
+      }
+      // Sort args arrays within exec_tool actions
+      if (action.type === "exec_tool") {
+        return {
+          ...action,
+          args: [...action.args].sort(),
+        };
+      }
+      return action;
+    });
 }
 
 /**
@@ -139,7 +143,7 @@ export function sortActions(actions: PolicyAction[]): PolicyAction[] {
  */
 export function isOpaAvailable(): boolean {
   try {
-    const result = spawnSync('opa', ['version'], { encoding: 'utf-8', timeout: 5000 });
+    const result = spawnSync("opa", ["version"], { encoding: "utf-8", timeout: 5000 });
     return result.status === 0;
   } catch {
     return false;
@@ -161,11 +165,11 @@ export function loadPolicyBundle(bundlePath: string): { valid: boolean; error?: 
 
     // Check for policy.rego file
     if (stat.isDirectory()) {
-      const policyFile = path.join(resolvedPath, 'policy.rego');
+      const policyFile = path.join(resolvedPath, "policy.rego");
       if (!fs.existsSync(policyFile)) {
         return { valid: false, error: `No policy.rego found in bundle: ${bundlePath}` };
       }
-    } else if (!resolvedPath.endsWith('.rego')) {
+    } else if (!resolvedPath.endsWith(".rego")) {
       return { valid: false, error: `Invalid policy bundle format: ${bundlePath}` };
     }
 
@@ -173,7 +177,7 @@ export function loadPolicyBundle(bundlePath: string): { valid: boolean; error?: 
   } catch (error) {
     return {
       valid: false,
-      error: `Failed to load policy bundle: ${error instanceof Error ? error.message : String(error)}`
+      error: `Failed to load policy bundle: ${error instanceof Error ? error.message : String(error)}`,
     };
   }
 }
@@ -193,7 +197,7 @@ function collectRegoFiles(dir: string): string[] {
       const fullPath = path.join(currentDir, entry.name);
       if (entry.isDirectory()) {
         walk(fullPath);
-      } else if (entry.isFile() && entry.name.endsWith('.rego')) {
+      } else if (entry.isFile() && entry.name.endsWith(".rego")) {
         files.push(fullPath);
       }
     }
@@ -223,7 +227,7 @@ export function computePolicyBundleHash(bundlePath: string): string | null {
     }
 
     const stat = fs.statSync(resolvedPath);
-    const hash = crypto.createHash('sha256');
+    const hash = crypto.createHash("sha256");
 
     if (stat.isDirectory()) {
       // Collect all .rego files in sorted order
@@ -236,20 +240,20 @@ export function computePolicyBundleHash(bundlePath: string): string | null {
       for (const file of regoFiles) {
         // Use relative path for consistency across machines
         const relativePath = path.relative(resolvedPath, file);
-        const content = fs.readFileSync(file, 'utf-8');
+        const content = fs.readFileSync(file, "utf-8");
         // Include path in hash to detect file renames
-        hash.update(relativePath + '\0' + content);
+        hash.update(relativePath + "\0" + content);
       }
-    } else if (resolvedPath.endsWith('.rego')) {
+    } else if (resolvedPath.endsWith(".rego")) {
       // Single .rego file
-      const content = fs.readFileSync(resolvedPath, 'utf-8');
+      const content = fs.readFileSync(resolvedPath, "utf-8");
       const basename = path.basename(resolvedPath);
-      hash.update(basename + '\0' + content);
+      hash.update(basename + "\0" + content);
     } else {
       return null;
     }
 
-    return hash.digest('hex');
+    return hash.digest("hex");
   } catch {
     return null;
   }
@@ -279,13 +283,10 @@ export function buildPolicyInput(
 /**
  * Evaluate policy using OPA
  */
-export function evaluatePolicy(
-  input: PolicyInput,
-  bundlePath: string
-): PolicyDecision {
+export function evaluatePolicy(input: PolicyInput, bundlePath: string): PolicyDecision {
   const resolvedBundle = path.resolve(bundlePath);
   const policyPath = fs.statSync(resolvedBundle).isDirectory()
-    ? path.join(resolvedBundle, 'policy.rego')
+    ? path.join(resolvedBundle, "policy.rego")
     : resolvedBundle;
 
   // Create deterministic input JSON
@@ -294,23 +295,26 @@ export function evaluatePolicy(
   try {
     // Use OPA eval with JSON output
     const result = spawnSync(
-      'opa',
+      "opa",
       [
-        'eval',
-        '--data', policyPath,
-        '--input', '/dev/stdin',
-        '--format', 'json',
-        'data.claude.policy.decision',
+        "eval",
+        "--data",
+        policyPath,
+        "--input",
+        "/dev/stdin",
+        "--format",
+        "json",
+        "data.claude.policy.decision",
       ],
       {
         input: inputJson,
-        encoding: 'utf-8',
+        encoding: "utf-8",
         timeout: 30000,
       }
     );
 
     if (result.status !== 0) {
-      throw new Error(`OPA evaluation failed: ${result.stderr || 'unknown error'}`);
+      throw new Error(`OPA evaluation failed: ${result.stderr || "unknown error"}`);
     }
 
     const output = JSON.parse(result.stdout);
@@ -320,7 +324,7 @@ export function evaluatePolicy(
       // No result means default deny
       return {
         allow: false,
-        deny_reasons: ['no_policy_result'],
+        deny_reasons: ["no_policy_result"],
       };
     }
 
@@ -330,7 +334,9 @@ export function evaluatePolicy(
     // Policy evaluation errors result in deny
     return {
       allow: false,
-      deny_reasons: [`policy_eval_error: ${error instanceof Error ? error.message : String(error)}`],
+      deny_reasons: [
+        `policy_eval_error: ${error instanceof Error ? error.message : String(error)}`,
+      ],
     };
   }
 }
@@ -345,7 +351,7 @@ export class PolicyError extends Error {
     public exitCode: number = POLICY_EXIT_CODE
   ) {
     super(message);
-    this.name = 'PolicyError';
+    this.name = "PolicyError";
   }
 
   /**
@@ -355,7 +361,7 @@ export class PolicyError extends Error {
     const sortedReasons = [...this.reasons].sort();
     let output = `Policy Error: ${this.message}`;
     if (sortedReasons.length > 0) {
-      output += '\nDeny reasons:';
+      output += "\nDeny reasons:";
       for (const reason of sortedReasons) {
         output += `\n  - ${reason}`;
       }
@@ -383,8 +389,8 @@ export class PolicyGate {
     // In CI mode, policy bundle is required
     if (this.options.ci && !this.options.policyBundle) {
       throw new PolicyError(
-        'Policy bundle required in CI mode',
-        ['ci_mode_requires_policy'],
+        "Policy bundle required in CI mode",
+        ["ci_mode_requires_policy"],
         POLICY_EXIT_CODE
       );
     }
@@ -394,8 +400,8 @@ export class PolicyGate {
       // Check OPA availability
       if (!isOpaAvailable()) {
         throw new PolicyError(
-          'OPA not found. Install OPA to use policy enforcement.',
-          ['opa_not_available'],
+          "OPA not found. Install OPA to use policy enforcement.",
+          ["opa_not_available"],
           POLICY_EXIT_CODE
         );
       }
@@ -404,8 +410,8 @@ export class PolicyGate {
       const { valid, error } = loadPolicyBundle(this.options.policyBundle);
       if (!valid) {
         throw new PolicyError(
-          error || 'Invalid policy bundle',
-          ['invalid_policy_bundle'],
+          error || "Invalid policy bundle",
+          ["invalid_policy_bundle"],
           POLICY_EXIT_CODE
         );
       }
@@ -419,11 +425,7 @@ export class PolicyGate {
   /**
    * Evaluate actions against policy
    */
-  evaluate(
-    command: string,
-    flags: { write: boolean },
-    actions: PolicyAction[]
-  ): PolicyDecision {
+  evaluate(command: string, flags: { write: boolean }, actions: PolicyAction[]): PolicyDecision {
     // If no policy loaded and not in CI mode, allow by default
     if (!this.policyLoaded) {
       return {
@@ -448,11 +450,7 @@ export class PolicyGate {
     // Enforce decision
     if (!decision.allow) {
       const sortedReasons = [...(decision.deny_reasons || [])].sort();
-      throw new PolicyError(
-        'Action denied by policy',
-        sortedReasons,
-        POLICY_EXIT_CODE
-      );
+      throw new PolicyError("Action denied by policy", sortedReasons, POLICY_EXIT_CODE);
     }
 
     return decision;
@@ -468,7 +466,7 @@ export class PolicyGate {
   /**
    * Get policy limits (if any)
    */
-  getLimits(): PolicyDecision['limits'] | undefined {
+  getLimits(): PolicyDecision["limits"] | undefined {
     return undefined; // Limits are returned per-evaluation
   }
 
@@ -476,7 +474,7 @@ export class PolicyGate {
    * Get policy bundle path (if loaded)
    */
   getPolicyBundlePath(): string | null {
-    return this.policyLoaded ? this.options.policyBundle ?? null : null;
+    return this.policyLoaded ? (this.options.policyBundle ?? null) : null;
   }
 
   /**

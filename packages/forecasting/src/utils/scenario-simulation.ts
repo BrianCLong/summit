@@ -2,7 +2,7 @@
  * Scenario Analysis and Monte Carlo Simulation
  */
 
-import type { TimeSeriesData, ForecastResult } from '../types/index.js';
+import type { TimeSeriesData, ForecastResult } from "../types/index.js";
 
 export interface ScenarioConfig {
   name: string;
@@ -47,16 +47,18 @@ export class MonteCarloSimulator {
 
     // Calculate percentiles
     const percentiles = new Map<number, ForecastResult[]>();
-    [5, 25, 50, 75, 95].forEach(p => {
+    [5, 25, 50, 75, 95].forEach((p) => {
       percentiles.set(p, this.calculatePercentile(allPaths, p));
     });
 
     return {
-      scenarios: [{
-        name: 'Monte Carlo',
-        forecasts: baseForecasts,
-        probability: 1.0,
-      }],
+      scenarios: [
+        {
+          name: "Monte Carlo",
+          forecasts: baseForecasts,
+          probability: 1.0,
+        },
+      ],
       percentiles,
       mean: this.calculateMean(allPaths),
       median: percentiles.get(50)!,
@@ -92,16 +94,13 @@ export class MonteCarloSimulator {
   /**
    * Calculate percentile across all paths
    */
-  private calculatePercentile(
-    paths: ForecastResult[][],
-    percentile: number
-  ): ForecastResult[] {
+  private calculatePercentile(paths: ForecastResult[][], percentile: number): ForecastResult[] {
     const n = paths[0].length;
     const result: ForecastResult[] = [];
 
     for (let i = 0; i < n; i++) {
-      const values = paths.map(p => p[i].forecast).sort((a, b) => a - b);
-      const index = Math.floor(values.length * percentile / 100);
+      const values = paths.map((p) => p[i].forecast).sort((a, b) => a - b);
+      const index = Math.floor((values.length * percentile) / 100);
 
       result.push({
         timestamp: paths[0][i].timestamp,
@@ -123,7 +122,7 @@ export class MonteCarloSimulator {
     const result: ForecastResult[] = [];
 
     for (let i = 0; i < n; i++) {
-      const values = paths.map(p => p[i].forecast);
+      const values = paths.map((p) => p[i].forecast);
       const mean = values.reduce((a, b) => a + b, 0) / values.length;
 
       result.push({
@@ -161,7 +160,7 @@ export class ScenarioAnalyzer {
     impact: number;
     ranking: number;
   }> {
-    const results = scenarios.map(scenario => ({
+    const results = scenarios.map((scenario) => ({
       scenario,
       impact: this.calculateImpact(scenario),
       ranking: 0,
@@ -169,7 +168,7 @@ export class ScenarioAnalyzer {
 
     // Rank by impact
     results.sort((a, b) => b.impact - a.impact);
-    results.forEach((r, i) => r.ranking = i + 1);
+    results.forEach((r, i) => (r.ranking = i + 1));
 
     return results;
   }
@@ -177,14 +176,11 @@ export class ScenarioAnalyzer {
   /**
    * Perform sensitivity analysis
    */
-  sensitivityAnalysis(
-    baseValue: number,
-    parameters: Map<string, number[]>
-  ): Map<string, number[]> {
+  sensitivityAnalysis(baseValue: number, parameters: Map<string, number[]>): Map<string, number[]> {
     const results = new Map<string, number[]>();
 
     for (const [param, values] of parameters.entries()) {
-      const impacts = values.map(v => this.calculateParameterImpact(baseValue, v));
+      const impacts = values.map((v) => this.calculateParameterImpact(baseValue, v));
       results.set(param, impacts);
     }
 
@@ -198,7 +194,7 @@ export class ScenarioAnalyzer {
     baseForecasts: ForecastResult[],
     stressFactors: Map<string, number>
   ): ForecastResult[] {
-    return baseForecasts.map(forecast => {
+    return baseForecasts.map((forecast) => {
       let stressedValue = forecast.forecast;
 
       for (const [factor, multiplier] of stressFactors.entries()) {
@@ -284,7 +280,10 @@ export class Backtester {
       }
     }
 
-    const accuracy = this.calculateAccuracy(forecasts.map(f => f.forecast), actuals);
+    const accuracy = this.calculateAccuracy(
+      forecasts.map((f) => f.forecast),
+      actuals
+    );
 
     return { accuracy, forecasts, actuals, errors };
   }

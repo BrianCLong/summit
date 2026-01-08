@@ -122,13 +122,13 @@ policy gate that starts in warn-only mode.
 
 **How to Test**
 
-1) Deploy path
+1. Deploy path
 
 - Ensure `VERIFY_ENABLED_STAGE=true` and attempt to deploy an unsigned image
   digest — deployment must fail.
 - Deploy a signed digest — deployment must succeed.
 
-2) Policy path
+2. Policy path
 
 - Add a known-bad snippet (e.g., wildcard IAM action, privileged pod) in a test
   fixture and run policy tests.

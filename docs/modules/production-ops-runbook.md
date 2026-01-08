@@ -320,63 +320,63 @@ kubectl rollout status deployment/api -n intelgraph
 <script>
   (function ($) {
     // Toggle XAI & provenance overlays using jQuery events
-    $('#overlay-xai, #overlay-prov').on('click', function () {
-      var overlay = $(this).attr('id').replace('overlay-', '');
-      var isActive = $(this).hasClass('active');
+    $("#overlay-xai, #overlay-prov").on("click", function () {
+      var overlay = $(this).attr("id").replace("overlay-", "");
+      var isActive = $(this).hasClass("active");
 
       $.ajax({
-        url: '/api/overlays/toggle',
-        method: 'POST',
+        url: "/api/overlays/toggle",
+        method: "POST",
         data: JSON.stringify({
           overlay: overlay,
           enabled: !isActive,
           caseId: window.currentCaseId,
         }),
-        contentType: 'application/json',
+        contentType: "application/json",
         headers: {
-          Authorization: 'Bearer ' + window.authToken,
+          Authorization: "Bearer " + window.authToken,
         },
       })
         .done(function (response) {
           // Update UI state
-          $('#overlay-' + overlay).toggleClass('active');
+          $("#overlay-" + overlay).toggleClass("active");
 
           // Refresh graph badges
-          $('[data-graph]').trigger('refresh-badges', [response.badgeData]);
+          $("[data-graph]").trigger("refresh-badges", [response.badgeData]);
 
           // Update overlay legend
           updateOverlayLegend(overlay, !isActive);
         })
         .fail(function (xhr) {
-          console.error('Overlay toggle failed:', xhr.responseText);
-          showToast('Failed to toggle ' + overlay + ' overlay', 'error');
+          console.error("Overlay toggle failed:", xhr.responseText);
+          showToast("Failed to toggle " + overlay + " overlay", "error");
         });
     });
 
     // Tri-pane sync: timeline drives graph selection
-    $('#timeline .scrub').on('input', function () {
+    $("#timeline .scrub").on("input", function () {
       var timeWindow = $(this).val();
-      var startTime = moment().subtract(timeWindow, 'minutes').toISOString();
+      var startTime = moment().subtract(timeWindow, "minutes").toISOString();
       var endTime = moment().toISOString();
 
       $.ajax({
-        url: '/api/timeline/select',
-        method: 'POST',
+        url: "/api/timeline/select",
+        method: "POST",
         data: JSON.stringify({
           startTime: startTime,
           endTime: endTime,
           caseId: window.currentCaseId,
         }),
-        contentType: 'application/json',
+        contentType: "application/json",
         headers: {
-          Authorization: 'Bearer ' + window.authToken,
+          Authorization: "Bearer " + window.authToken,
         },
       }).done(function (response) {
         // Update graph selection
-        $('[data-graph]').trigger('select-nodes', [response.nodeIds]);
+        $("[data-graph]").trigger("select-nodes", [response.nodeIds]);
 
         // Update map markers
-        $('[data-map]').trigger('update-markers', [response.entities]);
+        $("[data-map]").trigger("update-markers", [response.entities]);
 
         // Update entity details panel
         updateEntityDetailsPanel(response.entities);
@@ -386,17 +386,15 @@ kubectl rollout status deployment/api -n intelgraph
     function updateOverlayLegend(overlay, enabled) {
       var legend = $('.overlay-legend[data-overlay="' + overlay + '"]');
       if (enabled) {
-        legend.show().addClass('active');
+        legend.show().addClass("active");
       } else {
-        legend.hide().removeClass('active');
+        legend.hide().removeClass("active");
       }
     }
 
     function showToast(message, type) {
-      var toast = $(
-        '<div class="toast toast-' + type + '">' + message + '</div>',
-      );
-      $('.toast-container').append(toast);
+      var toast = $('<div class="toast toast-' + type + '">' + message + "</div>");
+      $(".toast-container").append(toast);
       setTimeout(function () {
         toast.fadeOut(300, function () {
           $(this).remove();
@@ -413,13 +411,13 @@ kubectl rollout status deployment/api -n intelgraph
 
 ```javascript
 // Add to main application bundle
-import { getLCP, getFID, getCLS, getTTFB } from 'web-vitals';
+import { getLCP, getFID, getCLS, getTTFB } from "web-vitals";
 
 function sendToAnalytics({ name, value, id, delta }) {
   // Send to monitoring endpoint
-  fetch('/api/metrics/web-vitals', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+  fetch("/api/metrics/web-vitals", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       metric: name,
       value,
@@ -448,11 +446,11 @@ function checkPerformanceBudgets() {
     const value = performance.getEntriesByName(metric)[0]?.value || 0;
     if (value > threshold) {
       console.warn(
-        `Performance budget violation: ${metric} = ${value}ms (threshold: ${threshold}ms)`,
+        `Performance budget violation: ${metric} = ${value}ms (threshold: ${threshold}ms)`
       );
       // Send alert to monitoring
       sendToAnalytics({
-        name: 'budget_violation',
+        name: "budget_violation",
         value: value,
         id: metric,
         delta: value - threshold,
@@ -462,7 +460,7 @@ function checkPerformanceBudgets() {
 }
 
 // Check budgets after page load
-window.addEventListener('load', () => {
+window.addEventListener("load", () => {
   setTimeout(checkPerformanceBudgets, 1000);
 });
 ```

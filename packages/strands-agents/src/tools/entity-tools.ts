@@ -4,36 +4,36 @@
  * @module @intelgraph/strands-agents/tools/entity-tools
  */
 
-import { z } from 'zod';
-import type { Driver, Session } from 'neo4j-driver';
-import { v4 as uuidv4 } from 'uuid';
-import { EntitySchema, EntityTypeSchema, type Entity } from '../types.js';
+import { z } from "zod";
+import type { Driver, Session } from "neo4j-driver";
+import { v4 as uuidv4 } from "uuid";
+import { EntitySchema, EntityTypeSchema, type Entity } from "../types.js";
 
 // ============================================================================
 // Tool Input Schemas
 // ============================================================================
 
 export const SearchEntitiesInputSchema = z.object({
-  query: z.string().min(1).describe('Search query (supports fuzzy matching)'),
-  entityTypes: z.array(EntityTypeSchema).optional().describe('Filter by entity types'),
-  minConfidence: z.number().min(0).max(1).optional().describe('Minimum confidence threshold'),
+  query: z.string().min(1).describe("Search query (supports fuzzy matching)"),
+  entityTypes: z.array(EntityTypeSchema).optional().describe("Filter by entity types"),
+  minConfidence: z.number().min(0).max(1).optional().describe("Minimum confidence threshold"),
   limit: z.number().min(1).max(100).default(20),
-  includeRelationships: z.boolean().default(false).describe('Include connected entities'),
+  includeRelationships: z.boolean().default(false).describe("Include connected entities"),
 });
 
 export const GetEntityInputSchema = z.object({
-  entityId: z.string().uuid().describe('Entity UUID'),
+  entityId: z.string().uuid().describe("Entity UUID"),
   includeRelationships: z.boolean().default(true),
   relationshipDepth: z.number().min(0).max(2).default(1),
 });
 
 export const CreateEntityInputSchema = z.object({
-  type: EntityTypeSchema.describe('Entity type'),
-  label: z.string().min(1).max(500).describe('Display name/label'),
-  properties: z.record(z.unknown()).optional().describe('Additional properties'),
+  type: EntityTypeSchema.describe("Entity type"),
+  label: z.string().min(1).max(500).describe("Display name/label"),
+  properties: z.record(z.unknown()).optional().describe("Additional properties"),
   confidence: z.number().min(0).max(1).default(1.0),
-  source: z.string().optional().describe('Source of this entity'),
-  investigationId: z.string().uuid().optional().describe('Link to investigation'),
+  source: z.string().optional().describe("Source of this entity"),
+  investigationId: z.string().uuid().optional().describe("Link to investigation"),
 });
 
 export const UpdateEntityInputSchema = z.object({
@@ -43,27 +43,29 @@ export const UpdateEntityInputSchema = z.object({
     properties: z.record(z.unknown()).optional(),
     confidence: z.number().min(0).max(1).optional(),
   }),
-  reason: z.string().optional().describe('Reason for update (audit trail)'),
+  reason: z.string().optional().describe("Reason for update (audit trail)"),
 });
 
 export const MergeEntitiesInputSchema = z.object({
-  primaryEntityId: z.string().uuid().describe('Entity to keep'),
-  secondaryEntityIds: z.array(z.string().uuid()).min(1).describe('Entities to merge into primary'),
-  mergeStrategy: z.enum(['keep_primary', 'combine_properties', 'highest_confidence']).default('combine_properties'),
-  reason: z.string().describe('Justification for merge'),
+  primaryEntityId: z.string().uuid().describe("Entity to keep"),
+  secondaryEntityIds: z.array(z.string().uuid()).min(1).describe("Entities to merge into primary"),
+  mergeStrategy: z
+    .enum(["keep_primary", "combine_properties", "highest_confidence"])
+    .default("combine_properties"),
+  reason: z.string().describe("Justification for merge"),
 });
 
 export const FindSimilarEntitiesInputSchema = z.object({
-  entityId: z.string().uuid().describe('Reference entity'),
+  entityId: z.string().uuid().describe("Reference entity"),
   similarityThreshold: z.number().min(0).max(1).default(0.8),
   limit: z.number().min(1).max(50).default(10),
-  algorithm: z.enum(['jaccard', 'cosine', 'levenshtein']).default('jaccard'),
+  algorithm: z.enum(["jaccard", "cosine", "levenshtein"]).default("jaccard"),
 });
 
 export const ResolveEntityInputSchema = z.object({
-  label: z.string().min(1).describe('Entity name to resolve'),
+  label: z.string().min(1).describe("Entity name to resolve"),
   type: EntityTypeSchema.optional(),
-  context: z.string().optional().describe('Additional context for disambiguation'),
+  context: z.string().optional().describe("Additional context for disambiguation"),
   createIfNotFound: z.boolean().default(false),
 });
 
@@ -82,7 +84,7 @@ export interface EntityToolsConfig {
  * Creates entity management tools for Strands Agents
  */
 export function createEntityTools(config: EntityToolsConfig) {
-  const { driver, database = 'neo4j', auditLog, userId = 'agent' } = config;
+  const { driver, database = "neo4j", auditLog, userId = "agent" } = config;
 
   const logAudit = (action: string, details: Record<string, unknown>) => {
     if (auditLog) {
@@ -94,7 +96,7 @@ export function createEntityTools(config: EntityToolsConfig) {
   // Search Entities Tool
   // ---------------------------------------------------------------------------
   const searchEntities = {
-    name: 'search_entities',
+    name: "search_entities",
     description: `Search for entities in the knowledge graph by name or properties.
 Supports fuzzy matching and filtering by type and confidence.
 Use this to find entities before creating duplicates.`,
@@ -105,14 +107,11 @@ Use this to find entities before creating duplicates.`,
 
       let session: Session | null = null;
       try {
-        session = driver.session({ database, defaultAccessMode: 'READ' });
+        session = driver.session({ database, defaultAccessMode: "READ" });
 
-        const typeFilter = entityTypes?.length
-          ? `AND e.type IN $entityTypes`
-          : '';
-        const confidenceFilter = minConfidence !== undefined
-          ? `AND e.confidence >= $minConfidence`
-          : '';
+        const typeFilter = entityTypes?.length ? `AND e.type IN $entityTypes` : "";
+        const confidenceFilter =
+          minConfidence !== undefined ? `AND e.confidence >= $minConfidence` : "";
 
         const cypherQuery = `
           CALL db.index.fulltext.queryNodes('entity_search', $query)
@@ -121,13 +120,17 @@ Use this to find entities before creating duplicates.`,
           WITH e, score
           ORDER BY score DESC, e.confidence DESC
           LIMIT $limit
-          ${includeRelationships ? `
+          ${
+            includeRelationships
+              ? `
           OPTIONAL MATCH (e)-[r]-(related:Entity)
           WITH e, score, collect(DISTINCT {
             relationship: type(r),
             entity: related { .id, .type, .label }
           })[0..5] as connections
-          ` : 'WITH e, score, [] as connections'}
+          `
+              : "WITH e, score, [] as connections"
+          }
           RETURN e { .*, score: score, connections: connections } as entity
         `;
 
@@ -138,10 +141,10 @@ Use this to find entities before creating duplicates.`,
           limit,
         });
 
-        const entities = result.records.map((r) => r.get('entity'));
+        const entities = result.records.map((r) => r.get("entity"));
         const executionTimeMs = Date.now() - startTime;
 
-        logAudit('entity_search', { query, resultCount: entities.length });
+        logAudit("entity_search", { query, resultCount: entities.length });
 
         return JSON.stringify({
           success: true,
@@ -155,7 +158,7 @@ Use this to find entities before creating duplicates.`,
           },
         });
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         return JSON.stringify({
           success: false,
           error: `Entity search failed: ${errorMessage}`,
@@ -172,7 +175,7 @@ Use this to find entities before creating duplicates.`,
   // Get Entity Tool
   // ---------------------------------------------------------------------------
   const getEntity = {
-    name: 'get_entity',
+    name: "get_entity",
     description: `Retrieve detailed information about a specific entity by ID.
 Optionally includes connected entities and relationships.`,
     inputSchema: GetEntityInputSchema,
@@ -182,7 +185,7 @@ Optionally includes connected entities and relationships.`,
 
       let session: Session | null = null;
       try {
-        session = driver.session({ database, defaultAccessMode: 'READ' });
+        session = driver.session({ database, defaultAccessMode: "READ" });
 
         let query: string;
         if (includeRelationships && relationshipDepth > 0) {
@@ -221,14 +224,14 @@ Optionally includes connected entities and relationships.`,
         return JSON.stringify({
           success: true,
           data: {
-            entity: record.get('entity'),
-            relatedEntities: record.get('relatedEntities'),
-            relationships: record.get('relationships'),
+            entity: record.get("entity"),
+            relatedEntities: record.get("relatedEntities"),
+            relationships: record.get("relationships"),
             metadata: { executionTimeMs },
           },
         });
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         return JSON.stringify({
           success: false,
           error: `Failed to get entity: ${errorMessage}`,
@@ -245,7 +248,7 @@ Optionally includes connected entities and relationships.`,
   // Create Entity Tool
   // ---------------------------------------------------------------------------
   const createEntity = {
-    name: 'create_entity',
+    name: "create_entity",
     description: `Create a new entity in the knowledge graph.
 IMPORTANT: Always search for existing entities first to avoid duplicates.
 This operation requires SUPERVISED approval in most configurations.`,
@@ -256,7 +259,7 @@ This operation requires SUPERVISED approval in most configurations.`,
 
       let session: Session | null = null;
       try {
-        session = driver.session({ database, defaultAccessMode: 'WRITE' });
+        session = driver.session({ database, defaultAccessMode: "WRITE" });
 
         const entityId = uuidv4();
         const now = new Date().toISOString();
@@ -273,11 +276,15 @@ This operation requires SUPERVISED approval in most configurations.`,
             createdBy: $createdBy
           })
           SET e += $properties
-          ${investigationId ? `
+          ${
+            investigationId
+              ? `
           WITH e
           MATCH (i:Investigation {id: $investigationId})
           CREATE (i)-[:CONTAINS]->(e)
-          ` : ''}
+          `
+              : ""
+          }
           RETURN e { .* } as entity
         `;
 
@@ -286,17 +293,17 @@ This operation requires SUPERVISED approval in most configurations.`,
           type,
           label,
           confidence,
-          source: source || 'agent',
+          source: source || "agent",
           properties,
           createdAt: now,
           createdBy: userId,
           investigationId,
         });
 
-        const entity = result.records[0]?.get('entity');
+        const entity = result.records[0]?.get("entity");
         const executionTimeMs = Date.now() - startTime;
 
-        logAudit('entity_created', { entityId, type, label });
+        logAudit("entity_created", { entityId, type, label });
 
         return JSON.stringify({
           success: true,
@@ -306,7 +313,7 @@ This operation requires SUPERVISED approval in most configurations.`,
           },
         });
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         return JSON.stringify({
           success: false,
           error: `Failed to create entity: ${errorMessage}`,
@@ -323,7 +330,7 @@ This operation requires SUPERVISED approval in most configurations.`,
   // Find Similar Entities Tool
   // ---------------------------------------------------------------------------
   const findSimilarEntities = {
-    name: 'find_similar_entities',
+    name: "find_similar_entities",
     description: `Find entities similar to a given entity for potential deduplication.
 Uses graph structure and property similarity to identify candidates.
 Essential for entity resolution workflows.`,
@@ -334,13 +341,12 @@ Essential for entity resolution workflows.`,
 
       let session: Session | null = null;
       try {
-        session = driver.session({ database, defaultAccessMode: 'READ' });
+        session = driver.session({ database, defaultAccessMode: "READ" });
 
         // Get reference entity first
-        const refResult = await session.run(
-          'MATCH (e:Entity {id: $entityId}) RETURN e',
-          { entityId }
-        );
+        const refResult = await session.run("MATCH (e:Entity {id: $entityId}) RETURN e", {
+          entityId,
+        });
 
         if (refResult.records.length === 0) {
           return JSON.stringify({
@@ -391,10 +397,10 @@ Essential for entity resolution workflows.`,
           limit,
         });
 
-        const similarEntities = result.records.map((r) => r.get('entity'));
+        const similarEntities = result.records.map((r) => r.get("entity"));
         const executionTimeMs = Date.now() - startTime;
 
-        logAudit('similar_entities_found', { entityId, count: similarEntities.length });
+        logAudit("similar_entities_found", { entityId, count: similarEntities.length });
 
         return JSON.stringify({
           success: true,
@@ -410,7 +416,7 @@ Essential for entity resolution workflows.`,
           },
         });
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         return JSON.stringify({
           success: false,
           error: `Failed to find similar entities: ${errorMessage}`,
@@ -427,7 +433,7 @@ Essential for entity resolution workflows.`,
   // Resolve Entity Tool
   // ---------------------------------------------------------------------------
   const resolveEntity = {
-    name: 'resolve_entity',
+    name: "resolve_entity",
     description: `Resolve an entity name to an existing entity in the graph.
 Uses fuzzy matching and optional context for disambiguation.
 Can optionally create the entity if not found.`,
@@ -438,13 +444,16 @@ Can optionally create the entity if not found.`,
 
       let session: Session | null = null;
       try {
-        session = driver.session({ database, defaultAccessMode: createIfNotFound ? 'WRITE' : 'READ' });
+        session = driver.session({
+          database,
+          defaultAccessMode: createIfNotFound ? "WRITE" : "READ",
+        });
 
         // Try exact match first
         const exactQuery = `
           MATCH (e:Entity)
           WHERE toLower(e.label) = toLower($label)
-          ${type ? 'AND e.type = $type' : ''}
+          ${type ? "AND e.type = $type" : ""}
           RETURN e { .* } as entity
           ORDER BY e.confidence DESC
           LIMIT 5
@@ -453,12 +462,12 @@ Can optionally create the entity if not found.`,
         const exactResult = await session.run(exactQuery, { label, type });
 
         if (exactResult.records.length > 0) {
-          const entities = exactResult.records.map((r) => r.get('entity'));
+          const entities = exactResult.records.map((r) => r.get("entity"));
           return JSON.stringify({
             success: true,
             data: {
               resolved: true,
-              matchType: 'exact',
+              matchType: "exact",
               entities,
               metadata: { executionTimeMs: Date.now() - startTime },
             },
@@ -469,7 +478,7 @@ Can optionally create the entity if not found.`,
         const fuzzyQuery = `
           CALL db.index.fulltext.queryNodes('entity_search', $searchTerm)
           YIELD node as e, score
-          ${type ? 'WHERE e.type = $type' : ''}
+          ${type ? "WHERE e.type = $type" : ""}
           RETURN e { .*, matchScore: score } as entity
           ORDER BY score DESC
           LIMIT 5
@@ -481,12 +490,12 @@ Can optionally create the entity if not found.`,
         });
 
         if (fuzzyResult.records.length > 0) {
-          const entities = fuzzyResult.records.map((r) => r.get('entity'));
+          const entities = fuzzyResult.records.map((r) => r.get("entity"));
           return JSON.stringify({
             success: true,
             data: {
               resolved: true,
-              matchType: 'fuzzy',
+              matchType: "fuzzy",
               entities,
               metadata: { executionTimeMs: Date.now() - startTime },
             },
@@ -520,8 +529,8 @@ Can optionally create the entity if not found.`,
             createdBy: userId,
           });
 
-          const entity = createResult.records[0]?.get('entity');
-          logAudit('entity_created_via_resolution', { entityId, type, label });
+          const entity = createResult.records[0]?.get("entity");
+          logAudit("entity_created_via_resolution", { entityId, type, label });
 
           return JSON.stringify({
             success: true,
@@ -544,7 +553,7 @@ Can optionally create the entity if not found.`,
           },
         });
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         return JSON.stringify({
           success: false,
           error: `Entity resolution failed: ${errorMessage}`,

@@ -4,9 +4,9 @@
  */
 
 // Types
-export * from './types/inference.js';
+export * from "./types/inference.js";
 
 // Core engines
-export { InferenceEngine } from './engine/InferenceEngine.js';
-export { ContradictionDetector } from './engine/ContradictionDetector.js';
-export { LinkPredictor } from './prediction/LinkPredictor.js';
+export { InferenceEngine } from "./engine/InferenceEngine.js";
+export { ContradictionDetector } from "./engine/ContradictionDetector.js";
+export { LinkPredictor } from "./prediction/LinkPredictor.js";

@@ -10,6 +10,7 @@
 ## Example: Hello World
 
 **plugin.json**
+
 ```json
 {
   "id": "com.example.hello",
@@ -21,6 +22,7 @@
 ```
 
 **index.js**
+
 ```javascript
 module.exports = {
   async initialize(context) {
@@ -32,16 +34,16 @@ module.exports = {
       return { message: `Hello, ${params.name || "World"}!` };
     }
     throw new Error(`Unknown action: ${action}`);
-  }
+  },
 };
 ```
 
 ## Best Practices
 
-*   **Statelessness**: Do not store state in global variables. Use the provided storage API or external databases.
-*   **Error Handling**: Catch and handle errors gracefully. Return meaningful error messages.
-*   **Async/Await**: Use async/await for all I/O operations.
-*   **Logging**: Use `context.log` instead of `console.log`.
+- **Statelessness**: Do not store state in global variables. Use the provided storage API or external databases.
+- **Error Handling**: Catch and handle errors gracefully. Return meaningful error messages.
+- **Async/Await**: Use async/await for all I/O operations.
+- **Logging**: Use `context.log` instead of `console.log`.
 
 ## Testing
 

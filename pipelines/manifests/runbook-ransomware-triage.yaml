@@ -194,7 +194,7 @@ spec:
     budget:
       per_run_usd: 25.00
     slo:
-      latency_p95_ms: 3600000  # 1 hour for initial triage
+      latency_p95_ms: 3600000 # 1 hour for initial triage
       success_rate_percent: 100.0
     policies:
       - incident-response-logging

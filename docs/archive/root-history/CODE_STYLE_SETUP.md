@@ -33,6 +33,7 @@ Install the recommended VS Code extensions:
 4. Install all workspace recommendations
 
 Or manually install:
+
 - **Prettier** (esbenp.prettier-vscode)
 - **ESLint** (dbaeumer.vscode-eslint)
 - **EditorConfig** (editorconfig.editorconfig)
@@ -42,13 +43,13 @@ Or manually install:
 
 ### Automated Tools
 
-| Tool | Purpose | Auto-runs on |
-|------|---------|--------------|
-| **Prettier** | Code formatting | Save (in editor) |
-| **ESLint** | Linting & code quality | Save (in editor), Commit |
-| **Ruff** | Python linting & formatting | Save (in editor), Commit |
-| **Gitleaks** | Secret detection | Commit |
-| **commitlint** | Commit message format | Commit |
+| Tool           | Purpose                     | Auto-runs on             |
+| -------------- | --------------------------- | ------------------------ |
+| **Prettier**   | Code formatting             | Save (in editor)         |
+| **ESLint**     | Linting & code quality      | Save (in editor), Commit |
+| **Ruff**       | Python linting & formatting | Save (in editor), Commit |
+| **Gitleaks**   | Secret detection            | Commit                   |
+| **commitlint** | Commit message format       | Commit                   |
 
 ### Pre-commit Hooks
 
@@ -202,6 +203,7 @@ For comprehensive documentation, see:
 📖 **[docs/CODE_STYLE_GUIDE.md](docs/CODE_STYLE_GUIDE.md)**
 
 This includes:
+
 - Detailed tool configurations
 - Language-specific guidelines
 - Best practices

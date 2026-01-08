@@ -77,7 +77,7 @@ spec:
     metadata:
       labels:
         app: summit
-        version: "v1"  # Updated by CI/CD
+        version: "v1" # Updated by CI/CD
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9090"
@@ -93,7 +93,7 @@ spec:
 
       containers:
         - name: summit
-          image: ghcr.io/brianclong/summit:v1.0.0  # Updated by CI/CD
+          image: ghcr.io/brianclong/summit:v1.0.0 # Updated by CI/CD
           imagePullPolicy: IfNotPresent
 
           ports:
@@ -223,7 +223,7 @@ spec:
       autoPromotionEnabled: false
 
       # Time to wait before scaling down old version
-      scaleDownDelaySeconds: 300  # 5 minutes
+      scaleDownDelaySeconds: 300 # 5 minutes
 
       # Time to keep old version before deletion
       scaleDownDelayRevisionLimit: 2
@@ -288,7 +288,7 @@ spec:
     - name: error-rate
       interval: 1m
       count: 5
-      successCondition: result < 0.05  # Less than 5% error rate
+      successCondition: result < 0.05 # Less than 5% error rate
       failureLimit: 2
       provider:
         prometheus:
@@ -311,7 +311,7 @@ spec:
     - name: p95-latency
       interval: 1m
       count: 5
-      successCondition: result < 500  # Less than 500ms p95 latency
+      successCondition: result < 500 # Less than 500ms p95 latency
       failureLimit: 2
       provider:
         prometheus:
@@ -363,7 +363,7 @@ spec:
     - name: availability-slo
       interval: 1m
       count: 5
-      successCondition: result > 0.999  # 99.9% availability
+      successCondition: result > 0.999 # 99.9% availability
       failureLimit: 1
       provider:
         prometheus:

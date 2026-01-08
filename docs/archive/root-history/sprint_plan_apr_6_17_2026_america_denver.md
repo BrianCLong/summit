@@ -22,23 +22,23 @@ Deliver **Identity hardening (SSO + SCIM + WebAuthn step-up)**, **KMS-backed env
   - SSO success ≥99.9%; JIT roles present in session (`workspaceId`, `roles[]`, `purpose`).
   - SCIM drift ≤0.5%; contract tests 100% green; disable in IdP blocks login ≤1 min.
   - Step-up enforced on export/retention/plugin installs; 2 keys/user; recovery documented.
-  _Verify:_ Okta & Azure AD E2E, SCIM contract suite, audit logs, blocked export without step-up.
+    _Verify:_ Okta & Azure AD E2E, SCIM contract suite, audit logs, blocked export without step-up.
 - **KMS & Rotation:**
   - 100% new blobs encrypted with active KEK; rewrap job ≥200 blobs/min; proofs logged per workspace.
   - No decrypt failures; scheduler pause/resume works; retries safe.
-  _Verify:_ Unit/coverage report 100%; rotation drill runbook output; audit trail.
+    _Verify:_ Unit/coverage report 100%; rotation drill runbook output; audit trail.
 - **Cross-Region DR:**
   - PITR: nightly full + hourly incrementals; checksum chain valid; restore last 24h in dev.
   - Replication RPO ≤15 min; failover RTO ≤30 min with DNS switch; audit receipts.
-  _Verify:_ Automated drill CLI receipts; integrity checks; health probes.
+    _Verify:_ Automated drill CLI receipts; integrity checks; health probes.
 - **Graph Snapshots/Diff:**
   - Snapshot manifest immutable; creation ≤60s demo graph.
   - Diff ≤2s for ≤200k edges; explain-why changed shows lineage.
-  _Verify:_ Fixture benchmarks; UI overlay counts/legend; report export.
+    _Verify:_ Fixture benchmarks; UI overlay counts/legend; report export.
 - **Query Planner v2:**
   - Cardinality estimator p50 error <2×; hints visible pre-execution.
   - Slow-query coach suggests ≥1 actionable hint for 90% flagged queries.
-  _Verify:_ Planner fixtures; UI hint telemetry; coach acceptance logs.
+    _Verify:_ Planner fixtures; UI hint telemetry; coach acceptance logs.
 
 ---
 
@@ -154,4 +154,3 @@ Deliver **Identity hardening (SSO + SCIM + WebAuthn step-up)**, **KMS-backed env
 2. Target RPO/RTO beyond demo numbers (hard SLAs)?
 3. Snapshot retention defaults (count/age) and who approves forced deletions?
 4. Any regulated datasets requiring FIPS-validated crypto modules this sprint?
-

@@ -3,15 +3,15 @@ on:
   pull_request:
     branches: [main, release/ga-core]
     paths:
-      - 'server/src/services/**EntityResolution**'
-      - 'ml/**'
-      - 'server/src/graphql/**er**'
+      - "server/src/services/**EntityResolution**"
+      - "ml/**"
+      - "server/src/graphql/**er**"
   workflow_dispatch:
     inputs:
       entity_type:
-        description: 'Entity type to test'
+        description: "Entity type to test"
         required: false
-        default: 'PERSON'
+        default: "PERSON"
         type: choice
         options:
           - PERSON
@@ -75,13 +75,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: "18"
+          cache: "npm"
 
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |

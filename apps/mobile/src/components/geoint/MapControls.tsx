@@ -1,14 +1,6 @@
 import React, { useState } from 'react';
 import { View, TouchableOpacity, Text } from 'react-native';
-import {
-  Plus,
-  Minus,
-  Navigation,
-  Map,
-  Satellite,
-  Moon,
-  Sun,
-} from 'lucide-react-native';
+import { Plus, Minus, Navigation, Map, Satellite, Moon, Sun } from 'lucide-react-native';
 
 import { cn } from '@/utils/cn';
 
@@ -52,10 +44,7 @@ export const MapControls: React.FC<MapControlsProps> = ({
         >
           <Plus size={20} color="#fff" />
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={onZoomOut}
-          className="p-3 active:bg-dark-elevated"
-        >
+        <TouchableOpacity onPress={onZoomOut} className="p-3 active:bg-dark-elevated">
           <Minus size={20} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -127,9 +116,7 @@ export const MapCompass: React.FC<{ bearing: number; onPress: () => void }> = ({
 };
 
 // Scale bar component
-export const MapScaleBar: React.FC<{ metersPerPixel: number }> = ({
-  metersPerPixel,
-}) => {
+export const MapScaleBar: React.FC<{ metersPerPixel: number }> = ({ metersPerPixel }) => {
   // Calculate a nice round number for the scale bar
   const targetWidth = 100; // pixels
   const targetDistance = metersPerPixel * targetWidth;
@@ -145,14 +132,11 @@ export const MapScaleBar: React.FC<{ metersPerPixel: number }> = ({
     unit = 'm';
   }
 
-  const actualWidth = distance / metersPerPixel * (unit === 'km' ? 1000 : 1);
+  const actualWidth = (distance / metersPerPixel) * (unit === 'km' ? 1000 : 1);
 
   return (
     <View className="absolute left-4 bottom-4 items-start">
-      <View
-        style={{ width: actualWidth }}
-        className="h-1 bg-white border border-dark-bg"
-      />
+      <View style={{ width: actualWidth }} className="h-1 bg-white border border-dark-bg" />
       <Text className="text-xs text-white mt-1 font-medium">
         {distance} {unit}
       </Text>

@@ -8,7 +8,7 @@ import type {
   Notification,
   Post,
   UserProfile,
-} from './types.js';
+} from "./types.js";
 
 const cloneArray = <T>(values: Iterable<T>): T[] => Array.from(values);
 
@@ -63,9 +63,7 @@ const cloneNotification = (notification: Notification): Notification => ({
   metadata: { ...notification.metadata },
 });
 
-const cloneContribution = (
-  summary: ContributionSummary,
-): ContributionSummary => ({
+const cloneContribution = (summary: ContributionSummary): ContributionSummary => ({
   ...summary,
   badgesEarned: cloneArray(summary.badgesEarned),
 });
@@ -164,10 +162,7 @@ export class CommunityStore {
 
   public appendNotification(notification: Notification): void {
     const current = this.#notifications.get(notification.userId) ?? [];
-    this.#notifications.set(notification.userId, [
-      ...current,
-      cloneNotification(notification),
-    ]);
+    this.#notifications.set(notification.userId, [...current, cloneNotification(notification)]);
   }
 
   public listNotifications(userId: string): Notification[] {
@@ -175,10 +170,7 @@ export class CommunityStore {
     return queue.map(cloneNotification);
   }
 
-  public replaceNotifications(
-    userId: string,
-    notifications: Notification[],
-  ): void {
+  public replaceNotifications(userId: string, notifications: Notification[]): void {
     this.#notifications.set(userId, notifications.map(cloneNotification));
   }
 

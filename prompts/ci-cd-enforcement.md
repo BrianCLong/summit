@@ -15,7 +15,7 @@ Every deliverable MUST:
 
 ## Mandatory Questions
 
-*All must be YES:*
+_All must be YES:_
 
 - Will typecheck pass?
 - Will lint pass?
@@ -111,12 +111,12 @@ If **ANY** answer is NO → revise.
 
 ### Common Failures
 
-| Issue | Cause | Fix |
-|-------|-------|-----|
-| Type error | Missing types | Add explicit types |
-| Lint error | Style violation | Run `pnpm lint:fix` |
-| Test flake | Race condition | Add proper waits/mocks |
-| OOM | Large test suite | Increase memory, parallelize |
+| Issue      | Cause            | Fix                          |
+| ---------- | ---------------- | ---------------------------- |
+| Type error | Missing types    | Add explicit types           |
+| Lint error | Style violation  | Run `pnpm lint:fix`          |
+| Test flake | Race condition   | Add proper waits/mocks       |
+| OOM        | Large test suite | Increase memory, parallelize |
 
 ---
 

@@ -1,10 +1,10 @@
-import { z } from 'zod';
-import { PluginPermission } from '../types/permissions.js';
+import { z } from "zod";
+import { PluginPermission } from "../types/permissions.js";
 
 export const PluginSignatureSchema = z
   .object({
-    signature: z.string().min(1, 'Signature is required'),
-    publicKey: z.string().min(1, 'Public key is required'),
+    signature: z.string().min(1, "Signature is required"),
+    publicKey: z.string().min(1, "Public key is required"),
     algorithm: z.string().optional(),
     timestamp: z.string().datetime({ offset: true }).optional(),
   })
@@ -12,7 +12,11 @@ export const PluginSignatureSchema = z
 
 export const PluginManifestSchema = z
   .object({
-    id: z.string().min(3).max(100).regex(/^[a-z0-9-]+$/),
+    id: z
+      .string()
+      .min(3)
+      .max(100)
+      .regex(/^[a-z0-9-]+$/),
     name: z.string().min(1).max(200),
     version: z.string().regex(/^\d+\.\d+\.\d+(?:-[a-zA-Z0-9.]+)?$/),
     description: z.string().max(1000),
@@ -28,18 +32,18 @@ export const PluginManifestSchema = z
     license: z.string(),
 
     category: z.enum([
-      'data-source',
-      'analyzer',
-      'visualization',
-      'export',
-      'authentication',
-      'search',
-      'ml-model',
-      'workflow',
-      'ui-theme',
-      'api-extension',
-      'integration',
-      'utility',
+      "data-source",
+      "analyzer",
+      "visualization",
+      "export",
+      "authentication",
+      "search",
+      "ml-model",
+      "workflow",
+      "ui-theme",
+      "api-extension",
+      "integration",
+      "utility",
     ]),
 
     main: z.string(),
@@ -90,7 +94,7 @@ export const PluginManifestSchema = z
       .array(
         z
           .object({
-            method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']),
+            method: z.enum(["GET", "POST", "PUT", "PATCH", "DELETE"]),
             path: z.string(),
             handler: z.string(),
           })

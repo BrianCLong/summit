@@ -2,27 +2,29 @@
  * Common types and interfaces for cloud abstraction
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // Cloud provider enum
 export enum CloudProvider {
-  AWS = 'aws',
-  AZURE = 'azure',
-  GCP = 'gcp'
+  AWS = "aws",
+  AZURE = "azure",
+  GCP = "gcp",
 }
 
 // Configuration schemas
 export const CloudConfigSchema = z.object({
   provider: z.nativeEnum(CloudProvider),
   region: z.string(),
-  credentials: z.object({
-    accessKeyId: z.string().optional(),
-    secretAccessKey: z.string().optional(),
-    accountName: z.string().optional(),
-    accountKey: z.string().optional(),
-    projectId: z.string().optional(),
-    keyFilename: z.string().optional()
-  }).optional()
+  credentials: z
+    .object({
+      accessKeyId: z.string().optional(),
+      secretAccessKey: z.string().optional(),
+      accountName: z.string().optional(),
+      accountKey: z.string().optional(),
+      projectId: z.string().optional(),
+      keyFilename: z.string().optional(),
+    })
+    .optional(),
 });
 
 export type CloudConfig = z.infer<typeof CloudConfigSchema>;
@@ -72,7 +74,7 @@ export interface DatabaseQueryOptions {
   limit?: number;
   offset?: number;
   orderBy?: string;
-  orderDirection?: 'asc' | 'desc';
+  orderDirection?: "asc" | "desc";
   continuationToken?: string;
 }
 
@@ -139,34 +141,34 @@ export class CloudAbstractionError extends Error {
     public originalError?: Error
   ) {
     super(message);
-    this.name = 'CloudAbstractionError';
+    this.name = "CloudAbstractionError";
   }
 }
 
 export class StorageError extends CloudAbstractionError {
   constructor(message: string, provider: CloudProvider, originalError?: Error) {
-    super(message, provider, 'storage', originalError);
-    this.name = 'StorageError';
+    super(message, provider, "storage", originalError);
+    this.name = "StorageError";
   }
 }
 
 export class DatabaseError extends CloudAbstractionError {
   constructor(message: string, provider: CloudProvider, originalError?: Error) {
-    super(message, provider, 'database', originalError);
-    this.name = 'DatabaseError';
+    super(message, provider, "database", originalError);
+    this.name = "DatabaseError";
   }
 }
 
 export class MessagingError extends CloudAbstractionError {
   constructor(message: string, provider: CloudProvider, originalError?: Error) {
-    super(message, provider, 'messaging', originalError);
-    this.name = 'MessagingError';
+    super(message, provider, "messaging", originalError);
+    this.name = "MessagingError";
   }
 }
 
 export class SecretsError extends CloudAbstractionError {
   constructor(message: string, provider: CloudProvider, originalError?: Error) {
-    super(message, provider, 'secrets', originalError);
-    this.name = 'SecretsError';
+    super(message, provider, "secrets", originalError);
+    this.name = "SecretsError";
   }
 }

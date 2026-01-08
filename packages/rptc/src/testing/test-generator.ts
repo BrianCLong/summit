@@ -1,4 +1,4 @@
-import type { PromptTemplate } from '../compiler.js';
+import type { PromptTemplate } from "../compiler.js";
 import {
   type EnumSlotSchema,
   type NumberSlotSchema,
@@ -7,7 +7,7 @@ import {
   type SlotValues,
   type PartialSlotValues,
   type StringSlotSchema,
-} from '../schema.js';
+} from "../schema.js";
 import {
   type GeneratedCaseResult,
   type GeneratedTestCase,
@@ -15,7 +15,7 @@ import {
   type GeneratedTestSuite,
   type TestGenerationOptions,
   type TestHarness,
-} from './types.js';
+} from "./types.js";
 
 export type {
   GeneratedTestSuite,
@@ -24,17 +24,17 @@ export type {
   GeneratedCaseResult,
   TestGenerationOptions,
   TestHarness,
-} from './types.js';
+} from "./types.js";
 
 export function generateTestSuite<TSlots extends SlotSchemaMap>(
   template: PromptTemplate<TSlots>,
-  options: TestGenerationOptions<TSlots> = {},
+  options: TestGenerationOptions<TSlots> = {}
 ): GeneratedTestSuite<TSlots> {
   const baseValues = buildBaseValues(template, options);
   const cases: GeneratedTestCase<TSlots>[] = [
     {
-      description: 'renders successfully with canonical valid values',
-      slot: 'template',
+      description: "renders successfully with canonical valid values",
+      slot: "template",
       values: baseValues,
       expectValid: true,
     },
@@ -55,9 +55,7 @@ export function generateTestSuite<TSlots extends SlotSchemaMap>(
     cases,
     run(targetTemplate?: PromptTemplate<TSlots>) {
       const target = targetTemplate ?? template;
-      const results = cases.map((testCase) =>
-        executeTestCase(target, baseValues, testCase),
-      );
+      const results = cases.map((testCase) => executeTestCase(target, baseValues, testCase));
       return {
         passed: results.every((result) => result.passed),
         results,
@@ -66,9 +64,7 @@ export function generateTestSuite<TSlots extends SlotSchemaMap>(
     register(harness?: TestHarness) {
       const effectiveHarness = harness ?? detectHarness();
       if (!effectiveHarness) {
-        throw new Error(
-          'No test harness detected. Provide a harness with describe/it/expect.',
-        );
+        throw new Error("No test harness detected. Provide a harness with describe/it/expect.");
       }
       effectiveHarness.describe(suiteName, () => {
         for (const testCase of cases) {
@@ -91,7 +87,7 @@ export function generateTestSuite<TSlots extends SlotSchemaMap>(
 
 function buildBaseValues<TSlots extends SlotSchemaMap>(
   template: PromptTemplate<TSlots>,
-  options: TestGenerationOptions<TSlots>,
+  options: TestGenerationOptions<TSlots>
 ): SlotValues<TSlots> {
   const base: Partial<SlotValues<TSlots>> = {
     ...(options.validExample ?? ({} as SlotValues<TSlots>)),
@@ -106,7 +102,7 @@ function buildBaseValues<TSlots extends SlotSchemaMap>(
     const value = deriveValidValue(slotName as string, schema);
     if (value === undefined) {
       throw new Error(
-        `Unable to derive valid example for slot ${String(slotName)}. Provide a validExample override.`,
+        `Unable to derive valid example for slot ${String(slotName)}. Provide a validExample override.`
       );
     }
     base[slotName] = value as SlotValues<TSlots>[typeof slotName];
@@ -116,21 +112,21 @@ function buildBaseValues<TSlots extends SlotSchemaMap>(
 }
 
 function deriveValidValue(slotName: string, schema: SlotSchema): unknown {
-  if ('example' in schema && schema.example !== undefined) {
+  if ("example" in schema && schema.example !== undefined) {
     return schema.example;
   }
-  if ('defaultValue' in schema && schema.defaultValue !== undefined) {
+  if ("defaultValue" in schema && schema.defaultValue !== undefined) {
     return schema.defaultValue;
   }
 
   switch (schema.kind) {
-    case 'string':
+    case "string":
       return deriveStringValue(slotName, schema);
-    case 'number':
+    case "number":
       return deriveNumberValue(schema);
-    case 'boolean':
+    case "boolean":
       return true;
-    case 'enum':
+    case "enum":
       return (schema as EnumSlotSchema<string>).values[0];
     default:
       return undefined;
@@ -139,41 +135,31 @@ function deriveValidValue(slotName: string, schema: SlotSchema): unknown {
 
 function deriveStringValue(slotName: string, schema: StringSlotSchema): string {
   const min = schema.constraints?.minLength ?? 1;
-  const base = schema.constraints?.pattern?.source.includes('email')
-    ? 'user@example.com'
+  const base = schema.constraints?.pattern?.source.includes("email")
+    ? "user@example.com"
     : `${slotName}-value`;
   let candidate = base.repeat(Math.max(1, Math.ceil(min / base.length)));
   if (candidate.length < min) {
-    candidate = candidate.padEnd(min, 'x');
+    candidate = candidate.padEnd(min, "x");
   }
-  if (
-    schema.constraints?.maxLength &&
-    candidate.length > schema.constraints.maxLength
-  ) {
+  if (schema.constraints?.maxLength && candidate.length > schema.constraints.maxLength) {
     candidate = candidate.slice(0, schema.constraints.maxLength);
   }
-  if (
-    schema.constraints?.pattern &&
-    !schema.constraints.pattern.test(candidate)
-  ) {
+  if (schema.constraints?.pattern && !schema.constraints.pattern.test(candidate)) {
     candidate = ensurePatternCompliance(
       schema.constraints.pattern,
       min,
-      schema.constraints?.maxLength,
+      schema.constraints?.maxLength
     );
   }
   return candidate;
 }
 
-function ensurePatternCompliance(
-  pattern: RegExp,
-  minLength?: number,
-  maxLength?: number,
-): string {
-  const safe = 'valid';
+function ensurePatternCompliance(pattern: RegExp, minLength?: number, maxLength?: number): string {
+  const safe = "valid";
   let candidate = safe;
   if (minLength && candidate.length < minLength) {
-    candidate = candidate.padEnd(minLength, 'd');
+    candidate = candidate.padEnd(minLength, "d");
   }
   if (maxLength && candidate.length > maxLength) {
     candidate = candidate.slice(0, maxLength);
@@ -181,9 +167,7 @@ function ensurePatternCompliance(
   if (pattern.test(candidate)) {
     return candidate;
   }
-  return pattern.flags.includes('i')
-    ? candidate.toUpperCase()
-    : `${candidate}x`;
+  return pattern.flags.includes("i") ? candidate.toUpperCase() : `${candidate}x`;
 }
 
 function deriveNumberValue(schema: NumberSlotSchema): number {
@@ -199,7 +183,7 @@ function deriveNumberValue(schema: NumberSlotSchema): number {
 function buildSlotCases<TSlots extends SlotSchemaMap>(
   slotName: keyof TSlots,
   schema: SlotSchema,
-  options: TestGenerationOptions<TSlots>,
+  options: TestGenerationOptions<TSlots>
 ): GeneratedTestCase<TSlots>[] {
   const cases: GeneratedTestCase<TSlots>[] = [];
 
@@ -223,16 +207,16 @@ function buildSlotCases<TSlots extends SlotSchemaMap>(
   }
 
   switch (schema.kind) {
-    case 'string':
+    case "string":
       cases.push(...buildStringCases(slotName, schema as StringSlotSchema));
       break;
-    case 'number':
+    case "number":
       cases.push(...buildNumberCases(slotName, schema as NumberSlotSchema));
       break;
-    case 'enum':
+    case "enum":
       cases.push(buildEnumCase(slotName, schema as EnumSlotSchema<string>));
       break;
-    case 'boolean':
+    case "boolean":
       cases.push(buildBooleanCase(slotName));
       break;
   }
@@ -242,7 +226,7 @@ function buildSlotCases<TSlots extends SlotSchemaMap>(
 
 function buildStringCases<TSlots extends SlotSchemaMap>(
   slotName: keyof TSlots,
-  schema: StringSlotSchema,
+  schema: StringSlotSchema
 ): GeneratedTestCase<TSlots>[] {
   const cases: GeneratedTestCase<TSlots>[] = [];
   const min = schema.constraints?.minLength;
@@ -253,7 +237,7 @@ function buildStringCases<TSlots extends SlotSchemaMap>(
       description: `enforces minLength on ${String(slotName)}`,
       slot: slotName,
       values: {
-        [slotName]: 'x'.repeat(Math.max(0, min - 1)),
+        [slotName]: "x".repeat(Math.max(0, min - 1)),
       } as PartialSlotValues<TSlots>,
       expectValid: false,
     });
@@ -263,7 +247,7 @@ function buildStringCases<TSlots extends SlotSchemaMap>(
     cases.push({
       description: `enforces maxLength on ${String(slotName)}`,
       slot: slotName,
-      values: { [slotName]: 'y'.repeat(max + 1) } as PartialSlotValues<TSlots>,
+      values: { [slotName]: "y".repeat(max + 1) } as PartialSlotValues<TSlots>,
       expectValid: false,
     });
   }
@@ -272,7 +256,7 @@ function buildStringCases<TSlots extends SlotSchemaMap>(
     cases.push({
       description: `enforces pattern on ${String(slotName)}`,
       slot: slotName,
-      values: { [slotName]: '__invalid__' } as PartialSlotValues<TSlots>,
+      values: { [slotName]: "__invalid__" } as PartialSlotValues<TSlots>,
       expectValid: false,
     });
   }
@@ -282,7 +266,7 @@ function buildStringCases<TSlots extends SlotSchemaMap>(
 
 function buildNumberCases<TSlots extends SlotSchemaMap>(
   slotName: keyof TSlots,
-  schema: NumberSlotSchema,
+  schema: NumberSlotSchema
 ): GeneratedTestCase<TSlots>[] {
   const cases: GeneratedTestCase<TSlots>[] = [];
   const min = schema.constraints?.min;
@@ -311,24 +295,24 @@ function buildNumberCases<TSlots extends SlotSchemaMap>(
 
 function buildEnumCase<TSlots extends SlotSchemaMap>(
   slotName: keyof TSlots,
-  _schema: EnumSlotSchema<string>,
+  _schema: EnumSlotSchema<string>
 ): GeneratedTestCase<TSlots> {
   void _schema;
   return {
     description: `rejects value outside enum for ${String(slotName)}`,
     slot: slotName,
-    values: { [slotName]: '__invalid__' } as PartialSlotValues<TSlots>,
+    values: { [slotName]: "__invalid__" } as PartialSlotValues<TSlots>,
     expectValid: false,
   };
 }
 
 function buildBooleanCase<TSlots extends SlotSchemaMap>(
-  slotName: keyof TSlots,
+  slotName: keyof TSlots
 ): GeneratedTestCase<TSlots> {
   return {
     description: `rejects non-boolean values for ${String(slotName)}`,
     slot: slotName,
-    values: { [slotName]: 'truthy' } as PartialSlotValues<TSlots>,
+    values: { [slotName]: "truthy" } as PartialSlotValues<TSlots>,
     expectValid: false,
   };
 }
@@ -336,18 +320,17 @@ function buildBooleanCase<TSlots extends SlotSchemaMap>(
 function collectCounterExamples<TSlots extends SlotSchemaMap>(
   slotName: keyof TSlots,
   schema: SlotSchema,
-  options: TestGenerationOptions<TSlots>,
+  options: TestGenerationOptions<TSlots>
 ): readonly unknown[] {
   const schemaExamples = schema.counterExamples ?? [];
-  const optionExamples = (options.counterExamples?.[slotName] ??
-    []) as readonly unknown[];
+  const optionExamples = (options.counterExamples?.[slotName] ?? []) as readonly unknown[];
   return [...schemaExamples, ...optionExamples];
 }
 
 function executeTestCase<TSlots extends SlotSchemaMap>(
   template: PromptTemplate<TSlots>,
   baseValues: SlotValues<TSlots>,
-  testCase: GeneratedTestCase<TSlots>,
+  testCase: GeneratedTestCase<TSlots>
 ): GeneratedCaseResult<TSlots> {
   const mergedValues = {
     ...baseValues,
@@ -359,18 +342,14 @@ function executeTestCase<TSlots extends SlotSchemaMap>(
       return {
         testCase,
         passed: false,
-        error: new Error(
-          `Expected valid but got errors for slot ${String(testCase.slot)}.`,
-        ),
+        error: new Error(`Expected valid but got errors for slot ${String(testCase.slot)}.`),
       };
     }
     if (!testCase.expectValid && result.valid) {
       return {
         testCase,
         passed: false,
-        error: new Error(
-          `Expected validation failure for slot ${String(testCase.slot)}.`,
-        ),
+        error: new Error(`Expected validation failure for slot ${String(testCase.slot)}.`),
       };
     }
     if (testCase.expectValid) {
@@ -378,8 +357,8 @@ function executeTestCase<TSlots extends SlotSchemaMap>(
       return { testCase, passed: true };
     }
     let threw = false;
-  try {
-    template.render(mergedValues);
+    try {
+      template.render(mergedValues);
     } catch {
       threw = true;
     }
@@ -387,9 +366,7 @@ function executeTestCase<TSlots extends SlotSchemaMap>(
       return {
         testCase,
         passed: false,
-        error: new Error(
-          `Expected render to throw for invalid slot ${String(testCase.slot)}.`,
-        ),
+        error: new Error(`Expected render to throw for invalid slot ${String(testCase.slot)}.`),
       };
     }
     return { testCase, passed: true };
@@ -405,14 +382,14 @@ function detectHarness(): TestHarness | undefined {
     expect?: unknown;
   };
   if (
-    typeof globalRef.describe === 'function' &&
-    typeof globalRef.it === 'function' &&
-    typeof globalRef.expect === 'function'
+    typeof globalRef.describe === "function" &&
+    typeof globalRef.it === "function" &&
+    typeof globalRef.expect === "function"
   ) {
     return {
       describe: globalRef.describe.bind(globalRef),
       it: globalRef.it.bind(globalRef),
-      expect: globalRef.expect as TestHarness['expect'],
+      expect: globalRef.expect as TestHarness["expect"],
     } satisfies TestHarness;
   }
   return undefined;

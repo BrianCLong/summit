@@ -1,5 +1,5 @@
-import { writeFileSync } from 'node:fs';
-import { CompiledModelCard } from './types.js';
+import { writeFileSync } from "node:fs";
+import { CompiledModelCard } from "./types.js";
 
 export interface GalleryEntry {
   modelId: string;
@@ -13,13 +13,15 @@ export interface GalleryEntry {
 
 export function buildGalleryDataset(cards: CompiledModelCard[]): GalleryEntry[] {
   return cards.map((card) => {
-    const highestRisk = card.risk.flags.reduce((current, flag) => {
-      const levels = ['low', 'medium', 'high'];
-      return levels.indexOf(flag.level) > levels.indexOf(current.level)
-        ? { level: flag.level, flag }
-        : current;
-    },
-    { level: 'low', flag: card.risk.flags[0] });
+    const highestRisk = card.risk.flags.reduce(
+      (current, flag) => {
+        const levels = ["low", "medium", "high"];
+        return levels.indexOf(flag.level) > levels.indexOf(current.level)
+          ? { level: flag.level, flag }
+          : current;
+      },
+      { level: "low", flag: card.risk.flags[0] }
+    );
 
     return {
       modelId: card.metadata.modelId,
@@ -39,5 +41,5 @@ export function buildGalleryDataset(cards: CompiledModelCard[]): GalleryEntry[] 
 
 export function writeGalleryDataset(outputPath: string, cards: CompiledModelCard[]) {
   const dataset = buildGalleryDataset(cards);
-  writeFileSync(outputPath, JSON.stringify(dataset, null, 2), 'utf8');
+  writeFileSync(outputPath, JSON.stringify(dataset, null, 2), "utf8");
 }

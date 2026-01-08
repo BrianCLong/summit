@@ -4,9 +4,9 @@
  */
 
 // Types
-export * from './types/semantic.js';
+export * from "./types/semantic.js";
 
 // Core modules
-export { RelationshipExtractor } from './extraction/RelationshipExtractor.js';
-export { SemanticSearch } from './search/SemanticSearch.js';
-export type { SearchQuery, SearchResult } from './search/SemanticSearch.js';
+export { RelationshipExtractor } from "./extraction/RelationshipExtractor.js";
+export { SemanticSearch } from "./search/SemanticSearch.js";
+export type { SearchQuery, SearchResult } from "./search/SemanticSearch.js";

@@ -1,4 +1,4 @@
-import { deepEqual } from './utils.ts';
+import { deepEqual } from "./utils.ts";
 
 export class EntitlementService {
   constructor() {
@@ -27,7 +27,7 @@ export class EntitlementService {
     }
     return {
       ...entitlements,
-      previewNotes: 'Preview only - cutover blocked until billing reconciliation passes',
+      previewNotes: "Preview only - cutover blocked until billing reconciliation passes",
     };
   }
 
@@ -35,7 +35,7 @@ export class EntitlementService {
     const entitlements = this.entitlements.get(tenantId);
     const billing = this.billingSnapshots.get(tenantId);
     if (!entitlements || !billing) {
-      return { ok: false, mismatches: ['missing-entitlements-or-billing'] };
+      return { ok: false, mismatches: ["missing-entitlements-or-billing"] };
     }
     const mismatches = entitlements.entitlements
       .filter((entitlement) => {

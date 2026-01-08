@@ -2,8 +2,8 @@ name: migration-gate
 on:
   pull_request:
     paths:
-      - 'db/migrations/**'
-      - '.ci/policies/**'
+      - "db/migrations/**"
+      - ".ci/policies/**"
 jobs:
   gate:
     runs-on: ubuntu-latest

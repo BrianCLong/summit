@@ -7,7 +7,7 @@ receivers:
 
 exporters:
   otlp:
-    endpoint: 'otel-collector:4317'
+    endpoint: "otel-collector:4317"
     tls:
       insecure: true
 

@@ -12,16 +12,16 @@
           },
           "lead_routing": {
             "enterprise": {
-              "assignee": {"type": "team", "id": "enterprise-team"},
-              "sla": {"first_touch_hours": 4}
+              "assignee": { "type": "team", "id": "enterprise-team" },
+              "sla": { "first_touch_hours": 4 }
             },
             "smb": {
-              "assignee": {"type": "team", "id": "smb-queue"},
-              "sla": {"first_touch_hours": 24}
+              "assignee": { "type": "team", "id": "smb-queue" },
+              "sla": { "first_touch_hours": 24 }
             },
             "midmarket": {
-              "assignee": {"type": "team", "id": "midmarket-pod"},
-              "sla": {"first_touch_hours": 8}
+              "assignee": { "type": "team", "id": "midmarket-pod" },
+              "sla": { "first_touch_hours": 8 }
             }
           },
           "lead_routing_flags": {
@@ -36,9 +36,9 @@
               },
               "approvals": {
                 "thresholds": [
-                  {"max_discount": 20, "approvers": []},
-                  {"max_discount": 30, "approvers": ["sales_manager"]},
-                  {"max_discount": 40, "approvers": ["sales_manager", "finance"]}
+                  { "max_discount": 20, "approvers": [] },
+                  { "max_discount": 30, "approvers": ["sales_manager"] },
+                  { "max_discount": 40, "approvers": ["sales_manager", "finance"] }
                 ]
               },
               "min_term_months": 12
@@ -51,9 +51,9 @@
               },
               "approvals": {
                 "thresholds": [
-                  {"max_discount": 15, "approvers": []},
-                  {"max_discount": 25, "approvers": ["sales_manager"]},
-                  {"max_discount": 35, "approvers": ["sales_manager", "finance", "vp_sales"]}
+                  { "max_discount": 15, "approvers": [] },
+                  { "max_discount": 25, "approvers": ["sales_manager"] },
+                  { "max_discount": 35, "approvers": ["sales_manager", "finance", "vp_sales"] }
                 ]
               },
               "min_term_months": 12
@@ -70,8 +70,8 @@
           },
           "lead_routing": {
             "enterprise": {
-              "assignee": {"type": "team", "id": "global-enterprise"},
-              "sla": {"first_touch_hours": 2}
+              "assignee": { "type": "team", "id": "global-enterprise" },
+              "sla": { "first_touch_hours": 2 }
             }
           },
           "lead_routing_flags": {
@@ -86,9 +86,9 @@
               },
               "approvals": {
                 "thresholds": [
-                  {"max_discount": 10, "approvers": []},
-                  {"max_discount": 20, "approvers": ["sales_manager"]},
-                  {"max_discount": 30, "approvers": ["sales_manager", "finance"]}
+                  { "max_discount": 10, "approvers": [] },
+                  { "max_discount": 20, "approvers": ["sales_manager"] },
+                  { "max_discount": 30, "approvers": ["sales_manager", "finance"] }
                 ]
               },
               "min_term_months": 12
@@ -139,19 +139,19 @@
         },
         "forecast": {
           "categories": {
-            "commit": {"min_stage": "negotiation", "evidence": ["contract_signed"]},
-            "best_case": {"min_stage": "proposal", "evidence": ["commercial_terms_sent"]},
-            "upside": {"min_stage": "evaluation", "evidence": ["champion_identified"]},
-            "pipeline": {"min_stage": "discovery", "evidence": []}
+            "commit": { "min_stage": "negotiation", "evidence": ["contract_signed"] },
+            "best_case": { "min_stage": "proposal", "evidence": ["commercial_terms_sent"] },
+            "upside": { "min_stage": "evaluation", "evidence": ["champion_identified"] },
+            "pipeline": { "min_stage": "discovery", "evidence": [] }
           }
         },
         "quote_to_cash": {
-          "floors": {"enterprise": 5000, "smb": 1200},
-          "ceilings": {"enterprise": 1000000, "smb": 250000},
+          "floors": { "enterprise": 5000, "smb": 1200 },
+          "ceilings": { "enterprise": 1000000, "smb": 250000 },
           "approval_thresholds": [
-            {"max_discount": 10, "approvers": []},
-            {"max_discount": 20, "approvers": ["manager"]},
-            {"max_discount": 35, "approvers": ["manager", "finance"]}
+            { "max_discount": 10, "approvers": [] },
+            { "max_discount": 20, "approvers": ["manager"] },
+            { "max_discount": 35, "approvers": ["manager", "finance"] }
           ],
           "renewal_creation_days": [180, 120, 90]
         },
@@ -164,7 +164,14 @@
           "commitment_registry_required": true
         },
         "data_quality": {
-          "mandatory_fields": ["next_step", "next_step_date", "buying_role", "source", "segment", "territory"],
+          "mandatory_fields": [
+            "next_step",
+            "next_step_date",
+            "buying_role",
+            "source",
+            "segment",
+            "territory"
+          ],
           "dedupe": true
         },
         "governance_controls": {
@@ -176,15 +183,54 @@
   },
   "revops_fixtures": {
     "leads": [
-      {"id": "lead-123", "email": "cto@bigcorp.com", "domain": "bigcorp.com", "company_size": "1000+", "country": "GB", "segment_hint": ""},
-      {"id": "lead-999", "email": "spam@blocked.test", "domain": "blocked.test", "company_size": "1-199", "country": "US", "segment_hint": ""}
+      {
+        "id": "lead-123",
+        "email": "cto@bigcorp.com",
+        "domain": "bigcorp.com",
+        "company_size": "1000+",
+        "country": "GB",
+        "segment_hint": ""
+      },
+      {
+        "id": "lead-999",
+        "email": "spam@blocked.test",
+        "domain": "blocked.test",
+        "company_size": "1-199",
+        "country": "US",
+        "segment_hint": ""
+      }
     ],
     "quotes": [
-      {"id": "quote-1", "segment": "enterprise", "discount_percentage": 20, "total_value": 100000, "term_months": 12, "non_standard_terms": []}
+      {
+        "id": "quote-1",
+        "segment": "enterprise",
+        "discount_percentage": 20,
+        "total_value": 100000,
+        "term_months": 12,
+        "non_standard_terms": []
+      }
     ],
     "contracts": [
-      {"id": "contract-1", "status": "signed", "region": "US", "term_months": 12, "mrr": 20000, "signatures": [{"role": "buyer", "signed_at": "2025-01-01T00:00:00Z"}], "approvals": ["sales_manager"], "flags": []},
-      {"id": "contract-2", "status": "draft", "region": "US", "term_months": 12, "mrr": 20000, "signatures": [], "approvals": [], "flags": []}
+      {
+        "id": "contract-1",
+        "status": "signed",
+        "region": "US",
+        "term_months": 12,
+        "mrr": 20000,
+        "signatures": [{ "role": "buyer", "signed_at": "2025-01-01T00:00:00Z" }],
+        "approvals": ["sales_manager"],
+        "flags": []
+      },
+      {
+        "id": "contract-2",
+        "status": "draft",
+        "region": "US",
+        "term_months": 12,
+        "mrr": 20000,
+        "signatures": [],
+        "approvals": [],
+        "flags": []
+      }
     ]
   }
 }

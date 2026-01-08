@@ -1,13 +1,7 @@
-import React, { useRef } from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-} from '@mui/material';
-import { useFocusTrap } from '../utils/useFocusTrap';
-import PolicyExplain from './PolicyExplain';
+import React, { useRef } from "react";
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/material";
+import { useFocusTrap } from "../utils/useFocusTrap";
+import PolicyExplain from "./PolicyExplain";
 
 export default function PolicyExplainDialog({
   open,

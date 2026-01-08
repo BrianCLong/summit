@@ -29,7 +29,9 @@ export const TooltipExample: Story = {
         <TooltipTrigger asChild>
           <Button variant="secondary">Hover me</Button>
         </TooltipTrigger>
-        <TooltipContent side="top">Explains the control without clutter.</TooltipContent>
+        <TooltipContent side="top">
+          Explains the control without clutter.
+        </TooltipContent>
       </Tooltip>
     </TooltipProvider>
   ),

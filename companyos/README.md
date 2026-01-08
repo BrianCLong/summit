@@ -4,12 +4,12 @@ This directory contains the operational blueprint, agent definitions, and govern
 
 ## Structure
 
-*   **`blueprint/`**: The organizational design and high-level architecture.
-*   **`agents/`**: Definitions and system prompts for the Agent Mesh.
-*   **`workflows/`**: Maestro Task Graph templates for standard flows.
-*   **`governance/`**: Integration of the Governance Layer into the mesh.
-*   **`backlog/`**: Initial backlog and sprint plans (Sprint 0-3).
-*   **`toolchain/`**: Specifications for tool interoperability.
+- **`blueprint/`**: The organizational design and high-level architecture.
+- **`agents/`**: Definitions and system prompts for the Agent Mesh.
+- **`workflows/`**: Maestro Task Graph templates for standard flows.
+- **`governance/`**: Integration of the Governance Layer into the mesh.
+- **`backlog/`**: Initial backlog and sprint plans (Sprint 0-3).
+- **`toolchain/`**: Specifications for tool interoperability.
 
 ## Quick Start (Sprint 0)
 

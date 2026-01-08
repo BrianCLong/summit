@@ -3,6 +3,7 @@
 ## 🎯 What Was Built
 
 A minimal IntelGraph "Decision & Claims" slice with:
+
 - **Domain models**: Entity, Claim, Decision, Source (Python 3.11+)
 - **Persistence**: SQLite-backed store using SQLModel (migration-ready)
 - **API**: FastAPI router with REST endpoints
@@ -101,6 +102,7 @@ uvicorn api:app --reload
 ## 📊 Domain Model
 
 ### Entity
+
 Core nodes in the knowledge graph.
 
 ```python
@@ -114,6 +116,7 @@ Core nodes in the knowledge graph.
 ```
 
 ### Claim
+
 Assertions about entities with provenance.
 
 ```python
@@ -133,6 +136,7 @@ Assertions about entities with provenance.
 ```
 
 ### Decision
+
 Structured decision records (CEO template).
 
 ```python
@@ -154,6 +158,7 @@ Structured decision records (CEO template).
 ```
 
 ### Source
+
 Provenance tracking.
 
 ```python
@@ -170,25 +175,30 @@ Provenance tracking.
 ## 🌐 API Endpoints
 
 ### Entities
+
 - `POST /entities` - Create entity
 - `GET /entities?limit=100&offset=0` - List entities (paginated)
 - `GET /entities/{id}` - Get entity by ID
 - `GET /entities/{id}/context` - Get entity + claims + related decisions
 
 ### Claims
+
 - `POST /claims` - Create claim (validates entity_id exists)
 - `GET /claims?limit=100&offset=0` - List claims (paginated)
 
 ### Decisions
+
 - `POST /decisions` - Create decision
 - `GET /decisions?limit=100&offset=0` - List decisions (paginated)
 - `GET /decisions/{id}` - Get decision by ID
 
 ### Sources
+
 - `POST /sources` - Create source
 - `GET /sources?limit=100&offset=0` - List sources (paginated)
 
 ### Meta
+
 - `GET /` - API info
 - `GET /health` - Health check
 
@@ -243,6 +253,7 @@ curl http://localhost:8000/entities/1/context
 ```
 
 Response includes:
+
 - Entity details
 - All claims about the entity
 - All decisions that reference those claims
@@ -267,6 +278,7 @@ make intelgraph-test
 ```
 
 Output shows:
+
 - `test_models.py` - 12 tests
 - `test_database.py` - 15 tests
 - `test_api.py` - 20+ tests
@@ -286,6 +298,7 @@ Policy labels are **explicit** on Claims and Sources:
 ```
 
 Defaults to:
+
 ```json
 {
   "origin": "public",
@@ -296,15 +309,15 @@ Defaults to:
 
 ## 🎓 CEO Decision Template Mapping
 
-| CEO Template Field | Decision Model Field | Type |
-|--------------------|----------------------|------|
-| Context | `context` | String |
-| Options | `options` | JSON array |
-| Decision | `decision` | String |
-| Reversible? | `reversible_flag` | Boolean |
-| Risks | `checks` | JSON array |
-| Owners | `owners` | JSON array |
-| Checks | `checks` | JSON array |
+| CEO Template Field | Decision Model Field | Type       |
+| ------------------ | -------------------- | ---------- |
+| Context            | `context`            | String     |
+| Options            | `options`            | JSON array |
+| Decision           | `decision`           | String     |
+| Reversible?        | `reversible_flag`    | Boolean    |
+| Risks              | `checks`             | JSON array |
+| Owners             | `owners`             | JSON array |
+| Checks             | `checks`             | JSON array |
 
 See `test_api.py::test_create_decision_ceo_template_example()` for a complete example.
 
@@ -316,34 +329,38 @@ See `test_api.py::test_create_decision_ceo_template_example()` for a complete ex
 
 ## 🔧 Technology Choices
 
-| Component | Choice | Why |
-|-----------|--------|-----|
-| API Framework | FastAPI | Modern, fast, auto-docs, async-ready |
-| ORM | SQLModel | Type-safe, Pydantic validation built-in |
-| Database (dev) | SQLite | Zero config, portable, fast |
-| Database (prod) | PostgreSQL-ready | Same SQLModel code, just change URL |
-| Testing | pytest, httpx | Industry standard, great async support |
-| Types | Python 3.11+ type hints | Catch errors early, better IDE support |
+| Component       | Choice                  | Why                                     |
+| --------------- | ----------------------- | --------------------------------------- |
+| API Framework   | FastAPI                 | Modern, fast, auto-docs, async-ready    |
+| ORM             | SQLModel                | Type-safe, Pydantic validation built-in |
+| Database (dev)  | SQLite                  | Zero config, portable, fast             |
+| Database (prod) | PostgreSQL-ready        | Same SQLModel code, just change URL     |
+| Testing         | pytest, httpx           | Industry standard, great async support  |
+| Types           | Python 3.11+ type hints | Catch errors early, better IDE support  |
 
 ## 🚧 Design Decisions
 
 **SQLite for development:**
+
 - Zero config, works out of the box
 - Easy to reset: `rm -f data/intelgraph.db`
 - Production: swap URL to PostgreSQL, same code
 
 **JSON strings for arrays:**
+
 - Works in SQLite and PostgreSQL without schema changes
 - Explicit (no hidden serialization)
 - Trade-off: Manual `json.loads()`, but keeps data model transparent
 - Future: Migrate to PostgreSQL array columns later
 
 **Separate Source table:**
+
 - Provenance is first-class
 - Sources can be reused across claims
 - Ready for chain-of-custody/audit trail
 
 **Policy labels on Claim:**
+
 - Flexibility: Source might be public, but derived claim confidential
 - Fine-grained access control ready
 - Data-level governance

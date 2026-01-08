@@ -1,10 +1,10 @@
-import { Pool } from 'pg';
-import { logger } from '../utils/logger';
+import { Pool } from "pg";
+import { logger } from "../utils/logger";
 
 export type MaterializedViewSource =
-  | 'maestro.mv_reporting_entity_activity'
-  | 'maestro.mv_reporting_case_snapshot'
-  | 'maestro.mv_reporting_case_timeline'
+  | "maestro.mv_reporting_entity_activity"
+  | "maestro.mv_reporting_case_snapshot"
+  | "maestro.mv_reporting_case_timeline"
   | string;
 
 export interface RefreshViewStatus {
@@ -32,9 +32,9 @@ export interface SchedulerOptions {
 }
 
 const DEFAULT_VIEWS: MaterializedViewSource[] = [
-  'maestro.mv_reporting_entity_activity',
-  'maestro.mv_reporting_case_snapshot',
-  'maestro.mv_reporting_case_timeline',
+  "maestro.mv_reporting_entity_activity",
+  "maestro.mv_reporting_case_snapshot",
+  "maestro.mv_reporting_case_timeline",
 ];
 
 export class MaterializedViewScheduler {
@@ -43,12 +43,12 @@ export class MaterializedViewScheduler {
 
   constructor(
     private pool: Pool,
-    private options: SchedulerOptions,
+    private options: SchedulerOptions
   ) {}
 
   start() {
     if (!this.options.enabled) {
-      logger.info('MV reporting disabled; scheduler not started');
+      logger.info("MV reporting disabled; scheduler not started");
       return;
     }
 
@@ -56,10 +56,9 @@ export class MaterializedViewScheduler {
       try {
         await this.refreshNow();
       } catch (error) {
-        logger.warn(
-          'Materialized view refresh failed (will retry on next interval)',
-          { err: error as Error },
-        );
+        logger.warn("Materialized view refresh failed (will retry on next interval)", {
+          err: error as Error,
+        });
       }
     };
 
@@ -79,17 +78,16 @@ export class MaterializedViewScheduler {
 
   async refreshNow(): Promise<RefreshViewStatus[]> {
     // Respect the CONCURRENTLY override if an environment (pg-mem) cannot support it.
-    const concurrentSetting = this.options.useConcurrentRefresh ? 'on' : 'off';
-    await this.pool.query(
-      "SELECT set_config('maestro.reporting_refresh_concurrent', $1, false)",
-      [concurrentSetting],
-    );
+    const concurrentSetting = this.options.useConcurrentRefresh ? "on" : "off";
+    await this.pool.query("SELECT set_config('maestro.reporting_refresh_concurrent', $1, false)", [
+      concurrentSetting,
+    ]);
 
     const startedAt = new Date();
     this.snapshot.lastRunStartedAt = startedAt;
 
     const { rows } = await this.pool.query(
-      'SELECT * FROM maestro.refresh_reporting_materialized_views()',
+      "SELECT * FROM maestro.refresh_reporting_materialized_views()"
     );
 
     const statuses: RefreshViewStatus[] = rows.map((row: any) => ({
@@ -97,7 +95,7 @@ export class MaterializedViewScheduler {
       refreshedAt: row.refreshed_at ? new Date(row.refreshed_at) : undefined,
       durationMs: row.duration_ms ?? undefined,
       rowCount: row.row_count ?? undefined,
-      status: row.status ?? 'ok',
+      status: row.status ?? "ok",
       error: row.error ?? null,
     }));
 
@@ -107,23 +105,18 @@ export class MaterializedViewScheduler {
       lastError: undefined,
       views: {
         ...this.snapshot.views,
-        ...Object.fromEntries(
-          statuses.map((s) => [s.viewName, s] as const),
-        ),
+        ...Object.fromEntries(statuses.map((s) => [s.viewName, s] as const)),
       },
     };
 
-    logger.info(
-      'Materialized view refresh completed',
-      {
-        views: statuses.map((s) => ({
-          view: s.viewName,
-          status: s.status,
-          durationMs: s.durationMs,
-          rows: s.rowCount,
-        })),
-      },
-    );
+    logger.info("Materialized view refresh completed", {
+      views: statuses.map((s) => ({
+        view: s.viewName,
+        status: s.status,
+        durationMs: s.durationMs,
+        rows: s.rowCount,
+      })),
+    });
 
     return statuses;
   }
@@ -134,9 +127,7 @@ export class MaterializedViewScheduler {
 
   getStalenessSeconds(viewNames?: MaterializedViewSource[]): number | undefined {
     const targets =
-      viewNames && viewNames.length > 0
-        ? viewNames
-        : this.options.viewNames || DEFAULT_VIEWS;
+      viewNames && viewNames.length > 0 ? viewNames : this.options.viewNames || DEFAULT_VIEWS;
 
     const timestamps = targets
       .map((name) => this.snapshot.views[name]?.refreshedAt)
@@ -146,9 +137,7 @@ export class MaterializedViewScheduler {
       return undefined;
     }
 
-    const maxAgeMs = Math.max(
-      ...timestamps.map((date) => Date.now() - date.getTime()),
-    );
+    const maxAgeMs = Math.max(...timestamps.map((date) => Date.now() - date.getTime()));
     return Math.round(maxAgeMs / 1000);
   }
 }

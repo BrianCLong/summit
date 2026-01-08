@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
 export interface DependencyEdge {
   from: string;
@@ -17,18 +17,18 @@ export interface CycleReport {
 }
 
 function readJson(filePath: string): any {
-  const content = fs.readFileSync(filePath, 'utf-8');
+  const content = fs.readFileSync(filePath, "utf-8");
   return JSON.parse(content);
 }
 
 export function discoverWorkspacePackages(rootDir: string): Map<string, string> {
-  const packagesDir = path.join(rootDir, 'packages');
+  const packagesDir = path.join(rootDir, "packages");
   const entries = fs.readdirSync(packagesDir, { withFileTypes: true });
   const packages = new Map<string, string>();
 
   entries.forEach((entry) => {
     if (!entry.isDirectory()) return;
-    const packageJsonPath = path.join(packagesDir, entry.name, 'package.json');
+    const packageJsonPath = path.join(packagesDir, entry.name, "package.json");
     if (!fs.existsSync(packageJsonPath)) return;
     const pkg = readJson(packageJsonPath);
     if (pkg?.name) {
@@ -44,7 +44,7 @@ export function buildDependencyGraph(packageRoots: Map<string, string>): Depende
   const nodes = new Set<string>(packageRoots.keys());
 
   packageRoots.forEach((pkgPath, pkgName) => {
-    const pkgJsonPath = path.join(pkgPath, 'package.json');
+    const pkgJsonPath = path.join(pkgPath, "package.json");
     const pkg = readJson(pkgJsonPath);
     const deps = Object.assign({}, pkg.dependencies, pkg.devDependencies, pkg.peerDependencies);
     Object.keys(deps || {}).forEach((dep) => {

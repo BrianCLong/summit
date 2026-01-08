@@ -54,7 +54,7 @@ export class CanvasPerformanceMonitor {
         try {
           callback(this.getMetrics());
         } catch (error) {
-          console.warn('Performance callback error:', error);
+          console.warn("Performance callback error:", error);
         }
       });
     }
@@ -92,7 +92,7 @@ export class LODManager {
       MAXIMUM: { maxNodes: 3000, maxEdges: 6000, minConfidence: 0.3 },
     };
 
-    this.currentLevel = 'FOCUSED';
+    this.currentLevel = "FOCUSED";
     this.adaptiveMode = true;
   }
 
@@ -102,23 +102,23 @@ export class LODManager {
 
     // Performance is good, try upgrading
     if (fps >= 60) {
-      if (this.currentLevel === 'OVERVIEW' && nodeCount < 500) {
-        this.currentLevel = 'DETAILED';
-      } else if (this.currentLevel === 'DETAILED' && nodeCount < 2000) {
-        this.currentLevel = 'FOCUSED';
-      } else if (this.currentLevel === 'FOCUSED' && nodeCount < 2500) {
-        this.currentLevel = 'MAXIMUM';
+      if (this.currentLevel === "OVERVIEW" && nodeCount < 500) {
+        this.currentLevel = "DETAILED";
+      } else if (this.currentLevel === "DETAILED" && nodeCount < 2000) {
+        this.currentLevel = "FOCUSED";
+      } else if (this.currentLevel === "FOCUSED" && nodeCount < 2500) {
+        this.currentLevel = "MAXIMUM";
       }
     }
 
     // Performance is poor, downgrade
     if (fps < 45) {
-      if (this.currentLevel === 'MAXIMUM') {
-        this.currentLevel = 'FOCUSED';
-      } else if (this.currentLevel === 'FOCUSED') {
-        this.currentLevel = 'DETAILED';
-      } else if (this.currentLevel === 'DETAILED') {
-        this.currentLevel = 'OVERVIEW';
+      if (this.currentLevel === "MAXIMUM") {
+        this.currentLevel = "FOCUSED";
+      } else if (this.currentLevel === "FOCUSED") {
+        this.currentLevel = "DETAILED";
+      } else if (this.currentLevel === "DETAILED") {
+        this.currentLevel = "OVERVIEW";
       }
     }
 
@@ -155,7 +155,7 @@ export class LODManager {
         (edge) =>
           nodeIds.has(edge.sourceEntityId) &&
           nodeIds.has(edge.targetEntityId) &&
-          edge.confidence >= config.minConfidence,
+          edge.confidence >= config.minConfidence
       )
       .sort((a, b) => b.confidence - a.confidence)
       .slice(0, config.maxEdges);
@@ -166,9 +166,7 @@ export class LODManager {
       totalNodes: nodes.length,
       totalEdges: edges.length,
       level,
-      hasMore:
-        nodes.length > sortedNodes.length ||
-        edges.length > filteredEdges.length,
+      hasMore: nodes.length > sortedNodes.length || edges.length > filteredEdges.length,
     };
   }
 
@@ -201,30 +199,30 @@ export class CytoscapeOptimizer {
       // Styling optimizations
       style: [
         {
-          selector: 'node',
+          selector: "node",
           style: {
-            'overlay-opacity': 0, // Disable overlays for performance
-            'selection-box-opacity': 0.2, // Minimal selection styling
+            "overlay-opacity": 0, // Disable overlays for performance
+            "selection-box-opacity": 0.2, // Minimal selection styling
           },
         },
         {
-          selector: 'edge',
+          selector: "edge",
           style: {
-            'overlay-opacity': 0,
-            'selection-box-opacity': 0.2,
+            "overlay-opacity": 0,
+            "selection-box-opacity": 0.2,
           },
         },
       ],
     };
   }
 
-  static getOptimizedLayoutConfig(nodeCount, layoutName = 'fcose') {
+  static getOptimizedLayoutConfig(nodeCount, layoutName = "fcose") {
     const isLargeGraph = nodeCount > 1000;
 
     const configs = {
       fcose: {
-        name: 'fcose',
-        quality: isLargeGraph ? 'draft' : 'default',
+        name: "fcose",
+        quality: isLargeGraph ? "draft" : "default",
         randomize: false,
         animate: !isLargeGraph, // Disable animation for large graphs
         animationDuration: isLargeGraph ? 0 : 1000,
@@ -238,9 +236,9 @@ export class CytoscapeOptimizer {
         uniformNodeDimensions: isLargeGraph,
         packComponents: true,
       },
-      'cose-bilkent': {
-        name: 'cose-bilkent',
-        quality: isLargeGraph ? 'draft' : 'default',
+      "cose-bilkent": {
+        name: "cose-bilkent",
+        quality: isLargeGraph ? "draft" : "default",
         animate: !isLargeGraph,
         animationDuration: isLargeGraph ? 0 : 1000,
         fit: true,

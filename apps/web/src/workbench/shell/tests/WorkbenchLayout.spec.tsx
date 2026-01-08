@@ -6,10 +6,10 @@ import { useWorkbenchStore } from '../../store/viewStore'
 
 // Mock sub-components
 vi.mock('../../canvas/LinkAnalysisCanvas', () => ({
-  LinkAnalysisCanvas: () => <div data-testid="canvas">Canvas</div>
+  LinkAnalysisCanvas: () => <div data-testid="canvas">Canvas</div>,
 }))
 vi.mock('../../inspector/InspectorPanel', () => ({
-  InspectorPanel: () => <div data-testid="inspector">Inspector</div>
+  InspectorPanel: () => <div data-testid="inspector">Inspector</div>,
 }))
 
 describe('WorkbenchShell', () => {

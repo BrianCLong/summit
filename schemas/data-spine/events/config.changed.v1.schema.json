@@ -15,7 +15,10 @@
           "additionalProperties": false,
           "properties": {
             "config_key": { "type": "string" },
-            "scope": { "type": "string", "description": "Scope of the change (global, tenant, service)." },
+            "scope": {
+              "type": "string",
+              "description": "Scope of the change (global, tenant, service)."
+            },
             "change_type": {
               "type": "string",
               "enum": ["create", "update", "delete"]
@@ -32,13 +35,7 @@
             "change_ticket": { "type": ["string", "null"] },
             "approval_reference": { "type": ["string", "null"] }
           },
-          "required": [
-            "config_key",
-            "scope",
-            "change_type",
-            "new_value",
-            "changed_by"
-          ]
+          "required": ["config_key", "scope", "change_type", "new_value", "changed_by"]
         }
       }
     }

@@ -10,13 +10,13 @@ export interface SocialInfluenceModel {
 }
 
 export type InfluenceType =
-  | 'DEGROOT' // Weighted averaging
-  | 'FRIEDKIN_JOHNSEN' // Stubborn agents
-  | 'BOUNDED_CONFIDENCE' // Homophily limits
-  | 'SOCIAL_IMPACT' // Latané model
-  | 'VOTER_MODEL' // Stochastic adoption
-  | 'THRESHOLD' // Granovetter thresholds
-  | 'COMPLEX_CONTAGION'; // Multiple exposure required
+  | "DEGROOT" // Weighted averaging
+  | "FRIEDKIN_JOHNSEN" // Stubborn agents
+  | "BOUNDED_CONFIDENCE" // Homophily limits
+  | "SOCIAL_IMPACT" // Latané model
+  | "VOTER_MODEL" // Stochastic adoption
+  | "THRESHOLD" // Granovetter thresholds
+  | "COMPLEX_CONTAGION"; // Multiple exposure required
 
 export interface InfluenceParameters {
   // DeGroot
@@ -48,11 +48,7 @@ export class SocialInfluenceSimulator {
    * x(t+1) = W * x(t)
    * where W is row-stochastic trust matrix
    */
-  simulateDeGroot(
-    opinions: number[],
-    trustMatrix: number[][],
-    iterations: number
-  ): number[][] {
+  simulateDeGroot(opinions: number[], trustMatrix: number[][], iterations: number): number[][] {
     const trajectory: number[][] = [opinions];
     let current = [...opinions];
 
@@ -99,8 +95,7 @@ export class SocialInfluenceSimulator {
 
         // Weighted combination with initial opinion
         next[i] =
-          susceptibilities[i] * socialInfluence +
-          (1 - susceptibilities[i]) * initialOpinions[i];
+          susceptibilities[i] * socialInfluence + (1 - susceptibilities[i]) * initialOpinions[i];
       }
 
       trajectory.push(next);
@@ -169,7 +164,9 @@ export class SocialInfluenceSimulator {
       const newAdopters: number[] = [];
 
       for (let i = 0; i < n; i++) {
-        if (adopted.has(i)) {continue;}
+        if (adopted.has(i)) {
+          continue;
+        }
 
         // Calculate fraction of neighbors who adopted
         let adoptedNeighbors = 0;
@@ -198,7 +195,9 @@ export class SocialInfluenceSimulator {
 
       trajectory.push(adopted.size);
 
-      if (newAdopters.length === 0) {break;}
+      if (newAdopters.length === 0) {
+        break;
+      }
     }
 
     return {

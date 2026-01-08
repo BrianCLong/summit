@@ -5,17 +5,13 @@
  * for seamless citizen, immigrant, and international partner access.
  */
 
-import { errorFactory, SummitError } from '@intelgraph/errors';
+import { errorFactory, SummitError } from "@intelgraph/errors";
 
-import type { TranslationResult } from '../types';
+import type { TranslationResult } from "../types";
 
 export interface TranslationProvider {
   name: string;
-  translate(
-    text: string,
-    source: string,
-    target: string
-  ): Promise<TranslationResult>;
+  translate(text: string, source: string, target: string): Promise<TranslationResult>;
   supportedLanguages(): Promise<string[]>;
   isAvailable(): Promise<boolean>;
 }
@@ -37,40 +33,78 @@ export interface StreamingTranslationOptions {
 }
 
 export interface TranslationContext {
-  domain?: 'government' | 'legal' | 'healthcare' | 'education' | 'general';
-  formality?: 'formal' | 'informal';
+  domain?: "government" | "legal" | "healthcare" | "education" | "general";
+  formality?: "formal" | "informal";
   preserveFormatting?: boolean;
   glossaryId?: string;
 }
 
 const SUPPORTED_LANGUAGES = [
   // EU Official Languages
-  'en', 'et', 'de', 'fr', 'es', 'it', 'pt', 'nl', 'pl', 'ro',
-  'hu', 'cs', 'sk', 'bg', 'hr', 'sl', 'lt', 'lv', 'fi', 'sv',
-  'da', 'el', 'ga', 'mt',
+  "en",
+  "et",
+  "de",
+  "fr",
+  "es",
+  "it",
+  "pt",
+  "nl",
+  "pl",
+  "ro",
+  "hu",
+  "cs",
+  "sk",
+  "bg",
+  "hr",
+  "sl",
+  "lt",
+  "lv",
+  "fi",
+  "sv",
+  "da",
+  "el",
+  "ga",
+  "mt",
   // International Partners
-  'ru', 'uk', 'zh', 'ja', 'ko', 'ar', 'hi', 'vi', 'th', 'tr',
+  "ru",
+  "uk",
+  "zh",
+  "ja",
+  "ko",
+  "ar",
+  "hi",
+  "vi",
+  "th",
+  "tr",
   // Additional Global Languages
-  'bn', 'fa', 'he', 'id', 'ms', 'sw', 'ta', 'te', 'ur',
+  "bn",
+  "fa",
+  "he",
+  "id",
+  "ms",
+  "sw",
+  "ta",
+  "te",
+  "ur",
 ];
 
 const LANGUAGE_NAMES: Record<string, string> = {
-  en: 'English',
-  et: 'Estonian',
-  ru: 'Russian',
-  uk: 'Ukrainian',
-  de: 'German',
-  fr: 'French',
-  es: 'Spanish',
-  zh: 'Chinese',
-  ar: 'Arabic',
-  ja: 'Japanese',
-  ko: 'Korean',
-  fi: 'Finnish',
-  sv: 'Swedish',
-  lv: 'Latvian',
-  lt: 'Lithuanian',
-  pl: 'Polish',
+  en: "English",
+  et: "Estonian",
+  ru: "Russian",
+  uk: "Ukrainian",
+  de: "German",
+  fr: "French",
+  es: "Spanish",
+  zh: "Chinese",
+  ar: "Arabic",
+  ja: "Japanese",
+  ko: "Korean",
+  fi: "Finnish",
+  sv: "Swedish",
+  lv: "Latvian",
+  lt: "Lithuanian",
+  pl: "Polish",
 };
 
 export class RealTimeTranslator {
@@ -103,8 +137,8 @@ export class RealTimeTranslator {
   ): Promise<TranslationResult> {
     if (!text?.trim()) {
       return {
-        translatedText: '',
-        sourceLanguage: sourceLanguage || 'unknown',
+        translatedText: "",
+        sourceLanguage: sourceLanguage || "unknown",
         targetLanguage,
         confidence: 1.0,
       };
@@ -127,16 +161,13 @@ export class RealTimeTranslator {
     // Check cache
     if (this.config.cacheEnabled) {
       const cached = this.getFromCache(cacheKey);
-      if (cached) {return cached;}
+      if (cached) {
+        return cached;
+      }
     }
 
     // Translate with fallback support
-    const result = await this.translateWithFallback(
-      text,
-      detectedSource,
-      targetLanguage,
-      context
-    );
+    const result = await this.translateWithFallback(text, detectedSource, targetLanguage, context);
 
     // Cache result
     if (this.config.cacheEnabled && result.confidence >= this.config.qualityThreshold) {
@@ -179,10 +210,10 @@ export class RealTimeTranslator {
         options.onChunk?.(result);
       } catch (error) {
         const llmError = errorFactory.fromUnknown(error, {
-          category: 'LLM',
-          errorCode: 'LLM_STREAM_FAILURE',
-          humanMessage: 'Streaming translation failed.',
-          suggestedAction: 'Retry with a smaller chunk size or alternate provider.',
+          category: "LLM",
+          errorCode: "LLM_STREAM_FAILURE",
+          humanMessage: "Streaming translation failed.",
+          suggestedAction: "Retry with a smaller chunk size or alternate provider.",
           context: { targetLanguage, chunkSize },
         });
         options.onError?.(llmError);
@@ -191,8 +222,8 @@ export class RealTimeTranslator {
     }
 
     const finalResult: TranslationResult = {
-      translatedText: translatedChunks.join(' '),
-      sourceLanguage: 'auto',
+      translatedText: translatedChunks.join(" "),
+      sourceLanguage: "auto",
       targetLanguage,
       confidence: 0.85,
     };
@@ -205,7 +236,9 @@ export class RealTimeTranslator {
    * Detect language of input text
    */
   async detectLanguage(text: string): Promise<string> {
-    if (!text?.trim()) {return 'unknown';}
+    if (!text?.trim()) {
+      return "unknown";
+    }
 
     // Simple heuristic-based detection
     const patterns: Record<string, RegExp> = {
@@ -223,10 +256,12 @@ export class RealTimeTranslator {
     };
 
     for (const [lang, pattern] of Object.entries(patterns)) {
-      if (pattern.test(text)) {return lang;}
+      if (pattern.test(text)) {
+        return lang;
+      }
     }
 
-    return 'en'; // Default to English
+    return "en"; // Default to English
   }
 
   /**
@@ -243,9 +278,7 @@ export class RealTimeTranslator {
    * Check if language pair is supported
    */
   isLanguagePairSupported(source: string, target: string): boolean {
-    return (
-      SUPPORTED_LANGUAGES.includes(source) && SUPPORTED_LANGUAGES.includes(target)
-    );
+    return SUPPORTED_LANGUAGES.includes(source) && SUPPORTED_LANGUAGES.includes(target);
   }
 
   /**
@@ -257,16 +290,16 @@ export class RealTimeTranslator {
     sourceLanguage?: string
   ): Promise<TranslationResult & { officialDisclaimer: string }> {
     const result = await this.translate(text, targetLanguage, sourceLanguage, {
-      domain: 'government',
-      formality: 'formal',
+      domain: "government",
+      formality: "formal",
       preserveFormatting: true,
     });
 
     return {
       ...result,
       officialDisclaimer:
-        'This translation is provided for informational purposes. ' +
-        'For official documents, please consult certified translation services.',
+        "This translation is provided for informational purposes. " +
+        "For official documents, please consult certified translation services.",
     };
   }
 
@@ -307,7 +340,7 @@ export class RealTimeTranslator {
     target: string,
     context?: TranslationContext
   ): string {
-    const contextKey = context ? JSON.stringify(context) : '';
+    const contextKey = context ? JSON.stringify(context) : "";
     return `${source}:${target}:${contextKey}:${text.substring(0, 100)}`;
   }
 
@@ -330,18 +363,20 @@ export class RealTimeTranslator {
   private splitIntoChunks(text: string, chunkSize: number): string[] {
     const chunks: string[] = [];
     const sentences = text.split(/(?<=[.!?])\s+/);
-    let current = '';
+    let current = "";
 
     for (const sentence of sentences) {
       if ((current + sentence).length > chunkSize && current) {
         chunks.push(current.trim());
         current = sentence;
       } else {
-        current += (current ? ' ' : '') + sentence;
+        current += (current ? " " : "") + sentence;
       }
     }
 
-    if (current) {chunks.push(current.trim());}
+    if (current) {
+      chunks.push(current.trim());
+    }
     return chunks;
   }
 

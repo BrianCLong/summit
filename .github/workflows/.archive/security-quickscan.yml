@@ -3,8 +3,8 @@ name: security-quickscan
 on:
   pull_request:
     paths:
-      - 'server/**'
-      - '.github/workflows/security-quickscan.yml'
+      - "server/**"
+      - ".github/workflows/security-quickscan.yml"
 
 permissions:
   contents: read
@@ -26,7 +26,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install server dependencies (frozen)
         run: pnpm install --filter intelgraph-server --ignore-scripts --frozen-lockfile

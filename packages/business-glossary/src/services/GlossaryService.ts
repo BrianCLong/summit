@@ -10,7 +10,7 @@ import {
   GlossaryCategory,
   TermLink,
   TermVersion,
-} from '@intelgraph/data-catalog';
+} from "@intelgraph/data-catalog";
 
 export interface IGlossaryStore {
   getTerm(id: string): Promise<GlossaryTerm | null>;
@@ -30,7 +30,7 @@ export class GlossaryService {
    * Create new glossary term
    */
   async createTerm(
-    data: Omit<GlossaryTerm, 'id' | 'createdAt' | 'updatedAt' | 'version' | 'versionHistory'>
+    data: Omit<GlossaryTerm, "id" | "createdAt" | "updatedAt" | "version" | "versionHistory">
   ): Promise<GlossaryTerm> {
     const now = new Date();
 
@@ -61,7 +61,7 @@ export class GlossaryService {
     id: string,
     updates: Partial<GlossaryTerm>,
     updatedBy: string,
-    changeNotes: string = ''
+    changeNotes: string = ""
   ): Promise<GlossaryTerm> {
     const existingTerm = await this.store.getTerm(id);
     if (!existingTerm) {
@@ -120,7 +120,7 @@ export class GlossaryService {
     }
 
     if (term.approvalStatus !== ApprovalStatus.APPROVED) {
-      throw new Error('Term must be approved before publishing');
+      throw new Error("Term must be approved before publishing");
     }
 
     return this.store.updateTerm(id, {
@@ -162,7 +162,11 @@ export class GlossaryService {
   /**
    * Add related term
    */
-  async addRelatedTerm(termId: string, relatedTermId: string, updatedBy: string): Promise<GlossaryTerm> {
+  async addRelatedTerm(
+    termId: string,
+    relatedTermId: string,
+    updatedBy: string
+  ): Promise<GlossaryTerm> {
     const term = await this.store.getTerm(termId);
     if (!term) {
       throw new Error(`Term ${termId} not found`);
@@ -211,7 +215,7 @@ export class GlossaryService {
    * Create category
    */
   async createCategory(
-    data: Omit<GlossaryCategory, 'id' | 'childCategoryIds' | 'termCount'>
+    data: Omit<GlossaryCategory, "id" | "childCategoryIds" | "termCount">
   ): Promise<GlossaryCategory> {
     const category: GlossaryCategory = {
       ...data,
@@ -234,7 +238,7 @@ export class GlossaryService {
    * Generate term ID
    */
   private generateTermId(name: string): string {
-    const sanitizedName = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    const sanitizedName = name.toLowerCase().replace(/[^a-z0-9]/g, "-");
     return `term-${sanitizedName}-${Date.now()}`;
   }
 
@@ -242,7 +246,7 @@ export class GlossaryService {
    * Generate category ID
    */
   private generateCategoryId(name: string): string {
-    const sanitizedName = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    const sanitizedName = name.toLowerCase().replace(/[^a-z0-9]/g, "-");
     return `cat-${sanitizedName}-${Date.now()}`;
   }
 }

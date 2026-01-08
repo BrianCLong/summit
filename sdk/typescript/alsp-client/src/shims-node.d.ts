@@ -1,4 +1,4 @@
-declare module "crypto" {
+declare module 'crypto' {
   interface Hash {
     update(data: string | ArrayBufferView): Hash;
     digest(): Buffer;

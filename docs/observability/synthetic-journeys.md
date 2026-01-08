@@ -5,7 +5,9 @@ This document defines the synthetic user journeys used to monitor the health and
 ## Journey Definitions
 
 ### J-001: Basic Login
+
 **Goal**: Verify that a user can authenticate and receive a valid JWT.
+
 - **Steps**:
   1.  Call GraphQL `login` mutation with test credentials.
   2.  Verify response contains `token` and `user` object.
@@ -13,7 +15,9 @@ This document defines the synthetic user journeys used to monitor the health and
 - **Success Criteria**: HTTP 200, valid token returned.
 
 ### J-002: Upload Dataset
+
 **Goal**: Verify the data ingestion pipeline.
+
 - **Pre-requisites**: Authenticated user (from J-001).
 - **Steps**:
   1.  Create a temporary Investigation via GraphQL `createInvestigation`.
@@ -24,7 +28,9 @@ This document defines the synthetic user journeys used to monitor the health and
 - **Success Criteria**: Job accepted (HTTP 200) and completes successfully.
 
 ### J-003: Perform Graph Queries
+
 **Goal**: Verify Neo4j connectivity and GraphQL read performance.
+
 - **Pre-requisites**: Authenticated user.
 - **Steps**:
   1.  Execute GraphQL `entities` query (fetch first 3).
@@ -33,7 +39,9 @@ This document defines the synthetic user journeys used to monitor the health and
 - **Success Criteria**: Queries return HTTP 200 and expected data structure.
 
 ### J-004: Trigger Maestro Run
+
 **Goal**: Verify the Maestro orchestration engine is accepting requests.
+
 - **Pre-requisites**: Authenticated user.
 - **Steps**:
   1.  POST to `/api/maestro/runs` with a simple prompt (e.g., "Analyze the connection between A and B").
@@ -41,7 +49,9 @@ This document defines the synthetic user journeys used to monitor the health and
 - **Success Criteria**: HTTP 200, valid `run` object returned.
 
 ### J-005: Wait for Job Completion
+
 **Goal**: Verify background processing (Maestro/Workers).
+
 - **Pre-requisites**: Maestro run initiated (J-004).
 - **Steps**:
   1.  If the API is synchronous (v0), this step is implicit.
@@ -49,7 +59,9 @@ This document defines the synthetic user journeys used to monitor the health and
 - **Success Criteria**: Run status becomes `completed` or `succeeded`.
 
 ### J-006: Fetch Result & Evaluate
+
 **Goal**: Verify the integrity of the output.
+
 - **Pre-requisites**: Completed Maestro run.
 - **Steps**:
   1.  Inspect the run results/artifacts.

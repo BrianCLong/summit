@@ -10,9 +10,9 @@
  * This does NOT enable unauthorized interception.
  */
 
-import { EventEmitter } from 'eventemitter3';
-import { v4 as uuid } from 'uuid';
-import { RawSignal, SignalMetadata, SignalType, ClassificationLevel } from '../types';
+import { EventEmitter } from "eventemitter3";
+import { v4 as uuid } from "uuid";
+import { RawSignal, SignalMetadata, SignalType, ClassificationLevel } from "../types";
 
 export interface DataSourceConfig {
   id: string;
@@ -24,12 +24,12 @@ export interface DataSourceConfig {
 }
 
 export type DataSourceType =
-  | 'SIMULATION'      // Internal simulation generator
-  | 'FILE'            // Pre-recorded/authorized files
-  | 'TRAINING_FEED'   // Authorized training data feed
-  | 'DEFENSIVE'       // Your own infrastructure monitoring
-  | 'EXERCISE'        // Sanctioned exercise data
-  | 'REPLAY';         // Replay of authorized recordings
+  | "SIMULATION" // Internal simulation generator
+  | "FILE" // Pre-recorded/authorized files
+  | "TRAINING_FEED" // Authorized training data feed
+  | "DEFENSIVE" // Your own infrastructure monitoring
+  | "EXERCISE" // Sanctioned exercise data
+  | "REPLAY"; // Replay of authorized recordings
 
 export interface AuthorizationInfo {
   authority: string;
@@ -38,15 +38,15 @@ export interface AuthorizationInfo {
   validTo: Date;
   restrictions: string[];
   authorizedBy: string;
-  verificationMethod: 'MANUAL' | 'TOKEN' | 'CERTIFICATE';
+  verificationMethod: "MANUAL" | "TOKEN" | "CERTIFICATE";
 }
 
 export interface DataSourceEvents {
-  'data:received': (data: RawSignal) => void;
-  'connected': () => void;
-  'disconnected': () => void;
-  'error': (error: Error) => void;
-  'authorization:expired': () => void;
+  "data:received": (data: RawSignal) => void;
+  connected: () => void;
+  disconnected: () => void;
+  error: (error: Error) => void;
+  "authorization:expired": () => void;
 }
 
 export abstract class DataSourceAdapter extends EventEmitter<DataSourceEvents> {
@@ -69,13 +69,18 @@ export abstract class DataSourceAdapter extends EventEmitter<DataSourceEvents> {
 
     if (now < auth.validFrom || now > auth.validTo) {
       this.authorizationValid = false;
-      this.emit('authorization:expired');
+      this.emit("authorization:expired");
       return false;
     }
 
     // Check source type is authorized
     const allowedTypes: DataSourceType[] = [
-      'SIMULATION', 'FILE', 'TRAINING_FEED', 'DEFENSIVE', 'EXERCISE', 'REPLAY'
+      "SIMULATION",
+      "FILE",
+      "TRAINING_FEED",
+      "DEFENSIVE",
+      "EXERCISE",
+      "REPLAY",
     ];
 
     if (!allowedTypes.includes(this.config.type)) {
@@ -135,29 +140,29 @@ export class FileDataSource extends DataSourceAdapter {
 
   async connect(): Promise<void> {
     if (!this.validateAuthorization()) {
-      throw new Error('Authorization invalid or expired');
+      throw new Error("Authorization invalid or expired");
     }
 
     // Verify file exists and is authorized
     this.connected = true;
-    this.emit('connected');
+    this.emit("connected");
   }
 
   async disconnect(): Promise<void> {
     await this.stopReceiving();
     this.connected = false;
-    this.emit('disconnected');
+    this.emit("disconnected");
   }
 
   async startReceiving(): Promise<void> {
     if (!this.isConnected()) {
-      throw new Error('Not connected');
+      throw new Error("Not connected");
     }
 
     // Simulate reading from file
     this.fileReader = setInterval(() => {
       const signal = this.generateFromFile();
-      this.emit('data:received', signal);
+      this.emit("data:received", signal);
     }, 1000);
   }
 
@@ -173,14 +178,14 @@ export class FileDataSource extends DataSourceAdapter {
     const metadata: SignalMetadata = {
       id: uuid(),
       timestamp: new Date(),
-      signalType: 'RF_DIGITAL',
-      category: 'TECHINT',
-      classification: 'UNCLASSIFIED',
+      signalType: "RF_DIGITAL",
+      category: "TECHINT",
+      classification: "UNCLASSIFIED",
       collectorId: this.config.id,
       processed: false,
       priority: 3,
       legalAuthority: this.config.authorization.reference,
-      isSimulated: true
+      isSimulated: true,
     };
 
     return { metadata };
@@ -195,38 +200,40 @@ export class TrainingFeedSource extends DataSourceAdapter {
   private signalTypes: SignalType[];
   private rate: number;
 
-  constructor(config: DataSourceConfig & {
-    signalTypes?: SignalType[];
-    rate?: number;
-  }) {
+  constructor(
+    config: DataSourceConfig & {
+      signalTypes?: SignalType[];
+      rate?: number;
+    }
+  ) {
     super(config);
-    this.signalTypes = config.signalTypes || ['RF_DIGITAL', 'CELLULAR_4G', 'WIFI'];
+    this.signalTypes = config.signalTypes || ["RF_DIGITAL", "CELLULAR_4G", "WIFI"];
     this.rate = config.rate || 1000;
   }
 
   async connect(): Promise<void> {
     if (!this.validateAuthorization()) {
-      throw new Error('Authorization invalid or expired');
+      throw new Error("Authorization invalid or expired");
     }
 
     this.connected = true;
-    this.emit('connected');
+    this.emit("connected");
   }
 
   async disconnect(): Promise<void> {
     await this.stopReceiving();
     this.connected = false;
-    this.emit('disconnected');
+    this.emit("disconnected");
   }
 
   async startReceiving(): Promise<void> {
     if (!this.isConnected()) {
-      throw new Error('Not connected');
+      throw new Error("Not connected");
     }
 
     this.feedInterval = setInterval(() => {
       const signal = this.generateTrainingSignal();
-      this.emit('data:received', signal);
+      this.emit("data:received", signal);
     }, this.rate);
   }
 
@@ -238,16 +245,14 @@ export class TrainingFeedSource extends DataSourceAdapter {
   }
 
   private generateTrainingSignal(): RawSignal {
-    const signalType = this.signalTypes[
-      Math.floor(Math.random() * this.signalTypes.length)
-    ];
+    const signalType = this.signalTypes[Math.floor(Math.random() * this.signalTypes.length)];
 
     const metadata: SignalMetadata = {
       id: uuid(),
       timestamp: new Date(),
       signalType,
-      category: 'COMINT',
-      classification: 'UNCLASSIFIED',
+      category: "COMINT",
+      classification: "UNCLASSIFIED",
       frequency: 100e6 + Math.random() * 5000e6,
       bandwidth: 1e6 + Math.random() * 50e6,
       signalStrength: -90 + Math.random() * 60,
@@ -256,7 +261,7 @@ export class TrainingFeedSource extends DataSourceAdapter {
       processed: false,
       priority: Math.ceil(Math.random() * 5),
       legalAuthority: this.config.authorization.reference,
-      isSimulated: true
+      isSimulated: true,
     };
 
     // Generate I/Q data
@@ -273,7 +278,7 @@ export class TrainingFeedSource extends DataSourceAdapter {
     return {
       metadata,
       iqData: { i, q },
-      decodedContent: '[TRAINING DATA]'
+      decodedContent: "[TRAINING DATA]",
     };
   }
 }
@@ -294,30 +299,30 @@ export class ExerciseDataSource extends DataSourceAdapter {
 
   async connect(): Promise<void> {
     if (!this.validateAuthorization()) {
-      throw new Error('Authorization invalid or expired');
+      throw new Error("Authorization invalid or expired");
     }
 
     // Load exercise scenario
     this.loadExerciseScenario();
     this.connected = true;
-    this.emit('connected');
+    this.emit("connected");
   }
 
   async disconnect(): Promise<void> {
     await this.stopReceiving();
     this.connected = false;
-    this.emit('disconnected');
+    this.emit("disconnected");
   }
 
   async startReceiving(): Promise<void> {
     if (!this.isConnected()) {
-      throw new Error('Not connected');
+      throw new Error("Not connected");
     }
 
     this.playbackIndex = 0;
     this.playbackInterval = setInterval(() => {
       if (this.playbackIndex < this.scenarioData.length) {
-        this.emit('data:received', this.scenarioData[this.playbackIndex]);
+        this.emit("data:received", this.scenarioData[this.playbackIndex]);
         this.playbackIndex++;
       } else {
         // Loop or stop
@@ -335,17 +340,15 @@ export class ExerciseDataSource extends DataSourceAdapter {
 
   private loadExerciseScenario(): void {
     // Generate exercise scenario data
-    const signalTypes: SignalType[] = [
-      'CELLULAR_4G', 'WIFI', 'RADAR', 'SATELLITE', 'VHF'
-    ];
+    const signalTypes: SignalType[] = ["CELLULAR_4G", "WIFI", "RADAR", "SATELLITE", "VHF"];
 
     for (let i = 0; i < 100; i++) {
       const metadata: SignalMetadata = {
         id: uuid(),
         timestamp: new Date(Date.now() + i * 1000),
         signalType: signalTypes[Math.floor(Math.random() * signalTypes.length)],
-        category: Math.random() > 0.7 ? 'ELINT' : 'COMINT',
-        classification: 'UNCLASSIFIED',
+        category: Math.random() > 0.7 ? "ELINT" : "COMINT",
+        classification: "UNCLASSIFIED",
         frequency: 100e6 + Math.random() * 10000e6,
         bandwidth: 100e3 + Math.random() * 10e6,
         signalStrength: -100 + Math.random() * 70,
@@ -353,14 +356,14 @@ export class ExerciseDataSource extends DataSourceAdapter {
           latitude: 38.8 + Math.random() * 0.2,
           longitude: -77.1 + Math.random() * 0.2,
           accuracy: 50 + Math.random() * 500,
-          method: 'SIMULATED'
+          method: "SIMULATED",
         },
         collectorId: this.config.id,
         missionId: this.exerciseId,
         processed: false,
         priority: Math.ceil(Math.random() * 5),
         legalAuthority: this.config.authorization.reference,
-        isSimulated: true
+        isSimulated: true,
       };
 
       this.scenarioData.push({ metadata });
@@ -374,7 +377,7 @@ export class ExerciseDataSource extends DataSourceAdapter {
   getProgress(): { current: number; total: number } {
     return {
       current: this.playbackIndex,
-      total: this.scenarioData.length
+      total: this.scenarioData.length,
     };
   }
 }
@@ -385,12 +388,12 @@ export class ExerciseDataSource extends DataSourceAdapter {
 export class DataSourceFactory {
   static create(config: DataSourceConfig): DataSourceAdapter {
     switch (config.type) {
-      case 'FILE':
+      case "FILE":
         return new FileDataSource(config as DataSourceConfig & { filePath: string });
-      case 'TRAINING_FEED':
-      case 'SIMULATION':
+      case "TRAINING_FEED":
+      case "SIMULATION":
         return new TrainingFeedSource(config);
-      case 'EXERCISE':
+      case "EXERCISE":
         return new ExerciseDataSource(config as DataSourceConfig & { exerciseId: string });
       default:
         throw new Error(`Unsupported data source type: ${config.type}`);
@@ -401,16 +404,16 @@ export class DataSourceFactory {
     return new TrainingFeedSource({
       id: uuid(),
       name,
-      type: 'TRAINING_FEED',
+      type: "TRAINING_FEED",
       authorization: {
-        authority: 'TRAINING',
-        reference: 'TRAINING-AUTO',
+        authority: "TRAINING",
+        reference: "TRAINING-AUTO",
         validFrom: new Date(),
         validTo: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-        restrictions: ['SIMULATION_ONLY'],
-        authorizedBy: 'SYSTEM',
-        verificationMethod: 'MANUAL'
-      }
+        restrictions: ["SIMULATION_ONLY"],
+        authorizedBy: "SYSTEM",
+        verificationMethod: "MANUAL",
+      },
     });
   }
 }

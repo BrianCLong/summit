@@ -4,20 +4,20 @@
  * Types and schemas for managing source debriefing sessions.
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 import type {
   DebriefType,
   DebriefStatus,
   InformationRating,
   ClassificationLevel,
-} from './constants.js';
-import type { PolicyLabels, BaseEntity, ProvenanceInfo } from './types.js';
+} from "./constants.js";
+import type { PolicyLabels, BaseEntity, ProvenanceInfo } from "./types.js";
 import {
   DebriefTypeSchema,
   DebriefStatusSchema,
   InformationRatingSchema,
   PolicyLabelsSchema,
-} from './schemas.js';
+} from "./schemas.js";
 
 // ============================================================================
 // Debrief Types
@@ -27,7 +27,7 @@ import {
  * Location information for debrief
  */
 export interface DebriefLocation {
-  type: 'SAFE_HOUSE' | 'NEUTRAL' | 'VEHICLE' | 'VIRTUAL' | 'OTHER';
+  type: "SAFE_HOUSE" | "NEUTRAL" | "VEHICLE" | "VIRTUAL" | "OTHER";
   identifier: string;
   coordinates?: {
     latitude: number;
@@ -53,7 +53,7 @@ export interface IntelligenceItem {
     entityType: string;
     relationship: string;
   }[];
-  actionability: 'IMMEDIATE' | 'SHORT_TERM' | 'LONG_TERM' | 'BACKGROUND';
+  actionability: "IMMEDIATE" | "SHORT_TERM" | "LONG_TERM" | "BACKGROUND";
   perishability?: Date;
   disseminationRestrictions: string[];
 }
@@ -64,17 +64,17 @@ export interface IntelligenceItem {
 export interface DebriefTasking {
   id: string;
   description: string;
-  priority: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  priority: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
   deadline?: Date;
   assignedTo?: string;
-  status: 'PENDING' | 'ASSIGNED' | 'COMPLETED' | 'CANCELLED';
+  status: "PENDING" | "ASSIGNED" | "COMPLETED" | "CANCELLED";
 }
 
 /**
  * Security assessment from debrief
  */
 export interface SecurityAssessment {
-  sourceCompromiseRisk: 'NONE' | 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL';
+  sourceCompromiseRisk: "NONE" | "LOW" | "MODERATE" | "HIGH" | "CRITICAL";
   operationalSecurityIssues: string[];
   counterintelligenceIndicators: string[];
   recommendedMitigations: string[];
@@ -153,7 +153,7 @@ export interface DebriefSession extends BaseEntity {
   /** Attachments (encrypted references) */
   attachments: {
     id: string;
-    type: 'AUDIO' | 'VIDEO' | 'DOCUMENT' | 'IMAGE';
+    type: "AUDIO" | "VIDEO" | "DOCUMENT" | "IMAGE";
     encryptedRef: string;
     size: number;
     checksum: string;
@@ -231,7 +231,7 @@ export interface DebriefReport {
 // ============================================================================
 
 export const DebriefLocationSchema = z.object({
-  type: z.enum(['SAFE_HOUSE', 'NEUTRAL', 'VEHICLE', 'VIRTUAL', 'OTHER']),
+  type: z.enum(["SAFE_HOUSE", "NEUTRAL", "VEHICLE", "VIRTUAL", "OTHER"]),
   identifier: z.string().min(1),
   coordinates: z
     .object({
@@ -249,11 +249,11 @@ export const IntelligenceItemSchema = z.object({
   content: z.string().min(1).max(10000),
   informationRating: InformationRatingSchema,
   classification: z.enum([
-    'UNCLASSIFIED',
-    'CONFIDENTIAL',
-    'SECRET',
-    'TOP_SECRET',
-    'TOP_SECRET_SCI',
+    "UNCLASSIFIED",
+    "CONFIDENTIAL",
+    "SECRET",
+    "TOP_SECRET",
+    "TOP_SECRET_SCI",
   ]),
   requiresCorroboration: z.boolean(),
   corroboratedBy: z.array(z.string().uuid()),
@@ -262,9 +262,9 @@ export const IntelligenceItemSchema = z.object({
       entityId: z.string().uuid(),
       entityType: z.string(),
       relationship: z.string(),
-    }),
+    })
   ),
-  actionability: z.enum(['IMMEDIATE', 'SHORT_TERM', 'LONG_TERM', 'BACKGROUND']),
+  actionability: z.enum(["IMMEDIATE", "SHORT_TERM", "LONG_TERM", "BACKGROUND"]),
   perishability: z.coerce.date().optional(),
   disseminationRestrictions: z.array(z.string()),
 });
@@ -272,20 +272,14 @@ export const IntelligenceItemSchema = z.object({
 export const DebriefTaskingSchema = z.object({
   id: z.string().uuid(),
   description: z.string().min(1).max(2000),
-  priority: z.enum(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']),
+  priority: z.enum(["CRITICAL", "HIGH", "MEDIUM", "LOW"]),
   deadline: z.coerce.date().optional(),
   assignedTo: z.string().uuid().optional(),
-  status: z.enum(['PENDING', 'ASSIGNED', 'COMPLETED', 'CANCELLED']),
+  status: z.enum(["PENDING", "ASSIGNED", "COMPLETED", "CANCELLED"]),
 });
 
 export const SecurityAssessmentSchema = z.object({
-  sourceCompromiseRisk: z.enum([
-    'NONE',
-    'LOW',
-    'MODERATE',
-    'HIGH',
-    'CRITICAL',
-  ]),
+  sourceCompromiseRisk: z.enum(["NONE", "LOW", "MODERATE", "HIGH", "CRITICAL"]),
   operationalSecurityIssues: z.array(z.string()),
   counterintelligenceIndicators: z.array(z.string()),
   recommendedMitigations: z.array(z.string()),
@@ -301,7 +295,7 @@ export const PaymentRecordSchema = z.object({
 
 export const AttachmentSchema = z.object({
   id: z.string().uuid(),
-  type: z.enum(['AUDIO', 'VIDEO', 'DOCUMENT', 'IMAGE']),
+  type: z.enum(["AUDIO", "VIDEO", "DOCUMENT", "IMAGE"]),
   encryptedRef: z.string().min(1),
   size: z.number().int().positive(),
   checksum: z.string().min(1),
@@ -392,24 +386,20 @@ export const DebriefSearchCriteriaSchema = z.object({
 /**
  * Valid state transitions for debrief workflow
  */
-export const DEBRIEF_STATE_TRANSITIONS: Record<DebriefStatus, DebriefStatus[]> =
-  {
-    PLANNED: ['IN_PROGRESS', 'CANCELLED'],
-    IN_PROGRESS: ['PENDING_REVIEW', 'CANCELLED'],
-    PENDING_REVIEW: ['APPROVED', 'IN_PROGRESS', 'ACTION_REQUIRED'],
-    APPROVED: ['DISSEMINATED'],
-    DISSEMINATED: [],
-    CANCELLED: [],
-    ACTION_REQUIRED: ['IN_PROGRESS', 'CANCELLED'],
-  };
+export const DEBRIEF_STATE_TRANSITIONS: Record<DebriefStatus, DebriefStatus[]> = {
+  PLANNED: ["IN_PROGRESS", "CANCELLED"],
+  IN_PROGRESS: ["PENDING_REVIEW", "CANCELLED"],
+  PENDING_REVIEW: ["APPROVED", "IN_PROGRESS", "ACTION_REQUIRED"],
+  APPROVED: ["DISSEMINATED"],
+  DISSEMINATED: [],
+  CANCELLED: [],
+  ACTION_REQUIRED: ["IN_PROGRESS", "CANCELLED"],
+};
 
 /**
  * Check if a state transition is valid
  */
-export function isValidTransition(
-  from: DebriefStatus,
-  to: DebriefStatus,
-): boolean {
+export function isValidTransition(from: DebriefStatus, to: DebriefStatus): boolean {
   const validTargets = DEBRIEF_STATE_TRANSITIONS[from];
   return validTargets?.includes(to) ?? false;
 }

@@ -1,10 +1,4 @@
-function createResult({
-  name,
-  description,
-  passed,
-  details = [],
-  remediation,
-}) {
+function createResult({ name, description, passed, details = [], remediation }) {
   return {
     name,
     description,

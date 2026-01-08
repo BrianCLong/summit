@@ -28,40 +28,40 @@
  *   node scripts/generate-changelog.js --output CHANGELOG.md
  */
 
-import { execSync } from 'child_process';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { execSync } from "child_process";
+import { readFileSync, writeFileSync, existsSync } from "fs";
+import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const PROJECT_ROOT = resolve(__dirname, '..');
+const PROJECT_ROOT = resolve(__dirname, "..");
 
 // Configuration
 const CONFIG = {
   types: {
-    feat: { title: 'Features', emoji: '' },
-    fix: { title: 'Bug Fixes', emoji: '' },
-    perf: { title: 'Performance Improvements', emoji: '' },
-    refactor: { title: 'Code Refactoring', emoji: '' },
-    docs: { title: 'Documentation', emoji: '' },
-    style: { title: 'Styles', emoji: '' },
-    test: { title: 'Tests', emoji: '' },
-    build: { title: 'Build System', emoji: '' },
-    ci: { title: 'CI/CD', emoji: '' },
-    chore: { title: 'Chores', emoji: '' },
-    revert: { title: 'Reverts', emoji: '' },
+    feat: { title: "Features", emoji: "" },
+    fix: { title: "Bug Fixes", emoji: "" },
+    perf: { title: "Performance Improvements", emoji: "" },
+    refactor: { title: "Code Refactoring", emoji: "" },
+    docs: { title: "Documentation", emoji: "" },
+    style: { title: "Styles", emoji: "" },
+    test: { title: "Tests", emoji: "" },
+    build: { title: "Build System", emoji: "" },
+    ci: { title: "CI/CD", emoji: "" },
+    chore: { title: "Chores", emoji: "" },
+    revert: { title: "Reverts", emoji: "" },
   },
   scopes: {
-    api: 'API',
-    web: 'Web',
-    server: 'Server',
-    client: 'Client',
-    db: 'Database',
-    graph: 'Graph',
-    auth: 'Authentication',
-    ci: 'CI/CD',
-    deps: 'Dependencies',
+    api: "API",
+    web: "Web",
+    server: "Server",
+    client: "Client",
+    db: "Database",
+    graph: "Graph",
+    auth: "Authentication",
+    ci: "CI/CD",
+    deps: "Dependencies",
   },
 };
 
@@ -69,9 +69,9 @@ const CONFIG = {
 function parseArgs(args) {
   const options = {
     from: null,
-    to: 'HEAD',
+    to: "HEAD",
     output: null,
-    format: 'markdown',
+    format: "markdown",
     dryRun: false,
     help: false,
   };
@@ -79,23 +79,23 @@ function parseArgs(args) {
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     switch (arg) {
-      case '--from':
+      case "--from":
         options.from = args[++i];
         break;
-      case '--to':
+      case "--to":
         options.to = args[++i];
         break;
-      case '--output':
+      case "--output":
         options.output = args[++i];
         break;
-      case '--format':
+      case "--format":
         options.format = args[++i];
         break;
-      case '--dry-run':
+      case "--dry-run":
         options.dryRun = true;
         break;
-      case '--help':
-      case '-h':
+      case "--help":
+      case "-h":
         options.help = true;
         break;
     }
@@ -139,7 +139,7 @@ function git(command) {
   try {
     return execSync(`git ${command}`, {
       cwd: PROJECT_ROOT,
-      encoding: 'utf8',
+      encoding: "utf8",
     }).trim();
   } catch (error) {
     return null;
@@ -148,23 +148,22 @@ function git(command) {
 
 // Get the latest tag
 function getLatestTag() {
-  return git('describe --tags --abbrev=0 2>/dev/null') || null;
+  return git("describe --tags --abbrev=0 2>/dev/null") || null;
 }
 
 // Get commits between two refs
 function getCommits(from, to) {
   const range = from ? `${from}..${to}` : to;
-  const format = '%H|%s|%b|%an|%ae|%ai';
+  const format = "%H|%s|%b|%an|%ae|%ai";
   const log = git(`log ${range} --pretty=format:"${format}" --no-merges`);
 
   if (!log) return [];
 
   return log
-    .split('\n')
+    .split("\n")
     .filter(Boolean)
     .map((line) => {
-      const [hash, subject, body, authorName, authorEmail, date] =
-        line.split('|');
+      const [hash, subject, body, authorName, authorEmail, date] = line.split("|");
       return { hash, subject, body, authorName, authorEmail, date };
     });
 }
@@ -182,10 +181,7 @@ function parseCommit(commit) {
   const { type, scope, breaking, description } = match.groups;
 
   // Check for BREAKING CHANGE in body
-  const isBreaking =
-    breaking === '!' ||
-    (commit.body &&
-      /BREAKING CHANGE[S]?:/i.test(commit.body));
+  const isBreaking = breaking === "!" || (commit.body && /BREAKING CHANGE[S]?:/i.test(commit.body));
 
   return {
     ...commit,
@@ -220,7 +216,7 @@ function groupCommits(commits) {
 
 // Format commit for markdown
 function formatCommitMarkdown(commit) {
-  const scope = commit.scope ? `**${commit.scope}:** ` : '';
+  const scope = commit.scope ? `**${commit.scope}:** ` : "";
   const hash = commit.hash.substring(0, 7);
   return `- ${scope}${commit.description} (${hash})`;
 }
@@ -228,20 +224,20 @@ function formatCommitMarkdown(commit) {
 // Generate markdown changelog
 function generateMarkdown(groups, breaking, from, to) {
   const lines = [];
-  const date = new Date().toISOString().split('T')[0];
-  const version = to === 'HEAD' ? 'Unreleased' : to;
+  const date = new Date().toISOString().split("T")[0];
+  const version = to === "HEAD" ? "Unreleased" : to;
 
   lines.push(`## [${version}] - ${date}`);
-  lines.push('');
+  lines.push("");
 
   // Breaking changes first
   if (breaking.length > 0) {
-    lines.push('### BREAKING CHANGES');
-    lines.push('');
+    lines.push("### BREAKING CHANGES");
+    lines.push("");
     for (const commit of breaking) {
       lines.push(formatCommitMarkdown(commit));
     }
-    lines.push('');
+    lines.push("");
   }
 
   // Other changes by type
@@ -250,31 +246,31 @@ function generateMarkdown(groups, breaking, from, to) {
     if (!commits || commits.length === 0) continue;
 
     // Skip non-user-facing types in changelog
-    if (['style', 'test', 'chore'].includes(type)) continue;
+    if (["style", "test", "chore"].includes(type)) continue;
 
     lines.push(`### ${typeConfig.emoji} ${typeConfig.title}`);
-    lines.push('');
+    lines.push("");
     for (const commit of commits) {
       lines.push(formatCommitMarkdown(commit));
     }
-    lines.push('');
+    lines.push("");
   }
 
   if (from) {
     lines.push(
       `**Full Changelog**: https://github.com/BrianCLong/summit/compare/${from}...${version}`
     );
-    lines.push('');
+    lines.push("");
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 // Generate JSON output
 function generateJson(groups, breaking, from, to) {
   return JSON.stringify(
     {
-      version: to === 'HEAD' ? 'unreleased' : to,
+      version: to === "HEAD" ? "unreleased" : to,
       date: new Date().toISOString(),
       range: { from, to },
       breaking,
@@ -288,18 +284,18 @@ function generateJson(groups, breaking, from, to) {
 // Generate plain text output
 function generatePlain(groups, breaking, from, to) {
   const lines = [];
-  const version = to === 'HEAD' ? 'Unreleased' : to;
+  const version = to === "HEAD" ? "Unreleased" : to;
 
   lines.push(`Changes for ${version}`);
-  lines.push('='.repeat(40));
-  lines.push('');
+  lines.push("=".repeat(40));
+  lines.push("");
 
   if (breaking.length > 0) {
-    lines.push('BREAKING CHANGES:');
+    lines.push("BREAKING CHANGES:");
     for (const commit of breaking) {
       lines.push(`  - ${commit.description}`);
     }
-    lines.push('');
+    lines.push("");
   }
 
   for (const [type, typeConfig] of Object.entries(CONFIG.types)) {
@@ -308,13 +304,13 @@ function generatePlain(groups, breaking, from, to) {
 
     lines.push(`${typeConfig.title}:`);
     for (const commit of commits) {
-      const scope = commit.scope ? `[${commit.scope}] ` : '';
+      const scope = commit.scope ? `[${commit.scope}] ` : "";
       lines.push(`  - ${scope}${commit.description}`);
     }
-    lines.push('');
+    lines.push("");
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 // Insert changelog entry into existing file
@@ -333,17 +329,17 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
   }
 
   // Read existing changelog
-  const existing = readFileSync(changelogPath, 'utf8');
+  const existing = readFileSync(changelogPath, "utf8");
 
   // Find insertion point (after header, before first version entry)
-  const headerEnd = existing.indexOf('## [');
+  const headerEnd = existing.indexOf("## [");
   if (headerEnd === -1) {
     // No existing versions, append to end
-    return existing + '\n' + content;
+    return existing + "\n" + content;
   }
 
   // Insert before first version
-  return existing.slice(0, headerEnd) + content + '\n' + existing.slice(headerEnd);
+  return existing.slice(0, headerEnd) + content + "\n" + existing.slice(headerEnd);
 }
 
 // Main function
@@ -356,20 +352,20 @@ function main() {
     process.exit(0);
   }
 
-  console.error('Generating changelog...');
+  console.error("Generating changelog...");
 
   // Determine range
   const from = options.from || getLatestTag();
   const to = options.to;
 
-  console.error(`Range: ${from || '(beginning)'} -> ${to}`);
+  console.error(`Range: ${from || "(beginning)"} -> ${to}`);
 
   // Get and parse commits
   const commits = getCommits(from, to);
   console.error(`Found ${commits.length} commits`);
 
   if (commits.length === 0) {
-    console.error('No commits found in range');
+    console.error("No commits found in range");
     process.exit(0);
   }
 
@@ -379,26 +375,26 @@ function main() {
   // Generate output
   let output;
   switch (options.format) {
-    case 'json':
+    case "json":
       output = generateJson(groups, breaking, from, to);
       break;
-    case 'plain':
+    case "plain":
       output = generatePlain(groups, breaking, from, to);
       break;
-    case 'markdown':
+    case "markdown":
     default:
       output = generateMarkdown(groups, breaking, from, to);
   }
 
   // Output
   if (options.dryRun) {
-    console.log('\n--- DRY RUN OUTPUT ---\n');
+    console.log("\n--- DRY RUN OUTPUT ---\n");
     console.log(output);
-    console.log('\n--- END DRY RUN ---');
+    console.log("\n--- END DRY RUN ---");
   } else if (options.output) {
     const filePath = resolve(PROJECT_ROOT, options.output);
 
-    if (options.format === 'markdown' && options.output.endsWith('.md')) {
+    if (options.format === "markdown" && options.output.endsWith(".md")) {
       // Insert into existing changelog
       const content = insertIntoChangelog(output, options.output);
       writeFileSync(filePath, content);

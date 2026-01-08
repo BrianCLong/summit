@@ -2,9 +2,9 @@
  * MySQL database connector
  */
 
-import { BaseConnector } from '../core/BaseConnector';
-import { ConnectorCapabilities, DataSourceConfig } from '../types';
-import { Logger } from 'winston';
+import { BaseConnector } from "../core/BaseConnector";
+import { ConnectorCapabilities, DataSourceConfig } from "../types";
+import { Logger } from "winston";
 
 export class MySQLConnector extends BaseConnector {
   private connection: any = null;
@@ -19,7 +19,7 @@ export class MySQLConnector extends BaseConnector {
       // Using mysql2 package (would need to be installed)
       // const mysql = require('mysql2/promise');
 
-      this.logger.info('MySQL connector ready for implementation');
+      this.logger.info("MySQL connector ready for implementation");
       this.isConnected = true;
 
       // Placeholder for actual implementation
@@ -32,7 +32,7 @@ export class MySQLConnector extends BaseConnector {
       //   ssl: this.config.connectionConfig.sslConfig?.enabled ? {...} : undefined
       // });
     } catch (error) {
-      this.logger.error('Failed to connect to MySQL', { error });
+      this.logger.error("Failed to connect to MySQL", { error });
       throw error;
     }
   }
@@ -43,7 +43,7 @@ export class MySQLConnector extends BaseConnector {
       this.connection = null;
     }
     this.isConnected = false;
-    this.logger.info('Disconnected from MySQL');
+    this.logger.info("Disconnected from MySQL");
   }
 
   async testConnection(): Promise<boolean> {
@@ -51,7 +51,7 @@ export class MySQLConnector extends BaseConnector {
       // const [rows] = await this.connection.execute('SELECT 1');
       return true;
     } catch (error) {
-      this.logger.error('Connection test failed', { error });
+      this.logger.error("Connection test failed", { error });
       return false;
     }
   }
@@ -63,13 +63,13 @@ export class MySQLConnector extends BaseConnector {
       supportsCDC: true, // With binlog
       supportsSchema: true,
       supportsPartitioning: true,
-      maxConcurrentConnections: 100
+      maxConcurrentConnections: 100,
     };
   }
 
   async *extract(): AsyncGenerator<any[], void, unknown> {
     const batchSize = this.config.extractionConfig.batchSize || 1000;
-    this.logger.info('MySQL extraction implementation');
+    this.logger.info("MySQL extraction implementation");
 
     // Placeholder - would implement actual MySQL streaming extraction
     yield [];
@@ -85,7 +85,7 @@ export class MySQLConnector extends BaseConnector {
 
     return {
       tableName,
-      columns: []
+      columns: [],
     };
   }
 }

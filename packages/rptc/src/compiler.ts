@@ -1,4 +1,4 @@
-import { PromptValidationError, type SlotErrorDetail } from './errors.js';
+import { PromptValidationError, type SlotErrorDetail } from "./errors.js";
 import {
   type EnumSlotSchema,
   type NumberSlotSchema,
@@ -10,20 +10,16 @@ import {
   type SlotValue,
   type StringSlotSchema,
   type BooleanSlotSchema,
-} from './schema.js';
-import type {
-  GeneratedTestSuite,
-  TestGenerationOptions,
-} from './testing/types.js';
-import { generateTestSuite } from './testing/test-generator.js';
-import type { LLMAdapter } from './adapters/types.js';
+} from "./schema.js";
+import type { GeneratedTestSuite, TestGenerationOptions } from "./testing/types.js";
+import { generateTestSuite } from "./testing/test-generator.js";
+import type { LLMAdapter } from "./adapters/types.js";
 
 const PLACEHOLDER_REGEX = /{{\s*([a-zA-Z0-9_]+)\s*}}/g;
 
-type PlaceholderNames<S extends string> =
-  S extends `${string}{{${infer Slot}}}${infer Rest}`
-    ? TrimPlaceholder<Slot> | PlaceholderNames<Rest>
-    : never;
+type PlaceholderNames<S extends string> = S extends `${string}{{${infer Slot}}}${infer Rest}`
+  ? TrimPlaceholder<Slot> | PlaceholderNames<Rest>
+  : never;
 
 type TrimPlaceholder<S extends string> = S extends ` ${infer R}`
   ? TrimPlaceholder<R>
@@ -31,15 +27,15 @@ type TrimPlaceholder<S extends string> = S extends ` ${infer R}`
     ? TrimPlaceholder<R>
     : S;
 
-type MissingSlots<
-  TTemplate extends string,
-  TSlots extends SlotSchemaMap,
-> = Exclude<PlaceholderNames<TTemplate>, keyof TSlots>;
+type MissingSlots<TTemplate extends string, TSlots extends SlotSchemaMap> = Exclude<
+  PlaceholderNames<TTemplate>,
+  keyof TSlots
+>;
 
-type UnusedSlots<
-  TTemplate extends string,
-  TSlots extends SlotSchemaMap,
-> = Exclude<keyof TSlots, PlaceholderNames<TTemplate>>;
+type UnusedSlots<TTemplate extends string, TSlots extends SlotSchemaMap> = Exclude<
+  keyof TSlots,
+  PlaceholderNames<TTemplate>
+>;
 
 type ValidateTemplate<TTemplate extends string, TSlots extends SlotSchemaMap> =
   MissingSlots<TTemplate, TSlots> extends never
@@ -67,10 +63,7 @@ export interface CompiledPrompt<TSlots extends SlotSchemaMap> {
   readonly metadata?: Record<string, unknown>;
 }
 
-export interface PromptTemplateConfig<
-  TTemplate extends string,
-  TSlots extends SlotSchemaMap,
-> {
+export interface PromptTemplateConfig<TTemplate extends string, TSlots extends SlotSchemaMap> {
   readonly name: string;
   readonly template: TTemplate;
   readonly slots: TSlots;
@@ -90,31 +83,23 @@ export interface PromptTemplate<TSlots extends SlotSchemaMap> {
   formatFor<TAdapter extends LLMAdapter>(
     adapter: TAdapter,
     values: SlotValues<TSlots>,
-    options?: Record<string, unknown>,
-  ): ReturnType<TAdapter['format']>;
-  generateTestSuite(
-    options?: TestGenerationOptions<TSlots>,
-  ): GeneratedTestSuite<TSlots>;
+    options?: Record<string, unknown>
+  ): ReturnType<TAdapter["format"]>;
+  generateTestSuite(options?: TestGenerationOptions<TSlots>): GeneratedTestSuite<TSlots>;
 }
 
-interface InternalValidation<TSlots extends SlotSchemaMap>
-  extends PromptValidationResult<TSlots> {
+interface InternalValidation<TSlots extends SlotSchemaMap> extends PromptValidationResult<TSlots> {
   readonly value: SlotValues<TSlots>;
 }
 
-export function createPromptTemplate<
-  TTemplate extends string,
-  TSlots extends SlotSchemaMap,
->(
-  config: PromptTemplateConfig<TTemplate, ValidateTemplate<TTemplate, TSlots>>,
+export function createPromptTemplate<TTemplate extends string, TSlots extends SlotSchemaMap>(
+  config: PromptTemplateConfig<TTemplate, ValidateTemplate<TTemplate, TSlots>>
 ): PromptTemplate<ValidateTemplate<TTemplate, TSlots>> {
   const validatedSlots = config.slots as ValidateTemplate<TTemplate, TSlots>;
   const placeholders = collectPlaceholders(config.template);
 
   if (placeholders.size === 0) {
-    throw new Error(
-      `Prompt template "${config.name}" must contain at least one slot placeholder.`,
-    );
+    throw new Error(`Prompt template "${config.name}" must contain at least one slot placeholder.`);
   }
 
   const template: PromptTemplate<ValidateTemplate<TTemplate, TSlots>> = {
@@ -127,12 +112,7 @@ export function createPromptTemplate<
       return validateValues(config.name, validatedSlots, placeholders, values);
     },
     compile(values) {
-      const validation = validateValues(
-        config.name,
-        validatedSlots,
-        placeholders,
-        values,
-      );
+      const validation = validateValues(config.name, validatedSlots, placeholders, values);
       if (!validation.valid || !validation.value) {
         const errorMap: Record<string, SlotErrorDetail[]> = {};
         for (const item of validation.errors) {
@@ -157,10 +137,10 @@ export function createPromptTemplate<
     formatFor<TAdapter extends LLMAdapter>(
       adapter: TAdapter,
       values: SlotValues<ValidateTemplate<TTemplate, TSlots>>,
-      options: Record<string, unknown> = {},
+      options: Record<string, unknown> = {}
     ) {
       const compiled = this.compile(values);
-      return adapter.format(compiled, options) as ReturnType<TAdapter['format']>;
+      return adapter.format(compiled, options) as ReturnType<TAdapter["format"]>;
     },
     generateTestSuite(options) {
       return generateTestSuite(this, options);
@@ -187,7 +167,7 @@ function validateValues<TSlots extends SlotSchemaMap>(
   templateName: string,
   slots: TSlots,
   placeholders: Set<string>,
-  values: PartialSlotValues<TSlots>,
+  values: PartialSlotValues<TSlots>
 ): PromptValidationResult<TSlots> | InternalValidation<TSlots> {
   const slotNames = Object.keys(slots) as Array<keyof TSlots>;
   const resolved: Partial<SlotValues<TSlots>> = {};
@@ -200,16 +180,14 @@ function validateValues<TSlots extends SlotSchemaMap>(
     const schema = slots[slotName] as SlotSchema;
     const value = (values as Record<string, unknown>)[slotName as string];
     const outcome = validateSlot(slotName as string, schema, value);
-    slotOutcomes[slotName] = outcome as SlotValidationOutcome<
-      SlotValue<TSlots[typeof slotName]>
-    >;
+    slotOutcomes[slotName] = outcome as SlotValidationOutcome<SlotValue<TSlots[typeof slotName]>>;
     if (outcome.valid) {
       resolved[slotName] = outcome.value as SlotValues<TSlots>[typeof slotName];
     } else {
       errors.push({
         slot: slotName,
         details:
-          'errors' in outcome && Array.isArray((outcome as any).errors)
+          "errors" in outcome && Array.isArray((outcome as any).errors)
             ? (outcome as any).errors
             : [],
       });
@@ -222,7 +200,7 @@ function validateValues<TSlots extends SlotSchemaMap>(
         slot: placeholder as keyof TSlots,
         details: [
           {
-            code: 'slot.undefined',
+            code: "slot.undefined",
             message: `Placeholder "${placeholder}" is not defined in slot schema.`,
           },
         ],
@@ -236,7 +214,7 @@ function validateValues<TSlots extends SlotSchemaMap>(
       slot: key as keyof TSlots,
       details: [
         {
-          code: 'slot.unexpected',
+          code: "slot.unexpected",
           message: `Value provided for undefined slot "${key}".`,
         },
       ],
@@ -262,27 +240,23 @@ function validateValues<TSlots extends SlotSchemaMap>(
 function validateSlot(
   slotName: string,
   schema: SlotSchema,
-  value: unknown,
+  value: unknown
 ): SlotValidationOutcome<unknown> {
   switch (schema.kind) {
-    case 'string':
+    case "string":
       return validateStringSlot(slotName, schema, value);
-    case 'number':
+    case "number":
       return validateNumberSlot(slotName, schema, value);
-    case 'boolean':
+    case "boolean":
       return validateBooleanSlot(slotName, schema, value);
-    case 'enum':
-      return validateEnumSlot(
-        slotName,
-        schema as EnumSlotSchema<string>,
-        value,
-      );
+    case "enum":
+      return validateEnumSlot(slotName, schema as EnumSlotSchema<string>, value);
     default:
       return {
         valid: false,
         errors: [
           {
-            code: 'slot.unsupported',
+            code: "slot.unsupported",
             message: `Slot "${slotName}" has unsupported kind ${(schema as SlotSchema).kind}.`,
           },
         ],
@@ -293,29 +267,27 @@ function validateSlot(
 function validateStringSlot(
   slotName: string,
   schema: StringSlotSchema,
-  value: unknown,
+  value: unknown
 ): SlotValidationOutcome<string> {
   if (value === undefined || value === null) {
     if (schema.defaultValue !== undefined) {
       return { valid: true, value: schema.defaultValue };
     }
     if (schema.optional) {
-      return { valid: true, value: '' };
+      return { valid: true, value: "" };
     }
     return {
       valid: false,
-      errors: [
-        { code: 'slot.required', message: `Slot "${slotName}" is required.` },
-      ],
+      errors: [{ code: "slot.required", message: `Slot "${slotName}" is required.` }],
     };
   }
 
-  if (typeof value !== 'string') {
+  if (typeof value !== "string") {
     return {
       valid: false,
       errors: [
         {
-          code: 'slot.type',
+          code: "slot.type",
           message: `Slot "${slotName}" must be a string.`,
         },
       ],
@@ -325,23 +297,17 @@ function validateStringSlot(
   const constraints = schema.constraints;
   const violations: SlotErrorDetail[] = [];
 
-  if (
-    constraints?.minLength !== undefined &&
-    value.length < constraints.minLength
-  ) {
+  if (constraints?.minLength !== undefined && value.length < constraints.minLength) {
     violations.push({
-      code: 'string.minLength',
+      code: "string.minLength",
       message: `Length must be >= ${constraints.minLength}.`,
       meta: { provided: value.length },
     });
   }
 
-  if (
-    constraints?.maxLength !== undefined &&
-    value.length > constraints.maxLength
-  ) {
+  if (constraints?.maxLength !== undefined && value.length > constraints.maxLength) {
     violations.push({
-      code: 'string.maxLength',
+      code: "string.maxLength",
       message: `Length must be <= ${constraints.maxLength}.`,
       meta: { provided: value.length },
     });
@@ -349,7 +315,7 @@ function validateStringSlot(
 
   if (constraints?.pattern && !constraints.pattern.test(value)) {
     violations.push({
-      code: 'string.pattern',
+      code: "string.pattern",
       message: `Value does not match required pattern ${constraints.pattern}.`,
     });
   }
@@ -364,7 +330,7 @@ function validateStringSlot(
 function validateNumberSlot(
   slotName: string,
   schema: NumberSlotSchema,
-  value: unknown,
+  value: unknown
 ): SlotValidationOutcome<number> {
   if (value === undefined || value === null) {
     if (schema.defaultValue !== undefined) {
@@ -375,7 +341,7 @@ function validateNumberSlot(
         valid: false,
         errors: [
           {
-            code: 'slot.required',
+            code: "slot.required",
             message: `Slot "${slotName}" is optional but requires a defaultValue for numeric slots.`,
           },
         ],
@@ -383,18 +349,16 @@ function validateNumberSlot(
     }
     return {
       valid: false,
-      errors: [
-        { code: 'slot.required', message: `Slot "${slotName}" is required.` },
-      ],
+      errors: [{ code: "slot.required", message: `Slot "${slotName}" is required.` }],
     };
   }
 
-  if (typeof value !== 'number' || Number.isNaN(value)) {
+  if (typeof value !== "number" || Number.isNaN(value)) {
     return {
       valid: false,
       errors: [
         {
-          code: 'slot.type',
+          code: "slot.type",
           message: `Slot "${slotName}" must be a finite number.`,
         },
       ],
@@ -406,7 +370,7 @@ function validateNumberSlot(
 
   if (constraints?.min !== undefined && value < constraints.min) {
     violations.push({
-      code: 'number.min',
+      code: "number.min",
       message: `Value must be >= ${constraints.min}.`,
       meta: { provided: value },
     });
@@ -414,7 +378,7 @@ function validateNumberSlot(
 
   if (constraints?.max !== undefined && value > constraints.max) {
     violations.push({
-      code: 'number.max',
+      code: "number.max",
       message: `Value must be <= ${constraints.max}.`,
       meta: { provided: value },
     });
@@ -430,7 +394,7 @@ function validateNumberSlot(
 function validateBooleanSlot(
   slotName: string,
   schema: BooleanSlotSchema,
-  value: unknown,
+  value: unknown
 ): SlotValidationOutcome<boolean> {
   if (value === undefined || value === null) {
     if (schema.defaultValue !== undefined) {
@@ -441,7 +405,7 @@ function validateBooleanSlot(
         valid: false,
         errors: [
           {
-            code: 'slot.required',
+            code: "slot.required",
             message: `Slot "${slotName}" is optional but requires a defaultValue for boolean slots.`,
           },
         ],
@@ -449,18 +413,16 @@ function validateBooleanSlot(
     }
     return {
       valid: false,
-      errors: [
-        { code: 'slot.required', message: `Slot "${slotName}" is required.` },
-      ],
+      errors: [{ code: "slot.required", message: `Slot "${slotName}" is required.` }],
     };
   }
 
-  if (typeof value !== 'boolean') {
+  if (typeof value !== "boolean") {
     return {
       valid: false,
       errors: [
         {
-          code: 'slot.type',
+          code: "slot.type",
           message: `Slot "${slotName}" must be a boolean.`,
         },
       ],
@@ -473,7 +435,7 @@ function validateBooleanSlot(
 function validateEnumSlot(
   slotName: string,
   schema: EnumSlotSchema<string>,
-  value: unknown,
+  value: unknown
 ): SlotValidationOutcome<string> {
   if (value === undefined || value === null) {
     if (schema.defaultValue !== undefined) {
@@ -484,7 +446,7 @@ function validateEnumSlot(
         valid: false,
         errors: [
           {
-            code: 'slot.required',
+            code: "slot.required",
             message: `Slot "${slotName}" is optional but requires a defaultValue for enum slots.`,
           },
         ],
@@ -492,18 +454,16 @@ function validateEnumSlot(
     }
     return {
       valid: false,
-      errors: [
-        { code: 'slot.required', message: `Slot "${slotName}" is required.` },
-      ],
+      errors: [{ code: "slot.required", message: `Slot "${slotName}" is required.` }],
     };
   }
 
-  if (typeof value !== 'string') {
+  if (typeof value !== "string") {
     return {
       valid: false,
       errors: [
         {
-          code: 'slot.type',
+          code: "slot.type",
           message: `Slot "${slotName}" must be a string literal.`,
         },
       ],
@@ -515,8 +475,8 @@ function validateEnumSlot(
       valid: false,
       errors: [
         {
-          code: 'enum.value',
-          message: `Value must be one of: ${schema.values.join(', ')}.`,
+          code: "enum.value",
+          message: `Value must be one of: ${schema.values.join(", ")}.`,
         },
       ],
     };
@@ -527,14 +487,14 @@ function validateEnumSlot(
 
 function renderTemplate<TSlots extends SlotSchemaMap>(
   template: string,
-  values: SlotValues<TSlots>,
+  values: SlotValues<TSlots>
 ): string {
   return template.replace(PLACEHOLDER_REGEX, (_match, group: string) => {
     const key = group.trim() as keyof TSlots;
     const value = values[key];
     if (value === undefined || value === null) {
-      return '';
+      return "";
     }
-    return typeof value === 'string' ? value : String(value);
+    return typeof value === "string" ? value : String(value);
   });
 }

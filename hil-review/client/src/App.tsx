@@ -1,8 +1,8 @@
-import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Actor, createClient } from './api';
-import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Actor, createClient } from "./api";
+import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 
-type Role = 'admin' | 'reviewer' | 'auditor';
+type Role = "admin" | "reviewer" | "auditor";
 
 type Evidence = {
   id: string;
@@ -16,7 +16,7 @@ type Evidence = {
 type DecisionEntry = {
   id: string;
   actor: Actor;
-  decision: 'approve' | 'deny';
+  decision: "approve" | "deny";
   comment: string;
   timestamp: string;
 };
@@ -55,7 +55,7 @@ type PolicyProposal = {
   decisions: {
     id: string;
     actor: Actor;
-    disposition: 'advance' | 'reject';
+    disposition: "advance" | "reject";
     comment: string;
     timestamp: string;
   }[];
@@ -72,9 +72,9 @@ type AuditEntry = {
 };
 
 const defaultUser: Actor = {
-  id: 'reviewer-1',
-  name: 'Reviewer One',
-  role: 'reviewer'
+  id: "reviewer-1",
+  name: "Reviewer One",
+  role: "reviewer",
 };
 
 const formatDate = (iso: string) => new Date(iso).toLocaleString();
@@ -85,15 +85,15 @@ export default function App() {
   const [selectedAppealId, setSelectedAppealId] = useState<string | null>(null);
   const [auditLog, setAuditLog] = useState<AuditEntry[]>([]);
   const [policyProposals, setPolicyProposals] = useState<PolicyProposal[]>([]);
-  const [newAppeal, setNewAppeal] = useState({ title: '', description: '', submittedBy: '' });
-  const [evidenceForm, setEvidenceForm] = useState({ label: '', description: '', url: '' });
-  const [decisionComment, setDecisionComment] = useState('');
-  const [policySuggestion, setPolicySuggestion] = useState({ summary: '', rationale: '' });
-  const [proposalForm, setProposalForm] = useState({ title: '', summary: '' });
-  const [exported, setExported] = useState('');
-  const [importInput, setImportInput] = useState('');
-  const [status, setStatus] = useState('');
-  const [focusTarget, setFocusTarget] = useState<'newAppeal' | 'evidence' | 'policy' | null>(null);
+  const [newAppeal, setNewAppeal] = useState({ title: "", description: "", submittedBy: "" });
+  const [evidenceForm, setEvidenceForm] = useState({ label: "", description: "", url: "" });
+  const [decisionComment, setDecisionComment] = useState("");
+  const [policySuggestion, setPolicySuggestion] = useState({ summary: "", rationale: "" });
+  const [proposalForm, setProposalForm] = useState({ title: "", summary: "" });
+  const [exported, setExported] = useState("");
+  const [importInput, setImportInput] = useState("");
+  const [status, setStatus] = useState("");
+  const [focusTarget, setFocusTarget] = useState<"newAppeal" | "evidence" | "policy" | null>(null);
 
   const client = useMemo(() => createClient(actor), [actor]);
 
@@ -116,15 +116,15 @@ export default function App() {
     try {
       const [{ data: appealsResponse }, { data: auditResponse }, { data: policyResponse }] =
         await Promise.all([
-          client.get('/appeals'),
-          client.get('/audit-log'),
-          client.get('/policy-proposals')
+          client.get("/appeals"),
+          client.get("/audit-log"),
+          client.get("/policy-proposals"),
         ]);
       setAppeals(appealsResponse.appeals ?? []);
       setAuditLog(auditResponse.logs ?? []);
       setPolicyProposals(policyResponse.proposals ?? []);
     } catch (error) {
-      setStatus('Unable to refresh data. Check server logs.');
+      setStatus("Unable to refresh data. Check server logs.");
     }
   }, [client]);
 
@@ -133,13 +133,13 @@ export default function App() {
   }, [refreshAppeals]);
 
   useEffect(() => {
-    if (focusTarget === 'evidence') {
+    if (focusTarget === "evidence") {
       evidenceRef.current?.focus();
     }
-    if (focusTarget === 'newAppeal') {
+    if (focusTarget === "newAppeal") {
       newAppealRef.current?.focus();
     }
-    if (focusTarget === 'policy') {
+    if (focusTarget === "policy") {
       policyRef.current?.focus();
     }
     if (focusTarget) {
@@ -149,33 +149,39 @@ export default function App() {
 
   const moveSelection = useCallback(
     (direction: number) => {
-      if (appeals.length === 0) {return;}
+      if (appeals.length === 0) {
+        return;
+      }
       const currentIndex = appeals.findIndex((item) => item.id === selectedAppealId);
       const nextIndex =
-        currentIndex === -1 ? 0 : Math.max(0, Math.min(appeals.length - 1, currentIndex + direction));
+        currentIndex === -1
+          ? 0
+          : Math.max(0, Math.min(appeals.length - 1, currentIndex + direction));
       setSelectedAppealId(appeals[nextIndex].id);
     },
     [appeals, selectedAppealId]
   );
 
   const handleDecision = useCallback(
-    async (decision: 'approve' | 'deny') => {
-      if (!selectedAppeal) {return;}
-      if (!['admin', 'reviewer'].includes(actor.role)) {
-        setStatus('Only admins and reviewers can register decisions.');
+    async (decision: "approve" | "deny") => {
+      if (!selectedAppeal) {
+        return;
+      }
+      if (!["admin", "reviewer"].includes(actor.role)) {
+        setStatus("Only admins and reviewers can register decisions.");
         return;
       }
 
       try {
         await client.post(`/appeals/${selectedAppeal.id}/decision`, {
           decision,
-          comment: decisionComment
+          comment: decisionComment,
         });
-        setDecisionComment('');
+        setDecisionComment("");
         setStatus(`Recorded ${decision} decision. Dual-control enforced.`);
         await refreshAppeals();
       } catch (error: any) {
-        setStatus(error?.response?.data?.error ?? 'Unable to record decision.');
+        setStatus(error?.response?.data?.error ?? "Unable to record decision.");
       }
     },
     [actor.role, client, decisionComment, refreshAppeals, selectedAppeal]
@@ -183,11 +189,11 @@ export default function App() {
 
   const handleExport = useCallback(async () => {
     try {
-      const { data } = await client.get('/export');
+      const { data } = await client.get("/export");
       setExported(JSON.stringify(data, null, 2));
-      setStatus('Export ready. Use Shift+E anytime to refresh export.');
+      setStatus("Export ready. Use Shift+E anytime to refresh export.");
     } catch (error: any) {
-      setStatus(error?.response?.data?.error ?? 'Unable to export.');
+      setStatus(error?.response?.data?.error ?? "Unable to export.");
     }
   }, [client]);
 
@@ -195,12 +201,12 @@ export default function App() {
     () => ({
       j: () => moveSelection(1),
       k: () => moveSelection(-1),
-      n: () => setFocusTarget('newAppeal'),
-      e: () => setFocusTarget('evidence'),
-      p: () => setFocusTarget('policy'),
-      a: () => handleDecision('approve'),
-      x: () => handleDecision('deny'),
-      'Shift+E': () => handleExport()
+      n: () => setFocusTarget("newAppeal"),
+      e: () => setFocusTarget("evidence"),
+      p: () => setFocusTarget("policy"),
+      a: () => handleDecision("approve"),
+      x: () => handleDecision("deny"),
+      "Shift+E": () => handleExport(),
     }),
     [handleDecision, handleExport, moveSelection]
   );
@@ -214,113 +220,125 @@ export default function App() {
   const handleCreateAppeal = async (event: FormEvent) => {
     event.preventDefault();
     try {
-      await client.post('/appeals', {
+      await client.post("/appeals", {
         title: newAppeal.title,
         description: newAppeal.description,
-        submittedBy: newAppeal.submittedBy
+        submittedBy: newAppeal.submittedBy,
       });
-      setNewAppeal({ title: '', description: '', submittedBy: '' });
-      setStatus('Appeal submitted and queued.');
+      setNewAppeal({ title: "", description: "", submittedBy: "" });
+      setStatus("Appeal submitted and queued.");
       await refreshAppeals();
     } catch (error: any) {
-      setStatus(error?.response?.data?.error ?? 'Unable to create appeal.');
+      setStatus(error?.response?.data?.error ?? "Unable to create appeal.");
     }
   };
 
   const handleQueueAppeal = async () => {
-    if (!selectedAppeal) {return;}
+    if (!selectedAppeal) {
+      return;
+    }
     try {
       await client.post(`/appeals/${selectedAppeal.id}/queue`);
-      setStatus('Appeal moved to triage queue.');
+      setStatus("Appeal moved to triage queue.");
       await refreshAppeals();
     } catch (error: any) {
-      setStatus(error?.response?.data?.error ?? 'Unable to update queue.');
+      setStatus(error?.response?.data?.error ?? "Unable to update queue.");
     }
   };
 
   const handleAddEvidence = async (event: FormEvent) => {
     event.preventDefault();
-    if (!selectedAppeal) {return;}
+    if (!selectedAppeal) {
+      return;
+    }
     try {
       await client.post(`/appeals/${selectedAppeal.id}/evidence`, evidenceForm);
-      setEvidenceForm({ label: '', description: '', url: '' });
-      setStatus('Evidence attached.');
+      setEvidenceForm({ label: "", description: "", url: "" });
+      setStatus("Evidence attached.");
       await refreshAppeals();
     } catch (error: any) {
-      setStatus(error?.response?.data?.error ?? 'Unable to attach evidence.');
+      setStatus(error?.response?.data?.error ?? "Unable to attach evidence.");
     }
   };
 
   const handleAddSuggestion = async (event: FormEvent) => {
     event.preventDefault();
-    if (!selectedAppeal) {return;}
+    if (!selectedAppeal) {
+      return;
+    }
     try {
       await client.post(`/appeals/${selectedAppeal.id}/policy-suggestions`, policySuggestion);
-      setPolicySuggestion({ summary: '', rationale: '' });
-      setStatus('Policy suggestion submitted.');
+      setPolicySuggestion({ summary: "", rationale: "" });
+      setStatus("Policy suggestion submitted.");
       await refreshAppeals();
     } catch (error: any) {
-      setStatus(error?.response?.data?.error ?? 'Unable to submit policy suggestion.');
+      setStatus(error?.response?.data?.error ?? "Unable to submit policy suggestion.");
     }
   };
 
   const handlePolicyProposal = async (event: FormEvent) => {
     event.preventDefault();
     try {
-      await client.post('/policy-proposals', {
+      await client.post("/policy-proposals", {
         ...proposalForm,
-        relatedAppealId: selectedAppeal?.id ?? null
+        relatedAppealId: selectedAppeal?.id ?? null,
       });
-      setProposalForm({ title: '', summary: '' });
-      setStatus('Policy change proposal recorded.');
+      setProposalForm({ title: "", summary: "" });
+      setStatus("Policy change proposal recorded.");
       await refreshAppeals();
     } catch (error: any) {
-      setStatus(error?.response?.data?.error ?? 'Unable to record policy proposal.');
+      setStatus(error?.response?.data?.error ?? "Unable to record policy proposal.");
     }
   };
 
-  const handlePolicyDecision = async (proposal: PolicyProposal, disposition: 'advance' | 'reject') => {
+  const handlePolicyDecision = async (
+    proposal: PolicyProposal,
+    disposition: "advance" | "reject"
+  ) => {
     try {
       await client.post(`/policy-proposals/${proposal.id}/decision`, {
         disposition,
-        comment: ''
+        comment: "",
       });
       setStatus(`Policy proposal ${disposition}.`);
       await refreshAppeals();
     } catch (error: any) {
-      setStatus(error?.response?.data?.error ?? 'Unable to evaluate proposal.');
+      setStatus(error?.response?.data?.error ?? "Unable to evaluate proposal.");
     }
   };
 
   const handleImport = async () => {
-    if (!importInput.trim()) {return;}
+    if (!importInput.trim()) {
+      return;
+    }
     try {
       const payload = JSON.parse(importInput);
-      await client.post('/import', payload);
-      setStatus('Import successful. State rehydrated.');
-      setImportInput('');
+      await client.post("/import", payload);
+      setStatus("Import successful. State rehydrated.");
+      setImportInput("");
       await refreshAppeals();
     } catch (error: any) {
       if (error instanceof SyntaxError) {
-        setStatus('Import payload is not valid JSON.');
+        setStatus("Import payload is not valid JSON.");
         return;
       }
-      setStatus(error?.response?.data?.error ?? 'Unable to import payload.');
+      setStatus(error?.response?.data?.error ?? "Unable to import payload.");
     }
   };
 
   const queue = useMemo(
-    () => appeals.filter((appeal) => ['pending', 'queued'].includes(appeal.status)),
+    () => appeals.filter((appeal) => ["pending", "queued"].includes(appeal.status)),
     [appeals]
   );
 
   return (
     <div className="app-shell">
-      <section className="panel" style={{ gridColumn: '1 / span 1', gridRow: '1 / span 2' }}>
+      <section className="panel" style={{ gridColumn: "1 / span 1", gridRow: "1 / span 2" }}>
         <header className="section">
           <h2>Appeals Queue</h2>
           <p className="shortcut-hint">
-            <kbd>j</kbd>/<kbd>k</kbd> navigate · <kbd>n</kbd> new · <kbd>a</kbd>/<kbd>x</kbd> approve/deny
+            <kbd>j</kbd>/<kbd>k</kbd> navigate · <kbd>n</kbd> new · <kbd>a</kbd>/<kbd>x</kbd>{" "}
+            approve/deny
           </p>
         </header>
         <div className="section">
@@ -352,7 +370,7 @@ export default function App() {
           {queue.map((item) => (
             <button
               key={item.id}
-              className={`queue-item ${item.id === selectedAppealId ? 'active' : ''}`}
+              className={`queue-item ${item.id === selectedAppealId ? "active" : ""}`}
               onClick={() => setSelectedAppealId(item.id)}
             >
               <div className={`badge ${item.status}`}>{item.status}</div>
@@ -365,7 +383,7 @@ export default function App() {
         </div>
       </section>
 
-      <section className="panel" style={{ gridColumn: '2 / span 1' }}>
+      <section className="panel" style={{ gridColumn: "2 / span 1" }}>
         <div className="section">
           <h2>Submit new appeal</h2>
           <form onSubmit={handleCreateAppeal}>
@@ -401,7 +419,7 @@ export default function App() {
               <button
                 className="button-secondary"
                 type="button"
-                onClick={() => setNewAppeal({ title: '', description: '', submittedBy: '' })}
+                onClick={() => setNewAppeal({ title: "", description: "", submittedBy: "" })}
               >
                 Reset
               </button>
@@ -421,8 +439,8 @@ export default function App() {
               <strong>Submitted by:</strong> {selectedAppeal.submittedBy}
             </p>
             <p>
-              <strong>Created:</strong> {formatDate(selectedAppeal.createdAt)} · <strong>Updated:</strong>{' '}
-              {formatDate(selectedAppeal.updatedAt)}
+              <strong>Created:</strong> {formatDate(selectedAppeal.createdAt)} ·{" "}
+              <strong>Updated:</strong> {formatDate(selectedAppeal.updatedAt)}
             </p>
             <div className="button-row">
               <button className="button-secondary" onClick={handleQueueAppeal}>
@@ -453,7 +471,9 @@ export default function App() {
                 <input
                   placeholder="Link (optional)"
                   value={evidenceForm.url}
-                  onChange={(event) => setEvidenceForm((prev) => ({ ...prev, url: event.target.value }))}
+                  onChange={(event) =>
+                    setEvidenceForm((prev) => ({ ...prev, url: event.target.value }))
+                  }
                   style={{ marginTop: 8 }}
                 />
                 <button className="button-secondary" type="submit" style={{ marginTop: 8 }}>
@@ -463,7 +483,8 @@ export default function App() {
               <ul>
                 {selectedAppeal.evidence.map((item) => (
                   <li key={item.id}>
-                    <strong>{item.label}</strong> — added {formatDate(item.addedAt)} by {item.addedBy.name}{' '}
+                    <strong>{item.label}</strong> — added {formatDate(item.addedAt)} by{" "}
+                    {item.addedBy.name}{" "}
                     {item.url && (
                       <a href={item.url} target="_blank" rel="noreferrer">
                         evidence link
@@ -484,17 +505,26 @@ export default function App() {
                 onChange={(event) => setDecisionComment(event.target.value)}
               />
               <div className="button-row" style={{ marginTop: 8 }}>
-                <button className="button-primary" type="button" onClick={() => handleDecision('approve')}>
+                <button
+                  className="button-primary"
+                  type="button"
+                  onClick={() => handleDecision("approve")}
+                >
                   Approve (dual-control)
                 </button>
-                <button className="button-secondary" type="button" onClick={() => handleDecision('deny')}>
+                <button
+                  className="button-secondary"
+                  type="button"
+                  onClick={() => handleDecision("deny")}
+                >
                   Deny (dual-control)
                 </button>
               </div>
               <ul>
                 {selectedAppeal.approvals.map((entry) => (
                   <li key={entry.id}>
-                    <strong>{entry.actor.name}</strong> {entry.decision} — {formatDate(entry.timestamp)}
+                    <strong>{entry.actor.name}</strong> {entry.decision} —{" "}
+                    {formatDate(entry.timestamp)}
                     {entry.comment && <p>{entry.comment}</p>}
                   </li>
                 ))}
@@ -529,7 +559,7 @@ export default function App() {
               <ul>
                 {selectedAppeal.policySuggestions.map((item) => (
                   <li key={item.id}>
-                    <strong>{item.summary}</strong> — proposed by {item.createdBy.name} on{' '}
+                    <strong>{item.summary}</strong> — proposed by {item.createdBy.name} on{" "}
                     {formatDate(item.createdAt)}
                     <p>{item.rationale}</p>
                   </li>
@@ -543,14 +573,16 @@ export default function App() {
         )}
       </section>
 
-      <section className="panel" style={{ gridColumn: '3 / span 1', gridRow: '1 / span 2' }}>
+      <section className="panel" style={{ gridColumn: "3 / span 1", gridRow: "1 / span 2" }}>
         <div className="section">
           <h2>Policy change proposals</h2>
           <form onSubmit={handlePolicyProposal}>
             <input
               placeholder="Proposal title"
               value={proposalForm.title}
-              onChange={(event) => setProposalForm((prev) => ({ ...prev, title: event.target.value }))}
+              onChange={(event) =>
+                setProposalForm((prev) => ({ ...prev, title: event.target.value }))
+              }
               required
             />
             <textarea
@@ -586,14 +618,14 @@ export default function App() {
                   <button
                     className="button-primary"
                     type="button"
-                    onClick={() => handlePolicyDecision(proposal, 'advance')}
+                    onClick={() => handlePolicyDecision(proposal, "advance")}
                   >
                     Advance
                   </button>
                   <button
                     className="button-secondary"
                     type="button"
-                    onClick={() => handlePolicyDecision(proposal, 'reject')}
+                    onClick={() => handlePolicyDecision(proposal, "reject")}
                   >
                     Reject
                   </button>
@@ -601,7 +633,8 @@ export default function App() {
                 <ul>
                   {proposal.decisions.map((entry) => (
                     <li key={entry.id}>
-                      <strong>{entry.actor.name}</strong> {entry.disposition} — {formatDate(entry.timestamp)}
+                      <strong>{entry.actor.name}</strong> {entry.disposition} —{" "}
+                      {formatDate(entry.timestamp)}
                     </li>
                   ))}
                   {proposal.decisions.length === 0 && <li>No decisions yet.</li>}
@@ -622,7 +655,9 @@ export default function App() {
                   {`${formatDate(entry.timestamp)} · ${entry.actor.name} (${entry.actor.role}) → ${entry.targetType} #${entry.targetId}`}
                 </p>
                 {entry.details && (
-                  <pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(entry.details, null, 2)}</pre>
+                  <pre style={{ whiteSpace: "pre-wrap" }}>
+                    {JSON.stringify(entry.details, null, 2)}
+                  </pre>
                 )}
               </div>
             ))}

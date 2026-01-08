@@ -12,7 +12,7 @@ export interface SchemaDefinition {
 export interface CompatibilityIssue {
   field: string;
   reason: string;
-  severity: 'breaking' | 'warning';
+  severity: "breaking" | "warning";
 }
 
 export interface CompatibilityReport {

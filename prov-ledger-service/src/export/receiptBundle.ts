@@ -4,10 +4,10 @@ import {
   ReceiptExportBundle,
   RedactionRule,
   applyRedactions,
-} from '@intelgraph/provenance';
-import tar from 'tar-stream';
-import { createGzip } from 'zlib';
-import { ProvenanceChain } from '../ledger';
+} from "@intelgraph/provenance";
+import tar from "tar-stream";
+import { createGzip } from "zlib";
+import { ProvenanceChain } from "../ledger";
 
 export interface ReceiptBundleOptions {
   receipts: Receipt[];
@@ -32,13 +32,10 @@ export function assembleReceiptBundle({
   for (const receipt of receipts) {
     const sanitized = applyRedactions(receipt, [...(receipt.redactions ?? []), ...redactions]);
 
-    pack.entry(
-      { name: `receipts/full/${receipt.id}.json` },
-      JSON.stringify(receipt, null, 2),
-    );
+    pack.entry({ name: `receipts/full/${receipt.id}.json` }, JSON.stringify(receipt, null, 2));
     pack.entry(
       { name: `receipts/redacted/${receipt.id}.json` },
-      JSON.stringify(sanitized, null, 2),
+      JSON.stringify(sanitized, null, 2)
     );
 
     bundle.receipts.push(sanitized);
@@ -48,13 +45,13 @@ export function assembleReceiptBundle({
       if (prov) {
         pack.entry(
           { name: `provenance/${receipt.claimIds[0]}.json` },
-          JSON.stringify(prov, null, 2),
+          JSON.stringify(prov, null, 2)
         );
       }
     }
   }
 
-  pack.entry({ name: 'bundle.json' }, JSON.stringify(bundle, null, 2));
+  pack.entry({ name: "bundle.json" }, JSON.stringify(bundle, null, 2));
   pack.finalize();
 
   return pack.pipe(createGzip());

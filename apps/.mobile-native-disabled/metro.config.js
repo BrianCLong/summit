@@ -80,7 +80,7 @@ const config = {
     // Custom module ID factory for smaller IDs
     createModuleIdFactory: function () {
       const projectRootPath = __dirname;
-      return (path) => {
+      return path => {
         const relativePath = path
           .replace(projectRootPath, '')
           .replace(/\//g, '_')
@@ -89,7 +89,7 @@ const config = {
       };
     },
     // Process modules for better tree-shaking
-    processModuleFilter: (module) => {
+    processModuleFilter: module => {
       // Filter out source maps in production
       if (!__DEV__ && module.path.includes('.map')) {
         return false;
@@ -99,14 +99,14 @@ const config = {
   },
   server: {
     // Enable persistent caching
-    enhanceMiddleware: (middleware) => {
+    enhanceMiddleware: middleware => {
       return middleware;
     },
   },
   cacheStores: [
     {
       // File-based cache store for faster rebuilds
-      get: async (key) => {
+      get: async key => {
         // Implement cache retrieval if needed
         return null;
       },

@@ -39,6 +39,7 @@ The **Summit Eval & Routing SDK** is a comprehensive toolkit for evaluating, rou
 ### 1. Open Source Core (MIT License)
 
 **Components**:
+
 - Basic eval runner
 - YAML scenario format
 - Trace schema
@@ -50,6 +51,7 @@ The **Summit Eval & Routing SDK** is a comprehensive toolkit for evaluating, rou
 ### 2. Pro SDK ($499/month)
 
 **Additional Features**:
+
 - Adaptive router with learning
 - Advanced safety (custom patterns, red-team library)
 - Prometheus/OTLP integrations
@@ -60,6 +62,7 @@ The **Summit Eval & Routing SDK** is a comprehensive toolkit for evaluating, rou
 ### 3. Enterprise Platform ($5,000+/month)
 
 **Additional Features**:
+
 - Managed evaluation service
 - Dashboard and analytics
 - Custom scenario development
@@ -71,12 +74,12 @@ The **Summit Eval & Routing SDK** is a comprehensive toolkit for evaluating, rou
 
 ## Revenue Model
 
-| Stream | Year 1 | Year 2 | Year 3 |
-|--------|--------|--------|--------|
-| Pro SDK | $100K | $500K | $1.5M |
-| Enterprise | $200K | $1M | $3M |
-| Services | $150K | $400K | $800K |
-| **Total** | **$450K** | **$1.9M** | **$5.3M** |
+| Stream     | Year 1    | Year 2    | Year 3    |
+| ---------- | --------- | --------- | --------- |
+| Pro SDK    | $100K     | $500K     | $1.5M     |
+| Enterprise | $200K     | $1M       | $3M       |
+| Services   | $150K     | $400K     | $800K     |
+| **Total**  | **$450K** | **$1.9M** | **$5.3M** |
 
 ### Pricing Rationale
 
@@ -129,12 +132,12 @@ The **Summit Eval & Routing SDK** is a comprehensive toolkit for evaluating, rou
 
 ## Competitive Landscape
 
-| Competitor | Strengths | Weaknesses | Our Differentiation |
-|------------|-----------|------------|---------------------|
-| LangSmith | LangChain integration | Vendor lock-in | Framework agnostic |
-| Helicone | Simple setup | Limited routing | Eval-aware routing |
-| Weights & Biases | ML tracking | LLM features limited | LLM-first design |
-| OpenTelemetry | Standard | Generic | LLM-specific schema |
+| Competitor       | Strengths             | Weaknesses           | Our Differentiation |
+| ---------------- | --------------------- | -------------------- | ------------------- |
+| LangSmith        | LangChain integration | Vendor lock-in       | Framework agnostic  |
+| Helicone         | Simple setup          | Limited routing      | Eval-aware routing  |
+| Weights & Biases | ML tracking           | LLM features limited | LLM-first design    |
+| OpenTelemetry    | Standard              | Generic              | LLM-specific schema |
 
 ## Key Differentiators
 
@@ -180,12 +183,12 @@ The **Summit Eval & Routing SDK** is a comprehensive toolkit for evaluating, rou
 
 ## Risks & Mitigations
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Commoditization | Medium | High | Focus on integration, network effects |
-| Large competitor entry | High | Medium | Speed, community, specialization |
-| Open source sustainability | Medium | Medium | Clear monetization, enterprise focus |
-| Technical complexity | Low | High | Strong documentation, support |
+| Risk                       | Likelihood | Impact | Mitigation                            |
+| -------------------------- | ---------- | ------ | ------------------------------------- |
+| Commoditization            | Medium     | High   | Focus on integration, network effects |
+| Large competitor entry     | High       | Medium | Speed, community, specialization      |
+| Open source sustainability | Medium     | Medium | Clear monetization, enterprise focus  |
+| Technical complexity       | Low        | High   | Strong documentation, support         |
 
 ## IP Strategy
 
@@ -203,5 +206,5 @@ The **Summit Eval & Routing SDK** is a comprehensive toolkit for evaluating, rou
 
 ---
 
-*Version: 1.0*
-*Status: Internal Draft*
+_Version: 1.0_
+_Status: Internal Draft_

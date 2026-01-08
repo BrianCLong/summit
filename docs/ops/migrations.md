@@ -2,9 +2,9 @@
 
 ## Policy
 
-*   **Forward-Only**: Prefer forward-only migrations (add columns, don't rename/delete) to support zero-downtime deploys.
-*   **Idempotency**: All migration scripts must be idempotent.
-*   **Testing**: Migrations must be tested on a staging DB copy before production.
+- **Forward-Only**: Prefer forward-only migrations (add columns, don't rename/delete) to support zero-downtime deploys.
+- **Idempotency**: All migration scripts must be idempotent.
+- **Testing**: Migrations must be tested on a staging DB copy before production.
 
 ## Workflow
 
@@ -16,5 +16,6 @@
 ## Safety Checks
 
 Before applying in Prod:
-*   Check for `DROP TABLE` or destructive `UPDATE` without where clauses.
-*   Check for long-running locks (e.g., index creation on large tables).
+
+- Check for `DROP TABLE` or destructive `UPDATE` without where clauses.
+- Check for long-running locks (e.g., index creation on large tables).

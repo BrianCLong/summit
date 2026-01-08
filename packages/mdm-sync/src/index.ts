@@ -3,12 +3,7 @@
  * Multi-source data synchronization
  */
 
-export * from './engine/sync-engine.js';
+export * from "./engine/sync-engine.js";
 
 // Re-export types
-export type {
-  SyncConfiguration,
-  SyncJob,
-  SyncConflict,
-  DeltaChange
-} from '@intelgraph/mdm-core';
+export type { SyncConfiguration, SyncJob, SyncConflict, DeltaChange } from "@intelgraph/mdm-core";

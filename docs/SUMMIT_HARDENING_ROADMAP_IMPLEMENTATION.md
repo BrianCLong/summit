@@ -15,6 +15,7 @@ This guide operationalizes the 90-day hardening roadmap into an execution-ready 
 ## 1. Epic – Security & LBAC Bunker (Weeks 1–4)
 
 ### SEC-1: Implement LBAC Security Proxy
+
 - **Goals:** All graph IO mediated by clearance/compartment-aware layer.
 - **Tasks:**
   1. Extend node/edge schemas with `clearance: int` and `compartments: string[]`; add migrations.
@@ -25,6 +26,7 @@ This guide operationalizes the 90-day hardening roadmap into an execution-ready 
 - **Acceptance Criteria:** Deny-by-default posture; 100% graph queries pass through `SecureGraph`; coverage ≥80% for new code.
 
 ### SEC-2: Docker & Secrets Hardening
+
 - **Tasks:**
   1. Update service Dockerfiles to run as non-root, drop capabilities, and enable read-only rootfs where possible.
   2. Remove secrets from Compose; source from Vault/SM or encrypted env files mounted at runtime.
@@ -32,6 +34,7 @@ This guide operationalizes the 90-day hardening roadmap into an execution-ready 
 - **Acceptance Criteria:** CI fails on critical CVEs; containers start without root; zero plaintext secrets in git.
 
 ### SEC-3: Audit Logging & Export Controls
+
 - **Tasks:**
   1. Add Postgres `audit_log` table (`id`, `user_id`, `action`, `entity_id`, `entity_type`, `graph_context`, `timestamp`).
   2. Instrument API reads/writes to append audit entries; include export attempts.
@@ -41,6 +44,7 @@ This guide operationalizes the 90-day hardening roadmap into an execution-ready 
 ## 2. Epic – Ingest Stability & Staging (Weeks 5–8)
 
 ### ING-1: Kafka/Redpanda Ingest Buffer
+
 - **Tasks:**
   1. Deploy Kafka/Redpanda topics for ingest feeds; update producers to publish instead of direct DB writes.
   2. Implement consumers with batching (≈5k) and safe offset commit after DB persistence.
@@ -48,6 +52,7 @@ This guide operationalizes the 90-day hardening roadmap into an execution-ready 
 - **Acceptance Criteria:** Zero data loss under load; dashboards show stable throughput and latency.
 
 ### ING-2: Air-Gap Ingestion Gateway
+
 - **Tasks:**
   1. Define Dirty/Clean buckets (S3/MinIO) with lifecycle policies; block internet egress for loaders.
   2. Build sanitizer service (MIME via magic bytes, HTML stripping, JSON schema validation via Zod/Pydantic).
@@ -55,6 +60,7 @@ This guide operationalizes the 90-day hardening roadmap into an execution-ready 
 - **Acceptance Criteria:** Dirty payloads never touch DB; all loaders consume only from Clean bucket; runbook exercised.
 
 ### ING-3: Entity Resolution v1
+
 - **Tasks:**
   1. Implement blocking keys for people (`soundex(last)` + first initial + YOB) and store alongside entities.
   2. Retrieve candidates by block key; compute similarity across name/address/DOB; define auto-merge and review thresholds.
@@ -64,6 +70,7 @@ This guide operationalizes the 90-day hardening roadmap into an execution-ready 
 ## 3. Epic – Simulation Overlay & Fact-Check (Weeks 9–12)
 
 ### SIM-1: Hypothesis / Simulation Overlay Graph
+
 - **Tasks:**
   1. Define Neo4j schema for `Hypothesis`, `PredictedEvent`, `SIMULATES`, `LEADS_TO`, `INVOLVES`.
   2. Add API endpoints to create/list hypotheses and attach predicted events.
@@ -71,6 +78,7 @@ This guide operationalizes the 90-day hardening roadmap into an execution-ready 
 - **Acceptance Criteria:** Default queries exclude simulations; opt-in overlay merges ghost nodes/edges correctly.
 
 ### SIM-2: Hallucination Firewall & Physics Checks
+
 - **Tasks:**
   1. Add schema validator for LLM proposals; reject invalid types or endpoints.
   2. Enforce trust-score filters and physics constraints (distance/time, role caps); tag `source='synthetic'`.
@@ -78,6 +86,7 @@ This guide operationalizes the 90-day hardening roadmap into an execution-ready 
 - **Acceptance Criteria:** Invalid proposals blocked; synthetic data segregated; tests cover physics violations.
 
 ### SIM-3: “Why?” Button & Evidence Paths
+
 - **Tasks:**
   1. Extend simulation output to include evidence IDs and provenance summaries.
   2. Implement API to fetch supporting subgraph for prediction IDs.
@@ -87,12 +96,14 @@ This guide operationalizes the 90-day hardening roadmap into an execution-ready 
 ## 4. Epic – Observability & Failure Guardrails (Parallel)
 
 ### OBS-1: Graph APM & Canary Queries
+
 - **Tasks:**
   1. Add canary query (`MATCH (n:Canary {id:'canary_node'}) RETURN n`) every 60s; emit Prometheus metrics.
   2. Build Grafana panels for p95 latency and error rates; define SLOs and alerts.
 - **Acceptance Criteria:** Canary alerts when latency/error thresholds breached; dashboards published.
 
 ### OBS-2: Supernode & Query Guardrails
+
 - **Tasks:**
   1. Compute node degrees periodically; store high-degree IDs in Redis and avoid traversal fan-out.
   2. Enforce max traversal depth, fan-out, and execution timeouts configurable by role.
@@ -100,6 +111,7 @@ This guide operationalizes the 90-day hardening roadmap into an execution-ready 
 - **Acceptance Criteria:** Guardrails enabled by default; test suite ensures protection.
 
 ### OBS-3: Chaos & Load Tests
+
 - **Tasks:**
   1. Generate 100k nodes/1M edges fixture; run ingest end-to-end under load.
   2. Measure ingest throughput, query latency, and simulation performance; set thresholds in tests.
@@ -139,4 +151,3 @@ This guide operationalizes the 90-day hardening roadmap into an execution-ready 
 - **Confidential Computing Edge:** Explore running security proxy inside enclave (e.g., Nitro/SGX) for high-sensitivity tenants.
 - **Adaptive Guardrails:** Machine-learned dynamic fan-out limits based on historical query costs.
 - **Probabilistic ER:** Add graph-based similarity with GNN embeddings as optional scoring alongside rule-based ER.
-

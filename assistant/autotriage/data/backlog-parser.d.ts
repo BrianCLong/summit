@@ -6,27 +6,27 @@
  *
  * @module data/backlog-parser
  */
-import { TriageItem } from '../types.js';
+import { TriageItem } from "../types.js";
 /**
  * Validation error details
  */
 interface ValidationError {
-    type: 'missing_field' | 'invalid_format' | 'empty_array';
-    message: string;
-    context?: string;
+  type: "missing_field" | "invalid_format" | "empty_array";
+  message: string;
+  context?: string;
 }
 /**
  * Parse result with errors and warnings
  */
 export interface ParseResult {
-    items: TriageItem[];
-    errors: ValidationError[];
-    warnings: string[];
-    stats: {
-        totalEpics: number;
-        totalStories: number;
-        skipped: number;
-    };
+  items: TriageItem[];
+  errors: ValidationError[];
+  warnings: string[];
+  stats: {
+    totalEpics: number;
+    totalStories: number;
+    skipped: number;
+  };
 }
 /**
  * Parses backlog.json file and converts to triage items

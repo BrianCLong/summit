@@ -1,18 +1,18 @@
-import { EventEmitter } from 'node:events';
-import type { Pool } from 'pg';
-import { createHash, generateKeyPairSync } from 'node:crypto';
-import express, { Router, type RequestHandler } from 'express';
-import { graphqlHTTP } from 'express-graphql';
-import { buildSchema, GraphQLError } from 'graphql';
-import type { EvidenceBundle, LedgerEntry, LedgerFactInput } from 'common-types';
-import { createExportManifest, TransparencyLog } from './manifest.js';
+import { EventEmitter } from "node:events";
+import type { Pool } from "pg";
+import { createHash, generateKeyPairSync } from "node:crypto";
+import express, { Router, type RequestHandler } from "express";
+import { graphqlHTTP } from "express-graphql";
+import { buildSchema, GraphQLError } from "graphql";
+import type { EvidenceBundle, LedgerEntry, LedgerFactInput } from "common-types";
+import { createExportManifest, TransparencyLog } from "./manifest.js";
 import {
   AccessTokenService,
   QuantumSafeLedger,
   type HybridSignature,
   type QuantumLedgerEntry,
   type SchnorrProof,
-} from './quantum-safe-ledger.js';
+} from "./quantum-safe-ledger.js";
 
 export interface ClaimMessage {
   caseId: string;
@@ -28,11 +28,11 @@ export type LedgerMessage = ClaimMessage | EvidenceMessage;
 
 export class InMemoryClaimTopic extends EventEmitter {
   emitClaim(message: LedgerMessage): void {
-    this.emit('message', message);
+    this.emit("message", message);
   }
 
   subscribe(handler: (message: LedgerMessage) => void): void {
-    this.on('message', handler);
+    this.on("message", handler);
   }
 }
 
@@ -68,13 +68,13 @@ export class PostgresManifestStore implements ManifestStore {
         case_id TEXT PRIMARY KEY,
         manifest JSONB NOT NULL,
         created_at TIMESTAMPTZ NOT NULL
-      )`,
+      )`
     );
     await this.pool.query(
       `INSERT INTO prov_manifests(case_id, manifest, created_at)
        VALUES($1, $2, $3)
        ON CONFLICT (case_id) DO UPDATE SET manifest = excluded.manifest, created_at = excluded.created_at`,
-      [record.caseId, record.manifest, record.createdAt],
+      [record.caseId, record.manifest, record.createdAt]
     );
   }
 
@@ -84,11 +84,11 @@ export class PostgresManifestStore implements ManifestStore {
         case_id TEXT PRIMARY KEY,
         manifest JSONB NOT NULL,
         created_at TIMESTAMPTZ NOT NULL
-      )`,
+      )`
     );
     const result = await this.pool.query(
-      'SELECT case_id, manifest, created_at FROM prov_manifests WHERE case_id = $1 LIMIT 1',
-      [caseId],
+      "SELECT case_id, manifest, created_at FROM prov_manifests WHERE case_id = $1 LIMIT 1",
+      [caseId]
     );
     if (result.rows.length === 0) {
       return null;
@@ -130,21 +130,19 @@ export class LedgerService {
     this.manifestStore = options.manifestStore ?? new InMemoryManifestStore();
     this.topic = options.claimTopic ?? new InMemoryClaimTopic();
     this.now = options.now ?? (() => new Date());
-    this.tokenService = new AccessTokenService(options.tokenSecret ?? 'prov-ledger-secret', {
+    this.tokenService = new AccessTokenService(options.tokenSecret ?? "prov-ledger-secret", {
       ttlMs: 5 * 60 * 1000,
       now: this.now,
     });
     this.identityPublicKey = options.identityPublicKey;
-    const keyPair = generateKeyPairSync('rsa', { modulusLength: 2048 });
+    const keyPair = generateKeyPairSync("rsa", { modulusLength: 2048 });
     const defaultPrivateKey = keyPair.privateKey
-      .export({ format: 'pem', type: 'pkcs1' })
+      .export({ format: "pem", type: "pkcs1" })
       .toString();
-    const defaultPublicKey = keyPair.publicKey
-      .export({ format: 'pem', type: 'pkcs1' })
-      .toString();
+    const defaultPublicKey = keyPair.publicKey.export({ format: "pem", type: "pkcs1" }).toString();
     this.manifestSigner = {
-      issuer: options.issuer ?? 'prov-ledger',
-      keyId: options.issuerKeyId ?? 'issuer-key',
+      issuer: options.issuer ?? "prov-ledger",
+      keyId: options.issuerKeyId ?? "issuer-key",
       privateKey: options.issuerPrivateKey ?? defaultPrivateKey,
       publicKey: options.issuerPublicKey ?? defaultPublicKey,
     };
@@ -171,7 +169,7 @@ export class LedgerService {
     fact: LedgerFactInput,
     signature: HybridSignature,
     accessToken: string,
-    zkProof?: SchnorrProof,
+    zkProof?: SchnorrProof
   ): QuantumLedgerEntry {
     const ledger = this.ledger(caseId);
     const entry = ledger.append(fact, signature, accessToken, zkProof);
@@ -180,7 +178,7 @@ export class LedgerService {
   }
 
   registerEvidence(caseId: string, evidence: EvidenceBundle): EvidenceBundle {
-    const hash = createHash('sha256').update(JSON.stringify(evidence)).digest('hex');
+    const hash = createHash("sha256").update(JSON.stringify(evidence)).digest("hex");
     const stamped: EvidenceBundle = { ...evidence, headHash: evidence.headHash ?? hash };
     return stamped;
   }
@@ -222,10 +220,12 @@ export function buildLedgerRouter(service: LedgerService): Router {
   const jsonHandler: RequestHandler = express.json();
   router.use(jsonHandler);
 
-  router.post('/ledger/claim', ((req, res) => {
+  router.post("/ledger/claim", ((req, res) => {
     const { caseId, fact, signature, accessToken, zkProof } = req.body ?? {};
     if (!caseId || !fact || !signature || !accessToken) {
-      return res.status(400).json({ error: 'caseId, fact, signature, and accessToken are required' });
+      return res
+        .status(400)
+        .json({ error: "caseId, fact, signature, and accessToken are required" });
     }
     try {
       const entry = service.appendClaim(caseId, fact, signature, accessToken, zkProof);
@@ -235,16 +235,16 @@ export function buildLedgerRouter(service: LedgerService): Router {
     }
   }) as RequestHandler);
 
-  router.post('/ledger/evidence', ((req, res) => {
+  router.post("/ledger/evidence", ((req, res) => {
     const { caseId, evidence } = req.body ?? {};
     if (!caseId || !evidence) {
-      return res.status(400).json({ error: 'caseId and evidence are required' });
+      return res.status(400).json({ error: "caseId and evidence are required" });
     }
     const bundle = service.registerEvidence(caseId, evidence);
     return res.status(201).json({ bundle });
   }) as RequestHandler);
 
-  router.get('/ledger/export/:caseId', ((req, res) => {
+  router.get("/ledger/export/:caseId", ((req, res) => {
     const caseId = req.params.caseId;
     const record = service.exportManifest(caseId);
     return res.json(record);
@@ -306,13 +306,13 @@ export function buildLedgerRouter(service: LedgerService): Router {
   };
 
   router.use(
-    '/graphql',
+    "/graphql",
     graphqlHTTP({
       schema,
       rootValue: root,
       graphiql: false,
       customFormatErrorFn: (err) => new GraphQLError(err.message),
-    }),
+    })
   );
 
   return router;

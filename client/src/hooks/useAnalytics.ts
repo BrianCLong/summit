@@ -8,7 +8,7 @@
  * @module hooks/useAnalytics
  */
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo } from "react";
 import {
   GovernanceMetricsAPI,
   ComplianceMetricsAPI,
@@ -24,7 +24,7 @@ import {
   EvidenceStatus,
   FrameworkStatus,
   TimeRange,
-} from '../services/analytics-api';
+} from "../services/analytics-api";
 
 // ============================================================================
 // Types
@@ -49,39 +49,39 @@ export interface TimeRangePreset {
 
 export const TIME_RANGE_PRESETS: TimeRangePreset[] = [
   {
-    label: 'Last 24 Hours',
-    value: '24h',
+    label: "Last 24 Hours",
+    value: "24h",
     getRange: () => ({
       start: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
       end: new Date().toISOString(),
-      granularity: 'hour',
+      granularity: "hour",
     }),
   },
   {
-    label: 'Last 7 Days',
-    value: '7d',
+    label: "Last 7 Days",
+    value: "7d",
     getRange: () => ({
       start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
       end: new Date().toISOString(),
-      granularity: 'day',
+      granularity: "day",
     }),
   },
   {
-    label: 'Last 30 Days',
-    value: '30d',
+    label: "Last 30 Days",
+    value: "30d",
     getRange: () => ({
       start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
       end: new Date().toISOString(),
-      granularity: 'day',
+      granularity: "day",
     }),
   },
   {
-    label: 'Last 90 Days',
-    value: '90d',
+    label: "Last 90 Days",
+    value: "90d",
     getRange: () => ({
       start: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
       end: new Date().toISOString(),
-      granularity: 'week',
+      granularity: "week",
     }),
   },
 ];
@@ -93,7 +93,7 @@ export const TIME_RANGE_PRESETS: TimeRangePreset[] = [
 /**
  * Hook for governance metrics summary
  */
-export function useGovernanceMetrics(presetValue: string = '7d') {
+export function useGovernanceMetrics(presetValue: string = "7d") {
   const [state, setState] = useState<UseAnalyticsState<GovernanceMetricsSummary>>({
     data: null,
     loading: false,
@@ -120,7 +120,7 @@ export function useGovernanceMetrics(presetValue: string = '7d') {
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: err.message || 'Failed to load governance metrics',
+        error: err.message || "Failed to load governance metrics",
       }));
     }
   }, [timeRange]);
@@ -135,7 +135,7 @@ export function useGovernanceMetrics(presetValue: string = '7d') {
 /**
  * Hook for verdict distribution
  */
-export function useVerdictDistribution(presetValue: string = '7d') {
+export function useVerdictDistribution(presetValue: string = "7d") {
   const [state, setState] = useState<UseAnalyticsState<VerdictDistribution>>({
     data: null,
     loading: false,
@@ -162,7 +162,7 @@ export function useVerdictDistribution(presetValue: string = '7d') {
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: err.message || 'Failed to load verdict distribution',
+        error: err.message || "Failed to load verdict distribution",
       }));
     }
   }, [timeRange]);
@@ -177,7 +177,7 @@ export function useVerdictDistribution(presetValue: string = '7d') {
 /**
  * Hook for verdict trends
  */
-export function useVerdictTrends(presetValue: string = '7d') {
+export function useVerdictTrends(presetValue: string = "7d") {
   const [state, setState] = useState<UseAnalyticsState<VerdictTrend[]>>({
     data: null,
     loading: false,
@@ -204,7 +204,7 @@ export function useVerdictTrends(presetValue: string = '7d') {
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: err.message || 'Failed to load verdict trends',
+        error: err.message || "Failed to load verdict trends",
       }));
     }
   }, [timeRange]);
@@ -219,7 +219,7 @@ export function useVerdictTrends(presetValue: string = '7d') {
 /**
  * Hook for policy effectiveness
  */
-export function usePolicyEffectiveness(presetValue: string = '7d', limit: number = 10) {
+export function usePolicyEffectiveness(presetValue: string = "7d", limit: number = 10) {
   const [state, setState] = useState<UseAnalyticsState<PolicyEffectiveness[]>>({
     data: null,
     loading: false,
@@ -246,7 +246,7 @@ export function usePolicyEffectiveness(presetValue: string = '7d', limit: number
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: err.message || 'Failed to load policy effectiveness',
+        error: err.message || "Failed to load policy effectiveness",
       }));
     }
   }, [timeRange, limit]);
@@ -261,7 +261,7 @@ export function usePolicyEffectiveness(presetValue: string = '7d', limit: number
 /**
  * Hook for anomaly detection
  */
-export function useAnomalies(presetValue: string = '7d') {
+export function useAnomalies(presetValue: string = "7d") {
   const [state, setState] = useState<UseAnalyticsState<AnomalyEvent[]>>({
     data: null,
     loading: false,
@@ -288,7 +288,7 @@ export function useAnomalies(presetValue: string = '7d') {
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: err.message || 'Failed to load anomalies',
+        error: err.message || "Failed to load anomalies",
       }));
     }
   }, [timeRange]);
@@ -329,7 +329,7 @@ export function useComplianceSummary() {
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: err.message || 'Failed to load compliance summary',
+        error: err.message || "Failed to load compliance summary",
       }));
     }
   }, []);
@@ -366,7 +366,7 @@ export function useAuditReadiness() {
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: err.message || 'Failed to load audit readiness',
+        error: err.message || "Failed to load audit readiness",
       }));
     }
   }, []);
@@ -403,7 +403,7 @@ export function useControlStatus(framework?: string) {
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: err.message || 'Failed to load control status',
+        error: err.message || "Failed to load control status",
       }));
     }
   }, [framework]);
@@ -440,7 +440,7 @@ export function useControlEffectiveness() {
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: err.message || 'Failed to load control effectiveness',
+        error: err.message || "Failed to load control effectiveness",
       }));
     }
   }, []);
@@ -477,7 +477,7 @@ export function useFrameworkStatus() {
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: err.message || 'Failed to load framework status',
+        error: err.message || "Failed to load framework status",
       }));
     }
   }, []);

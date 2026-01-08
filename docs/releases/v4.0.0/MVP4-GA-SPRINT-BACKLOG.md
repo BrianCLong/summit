@@ -13,14 +13,15 @@
 
 ### Epic 1.1: Graph Performance (21 SP)
 
-| ID | Story | SP | Priority | Assignee |
-|----|-------|-----|----------|----------|
-| GRAPH-001 | As a user, I can view graphs with 10K+ nodes without browser freezing | 8 | P0 | - |
-| GRAPH-002 | As a user, I see progressive loading with visual feedback for large graphs | 5 | P0 | - |
-| GRAPH-003 | As a system, supernodes (>1000 connections) don't block query execution | 5 | P0 | - |
-| GRAPH-004 | As a user, I can use LOD controls to adjust rendering detail | 3 | P1 | - |
+| ID        | Story                                                                      | SP  | Priority | Assignee |
+| --------- | -------------------------------------------------------------------------- | --- | -------- | -------- |
+| GRAPH-001 | As a user, I can view graphs with 10K+ nodes without browser freezing      | 8   | P0       | -        |
+| GRAPH-002 | As a user, I see progressive loading with visual feedback for large graphs | 5   | P0       | -        |
+| GRAPH-003 | As a system, supernodes (>1000 connections) don't block query execution    | 5   | P0       | -        |
+| GRAPH-004 | As a user, I can use LOD controls to adjust rendering detail               | 3   | P1       | -        |
 
 **GRAPH-001: 10K+ Node Graph Rendering**
+
 ```
 Acceptance Criteria:
 - [ ] Graph with 50K nodes renders in <1 second
@@ -37,6 +38,7 @@ Technical Tasks:
 ```
 
 **GRAPH-002: Progressive Loading**
+
 ```
 Acceptance Criteria:
 - [ ] Loading spinner shows during initial render
@@ -53,6 +55,7 @@ Technical Tasks:
 ```
 
 **GRAPH-003: Supernode Query Optimization**
+
 ```
 Acceptance Criteria:
 - [ ] Queries involving entities with >1000 connections complete in <2s
@@ -70,14 +73,15 @@ Technical Tasks:
 
 ### Epic 1.2: GraphRAG Safety (13 SP)
 
-| ID | Story | SP | Priority | Assignee |
-|----|-------|-----|----------|----------|
-| RAG-001 | As a user, every AI answer includes citations to source entities | 5 | P0 | - |
-| RAG-002 | As a user, I see confidence scores for AI assertions | 3 | P0 | - |
-| RAG-003 | As a user, I'm warned when AI may be hallucinating | 3 | P0 | - |
-| RAG-004 | As an admin, I can require citations before AI answers are published | 2 | P1 | - |
+| ID      | Story                                                                | SP  | Priority | Assignee |
+| ------- | -------------------------------------------------------------------- | --- | -------- | -------- |
+| RAG-001 | As a user, every AI answer includes citations to source entities     | 5   | P0       | -        |
+| RAG-002 | As a user, I see confidence scores for AI assertions                 | 3   | P0       | -        |
+| RAG-003 | As a user, I'm warned when AI may be hallucinating                   | 3   | P0       | -        |
+| RAG-004 | As an admin, I can require citations before AI answers are published | 2   | P1       | -        |
 
 **RAG-001: Mandatory Citation Enforcement**
+
 ```
 Acceptance Criteria:
 - [ ] Every factual claim has [entity:ID] or [evidence:ID] citation
@@ -94,6 +98,7 @@ Technical Tasks:
 ```
 
 **RAG-002: Confidence Scoring**
+
 ```
 Acceptance Criteria:
 - [ ] Each answer shows confidence score (0-100%)
@@ -111,11 +116,11 @@ Technical Tasks:
 
 ### Epic 1.3: Critical Bug Fixes (8 SP)
 
-| ID | Story | SP | Priority | Assignee |
-|----|-------|-----|----------|----------|
-| BUG-001 | Fix: API returns 500 on malformed GraphQL queries | 3 | P0 | - |
-| BUG-002 | Fix: WebSocket disconnects under load | 3 | P0 | - |
-| BUG-003 | Fix: Memory leak in long-running sessions | 2 | P0 | - |
+| ID      | Story                                             | SP  | Priority | Assignee |
+| ------- | ------------------------------------------------- | --- | -------- | -------- |
+| BUG-001 | Fix: API returns 500 on malformed GraphQL queries | 3   | P0       | -        |
+| BUG-002 | Fix: WebSocket disconnects under load             | 3   | P0       | -        |
+| BUG-003 | Fix: Memory leak in long-running sessions         | 2   | P0       | -        |
 
 ---
 
@@ -125,15 +130,16 @@ Technical Tasks:
 
 ### Epic 2.1: Test Coverage Sprint (21 SP)
 
-| ID | Story | SP | Priority | Assignee |
-|----|-------|-----|----------|----------|
-| TEST-001 | Add unit tests for middleware layer (opa-abac, ingestValidator) | 5 | P0 | - |
-| TEST-002 | Add unit tests for CRUD resolvers | 5 | P0 | - |
-| TEST-003 | Add unit tests for GraphRAGService | 5 | P0 | - |
-| TEST-004 | Add integration tests for auth flow | 3 | P0 | - |
-| TEST-005 | Add integration tests for Neo4j operations | 3 | P0 | - |
+| ID       | Story                                                           | SP  | Priority | Assignee |
+| -------- | --------------------------------------------------------------- | --- | -------- | -------- |
+| TEST-001 | Add unit tests for middleware layer (opa-abac, ingestValidator) | 5   | P0       | -        |
+| TEST-002 | Add unit tests for CRUD resolvers                               | 5   | P0       | -        |
+| TEST-003 | Add unit tests for GraphRAGService                              | 5   | P0       | -        |
+| TEST-004 | Add integration tests for auth flow                             | 3   | P0       | -        |
+| TEST-005 | Add integration tests for Neo4j operations                      | 3   | P0       | -        |
 
 **TEST-001: Middleware Unit Tests**
+
 ```
 Acceptance Criteria:
 - [ ] opa-abac.test.ts with 80% coverage
@@ -153,14 +159,15 @@ Test Cases (opa-abac):
 
 ### Epic 2.2: Audit Logging (13 SP)
 
-| ID | Story | SP | Priority | Assignee |
-|----|-------|-----|----------|----------|
-| AUDIT-001 | As a compliance officer, all mutations are logged with actor/timestamp | 5 | P1 | - |
-| AUDIT-002 | As an admin, I can query audit logs via GraphQL | 3 | P1 | - |
-| AUDIT-003 | As a system, audit logs are tamper-evident (hash chain) | 3 | P1 | - |
-| AUDIT-004 | As a compliance officer, I can export audit logs in SOC 2 format | 2 | P1 | - |
+| ID        | Story                                                                  | SP  | Priority | Assignee |
+| --------- | ---------------------------------------------------------------------- | --- | -------- | -------- |
+| AUDIT-001 | As a compliance officer, all mutations are logged with actor/timestamp | 5   | P1       | -        |
+| AUDIT-002 | As an admin, I can query audit logs via GraphQL                        | 3   | P1       | -        |
+| AUDIT-003 | As a system, audit logs are tamper-evident (hash chain)                | 3   | P1       | -        |
+| AUDIT-004 | As a compliance officer, I can export audit logs in SOC 2 format       | 2   | P1       | -        |
 
 **AUDIT-001: Comprehensive Audit Logging**
+
 ```
 Acceptance Criteria:
 - [ ] Every mutation emits audit event
@@ -178,10 +185,10 @@ Technical Tasks:
 
 ### Epic 2.3: Entity Resolution (8 SP)
 
-| ID | Story | SP | Priority | Assignee |
-|----|-------|-----|----------|----------|
-| ER-001 | As a system, incoming entities are matched against existing records | 5 | P1 | - |
-| ER-002 | As a user, I can review and approve entity merge suggestions | 3 | P1 | - |
+| ID     | Story                                                               | SP  | Priority | Assignee |
+| ------ | ------------------------------------------------------------------- | --- | -------- | -------- |
+| ER-001 | As a system, incoming entities are matched against existing records | 5   | P1       | -        |
+| ER-002 | As a user, I can review and approve entity merge suggestions        | 3   | P1       | -        |
 
 ---
 
@@ -191,13 +198,14 @@ Technical Tasks:
 
 ### Epic 3.1: WebSocket Scalability (13 SP)
 
-| ID | Story | SP | Priority | Assignee |
-|----|-------|-----|----------|----------|
-| WS-001 | As a system, WebSocket connections scale horizontally via Redis pub/sub | 8 | P1 | - |
-| WS-002 | As a user, I see presence indicators for collaborators | 3 | P1 | - |
-| WS-003 | As a user, concurrent edits merge without data loss (CRDT) | 2 | P1 | - |
+| ID     | Story                                                                   | SP  | Priority | Assignee |
+| ------ | ----------------------------------------------------------------------- | --- | -------- | -------- |
+| WS-001 | As a system, WebSocket connections scale horizontally via Redis pub/sub | 8   | P1       | -        |
+| WS-002 | As a user, I see presence indicators for collaborators                  | 3   | P1       | -        |
+| WS-003 | As a user, concurrent edits merge without data loss (CRDT)              | 2   | P1       | -        |
 
 **WS-001: Horizontal WebSocket Scaling**
+
 ```
 Acceptance Criteria:
 - [ ] 1000 concurrent WebSocket connections supported
@@ -215,14 +223,15 @@ Technical Tasks:
 
 ### Epic 3.2: Security Hardening (13 SP)
 
-| ID | Story | SP | Priority | Assignee |
-|----|-------|-----|----------|----------|
-| SEC-001 | Pass OWASP Top 10 scan with 0 high/critical findings | 5 | P0 | - |
-| SEC-002 | All dependencies have 0 high/critical CVEs | 3 | P0 | - |
-| SEC-003 | Secret scanning in CI blocks PRs with leaked credentials | 2 | P0 | - |
-| SEC-004 | Implement field-level encryption for PII | 3 | P1 | - |
+| ID      | Story                                                    | SP  | Priority | Assignee |
+| ------- | -------------------------------------------------------- | --- | -------- | -------- |
+| SEC-001 | Pass OWASP Top 10 scan with 0 high/critical findings     | 5   | P0       | -        |
+| SEC-002 | All dependencies have 0 high/critical CVEs               | 3   | P0       | -        |
+| SEC-003 | Secret scanning in CI blocks PRs with leaked credentials | 2   | P0       | -        |
+| SEC-004 | Implement field-level encryption for PII                 | 3   | P1       | -        |
 
 **SEC-001: OWASP Compliance**
+
 ```
 Acceptance Criteria:
 - [ ] ZAP scan shows 0 high/critical vulnerabilities
@@ -240,10 +249,10 @@ Technical Tasks:
 
 ### Epic 3.3: Performance Testing (8 SP)
 
-| ID | Story | SP | Priority | Assignee |
-|----|-------|-----|----------|----------|
-| PERF-001 | API p95 latency <200ms under load | 5 | P0 | - |
-| PERF-002 | Database queries p99 <500ms | 3 | P1 | - |
+| ID       | Story                             | SP  | Priority | Assignee |
+| -------- | --------------------------------- | --- | -------- | -------- |
+| PERF-001 | API p95 latency <200ms under load | 5   | P0       | -        |
+| PERF-002 | Database queries p99 <500ms       | 3   | P1       | -        |
 
 ---
 
@@ -253,15 +262,16 @@ Technical Tasks:
 
 ### Epic 4.1: E2E Test Suite (13 SP)
 
-| ID | Story | SP | Priority | Assignee |
-|----|-------|-----|----------|----------|
-| E2E-001 | New user onboarding journey tested end-to-end | 2 | P0 | - |
-| E2E-002 | Entity import to graph view journey tested | 2 | P0 | - |
-| E2E-003 | Investigation workflow journey tested | 3 | P0 | - |
-| E2E-004 | AI query to citation view journey tested | 3 | P0 | - |
-| E2E-005 | Collaboration and sharing journey tested | 3 | P0 | - |
+| ID      | Story                                         | SP  | Priority | Assignee |
+| ------- | --------------------------------------------- | --- | -------- | -------- |
+| E2E-001 | New user onboarding journey tested end-to-end | 2   | P0       | -        |
+| E2E-002 | Entity import to graph view journey tested    | 2   | P0       | -        |
+| E2E-003 | Investigation workflow journey tested         | 3   | P0       | -        |
+| E2E-004 | AI query to citation view journey tested      | 3   | P0       | -        |
+| E2E-005 | Collaboration and sharing journey tested      | 3   | P0       | -        |
 
 **E2E-003: Investigation Workflow**
+
 ```
 Acceptance Criteria:
 - [ ] User can create new investigation
@@ -286,32 +296,32 @@ Playwright Script Outline:
 
 ### Epic 4.2: Documentation (8 SP)
 
-| ID | Story | SP | Priority | Assignee |
-|----|-------|-----|----------|----------|
-| DOC-001 | API reference updated for v4.0.0 | 3 | P1 | - |
-| DOC-002 | Runbooks created for all P0 alerts | 3 | P1 | - |
-| DOC-003 | Release notes generated from commits | 2 | P1 | - |
+| ID      | Story                                | SP  | Priority | Assignee |
+| ------- | ------------------------------------ | --- | -------- | -------- |
+| DOC-001 | API reference updated for v4.0.0     | 3   | P1       | -        |
+| DOC-002 | Runbooks created for all P0 alerts   | 3   | P1       | -        |
+| DOC-003 | Release notes generated from commits | 2   | P1       | -        |
 
 ### Epic 4.3: Final Hardening (13 SP)
 
-| ID | Story | SP | Priority | Assignee |
-|----|-------|-----|----------|----------|
-| HARD-001 | All P0 bugs closed (0 open) | 5 | P0 | - |
-| HARD-002 | Test coverage at 70% | 3 | P0 | - |
-| HARD-003 | Load test passes: 500 concurrent users | 3 | P0 | - |
-| HARD-004 | Lighthouse customer pilot completed | 2 | P0 | - |
+| ID       | Story                                  | SP  | Priority | Assignee |
+| -------- | -------------------------------------- | --- | -------- | -------- |
+| HARD-001 | All P0 bugs closed (0 open)            | 5   | P0       | -        |
+| HARD-002 | Test coverage at 70%                   | 3   | P0       | -        |
+| HARD-003 | Load test passes: 500 concurrent users | 3   | P0       | -        |
+| HARD-004 | Lighthouse customer pilot completed    | 2   | P0       | -        |
 
 ---
 
 ## Backlog Summary
 
-| Sprint | Story Points | Epic Focus |
-|--------|-------------|------------|
-| Sprint 1 | 42 SP | Graph Perf, RAG Safety, Critical Bugs |
-| Sprint 2 | 42 SP | Test Coverage, Audit, Entity Resolution |
-| Sprint 3 | 34 SP | WebSocket Scale, Security, Load Test |
-| Sprint 4 | 34 SP | E2E Tests, Docs, Final Hardening |
-| **Total** | **152 SP** | |
+| Sprint    | Story Points | Epic Focus                              |
+| --------- | ------------ | --------------------------------------- |
+| Sprint 1  | 42 SP        | Graph Perf, RAG Safety, Critical Bugs   |
+| Sprint 2  | 42 SP        | Test Coverage, Audit, Entity Resolution |
+| Sprint 3  | 34 SP        | WebSocket Scale, Security, Load Test    |
+| Sprint 4  | 34 SP        | E2E Tests, Docs, Final Hardening        |
+| **Total** | **152 SP**   |                                         |
 
 **Estimated Duration**: 8 weeks (4 sprints x 2 weeks) with 2 developers
 
@@ -320,17 +330,19 @@ Playwright Script Outline:
 ## Dependencies & Risks
 
 ### External Dependencies
+
 - Neo4j GDS plugin availability
 - OpenAI/Anthropic API stability
 - Redis cluster for WebSocket scaling
 
 ### Technical Risks
-| Risk | Likelihood | Impact | Mitigation |
-|------|-----------|--------|------------|
-| WebGL not supported on all browsers | Low | Medium | Fallback to Canvas renderer |
-| LLM rate limits during load test | Medium | High | Mock LLM for load tests |
-| Neo4j query timeouts on supernodes | High | High | Pre-computation + query limits |
-| Flaky tests block merge queue | Medium | Medium | Quarantine mechanism |
+
+| Risk                                | Likelihood | Impact | Mitigation                     |
+| ----------------------------------- | ---------- | ------ | ------------------------------ |
+| WebGL not supported on all browsers | Low        | Medium | Fallback to Canvas renderer    |
+| LLM rate limits during load test    | Medium     | High   | Mock LLM for load tests        |
+| Neo4j query timeouts on supernodes  | High       | High   | Pre-computation + query limits |
+| Flaky tests block merge queue       | Medium     | Medium | Quarantine mechanism           |
 
 ---
 

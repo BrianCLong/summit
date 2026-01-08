@@ -17,7 +17,7 @@ import type {
   DataEnvelope,
   Evidence,
   EvidenceType,
-} from './types.js';
+} from "./types.js";
 
 /**
  * HTTP client interface for compliance operations
@@ -62,7 +62,7 @@ export class ComplianceClient {
       }>
     >
   > {
-    return this.http.get('/compliance/frameworks');
+    return this.http.get("/compliance/frameworks");
   }
 
   /**
@@ -96,9 +96,7 @@ export class ComplianceClient {
    * }
    * ```
    */
-  async getAuditReadiness(
-    framework: ComplianceFramework
-  ): Promise<DataEnvelope<AuditReadiness>> {
+  async getAuditReadiness(framework: ComplianceFramework): Promise<DataEnvelope<AuditReadiness>> {
     return this.http.get<AuditReadiness>(`/compliance/frameworks/${framework}/readiness`);
   }
 
@@ -173,12 +171,8 @@ export class ComplianceClient {
    * @param framework - Compliance framework identifier
    * @returns List of control assessments
    */
-  async getAssessments(
-    framework: ComplianceFramework
-  ): Promise<DataEnvelope<ControlAssessment[]>> {
-    return this.http.get<ControlAssessment[]>(
-      `/compliance/frameworks/${framework}/assessments`
-    );
+  async getAssessments(framework: ComplianceFramework): Promise<DataEnvelope<ControlAssessment[]>> {
+    return this.http.get<ControlAssessment[]>(`/compliance/frameworks/${framework}/assessments`);
   }
 
   /**
@@ -220,14 +214,14 @@ export class ComplianceClient {
     framework?: ComplianceFramework;
     controlId?: string;
     type?: EvidenceType;
-    status?: 'pending' | 'verified' | 'rejected' | 'expired';
+    status?: "pending" | "verified" | "rejected" | "expired";
   }): Promise<DataEnvelope<Evidence[]>> {
     const params: Record<string, string> = {};
     if (filters?.framework) params.framework = filters.framework;
     if (filters?.controlId) params.controlId = filters.controlId;
     if (filters?.type) params.type = filters.type;
     if (filters?.status) params.status = filters.status;
-    return this.http.get<Evidence[]>('/compliance/evidence', params);
+    return this.http.get<Evidence[]>("/compliance/evidence", params);
   }
 
   /**
@@ -268,7 +262,7 @@ export class ComplianceClient {
     content: unknown;
     metadata?: Record<string, unknown>;
   }): Promise<DataEnvelope<Evidence>> {
-    return this.http.post<Evidence>('/compliance/evidence', evidence);
+    return this.http.post<Evidence>("/compliance/evidence", evidence);
   }
 
   /**
@@ -307,7 +301,7 @@ export class ComplianceClient {
     }>
   > {
     const params = framework ? { framework } : undefined;
-    return this.http.get('/compliance/evidence/status', params);
+    return this.http.get("/compliance/evidence/status", params);
   }
 
   // ==========================================================================
@@ -333,7 +327,7 @@ export class ComplianceClient {
   async generateReport(
     framework: ComplianceFramework,
     options?: {
-      format?: 'json' | 'pdf' | 'csv';
+      format?: "json" | "pdf" | "csv";
       includeEvidence?: boolean;
       categories?: string[];
       startDate?: string;
@@ -355,10 +349,10 @@ export class ComplianceClient {
   async getReportStatus(
     reportId: string
   ): Promise<
-    DataEnvelope<{ status: 'pending' | 'generating' | 'ready' | 'failed'; downloadUrl?: string }>
+    DataEnvelope<{ status: "pending" | "generating" | "ready" | "failed"; downloadUrl?: string }>
   > {
     return this.http.get<{
-      status: 'pending' | 'generating' | 'ready' | 'failed';
+      status: "pending" | "generating" | "ready" | "failed";
       downloadUrl?: string;
     }>(`/compliance/reports/${reportId}`);
   }

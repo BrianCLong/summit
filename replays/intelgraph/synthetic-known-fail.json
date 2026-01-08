@@ -43,12 +43,7 @@
   },
   "privacy": {
     "piiScrubbed": true,
-    "notes": [
-      "Synthetic replay fixture; no live user data."
-    ]
+    "notes": ["Synthetic replay fixture; no live user data."]
   },
-  "tags": [
-    "synthetic",
-    "known-fail"
-  ]
+  "tags": ["synthetic", "known-fail"]
 }

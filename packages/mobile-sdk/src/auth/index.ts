@@ -1,5 +1,5 @@
-import ReactNativeBiometrics from 'react-native-biometrics';
-import * as Keychain from 'react-native-keychain';
+import ReactNativeBiometrics from "react-native-biometrics";
+import * as Keychain from "react-native-keychain";
 
 export interface AuthConfig {
   baseUrl: string;
@@ -10,8 +10,8 @@ export interface AuthConfig {
 
 const DEFAULT_CONFIG: Partial<AuthConfig> = {
   tokenRefreshBuffer: 30000,
-  biometricPromptMessage: 'Confirm your identity',
-  keychainService: 'intelgraph_auth',
+  biometricPromptMessage: "Confirm your identity",
+  keychainService: "intelgraph_auth",
 };
 
 export class AuthService {

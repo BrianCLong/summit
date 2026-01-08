@@ -53,20 +53,16 @@ pnpm add @intelgraph/authz-core
 ### 1. Initialize Services
 
 ```typescript
-import {
-  AuthorizationService,
-  WarrantService,
-  LicenseService
-} from '@intelgraph/authz-core';
+import { AuthorizationService, WarrantService, LicenseService } from "@intelgraph/authz-core";
 
 // Initialize authorization service
 const authz = new AuthorizationService({
   databaseUrl: process.env.DATABASE_URL,
-  opaUrl: process.env.OPA_URL || 'http://localhost:8181',
-  failSecure: process.env.NODE_ENV === 'production',
+  opaUrl: process.env.OPA_URL || "http://localhost:8181",
+  failSecure: process.env.NODE_ENV === "production",
   requirePurpose: true,
-  requireWarrantFor: ['EXPORT', 'SHARE', 'DISTRIBUTE'],
-  requireLicenseFor: ['EXPORT', 'SHARE', 'DOWNLOAD'],
+  requireWarrantFor: ["EXPORT", "SHARE", "DISTRIBUTE"],
+  requireLicenseFor: ["EXPORT", "SHARE", "DOWNLOAD"],
   auditEnabled: true,
 });
 
@@ -80,34 +76,34 @@ const licenseService = new LicenseService(process.env.DATABASE_URL);
 ### 2. Check Authorization
 
 ```typescript
-import type { AuthorizationInput, Subject, Resource, Action } from '@intelgraph/authz-core';
+import type { AuthorizationInput, Subject, Resource, Action } from "@intelgraph/authz-core";
 
 // Define subject (user/service)
 const subject: Subject = {
-  id: 'user-123',
-  type: 'user',
-  tenantId: 'tenant-001',
-  email: 'analyst@example.com',
-  roles: ['ANALYST'],
-  permissions: ['entity:read', 'entity:query'],
-  clearance: 'SECRET',
+  id: "user-123",
+  type: "user",
+  tenantId: "tenant-001",
+  email: "analyst@example.com",
+  roles: ["ANALYST"],
+  permissions: ["entity:read", "entity:query"],
+  clearance: "SECRET",
   clearanceLevel: 4,
   mfaVerified: true,
 };
 
 // Define resource
 const resource: Resource = {
-  type: 'entity',
-  id: 'entity-456',
-  tenantId: 'tenant-001',
-  classification: 'SECRET',
+  type: "entity",
+  id: "entity-456",
+  tenantId: "tenant-001",
+  classification: "SECRET",
   classificationLevel: 4,
-  ownerId: 'user-789',
-  investigationId: 'inv-001',
+  ownerId: "user-789",
+  investigationId: "inv-001",
 };
 
 // Define action
-const action: Action = 'EXPORT';
+const action: Action = "EXPORT";
 
 // Check authorization
 const decision = await authz.isAllowed({
@@ -116,32 +112,32 @@ const decision = await authz.isAllowed({
   resource,
   context: {
     requestTime: new Date(),
-    environment: 'production',
-    purpose: 'Export entity data for case analysis',
-    ip: '192.168.1.100',
-    requestId: 'req-abc123',
-    warrantId: 'warrant-xyz',  // Required for exports
+    environment: "production",
+    purpose: "Export entity data for case analysis",
+    ip: "192.168.1.100",
+    requestId: "req-abc123",
+    warrantId: "warrant-xyz", // Required for exports
   },
 });
 
 if (decision.allowed) {
-  console.log('✅ Access granted:', decision.reason);
+  console.log("✅ Access granted:", decision.reason);
 
   // Check for obligations
   if (decision.obligations && decision.obligations.length > 0) {
-    console.log('📋 Obligations:');
-    decision.obligations.forEach(obl => {
+    console.log("📋 Obligations:");
+    decision.obligations.forEach((obl) => {
       console.log(`  - ${obl.type}: ${obl.description}`);
     });
   }
 
   // Proceed with operation...
 } else {
-  console.error('❌ Access denied:', decision.reason);
+  console.error("❌ Access denied:", decision.reason);
 
   // Show appeal information if available
   if (decision.appealable) {
-    console.log('📧 Appeal process:', decision.appealProcess);
+    console.log("📧 Appeal process:", decision.appealProcess);
   }
 }
 ```
@@ -149,55 +145,55 @@ if (decision.allowed) {
 ### 3. Create and Bind Warrant
 
 ```typescript
-import { CreateWarrantInput } from '@intelgraph/authz-core';
+import { CreateWarrantInput } from "@intelgraph/authz-core";
 
 // Create warrant
 const warrantInput: CreateWarrantInput = {
-  tenantId: 'tenant-001',
-  warrantNumber: 'SW-2025-12345',
-  warrantType: 'WARRANT',
-  issuingAuthority: 'District Court of Eastern District',
-  jurisdiction: 'US-Federal',
-  legalBasis: '18 U.S.C. § 2703',
+  tenantId: "tenant-001",
+  warrantNumber: "SW-2025-12345",
+  warrantType: "WARRANT",
+  issuingAuthority: "District Court of Eastern District",
+  jurisdiction: "US-Federal",
+  legalBasis: "18 U.S.C. § 2703",
   scope: {
-    entities: ['entity-456', 'entity-789'],
+    entities: ["entity-456", "entity-789"],
     relationships: true,
   },
-  scopeDescription: 'Search warrant for fraud investigation',
-  permittedActions: ['READ', 'QUERY', 'EXPORT'],
-  issuedDate: new Date('2025-01-01'),
-  effectiveDate: new Date('2025-01-01'),
-  expiryDate: new Date('2025-06-01'),
-  caseNumber: 'CASE-2025-001',
+  scopeDescription: "Search warrant for fraud investigation",
+  permittedActions: ["READ", "QUERY", "EXPORT"],
+  issuedDate: new Date("2025-01-01"),
+  effectiveDate: new Date("2025-01-01"),
+  expiryDate: new Date("2025-06-01"),
+  caseNumber: "CASE-2025-001",
   requiresApproval: true,
-  createdBy: 'admin@example.com',
+  createdBy: "admin@example.com",
 };
 
 const warrant = await warrantService.createWarrant(warrantInput);
-console.log('Warrant created:', warrant.warrantId);
+console.log("Warrant created:", warrant.warrantId);
 
 // Bind warrant to resource
 const bindingId = await warrantService.bindWarrant({
   warrantId: warrant.warrantId,
-  tenantId: 'tenant-001',
-  resourceType: 'entity',
-  resourceId: 'entity-456',
-  boundBy: 'admin@example.com',
+  tenantId: "tenant-001",
+  resourceType: "entity",
+  resourceId: "entity-456",
+  boundBy: "admin@example.com",
 });
-console.log('Warrant bound to resource:', bindingId);
+console.log("Warrant bound to resource:", bindingId);
 ```
 
 ### 4. Assign License to Data
 
 ```typescript
-import { CreateLicenseInput, AssignLicenseInput } from '@intelgraph/authz-core';
+import { CreateLicenseInput, AssignLicenseInput } from "@intelgraph/authz-core";
 
 // Create license
 const licenseInput: CreateLicenseInput = {
-  tenantId: 'tenant-001',
-  licenseKey: 'INTERNAL-ONLY-V1',
-  licenseName: 'Internal Use Only',
-  licenseType: 'INTERNAL_ONLY',
+  tenantId: "tenant-001",
+  licenseKey: "INTERNAL-ONLY-V1",
+  licenseName: "Internal Use Only",
+  licenseType: "INTERNAL_ONLY",
   permissions: {
     read: true,
     copy: true,
@@ -210,23 +206,23 @@ const licenseInput: CreateLicenseInput = {
     nonCommercial: true,
   },
   requiresAttribution: false,
-  createdBy: 'admin@example.com',
+  createdBy: "admin@example.com",
 };
 
 const license = await licenseService.createLicense(licenseInput);
-console.log('License created:', license.licenseId);
+console.log("License created:", license.licenseId);
 
 // Assign license to resource
 const assignmentId = await licenseService.assignLicense({
   licenseId: license.licenseId,
-  tenantId: 'tenant-001',
-  resourceType: 'entity',
-  resourceId: 'entity-456',
+  tenantId: "tenant-001",
+  resourceType: "entity",
+  resourceId: "entity-456",
   appliesToDerivatives: true,
-  assignedBy: 'admin@example.com',
-  assignmentReason: 'Proprietary data from external source',
+  assignedBy: "admin@example.com",
+  assignmentReason: "Proprietary data from external source",
 });
-console.log('License assigned:', assignmentId);
+console.log("License assigned:", assignmentId);
 ```
 
 ## Authorization Decision Flow
@@ -310,6 +306,7 @@ psql $DATABASE_URL -f server/db/migrations/postgres/2025-11-24_authorization_aud
 ### Key Tables
 
 #### Warrants
+
 - `warrants` - Core warrant registry
 - `warrant_bindings` - Resource authorizations
 - `warrant_usage_log` - Immutable usage audit
@@ -317,6 +314,7 @@ psql $DATABASE_URL -f server/db/migrations/postgres/2025-11-24_authorization_aud
 - `warrant_approval_workflow` - Approval process tracking
 
 #### Licenses
+
 - `licenses` - License registry
 - `data_license_assignments` - Resource assignments
 - `license_lineage` - Inheritance tracking
@@ -325,6 +323,7 @@ psql $DATABASE_URL -f server/db/migrations/postgres/2025-11-24_authorization_aud
 - `license_compatibility_matrix` - Compatibility rules
 
 #### Audit
+
 - `authorization_audit_log` - Authorization decisions
 - `mv_authz_denials_summary` - Denial analytics (materialized view)
 
@@ -387,16 +386,16 @@ TRACING_ENABLED=true
 
 ```typescript
 const config: AuthorizationConfig = {
-  opaUrl: 'http://localhost:8181',
+  opaUrl: "http://localhost:8181",
   opaTimeout: 5000,
   opaCacheEnabled: true,
   opaCacheTtl: 300000,
   databaseUrl: process.env.DATABASE_URL,
   databasePoolSize: 20,
-  failSecure: true,                          // Deny on errors in production
-  requirePurpose: true,                      // Always require purpose
-  requireWarrantFor: ['EXPORT', 'SHARE'],    // Actions requiring warrant
-  requireLicenseFor: ['EXPORT', 'DOWNLOAD'], // Actions requiring license check
+  failSecure: true, // Deny on errors in production
+  requirePurpose: true, // Always require purpose
+  requireWarrantFor: ["EXPORT", "SHARE"], // Actions requiring warrant
+  requireLicenseFor: ["EXPORT", "DOWNLOAD"], // Actions requiring license check
   auditEnabled: true,
   cacheEnabled: true,
   cacheTtl: 60000,
@@ -414,12 +413,14 @@ const config: AuthorizationConfig = {
 Central authorization API. Side-effect free (only reads state, logs to audit).
 
 **Parameters:**
+
 - `input.subject` - User/service requesting access
 - `input.action` - Action being performed
 - `input.resource` - Resource being accessed
 - `input.context` - Request context (purpose, IP, etc.)
 
 **Returns:**
+
 - `decision.allowed` - Boolean authorization result
 - `decision.reason` - Human-readable explanation
 - `decision.obligations` - Actions that must be taken
@@ -430,41 +431,53 @@ Central authorization API. Side-effect free (only reads state, logs to audit).
 ### WarrantService
 
 #### `createWarrant(input: CreateWarrantInput): Promise<Warrant>`
+
 Create a new warrant or legal authority.
 
 #### `bindWarrant(input: BindWarrantInput): Promise<string>`
+
 Bind warrant to a specific resource.
 
 #### `validateWarrant(warrantId, action, resourceType): Promise<WarrantValidationResult>`
+
 Validate warrant for specific action.
 
 #### `approveWarrant(input: ApproveWarrantInput): Promise<void>`
+
 Approve or reject warrant (for approval workflow).
 
 #### `processExpirationAlerts(): Promise<number>`
+
 Process pending expiration alerts (call from cron job).
 
 #### `logWarrantUsage(input: WarrantUsageInput): Promise<void>`
+
 Log warrant usage to audit trail.
 
 ### LicenseService
 
 #### `createLicense(input: CreateLicenseInput): Promise<License>`
+
 Create a new data license.
 
 #### `assignLicense(input: AssignLicenseInput): Promise<string>`
+
 Assign license to a resource.
 
 #### `validateLicense(tenantId, resourceType, resourceId, action): Promise<LicenseValidationResult>`
+
 Validate license for action.
 
 #### `acceptTOS(input: AcceptTOSInput): Promise<string>`
+
 Record TOS acceptance.
 
 #### `hasUserAcceptedTOS(userId, tosVersion, tosType): Promise<boolean>`
+
 Check if user has accepted TOS.
 
 #### `recordLicenseLineage(...): Promise<string>`
+
 Record license inheritance for derived data.
 
 ## Error Handling
@@ -472,14 +485,14 @@ Record license inheritance for derived data.
 All services throw typed errors:
 
 ```typescript
-import { AuthorizationError, WarrantError, LicenseError } from '@intelgraph/authz-core';
+import { AuthorizationError, WarrantError, LicenseError } from "@intelgraph/authz-core";
 
 try {
   const decision = await authz.isAllowed(input);
 } catch (error) {
   if (error instanceof AuthorizationError) {
-    console.error('Authorization failed:', error.code, error.message);
-    console.error('Details:', error.details);
+    console.error("Authorization failed:", error.code, error.message);
+    console.error("Details:", error.details);
     // error.statusCode = 403
   }
 }
@@ -509,6 +522,7 @@ pnpm test:integration
 ### Example Tests
 
 See `__tests__/` directory for comprehensive test suite including:
+
 - Authorization decision tests
 - Cross-tenant isolation tests
 - Warrant lifecycle tests
@@ -520,6 +534,7 @@ See `__tests__/` directory for comprehensive test suite including:
 ### Metrics
 
 The authorization service exposes metrics for:
+
 - Authorization requests (total, allowed, denied)
 - Decision latency (p50, p95, p99)
 - Cache hit rate
@@ -561,18 +576,22 @@ GROUP BY license_key, action, license_decision;
 ```typescript
 // ✅ Good
 const decision = await authz.isAllowed({
-  subject, action, resource,
+  subject,
+  action,
+  resource,
   context: {
     requestTime: new Date(),
-    environment: 'production',
-    purpose: 'Export entity data for fraud investigation case #12345',
+    environment: "production",
+    purpose: "Export entity data for fraud investigation case #12345",
   },
 });
 
 // ❌ Bad - will fail if requirePurpose = true
 const decision = await authz.isAllowed({
-  subject, action, resource,
-  context: { requestTime: new Date(), environment: 'production' },
+  subject,
+  action,
+  resource,
+  context: { requestTime: new Date(), environment: "production" },
 });
 ```
 
@@ -584,15 +603,15 @@ const decision = await authz.isAllowed(input);
 if (decision.allowed && decision.obligations) {
   for (const obligation of decision.obligations) {
     switch (obligation.type) {
-      case 'ATTRIBUTION':
+      case "ATTRIBUTION":
         // Display attribution text
         displayAttribution(obligation.requirement);
         break;
-      case 'SHARE_ALIKE':
+      case "SHARE_ALIKE":
         // Enforce same license on derivatives
         enforceLicense(obligation.metadata.requiredLicense);
         break;
-      case 'NOTICE':
+      case "NOTICE":
         // Display legal notice
         displayNotice(obligation.requirement);
         break;
@@ -611,7 +630,7 @@ if (decision.requiresStepUp) {
   await requestStepUpAuth(decision.minimumAcr);
 
   // Retry with elevated credentials
-  input.context.currentAcr = 'loa2';
+  input.context.currentAcr = "loa2";
   input.context.mfaVerified = true;
   const newDecision = await authz.isAllowed(input);
 }
@@ -620,6 +639,7 @@ if (decision.requiresStepUp) {
 ### 4. Cache Decisions Carefully
 
 The service includes built-in caching, but be aware:
+
 - Cache is keyed by subject, action, resource, purpose
 - Changes to warrants, licenses, or policies won't invalidate cache
 - Use short TTL (60s) for production
@@ -628,6 +648,7 @@ The service includes built-in caching, but be aware:
 ### 5. Monitor Denials
 
 Set up alerts for:
+
 - Repeated denials from same user (potential misuse)
 - Denials due to expired warrants
 - License enforcement violations
@@ -636,18 +657,21 @@ Set up alerts for:
 ## Compliance Features
 
 ### GDPR
+
 - Comprehensive audit trail (right to access)
 - Data subject request tracking
 - Retention policy enforcement
 - Pseudonymization support
 
 ### HIPAA
+
 - PHI access logging with purpose
 - Minimum necessary justification
 - Audit trail integrity (immutable logs)
 - Access controls and encryption
 
 ### SOC 2
+
 - Authorization audit logging
 - Separation of duties (two-person rule)
 - Change management (approval workflows)
@@ -662,6 +686,7 @@ Error: OPA evaluation failed
 ```
 
 **Solution:**
+
 1. Check OPA is running: `curl http://localhost:8181/health`
 2. Verify policies are loaded: `curl http://localhost:8181/v1/policies`
 3. Check OPA logs: `docker logs opa`
@@ -674,6 +699,7 @@ Error: Action 'EXPORT' requires a warrant
 ```
 
 **Solution:**
+
 1. Check if warrant exists: `SELECT * FROM warrants WHERE tenant_id = '...' AND status = 'ACTIVE'`
 2. Check warrant binding: `SELECT * FROM warrant_bindings WHERE resource_id = '...'`
 3. Verify warrant permits action: Check `permitted_actions` column
@@ -687,6 +713,7 @@ Error: Tenant mismatch: tenant-001 != tenant-002
 
 **Solution:**
 This is expected behavior for security. To allow cross-tenant access:
+
 1. Implement cross-tenant authorization workflow
 2. Use shared resources with appropriate policies
 3. Verify tenant IDs are correct
@@ -698,6 +725,7 @@ Proprietary - IntelGraph Platform
 ## Support
 
 For issues and questions:
+
 - GitHub Issues: https://github.com/BrianCLong/summit/issues
 - Internal Slack: #authz-support
 - Email: platform@intelgraph.example.com

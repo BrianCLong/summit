@@ -1,12 +1,12 @@
-import { AlertManager } from './alert-manager';
-import { BehavioralModel } from './behavioral-model';
-import { CorrelationEngine } from './correlation-engine';
-import { EntityResolver } from './entity-resolution';
-import { PatternRecognizer, defaultPatterns } from './pattern-recognition';
-import { DetectionRuleEngine } from './rule-engine';
-import { ThreatScorer } from './threat-scoring';
-import { TemporalAnalyzer } from './temporal-analysis';
-import { TriageEngine } from './triage';
+import { AlertManager } from "./alert-manager";
+import { BehavioralModel } from "./behavioral-model";
+import { CorrelationEngine } from "./correlation-engine";
+import { EntityResolver } from "./entity-resolution";
+import { PatternRecognizer, defaultPatterns } from "./pattern-recognition";
+import { DetectionRuleEngine } from "./rule-engine";
+import { ThreatScorer } from "./threat-scoring";
+import { TemporalAnalyzer } from "./temporal-analysis";
+import { TriageEngine } from "./triage";
 import type {
   BehaviorEvent,
   DetectionRule,
@@ -14,29 +14,29 @@ import type {
   ThreatAnalyticsOptions,
   ThreatIntelClient,
   ThreatIntelIndicator,
-} from './types';
+} from "./types";
 
 function matchIndicators(
   event: BehaviorEvent,
-  indicators: ThreatIntelIndicator[],
+  indicators: ThreatIntelIndicator[]
 ): ThreatIntelIndicator[] {
   const matches: ThreatIntelIndicator[] = [];
   for (const indicator of indicators) {
-    if (indicator.type === 'ip' && indicator.value === event.context?.ip) {
+    if (indicator.type === "ip" && indicator.value === event.context?.ip) {
       matches.push(indicator);
     }
-    if (indicator.type === 'user' && indicator.value === event.actor) {
+    if (indicator.type === "user" && indicator.value === event.actor) {
       matches.push(indicator);
     }
-    if (indicator.type === 'domain' && typeof event.attributes?.host === 'string') {
+    if (indicator.type === "domain" && typeof event.attributes?.host === "string") {
       if ((event.attributes.host as string).includes(indicator.value)) {
         matches.push(indicator);
       }
     }
-    if (indicator.type === 'hash' && event.attributes?.hash === indicator.value) {
+    if (indicator.type === "hash" && event.attributes?.hash === indicator.value) {
       matches.push(indicator);
     }
-    if (indicator.type === 'uri' && typeof event.attributes?.uri === 'string') {
+    if (indicator.type === "uri" && typeof event.attributes?.uri === "string") {
       if ((event.attributes.uri as string).includes(indicator.value)) {
         matches.push(indicator);
       }
@@ -68,7 +68,7 @@ export class ThreatAnalyticsEngine {
 
   private intelIndicators: ThreatIntelIndicator[] = [];
 
-  private readonly intelOptions: Required<ThreatAnalyticsOptions['intel']>;
+  private readonly intelOptions: Required<ThreatAnalyticsOptions["intel"]>;
 
   constructor(options?: ThreatAnalyticsOptions) {
     this.behavior = new BehavioralModel(options?.behavior);
@@ -77,7 +77,7 @@ export class ThreatAnalyticsEngine {
     this.intelOptions = {
       minConfidence: options?.intel?.minConfidence ?? 0,
       now: options?.intel?.now ?? Date.now,
-    } satisfies Required<ThreatAnalyticsOptions['intel']>;
+    } satisfies Required<ThreatAnalyticsOptions["intel"]>;
   }
 
   registerIntelClient(client: ThreatIntelClient): void {
@@ -88,7 +88,7 @@ export class ThreatAnalyticsEngine {
     this.rules.register(rule);
   }
 
-  registerEntity(profile: Parameters<EntityResolver['registerProfile']>[0]): void {
+  registerEntity(profile: Parameters<EntityResolver["registerProfile"]>[0]): void {
     this.entities.registerProfile(profile);
   }
 
@@ -125,7 +125,8 @@ export class ThreatAnalyticsEngine {
         const existingExpiry = existing.validUntil ? Date.parse(existing.validUntil) : undefined;
         const candidateExpiry = indicator.validUntil ? Date.parse(indicator.validUntil) : undefined;
         if (
-          existingExpiry !== undefined && candidateExpiry !== undefined &&
+          existingExpiry !== undefined &&
+          candidateExpiry !== undefined &&
           Number.isFinite(existingExpiry) &&
           Number.isFinite(candidateExpiry) &&
           candidateExpiry > existingExpiry
@@ -163,7 +164,7 @@ export class ThreatAnalyticsEngine {
       behavior ?? undefined,
       patternMatches,
       correlation,
-      ruleHits.map((rule) => rule.id),
+      ruleHits.map((rule) => rule.id)
     );
     const triage = this.triage.plan(score);
 
@@ -172,7 +173,7 @@ export class ThreatAnalyticsEngine {
       alerts.push(
         this.alerts.raise({
           entityId: resolved.entityId,
-          title: 'Advanced threat detection alert',
+          title: "Advanced threat detection alert",
           description: this.describeAlert(score, patternMatches, indicatorHits),
           severity: score.severity,
           score: score.score,
@@ -182,7 +183,7 @@ export class ThreatAnalyticsEngine {
           temporal,
           triage,
           ruleIds: ruleHits.map((rule) => rule.id),
-        }),
+        })
       );
     }
     return alerts;
@@ -193,17 +194,17 @@ export class ThreatAnalyticsEngine {
   }
 
   private describeAlert(
-    score: ReturnType<ThreatScorer['score']>,
-    patterns: ReturnType<PatternRecognizer['observe']>,
-    indicators: ThreatIntelIndicator[],
+    score: ReturnType<ThreatScorer["score"]>,
+    patterns: ReturnType<PatternRecognizer["observe"]>,
+    indicators: ThreatIntelIndicator[]
   ): string {
     const parts = [`composite threat score ${score.score.toFixed(2)} (${score.severity})`];
     if (patterns.length > 0) {
-      parts.push(`patterns: ${patterns.map((p) => p.pattern).join(', ')}`);
+      parts.push(`patterns: ${patterns.map((p) => p.pattern).join(", ")}`);
     }
     if (indicators.length > 0) {
-      parts.push(`intel hits: ${indicators.map((i) => `${i.type}:${i.value}`).join(', ')}`);
+      parts.push(`intel hits: ${indicators.map((i) => `${i.type}:${i.value}`).join(", ")}`);
     }
-    return parts.join(' | ');
+    return parts.join(" | ");
   }
 }

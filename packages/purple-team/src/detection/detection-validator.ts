@@ -1,4 +1,4 @@
-import { SIEMRule, IOC, Detection, ControlAssessment } from '../types';
+import { SIEMRule, IOC, Detection, ControlAssessment } from "../types";
 
 /**
  * SIEM Rule Validator
@@ -26,7 +26,9 @@ export class SIEMRuleValidator {
     effectiveness: number;
   }> {
     const rule = this.rules.get(ruleId);
-    if (!rule) {throw new Error('Rule not found');}
+    if (!rule) {
+      throw new Error("Rule not found");
+    }
 
     // Simulate rule evaluation against logs
     const matchedLogs: string[] = [];
@@ -47,40 +49,38 @@ export class SIEMRuleValidator {
     return {
       triggered,
       matchedLogs,
-      effectiveness
+      effectiveness,
     };
   }
 
   /**
    * Generate detection rule for technique
    */
-  generateRuleForTechnique(
-    techniqueId: string,
-    techniqueName: string,
-    platform: string
-  ): SIEMRule {
+  generateRuleForTechnique(techniqueId: string, techniqueName: string, platform: string): SIEMRule {
     const rules: Record<string, { query: string; description: string }> = {
-      'T1059.001': {
-        query: 'event.type:process AND process.name:powershell.exe AND (command_line:*-enc* OR command_line:*bypass*)',
-        description: 'Detects suspicious PowerShell execution'
+      "T1059.001": {
+        query:
+          "event.type:process AND process.name:powershell.exe AND (command_line:*-enc* OR command_line:*bypass*)",
+        description: "Detects suspicious PowerShell execution",
       },
-      'T1003': {
-        query: 'event.type:process AND (process.name:mimikatz* OR command_line:*sekurlsa*)',
-        description: 'Detects credential dumping attempts'
+      T1003: {
+        query: "event.type:process AND (process.name:mimikatz* OR command_line:*sekurlsa*)",
+        description: "Detects credential dumping attempts",
       },
-      'T1547': {
-        query: 'event.type:registry AND registry.path:*\\\\Run\\\\*',
-        description: 'Detects persistence via Run keys'
+      T1547: {
+        query: "event.type:registry AND registry.path:*\\\\Run\\\\*",
+        description: "Detects persistence via Run keys",
       },
-      'T1566': {
-        query: 'event.type:file AND file.extension:(exe OR dll OR js OR vbs) AND file.path:*\\\\Downloads\\\\*',
-        description: 'Detects suspicious file downloads'
-      }
+      T1566: {
+        query:
+          "event.type:file AND file.extension:(exe OR dll OR js OR vbs) AND file.path:*\\\\Downloads\\\\*",
+        description: "Detects suspicious file downloads",
+      },
     };
 
     const template = rules[techniqueId] || {
       query: `event.type:* AND technique.id:"${techniqueId}"`,
-      description: `Detection rule for ${techniqueName}`
+      description: `Detection rule for ${techniqueName}`,
     };
 
     return {
@@ -90,8 +90,8 @@ export class SIEMRuleValidator {
       platform,
       query: template.query,
       techniquesCovered: [techniqueId],
-      severity: 'high',
-      enabled: true
+      severity: "high",
+      enabled: true,
     };
   }
 
@@ -112,24 +112,24 @@ export class SIEMRuleValidator {
       }
     }
 
-    const covered = techniqueIds.filter(t => coveredTechniques.has(t));
-    const uncovered = techniqueIds.filter(t => !coveredTechniques.has(t));
+    const covered = techniqueIds.filter((t) => coveredTechniques.has(t));
+    const uncovered = techniqueIds.filter((t) => !coveredTechniques.has(t));
 
     return {
       covered,
       uncovered,
-      coveragePercentage: (covered.length / techniqueIds.length) * 100
+      coveragePercentage: (covered.length / techniqueIds.length) * 100,
     };
   }
 
   private evaluateRuleQuery(query: string, log: string): boolean {
     // Simplified query evaluation
-    const terms = query.split(' AND ');
+    const terms = query.split(" AND ");
     const logLower = log.toLowerCase();
 
     for (const term of terms) {
-      const [field, pattern] = term.split(':');
-      if (pattern && !logLower.includes(pattern.replace(/\*/g, '').toLowerCase())) {
+      const [field, pattern] = term.split(":");
+      if (pattern && !logLower.includes(pattern.replace(/\*/g, "").toLowerCase())) {
         return false;
       }
     }
@@ -154,7 +154,9 @@ export class IOCGenerator {
     const now = new Date();
 
     for (const detection of detections) {
-      if (!detection.truePositive) {continue;}
+      if (!detection.truePositive) {
+        continue;
+      }
 
       // Extract IOCs from detection description
       const extractedIOCs = this.extractIOCsFromText(detection.description);
@@ -164,13 +166,13 @@ export class IOCGenerator {
           id: this.generateId(),
           type: extracted.type,
           value: extracted.value,
-          confidence: 'high',
+          confidence: "high",
           source: `Exercise Detection: ${detection.id}`,
           context: detection.description,
           firstSeen: detection.timestamp,
           lastSeen: now,
-          tags: ['exercise', 'validated'],
-          relatedTechniques: detection.techniqueId ? [detection.techniqueId] : []
+          tags: ["exercise", "validated"],
+          relatedTechniques: detection.techniqueId ? [detection.techniqueId] : [],
         });
       }
     }
@@ -181,30 +183,27 @@ export class IOCGenerator {
   /**
    * Generate IOC bundle for threat intel sharing
    */
-  generateIOCBundle(
-    iocs: IOC[],
-    format: 'stix' | 'openioc' | 'csv'
-  ): string {
+  generateIOCBundle(iocs: IOC[], format: "stix" | "openioc" | "csv"): string {
     switch (format) {
-      case 'stix':
+      case "stix":
         return this.toSTIX(iocs);
-      case 'openioc':
+      case "openioc":
         return this.toOpenIOC(iocs);
-      case 'csv':
+      case "csv":
         return this.toCSV(iocs);
       default:
         throw new Error(`Unsupported format: ${format}`);
     }
   }
 
-  private extractIOCsFromText(text: string): Array<{ type: IOC['type']; value: string }> {
-    const iocs: Array<{ type: IOC['type']; value: string }> = [];
+  private extractIOCsFromText(text: string): Array<{ type: IOC["type"]; value: string }> {
+    const iocs: Array<{ type: IOC["type"]; value: string }> = [];
 
     // IP addresses
     const ipRegex = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g;
     const ips = text.match(ipRegex) || [];
     for (const ip of ips) {
-      iocs.push({ type: 'ip', value: ip });
+      iocs.push({ type: "ip", value: ip });
     }
 
     // Domains
@@ -212,7 +211,7 @@ export class IOCGenerator {
     const domains = text.match(domainRegex) || [];
     for (const domain of domains) {
       if (!domain.match(/^\d/)) {
-        iocs.push({ type: 'domain', value: domain });
+        iocs.push({ type: "domain", value: domain });
       }
     }
 
@@ -220,37 +219,41 @@ export class IOCGenerator {
     const md5Regex = /\b[a-fA-F0-9]{32}\b/g;
     const md5s = text.match(md5Regex) || [];
     for (const hash of md5s) {
-      iocs.push({ type: 'hash', value: hash });
+      iocs.push({ type: "hash", value: hash });
     }
 
     // SHA256 hashes
     const sha256Regex = /\b[a-fA-F0-9]{64}\b/g;
     const sha256s = text.match(sha256Regex) || [];
     for (const hash of sha256s) {
-      iocs.push({ type: 'hash', value: hash });
+      iocs.push({ type: "hash", value: hash });
     }
 
     return iocs;
   }
 
   private toSTIX(iocs: IOC[]): string {
-    const objects = iocs.map(ioc => ({
-      type: 'indicator',
+    const objects = iocs.map((ioc) => ({
+      type: "indicator",
       id: `indicator--${ioc.id}`,
       created: ioc.firstSeen.toISOString(),
       modified: ioc.lastSeen.toISOString(),
       pattern: this.getSTIXPattern(ioc),
-      pattern_type: 'stix',
+      pattern_type: "stix",
       valid_from: ioc.firstSeen.toISOString(),
       labels: ioc.tags,
-      confidence: ioc.confidence === 'high' ? 85 : ioc.confidence === 'medium' ? 50 : 25
+      confidence: ioc.confidence === "high" ? 85 : ioc.confidence === "medium" ? 50 : 25,
     }));
 
-    return JSON.stringify({
-      type: 'bundle',
-      id: `bundle--${this.generateId()}`,
-      objects
-    }, null, 2);
+    return JSON.stringify(
+      {
+        type: "bundle",
+        id: `bundle--${this.generateId()}`,
+        objects,
+      },
+      null,
+      2
+    );
   }
 
   private getSTIXPattern(ioc: IOC): string {
@@ -259,20 +262,24 @@ export class IOCGenerator {
       domain: `[domain-name:value = '${ioc.value}']`,
       hash: `[file:hashes.MD5 = '${ioc.value}']`,
       url: `[url:value = '${ioc.value}']`,
-      email: `[email-addr:value = '${ioc.value}']`
+      email: `[email-addr:value = '${ioc.value}']`,
     };
     return patterns[ioc.type] || `[x-unknown:value = '${ioc.value}']`;
   }
 
   private toOpenIOC(iocs: IOC[]): string {
-    const indicators = iocs.map(ioc => `
+    const indicators = iocs
+      .map(
+        (ioc) => `
     <Indicator>
       <IndicatorItem>
         <Context document="FileItem" search="FileItem/${ioc.type}" type="mir"/>
         <Content type="string">${ioc.value}</Content>
       </IndicatorItem>
     </Indicator>
-    `).join('\n');
+    `
+      )
+      .join("\n");
 
     return `<?xml version="1.0" encoding="UTF-8"?>
 <ioc xmlns="http://schemas.mandiant.com/2010/ioc">
@@ -281,11 +288,12 @@ export class IOCGenerator {
   }
 
   private toCSV(iocs: IOC[]): string {
-    const header = 'type,value,confidence,source,first_seen,tags';
-    const rows = iocs.map(ioc =>
-      `${ioc.type},${ioc.value},${ioc.confidence},${ioc.source},${ioc.firstSeen.toISOString()},${ioc.tags.join(';')}`
+    const header = "type,value,confidence,source,first_seen,tags";
+    const rows = iocs.map(
+      (ioc) =>
+        `${ioc.type},${ioc.value},${ioc.confidence},${ioc.source},${ioc.firstSeen.toISOString()},${ioc.tags.join(";")}`
     );
-    return [header, ...rows].join('\n');
+    return [header, ...rows].join("\n");
   }
 
   private generateId(): string {
@@ -311,8 +319,8 @@ export class ControlAssessor {
     }>
   ): ControlAssessment {
     const tested = testResults.length > 0;
-    const blockedCount = testResults.filter(r => r.blocked).length;
-    const detectedCount = testResults.filter(r => r.detected).length;
+    const blockedCount = testResults.filter((r) => r.blocked).length;
+    const detectedCount = testResults.filter((r) => r.detected).length;
 
     const effective = (blockedCount + detectedCount) / testResults.length > 0.7;
     const coverage = (testResults.length / 10) * 100; // Assume 10 techniques per control
@@ -335,7 +343,7 @@ export class ControlAssessor {
       effective,
       coverage,
       gaps,
-      recommendations
+      recommendations,
     };
   }
 
@@ -366,13 +374,13 @@ export class ControlAssessor {
       }
     }
 
-    const gaps = techniques.filter(t => !coveredTechniques.has(t));
+    const gaps = techniques.filter((t) => !coveredTechniques.has(t));
     const overallCoverage = (coveredTechniques.size / techniques.length) * 100;
 
     return {
       matrix,
       overallCoverage,
-      gaps
+      gaps,
     };
   }
 }

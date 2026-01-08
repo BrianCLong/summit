@@ -1,6 +1,6 @@
-import { LineChart } from 'd3';
-import 'tailwindcss/tailwind.css';
-import * as THREE from 'three';
+import { LineChart } from "d3";
+import "tailwindcss/tailwind.css";
+import * as THREE from "three";
 
 const RealTimeEngagement = ({ plan }) => (
   <div className="h-screen bg-gray-900 text-white">

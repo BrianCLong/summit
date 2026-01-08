@@ -160,13 +160,13 @@ owners:
 
 kpis:
   - name: preview_latency_p95_ms
-    target: '<=200'
+    target: "<=200"
   - name: cache_hit_rate
-    target: '>=0.94'
+    target: ">=0.94"
   - name: semantic_accuracy
-    target: '>=0.93'
+    target: ">=0.93"
   - name: metering_accuracy
-    target: '>=0.99'
+    target: ">=0.99"
 
 budget:
   cost_per_req_max_usd: 0.01
@@ -319,7 +319,7 @@ body:
 name: reconcile-billing
 on:
   schedule:
-    - cron: '15 2 * * *'
+    - cron: "15 2 * * *"
 jobs:
   reconcile:
     runs-on: ubuntu-latest
@@ -338,7 +338,7 @@ console.log(JSON.stringify({ ok: true, delta_pct: 0.3 }));
 
 ```tsx
 // apps/web/components/ExplainabilityPanel.tsx (stub)
-import React from 'react';
+import React from "react";
 export default function ExplainabilityPanel({
   rationale,
   highlights,
@@ -350,9 +350,7 @@ export default function ExplainabilityPanel({
     <div className="rounded-2xl p-3 shadow">
       <h4 className="font-semibold mb-2">Why this query?</h4>
       <p className="text-sm mb-2">{rationale}</p>
-      <div className="text-xs opacity-80">
-        {highlights.length} highlighted nodes/edges
-      </div>
+      <div className="text-xs opacity-80">{highlights.length} highlighted nodes/edges</div>
     </div>
   );
 }

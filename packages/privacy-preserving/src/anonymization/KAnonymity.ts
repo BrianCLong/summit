@@ -2,7 +2,7 @@
  * KAnonymity - Implement k-anonymity, l-diversity, and t-closeness
  */
 
-import { TabularData } from '@intelgraph/synthetic-data';
+import { TabularData } from "@intelgraph/synthetic-data";
 
 export interface AnonymizationConfig {
   k: number; // k-anonymity parameter
@@ -54,10 +54,12 @@ export class KAnonymity {
     const equivalenceClasses = this.createEquivalenceClasses(data);
 
     // Identify and handle small equivalence classes
-    const smallClasses = equivalenceClasses.filter(ec => ec.size < this.config.k);
+    const smallClasses = equivalenceClasses.filter((ec) => ec.size < this.config.k);
 
     if (smallClasses.length > 0) {
-      warnings.push(`Found ${smallClasses.length} equivalence classes smaller than k=${this.config.k}`);
+      warnings.push(
+        `Found ${smallClasses.length} equivalence classes smaller than k=${this.config.k}`
+      );
     }
 
     // Apply generalization and suppression
@@ -94,7 +96,7 @@ export class KAnonymity {
     return {
       anonymizedData: anonymized,
       metrics,
-      warnings
+      warnings,
     };
   }
 
@@ -106,11 +108,11 @@ export class KAnonymity {
     const classMap = new Map<string, any[][]>();
 
     // Get indices of quasi-identifier columns
-    const qiIndices = quasiIdentifiers.map(qi => data.columns.indexOf(qi));
+    const qiIndices = quasiIdentifiers.map((qi) => data.columns.indexOf(qi));
 
     // Group records by quasi-identifier values
-    data.data.forEach(record => {
-      const qiValues = qiIndices.map(idx => record[idx]);
+    data.data.forEach((record) => {
+      const qiValues = qiIndices.map((idx) => record[idx]);
       const key = JSON.stringify(qiValues);
 
       if (!classMap.has(key)) {
@@ -126,7 +128,7 @@ export class KAnonymity {
       classes.push({
         records,
         size: records.length,
-        quasiIdentifierValues: qiValues
+        quasiIdentifierValues: qiValues,
       });
     });
 
@@ -170,21 +172,21 @@ export class KAnonymity {
     // Compute information loss
     const informationLoss = this.computeInformationLoss(data, {
       columns: data.columns,
-      data: anonymizedRecords
+      data: anonymizedRecords,
     });
 
     return {
       anonymized: {
         columns: data.columns,
         data: anonymizedRecords,
-        metadata: data.metadata
+        metadata: data.metadata,
       },
       metrics: {
         kAnonymity: 0, // Will be computed later
         suppressedRecords: suppressedCount,
         generalizedCells: generalizedCount,
-        informationLoss
-      }
+        informationLoss,
+      },
     };
   }
 
@@ -203,13 +205,13 @@ export class KAnonymity {
    * Generalize records in equivalence class
    */
   private generalizeRecords(ec: EquivalenceClass, data: TabularData): any[][] {
-    const qiIndices = this.config.quasiIdentifiers.map(qi => data.columns.indexOf(qi));
+    const qiIndices = this.config.quasiIdentifiers.map((qi) => data.columns.indexOf(qi));
 
-    return ec.records.map(record => {
+    return ec.records.map((record) => {
       const generalized = [...record];
 
       // Generalize quasi-identifiers
-      qiIndices.forEach(idx => {
+      qiIndices.forEach((idx) => {
         generalized[idx] = this.generalizeValue(record[idx], data.columns[idx]);
       });
 
@@ -221,15 +223,15 @@ export class KAnonymity {
    * Generalize a single value
    */
   private generalizeValue(value: any, columnName: string): any {
-    if (typeof value === 'number') {
+    if (typeof value === "number") {
       // Generalize numerical values to ranges
       const range = 10; // Fixed range for simplicity
       const lower = Math.floor(value / range) * range;
       return `${lower}-${lower + range}`;
-    } else if (typeof value === 'string') {
+    } else if (typeof value === "string") {
       // Generalize strings by truncation or wildcarding
       if (value.length > 3) {
-        return `${value.substring(0, 3)  }*`;
+        return `${value.substring(0, 3)}*`;
       }
       return value;
     }
@@ -242,7 +244,7 @@ export class KAnonymity {
    */
   private verifyKAnonymity(data: TabularData): number {
     const classes = this.createEquivalenceClasses(data);
-    const sizes = classes.map(ec => ec.size);
+    const sizes = classes.map((ec) => ec.size);
     return sizes.length > 0 ? Math.min(...sizes) : 0;
   }
 
@@ -261,7 +263,7 @@ export class KAnonymity {
 
     for (const ec of classes) {
       // Count distinct sensitive values in this equivalence class
-      const sensitiveValues = new Set(ec.records.map(r => r[sensitiveIdx]));
+      const sensitiveValues = new Set(ec.records.map((r) => r[sensitiveIdx]));
       minDiversity = Math.min(minDiversity, sensitiveValues.size);
     }
 
@@ -280,17 +282,13 @@ export class KAnonymity {
     const sensitiveIdx = anonymized.columns.indexOf(this.config.sensitiveAttributes[0]);
 
     // Compute overall distribution
-    const overallDist = this.computeDistribution(
-      original.data.map(r => r[sensitiveIdx])
-    );
+    const overallDist = this.computeDistribution(original.data.map((r) => r[sensitiveIdx]));
 
     let maxDistance = 0;
 
     // Compute EMD (Earth Mover's Distance) for each equivalence class
     for (const ec of classes) {
-      const classDist = this.computeDistribution(
-        ec.records.map(r => r[sensitiveIdx])
-      );
+      const classDist = this.computeDistribution(ec.records.map((r) => r[sensitiveIdx]));
 
       const distance = this.earthMoversDistance(overallDist, classDist);
       maxDistance = Math.max(maxDistance, distance);
@@ -306,7 +304,7 @@ export class KAnonymity {
     const dist = new Map<any, number>();
     const total = values.length;
 
-    values.forEach(v => {
+    values.forEach((v) => {
       dist.set(v, (dist.get(v) || 0) + 1 / total);
     });
 
@@ -321,7 +319,7 @@ export class KAnonymity {
     const allKeys = new Set([...dist1.keys(), ...dist2.keys()]);
     let distance = 0;
 
-    allKeys.forEach(key => {
+    allKeys.forEach((key) => {
       const p1 = dist1.get(key) || 0;
       const p2 = dist2.get(key) || 0;
       distance += Math.abs(p1 - p2);
@@ -340,8 +338,8 @@ export class KAnonymity {
     let numColumns = 0;
 
     original.columns.forEach((col, idx) => {
-      const origValues = original.data.map(r => r[idx]);
-      const anonValues = anonymized.data.map(r => r[idx]);
+      const origValues = original.data.map((r) => r[idx]);
+      const anonValues = anonymized.data.map((r) => r[idx]);
 
       const origEntropy = this.computeEntropy(origValues);
       const anonEntropy = this.computeEntropy(anonValues);
@@ -361,7 +359,7 @@ export class KAnonymity {
     const dist = this.computeDistribution(values);
     let entropy = 0;
 
-    dist.forEach(prob => {
+    dist.forEach((prob) => {
       if (prob > 0) {
         entropy -= prob * Math.log2(prob);
       }

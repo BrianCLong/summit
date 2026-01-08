@@ -4,8 +4,8 @@
  * React components for feature flag management
  */
 
-import React, { useState, useEffect } from 'react';
-import type { FlagDefinition, FlagEvaluation } from '../types.js';
+import React, { useState, useEffect } from "react";
+import type { FlagDefinition, FlagEvaluation } from "../types.js";
 
 /**
  * Flag list component props
@@ -41,20 +41,22 @@ export const FlagList: React.FC<FlagListProps> = ({
   isLoading = false,
   filter,
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   // Filter flags
   const filteredFlags = flags.filter((flag) => {
     // Search filter
-    if (searchTerm && !flag.key.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !flag.name?.toLowerCase().includes(searchTerm.toLowerCase())) {
+    if (
+      searchTerm &&
+      !flag.key.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !flag.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    ) {
       return false;
     }
 
     // Tag filter
-    if (selectedTags.length > 0 &&
-        !selectedTags.some((tag) => flag.tags?.includes(tag))) {
+    if (selectedTags.length > 0 && !selectedTags.some((tag) => flag.tags?.includes(tag))) {
       return false;
     }
 
@@ -67,9 +69,7 @@ export const FlagList: React.FC<FlagListProps> = ({
   });
 
   // Get all unique tags
-  const allTags = Array.from(
-    new Set(flags.flatMap((flag) => flag.tags || [])),
-  ).sort();
+  const allTags = Array.from(new Set(flags.flatMap((flag) => flag.tags || []))).sort();
 
   if (isLoading) {
     return <div className="flag-list-loading">Loading flags...</div>;
@@ -91,12 +91,10 @@ export const FlagList: React.FC<FlagListProps> = ({
             {allTags.map((tag) => (
               <button
                 key={tag}
-                className={`tag-filter ${selectedTags.includes(tag) ? 'active' : ''}`}
+                className={`tag-filter ${selectedTags.includes(tag) ? "active" : ""}`}
                 onClick={() => {
                   setSelectedTags((prev) =>
-                    prev.includes(tag)
-                      ? prev.filter((t) => t !== tag)
-                      : [...prev, tag],
+                    prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
                   );
                 }}
               >
@@ -114,7 +112,7 @@ export const FlagList: React.FC<FlagListProps> = ({
           filteredFlags.map((flag) => (
             <div
               key={flag.key}
-              className={`flag-list-item ${!flag.enabled ? 'disabled' : ''}`}
+              className={`flag-list-item ${!flag.enabled ? "disabled" : ""}`}
               onClick={() => onSelect?.(flag)}
             >
               <div className="flag-item-header">
@@ -132,7 +130,7 @@ export const FlagList: React.FC<FlagListProps> = ({
                         onToggle(flag.key, !flag.enabled);
                       }}
                     >
-                      {flag.enabled ? 'Enabled' : 'Disabled'}
+                      {flag.enabled ? "Enabled" : "Disabled"}
                     </button>
                   )}
 
@@ -152,9 +150,7 @@ export const FlagList: React.FC<FlagListProps> = ({
                 </div>
               </div>
 
-              {flag.description && (
-                <p className="flag-description">{flag.description}</p>
-              )}
+              {flag.description && <p className="flag-description">{flag.description}</p>}
 
               {flag.tags && flag.tags.length > 0 && (
                 <div className="flag-tags">
@@ -196,23 +192,19 @@ export interface FlagEditorProps {
 /**
  * Flag editor component
  */
-export const FlagEditor: React.FC<FlagEditorProps> = ({
-  flag,
-  onSave,
-  onCancel,
-}) => {
+export const FlagEditor: React.FC<FlagEditorProps> = ({ flag, onSave, onCancel }) => {
   const [formData, setFormData] = useState<Partial<FlagDefinition>>(
     flag || {
-      key: '',
-      name: '',
-      description: '',
-      type: 'boolean',
+      key: "",
+      name: "",
+      description: "",
+      type: "boolean",
       enabled: false,
       defaultValue: false,
       variations: [],
       rules: [],
       tags: [],
-    },
+    }
   );
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -224,7 +216,7 @@ export const FlagEditor: React.FC<FlagEditorProps> = ({
 
   return (
     <form className="flag-editor" onSubmit={handleSubmit}>
-      <h2>{flag ? 'Edit Flag' : 'Create Flag'}</h2>
+      <h2>{flag ? "Edit Flag" : "Create Flag"}</h2>
 
       <div className="form-group">
         <label>Flag Key *</label>
@@ -251,9 +243,7 @@ export const FlagEditor: React.FC<FlagEditorProps> = ({
         <label>Description</label>
         <textarea
           value={formData.description}
-          onChange={(e) =>
-            setFormData({ ...formData, description: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
         />
       </div>
 
@@ -264,7 +254,7 @@ export const FlagEditor: React.FC<FlagEditorProps> = ({
           onChange={(e) =>
             setFormData({
               ...formData,
-              type: e.target.value as FlagDefinition['type'],
+              type: e.target.value as FlagDefinition["type"],
             })
           }
         >
@@ -280,9 +270,7 @@ export const FlagEditor: React.FC<FlagEditorProps> = ({
           <input
             type="checkbox"
             checked={formData.enabled}
-            onChange={(e) =>
-              setFormData({ ...formData, enabled: e.target.checked })
-            }
+            onChange={(e) => setFormData({ ...formData, enabled: e.target.checked })}
           />
           Enabled
         </label>
@@ -321,10 +309,7 @@ export interface FlagAnalyticsProps {
 /**
  * Flag analytics component
  */
-export const FlagAnalytics: React.FC<FlagAnalyticsProps> = ({
-  flagKey,
-  data,
-}) => {
+export const FlagAnalytics: React.FC<FlagAnalyticsProps> = ({ flagKey, data }) => {
   return (
     <div className="flag-analytics">
       <h2>Analytics: {flagKey}</h2>
@@ -350,10 +335,7 @@ export const FlagAnalytics: React.FC<FlagAnalyticsProps> = ({
               <div key={variation} className="variation-stat">
                 <div className="variation-name">{variation}</div>
                 <div className="variation-bar">
-                  <div
-                    className="variation-fill"
-                    style={{ width: `${percentage}%` }}
-                  />
+                  <div className="variation-fill" style={{ width: `${percentage}%` }} />
                 </div>
                 <div className="variation-count">
                   {count.toLocaleString()} ({percentage.toFixed(1)}%)
@@ -392,7 +374,7 @@ export const FlagAnalytics: React.FC<FlagAnalyticsProps> = ({
 export const FlagDashboard: React.FC<{
   /** API endpoint */
   apiEndpoint?: string;
-}> = ({ apiEndpoint = '/api/admin/feature-flags' }) => {
+}> = ({ apiEndpoint = "/api/admin/feature-flags" }) => {
   const [flags, setFlags] = useState<FlagDefinition[]>([]);
   const [selectedFlag, setSelectedFlag] = useState<FlagDefinition | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -405,7 +387,7 @@ export const FlagDashboard: React.FC<{
         setIsLoading(true);
         const response = await fetch(apiEndpoint);
         if (!response.ok) {
-          throw new Error('Failed to fetch flags');
+          throw new Error("Failed to fetch flags");
         }
         const data = await response.json();
         setFlags(data.flags || data);
@@ -422,21 +404,17 @@ export const FlagDashboard: React.FC<{
   const handleToggle = async (flagKey: string, enabled: boolean) => {
     try {
       const response = await fetch(`${apiEndpoint}/${flagKey}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ enabled }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update flag');
+        throw new Error("Failed to update flag");
       }
 
       // Update local state
-      setFlags((prev) =>
-        prev.map((flag) =>
-          flag.key === flagKey ? { ...flag, enabled } : flag,
-        ),
-      );
+      setFlags((prev) => prev.map((flag) => (flag.key === flagKey ? { ...flag, enabled } : flag)));
     } catch (err) {
       alert(`Error updating flag: ${(err as Error).message}`);
     }

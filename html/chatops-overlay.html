@@ -25,21 +25,17 @@
   <body>
     <div id="dock">
       <div id="log"></div>
-      <div>
-        <input id="q" placeholder="ask: cost of PR#512?" /><button id="go">
-          Go
-        </button>
-      </div>
+      <div><input id="q" placeholder="ask: cost of PR#512?" /><button id="go">Go</button></div>
     </div>
     <script>
       $(function () {
         function say(t) {
-          $('#log').append('<div>' + t + '</div>');
-          $('#log').scrollTop(1e6);
+          $("#log").append("<div>" + t + "</div>");
+          $("#log").scrollTop(1e6);
         }
-        $('#go').on('click', function () {
-          var q = $('#q').val();
-          $.getJSON('/api/chatops', { q: q }, function (r) {
+        $("#go").on("click", function () {
+          var q = $("#q").val();
+          $.getJSON("/api/chatops", { q: q }, function (r) {
             say(r.answer);
           });
         });

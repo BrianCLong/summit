@@ -7,22 +7,22 @@ on:
   push:
     branches: [main]
     paths:
-      - 'server/**'
-      - 'client/**'
-      - 'charts/**'
-      - '.github/workflows/blue-green-deploy.yml'
+      - "server/**"
+      - "client/**"
+      - "charts/**"
+      - ".github/workflows/blue-green-deploy.yml"
   workflow_dispatch:
     inputs:
       target_environment:
-        description: 'Target environment for deployment'
+        description: "Target environment for deployment"
         required: true
-        default: 'staging'
+        default: "staging"
         type: choice
         options:
           - staging
           - production
       force_deployment:
-        description: 'Force deployment even if tests fail'
+        description: "Force deployment even if tests fail"
         required: false
         default: false
         type: boolean
@@ -52,8 +52,8 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: |
@@ -119,13 +119,13 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ needs.build-and-test.outputs.image-tag }}
-          format: 'sarif'
-          output: 'trivy-results.sarif'
+          format: "sarif"
+          output: "trivy-results.sarif"
 
       - name: Upload Trivy scan results
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: "trivy-results.sarif"
 
   # Deploy to staging (blue/green)
   deploy-staging:
@@ -143,7 +143,7 @@ jobs:
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
         with:
-          version: 'v1.28.0'
+          version: "v1.28.0"
 
       - name: Configure kubectl for staging
         run: |
@@ -209,8 +209,8 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Run chaos tests
         run: |
@@ -255,7 +255,7 @@ jobs:
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
         with:
-          version: 'v1.28.0'
+          version: "v1.28.0"
 
       - name: Configure kubectl for production
         run: |
@@ -317,7 +317,7 @@ jobs:
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
         with:
-          version: 'v1.28.0'
+          version: "v1.28.0"
 
       - name: Configure kubectl for production
         run: |

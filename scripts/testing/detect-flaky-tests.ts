@@ -1,8 +1,8 @@
-import { spawnSync } from 'child_process';
-import { existsSync } from 'fs';
-import { mkdir, readFile, writeFile } from 'fs/promises';
-import path from 'path';
-import { tmpdir } from 'os';
+import { spawnSync } from "child_process";
+import { existsSync } from "fs";
+import { mkdir, readFile, writeFile } from "fs/promises";
+import path from "path";
+import { tmpdir } from "os";
 
 interface CliOptions {
   iterations: number;
@@ -13,7 +13,7 @@ interface CliOptions {
 
 interface AssertionResult {
   fullName: string;
-  status: 'passed' | 'failed' | 'pending' | 'skipped' | string;
+  status: "passed" | "failed" | "pending" | "skipped" | string;
   ancestorTitles?: string[];
   title?: string;
 }
@@ -58,7 +58,7 @@ interface ReportPayload {
   topOffenders: AggregatedTestResult[];
 }
 
-const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\$&');
+const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\$&");
 
 const parseArgs = (): CliOptions => {
   const args = process.argv.slice(2);
@@ -66,16 +66,16 @@ const parseArgs = (): CliOptions => {
 
   for (let i = 0; i < args.length; i += 1) {
     const arg = args[i];
-    if (arg === '--iterations' && args[i + 1]) {
+    if (arg === "--iterations" && args[i + 1]) {
       options.iterations = Number(args[i + 1]);
       i += 1;
-    } else if (arg === '--command' && args[i + 1]) {
+    } else if (arg === "--command" && args[i + 1]) {
       options.command = args[i + 1];
       i += 1;
-    } else if (arg === '--pattern' && args[i + 1]) {
+    } else if (arg === "--pattern" && args[i + 1]) {
       options.pattern = args[i + 1];
       i += 1;
-    } else if (arg === '--outputDir' && args[i + 1]) {
+    } else if (arg === "--outputDir" && args[i + 1]) {
       options.outputDir = args[i + 1];
       i += 1;
     }
@@ -83,9 +83,9 @@ const parseArgs = (): CliOptions => {
 
   return {
     iterations: options.iterations && options.iterations > 0 ? options.iterations : 10,
-    command: options.command || 'pnpm exec jest',
+    command: options.command || "pnpm exec jest",
     pattern: options.pattern,
-    outputDir: options.outputDir || 'reports',
+    outputDir: options.outputDir || "reports",
   };
 };
 
@@ -94,7 +94,7 @@ const readJestOutput = async (outputFile: string): Promise<JestJsonOutput | null
     return null;
   }
 
-  const content = await readFile(outputFile, 'utf8');
+  const content = await readFile(outputFile, "utf8");
   try {
     return JSON.parse(content) as JestJsonOutput;
   } catch (error) {
@@ -120,9 +120,9 @@ const collectResults = (json: JestJsonOutput, summary: Map<string, AggregatedTes
       };
 
       current.iterations += 1;
-      if (assertion.status === 'passed') {
+      if (assertion.status === "passed") {
         current.passes += 1;
-      } else if (assertion.status === 'failed') {
+      } else if (assertion.status === "failed") {
         current.failures += 1;
       }
 
@@ -131,7 +131,10 @@ const collectResults = (json: JestJsonOutput, summary: Map<string, AggregatedTes
   });
 };
 
-const buildReport = (summary: Map<string, AggregatedTestResult>, metadata: ReportPayload['metadata']): ReportPayload => {
+const buildReport = (
+  summary: Map<string, AggregatedTestResult>,
+  metadata: ReportPayload["metadata"]
+): ReportPayload => {
   const tests: AggregatedTestResult[] = [];
   const flakyTests: AggregatedTestResult[] = [];
 
@@ -151,7 +154,9 @@ const buildReport = (summary: Map<string, AggregatedTestResult>, metadata: Repor
     }
   });
 
-  const topOffenders = [...flakyTests].sort((a, b) => b.failureRate - a.failureRate || b.failures - a.failures).slice(0, 10);
+  const topOffenders = [...flakyTests]
+    .sort((a, b) => b.failureRate - a.failureRate || b.failures - a.failures)
+    .slice(0, 10);
 
   return {
     metadata,
@@ -166,18 +171,20 @@ const main = async () => {
   const options = parseArgs();
   const startedAt = new Date().toISOString();
   const summary = new Map<string, AggregatedTestResult>();
-  const iterations: ReportPayload['iterations'] = [];
+  const iterations: ReportPayload["iterations"] = [];
 
   await mkdir(options.outputDir, { recursive: true });
 
   for (let i = 0; i < options.iterations; i += 1) {
     const outputFile = path.join(tmpdir(), `flaky-run-${Date.now()}-${i}.json`);
-    const patternFlag = options.pattern ? ` --testNamePattern="${escapeRegex(options.pattern)}"` : '';
+    const patternFlag = options.pattern
+      ? ` --testNamePattern="${escapeRegex(options.pattern)}"`
+      : "";
     const command = `${options.command} --json --outputFile="${outputFile}" --runInBand --testLocationInResults${patternFlag}`;
 
     console.log(`\n[flaky-scan] Iteration ${i + 1}/${options.iterations}`);
     const started = Date.now();
-    const result = spawnSync(command, { shell: true, stdio: 'inherit' });
+    const result = spawnSync(command, { shell: true, stdio: "inherit" });
     const durationMs = Date.now() - started;
     iterations.push({ index: i + 1, exitCode: result.status, durationMs, outputFile });
 
@@ -188,7 +195,7 @@ const main = async () => {
   }
 
   const finishedAt = new Date().toISOString();
-  const metadata: ReportPayload['metadata'] = {
+  const metadata: ReportPayload["metadata"] = {
     iterations: options.iterations,
     command: options.command,
     pattern: options.pattern,
@@ -200,14 +207,14 @@ const main = async () => {
   const report = buildReport(summary, metadata);
   report.iterations = iterations;
 
-  const timestamp = finishedAt.replace(/[:.]/g, '-');
+  const timestamp = finishedAt.replace(/[:.]/g, "-");
   const reportPath = path.join(options.outputDir, `flaky-tests-${timestamp}.json`);
   await writeFile(reportPath, JSON.stringify(report, null, 2));
 
   if (report.flakyTests.length === 0) {
     console.log(`No flaky tests detected across ${options.iterations} iterations.`);
   } else {
-    console.log('\nFlaky tests detected:');
+    console.log("\nFlaky tests detected:");
     report.topOffenders.forEach((test, index) => {
       const rate = (test.failureRate * 100).toFixed(1);
       console.log(`${index + 1}. ${test.name} (${test.file}) - failure rate ${rate}%`);
@@ -218,6 +225,6 @@ const main = async () => {
 };
 
 main().catch((error) => {
-  console.error('[flaky-scan] Failed to execute detection', error);
+  console.error("[flaky-scan] Failed to execute detection", error);
   process.exit(1);
 });

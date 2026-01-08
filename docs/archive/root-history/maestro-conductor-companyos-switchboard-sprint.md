@@ -1,6 +1,7 @@
 # Maestro Conductor – Alignment with CompanyOS & Switchboard
 
 ## High-level summary & 7th+ order implications
+
 - Conductor becomes a **policy-aware, graph-native orchestration engine**; all runs, approvals, and receipts map directly to the Company Graph, enabling lineage, entitlements, and auditable provenance across Switchboard.
 - Tenant, environment, and region scoping are enforced end-to-end (API, graph, storage, policy), eliminating cross-tenant leakage and unlocking hosted/white-label packaging.
 - OPA/ABAC gates every lifecycle action and emits policy-decision evidence; high-risk flows require Switchboard approvals with dual-control options, producing end-to-end provenance chains.
@@ -10,6 +11,7 @@
 - Forward-looking: design keeps graph and policy artifacts portable to future federated multi-region topology and adaptive policy simulation pipelines.
 
 ## Architecture overview
+
 - **Core services**: Conductor runtime (task runner), Company Graph ingestion/writer, Policy gateway (OPA/ABAC), Provenance ledger emitter, Metrics/metering exporters.
 - **Data model (graph)**: Entities `conductor.workflow`, `conductor.run`, `conductor.task`, `conductor.schedule`; edges to `tenant`, `user`, `system`, `resource`, `policy-decision`, `receipt`, with soft-delete/status edges for archival.
 - **Scoping**: All entities carry `tenant_id`, `environment`, `region`; API surface requires these in headers/context, and policy inputs mirror them.
@@ -20,33 +22,40 @@
 - **Packaging & delivery**: SBOM/SLSA attestations + cosign/signature gates; Helm values for internal/partner editions; Terraform wiring for VPC, secrets, logging; synthetic probe for prod-like health.
 
 ## Detailed implementation plan
+
 ### Workstream 1 — Conductor ↔ CompanyOS Graph Integration
+
 1. **Graph schema**: Add entity/edge specs for workflows/runs/tasks/schedules with attributes (tenant, environment, region, status, soft-delete markers, lineage refs). Auto-generate API types.
 2. **Ingestion pipeline**: On run create/update/delete, emit graph mutations with provenance receipts; include evidence link back to Conductor request and user.
 3. **Queries**: Prebuild graph queries for runs-by-tenant/time, workflows touching resource, initiator/approver for a run; add integration tests hitting the graph API.
 
 ### Workstream 2 — Policy & Approvals (OPA/ABAC)
+
 1. **Policy abstraction**: Central guard for lifecycle actions; denies on missing/deny; logs decision IDs and inputs.
 2. **Bundles**: Two profiles (internal, hosted SaaS) differentiated by risk sensitivity and environment/tenant constraints.
 3. **Simulation harness**: Scenario files to replay decisions offline; policy tests required for changes.
 4. **Approvals**: High-risk workflows generate pending approvals; Switchboard approval paths (including dual-control). Provenance connects approval decisions to runs.
 
 ### Workstream 3 — Switchboard Integration
+
 1. **Run viewer**: Tri-pane UI with list filters (status, workflow, date, environment, tenant), timeline of state changes, graph pane showing linked entities.
 2. **Command palette**: Actions to trigger policy-permitted workflows; indicates “Requires Approval” for high-risk; parameter form submission routes to run detail/approval.
 3. **Performance**: Target p95 <1.5s on agreed dataset; include caching or pagination as needed.
 
 ### Workstream 4 — Observability & FinOps
+
 1. **Metrics**: Export run latency (p50/p95), task failure rate, policy decision latency, queue depth.
 2. **Dashboards & SLOs**: Maestro overview, per-tenant volume; SLOs (start→complete, policy p99) with alerting on error-budget burn.
 3. **Metering**: Emit usage events with tenant/workflow/environment/resource hints; FinOps report for per-tenant usage.
 
 ### Workstream 5 — Security, Packaging, Runbooks
+
 1. **Supply chain**: SBOM + SLSA attestations; signed images; OPA gate in CI/CD to block unsigned artifacts; evidence recorded.
 2. **Deploy artifacts**: Helm values for internal vs. partner; Terraform module wiring for VPC/secrets/logging; single-command deployment paths.
 3. **Runbooks**: Release/deploy instructions and operational debugging snippets; DRY-run deployment evidence.
 
 ## Backlog (ticket-ready), with priorities
+
 - **P0**
   - Graph schema + API generation for Conductor entities and edges.
   - Policy gate for start/cancel/rerun/edit actions with provenance logging.
@@ -70,18 +79,21 @@
   - Policy bundle hardening for hosted SaaS (region pinning, env isolation) with regression tests.
 
 ## Testing, observability, and compliance approach
+
 - Unit + integration tests targeting ≥80% coverage on new paths; graph write/read tests for schema; cross-tenant leak-prevention tests.
 - Policy regression suite tied to bundle changes; simulation harness in CI.
 - Observability validation: synthetic probe + dashboard snapshots; alert dry-run for SLO burn.
 - Provenance receipts emitted for graph writes, policy decisions, approvals, deploy evidence.
 
 ## Risks & mitigations
+
 - **Cross-tenant leakage**: enforce scoping at API boundary and policy inputs; dedicated negative tests.
 - **Policy regressions**: simulation harness and required CI gate before bundle merge.
 - **Performance (run detail p95)**: caching/pagination and pre-fetched timelines; load-test dataset.
 - **Supply-chain gaps**: CI gate blocks unsigned images; attestations stored in evidence ledger.
 
 ## Forward-looking enhancements
+
 - Federated multi-region graph replication with policy-aware data residency.
 - Adaptive policy simulations fed by real provenance data to auto-tune defaults.
 - Proactive cost guardrails that throttle high-cost workflows per tenant.

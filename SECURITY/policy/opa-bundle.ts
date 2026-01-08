@@ -3,11 +3,11 @@
  * Sprint 27D: Secure policy distribution with cryptographic verification
  */
 
-import crypto from 'crypto';
-import fs from 'fs/promises';
-import path from 'path';
-import tar from 'tar';
-import { EventEmitter } from 'events';
+import crypto from "crypto";
+import fs from "fs/promises";
+import path from "path";
+import tar from "tar";
+import { EventEmitter } from "events";
 
 export interface PolicyBundle {
   name: string;
@@ -58,7 +58,7 @@ export interface BundleManifest {
 export interface SigningConfig {
   privateKey: string;
   publicKey: string;
-  algorithm: 'RS256' | 'ES256' | 'HS256';
+  algorithm: "RS256" | "ES256" | "HS256";
   keyId?: string;
 }
 
@@ -88,7 +88,7 @@ export class OPABundleManager extends EventEmitter {
     version: string,
     policies: Array<{ path: string; content: string }>,
     data: Array<{ path: string; content: any }> = [],
-    metadata: Partial<BundleManifest['metadata']> = {},
+    metadata: Partial<BundleManifest["metadata"]> = {}
   ): Promise<PolicyBundle> {
     // Validate policy syntax
     await this.validatePolicies(policies);
@@ -113,7 +113,7 @@ export class OPABundleManager extends EventEmitter {
       metadata: {
         name,
         description: metadata.description || `Policy bundle ${name}`,
-        author: metadata.author || 'system',
+        author: metadata.author || "system",
         created: new Date().toISOString(),
         ...metadata,
       },
@@ -145,7 +145,7 @@ export class OPABundleManager extends EventEmitter {
 
     this.bundles.set(`${name}:${version}`, bundle);
 
-    this.emit('bundle_created', {
+    this.emit("bundle_created", {
       name,
       version,
       policiesCount: policies.length,
@@ -160,18 +160,15 @@ export class OPABundleManager extends EventEmitter {
    * Package bundle as tar.gz file
    */
   async packageBundle(bundle: PolicyBundle, outputPath: string): Promise<void> {
-    const tempDir = path.join('/tmp', `bundle-${bundle.name}-${Date.now()}`);
+    const tempDir = path.join("/tmp", `bundle-${bundle.name}-${Date.now()}`);
 
     try {
       // Create temp directory structure
       await fs.mkdir(tempDir, { recursive: true });
 
       // Write manifest
-      const manifestPath = path.join(tempDir, '.manifest');
-      await fs.writeFile(
-        manifestPath,
-        JSON.stringify(bundle.manifest, null, 2),
-      );
+      const manifestPath = path.join(tempDir, ".manifest");
+      await fs.writeFile(manifestPath, JSON.stringify(bundle.manifest, null, 2));
 
       // Write policies
       for (const policy of bundle.policies) {
@@ -189,11 +186,11 @@ export class OPABundleManager extends EventEmitter {
 
       // Write signature if present
       if (bundle.signature) {
-        const signaturePath = path.join(tempDir, '.signatures.json');
+        const signaturePath = path.join(tempDir, ".signatures.json");
         const signatures = {
           signatures: [
             {
-              keyid: this.signingConfig?.keyId || 'default',
+              keyid: this.signingConfig?.keyId || "default",
               sig: bundle.signature,
             },
           ],
@@ -208,10 +205,10 @@ export class OPABundleManager extends EventEmitter {
           file: outputPath,
           cwd: tempDir,
         },
-        ['.'],
+        ["."]
       );
 
-      this.emit('bundle_packaged', {
+      this.emit("bundle_packaged", {
         name: bundle.name,
         version: bundle.version,
         outputPath,
@@ -227,7 +224,7 @@ export class OPABundleManager extends EventEmitter {
    * Verify and load bundle from file
    */
   async loadBundle(bundlePath: string): Promise<BundleVerificationResult> {
-    const tempDir = path.join('/tmp', `verify-${Date.now()}`);
+    const tempDir = path.join("/tmp", `verify-${Date.now()}`);
 
     try {
       // Extract bundle
@@ -237,15 +234,15 @@ export class OPABundleManager extends EventEmitter {
       });
 
       // Load manifest
-      const manifestPath = path.join(tempDir, '.manifest');
-      const manifestContent = await fs.readFile(manifestPath, 'utf-8');
+      const manifestPath = path.join(tempDir, ".manifest");
+      const manifestContent = await fs.readFile(manifestPath, "utf-8");
       const manifest: BundleManifest = JSON.parse(manifestContent);
 
       // Load policies
       const policies: PolicyFile[] = [];
       for (const policyInfo of manifest.policies) {
         const policyPath = path.join(tempDir, policyInfo.path);
-        const content = await fs.readFile(policyPath, 'utf-8');
+        const content = await fs.readFile(policyPath, "utf-8");
         const hash = this.calculateHash(content);
 
         policies.push({
@@ -259,7 +256,7 @@ export class OPABundleManager extends EventEmitter {
       const data: DataFile[] = [];
       for (const dataInfo of manifest.data) {
         const dataPath = path.join(tempDir, dataInfo.path);
-        const content = JSON.parse(await fs.readFile(dataPath, 'utf-8'));
+        const content = JSON.parse(await fs.readFile(dataPath, "utf-8"));
         const hash = this.calculateHash(JSON.stringify(content));
 
         data.push({
@@ -281,8 +278,8 @@ export class OPABundleManager extends EventEmitter {
       // Load and verify signature if present
       let signatureValid = true;
       try {
-        const signaturePath = path.join(tempDir, '.signatures.json');
-        const signatureContent = await fs.readFile(signaturePath, 'utf-8');
+        const signaturePath = path.join(tempDir, ".signatures.json");
+        const signatureContent = await fs.readFile(signaturePath, "utf-8");
         const signatures = JSON.parse(signatureContent);
 
         if (signatures.signatures && signatures.signatures.length > 0) {
@@ -311,13 +308,13 @@ export class OPABundleManager extends EventEmitter {
         policiesValid,
       };
 
-      if (!signatureValid) result.errors.push('Invalid or missing signature');
-      if (!manifestValid) result.errors.push('Manifest integrity check failed');
-      if (!policiesValid) result.errors.push('Policy validation failed');
+      if (!signatureValid) result.errors.push("Invalid or missing signature");
+      if (!manifestValid) result.errors.push("Manifest integrity check failed");
+      if (!policiesValid) result.errors.push("Policy validation failed");
 
       if (result.valid) {
         this.bundles.set(`${bundle.name}:${bundle.version}`, bundle);
-        this.emit('bundle_loaded', {
+        this.emit("bundle_loaded", {
           name: bundle.name,
           version: bundle.version,
           verified: true,
@@ -362,7 +359,7 @@ export class OPABundleManager extends EventEmitter {
     name: string,
     newVersion: string,
     policies?: Array<{ path: string; content: string }>,
-    data?: Array<{ path: string; content: any }>,
+    data?: Array<{ path: string; content: any }>
   ): Promise<PolicyBundle> {
     // Find latest version of the bundle
     const existingBundles = Array.from(this.bundles.values())
@@ -394,21 +391,21 @@ export class OPABundleManager extends EventEmitter {
       newVersion,
       updatedPolicies,
       updatedData,
-      latestBundle.manifest.metadata,
+      latestBundle.manifest.metadata
     );
   }
 
   private async validatePolicies(
-    policies: Array<{ path: string; content: string }>,
+    policies: Array<{ path: string; content: string }>
   ): Promise<void> {
     for (const policy of policies) {
       // Basic Rego syntax validation
-      if (!policy.content.includes('package ')) {
+      if (!policy.content.includes("package ")) {
         throw new Error(`Policy ${policy.path} missing package declaration`);
       }
 
       // Additional syntax checks could be added here
-      if (policy.content.includes('undefined_rule')) {
+      if (policy.content.includes("undefined_rule")) {
         throw new Error(`Policy ${policy.path} contains undefined rule`);
       }
     }
@@ -459,7 +456,7 @@ export class OPABundleManager extends EventEmitter {
 
   private async signBundle(bundle: PolicyBundle): Promise<string> {
     if (!this.signingConfig) {
-      throw new Error('No signing configuration provided');
+      throw new Error("No signing configuration provided");
     }
 
     // Create canonical representation for signing
@@ -467,26 +464,24 @@ export class OPABundleManager extends EventEmitter {
     const data = JSON.stringify(canonical);
 
     switch (this.signingConfig.algorithm) {
-      case 'RS256':
+      case "RS256":
         return crypto
-          .sign('sha256', Buffer.from(data), this.signingConfig.privateKey)
-          .toString('base64');
+          .sign("sha256", Buffer.from(data), this.signingConfig.privateKey)
+          .toString("base64");
 
-      case 'ES256':
+      case "ES256":
         return crypto
-          .sign('sha256', Buffer.from(data), this.signingConfig.privateKey)
-          .toString('base64');
+          .sign("sha256", Buffer.from(data), this.signingConfig.privateKey)
+          .toString("base64");
 
-      case 'HS256':
+      case "HS256":
         return crypto
-          .createHmac('sha256', this.signingConfig.privateKey)
+          .createHmac("sha256", this.signingConfig.privateKey)
           .update(data)
-          .digest('base64');
+          .digest("base64");
 
       default:
-        throw new Error(
-          `Unsupported signing algorithm: ${this.signingConfig.algorithm}`,
-        );
+        throw new Error(`Unsupported signing algorithm: ${this.signingConfig.algorithm}`);
     }
   }
 
@@ -498,23 +493,23 @@ export class OPABundleManager extends EventEmitter {
     try {
       const canonical = this.createCanonicalBundle(bundle);
       const data = JSON.stringify(canonical);
-      const signature = Buffer.from(bundle.signature, 'base64');
+      const signature = Buffer.from(bundle.signature, "base64");
 
       switch (this.signingConfig.algorithm) {
-        case 'RS256':
-        case 'ES256':
+        case "RS256":
+        case "ES256":
           return crypto.verify(
-            'sha256',
+            "sha256",
             Buffer.from(data),
             this.signingConfig.publicKey,
-            signature,
+            signature
           );
 
-        case 'HS256':
+        case "HS256":
           const expectedSignature = crypto
-            .createHmac('sha256', this.signingConfig.privateKey)
+            .createHmac("sha256", this.signingConfig.privateKey)
             .update(data)
-            .digest('base64');
+            .digest("base64");
           return bundle.signature === expectedSignature;
 
         default:
@@ -532,9 +527,7 @@ export class OPABundleManager extends EventEmitter {
       version: bundle.version,
       manifest: {
         ...bundle.manifest,
-        policies: bundle.manifest.policies.sort((a, b) =>
-          a.path.localeCompare(b.path),
-        ),
+        policies: bundle.manifest.policies.sort((a, b) => a.path.localeCompare(b.path)),
         data: bundle.manifest.data.sort((a, b) => a.path.localeCompare(b.path)),
       },
       policies: bundle.policies
@@ -547,14 +540,13 @@ export class OPABundleManager extends EventEmitter {
   }
 
   private calculateHash(content: string): string {
-    return crypto.createHash('sha256').update(content).digest('hex');
+    return crypto.createHash("sha256").update(content).digest("hex");
   }
 
   private isEntrypoint(policyPath: string): boolean {
     // Consider main.rego or policies in root as entrypoints
     return (
-      policyPath === 'main.rego' ||
-      (!policyPath.includes('/') && policyPath.endsWith('.rego'))
+      policyPath === "main.rego" || (!policyPath.includes("/") && policyPath.endsWith(".rego"))
     );
   }
 
@@ -563,12 +555,10 @@ export class OPABundleManager extends EventEmitter {
 
     for (const policy of policies) {
       // Extract package name from policy content
-      const packageMatch = policy.content.match(
-        /package\s+([a-zA-Z_][a-zA-Z0-9_.]*)/,
-      );
+      const packageMatch = policy.content.match(/package\s+([a-zA-Z_][a-zA-Z0-9_.]*)/);
       if (packageMatch) {
         const packageName = packageMatch[1];
-        const rootPart = packageName.split('.')[0];
+        const rootPart = packageName.split(".")[0];
         roots.add(rootPart);
       }
     }
@@ -579,7 +569,7 @@ export class OPABundleManager extends EventEmitter {
 
 // Default ABAC policies for tenant isolation
 export const DEFAULT_ABAC_POLICIES = {
-  'authz/main.rego': `
+  "authz/main.rego": `
 package authz
 
 import future.keywords.if
@@ -625,7 +615,7 @@ audit_log := {
 }
 `,
 
-  'tenant/isolation.rego': `
+  "tenant/isolation.rego": `
 package tenant.isolation
 
 import future.keywords.if
@@ -651,7 +641,7 @@ tenant_isolated := true if {
 }
 `,
 
-  'data/permissions.rego': `
+  "data/permissions.rego": `
 package data.permissions
 
 # Permission definitions

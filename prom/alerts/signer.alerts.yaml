@@ -10,7 +10,7 @@ groups:
           service: signer-service
           slo: attestation-success
         annotations:
-          summary: 'Signer attestation failure rate above 1%'
+          summary: "Signer attestation failure rate above 1%"
           description: |
             Failure rate is {{ $value | printf "%.2f" }} over the last 10m. Check signer pods,
             JWKS propagation, and upstream digest producers.
@@ -25,7 +25,7 @@ groups:
           service: signer-service
           slo: key-rotation
         annotations:
-          summary: 'Signer active key expires in less than 24h'
+          summary: "Signer active key expires in less than 24h"
           description: |
             Active signer key TTL is {{ $value | printf "%.0f" }} seconds. Prepare rotation and
             ensure downstream verifiers have the new JWKS.

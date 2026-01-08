@@ -22,21 +22,18 @@ export class SearchClient {
 
   async query(req: QueryRequest): Promise<QueryResponse> {
     const res = await fetch(`${this.baseUrl}/search/query`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(req),
     });
     if (!res.ok) throw new Error(`query failed: ${res.status}`);
     return res.json();
   }
 
-  async index(
-    label: string,
-    action: 'start' | 'stop',
-  ): Promise<Record<string, string>> {
+  async index(label: string, action: "start" | "stop"): Promise<Record<string, string>> {
     const res = await fetch(`${this.baseUrl}/search/index`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ label, action }),
     });
     if (!res.ok) throw new Error(`index control failed: ${res.status}`);

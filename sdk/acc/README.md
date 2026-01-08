@@ -12,17 +12,17 @@ pnpm add @intelgraph/acc-sdk
 ## Usage
 
 ```ts
-import { ACCClient, withPolicyTags } from '@intelgraph/acc-sdk';
+import { ACCClient, withPolicyTags } from "@intelgraph/acc-sdk";
 
-const client = new ACCClient({ baseUrl: 'http://localhost:8088' });
+const client = new ACCClient({ baseUrl: "http://localhost:8088" });
 
 const plan = await client.plan({
-  id: 'session-read',
-  operation: 'read',
-  session: 'sess-1',
-  dataClass: 'behavioral',
-  purpose: 'personalization',
-  jurisdiction: 'us'
+  id: "session-read",
+  operation: "read",
+  session: "sess-1",
+  dataClass: "behavioral",
+  purpose: "personalization",
+  jurisdiction: "us",
 });
 
 console.log(plan.mode, plan.route.quorum);

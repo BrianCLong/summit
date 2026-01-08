@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+import crypto from "node:crypto";
 
 export class ParityEngine {
   computeParity(entity, legacy, target, invariants, sampleSize = 5) {
@@ -34,8 +34,8 @@ export class ParityEngine {
   }
 
   hashRecords(records) {
-    const hash = crypto.createHash('sha256');
+    const hash = crypto.createHash("sha256");
     hash.update(JSON.stringify(records.sort((a, b) => a.id.localeCompare(b.id))));
-    return hash.digest('hex');
+    return hash.digest("hex");
   }
 }

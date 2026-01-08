@@ -2,8 +2,8 @@
  * Event correlation utilities
  */
 
-import { ThreatEvent } from '../types/events';
-import { createHash } from 'crypto';
+import { ThreatEvent } from "../types/events";
+import { createHash } from "crypto";
 
 /**
  * Generate correlation ID based on event characteristics
@@ -11,13 +11,13 @@ import { createHash } from 'crypto';
 export function generateCorrelationId(event: ThreatEvent): string {
   const correlationKey = [
     event.category,
-    event.sourceIp || '',
-    event.userId || '',
-    event.entityId || '',
-    Math.floor(event.timestamp.getTime() / (5 * 60 * 1000)) // 5-minute windows
-  ].join('|');
+    event.sourceIp || "",
+    event.userId || "",
+    event.entityId || "",
+    Math.floor(event.timestamp.getTime() / (5 * 60 * 1000)), // 5-minute windows
+  ].join("|");
 
-  return createHash('sha256').update(correlationKey).digest('hex').substring(0, 16);
+  return createHash("sha256").update(correlationKey).digest("hex").substring(0, 16);
 }
 
 /**
@@ -67,14 +67,14 @@ export function calculateEventSimilarity(event1: ThreatEvent, event2: ThreatEven
   const timeDiff = Math.abs(event1.timestamp.getTime() - event2.timestamp.getTime());
   const oneHour = 3600000;
   if (timeDiff < oneHour) {
-    similarityScore += 1 - (timeDiff / oneHour);
+    similarityScore += 1 - timeDiff / oneHour;
   }
   factors++;
 
   // Indicator overlap
   const indicators1 = new Set(event1.indicators);
   const indicators2 = new Set(event2.indicators);
-  const intersection = new Set([...indicators1].filter(x => indicators2.has(x)));
+  const intersection = new Set([...indicators1].filter((x) => indicators2.has(x)));
   const union = new Set([...indicators1, ...indicators2]);
 
   if (union.size > 0) {
@@ -86,7 +86,7 @@ export function calculateEventSimilarity(event1: ThreatEvent, event2: ThreatEven
   if (event1.mitreAttackTechniques && event2.mitreAttackTechniques) {
     const techniques1 = new Set(event1.mitreAttackTechniques);
     const techniques2 = new Set(event2.mitreAttackTechniques);
-    const techniqueIntersection = new Set([...techniques1].filter(x => techniques2.has(x)));
+    const techniqueIntersection = new Set([...techniques1].filter((x) => techniques2.has(x)));
     const techniqueUnion = new Set([...techniques1, ...techniques2]);
 
     if (techniqueUnion.size > 0) {
@@ -152,9 +152,7 @@ export function detectEventSequence(
     return { matched: false, matchedEvents: [], confidence: 0 };
   }
 
-  const sortedEvents = [...events].sort((a, b) =>
-    a.timestamp.getTime() - b.timestamp.getTime()
-  );
+  const sortedEvents = [...events].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
 
   const matchedEvents: ThreatEvent[] = [];
   let stageIndex = 0;
@@ -170,7 +168,7 @@ export function detectEventSequence(
     }
 
     if (stage.techniques && event.mitreAttackTechniques) {
-      const hasMatchingTechnique = stage.techniques.some(t =>
+      const hasMatchingTechnique = stage.techniques.some((t) =>
         event.mitreAttackTechniques!.includes(t)
       );
       if (!hasMatchingTechnique) {
@@ -210,13 +208,13 @@ export function generateAlertFingerprint(event: ThreatEvent): string {
   const fingerprintKey = [
     event.category,
     event.severity,
-    event.sourceIp || 'none',
-    event.userId || 'none',
+    event.sourceIp || "none",
+    event.userId || "none",
     event.description.substring(0, 100), // First 100 chars
-    event.indicators.sort().join(',')
-  ].join('|');
+    event.indicators.sort().join(","),
+  ].join("|");
 
-  return createHash('sha256').update(fingerprintKey).digest('hex');
+  return createHash("sha256").update(fingerprintKey).digest("hex");
 }
 
 /**
@@ -250,7 +248,7 @@ export function detectTemporalPattern(
   }
 
   const sortedEvents = [...events]
-    .filter(e => !options.category || e.category === options.category)
+    .filter((e) => !options.category || e.category === options.category)
     .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
 
   let windowStart = sortedEvents[0].timestamp.getTime();
@@ -269,7 +267,7 @@ export function detectTemporalPattern(
           start: new Date(windowStart),
           end: new Date(windowEnd),
           events: [...windowEvents],
-          frequency: windowEvents.length / (options.windowSize / 1000) // events per second
+          frequency: windowEvents.length / (options.windowSize / 1000), // events per second
         });
       }
 
@@ -286,13 +284,13 @@ export function detectTemporalPattern(
       start: new Date(windowStart),
       end: new Date(windowEnd),
       events: windowEvents,
-      frequency: windowEvents.length / (options.windowSize / 1000)
+      frequency: windowEvents.length / (options.windowSize / 1000),
     });
   }
 
   return {
     detected: windows.length > 0,
-    windows
+    windows,
   };
 }
 
@@ -303,7 +301,7 @@ export function detectSpatialPattern(
   events: ThreatEvent[],
   options: {
     minAffectedEntities: number;
-    entityField: 'userId' | 'sourceIp' | 'entityId';
+    entityField: "userId" | "sourceIp" | "entityId";
   }
 ): {
   detected: boolean;
@@ -328,6 +326,6 @@ export function detectSpatialPattern(
   return {
     detected,
     affectedEntities,
-    eventsByEntity
+    eventsByEntity,
   };
 }

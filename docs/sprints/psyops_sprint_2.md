@@ -110,7 +110,7 @@ paths:
           name: timeEnd
           schema: { type: string, format: date-time }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -119,12 +119,12 @@ paths:
                 properties:
                   items:
                     type: array
-                    items: { $ref: '#/components/schemas/Narrative' }
+                    items: { $ref: "#/components/schemas/Narrative" }
   /graph/delta:
     get:
       summary: Streamable graph deltas for the tri‑pane
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
 components:
   schemas:
     Narrative:
@@ -136,10 +136,9 @@ components:
         tags: { type: array, items: { type: string } }
         deceptionScore: { type: number, minimum: 0, maximum: 1 }
         uncertainty: { type: number, minimum: 0, maximum: 1 }
-        rationale:
-          { type: array, items: { $ref: '#/components/schemas/Rationale' } }
+        rationale: { type: array, items: { $ref: "#/components/schemas/Rationale" } }
         traceId: { type: string }
-        provenance: { $ref: '#/components/schemas/Prov' }
+        provenance: { $ref: "#/components/schemas/Prov" }
     Rationale:
       type: object
       properties:
@@ -158,12 +157,12 @@ components:
 
 ```ts
 // apps/server/src/main.ts
-import express from 'express';
-import { WebSocketServer } from 'ws';
-import cors from 'cors';
-import rateLimit from 'express-rate-limit';
-import { z } from 'zod';
-import crypto from 'crypto';
+import express from "express";
+import { WebSocketServer } from "ws";
+import cors from "cors";
+import rateLimit from "express-rate-limit";
+import { z } from "zod";
+import crypto from "crypto";
 
 const app = express();
 app.use(express.json());
@@ -195,17 +194,17 @@ const Narrative = z.object({
 type NarrativeT = z.infer<typeof Narrative>;
 
 // --- Read‑only API ---
-app.get('/narratives', (_req, res) => {
+app.get("/narratives", (_req, res) => {
   const items: NarrativeT[] = sampleNarratives();
   res.json({ items });
 });
 
 // --- WebSocket (signed events) ---
 const wss = new WebSocketServer({ noServer: true });
-const PRIV = crypto.generateKeyPairSync('ed25519').privateKey; // replace with HSM in prod
+const PRIV = crypto.generateKeyPairSync("ed25519").privateKey; // replace with HSM in prod
 
 function sign(payload: string) {
-  const sig = crypto.sign(null, Buffer.from(payload), PRIV).toString('base64');
+  const sig = crypto.sign(null, Buffer.from(payload), PRIV).toString("base64");
   return sig;
 }
 
@@ -214,36 +213,34 @@ function makeEvent(topic: string, body: any) {
   return { payload, sig: sign(payload) };
 }
 
-wss.on('connection', (ws) => {
+wss.on("connection", (ws) => {
   const timer = setInterval(() => {
-    const ev = makeEvent('narrative.delta', sampleNarratives()[0]);
+    const ev = makeEvent("narrative.delta", sampleNarratives()[0]);
     ws.send(JSON.stringify(ev));
   }, 1500);
-  ws.on('close', () => clearInterval(timer));
+  ws.on("close", () => clearInterval(timer));
 });
 
 const server = app.listen(8080);
-server.on('upgrade', (req, socket, head) => {
-  if (req.url !== '/psyops/events') return socket.destroy();
-  wss.handleUpgrade(req, socket, head, (ws) => wss.emit('connection', ws, req));
+server.on("upgrade", (req, socket, head) => {
+  if (req.url !== "/psyops/events") return socket.destroy();
+  wss.handleUpgrade(req, socket, head, (ws) => wss.emit("connection", ws, req));
 });
 
 function sampleNarratives(): NarrativeT[] {
   return [
     {
-      id: 'n1',
-      title: 'Narrative: supply‑chain hoax',
-      tags: ['coordination', 'burst'],
+      id: "n1",
+      title: "Narrative: supply‑chain hoax",
+      tags: ["coordination", "burst"],
       deceptionScore: 0.78,
       uncertainty: 0.22,
-      rationale: [
-        { feature: 'cadenceEntropy', weight: 0.42, snippet: '23 posts in 3m' },
-      ],
-      traceId: 'tr_01H...',
+      rationale: [{ feature: "cadenceEntropy", weight: 0.42, snippet: "23 posts in 3m" }],
+      traceId: "tr_01H...",
       provenance: {
-        source: 'https://example.org/post/123',
-        license: 'CC‑BY',
-        chain: ['fetch', 'dedupe', 'score'],
+        source: "https://example.org/post/123",
+        license: "CC‑BY",
+        chain: ["fetch", "dedupe", "score"],
       },
     },
   ];
@@ -254,7 +251,7 @@ function sampleNarratives(): NarrativeT[] {
 
 ```tsx
 // apps/web/src/features/psyops/usePsyOpsEvents.ts
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
 export type EventEnvelope<T> = { payload: string; sig: string };
 export type Narrative = {
@@ -270,15 +267,14 @@ export function usePsyOpsEvents() {
   const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    const ws = new WebSocket('wss://api.intelgraph.local/psyops/events');
+    const ws = new WebSocket("wss://api.intelgraph.local/psyops/events");
     wsRef.current = ws;
     ws.onmessage = (msg) => {
       const env: EventEnvelope<any> = JSON.parse(msg.data as string);
       const ev = JSON.parse(env.payload);
-      if (ev.topic === 'narrative.delta')
-        setItems((prev) => [ev.body, ...prev].slice(0, 50));
+      if (ev.topic === "narrative.delta") setItems((prev) => [ev.body, ...prev].slice(0, 50));
     };
-    ws.onerror = () => console.warn('WS error');
+    ws.onerror = () => console.warn("WS error");
     return () => ws.close();
   }, []);
 

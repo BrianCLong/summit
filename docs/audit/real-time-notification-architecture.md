@@ -56,6 +56,7 @@ This document describes the real-time notification system that extends the exist
 **Location**: `services/notification-router/`
 
 **Responsibilities**:
+
 - Listen to audit event stream (PostgreSQL LISTEN/NOTIFY or Kafka)
 - Evaluate event severity and classification
 - Match events against user notification preferences
@@ -64,6 +65,7 @@ This document describes the real-time notification system that extends the exist
 - Log all notification delivery attempts
 
 **Key Features**:
+
 - Event-driven architecture using PostgreSQL NOTIFY or Kafka
 - In-memory preference cache (Redis)
 - Circuit breaker for external services
@@ -75,6 +77,7 @@ This document describes the real-time notification system that extends the exist
 **Location**: `services/notification-preferences/`
 
 **Responsibilities**:
+
 - Store user notification preferences
 - Provide preference lookup API
 - Handle preference inheritance (role-based defaults)
@@ -84,24 +87,28 @@ This document describes the real-time notification system that extends the exist
 #### 3. Channel Delivery Services
 
 **WebSocket Service**
+
 - Real-time push to connected web clients
 - Persistent connection management
 - Reconnection handling
 - Message queuing for offline clients
 
 **Email Service**
+
 - SMTP integration (AWS SES, SendGrid, etc.)
 - HTML template rendering
 - Digest emails for batched notifications
 - Bounce and complaint handling
 
 **Slack Service**
+
 - Slack Incoming Webhooks or Bot API
 - Channel routing based on severity
 - Interactive message buttons (acknowledge, investigate)
 - Thread grouping for related events
 
 **Webhook Service**
+
 - HTTP POST to user-configured endpoints
 - Signature verification (HMAC)
 - Retry with exponential backoff
@@ -244,7 +251,7 @@ function calculateNotificationSeverity(event: AuditEvent): NotificationSeverity 
     info: 1,
     warn: 2,
     error: 3,
-    critical: 4
+    critical: 4,
   };
   score += severityScores[event.level] || 0;
 
@@ -255,22 +262,22 @@ function calculateNotificationSeverity(event: AuditEvent): NotificationSeverity 
 
   // Security-sensitive event types
   const highRiskEvents = [
-    'access_denied',
-    'permission_revoked',
-    'data_breach',
-    'data_deletion',
-    'security_alert',
-    'anomaly_detected',
-    'brute_force_detected',
-    'suspicious_activity',
-    'policy_violation'
+    "access_denied",
+    "permission_revoked",
+    "data_breach",
+    "data_deletion",
+    "security_alert",
+    "anomaly_detected",
+    "brute_force_detected",
+    "suspicious_activity",
+    "policy_violation",
   ];
   if (highRiskEvents.includes(event.event_type)) {
     score += 2;
   }
 
   // Failed operations
-  if (event.outcome === 'failure') {
+  if (event.outcome === "failure") {
     score += 1;
   }
 
@@ -280,11 +287,11 @@ function calculateNotificationSeverity(event: AuditEvent): NotificationSeverity 
   }
 
   // Convert score to severity
-  if (score >= 6) return 'emergency';
-  if (score >= 4) return 'critical';
-  if (score >= 3) return 'high';
-  if (score >= 2) return 'medium';
-  return 'low';
+  if (score >= 6) return "emergency";
+  if (score >= 4) return "critical";
+  if (score >= 3) return "high";
+  if (score >= 2) return "medium";
+  return "low";
 }
 ```
 
@@ -292,43 +299,43 @@ function calculateNotificationSeverity(event: AuditEvent): NotificationSeverity 
 
 ```typescript
 type NotificationSeverity =
-  | 'low'       // Informational, digest-only
-  | 'medium'    // Important, throttled delivery
-  | 'high'      // Urgent, immediate delivery
-  | 'critical'  // Critical, all channels + escalation
-  | 'emergency'; // Emergency, bypass quiet hours + SMS
+  | "low" // Informational, digest-only
+  | "medium" // Important, throttled delivery
+  | "high" // Urgent, immediate delivery
+  | "critical" // Critical, all channels + escalation
+  | "emergency"; // Emergency, bypass quiet hours + SMS
 
 // Routing rules
 const severityRouting: Record<NotificationSeverity, ChannelStrategy> = {
   low: {
-    channels: ['websocket'],
-    throttle: '15min',
-    batchable: true
+    channels: ["websocket"],
+    throttle: "15min",
+    batchable: true,
   },
   medium: {
-    channels: ['websocket', 'email'],
-    throttle: '5min',
-    batchable: true
+    channels: ["websocket", "email"],
+    throttle: "5min",
+    batchable: true,
   },
   high: {
-    channels: ['websocket', 'email', 'slack'],
-    throttle: '1min',
-    batchable: false
+    channels: ["websocket", "email", "slack"],
+    throttle: "1min",
+    batchable: false,
   },
   critical: {
-    channels: ['websocket', 'email', 'slack', 'webhook'],
-    throttle: 'none',
+    channels: ["websocket", "email", "slack", "webhook"],
+    throttle: "none",
     batchable: false,
-    escalation: true
+    escalation: true,
   },
   emergency: {
-    channels: ['websocket', 'email', 'slack', 'webhook', 'sms'],
-    throttle: 'none',
+    channels: ["websocket", "email", "slack", "webhook", "sms"],
+    throttle: "none",
     batchable: false,
     bypassQuietHours: true,
     escalation: true,
-    autoAcknowledgeRequired: true
-  }
+    autoAcknowledgeRequired: true,
+  },
 };
 ```
 
@@ -341,12 +348,12 @@ const severityRouting: Record<NotificationSeverity, ChannelStrategy> = {
 const event = await this.storage.insert(auditEvent);
 
 // Emit event for notification processing
-await this.notificationBus.publish('audit.event.created', {
+await this.notificationBus.publish("audit.event.created", {
   eventId: event.id,
   eventType: event.event_type,
   severity: event.level,
   tenantId: event.tenant_id,
-  timestamp: event.timestamp
+  timestamp: event.timestamp,
 });
 ```
 
@@ -354,14 +361,14 @@ await this.notificationBus.publish('audit.event.created', {
 
 ```typescript
 // In NotificationRouterService
-this.notificationBus.subscribe('audit.event.created', async (message) => {
+this.notificationBus.subscribe("audit.event.created", async (message) => {
   const event = await this.auditService.getEvent(message.eventId);
 
   // Calculate notification severity
   const severity = this.calculateSeverity(event);
 
   // Skip low-severity events unless explicitly subscribed
-  if (severity === 'low' && !this.hasExplicitSubscribers(event)) {
+  if (severity === "low" && !this.hasExplicitSubscribers(event)) {
     return;
   }
 
@@ -374,7 +381,7 @@ this.notificationBus.subscribe('audit.event.created', async (message) => {
       event,
       severity,
       recipient,
-      channels: this.selectChannels(severity, recipient.preferences)
+      channels: this.selectChannels(severity, recipient.preferences),
     });
   }
 });
@@ -452,7 +459,7 @@ class NotificationThrottler {
 
   async shouldDeliver(notification: Notification): Promise<boolean> {
     // Critical events always deliver
-    if (notification.severity === 'critical' || notification.severity === 'emergency') {
+    if (notification.severity === "critical" || notification.severity === "emergency") {
       return true;
     }
 
@@ -480,7 +487,7 @@ class NotificationThrottler {
     if (isDuplicate) {
       return false;
     }
-    await this.redis.setex(dedupKey, 300, '1'); // 5 minute dedup window
+    await this.redis.setex(dedupKey, 300, "1"); // 5 minute dedup window
 
     return true;
   }
@@ -496,9 +503,8 @@ extend type Mutation {
   """
   Update notification preferences for the current user
   """
-  updateNotificationPreferences(
-    input: NotificationPreferencesInput!
-  ): NotificationPreferences! @auth
+  updateNotificationPreferences(input: NotificationPreferencesInput!): NotificationPreferences!
+    @auth
 
   """
   Mark notification as read
@@ -513,11 +519,8 @@ extend type Mutation {
   """
   Test notification delivery (admin only)
   """
-  testNotification(
-    userId: ID!
-    channel: NotificationChannel!
-    message: String!
-  ): Boolean! @auth(requires: ADMIN)
+  testNotification(userId: ID!, channel: NotificationChannel!, message: String!): Boolean!
+    @auth(requires: ADMIN)
 }
 
 input NotificationPreferencesInput {
@@ -653,8 +656,8 @@ extend type Subscription {
 
 ```tsx
 // web/src/components/NotificationBell.tsx
-import { Badge, IconButton, Popover } from '@mui/material';
-import { NotificationsOutlined } from '@mui/icons-material';
+import { Badge, IconButton, Popover } from "@mui/material";
+import { NotificationsOutlined } from "@mui/icons-material";
 
 export function NotificationBell() {
   const { data } = useQuery(UNREAD_NOTIFICATION_COUNT);
@@ -676,17 +679,13 @@ export function NotificationBell() {
 // web/src/components/NotificationPopover.tsx
 export function NotificationPopover() {
   const { data } = useQuery(NOTIFICATION_HISTORY, {
-    variables: { first: 20 }
+    variables: { first: 20 },
   });
 
   return (
     <List>
       {data?.notificationHistory?.edges.map(({ node }) => (
-        <NotificationItem
-          key={node.id}
-          notification={node}
-          onRead={handleMarkRead}
-        />
+        <NotificationItem key={node.id} notification={node} onRead={handleMarkRead} />
       ))}
     </List>
   );
@@ -705,40 +704,21 @@ export function NotificationPreferencesPage() {
     <Card>
       <CardContent>
         <FormGroup>
-          <FormControlLabel
-            control={<Switch />}
-            label="WebSocket Notifications"
-          />
-          <FormControlLabel
-            control={<Switch />}
-            label="Email Notifications"
-          />
-          <FormControlLabel
-            control={<Switch />}
-            label="Slack Notifications"
-          />
+          <FormControlLabel control={<Switch />} label="WebSocket Notifications" />
+          <FormControlLabel control={<Switch />} label="Email Notifications" />
+          <FormControlLabel control={<Switch />} label="Slack Notifications" />
         </FormGroup>
 
-        <TextField
-          select
-          label="Severity Threshold"
-          value={preferences.severityThreshold}
-        >
+        <TextField select label="Severity Threshold" value={preferences.severityThreshold}>
           <MenuItem value="info">Info and above</MenuItem>
           <MenuItem value="warn">Warning and above</MenuItem>
           <MenuItem value="error">Error and above</MenuItem>
           <MenuItem value="critical">Critical only</MenuItem>
         </TextField>
 
-        <TextField
-          label="Email Address"
-          value={preferences.emailAddress}
-        />
+        <TextField label="Email Address" value={preferences.emailAddress} />
 
-        <TextField
-          label="Slack Webhook URL"
-          value={preferences.slackWebhookUrl}
-        />
+        <TextField label="Slack Webhook URL" value={preferences.slackWebhookUrl} />
 
         <Button onClick={handleSave}>Save Preferences</Button>
       </CardContent>
@@ -770,11 +750,11 @@ export function NotificationPreferencesPage() {
 
 ```typescript
 // Prometheus metrics
-notificationRouter.counter('notifications_sent_total', { channel, severity });
-notificationRouter.counter('notifications_failed_total', { channel, error });
-notificationRouter.histogram('notification_delivery_duration_seconds', { channel });
-notificationRouter.gauge('websocket_connections_active', { });
-notificationRouter.counter('notifications_throttled_total', { reason });
+notificationRouter.counter("notifications_sent_total", { channel, severity });
+notificationRouter.counter("notifications_failed_total", { channel, error });
+notificationRouter.histogram("notification_delivery_duration_seconds", { channel });
+notificationRouter.gauge("websocket_connections_active", {});
+notificationRouter.counter("notifications_throttled_total", { reason });
 ```
 
 ### Health Checks
@@ -800,7 +780,7 @@ services:
     depends_on:
       - postgres
       - redis
-      - kafka  # or use postgres NOTIFY
+      - kafka # or use postgres NOTIFY
     environment:
       - SMTP_HOST
       - SMTP_PORT
@@ -819,30 +799,35 @@ services:
 ## Migration Plan
 
 ### Phase 1: Infrastructure (Week 1)
+
 - [ ] Create database schema
 - [ ] Implement notification router service
 - [ ] Set up Redis caching
 - [ ] Add WebSocket delivery
 
 ### Phase 2: Channels (Week 2)
+
 - [ ] Implement email service
 - [ ] Implement Slack service
 - [ ] Add webhook delivery
 - [ ] Create notification templates
 
 ### Phase 3: User Preferences (Week 3)
+
 - [ ] Implement preferences API
 - [ ] Add GraphQL mutations/queries
 - [ ] Build preferences UI
 - [ ] Add notification bell component
 
 ### Phase 4: Advanced Features (Week 4)
+
 - [ ] Implement throttling and batching
 - [ ] Add digest emails
 - [ ] Implement quiet hours
 - [ ] Add escalation rules
 
 ### Phase 5: Testing & Rollout
+
 - [ ] Integration tests
 - [ ] Load testing
 - [ ] Beta rollout (10% of users)

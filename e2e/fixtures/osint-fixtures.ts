@@ -1,4 +1,4 @@
-import { test as base, expect } from '@playwright/test';
+import { test as base, expect } from "@playwright/test";
 
 // Define custom types if needed
 type OsintFixtures = {
@@ -10,22 +10,22 @@ type OsintFixtures = {
 export const test = base.extend<OsintFixtures>({
   mockWikipedia: async ({ page }, use) => {
     await use(async () => {
-      await page.route('https://en.wikipedia.org/w/api.php*', async (route) => {
+      await page.route("https://en.wikipedia.org/w/api.php*", async (route) => {
         const url = new URL(route.request().url());
-        const title = url.searchParams.get('titles');
+        const title = url.searchParams.get("titles");
 
         // Return mock data based on title
-        if (title === 'Cyber_Warfare') {
+        if (title === "Cyber_Warfare") {
           await route.fulfill({
-            contentType: 'application/json',
+            contentType: "application/json",
             body: JSON.stringify({
               query: {
                 pages: {
-                  '12345': {
+                  "12345": {
                     pageid: 12345,
-                    title: 'Cyber Warfare',
-                    fullurl: 'https://en.wikipedia.org/wiki/Cyber_Warfare',
-                    extract: 'Cyber warfare is the use of cyber attacks against an enemy state.',
+                    title: "Cyber Warfare",
+                    fullurl: "https://en.wikipedia.org/wiki/Cyber_Warfare",
+                    extract: "Cyber warfare is the use of cyber attacks against an enemy state.",
                   },
                 },
               },
@@ -41,13 +41,13 @@ export const test = base.extend<OsintFixtures>({
   mockOsintFeeds: async ({ page }, use) => {
     await use(async () => {
       // Mock generic RSS/JSON feeds if they are accessed from the frontend
-      await page.route('**/feed.json', async (route) => {
+      await page.route("**/feed.json", async (route) => {
         await route.fulfill({
-          contentType: 'application/json',
+          contentType: "application/json",
           body: JSON.stringify({
             items: [
-              { title: 'Threat Alert 1', description: 'Severe vulnerability found.' },
-              { title: 'Threat Alert 2', description: 'New malware strain detected.' },
+              { title: "Threat Alert 1", description: "Severe vulnerability found." },
+              { title: "Threat Alert 2", description: "New malware strain detected." },
             ],
           }),
         });
@@ -57,7 +57,7 @@ export const test = base.extend<OsintFixtures>({
 
   createEntity: async ({ request }, use) => {
     await use(async (data: any) => {
-      const response = await request.post('/api/entities', {
+      const response = await request.post("/api/entities", {
         data: {
           ...data,
           verified: false,

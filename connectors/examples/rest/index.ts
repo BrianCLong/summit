@@ -1,8 +1,4 @@
-import {
-  BaseConnector,
-  createEmitter,
-  ConnectorContext,
-} from '@intelgraph/connector-js';
+import { BaseConnector, createEmitter, ConnectorContext } from "@intelgraph/connector-js";
 
 class RestConnector extends BaseConnector {
   constructor(private url: string) {

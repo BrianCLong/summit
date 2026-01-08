@@ -2,12 +2,12 @@
  * Auto-labeling module
  * Generates GitHub labels and titles for issues
  */
-import { TriageItem } from '../types.js';
+import { TriageItem } from "../types.js";
 export interface LabelSuggestion {
-    issueId: string;
-    labels: string[];
-    suggestedTitle?: string;
-    confidence: number;
+  issueId: string;
+  labels: string[];
+  suggestedTitle?: string;
+  confidence: number;
 }
 export declare function generateLabels(item: TriageItem): LabelSuggestion;
 export declare function generateBatchLabels(items: TriageItem[]): LabelSuggestion[];

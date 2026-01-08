@@ -4,16 +4,16 @@ on:
   push:
     branches: [main]
     paths:
-      - 'docs/**'
-      - 'README.md'
-      - 'scripts/check-doc-links.ts'
-      - '.doclinkignore'
+      - "docs/**"
+      - "README.md"
+      - "scripts/check-doc-links.ts"
+      - ".doclinkignore"
   pull_request:
     paths:
-      - 'docs/**'
-      - 'README.md'
-      - 'scripts/check-doc-links.ts'
-      - '.doclinkignore'
+      - "docs/**"
+      - "README.md"
+      - "scripts/check-doc-links.ts"
+      - ".doclinkignore"
 
 jobs:
   link-check:
@@ -25,7 +25,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install tsx
         run: npm install -g tsx

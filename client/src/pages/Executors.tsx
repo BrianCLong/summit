@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -10,13 +10,13 @@ import {
   List,
   ListItem,
   ListItemText,
-} from '@mui/material';
-import Grid from '@mui/material/Grid';
+} from "@mui/material";
+import Grid from "@mui/material/Grid";
 
 type Exec = {
   id: string;
   name: string;
-  kind: 'cpu' | 'gpu';
+  kind: "cpu" | "gpu";
   labels: string[];
   capacity: number;
   status: string;
@@ -24,39 +24,39 @@ type Exec = {
 
 export default function ExecutorsPage() {
   const [list, setList] = useState<Exec[]>([]);
-  const [name, setName] = useState('pool-1');
-  const [kind, setKind] = useState<'cpu' | 'gpu'>('cpu');
-  const [labels, setLabels] = useState('ci,build');
+  const [name, setName] = useState("pool-1");
+  const [kind, setKind] = useState<"cpu" | "gpu">("cpu");
+  const [labels, setLabels] = useState("ci,build");
   const [capacity, setCapacity] = useState(1);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const load = async () => {
-    const r = await fetch('/api/maestro/v1/executors');
+    const r = await fetch("/api/maestro/v1/executors");
     setList(await r.json());
   };
   useEffect(() => {
     load();
   }, []);
   const create = async () => {
-    setError('');
+    setError("");
     try {
-      const r = await fetch('/api/maestro/v1/executors', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const r = await fetch("/api/maestro/v1/executors", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
           kind,
           labels: labels
-            .split(',')
+            .split(",")
             .map((s) => s.trim())
             .filter(Boolean),
           capacity,
-          status: 'ready',
+          status: "ready",
         }),
       });
-      if (!r.ok) throw new Error('create failed');
+      if (!r.ok) throw new Error("create failed");
       await load();
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'create failed');
+      setError(e instanceof Error ? e.message : "create failed");
     }
   };
   return (
@@ -81,7 +81,7 @@ export default function ExecutorsPage() {
                 value={kind}
                 onChange={(e) => {
                   const value = e.target.value;
-                  if (value === 'cpu' || value === 'gpu') {
+                  if (value === "cpu" || value === "gpu") {
                     setKind(value);
                   }
                 }}
@@ -117,7 +117,7 @@ export default function ExecutorsPage() {
                   <ListItem key={e.id}>
                     <ListItemText
                       primary={`${e.name} (${e.kind})`}
-                      secondary={`cap=${e.capacity} labels=${e.labels.join(',')}`}
+                      secondary={`cap=${e.capacity} labels=${e.labels.join(",")}`}
                     />
                   </ListItem>
                 ))}

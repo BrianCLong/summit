@@ -3,7 +3,7 @@ name: docs-debt
 permissions:
   contents: read
 on:
-  schedule: [{ cron: '0 14 * * 5' }]
+  schedule: [{ cron: "0 14 * * 5" }]
   workflow_dispatch:
 jobs:
   triage:

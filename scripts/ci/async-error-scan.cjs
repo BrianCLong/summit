@@ -1,16 +1,16 @@
-const fs = require('node:fs');
-const ts = require('typescript');
-const { createResult } = require('./lib/reporting.cjs');
-const { getAddedLineNumbers, getChangedFiles } = require('./lib/git-utils.cjs');
+const fs = require("node:fs");
+const ts = require("typescript");
+const { createResult } = require("./lib/reporting.cjs");
+const { getAddedLineNumbers, getChangedFiles } = require("./lib/git-utils.cjs");
 
 const SOURCE_EXTENSIONS = /(\.tsx?|\.jsx?)$/i;
-const SAFE_PROMISE_IDENTIFIERS = ['allSettled'];
+const SAFE_PROMISE_IDENTIFIERS = ["allSettled"];
 
 function runAsyncAwaitScan({ baseRef }) {
   const description =
-    'Verifies async/await usage includes error handling through try/catch or explicit catch chains.';
+    "Verifies async/await usage includes error handling through try/catch or explicit catch chains.";
   const remediation =
-    'Wrap awaited calls in try/catch blocks or append a .catch handler so errors cannot escape silently.';
+    "Wrap awaited calls in try/catch blocks or append a .catch handler so errors cannot escape silently.";
   const changedFiles = getChangedFiles(baseRef).filter(isCandidateFile);
   const violations = [];
   for (const filePath of changedFiles) {
@@ -18,7 +18,7 @@ function runAsyncAwaitScan({ baseRef }) {
     if (addedLines.size === 0) {
       continue;
     }
-    const content = fs.readFileSync(filePath, 'utf8');
+    const content = fs.readFileSync(filePath, "utf8");
     const issues = findUnhandledAwaitExpressions(content, addedLines, filePath);
     if (issues.length > 0) {
       violations.push({ filePath, issues });
@@ -26,21 +26,21 @@ function runAsyncAwaitScan({ baseRef }) {
   }
   if (violations.length === 0) {
     return createResult({
-      name: 'async-error-scan',
+      name: "async-error-scan",
       description,
       passed: true,
-      details: ['All new async operations include error handling.'],
+      details: ["All new async operations include error handling."],
       remediation,
     });
   }
   const details = violations.map((violation) => {
     const formatted = violation.issues
       .map((issue) => `line ${issue.line}: ${issue.message}`)
-      .join('; ');
+      .join("; ");
     return `${violation.filePath} → ${formatted}`;
   });
   return createResult({
-    name: 'async-error-scan',
+    name: "async-error-scan",
     description,
     passed: false,
     details,
@@ -48,33 +48,23 @@ function runAsyncAwaitScan({ baseRef }) {
   });
 }
 
-function findUnhandledAwaitExpressions(
-  sourceText,
-  addedLines,
-  filePath = 'unknown',
-) {
+function findUnhandledAwaitExpressions(sourceText, addedLines, filePath = "unknown") {
   const sourceFile = ts.createSourceFile(
     filePath,
     sourceText,
     ts.ScriptTarget.Latest,
     true,
-    ts.ScriptKind.TSX,
+    ts.ScriptKind.TSX
   );
   const violations = [];
   const visit = (node, ancestors) => {
     if (ts.isAwaitExpression(node)) {
-      const { line } = sourceFile.getLineAndCharacterOfPosition(
-        node.getStart(),
-      );
+      const { line } = sourceFile.getLineAndCharacterOfPosition(node.getStart());
       const oneBasedLine = line + 1;
-      if (
-        addedLines.has(oneBasedLine) &&
-        !isAwaitHandled(node, ancestors, sourceFile)
-      ) {
+      if (addedLines.has(oneBasedLine) && !isAwaitHandled(node, ancestors, sourceFile)) {
         violations.push({
           line: oneBasedLine,
-          message:
-            'awaited call is missing try/catch coverage or a chained catch handler.',
+          message: "awaited call is missing try/catch coverage or a chained catch handler.",
         });
       }
     }
@@ -85,7 +75,7 @@ function findUnhandledAwaitExpressions(
 }
 
 function isCandidateFile(filePath) {
-  const normalized = filePath.replace(/\\\\/g, '/');
+  const normalized = filePath.replace(/\\\\/g, "/");
   if (!SOURCE_EXTENSIONS.test(normalized)) {
     return false;
   }
@@ -125,10 +115,10 @@ function hasCatchHandler(node, sourceFile) {
       const property = expression.expression.name;
       if (ts.isIdentifier(property)) {
         const name = property.text;
-        if (name === 'catch') {
+        if (name === "catch") {
           return true;
         }
-        if (name === 'then' && expression.arguments.length >= 2) {
+        if (name === "then" && expression.arguments.length >= 2) {
           return true;
         }
         if (SAFE_PROMISE_IDENTIFIERS.includes(name)) {
@@ -152,10 +142,7 @@ function hasCatchHandler(node, sourceFile) {
       return true;
     }
   }
-  if (
-    ts.isIdentifier(expression) &&
-    SAFE_PROMISE_IDENTIFIERS.includes(expression.text)
-  ) {
+  if (ts.isIdentifier(expression) && SAFE_PROMISE_IDENTIFIERS.includes(expression.text)) {
     return true;
   }
   return false;

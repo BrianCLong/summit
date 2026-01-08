@@ -1,4 +1,4 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { Page, Locator, expect } from "@playwright/test";
 
 export class BasePage {
   readonly page: Page;
@@ -31,7 +31,7 @@ export class BasePage {
     return this.page.getByText(text);
   }
 
-  async getByRole(role: 'button' | 'link' | 'tab' | 'heading', options?: any): Promise<Locator> {
+  async getByRole(role: "button" | "link" | "tab" | "heading", options?: any): Promise<Locator> {
     return this.page.getByRole(role, options);
   }
 

@@ -5,29 +5,29 @@
  * Orchestrates all quality checks and provides go/no-go decisions for deployments
  */
 
-import { spawn, exec } from 'child_process';
-import { promisify } from 'util';
-import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs';
-import { join, resolve } from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { spawn, exec } from "child_process";
+import { promisify } from "util";
+import { writeFileSync, readFileSync, existsSync, mkdirSync } from "fs";
+import { join, resolve } from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
 // Import our quality tools
-import TestRunner from './test-runner.js';
-import SecurityScanner from './security-scanner.js';
-import AccessibilityChecker from './accessibility-checker.js';
-import PerformanceMonitor from './performance-monitor.js';
-import HealthChecker from './health-checker.js';
-import VisualTesting from './visual-testing.js';
+import TestRunner from "./test-runner.js";
+import SecurityScanner from "./security-scanner.js";
+import AccessibilityChecker from "./accessibility-checker.js";
+import PerformanceMonitor from "./performance-monitor.js";
+import HealthChecker from "./health-checker.js";
+import VisualTesting from "./visual-testing.js";
 
 const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const root = resolve(__dirname, '..');
+const root = resolve(__dirname, "..");
 
 class QualityGate {
   constructor() {
-    this.reportDir = join(root, 'test-results', 'quality-gate');
+    this.reportDir = join(root, "test-results", "quality-gate");
     this.startTime = Date.now();
     this.results = {
       linting: null,
@@ -86,19 +86,17 @@ class QualityGate {
         typeErrors: true,
         testFailures: true,
       },
-      environment: 'development', // development, staging, production
+      environment: "development", // development, staging, production
     };
 
     // Try to load custom configuration
-    const configPath = join(root, 'quality-gate.config.js');
+    const configPath = join(root, "quality-gate.config.js");
     if (existsSync(configPath)) {
       try {
         const customConfig = require(configPath);
         return { ...defaultConfig, ...customConfig };
       } catch (error) {
-        console.log(
-          '⚠️ Failed to load custom quality gate config, using defaults',
-        );
+        console.log("⚠️ Failed to load custom quality gate config, using defaults");
         return defaultConfig;
       }
     }
@@ -107,7 +105,7 @@ class QualityGate {
   }
 
   async setup() {
-    console.log('🏁 Setting up Quality Gate system...');
+    console.log("🏁 Setting up Quality Gate system...");
 
     // Create report directory
     if (!existsSync(this.reportDir)) {
@@ -115,12 +113,11 @@ class QualityGate {
     }
 
     // Determine which environment we're in
-    const environment =
-      process.env.NODE_ENV || process.env.CI ? 'ci' : 'development';
+    const environment = process.env.NODE_ENV || process.env.CI ? "ci" : "development";
     console.log(`  Environment: ${environment}`);
 
     // Adjust configuration based on environment
-    if (environment === 'ci' || environment === 'production') {
+    if (environment === "ci" || environment === "production") {
       this.gateConfig.required.e2eTests = true;
       this.gateConfig.required.securityScan = true;
       this.gateConfig.required.accessibilityTests = true;
@@ -130,14 +127,14 @@ class QualityGate {
 
   async runLinting() {
     if (!this.gateConfig.required.linting) {
-      console.log('📝 Linting: SKIPPED');
+      console.log("📝 Linting: SKIPPED");
       return { skipped: true };
     }
 
-    console.log('📝 Running linting checks...');
+    console.log("📝 Running linting checks...");
 
     try {
-      const { stdout, stderr } = await execAsync('npm run lint', {
+      const { stdout, stderr } = await execAsync("npm run lint", {
         cwd: root,
         timeout: 60000,
       });
@@ -168,7 +165,7 @@ class QualityGate {
       };
 
       this.results.linting = result;
-      console.log('  ❌ Linting: Failed');
+      console.log("  ❌ Linting: Failed");
 
       return result;
     }
@@ -176,14 +173,14 @@ class QualityGate {
 
   async runTypeChecking() {
     if (!this.gateConfig.required.typeChecking) {
-      console.log('🔍 Type Checking: SKIPPED');
+      console.log("🔍 Type Checking: SKIPPED");
       return { skipped: true };
     }
 
-    console.log('🔍 Running type checking...');
+    console.log("🔍 Running type checking...");
 
     try {
-      const { stdout, stderr } = await execAsync('npm run typecheck', {
+      const { stdout, stderr } = await execAsync("npm run typecheck", {
         cwd: root,
         timeout: 90000,
       });
@@ -212,14 +209,14 @@ class QualityGate {
       };
 
       this.results.typeChecking = result;
-      console.log('  ❌ Type Checking: Failed');
+      console.log("  ❌ Type Checking: Failed");
 
       return result;
     }
   }
 
   async runTests() {
-    console.log('🧪 Running comprehensive test suite...');
+    console.log("🧪 Running comprehensive test suite...");
 
     try {
       const testRunner = new TestRunner();
@@ -255,7 +252,7 @@ class QualityGate {
       this.results.visualTests = testRunner.results.visual;
 
       console.log(
-        `  ✅ Tests: ${result.passedTests}/${result.totalTests} passed (${result.successRate}%)`,
+        `  ✅ Tests: ${result.passedTests}/${result.totalTests} passed (${result.successRate}%)`
       );
 
       return result;
@@ -266,18 +263,18 @@ class QualityGate {
         score: 0,
       };
 
-      console.log('  ❌ Tests: Failed');
+      console.log("  ❌ Tests: Failed");
       return result;
     }
   }
 
   async runSecurityScan() {
     if (!this.gateConfig.required.securityScan) {
-      console.log('🔒 Security Scan: SKIPPED');
+      console.log("🔒 Security Scan: SKIPPED");
       return { skipped: true };
     }
 
-    console.log('🔒 Running security scan...');
+    console.log("🔒 Running security scan...");
 
     try {
       const scanner = new SecurityScanner();
@@ -287,13 +284,9 @@ class QualityGate {
 
       // Calculate security score based on findings
       const findings = scanner.findings;
-      const criticalIssues = findings.filter(
-        (f) => f.severity === 'critical',
-      ).length;
-      const highIssues = findings.filter((f) => f.severity === 'high').length;
-      const moderateIssues = findings.filter(
-        (f) => f.severity === 'moderate',
-      ).length;
+      const criticalIssues = findings.filter((f) => f.severity === "critical").length;
+      const highIssues = findings.filter((f) => f.severity === "high").length;
+      const moderateIssues = findings.filter((f) => f.severity === "moderate").length;
 
       let score = 100;
       score -= criticalIssues * 40; // Critical issues heavily penalize
@@ -316,7 +309,7 @@ class QualityGate {
 
       this.results.securityScan = result;
       console.log(
-        `  ✅ Security: ${findings.length} issues found (${criticalIssues} critical, ${highIssues} high)`,
+        `  ✅ Security: ${findings.length} issues found (${criticalIssues} critical, ${highIssues} high)`
       );
 
       return result;
@@ -328,7 +321,7 @@ class QualityGate {
       };
 
       this.results.securityScan = result;
-      console.log('  ❌ Security Scan: Failed');
+      console.log("  ❌ Security Scan: Failed");
 
       return result;
     }
@@ -336,14 +329,14 @@ class QualityGate {
 
   async runAccessibilityTests() {
     if (!this.gateConfig.required.accessibilityTests) {
-      console.log('♿ Accessibility Tests: SKIPPED');
+      console.log("♿ Accessibility Tests: SKIPPED");
       return { skipped: true };
     }
 
-    console.log('♿ Running accessibility tests...');
+    console.log("♿ Running accessibility tests...");
 
     try {
-      const checker = new AccessibilityChecker('http://localhost:5173');
+      const checker = new AccessibilityChecker("http://localhost:5173");
       const passed = await checker.run({ generateReport: true });
 
       // Extract results from the checker
@@ -356,15 +349,12 @@ class QualityGate {
           acc.minor += result.summary?.minor || 0;
           return acc;
         },
-        { totalTests: 0, passed: 0, critical: 0, major: 0, minor: 0 },
+        { totalTests: 0, passed: 0, critical: 0, major: 0, minor: 0 }
       );
 
       // Calculate accessibility score
       const totalIssues = summary.critical + summary.major + summary.minor;
-      let score =
-        summary.totalTests > 0
-          ? (summary.passed / summary.totalTests) * 100
-          : 0;
+      let score = summary.totalTests > 0 ? (summary.passed / summary.totalTests) * 100 : 0;
       score -= summary.critical * 20; // Critical issues heavily penalize
       score -= summary.major * 10; // Major issues significantly penalize
       score -= summary.minor * 2; // Minor issues lightly penalize
@@ -378,9 +368,7 @@ class QualityGate {
       };
 
       this.results.accessibilityTests = result;
-      console.log(
-        `  ✅ Accessibility: ${summary.passed}/${summary.totalTests} tests passed`,
-      );
+      console.log(`  ✅ Accessibility: ${summary.passed}/${summary.totalTests} tests passed`);
 
       return result;
     } catch (error) {
@@ -391,7 +379,7 @@ class QualityGate {
       };
 
       this.results.accessibilityTests = result;
-      console.log('  ❌ Accessibility Tests: Failed');
+      console.log("  ❌ Accessibility Tests: Failed");
 
       return result;
     }
@@ -399,15 +387,15 @@ class QualityGate {
 
   async runBuildValidation() {
     if (!this.gateConfig.required.buildValidation) {
-      console.log('🏗️ Build Validation: SKIPPED');
+      console.log("🏗️ Build Validation: SKIPPED");
       return { skipped: true };
     }
 
-    console.log('🏗️ Running build validation...');
+    console.log("🏗️ Running build validation...");
 
     try {
       const startTime = Date.now();
-      const { stdout, stderr } = await execAsync('npm run build', {
+      const { stdout, stderr } = await execAsync("npm run build", {
         cwd: root,
         timeout: 300000, // 5 minute timeout
       });
@@ -415,13 +403,13 @@ class QualityGate {
       const buildTime = Date.now() - startTime;
 
       // Check if build directory exists and has files
-      const distExists = existsSync(join(root, 'dist'));
+      const distExists = existsSync(join(root, "dist"));
       const hasFiles = distExists
-        ? require('fs').readdirSync(join(root, 'dist')).length > 0
+        ? require("fs").readdirSync(join(root, "dist")).length > 0
         : false;
 
       const result = {
-        passed: distExists && hasFiles && !stderr.includes('error'),
+        passed: distExists && hasFiles && !stderr.includes("error"),
         buildTime,
         distExists,
         hasFiles,
@@ -442,7 +430,7 @@ class QualityGate {
       };
 
       this.results.buildValidation = result;
-      console.log('  ❌ Build: Failed');
+      console.log("  ❌ Build: Failed");
 
       return result;
     }
@@ -450,14 +438,14 @@ class QualityGate {
 
   async runPerformanceTests() {
     if (!this.gateConfig.required.performanceTests) {
-      console.log('⚡ Performance Tests: SKIPPED');
+      console.log("⚡ Performance Tests: SKIPPED");
       return { skipped: true };
     }
 
-    console.log('⚡ Running performance tests...');
+    console.log("⚡ Running performance tests...");
 
     try {
-      const monitor = new PerformanceMonitor('http://localhost:5173');
+      const monitor = new PerformanceMonitor("http://localhost:5173");
       await monitor.run({ generateReport: true });
 
       // Extract performance metrics
@@ -498,7 +486,7 @@ class QualityGate {
       };
 
       this.results.performanceTests = result;
-      console.log('  ❌ Performance Tests: Failed');
+      console.log("  ❌ Performance Tests: Failed");
 
       return result;
     }
@@ -506,24 +494,24 @@ class QualityGate {
 
   async runBundleAnalysis() {
     if (!this.gateConfig.required.bundleAnalysis) {
-      console.log('📦 Bundle Analysis: SKIPPED');
+      console.log("📦 Bundle Analysis: SKIPPED");
       return { skipped: true };
     }
 
-    console.log('📦 Running bundle analysis...');
+    console.log("📦 Running bundle analysis...");
 
     try {
-      await execAsync('node tools/bundle-analyzer.js', {
+      await execAsync("node tools/bundle-analyzer.js", {
         cwd: root,
         timeout: 30000,
       });
 
       // Read bundle analysis results if available
-      const analysisPath = join(root, 'dist', 'bundle-analysis.json');
+      const analysisPath = join(root, "dist", "bundle-analysis.json");
       let analysis = null;
 
       if (existsSync(analysisPath)) {
-        analysis = JSON.parse(readFileSync(analysisPath, 'utf8'));
+        analysis = JSON.parse(readFileSync(analysisPath, "utf8"));
       }
 
       const result = {
@@ -533,7 +521,7 @@ class QualityGate {
       };
 
       this.results.bundleAnalysis = result;
-      console.log('  ✅ Bundle Analysis: Completed');
+      console.log("  ✅ Bundle Analysis: Completed");
 
       return result;
     } catch (error) {
@@ -544,7 +532,7 @@ class QualityGate {
       };
 
       this.results.bundleAnalysis = result;
-      console.log('  ❌ Bundle Analysis: Failed');
+      console.log("  ❌ Bundle Analysis: Failed");
 
       return result;
     }
@@ -575,23 +563,14 @@ class QualityGate {
       this.qualityMetrics.testCoverage = results.unitTests.coverage.statements;
     } else {
       // Fall back to test success rate
-      const testResults = [
-        results.unitTests,
-        results.integrationTests,
-        results.e2eTests,
-      ].filter((r) => r && !r.skipped && r.tests);
+      const testResults = [results.unitTests, results.integrationTests, results.e2eTests].filter(
+        (r) => r && !r.skipped && r.tests
+      );
 
       if (testResults.length > 0) {
-        const totalTests = testResults.reduce(
-          (acc, r) => acc + r.tests.total,
-          0,
-        );
-        const passedTests = testResults.reduce(
-          (acc, r) => acc + r.tests.passed,
-          0,
-        );
-        this.qualityMetrics.testCoverage =
-          totalTests > 0 ? (passedTests / totalTests) * 100 : 0;
+        const totalTests = testResults.reduce((acc, r) => acc + r.tests.total, 0);
+        const passedTests = testResults.reduce((acc, r) => acc + r.tests.passed, 0);
+        this.qualityMetrics.testCoverage = totalTests > 0 ? (passedTests / totalTests) * 100 : 0;
       }
     }
 
@@ -599,8 +578,7 @@ class QualityGate {
     this.qualityMetrics.security = results.securityScan?.score || 100;
 
     // Accessibility Score
-    this.qualityMetrics.accessibility =
-      results.accessibilityTests?.score || 100;
+    this.qualityMetrics.accessibility = results.accessibilityTests?.score || 100;
 
     // Performance Score
     this.qualityMetrics.performance = results.performanceTests?.score || 100;
@@ -632,61 +610,50 @@ class QualityGate {
     // Check blocking conditions
     if (blocking.buildFailures && !this.results.buildValidation?.passed) {
       passed = false;
-      failures.push('Build validation failed');
+      failures.push("Build validation failed");
     }
 
-    if (
-      blocking.lintingErrors &&
-      this.results.linting &&
-      !this.results.linting.passed
-    ) {
+    if (blocking.lintingErrors && this.results.linting && !this.results.linting.passed) {
       passed = false;
-      failures.push('Linting errors found');
+      failures.push("Linting errors found");
     }
 
-    if (
-      blocking.typeErrors &&
-      this.results.typeChecking &&
-      !this.results.typeChecking.passed
-    ) {
+    if (blocking.typeErrors && this.results.typeChecking && !this.results.typeChecking.passed) {
       passed = false;
-      failures.push('Type checking errors found');
+      failures.push("Type checking errors found");
     }
 
-    if (
-      blocking.criticalSecurityIssues &&
-      this.results.securityScan?.summary?.critical > 0
-    ) {
+    if (blocking.criticalSecurityIssues && this.results.securityScan?.summary?.critical > 0) {
       passed = false;
-      failures.push('Critical security issues found');
+      failures.push("Critical security issues found");
     }
 
     // Check quality thresholds
     if (this.qualityMetrics.codeQuality < thresholds.codeQuality) {
       passed = false;
       failures.push(
-        `Code quality below threshold (${this.qualityMetrics.codeQuality.toFixed(1)} < ${thresholds.codeQuality})`,
+        `Code quality below threshold (${this.qualityMetrics.codeQuality.toFixed(1)} < ${thresholds.codeQuality})`
       );
     }
 
     if (this.qualityMetrics.testCoverage < thresholds.testCoverage) {
       passed = false;
       failures.push(
-        `Test coverage below threshold (${this.qualityMetrics.testCoverage.toFixed(1)}% < ${thresholds.testCoverage}%)`,
+        `Test coverage below threshold (${this.qualityMetrics.testCoverage.toFixed(1)}% < ${thresholds.testCoverage}%)`
       );
     }
 
     if (this.qualityMetrics.security < thresholds.security) {
       passed = false;
       failures.push(
-        `Security score below threshold (${this.qualityMetrics.security.toFixed(1)} < ${thresholds.security})`,
+        `Security score below threshold (${this.qualityMetrics.security.toFixed(1)} < ${thresholds.security})`
       );
     }
 
     if (this.qualityMetrics.overall < thresholds.overall) {
       passed = false;
       failures.push(
-        `Overall quality below threshold (${this.qualityMetrics.overall.toFixed(1)} < ${thresholds.overall})`,
+        `Overall quality below threshold (${this.qualityMetrics.overall.toFixed(1)} < ${thresholds.overall})`
       );
     }
 
@@ -694,7 +661,7 @@ class QualityGate {
   }
 
   async generateReport() {
-    console.log('📄 Generating quality gate report...');
+    console.log("📄 Generating quality gate report...");
 
     const totalDuration = Date.now() - this.startTime;
     const gateEvaluation = this.evaluateQualityGate();
@@ -709,38 +676,33 @@ class QualityGate {
       thresholds: this.gateConfig.thresholds,
       results: this.results,
       summary: {
-        totalChecks: Object.values(this.results).filter((r) => r && !r.skipped)
+        totalChecks: Object.values(this.results).filter((r) => r && !r.skipped).length,
+        passedChecks: Object.values(this.results).filter((r) => r && !r.skipped && r.passed).length,
+        failedChecks: Object.values(this.results).filter((r) => r && !r.skipped && !r.passed)
           .length,
-        passedChecks: Object.values(this.results).filter(
-          (r) => r && !r.skipped && r.passed,
-        ).length,
-        failedChecks: Object.values(this.results).filter(
-          (r) => r && !r.skipped && !r.passed,
-        ).length,
-        skippedChecks: Object.values(this.results).filter((r) => r && r.skipped)
-          .length,
+        skippedChecks: Object.values(this.results).filter((r) => r && r.skipped).length,
       },
     };
 
     // Write JSON report
     writeFileSync(
-      join(this.reportDir, 'quality-gate-report.json'),
-      JSON.stringify(report, null, 2),
+      join(this.reportDir, "quality-gate-report.json"),
+      JSON.stringify(report, null, 2)
     );
 
     // Write HTML report
     const htmlReport = this.generateHTMLReport(report);
-    writeFileSync(join(this.reportDir, 'quality-gate-report.html'), htmlReport);
+    writeFileSync(join(this.reportDir, "quality-gate-report.html"), htmlReport);
 
     return report;
   }
 
   generateHTMLReport(report) {
     const getScoreColor = (score) => {
-      if (score >= 90) return '#28a745';
-      if (score >= 80) return '#ffc107';
-      if (score >= 70) return '#fd7e14';
-      return '#dc3545';
+      if (score >= 90) return "#28a745";
+      if (score >= 80) return "#ffc107";
+      if (score >= 70) return "#fd7e14";
+      return "#dc3545";
     };
 
     return `
@@ -786,8 +748,8 @@ class QualityGate {
             <p><strong>Duration:</strong> ${(report.duration / 1000).toFixed(2)} seconds</p>
         </div>
         
-        <div class="status ${report.passed ? 'passed' : 'failed'}">
-            ${report.passed ? '✅ QUALITY GATE PASSED' : '❌ QUALITY GATE FAILED'}
+        <div class="status ${report.passed ? "passed" : "failed"}">
+            ${report.passed ? "✅ QUALITY GATE PASSED" : "❌ QUALITY GATE FAILED"}
         </div>
         
         ${
@@ -799,12 +761,12 @@ class QualityGate {
                   .map(
                     (failure) => `
                     <div class="failure-item">${failure}</div>
-                `,
+                `
                   )
-                  .join('')}
+                  .join("")}
             </div>
         `
-            : ''
+            : ""
         }
         
         <h2>📊 Quality Metrics</h2>
@@ -877,42 +839,30 @@ class QualityGate {
         <div class="checks">
             ${Object.entries(report.results)
               .map(([checkName, result]) => {
-                if (!result) return '';
+                if (!result) return "";
 
-                const status = result.skipped
-                  ? 'skipped'
-                  : result.passed
-                    ? 'passed'
-                    : 'failed';
-                const statusIcon = result.skipped
-                  ? '⏭️'
-                  : result.passed
-                    ? '✅'
-                    : '❌';
-                const statusText = result.skipped
-                  ? 'SKIPPED'
-                  : result.passed
-                    ? 'PASSED'
-                    : 'FAILED';
+                const status = result.skipped ? "skipped" : result.passed ? "passed" : "failed";
+                const statusIcon = result.skipped ? "⏭️" : result.passed ? "✅" : "❌";
+                const statusText = result.skipped ? "SKIPPED" : result.passed ? "PASSED" : "FAILED";
 
                 return `
                 <div class="check ${status}">
                     <div class="check-header">
-                        <span>${checkName.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}</span>
+                        <span>${checkName.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}</span>
                         <span class="check-status">${statusIcon} ${statusText}</span>
                     </div>
                     <div class="check-details">
-                        ${result.score !== undefined ? `<p><strong>Score:</strong> ${result.score.toFixed(1)}</p>` : ''}
-                        ${result.errors !== undefined ? `<p><strong>Errors:</strong> ${result.errors}</p>` : ''}
-                        ${result.warnings !== undefined ? `<p><strong>Warnings:</strong> ${result.warnings}</p>` : ''}
-                        ${result.successRate !== undefined ? `<p><strong>Success Rate:</strong> ${result.successRate}%</p>` : ''}
-                        ${result.summary ? `<p><strong>Issues:</strong> ${JSON.stringify(result.summary)}</p>` : ''}
-                        ${result.error ? `<p><strong>Error:</strong> ${result.error}</p>` : ''}
+                        ${result.score !== undefined ? `<p><strong>Score:</strong> ${result.score.toFixed(1)}</p>` : ""}
+                        ${result.errors !== undefined ? `<p><strong>Errors:</strong> ${result.errors}</p>` : ""}
+                        ${result.warnings !== undefined ? `<p><strong>Warnings:</strong> ${result.warnings}</p>` : ""}
+                        ${result.successRate !== undefined ? `<p><strong>Success Rate:</strong> ${result.successRate}%</p>` : ""}
+                        ${result.summary ? `<p><strong>Issues:</strong> ${JSON.stringify(result.summary)}</p>` : ""}
+                        ${result.error ? `<p><strong>Error:</strong> ${result.error}</p>` : ""}
                     </div>
                 </div>
               `;
               })
-              .join('')}
+              .join("")}
         </div>
     </div>
 </body>
@@ -932,14 +882,10 @@ class QualityGate {
     try {
       await this.setup();
 
-      console.log('🏁 Starting Quality Gate evaluation...\n');
+      console.log("🏁 Starting Quality Gate evaluation...\n");
 
       // Run all quality checks
-      const checkPromises = [
-        this.runLinting(),
-        this.runTypeChecking(),
-        this.runBuildValidation(),
-      ];
+      const checkPromises = [this.runLinting(), this.runTypeChecking(), this.runBuildValidation()];
 
       // Add optional checks based on configuration and options
       if (!skipTests) {
@@ -979,37 +925,21 @@ class QualityGate {
       // Evaluate quality gate
       const gateEvaluation = this.evaluateQualityGate();
 
-      console.log('\n🎯 Quality Gate Summary:');
+      console.log("\n🎯 Quality Gate Summary:");
+      console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.log(`  Overall Status:       ${gateEvaluation.passed ? "✅ PASSED" : "❌ FAILED"}`);
+      console.log(`  Code Quality:         ${this.qualityMetrics.codeQuality.toFixed(1)}/100`);
+      console.log(`  Test Coverage:        ${this.qualityMetrics.testCoverage.toFixed(1)}%`);
+      console.log(`  Security Score:       ${this.qualityMetrics.security.toFixed(1)}/100`);
+      console.log(`  Accessibility:        ${this.qualityMetrics.accessibility.toFixed(1)}/100`);
+      console.log(`  Performance:          ${this.qualityMetrics.performance.toFixed(1)}/100`);
+      console.log(`  Overall Quality:      ${this.qualityMetrics.overall.toFixed(1)}/100`);
       console.log(
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
-      );
-      console.log(
-        `  Overall Status:       ${gateEvaluation.passed ? '✅ PASSED' : '❌ FAILED'}`,
-      );
-      console.log(
-        `  Code Quality:         ${this.qualityMetrics.codeQuality.toFixed(1)}/100`,
-      );
-      console.log(
-        `  Test Coverage:        ${this.qualityMetrics.testCoverage.toFixed(1)}%`,
-      );
-      console.log(
-        `  Security Score:       ${this.qualityMetrics.security.toFixed(1)}/100`,
-      );
-      console.log(
-        `  Accessibility:        ${this.qualityMetrics.accessibility.toFixed(1)}/100`,
-      );
-      console.log(
-        `  Performance:          ${this.qualityMetrics.performance.toFixed(1)}/100`,
-      );
-      console.log(
-        `  Overall Quality:      ${this.qualityMetrics.overall.toFixed(1)}/100`,
-      );
-      console.log(
-        `  Duration:             ${((Date.now() - this.startTime) / 1000).toFixed(2)} seconds`,
+        `  Duration:             ${((Date.now() - this.startTime) / 1000).toFixed(2)} seconds`
       );
 
       if (!gateEvaluation.passed) {
-        console.log('\n❌ Quality Gate Failures:');
+        console.log("\n❌ Quality Gate Failures:");
         gateEvaluation.failures.forEach((failure) => {
           console.log(`  • ${failure}`);
         });
@@ -1017,13 +947,13 @@ class QualityGate {
 
       if (generateReport) {
         console.log(
-          `\n📄 Detailed report: ${join('test-results', 'quality-gate', 'quality-gate-report.html')}`,
+          `\n📄 Detailed report: ${join("test-results", "quality-gate", "quality-gate-report.html")}`
         );
       }
 
       return gateEvaluation.passed;
     } catch (error) {
-      console.error('❌ Quality Gate execution failed:', error);
+      console.error("❌ Quality Gate execution failed:", error);
       return false;
     }
   }
@@ -1033,11 +963,11 @@ class QualityGate {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const args = process.argv.slice(2);
   const options = {
-    skipTests: args.includes('--skip-tests'),
-    skipSecurity: args.includes('--skip-security'),
-    skipAccessibility: args.includes('--skip-accessibility'),
-    skipPerformance: args.includes('--skip-performance'),
-    generateReport: !args.includes('--no-report'),
+    skipTests: args.includes("--skip-tests"),
+    skipSecurity: args.includes("--skip-security"),
+    skipAccessibility: args.includes("--skip-accessibility"),
+    skipPerformance: args.includes("--skip-performance"),
+    generateReport: !args.includes("--no-report"),
   };
 
   const gate = new QualityGate();
@@ -1047,7 +977,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       process.exit(passed ? 0 : 1);
     })
     .catch((error) => {
-      console.error('Quality Gate failed:', error);
+      console.error("Quality Gate failed:", error);
       process.exit(1);
     });
 }

@@ -12,7 +12,7 @@ concurrency:
 
 env:
   PNPM_CACHE_FOLDER: ~/.pnpm-store
-  NODE_VERSION: '20.x'
+  NODE_VERSION: "20.x"
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
@@ -113,10 +113,10 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.24.0
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'table'
-          severity: 'CRITICAL,HIGH'
+          scan-type: "fs"
+          scan-ref: "."
+          format: "table"
+          severity: "CRITICAL,HIGH"
           ignore-unfixed: true
 
   # 4. Build & Push Docker Images

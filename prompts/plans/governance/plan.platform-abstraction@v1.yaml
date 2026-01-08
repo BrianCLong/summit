@@ -1,7 +1,7 @@
 meta:
   id: plan.platform-abstraction@v1
-  owner: 'platform-engineering'
-  purpose: 'Reduce platform-specific drift with common abstractions'
+  owner: "platform-engineering"
+  purpose: "Reduce platform-specific drift with common abstractions"
   tags:
     - platform
     - abstraction
@@ -9,13 +9,13 @@ meta:
     - portability
     - standardization
   guardrails:
-    - 'Abstractions must not hide necessary complexity'
-    - 'Performance overhead must be minimal'
-    - 'Escape hatches must exist for edge cases'
-    - 'Abstractions must be well documented'
+    - "Abstractions must not hide necessary complexity"
+    - "Performance overhead must be minimal"
+    - "Escape hatches must exist for edge cases"
+    - "Abstractions must be well documented"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -317,15 +317,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'platform-abstraction'
+  - name: "platform-abstraction"
     inputs:
-      platforms: 'Local Docker, AWS staging, AWS production, on-prem option'
-      current_drift: 'Direct Redis calls, mixed logging, hardcoded configs'
-      shared_capabilities: 'Config, Logging, Caching, Queuing, Metrics'
-      team_structure: '3 platform engineers, 20 feature developers'
-      portability_requirements: 'Run locally, AWS, potential on-prem'
+      platforms: "Local Docker, AWS staging, AWS production, on-prem option"
+      current_drift: "Direct Redis calls, mixed logging, hardcoded configs"
+      shared_capabilities: "Config, Logging, Caching, Queuing, Metrics"
+      team_structure: "3 platform engineers, 20 feature developers"
+      portability_requirements: "Run locally, AWS, potential on-prem"
     expected_contains:
-      - 'Interface Contracts'
-      - 'Adapter Pattern'
-      - 'Service Templates'
-      - 'Portability Matrix'
+      - "Interface Contracts"
+      - "Adapter Pattern"
+      - "Service Templates"
+      - "Portability Matrix"

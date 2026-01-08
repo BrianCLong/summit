@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -9,8 +9,8 @@ import {
   Autocomplete,
   Slider,
   Box,
-} from '@mui/material';
-import { gql, useLazyQuery } from '@apollo/client';
+} from "@mui/material";
+import { gql, useLazyQuery } from "@apollo/client";
 
 const GET_REL_TYPES = gql`
   query {
@@ -26,13 +26,13 @@ export default function RelationshipModal({
   open,
   onClose,
   onConfirm,
-  initialLabel = '',
-  initialType = 'RELATED_TO',
+  initialLabel = "",
+  initialType = "RELATED_TO",
 }) {
   const [type, setType] = useState(initialType);
   const [label, setLabel] = useState(initialLabel || initialType);
-  const [validFrom, setValidFrom] = useState('');
-  const [validTo, setValidTo] = useState('');
+  const [validFrom, setValidFrom] = useState("");
+  const [validTo, setValidTo] = useState("");
   const [confidence, setConfidence] = useState(0.5);
   const [loadTypes, { data }] = useLazyQuery(GET_REL_TYPES);
 
@@ -50,12 +50,10 @@ export default function RelationshipModal({
           options={types}
           value={type}
           onChange={(e, v) => {
-            setType(v || 'RELATED_TO');
-            if (!label) setLabel(v || 'RELATED_TO');
+            setType(v || "RELATED_TO");
+            if (!label) setLabel(v || "RELATED_TO");
           }}
-          renderInput={(p) => (
-            <TextField {...p} label="Type" size="small" sx={{ mt: 1 }} />
-          )}
+          renderInput={(p) => <TextField {...p} label="Type" size="small" sx={{ mt: 1 }} />}
         />
         <TextField
           label="Label"
@@ -65,7 +63,7 @@ export default function RelationshipModal({
           value={label}
           onChange={(e) => setLabel(e.target.value)}
         />
-        <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
+        <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
           <TextField
             label="Valid From"
             type="date"

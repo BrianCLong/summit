@@ -8,6 +8,7 @@
 ## 🚀 Features
 
 ### Interactive Dashboard Framework
+
 - ✅ **Drag-and-Drop Builder** - Intuitive dashboard creation with grid-based layout
 - ✅ **Widget Library** - 10+ pre-built widgets (charts, maps, tables, metrics, timelines)
 - ✅ **Multi-Page Dashboards** - Organize complex visualizations across pages
@@ -16,6 +17,7 @@
 - ✅ **Export & Share** - Export to PDF, PNG, PowerPoint
 
 ### Advanced Charting
+
 - ✅ **20+ Chart Types** - Line, bar, pie, scatter, heatmap, treemap, sankey, and more
 - ✅ **D3.js Integration** - Custom visualizations with full D3.js power
 - ✅ **Animated Transitions** - Smooth animations for data updates
@@ -23,6 +25,7 @@
 - ✅ **Responsive Design** - Adapts to any screen size
 
 ### Geospatial Visualization
+
 - ✅ **Interactive Maps** - Mapbox, Leaflet, Deck.gl integration
 - ✅ **Choropleth Maps** - Regional data visualization
 - ✅ **Heat Maps** - Density visualization
@@ -30,6 +33,7 @@
 - ✅ **3D Terrain** - Elevation and building visualization
 
 ### Network Graph Visualization
+
 - ✅ **Force-Directed Layouts** - Physics-based graph layouts
 - ✅ **Hierarchical Layouts** - Tree and hierarchy visualization
 - ✅ **Community Detection** - Automatic clustering
@@ -37,6 +41,7 @@
 - ✅ **Path Analysis** - Shortest path, centrality measures
 
 ### Real-Time Data Streaming
+
 - ✅ **WebSocket Support** - Live data updates
 - ✅ **Server-Sent Events** - Fallback for older browsers
 - ✅ **Incremental Updates** - Efficient data streaming
@@ -44,6 +49,7 @@
 - ✅ **Connection Resilience** - Automatic reconnection
 
 ### 3D and Immersive Visualizations
+
 - ✅ **3D Scatter Plots** - Three-dimensional data visualization
 - ✅ **Globe Visualization** - Global data on 3D globe
 - ✅ **WebGL Acceleration** - High-performance rendering
@@ -51,6 +57,7 @@
 - ✅ **VR/AR Ready** - Immersive analysis capabilities
 
 ### Data Exploration Tools
+
 - ✅ **Drill-Down** - Navigate from summary to details
 - ✅ **Cross-Filtering** - Coordinated views across widgets
 - ✅ **Brushing & Linking** - Select data in one view, highlight in others
@@ -58,6 +65,7 @@
 - ✅ **Bookmarks** - Save and restore view states
 
 ### Performance Optimization
+
 - ✅ **Virtual Scrolling** - Handle millions of rows
 - ✅ **Data Aggregation** - Server-side aggregation
 - ✅ **Progressive Rendering** - Load large visualizations incrementally
@@ -122,32 +130,32 @@ function App() {
 ### Creating a Dashboard Programmatically
 
 ```typescript
-import { useDashboardStore } from '@intelgraph/dashboard-framework';
+import { useDashboardStore } from "@intelgraph/dashboard-framework";
 
 function setupDashboard() {
   const { createDashboard, createPage, addWidget } = useDashboardStore();
 
   // Create dashboard
   const dashboardId = createDashboard({
-    name: 'Executive Dashboard',
-    description: 'Key metrics and KPIs',
+    name: "Executive Dashboard",
+    description: "Key metrics and KPIs",
     pages: [],
   });
 
   // Create page
   const pageId = createPage(dashboardId, {
-    name: 'Overview',
-    layout: { type: 'grid', columns: 12, rowHeight: 80 },
+    name: "Overview",
+    layout: { type: "grid", columns: 12, rowHeight: 80 },
     widgets: [],
   });
 
   // Add widgets
   addWidget(pageId, {
-    type: 'metric',
-    title: 'Total Revenue',
+    type: "metric",
+    title: "Total Revenue",
     config: {
-      value: '$2.5M',
-      trend: { value: 12.5, direction: 'up' },
+      value: "$2.5M",
+      trend: { value: 12.5, direction: "up" },
     },
     layout: { x: 0, y: 0, w: 3, h: 2 },
   });
@@ -168,6 +176,7 @@ function setupDashboard() {
 ### Dashboard Templates
 
 Choose from pre-built templates:
+
 - **Executive Dashboard** - KPIs and business metrics
 - **Threat Intelligence** - Security threat monitoring
 - **Network Analysis** - Entity relationship analysis
@@ -176,18 +185,18 @@ Choose from pre-built templates:
 
 ### Widget Types
 
-| Widget | Description | Use Case |
-|--------|-------------|----------|
-| **Metric Card** | Display KPIs with trends | Revenue, users, conversion rate |
-| **Line Chart** | Time-series trends | Revenue over time, user growth |
-| **Bar Chart** | Category comparison | Sales by region, products |
-| **Pie Chart** | Proportions | Market share, category breakdown |
-| **Heat Map** | Intensity patterns | Activity by time/location |
-| **Map** | Geographic data | Store locations, threat origins |
-| **Network Graph** | Relationships | Entity connections, social networks |
-| **Timeline** | Temporal events | Project milestones, incidents |
-| **Table** | Tabular data | Detailed records, logs |
-| **3D Scatter** | 3D relationships | Multi-dimensional analysis |
+| Widget            | Description              | Use Case                            |
+| ----------------- | ------------------------ | ----------------------------------- |
+| **Metric Card**   | Display KPIs with trends | Revenue, users, conversion rate     |
+| **Line Chart**    | Time-series trends       | Revenue over time, user growth      |
+| **Bar Chart**     | Category comparison      | Sales by region, products           |
+| **Pie Chart**     | Proportions              | Market share, category breakdown    |
+| **Heat Map**      | Intensity patterns       | Activity by time/location           |
+| **Map**           | Geographic data          | Store locations, threat origins     |
+| **Network Graph** | Relationships            | Entity connections, social networks |
+| **Timeline**      | Temporal events          | Project milestones, incidents       |
+| **Table**         | Tabular data             | Detailed records, logs              |
+| **3D Scatter**    | 3D relationships         | Multi-dimensional analysis          |
 
 ## 🔧 Backend API
 
@@ -196,10 +205,7 @@ Choose from pre-built templates:
 ```graphql
 # Create dashboard
 mutation {
-  createDashboard(input: {
-    name: "My Dashboard"
-    description: "Custom dashboard"
-  }) {
+  createDashboard(input: { name: "My Dashboard", description: "Custom dashboard" }) {
     id
     name
   }
@@ -246,19 +252,19 @@ POST   /api/dashboards/:id/export   # Export dashboard
 
 ```typescript
 const customTheme = {
-  name: 'Dark Mode',
+  name: "Dark Mode",
   colors: {
-    primary: '#3b82f6',
-    secondary: '#8b5cf6',
-    background: '#1f2937',
-    surface: '#374151',
-    text: '#f9fafb',
-    textSecondary: '#d1d5db',
-    border: '#4b5563',
-    accent: ['#10b981', '#f59e0b', '#ef4444'],
+    primary: "#3b82f6",
+    secondary: "#8b5cf6",
+    background: "#1f2937",
+    surface: "#374151",
+    text: "#f9fafb",
+    textSecondary: "#d1d5db",
+    border: "#4b5563",
+    accent: ["#10b981", "#f59e0b", "#ef4444"],
   },
   typography: {
-    fontFamily: 'Inter, system-ui, sans-serif',
+    fontFamily: "Inter, system-ui, sans-serif",
     fontSize: { small: 12, medium: 14, large: 18 },
   },
 };
@@ -319,6 +325,7 @@ MIT License - see [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 Built with:
+
 - React 18.3+ for UI
 - D3.js for visualizations
 - Zustand for state management

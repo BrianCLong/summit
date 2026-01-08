@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000 # v4
       - uses: actions/labeler@85c775501f80428f35346a76b000a61718f7372a # v5
         with:
-          repo-token: '${{ secrets.GITHUB_TOKEN }}'
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
 
   dependency-review:
     runs-on: ubuntu-latest
@@ -24,8 +24,8 @@ jobs:
       - uses: actions/dependency-review-action@0b10202287249938026321b9242228f874612677 # v4
         with:
           fail-on-severity: high
-          allow-licenses: 'MIT,Apache-2.0,BSD-2-Clause,BSD-3-Clause,ISC'
-          deny-licenses: 'GPL-2.0,GPL-3.0'
+          allow-licenses: "MIT,Apache-2.0,BSD-2-Clause,BSD-3-Clause,ISC"
+          deny-licenses: "GPL-2.0,GPL-3.0"
 
   quick-checks:
     runs-on: ubuntu-latest
@@ -35,8 +35,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: "18"
+          cache: "npm"
           cache-dependency-path: |
             client/package-lock.json
             server/package-lock.json

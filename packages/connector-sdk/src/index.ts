@@ -6,6 +6,6 @@
  * @module connector-sdk
  */
 
-export * from './types';
-export * from './base-connector';
-export * from './testing';
+export * from "./types";
+export * from "./base-connector";
+export * from "./testing";

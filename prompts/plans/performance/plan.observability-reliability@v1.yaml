@@ -1,7 +1,7 @@
 meta:
   id: plan.observability-reliability@v1
-  owner: 'platform-engineering'
-  purpose: 'Tie traces, logs, and metrics to SLOs for observability-driven reliability'
+  owner: "platform-engineering"
+  purpose: "Tie traces, logs, and metrics to SLOs for observability-driven reliability"
   tags:
     - observability
     - reliability
@@ -9,13 +9,13 @@ meta:
     - sli
     - alerting
   guardrails:
-    - 'SLOs must be based on user-facing impact'
-    - 'Alerts must be actionable with runbooks'
-    - 'Dashboard must show SLO burn rate'
-    - 'Avoid alert fatigue with proper thresholds'
+    - "SLOs must be based on user-facing impact"
+    - "Alerts must be actionable with runbooks"
+    - "Dashboard must show SLO burn rate"
+    - "Avoid alert fatigue with proper thresholds"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -180,15 +180,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'summit-slos'
+  - name: "summit-slos"
     inputs:
-      user_journeys: 'Investigation creation, Entity search, Relationship mapping, Copilot queries'
-      current_observability: 'Prometheus metrics, Grafana dashboards, basic logging'
-      reliability_targets: '99.9% availability, p99 < 500ms, 99.5% success rate'
-      alerting_channels: 'PagerDuty, Slack #alerts, Email'
-      on_call_structure: 'Weekly rotation, 2 engineers per shift'
+      user_journeys: "Investigation creation, Entity search, Relationship mapping, Copilot queries"
+      current_observability: "Prometheus metrics, Grafana dashboards, basic logging"
+      reliability_targets: "99.9% availability, p99 < 500ms, 99.5% success rate"
+      alerting_channels: "PagerDuty, Slack #alerts, Email"
+      on_call_structure: "Weekly rotation, 2 engineers per shift"
     expected_contains:
-      - 'slos'
-      - 'Alert Rules'
-      - 'burn rate'
-      - 'correlation'
+      - "slos"
+      - "Alert Rules"
+      - "burn rate"
+      - "correlation"

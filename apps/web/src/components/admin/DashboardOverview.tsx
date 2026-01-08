@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 import {
   Box,
   Grid,
@@ -12,7 +12,7 @@ import {
   ListItemText,
   Chip,
   Skeleton,
-} from '@mui/material';
+} from '@mui/material'
 import {
   People as PeopleIcon,
   TrendingUp as TrendingUpIcon,
@@ -20,8 +20,19 @@ import {
   Warning as WarningIcon,
   CheckCircle as CheckCircleIcon,
   Error as ErrorIcon,
-} from '@mui/icons-material';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+} from '@mui/icons-material'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts'
 
 // ============================================================================
 // TYPES
@@ -29,47 +40,47 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 interface DashboardStats {
   users: {
-    totalUsers: number;
-    activeUsers: number;
-    suspendedUsers: number;
-    adminUsers: number;
-    analystUsers: number;
-    viewerUsers: number;
-    activeToday: number;
-    activeThisWeek: number;
-    newThisMonth: number;
-  };
+    totalUsers: number
+    activeUsers: number
+    suspendedUsers: number
+    adminUsers: number
+    analystUsers: number
+    viewerUsers: number
+    activeToday: number
+    activeThisWeek: number
+    newThisMonth: number
+  }
   audit: {
-    totalEvents: number;
-    eventsToday: number;
-    eventsThisWeek: number;
-    successfulEvents: number;
-    failedEvents: number;
-    uniqueUsers: number;
-    topActions: Array<{ action: string; count: number }>;
-  };
+    totalEvents: number
+    eventsToday: number
+    eventsThisWeek: number
+    successfulEvents: number
+    failedEvents: number
+    uniqueUsers: number
+    topActions: Array<{ action: string; count: number }>
+  }
   moderation: {
-    totalItems: number;
-    pendingItems: number;
-    approvedItems: number;
-    rejectedItems: number;
-    criticalItems: number;
-    highPriorityItems: number;
-    avgResolutionTimeSeconds: number;
-  };
+    totalItems: number
+    pendingItems: number
+    approvedItems: number
+    rejectedItems: number
+    criticalItems: number
+    highPriorityItems: number
+    avgResolutionTimeSeconds: number
+  }
   alerts: {
-    totalAlerts: number;
-    activeAlerts: number;
-    criticalAlerts: number;
-    highSeverityAlerts: number;
-    securityAlerts: number;
-    performanceAlerts: number;
-  };
+    totalAlerts: number
+    activeAlerts: number
+    criticalAlerts: number
+    highSeverityAlerts: number
+    securityAlerts: number
+    performanceAlerts: number
+  }
 }
 
 interface Props {
-  data?: DashboardStats;
-  loading?: boolean;
+  data?: DashboardStats
+  loading?: boolean
 }
 
 // ============================================================================
@@ -80,30 +91,31 @@ export default function DashboardOverview({ data, loading }: Props) {
   if (loading || !data) {
     return (
       <Grid container spacing={3}>
-        {[1, 2, 3, 4].map((i) => (
+        {[1, 2, 3, 4].map(i => (
           <Grid item xs={12} sm={6} md={3} key={i}>
             <Skeleton variant="rectangular" height={150} />
           </Grid>
         ))}
       </Grid>
-    );
+    )
   }
 
-  const { users, audit, moderation, alerts } = data;
+  const { users, audit, moderation, alerts } = data
 
   // Calculate percentages
-  const activeUserPercentage = (users.activeUsers / users.totalUsers) * 100;
-  const auditSuccessRate = (audit.successfulEvents / audit.totalEvents) * 100;
-  const moderationPendingPercentage = (moderation.pendingItems / moderation.totalItems) * 100;
+  const activeUserPercentage = (users.activeUsers / users.totalUsers) * 100
+  const auditSuccessRate = (audit.successfulEvents / audit.totalEvents) * 100
+  const moderationPendingPercentage =
+    (moderation.pendingItems / moderation.totalItems) * 100
 
   // Data for charts
   const userRoleData = [
     { name: 'Admins', value: users.adminUsers },
     { name: 'Analysts', value: users.analystUsers },
     { name: 'Viewers', value: users.viewerUsers },
-  ];
+  ]
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28']
 
   return (
     <Box>
@@ -270,13 +282,18 @@ export default function DashboardOverview({ data, loading }: Props) {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  label={({ name, percent }) =>
+                    `${name}: ${(percent * 100).toFixed(0)}%`
+                  }
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
                 >
                   {userRoleData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
                   ))}
                 </Pie>
                 <Tooltip />
@@ -294,7 +311,12 @@ export default function DashboardOverview({ data, loading }: Props) {
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={audit.topActions.slice(0, 5)}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="action" angle={-45} textAnchor="end" height={100} />
+                <XAxis
+                  dataKey="action"
+                  angle={-45}
+                  textAnchor="end"
+                  height={100}
+                />
                 <YAxis />
                 <Tooltip />
                 <Bar dataKey="count" fill="#8884d8" />
@@ -371,7 +393,9 @@ export default function DashboardOverview({ data, loading }: Props) {
                 />
                 <Chip
                   label={`${moderationPendingPercentage.toFixed(0)}%`}
-                  color={moderationPendingPercentage > 50 ? 'warning' : 'default'}
+                  color={
+                    moderationPendingPercentage > 50 ? 'warning' : 'default'
+                  }
                   size="small"
                 />
               </ListItem>
@@ -399,5 +423,5 @@ export default function DashboardOverview({ data, loading }: Props) {
         </Grid>
       </Grid>
     </Box>
-  );
+  )
 }

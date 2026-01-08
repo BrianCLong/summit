@@ -11,10 +11,10 @@
 
 export type UUID = string;
 export type Timestamp = string; // ISO 8601
-export type RiskTier = 'low' | 'medium' | 'high' | 'critical';
-export type TaskStatus = 'pending' | 'queued' | 'running' | 'completed' | 'failed' | 'cancelled';
-export type AgentStatus = 'active' | 'busy' | 'unhealthy' | 'retired';
-export type PolicyAction = 'allow' | 'deny' | 'allow_with_redactions' | 'escalate_to_human';
+export type RiskTier = "low" | "medium" | "high" | "critical";
+export type TaskStatus = "pending" | "queued" | "running" | "completed" | "failed" | "cancelled";
+export type AgentStatus = "active" | "busy" | "unhealthy" | "retired";
+export type PolicyAction = "allow" | "deny" | "allow_with_redactions" | "escalate_to_human";
 
 // ============================================================================
 // AGENT DESCRIPTORS
@@ -53,19 +53,19 @@ export interface AgentDescriptor {
 }
 
 export type AgentRole =
-  | 'planner'
-  | 'coder'
-  | 'researcher'
-  | 'critic'
-  | 'red_teamer'
-  | 'policy_guardian'
-  | 'provenance_auditor'
-  | 'judge'
-  | 'human_bridge'
-  | 'ops_engineer'
-  | 'data_engineer'
-  | 'product_strategist'
-  | 'custom';
+  | "planner"
+  | "coder"
+  | "researcher"
+  | "critic"
+  | "red_teamer"
+  | "policy_guardian"
+  | "provenance_auditor"
+  | "judge"
+  | "human_bridge"
+  | "ops_engineer"
+  | "data_engineer"
+  | "product_strategist"
+  | "custom";
 
 export interface ModelPreference {
   provider: ModelProvider;
@@ -76,7 +76,7 @@ export interface ModelPreference {
   fallbackModel?: string;
 }
 
-export type ModelProvider = 'anthropic' | 'openai' | 'google' | 'local';
+export type ModelProvider = "anthropic" | "openai" | "google" | "local";
 
 export interface CostProfile {
   /** Cost per 1K input tokens */
@@ -158,7 +158,7 @@ export interface ToolDescriptor {
   /** Required roles to invoke */
   requiredRoles: string[];
   /** Tool status */
-  status: 'active' | 'deprecated' | 'disabled';
+  status: "active" | "deprecated" | "disabled";
 }
 
 export interface ToolCostModel {
@@ -167,7 +167,7 @@ export interface ToolCostModel {
   /** Variable cost based on input size */
   perInputUnit?: number;
   /** Unit type for variable cost */
-  inputUnitType?: 'bytes' | 'tokens' | 'records';
+  inputUnitType?: "bytes" | "tokens" | "records";
   currency: string;
 }
 
@@ -211,7 +211,7 @@ export interface TaskMetadata {
   spanId?: string;
 }
 
-export type DataClassification = 'public' | 'internal' | 'confidential' | 'restricted';
+export type DataClassification = "public" | "internal" | "confidential" | "restricted";
 
 export interface CallerIdentity {
   userId?: string;
@@ -233,17 +233,17 @@ export interface LatencySlo {
 }
 
 export type RoutingStrategy =
-  | 'cheapest_meeting_slo'
-  | 'max_quality'
-  | 'defensive_multi_model'
-  | 'consensus'
-  | 'fastest';
+  | "cheapest_meeting_slo"
+  | "max_quality"
+  | "defensive_multi_model"
+  | "consensus"
+  | "fastest";
 
 export interface RoutingAttempt {
   agentId: UUID;
   modelProvider: ModelProvider;
   timestamp: Timestamp;
-  result: 'success' | 'failure' | 'timeout';
+  result: "success" | "failure" | "timeout";
   latencyMs?: number;
   error?: string;
 }
@@ -267,16 +267,16 @@ export interface PolicyContext {
 }
 
 export type PolicyActionType =
-  | 'task_assign'
-  | 'tool_invoke'
-  | 'model_call'
-  | 'data_export'
-  | 'data_read'
-  | 'agent_spawn'
-  | 'external_api_call';
+  | "task_assign"
+  | "tool_invoke"
+  | "model_call"
+  | "data_export"
+  | "data_read"
+  | "agent_spawn"
+  | "external_api_call";
 
 export interface PolicySubject {
-  type: 'user' | 'agent' | 'service';
+  type: "user" | "agent" | "service";
   id: string;
   roles: string[];
   attributes: Record<string, unknown>;
@@ -319,7 +319,7 @@ export interface PolicyCondition {
 
 export interface RedactionSpec {
   path: string;
-  strategy: 'mask' | 'remove' | 'hash' | 'encrypt';
+  strategy: "mask" | "remove" | "hash" | "encrypt";
 }
 
 // ============================================================================
@@ -351,19 +351,19 @@ export interface ProvenanceRecord {
 }
 
 export type ProvenanceEventType =
-  | 'task_created'
-  | 'task_assigned'
-  | 'task_completed'
-  | 'task_failed'
-  | 'subtask_spawned'
-  | 'model_call'
-  | 'tool_invocation'
-  | 'policy_decision'
-  | 'agent_handoff'
-  | 'human_review_requested'
-  | 'human_review_completed'
-  | 'output_produced'
-  | 'error_occurred';
+  | "task_created"
+  | "task_assigned"
+  | "task_completed"
+  | "task_failed"
+  | "subtask_spawned"
+  | "model_call"
+  | "tool_invocation"
+  | "policy_decision"
+  | "agent_handoff"
+  | "human_review_requested"
+  | "human_review_completed"
+  | "output_produced"
+  | "error_occurred";
 
 export type ProvenancePayload =
   | TaskCreatedPayload
@@ -374,14 +374,14 @@ export type ProvenancePayload =
   | ErrorPayload;
 
 export interface TaskCreatedPayload {
-  type: 'task_created';
+  type: "task_created";
   taskType: string;
   inputSummary: string;
   priority: number;
 }
 
 export interface ModelCallPayload {
-  type: 'model_call';
+  type: "model_call";
   provider: ModelProvider;
   model: string;
   promptHash: string;
@@ -393,7 +393,7 @@ export interface ModelCallPayload {
 }
 
 export interface ToolInvocationPayload {
-  type: 'tool_invocation';
+  type: "tool_invocation";
   toolName: string;
   inputHash: string;
   outputHash: string;
@@ -403,21 +403,21 @@ export interface ToolInvocationPayload {
 }
 
 export interface PolicyDecisionPayload {
-  type: 'policy_decision';
+  type: "policy_decision";
   action: PolicyAction;
   reason: string;
   policyIds: string[];
 }
 
 export interface OutputProducedPayload {
-  type: 'output_produced';
+  type: "output_produced";
   outputType: string;
   outputHash: string;
   size: number;
 }
 
 export interface ErrorPayload {
-  type: 'error';
+  type: "error";
   errorCode: string;
   message: string;
   stackTrace?: string;
@@ -476,7 +476,7 @@ export interface AlternativeRoute {
  */
 export interface TaskOutput<T = Record<string, unknown>> {
   taskId: UUID;
-  status: 'completed' | 'failed' | 'needs_review';
+  status: "completed" | "failed" | "needs_review";
   result?: T;
   error?: TaskError;
   subtasks?: SubtaskResult[];
@@ -518,12 +518,12 @@ export interface AgentLifecycleEvent {
 }
 
 export type AgentLifecycleEventType =
-  | 'registered'
-  | 'task_received'
-  | 'subtask_result'
-  | 'error'
-  | 'health_check'
-  | 'retired';
+  | "registered"
+  | "task_received"
+  | "subtask_result"
+  | "error"
+  | "health_check"
+  | "retired";
 
 // ============================================================================
 // UTILITY TYPES
@@ -548,7 +548,7 @@ export interface PaginatedResult<T> {
 
 export interface HealthStatus {
   service: string;
-  status: 'healthy' | 'degraded' | 'unhealthy';
+  status: "healthy" | "degraded" | "unhealthy";
   latencyMs: number;
   details?: Record<string, unknown>;
   checkedAt: Timestamp;

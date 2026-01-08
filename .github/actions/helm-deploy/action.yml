@@ -3,19 +3,20 @@ inputs:
   chart: { required: true }
   namespace: { required: true }
   values: { required: false }
-  image: { required: true, description: 'Container image (tag or digest) to verify before deployment' }
-  cosign_public_key: { required: false, description: 'Optional cosign public key for verification' }
+  image:
+    { required: true, description: "Container image (tag or digest) to verify before deployment" }
+  cosign_public_key: { required: false, description: "Optional cosign public key for verification" }
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - uses: sigstore/cosign-installer@v3
       with:
-        cosign-release: 'v2.2.4'
+        cosign-release: "v2.2.4"
 
     - name: Verify image attestation
       shell: bash
       env:
-        COSIGN_EXPERIMENTAL: '1'
+        COSIGN_EXPERIMENTAL: "1"
       run: |
         set -euo pipefail
         if [ -z "${{ inputs.image }}" ]; then

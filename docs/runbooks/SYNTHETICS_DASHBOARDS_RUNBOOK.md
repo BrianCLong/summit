@@ -38,18 +38,18 @@ This runbook covers:
 ```javascript
 export const options = {
   stages: [
-    { duration: '30s', target: 10 }, // Ramp-up
-    { duration: '1m', target: 10 }, // Steady state
-    { duration: '30s', target: 0 }, // Ramp-down
+    { duration: "30s", target: 10 }, // Ramp-up
+    { duration: "1m", target: 10 }, // Steady state
+    { duration: "30s", target: 0 }, // Ramp-down
   ],
   thresholds: {
-    'http_req_duration{type:api}': ['p(95)<1500'],
-    login_duration: ['p(95)<2000'],
-    query_duration: ['p(95)<1500'],
-    graph_render_duration: ['p(95)<3000'],
-    export_duration: ['p(95)<5000'],
-    golden_flow_success: ['rate>0.99'],
-    http_req_failed: ['rate<0.01'],
+    "http_req_duration{type:api}": ["p(95)<1500"],
+    login_duration: ["p(95)<2000"],
+    query_duration: ["p(95)<1500"],
+    graph_render_duration: ["p(95)<3000"],
+    export_duration: ["p(95)<5000"],
+    golden_flow_success: ["rate>0.99"],
+    http_req_failed: ["rate<0.01"],
   },
 };
 ```
@@ -204,8 +204,8 @@ curl -X POST "$GRAFANA_URL/api/dashboards/db" \
 # /etc/grafana/provisioning/dashboards/slo-dashboards.yml
 apiVersion: 1
 providers:
-  - name: 'SLO Dashboards'
-    folder: 'Observability'
+  - name: "SLO Dashboards"
+    folder: "Observability"
     type: file
     options:
       path: /var/lib/grafana/dashboards/slo
@@ -335,43 +335,43 @@ opa_decision_duration_seconds_bucket{trace_id="a1b2c3d4e5f6g7h8"}
 
 ```yaml
 route:
-  group_by: ['alertname', 'severity', 'slo']
+  group_by: ["alertname", "severity", "slo"]
   group_wait: 10s
   group_interval: 10s
   repeat_interval: 12h
-  receiver: 'default'
+  receiver: "default"
   routes:
     - match:
         severity: critical
-      receiver: 'critical-alerts'
+      receiver: "critical-alerts"
     - match:
         severity: warning
-      receiver: 'warning-alerts'
+      receiver: "warning-alerts"
     - match:
         slo: opa_latency
-      receiver: 'opa-slo-alerts'
+      receiver: "opa-slo-alerts"
 
 receivers:
-  - name: 'default'
+  - name: "default"
     slack_configs:
-      - channel: '#alerts'
+      - channel: "#alerts"
         send_resolved: true
 
-  - name: 'critical-alerts'
+  - name: "critical-alerts"
     pagerduty_configs:
-      - service_key: '<pagerduty-key>'
+      - service_key: "<pagerduty-key>"
     slack_configs:
-      - channel: '#critical-alerts'
-        color: 'danger'
+      - channel: "#critical-alerts"
+        color: "danger"
 
-  - name: 'warning-alerts'
+  - name: "warning-alerts"
     slack_configs:
-      - channel: '#slo-warnings'
-        color: 'warning'
+      - channel: "#slo-warnings"
+        color: "warning"
 
-  - name: 'opa-slo-alerts'
+  - name: "opa-slo-alerts"
     slack_configs:
-      - channel: '#opa-performance'
+      - channel: "#opa-performance"
         text: |
           Alert: {{ .GroupLabels.alertname }}
           Description: {{ .CommonAnnotations.description }}
@@ -671,18 +671,18 @@ Add to `observability/prometheus/alerts/slo-alerts.yml`:
     slo: db_latency
     panel_uid: db-p95-latency-006
   annotations:
-    summary: 'Database p95 query latency exceeds SLO (>1s)'
-    dashboard_url: 'https://grafana.example.com/d/slo-core/slo-core-dashboards?viewPanel=db-p95-latency-006'
+    summary: "Database p95 query latency exceeds SLO (>1s)"
+    dashboard_url: "https://grafana.example.com/d/slo-core/slo-core-dashboards?viewPanel=db-p95-latency-006"
 ```
 
 **4. Add to k6 Test**:
 
 ```javascript
-const dbQueryDuration = new Trend('db_query_duration', true);
+const dbQueryDuration = new Trend("db_query_duration", true);
 
 export const options = {
   thresholds: {
-    db_query_duration: ['p(95)<1000'],
+    db_query_duration: ["p(95)<1000"],
   },
 };
 ```

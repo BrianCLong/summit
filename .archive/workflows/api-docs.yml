@@ -8,9 +8,9 @@ on:
     branches:
       - main
     paths:
-      - 'maestro-orchestration-api.yaml'
-      - 'intelgraph-core-api.yaml'
-      - 'docs-site/**'
+      - "maestro-orchestration-api.yaml"
+      - "intelgraph-core-api.yaml"
+      - "docs-site/**"
 
 jobs:
   build-docs:
@@ -25,8 +25,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
       - name: Install dependencies
         run: |
           cd docs-site

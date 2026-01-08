@@ -1,6 +1,6 @@
-const axios = require('axios');
-const { createHash } = require('crypto');
-const { readFileSync } = require('fs');
+const axios = require("axios");
+const { createHash } = require("crypto");
+const { readFileSync } = require("fs");
 
 async function getTemplates(apiBase) {
   const { data } = await axios.get(`${apiBase}/reports/templates`);
@@ -14,7 +14,7 @@ async function renderReport(apiBase, payload) {
 
 function verifyReport(filePath, expectedHash) {
   const file = readFileSync(filePath);
-  const hash = createHash('sha256').update(file).digest('hex');
+  const hash = createHash("sha256").update(file).digest("hex");
   return hash === expectedHash;
 }
 

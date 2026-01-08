@@ -10,13 +10,10 @@ export function exportDisclosurePackHandler(req: Request, res: Response) {
   trackEvent(req, "disclosure_pack_exported", {
     pack_id: pack.id,
     environment: pack.environment,
-    residency_region: pack.residency_region ?? "us"
+    residency_region: pack.residency_region ?? "us",
   });
 
   res.setHeader("Content-Type", "application/json");
-  res.setHeader(
-    "Content-Disposition",
-    `attachment; filename="disclosure-${pack.id}.json"`
-  );
+  res.setHeader("Content-Disposition", `attachment; filename="disclosure-${pack.id}.json"`);
   return res.status(200).send(pack);
 }

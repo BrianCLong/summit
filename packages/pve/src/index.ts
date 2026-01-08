@@ -8,10 +8,10 @@
  */
 
 // Core exports
-export * from './types/index.js';
-export * from './evaluator/index.js';
-export * from './github/index.js';
-export * from './utils/index.js';
+export * from "./types/index.js";
+export * from "./evaluator/index.js";
+export * from "./github/index.js";
+export * from "./utils/index.js";
 
 // Convenience re-exports
 export {
@@ -22,7 +22,7 @@ export {
   type EvaluationOptions,
   type EvaluationReport,
   type CustomValidator,
-} from './evaluator/PolicyEngine.js';
+} from "./evaluator/PolicyEngine.js";
 
 export {
   PolicyResultBuilder,
@@ -32,21 +32,21 @@ export {
   info,
   aggregateResults,
   formatResults,
-} from './evaluator/PolicyResult.js';
+} from "./evaluator/PolicyResult.js";
 
 export {
   OPAAdapter,
   createOPAAdapter,
   type OPAConfig,
   type OPAEvalResult,
-} from './evaluator/OPAAdapter.js';
+} from "./evaluator/OPAAdapter.js";
 
 export {
   PRValidator,
   createPRValidator,
   type PRValidatorConfig,
   type PRValidationResult,
-} from './github/pull-request-validator.js';
+} from "./github/pull-request-validator.js";
 
 export {
   parseDiff,
@@ -55,18 +55,18 @@ export {
   type ParsedDiff,
   type ParsedFile,
   type DiffHunk,
-} from './github/diff-parser.js';
+} from "./github/diff-parser.js";
 
 // Version
-export const VERSION = '0.1.0';
+export const VERSION = "0.1.0";
 
 /**
  * Quick validation helper
  */
 export async function validate(
-  input: import('./types/index.js').EvaluationContext,
-  options?: import('./evaluator/PolicyEngine.js').EvaluationOptions,
-): Promise<import('./evaluator/PolicyEngine.js').EvaluationReport> {
+  input: import("./types/index.js").EvaluationContext,
+  options?: import("./evaluator/PolicyEngine.js").EvaluationOptions
+): Promise<import("./evaluator/PolicyEngine.js").EvaluationReport> {
   const engine = createPolicyEngine();
   return engine.evaluate(input, options);
 }
@@ -75,8 +75,8 @@ export async function validate(
  * Quick assertion helper - throws if validation fails
  */
 export async function assertValid(
-  input: import('./types/index.js').EvaluationContext,
-  options?: import('./evaluator/PolicyEngine.js').EvaluationOptions,
+  input: import("./types/index.js").EvaluationContext,
+  options?: import("./evaluator/PolicyEngine.js").EvaluationOptions
 ): Promise<void> {
   const engine = createPolicyEngine();
   return engine.assertAll(input, options);

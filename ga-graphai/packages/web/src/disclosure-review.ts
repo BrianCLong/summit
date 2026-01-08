@@ -32,14 +32,14 @@ export interface DisclosureManifestLike {
 }
 
 export const LICENSE_OPTIONS = [
-  { id: 'CC-BY-4.0', name: 'Creative Commons BY 4.0' },
-  { id: 'CC-BY-SA-4.0', name: 'Creative Commons BY-SA 4.0' },
-  { id: 'PROPRIETARY', name: 'Proprietary / Restricted' },
+  { id: "CC-BY-4.0", name: "Creative Commons BY 4.0" },
+  { id: "CC-BY-SA-4.0", name: "Creative Commons BY-SA 4.0" },
+  { id: "PROPRIETARY", name: "Proprietary / Restricted" },
 ];
 
 export function estimateBundleCost(
   totalBytes: number,
-  options: { usdPerMb?: number } = {},
+  options: { usdPerMb?: number } = {}
 ): { estimatedSizeMb: number; estimatedCostUsd: number } {
   const usdPerMb = options.usdPerMb ?? 0.02;
   const estimatedSizeMb = Number((totalBytes / (1024 * 1024)).toFixed(2));
@@ -49,27 +49,27 @@ export function estimateBundleCost(
 
 export function buildDisclosureReview(
   manifest: DisclosureManifestLike,
-  totalBytes: number,
+  totalBytes: number
 ): DisclosureReview {
   const artifacts: DisclosureArtifact[] = [
     ...manifest.documents.map((doc) => ({
       id: doc.id,
       path: doc.path,
-      role: doc.role ?? 'document',
+      role: doc.role ?? "document",
     })),
     ...(manifest.exhibits ?? []).map((exhibit) => ({
       id: exhibit.id,
       path: exhibit.path,
-      role: exhibit.role ?? 'exhibit',
+      role: exhibit.role ?? "exhibit",
     })),
     ...(manifest.evidence ?? []).map((evidence) => ({
       id: evidence.id,
       path: evidence.path,
-      role: evidence.role ?? 'evidence',
+      role: evidence.role ?? "evidence",
     })),
   ];
   const redactionFields = Array.from(
-    new Set((manifest.disclosure?.redactions ?? []).map((redaction) => redaction.field)),
+    new Set((manifest.disclosure?.redactions ?? []).map((redaction) => redaction.field))
   );
   const { estimatedSizeMb, estimatedCostUsd } = estimateBundleCost(totalBytes);
   return {
@@ -85,7 +85,7 @@ export function buildDisclosureReview(
 
 export function diffArtifacts(
   previous: DisclosureArtifact[],
-  current: DisclosureArtifact[],
+  current: DisclosureArtifact[]
 ): DisclosureArtifactDiff {
   const previousIds = new Set(previous.map((artifact) => artifact.id));
   const currentIds = new Set(current.map((artifact) => artifact.id));

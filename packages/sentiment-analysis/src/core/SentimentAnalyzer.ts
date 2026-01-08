@@ -2,16 +2,12 @@
  * Main sentiment analyzer orchestrating all sentiment analysis components
  */
 
-import { BertSentimentModel } from '../models/BertSentimentModel.js';
-import { EmotionClassifier } from '../models/EmotionClassifier.js';
-import { SarcasmDetector } from '../analyzers/SarcasmDetector.js';
-import { AspectBasedAnalyzer } from '../analyzers/AspectBasedAnalyzer.js';
-import { TemporalSentimentTracker } from '../analyzers/TemporalSentimentTracker.js';
-import type {
-  SentimentAnalysisResult,
-  AnalysisOptions,
-  ModelConfig,
-} from './types.js';
+import { BertSentimentModel } from "../models/BertSentimentModel.js";
+import { EmotionClassifier } from "../models/EmotionClassifier.js";
+import { SarcasmDetector } from "../analyzers/SarcasmDetector.js";
+import { AspectBasedAnalyzer } from "../analyzers/AspectBasedAnalyzer.js";
+import { TemporalSentimentTracker } from "../analyzers/TemporalSentimentTracker.js";
+import type { SentimentAnalysisResult, AnalysisOptions, ModelConfig } from "./types.js";
 
 export class SentimentAnalyzer {
   private sentimentModel: BertSentimentModel;
@@ -37,19 +33,13 @@ export class SentimentAnalyzer {
       return;
     }
 
-    await Promise.all([
-      this.sentimentModel.initialize(),
-      this.emotionClassifier.initialize(),
-    ]);
+    await Promise.all([this.sentimentModel.initialize(), this.emotionClassifier.initialize()]);
 
     this.isInitialized = true;
-    console.log('Sentiment Analyzer initialized successfully');
+    console.log("Sentiment Analyzer initialized successfully");
   }
 
-  async analyze(
-    text: string,
-    options: AnalysisOptions = {}
-  ): Promise<SentimentAnalysisResult> {
+  async analyze(text: string, options: AnalysisOptions = {}): Promise<SentimentAnalysisResult> {
     if (!this.isInitialized) {
       await this.initialize();
     }
@@ -78,9 +68,7 @@ export class SentimentAnalyzer {
         };
 
     // Run aspect-based analysis
-    const aspects = includeAspects
-      ? await this.aspectAnalyzer.analyzeAspects(text)
-      : [];
+    const aspects = includeAspects ? await this.aspectAnalyzer.analyzeAspects(text) : [];
 
     // Detect sarcasm and irony
     const sarcasmScore = detectSarcasm
@@ -118,13 +106,13 @@ export class SentimentAnalyzer {
       await this.initialize();
     }
 
-    return Promise.all(texts.map(text => this.analyze(text, options)));
+    return Promise.all(texts.map((text) => this.analyze(text, options)));
   }
 
   trackSentiment(entityId: string, text: string, timestamp?: Date): void {
     // This would typically be called after analyze()
     // For now, we'll do a quick analysis
-    this.analyze(text).then(result => {
+    this.analyze(text).then((result) => {
       this.temporalTracker.trackSentiment(entityId, result.overallSentiment, timestamp);
     });
   }
@@ -149,11 +137,7 @@ export class SentimentAnalyzer {
 
   private calculateConfidence(sentiment: any, emotions: any): number {
     // Confidence based on decisiveness of sentiment and emotion scores
-    const sentimentMax = Math.max(
-      sentiment.positive,
-      sentiment.negative,
-      sentiment.neutral
-    );
+    const sentimentMax = Math.max(sentiment.positive, sentiment.negative, sentiment.neutral);
 
     const emotionMax = Math.max(
       emotions.anger,
@@ -169,10 +153,7 @@ export class SentimentAnalyzer {
   }
 
   async dispose(): Promise<void> {
-    await Promise.all([
-      this.sentimentModel.dispose(),
-      this.emotionClassifier.dispose(),
-    ]);
+    await Promise.all([this.sentimentModel.dispose(), this.emotionClassifier.dispose()]);
     this.isInitialized = false;
   }
 }

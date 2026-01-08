@@ -11,7 +11,7 @@ import type {
   PolicySeverity,
   PolicyDetails,
   PolicyLocation,
-} from '../types/index.js';
+} from "../types/index.js";
 
 /**
  * Builder class for constructing PolicyResult objects
@@ -69,21 +69,21 @@ export class PolicyResultBuilder {
    * Set as error severity
    */
   asError(): this {
-    return this.severity('error');
+    return this.severity("error");
   }
 
   /**
    * Set as warning severity
    */
   asWarning(): this {
-    return this.severity('warning');
+    return this.severity("warning");
   }
 
   /**
    * Set as info severity
    */
   asInfo(): this {
-    return this.severity('info');
+    return this.severity("info");
   }
 
   /**
@@ -218,12 +218,12 @@ export function fail(
     fix?: string;
     location?: PolicyLocation;
     details?: PolicyDetails;
-  },
+  }
 ): PolicyResult {
   const builder = PolicyResultBuilder.for(policy)
     .deny()
     .message(message)
-    .severity(options?.severity || 'error');
+    .severity(options?.severity || "error");
 
   if (options?.fix) {
     builder.fix(options.fix);
@@ -248,9 +248,9 @@ export function warn(
     fix?: string;
     location?: PolicyLocation;
     details?: PolicyDetails;
-  },
+  }
 ): PolicyResult {
-  return fail(policy, message, { ...options, severity: 'warning' });
+  return fail(policy, message, { ...options, severity: "warning" });
 }
 
 /**
@@ -262,9 +262,9 @@ export function info(
   options?: {
     location?: PolicyLocation;
     details?: PolicyDetails;
-  },
+  }
 ): PolicyResult {
-  return fail(policy, message, { ...options, severity: 'info' });
+  return fail(policy, message, { ...options, severity: "info" });
 }
 
 /**
@@ -279,9 +279,9 @@ export function aggregateResults(results: PolicyResult[]): {
   warnings: PolicyResult[];
   infos: PolicyResult[];
 } {
-  const errors = results.filter((r) => !r.allowed && r.severity === 'error');
-  const warnings = results.filter((r) => !r.allowed && r.severity === 'warning');
-  const infos = results.filter((r) => !r.allowed && r.severity === 'info');
+  const errors = results.filter((r) => !r.allowed && r.severity === "error");
+  const warnings = results.filter((r) => !r.allowed && r.severity === "warning");
+  const infos = results.filter((r) => !r.allowed && r.severity === "info");
 
   return {
     passed: errors.length === 0,
@@ -299,7 +299,7 @@ export function aggregateResults(results: PolicyResult[]): {
  */
 export function formatResults(
   results: PolicyResult[],
-  options?: { verbose?: boolean; colors?: boolean },
+  options?: { verbose?: boolean; colors?: boolean }
 ): string {
   const { verbose = false, colors = true } = options || {};
   const lines: string[] = [];
@@ -307,20 +307,19 @@ export function formatResults(
   const colorize = (text: string, color: string): string => {
     if (!colors) return text;
     const codes: Record<string, string> = {
-      red: '\x1b[31m',
-      yellow: '\x1b[33m',
-      green: '\x1b[32m',
-      cyan: '\x1b[36m',
-      reset: '\x1b[0m',
+      red: "\x1b[31m",
+      yellow: "\x1b[33m",
+      green: "\x1b[32m",
+      cyan: "\x1b[36m",
+      reset: "\x1b[0m",
     };
-    return `${codes[color] || ''}${text}${codes.reset}`;
+    return `${codes[color] || ""}${text}${codes.reset}`;
   };
 
   for (const result of results) {
-    const icon = result.allowed ? colorize('✓', 'green') : colorize('✗', 'red');
-    const severity = result.severity || (result.allowed ? 'info' : 'error');
-    const severityColor =
-      severity === 'error' ? 'red' : severity === 'warning' ? 'yellow' : 'cyan';
+    const icon = result.allowed ? colorize("✓", "green") : colorize("✗", "red");
+    const severity = result.severity || (result.allowed ? "info" : "error");
+    const severityColor = severity === "error" ? "red" : severity === "warning" ? "yellow" : "cyan";
 
     let line = `${icon} [${colorize(severity.toUpperCase(), severityColor)}] ${result.policy}`;
 
@@ -333,7 +332,7 @@ export function formatResults(
       if (result.location.line) {
         line += `:${result.location.line}`;
       }
-      line += ')';
+      line += ")";
     }
 
     lines.push(line);
@@ -348,17 +347,15 @@ export function formatResults(
   }
 
   const aggregate = aggregateResults(results);
-  lines.push('');
-  lines.push(
-    `${colorize('Summary:', 'cyan')} ${aggregate.passed_count}/${aggregate.total} passed`,
-  );
+  lines.push("");
+  lines.push(`${colorize("Summary:", "cyan")} ${aggregate.passed_count}/${aggregate.total} passed`);
 
   if (aggregate.errors.length > 0) {
-    lines.push(colorize(`  ${aggregate.errors.length} error(s)`, 'red'));
+    lines.push(colorize(`  ${aggregate.errors.length} error(s)`, "red"));
   }
   if (aggregate.warnings.length > 0) {
-    lines.push(colorize(`  ${aggregate.warnings.length} warning(s)`, 'yellow'));
+    lines.push(colorize(`  ${aggregate.warnings.length} warning(s)`, "yellow"));
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }

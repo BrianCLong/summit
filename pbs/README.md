@@ -35,9 +35,9 @@ Pass `--recommendation` to include the rollout summary inside the page. The gene
 
 ## Determinism and Verification
 
-* Reports embed a deterministic `deterministic_run_id` derived from the policy digest, history digest, and engine version.
-* Engine tests cover deterministic reproduction, policy delta expectations, and signature integrity.
-* Golden recommendations prevent accidental drift in rollout guidance.
+- Reports embed a deterministic `deterministic_run_id` derived from the policy digest, history digest, and engine version.
+- Engine tests cover deterministic reproduction, policy delta expectations, and signature integrity.
+- Golden recommendations prevent accidental drift in rollout guidance.
 
 ## File Layout
 

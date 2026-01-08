@@ -81,16 +81,16 @@ A secure, scalable marketplace enabling seamless public/private sector data shar
 
 ### Service Architecture
 
-| Service | Responsibility | Tech Stack |
-|---------|---------------|------------|
-| **Catalog Service** | Dataset discovery, search, metadata | GraphQL, Elasticsearch |
-| **Transaction Service** | Purchase flow, payments, settlements | PostgreSQL, Stripe |
-| **Access Control** | Permissions, tokens, usage limits | OPA, Redis |
-| **Compliance Engine** | Regulatory checks, certifications | Python ML, Rules Engine |
-| **Consent Manager** | User consent, preferences, DSAR | PostgreSQL, Event Sourcing |
-| **Risk Scorer** | Sensitivity analysis, PII detection | ML Pipeline, NLP |
-| **Pricing Engine** | Dynamic pricing, negotiations | PostgreSQL, Redis |
-| **Analytics Service** | Usage metrics, reporting | TimescaleDB, Grafana |
+| Service                 | Responsibility                       | Tech Stack                 |
+| ----------------------- | ------------------------------------ | -------------------------- |
+| **Catalog Service**     | Dataset discovery, search, metadata  | GraphQL, Elasticsearch     |
+| **Transaction Service** | Purchase flow, payments, settlements | PostgreSQL, Stripe         |
+| **Access Control**      | Permissions, tokens, usage limits    | OPA, Redis                 |
+| **Compliance Engine**   | Regulatory checks, certifications    | Python ML, Rules Engine    |
+| **Consent Manager**     | User consent, preferences, DSAR      | PostgreSQL, Event Sourcing |
+| **Risk Scorer**         | Sensitivity analysis, PII detection  | ML Pipeline, NLP           |
+| **Pricing Engine**      | Dynamic pricing, negotiations        | PostgreSQL, Redis          |
+| **Analytics Service**   | Usage metrics, reporting             | TimescaleDB, Grafana       |
 
 ---
 
@@ -161,18 +161,18 @@ interface ConsentRecord {
   revocationReason?: string;
 
   // Audit
-  consentMethod: 'explicit' | 'opt-in' | 'contractual';
+  consentMethod: "explicit" | "opt-in" | "contractual";
   evidenceHash: string; // Blockchain anchored
   version: number;
 }
 
 enum ConsentPurpose {
-  ANALYTICS = 'analytics',
-  RESEARCH = 'research',
-  MARKETING = 'marketing',
-  AI_TRAINING = 'ai_training',
-  RESALE = 'resale',
-  INTERNAL_USE = 'internal_use'
+  ANALYTICS = "analytics",
+  RESEARCH = "research",
+  MARKETING = "marketing",
+  AI_TRAINING = "ai_training",
+  RESALE = "resale",
+  INTERNAL_USE = "internal_use",
 }
 ```
 
@@ -185,14 +185,14 @@ interface RiskAssessment {
 
   // Overall Score (0-100, higher = more risk)
   overallScore: number;
-  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  riskLevel: "low" | "medium" | "high" | "critical";
 
   // Component Scores
-  piiScore: number;         // Personal data exposure
-  sensitivityScore: number;  // Data sensitivity
-  regulatoryScore: number;   // Regulatory complexity
-  reputationScore: number;   // Provider reputation
-  technicalScore: number;    // Security controls
+  piiScore: number; // Personal data exposure
+  sensitivityScore: number; // Data sensitivity
+  regulatoryScore: number; // Regulatory complexity
+  reputationScore: number; // Provider reputation
+  technicalScore: number; // Security controls
 
   // Findings
   piiDetected: PIIFinding[];
@@ -211,7 +211,7 @@ interface PIIFinding {
   fieldName: string;
   piiType: PIIType;
   confidence: number;
-  recommendation: 'mask' | 'encrypt' | 'remove' | 'consent_required';
+  recommendation: "mask" | "encrypt" | "remove" | "consent_required";
 }
 ```
 
@@ -253,15 +253,15 @@ interface DataTransaction {
 }
 
 enum TransactionStatus {
-  PENDING_PAYMENT = 'pending_payment',
-  PAYMENT_RECEIVED = 'payment_received',
-  COMPLIANCE_CHECK = 'compliance_check',
-  PREPARING_DATA = 'preparing_data',
-  DELIVERED = 'delivered',
-  COMPLETED = 'completed',
-  DISPUTED = 'disputed',
-  REFUNDED = 'refunded',
-  CANCELLED = 'cancelled'
+  PENDING_PAYMENT = "pending_payment",
+  PAYMENT_RECEIVED = "payment_received",
+  COMPLIANCE_CHECK = "compliance_check",
+  PREPARING_DATA = "preparing_data",
+  DELIVERED = "delivered",
+  COMPLETED = "completed",
+  DISPUTED = "disputed",
+  REFUNDED = "refunded",
+  CANCELLED = "cancelled",
 }
 ```
 
@@ -449,14 +449,14 @@ CREATE INDEX idx_consent_subject ON consent_records(data_subject_id);
 
 ### Privacy Controls
 
-| Control | Implementation |
-|---------|---------------|
-| **PII Detection** | ML-based scanning of all datasets |
-| **Anonymization** | k-anonymity, l-diversity, differential privacy |
-| **Encryption** | AES-256 at rest, TLS 1.3 in transit |
-| **Access Tokens** | Short-lived JWTs with usage limits |
-| **Audit Trail** | Immutable blockchain-anchored logs |
-| **Data Minimization** | Field-level access control |
+| Control               | Implementation                                 |
+| --------------------- | ---------------------------------------------- |
+| **PII Detection**     | ML-based scanning of all datasets              |
+| **Anonymization**     | k-anonymity, l-diversity, differential privacy |
+| **Encryption**        | AES-256 at rest, TLS 1.3 in transit            |
+| **Access Tokens**     | Short-lived JWTs with usage limits             |
+| **Audit Trail**       | Immutable blockchain-anchored logs             |
+| **Data Minimization** | Field-level access control                     |
 
 ### Access Control Matrix
 
@@ -504,45 +504,45 @@ interface ComplianceCheck {
 
 const complianceMatrix: ComplianceCheck[] = [
   {
-    regulation: 'GDPR',
+    regulation: "GDPR",
     requirements: [
-      { id: 'lawful_basis', description: 'Lawful basis for processing' },
-      { id: 'consent', description: 'Valid consent obtained' },
-      { id: 'data_minimization', description: 'Only necessary data' },
-      { id: 'right_to_erasure', description: 'Deletion capability' },
-      { id: 'portability', description: 'Export in standard format' }
+      { id: "lawful_basis", description: "Lawful basis for processing" },
+      { id: "consent", description: "Valid consent obtained" },
+      { id: "data_minimization", description: "Only necessary data" },
+      { id: "right_to_erasure", description: "Deletion capability" },
+      { id: "portability", description: "Export in standard format" },
     ],
     automatedChecks: [
-      { name: 'consent_record_exists', type: 'database_check' },
-      { name: 'pii_fields_documented', type: 'schema_check' },
-      { name: 'retention_policy_set', type: 'config_check' },
-      { name: 'dpo_contact_available', type: 'metadata_check' }
-    ]
+      { name: "consent_record_exists", type: "database_check" },
+      { name: "pii_fields_documented", type: "schema_check" },
+      { name: "retention_policy_set", type: "config_check" },
+      { name: "dpo_contact_available", type: "metadata_check" },
+    ],
   },
   {
-    regulation: 'CCPA',
+    regulation: "CCPA",
     requirements: [
-      { id: 'disclosure', description: 'Categories disclosed' },
-      { id: 'opt_out', description: 'Opt-out mechanism' },
-      { id: 'non_discrimination', description: 'Equal service' }
+      { id: "disclosure", description: "Categories disclosed" },
+      { id: "opt_out", description: "Opt-out mechanism" },
+      { id: "non_discrimination", description: "Equal service" },
     ],
     automatedChecks: [
-      { name: 'categories_documented', type: 'metadata_check' },
-      { name: 'opt_out_link_present', type: 'ui_check' }
-    ]
+      { name: "categories_documented", type: "metadata_check" },
+      { name: "opt_out_link_present", type: "ui_check" },
+    ],
   },
   {
-    regulation: 'HIPAA',
+    regulation: "HIPAA",
     requirements: [
-      { id: 'phi_identified', description: 'PHI fields identified' },
-      { id: 'baa_signed', description: 'BAA in place' },
-      { id: 'encryption', description: 'PHI encrypted' }
+      { id: "phi_identified", description: "PHI fields identified" },
+      { id: "baa_signed", description: "BAA in place" },
+      { id: "encryption", description: "PHI encrypted" },
     ],
     automatedChecks: [
-      { name: 'phi_fields_encrypted', type: 'schema_check' },
-      { name: 'baa_document_exists', type: 'document_check' }
-    ]
-  }
+      { name: "phi_fields_encrypted", type: "schema_check" },
+      { name: "baa_document_exists", type: "document_check" },
+    ],
+  },
 ];
 ```
 
@@ -551,11 +551,11 @@ const complianceMatrix: ComplianceCheck[] = [
 ```typescript
 function calculateRiskScore(product: DataProduct): RiskAssessment {
   const weights = {
-    pii: 0.30,
+    pii: 0.3,
     sensitivity: 0.25,
-    regulatory: 0.20,
+    regulatory: 0.2,
     reputation: 0.15,
-    technical: 0.10
+    technical: 0.1,
   };
 
   const piiScore = assessPIIRisk(product.schema, product.piiFields);
@@ -566,10 +566,10 @@ function calculateRiskScore(product: DataProduct): RiskAssessment {
 
   const overallScore = Math.round(
     piiScore * weights.pii +
-    sensitivityScore * weights.sensitivity +
-    regulatoryScore * weights.regulatory +
-    reputationScore * weights.reputation +
-    technicalScore * weights.technical
+      sensitivityScore * weights.sensitivity +
+      regulatoryScore * weights.regulatory +
+      reputationScore * weights.reputation +
+      technicalScore * weights.technical
   );
 
   return {
@@ -585,10 +585,10 @@ function calculateRiskScore(product: DataProduct): RiskAssessment {
 }
 
 function getRiskLevel(score: number): RiskLevel {
-  if (score <= 25) return 'low';
-  if (score <= 50) return 'medium';
-  if (score <= 75) return 'high';
-  return 'critical';
+  if (score <= 25) return "low";
+  if (score <= 50) return "medium";
+  if (score <= 75) return "high";
+  return "critical";
 }
 ```
 
@@ -767,14 +767,14 @@ GET    /api/v1/risk/report/:productId      # Get risk report
 
 ## Success Metrics
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
+| Metric                    | Target   | Measurement             |
+| ------------------------- | -------- | ----------------------- |
 | Time to First Transaction | < 30 min | From signup to purchase |
-| Compliance Check Time | < 5 sec | Automated assessment |
-| Platform Availability | 99.9% | Uptime SLA |
-| Data Delivery Time | < 1 min | For datasets < 1GB |
-| Provider Onboarding | < 1 day | Verification complete |
-| Risk Assessment Accuracy | > 95% | PII detection F1 score |
+| Compliance Check Time     | < 5 sec  | Automated assessment    |
+| Platform Availability     | 99.9%    | Uptime SLA              |
+| Data Delivery Time        | < 1 min  | For datasets < 1GB      |
+| Provider Onboarding       | < 1 day  | Verification complete   |
+| Risk Assessment Accuracy  | > 95%    | PII detection F1 score  |
 
 ---
 

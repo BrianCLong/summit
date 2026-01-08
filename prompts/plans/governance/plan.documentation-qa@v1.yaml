@@ -1,7 +1,7 @@
 meta:
   id: plan.documentation-qa@v1
-  owner: 'platform-engineering'
-  purpose: 'Ensure documentation meets quality standards with automated checks'
+  owner: "platform-engineering"
+  purpose: "Ensure documentation meets quality standards with automated checks"
   tags:
     - documentation
     - quality
@@ -9,13 +9,13 @@ meta:
     - automation
     - standards
   guardrails:
-    - 'Checks must not block critical fixes'
-    - 'False positives must be minimized'
-    - 'Human review still required for clarity'
-    - 'Standards must be achievable'
+    - "Checks must not block critical fixes"
+    - "False positives must be minimized"
+    - "Human review still required for clarity"
+    - "Standards must be achievable"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -353,15 +353,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'documentation-qa'
+  - name: "documentation-qa"
     inputs:
-      documentation_types: 'Markdown docs, API docs, inline code docs'
-      current_quality: 'Inconsistent, some outdated, no automated checks'
-      quality_standards: 'Clear, accurate, accessible, maintainable'
-      tooling_preferences: 'Open source, CI-friendly'
-      team_capacity: '1 technical writer, all devs contribute'
+      documentation_types: "Markdown docs, API docs, inline code docs"
+      current_quality: "Inconsistent, some outdated, no automated checks"
+      quality_standards: "Clear, accurate, accessible, maintainable"
+      tooling_preferences: "Open source, CI-friendly"
+      team_capacity: "1 technical writer, all devs contribute"
     expected_contains:
-      - 'Linting Configuration'
-      - 'CI Render Checks'
-      - 'Quality Standards'
-      - 'Review Workflow'
+      - "Linting Configuration"
+      - "CI Render Checks"
+      - "Quality Standards"
+      - "Review Workflow"

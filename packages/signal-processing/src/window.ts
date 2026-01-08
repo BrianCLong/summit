@@ -1,21 +1,21 @@
 // @ts-nocheck
-import { NumericArray, WindowFunction, WindowKind } from './types.js';
+import { NumericArray, WindowFunction, WindowKind } from "./types.js";
 
 function generateWindow(kind: WindowKind, size: number): Float64Array {
   if (size <= 0) {
-    throw new Error('Window size must be positive');
+    throw new Error("Window size must be positive");
   }
   const w = new Float64Array(size);
   switch (kind) {
-    case 'rectangular':
+    case "rectangular":
       w.fill(1);
       break;
-    case 'hann':
+    case "hann":
       for (let n = 0; n < size; n += 1) {
         w[n] = 0.5 * (1 - Math.cos((2 * Math.PI * n) / (size - 1)));
       }
       break;
-    case 'hamming':
+    case "hamming":
       for (let n = 0; n < size; n += 1) {
         w[n] = 0.54 - 0.46 * Math.cos((2 * Math.PI * n) / (size - 1));
       }

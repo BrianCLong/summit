@@ -19,18 +19,19 @@ The Ecosystem Certification & Trust Programs define the standards, processes, an
 
 The framework covers the following domains:
 
-*   **Platform Deployments:** Certification of the running environment and infrastructure.
-*   **Operators & Roles:** Certification of human operators and their authorization levels.
-*   **Plugins & Extensions:** Certification of code modules that extend platform functionality.
-*   **Partners / Integrators:** Certification of external organizations delivering solutions on the platform.
-*   **Autonomy Usage:** specific certifications for varying levels of autonomous agent operation.
+- **Platform Deployments:** Certification of the running environment and infrastructure.
+- **Operators & Roles:** Certification of human operators and their authorization levels.
+- **Plugins & Extensions:** Certification of code modules that extend platform functionality.
+- **Partners / Integrators:** Certification of external organizations delivering solutions on the platform.
+- **Autonomy Usage:** specific certifications for varying levels of autonomous agent operation.
 
 ## 4. Certification Levels
 
 See [LEVELS.md](./LEVELS.md) for detailed definitions of:
-*   **Baseline**
-*   **Verified**
-*   **Audited**
+
+- **Baseline**
+- **Verified**
+- **Audited**
 
 ## 5. Governance
 

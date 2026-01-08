@@ -17,7 +17,7 @@ export interface StressProfile {
   policyStrict: boolean;
 }
 export interface Sanction {
-  type: 'rate_limit' | 'proof_required' | 'interstitial';
+  type: "rate_limit" | "proof_required" | "interstitial";
   value: number | string;
   rationale: string;
 }

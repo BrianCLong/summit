@@ -27,16 +27,16 @@ export interface Transaction {
 }
 
 export enum TransactionType {
-  AUDIT_LOG = 'audit_log',
-  CONFIG_CHANGE = 'config_change',
-  USER_ACTION = 'user_action',
-  DATA_ACCESS = 'data_access',
-  PERMISSION_CHANGE = 'permission_change',
-  SMART_CONTRACT_DEPLOY = 'smart_contract_deploy',
-  SMART_CONTRACT_EXECUTE = 'smart_contract_execute',
-  IDENTITY_CREDENTIAL = 'identity_credential',
-  CUSTODY_TRANSFER = 'custody_transfer',
-  EVIDENCE_SEAL = 'evidence_seal',
+  AUDIT_LOG = "audit_log",
+  CONFIG_CHANGE = "config_change",
+  USER_ACTION = "user_action",
+  DATA_ACCESS = "data_access",
+  PERMISSION_CHANGE = "permission_change",
+  SMART_CONTRACT_DEPLOY = "smart_contract_deploy",
+  SMART_CONTRACT_EXECUTE = "smart_contract_execute",
+  IDENTITY_CREDENTIAL = "identity_credential",
+  CUSTODY_TRANSFER = "custody_transfer",
+  EVIDENCE_SEAL = "evidence_seal",
 }
 
 export interface TransactionPayload {
@@ -48,7 +48,7 @@ export interface TransactionPayload {
   tenantId: string;
   details: Record<string, any>;
   complianceRelevant: boolean;
-  dataClassification?: 'public' | 'internal' | 'confidential' | 'restricted';
+  dataClassification?: "public" | "internal" | "confidential" | "restricted";
 }
 
 export interface Block {
@@ -78,10 +78,10 @@ export interface ConsensusState {
 }
 
 export enum ConsensusStep {
-  PROPOSE = 'propose',
-  PREVOTE = 'prevote',
-  PRECOMMIT = 'precommit',
-  COMMIT = 'commit',
+  PROPOSE = "propose",
+  PREVOTE = "prevote",
+  PRECOMMIT = "precommit",
+  COMMIT = "commit",
 }
 
 export interface ValidatorInfo {
@@ -96,8 +96,8 @@ export interface GenesisConfig {
   initialValidators: ValidatorInfo[];
   blockTime: number;
   maxBlockSize: number;
-  consensusAlgorithm: 'pbft' | 'raft' | 'poa';
-  networkType: 'private' | 'consortium';
+  consensusAlgorithm: "pbft" | "raft" | "poa";
+  networkType: "private" | "consortium";
 }
 
 export interface ChainConfig {
@@ -127,14 +127,14 @@ export interface NetworkMessage {
 }
 
 export enum MessageType {
-  PROPOSE_BLOCK = 'propose_block',
-  VOTE = 'vote',
-  COMMIT = 'commit',
-  NEW_TRANSACTION = 'new_transaction',
-  SYNC_REQUEST = 'sync_request',
-  SYNC_RESPONSE = 'sync_response',
-  PEER_DISCOVERY = 'peer_discovery',
-  HEARTBEAT = 'heartbeat',
+  PROPOSE_BLOCK = "propose_block",
+  VOTE = "vote",
+  COMMIT = "commit",
+  NEW_TRANSACTION = "new_transaction",
+  SYNC_REQUEST = "sync_request",
+  SYNC_RESPONSE = "sync_response",
+  PEER_DISCOVERY = "peer_discovery",
+  HEARTBEAT = "heartbeat",
 }
 
 export interface Vote {
@@ -142,7 +142,7 @@ export interface Vote {
   height: number;
   round: number;
   blockHash: string;
-  voteType: 'prevote' | 'precommit';
+  voteType: "prevote" | "precommit";
   signature: string;
   timestamp: number;
 }
@@ -173,7 +173,7 @@ export interface AuditTrailEntry {
   actor: string;
   action: string;
   resource?: string;
-  outcome: 'success' | 'failure';
+  outcome: "success" | "failure";
   details: Record<string, any>;
   proofOfExistence: ProofOfExistence;
 }

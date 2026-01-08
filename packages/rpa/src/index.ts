@@ -3,26 +3,26 @@
  * Provides screen scraping, UI automation, file processing, and batch job scheduling
  */
 
-import { EventEmitter } from 'events';
-import { v4 as uuidv4 } from 'uuid';
-import axios, { AxiosRequestConfig } from 'axios';
-import * as cheerio from 'cheerio';
-import cron, { ScheduledTask } from 'node-cron';
-import fs from 'fs/promises';
-import path from 'path';
+import { EventEmitter } from "events";
+import { v4 as uuidv4 } from "uuid";
+import axios, { AxiosRequestConfig } from "axios";
+import * as cheerio from "cheerio";
+import cron, { ScheduledTask } from "node-cron";
+import fs from "fs/promises";
+import path from "path";
 
 export interface RPATask {
   id: string;
   name: string;
   type:
-    | 'web_scraping'
-    | 'api_call'
-    | 'file_processing'
-    | 'email'
-    | 'database'
-    | 'ui_automation'
-    | 'data_transformation'
-    | 'batch_job';
+    | "web_scraping"
+    | "api_call"
+    | "file_processing"
+    | "email"
+    | "database"
+    | "ui_automation"
+    | "data_transformation"
+    | "batch_job";
   config: RPATaskConfig;
   schedule?: string; // Cron expression
   enabled: boolean;
@@ -45,7 +45,7 @@ export interface RPATaskConfig {
   screenshotPath?: string;
 
   // API call config
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   headers?: Record<string, string>;
   body?: any;
   queryParams?: Record<string, string>;
@@ -54,14 +54,7 @@ export interface RPATaskConfig {
   inputPath?: string;
   outputPath?: string;
   filePattern?: string;
-  operation?:
-    | 'read'
-    | 'write'
-    | 'copy'
-    | 'move'
-    | 'delete'
-    | 'transform'
-    | 'archive';
+  operation?: "read" | "write" | "copy" | "move" | "delete" | "transform" | "archive";
 
   // Email config
   to?: string[];
@@ -79,15 +72,7 @@ export interface RPATaskConfig {
 }
 
 export interface DataTransformation {
-  type:
-    | 'map'
-    | 'filter'
-    | 'reduce'
-    | 'aggregate'
-    | 'join'
-    | 'pivot'
-    | 'normalize'
-    | 'custom';
+  type: "map" | "filter" | "reduce" | "aggregate" | "join" | "pivot" | "normalize" | "custom";
   field?: string;
   operation?: string;
   value?: any;
@@ -97,7 +82,7 @@ export interface DataTransformation {
 export interface RPAExecution {
   id: string;
   taskId: string;
-  status: 'running' | 'completed' | 'failed' | 'cancelled';
+  status: "running" | "completed" | "failed" | "cancelled";
   startedAt: Date;
   completedAt?: Date;
   result?: any;
@@ -133,7 +118,7 @@ export class RPAEngine extends EventEmitter {
   /**
    * Register an RPA task
    */
-  registerTask(task: Omit<RPATask, 'id' | 'createdAt'>): RPATask {
+  registerTask(task: Omit<RPATask, "id" | "createdAt">): RPATask {
     const id = uuidv4();
     const rpaTask: RPATask = {
       ...task,
@@ -148,7 +133,7 @@ export class RPAEngine extends EventEmitter {
       this.scheduleTask(rpaTask);
     }
 
-    this.emit('task.registered', rpaTask);
+    this.emit("task.registered", rpaTask);
     return rpaTask;
   }
 
@@ -172,9 +157,9 @@ export class RPAEngine extends EventEmitter {
       });
 
       this.scheduledJobs.set(task.id, job);
-      this.emit('task.scheduled', task);
+      this.emit("task.scheduled", task);
     } catch (error) {
-      this.emit('task.schedule.error', { task, error: error.message });
+      this.emit("task.schedule.error", { task, error: error.message });
     }
   }
 
@@ -184,23 +169,23 @@ export class RPAEngine extends EventEmitter {
   async executeTask(taskId: string): Promise<RPAExecution> {
     const task = this.tasks.get(taskId);
     if (!task) {
-      throw new Error('Task not found');
+      throw new Error("Task not found");
     }
 
     if (!task.enabled) {
-      throw new Error('Task is disabled');
+      throw new Error("Task is disabled");
     }
 
     // Check concurrency limit
     if (this.runningExecutions.size >= this.maxConcurrent) {
-      throw new Error('Maximum concurrent executions reached');
+      throw new Error("Maximum concurrent executions reached");
     }
 
     const executionId = uuidv4();
     const execution: RPAExecution = {
       id: executionId,
       taskId: task.id,
-      status: 'running',
+      status: "running",
       startedAt: new Date(),
       retryCount: 0,
     };
@@ -209,57 +194,52 @@ export class RPAEngine extends EventEmitter {
     this.runningExecutions.add(executionId);
 
     task.lastExecuted = new Date();
-    this.emit('task.execution.started', execution);
+    this.emit("task.execution.started", execution);
 
     try {
       let result: any;
 
       switch (task.type) {
-        case 'web_scraping':
+        case "web_scraping":
           result = await this.executeWebScraping(task.config);
           break;
-        case 'api_call':
+        case "api_call":
           result = await this.executeAPICall(task.config);
           break;
-        case 'file_processing':
+        case "file_processing":
           result = await this.executeFileProcessing(task.config);
           break;
-        case 'email':
+        case "email":
           result = await this.executeEmailTask(task.config);
           break;
-        case 'data_transformation':
+        case "data_transformation":
           result = await this.executeDataTransformation(task.config);
           break;
-        case 'batch_job':
+        case "batch_job":
           result = await this.executeBatchJob(task.config);
           break;
         default:
           throw new Error(`Unsupported task type: ${task.type}`);
       }
 
-      execution.status = 'completed';
+      execution.status = "completed";
       execution.completedAt = new Date();
       execution.result = result;
-      execution.duration =
-        execution.completedAt.getTime() - execution.startedAt.getTime();
+      execution.duration = execution.completedAt.getTime() - execution.startedAt.getTime();
 
-      this.emit('task.execution.completed', execution);
+      this.emit("task.execution.completed", execution);
       return execution;
     } catch (error: any) {
-      execution.status = 'failed';
+      execution.status = "failed";
       execution.completedAt = new Date();
       execution.error = {
         message: error.message,
         stack: error.stack,
       };
-      execution.duration =
-        execution.completedAt.getTime() - execution.startedAt.getTime();
+      execution.duration = execution.completedAt.getTime() - execution.startedAt.getTime();
 
       // Handle retries
-      if (
-        task.retryConfig &&
-        execution.retryCount < task.retryConfig.maxRetries
-      ) {
+      if (task.retryConfig && execution.retryCount < task.retryConfig.maxRetries) {
         execution.retryCount++;
         const delay = task.retryConfig.exponentialBackoff
           ? task.retryConfig.retryDelay * Math.pow(2, execution.retryCount - 1)
@@ -267,13 +247,13 @@ export class RPAEngine extends EventEmitter {
 
         setTimeout(() => {
           this.executeTask(taskId).catch((err) =>
-            this.emit('task.retry.failed', { task, error: err.message }),
+            this.emit("task.retry.failed", { task, error: err.message })
           );
         }, delay);
 
-        this.emit('task.execution.retrying', { execution, delay });
+        this.emit("task.execution.retrying", { execution, delay });
       } else {
-        this.emit('task.execution.failed', execution);
+        this.emit("task.execution.failed", execution);
       }
 
       throw error;
@@ -287,7 +267,7 @@ export class RPAEngine extends EventEmitter {
    */
   private async executeWebScraping(config: RPATaskConfig): Promise<ScrapedData> {
     if (!config.url) {
-      throw new Error('URL is required for web scraping');
+      throw new Error("URL is required for web scraping");
     }
 
     const startTime = Date.now();
@@ -307,9 +287,7 @@ export class RPAEngine extends EventEmitter {
           if (elements.length === 1) {
             data[key] = elements.text().trim();
           } else {
-            data[key] = elements
-              .map((_, el) => $(el).text().trim())
-              .get();
+            data[key] = elements.map((_, el) => $(el).text().trim()).get();
           }
         });
       } else {
@@ -339,11 +317,11 @@ export class RPAEngine extends EventEmitter {
    */
   private async executeAPICall(config: RPATaskConfig): Promise<any> {
     if (!config.url) {
-      throw new Error('URL is required for API call');
+      throw new Error("URL is required for API call");
     }
 
     const requestConfig: AxiosRequestConfig = {
-      method: config.method || 'GET',
+      method: config.method || "GET",
       url: config.url,
       headers: config.headers,
       params: config.queryParams,
@@ -359,9 +337,7 @@ export class RPAEngine extends EventEmitter {
         data: response.data,
       };
     } catch (error: any) {
-      throw new Error(
-        `API call failed: ${error.response?.status || error.message}`,
-      );
+      throw new Error(`API call failed: ${error.response?.status || error.message}`);
     }
   }
 
@@ -370,44 +346,41 @@ export class RPAEngine extends EventEmitter {
    */
   private async executeFileProcessing(config: RPATaskConfig): Promise<any> {
     if (!config.inputPath) {
-      throw new Error('Input path is required for file processing');
+      throw new Error("Input path is required for file processing");
     }
 
     try {
       switch (config.operation) {
-        case 'read':
+        case "read":
           return await this.readFile(config.inputPath);
 
-        case 'write':
+        case "write":
           if (!config.outputPath) {
-            throw new Error('Output path required for write operation');
+            throw new Error("Output path required for write operation");
           }
-          return await this.writeFile(
-            config.outputPath,
-            config.customConfig?.content,
-          );
+          return await this.writeFile(config.outputPath, config.customConfig?.content);
 
-        case 'copy':
+        case "copy":
           if (!config.outputPath) {
-            throw new Error('Output path required for copy operation');
+            throw new Error("Output path required for copy operation");
           }
           return await this.copyFile(config.inputPath, config.outputPath);
 
-        case 'move':
+        case "move":
           if (!config.outputPath) {
-            throw new Error('Output path required for move operation');
+            throw new Error("Output path required for move operation");
           }
           return await this.moveFile(config.inputPath, config.outputPath);
 
-        case 'delete':
+        case "delete":
           return await this.deleteFile(config.inputPath);
 
-        case 'transform':
+        case "transform":
           return await this.transformFile(config);
 
-        case 'archive':
+        case "archive":
           if (!config.outputPath) {
-            throw new Error('Output path required for archive operation');
+            throw new Error("Output path required for archive operation");
           }
           return await this.archiveFiles(config.inputPath, config.outputPath);
 
@@ -424,12 +397,12 @@ export class RPAEngine extends EventEmitter {
    */
   private async executeEmailTask(config: RPATaskConfig): Promise<any> {
     if (!config.to || config.to.length === 0) {
-      throw new Error('Recipients are required for email task');
+      throw new Error("Recipients are required for email task");
     }
 
     // Email sending implementation would go here
     // Using nodemailer or similar
-    this.emit('email.sent', {
+    this.emit("email.sent", {
       to: config.to,
       subject: config.subject,
       timestamp: new Date(),
@@ -445,17 +418,15 @@ export class RPAEngine extends EventEmitter {
   /**
    * Execute data transformation task
    */
-  private async executeDataTransformation(
-    config: RPATaskConfig,
-  ): Promise<any> {
+  private async executeDataTransformation(config: RPATaskConfig): Promise<any> {
     if (!config.transformations || config.transformations.length === 0) {
-      throw new Error('Transformations are required');
+      throw new Error("Transformations are required");
     }
 
     let data = config.customConfig?.inputData;
 
     if (!data) {
-      throw new Error('Input data is required for transformation');
+      throw new Error("Input data is required for transformation");
     }
 
     for (const transformation of config.transformations) {
@@ -468,58 +439,44 @@ export class RPAEngine extends EventEmitter {
   /**
    * Apply a data transformation
    */
-  private async applyTransformation(
-    data: any,
-    transformation: DataTransformation,
-  ): Promise<any> {
+  private async applyTransformation(data: any, transformation: DataTransformation): Promise<any> {
     if (!Array.isArray(data)) {
       data = [data];
     }
 
     switch (transformation.type) {
-      case 'map':
+      case "map":
         return data.map((item: any) =>
-          transformation.customTransform
-            ? transformation.customTransform(item)
-            : item,
+          transformation.customTransform ? transformation.customTransform(item) : item
         );
 
-      case 'filter':
+      case "filter":
         return data.filter((item: any) =>
-          transformation.customTransform
-            ? transformation.customTransform(item)
-            : true,
+          transformation.customTransform ? transformation.customTransform(item) : true
         );
 
-      case 'reduce':
+      case "reduce":
         return data.reduce(
           (acc: any, item: any) =>
-            transformation.customTransform
-              ? transformation.customTransform({ acc, item })
-              : acc,
-          transformation.value || {},
+            transformation.customTransform ? transformation.customTransform({ acc, item }) : acc,
+          transformation.value || {}
         );
 
-      case 'aggregate':
+      case "aggregate":
         // Simple aggregation
         return {
           count: data.length,
           sum:
             transformation.field &&
-            data.reduce(
-              (sum: number, item: any) => sum + (item[transformation.field] || 0),
-              0,
-            ),
+            data.reduce((sum: number, item: any) => sum + (item[transformation.field] || 0), 0),
         };
 
-      case 'normalize':
+      case "normalize":
         // Flatten nested structures
         return data.map((item: any) => this.flattenObject(item));
 
-      case 'custom':
-        return transformation.customTransform
-          ? transformation.customTransform(data)
-          : data;
+      case "custom":
+        return transformation.customTransform ? transformation.customTransform(data) : data;
 
       default:
         return data;
@@ -537,11 +494,11 @@ export class RPAEngine extends EventEmitter {
     for (const job of jobs) {
       try {
         const result = await this.executeTask(job.taskId);
-        results.push({ job: job.taskId, status: 'success', result });
+        results.push({ job: job.taskId, status: "success", result });
       } catch (error: any) {
         results.push({
           job: job.taskId,
-          status: 'failed',
+          status: "failed",
           error: error.message,
         });
       }
@@ -549,21 +506,21 @@ export class RPAEngine extends EventEmitter {
 
     return {
       totalJobs: jobs.length,
-      successful: results.filter((r) => r.status === 'success').length,
-      failed: results.filter((r) => r.status === 'failed').length,
+      successful: results.filter((r) => r.status === "success").length,
+      failed: results.filter((r) => r.status === "failed").length,
       results,
     };
   }
 
   // File operation helpers
   private async readFile(filePath: string): Promise<string> {
-    return await fs.readFile(filePath, 'utf-8');
+    return await fs.readFile(filePath, "utf-8");
   }
 
   private async writeFile(filePath: string, content: string): Promise<void> {
     const dir = path.dirname(filePath);
     await fs.mkdir(dir, { recursive: true });
-    await fs.writeFile(filePath, content, 'utf-8');
+    await fs.writeFile(filePath, content, "utf-8");
   }
 
   private async copyFile(source: string, destination: string): Promise<void> {
@@ -608,29 +565,21 @@ export class RPAEngine extends EventEmitter {
     return transformed;
   }
 
-  private async archiveFiles(
-    sourcePath: string,
-    archivePath: string,
-  ): Promise<any> {
+  private async archiveFiles(sourcePath: string, archivePath: string): Promise<any> {
     // Archive implementation would use a library like archiver
     // For now, just copy
     await this.copyFile(sourcePath, archivePath);
     return { archived: true, path: archivePath };
   }
 
-  private flattenObject(obj: any, prefix = ''): any {
+  private flattenObject(obj: any, prefix = ""): any {
     const flattened: any = {};
 
     Object.keys(obj).forEach((key) => {
       const value = obj[key];
       const newKey = prefix ? `${prefix}.${key}` : key;
 
-      if (
-        value &&
-        typeof value === 'object' &&
-        !Array.isArray(value) &&
-        !(value instanceof Date)
-      ) {
+      if (value && typeof value === "object" && !Array.isArray(value) && !(value instanceof Date)) {
         Object.assign(flattened, this.flattenObject(value, newKey));
       } else {
         flattened[newKey] = value;
@@ -661,20 +610,17 @@ export class RPAEngine extends EventEmitter {
   } {
     const executions = this.getExecutionHistory(taskId);
 
-    const successful = executions.filter((e) => e.status === 'completed').length;
-    const failed = executions.filter((e) => e.status === 'failed').length;
+    const successful = executions.filter((e) => e.status === "completed").length;
+    const failed = executions.filter((e) => e.status === "failed").length;
 
-    const completedExecutions = executions.filter(
-      (e) => e.duration !== undefined,
-    );
+    const completedExecutions = executions.filter((e) => e.duration !== undefined);
     const averageDuration =
       completedExecutions.length > 0
         ? completedExecutions.reduce((sum, e) => sum + (e.duration || 0), 0) /
           completedExecutions.length
         : 0;
 
-    const successRate =
-      executions.length > 0 ? (successful / executions.length) * 100 : 0;
+    const successRate = executions.length > 0 ? (successful / executions.length) * 100 : 0;
 
     return {
       totalExecutions: executions.length,
@@ -691,7 +637,7 @@ export class RPAEngine extends EventEmitter {
   stopAllSchedules(): void {
     this.scheduledJobs.forEach((job) => job.stop());
     this.scheduledJobs.clear();
-    this.emit('all_schedules.stopped');
+    this.emit("all_schedules.stopped");
   }
 
   /**
@@ -699,11 +645,11 @@ export class RPAEngine extends EventEmitter {
    */
   cancelExecution(executionId: string): void {
     const execution = this.executions.get(executionId);
-    if (execution && execution.status === 'running') {
-      execution.status = 'cancelled';
+    if (execution && execution.status === "running") {
+      execution.status = "cancelled";
       execution.completedAt = new Date();
       this.runningExecutions.delete(executionId);
-      this.emit('execution.cancelled', execution);
+      this.emit("execution.cancelled", execution);
     }
   }
 }

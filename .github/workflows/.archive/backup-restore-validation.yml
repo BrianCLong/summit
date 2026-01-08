@@ -3,22 +3,22 @@ name: Backup & Restore Validation
 on:
   schedule:
     # Run daily at 3 AM UTC
-    - cron: '0 3 * * *'
+    - cron: "0 3 * * *"
   workflow_dispatch:
     inputs:
       backup_set:
-        description: 'Backup set to validate'
+        description: "Backup set to validate"
         required: false
-        default: 'minimal'
+        default: "minimal"
         type: choice
         options:
           - minimal
           - full
           - config_only
       restore_env:
-        description: 'Restore environment'
+        description: "Restore environment"
         required: false
-        default: 'test'
+        default: "test"
         type: choice
         options:
           - test

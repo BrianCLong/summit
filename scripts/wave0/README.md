@@ -17,13 +17,17 @@ Scripts for implementing Wave 0: Baseline Stabilization of the Summit strategic 
 ## Scripts
 
 ### 01-validate-golden-path.sh
+
 Validates the golden path is working:
+
 - `make bootstrap` succeeds
 - `make up` starts all services
 - `make smoke` passes
 
 ### 02-install-packages.sh
+
 Installs new governance packages:
+
 - @intelgraph/authority-compiler
 - @intelgraph/canonical-entities
 - @intelgraph/connector-sdk
@@ -31,19 +35,25 @@ Installs new governance packages:
 - @intelgraph/governance-hooks
 
 ### 03-run-health-checks.sh
+
 Runs comprehensive health checks:
+
 - Database connectivity (Neo4j, Postgres, Redis)
 - Service health endpoints
 - GraphQL schema validation
 
 ### 04-validate-schema.sh
+
 Validates canonical entity types:
+
 - TypeScript compilation
 - Zod schema validation
 - GraphQL type generation
 
 ### 05-generate-reports.sh
+
 Generates Wave 0 completion reports:
+
 - Test coverage report
 - Service inventory
 - Integration checklist

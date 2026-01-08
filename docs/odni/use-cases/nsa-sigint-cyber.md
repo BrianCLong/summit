@@ -1,18 +1,21 @@
 # Use Case: NSA - SIGINT/Cyber Attribution & Network Mapping
 
 ## Mission Context
+
 The National Security Agency (NSA) must attribute sophisticated cyber attacks to specific nation-state actors and map the underlying command-and-control (C2) infrastructure. This requires fusing technical SIGINT indicators with contextual data to understand the "who" behind the "what."
 
 ## Challenge
-*   **Obfuscation:** Adversaries use cut-outs, proxies, and multi-hop infrastructure to hide their origins.
-*   **Volume:** The sheer volume of intercept data makes manual correlation of IP addresses to physical personas impossible.
-*   **Speed:** Cyber threats move at machine speed; attribution often lags by months.
+
+- **Obfuscation:** Adversaries use cut-outs, proxies, and multi-hop infrastructure to hide their origins.
+- **Volume:** The sheer volume of intercept data makes manual correlation of IP addresses to physical personas impossible.
+- **Speed:** Cyber threats move at machine speed; attribution often lags by months.
 
 ## Summit Solution: Graph-Based Attribution Engine
 
 Summit treats cyber attribution as a graph traversal problem, linking technical selectors (IPs, domains, hashes) to real-world entities (organizations, individuals, locations).
 
 ### Key Capabilities Applied
+
 1.  **Infrastructure Chaining:** Automatically traversing passive DNS and WHOIS history to map adversary infrastructure evolution over time.
 2.  **Code Provenance Analysis:** Linking malware families based on shared code snippets or distinct development patterns, managed via the Knowledge Lattice.
 3.  **Cross-Domain Fusion:** Correlating technical SIGINT (e.g., login times) with physical world events (e.g., known working hours of a specific military unit).
@@ -26,6 +29,7 @@ Summit treats cyber attribution as a graph traversal problem, linking technical 
 5.  **Disruption Planning:** The Network Graph view highlights "bridge nodes"—critical servers that, if disrupted, would sever the adversary's control.
 
 ## Impact
-*   **Faster Attribution:** Reduces time-to-attribution from months to days.
-*   **Proactive Defense:** Enables "left-of-boom" disruption by identifying infrastructure before it is activated for an attack.
-*   **Holistic View:** Bridges the gap between the Cyber Operations Center and regional geopolitical analysts.
+
+- **Faster Attribution:** Reduces time-to-attribution from months to days.
+- **Proactive Defense:** Enables "left-of-boom" disruption by identifying infrastructure before it is activated for an attack.
+- **Holistic View:** Bridges the gap between the Cyber Operations Center and regional geopolitical analysts.

@@ -1,9 +1,9 @@
 // Conductor Studio - MoE+MCP Router Interface
 // Provides routing preview, execution, and system monitoring for the Conductor
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { useMutation, useLazyQuery } from '@apollo/client';
-import { gql } from '@apollo/client';
+import React, { useState, useEffect, useCallback } from "react";
+import { useMutation, useLazyQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
 import {
   Box,
   Card,
@@ -33,8 +33,8 @@ import {
   AccordionSummary,
   AccordionDetails,
   Divider,
-} from '@mui/material';
-import Grid from '@mui/material/Grid';
+} from "@mui/material";
+import Grid from "@mui/material/Grid";
 import {
   PlayArrow,
   Preview,
@@ -45,20 +45,15 @@ import {
   ExpandMore,
   Refresh,
   OpenInNew,
-} from '@mui/icons-material';
-import { RolloutTimeline, RolloutStep } from './panels/RolloutTimeline';
-import { CanaryHealthPanel } from './panels/CanaryHealthPanel';
-import { BudgetGuardrails, Denial } from './panels/BudgetGuardrails';
-import { ProvenanceTree, StepNode } from './panels/ProvenanceTree';
-import { SLODashboardEmbed } from './panels/SLODashboardEmbed';
-import { NLToCypherPreview } from './panels/NLToCypherPreview';
-import { DualControlModal } from '../conductor/components/DualControlModal';
-import {
-  useBudgetDenials,
-  useCanaryHealth,
-  useProvenanceRoot,
-  useRolloutSteps,
-} from './hooks';
+} from "@mui/icons-material";
+import { RolloutTimeline, RolloutStep } from "./panels/RolloutTimeline";
+import { CanaryHealthPanel } from "./panels/CanaryHealthPanel";
+import { BudgetGuardrails, Denial } from "./panels/BudgetGuardrails";
+import { ProvenanceTree, StepNode } from "./panels/ProvenanceTree";
+import { SLODashboardEmbed } from "./panels/SLODashboardEmbed";
+import { NLToCypherPreview } from "./panels/NLToCypherPreview";
+import { DualControlModal } from "../conductor/components/DualControlModal";
+import { useBudgetDenials, useCanaryHealth, useProvenanceRoot, useRolloutSteps } from "./hooks";
 
 // GraphQL operations (preview conduct only)
 const PREVIEW_ROUTING = gql`
@@ -161,14 +156,13 @@ function RoutingPreview({
   onTaskChange: (value: string) => void;
 }) {
   const [maxLatency, setMaxLatency] = useState(30000);
-  const target = 'https://maestro.intelgraph.ai/health';
+  const target = "https://maestro.intelgraph.ai/health";
   const rollout = useRolloutSteps();
   const canary = useCanaryHealth(target);
   const denials = useBudgetDenials();
   const prov = useProvenanceRoot();
-  const [dualOpen, setDualOpen] = useState<null | 'promote' | 'abort'>(null);
-  const [previewRouting, { loading, data, error }] =
-    useLazyQuery(PREVIEW_ROUTING);
+  const [dualOpen, setDualOpen] = useState<null | "promote" | "abort">(null);
+  const [previewRouting, { loading, data, error }] = useLazyQuery(PREVIEW_ROUTING);
 
   const handlePreview = useCallback(() => {
     if (!taskInput.trim()) return;
@@ -186,15 +180,15 @@ function RoutingPreview({
 
   const getExpertColor = (expert: string) => {
     const colors: Record<string, string> = {
-      LLM_LIGHT: '#4caf50',
-      LLM_HEAVY: '#ff9800',
-      GRAPH_TOOL: '#2196f3',
-      RAG_TOOL: '#9c27b0',
-      FILES_TOOL: '#795548',
-      OSINT_TOOL: '#f44336',
-      EXPORT_TOOL: '#607d8b',
+      LLM_LIGHT: "#4caf50",
+      LLM_HEAVY: "#ff9800",
+      GRAPH_TOOL: "#2196f3",
+      RAG_TOOL: "#9c27b0",
+      FILES_TOOL: "#795548",
+      OSINT_TOOL: "#f44336",
+      EXPORT_TOOL: "#607d8b",
     };
-    return colors[expert] || '#757575';
+    return colors[expert] || "#757575";
   };
 
   return (
@@ -203,7 +197,7 @@ function RoutingPreview({
         <Card>
           <CardContent>
             <Typography variant="h6" gutterBottom>
-              <Preview sx={{ mr: 1, verticalAlign: 'middle' }} />
+              <Preview sx={{ mr: 1, verticalAlign: "middle" }} />
               Routing Preview
             </Typography>
 
@@ -220,7 +214,7 @@ function RoutingPreview({
               />
             </Box>
 
-            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+            <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
               <TextField
                 label="Max Latency (ms)"
                 type="number"
@@ -252,14 +246,12 @@ function RoutingPreview({
                   Routing Decision
                 </Typography>
 
-                <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
                   <Chip
                     label={data.previewRouting.expert}
                     sx={{
-                      backgroundColor: getExpertColor(
-                        data.previewRouting.expert,
-                      ),
-                      color: 'white',
+                      backgroundColor: getExpertColor(data.previewRouting.expert),
+                      color: "white",
                     }}
                   />
                   <Chip
@@ -276,32 +268,29 @@ function RoutingPreview({
                   <Accordion>
                     <AccordionSummary expandIcon={<ExpandMore />}>
                       <Typography>
-                        Alternative Options (
-                        {data.previewRouting.alternatives.length})
+                        Alternative Options ({data.previewRouting.alternatives.length})
                       </Typography>
                     </AccordionSummary>
                     <AccordionDetails>
                       <List dense>
-                        {data.previewRouting.alternatives.map(
-                          (alt: Alternative) => (
-                            <ListItem key={alt.expert}>
-                              <ListItemIcon>
-                                <Chip
-                                  size="small"
-                                  label={alt.expert}
-                                  sx={{
-                                    backgroundColor: getExpertColor(alt.expert),
-                                    color: 'white',
-                                  }}
-                                />
-                              </ListItemIcon>
-                              <ListItemText
-                                primary={`${Math.round(alt.confidence * 100)}% confidence`}
-                                secondary={alt.reason}
+                        {data.previewRouting.alternatives.map((alt: Alternative) => (
+                          <ListItem key={alt.expert}>
+                            <ListItemIcon>
+                              <Chip
+                                size="small"
+                                label={alt.expert}
+                                sx={{
+                                  backgroundColor: getExpertColor(alt.expert),
+                                  color: "white",
+                                }}
                               />
-                            </ListItem>
-                          ),
-                        )}
+                            </ListItemIcon>
+                            <ListItemText
+                              primary={`${Math.round(alt.confidence * 100)}% confidence`}
+                              secondary={alt.reason}
+                            />
+                          </ListItem>
+                        ))}
                       </List>
                     </AccordionDetails>
                   </Accordion>
@@ -335,13 +324,9 @@ function RoutingPreview({
                         data.previewRouting.features.keywords.map(
                           (keyword: string, idx: number) => (
                             <Grid key={idx}>
-                              <Chip
-                                size="small"
-                                variant="outlined"
-                                label={keyword}
-                              />
+                              <Chip size="small" variant="outlined" label={keyword} />
                             </Grid>
-                          ),
+                          )
                         )}
                     </Grid>
                   </Box>
@@ -354,12 +339,7 @@ function RoutingPreview({
       {/* Rollouts & SLO/Guardrails/Provenance */}
       <Grid xs={12}>
         <Paper>
-          <Tabs
-            value={0}
-            variant="scrollable"
-            scrollButtons
-            allowScrollButtonsMobile
-          >
+          <Tabs value={0} variant="scrollable" scrollButtons allowScrollButtonsMobile>
             <Tab label="Rollout" />
             <Tab label="SLO" />
             <Tab label="Budgets" />
@@ -368,19 +348,15 @@ function RoutingPreview({
           <Box sx={{ p: 2 }}>
             <Grid container spacing={2}>
               <Grid xs={12} md={6}>
-                <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={() => setDualOpen('promote')}
-                  >
+                <Box sx={{ display: "flex", gap: 1, mb: 1 }}>
+                  <Button variant="contained" size="small" onClick={() => setDualOpen("promote")}>
                     Promote
                   </Button>
                   <Button
                     variant="outlined"
                     color="error"
                     size="small"
-                    onClick={() => setDualOpen('abort')}
+                    onClick={() => setDualOpen("abort")}
                   >
                     Abort
                   </Button>
@@ -416,10 +392,10 @@ function RoutingPreview({
       </Grid>
       <DualControlModal
         open={dualOpen !== null}
-        actionLabel={dualOpen === 'promote' ? 'Promote' : 'Abort'}
+        actionLabel={dualOpen === "promote" ? "Promote" : "Abort"}
         onClose={() => setDualOpen(null)}
         onConfirm={(p) => {
-          console.log('dual-control', dualOpen, p);
+          console.log("dual-control", dualOpen, p);
           setDualOpen(null);
         }}
       />
@@ -461,7 +437,7 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
     } catch (err) {
       setExecutionLog((prev) => [
         ...prev,
-        `❌ Execution failed: ${err instanceof Error ? err.message : 'Unknown error'}`,
+        `❌ Execution failed: ${err instanceof Error ? err.message : "Unknown error"}`,
       ]);
     }
   }, [taskInput, conduct]);
@@ -470,10 +446,10 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
     if (!data?.conduct?.evidence) return;
 
     const blob = new Blob([JSON.stringify(data.conduct.evidence, null, 2)], {
-      type: 'application/json',
+      type: "application/json",
     });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `conductor-evidence-${data.conduct.auditId}.json`;
     document.body.appendChild(a);
@@ -488,7 +464,7 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
         <Card>
           <CardContent>
             <Typography variant="h6" gutterBottom>
-              <PlayArrow sx={{ mr: 1, verticalAlign: 'middle' }} />
+              <PlayArrow sx={{ mr: 1, verticalAlign: "middle" }} />
               Execute Task
             </Typography>
 
@@ -501,7 +477,7 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
               disabled={loading || !taskInput.trim()}
               sx={{ mb: 2 }}
             >
-              {loading ? 'Executing...' : 'Execute Task'}
+              {loading ? "Executing..." : "Execute Task"}
             </Button>
 
             {loading && <LinearProgress />}
@@ -518,40 +494,28 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
                   Execution Results
                 </Typography>
 
-                <Grid
-                  container
-                  spacing={1}
-                  sx={{ mb: 2, alignItems: 'center' }}
-                >
+                <Grid container spacing={1} sx={{ mb: 2, alignItems: "center" }}>
                   <Grid xs={6}>
-                    <Paper sx={{ p: 1, textAlign: 'center' }}>
+                    <Paper sx={{ p: 1, textAlign: "center" }}>
                       <Typography variant="caption">Latency</Typography>
-                      <Typography variant="h6">
-                        {data.conduct.latencyMs}ms
-                      </Typography>
+                      <Typography variant="h6">{data.conduct.latencyMs}ms</Typography>
                     </Paper>
                   </Grid>
                   <Grid xs={6}>
-                    <Paper sx={{ p: 1, textAlign: 'center' }}>
+                    <Paper sx={{ p: 1, textAlign: "center" }}>
                       <Typography variant="caption">Cost</Typography>
-                      <Typography variant="h6">
-                        ${data.conduct.cost?.toFixed(4)}
-                      </Typography>
+                      <Typography variant="h6">${data.conduct.cost?.toFixed(4)}</Typography>
                     </Paper>
                   </Grid>
                   {Number(data.conduct.cost || 0) === 0 &&
                     Number(data.conduct.latencyMs || 0) < 50 && (
                       <Grid xs={12}>
-                        <Chip
-                          size="small"
-                          color="success"
-                          label="from cache (heuristic)"
-                        />
+                        <Chip size="small" color="success" label="from cache (heuristic)" />
                       </Grid>
                     )}
                 </Grid>
 
-                <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
                   {data.conduct.traceId && (
                     <Tooltip title="Open trace in monitoring">
                       <IconButton size="small">
@@ -570,13 +534,9 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
                 </Box>
 
                 {data.conduct.result && (
-                  <Paper sx={{ p: 2, backgroundColor: 'grey.50' }}>
-                    <Typography
-                      variant="body2"
-                      component="pre"
-                      sx={{ whiteSpace: 'pre-wrap' }}
-                    >
-                      {typeof data.conduct.result === 'string'
+                  <Paper sx={{ p: 2, backgroundColor: "grey.50" }}>
+                    <Typography variant="body2" component="pre" sx={{ whiteSpace: "pre-wrap" }}>
+                      {typeof data.conduct.result === "string"
                         ? data.conduct.result
                         : JSON.stringify(data.conduct.result, null, 2)}
                     </Typography>
@@ -592,7 +552,7 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
         <Card>
           <CardContent>
             <Typography variant="h6" gutterBottom>
-              <Timeline sx={{ mr: 1, verticalAlign: 'middle' }} />
+              <Timeline sx={{ mr: 1, verticalAlign: "middle" }} />
               Execution Log
             </Typography>
 
@@ -608,10 +568,10 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
             <Paper
               sx={{
                 p: 2,
-                backgroundColor: 'grey.900',
-                color: 'grey.100',
+                backgroundColor: "grey.900",
+                color: "grey.100",
                 maxHeight: 400,
-                overflow: 'auto',
+                overflow: "auto",
               }}
             >
               {executionLog.length === 0 ? (
@@ -624,7 +584,7 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
                     key={idx}
                     variant="body2"
                     component="div"
-                    sx={{ fontFamily: 'monospace', mb: 0.5 }}
+                    sx={{ fontFamily: "monospace", mb: 0.5 }}
                   >
                     {log}
                   </Typography>
@@ -650,13 +610,13 @@ function MCPRegistry() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/maestro/v1/mcp/servers');
+      const res = await fetch("/api/maestro/v1/mcp/servers");
       if (!res.ok) throw new Error(`Failed ${res.status}`);
       const servers = await res.json();
       setData({
         mcpServers: servers.map((s: MCPServer) => ({
           ...s,
-          status: 'healthy',
+          status: "healthy",
         })),
       });
     } catch (e: unknown) {
@@ -674,14 +634,14 @@ function MCPRegistry() {
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'healthy':
-        return 'success';
-      case 'degraded':
-        return 'warning';
-      case 'unhealthy':
-        return 'error';
+      case "healthy":
+        return "success";
+      case "degraded":
+        return "warning";
+      case "unhealthy":
+        return "error";
       default:
-        return 'default';
+        return "default";
     }
   };
 
@@ -692,21 +652,17 @@ function MCPRegistry() {
           <CardContent>
             <Box
               sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
                 mb: 2,
               }}
             >
               <Typography variant="h6">
-                <Engineering sx={{ mr: 1, verticalAlign: 'middle' }} />
+                <Engineering sx={{ mr: 1, verticalAlign: "middle" }} />
                 MCP Server Registry
               </Typography>
-              <Button
-                startIcon={<Refresh />}
-                onClick={() => refetch()}
-                disabled={loading}
-              >
+              <Button startIcon={<Refresh />} onClick={() => refetch()} disabled={loading}>
                 Refresh
               </Button>
             </Box>
@@ -734,9 +690,7 @@ function MCPRegistry() {
                     {data.mcpServers.map((server: MCPServer, idx: number) => (
                       <TableRow key={idx}>
                         <TableCell>
-                          <Typography variant="subtitle2">
-                            {server.name}
-                          </Typography>
+                          <Typography variant="subtitle2">{server.name}</Typography>
                         </TableCell>
                         <TableCell>
                           <Chip
@@ -746,24 +700,15 @@ function MCPRegistry() {
                           />
                         </TableCell>
                         <TableCell>
-                          <Typography
-                            variant="body2"
-                            sx={{ fontFamily: 'monospace' }}
-                          >
+                          <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
                             {server.url}
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Box
-                            sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}
-                          >
+                          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                             {server.tools?.map((tool: MCPTool) => (
                               <Tooltip key={tool.name} title={tool.description}>
-                                <Chip
-                                  size="small"
-                                  variant="outlined"
-                                  label={tool.name}
-                                />
+                                <Chip size="small" variant="outlined" label={tool.name} />
                               </Tooltip>
                             ))}
                           </Box>
@@ -776,8 +721,7 @@ function MCPRegistry() {
             ) : (
               !loading && (
                 <Alert severity="info">
-                  No MCP servers found. Make sure the Conductor system is
-                  running.
+                  No MCP servers found. Make sure the Conductor system is running.
                 </Alert>
               )
             )}
@@ -791,7 +735,7 @@ function MCPRegistry() {
 // Main Conductor Studio Component
 export default function ConductorStudio() {
   const [tabValue, setTabValue] = useState(0);
-  const [taskInput, setTaskInput] = useState('');
+  const [taskInput, setTaskInput] = useState("");
   const [sessions, setSessions] = useState<MCPSession[]>([]);
   const [invocations, setInvocations] = useState<MCPInvocation[]>([]);
 
@@ -806,9 +750,7 @@ export default function ConductorStudio() {
 
   const loadInvocations = useCallback(async () => {
     try {
-      const res = await await fetch(
-        `/api/maestro/v1/runs/demo-run/mcp/invocations`,
-      );
+      const res = await await fetch(`/api/maestro/v1/runs/demo-run/mcp/invocations`);
       if (res.ok) setInvocations(await res.json());
     } catch {
       /* noop */
@@ -825,16 +767,16 @@ export default function ConductorStudio() {
   };
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={{ width: "100%" }}>
       <Typography variant="h4" gutterBottom sx={{ mb: 3 }}>
-        <Psychology sx={{ mr: 1, verticalAlign: 'middle', fontSize: '2rem' }} />
+        <Psychology sx={{ mr: 1, verticalAlign: "middle", fontSize: "2rem" }} />
         Conductor Studio
         <Typography variant="subtitle1" color="text.secondary" sx={{ mt: 1 }}>
           Multi-Expert Router & MCP Tool Orchestra
         </Typography>
       </Typography>
 
-      <Paper sx={{ width: '100%', mb: 2 }}>
+      <Paper sx={{ width: "100%", mb: 2 }}>
         <Tabs
           value={tabValue}
           onChange={handleTabChange}
@@ -870,18 +812,11 @@ export default function ConductorStudio() {
                 <Typography variant="h6" gutterBottom>
                   Attached MCP Sessions
                 </Typography>
-                <Button
-                  size="small"
-                  startIcon={<Refresh />}
-                  onClick={loadSessions}
-                  sx={{ mb: 2 }}
-                >
+                <Button size="small" startIcon={<Refresh />} onClick={loadSessions} sx={{ mb: 2 }}>
                   Refresh
                 </Button>
                 {sessions.length === 0 ? (
-                  <Alert severity="info">
-                    No active sessions for run: demo-run
-                  </Alert>
+                  <Alert severity="info">No active sessions for run: demo-run</Alert>
                 ) : (
                   <List>
                     {sessions.map((s, i) => (
@@ -889,7 +824,7 @@ export default function ConductorStudio() {
                         <ListItem>
                           <ListItemText
                             primary={`sid=${s.sid}`}
-                            secondary={`scopes=[${(s.scopes || []).join(', ')}] servers=[${(s.servers || []).join(', ')}]`}
+                            secondary={`scopes=[${(s.scopes || []).join(", ")}] servers=[${(s.servers || []).join(", ")}]`}
                           />
                         </ListItem>
                         {i < sessions.length - 1 && <Divider />}
@@ -916,9 +851,7 @@ export default function ConductorStudio() {
                   Refresh
                 </Button>
                 {invocations.length === 0 ? (
-                  <Alert severity="info">
-                    No invocations recorded for run: demo-run
-                  </Alert>
+                  <Alert severity="info">No invocations recorded for run: demo-run</Alert>
                 ) : (
                   <List>
                     {invocations.map((v, i) => (

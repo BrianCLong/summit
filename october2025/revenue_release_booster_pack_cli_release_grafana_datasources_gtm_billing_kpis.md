@@ -114,21 +114,17 @@ for d in ops/grafana/datasources/*.json; do create_ds "$d"; done
 
 ```ts
 // services/billing/src/index.ts
-import express from 'express';
-import Stripe from 'stripe';
+import express from "express";
+import Stripe from "stripe";
 const app = express();
-app.use(express.json({ type: 'application/json' }));
+app.use(express.json({ type: "application/json" }));
 const stripe = new Stripe(process.env.STRIPE_KEY as string, {
-  apiVersion: '2024-06-20',
+  apiVersion: "2024-06-20",
 });
-app.post(
-  '/webhook',
-  express.raw({ type: 'application/json' }) as any,
-  (req, res) => {
-    /* verify signature, upsert subscription */ res.sendStatus(200);
-  },
-);
-app.post('/meter', async (req, res) => {
+app.post("/webhook", express.raw({ type: "application/json" }) as any, (req, res) => {
+  /* verify signature, upsert subscription */ res.sendStatus(200);
+});
+app.post("/meter", async (req, res) => {
   /* record usage for tenant */ res.json({ ok: true });
 });
 app.listen(process.env.PORT || 7080);
@@ -139,9 +135,9 @@ app.listen(process.env.PORT || 7080);
 ```ts
 // services/gateway-graphql/src/meter.ts
 export function emitUsage(tenant: string, edges: number, ms: number) {
-  fetch(process.env.BILLING_URL + '/meter', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
+  fetch(process.env.BILLING_URL + "/meter", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify({ tenant, edges, ms, ts: Date.now() }),
   }).catch(() => {});
 }
@@ -160,10 +156,10 @@ Hook from analytics execution path.
 export function track(ev: string, props: Record<string, any> = {}) {
   try {
     navigator.sendBeacon(
-      '/analytics',
+      "/analytics",
       new Blob([JSON.stringify({ ev, props, ts: Date.now() })], {
-        type: 'application/json',
-      }),
+        type: "application/json",
+      })
     );
   } catch {}
 }
@@ -247,7 +243,7 @@ seed-tenant:
 ```yaml
 # .github/workflows/metrics-rollup.yaml
 name: metrics-rollup
-on: { schedule: [{ cron: '0 7 * * *' }] }
+on: { schedule: [{ cron: "0 7 * * *" }] }
 jobs:
   rollup:
     runs-on: ubuntu-latest

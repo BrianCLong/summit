@@ -5,12 +5,12 @@ on:
     branches:
       - main
     paths:
-      - 'cognitive-targeting-engine/**'
+      - "cognitive-targeting-engine/**"
   pull_request:
     branches:
       - main
     paths:
-      - 'cognitive-targeting-engine/**'
+      - "cognitive-targeting-engine/**"
 
 jobs:
   build-and-test:
@@ -22,7 +22,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@824a62378795d7a63864050674956c050c8c0868 # v4
         with:
-          python-version: '3.9' # Match the Python version in Dockerfile
+          python-version: "3.9" # Match the Python version in Dockerfile
 
       - name: Install dependencies
         run: pip install -r cognitive-targeting-engine/requirements.txt jsonschema

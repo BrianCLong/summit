@@ -1,1 +1,1 @@
-export * from './video-analyzer.js';
+export * from "./video-analyzer.js";

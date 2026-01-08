@@ -23,18 +23,18 @@ jobs:
       - name: Run Trivy vulnerability scanner in fs mode
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'table'
-          exit-code: '1'
-          severity: 'HIGH,CRITICAL'
+          scan-type: "fs"
+          scan-ref: "."
+          format: "table"
+          exit-code: "1"
+          severity: "HIGH,CRITICAL"
           ignore-unfixed: true
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: "trivy-results.sarif"
 
   trivy-image:
     name: Trivy Image Scan
@@ -59,17 +59,17 @@ jobs:
       - name: Run Trivy vulnerability scanner on image
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'intelgraph:${{ github.sha }}'
-          format: 'sarif'
-          output: 'trivy-image-results.sarif'
-          exit-code: '1'
-          severity: 'HIGH,CRITICAL'
+          image-ref: "intelgraph:${{ github.sha }}"
+          format: "sarif"
+          output: "trivy-image-results.sarif"
+          exit-code: "1"
+          severity: "HIGH,CRITICAL"
 
       - name: Upload Trivy image scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: 'trivy-image-results.sarif'
+          sarif_file: "trivy-image-results.sarif"
 
   trivy-config:
     name: Trivy Config Scan
@@ -81,11 +81,11 @@ jobs:
       - name: Run Trivy misconfiguration scanner
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'config'
-          scan-ref: '.'
-          format: 'table'
-          exit-code: '1'
-          severity: 'HIGH,CRITICAL'
+          scan-type: "config"
+          scan-ref: "."
+          format: "table"
+          exit-code: "1"
+          severity: "HIGH,CRITICAL"
 
   helm-digest-validation:
     name: Validate Helm Digest Policy

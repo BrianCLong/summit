@@ -1,8 +1,17 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Modal, Button } from 'react-native';
-import * as FileSystem from 'expo-file-system';
-import { Camera, CameraType } from 'expo-camera';
-import { useSync } from '../services/SyncProvider';
+import React, { useEffect, useState, useRef } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Alert,
+  Modal,
+  Button,
+} from "react-native";
+import * as FileSystem from "expo-file-system";
+import { Camera, CameraType } from "expo-camera";
+import { useSync } from "../services/SyncProvider";
 
 type SecureDocument = {
   id: string;
@@ -40,26 +49,29 @@ export default function DocumentsScreen(): JSX.Element {
       id: docId,
       title: `Field Scan ${new Date(now).toLocaleTimeString()}`,
       path: filename,
-      scannedAt: now
+      scannedAt: now,
     };
 
     // Optimistic local state update
-    setDocuments(prev => [newDoc, ...prev]);
+    setDocuments((prev) => [newDoc, ...prev]);
 
     // Store metadata and OCR result in Encrypted Queue (SQLite)
     await enqueue({
-      type: 'document-scan',
+      type: "document-scan",
       id: docId,
       title: newDoc.title,
       ocrText: text,
       imagePath: filename,
       metadata: {
-        scannedAt: newDoc.scannedAt
-      }
+        scannedAt: newDoc.scannedAt,
+      },
     });
 
     setScanning(false);
-    Alert.alert('Document Secured', 'Scan completed, OCR extracted, and encrypted into local database.');
+    Alert.alert(
+      "Document Secured",
+      "Scan completed, OCR extracted, and encrypted into local database."
+    );
   };
 
   const handleOpen = async (doc: SecureDocument) => {
@@ -68,8 +80,8 @@ export default function DocumentsScreen(): JSX.Element {
     // The lint rule sometimes gets confused by async arrow functions in props.
     // eslint-disable-next-line react-hooks/purity
     const openedTime = Date.now();
-    await enqueue({ type: 'document-open', id: doc.id, openedAt: openedTime });
-    Alert.alert('Secure Viewer', `Accessing encrypted document: ${doc.title}`);
+    await enqueue({ type: "document-open", id: doc.id, openedAt: openedTime });
+    Alert.alert("Secure Viewer", `Accessing encrypted document: ${doc.title}`);
   };
 
   return (
@@ -81,11 +93,13 @@ export default function DocumentsScreen(): JSX.Element {
 
       <FlatList
         data={documents}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.item} onPress={() => handleOpen(item)}>
             <Text style={styles.itemTitle}>{item.title}</Text>
-            <Text style={styles.metadata}>Scanned: {new Date(item.scannedAt).toLocaleDateString()}</Text>
+            <Text style={styles.metadata}>
+              Scanned: {new Date(item.scannedAt).toLocaleDateString()}
+            </Text>
           </TouchableOpacity>
         )}
         ListEmptyComponent={<Text style={styles.empty}>No secure documents in this session.</Text>}
@@ -108,16 +122,39 @@ export default function DocumentsScreen(): JSX.Element {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#0B1221' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  title: { color: 'white', fontSize: 20, fontWeight: '700' },
-  item: { padding: 16, backgroundColor: '#111A30', borderRadius: 8, marginBottom: 12, borderWidth: 1, borderColor: '#1F2A44' },
-  itemTitle: { color: 'white', fontSize: 16, fontWeight: '600' },
-  metadata: { color: '#A1A8BC', marginTop: 6, fontSize: 12 },
-  empty: { color: '#666', textAlign: 'center', marginTop: 20 },
-  scanContainer: { flex: 1, backgroundColor: 'black' },
-  scanTitle: { color: 'white', textAlign: 'center', margin: 20, fontSize: 18, fontWeight: 'bold' },
-  camera: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  guideFrame: { width: '80%', height: '60%', borderWidth: 2, borderColor: '#5AC8FA', borderStyle: 'dashed' },
-  scanControls: { flexDirection: 'row', justifyContent: 'space-around', padding: 20, backgroundColor: '#0B1221' }
+  container: { flex: 1, padding: 16, backgroundColor: "#0B1221" },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  title: { color: "white", fontSize: 20, fontWeight: "700" },
+  item: {
+    padding: 16,
+    backgroundColor: "#111A30",
+    borderRadius: 8,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#1F2A44",
+  },
+  itemTitle: { color: "white", fontSize: 16, fontWeight: "600" },
+  metadata: { color: "#A1A8BC", marginTop: 6, fontSize: 12 },
+  empty: { color: "#666", textAlign: "center", marginTop: 20 },
+  scanContainer: { flex: 1, backgroundColor: "black" },
+  scanTitle: { color: "white", textAlign: "center", margin: 20, fontSize: 18, fontWeight: "bold" },
+  camera: { flex: 1, justifyContent: "center", alignItems: "center" },
+  guideFrame: {
+    width: "80%",
+    height: "60%",
+    borderWidth: 2,
+    borderColor: "#5AC8FA",
+    borderStyle: "dashed",
+  },
+  scanControls: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    padding: 20,
+    backgroundColor: "#0B1221",
+  },
 });

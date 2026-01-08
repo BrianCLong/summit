@@ -1,6 +1,6 @@
-import { configureStore } from '@reduxjs/toolkit';
-import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
-import ui from './slices/ui';
+import { configureStore } from "@reduxjs/toolkit";
+import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+import ui from "./slices/ui";
 
 const store = configureStore({
   reducer: { ui },

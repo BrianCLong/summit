@@ -1,8 +1,8 @@
-import { createHash } from 'crypto';
+import { createHash } from "crypto";
 export function sha256Hex(buf: Buffer | string) {
-  const h = createHash('sha256');
+  const h = createHash("sha256");
   h.update(buf);
-  return h.digest('hex');
+  return h.digest("hex");
 }
 
 // Deterministic leaf encoding for a step
@@ -12,8 +12,7 @@ export function leafHash(step: any) {
 }
 
 export function buildMerkle(leavesHex: string[]) {
-  if (leavesHex.length === 0)
-    return { root: sha256Hex(Buffer.from('EMPTY')), layers: [[]] };
+  if (leavesHex.length === 0) return { root: sha256Hex(Buffer.from("EMPTY")), layers: [[]] };
   let layer = leavesHex.slice();
   const layers = [layer];
   while (layer.length > 1) {
@@ -30,17 +29,13 @@ export function buildMerkle(leavesHex: string[]) {
 }
 
 export function proofForLeaf(index: number, layers: string[][]) {
-  const path: { dir: 'L' | 'R'; hash: string }[] = [];
+  const path: { dir: "L" | "R"; hash: string }[] = [];
   let idx = index;
   for (let L = 0; L < layers.length - 1; L++) {
     const layer = layers[L];
     const isRight = idx % 2 === 1;
-    const siblingIdx = isRight
-      ? idx - 1
-      : idx + 1 >= layer.length
-        ? idx
-        : idx + 1;
-    const dir = isRight ? 'L' : 'R';
+    const siblingIdx = isRight ? idx - 1 : idx + 1 >= layer.length ? idx : idx + 1;
+    const dir = isRight ? "L" : "R";
     path.push({ dir, hash: layer[siblingIdx] });
     idx = Math.floor(idx / 2);
   }
@@ -49,15 +44,12 @@ export function proofForLeaf(index: number, layers: string[][]) {
 
 export function verifyProof(
   leaf: string,
-  path: { dir: 'L' | 'R'; hash: string }[],
-  expectedRoot: string,
+  path: { dir: "L" | "R"; hash: string }[],
+  expectedRoot: string
 ) {
   let h = leaf;
   for (const p of path) {
-    h =
-      p.dir === 'L'
-        ? sha256Hex(Buffer.from(p.hash + h))
-        : sha256Hex(Buffer.from(h + p.hash));
+    h = p.dir === "L" ? sha256Hex(Buffer.from(p.hash + h)) : sha256Hex(Buffer.from(h + p.hash));
   }
   return h === expectedRoot;
 }

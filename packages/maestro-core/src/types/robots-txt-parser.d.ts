@@ -1,4 +1,4 @@
-declare module 'robots-txt-parser' {
+declare module "robots-txt-parser" {
   interface RobotsResult {
     isAllowed(url: string, userAgent?: string): boolean;
     isDisallowed(url: string, userAgent?: string): boolean;

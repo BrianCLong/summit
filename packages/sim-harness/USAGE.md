@@ -65,6 +65,7 @@ sim-harness list-scenarios
 ```
 
 Output:
+
 ```
 Built-in Scenarios:
 
@@ -90,19 +91,19 @@ sim-harness generate --scenario fraud-ring --output my-scenario.json
 ### Generate and Ingest Scenario
 
 ```typescript
-import { ScenarioGenerator } from '@intelgraph/sim-harness';
-import axios from 'axios';
+import { ScenarioGenerator } from "@intelgraph/sim-harness";
+import axios from "axios";
 
 // Generate scenario
 const generator = new ScenarioGenerator({
-  template: 'fraud-ring',
-  params: { seed: 42 }
+  template: "fraud-ring",
+  params: { seed: 42 },
 });
 
 const scenario = await generator.generate();
 
 // Ingest via API
-const apiUrl = 'http://localhost:4000/graphql';
+const apiUrl = "http://localhost:4000/graphql";
 
 // Create investigation
 const createInvestigationMutation = `
@@ -119,9 +120,9 @@ const { data } = await axios.post(apiUrl, {
     input: {
       name: scenario.name,
       description: scenario.description,
-      type: 'FRAUD_ANALYSIS'
-    }
-  }
+      type: "FRAUD_ANALYSIS",
+    },
+  },
 });
 
 const investigationId = data.data.createInvestigation.id;
@@ -137,9 +138,9 @@ for (const entity of scenario.entities) {
     variables: {
       input: {
         investigationId,
-        ...entity
-      }
-    }
+        ...entity,
+      },
+    },
   });
 }
 ```
@@ -147,15 +148,15 @@ for (const entity of scenario.entities) {
 ### Run Ghost Analyst
 
 ```typescript
-import { GhostAnalyst } from '@intelgraph/sim-harness';
-import type { WorkflowScript } from '@intelgraph/sim-harness';
+import { GhostAnalyst } from "@intelgraph/sim-harness";
+import type { WorkflowScript } from "@intelgraph/sim-harness";
 
 const workflow: WorkflowScript = {
-  name: 'fraud-investigation',
+  name: "fraud-investigation",
   steps: [
     {
-      name: 'search-high-risk',
-      action: 'graphql-query',
+      name: "search-high-risk",
+      action: "graphql-query",
       query: `
         query SearchHighRisk {
           entities(filter: { risk_score: { gte: 70 }}) {
@@ -163,21 +164,21 @@ const workflow: WorkflowScript = {
           }
         }
       `,
-      assertions: ['entities.length >= 5']
-    }
-  ]
+      assertions: ["entities.length >= 5"],
+    },
+  ],
 };
 
 const analyst = new GhostAnalyst({
-  apiUrl: 'http://localhost:4000/graphql',
-  tenantId: 'test-001',
+  apiUrl: "http://localhost:4000/graphql",
+  tenantId: "test-001",
   script: workflow,
-  verbose: true
+  verbose: true,
 });
 
-const session = await analyst.run({ scenarioId: 'my-scenario' });
-console.log('Session status:', session.status);
-console.log('Queries issued:', session.metrics.queriesIssued);
+const session = await analyst.run({ scenarioId: "my-scenario" });
+console.log("Session status:", session.status);
+console.log("Queries issued:", session.metrics.queriesIssued);
 ```
 
 ### Collect Metrics
@@ -217,15 +218,15 @@ const candidateCollector = new MetricsCollector();
 // ... run sessions ...
 const candidateReport = await candidateCollector.generateReport({
   baseline: baselineReport.aggregateMetrics,
-  baselineVersion: 'v1.2.0',
-  candidateVersion: 'v1.3.0'
+  baselineVersion: "v1.2.0",
+  candidateVersion: "v1.3.0",
 });
 
 // Check for regressions
 if (candidateReport.comparison) {
   const perfDelta = candidateReport.comparison.deltas.performance.avgDuration;
   if (perfDelta > 10) {
-    console.warn('Performance regression detected:', perfDelta, '% slower');
+    console.warn("Performance regression detected:", perfDelta, "% slower");
   }
 }
 ```
@@ -316,31 +317,37 @@ jobs:
 ## Tips & Best Practices
 
 1. **Use Fixed Seeds**: Always use fixed seeds for reproducible results
+
    ```bash
    pnpm run-scenario --scenario fraud-ring --seed 42
    ```
 
 2. **Start Small**: Test with small scenarios first
+
    ```bash
    pnpm run-scenario --scenario fraud-ring --size small
    ```
 
 3. **Verbose Mode**: Use `--verbose` for debugging
+
    ```bash
    pnpm run-scenario --scenario fraud-ring --verbose
    ```
 
 4. **Multiple Sessions**: Run multiple sessions for statistical significance
+
    ```bash
    pnpm run-scenario --scenario fraud-ring --sessions 10
    ```
 
 5. **Check Reports**: Always review HTML reports for insights
+
    ```bash
    open reports/*-report.html
    ```
 
 6. **Version Comparison**: Save baseline reports for regression testing
+
    ```bash
    # Save baseline
    pnpm run-scenario --scenario fraud-ring --output baseline/
@@ -360,6 +367,7 @@ Error: connect ECONNREFUSED 127.0.0.1:4000
 ```
 
 **Solution**: Ensure IntelGraph stack is running
+
 ```bash
 make up
 curl http://localhost:4000/health
@@ -372,6 +380,7 @@ SAFETY: Tenant ID must start with 'test-' prefix
 ```
 
 **Solution**: Use proper tenant ID
+
 ```bash
 pnpm run-scenario --tenant-id test-my-harness
 ```

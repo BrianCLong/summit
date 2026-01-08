@@ -4,35 +4,35 @@
  * Generates realistic test data for Summit entities
  */
 
-import { faker } from '@faker-js/faker';
-import { v4 as uuidv4 } from 'uuid';
+import { faker } from "@faker-js/faker";
+import { v4 as uuidv4 } from "uuid";
 
 /**
  * Entity types supported by the factory
  */
 export type EntityType =
-  | 'person'
-  | 'organization'
-  | 'location'
-  | 'event'
-  | 'document'
-  | 'transaction'
-  | 'communication'
-  | 'asset';
+  | "person"
+  | "organization"
+  | "location"
+  | "event"
+  | "document"
+  | "transaction"
+  | "communication"
+  | "asset";
 
 /**
  * Relationship types
  */
 export type RelationshipType =
-  | 'knows'
-  | 'works_for'
-  | 'owns'
-  | 'located_at'
-  | 'participated_in'
-  | 'authored'
-  | 'sent_to'
-  | 'received_from'
-  | 'related_to';
+  | "knows"
+  | "works_for"
+  | "owns"
+  | "located_at"
+  | "participated_in"
+  | "authored"
+  | "sent_to"
+  | "received_from"
+  | "related_to";
 
 /**
  * Base entity interface
@@ -50,7 +50,7 @@ export interface BaseEntity {
  * Person entity
  */
 export interface PersonEntity extends BaseEntity {
-  type: 'person';
+  type: "person";
   firstName: string;
   lastName: string;
   email: string;
@@ -65,7 +65,7 @@ export interface PersonEntity extends BaseEntity {
  * Organization entity
  */
 export interface OrganizationEntity extends BaseEntity {
-  type: 'organization';
+  type: "organization";
   industry: string;
   founded: Date;
   headquarters: string;
@@ -78,14 +78,14 @@ export interface OrganizationEntity extends BaseEntity {
  * Location entity
  */
 export interface LocationEntity extends BaseEntity {
-  type: 'location';
+  type: "location";
   address: string;
   city: string;
   country: string;
   postalCode: string;
   latitude: number;
   longitude: number;
-  locationType: 'residential' | 'commercial' | 'government' | 'other';
+  locationType: "residential" | "commercial" | "government" | "other";
 }
 
 /**
@@ -108,8 +108,8 @@ export interface Investigation {
   id: string;
   title: string;
   description: string;
-  status: 'open' | 'in_progress' | 'closed' | 'archived';
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  status: "open" | "in_progress" | "closed" | "archived";
+  priority: "low" | "medium" | "high" | "critical";
   assignedTo: string;
   createdAt: Date;
   updatedAt: Date;
@@ -148,13 +148,13 @@ export class MockDataFactory {
 
     return {
       id: overrides.id ?? uuidv4(),
-      type: 'person',
+      type: "person",
       name: overrides.name ?? `${firstName} ${lastName}`,
       firstName,
       lastName,
       email: overrides.email ?? faker.internet.email({ firstName, lastName }),
       phone: overrides.phone ?? faker.phone.number(),
-      dateOfBirth: overrides.dateOfBirth ?? faker.date.birthdate({ min: 18, max: 80, mode: 'age' }),
+      dateOfBirth: overrides.dateOfBirth ?? faker.date.birthdate({ min: 18, max: 80, mode: "age" }),
       nationality: overrides.nationality ?? faker.location.country(),
       occupation: overrides.occupation ?? faker.person.jobTitle(),
       organization: overrides.organization ?? faker.company.name(),
@@ -170,7 +170,7 @@ export class MockDataFactory {
   organization(overrides: Partial<OrganizationEntity> = {}): OrganizationEntity {
     return {
       id: overrides.id ?? uuidv4(),
-      type: 'organization',
+      type: "organization",
       name: overrides.name ?? faker.company.name(),
       industry: overrides.industry ?? faker.company.buzzNoun(),
       founded: overrides.founded ?? faker.date.past({ years: 50 }),
@@ -190,7 +190,7 @@ export class MockDataFactory {
   location(overrides: Partial<LocationEntity> = {}): LocationEntity {
     return {
       id: overrides.id ?? uuidv4(),
-      type: 'location',
+      type: "location",
       name: overrides.name ?? faker.location.streetAddress(),
       address: overrides.address ?? faker.location.streetAddress(),
       city: overrides.city ?? faker.location.city(),
@@ -198,7 +198,9 @@ export class MockDataFactory {
       postalCode: overrides.postalCode ?? faker.location.zipCode(),
       latitude: overrides.latitude ?? faker.location.latitude(),
       longitude: overrides.longitude ?? faker.location.longitude(),
-      locationType: overrides.locationType ?? faker.helpers.arrayElement(['residential', 'commercial', 'government', 'other']),
+      locationType:
+        overrides.locationType ??
+        faker.helpers.arrayElement(["residential", "commercial", "government", "other"]),
       createdAt: overrides.createdAt ?? new Date(),
       updatedAt: overrides.updatedAt ?? new Date(),
       metadata: overrides.metadata ?? {},
@@ -215,15 +217,23 @@ export class MockDataFactory {
   ): Relationship {
     return {
       id: overrides.id ?? uuidv4(),
-      type: overrides.type ?? faker.helpers.arrayElement([
-        'knows', 'works_for', 'owns', 'located_at',
-        'participated_in', 'authored', 'related_to'
-      ] as RelationshipType[]),
+      type:
+        overrides.type ??
+        faker.helpers.arrayElement([
+          "knows",
+          "works_for",
+          "owns",
+          "located_at",
+          "participated_in",
+          "authored",
+          "related_to",
+        ] as RelationshipType[]),
       sourceId,
       targetId,
       properties: overrides.properties ?? {},
       createdAt: overrides.createdAt ?? new Date(),
-      confidence: overrides.confidence ?? faker.number.float({ min: 0.5, max: 1, fractionDigits: 2 }),
+      confidence:
+        overrides.confidence ?? faker.number.float({ min: 0.5, max: 1, fractionDigits: 2 }),
     };
   }
 
@@ -235,35 +245,35 @@ export class MockDataFactory {
       id: overrides.id ?? uuidv4(),
       title: overrides.title ?? faker.lorem.sentence(),
       description: overrides.description ?? faker.lorem.paragraph(),
-      status: overrides.status ?? faker.helpers.arrayElement(['open', 'in_progress', 'closed', 'archived']),
-      priority: overrides.priority ?? faker.helpers.arrayElement(['low', 'medium', 'high', 'critical']),
+      status:
+        overrides.status ??
+        faker.helpers.arrayElement(["open", "in_progress", "closed", "archived"]),
+      priority:
+        overrides.priority ?? faker.helpers.arrayElement(["low", "medium", "high", "critical"]),
       assignedTo: overrides.assignedTo ?? faker.person.fullName(),
       createdAt: overrides.createdAt ?? faker.date.recent({ days: 30 }),
       updatedAt: overrides.updatedAt ?? new Date(),
       entities: overrides.entities ?? [],
       relationships: overrides.relationships ?? [],
-      tags: overrides.tags ?? faker.lorem.words(3).split(' '),
+      tags: overrides.tags ?? faker.lorem.words(3).split(" "),
     };
   }
 
   /**
    * Generate a complete network of entities and relationships
    */
-  network(options: {
-    people?: number;
-    organizations?: number;
-    locations?: number;
-    relationshipsPerEntity?: number;
-  } = {}): {
+  network(
+    options: {
+      people?: number;
+      organizations?: number;
+      locations?: number;
+      relationshipsPerEntity?: number;
+    } = {}
+  ): {
     entities: BaseEntity[];
     relationships: Relationship[];
   } {
-    const {
-      people = 10,
-      organizations = 5,
-      locations = 5,
-      relationshipsPerEntity = 3,
-    } = options;
+    const { people = 10, organizations = 5, locations = 5, relationshipsPerEntity = 3 } = options;
 
     const entities: BaseEntity[] = [];
     const relationships: Relationship[] = [];
@@ -286,7 +296,7 @@ export class MockDataFactory {
       const numRelationships = faker.number.int({ min: 1, max: relationshipsPerEntity });
 
       for (let i = 0; i < numRelationships; i++) {
-        const target = faker.helpers.arrayElement(entities.filter(e => e.id !== entity.id));
+        const target = faker.helpers.arrayElement(entities.filter((e) => e.id !== entity.id));
         relationships.push(this.relationship(entity.id, target.id));
       }
     }
@@ -308,10 +318,12 @@ export class MockDataFactory {
   /**
    * Generate a realistic investigation with entities
    */
-  investigationWithEntities(options: {
-    entityCount?: number;
-    relationshipCount?: number;
-  } = {}): {
+  investigationWithEntities(
+    options: {
+      entityCount?: number;
+      relationshipCount?: number;
+    } = {}
+  ): {
     investigation: Investigation;
     entities: BaseEntity[];
     relationships: Relationship[];
@@ -339,13 +351,13 @@ export class MockDataFactory {
     // Generate relationships
     for (let i = 0; i < relationshipCount && entities.length >= 2; i++) {
       const source = faker.helpers.arrayElement(entities);
-      const target = faker.helpers.arrayElement(entities.filter(e => e.id !== source.id));
+      const target = faker.helpers.arrayElement(entities.filter((e) => e.id !== source.id));
       relationships.push(this.relationship(source.id, target.id));
     }
 
     const investigation = this.investigation({
-      entities: entities.map(e => e.id),
-      relationships: relationships.map(r => r.id),
+      entities: entities.map((e) => e.id),
+      relationships: relationships.map((r) => r.id),
     });
 
     return { investigation, entities, relationships };

@@ -1,22 +1,20 @@
 // @ts-nocheck
-import crypto from 'node:crypto';
+import crypto from "node:crypto";
 
 export function createSlug(value: string): string {
   return value
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/[^a-z0-9\s-]/g, "")
     .trim()
-    .replace(/\s+/g, '-');
+    .replace(/\s+/g, "-");
 }
 
 export function computeSha256(content: string): string {
-  return crypto.createHash('sha256').update(content, 'utf8').digest('hex');
+  return crypto.createHash("sha256").update(content, "utf8").digest("hex");
 }
 
 export function splitIntoSentences(text: string): string[] {
-  const sanitized = text
-    .replace(/\s+/g, ' ')
-    .replace(/([a-z])([A-Z])/g, '$1. $2');
+  const sanitized = text.replace(/\s+/g, " ").replace(/([a-z])([A-Z])/g, "$1. $2");
   return sanitized
     .split(/(?<=[.!?])\s+(?=[A-Z0-9])/)
     .map((sentence) => sentence.trim())
@@ -28,7 +26,7 @@ export function limitWords(text: string, maxWords: number): string {
   if (words.length <= maxWords) {
     return text.trim();
   }
-  return `${words.slice(0, maxWords).join(' ')}…`;
+  return `${words.slice(0, maxWords).join(" ")}…`;
 }
 
 export function unique<T>(values: T[]): T[] {
@@ -37,11 +35,11 @@ export function unique<T>(values: T[]): T[] {
 
 export function ensureIsoDate(input: string | undefined): string {
   if (!input) {
-    return '';
+    return "";
   }
   const parsed = new Date(input);
   if (Number.isNaN(parsed.getTime())) {
-    return '';
+    return "";
   }
-  return parsed.toISOString().split('T')[0];
+  return parsed.toISOString().split("T")[0];
 }

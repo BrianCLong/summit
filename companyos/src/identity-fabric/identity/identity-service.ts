@@ -7,7 +7,7 @@
  * @module identity-fabric/identity
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 import type {
   Identity,
   UserIdentity,
@@ -22,7 +22,7 @@ import type {
   SessionContext,
   ClassificationLevel,
   TrustLevel,
-} from './types.js';
+} from "./types.js";
 
 // ============================================================================
 // IDENTITY SERVICE CONFIGURATION
@@ -46,10 +46,10 @@ const DEFAULT_CONFIG: IdentityServiceConfig = {
   auditEnabled: true,
   validationStrict: true,
   maxIdentitiesPerTenant: 10000,
-  defaultClearance: 'unclassified',
+  defaultClearance: "unclassified",
   requireEmailVerification: true,
   spiffeEnabled: true,
-  spiffeTrustDomain: 'companyos.local',
+  spiffeTrustDomain: "companyos.local",
 };
 
 // ============================================================================
@@ -97,10 +97,7 @@ export class IdentityService extends EventEmitter {
   private tenantStore: TenantStore;
   private roleStore: RoleStore;
 
-  constructor(
-    config: Partial<IdentityServiceConfig> = {},
-    stores?: IdentityStores
-  ) {
+  constructor(config: Partial<IdentityServiceConfig> = {}, stores?: IdentityStores) {
     super();
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.identityCache = new Map();
@@ -219,7 +216,9 @@ export class IdentityService extends EventEmitter {
   /**
    * Create a new user identity.
    */
-  async createUser(user: Omit<UserIdentity, 'id' | 'createdAt' | 'updatedAt'>): Promise<UserIdentity> {
+  async createUser(
+    user: Omit<UserIdentity, "id" | "createdAt" | "updatedAt">
+  ): Promise<UserIdentity> {
     const validation = await this.validateUserIdentity(user);
     if (!validation.valid) {
       throw new IdentityValidationError(validation.errors);
@@ -227,16 +226,16 @@ export class IdentityService extends EventEmitter {
 
     const newUser: UserIdentity = {
       ...user,
-      id: this.generateId('user'),
+      id: this.generateId("user"),
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
     await this.userStore.create(newUser);
-    this.emit('identity:created', { type: 'human', identity: newUser });
+    this.emit("identity:created", { type: "human", identity: newUser });
 
     if (this.config.auditEnabled) {
-      this.emitAuditEvent('identity.user.created', newUser);
+      this.emitAuditEvent("identity.user.created", newUser);
     }
 
     return newUser;
@@ -246,7 +245,7 @@ export class IdentityService extends EventEmitter {
    * Create a new service identity.
    */
   async createService(
-    service: Omit<ServiceIdentity, 'id' | 'createdAt' | 'updatedAt'>
+    service: Omit<ServiceIdentity, "id" | "createdAt" | "updatedAt">
   ): Promise<ServiceIdentity> {
     const validation = await this.validateServiceIdentity(service);
     if (!validation.valid) {
@@ -255,7 +254,7 @@ export class IdentityService extends EventEmitter {
 
     const newService: ServiceIdentity = {
       ...service,
-      id: this.generateId('svc'),
+      id: this.generateId("svc"),
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -266,10 +265,10 @@ export class IdentityService extends EventEmitter {
     }
 
     await this.serviceStore.create(newService);
-    this.emit('identity:created', { type: 'service', identity: newService });
+    this.emit("identity:created", { type: "service", identity: newService });
 
     if (this.config.auditEnabled) {
-      this.emitAuditEvent('identity.service.created', newService);
+      this.emitAuditEvent("identity.service.created", newService);
     }
 
     return newService;
@@ -279,7 +278,7 @@ export class IdentityService extends EventEmitter {
    * Create a new agent identity.
    */
   async createAgent(
-    agent: Omit<AgentIdentity, 'id' | 'createdAt' | 'updatedAt'>
+    agent: Omit<AgentIdentity, "id" | "createdAt" | "updatedAt">
   ): Promise<AgentIdentity> {
     const validation = await this.validateAgentIdentity(agent);
     if (!validation.valid) {
@@ -288,16 +287,16 @@ export class IdentityService extends EventEmitter {
 
     const newAgent: AgentIdentity = {
       ...agent,
-      id: this.generateId('agent'),
+      id: this.generateId("agent"),
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
     await this.agentStore.create(newAgent);
-    this.emit('identity:created', { type: 'agent', identity: newAgent });
+    this.emit("identity:created", { type: "agent", identity: newAgent });
 
     if (this.config.auditEnabled) {
-      this.emitAuditEvent('identity.agent.created', newAgent);
+      this.emitAuditEvent("identity.agent.created", newAgent);
     }
 
     return newAgent;
@@ -307,7 +306,7 @@ export class IdentityService extends EventEmitter {
    * Create a new workload identity.
    */
   async createWorkload(
-    workload: Omit<WorkloadIdentity, 'id' | 'createdAt' | 'updatedAt'>
+    workload: Omit<WorkloadIdentity, "id" | "createdAt" | "updatedAt">
   ): Promise<WorkloadIdentity> {
     const validation = await this.validateWorkloadIdentity(workload);
     if (!validation.valid) {
@@ -316,16 +315,16 @@ export class IdentityService extends EventEmitter {
 
     const newWorkload: WorkloadIdentity = {
       ...workload,
-      id: this.generateId('wkld'),
+      id: this.generateId("wkld"),
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
     await this.workloadStore.create(newWorkload);
-    this.emit('identity:created', { type: 'workload', identity: newWorkload });
+    this.emit("identity:created", { type: "workload", identity: newWorkload });
 
     if (this.config.auditEnabled) {
-      this.emitAuditEvent('identity.workload.created', newWorkload);
+      this.emitAuditEvent("identity.workload.created", newWorkload);
     }
 
     return newWorkload;
@@ -335,24 +334,24 @@ export class IdentityService extends EventEmitter {
    * Get any identity by ID.
    */
   async getIdentityById(id: string): Promise<Identity | null> {
-    const prefix = id.split('_')[0];
+    const prefix = id.split("_")[0];
 
     switch (prefix) {
-      case 'user':
+      case "user":
         return this.userStore.get(id);
-      case 'svc':
+      case "svc":
         return this.serviceStore.get(id);
-      case 'agent':
+      case "agent":
         return this.agentStore.get(id);
-      case 'wkld':
+      case "wkld":
         return this.workloadStore.get(id);
       default:
         // Try all stores
         return (
-          await this.userStore.get(id) ||
-          await this.serviceStore.get(id) ||
-          await this.agentStore.get(id) ||
-          await this.workloadStore.get(id)
+          (await this.userStore.get(id)) ||
+          (await this.serviceStore.get(id)) ||
+          (await this.agentStore.get(id)) ||
+          (await this.workloadStore.get(id))
         );
     }
   }
@@ -370,7 +369,7 @@ export class IdentityService extends EventEmitter {
       ...existing,
       ...updates,
       id: existing.id,
-      type: 'human',
+      type: "human",
       tenantId: existing.tenantId,
       createdAt: existing.createdAt,
       updatedAt: new Date(),
@@ -378,10 +377,10 @@ export class IdentityService extends EventEmitter {
 
     await this.userStore.update(updated);
     this.invalidateCache(id);
-    this.emit('identity:updated', { type: 'human', identity: updated });
+    this.emit("identity:updated", { type: "human", identity: updated });
 
     if (this.config.auditEnabled) {
-      this.emitAuditEvent('identity.user.updated', updated, { changes: updates });
+      this.emitAuditEvent("identity.user.updated", updated, { changes: updates });
     }
 
     return updated;
@@ -403,10 +402,10 @@ export class IdentityService extends EventEmitter {
 
     await this.updateIdentityByType(identity);
     this.invalidateCache(id);
-    this.emit('identity:deactivated', { identity, reason });
+    this.emit("identity:deactivated", { identity, reason });
 
     if (this.config.auditEnabled) {
-      this.emitAuditEvent('identity.deactivated', identity, { reason });
+      this.emitAuditEvent("identity.deactivated", identity, { reason });
     }
   }
 
@@ -417,10 +416,7 @@ export class IdentityService extends EventEmitter {
   /**
    * Compute effective permissions for an identity.
    */
-  async computeEffectivePermissions(
-    identity: Identity,
-    roles: Role[]
-  ): Promise<string[]> {
+  async computeEffectivePermissions(identity: Identity, roles: Role[]): Promise<string[]> {
     const cacheKey = `perms:${identity.id}`;
     const now = Date.now();
 
@@ -458,10 +454,7 @@ export class IdentityService extends EventEmitter {
     return permissionArray;
   }
 
-  private async resolveInheritedPermissions(
-    role: Role,
-    permissions: Set<string>
-  ): Promise<void> {
+  private async resolveInheritedPermissions(role: Role, permissions: Set<string>): Promise<void> {
     for (const parentRoleId of role.inheritsFrom) {
       const parentRole = await this.roleStore.get(parentRoleId);
       if (parentRole) {
@@ -478,7 +471,7 @@ export class IdentityService extends EventEmitter {
     permissions: Set<string>
   ): Promise<void> {
     switch (identity.type) {
-      case 'service': {
+      case "service": {
         const service = identity as ServiceIdentity;
         for (const scope of service.scopes) {
           permissions.add(`scope:${scope}`);
@@ -488,7 +481,7 @@ export class IdentityService extends EventEmitter {
         }
         break;
       }
-      case 'agent': {
+      case "agent": {
         const agent = identity as AgentIdentity;
         for (const cap of agent.capabilities) {
           permissions.add(`agent:${cap}`);
@@ -499,7 +492,7 @@ export class IdentityService extends EventEmitter {
         }
         break;
       }
-      case 'workload': {
+      case "workload": {
         const workload = identity as WorkloadIdentity;
         for (const audience of workload.allowedAudiences) {
           permissions.add(`audience:${audience}`);
@@ -512,21 +505,18 @@ export class IdentityService extends EventEmitter {
   /**
    * Compute effective clearance level.
    */
-  computeEffectiveClearance(
-    identity: Identity,
-    tenant: Tenant
-  ): ClassificationLevel {
+  computeEffectiveClearance(identity: Identity, tenant: Tenant): ClassificationLevel {
     const CLEARANCE_LEVELS: Record<ClassificationLevel, number> = {
-      'unclassified': 0,
-      'cui': 1,
-      'confidential': 2,
-      'secret': 3,
-      'top-secret': 4,
-      'top-secret-sci': 5,
+      unclassified: 0,
+      cui: 1,
+      confidential: 2,
+      secret: 3,
+      "top-secret": 4,
+      "top-secret-sci": 5,
     };
 
     let identityClearance: ClassificationLevel = this.config.defaultClearance;
-    if (identity.type === 'human') {
+    if (identity.type === "human") {
       identityClearance = (identity as UserIdentity).clearance;
     }
 
@@ -543,28 +533,26 @@ export class IdentityService extends EventEmitter {
   // VALIDATION
   // ==========================================================================
 
-  async validateUserIdentity(
-    user: Partial<UserIdentity>
-  ): Promise<IdentityValidationResult> {
+  async validateUserIdentity(user: Partial<UserIdentity>): Promise<IdentityValidationResult> {
     const errors: IdentityValidationError[] = [];
     const warnings: string[] = [];
 
     if (!user.email) {
-      errors.push({ field: 'email', code: 'required', message: 'Email is required' });
+      errors.push({ field: "email", code: "required", message: "Email is required" });
     } else if (!this.isValidEmail(user.email)) {
-      errors.push({ field: 'email', code: 'invalid', message: 'Invalid email format' });
+      errors.push({ field: "email", code: "invalid", message: "Invalid email format" });
     }
 
     if (!user.tenantId) {
-      errors.push({ field: 'tenantId', code: 'required', message: 'Tenant ID is required' });
+      errors.push({ field: "tenantId", code: "required", message: "Tenant ID is required" });
     }
 
     if (!user.displayName) {
-      errors.push({ field: 'displayName', code: 'required', message: 'Display name is required' });
+      errors.push({ field: "displayName", code: "required", message: "Display name is required" });
     }
 
     if (user.clearance && !this.isValidClearance(user.clearance)) {
-      errors.push({ field: 'clearance', code: 'invalid', message: 'Invalid clearance level' });
+      errors.push({ field: "clearance", code: "invalid", message: "Invalid clearance level" });
     }
 
     // Check tenant limits
@@ -572,8 +560,8 @@ export class IdentityService extends EventEmitter {
       const count = await this.userStore.countByTenant(user.tenantId);
       if (count >= this.config.maxIdentitiesPerTenant) {
         errors.push({
-          field: 'tenantId',
-          code: 'limit_exceeded',
+          field: "tenantId",
+          code: "limit_exceeded",
           message: `Tenant has reached maximum identity limit (${this.config.maxIdentitiesPerTenant})`,
         });
       }
@@ -589,48 +577,50 @@ export class IdentityService extends EventEmitter {
     const warnings: string[] = [];
 
     if (!service.name) {
-      errors.push({ field: 'name', code: 'required', message: 'Service name is required' });
+      errors.push({ field: "name", code: "required", message: "Service name is required" });
     }
 
     if (!service.owner) {
-      errors.push({ field: 'owner', code: 'required', message: 'Service owner is required' });
+      errors.push({ field: "owner", code: "required", message: "Service owner is required" });
     }
 
     if (!service.tenantId) {
-      errors.push({ field: 'tenantId', code: 'required', message: 'Tenant ID is required' });
+      errors.push({ field: "tenantId", code: "required", message: "Tenant ID is required" });
     }
 
     if (!service.scopes || service.scopes.length === 0) {
-      warnings.push('Service has no scopes defined');
+      warnings.push("Service has no scopes defined");
     }
 
     return { valid: errors.length === 0, errors, warnings };
   }
 
-  async validateAgentIdentity(
-    agent: Partial<AgentIdentity>
-  ): Promise<IdentityValidationResult> {
+  async validateAgentIdentity(agent: Partial<AgentIdentity>): Promise<IdentityValidationResult> {
     const errors: IdentityValidationError[] = [];
     const warnings: string[] = [];
 
     if (!agent.name) {
-      errors.push({ field: 'name', code: 'required', message: 'Agent name is required' });
+      errors.push({ field: "name", code: "required", message: "Agent name is required" });
     }
 
     if (!agent.modelId) {
-      errors.push({ field: 'modelId', code: 'required', message: 'Model ID is required' });
+      errors.push({ field: "modelId", code: "required", message: "Model ID is required" });
     }
 
     if (!agent.owner) {
-      errors.push({ field: 'owner', code: 'required', message: 'Agent owner is required' });
+      errors.push({ field: "owner", code: "required", message: "Agent owner is required" });
     }
 
     if (!agent.tenantId) {
-      errors.push({ field: 'tenantId', code: 'required', message: 'Tenant ID is required' });
+      errors.push({ field: "tenantId", code: "required", message: "Tenant ID is required" });
     }
 
     if (agent.maxTokenBudget && agent.maxTokenBudget <= 0) {
-      errors.push({ field: 'maxTokenBudget', code: 'invalid', message: 'Token budget must be positive' });
+      errors.push({
+        field: "maxTokenBudget",
+        code: "invalid",
+        message: "Token budget must be positive",
+      });
     }
 
     return { valid: errors.length === 0, errors, warnings };
@@ -643,17 +633,17 @@ export class IdentityService extends EventEmitter {
     const warnings: string[] = [];
 
     if (!workload.spiffeId) {
-      errors.push({ field: 'spiffeId', code: 'required', message: 'SPIFFE ID is required' });
+      errors.push({ field: "spiffeId", code: "required", message: "SPIFFE ID is required" });
     } else if (!this.isValidSpiffeId(workload.spiffeId)) {
-      errors.push({ field: 'spiffeId', code: 'invalid', message: 'Invalid SPIFFE ID format' });
+      errors.push({ field: "spiffeId", code: "invalid", message: "Invalid SPIFFE ID format" });
     }
 
     if (!workload.trustDomain) {
-      errors.push({ field: 'trustDomain', code: 'required', message: 'Trust domain is required' });
+      errors.push({ field: "trustDomain", code: "required", message: "Trust domain is required" });
     }
 
     if (!workload.tenantId) {
-      errors.push({ field: 'tenantId', code: 'required', message: 'Tenant ID is required' });
+      errors.push({ field: "tenantId", code: "required", message: "Tenant ID is required" });
     }
 
     return { valid: errors.length === 0, errors, warnings };
@@ -678,7 +668,14 @@ export class IdentityService extends EventEmitter {
   }
 
   private isValidClearance(clearance: string): boolean {
-    return ['unclassified', 'cui', 'confidential', 'secret', 'top-secret', 'top-secret-sci'].includes(clearance);
+    return [
+      "unclassified",
+      "cui",
+      "confidential",
+      "secret",
+      "top-secret",
+      "top-secret-sci",
+    ].includes(clearance);
   }
 
   private isValidSpiffeId(spiffeId: string): boolean {
@@ -695,7 +692,7 @@ export class IdentityService extends EventEmitter {
   }
 
   private async getOrganizations(identity: Identity): Promise<Organization[]> {
-    if (identity.type !== 'human') {
+    if (identity.type !== "human") {
       return [];
     }
     const user = identity as UserIdentity;
@@ -723,16 +720,16 @@ export class IdentityService extends EventEmitter {
 
   private async updateIdentityByType(identity: Identity): Promise<void> {
     switch (identity.type) {
-      case 'human':
+      case "human":
         await this.userStore.update(identity as UserIdentity);
         break;
-      case 'service':
+      case "service":
         await this.serviceStore.update(identity as ServiceIdentity);
         break;
-      case 'agent':
+      case "agent":
         await this.agentStore.update(identity as AgentIdentity);
         break;
-      case 'workload':
+      case "workload":
         await this.workloadStore.update(identity as WorkloadIdentity);
         break;
     }
@@ -743,7 +740,7 @@ export class IdentityService extends EventEmitter {
     identity: Identity,
     additionalData?: Record<string, unknown>
   ): void {
-    this.emit('audit', {
+    this.emit("audit", {
       eventType,
       timestamp: new Date().toISOString(),
       identityId: identity.id,
@@ -830,7 +827,7 @@ export class InMemoryIdentityStore<T extends Identity> implements IdentityStore<
   }
 
   async listByTenant(tenantId: string): Promise<T[]> {
-    return Array.from(this.store.values()).filter(i => i.tenantId === tenantId);
+    return Array.from(this.store.values()).filter((i) => i.tenantId === tenantId);
   }
 
   async countByTenant(tenantId: string): Promise<number> {
@@ -868,9 +865,7 @@ export class InMemoryRoleStore implements RoleStore {
   }
 
   async getBindings(identityId: string, tenantId: string): Promise<RoleBinding[]> {
-    return this.bindings.filter(
-      b => b.principalId === identityId && b.tenantId === tenantId
-    );
+    return this.bindings.filter((b) => b.principalId === identityId && b.tenantId === tenantId);
   }
 
   setRole(role: Role): void {
@@ -889,14 +884,14 @@ export class InMemoryRoleStore implements RoleStore {
 export class IdentityNotFoundError extends Error {
   constructor(public readonly identityId: string) {
     super(`Identity not found: ${identityId}`);
-    this.name = 'IdentityNotFoundError';
+    this.name = "IdentityNotFoundError";
   }
 }
 
 export class TenantNotFoundError extends Error {
   constructor(public readonly tenantId: string) {
     super(`Tenant not found: ${tenantId}`);
-    this.name = 'TenantNotFoundError';
+    this.name = "TenantNotFoundError";
   }
 }
 
@@ -906,13 +901,13 @@ export class TenantAccessDeniedError extends Error {
     public readonly tenantId: string
   ) {
     super(`Identity ${identityId} does not have access to tenant ${tenantId}`);
-    this.name = 'TenantAccessDeniedError';
+    this.name = "TenantAccessDeniedError";
   }
 }
 
 export class IdentityValidationError extends Error {
   constructor(public readonly errors: IdentityValidationError[]) {
-    super(`Identity validation failed: ${errors.map(e => e.message).join(', ')}`);
-    this.name = 'IdentityValidationError';
+    super(`Identity validation failed: ${errors.map((e) => e.message).join(", ")}`);
+    this.name = "IdentityValidationError";
   }
 }

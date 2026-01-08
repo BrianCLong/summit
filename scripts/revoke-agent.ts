@@ -12,18 +12,18 @@
  *   npm run reinstate-agent -- --agent <agent-id>
  */
 
-import { Pool } from 'pg';
-import { randomUUID } from 'crypto';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as yaml from 'yaml';
+import { Pool } from "pg";
+import { randomUUID } from "crypto";
+import * as fs from "fs";
+import * as path from "path";
+import * as yaml from "yaml";
 
 // ============================================================================
 // Configuration
 // ============================================================================
 
-const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://localhost:5432/summit';
-const REGISTRY_PATH = path.join(process.cwd(), 'agents', 'registry.yaml');
+const DATABASE_URL = process.env.DATABASE_URL || "postgresql://localhost:5432/summit";
+const REGISTRY_PATH = path.join(process.cwd(), "agents", "registry.yaml");
 
 // ============================================================================
 // Revocation Manager
@@ -78,11 +78,11 @@ class RevocationManager {
     // 4. Log lifecycle event
     await this.logLifecycleEvent({
       agent_id: agentId,
-      event_type: 'agent_revoked',
-      event_category: 'security',
-      event_severity: 'critical',
+      event_type: "agent_revoked",
+      event_category: "security",
+      event_severity: "critical",
       actor_id: revokedBy,
-      actor_type: 'user',
+      actor_type: "user",
       metadata: { reason },
     });
     console.log(`✅ Logged lifecycle event`);
@@ -119,11 +119,11 @@ class RevocationManager {
     // 3. Log lifecycle event
     await this.logLifecycleEvent({
       agent_id: agentId,
-      event_type: 'agent_reinstated',
-      event_category: 'lifecycle',
-      event_severity: 'info',
+      event_type: "agent_reinstated",
+      event_category: "lifecycle",
+      event_severity: "info",
       actor_id: reinstatedBy,
-      actor_type: 'user',
+      actor_type: "user",
       metadata: {},
     });
     console.log(`✅ Logged lifecycle event`);
@@ -139,11 +139,11 @@ class RevocationManager {
     capability: string,
     reason: string,
     revokedBy: string,
-    appliesTo: string[] = ['*']
+    appliesTo: string[] = ["*"]
   ): Promise<void> {
     console.log(`🚨 Revoking capability: ${capability}`);
     console.log(`   Reason: ${reason}`);
-    console.log(`   Applies to: ${appliesTo.join(', ')}`);
+    console.log(`   Applies to: ${appliesTo.join(", ")}`);
     console.log(`   Revoked by: ${revokedBy}`);
 
     // 1. Add capability revocation to registry
@@ -157,19 +157,23 @@ class RevocationManager {
     console.log(`✅ Added capability revocation to registry file`);
 
     // 2. Abort in-flight runs using this capability
-    const abortedRuns = await this.abortRunsUsingCapability(capability, appliesTo, `Capability revoked: ${reason}`);
+    const abortedRuns = await this.abortRunsUsingCapability(
+      capability,
+      appliesTo,
+      `Capability revoked: ${reason}`
+    );
     console.log(`✅ Aborted ${abortedRuns} in-flight runs using this capability`);
 
     // 3. Log lifecycle event for affected agents
-    if (appliesTo.includes('*')) {
+    if (appliesTo.includes("*")) {
       // Log global revocation
       await this.logLifecycleEvent({
-        agent_id: 'GLOBAL',
-        event_type: 'capability_revoked',
-        event_category: 'security',
-        event_severity: 'critical',
+        agent_id: "GLOBAL",
+        event_type: "capability_revoked",
+        event_category: "security",
+        event_severity: "critical",
         actor_id: revokedBy,
-        actor_type: 'user',
+        actor_type: "user",
         metadata: { capability, reason, applies_to: appliesTo },
       });
     } else {
@@ -177,11 +181,11 @@ class RevocationManager {
       for (const agentId of appliesTo) {
         await this.logLifecycleEvent({
           agent_id: agentId,
-          event_type: 'capability_revoked',
-          event_category: 'security',
-          event_severity: 'critical',
+          event_type: "capability_revoked",
+          event_category: "security",
+          event_severity: "critical",
           actor_id: revokedBy,
-          actor_type: 'user',
+          actor_type: "user",
           metadata: { capability, reason },
         });
       }
@@ -203,12 +207,12 @@ class RevocationManager {
 
     // Log lifecycle event
     await this.logLifecycleEvent({
-      agent_id: 'GLOBAL',
-      event_type: 'capability_reinstated',
-      event_category: 'lifecycle',
-      event_severity: 'info',
+      agent_id: "GLOBAL",
+      event_type: "capability_reinstated",
+      event_category: "lifecycle",
+      event_severity: "info",
       actor_id: reinstatedBy,
-      actor_type: 'user',
+      actor_type: "user",
       metadata: { capability },
     });
     console.log(`✅ Logged lifecycle event`);
@@ -245,7 +249,7 @@ class RevocationManager {
 
     const result = await this.pool.query(query, [
       JSON.stringify({
-        error_type: 'emergency_shutdown',
+        error_type: "emergency_shutdown",
         error_message: reason,
       }),
     ]);
@@ -255,12 +259,12 @@ class RevocationManager {
 
     // Log global lifecycle event
     await this.logLifecycleEvent({
-      agent_id: 'GLOBAL',
-      event_type: 'emergency_shutdown',
-      event_category: 'security',
-      event_severity: 'critical',
-      actor_id: 'system',
-      actor_type: 'system',
+      agent_id: "GLOBAL",
+      event_type: "emergency_shutdown",
+      event_category: "security",
+      event_severity: "critical",
+      actor_id: "system",
+      actor_type: "system",
       metadata: { reason, runs_aborted: count },
     });
 
@@ -355,13 +359,13 @@ class RevocationManager {
       return { agents: [], revocations: { agents: [], capabilities: [] } };
     }
 
-    const content = fs.readFileSync(REGISTRY_PATH, 'utf8');
+    const content = fs.readFileSync(REGISTRY_PATH, "utf8");
     return yaml.parse(content);
   }
 
   private saveRegistry(registry: any): void {
     const content = yaml.stringify(registry);
-    fs.writeFileSync(REGISTRY_PATH, content, 'utf8');
+    fs.writeFileSync(REGISTRY_PATH, content, "utf8");
   }
 
   // ==========================================================================
@@ -381,7 +385,7 @@ class RevocationManager {
     const result = await this.pool.query(query, [
       agentId,
       JSON.stringify({
-        error_type: 'agent_revoked',
+        error_type: "agent_revoked",
         error_message: reason,
       }),
     ]);
@@ -445,62 +449,64 @@ async function main() {
 
   try {
     switch (command) {
-      case 'revoke-agent': {
-        const agentId = getArg(args, '--agent');
-        const reason = getArg(args, '--reason') || 'Manual revocation';
-        const revokedBy = getArg(args, '--by') || 'admin';
+      case "revoke-agent": {
+        const agentId = getArg(args, "--agent");
+        const reason = getArg(args, "--reason") || "Manual revocation";
+        const revokedBy = getArg(args, "--by") || "admin";
         await manager.revokeAgent(agentId, reason, revokedBy);
         break;
       }
 
-      case 'reinstate-agent': {
-        const agentId = getArg(args, '--agent');
-        const reinstatedBy = getArg(args, '--by') || 'admin';
+      case "reinstate-agent": {
+        const agentId = getArg(args, "--agent");
+        const reinstatedBy = getArg(args, "--by") || "admin";
         await manager.reinstateAgent(agentId, reinstatedBy);
         break;
       }
 
-      case 'revoke-capability': {
-        const capability = getArg(args, '--capability');
-        const reason = getArg(args, '--reason') || 'Manual revocation';
-        const revokedBy = getArg(args, '--by') || 'admin';
-        const appliesTo = getArg(args, '--applies-to')?.split(',') || ['*'];
+      case "revoke-capability": {
+        const capability = getArg(args, "--capability");
+        const reason = getArg(args, "--reason") || "Manual revocation";
+        const revokedBy = getArg(args, "--by") || "admin";
+        const appliesTo = getArg(args, "--applies-to")?.split(",") || ["*"];
         await manager.revokeCapability(capability, reason, revokedBy, appliesTo);
         break;
       }
 
-      case 'reinstate-capability': {
-        const capability = getArg(args, '--capability');
-        const reinstatedBy = getArg(args, '--by') || 'admin';
+      case "reinstate-capability": {
+        const capability = getArg(args, "--capability");
+        const reinstatedBy = getArg(args, "--by") || "admin";
         await manager.reinstateCapability(capability, reinstatedBy);
         break;
       }
 
-      case 'kill-runs': {
-        const agentId = getArg(args, '--agent');
-        const reason = getArg(args, '--reason') || 'Manual kill';
+      case "kill-runs": {
+        const agentId = getArg(args, "--agent");
+        const reason = getArg(args, "--reason") || "Manual kill";
         await manager.killAgentRuns(agentId, reason);
         break;
       }
 
-      case 'kill-all-runs': {
-        const reason = getArg(args, '--reason') || 'Emergency shutdown';
-        console.warn('⚠️  WARNING: This will abort ALL in-flight agent runs!');
-        console.warn('   Press Ctrl+C to cancel, or wait 5 seconds to proceed...');
-        await new Promise(resolve => setTimeout(resolve, 5000));
+      case "kill-all-runs": {
+        const reason = getArg(args, "--reason") || "Emergency shutdown";
+        console.warn("⚠️  WARNING: This will abort ALL in-flight agent runs!");
+        console.warn("   Press Ctrl+C to cancel, or wait 5 seconds to proceed...");
+        await new Promise((resolve) => setTimeout(resolve, 5000));
         await manager.killAllRuns(reason);
         break;
       }
 
       default:
-        console.log('Agent Revocation & Kill-Switch CLI\n');
-        console.log('Usage:');
-        console.log('  revoke-agent --agent <id> --reason <reason> [--by <user>]');
-        console.log('  reinstate-agent --agent <id> [--by <user>]');
-        console.log('  revoke-capability --capability <name> --reason <reason> [--applies-to <agents>] [--by <user>]');
-        console.log('  reinstate-capability --capability <name> [--by <user>]');
-        console.log('  kill-runs --agent <id> --reason <reason>');
-        console.log('  kill-all-runs --reason <reason>  (⚠️  EMERGENCY ONLY)');
+        console.log("Agent Revocation & Kill-Switch CLI\n");
+        console.log("Usage:");
+        console.log("  revoke-agent --agent <id> --reason <reason> [--by <user>]");
+        console.log("  reinstate-agent --agent <id> [--by <user>]");
+        console.log(
+          "  revoke-capability --capability <name> --reason <reason> [--applies-to <agents>] [--by <user>]"
+        );
+        console.log("  reinstate-capability --capability <name> [--by <user>]");
+        console.log("  kill-runs --agent <id> --reason <reason>");
+        console.log("  kill-all-runs --reason <reason>  (⚠️  EMERGENCY ONLY)");
         process.exit(1);
     }
   } catch (error: any) {

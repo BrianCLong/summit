@@ -2,12 +2,12 @@
  * Scraper Engine - Main orchestrator for web scraping
  */
 
-import { EventEmitter } from 'events';
-import type { ScrapeTask, ScrapeResult, ScrapeOptions } from '../types/index.js';
-import { StaticScraper } from '../scrapers/StaticScraper.js';
-import { DynamicScraper } from '../scrapers/DynamicScraper.js';
-import { ArchiveScraper } from '../scrapers/ArchiveScraper.js';
-import { BrowserPool } from './BrowserPool.js';
+import { EventEmitter } from "events";
+import type { ScrapeTask, ScrapeResult, ScrapeOptions } from "../types/index.js";
+import { StaticScraper } from "../scrapers/StaticScraper.js";
+import { DynamicScraper } from "../scrapers/DynamicScraper.js";
+import { ArchiveScraper } from "../scrapers/ArchiveScraper.js";
+import { BrowserPool } from "./BrowserPool.js";
 
 export class ScraperEngine extends EventEmitter {
   private browserPool: BrowserPool;
@@ -28,27 +28,27 @@ export class ScraperEngine extends EventEmitter {
    */
   async initialize(): Promise<void> {
     await this.browserPool.initialize();
-    this.emit('initialized');
+    this.emit("initialized");
   }
 
   /**
    * Scrape a URL
    */
   async scrape(task: ScrapeTask): Promise<ScrapeResult> {
-    this.emit('scrape:start', { taskId: task.id, url: task.url });
+    this.emit("scrape:start", { taskId: task.id, url: task.url });
     const startTime = Date.now();
 
     try {
       let result: ScrapeResult;
 
       switch (task.method) {
-        case 'static':
+        case "static":
           result = await this.staticScraper.scrape(task.url, task.options);
           break;
-        case 'dynamic':
+        case "dynamic":
           result = await this.dynamicScraper.scrape(task.url, task.options);
           break;
-        case 'archive':
+        case "archive":
           result = await this.archiveScraper.scrape(task.url, task.options);
           break;
         default:
@@ -57,15 +57,15 @@ export class ScraperEngine extends EventEmitter {
 
       result.performance = {
         ...result.performance,
-        loadTime: Date.now() - startTime
+        loadTime: Date.now() - startTime,
       };
 
-      this.emit('scrape:complete', { taskId: task.id, result });
+      this.emit("scrape:complete", { taskId: task.id, result });
       return result;
     } catch (error) {
-      this.emit('scrape:error', {
+      this.emit("scrape:error", {
         taskId: task.id,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -74,18 +74,15 @@ export class ScraperEngine extends EventEmitter {
   /**
    * Scrape multiple URLs in batch
    */
-  async scrapeBatch(
-    urls: string[],
-    options?: ScrapeOptions
-  ): Promise<ScrapeResult[]> {
+  async scrapeBatch(urls: string[], options?: ScrapeOptions): Promise<ScrapeResult[]> {
     const tasks = urls.map((url, index) => ({
       id: `batch-${Date.now()}-${index}`,
       url,
-      method: (options?.renderJavaScript ? 'dynamic' : 'static') as 'static' | 'dynamic',
-      options
+      method: (options?.renderJavaScript ? "dynamic" : "static") as "static" | "dynamic",
+      options,
     }));
 
-    return await Promise.all(tasks.map(task => this.scrape(task)));
+    return await Promise.all(tasks.map((task) => this.scrape(task)));
   }
 
   /**
@@ -93,7 +90,7 @@ export class ScraperEngine extends EventEmitter {
    */
   async shutdown(): Promise<void> {
     await this.browserPool.shutdown();
-    this.emit('shutdown');
+    this.emit("shutdown");
   }
 
   /**
@@ -106,13 +103,13 @@ export class ScraperEngine extends EventEmitter {
     return {
       browsers: {
         active: this.browserPool.getActiveCount(),
-        max: this.browserPool.getMaxBrowsers()
+        max: this.browserPool.getMaxBrowsers(),
       },
       scrapers: {
         static: true,
         dynamic: true,
-        archive: true
-      }
+        archive: true,
+      },
     };
   }
 }

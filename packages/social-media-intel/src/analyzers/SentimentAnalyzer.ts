@@ -2,8 +2,8 @@
  * Sentiment Analyzer - Analyzes sentiment and emotions in social media content
  */
 
-import Sentiment from 'sentiment';
-import type { SentimentScore, Entity } from '../types/index.js';
+import Sentiment from "sentiment";
+import type { SentimentScore, Entity } from "../types/index.js";
 
 export class SentimentAnalyzer {
   private sentiment: Sentiment;
@@ -28,39 +28,37 @@ export class SentimentAnalyzer {
       polarity,
       subjectivity: this.calculateSubjectivity(text),
       emotion,
-      label: polarity > 0.1 ? 'positive' : polarity < -0.1 ? 'negative' : 'neutral'
+      label: polarity > 0.1 ? "positive" : polarity < -0.1 ? "negative" : "neutral",
     };
   }
 
   /**
    * Analyze sentiment trends over time
    */
-  analyzeTrends(
-    posts: Array<{ content: string; timestamp: Date }>
-  ): {
+  analyzeTrends(posts: Array<{ content: string; timestamp: Date }>): {
     overall: SentimentScore;
-    trend: 'improving' | 'declining' | 'stable';
+    trend: "improving" | "declining" | "stable";
     timeline: Array<{ date: Date; sentiment: number }>;
   } {
-    const sentiments = posts.map(post => ({
+    const sentiments = posts.map((post) => ({
       date: post.timestamp,
-      sentiment: this.analyze(post.content).polarity
+      sentiment: this.analyze(post.content).polarity,
     }));
 
     // Calculate overall sentiment
     const avgPolarity = sentiments.reduce((sum, s) => sum + s.sentiment, 0) / sentiments.length;
 
     // Calculate trend (simple linear regression)
-    const trend = this.calculateTrend(sentiments.map(s => s.sentiment));
+    const trend = this.calculateTrend(sentiments.map((s) => s.sentiment));
 
     return {
       overall: {
         polarity: avgPolarity,
         subjectivity: 0.5,
-        label: avgPolarity > 0.1 ? 'positive' : avgPolarity < -0.1 ? 'negative' : 'neutral'
+        label: avgPolarity > 0.1 ? "positive" : avgPolarity < -0.1 ? "negative" : "neutral",
       },
       trend,
-      timeline: sentiments
+      timeline: sentiments,
     };
   }
 
@@ -73,11 +71,11 @@ export class SentimentAnalyzer {
     // Extract mentions (@username)
     const mentions = text.match(/@(\w+)/g);
     if (mentions) {
-      mentions.forEach(mention => {
+      mentions.forEach((mention) => {
         entities.push({
-          type: 'person',
+          type: "person",
           text: mention.substring(1),
-          confidence: 0.9
+          confidence: 0.9,
         });
       });
     }
@@ -85,11 +83,11 @@ export class SentimentAnalyzer {
     // Extract hashtags (#topic)
     const hashtags = text.match(/#(\w+)/g);
     if (hashtags) {
-      hashtags.forEach(hashtag => {
+      hashtags.forEach((hashtag) => {
         entities.push({
-          type: 'event',
+          type: "event",
           text: hashtag.substring(1),
-          confidence: 0.8
+          confidence: 0.8,
         });
       });
     }
@@ -97,11 +95,11 @@ export class SentimentAnalyzer {
     // Extract URLs
     const urls = text.match(/https?:\/\/[^\s]+/g);
     if (urls) {
-      urls.forEach(url => {
+      urls.forEach((url) => {
         entities.push({
-          type: 'organization',
+          type: "organization",
           text: url,
-          confidence: 0.7
+          confidence: 0.7,
         });
       });
     }
@@ -123,23 +121,23 @@ export class SentimentAnalyzer {
     const emotion: any = {};
 
     // Joy keywords
-    const joyKeywords = ['happy', 'joy', 'excited', 'love', 'great', 'awesome', 'wonderful'];
+    const joyKeywords = ["happy", "joy", "excited", "love", "great", "awesome", "wonderful"];
     emotion.joy = this.countKeywords(lowerText, joyKeywords) / joyKeywords.length;
 
     // Anger keywords
-    const angerKeywords = ['angry', 'mad', 'hate', 'furious', 'outraged'];
+    const angerKeywords = ["angry", "mad", "hate", "furious", "outraged"];
     emotion.anger = this.countKeywords(lowerText, angerKeywords) / angerKeywords.length;
 
     // Fear keywords
-    const fearKeywords = ['scared', 'afraid', 'terrified', 'worried', 'anxious'];
+    const fearKeywords = ["scared", "afraid", "terrified", "worried", "anxious"];
     emotion.fear = this.countKeywords(lowerText, fearKeywords) / fearKeywords.length;
 
     // Sadness keywords
-    const sadnessKeywords = ['sad', 'depressed', 'unhappy', 'miserable', 'disappointed'];
+    const sadnessKeywords = ["sad", "depressed", "unhappy", "miserable", "disappointed"];
     emotion.sadness = this.countKeywords(lowerText, sadnessKeywords) / sadnessKeywords.length;
 
     // Surprise keywords
-    const surpriseKeywords = ['surprised', 'shocked', 'amazed', 'unexpected'];
+    const surpriseKeywords = ["surprised", "shocked", "amazed", "unexpected"];
     emotion.surprise = this.countKeywords(lowerText, surpriseKeywords) / surpriseKeywords.length;
 
     return emotion;
@@ -150,7 +148,7 @@ export class SentimentAnalyzer {
    */
   private countKeywords(text: string, keywords: string[]): number {
     let count = 0;
-    keywords.forEach(keyword => {
+    keywords.forEach((keyword) => {
       if (text.includes(keyword)) count++;
     });
     return count;
@@ -161,19 +159,19 @@ export class SentimentAnalyzer {
    */
   private calculateSubjectivity(text: string): number {
     const subjectiveIndicators = [
-      'i think',
-      'i feel',
-      'i believe',
-      'in my opinion',
-      'seems',
-      'probably',
-      'maybe'
+      "i think",
+      "i feel",
+      "i believe",
+      "in my opinion",
+      "seems",
+      "probably",
+      "maybe",
     ];
 
     let score = 0.5; // Base subjectivity
     const lowerText = text.toLowerCase();
 
-    subjectiveIndicators.forEach(indicator => {
+    subjectiveIndicators.forEach((indicator) => {
       if (lowerText.includes(indicator)) {
         score += 0.1;
       }
@@ -185,8 +183,8 @@ export class SentimentAnalyzer {
   /**
    * Calculate trend direction
    */
-  private calculateTrend(values: number[]): 'improving' | 'declining' | 'stable' {
-    if (values.length < 2) return 'stable';
+  private calculateTrend(values: number[]): "improving" | "declining" | "stable" {
+    if (values.length < 2) return "stable";
 
     const firstHalf = values.slice(0, Math.floor(values.length / 2));
     const secondHalf = values.slice(Math.floor(values.length / 2));
@@ -196,7 +194,7 @@ export class SentimentAnalyzer {
 
     const diff = avgSecond - avgFirst;
 
-    if (Math.abs(diff) < 0.1) return 'stable';
-    return diff > 0 ? 'improving' : 'declining';
+    if (Math.abs(diff) < 0.1) return "stable";
+    return diff > 0 ? "improving" : "declining";
   }
 }

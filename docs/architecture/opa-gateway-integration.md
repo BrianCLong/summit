@@ -22,7 +22,7 @@ const opaEnforcementPlugin = {
         const isAllowed = await opaClient.isAllowed({ principal, resource });
 
         if (!isAllowed) {
-          throw new ForbiddenError('Policy violation');
+          throw new ForbiddenError("Policy violation");
         }
       },
     };

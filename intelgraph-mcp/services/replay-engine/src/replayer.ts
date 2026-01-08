@@ -1,4 +1,4 @@
-import { Recording, ReplayResult } from './model';
+import { Recording, ReplayResult } from "./model";
 
 export class Replayer {
   replay(rec: Recording): ReplayResult {

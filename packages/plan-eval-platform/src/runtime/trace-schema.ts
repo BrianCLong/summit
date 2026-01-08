@@ -1,5 +1,5 @@
-import { randomUUID } from 'node:crypto';
-import type { Trace, TraceEvent, TraceEventType } from '../types.js';
+import { randomUUID } from "node:crypto";
+import type { Trace, TraceEvent, TraceEventType } from "../types.js";
 
 /**
  * TraceBuilder - Fluent API for constructing evaluation traces
@@ -27,16 +27,10 @@ export class TraceBuilder {
   /**
    * Start a new span/event
    */
-  startEvent(
-    type: TraceEventType,
-    name: string,
-    attributes?: Record<string, unknown>,
-  ): string {
+  startEvent(type: TraceEventType, name: string, attributes?: Record<string, unknown>): string {
     const eventId = randomUUID();
     const parentId =
-      this.eventStack.length > 0
-        ? this.eventStack[this.eventStack.length - 1]
-        : undefined;
+      this.eventStack.length > 0 ? this.eventStack[this.eventStack.length - 1] : undefined;
 
     const event: TraceEvent = {
       id: eventId,
@@ -46,7 +40,7 @@ export class TraceBuilder {
       type,
       name,
       attributes,
-      status: 'pending',
+      status: "pending",
     };
 
     this.events.push(event);
@@ -59,9 +53,9 @@ export class TraceBuilder {
    */
   endEvent(
     eventId: string,
-    status: 'success' | 'failure',
-    metrics?: TraceEvent['metrics'],
-    error?: TraceEvent['error'],
+    status: "success" | "failure",
+    metrics?: TraceEvent["metrics"],
+    error?: TraceEvent["error"]
   ): void {
     const event = this.events.find((e) => e.id === eventId);
     if (!event) {
@@ -88,45 +82,40 @@ export class TraceBuilder {
     selectedTool: string,
     score: number,
     reasoning: string[],
-    alternatives: Array<{ toolId: string; score: number }>,
+    alternatives: Array<{ toolId: string; score: number }>
   ): void {
-    this.startEvent('routing_decision', `route:${selectedTool}`, {
+    this.startEvent("routing_decision", `route:${selectedTool}`, {
       selectedTool,
       score,
       reasoning,
       alternatives,
     });
     // Routing decisions are instantaneous
-    this.endEvent(this.eventStack[this.eventStack.length - 1], 'success');
+    this.endEvent(this.eventStack[this.eventStack.length - 1], "success");
   }
 
   /**
    * Record a safety check
    */
-  recordSafetyCheck(
-    checkType: string,
-    passed: boolean,
-    severity: string,
-    details: string,
-  ): void {
-    const eventId = this.startEvent('safety_check', `safety:${checkType}`, {
+  recordSafetyCheck(checkType: string, passed: boolean, severity: string, details: string): void {
+    const eventId = this.startEvent("safety_check", `safety:${checkType}`, {
       checkType,
       passed,
       severity,
       details,
     });
-    this.endEvent(eventId, passed ? 'success' : 'failure');
+    this.endEvent(eventId, passed ? "success" : "failure");
   }
 
   /**
    * Record an error
    */
   recordError(code: string, message: string, stack?: string): void {
-    const eventId = this.startEvent('error', `error:${code}`, {
+    const eventId = this.startEvent("error", `error:${code}`, {
       code,
       message,
     });
-    this.endEvent(eventId, 'failure', undefined, { code, message, stack });
+    this.endEvent(eventId, "failure", undefined, { code, message, stack });
   }
 
   /**
@@ -143,8 +132,7 @@ export class TraceBuilder {
     this.endTime = new Date();
 
     // Calculate summary
-    const totalDurationMs =
-      this.endTime.getTime() - this.startTime.getTime();
+    const totalDurationMs = this.endTime.getTime() - this.startTime.getTime();
     let totalTokens = 0;
     let totalCostUsd = 0;
     let toolCallCount = 0;
@@ -156,19 +144,13 @@ export class TraceBuilder {
         totalTokens += event.metrics.totalTokens ?? 0;
         totalCostUsd += event.metrics.costUsd ?? 0;
       }
-      if (
-        event.type === 'tool_call_start' ||
-        event.type === 'tool_call_end'
-      ) {
+      if (event.type === "tool_call_start" || event.type === "tool_call_end") {
         toolCallCount += 0.5; // Count pairs
       }
-      if (event.status === 'failure') {
+      if (event.status === "failure") {
         errorCount++;
       }
-      if (
-        event.type === 'safety_check' &&
-        event.attributes?.passed === false
-      ) {
+      if (event.type === "safety_check" && event.attributes?.passed === false) {
         safetyViolations++;
       }
     }
@@ -176,9 +158,7 @@ export class TraceBuilder {
     const success =
       errorCount === 0 &&
       safetyViolations === 0 &&
-      this.events.some(
-        (e) => e.type === 'request_end' && e.status === 'success',
-      );
+      this.events.some((e) => e.type === "request_end" && e.status === "success");
 
     return {
       id: this.traceId,
@@ -208,7 +188,7 @@ export function parseTrace(json: unknown): Trace {
   // Basic validation - in production use Zod schema
   const trace = json as Trace;
   if (!trace.id || !trace.scenarioId || !trace.events) {
-    throw new Error('Invalid trace format');
+    throw new Error("Invalid trace format");
   }
   return trace;
 }
@@ -218,7 +198,7 @@ export function parseTrace(json: unknown): Trace {
  */
 export function mergeTraces(traces: Trace[]): Trace {
   if (traces.length === 0) {
-    throw new Error('Cannot merge empty trace array');
+    throw new Error("Cannot merge empty trace array");
   }
 
   const merged: Trace = {
@@ -227,39 +207,21 @@ export function mergeTraces(traces: Trace[]): Trace {
     runId: traces[0].runId,
     startTime: traces.reduce(
       (min, t) => (t.startTime < min ? t.startTime : min),
-      traces[0].startTime,
+      traces[0].startTime
     ),
     endTime: traces.reduce(
       (max, t) => (t.endTime && t.endTime > max ? t.endTime : max),
-      traces[0].endTime ?? traces[0].startTime,
+      traces[0].endTime ?? traces[0].startTime
     ),
     events: traces.flatMap((t) => t.events),
     summary: {
       success: traces.every((t) => t.summary?.success ?? false),
-      totalDurationMs: traces.reduce(
-        (sum, t) => sum + (t.summary?.totalDurationMs ?? 0),
-        0,
-      ),
-      totalTokens: traces.reduce(
-        (sum, t) => sum + (t.summary?.totalTokens ?? 0),
-        0,
-      ),
-      totalCostUsd: traces.reduce(
-        (sum, t) => sum + (t.summary?.totalCostUsd ?? 0),
-        0,
-      ),
-      toolCallCount: traces.reduce(
-        (sum, t) => sum + (t.summary?.toolCallCount ?? 0),
-        0,
-      ),
-      errorCount: traces.reduce(
-        (sum, t) => sum + (t.summary?.errorCount ?? 0),
-        0,
-      ),
-      safetyViolations: traces.reduce(
-        (sum, t) => sum + (t.summary?.safetyViolations ?? 0),
-        0,
-      ),
+      totalDurationMs: traces.reduce((sum, t) => sum + (t.summary?.totalDurationMs ?? 0), 0),
+      totalTokens: traces.reduce((sum, t) => sum + (t.summary?.totalTokens ?? 0), 0),
+      totalCostUsd: traces.reduce((sum, t) => sum + (t.summary?.totalCostUsd ?? 0), 0),
+      toolCallCount: traces.reduce((sum, t) => sum + (t.summary?.toolCallCount ?? 0), 0),
+      errorCount: traces.reduce((sum, t) => sum + (t.summary?.errorCount ?? 0), 0),
+      safetyViolations: traces.reduce((sum, t) => sum + (t.summary?.safetyViolations ?? 0), 0),
     },
   };
 

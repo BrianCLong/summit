@@ -1,4 +1,4 @@
-import { ModelInversionResult, MembershipInferenceResult, ModelExtractionResult } from '../types';
+import { ModelInversionResult, MembershipInferenceResult, ModelExtractionResult } from "../types";
 
 /**
  * Model Inversion Attack
@@ -50,10 +50,7 @@ export class ModelInversionAttack {
 
       // Add regularization (prefer natural-looking images)
       if (iter % 100 === 0) {
-        reconstructedInput = this.applyTotalVariationRegularization(
-          reconstructedInput,
-          0.01
-        );
+        reconstructedInput = this.applyTotalVariationRegularization(reconstructedInput, 0.01);
       }
     }
 
@@ -69,9 +66,9 @@ export class ModelInversionAttack {
       iterations,
       loss: bestLoss,
       metadata: {
-        method: 'Gradient-Based-Inversion',
-        learningRate
-      }
+        method: "Gradient-Based-Inversion",
+        learningRate,
+      },
     };
   }
 
@@ -125,27 +122,25 @@ export class ModelInversionAttack {
       iterations,
       loss: -Math.log(bestConfidence),
       metadata: {
-        method: 'Prior-Guided-Inversion',
-        priorSamples: priorSamples.length
-      }
+        method: "Prior-Guided-Inversion",
+        priorSamples: priorSamples.length,
+      },
     };
   }
 
-  private applyTotalVariationRegularization(
-    input: number[],
-    weight: number
-  ): number[] {
+  private applyTotalVariationRegularization(input: number[], weight: number): number[] {
     // Simple smoothing for 1D case
     const smoothed = [...input];
     for (let i = 1; i < input.length - 1; i++) {
-      smoothed[i] = (1 - weight) * input[i] +
-                    weight * (input[i - 1] + input[i + 1]) / 2;
+      smoothed[i] = (1 - weight) * input[i] + (weight * (input[i - 1] + input[i + 1])) / 2;
     }
     return smoothed;
   }
 
   private computeMean(samples: number[][]): number[] {
-    if (samples.length === 0) {return [];}
+    if (samples.length === 0) {
+      return [];
+    }
 
     const mean = new Array(samples[0].length).fill(0);
     for (const sample of samples) {
@@ -182,10 +177,7 @@ export class MembershipInferenceAttack {
     const targetEntropy = this.computeEntropy(targetLogits);
 
     // Train simple threshold-based classifier on shadow model
-    const threshold = this.learnThreshold(
-      shadowModelPredictions,
-      membershipLabels
-    );
+    const threshold = this.learnThreshold(shadowModelPredictions, membershipLabels);
 
     // Infer membership
     const isMember = targetConfidence > threshold;
@@ -206,11 +198,11 @@ export class MembershipInferenceAttack {
       truePositiveRate: tpr,
       falsePositiveRate: fpr,
       metadata: {
-        method: 'Confidence-Threshold',
+        method: "Confidence-Threshold",
         threshold,
         targetConfidence,
-        targetEntropy
-      }
+        targetEntropy,
+      },
     };
   }
 
@@ -242,8 +234,7 @@ export class MembershipInferenceAttack {
     const nonMemberScore = this.computeSimilarity(features, nonMembers);
 
     const isMember = memberScore > nonMemberScore;
-    const confidence = Math.abs(memberScore - nonMemberScore) /
-                      (memberScore + nonMemberScore);
+    const confidence = Math.abs(memberScore - nonMemberScore) / (memberScore + nonMemberScore);
 
     return {
       inferenceId: this.generateId(),
@@ -254,11 +245,11 @@ export class MembershipInferenceAttack {
       truePositiveRate: 0.75,
       falsePositiveRate: 0.25,
       metadata: {
-        method: 'Metric-Based',
+        method: "Metric-Based",
         shadowModels: shadowModels.length,
         memberScore,
-        nonMemberScore
-      }
+        nonMemberScore,
+      },
     };
   }
 
@@ -269,16 +260,13 @@ export class MembershipInferenceAttack {
 
   private softmax(logits: number[]): number[] {
     const maxLogit = Math.max(...logits);
-    const exps = logits.map(l => Math.exp(l - maxLogit));
+    const exps = logits.map((l) => Math.exp(l - maxLogit));
     const sum = exps.reduce((a, b) => a + b, 0);
-    return exps.map(e => e / sum);
+    return exps.map((e) => e / sum);
   }
 
-  private learnThreshold(
-    predictions: number[][],
-    labels: boolean[]
-  ): number {
-    const confidences = predictions.map(p => Math.max(...p));
+  private learnThreshold(predictions: number[][], labels: boolean[]): number {
+    const confidences = predictions.map((p) => Math.max(...p));
 
     // Find threshold that maximizes accuracy
     const sortedConfidences = [...confidences].sort((a, b) => a - b);
@@ -289,7 +277,9 @@ export class MembershipInferenceAttack {
       let correct = 0;
       for (let i = 0; i < confidences.length; i++) {
         const predicted = confidences[i] > threshold;
-        if (predicted === labels[i]) {correct++;}
+        if (predicted === labels[i]) {
+          correct++;
+        }
       }
       const accuracy = correct / confidences.length;
       if (accuracy > bestAccuracy) {
@@ -306,17 +296,25 @@ export class MembershipInferenceAttack {
     labels: boolean[],
     threshold: number
   ): { accuracy: number; tpr: number; fpr: number } {
-    let tp = 0, fp = 0, tn = 0, fn = 0;
+    let tp = 0,
+      fp = 0,
+      tn = 0,
+      fn = 0;
 
     for (let i = 0; i < predictions.length; i++) {
       const confidence = Math.max(...predictions[i]);
       const predicted = confidence > threshold;
       const actual = labels[i];
 
-      if (predicted && actual) {tp++;}
-      else if (predicted && !actual) {fp++;}
-      else if (!predicted && !actual) {tn++;}
-      else {fn++;}
+      if (predicted && actual) {
+        tp++;
+      } else if (predicted && !actual) {
+        fp++;
+      } else if (!predicted && !actual) {
+        tn++;
+      } else {
+        fn++;
+      }
     }
 
     const accuracy = (tp + tn) / (tp + tn + fp + fn);
@@ -362,7 +360,9 @@ export class MembershipInferenceAttack {
   }
 
   private computeSimilarity(features: number[], dataset: number[][]): number {
-    if (dataset.length === 0) {return 0;}
+    if (dataset.length === 0) {
+      return 0;
+    }
 
     // Compute average cosine similarity
     let totalSimilarity = 0;
@@ -376,7 +376,7 @@ export class MembershipInferenceAttack {
   }
 
   private hashSample(sample: number[]): string {
-    return `sample_${sample.slice(0, 5).join('_')}_${Date.now()}`;
+    return `sample_${sample.slice(0, 5).join("_")}_${Date.now()}`;
   }
 
   private generateId(): string {
@@ -443,15 +443,15 @@ export class ModelExtractionAttack {
       fidelity,
       agreementRate: fidelity,
       extractedParameters: {
-        type: 'linear',
+        type: "linear",
         weights: weights,
         inputDimension,
-        numClasses
+        numClasses,
       },
       metadata: {
-        method: 'Random-Query',
-        queryBudget
-      }
+        method: "Random-Query",
+        queryBudget,
+      },
     };
   }
 
@@ -527,15 +527,15 @@ export class ModelExtractionAttack {
       fidelity: agreementCount / testInputs.length,
       agreementRate: agreementCount / testInputs.length,
       extractedParameters: {
-        type: 'linear-active',
+        type: "linear-active",
         weights,
         inputDimension,
-        numClasses
+        numClasses,
       },
       metadata: {
-        method: 'Active-Learning',
-        queryBudget
-      }
+        method: "Active-Learning",
+        queryBudget,
+      },
     };
   }
 
@@ -573,7 +573,7 @@ export class ModelExtractionAttack {
   }
 
   private predictLinear(input: number[], weights: number[][]): number[] {
-    return weights.map(w => {
+    return weights.map((w) => {
       return w.reduce((sum, wi, idx) => sum + wi * input[idx], 0);
     });
   }
@@ -585,9 +585,9 @@ export class ModelExtractionAttack {
 
   private softmax(logits: number[]): number[] {
     const maxLogit = Math.max(...logits);
-    const exps = logits.map(l => Math.exp(l - maxLogit));
+    const exps = logits.map((l) => Math.exp(l - maxLogit));
     const sum = exps.reduce((a, b) => a + b, 0);
-    return exps.map(e => e / sum);
+    return exps.map((e) => e / sum);
   }
 
   private argmax(array: number[]): number {

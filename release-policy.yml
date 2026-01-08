@@ -10,7 +10,7 @@ freeze:
 
     - name: "New Year freeze"
       start: "2025-12-31T00:00:00"
-      end:   "2026-01-02T23:59:59"
+      end: "2026-01-02T23:59:59"
       active: true
 
 override:

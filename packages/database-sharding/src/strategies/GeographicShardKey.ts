@@ -1,5 +1,5 @@
-import { ShardKeyStrategy } from './ShardKeyStrategy';
-import { ShardConfig } from '../types';
+import { ShardKeyStrategy } from "./ShardKeyStrategy";
+import { ShardConfig } from "../types";
 
 /**
  * Geographic sharding for data locality (e.g., by region, country, datacenter)
@@ -8,7 +8,7 @@ export class GeographicShardKey implements ShardKeyStrategy {
   private geographyMap: Map<string, string> = new Map();
 
   getName(): string {
-    return 'geographic';
+    return "geographic";
   }
 
   /**
@@ -20,7 +20,7 @@ export class GeographicShardKey implements ShardKeyStrategy {
     for (const shard of shards) {
       if (shard.geography) {
         // Support multiple geographies per shard (comma-separated)
-        const geographies = shard.geography.split(',').map((g) => g.trim());
+        const geographies = shard.geography.split(",").map((g) => g.trim());
         for (const geo of geographies) {
           this.geographyMap.set(geo.toLowerCase(), shard.id);
         }
@@ -45,9 +45,7 @@ export class GeographicShardKey implements ShardKeyStrategy {
     }
 
     // Fallback to default shard
-    const defaultShard = shards.find(
-      (s) => s.geography?.toLowerCase() === 'default'
-    );
+    const defaultShard = shards.find((s) => s.geography?.toLowerCase() === "default");
     if (defaultShard) {
       return defaultShard;
     }
@@ -60,11 +58,7 @@ export class GeographicShardKey implements ShardKeyStrategy {
     throw new Error(`No shard found for geography ${geography}`);
   }
 
-  getShardsForRange(
-    startKey: any,
-    endKey: any,
-    shards: ShardConfig[]
-  ): ShardConfig[] {
+  getShardsForRange(startKey: any, endKey: any, shards: ShardConfig[]): ShardConfig[] {
     // For geographic sharding, we might need multiple shards if the range
     // spans multiple geographies
     const geographies = this.extractGeographyRange(startKey, endKey);
@@ -85,21 +79,21 @@ export class GeographicShardKey implements ShardKeyStrategy {
 
   private extractGeography(key: any): string {
     // Support multiple key formats
-    if (typeof key === 'string') {
+    if (typeof key === "string") {
       // e.g., "us-east-1:user123" or "eu:tenant456"
-      const parts = key.split(':');
+      const parts = key.split(":");
       if (parts.length > 1) {
         return parts[0];
       }
       return key;
     }
 
-    if (typeof key === 'object' && key !== null) {
+    if (typeof key === "object" && key !== null) {
       // e.g., { geography: "us-west-2", id: "user123" }
-      return key.geography || key.region || key.country || 'default';
+      return key.geography || key.region || key.country || "default";
     }
 
-    return 'default';
+    return "default";
   }
 
   private extractGeographyRange(startKey: any, endKey: any): string[] {

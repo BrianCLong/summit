@@ -11,7 +11,7 @@ spec:
         any:
           - resources:
               kinds:
-                - '*'
+                - "*"
       validate:
         message: "Helm rendered resources must define kind and metadata.name"
         pattern:

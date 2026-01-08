@@ -1,5 +1,5 @@
-import fetch from 'cross-fetch';
-import { createHash } from 'crypto';
+import fetch from "cross-fetch";
+import { createHash } from "crypto";
 
 export interface GatewayClientOptions {
   url: string;
@@ -23,10 +23,10 @@ export class GatewayClient {
     if (!query) {
       throw new Error(`Unknown query: ${name}`);
     }
-    const hash = createHash('sha256').update(query).digest('hex');
+    const hash = createHash("sha256").update(query).digest("hex");
     const res = await fetch(this.url, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', ...this.headers },
+      method: "POST",
+      headers: { "content-type": "application/json", ...this.headers },
       body: JSON.stringify({
         query,
         variables,

@@ -56,7 +56,7 @@ const defaultSettings: AppSettings = {
 
 export const useAppStore = create<AppState>()(
   persist(
-    immer((set) => ({
+    immer(set => ({
       // Initial state
       isInitialized: false,
       isOnline: true,
@@ -69,53 +69,53 @@ export const useAppStore = create<AppState>()(
       lastSyncTime: null,
 
       // Actions
-      setInitialized: (initialized) =>
-        set((state) => {
+      setInitialized: initialized =>
+        set(state => {
           state.isInitialized = initialized;
         }),
 
-      setOnlineStatus: (online) =>
-        set((state) => {
+      setOnlineStatus: online =>
+        set(state => {
           state.isOnline = online;
         }),
 
-      setBackgroundMode: (background) =>
-        set((state) => {
+      setBackgroundMode: background =>
+        set(state => {
           state.isBackgroundMode = background;
         }),
 
-      updateSettings: (newSettings) =>
-        set((state) => {
+      updateSettings: newSettings =>
+        set(state => {
           state.settings = {...state.settings, ...newSettings};
         }),
 
-      setActiveScreen: (screen) =>
-        set((state) => {
+      setActiveScreen: screen =>
+        set(state => {
           state.activeScreen = screen;
         }),
 
-      setLoading: (loading) =>
-        set((state) => {
+      setLoading: loading =>
+        set(state => {
           state.isLoading = loading;
         }),
 
-      setError: (error) =>
-        set((state) => {
+      setError: error =>
+        set(state => {
           state.error = error;
         }),
 
-      setStartupTime: (time) =>
-        set((state) => {
+      setStartupTime: time =>
+        set(state => {
           state.startupTime = time;
         }),
 
-      setLastSyncTime: (time) =>
-        set((state) => {
+      setLastSyncTime: time =>
+        set(state => {
           state.lastSyncTime = time;
         }),
 
       reset: () =>
-        set((state) => {
+        set(state => {
           state.isInitialized = false;
           state.isOnline = true;
           state.isBackgroundMode = false;
@@ -131,7 +131,7 @@ export const useAppStore = create<AppState>()(
       name: 'app-storage',
       storage: createJSONStorage(() => AsyncStorage),
       // Only persist settings and some state
-      partialize: (state) => ({
+      partialize: state => ({
         settings: state.settings,
         lastSyncTime: state.lastSyncTime,
       }),

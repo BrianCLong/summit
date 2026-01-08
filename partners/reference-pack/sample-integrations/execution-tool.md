@@ -3,6 +3,7 @@
 **Type**: Infrastructure Automation
 
 ## Manifest
+
 ```json
 {
   "partnerId": "auto-bot",
@@ -15,6 +16,7 @@
 ```
 
 ## Receipt Format
+
 ```json
 {
   "commandId": "cmd-123",

@@ -1,5 +1,5 @@
-import { randomUUID } from 'crypto';
-import { ExceptionEntry, GateType } from './types.js';
+import { randomUUID } from "crypto";
+import { ExceptionEntry, GateType } from "./types.js";
 
 export class ExceptionRegistry {
   private entries: ExceptionEntry[] = [];
@@ -32,7 +32,7 @@ export class ExceptionRegistry {
       (entry) =>
         entry.domainId === domainId &&
         entry.gate === gate &&
-        new Date(entry.expiresAt).getTime() > Date.now(),
+        new Date(entry.expiresAt).getTime() > Date.now()
     );
   }
 

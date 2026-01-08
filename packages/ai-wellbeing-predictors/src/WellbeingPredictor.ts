@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from "crypto";
 import {
   CitizenWellbeingProfile,
   WellbeingPrediction,
@@ -8,10 +8,10 @@ import {
   EconomicData,
   EducationalData,
   BehavioralData,
-} from './types.js';
+} from "./types.js";
 
 export interface PredictionOptions {
-  horizon: '30_days' | '90_days' | '180_days' | '365_days';
+  horizon: "30_days" | "90_days" | "180_days" | "365_days";
   includeContributingFactors: boolean;
   minConfidence: number;
 }
@@ -28,12 +28,12 @@ interface DomainWeights {
 }
 
 const DEFAULT_WEIGHTS: DomainWeights = {
-  health: 0.20,
+  health: 0.2,
   economic: 0.18,
   educational: 0.12,
   social: 0.12,
   housing: 0.12,
-  mental_health: 0.10,
+  mental_health: 0.1,
   food_security: 0.08,
   employment: 0.08,
 };
@@ -48,7 +48,7 @@ export class WellbeingPredictor {
 
   constructor(weights: Partial<DomainWeights> = {}) {
     this.weights = { ...DEFAULT_WEIGHTS, ...weights };
-    this.modelVersion = '1.0.0';
+    this.modelVersion = "1.0.0";
   }
 
   /**
@@ -59,7 +59,7 @@ export class WellbeingPredictor {
     options: Partial<PredictionOptions> = {}
   ): WellbeingPrediction {
     const opts: PredictionOptions = {
-      horizon: options.horizon ?? '90_days',
+      horizon: options.horizon ?? "90_days",
       includeContributingFactors: options.includeContributingFactors ?? true,
       minConfidence: options.minConfidence ?? 0.6,
     };
@@ -100,9 +100,7 @@ export class WellbeingPredictor {
   /**
    * Calculate domain-specific wellbeing scores
    */
-  private calculateDomainScores(
-    profile: CitizenWellbeingProfile
-  ): Record<string, number> {
+  private calculateDomainScores(profile: CitizenWellbeingProfile): Record<string, number> {
     return {
       health: this.scoreHealthDomain(profile.healthData),
       economic: this.scoreEconomicDomain(profile.economicData),
@@ -116,7 +114,9 @@ export class WellbeingPredictor {
   }
 
   private scoreHealthDomain(data?: HealthData): number {
-    if (!data) {return 50;}
+    if (!data) {
+      return 50;
+    }
     let score = 70;
 
     // Chronic conditions impact
@@ -135,13 +135,17 @@ export class WellbeingPredictor {
     }
 
     // Disability adjustment
-    if (data.disabilityStatus) {score -= 10;}
+    if (data.disabilityStatus) {
+      score -= 10;
+    }
 
     return Math.max(0, Math.min(100, score));
   }
 
   private scoreEconomicDomain(data?: EconomicData): number {
-    if (!data) {return 50;}
+    if (!data) {
+      return 50;
+    }
     let score = 60;
 
     // Income level
@@ -161,15 +165,20 @@ export class WellbeingPredictor {
 
     // Debt ratio impact
     if (data.debtToIncomeRatio !== undefined) {
-      if (data.debtToIncomeRatio > 0.5) {score -= 15;}
-      else if (data.debtToIncomeRatio > 0.3) {score -= 8;}
+      if (data.debtToIncomeRatio > 0.5) {
+        score -= 15;
+      } else if (data.debtToIncomeRatio > 0.3) {
+        score -= 8;
+      }
     }
 
     return Math.max(0, Math.min(100, score));
   }
 
   private scoreEducationalDomain(data?: EducationalData): number {
-    if (!data) {return 50;}
+    if (!data) {
+      return 50;
+    }
     let score = 50;
 
     // Education level
@@ -193,13 +202,17 @@ export class WellbeingPredictor {
     score += digitalScores[data.digitalLiteracy];
 
     // Current enrollment bonus
-    if (data.currentEnrollment) {score += 10;}
+    if (data.currentEnrollment) {
+      score += 10;
+    }
 
     return Math.max(0, Math.min(100, score));
   }
 
   private scoreSocialDomain(data?: BehavioralData): number {
-    if (!data) {return 50;}
+    if (!data) {
+      return 50;
+    }
     let score = 50;
 
     // Community participation
@@ -217,7 +230,9 @@ export class WellbeingPredictor {
   }
 
   private scoreHousingDomain(data?: EconomicData): number {
-    if (!data) {return 50;}
+    if (!data) {
+      return 50;
+    }
     const housingScores = { homeless: 0, unstable: 25, stable: 70, owned: 90 };
     return housingScores[data.housingStability];
   }
@@ -234,21 +249,29 @@ export class WellbeingPredictor {
       score -= behavioral.crisisHistoryCount * 8;
 
       // Social isolation impact
-      if (behavioral.communityParticipation === 'isolated') {score -= 15;}
-      if (behavioral.socialSupportNetwork === 'none') {score -= 15;}
+      if (behavioral.communityParticipation === "isolated") {
+        score -= 15;
+      }
+      if (behavioral.socialSupportNetwork === "none") {
+        score -= 15;
+      }
     }
 
     return Math.max(0, Math.min(100, score));
   }
 
   private scoreFoodSecurityDomain(data?: EconomicData): number {
-    if (!data) {return 50;}
+    if (!data) {
+      return 50;
+    }
     const foodScores = { insecure: 15, marginal: 50, secure: 90 };
     return foodScores[data.foodSecurityStatus];
   }
 
   private scoreEmploymentDomain(data?: EconomicData): number {
-    if (!data) {return 50;}
+    if (!data) {
+      return 50;
+    }
     const employmentScores = {
       employed: 85,
       unemployed: 20,
@@ -280,11 +303,19 @@ export class WellbeingPredictor {
    * Determine risk level from overall score
    */
   private determineRiskLevel(score: number): RiskLevel {
-    if (score < 25) {return 'critical';}
-    if (score < 40) {return 'high';}
-    if (score < 60) {return 'moderate';}
-    if (score < 80) {return 'low';}
-    return 'minimal';
+    if (score < 25) {
+      return "critical";
+    }
+    if (score < 40) {
+      return "high";
+    }
+    if (score < 60) {
+      return "moderate";
+    }
+    if (score < 80) {
+      return "low";
+    }
+    return "minimal";
   }
 
   /**
@@ -292,12 +323,16 @@ export class WellbeingPredictor {
    */
   private analyzeTrajectory(
     profile: CitizenWellbeingProfile
-  ): 'declining' | 'stable' | 'improving' {
+  ): "declining" | "stable" | "improving" {
     const history = profile.historicalScores;
-    if (history.length < 2) {return 'stable';}
+    if (history.length < 2) {
+      return "stable";
+    }
 
     const recentScores = history.slice(-5);
-    if (recentScores.length < 2) {return 'stable';}
+    if (recentScores.length < 2) {
+      return "stable";
+    }
 
     const firstHalf = recentScores.slice(0, Math.floor(recentScores.length / 2));
     const secondHalf = recentScores.slice(Math.floor(recentScores.length / 2));
@@ -306,9 +341,13 @@ export class WellbeingPredictor {
     const avgSecond = secondHalf.reduce((sum, s) => sum + s.score, 0) / secondHalf.length;
 
     const diff = avgSecond - avgFirst;
-    if (diff > 5) {return 'improving';}
-    if (diff < -5) {return 'declining';}
-    return 'stable';
+    if (diff > 5) {
+      return "improving";
+    }
+    if (diff < -5) {
+      return "declining";
+    }
+    return "stable";
   }
 
   /**
@@ -324,49 +363,49 @@ export class WellbeingPredictor {
     if (profile.healthData) {
       if (profile.healthData.chronicConditions.length > 0) {
         factors.push({
-          factor: 'Chronic health conditions',
+          factor: "Chronic health conditions",
           impact: -0.15 * profile.healthData.chronicConditions.length,
-          domain: 'health',
+          domain: "health",
         });
       }
-      if (profile.healthData.accessToHealthcare === 'none') {
-        factors.push({ factor: 'No healthcare access', impact: -0.3, domain: 'health' });
+      if (profile.healthData.accessToHealthcare === "none") {
+        factors.push({ factor: "No healthcare access", impact: -0.3, domain: "health" });
       }
     }
 
     // Economic factors
     if (profile.economicData) {
-      if (profile.economicData.incomeLevel === 'poverty') {
-        factors.push({ factor: 'Poverty-level income', impact: -0.35, domain: 'economic' });
+      if (profile.economicData.incomeLevel === "poverty") {
+        factors.push({ factor: "Poverty-level income", impact: -0.35, domain: "economic" });
       }
-      if (profile.economicData.housingStability === 'homeless') {
-        factors.push({ factor: 'Homelessness', impact: -0.5, domain: 'housing' });
+      if (profile.economicData.housingStability === "homeless") {
+        factors.push({ factor: "Homelessness", impact: -0.5, domain: "housing" });
       }
-      if (profile.economicData.foodSecurityStatus === 'insecure') {
-        factors.push({ factor: 'Food insecurity', impact: -0.3, domain: 'food_security' });
+      if (profile.economicData.foodSecurityStatus === "insecure") {
+        factors.push({ factor: "Food insecurity", impact: -0.3, domain: "food_security" });
       }
-      if (profile.economicData.employmentStatus === 'unemployed') {
-        factors.push({ factor: 'Unemployment', impact: -0.25, domain: 'employment' });
+      if (profile.economicData.employmentStatus === "unemployed") {
+        factors.push({ factor: "Unemployment", impact: -0.25, domain: "employment" });
       }
     }
 
     // Educational factors
     if (profile.educationalData) {
-      if (profile.educationalData.literacyLevel === 'illiterate') {
-        factors.push({ factor: 'Illiteracy', impact: -0.25, domain: 'educational' });
+      if (profile.educationalData.literacyLevel === "illiterate") {
+        factors.push({ factor: "Illiteracy", impact: -0.25, domain: "educational" });
       }
-      if (profile.educationalData.digitalLiteracy === 'none') {
-        factors.push({ factor: 'No digital literacy', impact: -0.15, domain: 'educational' });
+      if (profile.educationalData.digitalLiteracy === "none") {
+        factors.push({ factor: "No digital literacy", impact: -0.15, domain: "educational" });
       }
     }
 
     // Behavioral/social factors
     if (profile.behavioralData) {
-      if (profile.behavioralData.communityParticipation === 'isolated') {
-        factors.push({ factor: 'Social isolation', impact: -0.3, domain: 'social' });
+      if (profile.behavioralData.communityParticipation === "isolated") {
+        factors.push({ factor: "Social isolation", impact: -0.3, domain: "social" });
       }
       if (profile.behavioralData.crisisHistoryCount > 2) {
-        factors.push({ factor: 'Crisis history', impact: -0.2, domain: 'mental_health' });
+        factors.push({ factor: "Crisis history", impact: -0.2, domain: "mental_health" });
       }
     }
 
@@ -380,10 +419,18 @@ export class WellbeingPredictor {
     let completeness = 0;
     const total = 4;
 
-    if (profile.healthData) {completeness++;}
-    if (profile.economicData) {completeness++;}
-    if (profile.educationalData) {completeness++;}
-    if (profile.behavioralData) {completeness++;}
+    if (profile.healthData) {
+      completeness++;
+    }
+    if (profile.economicData) {
+      completeness++;
+    }
+    if (profile.educationalData) {
+      completeness++;
+    }
+    if (profile.behavioralData) {
+      completeness++;
+    }
 
     const dataCompleteness = completeness / total;
     const historyBonus = Math.min(profile.historicalScores.length / 10, 0.2);

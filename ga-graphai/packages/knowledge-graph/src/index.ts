@@ -1,31 +1,31 @@
-import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
-import { StructuredEventEmitter } from '@ga-graphai/common-types';
-import type { PolicyRule } from '@ga-graphai/common-types';
-import { stableHash } from '@ga-graphai/data-integrity';
+import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:crypto";
+import { StructuredEventEmitter } from "@ga-graphai/common-types";
+import type { PolicyRule } from "@ga-graphai/common-types";
+import { stableHash } from "@ga-graphai/data-integrity";
 
 type NodeType =
-  | 'service'
-  | 'environment'
-  | 'pipeline'
-  | 'stage'
-  | 'incident'
-  | 'policy'
-  | 'cost-signal';
+  | "service"
+  | "environment"
+  | "pipeline"
+  | "stage"
+  | "incident"
+  | "policy"
+  | "cost-signal";
 
 type RelationshipType =
-  | 'DEPENDS_ON'
-  | 'DEPLOYED_IN'
-  | 'CONTAINS'
-  | 'RUNS_IN'
-  | 'TARGETS'
-  | 'AFFECTS'
-  | 'OCCURRED_IN'
-  | 'GOVERNS'
-  | 'OBSERVED_FOR';
+  | "DEPENDS_ON"
+  | "DEPLOYED_IN"
+  | "CONTAINS"
+  | "RUNS_IN"
+  | "TARGETS"
+  | "AFFECTS"
+  | "OCCURRED_IN"
+  | "GOVERNS"
+  | "OBSERVED_FOR";
 
 export interface GraphProvenance {
   source: string;
-  ingress: 'api' | 'database' | 'message-broker' | 'ingestion' | string;
+  ingress: "api" | "database" | "message-broker" | "ingestion" | string;
   observedAt: string;
   checksum: string;
   traceId?: string;
@@ -65,7 +65,7 @@ export interface ServiceRecord {
 export interface EnvironmentRecord {
   id: string;
   name: string;
-  stage: 'dev' | 'staging' | 'prod' | string;
+  stage: "dev" | "staging" | "prod" | string;
   region: string;
   deploymentMechanism?: string;
   zeroTrustTier?: number;
@@ -96,7 +96,7 @@ export interface PipelineRecord {
   provenance?: GraphProvenance;
 }
 
-export type IncidentSeverity = 'low' | 'medium' | 'high' | 'critical';
+export type IncidentSeverity = "low" | "medium" | "high" | "critical";
 
 export interface IncidentRecord {
   id: string;
@@ -104,7 +104,7 @@ export interface IncidentRecord {
   environmentId: string;
   severity: IncidentSeverity;
   occurredAt: string;
-  status: 'open' | 'mitigated' | 'closed';
+  status: "open" | "mitigated" | "closed";
   rootCauseCategory?: string;
   provenance?: GraphProvenance;
 }
@@ -193,9 +193,9 @@ export interface GraphSnapshot {
   };
 }
 
-export type KnowledgeGraphEncryptionAlgorithm = 'aes-256-gcm';
+export type KnowledgeGraphEncryptionAlgorithm = "aes-256-gcm";
 
-export type KnowledgeGraphEncryptionMode = 'transparent' | 'encrypt-sensitive';
+export type KnowledgeGraphEncryptionMode = "transparent" | "encrypt-sensitive";
 
 export interface EncryptedGraphPayload {
   algorithm: KnowledgeGraphEncryptionAlgorithm;
@@ -225,38 +225,38 @@ export interface ProtectedNodeSummary {
 }
 
 function isEncryptedPayload(value: unknown): value is EncryptedGraphPayload {
-  if (!value || typeof value !== 'object') {
+  if (!value || typeof value !== "object") {
     return false;
   }
   const payload = value as Record<string, unknown>;
   return (
-    typeof payload.algorithm === 'string' &&
-    typeof payload.iv === 'string' &&
-    typeof payload.authTag === 'string' &&
-    typeof payload.ciphertext === 'string'
+    typeof payload.algorithm === "string" &&
+    typeof payload.iv === "string" &&
+    typeof payload.authTag === "string" &&
+    typeof payload.ciphertext === "string"
   );
 }
 
 function deriveKey(secret: string): Buffer {
-  return createHash('sha256').update(secret).digest();
+  return createHash("sha256").update(secret).digest();
 }
 
 function encryptPayload(
   data: unknown,
-  options: KnowledgeGraphEncryptionOptions,
+  options: KnowledgeGraphEncryptionOptions
 ): EncryptedGraphPayload {
-  const algorithm = options.algorithm ?? 'aes-256-gcm';
+  const algorithm = options.algorithm ?? "aes-256-gcm";
   const iv = randomBytes(12);
   const cipher = createCipheriv(algorithm, deriveKey(options.secret), iv);
   if (options.associatedData) {
     cipher.setAAD(Buffer.from(options.associatedData));
   }
-  const plaintext = Buffer.from(JSON.stringify(data), 'utf8');
-  const ciphertext = Buffer.concat([cipher.update(plaintext), cipher.final()]).toString('base64');
-  const authTag = cipher.getAuthTag().toString('base64');
+  const plaintext = Buffer.from(JSON.stringify(data), "utf8");
+  const ciphertext = Buffer.concat([cipher.update(plaintext), cipher.final()]).toString("base64");
+  const authTag = cipher.getAuthTag().toString("base64");
   return {
     algorithm,
-    iv: iv.toString('base64'),
+    iv: iv.toString("base64"),
     authTag,
     ciphertext,
     associatedData: options.associatedData,
@@ -266,28 +266,24 @@ function encryptPayload(
 function decryptPayload<T = unknown>(
   payload: EncryptedGraphPayload,
   secret: string,
-  associatedData?: string,
+  associatedData?: string
 ): T {
   const key = deriveKey(secret);
-  const decipher = createDecipheriv(
-    payload.algorithm,
-    key,
-    Buffer.from(payload.iv, 'base64'),
-  );
+  const decipher = createDecipheriv(payload.algorithm, key, Buffer.from(payload.iv, "base64"));
   if (associatedData ?? payload.associatedData) {
-    decipher.setAAD(Buffer.from(associatedData ?? payload.associatedData ?? ''));
+    decipher.setAAD(Buffer.from(associatedData ?? payload.associatedData ?? ""));
   }
   const decrypted = Buffer.concat([
-    decipher.update(Buffer.from(payload.ciphertext, 'base64')),
+    decipher.update(Buffer.from(payload.ciphertext, "base64")),
     decipher.final(),
   ]);
-  return JSON.parse(decrypted.toString('utf8')) as T;
+  return JSON.parse(decrypted.toString("utf8")) as T;
 }
 
 export interface AgentTrigger {
   agent: string;
   reason: string;
-  priority?: 'low' | 'normal' | 'high';
+  priority?: "low" | "normal" | "high";
   payload?: Record<string, unknown>;
   correlationId?: string;
 }
@@ -413,7 +409,7 @@ export class OrchestrationKnowledgeGraph {
 
   constructor(
     events: StructuredEventEmitter | KnowledgeGraphOptions = new StructuredEventEmitter(),
-    options: KnowledgeGraphOptions = {},
+    options: KnowledgeGraphOptions = {}
   ) {
     if (events instanceof StructuredEventEmitter) {
       this.events = events;
@@ -452,16 +448,16 @@ export class OrchestrationKnowledgeGraph {
 
   async refresh(): Promise<GraphSnapshot> {
     if (this.options.requireConfirmation && !this.options.confirmationProvided) {
-      throw new Error('Graph refresh confirmation required but not provided');
+      throw new Error("Graph refresh confirmation required but not provided");
     }
 
     const previousState = this.cloneState();
     const startedAt = Date.now();
-    const span = this.startSpan('intelgraph.kg.refresh', {
+    const span = this.startSpan("intelgraph.kg.refresh", {
       namespace: this.namespace(),
       sandbox: Boolean(this.options.sandboxMode),
     });
-    this.logInfo('intelgraph.kg.refresh.start', {
+    this.logInfo("intelgraph.kg.refresh.start", {
       namespace: this.namespace(),
       sandbox: Boolean(this.options.sandboxMode),
     });
@@ -484,12 +480,15 @@ export class OrchestrationKnowledgeGraph {
       Math.abs(snapshot.nodes.length - previousState.nodes.size) +
       Math.abs(snapshot.edges.length - previousState.edges.size);
 
-    if (this.options.mutationThreshold !== undefined && mutationDelta > this.options.mutationThreshold) {
+    if (
+      this.options.mutationThreshold !== undefined &&
+      mutationDelta > this.options.mutationThreshold
+    ) {
       this.restoreState(previousState);
       const error = new Error(
-        `Refusing to mutate graph by ${mutationDelta} elements without confirmation`,
+        `Refusing to mutate graph by ${mutationDelta} elements without confirmation`
       );
-      this.logWarn('intelgraph.kg.refresh.blocked', {
+      this.logWarn("intelgraph.kg.refresh.blocked", {
         namespace: this.namespace(),
         mutationDelta,
         threshold: this.options.mutationThreshold,
@@ -499,27 +498,27 @@ export class OrchestrationKnowledgeGraph {
       throw error;
     }
 
-    this.metricsObserve('intelgraph_kg_refresh_duration_ms', durationMs, {
+    this.metricsObserve("intelgraph_kg_refresh_duration_ms", durationMs, {
       namespace: snapshot.namespace,
     });
-    this.metricsObserve('intelgraph_kg_nodes_total', snapshot.nodes.length, {
+    this.metricsObserve("intelgraph_kg_nodes_total", snapshot.nodes.length, {
       namespace: snapshot.namespace,
     });
-    this.metricsObserve('intelgraph_kg_edges_total', snapshot.edges.length, {
+    this.metricsObserve("intelgraph_kg_edges_total", snapshot.edges.length, {
       namespace: snapshot.namespace,
     });
-    this.logInfo('intelgraph.kg.refresh.completed', {
+    this.logInfo("intelgraph.kg.refresh.completed", {
       namespace: snapshot.namespace,
       durationMs,
       nodeCount: snapshot.nodes.length,
       edgeCount: snapshot.edges.length,
       sandbox: snapshot.sandbox,
     });
-    this.events.emitEvent('summit.intelgraph.graph.updated', {
-      source: 'connector-refresh',
-      ingress: 'ingestion',
+    this.events.emitEvent("summit.intelgraph.graph.updated", {
+      source: "connector-refresh",
+      ingress: "ingestion",
       namespace: snapshot.namespace,
-      trigger: 'refresh',
+      trigger: "refresh",
       version: this.version,
       nodeCount: snapshot.nodes.length,
       edgeCount: snapshot.edges.length,
@@ -541,12 +540,12 @@ export class OrchestrationKnowledgeGraph {
     const protectedNodes = residency.nodes.map((node) => this.protectNode(node));
     const serviceRisk = this.calculateServiceRisk();
     const warnings = this.options.sandboxMode
-      ? ['Sandbox mode active: graph mutations isolated']
+      ? ["Sandbox mode active: graph mutations isolated"]
       : undefined;
     const lineage = this.lineageSummary(protectedNodes, residency.edges);
     const namespace = this.namespace();
     if (warnings) {
-      this.logWarn('intelgraph.kg.sandbox', { namespace });
+      this.logWarn("intelgraph.kg.sandbox", { namespace });
     }
     return {
       generatedAt: new Date().toISOString(),
@@ -589,18 +588,16 @@ export class OrchestrationKnowledgeGraph {
   }
 
   getNodes(ids: string[]): GraphNode[] {
-    return ids
-      .map((id) => this.getNode(id))
-      .filter((node): node is GraphNode => Boolean(node));
+    return ids.map((id) => this.getNode(id)).filter((node): node is GraphNode => Boolean(node));
   }
 
   queryService(serviceId: string) {
     const startedAt = Date.now();
-    const span = this.startSpan('intelgraph.kg.query.service', {
+    const span = this.startSpan("intelgraph.kg.query.service", {
       serviceId,
       namespace: this.namespace(),
     });
-    this.logInfo('intelgraph.kg.query.start', {
+    this.logInfo("intelgraph.kg.query.start", {
       serviceId,
       namespace: this.namespace(),
     });
@@ -612,27 +609,31 @@ export class OrchestrationKnowledgeGraph {
     const environments = Array.from(this.state.environments.values()).filter((environment) => {
       const residencyNode: GraphNode = {
         id: `env:${environment.id}`,
-        type: 'environment',
+        type: "environment",
         data: environment,
       };
       const linked =
-        this.state.edges.has(edgeId(`service:${serviceId}`, 'DEPLOYED_IN', `env:${environment.id}`)) ||
-        this.state.edges.has(edgeId(`env:${environment.id}`, 'DEPLOYED_IN', `service:${serviceId}`));
+        this.state.edges.has(
+          edgeId(`service:${serviceId}`, "DEPLOYED_IN", `env:${environment.id}`)
+        ) ||
+        this.state.edges.has(
+          edgeId(`env:${environment.id}`, "DEPLOYED_IN", `service:${serviceId}`)
+        );
       return linked && !this.isResidencyBlocked(residencyNode);
     });
     const incidents = Array.from(this.state.incidents.values()).filter((incident) => {
       const residencyNode: GraphNode = {
         id: `incident:${incident.id}`,
-        type: 'incident',
+        type: "incident",
         data: incident,
       };
       return incident.serviceId === serviceId && !this.isResidencyBlocked(residencyNode);
     });
     const policies = Array.from(this.state.policies.values()).filter((policy) =>
-      policy.resources.some((resource) => resource.includes(serviceId)),
+      policy.resources.some((resource) => resource.includes(serviceId))
     );
     const pipelines = Array.from(this.state.pipelines.values()).filter((pipeline) =>
-      pipeline.stages.some((stage) => stage.serviceId === serviceId),
+      pipeline.stages.some((stage) => stage.serviceId === serviceId)
     );
     const snapshot = {
       service,
@@ -644,10 +645,9 @@ export class OrchestrationKnowledgeGraph {
     };
 
     const durationMs = Date.now() - startedAt;
-    const resultCount =
-      environments.length + incidents.length + policies.length + pipelines.length;
-    this.events.emitEvent('summit.intelgraph.query.executed', {
-      queryType: 'service',
+    const resultCount = environments.length + incidents.length + policies.length + pipelines.length;
+    this.events.emitEvent("summit.intelgraph.query.executed", {
+      queryType: "service",
       subjectId: serviceId,
       durationMs,
       resultCount,
@@ -655,15 +655,15 @@ export class OrchestrationKnowledgeGraph {
       incidentCount: incidents.length,
     });
 
-    this.metricsObserve('intelgraph_kg_query_duration_ms', durationMs, {
+    this.metricsObserve("intelgraph_kg_query_duration_ms", durationMs, {
       namespace: this.namespace(),
-      queryType: 'service',
+      queryType: "service",
     });
-    this.metricsIncrement('intelgraph_kg_queries_total', 1, {
+    this.metricsIncrement("intelgraph_kg_queries_total", 1, {
       namespace: this.namespace(),
-      queryType: 'service',
+      queryType: "service",
     });
-    this.logInfo('intelgraph.kg.query.completed', {
+    this.logInfo("intelgraph.kg.query.completed", {
       serviceId,
       durationMs,
       resultCount,
@@ -677,54 +677,40 @@ export class OrchestrationKnowledgeGraph {
 
   applyUpdate(update: GraphUpdate): GraphSnapshot {
     if (this.options.requireConfirmation && !this.options.confirmationProvided) {
-      throw new Error('Graph refresh confirmation required but not provided');
+      throw new Error("Graph refresh confirmation required but not provided");
     }
 
     const previousState = this.cloneState();
     const startedAt = Date.now();
-    const source = update.source ?? 'intelgraph.stream';
+    const source = update.source ?? "intelgraph.stream";
     const namespace = update.namespace ?? this.namespace();
-    const span = this.startSpan('intelgraph.kg.stream.update', {
+    const span = this.startSpan("intelgraph.kg.stream.update", {
       source,
       topic: update.topic,
       namespace,
     });
 
-    const serviceDelta = this.mergeRecords(
-      this.state.services,
-      update.services,
-      update,
-      'service',
-    );
+    const serviceDelta = this.mergeRecords(this.state.services, update.services, update, "service");
     const environmentDelta = this.mergeRecords(
       this.state.environments,
       update.environments,
       update,
-      'environment',
+      "environment"
     );
-    const pipelineDelta = this.mergePipelineRecords(
-      this.state.pipelines,
-      update.pipelines,
-      update,
-    );
+    const pipelineDelta = this.mergePipelineRecords(this.state.pipelines, update.pipelines, update);
     const incidentDelta = this.mergeRecords(
       this.state.incidents,
       update.incidents,
       update,
-      'incident',
+      "incident"
     );
-    const policyDelta = this.mergeRecords(
-      this.state.policies,
-      update.policies,
-      update,
-      'policy',
-    );
+    const policyDelta = this.mergeRecords(this.state.policies, update.policies, update, "policy");
     const costSignalDelta = this.mergeRecords(
       this.state.costSignals,
       update.costSignals,
       update,
-      'cost-signal',
-      (record) => `${record.serviceId}:${record.timeBucket}`,
+      "cost-signal",
+      (record) => `${record.serviceId}:${record.timeBucket}`
     );
 
     this.mergeStreamNodes(update.nodes, update);
@@ -740,12 +726,15 @@ export class OrchestrationKnowledgeGraph {
       Math.abs(snapshot.nodes.length - previousState.nodes.size) +
       Math.abs(snapshot.edges.length - previousState.edges.size);
 
-    if (this.options.mutationThreshold !== undefined && mutationDelta > this.options.mutationThreshold) {
+    if (
+      this.options.mutationThreshold !== undefined &&
+      mutationDelta > this.options.mutationThreshold
+    ) {
       this.restoreState(previousState);
       const error = new Error(
-        `Refusing to mutate graph by ${mutationDelta} elements without confirmation`,
+        `Refusing to mutate graph by ${mutationDelta} elements without confirmation`
       );
-      this.logWarn('intelgraph.kg.stream.blocked', {
+      this.logWarn("intelgraph.kg.stream.blocked", {
         namespace,
         mutationDelta,
         threshold: this.options.mutationThreshold,
@@ -755,18 +744,18 @@ export class OrchestrationKnowledgeGraph {
       throw error;
     }
 
-    this.metricsObserve('intelgraph_kg_stream_update_ms', durationMs, {
+    this.metricsObserve("intelgraph_kg_stream_update_ms", durationMs, {
       source,
     });
-    this.metricsIncrement('intelgraph_kg_stream_updates_total', 1, {
+    this.metricsIncrement("intelgraph_kg_stream_updates_total", 1, {
       source,
-      topic: update.topic ?? 'unspecified',
+      topic: update.topic ?? "unspecified",
     });
-    this.events.emitEvent('summit.intelgraph.graph.updated', {
+    this.events.emitEvent("summit.intelgraph.graph.updated", {
       source,
-      ingress: update.ingress ?? 'message-broker',
+      ingress: update.ingress ?? "message-broker",
       namespace,
-      trigger: 'stream',
+      trigger: "stream",
       version: this.version,
       nodeCount: snapshot.nodes.length,
       edgeCount: snapshot.edges.length,
@@ -777,10 +766,10 @@ export class OrchestrationKnowledgeGraph {
 
     if (update.agentTriggers) {
       for (const trigger of update.agentTriggers) {
-        this.events.emitEvent('summit.intelgraph.agent.triggered', {
+        this.events.emitEvent("summit.intelgraph.agent.triggered", {
           agent: trigger.agent,
           reason: trigger.reason,
-          priority: trigger.priority ?? 'normal',
+          priority: trigger.priority ?? "normal",
           namespace,
           graphVersion: this.version,
           correlationId: trigger.correlationId ?? update.correlationId,
@@ -789,7 +778,7 @@ export class OrchestrationKnowledgeGraph {
       }
     }
 
-    this.logInfo('intelgraph.kg.stream.update', {
+    this.logInfo("intelgraph.kg.stream.update", {
       namespace,
       source,
       topic: update.topic,
@@ -811,7 +800,7 @@ export class OrchestrationKnowledgeGraph {
     if (this.options.namespace) {
       return this.options.namespace;
     }
-    return this.options.sandboxMode ? 'intelgraph-sandbox' : 'intelgraph';
+    return this.options.sandboxMode ? "intelgraph-sandbox" : "intelgraph";
   }
 
   private mergeRecords<T extends { provenance?: GraphProvenance }>(
@@ -819,8 +808,7 @@ export class OrchestrationKnowledgeGraph {
     records: T[] | undefined,
     update: GraphUpdate,
     type: string,
-    idSelector: (record: T) => string = (record) =>
-      (record as unknown as { id: string }).id,
+    idSelector: (record: T) => string = (record) => (record as unknown as { id: string }).id
   ): { added: number; updated: number } {
     if (!records || records.length === 0) {
       return { added: 0, updated: 0 };
@@ -830,8 +818,7 @@ export class OrchestrationKnowledgeGraph {
     let updated = 0;
     for (const record of records) {
       const id = idSelector(record);
-      const provenance =
-        record.provenance ?? this.defaultStreamProvenance(update, `${type}:${id}`);
+      const provenance = record.provenance ?? this.defaultStreamProvenance(update, `${type}:${id}`);
       const enrichedRecord = { ...record, provenance } as T;
       if (map.has(id)) {
         updated += 1;
@@ -846,7 +833,7 @@ export class OrchestrationKnowledgeGraph {
   private mergePipelineRecords(
     map: Map<string, PipelineRecord>,
     records: PipelineRecord[] | undefined,
-    update: GraphUpdate,
+    update: GraphUpdate
   ): { added: number; updated: number } {
     if (!records || records.length === 0) {
       return { added: 0, updated: 0 };
@@ -894,7 +881,7 @@ export class OrchestrationKnowledgeGraph {
     }
   }
 
-  private applyDeletions(deletions: GraphUpdate['deletions']): void {
+  private applyDeletions(deletions: GraphUpdate["deletions"]): void {
     if (!deletions) {
       return;
     }
@@ -921,8 +908,8 @@ export class OrchestrationKnowledgeGraph {
       lineage.add(update.correlationId);
     }
     return {
-      source: update.source ?? 'intelgraph.stream',
-      ingress: update.ingress ?? 'message-broker',
+      source: update.source ?? "intelgraph.stream",
+      ingress: update.ingress ?? "message-broker",
       observedAt,
       traceId: update.traceId,
       checksum: stableHash({ seed, observedAt, topic: update.topic, source: update.source }),
@@ -975,24 +962,24 @@ export class OrchestrationKnowledgeGraph {
       return;
     }
     const startedAt = Date.now();
-    const span = this.startSpan('intelgraph.kg.ingest.services', {
+    const span = this.startSpan("intelgraph.kg.ingest.services", {
       connectors: this.serviceConnectors.length,
     });
     const results = await Promise.all(
-      this.serviceConnectors.map((connector) => connector.loadServices()),
+      this.serviceConnectors.map((connector) => connector.loadServices())
     );
     for (const record of results.flat()) {
       this.state.services.set(record.id, record);
     }
     const durationMs = Date.now() - startedAt;
-    this.logInfo('intelgraph.kg.ingest.services', {
+    this.logInfo("intelgraph.kg.ingest.services", {
       durationMs,
       count: this.state.services.size,
     });
-    this.metricsObserve('intelgraph_kg_ingest_services_ms', durationMs, {
+    this.metricsObserve("intelgraph_kg_ingest_services_ms", durationMs, {
       connectors: this.serviceConnectors.length,
     });
-    this.metricsIncrement('intelgraph_kg_services_total', this.state.services.size);
+    this.metricsIncrement("intelgraph_kg_services_total", this.state.services.size);
     span?.end({ durationMs, count: this.state.services.size });
   }
 
@@ -1001,24 +988,24 @@ export class OrchestrationKnowledgeGraph {
       return;
     }
     const startedAt = Date.now();
-    const span = this.startSpan('intelgraph.kg.ingest.environments', {
+    const span = this.startSpan("intelgraph.kg.ingest.environments", {
       connectors: this.environmentConnectors.length,
     });
     const results = await Promise.all(
-      this.environmentConnectors.map((connector) => connector.loadEnvironments()),
+      this.environmentConnectors.map((connector) => connector.loadEnvironments())
     );
     for (const record of results.flat()) {
       this.state.environments.set(record.id, record);
     }
     const durationMs = Date.now() - startedAt;
-    this.logInfo('intelgraph.kg.ingest.environments', {
+    this.logInfo("intelgraph.kg.ingest.environments", {
       durationMs,
       count: this.state.environments.size,
     });
-    this.metricsObserve('intelgraph_kg_ingest_environments_ms', durationMs, {
+    this.metricsObserve("intelgraph_kg_ingest_environments_ms", durationMs, {
       connectors: this.environmentConnectors.length,
     });
-    this.metricsIncrement('intelgraph_kg_environments_total', this.state.environments.size);
+    this.metricsIncrement("intelgraph_kg_environments_total", this.state.environments.size);
     span?.end({ durationMs, count: this.state.environments.size });
   }
 
@@ -1027,31 +1014,31 @@ export class OrchestrationKnowledgeGraph {
       return;
     }
     const startedAt = Date.now();
-    const span = this.startSpan('intelgraph.kg.ingest.pipelines', {
+    const span = this.startSpan("intelgraph.kg.ingest.pipelines", {
       connectors: this.pipelineConnectors.length,
     });
     const results = await Promise.all(
-      this.pipelineConnectors.map((connector) => connector.loadPipelines()),
+      this.pipelineConnectors.map((connector) => connector.loadPipelines())
     );
     for (const pipeline of results.flat()) {
       this.state.pipelines.set(pipeline.id, pipeline);
       for (const stage of pipeline.stages) {
         this.state.nodes.set(`stage:${stage.id}`, {
           id: `stage:${stage.id}`,
-          type: 'stage',
+          type: "stage",
           data: stage,
         });
       }
     }
     const durationMs = Date.now() - startedAt;
-    this.logInfo('intelgraph.kg.ingest.pipelines', {
+    this.logInfo("intelgraph.kg.ingest.pipelines", {
       durationMs,
       pipelines: this.state.pipelines.size,
     });
-    this.metricsObserve('intelgraph_kg_ingest_pipelines_ms', durationMs, {
+    this.metricsObserve("intelgraph_kg_ingest_pipelines_ms", durationMs, {
       connectors: this.pipelineConnectors.length,
     });
-    this.metricsIncrement('intelgraph_kg_pipelines_total', this.state.pipelines.size);
+    this.metricsIncrement("intelgraph_kg_pipelines_total", this.state.pipelines.size);
     span?.end({ durationMs, pipelines: this.state.pipelines.size });
   }
 
@@ -1060,24 +1047,24 @@ export class OrchestrationKnowledgeGraph {
       return;
     }
     const startedAt = Date.now();
-    const span = this.startSpan('intelgraph.kg.ingest.incidents', {
+    const span = this.startSpan("intelgraph.kg.ingest.incidents", {
       connectors: this.incidentConnectors.length,
     });
     const results = await Promise.all(
-      this.incidentConnectors.map((connector) => connector.loadIncidents()),
+      this.incidentConnectors.map((connector) => connector.loadIncidents())
     );
     for (const incident of results.flat()) {
       this.state.incidents.set(incident.id, incident);
     }
     const durationMs = Date.now() - startedAt;
-    this.logInfo('intelgraph.kg.ingest.incidents', {
+    this.logInfo("intelgraph.kg.ingest.incidents", {
       durationMs,
       incidents: this.state.incidents.size,
     });
-    this.metricsObserve('intelgraph_kg_ingest_incidents_ms', durationMs, {
+    this.metricsObserve("intelgraph_kg_ingest_incidents_ms", durationMs, {
       connectors: this.incidentConnectors.length,
     });
-    this.metricsIncrement('intelgraph_kg_incidents_total', this.state.incidents.size);
+    this.metricsIncrement("intelgraph_kg_incidents_total", this.state.incidents.size);
     span?.end({ durationMs, incidents: this.state.incidents.size });
   }
 
@@ -1086,24 +1073,24 @@ export class OrchestrationKnowledgeGraph {
       return;
     }
     const startedAt = Date.now();
-    const span = this.startSpan('intelgraph.kg.ingest.policies', {
+    const span = this.startSpan("intelgraph.kg.ingest.policies", {
       connectors: this.policyConnectors.length,
     });
     const results = await Promise.all(
-      this.policyConnectors.map((connector) => connector.loadPolicies()),
+      this.policyConnectors.map((connector) => connector.loadPolicies())
     );
     for (const policy of results.flat()) {
       this.state.policies.set(policy.id, policy);
     }
     const durationMs = Date.now() - startedAt;
-    this.logInfo('intelgraph.kg.ingest.policies', {
+    this.logInfo("intelgraph.kg.ingest.policies", {
       durationMs,
       policies: this.state.policies.size,
     });
-    this.metricsObserve('intelgraph_kg_ingest_policies_ms', durationMs, {
+    this.metricsObserve("intelgraph_kg_ingest_policies_ms", durationMs, {
       connectors: this.policyConnectors.length,
     });
-    this.metricsIncrement('intelgraph_kg_policies_total', this.state.policies.size);
+    this.metricsIncrement("intelgraph_kg_policies_total", this.state.policies.size);
     span?.end({ durationMs, policies: this.state.policies.size });
   }
 
@@ -1112,32 +1099,32 @@ export class OrchestrationKnowledgeGraph {
       return;
     }
     const startedAt = Date.now();
-    const span = this.startSpan('intelgraph.kg.ingest.costSignals', {
+    const span = this.startSpan("intelgraph.kg.ingest.costSignals", {
       connectors: this.costSignalConnectors.length,
     });
     const results = await Promise.all(
-      this.costSignalConnectors.map((connector) => connector.loadCostSignals()),
+      this.costSignalConnectors.map((connector) => connector.loadCostSignals())
     );
     for (const signal of results.flat()) {
       const id = `${signal.serviceId}:${signal.timeBucket}`;
       this.state.costSignals.set(id, signal);
     }
     const durationMs = Date.now() - startedAt;
-    this.logInfo('intelgraph.kg.ingest.costSignals', {
+    this.logInfo("intelgraph.kg.ingest.costSignals", {
       durationMs,
       costSignals: this.state.costSignals.size,
     });
-    this.metricsObserve('intelgraph_kg_ingest_cost_signals_ms', durationMs, {
+    this.metricsObserve("intelgraph_kg_ingest_cost_signals_ms", durationMs, {
       connectors: this.costSignalConnectors.length,
     });
-    this.metricsIncrement('intelgraph_kg_cost_signals_total', this.state.costSignals.size);
+    this.metricsIncrement("intelgraph_kg_cost_signals_total", this.state.costSignals.size);
     span?.end({ durationMs, costSignals: this.state.costSignals.size });
   }
 
   private provenanceForRecord(
     record: { provenance?: GraphProvenance },
     type: NodeType,
-    nodeId: string,
+    nodeId: string
   ): GraphProvenance {
     const checksum = record.provenance?.checksum ?? stableHash({ type, nodeId, record });
     const lineage = new Set(record.provenance?.lineage ?? []);
@@ -1145,8 +1132,8 @@ export class OrchestrationKnowledgeGraph {
       lineage.add(record.provenance.checksum);
     }
     return {
-      source: record.provenance?.source ?? 'intelgraph.connector',
-      ingress: record.provenance?.ingress ?? 'ingestion',
+      source: record.provenance?.source ?? "intelgraph.connector",
+      ingress: record.provenance?.ingress ?? "ingestion",
       observedAt: record.provenance?.observedAt ?? new Date().toISOString(),
       traceId: record.provenance?.traceId,
       checksum,
@@ -1159,18 +1146,14 @@ export class OrchestrationKnowledgeGraph {
   private edgeProvenance(
     type: RelationshipType,
     from?: GraphProvenance,
-    to?: GraphProvenance,
+    to?: GraphProvenance
   ): GraphProvenance {
     const observedAt = new Date().toISOString();
     const parents = [from?.checksum, to?.checksum].filter(Boolean) as string[];
-    const lineage = new Set<string>([
-      ...(from?.lineage ?? []),
-      ...(to?.lineage ?? []),
-      ...parents,
-    ]);
+    const lineage = new Set<string>([...(from?.lineage ?? []), ...(to?.lineage ?? []), ...parents]);
     return {
-      source: 'intelgraph.graph-builder',
-      ingress: 'ingestion',
+      source: "intelgraph.graph-builder",
+      ingress: "ingestion",
       observedAt,
       traceId: from?.traceId ?? to?.traceId,
       checksum: stableHash({ type, observedAt, parents }),
@@ -1189,42 +1172,39 @@ export class OrchestrationKnowledgeGraph {
     };
   }
 
-  private mergeWarnings(
-    ...warnings: Array<string[] | undefined>
-  ): string[] | undefined {
+  private mergeWarnings(...warnings: Array<string[] | undefined>): string[] | undefined {
     const merged = warnings.flatMap((warning) => warning ?? []);
     return merged.length ? Array.from(new Set(merged)) : undefined;
   }
 
   private protectionMode(): KnowledgeGraphEncryptionMode {
     if (!this.encryption?.secret) {
-      return 'transparent';
+      return "transparent";
     }
-    return this.encryption.mode ?? 'encrypt-sensitive';
+    return this.encryption.mode ?? "encrypt-sensitive";
   }
 
   private shouldEncryptNode(node: GraphNode): boolean {
-    if (this.protectionMode() !== 'encrypt-sensitive') {
+    if (this.protectionMode() !== "encrypt-sensitive") {
       return false;
     }
     if (!this.encryption?.secret) {
       return false;
     }
     const sensitiveTypes = new Set(
-      this.encryption.sensitiveTypes ?? ['service', 'environment', 'incident'],
+      this.encryption.sensitiveTypes ?? ["service", "environment", "incident"]
     );
     const sensitiveFields = new Set(
-      this.encryption.sensitiveFields ?? ['piiClassification', 'soxCritical', 'owner'],
+      this.encryption.sensitiveFields ?? ["piiClassification", "soxCritical", "owner"]
     );
     const hasSensitiveField = Object.keys(node.data ?? {}).some((field) =>
-      sensitiveFields.has(field),
+      sensitiveFields.has(field)
     );
     const sensitivityAttribute = node.provenance?.attributes
       ? (node.provenance.attributes as Record<string, unknown>).sensitivity
       : undefined;
     const provenanceSensitivity =
-      typeof sensitivityAttribute === 'string' &&
-      sensitivityAttribute.toLowerCase() !== 'public';
+      typeof sensitivityAttribute === "string" && sensitivityAttribute.toLowerCase() !== "public";
     return sensitiveTypes.has(node.type) || hasSensitiveField || provenanceSensitivity;
   }
 
@@ -1254,12 +1234,14 @@ export class OrchestrationKnowledgeGraph {
     if (!this.dataResidency) {
       return false;
     }
-    const allowed = new Set(this.dataResidency.allowedRegions.map((region) => region.toLowerCase()));
+    const allowed = new Set(
+      this.dataResidency.allowedRegions.map((region) => region.toLowerCase())
+    );
     const region =
-      typeof node.data === 'object' && node.data !== null
+      typeof node.data === "object" && node.data !== null
         ? (node.data as Record<string, unknown>).region
         : undefined;
-    if (typeof region === 'string') {
+    if (typeof region === "string") {
       return !allowed.has(region.toLowerCase());
     }
     return Boolean(this.dataResidency.denyUnknown);
@@ -1267,7 +1249,7 @@ export class OrchestrationKnowledgeGraph {
 
   private enforceDataResidency(
     nodes: GraphNode[],
-    edges: GraphEdge[],
+    edges: GraphEdge[]
   ): { nodes: GraphNode[]; edges: GraphEdge[]; warnings?: string[]; filteredCount: number } {
     if (!this.dataResidency) {
       return { nodes, edges, filteredCount: 0 };
@@ -1284,12 +1266,12 @@ export class OrchestrationKnowledgeGraph {
     });
 
     const filteredEdges = edges.filter(
-      (edge) => !filteredNodeIds.has(edge.from) && !filteredNodeIds.has(edge.to),
+      (edge) => !filteredNodeIds.has(edge.from) && !filteredNodeIds.has(edge.to)
     );
 
     if (filteredNodeIds.size) {
       residencyWarnings.push(
-        `Data residency filter removed ${filteredNodeIds.size} node(s) outside of ${this.dataResidency.allowedRegions.join(', ')}`,
+        `Data residency filter removed ${filteredNodeIds.size} node(s) outside of ${this.dataResidency.allowedRegions.join(", ")}`
       );
     }
 
@@ -1301,14 +1283,14 @@ export class OrchestrationKnowledgeGraph {
     };
   }
 
-  private snapshotEncryptionSummary(nodes: GraphNode[]): GraphSnapshot['encryption'] {
-    if (this.protectionMode() === 'transparent' || !this.encryption?.secret) {
+  private snapshotEncryptionSummary(nodes: GraphNode[]): GraphSnapshot["encryption"] {
+    if (this.protectionMode() === "transparent" || !this.encryption?.secret) {
       return undefined;
     }
     const sensitiveNodes = nodes.filter((node) => isEncryptedPayload(node.data)).length;
     return {
       mode: this.protectionMode(),
-      algorithm: this.encryption.algorithm ?? 'aes-256-gcm',
+      algorithm: this.encryption.algorithm ?? "aes-256-gcm",
       sensitiveNodes,
     };
   }
@@ -1321,24 +1303,24 @@ export class OrchestrationKnowledgeGraph {
 
     for (const service of this.state.services.values()) {
       const nodeId = `service:${service.id}`;
-      const provenance = this.provenanceForRecord(service, 'service', nodeId);
+      const provenance = this.provenanceForRecord(service, "service", nodeId);
       nodeProvenance.set(nodeId, provenance);
       this.state.nodes.set(nodeId, {
         id: nodeId,
-        type: 'service',
+        type: "service",
         data: service,
         provenance,
       });
       for (const dependency of service.dependencies ?? []) {
         const edge = {
-          id: edgeId(`service:${service.id}`, 'DEPENDS_ON', `service:${dependency}`),
+          id: edgeId(`service:${service.id}`, "DEPENDS_ON", `service:${dependency}`),
           from: `service:${service.id}`,
           to: `service:${dependency}`,
-          type: 'DEPENDS_ON' as const,
+          type: "DEPENDS_ON" as const,
           provenance: this.edgeProvenance(
-            'DEPENDS_ON',
+            "DEPENDS_ON",
             provenance,
-            nodeProvenance.get(`service:${dependency}`),
+            nodeProvenance.get(`service:${dependency}`)
           ),
         } satisfies GraphEdge;
         this.state.edges.set(edge.id, edge);
@@ -1347,11 +1329,11 @@ export class OrchestrationKnowledgeGraph {
 
     for (const environment of this.state.environments.values()) {
       const nodeId = `env:${environment.id}`;
-      const provenance = this.provenanceForRecord(environment, 'environment', nodeId);
+      const provenance = this.provenanceForRecord(environment, "environment", nodeId);
       nodeProvenance.set(nodeId, provenance);
       this.state.nodes.set(nodeId, {
         id: nodeId,
-        type: 'environment',
+        type: "environment",
         data: environment,
         provenance,
       });
@@ -1359,54 +1341,54 @@ export class OrchestrationKnowledgeGraph {
 
     for (const pipeline of this.state.pipelines.values()) {
       const pipelineNodeId = `pipeline:${pipeline.id}`;
-      const pipelineProv = this.provenanceForRecord(pipeline, 'pipeline', pipelineNodeId);
+      const pipelineProv = this.provenanceForRecord(pipeline, "pipeline", pipelineNodeId);
       nodeProvenance.set(pipelineNodeId, pipelineProv);
       this.state.nodes.set(pipelineNodeId, {
         id: pipelineNodeId,
-        type: 'pipeline',
+        type: "pipeline",
         data: pipeline,
         provenance: pipelineProv,
       });
       for (const stage of pipeline.stages) {
         const stageNode: GraphNode = {
           id: `stage:${stage.id}`,
-          type: 'stage',
+          type: "stage",
           data: stage,
-          provenance: this.provenanceForRecord(stage, 'stage', `stage:${stage.id}`),
+          provenance: this.provenanceForRecord(stage, "stage", `stage:${stage.id}`),
         };
         nodeProvenance.set(stageNode.id, stageNode.provenance!);
         this.state.nodes.set(stageNode.id, stageNode);
         const containsEdge: GraphEdge = {
-          id: edgeId(`pipeline:${pipeline.id}`, 'CONTAINS', stageNode.id),
+          id: edgeId(`pipeline:${pipeline.id}`, "CONTAINS", stageNode.id),
           from: `pipeline:${pipeline.id}`,
           to: stageNode.id,
-          type: 'CONTAINS',
-          provenance: this.edgeProvenance('CONTAINS', pipelineProv, stageNode.provenance),
+          type: "CONTAINS",
+          provenance: this.edgeProvenance("CONTAINS", pipelineProv, stageNode.provenance),
         };
         this.state.edges.set(containsEdge.id, containsEdge);
 
         const serviceEdge: GraphEdge = {
-          id: edgeId(stageNode.id, 'TARGETS', `service:${stage.serviceId}`),
+          id: edgeId(stageNode.id, "TARGETS", `service:${stage.serviceId}`),
           from: stageNode.id,
           to: `service:${stage.serviceId}`,
-          type: 'TARGETS',
+          type: "TARGETS",
           provenance: this.edgeProvenance(
-            'TARGETS',
+            "TARGETS",
             stageNode.provenance,
-            nodeProvenance.get(`service:${stage.serviceId}`),
+            nodeProvenance.get(`service:${stage.serviceId}`)
           ),
         };
         this.state.edges.set(serviceEdge.id, serviceEdge);
 
         const envEdge: GraphEdge = {
-          id: edgeId(stageNode.id, 'RUNS_IN', `env:${stage.environmentId}`),
+          id: edgeId(stageNode.id, "RUNS_IN", `env:${stage.environmentId}`),
           from: stageNode.id,
           to: `env:${stage.environmentId}`,
-          type: 'RUNS_IN',
+          type: "RUNS_IN",
           provenance: this.edgeProvenance(
-            'RUNS_IN',
+            "RUNS_IN",
             stageNode.provenance,
-            nodeProvenance.get(`env:${stage.environmentId}`),
+            nodeProvenance.get(`env:${stage.environmentId}`)
           ),
         };
         this.state.edges.set(envEdge.id, envEdge);
@@ -1416,34 +1398,34 @@ export class OrchestrationKnowledgeGraph {
     for (const incident of this.state.incidents.values()) {
       const incidentNode: GraphNode = {
         id: `incident:${incident.id}`,
-        type: 'incident',
+        type: "incident",
         data: incident,
-        provenance: this.provenanceForRecord(incident, 'incident', `incident:${incident.id}`),
+        provenance: this.provenanceForRecord(incident, "incident", `incident:${incident.id}`),
       };
       nodeProvenance.set(incidentNode.id, incidentNode.provenance!);
       this.state.nodes.set(incidentNode.id, incidentNode);
       const serviceEdge: GraphEdge = {
-        id: edgeId(incidentNode.id, 'AFFECTS', `service:${incident.serviceId}`),
+        id: edgeId(incidentNode.id, "AFFECTS", `service:${incident.serviceId}`),
         from: incidentNode.id,
         to: `service:${incident.serviceId}`,
-        type: 'AFFECTS',
+        type: "AFFECTS",
         metadata: { severity: incident.severity, occurredAt: incident.occurredAt },
         provenance: this.edgeProvenance(
-          'AFFECTS',
+          "AFFECTS",
           incidentNode.provenance,
-          nodeProvenance.get(`service:${incident.serviceId}`),
+          nodeProvenance.get(`service:${incident.serviceId}`)
         ),
       };
       this.state.edges.set(serviceEdge.id, serviceEdge);
       const envEdge: GraphEdge = {
-        id: edgeId(incidentNode.id, 'OCCURRED_IN', `env:${incident.environmentId}`),
+        id: edgeId(incidentNode.id, "OCCURRED_IN", `env:${incident.environmentId}`),
         from: incidentNode.id,
         to: `env:${incident.environmentId}`,
-        type: 'OCCURRED_IN',
+        type: "OCCURRED_IN",
         provenance: this.edgeProvenance(
-          'OCCURRED_IN',
+          "OCCURRED_IN",
           incidentNode.provenance,
-          nodeProvenance.get(`env:${incident.environmentId}`),
+          nodeProvenance.get(`env:${incident.environmentId}`)
         ),
       };
       this.state.edges.set(envEdge.id, envEdge);
@@ -1452,23 +1434,27 @@ export class OrchestrationKnowledgeGraph {
     for (const policy of this.state.policies.values()) {
       const policyNode: GraphNode = {
         id: `policy:${policy.id}`,
-        type: 'policy',
+        type: "policy",
         data: policy,
-        provenance: this.provenanceForRecord(policy as unknown as { provenance?: GraphProvenance }, 'policy', `policy:${policy.id}`),
+        provenance: this.provenanceForRecord(
+          policy as unknown as { provenance?: GraphProvenance },
+          "policy",
+          `policy:${policy.id}`
+        ),
       };
       nodeProvenance.set(policyNode.id, policyNode.provenance!);
       this.state.nodes.set(policyNode.id, policyNode);
       for (const resource of policy.resources) {
-        const targetId = resource.includes(':') ? resource : `service:${resource}`;
+        const targetId = resource.includes(":") ? resource : `service:${resource}`;
         const edge: GraphEdge = {
-          id: edgeId(policyNode.id, 'GOVERNS', targetId),
+          id: edgeId(policyNode.id, "GOVERNS", targetId),
           from: policyNode.id,
           to: targetId,
-          type: 'GOVERNS',
+          type: "GOVERNS",
           provenance: this.edgeProvenance(
-            'GOVERNS',
+            "GOVERNS",
             policyNode.provenance,
-            nodeProvenance.get(targetId),
+            nodeProvenance.get(targetId)
           ),
         };
         this.state.edges.set(edge.id, edge);
@@ -1478,25 +1464,25 @@ export class OrchestrationKnowledgeGraph {
     for (const signal of this.state.costSignals.values()) {
       const signalNode: GraphNode = {
         id: `cost:${signal.serviceId}:${signal.timeBucket}`,
-        type: 'cost-signal',
+        type: "cost-signal",
         data: signal,
         provenance: this.provenanceForRecord(
           signal,
-          'cost-signal' as NodeType,
-          `cost:${signal.serviceId}:${signal.timeBucket}`,
+          "cost-signal" as NodeType,
+          `cost:${signal.serviceId}:${signal.timeBucket}`
         ),
       };
       nodeProvenance.set(signalNode.id, signalNode.provenance!);
       this.state.nodes.set(signalNode.id, signalNode);
       const edge: GraphEdge = {
-        id: edgeId(signalNode.id, 'OBSERVED_FOR', `service:${signal.serviceId}`),
+        id: edgeId(signalNode.id, "OBSERVED_FOR", `service:${signal.serviceId}`),
         from: signalNode.id,
         to: `service:${signal.serviceId}`,
-        type: 'OBSERVED_FOR',
+        type: "OBSERVED_FOR",
         provenance: this.edgeProvenance(
-          'OBSERVED_FOR',
+          "OBSERVED_FOR",
           signalNode.provenance,
-          nodeProvenance.get(`service:${signal.serviceId}`),
+          nodeProvenance.get(`service:${signal.serviceId}`)
         ),
       };
       this.state.edges.set(edge.id, edge);
@@ -1517,18 +1503,18 @@ export class OrchestrationKnowledgeGraph {
     for (const service of this.state.services.values()) {
       const serviceId = service.id;
       const incidents = Array.from(this.state.incidents.values()).filter(
-        (incident) => incident.serviceId === serviceId,
+        (incident) => incident.serviceId === serviceId
       );
       const costSignals = Array.from(this.state.costSignals.values()).filter(
-        (signal) => signal.serviceId === serviceId,
+        (signal) => signal.serviceId === serviceId
       );
       const policies = Array.from(this.state.policies.values()).filter((policy) =>
-        policy.resources.some((resource) => resource.includes(serviceId)),
+        policy.resources.some((resource) => resource.includes(serviceId))
       );
 
       const incidentLoad = incidents.reduce((acc, incident) => {
         const weight = INCIDENT_SEVERITY_WEIGHTS[incident.severity] ?? 0.2;
-        const openMultiplier = incident.status === 'open' ? 1.3 : 0.6;
+        const openMultiplier = incident.status === "open" ? 1.3 : 0.6;
         return acc + weight * openMultiplier;
       }, 0);
       const recentCostSignal = costSignals[costSignals.length - 1];
@@ -1538,14 +1524,10 @@ export class OrchestrationKnowledgeGraph {
               recentCostSignal.budgetBreaches * 0.25 +
               recentCostSignal.throttleCount * 0.2,
             0,
-            1.2,
+            1.2
           )
         : 0;
-      const policyRisk = policies.some((policy) =>
-        policy.tags?.includes('high-risk'),
-      )
-        ? 0.8
-        : 0.3;
+      const policyRisk = policies.some((policy) => policy.tags?.includes("high-risk")) ? 0.8 : 0.3;
 
       const rawScore = incidentLoad * 0.5 + costPressure * 0.35 + policyRisk * 0.4;
       const score = clamp(rawScore / 2.2, 0, 1);
@@ -1575,7 +1557,7 @@ export class OrchestrationKnowledgeGraph {
   private metricsObserve(
     metric: string,
     value: number,
-    attributes?: Record<string, string | number>,
+    attributes?: Record<string, string | number>
   ): void {
     this.options.metrics?.observe?.(metric, value, attributes);
   }
@@ -1583,7 +1565,7 @@ export class OrchestrationKnowledgeGraph {
   private metricsIncrement(
     metric: string,
     value = 1,
-    attributes?: Record<string, string | number>,
+    attributes?: Record<string, string | number>
   ): void {
     this.options.metrics?.increment?.(metric, value, attributes);
   }
@@ -1596,10 +1578,10 @@ export class OrchestrationKnowledgeGraph {
 export function decryptGraphPayload<T = unknown>(
   payload: unknown,
   secret: string,
-  options?: { associatedData?: string },
+  options?: { associatedData?: string }
 ): T {
   if (!isEncryptedPayload(payload)) {
-    throw new Error('Payload is not encrypted data');
+    throw new Error("Payload is not encrypted data");
   }
   return decryptPayload<T>(payload, secret, options?.associatedData ?? payload.associatedData);
 }
@@ -1607,7 +1589,7 @@ export function decryptGraphPayload<T = unknown>(
 export function decryptGraphNode<TData = Record<string, unknown>>(
   node: GraphNode,
   secret: string,
-  options?: { associatedData?: string },
+  options?: { associatedData?: string }
 ): GraphNode<TData> {
   if (!isEncryptedPayload(node.data)) {
     return node as GraphNode<TData>;
@@ -1642,11 +1624,11 @@ export type {
   DataResidencyOptions,
 };
 
-export * from './osint.js';
+export * from "./osint.js";
 export {
   KafkaGraphUpdateStream,
   type KafkaLikeConsumer,
   type KafkaLikeEachMessagePayload,
   type KafkaLikeMessage,
   type KafkaStreamConfig,
-} from './streams.js';
+} from "./streams.js";

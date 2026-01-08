@@ -9,8 +9,8 @@ import type {
   SeasonalityConfig,
   HolidayConfig,
   TrendDecomposition,
-  ChangePoint
-} from '../types/index.js';
+  ChangePoint,
+} from "../types/index.js";
 
 export class ProphetForecaster {
   private config: ForecastConfig;
@@ -54,7 +54,7 @@ export class ProphetForecaster {
    */
   forecast(horizon?: number, confidenceLevel?: number): ForecastResult[] {
     if (!this.fitted) {
-      throw new Error('Model must be fitted before forecasting');
+      throw new Error("Model must be fitted before forecasting");
     }
 
     const h = horizon || this.config.horizon;
@@ -113,7 +113,7 @@ export class ProphetForecaster {
    */
   private detectChangepoints(): void {
     const n = this.data.length;
-    const values = this.data.map(d => d.value);
+    const values = this.data.map((d) => d.value);
     const windowSize = Math.max(10, Math.floor(n * 0.1));
 
     for (let i = windowSize; i < n - windowSize; i++) {
@@ -147,7 +147,7 @@ export class ProphetForecaster {
    */
   private fitTrend(): void {
     const n = this.data.length;
-    const values = this.data.map(d => d.value);
+    const values = this.data.map((d) => d.value);
 
     if (this.changepoints.length === 0) {
       // Simple linear trend
@@ -188,9 +188,7 @@ export class ProphetForecaster {
     const period = seasonality.period;
     const fourierOrder = seasonality.fourierOrder || 10;
 
-    const detrended = this.data.map((d, i) =>
-      d.value - (this.trendComponent[i] || 0)
-    );
+    const detrended = this.data.map((d, i) => d.value - (this.trendComponent[i] || 0));
 
     const seasonalFit: number[] = new Array(this.data.length).fill(0);
 
@@ -200,22 +198,24 @@ export class ProphetForecaster {
 
       for (let i = 0; i < this.data.length; i++) {
         const t = i % period;
-        const angle = 2 * Math.PI * k * t / period;
+        const angle = (2 * Math.PI * k * t) / period;
         sinCoeffs.push(Math.sin(angle));
         cosCoeffs.push(Math.cos(angle));
       }
 
-      const sinCoeff = this.dotProduct(detrended, sinCoeffs) / this.dotProduct(sinCoeffs, sinCoeffs);
-      const cosCoeff = this.dotProduct(detrended, cosCoeffs) / this.dotProduct(cosCoeffs, cosCoeffs);
+      const sinCoeff =
+        this.dotProduct(detrended, sinCoeffs) / this.dotProduct(sinCoeffs, sinCoeffs);
+      const cosCoeff =
+        this.dotProduct(detrended, cosCoeffs) / this.dotProduct(cosCoeffs, cosCoeffs);
 
       for (let i = 0; i < this.data.length; i++) {
         const t = i % period;
-        const angle = 2 * Math.PI * k * t / period;
+        const angle = (2 * Math.PI * k * t) / period;
         seasonalFit[i] += sinCoeff * Math.sin(angle) + cosCoeff * Math.cos(angle);
       }
     }
 
-    this.seasonalComponents.set('main', seasonalFit);
+    this.seasonalComponents.set("main", seasonalFit);
   }
 
   /**
@@ -231,9 +231,10 @@ export class ProphetForecaster {
       const effects: number[] = [];
 
       for (const idx of holidayIndices) {
-        const detrended = this.data[idx].value -
-                         (this.trendComponent[idx] || 0) -
-                         this.getSeasonalValue(this.data[idx].timestamp);
+        const detrended =
+          this.data[idx].value -
+          (this.trendComponent[idx] || 0) -
+          this.getSeasonalValue(this.data[idx].timestamp);
         effects.push(detrended);
       }
 
@@ -250,7 +251,7 @@ export class ProphetForecaster {
       }
     }
 
-    this.seasonalComponents.set('holidays', holidayFit);
+    this.seasonalComponents.set("holidays", holidayFit);
   }
 
   /**
@@ -285,13 +286,13 @@ export class ProphetForecaster {
   private forecastHoliday(timestamp: Date): number {
     if (!this.config.holidays) return 0;
 
-    const holidayComponent = this.seasonalComponents.get('holidays');
+    const holidayComponent = this.seasonalComponents.get("holidays");
     if (!holidayComponent) return 0;
 
     for (const holiday of this.config.holidays) {
       if (this.isHoliday(timestamp, holiday)) {
         const holidayIndices = this.findHolidayIndices(holiday);
-        const effects = holidayIndices.map(idx => holidayComponent[idx]);
+        const effects = holidayIndices.map((idx) => holidayComponent[idx]);
         return this.mean(effects);
       }
     }
@@ -309,11 +310,11 @@ export class ProphetForecaster {
     const dayOfYear = this.getDayOfYear(timestamp);
     const t = dayOfYear % period;
 
-    const mainSeasonal = this.seasonalComponents.get('main');
+    const mainSeasonal = this.seasonalComponents.get("main");
     if (!mainSeasonal) return 0;
 
     // Interpolate seasonal value
-    const idx = Math.floor(t * mainSeasonal.length / period);
+    const idx = Math.floor((t * mainSeasonal.length) / period);
     return mainSeasonal[idx] || 0;
   }
 
@@ -339,7 +340,7 @@ export class ProphetForecaster {
 
   private std(arr: number[]): number {
     const avg = this.mean(arr);
-    const squareDiffs = arr.map(x => Math.pow(x - avg, 2));
+    const squareDiffs = arr.map((x) => Math.pow(x - avg, 2));
     return Math.sqrt(this.mean(squareDiffs));
   }
 
@@ -368,7 +369,7 @@ export class ProphetForecaster {
 
   private getZScore(confidenceLevel: number): number {
     const zScores: Record<number, number> = {
-      0.90: 1.645,
+      0.9: 1.645,
       0.95: 1.96,
       0.99: 2.576,
     };
@@ -388,10 +389,11 @@ export class ProphetForecaster {
   }
 
   private isHoliday(timestamp: Date, holiday: HolidayConfig): boolean {
-    return holiday.dates.some(d =>
-      d.getFullYear() === timestamp.getFullYear() &&
-      d.getMonth() === timestamp.getMonth() &&
-      d.getDate() === timestamp.getDate()
+    return holiday.dates.some(
+      (d) =>
+        d.getFullYear() === timestamp.getFullYear() &&
+        d.getMonth() === timestamp.getMonth() &&
+        d.getDate() === timestamp.getDate()
     );
   }
 

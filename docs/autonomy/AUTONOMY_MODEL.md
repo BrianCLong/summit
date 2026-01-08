@@ -14,9 +14,11 @@
 Summit is **agent-native** but **governance-first**. This document defines the **explicit autonomy boundaries** for all agents, autonomous systems, and AI-augmented capabilities operating within Summit.
 
 **Core Principle**:
+
 > Autonomy without veto is a defect.
 
 **Operating Constraint**:
+
 > All autonomous behaviors must declare a tier. Undeclared autonomy is **denied by default**.
 
 ---
@@ -38,6 +40,7 @@ Summit defines **five distinct autonomy tiers** with progressively increasing fr
 **Veto Window**: N/A.
 
 **Examples**:
+
 - Metrics dashboards (Grafana)
 - Log viewers (Loki, CloudWatch)
 - Read-only GraphQL queries
@@ -45,11 +48,13 @@ Summit defines **five distinct autonomy tiers** with progressively increasing fr
 - Compliance reporting (read-only)
 
 **Restrictions**:
+
 - No mutations allowed
 - No side effects permitted
 - No external API calls with credentials
 
 **Policy Enforcement**:
+
 ```rego
 # policies/autonomy_tier_0.rego
 package autonomy.tier0
@@ -82,6 +87,7 @@ deny {
 **Veto Window**: N/A (humans decide if/when to act).
 
 **Examples**:
+
 - Policy optimization suggestions
 - Security posture recommendations
 - Cost optimization proposals
@@ -89,6 +95,7 @@ deny {
 - Incident remediation playbooks (suggested, not executed)
 
 **Restrictions**:
+
 - Agent **cannot execute** recommendations
 - Recommendations must include:
   - Rationale
@@ -97,6 +104,7 @@ deny {
   - Rollback plan (if applicable)
 
 **Policy Enforcement**:
+
 ```rego
 # policies/autonomy_tier_1.rego
 package autonomy.tier1
@@ -117,6 +125,7 @@ deny {
 ```
 
 **Audit Record Schema**:
+
 ```json
 {
   "event_type": "recommendation",
@@ -150,6 +159,7 @@ deny {
 **Veto Window**: 30 seconds (configurable per agent/action).
 
 **Examples**:
+
 - Auto-remediation (restart failed service)
 - Horizontal scaling (add/remove pods)
 - Cache invalidation
@@ -157,12 +167,14 @@ deny {
 - Incident response automation (pre-approved playbooks)
 
 **Restrictions**:
+
 - Actions must be **idempotent** (safe to retry)
 - Actions must be **reversible** (rollback plan required)
 - Actions must be within **pre-defined bounds** (no unbounded autonomy)
 - Critical actions **escalate to Tier 1** (e.g., database mutations)
 
 **Policy Enforcement**:
+
 ```rego
 # policies/autonomy_tier_2.rego
 package autonomy.tier2
@@ -197,6 +209,7 @@ is_critical_action(action) {
 ```
 
 **Veto Protocol**:
+
 1. Agent declares intent (logs + UI notification)
 2. 30-second countdown begins
 3. Human can **veto** (cancel) or **approve** (execute immediately)
@@ -204,6 +217,7 @@ is_critical_action(action) {
 5. Log outcome (success/failure/vetoed)
 
 **Audit Record Schema**:
+
 ```json
 {
   "event_type": "autonomous_execution",
@@ -214,7 +228,7 @@ is_critical_action(action) {
   "action": {
     "type": "scale_deployment",
     "target": "intelgraph-server",
-    "parameters": {"replicas": 5},
+    "parameters": { "replicas": 5 },
     "rationale": "CPU >80% for 5 minutes",
     "rollback_plan": "kubectl scale deployment intelgraph-server --replicas=3"
   },
@@ -245,6 +259,7 @@ is_critical_action(action) {
 **Veto Window**: None (executes immediately, reviewed later).
 
 **Examples**:
+
 - Rate limit auto-tuning (within min/max bounds)
 - Cache size optimization (within memory limits)
 - Query optimizer (index selection, execution plan tuning)
@@ -252,12 +267,14 @@ is_critical_action(action) {
 - Anomaly detection threshold tuning
 
 **Restrictions**:
+
 - **Bounds are immutable** (defined in policy, cannot be changed by agent)
 - **No critical paths** (agent cannot optimize authentication, authorization, audit)
 - **Revertible** (baseline configuration always available)
 - **Observable** (metrics exported for human review)
 
 **Policy Enforcement**:
+
 ```rego
 # policies/autonomy_tier_3.rego
 package autonomy.tier3
@@ -290,18 +307,20 @@ is_critical_parameter(parameter) {
 ```
 
 **Bounds Configuration** (immutable, policy-as-code):
+
 ```json
 {
   "optimization_bounds": {
-    "rate_limit_requests_per_minute": {"min": 100, "max": 10000},
-    "cache_size_mb": {"min": 128, "max": 2048},
-    "connection_pool_size": {"min": 10, "max": 100},
-    "query_timeout_seconds": {"min": 5, "max": 60}
+    "rate_limit_requests_per_minute": { "min": 100, "max": 10000 },
+    "cache_size_mb": { "min": 128, "max": 2048 },
+    "connection_pool_size": { "min": 10, "max": 100 },
+    "query_timeout_seconds": { "min": 5, "max": 60 }
   }
 }
 ```
 
 **Audit Record Schema**:
+
 ```json
 {
   "event_type": "autonomous_optimization",
@@ -312,16 +331,17 @@ is_critical_parameter(parameter) {
     "previous_value": 500,
     "new_value": 750,
     "rationale": "P95 latency stable at 100ms, headroom available",
-    "bounds": {"min": 100, "max": 10000}
+    "bounds": { "min": 100, "max": 10000 }
   },
   "outcome": {
     "status": "success",
-    "metrics_delta": {"p95_latency_ms": -5, "error_rate": 0.0}
+    "metrics_delta": { "p95_latency_ms": -5, "error_rate": 0.0 }
   }
 }
 ```
 
 **Review Protocol**:
+
 - Weekly report generated: `scripts/generate-autonomy-report.ts`
 - SRE reviews optimization history
 - Anomalies flagged for investigation
@@ -342,11 +362,13 @@ is_critical_parameter(parameter) {
 **Veto Window**: 5 minutes (for high-risk modifications).
 
 **Examples**:
+
 - A/B test framework (swap decision logic between variants)
 - Feature flag management (enable/disable features based on metrics)
 - Model retraining (update ML model weights based on new data)
 
 **Restrictions**:
+
 - **Disabled by default** (opt-in only)
 - **Sandboxed** (cannot modify critical paths: auth, audit, policy engine)
 - **Versioned** (all modifications tracked in version control or config store)
@@ -354,6 +376,7 @@ is_critical_parameter(parameter) {
 - **Revertible** (rollback to previous version within 1 minute)
 
 **Policy Enforcement**:
+
 ```rego
 # policies/autonomy_tier_4.rego
 package autonomy.tier4
@@ -392,6 +415,7 @@ has_rollback_plan(modification) {
 ```
 
 **Self-Modification Protocol**:
+
 1. Agent proposes modification (logs intent + diff)
 2. Automated tests run on modified version
 3. If tests pass → 5-minute veto window
@@ -401,6 +425,7 @@ has_rollback_plan(modification) {
 7. Log outcome + diff to audit trail
 
 **Audit Record Schema**:
+
 ```json
 {
   "event_type": "self_modification",
@@ -425,12 +450,13 @@ has_rollback_plan(modification) {
   },
   "outcome": {
     "status": "success",
-    "metrics_delta": {"click_through_rate": +0.05, "p95_latency_ms": +10}
+    "metrics_delta": { "click_through_rate": +0.05, "p95_latency_ms": +10 }
   }
 }
 ```
 
 **Governance Requirements for Tier 4**:
+
 1. **Security Council Approval**: Required to enable Tier 4 for any agent
 2. **Sandbox Enforcement**: Agent cannot modify critical components (enforced by policy)
 3. **Automated Testing**: All modifications must pass CI before deployment
@@ -451,16 +477,8 @@ Every agent must declare its autonomy tier and capabilities via `agent-contract.
   "agent_id": "cost-optimizer-v1",
   "version": "1.2.3",
   "autonomy_tier": 3,
-  "capabilities": [
-    "optimize_cache_size",
-    "tune_rate_limits",
-    "select_cloud_provider"
-  ],
-  "required_permissions": [
-    "read:metrics",
-    "write:config",
-    "read:cost_data"
-  ],
+  "capabilities": ["optimize_cache_size", "tune_rate_limits", "select_cloud_provider"],
+  "required_permissions": ["read:metrics", "write:config", "read:cost_data"],
   "failure_modes": [
     "timeout",
     "invalid_optimization_bounds",
@@ -475,8 +493,8 @@ Every agent must declare its autonomy tier and capabilities via `agent-contract.
   "veto_window_seconds": 0,
   "kill_switch_enabled": true,
   "bounds": {
-    "cache_size_mb": {"min": 128, "max": 2048},
-    "rate_limit_rpm": {"min": 100, "max": 10000}
+    "cache_size_mb": { "min": 128, "max": 2048 },
+    "rate_limit_rpm": { "min": 100, "max": 10000 }
   }
 }
 ```
@@ -484,6 +502,7 @@ Every agent must declare its autonomy tier and capabilities via `agent-contract.
 ### 2.2 Contract Validation
 
 **CI Enforcement**:
+
 ```bash
 # .github/workflows/ci.yml
 - name: Validate Agent Contracts
@@ -491,6 +510,7 @@ Every agent must declare its autonomy tier and capabilities via `agent-contract.
 ```
 
 **Validation Rules**:
+
 - Schema compliance (JSON Schema validation)
 - Tier declaration (0-4, valid integer)
 - Capabilities match declared tier (e.g., Tier 0 cannot declare "execute")
@@ -504,6 +524,7 @@ Every agent must declare its autonomy tier and capabilities via `agent-contract.
 ### 2.3 Runtime Enforcement
 
 **Policy Engine Integration**:
+
 ```rego
 # policies/agent_contract_enforcement.rego
 package agent.contract
@@ -525,6 +546,7 @@ required_tier_for_action(action) = 4 { action == "self_modify" }
 ```
 
 **Violation Response**:
+
 - Request **rejected** (HTTP 403)
 - Incident logged (severity: P2)
 - Agent flagged for review
@@ -539,12 +561,14 @@ required_tier_for_action(action) = 4 { action == "self_modify" }
 **Purpose**: Emergency halt of all autonomous agents.
 
 **Trigger**:
+
 - Security incident (P0)
 - Data corruption detected
 - Policy engine failure
 - Manual operator intervention
 
 **Mechanism**:
+
 ```bash
 # Emergency kill switch
 kubectl scale deployment --all --replicas=0 -n autonomous-agents
@@ -552,12 +576,14 @@ kubectl delete configmap agent-contracts -n autonomous-agents
 ```
 
 **Activation**:
+
 ```bash
 # Operator command
 ./scripts/emergency-kill-switch.sh --reason "P0 incident #12345"
 ```
 
 **Audit Trail**:
+
 ```json
 {
   "event_type": "kill_switch_activated",
@@ -574,11 +600,13 @@ kubectl delete configmap agent-contracts -n autonomous-agents
 **Purpose**: Human operator cancels autonomous action before execution.
 
 **UI Integration**:
+
 - Real-time notification (Slack, PagerDuty, web UI)
 - One-click veto button
 - Countdown timer (30s default)
 
 **Veto Record**:
+
 ```json
 {
   "event_type": "veto",
@@ -592,6 +620,7 @@ kubectl delete configmap agent-contracts -n autonomous-agents
 ```
 
 **Post-Veto Actions**:
+
 - Log veto reason
 - Update agent metrics (veto rate)
 - Review agent behavior (if veto rate >10%, escalate for tuning)
@@ -603,6 +632,7 @@ kubectl delete configmap agent-contracts -n autonomous-agents
 ### 4.1 Autonomy Metrics
 
 **Prometheus Metrics**:
+
 ```
 # Recommendations generated (Tier 1)
 agent_recommendations_total{agent_id, action_type, confidence_score}
@@ -630,6 +660,7 @@ agent_kill_switch_activations_total{reason}
 **Schema**: See Section 1 (Audit Record Schema per tier).
 
 **Export**:
+
 ```bash
 ./scripts/generate-autonomy-audit-report.ts \
   --start 2026-01-01T00:00:00Z \
@@ -639,6 +670,7 @@ agent_kill_switch_activations_total{reason}
 ```
 
 **Compliance Requirement**:
+
 > Every autonomous action must have a corresponding audit record.
 > Missing audit records are **compliance violations** (P1 incident).
 
@@ -651,12 +683,14 @@ agent_kill_switch_activations_total{reason}
 **Production Default**: **Tier 1** (Recommend only).
 
 **Rationale**:
+
 - Conservative stance minimizes risk
 - Humans retain full control
 - Audit trail builds confidence
 - Gradual escalation to Tier 2+ based on evidence
 
 **Escalation Process**:
+
 1. Agent operates at Tier 1 for 30 days
 2. Review recommendation accuracy, veto rate, human feedback
 3. If metrics are green (accuracy >90%, veto rate <5%) → propose Tier 2
@@ -667,12 +701,14 @@ agent_kill_switch_activations_total{reason}
 ### 5.2 Opt-In for Higher Tiers
 
 **Tier 2+ Activation**:
+
 - Requires **Security Council approval**
 - Requires **documented risk assessment**
 - Requires **rollback plan**
 - Requires **monitoring dashboard** (Grafana)
 
 **Approval Template**:
+
 ```markdown
 # Tier Escalation Request: auto-scaler-v2 (Tier 1 → Tier 2)
 
@@ -694,19 +730,20 @@ agent_kill_switch_activations_total{reason}
 
 ### 6.1 Threat Scenarios
 
-| Threat | Tier | Mitigation |
-|--------|------|------------|
-| **Agent exceeds declared tier** | All | Policy engine denies, logs violation |
-| **Agent modifies critical component** | 4 | Sandbox enforcement, policy denial |
-| **Agent executes unbounded action** | 2, 3 | Bounds enforcement, policy denial |
-| **Agent bypasses veto window** | 2 | Veto protocol enforced by orchestrator |
-| **Agent tampers with audit trail** | All | Immutable audit log (append-only DB) |
-| **Compromised agent credentials** | All | Short-lived tokens, rotation, revocation |
-| **Agent collusion** | All | Agent-to-agent communication logged, restricted |
+| Threat                                | Tier | Mitigation                                      |
+| ------------------------------------- | ---- | ----------------------------------------------- |
+| **Agent exceeds declared tier**       | All  | Policy engine denies, logs violation            |
+| **Agent modifies critical component** | 4    | Sandbox enforcement, policy denial              |
+| **Agent executes unbounded action**   | 2, 3 | Bounds enforcement, policy denial               |
+| **Agent bypasses veto window**        | 2    | Veto protocol enforced by orchestrator          |
+| **Agent tampers with audit trail**    | All  | Immutable audit log (append-only DB)            |
+| **Compromised agent credentials**     | All  | Short-lived tokens, rotation, revocation        |
+| **Agent collusion**                   | All  | Agent-to-agent communication logged, restricted |
 
 ### 6.2 Defense-in-Depth
 
 **Layered Controls**:
+
 1. **Agent Contract Validation** (CI + runtime)
 2. **Policy Engine Enforcement** (OPA, default deny)
 3. **Veto Mechanisms** (Tier 2+)
@@ -724,11 +761,13 @@ agent_kill_switch_activations_total{reason}
 This document is **locked** and can only be amended via formal governance process.
 
 **Amendment Triggers**:
+
 - Security incident requiring tier redefinition
 - New autonomy capability (e.g., Tier 5)
 - Regulatory requirement (e.g., AI Act compliance)
 
 **Amendment Process**:
+
 1. Proposal (ADR format)
 2. Security Council review
 3. Approval (Security Lead + SRE Lead + Release Captain)
@@ -737,9 +776,9 @@ This document is **locked** and can only be amended via formal governance proces
 
 ### 7.2 Version History
 
-| Version | Date | Changes | Approved By |
-|---------|------|---------|-------------|
-| 1.0.0 | 2026-01-01 | Initial autonomy model | Release Captain |
+| Version | Date       | Changes                | Approved By     |
+| ------- | ---------- | ---------------------- | --------------- |
+| 1.0.0   | 2026-01-01 | Initial autonomy model | Release Captain |
 
 ---
 
@@ -748,6 +787,7 @@ This document is **locked** and can only be amended via formal governance proces
 ### 8.1 Example Agent Contracts
 
 **Tier 1 Agent** (Policy Recommender):
+
 ```json
 {
   "agent_id": "policy-recommender-v1",
@@ -762,6 +802,7 @@ This document is **locked** and can only be amended via formal governance proces
 ```
 
 **Tier 2 Agent** (Auto-Scaler):
+
 ```json
 {
   "agent_id": "auto-scaler-v2",
@@ -772,11 +813,12 @@ This document is **locked** and can only be amended via formal governance proces
   "evidence_hooks": ["log_intent", "log_outcome"],
   "veto_window_seconds": 30,
   "kill_switch_enabled": true,
-  "bounds": {"min_replicas": 2, "max_replicas": 10}
+  "bounds": { "min_replicas": 2, "max_replicas": 10 }
 }
 ```
 
 **Tier 3 Agent** (Rate Limit Tuner):
+
 ```json
 {
   "agent_id": "rate-limit-tuner-v1",
@@ -787,28 +829,29 @@ This document is **locked** and can only be amended via formal governance proces
   "evidence_hooks": ["log_optimization"],
   "veto_window_seconds": 0,
   "kill_switch_enabled": true,
-  "bounds": {"rate_limit_rpm": {"min": 100, "max": 10000}}
+  "bounds": { "rate_limit_rpm": { "min": 100, "max": 10000 } }
 }
 ```
 
 ### 8.2 Reference Scripts
 
 **Validate Agent Contracts**:
+
 ```typescript
 // scripts/validate-agent-contracts.ts
-import { glob } from 'glob';
-import { readFileSync } from 'fs';
-import Ajv from 'ajv';
+import { glob } from "glob";
+import { readFileSync } from "fs";
+import Ajv from "ajv";
 
-const schema = JSON.parse(readFileSync('schemas/agent-contract-v1.json', 'utf-8'));
+const schema = JSON.parse(readFileSync("schemas/agent-contract-v1.json", "utf-8"));
 const ajv = new Ajv();
 const validate = ajv.compile(schema);
 
-const contracts = glob.sync('**/agent-contract.json');
+const contracts = glob.sync("**/agent-contract.json");
 let valid = true;
 
 for (const contractPath of contracts) {
-  const contract = JSON.parse(readFileSync(contractPath, 'utf-8'));
+  const contract = JSON.parse(readFileSync(contractPath, "utf-8"));
   if (!validate(contract)) {
     console.error(`Invalid contract: ${contractPath}`, validate.errors);
     valid = false;
@@ -819,21 +862,25 @@ process.exit(valid ? 0 : 1);
 ```
 
 **Generate Autonomy Audit Report**:
+
 ```typescript
 // scripts/generate-autonomy-audit-report.ts
-import { Pool } from 'pg';
+import { Pool } from "pg";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 async function generateReport(start: string, end: string) {
-  const result = await pool.query(`
+  const result = await pool.query(
+    `
     SELECT agent_id, event_type, COUNT(*) as count
     FROM audit_trail
     WHERE timestamp >= $1 AND timestamp <= $2
       AND event_type IN ('recommendation', 'autonomous_execution', 'autonomous_optimization', 'self_modification', 'veto')
     GROUP BY agent_id, event_type
     ORDER BY count DESC
-  `, [start, end]);
+  `,
+    [start, end]
+  );
 
   console.log(JSON.stringify(result.rows, null, 2));
 }
@@ -850,6 +897,7 @@ generateReport(process.argv[2], process.argv[3]);
 This model ensures Summit can operate autonomously **without becoming reckless**.
 
 **Next Steps**:
+
 1. Implement agent contract validation in CI (`scripts/validate-agent-contracts.ts`)
 2. Deploy policy enforcement (`policies/autonomy_tier_*.rego`)
 3. Integrate veto UI (Slack bot + web dashboard)

@@ -3,12 +3,12 @@
  * Panel for displaying entity/edge details and enrichment data
  */
 
-import React from 'react';
-import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { GraphNode, GraphEdge, NODE_TYPE_COLORS } from './types';
+import React from "react";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { GraphNode, GraphEdge, NODE_TYPE_COLORS } from "./types";
 
 interface EntityPanelProps {
   node: GraphNode | null;
@@ -38,12 +38,7 @@ interface EntityPanelProps {
   onClose: () => void;
 }
 
-export function EntityPanel({
-  node,
-  edge,
-  enrichment,
-  onClose,
-}: EntityPanelProps) {
+export function EntityPanel({ node, edge, enrichment, onClose }: EntityPanelProps) {
   if (!node && !edge) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-6 text-center">
@@ -121,9 +116,7 @@ export function EntityPanel({
                     style={{ width: `${edge.confidence * 100}%` }}
                   />
                 </div>
-                <span className="text-sm font-medium">
-                  {Math.round(edge.confidence * 100)}%
-                </span>
+                <span className="text-sm font-medium">{Math.round(edge.confidence * 100)}%</span>
               </div>
             </div>
           )}
@@ -156,9 +149,7 @@ export function EntityPanel({
                     <div key={key} className="flex justify-between text-sm">
                       <span className="text-muted-foreground">{key}</span>
                       <span className="font-medium">
-                        {typeof value === 'object'
-                          ? JSON.stringify(value)
-                          : String(value)}
+                        {typeof value === "object" ? JSON.stringify(value) : String(value)}
                       </span>
                     </div>
                   ))}
@@ -179,8 +170,7 @@ export function EntityPanel({
           <div className="flex items-center gap-2 mb-1">
             <Badge
               style={{
-                backgroundColor:
-                  NODE_TYPE_COLORS[node!.type] ?? NODE_TYPE_COLORS.DEFAULT,
+                backgroundColor: NODE_TYPE_COLORS[node!.type] ?? NODE_TYPE_COLORS.DEFAULT,
               }}
             >
               {node!.type}
@@ -240,9 +230,7 @@ export function EntityPanel({
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                 Created
               </label>
-              <p className="mt-1 text-sm">
-                {new Date(node!.createdAt).toLocaleDateString()}
-              </p>
+              <p className="mt-1 text-sm">{new Date(node!.createdAt).toLocaleDateString()}</p>
             </div>
           )}
           {node!.updatedAt && (
@@ -250,9 +238,7 @@ export function EntityPanel({
               <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                 Updated
               </label>
-              <p className="mt-1 text-sm">
-                {new Date(node!.updatedAt).toLocaleDateString()}
-              </p>
+              <p className="mt-1 text-sm">{new Date(node!.updatedAt).toLocaleDateString()}</p>
             </div>
           )}
         </div>
@@ -270,9 +256,7 @@ export function EntityPanel({
                   <div key={key} className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{key}</span>
                     <span className="font-medium truncate max-w-[150px]">
-                      {typeof value === 'object'
-                        ? JSON.stringify(value)
-                        : String(value)}
+                      {typeof value === "object" ? JSON.stringify(value) : String(value)}
                     </span>
                   </div>
                 ))}
@@ -295,12 +279,12 @@ export function EntityPanel({
                 <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                   <div
                     className={cn(
-                      'h-full rounded-full',
+                      "h-full rounded-full",
                       enrichment.reputation.score > 0.7
-                        ? 'bg-green-500'
+                        ? "bg-green-500"
                         : enrichment.reputation.score > 0.4
-                          ? 'bg-yellow-500'
-                          : 'bg-red-500',
+                          ? "bg-yellow-500"
+                          : "bg-red-500"
                     )}
                     style={{ width: `${enrichment.reputation.score * 100}%` }}
                   />
@@ -323,15 +307,14 @@ export function EntityPanel({
                 <p className="mt-1 text-sm">
                   {[enrichment.geolocation.city, enrichment.geolocation.country]
                     .filter(Boolean)
-                    .join(', ') || 'Unknown'}
+                    .join(", ") || "Unknown"}
                 </p>
-                {enrichment.geolocation.latitude &&
-                  enrichment.geolocation.longitude && (
-                    <p className="text-xs text-muted-foreground">
-                      {enrichment.geolocation.latitude.toFixed(4)},{' '}
-                      {enrichment.geolocation.longitude.toFixed(4)}
-                    </p>
-                  )}
+                {enrichment.geolocation.latitude && enrichment.geolocation.longitude && (
+                  <p className="text-xs text-muted-foreground">
+                    {enrichment.geolocation.latitude.toFixed(4)},{" "}
+                    {enrichment.geolocation.longitude.toFixed(4)}
+                  </p>
+                )}
               </div>
             )}
 
@@ -373,9 +356,7 @@ export function EntityPanel({
                         variant="outline"
                         className="text-xs"
                         style={{
-                          borderColor:
-                            NODE_TYPE_COLORS[entity.type] ??
-                            NODE_TYPE_COLORS.DEFAULT,
+                          borderColor: NODE_TYPE_COLORS[entity.type] ?? NODE_TYPE_COLORS.DEFAULT,
                         }}
                       >
                         {entity.type}
@@ -388,8 +369,7 @@ export function EntityPanel({
             )}
 
             <p className="text-xs text-muted-foreground">
-              Last enriched:{' '}
-              {new Date(enrichment.lastEnriched).toLocaleString()}
+              Last enriched: {new Date(enrichment.lastEnriched).toLocaleString()}
             </p>
           </>
         )}

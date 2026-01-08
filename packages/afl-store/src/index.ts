@@ -1,22 +1,22 @@
-import Redis from 'ioredis';
-import neo4j, { Driver } from 'neo4j-driver';
-import { Fingerprint } from './types';
+import Redis from "ioredis";
+import neo4j, { Driver } from "neo4j-driver";
+import { Fingerprint } from "./types";
 
 export class AFLStore {
   private redis: Redis;
   private neo: Driver | null = null;
 
   constructor(
-    redisUrl = process.env.AFL_REDIS_URL || 'redis://redis-afl:6379',
+    redisUrl = process.env.AFL_REDIS_URL || "redis://redis-afl:6379",
     neo4jUrl?: string,
     neoUser?: string,
-    neoPass?: string,
+    neoPass?: string
   ) {
     this.redis = new Redis(redisUrl);
     if (neo4jUrl)
       this.neo = neo4j.driver(
         neo4jUrl,
-        neo4j.auth.basic(neoUser || 'neo4j', neoPass || 'password'),
+        neo4j.auth.basic(neoUser || "neo4j", neoPass || "password")
       );
   }
 
@@ -36,17 +36,13 @@ export class AFLStore {
           count: (JSON.parse(existing).count || 0) + 1,
         }
       : { ...fp, firstSeen: now, lastSeen: now, count: 1 };
-    await this.redis.set(k, JSON.stringify(merged), 'EX', 60 * 60 * 24 * 30);
+    await this.redis.set(k, JSON.stringify(merged), "EX", 60 * 60 * 24 * 30);
     if (this.neo) {
       await this.upsertNeo(fp);
     }
   }
 
-  async getBySignature(sig: {
-    formatSig: string;
-    timingSig: string;
-    xformSig: string;
-  }) {
+  async getBySignature(sig: { formatSig: string; timingSig: string; xformSig: string }) {
     const k = `afl:${sig.formatSig}:${sig.timingSig}:${sig.xformSig}`;
     const v = await this.redis.get(k);
     return v ? (JSON.parse(v) as Fingerprint) : null;
@@ -77,7 +73,7 @@ export class AFLStore {
           x: fp.xformSig,
           now: Date.now(),
           route: fp.route,
-        },
+        }
       );
     } finally {
       await s.close();

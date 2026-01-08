@@ -1,4 +1,4 @@
-import { verify } from '@noble/ed25519';
+import { verify } from "@noble/ed25519";
 
 export interface TokenRequest {
   subject: string;
@@ -31,11 +31,11 @@ export interface DecryptResponse {
 }
 
 export interface Jwk {
-  kty: 'OKP';
-  crv: 'Ed25519';
+  kty: "OKP";
+  crv: "Ed25519";
   kid: string;
   x: string;
-  alg: 'EdDSA';
+  alg: "EdDSA";
 }
 
 export interface TokenClaims {
@@ -59,17 +59,17 @@ export class KkpClient {
   private readonly fetchImpl: typeof fetch;
 
   constructor(options: KkpClientOptions) {
-    this.baseUrl = options.baseUrl.replace(/\/$/, '');
+    this.baseUrl = options.baseUrl.replace(/\/$/, "");
     this.fetchImpl = options.fetchImpl ?? globalThis.fetch;
     if (!this.fetchImpl) {
-      throw new Error('fetch implementation required');
+      throw new Error("fetch implementation required");
     }
   }
 
   async issueToken(request: TokenRequest): Promise<TokenResponse> {
     const response = await this.fetchImpl(`${this.baseUrl}/token`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      method: "POST",
+      headers: { "content-type": "application/json" },
       body: JSON.stringify(request),
     });
     if (!response.ok) {
@@ -78,10 +78,14 @@ export class KkpClient {
     return (await response.json()) as TokenResponse;
   }
 
-  async decrypt(envelope: Envelope, token: string, context: Record<string, unknown> = {}): Promise<DecryptResponse> {
+  async decrypt(
+    envelope: Envelope,
+    token: string,
+    context: Record<string, unknown> = {}
+  ): Promise<DecryptResponse> {
     const response = await this.fetchImpl(`${this.baseUrl}/envelope/decrypt`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      method: "POST",
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({ envelope, token, context }),
     });
     if (!response.ok) {
@@ -101,9 +105,9 @@ export class KkpClient {
 }
 
 function base64UrlDecode(input: string): Uint8Array {
-  const normalized = input.replace(/-/g, '+').replace(/_/g, '/');
-  const padded = normalized + '==='.slice((normalized.length + 3) % 4);
-  if (typeof globalThis.atob === 'function') {
+  const normalized = input.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = normalized + "===".slice((normalized.length + 3) % 4);
+  if (typeof globalThis.atob === "function") {
     const binary = globalThis.atob(padded);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i += 1) {
@@ -111,12 +115,14 @@ function base64UrlDecode(input: string): Uint8Array {
     }
     return bytes;
   }
-  const bufferCtor = (globalThis as { Buffer?: { from(data: string, encoding: string): Uint8Array } }).Buffer;
+  const bufferCtor = (
+    globalThis as { Buffer?: { from(data: string, encoding: string): Uint8Array } }
+  ).Buffer;
   if (bufferCtor) {
-    const buf = bufferCtor.from(padded, 'base64');
+    const buf = bufferCtor.from(padded, "base64");
     return new Uint8Array(buf);
   }
-  throw new Error('No base64 decoder available');
+  throw new Error("No base64 decoder available");
 }
 
 function decodeJson<T>(segment: string): T {
@@ -126,29 +132,29 @@ function decodeJson<T>(segment: string): T {
 }
 
 export async function verifyToken(token: string, keys: Jwk[]): Promise<TokenClaims> {
-  const [headerPart, payloadPart, signaturePart] = token.split('.');
+  const [headerPart, payloadPart, signaturePart] = token.split(".");
   if (!headerPart || !payloadPart || !signaturePart) {
-    throw new Error('token format invalid');
+    throw new Error("token format invalid");
   }
   const header = decodeJson<{ alg: string; kid: string; typ: string }>(headerPart);
-  if (header.alg !== 'EdDSA') {
+  if (header.alg !== "EdDSA") {
     throw new Error(`unsupported algorithm: ${header.alg}`);
   }
   const jwk = keys.find((key) => key.kid === header.kid);
   if (!jwk) {
-    throw new Error('unknown key id');
+    throw new Error("unknown key id");
   }
   const publicKey = base64UrlDecode(jwk.x);
   const signature = base64UrlDecode(signaturePart);
   const message = new TextEncoder().encode(`${headerPart}.${payloadPart}`);
   const valid = await verify(signature, message, publicKey);
   if (!valid) {
-    throw new Error('signature invalid');
+    throw new Error("signature invalid");
   }
   const claims = decodeJson<TokenClaims>(payloadPart);
   const now = Math.floor(Date.now() / 1000);
   if (claims.exp <= now) {
-    throw new Error('token expired');
+    throw new Error("token expired");
   }
   return claims;
 }

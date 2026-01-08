@@ -1,11 +1,11 @@
-import { execSync } from 'node:child_process';
-import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { execSync } from "node:child_process";
+import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from "node:fs";
+import { join } from "node:path";
 
 // Utils
 function run(cmd) {
   try {
-    return execSync(cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    return execSync(cmd, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
   } catch (e) {
     return null;
   }
@@ -14,8 +14,8 @@ function run(cmd) {
 function fail(msg, details = []) {
   console.error(`❌ Preflight Check Failed: ${msg}`);
   if (details.length) {
-    console.error('Details:');
-    details.forEach(d => console.error(`  - ${d}`));
+    console.error("Details:");
+    details.forEach((d) => console.error(`  - ${d}`));
   }
   process.exit(1);
 }
@@ -25,7 +25,7 @@ const TAG = process.env.TAG || process.env.GITHUB_REF_NAME;
 if (!TAG) {
   // If run without tag, maybe we can assume checking HEAD if it matches a tag?
   // But requirement is strict.
-  fail('No TAG provided via TAG or GITHUB_REF_NAME env vars.');
+  fail("No TAG provided via TAG or GITHUB_REF_NAME env vars.");
 }
 
 console.log(`🔍 Checking release preflight for tag: ${TAG}`);
@@ -47,32 +47,34 @@ if (!sha) {
 console.log(`✅ Tag resolved to SHA: ${sha}`);
 
 // 4. Check Ancestry
-const defaultBranch = process.env.DEFAULT_BRANCH || 'main';
-let ancestryAcceptedVia = 'none';
+const defaultBranch = process.env.DEFAULT_BRANCH || "main";
+let ancestryAcceptedVia = "none";
 let series = null;
 let seriesBranch = null;
 
 // Check if origin/<defaultBranch> exists, if not try to fetch
 let originRef = `origin/${defaultBranch}`;
 if (!run(`git rev-parse --verify ${originRef}`)) {
-    console.log(`ℹ️ ${originRef} not found, attempting fetch...`);
-    try {
-        execSync(`git fetch origin ${defaultBranch} --depth=1`, { stdio: 'inherit' });
-    } catch (e) {
-        console.warn(`⚠️ Failed to fetch origin/${defaultBranch}. Ancestry check might fail if ref is missing.`);
-    }
+  console.log(`ℹ️ ${originRef} not found, attempting fetch...`);
+  try {
+    execSync(`git fetch origin ${defaultBranch} --depth=1`, { stdio: "inherit" });
+  } catch (e) {
+    console.warn(
+      `⚠️ Failed to fetch origin/${defaultBranch}. Ancestry check might fail if ref is missing.`
+    );
+  }
 }
 
 let reachableFromDefault = false;
 try {
-  execSync(`git merge-base --is-ancestor ${sha} ${originRef}`, { stdio: 'ignore' });
+  execSync(`git merge-base --is-ancestor ${sha} ${originRef}`, { stdio: "ignore" });
   reachableFromDefault = true;
 } catch (e) {
   reachableFromDefault = false;
 }
 
 if (reachableFromDefault) {
-  ancestryAcceptedVia = 'default';
+  ancestryAcceptedVia = "default";
   console.log(`✅ Tag is reachable from ${originRef}`);
 } else {
   console.log(`ℹ️ Tag not reachable from ${originRef}, checking for series branch match...`);
@@ -86,21 +88,21 @@ if (reachableFromDefault) {
 
     // Check if series branch exists
     if (run(`git rev-parse --verify ${seriesRef}`)) {
-       // Check reachability
-       try {
-          execSync(`git merge-base --is-ancestor ${sha} ${seriesRef}`, { stdio: 'ignore' });
-          ancestryAcceptedVia = 'series';
-          console.log(`✅ Tag is reachable from ${seriesRef}`);
-       } catch (e) {
-          console.log(`❌ Tag not reachable from ${seriesRef}`);
-       }
+      // Check reachability
+      try {
+        execSync(`git merge-base --is-ancestor ${sha} ${seriesRef}`, { stdio: "ignore" });
+        ancestryAcceptedVia = "series";
+        console.log(`✅ Tag is reachable from ${seriesRef}`);
+      } catch (e) {
+        console.log(`❌ Tag not reachable from ${seriesRef}`);
+      }
     } else {
       console.log(`ℹ️ Series branch ${seriesRef} does not exist.`);
     }
   }
 }
 
-if (ancestryAcceptedVia === 'none') {
+if (ancestryAcceptedVia === "none") {
   fail(`Tag ${TAG} is not reachable from default branch '${originRef}' or valid series branch.`);
 }
 
@@ -110,7 +112,7 @@ const mismatches = [];
 function checkPackage(path, name) {
   if (!existsSync(path)) return;
   try {
-    const pkg = JSON.parse(readFileSync(path, 'utf8'));
+    const pkg = JSON.parse(readFileSync(path, "utf8"));
     if (pkg.version !== versionExpected) {
       mismatches.push(`${name} (${path}): ${pkg.version} != ${versionExpected}`);
     }
@@ -120,26 +122,26 @@ function checkPackage(path, name) {
 }
 
 // Root
-checkPackage('package.json', 'ROOT');
+checkPackage("package.json", "ROOT");
 
 // Workspaces - "best effort" scanning based on repo structure knowledge
 // "packages/*", "client", "server"
 
-const candidates = ['client', 'server'];
+const candidates = ["client", "server"];
 
 // Scan packages/*
-if (existsSync('packages')) {
-  const pkgs = readdirSync('packages', { withFileTypes: true });
+if (existsSync("packages")) {
+  const pkgs = readdirSync("packages", { withFileTypes: true });
   for (const dirent of pkgs) {
     if (dirent.isDirectory()) {
-        candidates.push(join('packages', dirent.name));
+      candidates.push(join("packages", dirent.name));
     }
   }
 }
 
 // Check found workspaces
-candidates.forEach(dir => {
-  const pkgPath = join(dir, 'package.json');
+candidates.forEach((dir) => {
+  const pkgPath = join(dir, "package.json");
   checkPackage(pkgPath, dir);
 });
 
@@ -149,7 +151,7 @@ if (mismatches.length > 0) {
 console.log(`✅ All package versions match ${versionExpected}`);
 
 // 6. Write Output
-const outputDir = 'dist/release';
+const outputDir = "dist/release";
 if (!existsSync(outputDir)) {
   mkdirSync(outputDir, { recursive: true });
 }
@@ -158,13 +160,13 @@ const result = {
   tag: TAG,
   sha,
   defaultBranch,
-  reachableFromDefaultBranch: ancestryAcceptedVia === 'default', // Keep for backward compat
+  reachableFromDefaultBranch: ancestryAcceptedVia === "default", // Keep for backward compat
   ancestryAcceptedVia,
   series,
   seriesBranch,
   versionExpected,
-  mismatches
+  mismatches,
 };
 
-writeFileSync(join(outputDir, 'preflight.json'), JSON.stringify(result, null, 2));
-console.log(`📝 Wrote preflight results to ${join(outputDir, 'preflight.json')}`);
+writeFileSync(join(outputDir, "preflight.json"), JSON.stringify(result, null, 2));
+console.log(`📝 Wrote preflight results to ${join(outputDir, "preflight.json")}`);

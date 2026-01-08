@@ -1,29 +1,27 @@
-import { randomUUID } from 'node:crypto';
-import { analyzeCypherPlan } from './cypherEstimator.js';
-import { nlToCypher } from './nlToCypher.js';
-import { sandboxExecute } from './sandbox.js';
+import { randomUUID } from "node:crypto";
+import { analyzeCypherPlan } from "./cypherEstimator.js";
+import { nlToCypher } from "./nlToCypher.js";
+import { sandboxExecute } from "./sandbox.js";
 import type {
   NLQuerySandboxInput,
   NLQuerySandboxResponse,
   PolicyContext,
   SandboxResult,
-} from './types.js';
+} from "./types.js";
 
 const DEFAULT_POLICY: PolicyContext = {
-  authorityId: 'nl-query-sandbox',
-  purpose: 'exploration',
+  authorityId: "nl-query-sandbox",
+  purpose: "exploration",
 };
 
 const DEFAULT_MAX_DEPTH = 3;
 
-export function buildNlQuerySandboxResponse(
-  input: NLQuerySandboxInput,
-): NLQuerySandboxResponse {
+export function buildNlQuerySandboxResponse(input: NLQuerySandboxInput): NLQuerySandboxResponse {
   if (!input.prompt?.trim()) {
-    throw new Error('Prompt must be provided');
+    throw new Error("Prompt must be provided");
   }
   if (!input.caseScope?.caseId) {
-    throw new Error('Case scope with caseId is required');
+    throw new Error("Case scope with caseId is required");
   }
 
   const requestId = input.requestId ?? randomUUID();
@@ -41,37 +39,36 @@ export function buildNlQuerySandboxResponse(
   const sandboxEnabled = input.sandboxMode !== false;
   const blockedByWrite = Boolean(analysis.estimate.containsWrite);
   const blockedByDepth =
-    analysis.estimate.depth > (input.maxDepth ?? DEFAULT_MAX_DEPTH) &&
-    !input.approvedExecution;
+    analysis.estimate.depth > (input.maxDepth ?? DEFAULT_MAX_DEPTH) && !input.approvedExecution;
   let sandboxPreview: SandboxResult | undefined;
 
   if (sandboxEnabled && !blockedByWrite) {
     try {
       sandboxPreview = sandboxExecute({
         cypher: nlResult.cypher,
-        tenantId: input.tenantId ?? 'sandbox-tenant',
+        tenantId: input.tenantId ?? "sandbox-tenant",
         policy,
         approvedExecution: input.approvedExecution ?? false,
         featureFlags: input.featureFlags,
         traceId: input.traceId,
         requestId,
         userId: input.userId,
-        environment: process.env.APP_ENV ?? 'sandbox',
+        environment: process.env.APP_ENV ?? "sandbox",
       });
     } catch (error) {
       warnings.push(
-        `Sandbox execution failed: ${error instanceof Error ? error.message : 'unknown error'}`,
+        `Sandbox execution failed: ${error instanceof Error ? error.message : "unknown error"}`
       );
     }
   } else if (sandboxEnabled && blockedByWrite) {
-    warnings.push('Sandbox execution skipped because write intent was detected.');
+    warnings.push("Sandbox execution skipped because write intent was detected.");
   }
 
   const allowExecute = Boolean(input.approvedExecution) && !blockedByWrite && !blockedByDepth;
-  const decision = allowExecute ? 'approved' : 'sandbox-only';
+  const decision = allowExecute ? "approved" : "sandbox-only";
 
   console.info(
-    `[nl-query-sandbox] request=${requestId} decision=${decision} depth=${analysis.estimate.depth} rows=${analysis.estimate.rows}`,
+    `[nl-query-sandbox] request=${requestId} decision=${decision} depth=${analysis.estimate.depth} rows=${analysis.estimate.rows}`
   );
 
   return {

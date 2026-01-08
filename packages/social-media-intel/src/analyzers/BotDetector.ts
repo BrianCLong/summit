@@ -2,16 +2,13 @@
  * Bot Detector - Detects automated accounts and bots
  */
 
-import type { BotScore, SocialProfile, SocialPost } from '../types/index.js';
+import type { BotScore, SocialProfile, SocialPost } from "../types/index.js";
 
 export class BotDetector {
   /**
    * Analyze account for bot-like behavior
    */
-  analyze(
-    profile: SocialProfile,
-    recentPosts: SocialPost[]
-  ): BotScore {
+  analyze(profile: SocialProfile, recentPosts: SocialPost[]): BotScore {
     const indicators = {
       accountAge: this.analyzeAccountAge(profile),
       postFrequency: this.analyzePostFrequency(recentPosts),
@@ -19,18 +16,18 @@ export class BotDetector {
       profileCompleteness: this.analyzeProfileCompleteness(profile),
       contentDiversity: this.analyzeContentDiversity(recentPosts),
       timingPatterns: this.analyzeTimingPatterns(recentPosts),
-      engagement: this.analyzeEngagement(profile, recentPosts)
+      engagement: this.analyzeEngagement(profile, recentPosts),
     };
 
     // Calculate overall bot score
     const weights = {
       accountAge: 0.15,
-      postFrequency: 0.20,
+      postFrequency: 0.2,
       followRatio: 0.15,
-      profileCompleteness: 0.10,
+      profileCompleteness: 0.1,
       contentDiversity: 0.15,
       timingPatterns: 0.15,
-      engagement: 0.10
+      engagement: 0.1,
     };
 
     let score = 0;
@@ -39,10 +36,10 @@ export class BotDetector {
     }
 
     // Determine classification
-    let classification: 'human' | 'bot' | 'cyborg' | 'unknown' = 'unknown';
-    if (score < 0.3) classification = 'human';
-    else if (score > 0.7) classification = 'bot';
-    else classification = 'cyborg';
+    let classification: "human" | "bot" | "cyborg" | "unknown" = "unknown";
+    if (score < 0.3) classification = "human";
+    else if (score > 0.7) classification = "bot";
+    else classification = "cyborg";
 
     return {
       username: profile.username,
@@ -50,7 +47,7 @@ export class BotDetector {
       score,
       confidence: 0.8,
       indicators,
-      classification
+      classification,
     };
   }
 
@@ -76,7 +73,7 @@ export class BotDetector {
     if (posts.length < 2) return 0.5;
 
     // Calculate average time between posts
-    const timestamps = posts.map(p => p.timestamp.getTime()).sort((a, b) => a - b);
+    const timestamps = posts.map((p) => p.timestamp.getTime()).sort((a, b) => a - b);
     const intervals: number[] = [];
 
     for (let i = 1; i < timestamps.length; i++) {
@@ -115,12 +112,9 @@ export class BotDetector {
    * Analyze profile completeness
    */
   private analyzeProfileCompleteness(profile: SocialProfile): number {
-    const hasFields = [
-      profile.bio,
-      profile.location,
-      profile.website,
-      profile.profileImage
-    ].filter(Boolean).length;
+    const hasFields = [profile.bio, profile.location, profile.website, profile.profileImage].filter(
+      Boolean
+    ).length;
 
     // Bots often have incomplete profiles
     const completeness = hasFields / 4;
@@ -134,7 +128,7 @@ export class BotDetector {
     if (posts.length < 2) return 0.5;
 
     // Check for repeated content
-    const contents = posts.map(p => p.content);
+    const contents = posts.map((p) => p.content);
     const unique = new Set(contents);
 
     const diversity = unique.size / contents.length;
@@ -151,11 +145,11 @@ export class BotDetector {
   private analyzeTimingPatterns(posts: SocialPost[]): number {
     if (posts.length < 10) return 0.5;
 
-    const hours = posts.map(p => p.timestamp.getHours());
+    const hours = posts.map((p) => p.timestamp.getHours());
 
     // Calculate distribution across 24 hours
     const distribution = new Array(24).fill(0);
-    hours.forEach(h => distribution[h]++);
+    hours.forEach((h) => distribution[h]++);
 
     // Calculate variance
     const avg = hours.length / 24;

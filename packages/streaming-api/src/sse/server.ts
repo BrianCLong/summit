@@ -4,15 +4,10 @@
  * Provides real-time unidirectional streaming over HTTP
  */
 
-import { EventEmitter } from 'eventemitter3';
-import { v4 as uuidv4 } from 'uuid';
-import type { Request, Response } from 'express';
-import type {
-  SSEConnection,
-  SSEMessage,
-  StreamEvent,
-  StreamError,
-} from '../types';
+import { EventEmitter } from "eventemitter3";
+import { v4 as uuidv4 } from "uuid";
+import type { Request, Response } from "express";
+import type { SSEConnection, SSEMessage, StreamEvent, StreamError } from "../types";
 
 export interface SSEServerOptions {
   heartbeatInterval?: number;
@@ -43,28 +38,32 @@ export class SSEServer extends EventEmitter {
   /**
    * Handle SSE connection
    */
-  handleConnection(req: Request, res: Response, options?: {
-    topics?: string[];
-    authenticate?: boolean;
-  }) {
+  handleConnection(
+    req: Request,
+    res: Response,
+    options?: {
+      topics?: string[];
+      authenticate?: boolean;
+    }
+  ) {
     const connectionId = uuidv4();
 
     // Check connection limit
     if (this.connections.size >= this.options.maxConnections) {
-      res.status(503).send('Max connections reached');
+      res.status(503).send("Max connections reached");
       return;
     }
 
     // Set SSE headers
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.setHeader('X-Accel-Buffering', 'no'); // Disable nginx buffering
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.setHeader("X-Accel-Buffering", "no"); // Disable nginx buffering
 
     // Send retry interval
     this.sendSSE(res, {
       retry: this.options.retryInterval,
-      data: '',
+      data: "",
     });
 
     const connection: SSEConnection = {
@@ -75,7 +74,7 @@ export class SSEServer extends EventEmitter {
         connectedAt: new Date(),
         lastActivity: new Date(),
         ip: req.ip || req.socket.remoteAddress,
-        userAgent: req.get('user-agent'),
+        userAgent: req.get("user-agent"),
       },
     };
 
@@ -91,18 +90,18 @@ export class SSEServer extends EventEmitter {
     // Send welcome message
     this.sendEvent(connectionId, {
       id: uuidv4(),
-      topic: 'system',
-      type: 'connected',
+      topic: "system",
+      type: "connected",
       data: { connectionId },
       timestamp: new Date(),
     });
 
     // Handle client disconnect
-    req.on('close', () => {
+    req.on("close", () => {
       this.handleDisconnection(connectionId);
     });
 
-    this.emit('connection', connection);
+    this.emit("connection", connection);
   }
 
   /**
@@ -119,7 +118,7 @@ export class SSEServer extends EventEmitter {
     }
     this.subscriptions.get(topic)!.add(connectionId);
 
-    this.emit('subscribe', { connectionId, topic });
+    this.emit("subscribe", { connectionId, topic });
   }
 
   /**
@@ -139,7 +138,7 @@ export class SSEServer extends EventEmitter {
       }
     }
 
-    this.emit('unsubscribe', { connectionId, topic });
+    this.emit("unsubscribe", { connectionId, topic });
   }
 
   /**
@@ -183,7 +182,7 @@ export class SSEServer extends EventEmitter {
     if (!connection) return;
 
     this.sendSSE(connection.response, {
-      event: 'error',
+      event: "error",
       data: JSON.stringify(error),
     });
   }
@@ -207,7 +206,7 @@ export class SSEServer extends EventEmitter {
 
       res.write(`data: ${message.data}\n\n`);
     } catch (error) {
-      console.error('Failed to send SSE message:', error);
+      console.error("Failed to send SSE message:", error);
     }
   }
 
@@ -218,7 +217,7 @@ export class SSEServer extends EventEmitter {
     this.heartbeatTimer = setInterval(() => {
       this.connections.forEach((connection) => {
         this.sendSSE(connection.response, {
-          event: 'heartbeat',
+          event: "heartbeat",
           data: JSON.stringify({ timestamp: new Date() }),
         });
       });
@@ -244,7 +243,7 @@ export class SSEServer extends EventEmitter {
     });
 
     this.connections.delete(connectionId);
-    this.emit('disconnection', connection);
+    this.emit("disconnection", connection);
   }
 
   /**

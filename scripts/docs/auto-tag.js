@@ -1,7 +1,7 @@
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
-const { TfIdf } = require('natural');
+const fs = require("fs");
+const path = require("path");
+const matter = require("gray-matter");
+const { TfIdf } = require("natural");
 const tfidf = new TfIdf();
 const files = [];
 (function walk(d) {
@@ -10,10 +10,8 @@ const files = [];
     const s = fs.statSync(p);
     s.isDirectory() ? walk(p) : /\.mdx?$/.test(f) && files.push(p);
   }
-})('docs');
-files.forEach((f) =>
-  tfidf.addDocument(fs.readFileSync(f, 'utf8').replace(/```[\s\S]*?```/g, '')),
-);
+})("docs");
+files.forEach((f) => tfidf.addDocument(fs.readFileSync(f, "utf8").replace(/```[\s\S]*?```/g, "")));
 const keywords = (i) =>
   tfidf
     .listTerms(i)

@@ -13,7 +13,7 @@ export interface ThresholdDistribution {
  * Generate threshold distributions
  */
 export function generateThresholdDistribution(
-  type: 'UNIFORM' | 'NORMAL' | 'BIMODAL',
+  type: "UNIFORM" | "NORMAL" | "BIMODAL",
   params: DistributionParams
 ): ThresholdDistribution {
   const n = params.size || 1000;
@@ -23,14 +23,14 @@ export function generateThresholdDistribution(
     let threshold: number;
 
     switch (type) {
-      case 'UNIFORM':
+      case "UNIFORM":
         threshold = Math.random();
         break;
-      case 'NORMAL':
+      case "NORMAL":
         threshold = normalRandom(params.mean || 0.5, params.std || 0.15);
         threshold = Math.max(0, Math.min(1, threshold));
         break;
-      case 'BIMODAL':
+      case "BIMODAL":
         // Mix of two normal distributions
         if (Math.random() < 0.5) {
           threshold = normalRandom(params.mode1 || 0.2, params.std || 0.1);
@@ -141,10 +141,16 @@ function normalRandom(mean: number, std: number): number {
 }
 
 function categorizeEquilibrium(activation: number): string {
-  if (activation < 0.1) {return 'NO_CASCADE';}
-  if (activation < 0.5) {return 'PARTIAL_CASCADE';}
-  if (activation < 0.9) {return 'MAJORITY_CASCADE';}
-  return 'FULL_CASCADE';
+  if (activation < 0.1) {
+    return "NO_CASCADE";
+  }
+  if (activation < 0.5) {
+    return "PARTIAL_CASCADE";
+  }
+  if (activation < 0.9) {
+    return "MAJORITY_CASCADE";
+  }
+  return "FULL_CASCADE";
 }
 
 interface DistributionParams {

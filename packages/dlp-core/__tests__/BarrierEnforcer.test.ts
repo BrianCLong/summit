@@ -3,31 +3,31 @@
  * @package dlp-core
  */
 
-import { BarrierEnforcer } from '../src/BarrierEnforcer';
-import type { BarrierCheckRequest } from '../src/types';
+import { BarrierEnforcer } from "../src/BarrierEnforcer";
+import type { BarrierCheckRequest } from "../src/types";
 
-describe('BarrierEnforcer', () => {
+describe("BarrierEnforcer", () => {
   let enforcer: BarrierEnforcer;
 
   beforeEach(() => {
     enforcer = new BarrierEnforcer({
-      opaEndpoint: 'http://localhost:8181',
+      opaEndpoint: "http://localhost:8181",
       strictMode: true,
     });
   });
 
-  describe('Tenant Isolation', () => {
-    it('should allow same-tenant access', async () => {
+  describe("Tenant Isolation", () => {
+    it("should allow same-tenant access", async () => {
       const request: BarrierCheckRequest = {
-        source: { tenantId: 'tenant-1', environment: 'production' },
-        target: { tenantId: 'tenant-1', environment: 'production' },
-        actor: { id: 'user-1', tenantId: 'tenant-1', roles: ['analyst'] },
+        source: { tenantId: "tenant-1", environment: "production" },
+        target: { tenantId: "tenant-1", environment: "production" },
+        actor: { id: "user-1", tenantId: "tenant-1", roles: ["analyst"] },
         resource: {
-          id: 'doc-1',
-          type: 'document',
-          classification: 'INTERNAL',
+          id: "doc-1",
+          type: "document",
+          classification: "INTERNAL",
         },
-        operation: 'READ',
+        operation: "READ",
       };
 
       const result = await enforcer.check(request);
@@ -35,36 +35,36 @@ describe('BarrierEnforcer', () => {
       expect(result.barrierViolation).toBe(false);
     });
 
-    it('should block cross-tenant access', async () => {
+    it("should block cross-tenant access", async () => {
       const request: BarrierCheckRequest = {
-        source: { tenantId: 'tenant-1', environment: 'production' },
-        target: { tenantId: 'tenant-2', environment: 'production' },
-        actor: { id: 'user-1', tenantId: 'tenant-1', roles: ['analyst'] },
+        source: { tenantId: "tenant-1", environment: "production" },
+        target: { tenantId: "tenant-2", environment: "production" },
+        actor: { id: "user-1", tenantId: "tenant-1", roles: ["analyst"] },
         resource: {
-          id: 'doc-1',
-          type: 'document',
-          classification: 'INTERNAL',
+          id: "doc-1",
+          type: "document",
+          classification: "INTERNAL",
         },
-        operation: 'READ',
+        operation: "READ",
       };
 
       const result = await enforcer.check(request);
       expect(result.allowed).toBe(false);
       expect(result.barrierViolation).toBe(true);
-      expect(result.violations.some((v) => v.type === 'TENANT_ISOLATION')).toBe(true);
+      expect(result.violations.some((v) => v.type === "TENANT_ISOLATION")).toBe(true);
     });
 
-    it('should allow PLATFORM tenant access to any tenant', async () => {
+    it("should allow PLATFORM tenant access to any tenant", async () => {
       const request: BarrierCheckRequest = {
-        source: { tenantId: 'PLATFORM', environment: 'production' },
-        target: { tenantId: 'tenant-1', environment: 'production' },
-        actor: { id: 'system', tenantId: 'PLATFORM', roles: ['system'] },
+        source: { tenantId: "PLATFORM", environment: "production" },
+        target: { tenantId: "tenant-1", environment: "production" },
+        actor: { id: "system", tenantId: "PLATFORM", roles: ["system"] },
         resource: {
-          id: 'config-1',
-          type: 'config',
-          classification: 'INTERNAL',
+          id: "config-1",
+          type: "config",
+          classification: "INTERNAL",
         },
-        operation: 'READ',
+        operation: "READ",
       };
 
       const result = await enforcer.check(request);
@@ -72,56 +72,56 @@ describe('BarrierEnforcer', () => {
     });
   });
 
-  describe('Environment Boundaries', () => {
-    it('should allow same-environment access', async () => {
+  describe("Environment Boundaries", () => {
+    it("should allow same-environment access", async () => {
       const request: BarrierCheckRequest = {
-        source: { tenantId: 'tenant-1', environment: 'production' },
-        target: { tenantId: 'tenant-1', environment: 'production' },
-        actor: { id: 'user-1', tenantId: 'tenant-1', roles: ['analyst'] },
+        source: { tenantId: "tenant-1", environment: "production" },
+        target: { tenantId: "tenant-1", environment: "production" },
+        actor: { id: "user-1", tenantId: "tenant-1", roles: ["analyst"] },
         resource: {
-          id: 'doc-1',
-          type: 'document',
-          classification: 'INTERNAL',
+          id: "doc-1",
+          type: "document",
+          classification: "INTERNAL",
         },
-        operation: 'READ',
+        operation: "READ",
       };
 
       const result = await enforcer.check(request);
       expect(result.allowed).toBe(true);
     });
 
-    it('should block PII to non-production environment', async () => {
+    it("should block PII to non-production environment", async () => {
       const request: BarrierCheckRequest = {
-        source: { tenantId: 'tenant-1', environment: 'production' },
-        target: { tenantId: 'tenant-1', environment: 'development' },
-        actor: { id: 'user-1', tenantId: 'tenant-1', roles: ['developer'] },
+        source: { tenantId: "tenant-1", environment: "production" },
+        target: { tenantId: "tenant-1", environment: "development" },
+        actor: { id: "user-1", tenantId: "tenant-1", roles: ["developer"] },
         resource: {
-          id: 'doc-1',
-          type: 'document',
-          classification: 'CONFIDENTIAL',
+          id: "doc-1",
+          type: "document",
+          classification: "CONFIDENTIAL",
           containsPii: true,
         },
-        operation: 'TRANSFER',
+        operation: "TRANSFER",
       };
 
       const result = await enforcer.check(request);
       expect(result.allowed).toBe(false);
-      expect(result.violations.some((v) => v.type === 'ENVIRONMENT')).toBe(true);
+      expect(result.violations.some((v) => v.type === "ENVIRONMENT")).toBe(true);
     });
 
-    it('should allow anonymized PII to non-production', async () => {
+    it("should allow anonymized PII to non-production", async () => {
       const request: BarrierCheckRequest = {
-        source: { tenantId: 'tenant-1', environment: 'production' },
-        target: { tenantId: 'tenant-1', environment: 'development' },
-        actor: { id: 'user-1', tenantId: 'tenant-1', roles: ['developer'] },
+        source: { tenantId: "tenant-1", environment: "production" },
+        target: { tenantId: "tenant-1", environment: "development" },
+        actor: { id: "user-1", tenantId: "tenant-1", roles: ["developer"] },
         resource: {
-          id: 'doc-1',
-          type: 'document',
-          classification: 'INTERNAL',
+          id: "doc-1",
+          type: "document",
+          classification: "INTERNAL",
           containsPii: true,
           anonymized: true,
         },
-        operation: 'TRANSFER',
+        operation: "TRANSFER",
       };
 
       const result = await enforcer.check(request);
@@ -129,70 +129,70 @@ describe('BarrierEnforcer', () => {
     });
   });
 
-  describe('Role-Based Barriers (Clearance)', () => {
-    it('should allow access when clearance matches classification', async () => {
+  describe("Role-Based Barriers (Clearance)", () => {
+    it("should allow access when clearance matches classification", async () => {
       const request: BarrierCheckRequest = {
-        source: { tenantId: 'tenant-1', environment: 'production' },
-        target: { tenantId: 'tenant-1', environment: 'production' },
+        source: { tenantId: "tenant-1", environment: "production" },
+        target: { tenantId: "tenant-1", environment: "production" },
         actor: {
-          id: 'user-1',
-          tenantId: 'tenant-1',
-          roles: ['senior-analyst'],
-          clearance: 'SECRET',
+          id: "user-1",
+          tenantId: "tenant-1",
+          roles: ["senior-analyst"],
+          clearance: "SECRET",
         },
         resource: {
-          id: 'doc-1',
-          type: 'document',
-          classification: 'RESTRICTED',
+          id: "doc-1",
+          type: "document",
+          classification: "RESTRICTED",
         },
-        operation: 'READ',
+        operation: "READ",
       };
 
       const result = await enforcer.check(request);
       expect(result.allowed).toBe(true);
     });
 
-    it('should block access when clearance is insufficient', async () => {
+    it("should block access when clearance is insufficient", async () => {
       const request: BarrierCheckRequest = {
-        source: { tenantId: 'tenant-1', environment: 'production' },
-        target: { tenantId: 'tenant-1', environment: 'production' },
+        source: { tenantId: "tenant-1", environment: "production" },
+        target: { tenantId: "tenant-1", environment: "production" },
         actor: {
-          id: 'user-1',
-          tenantId: 'tenant-1',
-          roles: ['analyst'],
-          clearance: 'BASIC',
+          id: "user-1",
+          tenantId: "tenant-1",
+          roles: ["analyst"],
+          clearance: "BASIC",
         },
         resource: {
-          id: 'doc-1',
-          type: 'document',
-          classification: 'RESTRICTED',
+          id: "doc-1",
+          type: "document",
+          classification: "RESTRICTED",
         },
-        operation: 'READ',
+        operation: "READ",
       };
 
       const result = await enforcer.check(request);
       expect(result.allowed).toBe(false);
-      expect(result.violations.some((v) => v.type === 'ROLE_BASED')).toBe(true);
+      expect(result.violations.some((v) => v.type === "ROLE_BASED")).toBe(true);
     });
 
-    it('should allow access with step-up authentication', async () => {
+    it("should allow access with step-up authentication", async () => {
       const request: BarrierCheckRequest = {
-        source: { tenantId: 'tenant-1', environment: 'production' },
-        target: { tenantId: 'tenant-1', environment: 'production' },
+        source: { tenantId: "tenant-1", environment: "production" },
+        target: { tenantId: "tenant-1", environment: "production" },
         actor: {
-          id: 'user-1',
-          tenantId: 'tenant-1',
-          roles: ['analyst'],
-          clearance: 'BASIC',
+          id: "user-1",
+          tenantId: "tenant-1",
+          roles: ["analyst"],
+          clearance: "BASIC",
           stepUpVerified: true,
           stepUpLevel: 3, // RESTRICTED level
         },
         resource: {
-          id: 'doc-1',
-          type: 'document',
-          classification: 'RESTRICTED',
+          id: "doc-1",
+          type: "document",
+          classification: "RESTRICTED",
         },
-        operation: 'READ',
+        operation: "READ",
       };
 
       const result = await enforcer.check(request);
@@ -200,18 +200,18 @@ describe('BarrierEnforcer', () => {
     });
   });
 
-  describe('Caching', () => {
-    it('should cache barrier check results', async () => {
+  describe("Caching", () => {
+    it("should cache barrier check results", async () => {
       const request: BarrierCheckRequest = {
-        source: { tenantId: 'tenant-1', environment: 'production' },
-        target: { tenantId: 'tenant-1', environment: 'production' },
-        actor: { id: 'user-1', tenantId: 'tenant-1', roles: ['analyst'] },
+        source: { tenantId: "tenant-1", environment: "production" },
+        target: { tenantId: "tenant-1", environment: "production" },
+        actor: { id: "user-1", tenantId: "tenant-1", roles: ["analyst"] },
         resource: {
-          id: 'doc-1',
-          type: 'document',
-          classification: 'INTERNAL',
+          id: "doc-1",
+          type: "document",
+          classification: "INTERNAL",
         },
-        operation: 'READ',
+        operation: "READ",
       };
 
       // First call
@@ -224,20 +224,20 @@ describe('BarrierEnforcer', () => {
       expect(result1.barrierViolation).toBe(result2.barrierViolation);
     });
 
-    it('should clear cache', async () => {
+    it("should clear cache", async () => {
       const stats1 = enforcer.getCacheStats();
       expect(stats1.size).toBe(0);
 
       const request: BarrierCheckRequest = {
-        source: { tenantId: 'tenant-1', environment: 'production' },
-        target: { tenantId: 'tenant-1', environment: 'production' },
-        actor: { id: 'user-1', tenantId: 'tenant-1', roles: ['analyst'] },
+        source: { tenantId: "tenant-1", environment: "production" },
+        target: { tenantId: "tenant-1", environment: "production" },
+        actor: { id: "user-1", tenantId: "tenant-1", roles: ["analyst"] },
         resource: {
-          id: 'doc-1',
-          type: 'document',
-          classification: 'INTERNAL',
+          id: "doc-1",
+          type: "document",
+          classification: "INTERNAL",
         },
-        operation: 'READ',
+        operation: "READ",
       };
 
       await enforcer.check(request);
@@ -252,18 +252,18 @@ describe('BarrierEnforcer', () => {
     });
   });
 
-  describe('Audit Event Generation', () => {
-    it('should generate unique audit event IDs', async () => {
+  describe("Audit Event Generation", () => {
+    it("should generate unique audit event IDs", async () => {
       const request: BarrierCheckRequest = {
-        source: { tenantId: 'tenant-1', environment: 'production' },
-        target: { tenantId: 'tenant-1', environment: 'production' },
-        actor: { id: 'user-1', tenantId: 'tenant-1', roles: ['analyst'] },
+        source: { tenantId: "tenant-1", environment: "production" },
+        target: { tenantId: "tenant-1", environment: "production" },
+        actor: { id: "user-1", tenantId: "tenant-1", roles: ["analyst"] },
         resource: {
-          id: 'doc-1',
-          type: 'document',
-          classification: 'INTERNAL',
+          id: "doc-1",
+          type: "document",
+          classification: "INTERNAL",
         },
-        operation: 'READ',
+        operation: "READ",
       };
 
       enforcer.clearCache(); // Ensure no caching
@@ -278,23 +278,23 @@ describe('BarrierEnforcer', () => {
     });
   });
 
-  describe('Error Handling', () => {
-    it('should fail closed in strict mode on OPA error', async () => {
+  describe("Error Handling", () => {
+    it("should fail closed in strict mode on OPA error", async () => {
       const failingEnforcer = new BarrierEnforcer({
-        opaEndpoint: 'http://invalid-endpoint:9999',
+        opaEndpoint: "http://invalid-endpoint:9999",
         strictMode: true,
       });
 
       const request: BarrierCheckRequest = {
-        source: { tenantId: 'tenant-1', environment: 'production' },
-        target: { tenantId: 'tenant-1', environment: 'production' },
-        actor: { id: 'user-1', tenantId: 'tenant-1', roles: ['analyst'] },
+        source: { tenantId: "tenant-1", environment: "production" },
+        target: { tenantId: "tenant-1", environment: "production" },
+        actor: { id: "user-1", tenantId: "tenant-1", roles: ["analyst"] },
         resource: {
-          id: 'doc-1',
-          type: 'document',
-          classification: 'INTERNAL',
+          id: "doc-1",
+          type: "document",
+          classification: "INTERNAL",
         },
-        operation: 'READ',
+        operation: "READ",
       };
 
       // Local checks will pass, so the result depends on OPA
@@ -308,24 +308,24 @@ describe('BarrierEnforcer', () => {
     });
   });
 
-  describe('Multiple Violations', () => {
-    it('should collect multiple violations', async () => {
+  describe("Multiple Violations", () => {
+    it("should collect multiple violations", async () => {
       const request: BarrierCheckRequest = {
-        source: { tenantId: 'tenant-1', environment: 'production' },
-        target: { tenantId: 'tenant-2', environment: 'development' },
+        source: { tenantId: "tenant-1", environment: "production" },
+        target: { tenantId: "tenant-2", environment: "development" },
         actor: {
-          id: 'user-1',
-          tenantId: 'tenant-1',
-          roles: ['analyst'],
-          clearance: 'NONE',
+          id: "user-1",
+          tenantId: "tenant-1",
+          roles: ["analyst"],
+          clearance: "NONE",
         },
         resource: {
-          id: 'doc-1',
-          type: 'document',
-          classification: 'RESTRICTED',
+          id: "doc-1",
+          type: "document",
+          classification: "RESTRICTED",
           containsPii: true,
         },
-        operation: 'TRANSFER',
+        operation: "TRANSFER",
       };
 
       const result = await enforcer.check(request);
@@ -334,7 +334,7 @@ describe('BarrierEnforcer', () => {
       expect(result.violations.length).toBeGreaterThanOrEqual(1);
 
       // Should have tenant isolation violation
-      expect(result.violations.some((v) => v.type === 'TENANT_ISOLATION')).toBe(true);
+      expect(result.violations.some((v) => v.type === "TENANT_ISOLATION")).toBe(true);
     });
   });
 });

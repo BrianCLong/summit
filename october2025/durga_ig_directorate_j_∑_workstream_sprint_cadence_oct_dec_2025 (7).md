@@ -347,14 +347,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "PCQ Manifest",
   "type": "object",
-  "required": [
-    "id",
-    "actor",
-    "graph",
-    "inputs",
-    "policy_bundle_digest",
-    "attestations"
-  ],
+  "required": ["id", "actor", "graph", "inputs", "policy_bundle_digest", "attestations"],
   "properties": {
     "id": { "type": "string", "pattern": "^[a-f0-9-]{16,}$" },
     "actor": {
@@ -540,7 +533,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: "20" }
       - name: Install OPA
         run: |
           curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
@@ -821,38 +814,34 @@ trace("missing x-consent-scoped header should deny")
 **Path:** `services/gateway/src/middleware/consentChecker.ts`
 
 ```ts
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
 
-export function consentChecker(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  if (req.method !== 'POST' && req.method !== 'GET') return next();
-  if (req.path.startsWith('/export') === false) return next();
+export function consentChecker(req: Request, res: Response, next: NextFunction) {
+  if (req.method !== "POST" && req.method !== "GET") return next();
+  if (req.path.startsWith("/export") === false) return next();
 
-  const scoped = req.header('x-consent-scoped') === 'true';
-  const auth = req.header('authorization') || '';
+  const scoped = req.header("x-consent-scoped") === "true";
+  const auth = req.header("authorization") || "";
 
   try {
-    const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+    const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
     const claims = token
-      ? (jwt.verify(token, process.env.CONSENT_JWT_PUB || '', {
-          algorithms: ['RS256'],
+      ? (jwt.verify(token, process.env.CONSENT_JWT_PUB || "", {
+          algorithms: ["RS256"],
         }) as any)
       : {};
     const ok = scoped && claims?.consent === true;
     if (!ok) {
       res.status(412).json({
-        error: 'consent_required',
+        error: "consent_required",
         details: { scoped, hasJwt: !!token },
       });
       return;
     }
     return next();
   } catch (e) {
-    return res.status(401).json({ error: 'invalid_token' });
+    return res.status(401).json({ error: "invalid_token" });
   }
 }
 ```
@@ -860,9 +849,9 @@ export function consentChecker(
 **Unit Test:** `services/gateway/test/consentChecker.test.ts`
 
 ```ts
-import { consentChecker } from '../src/middleware/consentChecker';
-import httpMocks from 'node-mocks-http';
-import jwt from 'jsonwebtoken';
+import { consentChecker } from "../src/middleware/consentChecker";
+import httpMocks from "node-mocks-http";
+import jwt from "jsonwebtoken";
 
 const pub = (process.env.CONSENT_JWT_PUB = `-----BEGIN PUBLIC KEY-----
 ...
@@ -872,13 +861,13 @@ const priv = (process.env.CONSENT_JWT_PRIV = `-----BEGIN PRIVATE KEY-----
 -----END PRIVATE KEY-----`);
 
 function token(payload: any = { consent: true }) {
-  return jwt.sign(payload, priv, { algorithm: 'RS256' });
+  return jwt.sign(payload, priv, { algorithm: "RS256" });
 }
 
-test('blocks when header missing', async () => {
+test("blocks when header missing", async () => {
   const req = httpMocks.createRequest({
-    method: 'POST',
-    url: '/export',
+    method: "POST",
+    url: "/export",
     headers: { authorization: `Bearer ${token()}` },
   });
   const res = httpMocks.createResponse();
@@ -887,12 +876,12 @@ test('blocks when header missing', async () => {
   expect(res.statusCode).toBe(412);
 });
 
-test('allows when header and JWT consent=true', async () => {
+test("allows when header and JWT consent=true", async () => {
   const req = httpMocks.createRequest({
-    method: 'POST',
-    url: '/export',
+    method: "POST",
+    url: "/export",
     headers: {
-      'x-consent-scoped': 'true',
+      "x-consent-scoped": "true",
       authorization: `Bearer ${token({ consent: true })}`,
     },
   });
@@ -926,7 +915,7 @@ echo "missed=$M/$N" >&2
 **Path:** `apps/console/src/lib/usePolicyRationale.ts`
 
 ```ts
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
 export function usePolicyRationale(actionId: string, ms: number = 300) {
   const shown = useRef(false);
@@ -935,11 +924,11 @@ export function usePolicyRationale(actionId: string, ms: number = 300) {
       if (!shown.current) {
         // Block action escalation and emit telemetry
         document.dispatchEvent(
-          new CustomEvent('policy:rationale:missing', { detail: { actionId } }),
+          new CustomEvent("policy:rationale:missing", { detail: { actionId } })
         );
         // Replace action with fatal banner
-        const ev = new CustomEvent('policy:halt', {
-          detail: { actionId, reason: 'Rationale not available' },
+        const ev = new CustomEvent("policy:halt", {
+          detail: { actionId, reason: "Rationale not available" },
         });
         document.dispatchEvent(ev);
       }
@@ -958,16 +947,10 @@ export function usePolicyRationale(actionId: string, ms: number = 300) {
 **Path:** `apps/console/src/components/PolicyDiffPane.tsx`
 
 ```tsx
-import React from 'react';
-import { usePolicyRationale } from '../lib/usePolicyRationale';
+import React from "react";
+import { usePolicyRationale } from "../lib/usePolicyRationale";
 
-export default function PolicyDiffPane({
-  diff,
-  actionId,
-}: {
-  diff: any;
-  actionId: string;
-}) {
+export default function PolicyDiffPane({ diff, actionId }: { diff: any; actionId: string }) {
   const { markShown } = usePolicyRationale(actionId);
   React.useEffect(() => {
     if (diff) markShown();
@@ -984,14 +967,14 @@ export default function PolicyDiffPane({
 **E2E (Playwright):** `apps/console/e2e/policy-rationale.spec.ts`
 
 ```ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test('blocks when rationale missing', async ({ page }) => {
-  await page.goto('/action/write');
-  const halted = page.waitForEvent('console', {
-    predicate: (m) => m.text().includes('policy:halt'),
+test("blocks when rationale missing", async ({ page }) => {
+  await page.goto("/action/write");
+  const halted = page.waitForEvent("console", {
+    predicate: (m) => m.text().includes("policy:halt"),
   });
-  await expect(page.getByTestId('policy-diff')).toHaveCount(0);
+  await expect(page.getByTestId("policy-diff")).toHaveCount(0);
   await halted;
 });
 ```
@@ -1196,7 +1179,7 @@ components:
   headers:
     X-Consent-Scoped:
       description: Indicates consent scope applied to the response.
-      schema: { type: string, enum: ['true', 'false'] }
+      schema: { type: string, enum: ["true", "false"] }
     X-License:
       description: License identifier for included content.
       schema: { type: string }
@@ -1216,11 +1199,10 @@ components:
       type: object
       properties:
         id: { type: string }
-        pcq_manifest: { $ref: '#/components/schemas/PCQ' }
+        pcq_manifest: { $ref: "#/components/schemas/PCQ" }
         policy_bundle_digest: { type: string }
         created: { type: string, format: date-time }
-        attestations:
-          { type: array, items: { $ref: '#/components/schemas/Attestation' } }
+        attestations: { type: array, items: { $ref: "#/components/schemas/Attestation" } }
       required: [id, created]
     PCQ:
       type: object
@@ -1245,23 +1227,23 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           headers:
-            X-Consent-Scoped: { $ref: '#/components/headers/X-Consent-Scoped' }
-            X-License: { $ref: '#/components/headers/X-License' }
-            X-PCS-Receipt-Id: { $ref: '#/components/headers/X-PCS-Receipt-Id' }
+            X-Consent-Scoped: { $ref: "#/components/headers/X-Consent-Scoped" }
+            X-License: { $ref: "#/components/headers/X-License" }
+            X-PCS-Receipt-Id: { $ref: "#/components/headers/X-PCS-Receipt-Id" }
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Entity' }
+              schema: { $ref: "#/components/schemas/Entity" }
               examples:
                 sample:
                   value:
                     id: ent_123
                     type: organization
-                    attributes: { name: 'Acme' }
-        '404': { description: Not Found }
-        '401': { description: Unauthorized }
+                    attributes: { name: "Acme" }
+        "404": { description: Not Found }
+        "401": { description: Unauthorized }
   /v0/paths/{id}/receipts:
     get:
       summary: List receipts for a graph path or entity
@@ -1274,7 +1256,7 @@ paths:
           name: limit
           schema: { type: integer, default: 20, minimum: 1, maximum: 200 }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -1283,7 +1265,7 @@ paths:
                 properties:
                   items:
                     type: array
-                    items: { $ref: '#/components/schemas/Receipt' }
+                    items: { $ref: "#/components/schemas/Receipt" }
   /v0/receipts/{receiptId}:
     get:
       summary: Fetch a specific receipt
@@ -1293,12 +1275,12 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Receipt' }
-        '404': { description: Not Found }
+              schema: { $ref: "#/components/schemas/Receipt" }
+        "404": { description: Not Found }
 ```
 
 ---

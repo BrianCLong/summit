@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 
-import fs from 'fs/promises';
-import path from 'path';
+import fs from "fs/promises";
+import path from "path";
 
-const SCHEMA_VERSION = '1.0.0';
+const SCHEMA_VERSION = "1.0.0";
 
 async function addSchemaVersion(filePath) {
   try {
-    const content = await fs.readFile(filePath, 'utf-8');
+    const content = await fs.readFile(filePath, "utf-8");
     const trimmedContent = content.trim();
     let data = {};
 
-    if (trimmedContent !== '') {
+    if (trimmedContent !== "") {
       data = JSON.parse(content);
     }
 
@@ -21,7 +21,7 @@ async function addSchemaVersion(filePath) {
     }
 
     const newData = { schemaVersion: SCHEMA_VERSION, ...data };
-    await fs.writeFile(filePath, JSON.stringify(newData, null, 2) + '\n');
+    await fs.writeFile(filePath, JSON.stringify(newData, null, 2) + "\n");
     console.log(`Added schemaVersion to ${filePath}`);
   } catch (error) {
     console.error(`Error processing ${filePath}:`, error.message);
@@ -32,21 +32,21 @@ async function main() {
   const [dir, files] = process.argv.slice(2);
 
   if (!dir || !files) {
-    console.error('Usage: ./add-schema-version.mjs <directory> <file1.json,file2.json,...>');
+    console.error("Usage: ./add-schema-version.mjs <directory> <file1.json,file2.json,...>");
     process.exit(1);
   }
 
-  const fileList = files.split(',');
+  const fileList = files.split(",");
 
   for (const file of fileList) {
     const filePath = path.join(dir, file.trim());
     if ((await fs.stat(filePath)).isFile()) {
-        await addSchemaVersion(filePath);
+      await addSchemaVersion(filePath);
     }
   }
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error(err);
   process.exit(1);
 });

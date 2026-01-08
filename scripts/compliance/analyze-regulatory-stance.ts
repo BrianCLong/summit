@@ -18,9 +18,9 @@
  * @module compliance/analyze-regulatory-stance
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import * as yaml from 'js-yaml';
+import * as fs from "fs";
+import * as path from "path";
+import * as yaml from "js-yaml";
 
 // ============================================================================
 // Type Definitions
@@ -114,7 +114,7 @@ interface Finding {
   category: string;
   title: string;
   description: string;
-  severity: 'critical' | 'high' | 'medium' | 'low' | 'informational';
+  severity: "critical" | "high" | "medium" | "low" | "informational";
   service?: string;
   dataTypes?: string[];
   features?: string[];
@@ -134,7 +134,7 @@ interface StanceReport {
   summary: {
     overallScore: number;
     passingThreshold: number;
-    status: 'compliant' | 'needs_review' | 'non_compliant';
+    status: "compliant" | "needs_review" | "non_compliant";
     findingCounts: Record<string, number>;
   };
   findings: Finding[];
@@ -147,7 +147,7 @@ interface ObligationChecklistItem {
   id: string;
   obligation: string;
   category: string;
-  status: 'implemented' | 'partial' | 'not_implemented' | 'not_applicable';
+  status: "implemented" | "partial" | "not_implemented" | "not_applicable";
   evidence?: string;
   gaps?: string[];
 }
@@ -156,8 +156,8 @@ interface Recommendation {
   priority: number;
   title: string;
   description: string;
-  effort: 'low' | 'medium' | 'high';
-  impact: 'low' | 'medium' | 'high';
+  effort: "low" | "medium" | "high";
+  impact: "low" | "medium" | "high";
   relatedFindings: string[];
 }
 
@@ -187,23 +187,21 @@ interface CrossBorderTransfer {
 // Configuration Loading
 // ============================================================================
 
-const ROOT_DIR = path.resolve(import.meta.dirname || __dirname, '../..');
-const LENSES_PATH = path.join(ROOT_DIR, 'compliance/regulatory-lenses.yml');
-const DATA_FLOW_PATH = path.join(ROOT_DIR, 'docs/compliance/data-flow-map.md');
-const REPORTS_DIR = path.join(ROOT_DIR, 'reports');
+const ROOT_DIR = path.resolve(import.meta.dirname || __dirname, "../..");
+const LENSES_PATH = path.join(ROOT_DIR, "compliance/regulatory-lenses.yml");
+const DATA_FLOW_PATH = path.join(ROOT_DIR, "docs/compliance/data-flow-map.md");
+const REPORTS_DIR = path.join(ROOT_DIR, "reports");
 
 function loadLensConfiguration(): LensConfiguration {
   if (!fs.existsSync(LENSES_PATH)) {
-    throw new Error(
-      `Regulatory lenses configuration not found: ${LENSES_PATH}`,
-    );
+    throw new Error(`Regulatory lenses configuration not found: ${LENSES_PATH}`);
   }
 
-  const content = fs.readFileSync(LENSES_PATH, 'utf-8');
+  const content = fs.readFileSync(LENSES_PATH, "utf-8");
   const config = yaml.load(content) as LensConfiguration;
 
   if (!config.lenses || config.lenses.length === 0) {
-    throw new Error('No regulatory lenses defined in configuration');
+    throw new Error("No regulatory lenses defined in configuration");
   }
 
   return config;
@@ -212,10 +210,8 @@ function loadLensConfiguration(): LensConfiguration {
 function getLens(config: LensConfiguration, lensId: string): RegulatoryLens {
   const lens = config.lenses.find((l) => l.id === lensId);
   if (!lens) {
-    const available = config.lenses.map((l) => l.id).join(', ');
-    throw new Error(
-      `Lens "${lensId}" not found. Available lenses: ${available}`,
-    );
+    const available = config.lenses.map((l) => l.id).join(", ");
+    throw new Error(`Lens "${lensId}" not found. Available lenses: ${available}`);
   }
   return lens;
 }
@@ -224,10 +220,7 @@ function getLens(config: LensConfiguration, lensId: string): RegulatoryLens {
 // Analysis Functions
 // ============================================================================
 
-function analyzeServiceMappings(
-  config: LensConfiguration,
-  lens: RegulatoryLens,
-): Finding[] {
+function analyzeServiceMappings(config: LensConfiguration, lens: RegulatoryLens): Finding[] {
   const findings: Finding[] = [];
   const serviceMappings = config.serviceMappings || {};
 
@@ -239,10 +232,7 @@ function analyzeServiceMappings(
     // Check for high-risk features
     const highRiskFeatures = mapping.features.filter((feature) => {
       const riskEntry = config.featureRiskMatrix?.[feature]?.[lens.id];
-      return (
-        riskEntry &&
-        (riskEntry.risk_level === 'high' || riskEntry.risk_level === 'critical')
-      );
+      return riskEntry && (riskEntry.risk_level === "high" || riskEntry.risk_level === "critical");
     });
 
     if (highRiskFeatures.length > 0) {
@@ -261,93 +251,86 @@ function analyzeServiceMappings(
 
       findings.push({
         id: `${lens.id}-${serviceName}-high-risk`,
-        category: 'high_risk_processing',
+        category: "high_risk_processing",
         title: `High-Risk Processing in ${serviceName}`,
-        description: `Service "${serviceName}" implements high-risk features: ${highRiskFeatures.join(', ')}`,
-        severity: 'high',
+        description: `Service "${serviceName}" implements high-risk features: ${highRiskFeatures.join(", ")}`,
+        severity: "high",
         service: serviceName,
         features: highRiskFeatures,
         dataTypes: mapping.dataTypes,
         obligations: [...new Set(allObligations)],
         articles: [...new Set(allArticles)],
         remediation: [
-          'Conduct Data Protection Impact Assessment (DPIA)',
-          'Implement required safeguards and controls',
-          'Document lawful basis for processing',
-          'Ensure human oversight mechanisms are in place',
+          "Conduct Data Protection Impact Assessment (DPIA)",
+          "Implement required safeguards and controls",
+          "Document lawful basis for processing",
+          "Ensure human oversight mechanisms are in place",
         ],
       });
     }
 
     // Check for special category data
     const specialCategoryTypes =
-      lens.dataTypeMappings?.special_category ||
-      lens.dataTypeMappings?.sensitive_data ||
-      [];
+      lens.dataTypeMappings?.special_category || lens.dataTypeMappings?.sensitive_data || [];
     const handlesSpecialCategory = mapping.dataTypes.some(
       (dt) =>
         specialCategoryTypes.includes(dt) ||
-        dt.includes('biometric') ||
-        dt.includes('health') ||
-        dt.includes('genetic'),
+        dt.includes("biometric") ||
+        dt.includes("health") ||
+        dt.includes("genetic")
     );
 
     if (handlesSpecialCategory) {
       findings.push({
         id: `${lens.id}-${serviceName}-special-category`,
-        category: 'special_category_data',
+        category: "special_category_data",
         title: `Special Category Data in ${serviceName}`,
         description: `Service "${serviceName}" may process special category/sensitive data`,
-        severity: 'critical',
+        severity: "critical",
         service: serviceName,
         dataTypes: mapping.dataTypes,
         obligations: [
-          'explicit_consent_or_legal_basis',
-          'enhanced_security_measures',
-          'dpia_required',
-          'access_restrictions',
+          "explicit_consent_or_legal_basis",
+          "enhanced_security_measures",
+          "dpia_required",
+          "access_restrictions",
         ],
         remediation: [
-          'Verify explicit consent or applicable legal exemption',
-          'Implement enhanced access controls',
-          'Conduct mandatory DPIA',
-          'Apply data minimization principles',
+          "Verify explicit consent or applicable legal exemption",
+          "Implement enhanced access controls",
+          "Conduct mandatory DPIA",
+          "Apply data minimization principles",
         ],
       });
     }
 
     // Check for automated decision-making
     if (
-      mapping.features.includes('automated_decision_making') ||
-      mapping.features.includes('profiling')
+      mapping.features.includes("automated_decision_making") ||
+      mapping.features.includes("profiling")
     ) {
       findings.push({
         id: `${lens.id}-${serviceName}-automated-decisions`,
-        category: 'automated_decisions',
+        category: "automated_decisions",
         title: `Automated Decision-Making in ${serviceName}`,
         description: `Service "${serviceName}" implements automated decision-making or profiling`,
-        severity: 'high',
+        severity: "high",
         service: serviceName,
         features: mapping.features.filter(
-          (f) => f.includes('automated') || f.includes('profiling'),
+          (f) => f.includes("automated") || f.includes("profiling")
         ),
         obligations: [
-          'human_review_mechanism',
-          'explanation_capability',
-          'right_to_contest',
-          'transparency_notice',
+          "human_review_mechanism",
+          "explanation_capability",
+          "right_to_contest",
+          "transparency_notice",
         ],
-        articles:
-          lens.id === 'gdpr'
-            ? ['Art. 22']
-            : lens.id === 'eu_ai_act'
-              ? ['Art. 14']
-              : [],
+        articles: lens.id === "gdpr" ? ["Art. 22"] : lens.id === "eu_ai_act" ? ["Art. 14"] : [],
         remediation: [
-          'Implement human review/override capability',
-          'Provide meaningful explanations of decisions',
-          'Enable data subjects to contest decisions',
-          'Document the logic and significance of processing',
+          "Implement human review/override capability",
+          "Provide meaningful explanations of decisions",
+          "Enable data subjects to contest decisions",
+          "Document the logic and significance of processing",
         ],
       });
     }
@@ -356,57 +339,54 @@ function analyzeServiceMappings(
   return findings;
 }
 
-function analyzeDataFlows(
-  config: LensConfiguration,
-  lens: RegulatoryLens,
-): DataFlowAnalysisResult {
+function analyzeDataFlows(config: LensConfiguration, lens: RegulatoryLens): DataFlowAnalysisResult {
   const serviceMappings = config.serviceMappings || {};
 
   const entryPoints: DataFlowPoint[] = [
     {
-      name: 'Web Application',
-      dataTypes: ['user_credentials', 'session_data', 'preferences'],
-      riskLevel: 'medium',
-      regulatoryFlags: ['transparency_required', 'consent_management'],
+      name: "Web Application",
+      dataTypes: ["user_credentials", "session_data", "preferences"],
+      riskLevel: "medium",
+      regulatoryFlags: ["transparency_required", "consent_management"],
     },
     {
-      name: 'API Gateway',
-      dataTypes: ['api_keys', 'request_metadata', 'query_parameters'],
-      riskLevel: 'low',
-      regulatoryFlags: ['access_logging'],
+      name: "API Gateway",
+      dataTypes: ["api_keys", "request_metadata", "query_parameters"],
+      riskLevel: "low",
+      regulatoryFlags: ["access_logging"],
     },
     {
-      name: 'GraphQL API',
-      dataTypes: ['entity_data', 'relationship_data', 'search_queries'],
-      riskLevel: 'medium',
-      regulatoryFlags: ['purpose_limitation'],
+      name: "GraphQL API",
+      dataTypes: ["entity_data", "relationship_data", "search_queries"],
+      riskLevel: "medium",
+      regulatoryFlags: ["purpose_limitation"],
     },
     {
-      name: 'Ingest Connectors',
-      dataTypes: ['external_feeds', 'osint_data'],
-      riskLevel: 'high',
-      regulatoryFlags: ['third_party_data', 'lawful_basis_verification'],
+      name: "Ingest Connectors",
+      dataTypes: ["external_feeds", "osint_data"],
+      riskLevel: "high",
+      regulatoryFlags: ["third_party_data", "lawful_basis_verification"],
     },
   ];
 
   const storageLocations: DataFlowPoint[] = [
     {
-      name: 'Neo4j Graph Database',
-      dataTypes: ['entities', 'relationships', 'properties'],
-      riskLevel: 'high',
-      regulatoryFlags: ['encryption_required', 'access_control', 'retention'],
+      name: "Neo4j Graph Database",
+      dataTypes: ["entities", "relationships", "properties"],
+      riskLevel: "high",
+      regulatoryFlags: ["encryption_required", "access_control", "retention"],
     },
     {
-      name: 'PostgreSQL',
-      dataTypes: ['user_accounts', 'case_metadata', 'audit_logs'],
-      riskLevel: 'high',
-      regulatoryFlags: ['encryption_required', 'access_control', 'backup'],
+      name: "PostgreSQL",
+      dataTypes: ["user_accounts", "case_metadata", "audit_logs"],
+      riskLevel: "high",
+      regulatoryFlags: ["encryption_required", "access_control", "backup"],
     },
     {
-      name: 'Redis Cache',
-      dataTypes: ['session_data', 'query_cache'],
-      riskLevel: 'low',
-      regulatoryFlags: ['ttl_required', 'no_persistence_sensitive'],
+      name: "Redis Cache",
+      dataTypes: ["session_data", "query_cache"],
+      riskLevel: "low",
+      regulatoryFlags: ["ttl_required", "no_persistence_sensitive"],
     },
   ];
 
@@ -416,48 +396,45 @@ function analyzeDataFlows(
       name,
       dataTypes: mapping.dataTypes,
       riskLevel: mapping.features.some(
-        (f) =>
-          f.includes('automated') ||
-          f.includes('profiling') ||
-          f.includes('biometric'),
+        (f) => f.includes("automated") || f.includes("profiling") || f.includes("biometric")
       )
-        ? 'high'
-        : 'medium',
+        ? "high"
+        : "medium",
       regulatoryFlags: mapping.features,
     }));
 
   const exitPoints: DataFlowPoint[] = [
     {
-      name: 'DSAR Export',
-      dataTypes: ['personal_data_package'],
-      riskLevel: 'medium',
-      regulatoryFlags: ['identity_verification', 'encryption', 'audit_trail'],
+      name: "DSAR Export",
+      dataTypes: ["personal_data_package"],
+      riskLevel: "medium",
+      regulatoryFlags: ["identity_verification", "encryption", "audit_trail"],
     },
     {
-      name: 'Report Export',
-      dataTypes: ['investigation_reports'],
-      riskLevel: 'medium',
-      regulatoryFlags: ['access_control', 'watermarking'],
+      name: "Report Export",
+      dataTypes: ["investigation_reports"],
+      riskLevel: "medium",
+      regulatoryFlags: ["access_control", "watermarking"],
     },
     {
-      name: 'API Responses',
-      dataTypes: ['query_results'],
-      riskLevel: 'low',
-      regulatoryFlags: ['rate_limiting', 'field_level_access'],
+      name: "API Responses",
+      dataTypes: ["query_results"],
+      riskLevel: "low",
+      regulatoryFlags: ["rate_limiting", "field_level_access"],
     },
   ];
 
   const crossBorderTransfers: CrossBorderTransfer[] = [
     {
-      source: 'EU',
-      destination: 'US (Cloud Provider)',
-      mechanism: 'SCCs + Supplementary Measures',
+      source: "EU",
+      destination: "US (Cloud Provider)",
+      mechanism: "SCCs + Supplementary Measures",
       requiresTIA: true,
     },
     {
-      source: 'EU',
-      destination: 'US (LLM Provider)',
-      mechanism: 'SCCs + DPA',
+      source: "EU",
+      destination: "US (LLM Provider)",
+      mechanism: "SCCs + DPA",
       requiresTIA: true,
     },
   ];
@@ -473,7 +450,7 @@ function analyzeDataFlows(
 
 function generateObligationChecklist(
   config: LensConfiguration,
-  lens: RegulatoryLens,
+  lens: RegulatoryLens
 ): ObligationChecklistItem[] {
   const checklist: ObligationChecklistItem[] = [];
 
@@ -498,52 +475,52 @@ function generateObligationChecklist(
 
 function getObligationsForCategory(
   category: LensCategory,
-  lensId: string,
+  lensId: string
 ): { id: string; name: string }[] {
   const obligations: { id: string; name: string }[] = [];
 
-  if (category.id === 'data_subject_rights' && lensId === 'gdpr') {
+  if (category.id === "data_subject_rights" && lensId === "gdpr") {
     obligations.push(
-      { id: 'access', name: 'Right of Access (Art. 15)' },
-      { id: 'rectification', name: 'Right to Rectification (Art. 16)' },
-      { id: 'erasure', name: 'Right to Erasure (Art. 17)' },
-      { id: 'portability', name: 'Right to Data Portability (Art. 20)' },
-      { id: 'object', name: 'Right to Object (Art. 21)' },
+      { id: "access", name: "Right of Access (Art. 15)" },
+      { id: "rectification", name: "Right to Rectification (Art. 16)" },
+      { id: "erasure", name: "Right to Erasure (Art. 17)" },
+      { id: "portability", name: "Right to Data Portability (Art. 20)" },
+      { id: "object", name: "Right to Object (Art. 21)" },
       {
-        id: 'automated_decisions',
-        name: 'Automated Decision Rights (Art. 22)',
-      },
+        id: "automated_decisions",
+        name: "Automated Decision Rights (Art. 22)",
+      }
     );
-  } else if (category.id === 'consumer_rights' && lensId === 'ccpa') {
+  } else if (category.id === "consumer_rights" && lensId === "ccpa") {
     obligations.push(
-      { id: 'know', name: 'Right to Know' },
-      { id: 'delete', name: 'Right to Delete' },
-      { id: 'opt_out', name: 'Right to Opt-Out of Sale' },
-      { id: 'correct', name: 'Right to Correct' },
-      { id: 'limit', name: 'Right to Limit Sensitive Data Use' },
+      { id: "know", name: "Right to Know" },
+      { id: "delete", name: "Right to Delete" },
+      { id: "opt_out", name: "Right to Opt-Out of Sale" },
+      { id: "correct", name: "Right to Correct" },
+      { id: "limit", name: "Right to Limit Sensitive Data Use" }
     );
-  } else if (category.id === 'high_risk_ai' && lensId === 'eu_ai_act') {
+  } else if (category.id === "high_risk_ai" && lensId === "eu_ai_act") {
     obligations.push(
-      { id: 'risk_management', name: 'Risk Management System' },
-      { id: 'data_governance', name: 'Data Governance' },
-      { id: 'technical_docs', name: 'Technical Documentation' },
-      { id: 'human_oversight', name: 'Human Oversight' },
-      { id: 'transparency', name: 'Transparency Requirements' },
-      { id: 'conformity', name: 'Conformity Assessment' },
+      { id: "risk_management", name: "Risk Management System" },
+      { id: "data_governance", name: "Data Governance" },
+      { id: "technical_docs", name: "Technical Documentation" },
+      { id: "human_oversight", name: "Human Oversight" },
+      { id: "transparency", name: "Transparency Requirements" },
+      { id: "conformity", name: "Conformity Assessment" }
     );
-  } else if (category.id === 'security') {
+  } else if (category.id === "security") {
     obligations.push(
-      { id: 'encryption', name: 'Encryption at Rest and in Transit' },
-      { id: 'access_control', name: 'Access Control Measures' },
-      { id: 'breach_notification', name: 'Breach Notification Process' },
-      { id: 'incident_response', name: 'Incident Response Plan' },
+      { id: "encryption", name: "Encryption at Rest and in Transit" },
+      { id: "access_control", name: "Access Control Measures" },
+      { id: "breach_notification", name: "Breach Notification Process" },
+      { id: "incident_response", name: "Incident Response Plan" }
     );
-  } else if (category.id === 'accountability') {
+  } else if (category.id === "accountability") {
     obligations.push(
-      { id: 'records', name: 'Records of Processing Activities' },
-      { id: 'dpia', name: 'Data Protection Impact Assessment' },
-      { id: 'dpo', name: 'Data Protection Officer' },
-      { id: 'policies', name: 'Privacy Policies and Notices' },
+      { id: "records", name: "Records of Processing Activities" },
+      { id: "dpia", name: "Data Protection Impact Assessment" },
+      { id: "dpo", name: "Data Protection Officer" },
+      { id: "policies", name: "Privacy Policies and Notices" }
     );
   }
 
@@ -551,44 +528,44 @@ function getObligationsForCategory(
 }
 
 function evaluateObligationStatus(
-  obligationId: string,
-): 'implemented' | 'partial' | 'not_implemented' | 'not_applicable' {
+  obligationId: string
+): "implemented" | "partial" | "not_implemented" | "not_applicable" {
   // Simulated evaluation based on known platform capabilities
   const implementedObligations = [
-    'access',
-    'erasure',
-    'encryption',
-    'access_control',
-    'records',
-    'delete',
-    'know',
+    "access",
+    "erasure",
+    "encryption",
+    "access_control",
+    "records",
+    "delete",
+    "know",
   ];
   const partialObligations = [
-    'portability',
-    'automated_decisions',
-    'dpia',
-    'human_oversight',
-    'transparency',
-    'risk_management',
+    "portability",
+    "automated_decisions",
+    "dpia",
+    "human_oversight",
+    "transparency",
+    "risk_management",
   ];
 
   if (implementedObligations.includes(obligationId)) {
-    return 'implemented';
+    return "implemented";
   } else if (partialObligations.includes(obligationId)) {
-    return 'partial';
+    return "partial";
   }
-  return 'not_implemented';
+  return "not_implemented";
 }
 
 function getEvidenceForObligation(obligationId: string): string | undefined {
   const evidenceMap: Record<string, string> = {
-    access: 'DSAR export functionality in services/compliance/dsar.ts',
-    erasure: 'RTBF worker in services/compliance/workers/rtbf_worker.ts',
-    encryption: 'AES-256-GCM encryption configured for all data stores',
-    access_control: 'RBAC + ABAC via OPA policy engine',
-    records: 'Audit ledger in services/audit_svc/',
-    delete: 'DSAR deletion workflow implemented',
-    know: 'DSAR export with full data package',
+    access: "DSAR export functionality in services/compliance/dsar.ts",
+    erasure: "RTBF worker in services/compliance/workers/rtbf_worker.ts",
+    encryption: "AES-256-GCM encryption configured for all data stores",
+    access_control: "RBAC + ABAC via OPA policy engine",
+    records: "Audit ledger in services/audit_svc/",
+    delete: "DSAR deletion workflow implemented",
+    know: "DSAR export with full data package",
   };
   return evidenceMap[obligationId];
 }
@@ -596,28 +573,28 @@ function getEvidenceForObligation(obligationId: string): string | undefined {
 function getGapsForObligation(obligationId: string): string[] | undefined {
   const gapsMap: Record<string, string[]> = {
     portability: [
-      'Machine-readable format export not fully standardized',
-      'Direct transfer to other controllers not implemented',
+      "Machine-readable format export not fully standardized",
+      "Direct transfer to other controllers not implemented",
     ],
     automated_decisions: [
-      'Explainability for all AI decisions not complete',
-      'Human review workflow needs enhancement',
+      "Explainability for all AI decisions not complete",
+      "Human review workflow needs enhancement",
     ],
     dpia: [
-      'DPIA templates need updating for new features',
-      'Automated DPIA triggers not fully implemented',
+      "DPIA templates need updating for new features",
+      "Automated DPIA triggers not fully implemented",
     ],
     human_oversight: [
-      'Some AI features lack explicit override mechanisms',
-      'Oversight dashboards need enhancement',
+      "Some AI features lack explicit override mechanisms",
+      "Oversight dashboards need enhancement",
     ],
     transparency: [
-      'AI interaction disclosure not in all user interfaces',
-      'Model documentation incomplete',
+      "AI interaction disclosure not in all user interfaces",
+      "Model documentation incomplete",
     ],
     risk_management: [
-      'AI risk classification framework needs formalization',
-      'Continuous monitoring capabilities need expansion',
+      "AI risk classification framework needs formalization",
+      "Continuous monitoring capabilities need expansion",
     ],
   };
   return gapsMap[obligationId];
@@ -625,50 +602,44 @@ function getGapsForObligation(obligationId: string): string[] | undefined {
 
 function generateRecommendations(findings: Finding[]): Recommendation[] {
   const recommendations: Recommendation[] = [];
-  const findingsByCategory = groupBy(findings, 'category');
+  const findingsByCategory = groupBy(findings, "category");
 
   // High-risk processing recommendations
-  if (findingsByCategory['high_risk_processing']?.length) {
+  if (findingsByCategory["high_risk_processing"]?.length) {
     recommendations.push({
       priority: 1,
-      title: 'Conduct Comprehensive DPIA',
+      title: "Conduct Comprehensive DPIA",
       description:
-        'Perform Data Protection Impact Assessments for all high-risk processing operations identified',
-      effort: 'high',
-      impact: 'high',
-      relatedFindings: findingsByCategory['high_risk_processing'].map(
-        (f) => f.id,
-      ),
+        "Perform Data Protection Impact Assessments for all high-risk processing operations identified",
+      effort: "high",
+      impact: "high",
+      relatedFindings: findingsByCategory["high_risk_processing"].map((f) => f.id),
     });
   }
 
   // Special category data recommendations
-  if (findingsByCategory['special_category_data']?.length) {
+  if (findingsByCategory["special_category_data"]?.length) {
     recommendations.push({
       priority: 1,
-      title: 'Review Special Category Data Handling',
+      title: "Review Special Category Data Handling",
       description:
-        'Verify explicit consent or legal basis for all special category data processing',
-      effort: 'medium',
-      impact: 'high',
-      relatedFindings: findingsByCategory['special_category_data'].map(
-        (f) => f.id,
-      ),
+        "Verify explicit consent or legal basis for all special category data processing",
+      effort: "medium",
+      impact: "high",
+      relatedFindings: findingsByCategory["special_category_data"].map((f) => f.id),
     });
   }
 
   // Automated decisions recommendations
-  if (findingsByCategory['automated_decisions']?.length) {
+  if (findingsByCategory["automated_decisions"]?.length) {
     recommendations.push({
       priority: 2,
-      title: 'Enhance Automated Decision Safeguards',
+      title: "Enhance Automated Decision Safeguards",
       description:
-        'Implement human oversight, explainability, and contestability for automated decisions',
-      effort: 'high',
-      impact: 'high',
-      relatedFindings: findingsByCategory['automated_decisions'].map(
-        (f) => f.id,
-      ),
+        "Implement human oversight, explainability, and contestability for automated decisions",
+      effort: "high",
+      impact: "high",
+      relatedFindings: findingsByCategory["automated_decisions"].map((f) => f.id),
     });
   }
 
@@ -676,22 +647,21 @@ function generateRecommendations(findings: Finding[]): Recommendation[] {
   recommendations.push(
     {
       priority: 3,
-      title: 'Maintain Compliance Documentation',
+      title: "Maintain Compliance Documentation",
       description:
-        'Keep records of processing activities, DPIAs, and compliance evidence up to date',
-      effort: 'medium',
-      impact: 'medium',
+        "Keep records of processing activities, DPIAs, and compliance evidence up to date",
+      effort: "medium",
+      impact: "medium",
       relatedFindings: [],
     },
     {
       priority: 4,
-      title: 'Regular Compliance Reviews',
-      description:
-        'Schedule quarterly reviews of regulatory stance and update controls as needed',
-      effort: 'low',
-      impact: 'medium',
+      title: "Regular Compliance Reviews",
+      description: "Schedule quarterly reviews of regulatory stance and update controls as needed",
+      effort: "low",
+      impact: "medium",
       relatedFindings: [],
-    },
+    }
   );
 
   return recommendations.sort((a, b) => a.priority - b.priority);
@@ -707,13 +677,13 @@ function groupBy<T>(array: T[], key: keyof T): Record<string, T[]> {
       result[groupKey].push(item);
       return result;
     },
-    {} as Record<string, T[]>,
+    {} as Record<string, T[]>
   );
 }
 
 function calculateComplianceScore(
   findings: Finding[],
-  checklist: ObligationChecklistItem[],
+  checklist: ObligationChecklistItem[]
 ): number {
   const findingSeverityScores: Record<string, number> = {
     critical: 0,
@@ -733,19 +703,15 @@ function calculateComplianceScore(
   // Calculate finding score (inverse - fewer/less severe = higher score)
   const avgFindingSeverity =
     findings.length > 0
-      ? findings.reduce(
-          (sum, f) => sum + (findingSeverityScores[f.severity] || 0),
-          0,
-        ) / findings.length
+      ? findings.reduce((sum, f) => sum + (findingSeverityScores[f.severity] || 0), 0) /
+        findings.length
       : 1;
 
   // Calculate checklist score
   const avgChecklistStatus =
     checklist.length > 0
-      ? checklist.reduce(
-          (sum, c) => sum + (checklistStatusScores[c.status] || 0),
-          0,
-        ) / checklist.length
+      ? checklist.reduce((sum, c) => sum + (checklistStatusScores[c.status] || 0), 0) /
+        checklist.length
       : 0;
 
   // Weighted average
@@ -757,10 +723,7 @@ function calculateComplianceScore(
 // Report Generation
 // ============================================================================
 
-function generateReport(
-  config: LensConfiguration,
-  lens: RegulatoryLens,
-): StanceReport {
+function generateReport(config: LensConfiguration, lens: RegulatoryLens): StanceReport {
   const findings = analyzeServiceMappings(config, lens);
   const dataFlowAnalysis = analyzeDataFlows(config, lens);
   const obligationChecklist = generateObligationChecklist(config, lens);
@@ -772,7 +735,7 @@ function generateReport(
       counts[f.severity] = (counts[f.severity] || 0) + 1;
       return counts;
     },
-    {} as Record<string, number>,
+    {} as Record<string, number>
   );
 
   return {
@@ -780,20 +743,15 @@ function generateReport(
       lensId: lens.id,
       lensName: lens.name,
       generatedAt: new Date().toISOString(),
-      platformVersion: '1.0.0',
+      platformVersion: "1.0.0",
       disclaimer:
-        'This is a simulation/aid tool, NOT legal advice. Consult qualified legal counsel for compliance matters.',
+        "This is a simulation/aid tool, NOT legal advice. Consult qualified legal counsel for compliance matters.",
     },
     summary: {
       overallScore,
-      passingThreshold:
-        config.analysisConfig?.complianceScoring?.passingThreshold || 0.7,
+      passingThreshold: config.analysisConfig?.complianceScoring?.passingThreshold || 0.7,
       status:
-        overallScore >= 0.7
-          ? 'compliant'
-          : overallScore >= 0.5
-            ? 'needs_review'
-            : 'non_compliant',
+        overallScore >= 0.7 ? "compliant" : overallScore >= 0.5 ? "needs_review" : "non_compliant",
       findingCounts,
     },
     findings,
@@ -808,180 +766,166 @@ function formatReportAsMarkdown(report: StanceReport): string {
 
   // Header
   lines.push(`# Regulatory Stance Report: ${report.metadata.lensName}`);
-  lines.push('');
+  lines.push("");
   lines.push(`> **Generated**: ${report.metadata.generatedAt}`);
   lines.push(`> **Platform Version**: ${report.metadata.platformVersion}`);
-  lines.push('');
+  lines.push("");
   lines.push(`> **DISCLAIMER**: ${report.metadata.disclaimer}`);
-  lines.push('');
-  lines.push('---');
-  lines.push('');
+  lines.push("");
+  lines.push("---");
+  lines.push("");
 
   // Executive Summary
-  lines.push('## Executive Summary');
-  lines.push('');
+  lines.push("## Executive Summary");
+  lines.push("");
   const statusEmoji =
-    report.summary.status === 'compliant'
-      ? 'PASS'
-      : report.summary.status === 'needs_review'
-        ? 'REVIEW'
-        : 'FAIL';
+    report.summary.status === "compliant"
+      ? "PASS"
+      : report.summary.status === "needs_review"
+        ? "REVIEW"
+        : "FAIL";
   lines.push(`| Metric | Value |`);
   lines.push(`|--------|-------|`);
-  lines.push(
-    `| **Overall Score** | ${(report.summary.overallScore * 100).toFixed(1)}% |`,
-  );
-  lines.push(
-    `| **Passing Threshold** | ${(report.summary.passingThreshold * 100).toFixed(1)}% |`,
-  );
+  lines.push(`| **Overall Score** | ${(report.summary.overallScore * 100).toFixed(1)}% |`);
+  lines.push(`| **Passing Threshold** | ${(report.summary.passingThreshold * 100).toFixed(1)}% |`);
   lines.push(`| **Status** | ${statusEmoji} |`);
-  lines.push(
-    `| **Critical Findings** | ${report.summary.findingCounts['critical'] || 0} |`,
-  );
-  lines.push(
-    `| **High Findings** | ${report.summary.findingCounts['high'] || 0} |`,
-  );
-  lines.push(
-    `| **Medium Findings** | ${report.summary.findingCounts['medium'] || 0} |`,
-  );
-  lines.push('');
+  lines.push(`| **Critical Findings** | ${report.summary.findingCounts["critical"] || 0} |`);
+  lines.push(`| **High Findings** | ${report.summary.findingCounts["high"] || 0} |`);
+  lines.push(`| **Medium Findings** | ${report.summary.findingCounts["medium"] || 0} |`);
+  lines.push("");
 
   // Findings
-  lines.push('## Findings');
-  lines.push('');
+  lines.push("## Findings");
+  lines.push("");
 
   if (report.findings.length === 0) {
-    lines.push('No significant findings identified.');
+    lines.push("No significant findings identified.");
   } else {
     for (const finding of report.findings) {
       const severityBadge = `[${finding.severity.toUpperCase()}]`;
       lines.push(`### ${severityBadge} ${finding.title}`);
-      lines.push('');
+      lines.push("");
       lines.push(`**ID**: ${finding.id}`);
       lines.push(`**Category**: ${finding.category}`);
       if (finding.service) {
         lines.push(`**Service**: ${finding.service}`);
       }
-      lines.push('');
+      lines.push("");
       lines.push(finding.description);
-      lines.push('');
+      lines.push("");
 
       if (finding.dataTypes?.length) {
-        lines.push(`**Data Types**: ${finding.dataTypes.join(', ')}`);
+        lines.push(`**Data Types**: ${finding.dataTypes.join(", ")}`);
       }
       if (finding.features?.length) {
-        lines.push(`**Features**: ${finding.features.join(', ')}`);
+        lines.push(`**Features**: ${finding.features.join(", ")}`);
       }
       if (finding.articles?.length) {
-        lines.push(`**Relevant Articles**: ${finding.articles.join(', ')}`);
+        lines.push(`**Relevant Articles**: ${finding.articles.join(", ")}`);
       }
-      lines.push('');
+      lines.push("");
 
       if (finding.obligations.length) {
-        lines.push('**Obligations**:');
+        lines.push("**Obligations**:");
         for (const obligation of finding.obligations) {
           lines.push(`- ${obligation}`);
         }
-        lines.push('');
+        lines.push("");
       }
 
       if (finding.remediation?.length) {
-        lines.push('**Remediation**:');
+        lines.push("**Remediation**:");
         for (const step of finding.remediation) {
           lines.push(`- ${step}`);
         }
-        lines.push('');
+        lines.push("");
       }
     }
   }
 
   // Obligation Checklist
-  lines.push('## Obligation Checklist');
-  lines.push('');
-  lines.push('| Status | Obligation | Category | Evidence/Gaps |');
-  lines.push('|--------|------------|----------|---------------|');
+  lines.push("## Obligation Checklist");
+  lines.push("");
+  lines.push("| Status | Obligation | Category | Evidence/Gaps |");
+  lines.push("|--------|------------|----------|---------------|");
 
   for (const item of report.obligationChecklist) {
     const statusIcon =
-      item.status === 'implemented'
-        ? '[x]'
-        : item.status === 'partial'
-          ? '[~]'
-          : item.status === 'not_applicable'
-            ? 'N/A'
-            : '[ ]';
+      item.status === "implemented"
+        ? "[x]"
+        : item.status === "partial"
+          ? "[~]"
+          : item.status === "not_applicable"
+            ? "N/A"
+            : "[ ]";
     const evidenceOrGaps = item.evidence
       ? item.evidence
       : item.gaps?.length
-        ? `Gaps: ${item.gaps.join('; ')}`
-        : '-';
-    lines.push(
-      `| ${statusIcon} | ${item.obligation} | ${item.category} | ${evidenceOrGaps} |`,
-    );
+        ? `Gaps: ${item.gaps.join("; ")}`
+        : "-";
+    lines.push(`| ${statusIcon} | ${item.obligation} | ${item.category} | ${evidenceOrGaps} |`);
   }
-  lines.push('');
+  lines.push("");
 
   // Recommendations
-  lines.push('## Recommendations');
-  lines.push('');
+  lines.push("## Recommendations");
+  lines.push("");
 
   for (const rec of report.recommendations) {
     lines.push(`### ${rec.priority}. ${rec.title}`);
-    lines.push('');
+    lines.push("");
     lines.push(rec.description);
-    lines.push('');
+    lines.push("");
     lines.push(`- **Effort**: ${rec.effort}`);
     lines.push(`- **Impact**: ${rec.impact}`);
     if (rec.relatedFindings.length) {
-      lines.push(`- **Related Findings**: ${rec.relatedFindings.join(', ')}`);
+      lines.push(`- **Related Findings**: ${rec.relatedFindings.join(", ")}`);
     }
-    lines.push('');
+    lines.push("");
   }
 
   // Data Flow Analysis
-  lines.push('## Data Flow Analysis');
-  lines.push('');
+  lines.push("## Data Flow Analysis");
+  lines.push("");
 
-  lines.push('### Entry Points');
-  lines.push('');
-  lines.push('| Name | Data Types | Risk Level | Regulatory Flags |');
-  lines.push('|------|------------|------------|------------------|');
+  lines.push("### Entry Points");
+  lines.push("");
+  lines.push("| Name | Data Types | Risk Level | Regulatory Flags |");
+  lines.push("|------|------------|------------|------------------|");
   for (const ep of report.dataFlowAnalysis.entryPoints) {
     lines.push(
-      `| ${ep.name} | ${ep.dataTypes.join(', ')} | ${ep.riskLevel} | ${ep.regulatoryFlags.join(', ')} |`,
+      `| ${ep.name} | ${ep.dataTypes.join(", ")} | ${ep.riskLevel} | ${ep.regulatoryFlags.join(", ")} |`
     );
   }
-  lines.push('');
+  lines.push("");
 
-  lines.push('### Processing Services');
-  lines.push('');
-  lines.push('| Service | Data Types | Risk Level | Features |');
-  lines.push('|---------|------------|------------|----------|');
+  lines.push("### Processing Services");
+  lines.push("");
+  lines.push("| Service | Data Types | Risk Level | Features |");
+  lines.push("|---------|------------|------------|----------|");
   for (const ps of report.dataFlowAnalysis.processingServices) {
     lines.push(
-      `| ${ps.name} | ${ps.dataTypes.join(', ')} | ${ps.riskLevel} | ${ps.regulatoryFlags.join(', ')} |`,
+      `| ${ps.name} | ${ps.dataTypes.join(", ")} | ${ps.riskLevel} | ${ps.regulatoryFlags.join(", ")} |`
     );
   }
-  lines.push('');
+  lines.push("");
 
-  lines.push('### Cross-Border Transfers');
-  lines.push('');
-  lines.push('| Source | Destination | Mechanism | TIA Required |');
-  lines.push('|--------|-------------|-----------|--------------|');
+  lines.push("### Cross-Border Transfers");
+  lines.push("");
+  lines.push("| Source | Destination | Mechanism | TIA Required |");
+  lines.push("|--------|-------------|-----------|--------------|");
   for (const transfer of report.dataFlowAnalysis.crossBorderTransfers) {
     lines.push(
-      `| ${transfer.source} | ${transfer.destination} | ${transfer.mechanism} | ${transfer.requiresTIA ? 'Yes' : 'No'} |`,
+      `| ${transfer.source} | ${transfer.destination} | ${transfer.mechanism} | ${transfer.requiresTIA ? "Yes" : "No"} |`
     );
   }
-  lines.push('');
+  lines.push("");
 
-  lines.push('---');
-  lines.push('');
-  lines.push(
-    '*Report generated by Summit/IntelGraph Regulatory Stance Analyzer*',
-  );
+  lines.push("---");
+  lines.push("");
+  lines.push("*Report generated by Summit/IntelGraph Regulatory Stance Analyzer*");
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 function writeReport(report: StanceReport, outputPath: string): void {
@@ -993,7 +937,7 @@ function writeReport(report: StanceReport, outputPath: string): void {
     fs.mkdirSync(dir, { recursive: true });
   }
 
-  fs.writeFileSync(outputPath, markdown, 'utf-8');
+  fs.writeFileSync(outputPath, markdown, "utf-8");
   console.log(`Report written to: ${outputPath}`);
 }
 
@@ -1006,12 +950,12 @@ function parseArgs(): { lensIds: string[]; all: boolean } {
   const result = { lensIds: [] as string[], all: false };
 
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--lens' && args[i + 1]) {
+    if (args[i] === "--lens" && args[i + 1]) {
       result.lensIds.push(args[i + 1]);
       i++;
-    } else if (args[i] === '--all') {
+    } else if (args[i] === "--all") {
       result.all = true;
-    } else if (args[i] === '--help' || args[i] === '-h') {
+    } else if (args[i] === "--help" || args[i] === "-h") {
       console.log(`
 Regulatory Stance Analyzer for Summit/IntelGraph
 =================================================
@@ -1042,11 +986,11 @@ DISCLAIMER: This is a simulation/aid tool, NOT legal advice.
 }
 
 async function main(): Promise<void> {
-  console.log('');
-  console.log('='.repeat(60));
-  console.log('  Regulatory Stance Analyzer - Summit/IntelGraph');
-  console.log('='.repeat(60));
-  console.log('');
+  console.log("");
+  console.log("=".repeat(60));
+  console.log("  Regulatory Stance Analyzer - Summit/IntelGraph");
+  console.log("=".repeat(60));
+  console.log("");
 
   try {
     const config = loadLensConfiguration();
@@ -1060,37 +1004,32 @@ async function main(): Promise<void> {
       targetLensIds = lensIds;
     } else {
       // Default to GDPR
-      targetLensIds = [config.analysisConfig?.defaultLens || 'gdpr'];
+      targetLensIds = [config.analysisConfig?.defaultLens || "gdpr"];
     }
 
-    console.log(`Analyzing regulatory stance for: ${targetLensIds.join(', ')}`);
-    console.log('');
+    console.log(`Analyzing regulatory stance for: ${targetLensIds.join(", ")}`);
+    console.log("");
 
     for (const lensId of targetLensIds) {
       console.log(`Processing lens: ${lensId}...`);
 
       const lens = getLens(config, lensId);
       const report = generateReport(config, lens);
-      const outputPath = path.join(
-        REPORTS_DIR,
-        `regulatory-stance-${lensId}.md`,
-      );
+      const outputPath = path.join(REPORTS_DIR, `regulatory-stance-${lensId}.md`);
 
       writeReport(report, outputPath);
 
       // Print summary
       console.log(`  Status: ${report.summary.status.toUpperCase()}`);
-      console.log(
-        `  Score: ${(report.summary.overallScore * 100).toFixed(1)}%`,
-      );
+      console.log(`  Score: ${(report.summary.overallScore * 100).toFixed(1)}%`);
       console.log(`  Findings: ${report.findings.length}`);
-      console.log('');
+      console.log("");
     }
 
-    console.log('Analysis complete.');
-    console.log('');
+    console.log("Analysis complete.");
+    console.log("");
   } catch (error) {
-    console.error('Error:', error instanceof Error ? error.message : error);
+    console.error("Error:", error instanceof Error ? error.message : error);
     process.exit(1);
   }
 }

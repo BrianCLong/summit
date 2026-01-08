@@ -1,7 +1,7 @@
-export { ProvenanceChainViewer } from './components/ProvenanceChainViewer';
-export { MerkleTreeViewer } from './components/MerkleTreeViewer';
-export { ChainOfCustodyViewer } from './components/ChainOfCustodyViewer';
-export { ProvenanceLedgerClient } from './api/client';
+export { ProvenanceChainViewer } from "./components/ProvenanceChainViewer";
+export { MerkleTreeViewer } from "./components/MerkleTreeViewer";
+export { ChainOfCustodyViewer } from "./components/ChainOfCustodyViewer";
+export { ProvenanceLedgerClient } from "./api/client";
 export type {
   TransformStep,
   Claim,
@@ -11,4 +11,4 @@ export type {
   MerkleNode,
   VerificationResult,
   ChainOfCustodyEvent,
-} from './types';
+} from "./types";

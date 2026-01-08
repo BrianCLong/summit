@@ -10,7 +10,11 @@ function mockExportRoutes(page: any, { readyImmediately = false } = {}) {
       return route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ id: mockJobId, status: 'accepted', startedAt: new Date().toISOString() }),
+        body: JSON.stringify({
+          id: mockJobId,
+          status: 'accepted',
+          startedAt: new Date().toISOString(),
+        }),
       })
     }
     return route.continue()
@@ -70,10 +74,14 @@ test.describe('Case export', () => {
     await page.getByRole('button', { name: 'Export case' }).click()
     await page.getByRole('button', { name: 'Start export' }).click()
 
-    await expect(page.getByRole('dialog', { name: 'Case export modal' })).toBeVisible()
+    await expect(
+      page.getByRole('dialog', { name: 'Case export modal' })
+    ).toBeVisible()
     await page.getByRole('button', { name: 'Tasks (4)' }).click()
     await page.getByRole('button', { name: 'Graph Explorer' }).click()
-    await expect(page.getByText('Download ready')).toBeVisible({ timeout: 5000 })
+    await expect(page.getByText('Download ready')).toBeVisible({
+      timeout: 5000,
+    })
   })
 
   test('retry does not duplicate job for same params', async ({ page }) => {
@@ -84,19 +92,31 @@ test.describe('Case export', () => {
         return route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({ id: mockJobId, status: 'accepted', startedAt: new Date().toISOString() }),
+          body: JSON.stringify({
+            id: mockJobId,
+            status: 'accepted',
+            startedAt: new Date().toISOString(),
+          }),
         })
       }
       return route.continue()
     })
 
-    await page.route(`**/api/tenants/**/exports/${mockJobId}`, async (route: any) => {
-      return route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ id: mockJobId, status: 'failed', progress: 0, error: 'Network' }),
-      })
-    })
+    await page.route(
+      `**/api/tenants/**/exports/${mockJobId}`,
+      async (route: any) => {
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            id: mockJobId,
+            status: 'failed',
+            progress: 0,
+            error: 'Network',
+          }),
+        })
+      }
+    )
 
     await page.goto('/cases/case-1')
     await page.getByRole('button', { name: 'Export case' }).click()

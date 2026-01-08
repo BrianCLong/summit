@@ -84,6 +84,7 @@ Calculates quantum risk for assets:
 ```
 
 Output:
+
 ```json
 {
   "asset": "database-keys",

@@ -2,9 +2,9 @@
  * Data loading engine with multiple load strategies
  */
 
-import { Pool, PoolClient } from 'pg';
-import { Logger } from 'winston';
-import { LoadConfig, LoadStrategy, PipelineError } from '@intelgraph/data-integration/src/types';
+import { Pool, PoolClient } from "pg";
+import { Logger } from "winston";
+import { LoadConfig, LoadStrategy, PipelineError } from "@intelgraph/data-integration/src/types";
 
 export interface LoadResult {
   recordsLoaded: number;
@@ -27,11 +27,11 @@ export class DataLoader {
     // Using PostgreSQL as default target - would support multiple targets
     this.pool = new Pool({
       // Connection config would come from environment or config
-      connectionString: process.env.TARGET_DATABASE_URL
+      connectionString: process.env.TARGET_DATABASE_URL,
     });
 
     this.client = await this.pool.connect();
-    this.logger.info('Connected to target database');
+    this.logger.info("Connected to target database");
   }
 
   async disconnect(): Promise<void> {
@@ -43,7 +43,7 @@ export class DataLoader {
       await this.pool.end();
       this.pool = null;
     }
-    this.logger.info('Disconnected from target database');
+    this.logger.info("Disconnected from target database");
   }
 
   /**
@@ -53,7 +53,7 @@ export class DataLoader {
     const result: LoadResult = {
       recordsLoaded: 0,
       recordsFailed: 0,
-      errors: []
+      errors: [],
     };
 
     if (data.length === 0) {
@@ -83,12 +83,12 @@ export class DataLoader {
 
       return result;
     } catch (error) {
-      this.logger.error('Error loading data', { error });
+      this.logger.error("Error loading data", { error });
       result.errors.push({
         timestamp: new Date(),
-        stage: 'loading',
-        message: error instanceof Error ? error.message : 'Unknown error',
-        details: error
+        stage: "loading",
+        message: error instanceof Error ? error.message : "Unknown error",
+        details: error,
       });
       return result;
     }
@@ -96,7 +96,7 @@ export class DataLoader {
 
   private async bulkLoad(data: any[], result: LoadResult): Promise<void> {
     if (!this.client) {
-      throw new Error('Not connected to database');
+      throw new Error("Not connected to database");
     }
 
     const batchSize = this.config.batchSize || 1000;
@@ -106,7 +106,7 @@ export class DataLoader {
       const batch = data.slice(i, i + batchSize);
 
       try {
-        await this.client.query('BEGIN');
+        await this.client.query("BEGIN");
 
         for (const record of batch) {
           const { columns, values, placeholders } = this.prepareInsert(record);
@@ -116,15 +116,15 @@ export class DataLoader {
           result.recordsLoaded++;
         }
 
-        await this.client.query('COMMIT');
+        await this.client.query("COMMIT");
       } catch (error) {
-        await this.client.query('ROLLBACK');
+        await this.client.query("ROLLBACK");
         result.recordsFailed += batch.length;
         result.errors.push({
           timestamp: new Date(),
-          stage: 'loading',
+          stage: "loading",
           message: `Bulk load failed for batch starting at index ${i}`,
-          details: error
+          details: error,
         });
       }
     }
@@ -132,21 +132,21 @@ export class DataLoader {
 
   private async upsertLoad(data: any[], result: LoadResult): Promise<void> {
     if (!this.client) {
-      throw new Error('Not connected to database');
+      throw new Error("Not connected to database");
     }
 
     const tableName = this.getFullTableName();
-    const upsertKeys = this.config.upsertKey || ['id'];
+    const upsertKeys = this.config.upsertKey || ["id"];
 
     for (const record of data) {
       try {
         const { columns, values, placeholders } = this.prepareInsert(record);
         const updateSet = columns
-          .split(',')
+          .split(",")
           .map((col, idx) => `${col.trim()} = $${idx + 1}`)
-          .join(', ');
+          .join(", ");
 
-        const conflictColumns = upsertKeys.join(', ');
+        const conflictColumns = upsertKeys.join(", ");
 
         const query = `
           INSERT INTO ${tableName} (${columns})
@@ -161,9 +161,9 @@ export class DataLoader {
         result.recordsFailed++;
         result.errors.push({
           timestamp: new Date(),
-          stage: 'loading',
-          message: 'Upsert failed for record',
-          details: error
+          stage: "loading",
+          message: "Upsert failed for record",
+          details: error,
         });
       }
     }
@@ -171,24 +171,22 @@ export class DataLoader {
 
   private async scdType2Load(data: any[], result: LoadResult): Promise<void> {
     if (!this.client) {
-      throw new Error('Not connected to database');
+      throw new Error("Not connected to database");
     }
 
     const tableName = this.getFullTableName();
-    const naturalKeys = this.config.upsertKey || ['id'];
-    const effectiveFrom = 'effective_from';
-    const effectiveTo = 'effective_to';
-    const isCurrent = 'is_current';
+    const naturalKeys = this.config.upsertKey || ["id"];
+    const effectiveFrom = "effective_from";
+    const effectiveTo = "effective_to";
+    const isCurrent = "is_current";
 
     for (const record of data) {
       try {
-        await this.client.query('BEGIN');
+        await this.client.query("BEGIN");
 
         // Close current record
-        const whereClause = naturalKeys
-          .map((key, idx) => `${key} = $${idx + 1}`)
-          .join(' AND ');
-        const keyValues = naturalKeys.map(key => record[key]);
+        const whereClause = naturalKeys.map((key, idx) => `${key} = $${idx + 1}`).join(" AND ");
+        const keyValues = naturalKeys.map((key) => record[key]);
 
         await this.client.query(
           `UPDATE ${tableName}
@@ -201,25 +199,25 @@ export class DataLoader {
         const enrichedRecord = {
           ...record,
           [effectiveFrom]: new Date(),
-          [effectiveTo]: new Date('9999-12-31'),
-          [isCurrent]: true
+          [effectiveTo]: new Date("9999-12-31"),
+          [isCurrent]: true,
         };
 
         const { columns, values, placeholders } = this.prepareInsert(enrichedRecord);
         const query = `INSERT INTO ${tableName} (${columns}) VALUES (${placeholders})`;
 
         await this.client.query(query, values);
-        await this.client.query('COMMIT');
+        await this.client.query("COMMIT");
 
         result.recordsLoaded++;
       } catch (error) {
-        await this.client.query('ROLLBACK');
+        await this.client.query("ROLLBACK");
         result.recordsFailed++;
         result.errors.push({
           timestamp: new Date(),
-          stage: 'loading',
-          message: 'SCD Type 2 load failed for record',
-          details: error
+          stage: "loading",
+          message: "SCD Type 2 load failed for record",
+          details: error,
         });
       }
     }
@@ -244,12 +242,12 @@ export class DataLoader {
       values.push(value);
     }
 
-    const placeholders = values.map((_, idx) => `$${idx + 1}`).join(', ');
+    const placeholders = values.map((_, idx) => `$${idx + 1}`).join(", ");
 
     return {
-      columns: columns.join(', '),
+      columns: columns.join(", "),
       values,
-      placeholders
+      placeholders,
     };
   }
 

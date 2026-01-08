@@ -1,4 +1,4 @@
-import type { DateTime } from 'luxon';
+import type { DateTime } from "luxon";
 
 export interface ConsentPurpose {
   purposeId: string;
@@ -32,9 +32,9 @@ export interface ConsentSubject {
 }
 
 export interface VerifiableConsentReceipt {
-  '@context': string[];
+  "@context": string[];
   id: string;
-  type: ['VerifiableCredential', 'ConsentReceiptCredential'];
+  type: ["VerifiableCredential", "ConsentReceiptCredential"];
   issuer: string;
   issuanceDate: string;
   expirationDate?: string;
@@ -45,10 +45,10 @@ export interface VerifiableConsentReceipt {
 }
 
 export interface Proof {
-  type: 'Ed25519Signature2020';
+  type: "Ed25519Signature2020";
   created: string;
   verificationMethod: string;
-  proofPurpose: 'assertionMethod';
+  proofPurpose: "assertionMethod";
   proofValue: string; // base64url signature
   revocationListCredential?: string;
 }
@@ -74,7 +74,7 @@ export interface DidDocument {
   assertionMethod: string[];
   verificationMethod: Array<{
     id: string;
-    type: 'Ed25519VerificationKey2020';
+    type: "Ed25519VerificationKey2020";
     controller: string;
     publicKeyMultibase: string;
   }>;

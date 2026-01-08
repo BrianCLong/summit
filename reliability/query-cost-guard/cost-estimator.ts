@@ -1,7 +1,7 @@
-import { getPostgresPool } from '../../server/src/db/postgres';
-import baseLogger from '../../server/src/config/logger';
+import { getPostgresPool } from "../../server/src/db/postgres";
+import baseLogger from "../../server/src/config/logger";
 
-const logger = baseLogger.child({ name: 'QueryCostEstimator' });
+const logger = baseLogger.child({ name: "QueryCostEstimator" });
 
 /**
  * Represents the estimated cost of a database query.
@@ -23,8 +23,8 @@ export interface QueryCost {
  */
 interface ExplainPlan {
   Plan: {
-    'Total Cost': number;
-    'Startup Cost': number;
+    "Total Cost": number;
+    "Startup Cost": number;
   };
 }
 
@@ -44,22 +44,22 @@ export async function estimateQueryCost(sql: string, params: any[] = []): Promis
     // We use the 'read' pool for EXPLAIN as it's a read-only operation.
     const result = await pool.read(explainQuery, params);
 
-    if (result.rows.length === 0 || !result.rows[0]['QUERY PLAN']) {
-      throw new Error('Could not retrieve query plan.');
+    if (result.rows.length === 0 || !result.rows[0]["QUERY PLAN"]) {
+      throw new Error("Could not retrieve query plan.");
     }
 
-    const plan = result.rows[0]['QUERY PLAN'][0] as ExplainPlan;
+    const plan = result.rows[0]["QUERY PLAN"][0] as ExplainPlan;
 
-    if (!plan.Plan || typeof plan.Plan['Total Cost'] !== 'number') {
-      throw new Error('Invalid query plan format.');
+    if (!plan.Plan || typeof plan.Plan["Total Cost"] !== "number") {
+      throw new Error("Invalid query plan format.");
     }
 
     return {
-      totalCost: plan.Plan['Total Cost'],
-      startupCost: plan.Plan['Startup Cost'],
+      totalCost: plan.Plan["Total Cost"],
+      startupCost: plan.Plan["Startup Cost"],
     };
   } catch (error) {
-    logger.error({ err: error, sql }, 'Failed to estimate query cost.');
+    logger.error({ err: error, sql }, "Failed to estimate query cost.");
     // Re-throw the error to be handled by the caller.
     throw error;
   }

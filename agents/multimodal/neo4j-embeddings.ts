@@ -4,8 +4,8 @@
  * Implements Node2Vec, GraphSAGE-style neighborhood aggregation.
  */
 
-import neo4j, { Driver, Session } from 'neo4j-driver';
-import pino from 'pino';
+import neo4j, { Driver, Session } from "neo4j-driver";
+import pino from "pino";
 
 import type {
   GraphEmbeddingNode,
@@ -13,9 +13,9 @@ import type {
   NeighborInfo,
   FusedEmbedding,
   ModalityType,
-} from './types.js';
+} from "./types.js";
 
-const logger = pino({ name: 'neo4j-embeddings' });
+const logger = pino({ name: "neo4j-embeddings" });
 
 export interface Neo4jEmbeddingsConfig extends GraphEmbeddingConfig {
   uri: string;
@@ -23,7 +23,7 @@ export interface Neo4jEmbeddingsConfig extends GraphEmbeddingConfig {
   password: string;
   database: string;
   maxNeighbors: number;
-  aggregationMethod: 'mean' | 'max' | 'attention';
+  aggregationMethod: "mean" | "max" | "attention";
   includeRelationshipTypes: boolean;
   cacheEnabled: boolean;
   cacheTTL: number;
@@ -51,25 +51,25 @@ export class Neo4jEmbeddings {
 
   constructor(config: Partial<Neo4jEmbeddingsConfig> = {}) {
     this.config = {
-      algorithm: 'node2vec',
+      algorithm: "node2vec",
       dimensions: 128,
       walkLength: 80,
       numWalks: 10,
       p: 1.0,
       q: 1.0,
-      uri: process.env.NEO4J_URI || 'bolt://localhost:7687',
-      username: process.env.NEO4J_USERNAME || 'neo4j',
-      password: process.env.NEO4J_PASSWORD || 'password',
-      database: process.env.NEO4J_DATABASE || 'neo4j',
+      uri: process.env.NEO4J_URI || "bolt://localhost:7687",
+      username: process.env.NEO4J_USERNAME || "neo4j",
+      password: process.env.NEO4J_PASSWORD || "password",
+      database: process.env.NEO4J_DATABASE || "neo4j",
       maxNeighbors: 50,
-      aggregationMethod: 'mean',
+      aggregationMethod: "mean",
       includeRelationshipTypes: true,
       cacheEnabled: true,
       cacheTTL: 3600000, // 1 hour
       ...config,
     };
 
-    logger.info('Neo4j Embeddings configured', {
+    logger.info("Neo4j Embeddings configured", {
       algorithm: this.config.algorithm,
       dimensions: this.config.dimensions,
       uri: this.config.uri,
@@ -85,17 +85,17 @@ export class Neo4jEmbeddings {
     try {
       this.driver = neo4j.driver(
         this.config.uri,
-        neo4j.auth.basic(this.config.username, this.config.password),
+        neo4j.auth.basic(this.config.username, this.config.password)
       );
 
       // Verify connectivity
       await this.driver.verifyConnectivity();
 
       this.initialized = true;
-      logger.info('Neo4j connection established');
+      logger.info("Neo4j connection established");
     } catch (error) {
-      logger.error('Failed to connect to Neo4j', {
-        error: error instanceof Error ? error.message : 'Unknown error',
+      logger.error("Failed to connect to Neo4j", {
+        error: error instanceof Error ? error.message : "Unknown error",
       });
       throw error;
     }
@@ -104,17 +104,14 @@ export class Neo4jEmbeddings {
   /**
    * Generate graph embedding for a node
    */
-  async embedNode(
-    nodeId: string,
-    investigationId: string,
-  ): Promise<GraphEmbeddingNode> {
+  async embedNode(nodeId: string, investigationId: string): Promise<GraphEmbeddingNode> {
     await this.ensureInitialized();
 
     // Check cache
     if (this.config.cacheEnabled) {
       const cached = this.getCached(nodeId);
       if (cached) {
-        logger.debug('Cache hit for node embedding', { nodeId });
+        logger.debug("Cache hit for node embedding", { nodeId });
         return {
           nodeId,
           labels: [],
@@ -138,16 +135,16 @@ export class Neo4jEmbeddings {
       let embedding: number[];
 
       switch (this.config.algorithm) {
-        case 'node2vec':
+        case "node2vec":
           embedding = await this.node2vecEmbedding(session, nodeId);
           break;
-        case 'graphsage':
+        case "graphsage":
           embedding = await this.graphSageEmbedding(session, nodeId, neighbors);
           break;
-        case 'gat':
+        case "gat":
           embedding = await this.gatEmbedding(session, nodeId, neighbors);
           break;
-        case 'gcn':
+        case "gcn":
           embedding = await this.gcnEmbedding(session, nodeId, neighbors);
           break;
         default:
@@ -174,10 +171,7 @@ export class Neo4jEmbeddings {
   /**
    * Generate embeddings for multiple nodes
    */
-  async embedNodes(
-    nodeIds: string[],
-    investigationId: string,
-  ): Promise<GraphEmbeddingNode[]> {
+  async embedNodes(nodeIds: string[], investigationId: string): Promise<GraphEmbeddingNode[]> {
     const results: GraphEmbeddingNode[] = [];
 
     for (const nodeId of nodeIds) {
@@ -185,9 +179,9 @@ export class Neo4jEmbeddings {
         const embedding = await this.embedNode(nodeId, investigationId);
         results.push(embedding);
       } catch (error) {
-        logger.warn('Failed to embed node', {
+        logger.warn("Failed to embed node", {
           nodeId,
-          error: error instanceof Error ? error.message : 'Unknown',
+          error: error instanceof Error ? error.message : "Unknown",
         });
       }
     }
@@ -198,10 +192,7 @@ export class Neo4jEmbeddings {
   /**
    * Generate Node2Vec-style embedding using random walks
    */
-  private async node2vecEmbedding(
-    session: Session,
-    nodeId: string,
-  ): Promise<number[]> {
+  private async node2vecEmbedding(session: Session, nodeId: string): Promise<number[]> {
     // Generate random walks
     const walks = await this.generateRandomWalks(session, nodeId);
 
@@ -217,7 +208,7 @@ export class Neo4jEmbeddings {
   private async graphSageEmbedding(
     session: Session,
     nodeId: string,
-    neighbors: NeighborInfo[],
+    neighbors: NeighborInfo[]
   ): Promise<number[]> {
     // Get node's own features
     const nodeFeatures = await this.getNodeFeatureVector(session, nodeId);
@@ -245,7 +236,7 @@ export class Neo4jEmbeddings {
   private async gatEmbedding(
     session: Session,
     nodeId: string,
-    neighbors: NeighborInfo[],
+    neighbors: NeighborInfo[]
   ): Promise<number[]> {
     // Get node's own features
     const nodeFeatures = await this.getNodeFeatureVector(session, nodeId);
@@ -287,15 +278,13 @@ export class Neo4jEmbeddings {
   private async gcnEmbedding(
     session: Session,
     nodeId: string,
-    neighbors: NeighborInfo[],
+    neighbors: NeighborInfo[]
   ): Promise<number[]> {
     // Simple GCN: aggregate self + neighbors with degree normalization
     const nodeFeatures = await this.getNodeFeatureVector(session, nodeId);
     const selfDegree = neighbors.length + 1;
 
-    const allFeatures: number[][] = [
-      nodeFeatures.map((f) => f / Math.sqrt(selfDegree)),
-    ];
+    const allFeatures: number[][] = [nodeFeatures.map((f) => f / Math.sqrt(selfDegree))];
 
     for (const neighbor of neighbors.slice(0, this.config.maxNeighbors)) {
       const features = await this.getNodeFeatureVector(session, neighbor.nodeId);
@@ -315,10 +304,7 @@ export class Neo4jEmbeddings {
   /**
    * Generate random walks from a node
    */
-  private async generateRandomWalks(
-    session: Session,
-    startNodeId: string,
-  ): Promise<RandomWalk[]> {
+  private async generateRandomWalks(session: Session, startNodeId: string): Promise<RandomWalk[]> {
     const walks: RandomWalk[] = [];
 
     for (let i = 0; i < this.config.numWalks; i++) {
@@ -332,10 +318,7 @@ export class Neo4jEmbeddings {
   /**
    * Perform a single random walk
    */
-  private async randomWalk(
-    session: Session,
-    startNodeId: string,
-  ): Promise<RandomWalk> {
+  private async randomWalk(session: Session, startNodeId: string): Promise<RandomWalk> {
     const nodes: string[] = [startNodeId];
     const relationships: string[] = [];
 
@@ -348,12 +331,7 @@ export class Neo4jEmbeddings {
       if (neighbors.length === 0) break;
 
       // Node2Vec biased sampling
-      const nextNode = this.sampleNextNode(
-        neighbors,
-        prevNodeId,
-        this.config.p,
-        this.config.q,
-      );
+      const nextNode = this.sampleNextNode(neighbors, prevNodeId, this.config.p, this.config.q);
 
       nodes.push(nextNode.nodeId);
       relationships.push(nextNode.relationship);
@@ -372,7 +350,7 @@ export class Neo4jEmbeddings {
     neighbors: Array<{ nodeId: string; relationship: string; prevDistance: number }>,
     prevNodeId: string | null,
     p: number,
-    q: number,
+    q: number
   ): { nodeId: string; relationship: string } {
     // Calculate unnormalized probabilities
     const probs: number[] = [];
@@ -456,10 +434,7 @@ export class Neo4jEmbeddings {
   /**
    * Get node features from Neo4j
    */
-  private async getNodeFeatures(
-    session: Session,
-    nodeId: string,
-  ): Promise<NodeFeatures> {
+  private async getNodeFeatures(session: Session, nodeId: string): Promise<NodeFeatures> {
     const result = await session.run(
       `
       MATCH (n)
@@ -469,7 +444,7 @@ export class Neo4jEmbeddings {
       OPTIONAL MATCH ()-[r2]->(n)
       RETURN n, labels(n) as labels, outDeg, count(r2) as inDeg
       `,
-      { nodeId },
+      { nodeId }
     );
 
     if (result.records.length === 0) {
@@ -477,25 +452,22 @@ export class Neo4jEmbeddings {
     }
 
     const record = result.records[0];
-    const node = record.get('n');
+    const node = record.get("n");
 
     return {
       nodeId,
-      labels: record.get('labels') || [],
+      labels: record.get("labels") || [],
       properties: node.properties,
-      degree: record.get('outDeg').toNumber() + record.get('inDeg').toNumber(),
-      inDegree: record.get('inDeg').toNumber(),
-      outDegree: record.get('outDeg').toNumber(),
+      degree: record.get("outDeg").toNumber() + record.get("inDeg").toNumber(),
+      inDegree: record.get("inDeg").toNumber(),
+      outDegree: record.get("outDeg").toNumber(),
     };
   }
 
   /**
    * Get neighbor information
    */
-  private async getNeighbors(
-    session: Session,
-    nodeId: string,
-  ): Promise<NeighborInfo[]> {
+  private async getNeighbors(session: Session, nodeId: string): Promise<NeighborInfo[]> {
     const result = await session.run(
       `
       MATCH (n)-[r]-(neighbor)
@@ -504,13 +476,13 @@ export class Neo4jEmbeddings {
              coalesce(r.weight, 1.0) as weight
       LIMIT $limit
       `,
-      { nodeId, limit: neo4j.int(this.config.maxNeighbors) },
+      { nodeId, limit: neo4j.int(this.config.maxNeighbors) }
     );
 
     return result.records.map((record) => ({
-      nodeId: record.get('neighborId'),
-      relationship: record.get('relType'),
-      weight: record.get('weight'),
+      nodeId: record.get("neighborId"),
+      relationship: record.get("relType"),
+      weight: record.get("weight"),
     }));
   }
 
@@ -519,7 +491,7 @@ export class Neo4jEmbeddings {
    */
   private async getNeighborsForWalk(
     session: Session,
-    nodeId: string,
+    nodeId: string
   ): Promise<Array<{ nodeId: string; relationship: string; prevDistance: number }>> {
     const result = await session.run(
       `
@@ -528,12 +500,12 @@ export class Neo4jEmbeddings {
       RETURN neighbor.id as neighborId, type(r) as relType
       LIMIT 100
       `,
-      { nodeId },
+      { nodeId }
     );
 
     return result.records.map((record) => ({
-      nodeId: record.get('neighborId'),
-      relationship: record.get('relType'),
+      nodeId: record.get("neighborId"),
+      relationship: record.get("relType"),
       prevDistance: 1, // Simplified - would need to track actual distance
     }));
   }
@@ -541,10 +513,7 @@ export class Neo4jEmbeddings {
   /**
    * Get node feature vector
    */
-  private async getNodeFeatureVector(
-    session: Session,
-    nodeId: string,
-  ): Promise<number[]> {
+  private async getNodeFeatureVector(session: Session, nodeId: string): Promise<number[]> {
     const features = await this.getNodeFeatures(session, nodeId);
 
     // Create feature vector from node properties
@@ -556,7 +525,7 @@ export class Neo4jEmbeddings {
     vector.push(features.outDegree);
 
     // Add label encoding (one-hot style)
-    const commonLabels = ['Entity', 'Person', 'Organization', 'Location', 'Event'];
+    const commonLabels = ["Entity", "Person", "Organization", "Location", "Event"];
     for (const label of commonLabels) {
       vector.push(features.labels.includes(label) ? 1 : 0);
     }
@@ -579,10 +548,10 @@ export class Neo4jEmbeddings {
       WHERE n.id = $nodeId OR id(n) = toInteger($nodeId)
       RETURN count(r) as degree
       `,
-      { nodeId },
+      { nodeId }
     );
 
-    return result.records[0]?.get('degree').toNumber() || 1;
+    return result.records[0]?.get("degree").toNumber() || 1;
   }
 
   /**
@@ -597,13 +566,13 @@ export class Neo4jEmbeddings {
     const result = new Array(dim).fill(0);
 
     switch (this.config.aggregationMethod) {
-      case 'max':
+      case "max":
         for (let i = 0; i < dim; i++) {
           result[i] = Math.max(...features.map((f) => f[i] || 0));
         }
         break;
 
-      case 'mean':
+      case "mean":
       default:
         for (const feature of features) {
           for (let i = 0; i < dim; i++) {
@@ -622,7 +591,7 @@ export class Neo4jEmbeddings {
   private calculateAttention(
     sourceFeatures: number[],
     targetFeatures: number[],
-    relationshipWeight: number,
+    relationshipWeight: number
   ): number {
     // Simple attention: dot product + relationship weight
     let dotProduct = 0;
@@ -682,7 +651,7 @@ export class Neo4jEmbeddings {
   async storeEmbedding(
     nodeId: string,
     embedding: number[],
-    investigationId: string,
+    investigationId: string
   ): Promise<void> {
     await this.ensureInitialized();
 
@@ -703,10 +672,10 @@ export class Neo4jEmbeddings {
           embedding,
           dimension: neo4j.int(embedding.length),
           algorithm: this.config.algorithm,
-        },
+        }
       );
 
-      logger.debug('Embedding stored in Neo4j', { nodeId });
+      logger.debug("Embedding stored in Neo4j", { nodeId });
     } finally {
       await session.close();
     }
@@ -718,7 +687,7 @@ export class Neo4jEmbeddings {
   async findSimilarNodes(
     embedding: number[],
     topK: number = 10,
-    threshold: number = 0.7,
+    threshold: number = 0.7
   ): Promise<Array<{ nodeId: string; similarity: number }>> {
     await this.ensureInitialized();
 
@@ -740,16 +709,16 @@ export class Neo4jEmbeddings {
           embedding,
           threshold,
           topK: neo4j.int(topK),
-        },
+        }
       );
 
       return result.records.map((record) => ({
-        nodeId: record.get('nodeId'),
-        similarity: record.get('similarity'),
+        nodeId: record.get("nodeId"),
+        similarity: record.get("similarity"),
       }));
     } catch (error) {
       // Fallback if GDS not available
-      logger.warn('GDS similarity not available, using fallback');
+      logger.warn("GDS similarity not available, using fallback");
       return [];
     } finally {
       await session.close();
@@ -802,7 +771,7 @@ export class Neo4jEmbeddings {
       await this.driver.close();
       this.driver = null;
       this.initialized = false;
-      logger.info('Neo4j connection closed');
+      logger.info("Neo4j connection closed");
     }
   }
 

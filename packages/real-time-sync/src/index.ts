@@ -1,3 +1,3 @@
-export * from './types';
-export * from './OperationalTransform';
-export * from './SyncEngine';
+export * from "./types";
+export * from "./OperationalTransform";
+export * from "./SyncEngine";

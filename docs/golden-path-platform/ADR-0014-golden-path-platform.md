@@ -30,13 +30,13 @@ We will implement a **Golden Path Platform** consisting of:
 
 Define five canonical service types with explicit defaults:
 
-| Type | Runtime | SLO Target | Key Features |
-|------|---------|------------|--------------|
-| **API Service** | Node.js 20 / Go 1.22 | 99.9% avail, p99 <500ms | REST/GraphQL, rate limiting, auth |
-| **Worker Service** | Node.js 20 / Python 3.11 | 99.9% success, p95 <30s | Queue consumption, DLQ handling |
-| **Batch Job** | Python 3.11 | 99% completion | CronJob, data processing |
-| **Data Service** | Node.js 20 | 99.95% avail, p99 <100ms | Database access, migrations |
-| **Frontend** | React 18 / Next.js 14 | Core Web Vitals | SPA, SSR, edge caching |
+| Type               | Runtime                  | SLO Target               | Key Features                      |
+| ------------------ | ------------------------ | ------------------------ | --------------------------------- |
+| **API Service**    | Node.js 20 / Go 1.22     | 99.9% avail, p99 <500ms  | REST/GraphQL, rate limiting, auth |
+| **Worker Service** | Node.js 20 / Python 3.11 | 99.9% success, p95 <30s  | Queue consumption, DLQ handling   |
+| **Batch Job**      | Python 3.11              | 99% completion           | CronJob, data processing          |
+| **Data Service**   | Node.js 20               | 99.95% avail, p99 <100ms | Database access, migrations       |
+| **Frontend**       | React 18 / Next.js 14    | Core Web Vitals          | SPA, SSR, edge caching            |
 
 ### 2. Scaffold CLI
 
@@ -64,6 +64,7 @@ Lint → Test → Security → Build → Publish → Deploy → Verify → Promo
 ```
 
 **Required Gates** (cannot bypass):
+
 - Secret detection (Gitleaks)
 - Critical CVE blocking (Trivy)
 - Image signature verification (Cosign)
@@ -71,6 +72,7 @@ Lint → Test → Security → Build → Publish → Deploy → Verify → Promo
 - Health check verification
 
 **Conditional Gates** (tier-based):
+
 - Coverage thresholds (90%/80%/70% by tier)
 - Canary analysis duration
 - Soak test requirements
@@ -79,6 +81,7 @@ Lint → Test → Security → Build → Publish → Deploy → Verify → Promo
 ### 4. Policy-as-Code Governance
 
 OPA/Rego policies enforcing:
+
 - ABAC authorization patterns
 - Zero-trust networking defaults
 - Deployment freeze compliance
@@ -88,6 +91,7 @@ OPA/Rego policies enforcing:
 ### 5. Opt-Out with Guardrails
 
 Teams can request exceptions via documented process:
+
 1. File exception request with justification
 2. Approval by security/SRE/architecture council
 3. Implement compensating controls
@@ -117,13 +121,13 @@ Teams can request exceptions via documented process:
 
 ### Mitigations
 
-| Risk | Mitigation |
-|------|------------|
-| Migration effort | Phased rollout starting with new services; migration guide for existing |
-| Reduced flexibility | Clear exception process with 48-hour SLA |
-| Platform dependency | Self-service template extensions; community contribution model |
-| Learning curve | Comprehensive documentation; training sessions; office hours |
-| Exception bottleneck | Pre-approved exception patterns for common cases |
+| Risk                 | Mitigation                                                              |
+| -------------------- | ----------------------------------------------------------------------- |
+| Migration effort     | Phased rollout starting with new services; migration guide for existing |
+| Reduced flexibility  | Clear exception process with 48-hour SLA                                |
+| Platform dependency  | Self-service template extensions; community contribution model          |
+| Learning curve       | Comprehensive documentation; training sessions; office hours            |
+| Exception bottleneck | Pre-approved exception patterns for common cases                        |
 
 ## Alternatives Considered
 
@@ -154,24 +158,28 @@ Allow teams complete autonomy in service implementation.
 ## Implementation Plan
 
 ### Phase 1: Foundation (Weeks 1-4)
+
 - [ ] Finalize service archetypes and directory structures
 - [ ] Implement scaffold CLI with API service template
 - [ ] Create reusable CI/CD workflow templates
 - [ ] Document exception process
 
 ### Phase 2: Templates (Weeks 5-8)
+
 - [ ] Add worker, batch, data service templates
 - [ ] Add frontend template
 - [ ] Add shared library template
 - [ ] Create policy templates (OPA, Kyverno)
 
 ### Phase 3: Migration (Weeks 9-16)
+
 - [ ] Pilot with 3 new services
 - [ ] Develop migration guide for existing services
 - [ ] Migrate 10 high-priority services
 - [ ] Gather feedback and iterate
 
 ### Phase 4: Scale (Weeks 17-24)
+
 - [ ] Roll out to all teams
 - [ ] Deprecate legacy patterns
 - [ ] Establish platform team rotation
@@ -179,13 +187,13 @@ Allow teams complete autonomy in service implementation.
 
 ## Success Metrics
 
-| Metric | Baseline | Target | Timeline |
-|--------|----------|--------|----------|
-| New service time-to-production | 2 weeks | 2 days | 6 months |
-| Cross-team PR review time | 2 days | 4 hours | 6 months |
-| Security audit duration | 2 weeks/service | 2 days/service | 12 months |
-| Incident MTTR | 45 min | 15 min | 12 months |
-| SLO compliance | 85% | 99% | 12 months |
+| Metric                         | Baseline        | Target         | Timeline  |
+| ------------------------------ | --------------- | -------------- | --------- |
+| New service time-to-production | 2 weeks         | 2 days         | 6 months  |
+| Cross-team PR review time      | 2 days          | 4 hours        | 6 months  |
+| Security audit duration        | 2 weeks/service | 2 days/service | 12 months |
+| Incident MTTR                  | 45 min          | 15 min         | 12 months |
+| SLO compliance                 | 85%             | 99%            | 12 months |
 
 ## Related Documents
 
@@ -196,15 +204,15 @@ Allow teams complete autonomy in service implementation.
 
 ## Decision Makers
 
-| Role | Name | Decision |
-|------|------|----------|
-| Architecture Lead | TBD | Pending |
-| Security Lead | TBD | Pending |
-| SRE Lead | TBD | Pending |
-| Engineering Director | TBD | Pending |
+| Role                 | Name | Decision |
+| -------------------- | ---- | -------- |
+| Architecture Lead    | TBD  | Pending  |
+| Security Lead        | TBD  | Pending  |
+| SRE Lead             | TBD  | Pending  |
+| Engineering Director | TBD  | Pending  |
 
 ## Revision History
 
-| Date | Author | Change |
-|------|--------|--------|
+| Date       | Author                    | Change        |
+| ---------- | ------------------------- | ------------- |
 | 2025-12-06 | Golden Path Platform Team | Initial draft |

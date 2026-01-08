@@ -5,72 +5,72 @@ metadata:
   namespace: intelgraph
 spec:
   hosts:
-  - "api.intelgraph.io"
-  - "intelgraph-api.intelgraph.svc.cluster.local"
+    - "api.intelgraph.io"
+    - "intelgraph-api.intelgraph.svc.cluster.local"
   gateways:
-  - intelgraph-gateway
-  - mesh
+    - intelgraph-gateway
+    - mesh
   http:
-  - match:
-    - headers:
-        x-api-version:
-          exact: "v2"
-    route:
-    - destination:
-        host: intelgraph-api-v2
-        port:
-          number: 4000
-      weight: 100
-  - match:
-    - uri:
-        prefix: "/graphql"
-    route:
-    - destination:
-        host: intelgraph-api
-        port:
-          number: 4000
-        subset: stable
-      weight: 90
-    - destination:
-        host: intelgraph-api
-        port:
-          number: 4000
-        subset: canary
-      weight: 10
-    timeout: 30s
-    retries:
-      attempts: 3
-      perTryTimeout: 10s
-      retryOn: 5xx,reset,connect-failure,refused-stream
-  - match:
-    - uri:
-        prefix: "/api"
-    route:
-    - destination:
-        host: intelgraph-api
-        port:
-          number: 4000
-      weight: 100
-    corsPolicy:
-      allowOrigins:
-      - exact: "https://app.intelgraph.io"
-      - regex: "https://.*\\.intelgraph\\.io"
-      allowMethods:
-      - GET
-      - POST
-      - PUT
-      - DELETE
-      - OPTIONS
-      allowHeaders:
-      - authorization
-      - content-type
-      - x-request-id
-      maxAge: "24h"
-    fault:
-      delay:
-        percentage:
-          value: 0.1
-        fixedDelay: 500ms
+    - match:
+        - headers:
+            x-api-version:
+              exact: "v2"
+      route:
+        - destination:
+            host: intelgraph-api-v2
+            port:
+              number: 4000
+          weight: 100
+    - match:
+        - uri:
+            prefix: "/graphql"
+      route:
+        - destination:
+            host: intelgraph-api
+            port:
+              number: 4000
+            subset: stable
+          weight: 90
+        - destination:
+            host: intelgraph-api
+            port:
+              number: 4000
+            subset: canary
+          weight: 10
+      timeout: 30s
+      retries:
+        attempts: 3
+        perTryTimeout: 10s
+        retryOn: 5xx,reset,connect-failure,refused-stream
+    - match:
+        - uri:
+            prefix: "/api"
+      route:
+        - destination:
+            host: intelgraph-api
+            port:
+              number: 4000
+          weight: 100
+      corsPolicy:
+        allowOrigins:
+          - exact: "https://app.intelgraph.io"
+          - regex: "https://.*\\.intelgraph\\.io"
+        allowMethods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+        allowHeaders:
+          - authorization
+          - content-type
+          - x-request-id
+        maxAge: "24h"
+      fault:
+        delay:
+          percentage:
+            value: 0.1
+          fixedDelay: 500ms
 ---
 apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
@@ -92,10 +92,10 @@ spec:
       localityLbSetting:
         enabled: true
         distribute:
-        - from: us-east-1/*
-          to:
-            "us-east-1/*": 80
-            "us-west-2/*": 20
+          - from: us-east-1/*
+            to:
+              "us-east-1/*": 80
+              "us-west-2/*": 20
     outlierDetection:
       consecutiveErrors: 5
       interval: 30s
@@ -103,20 +103,20 @@ spec:
       maxEjectionPercent: 50
       minHealthPercent: 40
   subsets:
-  - name: stable
-    labels:
-      version: stable
-    trafficPolicy:
-      connectionPool:
-        http:
-          maxRequestsPerConnection: 1
-  - name: canary
-    labels:
-      version: canary
-    trafficPolicy:
-      connectionPool:
-        http:
-          maxRequestsPerConnection: 1
+    - name: stable
+      labels:
+        version: stable
+      trafficPolicy:
+        connectionPool:
+          http:
+            maxRequestsPerConnection: 1
+    - name: canary
+      labels:
+        version: canary
+      trafficPolicy:
+        connectionPool:
+          http:
+            maxRequestsPerConnection: 1
 ---
 apiVersion: networking.istio.io/v1beta1
 kind: Gateway
@@ -127,21 +127,21 @@ spec:
   selector:
     istio: ingressgateway
   servers:
-  - port:
-      number: 443
-      name: https
-      protocol: HTTPS
-    tls:
-      mode: SIMPLE
-      credentialName: intelgraph-tls-cert
-    hosts:
-    - "api.intelgraph.io"
-    - "*.intelgraph.io"
-  - port:
-      number: 80
-      name: http
-      protocol: HTTP
-    hosts:
-    - "api.intelgraph.io"
-    tls:
-      httpsRedirect: true
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: intelgraph-tls-cert
+      hosts:
+        - "api.intelgraph.io"
+        - "*.intelgraph.io"
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "api.intelgraph.io"
+      tls:
+        httpsRedirect: true

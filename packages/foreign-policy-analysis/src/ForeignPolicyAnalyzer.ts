@@ -7,8 +7,8 @@ import {
   StrategicDoctrine,
   PolicyAlignment,
   PolicyComparison,
-  VotingRecord
-} from './types.js';
+  VotingRecord,
+} from "./types.js";
 
 /**
  * ForeignPolicyAnalyzer
@@ -65,7 +65,7 @@ export class ForeignPolicyAnalyzer {
   getPoliciesByCountry(country: string): ForeignPolicy[] {
     const policyIds = this.policiesByCountry.get(country) || new Set();
     return Array.from(policyIds)
-      .map(id => this.policies.get(id))
+      .map((id) => this.policies.get(id))
       .filter((p): p is ForeignPolicy => p !== undefined);
   }
 
@@ -75,7 +75,7 @@ export class ForeignPolicyAnalyzer {
   getPoliciesByDomain(domain: PolicyDomain): ForeignPolicy[] {
     const policyIds = this.policiesByDomain.get(domain) || new Set();
     return Array.from(policyIds)
-      .map(id => this.policies.get(id))
+      .map((id) => this.policies.get(id))
       .filter((p): p is ForeignPolicy => p !== undefined);
   }
 
@@ -91,7 +91,7 @@ export class ForeignPolicyAnalyzer {
 
     for (const policy of policies) {
       if (policy.shiftHistory) {
-        const recentShifts = policy.shiftHistory.filter(s => s.date >= cutoffDate);
+        const recentShifts = policy.shiftHistory.filter((s) => s.date >= cutoffDate);
         shifts.push(...recentShifts);
       }
     }
@@ -120,7 +120,7 @@ export class ForeignPolicyAnalyzer {
       YES: 0,
       NO: 0,
       ABSTAIN: 0,
-      ABSENT: 0
+      ABSENT: 0,
     };
 
     const topics = new Set<string>();
@@ -131,14 +131,15 @@ export class ForeignPolicyAnalyzer {
     }
 
     // Calculate alignment with majority (simplified)
-    const alignmentWithMajority = allVotes.filter(v => v.vote === 'YES').length / allVotes.length * 100;
+    const alignmentWithMajority =
+      (allVotes.filter((v) => v.vote === "YES").length / allVotes.length) * 100;
 
     return {
       totalVotes: allVotes.length,
       voteDistribution,
       topicsVotedOn: Array.from(topics),
       alignmentWithMajority,
-      frequentCosponsors: []
+      frequentCosponsors: [],
     };
   }
 
@@ -154,7 +155,7 @@ export class ForeignPolicyAnalyzer {
     const differences: string[] = [];
 
     for (const p1 of policies1) {
-      const p2 = policies2.find(p => p.domain === p1.domain && p.topic === p1.topic);
+      const p2 = policies2.find((p) => p.domain === p1.domain && p.topic === p1.topic);
       if (p2) {
         const alignment = this.calculatePositionAlignment(p1.position, p2.position);
 
@@ -174,19 +175,23 @@ export class ForeignPolicyAnalyzer {
       }
     }
 
-    const domainAlignmentArray = Array.from(domainAlignment.entries()).map(([domain, { alignment, count }]) => ({
-      domain,
-      alignment: alignment / count,
-      trend: 'STABLE' as const
-    }));
+    const domainAlignmentArray = Array.from(domainAlignment.entries()).map(
+      ([domain, { alignment, count }]) => ({
+        domain,
+        alignment: alignment / count,
+        trend: "STABLE" as const,
+      })
+    );
 
-    const overallAlignment = domainAlignmentArray.length > 0
-      ? domainAlignmentArray.reduce((sum, d) => sum + d.alignment, 0) / domainAlignmentArray.length
-      : 0;
+    const overallAlignment =
+      domainAlignmentArray.length > 0
+        ? domainAlignmentArray.reduce((sum, d) => sum + d.alignment, 0) /
+          domainAlignmentArray.length
+        : 0;
 
-    let trajectory: 'IMPROVING' | 'STABLE' | 'DETERIORATING' = 'STABLE';
-    if (overallAlignment > 70) trajectory = 'IMPROVING';
-    else if (overallAlignment < 40) trajectory = 'DETERIORATING';
+    let trajectory: "IMPROVING" | "STABLE" | "DETERIORATING" = "STABLE";
+    if (overallAlignment > 70) trajectory = "IMPROVING";
+    else if (overallAlignment < 40) trajectory = "DETERIORATING";
 
     return {
       country1,
@@ -196,7 +201,7 @@ export class ForeignPolicyAnalyzer {
       keySimilarities: similarities.slice(0, 10),
       keyDifferences: differences.slice(0, 10),
       trajectory,
-      outlook: this.generateAlignmentOutlook(overallAlignment, trajectory)
+      outlook: this.generateAlignmentOutlook(overallAlignment, trajectory),
     };
   }
 
@@ -212,29 +217,36 @@ export class ForeignPolicyAnalyzer {
 
     for (const country of countries) {
       const policies = this.getPoliciesByCountry(country);
-      const policy = policies.find(p => p.domain === domain && p.topic === topic);
+      const policy = policies.find((p) => p.domain === domain && p.topic === topic);
 
       if (policy) {
         positions.push({
           country,
           position: policy.position,
-          rationale: policy.officialStatement
+          rationale: policy.officialStatement,
         });
       }
     }
 
     // Categorize into spectrum
     const mostHawkish = positions
-      .filter(p => p.position === PolicyPosition.STRONGLY_OPPOSE || p.position === PolicyPosition.OPPOSE)
-      .map(p => p.country);
+      .filter(
+        (p) => p.position === PolicyPosition.STRONGLY_OPPOSE || p.position === PolicyPosition.OPPOSE
+      )
+      .map((p) => p.country);
 
     const moderate = positions
-      .filter(p => p.position === PolicyPosition.NEUTRAL || p.position === PolicyPosition.CONDITIONAL)
-      .map(p => p.country);
+      .filter(
+        (p) => p.position === PolicyPosition.NEUTRAL || p.position === PolicyPosition.CONDITIONAL
+      )
+      .map((p) => p.country);
 
     const mostDovish = positions
-      .filter(p => p.position === PolicyPosition.STRONGLY_SUPPORT || p.position === PolicyPosition.SUPPORT)
-      .map(p => p.country);
+      .filter(
+        (p) =>
+          p.position === PolicyPosition.STRONGLY_SUPPORT || p.position === PolicyPosition.SUPPORT
+      )
+      .map((p) => p.country);
 
     // Detect coalitions
     const coalitions = this.detectCoalitions(positions);
@@ -247,17 +259,20 @@ export class ForeignPolicyAnalyzer {
       spectrum: {
         mostHawkish,
         moderate,
-        mostDovish
+        mostDovish,
       },
       coalitions,
-      outliers: []
+      outliers: [],
     };
   }
 
   /**
    * Analyze policy consistency over time
    */
-  analyzePolicyConsistency(country: string, domain?: PolicyDomain): {
+  analyzePolicyConsistency(
+    country: string,
+    domain?: PolicyDomain
+  ): {
     overallConsistency: number;
     volatilePolicies: string[];
     stablePolicies: string[];
@@ -266,27 +281,28 @@ export class ForeignPolicyAnalyzer {
     let policies = this.getPoliciesByCountry(country);
 
     if (domain) {
-      policies = policies.filter(p => p.domain === domain);
+      policies = policies.filter((p) => p.domain === domain);
     }
 
-    const consistencyScores = policies.map(p => p.consistency);
-    const overallConsistency = consistencyScores.length > 0
-      ? consistencyScores.reduce((a, b) => a + b, 0) / consistencyScores.length
-      : 0;
+    const consistencyScores = policies.map((p) => p.consistency);
+    const overallConsistency =
+      consistencyScores.length > 0
+        ? consistencyScores.reduce((a, b) => a + b, 0) / consistencyScores.length
+        : 0;
 
     const volatilePolicies = policies
-      .filter(p => p.trendDirection === 'VOLATILE')
-      .map(p => p.topic);
+      .filter((p) => p.trendDirection === "VOLATILE")
+      .map((p) => p.topic);
 
     const stablePolicies = policies
-      .filter(p => p.trendDirection === 'STABLE' && p.consistency > 80)
-      .map(p => p.topic);
+      .filter((p) => p.trendDirection === "STABLE" && p.consistency > 80)
+      .map((p) => p.topic);
 
     const majorReversals: PolicyShift[] = [];
     for (const policy of policies) {
       if (policy.shiftHistory) {
-        const reversals = policy.shiftHistory.filter(s =>
-          s.shiftType === 'MAJOR_REVERSAL' && s.magnitude >= 7
+        const reversals = policy.shiftHistory.filter(
+          (s) => s.shiftType === "MAJOR_REVERSAL" && s.magnitude >= 7
         );
         majorReversals.push(...reversals);
       }
@@ -296,44 +312,47 @@ export class ForeignPolicyAnalyzer {
       overallConsistency,
       volatilePolicies,
       stablePolicies,
-      majorReversals: majorReversals.sort((a, b) => b.date.getTime() - a.date.getTime())
+      majorReversals: majorReversals.sort((a, b) => b.date.getTime() - a.date.getTime()),
     };
   }
 
   /**
    * Predict policy evolution
    */
-  predictPolicyEvolution(country: string, domain: PolicyDomain): {
+  predictPolicyEvolution(
+    country: string,
+    domain: PolicyDomain
+  ): {
     domain: PolicyDomain;
     currentTrend: string;
-    predictedDirection: 'HARDENING' | 'SOFTENING' | 'STABLE';
+    predictedDirection: "HARDENING" | "SOFTENING" | "STABLE";
     confidence: number;
     indicators: string[];
     timeframe: string;
   } {
-    const policies = this.getPoliciesByCountry(country).filter(p => p.domain === domain);
+    const policies = this.getPoliciesByCountry(country).filter((p) => p.domain === domain);
 
     if (policies.length === 0) {
       return {
         domain,
-        currentTrend: 'UNKNOWN',
-        predictedDirection: 'STABLE',
+        currentTrend: "UNKNOWN",
+        predictedDirection: "STABLE",
         confidence: 0,
         indicators: [],
-        timeframe: 'N/A'
+        timeframe: "N/A",
       };
     }
 
     // Analyze trends
-    const hardening = policies.filter(p => p.trendDirection === 'HARDENING').length;
-    const softening = policies.filter(p => p.trendDirection === 'SOFTENING').length;
-    const stable = policies.filter(p => p.trendDirection === 'STABLE').length;
+    const hardening = policies.filter((p) => p.trendDirection === "HARDENING").length;
+    const softening = policies.filter((p) => p.trendDirection === "SOFTENING").length;
+    const stable = policies.filter((p) => p.trendDirection === "STABLE").length;
 
-    let predictedDirection: 'HARDENING' | 'SOFTENING' | 'STABLE' = 'STABLE';
-    if (hardening > softening && hardening > stable) predictedDirection = 'HARDENING';
-    else if (softening > hardening && softening > stable) predictedDirection = 'SOFTENING';
+    let predictedDirection: "HARDENING" | "SOFTENING" | "STABLE" = "STABLE";
+    if (hardening > softening && hardening > stable) predictedDirection = "HARDENING";
+    else if (softening > hardening && softening > stable) predictedDirection = "SOFTENING";
 
-    const confidence = Math.max(hardening, softening, stable) / policies.length * 100;
+    const confidence = (Math.max(hardening, softening, stable) / policies.length) * 100;
 
     const indicators = this.identifyPolicyIndicators(policies, predictedDirection);
 
@@ -343,17 +362,20 @@ export class ForeignPolicyAnalyzer {
       predictedDirection,
       confidence,
       indicators,
-      timeframe: '6-12 months'
+      timeframe: "6-12 months",
     };
   }
 
   /**
    * Get national interests for a country
    */
-  getNationalInterests(country: string, category?: 'VITAL' | 'IMPORTANT' | 'PERIPHERAL'): NationalInterest[] {
+  getNationalInterests(
+    country: string,
+    category?: "VITAL" | "IMPORTANT" | "PERIPHERAL"
+  ): NationalInterest[] {
     const interests = this.interests.get(country) || [];
     if (category) {
-      return interests.filter(i => i.category === category);
+      return interests.filter((i) => i.category === category);
     }
     return interests;
   }
@@ -361,7 +383,10 @@ export class ForeignPolicyAnalyzer {
   /**
    * Analyze doctrine-policy alignment
    */
-  analyzeDoctrineAlignment(country: string, doctrineName: string): {
+  analyzeDoctrineAlignment(
+    country: string,
+    doctrineName: string
+  ): {
     alignment: number;
     consistentPolicies: string[];
     inconsistentPolicies: string[];
@@ -373,7 +398,7 @@ export class ForeignPolicyAnalyzer {
         alignment: 0,
         consistentPolicies: [],
         inconsistentPolicies: [],
-        recommendations: ['Doctrine not found']
+        recommendations: ["Doctrine not found"],
       };
     }
 
@@ -390,21 +415,19 @@ export class ForeignPolicyAnalyzer {
       }
     }
 
-    const alignment = policies.length > 0
-      ? (consistentPolicies.length / policies.length) * 100
-      : 0;
+    const alignment = policies.length > 0 ? (consistentPolicies.length / policies.length) * 100 : 0;
 
     const recommendations = [];
     if (alignment < 60) {
-      recommendations.push('Consider revising doctrine to match actual policies');
-      recommendations.push('Increase coordination between policy formulation and implementation');
+      recommendations.push("Consider revising doctrine to match actual policies");
+      recommendations.push("Increase coordination between policy formulation and implementation");
     }
 
     return {
       alignment,
       consistentPolicies,
       inconsistentPolicies,
-      recommendations
+      recommendations,
     };
   }
 
@@ -416,7 +439,7 @@ export class ForeignPolicyAnalyzer {
       PolicyPosition.OPPOSE,
       PolicyPosition.NEUTRAL,
       PolicyPosition.SUPPORT,
-      PolicyPosition.STRONGLY_SUPPORT
+      PolicyPosition.STRONGLY_SUPPORT,
     ];
 
     const idx1 = positions.indexOf(pos1);
@@ -425,18 +448,18 @@ export class ForeignPolicyAnalyzer {
     if (idx1 === -1 || idx2 === -1) return 50; // Unknown positions
 
     const distance = Math.abs(idx1 - idx2);
-    return Math.max(0, 100 - (distance * 25));
+    return Math.max(0, 100 - distance * 25);
   }
 
   private generateAlignmentOutlook(alignment: number, trajectory: string): string {
     if (alignment > 80) {
-      return 'Strong strategic partnership with high policy coherence';
+      return "Strong strategic partnership with high policy coherence";
     } else if (alignment > 60) {
-      return 'Significant alignment with areas of cooperation';
+      return "Significant alignment with areas of cooperation";
     } else if (alignment > 40) {
-      return 'Mixed alignment with both cooperation and competition';
+      return "Mixed alignment with both cooperation and competition";
     } else {
-      return 'Low alignment with significant policy divergence';
+      return "Low alignment with significant policy divergence";
     }
   }
 
@@ -459,7 +482,7 @@ export class ForeignPolicyAnalyzer {
       .map(([position, members]) => ({
         name: `${position} Coalition`,
         members,
-        position: position.toString()
+        position: position.toString(),
       }));
   }
 
@@ -499,7 +522,7 @@ export class ForeignPolicyAnalyzer {
       totalPolicies: this.policies.size,
       policiesByDomain,
       countriesTracked: this.policiesByCountry.size,
-      doctrinesTracked: this.doctrines.size
+      doctrinesTracked: this.doctrines.size,
     };
   }
 }

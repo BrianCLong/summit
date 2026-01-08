@@ -182,9 +182,7 @@ export const getAllAlerts = (): OSINTAlert[] => {
   });
 
   // Sort by timestamp descending
-  return alerts.sort(
-    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-  );
+  return alerts.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 };
 
 export const getUnreadAlerts = (): OSINTAlert[] => {
@@ -301,7 +299,12 @@ export const clearAllData = (): void => {
   OfflineService.clearAllData().catch(console.error);
 };
 
-export const getStorageSize = (): { entities: number; investigations: number; alerts: number; geoint: number } => {
+export const getStorageSize = (): {
+  entities: number;
+  investigations: number;
+  alerts: number;
+  geoint: number;
+} => {
   return {
     entities: entityStorage.getAllKeys().length,
     investigations: investigationStorage.getAllKeys().length,

@@ -50,6 +50,7 @@ Hold rollback and continue investigation when:
 
 1. Identify the last known good image tag (from `helm history` or release notes).
 2. Trigger the workflow with the target environment and tag:
+
    ```bash
    gh workflow run cd-rollback.yml \
      -f environment=staging \
@@ -57,6 +58,7 @@ Hold rollback and continue investigation when:
    ```
 
    - The workflow logs into GHCR, pulls the requested tag, recreates `server`/`client` via Compose, and prunes unused images.
+
 3. Monitor the workflow logs and proceed to post-rollback validation below.
 
 ### Option B: Helm rollback (cluster-admin)

@@ -1,1 +1,1 @@
-export * from './risk-assessor.js';
+export * from "./risk-assessor.js";

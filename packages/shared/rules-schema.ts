@@ -1,6 +1,6 @@
 export interface WatchlistItem {
   value: string;
-  type?: 'entity' | 'term' | 'relation';
+  type?: "entity" | "term" | "relation";
 }
 
 export interface Watchlist {
@@ -13,7 +13,7 @@ export interface Watchlist {
   createdAt: Date;
 }
 
-export type RuleTrigger = 'INGEST' | 'MUTATION' | 'SCHEDULED';
+export type RuleTrigger = "INGEST" | "MUTATION" | "SCHEDULED";
 
 export interface Rule {
   id: string;
@@ -26,7 +26,7 @@ export interface Rule {
   threshold: number;
 }
 
-export type AlertStatus = 'OPEN' | 'ACK' | 'CLOSED';
+export type AlertStatus = "OPEN" | "ACK" | "CLOSED";
 
 export interface Alert {
   id: string;

@@ -3,12 +3,12 @@ name: 🔐 Key Rotation
 on:
   schedule:
     # Run quarterly (every 90 days) at 2 AM UTC
-    - cron: '0 2 1 */3 *'
-  
+    - cron: "0 2 1 */3 *"
+
   workflow_dispatch:
     inputs:
       key_type:
-        description: 'Key type to rotate'
+        description: "Key type to rotate"
         required: true
         type: choice
         options:
@@ -16,16 +16,16 @@ on:
           - database_master
           - api_keys
           - encryption_keys
-        default: 'all'
-      
+        default: "all"
+
       emergency:
-        description: 'Emergency rotation (skip waiting period)'
+        description: "Emergency rotation (skip waiting period)"
         required: false
         type: boolean
         default: false
-      
+
       dry_run:
-        description: 'Dry run (no actual changes)'
+        description: "Dry run (no actual changes)"
         required: false
         type: boolean
         default: true
@@ -42,28 +42,28 @@ jobs:
     outputs:
       keys_to_rotate: ${{ steps.check.outputs.keys }}
       rotation_required: ${{ steps.check.outputs.required }}
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_KMS_ROTATION_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
-      
+
       - name: Check key ages
         id: check
         run: |
           echo "Checking key ages for rotation requirements..."
-          
+
           KEY_TYPE="${{ github.event.inputs.key_type || 'all' }}"
           KEYS_TO_ROTATE=""
-          
+
           # List all KMS keys
           KEYS=$(aws kms list-keys --output json | jq -r '.Keys[].KeyId')
-          
+
           for KEY_ID in $KEYS; do
             # Get key metadata
             METADATA=$(aws kms describe-key --key-id "$KEY_ID" --output json)
@@ -85,7 +85,7 @@ jobs:
               fi
             fi
           done
-          
+
           if [[ -n "$KEYS_TO_ROTATE" ]]; then
             echo "keys=$KEYS_TO_ROTATE" >> $GITHUB_OUTPUT
             echo "required=true" >> $GITHUB_OUTPUT
@@ -93,7 +93,7 @@ jobs:
             echo "No keys require rotation"
             echo "required=false" >> $GITHUB_OUTPUT
           fi
-      
+
       - name: Notify rotation start
         if: steps.check.outputs.required == 'true'
         run: |
@@ -104,126 +104,126 @@ jobs:
     needs: pre-rotation-checks
     if: needs.pre-rotation-checks.outputs.rotation_required == 'true'
     runs-on: ubuntu-latest
-    
+
     strategy:
       matrix:
         key: ${{ fromJSON(format('["{0}"]', needs.pre-rotation-checks.outputs.keys_to_rotate)) }}
       fail-fast: false
       max-parallel: 2
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_KMS_ROTATION_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
-      
+
       - name: Create new key version
         id: new_key
         run: |
           DRY_RUN="${{ github.event.inputs.dry_run || 'true' }}"
-          
+
           if [[ "$DRY_RUN" == "true" ]]; then
             echo "::warning::Dry run mode - no actual key creation"
             echo "new_key_id=dry-run-key-id" >> $GITHUB_OUTPUT
             exit 0
           fi
-          
+
           # Get original key description
           ORIGINAL_DESC=$(aws kms describe-key --key-id "${{ matrix.key }}" \
             --query 'KeyMetadata.Description' --output text)
-          
+
           # Create new key version
           NEW_KEY=$(aws kms create-key \
             --description "${ORIGINAL_DESC} (rotated $(date +%Y%m%d))" \
             --key-usage ENCRYPT_DECRYPT \
             --origin AWS_KMS \
             --output json)
-          
+
           NEW_KEY_ID=$(echo "$NEW_KEY" | jq -r '.KeyMetadata.KeyId')
           echo "new_key_id=$NEW_KEY_ID" >> $GITHUB_OUTPUT
           echo "Created new key: $NEW_KEY_ID"
-      
+
       - name: Enable automatic key rotation
         run: |
           DRY_RUN="${{ github.event.inputs.dry_run || 'true' }}"
-          
+
           if [[ "$DRY_RUN" == "true" ]]; then
             echo "::warning::Dry run mode - skipping rotation enablement"
             exit 0
           fi
-          
+
           # Enable automatic rotation for the new key
           aws kms enable-key-rotation --key-id "${{ steps.new_key.outputs.new_key_id }}"
           echo "Enabled automatic rotation for new key"
-      
+
       - name: Update Kubernetes secrets
         run: |
           DRY_RUN="${{ github.event.inputs.dry_run || 'true' }}"
-          
+
           if [[ "$DRY_RUN" == "true" ]]; then
             echo "::warning::Dry run mode - skipping Kubernetes secret update"
             exit 0
           fi
-          
+
           # Update Kubernetes secret with new key ID
           # This would typically use kubectl or Helm
           echo "Updating Kubernetes secrets with new key ID..."
-          
+
           # Example (requires cluster access):
           # kubectl set env deployment/summit-api \
           #   KMS_KEY_ID=${{ steps.new_key.outputs.new_key_id }} \
           #   KMS_OLD_KEY_ID=${{ matrix.key }} \
           #   KMS_ROTATION_MODE=dual_write
-      
+
       - name: Trigger gradual rollout
         run: |
           DRY_RUN="${{ github.event.inputs.dry_run || 'true' }}"
-          
+
           if [[ "$DRY_RUN" == "true" ]]; then
             echo "::warning::Dry run mode - skipping rollout"
             exit 0
           fi
-          
+
           echo "Triggering gradual service rollout..."
           # kubectl rollout restart deployment/summit-api
           # kubectl rollout restart deployment/summit-worker
-      
+
       - name: Wait for dual-write period
         if: github.event.inputs.emergency != 'true'
         run: |
           DRY_RUN="${{ github.event.inputs.dry_run || 'true' }}"
           EMERGENCY="${{ github.event.inputs.emergency || 'false' }}"
-          
+
           if [[ "$DRY_RUN" == "true" ]]; then
             echo "::warning::Dry run mode - skipping wait period"
             exit 0
           fi
-          
+
           if [[ "$EMERGENCY" == "true" ]]; then
             echo "::warning::Emergency mode - skipping wait period"
             exit 0
           fi
-          
+
           echo "Waiting ${{ env.ROTATION_WAIT_HOURS }} hours for dual-write period..."
           # In production, this would wait the full period
           # For CI, we'll just log the expected wait time
           echo "Services will accept both old and new keys during this period"
-      
+
       - name: Verify decryption with both keys
         run: |
           DRY_RUN="${{ github.event.inputs.dry_run || 'true' }}"
-          
+
           if [[ "$DRY_RUN" == "true" ]]; then
             echo "::warning::Dry run mode - skipping verification"
             exit 0
           fi
-          
+
           echo "Verifying decryption works with both keys..."
-          
+
           # Test encryption with new key
           TEST_DATA="rotation-test-$(date +%s)"
           ENCRYPTED=$(aws kms encrypt \
@@ -231,41 +231,41 @@ jobs:
             --plaintext "$TEST_DATA" \
             --output text \
             --query CiphertextBlob)
-          
+
           # Test decryption (should work with new key)
           DECRYPTED=$(aws kms decrypt \
             --ciphertext-blob "fileb://<(echo $ENCRYPTED | base64 -d)" \
             --output text \
             --query Plaintext | base64 -d)
-          
+
           if [[ "$DECRYPTED" == "$TEST_DATA" ]]; then
             echo "✅ New key encryption/decryption verified"
           else
             echo "::error::New key verification failed"
             exit 1
           fi
-      
+
       - name: Disable old key
         if: github.event.inputs.dry_run != 'true'
         run: |
           DRY_RUN="${{ github.event.inputs.dry_run || 'true' }}"
-          
+
           if [[ "$DRY_RUN" == "true" ]]; then
             echo "::warning::Dry run mode - skipping old key disablement"
             exit 0
           fi
-          
+
           # Disable the old key
           aws kms disable-key --key-id "${{ matrix.key }}"
           echo "Disabled old key: ${{ matrix.key }}"
-          
+
           # Schedule deletion in 30 days (compliance retention)
           aws kms schedule-key-deletion \
             --key-id "${{ matrix.key }}" \
             --pending-window-in-days 30
-          
+
           echo "Scheduled old key deletion in 30 days"
-      
+
       - name: Log rotation event
         run: |
           cat >> rotation-log.json << EOF
@@ -279,9 +279,9 @@ jobs:
             "workflow_run": "${{ github.run_id }}"
           }
           EOF
-          
+
           echo "Rotation event logged"
-      
+
       - name: Upload rotation logs
         uses: actions/upload-artifact@v4
         with:
@@ -294,14 +294,14 @@ jobs:
     needs: [pre-rotation-checks, rotate-keys]
     if: always()
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Download all rotation logs
         uses: actions/download-artifact@v4
         with:
           pattern: rotation-logs-*
           path: ./logs
-      
+
       - name: Generate rotation summary
         run: |
           echo "# Key Rotation Summary" > summary.md
@@ -310,7 +310,7 @@ jobs:
           echo "**Workflow Run:** ${{ github.run_id }}" >> summary.md
           echo "**Dry Run:** ${{ github.event.inputs.dry_run || 'true' }}" >> summary.md
           echo "" >> summary.md
-          
+
           if [[ -d "./logs" ]]; then
             echo "## Rotated Keys" >> summary.md
             for log in ./logs/*/rotation-log.json; do
@@ -323,9 +323,9 @@ jobs:
           else
             echo "No keys were rotated in this run." >> summary.md
           fi
-          
+
           cat summary.md >> $GITHUB_STEP_SUMMARY
-      
+
       - name: Send Slack notification
         if: github.event.inputs.dry_run != 'true'
         run: |
@@ -335,7 +335,7 @@ jobs:
           # curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} \
           #   -H 'Content-Type: application/json' \
           #   -d '{"text":"Key rotation completed. Run ID: ${{ github.run_id }}"}'
-      
+
       - name: Update compliance tracking
         if: github.event.inputs.dry_run != 'true'
         run: |
@@ -348,15 +348,15 @@ jobs:
     needs: rotate-keys
     if: github.event.inputs.dry_run != 'true'
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Monitor error rates
         run: |
           echo "Monitoring decryption error rates..."
-          
+
           # Query CloudWatch or application metrics
           # Check for increased error rates indicating rotation issues
-          
+
           # Example CloudWatch query:
           # aws cloudwatch get-metric-statistics \
           #   --namespace Summit/KMS \
@@ -365,9 +365,9 @@ jobs:
           #   --end-time $(date -u +%Y-%m-%dT%H:%M:%S) \
           #   --period 300 \
           #   --statistics Sum
-          
+
           echo "No significant error rate increases detected"
-      
+
       - name: Alert if errors detected
         run: |
           # If error rate > 0.1%, trigger alert

@@ -1,4 +1,4 @@
-import type { RelationshipType } from '../core/types.js';
+import type { RelationshipType } from "../core/types.js";
 
 export interface RelationshipSnapshot {
   sourceId: string;
@@ -24,7 +24,7 @@ export class Relationship {
   }) {
     this.sourceId = options.sourceId;
     this.targetId = options.targetId;
-    this.type = options.type ?? 'neutral';
+    this.type = options.type ?? "neutral";
     this.intensity = Math.max(0, Math.min(1, options.intensity ?? 0.5));
     this.trust = Math.max(0, Math.min(1, options.trust ?? 0.5));
   }
@@ -41,11 +41,7 @@ export class Relationship {
 
   influenceFromMood(mood: number): number {
     const direction =
-      this.type === 'ally' || this.type === 'family'
-        ? 1
-        : this.type === 'rival'
-          ? -1
-          : 0.25;
+      this.type === "ally" || this.type === "family" ? 1 : this.type === "rival" ? -1 : 0.25;
     const scaled = mood * this.intensity * this.trust * direction;
     return Math.max(-5, Math.min(5, scaled));
   }

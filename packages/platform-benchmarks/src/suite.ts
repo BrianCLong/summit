@@ -1,6 +1,4 @@
-import {
-  BenchmarkHarness,
-} from './harness.js';
+import { BenchmarkHarness } from "./harness.js";
 import type {
   BenchmarkConfig,
   BenchmarkSuiteConfig,
@@ -8,8 +6,8 @@ import type {
   BenchmarkResult,
   BenchmarkReporter,
   BenchmarkConfigSchema,
-} from './types.js';
-import { ConsoleReporter } from './reporters/console.js';
+} from "./types.js";
+import { ConsoleReporter } from "./reporters/console.js";
 
 /**
  * Benchmark suite for organizing and running multiple benchmarks
@@ -64,11 +62,12 @@ export class BenchmarkSuite {
     for (const benchmark of this.benchmarks) {
       const config: BenchmarkConfig = {
         name: benchmark.name,
-        subsystem: benchmark.config?.subsystem ?? 'api',
-        language: benchmark.config?.language ?? 'typescript',
-        workloadType: benchmark.config?.workloadType ?? 'cpu',
+        subsystem: benchmark.config?.subsystem ?? "api",
+        language: benchmark.config?.language ?? "typescript",
+        workloadType: benchmark.config?.workloadType ?? "cpu",
         iterations: benchmark.config?.iterations ?? this.config.defaultIterations ?? 1000,
-        warmupIterations: benchmark.config?.warmupIterations ?? this.config.defaultWarmupIterations ?? 100,
+        warmupIterations:
+          benchmark.config?.warmupIterations ?? this.config.defaultWarmupIterations ?? 100,
         timeout: benchmark.config?.timeout ?? 30000,
         tags: benchmark.config?.tags ?? this.config.tags ?? [],
         description: benchmark.config?.description,
@@ -143,11 +142,11 @@ export class BenchmarkSuite {
             arrayBuffers: 0,
           },
           timestamp: new Date().toISOString(),
-          gitCommit: 'unknown',
+          gitCommit: "unknown",
           nodeVersion: process.version,
           platform: {
-            os: 'unknown',
-            arch: 'unknown',
+            os: "unknown",
+            arch: "unknown",
             cpus: 0,
             totalMemory: 0,
           },

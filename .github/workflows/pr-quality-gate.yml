@@ -87,3 +87,33 @@ jobs:
           name: sbom-cyclonedx
           path: artifacts/sbom/sbom.json
           retention-days: 14
+
+  casepack-verify:
+    name: Case Pack Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build and Verify Case Pack
+        run: |
+          mkdir -p /tmp/casepack-test
+          echo '{"selectors":[]}' > /tmp/scope.json
+          node scripts/casepack/build.mjs --case test-case --scope /tmp/scope.json --out /tmp/casepack-test
+          node scripts/casepack/verify.mjs --path /tmp/casepack-test
+
+      - name: Upload Case Pack Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: casepack
+          path: /tmp/casepack-test
+          retention-days: 14

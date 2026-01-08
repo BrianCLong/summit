@@ -43,7 +43,7 @@ class GrpcJsonClient implements RunJobClient {
     const res = await fetch(`http://${this.host}/runJob`, {
       method: "POST",
       body,
-      headers: { "content-type": "application/json" }
+      headers: { "content-type": "application/json" },
     });
     if (!res.ok) {
       throw new Error(`CCE runJob failed: ${res.status}`);

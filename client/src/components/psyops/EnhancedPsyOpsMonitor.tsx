@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import Grid from '@mui/material/Grid';
+import React, { useState, useEffect, useCallback } from "react";
+import Grid from "@mui/material/Grid";
 import {
   Box,
   Typography,
@@ -21,7 +21,7 @@ import {
   Badge,
   IconButton,
   Tooltip,
-} from '@mui/material';
+} from "@mui/material";
 import {
   ExpandMore,
   Visibility,
@@ -32,8 +32,8 @@ import {
   Refresh,
   PlayArrow,
   Stop,
-} from '@mui/icons-material';
-import { analyzeText } from '../../psyops-monitor/detector';
+} from "@mui/icons-material";
+import { analyzeText } from "../../psyops-monitor/detector";
 
 interface BasicAnalysis {
   score: number;
@@ -59,7 +59,7 @@ interface ThreatMetrics {
 
 const EnhancedPsyOpsMonitor: React.FC = () => {
   const [isMonitoring, setIsMonitoring] = useState(false);
-  const [inputText, setInputText] = useState('');
+  const [inputText, setInputText] = useState("");
   const [analysisResults, setAnalysisResults] = useState<AnalysisResult[]>([]);
   const [metrics, setMetrics] = useState<ThreatMetrics>({
     totalAnalyzed: 0,
@@ -70,59 +70,49 @@ const EnhancedPsyOpsMonitor: React.FC = () => {
   const [realTimeEnabled, setRealTimeEnabled] = useState(false);
 
   // Enhanced analysis function that integrates with backend capabilities
-  const performAnalysis = useCallback(
-    async (text: string, source: string = 'manual') => {
-      if (!text.trim()) return;
+  const performAnalysis = useCallback(async (text: string, source: string = "manual") => {
+    if (!text.trim()) return;
 
-      // Use the existing client-side detector
-      const basicAnalysis: BasicAnalysis = analyzeText(text);
+    // Use the existing client-side detector
+    const basicAnalysis: BasicAnalysis = analyzeText(text);
 
-      // Enhanced analysis with additional checks
-      const enhancedScore = calculateEnhancedScore(text, basicAnalysis);
-      const countermeasures = generateCountermeasures(
-        basicAnalysis.tags,
-        enhancedScore,
-      );
+    // Enhanced analysis with additional checks
+    const enhancedScore = calculateEnhancedScore(text, basicAnalysis);
+    const countermeasures = generateCountermeasures(basicAnalysis.tags, enhancedScore);
 
-      const result: AnalysisResult = {
-        id: `analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        text: text.substring(0, 200) + (text.length > 200 ? '...' : ''),
+    const result: AnalysisResult = {
+      id: `analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      text: text.substring(0, 200) + (text.length > 200 ? "..." : ""),
+      score: enhancedScore,
+      tags: basicAnalysis.tags,
+      timestamp: new Date(),
+      source,
+      countermeasures,
+    };
+
+    setAnalysisResults((prev) => [result, ...prev.slice(0, 49)]); // Keep last 50 results
+
+    // Update metrics
+    setMetrics((prev) => ({
+      totalAnalyzed: prev.totalAnalyzed + 1,
+      threatsDetected: prev.threatsDetected + (enhancedScore > 0.5 ? 1 : 0),
+      averageScore:
+        (prev.averageScore * prev.totalAnalyzed + enhancedScore) / (prev.totalAnalyzed + 1),
+      lastUpdate: new Date(),
+    }));
+
+    // If this is a high-risk detection, could trigger backend notification
+    if (enhancedScore > 0.7) {
+      console.log("High-risk content detected:", {
         score: enhancedScore,
         tags: basicAnalysis.tags,
-        timestamp: new Date(),
-        source,
-        countermeasures,
-      };
-
-      setAnalysisResults((prev) => [result, ...prev.slice(0, 49)]); // Keep last 50 results
-
-      // Update metrics
-      setMetrics((prev) => ({
-        totalAnalyzed: prev.totalAnalyzed + 1,
-        threatsDetected: prev.threatsDetected + (enhancedScore > 0.5 ? 1 : 0),
-        averageScore:
-          (prev.averageScore * prev.totalAnalyzed + enhancedScore) /
-          (prev.totalAnalyzed + 1),
-        lastUpdate: new Date(),
-      }));
-
-      // If this is a high-risk detection, could trigger backend notification
-      if (enhancedScore > 0.7) {
-        console.log('High-risk content detected:', {
-          score: enhancedScore,
-          tags: basicAnalysis.tags,
-          text: text.substring(0, 100),
-        });
-      }
-    },
-    [],
-  );
+        text: text.substring(0, 100),
+      });
+    }
+  }, []);
 
   // Enhanced scoring that considers additional factors
-  const calculateEnhancedScore = (
-    text: string,
-    basicAnalysis: BasicAnalysis,
-  ): number => {
+  const calculateEnhancedScore = (text: string, basicAnalysis: BasicAnalysis): number => {
     let score = basicAnalysis.score;
 
     // Additional scoring factors
@@ -135,14 +125,7 @@ const EnhancedPsyOpsMonitor: React.FC = () => {
     const exclamationCount = (text.match(/!/g) || []).length;
     if (exclamationCount > 2) score += 0.1; // Excessive exclamation
 
-    const urgencyWords = [
-      'urgent',
-      'immediate',
-      'now',
-      'hurry',
-      'crisis',
-      'emergency',
-    ];
+    const urgencyWords = ["urgent", "immediate", "now", "hurry", "crisis", "emergency"];
     if (urgencyWords.some((word) => text.toLowerCase().includes(word))) {
       score += 0.15; // Urgency manipulation
     }
@@ -157,25 +140,23 @@ const EnhancedPsyOpsMonitor: React.FC = () => {
   const generateCountermeasures = (tags: string[], score: number): string[] => {
     const countermeasures: string[] = [];
 
-    if (tags.includes('bias')) {
-      countermeasures.push('Source verification recommended');
-      countermeasures.push('Cross-reference with factual sources');
+    if (tags.includes("bias")) {
+      countermeasures.push("Source verification recommended");
+      countermeasures.push("Cross-reference with factual sources");
     }
 
-    if (tags.some((tag) => tag.startsWith('emotion:'))) {
-      countermeasures.push(
-        'Emotional manipulation detected - apply critical thinking',
-      );
-      countermeasures.push('Consider the emotional intent behind the message');
+    if (tags.some((tag) => tag.startsWith("emotion:"))) {
+      countermeasures.push("Emotional manipulation detected - apply critical thinking");
+      countermeasures.push("Consider the emotional intent behind the message");
     }
 
     if (score > 0.7) {
-      countermeasures.push('High-risk content - human review recommended');
-      countermeasures.push('Consider content isolation or flagging');
+      countermeasures.push("High-risk content - human review recommended");
+      countermeasures.push("Consider content isolation or flagging");
     }
 
     if (score > 0.5) {
-      countermeasures.push('Moderate risk - monitor for patterns');
+      countermeasures.push("Moderate risk - monitor for patterns");
     }
 
     return countermeasures;
@@ -189,16 +170,15 @@ const EnhancedPsyOpsMonitor: React.FC = () => {
       interval = setInterval(() => {
         // Simulate incoming content for monitoring
         const simulatedContent = [
-          'Breaking: Urgent action needed on this critical issue!',
-          'Everyone knows this is fake news and propaganda!',
+          "Breaking: Urgent action needed on this critical issue!",
+          "Everyone knows this is fake news and propaganda!",
           "You should be furious about what they're hiding from you!",
-          'The truth is they never tell you the real story.',
-          'Normal news content with balanced reporting.',
+          "The truth is they never tell you the real story.",
+          "Normal news content with balanced reporting.",
         ];
 
-        const randomContent =
-          simulatedContent[Math.floor(Math.random() * simulatedContent.length)];
-        performAnalysis(randomContent, 'real-time');
+        const randomContent = simulatedContent[Math.floor(Math.random() * simulatedContent.length)];
+        performAnalysis(randomContent, "real-time");
       }, 5000); // Analyze every 5 seconds
     }
 
@@ -208,39 +188,33 @@ const EnhancedPsyOpsMonitor: React.FC = () => {
   }, [realTimeEnabled, isMonitoring, performAnalysis]);
 
   const handleManualAnalysis = () => {
-    performAnalysis(inputText, 'manual');
-    setInputText('');
+    performAnalysis(inputText, "manual");
+    setInputText("");
   };
 
-  const getScoreColor = (
-    score: number,
-  ): 'error' | 'warning' | 'success' => {
-    if (score >= 0.7) return 'error';
-    if (score >= 0.4) return 'warning';
-    return 'success';
+  const getScoreColor = (score: number): "error" | "warning" | "success" => {
+    if (score >= 0.7) return "error";
+    if (score >= 0.4) return "warning";
+    return "success";
   };
 
   const getScoreLabel = (score: number) => {
-    if (score >= 0.7) return 'High Risk';
-    if (score >= 0.4) return 'Medium Risk';
-    return 'Low Risk';
+    if (score >= 0.7) return "High Risk";
+    if (score >= 0.4) return "Medium Risk";
+    return "Low Risk";
   };
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography
-        variant="h5"
-        gutterBottom
-        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-      >
+      <Typography variant="h5" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
         <Psychology color="primary" />
         Enhanced PsyOps Monitor
       </Typography>
 
       <Alert severity="info" sx={{ mb: 3 }}>
-        <strong>Defensive Security Tool:</strong> This monitor analyzes content
-        for psychological manipulation patterns and provides defensive
-        countermeasures. All analysis is for protective purposes only.
+        <strong>Defensive Security Tool:</strong> This monitor analyzes content for psychological
+        manipulation patterns and provides defensive countermeasures. All analysis is for protective
+        purposes only.
       </Alert>
 
       {/* Control Panel */}
@@ -287,7 +261,7 @@ const EnhancedPsyOpsMonitor: React.FC = () => {
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} md={3}>
           <Card>
-            <CardContent sx={{ textAlign: 'center' }}>
+            <CardContent sx={{ textAlign: "center" }}>
               <Typography variant="h4" color="primary">
                 {metrics.totalAnalyzed}
               </Typography>
@@ -297,7 +271,7 @@ const EnhancedPsyOpsMonitor: React.FC = () => {
         </Grid>
         <Grid item xs={12} md={3}>
           <Card>
-            <CardContent sx={{ textAlign: 'center' }}>
+            <CardContent sx={{ textAlign: "center" }}>
               <Typography variant="h4" color="error">
                 {metrics.threatsDetected}
               </Typography>
@@ -307,7 +281,7 @@ const EnhancedPsyOpsMonitor: React.FC = () => {
         </Grid>
         <Grid item xs={12} md={3}>
           <Card>
-            <CardContent sx={{ textAlign: 'center' }}>
+            <CardContent sx={{ textAlign: "center" }}>
               <Typography variant="h4" color="warning.main">
                 {(metrics.averageScore * 100).toFixed(1)}%
               </Typography>
@@ -317,9 +291,9 @@ const EnhancedPsyOpsMonitor: React.FC = () => {
         </Grid>
         <Grid item xs={12} md={3}>
           <Card>
-            <CardContent sx={{ textAlign: 'center' }}>
+            <CardContent sx={{ textAlign: "center" }}>
               <Typography variant="h4" color="success.main">
-                {isMonitoring ? 'Active' : 'Inactive'}
+                {isMonitoring ? "Active" : "Inactive"}
               </Typography>
               <Typography variant="body2">Monitor Status</Typography>
             </CardContent>
@@ -351,7 +325,7 @@ const EnhancedPsyOpsMonitor: React.FC = () => {
                 variant="contained"
                 onClick={handleManualAnalysis}
                 disabled={!inputText.trim()}
-                sx={{ height: '100%' }}
+                sx={{ height: "100%" }}
                 startIcon={<Visibility />}
               >
                 Analyze Content
@@ -367,7 +341,7 @@ const EnhancedPsyOpsMonitor: React.FC = () => {
           <Typography
             variant="h6"
             gutterBottom
-            sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+            sx={{ display: "flex", alignItems: "center", gap: 1 }}
           >
             <Security />
             Analysis Results
@@ -376,8 +350,8 @@ const EnhancedPsyOpsMonitor: React.FC = () => {
 
           {analysisResults.length === 0 ? (
             <Alert severity="info">
-              No analysis results yet. Enter content above or enable real-time
-              monitoring to begin analysis.
+              No analysis results yet. Enter content above or enable real-time monitoring to begin
+              analysis.
             </Alert>
           ) : (
             <List>
@@ -386,10 +360,10 @@ const EnhancedPsyOpsMonitor: React.FC = () => {
                   <AccordionSummary expandIcon={<ExpandMore />}>
                     <Box
                       sx={{
-                        display: 'flex',
-                        alignItems: 'center',
+                        display: "flex",
+                        alignItems: "center",
                         gap: 2,
-                        width: '100%',
+                        width: "100%",
                       }}
                     >
                       <Chip
@@ -413,8 +387,8 @@ const EnhancedPsyOpsMonitor: React.FC = () => {
                         </Typography>
                         <Box
                           sx={{
-                            display: 'flex',
-                            alignItems: 'center',
+                            display: "flex",
+                            alignItems: "center",
                             gap: 1,
                             mb: 1,
                           }}
@@ -433,14 +407,9 @@ const EnhancedPsyOpsMonitor: React.FC = () => {
                         <Typography variant="subtitle2" gutterBottom>
                           Detected Patterns
                         </Typography>
-                        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
                           {result.tags.map((tag, i) => (
-                            <Chip
-                              key={i}
-                              label={tag}
-                              size="small"
-                              variant="outlined"
-                            />
+                            <Chip key={i} label={tag} size="small" variant="outlined" />
                           ))}
                           {result.tags.length === 0 && (
                             <Typography variant="body2" color="text.secondary">
@@ -453,14 +422,13 @@ const EnhancedPsyOpsMonitor: React.FC = () => {
                         <Typography variant="subtitle2" gutterBottom>
                           Recommended Countermeasures
                         </Typography>
-                        {result.countermeasures &&
-                        result.countermeasures.length > 0 ? (
+                        {result.countermeasures && result.countermeasures.length > 0 ? (
                           <List dense>
                             {result.countermeasures.map((measure, i) => (
                               <ListItem key={i} sx={{ pl: 0 }}>
                                 <ListItemText
                                   primary={measure}
-                                  primaryTypographyProps={{ variant: 'body2' }}
+                                  primaryTypographyProps={{ variant: "body2" }}
                                 />
                               </ListItem>
                             ))}

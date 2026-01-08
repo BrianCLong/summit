@@ -28,13 +28,13 @@ After running evaluations, this report will contain:
 
 ## Baseline Targets
 
-| Metric | Target | Current |
-|--------|--------|---------|
-| Success Rate | ≥ 90% | - |
-| P95 Latency | ≤ 5000ms | - |
-| Cost per Success | ≤ $0.03 | - |
-| Safety Violations | 0 | - |
+| Metric            | Target   | Current |
+| ----------------- | -------- | ------- |
+| Success Rate      | ≥ 90%    | -       |
+| P95 Latency       | ≤ 5000ms | -       |
+| Cost per Success  | ≤ $0.03  | -       |
+| Safety Violations | 0        | -       |
 
 ---
 
-*Run evaluations to populate this report.*
+_Run evaluations to populate this report._

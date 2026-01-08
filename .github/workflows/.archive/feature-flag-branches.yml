@@ -29,8 +29,8 @@ jobs:
           run_install: false
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.11.x'
-          cache: 'pnpm'
+          node-version: "20.11.x"
+          cache: "pnpm"
       - name: Enable corepack
         run: corepack enable
       - name: Install dependencies
@@ -48,8 +48,8 @@ jobs:
           run_install: false
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.11.x'
-          cache: 'pnpm'
+          node-version: "20.11.x"
+          cache: "pnpm"
       - name: Enable corepack
         run: corepack enable
       - name: Install dependencies
@@ -57,7 +57,7 @@ jobs:
       - name: Unit tests
         run: pnpm run test:unit -- --runInBand
         env:
-          CI: 'true'
+          CI: "true"
 
   contract:
     runs-on: ubuntu-22.04
@@ -69,8 +69,8 @@ jobs:
           run_install: false
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.11.x'
-          cache: 'pnpm'
+          node-version: "20.11.x"
+          cache: "pnpm"
       - name: Enable corepack
         run: corepack enable
       - name: Install dependencies
@@ -78,7 +78,7 @@ jobs:
       - name: Contract tests
         run: pnpm run test:policy
         env:
-          CI: 'true'
+          CI: "true"
 
   playwright:
     runs-on: ubuntu-22.04
@@ -90,8 +90,8 @@ jobs:
           run_install: false
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.11.x'
-          cache: 'pnpm'
+          node-version: "20.11.x"
+          cache: "pnpm"
       - name: Enable corepack
         run: corepack enable
       - name: Install dependencies
@@ -101,7 +101,7 @@ jobs:
       - name: Playwright (flagged flows)
         run: pnpm run e2e
         env:
-          CI: 'true'
+          CI: "true"
 
   preview-and-rollback:
     runs-on: ubuntu-22.04

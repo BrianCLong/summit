@@ -13,7 +13,7 @@
  * Implements "Auditable by Design" requirements from Wishbook
  */
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Box,
   Card,
@@ -34,7 +34,7 @@ import {
   ListItem,
   ListItemText,
   Link,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Send as SendIcon,
   Visibility as PreviewIcon,
@@ -48,11 +48,11 @@ import {
   ExpandMore as ExpandIcon,
   ExpandLess as CollapseIcon,
   Info as InfoIcon,
-} from '@mui/icons-material';
-import { useMutation, useLazyQuery } from '@apollo/client';
-import { gql } from '@apollo/client';
-import SyntaxHighlighter from 'react-syntax-highlighter';
-import { github } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+} from "@mui/icons-material";
+import { useMutation, useLazyQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
+import SyntaxHighlighter from "react-syntax-highlighter";
+import { github } from "react-syntax-highlighter/dist/esm/styles/hljs";
 
 // GraphQL Queries
 const PREVIEW_NL_QUERY = gql`
@@ -149,11 +149,11 @@ export default function CopilotSidebar({
   userId,
   onEntityClick,
 }: CopilotSidebarProps) {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [preview, setPreview] = useState<CypherPreview | null>(null);
   const [results, setResults] = useState<ExecutionResult | null>(null);
   const [showCypher, setShowCypher] = useState(false);
-  const [activeTab, setActiveTab] = useState<'query' | 'hypotheses' | 'narrative'>('query');
+  const [activeTab, setActiveTab] = useState<"query" | "hypotheses" | "narrative">("query");
 
   const [previewQuery, { loading: previewing }] = useLazyQuery(PREVIEW_NL_QUERY, {
     onCompleted: (data) => {
@@ -161,7 +161,7 @@ export default function CopilotSidebar({
       setResults(null);
     },
     onError: (error) => {
-      console.error('Preview failed:', error);
+      console.error("Preview failed:", error);
     },
   });
 
@@ -170,7 +170,7 @@ export default function CopilotSidebar({
       setResults(data.executeNLQuery);
     },
     onError: (error) => {
-      console.error('Execution failed:', error);
+      console.error("Execution failed:", error);
     },
   });
 
@@ -226,7 +226,7 @@ export default function CopilotSidebar({
       variables: {
         input: {
           investigationId,
-          style: 'ANALYTICAL',
+          style: "ANALYTICAL",
         },
       },
     });
@@ -234,20 +234,20 @@ export default function CopilotSidebar({
 
   const getComplexityColor = (complexity: string) => {
     switch (complexity) {
-      case 'low':
-        return 'success';
-      case 'medium':
-        return 'warning';
-      case 'high':
-        return 'error';
+      case "low":
+        return "success";
+      case "medium":
+        return "warning";
+      case "high":
+        return "error";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   return (
-    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <CardContent sx={{ flexGrow: 1, overflow: 'auto' }}>
+    <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <CardContent sx={{ flexGrow: 1, overflow: "auto" }}>
         <Typography variant="h5" gutterBottom>
           🤖 AI Copilot
         </Typography>
@@ -261,24 +261,24 @@ export default function CopilotSidebar({
         <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
           <Button
             size="small"
-            variant={activeTab === 'query' ? 'contained' : 'outlined'}
-            onClick={() => setActiveTab('query')}
+            variant={activeTab === "query" ? "contained" : "outlined"}
+            onClick={() => setActiveTab("query")}
             startIcon={<CodeIcon />}
           >
             Query
           </Button>
           <Button
             size="small"
-            variant={activeTab === 'hypotheses' ? 'contained' : 'outlined'}
-            onClick={() => setActiveTab('hypotheses')}
+            variant={activeTab === "hypotheses" ? "contained" : "outlined"}
+            onClick={() => setActiveTab("hypotheses")}
             startIcon={<LightbulbIcon />}
           >
             Hypotheses
           </Button>
           <Button
             size="small"
-            variant={activeTab === 'narrative' ? 'contained' : 'outlined'}
-            onClick={() => setActiveTab('narrative')}
+            variant={activeTab === "narrative" ? "contained" : "outlined"}
+            onClick={() => setActiveTab("narrative")}
             startIcon={<ArticleIcon />}
           >
             Narrative
@@ -286,7 +286,7 @@ export default function CopilotSidebar({
         </Stack>
 
         {/* Query Tab */}
-        {activeTab === 'query' && (
+        {activeTab === "query" && (
           <>
             {/* Query Input */}
             <TextField
@@ -313,7 +313,7 @@ Examples:
                 disabled={!query.trim() || previewing || executing}
                 fullWidth
               >
-                {previewing ? 'Generating...' : 'Preview Query'}
+                {previewing ? "Generating..." : "Preview Query"}
               </Button>
             </Stack>
 
@@ -401,7 +401,7 @@ Examples:
                         startIcon={showCypher ? <CollapseIcon /> : <ExpandIcon />}
                         onClick={() => setShowCypher(!showCypher)}
                       >
-                        {showCypher ? 'Hide' : 'Show'} Generated Cypher
+                        {showCypher ? "Hide" : "Show"} Generated Cypher
                       </Button>
                       <Collapse in={showCypher}>
                         <Paper variant="outlined" sx={{ mt: 1 }}>
@@ -421,7 +421,7 @@ Examples:
                       disabled={executing}
                       fullWidth
                     >
-                      {executing ? 'Executing...' : 'Execute Query'}
+                      {executing ? "Executing..." : "Execute Query"}
                     </Button>
                   </>
                 )}
@@ -442,10 +442,7 @@ Examples:
                     color="success"
                     size="small"
                   />
-                  <Chip
-                    label={`${results.summary.executionTime.toFixed(0)}ms`}
-                    size="small"
-                  />
+                  <Chip label={`${results.summary.executionTime.toFixed(0)}ms`} size="small" />
                   <Chip
                     label={`${results.citations.length} entities`}
                     color="primary"
@@ -474,7 +471,7 @@ Examples:
                 )}
 
                 {/* Results Data */}
-                <Paper variant="outlined" sx={{ p: 2, maxHeight: 400, overflow: 'auto' }}>
+                <Paper variant="outlined" sx={{ p: 2, maxHeight: 400, overflow: "auto" }}>
                   <List dense>
                     {results.records.map((record, idx) => (
                       <ListItem key={idx}>
@@ -484,7 +481,7 @@ Examples:
                             <Typography
                               component="pre"
                               variant="caption"
-                              sx={{ fontSize: '0.7rem' }}
+                              sx={{ fontSize: "0.7rem" }}
                             >
                               {JSON.stringify(record, null, 2)}
                             </Typography>
@@ -504,7 +501,7 @@ Examples:
         )}
 
         {/* Hypotheses Tab */}
-        {activeTab === 'hypotheses' && (
+        {activeTab === "hypotheses" && (
           <>
             <Typography variant="body2" gutterBottom>
               Generate AI-powered hypotheses based on current investigation data.
@@ -518,7 +515,7 @@ Examples:
               fullWidth
               sx={{ my: 2 }}
             >
-              {generatingHypotheses ? 'Generating Hypotheses...' : 'Generate Hypotheses'}
+              {generatingHypotheses ? "Generating Hypotheses..." : "Generate Hypotheses"}
             </Button>
 
             {generatingHypotheses && <LinearProgress sx={{ mb: 2 }} />}
@@ -534,7 +531,7 @@ Examples:
                       <Chip
                         label={`${(hypothesis.confidence * 100).toFixed(0)}%`}
                         size="small"
-                        color={hypothesis.confidence > 0.7 ? 'success' : 'warning'}
+                        color={hypothesis.confidence > 0.7 ? "success" : "warning"}
                       />
                     </Stack>
 
@@ -571,7 +568,7 @@ Examples:
         )}
 
         {/* Narrative Tab */}
-        {activeTab === 'narrative' && (
+        {activeTab === "narrative" && (
           <>
             <Typography variant="body2" gutterBottom>
               Generate a comprehensive narrative report of the investigation.
@@ -585,7 +582,7 @@ Examples:
               fullWidth
               sx={{ my: 2 }}
             >
-              {generatingNarrative ? 'Generating Narrative...' : 'Generate Narrative'}
+              {generatingNarrative ? "Generating Narrative..." : "Generate Narrative"}
             </Button>
 
             {generatingNarrative && <LinearProgress sx={{ mb: 2 }} />}
@@ -610,11 +607,7 @@ Examples:
 
                 <Divider sx={{ my: 2 }} />
 
-                <Typography
-                  variant="body2"
-                  component="div"
-                  sx={{ whiteSpace: 'pre-line', mb: 2 }}
-                >
+                <Typography variant="body2" component="div" sx={{ whiteSpace: "pre-line", mb: 2 }}>
                   {narrativeData.generateNarrative.content}
                 </Typography>
 
@@ -623,13 +616,11 @@ Examples:
                 <Typography variant="subtitle2" gutterBottom>
                   Key Findings:
                 </Typography>
-                {narrativeData.generateNarrative.keyFindings.map(
-                  (finding: string, idx: number) => (
-                    <Typography key={idx} variant="body2" sx={{ ml: 2 }}>
-                      • {finding}
-                    </Typography>
-                  )
-                )}
+                {narrativeData.generateNarrative.keyFindings.map((finding: string, idx: number) => (
+                  <Typography key={idx} variant="body2" sx={{ ml: 2 }}>
+                    • {finding}
+                  </Typography>
+                ))}
 
                 <Typography variant="caption" color="text.secondary" sx={{ mt: 2 }}>
                   Audit ID: {narrativeData.generateNarrative.auditId}

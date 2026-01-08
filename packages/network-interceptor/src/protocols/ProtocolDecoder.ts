@@ -3,7 +3,7 @@
  * TRAINING/SIMULATION ONLY
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid } from "uuid";
 
 export interface DecodedMessage {
   id: string;
@@ -19,7 +19,7 @@ export interface DecodedMessage {
 }
 
 export interface HTTPMessage {
-  type: 'request' | 'response';
+  type: "request" | "response";
   method?: string;
   uri?: string;
   statusCode?: number;
@@ -31,7 +31,7 @@ export interface HTTPMessage {
 }
 
 export interface DNSMessage {
-  type: 'query' | 'response';
+  type: "query" | "response";
   id: number;
   flags: {
     qr: boolean;
@@ -70,8 +70,8 @@ export class ProtocolDecoder {
    * Decode HTTP message
    */
   decodeHTTP(data: Uint8Array | string): HTTPMessage | null {
-    const text = typeof data === 'string' ? data : new TextDecoder().decode(data);
-    const lines = text.split('\r\n');
+    const text = typeof data === "string" ? data : new TextDecoder().decode(data);
+    const lines = text.split("\r\n");
 
     if (lines.length === 0) return null;
 
@@ -82,11 +82,11 @@ export class ProtocolDecoder {
     let bodyStart = -1;
 
     for (let i = 1; i < lines.length; i++) {
-      if (lines[i] === '') {
+      if (lines[i] === "") {
         bodyStart = i + 1;
         break;
       }
-      const colonIdx = lines[i].indexOf(':');
+      const colonIdx = lines[i].indexOf(":");
       if (colonIdx > 0) {
         const key = lines[i].slice(0, colonIdx).trim().toLowerCase();
         const value = lines[i].slice(colonIdx + 1).trim();
@@ -94,31 +94,31 @@ export class ProtocolDecoder {
       }
     }
 
-    const body = bodyStart > 0 ? lines.slice(bodyStart).join('\r\n') : undefined;
+    const body = bodyStart > 0 ? lines.slice(bodyStart).join("\r\n") : undefined;
 
     if (isRequest) {
-      const [method, uri, version] = firstLine.split(' ');
+      const [method, uri, version] = firstLine.split(" ");
       return {
-        type: 'request',
+        type: "request",
         method,
         uri,
-        version: version || 'HTTP/1.1',
+        version: version || "HTTP/1.1",
         headers,
         body,
-        contentLength: headers['content-length'] ? parseInt(headers['content-length']) : undefined
+        contentLength: headers["content-length"] ? parseInt(headers["content-length"]) : undefined,
       };
     } else {
       const match = firstLine.match(/^HTTP\/(\d\.\d)\s+(\d+)\s*(.*)/);
       if (!match) return null;
 
       return {
-        type: 'response',
+        type: "response",
         version: `HTTP/${match[1]}`,
         statusCode: parseInt(match[2]),
         statusText: match[3],
         headers,
         body,
-        contentLength: headers['content-length'] ? parseInt(headers['content-length']) : undefined
+        contentLength: headers["content-length"] ? parseInt(headers["content-length"]) : undefined,
       };
     }
   }
@@ -135,19 +135,19 @@ export class ProtocolDecoder {
     const anCount = (data[6] << 8) | data[7];
 
     const message: DNSMessage = {
-      type: (flags & 0x8000) ? 'response' : 'query',
+      type: flags & 0x8000 ? "response" : "query",
       id,
       flags: {
         qr: (flags & 0x8000) !== 0,
-        opcode: (flags >> 11) & 0x0F,
+        opcode: (flags >> 11) & 0x0f,
         authoritative: (flags & 0x0400) !== 0,
         truncated: (flags & 0x0200) !== 0,
         recursionDesired: (flags & 0x0100) !== 0,
         recursionAvailable: (flags & 0x0080) !== 0,
-        responseCode: flags & 0x000F
+        responseCode: flags & 0x000f,
       },
       questions: [],
-      answers: []
+      answers: [],
     };
 
     let offset = 12;
@@ -174,12 +174,15 @@ export class ProtocolDecoder {
       if (offset + 10 <= data.length) {
         const atype = (data[offset] << 8) | data[offset + 1];
         const aclass = (data[offset + 2] << 8) | data[offset + 3];
-        const ttl = (data[offset + 4] << 24) | (data[offset + 5] << 16) |
-          (data[offset + 6] << 8) | data[offset + 7];
+        const ttl =
+          (data[offset + 4] << 24) |
+          (data[offset + 5] << 16) |
+          (data[offset + 6] << 8) |
+          data[offset + 7];
         const rdlength = (data[offset + 8] << 8) | data[offset + 9];
         offset += 10;
 
-        let rdata = '';
+        let rdata = "";
         if (atype === 1 && rdlength === 4) {
           // A record
           rdata = `${data[offset]}.${data[offset + 1]}.${data[offset + 2]}.${data[offset + 3]}`;
@@ -189,7 +192,7 @@ export class ProtocolDecoder {
           for (let j = 0; j < 16; j += 2) {
             parts.push(((data[offset + j] << 8) | data[offset + j + 1]).toString(16));
           }
-          rdata = parts.join(':');
+          rdata = parts.join(":");
         }
 
         offset += rdlength;
@@ -213,10 +216,10 @@ export class ProtocolDecoder {
         break;
       }
 
-      if ((len & 0xC0) === 0xC0) {
+      if ((len & 0xc0) === 0xc0) {
         // Compression pointer
         if (!jumped) jumpOffset = offset + 2;
-        offset = ((len & 0x3F) << 8) | data[offset + 1];
+        offset = ((len & 0x3f) << 8) | data[offset + 1];
         jumped = true;
         continue;
       }
@@ -228,8 +231,8 @@ export class ProtocolDecoder {
     }
 
     return {
-      name: labels.join('.'),
-      newOffset: jumped ? jumpOffset : offset
+      name: labels.join("."),
+      newOffset: jumped ? jumpOffset : offset,
     };
   }
 
@@ -237,8 +240,8 @@ export class ProtocolDecoder {
    * Decode SMTP message
    */
   decodeSMTP(data: Uint8Array | string): SMTPMessage {
-    const text = typeof data === 'string' ? data : new TextDecoder().decode(data);
-    const lines = text.split('\r\n');
+    const text = typeof data === "string" ? data : new TextDecoder().decode(data);
+    const lines = text.split("\r\n");
     const message: SMTPMessage = {};
 
     for (const line of lines) {
@@ -247,23 +250,23 @@ export class ProtocolDecoder {
       if (responseMatch) {
         message.response = {
           code: parseInt(responseMatch[1]),
-          message: responseMatch[2]
+          message: responseMatch[2],
         };
         continue;
       }
 
       // Commands
-      if (line.startsWith('MAIL FROM:')) {
-        message.command = 'MAIL FROM';
-        message.from = line.slice(10).trim().replace(/[<>]/g, '');
-      } else if (line.startsWith('RCPT TO:')) {
-        message.command = 'RCPT TO';
+      if (line.startsWith("MAIL FROM:")) {
+        message.command = "MAIL FROM";
+        message.from = line.slice(10).trim().replace(/[<>]/g, "");
+      } else if (line.startsWith("RCPT TO:")) {
+        message.command = "RCPT TO";
         message.to = message.to || [];
-        message.to.push(line.slice(8).trim().replace(/[<>]/g, ''));
-      } else if (line.startsWith('Subject:')) {
+        message.to.push(line.slice(8).trim().replace(/[<>]/g, ""));
+      } else if (line.startsWith("Subject:")) {
         message.subject = line.slice(8).trim();
       } else if (/^(HELO|EHLO|DATA|QUIT|RSET|NOOP|AUTH)/.test(line)) {
-        message.command = line.split(' ')[0];
+        message.command = line.split(" ")[0];
       }
     }
 
@@ -286,7 +289,7 @@ export class ProtocolDecoder {
         sourcePort: 1024 + Math.floor(Math.random() * 64000),
         destinationPort: this.getDefaultPort(protocol),
         decoded: this.generateProtocolData(protocol),
-        isSimulated: true
+        isSimulated: true,
       };
 
       messages.push(msg);
@@ -302,43 +305,45 @@ export class ProtocolDecoder {
       DNS: 53,
       SMTP: 25,
       FTP: 21,
-      SSH: 22
+      SSH: 22,
     };
     return ports[protocol.toUpperCase()] || 80;
   }
 
   private generateProtocolData(protocol: string): Record<string, unknown> {
     switch (protocol.toUpperCase()) {
-      case 'HTTP':
+      case "HTTP":
         return {
-          method: ['GET', 'POST', 'PUT'][Math.floor(Math.random() * 3)],
-          uri: '/api/training/simulation',
-          version: 'HTTP/1.1',
+          method: ["GET", "POST", "PUT"][Math.floor(Math.random() * 3)],
+          uri: "/api/training/simulation",
+          version: "HTTP/1.1",
           headers: {
-            'host': 'training.example.com',
-            'user-agent': 'SIGINT-Training/1.0',
-            'content-type': 'application/json'
+            host: "training.example.com",
+            "user-agent": "SIGINT-Training/1.0",
+            "content-type": "application/json",
           },
-          body: '[SIMULATED HTTP BODY]'
+          body: "[SIMULATED HTTP BODY]",
         };
-      case 'DNS':
+      case "DNS":
         return {
-          type: 'query',
+          type: "query",
           id: Math.floor(Math.random() * 65535),
-          questions: [{
-            name: 'training.example.com',
-            type: 1,
-            class: 1
-          }]
+          questions: [
+            {
+              name: "training.example.com",
+              type: 1,
+              class: 1,
+            },
+          ],
         };
-      case 'SMTP':
+      case "SMTP":
         return {
-          command: 'MAIL FROM',
-          from: 'training@example.com',
-          to: ['recipient@example.com']
+          command: "MAIL FROM",
+          from: "training@example.com",
+          to: ["recipient@example.com"],
         };
       default:
-        return { data: '[SIMULATED PROTOCOL DATA]' };
+        return { data: "[SIMULATED PROTOCOL DATA]" };
     }
   }
 }

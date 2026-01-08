@@ -4,7 +4,7 @@ import type {
   ToolCandidate,
   ScenarioStep,
   Scenario,
-} from '../types.js';
+} from "../types.js";
 
 /**
  * BaseRouter - Abstract base class for routing implementations
@@ -24,7 +24,7 @@ export abstract class BaseRouter {
   abstract route(
     step: ScenarioStep,
     candidates: ToolCandidate[],
-    context?: Record<string, unknown>,
+    context?: Record<string, unknown>
   ): Promise<RoutingDecision>;
 
   /**
@@ -53,36 +53,28 @@ export abstract class BaseRouter {
    */
   protected filterByCapabilities(
     candidates: ToolCandidate[],
-    requiredCapabilities: string[],
+    requiredCapabilities: string[]
   ): ToolCandidate[] {
     if (requiredCapabilities.length === 0) {
       return candidates;
     }
 
     return candidates.filter((c) =>
-      requiredCapabilities.every((cap) => c.capabilities.includes(cap)),
+      requiredCapabilities.every((cap) => c.capabilities.includes(cap))
     );
   }
 
   /**
    * Filter candidates by latency budget
    */
-  protected filterByLatency(
-    candidates: ToolCandidate[],
-    maxLatencyMs: number,
-  ): ToolCandidate[] {
-    return candidates.filter(
-      (c) => c.estimatedLatencyMs <= maxLatencyMs,
-    );
+  protected filterByLatency(candidates: ToolCandidate[], maxLatencyMs: number): ToolCandidate[] {
+    return candidates.filter((c) => c.estimatedLatencyMs <= maxLatencyMs);
   }
 
   /**
    * Calculate a combined score for a candidate
    */
-  protected calculateScore(
-    candidate: ToolCandidate,
-    costWeight: number,
-  ): number {
+  protected calculateScore(candidate: ToolCandidate, costWeight: number): number {
     // Score = quality * (1 - costWeight) - cost * costWeight
     // Normalized so higher is better
     const qualityScore = candidate.estimatedQuality;
@@ -98,7 +90,7 @@ export abstract class BaseRouter {
     score: number,
     reasoning: string[],
     alternatives: ToolCandidate[],
-    latencyBudgetMs: number,
+    latencyBudgetMs: number
   ): RoutingDecision {
     return {
       selectedTool: selected.toolId,
@@ -122,20 +114,17 @@ export abstract class BaseRouter {
   /**
    * Get reason why an alternative wasn't selected
    */
-  private getAlternativeReason(
-    alt: ToolCandidate,
-    selected: ToolCandidate,
-  ): string {
+  private getAlternativeReason(alt: ToolCandidate, selected: ToolCandidate): string {
     if (alt.estimatedCost > selected.estimatedCost) {
-      return 'Higher cost';
+      return "Higher cost";
     }
     if (alt.estimatedLatencyMs > selected.estimatedLatencyMs) {
-      return 'Higher latency';
+      return "Higher latency";
     }
     if (alt.estimatedQuality < selected.estimatedQuality) {
-      return 'Lower quality estimate';
+      return "Lower quality estimate";
     }
-    return 'Lower overall score';
+    return "Lower overall score";
   }
 }
 
@@ -144,7 +133,7 @@ export abstract class BaseRouter {
  */
 export function createCandidatesFromScenario(
   scenario: Scenario,
-  step: ScenarioStep,
+  step: ScenarioStep
 ): ToolCandidate[] {
   const allowedTools = step.allowedTools ?? scenario.tools.map((t) => t.name);
 

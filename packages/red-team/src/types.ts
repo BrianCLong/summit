@@ -2,33 +2,33 @@
  * MITRE ATT&CK Tactics
  */
 export enum MITRETactic {
-  RECONNAISSANCE = 'reconnaissance',
-  RESOURCE_DEVELOPMENT = 'resource-development',
-  INITIAL_ACCESS = 'initial-access',
-  EXECUTION = 'execution',
-  PERSISTENCE = 'persistence',
-  PRIVILEGE_ESCALATION = 'privilege-escalation',
-  DEFENSE_EVASION = 'defense-evasion',
-  CREDENTIAL_ACCESS = 'credential-access',
-  DISCOVERY = 'discovery',
-  LATERAL_MOVEMENT = 'lateral-movement',
-  COLLECTION = 'collection',
-  COMMAND_AND_CONTROL = 'command-and-control',
-  EXFILTRATION = 'exfiltration',
-  IMPACT = 'impact'
+  RECONNAISSANCE = "reconnaissance",
+  RESOURCE_DEVELOPMENT = "resource-development",
+  INITIAL_ACCESS = "initial-access",
+  EXECUTION = "execution",
+  PERSISTENCE = "persistence",
+  PRIVILEGE_ESCALATION = "privilege-escalation",
+  DEFENSE_EVASION = "defense-evasion",
+  CREDENTIAL_ACCESS = "credential-access",
+  DISCOVERY = "discovery",
+  LATERAL_MOVEMENT = "lateral-movement",
+  COLLECTION = "collection",
+  COMMAND_AND_CONTROL = "command-and-control",
+  EXFILTRATION = "exfiltration",
+  IMPACT = "impact",
 }
 
 /**
  * Kill Chain Phases
  */
 export enum KillChainPhase {
-  RECONNAISSANCE = 'reconnaissance',
-  WEAPONIZATION = 'weaponization',
-  DELIVERY = 'delivery',
-  EXPLOITATION = 'exploitation',
-  INSTALLATION = 'installation',
-  COMMAND_AND_CONTROL = 'command-and-control',
-  ACTIONS_ON_OBJECTIVES = 'actions-on-objectives'
+  RECONNAISSANCE = "reconnaissance",
+  WEAPONIZATION = "weaponization",
+  DELIVERY = "delivery",
+  EXPLOITATION = "exploitation",
+  INSTALLATION = "installation",
+  COMMAND_AND_CONTROL = "command-and-control",
+  ACTIONS_ON_OBJECTIVES = "actions-on-objectives",
 }
 
 /**
@@ -69,7 +69,7 @@ export interface AttackScenario {
  * Target Environment
  */
 export interface TargetEnvironment {
-  type: 'cloud' | 'on-premise' | 'hybrid';
+  type: "cloud" | "on-premise" | "hybrid";
   platforms: string[];
   assets: TargetAsset[];
   networkTopology: NetworkTopology;
@@ -82,11 +82,11 @@ export interface TargetEnvironment {
 export interface TargetAsset {
   id: string;
   name: string;
-  type: 'server' | 'workstation' | 'network-device' | 'application' | 'database' | 'cloud-service';
+  type: "server" | "workstation" | "network-device" | "application" | "database" | "cloud-service";
   os?: string;
   services: string[];
   vulnerabilities: string[];
-  criticality: 'low' | 'medium' | 'high' | 'critical';
+  criticality: "low" | "medium" | "high" | "critical";
 }
 
 /**
@@ -100,7 +100,7 @@ export interface NetworkTopology {
 export interface NetworkZone {
   id: string;
   name: string;
-  type: 'dmz' | 'internal' | 'external' | 'management';
+  type: "dmz" | "internal" | "external" | "management";
   assets: string[];
 }
 
@@ -116,7 +116,7 @@ export interface NetworkConnection {
  */
 export interface SecurityControl {
   id: string;
-  type: 'firewall' | 'ids' | 'ips' | 'edr' | 'siem' | 'waf' | 'dlp' | 'mfa';
+  type: "firewall" | "ids" | "ips" | "edr" | "siem" | "waf" | "dlp" | "mfa";
   name: string;
   coverage: string[];
   effectiveness: number;
@@ -165,7 +165,7 @@ export interface CampaignResult {
   scenarioId: string;
   startTime: Date;
   endTime: Date;
-  status: 'planned' | 'in-progress' | 'completed' | 'aborted';
+  status: "planned" | "in-progress" | "completed" | "aborted";
   phases: PhaseResult[];
   techniquesUsed: TechniqueResult[];
   objectivesAchieved: string[];
@@ -177,7 +177,7 @@ export interface CampaignResult {
 
 export interface PhaseResult {
   phase: KillChainPhase;
-  status: 'success' | 'partial' | 'failed' | 'skipped';
+  status: "success" | "partial" | "failed" | "skipped";
   startTime: Date;
   endTime: Date;
   actions: ActionResult[];
@@ -205,7 +205,7 @@ export interface Detection {
   id: string;
   source: string;
   type: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   timestamp: Date;
   description: string;
   iocGenerated?: string[];
@@ -213,7 +213,7 @@ export interface Detection {
 
 export interface Finding {
   id: string;
-  severity: 'informational' | 'low' | 'medium' | 'high' | 'critical';
+  severity: "informational" | "low" | "medium" | "high" | "critical";
   title: string;
   description: string;
   affectedAssets: string[];
@@ -224,11 +224,11 @@ export interface Finding {
 
 export interface Recommendation {
   id: string;
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  priority: "low" | "medium" | "high" | "critical";
   title: string;
   description: string;
-  effort: 'low' | 'medium' | 'high';
-  impact: 'low' | 'medium' | 'high';
+  effort: "low" | "medium" | "high";
+  impact: "low" | "medium" | "high";
   relatedFindings: string[];
 }
 
@@ -246,16 +246,16 @@ export interface CampaignMetrics {
  * Social Engineering Types
  */
 export enum SocialEngineeringType {
-  PHISHING = 'phishing',
-  SPEAR_PHISHING = 'spear-phishing',
-  WHALING = 'whaling',
-  VISHING = 'vishing',
-  SMISHING = 'smishing',
-  PRETEXTING = 'pretexting',
-  BAITING = 'baiting',
-  QUID_PRO_QUO = 'quid-pro-quo',
-  TAILGATING = 'tailgating',
-  WATERING_HOLE = 'watering-hole'
+  PHISHING = "phishing",
+  SPEAR_PHISHING = "spear-phishing",
+  WHALING = "whaling",
+  VISHING = "vishing",
+  SMISHING = "smishing",
+  PRETEXTING = "pretexting",
+  BAITING = "baiting",
+  QUID_PRO_QUO = "quid-pro-quo",
+  TAILGATING = "tailgating",
+  WATERING_HOLE = "watering-hole",
 }
 
 /**
@@ -270,7 +270,7 @@ export interface SocialEngineeringCampaign {
   content: CampaignContent;
   schedule: CampaignSchedule;
   metrics: SocialMetrics;
-  status: 'draft' | 'scheduled' | 'active' | 'completed' | 'cancelled';
+  status: "draft" | "scheduled" | "active" | "completed" | "cancelled";
 }
 
 export interface SocialTarget {
@@ -279,7 +279,7 @@ export interface SocialTarget {
   phone?: string;
   department?: string;
   role?: string;
-  riskLevel: 'low' | 'medium' | 'high';
+  riskLevel: "low" | "medium" | "high";
 }
 
 export interface CampaignContent {
@@ -325,7 +325,7 @@ export interface AttackSurface {
 
 export interface SurfaceAsset {
   id: string;
-  type: 'domain' | 'ip' | 'service' | 'application' | 'certificate' | 'cloud-resource';
+  type: "domain" | "ip" | "service" | "application" | "certificate" | "cloud-resource";
   identifier: string;
   firstSeen: Date;
   lastSeen: Date;
@@ -336,8 +336,8 @@ export interface SurfaceAsset {
 export interface Exposure {
   id: string;
   assetId: string;
-  type: 'open-port' | 'vulnerable-service' | 'misconfiguration' | 'data-leak' | 'weak-credential';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  type: "open-port" | "vulnerable-service" | "misconfiguration" | "data-leak" | "weak-credential";
+  severity: "low" | "medium" | "high" | "critical";
   description: string;
   remediation: string;
 }

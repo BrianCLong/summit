@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -70,20 +70,20 @@
     </main>
     <script type="module">
       async function loadCards() {
-        const response = await fetch('./cards.json');
+        const response = await fetch("./cards.json");
         if (!response.ok) {
-          throw new Error('Unable to load cards.json');
+          throw new Error("Unable to load cards.json");
         }
         return response.json();
       }
 
       function riskClass(level) {
-        return level === 'high' ? 'risk-high' : level === 'medium' ? 'risk-medium' : 'risk-low';
+        return level === "high" ? "risk-high" : level === "medium" ? "risk-medium" : "risk-low";
       }
 
       function renderCard(entry) {
-        const wrapper = document.createElement('section');
-        wrapper.className = 'card';
+        const wrapper = document.createElement("section");
+        wrapper.className = "card";
         wrapper.innerHTML = `
           <h2>${entry.modelId}</h2>
           <p><strong>Version:</strong> ${entry.version}</p>
@@ -92,21 +92,24 @@
           <h3>Metrics</h3>
           <ul class="metrics">
             ${entry.metrics
-              .map((metric) => `<li>${metric.name}: ${metric.value}${metric.unit ? ' ' + metric.unit : ''}</li>`)
-              .join('')}
+              .map(
+                (metric) =>
+                  `<li>${metric.name}: ${metric.value}${metric.unit ? " " + metric.unit : ""}</li>`
+              )
+              .join("")}
           </ul>
           <h3>Intended Use</h3>
-          <div>${entry.intendedUse.map((purpose) => `<span class="chip">${purpose}</span>`).join('')}</div>
+          <div>${entry.intendedUse.map((purpose) => `<span class="chip">${purpose}</span>`).join("")}</div>
           <div class="chip ${riskClass(entry.riskLevel)}">Risk: ${entry.riskLevel}</div>
         `;
         return wrapper;
       }
 
       async function renderGallery() {
-        const container = document.getElementById('gallery');
+        const container = document.getElementById("gallery");
         try {
           const cards = await loadCards();
-          container.innerHTML = '';
+          container.innerHTML = "";
           cards.forEach((entry) => container.appendChild(renderCard(entry)));
         } catch (error) {
           container.innerHTML = `<p style="color: #c53030;">${error.message}</p>`;

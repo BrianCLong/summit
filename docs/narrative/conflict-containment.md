@@ -4,9 +4,9 @@
 
 In a healthy organization, conflict is not a bug—it is a feature.
 
-*   **Security** *should* conflict with **Velocity**.
-*   **Reliability** *should* conflict with **Feature Functionality**.
-*   **Cost Efficiency** *should* conflict with **Scale**.
+- **Security** _should_ conflict with **Velocity**.
+- **Reliability** _should_ conflict with **Feature Functionality**.
+- **Cost Efficiency** _should_ conflict with **Scale**.
 
 These tensions keep the organization balanced. The problem is not the conflict itself, but how it is **processed**.
 
@@ -19,30 +19,34 @@ In most organizations, these structural conflicts devolve into interpersonal dra
 Summit acts as a "containment vessel" for organizational conflict. It turns open-ended fights into **bounded, structured negotiations**.
 
 ### 1. Conflict as Code
+
 Summit forces vague disagreements into precise definitions.
 
-*   **Vague:** "This release is too risky." (Subjective, emotional).
-*   **Precise:** "This release violates `policy/risk/p99-latency-threshold`." (Objective, falsifiable).
+- **Vague:** "This release is too risky." (Subjective, emotional).
+- **Precise:** "This release violates `policy/risk/p99-latency-threshold`." (Objective, falsifiable).
 
 When conflict is expressed as code (policies, thresholds, metrics), it becomes a technical problem to be solved, not a political battle to be won.
 
 ### 2. The "Conflict Surface"
-Summit defines *where* conflict happens.
 
-*   **The Wrong Place:** In a Slack DM at 11 PM. In a "War Room." In a passionate email thread.
-*   **The Right Place (Summit):**
-    *   **The Proposal:** A structured request to change a Policy.
-    *   **The Exception:** A formal request for a temporary variance.
-    *   **The Arbitrator:** An automated check against the `RiskBudget`.
+Summit defines _where_ conflict happens.
+
+- **The Wrong Place:** In a Slack DM at 11 PM. In a "War Room." In a passionate email thread.
+- **The Right Place (Summit):**
+  - **The Proposal:** A structured request to change a Policy.
+  - **The Exception:** A formal request for a temporary variance.
+  - **The Arbitrator:** An automated check against the `RiskBudget`.
 
 By strictly defining the "surface area" where conflict is allowed, Summit prevents it from spilling over into personal relationships.
 
 ### 3. Consistent Arbitration
+
 Humans are inconsistent. A manager might be strict on Monday and lenient on Friday. This unpredictability fuels anxiety and politicking.
 
 Summit is **relentlessly consistent**.
-*   If the budget is exceeded, the request is denied. Every time.
-*   If the security scan fails, the merge is blocked. Every time.
+
+- If the budget is exceeded, the request is denied. Every time.
+- If the security scan fails, the merge is blocked. Every time.
 
 This consistency lowers the emotional temperature. You don't get angry at a compiler for finding a syntax error. You shouldn't get angry at Summit for enforcing a policy.
 
@@ -51,6 +55,7 @@ This consistency lowers the emotional temperature. You don't get angry at a comp
 ## Artifact: Conflict Surfaces vs. Conflict Cascades
 
 ### The Cascade (Without Summit)
+
 1.  **Trigger:** A risky deployment fails.
 2.  **Blame:** "Why did DevOps let this through?"
 3.  **Escalation:** VP of Engineering yells at VP of Ops.
@@ -59,6 +64,7 @@ This consistency lowers the emotional temperature. You don't get angry at a comp
 6.  **Result:** **Systemic Paralysis.**
 
 ### The Containment (With Summit)
+
 1.  **Trigger:** A risky deployment fails.
 2.  **Detection:** Summit's `IncidentManager` captures the event.
 3.  **Adjustment:** The `ErrorBudget` for the team is automatically deducted.

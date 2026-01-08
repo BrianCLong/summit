@@ -57,7 +57,7 @@ golden_tests:
 # === Compliance & Governance ===
 compliance:
   pii_detection: true
-  pii_fields: []  # No PII expected in CVE data
+  pii_fields: [] # No PII expected in CVE data
   license_check: true
   data_classification: public
   retention_days: 365
@@ -68,17 +68,17 @@ compliance:
 observability:
   metrics_enabled: true
   sli_targets:
-    availability: 0.99          # 99% success rate
-    latency_p95_ms: 10000       # 95th percentile < 10s (external API)
-    throughput_min: 1000        # Min records/min
-    data_freshness_hours: 24    # Data should be < 24 hours old
+    availability: 0.99 # 99% success rate
+    latency_p95_ms: 10000 # 95th percentile < 10s (external API)
+    throughput_min: 1000 # Min records/min
+    data_freshness_hours: 24 # Data should be < 24 hours old
   slo_window_days: 30
   alert_on_slo_breach: true
 
 # === Resource Limits ===
 resources:
-  max_concurrent_requests: 1    # Single API call for full catalog
-  batch_size: 100               # Process 100 vulnerabilities per batch
+  max_concurrent_requests: 1 # Single API call for full catalog
+  batch_size: 100 # Process 100 vulnerabilities per batch
   timeout_seconds: 30
   memory_limit_mb: 256
 

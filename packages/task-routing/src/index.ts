@@ -3,8 +3,8 @@
  * Provides skill-based routing, load balancing, SLA management, and dynamic task assignment
  */
 
-import { EventEmitter } from 'events';
-import { v4 as uuidv4 } from 'uuid';
+import { EventEmitter } from "events";
+import { v4 as uuidv4 } from "uuid";
 
 export interface Worker {
   id: string;
@@ -14,7 +14,7 @@ export interface Worker {
   skillLevels: Record<string, number>; // skill -> proficiency (1-10)
   capacity: number; // Max concurrent tasks
   currentLoad: number; // Current number of assigned tasks
-  availability: 'available' | 'busy' | 'offline';
+  availability: "available" | "busy" | "offline";
   location?: string;
   timezone?: string;
   performanceRating: number; // 0-10
@@ -25,7 +25,7 @@ export interface Task {
   id: string;
   title: string;
   description?: string;
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  priority: "low" | "medium" | "high" | "critical";
   requiredSkills: string[];
   minimumSkillLevel?: number;
   estimatedDuration?: number; // minutes
@@ -36,20 +36,20 @@ export interface Task {
   };
   assignedTo?: string; // Worker ID
   assignedAt?: Date;
-  status: 'pending' | 'assigned' | 'in_progress' | 'completed' | 'escalated';
+  status: "pending" | "assigned" | "in_progress" | "completed" | "escalated";
   createdAt: Date;
   metadata?: Record<string, any>;
 }
 
 export interface RoutingStrategy {
   type:
-    | 'round-robin'
-    | 'least-loaded'
-    | 'skill-based'
-    | 'priority-based'
-    | 'performance-based'
-    | 'geographic'
-    | 'custom';
+    | "round-robin"
+    | "least-loaded"
+    | "skill-based"
+    | "priority-based"
+    | "performance-based"
+    | "geographic"
+    | "custom";
   config?: Record<string, any>;
 }
 
@@ -62,13 +62,13 @@ export interface EscalationPolicy {
 }
 
 export interface EscalationCondition {
-  type: 'time-based' | 'sla-breach' | 'no-response' | 'custom';
+  type: "time-based" | "sla-breach" | "no-response" | "custom";
   threshold?: number; // minutes
   customCheck?: (task: Task) => boolean;
 }
 
 export interface EscalationAction {
-  type: 'reassign' | 'notify' | 'priority-increase' | 'custom';
+  type: "reassign" | "notify" | "priority-increase" | "custom";
   target?: string[]; // Worker IDs or notification targets
   customAction?: (task: Task) => Promise<void>;
 }
@@ -81,7 +81,7 @@ export class TaskRouter extends EventEmitter {
   private escalationPolicies: EscalationPolicy[] = [];
   private roundRobinIndex = 0;
 
-  constructor(strategy: RoutingStrategy = { type: 'skill-based' }) {
+  constructor(strategy: RoutingStrategy = { type: "skill-based" }) {
     super();
     this.routingStrategy = strategy;
     this.startEscalationMonitor();
@@ -93,7 +93,7 @@ export class TaskRouter extends EventEmitter {
   registerWorker(worker: Worker): void {
     this.workers.set(worker.id, worker);
     this.workerAssignmentCount.set(worker.id, 0);
-    this.emit('worker.registered', worker);
+    this.emit("worker.registered", worker);
   }
 
   /**
@@ -103,33 +103,28 @@ export class TaskRouter extends EventEmitter {
     const worker = this.workers.get(workerId);
     if (worker) {
       // Reassign tasks from this worker
-      const workerTasks = Array.from(this.tasks.values()).filter(
-        (t) => t.assignedTo === workerId,
-      );
+      const workerTasks = Array.from(this.tasks.values()).filter((t) => t.assignedTo === workerId);
       workerTasks.forEach((task) => this.reassignTask(task.id));
 
       this.workers.delete(workerId);
       this.workerAssignmentCount.delete(workerId);
-      this.emit('worker.unregistered', worker);
+      this.emit("worker.unregistered", worker);
     }
   }
 
   /**
    * Update worker availability
    */
-  updateWorkerAvailability(
-    workerId: string,
-    availability: Worker['availability'],
-  ): void {
+  updateWorkerAvailability(workerId: string, availability: Worker["availability"]): void {
     const worker = this.workers.get(workerId);
     if (worker) {
       worker.availability = availability;
-      this.emit('worker.availability.updated', worker);
+      this.emit("worker.availability.updated", worker);
 
-      if (availability === 'offline') {
+      if (availability === "offline") {
         // Reassign tasks if worker goes offline
         const workerTasks = Array.from(this.tasks.values()).filter(
-          (t) => t.assignedTo === workerId && t.status === 'assigned',
+          (t) => t.assignedTo === workerId && t.status === "assigned"
         );
         workerTasks.forEach((task) => this.reassignTask(task.id));
       }
@@ -143,7 +138,7 @@ export class TaskRouter extends EventEmitter {
     const worker = this.workers.get(workerId);
     if (worker) {
       worker.currentLoad = load;
-      this.emit('worker.load.updated', worker);
+      this.emit("worker.load.updated", worker);
     }
   }
 
@@ -156,36 +151,36 @@ export class TaskRouter extends EventEmitter {
     const eligibleWorkers = this.findEligibleWorkers(task);
 
     if (eligibleWorkers.length === 0) {
-      this.emit('task.no_eligible_workers', task);
+      this.emit("task.no_eligible_workers", task);
       return null;
     }
 
     let selectedWorker: Worker | null = null;
 
     switch (this.routingStrategy.type) {
-      case 'round-robin':
+      case "round-robin":
         selectedWorker = this.roundRobinSelection(eligibleWorkers);
         break;
-      case 'least-loaded':
+      case "least-loaded":
         selectedWorker = this.leastLoadedSelection(eligibleWorkers);
         break;
-      case 'skill-based':
+      case "skill-based":
         selectedWorker = this.skillBasedSelection(eligibleWorkers, task);
         break;
-      case 'priority-based':
+      case "priority-based":
         selectedWorker = this.priorityBasedSelection(eligibleWorkers, task);
         break;
-      case 'performance-based':
+      case "performance-based":
         selectedWorker = this.performanceBasedSelection(eligibleWorkers);
         break;
-      case 'geographic':
+      case "geographic":
         selectedWorker = this.geographicSelection(eligibleWorkers, task);
         break;
-      case 'custom':
+      case "custom":
         selectedWorker = await this.customSelection(
           eligibleWorkers,
           task,
-          this.routingStrategy.config,
+          this.routingStrategy.config
         );
         break;
       default:
@@ -195,15 +190,15 @@ export class TaskRouter extends EventEmitter {
     if (selectedWorker) {
       task.assignedTo = selectedWorker.id;
       task.assignedAt = new Date();
-      task.status = 'assigned';
+      task.status = "assigned";
 
       selectedWorker.currentLoad++;
       this.workerAssignmentCount.set(
         selectedWorker.id,
-        (this.workerAssignmentCount.get(selectedWorker.id) || 0) + 1,
+        (this.workerAssignmentCount.get(selectedWorker.id) || 0) + 1
       );
 
-      this.emit('task.assigned', task, selectedWorker);
+      this.emit("task.assigned", task, selectedWorker);
       return selectedWorker.id;
     }
 
@@ -216,7 +211,7 @@ export class TaskRouter extends EventEmitter {
   async reassignTask(taskId: string): Promise<void> {
     const task = this.tasks.get(taskId);
     if (!task) {
-      throw new Error('Task not found');
+      throw new Error("Task not found");
     }
 
     // Clear previous assignment
@@ -229,7 +224,7 @@ export class TaskRouter extends EventEmitter {
 
     task.assignedTo = undefined;
     task.assignedAt = undefined;
-    task.status = 'pending';
+    task.status = "pending";
 
     // Reassign using routing strategy
     await this.assignTask(task);
@@ -241,7 +236,7 @@ export class TaskRouter extends EventEmitter {
   private findEligibleWorkers(task: Task): Worker[] {
     return Array.from(this.workers.values()).filter((worker) => {
       // Check availability
-      if (worker.availability !== 'available') {
+      if (worker.availability !== "available") {
         return false;
       }
 
@@ -252,9 +247,7 @@ export class TaskRouter extends EventEmitter {
 
       // Check skills
       if (task.requiredSkills.length > 0) {
-        const hasAllSkills = task.requiredSkills.every((skill) =>
-          worker.skills.includes(skill),
-        );
+        const hasAllSkills = task.requiredSkills.every((skill) => worker.skills.includes(skill));
 
         if (!hasAllSkills) {
           return false;
@@ -263,8 +256,7 @@ export class TaskRouter extends EventEmitter {
         // Check minimum skill level if specified
         if (task.minimumSkillLevel) {
           const meetsSkillLevel = task.requiredSkills.every(
-            (skill) =>
-              (worker.skillLevels[skill] || 0) >= (task.minimumSkillLevel || 0),
+            (skill) => (worker.skillLevels[skill] || 0) >= (task.minimumSkillLevel || 0)
           );
 
           if (!meetsSkillLevel) {
@@ -291,7 +283,7 @@ export class TaskRouter extends EventEmitter {
    */
   private leastLoadedSelection(workers: Worker[]): Worker {
     return workers.reduce((prev, current) =>
-      current.currentLoad < prev.currentLoad ? current : prev,
+      current.currentLoad < prev.currentLoad ? current : prev
     );
   }
 
@@ -327,16 +319,18 @@ export class TaskRouter extends EventEmitter {
    */
   private priorityBasedSelection(workers: Worker[], task: Task): Worker {
     // For high/critical priority, select best performer with lowest load
-    if (task.priority === 'high' || task.priority === 'critical') {
-      return workers
-        .filter((w) => w.performanceRating >= 7)
-        .sort((a, b) => {
-          // First by performance, then by load
-          if (b.performanceRating !== a.performanceRating) {
-            return b.performanceRating - a.performanceRating;
-          }
-          return a.currentLoad - b.currentLoad;
-        })[0] || this.leastLoadedSelection(workers);
+    if (task.priority === "high" || task.priority === "critical") {
+      return (
+        workers
+          .filter((w) => w.performanceRating >= 7)
+          .sort((a, b) => {
+            // First by performance, then by load
+            if (b.performanceRating !== a.performanceRating) {
+              return b.performanceRating - a.performanceRating;
+            }
+            return a.currentLoad - b.currentLoad;
+          })[0] || this.leastLoadedSelection(workers)
+      );
     }
 
     // For low/medium priority, use least-loaded
@@ -348,7 +342,7 @@ export class TaskRouter extends EventEmitter {
    */
   private performanceBasedSelection(workers: Worker[]): Worker {
     return workers.reduce((prev, current) =>
-      current.performanceRating > prev.performanceRating ? current : prev,
+      current.performanceRating > prev.performanceRating ? current : prev
     );
   }
 
@@ -359,9 +353,7 @@ export class TaskRouter extends EventEmitter {
     const taskLocation = task.metadata?.location;
 
     if (taskLocation) {
-      const localWorkers = workers.filter(
-        (w) => w.location === taskLocation,
-      );
+      const localWorkers = workers.filter((w) => w.location === taskLocation);
       if (localWorkers.length > 0) {
         return this.skillBasedSelection(localWorkers, task);
       }
@@ -377,7 +369,7 @@ export class TaskRouter extends EventEmitter {
   private async customSelection(
     workers: Worker[],
     task: Task,
-    config?: Record<string, any>,
+    config?: Record<string, any>
   ): Promise<Worker> {
     // Custom logic can be implemented here based on config
     // Default to skill-based for now
@@ -389,7 +381,7 @@ export class TaskRouter extends EventEmitter {
    */
   addEscalationPolicy(policy: EscalationPolicy): void {
     this.escalationPolicies.push(policy);
-    this.emit('escalation.policy.added', policy);
+    this.emit("escalation.policy.added", policy);
   }
 
   /**
@@ -399,7 +391,7 @@ export class TaskRouter extends EventEmitter {
     const index = this.escalationPolicies.findIndex((p) => p.id === policyId);
     if (index !== -1) {
       const policy = this.escalationPolicies.splice(index, 1)[0];
-      this.emit('escalation.policy.removed', policy);
+      this.emit("escalation.policy.removed", policy);
     }
   }
 
@@ -417,7 +409,7 @@ export class TaskRouter extends EventEmitter {
    */
   private async checkEscalations(): Promise<void> {
     for (const task of this.tasks.values()) {
-      if (task.status === 'completed') {
+      if (task.status === "completed") {
         continue;
       }
 
@@ -441,31 +433,28 @@ export class TaskRouter extends EventEmitter {
   private shouldEscalate(task: Task, policy: EscalationPolicy): boolean {
     return policy.conditions.some((condition) => {
       switch (condition.type) {
-        case 'time-based':
+        case "time-based":
           if (task.assignedAt && condition.threshold) {
-            const minutesSinceAssignment =
-              (Date.now() - task.assignedAt.getTime()) / (1000 * 60);
+            const minutesSinceAssignment = (Date.now() - task.assignedAt.getTime()) / (1000 * 60);
             return minutesSinceAssignment > condition.threshold;
           }
           return false;
 
-        case 'sla-breach':
+        case "sla-breach":
           if (task.sla && task.createdAt) {
-            const minutesSinceCreation =
-              (Date.now() - task.createdAt.getTime()) / (1000 * 60);
+            const minutesSinceCreation = (Date.now() - task.createdAt.getTime()) / (1000 * 60);
             return minutesSinceCreation > task.sla.responseTime;
           }
           return false;
 
-        case 'no-response':
+        case "no-response":
           return (
-            task.status === 'assigned' &&
+            task.status === "assigned" &&
             task.assignedAt &&
-            Date.now() - task.assignedAt.getTime() >
-              (condition.threshold || 30) * 60 * 1000
+            Date.now() - task.assignedAt.getTime() > (condition.threshold || 30) * 60 * 1000
           );
 
-        case 'custom':
+        case "custom":
           return condition.customCheck ? condition.customCheck(task) : false;
 
         default:
@@ -477,30 +466,31 @@ export class TaskRouter extends EventEmitter {
   /**
    * Execute escalation actions for a task
    */
-  private async executeEscalation(
-    task: Task,
-    policy: EscalationPolicy,
-  ): Promise<void> {
-    task.status = 'escalated';
-    this.emit('task.escalated', task, policy);
+  private async executeEscalation(task: Task, policy: EscalationPolicy): Promise<void> {
+    task.status = "escalated";
+    this.emit("task.escalated", task, policy);
 
     for (const action of policy.actions) {
       switch (action.type) {
-        case 'reassign':
+        case "reassign":
           await this.reassignTask(task.id);
           break;
 
-        case 'notify':
-          this.emit('task.escalation.notify', task, action.target);
+        case "notify":
+          this.emit("task.escalation.notify", task, action.target);
           break;
 
-        case 'priority-increase':
-          if (task.priority === 'low') {task.priority = 'medium';}
-          else if (task.priority === 'medium') {task.priority = 'high';}
-          else if (task.priority === 'high') {task.priority = 'critical';}
+        case "priority-increase":
+          if (task.priority === "low") {
+            task.priority = "medium";
+          } else if (task.priority === "medium") {
+            task.priority = "high";
+          } else if (task.priority === "high") {
+            task.priority = "critical";
+          }
           break;
 
-        case 'custom':
+        case "custom":
           if (action.customAction) {
             await action.customAction(task);
           }
@@ -522,23 +512,19 @@ export class TaskRouter extends EventEmitter {
     workerUtilization: Record<string, number>;
   } {
     const availableWorkers = Array.from(this.workers.values()).filter(
-      (w) => w.availability === 'available',
+      (w) => w.availability === "available"
     );
 
     const assignedTasks = Array.from(this.tasks.values()).filter(
-      (t) => t.status === 'assigned' || t.status === 'in_progress',
+      (t) => t.status === "assigned" || t.status === "in_progress"
     );
 
-    const pendingTasks = Array.from(this.tasks.values()).filter(
-      (t) => t.status === 'pending',
-    );
+    const pendingTasks = Array.from(this.tasks.values()).filter((t) => t.status === "pending");
 
     const averageLoad =
       this.workers.size > 0
-        ? Array.from(this.workers.values()).reduce(
-            (sum, w) => sum + w.currentLoad,
-            0,
-          ) / this.workers.size
+        ? Array.from(this.workers.values()).reduce((sum, w) => sum + w.currentLoad, 0) /
+          this.workers.size
         : 0;
 
     const workerUtilization: Record<string, number> = {};
@@ -562,9 +548,7 @@ export class TaskRouter extends EventEmitter {
    * Get task queue for a specific worker
    */
   getWorkerTasks(workerId: string): Task[] {
-    return Array.from(this.tasks.values()).filter(
-      (t) => t.assignedTo === workerId,
-    );
+    return Array.from(this.tasks.values()).filter((t) => t.assignedTo === workerId);
   }
 
   /**

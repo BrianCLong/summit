@@ -7,8 +7,8 @@ import {
   SummitEvent,
   NegotiationSession,
   EmbassyActivity,
-  BackchannelIndicator
-} from './types.js';
+  BackchannelIndicator,
+} from "./types.js";
 
 /**
  * DiplomaticEventTracker
@@ -56,8 +56,8 @@ export class DiplomaticEventTracker {
     // Track upcoming events
     if (event.status === EventStatus.SCHEDULED || event.status === EventStatus.CONFIRMED) {
       this.upcomingEvents.push(event);
-      this.upcomingEvents.sort((a, b) =>
-        a.scheduledStartDate.getTime() - b.scheduledStartDate.getTime()
+      this.upcomingEvents.sort(
+        (a, b) => a.scheduledStartDate.getTime() - b.scheduledStartDate.getTime()
       );
     }
   }
@@ -68,7 +68,7 @@ export class DiplomaticEventTracker {
   getEventsByType(type: DiplomaticEventType): DiplomaticEvent[] {
     const eventIds = this.eventsByType.get(type) || new Set();
     return Array.from(eventIds)
-      .map(id => this.events.get(id))
+      .map((id) => this.events.get(id))
       .filter((e): e is DiplomaticEvent => e !== undefined);
   }
 
@@ -78,7 +78,7 @@ export class DiplomaticEventTracker {
   getEventsByCountry(country: string): DiplomaticEvent[] {
     const eventIds = this.eventsByCountry.get(country) || new Set();
     return Array.from(eventIds)
-      .map(id => this.events.get(id))
+      .map((id) => this.events.get(id))
       .filter((e): e is DiplomaticEvent => e !== undefined);
   }
 
@@ -89,14 +89,15 @@ export class DiplomaticEventTracker {
     const events1 = this.eventsByCountry.get(country1) || new Set();
     const events2 = this.eventsByCountry.get(country2) || new Set();
 
-    const bilateralIds = Array.from(events1).filter(id => events2.has(id));
+    const bilateralIds = Array.from(events1).filter((id) => events2.has(id));
     return bilateralIds
-      .map(id => this.events.get(id))
+      .map((id) => this.events.get(id))
       .filter((e): e is DiplomaticEvent => e !== undefined)
-      .filter(e =>
-        e.type === DiplomaticEventType.BILATERAL_MEETING ||
-        e.type === DiplomaticEventType.STATE_VISIT ||
-        e.type === DiplomaticEventType.OFFICIAL_VISIT
+      .filter(
+        (e) =>
+          e.type === DiplomaticEventType.BILATERAL_MEETING ||
+          e.type === DiplomaticEventType.STATE_VISIT ||
+          e.type === DiplomaticEventType.OFFICIAL_VISIT
       );
   }
 
@@ -107,9 +108,7 @@ export class DiplomaticEventTracker {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() + daysAhead);
 
-    return this.upcomingEvents.filter(e =>
-      e.scheduledStartDate <= cutoffDate
-    );
+    return this.upcomingEvents.filter((e) => e.scheduledStartDate <= cutoffDate);
   }
 
   /**
@@ -117,7 +116,7 @@ export class DiplomaticEventTracker {
    */
   getHighSignificanceEvents(minSignificance: number = 8): DiplomaticEvent[] {
     return Array.from(this.events.values())
-      .filter(e => e.significance >= minSignificance)
+      .filter((e) => e.significance >= minSignificance)
       .sort((a, b) => b.significance - a.significance);
   }
 
@@ -155,16 +154,16 @@ export class DiplomaticEventTracker {
       status: EventStatus.COMPLETED,
       scheduledStartDate: session.date,
       participants: session.participants,
-      hostCountry: session.participants[0]?.country || '',
-      guestCountries: session.participants.slice(1).map(p => p.country),
-      location: { city: '', country: '' },
+      hostCountry: session.participants[0]?.country || "",
+      guestCountries: session.participants.slice(1).map((p) => p.country),
+      location: { city: "", country: "" },
       significance: this.calculateNegotiationSignificance(session),
       confidentialityLevel: session.confidentialityLevel as any,
       createdAt: new Date(),
       updatedAt: new Date(),
       sources: [],
       confidence: 1,
-      verified: true
+      verified: true,
     };
 
     this.trackEvent(event);
@@ -184,14 +183,14 @@ export class DiplomaticEventTracker {
       participants: activity.participants || [],
       hostCountry: activity.hostCountry,
       guestCountries: [activity.country],
-      location: { city: '', country: activity.hostCountry },
+      location: { city: "", country: activity.hostCountry },
       significance: activity.significance || 3,
-      confidentialityLevel: activity.publicVisibility ? 'PUBLIC' : 'RESTRICTED',
+      confidentialityLevel: activity.publicVisibility ? "PUBLIC" : "RESTRICTED",
       createdAt: new Date(),
       updatedAt: new Date(),
       sources: [],
       confidence: 1,
-      verified: true
+      verified: true,
     };
 
     this.trackEvent(event);
@@ -205,20 +204,22 @@ export class DiplomaticEventTracker {
       id: indicator.id,
       type: DiplomaticEventType.BACKCHANNEL_COMMUNICATION,
       title: `Backchannel: ${indicator.indicatorType}`,
-      description: indicator.context || `Possible backchannel communication between ${indicator.countries.join(', ')}`,
+      description:
+        indicator.context ||
+        `Possible backchannel communication between ${indicator.countries.join(", ")}`,
       status: EventStatus.RUMORED,
       scheduledStartDate: indicator.date,
       participants: [],
       hostCountry: indicator.location?.country || indicator.countries[0],
       guestCountries: indicator.countries.slice(1),
-      location: indicator.location || { city: 'Unknown', country: indicator.countries[0] },
+      location: indicator.location || { city: "Unknown", country: indicator.countries[0] },
       significance: 7, // Backchannels are often significant
-      confidentialityLevel: 'CONFIDENTIAL',
+      confidentialityLevel: "CONFIDENTIAL",
       createdAt: new Date(),
       updatedAt: new Date(),
       sources: indicator.sources,
       confidence: indicator.confidence,
-      verified: false
+      verified: false,
     };
 
     this.trackEvent(event);
@@ -227,18 +228,22 @@ export class DiplomaticEventTracker {
   /**
    * Analyze diplomatic activity patterns for a country
    */
-  analyzeDiplomaticActivity(country: string, days: number = 90): {
+  analyzeDiplomaticActivity(
+    country: string,
+    days: number = 90
+  ): {
     totalEvents: number;
     eventsByType: Record<string, number>;
     topPartners: { country: string; events: number }[];
     averageSignificance: number;
-    activityTrend: 'INCREASING' | 'STABLE' | 'DECREASING';
+    activityTrend: "INCREASING" | "STABLE" | "DECREASING";
   } {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
 
-    const events = this.getEventsByCountry(country)
-      .filter(e => e.scheduledStartDate >= cutoffDate);
+    const events = this.getEventsByCountry(country).filter(
+      (e) => e.scheduledStartDate >= cutoffDate
+    );
 
     // Count by type
     const eventsByType: Record<string, number> = {};
@@ -249,9 +254,10 @@ export class DiplomaticEventTracker {
     // Top diplomatic partners
     const partnerCounts = new Map<string, number>();
     for (const event of events) {
-      const partners = event.hostCountry === country
-        ? event.guestCountries
-        : [event.hostCountry, ...event.guestCountries.filter(c => c !== country)];
+      const partners =
+        event.hostCountry === country
+          ? event.guestCountries
+          : [event.hostCountry, ...event.guestCountries.filter((c) => c !== country)];
 
       for (const partner of partners) {
         partnerCounts.set(partner, (partnerCounts.get(partner) || 0) + 1);
@@ -264,25 +270,24 @@ export class DiplomaticEventTracker {
       .slice(0, 10);
 
     // Average significance
-    const averageSignificance = events.length > 0
-      ? events.reduce((sum, e) => sum + e.significance, 0) / events.length
-      : 0;
+    const averageSignificance =
+      events.length > 0 ? events.reduce((sum, e) => sum + e.significance, 0) / events.length : 0;
 
     // Activity trend (compare first half vs second half)
     const midpoint = new Date(cutoffDate.getTime() + (Date.now() - cutoffDate.getTime()) / 2);
-    const firstHalf = events.filter(e => e.scheduledStartDate < midpoint).length;
-    const secondHalf = events.filter(e => e.scheduledStartDate >= midpoint).length;
+    const firstHalf = events.filter((e) => e.scheduledStartDate < midpoint).length;
+    const secondHalf = events.filter((e) => e.scheduledStartDate >= midpoint).length;
 
-    let activityTrend: 'INCREASING' | 'STABLE' | 'DECREASING' = 'STABLE';
-    if (secondHalf > firstHalf * 1.2) activityTrend = 'INCREASING';
-    else if (secondHalf < firstHalf * 0.8) activityTrend = 'DECREASING';
+    let activityTrend: "INCREASING" | "STABLE" | "DECREASING" = "STABLE";
+    if (secondHalf > firstHalf * 1.2) activityTrend = "INCREASING";
+    else if (secondHalf < firstHalf * 0.8) activityTrend = "DECREASING";
 
     return {
       totalEvents: events.length,
       eventsByType,
       topPartners,
       averageSignificance,
-      activityTrend
+      activityTrend,
     };
   }
 
@@ -327,38 +332,40 @@ export class DiplomaticEventTracker {
       .map(([topic]) => topic);
 
     // Bilateral vs multilateral
-    const bilateral = events.filter(e =>
-      e.type === DiplomaticEventType.BILATERAL_MEETING ||
-      e.type === DiplomaticEventType.STATE_VISIT ||
-      e.type === DiplomaticEventType.OFFICIAL_VISIT
+    const bilateral = events.filter(
+      (e) =>
+        e.type === DiplomaticEventType.BILATERAL_MEETING ||
+        e.type === DiplomaticEventType.STATE_VISIT ||
+        e.type === DiplomaticEventType.OFFICIAL_VISIT
     ).length;
 
-    const multilateral = events.filter(e =>
-      e.type === DiplomaticEventType.MULTILATERAL_MEETING ||
-      e.type === DiplomaticEventType.SUMMIT ||
-      e.type === DiplomaticEventType.CONFERENCE
+    const multilateral = events.filter(
+      (e) =>
+        e.type === DiplomaticEventType.MULTILATERAL_MEETING ||
+        e.type === DiplomaticEventType.SUMMIT ||
+        e.type === DiplomaticEventType.CONFERENCE
     ).length;
 
     // Determine diplomatic style
-    let diplomaticStyle = 'BALANCED';
-    if (bilateral > multilateral * 2) diplomaticStyle = 'BILATERAL_FOCUSED';
-    else if (multilateral > bilateral * 2) diplomaticStyle = 'MULTILATERAL_FOCUSED';
+    let diplomaticStyle = "BALANCED";
+    if (bilateral > multilateral * 2) diplomaticStyle = "BILATERAL_FOCUSED";
+    else if (multilateral > bilateral * 2) diplomaticStyle = "MULTILATERAL_FOCUSED";
 
     return {
       preferredVenues,
       frequentTopics,
       diplomaticStyle,
       multilateralEngagement: multilateral,
-      bilateralEngagement: bilateral
+      bilateralEngagement: bilateral,
     };
   }
 
   private calculateNegotiationSignificance(session: NegotiationSession): number {
     let significance = 5; // Base significance
 
-    if (session.progress === 'BREAKTHROUGH') significance += 3;
-    else if (session.progress === 'PROGRESS') significance += 1;
-    else if (session.progress === 'DEADLOCK') significance += 2; // Deadlocks are also significant
+    if (session.progress === "BREAKTHROUGH") significance += 3;
+    else if (session.progress === "PROGRESS") significance += 1;
+    else if (session.progress === "DEADLOCK") significance += 2; // Deadlocks are also significant
 
     // Higher session numbers might indicate long-running important negotiations
     if (session.sessionNumber > 10) significance += 1;
@@ -414,7 +421,7 @@ export class DiplomaticEventTracker {
       totalEvents: events.length,
       eventsByType,
       eventsByStatus,
-      upcomingCount: this.upcomingEvents.length
+      upcomingCount: this.upcomingEvents.length,
     };
   }
 }

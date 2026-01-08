@@ -3,21 +3,21 @@
  * Executes workflows locally or remotely with real-time feedback
  */
 
-import { readFileSync, existsSync, watchFile } from 'fs';
-import { resolve } from 'path';
-import chalk from 'chalk';
-import yaml from 'js-yaml';
-import { spawn } from 'child_process';
-import WebSocket from 'ws';
-import ora from 'ora';
+import { readFileSync, existsSync, watchFile } from "fs";
+import { resolve } from "path";
+import chalk from "chalk";
+import yaml from "js-yaml";
+import { spawn } from "child_process";
+import WebSocket from "ws";
+import ora from "ora";
 
-import { MaestroEngine } from '@maestro/core/engine';
-import { PostgresStateStore } from '@maestro/core/stores/postgres-state-store';
-import { S3ArtifactStore } from '@maestro/core/stores/s3-artifact-store';
-import { OPAPolicyEngine } from '@maestro/core/policy/opa-policy-engine';
-import { LiteLLMPlugin } from '@maestro/core/plugins/litellm-plugin';
-import { OllamaPlugin } from '@maestro/core/plugins/ollama-plugin';
-import { WebScraperPlugin } from '@maestro/core/plugins/web-scraper-plugin';
+import { MaestroEngine } from "@maestro/core/engine";
+import { PostgresStateStore } from "@maestro/core/stores/postgres-state-store";
+import { S3ArtifactStore } from "@maestro/core/stores/s3-artifact-store";
+import { OPAPolicyEngine } from "@maestro/core/policy/opa-policy-engine";
+import { LiteLLMPlugin } from "@maestro/core/plugins/litellm-plugin";
+import { OllamaPlugin } from "@maestro/core/plugins/ollama-plugin";
+import { WebScraperPlugin } from "@maestro/core/plugins/web-scraper-plugin";
 
 export interface RunOptions {
   file: string;
@@ -60,23 +60,23 @@ export class RunCommand {
         await this.setupWatch(options);
       }
     } catch (error) {
-      console.error(chalk.red('✗'), 'Run failed:', (error as Error).message);
+      console.error(chalk.red("✗"), "Run failed:", (error as Error).message);
       process.exit(1);
     }
   }
 
   private async loadWorkflow(filePath: string): Promise<any> {
     try {
-      const content = readFileSync(filePath, 'utf8');
+      const content = readFileSync(filePath, "utf8");
       const workflow = yaml.load(content) as any;
 
       // Basic validation
       if (!workflow.name || !workflow.version) {
-        throw new Error('Workflow must have name and version');
+        throw new Error("Workflow must have name and version");
       }
 
       if (!workflow.stages || !Array.isArray(workflow.stages)) {
-        throw new Error('Workflow must have stages array');
+        throw new Error("Workflow must have stages array");
       }
 
       return workflow;
@@ -89,12 +89,12 @@ export class RunCommand {
     const result: Record<string, any> = {};
 
     for (const param of params) {
-      const [key, ...valueParts] = param.split('=');
+      const [key, ...valueParts] = param.split("=");
       if (!key || valueParts.length === 0) {
         throw new Error(`Invalid parameter format: ${param}. Use key=value`);
       }
 
-      const value = valueParts.join('=');
+      const value = valueParts.join("=");
 
       // Try to parse as JSON, fall back to string
       try {
@@ -110,9 +110,9 @@ export class RunCommand {
   private async runLocal(
     workflow: any,
     parameters: Record<string, any>,
-    options: RunOptions,
+    options: RunOptions
   ): Promise<void> {
-    console.log(chalk.blue('🏃‍♂️'), 'Running workflow locally...\n');
+    console.log(chalk.blue("🏃‍♂️"), "Running workflow locally...\n");
 
     try {
       // Initialize local engine
@@ -125,8 +125,8 @@ export class RunCommand {
       const runContext = {
         run_id: this.generateRunId(),
         workflow: maestroWorkflow,
-        tenant_id: 'local',
-        triggered_by: 'cli',
+        tenant_id: "local",
+        triggered_by: "cli",
         environment: options.env,
         parameters,
         budget: {
@@ -144,7 +144,7 @@ export class RunCommand {
       // Wait for completion
       await this.waitForCompletion(engine, runId);
 
-      console.log(chalk.green('\n✅'), 'Workflow completed successfully!');
+      console.log(chalk.green("\n✅"), "Workflow completed successfully!");
     } catch (error) {
       throw new Error(`Local execution failed: ${(error as Error).message}`);
     }
@@ -153,26 +153,21 @@ export class RunCommand {
   private async runRemote(
     workflow: any,
     parameters: Record<string, any>,
-    options: RunOptions,
+    options: RunOptions
   ): Promise<void> {
-    console.log(chalk.blue('☁️'), 'Running workflow remotely...\n');
+    console.log(chalk.blue("☁️"), "Running workflow remotely...\n");
 
     try {
       // Get cluster configuration
       const clusterConfig = await this.getClusterConfig(options.env);
 
       // Submit workflow
-      const runId = await this.submitWorkflow(
-        clusterConfig,
-        workflow,
-        parameters,
-        options,
-      );
+      const runId = await this.submitWorkflow(clusterConfig, workflow, parameters, options);
 
       // Stream execution status
       await this.streamRemoteExecution(clusterConfig, runId);
 
-      console.log(chalk.green('\n✅'), 'Remote workflow completed!');
+      console.log(chalk.green("\n✅"), "Remote workflow completed!");
     } catch (error) {
       throw new Error(`Remote execution failed: ${(error as Error).message}`);
     }
@@ -181,49 +176,40 @@ export class RunCommand {
   private async runAuto(
     workflow: any,
     parameters: Record<string, any>,
-    options: RunOptions,
+    options: RunOptions
   ): Promise<void> {
     // Check if remote cluster is available
     const hasRemoteConfig = await this.hasRemoteConfiguration(options.env);
 
     if (hasRemoteConfig) {
-      console.log(
-        chalk.yellow('🤖'),
-        'Auto-detected remote configuration, running remotely',
-      );
+      console.log(chalk.yellow("🤖"), "Auto-detected remote configuration, running remotely");
       await this.runRemote(workflow, parameters, options);
     } else {
-      console.log(
-        chalk.yellow('🖥️'),
-        'No remote configuration found, running locally',
-      );
+      console.log(chalk.yellow("🖥️"), "No remote configuration found, running locally");
       await this.runLocal(workflow, parameters, options);
     }
   }
 
-  private async initializeLocalEngine(
-    environment: string,
-  ): Promise<MaestroEngine> {
+  private async initializeLocalEngine(environment: string): Promise<MaestroEngine> {
     // Initialize stores
-    const { Pool } = require('pg');
+    const { Pool } = require("pg");
     const pool = new Pool({
       connectionString:
-        process.env.MAESTRO_DATABASE_URL ||
-        'postgresql://postgres:password@localhost:5432/maestro',
+        process.env.MAESTRO_DATABASE_URL || "postgresql://postgres:password@localhost:5432/maestro",
     });
 
     const stateStore = new PostgresStateStore(pool);
 
     const artifactStore = new S3ArtifactStore({
-      bucket: process.env.MAESTRO_ARTIFACT_BUCKET || 'maestro-local-artifacts',
-      endpoint: process.env.MAESTRO_S3_ENDPOINT || 'http://localhost:9000',
-      accessKeyId: process.env.MAESTRO_ACCESS_KEY_ID || 'minioadmin',
-      secretAccessKey: process.env.MAESTRO_SECRET_ACCESS_KEY || 'minioadmin',
+      bucket: process.env.MAESTRO_ARTIFACT_BUCKET || "maestro-local-artifacts",
+      endpoint: process.env.MAESTRO_S3_ENDPOINT || "http://localhost:9000",
+      accessKeyId: process.env.MAESTRO_ACCESS_KEY_ID || "minioadmin",
+      secretAccessKey: process.env.MAESTRO_SECRET_ACCESS_KEY || "minioadmin",
     });
 
     const policyEngine = new OPAPolicyEngine({
-      opaUrl: process.env.MAESTRO_OPA_URL || 'http://localhost:8181',
-      packageName: 'maestro',
+      opaUrl: process.env.MAESTRO_OPA_URL || "http://localhost:8181",
+      packageName: "maestro",
     });
 
     // Create engine
@@ -232,20 +218,18 @@ export class RunCommand {
     // Register plugins
     engine.registerPlugin(
       new LiteLLMPlugin({
-        baseUrl: process.env.LITELLM_BASE_URL || 'http://localhost:4000',
-        apiKey: process.env.LITELLM_API_KEY || 'local-dev-key',
+        baseUrl: process.env.LITELLM_BASE_URL || "http://localhost:4000",
+        apiKey: process.env.LITELLM_API_KEY || "local-dev-key",
         costTrackingEnabled: true,
-      }),
+      })
     );
 
     engine.registerPlugin(
       new OllamaPlugin({
-        baseUrl: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
-        maxConcurrentRequests: parseInt(
-          process.env.OLLAMA_MAX_CONCURRENT || '2',
-        ),
+        baseUrl: process.env.OLLAMA_BASE_URL || "http://localhost:11434",
+        maxConcurrentRequests: parseInt(process.env.OLLAMA_MAX_CONCURRENT || "2"),
         autoModelSelection: true,
-      }),
+      })
     );
 
     engine.registerPlugin(
@@ -253,7 +237,7 @@ export class RunCommand {
         respectRobotsTxt: true,
         defaultDelay: 1000,
         maxConcurrentRequests: 3,
-      }),
+      })
     );
 
     return engine;
@@ -285,75 +269,59 @@ export class RunCommand {
       version: workflow.version,
       steps,
       global_timeout_ms: workflow.global_timeout_ms,
-      on_failure: workflow.on_failure || 'stop',
+      on_failure: workflow.on_failure || "stop",
     };
   }
 
   private mapPluginName(runName: string): string {
     const mapping: Record<string, string> = {
-      'litellm.generate': 'litellm',
-      litellm: 'litellm',
-      ollama: 'ollama',
-      web_scraper: 'web_scraper',
-      scrape: 'web_scraper',
-      shell: 'shell',
-      docker: 'docker',
-      'api.request': 'api',
+      "litellm.generate": "litellm",
+      litellm: "litellm",
+      ollama: "ollama",
+      web_scraper: "web_scraper",
+      scrape: "web_scraper",
+      shell: "shell",
+      docker: "docker",
+      "api.request": "api",
     };
 
     return mapping[runName] || runName;
   }
 
   private setupEngineListeners(engine: MaestroEngine): void {
-    engine.on('run:started', (event) => {
-      console.log(chalk.blue('▶️'), `Run started: ${event.run_id}`);
+    engine.on("run:started", (event) => {
+      console.log(chalk.blue("▶️"), `Run started: ${event.run_id}`);
     });
 
-    engine.on('step:completed', (event) => {
-      console.log(chalk.green('✅'), `Step completed: ${event.step_id}`);
+    engine.on("step:completed", (event) => {
+      console.log(chalk.green("✅"), `Step completed: ${event.step_id}`);
     });
 
-    engine.on('step:failed', (event) => {
-      console.log(
-        chalk.red('❌'),
-        `Step failed: ${event.step_id} - ${event.error}`,
-      );
+    engine.on("step:failed", (event) => {
+      console.log(chalk.red("❌"), `Step failed: ${event.step_id} - ${event.error}`);
     });
 
-    engine.on('run:completed', (event) => {
-      console.log(chalk.green('🎉'), `Run completed: ${event.run_id}`);
+    engine.on("run:completed", (event) => {
+      console.log(chalk.green("🎉"), `Run completed: ${event.run_id}`);
     });
 
-    engine.on('run:failed', (event) => {
-      console.log(
-        chalk.red('💥'),
-        `Run failed: ${event.run_id} - ${event.error}`,
-      );
+    engine.on("run:failed", (event) => {
+      console.log(chalk.red("💥"), `Run failed: ${event.run_id} - ${event.error}`);
     });
   }
 
-  private async waitForCompletion(
-    engine: MaestroEngine,
-    runId: string,
-  ): Promise<void> {
+  private async waitForCompletion(engine: MaestroEngine, runId: string): Promise<void> {
     return new Promise((resolve, reject) => {
       const checkInterval = setInterval(async () => {
         try {
           const status = await engine.getRunStatus(runId);
 
-          if (status.status === 'completed') {
+          if (status.status === "completed") {
             clearInterval(checkInterval);
             resolve();
-          } else if (
-            status.status === 'failed' ||
-            status.status === 'cancelled'
-          ) {
+          } else if (status.status === "failed" || status.status === "cancelled") {
             clearInterval(checkInterval);
-            reject(
-              new Error(
-                `Workflow ${status.status}: ${status.error || 'Unknown error'}`,
-              ),
-            );
+            reject(new Error(`Workflow ${status.status}: ${status.error || "Unknown error"}`));
           }
         } catch (error) {
           clearInterval(checkInterval);
@@ -364,7 +332,7 @@ export class RunCommand {
       // Set timeout
       setTimeout(() => {
         clearInterval(checkInterval);
-        reject(new Error('Workflow execution timeout'));
+        reject(new Error("Workflow execution timeout"));
       }, 3600000); // 1 hour timeout
     });
   }
@@ -372,16 +340,14 @@ export class RunCommand {
   private async getClusterConfig(environment: string): Promise<any> {
     // Load cluster configuration from config files or environment
     const config = {
-      apiUrl: process.env.MAESTRO_API_URL || 'https://maestro-api.example.com',
+      apiUrl: process.env.MAESTRO_API_URL || "https://maestro-api.example.com",
       apiKey: process.env.MAESTRO_API_KEY,
-      namespace: process.env.MAESTRO_NAMESPACE || 'default',
+      namespace: process.env.MAESTRO_NAMESPACE || "default",
       environment,
     };
 
     if (!config.apiKey) {
-      throw new Error(
-        'MAESTRO_API_KEY environment variable is required for remote execution',
-      );
+      throw new Error("MAESTRO_API_KEY environment variable is required for remote execution");
     }
 
     return config;
@@ -391,10 +357,10 @@ export class RunCommand {
     clusterConfig: any,
     workflow: any,
     parameters: Record<string, any>,
-    options: RunOptions,
+    options: RunOptions
   ): Promise<string> {
     // Submit workflow to remote cluster via API
-    const axios = require('axios');
+    const axios = require("axios");
 
     const response = await axios.post(
       `${clusterConfig.apiUrl}/api/v1/workflows/runs`,
@@ -402,27 +368,23 @@ export class RunCommand {
         workflow,
         parameters,
         environment: clusterConfig.environment,
-        triggered_by: 'cli',
+        triggered_by: "cli",
       },
       {
         headers: {
           Authorization: `Bearer ${clusterConfig.apiKey}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-      },
+      }
     );
 
     return response.data.run_id;
   }
 
-  private async streamRemoteExecution(
-    clusterConfig: any,
-    runId: string,
-  ): Promise<void> {
+  private async streamRemoteExecution(clusterConfig: any, runId: string): Promise<void> {
     // Connect to WebSocket for real-time updates
     const wsUrl =
-      clusterConfig.apiUrl.replace(/^http/, 'ws') +
-      `/api/v1/workflows/runs/${runId}/stream`;
+      clusterConfig.apiUrl.replace(/^http/, "ws") + `/api/v1/workflows/runs/${runId}/stream`;
 
     return new Promise((resolve, reject) => {
       const ws = new WebSocket(wsUrl, {
@@ -431,57 +393,52 @@ export class RunCommand {
         },
       });
 
-      ws.on('open', () => {
-        console.log(chalk.blue('📡'), 'Connected to remote execution stream');
+      ws.on("open", () => {
+        console.log(chalk.blue("📡"), "Connected to remote execution stream");
       });
 
-      ws.on('message', (data: Buffer) => {
+      ws.on("message", (data: Buffer) => {
         const event = JSON.parse(data.toString());
         this.handleRemoteEvent(event);
 
-        if (event.type === 'run:completed') {
+        if (event.type === "run:completed") {
           ws.close();
           resolve();
-        } else if (event.type === 'run:failed') {
+        } else if (event.type === "run:failed") {
           ws.close();
           reject(new Error(event.error));
         }
       });
 
-      ws.on('error', (error) => {
+      ws.on("error", (error) => {
         reject(error);
       });
 
-      ws.on('close', () => {
-        console.log(chalk.gray('📡'), 'Disconnected from remote stream');
+      ws.on("close", () => {
+        console.log(chalk.gray("📡"), "Disconnected from remote stream");
       });
     });
   }
 
   private handleRemoteEvent(event: any): void {
     switch (event.type) {
-      case 'run:started':
-        console.log(chalk.blue('▶️'), `Remote run started: ${event.run_id}`);
+      case "run:started":
+        console.log(chalk.blue("▶️"), `Remote run started: ${event.run_id}`);
         break;
-      case 'step:started':
-        console.log(chalk.yellow('⏳'), `Step started: ${event.step_id}`);
+      case "step:started":
+        console.log(chalk.yellow("⏳"), `Step started: ${event.step_id}`);
         break;
-      case 'step:completed':
-        console.log(chalk.green('✅'), `Step completed: ${event.step_id}`);
+      case "step:completed":
+        console.log(chalk.green("✅"), `Step completed: ${event.step_id}`);
         break;
-      case 'step:failed':
+      case "step:failed":
+        console.log(chalk.red("❌"), `Step failed: ${event.step_id} - ${event.error}`);
+        break;
+      case "run:progress":
+        const progress = Math.round((event.completed_steps / event.total_steps) * 100);
         console.log(
-          chalk.red('❌'),
-          `Step failed: ${event.step_id} - ${event.error}`,
-        );
-        break;
-      case 'run:progress':
-        const progress = Math.round(
-          (event.completed_steps / event.total_steps) * 100,
-        );
-        console.log(
-          chalk.blue('📊'),
-          `Progress: ${progress}% (${event.completed_steps}/${event.total_steps})`,
+          chalk.blue("📊"),
+          `Progress: ${progress}% (${event.completed_steps}/${event.total_steps})`
         );
         break;
     }
@@ -492,22 +449,18 @@ export class RunCommand {
   }
 
   private async setupWatch(options: RunOptions): Promise<void> {
-    console.log(chalk.yellow('\n👀'), 'Watching for file changes...');
-    console.log(chalk.gray('Press Ctrl+C to stop\n'));
+    console.log(chalk.yellow("\n👀"), "Watching for file changes...");
+    console.log(chalk.gray("Press Ctrl+C to stop\n"));
 
     watchFile(options.file, { interval: 1000 }, async () => {
-      console.log(chalk.blue('\n🔄'), 'File changed, re-running workflow...\n');
+      console.log(chalk.blue("\n🔄"), "File changed, re-running workflow...\n");
 
       try {
         // Re-run with same options but without watch
         const newOptions = { ...options, watch: false };
         await this.execute(newOptions);
       } catch (error) {
-        console.error(
-          chalk.red('✗'),
-          'Re-run failed:',
-          (error as Error).message,
-        );
+        console.error(chalk.red("✗"), "Re-run failed:", (error as Error).message);
       }
     });
 

@@ -3,6 +3,7 @@
 The intent engine converts natural-language or declarative workflow definitions into deterministic intermediate representations (IR DAGs).
 
 ## Capabilities
+
 - Zod-based schema validation to guarantee structure and safety.
 - Canonical node and edge ordering for reproducible hashes.
 - CLI tool (`chronos-intent`) for local compilation.

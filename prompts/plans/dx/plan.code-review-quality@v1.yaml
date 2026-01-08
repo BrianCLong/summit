@@ -1,7 +1,7 @@
 meta:
   id: plan.code-review-quality@v1
-  owner: 'platform-engineering'
-  purpose: 'Improve PR reviews with structured quality signals and automation'
+  owner: "platform-engineering"
+  purpose: "Improve PR reviews with structured quality signals and automation"
   tags:
     - dx
     - code-review
@@ -9,13 +9,13 @@ meta:
     - automation
     - culture
   guardrails:
-    - 'Automation must not replace human judgment'
-    - 'Review process must not slow down velocity'
-    - 'Feedback must be constructive'
-    - 'Standards must be achievable'
+    - "Automation must not replace human judgment"
+    - "Review process must not slow down velocity"
+    - "Feedback must be constructive"
+    - "Standards must be achievable"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -328,15 +328,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'review-quality'
+  - name: "review-quality"
     inputs:
-      current_review_process: 'Informal, 1 approval required, no structure'
-      team_size: '20 developers across 4 teams'
-      common_issues: 'Large PRs, slow reviews, inconsistent feedback'
-      automation_goals: 'Catch obvious issues, suggest reviewers'
-      culture_constraints: 'Avoid slowing down, keep collaborative'
+      current_review_process: "Informal, 1 approval required, no structure"
+      team_size: "20 developers across 4 teams"
+      common_issues: "Large PRs, slow reviews, inconsistent feedback"
+      automation_goals: "Catch obvious issues, suggest reviewers"
+      culture_constraints: "Avoid slowing down, keep collaborative"
     expected_contains:
-      - 'Review Rubric'
-      - 'Automated Checks'
-      - 'Review Workflow'
-      - 'Culture'
+      - "Review Rubric"
+      - "Automated Checks"
+      - "Review Workflow"
+      - "Culture"

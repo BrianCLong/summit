@@ -22,14 +22,14 @@ export interface PlatformCorrelation {
 }
 
 export enum CorrelationType {
-  CONTENT_SIMILARITY = 'content_similarity',
-  TEMPORAL_COORDINATION = 'temporal_coordination',
-  ACCOUNT_LINKING = 'account_linking',
-  NARRATIVE_PROPAGATION = 'narrative_propagation',
-  HASHTAG_COORDINATION = 'hashtag_coordination',
-  URL_SHARING = 'url_sharing',
-  IMAGE_REUSE = 'image_reuse',
-  BEHAVIORAL_SIMILARITY = 'behavioral_similarity',
+  CONTENT_SIMILARITY = "content_similarity",
+  TEMPORAL_COORDINATION = "temporal_coordination",
+  ACCOUNT_LINKING = "account_linking",
+  NARRATIVE_PROPAGATION = "narrative_propagation",
+  HASHTAG_COORDINATION = "hashtag_coordination",
+  URL_SHARING = "url_sharing",
+  IMAGE_REUSE = "image_reuse",
+  BEHAVIORAL_SIMILARITY = "behavioral_similarity",
 }
 
 export interface CorrelationEvidence {
@@ -117,14 +117,14 @@ export interface AttributedActor {
 }
 
 export enum ActorType {
-  STATE_SPONSORED = 'state_sponsored',
-  COMMERCIAL = 'commercial',
-  POLITICAL = 'political',
-  GRASSROOTS = 'grassroots',
-  TROLL_FARM = 'troll_farm',
-  INDIVIDUAL = 'individual',
-  BOT_NETWORK = 'bot_network',
-  UNKNOWN = 'unknown',
+  STATE_SPONSORED = "state_sponsored",
+  COMMERCIAL = "commercial",
+  POLITICAL = "political",
+  GRASSROOTS = "grassroots",
+  TROLL_FARM = "troll_farm",
+  INDIVIDUAL = "individual",
+  BOT_NETWORK = "bot_network",
+  UNKNOWN = "unknown",
 }
 
 export interface AccountLink {
@@ -244,9 +244,22 @@ export class CrossPlatformCorrelationEngine {
   private initializePlatforms(): void {
     // Initialize platform connectors
     const supportedPlatforms = [
-      'twitter', 'facebook', 'instagram', 'tiktok', 'youtube',
-      'reddit', 'telegram', 'vk', 'weibo', 'gab', 'parler',
-      'truth_social', 'rumble', 'bitchute', '4chan', '8kun',
+      "twitter",
+      "facebook",
+      "instagram",
+      "tiktok",
+      "youtube",
+      "reddit",
+      "telegram",
+      "vk",
+      "weibo",
+      "gab",
+      "parler",
+      "truth_social",
+      "rumble",
+      "bitchute",
+      "4chan",
+      "8kun",
     ];
 
     for (const platform of supportedPlatforms) {
@@ -335,19 +348,22 @@ export class CrossPlatformCorrelationEngine {
     return correlations;
   }
 
-  private async findContentSimilarity(platform1: any, platform2: any): Promise<PlatformCorrelation> {
+  private async findContentSimilarity(
+    platform1: any,
+    platform2: any
+  ): Promise<PlatformCorrelation> {
     // Compare content across platforms using semantic similarity
     const evidence: CorrelationEvidence[] = [];
 
     // TF-IDF similarity
     const tfidfSimilarity = this.calculateTFIDFSimilarity(
       platform1.content.map((c: any) => c.text),
-      platform2.content.map((c: any) => c.text),
+      platform2.content.map((c: any) => c.text)
     );
 
     if (tfidfSimilarity > 0.3) {
       evidence.push({
-        type: 'tfidf_similarity',
+        type: "tfidf_similarity",
         data: { similarity: tfidfSimilarity },
         strength: tfidfSimilarity,
         timestamp: new Date(),
@@ -355,10 +371,13 @@ export class CrossPlatformCorrelationEngine {
     }
 
     // Semantic embedding similarity
-    const semanticSimilarity = await this.calculateSemanticSimilarity(platform1.content, platform2.content);
+    const semanticSimilarity = await this.calculateSemanticSimilarity(
+      platform1.content,
+      platform2.content
+    );
     if (semanticSimilarity > 0.4) {
       evidence.push({
-        type: 'semantic_similarity',
+        type: "semantic_similarity",
         data: { similarity: semanticSimilarity },
         strength: semanticSimilarity,
         timestamp: new Date(),
@@ -369,16 +388,15 @@ export class CrossPlatformCorrelationEngine {
     const ngramOverlap = this.calculateNGramOverlap(platform1.content, platform2.content);
     if (ngramOverlap > 0.2) {
       evidence.push({
-        type: 'ngram_overlap',
+        type: "ngram_overlap",
         data: { overlap: ngramOverlap },
         strength: ngramOverlap,
         timestamp: new Date(),
       });
     }
 
-    const avgStrength = evidence.length > 0
-      ? evidence.reduce((sum, e) => sum + e.strength, 0) / evidence.length
-      : 0;
+    const avgStrength =
+      evidence.length > 0 ? evidence.reduce((sum, e) => sum + e.strength, 0) / evidence.length : 0;
 
     return {
       platforms: [platform1.platform, platform2.platform],
@@ -412,8 +430,8 @@ export class CrossPlatformCorrelationEngine {
 
   private calculateNGramOverlap(content1: any[], content2: any[]): number {
     // Calculate n-gram overlap
-    const ngrams1 = this.extractNGrams(content1.map((c) => c.text).join(' '), 3);
-    const ngrams2 = this.extractNGrams(content2.map((c) => c.text).join(' '), 3);
+    const ngrams1 = this.extractNGrams(content1.map((c) => c.text).join(" "), 3);
+    const ngrams2 = this.extractNGrams(content2.map((c) => c.text).join(" "), 3);
 
     const intersection = new Set([...ngrams1].filter((ng) => ngrams2.has(ng)));
 
@@ -425,13 +443,16 @@ export class CrossPlatformCorrelationEngine {
     const ngrams = new Set<string>();
 
     for (let i = 0; i <= words.length - n; i++) {
-      ngrams.add(words.slice(i, i + n).join(' '));
+      ngrams.add(words.slice(i, i + n).join(" "));
     }
 
     return ngrams;
   }
 
-  private async findTemporalCoordination(platform1: any, platform2: any): Promise<PlatformCorrelation> {
+  private async findTemporalCoordination(
+    platform1: any,
+    platform2: any
+  ): Promise<PlatformCorrelation> {
     // Analyze posting times for coordination
     const evidence: CorrelationEvidence[] = [];
 
@@ -443,7 +464,7 @@ export class CrossPlatformCorrelationEngine {
 
     if (crossCorrelation > 0.5) {
       evidence.push({
-        type: 'temporal_cross_correlation',
+        type: "temporal_cross_correlation",
         data: { correlation: crossCorrelation },
         strength: crossCorrelation,
         timestamp: new Date(),
@@ -454,16 +475,15 @@ export class CrossPlatformCorrelationEngine {
     const optimalLag = this.findOptimalTimeLag(timestamps1, timestamps2);
     if (optimalLag.correlation > 0.6) {
       evidence.push({
-        type: 'time_lag_correlation',
+        type: "time_lag_correlation",
         data: optimalLag,
         strength: optimalLag.correlation,
         timestamp: new Date(),
       });
     }
 
-    const avgStrength = evidence.length > 0
-      ? evidence.reduce((sum, e) => sum + e.strength, 0) / evidence.length
-      : 0;
+    const avgStrength =
+      evidence.length > 0 ? evidence.reduce((sum, e) => sum + e.strength, 0) / evidence.length : 0;
 
     return {
       platforms: [platform1.platform, platform2.platform],
@@ -550,7 +570,7 @@ export class CrossPlatformCorrelationEngine {
         const similarity = this.calculateUsernameSimilarity(acc1.username, acc2.username);
         if (similarity > 0.7) {
           evidence.push({
-            type: 'username_similarity',
+            type: "username_similarity",
             data: { account1: acc1.id, account2: acc2.id, similarity },
             strength: similarity,
             timestamp: new Date(),
@@ -563,9 +583,8 @@ export class CrossPlatformCorrelationEngine {
     const profileMatches = await this.findProfileMatches(platform1.accounts, platform2.accounts);
     evidence.push(...profileMatches);
 
-    const avgStrength = evidence.length > 0
-      ? evidence.reduce((sum, e) => sum + e.strength, 0) / evidence.length
-      : 0;
+    const avgStrength =
+      evidence.length > 0 ? evidence.reduce((sum, e) => sum + e.strength, 0) / evidence.length : 0;
 
     return {
       platforms: [platform1.platform, platform2.platform],
@@ -605,7 +624,10 @@ export class CrossPlatformCorrelationEngine {
     return dp[m][n];
   }
 
-  private async findProfileMatches(accounts1: any[], accounts2: any[]): Promise<CorrelationEvidence[]> {
+  private async findProfileMatches(
+    accounts1: any[],
+    accounts2: any[]
+  ): Promise<CorrelationEvidence[]> {
     // Find matching profile elements
     return [];
   }
@@ -632,7 +654,7 @@ export class CrossPlatformCorrelationEngine {
    */
   private async identifyCampaigns(
     platforms: any[],
-    correlations: PlatformCorrelation[],
+    correlations: PlatformCorrelation[]
   ): Promise<CrossPlatformCampaign[]> {
     const campaigns: CrossPlatformCampaign[] = [];
 
@@ -656,7 +678,12 @@ export class CrossPlatformCorrelationEngine {
     for (const correlation of correlations) {
       let added = false;
       for (const cluster of clusters) {
-        if (this.hasOverlap(correlation.platforms, cluster.flatMap((c) => c.platforms))) {
+        if (
+          this.hasOverlap(
+            correlation.platforms,
+            cluster.flatMap((c) => c.platforms)
+          )
+        ) {
           cluster.push(correlation);
           added = true;
           break;
@@ -676,7 +703,7 @@ export class CrossPlatformCorrelationEngine {
 
   private async buildCampaign(
     correlations: PlatformCorrelation[],
-    platforms: any[],
+    platforms: any[]
   ): Promise<CrossPlatformCampaign> {
     const involvedPlatforms = [...new Set(correlations.flatMap((c) => c.platforms))];
 
@@ -694,12 +721,14 @@ export class CrossPlatformCorrelationEngine {
       campaignId: `campaign_${Date.now()}`,
       platforms: presence,
       coordination: {
-        timingCorrelation: correlations
-          .filter((c) => c.correlationType === CorrelationType.TEMPORAL_COORDINATION)
-          .reduce((sum, c) => sum + c.strength, 0) / correlations.length,
-        contentOverlap: correlations
-          .filter((c) => c.correlationType === CorrelationType.CONTENT_SIMILARITY)
-          .reduce((sum, c) => sum + c.strength, 0) / correlations.length,
+        timingCorrelation:
+          correlations
+            .filter((c) => c.correlationType === CorrelationType.TEMPORAL_COORDINATION)
+            .reduce((sum, c) => sum + c.strength, 0) / correlations.length,
+        contentOverlap:
+          correlations
+            .filter((c) => c.correlationType === CorrelationType.CONTENT_SIMILARITY)
+            .reduce((sum, c) => sum + c.strength, 0) / correlations.length,
         narrativeConsistency: 0.7,
         behavioralSimilarity: 0.6,
         networkOverlap: 0.5,
@@ -720,7 +749,7 @@ export class CrossPlatformCorrelationEngine {
       },
       attribution: {
         confidence: 0.5,
-        likelyOrigin: 'unknown',
+        likelyOrigin: "unknown",
         actors: [],
         methodology: [],
         evidence: [],
@@ -733,7 +762,7 @@ export class CrossPlatformCorrelationEngine {
    */
   private async attributeActors(
     platforms: any[],
-    campaigns: CrossPlatformCampaign[],
+    campaigns: CrossPlatformCampaign[]
   ): Promise<AttributedActor[]> {
     const actors: AttributedActor[] = [];
 
@@ -748,7 +777,7 @@ export class CrossPlatformCorrelationEngine {
 
   private async identifyActors(
     campaign: CrossPlatformCampaign,
-    platforms: any[],
+    platforms: any[]
   ): Promise<AttributedActor[]> {
     return [];
   }
@@ -777,16 +806,16 @@ export class CrossPlatformCorrelationEngine {
    */
   private async performAttribution(
     campaigns: CrossPlatformCampaign[],
-    actors: AttributedActor[],
+    actors: AttributedActor[]
   ): Promise<AttributionResult> {
     return {
       primaryActor: actors[0] || null,
       secondaryActors: actors.slice(1),
       confidence: actors.length > 0 ? 0.6 : 0.2,
-      methodology: 'multi-platform correlation analysis',
+      methodology: "multi-platform correlation analysis",
       limitations: [
-        'Attribution confidence limited by available data',
-        'Sophisticated actors may use counter-forensics',
+        "Attribution confidence limited by available data",
+        "Sophisticated actors may use counter-forensics",
       ],
     };
   }
@@ -798,7 +827,9 @@ class PlatformConnector {
 
 class ContentIndex {
   async index(content: any): Promise<void> {}
-  async search(query: string): Promise<any[]> { return []; }
+  async search(query: string): Promise<any[]> {
+    return [];
+  }
 }
 
 class NarrativeTracker {
@@ -806,5 +837,7 @@ class NarrativeTracker {
 }
 
 class ActorDatabase {
-  async lookup(characteristics: any): Promise<any> { return null; }
+  async lookup(characteristics: any): Promise<any> {
+    return null;
+  }
 }

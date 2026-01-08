@@ -3,36 +3,24 @@
  * Main component for interactive graph exploration with Cytoscape.js
  */
 
-import React, {
-  useRef,
-  useEffect,
-  useState,
-  useCallback,
-  useMemo,
-} from 'react';
-import cytoscape, { Core, NodeSingular } from 'cytoscape';
-import fcose from 'cytoscape-fcose';
-import dagre from 'cytoscape-dagre';
-import cola from 'cytoscape-cola';
-import edgehandles from 'cytoscape-edgehandles';
-import { cn } from '@/lib/utils';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  GraphNode,
-  GraphEdge,
-  TraversalStep,
-  NODE_TYPE_COLORS,
-  ExplorerFilters,
-} from './types';
-import { useGraphData, useEntityDetails, useEnrichment } from './useGraphData';
-import { ExplorerToolbar } from './ExplorerToolbar';
-import { EntityPanel } from './EntityPanel';
-import { RAGPreviewPanel } from './RAGPreviewPanel';
-import { TraversalPanel } from './TraversalPanel';
-import { getCytoscapeStylesheet } from './cytoscapeStyles';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from "react";
+import cytoscape, { Core, NodeSingular } from "cytoscape";
+import fcose from "cytoscape-fcose";
+import dagre from "cytoscape-dagre";
+import cola from "cytoscape-cola";
+import edgehandles from "cytoscape-edgehandles";
+import { cn } from "@/lib/utils";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { GraphNode, GraphEdge, TraversalStep, NODE_TYPE_COLORS, ExplorerFilters } from "./types";
+import { useGraphData, useEntityDetails, useEnrichment } from "./useGraphData";
+import { ExplorerToolbar } from "./ExplorerToolbar";
+import { EntityPanel } from "./EntityPanel";
+import { RAGPreviewPanel } from "./RAGPreviewPanel";
+import { TraversalPanel } from "./TraversalPanel";
+import { getCytoscapeStylesheet } from "./cytoscapeStyles";
 
 // Register Cytoscape extensions
 cytoscape.use(fcose);
@@ -62,36 +50,26 @@ export function KGExplorer({
   const ehRef = useRef<ReturnType<typeof edgehandles> | null>(null);
 
   // Graph data from GraphQL
-  const {
-    cytoscapeElements,
-    nodes,
-    edges,
-    nodeCount,
-    edgeCount,
-    loading,
-    error,
-    refetch,
-  } = useGraphData({ investigationId });
+  const { cytoscapeElements, nodes, edges, nodeCount, edgeCount, loading, error, refetch } =
+    useGraphData({ investigationId });
 
   // Local state
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [selectedEdge, setSelectedEdge] = useState<GraphEdge | null>(null);
   const [hoveredNode, setHoveredNode] = useState<GraphNode | null>(null);
   const [traversalPath, setTraversalPath] = useState<TraversalStep[]>([]);
-  const [layout, setLayout] = useState('fcose');
+  const [layout, setLayout] = useState("fcose");
   const [showRAGPreview, setShowRAGPreview] = useState(enableRAGPreview);
   const [showTraversalPanel, setShowTraversalPanel] = useState(false);
   const [filters, setFilters] = useState<ExplorerFilters>({
     nodeTypes: [],
     edgeTypes: [],
     minConfidence: 0,
-    searchQuery: '',
+    searchQuery: "",
   });
 
   // Entity details for selected node
-  const { entity: selectedEntityDetails } = useEntityDetails(
-    selectedNode?.id ?? null,
-  );
+  const { entity: selectedEntityDetails } = useEntityDetails(selectedNode?.id ?? null);
   const { enrichment } = useEnrichment(selectedNode?.id ?? null);
 
   // Filter elements based on current filters
@@ -99,26 +77,17 @@ export function KGExplorer({
     if (!cytoscapeElements.length) return [];
 
     return cytoscapeElements.filter((el) => {
-      if ('source' in el.data) {
+      if ("source" in el.data) {
         // Edge filtering
-        if (
-          filters.edgeTypes.length > 0 &&
-          !filters.edgeTypes.includes(el.data.type)
-        ) {
+        if (filters.edgeTypes.length > 0 && !filters.edgeTypes.includes(el.data.type)) {
           return false;
         }
-        if (
-          filters.minConfidence > 0 &&
-          (el.data.confidence ?? 1) < filters.minConfidence
-        ) {
+        if (filters.minConfidence > 0 && (el.data.confidence ?? 1) < filters.minConfidence) {
           return false;
         }
       } else {
         // Node filtering
-        if (
-          filters.nodeTypes.length > 0 &&
-          !filters.nodeTypes.includes(el.data.type)
-        ) {
+        if (filters.nodeTypes.length > 0 && !filters.nodeTypes.includes(el.data.type)) {
           return false;
         }
         if (
@@ -140,12 +109,12 @@ export function KGExplorer({
       container: containerRef.current,
       elements: [],
       style: getCytoscapeStylesheet() as any,
-      layout: { name: 'preset' },
+      layout: { name: "preset" },
       minZoom: 0.1,
       maxZoom: 4,
       wheelSensitivity: 0.3,
       boxSelectionEnabled: true,
-      selectionType: 'single',
+      selectionType: "single",
     });
 
     cyRef.current = cy;
@@ -155,21 +124,18 @@ export function KGExplorer({
       const eh = (cy as any).edgehandles({
         preview: true,
         hoverDelay: 150,
-        handleNodes: 'node',
+        handleNodes: "node",
         snap: true,
         snapThreshold: 50,
         snapFrequency: 15,
         noEdgeEventsInDraw: true,
         disableBrowserGestures: true,
-        handlePosition: () => 'middle top',
+        handlePosition: () => "middle top",
         handleInDrawMode: false,
-        edgeType: () => 'flat',
+        edgeType: () => "flat",
         loopAllowed: () => false,
         nodeLoopOffset: -50,
-        complete: (
-          sourceNode: NodeSingular,
-          targetNode: NodeSingular,
-        ) => {
+        complete: (sourceNode: NodeSingular, targetNode: NodeSingular) => {
           // Handle drag traversal completion
           const targetData = targetNode.data();
 
@@ -177,7 +143,7 @@ export function KGExplorer({
             nodeId: targetData.id,
             nodeLabel: targetData.label,
             nodeType: targetData.type,
-            direction: 'outgoing',
+            direction: "outgoing",
             depth: traversalPath.length + 1,
           };
 
@@ -190,7 +156,7 @@ export function KGExplorer({
     }
 
     // Event handlers
-    cy.on('tap', 'node', (e) => {
+    cy.on("tap", "node", (e) => {
       const nodeData = e.target.data();
       const node = nodes.find((n) => n.id === nodeData.id) ?? null;
       setSelectedNode(node);
@@ -198,7 +164,7 @@ export function KGExplorer({
       onNodeSelect?.(node);
     });
 
-    cy.on('tap', 'edge', (e) => {
+    cy.on("tap", "edge", (e) => {
       const edgeData = e.target.data();
       const edge = edges.find((ed) => ed.id === edgeData.id) ?? null;
       setSelectedNode(null);
@@ -206,7 +172,7 @@ export function KGExplorer({
       onEdgeSelect?.(edge);
     });
 
-    cy.on('tap', (e) => {
+    cy.on("tap", (e) => {
       if (e.target === cy) {
         setSelectedNode(null);
         setSelectedEdge(null);
@@ -215,26 +181,26 @@ export function KGExplorer({
       }
     });
 
-    cy.on('mouseover', 'node', (e) => {
+    cy.on("mouseover", "node", (e) => {
       const nodeData = e.target.data();
       const node = nodes.find((n) => n.id === nodeData.id) ?? null;
       setHoveredNode(node);
-      e.target.addClass('hover');
+      e.target.addClass("hover");
     });
 
-    cy.on('mouseout', 'node', (e) => {
+    cy.on("mouseout", "node", (e) => {
       setHoveredNode(null);
-      e.target.removeClass('hover');
+      e.target.removeClass("hover");
     });
 
     // Double-click to expand node
-    cy.on('dbltap', 'node', (e) => {
+    cy.on("dbltap", "node", (e) => {
       const nodeData = e.target.data();
       const step: TraversalStep = {
         nodeId: nodeData.id,
         nodeLabel: nodeData.label,
         nodeType: nodeData.type,
-        direction: 'both',
+        direction: "both",
         depth: traversalPath.length + 1,
       };
       setTraversalPath((prev) => [...prev, step]);
@@ -249,91 +215,87 @@ export function KGExplorer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enableDragTraversal]);
 
-
   // Layout function
-  const runLayout = useCallback(
-    (layoutName: string) => {
-      const cy = cyRef.current;
-      if (!cy || cy.nodes().length === 0) return;
+  const runLayout = useCallback((layoutName: string) => {
+    const cy = cyRef.current;
+    if (!cy || cy.nodes().length === 0) return;
 
-      const layoutOptions: Record<string, object> = {
-        fcose: {
-          name: 'fcose',
-          quality: 'default',
-          animate: true,
-          animationDuration: 500,
-          randomize: true,
-          fit: true,
-          padding: 50,
-          nodeDimensionsIncludeLabels: true,
-          uniformNodeDimensions: false,
-          packComponents: true,
-          nodeRepulsion: 4500,
-          idealEdgeLength: 100,
-          edgeElasticity: 0.45,
-          nestingFactor: 0.1,
-          numIter: 2500,
-          tile: true,
-          tilingPaddingVertical: 10,
-          tilingPaddingHorizontal: 10,
-          gravity: 0.25,
-          gravityRange: 3.8,
-        },
-        dagre: {
-          name: 'dagre',
-          rankDir: 'TB',
-          align: 'UL',
-          ranker: 'network-simplex',
-          nodeSep: 50,
-          edgeSep: 10,
-          rankSep: 75,
-          animate: true,
-          animationDuration: 500,
-          fit: true,
-          padding: 50,
-        },
-        cola: {
-          name: 'cola',
-          animate: true,
-          animationDuration: 500,
-          fit: true,
-          padding: 50,
-          nodeDimensionsIncludeLabels: true,
-          avoidOverlap: true,
-          unconstrIter: 10,
-          userConstIter: 10,
-          allConstIter: 10,
-          convergenceThreshold: 0.01,
-        },
-        circle: {
-          name: 'circle',
-          fit: true,
-          padding: 50,
-          animate: true,
-          animationDuration: 500,
-          avoidOverlap: true,
-          startAngle: (3 / 2) * Math.PI,
-          sweep: 2 * Math.PI,
-          clockwise: true,
-        },
-        concentric: {
-          name: 'concentric',
-          fit: true,
-          padding: 50,
-          animate: true,
-          animationDuration: 500,
-          avoidOverlap: true,
-          minNodeSpacing: 50,
-          concentric: (node: NodeSingular) => node.degree(),
-          levelWidth: () => 2,
-        },
-      };
+    const layoutOptions: Record<string, object> = {
+      fcose: {
+        name: "fcose",
+        quality: "default",
+        animate: true,
+        animationDuration: 500,
+        randomize: true,
+        fit: true,
+        padding: 50,
+        nodeDimensionsIncludeLabels: true,
+        uniformNodeDimensions: false,
+        packComponents: true,
+        nodeRepulsion: 4500,
+        idealEdgeLength: 100,
+        edgeElasticity: 0.45,
+        nestingFactor: 0.1,
+        numIter: 2500,
+        tile: true,
+        tilingPaddingVertical: 10,
+        tilingPaddingHorizontal: 10,
+        gravity: 0.25,
+        gravityRange: 3.8,
+      },
+      dagre: {
+        name: "dagre",
+        rankDir: "TB",
+        align: "UL",
+        ranker: "network-simplex",
+        nodeSep: 50,
+        edgeSep: 10,
+        rankSep: 75,
+        animate: true,
+        animationDuration: 500,
+        fit: true,
+        padding: 50,
+      },
+      cola: {
+        name: "cola",
+        animate: true,
+        animationDuration: 500,
+        fit: true,
+        padding: 50,
+        nodeDimensionsIncludeLabels: true,
+        avoidOverlap: true,
+        unconstrIter: 10,
+        userConstIter: 10,
+        allConstIter: 10,
+        convergenceThreshold: 0.01,
+      },
+      circle: {
+        name: "circle",
+        fit: true,
+        padding: 50,
+        animate: true,
+        animationDuration: 500,
+        avoidOverlap: true,
+        startAngle: (3 / 2) * Math.PI,
+        sweep: 2 * Math.PI,
+        clockwise: true,
+      },
+      concentric: {
+        name: "concentric",
+        fit: true,
+        padding: 50,
+        animate: true,
+        animationDuration: 500,
+        avoidOverlap: true,
+        minNodeSpacing: 50,
+        concentric: (node: NodeSingular) => node.degree(),
+        levelWidth: () => 2,
+      },
+    };
 
-      const opts = (layoutOptions[layoutName] ?? layoutOptions.fcose) as any;
-      cy.layout(opts).run();
-    },
-    [],
-  );
+    const opts = (layoutOptions[layoutName] ?? layoutOptions.fcose) as any;
+    cy.layout(opts).run();
+  }, []);
 
   // Update elements when data changes
   useEffect(() => {
@@ -387,26 +349,16 @@ export function KGExplorer({
   }, []);
 
   // Get unique node and edge types for filters
-  const nodeTypes = useMemo(
-    () => [...new Set(nodes.map((n) => n.type))],
-    [nodes],
-  );
-  const edgeTypes = useMemo(
-    () => [...new Set(edges.map((e) => e.type))],
-    [edges],
-  );
+  const nodeTypes = useMemo(() => [...new Set(nodes.map((n) => n.type))], [nodes]);
+  const edgeTypes = useMemo(() => [...new Set(edges.map((e) => e.type))], [edges]);
 
   if (error) {
     return (
-      <Card className={cn('w-full h-full', className)}>
+      <Card className={cn("w-full h-full", className)}>
         <CardContent className="flex items-center justify-center h-full">
           <div className="text-center">
-            <p className="text-destructive font-medium mb-2">
-              Error loading graph data
-            </p>
-            <p className="text-sm text-muted-foreground mb-4">
-              {error.message}
-            </p>
+            <p className="text-destructive font-medium mb-2">Error loading graph data</p>
+            <p className="text-sm text-muted-foreground mb-4">{error.message}</p>
             <Button variant="outline" onClick={() => refetch()}>
               Retry
             </Button>
@@ -417,7 +369,7 @@ export function KGExplorer({
   }
 
   return (
-    <div className={cn('flex flex-col h-full w-full', className)}>
+    <div className={cn("flex flex-col h-full w-full", className)}>
       {/* Toolbar */}
       <ExplorerToolbar
         layout={layout}
@@ -460,9 +412,7 @@ export function KGExplorer({
           {!loading && nodeCount === 0 && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
-                <p className="text-lg font-medium text-muted-foreground mb-2">
-                  No entities found
-                </p>
+                <p className="text-lg font-medium text-muted-foreground mb-2">No entities found</p>
                 <p className="text-sm text-muted-foreground">
                   Add entities to this investigation to visualize them here
                 </p>
@@ -476,9 +426,7 @@ export function KGExplorer({
               <div className="flex items-center gap-2 mb-1">
                 <Badge
                   style={{
-                    backgroundColor:
-                      NODE_TYPE_COLORS[hoveredNode.type] ??
-                      NODE_TYPE_COLORS.DEFAULT,
+                    backgroundColor: NODE_TYPE_COLORS[hoveredNode.type] ?? NODE_TYPE_COLORS.DEFAULT,
                   }}
                 >
                   {hoveredNode.type}
@@ -506,7 +454,7 @@ export function KGExplorer({
               onClick={() => setShowRAGPreview(!showRAGPreview)}
               className="shadow-md"
             >
-              {showRAGPreview ? 'Hide' : 'Show'} RAG Preview
+              {showRAGPreview ? "Hide" : "Show"} RAG Preview
             </Button>
             {traversalPath.length > 0 && (
               <Button
@@ -529,10 +477,7 @@ export function KGExplorer({
               <TabsTrigger value="rag" disabled={!showRAGPreview}>
                 RAG
               </TabsTrigger>
-              <TabsTrigger
-                value="traversal"
-                disabled={traversalPath.length === 0}
-              >
+              <TabsTrigger value="traversal" disabled={traversalPath.length === 0}>
                 Path
               </TabsTrigger>
             </TabsList>
@@ -550,10 +495,7 @@ export function KGExplorer({
             </TabsContent>
 
             <TabsContent value="rag" className="flex-1 overflow-auto p-0 m-0">
-              <RAGPreviewPanel
-                node={selectedNode}
-                enrichment={enrichment}
-              />
+              <RAGPreviewPanel node={selectedNode} enrichment={enrichment} />
             </TabsContent>
 
             <TabsContent value="traversal" className="flex-1 overflow-auto p-0 m-0">

@@ -1,4 +1,4 @@
-import { Pool, PoolConfig } from 'pg';
+import { Pool, PoolConfig } from "pg";
 
 export interface ShardConfig {
   id: string;
@@ -26,7 +26,7 @@ export interface DatabaseConfig {
 
 export interface ShardingConfig {
   shards: ShardConfig[];
-  strategy: 'hash' | 'range' | 'geographic' | 'custom';
+  strategy: "hash" | "range" | "geographic" | "custom";
   shardKeyField: string;
   replicationFactor?: number;
   consistentHashingVirtualNodes?: number;
@@ -38,7 +38,7 @@ export interface QueryContext {
   tenantId?: string;
   userId?: string;
   readonly?: boolean;
-  priority?: 'high' | 'normal' | 'low';
+  priority?: "high" | "normal" | "low";
   timeout?: number;
   useReplica?: boolean;
 }
@@ -83,7 +83,7 @@ export interface MigrationTask {
   table: string;
   rangeStart: any;
   rangeEnd: any;
-  status: 'pending' | 'in_progress' | 'completed' | 'failed';
+  status: "pending" | "in_progress" | "completed" | "failed";
   progress: number;
   startedAt?: Date;
   completedAt?: Date;

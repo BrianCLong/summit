@@ -3,7 +3,7 @@
  * Ranks search results based on multiple signals
  */
 
-import { AssetMetadata } from '@intelgraph/data-catalog';
+import { AssetMetadata } from "@intelgraph/data-catalog";
 
 export interface RankingSignals {
   textScore: number;
@@ -163,8 +163,8 @@ export class RelevanceRanker {
   applyCertificationBoost(assets: AssetMetadata[]): AssetMetadata[] {
     return assets.map((asset) => {
       if (
-        asset.trustIndicators.certificationLevel === 'GOLD' ||
-        asset.trustIndicators.certificationLevel === 'PLATINUM'
+        asset.trustIndicators.certificationLevel === "GOLD" ||
+        asset.trustIndicators.certificationLevel === "PLATINUM"
       ) {
         // Boost will be applied in ranking
       }

@@ -9,12 +9,14 @@ Implemented a comprehensive canonical entity system with full bitemporal trackin
 ### 1. Core Infrastructure
 
 **Bitemporal Types** (`server/src/canonical/types.ts`)
+
 - `BitemporalFields` interface with `validFrom/validTo` + `observedAt/recordedAt`
 - `BaseCanonicalEntity` interface with version control
 - Helper functions for temporal filtering
 - Type-safe temporal query interfaces
 
 **Provenance System** (`server/src/canonical/provenance.ts`)
+
 - `ProvenanceSource` - data source tracking
 - `ProvenanceAssertion` - claim tracking with confidence
 - `ProvenanceTransform` - transformation pipeline tracking
@@ -37,6 +39,7 @@ All located in `server/src/canonical/entities/`:
 8. **Case** - Investigations with related entities and timeline
 
 Each schema includes:
+
 - Full TypeScript type definitions
 - Structured fields for domain-specific data
 - Risk flag support
@@ -46,17 +49,20 @@ Each schema includes:
 ### 3. Helper Functions (`server/src/canonical/helpers.ts`)
 
 **Time-Travel Queries:**
+
 - `snapshotAtTime()` - Get entities as they were at a specific point
 - `getEntityHistory()` - Get complete version history
 - `getEntitiesInTimeRange()` - Query entities valid during a period
 - `getEntitiesWithProvenance()` - Fetch entities with provenance chains
 
 **Entity Operations:**
+
 - `createEntityVersion()` - Create new version with temporal tracking
 - `correctEntity()` - Retroactive corrections preserving history
 - `softDeleteEntity()` - Soft delete without losing history
 
 **Utilities:**
+
 - `temporalDistance()` - Calculate time between versions
 - Case conversion helpers (camelCase ↔ snake_case)
 
@@ -80,10 +86,12 @@ Plus `demonstrateTimeTravelQueries()` function for interactive demos.
 Complete schema setup:
 
 **Tables:**
+
 - `canonical_provenance` - Provenance chain storage
 - `canonical_person` through `canonical_case` - 8 entity tables
 
 **Each table includes:**
+
 - Composite primary key: `(id, recorded_at, valid_from)`
 - Bitemporal fields: `valid_from`, `valid_to`, `observed_at`, `recorded_at`
 - Version control: `version`, `modified_by`
@@ -92,12 +100,14 @@ Complete schema setup:
 - Entity-specific JSONB fields for flexibility
 
 **Indexes:**
+
 - Temporal queries: `(valid_from, valid_to)`, `(recorded_at)`
 - Current entities: Partial index on `valid_to IS NULL AND deleted = false`
 - Tenant isolation: `(tenant_id)`
 - Full-text search: GIN indexes on text fields
 
 **Database Objects:**
+
 - `canonical_entities_current` view - Current state across all types
 - `get_entity_at_time()` function - Helper for temporal queries
 - `canonical_metrics` table - Monitoring and analytics
@@ -105,6 +115,7 @@ Complete schema setup:
 ### 6. Subgraph Export (`server/src/canonical/export.ts`)
 
 **Features:**
+
 - Export entities and relationships with provenance
 - Recursive graph traversal (configurable depth)
 - Relationship extraction from entity fields
@@ -113,6 +124,7 @@ Complete schema setup:
 - Multiple formats: JSON, JSON-LD, Turtle (planned)
 
 **Functions:**
+
 - `exportSubgraph()` - Main export function
 - `validateSubgraphExport()` - Validate export integrity
 - `exportToJSON()` / `exportToJSONLD()` - Format conversion
@@ -121,6 +133,7 @@ Complete schema setup:
 ### 7. Comprehensive Test Suite
 
 **Bitemporal Tests** (`server/src/tests/canonical/bitemporal.test.ts`)
+
 - Valid time dimension (12 test cases)
 - Transaction time dimension (8 test cases)
 - Entity history tracking (6 test cases)
@@ -129,6 +142,7 @@ Complete schema setup:
 - Helper functions (5 test cases)
 
 **Provenance Tests** (`server/src/tests/canonical/provenance.test.ts`)
+
 - Hash consistency (8 test cases)
 - Chain creation (4 test cases)
 - Tamper detection (6 test cases)
@@ -136,6 +150,7 @@ Complete schema setup:
 - End-to-end flows (2 test cases)
 
 **Integration Tests** (`server/src/tests/canonical/integration.test.ts`)
+
 - Complete entity lifecycle
 - Time-travel demonstrations
 - Export with provenance
@@ -144,6 +159,7 @@ Complete schema setup:
 ### 8. Documentation
 
 **README.md** (`server/src/canonical/README.md`)
+
 - Quick start guide
 - Architecture overview
 - API documentation
@@ -153,6 +169,7 @@ Complete schema setup:
 - Future enhancements
 
 **Implementation Guide** (this document)
+
 - Complete file listing
 - Feature summary
 - Acceptance criteria verification
@@ -162,6 +179,7 @@ Complete schema setup:
 ### ✅ Criterion 1: Unit tests verify bitemporality
 
 **Evidence:**
+
 - `bitemporal.test.ts` - 39 test cases covering:
   - Valid time tracking (when facts were true)
   - Transaction time tracking (when we learned about facts)
@@ -171,6 +189,7 @@ Complete schema setup:
   - Soft deletes preserving history
 
 **Key Test Results:**
+
 ```typescript
 ✓ Valid time dimension (12 tests)
 ✓ Transaction time dimension (8 tests)
@@ -183,6 +202,7 @@ Complete schema setup:
 ### ✅ Criterion 2: Exporting a subgraph produces a provenance manifest
 
 **Evidence:**
+
 - `export.ts` - Complete subgraph export implementation
 - `integration.test.ts` - End-to-end export verification
 - Every export includes:
@@ -192,6 +212,7 @@ Complete schema setup:
   - Statistics and metadata
 
 **Export Structure:**
+
 ```typescript
 {
   metadata: {
@@ -216,6 +237,7 @@ Complete schema setup:
 ```
 
 **Verification:**
+
 ```typescript
 const subgraph = await exportSubgraph(pool, options, user);
 const validation = validateSubgraphExport(subgraph);
@@ -295,33 +317,34 @@ server/src/
 ## Usage Example
 
 ```typescript
-import {
-  createPerson,
-  createProvenanceChain,
-  snapshotAtTime,
-  exportSubgraph,
-} from './canonical';
+import { createPerson, createProvenanceChain, snapshotAtTime, exportSubgraph } from "./canonical";
 
 // 1. Create provenance
-const chain = createProvenanceChain('chain-1', source, assertions, transforms);
+const chain = createProvenanceChain("chain-1", source, assertions, transforms);
 
 // 2. Create entity
 const person = createPerson(data, temporalFields, chain.chainId);
-await createEntityVersion(pool, 'Person', person);
+await createEntityVersion(pool, "Person", person);
 
 // 3. Time-travel query
 const snapshot = await snapshotAtTime(
-  pool, 'Person', tenantId,
-  new Date('2023-06-15'),  // asOf
-  new Date('2023-06-15')   // asKnownAt
+  pool,
+  "Person",
+  tenantId,
+  new Date("2023-06-15"), // asOf
+  new Date("2023-06-15") // asKnownAt
 );
 
 // 4. Export with provenance
-const subgraph = await exportSubgraph(pool, {
-  tenantId,
-  rootEntityIds: ['person-1'],
-  maxDepth: 3,
-}, userId);
+const subgraph = await exportSubgraph(
+  pool,
+  {
+    tenantId,
+    rootEntityIds: ["person-1"],
+    maxDepth: 3,
+  },
+  userId
+);
 
 console.log(subgraph.provenance.manifestHash);
 // "a1b2c3d4e5f6..."
@@ -332,17 +355,20 @@ console.log(subgraph.provenance.manifestHash);
 To use the canonical entities system:
 
 1. **Run Migration:**
+
    ```bash
    # Migration will be automatically applied
    npm run migrate
    ```
 
 2. **Import in Code:**
+
    ```typescript
-   import { createPerson, snapshotAtTime } from './canonical';
+   import { createPerson, snapshotAtTime } from "./canonical";
    ```
 
 3. **Run Tests:**
+
    ```bash
    npm test server/src/tests/canonical
    ```
@@ -371,6 +397,7 @@ To use the canonical entities system:
 ## Conclusion
 
 The canonical entities system provides a production-ready foundation for:
+
 - Intelligence graph entity management
 - Temporal analysis and forensics
 - Data lineage and provenance tracking

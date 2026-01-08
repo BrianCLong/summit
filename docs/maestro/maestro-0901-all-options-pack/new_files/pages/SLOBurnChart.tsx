@@ -1,5 +1,5 @@
-import React from 'react';
-import LineTimeseries from '../components/charts/LineTimeseries';
+import React from "react";
+import LineTimeseries from "../components/charts/LineTimeseries";
 
 export default function SLOBurnChart() {
   const series = Array.from({ length: 24 }, (_, i) => ({
@@ -8,11 +8,7 @@ export default function SLOBurnChart() {
   }));
   return (
     <div className="p-6">
-      <LineTimeseries
-        title="SLO Burn (demo)"
-        data={series}
-        ariaLabel="SLO burn trend"
-      />
+      <LineTimeseries title="SLO Burn (demo)" data={series} ariaLabel="SLO burn trend" />
     </div>
   );
 }

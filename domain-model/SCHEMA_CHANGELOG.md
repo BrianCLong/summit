@@ -8,6 +8,7 @@
 - Shipped validation samples and test harness (`domain-model/tests/validate_samples.py`).
 
 ### Impacted teams
+
 - **Ingest**: map source payloads to canonical IDs, timestamps, and `schemaVersion` before persisting.
 - **Graph/XAI**: rely on `entityType` and relationship enumerations for traversal and explanations.
 - **Governance**: enforce `PolicyTag` attachment via relationships; ensure warrants/licenses reference `validFor` ranges.

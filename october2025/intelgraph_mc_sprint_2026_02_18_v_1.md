@@ -326,11 +326,7 @@ export function nextCursor(last: string) {
 **Cache (TS excerpt)**
 
 ```ts
-export async function readThrough(
-  key: string,
-  fetcher: () => Promise<any>,
-  ttlMs: number,
-) {
+export async function readThrough(key: string, fetcher: () => Promise<any>, ttlMs: number) {
   /* ... */
 }
 ```

@@ -3,51 +3,51 @@ name: helm-governance-pipeline
 on:
   pull_request:
     paths:
-      - 'helm/**'
-      - 'charts/**'
-      - 'infra/helm/**'
-      - 'deploy/helm/**'
-      - 'k8s/**'
-      - 'ops/**'
-      - 'services/**/helm/**'
-      - 'deepagent-mvp/helm/**'
-      - 'graph-xai/infra/helm/**'
-      - 'graph_xai/infra/helm/**'
-      - 'ga-graphai/infra/helm/**'
-      - 'prov-ledger/infra/helm/**'
-      - 'prov_ledger/infra/helm/**'
-      - 'templates/golden-path-platform/helm/**'
-      - 'v24_modules/**'
-      - 'sprint-kits/**'
-      - 'summit-company_extended/infra/helm/**'
-      - 'policy/**'
-      - 'policies/**'
-      - '.github/workflows/helm-governance.yml'
-      - '.github/ct-helm.yaml'
+      - "helm/**"
+      - "charts/**"
+      - "infra/helm/**"
+      - "deploy/helm/**"
+      - "k8s/**"
+      - "ops/**"
+      - "services/**/helm/**"
+      - "deepagent-mvp/helm/**"
+      - "graph-xai/infra/helm/**"
+      - "graph_xai/infra/helm/**"
+      - "ga-graphai/infra/helm/**"
+      - "prov-ledger/infra/helm/**"
+      - "prov_ledger/infra/helm/**"
+      - "templates/golden-path-platform/helm/**"
+      - "v24_modules/**"
+      - "sprint-kits/**"
+      - "summit-company_extended/infra/helm/**"
+      - "policy/**"
+      - "policies/**"
+      - ".github/workflows/helm-governance.yml"
+      - ".github/ct-helm.yaml"
   push:
     branches: [main]
     paths:
-      - 'helm/**'
-      - 'charts/**'
-      - 'infra/helm/**'
-      - 'deploy/helm/**'
-      - 'k8s/**'
-      - 'ops/**'
-      - 'services/**/helm/**'
-      - 'deepagent-mvp/helm/**'
-      - 'graph-xai/infra/helm/**'
-      - 'graph_xai/infra/helm/**'
-      - 'ga-graphai/infra/helm/**'
-      - 'prov-ledger/infra/helm/**'
-      - 'prov_ledger/infra/helm/**'
-      - 'templates/golden-path-platform/helm/**'
-      - 'v24_modules/**'
-      - 'sprint-kits/**'
-      - 'summit-company_extended/infra/helm/**'
-      - 'policy/**'
-      - 'policies/**'
-      - '.github/workflows/helm-governance.yml'
-      - '.github/ct-helm.yaml'
+      - "helm/**"
+      - "charts/**"
+      - "infra/helm/**"
+      - "deploy/helm/**"
+      - "k8s/**"
+      - "ops/**"
+      - "services/**/helm/**"
+      - "deepagent-mvp/helm/**"
+      - "graph-xai/infra/helm/**"
+      - "graph_xai/infra/helm/**"
+      - "ga-graphai/infra/helm/**"
+      - "prov-ledger/infra/helm/**"
+      - "prov_ledger/infra/helm/**"
+      - "templates/golden-path-platform/helm/**"
+      - "v24_modules/**"
+      - "sprint-kits/**"
+      - "summit-company_extended/infra/helm/**"
+      - "policy/**"
+      - "policies/**"
+      - ".github/workflows/helm-governance.yml"
+      - ".github/ct-helm.yaml"
   workflow_dispatch:
 
 permissions:

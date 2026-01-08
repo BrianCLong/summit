@@ -76,4 +76,3 @@ Integrate these alerts into Alertmanager routing so the on-call team is paged fo
 - To rerun verification manually, use `kubectl create job --from=cronjob/<name> <name>-manual-$(date +%s)`.
 - Keep the scripts under version control and redeploy the ConfigMap whenever they change: `kubectl create configmap backup-verification-scripts --from-file=ops/backup-verification/ -o yaml --dry-run=client | kubectl apply -f -`.
 - Consider tuning resource requests if restorations routinely approach limits, especially for large Neo4j stores.
-

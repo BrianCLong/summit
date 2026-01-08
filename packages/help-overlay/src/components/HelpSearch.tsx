@@ -3,13 +3,13 @@
  * Search input for KB content
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
-import { useHelp } from '../HelpContext.js';
-import type { HelpSearchProps, HelpArticle } from '../types.js';
+import React, { useCallback, useEffect, useRef } from "react";
+import { useHelp } from "../HelpContext.js";
+import type { HelpSearchProps, HelpArticle } from "../types.js";
 
 export function HelpSearch({
-  placeholder = 'Search help...',
-  className = '',
+  placeholder = "Search help...",
+  className = "",
   onResultSelect,
 }: HelpSearchProps): JSX.Element {
   const { searchQuery, setSearchQuery, search, isSearching } = useHelp();
@@ -40,8 +40,8 @@ export function HelpSearch({
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === 'Escape') {
-        setSearchQuery('');
+      if (event.key === "Escape") {
+        setSearchQuery("");
         inputRef.current?.blur();
       }
     },
@@ -49,17 +49,17 @@ export function HelpSearch({
   );
 
   const inputStyles: React.CSSProperties = {
-    width: '100%',
-    padding: '10px 12px',
-    fontSize: '14px',
-    border: '1px solid #ddd',
-    borderRadius: '6px',
-    outline: 'none',
-    boxSizing: 'border-box',
+    width: "100%",
+    padding: "10px 12px",
+    fontSize: "14px",
+    border: "1px solid #ddd",
+    borderRadius: "6px",
+    outline: "none",
+    boxSizing: "border-box",
   };
 
   const containerStyles: React.CSSProperties = {
-    position: 'relative',
+    position: "relative",
   };
 
   return (
@@ -77,12 +77,12 @@ export function HelpSearch({
       {isSearching && (
         <span
           style={{
-            position: 'absolute',
-            right: '12px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            fontSize: '12px',
-            color: '#666',
+            position: "absolute",
+            right: "12px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            fontSize: "12px",
+            color: "#666",
           }}
         >
           Searching...

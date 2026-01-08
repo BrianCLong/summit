@@ -2,9 +2,9 @@
  * REST API Framework Type Definitions
  */
 
-import type { Request, Response, NextFunction, RequestHandler } from 'express';
-import type { OpenAPIObject, PathItemObject, OperationObject } from 'openapi3-ts/oas31';
-import type { ErrorEnvelope } from '@intelgraph/errors';
+import type { Request, Response, NextFunction, RequestHandler } from "express";
+import type { OpenAPIObject, PathItemObject, OperationObject } from "openapi3-ts/oas31";
+import type { ErrorEnvelope } from "@intelgraph/errors";
 
 // ===== API Configuration =====
 
@@ -67,14 +67,14 @@ export interface SecurityOptions {
 export interface PaginationOptions {
   defaultLimit: number;
   maxLimit: number;
-  strategy: 'offset' | 'cursor';
+  strategy: "offset" | "cursor";
 }
 
 export interface ValidationOptions {
   enabled: boolean;
-  removeAdditional?: boolean | 'all' | 'failing';
-  coerceTypes?: boolean | 'array';
-  useDefaults?: boolean | 'empty';
+  removeAdditional?: boolean | "all" | "failing";
+  coerceTypes?: boolean | "array";
+  useDefaults?: boolean | "empty";
 }
 
 export interface OpenAPIOptions {
@@ -97,7 +97,7 @@ export interface RouteDefinition {
   cache?: CacheOptions;
 }
 
-export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS';
+export type HTTPMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "HEAD" | "OPTIONS";
 
 export interface RouteOpenAPISpec {
   summary?: string;
@@ -113,7 +113,7 @@ export interface RouteOpenAPISpec {
 
 export interface ParameterSpec {
   name: string;
-  in: 'query' | 'path' | 'header' | 'cookie';
+  in: "query" | "path" | "header" | "cookie";
   description?: string;
   required?: boolean;
   schema: JSONSchema;
@@ -276,7 +276,7 @@ export interface IdempotencyRecord {
 // ===== Versioning =====
 
 export interface VersioningOptions {
-  strategy: 'url' | 'header' | 'query' | 'accept';
+  strategy: "url" | "header" | "query" | "accept";
   headerName?: string;
   queryName?: string;
   acceptPrefix?: string;

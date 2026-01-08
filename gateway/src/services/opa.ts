@@ -6,11 +6,10 @@ export interface EvaluationInput {
 }
 
 export async function evaluate(input: EvaluationInput) {
-  const url =
-    process.env.OPA_URL ?? 'http://localhost:8181/v1/data/graphql/guard';
+  const url = process.env.OPA_URL ?? "http://localhost:8181/v1/data/graphql/guard";
   const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ input }),
   });
   if (!res.ok) throw new Error(`OPA decision failed: ${res.status}`);

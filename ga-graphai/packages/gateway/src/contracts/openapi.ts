@@ -1,77 +1,77 @@
-import type { OpenAPIV3_1 } from 'openapi-types';
+import type { OpenAPIV3_1 } from "openapi-types";
 
 type GatewayOpenApi = OpenAPIV3_1.Document & { version: string };
 
 export const gatewayOpenApiContract: GatewayOpenApi = {
-  version: '2025.3.0',
-  openapi: '3.1.0',
+  version: "2025.3.0",
+  openapi: "3.1.0",
   info: {
-    title: 'GA GraphAI Gateway',
-    version: '2025.3.0',
+    title: "GA GraphAI Gateway",
+    version: "2025.3.0",
     description:
-      'Unified gateway for search, policy-aware orchestration, and GraphQL execution. OpenAPI is the single source of truth for REST entrypoints.',
+      "Unified gateway for search, policy-aware orchestration, and GraphQL execution. OpenAPI is the single source of truth for REST entrypoints.",
   },
   servers: [
-    { url: 'https://api.graphai.example.com', description: 'Production' },
-    { url: 'https://staging-api.graphai.example.com', description: 'Staging' },
+    { url: "https://api.graphai.example.com", description: "Production" },
+    { url: "https://staging-api.graphai.example.com", description: "Staging" },
   ],
   paths: {
-    '/api/search/unified': {
+    "/api/search/unified": {
       get: {
-        operationId: 'searchUnified',
-        summary: 'Unified search across connectors and knowledge graph.',
+        operationId: "searchUnified",
+        summary: "Unified search across connectors and knowledge graph.",
         parameters: [
           {
-            name: 'q',
-            in: 'query',
+            name: "q",
+            in: "query",
             required: true,
-            schema: { type: 'string' },
-            description: 'Search query string.',
+            schema: { type: "string" },
+            description: "Search query string.",
           },
           {
-            name: 'tenant_id',
-            in: 'query',
+            name: "tenant_id",
+            in: "query",
             required: true,
-            schema: { type: 'string' },
-            description: 'Tenant identifier used to route policy and context.',
+            schema: { type: "string" },
+            description: "Tenant identifier used to route policy and context.",
           },
           {
-            name: 'x-purpose',
-            in: 'header',
+            name: "x-purpose",
+            in: "header",
             required: false,
-            schema: { type: 'string' },
-            description: 'Purpose header to enforce policy controls.',
+            schema: { type: "string" },
+            description: "Purpose header to enforce policy controls.",
           },
           {
-            name: 'Accept-Version',
-            in: 'header',
+            name: "Accept-Version",
+            in: "header",
             required: false,
-            schema: { type: 'string', enum: ['v1'] },
-            description: 'Explicit contract version to pin the response schema.',
+            schema: { type: "string", enum: ["v1"] },
+            description: "Explicit contract version to pin the response schema.",
           },
         ],
         responses: {
-          '200': {
-            description: 'Successful unified search.',
+          "200": {
+            description: "Successful unified search.",
             content: {
-              'application/json': {
+              "application/json": {
                 schema: {
-                  type: 'object',
-                  required: ['items', 'trace_id'],
+                  type: "object",
+                  required: ["items", "trace_id"],
                   properties: {
-                    trace_id: { type: 'string' },
+                    trace_id: { type: "string" },
                     items: {
-                      type: 'array',
+                      type: "array",
                       items: {
-                        type: 'object',
-                        required: ['title', 'source', 'ranking_features'],
+                        type: "object",
+                        required: ["title", "source", "ranking_features"],
                         properties: {
-                          title: { type: 'string' },
-                          source: { type: 'string' },
-                          snippet: { type: 'string' },
+                          title: { type: "string" },
+                          source: { type: "string" },
+                          snippet: { type: "string" },
                           ranking_features: {
-                            type: 'object',
-                            additionalProperties: { type: 'number' },
+                            type: "object",
+                            additionalProperties: { type: "number" },
                           },
                         },
                       },
@@ -79,12 +79,12 @@ export const gatewayOpenApiContract: GatewayOpenApi = {
                   },
                 },
                 example: {
-                  trace_id: 'trace-123',
+                  trace_id: "trace-123",
                   items: [
                     {
-                      title: 'Bridge operations',
-                      source: 'demo-index',
-                      snippet: 'Findings about bridges...',
+                      title: "Bridge operations",
+                      source: "demo-index",
+                      snippet: "Findings about bridges...",
                       ranking_features: { bm25: 0.92, semantic: 0.87 },
                     },
                   ],
@@ -93,52 +93,52 @@ export const gatewayOpenApiContract: GatewayOpenApi = {
             },
           },
         },
-        tags: ['Search'],
+        tags: ["Search"],
       },
     },
-    '/graphql': {
+    "/graphql": {
       post: {
-        operationId: 'graphqlGateway',
-        summary: 'GraphQL gateway endpoint',
+        operationId: "graphqlGateway",
+        summary: "GraphQL gateway endpoint",
         responses: {
-          '200': {
-            description: 'GraphQL execution result',
+          "200": {
+            description: "GraphQL execution result",
             content: {
-              'application/json': {
+              "application/json": {
                 schema: {
-                  type: 'object',
-                  required: ['data'],
+                  type: "object",
+                  required: ["data"],
                   properties: {
-                    data: { type: 'object' },
+                    data: { type: "object" },
                     errors: {
-                      type: 'array',
-                      items: { type: 'object' },
+                      type: "array",
+                      items: { type: "object" },
                     },
                   },
                 },
                 example: {
-                  data: { models: [{ id: 'gpt-4', family: 'llm', modality: ['text'] }] },
+                  data: { models: [{ id: "gpt-4", family: "llm", modality: ["text"] }] },
                 },
               },
             },
           },
         },
-        tags: ['GraphQL'],
+        tags: ["GraphQL"],
       },
     },
   },
   components: {
     schemas: {
       SearchResultItem: {
-        type: 'object',
-        required: ['title', 'source', 'ranking_features'],
+        type: "object",
+        required: ["title", "source", "ranking_features"],
         properties: {
-          title: { type: 'string' },
-          source: { type: 'string' },
-          snippet: { type: 'string' },
+          title: { type: "string" },
+          source: { type: "string" },
+          snippet: { type: "string" },
           ranking_features: {
-            type: 'object',
-            additionalProperties: { type: 'number' },
+            type: "object",
+            additionalProperties: { type: "number" },
           },
         },
       },

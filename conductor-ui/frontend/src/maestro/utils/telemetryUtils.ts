@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 // OpenTelemetry trace and span types
 export interface TraceContext {
@@ -89,7 +89,7 @@ export interface TraceViewState {
   filters: {
     services?: string[];
     operations?: string[];
-    statusFilter?: 'all' | 'ok' | 'error';
+    statusFilter?: "all" | "ok" | "error";
     minDuration?: number;
   };
 }
@@ -107,12 +107,12 @@ export class TelemetryManager {
       apiKey?: string;
       serviceName?: string;
       serviceVersion?: string;
-    } = {},
+    } = {}
   ) {
-    this.endpoint = options.endpoint || '/api/maestro/v1/telemetry';
+    this.endpoint = options.endpoint || "/api/maestro/v1/telemetry";
     this.headers = {
-      'Content-Type': 'application/json',
-      ...(options.apiKey && { 'X-API-Key': options.apiKey }),
+      "Content-Type": "application/json",
+      ...(options.apiKey && { "X-API-Key": options.apiKey }),
     };
   }
 
@@ -134,8 +134,8 @@ export class TelemetryManager {
   }
 
   private generateRandomId(length: number): string {
-    const chars = '0123456789abcdef';
-    let result = '';
+    const chars = "0123456789abcdef";
+    let result = "";
     for (let i = 0; i < length; i++) {
       result += chars[Math.floor(Math.random() * chars.length)];
     }
@@ -150,7 +150,7 @@ export class TelemetryManager {
       parentSpanId?: string;
       attributes?: Record<string, unknown>;
       links?: SpanLink[];
-    } = {},
+    } = {}
   ): string {
     const spanId = this.generateSpanId();
     const traceId = this.traceContext?.traceId || this.generateTraceId();
@@ -165,26 +165,26 @@ export class TelemetryManager {
       startTime,
       status: SpanStatus.UNSET,
       attributes: {
-        'maestro.run.id': this.extractRunId(),
-        'maestro.node.id': this.extractNodeId(),
-        'maestro.component': this.extractComponent(),
-        'user.id': this.extractUserId(),
-        'tenant.id': this.extractTenantId(),
+        "maestro.run.id": this.extractRunId(),
+        "maestro.node.id": this.extractNodeId(),
+        "maestro.component": this.extractComponent(),
+        "user.id": this.extractUserId(),
+        "tenant.id": this.extractTenantId(),
         ...options.attributes,
       },
       events: [],
       links: options.links || [],
       resource: {
         attributes: {
-          'service.name': 'maestro-ui',
-          'service.version': process.env.VITE_APP_VERSION || '1.0.0',
-          'service.instance.id': this.generateInstanceId(),
-          'deployment.environment': process.env.NODE_ENV || 'development',
+          "service.name": "maestro-ui",
+          "service.version": process.env.VITE_APP_VERSION || "1.0.0",
+          "service.instance.id": this.generateInstanceId(),
+          "deployment.environment": process.env.NODE_ENV || "development",
         },
       },
       instrumentationScope: {
-        name: '@maestro/telemetry',
-        version: '1.0.0',
+        name: "@maestro/telemetry",
+        version: "1.0.0",
       },
     };
 
@@ -209,7 +209,7 @@ export class TelemetryManager {
       status?: SpanStatus;
       statusMessage?: string;
       attributes?: Record<string, unknown>;
-    } = {},
+    } = {}
   ): void {
     const span = this.spans.get(spanId);
     if (!span) {
@@ -227,7 +227,7 @@ export class TelemetryManager {
     }
 
     if (options.statusMessage) {
-      span.attributes['otel.status_description'] = options.statusMessage;
+      span.attributes["otel.status_description"] = options.statusMessage;
     }
 
     this.activeSpans.delete(spanId);
@@ -236,11 +236,7 @@ export class TelemetryManager {
     this.exportSpan(span);
   }
 
-  addSpanEvent(
-    spanId: string,
-    name: string,
-    attributes?: Record<string, unknown>,
-  ): void {
+  addSpanEvent(spanId: string, name: string, attributes?: Record<string, unknown>): void {
     const span = this.spans.get(spanId);
     if (!span) {
       console.warn(`Span ${spanId} not found`);
@@ -272,18 +268,18 @@ export class TelemetryManager {
     }
 
     span.status = SpanStatus.ERROR;
-    span.attributes['error'] = true;
-    span.attributes['error.type'] = exception.name;
-    span.attributes['error.message'] = exception.message;
+    span.attributes["error"] = true;
+    span.attributes["error.type"] = exception.name;
+    span.attributes["error.message"] = exception.message;
 
     if (exception.stack) {
-      span.attributes['error.stack'] = exception.stack;
+      span.attributes["error.stack"] = exception.stack;
     }
 
-    this.addSpanEvent(spanId, 'exception', {
-      'exception.type': exception.name,
-      'exception.message': exception.message,
-      'exception.stacktrace': exception.stack,
+    this.addSpanEvent(spanId, "exception", {
+      "exception.type": exception.name,
+      "exception.message": exception.message,
+      "exception.stacktrace": exception.stack,
     });
   }
 
@@ -301,7 +297,7 @@ export class TelemetryManager {
       const traceData = await response.json();
       return traceData.spans || [];
     } catch (error) {
-      console.error('Failed to fetch trace:', error);
+      console.error("Failed to fetch trace:", error);
       return [];
     }
   }
@@ -317,7 +313,7 @@ export class TelemetryManager {
   }): Promise<{ traceId: string; spans: SpanData[]; summary: object }[]> {
     try {
       const response = await fetch(`${this.endpoint}/traces/search`, {
-        method: 'POST',
+        method: "POST",
         headers: this.headers,
         body: JSON.stringify(query),
       });
@@ -329,7 +325,7 @@ export class TelemetryManager {
       const searchResults = await response.json();
       return searchResults.traces || [];
     } catch (error) {
-      console.error('Failed to search traces:', error);
+      console.error("Failed to search traces:", error);
       return [];
     }
   }
@@ -366,9 +362,7 @@ export class TelemetryManager {
       };
     };
 
-    return rootSpans
-      .sort((a, b) => a.startTime - b.startTime)
-      .map((span) => buildNode(span));
+    return rootSpans.sort((a, b) => a.startTime - b.startTime).map((span) => buildNode(span));
   }
 
   calculateTraceMetrics(spans: SpanData[]): {
@@ -393,21 +387,14 @@ export class TelemetryManager {
     const sortedSpans = spans.sort((a, b) => a.startTime - b.startTime);
     const firstSpan = sortedSpans[0];
     const lastSpan = sortedSpans.reduce((latest, span) =>
-      (span.endTime || span.startTime) > (latest.endTime || latest.startTime)
-        ? span
-        : latest,
+      (span.endTime || span.startTime) > (latest.endTime || latest.startTime) ? span : latest
     );
 
-    const totalDuration =
-      (lastSpan.endTime || lastSpan.startTime) - firstSpan.startTime;
-    const errorCount = spans.filter(
-      (s) => s.status === SpanStatus.ERROR,
-    ).length;
+    const totalDuration = (lastSpan.endTime || lastSpan.startTime) - firstSpan.startTime;
+    const errorCount = spans.filter((s) => s.status === SpanStatus.ERROR).length;
     const services = [
       ...new Set(
-        spans
-          .map((s) => s.resource.attributes['service.name'])
-          .filter(Boolean) as string[],
+        spans.map((s) => s.resource.attributes["service.name"]).filter(Boolean) as string[]
       ),
     ];
 
@@ -438,10 +425,7 @@ export class TelemetryManager {
 
       if (children.length === 0) {
         // Leaf node - calculate total duration
-        const pathDuration = newPath.reduce(
-          (sum, s) => sum + (s.duration || 0),
-          0,
-        );
+        const pathDuration = newPath.reduce((sum, s) => sum + (s.duration || 0), 0);
         if (pathDuration > maxDuration) {
           maxDuration = pathDuration;
           longestPath = newPath;
@@ -459,7 +443,7 @@ export class TelemetryManager {
   private async exportSpan(span: SpanData): Promise<void> {
     try {
       await fetch(`${this.endpoint}/spans`, {
-        method: 'POST',
+        method: "POST",
         headers: this.headers,
         body: JSON.stringify({
           resourceSpans: [
@@ -476,7 +460,7 @@ export class TelemetryManager {
         }),
       });
     } catch (error) {
-      console.error('Failed to export span:', error);
+      console.error("Failed to export span:", error);
     }
   }
 
@@ -487,24 +471,24 @@ export class TelemetryManager {
 
   private extractNodeId(): string | undefined {
     const params = new URLSearchParams(window.location.search);
-    return params.get('nodeId') || undefined;
+    return params.get("nodeId") || undefined;
   }
 
   private extractComponent(): string {
-    if (window.location.pathname.includes('/maestro')) {
-      return 'maestro-ui';
+    if (window.location.pathname.includes("/maestro")) {
+      return "maestro-ui";
     }
-    return 'frontend';
+    return "frontend";
   }
 
   private extractUserId(): string | undefined {
     // Would typically extract from authentication context
-    return 'demo-user';
+    return "demo-user";
   }
 
   private extractTenantId(): string | undefined {
     const params = new URLSearchParams(window.location.search);
-    return params.get('tenant') || 'default';
+    return params.get("tenant") || "default";
   }
 
   private generateInstanceId(): string {
@@ -534,23 +518,17 @@ export const useTelemetry = () => {
     });
   }, []);
 
-  const recordEvent = React.useCallback(
-    (spanId: string, name: string, attributes?: object) => {
-      telemetry.addSpanEvent(spanId, name, attributes);
-    },
-    [],
-  );
+  const recordEvent = React.useCallback((spanId: string, name: string, attributes?: object) => {
+    telemetry.addSpanEvent(spanId, name, attributes);
+  }, []);
 
   const recordError = React.useCallback((spanId: string, error: Error) => {
     telemetry.recordException(spanId, error);
   }, []);
 
-  const setAttribute = React.useCallback(
-    (spanId: string, key: string, value: unknown) => {
-      telemetry.setSpanAttribute(spanId, key, value);
-    },
-    [],
-  );
+  const setAttribute = React.useCallback((spanId: string, key: string, value: unknown) => {
+    telemetry.setSpanAttribute(spanId, key, value);
+  }, []);
 
   return {
     activeSpans: Array.from(activeSpans),
@@ -566,11 +544,7 @@ export const useTelemetry = () => {
 
 // Decorator for automatic span creation
 export function traced(name?: string) {
-  return function (
-    target: object,
-    propertyKey: string,
-    descriptor: PropertyDescriptor,
-  ) {
+  return function (target: object, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
     const spanName = name || `${target.constructor.name}.${propertyKey}`;
 
@@ -578,8 +552,8 @@ export function traced(name?: string) {
       const spanId = telemetry.startSpan(spanName, {
         kind: SpanKind.INTERNAL,
         attributes: {
-          'code.function': propertyKey,
-          'code.namespace': target.constructor.name,
+          "code.function": propertyKey,
+          "code.namespace": target.constructor.name,
         },
       });
 
@@ -599,13 +573,10 @@ export function traced(name?: string) {
 }
 
 // Performance monitoring utilities
-export const measurePerformance = (
-  name: string,
-  fn: () => Promise<unknown> | unknown,
-) => {
+export const measurePerformance = (name: string, fn: () => Promise<unknown> | unknown) => {
   const spanId = telemetry.startSpan(`performance.${name}`, {
     kind: SpanKind.INTERNAL,
-    attributes: { 'performance.measure': true },
+    attributes: { "performance.measure": true },
   });
 
   const startTime = performance.now();
@@ -617,7 +588,7 @@ export const measurePerformance = (
       return result
         .then((res) => {
           const duration = performance.now() - startTime;
-          telemetry.setSpanAttribute(spanId, 'performance.duration', duration);
+          telemetry.setSpanAttribute(spanId, "performance.duration", duration);
           telemetry.finishSpan(spanId, { status: SpanStatus.OK });
           return res;
         })
@@ -628,7 +599,7 @@ export const measurePerformance = (
         });
     } else {
       const duration = performance.now() - startTime;
-      telemetry.setSpanAttribute(spanId, 'performance.duration', duration);
+      telemetry.setSpanAttribute(spanId, "performance.duration", duration);
       telemetry.finishSpan(spanId, { status: SpanStatus.OK });
       return result;
     }

@@ -37,6 +37,7 @@ This document provides best practices for containerization and orchestration of 
 **Why**: Reduce image size, separate build and runtime dependencies, improve security.
 
 **Example**:
+
 ```dockerfile
 # Build stage
 FROM node:20-alpine AS builder
@@ -59,11 +60,13 @@ CMD ["node", "dist/index.js"]
 **Why**: Faster builds by reusing cached layers.
 
 **Best Practices**:
+
 - Copy `package.json` and lock files **before** source code
 - Combine RUN commands where possible
 - Put frequently changing files at the end
 
 **Example**:
+
 ```dockerfile
 # ✅ Good - leverages cache
 COPY package.json pnpm-lock.yaml ./
@@ -80,6 +83,7 @@ RUN pnpm install
 **Best Practices**:
 
 #### Use Specific Version Tags
+
 ```dockerfile
 # ✅ Good
 FROM node:20.11.0-alpine3.19
@@ -89,6 +93,7 @@ FROM node:latest
 ```
 
 #### Run as Non-Root User
+
 ```dockerfile
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
@@ -99,6 +104,7 @@ USER 1001:1001
 ```
 
 #### Use Distroless Images for Production
+
 ```dockerfile
 FROM gcr.io/distroless/nodejs20-debian12:nonroot
 USER 65532:65532
@@ -107,6 +113,7 @@ CMD ["index.js"]
 ```
 
 #### Read-Only Root Filesystem
+
 ```dockerfile
 # In Dockerfile
 RUN chmod -R 555 /app
@@ -155,11 +162,13 @@ RUN rm file
 ### 7. Use .dockerignore
 
 Always include a comprehensive `.dockerignore` file to:
+
 - Reduce build context size
 - Speed up builds
 - Avoid including secrets
 
 **Example** `.dockerignore`:
+
 ```
 node_modules/
 .git/
@@ -183,16 +192,18 @@ coverage/
 We use multiple scanning tools:
 
 **Trivy** (vulnerability scanning):
+
 ```yaml
 - name: Run Trivy
   uses: aquasecurity/trivy-action@master
   with:
     image-ref: ${{ env.IMAGE }}
-    format: 'sarif'
-    severity: 'CRITICAL,HIGH'
+    format: "sarif"
+    severity: "CRITICAL,HIGH"
 ```
 
 **Grype** (additional vulnerability scanning):
+
 ```yaml
 - name: Scan with Grype
   uses: anchore/scan-action@v3
@@ -202,6 +213,7 @@ We use multiple scanning tools:
 ```
 
 **Hadolint** (Dockerfile linting):
+
 ```bash
 docker run --rm -i hadolint/hadolint < Dockerfile
 ```
@@ -251,7 +263,7 @@ securityContext:
   allowPrivilegeEscalation: false
   capabilities:
     drop:
-    - ALL
+      - ALL
   readOnlyRootFilesystem: true
 ```
 
@@ -269,24 +281,24 @@ spec:
     matchLabels:
       app: api-server
   policyTypes:
-  - Ingress
-  - Egress
+    - Ingress
+    - Egress
   ingress:
-  - from:
-    - podSelector:
-        matchLabels:
-          app: gateway
-    ports:
-    - protocol: TCP
-      port: 4000
+    - from:
+        - podSelector:
+            matchLabels:
+              app: gateway
+      ports:
+        - protocol: TCP
+          port: 4000
   egress:
-  - to:
-    - podSelector:
-        matchLabels:
-          app: postgres
-    ports:
-    - protocol: TCP
-      port: 5432
+    - to:
+        - podSelector:
+            matchLabels:
+              app: postgres
+      ports:
+        - protocol: TCP
+          port: 5432
 ```
 
 ### 4. Image Signing and Verification
@@ -311,22 +323,22 @@ metadata:
 spec:
   validationFailureAction: enforce
   rules:
-  - name: verify-signature
-    match:
-      resources:
-        kinds:
-        - Pod
-    verifyImages:
-    - imageReferences:
-      - "ghcr.io/brianclong/summit/*"
-      attestors:
-      - count: 1
-        entries:
-        - keys:
-            publicKeys: |-
-              -----BEGIN PUBLIC KEY-----
-              ...
-              -----END PUBLIC KEY-----
+    - name: verify-signature
+      match:
+        resources:
+          kinds:
+            - Pod
+      verifyImages:
+        - imageReferences:
+            - "ghcr.io/brianclong/summit/*"
+          attestors:
+            - count: 1
+              entries:
+                - keys:
+                    publicKeys: |-
+                      -----BEGIN PUBLIC KEY-----
+                      ...
+                      -----END PUBLIC KEY-----
 ```
 
 ---
@@ -351,11 +363,13 @@ spec:
 ```
 
 **Key Configurations**:
+
 - **minAvailable**: Minimum pods that must remain available
 - **maxUnavailable**: Maximum pods that can be unavailable
 - **unhealthyPodEvictionPolicy**: How to handle unhealthy pods
 
 **Guidelines**:
+
 - Critical services: `minAvailable: 2` or `maxUnavailable: 1`
 - Worker services: `maxUnavailable: "25%"`
 - Databases: `minAvailable: 1`
@@ -393,19 +407,19 @@ metadata:
   namespace: intelgraph-production
 spec:
   limits:
-  - type: Container
-    default:
-      cpu: "1000m"
-      memory: "2Gi"
-    defaultRequest:
-      cpu: "250m"
-      memory: "512Mi"
-    max:
-      cpu: "8000m"
-      memory: "16Gi"
-    min:
-      cpu: "100m"
-      memory: "128Mi"
+    - type: Container
+      default:
+        cpu: "1000m"
+        memory: "2Gi"
+      defaultRequest:
+        cpu: "250m"
+        memory: "512Mi"
+      max:
+        cpu: "8000m"
+        memory: "16Gi"
+      min:
+        cpu: "100m"
+        memory: "128Mi"
 ```
 
 ---
@@ -415,6 +429,7 @@ spec:
 ### 1. Types of Probes
 
 #### Startup Probe
+
 **Purpose**: Give slow-starting containers time to initialize
 
 ```yaml
@@ -424,10 +439,11 @@ startupProbe:
     port: 4000
   initialDelaySeconds: 0
   periodSeconds: 10
-  failureThreshold: 30  # 30 * 10s = 5 minutes
+  failureThreshold: 30 # 30 * 10s = 5 minutes
 ```
 
 #### Liveness Probe
+
 **Purpose**: Restart container if it's in a broken state
 
 ```yaml
@@ -442,6 +458,7 @@ livenessProbe:
 ```
 
 #### Readiness Probe
+
 **Purpose**: Remove pod from service if it can't handle traffic
 
 ```yaml
@@ -458,32 +475,36 @@ readinessProbe:
 ### 2. Probe Mechanisms
 
 #### HTTP Probes
+
 ```yaml
 httpGet:
   path: /health
   port: 4000
   scheme: HTTP
   httpHeaders:
-  - name: X-Probe-Type
-    value: Readiness
+    - name: X-Probe-Type
+      value: Readiness
 ```
 
 #### TCP Probes
+
 ```yaml
 tcpSocket:
   port: 5432
 ```
 
 #### Exec Probes
+
 ```yaml
 exec:
   command:
-  - /bin/sh
-  - -c
-  - pg_isready -U postgres
+    - /bin/sh
+    - -c
+    - pg_isready -U postgres
 ```
 
 #### gRPC Probes
+
 ```yaml
 grpc:
   port: 9000
@@ -496,38 +517,38 @@ grpc:
 
 ```javascript
 // /health/startup
-app.get('/health/startup', (req, res) => {
+app.get("/health/startup", (req, res) => {
   if (global.appReady) {
-    res.status(200).json({ status: 'started' });
+    res.status(200).json({ status: "started" });
   } else {
-    res.status(503).json({ status: 'starting' });
+    res.status(503).json({ status: "starting" });
   }
 });
 
 // /health/live
-app.get('/health/live', (req, res) => {
+app.get("/health/live", (req, res) => {
   res.status(200).json({
-    status: 'alive',
-    uptime: process.uptime()
+    status: "alive",
+    uptime: process.uptime(),
   });
 });
 
 // /health/ready
-app.get('/health/ready', async (req, res) => {
+app.get("/health/ready", async (req, res) => {
   try {
     await db.ping();
     await redis.ping();
     res.status(200).json({
-      status: 'ready',
+      status: "ready",
       checks: {
-        database: 'healthy',
-        redis: 'healthy'
-      }
+        database: "healthy",
+        redis: "healthy",
+      },
     });
   } catch (error) {
     res.status(503).json({
-      status: 'not ready',
-      error: error.message
+      status: "not ready",
+      error: error.message,
     });
   }
 });
@@ -564,38 +585,38 @@ spec:
   minReplicas: 3
   maxReplicas: 20
   metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 70
-  - type: Resource
-    resource:
-      name: memory
-      target:
-        type: Utilization
-        averageUtilization: 80
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
 ```
 
 #### Custom Metrics with Prometheus
 
 ```yaml
 metrics:
-- type: Pods
-  pods:
-    metric:
-      name: http_requests_per_second
-    target:
-      type: AverageValue
-      averageValue: "1000"
-- type: Pods
-  pods:
-    metric:
-      name: graphql_query_rate
-    target:
-      type: AverageValue
-      averageValue: "500"
+  - type: Pods
+    pods:
+      metric:
+        name: http_requests_per_second
+      target:
+        type: AverageValue
+        averageValue: "1000"
+  - type: Pods
+    pods:
+      metric:
+        name: graphql_query_rate
+      target:
+        type: AverageValue
+        averageValue: "500"
 ```
 
 #### Scaling Behavior
@@ -605,22 +626,22 @@ behavior:
   scaleDown:
     stabilizationWindowSeconds: 300
     policies:
-    - type: Percent
-      value: 50
-      periodSeconds: 60
-    - type: Pods
-      value: 2
-      periodSeconds: 60
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+      - type: Pods
+        value: 2
+        periodSeconds: 60
     selectPolicy: Min
   scaleUp:
     stabilizationWindowSeconds: 60
     policies:
-    - type: Percent
-      value: 100
-      periodSeconds: 30
-    - type: Pods
-      value: 4
-      periodSeconds: 30
+      - type: Percent
+        value: 100
+        periodSeconds: 30
+      - type: Pods
+        value: 4
+        periodSeconds: 30
     selectPolicy: Max
 ```
 
@@ -639,15 +660,15 @@ helm install prometheus-adapter prometheus-community/prometheus-adapter \
 ```yaml
 # prometheus-adapter-values.yaml
 rules:
-- seriesQuery: 'http_requests_total{namespace!="",pod!=""}'
-  resources:
-    overrides:
-      namespace: {resource: "namespace"}
-      pod: {resource: "pod"}
-  name:
-    matches: "^(.*)_total$"
-    as: "${1}_per_second"
-  metricsQuery: 'rate(<<.Series>>{<<.LabelMatchers>>}[2m])'
+  - seriesQuery: 'http_requests_total{namespace!="",pod!=""}'
+    resources:
+      overrides:
+        namespace: { resource: "namespace" }
+        pod: { resource: "pod" }
+    name:
+      matches: "^(.*)_total$"
+      as: "${1}_per_second"
+    metricsQuery: "rate(<<.Series>>{<<.LabelMatchers>>}[2m])"
 ```
 
 ### 3. KEDA (Event-Driven Autoscaling)
@@ -663,18 +684,18 @@ spec:
   minReplicaCount: 2
   maxReplicaCount: 50
   triggers:
-  - type: prometheus
-    metadata:
-      serverAddress: http://prometheus:9090
-      metricName: kafka_consumer_lag
-      query: sum(kafka_consumergroup_lag{group="worker-group"})
-      threshold: "1000"
-  - type: kafka
-    metadata:
-      bootstrapServers: kafka:9092
-      consumerGroup: worker-group
-      topic: worker-tasks
-      lagThreshold: "500"
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus:9090
+        metricName: kafka_consumer_lag
+        query: sum(kafka_consumergroup_lag{group="worker-group"})
+        threshold: "1000"
+    - type: kafka
+      metadata:
+        bootstrapServers: kafka:9092
+        consumerGroup: worker-group
+        topic: worker-tasks
+        lagThreshold: "500"
 ```
 
 ### 4. Vertical Pod Autoscaling (VPA)
@@ -693,13 +714,13 @@ spec:
     updateMode: "Auto"
   resourcePolicy:
     containerPolicies:
-    - containerName: api-server
-      minAllowed:
-        cpu: 100m
-        memory: 128Mi
-      maxAllowed:
-        cpu: 4000m
-        memory: 8Gi
+      - containerName: api-server
+        minAllowed:
+          cpu: 100m
+          memory: 128Mi
+        maxAllowed:
+          cpu: 4000m
+          memory: 8Gi
 ```
 
 ---
@@ -721,12 +742,14 @@ resources:
 ```
 
 **Guidelines**:
+
 - **Requests**: Minimum resources guaranteed
 - **Limits**: Maximum resources allowed
 - **CPU**: Compressible resource (throttled, not killed)
 - **Memory**: Incompressible resource (pod killed if exceeded)
 
 **Best Practices**:
+
 - Set requests based on baseline usage
 - Set limits to prevent resource hogging
 - Monitor actual usage and adjust
@@ -735,6 +758,7 @@ resources:
 ### 2. Quality of Service (QoS) Classes
 
 #### Guaranteed QoS
+
 ```yaml
 # requests == limits for all resources
 resources:
@@ -747,6 +771,7 @@ resources:
 ```
 
 #### Burstable QoS
+
 ```yaml
 # requests < limits
 resources:
@@ -759,11 +784,13 @@ resources:
 ```
 
 #### BestEffort QoS
+
 ```yaml
 # No requests or limits specified
 ```
 
 **Use Cases**:
+
 - **Guaranteed**: Critical services (API, databases)
 - **Burstable**: Most services (default)
 - **BestEffort**: Non-critical batch jobs
@@ -793,12 +820,14 @@ spec:
 ### 1. Container Won't Start
 
 #### Check Pod Status
+
 ```bash
 kubectl get pods -n intelgraph-production
 kubectl describe pod <pod-name> -n intelgraph-production
 ```
 
 #### Check Logs
+
 ```bash
 kubectl logs <pod-name> -n intelgraph-production
 kubectl logs <pod-name> -n intelgraph-production --previous
@@ -807,6 +836,7 @@ kubectl logs <pod-name> -n intelgraph-production --previous
 #### Common Issues
 
 **ImagePullBackOff**:
+
 ```bash
 # Check image exists
 docker pull ghcr.io/brianclong/summit/api:tag
@@ -817,12 +847,14 @@ kubectl describe secret <secret-name>
 ```
 
 **CrashLoopBackOff**:
+
 - Check application logs
 - Verify health check endpoints
 - Check resource limits
 - Review startup probe configuration
 
 **Pending**:
+
 - Insufficient cluster resources
 - Node selector/affinity not satisfied
 - PVC not bound
@@ -831,6 +863,7 @@ kubectl describe secret <secret-name>
 ### 2. Health Check Failures
 
 #### Debug Health Checks
+
 ```bash
 # Execute health check manually
 kubectl exec -it <pod-name> -- curl http://localhost:4000/health
@@ -840,6 +873,7 @@ kubectl get pod <pod-name> -o yaml | grep -A 10 "livenessProbe"
 ```
 
 #### Common Issues
+
 - **Timeout too short**: Increase timeoutSeconds
 - **Too aggressive**: Increase periodSeconds or failureThreshold
 - **Wrong endpoint**: Verify path and port
@@ -848,6 +882,7 @@ kubectl get pod <pod-name> -o yaml | grep -A 10 "livenessProbe"
 ### 3. Performance Issues
 
 #### Check Resource Usage
+
 ```bash
 # CPU and memory usage
 kubectl top pods -n intelgraph-production
@@ -857,12 +892,14 @@ kubectl describe pod <pod-name> -n intelgraph-production | grep -A 5 "Limits"
 ```
 
 #### Check HPA Status
+
 ```bash
 kubectl get hpa -n intelgraph-production
 kubectl describe hpa <hpa-name> -n intelgraph-production
 ```
 
 #### Check for Throttling
+
 ```bash
 # CPU throttling
 kubectl top pod <pod-name> -n intelgraph-production
@@ -874,16 +911,19 @@ kubectl get --raw /apis/metrics.k8s.io/v1beta1/namespaces/intelgraph-production/
 ### 4. Image Build Issues
 
 #### Clear Build Cache
+
 ```bash
 docker builder prune -af
 ```
 
 #### Check Layer Caching
+
 ```bash
 docker build --progress=plain -t myimage:tag .
 ```
 
 #### Optimize Build Performance
+
 ```bash
 # Use BuildKit
 DOCKER_BUILDKIT=1 docker build -t myimage:tag .
@@ -895,6 +935,7 @@ docker buildx build --platform linux/amd64,linux/arm64 -t myimage:tag .
 ### 5. Security Scan Failures
 
 #### Local Scanning
+
 ```bash
 # Scan with Trivy
 trivy image myimage:tag
@@ -907,6 +948,7 @@ trivy image --ignore-unfixed myimage:tag
 ```
 
 #### Fix Common Vulnerabilities
+
 - Update base images
 - Update dependencies
 - Use distroless images
@@ -921,6 +963,7 @@ trivy image --ignore-unfixed myimage:tag
 See `.github/workflows/container-security.yml` for complete workflow.
 
 **Key Steps**:
+
 1. Dockerfile linting with Hadolint
 2. Build with BuildKit and layer caching
 3. Vulnerability scanning with Trivy and Grype

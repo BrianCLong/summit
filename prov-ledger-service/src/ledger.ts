@@ -1,14 +1,8 @@
 // @ts-nocheck
-import {
-  randomUUID,
-  createHash,
-  generateKeyPairSync,
-  sign,
-  verify,
-} from 'crypto';
-import pino from 'pino';
+import { randomUUID, createHash, generateKeyPairSync, sign, verify } from "crypto";
+import pino from "pino";
 
-const logger = pino({ name: 'prov-ledger' });
+const logger = pino({ name: "prov-ledger" });
 
 export interface Evidence {
   id: string;
@@ -34,9 +28,9 @@ export interface Claim {
 const evidenceStore = new Map<string, Evidence>();
 const claimStore = new Map<string, Claim>();
 
-const { publicKey, privateKey } = generateKeyPairSync('ed25519');
+const { publicKey, privateKey } = generateKeyPairSync("ed25519");
 
-export function registerEvidence(input: Omit<Evidence, 'id' | 'timestamp'>): Evidence {
+export function registerEvidence(input: Omit<Evidence, "id" | "timestamp">): Evidence {
   const id = randomUUID();
   const evid: Evidence = { id, ...input, timestamp: new Date() };
   evidenceStore.set(id, evid);
@@ -44,21 +38,17 @@ export function registerEvidence(input: Omit<Evidence, 'id' | 'timestamp'>): Evi
 }
 
 export function createClaim(
-  input: Omit<Claim, 'id' | 'hash' | 'signature' | 'publicKey' | 'timestamp'>,
+  input: Omit<Claim, "id" | "hash" | "signature" | "publicKey" | "timestamp">
 ): Claim {
   const id = randomUUID();
-  const hash = createHash('sha256').update(input.text).digest('hex');
-  const sig = sign(null, Buffer.from(hash, 'hex'), privateKey).toString(
-    'base64',
-  );
+  const hash = createHash("sha256").update(input.text).digest("hex");
+  const sig = sign(null, Buffer.from(hash, "hex"), privateKey).toString("base64");
   const claim: Claim = {
     id,
     ...input,
     hash,
     signature: sig,
-    publicKey: publicKey
-      .export({ type: 'spki', format: 'der' })
-      .toString('base64'),
+    publicKey: publicKey.export({ type: "spki", format: "der" }).toString("base64"),
     timestamp: new Date(),
   };
   claimStore.set(id, claim);
@@ -74,16 +64,16 @@ export function getEvidence(id: string): Evidence | undefined {
 }
 
 export function merkleRoot(hashes: string[]): string {
-  if (hashes.length === 0) return '';
-  let nodes: Buffer[] = hashes.map((h) => Buffer.from(h, 'hex')) as Buffer[];
+  if (hashes.length === 0) return "";
+  let nodes: Buffer[] = hashes.map((h) => Buffer.from(h, "hex")) as Buffer[];
   while (nodes.length > 1) {
     const next: Buffer[] = [];
     for (let i = 0; i < nodes.length; i += 2) {
       if (i + 1 < nodes.length) {
         next.push(
-          createHash('sha256')
+          createHash("sha256")
             .update(Buffer.concat([nodes[i], nodes[i + 1]]))
-            .digest(),
+            .digest()
         );
       } else {
         next.push(nodes[i]);
@@ -91,7 +81,7 @@ export function merkleRoot(hashes: string[]): string {
     }
     nodes = next;
   }
-  return nodes[0].toString('hex');
+  return nodes[0].toString("hex");
 }
 
 export interface ManifestClaim {
@@ -141,15 +131,12 @@ export interface LicenseCheck {
   appealCode?: string;
 }
 
-const incompatibleLicenses = new Map<
-  string,
-  { reason: string; appealCode: string }
->([
+const incompatibleLicenses = new Map<string, { reason: string; appealCode: string }>([
   [
-    'GPL-3.0',
+    "GPL-3.0",
     {
-      reason: 'GPL-3.0 license is incompatible with export policy',
-      appealCode: 'LIC001',
+      reason: "GPL-3.0 license is incompatible with export policy",
+      appealCode: "LIC001",
     },
   ],
 ]);
@@ -165,17 +152,17 @@ export function checkLicenses(licenses: string[]): LicenseCheck {
 }
 
 export function verifyClaim(manifestClaim: ManifestClaim): boolean {
-  const hash = createHash('sha256').update(manifestClaim.text).digest('hex');
+  const hash = createHash("sha256").update(manifestClaim.text).digest("hex");
   if (hash !== manifestClaim.hash) return false;
   return verify(
     null,
-    Buffer.from(hash, 'hex'),
+    Buffer.from(hash, "hex"),
     {
-      key: Buffer.from(manifestClaim.publicKey, 'base64'),
-      format: 'der',
-      type: 'spki',
+      key: Buffer.from(manifestClaim.publicKey, "base64"),
+      format: "der",
+      type: "spki",
     },
-    Buffer.from(manifestClaim.signature, 'base64'),
+    Buffer.from(manifestClaim.signature, "base64")
   );
 }
 
@@ -192,7 +179,7 @@ export interface Transform {
 
 export interface ProvenanceChain {
   id: string;
-  type: 'evidence' | 'claim';
+  type: "evidence" | "claim";
   source: Evidence | Claim;
   transforms: Transform[];
   derivedFrom: string[];
@@ -202,7 +189,7 @@ export interface ProvenanceChain {
 
 export interface ProvenanceNode {
   id: string;
-  type: 'evidence' | 'claim' | 'transform';
+  type: "evidence" | "claim" | "transform";
   parentIds: string[];
   metadata: Record<string, any>;
   timestamp: Date;
@@ -211,7 +198,7 @@ export interface ProvenanceNode {
 const transformStore = new Map<string, Transform>();
 const provenanceStore = new Map<string, ProvenanceChain>();
 
-export function recordTransform(input: Omit<Transform, 'id'>): Transform {
+export function recordTransform(input: Omit<Transform, "id">): Transform {
   const id = randomUUID();
   const transform: Transform = { id, ...input };
   transformStore.set(id, transform);
@@ -226,7 +213,7 @@ export function recordTransform(input: Omit<Transform, 'id'>): Transform {
       inputCount: input.inputIds.length,
       outputId: input.outputId,
     },
-    'Transform recorded',
+    "Transform recorded"
   );
 
   return transform;
@@ -235,7 +222,7 @@ export function recordTransform(input: Omit<Transform, 'id'>): Transform {
 function updateProvenanceChain(outputId: string, transform: Transform): void {
   const chain = provenanceStore.get(outputId) || {
     id: outputId,
-    type: claimStore.has(outputId) ? ('claim' as const) : ('evidence' as const),
+    type: claimStore.has(outputId) ? ("claim" as const) : ("evidence" as const),
     source: claimStore.get(outputId) || evidenceStore.get(outputId)!,
     transforms: [],
     derivedFrom: [],
@@ -248,7 +235,7 @@ function updateProvenanceChain(outputId: string, transform: Transform): void {
   // Build lineage tree
   const lineageNode: ProvenanceNode = {
     id: transform.id,
-    type: 'transform',
+    type: "transform",
     parentIds: transform.inputIds,
     metadata: {
       operation: transform.operation,
@@ -274,14 +261,14 @@ export function getProvenance(id: string): ProvenanceChain | null {
   if (evidence) {
     const chain: ProvenanceChain = {
       id,
-      type: 'evidence',
+      type: "evidence",
       source: evidence,
       transforms: [],
       derivedFrom: [],
       lineage: [
         {
           id: evidence.id,
-          type: 'evidence',
+          type: "evidence",
           parentIds: [],
           metadata: {
             source: evidence.source,
@@ -299,7 +286,7 @@ export function getProvenance(id: string): ProvenanceChain | null {
   if (claim) {
     const chain: ProvenanceChain = {
       id,
-      type: 'claim',
+      type: "claim",
       source: claim,
       transforms: [],
       derivedFrom: claim.evidenceIds,
@@ -307,7 +294,7 @@ export function getProvenance(id: string): ProvenanceChain | null {
       lineage: [
         {
           id: claim.id,
-          type: 'claim',
+          type: "claim",
           parentIds: claim.evidenceIds,
           metadata: {
             text: claim.text,
@@ -330,7 +317,7 @@ export interface PolicyContext {
   userId: string;
   tenantId: string;
   purpose: string;
-  exportType: 'analysis' | 'report' | 'dataset' | 'api';
+  exportType: "analysis" | "report" | "dataset" | "api";
   destination?: string;
 }
 
@@ -340,68 +327,65 @@ export interface EnhancedLicenseCheck {
   appealCode?: string;
   appealUrl?: string;
   policyDecision: {
-    action: 'allow' | 'deny' | 'review';
+    action: "allow" | "deny" | "review";
     reasons: string[];
     requiredApprovals?: string[];
   };
   riskAssessment: {
-    level: 'low' | 'medium' | 'high';
+    level: "low" | "medium" | "high";
     factors: string[];
   };
 }
 
 export function checkLicensesWithContext(
   licenses: string[],
-  context: PolicyContext,
+  context: PolicyContext
 ): EnhancedLicenseCheck {
   // Start with basic license check
   const basicCheck = checkLicenses(licenses);
 
   // Enhanced policy evaluation
   const riskFactors: string[] = [];
-  let riskLevel: 'low' | 'medium' | 'high' = 'low';
+  let riskLevel: "low" | "medium" | "high" = "low";
 
   // Check for restrictive licenses
   const restrictiveLicenses = licenses.filter((l) =>
-    ['GPL-3.0', 'AGPL-3.0', 'CC-BY-NC'].includes(l),
+    ["GPL-3.0", "AGPL-3.0", "CC-BY-NC"].includes(l)
   );
 
   if (restrictiveLicenses.length > 0) {
-    riskFactors.push(`Restrictive licenses: ${restrictiveLicenses.join(', ')}`);
-    riskLevel = 'medium';
+    riskFactors.push(`Restrictive licenses: ${restrictiveLicenses.join(", ")}`);
+    riskLevel = "medium";
   }
 
   // Check export type and destination
-  if (
-    context.exportType === 'dataset' &&
-    context.destination?.includes('external')
-  ) {
-    riskFactors.push('External dataset export requires additional review');
-    riskLevel = 'high';
+  if (context.exportType === "dataset" && context.destination?.includes("external")) {
+    riskFactors.push("External dataset export requires additional review");
+    riskLevel = "high";
   }
 
   // Commercial vs research purpose
-  if (context.purpose === 'commercial' && restrictiveLicenses.length > 0) {
-    riskFactors.push('Commercial use with restrictive licenses');
-    riskLevel = 'high';
+  if (context.purpose === "commercial" && restrictiveLicenses.length > 0) {
+    riskFactors.push("Commercial use with restrictive licenses");
+    riskLevel = "high";
   }
 
-  let policyAction: 'allow' | 'deny' | 'review' = 'allow';
+  let policyAction: "allow" | "deny" | "review" = "allow";
   const policyReasons: string[] = [];
 
   if (!basicCheck.valid) {
-    policyAction = 'deny';
-    policyReasons.push(basicCheck.reason || 'License incompatibility');
-  } else if (riskLevel === 'high') {
-    policyAction = 'review';
-    policyReasons.push('High-risk export requires manual review');
-  } else if (riskLevel === 'medium' && context.exportType === 'dataset') {
-    policyAction = 'review';
-    policyReasons.push('Medium-risk dataset export requires review');
+    policyAction = "deny";
+    policyReasons.push(basicCheck.reason || "License incompatibility");
+  } else if (riskLevel === "high") {
+    policyAction = "review";
+    policyReasons.push("High-risk export requires manual review");
+  } else if (riskLevel === "medium" && context.exportType === "dataset") {
+    policyAction = "review";
+    policyReasons.push("Medium-risk dataset export requires review");
   }
 
   return {
-    valid: policyAction === 'allow',
+    valid: policyAction === "allow",
     reason: basicCheck.reason,
     appealCode: basicCheck.appealCode,
     appealUrl: basicCheck.appealCode
@@ -410,8 +394,7 @@ export function checkLicensesWithContext(
     policyDecision: {
       action: policyAction,
       reasons: policyReasons,
-      requiredApprovals:
-        policyAction === 'review' ? ['compliance-officer'] : undefined,
+      requiredApprovals: policyAction === "review" ? ["compliance-officer"] : undefined,
     },
     riskAssessment: {
       level: riskLevel,
@@ -441,11 +424,11 @@ export function buildHashTree(hashes: string[]): HashTreeNode | null {
       const right = i + 1 < nodes.length ? nodes[i + 1] : left;
 
       const combined = Buffer.concat([
-        Buffer.from(left.hash, 'hex'),
-        Buffer.from(right.hash, 'hex'),
+        Buffer.from(left.hash, "hex"),
+        Buffer.from(right.hash, "hex"),
       ]);
 
-      const parentHash = createHash('sha256').update(combined).digest('hex');
+      const parentHash = createHash("sha256").update(combined).digest("hex");
 
       nextLevel.push({
         hash: parentHash,
@@ -460,10 +443,7 @@ export function buildHashTree(hashes: string[]): HashTreeNode | null {
   return nodes[0];
 }
 
-export function getHashTreeProof(
-  tree: HashTreeNode,
-  targetHash: string,
-): string[] | null {
+export function getHashTreeProof(tree: HashTreeNode, targetHash: string): string[] | null {
   const proof: string[] = [];
 
   function findPath(node: HashTreeNode, target: string): boolean {
@@ -494,16 +474,16 @@ export function getHashTreeProof(
 export function verifyHashTreeProof(
   targetHash: string,
   proof: string[],
-  rootHash: string,
+  rootHash: string
 ): boolean {
   let currentHash = targetHash;
 
   for (const proofHash of proof) {
     const combined = Buffer.concat([
-      Buffer.from(currentHash, 'hex'),
-      Buffer.from(proofHash, 'hex'),
+      Buffer.from(currentHash, "hex"),
+      Buffer.from(proofHash, "hex"),
     ]);
-    currentHash = createHash('sha256').update(combined).digest('hex');
+    currentHash = createHash("sha256").update(combined).digest("hex");
   }
 
   return currentHash === rootHash;

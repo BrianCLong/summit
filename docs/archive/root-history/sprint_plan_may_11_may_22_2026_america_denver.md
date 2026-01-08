@@ -77,4 +77,3 @@ Enable partners to certify, publish, and monetize adapters safely so tenants can
 4. Adapter runs under sandbox policy → receipts + metering emitted.
 5. Invoice-ready report shows adapter SKU + usage.
 6. Partner payout report exported for revenue share.
-

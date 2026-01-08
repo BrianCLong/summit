@@ -7,9 +7,9 @@ paths:
     post:
       summary: Annotate query with warrant/authority, require reason-for-access if needed
       responses:
-        '200': { description: Decision with prompts }
+        "200": { description: Decision with prompts }
   /policy/v1/export/license:
     post:
       summary: Evaluate License/TOS and return allow/block with human-readable reason and appeal path
       responses:
-        '200': { description: Decision }
+        "200": { description: Decision }

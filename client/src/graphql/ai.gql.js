@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 export const SUGGEST_LINKS = gql`
   query SuggestLinks($entityId: ID!, $limit: Int) {

@@ -39,23 +39,23 @@ export interface MessageEnvelope<T = any> extends Message<T> {
 }
 
 export enum DeliveryGuarantee {
-  AT_MOST_ONCE = 'at-most-once',
-  AT_LEAST_ONCE = 'at-least-once',
-  EXACTLY_ONCE = 'exactly-once'
+  AT_MOST_ONCE = "at-most-once",
+  AT_LEAST_ONCE = "at-least-once",
+  EXACTLY_ONCE = "exactly-once",
 }
 
 export enum MessageStatus {
-  PENDING = 'pending',
-  PROCESSING = 'processing',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  DEAD_LETTER = 'dead-letter'
+  PENDING = "pending",
+  PROCESSING = "processing",
+  COMPLETED = "completed",
+  FAILED = "failed",
+  DEAD_LETTER = "dead-letter",
 }
 
 export interface SubscriptionOptions {
   guarantee?: DeliveryGuarantee;
   maxRetries?: number;
-  retryBackoff?: 'linear' | 'exponential';
+  retryBackoff?: "linear" | "exponential";
   retryDelay?: number;
   deadLetterQueue?: string;
   prefetchCount?: number;
@@ -81,9 +81,7 @@ export interface PublishOptions {
   delayed?: number;
 }
 
-export type MessageHandler<T = any> = (
-  message: MessageEnvelope<T>
-) => Promise<void> | void;
+export type MessageHandler<T = any> = (message: MessageEnvelope<T>) => Promise<void> | void;
 
 export interface Subscription {
   id: string;

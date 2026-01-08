@@ -3,6 +3,6 @@ export interface Tenant {
   name: string;
   modules: string[];
   region: string;
-  slaTier: 'STANDARD' | 'PREMIUM';
+  slaTier: "STANDARD" | "PREMIUM";
   createdAt: Date;
 }

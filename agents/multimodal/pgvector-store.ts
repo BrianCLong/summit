@@ -4,8 +4,8 @@
  * Supports HNSW and IVFFlat indexes for fast similarity search.
  */
 
-import { Pool, PoolClient } from 'pg';
-import pino from 'pino';
+import { Pool, PoolClient } from "pg";
+import pino from "pino";
 
 import type {
   VectorStoreConfig,
@@ -14,9 +14,9 @@ import type {
   HNSWParams,
   FusedEmbedding,
   ModalityType,
-} from './types.js';
+} from "./types.js";
 
-const logger = pino({ name: 'pgvector-store' });
+const logger = pino({ name: "pgvector-store" });
 
 export interface PgVectorStoreConfig extends VectorStoreConfig {
   connectionString?: string;
@@ -45,10 +45,10 @@ export class PgVectorStore {
 
   constructor(config: Partial<PgVectorStoreConfig> = {}) {
     this.config = {
-      tableName: 'multimodal_embeddings',
+      tableName: "multimodal_embeddings",
       dimension: 768,
-      indexType: 'hnsw',
-      distanceMetric: 'cosine',
+      indexType: "hnsw",
+      distanceMetric: "cosine",
       indexParams: {
         m: 16,
         efConstruction: 64,
@@ -56,13 +56,13 @@ export class PgVectorStore {
       } as HNSWParams,
       connectionString: process.env.DATABASE_URL,
       poolSize: 10,
-      schemaName: 'public',
+      schemaName: "public",
       enableWAL: true,
       vacuumThreshold: 10000,
       ...config,
     };
 
-    logger.info('PgVector Store configured', {
+    logger.info("PgVector Store configured", {
       tableName: this.config.tableName,
       dimension: this.config.dimension,
       indexType: this.config.indexType,
@@ -86,7 +86,7 @@ export class PgVectorStore {
 
       try {
         // Ensure pgvector extension
-        await client.query('CREATE EXTENSION IF NOT EXISTS vector');
+        await client.query("CREATE EXTENSION IF NOT EXISTS vector");
 
         // Create table
         await this.createTable(client);
@@ -96,21 +96,21 @@ export class PgVectorStore {
 
         // Get current vector count
         const countResult = await client.query(
-          `SELECT COUNT(*) FROM ${this.config.schemaName}.${this.config.tableName}`,
+          `SELECT COUNT(*) FROM ${this.config.schemaName}.${this.config.tableName}`
         );
         this.vectorCount = parseInt(countResult.rows[0].count);
 
         this.initialized = true;
 
-        logger.info('PgVector Store initialized', {
+        logger.info("PgVector Store initialized", {
           vectorCount: this.vectorCount,
         });
       } finally {
         client.release();
       }
     } catch (error) {
-      logger.error('Failed to initialize PgVector Store', {
-        error: error instanceof Error ? error.message : 'Unknown error',
+      logger.error("Failed to initialize PgVector Store", {
+        error: error instanceof Error ? error.message : "Unknown error",
       });
       throw error;
     }
@@ -168,7 +168,7 @@ export class PgVectorStore {
     const distanceOp = this.getDistanceOperator();
     const indexName = `idx_${this.config.tableName}_embedding_${this.config.indexType}`;
 
-    if (this.config.indexType === 'hnsw') {
+    if (this.config.indexType === "hnsw") {
       const params = this.config.indexParams as HNSWParams;
       await client.query(`
         CREATE INDEX IF NOT EXISTS ${indexName}
@@ -192,14 +192,14 @@ export class PgVectorStore {
    */
   private getDistanceOperator(): string {
     switch (this.config.distanceMetric) {
-      case 'cosine':
-        return 'vector_cosine_ops';
-      case 'euclidean':
-        return 'vector_l2_ops';
-      case 'inner_product':
-        return 'vector_ip_ops';
+      case "cosine":
+        return "vector_cosine_ops";
+      case "euclidean":
+        return "vector_l2_ops";
+      case "inner_product":
+        return "vector_ip_ops";
       default:
-        return 'vector_cosine_ops';
+        return "vector_cosine_ops";
     }
   }
 
@@ -208,14 +208,14 @@ export class PgVectorStore {
    */
   private getDistanceFunction(): string {
     switch (this.config.distanceMetric) {
-      case 'cosine':
-        return '<=>';
-      case 'euclidean':
-        return '<->';
-      case 'inner_product':
-        return '<#>';
+      case "cosine":
+        return "<=>";
+      case "euclidean":
+        return "<->";
+      case "inner_product":
+        return "<#>";
       default:
-        return '<=>';
+        return "<=>";
     }
   }
 
@@ -228,7 +228,7 @@ export class PgVectorStore {
     const client = await this.pool!.connect();
 
     try {
-      const vectorString = `[${embedding.fusedVector.join(',')}]`;
+      const vectorString = `[${embedding.fusedVector.join(",")}]`;
 
       await client.query(
         `
@@ -248,7 +248,7 @@ export class PgVectorStore {
           embedding.id,
           embedding.entityId,
           embedding.investigationId,
-          'fused',
+          "fused",
           vectorString,
           embedding.fusionMethod,
           embedding.crossModalScore,
@@ -258,12 +258,12 @@ export class PgVectorStore {
             modalityCount: embedding.modalityVectors.length,
             modalities: embedding.modalityVectors.map((m) => m.modality),
           }),
-        ],
+        ]
       );
 
       this.vectorCount++;
 
-      logger.debug('Embedding stored', {
+      logger.debug("Embedding stored", {
         id: embedding.id,
         entityId: embedding.entityId,
       });
@@ -281,10 +281,10 @@ export class PgVectorStore {
     const client = await this.pool!.connect();
 
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
 
       for (const embedding of embeddings) {
-        const vectorString = `[${embedding.fusedVector.join(',')}]`;
+        const vectorString = `[${embedding.fusedVector.join(",")}]`;
 
         await client.query(
           `
@@ -304,7 +304,7 @@ export class PgVectorStore {
             embedding.id,
             embedding.entityId,
             embedding.investigationId,
-            'fused',
+            "fused",
             vectorString,
             embedding.fusionMethod,
             embedding.crossModalScore,
@@ -314,18 +314,18 @@ export class PgVectorStore {
               modalityCount: embedding.modalityVectors.length,
               modalities: embedding.modalityVectors.map((m) => m.modality),
             }),
-          ],
+          ]
         );
       }
 
-      await client.query('COMMIT');
+      await client.query("COMMIT");
       this.vectorCount += embeddings.length;
 
-      logger.info('Batch embeddings stored', {
+      logger.info("Batch embeddings stored", {
         count: embeddings.length,
       });
     } catch (error) {
-      await client.query('ROLLBACK');
+      await client.query("ROLLBACK");
       throw error;
     } finally {
       client.release();
@@ -343,22 +343,16 @@ export class PgVectorStore {
       investigationId?: string;
       modality?: ModalityType;
       filters?: Record<string, unknown>;
-    } = {},
+    } = {}
   ): Promise<VectorSearchResult[]> {
     await this.ensureInitialized();
 
-    const {
-      topK = 10,
-      threshold = 0.7,
-      investigationId,
-      modality,
-      filters,
-    } = options;
+    const { topK = 10, threshold = 0.7, investigationId, modality, filters } = options;
 
     const client = await this.pool!.connect();
 
     try {
-      const vectorString = `[${queryVector.join(',')}]`;
+      const vectorString = `[${queryVector.join(",")}]`;
       const distanceFunc = this.getDistanceFunction();
 
       // Build query with optional filters
@@ -402,7 +396,7 @@ export class PgVectorStore {
       params.push(topK);
 
       // Set HNSW search parameter if applicable
-      if (this.config.indexType === 'hnsw') {
+      if (this.config.indexType === "hnsw") {
         const hnswParams = this.config.indexParams as HNSWParams;
         await client.query(`SET hnsw.ef_search = ${hnswParams.efSearch}`);
       } else {
@@ -435,7 +429,7 @@ export class PgVectorStore {
     try {
       const result = await client.query(
         `SELECT * FROM ${this.config.schemaName}.${this.config.tableName} WHERE id = $1`,
-        [id],
+        [id]
       );
 
       if (result.rows.length === 0) {
@@ -469,7 +463,7 @@ export class PgVectorStore {
     try {
       const result = await client.query(
         `DELETE FROM ${this.config.schemaName}.${this.config.tableName} WHERE id = $1`,
-        [id],
+        [id]
       );
 
       if (result.rowCount && result.rowCount > 0) {
@@ -494,13 +488,13 @@ export class PgVectorStore {
       const result = await client.query(
         `DELETE FROM ${this.config.schemaName}.${this.config.tableName}
          WHERE investigation_id = $1`,
-        [investigationId],
+        [investigationId]
       );
 
       const deleted = result.rowCount || 0;
       this.vectorCount -= deleted;
 
-      logger.info('Deleted embeddings by investigation', {
+      logger.info("Deleted embeddings by investigation", {
         investigationId,
         count: deleted,
       });
@@ -514,10 +508,7 @@ export class PgVectorStore {
   /**
    * Update verification status
    */
-  async updateVerificationStatus(
-    id: string,
-    status: string,
-  ): Promise<void> {
+  async updateVerificationStatus(id: string, status: string): Promise<void> {
     await this.ensureInitialized();
 
     const client = await this.pool!.connect();
@@ -527,7 +518,7 @@ export class PgVectorStore {
         `UPDATE ${this.config.schemaName}.${this.config.tableName}
          SET verification_status = $1, updated_at = NOW()
          WHERE id = $2`,
-        [status, id],
+        [status, id]
       );
     } finally {
       client.release();
@@ -552,38 +543,39 @@ export class PgVectorStore {
     try {
       // Get total count
       const countResult = await client.query(
-        `SELECT COUNT(*) FROM ${this.config.schemaName}.${this.config.tableName}`,
+        `SELECT COUNT(*) FROM ${this.config.schemaName}.${this.config.tableName}`
       );
 
       // Get investigation count
       const investigationResult = await client.query(
         `SELECT COUNT(DISTINCT investigation_id)
-         FROM ${this.config.schemaName}.${this.config.tableName}`,
+         FROM ${this.config.schemaName}.${this.config.tableName}`
       );
 
       // Get modality distribution
       const modalityResult = await client.query(
         `SELECT modality, COUNT(*) as count
          FROM ${this.config.schemaName}.${this.config.tableName}
-         GROUP BY modality`,
+         GROUP BY modality`
       );
 
       // Get average hallucination score
       const hallucinationResult = await client.query(
         `SELECT AVG(hallucination_score) as avg
          FROM ${this.config.schemaName}.${this.config.tableName}
-         WHERE hallucination_score IS NOT NULL`,
+         WHERE hallucination_score IS NOT NULL`
       );
 
       // Get verification distribution
       const verificationResult = await client.query(
         `SELECT verification_status, COUNT(*) as count
          FROM ${this.config.schemaName}.${this.config.tableName}
-         GROUP BY verification_status`,
+         GROUP BY verification_status`
       );
 
       // Get index stats
-      const indexResult = await client.query(`
+      const indexResult = await client.query(
+        `
         SELECT
           schemaname,
           tablename,
@@ -592,17 +584,19 @@ export class PgVectorStore {
         FROM pg_indexes
         JOIN pg_stat_user_indexes USING (indexrelid)
         WHERE tablename = $1
-      `, [this.config.tableName]);
+      `,
+        [this.config.tableName]
+      );
 
       return {
         totalVectors: parseInt(countResult.rows[0].count),
         investigationCount: parseInt(investigationResult.rows[0].count),
         modalityDistribution: Object.fromEntries(
-          modalityResult.rows.map((r) => [r.modality, parseInt(r.count)]),
+          modalityResult.rows.map((r) => [r.modality, parseInt(r.count)])
         ),
         avgHallucinationScore: parseFloat(hallucinationResult.rows[0].avg) || 0,
         verificationDistribution: Object.fromEntries(
-          verificationResult.rows.map((r) => [r.verification_status, parseInt(r.count)]),
+          verificationResult.rows.map((r) => [r.verification_status, parseInt(r.count)])
         ),
         indexStats: indexResult.rows,
       };
@@ -620,11 +614,9 @@ export class PgVectorStore {
     const client = await this.pool!.connect();
 
     try {
-      logger.info('Running VACUUM ANALYZE...');
-      await client.query(
-        `VACUUM ANALYZE ${this.config.schemaName}.${this.config.tableName}`,
-      );
-      logger.info('VACUUM ANALYZE completed');
+      logger.info("Running VACUUM ANALYZE...");
+      await client.query(`VACUUM ANALYZE ${this.config.schemaName}.${this.config.tableName}`);
+      logger.info("VACUUM ANALYZE completed");
     } finally {
       client.release();
     }
@@ -634,8 +626,8 @@ export class PgVectorStore {
    * Parse pgvector string to array
    */
   private parseVectorString(vectorString: string): number[] {
-    const cleaned = vectorString.replace(/^\[|\]$/g, '');
-    return cleaned.split(',').map((v) => parseFloat(v.trim()));
+    const cleaned = vectorString.replace(/^\[|\]$/g, "");
+    return cleaned.split(",").map((v) => parseFloat(v.trim()));
   }
 
   /**
@@ -655,7 +647,7 @@ export class PgVectorStore {
       await this.pool.end();
       this.pool = null;
       this.initialized = false;
-      logger.info('PgVector Store connection closed');
+      logger.info("PgVector Store connection closed");
     }
   }
 }

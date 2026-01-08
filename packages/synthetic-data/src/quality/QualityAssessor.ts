@@ -2,7 +2,7 @@
  * QualityAssessor - Assess quality of synthetic data
  */
 
-import { TabularData } from '../generators/TabularSynthesizer';
+import { TabularData } from "../generators/TabularSynthesizer";
 
 export interface QualityReport {
   overallScore: number;
@@ -45,7 +45,7 @@ export class QualityAssessor {
       statisticalFidelity: this.assessStatisticalFidelity(original, synthetic),
       diversity: this.assessDiversity(synthetic),
       coverage: this.assessCoverage(original, synthetic),
-      realism: this.assessRealism(synthetic)
+      realism: this.assessRealism(synthetic),
     };
 
     const tests = this.runStatisticalTests(original, synthetic);
@@ -58,7 +58,7 @@ export class QualityAssessor {
       overallScore,
       metrics,
       tests,
-      recommendations
+      recommendations,
     };
   }
 
@@ -74,8 +74,10 @@ export class QualityAssessor {
     let numColumns = 0;
 
     original.columns.forEach((col, idx) => {
-      const origValues = original.data.map(row => row[idx]).filter(v => typeof v === 'number');
-      const synthValues = synthetic.data.map(row => row[idx]).filter(v => typeof v === 'number');
+      const origValues = original.data.map((row) => row[idx]).filter((v) => typeof v === "number");
+      const synthValues = synthetic.data
+        .map((row) => row[idx])
+        .filter((v) => typeof v === "number");
 
       if (origValues.length > 0 && synthValues.length > 0) {
         const ksStatistic = this.kolmogorovSmirnovTest(origValues, synthValues);
@@ -88,8 +90,8 @@ export class QualityAssessor {
 
     return {
       score,
-      description: 'Measures how well synthetic data matches original distributions',
-      passed: score >= 80
+      description: "Measures how well synthetic data matches original distributions",
+      passed: score >= 80,
     };
   }
 
@@ -109,8 +111,8 @@ export class QualityAssessor {
 
     return {
       score,
-      description: 'Measures preservation of variable relationships',
-      passed: score >= 85
+      description: "Measures preservation of variable relationships",
+      passed: score >= 85,
     };
   }
 
@@ -126,8 +128,10 @@ export class QualityAssessor {
     let numColumns = 0;
 
     original.columns.forEach((col, idx) => {
-      const origValues = original.data.map(row => row[idx]).filter(v => typeof v === 'number');
-      const synthValues = synthetic.data.map(row => row[idx]).filter(v => typeof v === 'number');
+      const origValues = original.data.map((row) => row[idx]).filter((v) => typeof v === "number");
+      const synthValues = synthetic.data
+        .map((row) => row[idx])
+        .filter((v) => typeof v === "number");
 
       if (origValues.length > 0 && synthValues.length > 0) {
         const similarity = this.compareMoments(origValues, synthValues);
@@ -140,8 +144,8 @@ export class QualityAssessor {
 
     return {
       score,
-      description: 'Measures statistical property preservation',
-      passed: score >= 80
+      description: "Measures statistical property preservation",
+      passed: score >= 80,
     };
   }
 
@@ -154,7 +158,7 @@ export class QualityAssessor {
     let numColumns = 0;
 
     synthetic.columns.forEach((col, idx) => {
-      const values = synthetic.data.map(row => row[idx]);
+      const values = synthetic.data.map((row) => row[idx]);
       const uniqueCount = new Set(values).size;
       const uniqueRatio = uniqueCount / values.length;
 
@@ -166,8 +170,8 @@ export class QualityAssessor {
 
     return {
       score,
-      description: 'Measures variety in synthetic samples',
-      passed: score >= 70
+      description: "Measures variety in synthetic samples",
+      passed: score >= 70,
     };
   }
 
@@ -180,8 +184,10 @@ export class QualityAssessor {
     let numColumns = 0;
 
     original.columns.forEach((col, idx) => {
-      const origValues = original.data.map(row => row[idx]).filter(v => typeof v === 'number');
-      const synthValues = synthetic.data.map(row => row[idx]).filter(v => typeof v === 'number');
+      const origValues = original.data.map((row) => row[idx]).filter((v) => typeof v === "number");
+      const synthValues = synthetic.data
+        .map((row) => row[idx])
+        .filter((v) => typeof v === "number");
 
       if (origValues.length > 0 && synthValues.length > 0) {
         const origRange = [Math.min(...origValues), Math.max(...origValues)];
@@ -198,8 +204,8 @@ export class QualityAssessor {
 
     return {
       score,
-      description: 'Measures coverage of original data space',
-      passed: score >= 90
+      description: "Measures coverage of original data space",
+      passed: score >= 90,
     };
   }
 
@@ -213,8 +219,8 @@ export class QualityAssessor {
 
     return {
       score,
-      description: 'Measures realism and plausibility of synthetic values',
-      passed: score >= 85
+      description: "Measures realism and plausibility of synthetic values",
+      passed: score >= 85,
     };
   }
 
@@ -229,17 +235,17 @@ export class QualityAssessor {
 
     // Chi-square test for categorical columns
     original.columns.forEach((col, idx) => {
-      const origValues = original.data.map(row => row[idx]);
-      const synthValues = synthetic.data.map(row => row[idx]);
+      const origValues = original.data.map((row) => row[idx]);
+      const synthValues = synthetic.data.map((row) => row[idx]);
 
       // Check if categorical (non-numeric)
-      if (origValues.some(v => typeof v !== 'number')) {
+      if (origValues.some((v) => typeof v !== "number")) {
         const chiSquare = this.chiSquareTest(origValues, synthValues);
         tests.push({
           name: `Chi-square test for ${col}`,
           pValue: chiSquare.pValue,
           passed: chiSquare.pValue > 0.05,
-          description: 'Tests if categorical distributions match'
+          description: "Tests if categorical distributions match",
         });
       }
     });
@@ -262,20 +268,22 @@ export class QualityAssessor {
     const recommendations: string[] = [];
 
     if (metrics.distributionSimilarity.score < 80) {
-      recommendations.push('Consider increasing training data or adjusting generation parameters');
+      recommendations.push("Consider increasing training data or adjusting generation parameters");
     }
 
     if (metrics.correlationPreservation.score < 85) {
-      recommendations.push('Enable correlation preservation in synthesis configuration');
+      recommendations.push("Enable correlation preservation in synthesis configuration");
     }
 
     if (metrics.diversity.score < 70) {
-      recommendations.push('Increase diversity by adding more noise or variation');
+      recommendations.push("Increase diversity by adding more noise or variation");
     }
 
-    const failedTests = tests.filter(t => !t.passed);
+    const failedTests = tests.filter((t) => !t.passed);
     if (failedTests.length > 0) {
-      recommendations.push(`Address failed statistical tests: ${failedTests.map(t => t.name).join(', ')}`);
+      recommendations.push(
+        `Address failed statistical tests: ${failedTests.map((t) => t.name).join(", ")}`
+      );
     }
 
     return recommendations;
@@ -289,7 +297,8 @@ export class QualityAssessor {
     const sorted2 = [...sample2].sort((a, b) => a - b);
 
     let maxDiff = 0;
-    let i = 0, j = 0;
+    let i = 0,
+      j = 0;
 
     while (i < sorted1.length && j < sorted2.length) {
       const cdf1 = i / sorted1.length;
@@ -309,7 +318,9 @@ export class QualityAssessor {
   private static computeCorrelationMatrix(data: TabularData): number[][] {
     // Placeholder - simplified correlation matrix
     const n = data.columns.length;
-    return Array(n).fill(0).map(() => Array(n).fill(0));
+    return Array(n)
+      .fill(0)
+      .map(() => Array(n).fill(0));
   }
 
   private static compareCorrelationMatrices(matrix1: number[][], matrix2: number[][]): number {
@@ -357,7 +368,9 @@ export class QualityAssessor {
     const overlapMin = Math.max(origMin, synthMin);
     const overlapMax = Math.min(origMax, synthMax);
 
-    if (overlapMax < overlapMin) {return 0;}
+    if (overlapMax < overlapMin) {
+      return 0;
+    }
 
     const overlapSize = overlapMax - overlapMin;
     const origSize = origMax - origMin;

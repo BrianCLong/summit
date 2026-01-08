@@ -9,10 +9,10 @@ import {
   Ticket,
   TicketInput,
   validateTaskSpec,
-} from '@ga-graphai/common-types';
+} from "@ga-graphai/common-types";
 
-import { AcceptanceCriteriaSynthesizer } from './acceptanceCriteria.js';
-import { PolicyTagger } from './policyTagger.js';
+import { AcceptanceCriteriaSynthesizer } from "./acceptanceCriteria.js";
+import { PolicyTagger } from "./policyTagger.js";
 import {
   dedupeParagraphs,
   detectLanguage,
@@ -24,7 +24,7 @@ import {
   findAmbiguousPhrases,
   normalizeWhitespace,
   splitParagraphs,
-} from './utils.js';
+} from "./utils.js";
 
 export interface NormalizationOptions {
   defaultPolicy: PolicyMetadata;
@@ -49,7 +49,7 @@ export class TicketNormalizer {
     const language = detectLanguage(deduped);
     const keyValues = extractKeyValues(deduped);
 
-    const goal = keyValues['goal'] ?? this.deriveGoal(deduped, input.title);
+    const goal = keyValues["goal"] ?? this.deriveGoal(deduped, input.title);
     const nonGoals = this.deriveNonGoals(deduped);
     const constraints = this.deriveConstraints(deduped, keyValues);
     const inputs = this.deriveInputs(deduped, keyValues);
@@ -60,16 +60,15 @@ export class TicketNormalizer {
 
     const { policy, tags } = this.tagger.tag(deduped, {
       retention:
-        (keyValues['retention'] as PolicyMetadata['retention']) ??
+        (keyValues["retention"] as PolicyMetadata["retention"]) ??
         this.options.defaultPolicy.retention,
       purpose:
-        (keyValues['purpose'] as PolicyMetadata['purpose']) ??
-        this.options.defaultPolicy.purpose,
+        (keyValues["purpose"] as PolicyMetadata["purpose"]) ?? this.options.defaultPolicy.purpose,
       pii: /pii|personal data/i.test(deduped) || this.options.defaultPolicy.pii,
     });
 
     const { criteria, missingSignals } = this.synthesizer.generate(deduped, [
-      keyValues['acceptance'] ?? '',
+      keyValues["acceptance"] ?? "",
     ]);
 
     const taskSpec: TaskSpec = {
@@ -81,8 +80,7 @@ export class TicketNormalizer {
       inputs,
       constraints,
       policy,
-      acceptanceCriteria:
-        criteria.length > 0 ? criteria : this.buildFallbackCriteria(goal),
+      acceptanceCriteria: criteria.length > 0 ? criteria : this.buildFallbackCriteria(goal),
       risks,
       raci,
       sla,
@@ -107,10 +105,9 @@ export class TicketNormalizer {
     const clarifyingQuestions: ClarifyingQuestion[] = [];
     if (missingSignals.length > 0) {
       clarifyingQuestions.push({
-        question:
-          'Please provide explicit acceptance criteria or measurable verification steps.',
-        reason: 'acceptance criteria gaps',
-        priority: 'high',
+        question: "Please provide explicit acceptance criteria or measurable verification steps.",
+        reason: "acceptance criteria gaps",
+        priority: "high",
       });
     }
     ticket.ambiguities.forEach((phrase) => {
@@ -119,31 +116,26 @@ export class TicketNormalizer {
       }
       clarifyingQuestions.push({
         question: `Clarify the use of "${phrase}" with concrete expectations or metrics?`,
-        reason: 'ambiguous phrasing',
-        priority: 'medium',
+        reason: "ambiguous phrasing",
+        priority: "medium",
       });
     });
 
     const validation = validateTaskSpec(taskSpec);
     if (!validation.valid) {
-      validation.errors
-        .slice(0, this.clarifyingQuestionLimit)
-        .forEach((error) => {
-          clarifyingQuestions.push({
-            question: `Resolve validation error: ${error}`,
-            reason: 'spec validation',
-            priority: 'high',
-          });
+      validation.errors.slice(0, this.clarifyingQuestionLimit).forEach((error) => {
+        clarifyingQuestions.push({
+          question: `Resolve validation error: ${error}`,
+          reason: "spec validation",
+          priority: "high",
         });
+      });
     }
 
     return {
       ticket,
       taskSpec,
-      clarifyingQuestions: clarifyingQuestions.slice(
-        0,
-        this.clarifyingQuestionLimit,
-      ),
+      clarifyingQuestions: clarifyingQuestions.slice(0, this.clarifyingQuestionLimit),
     };
   }
 
@@ -161,44 +153,27 @@ export class TicketNormalizer {
     if (!matches) {
       return [];
     }
-    return matches.map((entry) =>
-      normalizeWhitespace(entry.split(/[:=]/)[1] ?? ''),
-    );
+    return matches.map((entry) => normalizeWhitespace(entry.split(/[:=]/)[1] ?? ""));
   }
 
-  private deriveConstraints(
-    body: string,
-    keyValues: Record<string, string>,
-  ): TaskConstraints {
+  private deriveConstraints(body: string, keyValues: Record<string, string>): TaskConstraints {
     const base = { ...this.options.defaultConstraints };
-    const budget =
-      extractBudgetUSD(body) ?? Number.parseFloat(keyValues['budget'] ?? '');
-    const latency =
-      extractLatency(body) ?? Number.parseFloat(keyValues['latency'] ?? '');
-    const context =
-      extractContextLimit(body) ??
-      Number.parseFloat(keyValues['context'] ?? '');
+    const budget = extractBudgetUSD(body) ?? Number.parseFloat(keyValues["budget"] ?? "");
+    const latency = extractLatency(body) ?? Number.parseFloat(keyValues["latency"] ?? "");
+    const context = extractContextLimit(body) ?? Number.parseFloat(keyValues["context"] ?? "");
     return {
-      latencyP95Ms:
-        Number.isFinite(latency) && latency > 0 ? latency : base.latencyP95Ms,
-      budgetUSD:
-        Number.isFinite(budget) && budget > 0 ? budget : base.budgetUSD,
-      contextTokensMax:
-        Number.isFinite(context) && context > 0
-          ? context
-          : base.contextTokensMax,
+      latencyP95Ms: Number.isFinite(latency) && latency > 0 ? latency : base.latencyP95Ms,
+      budgetUSD: Number.isFinite(budget) && budget > 0 ? budget : base.budgetUSD,
+      contextTokensMax: Number.isFinite(context) && context > 0 ? context : base.contextTokensMax,
     };
   }
 
-  private deriveInputs(
-    body: string,
-    keyValues: Record<string, string>,
-  ): TaskInputReference[] {
+  private deriveInputs(body: string, keyValues: Record<string, string>): TaskInputReference[] {
     const entities = extractEntities(body);
-    const explicit = keyValues['inputs']?.split(/,\s*/) ?? [];
+    const explicit = keyValues["inputs"]?.split(/,\s*/) ?? [];
     const combined = [...entities, ...explicit];
     return combined.map((entry, index) => ({
-      type: entry.startsWith('http') ? 'url' : 'code',
+      type: entry.startsWith("http") ? "url" : "code",
       uri: entry,
       hash: undefined,
       estimatedTokens: 2000,
@@ -215,45 +190,43 @@ export class TicketNormalizer {
       const [, uri] = match.split(/[:=]/);
       return {
         id: `evidence-${index + 1}`,
-        description: 'submitted evidence',
+        description: "submitted evidence",
         uri: uri.trim(),
       };
     });
   }
 
-  private deriveRisks(body: string): TaskSpec['risks'] {
+  private deriveRisks(body: string): TaskSpec["risks"] {
     const matches = body.match(/risk\s*[:=]\s*(.+)/gi);
     if (!matches) {
       return [
         {
-          id: 'risk-default',
-          description: 'Model cooperation drift if adjudication fails',
-          severity: 'medium',
+          id: "risk-default",
+          description: "Model cooperation drift if adjudication fails",
+          severity: "medium",
         },
       ];
     }
     return matches.map((entry, index) => ({
       id: `risk-${index + 1}`,
-      description: normalizeWhitespace(entry.split(/[:=]/)[1] ?? ''),
-      severity: /high/i.test(entry) ? 'high' : 'medium',
+      description: normalizeWhitespace(entry.split(/[:=]/)[1] ?? ""),
+      severity: /high/i.test(entry) ? "high" : "medium",
     }));
   }
 
-  private deriveRaci(keyValues: Record<string, string>): TaskSpec['raci'] {
-    const owner = keyValues['owner'] ?? 'unassigned@intelgraph';
-    const reviewers = keyValues['reviewers']
-      ? keyValues['reviewers']
-          .split(/,\s*/)
-          .map((reviewer) => reviewer || 'reviewer@intelgraph')
-      : ['reviewer@intelgraph'];
+  private deriveRaci(keyValues: Record<string, string>): TaskSpec["raci"] {
+    const owner = keyValues["owner"] ?? "unassigned@intelgraph";
+    const reviewers = keyValues["reviewers"]
+      ? keyValues["reviewers"].split(/,\s*/).map((reviewer) => reviewer || "reviewer@intelgraph")
+      : ["reviewer@intelgraph"];
     return {
       owner,
       reviewers,
     };
   }
 
-  private deriveSla(keyValues: Record<string, string>): TaskSpec['sla'] {
-    const due = keyValues['due'];
+  private deriveSla(keyValues: Record<string, string>): TaskSpec["sla"] {
+    const due = keyValues["due"];
     if (due && !Number.isNaN(Date.parse(due))) {
       return { due };
     }
@@ -262,14 +235,14 @@ export class TicketNormalizer {
     return { due: date.toISOString() };
   }
 
-  private buildFallbackCriteria(goal: string): TaskSpec['acceptanceCriteria'] {
+  private buildFallbackCriteria(goal: string): TaskSpec["acceptanceCriteria"] {
     return [
       {
-        id: 'AC-1',
+        id: "AC-1",
         statement: `Validate that the goal \"${goal}\" is satisfied with measurable evidence.`,
-        verify: 'assert',
-        metric: 'qualitative',
-        threshold: '1.0',
+        verify: "assert",
+        metric: "qualitative",
+        threshold: "1.0",
       },
     ];
   }

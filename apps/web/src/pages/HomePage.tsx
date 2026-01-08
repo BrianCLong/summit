@@ -6,12 +6,7 @@ import {
   FileText,
   BarChart3,
 } from 'lucide-react'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/Card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { KPIStrip } from '@/components/panels/KPIStrip'
@@ -167,8 +162,11 @@ export default function HomePage() {
           data={kpiMetrics}
           loading={loading}
           onSelect={metric => {
-            if (metric.id === 'threats') {navigate('/alerts')}
-            else if (metric.id === 'investigations') {navigate('/explore')}
+            if (metric.id === 'threats') {
+              navigate('/alerts')
+            } else if (metric.id === 'investigations') {
+              navigate('/explore')
+            }
           }}
         />
         {!loading && kpiMetrics.length === 0 && (

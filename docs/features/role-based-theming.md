@@ -93,21 +93,23 @@ Apply custom_overrides if present → Merge with base theme → Return effective
 ### Tables
 
 #### `ui_themes`
+
 Stores theme definitions with Material-UI configuration.
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | UUID | Primary key |
-| name | VARCHAR(100) | Unique theme identifier |
-| display_name | VARCHAR(255) | Human-readable name |
-| role | VARCHAR(100) | Target role (NULL = default) |
-| tenant_id | VARCHAR(255) | Tenant isolation |
-| theme_config | JSONB | MUI theme object |
-| version | INTEGER | Theme version number |
-| is_active | BOOLEAN | Active status |
-| is_default | BOOLEAN | Default theme flag |
+| Column       | Type         | Description                  |
+| ------------ | ------------ | ---------------------------- |
+| id           | UUID         | Primary key                  |
+| name         | VARCHAR(100) | Unique theme identifier      |
+| display_name | VARCHAR(255) | Human-readable name          |
+| role         | VARCHAR(100) | Target role (NULL = default) |
+| tenant_id    | VARCHAR(255) | Tenant isolation             |
+| theme_config | JSONB        | MUI theme object             |
+| version      | INTEGER      | Theme version number         |
+| is_active    | BOOLEAN      | Active status                |
+| is_default   | BOOLEAN      | Default theme flag           |
 
 **Seed Data**: 5 pre-configured themes:
+
 - System Default (light)
 - Security Analyst (dark with red accents)
 - Compliance Officer (formal light blue)
@@ -115,38 +117,45 @@ Stores theme definitions with Material-UI configuration.
 - Intelligence Analyst (balanced neutral)
 
 #### `user_theme_preferences`
+
 Per-user theme preferences and overrides.
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | UUID | Primary key |
-| user_id | VARCHAR(255) | User identifier |
-| tenant_id | VARCHAR(255) | Tenant identifier |
-| theme_id | UUID | Selected theme (FK) |
-| custom_overrides | JSONB | User customizations |
-| auto_switch_by_role | BOOLEAN | Auto-apply role theme |
-| dark_mode_preference | VARCHAR(20) | 'light', 'dark', 'system' |
+| Column               | Type         | Description               |
+| -------------------- | ------------ | ------------------------- |
+| id                   | UUID         | Primary key               |
+| user_id              | VARCHAR(255) | User identifier           |
+| tenant_id            | VARCHAR(255) | Tenant identifier         |
+| theme_id             | UUID         | Selected theme (FK)       |
+| custom_overrides     | JSONB        | User customizations       |
+| auto_switch_by_role  | BOOLEAN      | Auto-apply role theme     |
+| dark_mode_preference | VARCHAR(20)  | 'light', 'dark', 'system' |
 
 #### `theme_components`
+
 Reusable theme fragments for composition.
 
 Categories: `color`, `typography`, `spacing`, `component`
 
 #### `theme_presets`
+
 Quick theme variations based on base themes.
 
 #### `theme_audit_log`
+
 Complete audit trail of theme changes.
 
 ### Functions
 
 #### `get_effective_theme(user_id, tenant_id, user_role)`
+
 Returns the effective theme configuration for a user considering:
+
 1. User explicit selection (if auto-switch disabled)
 2. Role-based theme
 3. Default theme
 
 #### `audit_theme_changes()`
+
 Trigger function that logs all INSERT/UPDATE/DELETE operations on `ui_themes`.
 
 ## Backend API
@@ -157,23 +166,30 @@ Trigger function that logs all INSERT/UPDATE/DELETE operations on `ui_themes`.
 // services/theming/theme-service.ts
 class ThemeService {
   // Theme CRUD
-  async createTheme(input: CreateThemeInput): Promise<UITheme>
-  async getThemeById(id: string): Promise<UITheme | null>
-  async listThemes(filters?: ThemeFilterInput): Promise<UITheme[]>
-  async updateTheme(id: string, input: UpdateThemeInput): Promise<UITheme>
-  async deleteTheme(id: string): Promise<boolean>
+  async createTheme(input: CreateThemeInput): Promise<UITheme>;
+  async getThemeById(id: string): Promise<UITheme | null>;
+  async listThemes(filters?: ThemeFilterInput): Promise<UITheme[]>;
+  async updateTheme(id: string, input: UpdateThemeInput): Promise<UITheme>;
+  async deleteTheme(id: string): Promise<boolean>;
 
   // Theme Resolution
-  async getEffectiveTheme(context: ThemeResolutionContext): Promise<EffectiveThemeResult>
+  async getEffectiveTheme(context: ThemeResolutionContext): Promise<EffectiveThemeResult>;
 
   // User Preferences
-  async getUserThemePreference(userId: string, tenantId: string): Promise<UserThemePreference | null>
-  async updateUserThemePreference(userId: string, tenantId: string, input: UpdateUserThemePreferenceInput): Promise<UserThemePreference>
+  async getUserThemePreference(
+    userId: string,
+    tenantId: string
+  ): Promise<UserThemePreference | null>;
+  async updateUserThemePreference(
+    userId: string,
+    tenantId: string,
+    input: UpdateUserThemePreferenceInput
+  ): Promise<UserThemePreference>;
 
   // Validation & Utilities
-  validateThemeConfig(config: ThemeConfig): ThemeValidationResult
-  mergeThemeConfigs(base: ThemeConfig, override: ThemeConfig): ThemeConfig
-  generateThemeDiff(oldConfig: ThemeConfig, newConfig: ThemeConfig): ThemeDiff
+  validateThemeConfig(config: ThemeConfig): ThemeValidationResult;
+  mergeThemeConfigs(base: ThemeConfig, override: ThemeConfig): ThemeConfig;
+  generateThemeDiff(oldConfig: ThemeConfig, newConfig: ThemeConfig): ThemeDiff;
 }
 ```
 
@@ -326,23 +342,22 @@ Themes use Material-UI theme specification:
 
 ```graphql
 mutation CreateCustomTheme {
-  createTheme(input: {
-    name: "custom_dark"
-    displayName: "Custom Dark Theme"
-    description: "Dark theme with custom colors"
-    role: "analyst"
-    themeConfig: {
-      palette: {
-        mode: "dark"
-        primary: { main: "#00bcd4" }
-        secondary: { main: "#ff4081" }
-        background: {
-          default: "#121212"
-          paper: "#1e1e1e"
+  createTheme(
+    input: {
+      name: "custom_dark"
+      displayName: "Custom Dark Theme"
+      description: "Dark theme with custom colors"
+      role: "analyst"
+      themeConfig: {
+        palette: {
+          mode: "dark"
+          primary: { main: "#00bcd4" }
+          secondary: { main: "#ff4081" }
+          background: { default: "#121212", paper: "#1e1e1e" }
         }
       }
     }
-  }) {
+  ) {
     id
     name
     displayName
@@ -354,11 +369,9 @@ mutation CreateCustomTheme {
 
 ```graphql
 mutation UpdateMyPreferences {
-  updateMyThemePreference(input: {
-    darkModePreference: DARK
-    autoSwitchByRole: false
-    themeId: "uuid-of-preferred-theme"
-  }) {
+  updateMyThemePreference(
+    input: { darkModePreference: DARK, autoSwitchByRole: false, themeId: "uuid-of-preferred-theme" }
+  ) {
     id
     darkModePreference
   }
@@ -388,6 +401,7 @@ query GetMyTheme {
 ### Hot Reload
 
 Theme changes trigger GraphQL subscription:
+
 ```
 Admin updates theme → PubSub event → All affected users notified → React re-renders with new theme
 ```
@@ -413,6 +427,7 @@ validateThemeConfig(config: ThemeConfig): ThemeValidationResult
 ```
 
 Validates:
+
 - Color format (hex, rgb, rgba)
 - Contrast ratios (basic WCAG check)
 - Value ranges (spacing, font sizes, border radius)
@@ -421,6 +436,7 @@ Validates:
 ### Audit Trail
 
 All theme modifications logged to `theme_audit_log`:
+
 - Who changed what
 - Old config vs new config
 - Timestamp and IP address
@@ -430,36 +446,42 @@ All theme modifications logged to `theme_audit_log`:
 ### Unit Tests
 
 ```typescript
-describe('ThemeService', () => {
-  it('should create theme with valid config', async () => {
-    const theme = await themeService.createTheme({
-      name: 'test_theme',
-      displayName: 'Test Theme',
-      themeConfig: validConfig
-    }, 'admin-user');
+describe("ThemeService", () => {
+  it("should create theme with valid config", async () => {
+    const theme = await themeService.createTheme(
+      {
+        name: "test_theme",
+        displayName: "Test Theme",
+        themeConfig: validConfig,
+      },
+      "admin-user"
+    );
 
     expect(theme).toBeDefined();
-    expect(theme.name).toBe('test_theme');
+    expect(theme.name).toBe("test_theme");
   });
 
-  it('should reject invalid theme config', async () => {
+  it("should reject invalid theme config", async () => {
     await expect(
-      themeService.createTheme({
-        name: 'invalid',
-        displayName: 'Invalid',
-        themeConfig: invalidConfig
-      }, 'admin-user')
-    ).rejects.toThrow('Invalid theme configuration');
+      themeService.createTheme(
+        {
+          name: "invalid",
+          displayName: "Invalid",
+          themeConfig: invalidConfig,
+        },
+        "admin-user"
+      )
+    ).rejects.toThrow("Invalid theme configuration");
   });
 
-  it('should resolve effective theme for user', async () => {
+  it("should resolve effective theme for user", async () => {
     const effective = await themeService.getEffectiveTheme({
-      userId: 'user-123',
-      tenantId: 'tenant-456',
-      userRole: 'security_analyst'
+      userId: "user-123",
+      tenantId: "tenant-456",
+      userRole: "security_analyst",
     });
 
-    expect(effective.source).toBe('role_based');
+    expect(effective.source).toBe("role_based");
   });
 });
 ```
@@ -467,20 +489,20 @@ describe('ThemeService', () => {
 ### Integration Tests
 
 ```typescript
-describe('Theme GraphQL API', () => {
-  it('should get effective theme', async () => {
+describe("Theme GraphQL API", () => {
+  it("should get effective theme", async () => {
     const result = await executeQuery(GET_MY_EFFECTIVE_THEME, {}, context);
     expect(result.data.myEffectiveTheme).toBeDefined();
     expect(result.data.myEffectiveTheme.theme).toBeDefined();
   });
 
-  it('should update user preferences', async () => {
+  it("should update user preferences", async () => {
     const result = await executeMutation(
       UPDATE_MY_THEME_PREFERENCE,
-      { input: { darkModePreference: 'DARK' } },
+      { input: { darkModePreference: "DARK" } },
       context
     );
-    expect(result.data.updateMyThemePreference.darkModePreference).toBe('DARK');
+    expect(result.data.updateMyThemePreference.darkModePreference).toBe("DARK");
   });
 });
 ```
@@ -488,8 +510,8 @@ describe('Theme GraphQL API', () => {
 ### E2E Tests
 
 ```typescript
-test('user can change theme', async () => {
-  await page.goto('/settings');
+test("user can change theme", async () => {
+  await page.goto("/settings");
   await page.click('[data-testid="theme-settings"]');
   await page.click('[data-testid="dark-mode-toggle"]');
 

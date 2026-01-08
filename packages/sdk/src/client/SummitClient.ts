@@ -9,7 +9,7 @@
  */
 
 /* eslint-disable require-await, no-console */
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 
 // ============================================================================
 // Types and Interfaces
@@ -27,13 +27,13 @@ export interface SummitClientConfig {
   retries?: number;
   retryDelay?: number;
   enableLogging?: boolean;
-  logLevel?: 'debug' | 'info' | 'warn' | 'error';
+  logLevel?: "debug" | "info" | "warn" | "error";
 }
 
 /**
  * Authentication method
  */
-export type AuthMethod = 'api_key' | 'oauth2' | 'jwt';
+export type AuthMethod = "api_key" | "oauth2" | "jwt";
 
 /**
  * Request options
@@ -69,13 +69,13 @@ export interface PaginatedResponse<T> {
  * SDK event types
  */
 export interface SummitClientEvents {
-  'auth:login': { method: AuthMethod };
-  'auth:logout': void;
-  'auth:refresh': void;
-  'request:start': { method: string; url: string };
-  'request:complete': { method: string; url: string; duration: number };
-  'request:error': { method: string; url: string; error: Error };
-  'rate_limit:exceeded': { retryAfter: number };
+  "auth:login": { method: AuthMethod };
+  "auth:logout": void;
+  "auth:refresh": void;
+  "request:start": { method: string; url: string };
+  "request:complete": { method: string; url: string; duration: number };
+  "request:error": { method: string; url: string; error: Error };
+  "rate_limit:exceeded": { retryAfter: number };
 }
 
 /**
@@ -101,15 +101,15 @@ export class SummitClient extends EventEmitter {
   constructor(config: SummitClientConfig) {
     super();
     this.config = {
-      baseUrl: config.baseUrl.replace(/\/$/, ''),
-      tenantId: config.tenantId || '',
-      apiKey: config.apiKey || '',
-      accessToken: config.accessToken || '',
+      baseUrl: config.baseUrl.replace(/\/$/, ""),
+      tenantId: config.tenantId || "",
+      apiKey: config.apiKey || "",
+      accessToken: config.accessToken || "",
       timeout: config.timeout || 30000,
       retries: config.retries || 3,
       retryDelay: config.retryDelay || 1000,
       enableLogging: config.enableLogging ?? false,
-      logLevel: config.logLevel || 'info',
+      logLevel: config.logLevel || "info",
     };
 
     if (config.accessToken) {
@@ -126,8 +126,8 @@ export class SummitClient extends EventEmitter {
    */
   public async authenticateWithApiKey(apiKey: string): Promise<void> {
     this.config.apiKey = apiKey;
-    this.emit('auth:login', { method: 'api_key' });
-    this.log('info', 'Authenticated with API key');
+    this.emit("auth:login", { method: "api_key" });
+    this.log("info", "Authenticated with API key");
   }
 
   /**
@@ -143,13 +143,13 @@ export class SummitClient extends EventEmitter {
       refresh_token: string;
       expires_in: number;
       token_type: string;
-    }>('/oauth/token', {
-      method: 'POST',
+    }>("/oauth/token", {
+      method: "POST",
       body: {
-        grant_type: 'client_credentials',
+        grant_type: "client_credentials",
         client_id: clientId,
         client_secret: clientSecret,
-        scope: scopes.join(' '),
+        scope: scopes.join(" "),
       },
     });
 
@@ -157,8 +157,8 @@ export class SummitClient extends EventEmitter {
     this.refreshToken = response.data.refresh_token;
     this.tokenExpiry = new Date(Date.now() + response.data.expires_in * 1000);
 
-    this.emit('auth:login', { method: 'oauth2' });
-    this.log('info', 'Authenticated with OAuth2');
+    this.emit("auth:login", { method: "oauth2" });
+    this.log("info", "Authenticated with OAuth2");
 
     return {
       accessToken: response.data.access_token,
@@ -178,8 +178,8 @@ export class SummitClient extends EventEmitter {
       access_token: string;
       refresh_token: string;
       expires_in: number;
-    }>('/auth/login', {
-      method: 'POST',
+    }>("/auth/login", {
+      method: "POST",
       body: { email, password },
     });
 
@@ -187,7 +187,7 @@ export class SummitClient extends EventEmitter {
     this.refreshToken = response.data.refresh_token;
     this.tokenExpiry = new Date(Date.now() + response.data.expires_in * 1000);
 
-    this.emit('auth:login', { method: 'jwt' });
+    this.emit("auth:login", { method: "jwt" });
 
     return {
       accessToken: response.data.access_token,
@@ -200,22 +200,22 @@ export class SummitClient extends EventEmitter {
    */
   public async refreshAccessToken(): Promise<void> {
     if (!this.refreshToken) {
-      throw new Error('No refresh token available');
+      throw new Error("No refresh token available");
     }
 
     const response = await this.request<{
       access_token: string;
       expires_in: number;
-    }>('/auth/refresh', {
-      method: 'POST',
+    }>("/auth/refresh", {
+      method: "POST",
       body: { refresh_token: this.refreshToken },
     });
 
     this.accessToken = response.data.access_token;
     this.tokenExpiry = new Date(Date.now() + response.data.expires_in * 1000);
 
-    this.emit('auth:refresh');
-    this.log('info', 'Access token refreshed');
+    this.emit("auth:refresh");
+    this.log("info", "Access token refreshed");
   }
 
   /**
@@ -225,18 +225,24 @@ export class SummitClient extends EventEmitter {
     this.accessToken = null;
     this.refreshToken = null;
     this.tokenExpiry = null;
-    this.config.apiKey = '';
-    this.emit('auth:logout');
-    this.log('info', 'Logged out');
+    this.config.apiKey = "";
+    this.emit("auth:logout");
+    this.log("info", "Logged out");
   }
 
   /**
    * Check if authenticated
    */
   public isAuthenticated(): boolean {
-    if (this.config.apiKey) {return true;}
-    if (!this.accessToken) {return false;}
-    if (this.tokenExpiry && this.tokenExpiry <= new Date()) {return false;}
+    if (this.config.apiKey) {
+      return true;
+    }
+    if (!this.accessToken) {
+      return false;
+    }
+    if (this.tokenExpiry && this.tokenExpiry <= new Date()) {
+      return false;
+    }
     return true;
   }
 
@@ -250,13 +256,13 @@ export class SummitClient extends EventEmitter {
   public async request<T>(
     path: string,
     options: {
-      method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+      method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
       body?: unknown;
       query?: Record<string, string | number | boolean | undefined>;
       headers?: Record<string, string>;
     } = {}
   ): Promise<ApiResponse<T>> {
-    const { method = 'GET', body, query, headers = {} } = options;
+    const { method = "GET", body, query, headers = {} } = options;
     let url = `${this.config.baseUrl}${path}`;
 
     // Add query parameters
@@ -275,14 +281,14 @@ export class SummitClient extends EventEmitter {
 
     // Build headers
     const requestHeaders: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      "Content-Type": "application/json",
+      Accept: "application/json",
       ...headers,
     };
 
     // Add authentication
     if (this.config.apiKey) {
-      requestHeaders['X-API-Key'] = this.config.apiKey;
+      requestHeaders["X-API-Key"] = this.config.apiKey;
     } else if (this.accessToken) {
       // Auto-refresh if token is about to expire
       if (this.tokenExpiry && this.refreshToken) {
@@ -291,16 +297,16 @@ export class SummitClient extends EventEmitter {
           await this.refreshAccessToken();
         }
       }
-      requestHeaders['Authorization'] = `Bearer ${this.accessToken}`;
+      requestHeaders["Authorization"] = `Bearer ${this.accessToken}`;
     }
 
     // Add tenant ID if set
     if (this.config.tenantId) {
-      requestHeaders['X-Tenant-ID'] = this.config.tenantId;
+      requestHeaders["X-Tenant-ID"] = this.config.tenantId;
     }
 
     // Emit request start event
-    this.emit('request:start', { method, url });
+    this.emit("request:start", { method, url });
     const startTime = Date.now();
 
     let lastError: Error | null = null;
@@ -325,8 +331,8 @@ export class SummitClient extends EventEmitter {
 
         // Handle rate limiting
         if (response.status === 429) {
-          const retryAfter = parseInt(response.headers.get('Retry-After') || '60', 10);
-          this.emit('rate_limit:exceeded', { retryAfter });
+          const retryAfter = parseInt(response.headers.get("Retry-After") || "60", 10);
+          this.emit("rate_limit:exceeded", { retryAfter });
 
           if (attempt < this.config.retries - 1) {
             await this.delay(retryAfter * 1000);
@@ -339,14 +345,14 @@ export class SummitClient extends EventEmitter {
         const data = await this.parseResponse<T>(response);
         const duration = Date.now() - startTime;
 
-        this.emit('request:complete', { method, url, duration });
-        this.log('debug', `${method} ${path} completed in ${duration}ms`);
+        this.emit("request:complete", { method, url, duration });
+        this.log("debug", `${method} ${path} completed in ${duration}ms`);
 
         return {
           data,
           status: response.status,
           headers: Object.fromEntries(response.headers.entries()),
-          requestId: response.headers.get('X-Request-ID') || undefined,
+          requestId: response.headers.get("X-Request-ID") || undefined,
         };
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
@@ -356,18 +362,21 @@ export class SummitClient extends EventEmitter {
           attempt++;
           if (attempt < this.config.retries) {
             const delay = this.calculateRetryDelay(attempt);
-            this.log('warn', `Request failed, retrying in ${delay}ms (attempt ${attempt}/${this.config.retries})`);
+            this.log(
+              "warn",
+              `Request failed, retrying in ${delay}ms (attempt ${attempt}/${this.config.retries})`
+            );
             await this.delay(delay);
             continue;
           }
         }
 
-        this.emit('request:error', { method, url, error: lastError });
+        this.emit("request:error", { method, url, error: lastError });
         throw lastError;
       }
     }
 
-    throw lastError || new Error('Request failed after retries');
+    throw lastError || new Error("Request failed after retries");
   }
 
   /**
@@ -378,7 +387,7 @@ export class SummitClient extends EventEmitter {
     query?: Record<string, string | number | boolean | undefined>,
     options?: RequestOptions
   ): Promise<ApiResponse<T>> {
-    return this.request<T>(path, { method: 'GET', query, headers: options?.headers });
+    return this.request<T>(path, { method: "GET", query, headers: options?.headers });
   }
 
   /**
@@ -389,7 +398,7 @@ export class SummitClient extends EventEmitter {
     body?: unknown,
     options?: RequestOptions
   ): Promise<ApiResponse<T>> {
-    return this.request<T>(path, { method: 'POST', body, headers: options?.headers });
+    return this.request<T>(path, { method: "POST", body, headers: options?.headers });
   }
 
   /**
@@ -400,7 +409,7 @@ export class SummitClient extends EventEmitter {
     body?: unknown,
     options?: RequestOptions
   ): Promise<ApiResponse<T>> {
-    return this.request<T>(path, { method: 'PUT', body, headers: options?.headers });
+    return this.request<T>(path, { method: "PUT", body, headers: options?.headers });
   }
 
   /**
@@ -411,17 +420,14 @@ export class SummitClient extends EventEmitter {
     body?: unknown,
     options?: RequestOptions
   ): Promise<ApiResponse<T>> {
-    return this.request<T>(path, { method: 'PATCH', body, headers: options?.headers });
+    return this.request<T>(path, { method: "PATCH", body, headers: options?.headers });
   }
 
   /**
    * DELETE request
    */
-  public async delete<T>(
-    path: string,
-    options?: RequestOptions
-  ): Promise<ApiResponse<T>> {
-    return this.request<T>(path, { method: 'DELETE', headers: options?.headers });
+  public async delete<T>(path: string, options?: RequestOptions): Promise<ApiResponse<T>> {
+    return this.request<T>(path, { method: "DELETE", headers: options?.headers });
   }
 
   // --------------------------------------------------------------------------
@@ -460,21 +466,21 @@ export class SummitClient extends EventEmitter {
    * Health check
    */
   public async healthCheck(): Promise<{
-    status: 'healthy' | 'degraded' | 'unhealthy';
+    status: "healthy" | "degraded" | "unhealthy";
     latency: number;
     version?: string;
   }> {
     const start = Date.now();
     try {
-      const response = await this.get<{ status: string; version: string }>('/health');
+      const response = await this.get<{ status: string; version: string }>("/health");
       return {
-        status: 'healthy',
+        status: "healthy",
         latency: Date.now() - start,
         version: response.data.version,
       };
     } catch (_error) {
       return {
-        status: 'unhealthy',
+        status: "unhealthy",
         latency: Date.now() - start,
       };
     }
@@ -510,9 +516,9 @@ export class SummitClient extends EventEmitter {
   }
 
   private parseRateLimitHeaders(headers: Headers): void {
-    const limit = headers.get('X-RateLimit-Limit');
-    const remaining = headers.get('X-RateLimit-Remaining');
-    const reset = headers.get('X-RateLimit-Reset');
+    const limit = headers.get("X-RateLimit-Limit");
+    const remaining = headers.get("X-RateLimit-Remaining");
+    const reset = headers.get("X-RateLimit-Reset");
 
     if (limit && remaining && reset) {
       this.rateLimitInfo = {
@@ -524,14 +530,16 @@ export class SummitClient extends EventEmitter {
   }
 
   private isRetryableError(error: Error): boolean {
-    if (error.name === 'AbortError') {return false;}
+    if (error.name === "AbortError") {
+      return false;
+    }
 
     const errorWithStatus = error as Error & { status?: number };
     if (errorWithStatus.status) {
       return [408, 429, 500, 502, 503, 504].includes(errorWithStatus.status);
     }
 
-    return error.message.includes('fetch') || error.message.includes('network');
+    return error.message.includes("fetch") || error.message.includes("network");
   }
 
   private calculateRetryDelay(attempt: number): number {
@@ -545,11 +553,15 @@ export class SummitClient extends EventEmitter {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  private log(level: 'debug' | 'info' | 'warn' | 'error', message: string): void {
-    if (!this.config.enableLogging) {return;}
+  private log(level: "debug" | "info" | "warn" | "error", message: string): void {
+    if (!this.config.enableLogging) {
+      return;
+    }
 
-    const levels = ['debug', 'info', 'warn', 'error'];
-    if (levels.indexOf(level) < levels.indexOf(this.config.logLevel)) {return;}
+    const levels = ["debug", "info", "warn", "error"];
+    if (levels.indexOf(level) < levels.indexOf(this.config.logLevel)) {
+      return;
+    }
 
     const timestamp = new Date().toISOString();
     console[level](`[Summit SDK ${timestamp}] ${message}`);

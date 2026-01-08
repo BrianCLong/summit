@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       graphqlUrl:
-        description: 'GraphQL endpoint base URL (e.g., https://api.staging.example.com/graphql)'
+        description: "GraphQL endpoint base URL (e.g., https://api.staging.example.com/graphql)"
         required: true
 permissions: { contents: read }
 jobs:

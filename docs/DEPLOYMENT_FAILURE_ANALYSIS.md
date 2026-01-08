@@ -14,14 +14,15 @@
 
 ### Failure Records
 
-| Timestamp | Duration | Monitoring Window | Canary % | SLO Compliance |
-|-----------|----------|-------------------|----------|----------------|
-| 2025-12-25 04:44:58Z | 5s | 1s | 10% | ❌ False |
-| 2025-12-25 04:57:27Z | 6s | 2s | 10% | ❌ False |
-| 2025-12-25 05:03:05Z | 5s | 1s | 10% | ❌ False |
-| 2025-12-25 05:03:55Z | 6s | 2s | 10% | ❌ False |
+| Timestamp            | Duration | Monitoring Window | Canary % | SLO Compliance |
+| -------------------- | -------- | ----------------- | -------- | -------------- |
+| 2025-12-25 04:44:58Z | 5s       | 1s                | 10%      | ❌ False       |
+| 2025-12-25 04:57:27Z | 6s       | 2s                | 10%      | ❌ False       |
+| 2025-12-25 05:03:05Z | 5s       | 1s                | 10%      | ❌ False       |
+| 2025-12-25 05:03:55Z | 6s       | 2s                | 10%      | ❌ False       |
 
 **Source Files:**
+
 - `/deployment-failure-20251225-044458.json`
 - `/deployment-failure-20251225-045727.json`
 - `/deployment-failure-20251225-050305.json`
@@ -55,6 +56,7 @@
 **Hypothesis:** Deployments were test runs, not actual production deployments
 
 **Evidence to Collect:**
+
 ```bash
 # Check if MONITORING_DURATION was overridden
 git log --all --grep="MONITORING_DURATION" --since="2025-12-24"
@@ -70,6 +72,7 @@ kubectl get events -n intelgraph-prod \
 ```
 
 **Expected Findings:**
+
 - If test mode: MONITORING_DURATION set to 2-5 seconds
 - If production: Evidence of actual pod deployments/rollbacks
 
@@ -82,6 +85,7 @@ kubectl get events -n intelgraph-prod \
 **SLOs to Investigate:**
 
 1. **P95 Latency** (threshold: <350ms)
+
    ```promql
    histogram_quantile(0.95,
      sum(rate(http_request_duration_seconds_bucket{
@@ -93,6 +97,7 @@ kubectl get events -n intelgraph-prod \
    ```
 
 2. **Error Rate** (threshold: <1%)
+
    ```promql
    sum(rate(http_requests_total{
      job="intelgraph-canary",
@@ -113,6 +118,7 @@ kubectl get events -n intelgraph-prod \
    ```
 
 **Action Items:**
+
 - [ ] Query Prometheus for SLO metrics during failure windows
 - [ ] Check application logs for errors during 04:44-05:04 UTC
 - [ ] Review infrastructure metrics (CPU, memory, network)
@@ -124,6 +130,7 @@ kubectl get events -n intelgraph-prod \
 **Hypothesis:** v1.24.0 introduced regression
 
 **Investigation:**
+
 ```bash
 # Compare v1.24.0 with previous stable version
 git diff v1.23.0..v1.24.0 --stat
@@ -136,6 +143,7 @@ git log v1.24.0 -10 --oneline
 ```
 
 **Risk Areas to Review:**
+
 - Database migrations
 - API contract changes
 - Dependency updates
@@ -167,6 +175,7 @@ git log v1.24.0 -10 --oneline
 ### Short-Term (Complete within 1 week)
 
 4. **Improve Canary Script**
+
    ```bash
    # Proposed enhancement: scripts/production-canary.sh
    # Add explicit mode selection with confirmation
@@ -212,24 +221,29 @@ git log v1.24.0 -10 --oneline
 ### What Went Well
 
 ✅ **Canary process caught issues before affecting production**
+
 - Automatic rollback prevented customer impact
 - SLO monitoring worked as designed
 
 ✅ **Deployment artifacts captured**
+
 - Failure JSONs provide audit trail
 - Timestamps enable correlation with metrics
 
 ### What Could Be Improved
 
 ⚠️ **Monitoring duration inconsistency**
+
 - Production vs test mode not clearly separated
 - Risk of accidentally deploying with test parameters
 
 ⚠️ **Rapid retry without investigation**
+
 - 4 failures in 19 minutes suggests automated retry
 - Should investigate after first failure, not retry blindly
 
 ⚠️ **Holiday deployment timing**
+
 - Deploying on December 25 increases risk
 - Reduced engineering coverage for incident response
 
@@ -237,13 +251,13 @@ git log v1.24.0 -10 --oneline
 
 ## Action Owners
 
-| Action | Owner | Due Date | Status |
-|--------|-------|----------|--------|
-| Verify test vs production mode | SRE Team | 2025-12-26 | 🔄 Pending |
-| Query Prometheus metrics | Observability Team | 2025-12-26 | 🔄 Pending |
-| Review v1.24.0 changes | Engineering Team | 2025-12-27 | 🔄 Pending |
-| Enhance canary script | DevOps Team | 2025-12-31 | 🔄 Pending |
-| Create deployment checklist | SRE Team | 2026-01-07 | 🔄 Pending |
+| Action                         | Owner              | Due Date   | Status     |
+| ------------------------------ | ------------------ | ---------- | ---------- |
+| Verify test vs production mode | SRE Team           | 2025-12-26 | 🔄 Pending |
+| Query Prometheus metrics       | Observability Team | 2025-12-26 | 🔄 Pending |
+| Review v1.24.0 changes         | Engineering Team   | 2025-12-27 | 🔄 Pending |
+| Enhance canary script          | DevOps Team        | 2025-12-31 | 🔄 Pending |
+| Create deployment checklist    | SRE Team           | 2026-01-07 | 🔄 Pending |
 
 ---
 

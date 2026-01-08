@@ -4,7 +4,7 @@
  * Tracks uranium mining, milling, conversion, and fuel fabrication activities.
  */
 
-import type { FuelCycleActivity, TransportActivity } from './types.js';
+import type { FuelCycleActivity, TransportActivity } from "./types.js";
 
 export class FuelCycleTracker {
   private activities: Map<string, FuelCycleActivity[]>;
@@ -30,7 +30,7 @@ export class FuelCycleTracker {
   }
 
   trackMaterialFlow(materialType: string): TransportActivity[] {
-    return this.transports.filter(t => t.material_type === materialType);
+    return this.transports.filter((t) => t.material_type === materialType);
   }
 
   estimateFuelCycleCapacity(country: string): {
@@ -44,7 +44,7 @@ export class FuelCycleTracker {
       mining_capacity: 0,
       conversion_capacity: 0,
       fabrication_capacity: 0,
-      self_sufficient: false
+      self_sufficient: false,
     };
   }
 }

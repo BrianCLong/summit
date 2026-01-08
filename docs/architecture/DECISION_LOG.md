@@ -1,6 +1,6 @@
 # Architectural Decision Log (Multi-Generational Memory)
 
-This document serves as the **living memory** of the system's architectural evolution. It records not just *what* was decided, but *why*, tracing the lineage of thought across generations.
+This document serves as the **living memory** of the system's architectural evolution. It records not just _what_ was decided, but _why_, tracing the lineage of thought across generations.
 
 ## Template for New Decisions
 

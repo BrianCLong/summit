@@ -15,24 +15,24 @@ export interface CollectionTask {
 }
 
 export enum CollectionType {
-  SOCIAL_MEDIA = 'social_media',
-  WEB_SCRAPING = 'web_scraping',
-  RSS_FEED = 'rss_feed',
-  PUBLIC_RECORDS = 'public_records',
-  DOMAIN_INTEL = 'domain_intel',
-  DARK_WEB = 'dark_web',
-  FORUM = 'forum',
-  NEWS = 'news',
-  IMAGE_METADATA = 'image_metadata',
-  GEOLOCATION = 'geolocation'
+  SOCIAL_MEDIA = "social_media",
+  WEB_SCRAPING = "web_scraping",
+  RSS_FEED = "rss_feed",
+  PUBLIC_RECORDS = "public_records",
+  DOMAIN_INTEL = "domain_intel",
+  DARK_WEB = "dark_web",
+  FORUM = "forum",
+  NEWS = "news",
+  IMAGE_METADATA = "image_metadata",
+  GEOLOCATION = "geolocation",
 }
 
 export enum TaskStatus {
-  PENDING = 'pending',
-  IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled'
+  PENDING = "pending",
+  IN_PROGRESS = "in_progress",
+  COMPLETED = "completed",
+  FAILED = "failed",
+  CANCELLED = "cancelled",
 }
 
 export interface CollectionResult {
@@ -58,11 +58,11 @@ export interface CollectorConfig {
   timeout?: number;
   retryPolicy?: {
     maxRetries: number;
-    backoff: 'linear' | 'exponential';
+    backoff: "linear" | "exponential";
     initialDelay: number;
   };
   authentication?: {
-    type: 'api_key' | 'oauth' | 'basic' | 'token';
+    type: "api_key" | "oauth" | "basic" | "token";
     credentials: Record<string, string>;
   };
 }

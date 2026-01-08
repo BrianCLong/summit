@@ -3,6 +3,7 @@
 This document consolidates the cross-cutting user experience and customer success epics that guide the product toward clarity, speed to value, and operational excellence.
 
 ## Epic 1 — UX Surface Reduction (make the product feel obvious)
+
 1. Inventory top 50 screens/flows by usage and support burden.
 2. Merge duplicate paths into one canonical “happy path” per outcome.
 3. Remove or hide low-usage settings; replace with smart defaults.
@@ -16,6 +17,7 @@ This document consolidates the cross-cutting user experience and customer succes
 11. Deprecate legacy UI routes/components and remove dead CSS/JS.
 
 ## Epic 2 — Onboarding to First Value (minutes, not days)
+
 1. Define the “first value” moment and instrument it precisely.
 2. Ship one canonical onboarding flow (delete variants).
 3. Preconfigure sensible defaults and auto-provision required resources.
@@ -29,6 +31,7 @@ This document consolidates the cross-cutting user experience and customer succes
 11. Remove hidden prerequisites (docs-only steps) by building them into product.
 
 ## Epic 3 — Support Deflection as Product (make tickets unnecessary)
+
 1. Categorize top 25 ticket types with owners and root-cause classes.
 2. Improve error messages to include cause, impact, and next action.
 3. Add “diagnostics” panel that runs checks and suggests fixes.
@@ -42,6 +45,7 @@ This document consolidates the cross-cutting user experience and customer succes
 11. Kill the top 10 ticket drivers with product fixes (not training).
 
 ## Epic 4 — Performance & Responsiveness (speed is UX)
+
 1. Identify top 10 slow interactions (RUM + session replays if available).
 2. Set p95 targets per interaction and publish as budgets.
 3. Optimize payloads (pagination, field selection, compression).
@@ -55,6 +59,7 @@ This document consolidates the cross-cutting user experience and customer succes
 11. Ship a “Speed Release” and delete perf debt items that regress.
 
 ## Epic 5 — Reliability that Users Feel (fewer “weird” moments)
+
 1. Define SLOs for user-critical journeys (not just services).
 2. Add synthetic checks for signup, payment, core action, and integrations.
 3. Implement canary deploys + automated rollback on SLO burn.
@@ -68,6 +73,7 @@ This document consolidates the cross-cutting user experience and customer succes
 11. Track reliability-driven tickets/churn and treat as top-tier bugs.
 
 ## Epic 6 — Trust & Transparency (reduce anxiety, increase adoption)
+
 1. Add audit history for key objects (who changed what, when).
 2. Show “last updated/last sync” timestamps and data freshness indicators.
 3. Add permission explanations (“why can’t I do this?”) with next steps.
@@ -81,6 +87,7 @@ This document consolidates the cross-cutting user experience and customer succes
 11. Reduce surprise: predictable releases and in-app “what changed.”
 
 ## Epic 7 — Collaboration & Roles (invite loops with governance)
+
 1. Create role templates and default permissions for common teams.
 2. Add workspace/team structure with clean boundaries.
 3. Implement comment/annotation and assignment workflows.
@@ -94,6 +101,7 @@ This document consolidates the cross-cutting user experience and customer succes
 11. Reduce permission model debt by centralizing policy enforcement.
 
 ## Epic 8 — Messaging & Education In-Product (teach without docs rot)
+
 1. Add contextual tips that appear only when needed and then retire.
 2. Build interactive walkthroughs for core flows (skip anytime).
 3. Provide template gallery with best-practice examples.
@@ -107,6 +115,7 @@ This document consolidates the cross-cutting user experience and customer succes
 11. Track education KPIs: activation lift, fewer errors, fewer tickets.
 
 ## Epic 9 — CX Operating System (make improvement continuous)
+
 1. Establish CX metrics: activation, task success, time-to-task, tickets, NPS/CSAT.
 2. Create weekly “top friction” review: 3 issues in, 3 fixes shipped.
 3. Implement UX debt budget (fixed % capacity) until targets hit.
@@ -122,4 +131,5 @@ This document consolidates the cross-cutting user experience and customer succes
 ---
 
 ### Next “Next” Theme
+
 If additional scope is needed, extend the portfolio with a tenth epic focused on **data & AI productization**—personalization, copilots, automation with strong guardrails and debt burn baked in—using the same outcome-first structure above.

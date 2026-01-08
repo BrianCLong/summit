@@ -1,5 +1,5 @@
-import { PluginManifest } from '../types/plugin.js';
-import { ResourceQuota } from '../security/PluginSecurity.js';
+import { PluginManifest } from "../types/plugin.js";
+import { ResourceQuota } from "../security/PluginSecurity.js";
 
 /**
  * Resource quota enforcement and monitoring
@@ -93,33 +93,33 @@ export class QuotaEnforcer {
     if (usage.memoryUsedMB > quota.maxMemoryMB) {
       violations.push({
         pluginId,
-        type: 'memory',
+        type: "memory",
         limit: quota.maxMemoryMB,
         actual: usage.memoryUsedMB,
         timestamp: new Date(),
-        severity: usage.memoryUsedMB > quota.maxMemoryMB * 1.5 ? 'critical' : 'warning',
+        severity: usage.memoryUsedMB > quota.maxMemoryMB * 1.5 ? "critical" : "warning",
       });
     }
 
     if (usage.storageUsedMB > quota.maxStorageMB) {
       violations.push({
         pluginId,
-        type: 'storage',
+        type: "storage",
         limit: quota.maxStorageMB,
         actual: usage.storageUsedMB,
         timestamp: new Date(),
-        severity: 'warning',
+        severity: "warning",
       });
     }
 
     if (usage.networkUsedMbps > quota.maxNetworkMbps) {
       violations.push({
         pluginId,
-        type: 'network',
+        type: "network",
         limit: quota.maxNetworkMbps,
         actual: usage.networkUsedMbps,
         timestamp: new Date(),
-        severity: 'warning',
+        severity: "warning",
       });
     }
 
@@ -170,11 +170,11 @@ export interface ResourceUsageTracker {
 
 export interface QuotaViolation {
   pluginId: string;
-  type: 'memory' | 'cpu' | 'storage' | 'network';
+  type: "memory" | "cpu" | "storage" | "network";
   limit: number;
   actual: number;
   timestamp: Date;
-  severity: 'warning' | 'critical';
+  severity: "warning" | "critical";
 }
 
 /**

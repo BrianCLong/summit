@@ -57,7 +57,7 @@ commit-stage:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: "20"
 
     - name: Setup pnpm
       uses: pnpm/action-setup@v2
@@ -190,10 +190,10 @@ test-stage:
 ### Coverage Requirements
 
 | Service Tier | Minimum Coverage |
-|--------------|------------------|
-| Tier 1 | 80% |
-| Tier 2 | 70% |
-| Tier 3 | 60% |
+| ------------ | ---------------- |
+| Tier 1       | 80%              |
+| Tier 2       | 70%              |
+| Tier 3       | 60%              |
 
 ---
 
@@ -217,9 +217,9 @@ security-stage:
       uses: aquasecurity/trivy-action@master
       with:
         image-ref: ghcr.io/brianclong/summit/${{ inputs.service }}:${{ github.sha }}
-        format: 'sarif'
-        output: 'trivy-results.sarif'
-        severity: 'CRITICAL,HIGH'
+        format: "sarif"
+        output: "trivy-results.sarif"
+        severity: "CRITICAL,HIGH"
 
     - name: Check for critical vulnerabilities
       run: |
@@ -260,13 +260,13 @@ security-stage:
 
 ### Security Requirements
 
-| Check | Production | Staging | Development |
-|-------|------------|---------|-------------|
-| Critical CVEs | 0 | 0 | 0 |
-| High CVEs | 0 | ≤5 | ≤10 |
-| Secrets | 0 | 0 | 0 |
-| Image signed | Required | Required | Optional |
-| SLSA level | ≥3 | ≥2 | ≥1 |
+| Check         | Production | Staging  | Development |
+| ------------- | ---------- | -------- | ----------- |
+| Critical CVEs | 0          | 0        | 0           |
+| High CVEs     | 0          | ≤5       | ≤10         |
+| Secrets       | 0          | 0        | 0           |
+| Image signed  | Required   | Required | Optional    |
+| SLSA level    | ≥3         | ≥2       | ≥1          |
 
 ---
 
@@ -456,7 +456,7 @@ production-canary:
     - name: Notify deployment start
       uses: slackapi/slack-github-action@v1
       with:
-        channel-id: 'deployments'
+        channel-id: "deployments"
         slack-message: |
           :rocket: Starting production deployment
           Service: ${{ inputs.service }}
@@ -612,7 +612,7 @@ completion:
     - name: Notify success
       uses: slackapi/slack-github-action@v1
       with:
-        channel-id: 'deployments'
+        channel-id: "deployments"
         slack-message: |
           :white_check_mark: Production deployment complete
           Service: ${{ inputs.service }}
@@ -640,6 +640,7 @@ completion:
 ### Automatic Rollback
 
 Argo Rollouts automatically rolls back when:
+
 - Analysis template fails
 - Health checks fail for 3 consecutive checks
 - Error rate exceeds 5%
@@ -667,21 +668,21 @@ kubectl argo rollouts status <service> -n production
 
 ### Key Dashboards
 
-| Dashboard | URL | Purpose |
-|-----------|-----|---------|
+| Dashboard           | URL                    | Purpose                     |
+| ------------------- | ---------------------- | --------------------------- |
 | Deployment Overview | /d/deployment-overview | Real-time deployment status |
-| SLO Burn Rate | /d/slo-burn | Error budget consumption |
-| Golden Signals | /d/golden-signals | Latency, errors, traffic |
-| Canary Analysis | /d/canary-analysis | Canary vs stable comparison |
+| SLO Burn Rate       | /d/slo-burn            | Error budget consumption    |
+| Golden Signals      | /d/golden-signals      | Latency, errors, traffic    |
+| Canary Analysis     | /d/canary-analysis     | Canary vs stable comparison |
 
 ### Alerts During Deployment
 
-| Alert | Threshold | Action |
-|-------|-----------|--------|
-| ErrorRateSpike | >2% for 2m | Investigate |
-| ErrorRateCritical | >5% for 1m | Auto-rollback |
-| LatencySpike | p95 >500ms for 3m | Investigate |
-| CanaryHealthFailing | 3 failures | Auto-rollback |
+| Alert               | Threshold         | Action        |
+| ------------------- | ----------------- | ------------- |
+| ErrorRateSpike      | >2% for 2m        | Investigate   |
+| ErrorRateCritical   | >5% for 1m        | Auto-rollback |
+| LatencySpike        | p95 >500ms for 3m | Investigate   |
+| CanaryHealthFailing | 3 failures        | Auto-rollback |
 
 ---
 
@@ -689,13 +690,13 @@ kubectl argo rollouts status <service> -n production
 
 Track these metrics to improve the pipeline:
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Lead time | <1 hour | Commit to production |
-| Deployment frequency | Daily | Deployments per day |
-| Change failure rate | <5% | Rollbacks / deployments |
-| MTTR | <30 min | Time to recover from failure |
+| Metric               | Target  | Measurement                  |
+| -------------------- | ------- | ---------------------------- |
+| Lead time            | <1 hour | Commit to production         |
+| Deployment frequency | Daily   | Deployments per day          |
+| Change failure rate  | <5%     | Rollbacks / deployments      |
+| MTTR                 | <30 min | Time to recover from failure |
 
 ---
 
-*Pipeline documentation v0.1.0 - Review quarterly*
+_Pipeline documentation v0.1.0 - Review quarterly_

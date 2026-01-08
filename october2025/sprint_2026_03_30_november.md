@@ -17,12 +17,12 @@ roles:
   - FinOps Lead
   - Repo Maintainer / Arborist
 objectives:
-  - 'Data scale-out: partitioning/sharding plan v1 (tenant-hash) with zero-downtime cutover for one hot table.'
-  - 'Reliability: backup validation pipeline (automated restore + checksums) and quarterly DR report generator.'
-  - 'Observability v5: tail-based sampling, adaptive alerts, and SLO gap analysis with suggested remediations.'
-  - 'Search & ingest quality: relevance/recall tuning with canary metrics; schema index strategy codified.'
-  - 'Access governance: purpose-based access (PBA) prompts + immutable evidence for sensitive queries.'
-  - 'FinOps v5: predictive autoscaling (load forecast), savings-plan coverage report, and idle asset janitor v2.'
+  - "Data scale-out: partitioning/sharding plan v1 (tenant-hash) with zero-downtime cutover for one hot table."
+  - "Reliability: backup validation pipeline (automated restore + checksums) and quarterly DR report generator."
+  - "Observability v5: tail-based sampling, adaptive alerts, and SLO gap analysis with suggested remediations."
+  - "Search & ingest quality: relevance/recall tuning with canary metrics; schema index strategy codified."
+  - "Access governance: purpose-based access (PBA) prompts + immutable evidence for sensitive queries."
+  - "FinOps v5: predictive autoscaling (load forecast), savings-plan coverage report, and idle asset janitor v2."
 ---
 
 # Sprint 36 Plan — Scale-Out Data, Verified Backups, and Adaptive Observability
@@ -175,8 +175,8 @@ CREATE TRIGGER docs_route_tr BEFORE INSERT ON docs FOR EACH ROW EXECUTE FUNCTION
 
 ```ts
 export async function saveDoc(doc) {
-  await dbOld.insert('docs', doc); // legacy table
-  await dbNew.insert('docs', doc); // partitioned/sharded
+  await dbOld.insert("docs", doc); // legacy table
+  await dbNew.insert("docs", doc); // partitioned/sharded
 }
 ```
 
@@ -187,17 +187,19 @@ export async function saveDoc(doc) {
 const BATCH = 1000;
 let last = 0;
 while (true) {
-  const rows = await old.query(
-    'SELECT * FROM docs WHERE id>$1 ORDER BY id ASC LIMIT $2',
-    [last, BATCH],
-  );
+  const rows = await old.query("SELECT * FROM docs WHERE id>$1 ORDER BY id ASC LIMIT $2", [
+    last,
+    BATCH,
+  ]);
   if (!rows.rowCount) break;
   await newdb.tx(async (t) => {
     for (const r of rows.rows) {
-      await t.query(
-        'INSERT INTO docs VALUES ($1,$2,$3,$4) ON CONFLICT DO NOTHING',
-        [r.id, r.tenant_id, r.created_at, r.body],
-      );
+      await t.query("INSERT INTO docs VALUES ($1,$2,$3,$4) ON CONFLICT DO NOTHING", [
+        r.id,
+        r.tenant_id,
+        r.created_at,
+        r.body,
+      ]);
     }
   });
   last = rows.rows.at(-1).id;
@@ -213,7 +215,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata: { name: restore-validate }
 spec:
-  schedule: '0 4 * * *'
+  schedule: "0 4 * * *"
   jobTemplate:
     spec:
       template:
@@ -245,7 +247,7 @@ processors:
         latency: { threshold_ms: 1500 }
       - name: key-routes
         type: string_attribute
-        string_attribute: { key: http.target, values: ['/search', '/docs/'] }
+        string_attribute: { key: http.target, values: ["/search", "/docs/"] }
 service:
   pipelines:
     traces: { processors: [tail_sampling, batch] }
@@ -320,7 +322,7 @@ export function ReasonPrompt({ onSubmit }) {
 ```yaml
 name: idle-janitor
 on:
-  schedule: [{ cron: '0 2 * * *' }]
+  schedule: [{ cron: "0 2 * * *" }]
 jobs:
   sweep:
     runs-on: ubuntu-latest

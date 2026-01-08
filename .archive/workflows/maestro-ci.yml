@@ -44,7 +44,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ needs.setup.outputs.node-version }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -123,15 +123,15 @@ jobs:
         uses: aquasecurity/trivy-action@0.24.0
         with:
           image-ref: ${{ steps.build.outputs.server-image || steps.build.outputs.client-image }}
-          severity: 'CRITICAL,HIGH,MEDIUM'
-          format: 'sarif'
-          output: 'trivy-${{ matrix.service }}.sarif'
+          severity: "CRITICAL,HIGH,MEDIUM"
+          format: "sarif"
+          output: "trivy-${{ matrix.service }}.sarif"
 
       - name: Upload Trivy scan results
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: 'trivy-${{ matrix.service }}.sarif'
+          sarif_file: "trivy-${{ matrix.service }}.sarif"
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3

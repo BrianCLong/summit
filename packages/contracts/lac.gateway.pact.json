@@ -1,4 +1,15 @@
-{"consumer":{"name":"gateway"},"provider":{"name":"policy-compiler"},
- "interactions":[{"description":"allow simple read",
- "request":{"method":"POST","path":"/decide","body":{"query":"{ claim(id:\"1\"){ id } }","caller":{"purpose":"investigation"}}},
- "response":{"status":200,"body":{"allow":true}}}]}
+{
+  "consumer": { "name": "gateway" },
+  "provider": { "name": "policy-compiler" },
+  "interactions": [
+    {
+      "description": "allow simple read",
+      "request": {
+        "method": "POST",
+        "path": "/decide",
+        "body": { "query": "{ claim(id:\"1\"){ id } }", "caller": { "purpose": "investigation" } }
+      },
+      "response": { "status": 200, "body": { "allow": true } }
+    }
+  ]
+}

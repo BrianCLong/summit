@@ -8,6 +8,7 @@
 ## Context and Problem Statement
 
 The Summit repository has **212 active GitHub workflows**, creating:
+
 - Maintenance burden (each workflow needs updates)
 - Confusion about which workflow runs when
 - Overlapping functionality (multiple CI workflows)
@@ -15,6 +16,7 @@ The Summit repository has **212 active GitHub workflows**, creating:
 - Inconsistent quality gates
 
 **Current workflow categories:**
+
 - `ci.yml`, `ci-main.yml`, `ci.unified.yml`, `ci-comprehensive.yml` - Overlapping CI
 - 20+ deployment workflows (one per environment/service)
 - 50+ utility workflows (linting, scanning, releasing)
@@ -31,14 +33,17 @@ The Summit repository has **212 active GitHub workflows**, creating:
 ## Considered Options
 
 ### Option 1: Consolidated Workflow Architecture (Recommended)
+
 Merge into **10-15 core workflows** with reusable components.
 
 ### Option 2: Workflow Matrix Strategy
+
 Use GitHub Actions matrix to run everything in one workflow.
 
 **Rejected**: Single workflow becomes complex, harder to debug, all-or-nothing failures.
 
 ### Option 3: External CI System
+
 Migrate to CircleCI, Jenkins, or other CI system.
 
 **Rejected**: High migration cost, GitHub Actions is sufficient when organized properly.
@@ -155,10 +160,10 @@ on:
     inputs:
       command:
         type: string
-        default: 'build'
+        default: "build"
       packages:
         type: string
-        description: 'JSON array of packages to build'
+        description: "JSON array of packages to build"
 
 jobs:
   build:
@@ -173,7 +178,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -222,24 +227,28 @@ filters: |
 ### Workflow Migration Plan
 
 #### Phase 1: Audit (Week 1)
+
 1. Inventory all 212 workflows
 2. Categorize by purpose (CI, deploy, utility, experimental)
 3. Identify overlaps and redundancies
 4. Document workflow dependencies
 
 #### Phase 2: Consolidate CI (Week 2)
+
 1. Create unified `ci.yml` with reusable components
 2. Implement change detection
 3. Test on feature branch
 4. Migrate PR checks to new workflow
 
 #### Phase 3: Consolidate Deployment (Week 3)
+
 1. Create environment-specific deploy workflows
 2. Implement approval gates
 3. Add rollback capabilities
 4. Remove old deployment workflows
 
 #### Phase 4: Cleanup (Week 4)
+
 1. Archive unused workflows to `.github/workflows/.archive/`
 2. Update documentation
 3. Train team on new workflow structure
@@ -247,17 +256,18 @@ filters: |
 
 ### Workflow Ownership
 
-| Workflow | Owner | Approval Required |
-|----------|-------|-------------------|
-| `ci.yml` | Platform Team | No |
-| `release.yml` | Platform Team | Tech Lead |
-| `deploy-staging.yml` | DevOps Team | No |
-| `deploy-production.yml` | DevOps Team | 2 approvals |
-| `security.yml` | Security Team | No |
+| Workflow                | Owner         | Approval Required |
+| ----------------------- | ------------- | ----------------- |
+| `ci.yml`                | Platform Team | No                |
+| `release.yml`           | Platform Team | Tech Lead         |
+| `deploy-staging.yml`    | DevOps Team   | No                |
+| `deploy-production.yml` | DevOps Team   | 2 approvals       |
+| `security.yml`          | Security Team | No                |
 
 ### Quality Gates
 
 All PRs must pass:
+
 1. **Lint** - ESLint, Prettier
 2. **Typecheck** - TypeScript compilation
 3. **Test** - Unit and integration tests
@@ -265,12 +275,14 @@ All PRs must pass:
 5. **Security** - No high/critical vulnerabilities
 
 Deployment gates:
+
 1. **Staging** - CI passes, branch is `develop` or `release/*`
 2. **Production** - CI passes, branch is `main`, 2 approvals
 
 ## Consequences
 
 ### Positive
+
 - 95% reduction in workflow count (212 → 10)
 - Faster PR feedback (target: <10 min)
 - Consistent quality gates
@@ -278,26 +290,27 @@ Deployment gates:
 - Lower CI costs (fewer redundant runs)
 
 ### Negative
+
 - Migration effort required
 - Team needs to learn new structure
 - Consolidated workflows may be complex
 
 ### Risks
 
-| Risk | Mitigation |
-|------|------------|
-| Breaking existing CI | Run new and old workflows in parallel during migration |
-| Complex reusable workflows | Document thoroughly, add comments |
-| Missing edge cases | Gradual migration, monitor failures |
+| Risk                       | Mitigation                                             |
+| -------------------------- | ------------------------------------------------------ |
+| Breaking existing CI       | Run new and old workflows in parallel during migration |
+| Complex reusable workflows | Document thoroughly, add comments                      |
+| Missing edge cases         | Gradual migration, monitor failures                    |
 
 ## Success Metrics
 
-| Metric | Current | Target |
-|--------|---------|--------|
-| Workflow count | 212 | 10-15 |
-| PR feedback time | 15-20 min | <10 min |
-| CI cost/month | $X | 50% reduction |
-| Failed workflow rate | Unknown | <5% |
+| Metric               | Current   | Target        |
+| -------------------- | --------- | ------------- |
+| Workflow count       | 212       | 10-15         |
+| PR feedback time     | 15-20 min | <10 min       |
+| CI cost/month        | $X        | 50% reduction |
+| Failed workflow rate | Unknown   | <5%           |
 
 ## Related Documents
 

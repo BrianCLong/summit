@@ -3,10 +3,10 @@ import {
   PublicHealthComplianceMonitor,
   PublicHealthPlan,
   PurposeTag,
-} from '../src/publicHealthPlan.js';
+} from "../src/publicHealthPlan.js";
 
 const baseComplianceInput = {
-  purposeTags: ['public-health'] as PurposeTag[],
+  purposeTags: ["public-health"] as PurposeTag[],
   residencyEnabled: true,
   retentionDaysDefault: 365,
   retentionDaysPhi: 30,
@@ -41,45 +41,48 @@ const completedEpicProgress = plan.epics.map((epic) => ({
     artifact: task.output,
     ready: true,
     hash: `sha256-${task.id}`,
-    verifiedBy: 'qa-bot',
+    verifiedBy: "qa-bot",
     verifiedAt: nowIso,
     provenance: `epic:${epic.id}:${task.id}`,
-    evidence: 'slo:pass',
+    evidence: "slo:pass",
   })),
   evidence: [
     {
       artifact: epic.backoutArtifact,
       ready: true,
       hash: `sha256-${epic.backoutArtifact}`,
-      verifiedBy: 'qa-bot',
+      verifiedBy: "qa-bot",
       verifiedAt: nowIso,
       provenance: `epic:${epic.id}:backout`,
-      evidence: 'backout-ready',
+      evidence: "backout-ready",
     },
   ],
 }));
 
-describe('PublicHealthPlan', () => {
-  it('declares the full set of epics and tasks from the orchestration plan', () => {
-    const epicsWithTasks = plan.epics.map((epic) => ({ id: epic.id, taskCount: epic.tasks.length }));
+describe("PublicHealthPlan", () => {
+  it("declares the full set of epics and tasks from the orchestration plan", () => {
+    const epicsWithTasks = plan.epics.map((epic) => ({
+      id: epic.id,
+      taskCount: epic.tasks.length,
+    }));
     expect(epicsWithTasks).toEqual(
       expect.arrayContaining([
-        { id: 'EP1', taskCount: 14 },
-        { id: 'EP2', taskCount: 14 },
-        { id: 'EP3', taskCount: 11 },
-        { id: 'EP4', taskCount: 10 },
-        { id: 'EP5', taskCount: 13 },
-        { id: 'EP6', taskCount: 11 },
-        { id: 'EP7', taskCount: 11 },
-        { id: 'EP8', taskCount: 11 },
-        { id: 'EP9', taskCount: 11 },
-        { id: 'EP10', taskCount: 10 },
-        { id: 'EP11', taskCount: 11 },
-      ]),
+        { id: "EP1", taskCount: 14 },
+        { id: "EP2", taskCount: 14 },
+        { id: "EP3", taskCount: 11 },
+        { id: "EP4", taskCount: 10 },
+        { id: "EP5", taskCount: 13 },
+        { id: "EP6", taskCount: 11 },
+        { id: "EP7", taskCount: 11 },
+        { id: "EP8", taskCount: 11 },
+        { id: "EP9", taskCount: 11 },
+        { id: "EP10", taskCount: 10 },
+        { id: "EP11", taskCount: 11 },
+      ])
     );
   });
 
-  it('passes validation when all principles, SLOs, cost guardrails, and artifacts are satisfied', () => {
+  it("passes validation when all principles, SLOs, cost guardrails, and artifacts are satisfied", () => {
     const report = plan.validate({
       ...baseComplianceInput,
       epicProgress: completedEpicProgress,
@@ -91,11 +94,11 @@ describe('PublicHealthPlan', () => {
     expect(report.epicCoverage.every((coverage) => coverage.percentComplete === 100)).toBe(true);
   });
 
-  it('fails validation when SLOs, purpose tags, and tasks are violated', () => {
+  it("fails validation when SLOs, purpose tags, and tasks are violated", () => {
     const failingPlan = new PublicHealthPlan();
     const report = failingPlan.validate({
       ...baseComplianceInput,
-      purposeTags: ['research'],
+      purposeTags: ["research"],
       performance: {
         ...baseComplianceInput.performance,
         apiReadP95Ms: 500,
@@ -108,17 +111,17 @@ describe('PublicHealthPlan', () => {
       },
       epicProgress: [
         {
-          epicId: 'EP1',
-          completedTasks: new Set(['EP1-T01']),
+          epicId: "EP1",
+          completedTasks: new Set(["EP1-T01"]),
           taskEvidence: [],
           evidence: [
             {
-              artifact: 'boundary.md',
+              artifact: "boundary.md",
               ready: true,
-              hash: '',
-              verifiedBy: '',
-              verifiedAt: '',
-              provenance: '',
+              hash: "",
+              verifiedBy: "",
+              verifiedAt: "",
+              provenance: "",
             },
           ],
         },
@@ -139,33 +142,33 @@ describe('PublicHealthPlan', () => {
     expect(report.ok).toBe(false);
     expect(codes).toEqual(
       expect.arrayContaining([
-        'PURPOSE_MISSING',
-        'RESIDENCY_DISABLED',
-        'RETENTION_DEFAULT_EXCEEDS',
-        'RETENTION_PHI_EXCEEDS',
-        'SEC_OIDC',
-        'SEC_MTLS',
-        'SEC_FIELDLEVELENCRYPTION',
-        'SEC_PROVENANCELEDGER',
-        'SEC_AUTHORITYBINDING',
-        'SLO_API_READ',
-        'SLO_GRAPH_MULTI_HOP',
-        'SLO_INGEST_CAPACITY',
-        'COST_INGEST_EXCEEDS',
-        'COST_GRAPHQL_EXCEEDS',
-        'EPIC_MISSING',
-        'TASKS_INCOMPLETE',
-        'BACKOUT_MISSING',
-        'TASK_EVIDENCE_MISSING',
-        'EVIDENCE_HASH_MISSING',
-        'EVIDENCE_VERIFIER_MISSING',
-        'EVIDENCE_PROVENANCE_MISSING',
-        'EVIDENCE_VERIFIED_AT_INVALID',
-      ]),
+        "PURPOSE_MISSING",
+        "RESIDENCY_DISABLED",
+        "RETENTION_DEFAULT_EXCEEDS",
+        "RETENTION_PHI_EXCEEDS",
+        "SEC_OIDC",
+        "SEC_MTLS",
+        "SEC_FIELDLEVELENCRYPTION",
+        "SEC_PROVENANCELEDGER",
+        "SEC_AUTHORITYBINDING",
+        "SLO_API_READ",
+        "SLO_GRAPH_MULTI_HOP",
+        "SLO_INGEST_CAPACITY",
+        "COST_INGEST_EXCEEDS",
+        "COST_GRAPHQL_EXCEEDS",
+        "EPIC_MISSING",
+        "TASKS_INCOMPLETE",
+        "BACKOUT_MISSING",
+        "TASK_EVIDENCE_MISSING",
+        "EVIDENCE_HASH_MISSING",
+        "EVIDENCE_VERIFIER_MISSING",
+        "EVIDENCE_PROVENANCE_MISSING",
+        "EVIDENCE_VERIFIED_AT_INVALID",
+      ])
     );
   });
 
-  it('tracks compliance history through the monitor', () => {
+  it("tracks compliance history through the monitor", () => {
     const monitor = new PublicHealthComplianceMonitor();
     const failingSnapshot = monitor.recordSnapshot({
       ...baseComplianceInput,

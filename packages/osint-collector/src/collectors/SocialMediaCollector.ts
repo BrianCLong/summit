@@ -2,8 +2,8 @@
  * Social Media Collector - Collects data from social media platforms
  */
 
-import { CollectorBase } from '../core/CollectorBase.js';
-import type { CollectionTask, SocialMediaProfile } from '../types/index.js';
+import { CollectorBase } from "../core/CollectorBase.js";
+import type { CollectionTask, SocialMediaProfile } from "../types/index.js";
 
 export interface SocialMediaPost {
   id: string;
@@ -16,7 +16,7 @@ export interface SocialMediaPost {
   comments?: number;
   url: string;
   media?: Array<{
-    type: 'image' | 'video';
+    type: "image" | "video";
     url: string;
   }>;
   hashtags?: string[];
@@ -41,15 +41,15 @@ export class SocialMediaCollector extends CollectorBase {
     const query = task.target;
 
     switch (platform) {
-      case 'twitter':
+      case "twitter":
         return await this.collectTwitterData(query, task.config);
-      case 'facebook':
+      case "facebook":
         return await this.collectFacebookData(query, task.config);
-      case 'linkedin':
+      case "linkedin":
         return await this.collectLinkedInData(query, task.config);
-      case 'instagram':
+      case "instagram":
         return await this.collectInstagramData(query, task.config);
-      case 'tiktok':
+      case "tiktok":
         return await this.collectTikTokData(query, task.config);
       default:
         throw new Error(`Unsupported platform: ${platform}`);
@@ -76,7 +76,7 @@ export class SocialMediaCollector extends CollectorBase {
     return {
       platform,
       username,
-      profileUrl: `https://${platform}.com/${username}`
+      profileUrl: `https://${platform}.com/${username}`,
     };
   }
 
@@ -126,26 +126,29 @@ export class SocialMediaCollector extends CollectorBase {
     // Twitter API v2 integration
     // Would use bearer token authentication
     // Search tweets, get user timelines, track keywords
-    return { platform: 'twitter', query, posts: [] };
+    return { platform: "twitter", query, posts: [] };
   }
 
   private async collectFacebookData(query: string, config?: Record<string, unknown>): Promise<any> {
     // Facebook Graph API integration
-    return { platform: 'facebook', query, posts: [] };
+    return { platform: "facebook", query, posts: [] };
   }
 
   private async collectLinkedInData(query: string, config?: Record<string, unknown>): Promise<any> {
     // LinkedIn API integration
-    return { platform: 'linkedin', query, posts: [] };
+    return { platform: "linkedin", query, posts: [] };
   }
 
-  private async collectInstagramData(query: string, config?: Record<string, unknown>): Promise<any> {
+  private async collectInstagramData(
+    query: string,
+    config?: Record<string, unknown>
+  ): Promise<any> {
     // Instagram API integration
-    return { platform: 'instagram', query, posts: [] };
+    return { platform: "instagram", query, posts: [] };
   }
 
   private async collectTikTokData(query: string, config?: Record<string, unknown>): Promise<any> {
     // TikTok API integration
-    return { platform: 'tiktok', query, posts: [] };
+    return { platform: "tiktok", query, posts: [] };
   }
 }

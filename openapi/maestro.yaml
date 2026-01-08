@@ -15,21 +15,20 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/Workflow' }
+            schema: { $ref: "#/components/schemas/Workflow" }
           application/yaml:
             schema: { type: string }
       responses:
-        '201':
+        "201":
           description: Created
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  workflowRef:
-                    { type: string, example: ingest-enrich-handoff @1.2.0 }
+                  workflowRef: { type: string, example: ingest-enrich-handoff @1.2.0 }
                   digest: { type: string }
-        '400': { $ref: '#/components/responses/BadRequest' }
+        "400": { $ref: "#/components/responses/BadRequest" }
   /workflows/{name}:
     get:
       summary: Get workflow metadata
@@ -39,20 +38,19 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Workflow' }
-        '404': { $ref: '#/components/responses/NotFound' }
+              schema: { $ref: "#/components/schemas/Workflow" }
+        "404": { $ref: "#/components/responses/NotFound" }
   /runs:
     get:
       summary: List runs
       parameters:
         - in: query
           name: status
-          schema:
-            { type: string, enum: [queued, running, success, failed, canceled] }
+          schema: { type: string, enum: [queued, running, success, failed, canceled] }
         - in: query
           name: workflowRef
           schema: { type: string }
@@ -60,27 +58,27 @@ paths:
           name: since
           schema: { type: string, format: date-time }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
                 type: array
-                items: { $ref: '#/components/schemas/Run' }
+                items: { $ref: "#/components/schemas/Run" }
     post:
       summary: Start a run from a workflow or runbook
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/RunStart' }
+            schema: { $ref: "#/components/schemas/RunStart" }
       responses:
-        '202':
+        "202":
           description: Accepted
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Run' }
-        '400': { $ref: '#/components/responses/BadRequest' }
+              schema: { $ref: "#/components/schemas/Run" }
+        "400": { $ref: "#/components/responses/BadRequest" }
   /runs/{id}:
     get:
       summary: Get run status
@@ -90,12 +88,12 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Run' }
-        '404': { $ref: '#/components/responses/NotFound' }
+              schema: { $ref: "#/components/schemas/Run" }
+        "404": { $ref: "#/components/responses/NotFound" }
     patch:
       summary: Control a run (cancel, retry)
       parameters:
@@ -113,8 +111,8 @@ paths:
               properties:
                 action: { type: string, enum: [cancel, retry] }
       responses:
-        '200': { description: OK }
-        '404': { $ref: '#/components/responses/NotFound' }
+        "200": { description: OK }
+        "404": { $ref: "#/components/responses/NotFound" }
   /runbooks/trigger:
     post:
       summary: Trigger an allow‑listed runbook (SIG → Maestro)
@@ -122,14 +120,14 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/RunbookTrigger' }
+            schema: { $ref: "#/components/schemas/RunbookTrigger" }
       responses:
-        '202':
+        "202":
           description: Accepted
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/Run' }
-        '403': { $ref: '#/components/responses/Forbidden' }
+              schema: { $ref: "#/components/schemas/Run" }
+        "403": { $ref: "#/components/responses/Forbidden" }
 components:
   securitySchemes:
     bearerAuth:
@@ -141,17 +139,17 @@ components:
       description: Bad request
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/Error' }
+          schema: { $ref: "#/components/schemas/Error" }
     NotFound:
       description: Not found
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/Error' }
+          schema: { $ref: "#/components/schemas/Error" }
     Forbidden:
       description: Forbidden
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/Error' }
+          schema: { $ref: "#/components/schemas/Error" }
   schemas:
     Workflow:
       type: object
@@ -187,8 +185,7 @@ components:
       required: [id, status]
       properties:
         id: { type: string }
-        status:
-          { type: string, enum: [queued, running, success, failed, canceled] }
+        status: { type: string, enum: [queued, running, success, failed, canceled] }
         startedAt: { type: string, format: date-time }
         finishedAt: { type: string, format: date-time }
         workflowRef: { type: string }

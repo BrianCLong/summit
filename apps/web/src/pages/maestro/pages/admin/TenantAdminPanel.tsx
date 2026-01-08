@@ -56,7 +56,7 @@ export default function TenantAdminPanel() {
 
   const selectedSettings = useMemo(
     () => (selectedTenant?.settings as Record<string, unknown>) || {},
-    [selectedTenant],
+    [selectedTenant]
   )
 
   const loadTenants = async () => {
@@ -191,7 +191,7 @@ export default function TenantAdminPanel() {
           body: JSON.stringify({
             reason: rollbackReason || 'switchboard_admin_rollback',
           }),
-        },
+        }
       )
       const json = await res.json()
       if (!json.success) {
@@ -201,7 +201,9 @@ export default function TenantAdminPanel() {
       setRollbackReason('')
       await loadTenant(selectedTenantId)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to rollback settings')
+      setError(
+        err instanceof Error ? err.message : 'Unable to rollback settings'
+      )
     } finally {
       setRollbackSaving(false)
     }

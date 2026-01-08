@@ -1,11 +1,5 @@
-import React, { useState } from 'react';
-import {
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  SelectChangeEvent,
-} from '@mui/material';
+import React, { useState } from "react";
+import { FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from "@mui/material";
 
 // Assuming a User type is available
 interface User {
@@ -22,7 +16,7 @@ const RoleAssignmentDropdown: React.FC<RoleAssignmentDropdownProps> = ({
   participant,
   onRoleChange,
 }) => {
-  const [role, setRole] = useState('PARTICIPANT');
+  const [role, setRole] = useState("PARTICIPANT");
 
   const handleRoleChange = (event: SelectChangeEvent<string>) => {
     const newRole = event.target.value;

@@ -45,6 +45,7 @@ summit/
 **Coverage**: 150+ test cases
 
 **Test Suites**:
+
 - Bundle Creation (9 tests)
   - Basic bundle creation with policies
   - Bundle with policies and data files
@@ -77,6 +78,7 @@ summit/
   - Bundle creation
 
 **Key Features Tested**:
+
 - Cryptographic signing and verification
 - Hash-based integrity checking
 - Policy syntax validation
@@ -88,6 +90,7 @@ summit/
 **Coverage**: 100+ test cases
 
 **Test Suites**:
+
 - Secret Registration (3 tests)
 - Secret Creation (5 tests)
 - Secret Rotation (8 tests)
@@ -114,6 +117,7 @@ summit/
 - Health Status (3 tests)
 
 **Key Features Tested**:
+
 - Zero-downtime rotation
 - Grace period management
 - Emergency revocation
@@ -126,6 +130,7 @@ summit/
 **Coverage**: 80+ test cases
 
 **Test Suites**:
+
 - Initialization (2 tests)
 - Portfolio Generation (8 tests)
   - Ethical filtering
@@ -147,6 +152,7 @@ summit/
 - Error Handling (2 tests)
 
 **Key Features Tested**:
+
 - AI-driven measure selection
 - Risk/reward optimization
 - Compliance validation
@@ -160,6 +166,7 @@ summit/
 **Coverage**: 30+ test cases
 
 **Test Suites**:
+
 - Bundle Signing with Secrets Manager (2 tests)
   - Key rotation integration
   - Signature verification with grace period
@@ -173,6 +180,7 @@ summit/
 - Compliance and Verification (1 test)
 
 **Key Features Tested**:
+
 - Cross-module communication
 - Shared audit trails
 - Key rotation workflows
@@ -186,6 +194,7 @@ summit/
 **Coverage**: 20+ complete workflows
 
 **Test Suites**:
+
 - Complete Security Setup Workflow (1 test)
   - Full infrastructure setup
   - Policy deployment
@@ -202,6 +211,7 @@ summit/
   - Backup and restore
 
 **Key Features Tested**:
+
 - Complete system workflows
 - Real-world scenarios
 - Multi-component interaction
@@ -212,11 +222,11 @@ summit/
 
 ### Target Coverage Thresholds
 
-| Module | Lines | Functions | Branches | Statements |
-|--------|-------|-----------|----------|------------|
-| **Global** | 75% | 75% | 70% | 75% |
-| **SECURITY/policy/** | 85% | 85% | 80% | 85% |
-| **SECURITY/secrets/** | 85% | 85% | 80% | 85% |
+| Module                | Lines | Functions | Branches | Statements |
+| --------------------- | ----- | --------- | -------- | ---------- |
+| **Global**            | 75%   | 75%       | 70%      | 75%        |
+| **SECURITY/policy/**  | 85%   | 85%       | 80%      | 85%        |
+| **SECURITY/secrets/** | 85%   | 85%       | 80%      | 85%        |
 
 ### Running Coverage Reports
 
@@ -262,26 +272,31 @@ The coverage configuration is integrated with the CI/CD pipeline:
 ### Running Tests
 
 #### All Tests
+
 ```bash
 pnpm test
 ```
 
 #### Unit Tests Only
+
 ```bash
 jest --testPathPattern="__tests__.*\.test\.ts$" --testPathIgnorePatterns="integration|e2e"
 ```
 
 #### Integration Tests Only
+
 ```bash
 jest --testPathPattern="integration"
 ```
 
 #### E2E Tests Only
+
 ```bash
 jest --testPathPattern="e2e"
 ```
 
 #### Specific Module
+
 ```bash
 # OPA Bundle Manager tests
 jest SECURITY/policy/__tests__
@@ -311,7 +326,7 @@ All external dependencies are properly mocked:
 
 ```typescript
 // Example: Neo4j driver mock
-jest.mock('../../db/neo4j', () => ({
+jest.mock("../../db/neo4j", () => ({
   activeMeasuresGraphRepo: {
     initializeSchema: jest.fn().mockResolvedValue(undefined),
     getActiveMeasuresPortfolio: jest.fn().mockResolvedValue([]),
@@ -428,13 +443,13 @@ All files                    |   86.65 |    82.15 |   88.89 |   86.73 |
 
 ### Test File Summary
 
-| Test File | Lines | Test Cases | Coverage |
-|-----------|-------|------------|----------|
-| opa-bundle.test.ts | 750+ | 27 | 92% |
-| rotation.test.ts | 650+ | 35 | 89% |
-| ActiveMeasuresEngine.test.ts | 800+ | 34 | 78% |
-| security-modules.integration.test.ts | 600+ | 8 | 85% |
-| security-workflow.e2e.test.ts | 900+ | 7 workflows | 90% |
+| Test File                            | Lines | Test Cases  | Coverage |
+| ------------------------------------ | ----- | ----------- | -------- |
+| opa-bundle.test.ts                   | 750+  | 27          | 92%      |
+| rotation.test.ts                     | 650+  | 35          | 89%      |
+| ActiveMeasuresEngine.test.ts         | 800+  | 34          | 78%      |
+| security-modules.integration.test.ts | 600+  | 8           | 85%      |
+| security-workflow.e2e.test.ts        | 900+  | 7 workflows | 90%      |
 
 ### Total Test Statistics
 

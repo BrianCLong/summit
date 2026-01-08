@@ -33,17 +33,17 @@ summit-plugin pack ./my-plugin-source
 
 Plugins are stored in the `PluginRegistry` (backed by PostgreSQL + Object Storage).
 
-*   **Upload**: Admins upload the `.tgz` bundle.
-*   **Verification**:
-    *   Manifest is validated.
-    *   Code is scanned (static analysis).
-    *   Signature is verified (if signed).
-*   **Availability**: Once verified, the plugin is available for installation by tenants.
+- **Upload**: Admins upload the `.tgz` bundle.
+- **Verification**:
+  - Manifest is validated.
+  - Code is scanned (static analysis).
+  - Signature is verified (if signed).
+- **Availability**: Once verified, the plugin is available for installation by tenants.
 
 ## Versioning
 
 We adhere to [SemVer](https://semver.org/).
 
-*   **Major**: Breaking API changes.
-*   **Minor**: New capabilities (backward compatible).
-*   **Patch**: Bug fixes.
+- **Major**: Breaking API changes.
+- **Minor**: New capabilities (backward compatible).
+- **Patch**: Bug fixes.

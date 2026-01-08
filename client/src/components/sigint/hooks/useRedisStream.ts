@@ -2,9 +2,9 @@
  * useRedisStream - Real-time Redis Streams hook for SIGINT data
  * Provides live signal samples with automatic reconnection and buffering.
  */
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { io, Socket } from 'socket.io-client';
-import type { SignalSample, SignalStream, PerformanceMetrics } from '../types';
+import { useEffect, useRef, useState, useCallback } from "react";
+import { io, Socket } from "socket.io-client";
+import type { SignalSample, SignalStream, PerformanceMetrics } from "../types";
 
 interface RedisStreamOptions {
   streamKey: string;
@@ -120,7 +120,7 @@ export function useRedisStream(options: RedisStreamOptions): RedisStreamState & 
   // Subscribe to a specific signal stream
   const subscribe = useCallback((streamId: string) => {
     if (socketRef.current && !subscribedStreamsRef.current.has(streamId)) {
-      socketRef.current.emit('sigint:subscribe', { streamId });
+      socketRef.current.emit("sigint:subscribe", { streamId });
       subscribedStreamsRef.current.add(streamId);
     }
   }, []);
@@ -128,7 +128,7 @@ export function useRedisStream(options: RedisStreamOptions): RedisStreamState & 
   // Unsubscribe from a signal stream
   const unsubscribe = useCallback((streamId: string) => {
     if (socketRef.current && subscribedStreamsRef.current.has(streamId)) {
-      socketRef.current.emit('sigint:unsubscribe', { streamId });
+      socketRef.current.emit("sigint:unsubscribe", { streamId });
       subscribedStreamsRef.current.delete(streamId);
     }
   }, []);
@@ -137,13 +137,13 @@ export function useRedisStream(options: RedisStreamOptions): RedisStreamState & 
   useEffect(() => {
     const connect = () => {
       socketRef.current = io({
-        path: '/api/sigint/stream',
-        transports: ['websocket'],
+        path: "/api/sigint/stream",
+        transports: ["websocket"],
         reconnection: true,
         reconnectionDelay: reconnectInterval,
       });
 
-      socketRef.current.on('connect', () => {
+      socketRef.current.on("connect", () => {
         setState((prev) => ({
           ...prev,
           isConnected: true,
@@ -151,22 +151,22 @@ export function useRedisStream(options: RedisStreamOptions): RedisStreamState & 
         }));
 
         // Subscribe to main stream key
-        socketRef.current?.emit('sigint:join', { streamKey });
+        socketRef.current?.emit("sigint:join", { streamKey });
 
         // Re-subscribe to any previously subscribed streams
         subscribedStreamsRef.current.forEach((streamId) => {
-          socketRef.current?.emit('sigint:subscribe', { streamId });
+          socketRef.current?.emit("sigint:subscribe", { streamId });
         });
       });
 
-      socketRef.current.on('disconnect', () => {
+      socketRef.current.on("disconnect", () => {
         setState((prev) => ({
           ...prev,
           isConnected: false,
         }));
       });
 
-      socketRef.current.on('error', (err: Error) => {
+      socketRef.current.on("error", (err: Error) => {
         setState((prev) => ({
           ...prev,
           error: err.message,
@@ -174,13 +174,13 @@ export function useRedisStream(options: RedisStreamOptions): RedisStreamState & 
       });
 
       // Handle real-time sample data
-      socketRef.current.on('sigint:sample', handleSample);
+      socketRef.current.on("sigint:sample", handleSample);
 
       // Handle stream metadata updates
-      socketRef.current.on('sigint:stream', handleStreamUpdate);
+      socketRef.current.on("sigint:stream", handleStreamUpdate);
 
       // Handle bulk stream list
-      socketRef.current.on('sigint:streams', (streamList: SignalStream[]) => {
+      socketRef.current.on("sigint:streams", (streamList: SignalStream[]) => {
         setStreams(streamList);
       });
     };
@@ -199,12 +199,7 @@ export function useRedisStream(options: RedisStreamOptions): RedisStreamState & 
       clearInterval(updateInterval);
       socketRef.current?.disconnect();
     };
-  }, [
-    streamKey,
-    reconnectInterval,
-    handleSample,
-    handleStreamUpdate,
-  ]);
+  }, [streamKey, reconnectInterval, handleSample, handleStreamUpdate]);
 
   return {
     ...state,

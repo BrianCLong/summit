@@ -10,11 +10,11 @@ on:
       expected_repo:
         description: Expected repo name after rename (e.g., summit or summit-platform)
         required: false
-        default: ''
+        default: ""
       expected_owner:
         description: Expected owner/org (optional)
         required: false
-        default: ''
+        default: ""
       # Post-Rename Redirect Smoke
       old_repo:
         description: Old full repo (OWNER/REPO)
@@ -25,11 +25,11 @@ on:
       private:
         description: Is the repo private? (uses GITHUB_TOKEN for HTTPS)
         required: false
-        default: 'false'
+        default: "false"
       do_ssh:
         description: Also test SSH (requires secrets.DEPLOY_KEY)
         required: false
-        default: 'false'
+        default: "false"
       # Cutover Smoke
       base_url:
         description: Legacy docs base URL (e.g., https://docs.intelgraph.com)
@@ -37,32 +37,32 @@ on:
       new_ok_host:
         description: New docs host (e.g., https://docs.summit.com) for 200 checks
         required: false
-        default: ''
+        default: ""
       image_tag:
         description: Image tag or commit SHA to verify dual tags
         required: true
       sdk_smoke:
         description: Run optional SDK install smoke (requires NPM_TOKEN)
         required: false
-        default: 'false'
+        default: "false"
       # Optional runtime brand preflight (reads X-Brand-Name header)
       brand_check_url:
         description: Optional URL to check current brand via X-Brand-Name header (e.g., https://app.example.com/health)
         required: false
-        default: ''
+        default: ""
       expected_current_brand:
         description: Expected current brand before flip (default IntelGraph)
         required: false
-        default: 'IntelGraph'
+        default: "IntelGraph"
       # Brand Flip placeholder
       target_brand:
         description: Desired PRODUCT_BRAND (Summit or IntelGraph)
         required: false
-        default: 'Summit'
+        default: "Summit"
       brand_flip_confirm:
         description: Type 'ack' to acknowledge brand flip is external to CI (no-op)
         required: false
-        default: ''
+        default: ""
 
 jobs:
   brand-scan:

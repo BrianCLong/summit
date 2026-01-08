@@ -8,12 +8,12 @@
  * Integration: Extends @intelgraph/geospatial package
  */
 
-import { GeoPoint } from './geospatial.js';
+import { GeoPoint } from "./geospatial.js";
 
 /**
  * Entity types that can have geo-temporal observations
  */
-export type EntityType = 'PERSON' | 'DEVICE' | 'VEHICLE' | 'VESSEL' | 'AIRCRAFT' | 'OTHER';
+export type EntityType = "PERSON" | "DEVICE" | "VEHICLE" | "VESSEL" | "AIRCRAFT" | "OTHER";
 
 /**
  * Time range for queries
@@ -177,7 +177,7 @@ export interface TrajectoryAnalysis {
  */
 export interface MovementPattern {
   entityId: string;
-  patternType: 'STATIONARY' | 'LINEAR' | 'CIRCULAR' | 'RANDOM';
+  patternType: "STATIONARY" | "LINEAR" | "CIRCULAR" | "RANDOM";
   confidence: number;
   stayPoints: StayPoint[];
   frequentLocations: Array<{

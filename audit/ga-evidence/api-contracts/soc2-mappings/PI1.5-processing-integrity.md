@@ -15,16 +15,19 @@ Ensure all API inputs and outputs conform to documented contracts, with validati
 ### Boundary Definition
 
 **Input Boundary:** Client requests entering the API
+
 - HTTP requests to REST endpoints
 - GraphQL queries/mutations
 - Request headers (including versioning)
 
 **Output Boundary:** API responses returning to clients
+
 - HTTP responses from REST endpoints
 - GraphQL query results
 - Response headers (including version metadata)
 
 **Validation Points:**
+
 1. Request version detection and validation
 2. Request schema conformance (OpenAPI/GraphQL)
 3. Response schema conformance
@@ -37,6 +40,7 @@ Ensure all API inputs and outputs conform to documented contracts, with validati
 **Location:** `/api-schemas/v{VERSION}/graphql-schema-v{VERSION}.graphql`
 
 **Defines:**
+
 - All types and fields
 - Required vs optional fields
 - Field types and nullability
@@ -44,11 +48,13 @@ Ensure all API inputs and outputs conform to documented contracts, with validati
 - Output structure guarantees
 
 **Enforcement:**
+
 - GraphQL runtime validation
 - Schema snapshot comparison
 - Breaking change detection
 
 **Evidence:**
+
 - Schema snapshots (immutable)
 - SHA256 hashes for integrity
 - Version metadata
@@ -58,6 +64,7 @@ Ensure all API inputs and outputs conform to documented contracts, with validati
 **Location:** `/api-schemas/v{VERSION}/openapi-spec-v{VERSION}.json`
 
 **Defines:**
+
 - REST endpoint paths
 - HTTP methods
 - Request parameters (path, query, header, body)
@@ -66,11 +73,13 @@ Ensure all API inputs and outputs conform to documented contracts, with validati
 - Authentication requirements
 
 **Enforcement:**
+
 - Request validation middleware
 - Response validation (dev/test)
 - Schema diff on changes
 
 **Evidence:**
+
 - OpenAPI spec snapshots
 - Validation error logs
 - Diff reports
@@ -84,16 +93,19 @@ Ensure all API inputs and outputs conform to documented contracts, with validati
 **Implementation:** `/server/src/middleware/api-version.ts`
 
 **Validates:**
+
 - Version format (v1, v2, etc.)
 - Version is supported (not sunset)
 - Version matches endpoint availability
 
 **Error Handling:**
+
 - Invalid version → 400 Bad Request
 - Sunset version → 410 Gone
 - Deprecated version → 200 OK with warning headers
 
 **Evidence:**
+
 ```typescript
 // Priority order:
 // 1. URL path (/api/v1/)
@@ -103,7 +115,7 @@ Ensure all API inputs and outputs conform to documented contracts, with validati
 
 if (isSunset) {
   return res.status(410).json({
-    error: 'version_sunset',
+    error: "version_sunset",
     currentVersion: versionKey,
     latestVersion: latestVersion,
   });
@@ -113,18 +125,21 @@ if (isSunset) {
 ### Request Schema Validation
 
 **GraphQL:**
+
 - Built-in GraphQL validation
 - Type checking on all inputs
 - Required field enforcement
 - Custom scalar validation
 
 **REST:**
+
 - JSON schema validation (via Zod)
 - Request body validation
 - Query parameter validation
 - Path parameter validation
 
 **Example:** `/server/src/coherence/routes.ts`
+
 ```typescript
 const SignalIngestSchema = z.object({
   tenantId: z.string().min(1),
@@ -143,12 +158,14 @@ const validatedInput = SignalIngestSchema.parse(req.body);
 **Mechanism:** Schema snapshots define guaranteed outputs
 
 **Validation:**
+
 - Response structure matches OpenAPI spec
 - GraphQL response matches schema
 - No fields removed without version bump
 - Type safety maintained
 
 **Monitoring:**
+
 - Schema drift detection
 - Unexpected field warnings
 - Type mismatch alerts
@@ -165,6 +182,7 @@ X-API-Deprecation: false
 ```
 
 **Purpose:**
+
 - Client awareness of version used
 - Deprecation warnings
 - Version detection method transparency
@@ -175,12 +193,14 @@ X-API-Deprecation: false
 ### Response Completeness
 
 **Guarantees:**
+
 - All documented fields present
 - No breaking schema changes
 - Consistent error format
 - Predictable status codes
 
 **Example Error Format:**
+
 ```json
 {
   "error": "validation_error",
@@ -197,17 +217,20 @@ X-API-Deprecation: false
 **Purpose:** Baseline for contract validation
 
 **Contents:**
+
 - GraphQL schema (complete)
 - OpenAPI specification (complete)
 - Version metadata with hashes
 
 **Properties:**
+
 - Immutable (git-controlled)
 - SHA256 hashed for integrity
 - Timestamped
 - Version-tagged
 
 **Evidence:**
+
 ```json
 {
   "version": "v1",
@@ -223,6 +246,7 @@ X-API-Deprecation: false
 **Mechanism:** Automated diff blocks unauthorized changes
 
 **Process:**
+
 1. Developer modifies schema
 2. PR triggers schema diff
 3. Diff categorizes changes
@@ -230,6 +254,7 @@ X-API-Deprecation: false
 5. Audit log records decision
 
 **Validation:**
+
 - Field removal = breaking
 - Type change = breaking (usually)
 - Required field addition = breaking
@@ -241,42 +266,44 @@ X-API-Deprecation: false
 
 ### Input Validation Evidence
 
-| Validation Type | Evidence Location | Retention |
-|----------------|-------------------|-----------|
-| Version validation | Middleware logs | 90 days |
-| Schema validation | Error logs | 90 days |
-| Request validation | Application logs | 90 days |
-| Rate limiting | Rate limit logs | 30 days |
+| Validation Type    | Evidence Location | Retention |
+| ------------------ | ----------------- | --------- |
+| Version validation | Middleware logs   | 90 days   |
+| Schema validation  | Error logs        | 90 days   |
+| Request validation | Application logs  | 90 days   |
+| Rate limiting      | Rate limit logs   | 30 days   |
 
 ### Output Validation Evidence
 
-| Validation Type | Evidence Location | Retention |
-|----------------|-------------------|-----------|
-| Schema conformance | Diff reports | 7 years |
-| Response headers | Access logs | 90 days |
-| Error formatting | Error logs | 90 days |
-| Contract compliance | Schema snapshots | Indefinite |
+| Validation Type     | Evidence Location | Retention  |
+| ------------------- | ----------------- | ---------- |
+| Schema conformance  | Diff reports      | 7 years    |
+| Response headers    | Access logs       | 90 days    |
+| Error formatting    | Error logs        | 90 days    |
+| Contract compliance | Schema snapshots  | Indefinite |
 
 ### Contract Management Evidence
 
-| Artifact | Purpose | Retention |
-|----------|---------|-----------|
-| Schema snapshots | Contract baseline | Indefinite |
-| Diff reports | Change validation | 7 years |
-| Audit logs | Authorization trail | 7 years |
-| Version registry | Lifecycle tracking | Indefinite |
+| Artifact         | Purpose             | Retention  |
+| ---------------- | ------------------- | ---------- |
+| Schema snapshots | Contract baseline   | Indefinite |
+| Diff reports     | Change validation   | 7 years    |
+| Audit logs       | Authorization trail | 7 years    |
+| Version registry | Lifecycle tracking  | Indefinite |
 
 ## Control Testing
 
 ### Test 1: Invalid Input Rejection
 
 **Test Procedure:**
+
 1. Send request with invalid version (v999)
 2. Observe response
 3. Verify proper error returned
 4. Verify no processing occurred
 
 **Expected Result:**
+
 - ❌ Request rejected
 - ✅ 400 Bad Request status
 - ✅ Clear error message
@@ -287,12 +314,14 @@ X-API-Deprecation: false
 ### Test 2: Sunset Version Blocking
 
 **Test Procedure:**
+
 1. Configure v0 as sunset in registry
 2. Send request to /api/v0/endpoint
 3. Observe response
 4. Verify HTTP 410 Gone
 
 **Expected Result:**
+
 - ❌ Request blocked
 - ✅ 410 Gone status
 - ✅ Migration guide included
@@ -303,12 +332,14 @@ X-API-Deprecation: false
 ### Test 3: Response Contract Conformance
 
 **Test Procedure:**
+
 1. Query GraphQL endpoint
 2. Validate response against schema
 3. Verify all fields match types
 4. Verify no undocumented fields
 
 **Expected Result:**
+
 - ✅ Response matches schema exactly
 - ✅ All types correct
 - ✅ No schema drift
@@ -319,12 +350,14 @@ X-API-Deprecation: false
 ### Test 4: Breaking Change Detection
 
 **Test Procedure:**
+
 1. Remove field from schema
 2. Create PR
 3. Run schema diff
 4. Verify blocking
 
 **Expected Result:**
+
 - ✅ Breaking change detected
 - ✅ Categorized as critical
 - ✅ Merge blocked
@@ -379,9 +412,9 @@ X-API-Deprecation: false
 
 ## Revision History
 
-| Date | Version | Changes | Author |
-|------|---------|---------|--------|
-| 2025-12-27 | 1.0 | Initial processing integrity controls | Platform Team |
+| Date       | Version | Changes                               | Author        |
+| ---------- | ------- | ------------------------------------- | ------------- |
+| 2025-12-27 | 1.0     | Initial processing integrity controls | Platform Team |
 
 ---
 

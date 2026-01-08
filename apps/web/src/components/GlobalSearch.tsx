@@ -25,7 +25,9 @@ export function GlobalSearch() {
 
   // Mock search function
   const searchFunction = async (query: string): Promise<SearchResult[]> => {
-    if (!query.trim()) {return []}
+    if (!query.trim()) {
+      return []
+    }
     if (!query || !query.trim()) return []
 
     if (!isDemoMode) {
@@ -165,7 +167,9 @@ export function GlobalSearch() {
     }
   }
 
-  if (!isOpen) {return null}
+  if (!isOpen) {
+    return null
+  }
 
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
@@ -175,7 +179,10 @@ export function GlobalSearch() {
           label="Global Search"
         >
           <div className="flex items-center border-b px-3">
-            <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" aria-hidden="true" />
+            <Search
+              className="mr-2 h-4 w-4 shrink-0 opacity-50"
+              aria-hidden="true"
+            />
             <Command.Input
               aria-label="Search query"
               placeholder="Search entities, investigations, alerts..."
@@ -188,7 +195,8 @@ export function GlobalSearch() {
           <Command.List className="max-h-96 overflow-y-auto p-2">
             {!isDemoMode && (
               <div className="py-3 text-center text-xs text-muted-foreground">
-                Live search is unavailable until a backend connection is configured.
+                Live search is unavailable until a backend connection is
+                configured.
               </div>
             )}
             {loading && (
@@ -215,7 +223,9 @@ export function GlobalSearch() {
                 {['command', 'entity', 'investigation', 'alert', 'case'].map(
                   type => {
                     const typeResults = results.filter(r => r.type === type)
-                    if (typeResults.length === 0) {return null}
+                    if (typeResults.length === 0) {
+                      return null
+                    }
 
                     return (
                       <Command.Group

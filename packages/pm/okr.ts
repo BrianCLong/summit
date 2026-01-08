@@ -1,5 +1,5 @@
 export type OKR = {
-  period: '2025Q4';
+  period: "2025Q4";
   objectives: {
     id: string;
     title: string;

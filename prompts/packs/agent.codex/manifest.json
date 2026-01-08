@@ -8,10 +8,7 @@
   },
   "vars": {},
   "guardrails": {
-    "tags": [
-      "agent",
-      "system-prompt"
-    ]
+    "tags": ["agent", "system-prompt"]
   },
   "template_path": "system.md"
 }

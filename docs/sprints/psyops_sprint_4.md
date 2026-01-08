@@ -87,7 +87,7 @@
 #### 1) Scenario Pack Manifest (YAML)
 
 ```yaml
-scenario: 'burst_replay_v1'
+scenario: "burst_replay_v1"
 classification: INTERNAL
 createdAt: 2025-09-11T17:00:00Z
 seed: 42
@@ -124,7 +124,7 @@ export class Playback {
   private paused = true;
   constructor(
     private scenario: Scenario,
-    private emit: (e: Event) => void,
+    private emit: (e: Event) => void
   ) {}
   start(speed = 1) {
     this.speed = speed;
@@ -143,10 +143,7 @@ export class Playback {
   private tick = () => {
     if (this.paused) return;
     const now = (performance.now() - this.t0) * this.speed;
-    while (
-      this.i < this.scenario.stream.length &&
-      this.scenario.stream[this.i].t <= now
-    ) {
+    while (this.i < this.scenario.stream.length && this.scenario.stream[this.i].t <= now) {
       this.emit(this.scenario.stream[this.i++]);
     }
     this.handle = requestAnimationFrame(this.tick);
@@ -160,24 +157,20 @@ export class Playback {
 // apps/web/src/features/psyops/sim/counterfactual.ts
 export function applyCounterfactual(
   events: Event[],
-  drop: { node?: string; edge?: [string, string] },
+  drop: { node?: string; edge?: [string, string] }
 ) {
   // Filter graph deltas and nudge deceptionScore locally (purely for training UI)
   return events
     .map((e) => {
       if (
-        e.topic === 'graph.edgeDelta' &&
+        e.topic === "graph.edgeDelta" &&
         drop.edge &&
         e.body.from === drop.edge[0] &&
         e.body.to === drop.edge[1]
       ) {
         return null; // remove this edge
       }
-      if (
-        e.topic === 'narrative.delta' &&
-        drop.node &&
-        e.body.id === drop.node
-      ) {
+      if (e.topic === "narrative.delta" && drop.node && e.body.id === drop.node) {
         const body = {
           ...e.body,
           deceptionScore: Math.max(0, e.body.deceptionScore - 0.31),
@@ -194,18 +187,18 @@ export function applyCounterfactual(
 
 ```js
 // apps/web/public/sw.js
-const MANIFEST_CACHE = 'psyops-manifest-v1';
-const SNAP_CACHE = 'psyops-snap-v1';
-self.addEventListener('install', (e) => {
+const MANIFEST_CACHE = "psyops-manifest-v1";
+const SNAP_CACHE = "psyops-snap-v1";
+self.addEventListener("install", (e) => {
   self.skipWaiting();
 });
-self.addEventListener('activate', (e) => {
+self.addEventListener("activate", (e) => {
   clients.claim();
 });
 
-self.addEventListener('fetch', (event) => {
+self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
-  if (event.request.method !== 'GET') return; // read‑only
+  if (event.request.method !== "GET") return; // read‑only
   // Cache API reads for offline
   if (url.pathname.match(/\/(narratives|provenance|graph\/delta)/)) {
     event.respondWith(
@@ -221,11 +214,11 @@ self.addEventListener('fetch', (event) => {
           const hit = await cache.match(event.request);
           if (hit) return hit;
           return new Response(JSON.stringify({ offline: true, items: [] }), {
-            headers: { 'Content-Type': 'application/json' },
+            headers: { "Content-Type": "application/json" },
             status: 200,
           });
         }
-      })(),
+      })()
     );
   }
 });
@@ -265,24 +258,24 @@ function parseScenario(text: string) { try { return JSON.parse(text); } catch { 
 
 ```ts
 // apps/server/src/sim/sanitizer.ts
-import { z } from 'zod';
+import { z } from "zod";
 const Event = z.object({
   t: z.number().nonnegative(),
-  topic: z.enum(['narrative.delta', 'signal.burst', 'graph.edgeDelta']),
+  topic: z.enum(["narrative.delta", "signal.burst", "graph.edgeDelta"]),
   body: z.record(z.any()),
 });
 const Scenario = z.object({
-  classification: z.literal('INTERNAL'),
+  classification: z.literal("INTERNAL"),
   seed: z.number(),
   stream: z.array(Event).max(5000),
 });
 export function sanitizeScenario(payload: unknown) {
   const parsed = Scenario.parse(payload);
   // ethics redlines: no audience terms, no persuasion text fields
-  const banned = ['audience', 'segment', 'copy', 'cta', 'creative'];
+  const banned = ["audience", "segment", "copy", "cta", "creative"];
   const text = JSON.stringify(parsed).toLowerCase();
   if (banned.some((k) => text.includes(`"${k}"`))) {
-    const err = new Error('denied_by_policy');
+    const err = new Error("denied_by_policy");
     (err as any).code = 451;
     throw err;
   }

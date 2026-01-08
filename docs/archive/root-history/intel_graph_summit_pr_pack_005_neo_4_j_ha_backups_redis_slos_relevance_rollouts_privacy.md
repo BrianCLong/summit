@@ -16,7 +16,7 @@ Twelve PRs focused on graph/store resilience, cache tuning, safe search relevanc
 neo4j:
   name: graph
   edition: enterprise
-  acceptLicenseAgreement: 'yes'
+  acceptLicenseAgreement: "yes"
   core:
     numberOfServers: 3
     persistentVolume:
@@ -70,7 +70,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata: { name: neo4j-backup, namespace: prod }
 spec:
-  schedule: '0 * * * *' # hourly incrementals
+  schedule: "0 * * * *" # hourly incrementals
   jobTemplate:
     spec:
       template:
@@ -80,7 +80,7 @@ spec:
             - name: backup
               image: neo4j:5
               envFrom: [{ secretRef: { name: neo4j-backup } }]
-              command: ['/bin/bash', '-lc']
+              command: ["/bin/bash", "-lc"]
               args:
                 - |
                   neo4j-admin database backup --from=graph-core-0.graph:6362 --parallel-processes=4 --backup-dir=/tmp/backup graph;
@@ -94,7 +94,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata: { name: neo4j-backup-verify, namespace: prod }
 spec:
-  schedule: '30 0 * * *' # nightly
+  schedule: "30 0 * * *" # nightly
   jobTemplate:
     spec:
       template:
@@ -104,11 +104,8 @@ spec:
             - name: verify
               image: amazon/aws-cli:2
               envFrom: [{ secretRef: { name: neo4j-backup } }]
-              command: ['/bin/sh', '-c']
-              args:
-                [
-                  'test $(aws s3 ls $S3_BUCKET/ --recursive | tail -1 | wc -l) -gt 0',
-                ]
+              command: ["/bin/sh", "-c"]
+              args: ["test $(aws s3 ls $S3_BUCKET/ --recursive | tail -1 | wc -l) -gt 0"]
 ```
 
 **`k8s/neo4j/restore-rehearsal.yaml`** (scratch namespace)
@@ -118,7 +115,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata: { name: neo4j-restore-rehearsal, namespace: dr-verify }
 spec:
-  schedule: '0 3 * * 1'
+  schedule: "0 3 * * 1"
   jobTemplate:
     spec:
       template:
@@ -128,7 +125,7 @@ spec:
             - name: restore
               image: neo4j:5
               envFrom: [{ secretRef: { name: neo4j-backup, optional: false } }]
-              command: ['/bin/bash', '-lc']
+              command: ["/bin/bash", "-lc"]
               args:
                 - |
                   LATEST=$(aws s3 ls $S3_BUCKET/ --recursive | tail -1 | awk '{print $4}');
@@ -172,22 +169,12 @@ spec:
       containers:
         - name: redis
           image: redis:7
-          args: ['redis-server', '/etc/redis/redis.conf']
+          args: ["redis-server", "/etc/redis/redis.conf"]
           volumeMounts:
             - name: config
               mountPath: /etc/redis
-          readinessProbe:
-            {
-              tcpSocket: { port: 6379 },
-              initialDelaySeconds: 5,
-              periodSeconds: 5,
-            }
-          livenessProbe:
-            {
-              tcpSocket: { port: 6379 },
-              initialDelaySeconds: 15,
-              periodSeconds: 10,
-            }
+          readinessProbe: { tcpSocket: { port: 6379 }, initialDelaySeconds: 5, periodSeconds: 5 }
+          livenessProbe: { tcpSocket: { port: 6379 }, initialDelaySeconds: 15, periodSeconds: 10 }
       volumes:
         - name: config
           configMap: { name: redis-config }
@@ -205,7 +192,7 @@ groups:
         expr: redis:evictions_per_s:rate1m > 10
         for: 10m
         labels: { severity: warning }
-        annotations: { summary: 'Redis evictions elevated' }
+        annotations: { summary: "Redis evictions elevated" }
 ```
 
 **Rollback:** Revert configmap to default; disable alerts.
@@ -223,14 +210,14 @@ groups:
 ```yaml
 metadata:
   annotations:
-    nginx.ingress.kubernetes.io/enable-modsecurity: 'true'
+    nginx.ingress.kubernetes.io/enable-modsecurity: "true"
     nginx.ingress.kubernetes.io/modsecurity-snippet: |
       SecRuleEngine On
       Include /etc/nginx/owasp-modsecurity-crs/nginx-modsecurity.conf
-    nginx.ingress.kubernetes.io/proxy-body-size: '2m'
-    nginx.ingress.kubernetes.io/limit-rps: '10'
-    nginx.ingress.kubernetes.io/limit-burst-multiplier: '2'
-    nginx.ingress.kubernetes.io/limit-whitelist: '10.0.0.0/8'
+    nginx.ingress.kubernetes.io/proxy-body-size: "2m"
+    nginx.ingress.kubernetes.io/limit-rps: "10"
+    nginx.ingress.kubernetes.io/limit-burst-multiplier: "2"
+    nginx.ingress.kubernetes.io/limit-whitelist: "10.0.0.0/8"
 ```
 
 **Rollback:** Remove annotations; keep basic ingress.
@@ -254,7 +241,7 @@ ranker_guardrail: { default: true, owners: [search] }
 **`relevance/eval/offline_eval.ts`**
 
 ```ts
-import fs from 'fs';
+import fs from "fs";
 // Inputs: judgments.tsv (query \t doc \t label)
 // Outputs: nDCG@10, ERR@20 per variant
 ```
@@ -360,7 +347,7 @@ CREATE POLICY tenant_isolation ON events USING (tenant_id = current_setting('app
 
 ```ts
 export function setTenant(req, _res, next) {
-  const tenant = req.headers['x-tenant-id'];
+  const tenant = req.headers["x-tenant-id"];
   req.db.query("SELECT set_config('app.tenant_id', $1, false)", [tenant]);
   next();
 }
@@ -370,8 +357,7 @@ export function setTenant(req, _res, next) {
 
 ```ts
 export function enforceTenantInCypher(query: string, tenant: string) {
-  if (!/WHERE\s+tenant_id\s*=/.test(query))
-    throw new Error('tenant_filter_required');
+  if (!/WHERE\s+tenant_id\s*=/.test(query)) throw new Error("tenant_filter_required");
 }
 ```
 
@@ -540,10 +526,10 @@ jobs:
 **`privacy/tests/no-pii.e2e.ts`**
 
 ```ts
-import { getLogs } from './util';
+import { getLogs } from "./util";
 const DISALLOWED = [/email/i, /password/i, /ssn/i, /credit/i];
 
-it('no PII appears in logs', async () => {
+it("no PII appears in logs", async () => {
   const logs = await getLogs();
   for (const k of DISALLOWED) expect(logs).not.toMatch(k);
 });

@@ -4,10 +4,10 @@
  * Creates constraints, indexes, and seeds document type ontology.
  */
 
-import neo4j, { Driver } from 'neo4j-driver';
-import * as fs from 'fs';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
+import neo4j, { Driver } from "neo4j-driver";
+import * as fs from "fs";
+import * as path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,30 +21,30 @@ interface MigrationConfig {
 async function createConstraints(driver: Driver): Promise<void> {
   const session = driver.session();
   try {
-    console.log('Creating constraints...');
+    console.log("Creating constraints...");
 
     const constraints = [
-      'CREATE CONSTRAINT document_id IF NOT EXISTS FOR (d:Document) REQUIRE d.id IS UNIQUE',
-      'CREATE CONSTRAINT document_type_id IF NOT EXISTS FOR (dt:DocumentType) REQUIRE dt.id IS UNIQUE',
-      'CREATE CONSTRAINT relationship_type_id IF NOT EXISTS FOR (rt:RelationshipType) REQUIRE rt.id IS UNIQUE',
-      'CREATE CONSTRAINT compliance_standard_id IF NOT EXISTS FOR (cs:ComplianceStandard) REQUIRE cs.id IS UNIQUE',
-      'CREATE CONSTRAINT classification_level_id IF NOT EXISTS FOR (cl:ClassificationLevel) REQUIRE cl.id IS UNIQUE',
-      'CREATE CONSTRAINT lifecycle_history_id IF NOT EXISTS FOR (h:LifecycleHistory) REQUIRE h.id IS UNIQUE',
-      'CREATE CONSTRAINT approval_request_id IF NOT EXISTS FOR (ar:ApprovalRequest) REQUIRE ar.id IS UNIQUE',
-      'CREATE CONSTRAINT provenance_id IF NOT EXISTS FOR (p:Provenance) REQUIRE p.id IS UNIQUE',
-      'CREATE CONSTRAINT risk_score_doc IF NOT EXISTS FOR (rs:RiskScore) REQUIRE rs.document_id IS UNIQUE',
-      'CREATE CONSTRAINT audit_finding_id IF NOT EXISTS FOR (f:AuditFinding) REQUIRE f.id IS UNIQUE',
+      "CREATE CONSTRAINT document_id IF NOT EXISTS FOR (d:Document) REQUIRE d.id IS UNIQUE",
+      "CREATE CONSTRAINT document_type_id IF NOT EXISTS FOR (dt:DocumentType) REQUIRE dt.id IS UNIQUE",
+      "CREATE CONSTRAINT relationship_type_id IF NOT EXISTS FOR (rt:RelationshipType) REQUIRE rt.id IS UNIQUE",
+      "CREATE CONSTRAINT compliance_standard_id IF NOT EXISTS FOR (cs:ComplianceStandard) REQUIRE cs.id IS UNIQUE",
+      "CREATE CONSTRAINT classification_level_id IF NOT EXISTS FOR (cl:ClassificationLevel) REQUIRE cl.id IS UNIQUE",
+      "CREATE CONSTRAINT lifecycle_history_id IF NOT EXISTS FOR (h:LifecycleHistory) REQUIRE h.id IS UNIQUE",
+      "CREATE CONSTRAINT approval_request_id IF NOT EXISTS FOR (ar:ApprovalRequest) REQUIRE ar.id IS UNIQUE",
+      "CREATE CONSTRAINT provenance_id IF NOT EXISTS FOR (p:Provenance) REQUIRE p.id IS UNIQUE",
+      "CREATE CONSTRAINT risk_score_doc IF NOT EXISTS FOR (rs:RiskScore) REQUIRE rs.document_id IS UNIQUE",
+      "CREATE CONSTRAINT audit_finding_id IF NOT EXISTS FOR (f:AuditFinding) REQUIRE f.id IS UNIQUE",
     ];
 
     for (const constraint of constraints) {
       try {
         await session.run(constraint);
-        console.log(`  Created: ${constraint.split(' ')[2]}`);
+        console.log(`  Created: ${constraint.split(" ")[2]}`);
       } catch (error: any) {
-        if (!error.message.includes('already exists')) {
+        if (!error.message.includes("already exists")) {
           throw error;
         }
-        console.log(`  Exists: ${constraint.split(' ')[2]}`);
+        console.log(`  Exists: ${constraint.split(" ")[2]}`);
       }
     }
   } finally {
@@ -55,31 +55,31 @@ async function createConstraints(driver: Driver): Promise<void> {
 async function createIndexes(driver: Driver): Promise<void> {
   const session = driver.session();
   try {
-    console.log('Creating indexes...');
+    console.log("Creating indexes...");
 
     const indexes = [
-      'CREATE INDEX document_type_idx IF NOT EXISTS FOR (d:Document) ON (d.document_type_id)',
-      'CREATE INDEX document_status_idx IF NOT EXISTS FOR (d:Document) ON (d.status)',
-      'CREATE INDEX document_classification_idx IF NOT EXISTS FOR (d:Document) ON (d.classification)',
-      'CREATE INDEX document_owner_idx IF NOT EXISTS FOR (d:Document) ON (d.owner_id)',
-      'CREATE INDEX document_department_idx IF NOT EXISTS FOR (d:Document) ON (d.owner_department)',
-      'CREATE INDEX document_created_idx IF NOT EXISTS FOR (d:Document) ON (d.created_at)',
-      'CREATE INDEX document_updated_idx IF NOT EXISTS FOR (d:Document) ON (d.updated_at)',
-      'CREATE INDEX lifecycle_history_doc_idx IF NOT EXISTS FOR (h:LifecycleHistory) ON (h.document_id)',
-      'CREATE INDEX provenance_doc_idx IF NOT EXISTS FOR (p:Provenance) ON (p.document_id)',
-      'CREATE INDEX audit_finding_doc_idx IF NOT EXISTS FOR (f:AuditFinding) ON (f.document_id)',
-      'CREATE INDEX audit_finding_status_idx IF NOT EXISTS FOR (f:AuditFinding) ON (f.status)',
+      "CREATE INDEX document_type_idx IF NOT EXISTS FOR (d:Document) ON (d.document_type_id)",
+      "CREATE INDEX document_status_idx IF NOT EXISTS FOR (d:Document) ON (d.status)",
+      "CREATE INDEX document_classification_idx IF NOT EXISTS FOR (d:Document) ON (d.classification)",
+      "CREATE INDEX document_owner_idx IF NOT EXISTS FOR (d:Document) ON (d.owner_id)",
+      "CREATE INDEX document_department_idx IF NOT EXISTS FOR (d:Document) ON (d.owner_department)",
+      "CREATE INDEX document_created_idx IF NOT EXISTS FOR (d:Document) ON (d.created_at)",
+      "CREATE INDEX document_updated_idx IF NOT EXISTS FOR (d:Document) ON (d.updated_at)",
+      "CREATE INDEX lifecycle_history_doc_idx IF NOT EXISTS FOR (h:LifecycleHistory) ON (h.document_id)",
+      "CREATE INDEX provenance_doc_idx IF NOT EXISTS FOR (p:Provenance) ON (p.document_id)",
+      "CREATE INDEX audit_finding_doc_idx IF NOT EXISTS FOR (f:AuditFinding) ON (f.document_id)",
+      "CREATE INDEX audit_finding_status_idx IF NOT EXISTS FOR (f:AuditFinding) ON (f.status)",
     ];
 
     for (const index of indexes) {
       try {
         await session.run(index);
-        console.log(`  Created: ${index.split(' ')[2]}`);
+        console.log(`  Created: ${index.split(" ")[2]}`);
       } catch (error: any) {
-        if (!error.message.includes('already exists')) {
+        if (!error.message.includes("already exists")) {
           throw error;
         }
-        console.log(`  Exists: ${index.split(' ')[2]}`);
+        console.log(`  Exists: ${index.split(" ")[2]}`);
       }
     }
   } finally {
@@ -90,11 +90,11 @@ async function createIndexes(driver: Driver): Promise<void> {
 async function seedDocumentTypes(driver: Driver): Promise<void> {
   const session = driver.session();
   try {
-    console.log('Seeding document types...');
+    console.log("Seeding document types...");
 
     // Load ontology from JSON file
-    const ontologyPath = path.resolve(__dirname, '../../ontology/document-ontology.json');
-    const ontology = JSON.parse(fs.readFileSync(ontologyPath, 'utf-8'));
+    const ontologyPath = path.resolve(__dirname, "../../ontology/document-ontology.json");
+    const ontology = JSON.parse(fs.readFileSync(ontologyPath, "utf-8"));
 
     // Create document types
     for (const docType of ontology.document_types) {
@@ -189,7 +189,6 @@ async function seedDocumentTypes(driver: Driver): Promise<void> {
       );
     }
     console.log(`  Created ${ontology.compliance_standards.length} compliance standards`);
-
   } finally {
     await session.close();
   }
@@ -202,17 +201,17 @@ export async function runMigration(config: MigrationConfig): Promise<void> {
   );
 
   try {
-    console.log('Starting document governance migration...');
+    console.log("Starting document governance migration...");
     console.log(`Connecting to ${config.neo4jUri}...`);
 
     await driver.verifyConnectivity();
-    console.log('Connected to Neo4j');
+    console.log("Connected to Neo4j");
 
     await createConstraints(driver);
     await createIndexes(driver);
     await seedDocumentTypes(driver);
 
-    console.log('Migration completed successfully!');
+    console.log("Migration completed successfully!");
   } finally {
     await driver.close();
   }
@@ -221,13 +220,13 @@ export async function runMigration(config: MigrationConfig): Promise<void> {
 // Run migration if executed directly
 if (process.argv[1] === __filename) {
   const config: MigrationConfig = {
-    neo4jUri: process.env.NEO4J_URI || 'bolt://localhost:7687',
-    neo4jUser: process.env.NEO4J_USER || 'neo4j',
-    neo4jPassword: process.env.NEO4J_PASSWORD || 'password',
+    neo4jUri: process.env.NEO4J_URI || "bolt://localhost:7687",
+    neo4jUser: process.env.NEO4J_USER || "neo4j",
+    neo4jPassword: process.env.NEO4J_PASSWORD || "password",
   };
 
   runMigration(config).catch((error) => {
-    console.error('Migration failed:', error);
+    console.error("Migration failed:", error);
     process.exit(1);
   });
 }

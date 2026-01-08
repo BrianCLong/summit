@@ -36,19 +36,19 @@ This Maestro plan orchestrates the implementation of 11 foundational components 
 
 ## Runs Overview
 
-| Run ID | Prompt | Owner | Status | Start | End | Artifacts |
-|--------|--------|-------|--------|-------|-----|-----------|
-| R001 | IntelGraph Core | TBD | Pending | Week 1 | Week 2 | API, Schema, Tests |
-| R002 | Claim Ledger Library | TBD | Pending | Week 2 | Week 3 | Library, Types, Examples |
-| R003 | Maestro Conductor | TBD | Pending | Week 3 | Week 4 | Service, API, Tests |
-| R004 | OPA ABAC Governance | TBD | Pending | Week 3 | Week 4 | Adapter, Policies, Tests |
-| R005 | Metrics & Observability | TBD | Pending | Week 3 | Week 4 | Metrics Module, Endpoint |
-| R006 | White-Label Config | TBD | Pending | Week 5 | Week 5 | Config Service, API |
-| R007 | Risk & Incident Tracker | TBD | Pending | Week 5 | Week 5 | Tracker Service, API |
-| R008 | Disclosure Pack Generator | TBD | Pending | Week 7 | Week 7 | CLI Tool, Templates |
-| R009 | Release Gate Checker | TBD | Pending | Week 8 | Week 8 | CI Tool, Tests |
-| R010 | CEO Daily Dispatch | TBD | Pending | Week 7 | Week 7 | Generator Script, Templates |
-| R011 | Canonical Templates | TBD | Pending | Week 7 | Week 8 | Template Engine, Schemas |
+| Run ID | Prompt                    | Owner | Status  | Start  | End    | Artifacts                   |
+| ------ | ------------------------- | ----- | ------- | ------ | ------ | --------------------------- |
+| R001   | IntelGraph Core           | TBD   | Pending | Week 1 | Week 2 | API, Schema, Tests          |
+| R002   | Claim Ledger Library      | TBD   | Pending | Week 2 | Week 3 | Library, Types, Examples    |
+| R003   | Maestro Conductor         | TBD   | Pending | Week 3 | Week 4 | Service, API, Tests         |
+| R004   | OPA ABAC Governance       | TBD   | Pending | Week 3 | Week 4 | Adapter, Policies, Tests    |
+| R005   | Metrics & Observability   | TBD   | Pending | Week 3 | Week 4 | Metrics Module, Endpoint    |
+| R006   | White-Label Config        | TBD   | Pending | Week 5 | Week 5 | Config Service, API         |
+| R007   | Risk & Incident Tracker   | TBD   | Pending | Week 5 | Week 5 | Tracker Service, API        |
+| R008   | Disclosure Pack Generator | TBD   | Pending | Week 7 | Week 7 | CLI Tool, Templates         |
+| R009   | Release Gate Checker      | TBD   | Pending | Week 8 | Week 8 | CI Tool, Tests              |
+| R010   | CEO Daily Dispatch        | TBD   | Pending | Week 7 | Week 7 | Generator Script, Templates |
+| R011   | Canonical Templates       | TBD   | Pending | Week 7 | Week 8 | Template Engine, Schemas    |
 
 ---
 
@@ -129,6 +129,7 @@ This Maestro plan orchestrates the implementation of 11 foundational components 
 #### Rollback Plan
 
 If R001 fails:
+
 - Fall back to existing IntelGraph schema
 - Document gaps for future iteration
 - Triggers:
@@ -501,48 +502,59 @@ If R001 fails:
 ## Weekly Execution Plan
 
 ### Week 1-2: Foundation Sprint
+
 **Focus:** IntelGraph Core (R001)
 
 **Monday Week 1:**
+
 - Kick off R001
 - Stack selection and architecture design (STEP-001)
 
 **Wednesday Week 1:**
+
 - Complete schema design (STEP-002)
 - Begin API implementation (STEP-003)
 
 **Monday Week 2:**
+
 - Continue API implementation (STEP-003)
 - Begin query implementation (STEP-004)
 
 **Wednesday Week 2:**
+
 - Complete queries (STEP-004)
 - Begin testing (STEP-005)
 
 **Friday Week 2:**
+
 - Complete testing and documentation (STEP-005, STEP-006)
 - **GATE: R001 acceptance - proceed to Week 3 only if passed**
 
 ---
 
 ### Week 3-4: Platform Sprint
+
 **Focus:** Maestro (R003), OPA (R004), Metrics (R005)
 
 **Monday Week 3:**
+
 - Kick off R002 (Claim Ledger) - dependency for others
 - Complete by Wednesday
 
 **Wednesday Week 3:**
+
 - **Parallel kick-off:**
   - R003: Maestro (Session 1)
   - R004: OPA ABAC (Session 2)
   - R005: Metrics (Session 3)
 
 **Friday Week 3:**
+
 - Checkpoint: All three runs at 50%
 - Integration discussion
 
 **Week 4:**
+
 - Continue parallel execution
 - Integration testing between R003/R004/R005
 - **GATE: Platform services functional - proceed to Week 5 only if passed**
@@ -550,14 +562,17 @@ If R001 fails:
 ---
 
 ### Week 5: Application Features Sprint
+
 **Focus:** White-Label (R006), Risk Tracker (R007)
 
 **Monday Week 5:**
+
 - **Parallel kick-off:**
   - R006: White-Label Config (Session 1)
   - R007: Risk Tracker (Session 2)
 
 **Friday Week 5:**
+
 - Complete both runs
 - Integration with platform services
 - **GATE: Application features ready**
@@ -565,9 +580,11 @@ If R001 fails:
 ---
 
 ### Week 6: Integration & Hardening
+
 **Focus:** End-to-end testing, bug fixes
 
 **Activities:**
+
 - Integration tests across all components
 - Performance testing
 - Security review
@@ -577,33 +594,40 @@ If R001 fails:
 ---
 
 ### Week 7: Automation Sprint (Part 1)
+
 **Focus:** Disclosure Pack (R008), CEO Dispatch (R010), Templates (R011)
 
 **Monday Week 7:**
+
 - **Parallel kick-off:**
   - R008: Disclosure Pack (Session 1) - CRITICAL
   - R010: CEO Dispatch (Session 2)
   - R011: Templates (Session 3)
 
 **Friday Week 7:**
+
 - R008 must complete (blocks R009)
 - R010, R011 can carry into Week 8
 
 ---
 
 ### Week 8: Automation Sprint (Part 2) & Launch Prep
+
 **Focus:** Release Gate (R009), Final Integration
 
 **Monday Week 8:**
+
 - Kick off R009 (Release Gate Checker)
 - Depends on completed R008
 
 **Wednesday Week 8:**
+
 - Complete R009
 - Final integration tests
 - **GATE: Release automation functional**
 
 **Friday Week 8:**
+
 - Demo preparation
 - Launch readiness review
 - **FINAL GATE: System launch ready**
@@ -614,23 +638,25 @@ If R001 fails:
 
 ### Critical Path Risks
 
-| Risk | Impact | Mitigation | Owner |
-|------|--------|------------|-------|
-| R001 (IntelGraph Core) delays | HIGH - blocks all | Daily standups, clear requirements | TBD |
-| R002 (Claim Ledger) integration issues | HIGH - blocks provenance | Early integration tests with R001 | TBD |
-| Parallel runs (R003/R004/R005) conflicts | MEDIUM | Clear API contracts, integration testing | TBD |
-| R008 (Disclosure Pack) blocks R009 | MEDIUM | Start R008 early, buffer time | TBD |
-| Stack choice mismatch | HIGH | ADR approval before coding | TBD |
+| Risk                                     | Impact                   | Mitigation                               | Owner |
+| ---------------------------------------- | ------------------------ | ---------------------------------------- | ----- |
+| R001 (IntelGraph Core) delays            | HIGH - blocks all        | Daily standups, clear requirements       | TBD   |
+| R002 (Claim Ledger) integration issues   | HIGH - blocks provenance | Early integration tests with R001        | TBD   |
+| Parallel runs (R003/R004/R005) conflicts | MEDIUM                   | Clear API contracts, integration testing | TBD   |
+| R008 (Disclosure Pack) blocks R009       | MEDIUM                   | Start R008 early, buffer time            | TBD   |
+| Stack choice mismatch                    | HIGH                     | ADR approval before coding               | TBD   |
 
 ### Rollback Triggers
 
 **Per-Run Triggers:**
+
 - Test coverage < 70%
 - > 3 critical bugs in acceptance
 - Integration tests fail
 - Performance degrades > 50% vs baseline
 
 **Plan-Level Triggers:**
+
 - > 2 runs fail acceptance in same tier
 - Week 6 integration gate fails
 - Critical security finding
@@ -638,6 +664,7 @@ If R001 fails:
 ### Rollback Plan
 
 If plan fails:
+
 1. Preserve all completed artifacts
 2. Document learnings in `RETROSPECTIVE.md`
 3. Identify minimum viable subset for V2
@@ -647,22 +674,22 @@ If plan fails:
 
 ## Budget Tracking
 
-| Run | Budgeted Time | Budgeted Cost | Actual Time | Actual Cost | Variance |
-|-----|---------------|---------------|-------------|-------------|----------|
-| R001 | 10 days | $15,000 | TBD | TBD | TBD |
-| R002 | 5 days | $7,500 | TBD | TBD | TBD |
-| R003 | 7 days | $10,500 | TBD | TBD | TBD |
-| R004 | 5 days | $7,500 | TBD | TBD | TBD |
-| R005 | 5 days | $7,500 | TBD | TBD | TBD |
-| R006 | 5 days | $7,500 | TBD | TBD | TBD |
-| R007 | 5 days | $7,500 | TBD | TBD | TBD |
-| R008 | 5 days | $7,500 | TBD | TBD | TBD |
-| R009 | 3 days | $4,500 | TBD | TBD | TBD |
-| R010 | 3 days | $4,500 | TBD | TBD | TBD |
-| R011 | 4 days | $6,000 | TBD | TBD | TBD |
-| **Total** | **57 days** | **$85,500** | **TBD** | **TBD** | **TBD** |
+| Run       | Budgeted Time | Budgeted Cost | Actual Time | Actual Cost | Variance |
+| --------- | ------------- | ------------- | ----------- | ----------- | -------- |
+| R001      | 10 days       | $15,000       | TBD         | TBD         | TBD      |
+| R002      | 5 days        | $7,500        | TBD         | TBD         | TBD      |
+| R003      | 7 days        | $10,500       | TBD         | TBD         | TBD      |
+| R004      | 5 days        | $7,500        | TBD         | TBD         | TBD      |
+| R005      | 5 days        | $7,500        | TBD         | TBD         | TBD      |
+| R006      | 5 days        | $7,500        | TBD         | TBD         | TBD      |
+| R007      | 5 days        | $7,500        | TBD         | TBD         | TBD      |
+| R008      | 5 days        | $7,500        | TBD         | TBD         | TBD      |
+| R009      | 3 days        | $4,500        | TBD         | TBD         | TBD      |
+| R010      | 3 days        | $4,500        | TBD         | TBD         | TBD      |
+| R011      | 4 days        | $6,000        | TBD         | TBD         | TBD      |
+| **Total** | **57 days**   | **$85,500**   | **TBD**     | **TBD**     | **TBD**  |
 
-*Assumes $1,500/day blended engineering rate*
+_Assumes $1,500/day blended engineering rate_
 
 ---
 
@@ -708,8 +735,8 @@ Each run will generate a claim ledger manifest stored in `/manifests/{run-id}.js
       "status": "verified",
       "provenance": {
         "sources": [
-          {"type": "git_commit", "value": "abc123..."},
-          {"type": "test_report", "url": "file://test-results.xml"}
+          { "type": "git_commit", "value": "abc123..." },
+          { "type": "test_report", "url": "file://test-results.xml" }
         ],
         "ingestion_pipeline": "prompt-01-intelgraph-core",
         "method": "automated",

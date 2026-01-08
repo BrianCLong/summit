@@ -1,9 +1,9 @@
-import fs from 'fs';
-import fsp from 'fs/promises';
-import os from 'os';
-import path from 'path';
-import AdmZip from 'adm-zip';
-import { buildMerkleRoot, hashLeaf, sha256File } from './hash.js';
+import fs from "fs";
+import fsp from "fs/promises";
+import os from "os";
+import path from "path";
+import AdmZip from "adm-zip";
+import { buildMerkleRoot, hashLeaf, sha256File } from "./hash.js";
 import {
   BundleManifest,
   CheckResult,
@@ -11,7 +11,7 @@ import {
   EvidenceRecord,
   TransformStep,
   VerificationReport,
-} from './types.js';
+} from "./types.js";
 
 interface LoadedBundle {
   basePath: string;
@@ -70,7 +70,7 @@ async function loadBundle(bundlePath: string): Promise<LoadedBundle> {
   }
 
   if (stats.isDirectory()) {
-    const manifestPath = path.join(bundlePath, 'manifest.json');
+    const manifestPath = path.join(bundlePath, "manifest.json");
     return {
       basePath: bundlePath,
       manifestPath,
@@ -78,10 +78,10 @@ async function loadBundle(bundlePath: string): Promise<LoadedBundle> {
     };
   }
 
-  const tmpDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'prov-ledger-bundle-'));
+  const tmpDir = await fsp.mkdtemp(path.join(os.tmpdir(), "prov-ledger-bundle-"));
   const zip = new AdmZip(bundlePath);
   zip.extractAllTo(tmpDir, true);
-  const manifestPath = path.join(tmpDir, 'manifest.json');
+  const manifestPath = path.join(tmpDir, "manifest.json");
   return {
     basePath: tmpDir,
     manifestPath,
@@ -98,7 +98,7 @@ async function loadManifest(manifestPath: string): Promise<BundleManifest> {
     throw new Error(`manifest.json not found in bundle (looked at ${manifestPath})`);
   }
 
-  const content = await fsp.readFile(manifestPath, 'utf8');
+  const content = await fsp.readFile(manifestPath, "utf8");
   return JSON.parse(content) as BundleManifest;
 }
 
@@ -109,22 +109,22 @@ function buildCheck(name: string, ok: boolean, errors: string[], warnings: strin
 function validateManifest(manifest: BundleManifest): CheckResult {
   const errors: string[] = [];
   if (!manifest) {
-    errors.push('Manifest is missing or unreadable');
-    return buildCheck('Manifest structure', false, errors, []);
+    errors.push("Manifest is missing or unreadable");
+    return buildCheck("Manifest structure", false, errors, []);
   }
 
-  if (!manifest.bundleId) errors.push('bundleId is required');
-  if (!manifest.version) errors.push('version is required');
-  if (!manifest.generatedAt) errors.push('generatedAt is required');
-  if (manifest.hashAlgorithm !== 'sha256') {
+  if (!manifest.bundleId) errors.push("bundleId is required");
+  if (!manifest.version) errors.push("version is required");
+  if (!manifest.generatedAt) errors.push("generatedAt is required");
+  if (manifest.hashAlgorithm !== "sha256") {
     errors.push(`hashAlgorithm must be "sha256" (got "${manifest.hashAlgorithm}")`);
   }
 
   if (!Array.isArray(manifest.evidence) || manifest.evidence.length === 0) {
-    errors.push('evidence array is required and cannot be empty');
+    errors.push("evidence array is required and cannot be empty");
   } else {
     manifest.evidence.forEach((evidence) => {
-      if (!evidence.id) errors.push('evidence.id is required');
+      if (!evidence.id) errors.push("evidence.id is required");
       if (!evidence.path) errors.push(`evidence ${evidence.id} missing path`);
       if (!evidence.sha256) errors.push(`evidence ${evidence.id} missing sha256`);
       if (!Array.isArray(evidence.transforms) || evidence.transforms.length === 0) {
@@ -133,12 +133,12 @@ function validateManifest(manifest: BundleManifest): CheckResult {
     });
   }
 
-  return buildCheck('Manifest structure', errors.length === 0, errors, []);
+  return buildCheck("Manifest structure", errors.length === 0, errors, []);
 }
 
 async function verifyEvidence(
   manifest: BundleManifest,
-  basePath: string,
+  basePath: string
 ): Promise<{
   check: CheckResult;
   missingEvidence: string[];
@@ -153,7 +153,7 @@ async function verifyEvidence(
 
   if (!manifest?.evidence) {
     return {
-      check: buildCheck('Evidence hashes', false, ['Manifest missing evidence entries'], []),
+      check: buildCheck("Evidence hashes", false, ["Manifest missing evidence entries"], []),
       missingEvidence,
       hashMismatches,
       calculatedHashes,
@@ -183,10 +183,10 @@ async function verifyEvidence(
   const ok = missingEvidence.length === 0 && hashMismatches.length === 0;
   return {
     check: buildCheck(
-      'Evidence hashes',
+      "Evidence hashes",
       ok,
       [...missingEvidence.map((m) => `Missing evidence file for ${m}`), ...hashMismatches],
-      [],
+      []
     ),
     missingEvidence,
     hashMismatches,
@@ -197,7 +197,7 @@ async function verifyEvidence(
 
 function verifyTransformChains(
   manifest: BundleManifest,
-  calculatedHashes: Map<string, string>,
+  calculatedHashes: Map<string, string>
 ): CheckResult {
   const errors: string[] = [];
 
@@ -206,7 +206,7 @@ function verifyTransformChains(
     errors.push(...chainErrors);
   }
 
-  return buildCheck('Transform chains', errors.length === 0, errors, []);
+  return buildCheck("Transform chains", errors.length === 0, errors, []);
 }
 
 function validateTransformChain(evidence: EvidenceRecord, finalHash?: string): string[] {
@@ -231,7 +231,7 @@ function validateTransformChain(evidence: EvidenceRecord, finalHash?: string): s
       const prev = evidence.transforms[index - 1]!;
       if (step.inputHash && prev.outputHash && step.inputHash !== prev.outputHash) {
         errors.push(
-          `Transform ${step.id || index} inputHash does not match previous output for evidence ${evidence.id}`,
+          `Transform ${step.id || index} inputHash does not match previous output for evidence ${evidence.id}`
         );
       }
       const prevTime = Date.parse(prev.timestamp);
@@ -244,7 +244,7 @@ function validateTransformChain(evidence: EvidenceRecord, finalHash?: string): s
   const last = evidence.transforms[evidence.transforms.length - 1];
   if (finalHash && last?.outputHash && finalHash !== last.outputHash) {
     errors.push(
-      `Final transform outputHash for ${evidence.id} (${last.outputHash}) does not match content hash (${finalHash})`,
+      `Final transform outputHash for ${evidence.id} (${last.outputHash}) does not match content hash (${finalHash})`
     );
   }
 
@@ -253,21 +253,21 @@ function validateTransformChain(evidence: EvidenceRecord, finalHash?: string): s
 
 function verifyHashTree(
   manifest: BundleManifest,
-  calculatedHashes: Map<string, string>,
+  calculatedHashes: Map<string, string>
 ): CheckResult {
   const errors: string[] = [];
 
   if (!manifest.hashTree) {
-    errors.push('hashTree is missing from manifest');
-    return buildCheck('Hash tree', false, errors, []);
+    errors.push("hashTree is missing from manifest");
+    return buildCheck("Hash tree", false, errors, []);
   }
 
   if (!manifest.hashTree.root) {
-    errors.push('hashTree.root is missing');
+    errors.push("hashTree.root is missing");
   }
 
-  if (manifest.hashTree.algorithm !== 'sha256') {
-    errors.push('hashTree.algorithm must be sha256');
+  if (manifest.hashTree.algorithm !== "sha256") {
+    errors.push("hashTree.algorithm must be sha256");
   }
 
   const leaves = manifest.evidence
@@ -285,10 +285,10 @@ function verifyHashTree(
   }
 
   if (manifest.hashTree.leaves?.length !== manifest.evidence.length) {
-    errors.push('hashTree.leaves count does not match evidence count');
+    errors.push("hashTree.leaves count does not match evidence count");
   }
 
-  return buildCheck('Hash tree', errors.length === 0, errors, []);
+  return buildCheck("Hash tree", errors.length === 0, errors, []);
 }
 
 function verifyClaims(manifest: BundleManifest, evidenceIds: Set<string>): CheckResult {
@@ -296,22 +296,22 @@ function verifyClaims(manifest: BundleManifest, evidenceIds: Set<string>): Check
   const warnings: string[] = [];
 
   if (!manifest.claims || manifest.claims.length === 0) {
-    warnings.push('No claims found in manifest');
-    return buildCheck('Claim references', errors.length === 0, errors, warnings);
+    warnings.push("No claims found in manifest");
+    return buildCheck("Claim references", errors.length === 0, errors, warnings);
   }
 
   for (const claim of manifest.claims) {
     errors.push(...validateClaim(claim, evidenceIds));
   }
 
-  return buildCheck('Claim references', errors.length === 0, errors, warnings);
+  return buildCheck("Claim references", errors.length === 0, errors, warnings);
 }
 
 function validateClaim(claim: ClaimRecord, evidenceIds: Set<string>): string[] {
   const errors: string[] = [];
-  if (!claim.id) errors.push('Claim missing id');
+  if (!claim.id) errors.push("Claim missing id");
   if (!Array.isArray(claim.evidenceIds) || claim.evidenceIds.length === 0) {
-    errors.push(`Claim ${claim.id || '<unknown>'} missing evidenceIds`);
+    errors.push(`Claim ${claim.id || "<unknown>"} missing evidenceIds`);
     return errors;
   }
 

@@ -2,7 +2,7 @@
  * GitHub API integration for fetching issues and PRs
  */
 
-import { TriageItem } from '../types.js';
+import { TriageItem } from "../types.js";
 
 interface GitHubIssue {
   number: number;
@@ -24,7 +24,7 @@ export interface GitHubFetchOptions {
   token?: string;
   includeIssues?: boolean;
   includePRs?: boolean;
-  state?: 'open' | 'closed' | 'all';
+  state?: "open" | "closed" | "all";
   labels?: string[];
   maxResults?: number;
 }
@@ -36,7 +36,7 @@ export async function fetchGitHubIssues(options: GitHubFetchOptions): Promise<Tr
     token,
     includeIssues = true,
     includePRs = false,
-    state = 'open',
+    state = "open",
     labels = [],
     maxResults = 1000,
   } = options;
@@ -46,7 +46,7 @@ export async function fetchGitHubIssues(options: GitHubFetchOptions): Promise<Tr
   const perPage = 100;
 
   const headers: Record<string, string> = {
-    Accept: 'application/vnd.github.v3+json',
+    Accept: "application/vnd.github.v3+json",
   };
 
   if (token) {
@@ -58,12 +58,12 @@ export async function fetchGitHubIssues(options: GitHubFetchOptions): Promise<Tr
       state,
       per_page: perPage.toString(),
       page: page.toString(),
-      sort: 'created',
-      direction: 'desc',
+      sort: "created",
+      direction: "desc",
     });
 
     if (labels.length > 0) {
-      params.append('labels', labels.join(','));
+      params.append("labels", labels.join(","));
     }
 
     const url = `https://api.github.com/repos/${owner}/${repo}/issues?${params}`;
@@ -89,8 +89,8 @@ export async function fetchGitHubIssues(options: GitHubFetchOptions): Promise<Tr
         const item: TriageItem = {
           id: `github-${issue.number}`,
           title: issue.title,
-          description: issue.body || '',
-          source: 'github',
+          description: issue.body || "",
+          source: "github",
           sourceId: issue.number.toString(),
           area: extractAreasFromLabels(issue.labels),
           impact: extractImpactFromLabels(issue.labels),
@@ -100,7 +100,7 @@ export async function fetchGitHubIssues(options: GitHubFetchOptions): Promise<Tr
           impactScore: 0,
           complexityScore: estimateGitHubIssueComplexity(issue),
           isGoodFirstIssue: issue.labels.some((l) =>
-            ['good first issue', 'good-first-issue', 'beginner'].includes(l.name.toLowerCase()),
+            ["good first issue", "good-first-issue", "beginner"].includes(l.name.toLowerCase())
           ),
           raw: issue,
         };
@@ -123,54 +123,49 @@ export async function fetchGitHubIssues(options: GitHubFetchOptions): Promise<Tr
 function extractAreasFromLabels(labels: Array<{ name: string }>): string[] {
   const areaLabels = labels
     .map((l) => l.name)
-    .filter((name) => name.startsWith('area:'))
-    .map((name) => name.replace('area:', ''));
+    .filter((name) => name.startsWith("area:"))
+    .map((name) => name.replace("area:", ""));
 
   return areaLabels.length > 0 ? areaLabels : [];
 }
 
 function extractImpactFromLabels(
-  labels: Array<{ name: string }>,
-): 'blocker' | 'high' | 'medium' | 'low' {
+  labels: Array<{ name: string }>
+): "blocker" | "high" | "medium" | "low" {
   const labelNames = labels.map((l) => l.name.toLowerCase());
 
-  if (
-    labelNames.some((n) => n.includes('blocker') || n.includes('critical') || n.includes('p0'))
-  ) {
-    return 'blocker';
+  if (labelNames.some((n) => n.includes("blocker") || n.includes("critical") || n.includes("p0"))) {
+    return "blocker";
   }
-  if (labelNames.some((n) => n.includes('high') || n.includes('p1'))) {
-    return 'high';
+  if (labelNames.some((n) => n.includes("high") || n.includes("p1"))) {
+    return "high";
   }
-  if (labelNames.some((n) => n.includes('medium') || n.includes('p2'))) {
-    return 'medium';
+  if (labelNames.some((n) => n.includes("medium") || n.includes("p2"))) {
+    return "medium";
   }
-  return 'low';
+  return "low";
 }
 
 function extractTypeFromLabels(
   labels: Array<{ name: string }>,
-  isPR: boolean,
-): 'bug' | 'tech-debt' | 'feature' | 'enhancement' {
+  isPR: boolean
+): "bug" | "tech-debt" | "feature" | "enhancement" {
   const labelNames = labels.map((l) => l.name.toLowerCase());
 
-  if (labelNames.some((n) => n.includes('bug') || n.includes('error'))) {
-    return 'bug';
+  if (labelNames.some((n) => n.includes("bug") || n.includes("error"))) {
+    return "bug";
   }
-  if (labelNames.some((n) => n.includes('tech') && n.includes('debt'))) {
-    return 'tech-debt';
+  if (labelNames.some((n) => n.includes("tech") && n.includes("debt"))) {
+    return "tech-debt";
   }
-  if (labelNames.some((n) => n.includes('feature'))) {
-    return 'feature';
+  if (labelNames.some((n) => n.includes("feature"))) {
+    return "feature";
   }
-  if (
-    labelNames.some((n) => n.includes('enhancement') || n.includes('improvement')) ||
-    isPR
-  ) {
-    return 'enhancement';
+  if (labelNames.some((n) => n.includes("enhancement") || n.includes("improvement")) || isPR) {
+    return "enhancement";
   }
 
-  return 'feature';
+  return "feature";
 }
 
 function estimateGitHubIssueComplexity(issue: GitHubIssue): number {
@@ -183,7 +178,7 @@ function estimateGitHubIssueComplexity(issue: GitHubIssue): number {
 
   // Label-based complexity
   const labelNames = issue.labels.map((l) => l.name.toLowerCase());
-  if (labelNames.some((n) => n.includes('complex') || n.includes('hard'))) {
+  if (labelNames.some((n) => n.includes("complex") || n.includes("hard"))) {
     score += 30;
   }
 
@@ -199,13 +194,13 @@ function estimateGitHubIssueComplexity(issue: GitHubIssue): number {
  * CLI-friendly wrapper that uses environment variables
  */
 export async function fetchGitHubIssuesFromEnv(): Promise<TriageItem[]> {
-  const owner = process.env.GITHUB_OWNER || 'BrianCLong';
-  const repo = process.env.GITHUB_REPO || 'summit';
+  const owner = process.env.GITHUB_OWNER || "BrianCLong";
+  const repo = process.env.GITHUB_REPO || "summit";
   const token = process.env.GITHUB_TOKEN;
 
   if (!token) {
     console.warn(
-      'GITHUB_TOKEN not set. GitHub API rate limits will be restrictive. Set GITHUB_TOKEN for higher limits.',
+      "GITHUB_TOKEN not set. GitHub API rate limits will be restrictive. Set GITHUB_TOKEN for higher limits."
     );
   }
 
@@ -215,7 +210,7 @@ export async function fetchGitHubIssuesFromEnv(): Promise<TriageItem[]> {
     token,
     includeIssues: true,
     includePRs: false,
-    state: 'open',
+    state: "open",
     maxResults: 500,
   });
 }

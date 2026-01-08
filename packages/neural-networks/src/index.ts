@@ -4,9 +4,9 @@
  * Neural network architecture library and model zoo
  */
 
-import { z } from 'zod';
-import type { Layer, ModelMetadata } from '@intelgraph/deep-learning-core';
-export type { Layer, ModelMetadata } from '@intelgraph/deep-learning-core';
+import { z } from "zod";
+import type { Layer, ModelMetadata } from "@intelgraph/deep-learning-core";
+export type { Layer, ModelMetadata } from "@intelgraph/deep-learning-core";
 
 // ============================================================================
 // Neural Network Architecture Definitions
@@ -14,7 +14,7 @@ export type { Layer, ModelMetadata } from '@intelgraph/deep-learning-core';
 
 export interface NeuralNetworkArchitecture {
   name: string;
-  type: 'feedforward' | 'convolutional' | 'recurrent' | 'transformer' | 'hybrid';
+  type: "feedforward" | "convolutional" | "recurrent" | "transformer" | "hybrid";
   layers: Layer[];
   inputShape: number[];
   outputShape: number[];
@@ -33,7 +33,7 @@ export const ArchitectureSearchConfigSchema = z.object({
     hiddenUnitsRange: z.tuple([z.number(), z.number()]),
     activations: z.array(z.string()),
   }),
-  strategy: z.enum(['random', 'grid', 'bayesian', 'evolutionary', 'reinforcement']),
+  strategy: z.enum(["random", "grid", "bayesian", "evolutionary", "reinforcement"]),
   budget: z.object({
     maxTrials: z.number().positive(),
     maxDuration: z.number().positive().optional(),
@@ -41,7 +41,7 @@ export const ArchitectureSearchConfigSchema = z.object({
   }),
   objective: z.object({
     metric: z.string(),
-    direction: z.enum(['maximize', 'minimize']),
+    direction: z.enum(["maximize", "minimize"]),
   }),
 });
 
@@ -61,28 +61,28 @@ export function createMLP(config: {
   activation?: string;
   dropout?: number;
 }): NeuralNetworkArchitecture {
-  const { inputSize, hiddenLayers, outputSize, activation = 'relu', dropout = 0 } = config;
+  const { inputSize, hiddenLayers, outputSize, activation = "relu", dropout = 0 } = config;
 
   const layers: Layer[] = [];
 
   // Input layer
   layers.push({
-    type: 'input',
-    name: 'input',
+    type: "input",
+    name: "input",
     config: { shape: [inputSize] },
   });
 
   // Hidden layers
   hiddenLayers.forEach((units, index) => {
     layers.push({
-      type: 'dense',
+      type: "dense",
       name: `dense_${index}`,
       config: { units, activation },
     });
 
     if (dropout > 0) {
       layers.push({
-        type: 'dropout',
+        type: "dropout",
         name: `dropout_${index}`,
         config: { rate: dropout },
       });
@@ -91,18 +91,18 @@ export function createMLP(config: {
 
   // Output layer
   layers.push({
-    type: 'dense',
-    name: 'output',
-    config: { units: outputSize, activation: 'softmax' },
+    type: "dense",
+    name: "output",
+    config: { units: outputSize, activation: "softmax" },
   });
 
   return {
-    name: 'MLP',
-    type: 'feedforward',
+    name: "MLP",
+    type: "feedforward",
     layers,
     inputShape: [inputSize],
     outputShape: [outputSize],
-    description: 'Multi-Layer Perceptron',
+    description: "Multi-Layer Perceptron",
   };
 }
 
@@ -129,27 +129,27 @@ export function createResNet(config: {
   const layers: Layer[] = [];
 
   layers.push({
-    type: 'input',
-    name: 'input',
+    type: "input",
+    name: "input",
     config: { shape: inputShape },
   });
 
   // Initial convolution
   layers.push({
-    type: 'conv2d',
-    name: 'conv_init',
+    type: "conv2d",
+    name: "conv_init",
     config: {
       filters: 64,
       kernelSize: 7,
       strides: 2,
-      padding: 'same',
-      activation: 'relu',
+      padding: "same",
+      activation: "relu",
     },
   });
 
   layers.push({
-    type: 'max_pooling2d',
-    name: 'max_pool_init',
+    type: "max_pooling2d",
+    name: "max_pool_init",
     config: { poolSize: 3, strides: 2 },
   });
 
@@ -159,78 +159,78 @@ export function createResNet(config: {
 
     // Main path
     layers.push({
-      type: 'conv2d',
+      type: "conv2d",
       name: `${blockName}_conv1`,
       config: {
         filters: block.filters,
         kernelSize: block.kernelSize,
         strides: block.strides || 1,
-        padding: 'same',
+        padding: "same",
       },
     });
 
     layers.push({
-      type: 'batch_normalization',
+      type: "batch_normalization",
       name: `${blockName}_bn1`,
       config: {},
     });
 
     layers.push({
-      type: 'activation',
+      type: "activation",
       name: `${blockName}_act1`,
-      config: { activation: block.activation || 'relu' },
+      config: { activation: block.activation || "relu" },
     });
 
     layers.push({
-      type: 'conv2d',
+      type: "conv2d",
       name: `${blockName}_conv2`,
       config: {
         filters: block.filters,
         kernelSize: block.kernelSize,
-        padding: 'same',
+        padding: "same",
       },
     });
 
     layers.push({
-      type: 'batch_normalization',
+      type: "batch_normalization",
       name: `${blockName}_bn2`,
       config: {},
     });
 
     // Skip connection
     layers.push({
-      type: 'add',
+      type: "add",
       name: `${blockName}_add`,
       config: {},
     });
 
     layers.push({
-      type: 'activation',
+      type: "activation",
       name: `${blockName}_act2`,
-      config: { activation: block.activation || 'relu' },
+      config: { activation: block.activation || "relu" },
     });
   });
 
   // Global pooling and classification
   layers.push({
-    type: 'global_average_pooling2d',
-    name: 'global_pool',
+    type: "global_average_pooling2d",
+    name: "global_pool",
     config: {},
   });
 
   layers.push({
-    type: 'dense',
-    name: 'output',
-    config: { units: numClasses, activation: 'softmax' },
+    type: "dense",
+    name: "output",
+    config: { units: numClasses, activation: "softmax" },
   });
 
   return {
-    name: 'ResNet',
-    type: 'convolutional',
+    name: "ResNet",
+    type: "convolutional",
     layers,
     inputShape: inputShape,
     outputShape: [numClasses],
-    description: 'Residual Network',
+    description: "Residual Network",
   };
 }
 
@@ -248,8 +248,8 @@ export function createUNet(config: {
   const layers: Layer[] = [];
 
   layers.push({
-    type: 'input',
-    name: 'input',
+    type: "input",
+    name: "input",
     config: { shape: inputShape },
   });
 
@@ -258,20 +258,20 @@ export function createUNet(config: {
     const numFilters = filters * Math.pow(2, i);
 
     layers.push({
-      type: 'conv2d',
+      type: "conv2d",
       name: `encoder_conv_${i}_1`,
-      config: { filters: numFilters, kernelSize: 3, padding: 'same', activation: 'relu' },
+      config: { filters: numFilters, kernelSize: 3, padding: "same", activation: "relu" },
     });
 
     layers.push({
-      type: 'conv2d',
+      type: "conv2d",
       name: `encoder_conv_${i}_2`,
-      config: { filters: numFilters, kernelSize: 3, padding: 'same', activation: 'relu' },
+      config: { filters: numFilters, kernelSize: 3, padding: "same", activation: "relu" },
     });
 
     if (i < depth - 1) {
       layers.push({
-        type: 'max_pooling2d',
+        type: "max_pooling2d",
         name: `encoder_pool_${i}`,
         config: { poolSize: 2 },
       });
@@ -283,44 +283,44 @@ export function createUNet(config: {
     const numFilters = filters * Math.pow(2, i);
 
     layers.push({
-      type: 'conv2d_transpose',
+      type: "conv2d_transpose",
       name: `decoder_upconv_${i}`,
-      config: { filters: numFilters, kernelSize: 2, strides: 2, padding: 'same' },
+      config: { filters: numFilters, kernelSize: 2, strides: 2, padding: "same" },
     });
 
     layers.push({
-      type: 'concatenate',
+      type: "concatenate",
       name: `decoder_concat_${i}`,
       config: {},
     });
 
     layers.push({
-      type: 'conv2d',
+      type: "conv2d",
       name: `decoder_conv_${i}_1`,
-      config: { filters: numFilters, kernelSize: 3, padding: 'same', activation: 'relu' },
+      config: { filters: numFilters, kernelSize: 3, padding: "same", activation: "relu" },
     });
 
     layers.push({
-      type: 'conv2d',
+      type: "conv2d",
       name: `decoder_conv_${i}_2`,
-      config: { filters: numFilters, kernelSize: 3, padding: 'same', activation: 'relu' },
+      config: { filters: numFilters, kernelSize: 3, padding: "same", activation: "relu" },
     });
   }
 
   // Output
   layers.push({
-    type: 'conv2d',
-    name: 'output',
-    config: { filters: numClasses, kernelSize: 1, activation: 'softmax' },
+    type: "conv2d",
+    name: "output",
+    config: { filters: numClasses, kernelSize: 1, activation: "softmax" },
   });
 
   return {
-    name: 'U-Net',
-    type: 'convolutional',
+    name: "U-Net",
+    type: "convolutional",
     layers,
     inputShape,
     outputShape: [inputShape[0], inputShape[1], numClasses],
-    description: 'U-Net for semantic segmentation',
+    description: "U-Net for semantic segmentation",
   };
 }
 
@@ -348,14 +348,13 @@ export class NeuralArchitectureSearch {
     const layers: Layer[] = [];
 
     layers.push({
-      type: 'input',
-      name: 'input',
+      type: "input",
+      name: "input",
       config: { shape: [hiddenUnitsRange[0]] },
     });
 
     for (let i = 0; i < numLayers; i++) {
-      const layerType =
-        allowedLayerTypes[Math.floor(Math.random() * allowedLayerTypes.length)];
+      const layerType = allowedLayerTypes[Math.floor(Math.random() * allowedLayerTypes.length)];
       const units =
         Math.floor(Math.random() * (hiddenUnitsRange[1] - hiddenUnitsRange[0] + 1)) +
         hiddenUnitsRange[0];
@@ -369,14 +368,14 @@ export class NeuralArchitectureSearch {
     }
 
     layers.push({
-      type: 'dense',
-      name: 'output',
-      config: { units: hiddenUnitsRange[0], activation: 'softmax' },
+      type: "dense",
+      name: "output",
+      config: { units: hiddenUnitsRange[0], activation: "softmax" },
     });
 
     return {
       name: `nas_arch_${this.triedArchitectures.size}`,
-      type: 'feedforward',
+      type: "feedforward",
       layers,
       inputShape: [hiddenUnitsRange[0]],
       outputShape: [hiddenUnitsRange[0]],
@@ -387,10 +386,10 @@ export class NeuralArchitectureSearch {
    * Run architecture search
    */
   async search(
-    evaluationFn: (arch: NeuralNetworkArchitecture) => Promise<number>,
+    evaluationFn: (arch: NeuralNetworkArchitecture) => Promise<number>
   ): Promise<{ architecture: NeuralNetworkArchitecture; score: number }> {
     let bestArchitecture: NeuralNetworkArchitecture | null = null;
-    let bestScore = this.config.objective.direction === 'maximize' ? -Infinity : Infinity;
+    let bestScore = this.config.objective.direction === "maximize" ? -Infinity : Infinity;
 
     for (let trial = 0; trial < this.config.budget.maxTrials; trial++) {
       const architecture = this.generateRandomArchitecture();
@@ -404,9 +403,7 @@ export class NeuralArchitectureSearch {
       this.triedArchitectures.set(architectureKey, score);
 
       const isBetter =
-        this.config.objective.direction === 'maximize'
-          ? score > bestScore
-          : score < bestScore;
+        this.config.objective.direction === "maximize" ? score > bestScore : score < bestScore;
 
       if (isBetter) {
         bestScore = score;
@@ -415,7 +412,7 @@ export class NeuralArchitectureSearch {
     }
 
     if (!bestArchitecture) {
-      throw new Error('No valid architecture found');
+      throw new Error("No valid architecture found");
     }
 
     return { architecture: bestArchitecture, score: bestScore };
@@ -446,7 +443,7 @@ export class ModelVersionManager {
     modelId: string,
     architecture: NeuralNetworkArchitecture,
     parentVersion?: string,
-    changes: string[] = [],
+    changes: string[] = []
   ): ModelVersion {
     const versions = this.versions.get(modelId) || [];
     const version = `v${versions.length + 1}`;
@@ -540,15 +537,13 @@ export class ArchitectureBenchmark {
   compareArchitectures(
     arch1: string,
     arch2: string,
-    metric: string,
+    metric: string
   ): { architecture: string; value: number }[] {
     const results1 = this.getResultsForArchitecture(arch1);
     const results2 = this.getResultsForArchitecture(arch2);
 
-    const avg1 =
-      results1.reduce((sum, r) => sum + (r.metrics[metric] || 0), 0) / results1.length;
-    const avg2 =
-      results2.reduce((sum, r) => sum + (r.metrics[metric] || 0), 0) / results2.length;
+    const avg1 = results1.reduce((sum, r) => sum + (r.metrics[metric] || 0), 0) / results1.length;
+    const avg2 = results2.reduce((sum, r) => sum + (r.metrics[metric] || 0), 0) / results2.length;
 
     return [
       { architecture: arch1, value: avg1 },
@@ -571,5 +566,5 @@ export class ArchitectureBenchmark {
 // Exports
 // ============================================================================
 
-export * from './architectures';
-export * from './model-zoo';
+export * from "./architectures";
+export * from "./model-zoo";

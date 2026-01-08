@@ -5,7 +5,7 @@
  * with comprehensive audit trails for compliance.
  */
 
-import crypto from 'node:crypto';
+import crypto from "node:crypto";
 import {
   HallucinationDetection,
   HallucinationType,
@@ -18,7 +18,7 @@ import {
   GovernanceEvent,
   AgentId,
   SessionId,
-} from '../types';
+} from "../types";
 
 // ============================================================================
 // Configuration
@@ -26,9 +26,9 @@ import {
 
 const DEFAULT_CONFIG: HallucinationAuditConfig = {
   enabled: true,
-  detectionMethods: ['factual_check', 'consistency_check', 'source_verification'],
+  detectionMethods: ["factual_check", "consistency_check", "source_verification"],
   samplingRate: 1.0, // Check all outputs
-  severityThreshold: 'misleading',
+  severityThreshold: "misleading",
   autoRemediate: true,
   escalationThreshold: 5, // Escalate after 5 detections
   retentionDays: 90,
@@ -94,10 +94,14 @@ export class HallucinationAuditor {
     previousOutputs?: string[];
     sources?: string[];
   }): Promise<HallucinationDetection | null> {
-    if (!this.config.enabled) {return null;}
+    if (!this.config.enabled) {
+      return null;
+    }
 
     // Apply sampling
-    if (Math.random() > this.config.samplingRate) {return null;}
+    if (Math.random() > this.config.samplingRate) {
+      return null;
+    }
 
     const context: DetectionContext = {
       agentId: params.agentId,
@@ -112,7 +116,9 @@ export class HallucinationAuditor {
 
     for (const methodId of this.config.detectionMethods) {
       const method = this.detectionMethods.get(methodId);
-      if (!method) {continue;}
+      if (!method) {
+        continue;
+      }
 
       try {
         const result = await method.detect(params.input, params.output, context);
@@ -124,7 +130,9 @@ export class HallucinationAuditor {
 
     // Combine results
     const positiveDetections = results.filter((r) => r.detected);
-    if (positiveDetections.length === 0) {return null;}
+    if (positiveDetections.length === 0) {
+      return null;
+    }
 
     // Create detection record
     const detection = this.createDetection(params, positiveDetections);
@@ -153,15 +161,15 @@ export class HallucinationAuditor {
     this.emitEvent({
       id: crypto.randomUUID(),
       timestamp: new Date(),
-      type: 'hallucination_detected',
-      source: 'HallucinationAuditor',
+      type: "hallucination_detected",
+      source: "HallucinationAuditor",
       agentId: params.agentId,
       sessionId: params.sessionId,
-      actor: 'system',
-      action: 'detect_hallucination',
+      actor: "system",
+      action: "detect_hallucination",
       resource: detection.id,
-      outcome: 'success',
-      classification: 'UNCLASSIFIED',
+      outcome: "success",
+      classification: "UNCLASSIFIED",
       details: {
         type: detection.type,
         severity: detection.severity,
@@ -185,8 +193,8 @@ export class HallucinationAuditor {
   private registerDefaultMethods(): void {
     // Factual consistency check
     this.registerMethod({
-      id: 'factual_check',
-      name: 'Factual Consistency Check',
+      id: "factual_check",
+      name: "Factual Consistency Check",
       async detect(input, output, context) {
         // Check for common hallucination patterns
         const patterns = [
@@ -201,12 +209,12 @@ export class HallucinationAuditor {
             // Would verify against knowledge base in production
             return {
               detected: true,
-              type: 'citation_fabrication' as HallucinationType,
+              type: "citation_fabrication" as HallucinationType,
               confidence: 0.7,
               evidence: {
-                type: 'factual_check',
-                method: 'pattern_matching',
-                result: 'uncertain',
+                type: "factual_check",
+                method: "pattern_matching",
+                result: "uncertain",
               },
               hallucinatedContent: output.match(pattern)?.[0],
             };
@@ -219,8 +227,8 @@ export class HallucinationAuditor {
 
     // Self-contradiction check
     this.registerMethod({
-      id: 'consistency_check',
-      name: 'Self-Consistency Check',
+      id: "consistency_check",
+      name: "Self-Consistency Check",
       async detect(input, output, context) {
         if (!context.previousOutputs || context.previousOutputs.length === 0) {
           return { detected: false, confidence: 0 };
@@ -239,18 +247,18 @@ export class HallucinationAuditor {
         // Check for contradicting numbers in same context
         for (const prev of previousFacts) {
           const contradictingNumbers = currentFacts.numbers.filter(
-            (n) => prev.numbers.includes(n) === false && prev.numbers.length > 0,
+            (n) => prev.numbers.includes(n) === false && prev.numbers.length > 0
           );
 
           if (contradictingNumbers.length > 0 && prev.numbers.length > 0) {
             return {
               detected: true,
-              type: 'self_contradiction' as HallucinationType,
+              type: "self_contradiction" as HallucinationType,
               confidence: 0.6,
               evidence: {
-                type: 'consistency_check',
-                method: 'numerical_comparison',
-                result: 'uncertain',
+                type: "consistency_check",
+                method: "numerical_comparison",
+                result: "uncertain",
                 details: { contradictingNumbers },
               },
             };
@@ -263,8 +271,8 @@ export class HallucinationAuditor {
 
     // Source verification check
     this.registerMethod({
-      id: 'source_verification',
-      name: 'Source Verification Check',
+      id: "source_verification",
+      name: "Source Verification Check",
       async detect(input, output, context) {
         if (!context.sources || context.sources.length === 0) {
           return { detected: false, confidence: 0 };
@@ -273,22 +281,22 @@ export class HallucinationAuditor {
         // Check if output makes claims not supported by sources
         // This is a simplified version - production would use semantic similarity
         const outputLower = output.toLowerCase();
-        const sourcesLower = context.sources.join(' ').toLowerCase();
+        const sourcesLower = context.sources.join(" ").toLowerCase();
 
         // Extract quoted or emphasized claims
         const claims = output.match(/"[^"]+"/g) || [];
 
         for (const claim of claims) {
-          const cleanClaim = claim.replace(/"/g, '').toLowerCase();
+          const cleanClaim = claim.replace(/"/g, "").toLowerCase();
           if (!sourcesLower.includes(cleanClaim.substring(0, 20))) {
             return {
               detected: true,
-              type: 'unsupported_claim' as HallucinationType,
+              type: "unsupported_claim" as HallucinationType,
               confidence: 0.65,
               evidence: {
-                type: 'source_verification',
-                method: 'claim_extraction',
-                result: 'refuted',
+                type: "source_verification",
+                method: "claim_extraction",
+                result: "refuted",
                 details: { claim },
               },
               hallucinatedContent: claim,
@@ -302,22 +310,25 @@ export class HallucinationAuditor {
 
     // Temporal confusion check
     this.registerMethod({
-      id: 'temporal_check',
-      name: 'Temporal Confusion Check',
+      id: "temporal_check",
+      name: "Temporal Confusion Check",
       async detect(input, output, context) {
         const currentYear = new Date().getFullYear();
 
         // Check for future dates presented as past
-        const futurePattern = new RegExp(`in (${currentYear + 1}|${currentYear + 2}|\\d{4}).*happened`, 'i');
+        const futurePattern = new RegExp(
+          `in (${currentYear + 1}|${currentYear + 2}|\\d{4}).*happened`,
+          "i"
+        );
         if (futurePattern.test(output)) {
           return {
             detected: true,
-            type: 'temporal_confusion' as HallucinationType,
+            type: "temporal_confusion" as HallucinationType,
             confidence: 0.8,
             evidence: {
-              type: 'factual_check',
-              method: 'temporal_analysis',
-              result: 'confirmed',
+              type: "factual_check",
+              method: "temporal_analysis",
+              result: "confirmed",
             },
           };
         }
@@ -337,7 +348,7 @@ export class HallucinationAuditor {
       input: string;
       output: string;
     },
-    results: DetectionResult[],
+    results: DetectionResult[]
   ): HallucinationDetection {
     // Take the highest confidence detection
     const primary = results.reduce((a, b) => (a.confidence > b.confidence ? a : b));
@@ -347,16 +358,16 @@ export class HallucinationAuditor {
       sessionId: params.sessionId,
       agentId: params.agentId,
       timestamp: new Date(),
-      type: primary.type || 'factual_error',
+      type: primary.type || "factual_error",
       severity: this.calculateSeverity(primary),
       confidence: primary.confidence,
       inputContext: params.input.substring(0, 500),
       generatedOutput: params.output.substring(0, 1000),
-      hallucinatedContent: primary.hallucinatedContent || '',
+      hallucinatedContent: primary.hallucinatedContent || "",
       evidence: results.map((r) => ({
-        type: r.evidence.type || 'factual_check',
-        method: r.evidence.method || 'unknown',
-        result: r.evidence.result || 'uncertain',
+        type: r.evidence.type || "factual_check",
+        method: r.evidence.method || "unknown",
+        result: r.evidence.result || "uncertain",
         confidence: r.confidence,
         details: r.evidence.details || {},
       })) as HallucinationEvidence[],
@@ -368,24 +379,24 @@ export class HallucinationAuditor {
    */
   private calculateSeverity(result: DetectionResult): HallucinationSeverity {
     if (result.confidence > 0.9) {
-      if (result.type === 'factual_error' || result.type === 'citation_fabrication') {
-        return 'harmful';
+      if (result.type === "factual_error" || result.type === "citation_fabrication") {
+        return "harmful";
       }
-      return 'misleading';
+      return "misleading";
     }
 
     if (result.confidence > 0.7) {
-      return 'misleading';
+      return "misleading";
     }
 
-    return 'benign';
+    return "benign";
   }
 
   /**
    * Check if severity meets threshold
    */
   private meetsSeverityThreshold(severity: HallucinationSeverity): boolean {
-    const levels: HallucinationSeverity[] = ['benign', 'misleading', 'harmful', 'dangerous'];
+    const levels: HallucinationSeverity[] = ["benign", "misleading", "harmful", "dangerous"];
     return levels.indexOf(severity) >= levels.indexOf(this.config.severityThreshold);
   }
 
@@ -394,20 +405,20 @@ export class HallucinationAuditor {
    */
   private async remediate(detection: HallucinationDetection): Promise<HallucinationRemediation> {
     // Determine remediation action based on severity
-    let action: 'correct' | 'redact' | 'flag' | 'reject';
+    let action: "correct" | "redact" | "flag" | "reject";
 
     switch (detection.severity) {
-      case 'dangerous':
-        action = 'reject';
+      case "dangerous":
+        action = "reject";
         break;
-      case 'harmful':
-        action = 'redact';
+      case "harmful":
+        action = "redact";
         break;
-      case 'misleading':
-        action = 'flag';
+      case "misleading":
+        action = "flag";
         break;
       default:
-        action = 'flag';
+        action = "flag";
     }
 
     const remediation: HallucinationRemediation = {
@@ -415,10 +426,10 @@ export class HallucinationAuditor {
       explanation: `Detected ${detection.type} with ${Math.round(detection.confidence * 100)}% confidence`,
     };
 
-    if (action === 'redact') {
+    if (action === "redact") {
       remediation.correctedOutput = this.redactHallucination(
         detection.generatedOutput,
-        detection.hallucinatedContent,
+        detection.hallucinatedContent
       );
     }
 
@@ -426,15 +437,15 @@ export class HallucinationAuditor {
     this.emitEvent({
       id: crypto.randomUUID(),
       timestamp: new Date(),
-      type: 'hallucination_remediated',
-      source: 'HallucinationAuditor',
+      type: "hallucination_remediated",
+      source: "HallucinationAuditor",
       agentId: detection.agentId,
       sessionId: detection.sessionId,
-      actor: 'system',
+      actor: "system",
       action: `remediate_${action}`,
       resource: detection.id,
-      outcome: 'success',
-      classification: 'UNCLASSIFIED',
+      outcome: "success",
+      classification: "UNCLASSIFIED",
       details: { action, severity: detection.severity },
     });
 
@@ -445,8 +456,10 @@ export class HallucinationAuditor {
    * Redact hallucinated content from output
    */
   private redactHallucination(output: string, hallucinatedContent: string): string {
-    if (!hallucinatedContent) {return output;}
-    return output.replace(hallucinatedContent, '[REDACTED - Unverified Content]');
+    if (!hallucinatedContent) {
+      return output;
+    }
+    return output.replace(hallucinatedContent, "[REDACTED - Unverified Content]");
   }
 
   /**
@@ -455,7 +468,7 @@ export class HallucinationAuditor {
   private async escalate(agentId: AgentId, detection: HallucinationDetection): Promise<void> {
     console.warn(
       `[Hallucination] Escalation threshold exceeded for agent ${agentId}. ` +
-        `Total detections: ${this.agentDetectionCounts.get(agentId)}`,
+        `Total detections: ${this.agentDetectionCounts.get(agentId)}`
     );
     // Would integrate with IncidentResponseManager
   }
@@ -473,7 +486,7 @@ export class HallucinationAuditor {
    */
   generateReport(period: { start: Date; end: Date }): HallucinationAuditReport {
     const detectionsInPeriod = Array.from(this.detections.values()).filter(
-      (d) => d.timestamp >= period.start && d.timestamp <= period.end,
+      (d) => d.timestamp >= period.start && d.timestamp <= period.end
     );
 
     const byType: Record<HallucinationType, number> = {
@@ -557,17 +570,17 @@ export class HallucinationAuditor {
    */
   private suggestMitigation(type: HallucinationType): string {
     const mitigations: Record<HallucinationType, string> = {
-      factual_error: 'Enhance factual grounding with knowledge base retrieval',
-      citation_fabrication: 'Require explicit source attribution with verification',
-      entity_confusion: 'Implement entity disambiguation in preprocessing',
-      temporal_confusion: 'Add temporal context validation',
-      logical_inconsistency: 'Enable chain-of-thought verification',
-      self_contradiction: 'Implement output consistency checking across sessions',
-      unsupported_claim: 'Strengthen source citation requirements',
-      context_drift: 'Reduce context window or add context anchoring',
+      factual_error: "Enhance factual grounding with knowledge base retrieval",
+      citation_fabrication: "Require explicit source attribution with verification",
+      entity_confusion: "Implement entity disambiguation in preprocessing",
+      temporal_confusion: "Add temporal context validation",
+      logical_inconsistency: "Enable chain-of-thought verification",
+      self_contradiction: "Implement output consistency checking across sessions",
+      unsupported_claim: "Strengthen source citation requirements",
+      context_drift: "Reduce context window or add context anchoring",
     };
 
-    return mitigations[type] || 'Review and enhance detection methodology';
+    return mitigations[type] || "Review and enhance detection methodology";
   }
 
   /**
@@ -575,14 +588,14 @@ export class HallucinationAuditor {
    */
   private generateRecommendations(
     patterns: HallucinationPattern[],
-    byAgent: Record<AgentId, number>,
+    byAgent: Record<AgentId, number>
   ): string[] {
     const recommendations: string[] = [];
 
     // Pattern-based recommendations
     for (const pattern of patterns.slice(0, 3)) {
       recommendations.push(
-        `Address "${pattern.types[0]}" pattern (${pattern.frequency} occurrences): ${pattern.suggestedMitigation}`,
+        `Address "${pattern.types[0]}" pattern (${pattern.frequency} occurrences): ${pattern.suggestedMitigation}`
       );
     }
 
@@ -593,7 +606,7 @@ export class HallucinationAuditor {
 
     if (highRateAgents.length > 0) {
       recommendations.push(
-        `Review configuration for high-rate agents: ${highRateAgents.join(', ')}`,
+        `Review configuration for high-rate agents: ${highRateAgents.join(", ")}`
       );
     }
 
@@ -629,7 +642,7 @@ export class HallucinationAuditor {
       try {
         listener(event);
       } catch (error) {
-        console.error('Event listener error:', error);
+        console.error("Event listener error:", error);
       }
     }
   }

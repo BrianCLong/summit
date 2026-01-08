@@ -21,7 +21,7 @@ spec:
         app: falco
         app.kubernetes.io/name: falco
       annotations:
-        checksum/config: 'UPDATE_ON_CONFIG_CHANGE'
+        checksum/config: "UPDATE_ON_CONFIG_CHANGE"
     spec:
       serviceAccountName: falco
       hostNetwork: true
@@ -54,9 +54,9 @@ spec:
                 fieldRef:
                   fieldPath: spec.nodeName
             - name: FALCO_GRPC_BIND_ADDRESS
-              value: 'unix:///run/falco/falco.sock'
+              value: "unix:///run/falco/falco.sock"
             - name: FALCO_GRPC_THREAD_POOL_SIZE
-              value: '8'
+              value: "8"
           volumeMounts:
             - mountPath: /dev
               name: dev-fs
@@ -171,16 +171,15 @@ kind: ClusterRole
 metadata:
   name: falco
 rules:
-  - apiGroups: ['']
-    resources:
-      ['nodes', 'namespaces', 'pods', 'replicationcontrollers', 'services']
-    verbs: ['get', 'list', 'watch']
-  - apiGroups: ['apps']
-    resources: ['daemonsets', 'deployments', 'replicasets', 'statefulsets']
-    verbs: ['get', 'list', 'watch']
-  - apiGroups: ['extensions']
-    resources: ['daemonsets', 'deployments', 'replicasets']
-    verbs: ['get', 'list', 'watch']
+  - apiGroups: [""]
+    resources: ["nodes", "namespaces", "pods", "replicationcontrollers", "services"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["daemonsets", "deployments", "replicasets", "statefulsets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["extensions"]
+    resources: ["daemonsets", "deployments", "replicasets"]
+    verbs: ["get", "list", "watch"]
 
 ---
 # Falco ClusterRoleBinding
@@ -545,8 +544,8 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: 'Falco security alert'
-            description: 'Falco detected {{ $value }} security events in the last 5 minutes'
+            summary: "Falco security alert"
+            description: "Falco detected {{ $value }} security events in the last 5 minutes"
 
         - alert: FalcoCriticalAlert
           expr: increase(falco_events{priority="Critical"}[5m]) > 0
@@ -554,5 +553,5 @@ spec:
           labels:
             severity: critical
           annotations:
-            summary: 'Falco critical security alert'
-            description: 'Falco detected {{ $value }} critical security events in the last 5 minutes'
+            summary: "Falco critical security alert"
+            description: "Falco detected {{ $value }} critical security events in the last 5 minutes"

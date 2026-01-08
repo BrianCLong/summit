@@ -12,6 +12,7 @@ A Python tool that generates adversarial policy + query pairs to defeat governan
 ## Usage
 
 To run the fuzzer with all attack grammars enabled for 1000 iterations:
+
 ```bash
 python main.py --iterations 1000 --enable-synonym-dodges --enable-regex-dodges --enable-time-window-hops --enable-field-aliasing --enable-data-type-mismatches
 ```
@@ -19,6 +20,7 @@ python main.py --iterations 1000 --enable-synonym-dodges --enable-regex-dodges -
 ### Running Unit Tests
 
 To run the unit tests for the query generator:
+
 ```bash
 python -m unittest policy-fuzzer/tests/test_query_generator.py
 ```

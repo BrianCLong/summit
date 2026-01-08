@@ -21,10 +21,10 @@
  *   --help              Show help
  */
 
-import { execSync } from 'child_process';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as readline from 'readline';
+import { execSync } from "child_process";
+import * as fs from "fs";
+import * as path from "path";
+import * as readline from "readline";
 
 // Types
 interface PRInfo {
@@ -52,27 +52,27 @@ interface EntryOptions {
 
 // Constants
 const CATEGORIES = [
-  'Security',
-  'Performance',
-  'Governance',
-  'Architecture',
-  'Strategy',
-  'Infrastructure',
-  'API',
-  'Data',
+  "Security",
+  "Performance",
+  "Governance",
+  "Architecture",
+  "Strategy",
+  "Infrastructure",
+  "API",
+  "Data",
 ];
 
-const LOG_PATH = 'docs/future-history/LOG.md';
-const STANDALONE_DIR = 'docs/future-history/entries';
+const LOG_PATH = "docs/future-history/LOG.md";
+const STANDALONE_DIR = "docs/future-history/entries";
 
 // Utility functions
 function parseArgs(): EntryOptions & { interactive: boolean; help: boolean } {
   const args = process.argv.slice(2);
   const options: EntryOptions & { interactive: boolean; help: boolean } = {
     prs: [],
-    summary: '',
-    category: '',
-    owner: '',
+    summary: "",
+    category: "",
+    owner: "",
     output: LOG_PATH,
     standalone: false,
     dryRun: false,
@@ -83,31 +83,31 @@ function parseArgs(): EntryOptions & { interactive: boolean; help: boolean } {
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     switch (arg) {
-      case '--pr':
+      case "--pr":
         options.prs.push(parseInt(args[++i], 10));
         break;
-      case '--summary':
+      case "--summary":
         options.summary = args[++i];
         break;
-      case '--category':
+      case "--category":
         options.category = args[++i];
         break;
-      case '--owner':
+      case "--owner":
         options.owner = args[++i];
         break;
-      case '--output':
+      case "--output":
         options.output = args[++i];
         break;
-      case '--standalone':
+      case "--standalone":
         options.standalone = true;
         break;
-      case '--dry-run':
+      case "--dry-run":
         options.dryRun = true;
         break;
-      case '--interactive':
+      case "--interactive":
         options.interactive = true;
         break;
-      case '--help':
+      case "--help":
         options.help = true;
         break;
     }
@@ -130,7 +130,7 @@ Usage:
 Options:
   --pr <number>       PR number(s) to include (can be repeated)
   --summary <text>    Short summary of the change
-  --category <cat>    Category: ${CATEGORIES.join(', ')}
+  --category <cat>    Category: ${CATEGORIES.join(", ")}
   --owner <team>      Team or person responsible
   --output <path>     Output file (default: ${LOG_PATH})
   --standalone        Create standalone file instead of appending to LOG.md
@@ -158,14 +158,14 @@ async function fetchPRInfo(prNumber: number): Promise<PRInfo | null> {
     // Try using gh CLI if available
     const result = execSync(
       `gh pr view ${prNumber} --json number,title,body,author,additions,deletions,changedFiles,mergedAt,labels,url 2>/dev/null`,
-      { encoding: 'utf-8', timeout: 10000 },
+      { encoding: "utf-8", timeout: 10000 }
     );
     const data = JSON.parse(result);
     return {
       number: data.number,
       title: data.title,
-      body: data.body || '',
-      author: data.author?.login || 'unknown',
+      body: data.body || "",
+      author: data.author?.login || "unknown",
       additions: data.additions || 0,
       deletions: data.deletions || 0,
       changedFiles: data.changedFiles || 0,
@@ -175,14 +175,12 @@ async function fetchPRInfo(prNumber: number): Promise<PRInfo | null> {
     };
   } catch {
     // gh CLI not available or PR not found, create placeholder
-    console.warn(
-      `Warning: Could not fetch PR #${prNumber} info. Using placeholder.`,
-    );
+    console.warn(`Warning: Could not fetch PR #${prNumber} info. Using placeholder.`);
     return {
       number: prNumber,
       title: `PR #${prNumber}`,
-      body: '',
-      author: 'unknown',
+      body: "",
+      author: "unknown",
       additions: 0,
       deletions: 0,
       changedFiles: 0,
@@ -195,62 +193,46 @@ async function fetchPRInfo(prNumber: number): Promise<PRInfo | null> {
 
 function inferCategory(prInfo: PRInfo[]): string {
   const labels = prInfo.flatMap((pr) => pr.labels.map((l) => l.toLowerCase()));
-  const titles = prInfo.map((pr) => pr.title.toLowerCase()).join(' ');
-  const bodies = prInfo.map((pr) => pr.body.toLowerCase()).join(' ');
-  const combined = [...labels, titles, bodies].join(' ');
+  const titles = prInfo.map((pr) => pr.title.toLowerCase()).join(" ");
+  const bodies = prInfo.map((pr) => pr.body.toLowerCase()).join(" ");
+  const combined = [...labels, titles, bodies].join(" ");
 
-  if (
-    combined.includes('security') ||
-    combined.includes('auth') ||
-    combined.includes('vuln')
-  ) {
-    return 'Security';
+  if (combined.includes("security") || combined.includes("auth") || combined.includes("vuln")) {
+    return "Security";
+  }
+  if (combined.includes("perf") || combined.includes("optim") || combined.includes("latency")) {
+    return "Performance";
   }
   if (
-    combined.includes('perf') ||
-    combined.includes('optim') ||
-    combined.includes('latency')
+    combined.includes("governance") ||
+    combined.includes("compliance") ||
+    combined.includes("audit")
   ) {
-    return 'Performance';
+    return "Governance";
   }
   if (
-    combined.includes('governance') ||
-    combined.includes('compliance') ||
-    combined.includes('audit')
+    combined.includes("architect") ||
+    combined.includes("refactor") ||
+    combined.includes("migration")
   ) {
-    return 'Governance';
+    return "Architecture";
   }
   if (
-    combined.includes('architect') ||
-    combined.includes('refactor') ||
-    combined.includes('migration')
+    combined.includes("ci") ||
+    combined.includes("cd") ||
+    combined.includes("deploy") ||
+    combined.includes("infra")
   ) {
-    return 'Architecture';
+    return "Infrastructure";
   }
-  if (
-    combined.includes('ci') ||
-    combined.includes('cd') ||
-    combined.includes('deploy') ||
-    combined.includes('infra')
-  ) {
-    return 'Infrastructure';
+  if (combined.includes("graphql") || combined.includes("api") || combined.includes("endpoint")) {
+    return "API";
   }
-  if (
-    combined.includes('graphql') ||
-    combined.includes('api') ||
-    combined.includes('endpoint')
-  ) {
-    return 'API';
-  }
-  if (
-    combined.includes('database') ||
-    combined.includes('data') ||
-    combined.includes('schema')
-  ) {
-    return 'Data';
+  if (combined.includes("database") || combined.includes("data") || combined.includes("schema")) {
+    return "Data";
   }
 
-  return 'Architecture'; // Default
+  return "Architecture"; // Default
 }
 
 function generateDiffSummary(prInfo: PRInfo[]): string {
@@ -262,17 +244,15 @@ function generateDiffSummary(prInfo: PRInfo[]): string {
 }
 
 function generateEntry(options: EntryOptions, prInfo: PRInfo[]): string {
-  const date = new Date().toISOString().split('T')[0];
-  const title = options.summary || prInfo.map((pr) => pr.title).join('; ');
+  const date = new Date().toISOString().split("T")[0];
+  const title = options.summary || prInfo.map((pr) => pr.title).join("; ");
   const category = options.category || inferCategory(prInfo);
-  const owner = options.owner || 'Engineering Team';
+  const owner = options.owner || "Engineering Team";
   const diffSummary = generateDiffSummary(prInfo);
 
-  const prLinks = prInfo.map((pr) => `#${pr.number}`).join(', ');
+  const prLinks = prInfo.map((pr) => `#${pr.number}`).join(", ");
 
-  const prDescriptions = prInfo
-    .map((pr) => `- **PR #${pr.number}**: ${pr.title}`)
-    .join('\n');
+  const prDescriptions = prInfo.map((pr) => `- **PR #${pr.number}**: ${pr.title}`).join("\n");
 
   return `
 ### ${date}: ${title}
@@ -325,13 +305,13 @@ ${prDescriptions}
 }
 
 function generateIndexEntry(options: EntryOptions, prInfo: PRInfo[]): string {
-  const date = new Date().toISOString().split('T')[0];
-  const title = options.summary || prInfo.map((pr) => pr.title).join('; ');
+  const date = new Date().toISOString().split("T")[0];
+  const title = options.summary || prInfo.map((pr) => pr.title).join("; ");
   const category = options.category || inferCategory(prInfo);
   const anchor = title
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-');
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-");
 
   return `| ${date} | [${title}](#${date}-${anchor}) | ${category} | Draft |`;
 }
@@ -341,34 +321,26 @@ function appendToLog(entry: string, indexEntry: string, logPath: string): void {
 
   if (!fs.existsSync(fullPath)) {
     console.error(`Error: Log file not found at ${fullPath}`);
-    console.error('Please ensure docs/future-history/LOG.md exists.');
+    console.error("Please ensure docs/future-history/LOG.md exists.");
     process.exit(1);
   }
 
-  let content = fs.readFileSync(fullPath, 'utf-8');
+  let content = fs.readFileSync(fullPath, "utf-8");
 
   // Find the index table and add new entry
-  const indexMarker = '|------|-------|----------|--------|';
+  const indexMarker = "|------|-------|----------|--------|";
   const indexPosition = content.indexOf(indexMarker);
   if (indexPosition !== -1) {
-    const insertPosition = content.indexOf('\n', indexPosition) + 1;
-    content =
-      content.slice(0, insertPosition) +
-      indexEntry +
-      '\n' +
-      content.slice(insertPosition);
+    const insertPosition = content.indexOf("\n", indexPosition) + 1;
+    content = content.slice(0, insertPosition) + indexEntry + "\n" + content.slice(insertPosition);
   }
 
   // Find the entries section and add new entry
-  const entriesMarker = '## Entries';
+  const entriesMarker = "## Entries";
   const entriesPosition = content.indexOf(entriesMarker);
   if (entriesPosition !== -1) {
-    const insertPosition = content.indexOf('\n\n', entriesPosition) + 2;
-    content =
-      content.slice(0, insertPosition) +
-      entry +
-      '\n---\n' +
-      content.slice(insertPosition);
+    const insertPosition = content.indexOf("\n\n", entriesPosition) + 2;
+    content = content.slice(0, insertPosition) + entry + "\n---\n" + content.slice(insertPosition);
   }
 
   fs.writeFileSync(fullPath, content);
@@ -376,11 +348,11 @@ function appendToLog(entry: string, indexEntry: string, logPath: string): void {
 }
 
 function writeStandaloneEntry(entry: string, options: EntryOptions): string {
-  const date = new Date().toISOString().split('T')[0];
+  const date = new Date().toISOString().split("T")[0];
   const slug = options.summary
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
     .slice(0, 50);
 
   const dirPath = path.resolve(process.cwd(), STANDALONE_DIR);
@@ -413,40 +385,34 @@ async function promptUser(question: string): Promise<string> {
 }
 
 async function interactiveMode(): Promise<EntryOptions> {
-  console.log('\n=== Future History Entry Creator (Interactive Mode) ===\n');
+  console.log("\n=== Future History Entry Creator (Interactive Mode) ===\n");
 
-  const prInput = await promptUser(
-    'PR number(s) (comma-separated, or empty): ',
-  );
+  const prInput = await promptUser("PR number(s) (comma-separated, or empty): ");
   const prs = prInput
     ? prInput
-        .split(',')
+        .split(",")
         .map((n) => parseInt(n.trim(), 10))
         .filter((n) => !isNaN(n))
     : [];
 
-  const summary = await promptUser('Summary (short title): ');
+  const summary = await promptUser("Summary (short title): ");
 
-  console.log(`\nCategories: ${CATEGORIES.join(', ')}`);
-  const category = await promptUser(
-    'Category (or press Enter to auto-detect): ',
-  );
+  console.log(`\nCategories: ${CATEGORIES.join(", ")}`);
+  const category = await promptUser("Category (or press Enter to auto-detect): ");
 
-  const owner = await promptUser(
-    'Owner (team or person, default: Engineering Team): ',
-  );
+  const owner = await promptUser("Owner (team or person, default: Engineering Team): ");
 
-  const standaloneInput = await promptUser('Create standalone file? (y/N): ');
-  const standalone = standaloneInput.toLowerCase() === 'y';
+  const standaloneInput = await promptUser("Create standalone file? (y/N): ");
+  const standalone = standaloneInput.toLowerCase() === "y";
 
-  const dryRunInput = await promptUser('Dry run (preview only)? (y/N): ');
-  const dryRun = dryRunInput.toLowerCase() === 'y';
+  const dryRunInput = await promptUser("Dry run (preview only)? (y/N): ");
+  const dryRun = dryRunInput.toLowerCase() === "y";
 
   return {
     prs,
-    summary: summary || 'Untitled Entry',
-    category: category || '',
-    owner: owner || 'Engineering Team',
+    summary: summary || "Untitled Entry",
+    category: category || "",
+    owner: owner || "Engineering Team",
     output: LOG_PATH,
     standalone,
     dryRun,
@@ -468,14 +434,14 @@ async function main(): Promise<void> {
     options = await interactiveMode();
   } else {
     if (!args.summary && args.prs.length === 0) {
-      console.error('Error: --summary or --pr required. Use --help for usage.');
+      console.error("Error: --summary or --pr required. Use --help for usage.");
       process.exit(1);
     }
     options = args;
   }
 
   // Fetch PR info
-  console.log('\nFetching PR information...');
+  console.log("\nFetching PR information...");
   const prInfoPromises = options.prs.map((pr) => fetchPRInfo(pr));
   const prInfoResults = await Promise.all(prInfoPromises);
   const prInfo = prInfoResults.filter((pr): pr is PRInfo => pr !== null);
@@ -485,12 +451,12 @@ async function main(): Promise<void> {
   const indexEntry = generateIndexEntry(options, prInfo);
 
   if (options.dryRun) {
-    console.log('\n=== DRY RUN - Entry Preview ===\n');
-    console.log('Index entry:');
+    console.log("\n=== DRY RUN - Entry Preview ===\n");
+    console.log("Index entry:");
     console.log(indexEntry);
-    console.log('\nFull entry:');
+    console.log("\nFull entry:");
     console.log(entry);
-    console.log('\n=== End Preview ===');
+    console.log("\n=== End Preview ===");
     return;
   }
 
@@ -500,14 +466,14 @@ async function main(): Promise<void> {
     appendToLog(entry, indexEntry, options.output);
   }
 
-  console.log('\nEntry created successfully!');
-  console.log('Next steps:');
-  console.log('1. Fill in the TODO placeholders in the entry');
-  console.log('2. Review and update the predictions');
-  console.log('3. Change status from Draft to Active after review');
+  console.log("\nEntry created successfully!");
+  console.log("Next steps:");
+  console.log("1. Fill in the TODO placeholders in the entry");
+  console.log("2. Review and update the predictions");
+  console.log("3. Change status from Draft to Active after review");
 }
 
 main().catch((error) => {
-  console.error('Error:', error.message);
+  console.error("Error:", error.message);
   process.exit(1);
 });

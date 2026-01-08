@@ -1,9 +1,11 @@
 # Golden Paths Overview
 
 ## Principle
+
 Golden paths represent the curated, end-to-end workflows sanctioned by the platform governance council. Each path integrates AI guidance, policy guardrails, and telemetry capture by default.
 
 ## Current Golden Paths
+
 1. **Service Bootstrap Path**
    - CLI command `tools/deploy/init --template service-web`
    - Portal wizard step verifying policy coverage and dependency declarations.
@@ -18,6 +20,7 @@ Golden paths represent the curated, end-to-end workflows sanctioned by the platf
    - Post-recovery survey captured, feeding DX telemetry pipeline.
 
 ## Adoption Plan
+
 - Publish path-specific checklists in `enablement/playbooks/devexp`.
 - Embed inline prompts within CLI/UI referencing knowledge graph context.
 - Track adoption via knowledge graph `GoldenPathEvent` relationships.

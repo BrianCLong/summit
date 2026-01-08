@@ -2,7 +2,7 @@ name: Operational Verification Checklist
 
 on:
   schedule:
-    - cron: '0 6 * * *' # Daily at 6 AM UTC
+    - cron: "0 6 * * *" # Daily at 6 AM UTC
   workflow_dispatch:
   push:
     branches: [main]
@@ -21,8 +21,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps
@@ -66,8 +66,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps
@@ -112,8 +112,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps

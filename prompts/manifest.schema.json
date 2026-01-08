@@ -63,12 +63,12 @@
       }
     },
     "model_config": {
-        "type": "object",
-        "properties": {
-            "model": { "type": "string" },
-            "temperature": { "type": "number" },
-            "max_tokens": { "type": "integer" }
-        }
+      "type": "object",
+      "properties": {
+        "model": { "type": "string" },
+        "temperature": { "type": "number" },
+        "max_tokens": { "type": "integer" }
+      }
     },
     "vendor_overrides": {
       "type": "object",

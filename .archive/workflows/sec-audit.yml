@@ -1,11 +1,11 @@
 name: 🛡️ Security Audit - Comprehensive Security Scanning
 on:
   push:
-    branches: [main, develop, 'release/**']
+    branches: [main, develop, "release/**"]
   pull_request:
     branches: [main, develop]
   schedule:
-    - cron: '0 2 * * 1' # Weekly on Mondays at 2 AM UTC
+    - cron: "0 2 * * 1" # Weekly on Mondays at 2 AM UTC
   workflow_dispatch:
 
 permissions:
@@ -160,7 +160,7 @@ jobs:
       - name: Setup Python for Semgrep
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install Semgrep
         run: |
@@ -274,21 +274,21 @@ jobs:
         if: matrix.ecosystem == 'npm'
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Setup Python
         if: matrix.ecosystem == 'python'
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-          cache: 'pip'
+          python-version: "3.11"
+          cache: "pip"
 
       - name: Setup Go
         if: matrix.ecosystem == 'go'
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21'
+          go-version: "1.21"
 
       - name: Install audit tools
         run: |
@@ -368,8 +368,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install license checker
         run: |
@@ -404,15 +404,7 @@ jobs:
   security-report:
     name: 📊 Security Audit Report
     runs-on: ubuntu-latest
-    needs:
-      [
-        setup,
-        secret-scan,
-        sast-scan,
-        container-scan,
-        dependency-scan,
-        license-scan,
-      ]
+    needs: [setup, secret-scan, sast-scan, container-scan, dependency-scan, license-scan]
     if: always()
     steps:
       - uses: actions/checkout@v4
@@ -501,8 +493,7 @@ jobs:
   security-gate:
     name: 🚪 Security Gate
     runs-on: ubuntu-latest
-    needs:
-      [secret-scan, sast-scan, container-scan, dependency-scan, license-scan]
+    needs: [secret-scan, sast-scan, container-scan, dependency-scan, license-scan]
     if: always()
     steps:
       - name: Evaluate security posture

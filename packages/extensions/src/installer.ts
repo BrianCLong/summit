@@ -1,10 +1,10 @@
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import { ExtensionManifest } from './types.js';
-import { ExtensionManifestSchema } from './types.js';
+import * as fs from "fs/promises";
+import * as path from "path";
+import { ExtensionManifest } from "./types.js";
+import { ExtensionManifestSchema } from "./types.js";
 
 export interface InstallationAuditEntry {
-  action: 'install' | 'update' | 'rollback' | 'uninstall';
+  action: "install" | "update" | "rollback" | "uninstall";
   name: string;
   version: string;
   timestamp: string;
@@ -33,7 +33,12 @@ export class ExtensionInstaller {
     const manifest = await this.readManifest(sourcePath);
     const target = path.join(this.installDir, manifest.name);
     await this.copyExtension(sourcePath, target);
-    await this.writeAudit({ action: 'install', name: manifest.name, version: manifest.version, timestamp: new Date().toISOString() });
+    await this.writeAudit({
+      action: "install",
+      name: manifest.name,
+      version: manifest.version,
+      timestamp: new Date().toISOString(),
+    });
     return manifest;
   }
 
@@ -47,7 +52,7 @@ export class ExtensionInstaller {
     }
     await this.copyExtension(sourcePath, target);
     await this.writeAudit({
-      action: 'update',
+      action: "update",
       name: manifest.name,
       version: manifest.version,
       timestamp: new Date().toISOString(),
@@ -64,7 +69,12 @@ export class ExtensionInstaller {
     }
     await fs.rm(target, { recursive: true, force: true });
     await fs.rename(backup, target);
-    await this.writeAudit({ action: 'rollback', name, version, timestamp: new Date().toISOString() });
+    await this.writeAudit({
+      action: "rollback",
+      name,
+      version,
+      timestamp: new Date().toISOString(),
+    });
   }
 
   async uninstall(name: string): Promise<void> {
@@ -74,15 +84,20 @@ export class ExtensionInstaller {
     if (existsAfter) {
       throw new Error(`Cleanup verification failed for ${name}`);
     }
-    await this.writeAudit({ action: 'uninstall', name, version: 'unknown', timestamp: new Date().toISOString() });
+    await this.writeAudit({
+      action: "uninstall",
+      name,
+      version: "unknown",
+      timestamp: new Date().toISOString(),
+    });
   }
 
   async getAuditLog(): Promise<InstallationAuditEntry[]> {
     try {
-      const content = await fs.readFile(this.auditFile, 'utf-8');
+      const content = await fs.readFile(this.auditFile, "utf-8");
       return content
         .trim()
-        .split('\n')
+        .split("\n")
         .filter(Boolean)
         .map((line) => JSON.parse(line));
     } catch {
@@ -102,8 +117,8 @@ export class ExtensionInstaller {
   }
 
   private async readManifest(extensionPath: string): Promise<ExtensionManifest> {
-    const manifestPath = path.join(extensionPath, 'extension.json');
-    const content = await fs.readFile(manifestPath, 'utf-8');
+    const manifestPath = path.join(extensionPath, "extension.json");
+    const content = await fs.readFile(manifestPath, "utf-8");
     const parsed = JSON.parse(content);
     const validated = ExtensionManifestSchema.safeParse(parsed);
     if (!validated.success) {

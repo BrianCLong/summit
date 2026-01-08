@@ -4,7 +4,7 @@
  * Auto-loaded by gateway from adapters/entity-resolution/
  */
 
-const ER_SERVICE_URL = process.env.ER_SERVICE_URL || 'http://localhost:4020';
+const ER_SERVICE_URL = process.env.ER_SERVICE_URL || "http://localhost:4020";
 
 // ============================================================================
 // GraphQL Schema Extension
@@ -132,14 +132,14 @@ export const resolvers = {
   Query: {
     erCandidates: async (_: any, args: { entityId: string; limit?: number }) => {
       const response = await fetch(
-        `${ER_SERVICE_URL}/er/candidates/${args.entityId}?limit=${args.limit || 10}`,
+        `${ER_SERVICE_URL}/er/candidates/${args.entityId}?limit=${args.limit || 10}`
       );
       return response.json();
     },
 
     erExplain: async (_: any, args: { entityAId: string; entityBId: string }) => {
       const response = await fetch(
-        `${ER_SERVICE_URL}/er/explain/${args.entityAId}/${args.entityBId}`,
+        `${ER_SERVICE_URL}/er/explain/${args.entityAId}/${args.entityBId}`
       );
       return response.json();
     },
@@ -148,8 +148,8 @@ export const resolvers = {
   Mutation: {
     erMerge: async (_: any, args: { input: any }) => {
       const response = await fetch(`${ER_SERVICE_URL}/er/merge`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(args.input),
       });
       return response.json();
@@ -157,8 +157,8 @@ export const resolvers = {
 
     erSplit: async (_: any, args: { input: any }) => {
       const response = await fetch(`${ER_SERVICE_URL}/er/split`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(args.input),
       });
       return response.json();
@@ -171,8 +171,8 @@ export const resolvers = {
 // ============================================================================
 
 export const gatewayPlugin = {
-  name: 'entity-resolution',
-  version: '1.0.0',
+  name: "entity-resolution",
+  version: "1.0.0",
   typeDefs,
   resolvers,
 };

@@ -143,9 +143,7 @@ flowchart LR
   "id": "clm:123",
   "assertion": { "text": "...", "confidence": 0.82 },
   "source": { "id": "src:feed:news:001", "license": "CC-BY" },
-  "provenance": [
-    { "op": "ocr", "hash": "sha256:...", "ts": "2025-10-01T12:00:00Z" }
-  ],
+  "provenance": [{ "op": "ocr", "hash": "sha256:...", "ts": "2025-10-01T12:00:00Z" }],
   "links": { "license": "lic:cc-by", "authority": "warr:XYZ-2025" }
 }
 ```

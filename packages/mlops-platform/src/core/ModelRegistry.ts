@@ -3,14 +3,14 @@
  * Central registry for ML models with versioning and metadata management
  */
 
-import { ModelMetadata, ModelStatus } from '../types/index.js';
-import { EventEmitter } from 'events';
+import { ModelMetadata, ModelStatus } from "../types/index.js";
+import { EventEmitter } from "events";
 
 export interface ModelRegistryConfig {
-  backend: 'postgresql' | 'mongodb' | 's3';
+  backend: "postgresql" | "mongodb" | "s3";
   connectionString: string;
   artifactStore: {
-    type: 's3' | 'gcs' | 'azure-blob' | 'local';
+    type: "s3" | "gcs" | "azure-blob" | "local";
     bucket?: string;
     path?: string;
   };
@@ -40,7 +40,9 @@ export class ModelRegistry extends EventEmitter {
   /**
    * Register a new model
    */
-  async registerModel(metadata: Omit<ModelMetadata, 'id' | 'createdAt' | 'updatedAt'>): Promise<ModelMetadata> {
+  async registerModel(
+    metadata: Omit<ModelMetadata, "id" | "createdAt" | "updatedAt">
+  ): Promise<ModelMetadata> {
     const id = this.generateModelId();
     const now = new Date();
 
@@ -52,7 +54,7 @@ export class ModelRegistry extends EventEmitter {
     };
 
     this.models.set(id, model);
-    this.emit('model:registered', model);
+    this.emit("model:registered", model);
 
     return model;
   }
@@ -96,29 +98,27 @@ export class ModelRegistry extends EventEmitter {
     let results = Array.from(this.models.values());
 
     if (query.name) {
-      results = results.filter(m => m.name.includes(query.name!));
+      results = results.filter((m) => m.name.includes(query.name!));
     }
 
     if (query.framework) {
-      results = results.filter(m => m.framework === query.framework);
+      results = results.filter((m) => m.framework === query.framework);
     }
 
     if (query.type) {
-      results = results.filter(m => m.type === query.type);
+      results = results.filter((m) => m.type === query.type);
     }
 
     if (query.status) {
-      results = results.filter(m => m.status === query.status);
+      results = results.filter((m) => m.status === query.status);
     }
 
     if (query.tags && query.tags.length > 0) {
-      results = results.filter(m =>
-        query.tags!.some(tag => m.tags.includes(tag))
-      );
+      results = results.filter((m) => query.tags!.some((tag) => m.tags.includes(tag)));
     }
 
     if (query.author) {
-      results = results.filter(m => m.author === query.author);
+      results = results.filter((m) => m.author === query.author);
     }
 
     return results;
@@ -142,7 +142,7 @@ export class ModelRegistry extends EventEmitter {
     };
 
     this.models.set(id, updated);
-    this.emit('model:updated', updated);
+    this.emit("model:updated", updated);
 
     return updated;
   }
@@ -191,7 +191,7 @@ export class ModelRegistry extends EventEmitter {
     }
 
     this.models.delete(id);
-    this.emit('model:deleted', model);
+    this.emit("model:deleted", model);
 
     return true;
   }
@@ -228,7 +228,7 @@ export class ModelRegistry extends EventEmitter {
     if (!model) {
       return {
         valid: false,
-        errors: ['Model not found'],
+        errors: ["Model not found"],
       };
     }
 
@@ -236,12 +236,12 @@ export class ModelRegistry extends EventEmitter {
 
     // Check artifact exists
     if (!model.artifactUri) {
-      errors.push('Artifact URI not specified');
+      errors.push("Artifact URI not specified");
     }
 
     // Check checksum
     if (!model.checksum) {
-      errors.push('Checksum not available');
+      errors.push("Checksum not available");
     }
 
     // In a real implementation, would verify artifact integrity
@@ -254,7 +254,10 @@ export class ModelRegistry extends EventEmitter {
   /**
    * Compare model versions
    */
-  async compareVersions(id1: string, id2: string): Promise<{
+  async compareVersions(
+    id1: string,
+    id2: string
+  ): Promise<{
     model1: ModelMetadata;
     model2: ModelMetadata;
     differences: {
@@ -274,12 +277,7 @@ export class ModelRegistry extends EventEmitter {
     const differences: { field: string; value1: any; value2: any }[] = [];
 
     // Compare key fields
-    const fieldsToCompare: (keyof ModelMetadata)[] = [
-      'framework',
-      'type',
-      'status',
-      'size',
-    ];
+    const fieldsToCompare: (keyof ModelMetadata)[] = ["framework", "type", "status", "size"];
 
     for (const field of fieldsToCompare) {
       if (model1[field] !== model2[field]) {
@@ -294,10 +292,7 @@ export class ModelRegistry extends EventEmitter {
     // Compare metrics
     const metricsDiff: Record<string, number> = {};
     if (model1.metrics && model2.metrics) {
-      const allMetrics = new Set([
-        ...Object.keys(model1.metrics),
-        ...Object.keys(model2.metrics),
-      ]);
+      const allMetrics = new Set([...Object.keys(model1.metrics), ...Object.keys(model2.metrics)]);
 
       for (const metric of allMetrics) {
         const val1 = model1.metrics[metric] || 0;
@@ -318,9 +313,7 @@ export class ModelRegistry extends EventEmitter {
    * Get production models
    */
   async getProductionModels(): Promise<ModelMetadata[]> {
-    return Array.from(this.models.values()).filter(
-      m => m.status === 'production'
-    );
+    return Array.from(this.models.values()).filter((m) => m.status === "production");
   }
 
   /**
@@ -335,10 +328,10 @@ export class ModelRegistry extends EventEmitter {
     for (const model of this.models.values()) {
       if (
         model.createdAt < cutoffDate &&
-        model.status !== 'production' &&
-        model.status !== 'staging'
+        model.status !== "production" &&
+        model.status !== "staging"
       ) {
-        await this.updateModelStatus(model.id, 'archived');
+        await this.updateModelStatus(model.id, "archived");
         archivedCount++;
       }
     }

@@ -7,9 +7,9 @@
  * @module data/backlog-parser
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import { TriageItem } from '../types.js';
+import * as fs from "fs";
+import * as path from "path";
+import { TriageItem } from "../types.js";
 
 /**
  * Represents a story within an epic
@@ -46,7 +46,7 @@ interface Backlog {
  * Validation error details
  */
 interface ValidationError {
-  type: 'missing_field' | 'invalid_format' | 'empty_array';
+  type: "missing_field" | "invalid_format" | "empty_array";
   message: string;
   context?: string;
 }
@@ -89,13 +89,13 @@ export async function parseBacklog(backlogPath?: string): Promise<TriageItem[]> 
   // Log warnings if any
   if (result.warnings.length > 0) {
     console.warn(`⚠️  Backlog parsing warnings: ${result.warnings.length}`);
-    result.warnings.forEach(w => console.warn(`   - ${w}`));
+    result.warnings.forEach((w) => console.warn(`   - ${w}`));
   }
 
   // Log errors if any
   if (result.errors.length > 0) {
     console.warn(`❌ Backlog parsing errors: ${result.errors.length}`);
-    result.errors.forEach(e => console.warn(`   - ${e.message}`));
+    result.errors.forEach((e) => console.warn(`   - ${e.message}`));
   }
 
   return result.items;
@@ -120,7 +120,7 @@ export async function parseBacklogWithDetails(backlogPath?: string): Promise<Par
   };
 
   // Determine file path with fallback to default location
-  const filePath = backlogPath || path.join(process.cwd(), 'backlog', 'backlog.json');
+  const filePath = backlogPath || path.join(process.cwd(), "backlog", "backlog.json");
 
   // Check if file exists before attempting to read
   if (!fs.existsSync(filePath)) {
@@ -130,13 +130,13 @@ export async function parseBacklogWithDetails(backlogPath?: string): Promise<Par
 
   try {
     // Read file content with explicit encoding
-    const content = fs.readFileSync(filePath, 'utf8');
+    const content = fs.readFileSync(filePath, "utf8");
 
     // Validate that content is not empty
     if (!content || content.trim().length === 0) {
       result.errors.push({
-        type: 'invalid_format',
-        message: 'Backlog file is empty',
+        type: "invalid_format",
+        message: "Backlog file is empty",
         context: filePath,
       });
       return result;
@@ -148,7 +148,7 @@ export async function parseBacklogWithDetails(backlogPath?: string): Promise<Par
       backlog = JSON.parse(content);
     } catch (parseError: any) {
       result.errors.push({
-        type: 'invalid_format',
+        type: "invalid_format",
         message: `Invalid JSON format: ${parseError.message}`,
         context: filePath,
       });
@@ -169,9 +169,9 @@ export async function parseBacklogWithDetails(backlogPath?: string): Promise<Par
       // Validate epic has required fields
       if (!epic.id || !epic.title) {
         result.errors.push({
-          type: 'missing_field',
+          type: "missing_field",
           message: `Epic missing required fields (id or title)`,
-          context: epic.id || 'unknown',
+          context: epic.id || "unknown",
         });
         result.stats.skipped += epic.stories?.length || 0;
         continue;
@@ -191,9 +191,9 @@ export async function parseBacklogWithDetails(backlogPath?: string): Promise<Par
           // Validate story has required fields
           if (!story.id || !story.title) {
             result.errors.push({
-              type: 'missing_field',
+              type: "missing_field",
               message: `Story missing required fields (id or title)`,
-              context: `Epic: ${epic.id}, Story: ${story.id || 'unknown'}`,
+              context: `Epic: ${epic.id}, Story: ${story.id || "unknown"}`,
             });
             result.stats.skipped++;
             continue;
@@ -208,14 +208,14 @@ export async function parseBacklogWithDetails(backlogPath?: string): Promise<Par
           // Add acceptance criteria if present
           if (story.acceptance_criteria && Array.isArray(story.acceptance_criteria)) {
             const criteria = story.acceptance_criteria
-              .filter(c => typeof c === 'string' && c.trim().length > 0)
-              .join('\n');
+              .filter((c) => typeof c === "string" && c.trim().length > 0)
+              .join("\n");
             if (criteria) {
               descriptionParts.push(`Acceptance Criteria:\n${criteria}`);
             }
           }
 
-          const description = descriptionParts.filter(Boolean).join('\n\n');
+          const description = descriptionParts.filter(Boolean).join("\n\n");
 
           // Calculate complexity score for prioritization
           const complexityScore = calculateStoryComplexity(story);
@@ -225,13 +225,13 @@ export async function parseBacklogWithDetails(backlogPath?: string): Promise<Par
             id: sanitizeId(story.id),
             title: sanitizeTitle(story.title),
             description,
-            source: 'backlog',
+            source: "backlog",
             sourceId: story.id,
             area: [], // Will be populated by classifier
             impact: mapPriorityToImpact(epic.priority),
-            type: 'feature', // Backlog items default to features
+            type: "feature", // Backlog items default to features
             owner: sanitizeOwner(story.owner),
-            status: 'planned',
+            status: "planned",
             priority: epic.priority,
             impactScore: 0, // Will be calculated by impact analyzer
             complexityScore,
@@ -243,9 +243,9 @@ export async function parseBacklogWithDetails(backlogPath?: string): Promise<Par
         } catch (storyError: any) {
           // Catch any unexpected errors processing individual stories
           result.errors.push({
-            type: 'invalid_format',
+            type: "invalid_format",
             message: `Error processing story: ${storyError.message}`,
-            context: `Epic: ${epic.id}, Story: ${story.id || 'unknown'}`,
+            context: `Epic: ${epic.id}, Story: ${story.id || "unknown"}`,
           });
           result.stats.skipped++;
         }
@@ -254,7 +254,7 @@ export async function parseBacklogWithDetails(backlogPath?: string): Promise<Par
   } catch (error: any) {
     // Catch any unexpected file system or processing errors
     result.errors.push({
-      type: 'invalid_format',
+      type: "invalid_format",
       message: `Unexpected error parsing backlog: ${error.message}`,
       context: filePath,
     });
@@ -270,24 +270,24 @@ export async function parseBacklogWithDetails(backlogPath?: string): Promise<Par
  * @returns ValidationError if structure is invalid, undefined otherwise
  */
 function validateBacklogStructure(backlog: any): ValidationError | undefined {
-  if (!backlog || typeof backlog !== 'object') {
+  if (!backlog || typeof backlog !== "object") {
     return {
-      type: 'invalid_format',
-      message: 'Backlog is not a valid object',
+      type: "invalid_format",
+      message: "Backlog is not a valid object",
     };
   }
 
   if (!backlog.epics || !Array.isArray(backlog.epics)) {
     return {
-      type: 'missing_field',
+      type: "missing_field",
       message: 'Backlog missing "epics" array',
     };
   }
 
   if (backlog.epics.length === 0) {
     return {
-      type: 'empty_array',
-      message: 'Backlog has no epics',
+      type: "empty_array",
+      message: "Backlog has no epics",
     };
   }
 
@@ -306,30 +306,30 @@ function validateBacklogStructure(backlog: any): ValidationError | undefined {
  * @param priority - Priority string from backlog
  * @returns Normalized impact level
  */
-function mapPriorityToImpact(priority: string): 'blocker' | 'high' | 'medium' | 'low' {
-  if (!priority || typeof priority !== 'string') {
-    return 'low'; // Default for missing/invalid priority
+function mapPriorityToImpact(priority: string): "blocker" | "high" | "medium" | "low" {
+  if (!priority || typeof priority !== "string") {
+    return "low"; // Default for missing/invalid priority
   }
 
   const p = priority.toLowerCase().trim();
 
   // Blocker/Critical priority
-  if (p.includes('must') || p.includes('p0') || p.includes('critical')) {
-    return 'blocker';
+  if (p.includes("must") || p.includes("p0") || p.includes("critical")) {
+    return "blocker";
   }
 
   // High priority
-  if (p.includes('should') || p.includes('p1') || p.includes('high')) {
-    return 'high';
+  if (p.includes("should") || p.includes("p1") || p.includes("high")) {
+    return "high";
   }
 
   // Medium priority
-  if (p.includes('could') || p.includes('p2') || p.includes('medium')) {
-    return 'medium';
+  if (p.includes("could") || p.includes("p2") || p.includes("medium")) {
+    return "medium";
   }
 
   // Default to low priority
-  return 'low';
+  return "low";
 }
 
 /**
@@ -376,7 +376,7 @@ function calculateStoryComplexity(story: BacklogStory): number {
  * @returns Sanitized ID string
  */
 function sanitizeId(id: string): string {
-  if (!id || typeof id !== 'string') {
+  if (!id || typeof id !== "string") {
     return `backlog-${Date.now()}`; // Generate fallback ID
   }
   return id.trim();
@@ -389,12 +389,12 @@ function sanitizeId(id: string): string {
  * @returns Sanitized title string
  */
 function sanitizeTitle(title: string): string {
-  if (!title || typeof title !== 'string') {
-    return 'Untitled Story';
+  if (!title || typeof title !== "string") {
+    return "Untitled Story";
   }
 
   // Trim and collapse whitespace
-  return title.trim().replace(/\s+/g, ' ');
+  return title.trim().replace(/\s+/g, " ");
 }
 
 /**
@@ -404,7 +404,7 @@ function sanitizeTitle(title: string): string {
  * @returns Sanitized owner string or undefined
  */
 function sanitizeOwner(owner?: string): string | undefined {
-  if (!owner || typeof owner !== 'string') {
+  if (!owner || typeof owner !== "string") {
     return undefined;
   }
 

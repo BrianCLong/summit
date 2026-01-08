@@ -14,13 +14,7 @@ mutation CreateTenant(
   $region: String!
 ) {
   createTenant(
-    input: {
-      organizationId: $orgId
-      name: $name
-      slug: $slug
-      sector: $sector
-      region: $region
-    }
+    input: { organizationId: $orgId, name: $name, slug: $slug, sector: $sector, region: $region }
   ) {
     id
     name

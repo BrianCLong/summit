@@ -4,14 +4,10 @@
  * Load, save, and manage aggregates with event sourcing
  */
 
-import { EventStore } from '../store/EventStore.js';
-import { SnapshotStore } from '../snapshot/SnapshotStore.js';
-import pino from 'pino';
-import type {
-  DomainEvent,
-  AggregateRoot,
-  Snapshot
-} from '../store/types.js';
+import { EventStore } from "../store/EventStore.js";
+import { SnapshotStore } from "../snapshot/SnapshotStore.js";
+import pino from "pino";
+import type { DomainEvent, AggregateRoot, Snapshot } from "../store/types.js";
 
 export interface AggregateConstructor<T> {
   new (id: string): Aggregate<T>;
@@ -43,13 +39,13 @@ export abstract class Aggregate<T = any> {
    */
   protected raiseEvent(eventType: string, payload: any): void {
     const event: DomainEvent = {
-      eventId: '',
+      eventId: "",
       eventType,
       aggregateId: this.id,
       aggregateType: this.type,
       version: this.version + 1,
       timestamp: new Date(),
-      payload
+      payload,
     };
 
     this.applyEvent(event);
@@ -108,7 +104,7 @@ export class AggregateRepository<T, A extends Aggregate<T>> {
     this.snapshotStore = snapshotStore;
     this.aggregateConstructor = aggregateConstructor;
     this.snapshotInterval = snapshotInterval;
-    this.logger = pino({ name: 'AggregateRepository' });
+    this.logger = pino({ name: "AggregateRepository" });
   }
 
   /**
@@ -121,26 +117,18 @@ export class AggregateRepository<T, A extends Aggregate<T>> {
 
     // Try to load from snapshot
     if (this.snapshotStore) {
-      const snapshot = await this.snapshotStore.getLatestSnapshot<T>(
-        aggregateId
-      );
+      const snapshot = await this.snapshotStore.getLatestSnapshot<T>(aggregateId);
 
       if (snapshot) {
         aggregate.loadFromSnapshot(snapshot);
         fromVersion = snapshot.version;
 
-        this.logger.debug(
-          { aggregateId, version: snapshot.version },
-          'Loaded from snapshot'
-        );
+        this.logger.debug({ aggregateId, version: snapshot.version }, "Loaded from snapshot");
       }
     }
 
     // Load events since snapshot
-    const stream = await this.eventStore.getEventStream(
-      aggregateId,
-      fromVersion
-    );
+    const stream = await this.eventStore.getEventStream(aggregateId, fromVersion);
 
     for (const event of stream.events) {
       (aggregate as any).applyEvent(event);
@@ -148,7 +136,7 @@ export class AggregateRepository<T, A extends Aggregate<T>> {
 
     this.logger.debug(
       { aggregateId, version: aggregate.version, events: stream.events.length },
-      'Aggregate loaded'
+      "Aggregate loaded"
     );
 
     return aggregate;
@@ -175,21 +163,18 @@ export class AggregateRepository<T, A extends Aggregate<T>> {
     aggregate.clearUncommittedEvents();
 
     // Create snapshot if needed
-    if (
-      this.snapshotStore &&
-      aggregate.version % this.snapshotInterval === 0
-    ) {
+    if (this.snapshotStore && aggregate.version % this.snapshotInterval === 0) {
       await this.snapshotStore.saveSnapshot({
         aggregateId: aggregate.id,
         aggregateType: aggregate.type,
         version: aggregate.version,
         timestamp: new Date(),
-        state: aggregate.getState()
+        state: aggregate.getState(),
       });
 
       this.logger.debug(
         { aggregateId: aggregate.id, version: aggregate.version },
-        'Snapshot created'
+        "Snapshot created"
       );
     }
 
@@ -197,9 +182,9 @@ export class AggregateRepository<T, A extends Aggregate<T>> {
       {
         aggregateId: aggregate.id,
         version: aggregate.version,
-        events: uncommittedEvents.length
+        events: uncommittedEvents.length,
       },
-      'Aggregate saved'
+      "Aggregate saved"
     );
   }
 

@@ -22,6 +22,7 @@ open reports/report.html  # or xdg-open on Linux
 ## What You Get
 
 **p95 latencies for core queries on dataset X:**
+
 ```
 ✅ entity_read: 15.2ms (budget: 50ms)
 ✅ k_hop_2: 132.7ms (budget: 150ms)
@@ -60,12 +61,14 @@ Located in `config/budgets.json`:
 ## CI Integration
 
 Runs automatically on PRs touching:
+
 - GraphRAG/Analytics services
 - Entity/Relationship repositories
 - Neo4j driver code
 - Benchmark files themselves
 
 **Manual trigger:**
+
 ```bash
 gh workflow run graph-benchmark.yml -f size=medium -f scenarios=ci
 ```
@@ -73,11 +76,13 @@ gh workflow run graph-benchmark.yml -f size=medium -f scenarios=ci
 ## Troubleshooting
 
 **"Connection refused"**
+
 ```bash
 docker compose -f docker-compose.neo4j.yml up -d
 ```
 
 **"Benchmarks too slow"**
+
 ```bash
 npm run bench:quick  # Uses small dataset
 ```

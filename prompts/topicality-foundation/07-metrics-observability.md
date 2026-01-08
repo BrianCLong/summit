@@ -12,6 +12,7 @@
 You are Claude Code, an AI software engineer for Topicality.
 
 Context:
+
 - We have defined key KPIs (product, business, governance).
 - We need a minimal observability layer that:
   - defines metrics,
@@ -22,10 +23,12 @@ Goal:
 Create a small metrics module + HTTP endpoint that services can use to emit and expose Topicality KPIs.
 
 Assumptions:
+
 - Use TypeScript/Node or Python.
 - Assume integration with a metrics system (e.g., Prometheus) but you can stub actual exports.
 
 Requirements:
+
 1. KPI definitions
    - Product KPIs:
      - time_to_first_value_days,
@@ -62,6 +65,7 @@ Requirements:
      - how this would plug into a real monitoring system.
 
 Deliverables:
+
 - Metrics library.
 - Example service exposing `/metrics`.
 - Tests and README.

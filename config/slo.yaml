@@ -1,89 +1,72 @@
 {
   "version": 1,
-  "error_budget_policy": {
-    "window_days": 30,
-    "fast_burn_rate": 6,
-    "slow_burn_rate": 1,
-    "actions": [
-      "Freeze deploys when fast burn rate exceeds 6 over 1h",
-      "Escalate to SRE on-call when slow burn exceeds 1 over 6h",
-      "Open RCA and rollback plan when error budget drops below 25%"
-    ]
-  },
-  "services": [
+  "error_budget_policy":
     {
-      "name": "api-gateway",
-      "tier": "critical",
-      "owner": "platform-sre",
-      "metrics": {
-        "availability": "http_requests_total",
-        "latency": "http_request_duration_seconds",
-        "errors": "errors_total"
-      },
-      "objectives": {
-        "availability": 99.9,
-        "latency_p95_ms": 500,
-        "error_rate_percent": 0.5
-      },
-      "dashboards": [
-        "grafana/dashboards/observability-slo-v1.json"
-      ]
+      "window_days": 30,
+      "fast_burn_rate": 6,
+      "slow_burn_rate": 1,
+      "actions":
+        [
+          "Freeze deploys when fast burn rate exceeds 6 over 1h",
+          "Escalate to SRE on-call when slow burn exceeds 1 over 6h",
+          "Open RCA and rollback plan when error budget drops below 25%",
+        ],
     },
-    {
-      "name": "intelgraph-api",
-      "tier": "critical",
-      "owner": "intelgraph-app",
-      "metrics": {
-        "availability": "http_requests_total",
-        "latency": "http_request_duration_seconds",
-        "errors": "errors_total"
+  "services":
+    [
+      {
+        "name": "api-gateway",
+        "tier": "critical",
+        "owner": "platform-sre",
+        "metrics":
+          {
+            "availability": "http_requests_total",
+            "latency": "http_request_duration_seconds",
+            "errors": "errors_total",
+          },
+        "objectives": { "availability": 99.9, "latency_p95_ms": 500, "error_rate_percent": 0.5 },
+        "dashboards": ["grafana/dashboards/observability-slo-v1.json"],
       },
-      "objectives": {
-        "availability": 99.9,
-        "latency_p95_ms": 750,
-        "error_rate_percent": 0.75
+      {
+        "name": "intelgraph-api",
+        "tier": "critical",
+        "owner": "intelgraph-app",
+        "metrics":
+          {
+            "availability": "http_requests_total",
+            "latency": "http_request_duration_seconds",
+            "errors": "errors_total",
+          },
+        "objectives": { "availability": 99.9, "latency_p95_ms": 750, "error_rate_percent": 0.75 },
+        "dashboards": ["grafana/dashboards/observability-slo-v1.json"],
       },
-      "dashboards": [
-        "grafana/dashboards/observability-slo-v1.json"
-      ]
-    },
-    {
-      "name": "llm-orchestrator",
-      "tier": "critical",
-      "owner": "ai-platform",
-      "metrics": {
-        "availability": "llm_invocations_total",
-        "latency": "llm_invocation_duration_seconds",
-        "errors": "llm_invocations_total",
-        "throughput": "llm_tokens_total"
+      {
+        "name": "llm-orchestrator",
+        "tier": "critical",
+        "owner": "ai-platform",
+        "metrics":
+          {
+            "availability": "llm_invocations_total",
+            "latency": "llm_invocation_duration_seconds",
+            "errors": "llm_invocations_total",
+            "throughput": "llm_tokens_total",
+          },
+        "objectives": { "availability": 99.5, "latency_p95_ms": 3000, "error_rate_percent": 1.0 },
+        "dashboards": ["grafana/dashboards/observability-slo-v1.json"],
       },
-      "objectives": {
-        "availability": 99.5,
-        "latency_p95_ms": 3000,
-        "error_rate_percent": 1.0
+      {
+        "name": "ingestion-pipeline",
+        "tier": "critical",
+        "owner": "data-platform",
+        "metrics":
+          {
+            "availability": "ingestion_records_processed_total",
+            "latency": "ingestion_batch_duration_seconds",
+            "errors": "errors_total",
+            "throughput": "ingestion_throughput_records_per_second",
+          },
+        "objectives": { "availability": 99.0, "latency_p95_ms": 15000, "error_rate_percent": 1.5 },
+        "dashboards": ["grafana/dashboards/observability-slo-v1.json"],
       },
-      "dashboards": [
-        "grafana/dashboards/observability-slo-v1.json"
-      ]
-    },
-    {
-      "name": "ingestion-pipeline",
-      "tier": "critical",
-      "owner": "data-platform",
-      "metrics": {
-        "availability": "ingestion_records_processed_total",
-        "latency": "ingestion_batch_duration_seconds",
-        "errors": "errors_total",
-        "throughput": "ingestion_throughput_records_per_second"
-      },
-      "objectives": {
-        "availability": 99.0,
-        "latency_p95_ms": 15000,
-        "error_rate_percent": 1.5
-      },
-      "dashboards": [
-        "grafana/dashboards/observability-slo-v1.json"
-      ]
-    }
-  ]
+    ],
 }

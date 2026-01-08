@@ -35,35 +35,41 @@ Intelligence Cycle:
 ```
 
 #### Step 1: Requirements Definition
+
 - Define intelligence questions
 - Identify priority information requirements (PIRs)
 - Establish collection priorities
 
 #### Step 2: Collection
+
 - Gather data from diplomatic tracking
 - Monitor treaty developments
 - Analyze communications
 - Track personnel movements
 
 #### Step 3: Processing
+
 - Validate source reliability
 - Cross-reference data
 - Identify patterns
 - Filter noise
 
 #### Step 4: Analysis
+
 - Apply analytical frameworks
 - Generate insights
 - Develop predictions
 - Assess confidence
 
 #### Step 5: Dissemination
+
 - Tailor to audience
 - Provide actionable recommendations
 - Highlight key findings
 - Include confidence levels
 
 #### Step 6: Feedback
+
 - Validate predictions
 - Update models
 - Refine methodologies
@@ -76,6 +82,7 @@ Intelligence Cycle:
 #### 1. Relationship Quality Scoring (0-100)
 
 **Components:**
+
 - Political Relations (30%): Diplomatic engagement level, leadership rapport
 - Economic Relations (25%): Trade volume, investment flows, economic interdependence
 - Security Relations (20%): Defense cooperation, intelligence sharing, alliance membership
@@ -83,6 +90,7 @@ Intelligence Cycle:
 - Strategic Alignment (10%): UN voting alignment, shared values, common interests
 
 **Calculation:**
+
 ```
 Quality Score = (Political * 0.30) + (Economic * 0.25) + (Security * 0.20) +
                 (Cultural * 0.15) + (Strategic * 0.10)
@@ -100,20 +108,24 @@ Quality Score = (Political * 0.30) + (Economic * 0.25) + (Security * 0.20) +
 #### 3. Trend Analysis
 
 **Short-term Trend** (0-6 months):
+
 - Based on recent events, statements, and actions
 - High weight on current incidents
 
 **Medium-term Trend** (6-24 months):
+
 - Based on policy shifts and structural changes
 - Balanced weighting of events
 
 **Long-term Trend** (24+ months):
+
 - Based on strategic interests and systemic factors
 - Lower weight on individual incidents
 
 #### 4. Trajectory Prediction
 
 **Factors:**
+
 - Leadership stability
 - Domestic political pressures
 - Economic interdependence
@@ -121,6 +133,7 @@ Quality Score = (Political * 0.30) + (Economic * 0.25) + (Security * 0.20) +
 - Third-party influence
 
 **Confidence Levels:**
+
 - Very High (90-100%): Strong indicators, clear trajectory
 - High (75-89%): Good indicators, probable trajectory
 - Medium (50-74%): Mixed signals, uncertain trajectory
@@ -134,6 +147,7 @@ Quality Score = (Political * 0.30) + (Economic * 0.25) + (Security * 0.20) +
 #### 1. Position Identification
 
 **Data Sources:**
+
 - Official statements and documents
 - Voting records (UN, international forums)
 - Treaty commitments
@@ -143,6 +157,7 @@ Quality Score = (Political * 0.30) + (Economic * 0.25) + (Security * 0.20) +
 #### 2. Position Classification
 
 **Scale:**
+
 - Strongly Support (+2)
 - Support (+1)
 - Neutral (0)
@@ -156,6 +171,7 @@ Consistency = 100 - (StdDev of positions over time * multiplier)
 ```
 
 **Interpretation:**
+
 - 90-100: Highly consistent
 - 70-89: Generally consistent
 - 50-69: Moderately consistent
@@ -165,6 +181,7 @@ Consistency = 100 - (StdDev of positions over time * multiplier)
 #### 4. Policy Shift Detection
 
 **Indicators:**
+
 - Rhetorical changes in official statements
 - Changes in voting patterns
 - New policy documents or doctrines
@@ -173,6 +190,7 @@ Consistency = 100 - (StdDev of positions over time * multiplier)
 - Consultation with allies
 
 **Shift Types:**
+
 - **Major Reversal**: 180-degree policy change
 - **Gradual Shift**: Incremental movement over time
 - **Tactical Adjustment**: Short-term change for specific purpose
@@ -186,6 +204,7 @@ Alignment(Country A, Country B) =
 ```
 
 **Alignment Interpretation:**
+
 - 90-100%: Near-complete alignment
 - 70-89%: Strong alignment
 - 50-69%: Moderate alignment
@@ -199,6 +218,7 @@ Alignment(Country A, Country B) =
 #### 1. Indicator-Based Prediction
 
 **Leading Indicators** (predict future changes):
+
 - Leadership rhetoric shifts
 - Policy consultation processes
 - Alliance consultation patterns
@@ -206,12 +226,14 @@ Alignment(Country A, Country B) =
 - Legislative initiatives
 
 **Coincident Indicators** (confirm current state):
+
 - Official policy announcements
 - Treaty signatures
 - High-level visits
 - Public statements
 
 **Lagging Indicators** (confirm past changes):
+
 - Implementation measures
 - Budget allocations
 - Treaty ratifications
@@ -220,6 +242,7 @@ Alignment(Country A, Country B) =
 #### 2. Historical Pattern Matching
 
 **Process:**
+
 1. Identify current situation characteristics
 2. Search historical database for similar situations
 3. Calculate similarity scores
@@ -228,6 +251,7 @@ Alignment(Country A, Country B) =
 6. Generate prediction with confidence level
 
 **Similarity Factors:**
+
 - Actor characteristics
 - Issue type
 - Power dynamics
@@ -238,12 +262,14 @@ Alignment(Country A, Country B) =
 #### 3. Scenario Development
 
 **Types:**
+
 - **Best Case**: Most favorable outcome (P10-P25)
 - **Most Likely**: Highest probability outcome (P40-P60)
 - **Worst Case**: Least favorable outcome (P10-P25)
 - **Wild Card**: Low probability, high impact (P5-P10)
 
 **Scenario Components:**
+
 - Trigger events
 - Timeline
 - Key actors
@@ -254,6 +280,7 @@ Alignment(Country A, Country B) =
 #### 4. Confidence Assessment
 
 **Factors Affecting Confidence:**
+
 - Number and quality of indicators
 - Historical pattern strength
 - Information source reliability
@@ -262,6 +289,7 @@ Alignment(Country A, Country B) =
 - Number of actors involved
 
 **Confidence Calibration:**
+
 ```
 Adjusted Confidence = Base Confidence * Source Reliability *
                       Pattern Strength * (1 - Time Decay)
@@ -274,24 +302,28 @@ Adjusted Confidence = Base Confidence * Source Reliability *
 #### 1. Intensity Metrics (1-10)
 
 **Political Intensity:**
+
 - Diplomatic protests: 1-3
 - Sanctions threats: 4-6
 - Breaking diplomatic relations: 7-9
 - Explicit conflict threats: 10
 
 **Economic Intensity:**
+
 - Trade restrictions: 1-3
 - Targeted sanctions: 4-6
 - Comprehensive sanctions: 7-9
 - Economic warfare: 10
 
 **Military Intensity:**
+
 - Military exercises: 1-3
 - Border deployments: 4-6
 - Skirmishes: 7-9
 - Open conflict: 10
 
 **Humanitarian Impact:**
+
 - Minimal displacement: 1-3
 - Significant displacement: 4-6
 - Humanitarian emergency: 7-9
@@ -300,6 +332,7 @@ Adjusted Confidence = Base Confidence * Source Reliability *
 #### 2. Escalation Risk Assessment
 
 **Risk Factors:**
+
 - Historical grievances
 - Current tensions
 - Leadership statements
@@ -310,6 +343,7 @@ Adjusted Confidence = Base Confidence * Source Reliability *
 - Third-party involvement
 
 **Escalation Ladder:**
+
 1. Rhetorical escalation
 2. Diplomatic measures
 3. Economic measures
@@ -322,6 +356,7 @@ Adjusted Confidence = Base Confidence * Source Reliability *
 #### 3. Deescalation Opportunities
 
 **Indicators:**
+
 - Backchannel communications
 - Third-party mediation offers
 - Conciliatory statements
@@ -332,6 +367,7 @@ Adjusted Confidence = Base Confidence * Source Reliability *
 #### 4. Mediation Effectiveness
 
 **Success Factors:**
+
 - Mediator credibility
 - Party willingness
 - BATNA (Best Alternative To Negotiated Agreement) quality
@@ -340,6 +376,7 @@ Adjusted Confidence = Base Confidence * Source Reliability *
 - Third-party support
 
 **Effectiveness Score:**
+
 ```
 Effectiveness = (Mediator Credibility * 0.3) + (Party Willingness * 0.4) +
                 (Issue Tractability * 0.2) + (External Support * 0.1)
@@ -352,6 +389,7 @@ Effectiveness = (Mediator Credibility * 0.3) + (Party Willingness * 0.4) +
 #### 1. Negotiation Progress Tracking
 
 **Stages:**
+
 1. Pre-negotiation (0-10%): Agenda setting
 2. Initial positions (10-30%): Opening positions stated
 3. Substantive negotiations (30-70%): Core issues discussed
@@ -361,6 +399,7 @@ Effectiveness = (Mediator Credibility * 0.3) + (Party Willingness * 0.4) +
 #### 2. Deal-Breaker Identification
 
 **Categories:**
+
 - Market access issues
 - Intellectual property protection
 - Labor standards
@@ -369,6 +408,7 @@ Effectiveness = (Mediator Credibility * 0.3) + (Party Willingness * 0.4) +
 - Sovereignty concerns
 
 **Severity Assessment:**
+
 - Critical: Party has stated red line
 - High: Significant domestic opposition
 - Medium: Negotiable but difficult
@@ -377,6 +417,7 @@ Effectiveness = (Mediator Credibility * 0.3) + (Party Willingness * 0.4) +
 #### 3. Economic Impact Modeling
 
 **Quantitative Factors:**
+
 - Trade volume changes
 - GDP impact
 - Employment effects
@@ -384,6 +425,7 @@ Effectiveness = (Mediator Credibility * 0.3) + (Party Willingness * 0.4) +
 - Revenue implications
 
 **Qualitative Factors:**
+
 - Strategic positioning
 - Alliance strengthening
 - Rule-setting influence
@@ -392,6 +434,7 @@ Effectiveness = (Mediator Credibility * 0.3) + (Party Willingness * 0.4) +
 #### 4. Sanctions Effectiveness
 
 **Metrics:**
+
 - Economic cost to target
 - Behavioral change achieved
 - Unintended consequences
@@ -399,6 +442,7 @@ Effectiveness = (Mediator Credibility * 0.3) + (Party Willingness * 0.4) +
 - Duration sustainability
 
 **Effectiveness Formula:**
+
 ```
 Effectiveness = (Economic Impact * Behavior Change) /
                 (Unintended Consequences + Evasion)
@@ -413,6 +457,7 @@ Effectiveness = (Economic Impact * Behavior Change) /
 **Scale:** -1.0 (Very Negative) to +1.0 (Very Positive)
 
 **Indicators:**
+
 - Word choice and tone
 - Historical comparison
 - Context and timing
@@ -422,6 +467,7 @@ Effectiveness = (Economic Impact * Behavior Change) /
 #### 2. Tone Classification
 
 **Categories:**
+
 - Conciliatory
 - Cooperative
 - Neutral
@@ -432,6 +478,7 @@ Effectiveness = (Economic Impact * Behavior Change) /
 #### 3. Signal Detection
 
 **Signal Types:**
+
 - **Policy Signals**: Intended changes in position
 - **Warning Signals**: Threats or conditions
 - **Reassurance Signals**: Commitment to relationship
@@ -439,6 +486,7 @@ Effectiveness = (Economic Impact * Behavior Change) /
 - **Deterrence Signals**: Capability demonstrations
 
 **Confidence in Signal Detection:**
+
 - High: Multiple indicators, clear messaging, reinforced by actions
 - Medium: Some indicators, ambiguous messaging
 - Low: Weak indicators, contradictory signals
@@ -446,12 +494,14 @@ Effectiveness = (Economic Impact * Behavior Change) /
 #### 4. Messaging Consistency
 
 **Analysis:**
+
 - Compare official statements across time
 - Compare statements to actions
 - Compare public vs. private messaging
 - Compare messaging to different audiences
 
 **Consistency Score:**
+
 ```
 Consistency = 100 - (Variance in messaging * 10)
 ```
@@ -463,6 +513,7 @@ Consistency = 100 - (Variance in messaging * 10)
 #### 1. Node Identification
 
 **Node Types:**
+
 - Countries
 - Diplomats
 - International organizations
@@ -470,6 +521,7 @@ Consistency = 100 - (Variance in messaging * 10)
 - Think tanks and NGOs
 
 **Node Attributes:**
+
 - Influence level
 - Expertise areas
 - Access to decision-makers
@@ -478,12 +530,14 @@ Consistency = 100 - (Variance in messaging * 10)
 #### 2. Edge Analysis
 
 **Relationship Types:**
+
 - Formal (treaties, alliances)
 - Institutional (organization membership)
 - Personal (individual relationships)
 - Transactional (trade, aid)
 
 **Edge Strength:**
+
 - Frequency of interaction
 - Depth of cooperation
 - Resource flows
@@ -492,21 +546,25 @@ Consistency = 100 - (Variance in messaging * 10)
 #### 3. Centrality Measures
 
 **Degree Centrality**: Number of direct connections
+
 ```
 Degree = Number of direct connections / (Total possible connections - 1)
 ```
 
 **Betweenness Centrality**: Bridge position between others
+
 ```
 Betweenness = Number of shortest paths through node / Total shortest paths
 ```
 
 **Closeness Centrality**: Average distance to all others
+
 ```
 Closeness = (Number of nodes - 1) / Sum of distances to all other nodes
 ```
 
 **Eigenvector Centrality**: Connected to well-connected nodes
+
 ```
 Eigenvector = Proportional to sum of centralities of neighbors
 ```
@@ -514,12 +572,14 @@ Eigenvector = Proportional to sum of centralities of neighbors
 #### 4. Community Detection
 
 **Methods:**
+
 - Voting bloc analysis
 - Alliance patterns
 - Economic partnerships
 - Cultural affinity groups
 
 **Stability Assessment:**
+
 - Community coherence
 - Cross-community ties
 - Leadership influence
@@ -530,6 +590,7 @@ Eigenvector = Proportional to sum of centralities of neighbors
 ### Source Reliability Assessment
 
 **Criteria:**
+
 - **Track Record**: Historical accuracy
 - **Access**: Direct access to information
 - **Bias**: Known biases or interests
@@ -537,6 +598,7 @@ Eigenvector = Proportional to sum of centralities of neighbors
 - **Timeliness**: Currency of information
 
 **Reliability Scale:**
+
 - A (90-100%): Completely reliable
 - B (75-89%): Usually reliable
 - C (50-74%): Fairly reliable
@@ -546,6 +608,7 @@ Eigenvector = Proportional to sum of centralities of neighbors
 ### Information Credibility
 
 **Scale:**
+
 1. Confirmed by other sources
 2. Probably true
 3. Possibly true
@@ -556,6 +619,7 @@ Eigenvector = Proportional to sum of centralities of neighbors
 ### Analytical Standards
 
 **Requirements:**
+
 - Clear sourcing
 - Explicit assumptions
 - Confidence levels stated
@@ -568,35 +632,41 @@ Eigenvector = Proportional to sum of centralities of neighbors
 ### Intelligence Report Structure
 
 #### 1. Executive Summary
+
 - Bottom-line assessments (3-5 bullets)
 - Key findings
 - Confidence levels
 - Priority recommendations
 
 #### 2. Key Judgments
+
 - Main analytical conclusions
 - Supporting evidence
 - Confidence assessment
 - Dissenting views if applicable
 
 #### 3. Analysis
+
 - Detailed examination
 - Historical context
 - Comparative analysis
 - Trend identification
 
 #### 4. Outlook and Implications
+
 - Short-term trajectory (0-6 months)
 - Medium-term trajectory (6-24 months)
 - Long-term trajectory (24+ months)
 - Wild card scenarios
 
 #### 5. Indicators to Watch
+
 - Leading indicators for predicted outcomes
 - Warning indicators for alternative scenarios
 - Verification milestones
 
 #### 6. Recommendations
+
 - Strategic options
 - Policy considerations
 - Collection requirements
@@ -605,12 +675,14 @@ Eigenvector = Proportional to sum of centralities of neighbors
 ### Confidence Level Indicators
 
 **In Text:**
+
 - "We assess with high confidence..."
 - "We judge it likely that..."
 - "Available information suggests..."
 - "It is possible that..."
 
 **Visual Indicators:**
+
 - ████████ Very High (90-100%)
 - ██████░░ High (75-89%)
 - ████░░░░ Medium (50-74%)
@@ -620,6 +692,7 @@ Eigenvector = Proportional to sum of centralities of neighbors
 ### Update Protocols
 
 **Trigger Events:**
+
 - Major policy announcements
 - Leadership changes
 - Significant incidents
@@ -628,6 +701,7 @@ Eigenvector = Proportional to sum of centralities of neighbors
 - Verification milestones reached
 
 **Update Types:**
+
 - **Flash Update**: Breaking developments
 - **Revision**: Changed assessment based on new information
 - **Validation**: Confirmation or refutation of predictions

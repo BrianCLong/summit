@@ -7,6 +7,7 @@ Granger time-series) plus a lightweight do-calculus simulator that can surface t
 contributions and counterfactual deltas.
 
 ## Features
+
 - POST `/discover` — run causal discovery over tabular or time-series JSON data
 - POST `/intervene` — apply `do()` interventions and compute counterfactual deltas
 - GET `/explain/:simId` — retrieve learned graph, effect estimates, confidence, and top paths
@@ -36,6 +37,7 @@ pytest -m e2e  # requires Playwright browsers and a running dev server on :8090
 ```
 
 ## CI
+
 The `.github/workflows/cdis.yml` workflow installs Python 3.12, pins dependencies from
 `requirements-dev.txt`, runs Ruff, unit tests, and the FastAPI contract tests. The Playwright e2e
 suite is marked `e2e` and can be enabled with `RUN_E2E=true`.

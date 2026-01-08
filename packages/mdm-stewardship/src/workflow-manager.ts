@@ -3,14 +3,14 @@
  * Manage data stewardship workflows and approval processes
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 import type {
   StewardshipWorkflow,
   WorkflowType,
   WorkflowStatus,
   ChangeRequest,
-  DataCertification
-} from '@intelgraph/mdm-core';
+  DataCertification,
+} from "@intelgraph/mdm-core";
 
 export class StewardshipWorkflowManager {
   private workflows: Map<string, StewardshipWorkflow>;
@@ -36,21 +36,21 @@ export class StewardshipWorkflowManager {
     const workflow: StewardshipWorkflow = {
       id: uuidv4(),
       name,
-      description: '',
+      description: "",
       workflowType,
       domain,
       stages: [],
-      currentStage: '',
-      status: 'draft',
-      priority: 'medium',
+      currentStage: "",
+      status: "draft",
+      priority: "medium",
       assignedTo,
       createdBy,
       createdAt: new Date(),
       metadata: {
         relatedWorkflows: [],
         tags: [],
-        customFields: {}
-      }
+        customFields: {},
+      },
     };
 
     this.workflows.set(workflow.id, workflow);
@@ -66,23 +66,20 @@ export class StewardshipWorkflowManager {
       throw new Error(`Workflow ${workflowId} not found`);
     }
 
-    workflow.status = 'submitted';
+    workflow.status = "submitted";
     return workflow;
   }
 
   /**
    * Approve workflow
    */
-  async approveWorkflow(
-    workflowId: string,
-    approvedBy: string
-  ): Promise<StewardshipWorkflow> {
+  async approveWorkflow(workflowId: string, approvedBy: string): Promise<StewardshipWorkflow> {
     const workflow = this.workflows.get(workflowId);
     if (!workflow) {
       throw new Error(`Workflow ${workflowId} not found`);
     }
 
-    workflow.status = 'approved';
+    workflow.status = "approved";
     workflow.completedAt = new Date();
     return workflow;
   }
@@ -105,8 +102,8 @@ export class StewardshipWorkflowManager {
       changeType,
       requestedBy,
       requestedAt: new Date(),
-      status: 'draft',
-      priority: 'medium',
+      status: "draft",
+      priority: "medium",
       changes,
       justification,
       impact: {
@@ -115,14 +112,14 @@ export class StewardshipWorkflowManager {
         qualityImpact: {
           currentScore: 0,
           projectedScore: 0,
-          affectedDimensions: []
+          affectedDimensions: [],
         },
         downstreamImpact: [],
-        riskLevel: 'low',
-        mitigationSteps: []
+        riskLevel: "low",
+        mitigationSteps: [],
       },
       approvals: [],
-      workflowId: ''
+      workflowId: "",
     };
 
     this.changeRequests.set(request.id, request);
@@ -148,7 +145,7 @@ export class StewardshipWorkflowManager {
       certifiedAt: new Date(),
       criteria: [],
       qualityScore,
-      revoked: false
+      revoked: false,
     };
 
     this.certifications.set(certification.id, certification);
@@ -160,7 +157,7 @@ export class StewardshipWorkflowManager {
    */
   async getWorkflowsForUser(userId: string): Promise<StewardshipWorkflow[]> {
     return Array.from(this.workflows.values()).filter(
-      w => w.assignedTo === userId || w.createdBy === userId
+      (w) => w.assignedTo === userId || w.createdBy === userId
     );
   }
 
@@ -169,7 +166,7 @@ export class StewardshipWorkflowManager {
    */
   async getPendingApprovals(): Promise<StewardshipWorkflow[]> {
     return Array.from(this.workflows.values()).filter(
-      w => w.status === 'submitted' || w.status === 'in_review'
+      (w) => w.status === "submitted" || w.status === "in_review"
     );
   }
 }

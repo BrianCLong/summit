@@ -5,6 +5,7 @@
 ## Overview
 
 The Simulation Harness provides repeatable, deterministic testing for:
+
 - **Copilot AI** behavior across versions
 - **Analytics engines** for graph queries
 - **UI workflows** via API-driven "ghost analysts"
@@ -29,18 +30,21 @@ sim-harness/
 ## Key Features
 
 ### 1. Scenario Generator
+
 - **Templated scenarios**: Fraud rings, terror cells, corruption networks
 - **Parameterization**: Graph size, noise level, missing data
 - **Deterministic**: Fixed seeds for reproducibility
 - **Output formats**: JSON compatible with IntelGraph ingestion APIs
 
 ### 2. Ghost Analyst
+
 - **Scripted workflows**: YAML/JSON-defined investigation paths
 - **API-driven**: Interacts only via public GraphQL/REST APIs
 - **LLM integration**: Optional AI-driven exploration (future)
 - **Session replay**: Record and replay analyst sessions
 
 ### 3. Metrics & Reporting
+
 - **Performance**: Query latency, time-to-insight
 - **Correctness**: Entity coverage, relationship discovery
 - **Comparison**: Diff reports between builds/versions
@@ -77,16 +81,16 @@ pnpm run-scenario --scenario terror-cell --baseline v1.2.0 --candidate v1.3.0
 ### 1. Generate Scenario Data
 
 ```typescript
-import { ScenarioGenerator } from '@intelgraph/sim-harness';
+import { ScenarioGenerator } from "@intelgraph/sim-harness";
 
 const generator = new ScenarioGenerator({
-  template: 'fraud-ring',
+  template: "fraud-ring",
   params: {
     nodeCount: 50,
     edgeDensity: 0.3,
     noiseLevel: 0.1,
-    seed: 12345
-  }
+    seed: 12345,
+  },
 });
 
 const scenario = await generator.generate();
@@ -96,16 +100,16 @@ const scenario = await generator.generate();
 ### 2. Run Ghost Analyst
 
 ```typescript
-import { GhostAnalyst } from '@intelgraph/sim-harness';
+import { GhostAnalyst } from "@intelgraph/sim-harness";
 
 const analyst = new GhostAnalyst({
-  apiUrl: 'http://localhost:4000/graphql',
-  script: './test-data/scenarios/fraud-investigation.yaml'
+  apiUrl: "http://localhost:4000/graphql",
+  script: "./test-data/scenarios/fraud-investigation.yaml",
 });
 
 const session = await analyst.run({
   scenarioId: scenario.id,
-  timeoutMs: 300000
+  timeoutMs: 300000,
 });
 
 console.log(session.metrics);
@@ -115,14 +119,14 @@ console.log(session.metrics);
 ### 3. Generate Report
 
 ```typescript
-import { MetricsCollector } from '@intelgraph/sim-harness';
+import { MetricsCollector } from "@intelgraph/sim-harness";
 
 const collector = new MetricsCollector();
 collector.addSession(session);
 
 const report = await collector.generateReport({
-  format: 'html',
-  output: './reports/fraud-ring-eval.html'
+  format: "html",
+  output: "./reports/fraud-ring-eval.html",
 });
 ```
 
@@ -130,12 +134,12 @@ const report = await collector.generateReport({
 
 ### Built-in Templates
 
-| Template | Description | Default Size | Key Metrics |
-|----------|-------------|--------------|-------------|
-| **fraud-ring** | Financial fraud network | 50 entities, 80 edges | Transaction anomalies, shell companies |
-| **terror-cell** | Terror network topology | 30 entities, 45 edges | Communication patterns, safe houses |
-| **corruption-network** | Government corruption | 40 entities, 70 edges | Bribery chains, shell companies |
-| **smuggling-operation** | Cross-border smuggling | 60 entities, 100 edges | Border crossings, logistics nodes |
+| Template                | Description             | Default Size           | Key Metrics                            |
+| ----------------------- | ----------------------- | ---------------------- | -------------------------------------- |
+| **fraud-ring**          | Financial fraud network | 50 entities, 80 edges  | Transaction anomalies, shell companies |
+| **terror-cell**         | Terror network topology | 30 entities, 45 edges  | Communication patterns, safe houses    |
+| **corruption-network**  | Government corruption   | 40 entities, 70 edges  | Bribery chains, shell companies        |
+| **smuggling-operation** | Cross-border smuggling  | 60 entities, 100 edges | Border crossings, logistics nodes      |
 
 ### Custom Templates
 
@@ -258,18 +262,21 @@ steps:
 ### Captured Metrics
 
 **Performance:**
+
 - Query latency (p50, p95, p99)
 - Time to first insight
 - Total session duration
 - API call count
 
 **Correctness:**
+
 - Entity discovery rate (found / expected)
 - Relationship coverage
 - False positive rate
 - False negative rate
 
 **System:**
+
 - Memory usage
 - CPU utilization
 - Error rate
@@ -278,6 +285,7 @@ steps:
 ### Report Formats
 
 **JSON:**
+
 ```json
 {
   "scenarioId": "fraud-ring-001",
@@ -299,6 +307,7 @@ steps:
 ```
 
 **HTML Dashboard:**
+
 - Interactive charts (Chart.js)
 - Comparison tables
 - Drill-down details
@@ -317,11 +326,11 @@ steps:
 
 ```typescript
 // Harness refuses to run against production
-if (config.apiUrl.includes('prod.intelgraph.com')) {
-  throw new Error('Harness cannot run against production endpoints');
+if (config.apiUrl.includes("prod.intelgraph.com")) {
+  throw new Error("Harness cannot run against production endpoints");
 }
 
-if (!config.tenantId.startsWith('test-')) {
+if (!config.tenantId.startsWith("test-")) {
   throw new Error('Tenant ID must start with "test-" prefix');
 }
 ```
@@ -384,11 +393,13 @@ The harness interacts **only** with public APIs:
 ### No Direct Database Access
 
 The harness **never** accesses:
+
 - Neo4j directly
 - PostgreSQL directly
 - Redis directly
 
 All data flows through platform APIs to ensure:
+
 - Authorization checks
 - Audit logging
 - Schema validation
@@ -463,7 +474,7 @@ Ensure seed is fixed:
 
 ```yaml
 params:
-  seed: 42  # Fixed seed for reproducibility
+  seed: 42 # Fixed seed for reproducibility
 ```
 
 ## Future Enhancements

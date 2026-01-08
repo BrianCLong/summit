@@ -2,7 +2,7 @@ groups:
   - name: companyos-api-slo-alerts
     rules:
       - alert: CompanyOSApiHighErrorRate
-        expr: companyos_api:error_rate:ratio5m > 0.01   # >1% failure
+        expr: companyos_api:error_rate:ratio5m > 0.01 # >1% failure
         for: 15m
         labels:
           severity: warning
@@ -12,7 +12,7 @@ groups:
           description: "Error rate over 1% for 15m. Check recent deployments or incidents."
 
       - alert: CompanyOSApiSevereErrorRate
-        expr: companyos_api:error_rate:ratio5m > 0.02   # >2% failure
+        expr: companyos_api:error_rate:ratio5m > 0.02 # >2% failure
         for: 10m
         labels:
           severity: critical
@@ -22,7 +22,7 @@ groups:
           description: "Error rate over 2% for 10m. Consider rollback."
 
       - alert: CompanyOSApiHighLatencyP95
-        expr: companyos_api:latency_p95:seconds5m > 0.3  # >300ms
+        expr: companyos_api:latency_p95:seconds5m > 0.3 # >300ms
         for: 15m
         labels:
           severity: warning

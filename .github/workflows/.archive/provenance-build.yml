@@ -2,9 +2,9 @@ name: Build & Sign
 
 on:
   push:
-    branches: [ main, feature/** ]
+    branches: [main, feature/**]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
@@ -19,7 +19,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |

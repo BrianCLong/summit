@@ -3,7 +3,7 @@ name: tenant-credits
 permissions:
   contents: read
 on:
-  schedule: [{ cron: '0 0 * * *' }]
+  schedule: [{ cron: "0 0 * * *" }]
 jobs:
   compute:
     runs-on: ubuntu-latest

@@ -1,6 +1,6 @@
-import React from 'react';
-import { useQuery, useMutation, gql } from '@apollo/client';
-import { toast } from 'react-hot-toast';
+import React from "react";
+import { useQuery, useMutation, gql } from "@apollo/client";
+import { toast } from "react-hot-toast";
 
 const SUGGEST = gql`
   query SuggestLinks($input: SuggestLinksInput!) {
@@ -49,9 +49,7 @@ export const SuggestionsPanel: React.FC<{
   const items = data?.suggestLinks?.suggestions || [];
   return (
     <div className="p-3 border rounded-xl">
-      <div className="font-semibold mb-2">
-        Predictive Links {loading ? '…' : ''}
-      </div>
+      <div className="font-semibold mb-2">Predictive Links {loading ? "…" : ""}</div>
       <ul className="space-y-2">
         {items.map((s: any) => (
           <li
@@ -62,12 +60,11 @@ export const SuggestionsPanel: React.FC<{
           >
             <div>
               <div className="text-sm">
-                {' '}
-                {s.sourceId} → {s.targetId}{' '}
+                {" "}
+                {s.sourceId} → {s.targetId}{" "}
               </div>
               <div className="text-xs opacity-70">
-                score: {s.score.toFixed(3)} •{' '}
-                {s.reasons.map((r: any) => r.label).join(', ')}
+                score: {s.score.toFixed(3)} • {s.reasons.map((r: any) => r.label).join(", ")}
               </div>
             </div>
             <div className="flex gap-2">
@@ -75,7 +72,7 @@ export const SuggestionsPanel: React.FC<{
                 className="px-2 py-1 rounded bg-green-600 text-white"
                 onClick={() =>
                   accept({ variables: { id: s.id } })
-                    .then(() => toast.success('Link accepted'))
+                    .then(() => toast.success("Link accepted"))
                     .then(() => refetch())
                 }
               >
@@ -84,8 +81,8 @@ export const SuggestionsPanel: React.FC<{
               <button
                 className="px-2 py-1 rounded bg-neutral-700 text-white"
                 onClick={() =>
-                  reject({ variables: { id: s.id, reason: 'not relevant' } })
-                    .then(() => toast('Rejected'))
+                  reject({ variables: { id: s.id, reason: "not relevant" } })
+                    .then(() => toast("Rejected"))
                     .then(() => refetch())
                 }
               >

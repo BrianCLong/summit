@@ -1,5 +1,5 @@
 # Docker Compose for IntelGraph with AI/ML capabilities
-version: '3.8'
+version: "3.8"
 
 services:
   # Main application with AI support
@@ -89,7 +89,7 @@ services:
       - ./server/src/ai:/app/src/ai
 
     ports:
-      - '8000:8000' # AI service port
+      - "8000:8000" # AI service port
 
     # GPU support (uncomment if you have NVIDIA GPU)
     # deploy:
@@ -105,10 +105,10 @@ services:
 
     # Add extra hosts for Docker Desktop on macOS/Windows
     extra_hosts:
-      - 'host.docker.internal:host-gateway'
+      - "host.docker.internal:host-gateway"
 
     healthcheck:
-      test: ['/app/healthcheck.sh']
+      test: ["/app/healthcheck.sh"]
       interval: 30s
       timeout: 30s
       retries: 3
@@ -153,7 +153,7 @@ services:
       - ./server/logs:/app/logs
 
     ports:
-      - '4000:4000'
+      - "4000:4000"
 
     depends_on:
       - postgres
@@ -165,7 +165,7 @@ services:
       - intelgraph-network
 
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:4000/health']
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -183,11 +183,11 @@ services:
       - postgres_data_ai:/var/lib/postgresql/data
       - ./server/migrations:/docker-entrypoint-initdb.d
     ports:
-      - '5432:5432'
+      - "5432:5432"
     networks:
       - intelgraph-network
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U intelgraph -d intelgraph']
+      test: ["CMD-SHELL", "pg_isready -U intelgraph -d intelgraph"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -200,11 +200,11 @@ services:
     volumes:
       - redis_data_ai:/data
     ports:
-      - '6379:6379'
+      - "6379:6379"
     networks:
       - intelgraph-network
     healthcheck:
-      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
       interval: 10s
       timeout: 3s
       retries: 5
@@ -224,13 +224,12 @@ services:
       - neo4j_logs_ai:/logs
       - neo4j_import_ai:/var/lib/neo4j/import
     ports:
-      - '7474:7474' # HTTP
-      - '7687:7687' # Bolt
+      - "7474:7474" # HTTP
+      - "7687:7687" # Bolt
     networks:
       - intelgraph-network
     healthcheck:
-      test:
-        ['CMD', 'cypher-shell', '-u', 'neo4j', '-p', 'devpassword', 'RETURN 1']
+      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "devpassword", "RETURN 1"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -240,7 +239,7 @@ services:
     container_name: intelgraph-cognitive-targeting-engine
     restart: unless-stopped
     ports:
-      - '8005:8000'
+      - "8005:8000"
     networks:
       - intelgraph-network
 

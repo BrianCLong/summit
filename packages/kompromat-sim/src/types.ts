@@ -17,7 +17,7 @@ export interface Graph {
 
 export interface Intervention {
   t: number; // timestep
-  type: 'publish_proof' | 'influencer_rebuttal' | 'prebunk';
+  type: "publish_proof" | "influencer_rebuttal" | "prebunk";
   params?: Record<string, any>;
 }
 

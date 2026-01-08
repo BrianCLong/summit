@@ -2,7 +2,7 @@
  * Advanced tokenization with linguistic features
  */
 
-import type { Token, Sentence } from '../types';
+import type { Token, Sentence } from "../types";
 
 export class AdvancedTokenizer {
   /**
@@ -98,13 +98,23 @@ export class AdvancedTokenizer {
     const lower = word.toLowerCase();
 
     // Very simplified POS tagging
-    if (['the', 'a', 'an'].includes(lower)) {return 'DET';}
-    if (lower.endsWith('ing')) {return 'VERB';}
-    if (lower.endsWith('ly')) {return 'ADV';}
-    if (lower.endsWith('ed')) {return 'VERB';}
-    if (/^[A-Z]/.test(word)) {return 'PROPN';}
+    if (["the", "a", "an"].includes(lower)) {
+      return "DET";
+    }
+    if (lower.endsWith("ing")) {
+      return "VERB";
+    }
+    if (lower.endsWith("ly")) {
+      return "ADV";
+    }
+    if (lower.endsWith("ed")) {
+      return "VERB";
+    }
+    if (/^[A-Z]/.test(word)) {
+      return "PROPN";
+    }
 
-    return 'NOUN'; // Default
+    return "NOUN"; // Default
   }
 
   /**
@@ -114,9 +124,15 @@ export class AdvancedTokenizer {
     const lower = word.toLowerCase();
 
     // Very simplified lemmatization
-    if (lower.endsWith('ing')) {return lower.replace(/ing$/, '');}
-    if (lower.endsWith('ed')) {return lower.replace(/ed$/, '');}
-    if (lower.endsWith('s') && lower.length > 3) {return lower.replace(/s$/, '');}
+    if (lower.endsWith("ing")) {
+      return lower.replace(/ing$/, "");
+    }
+    if (lower.endsWith("ed")) {
+      return lower.replace(/ed$/, "");
+    }
+    if (lower.endsWith("s") && lower.length > 3) {
+      return lower.replace(/s$/, "");
+    }
 
     return lower;
   }
@@ -128,7 +144,7 @@ export class AdvancedTokenizer {
     let root = word.toLowerCase();
 
     // Remove common suffixes
-    root = root.replace(/(ing|ed|ly|ness|tion|ment|ity)$/, '');
+    root = root.replace(/(ing|ed|ly|ness|tion|ment|ity)$/, "");
 
     return root;
   }
@@ -137,7 +153,7 @@ export class AdvancedTokenizer {
    * Extract prefix from word
    */
   private extractPrefix(word: string): string | undefined {
-    const prefixes = ['un', 're', 'pre', 'dis', 'mis', 'over', 'under', 'out'];
+    const prefixes = ["un", "re", "pre", "dis", "mis", "over", "under", "out"];
 
     for (const prefix of prefixes) {
       if (word.toLowerCase().startsWith(prefix)) {
@@ -152,7 +168,7 @@ export class AdvancedTokenizer {
    * Extract suffix from word
    */
   private extractSuffix(word: string): string | undefined {
-    const suffixes = ['ing', 'ed', 'ly', 'ness', 'tion', 'ment', 'ity', 'able', 'ible'];
+    const suffixes = ["ing", "ed", "ly", "ness", "tion", "ment", "ity", "able", "ible"];
 
     for (const suffix of suffixes) {
       if (word.toLowerCase().endsWith(suffix)) {

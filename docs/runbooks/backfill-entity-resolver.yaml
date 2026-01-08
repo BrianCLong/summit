@@ -6,7 +6,7 @@ metadata:
   owner: sre@summit
   approvals:
     required: true
-    approvers: ['sre-oncall', 'data-lead']
+    approvers: ["sre-oncall", "data-lead"]
 spec:
   inputs:
     - name: since

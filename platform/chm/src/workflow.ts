@@ -1,12 +1,12 @@
-import { ChmEventBus } from './events.js';
+import { ChmEventBus } from "./events.js";
 import {
   type DocumentTag,
   type ExportContext,
   type ExportDecision,
-  type Classification
-} from './config.js';
-import { RuleEngine } from './rules.js';
-import { TaxonomyRegistry } from './taxonomy.js';
+  type Classification,
+} from "./config.js";
+import { RuleEngine } from "./rules.js";
+import { TaxonomyRegistry } from "./taxonomy.js";
 
 export interface DowngradeRequest {
   id: string;
@@ -15,7 +15,7 @@ export interface DowngradeRequest {
   targetLevel: Classification;
   approvers: Set<string>;
   requiredApprovals: number;
-  status: 'pending' | 'approved' | 'rejected';
+  status: "pending" | "approved" | "rejected";
   rationale: string;
 }
 
@@ -40,14 +40,14 @@ export class DowngradeWorkflow {
     this.ruleEngine = ruleEngine;
   }
 
-  requestDowngrade(payload: Omit<DowngradeRequest, 'approvers' | 'status'>): DowngradeRequest {
+  requestDowngrade(payload: Omit<DowngradeRequest, "approvers" | "status">): DowngradeRequest {
     if (payload.requiredApprovals < 2) {
-      throw new Error('Dual control requires at least two approvals');
+      throw new Error("Dual control requires at least two approvals");
     }
     const request: DowngradeRequest = {
       ...payload,
       approvers: new Set(),
-      status: 'pending'
+      status: "pending",
     };
     this.downgradeRequests.set(request.id, request);
     return request;
@@ -58,12 +58,12 @@ export class DowngradeWorkflow {
     if (!request) {
       throw new Error(`Downgrade request ${id} not found`);
     }
-    if (request.status !== 'pending') {
+    if (request.status !== "pending") {
       return request;
     }
     request.approvers.add(approver);
     if (request.approvers.size >= request.requiredApprovals) {
-      request.status = 'approved';
+      request.status = "approved";
     }
     return request;
   }
@@ -71,8 +71,8 @@ export class DowngradeWorkflow {
   finalizeDowngrade(requestId: string, tag: DocumentTag): DocumentTag {
     const request = this.downgradeRequests.get(requestId);
     if (!request) throw new Error(`Downgrade request ${requestId} not found`);
-    if (request.status !== 'approved') {
-      throw new Error('Downgrade requires dual control approvals');
+    if (request.status !== "approved") {
+      throw new Error("Downgrade requires dual control approvals");
     }
     return this.taxonomy.downgradeTag(tag, request.targetLevel, Array.from(request.approvers));
   }

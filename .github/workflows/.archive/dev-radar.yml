@@ -2,7 +2,7 @@ name: Developer Radar
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Nightly at midnight UTC
+    - cron: "0 0 * * *" # Nightly at midnight UTC
   workflow_dispatch:
 
 permissions:
@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       # Attempt to download test results from previous 'ci' run
       # This relies on the 'ci' workflow uploading 'junit-report' artifact

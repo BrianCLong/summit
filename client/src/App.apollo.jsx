@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo } from 'react';
-import { Provider } from 'react-redux';
-import { ApolloProvider } from '@apollo/client';
+import React, { useEffect, useMemo } from "react";
+import { Provider } from "react-redux";
+import { ApolloProvider } from "@apollo/client";
 import {
   ThemeProvider,
   CssBaseline,
@@ -12,35 +12,35 @@ import {
   Button,
   Grid,
   Alert,
-} from '@mui/material';
-import { getIntelGraphTheme } from './theme/intelgraphTheme';
-import { store } from './store';
-import { apolloClient } from './services/apollo';
-import { useSelector } from 'react-redux';
+} from "@mui/material";
+import { getIntelGraphTheme } from "./theme/intelgraphTheme";
+import { store } from "./store";
+import { apolloClient } from "./services/apollo";
+import { useSelector } from "react-redux";
 
 // Connection Status Component
 function ConnectionStatus() {
-  const [backendStatus, setBackendStatus] = React.useState('checking');
+  const [backendStatus, setBackendStatus] = React.useState("checking");
 
   React.useEffect(() => {
     const checkBackend = async () => {
       try {
-        const response = await fetch('http://localhost:4000/graphql', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        const response = await fetch("http://localhost:4000/graphql", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            query: '{ __typename }',
+            query: "{ __typename }",
           }),
         });
 
         if (response.ok) {
-          setBackendStatus('connected');
+          setBackendStatus("connected");
         } else {
-          setBackendStatus('error');
+          setBackendStatus("error");
         }
       } catch (error) {
-        setBackendStatus('error');
-        console.error('Backend connection failed:', error);
+        setBackendStatus("error");
+        console.error("Backend connection failed:", error);
       }
     };
 
@@ -50,14 +50,14 @@ function ConnectionStatus() {
   }, []);
 
   const statusConfig = {
-    checking: { color: 'info', message: '🔄 Checking backend connection...' },
+    checking: { color: "info", message: "🔄 Checking backend connection..." },
     connected: {
-      color: 'success',
-      message: '✅ Backend connected successfully!',
+      color: "success",
+      message: "✅ Backend connected successfully!",
     },
     error: {
-      color: 'error',
-      message: '❌ Backend connection failed. Check if server is running.',
+      color: "error",
+      message: "❌ Backend connection failed. Check if server is running.",
     },
   };
 
@@ -118,9 +118,7 @@ function Dashboard() {
               <Typography variant="h5" component="h2" gutterBottom>
                 🎯 Platform Features
               </Typography>
-              <Box
-                sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}
-              >
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1 }}>
                 <div>• Graph Analytics</div>
                 <div>• AI Copilot</div>
                 <div>• Real-time Collaboration</div>
@@ -140,12 +138,12 @@ function Dashboard() {
               <Typography variant="h5" component="h2" gutterBottom>
                 🔗 Quick Actions
               </Typography>
-              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+              <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
                 <Button
                   variant="contained"
                   color="primary"
                   // eslint-disable-next-line no-console
-                  onClick={() => console.log('Dashboard clicked')}
+                  onClick={() => console.log("Dashboard clicked")}
                 >
                   Dashboard
                 </Button>
@@ -153,7 +151,7 @@ function Dashboard() {
                   variant="outlined"
                   color="secondary"
                   // eslint-disable-next-line no-console
-                  onClick={() => console.log('Investigations clicked')}
+                  onClick={() => console.log("Investigations clicked")}
                 >
                   Investigations
                 </Button>
@@ -161,7 +159,7 @@ function Dashboard() {
                   variant="outlined"
                   color="info"
                   // eslint-disable-next-line no-console
-                  onClick={() => console.log('Graph Explorer clicked')}
+                  onClick={() => console.log("Graph Explorer clicked")}
                 >
                   Graph Explorer
                 </Button>
@@ -169,7 +167,7 @@ function Dashboard() {
                   variant="outlined"
                   color="success"
                   // eslint-disable-next-line no-console
-                  onClick={() => console.log('AI Copilot clicked')}
+                  onClick={() => console.log("AI Copilot clicked")}
                 >
                   AI Copilot
                 </Button>
@@ -189,7 +187,7 @@ function Dashboard() {
                 <br />
                 URL: {window.location.href}
                 <br />
-                Apollo Client: {apolloClient ? 'Initialized' : 'Not found'}
+                Apollo Client: {apolloClient ? "Initialized" : "Not found"}
                 <br />
                 Build: Apollo v1.1
               </Typography>
@@ -203,15 +201,13 @@ function Dashboard() {
 
 // Themed App Shell
 function ThemedAppShell({ children }) {
-  const mode = useSelector((state) => state.ui?.theme || 'light');
+  const mode = useSelector((state) => state.ui?.theme || "light");
   const theme = useMemo(() => getIntelGraphTheme(mode), [mode]);
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
-        {children}
-      </Box>
+      <Box sx={{ bgcolor: "background.default", minHeight: "100vh" }}>{children}</Box>
     </ThemeProvider>
   );
 }
@@ -219,13 +215,13 @@ function ThemedAppShell({ children }) {
 function App() {
   useEffect(() => {
     // eslint-disable-next-line no-console
-    console.log('🚀 Apollo IntelGraph App mounting...');
+    console.log("🚀 Apollo IntelGraph App mounting...");
     // eslint-disable-next-line no-console
-    console.log('✅ Redux store connected');
+    console.log("✅ Redux store connected");
     // eslint-disable-next-line no-console
-    console.log('✅ Material-UI theme loaded');
+    console.log("✅ Material-UI theme loaded");
     // eslint-disable-next-line no-console
-    console.log('✅ Apollo GraphQL client initialized');
+    console.log("✅ Apollo GraphQL client initialized");
   }, []);
 
   return (

@@ -11,25 +11,18 @@
  * - Cross-theater synchronization
  */
 
-import * as tf from '@tensorflow/tfjs-node';
-import { Matrix } from 'ml-matrix';
-import { v4 as uuidv4 } from 'uuid';
-import { Logger } from 'winston';
-import { EventEmitter } from 'events';
-import * as moment from 'moment';
-import axios from 'axios';
+import * as tf from "@tensorflow/tfjs-node";
+import { Matrix } from "ml-matrix";
+import { v4 as uuidv4 } from "uuid";
+import { Logger } from "winston";
+import { EventEmitter } from "events";
+import * as moment from "moment";
+import axios from "axios";
 
 // Influence Network Types
 interface InfluenceNode {
   id: string;
-  type:
-    | 'INDIVIDUAL'
-    | 'ORGANIZATION'
-    | 'MEDIA'
-    | 'GOVERNMENT'
-    | 'MILITARY'
-    | 'ECONOMIC'
-    | 'SOCIAL';
+  type: "INDIVIDUAL" | "ORGANIZATION" | "MEDIA" | "GOVERNMENT" | "MILITARY" | "ECONOMIC" | "SOCIAL";
   name: string;
   location: {
     country: string;
@@ -60,19 +53,14 @@ interface InfluenceEdge {
   id: string;
   source: string;
   target: string;
-  type:
-    | 'INFORMATION'
-    | 'FINANCIAL'
-    | 'POLITICAL'
-    | 'PERSONAL'
-    | 'ORGANIZATIONAL';
+  type: "INFORMATION" | "FINANCIAL" | "POLITICAL" | "PERSONAL" | "ORGANIZATIONAL";
   strength: number; // 0-1
-  direction: 'BIDIRECTIONAL' | 'SOURCE_TO_TARGET' | 'TARGET_TO_SOURCE';
+  direction: "BIDIRECTIONAL" | "SOURCE_TO_TARGET" | "TARGET_TO_SOURCE";
   confidence: number; // 0-1, confidence in edge existence
   temporalPattern: {
     frequency: number; // interactions per time unit
     consistency: number; // 0-1, regularity of interaction
-    trend: 'INCREASING' | 'DECREASING' | 'STABLE' | 'VOLATILE';
+    trend: "INCREASING" | "DECREASING" | "STABLE" | "VOLATILE";
   };
   metadata: Record<string, any>;
 }
@@ -167,16 +155,10 @@ interface SentimentForecast {
 interface ROIMetric {
   id: string;
   name: string;
-  category:
-    | 'INFLUENCE'
-    | 'ENGAGEMENT'
-    | 'REACH'
-    | 'CONVERSION'
-    | 'ATTRIBUTION'
-    | 'RESISTANCE';
+  category: "INFLUENCE" | "ENGAGEMENT" | "REACH" | "CONVERSION" | "ATTRIBUTION" | "RESISTANCE";
   value: number;
   target: number;
-  trend: 'IMPROVING' | 'DECLINING' | 'STABLE';
+  trend: "IMPROVING" | "DECLINING" | "STABLE";
   confidence: number;
   timeframe: {
     start: Date;
@@ -209,13 +191,7 @@ interface ROIAnalysis {
 
 // Proxy Detection Types
 interface ProxyIndicator {
-  type:
-    | 'BEHAVIORAL'
-    | 'TEMPORAL'
-    | 'NETWORK'
-    | 'LINGUISTIC'
-    | 'TECHNICAL'
-    | 'FINANCIAL';
+  type: "BEHAVIORAL" | "TEMPORAL" | "NETWORK" | "LINGUISTIC" | "TECHNICAL" | "FINANCIAL";
   indicator: string;
   strength: number; // 0-1
   confidence: number; // 0-1
@@ -297,7 +273,7 @@ export class AnalyticsEngine extends EventEmitter {
       updateIntervalMs?: number;
       modelPaths?: Record<string, string>;
       dataSourceConfig?: any;
-    },
+    }
   ) {
     super();
     this.logger = logger;
@@ -315,17 +291,13 @@ export class AnalyticsEngine extends EventEmitter {
       this.performRealTimeUpdates();
     }, config.updateIntervalMs || 60000); // Default 1 minute
 
-    this.logger.info(
-      'AnalyticsEngine initialized with military-grade capabilities',
-    );
+    this.logger.info("AnalyticsEngine initialized with military-grade capabilities");
   }
 
   /**
    * Initialize AI models for analytics
    */
-  private async initializeAIModels(
-    modelPaths?: Record<string, string>,
-  ): Promise<void> {
+  private async initializeAIModels(modelPaths?: Record<string, string>): Promise<void> {
     try {
       // Sentiment Analysis Model
       this.sentimentModel = await this.createSentimentModel();
@@ -342,9 +314,9 @@ export class AnalyticsEngine extends EventEmitter {
       // Network Analysis Model
       this.networkAnalysisModel = await this.createNetworkAnalysisModel();
 
-      this.logger.info('Analytics AI models initialized successfully');
+      this.logger.info("Analytics AI models initialized successfully");
     } catch (error) {
-      this.logger.error('Failed to initialize analytics AI models', { error });
+      this.logger.error("Failed to initialize analytics AI models", { error });
       throw error;
     }
   }
@@ -371,20 +343,20 @@ export class AnalyticsEngine extends EventEmitter {
           dropout: 0.3,
           recurrentDropout: 0.3,
         }),
-        tf.layers.dense({ units: 64, activation: 'relu' }),
+        tf.layers.dense({ units: 64, activation: "relu" }),
         tf.layers.dropout({ rate: 0.4 }),
-        tf.layers.dense({ units: 32, activation: 'relu' }),
+        tf.layers.dense({ units: 32, activation: "relu" }),
         tf.layers.dense({
           units: 10, // Sentiment + emotions
-          activation: 'tanh', // -1 to 1 range
+          activation: "tanh", // -1 to 1 range
         }),
       ],
     });
 
     model.compile({
       optimizer: tf.train.adam(0.001),
-      loss: 'meanSquaredError',
-      metrics: ['mae'],
+      loss: "meanSquaredError",
+      metrics: ["mae"],
     });
 
     return model;
@@ -399,26 +371,26 @@ export class AnalyticsEngine extends EventEmitter {
         tf.layers.dense({
           inputShape: [64], // Node + network features
           units: 512,
-          activation: 'relu',
+          activation: "relu",
         }),
         tf.layers.batchNormalization(),
         tf.layers.dropout({ rate: 0.4 }),
-        tf.layers.dense({ units: 256, activation: 'relu' }),
+        tf.layers.dense({ units: 256, activation: "relu" }),
         tf.layers.dropout({ rate: 0.3 }),
-        tf.layers.dense({ units: 128, activation: 'relu' }),
+        tf.layers.dense({ units: 128, activation: "relu" }),
         tf.layers.dropout({ rate: 0.2 }),
-        tf.layers.dense({ units: 64, activation: 'relu' }),
+        tf.layers.dense({ units: 64, activation: "relu" }),
         tf.layers.dense({
           units: 8, // Influence metrics
-          activation: 'sigmoid',
+          activation: "sigmoid",
         }),
       ],
     });
 
     model.compile({
       optimizer: tf.train.adam(0.0005),
-      loss: 'binaryCrossentropy',
-      metrics: ['accuracy', 'precision', 'recall'],
+      loss: "binaryCrossentropy",
+      metrics: ["accuracy", "precision", "recall"],
     });
 
     return model;
@@ -433,27 +405,27 @@ export class AnalyticsEngine extends EventEmitter {
         tf.layers.dense({
           inputShape: [128], // Multi-modal proxy features
           units: 1024,
-          activation: 'relu',
+          activation: "relu",
         }),
         tf.layers.dropout({ rate: 0.5 }),
-        tf.layers.dense({ units: 512, activation: 'relu' }),
+        tf.layers.dense({ units: 512, activation: "relu" }),
         tf.layers.dropout({ rate: 0.4 }),
-        tf.layers.dense({ units: 256, activation: 'relu' }),
+        tf.layers.dense({ units: 256, activation: "relu" }),
         tf.layers.dropout({ rate: 0.3 }),
-        tf.layers.dense({ units: 128, activation: 'relu' }),
+        tf.layers.dense({ units: 128, activation: "relu" }),
         tf.layers.dropout({ rate: 0.2 }),
-        tf.layers.dense({ units: 64, activation: 'relu' }),
+        tf.layers.dense({ units: 64, activation: "relu" }),
         tf.layers.dense({
           units: 3, // [proxy_probability, confidence, attribution_strength]
-          activation: 'sigmoid',
+          activation: "sigmoid",
         }),
       ],
     });
 
     model.compile({
       optimizer: tf.train.adam(0.0001),
-      loss: 'binaryCrossentropy',
-      metrics: ['accuracy', 'auc'],
+      loss: "binaryCrossentropy",
+      metrics: ["accuracy", "auc"],
     });
 
     return model;
@@ -483,19 +455,19 @@ export class AnalyticsEngine extends EventEmitter {
           dropout: 0.2,
           recurrentDropout: 0.2,
         }),
-        tf.layers.dense({ units: 32, activation: 'relu' }),
+        tf.layers.dense({ units: 32, activation: "relu" }),
         tf.layers.dropout({ rate: 0.3 }),
         tf.layers.dense({
           units: 24, // 24 hour forecast
-          activation: 'linear',
+          activation: "linear",
         }),
       ],
     });
 
     model.compile({
       optimizer: tf.train.adam(0.001),
-      loss: 'meanSquaredError',
-      metrics: ['mae', 'mape'],
+      loss: "meanSquaredError",
+      metrics: ["mae", "mape"],
     });
 
     return model;
@@ -510,25 +482,25 @@ export class AnalyticsEngine extends EventEmitter {
         tf.layers.dense({
           inputShape: [256], // Graph features
           units: 512,
-          activation: 'relu',
+          activation: "relu",
         }),
         tf.layers.dropout({ rate: 0.4 }),
-        tf.layers.dense({ units: 256, activation: 'relu' }),
+        tf.layers.dense({ units: 256, activation: "relu" }),
         tf.layers.dropout({ rate: 0.3 }),
-        tf.layers.dense({ units: 128, activation: 'relu' }),
+        tf.layers.dense({ units: 128, activation: "relu" }),
         tf.layers.dropout({ rate: 0.2 }),
-        tf.layers.dense({ units: 64, activation: 'relu' }),
+        tf.layers.dense({ units: 64, activation: "relu" }),
         tf.layers.dense({
           units: 16, // Network metrics
-          activation: 'sigmoid',
+          activation: "sigmoid",
         }),
       ],
     });
 
     model.compile({
       optimizer: tf.train.adam(0.0005),
-      loss: 'meanSquaredError',
-      metrics: ['mae'],
+      loss: "meanSquaredError",
+      metrics: ["mae"],
     });
 
     return model;
@@ -540,14 +512,14 @@ export class AnalyticsEngine extends EventEmitter {
   public async generateInfluenceMap(
     region: string,
     timeframe: { start: Date; end: Date },
-    resolution: 'LOW' | 'MEDIUM' | 'HIGH' = 'MEDIUM',
+    resolution: "LOW" | "MEDIUM" | "HIGH" = "MEDIUM",
     filters?: {
       minInfluence?: number;
       nodeTypes?: string[];
       includeProxies?: boolean;
-    },
+    }
   ): Promise<InfluenceNetwork> {
-    this.logger.info('Generating nation-scale influence map', {
+    this.logger.info("Generating nation-scale influence map", {
       region,
       timeframe,
       resolution,
@@ -557,11 +529,7 @@ export class AnalyticsEngine extends EventEmitter {
     const networkId = uuidv4();
 
     // Collect and analyze data sources
-    const rawData = await this.collectInfluenceData(
-      region,
-      timeframe,
-      resolution,
-    );
+    const rawData = await this.collectInfluenceData(region, timeframe, resolution);
 
     // Extract nodes and relationships
     const nodes = await this.extractInfluenceNodes(rawData, filters);
@@ -572,20 +540,14 @@ export class AnalyticsEngine extends EventEmitter {
     const enhancedEdges = await this.enhanceEdgesWithAI(edges, enhancedNodes);
 
     // Calculate network metrics
-    const networkMetrics = await this.calculateNetworkMetrics(
-      enhancedNodes,
-      enhancedEdges,
-    );
+    const networkMetrics = await this.calculateNetworkMetrics(enhancedNodes, enhancedEdges);
 
     // Identify clusters and communities
-    const clusters = await this.identifyInfluenceClusters(
-      enhancedNodes,
-      enhancedEdges,
-    );
+    const clusters = await this.identifyInfluenceClusters(enhancedNodes, enhancedEdges);
 
     const network: InfluenceNetwork = {
       id: networkId,
-      name: `${region}_influence_${moment().format('YYYYMMDD')}`,
+      name: `${region}_influence_${moment().format("YYYYMMDD")}`,
       region,
       timeframe,
       nodes: new Map(enhancedNodes.map((node) => [node.id, node])),
@@ -596,7 +558,7 @@ export class AnalyticsEngine extends EventEmitter {
 
     this.influenceNetworks.set(networkId, network);
 
-    this.logger.info('Influence map generated', {
+    this.logger.info("Influence map generated", {
       networkId,
       nodeCount: nodes.length,
       edgeCount: edges.length,
@@ -612,9 +574,9 @@ export class AnalyticsEngine extends EventEmitter {
   public async generateSentimentForecast(
     region: string,
     forecastHours: number = 72,
-    includeScenarios: boolean = true,
+    includeScenarios: boolean = true
   ): Promise<SentimentForecast> {
-    this.logger.info('Generating sentiment forecast', {
+    this.logger.info("Generating sentiment forecast", {
       region,
       forecastHours,
       includeScenarios,
@@ -626,16 +588,10 @@ export class AnalyticsEngine extends EventEmitter {
     const historicalData = await this.collectSentimentData(region, 168); // 1 week history
 
     // Prepare features for forecasting
-    const features = await this.prepareForecastingFeatures(
-      historicalData,
-      region,
-    );
+    const features = await this.prepareForecastingFeatures(historicalData, region);
 
     // Generate base forecast
-    const baseForecast = await this.generateBaseForecast(
-      features,
-      forecastHours,
-    );
+    const baseForecast = await this.generateBaseForecast(features, forecastHours);
 
     // Generate scenario-based forecasts
     const scenarios = includeScenarios
@@ -647,13 +603,13 @@ export class AnalyticsEngine extends EventEmitter {
       region,
       timeframe: {
         start: new Date(),
-        end: moment().add(forecastHours, 'hours').toDate(),
+        end: moment().add(forecastHours, "hours").toDate(),
       },
       predictions: baseForecast,
       scenarios,
     };
 
-    this.logger.info('Sentiment forecast generated', {
+    this.logger.info("Sentiment forecast generated", {
       forecastId,
       predictionCount: baseForecast.length,
       scenarioCount: scenarios.length,
@@ -668,9 +624,9 @@ export class AnalyticsEngine extends EventEmitter {
   public async analyzeOperationROI(
     operationId: string,
     investment: number,
-    timeframe: { start: Date; end: Date },
+    timeframe: { start: Date; end: Date }
   ): Promise<ROIAnalysis> {
-    this.logger.info('Analyzing operation ROI', {
+    this.logger.info("Analyzing operation ROI", {
       operationId,
       investment,
       timeframe,
@@ -686,20 +642,13 @@ export class AnalyticsEngine extends EventEmitter {
     const efficiency = this.calculateEfficiency(investment, returns, timeframe);
 
     // Calculate risk-adjusted return
-    const riskAdjustedReturn = this.calculateRiskAdjustedReturn(
-      returns,
-      metrics,
-    );
+    const riskAdjustedReturn = this.calculateRiskAdjustedReturn(returns, metrics);
 
     // Project future ROI
     const projectedROI = await this.projectROI(operationId, metrics, timeframe);
 
     // Perform break-even analysis
-    const breakEvenAnalysis = this.performBreakEvenAnalysis(
-      investment,
-      returns,
-      metrics,
-    );
+    const breakEvenAnalysis = this.performBreakEvenAnalysis(investment, returns, metrics);
 
     const analysis: ROIAnalysis = {
       operationId,
@@ -713,7 +662,7 @@ export class AnalyticsEngine extends EventEmitter {
 
     this.roiAnalyses.set(operationId, analysis);
 
-    this.logger.info('ROI analysis completed', {
+    this.logger.info("ROI analysis completed", {
       operationId,
       riskAdjustedReturn,
       projectedROI,
@@ -727,9 +676,9 @@ export class AnalyticsEngine extends EventEmitter {
    */
   public async detectProxyOperations(
     targetIds: string[],
-    analysisDepth: 'BASIC' | 'COMPREHENSIVE' | 'DEEP' = 'COMPREHENSIVE',
+    analysisDepth: "BASIC" | "COMPREHENSIVE" | "DEEP" = "COMPREHENSIVE"
   ): Promise<ProxyDetectionResult[]> {
-    this.logger.info('Detecting proxy operations', {
+    this.logger.info("Detecting proxy operations", {
       targetCount: targetIds.length,
       analysisDepth,
     });
@@ -738,10 +687,7 @@ export class AnalyticsEngine extends EventEmitter {
 
     for (const targetId of targetIds) {
       // Collect multi-modal data about the target
-      const targetData = await this.collectProxyAnalysisData(
-        targetId,
-        analysisDepth,
-      );
+      const targetData = await this.collectProxyAnalysisData(targetId, analysisDepth);
 
       // Extract proxy indicators
       const indicators = await this.extractProxyIndicators(targetData);
@@ -750,24 +696,17 @@ export class AnalyticsEngine extends EventEmitter {
       const aiAnalysis = await this.performAIProxyDetection(targetData);
 
       // Identify possible controllers
-      const possibleControllers = await this.identifyPossibleControllers(
-        targetId,
-        indicators,
-      );
+      const possibleControllers = await this.identifyPossibleControllers(targetId, indicators);
 
       // Perform attribution analysis
       const attribution = await this.performAttributionAnalysis(
         targetId,
         indicators,
-        possibleControllers,
+        possibleControllers
       );
 
       // Assess operational risks
-      const riskAssessment = this.assessProxyRisks(
-        targetId,
-        indicators,
-        attribution,
-      );
+      const riskAssessment = this.assessProxyRisks(targetId, indicators, attribution);
 
       const result: ProxyDetectionResult = {
         targetId,
@@ -783,7 +722,7 @@ export class AnalyticsEngine extends EventEmitter {
       this.proxyDetections.set(targetId, result);
     }
 
-    this.logger.info('Proxy detection completed', {
+    this.logger.info("Proxy detection completed", {
       totalTargets: targetIds.length,
       proxyDetected: results.filter((r) => r.proxyProbability > 0.7).length,
     });
@@ -797,13 +736,9 @@ export class AnalyticsEngine extends EventEmitter {
   public async analyzeMarketCoupling(
     markets: string[],
     timeframe: { start: Date; end: Date },
-    analysisType:
-      | 'CORRELATION'
-      | 'CAUSATION'
-      | 'VULNERABILITY'
-      | 'COMPREHENSIVE' = 'COMPREHENSIVE',
+    analysisType: "CORRELATION" | "CAUSATION" | "VULNERABILITY" | "COMPREHENSIVE" = "COMPREHENSIVE"
   ): Promise<MarketCouplingAnalysis> {
-    this.logger.info('Analyzing market coupling', {
+    this.logger.info("Analyzing market coupling", {
       markets,
       timeframe,
       analysisType,
@@ -818,16 +753,10 @@ export class AnalyticsEngine extends EventEmitter {
     const correlations = this.calculateMarketCorrelations(marketData);
 
     // Identify vulnerabilities
-    const vulnerabilities = await this.identifyMarketVulnerabilities(
-      marketData,
-      correlations,
-    );
+    const vulnerabilities = await this.identifyMarketVulnerabilities(marketData, correlations);
 
     // Calculate cascade risk
-    const cascadeRisk = this.calculateCascadeRisk(
-      correlations,
-      vulnerabilities,
-    );
+    const cascadeRisk = this.calculateCascadeRisk(correlations, vulnerabilities);
 
     // Calculate overall coupling strength
     const couplingStrength = this.calculateCouplingStrength(correlations);
@@ -842,7 +771,7 @@ export class AnalyticsEngine extends EventEmitter {
       cascadeRisk,
     };
 
-    this.logger.info('Market coupling analysis completed', {
+    this.logger.info("Market coupling analysis completed", {
       analysisId,
       couplingStrength,
       cascadeRisk,
@@ -858,7 +787,7 @@ export class AnalyticsEngine extends EventEmitter {
   public async analyzeCrossTheaterSync(
     theaters: string[],
     operationIds: string[],
-    syncMetrics: string[] = ['timing', 'messaging', 'resources', 'effects'],
+    syncMetrics: string[] = ["timing", "messaging", "resources", "effects"]
   ): Promise<{
     synchronizationScore: number;
     correlations: Array<{
@@ -871,17 +800,14 @@ export class AnalyticsEngine extends EventEmitter {
     recommendations: string[];
     riskFactors: string[];
   }> {
-    this.logger.info('Analyzing cross-theater synchronization', {
+    this.logger.info("Analyzing cross-theater synchronization", {
       theaters,
       operationIds,
       syncMetrics,
     });
 
     // Collect operation data from all theaters
-    const theaterData = await this.collectCrossTheaterData(
-      theaters,
-      operationIds,
-    );
+    const theaterData = await this.collectCrossTheaterData(theaters, operationIds);
 
     // Calculate synchronization metrics
     const correlations = [];
@@ -894,7 +820,7 @@ export class AnalyticsEngine extends EventEmitter {
           const correlation = this.calculateTheaterCorrelation(
             theaterData[theaters[i]],
             theaterData[theaters[j]],
-            metric,
+            metric
           );
 
           correlations.push({
@@ -914,15 +840,12 @@ export class AnalyticsEngine extends EventEmitter {
     const synchronizationScore = pairCount > 0 ? totalSyncScore / pairCount : 0;
 
     // Generate recommendations
-    const recommendations = this.generateSyncRecommendations(
-      correlations,
-      synchronizationScore,
-    );
+    const recommendations = this.generateSyncRecommendations(correlations, synchronizationScore);
 
     // Identify risk factors
     const riskFactors = this.identifySyncRiskFactors(correlations, theaterData);
 
-    this.logger.info('Cross-theater synchronization analysis completed', {
+    this.logger.info("Cross-theater synchronization analysis completed", {
       synchronizationScore,
       correlationCount: correlations.length,
       recommendationCount: recommendations.length,
@@ -940,19 +863,19 @@ export class AnalyticsEngine extends EventEmitter {
 
   private async initializeDataStreams(config?: any): Promise<void> {
     // Initialize real-time data streams
-    this.dataStreams.set('social_media', {
+    this.dataStreams.set("social_media", {
       active: true,
       endpoint: config?.socialMedia,
     });
-    this.dataStreams.set('news_feeds', {
+    this.dataStreams.set("news_feeds", {
       active: true,
       endpoint: config?.newsFeeds,
     });
-    this.dataStreams.set('market_data', {
+    this.dataStreams.set("market_data", {
       active: true,
       endpoint: config?.marketData,
     });
-    this.dataStreams.set('government_data', {
+    this.dataStreams.set("government_data", {
       active: true,
       endpoint: config?.governmentData,
     });
@@ -970,12 +893,12 @@ export class AnalyticsEngine extends EventEmitter {
       await this.updateMarketData();
 
       // Emit update event
-      this.emit('realTimeUpdate', {
+      this.emit("realTimeUpdate", {
         timestamp: new Date(),
-        updateType: 'periodic',
+        updateType: "periodic",
       });
     } catch (error) {
-      this.logger.error('Real-time update failed', { error });
+      this.logger.error("Real-time update failed", { error });
     }
   }
 
@@ -987,7 +910,7 @@ export class AnalyticsEngine extends EventEmitter {
       dataPoints.push(...newDataPoints);
 
       // Keep only recent data (last 7 days)
-      const cutoffTime = moment().subtract(7, 'days').toDate();
+      const cutoffTime = moment().subtract(7, "days").toDate();
       const recentData = dataPoints.filter((dp) => dp.timestamp > cutoffTime);
       this.sentimentData.set(regionId, recentData);
     }
@@ -1002,8 +925,8 @@ export class AnalyticsEngine extends EventEmitter {
       // Check for new nodes and edges
       const newData = await this.collectInfluenceData(
         network.region,
-        { start: moment().subtract(1, 'hour').toDate(), end: new Date() },
-        'LOW',
+        { start: moment().subtract(1, "hour").toDate(), end: new Date() },
+        "LOW"
       );
 
       await this.integrateNewInfluenceData(network, newData);
@@ -1018,7 +941,7 @@ export class AnalyticsEngine extends EventEmitter {
   private async collectInfluenceData(
     region: string,
     timeframe: { start: Date; end: Date },
-    resolution: string,
+    resolution: string
   ): Promise<any> {
     // Simulate data collection from various sources
     return {
@@ -1029,26 +952,20 @@ export class AnalyticsEngine extends EventEmitter {
     };
   }
 
-  private simulateSocialMediaData(
-    region: string,
-    timeframe: any,
-    resolution: string,
-  ): any {
-    const dataPoints =
-      resolution === 'HIGH' ? 10000 : resolution === 'MEDIUM' ? 1000 : 100;
+  private simulateSocialMediaData(region: string, timeframe: any, resolution: string): any {
+    const dataPoints = resolution === "HIGH" ? 10000 : resolution === "MEDIUM" ? 1000 : 100;
     return Array(dataPoints)
       .fill(null)
       .map(() => ({
         id: uuidv4(),
-        platform: ['twitter', 'facebook', 'instagram', 'linkedin', 'tiktok'][
+        platform: ["twitter", "facebook", "instagram", "linkedin", "tiktok"][
           Math.floor(Math.random() * 5)
         ],
         author: `user_${Math.floor(Math.random() * 10000)}`,
         content: `Sample content ${Math.floor(Math.random() * 1000)}`,
         timestamp: new Date(
           timeframe.start.getTime() +
-            Math.random() *
-              (timeframe.end.getTime() - timeframe.start.getTime()),
+            Math.random() * (timeframe.end.getTime() - timeframe.start.getTime())
         ),
         engagement: Math.floor(Math.random() * 10000),
         reach: Math.floor(Math.random() * 100000),
@@ -1056,13 +973,8 @@ export class AnalyticsEngine extends EventEmitter {
       }));
   }
 
-  private simulateNewsData(
-    region: string,
-    timeframe: any,
-    resolution: string,
-  ): any {
-    const articleCount =
-      resolution === 'HIGH' ? 1000 : resolution === 'MEDIUM' ? 100 : 10;
+  private simulateNewsData(region: string, timeframe: any, resolution: string): any {
+    const articleCount = resolution === "HIGH" ? 1000 : resolution === "MEDIUM" ? 100 : 10;
     return Array(articleCount)
       .fill(null)
       .map(() => ({
@@ -1071,8 +983,7 @@ export class AnalyticsEngine extends EventEmitter {
         title: `News Article ${Math.floor(Math.random() * 1000)}`,
         timestamp: new Date(
           timeframe.start.getTime() +
-            Math.random() *
-              (timeframe.end.getTime() - timeframe.start.getTime()),
+            Math.random() * (timeframe.end.getTime() - timeframe.start.getTime())
         ),
         reach: Math.floor(Math.random() * 1000000),
         credibility: Math.random(),
@@ -1080,18 +991,14 @@ export class AnalyticsEngine extends EventEmitter {
       }));
   }
 
-  private simulateGovernmentData(
-    region: string,
-    timeframe: any,
-    resolution: string,
-  ): any {
+  private simulateGovernmentData(region: string, timeframe: any, resolution: string): any {
     return {
       officials: Array(50)
         .fill(null)
         .map(() => ({
           id: uuidv4(),
           name: `Official ${Math.floor(Math.random() * 1000)}`,
-          position: ['minister', 'ambassador', 'general', 'director'][
+          position: ["minister", "ambassador", "general", "director"][
             Math.floor(Math.random() * 4)
           ],
           influence: Math.random(),
@@ -1108,11 +1015,7 @@ export class AnalyticsEngine extends EventEmitter {
     };
   }
 
-  private simulateEconomicData(
-    region: string,
-    timeframe: any,
-    resolution: string,
-  ): any {
+  private simulateEconomicData(region: string, timeframe: any, resolution: string): any {
     return {
       markets: Array(10)
         .fill(null)
@@ -1132,18 +1035,12 @@ export class AnalyticsEngine extends EventEmitter {
     };
   }
 
-  private async extractInfluenceNodes(
-    rawData: any,
-    filters?: any,
-  ): Promise<InfluenceNode[]> {
+  private async extractInfluenceNodes(rawData: any, filters?: any): Promise<InfluenceNode[]> {
     const nodes: InfluenceNode[] = [];
 
     // Extract nodes from social media data
     rawData.socialMedia.forEach((item: any) => {
-      if (
-        !filters?.minInfluence ||
-        this.calculateInfluenceScore(item) >= filters.minInfluence
-      ) {
+      if (!filters?.minInfluence || this.calculateInfluenceScore(item) >= filters.minInfluence) {
         nodes.push(this.createInfluenceNodeFromSocialMedia(item));
       }
     });
@@ -1173,11 +1070,11 @@ export class AnalyticsEngine extends EventEmitter {
   private createInfluenceNodeFromSocialMedia(item: any): InfluenceNode {
     return {
       id: item.id,
-      type: 'INDIVIDUAL',
+      type: "INDIVIDUAL",
       name: item.author,
       location: {
-        country: 'Unknown',
-        region: 'Unknown',
+        country: "Unknown",
+        region: "Unknown",
         coordinates: [0, 0],
       },
       metrics: {
@@ -1204,11 +1101,11 @@ export class AnalyticsEngine extends EventEmitter {
   private createInfluenceNodeFromNews(item: any): InfluenceNode {
     return {
       id: item.id,
-      type: 'MEDIA',
+      type: "MEDIA",
       name: item.source,
       location: {
-        country: 'Unknown',
-        region: 'Unknown',
+        country: "Unknown",
+        region: "Unknown",
         coordinates: [0, 0],
       },
       metrics: {
@@ -1225,8 +1122,8 @@ export class AnalyticsEngine extends EventEmitter {
         crossPlatformPresence: Math.random(),
         historicalReach: [item.reach || 0],
       },
-      vulnerabilities: ['media_bias', 'economic_pressure'],
-      capabilities: ['information_dissemination', 'agenda_setting'],
+      vulnerabilities: ["media_bias", "economic_pressure"],
+      capabilities: ["information_dissemination", "agenda_setting"],
       affiliations: [],
       metadata: { source: item.source, originalData: item },
     };
@@ -1235,11 +1132,11 @@ export class AnalyticsEngine extends EventEmitter {
   private createInfluenceNodeFromGovernment(item: any): InfluenceNode {
     return {
       id: item.id,
-      type: 'GOVERNMENT',
+      type: "GOVERNMENT",
       name: item.name,
       location: {
-        country: 'Unknown',
-        region: 'Unknown',
+        country: "Unknown",
+        region: "Unknown",
         coordinates: [0, 0],
       },
       metrics: {
@@ -1256,8 +1153,8 @@ export class AnalyticsEngine extends EventEmitter {
         crossPlatformPresence: 0.6,
         historicalReach: [0],
       },
-      vulnerabilities: ['political_pressure', 'scandal_risk'],
-      capabilities: ['policy_influence', 'resource_allocation'],
+      vulnerabilities: ["political_pressure", "scandal_risk"],
+      capabilities: ["policy_influence", "resource_allocation"],
       affiliations: [item.position],
       metadata: { position: item.position, originalData: item },
     };
@@ -1267,14 +1164,14 @@ export class AnalyticsEngine extends EventEmitter {
     const vulnerabilities = [];
 
     if (item.engagement && item.engagement < item.reach * 0.01) {
-      vulnerabilities.push('low_engagement');
+      vulnerabilities.push("low_engagement");
     }
 
     if (item.sentiment && Math.abs(item.sentiment) > 0.7) {
-      vulnerabilities.push('polarized_content');
+      vulnerabilities.push("polarized_content");
     }
 
-    vulnerabilities.push('platform_dependency');
+    vulnerabilities.push("platform_dependency");
 
     return vulnerabilities;
   }
@@ -1283,32 +1180,28 @@ export class AnalyticsEngine extends EventEmitter {
     const capabilities = [];
 
     if (item.reach > 100000) {
-      capabilities.push('mass_reach');
+      capabilities.push("mass_reach");
     }
 
     if (item.engagement > item.reach * 0.05) {
-      capabilities.push('high_engagement');
+      capabilities.push("high_engagement");
     }
 
-    capabilities.push('content_creation');
+    capabilities.push("content_creation");
 
     return capabilities;
   }
 
   private async extractInfluenceEdges(
     nodes: InfluenceNode[],
-    rawData: any,
+    rawData: any
   ): Promise<InfluenceEdge[]> {
     const edges: InfluenceEdge[] = [];
 
     // Create edges based on co-occurrence, mentions, and interactions
     for (let i = 0; i < nodes.length; i++) {
       for (let j = i + 1; j < nodes.length; j++) {
-        const relationship = this.calculateRelationshipStrength(
-          nodes[i],
-          nodes[j],
-          rawData,
-        );
+        const relationship = this.calculateRelationshipStrength(nodes[i], nodes[j], rawData);
 
         if (relationship.strength > 0.1) {
           // Threshold for edge creation
@@ -1318,12 +1211,12 @@ export class AnalyticsEngine extends EventEmitter {
             target: nodes[j].id,
             type: relationship.type,
             strength: relationship.strength,
-            direction: 'BIDIRECTIONAL',
+            direction: "BIDIRECTIONAL",
             confidence: relationship.confidence,
             temporalPattern: {
               frequency: Math.random() * 10,
               consistency: Math.random(),
-              trend: ['INCREASING', 'DECREASING', 'STABLE', 'VOLATILE'][
+              trend: ["INCREASING", "DECREASING", "STABLE", "VOLATILE"][
                 Math.floor(Math.random() * 4)
               ] as any,
             },
@@ -1339,12 +1232,12 @@ export class AnalyticsEngine extends EventEmitter {
   private calculateRelationshipStrength(
     node1: InfluenceNode,
     node2: InfluenceNode,
-    rawData: any,
+    rawData: any
   ): any {
     // Calculate relationship strength based on various factors
     let strength = 0;
     let confidence = 0;
-    let type = 'INFORMATION';
+    let type = "INFORMATION";
     const basis = [];
 
     // Check for co-occurrence in content
@@ -1352,33 +1245,30 @@ export class AnalyticsEngine extends EventEmitter {
     if (coOccurrence > 0) {
       strength += coOccurrence * 0.3;
       confidence += 0.2;
-      basis.push('co_occurrence');
+      basis.push("co_occurrence");
     }
 
     // Check for similar sentiment patterns
-    const sentimentSimilarity = Math.abs(
-      node1.metrics.alignment - node2.metrics.alignment,
-    );
+    const sentimentSimilarity = Math.abs(node1.metrics.alignment - node2.metrics.alignment);
     if (sentimentSimilarity < 0.3) {
       strength += (1 - sentimentSimilarity) * 0.2;
       confidence += 0.1;
-      basis.push('sentiment_alignment');
+      basis.push("sentiment_alignment");
     }
 
     // Check for similar audience/reach
-    const reachSimilarity =
-      1 - Math.abs(node1.metrics.reach - node2.metrics.reach);
+    const reachSimilarity = 1 - Math.abs(node1.metrics.reach - node2.metrics.reach);
     if (reachSimilarity > 0.7) {
       strength += reachSimilarity * 0.1;
       confidence += 0.1;
-      basis.push('similar_reach');
+      basis.push("similar_reach");
     }
 
     // Determine relationship type
-    if (node1.type === 'GOVERNMENT' || node2.type === 'GOVERNMENT') {
-      type = 'POLITICAL';
-    } else if (node1.type === 'MEDIA' || node2.type === 'MEDIA') {
-      type = 'INFORMATION';
+    if (node1.type === "GOVERNMENT" || node2.type === "GOVERNMENT") {
+      type = "POLITICAL";
+    } else if (node1.type === "MEDIA" || node2.type === "MEDIA") {
+      type = "INFORMATION";
     }
 
     return {
@@ -1389,19 +1279,13 @@ export class AnalyticsEngine extends EventEmitter {
     };
   }
 
-  private checkCoOccurrence(
-    node1: InfluenceNode,
-    node2: InfluenceNode,
-    rawData: any,
-  ): number {
+  private checkCoOccurrence(node1: InfluenceNode, node2: InfluenceNode, rawData: any): number {
     // Simplified co-occurrence check
     // In full implementation, this would analyze content for mentions, hashtags, etc.
     return Math.random() * 0.5; // Placeholder
   }
 
-  private async enhanceNodesWithAI(
-    nodes: InfluenceNode[],
-  ): Promise<InfluenceNode[]> {
+  private async enhanceNodesWithAI(nodes: InfluenceNode[]): Promise<InfluenceNode[]> {
     // Enhance node metrics using AI models
     const enhancedNodes = [];
 
@@ -1409,9 +1293,7 @@ export class AnalyticsEngine extends EventEmitter {
       const features = this.extractNodeFeatures(node);
       const tensorFeatures = tf.tensor2d([features]);
 
-      const prediction = this.influenceModel.predict(
-        tensorFeatures,
-      ) as tf.Tensor;
+      const prediction = this.influenceModel.predict(tensorFeatures) as tf.Tensor;
       const enhancements = await prediction.data();
 
       // Update node metrics based on AI predictions
@@ -1450,13 +1332,13 @@ export class AnalyticsEngine extends EventEmitter {
       node.capabilities.length / 10, // Normalized
       node.affiliations.length / 5, // Normalized
       // Node type encoding
-      node.type === 'INDIVIDUAL' ? 1 : 0,
-      node.type === 'ORGANIZATION' ? 1 : 0,
-      node.type === 'MEDIA' ? 1 : 0,
-      node.type === 'GOVERNMENT' ? 1 : 0,
-      node.type === 'MILITARY' ? 1 : 0,
-      node.type === 'ECONOMIC' ? 1 : 0,
-      node.type === 'SOCIAL' ? 1 : 0,
+      node.type === "INDIVIDUAL" ? 1 : 0,
+      node.type === "ORGANIZATION" ? 1 : 0,
+      node.type === "MEDIA" ? 1 : 0,
+      node.type === "GOVERNMENT" ? 1 : 0,
+      node.type === "MILITARY" ? 1 : 0,
+      node.type === "ECONOMIC" ? 1 : 0,
+      node.type === "SOCIAL" ? 1 : 0,
       // Additional features
       Math.random(), // Temporal factor
       Math.random(), // Geographic factor
@@ -1507,7 +1389,7 @@ export class AnalyticsEngine extends EventEmitter {
 
   private async enhanceEdgesWithAI(
     edges: InfluenceEdge[],
-    nodes: InfluenceNode[],
+    nodes: InfluenceNode[]
   ): Promise<InfluenceEdge[]> {
     // Enhance edge metrics using AI models
     const nodeMap = new Map(nodes.map((n) => [n.id, n]));
@@ -1522,9 +1404,7 @@ export class AnalyticsEngine extends EventEmitter {
       const features = this.extractEdgeFeatures(edge, sourceNode, targetNode);
       const tensorFeatures = tf.tensor2d([features]);
 
-      const prediction = this.influenceModel.predict(
-        tensorFeatures,
-      ) as tf.Tensor;
+      const prediction = this.influenceModel.predict(tensorFeatures) as tf.Tensor;
       const enhancements = await prediction.data();
 
       // Update edge metrics based on AI predictions
@@ -1546,7 +1426,7 @@ export class AnalyticsEngine extends EventEmitter {
   private extractEdgeFeatures(
     edge: InfluenceEdge,
     sourceNode: InfluenceNode,
-    targetNode: InfluenceNode,
+    targetNode: InfluenceNode
   ): number[] {
     return [
       edge.strength,
@@ -1571,20 +1451,20 @@ export class AnalyticsEngine extends EventEmitter {
       Math.abs(sourceNode.metrics.influence - targetNode.metrics.influence),
       Math.abs(sourceNode.metrics.alignment - targetNode.metrics.alignment),
       // Edge type encoding
-      edge.type === 'INFORMATION' ? 1 : 0,
-      edge.type === 'FINANCIAL' ? 1 : 0,
-      edge.type === 'POLITICAL' ? 1 : 0,
-      edge.type === 'PERSONAL' ? 1 : 0,
-      edge.type === 'ORGANIZATIONAL' ? 1 : 0,
+      edge.type === "INFORMATION" ? 1 : 0,
+      edge.type === "FINANCIAL" ? 1 : 0,
+      edge.type === "POLITICAL" ? 1 : 0,
+      edge.type === "PERSONAL" ? 1 : 0,
+      edge.type === "ORGANIZATIONAL" ? 1 : 0,
       // Direction encoding
-      edge.direction === 'BIDIRECTIONAL' ? 1 : 0,
-      edge.direction === 'SOURCE_TO_TARGET' ? 1 : 0,
-      edge.direction === 'TARGET_TO_SOURCE' ? 1 : 0,
+      edge.direction === "BIDIRECTIONAL" ? 1 : 0,
+      edge.direction === "SOURCE_TO_TARGET" ? 1 : 0,
+      edge.direction === "TARGET_TO_SOURCE" ? 1 : 0,
       // Trend encoding
-      edge.temporalPattern.trend === 'INCREASING' ? 1 : 0,
-      edge.temporalPattern.trend === 'DECREASING' ? 1 : 0,
-      edge.temporalPattern.trend === 'STABLE' ? 1 : 0,
-      edge.temporalPattern.trend === 'VOLATILE' ? 1 : 0,
+      edge.temporalPattern.trend === "INCREASING" ? 1 : 0,
+      edge.temporalPattern.trend === "DECREASING" ? 1 : 0,
+      edge.temporalPattern.trend === "STABLE" ? 1 : 0,
+      edge.temporalPattern.trend === "VOLATILE" ? 1 : 0,
       // Additional contextual features
       Math.random(), // Geographic proximity
       Math.random(), // Temporal alignment
@@ -1627,7 +1507,7 @@ export class AnalyticsEngine extends EventEmitter {
 
   private async calculateNetworkMetrics(
     nodes: InfluenceNode[],
-    edges: InfluenceEdge[],
+    edges: InfluenceEdge[]
   ): Promise<any> {
     const nodeCount = nodes.length;
     const edgeCount = edges.length;
@@ -1639,9 +1519,7 @@ export class AnalyticsEngine extends EventEmitter {
     const features = this.extractNetworkFeatures(nodes, edges);
     const tensorFeatures = tf.tensor2d([features]);
 
-    const prediction = this.networkAnalysisModel.predict(
-      tensorFeatures,
-    ) as tf.Tensor;
+    const prediction = this.networkAnalysisModel.predict(tensorFeatures) as tf.Tensor;
     const metrics = await prediction.data();
 
     tensorFeatures.dispose();
@@ -1656,25 +1534,17 @@ export class AnalyticsEngine extends EventEmitter {
     };
   }
 
-  private extractNetworkFeatures(
-    nodes: InfluenceNode[],
-    edges: InfluenceEdge[],
-  ): number[] {
+  private extractNetworkFeatures(nodes: InfluenceNode[], edges: InfluenceEdge[]): number[] {
     const nodeCount = nodes.length;
     const edgeCount = edges.length;
 
     // Calculate basic statistics
-    const avgInfluence =
-      nodes.reduce((sum, n) => sum + n.metrics.influence, 0) / nodeCount;
-    const avgCredibility =
-      nodes.reduce((sum, n) => sum + n.metrics.credibility, 0) / nodeCount;
-    const avgReach =
-      nodes.reduce((sum, n) => sum + n.metrics.reach, 0) / nodeCount;
+    const avgInfluence = nodes.reduce((sum, n) => sum + n.metrics.influence, 0) / nodeCount;
+    const avgCredibility = nodes.reduce((sum, n) => sum + n.metrics.credibility, 0) / nodeCount;
+    const avgReach = nodes.reduce((sum, n) => sum + n.metrics.reach, 0) / nodeCount;
 
-    const avgStrength =
-      edges.reduce((sum, e) => sum + e.strength, 0) / edgeCount;
-    const avgConfidence =
-      edges.reduce((sum, e) => sum + e.confidence, 0) / edgeCount;
+    const avgStrength = edges.reduce((sum, e) => sum + e.strength, 0) / edgeCount;
+    const avgConfidence = edges.reduce((sum, e) => sum + e.confidence, 0) / edgeCount;
 
     return [
       nodeCount / 10000, // Normalized node count
@@ -1685,19 +1555,19 @@ export class AnalyticsEngine extends EventEmitter {
       avgStrength,
       avgConfidence,
       // Node type distribution
-      nodes.filter((n) => n.type === 'INDIVIDUAL').length / nodeCount,
-      nodes.filter((n) => n.type === 'ORGANIZATION').length / nodeCount,
-      nodes.filter((n) => n.type === 'MEDIA').length / nodeCount,
-      nodes.filter((n) => n.type === 'GOVERNMENT').length / nodeCount,
-      nodes.filter((n) => n.type === 'MILITARY').length / nodeCount,
-      nodes.filter((n) => n.type === 'ECONOMIC').length / nodeCount,
-      nodes.filter((n) => n.type === 'SOCIAL').length / nodeCount,
+      nodes.filter((n) => n.type === "INDIVIDUAL").length / nodeCount,
+      nodes.filter((n) => n.type === "ORGANIZATION").length / nodeCount,
+      nodes.filter((n) => n.type === "MEDIA").length / nodeCount,
+      nodes.filter((n) => n.type === "GOVERNMENT").length / nodeCount,
+      nodes.filter((n) => n.type === "MILITARY").length / nodeCount,
+      nodes.filter((n) => n.type === "ECONOMIC").length / nodeCount,
+      nodes.filter((n) => n.type === "SOCIAL").length / nodeCount,
       // Edge type distribution
-      edges.filter((e) => e.type === 'INFORMATION').length / edgeCount,
-      edges.filter((e) => e.type === 'FINANCIAL').length / edgeCount,
-      edges.filter((e) => e.type === 'POLITICAL').length / edgeCount,
-      edges.filter((e) => e.type === 'PERSONAL').length / edgeCount,
-      edges.filter((e) => e.type === 'ORGANIZATIONAL').length / edgeCount,
+      edges.filter((e) => e.type === "INFORMATION").length / edgeCount,
+      edges.filter((e) => e.type === "FINANCIAL").length / edgeCount,
+      edges.filter((e) => e.type === "POLITICAL").length / edgeCount,
+      edges.filter((e) => e.type === "PERSONAL").length / edgeCount,
+      edges.filter((e) => e.type === "ORGANIZATIONAL").length / edgeCount,
       // Additional network features
       ...Array(256 - 19)
         .fill(0)
@@ -1707,7 +1577,7 @@ export class AnalyticsEngine extends EventEmitter {
 
   private async identifyInfluenceClusters(
     nodes: InfluenceNode[],
-    edges: InfluenceEdge[],
+    edges: InfluenceEdge[]
   ): Promise<any[]> {
     // Simplified clustering based on edge weights and node similarities
     const clusters = [];
@@ -1734,7 +1604,7 @@ export class AnalyticsEngine extends EventEmitter {
     startNode: InfluenceNode,
     allNodes: InfluenceNode[],
     edges: InfluenceEdge[],
-    visited: Set<string>,
+    visited: Set<string>
   ): string[] {
     const cluster = [startNode.id];
     visited.add(startNode.id);
@@ -1747,14 +1617,11 @@ export class AnalyticsEngine extends EventEmitter {
 
       // Find connected nodes with strong relationships
       const connectedEdges = edges.filter(
-        (e) =>
-          (e.source === currentNodeId || e.target === currentNodeId) &&
-          e.strength > threshold,
+        (e) => (e.source === currentNodeId || e.target === currentNodeId) && e.strength > threshold
       );
 
       for (const edge of connectedEdges) {
-        const neighborId =
-          edge.source === currentNodeId ? edge.target : edge.source;
+        const neighborId = edge.source === currentNodeId ? edge.target : edge.source;
 
         if (!visited.has(neighborId)) {
           visited.add(neighborId);
@@ -1770,7 +1637,7 @@ export class AnalyticsEngine extends EventEmitter {
   private calculateClusterCoherence(
     nodeIds: string[],
     nodes: InfluenceNode[],
-    edges: InfluenceEdge[],
+    edges: InfluenceEdge[]
   ): number {
     if (nodeIds.length < 2) return 1;
 
@@ -1782,7 +1649,7 @@ export class AnalyticsEngine extends EventEmitter {
         const edge = edges.find(
           (e) =>
             (e.source === nodeIds[i] && e.target === nodeIds[j]) ||
-            (e.source === nodeIds[j] && e.target === nodeIds[i]),
+            (e.source === nodeIds[j] && e.target === nodeIds[i])
         );
 
         if (edge) {
@@ -1799,22 +1666,13 @@ export class AnalyticsEngine extends EventEmitter {
     return density * avgWeight;
   }
 
-  private calculateClusterInfluence(
-    nodeIds: string[],
-    nodes: InfluenceNode[],
-  ): number {
+  private calculateClusterInfluence(nodeIds: string[], nodes: InfluenceNode[]): number {
     const clusterNodes = nodes.filter((n) => nodeIds.includes(n.id));
-    const totalInfluence = clusterNodes.reduce(
-      (sum, n) => sum + n.metrics.influence,
-      0,
-    );
+    const totalInfluence = clusterNodes.reduce((sum, n) => sum + n.metrics.influence, 0);
     return totalInfluence / clusterNodes.length;
   }
 
-  private async collectSentimentData(
-    region: string,
-    hours: number,
-  ): Promise<SentimentDataPoint[]> {
+  private async collectSentimentData(region: string, hours: number): Promise<SentimentDataPoint[]> {
     // Simulate sentiment data collection
     const dataPoints: SentimentDataPoint[] = [];
     const pointCount = hours * 10; // 10 points per hour
@@ -1823,13 +1681,11 @@ export class AnalyticsEngine extends EventEmitter {
       dataPoints.push({
         id: uuidv4(),
         timestamp: moment()
-          .subtract(hours - i / 10, 'hours')
+          .subtract(hours - i / 10, "hours")
           .toDate(),
         source: `source_${Math.floor(Math.random() * 100)}`,
         content: `Sample content ${i}`,
-        platform: ['twitter', 'facebook', 'news', 'blogs'][
-          Math.floor(Math.random() * 4)
-        ],
+        platform: ["twitter", "facebook", "news", "blogs"][Math.floor(Math.random() * 4)],
         location: {
           country: region,
           region: region,
@@ -1851,7 +1707,7 @@ export class AnalyticsEngine extends EventEmitter {
         },
         topics: [
           {
-            topic: 'politics',
+            topic: "politics",
             relevance: Math.random(),
             sentiment: (Math.random() - 0.5) * 2,
           },
@@ -1865,7 +1721,7 @@ export class AnalyticsEngine extends EventEmitter {
 
   private async prepareForecastingFeatures(
     historicalData: SentimentDataPoint[],
-    region: string,
+    region: string
   ): Promise<number[][]> {
     // Prepare time series features for forecasting
     const features: number[][] = [];
@@ -1880,26 +1736,19 @@ export class AnalyticsEngine extends EventEmitter {
     return features;
   }
 
-  private extractTimeSeriesFeatures(
-    dataPoints: SentimentDataPoint[],
-  ): number[] {
+  private extractTimeSeriesFeatures(dataPoints: SentimentDataPoint[]): number[] {
     // Extract time series features from data points
     const avgPolarity =
-      dataPoints.reduce((sum, dp) => sum + dp.sentiment.polarity, 0) /
-      dataPoints.length;
+      dataPoints.reduce((sum, dp) => sum + dp.sentiment.polarity, 0) / dataPoints.length;
     const avgMagnitude =
-      dataPoints.reduce((sum, dp) => sum + dp.sentiment.magnitude, 0) /
-      dataPoints.length;
+      dataPoints.reduce((sum, dp) => sum + dp.sentiment.magnitude, 0) / dataPoints.length;
     const avgConfidence =
-      dataPoints.reduce((sum, dp) => sum + dp.sentiment.confidence, 0) /
-      dataPoints.length;
+      dataPoints.reduce((sum, dp) => sum + dp.sentiment.confidence, 0) / dataPoints.length;
 
     // Calculate volatility
     const polarityVariance =
-      dataPoints.reduce(
-        (sum, dp) => sum + Math.pow(dp.sentiment.polarity - avgPolarity, 2),
-        0,
-      ) / dataPoints.length;
+      dataPoints.reduce((sum, dp) => sum + Math.pow(dp.sentiment.polarity - avgPolarity, 2), 0) /
+      dataPoints.length;
     const volatility = Math.sqrt(polarityVariance);
 
     // Calculate trend
@@ -1907,34 +1756,28 @@ export class AnalyticsEngine extends EventEmitter {
     const secondHalf = dataPoints.slice(Math.floor(dataPoints.length / 2));
 
     const firstHalfAvg =
-      firstHalf.reduce((sum, dp) => sum + dp.sentiment.polarity, 0) /
-      firstHalf.length;
+      firstHalf.reduce((sum, dp) => sum + dp.sentiment.polarity, 0) / firstHalf.length;
     const secondHalfAvg =
-      secondHalf.reduce((sum, dp) => sum + dp.sentiment.polarity, 0) /
-      secondHalf.length;
+      secondHalf.reduce((sum, dp) => sum + dp.sentiment.polarity, 0) / secondHalf.length;
     const trend = secondHalfAvg - firstHalfAvg;
 
     // Calculate emotion averages
     const emotions = [
-      'anger',
-      'fear',
-      'joy',
-      'sadness',
-      'surprise',
-      'trust',
-      'anticipation',
-      'disgust',
+      "anger",
+      "fear",
+      "joy",
+      "sadness",
+      "surprise",
+      "trust",
+      "anticipation",
+      "disgust",
     ];
     const emotionAvgs = emotions.map(
       (emotion) =>
         dataPoints.reduce(
-          (sum, dp) =>
-            sum +
-            dp.sentiment.emotions[
-              emotion as keyof typeof dp.sentiment.emotions
-            ],
-          0,
-        ) / dataPoints.length,
+          (sum, dp) => sum + dp.sentiment.emotions[emotion as keyof typeof dp.sentiment.emotions],
+          0
+        ) / dataPoints.length
     );
 
     return [
@@ -1952,10 +1795,7 @@ export class AnalyticsEngine extends EventEmitter {
     ];
   }
 
-  private async generateBaseForecast(
-    features: number[][],
-    forecastHours: number,
-  ): Promise<any[]> {
+  private async generateBaseForecast(features: number[][], forecastHours: number): Promise<any[]> {
     if (features.length === 0) return [];
 
     const predictions = [];
@@ -1965,9 +1805,7 @@ export class AnalyticsEngine extends EventEmitter {
     for (let hour = 1; hour <= forecastHours; hour++) {
       const tensorFeatures = tf.tensor3d([features.slice(-168)]); // Last week
 
-      const prediction = this.forecastingModel.predict(
-        tensorFeatures,
-      ) as tf.Tensor;
+      const prediction = this.forecastingModel.predict(tensorFeatures) as tf.Tensor;
       const forecastValues = await prediction.data();
 
       const hourIndex = Math.min(hour - 1, forecastValues.length - 1);
@@ -1978,7 +1816,7 @@ export class AnalyticsEngine extends EventEmitter {
       };
 
       predictions.push({
-        timestamp: moment().add(hour, 'hours').toDate(),
+        timestamp: moment().add(hour, "hours").toDate(),
         sentiment,
         volatility: Math.random() * 0.3,
         keyDrivers: this.identifyKeyDrivers(sentiment),
@@ -1996,47 +1834,44 @@ export class AnalyticsEngine extends EventEmitter {
     const drivers = [];
 
     if (Math.abs(sentiment.polarity) > 0.7) {
-      drivers.push('high_polarization');
+      drivers.push("high_polarization");
     }
 
     if (sentiment.magnitude > 0.8) {
-      drivers.push('strong_emotions');
+      drivers.push("strong_emotions");
     }
 
-    drivers.push('social_media_activity');
-    drivers.push('news_events');
+    drivers.push("social_media_activity");
+    drivers.push("news_events");
 
     return drivers;
   }
 
-  private async generateSentimentScenarios(
-    region: string,
-    forecastHours: number,
-  ): Promise<any[]> {
+  private async generateSentimentScenarios(region: string, forecastHours: number): Promise<any[]> {
     // Generate scenario-based forecasts
     const scenarios = [
       {
-        name: 'Optimistic',
+        name: "Optimistic",
         probability: 0.3,
-        description: 'Positive events drive sentiment improvement',
+        description: "Positive events drive sentiment improvement",
         sentimentImpact: 0.3,
       },
       {
-        name: 'Pessimistic',
+        name: "Pessimistic",
         probability: 0.3,
-        description: 'Negative events drive sentiment decline',
+        description: "Negative events drive sentiment decline",
         sentimentImpact: -0.3,
       },
       {
-        name: 'Volatile',
+        name: "Volatile",
         probability: 0.25,
-        description: 'High volatility with rapid sentiment swings',
+        description: "High volatility with rapid sentiment swings",
         sentimentImpact: 0,
       },
       {
-        name: 'Stable',
+        name: "Stable",
         probability: 0.15,
-        description: 'Minimal change in sentiment patterns',
+        description: "Minimal change in sentiment patterns",
         sentimentImpact: 0,
       },
     ];
@@ -2044,10 +1879,7 @@ export class AnalyticsEngine extends EventEmitter {
     return scenarios;
   }
 
-  private async collectOperationMetrics(
-    operationId: string,
-    timeframe: any,
-  ): Promise<any> {
+  private async collectOperationMetrics(operationId: string, timeframe: any): Promise<any> {
     // Simulate operation metrics collection
     return {
       reach: Math.floor(Math.random() * 10000000),
@@ -2070,13 +1902,8 @@ export class AnalyticsEngine extends EventEmitter {
     };
   }
 
-  private calculateEfficiency(
-    investment: number,
-    returns: any,
-    timeframe: any,
-  ): any {
-    const timeDiff =
-      (timeframe.end.getTime() - timeframe.start.getTime()) / (1000 * 60 * 60); // Hours
+  private calculateEfficiency(investment: number, returns: any, timeframe: any): any {
+    const timeDiff = (timeframe.end.getTime() - timeframe.start.getTime()) / (1000 * 60 * 60); // Hours
 
     return {
       costPerInfluence: investment / (returns.influence || 1),
@@ -2087,33 +1914,19 @@ export class AnalyticsEngine extends EventEmitter {
   }
 
   private calculateRiskAdjustedReturn(returns: any, metrics: any): number {
-    const totalReturn =
-      returns.influence +
-      returns.reach +
-      returns.engagement +
-      returns.conversion;
-    const riskFactor =
-      1 - (metrics.attribution * 0.3 + metrics.resistance * 0.7);
+    const totalReturn = returns.influence + returns.reach + returns.engagement + returns.conversion;
+    const riskFactor = 1 - (metrics.attribution * 0.3 + metrics.resistance * 0.7);
     return totalReturn * riskFactor;
   }
 
-  private async projectROI(
-    operationId: string,
-    metrics: any,
-    timeframe: any,
-  ): Promise<number> {
+  private async projectROI(operationId: string, metrics: any, timeframe: any): Promise<number> {
     // Project future ROI based on current trends
-    const currentROI =
-      (metrics.influence + metrics.engagement) / (metrics.cost || 1);
+    const currentROI = (metrics.influence + metrics.engagement) / (metrics.cost || 1);
     const trendFactor = Math.random() * 0.2 + 0.9; // 0.9-1.1 multiplier
     return currentROI * trendFactor;
   }
 
-  private performBreakEvenAnalysis(
-    investment: number,
-    returns: any,
-    metrics: any,
-  ): any {
+  private performBreakEvenAnalysis(investment: number, returns: any, metrics: any): any {
     const monthlyReturn = returns.influence / 30; // Assume 30-day cycle
     const timeToBreakEven = investment / (monthlyReturn || 1);
     const successProbability = 1 - metrics.resistance;
@@ -2124,10 +1937,7 @@ export class AnalyticsEngine extends EventEmitter {
     };
   }
 
-  private async collectProxyAnalysisData(
-    targetId: string,
-    depth: string,
-  ): Promise<any> {
+  private async collectProxyAnalysisData(targetId: string, depth: string): Promise<any> {
     // Simulate proxy analysis data collection
     return {
       behavioral: {
@@ -2159,41 +1969,39 @@ export class AnalyticsEngine extends EventEmitter {
     };
   }
 
-  private async extractProxyIndicators(
-    targetData: any,
-  ): Promise<ProxyIndicator[]> {
+  private async extractProxyIndicators(targetData: any): Promise<ProxyIndicator[]> {
     const indicators: ProxyIndicator[] = [];
 
     // Behavioral indicators
     if (targetData.behavioral.postingPatterns < 0.3) {
       indicators.push({
-        type: 'BEHAVIORAL',
-        indicator: 'irregular_posting_patterns',
+        type: "BEHAVIORAL",
+        indicator: "irregular_posting_patterns",
         strength: 1 - targetData.behavioral.postingPatterns,
         confidence: 0.7,
-        evidence: ['timing_anomalies', 'frequency_inconsistencies'],
+        evidence: ["timing_anomalies", "frequency_inconsistencies"],
       });
     }
 
     // Temporal indicators
     if (targetData.temporal.timeZoneConsistency < 0.4) {
       indicators.push({
-        type: 'TEMPORAL',
-        indicator: 'timezone_inconsistencies',
+        type: "TEMPORAL",
+        indicator: "timezone_inconsistencies",
         strength: 1 - targetData.temporal.timeZoneConsistency,
         confidence: 0.8,
-        evidence: ['location_mismatches', 'activity_time_anomalies'],
+        evidence: ["location_mismatches", "activity_time_anomalies"],
       });
     }
 
     // Network indicators
     if (targetData.network.connectionPatterns < 0.3) {
       indicators.push({
-        type: 'NETWORK',
-        indicator: 'artificial_network_structure',
+        type: "NETWORK",
+        indicator: "artificial_network_structure",
         strength: 1 - targetData.network.connectionPatterns,
         confidence: 0.6,
-        evidence: ['bot_connections', 'inorganic_growth'],
+        evidence: ["bot_connections", "inorganic_growth"],
       });
     }
 
@@ -2201,15 +2009,13 @@ export class AnalyticsEngine extends EventEmitter {
   }
 
   private async performAIProxyDetection(
-    targetData: any,
+    targetData: any
   ): Promise<{ proxyProbability: number; confidence: number }> {
     // Extract features for proxy detection model
     const features = this.extractProxyDetectionFeatures(targetData);
     const tensorFeatures = tf.tensor2d([features]);
 
-    const prediction = this.proxyDetectionModel.predict(
-      tensorFeatures,
-    ) as tf.Tensor;
+    const prediction = this.proxyDetectionModel.predict(tensorFeatures) as tf.Tensor;
     const results = await prediction.data();
 
     tensorFeatures.dispose();
@@ -2248,28 +2054,28 @@ export class AnalyticsEngine extends EventEmitter {
 
   private async identifyPossibleControllers(
     targetId: string,
-    indicators: ProxyIndicator[],
+    indicators: ProxyIndicator[]
   ): Promise<any[]> {
     // Identify possible controlling entities
     const controllers = [];
 
     // Analyze network connections for control signals
-    const networkIndicator = indicators.find((i) => i.type === 'NETWORK');
+    const networkIndicator = indicators.find((i) => i.type === "NETWORK");
     if (networkIndicator && networkIndicator.strength > 0.6) {
       controllers.push({
-        id: 'unknown_state_actor',
+        id: "unknown_state_actor",
         probability: 0.7,
-        evidence: ['network_analysis', 'funding_patterns'],
+        evidence: ["network_analysis", "funding_patterns"],
       });
     }
 
     // Analyze temporal patterns for geographic origin
-    const temporalIndicator = indicators.find((i) => i.type === 'TEMPORAL');
+    const temporalIndicator = indicators.find((i) => i.type === "TEMPORAL");
     if (temporalIndicator && temporalIndicator.strength > 0.5) {
       controllers.push({
-        id: 'foreign_organization',
+        id: "foreign_organization",
         probability: 0.6,
-        evidence: ['timezone_analysis', 'activity_patterns'],
+        evidence: ["timezone_analysis", "activity_patterns"],
       });
     }
 
@@ -2279,7 +2085,7 @@ export class AnalyticsEngine extends EventEmitter {
   private async performAttributionAnalysis(
     targetId: string,
     indicators: ProxyIndicator[],
-    controllers: any[],
+    controllers: any[]
   ): Promise<any> {
     // Perform attribution analysis
     let countryConfidence = 0;
@@ -2287,29 +2093,24 @@ export class AnalyticsEngine extends EventEmitter {
 
     // Analyze indicators for attribution signals
     indicators.forEach((indicator) => {
-      if (indicator.type === 'TEMPORAL' || indicator.type === 'TECHNICAL') {
+      if (indicator.type === "TEMPORAL" || indicator.type === "TECHNICAL") {
         countryConfidence += indicator.strength * 0.3;
       }
-      if (indicator.type === 'FINANCIAL' || indicator.type === 'NETWORK') {
+      if (indicator.type === "FINANCIAL" || indicator.type === "NETWORK") {
         organizationConfidence += indicator.strength * 0.3;
       }
     });
 
     return {
-      country: controllers.length > 0 ? 'Unknown' : 'N/A',
-      organization: controllers.length > 0 ? 'Unknown Entity' : 'N/A',
+      country: controllers.length > 0 ? "Unknown" : "N/A",
+      organization: controllers.length > 0 ? "Unknown Entity" : "N/A",
       confidence: Math.min(1, (countryConfidence + organizationConfidence) / 2),
     };
   }
 
-  private assessProxyRisks(
-    targetId: string,
-    indicators: ProxyIndicator[],
-    attribution: any,
-  ): any {
+  private assessProxyRisks(targetId: string, indicators: ProxyIndicator[], attribution: any): any {
     // Assess operational risks
-    const operationalRisk =
-      indicators.reduce((sum, i) => sum + i.strength, 0) / indicators.length;
+    const operationalRisk = indicators.reduce((sum, i) => sum + i.strength, 0) / indicators.length;
     const exposureRisk = attribution.confidence;
     const counterIntelligenceRisk = Math.random() * 0.5 + 0.3; // Simulated
 
@@ -2320,10 +2121,7 @@ export class AnalyticsEngine extends EventEmitter {
     };
   }
 
-  private async collectMarketData(
-    markets: string[],
-    timeframe: any,
-  ): Promise<any> {
+  private async collectMarketData(markets: string[], timeframe: any): Promise<any> {
     // Simulate market data collection
     const marketData: any = {};
 
@@ -2336,7 +2134,7 @@ export class AnalyticsEngine extends EventEmitter {
           .fill(null)
           .map(() => Math.random() * 1000000),
         volatility: Math.random(),
-        trend: Math.random() > 0.5 ? 'up' : 'down',
+        trend: Math.random() > 0.5 ? "up" : "down",
       };
     });
 
@@ -2355,7 +2153,7 @@ export class AnalyticsEngine extends EventEmitter {
         // Calculate correlation between price series
         const correlation = this.calculateCorrelation(
           marketData[market1].prices,
-          marketData[market2].prices,
+          marketData[market2].prices
         );
 
         correlations.push({
@@ -2373,7 +2171,7 @@ export class AnalyticsEngine extends EventEmitter {
 
   private calculateCorrelation(
     series1: number[],
-    series2: number[],
+    series2: number[]
   ): { value: number; lag: number } {
     // Calculate Pearson correlation
     const n = Math.min(series1.length, series2.length);
@@ -2403,7 +2201,7 @@ export class AnalyticsEngine extends EventEmitter {
 
   private async identifyMarketVulnerabilities(
     marketData: any,
-    correlations: any[],
+    correlations: any[]
   ): Promise<any[]> {
     const vulnerabilities = [];
 
@@ -2414,7 +2212,7 @@ export class AnalyticsEngine extends EventEmitter {
       if (data.volatility > 0.7) {
         vulnerabilities.push({
           market,
-          vulnerability: 'high_volatility',
+          vulnerability: "high_volatility",
           severity: data.volatility,
           exploitability: 0.8,
         });
@@ -2422,12 +2220,11 @@ export class AnalyticsEngine extends EventEmitter {
 
       // Liquidity vulnerability (low volume)
       const avgVolume =
-        data.volumes.reduce((a: number, b: number) => a + b, 0) /
-        data.volumes.length;
+        data.volumes.reduce((a: number, b: number) => a + b, 0) / data.volumes.length;
       if (avgVolume < 100000) {
         vulnerabilities.push({
           market,
-          vulnerability: 'low_liquidity',
+          vulnerability: "low_liquidity",
           severity: 1 - avgVolume / 1000000,
           exploitability: 0.6,
         });
@@ -2437,14 +2234,9 @@ export class AnalyticsEngine extends EventEmitter {
     return vulnerabilities;
   }
 
-  private calculateCascadeRisk(
-    correlations: any[],
-    vulnerabilities: any[],
-  ): number {
+  private calculateCascadeRisk(correlations: any[], vulnerabilities: any[]): number {
     // Calculate risk of market contagion
-    const highCorrelations = correlations.filter(
-      (c) => Math.abs(c.correlation) > 0.7,
-    );
+    const highCorrelations = correlations.filter((c) => Math.abs(c.correlation) > 0.7);
     const vulnerableMarkets = new Set(vulnerabilities.map((v) => v.market));
 
     let cascadeRisk = 0;
@@ -2463,15 +2255,11 @@ export class AnalyticsEngine extends EventEmitter {
 
   private calculateCouplingStrength(correlations: any[]): number {
     const avgCorrelation =
-      correlations.reduce((sum, c) => sum + Math.abs(c.correlation), 0) /
-      correlations.length;
+      correlations.reduce((sum, c) => sum + Math.abs(c.correlation), 0) / correlations.length;
     return avgCorrelation;
   }
 
-  private async collectCrossTheaterData(
-    theaters: string[],
-    operationIds: string[],
-  ): Promise<any> {
+  private async collectCrossTheaterData(theaters: string[], operationIds: string[]): Promise<any> {
     // Simulate cross-theater data collection
     const theaterData: any = {};
 
@@ -2498,7 +2286,7 @@ export class AnalyticsEngine extends EventEmitter {
   private calculateTheaterCorrelation(
     data1: any,
     data2: any,
-    metric: string,
+    metric: string
   ): { value: number; lag: number } {
     // Calculate correlation between theater metrics
     const series1 = data1[metric];
@@ -2507,62 +2295,46 @@ export class AnalyticsEngine extends EventEmitter {
     return this.calculateCorrelation(series1, series2);
   }
 
-  private generateSyncRecommendations(
-    correlations: any[],
-    syncScore: number,
-  ): string[] {
+  private generateSyncRecommendations(correlations: any[], syncScore: number): string[] {
     const recommendations = [];
 
     if (syncScore < 0.5) {
-      recommendations.push('Improve timing coordination between theaters');
-      recommendations.push('Standardize messaging protocols');
-      recommendations.push('Implement cross-theater communication channels');
+      recommendations.push("Improve timing coordination between theaters");
+      recommendations.push("Standardize messaging protocols");
+      recommendations.push("Implement cross-theater communication channels");
     }
 
     // Find poorly correlated theater pairs
-    const weakCorrelations = correlations.filter(
-      (c) => Math.abs(c.correlation) < 0.3,
-    );
+    const weakCorrelations = correlations.filter((c) => Math.abs(c.correlation) < 0.3);
     if (weakCorrelations.length > 0) {
-      recommendations.push(
-        'Focus on improving coordination between weakly correlated theaters',
-      );
+      recommendations.push("Focus on improving coordination between weakly correlated theaters");
     }
 
     return recommendations;
   }
 
-  private identifySyncRiskFactors(
-    correlations: any[],
-    theaterData: any,
-  ): string[] {
+  private identifySyncRiskFactors(correlations: any[], theaterData: any): string[] {
     const riskFactors = [];
 
     // Check for negative correlations (opposing actions)
-    const negativeCorrelations = correlations.filter(
-      (c) => c.correlation < -0.5,
-    );
+    const negativeCorrelations = correlations.filter((c) => c.correlation < -0.5);
     if (negativeCorrelations.length > 0) {
-      riskFactors.push('Opposing actions detected between some theaters');
+      riskFactors.push("Opposing actions detected between some theaters");
     }
 
     // Check for high lag in correlations
     const highLagCorrelations = correlations.filter((c) => c.lag > 6);
     if (highLagCorrelations.length > 0) {
-      riskFactors.push(
-        'Significant delays in coordination between some theaters',
-      );
+      riskFactors.push("Significant delays in coordination between some theaters");
     }
 
-    riskFactors.push('Communication security vulnerabilities');
-    riskFactors.push('Resource allocation conflicts');
+    riskFactors.push("Communication security vulnerabilities");
+    riskFactors.push("Resource allocation conflicts");
 
     return riskFactors;
   }
 
-  private async collectLatestSentimentData(
-    regionId: string,
-  ): Promise<SentimentDataPoint[]> {
+  private async collectLatestSentimentData(regionId: string): Promise<SentimentDataPoint[]> {
     // Simulate collection of latest sentiment data
     return Array(10)
       .fill(null)
@@ -2571,9 +2343,7 @@ export class AnalyticsEngine extends EventEmitter {
         timestamp: new Date(),
         source: `realtime_source_${Math.floor(Math.random() * 100)}`,
         content: `Real-time content ${Math.floor(Math.random() * 1000)}`,
-        platform: ['twitter', 'facebook', 'news'][
-          Math.floor(Math.random() * 3)
-        ],
+        platform: ["twitter", "facebook", "news"][Math.floor(Math.random() * 3)],
         location: {
           country: regionId,
           region: regionId,
@@ -2607,10 +2377,7 @@ export class AnalyticsEngine extends EventEmitter {
     network.metrics = await this.calculateNetworkMetrics(nodes, edges);
   }
 
-  private async integrateNewInfluenceData(
-    network: InfluenceNetwork,
-    newData: any,
-  ): Promise<void> {
+  private async integrateNewInfluenceData(network: InfluenceNetwork, newData: any): Promise<void> {
     // Integrate new influence data into existing network
     const newNodes = await this.extractInfluenceNodes(newData);
     const existingNodeIds = new Set(network.nodes.keys());
@@ -2654,7 +2421,7 @@ export class AnalyticsEngine extends EventEmitter {
     this.proxyDetections.clear();
     this.dataStreams.clear();
 
-    this.logger.info('AnalyticsEngine disposed');
+    this.logger.info("AnalyticsEngine disposed");
   }
 }
 

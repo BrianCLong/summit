@@ -206,8 +206,7 @@ type LineageResult {
 }
 
 extend type Query {
-  lineage(datasetId: ID!, maxDepth: Int = 3): LineageResult!
-    @auth(abac: "lineage.read")
+  lineage(datasetId: ID!, maxDepth: Int = 3): LineageResult! @auth(abac: "lineage.read")
 }
 ```
 
@@ -323,10 +322,10 @@ export class IGClient {
   constructor(private opts: { endpoint: string; token: string }) {}
   async exec(id: string, vars: any) {
     const res = await fetch(this.opts.endpoint, {
-      method: 'POST',
+      method: "POST",
       headers: {
         authorization: `Bearer ${this.opts.token}`,
-        'content-type': 'application/json',
+        "content-type": "application/json",
       },
       body: JSON.stringify({ id, vars }),
     });
@@ -348,8 +347,8 @@ export function hybridScore(kw: number, vec: number, alpha = 0.7) {
 
 ```ts
 const consumer = createTransactionalConsumer({
-  groupId: 'ingest',
-  isolationLevel: 'read_committed',
+  groupId: "ingest",
+  isolationLevel: "read_committed",
 });
 for await (const msg of consumer) {
   await withTransaction(async (tx) => {
@@ -362,11 +361,7 @@ for await (const msg of consumer) {
 **Lineage capture (TS)**
 
 ```ts
-export function capture(run: {
-  processId: string;
-  inputs: string[];
-  outputs: string[];
-}) {
+export function capture(run: { processId: string; inputs: string[]; outputs: string[] }) {
   /* write nodes/edges */
 }
 ```

@@ -8,11 +8,11 @@ export const MOCK_GRAPH_DATA = {
     { id: '2', label: 'Organization', name: 'BobCorp' },
   ],
   links: [{ source: '1', target: '2', type: 'WORKS_FOR' }],
-};
+}
 
 export const MOCK_USER = {
   id: 'u1',
   name: 'Test User',
   email: 'test@example.com',
   role: 'admin',
-};
+}

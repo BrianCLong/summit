@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Box,
@@ -16,16 +16,10 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@mui/material';
-import Grid from '@mui/material/Grid';
-import {
-  Assessment,
-  CloudUpload,
-  Savings,
-  Storage,
-  TrendingUp,
-} from '@mui/icons-material';
-import { FinOpsAPI } from '../../services/api';
+} from "@mui/material";
+import Grid from "@mui/material/Grid";
+import { Assessment, CloudUpload, Savings, Storage, TrendingUp } from "@mui/icons-material";
+import { FinOpsAPI } from "../../services/api";
 
 type TrendPoint = {
   usageDate: string;
@@ -51,7 +45,7 @@ type FinOpsOverview = {
     thirdPartyCostUsd: number;
   };
   buckets: Array<{
-    key: 'compute' | 'storage' | 'egress' | 'third_party';
+    key: "compute" | "storage" | "egress" | "third_party";
     label: string;
     costUsd: number;
     allocationPct: number;
@@ -79,7 +73,7 @@ function formatUsd(value: number): string {
 
 function Sparkline({
   points,
-  color = '#1976d2',
+  color = "#1976d2",
   height = 40,
 }: {
   points: number[];
@@ -98,15 +92,15 @@ function Sparkline({
     .map((value, idx) => {
       const x = (idx / Math.max(points.length - 1, 1)) * width;
       const y = height - ((value - min) / range) * height;
-      return `${idx === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`;
+      return `${idx === 0 ? "M" : "L"} ${x.toFixed(2)} ${y.toFixed(2)}`;
     })
-    .join(' ');
+    .join(" ");
 
   return (
     <svg
       viewBox={`0 0 ${width} ${height}`}
       preserveAspectRatio="none"
-      style={{ width: '100%', height }}
+      style={{ width: "100%", height }}
     >
       <path d={path} fill="none" stroke={color} strokeWidth={2} />
     </svg>
@@ -128,7 +122,7 @@ export default function FinOpsDashboard() {
         if (mounted) setOverview(data);
       })
       .catch((err: Error) => {
-        if (mounted) setError(err.message || 'Failed to load FinOps data');
+        if (mounted) setError(err.message || "Failed to load FinOps data");
       })
       .finally(() => {
         if (mounted) setLoading(false);
@@ -143,15 +137,15 @@ export default function FinOpsDashboard() {
   const trendPoints = overview?.trend || [];
   const totalSparkline = useMemo(
     () => trendPoints.map((point) => point.totalCostUsd),
-    [trendPoints],
+    [trendPoints]
   );
 
   return (
     <Box sx={{ p: 2 }}>
       <Stack
-        direction={{ xs: 'column', md: 'row' }}
+        direction={{ xs: "column", md: "row" }}
         justifyContent="space-between"
-        alignItems={{ xs: 'flex-start', md: 'center' }}
+        alignItems={{ xs: "flex-start", md: "center" }}
         spacing={2}
         sx={{ mb: 2 }}
       >
@@ -160,8 +154,8 @@ export default function FinOpsDashboard() {
             FinOps Cost & Usage
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Daily attribution by compute, storage, egress, and third-party usage
-            with per-unit insights.
+            Daily attribution by compute, storage, egress, and third-party usage with per-unit
+            insights.
           </Typography>
         </Box>
         <Stack direction="row" spacing={1} alignItems="center">
@@ -238,10 +232,10 @@ export default function FinOpsDashboard() {
                     size="small"
                     color={
                       bucket.allocationPct > 70
-                        ? 'error'
+                        ? "error"
                         : bucket.allocationPct > 50
-                          ? 'warning'
-                          : 'default'
+                          ? "warning"
+                          : "default"
                     }
                   />
                   <Typography variant="caption" color="text.secondary">
@@ -286,9 +280,7 @@ export default function FinOpsDashboard() {
                   <TableRow>
                     <TableCell>Cost per 3p request</TableCell>
                     <TableCell align="right">
-                      {formatUsd(
-                        overview?.unitMetrics.costPerThirdPartyRequest || 0,
-                      )}
+                      {formatUsd(overview?.unitMetrics.costPerThirdPartyRequest || 0)}
                     </TableCell>
                   </TableRow>
                 </TableBody>
@@ -320,21 +312,11 @@ export default function FinOpsDashboard() {
                   {trendPoints.map((point) => (
                     <TableRow key={point.usageDate}>
                       <TableCell>{point.usageDate}</TableCell>
-                      <TableCell align="right">
-                        {formatUsd(point.totalCostUsd)}
-                      </TableCell>
-                      <TableCell align="right">
-                        {formatUsd(point.computeCostUsd)}
-                      </TableCell>
-                      <TableCell align="right">
-                        {formatUsd(point.storageCostUsd)}
-                      </TableCell>
-                      <TableCell align="right">
-                        {formatUsd(point.egressCostUsd)}
-                      </TableCell>
-                      <TableCell align="right">
-                        {formatUsd(point.thirdPartyCostUsd)}
-                      </TableCell>
+                      <TableCell align="right">{formatUsd(point.totalCostUsd)}</TableCell>
+                      <TableCell align="right">{formatUsd(point.computeCostUsd)}</TableCell>
+                      <TableCell align="right">{formatUsd(point.storageCostUsd)}</TableCell>
+                      <TableCell align="right">{formatUsd(point.egressCostUsd)}</TableCell>
+                      <TableCell align="right">{formatUsd(point.thirdPartyCostUsd)}</TableCell>
                     </TableRow>
                   ))}
                   {!trendPoints.length && (

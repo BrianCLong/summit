@@ -90,8 +90,8 @@
 
 ## Sign-off
 
-| Role | Name | Date | Signature |
-|------|------|------|-----------|
-| Platform Lead | | | |
-| Performance Engineer | | | |
-| QA Lead | | | |
+| Role                 | Name | Date | Signature |
+| -------------------- | ---- | ---- | --------- |
+| Platform Lead        |      |      |           |
+| Performance Engineer |      |      |           |
+| QA Lead              |      |      |           |

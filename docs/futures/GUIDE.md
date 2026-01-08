@@ -36,7 +36,7 @@ Track developments across critical technology domains:
 **Usage:**
 
 ```typescript
-import { TechnologyTracker } from '@intelgraph/emerging-threats';
+import { TechnologyTracker } from "@intelgraph/emerging-threats";
 
 const tracker = new TechnologyTracker();
 
@@ -63,7 +63,7 @@ Identify unconventional and emerging threats:
 **Usage:**
 
 ```typescript
-import { DisruptiveThreatAnalyzer } from '@intelgraph/emerging-threats';
+import { DisruptiveThreatAnalyzer } from "@intelgraph/emerging-threats";
 
 const analyzer = new DisruptiveThreatAnalyzer({
   includeGrayZone: true,
@@ -96,27 +96,27 @@ Apply advanced foresight methodologies:
 **Usage:**
 
 ```typescript
-import { ScenarioPlanner, HorizonScanner } from '@intelgraph/futures-analysis';
+import { ScenarioPlanner, HorizonScanner } from "@intelgraph/futures-analysis";
 
 // Scenario planning
 const planner = new ScenarioPlanner({
-  timeHorizons: ['mid-term', 'long-term'],
+  timeHorizons: ["mid-term", "long-term"],
   scenarioCount: 4,
   includeTransformative: true,
   uncertaintyThreshold: 0.6,
 });
 
-const scenarios = await planner.developScenarios('AI Governance', 'long-term', 2040);
+const scenarios = await planner.developScenarios("AI Governance", "long-term", 2040);
 
 // Horizon scanning
 const scanner = new HorizonScanner({
   scanFrequency: 30,
-  domains: ['technology', 'geopolitics', 'environment'],
-  sources: ['academic', 'industry', 'government'],
+  domains: ["technology", "geopolitics", "environment"],
+  sources: ["academic", "industry", "government"],
   noveltyThreshold: 2,
 });
 
-const scan = await scanner.conductScan('mid-term');
+const scan = await scanner.conductScan("mid-term");
 ```
 
 ### 4. Global Risk Assessment
@@ -132,19 +132,15 @@ Comprehensive risk forecasting:
 **Usage:**
 
 ```typescript
-import { RiskForecaster } from '@intelgraph/risk-forecasting';
+import { RiskForecaster } from "@intelgraph/risk-forecasting";
 
 const forecaster = new RiskForecaster();
 
 // Assess global risks
-const risks = await forecaster.assessGlobalRisks([
-  'geopolitical',
-  'economic',
-  'technological'
-]);
+const risks = await forecaster.assessGlobalRisks(["geopolitical", "economic", "technological"]);
 
 // Identify black swans
-const blackSwans = await forecaster.identifyBlackSwans('cybersecurity');
+const blackSwans = await forecaster.identifyBlackSwans("cybersecurity");
 
 // Detect tipping points
 const tippingPoints = await forecaster.detectTippingPoints(riskId);
@@ -163,7 +159,7 @@ Monitor technology convergence:
 **Usage:**
 
 ```typescript
-import { ConvergenceTracker } from '@intelgraph/convergence-tracking';
+import { ConvergenceTracker } from "@intelgraph/convergence-tracking";
 
 const tracker = new ConvergenceTracker();
 

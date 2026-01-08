@@ -59,8 +59,8 @@ Agent returns governed result
 **Purpose**: Register agent with sovereignty layer, establish quotas
 
 ```typescript
-import { SummitIntegrationRuntime } from '@summit/runtime';
-import { Agent } from '@claude/agent-sdk';
+import { SummitIntegrationRuntime } from "@summit/runtime";
+import { Agent } from "@claude/agent-sdk";
 
 class SummitGovernedAgent extends Agent {
   private summit: SummitIntegrationRuntime;
@@ -75,14 +75,14 @@ class SummitGovernedAgent extends Agent {
 
     // Initialize Summit runtime
     this.summit = new SummitIntegrationRuntime({
-      mode: 'FULL_ENFORCEMENT',
+      mode: "FULL_ENFORCEMENT",
     });
 
     // Register with sovereignty layer
     this.summit.sovereignty.registerAgent({
       agent_id: this.agent_id,
       domain: this.domain,
-      ai_type: 'autonomous_agent',
+      ai_type: "autonomous_agent",
       capabilities: config.capabilities,
     });
 
@@ -114,7 +114,7 @@ class SummitGovernedAgent extends Agent {
     if (!sovereignty_check.permitted) {
       throw new SovereigntyViolationError(
         `Tool call blocked: ${sovereignty_check.reason}\n` +
-        `AI involvement quota exceeded. Agent must operate with reduced autonomy.`
+          `AI involvement quota exceeded. Agent must operate with reduced autonomy.`
       );
     }
 
@@ -141,7 +141,7 @@ class SummitGovernedAgent extends Agent {
 
         throw new IntegrityViolationError(
           `Tool output quarantined: ${validation.reason}\n` +
-          `Integrity score: ${validation.metadata.integrity_score}`
+            `Integrity score: ${validation.metadata.integrity_score}`
         );
       }
 
@@ -185,7 +185,7 @@ class SummitGovernedAgent extends Agent {
           agent_id: this.agent_id,
         });
 
-        if (result.status === 'DENIED' || result.status === 'QUARANTINED') {
+        if (result.status === "DENIED" || result.status === "QUARANTINED") {
           // Cannot use this source
           return null;
         }
@@ -202,7 +202,7 @@ class SummitGovernedAgent extends Agent {
 
     if (valid_sources.length === 0) {
       throw new NoValidSourcesError(
-        'All information sources failed Summit validation. Cannot make decision.'
+        "All information sources failed Summit validation. Cannot make decision."
       );
     }
 
@@ -214,10 +214,7 @@ class SummitGovernedAgent extends Agent {
     }
 
     // Formulate decision
-    const preliminary_decision = await this.formulateDecision(
-      context,
-      valid_sources
-    );
+    const preliminary_decision = await this.formulateDecision(context, valid_sources);
 
     // Validate decision through policy engine
     const policy_check = await this.summit.policy.evaluateDecision({
@@ -229,7 +226,7 @@ class SummitGovernedAgent extends Agent {
 
     if (!policy_check.compliant) {
       throw new PolicyViolationError(
-        `Decision violates policy: ${policy_check.violations.map(v => v.message).join('; ')}`
+        `Decision violates policy: ${policy_check.violations.map((v) => v.message).join("; ")}`
       );
     }
 
@@ -246,7 +243,7 @@ class SummitGovernedAgent extends Agent {
   }
 
   private calculateAverageIntegrity(sources: any[]): number {
-    const scores = sources.map(s => s.metadata.truth_ops.integrity_score);
+    const scores = sources.map((s) => s.metadata.truth_ops.integrity_score);
     return scores.reduce((a, b) => a + b, 0) / scores.length;
   }
 }
@@ -261,10 +258,7 @@ class SummitGovernedAgent extends Agent {
   /**
    * Generate explanation for decision/action
    */
-  async generateExplanation(
-    decision: Decision,
-    audience: string
-  ): Promise<Explanation> {
+  async generateExplanation(decision: Decision, audience: string): Promise<Explanation> {
     // Generate explanation using LLM
     const explanation = await this.llm.generate({
       prompt: this.buildExplanationPrompt(decision, audience),
@@ -282,9 +276,9 @@ class SummitGovernedAgent extends Agent {
     // Check for narrative attack indicators
     if (narrative_check.flags.length > 0) {
       // Explanation exhibits concerning patterns
-      const warnings = narrative_check.flags.map(f =>
-        `- ${f.indicator}: ${f.evidence}`
-      ).join('\n');
+      const warnings = narrative_check.flags
+        .map((f) => `- ${f.indicator}: ${f.evidence}`)
+        .join("\n");
 
       // Add narrative health disclaimer
       return {
@@ -322,16 +316,9 @@ class SummitGovernedAgent extends Agent {
     const urgency = await this.assessUrgency(context);
 
     // Calculate expected value of acting vs. waiting
-    const ev_act = await this.calculateExpectedValueOfAction(
-      context,
-      info_completeness
-    );
+    const ev_act = await this.calculateExpectedValueOfAction(context, info_completeness);
 
-    const ev_wait = await this.calculateExpectedValueOfWaiting(
-      context,
-      info_completeness,
-      urgency
-    );
+    const ev_wait = await this.calculateExpectedValueOfWaiting(context, info_completeness, urgency);
 
     if (ev_wait > ev_act) {
       // Strategic silence is optimal
@@ -340,7 +327,7 @@ class SummitGovernedAgent extends Agent {
       const silence_decision = await this.summit.sovereignty.recordStrategicSilence({
         agent_id: this.agent_id,
         context: context,
-        silence_type: 'UNCERTAINTY',
+        silence_type: "UNCERTAINTY",
         justification:
           `Insufficient information (${(info_completeness * 100).toFixed(0)}%). ` +
           `Expected value of waiting (${ev_wait.toFixed(2)}) exceeds ` +
@@ -350,7 +337,7 @@ class SummitGovernedAgent extends Agent {
       });
 
       return {
-        action: 'STRATEGIC_SILENCE',
+        action: "STRATEGIC_SILENCE",
         silence_decision: silence_decision,
         message:
           `Choosing strategic silence. Insufficient information to act confidently. ` +
@@ -360,7 +347,7 @@ class SummitGovernedAgent extends Agent {
 
     // Acting is optimal
     return {
-      action: 'PROCEED',
+      action: "PROCEED",
       confidence: info_completeness,
     };
   }
@@ -383,19 +370,12 @@ interface ToolWithIntegrity {
 }
 
 class SummitGovernedAgent extends Agent {
-  async selectTool(
-    task: string,
-    available_tools: ToolWithIntegrity[]
-  ): Promise<string> {
+  async selectTool(task: string, available_tools: ToolWithIntegrity[]): Promise<string> {
     // Filter to tools with acceptable integrity
-    const valid_tools = available_tools.filter(
-      t => t.integrity_score >= 0.60
-    );
+    const valid_tools = available_tools.filter((t) => t.integrity_score >= 0.6);
 
     if (valid_tools.length === 0) {
-      throw new NoValidToolsError(
-        'No tools meet integrity requirements for this task'
-      );
+      throw new NoValidToolsError("No tools meet integrity requirements for this task");
     }
 
     // Sort by integrity score (descending)
@@ -408,9 +388,7 @@ class SummitGovernedAgent extends Agent {
       }
     }
 
-    throw new NoCapableToolError(
-      'No high-integrity tool capable of performing this task'
-    );
+    throw new NoCapableToolError("No high-integrity tool capable of performing this task");
   }
 }
 ```
@@ -442,7 +420,7 @@ class SummitGovernedAgent extends Agent {
     }
 
     // Ensure diversity requirements
-    const non_ai_sources = sources.filter(s => s.type !== 'ai_model');
+    const non_ai_sources = sources.filter((s) => s.type !== "ai_model");
 
     if (sources.length < this.MIN_SOURCES) {
       throw new InsufficientSourcesError(
@@ -467,16 +445,13 @@ class SummitGovernedAgent extends Agent {
 
 ```typescript
 class SummitGovernedAgent extends Agent {
-  async reportFindings(
-    decision: Decision,
-    sources: ProcessedSource[]
-  ): Promise<Report> {
+  async reportFindings(decision: Decision, sources: ProcessedSource[]): Promise<Report> {
     // Calculate confidence from sources
-    const confidence_scores = sources.map(s => s.metadata.truth_ops.confidence);
+    const confidence_scores = sources.map((s) => s.metadata.truth_ops.confidence);
     const avg_confidence = confidence_scores.reduce((a, b) => a + b, 0) / confidence_scores.length;
 
     // Calculate integrity from sources
-    const integrity_scores = sources.map(s => s.metadata.truth_ops.integrity_score);
+    const integrity_scores = sources.map((s) => s.metadata.truth_ops.integrity_score);
     const avg_integrity = integrity_scores.reduce((a, b) => a + b, 0) / integrity_scores.length;
 
     // Calculate uncertainty
@@ -511,10 +486,12 @@ class SummitGovernedAgent extends Agent {
     const caveats: string[] = [];
 
     if (uncertainty > 0.15) {
-      caveats.push(`High uncertainty (±${(uncertainty * 100).toFixed(1)}%) due to source disagreement`);
+      caveats.push(
+        `High uncertainty (±${(uncertainty * 100).toFixed(1)}%) due to source disagreement`
+      );
     }
 
-    const low_integrity = sources.filter(s => s.metadata.truth_ops.integrity_score < 0.70);
+    const low_integrity = sources.filter((s) => s.metadata.truth_ops.integrity_score < 0.7);
     if (low_integrity.length > 0) {
       caveats.push(`${low_integrity.length} sources have medium/low integrity`);
     }
@@ -522,16 +499,13 @@ class SummitGovernedAgent extends Agent {
     return caveats;
   }
 
-  private identifyUnexplainedElements(
-    decision: Decision,
-    sources: ProcessedSource[]
-  ): string[] {
+  private identifyUnexplainedElements(decision: Decision, sources: ProcessedSource[]): string[] {
     // Identify facts not explained by decision
     // This prevents premature closure
     const all_facts = this.extractFacts(sources);
     const explained_facts = this.getFactsExplainedBy(decision);
 
-    return all_facts.filter(fact => !explained_facts.includes(fact));
+    return all_facts.filter((fact) => !explained_facts.includes(fact));
   }
 
   private async generateAlternativeHypotheses(
@@ -568,12 +542,12 @@ class SummitGovernedAgent extends Agent {
 
     if (behavioral_check.anomalous) {
       // Agent behavior is unusual
-      const anomalies = behavioral_check.anomalies.map(a =>
-        `- ${a.type}: ${a.description}`
-      ).join('\n');
+      const anomalies = behavioral_check.anomalies
+        .map((a) => `- ${a.type}: ${a.description}`)
+        .join("\n");
 
       return {
-        status: 'ANOMALOUS',
+        status: "ANOMALOUS",
         message:
           `Self-check detected anomalous behavior:\n${anomalies}\n\n` +
           `Possible explanations:\n` +
@@ -581,7 +555,7 @@ class SummitGovernedAgent extends Agent {
           `2. Agent is operating in unusual context\n` +
           `3. Agent's training data was poisoned\n\n` +
           `Recommendation: Human review required before continuing high-stakes operations.`,
-        recommendation: 'HUMAN_REVIEW',
+        recommendation: "HUMAN_REVIEW",
       };
     }
 
@@ -593,18 +567,18 @@ class SummitGovernedAgent extends Agent {
 
     if (misinformation_check.risk_detected) {
       return {
-        status: 'MISINFORMATION_RISK',
+        status: "MISINFORMATION_RISK",
         message:
           `Self-check detected potential misinformation amplification.\n` +
-          `Risk factors: ${misinformation_check.risk_factors.join(', ')}\n\n` +
+          `Risk factors: ${misinformation_check.risk_factors.join(", ")}\n\n` +
           `Recommendation: Increase source diversity and integrity requirements.`,
-        recommendation: 'INCREASE_SCRUTINY',
+        recommendation: "INCREASE_SCRUTINY",
       };
     }
 
     return {
-      status: 'HEALTHY',
-      message: 'No adversarial indicators detected in self-check',
+      status: "HEALTHY",
+      message: "No adversarial indicators detected in self-check",
     };
   }
 }
@@ -625,19 +599,19 @@ yarn add @summit/runtime
 ### Step 2: Extend Your Agent Class
 
 ```typescript
-import { SummitGovernedAgent } from '@summit/agent-sdk-integration';
-import { Agent } from '@claude/agent-sdk';
+import { SummitGovernedAgent } from "@summit/agent-sdk-integration";
+import { Agent } from "@claude/agent-sdk";
 
 class MyGovernedAgent extends SummitGovernedAgent {
   constructor() {
     super({
-      agent_id: 'my-agent-001',
-      domain: 'financial_analysis',
-      capabilities: ['data_analysis', 'report_generation'],
+      agent_id: "my-agent-001",
+      domain: "financial_analysis",
+      capabilities: ["data_analysis", "report_generation"],
       summit_config: {
-        mode: 'FULL_ENFORCEMENT',
-        integrity_threshold: 0.70,
-        sovereignty_quota: 0.80,
+        mode: "FULL_ENFORCEMENT",
+        integrity_threshold: 0.7,
+        sovereignty_quota: 0.8,
       },
     });
   }
@@ -659,12 +633,12 @@ const agent = new MyGovernedAgent();
 agent.summit.configure({
   domains: {
     financial_analysis: {
-      min_integrity: 0.80, // Higher for financial decisions
+      min_integrity: 0.8, // Higher for financial decisions
       min_sources: 3,
       require_human_review: true,
     },
     content_generation: {
-      min_integrity: 0.60, // Lower for non-critical content
+      min_integrity: 0.6, // Lower for non-critical content
       min_sources: 2,
       require_human_review: false,
     },
@@ -679,12 +653,12 @@ agent.summit.configure({
 ### Test 1: Integrity Violation
 
 ```typescript
-test('agent rejects low-integrity information', async () => {
+test("agent rejects low-integrity information", async () => {
   const agent = new MyGovernedAgent();
 
   // Simulate low-integrity source
   const low_integrity_source = {
-    content: 'Fake data',
+    content: "Fake data",
     metadata: {
       truth_ops: {
         integrity_score: 0.25, // Below threshold
@@ -692,16 +666,16 @@ test('agent rejects low-integrity information', async () => {
     },
   };
 
-  await expect(
-    agent.makeDecisionUsing([low_integrity_source])
-  ).rejects.toThrow(IntegrityViolationError);
+  await expect(agent.makeDecisionUsing([low_integrity_source])).rejects.toThrow(
+    IntegrityViolationError
+  );
 });
 ```
 
 ### Test 2: Sovereignty Quota Enforcement
 
 ```typescript
-test('agent respects AI involvement quota', async () => {
+test("agent respects AI involvement quota", async () => {
   const agent = new MyGovernedAgent();
 
   // Make many AI-assisted decisions
@@ -710,25 +684,21 @@ test('agent respects AI involvement quota', async () => {
   }
 
   // Next decision should trigger quota
-  await expect(
-    agent.makeDecision({ ai_assisted: true })
-  ).rejects.toThrow(SovereigntyViolationError);
+  await expect(agent.makeDecision({ ai_assisted: true })).rejects.toThrow(
+    SovereigntyViolationError
+  );
 });
 ```
 
 ### Test 3: Source Diversity Requirement
 
 ```typescript
-test('agent requires multiple sources', async () => {
+test("agent requires multiple sources", async () => {
   const agent = new MyGovernedAgent();
 
-  const single_source = [
-    { content: 'Data from one source' },
-  ];
+  const single_source = [{ content: "Data from one source" }];
 
-  await expect(
-    agent.makeDecisionUsing(single_source)
-  ).rejects.toThrow(DiversityRequirementError);
+  await expect(agent.makeDecisionUsing(single_source)).rejects.toThrow(DiversityRequirementError);
 });
 ```
 

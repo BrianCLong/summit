@@ -23,7 +23,7 @@ version: latest
 ```yaml
 name: Docs Health Commit
 on:
-  schedule: [{ cron: '0 2 * * *' }]
+  schedule: [{ cron: "0 2 * * *" }]
   workflow_dispatch:
 jobs:
   collect:
@@ -59,17 +59,14 @@ jobs:
 **`scripts/docs/health-index.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const dir = 'docs/ops/health/data';
+const fs = require("fs");
+const path = require("path");
+const dir = "docs/ops/health/data";
 const files = fs
   .readdirSync(dir)
-  .filter((f) => f.endsWith('.json'))
+  .filter((f) => f.endsWith(".json"))
   .sort();
-fs.writeFileSync(
-  path.join(dir, 'index.json'),
-  JSON.stringify({ files }, null, 2),
-);
+fs.writeFileSync(path.join(dir, "index.json"), JSON.stringify({ files }, null, 2));
 ```
 
 ## A2) Health dashboard component + page
@@ -77,7 +74,7 @@ fs.writeFileSync(
 **`src/components/DocsHealth.tsx`**
 
 ```tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   LineChart,
   Line,
@@ -86,13 +83,13 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-} from 'recharts';
+} from "recharts";
 
 export default function DocsHealth() {
   const [data, setData] = useState<any[]>([]);
   useEffect(() => {
     async function load() {
-      const idx = await import('@site/docs/ops/health/data/index.json');
+      const idx = await import("@site/docs/ops/health/data/index.json");
       const rows: any[] = [];
       for (const f of idx.files) {
         const rec = await import(`@site/docs/ops/health/data/${f}`);
@@ -108,10 +105,7 @@ export default function DocsHealth() {
       <section>
         <h3>Stale Pages Over Time</h3>
         <ResponsiveContainer width="100%" height={280}>
-          <LineChart
-            data={data}
-            margin={{ left: 16, right: 16, top: 16, bottom: 16 }}
-          >
+          <LineChart data={data} margin={{ left: 16, right: 16, top: 16, bottom: 16 }}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
             <YAxis allowDecimals={false} />
@@ -124,10 +118,7 @@ export default function DocsHealth() {
         <div>
           <h3>Broken Links</h3>
           <ResponsiveContainer width="100%" height={220}>
-            <LineChart
-              data={data}
-              margin={{ left: 16, right: 16, top: 16, bottom: 16 }}
-            >
+            <LineChart data={data} margin={{ left: 16, right: 16, top: 16, bottom: 16 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis allowDecimals={false} />
@@ -139,10 +130,7 @@ export default function DocsHealth() {
         <div>
           <h3>A11y Violations</h3>
           <ResponsiveContainer width="100%" height={220}>
-            <LineChart
-              data={data}
-              margin={{ left: 16, right: 16, top: 16, bottom: 16 }}
-            >
+            <LineChart data={data} margin={{ left: 16, right: 16, top: 16, bottom: 16 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis allowDecimals={false} />
@@ -166,7 +154,7 @@ summary: Rolling metrics for broken links, a11y, and stale pages.
 owner: docs
 ---
 
-import DocsHealth from '@site/src/components/DocsHealth';
+import DocsHealth from "@site/src/components/DocsHealth";
 
 <DocsHealth />
 ```
@@ -182,20 +170,20 @@ import DocsHealth from '@site/src/components/DocsHealth';
 **`src/pages/index.tsx`**
 
 ```tsx
-import React from 'react';
-import Link from '@docusaurus/Link';
+import React from "react";
+import Link from "@docusaurus/Link";
 
 const roles = [
-  { href: '/get-started/for-users', label: 'User' },
-  { href: '/get-started/for-admins', label: 'Admin' },
-  { href: '/get-started/for-operators', label: 'Operator' },
+  { href: "/get-started/for-users", label: "User" },
+  { href: "/get-started/for-admins", label: "Admin" },
+  { href: "/get-started/for-operators", label: "Operator" },
 ];
 
 const tasks = [
-  { href: '/tutorials/first-ingest', label: 'Ingest your first dataset' },
-  { href: '/how-to/zip-export', label: 'ZIP Export & Certification' },
-  { href: '/how-to/upgrade-to-v24', label: 'Upgrade to v24' },
-  { href: '/reference', label: 'API & CLI Reference' },
+  { href: "/tutorials/first-ingest", label: "Ingest your first dataset" },
+  { href: "/how-to/zip-export", label: "ZIP Export & Certification" },
+  { href: "/how-to/upgrade-to-v24", label: "Upgrade to v24" },
+  { href: "/reference", label: "API & CLI Reference" },
 ];
 
 export default function Home() {
@@ -203,9 +191,7 @@ export default function Home() {
     <main className="container margin-vert--lg">
       <section className="hero">
         <h1>IntelGraph Documentation</h1>
-        <p className="hero__subtitle">
-          Find answers fast—by role, task, or search.
-        </p>
+        <p className="hero__subtitle">Find answers fast—by role, task, or search.</p>
         <div className="flex gap-2 margin-top--sm">
           {roles.map((r) => (
             <Link key={r.href} className="button button--primary" to={r.href}>
@@ -263,15 +249,15 @@ export default function Home() {
 **`scripts/docs/link-doctor.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const map = require('../../docs/_meta/link-map.json');
+const fs = require("fs");
+const path = require("path");
+const map = require("../../docs/_meta/link-map.json");
 
 function replaceInFile(file) {
-  let src = fs.readFileSync(file, 'utf8');
+  let src = fs.readFileSync(file, "utf8");
   let changed = false;
   for (const [from, to] of Object.entries(map)) {
-    const rx = new RegExp(from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+    const rx = new RegExp(from.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g");
     if (rx.test(src)) {
       src = src.replace(rx, to);
       changed = true;
@@ -288,7 +274,7 @@ function walk(dir) {
     else if (/\.mdx?$/.test(f)) replaceInFile(p);
   }
 }
-walk('docs');
+walk("docs");
 ```
 
 **Add to** `docs-quality.yml` (as a fix step you can run manually or on schedule):
@@ -305,7 +291,7 @@ walk('docs');
 ```js
 // Pulls top zero-result queries from Algolia Analytics and opens issues.
 console.log(
-  'Integrate Algolia Analytics here and write to docs/search-queries.md, then create issues with create-issue-from-file.',
+  "Integrate Algolia Analytics here and write to docs/search-queries.md, then create issues with create-issue-from-file."
 );
 ```
 
@@ -314,7 +300,7 @@ console.log(
 ```yaml
 name: Docs Zero-Results Backlog
 on:
-  schedule: [{ cron: '0 11 * * 1' }]
+  schedule: [{ cron: "0 11 * * 1" }]
   workflow_dispatch:
 jobs:
   backlog:
@@ -330,9 +316,7 @@ jobs:
 
 ```js
 // Use openapi-diff to produce a human-readable markdown section appended to release notes.
-console.log(
-  'Diff core spec vs previous tag and write to docs/releases/_fragments/api-diff.md',
-);
+console.log("Diff core spec vs previous tag and write to docs/releases/_fragments/api-diff.md");
 ```
 
 ---
@@ -342,9 +326,9 @@ console.log(
 **`scripts/docs/quality-score.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
+const fs = require("fs");
+const path = require("path");
+const matter = require("gray-matter");
 const files = [];
 (function walk(d) {
   for (const f of fs.readdirSync(d)) {
@@ -352,28 +336,27 @@ const files = [];
     const s = fs.statSync(p);
     s.isDirectory() ? walk(p) : /\.mdx?$/.test(f) && files.push(p);
   }
-})('docs');
+})("docs");
 const rows = [];
 for (const f of files) {
-  const src = fs.readFileSync(f, 'utf8');
+  const src = fs.readFileSync(f, "utf8");
   const fm = matter(src).data || {};
   const hasSeeAlso = /##\s*See also/i.test(src);
   const hasNext = /##\s*Next steps/i.test(src);
   const hasAlt = !/!\[[\s\]]*\]\(/.test(src); // naive alt text check
-  const score =
-    [hasSeeAlso, hasNext, hasAlt, !!fm.owner].filter(Boolean).length / 4;
-  rows.push({ file: f.replace(/^docs\//, ''), score });
+  const score = [hasSeeAlso, hasNext, hasAlt, !!fm.owner].filter(Boolean).length / 4;
+  rows.push({ file: f.replace(/^docs\//, ""), score });
 }
-fs.writeFileSync('docs/ops/quality-report.json', JSON.stringify(rows, null, 2));
+fs.writeFileSync("docs/ops/quality-report.json", JSON.stringify(rows, null, 2));
 ```
 
 **`src/components/QualityBadge.tsx`**
 
 ```tsx
-import React from 'react';
+import React from "react";
 export default function QualityBadge({ score }: { score: number }) {
   const pct = Math.round(score * 100);
-  const color = pct >= 90 ? 'success' : pct >= 75 ? 'warning' : 'danger';
+  const color = pct >= 90 ? "success" : pct >= 75 ? "warning" : "danger";
   return <span className={`badge badge--${color}`}>Quality {pct}%</span>;
 }
 ```

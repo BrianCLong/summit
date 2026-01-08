@@ -3,16 +3,13 @@
  * Track and verify media provenance and authenticity chain
  */
 
-import type { ProvenanceResult, ProvenanceEntry } from '../types';
+import type { ProvenanceResult, ProvenanceEntry } from "../types";
 
 export class ProvenanceTracker {
   /**
    * Verify media provenance
    */
-  async verifyProvenance(
-    mediaBuffer: Buffer,
-    metadata?: any,
-  ): Promise<ProvenanceResult> {
+  async verifyProvenance(mediaBuffer: Buffer, metadata?: any): Promise<ProvenanceResult> {
     // Check for provenance information in:
     // 1. XMP metadata
     // 2. C2PA (Coalition for Content Provenance and Authenticity) manifests
@@ -49,7 +46,7 @@ export class ProvenanceTracker {
    */
   private async extractProvenanceChain(
     mediaBuffer: Buffer,
-    metadata?: any,
+    metadata?: any
   ): Promise<ProvenanceEntry[]> {
     const chain: ProvenanceEntry[] = [];
 
@@ -198,15 +195,13 @@ export class ProvenanceTracker {
   private async calculateContentHash(mediaBuffer: Buffer): Promise<string> {
     // Calculate cryptographic hash of content
     // Use SHA-256 or similar
-    return 'hash_placeholder';
+    return "hash_placeholder";
   }
 
   /**
    * Perform reverse image search
    */
-  async reverseImageSearch(
-    imageBuffer: Buffer,
-  ): Promise<{
+  async reverseImageSearch(imageBuffer: Buffer): Promise<{
     found: boolean;
     results: Array<{
       url: string;
@@ -244,7 +239,7 @@ export class ProvenanceTracker {
       action: string;
       timestamp?: Date;
       previousHash?: string;
-    },
+    }
   ): Promise<ProvenanceEntry> {
     const timestamp = metadata.timestamp || new Date();
     const contentHash = await this.calculateContentHash(mediaBuffer);

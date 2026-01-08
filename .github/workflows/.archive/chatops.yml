@@ -9,8 +9,8 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  NODE_VERSION: '20.11.1'
-  PNPM_VERSION: '9.6.0'
+  NODE_VERSION: "20.11.1"
+  PNPM_VERSION: "9.6.0"
 
 permissions:
   contents: write

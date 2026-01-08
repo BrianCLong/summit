@@ -105,16 +105,14 @@
 
 ```ts
 // server/src/federation/gateway.ts
-import pLimit from 'p-limit';
-import { planFederated } from './planner';
-import { applyPolicy } from './policy';
+import pLimit from "p-limit";
+import { planFederated } from "./planner";
+import { applyPolicy } from "./policy";
 
 export async function federatedQuery(ctx, nlQuery: string) {
   const plan = await planFederated(nlQuery, ctx);
   const limit = pLimit(4);
-  const results = await Promise.all(
-    plan.subqueries.map((sq) => limit(() => runOrgQuery(ctx, sq))),
-  );
+  const results = await Promise.all(plan.subqueries.map((sq) => limit(() => runOrgQuery(ctx, sq))));
   const merged = mergeAndDedupe(results);
   return merged.map((r) => applyPolicy(ctx, r));
 }
@@ -146,16 +144,16 @@ export async function planFederated(nlQuery: string, ctx: any) {
 export function applyPolicy(ctx: any, row: any) {
   const user = ctx.user;
   for (const f of Object.keys(row)) {
-    if (shouldMask(user, f)) row[f] = '•••';
+    if (shouldMask(user, f)) row[f] = "•••";
   }
   row.__source = row.__source || ctx.currentOrg;
   return row;
 }
 function shouldMask(user: any, field: string) {
   // purpose + role + field sensitivity
-  if (user.purpose !== 'investigation:case') return true;
-  const sensitive = ['biometric', 'geo.precise', 'minor.identifier'];
-  return sensitive.includes(field) && !user.scopes.includes('view:sensitive');
+  if (user.purpose !== "investigation:case") return true;
+  const sensitive = ["biometric", "geo.precise", "minor.identifier"];
+  return sensitive.includes(field) && !user.scopes.includes("view:sensitive");
 }
 ```
 
@@ -163,20 +161,15 @@ function shouldMask(user: any, field: string) {
 
 ```ts
 // server/src/security/purpose-token.ts
-import jwt from 'jsonwebtoken';
-export function issuePurposeToken(
-  user: any,
-  purpose: string,
-  scopes: string[],
-  ttlSec: number,
-) {
+import jwt from "jsonwebtoken";
+export function issuePurposeToken(user: any, purpose: string, scopes: string[], ttlSec: number) {
   return jwt.sign({ sub: user.id, purpose, scopes }, process.env.JWT_SECRET!, {
     expiresIn: ttlSec,
   });
 }
 export function guardPurpose(ctx: any, scope: string) {
-  if (!ctx.token?.scopes?.includes(scope)) throw new Error('ScopeDenied');
-  if (!ctx.token?.purpose) throw new Error('PurposeMissing');
+  if (!ctx.token?.scopes?.includes(scope)) throw new Error("ScopeDenied");
+  if (!ctx.token?.purpose) throw new Error("PurposeMissing");
 }
 ```
 
@@ -186,9 +179,7 @@ export function guardPurpose(ctx: any, scope: string) {
 // server/src/provenance/export-tags.ts
 export function tagExport(bundle: any, token: any) {
   bundle.meta.purpose = token.purpose;
-  bundle.meta.expiresAt = token.exp
-    ? new Date(token.exp * 1000).toISOString()
-    : null;
+  bundle.meta.expiresAt = token.exp ? new Date(token.exp * 1000).toISOString() : null;
   return bundle;
 }
 ```
@@ -197,7 +188,7 @@ export function tagExport(bundle: any, token: any) {
 
 ```tsx
 // apps/mobile/src/App.tsx
-import React from 'react';
+import React from "react";
 export default function App() {
   return (
     <div className="p-4">
@@ -215,23 +206,21 @@ export default function App() {
 
 ```js
 // apps/mobile/public/pwa-sw.js
-self.addEventListener('install', (e) => {
-  e.waitUntil(
-    caches.open('ig-snapshots-v1').then((c) => c.addAll(['/offline.html'])),
-  );
+self.addEventListener("install", (e) => {
+  e.waitUntil(caches.open("ig-snapshots-v1").then((c) => c.addAll(["/offline.html"])));
 });
-self.addEventListener('fetch', (e) => {
-  if (e.request.url.includes('/snapshots/')) {
+self.addEventListener("fetch", (e) => {
+  if (e.request.url.includes("/snapshots/")) {
     e.respondWith(
       caches.match(e.request).then(
         (r) =>
           r ||
           fetch(e.request).then((res) => {
             const cc = res.clone();
-            caches.open('ig-snapshots-v1').then((c) => c.put(e.request, cc));
+            caches.open("ig-snapshots-v1").then((c) => c.put(e.request, cc));
             return res;
-          }),
-      ),
+          })
+      )
     );
   }
 });
@@ -240,9 +229,9 @@ self.addEventListener('fetch', (e) => {
 ```js
 // apps/mobile/src/jquery-hooks.js
 $(function () {
-  $(document).on('click', '.insight-card', function () {
-    const id = $(this).data('id');
-    $('#view').load(`/mobile/insight/${id}`);
+  $(document).on("click", ".insight-card", function () {
+    const id = $(this).data("id");
+    $("#view").load(`/mobile/insight/${id}`);
   });
 });
 ```
@@ -251,21 +240,21 @@ $(function () {
 
 ```ts
 // server/src/snapshots/cdn.ts
-import crypto from 'crypto';
+import crypto from "crypto";
 export function signedUrl(id: string) {
   const exp = Math.floor(Date.now() / 1000) + 300;
   const sig = crypto
-    .createHmac('sha256', process.env.CDN_SECRET!)
+    .createHmac("sha256", process.env.CDN_SECRET!)
     .update(`${id}.${exp}`)
-    .digest('hex');
+    .digest("hex");
   return `/snapshots/${id}?exp=${exp}&sig=${sig}`;
 }
 export function verifySig(id: string, exp: number, sig: string) {
   if (Date.now() / 1000 > exp) return false;
   const good = crypto
-    .createHmac('sha256', process.env.CDN_SECRET!)
+    .createHmac("sha256", process.env.CDN_SECRET!)
     .update(`${id}.${exp}`)
-    .digest('hex');
+    .digest("hex");
   return sig === good;
 }
 ```
@@ -277,13 +266,13 @@ export function verifySig(id: string, exp: number, sig: string) {
 export class Breaker {
   constructor(
     private threshold = 5,
-    private timeoutMs = 10_000,
+    private timeoutMs = 10_000
   ) {}
   fails = 0;
   openUntil = 0;
   async call(fn: () => Promise<any>) {
     const now = Date.now();
-    if (now < this.openUntil) throw new Error('CircuitOpen');
+    if (now < this.openUntil) throw new Error("CircuitOpen");
     try {
       const r = await fn();
       this.fails = 0;
@@ -303,56 +292,49 @@ export class Breaker {
 
 ```ts
 // tests/e2e/federation.spec.ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test('cross‑org query shows source chips and masked fields', async ({
-  page,
-}) => {
-  await page.goto('/lens/cross‑org‑1');
-  await page.fill(
-    '#nl',
-    'find payments between org A vendors and org B shell corps last year',
-  );
-  await page.click('#run');
-  await expect(page.locator('.chip.source-org')).toHaveCount(2);
-  await expect(page.getByText('•••')).toBeVisible();
+test("cross‑org query shows source chips and masked fields", async ({ page }) => {
+  await page.goto("/lens/cross‑org‑1");
+  await page.fill("#nl", "find payments between org A vendors and org B shell corps last year");
+  await page.click("#run");
+  await expect(page.locator(".chip.source-org")).toHaveCount(2);
+  await expect(page.getByText("•••")).toBeVisible();
 });
 ```
 
 ```ts
 // tests/e2e/mobile.spec.ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test('mobile shows insights & snapshots offline', async ({ page }) => {
-  await page.goto('/mobile');
-  await page.addInitScript(() =>
-    navigator.serviceWorker.register('/pwa-sw.js'),
-  );
-  await page.click('text=Snapshots');
-  await page.reload({ waitUntil: 'networkidle' });
+test("mobile shows insights & snapshots offline", async ({ page }) => {
+  await page.goto("/mobile");
+  await page.addInitScript(() => navigator.serviceWorker.register("/pwa-sw.js"));
+  await page.click("text=Snapshots");
+  await page.reload({ waitUntil: "networkidle" });
   // simulate offline
   await page.context().setOffline(true);
-  await page.click('text=Snapshots');
-  await expect(page.locator('#view .snapshot')).toBeVisible();
+  await page.click("text=Snapshots");
+  await expect(page.locator("#view .snapshot")).toBeVisible();
 });
 ```
 
 ### 4.10 k6 — Cross‑org Soak
 
 ```js
-import http from 'k6/http';
+import http from "k6/http";
 export const options = {
   vus: 50,
-  duration: '8h',
-  thresholds: { http_req_duration: ['p(95)<1300'] },
+  duration: "8h",
+  thresholds: { http_req_duration: ["p(95)<1300"] },
 };
 export default function () {
   http.post(
-    'http://localhost:4000/graphql',
+    "http://localhost:4000/graphql",
     JSON.stringify({
       query: '{ federatedSearch(q:"fraud rings last quarter"){ __source id } }',
     }),
-    { headers: { 'Content-Type': 'application/json' } },
+    { headers: { "Content-Type": "application/json" } }
   );
 }
 ```

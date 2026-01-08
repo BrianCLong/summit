@@ -4,45 +4,45 @@
  */
 
 export enum PolicyDomain {
-  SECURITY = 'SECURITY',
-  DEFENSE = 'DEFENSE',
-  TRADE = 'TRADE',
-  DIPLOMACY = 'DIPLOMACY',
-  ECONOMIC = 'ECONOMIC',
-  HUMAN_RIGHTS = 'HUMAN_RIGHTS',
-  ENVIRONMENT = 'ENVIRONMENT',
-  DEVELOPMENT = 'DEVELOPMENT',
-  INTELLIGENCE = 'INTELLIGENCE',
-  CYBER = 'CYBER',
-  SPACE = 'SPACE',
-  ENERGY = 'ENERGY',
-  MIGRATION = 'MIGRATION',
-  HEALTH = 'HEALTH',
-  COUNTERTERRORISM = 'COUNTERTERRORISM',
-  NUCLEAR = 'NUCLEAR',
-  HUMANITARIAN = 'HUMANITARIAN'
+  SECURITY = "SECURITY",
+  DEFENSE = "DEFENSE",
+  TRADE = "TRADE",
+  DIPLOMACY = "DIPLOMACY",
+  ECONOMIC = "ECONOMIC",
+  HUMAN_RIGHTS = "HUMAN_RIGHTS",
+  ENVIRONMENT = "ENVIRONMENT",
+  DEVELOPMENT = "DEVELOPMENT",
+  INTELLIGENCE = "INTELLIGENCE",
+  CYBER = "CYBER",
+  SPACE = "SPACE",
+  ENERGY = "ENERGY",
+  MIGRATION = "MIGRATION",
+  HEALTH = "HEALTH",
+  COUNTERTERRORISM = "COUNTERTERRORISM",
+  NUCLEAR = "NUCLEAR",
+  HUMANITARIAN = "HUMANITARIAN",
 }
 
 export enum PolicyPosition {
-  STRONGLY_SUPPORT = 'STRONGLY_SUPPORT',
-  SUPPORT = 'SUPPORT',
-  NEUTRAL = 'NEUTRAL',
-  OPPOSE = 'OPPOSE',
-  STRONGLY_OPPOSE = 'STRONGLY_OPPOSE',
-  ABSTAIN = 'ABSTAIN',
-  CONDITIONAL = 'CONDITIONAL',
-  EVOLVING = 'EVOLVING'
+  STRONGLY_SUPPORT = "STRONGLY_SUPPORT",
+  SUPPORT = "SUPPORT",
+  NEUTRAL = "NEUTRAL",
+  OPPOSE = "OPPOSE",
+  STRONGLY_OPPOSE = "STRONGLY_OPPOSE",
+  ABSTAIN = "ABSTAIN",
+  CONDITIONAL = "CONDITIONAL",
+  EVOLVING = "EVOLVING",
 }
 
 export enum PolicyShiftType {
-  MAJOR_REVERSAL = 'MAJOR_REVERSAL',
-  GRADUAL_SHIFT = 'GRADUAL_SHIFT',
-  TACTICAL_ADJUSTMENT = 'TACTICAL_ADJUSTMENT',
-  RHETORICAL_CHANGE = 'RHETORICAL_CHANGE',
-  LEADERSHIP_DRIVEN = 'LEADERSHIP_DRIVEN',
-  CRISIS_DRIVEN = 'CRISIS_DRIVEN',
-  DOMESTIC_DRIVEN = 'DOMESTIC_DRIVEN',
-  ALLIANCE_DRIVEN = 'ALLIANCE_DRIVEN'
+  MAJOR_REVERSAL = "MAJOR_REVERSAL",
+  GRADUAL_SHIFT = "GRADUAL_SHIFT",
+  TACTICAL_ADJUSTMENT = "TACTICAL_ADJUSTMENT",
+  RHETORICAL_CHANGE = "RHETORICAL_CHANGE",
+  LEADERSHIP_DRIVEN = "LEADERSHIP_DRIVEN",
+  CRISIS_DRIVEN = "CRISIS_DRIVEN",
+  DOMESTIC_DRIVEN = "DOMESTIC_DRIVEN",
+  ALLIANCE_DRIVEN = "ALLIANCE_DRIVEN",
 }
 
 export interface ForeignPolicy {
@@ -74,7 +74,7 @@ export interface ForeignPolicy {
   // Evolution
   previousPositions?: PolicyPosition[];
   shiftHistory?: PolicyShift[];
-  trendDirection: 'HARDENING' | 'SOFTENING' | 'STABLE' | 'VOLATILE';
+  trendDirection: "HARDENING" | "SOFTENING" | "STABLE" | "VOLATILE";
 
   // Relationships
   alignedCountries: string[];
@@ -100,7 +100,7 @@ export interface ForeignPolicy {
 export interface PolicyDocument {
   id: string;
   title: string;
-  type: 'STRATEGY' | 'DOCTRINE' | 'WHITE_PAPER' | 'NSC_DIRECTIVE' | 'POLICY_BRIEF' | 'ROADMAP';
+  type: "STRATEGY" | "DOCTRINE" | "WHITE_PAPER" | "NSC_DIRECTIVE" | "POLICY_BRIEF" | "ROADMAP";
   releaseDate: Date;
   classification: string;
   summary: string;
@@ -119,7 +119,7 @@ export interface Speech {
   topic: string;
   transcript?: string;
   keyQuotes: string[];
-  tone: 'CONCILIATORY' | 'FIRM' | 'AGGRESSIVE' | 'DEFENSIVE' | 'COOPERATIVE';
+  tone: "CONCILIATORY" | "FIRM" | "AGGRESSIVE" | "DEFENSIVE" | "COOPERATIVE";
   policySignals: string[];
   sentiment: number; // -1 to 1
 }
@@ -129,7 +129,7 @@ export interface VotingRecord {
   forum: string; // e.g., "UN General Assembly", "UN Security Council"
   resolution: string;
   resolutionNumber?: string;
-  vote: 'YES' | 'NO' | 'ABSTAIN' | 'ABSENT';
+  vote: "YES" | "NO" | "ABSTAIN" | "ABSENT";
   date: Date;
   topic: string;
   explanation?: string;
@@ -149,7 +149,7 @@ export interface PolicyShift {
   domesticReaction?: string;
   internationalReaction?: {
     country: string;
-    reaction: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL' | 'CONCERNED';
+    reaction: "POSITIVE" | "NEGATIVE" | "NEUTRAL" | "CONCERNED";
     statement?: string;
   }[];
   reversible: boolean;
@@ -157,12 +157,12 @@ export interface PolicyShift {
 }
 
 export interface PolicyInstrument {
-  type: 'DIPLOMATIC' | 'MILITARY' | 'ECONOMIC' | 'INFORMATION' | 'LEGAL' | 'COVERT';
+  type: "DIPLOMATIC" | "MILITARY" | "ECONOMIC" | "INFORMATION" | "LEGAL" | "COVERT";
   description: string;
   active: boolean;
   effectiveness?: number;
   cost?: number;
-  riskLevel?: 'LOW' | 'MEDIUM' | 'HIGH';
+  riskLevel?: "LOW" | "MEDIUM" | "HIGH";
 }
 
 export interface ResourceAllocation {
@@ -170,11 +170,11 @@ export interface ResourceAllocation {
   personnel?: number;
   facilities?: string[];
   programs?: string[];
-  priorityLevel: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  priorityLevel: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
 }
 
 export interface Implementation {
-  status: 'PLANNED' | 'INITIATED' | 'ONGOING' | 'COMPLETED' | 'SUSPENDED' | 'FAILED';
+  status: "PLANNED" | "INITIATED" | "ONGOING" | "COMPLETED" | "SUSPENDED" | "FAILED";
   progress: number; // 0-100
   milestones: Milestone[];
   challenges: string[];
@@ -194,11 +194,11 @@ export interface Metric {
   target: number;
   current: number;
   unit: string;
-  trend: 'IMPROVING' | 'STABLE' | 'DECLINING';
+  trend: "IMPROVING" | "STABLE" | "DECLINING";
 }
 
 export interface Source {
-  type: 'OFFICIAL' | 'MEDIA' | 'ACADEMIC' | 'INTELLIGENCE' | 'THINK_TANK';
+  type: "OFFICIAL" | "MEDIA" | "ACADEMIC" | "INTELLIGENCE" | "THINK_TANK";
   name: string;
   url?: string;
   date: Date;
@@ -209,13 +209,13 @@ export interface NationalInterest {
   id: string;
   country: string;
   interest: string;
-  category: 'VITAL' | 'IMPORTANT' | 'PERIPHERAL';
+  category: "VITAL" | "IMPORTANT" | "PERIPHERAL";
   description: string;
   threatsToInterest: string[];
   policiesSupporting: string[];
   tradeofsAccepted?: string[];
   competingInterests?: string[];
-  stability: 'ENDURING' | 'STABLE' | 'EVOLVING' | 'CONTESTED';
+  stability: "ENDURING" | "STABLE" | "EVOLVING" | "CONTESTED";
 }
 
 export interface StrategicDoctrine {
@@ -255,7 +255,7 @@ export interface PolicyAlignment {
   domainAlignment: {
     domain: PolicyDomain;
     alignment: number;
-    trend: 'CONVERGING' | 'DIVERGING' | 'STABLE';
+    trend: "CONVERGING" | "DIVERGING" | "STABLE";
   }[];
 
   keySimilarities: string[];
@@ -265,7 +265,7 @@ export interface PolicyAlignment {
   treatyCooperation?: number;
   diplomaticCoordination?: number;
 
-  trajectory: 'IMPROVING' | 'STABLE' | 'DETERIORATING';
+  trajectory: "IMPROVING" | "STABLE" | "DETERIORATING";
   outlook: string;
 }
 

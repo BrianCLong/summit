@@ -2,7 +2,7 @@
  * Question answering system
  */
 
-import type { QuestionAnswerResult } from '../types';
+import type { QuestionAnswerResult } from "../types";
 
 export class QuestionAnswering {
   /**
@@ -26,11 +26,8 @@ export class QuestionAnswering {
   /**
    * Answer question from multiple documents
    */
-  async answerFromDocuments(
-    question: string,
-    documents: string[]
-  ): Promise<QuestionAnswerResult> {
-    const allContext = documents.join(' ');
+  async answerFromDocuments(question: string, documents: string[]): Promise<QuestionAnswerResult> {
+    const allContext = documents.join(" ");
     return this.answer(question, allContext);
   }
 

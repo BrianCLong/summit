@@ -4,7 +4,7 @@
  */
 
 export interface ImageGenerationConfig {
-  model: 'stylegan' | 'diffusion' | 'gan' | 'vae';
+  model: "stylegan" | "diffusion" | "gan" | "vae";
   resolution: [number, number];
   style?: string;
   seed?: number;
@@ -45,7 +45,7 @@ export class ImageSynthesizer {
 
   async augment(image: ImageData, transforms: string[]): Promise<ImageData[]> {
     // Image augmentation (rotation, flip, crop, etc.)
-    return transforms.map(transform => this.applyTransform(image, transform));
+    return transforms.map((transform) => this.applyTransform(image, transform));
   }
 
   private applyTransform(image: ImageData, transform: string): ImageData {
@@ -57,11 +57,15 @@ export class ImageSynthesizer {
 export class VideoSynthesizer {
   async generateVideo(frames: number, fps: number): Promise<ImageData[]> {
     // Generate video frames
-    const synthesizer = new ImageSynthesizer({ model: 'diffusion', resolution: [1920, 1080] });
+    const synthesizer = new ImageSynthesizer({ model: "diffusion", resolution: [1920, 1080] });
     return synthesizer.generate(frames);
   }
 
-  async interpolateFrames(frame1: ImageData, frame2: ImageData, numIntermediate: number): Promise<ImageData[]> {
+  async interpolateFrames(
+    frame1: ImageData,
+    frame2: ImageData,
+    numIntermediate: number
+  ): Promise<ImageData[]> {
     // Frame interpolation
     return Array.from({ length: numIntermediate }, () => frame1);
   }

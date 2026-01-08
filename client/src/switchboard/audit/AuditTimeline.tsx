@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Box,
@@ -11,9 +11,9 @@ import {
   ListItem,
   Stack,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
 
-type Outcome = 'success' | 'failure' | 'partial' | 'pending';
+type Outcome = "success" | "failure" | "partial" | "pending";
 
 export interface CorrelatedAuditEvent {
   id: string;
@@ -39,14 +39,14 @@ export interface AuditTimelineProps {
 
 const defaultApiBase =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (import.meta as any).env?.VITE_API_URL || 'http://localhost:4000';
+  (import.meta as any).env?.VITE_API_URL || "http://localhost:4000";
 
 const getFallbackText = (value?: string) => value?.trim() || undefined;
 
 const formatTimestamp = (timestamp?: string) => {
-  if (!timestamp) return 'Unknown time';
+  if (!timestamp) return "Unknown time";
   const date = new Date(timestamp);
-  if (Number.isNaN(date.getTime())) return 'Unknown time';
+  if (Number.isNaN(date.getTime())) return "Unknown time";
   return date.toISOString();
 };
 
@@ -91,10 +91,7 @@ export const AuditTimeline: React.FC<AuditTimelineProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   const apiBase = apiBaseUrl || defaultApiBase;
-  const correlationKey = useMemo(
-    () => correlationIds.filter(Boolean).join(','),
-    [correlationIds],
-  );
+  const correlationKey = useMemo(() => correlationIds.filter(Boolean).join(","), [correlationIds]);
 
   useEffect(() => {
     if (!correlationKey) {
@@ -115,7 +112,7 @@ export const AuditTimeline: React.FC<AuditTimelineProps> = ({
 
         const response = await (fetcher || fetch)(`${apiBase}/audit?${params}`, {
           signal: controller.signal,
-          headers: { Accept: 'application/json' },
+          headers: { Accept: "application/json" },
         });
 
         if (!response.ok) {
@@ -126,9 +123,9 @@ export const AuditTimeline: React.FC<AuditTimelineProps> = ({
         const data = Array.isArray(payload?.data) ? payload.data : [];
         setEvents(data);
       } catch (err) {
-        if ((err as Error).name === 'AbortError') return;
+        if ((err as Error).name === "AbortError") return;
         setEvents([]);
-        setError((err as Error).message || 'Failed to load audit events');
+        setError((err as Error).message || "Failed to load audit events");
       } finally {
         setLoading(false);
       }
@@ -148,7 +145,7 @@ export const AuditTimeline: React.FC<AuditTimelineProps> = ({
         const right = new Date(b.timestamp ?? 0).getTime();
         return right - left;
       }),
-    [events],
+    [events]
   );
 
   const hasCorrelation = Boolean(correlationKey);
@@ -173,23 +170,21 @@ export const AuditTimeline: React.FC<AuditTimelineProps> = ({
         {error && <Alert severity="error">{error}</Alert>}
 
         {hasCorrelation && !error && !loading && sortedEvents.length === 0 && (
-          <Typography color="text.secondary">
-            No correlated audit events were found.
-          </Typography>
+          <Typography color="text.secondary">No correlated audit events were found.</Typography>
         )}
 
-        <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
+        <List sx={{ width: "100%", bgcolor: "background.paper" }}>
           {sortedEvents.map((event) => {
             const link = buildDeepLink(event);
             const summary =
               getFallbackText(event.action) ||
               getFallbackText(event.message) ||
-              'No details available';
+              "No details available";
 
             const detailText =
               getFallbackText(event.message) ||
               getFallbackText(event.details?.summary as string) ||
-              'No additional context provided.';
+              "No additional context provided.";
 
             return (
               <ListItem key={event.id} alignItems="flex-start" divider>
@@ -224,11 +219,11 @@ export const AuditTimeline: React.FC<AuditTimelineProps> = ({
                         label={event.outcome}
                         size="small"
                         color={
-                          event.outcome === 'success'
-                            ? 'success'
-                            : event.outcome === 'failure'
-                              ? 'error'
-                              : 'warning'
+                          event.outcome === "success"
+                            ? "success"
+                            : event.outcome === "failure"
+                              ? "error"
+                              : "warning"
                         }
                         variant="outlined"
                       />

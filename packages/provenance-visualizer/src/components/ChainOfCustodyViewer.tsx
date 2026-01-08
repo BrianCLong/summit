@@ -1,14 +1,6 @@
 // @ts-nocheck
-import React, { useEffect, useState } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Chip,
-  Alert,
-  CircularProgress,
-} from '@mui/material';
+import React, { useEffect, useState } from "react";
+import { Box, Card, CardContent, Typography, Chip, Alert, CircularProgress } from "@mui/material";
 import {
   Timeline,
   TimelineItem,
@@ -17,16 +9,16 @@ import {
   TimelineContent,
   TimelineDot,
   TimelineOppositeContent,
-} from '@mui/lab';
+} from "@mui/lab";
 import {
   FingerprintOutlined,
   PersonOutline,
   LockOutlined,
   VerifiedUser,
-} from '@mui/icons-material';
-import { format } from 'date-fns';
-import type { Evidence, TransformStep } from '../types';
-import { ProvenanceLedgerClient } from '../api/client';
+} from "@mui/icons-material";
+import { format } from "date-fns";
+import type { Evidence, TransformStep } from "../types";
+import { ProvenanceLedgerClient } from "../api/client";
 
 interface ChainOfCustodyViewerProps {
   evidenceId: string;
@@ -53,7 +45,7 @@ export const ChainOfCustodyViewer: React.FC<ChainOfCustodyViewerProps> = ({
       const evidenceData = await client.getEvidence(evidenceId);
       setEvidence(evidenceData);
     } catch (err: any) {
-      setError(err.message || 'Failed to load evidence');
+      setError(err.message || "Failed to load evidence");
     } finally {
       setLoading(false);
     }
@@ -76,9 +68,9 @@ export const ChainOfCustodyViewer: React.FC<ChainOfCustodyViewerProps> = ({
   }
 
   const getTransformIcon = (transformType: string) => {
-    if (transformType.toLowerCase().includes('encrypt')) return <LockOutlined />;
-    if (transformType.toLowerCase().includes('sign')) return <VerifiedUser />;
-    if (transformType.toLowerCase().includes('hash')) return <FingerprintOutlined />;
+    if (transformType.toLowerCase().includes("encrypt")) return <LockOutlined />;
+    if (transformType.toLowerCase().includes("sign")) return <VerifiedUser />;
+    if (transformType.toLowerCase().includes("hash")) return <FingerprintOutlined />;
     return <PersonOutline />;
   };
 
@@ -107,7 +99,7 @@ export const ChainOfCustodyViewer: React.FC<ChainOfCustodyViewerProps> = ({
               </Typography>
             )}
             <Typography variant="body2" color="text.secondary">
-              Registered: {format(new Date(evidence.created_at), 'PPpp')}
+              Registered: {format(new Date(evidence.created_at), "PPpp")}
             </Typography>
             {evidence.authorityId && (
               <Typography variant="body2" color="text.secondary">
@@ -151,7 +143,7 @@ export const ChainOfCustodyViewer: React.FC<ChainOfCustodyViewerProps> = ({
               {/* Initial State */}
               <TimelineItem>
                 <TimelineOppositeContent color="text.secondary">
-                  {format(new Date(evidence.created_at), 'PPpp')}
+                  {format(new Date(evidence.created_at), "PPpp")}
                 </TimelineOppositeContent>
                 <TimelineSeparator>
                   <TimelineDot color="primary">
@@ -180,7 +172,7 @@ export const ChainOfCustodyViewer: React.FC<ChainOfCustodyViewerProps> = ({
               {evidence.transformChain.map((transform: TransformStep, index: number) => (
                 <TimelineItem key={index}>
                   <TimelineOppositeContent color="text.secondary">
-                    {format(new Date(transform.timestamp), 'PPpp')}
+                    {format(new Date(transform.timestamp), "PPpp")}
                   </TimelineOppositeContent>
                   <TimelineSeparator>
                     <TimelineDot color="secondary">
@@ -200,11 +192,11 @@ export const ChainOfCustodyViewer: React.FC<ChainOfCustodyViewerProps> = ({
                             component="pre"
                             sx={{
                               mt: 1,
-                              fontSize: '0.7rem',
-                              bgcolor: 'grey.100',
+                              fontSize: "0.7rem",
+                              bgcolor: "grey.100",
                               p: 1,
                               borderRadius: 1,
-                              overflow: 'auto',
+                              overflow: "auto",
                               maxHeight: 100,
                             }}
                           >
@@ -230,11 +222,11 @@ export const ChainOfCustodyViewer: React.FC<ChainOfCustodyViewerProps> = ({
               <Box
                 component="pre"
                 sx={{
-                  fontSize: '0.75rem',
-                  bgcolor: 'grey.100',
+                  fontSize: "0.75rem",
+                  bgcolor: "grey.100",
                   p: 2,
                   borderRadius: 1,
-                  overflow: 'auto',
+                  overflow: "auto",
                   maxHeight: 200,
                 }}
               >

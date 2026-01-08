@@ -2,7 +2,12 @@
  * ForesightEngine - Advanced Strategic Foresight Methods
  */
 
-import { StrategicForesight, ForesightInsight, MorphologicalAnalysis, CausalLayer } from './types.js';
+import {
+  StrategicForesight,
+  ForesightInsight,
+  MorphologicalAnalysis,
+  CausalLayer,
+} from "./types.js";
 
 export class ForesightEngine {
   private analyses: Map<string, StrategicForesight> = new Map();
@@ -16,9 +21,9 @@ export class ForesightEngine {
     const foresight: StrategicForesight = {
       id: `foresight-${Date.now()}`,
       title: `Futures Wheel: ${centralEvent}`,
-      domain: 'futures-wheel',
+      domain: "futures-wheel",
       timeframe: 10,
-      methodology: 'futures-wheel',
+      methodology: "futures-wheel",
       insights,
       recommendations: [],
       createdDate: new Date(),

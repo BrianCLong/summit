@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import cytoscape from 'cytoscape';
-import dagre from 'cytoscape-dagre';
-import coseBilkent from 'cytoscape-cose-bilkent';
-import { useDispatch, useSelector } from 'react-redux'; // Import useSelector
-import { graphInteractionActions as g } from '../../store/slices/graphInteractionSlice';
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
+import cytoscape from "cytoscape";
+import dagre from "cytoscape-dagre";
+import coseBilkent from "cytoscape-cose-bilkent";
+import { useDispatch, useSelector } from "react-redux"; // Import useSelector
+import { graphInteractionActions as g } from "../../store/slices/graphInteractionSlice";
 import {
   Box,
   CircularProgress,
@@ -13,13 +13,13 @@ import {
   Select,
   MenuItem,
   Tooltip,
-} from '@mui/material';
-import GraphContextMenu from './GraphContextMenu';
-import AIInsightsPanel from './AIInsightsPanel';
-import EdgeInspectorDialog from './EdgeInspectorDialog';
-import TTPCorrelationOverlay from './TTPCorrelationOverlay'; // Import the new overlay component
-import TTPTriagePanel from './TTPTriagePanel'; // Import the new triage panel component
-import SubgraphExplorerDialog from './SubgraphExplorerDialog';
+} from "@mui/material";
+import GraphContextMenu from "./GraphContextMenu";
+import AIInsightsPanel from "./AIInsightsPanel";
+import EdgeInspectorDialog from "./EdgeInspectorDialog";
+import TTPCorrelationOverlay from "./TTPCorrelationOverlay"; // Import the new overlay component
+import TTPTriagePanel from "./TTPTriagePanel"; // Import the new triage panel component
+import SubgraphExplorerDialog from "./SubgraphExplorerDialog";
 
 cytoscape.use(dagre);
 cytoscape.use(coseBilkent);
@@ -28,27 +28,25 @@ const LABEL_ZOOM_THRESHOLD = 1.2;
 
 export default function AdvancedGraphView({
   elements = { nodes: [], edges: [] },
-  layout = 'cose-bilkent',
+  layout = "cose-bilkent",
 }) {
   const dispatch = useDispatch();
   const params = useParams?.() || {};
-  const selectedNode = useSelector(
-    (state) => state.graphInteraction.selectedNode,
-  ); // Get selectedNode from Redux store
+  const selectedNode = useSelector((state) => state.graphInteraction.selectedNode); // Get selectedNode from Redux store
   const containerRef = useRef(null);
   const cyRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [insightsOpen, setInsightsOpen] = useState(() =>
-    localStorage.getItem('graph.aiPanelOpen') === '0' ? false : true,
+    localStorage.getItem("graph.aiPanelOpen") === "0" ? false : true
   );
   const [lodLabels, setLodLabels] = useState(true);
   const [layoutName, setLayoutName] = useState(
-    () => localStorage.getItem('graph.layoutName') || layout,
+    () => localStorage.getItem("graph.layoutName") || layout
   );
   const tooltipRef = useRef(null);
   const overlayCanvasRef = useRef(null);
   const [spriteLabels, setSpriteLabels] = useState(() =>
-    localStorage.getItem('graph.spriteLabels') === '1' ? true : false,
+    localStorage.getItem("graph.spriteLabels") === "1" ? true : false
   );
   const [edgeInspectorOpen, setEdgeInspectorOpen] = useState(false);
   const [edgeDetail, setEdgeDetail] = useState(null);
@@ -59,8 +57,7 @@ export default function AdvancedGraphView({
 
   const addElementsChunked = useMemo(() => {
     const ric =
-      window.requestIdleCallback ||
-      ((cb) => setTimeout(() => cb({ timeRemaining: () => 16 }), 0));
+      window.requestIdleCallback || ((cb) => setTimeout(() => cb({ timeRemaining: () => 16 }), 0));
     return (cy, nodes = [], edges = [], chunk = 2000) => {
       let i = 0,
         j = 0;
@@ -69,12 +66,10 @@ export default function AdvancedGraphView({
         const eSlice = edges.slice(j, j + chunk);
         cy.startBatch();
         nSlice.forEach((n) => {
-          if (!cy.getElementById(n.id).nonempty())
-            cy.add({ group: 'nodes', data: n });
+          if (!cy.getElementById(n.id).nonempty()) cy.add({ group: "nodes", data: n });
         });
         eSlice.forEach((e) => {
-          if (!cy.getElementById(e.id).nonempty())
-            cy.add({ group: 'edges', data: e });
+          if (!cy.getElementById(e.id).nonempty()) cy.add({ group: "edges", data: e });
         });
         cy.endBatch();
         i += chunk;
@@ -92,22 +87,22 @@ export default function AdvancedGraphView({
       container: containerRef.current,
       style: [
         {
-          selector: 'node',
+          selector: "node",
           style: {
-            'background-color': '#888',
-            label: 'data(label)',
-            'font-size': 10,
+            "background-color": "#888",
+            label: "data(label)",
+            "font-size": 10,
           },
         },
         {
-          selector: 'edge',
+          selector: "edge",
           style: {
             width: 1,
-            'line-color': '#bbb',
-            'target-arrow-shape': 'triangle',
-            'target-arrow-color': '#bbb',
-            label: 'data(label)',
-            'font-size': 8,
+            "line-color": "#bbb",
+            "target-arrow-shape": "triangle",
+            "target-arrow-color": "#bbb",
+            label: "data(label)",
+            "font-size": 8,
           },
         },
       ],
@@ -120,34 +115,27 @@ export default function AdvancedGraphView({
     });
 
     cyRef.current = cy;
-    if (
-      import.meta &&
-      import.meta.env &&
-      import.meta.env.MODE !== 'production'
-    ) {
+    if (import.meta && import.meta.env && import.meta.env.MODE !== "production") {
       // Expose for E2E tests
       window.__cy = cy;
     }
 
     setLoading(true);
     addElementsChunked(cy, elements.nodes, elements.edges);
-    if (
-      import.meta?.env?.VITE_SEED_ADV_GRAPH === '1' &&
-      (elements.nodes?.length || 0) === 0
-    ) {
+    if (import.meta?.env?.VITE_SEED_ADV_GRAPH === "1" && (elements.nodes?.length || 0) === 0) {
       const seedNodes = [
-        { id: 'n1', label: 'Alice', type: 'PERSON' },
-        { id: 'n2', label: 'Bob', type: 'PERSON' },
-        { id: 'n3', label: 'Acme Corp', type: 'ORGANIZATION' },
+        { id: "n1", label: "Alice", type: "PERSON" },
+        { id: "n2", label: "Bob", type: "PERSON" },
+        { id: "n3", label: "Acme Corp", type: "ORGANIZATION" },
       ];
       const seedEdges = [
-        { id: 'e1', source: 'n1', target: 'n2', type: 'KNOWS', label: 'KNOWS' },
+        { id: "e1", source: "n1", target: "n2", type: "KNOWS", label: "KNOWS" },
         {
-          id: 'e2',
-          source: 'n2',
-          target: 'n3',
-          type: 'WORKS_FOR',
-          label: 'WORKS_FOR',
+          id: "e2",
+          source: "n2",
+          target: "n3",
+          type: "WORKS_FOR",
+          label: "WORKS_FOR",
         },
       ];
       addElementsChunked(cy, seedNodes, seedEdges, 1000);
@@ -155,81 +143,76 @@ export default function AdvancedGraphView({
 
     const runLayout = () => {
       const cfg =
-        layoutName === 'dagre'
-          ? { name: 'dagre', rankDir: 'LR' }
-          : layoutName === 'grid'
-            ? { name: 'grid', fit: true }
-            : layoutName === 'concentric'
-              ? { name: 'concentric', minNodeSpacing: 15 }
-              : { name: 'cose-bilkent', randomize: true, animate: false };
+        layoutName === "dagre"
+          ? { name: "dagre", rankDir: "LR" }
+          : layoutName === "grid"
+            ? { name: "grid", fit: true }
+            : layoutName === "concentric"
+              ? { name: "concentric", minNodeSpacing: 15 }
+              : { name: "cose-bilkent", randomize: true, animate: false };
       cy.layout(cfg).run();
     };
     runLayout();
 
     // Restore camera if saved
     try {
-      const cameraKey = params?.id
-        ? `graph.camera.${params.id}`
-        : 'graph.camera';
-      const cam = JSON.parse(localStorage.getItem(cameraKey) || 'null');
-      if (cam && typeof cam.zoom === 'number' && cam.pan) {
+      const cameraKey = params?.id ? `graph.camera.${params.id}` : "graph.camera";
+      const cam = JSON.parse(localStorage.getItem(cameraKey) || "null");
+      if (cam && typeof cam.zoom === "number" && cam.pan) {
         cy.zoom(cam.zoom);
         cy.pan(cam.pan);
       }
     } catch (_) {}
 
     const updateLabelsForLOD = () => {
-      const show =
-        lodLabels && !spriteLabels && cy.zoom() >= LABEL_ZOOM_THRESHOLD;
+      const show = lodLabels && !spriteLabels && cy.zoom() >= LABEL_ZOOM_THRESHOLD;
       cy.batch(() => {
-        const nodeLabel = show ? (ele) => ele.data('label') : () => '';
-        const edgeLabel = show ? (ele) => ele.data('label') : () => '';
-        cy.nodes().forEach((n) => n.style('label', nodeLabel(n)));
-        cy.edges().forEach((e) => e.style('label', edgeLabel(e)));
+        const nodeLabel = show ? (ele) => ele.data("label") : () => "";
+        const edgeLabel = show ? (ele) => ele.data("label") : () => "";
+        cy.nodes().forEach((n) => n.style("label", nodeLabel(n)));
+        cy.edges().forEach((e) => e.style("label", edgeLabel(e)));
       });
     };
-    cy.on('zoom', updateLabelsForLOD);
+    cy.on("zoom", updateLabelsForLOD);
     updateLabelsForLOD();
 
     // Persist camera
     const persistCamera = () => {
       const cam = { zoom: cy.zoom(), pan: cy.pan() };
-      const cameraKey = params?.id
-        ? `graph.camera.${params.id}`
-        : 'graph.camera';
+      const cameraKey = params?.id ? `graph.camera.${params.id}` : "graph.camera";
       localStorage.setItem(cameraKey, JSON.stringify(cam));
     };
-    cy.on('zoom pan', persistCamera);
+    cy.on("zoom pan", persistCamera);
 
-    cy.on('tap', 'node', (evt) => dispatch(g.selectNode(evt.target.id())));
-    cy.on('tap', 'edge', (evt) => {
+    cy.on("tap", "node", (evt) => dispatch(g.selectNode(evt.target.id())));
+    cy.on("tap", "edge", (evt) => {
       dispatch(g.selectEdge(evt.target.id()));
       const e = evt.target;
       setEdgeDetail({
         id: e.id(),
-        type: e.data('type'),
-        label: e.data('label'),
-        properties: e.data('properties'),
+        type: e.data("type"),
+        label: e.data("label"),
+        properties: e.data("properties"),
         source: e.source().data(),
         target: e.target().data(),
       });
       setEdgeInspectorOpen(true);
     });
-    cy.on('tap', (evt) => {
+    cy.on("tap", (evt) => {
       if (evt.target === cy) dispatch(g.clearSelection());
     });
-    cy.on('cxttap', 'node, edge', (evt) => {
+    cy.on("cxttap", "node, edge", (evt) => {
       const pos = evt.renderedPosition || evt.position;
       const pageX = evt.originalEvent?.pageX || pos.x;
       const pageY = evt.originalEvent?.pageY || pos.y;
-      const targetType = evt.target.isNode() ? 'node' : 'edge';
+      const targetType = evt.target.isNode() ? "node" : "edge";
       dispatch(
         g.contextMenuOpen({
           x: pageX,
           y: pageY,
           targetType,
           targetId: evt.target.id(),
-        }),
+        })
       );
     });
 
@@ -237,25 +220,25 @@ export default function AdvancedGraphView({
 
     // Keyboard shortcuts
     const onKeyDown = (e) => {
-      if (e.code === 'Space') {
+      if (e.code === "Space") {
         e.preventDefault();
         cy.boxSelectionEnabled(false);
         cy.panningEnabled(true);
-      } else if (e.code === 'Escape') {
+      } else if (e.code === "Escape") {
         cy.elements().unselect();
         dispatch(g.clearSelection());
       }
     };
     const onKeyUp = (e) => {
-      if (e.code === 'Space') {
+      if (e.code === "Space") {
         cy.boxSelectionEnabled(true);
       }
     };
-    window.addEventListener('keydown', onKeyDown);
-    window.addEventListener('keyup', onKeyUp);
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
 
     // Focus animation on selection
-    cy.on('select', 'node,edge', (evt) => {
+    cy.on("select", "node,edge", (evt) => {
       const ele = evt.target;
       const pos = ele.position();
       cy.animate(
@@ -264,21 +247,21 @@ export default function AdvancedGraphView({
           zoom: Math.max(0.6, cy.zoom()),
           duration: 250,
         },
-        { queue: true },
+        { queue: true }
       );
     });
 
     // Throttled hover tooltip
-    const tooltip = document.createElement('div');
-    tooltip.style.position = 'fixed';
-    tooltip.style.pointerEvents = 'none';
-    tooltip.style.background = 'rgba(0,0,0,0.75)';
-    tooltip.style.color = '#fff';
-    tooltip.style.padding = '2px 6px';
-    tooltip.style.borderRadius = '4px';
-    tooltip.style.fontSize = '11px';
-    tooltip.style.zIndex = '9999';
-    tooltip.style.display = 'none';
+    const tooltip = document.createElement("div");
+    tooltip.style.position = "fixed";
+    tooltip.style.pointerEvents = "none";
+    tooltip.style.background = "rgba(0,0,0,0.75)";
+    tooltip.style.color = "#fff";
+    tooltip.style.padding = "2px 6px";
+    tooltip.style.borderRadius = "4px";
+    tooltip.style.fontSize = "11px";
+    tooltip.style.zIndex = "9999";
+    tooltip.style.display = "none";
     document.body.appendChild(tooltip);
     tooltipRef.current = tooltip;
 
@@ -290,28 +273,28 @@ export default function AdvancedGraphView({
       tooltip.textContent = text;
       tooltip.style.left = `${x + 12}px`;
       tooltip.style.top = `${y + 12}px`;
-      tooltip.style.display = 'block';
+      tooltip.style.display = "block";
     };
     const hideTooltip = () => {
-      tooltip.style.display = 'none';
+      tooltip.style.display = "none";
     };
 
-    cy.on('mouseover', 'node,edge', (evt) => {
-      const text = evt.target.data('label') || evt.target.id();
+    cy.on("mouseover", "node,edge", (evt) => {
+      const text = evt.target.data("label") || evt.target.id();
       const px = evt.renderedPosition;
       const rect = containerRef.current.getBoundingClientRect();
       const x = rect.left + px.x;
       const y = rect.top + px.y;
       showTooltip(text, x, y);
     });
-    cy.on('mouseout', 'node,edge', hideTooltip);
+    cy.on("mouseout", "node,edge", hideTooltip);
 
     // Listen for element additions from context menu
     const onAddElements = (ev) => {
       const { nodes = [], edges = [] } = ev.detail || {};
       addElementsChunked(cy, nodes, edges);
     };
-    document.addEventListener('graph:addElements', onAddElements);
+    document.addEventListener("graph:addElements", onAddElements);
 
     // Listen for edge inspector open events (from context menu)
     const onOpenInspector = (ev) => {
@@ -320,40 +303,36 @@ export default function AdvancedGraphView({
       if (e && e.nonempty() && e.isEdge()) {
         setEdgeDetail({
           id: e.id(),
-          type: e.data('type'),
-          label: e.data('label'),
-          properties: e.data('properties'),
+          type: e.data("type"),
+          label: e.data("label"),
+          properties: e.data("properties"),
           source: e.source().data(),
           target: e.target().data(),
         });
         setEdgeInspectorOpen(true);
       }
     };
-    document.addEventListener('graph:openEdgeInspector', onOpenInspector);
+    document.addEventListener("graph:openEdgeInspector", onOpenInspector);
 
     const onExploreSubgraph = () => {
-      const sel = cy.elements(':selected');
+      const sel = cy.elements(":selected");
       if (sel.length === 0) return;
-      const nodes = sel
-        .nodes()
-        .map((n) => ({
-          data: { ...n.data(), id: n.id() },
-          position: n.position(),
-        }));
-      const edges = sel
-        .edges()
-        .map((e) => ({
-          data: {
-            ...e.data(),
-            id: e.id(),
-            source: e.source().id(),
-            target: e.target().id(),
-          },
-        }));
+      const nodes = sel.nodes().map((n) => ({
+        data: { ...n.data(), id: n.id() },
+        position: n.position(),
+      }));
+      const edges = sel.edges().map((e) => ({
+        data: {
+          ...e.data(),
+          id: e.id(),
+          source: e.source().id(),
+          target: e.target().id(),
+        },
+      }));
       setSubgraphElements([...nodes, ...edges]);
       setSubgraphOpen(true);
     };
-    document.addEventListener('graph:exploreSubgraph', onExploreSubgraph);
+    document.addEventListener("graph:exploreSubgraph", onExploreSubgraph);
 
     const onSyncSubgraph = (ev) => {
       const { nodes = [], edges = [] } = ev.detail || {};
@@ -366,18 +345,17 @@ export default function AdvancedGraphView({
       });
       edges.forEach((e) => {
         const edge = cy.getElementById(e.id);
-        if (edge && edge.nonempty() && e.data)
-          edge.data({ ...edge.data(), ...e.data });
+        if (edge && edge.nonempty() && e.data) edge.data({ ...edge.data(), ...e.data });
       });
     };
-    document.addEventListener('graph:syncSubgraph', onSyncSubgraph);
+    document.addEventListener("graph:syncSubgraph", onSyncSubgraph);
 
     // Sprite labels overlay
-    const canvas = document.createElement('canvas');
-    canvas.style.position = 'absolute';
-    canvas.style.inset = '0';
-    canvas.style.pointerEvents = 'none';
-    canvas.style.zIndex = '5';
+    const canvas = document.createElement("canvas");
+    canvas.style.position = "absolute";
+    canvas.style.inset = "0";
+    canvas.style.pointerEvents = "none";
+    canvas.style.zIndex = "5";
     containerRef.current.appendChild(canvas);
     overlayCanvasRef.current = canvas;
 
@@ -387,32 +365,32 @@ export default function AdvancedGraphView({
       const rect = containerRef.current.getBoundingClientRect();
       c.width = rect.width;
       c.height = rect.height;
-      const ctx = c.getContext('2d');
+      const ctx = c.getContext("2d");
       ctx.clearRect(0, 0, c.width, c.height);
       if (!spriteLabels) return;
       const z = cy.zoom();
       if (z < LABEL_ZOOM_THRESHOLD) return;
-      ctx.fillStyle = 'rgba(0,0,0,0.75)';
-      ctx.font = '11px sans-serif';
-      ctx.textBaseline = 'top';
-      const nodes = cy.nodes(':visible');
+      ctx.fillStyle = "rgba(0,0,0,0.75)";
+      ctx.font = "11px sans-serif";
+      ctx.textBaseline = "top";
+      const nodes = cy.nodes(":visible");
       const max = Math.min(nodes.length, 2000);
       for (let i = 0; i < max; i++) {
         const n = nodes[i];
         const p = n.renderedPosition();
-        const text = n.data('label') || n.id();
+        const text = n.data("label") || n.id();
         ctx.fillText(text, p.x + 8, p.y + 8);
       }
     };
     const scheduleDraw = () => requestAnimationFrame(drawSprites);
-    cy.on('render zoom pan add remove position', scheduleDraw);
+    cy.on("render zoom pan add remove position", scheduleDraw);
     scheduleDraw();
     return () => {
-      document.removeEventListener('graph:addElements', onAddElements);
-      document.removeEventListener('graph:openEdgeInspector', onOpenInspector);
-      document.removeEventListener('graph:exploreSubgraph', onExploreSubgraph);
-      document.removeEventListener('graph:syncSubgraph', onSyncSubgraph);
-      cy.off('render zoom pan add remove position', scheduleDraw);
+      document.removeEventListener("graph:addElements", onAddElements);
+      document.removeEventListener("graph:openEdgeInspector", onOpenInspector);
+      document.removeEventListener("graph:exploreSubgraph", onExploreSubgraph);
+      document.removeEventListener("graph:syncSubgraph", onSyncSubgraph);
+      cy.off("render zoom pan add remove position", scheduleDraw);
       if (overlayCanvasRef.current) {
         overlayCanvasRef.current.remove();
         overlayCanvasRef.current = null;
@@ -421,9 +399,9 @@ export default function AdvancedGraphView({
         tooltipRef.current.remove();
         tooltipRef.current = null;
       }
-      window.removeEventListener('keydown', onKeyDown);
-      window.removeEventListener('keyup', onKeyUp);
-      cy.off('zoom pan', persistCamera);
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+      cy.off("zoom pan", persistCamera);
       cy.destroy();
       cyRef.current = null;
     };
@@ -431,28 +409,28 @@ export default function AdvancedGraphView({
 
   // Persist preferences
   useEffect(() => {
-    localStorage.setItem('graph.layoutName', layoutName);
+    localStorage.setItem("graph.layoutName", layoutName);
   }, [layoutName]);
   useEffect(() => {
-    localStorage.setItem('graph.lodLabels', lodLabels ? '1' : '0');
+    localStorage.setItem("graph.lodLabels", lodLabels ? "1" : "0");
   }, [lodLabels]);
   useEffect(() => {
-    localStorage.setItem('graph.spriteLabels', spriteLabels ? '1' : '0');
+    localStorage.setItem("graph.spriteLabels", spriteLabels ? "1" : "0");
   }, [spriteLabels]);
   useEffect(() => {
-    localStorage.setItem('graph.aiPanelOpen', insightsOpen ? '1' : '0');
+    localStorage.setItem("graph.aiPanelOpen", insightsOpen ? "1" : "0");
   }, [insightsOpen]);
 
   return (
-    <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
+    <Box sx={{ position: "relative", width: "100%", height: "100%" }}>
       {loading && (
         <Box
           sx={{
-            position: 'absolute',
+            position: "absolute",
             inset: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             zIndex: 10,
           }}
         >
@@ -460,46 +438,35 @@ export default function AdvancedGraphView({
         </Box>
       )}
 
-      <Box ref={containerRef} sx={{ width: '100%', height: '100%' }} />
+      <Box ref={containerRef} sx={{ width: "100%", height: "100%" }} />
 
       <Box
         sx={{
-          position: 'absolute',
+          position: "absolute",
           top: 8,
           left: 8,
           p: 1,
-          bgcolor: 'background.paper',
+          bgcolor: "background.paper",
           borderRadius: 1,
           boxShadow: 1,
-          display: 'flex',
+          display: "flex",
           gap: 1,
-          alignItems: 'center',
+          alignItems: "center",
         }}
       >
         <FormControlLabel
           control={
-            <Switch
-              checked={insightsOpen}
-              onChange={(e) => setInsightsOpen(e.target.checked)}
-            />
+            <Switch checked={insightsOpen} onChange={(e) => setInsightsOpen(e.target.checked)} />
           }
           label="AI Panel"
         />
         <FormControlLabel
-          control={
-            <Switch
-              checked={lodLabels}
-              onChange={(e) => setLodLabels(e.target.checked)}
-            />
-          }
+          control={<Switch checked={lodLabels} onChange={(e) => setLodLabels(e.target.checked)} />}
           label="LOD Labels"
         />
         <FormControlLabel
           control={
-            <Switch
-              checked={spriteLabels}
-              onChange={(e) => setSpriteLabels(e.target.checked)}
-            />
+            <Switch checked={spriteLabels} onChange={(e) => setSpriteLabels(e.target.checked)} />
           }
           label="Sprite Labels"
         />
@@ -521,38 +488,34 @@ export default function AdvancedGraphView({
           }
           label="Triage Panel"
         />
-        <Select
-          size="small"
-          value={layoutName}
-          onChange={(e) => setLayoutName(e.target.value)}
-        >
+        <Select size="small" value={layoutName} onChange={(e) => setLayoutName(e.target.value)}>
           <MenuItem value="cose-bilkent">CoSE</MenuItem>
           <MenuItem value="dagre">Dagre</MenuItem>
           <MenuItem value="grid">Grid</MenuItem>
           <MenuItem value="concentric">Concentric</MenuItem>
         </Select>
-        {import.meta?.env?.VITE_SEED_BUTTON === '1' && (
+        {import.meta?.env?.VITE_SEED_BUTTON === "1" && (
           <button
             onClick={() => {
               const seedNodes = [
-                { id: 'n1', label: 'Alice', type: 'PERSON' },
-                { id: 'n2', label: 'Bob', type: 'PERSON' },
-                { id: 'n3', label: 'Acme Corp', type: 'ORGANIZATION' },
+                { id: "n1", label: "Alice", type: "PERSON" },
+                { id: "n2", label: "Bob", type: "PERSON" },
+                { id: "n3", label: "Acme Corp", type: "ORGANIZATION" },
               ];
               const seedEdges = [
                 {
-                  id: 'e1',
-                  source: 'n1',
-                  target: 'n2',
-                  type: 'KNOWS',
-                  label: 'KNOWS',
+                  id: "e1",
+                  source: "n1",
+                  target: "n2",
+                  type: "KNOWS",
+                  label: "KNOWS",
                 },
                 {
-                  id: 'e2',
-                  source: 'n2',
-                  target: 'n3',
-                  type: 'WORKS_FOR',
-                  label: 'WORKS_FOR',
+                  id: "e2",
+                  source: "n2",
+                  target: "n3",
+                  type: "WORKS_FOR",
+                  label: "WORKS_FOR",
                 },
               ];
               const cy = cyRef.current;
@@ -566,10 +529,7 @@ export default function AdvancedGraphView({
       </Box>
 
       <GraphContextMenu />
-      <AIInsightsPanel
-        open={insightsOpen}
-        onClose={() => setInsightsOpen(false)}
-      />
+      <AIInsightsPanel open={insightsOpen} onClose={() => setInsightsOpen(false)} />
       <EdgeInspectorDialog
         open={edgeInspectorOpen}
         onClose={() => setEdgeInspectorOpen(false)}

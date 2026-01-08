@@ -26,13 +26,13 @@ pnpm add @intelgraph/error-handling
 ### 1. Express Application
 
 ```typescript
-import express from 'express';
+import express from "express";
 import {
   errorHandler,
   notFoundHandler,
   correlationIdMiddleware,
   asyncHandler,
-} from '@intelgraph/error-handling';
+} from "@intelgraph/error-handling";
 
 const app = express();
 
@@ -40,15 +40,18 @@ const app = express();
 app.use(correlationIdMiddleware);
 
 // Your routes using asyncHandler
-app.get('/api/entities/:id', asyncHandler(async (req, res) => {
-  const entity = await entityService.findById(req.params.id);
+app.get(
+  "/api/entities/:id",
+  asyncHandler(async (req, res) => {
+    const entity = await entityService.findById(req.params.id);
 
-  if (!entity) {
-    throw new NotFoundError('Entity');
-  }
+    if (!entity) {
+      throw new NotFoundError("Entity");
+    }
 
-  res.json(entity);
-}));
+    res.json(entity);
+  })
+);
 
 // Add 404 handler before error handler
 app.use(notFoundHandler);
@@ -60,8 +63,8 @@ app.use(errorHandler);
 ### 2. GraphQL Application
 
 ```typescript
-import { ApolloServer } from '@apollo/server';
-import { createGraphQLErrorFormatter } from '@intelgraph/error-handling';
+import { ApolloServer } from "@apollo/server";
+import { createGraphQLErrorFormatter } from "@intelgraph/error-handling";
 
 const server = new ApolloServer({
   typeDefs,
@@ -78,12 +81,12 @@ import {
   NotFoundError,
   AuthorizationError,
   DatabaseError,
-} from '@intelgraph/error-handling';
+} from "@intelgraph/error-handling";
 
 // Validation error
 if (!data.name) {
-  throw new ValidationError('Name is required', {
-    field: 'name',
+  throw new ValidationError("Name is required", {
+    field: "name",
     value: data.name,
   });
 }
@@ -91,39 +94,35 @@ if (!data.name) {
 // Not found error
 const user = await userRepo.findById(id);
 if (!user) {
-  throw new NotFoundError('User', { id });
+  throw new NotFoundError("User", { id });
 }
 
 // Authorization error
-if (!user.hasPermission('admin')) {
-  throw new AuthorizationError('INSUFFICIENT_PERMISSIONS',
-    'Admin permission required',
-    { userId: user.id, permission: 'admin' }
-  );
+if (!user.hasPermission("admin")) {
+  throw new AuthorizationError("INSUFFICIENT_PERMISSIONS", "Admin permission required", {
+    userId: user.id,
+    permission: "admin",
+  });
 }
 
 // Database error
 try {
   await db.query(sql);
 } catch (error) {
-  throw new DatabaseError('POSTGRES_ERROR',
-    'Query failed',
-    { sql },
-    error
-  );
+  throw new DatabaseError("POSTGRES_ERROR", "Query failed", { sql }, error);
 }
 ```
 
 ### 4. Circuit Breaker Pattern
 
 ```typescript
-import { executeWithCircuitBreaker } from '@intelgraph/error-handling';
+import { executeWithCircuitBreaker } from "@intelgraph/error-handling";
 
 // External API call with circuit breaker
 const result = await executeWithCircuitBreaker(
-  'external-api',
+  "external-api",
   async () => {
-    const response = await fetch('https://api.example.com/data');
+    const response = await fetch("https://api.example.com/data");
     return response.json();
   },
   {
@@ -138,38 +137,32 @@ const result = await executeWithCircuitBreaker(
 ### 5. Retry Logic
 
 ```typescript
-import { executeWithRetry, RetryPolicies } from '@intelgraph/error-handling';
+import { executeWithRetry, RetryPolicies } from "@intelgraph/error-handling";
 
 // Database query with retry
-const data = await executeWithRetry(
-  () => db.query('SELECT * FROM users'),
-  RetryPolicies.database
-);
+const data = await executeWithRetry(() => db.query("SELECT * FROM users"), RetryPolicies.database);
 
 // External service with custom retry policy
-const result = await executeWithRetry(
-  () => apiClient.fetchData(),
-  {
-    maxRetries: 3,
-    initialDelay: 1000,
-    maxDelay: 10000,
-    backoffMultiplier: 2,
-  }
-);
+const result = await executeWithRetry(() => apiClient.fetchData(), {
+  maxRetries: 3,
+  initialDelay: 1000,
+  maxDelay: 10000,
+  backoffMultiplier: 2,
+});
 ```
 
 ### 6. Graceful Degradation
 
 ```typescript
-import { withGracefulDegradation } from '@intelgraph/error-handling';
+import { withGracefulDegradation } from "@intelgraph/error-handling";
 
 // Optional feature that shouldn't break the app
 const recommendations = await withGracefulDegradation(
   () => recommendationService.getRecommendations(userId),
   [], // Fallback to empty array
   {
-    serviceName: 'recommendations',
-    operation: 'getRecommendations',
+    serviceName: "recommendations",
+    operation: "getRecommendations",
   }
 );
 ```
@@ -177,12 +170,12 @@ const recommendations = await withGracefulDegradation(
 ### 7. Full Resilience Stack
 
 ```typescript
-import { executeWithResilience, RetryPolicies } from '@intelgraph/error-handling';
+import { executeWithResilience, RetryPolicies } from "@intelgraph/error-handling";
 
 // Combine circuit breaker + retry + timeout
 const result = await executeWithResilience({
-  serviceName: 'payment-gateway',
-  operation: 'processPayment',
+  serviceName: "payment-gateway",
+  operation: "processPayment",
   fn: () => paymentGateway.charge(amount, card),
   retryPolicy: RetryPolicies.externalService,
   timeoutMs: 30000,
@@ -199,28 +192,28 @@ const result = await executeWithResilience({
 
 ### Client Errors (4xx)
 
-| Code | HTTP Status | Description | Retryable |
-|------|-------------|-------------|-----------|
-| `VALIDATION_FAILED` | 400 | Request validation failed | No |
-| `INVALID_INPUT` | 400 | Invalid input provided | No |
-| `AUTH_TOKEN_MISSING` | 401 | Authentication token missing | No |
-| `AUTH_TOKEN_EXPIRED` | 401 | Token has expired | No |
-| `FORBIDDEN` | 403 | Access forbidden | No |
-| `INSUFFICIENT_PERMISSIONS` | 403 | Insufficient permissions | No |
-| `RESOURCE_NOT_FOUND` | 404 | Resource not found | No |
-| `RESOURCE_CONFLICT` | 409 | Resource conflict | No |
-| `RATE_LIMIT_EXCEEDED` | 429 | Rate limit exceeded | Yes |
+| Code                       | HTTP Status | Description                  | Retryable |
+| -------------------------- | ----------- | ---------------------------- | --------- |
+| `VALIDATION_FAILED`        | 400         | Request validation failed    | No        |
+| `INVALID_INPUT`            | 400         | Invalid input provided       | No        |
+| `AUTH_TOKEN_MISSING`       | 401         | Authentication token missing | No        |
+| `AUTH_TOKEN_EXPIRED`       | 401         | Token has expired            | No        |
+| `FORBIDDEN`                | 403         | Access forbidden             | No        |
+| `INSUFFICIENT_PERMISSIONS` | 403         | Insufficient permissions     | No        |
+| `RESOURCE_NOT_FOUND`       | 404         | Resource not found           | No        |
+| `RESOURCE_CONFLICT`        | 409         | Resource conflict            | No        |
+| `RATE_LIMIT_EXCEEDED`      | 429         | Rate limit exceeded          | Yes       |
 
 ### Server Errors (5xx)
 
-| Code | HTTP Status | Description | Retryable |
-|------|-------------|-------------|-----------|
-| `INTERNAL_SERVER_ERROR` | 500 | Internal server error | No |
-| `DATABASE_QUERY_FAILED` | 500 | Database query failed | Yes |
-| `SERVICE_UNAVAILABLE` | 503 | Service unavailable | Yes |
-| `CIRCUIT_BREAKER_OPEN` | 503 | Circuit breaker open | Yes |
-| `OPERATION_TIMEOUT` | 504 | Operation timeout | Yes |
-| `GATEWAY_TIMEOUT` | 504 | Gateway timeout | Yes |
+| Code                    | HTTP Status | Description           | Retryable |
+| ----------------------- | ----------- | --------------------- | --------- |
+| `INTERNAL_SERVER_ERROR` | 500         | Internal server error | No        |
+| `DATABASE_QUERY_FAILED` | 500         | Database query failed | Yes       |
+| `SERVICE_UNAVAILABLE`   | 503         | Service unavailable   | Yes       |
+| `CIRCUIT_BREAKER_OPEN`  | 503         | Circuit breaker open  | Yes       |
+| `OPERATION_TIMEOUT`     | 504         | Operation timeout     | Yes       |
+| `GATEWAY_TIMEOUT`       | 504         | Gateway timeout       | Yes       |
 
 See [error-codes.ts](./src/error-codes.ts) for the complete catalog.
 
@@ -250,24 +243,28 @@ All errors follow a consistent format:
 Pre-configured retry policies for common scenarios:
 
 ### Default Policy
+
 - Max retries: 3
 - Initial delay: 1000ms
 - Max delay: 10000ms
 - Backoff: Exponential (2x)
 
 ### Database Policy
+
 - Max retries: 3
 - Initial delay: 500ms
 - Max delay: 5000ms
 - Retryable errors: Connection failures, timeouts
 
 ### External Service Policy
+
 - Max retries: 4
 - Initial delay: 2000ms
 - Max delay: 30000ms
 - Retryable errors: Timeouts, service unavailable
 
 ### Quick Policy
+
 - Max retries: 2
 - Initial delay: 100ms
 - Max delay: 1000ms
@@ -277,13 +274,13 @@ Pre-configured retry policies for common scenarios:
 ### Neo4j
 
 ```typescript
-import { ResilientNeo4jClient } from '@intelgraph/error-handling/examples/database-clients';
+import { ResilientNeo4jClient } from "@intelgraph/error-handling/examples/database-clients";
 
 const neo4jClient = new ResilientNeo4jClient(driver);
 
 // Query with timeout and retry
 const entities = await neo4jClient.query(
-  'MATCH (e:Entity {id: $id}) RETURN e',
+  "MATCH (e:Entity {id: $id}) RETURN e",
   { id: entityId },
   { timeoutMs: 5000 }
 );
@@ -292,33 +289,30 @@ const entities = await neo4jClient.query(
 ### PostgreSQL
 
 ```typescript
-import { ResilientPostgresClient } from '@intelgraph/error-handling/examples/database-clients';
+import { ResilientPostgresClient } from "@intelgraph/error-handling/examples/database-clients";
 
 const pgClient = new ResilientPostgresClient(pool);
 
 // Query with resilience
-const users = await pgClient.query(
-  'SELECT * FROM users WHERE id = $1',
-  [userId]
-);
+const users = await pgClient.query("SELECT * FROM users WHERE id = $1", [userId]);
 
 // Transaction with auto-rollback
 await pgClient.transaction(async (client) => {
-  await client.query('INSERT INTO ...');
-  await client.query('UPDATE ...');
+  await client.query("INSERT INTO ...");
+  await client.query("UPDATE ...");
 });
 ```
 
 ### Redis
 
 ```typescript
-import { ResilientRedisClient } from '@intelgraph/error-handling/examples/database-clients';
+import { ResilientRedisClient } from "@intelgraph/error-handling/examples/database-clients";
 
 const redisClient = new ResilientRedisClient(redis);
 
 // Operations with graceful degradation
-const cached = await redisClient.get('key'); // Returns null if Redis fails
-await redisClient.set('key', value, 3600); // Logs error but doesn't throw
+const cached = await redisClient.get("key"); // Returns null if Redis fails
+await redisClient.set("key", value, 3600); // Logs error but doesn't throw
 ```
 
 ## External Service Clients
@@ -326,22 +320,22 @@ await redisClient.set('key', value, 3600); // Logs error but doesn't throw
 ### OPA Policy Engine
 
 ```typescript
-import { createOPAClient } from '@intelgraph/error-handling/examples/opa-client';
+import { createOPAClient } from "@intelgraph/error-handling/examples/opa-client";
 
 const opaClient = createOPAClient();
 
 // Authorization with circuit breaker and retry
 await opaClient.authorize({
-  user: { id: userId, roles: ['admin'] },
-  resource: { type: 'entity', id: entityId },
-  action: 'read',
+  user: { id: userId, roles: ["admin"] },
+  resource: { type: "entity", id: entityId },
+  action: "read",
 });
 
 // With graceful degradation (fails closed)
 const decision = await opaClient.decideWithFallback({
-  user: { id: userId, roles: ['user'] },
-  resource: { type: 'investigation' },
-  action: 'create',
+  user: { id: userId, roles: ["user"] },
+  resource: { type: "investigation" },
+  action: "create",
 });
 ```
 
@@ -352,7 +346,7 @@ import {
   getCircuitBreakerMetrics,
   getHealthStatus,
   resetAllCircuitBreakers,
-} from '@intelgraph/error-handling';
+} from "@intelgraph/error-handling";
 
 // Get all circuit breaker metrics
 const metrics = getCircuitBreakerMetrics();
@@ -382,41 +376,45 @@ resetAllCircuitBreakers();
 
 ```typescript
 // ✅ Good - specific error type
-throw new NotFoundError('User', { id: userId });
+throw new NotFoundError("User", { id: userId });
 
 // ❌ Bad - generic error
-throw new Error('User not found');
+throw new Error("User not found");
 ```
 
 ### 2. Include Context in Errors
 
 ```typescript
 // ✅ Good - detailed context
-throw new DatabaseError('POSTGRES_ERROR',
-  'Query failed',
+throw new DatabaseError(
+  "POSTGRES_ERROR",
+  "Query failed",
   {
     query: sql.substring(0, 100),
     params: queryParams,
-    duration: queryDuration
+    duration: queryDuration,
   },
   originalError
 );
 
 // ❌ Bad - no context
-throw new DatabaseError('POSTGRES_ERROR', 'Query failed');
+throw new DatabaseError("POSTGRES_ERROR", "Query failed");
 ```
 
 ### 3. Use asyncHandler for Express Routes
 
 ```typescript
 // ✅ Good - automatic error handling
-app.get('/api/users/:id', asyncHandler(async (req, res) => {
-  const user = await userService.findById(req.params.id);
-  res.json(user);
-}));
+app.get(
+  "/api/users/:id",
+  asyncHandler(async (req, res) => {
+    const user = await userService.findById(req.params.id);
+    res.json(user);
+  })
+);
 
 // ❌ Bad - manual try/catch
-app.get('/api/users/:id', async (req, res) => {
+app.get("/api/users/:id", async (req, res) => {
   try {
     const user = await userService.findById(req.params.id);
     res.json(user);
@@ -430,11 +428,10 @@ app.get('/api/users/:id', async (req, res) => {
 
 ```typescript
 // ✅ Good - app continues if analytics fail
-const analytics = await withGracefulDegradation(
-  () => analyticsService.track(event),
-  null,
-  { serviceName: 'analytics', operation: 'track' }
-);
+const analytics = await withGracefulDegradation(() => analyticsService.track(event), null, {
+  serviceName: "analytics",
+  operation: "track",
+});
 
 // ❌ Bad - app breaks if analytics fail
 const analytics = await analyticsService.track(event);
@@ -445,20 +442,20 @@ const analytics = await analyticsService.track(event);
 ```typescript
 // ✅ Good - service-specific configuration
 const paymentResult = await executeWithCircuitBreaker(
-  'payment-gateway',
+  "payment-gateway",
   () => paymentGateway.charge(amount),
   {
-    failureThreshold: 3,  // Strict for payments
-    timeout: 15000,       // Quick recovery
+    failureThreshold: 3, // Strict for payments
+    timeout: 15000, // Quick recovery
   }
 );
 
 const analyticsResult = await executeWithCircuitBreaker(
-  'analytics',
+  "analytics",
   () => analyticsService.send(data),
   {
     failureThreshold: 10, // Lenient for analytics
-    timeout: 60000,       // Slower recovery
+    timeout: 60000, // Slower recovery
   }
 );
 ```
@@ -466,15 +463,15 @@ const analyticsResult = await executeWithCircuitBreaker(
 ## Testing
 
 ```typescript
-import { resetAllCircuitBreakers } from '@intelgraph/error-handling';
+import { resetAllCircuitBreakers } from "@intelgraph/error-handling";
 
-describe('Service Tests', () => {
+describe("Service Tests", () => {
   beforeEach(() => {
     // Reset circuit breakers between tests
     resetAllCircuitBreakers();
   });
 
-  it('should handle errors correctly', async () => {
+  it("should handle errors correctly", async () => {
     // Your tests
   });
 });
@@ -492,7 +489,7 @@ app.use((err, req, res, next) => {
 });
 
 // After
-import { errorHandler } from '@intelgraph/error-handling';
+import { errorHandler } from "@intelgraph/error-handling";
 app.use(errorHandler);
 ```
 
@@ -500,13 +497,12 @@ app.use(errorHandler);
 
 ```typescript
 // Before
-const result = await db.query('SELECT * FROM users WHERE id = $1', [id]);
+const result = await db.query("SELECT * FROM users WHERE id = $1", [id]);
 
 // After
-import { executePostgresQuery } from '@intelgraph/error-handling';
-const result = await executePostgresQuery(
-  'findUserById',
-  () => db.query('SELECT * FROM users WHERE id = $1', [id])
+import { executePostgresQuery } from "@intelgraph/error-handling";
+const result = await executePostgresQuery("findUserById", () =>
+  db.query("SELECT * FROM users WHERE id = $1", [id])
 );
 ```
 
@@ -518,10 +514,10 @@ const response = await fetch(apiUrl);
 const data = await response.json();
 
 // After
-import { executeWithResilience, RetryPolicies } from '@intelgraph/error-handling';
+import { executeWithResilience, RetryPolicies } from "@intelgraph/error-handling";
 const data = await executeWithResilience({
-  serviceName: 'external-api',
-  operation: 'fetchData',
+  serviceName: "external-api",
+  operation: "fetchData",
   fn: async () => {
     const response = await fetch(apiUrl);
     return response.json();

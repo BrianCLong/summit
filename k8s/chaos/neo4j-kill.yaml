@@ -8,8 +8,8 @@ spec:
       containers:
         - name: killer
           image: bitnami/kubectl
-          command: ['/bin/sh', '-c']
+          command: ["/bin/sh", "-c"]
           args:
             [
-              'kubectl -n stage delete pod -l app.kubernetes.io/name=web --field-selector=status.phase=Running --limit=1',
+              "kubectl -n stage delete pod -l app.kubernetes.io/name=web --field-selector=status.phase=Running --limit=1",
             ]

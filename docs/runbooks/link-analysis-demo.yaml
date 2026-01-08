@@ -2,27 +2,27 @@ apiVersion: maestro.intelgraph.ai/v1alpha1
 kind: Runbook
 metadata:
   name: link-analysis-demo
-  description: 'Performs link analysis on a given dataset.'
+  description: "Performs link analysis on a given dataset."
 spec:
-  version: '1.0.0'
+  version: "1.0.0"
   dag:
-    - name: 'fetch_graph_data'
-      task: 'graph.fetch'
+    - name: "fetch_graph_data"
+      task: "graph.fetch"
       params:
-        dataset: 'social_network_sample'
-    - name: 'identify_communities'
-      task: 'graph.community_detection'
-      dependsOn: ['fetch_graph_data']
+        dataset: "social_network_sample"
+    - name: "identify_communities"
+      task: "graph.community_detection"
+      dependsOn: ["fetch_graph_data"]
       params:
-        algorithm: 'louvain'
-    - name: 'calculate_centrality'
-      task: 'graph.centrality'
-      dependsOn: ['identify_communities']
+        algorithm: "louvain"
+    - name: "calculate_centrality"
+      task: "graph.centrality"
+      dependsOn: ["identify_communities"]
       params:
-        method: 'betweenness'
-    - name: 'store_results'
-      task: 'graph.store'
-      dependsOn: ['calculate_centrality']
+        method: "betweenness"
+    - name: "store_results"
+      task: "graph.store"
+      dependsOn: ["calculate_centrality"]
       params:
-        destination: 'intelgraph_db'
-        collection: 'link_analysis_results'
+        destination: "intelgraph_db"
+        collection: "link_analysis_results"

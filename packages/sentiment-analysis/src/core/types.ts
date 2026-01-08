@@ -79,13 +79,13 @@ export interface SentimentTimeSeries {
   timestamps: Date[];
   sentiments: SentimentScore[];
   events: TimeSeriesEvent[];
-  trend: 'positive' | 'negative' | 'neutral' | 'volatile';
+  trend: "positive" | "negative" | "neutral" | "volatile";
   momentum: number;
 }
 
 export interface TimeSeriesEvent {
   timestamp: Date;
-  type: 'shift' | 'spike' | 'anomaly';
+  type: "shift" | "spike" | "anomaly";
   magnitude: number;
   description: string;
 }
@@ -95,7 +95,7 @@ export interface ModelConfig {
   modelPath?: string;
   maxLength: number;
   batchSize: number;
-  device: 'cpu' | 'cuda' | 'mps';
+  device: "cpu" | "cuda" | "mps";
   quantize?: boolean;
 }
 

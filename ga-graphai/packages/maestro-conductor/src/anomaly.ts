@@ -1,4 +1,4 @@
-import type { AnomalySignal, AnomalyTrend, HealthSignal } from './types';
+import type { AnomalySignal, AnomalyTrend, HealthSignal } from "./types";
 
 export interface AnomalyDetectorOptions {
   windowSize?: number;
@@ -29,8 +29,7 @@ function computeStdDev(values: number[], mean: number): number {
   if (values.length === 0) {
     return 0;
   }
-  const variance =
-    values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / values.length;
+  const variance = values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / values.length;
   return Math.sqrt(variance);
 }
 
@@ -58,21 +57,17 @@ function computeSlope(values: number[]): number {
   return (n * sumXY - sumX * sumY) / denominator;
 }
 
-function determineTrend(
-  slope: number,
-  current: number,
-  mean: number,
-): AnomalyTrend {
+function determineTrend(slope: number, current: number, mean: number): AnomalyTrend {
   if (Math.abs(current - mean) < mean * 0.05) {
-    return 'oscillation';
+    return "oscillation";
   }
   if (slope > 0) {
-    return current > mean ? 'spike' : 'drift';
+    return current > mean ? "spike" : "drift";
   }
   if (slope < 0) {
-    return current < mean ? 'drop' : 'drift';
+    return current < mean ? "drop" : "drift";
   }
-  return 'oscillation';
+  return "oscillation";
 }
 
 export class AnomalyDetector {
@@ -101,32 +96,26 @@ export class AnomalyDetector {
     const std = computeStdDev(window.values, mean);
     const deviation = Math.abs(signal.value - mean);
     const zScore =
-      std === 0
-        ? deviation === 0
-          ? 0
-          : deviation / Math.max(mean, 1)
-        : deviation / std;
-    const slope = computeSlope(
-      window.values.slice(-Math.min(6, window.values.length)),
-    );
+      std === 0 ? (deviation === 0 ? 0 : deviation / Math.max(mean, 1)) : deviation / std;
+    const slope = computeSlope(window.values.slice(-Math.min(6, window.values.length)));
     const severityScore = Math.max(zScore, Math.abs(slope));
 
     if (severityScore < this.options.zThreshold) {
       return undefined;
     }
 
-    let severity: AnomalySignal['severity'] = 'low';
+    let severity: AnomalySignal["severity"] = "low";
     if (severityScore >= this.options.zThreshold + 2) {
-      severity = 'critical';
+      severity = "critical";
     } else if (severityScore >= this.options.zThreshold + 1) {
-      severity = 'high';
+      severity = "high";
     } else if (severityScore >= this.options.zThreshold + 0.4) {
-      severity = 'medium';
+      severity = "medium";
     }
 
     const trend = determineTrend(slope, signal.value, mean);
     const message =
-      severity === 'critical'
+      severity === "critical"
         ? `critical anomaly detected for ${signal.metric}`
         : `anomaly detected for ${signal.metric}`;
 

@@ -1,4 +1,4 @@
-import type { GraphEdge, GraphNode } from '../../src/index.js';
+import type { GraphEdge, GraphNode } from "../../src/index.js";
 
 export function buildFixtureGraph(count: number): { nodes: GraphNode[]; edges: GraphEdge[] } {
   const nodes: GraphNode[] = Array.from({ length: count }, (_, index) => ({

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { performance } from 'node:perf_hooks';
+import { performance } from "node:perf_hooks";
 import {
   BoostPattern,
   BoostRunResult,
@@ -7,7 +7,7 @@ import {
   EventBoosterOptions,
   EventRecord,
   HistoryEntry,
-} from './types.js';
+} from "./types.js";
 
 const DEFAULT_PERFORMANCE_BUDGET_MS = 5;
 const DEFAULT_HISTORY_LIMIT = 50;
@@ -18,9 +18,8 @@ const cloneEvent = (event: EventRecord): EventRecord => ({
   tags: event.tags ? [...event.tags] : undefined,
 });
 
-const freezeOptions = (
-  options: Record<string, unknown>,
-): Readonly<Record<string, unknown>> => Object.freeze({ ...options });
+const freezeOptions = (options: Record<string, unknown>): Readonly<Record<string, unknown>> =>
+  Object.freeze({ ...options });
 
 /**
  * Core orchestrator that manages boost pattern registration, execution, and telemetry.
@@ -34,8 +33,7 @@ export class EventBooster {
   private readonly maxHistory: number;
 
   constructor(options: EventBoosterOptions = {}) {
-    this.performanceBudgetMs =
-      options.performanceBudgetMs ?? DEFAULT_PERFORMANCE_BUDGET_MS;
+    this.performanceBudgetMs = options.performanceBudgetMs ?? DEFAULT_PERFORMANCE_BUDGET_MS;
     this.maxHistory = Math.max(1, options.maxHistory ?? DEFAULT_HISTORY_LIMIT);
     this.now = options.now ?? (() => performance.now());
     this.random = options.random ?? Math.random;
@@ -61,7 +59,7 @@ export class EventBooster {
   }
 
   /** Returns metadata for registered patterns. */
-  public listPatterns(): Array<Pick<BoostPattern, 'name' | 'description'>> {
+  public listPatterns(): Array<Pick<BoostPattern, "name" | "description">> {
     return Array.from(this.patterns.values()).map((pattern) => ({
       name: pattern.name,
       description: pattern.description,
@@ -101,7 +99,7 @@ export class EventBooster {
   public boost(
     events: readonly EventRecord[],
     patternName: string,
-    options: Record<string, unknown> = {},
+    options: Record<string, unknown> = {}
   ): BoostRunResult {
     const pattern = this.patterns.get(patternName);
     if (!pattern) {
@@ -110,7 +108,7 @@ export class EventBooster {
 
     const view = events.map(cloneEvent);
     const contextOptions = freezeOptions(options);
-    const generated: BoostRunResult['events'] = [];
+    const generated: BoostRunResult["events"] = [];
 
     const startedAt = this.now();
     for (let index = 0; index < view.length; index += 1) {
@@ -151,7 +149,7 @@ export class EventBooster {
   public boostFromGenerator(
     generator: () => readonly EventRecord[],
     patternName: string,
-    options: Record<string, unknown> = {},
+    options: Record<string, unknown> = {}
   ): BoostRunResult {
     return this.boost(generator(), patternName, options);
   }

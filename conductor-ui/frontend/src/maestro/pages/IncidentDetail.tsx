@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { api } from '../api';
+import React, { useState, useEffect, useMemo } from "react";
+import { useParams, Link } from "react-router-dom";
+import { api } from "../api";
 
 interface IncidentEvent {
   id: string;
   timestamp: string;
-  type: 'alert' | 'run' | 'user_action' | 'system_change' | 'escalation';
+  type: "alert" | "run" | "user_action" | "system_change" | "escalation";
   title: string;
   description: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   actor: string;
   metadata: Record<string, any>;
 }
@@ -16,7 +16,7 @@ interface IncidentEvent {
 interface RelatedRun {
   id: string;
   name: string;
-  status: 'running' | 'completed' | 'failed' | 'cancelled';
+  status: "running" | "completed" | "failed" | "cancelled";
   startedAt: string;
   completedAt?: string;
   duration?: number;
@@ -31,15 +31,15 @@ interface ImpactedSLO {
   objective: number;
   currentSLI: number;
   errorBudgetRemaining: number;
-  impact: 'minor' | 'major' | 'critical';
+  impact: "minor" | "major" | "critical";
 }
 
 interface IncidentDetails {
   id: string;
   title: string;
   description: string;
-  status: 'open' | 'investigating' | 'resolved' | 'closed';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  status: "open" | "investigating" | "resolved" | "closed";
+  severity: "low" | "medium" | "high" | "critical";
   startedAt: string;
   resolvedAt?: string;
   assignedTo?: string;
@@ -49,7 +49,7 @@ interface IncidentDetails {
   impactedSLOs: ImpactedSLO[];
   evidenceLinks: Array<{
     id: string;
-    type: 'log' | 'screenshot' | 'report' | 'artifact';
+    type: "log" | "screenshot" | "report" | "artifact";
     title: string;
     url: string;
     timestamp: string;
@@ -61,7 +61,7 @@ export default function IncidentDetail() {
   const [incident, setIncident] = useState<IncidentDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedPhase, setSelectedPhase] = useState<string>('all');
+  const [selectedPhase, setSelectedPhase] = useState<string>("all");
 
   const { getIncident } = api();
 
@@ -79,7 +79,7 @@ export default function IncidentDetail() {
       const data = await getIncident(incidentId);
       setIncident(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load incident');
+      setError(err instanceof Error ? err.message : "Failed to load incident");
     } finally {
       setLoading(false);
     }
@@ -89,16 +89,16 @@ export default function IncidentDetail() {
     if (!incident?.events) return [];
 
     const phases = [
-      { id: 'detection', label: 'Detection & Alert', types: ['alert'] },
+      { id: "detection", label: "Detection & Alert", types: ["alert"] },
       {
-        id: 'investigation',
-        label: 'Investigation',
-        types: ['run', 'user_action'],
+        id: "investigation",
+        label: "Investigation",
+        types: ["run", "user_action"],
       },
       {
-        id: 'response',
-        label: 'Response & Changes',
-        types: ['system_change', 'escalation'],
+        id: "response",
+        label: "Response & Changes",
+        types: ["system_change", "escalation"],
       },
     ];
 
@@ -106,57 +106,54 @@ export default function IncidentDetail() {
       ...phase,
       events: incident.events
         .filter((event) => phase.types.includes(event.type))
-        .sort(
-          (a, b) =>
-            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-        ),
+        .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()),
     }));
   }, [incident?.events]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'open':
-        return 'bg-red-100 text-red-800';
-      case 'investigating':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'resolved':
-        return 'bg-green-100 text-green-800';
-      case 'closed':
-        return 'bg-gray-100 text-gray-800';
+      case "open":
+        return "bg-red-100 text-red-800";
+      case "investigating":
+        return "bg-yellow-100 text-yellow-800";
+      case "resolved":
+        return "bg-green-100 text-green-800";
+      case "closed":
+        return "bg-gray-100 text-gray-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'critical':
-        return 'bg-red-500';
-      case 'high':
-        return 'bg-orange-500';
-      case 'medium':
-        return 'bg-yellow-500';
-      case 'low':
-        return 'bg-green-500';
+      case "critical":
+        return "bg-red-500";
+      case "high":
+        return "bg-orange-500";
+      case "medium":
+        return "bg-yellow-500";
+      case "low":
+        return "bg-green-500";
       default:
-        return 'bg-gray-500';
+        return "bg-gray-500";
     }
   };
 
   const getEventIcon = (type: string) => {
     switch (type) {
-      case 'alert':
-        return '🚨';
-      case 'run':
-        return '⚙️';
-      case 'user_action':
-        return '👤';
-      case 'system_change':
-        return '🔧';
-      case 'escalation':
-        return '📈';
+      case "alert":
+        return "🚨";
+      case "run":
+        return "⚙️";
+      case "user_action":
+        return "👤";
+      case "system_change":
+        return "🔧";
+      case "escalation":
+        return "📈";
       default:
-        return '📝';
+        return "📝";
     }
   };
 
@@ -184,10 +181,8 @@ export default function IncidentDetail() {
     return (
       <div className="p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <h2 className="text-lg font-semibold text-red-800">
-            Error Loading Incident
-          </h2>
-          <p className="text-red-600">{error || 'Incident not found'}</p>
+          <h2 className="text-lg font-semibold text-red-800">Error Loading Incident</h2>
+          <p className="text-red-600">{error || "Incident not found"}</p>
         </div>
       </div>
     );
@@ -200,9 +195,7 @@ export default function IncidentDetail() {
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-2xl font-bold text-gray-900">
-                {incident.title}
-              </h1>
+              <h1 className="text-2xl font-bold text-gray-900">{incident.title}</h1>
               <span
                 className={`px-2 py-1 text-sm font-medium rounded-full ${getStatusColor(incident.status)}`}
               >
@@ -212,28 +205,17 @@ export default function IncidentDetail() {
                 <div
                   className={`w-3 h-3 rounded-full ${getSeverityColor(incident.severity)}`}
                 ></div>
-                <span className="text-sm font-medium">
-                  {incident.severity.toUpperCase()}
-                </span>
+                <span className="text-sm font-medium">{incident.severity.toUpperCase()}</span>
               </div>
             </div>
             <p className="text-gray-600 max-w-3xl">{incident.description}</p>
             <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
-              <span>
-                Started: {new Date(incident.startedAt).toLocaleString()}
-              </span>
+              <span>Started: {new Date(incident.startedAt).toLocaleString()}</span>
               {incident.resolvedAt && (
-                <span>
-                  Resolved: {new Date(incident.resolvedAt).toLocaleString()}
-                </span>
+                <span>Resolved: {new Date(incident.resolvedAt).toLocaleString()}</span>
               )}
-              <span>
-                Duration:{' '}
-                {formatDuration(incident.startedAt, incident.resolvedAt)}
-              </span>
-              {incident.assignedTo && (
-                <span>Assigned to: {incident.assignedTo}</span>
-              )}
+              <span>Duration: {formatDuration(incident.startedAt, incident.resolvedAt)}</span>
+              {incident.assignedTo && <span>Assigned to: {incident.assignedTo}</span>}
             </div>
           </div>
         </div>
@@ -242,10 +224,7 @@ export default function IncidentDetail() {
         {incident.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-3">
             {incident.tags.map((tag) => (
-              <span
-                key={tag}
-                className="px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded-md"
-              >
+              <span key={tag} className="px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded-md">
                 {tag}
               </span>
             ))}
@@ -262,11 +241,11 @@ export default function IncidentDetail() {
                 <h2 className="text-lg font-semibold">Incident Timeline</h2>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => setSelectedPhase('all')}
+                    onClick={() => setSelectedPhase("all")}
                     className={`px-3 py-1 text-sm rounded ${
-                      selectedPhase === 'all'
-                        ? 'bg-blue-100 text-blue-800'
-                        : 'text-gray-600 hover:bg-gray-100'
+                      selectedPhase === "all"
+                        ? "bg-blue-100 text-blue-800"
+                        : "text-gray-600 hover:bg-gray-100"
                     }`}
                   >
                     All Events
@@ -277,8 +256,8 @@ export default function IncidentDetail() {
                       onClick={() => setSelectedPhase(phase.id)}
                       className={`px-3 py-1 text-sm rounded ${
                         selectedPhase === phase.id
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'text-gray-600 hover:bg-gray-100'
+                          ? "bg-blue-100 text-blue-800"
+                          : "text-gray-600 hover:bg-gray-100"
                       }`}
                     >
                       {phase.label} ({phase.events.length})
@@ -293,15 +272,11 @@ export default function IncidentDetail() {
               <div className="relative">
                 <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-300"></div>
 
-                {(selectedPhase === 'all'
+                {(selectedPhase === "all"
                   ? incident.events
-                  : groupedEvents.find((p) => p.id === selectedPhase)?.events ||
-                    []
+                  : groupedEvents.find((p) => p.id === selectedPhase)?.events || []
                 ).map((event, index) => (
-                  <div
-                    key={event.id}
-                    className="relative flex items-start gap-4 pb-8"
-                  >
+                  <div key={event.id} className="relative flex items-start gap-4 pb-8">
                     <div className="flex-shrink-0 w-12 h-12 bg-white border-2 border-gray-300 rounded-full flex items-center justify-center text-lg z-10">
                       {getEventIcon(event.type)}
                     </div>
@@ -309,16 +284,10 @@ export default function IncidentDetail() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h3 className="text-sm font-semibold text-gray-900">
-                            {event.title}
-                          </h3>
-                          <p className="text-sm text-gray-600 mt-1">
-                            {event.description}
-                          </p>
+                          <h3 className="text-sm font-semibold text-gray-900">{event.title}</h3>
+                          <p className="text-sm text-gray-600 mt-1">{event.description}</p>
                           <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
-                            <span>
-                              {new Date(event.timestamp).toLocaleString()}
-                            </span>
+                            <span>{new Date(event.timestamp).toLocaleString()}</span>
                             <span>by {event.actor}</span>
                             <span
                               className={`px-2 py-1 rounded ${getSeverityColor(event.severity)} text-white`}
@@ -376,31 +345,24 @@ export default function IncidentDetail() {
                       </Link>
                       <span
                         className={`text-xs px-2 py-1 rounded ${
-                          run.status === 'completed'
-                            ? 'bg-green-100 text-green-800'
-                            : run.status === 'failed'
-                              ? 'bg-red-100 text-red-800'
-                              : run.status === 'running'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : 'bg-gray-100 text-gray-800'
+                          run.status === "completed"
+                            ? "bg-green-100 text-green-800"
+                            : run.status === "failed"
+                              ? "bg-red-100 text-red-800"
+                              : run.status === "running"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-gray-100 text-gray-800"
                         }`}
                       >
                         {run.status}
                       </span>
                     </div>
                     <div className="text-xs text-gray-500 space-y-1">
-                      <div>
-                        Started: {new Date(run.startedAt).toLocaleString()}
-                      </div>
+                      <div>Started: {new Date(run.startedAt).toLocaleString()}</div>
                       {run.completedAt && (
-                        <div>
-                          Completed:{' '}
-                          {new Date(run.completedAt).toLocaleString()}
-                        </div>
+                        <div>Completed: {new Date(run.completedAt).toLocaleString()}</div>
                       )}
-                      {run.duration && (
-                        <div>Duration: {Math.floor(run.duration / 1000)}s</div>
-                      )}
+                      {run.duration && <div>Duration: {Math.floor(run.duration / 1000)}s</div>}
                       <div>Triggered by: {run.triggeredBy}</div>
                     </div>
                   </div>
@@ -427,11 +389,11 @@ export default function IncidentDetail() {
                       </Link>
                       <span
                         className={`text-xs px-2 py-1 rounded ${
-                          slo.impact === 'critical'
-                            ? 'bg-red-100 text-red-800'
-                            : slo.impact === 'major'
-                              ? 'bg-orange-100 text-orange-800'
-                              : 'bg-yellow-100 text-yellow-800'
+                          slo.impact === "critical"
+                            ? "bg-red-100 text-red-800"
+                            : slo.impact === "major"
+                              ? "bg-orange-100 text-orange-800"
+                              : "bg-yellow-100 text-yellow-800"
                         }`}
                       >
                         {slo.impact}
@@ -439,13 +401,9 @@ export default function IncidentDetail() {
                     </div>
                     <div className="text-xs text-gray-600 space-y-1">
                       <div>Service: {slo.service}</div>
-                      <div>
-                        Current SLI: {(slo.currentSLI * 100).toFixed(2)}%
-                      </div>
+                      <div>Current SLI: {(slo.currentSLI * 100).toFixed(2)}%</div>
                       <div>Objective: {(slo.objective * 100).toFixed(2)}%</div>
-                      <div>
-                        Error Budget: {slo.errorBudgetRemaining.toFixed(1)}%
-                      </div>
+                      <div>Error Budget: {slo.errorBudgetRemaining.toFixed(1)}%</div>
                     </div>
                   </div>
                 ))}
@@ -466,10 +424,10 @@ export default function IncidentDetail() {
                     className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded"
                   >
                     <div className="text-lg">
-                      {evidence.type === 'log' && '📋'}
-                      {evidence.type === 'screenshot' && '📸'}
-                      {evidence.type === 'report' && '📊'}
-                      {evidence.type === 'artifact' && '📁'}
+                      {evidence.type === "log" && "📋"}
+                      {evidence.type === "screenshot" && "📸"}
+                      {evidence.type === "report" && "📊"}
+                      {evidence.type === "artifact" && "📁"}
                     </div>
                     <div className="flex-1 min-w-0">
                       <a

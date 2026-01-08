@@ -1,4 +1,4 @@
-import { AdversarialExample, AttackConfig, AdversarialAttackType } from '../types';
+import { AdversarialExample, AttackConfig, AdversarialAttackType } from "../types";
 
 /**
  * Fast Gradient Sign Method (FGSM) Attack
@@ -18,7 +18,7 @@ export class FGSMAttack {
     const epsilon = config.epsilon || 0.03;
 
     // Calculate perturbation: epsilon * sign(gradient)
-    const perturbation = gradients.map(g => epsilon * Math.sign(g));
+    const perturbation = gradients.map((g) => epsilon * Math.sign(g));
 
     // Apply perturbation
     const perturbedInput = input.map((val, idx) => {
@@ -42,9 +42,9 @@ export class FGSMAttack {
       attackType: AdversarialAttackType.FGSM,
       metadata: {
         epsilon,
-        method: 'FGSM'
+        method: "FGSM",
       },
-      createdAt: new Date()
+      createdAt: new Date(),
     };
   }
 
@@ -60,7 +60,7 @@ export class FGSMAttack {
     const epsilon = config.epsilon || 0.03;
 
     // For targeted attack, move in opposite direction of gradient
-    const perturbation = gradients.map(g => -epsilon * Math.sign(g));
+    const perturbation = gradients.map((g) => -epsilon * Math.sign(g));
 
     const perturbedInput = input.map((val, idx) => {
       const perturbed = val + perturbation[idx];
@@ -82,9 +82,9 @@ export class FGSMAttack {
       metadata: {
         epsilon,
         targetClass,
-        method: 'FGSM-Targeted'
+        method: "FGSM-Targeted",
       },
-      createdAt: new Date()
+      createdAt: new Date(),
     };
   }
 
@@ -107,7 +107,7 @@ export class FGSMAttack {
       const gradients = await getGradients(perturbedInput);
 
       // Apply small step in gradient direction
-      const step = gradients.map(g => stepSize * Math.sign(g));
+      const step = gradients.map((g) => stepSize * Math.sign(g));
 
       // Update perturbed input
       perturbedInput = perturbedInput.map((val, idx) => {
@@ -137,9 +137,9 @@ export class FGSMAttack {
         epsilon,
         iterations,
         stepSize,
-        method: 'I-FGSM'
+        method: "I-FGSM",
       },
-      createdAt: new Date()
+      createdAt: new Date(),
     };
   }
 

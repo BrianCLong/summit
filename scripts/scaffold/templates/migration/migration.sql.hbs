@@ -1,16 +1,6 @@
--- Migration: {{NAME}}
--- Created at: CURRENT_TIMESTAMP
-
-BEGIN;
-
--- TODO: Add migration SQL here
--- Example:
--- CREATE TABLE IF NOT EXISTS public.some_table (
---   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
---   tenant_id TEXT NOT NULL,
---   created_at TIMESTAMPTZ DEFAULT NOW()
--- );
-
--- CREATE INDEX IF NOT EXISTS idx_some_table_tenant ON public.some_table(tenant_id);
-
-COMMIT;
+-- Migration:
+{{NAME}}
+-- Created at: CURRENT_TIMESTAMP BEGIN; -- TODO: Add migration SQL here -- Example: -- CREATE TABLE
+IF NOT EXISTS public.some_table ( -- id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- tenant_id
+TEXT NOT NULL, -- created_at TIMESTAMPTZ DEFAULT NOW() -- ); -- CREATE INDEX IF NOT EXISTS
+idx_some_table_tenant ON public.some_table(tenant_id); COMMIT;

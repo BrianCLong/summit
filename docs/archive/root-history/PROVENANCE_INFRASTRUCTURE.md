@@ -110,50 +110,49 @@ pnpm --filter @intelgraph/my-service add @intelgraph/bitemporal
 #### Usage Examples
 
 ```typescript
-import { BitemporalStore } from '@intelgraph/bitemporal';
-import pino from 'pino';
+import { BitemporalStore } from "@intelgraph/bitemporal";
+import pino from "pino";
 
 const logger = pino();
-const store = new BitemporalStore(
-  'postgresql://user:pass@localhost:5432/db',
-  'entities',
-  logger
-);
+const store = new BitemporalStore("postgresql://user:pass@localhost:5432/db", "entities", logger);
 
 await store.initialize();
 
 // Upsert a record
-await store.upsert('person-001',
-  { name: 'John Doe', age: 30 },
+await store.upsert(
+  "person-001",
+  { name: "John Doe", age: 30 },
   {
-    validFrom: new Date('2024-01-01'),
-    validTo: new Date('2024-12-31'),
-    userId: 'analyst-001'
+    validFrom: new Date("2024-01-01"),
+    validTo: new Date("2024-12-31"),
+    userId: "analyst-001",
   }
 );
 
 // Get current state
-const current = await store.getCurrent('person-001');
+const current = await store.getCurrent("person-001");
 
 // Time-travel query
 const asOf = await store.getAsOf(
-  'person-001',
-  new Date('2024-06-01'), // valid time
-  new Date('2024-06-15')  // transaction time
+  "person-001",
+  new Date("2024-06-01"), // valid time
+  new Date("2024-06-15") // transaction time
 );
 
 // Temporal diff
 const diff = await store.diff(
-  new Date('2024-01-01'), new Date('2024-01-01'),
-  new Date('2024-06-01'), new Date('2024-06-01')
+  new Date("2024-01-01"),
+  new Date("2024-01-01"),
+  new Date("2024-06-01"),
+  new Date("2024-06-01")
 );
 
-console.log('Added:', diff.added.length);
-console.log('Modified:', diff.modified.length);
-console.log('Removed:', diff.removed.length);
+console.log("Added:", diff.added.length);
+console.log("Modified:", diff.modified.length);
+console.log("Removed:", diff.removed.length);
 
 // Export audit trail
-const audit = await store.exportAudit('person-001', privateKey);
+const audit = await store.exportAudit("person-001", privateKey);
 ```
 
 #### Testing
@@ -306,11 +305,11 @@ services:
   streaming-ingest:
     build: ./services/streaming-ingest
     ports:
-      - '8080:8080'
+      - "8080:8080"
     environment:
       KAFKA_BROKERS: kafka:9092
       DATABASE_URL: postgresql://summit:password@postgres:5432/summit_dev
-      BATCH_MODE: 'true'
+      BATCH_MODE: "true"
       BATCH_SIZE: 100
     depends_on:
       - postgres
@@ -329,18 +328,18 @@ spec:
   template:
     spec:
       containers:
-      - name: streaming-ingest
-        image: intelgraph/streaming-ingest:latest
-        ports:
-        - containerPort: 8080
-        env:
-        - name: KAFKA_BROKERS
-          value: "kafka:9092"
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: url
+        - name: streaming-ingest
+          image: intelgraph/streaming-ingest:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: KAFKA_BROKERS
+              value: "kafka:9092"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: url
 ```
 
 ## Configuration
@@ -443,22 +442,24 @@ Track changes in entity attributes over both real-world time and database time:
 
 ```typescript
 // Record watchlist addition
-await store.upsert('entity-123',
-  { watchlist: true, reason: 'travel pattern' },
-  { validFrom: new Date('2024-01-15'), userId: 'analyst-007' }
+await store.upsert(
+  "entity-123",
+  { watchlist: true, reason: "travel pattern" },
+  { validFrom: new Date("2024-01-15"), userId: "analyst-007" }
 );
 
 // Later, correct the date
-await store.upsert('entity-123',
-  { watchlist: true, reason: 'travel pattern' },
-  { validFrom: new Date('2024-01-10'), userId: 'analyst-007' }
+await store.upsert(
+  "entity-123",
+  { watchlist: true, reason: "travel pattern" },
+  { validFrom: new Date("2024-01-10"), userId: "analyst-007" }
 );
 
 // Query: "What did we believe on Feb 1st about Jan 20th?"
 const belief = await store.getAsOf(
-  'entity-123',
-  new Date('2024-01-20'), // valid time
-  new Date('2024-02-01')  // tx time
+  "entity-123",
+  new Date("2024-01-20"), // valid time
+  new Date("2024-02-01") // tx time
 );
 ```
 
@@ -483,18 +484,18 @@ pnpm replay from-checkpoint \
 ### 3. Provenance Visualization for Analysts
 
 ```tsx
-import { useState } from 'react';
-import { Container, Tabs, Tab } from '@mui/material';
+import { useState } from "react";
+import { Container, Tabs, Tab } from "@mui/material";
 import {
   ProvenanceChainViewer,
   MerkleTreeViewer,
   ChainOfCustodyViewer,
   ProvenanceLedgerClient,
-} from '@intelgraph/provenance-visualizer';
+} from "@intelgraph/provenance-visualizer";
 
 function ProvenanceApp() {
   const [tab, setTab] = useState(0);
-  const client = new ProvenanceLedgerClient('http://localhost:4010');
+  const client = new ProvenanceLedgerClient("http://localhost:4010");
 
   return (
     <Container>
@@ -517,7 +518,7 @@ function ProvenanceApp() {
 Generate signed audit trail:
 
 ```typescript
-const audit = await store.exportAudit('entity-123', privateKey);
+const audit = await store.exportAudit("entity-123", privateKey);
 
 for (const entry of audit) {
   console.log(`${entry.operation} at ${entry.txTime}`);
@@ -570,12 +571,14 @@ for (const entry of audit) {
 ### Bitemporal Storage
 
 Query performance (100k records):
+
 - Current state: < 1ms
 - As-of query: < 5ms
 - Diff between snapshots: < 50ms
 - Temporal range query: < 100ms
 
 Indexes:
+
 - GiST indexes on temporal ranges
 - B-tree indexes on entity_key, timestamps
 - Combined index on all temporal columns
@@ -700,6 +703,7 @@ docker restart summit-prov-ledger
 ## Support
 
 For issues or questions:
+
 - GitHub Issues: https://github.com/BrianCLong/summit/issues
 - Internal Slack: #intelgraph-platform
 - Documentation: `/docs` directory

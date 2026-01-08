@@ -5,9 +5,9 @@
  * from unstructured text data at scale.
  */
 
-export * from './preprocessing';
-export * from './tokenization';
-export * from './language-detection';
-export * from './normalization';
-export * from './spelling';
-export * from './types';
+export * from "./preprocessing";
+export * from "./tokenization";
+export * from "./language-detection";
+export * from "./normalization";
+export * from "./spelling";
+export * from "./types";

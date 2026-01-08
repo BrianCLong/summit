@@ -110,10 +110,10 @@ intelgraph-mcp/
 
 ```yaml
 packages:
-  - 'services/*'
-  - 'packages/*'
-  - 'tools/*'
-  - 'benchmarks/*'
+  - "services/*"
+  - "packages/*"
+  - "tools/*"
+  - "benchmarks/*"
 ```
 
 **tsconfig.base.json**
@@ -210,14 +210,14 @@ jobs:
 **services/runtime-pooler/src/index.ts**
 
 ```ts
-import Fastify from 'fastify';
-import underPressure from '@fastify/under-pressure';
-import { registerApi } from './api';
-import { initTelemetry } from './telemetry';
+import Fastify from "fastify";
+import underPressure from "@fastify/under-pressure";
+import { registerApi } from "./api";
+import { initTelemetry } from "./telemetry";
 
 async function main() {
   const app = Fastify({ logger: true });
-  await initTelemetry('runtime-pooler');
+  await initTelemetry("runtime-pooler");
 
   app.register(underPressure, {
     maxEventLoopDelay: 100,
@@ -228,7 +228,7 @@ async function main() {
   registerApi(app);
 
   const port = Number(process.env.PORT || 8080);
-  await app.listen({ port, host: '0.0.0.0' });
+  await app.listen({ port, host: "0.0.0.0" });
 }
 
 main().catch((e) => {
@@ -240,15 +240,15 @@ main().catch((e) => {
 **services/runtime-pooler/src/api.ts**
 
 ```ts
-import { FastifyInstance } from 'fastify';
-import { z } from 'zod';
-import { Scheduler } from './scheduler';
-import { authorize } from './authz';
+import { FastifyInstance } from "fastify";
+import { z } from "zod";
+import { Scheduler } from "./scheduler";
+import { authorize } from "./authz";
 
 const scheduler = new Scheduler();
 
 export function registerApi(app: FastifyInstance) {
-  app.post('/v1/session', async (req, reply) => {
+  app.post("/v1/session", async (req, reply) => {
     const body = z
       .object({ toolClass: z.string(), caps: z.array(z.string()).default([]) })
       .parse(req.body);
@@ -257,7 +257,7 @@ export function registerApi(app: FastifyInstance) {
     return reply.code(201).send(session);
   });
 
-  app.post('/v1/session/:id/invoke', async (req, reply) => {
+  app.post("/v1/session/:id/invoke", async (req, reply) => {
     const params = z.object({ id: z.string() }).parse(req.params);
     const body = z.object({ fn: z.string(), args: z.any() }).parse(req.body);
     const result = await scheduler.invoke(params.id, body.fn, body.args);
@@ -269,8 +269,8 @@ export function registerApi(app: FastifyInstance) {
 **services/runtime-pooler/src/scheduler.ts**
 
 ```ts
-import pLimit from 'p-limit';
-import { startMicroVM, invokeSandbox } from './firecracker';
+import pLimit from "p-limit";
+import { startMicroVM, invokeSandbox } from "./firecracker";
 
 export type Session = {
   id: string;
@@ -313,20 +313,16 @@ export class Scheduler {
 **services/runtime-pooler/src/firecracker.ts**
 
 ```ts
-import { execa } from 'execa';
+import { execa } from "execa";
 
 export async function startMicroVM(toolClass: string): Promise<string> {
   const id = `fc_${Math.random().toString(36).slice(2)}`;
   // Placeholder: wire to firecracker --api-sock + jailer. Respect ADR 0003.
-  await execa('sh', ['-lc', `echo start ${id} for ${toolClass}`]);
+  await execa("sh", ["-lc", `echo start ${id} for ${toolClass}`]);
   return id;
 }
 
-export async function invokeSandbox(
-  sessionId: string,
-  fn: string,
-  args: unknown,
-) {
+export async function invokeSandbox(sessionId: string, fn: string, args: unknown) {
   // Placeholder: execute inside deterministic sandbox, capture I/O for replay.
   return { sessionId, fn, ok: true, result: { echo: args } };
 }
@@ -335,12 +331,9 @@ export async function invokeSandbox(
 **services/runtime-pooler/src/authz.ts**
 
 ```ts
-export async function authorize(
-  authorization: unknown,
-  requestedCaps: string[],
-) {
+export async function authorize(authorization: unknown, requestedCaps: string[]) {
   // Verify scoped capability token (OPA/ABAC call in real impl)
-  if (!authorization) throw new Error('unauthorized');
+  if (!authorization) throw new Error("unauthorized");
   // TODO: enforce purpose tags and caps intersection.
 }
 ```
@@ -348,8 +341,8 @@ export async function authorize(
 **services/runtime-pooler/src/telemetry.ts**
 
 ```ts
-import { NodeSDK } from '@opentelemetry/sdk-node';
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
 
 let sdk: NodeSDK | null = null;
 export async function initTelemetry(serviceName: string) {
@@ -365,14 +358,14 @@ export async function initTelemetry(serviceName: string) {
 **services/runtime-pooler/tests/scheduler.spec.ts**
 
 ```ts
-import { describe, it, expect } from 'vitest';
-import { Scheduler } from '../src/scheduler';
+import { describe, it, expect } from "vitest";
+import { Scheduler } from "../src/scheduler";
 
-describe('Scheduler', () => {
-  it('allocates and invokes', async () => {
+describe("Scheduler", () => {
+  it("allocates and invokes", async () => {
     const s = new Scheduler();
-    const sess = await s.allocate('github');
-    const out = await s.invoke(sess.id, 'ping', { x: 1 });
+    const sess = await s.allocate("github");
+    const out = await s.invoke(sess.id, "ping", { x: 1 });
     expect(out.ok).toBe(true);
   });
 });
@@ -415,8 +408,8 @@ describe('Scheduler', () => {
 ```ts
 export type IOEvent = {
   t: number;
-  dir: 'in' | 'out';
-  channel: 'mcp' | 'net' | 'fs' | 'env';
+  dir: "in" | "out";
+  channel: "mcp" | "net" | "fs" | "env";
   payload: unknown;
   hash?: string;
 };
@@ -437,7 +430,7 @@ export type ReplayResult = {
 **services/replay-engine/src/recorder.ts**
 
 ```ts
-import { Recording, IOEvent } from './model';
+import { Recording, IOEvent } from "./model";
 
 export class Recorder {
   start(sessionId: string, seed: string): Recording {
@@ -446,7 +439,7 @@ export class Recorder {
       sessionId,
       seed,
       events: [],
-      version: '1',
+      version: "1",
     };
   }
   push(rec: Recording, ev: IOEvent) {
@@ -458,7 +451,7 @@ export class Recorder {
 **services/replay-engine/src/replayer.ts**
 
 ```ts
-import { Recording, ReplayResult } from './model';
+import { Recording, ReplayResult } from "./model";
 
 export class Replayer {
   replay(rec: Recording): ReplayResult {
@@ -484,7 +477,7 @@ export function redact(obj: unknown): unknown {
 **services/replay-engine/src/storage.ts**
 
 ```ts
-import { Recording } from './model';
+import { Recording } from "./model";
 const mem = new Map<string, Recording>();
 export const Storage = {
   save(rec: Recording) {
@@ -500,45 +493,45 @@ export const Storage = {
 **services/replay-engine/src/index.ts**
 
 ```ts
-import Fastify from 'fastify';
-import { Recorder } from './recorder';
-import { Replayer } from './replayer';
-import { Storage } from './storage';
+import Fastify from "fastify";
+import { Recorder } from "./recorder";
+import { Replayer } from "./replayer";
+import { Storage } from "./storage";
 
 const app = Fastify({ logger: true });
 const recorder = new Recorder();
 const replayer = new Replayer();
 
-app.post('/v1/recordings', async (req, reply) => {
-  const seed = (req.body as any)?.seed ?? '0';
-  const sessionId = (req.body as any)?.sessionId ?? 'unknown';
+app.post("/v1/recordings", async (req, reply) => {
+  const seed = (req.body as any)?.seed ?? "0";
+  const sessionId = (req.body as any)?.sessionId ?? "unknown";
   const rec = recorder.start(sessionId, seed);
   Storage.save(rec);
   return reply.code(201).send(rec);
 });
 
-app.post('/v1/replay/:id', async (req, reply) => {
+app.post("/v1/replay/:id", async (req, reply) => {
   const id = (req.params as any).id;
   const rec = Storage.get(id);
-  if (!rec) return reply.code(404).send({ error: 'not found' });
+  if (!rec) return reply.code(404).send({ error: "not found" });
   return reply.send(replayer.replay(rec));
 });
 
-app.listen({ port: Number(process.env.PORT || 8081), host: '0.0.0.0' });
+app.listen({ port: Number(process.env.PORT || 8081), host: "0.0.0.0" });
 ```
 
 **services/replay-engine/tests/replayer.spec.ts**
 
 ```ts
-import { describe, it, expect } from 'vitest';
-import { Replayer } from '../src/replayer';
-import { Recorder } from '../src/recorder';
+import { describe, it, expect } from "vitest";
+import { Replayer } from "../src/replayer";
+import { Recorder } from "../src/recorder";
 
-describe('Replayer', () => {
-  it('replays a trivial recording', () => {
-    const rec = new Recorder().start('sess1', 'seed');
+describe("Replayer", () => {
+  it("replays a trivial recording", () => {
+    const rec = new Recorder().start("sess1", "seed");
     const out = new Replayer().replay(rec);
-    expect(out.sessionId).toBe('sess1');
+    expect(out.sessionId).toBe("sess1");
   });
 });
 ```
@@ -583,19 +576,19 @@ export type InvokeArgs = { fn: string; args: unknown };
 **packages/sdk-ts/src/client.ts**
 
 ```ts
-import { Session, InvokeArgs } from './types';
+import { Session, InvokeArgs } from "./types";
 
 export class McpClient {
   constructor(
     private baseUrl: string,
-    private token: string,
+    private token: string
   ) {}
 
   async connect(toolClass: string): Promise<Session> {
     const res = await fetch(`${this.baseUrl}/v1/session`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'content-type': 'application/json',
+        "content-type": "application/json",
         authorization: `Bearer ${this.token}`,
       },
       body: JSON.stringify({ toolClass }),
@@ -606,9 +599,9 @@ export class McpClient {
 
   async invoke(session: Session, input: InvokeArgs) {
     const res = await fetch(`${this.baseUrl}/v1/session/${session.id}/invoke`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'content-type': 'application/json',
+        "content-type": "application/json",
         authorization: `Bearer ${this.token}`,
       },
       body: JSON.stringify(input),
@@ -622,19 +615,19 @@ export class McpClient {
 **packages/sdk-ts/src/index.ts**
 
 ```ts
-export * from './client';
-export * from './types';
+export * from "./client";
+export * from "./types";
 ```
 
 **packages/sdk-ts/tests/client.spec.ts**
 
 ```ts
-import { describe, it, expect } from 'vitest';
-import { McpClient } from '../src/client';
+import { describe, it, expect } from "vitest";
+import { McpClient } from "../src/client";
 
-describe('McpClient', () => {
-  it('constructs', () => {
-    const c = new McpClient('http://localhost:8080', 't');
+describe("McpClient", () => {
+  it("constructs", () => {
+    const c = new McpClient("http://localhost:8080", "t");
     expect(c).toBeTruthy();
   });
 });
@@ -673,14 +666,14 @@ describe('McpClient', () => {
 
 ```ts
 #!/usr/bin/env tsx
-import { Command } from 'commander';
-import { runAll } from '../src/runner';
+import { Command } from "commander";
+import { runAll } from "../src/runner";
 
 const program = new Command();
 program
-  .name('ig-mcp-conformance')
-  .requiredOption('-e, --endpoint <url>', 'MCP server endpoint')
-  .option('-t, --token <token>', 'auth token')
+  .name("ig-mcp-conformance")
+  .requiredOption("-e, --endpoint <url>", "MCP server endpoint")
+  .option("-t, --token <token>", "auth token")
   .action(async (opts) => {
     const res = await runAll(opts.endpoint, opts.token);
     console.log(JSON.stringify(res, null, 2));
@@ -691,11 +684,11 @@ program.parse();
 **tools/conformance-cli/src/runner.ts**
 
 ```ts
-import * as latency from './checks/latency';
-import * as auth from './checks/auth';
-import * as sandbox from './checks/sandbox';
-import * as schema from './checks/schema';
-import * as provenance from './checks/provenance';
+import * as latency from "./checks/latency";
+import * as auth from "./checks/auth";
+import * as sandbox from "./checks/sandbox";
+import * as schema from "./checks/schema";
+import * as provenance from "./checks/provenance";
 
 export async function runAll(endpoint: string, token?: string) {
   const ctx = { endpoint, token } as const;
@@ -720,10 +713,10 @@ export async function runAll(endpoint: string, token?: string) {
 ```ts
 export async function run(ctx: { endpoint: string; token?: string }) {
   const t0 = Date.now();
-  const res = await fetch(ctx.endpoint + '/health');
+  const res = await fetch(ctx.endpoint + "/health");
   const ms = Date.now() - t0;
   const pass = res.ok && ms <= 250; // p95 target for session start (proxy)
-  return { name: 'latency', pass, ms };
+  return { name: "latency", pass, ms };
 }
 ```
 
@@ -748,22 +741,18 @@ export async function run(ctx: { endpoint: string; token?: string }) {
 **benchmarks/harness/k6/pooler-baseline.js**
 
 ```js
-import http from 'k6/http';
-import { check, sleep } from 'k6';
+import http from "k6/http";
+import { check, sleep } from "k6";
 
-export const options = { vus: 50, duration: '1m' };
+export const options = { vus: 50, duration: "1m" };
 
 export default function () {
-  const res = http.post(
-    `${__ENV.ENDPOINT}/v1/session`,
-    JSON.stringify({ toolClass: 'github' }),
-    {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${__ENV.TOKEN}`,
-      },
+  const res = http.post(`${__ENV.ENDPOINT}/v1/session`, JSON.stringify({ toolClass: "github" }), {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${__ENV.TOKEN}`,
     },
-  );
+  });
   check(res, { 201: (r) => r.status === 201 });
   sleep(0.1);
 }
@@ -772,7 +761,7 @@ export default function () {
 **benchmarks/harness/src/run.ts**
 
 ```ts
-console.log('Run k6 with ENDPOINT and TOKEN envs against pooler-baseline.js');
+console.log("Run k6 with ENDPOINT and TOKEN envs against pooler-baseline.js");
 ```
 
 ---
@@ -785,10 +774,10 @@ console.log('Run k6 with ENDPOINT and TOKEN envs against pooler-baseline.js');
 image: { repository: intelgraph/runtime-pooler, tag: v0.1.0 }
 replicaCount: 2
 resources:
-  requests: { cpu: '250m', memory: '256Mi' }
-  limits: { cpu: '1', memory: '512Mi' }
+  requests: { cpu: "250m", memory: "256Mi" }
+  limits: { cpu: "1", memory: "512Mi" }
 otel:
-  endpoint: 'http://otel-collector:4317'
+  endpoint: "http://otel-collector:4317"
 ```
 
 **ops/helm/replay-engine/values.yaml**
@@ -797,8 +786,8 @@ otel:
 image: { repository: intelgraph/replay-engine, tag: v0.1.0 }
 replicaCount: 1
 resources:
-  requests: { cpu: '200m', memory: '256Mi' }
-  limits: { cpu: '500m', memory: '512Mi' }
+  requests: { cpu: "200m", memory: "256Mi" }
+  limits: { cpu: "500m", memory: "512Mi" }
 ```
 
 ---

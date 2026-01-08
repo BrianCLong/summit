@@ -53,6 +53,7 @@ Successfully implemented a comprehensive PII/sensitive data detection and redact
 - **Callbacks**: Alerting on high-severity detection
 
 **Integration Points**:
+
 - ✅ Connector ingestion paths
 - ✅ ETL pipeline hooks
 - ✅ Document/graph creation
@@ -78,6 +79,7 @@ Successfully implemented a comprehensive PII/sensitive data detection and redact
 - **REST Middleware**: `createRESTRedactionMiddleware()`
 
 **Context-Aware**:
+
 - Purpose-based access (investigation, audit, export, etc.)
 - Step-up authentication requirements
 - Clearance-level enforcement
@@ -94,6 +96,7 @@ Successfully implemented a comprehensive PII/sensitive data detection and redact
 - **Redaction Notices**: Optional user-facing notices about masked fields
 
 **Features**:
+
 - Prevents PII leakage into LLM prompts
 - Enforces role-based output filtering
 - Comprehensive warnings and audit trail
@@ -206,6 +209,7 @@ Successfully implemented a comprehensive PII/sensitive data detection and redact
 ## Key Features
 
 ### 🔍 Detection
+
 - **73 PII types** across 15 categories
 - **Rule-based + ML-ready** hybrid approach
 - **Context-aware** (schema hints, field names)
@@ -213,6 +217,7 @@ Successfully implemented a comprehensive PII/sensitive data detection and redact
 - **Nested structure** support (recursive detection)
 
 ### 🏷️ Classification
+
 - **5-tier sensitivity** hierarchy
 - **8 regulatory frameworks** (GDPR, HIPAA, etc.)
 - **Automatic tagging** (catalog, graph, SQL)
@@ -220,6 +225,7 @@ Successfully implemented a comprehensive PII/sensitive data detection and redact
 - **Lineage tracking** (source, timestamp, validator)
 
 ### 🔒 Access Control
+
 - **10-level clearance** system (0-10)
 - **Role-based policies** (ADMIN, ANALYST, VIEWER)
 - **Purpose justification** (investigation, audit, export)
@@ -227,6 +233,7 @@ Successfully implemented a comprehensive PII/sensitive data detection and redact
 - **Approval workflows** for restricted access
 
 ### 🎭 Redaction
+
 - **5 strategies** (FULL, PARTIAL, HASH, NULL, REMOVE)
 - **Context-aware** (role + purpose + clearance)
 - **Partial masking** (show last N chars)
@@ -234,6 +241,7 @@ Successfully implemented a comprehensive PII/sensitive data detection and redact
 - **Audit logging** (who, what, when, why)
 
 ### 🤖 Copilot Safety
+
 - **Input sanitization** (prevent PII leakage to LLM)
 - **Output filtering** (redact PII in responses)
 - **Clearance enforcement** (block low-clearance users)
@@ -241,16 +249,16 @@ Successfully implemented a comprehensive PII/sensitive data detection and redact
 
 ## Integration Status
 
-| Component | Status | Notes |
-|-----------|--------|-------|
+| Component           | Status   | Notes                     |
+| ------------------- | -------- | ------------------------- |
 | Connector Ingestion | ✅ Ready | Wrapper function provided |
-| Neo4j Graph Tagging | ✅ Ready | Cypher queries defined |
-| Catalog Metadata | ✅ Ready | PostgreSQL schema created |
-| SQL Metadata | ✅ Ready | Column templates provided |
-| GraphQL Redaction | ✅ Ready | Resolver middleware |
-| REST Redaction | ✅ Ready | Express middleware |
+| Neo4j Graph Tagging | ✅ Ready | Cypher queries defined    |
+| Catalog Metadata    | ✅ Ready | PostgreSQL schema created |
+| SQL Metadata        | ✅ Ready | Column templates provided |
+| GraphQL Redaction   | ✅ Ready | Resolver middleware       |
+| REST Redaction      | ✅ Ready | Express middleware        |
 | Copilot Integration | ✅ Ready | GuardedGenerator enhanced |
-| Audit Trail | ✅ Ready | Log tables created |
+| Audit Trail         | ✅ Ready | Log tables created        |
 
 ## Next Steps (Deployment)
 
@@ -276,7 +284,7 @@ PII_AUTO_TAG_GRAPH=false  # Enable after Neo4j testing
 
 ```typescript
 // In each connector file
-import { createIngestionHook, withPIIDetection } from '@/pii';
+import { createIngestionHook, withPIIDetection } from "@/pii";
 
 const hook = createIngestionHook({ enabled: true });
 export default withPIIDetection(new MyConnector(), hook);
@@ -303,18 +311,18 @@ app.use(createRESTRedactionMiddleware(redactionMiddleware));
 
 ```typescript
 // In copilot handler
-import { applyCopilotPIIGuard } from '@/pii';
+import { applyCopilotPIIGuard } from "@/pii";
 
-const { guardedInput, guardedOutput } = await applyCopilotPIIGuard(
-  prompt,
-  llmResponse,
-  { user: context.user, query: prompt }
-);
+const { guardedInput, guardedOutput } = await applyCopilotPIIGuard(prompt, llmResponse, {
+  user: context.user,
+  query: prompt,
+});
 ```
 
 ## Compliance Validation
 
 ### GDPR ✅
+
 - Personal identifiers tagged
 - Purpose tracking enabled
 - Right to erasure (via catalog)
@@ -322,18 +330,21 @@ const { guardedInput, guardedOutput } = await applyCopilotPIIGuard(
 - Access logging
 
 ### HIPAA ✅
+
 - PHI detection (patient IDs, diagnoses, etc.)
 - Minimum necessary (role-based redaction)
 - Access audit trail
 - Encryption requirements defined
 
 ### PCI DSS ✅
+
 - PAN detection (credit cards)
 - Cardholder data redaction
 - Access controls enforced
 - Audit logging
 
 ### CCPA ✅
+
 - California resident data tagged
 - Consumer request support (catalog)
 - Opt-out tracking
@@ -406,6 +417,7 @@ The PII detection and redaction system is **production-ready** and fully integra
 All acceptance criteria validated with comprehensive integration tests.
 
 Ready for deployment with phased rollout recommended:
+
 1. Deploy database migrations
 2. Enable detection in non-production connectors
 3. Monitor and tune confidence thresholds

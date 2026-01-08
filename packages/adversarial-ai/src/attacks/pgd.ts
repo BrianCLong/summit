@@ -1,4 +1,4 @@
-import { AdversarialExample, AttackConfig, AdversarialAttackType } from '../types';
+import { AdversarialExample, AttackConfig, AdversarialAttackType } from "../types";
 
 /**
  * Projected Gradient Descent (PGD) Attack
@@ -20,7 +20,7 @@ export class PGDAttack {
     const stepSize = config.stepSize || epsilon / 10;
 
     // Random initialization within epsilon ball
-    let perturbedInput = input.map(val => {
+    let perturbedInput = input.map((val) => {
       const noise = (Math.random() * 2 - 1) * epsilon;
       return Math.max(0, Math.min(1, val + noise));
     });
@@ -62,10 +62,10 @@ export class PGDAttack {
         epsilon,
         iterations,
         stepSize,
-        method: 'PGD',
-        initialization: 'random'
+        method: "PGD",
+        initialization: "random",
       },
-      createdAt: new Date()
+      createdAt: new Date(),
     };
   }
 
@@ -82,7 +82,7 @@ export class PGDAttack {
     const iterations = config.iterations || 40;
     const stepSize = config.stepSize || epsilon / 10;
 
-    let perturbedInput = input.map(val => {
+    let perturbedInput = input.map((val) => {
       const noise = (Math.random() * 2 - 1) * epsilon;
       return Math.max(0, Math.min(1, val + noise));
     });
@@ -123,9 +123,9 @@ export class PGDAttack {
         iterations,
         stepSize,
         targetClass,
-        method: 'PGD-Targeted'
+        method: "PGD-Targeted",
       },
-      createdAt: new Date()
+      createdAt: new Date(),
     };
   }
 
@@ -154,9 +154,7 @@ export class PGDAttack {
 
       // Project to L2 ball
       const currentPerturbation = perturbedInput.map((val, idx) => val - input[idx]);
-      const l2Norm = Math.sqrt(
-        currentPerturbation.reduce((sum, p) => sum + p * p, 0)
-      );
+      const l2Norm = Math.sqrt(currentPerturbation.reduce((sum, p) => sum + p * p, 0));
 
       if (l2Norm > epsilon) {
         perturbedInput = perturbedInput.map((val, idx) => {
@@ -171,9 +169,7 @@ export class PGDAttack {
       }
     }
 
-    const perturbationNorm = Math.sqrt(
-      totalPerturbation.reduce((sum, p) => sum + p * p, 0)
-    );
+    const perturbationNorm = Math.sqrt(totalPerturbation.reduce((sum, p) => sum + p * p, 0));
 
     return {
       id: this.generateId(),
@@ -189,10 +185,10 @@ export class PGDAttack {
         epsilon,
         iterations,
         stepSize,
-        norm: 'L2',
-        method: 'PGD-L2'
+        norm: "L2",
+        method: "PGD-L2",
       },
-      createdAt: new Date()
+      createdAt: new Date(),
     };
   }
 

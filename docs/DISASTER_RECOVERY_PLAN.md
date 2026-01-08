@@ -33,38 +33,38 @@ This document defines the comprehensive disaster recovery (DR) and business cont
 
 ### 1.1 Recovery Time Objective (RTO)
 
-| Tier | Component | RTO | Description |
-|------|-----------|-----|-------------|
-| **Tier 1** | API Gateway, Authentication | 5 minutes | Critical path services |
-| **Tier 1** | GraphQL API | 5 minutes | Core application functionality |
-| **Tier 2** | PostgreSQL Database | 15 minutes | Relational data store |
-| **Tier 2** | Neo4j Graph Database | 15 minutes | Graph data store |
-| **Tier 3** | Redis Cache/Queue | 5 minutes | Can be rebuilt from persistent stores |
-| **Tier 3** | Analytics Engine | 30 minutes | Non-critical for core operations |
-| **Tier 4** | Copilot/AI Services | 60 minutes | Enhanced features |
+| Tier       | Component                   | RTO        | Description                           |
+| ---------- | --------------------------- | ---------- | ------------------------------------- |
+| **Tier 1** | API Gateway, Authentication | 5 minutes  | Critical path services                |
+| **Tier 1** | GraphQL API                 | 5 minutes  | Core application functionality        |
+| **Tier 2** | PostgreSQL Database         | 15 minutes | Relational data store                 |
+| **Tier 2** | Neo4j Graph Database        | 15 minutes | Graph data store                      |
+| **Tier 3** | Redis Cache/Queue           | 5 minutes  | Can be rebuilt from persistent stores |
+| **Tier 3** | Analytics Engine            | 30 minutes | Non-critical for core operations      |
+| **Tier 4** | Copilot/AI Services         | 60 minutes | Enhanced features                     |
 
 **Overall Platform RTO**: 15 minutes for core functionality, 60 minutes for full recovery.
 
 ### 1.2 Recovery Point Objective (RPO)
 
-| Data Store | RPO | Backup Method | Retention |
-|------------|-----|---------------|-----------|
-| PostgreSQL | 5 minutes | WAL archiving + streaming replication | 30 days |
-| Neo4j | 15 minutes | Incremental backups + transaction logs | 30 days |
-| Redis | 1 hour | RDB snapshots + AOF | 7 days |
-| Evidence Files | 0 (sync) | S3 cross-region replication | 90 days |
-| Kubernetes Configs | 0 (GitOps) | Git repository | Indefinite |
+| Data Store         | RPO        | Backup Method                          | Retention  |
+| ------------------ | ---------- | -------------------------------------- | ---------- |
+| PostgreSQL         | 5 minutes  | WAL archiving + streaming replication  | 30 days    |
+| Neo4j              | 15 minutes | Incremental backups + transaction logs | 30 days    |
+| Redis              | 1 hour     | RDB snapshots + AOF                    | 7 days     |
+| Evidence Files     | 0 (sync)   | S3 cross-region replication            | 90 days    |
+| Kubernetes Configs | 0 (GitOps) | Git repository                         | Indefinite |
 
 ### 1.3 Service Level Targets
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Availability | 99.9% | Monthly uptime |
-| MTTR (Mean Time to Recovery) | < 30 minutes | Per incident |
-| MTBF (Mean Time Between Failures) | > 720 hours | Rolling 90 days |
-| Data Durability | 99.999999999% | Annual |
-| Backup Success Rate | > 99% | Daily |
-| DR Test Success Rate | 100% | Quarterly |
+| Metric                            | Target        | Measurement     |
+| --------------------------------- | ------------- | --------------- |
+| Availability                      | 99.9%         | Monthly uptime  |
+| MTTR (Mean Time to Recovery)      | < 30 minutes  | Per incident    |
+| MTBF (Mean Time Between Failures) | > 720 hours   | Rolling 90 days |
+| Data Durability                   | 99.999999999% | Annual          |
+| Backup Success Rate               | > 99%         | Daily           |
+| DR Test Success Rate              | 100%          | Quarterly       |
 
 ---
 
@@ -115,13 +115,13 @@ This document defines the comprehensive disaster recovery (DR) and business cont
 
 ### 2.2 Critical Data Stores
 
-| Store | Data Type | Size (Est.) | Criticality |
-|-------|-----------|-------------|-------------|
-| PostgreSQL | Users, tenants, investigations, audit logs | 50-500 GB | Critical |
-| Neo4j | Entities, relationships, graph structure | 10-100 GB | Critical |
-| Redis | Sessions, cache, job queues | 1-10 GB | High |
-| S3/Evidence | Uploaded files, STIX bundles, reports | 100+ GB | Critical |
-| Kubernetes | Configs, secrets, state | < 1 GB | Critical |
+| Store       | Data Type                                  | Size (Est.) | Criticality |
+| ----------- | ------------------------------------------ | ----------- | ----------- |
+| PostgreSQL  | Users, tenants, investigations, audit logs | 50-500 GB   | Critical    |
+| Neo4j       | Entities, relationships, graph structure   | 10-100 GB   | Critical    |
+| Redis       | Sessions, cache, job queues                | 1-10 GB     | High        |
+| S3/Evidence | Uploaded files, STIX bundles, reports      | 100+ GB     | Critical    |
+| Kubernetes  | Configs, secrets, state                    | < 1 GB      | Critical    |
 
 ---
 
@@ -129,13 +129,13 @@ This document defines the comprehensive disaster recovery (DR) and business cont
 
 ### 3.1 Backup Schedule
 
-| Component | Full Backup | Incremental | WAL/Transaction Log |
-|-----------|-------------|-------------|---------------------|
-| PostgreSQL | Daily 02:00 UTC | Every 4 hours | Continuous streaming |
-| Neo4j | Daily 03:00 UTC | Every 6 hours | Transaction log backup |
-| Redis | Daily 04:00 UTC | Hourly RDB | AOF with fsync |
-| Evidence Files | Continuous sync | N/A | S3 versioning |
-| K8s Configs | On change | N/A | GitOps (Flux/ArgoCD) |
+| Component      | Full Backup     | Incremental   | WAL/Transaction Log    |
+| -------------- | --------------- | ------------- | ---------------------- |
+| PostgreSQL     | Daily 02:00 UTC | Every 4 hours | Continuous streaming   |
+| Neo4j          | Daily 03:00 UTC | Every 6 hours | Transaction log backup |
+| Redis          | Daily 04:00 UTC | Hourly RDB    | AOF with fsync         |
+| Evidence Files | Continuous sync | N/A           | S3 versioning          |
+| K8s Configs    | On change       | N/A           | GitOps (Flux/ArgoCD)   |
 
 ### 3.2 Backup Storage
 
@@ -176,14 +176,14 @@ s3://intelgraph-backups-prod/
 
 ### 3.4 Retention Policy
 
-| Backup Type | Retention | Storage Class |
-|-------------|-----------|---------------|
-| Daily Full | 30 days | S3 Standard |
-| Weekly Full | 90 days | S3 Standard-IA |
-| Monthly Full | 1 year | S3 Glacier |
-| Annual Full | 7 years | S3 Glacier Deep Archive |
-| WAL Archives | 7 days | S3 Standard |
-| Incremental | 7 days | S3 Standard |
+| Backup Type  | Retention | Storage Class           |
+| ------------ | --------- | ----------------------- |
+| Daily Full   | 30 days   | S3 Standard             |
+| Weekly Full  | 90 days   | S3 Standard-IA          |
+| Monthly Full | 1 year    | S3 Glacier              |
+| Annual Full  | 7 years   | S3 Glacier Deep Archive |
+| WAL Archives | 7 days    | S3 Standard             |
+| Incremental  | 7 days    | S3 Standard             |
 
 ---
 
@@ -220,6 +220,7 @@ postgresql:
 ```
 
 **Failover Process**:
+
 1. Primary failure detected via health checks
 2. Patroni/pg_auto_failover promotes replica
 3. Connection pool redirects traffic
@@ -309,17 +310,20 @@ spec:
 ### 5.1 DR Activation Criteria
 
 **Automatic Failover** (no human intervention required):
+
 - Single pod/container failure
 - Single node failure
 - Database replica lag > 30 seconds
 
 **Manual Failover** (requires approval):
+
 - Primary region network outage > 15 minutes
 - Multiple AZ failure in primary region
 - Data corruption detected
 - Security incident requiring isolation
 
 **Full DR Activation** (executive approval required):
+
 - Complete region failure
 - Major natural disaster
 - Sustained attack/compromise
@@ -433,12 +437,12 @@ kubectl scale deployment/intelgraph-api --replicas=3
 
 ### 6.1 Severity Classification
 
-| Severity | Description | Response Time | Escalation |
-|----------|-------------|---------------|------------|
-| **SEV1** | Complete outage, data loss risk | Immediate | VP Engineering |
-| **SEV2** | Major degradation, partial outage | 15 minutes | Engineering Manager |
-| **SEV3** | Minor degradation, workaround available | 1 hour | Team Lead |
-| **SEV4** | Cosmetic issues, no user impact | Next business day | On-call |
+| Severity | Description                             | Response Time     | Escalation          |
+| -------- | --------------------------------------- | ----------------- | ------------------- |
+| **SEV1** | Complete outage, data loss risk         | Immediate         | VP Engineering      |
+| **SEV2** | Major degradation, partial outage       | 15 minutes        | Engineering Manager |
+| **SEV3** | Minor degradation, workaround available | 1 hour            | Team Lead           |
+| **SEV4** | Cosmetic issues, no user impact         | Next business day | On-call             |
 
 ### 6.2 Incident Response Workflow
 
@@ -486,6 +490,7 @@ kubectl scale deployment/intelgraph-api --replicas=3
 ### 6.3 Communication Templates
 
 **Initial Incident Notification**:
+
 ```
 INCIDENT DECLARED - IntelGraph Platform
 
@@ -505,6 +510,7 @@ Status Page: https://status.intelgraph.ai
 ```
 
 **Resolution Notification**:
+
 ```
 INCIDENT RESOLVED - IntelGraph Platform
 
@@ -528,14 +534,14 @@ Follow-up:
 
 ### 7.1 Testing Schedule
 
-| Test Type | Frequency | Scope | Owner |
-|-----------|-----------|-------|-------|
-| Backup Verification | Daily | Automated integrity checks | SRE |
-| Restore Test | Weekly | Single database restore | SRE |
-| Failover Drill | Monthly | Database failover | Platform Team |
-| DR Simulation | Quarterly | Full region failover | Engineering |
-| Chaos Engineering | Monthly | Random failure injection | SRE |
-| Tabletop Exercise | Semi-annually | Full team walkthrough | Leadership |
+| Test Type           | Frequency     | Scope                      | Owner         |
+| ------------------- | ------------- | -------------------------- | ------------- |
+| Backup Verification | Daily         | Automated integrity checks | SRE           |
+| Restore Test        | Weekly        | Single database restore    | SRE           |
+| Failover Drill      | Monthly       | Database failover          | Platform Team |
+| DR Simulation       | Quarterly     | Full region failover       | Engineering   |
+| Chaos Engineering   | Monthly       | Random failure injection   | SRE           |
+| Tabletop Exercise   | Semi-annually | Full team walkthrough      | Leadership    |
 
 ### 7.2 Chaos Engineering Experiments
 
@@ -555,7 +561,7 @@ spec:
     labelSelectors:
       app: postgresql
   scheduler:
-    cron: "0 10 * * 1"  # Monday 10:00 UTC
+    cron: "0 10 * * 1" # Monday 10:00 UTC
 ---
 # Network Partition Experiment
 apiVersion: chaos-mesh.org/v1alpha1
@@ -583,17 +589,18 @@ spec:
 
 ### 7.3 Success Criteria
 
-| Test | Success Criteria |
-|------|------------------|
-| Backup Verification | Checksum match, file integrity, encryption valid |
-| Restore Test | Data integrity verified, < 15 min RTO |
-| Failover Drill | Automatic failover < 2 min, zero data loss |
-| DR Simulation | Full recovery < 60 min, RPO met |
-| Chaos Engineering | Service recovers within SLA, no cascading failures |
+| Test                | Success Criteria                                   |
+| ------------------- | -------------------------------------------------- |
+| Backup Verification | Checksum match, file integrity, encryption valid   |
+| Restore Test        | Data integrity verified, < 15 min RTO              |
+| Failover Drill      | Automatic failover < 2 min, zero data loss         |
+| DR Simulation       | Full recovery < 60 min, RPO met                    |
+| Chaos Engineering   | Service recovers within SLA, no cascading failures |
 
 ### 7.4 Test Documentation
 
 Each test must produce:
+
 1. **Pre-test checklist** completion
 2. **Execution log** with timestamps
 3. **Metrics capture** (RTO/RPO actual vs target)
@@ -606,13 +613,13 @@ Each test must produce:
 
 ### 8.1 DR Team Structure
 
-| Role | Responsibilities | Primary | Backup |
-|------|------------------|---------|--------|
-| **Incident Commander** | Overall coordination, decisions | On-call Lead | Engineering Manager |
-| **Technical Lead** | Technical diagnosis, resolution | Senior SRE | Platform Engineer |
-| **Communications** | Stakeholder updates, status page | Product Manager | Engineering Manager |
-| **Scribe** | Documentation, timeline | Any engineer | Automated logging |
-| **Subject Matter Expert** | Database/infra expertise | DBA | Cloud Engineer |
+| Role                      | Responsibilities                 | Primary         | Backup              |
+| ------------------------- | -------------------------------- | --------------- | ------------------- |
+| **Incident Commander**    | Overall coordination, decisions  | On-call Lead    | Engineering Manager |
+| **Technical Lead**        | Technical diagnosis, resolution  | Senior SRE      | Platform Engineer   |
+| **Communications**        | Stakeholder updates, status page | Product Manager | Engineering Manager |
+| **Scribe**                | Documentation, timeline          | Any engineer    | Automated logging   |
+| **Subject Matter Expert** | Database/infra expertise         | DBA             | Cloud Engineer      |
 
 ### 8.2 Escalation Matrix
 
@@ -636,19 +643,19 @@ Level 1: On-Call Engineer
 
 ### 9.1 Internal Communication
 
-| Audience | Channel | Frequency | Content |
-|----------|---------|-----------|---------|
-| Engineering | Slack #incidents | Real-time | Technical details |
-| Leadership | Email + Slack | Every 30 min | Summary, ETA |
-| All Staff | Email | Start/End | High-level impact |
+| Audience    | Channel          | Frequency    | Content           |
+| ----------- | ---------------- | ------------ | ----------------- |
+| Engineering | Slack #incidents | Real-time    | Technical details |
+| Leadership  | Email + Slack    | Every 30 min | Summary, ETA      |
+| All Staff   | Email            | Start/End    | High-level impact |
 
 ### 9.2 External Communication
 
-| Audience | Channel | Frequency | Content |
-|----------|---------|-----------|---------|
-| Customers | Status Page | Real-time | Service status |
-| Enterprise | Direct email | Hourly | Detailed updates |
-| Partners | API status | Real-time | Integration status |
+| Audience   | Channel      | Frequency | Content            |
+| ---------- | ------------ | --------- | ------------------ |
+| Customers  | Status Page  | Real-time | Service status     |
+| Enterprise | Direct email | Hourly    | Detailed updates   |
+| Partners   | API status   | Real-time | Integration status |
 
 ### 9.3 Status Page Categories
 
@@ -686,12 +693,12 @@ Level 1: On-Call Engineer
 
 ### 10.2 Key Contacts
 
-| Role | Name | Phone | Email |
-|------|------|-------|-------|
-| VP Engineering | [REDACTED] | +1-XXX-XXX-XXXX | vp-eng@company.com |
-| SRE Lead | [REDACTED] | +1-XXX-XXX-XXXX | sre-lead@company.com |
-| DBA Lead | [REDACTED] | +1-XXX-XXX-XXXX | dba-lead@company.com |
-| Security Lead | [REDACTED] | +1-XXX-XXX-XXXX | security@company.com |
+| Role           | Name       | Phone           | Email                |
+| -------------- | ---------- | --------------- | -------------------- |
+| VP Engineering | [REDACTED] | +1-XXX-XXX-XXXX | vp-eng@company.com   |
+| SRE Lead       | [REDACTED] | +1-XXX-XXX-XXXX | sre-lead@company.com |
+| DBA Lead       | [REDACTED] | +1-XXX-XXX-XXXX | dba-lead@company.com |
+| Security Lead  | [REDACTED] | +1-XXX-XXX-XXXX | security@company.com |
 
 ### 10.3 Related Documentation
 
@@ -703,18 +710,18 @@ Level 1: On-Call Engineer
 
 ### 10.4 Revision History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 2.0 | 2025-11-21 | Platform Team | Comprehensive overhaul, added HA configs |
-| 1.0 | 2025-09-25 | Jules | Initial DR documentation |
+| Version | Date       | Author        | Changes                                  |
+| ------- | ---------- | ------------- | ---------------------------------------- |
+| 2.0     | 2025-11-21 | Platform Team | Comprehensive overhaul, added HA configs |
+| 1.0     | 2025-09-25 | Jules         | Initial DR documentation                 |
 
 ---
 
 **Document Approval**
 
-| Role | Name | Date | Signature |
-|------|------|------|-----------|
-| Author | Platform Engineering | 2025-11-21 | |
-| Technical Review | SRE Team | | |
-| Business Review | Product Management | | |
-| Final Approval | VP Engineering | | |
+| Role             | Name                 | Date       | Signature |
+| ---------------- | -------------------- | ---------- | --------- |
+| Author           | Platform Engineering | 2025-11-21 |           |
+| Technical Review | SRE Team             |            |           |
+| Business Review  | Product Management   |            |           |
+| Final Approval   | VP Engineering       |            |           |

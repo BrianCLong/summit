@@ -5,6 +5,7 @@ A comprehensive dashboard for analyzing and visualizing pull requests by categor
 ## Overview
 
 This tool analyzes git history to categorize and summarize pull requests by:
+
 - **Type**: feature, bug, docs, dependencies, chore, other
 - **Status**: merged (extracted from git log)
 - **Time Period**: past 6 months (configurable)
@@ -49,14 +50,14 @@ npx tsx scripts/generate-pr-dashboard-html.ts
 
 PRs are automatically categorized based on commit message patterns:
 
-| Category      | Patterns                                                      |
-|---------------|---------------------------------------------------------------|
-| **Feature**   | `feat`, `feature`, `add `, `enhance`                         |
-| **Bug**       | `fix`, `bug`, `hotfix`, `patch`                              |
-| **Docs**      | `docs`, `documentation`, `readme`                            |
-| **Dependencies** | `chore(deps)`, `bump`, dependency/package updates          |
-| **Chore**     | `chore`, `refactor`, `test`, `ci`                            |
-| **Other**     | Everything else                                               |
+| Category         | Patterns                                          |
+| ---------------- | ------------------------------------------------- |
+| **Feature**      | `feat`, `feature`, `add `, `enhance`              |
+| **Bug**          | `fix`, `bug`, `hotfix`, `patch`                   |
+| **Docs**         | `docs`, `documentation`, `readme`                 |
+| **Dependencies** | `chore(deps)`, `bump`, dependency/package updates |
+| **Chore**        | `chore`, `refactor`, `test`, `ci`                 |
+| **Other**        | Everything else                                   |
 
 ## Data Structure
 
@@ -131,7 +132,7 @@ name: Generate PR Dashboard
 
 on:
   schedule:
-    - cron: '0 0 * * 0' # Weekly on Sunday
+    - cron: "0 0 * * 0" # Weekly on Sunday
   workflow_dispatch:
 
 jobs:
@@ -145,7 +146,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Generate Dashboard
         run: |
@@ -168,6 +169,7 @@ jobs:
 **Cause**: Git history may not include PR merge commits
 
 **Solution**: Ensure full git history is available:
+
 ```bash
 git fetch --unshallow
 git pull --all
@@ -178,6 +180,7 @@ git pull --all
 **Cause**: TypeScript execution environment not available
 
 **Solution**: Install `tsx`:
+
 ```bash
 npm install -g tsx
 # or
@@ -220,12 +223,12 @@ pnpm add -g tsx
 Edit `categorizePR()` function in `pr-dashboard.ts`:
 
 ```typescript
-function categorizePR(title: string): PRData['category'] {
+function categorizePR(title: string): PRData["category"] {
   const lowerTitle = title.toLowerCase();
 
   // Add your new category check
-  if (lowerTitle.includes('your-pattern')) {
-    return 'your-category';
+  if (lowerTitle.includes("your-pattern")) {
+    return "your-category";
   }
 
   // ... existing checks
@@ -233,6 +236,7 @@ function categorizePR(title: string): PRData['category'] {
 ```
 
 Don't forget to:
+
 1. Update the `CategoryStats` type
 2. Add emoji in `categoryEmojis`
 3. Add color in `categoryColors` (for HTML dashboard)

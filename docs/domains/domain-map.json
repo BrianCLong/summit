@@ -4,89 +4,109 @@
       "name": "case-intake",
       "owner": "Case Operations",
       "commands": [
-        {"name": "SubmitCase", "path": "/cases", "idempotent": true},
-        {"name": "AttachEvidence", "path": "/cases/{caseId}/evidence", "idempotent": true}
+        { "name": "SubmitCase", "path": "/cases", "idempotent": true },
+        { "name": "AttachEvidence", "path": "/cases/{caseId}/evidence", "idempotent": true }
       ],
       "events": [
-        {"name": "CaseSubmitted", "channel": "cases.events", "schemaVersion": 1},
-        {"name": "EvidenceAttached", "channel": "cases.events", "schemaVersion": 1}
+        { "name": "CaseSubmitted", "channel": "cases.events", "schemaVersion": 1 },
+        { "name": "EvidenceAttached", "channel": "cases.events", "schemaVersion": 1 }
       ],
       "readModels": [
-        {"name": "CaseOverview", "projection": "cases_view", "storage": "postgres"},
-        {"name": "CaseTimeline", "projection": "case_timeline_view", "storage": "postgres"}
+        { "name": "CaseOverview", "projection": "cases_view", "storage": "postgres" },
+        { "name": "CaseTimeline", "projection": "case_timeline_view", "storage": "postgres" }
       ],
-      "writePath": {"name": "CaseWritePipeline", "adapter": "case-intake-writer", "storage": "postgres"},
-      "slo": {"availability": 0.995, "latencyP95Ms": 300, "errorBudgetMinutes": 60}
+      "writePath": {
+        "name": "CaseWritePipeline",
+        "adapter": "case-intake-writer",
+        "storage": "postgres"
+      },
+      "slo": { "availability": 0.995, "latencyP95Ms": 300, "errorBudgetMinutes": 60 }
     },
     {
       "name": "entity-resolution",
       "owner": "Identity Intelligence",
       "commands": [
-        {"name": "ResolveEntity", "path": "/entities/resolve", "idempotent": true},
-        {"name": "MergeEntity", "path": "/entities/{entityId}/merge", "idempotent": false}
+        { "name": "ResolveEntity", "path": "/entities/resolve", "idempotent": true },
+        { "name": "MergeEntity", "path": "/entities/{entityId}/merge", "idempotent": false }
       ],
       "events": [
-        {"name": "EntityResolved", "channel": "entities.events", "schemaVersion": 1},
-        {"name": "EntityMerged", "channel": "entities.events", "schemaVersion": 1}
+        { "name": "EntityResolved", "channel": "entities.events", "schemaVersion": 1 },
+        { "name": "EntityMerged", "channel": "entities.events", "schemaVersion": 1 }
       ],
       "readModels": [
-        {"name": "EntityProfile", "projection": "entity_profile_view", "storage": "neo4j"},
-        {"name": "EntityLinkGraph", "projection": "entity_link_graph", "storage": "neo4j"}
+        { "name": "EntityProfile", "projection": "entity_profile_view", "storage": "neo4j" },
+        { "name": "EntityLinkGraph", "projection": "entity_link_graph", "storage": "neo4j" }
       ],
-      "writePath": {"name": "EntityWritePipeline", "adapter": "entity-writer", "storage": "neo4j"},
-      "slo": {"availability": 0.997, "latencyP95Ms": 200, "errorBudgetMinutes": 45}
+      "writePath": {
+        "name": "EntityWritePipeline",
+        "adapter": "entity-writer",
+        "storage": "neo4j"
+      },
+      "slo": { "availability": 0.997, "latencyP95Ms": 200, "errorBudgetMinutes": 45 }
     },
     {
       "name": "graph-query",
       "owner": "Graph Analytics",
-      "commands": [
-        {"name": "ExecuteGraphQuery", "path": "/graph/query", "idempotent": true}
-      ],
-      "events": [
-        {"name": "GraphQueryExecuted", "channel": "graph.events", "schemaVersion": 1}
-      ],
+      "commands": [{ "name": "ExecuteGraphQuery", "path": "/graph/query", "idempotent": true }],
+      "events": [{ "name": "GraphQueryExecuted", "channel": "graph.events", "schemaVersion": 1 }],
       "readModels": [
-        {"name": "GraphQueryCache", "projection": "graph_query_cache", "storage": "redis"},
-        {"name": "GraphQueryPlan", "projection": "graph_query_plan", "storage": "postgres"}
+        { "name": "GraphQueryCache", "projection": "graph_query_cache", "storage": "redis" },
+        { "name": "GraphQueryPlan", "projection": "graph_query_plan", "storage": "postgres" }
       ],
-      "writePath": {"name": "GraphQueryPlanner", "adapter": "graph-query-planner", "storage": "neo4j"},
-      "slo": {"availability": 0.999, "latencyP95Ms": 120, "errorBudgetMinutes": 30}
+      "writePath": {
+        "name": "GraphQueryPlanner",
+        "adapter": "graph-query-planner",
+        "storage": "neo4j"
+      },
+      "slo": { "availability": 0.999, "latencyP95Ms": 120, "errorBudgetMinutes": 30 }
     },
     {
       "name": "authorization",
       "owner": "Security Engineering",
       "commands": [
-        {"name": "EvaluatePolicy", "path": "/authz/evaluate", "idempotent": true},
-        {"name": "GrantRole", "path": "/authz/roles/{roleId}/grant", "idempotent": false}
+        { "name": "EvaluatePolicy", "path": "/authz/evaluate", "idempotent": true },
+        { "name": "GrantRole", "path": "/authz/roles/{roleId}/grant", "idempotent": false }
       ],
       "events": [
-        {"name": "PolicyEvaluated", "channel": "authz.events", "schemaVersion": 1},
-        {"name": "RoleGranted", "channel": "authz.events", "schemaVersion": 1}
+        { "name": "PolicyEvaluated", "channel": "authz.events", "schemaVersion": 1 },
+        { "name": "RoleGranted", "channel": "authz.events", "schemaVersion": 1 }
       ],
       "readModels": [
-        {"name": "PolicyCache", "projection": "policy_cache", "storage": "redis"},
-        {"name": "EntitlementLedger", "projection": "entitlement_ledger_view", "storage": "postgres"}
+        { "name": "PolicyCache", "projection": "policy_cache", "storage": "redis" },
+        {
+          "name": "EntitlementLedger",
+          "projection": "entitlement_ledger_view",
+          "storage": "postgres"
+        }
       ],
-      "writePath": {"name": "AuthorizationWritePipeline", "adapter": "authz-writer", "storage": "postgres"},
-      "slo": {"availability": 0.999, "latencyP95Ms": 80, "errorBudgetMinutes": 20}
+      "writePath": {
+        "name": "AuthorizationWritePipeline",
+        "adapter": "authz-writer",
+        "storage": "postgres"
+      },
+      "slo": { "availability": 0.999, "latencyP95Ms": 80, "errorBudgetMinutes": 20 }
     },
     {
       "name": "audit-provenance",
       "owner": "Trust & Safety",
       "commands": [
-        {"name": "RecordAuditEvent", "path": "/audit", "idempotent": true},
-        {"name": "SignProvenance", "path": "/provenance/sign", "idempotent": true}
+        { "name": "RecordAuditEvent", "path": "/audit", "idempotent": true },
+        { "name": "SignProvenance", "path": "/provenance/sign", "idempotent": true }
       ],
       "events": [
-        {"name": "AuditRecorded", "channel": "audit.events", "schemaVersion": 1},
-        {"name": "ProvenanceSigned", "channel": "audit.events", "schemaVersion": 1}
+        { "name": "AuditRecorded", "channel": "audit.events", "schemaVersion": 1 },
+        { "name": "ProvenanceSigned", "channel": "audit.events", "schemaVersion": 1 }
       ],
       "readModels": [
-        {"name": "AuditFeed", "projection": "audit_feed_view", "storage": "postgres"},
-        {"name": "SignatureLedger", "projection": "signature_ledger", "storage": "postgres"}
+        { "name": "AuditFeed", "projection": "audit_feed_view", "storage": "postgres" },
+        { "name": "SignatureLedger", "projection": "signature_ledger", "storage": "postgres" }
       ],
-      "writePath": {"name": "AuditWritePipeline", "adapter": "audit-writer", "storage": "postgres"},
-      "slo": {"availability": 0.999, "latencyP95Ms": 150, "errorBudgetMinutes": 15}
+      "writePath": {
+        "name": "AuditWritePipeline",
+        "adapter": "audit-writer",
+        "storage": "postgres"
+      },
+      "slo": { "availability": 0.999, "latencyP95Ms": 150, "errorBudgetMinutes": 15 }
     }
   ]
 }

@@ -3,6 +3,7 @@
 This suite exercises golden journeys with smoke, baseline, stress, spike, and soak coverage. It reads targets from `perf/models.yaml` and isolates traffic using synthetic tenant metadata.
 
 ## Prerequisites
+
 - k6 0.50+ (local or Docker).
 - Access to preview/stage endpoints; avoid production except low-QPS smoke.
 - Environment variables:
@@ -37,12 +38,15 @@ k6 run k6/golden-soak.js --summary-export perf/results/k6-soak-summary.json
 Artifacts are written to `perf/results/` and consumed by `.ci/scripts/perf/pr_comment_summary.py` for PR summaries.
 
 ## Thresholds and Checks
+
 - Global: `<1%` HTTP failures.
 - Journey-specific: p95 budgets per `perf/models.yaml`.
 - Application SLIs validated via `check()` blocks for response schema correctness.
 
 ## Synthetic Data and Tenancy
+
 All scenarios send `x-perf: true` and `x-tenant: test-perf` headers. Fixtures should be pre-seeded for the `test-perf` tenant; tests must not mutate production data.
 
 ## Prometheus Remote Write
+
 Pass `PROM_REMOTE_URL` and optional `K6_PROM_PUSH_INTERVAL` to ship metrics to long-term storage. Grafana dashboards expect `run` and `journey` tags.

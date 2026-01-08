@@ -3,7 +3,8 @@
 **Strategy:** Target organizations with high compliance burden + complex data graph needs.
 
 ## Segment 1: Government & Defense (Priority: High)
-*Focus: Auditability, Air-Gap Support, Provenance.*
+
+_Focus: Auditability, Air-Gap Support, Provenance._
 
 1.  **US Army - Cyber Command (ARCYBER):** Defensive Cyber Operations.
 2.  **DHS - CISA:** Critical Infrastructure analysis.
@@ -16,10 +17,11 @@
 9.  **Navy - ONI:** Maritime domain awareness.
 10. **State Dept - INR:** Diplomatic network analysis.
 
-*(Add 15 more specific program offices...)*
+_(Add 15 more specific program offices...)_
 
 ## Segment 2: Primes & Systems Integrators (Priority: Medium-High)
-*Focus: "Accelerate Delivery", "Governed Substrate".*
+
+_Focus: "Accelerate Delivery", "Governed Substrate"._
 
 1.  **Leidos:** Civil/Health/Defense groups.
 2.  **Booz Allen Hamilton:** National Security analytics.
@@ -33,7 +35,8 @@
 10. **Carahsoft:** Distributor channels.
 
 ## Segment 3: Regulated Enterprise (Priority: Medium)
-*Focus: Fraud, Insider Risk, Supply Chain.*
+
+_Focus: Fraud, Insider Risk, Supply Chain._
 
 1.  **JPMorgan Chase:** Cyber Defense / Fraud.
 2.  **Goldman Sachs:** Financial Crime Compliance.
@@ -49,11 +52,13 @@
 ## Outreach Sequences
 
 ### Persona: CISO / GRC Lead
-*   **Subject:** "Audit-ready graph analytics (SBOM included)"
-*   **Hook:** "Stop choosing between AI power and compliance."
-*   **Proof:** "Our platform enforces OPA policies at the query layer and generates signed evidence."
+
+- **Subject:** "Audit-ready graph analytics (SBOM included)"
+- **Hook:** "Stop choosing between AI power and compliance."
+- **Proof:** "Our platform enforces OPA policies at the query layer and generates signed evidence."
 
 ### Persona: Analyst Lead / Ops Director
-*   **Subject:** "Cut investigation time by 30% w/ Tri-Pane view"
-*   **Hook:** "Map, Graph, and Timeline in one screen."
-*   **Proof:** "See the 60-second demo: [Link]"
+
+- **Subject:** "Cut investigation time by 30% w/ Tri-Pane view"
+- **Hook:** "Map, Graph, and Timeline in one screen."
+- **Proof:** "See the 60-second demo: [Link]"

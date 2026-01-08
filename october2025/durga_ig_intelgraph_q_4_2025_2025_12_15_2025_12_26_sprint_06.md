@@ -136,11 +136,11 @@
 ### 1) Federation Verify Endpoint — `apps/proof-portal/server/federation.js`
 
 ```javascript
-import express from 'express';
-import { verifyEB } from './verify.js';
-import { requireOIDC } from './oidc.js';
+import express from "express";
+import { verifyEB } from "./verify.js";
+import { requireOIDC } from "./oidc.js";
 const r = express.Router();
-r.post('/federation/verify', requireOIDC, async (req, res) => {
+r.post("/federation/verify", requireOIDC, async (req, res) => {
   const { eb_id, sha256 } = req.body;
   const ok = await verifyEB(eb_id, sha256);
   if (!ok) return res.status(400).json({ ok: false });

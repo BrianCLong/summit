@@ -1,5 +1,5 @@
 module.exports = {
-  client: 'pg',
+  client: "pg",
   connection: process.env.DATABASE_URL,
-  migrations: { directory: __dirname + '/migrations' },
+  migrations: { directory: __dirname + "/migrations" },
 };

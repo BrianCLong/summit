@@ -1,2 +1,2 @@
-export * from './types.js';
-export * from './TreatyMonitor.js';
+export * from "./types.js";
+export * from "./TreatyMonitor.js";

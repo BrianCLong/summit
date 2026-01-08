@@ -17,21 +17,17 @@ Plugins declare metadata and capabilities in a `plugin.json` file. The schema is
 The SDK exposes helpers for calling the GraphQL API, registering UI panels, and emitting telemetry events.
 
 ```ts
-import {
-  createGraphClient,
-  registerPanel,
-  emitTelemetry,
-} from '../../plugins/sdk/ts';
+import { createGraphClient, registerPanel, emitTelemetry } from "../../plugins/sdk/ts";
 
-const client = createGraphClient('/graphql');
+const client = createGraphClient("/graphql");
 
 registerPanel({
-  id: 'sample-panel',
-  name: 'Sample Panel',
+  id: "sample-panel",
+  name: "Sample Panel",
   component: {}, // host will replace with runtime component
 });
 
-emitTelemetry('plugin-loaded', { id: 'sample-plugin' });
+emitTelemetry("plugin-loaded", { id: "sample-plugin" });
 ```
 
 These APIs are placeholders pending the full sandboxed runtime and should not be used in production.

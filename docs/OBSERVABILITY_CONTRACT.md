@@ -1,6 +1,7 @@
 # Observability Contract & Schema
 
 ## 1. Request Lifecycle
+
 Every request **must** be traceable from ingress to response.
 
 - **Correlation ID**: `x-correlation-id` header (UUID v4).
@@ -12,6 +13,7 @@ Every request **must** be traceable from ingress to response.
 - **Trace Context**: W3C Trace Context (`traceparent`) **must** be supported.
 
 ## 2. Agent Invocation
+
 Agents are treated as **infrastructure**, not black boxes.
 
 - **Start**: Log `AgentExecutionStarted` with `{ agentId, taskId, tenantId, correlationId }`.
@@ -23,18 +25,21 @@ Agents are treated as **infrastructure**, not black boxes.
   - `agent_tool_usage_total` (Counter, labels: `agent_id`, `tool_name`)
 
 ## 3. Policy Evaluation
+
 Policy decisions are critical security events.
 
 - **Log**: `PolicyEvaluation` with `{ policyId, decision: "allow" | "deny", tenantId, correlationId, inputsHash }`.
 - **Metric**: `policy_decisions_total` (Counter, labels: `policy`, `decision`).
 
 ## 4. Signal Integrity (MVP)
+
 All emitted signals (metrics, dashboards, reports) must be labeled.
 
 - **Label**: `signal_type` = `"real" | "simulated" | "synthetic"`.
 - **Rule**: Mixed signals must be explicitly aggregated with separate counters or clearly marked.
 
 ## 5. Structured Logging Schema (JSON)
+
 All logs must follow this JSON schema:
 
 ```json

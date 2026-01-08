@@ -1,11 +1,11 @@
-import '@testing-library/jest-dom';
+import "@testing-library/jest-dom";
 
 // Polyfill for TextEncoder
-import { TextEncoder } from 'util';
+import { TextEncoder } from "util";
 global.TextEncoder = TextEncoder;
 
 // Polyfill for performance.getEntriesByType
-if (typeof performance === 'undefined') {
+if (typeof performance === "undefined") {
   global.performance = {
     getEntriesByType: () => [],
   } as Performance;
@@ -38,11 +38,11 @@ class MockSpeechRecognition {
     this.onend?.();
   }
 }
-Object.defineProperty(window, 'SpeechRecognition', {
+Object.defineProperty(window, "SpeechRecognition", {
   writable: true,
   value: MockSpeechRecognition,
 });
-Object.defineProperty(window, 'webkitSpeechRecognition', {
+Object.defineProperty(window, "webkitSpeechRecognition", {
   writable: true,
   value: MockSpeechRecognition,
 });
@@ -51,18 +51,18 @@ class MockMediaRecorder {
   onstart?: () => void;
   onstop?: () => void;
   ondataavailable?: (e: any) => void;
-  state = 'inactive';
+  state = "inactive";
   start() {
-    this.state = 'recording';
+    this.state = "recording";
     this.onstart?.();
   }
   stop() {
-    this.state = 'inactive';
+    this.state = "inactive";
     this.ondataavailable?.({ data: new Blob() });
     this.onstop?.();
   }
 }
-Object.defineProperty(window, 'MediaRecorder', {
+Object.defineProperty(window, "MediaRecorder", {
   writable: true,
   value: MockMediaRecorder,
 });
@@ -74,10 +74,10 @@ let errorSpy: jest.SpyInstance;
 
 beforeAll(() => {
   const allow = [/ReactDOMTestUtils\.act/i, /MUI: The `anchorEl` prop/i];
-  errorSpy = jest.spyOn(console, 'error').mockImplementation((...args) => {
-    const msg = String(args[0] ?? '');
+  errorSpy = jest.spyOn(console, "error").mockImplementation((...args) => {
+    const msg = String(args[0] ?? "");
     if (allow.some((rx) => rx.test(msg))) return;
-    throw new Error('console.error in test: ' + args.join(' '));
+    throw new Error("console.error in test: " + args.join(" "));
   });
 });
 

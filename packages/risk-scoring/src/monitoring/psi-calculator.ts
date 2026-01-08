@@ -2,17 +2,13 @@
  * Population Stability Index (PSI) Calculator
  */
 
-import type { PSI } from '../types/index.js';
+import type { PSI } from "../types/index.js";
 
 export class PSICalculator {
   /**
    * Calculate PSI between baseline and current distributions
    */
-  calculatePSI(
-    baseline: number[],
-    current: number[],
-    bins: number = 10
-  ): PSI {
+  calculatePSI(baseline: number[], current: number[], bins: number = 10): PSI {
     const baselineDist = this.createDistribution(baseline, bins);
     const currentDist = this.createDistribution(current, bins);
 
@@ -28,7 +24,7 @@ export class PSICalculator {
     }
 
     return {
-      variable: 'score',
+      variable: "score",
       psi,
       status: this.getPSIStatus(psi),
     };
@@ -45,23 +41,20 @@ export class PSICalculator {
     const counts = new Array(bins).fill(0);
 
     for (const value of data) {
-      const binIndex = Math.min(
-        bins - 1,
-        Math.floor((value - min) / binWidth)
-      );
+      const binIndex = Math.min(bins - 1, Math.floor((value - min) / binWidth));
       counts[binIndex]++;
     }
 
     // Convert to percentages
-    return counts.map(c => (c / data.length) + 1e-10); // Add small value to avoid log(0)
+    return counts.map((c) => c / data.length + 1e-10); // Add small value to avoid log(0)
   }
 
   /**
    * Get PSI status
    */
-  private getPSIStatus(psi: number): 'stable' | 'warning' | 'unstable' {
-    if (psi < 0.1) return 'stable';
-    if (psi < 0.25) return 'warning';
-    return 'unstable';
+  private getPSIStatus(psi: number): "stable" | "warning" | "unstable" {
+    if (psi < 0.1) return "stable";
+    if (psi < 0.25) return "warning";
+    return "unstable";
   }
 }

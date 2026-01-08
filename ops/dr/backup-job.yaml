@@ -8,5 +8,5 @@ spec:
       containers:
         - name: dr-backup
           image: dr-orchestrator:latest
-          args: ['backup']
+          args: ["backup"]
       restartPolicy: OnFailure

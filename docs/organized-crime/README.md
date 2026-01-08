@@ -15,6 +15,7 @@ The Organized Crime and Trafficking Intelligence Platform is a comprehensive int
 ## Key Capabilities
 
 ### 1. Criminal Organization Tracking
+
 - **Comprehensive organization profiling**: Mafia, cartels, gangs, syndicates
 - **Leadership hierarchy mapping**: Track succession and organizational changes
 - **Territory control analysis**: Geographic influence and expansion
@@ -22,6 +23,7 @@ The Organized Crime and Trafficking Intelligence Platform is a comprehensive int
 - **Criminal enterprise tracking**: Legitimate fronts and revenue sources
 
 ### 2. Trafficking Network Intelligence
+
 - **Human trafficking monitoring**: Sex trafficking, labor trafficking, child exploitation
 - **Drug trafficking analysis**: Production, routes, distribution networks
 - **Weapons trafficking**: Illegal arms dealing and smuggling
@@ -29,6 +31,7 @@ The Organized Crime and Trafficking Intelligence Platform is a comprehensive int
 - **Victim protection protocols**: Safety-first approach with trauma-informed practices
 
 ### 3. Financial Crime Detection
+
 - **Money laundering schemes**: TBML, cryptocurrency, real estate, shell companies
 - **Asset tracing**: Follow-the-money investigations
 - **Fraud operations**: Business email compromise, identity theft, investment fraud
@@ -36,6 +39,7 @@ The Organized Crime and Trafficking Intelligence Platform is a comprehensive int
 - **Cryptocurrency analysis**: Blockchain forensics and wallet tracking
 
 ### 4. Cybercrime Monitoring
+
 - **Ransomware operations**: Threat actor tracking, victim support
 - **Dark web marketplaces**: Vendor identification, transaction monitoring
 - **Online fraud rings**: Romance scams, tech support scams, phishing
@@ -43,12 +47,14 @@ The Organized Crime and Trafficking Intelligence Platform is a comprehensive int
 - **Digital forensics integration**: IOCs, malware analysis
 
 ### 5. Corruption and Infiltration
+
 - **Government corruption**: Bribery, embezzlement, contract fraud
 - **Institutional infiltration**: Law enforcement, judiciary, political
 - **Influence operations**: Political corruption, vote buying
 - **Conflict of interest tracking**: Financial relationships
 
 ### 6. Law Enforcement Operations Support
+
 - **Investigation case management**: Evidence, legal authority, team coordination
 - **Surveillance operations**: Court-authorized monitoring with built-in compliance
 - **Confidential source management**: Maximum security protection
@@ -89,18 +95,21 @@ docs/organized-crime/
 ## Security Features
 
 ### Authentication & Authorization
+
 - **Bearer token authentication**: Government-issued credentials
 - **Security clearance verification**: UNCLASSIFIED through TOP SECRET
 - **Need-to-know enforcement**: Case-specific access controls
 - **Role-based permissions**: Analyst, investigator, prosecutor, supervisor
 
 ### Audit & Compliance
+
 - **Comprehensive audit logging**: Every access logged with justification
 - **Legal authority tracking**: Warrant/court order expiration monitoring
 - **Tamper-proof logs**: Write-once audit storage
 - **Suspicious activity alerting**: Real-time anomaly detection
 
 ### Data Protection
+
 - **Encryption at rest**: AES-256 for all sensitive data
 - **Encryption in transit**: TLS 1.3
 - **Data minimization**: Collect only necessary information
@@ -108,6 +117,7 @@ docs/organized-crime/
 - **Source protection**: Confidential informant data isolated and restricted
 
 ### Legal Compliance
+
 - **Constitutional protections**: Fourth Amendment compliance
 - **Statutory compliance**: ECPA, BSA, CFAA, Privacy Act
 - **Court authorization**: Warrant and court order tracking
@@ -117,6 +127,7 @@ docs/organized-crime/
 ## Built-in Safeguards
 
 ### Victim Protection
+
 - Anonymous victim IDs only
 - Trauma-informed data handling
 - Access limited to victim services personnel
@@ -124,6 +135,7 @@ docs/organized-crime/
 - Safety paramount in all decisions
 
 ### Source Protection
+
 - Anonymous source IDs
 - Supervisor approval required for access
 - True identity in separate secure system
@@ -131,6 +143,7 @@ docs/organized-crime/
 - Compromise detection and response
 
 ### Legal Authority Enforcement
+
 - Expiration date tracking
 - Automatic alerts for expiring authorities
 - Access blocked without valid authority
@@ -138,6 +151,7 @@ docs/organized-crime/
 - Court reporting compliance
 
 ### Privacy Protections
+
 - Data minimization principles
 - Purpose limitation
 - Access restrictions
@@ -147,6 +161,7 @@ docs/organized-crime/
 ## Usage Requirements
 
 ### Prerequisites
+
 1. **Valid government credentials**: Issued by authorized agency
 2. **Security clearance**: Appropriate for data classification
 3. **Training completion**: Legal, constitutional, and system training
@@ -154,6 +169,7 @@ docs/organized-crime/
 5. **Active investigation**: Legitimate law enforcement purpose
 
 ### Operational Requirements
+
 1. **Legal authority**: Valid warrant, court order, or authorization
 2. **Justification**: Document reason for each access
 3. **Need-to-know**: Access limited to assigned cases
@@ -187,6 +203,7 @@ docs/organized-crime/
 ## Support and Training
 
 ### Training Resources
+
 - Legal and constitutional compliance
 - System operation and procedures
 - Evidence handling and chain of custody
@@ -195,6 +212,7 @@ docs/organized-crime/
 - International cooperation procedures
 
 ### Support Contacts
+
 - **Technical support**: System administrators
 - **Legal questions**: Agency legal counsel
 - **Security incidents**: Security operations center
@@ -203,6 +221,7 @@ docs/organized-crime/
 ## Legal References
 
 ### Federal Statutes
+
 - 18 U.S.C. § 2510 et seq. (Wiretap Act)
 - 18 U.S.C. § 2701 et seq. (Stored Communications Act)
 - 18 U.S.C. § 1956-1957 (Money Laundering)
@@ -212,11 +231,13 @@ docs/organized-crime/
 - 50 U.S.C. § 1801 et seq. (FISA)
 
 ### Constitutional Provisions
+
 - Fourth Amendment (Search and Seizure)
 - Fifth Amendment (Due Process)
 - Sixth Amendment (Right to Counsel)
 
 ### Department Policies
+
 - DOJ Manual
 - FBI Domestic Investigations and Operations Guide (DIOG)
 - DEA Manual
@@ -225,6 +246,7 @@ docs/organized-crime/
 ## System Capabilities
 
 ### Intelligence Analysis
+
 - Link analysis and relationship mapping
 - Geographic analysis and territory tracking
 - Timeline analysis and event correlation
@@ -233,6 +255,7 @@ docs/organized-crime/
 - Predictive analytics and risk assessment
 
 ### Investigation Support
+
 - Case management and workflow
 - Evidence tracking and chain of custody
 - Legal authority management
@@ -241,6 +264,7 @@ docs/organized-crime/
 - Prosecutorial support and discovery
 
 ### Operations Planning
+
 - Surveillance operation planning
 - Raid and arrest coordination
 - Asset seizure planning
@@ -248,6 +272,7 @@ docs/organized-crime/
 - Risk assessment and mitigation
 
 ### Reporting and Analytics
+
 - Intelligence reports
 - Investigative summaries
 - Court filings support
@@ -258,6 +283,7 @@ docs/organized-crime/
 ## Best Practices
 
 ### Data Quality
+
 - Verify information from multiple sources
 - Document confidence levels
 - Update regularly
@@ -265,6 +291,7 @@ docs/organized-crime/
 - Archive outdated information
 
 ### Operational Security
+
 - Compartmentalize sensitive operations
 - Secure communications
 - Cover for action
@@ -272,6 +299,7 @@ docs/organized-crime/
 - Information protection
 
 ### Legal Compliance
+
 - Always verify legal authority
 - Document justifications thoroughly
 - Consult legal counsel when uncertain
@@ -279,6 +307,7 @@ docs/organized-crime/
 - Follow minimization procedures
 
 ### Ethical Conduct
+
 - Integrity in all operations
 - Truthful reporting
 - Respect for rights
@@ -301,6 +330,7 @@ The system includes built-in legal and technical safeguards, but users remain re
 ---
 
 **For additional information, see:**
+
 - [Comprehensive Usage Guide](./GUIDE.md)
 - [Investigation Support Procedures](./INVESTIGATION_SUPPORT.md)
 

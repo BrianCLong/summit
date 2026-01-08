@@ -548,7 +548,7 @@ Roger. I broke the plan into **sprint-level backlog items** mapped to your repo�
 ### 1) **Connector SDK (`connectors/sdk/index.ts`)**
 
 ```ts
-export type ConnectorState = 'idle' | 'running' | 'paused' | 'error';
+export type ConnectorState = "idle" | "running" | "paused" | "error";
 
 export interface ConnectorContext {
   logger: { info: Function; warn: Function; error: Function };
@@ -638,11 +638,11 @@ export interface Connector {
 
 ```ts
 export type FeatureName =
-  | 'embed_cosine'
-  | 'mutual_neighbors'
-  | 'co_occurrence'
-  | 'path_motif'
-  | 'text_overlap';
+  | "embed_cosine"
+  | "mutual_neighbors"
+  | "co_occurrence"
+  | "path_motif"
+  | "text_overlap";
 
 export interface Feature {
   name: FeatureName | string;
@@ -666,7 +666,7 @@ export interface Explanation {
   notes?: string;
 }
 
-export type SuggestionType = 'edge' | 'attribute';
+export type SuggestionType = "edge" | "attribute";
 
 export interface Suggestion {
   id: string;
@@ -722,5 +722,5 @@ export interface Suggestion {
 
 If you want, I can also draft **five example, fully filled Issue bodies** (ready to paste), plus **three exemplar PR descriptions** with “Verification Steps” and Grafana panel UIDs.
 
-[1]: https://github.com/BrianCLong/summit 'GitHub - BrianCLong/summit'
-[2]: https://github.com/BrianCLong/summit/issues 'GitHub · Where software is built'
+[1]: https://github.com/BrianCLong/summit "GitHub - BrianCLong/summit"
+[2]: https://github.com/BrianCLong/summit/issues "GitHub · Where software is built"

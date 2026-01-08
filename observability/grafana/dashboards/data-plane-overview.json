@@ -4,17 +4,29 @@
     {
       "type": "timeseries",
       "title": "Postgres p95 latency",
-      "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(db_query_latency_seconds_bucket{store='postgres'}[5m])) by (le))" }]
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(db_query_latency_seconds_bucket{store='postgres'}[5m])) by (le))"
+        }
+      ]
     },
     {
       "type": "timeseries",
       "title": "Neo4j p95 latency",
-      "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(db_query_latency_seconds_bucket{store='neo4j'}[5m])) by (le))" }]
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(db_query_latency_seconds_bucket{store='neo4j'}[5m])) by (le))"
+        }
+      ]
     },
     {
       "type": "timeseries",
       "title": "Redis p95 latency",
-      "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(db_query_latency_seconds_bucket{store='redis'}[5m])) by (le))" }]
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(db_query_latency_seconds_bucket{store='redis'}[5m])) by (le))"
+        }
+      ]
     },
     {
       "type": "stat",

@@ -10,7 +10,7 @@ on:
     types: [published]
   schedule:
     # Weekly compliance check on Monday at 6 AM UTC
-    - cron: '0 6 * * 1'
+    - cron: "0 6 * * 1"
 
 permissions:
   contents: read
@@ -35,8 +35,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -63,8 +63,8 @@ jobs:
         if: github.event_name == 'release'
         uses: actions/attest-sbom@v1
         with:
-          subject-path: 'sbom/*-sbom-cyclonedx.json'
-          sbom-path: 'sbom/*-sbom-cyclonedx.json'
+          subject-path: "sbom/*-sbom-cyclonedx.json"
+          sbom-path: "sbom/*-sbom-cyclonedx.json"
 
   # License compliance check
   license-check:
@@ -81,8 +81,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -175,7 +175,7 @@ jobs:
       - name: Download SBOMs
         uses: actions/download-artifact@v4
         with:
-          pattern: '*sbom*'
+          pattern: "*sbom*"
           merge-multiple: true
           path: sbom/
 

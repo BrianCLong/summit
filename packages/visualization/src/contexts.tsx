@@ -1,6 +1,6 @@
 // @ts-nocheck
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { VisualizationTheme, DataPoint } from './types';
+import React, { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import { VisualizationTheme, DataPoint } from "./types";
 
 // Visualization Theme Context
 interface VisualizationThemeContextValue {
@@ -9,38 +9,77 @@ interface VisualizationThemeContextValue {
 }
 
 const defaultTheme: VisualizationTheme = {
-  background: '#ffffff',
-  foreground: '#000000',
+  background: "#ffffff",
+  foreground: "#000000",
   grid: {
     enabled: true,
-    color: '#e0e0e0',
+    color: "#e0e0e0",
     strokeWidth: 1,
   },
   fonts: {
-    family: 'Inter, system-ui, sans-serif',
+    family: "Inter, system-ui, sans-serif",
     size: 12,
     weight: 400,
   },
   colors: {
     primary: [
-      '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
-      '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'
+      "#1f77b4",
+      "#ff7f0e",
+      "#2ca02c",
+      "#d62728",
+      "#9467bd",
+      "#8c564b",
+      "#e377c2",
+      "#7f7f7f",
+      "#bcbd22",
+      "#17becf",
     ],
     secondary: [
-      '#aec7e8', '#ffbb78', '#98df8a', '#ff9896', '#c5b0d5',
-      '#c49c94', '#f7b6d2', '#c7c7c7', '#dbdb8d', '#9edae5'
+      "#aec7e8",
+      "#ffbb78",
+      "#98df8a",
+      "#ff9896",
+      "#c5b0d5",
+      "#c49c94",
+      "#f7b6d2",
+      "#c7c7c7",
+      "#dbdb8d",
+      "#9edae5",
     ],
     diverging: [
-      '#d73027', '#f46d43', '#fdae61', '#fee08b', '#ffffbf',
-      '#e6f598', '#abdda4', '#66c2a5', '#3288bd', '#5e4fa2'
+      "#d73027",
+      "#f46d43",
+      "#fdae61",
+      "#fee08b",
+      "#ffffbf",
+      "#e6f598",
+      "#abdda4",
+      "#66c2a5",
+      "#3288bd",
+      "#5e4fa2",
     ],
     sequential: [
-      '#f7fbff', '#deebf7', '#c6dbef', '#9ecae1', '#6baed6',
-      '#4292c6', '#2171b5', '#08519c', '#08306b'
+      "#f7fbff",
+      "#deebf7",
+      "#c6dbef",
+      "#9ecae1",
+      "#6baed6",
+      "#4292c6",
+      "#2171b5",
+      "#08519c",
+      "#08306b",
     ],
     categorical: [
-      '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
-      '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'
+      "#1f77b4",
+      "#ff7f0e",
+      "#2ca02c",
+      "#d62728",
+      "#9467bd",
+      "#8c564b",
+      "#e377c2",
+      "#7f7f7f",
+      "#bcbd22",
+      "#17becf",
     ],
   },
 };
@@ -93,11 +132,11 @@ export function DataProvider<T extends DataPoint = DataPoint>({
 
   const addFilter = useCallback((filterFn: (data: T[]) => T[]) => {
     const id = Math.random().toString(36).substr(2, 9);
-    setFilters(prev => new Map(prev).set(id, filterFn));
+    setFilters((prev) => new Map(prev).set(id, filterFn));
   }, []);
 
   const removeFilter = useCallback((id: string) => {
-    setFilters(prev => {
+    setFilters((prev) => {
       const newFilters = new Map(prev);
       newFilters.delete(id);
       return newFilters;
@@ -112,7 +151,7 @@ export function DataProvider<T extends DataPoint = DataPoint>({
   // Apply all filters when filters or global data changes
   React.useEffect(() => {
     let result = globalData;
-    filters.forEach(filterFn => {
+    filters.forEach((filterFn) => {
       result = filterFn(result);
     });
     setFilteredData(result);
@@ -140,7 +179,7 @@ export function DataProvider<T extends DataPoint = DataPoint>({
 export function useDataContext<T extends DataPoint = DataPoint>(): DataContextValue<T> {
   const context = useContext(DataContext);
   if (!context) {
-    throw new Error('useDataContext must be used within a DataProvider');
+    throw new Error("useDataContext must be used within a DataProvider");
   }
   return context as DataContextValue<T>;
 }
@@ -163,19 +202,19 @@ export function InteractionProvider({ children }: { children: ReactNode }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const selectIds = useCallback((ids: string[]) => {
-    setSelectedIds(prev => new Set([...Array.from(prev), ...ids]));
+    setSelectedIds((prev) => new Set([...Array.from(prev), ...ids]));
   }, []);
 
   const deselectIds = useCallback((ids: string[]) => {
-    setSelectedIds(prev => {
+    setSelectedIds((prev) => {
       const newSet = new Set(prev);
-      ids.forEach(id => newSet.delete(id));
+      ids.forEach((id) => newSet.delete(id));
       return newSet;
     });
   }, []);
 
   const toggleId = useCallback((id: string) => {
-    setSelectedIds(prev => {
+    setSelectedIds((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(id)) {
         newSet.delete(id);
@@ -210,7 +249,7 @@ export function InteractionProvider({ children }: { children: ReactNode }) {
 export function useInteraction() {
   const context = useContext(InteractionContext);
   if (!context) {
-    throw new Error('useInteraction must be used within an InteractionProvider');
+    throw new Error("useInteraction must be used within an InteractionProvider");
   }
   return context;
 }

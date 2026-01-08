@@ -1,9 +1,9 @@
-import { promises as fsPromises } from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import YAML from 'yaml';
+import { promises as fsPromises } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import YAML from "yaml";
 
-type CheckType = 'github' | 'static' | 'code' | 'filesystem' | 'manual' | 'pattern';
+type CheckType = "github" | "static" | "code" | "filesystem" | "manual" | "pattern";
 
 type GateCheck = {
   id: string;
@@ -24,7 +24,7 @@ type GateConfig = {
   checks: GateCheck[];
 };
 
-type CheckStatus = 'pass' | 'fail' | 'manual';
+type CheckStatus = "pass" | "fail" | "manual";
 
 type CheckResult = {
   id: string;
@@ -35,65 +35,65 @@ type CheckResult = {
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const repoRoot = path.resolve(__dirname, '..');
-const artifactDir = path.join(repoRoot, 'artifacts');
-const artifactPath = path.join(artifactDir, 'ga-gate-report.json');
+const repoRoot = path.resolve(__dirname, "..");
+const artifactDir = path.join(repoRoot, "artifacts");
+const artifactPath = path.join(artifactDir, "ga-gate-report.json");
 
 const SKIP_DIRECTORIES = new Set([
-  'node_modules',
-  '.git',
-  '.turbo',
-  'dist',
-  'build',
-  'coverage',
-  'artifacts',
-  '.next',
-  '.cache',
-  'tmp',
-  'venv',
+  "node_modules",
+  ".git",
+  ".turbo",
+  "dist",
+  "build",
+  "coverage",
+  "artifacts",
+  ".next",
+  ".cache",
+  "tmp",
+  "venv",
 ]);
 
 async function loadConfig(): Promise<GateConfig> {
-  const configPath = path.join(repoRoot, 'release', 'ga-gate.yaml');
-  const raw = await fsPromises.readFile(configPath, 'utf8');
+  const configPath = path.join(repoRoot, "release", "ga-gate.yaml");
+  const raw = await fsPromises.readFile(configPath, "utf8");
   const parsed = YAML.parse(raw) as GateConfig;
   return parsed;
 }
 
 function formatStatus(status: CheckStatus): string {
   switch (status) {
-    case 'pass':
-      return 'PASS';
-    case 'fail':
-      return 'FAIL';
-    case 'manual':
-      return 'MANUAL';
+    case "pass":
+      return "PASS";
+    case "fail":
+      return "FAIL";
+    case "manual":
+      return "MANUAL";
     default:
       return status.toUpperCase();
   }
 }
 
 function isCIContext(): boolean {
-  return process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+  return process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
 }
 
 async function checkStaticStrict(tsconfigPath: string): Promise<CheckResult> {
   const fullPath = path.join(repoRoot, tsconfigPath);
   try {
-    const content = await fsPromises.readFile(fullPath, 'utf8');
+    const content = await fsPromises.readFile(fullPath, "utf8");
     const parsed = JSON.parse(content);
     const strictEnabled = parsed?.compilerOptions?.strict === true;
     return {
-      id: 'typescript_strict',
-      status: strictEnabled ? 'pass' : 'fail',
+      id: "typescript_strict",
+      status: strictEnabled ? "pass" : "fail",
       details: strictEnabled
-        ? 'TypeScript strict mode is enabled.'
-        : 'TypeScript strict mode is not enabled in tsconfig.',
+        ? "TypeScript strict mode is enabled."
+        : "TypeScript strict mode is not enabled in tsconfig.",
     };
   } catch (error) {
     return {
-      id: 'typescript_strict',
-      status: 'fail',
+      id: "typescript_strict",
+      status: "fail",
       details: `Failed to read tsconfig: ${(error as Error).message}`,
     };
   }
@@ -103,11 +103,11 @@ async function checkGithub(id: string, description?: string): Promise<CheckResul
   const inCI = isCIContext();
   return {
     id,
-    status: inCI ? 'pass' : 'fail',
+    status: inCI ? "pass" : "fail",
     description,
     details: inCI
-      ? 'Detected CI environment; assuming required workflows enforced.'
-      : 'Not running in CI; cannot verify status checks.',
+      ? "Detected CI environment; assuming required workflows enforced."
+      : "Not running in CI; cannot verify status checks.",
   };
 }
 
@@ -129,10 +129,10 @@ async function hasAuditLogging(targetPath: string): Promise<boolean> {
       }
     } else {
       const lowerName = path.basename(current).toLowerCase();
-      if (lowerName.includes('audit')) {
+      if (lowerName.includes("audit")) {
         return true;
       }
-      const content = await fsPromises.readFile(current, 'utf8');
+      const content = await fsPromises.readFile(current, "utf8");
       if (/audit\s*log/i.test(content)) {
         return true;
       }
@@ -144,23 +144,33 @@ async function hasAuditLogging(targetPath: string): Promise<boolean> {
 
 async function checkCode(check: GateCheck): Promise<CheckResult> {
   if (!check.path) {
-    return { id: check.id, status: 'fail', description: check.description, details: 'Missing path for code check.' };
+    return {
+      id: check.id,
+      status: "fail",
+      description: check.description,
+      details: "Missing path for code check.",
+    };
   }
 
   const auditFound = await hasAuditLogging(check.path);
   return {
     id: check.id,
-    status: auditFound ? 'pass' : 'fail',
+    status: auditFound ? "pass" : "fail",
     description: check.description,
     details: auditFound
-      ? 'Audit logging constructs detected.'
+      ? "Audit logging constructs detected."
       : `No audit logging references found under ${check.path}.`,
   };
 }
 
 async function checkFilesystem(check: GateCheck): Promise<CheckResult> {
   if (!check.paths || check.paths.length === 0) {
-    return { id: check.id, status: 'fail', description: check.description, details: 'No paths provided for filesystem check.' };
+    return {
+      id: check.id,
+      status: "fail",
+      description: check.description,
+      details: "No paths provided for filesystem check.",
+    };
   }
 
   const missing: string[] = [];
@@ -175,17 +185,23 @@ async function checkFilesystem(check: GateCheck): Promise<CheckResult> {
 
   return {
     id: check.id,
-    status: missing.length === 0 ? 'pass' : 'fail',
+    status: missing.length === 0 ? "pass" : "fail",
     description: check.description,
-    details: missing.length === 0 ? 'All required paths present.' : `Missing paths: ${missing.join(', ')}`,
+    details:
+      missing.length === 0 ? "All required paths present." : `Missing paths: ${missing.join(", ")}`,
   };
 }
 
 function hasTrackingReference(line: string): boolean {
-  return /#\d+/.test(line) || /tracking\s*issue/i.test(line) || /issue:\s*[A-Za-z0-9_-]+/.test(line);
+  return (
+    /#\d+/.test(line) || /tracking\s*issue/i.test(line) || /issue:\s*[A-Za-z0-9_-]+/.test(line)
+  );
 }
 
-async function walkFiles(startPaths: string[], visitor: (filePath: string) => Promise<void>): Promise<void> {
+async function walkFiles(
+  startPaths: string[],
+  visitor: (filePath: string) => Promise<void>
+): Promise<void> {
   const queue = startPaths.map((p) => path.join(repoRoot, p));
 
   while (queue.length > 0) {
@@ -211,17 +227,22 @@ async function walkFiles(startPaths: string[], visitor: (filePath: string) => Pr
 
 async function checkPattern(check: GateCheck): Promise<CheckResult> {
   if (!check.paths || !check.pattern) {
-    return { id: check.id, status: 'fail', description: check.description, details: 'Pattern or paths missing.' };
+    return {
+      id: check.id,
+      status: "fail",
+      description: check.description,
+      details: "Pattern or paths missing.",
+    };
   }
 
   const pattern = new RegExp(check.pattern);
   const violations: string[] = [];
 
   await walkFiles(check.paths, async (filePath) => {
-    if (!filePath.endsWith('.ts') && !filePath.endsWith('.tsx') && !filePath.endsWith('.js')) {
+    if (!filePath.endsWith(".ts") && !filePath.endsWith(".tsx") && !filePath.endsWith(".js")) {
       return;
     }
-    const content = await fsPromises.readFile(filePath, 'utf8').catch(() => '');
+    const content = await fsPromises.readFile(filePath, "utf8").catch(() => "");
     if (!content) return;
     const lines = content.split(/\r?\n/);
     lines.forEach((line, index) => {
@@ -235,37 +256,50 @@ async function checkPattern(check: GateCheck): Promise<CheckResult> {
 
   return {
     id: check.id,
-    status: violations.length === 0 ? 'pass' : 'fail',
+    status: violations.length === 0 ? "pass" : "fail",
     description: check.description,
-    details: violations.length === 0 ? 'No untracked @ts-ignore directives found.' : `Tracking issue missing at ${violations.join(', ')}`,
+    details:
+      violations.length === 0
+        ? "No untracked @ts-ignore directives found."
+        : `Tracking issue missing at ${violations.join(", ")}`,
   };
 }
 
 async function evaluateCheck(check: GateCheck): Promise<CheckResult> {
   switch (check.type) {
-    case 'github':
+    case "github":
       return checkGithub(check.id, check.description);
-    case 'static':
-      return checkStaticStrict(check.path ?? '');
-    case 'code':
+    case "static":
+      return checkStaticStrict(check.path ?? "");
+    case "code":
       return checkCode(check);
-    case 'filesystem':
+    case "filesystem":
       return checkFilesystem(check);
-    case 'pattern':
+    case "pattern":
       return checkPattern(check);
-    case 'manual':
-      return { id: check.id, status: 'manual', description: check.description, details: 'Manual verification required.' };
+    case "manual":
+      return {
+        id: check.id,
+        status: "manual",
+        description: check.description,
+        details: "Manual verification required.",
+      };
     default:
-      return { id: check.id, status: 'fail', description: check.description, details: `Unsupported check type ${check.type}` };
+      return {
+        id: check.id,
+        status: "fail",
+        description: check.description,
+        details: `Unsupported check type ${check.type}`,
+      };
   }
 }
 
-async function writeArtifact(results: CheckResult[], gate: GateConfig['gate']): Promise<void> {
+async function writeArtifact(results: CheckResult[], gate: GateConfig["gate"]): Promise<void> {
   await fsPromises.mkdir(artifactDir, { recursive: true });
   const payload = {
     gate,
     timestamp: new Date().toISOString(),
-    overall: results.every((r) => r.status !== 'fail') ? 'pass' : 'fail',
+    overall: results.every((r) => r.status !== "fail") ? "pass" : "fail",
     results,
   };
   await fsPromises.writeFile(artifactPath, JSON.stringify(payload, null, 2));
@@ -273,16 +307,18 @@ async function writeArtifact(results: CheckResult[], gate: GateConfig['gate']): 
 
 function printSummary(config: GateConfig, results: CheckResult[]): void {
   console.log(`\nGA Gate: ${config.gate.name} v${config.gate.version}`);
-  console.log('-------------------------------------------');
+  console.log("-------------------------------------------");
   results.forEach((result) => {
     const status = formatStatus(result.status);
-    console.log(`${status.padEnd(7)} ${result.id}${result.description ? ` - ${result.description}` : ''}`);
+    console.log(
+      `${status.padEnd(7)} ${result.id}${result.description ? ` - ${result.description}` : ""}`
+    );
     if (result.details) {
       console.log(`         ${result.details}`);
     }
   });
-  const overallPass = results.every((r) => r.status !== 'fail');
-  console.log('\nOverall:', overallPass ? 'PASS' : 'FAIL');
+  const overallPass = results.every((r) => r.status !== "fail");
+  console.log("\nOverall:", overallPass ? "PASS" : "FAIL");
 }
 
 async function run(): Promise<void> {
@@ -297,13 +333,13 @@ async function run(): Promise<void> {
   await writeArtifact(results, config.gate);
   printSummary(config, results);
 
-  const hasFailure = results.some((r) => r.status === 'fail');
+  const hasFailure = results.some((r) => r.status === "fail");
   if (hasFailure) {
     process.exitCode = 1;
   }
 }
 
 run().catch((error) => {
-  console.error('GA gate execution failed:', error);
+  console.error("GA gate execution failed:", error);
   process.exitCode = 1;
 });

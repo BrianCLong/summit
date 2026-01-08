@@ -28,6 +28,6 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
+          python-version: "3.12"
       - run: pip install -r python/requirements.txt
       - run: pytest python/tests/

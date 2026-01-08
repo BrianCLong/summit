@@ -34,7 +34,7 @@ pnpm -F @intelgraph/authenticity-service start
 ### Quick Start Example
 
 ```typescript
-import { UnifiedDeceptionDetector } from '@intelgraph/deception-detector';
+import { UnifiedDeceptionDetector } from "@intelgraph/deception-detector";
 
 const detector = new UnifiedDeceptionDetector();
 
@@ -43,7 +43,7 @@ const result = await detector.analyzeComprehensive({
   text: "Content to analyze",
   media: imageBuffer,
   account: accountData,
-  network: connectionData
+  network: connectionData,
 });
 
 console.log(`Deceptive: ${result.isDeceptive}`);
@@ -100,6 +100,7 @@ The deception detection system consists of multiple specialized packages and two
 Detects deepfakes across multiple modalities.
 
 **Features:**
+
 - Facial manipulation detection
 - Voice synthesis identification
 - Video manipulation analysis
@@ -110,14 +111,14 @@ Detects deepfakes across multiple modalities.
 **Usage:**
 
 ```typescript
-import { DeepfakeDetector } from '@intelgraph/deepfake-detection';
+import { DeepfakeDetector } from "@intelgraph/deepfake-detection";
 
 const detector = new DeepfakeDetector();
 
 const result = await detector.detectDeepfake({
-  type: 'image',
+  type: "image",
   buffer: imageBuffer,
-  metadata: { frameRate: 30 }
+  metadata: { frameRate: 30 },
 });
 
 console.log(`Deepfake: ${result.isDeepfake}`);
@@ -130,6 +131,7 @@ console.log(`Method: ${result.detectionMethod}`);
 Detects photo editing, splicing, and tampering.
 
 **Features:**
+
 - Copy-paste detection
 - Splicing detection
 - Content-aware fill detection
@@ -140,7 +142,7 @@ Detects photo editing, splicing, and tampering.
 **Usage:**
 
 ```typescript
-import { MediaManipulationDetector } from '@intelgraph/media-manipulation';
+import { MediaManipulationDetector } from "@intelgraph/media-manipulation";
 
 const detector = new MediaManipulationDetector();
 
@@ -155,6 +157,7 @@ console.log(`Manipulations found: ${result.manipulations.length}`);
 Identifies coordinated campaigns and bot networks.
 
 **Features:**
+
 - Coordinated behavior detection
 - Bot network identification
 - Narrative tracking
@@ -165,14 +168,14 @@ Identifies coordinated campaigns and bot networks.
 **Usage:**
 
 ```typescript
-import { DisinformationDetector } from '@intelgraph/disinformation-detection';
+import { DisinformationDetector } from "@intelgraph/disinformation-detection";
 
 const detector = new DisinformationDetector();
 
 const result = await detector.analyzeCampaign({
   content: posts,
   accounts: accountList,
-  network: connections
+  network: connections,
 });
 
 console.log(`Campaign detected: ${result.campaignDetected}`);
@@ -184,6 +187,7 @@ console.log(`Bot networks: ${result.botNetworks.length}`);
 Identifies bots, sockpuppets, and fake accounts.
 
 **Features:**
+
 - Bot scoring
 - Sockpuppet detection
 - Profile authenticity assessment
@@ -194,15 +198,15 @@ Identifies bots, sockpuppets, and fake accounts.
 **Usage:**
 
 ```typescript
-import { FakeAccountDetector } from '@intelgraph/fake-account-detection';
+import { FakeAccountDetector } from "@intelgraph/fake-account-detection";
 
 const detector = new FakeAccountDetector();
 
 const result = await detector.analyzeAccount({
-  id: 'user123',
+  id: "user123",
   profile: profileData,
   activity: activityData,
-  connections: connectionList
+  connections: connectionList,
 });
 
 console.log(`Fake: ${result.isFake}`);
@@ -215,6 +219,7 @@ console.log(`Bot score: ${result.behaviorAnalysis.activityPattern.humanLikelihoo
 Detects AI-generated content.
 
 **Features:**
+
 - AI text detection (GPT, Claude, etc.)
 - GAN-generated image detection
 - Neural vocoder detection
@@ -225,13 +230,13 @@ Detects AI-generated content.
 **Usage:**
 
 ```typescript
-import { SyntheticMediaDetector, MediaType } from '@intelgraph/synthetic-media';
+import { SyntheticMediaDetector, MediaType } from "@intelgraph/synthetic-media";
 
 const detector = new SyntheticMediaDetector();
 
 const result = await detector.detect({
   type: MediaType.TEXT,
-  content: "Text to analyze"
+  content: "Text to analyze",
 });
 
 console.log(`Synthetic: ${result.isSynthetic}`);
@@ -243,6 +248,7 @@ console.log(`Generator: ${result.generatorType}`);
 Fact-checking and authenticity verification.
 
 **Features:**
+
 - Automated fact-checking
 - Source credibility assessment
 - Citation verification
@@ -253,14 +259,14 @@ Fact-checking and authenticity verification.
 **Usage:**
 
 ```typescript
-import { ContentVerifier } from '@intelgraph/content-verification';
+import { ContentVerifier } from "@intelgraph/content-verification";
 
 const verifier = new ContentVerifier();
 
 const result = await verifier.verifyContent({
   text: contentText,
   source: sourceURL,
-  claims: extractedClaims
+  claims: extractedClaims,
 });
 
 console.log(`Authentic: ${result.isAuthentic}`);
@@ -360,17 +366,17 @@ const deepfakeDetector = new DeepfakeDetector();
 const manipResult = await detector.detectManipulation(imageBuffer);
 
 if (manipResult.isManipulated) {
-  console.log('⚠️ Image manipulation detected');
+  console.log("⚠️ Image manipulation detected");
 }
 
 // Check for deepfakes
 const deepfakeResult = await deepfakeDetector.detectDeepfake({
-  type: 'image',
-  buffer: imageBuffer
+  type: "image",
+  buffer: imageBuffer,
 });
 
 if (deepfakeResult.isDeepfake) {
-  console.log('⚠️ Deepfake detected');
+  console.log("⚠️ Deepfake detected");
 }
 ```
 
@@ -400,7 +406,7 @@ const disinfoDetector = new DisinformationDetector();
 const result = await disinfoDetector.analyzeCampaign({
   content: recentPosts,
   accounts: involvedAccounts,
-  network: connections
+  network: connections,
 });
 
 if (result.campaignDetected) {
@@ -420,7 +426,7 @@ const verifier = new ContentVerifier();
 const result = await verifier.verifyContent({
   text: article.text,
   source: article.source,
-  claims: article.claims
+  claims: article.claims,
 });
 
 console.log(`Overall authenticity: ${result.confidence}`);
@@ -446,7 +452,7 @@ const result = await unifiedDetector.analyzeComprehensive({
   media: imageBuffer,
   text: caption,
   account: posterAccount,
-  network: sharers
+  network: sharers,
 });
 ```
 
@@ -456,9 +462,9 @@ Use appropriate thresholds based on use case:
 
 ```typescript
 const THRESHOLDS = {
-  automated_action: 0.9,    // High confidence for automation
-  flag_for_review: 0.7,     // Medium confidence for flagging
-  warning_label: 0.5,       // Low confidence for warnings
+  automated_action: 0.9, // High confidence for automation
+  flag_for_review: 0.7, // Medium confidence for flagging
+  warning_label: 0.5, // Low confidence for warnings
 };
 
 if (result.confidence > THRESHOLDS.automated_action) {
@@ -478,9 +484,7 @@ Process in batches for large-scale analysis:
 async function processBatch(items: any[], batchSize: number) {
   for (let i = 0; i < items.length; i += batchSize) {
     const batch = items.slice(i, i + batchSize);
-    const results = await Promise.all(
-      batch.map(item => detector.analyze(item))
-    );
+    const results = await Promise.all(batch.map((item) => detector.analyze(item)));
     await processResults(results);
   }
 }
@@ -501,7 +505,7 @@ async function detectWithLogging(content: any) {
     processingTime: Date.now() - startTime,
     result: result,
     confidence: result.confidence,
-    method: 'unified_detector'
+    method: "unified_detector",
   });
 
   return result;
@@ -514,12 +518,12 @@ async function detectWithLogging(content: any) {
 
 Typical processing times on standard hardware:
 
-| Operation | Time | Throughput |
-|-----------|------|------------|
-| Image deepfake detection | 200-500ms | 2-5 images/sec |
-| Text authenticity check | 50-100ms | 10-20 texts/sec |
-| Account analysis | 100-200ms | 5-10 accounts/sec |
-| Campaign analysis | 1-5s | Depends on network size |
+| Operation                | Time      | Throughput              |
+| ------------------------ | --------- | ----------------------- |
+| Image deepfake detection | 200-500ms | 2-5 images/sec          |
+| Text authenticity check  | 50-100ms  | 10-20 texts/sec         |
+| Account analysis         | 100-200ms | 5-10 accounts/sec       |
+| Campaign analysis        | 1-5s      | Depends on network size |
 
 ### Optimization Tips
 

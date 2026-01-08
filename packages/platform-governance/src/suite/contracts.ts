@@ -1,13 +1,13 @@
-import { z } from 'zod';
-import { canonicalModules, type CanonicalModule } from './domain.js';
+import { z } from "zod";
+import { canonicalModules, type CanonicalModule } from "./domain.js";
 
-export type ApiStyle = 'rest' | 'grpc' | 'graphql';
+export type ApiStyle = "rest" | "grpc" | "graphql";
 
 export const apiContractSchema = z.object({
   module: z.enum(canonicalModules),
   name: z.string().min(3),
   version: z.string().regex(/^v\d+$/),
-  style: z.union([z.literal('rest'), z.literal('grpc'), z.literal('graphql')]),
+  style: z.union([z.literal("rest"), z.literal("grpc"), z.literal("graphql")]),
   path: z.string().min(1),
   idempotent: z.boolean(),
   deprecated: z.boolean().optional(),
@@ -29,7 +29,7 @@ export const cloudEventSchema = z.object({
   id: z.string(),
   source: z.string(),
   type: z.string(),
-  specversion: z.literal('1.0'),
+  specversion: z.literal("1.0"),
   datacontenttype: z.string().optional(),
   data: z.record(z.unknown()),
   time: z.string().optional(),
@@ -55,37 +55,40 @@ export function validateEventContract(event: unknown): CloudEventContract {
   return cloudEventSchema.parse(event);
 }
 
-export function isApiContractCompatible(previous: ApiContract, next: ApiContract): CompatibilityReport {
+export function isApiContractCompatible(
+  previous: ApiContract,
+  next: ApiContract
+): CompatibilityReport {
   const reasons: string[] = [];
 
   if (previous.name !== next.name || previous.module !== next.module) {
-    reasons.push('module or name mismatch');
+    reasons.push("module or name mismatch");
   }
 
   if (previous.style !== next.style) {
-    reasons.push('API style cannot change between versions');
+    reasons.push("API style cannot change between versions");
   }
 
   const prevResources = new Set(previous.resources);
   const missingResources = Array.from(prevResources).filter((res) => !next.resources.includes(res));
   if (missingResources.length) {
-    reasons.push(`missing resources in next version: ${missingResources.join(', ')}`);
+    reasons.push(`missing resources in next version: ${missingResources.join(", ")}`);
   }
 
   if (next.deprecationWindowDays < previous.deprecationWindowDays) {
-    reasons.push('deprecation window shortened');
+    reasons.push("deprecation window shortened");
   }
 
   if (next.sla.latencyMsP99 > previous.sla.latencyMsP99) {
-    reasons.push('latency regression');
+    reasons.push("latency regression");
   }
 
   if (next.sla.availabilityPercent < previous.sla.availabilityPercent) {
-    reasons.push('availability regression');
+    reasons.push("availability regression");
   }
 
   if (next.sla.errorBudgetPercent > previous.sla.errorBudgetPercent) {
-    reasons.push('error budget enlarged');
+    reasons.push("error budget enlarged");
   }
 
   return { compatible: reasons.length === 0, reasons };
@@ -102,9 +105,12 @@ export interface EventCompatibilityResult {
   issues: string[];
 }
 
-export function compareCloudEvents(previous: CloudEventContract, next: CloudEventContract): EventCompatibilityResult {
+export function compareCloudEvents(
+  previous: CloudEventContract,
+  next: CloudEventContract
+): EventCompatibilityResult {
   const issues: string[] = [];
-  const requiredKeys: (keyof CloudEventContract)[] = ['tenant_id', 'resource_id', 'provenance'];
+  const requiredKeys: (keyof CloudEventContract)[] = ["tenant_id", "resource_id", "provenance"];
 
   requiredKeys.forEach((key) => {
     if (!(key in next)) {
@@ -115,7 +121,7 @@ export function compareCloudEvents(previous: CloudEventContract, next: CloudEven
   const prevDataKeys = Object.keys(previous.data ?? {});
   const missingDataKeys = prevDataKeys.filter((key) => !(key in next.data));
   if (missingDataKeys.length) {
-    issues.push(`missing data fields: ${missingDataKeys.join(', ')}`);
+    issues.push(`missing data fields: ${missingDataKeys.join(", ")}`);
   }
 
   return { compatible: issues.length === 0, issues };

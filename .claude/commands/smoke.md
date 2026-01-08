@@ -9,6 +9,7 @@ pnpm smoke
 ```
 
 Or via Make:
+
 ```bash
 make smoke
 ```
@@ -42,11 +43,13 @@ The smoke test validates the critical golden path:
 Before running smoke tests:
 
 1. **Services must be running:**
+
    ```bash
    make up
    ```
 
 2. **Wait for services to be healthy:**
+
    ```bash
    ./scripts/wait-for-stack.sh
    ```
@@ -74,16 +77,19 @@ curl http://localhost:4000/metrics | head -20
 ## Troubleshooting Failed Smoke Tests
 
 ### Step 1: Check Service Status
+
 ```bash
 docker-compose ps
 ```
 
 ### Step 2: View API Logs
+
 ```bash
 docker-compose logs --tail=50 api
 ```
 
 ### Step 3: Test Individual Services
+
 ```bash
 # PostgreSQL
 docker-compose exec postgres pg_isready
@@ -96,6 +102,7 @@ docker-compose exec redis redis-cli ping
 ```
 
 ### Step 4: Restart Services
+
 ```bash
 make down
 make up
@@ -104,6 +111,7 @@ make up
 ## CI vs Local
 
 The smoke tests run identically in CI and locally:
+
 - Uses same `scripts/smoke-test.js`
 - Same test data from `data/golden-path/demo-investigation.json`
 - Same health check endpoints
@@ -111,6 +119,7 @@ The smoke tests run identically in CI and locally:
 ## Success Criteria
 
 Smoke tests pass when:
+
 - All health endpoints return 200
 - GraphQL mutations complete successfully
 - Golden path data flow works end-to-end

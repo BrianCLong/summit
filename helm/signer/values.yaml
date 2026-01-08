@@ -1,6 +1,6 @@
 image:
   repository: ghcr.io/BrianCLong/intelgraph/signer
-  tag: ''
+  tag: ""
   pullPolicy: IfNotPresent
 
 replicaCount: 2
@@ -16,11 +16,11 @@ env:
   - name: POLICY_BUNDLE_FILE
     value: /etc/policy/bundles.yaml
   - name: POLICY_REFRESH_SECONDS
-    value: '300'
+    value: "300"
   - name: SIGNING_KEY_ID
-    value: ''
+    value: ""
   - name: KMS_KEY_ARN
-    value: ''
+    value: ""
 
 policyBundles:
   enabled: true

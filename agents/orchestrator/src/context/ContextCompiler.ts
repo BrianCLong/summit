@@ -1,12 +1,12 @@
-import { v4 as uuid } from 'uuid';
-import { LLMRequest, LLMMessage } from '../../types/index.js';
+import { v4 as uuid } from "uuid";
+import { LLMRequest, LLMMessage } from "../../types/index.js";
 import {
   ContextCompiler as IContextCompiler,
   Session,
   CompilationOptions,
   ContextProcessor,
-  WorkingContext
-} from './types.js';
+  WorkingContext,
+} from "./types.js";
 
 /**
  * ContextCompiler
@@ -46,8 +46,8 @@ export class ContextCompiler implements IContextCompiler {
     // A. Stable Prefix (System Instructions)
     if (context.instructions.length > 0) {
       messages.push({
-        role: 'system',
-        content: context.instructions.join('\n\n'),
+        role: "system",
+        content: context.instructions.join("\n\n"),
       });
     }
 
@@ -55,25 +55,25 @@ export class ContextCompiler implements IContextCompiler {
     // Often injected as a system message or a user context block
     if (context.memories.length > 0) {
       const memoryBlock = context.memories
-        .map(m => `[Memory ID: ${m.id}] ${m.content}`)
-        .join('\n');
+        .map((m) => `[Memory ID: ${m.id}] ${m.content}`)
+        .join("\n");
 
       messages.push({
-        role: 'system',
+        role: "system",
         content: `Relevant Knowledge:\n${memoryBlock}`,
       });
     }
 
     // C. Artifacts (if loaded)
     if (context.artifacts.length > 0) {
-        const artifactBlock = context.artifacts
-            .map(a => `[Artifact: ${a.name} (${a.type})]\n${a.content}`)
-            .join('\n---\n');
+      const artifactBlock = context.artifacts
+        .map((a) => `[Artifact: ${a.name} (${a.type})]\n${a.content}`)
+        .join("\n---\n");
 
-        messages.push({
-            role: 'system',
-            content: `Loaded Artifacts:\n${artifactBlock}`
-        });
+      messages.push({
+        role: "system",
+        content: `Loaded Artifacts:\n${artifactBlock}`,
+      });
     }
 
     // D. History (Events)

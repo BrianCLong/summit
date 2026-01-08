@@ -6,8 +6,8 @@ Securiteyes supports defensive deception to identify attackers who have bypassed
 
 Deception assets are "fake" resources that should never be touched by legitimate users.
 
-*   **Honeytokens**: API keys that trigger an alert when used.
-*   **Decoy Data**: Database records that appear valuable but are fake.
+- **Honeytokens**: API keys that trigger an alert when used.
+- **Decoy Data**: Database records that appear valuable but are fake.
 
 ## Detection Logic
 

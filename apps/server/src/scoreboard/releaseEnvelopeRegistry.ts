@@ -1,10 +1,12 @@
-import { randomUUID } from 'crypto';
-import { ReleaseEnvelope } from './types.js';
+import { randomUUID } from "crypto";
+import { ReleaseEnvelope } from "./types.js";
 
 export class ReleaseEnvelopeRegistry {
   private envelopes: Map<string, ReleaseEnvelope> = new Map();
 
-  register(params: Omit<ReleaseEnvelope, 'id' | 'createdAt'> & { createdAt?: string }): ReleaseEnvelope {
+  register(
+    params: Omit<ReleaseEnvelope, "id" | "createdAt"> & { createdAt?: string }
+  ): ReleaseEnvelope {
     const createdAt = params.createdAt ?? new Date().toISOString();
     const envelope: ReleaseEnvelope = {
       ...params,

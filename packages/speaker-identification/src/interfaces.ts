@@ -1,4 +1,4 @@
-import type { AudioBuffer } from '@intelgraph/audio-processing';
+import type { AudioBuffer } from "@intelgraph/audio-processing";
 import type {
   VoiceBiometric,
   VerificationResult,
@@ -8,8 +8,8 @@ import type {
   DeepfakeDetectionResult,
   VoiceCloningDetection,
   SpeakerCluster,
-  SpeakerSeparationResult
-} from './types.js';
+  SpeakerSeparationResult,
+} from "./types.js";
 
 /**
  * Interface for voice biometric enrollment
@@ -68,7 +68,10 @@ export interface ISpeakerIdentifier {
   /**
    * Identify speaker from candidates
    */
-  identifyFromCandidates(audio: AudioBuffer, candidateIds: string[]): Promise<IdentificationResult[]>;
+  identifyFromCandidates(
+    audio: AudioBuffer,
+    candidateIds: string[]
+  ): Promise<IdentificationResult[]>;
 }
 
 /**
@@ -90,7 +93,7 @@ export interface DiarizationOptions {
   minSpeakers?: number;
   maxSpeakers?: number;
   minSegmentDuration?: number;
-  algorithm?: 'clustering' | 'neural' | 'hybrid';
+  algorithm?: "clustering" | "neural" | "hybrid";
 }
 
 /**
@@ -150,8 +153,8 @@ export interface ISpeakerClusterer {
 
 export interface ClusteringOptions {
   numClusters?: number;
-  algorithm?: 'kmeans' | 'dbscan' | 'hierarchical' | 'spectral';
-  distanceMetric?: 'euclidean' | 'cosine' | 'manhattan';
+  algorithm?: "kmeans" | "dbscan" | "hierarchical" | "spectral";
+  distanceMetric?: "euclidean" | "cosine" | "manhattan";
 }
 
 /**
@@ -206,7 +209,10 @@ export interface IVoiceDatabase {
   /**
    * Search for similar voices
    */
-  search(embedding: number[], topN: number): Promise<Array<{ speakerId: string; similarity: number }>>;
+  search(
+    embedding: number[],
+    topN: number
+  ): Promise<Array<{ speakerId: string; similarity: number }>>;
 
   /**
    * Delete voice biometric

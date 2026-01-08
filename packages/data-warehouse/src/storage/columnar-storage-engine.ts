@@ -12,9 +12,9 @@
  * Surpasses Snowflake/Redshift with intelligent compression selection
  */
 
-import { Pool } from 'pg';
-import { CompressionManager, CompressionType } from './compression-manager';
-import { ZoneMap, ZoneMapManager } from './zone-map-manager';
+import { Pool } from "pg";
+import { CompressionManager, CompressionType } from "./compression-manager";
+import { ZoneMap, ZoneMapManager } from "./zone-map-manager";
 
 export interface ColumnMetadata {
   name: string;
@@ -29,25 +29,25 @@ export interface ColumnMetadata {
 }
 
 export enum DataType {
-  INTEGER = 'INTEGER',
-  BIGINT = 'BIGINT',
-  DECIMAL = 'DECIMAL',
-  VARCHAR = 'VARCHAR',
-  TEXT = 'TEXT',
-  DATE = 'DATE',
-  TIMESTAMP = 'TIMESTAMP',
-  BOOLEAN = 'BOOLEAN',
-  JSON = 'JSON',
-  ARRAY = 'ARRAY',
+  INTEGER = "INTEGER",
+  BIGINT = "BIGINT",
+  DECIMAL = "DECIMAL",
+  VARCHAR = "VARCHAR",
+  TEXT = "TEXT",
+  DATE = "DATE",
+  TIMESTAMP = "TIMESTAMP",
+  BOOLEAN = "BOOLEAN",
+  JSON = "JSON",
+  ARRAY = "ARRAY",
 }
 
 export enum EncodingType {
-  NONE = 'NONE',
-  DICTIONARY = 'DICTIONARY',
-  RLE = 'RLE', // Run-Length Encoding
-  DELTA = 'DELTA', // Delta encoding for sorted data
-  BITPACK = 'BITPACK', // Bit-packing for integers
-  SPARSE = 'SPARSE', // Sparse encoding for mostly null columns
+  NONE = "NONE",
+  DICTIONARY = "DICTIONARY",
+  RLE = "RLE", // Run-Length Encoding
+  DELTA = "DELTA", // Delta encoding for sorted data
+  BITPACK = "BITPACK", // Bit-packing for integers
+  SPARSE = "SPARSE", // Sparse encoding for mostly null columns
 }
 
 export interface TableSchema {
@@ -92,18 +92,18 @@ export class ColumnarStorageEngine {
    * Create a table with columnar storage
    */
   async createTable(schema: TableSchema): Promise<void> {
-    const columnDefs = schema.columns.map((col) => {
-      const nullable = col.nullable ? 'NULL' : 'NOT NULL';
-      return `${col.name} ${col.type} ${nullable}`;
-    }).join(',\n  ');
+    const columnDefs = schema.columns
+      .map((col) => {
+        const nullable = col.nullable ? "NULL" : "NOT NULL";
+        return `${col.name} ${col.type} ${nullable}`;
+      })
+      .join(",\n  ");
 
     const sortKeyClause = schema.sortKeys?.length
-      ? `, SORTKEY (${schema.sortKeys.join(', ')})`
-      : '';
+      ? `, SORTKEY (${schema.sortKeys.join(", ")})`
+      : "";
 
-    const distKeyClause = schema.distributionKey
-      ? `, DISTKEY (${schema.distributionKey})`
-      : '';
+    const distKeyClause = schema.distributionKey ? `, DISTKEY (${schema.distributionKey})` : "";
 
     // Create main table with PostgreSQL columnar extension
     const createTableSQL = `
@@ -119,11 +119,7 @@ export class ColumnarStorageEngine {
 
     // Create zone maps for specified columns
     if (schema.zoneMapColumns?.length) {
-      await this.zoneMapManager.createZoneMaps(
-        this.pool,
-        schema.name,
-        schema.zoneMapColumns,
-      );
+      await this.zoneMapManager.createZoneMaps(this.pool, schema.name, schema.zoneMapColumns);
     }
   }
 
@@ -162,13 +158,7 @@ export class ColumnarStorageEngine {
         ON CONFLICT (column_name) DO UPDATE
         SET compression = EXCLUDED.compression, encoding = EXCLUDED.encoding
       `,
-        [
-          column.name,
-          column.type,
-          column.compression,
-          column.encoding,
-          column.nullable,
-        ],
+        [column.name, column.type, column.compression, column.encoding, column.nullable]
       );
     }
   }
@@ -176,12 +166,10 @@ export class ColumnarStorageEngine {
   /**
    * Insert data with automatic compression and encoding
    */
-  async insertData(
-    tableName: string,
-    columns: string[],
-    data: any[][],
-  ): Promise<void> {
-    if (data.length === 0) {return;}
+  async insertData(tableName: string, columns: string[], data: any[][]): Promise<void> {
+    if (data.length === 0) {
+      return;
+    }
 
     // Split into blocks
     const blocks = this.splitIntoBlocks(data, this.blockSize);
@@ -194,11 +182,7 @@ export class ColumnarStorageEngine {
   /**
    * Insert a single block with columnar storage
    */
-  private async insertBlock(
-    tableName: string,
-    columns: string[],
-    data: any[][],
-  ): Promise<void> {
+  private async insertBlock(tableName: string, columns: string[], data: any[][]): Promise<void> {
     const blockId = this.generateBlockId();
 
     // Transpose row-oriented data to columnar format
@@ -206,12 +190,7 @@ export class ColumnarStorageEngine {
 
     // Compress and store each column
     for (const [columnName, columnData] of Object.entries(columnarData)) {
-      const block = await this.compressColumn(
-        blockId,
-        tableName,
-        columnName,
-        columnData,
-      );
+      const block = await this.compressColumn(blockId, tableName, columnName, columnData);
 
       await this.storeColumnarBlock(block);
     }
@@ -220,14 +199,14 @@ export class ColumnarStorageEngine {
     const placeholders = data
       .map(
         (_, idx) =>
-          `(${columns.map((_, colIdx) => `$${idx * columns.length + colIdx + 1}`).join(', ')})`,
+          `(${columns.map((_, colIdx) => `$${idx * columns.length + colIdx + 1}`).join(", ")})`
       )
-      .join(',\n');
+      .join(",\n");
 
     const values = data.flat();
     await this.pool.query(
-      `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES ${placeholders}`,
-      values,
+      `INSERT INTO ${tableName} (${columns.join(", ")}) VALUES ${placeholders}`,
+      values
     );
   }
 
@@ -238,7 +217,7 @@ export class ColumnarStorageEngine {
     blockId: string,
     tableId: string,
     columnName: string,
-    data: any[],
+    data: any[]
   ): Promise<ColumnarBlock> {
     // Analyze column characteristics
     const stats = this.analyzeColumnData(data);
@@ -251,10 +230,7 @@ export class ColumnarStorageEngine {
     const encoded = this.applyEncoding(data, encodingType, stats);
 
     // Then compress
-    const compressed = await this.compressionManager.compress(
-      encoded.data,
-      compressionType,
-    );
+    const compressed = await this.compressionManager.compress(encoded.data, compressionType);
 
     // Create zone map for pruning
     const zoneMap = this.zoneMapManager.createZoneMap(data);
@@ -302,8 +278,12 @@ export class ColumnarStorageEngine {
     for (let i = 0; i < nonNull.length; i++) {
       const val = nonNull[i];
 
-      if (val < min) {min = val;}
-      if (val > max) {max = val;}
+      if (val < min) {
+        min = val;
+      }
+      if (val > max) {
+        max = val;
+      }
 
       if (i > 0 && nonNull[i] >= nonNull[i - 1]) {
         sortedCount++;
@@ -361,10 +341,7 @@ export class ColumnarStorageEngine {
     }
 
     // Small integer range -> bit-packing
-    if (
-      stats.dataType === 'number' &&
-      Math.abs(stats.max - stats.min) < 65536
-    ) {
+    if (stats.dataType === "number" && Math.abs(stats.max - stats.min) < 65536) {
       return EncodingType.BITPACK;
     }
 
@@ -383,12 +360,9 @@ export class ColumnarStorageEngine {
   private applyEncoding(
     data: any[],
     encoding: EncodingType,
-    stats: any,
+    stats: any
   ): { data: Buffer; originalSize: number; dictionary?: Map<any, number> } {
-    const originalSize = data.reduce(
-      (sum, val) => sum + this.getValueSize(val),
-      0,
-    );
+    const originalSize = data.reduce((sum, val) => sum + this.getValueSize(val), 0);
 
     switch (encoding) {
       case EncodingType.DICTIONARY:
@@ -416,7 +390,7 @@ export class ColumnarStorageEngine {
    */
   private dictionaryEncode(
     data: any[],
-    originalSize: number,
+    originalSize: number
   ): { data: Buffer; originalSize: number; dictionary: Map<any, number> } {
     const dictionary = new Map<any, number>();
     const encoded: number[] = [];
@@ -445,17 +419,14 @@ export class ColumnarStorageEngine {
   /**
    * Delta encoding for sorted data
    */
-  private deltaEncode(
-    data: any[],
-    originalSize: number,
-  ): { data: Buffer; originalSize: number } {
+  private deltaEncode(data: any[], originalSize: number): { data: Buffer; originalSize: number } {
     if (data.length === 0) {
-      return { data: Buffer.from('[]'), originalSize };
+      return { data: Buffer.from("[]"), originalSize };
     }
 
     const deltas = [data[0]];
     for (let i = 1; i < data.length; i++) {
-      if (typeof data[i] === 'number' && typeof data[i - 1] === 'number') {
+      if (typeof data[i] === "number" && typeof data[i - 1] === "number") {
         deltas.push(data[i] - data[i - 1]);
       } else {
         deltas.push(data[i]);
@@ -474,12 +445,10 @@ export class ColumnarStorageEngine {
   private bitpackEncode(
     data: any[],
     stats: any,
-    originalSize: number,
+    originalSize: number
   ): { data: Buffer; originalSize: number } {
     const min = stats.min;
-    const normalized = data.map((v) =>
-      typeof v === 'number' ? v - min : v,
-    );
+    const normalized = data.map((v) => (typeof v === "number" ? v - min : v));
 
     return {
       data: Buffer.from(JSON.stringify({ min, values: normalized })),
@@ -490,10 +459,7 @@ export class ColumnarStorageEngine {
   /**
    * Sparse encoding for mostly-null columns
    */
-  private sparseEncode(
-    data: any[],
-    originalSize: number,
-  ): { data: Buffer; originalSize: number } {
+  private sparseEncode(data: any[], originalSize: number): { data: Buffer; originalSize: number } {
     const sparse: Array<[number, any]> = [];
 
     for (let i = 0; i < data.length; i++) {
@@ -532,7 +498,7 @@ export class ColumnarStorageEngine {
         block.metadata.compressedSize,
         block.metadata.uncompressedSize,
         JSON.stringify(block.zoneMap),
-      ],
+      ]
     );
   }
 
@@ -542,13 +508,10 @@ export class ColumnarStorageEngine {
   async queryColumnar(
     tableName: string,
     columns: string[],
-    predicates?: Array<{ column: string; operator: string; value: any }>,
+    predicates?: Array<{ column: string; operator: string; value: any }>
   ): Promise<any[]> {
     // Use zone maps to prune blocks
-    const eligibleBlocks = await this.pruneBlocksWithZoneMaps(
-      tableName,
-      predicates,
-    );
+    const eligibleBlocks = await this.pruneBlocksWithZoneMaps(tableName, predicates);
 
     if (eligibleBlocks.length === 0) {
       return [];
@@ -557,17 +520,17 @@ export class ColumnarStorageEngine {
     // Build optimized query with block pruning
     const blockFilter =
       eligibleBlocks.length > 0
-        ? `AND block_id IN (${eligibleBlocks.map((_, i) => `$${i + 1}`).join(', ')})`
-        : '';
+        ? `AND block_id IN (${eligibleBlocks.map((_, i) => `$${i + 1}`).join(", ")})`
+        : "";
 
     const predicateSQL = predicates
       ?.map((p) => `${p.column} ${p.operator} '${p.value}'`)
-      .join(' AND ');
+      .join(" AND ");
 
-    const whereClause = predicateSQL ? `WHERE ${predicateSQL}` : '';
+    const whereClause = predicateSQL ? `WHERE ${predicateSQL}` : "";
 
     const query = `
-      SELECT ${columns.join(', ')}
+      SELECT ${columns.join(", ")}
       FROM ${tableName}
       ${whereClause}
       ${blockFilter}
@@ -582,7 +545,7 @@ export class ColumnarStorageEngine {
    */
   private async pruneBlocksWithZoneMaps(
     tableName: string,
-    predicates?: Array<{ column: string; operator: string; value: any }>,
+    predicates?: Array<{ column: string; operator: string; value: any }>
   ): Promise<string[]> {
     if (!predicates || predicates.length === 0) {
       return [];
@@ -590,25 +553,25 @@ export class ColumnarStorageEngine {
 
     const pruneConditions = predicates.map((p) => {
       switch (p.operator) {
-        case '=':
+        case "=":
           return `(min_value <= '${p.value}' AND max_value >= '${p.value}')`;
-        case '>':
+        case ">":
           return `max_value > '${p.value}'`;
-        case '>=':
+        case ">=":
           return `max_value >= '${p.value}'`;
-        case '<':
+        case "<":
           return `min_value < '${p.value}'`;
-        case '<=':
+        case "<=":
           return `min_value <= '${p.value}'`;
         default:
-          return 'TRUE';
+          return "TRUE";
       }
     });
 
     const result = await this.pool.query(`
       SELECT DISTINCT block_id
       FROM ${tableName}_columnar_metadata
-      WHERE ${pruneConditions.join(' AND ')}
+      WHERE ${pruneConditions.join(" AND ")}
     `);
 
     return result.rows.map((row) => row.block_id);
@@ -616,10 +579,7 @@ export class ColumnarStorageEngine {
 
   // Utility methods
 
-  private transposeToColumnar(
-    columns: string[],
-    data: any[][],
-  ): Record<string, any[]> {
+  private transposeToColumnar(columns: string[], data: any[][]): Record<string, any[]> {
     const columnar: Record<string, any[]> = {};
 
     columns.forEach((col, colIdx) => {
@@ -644,11 +604,21 @@ export class ColumnarStorageEngine {
   }
 
   private getValueSize(value: any): number {
-    if (value === null || value === undefined) {return 0;}
-    if (typeof value === 'string') {return value.length * 2;} // UTF-16
-    if (typeof value === 'number') {return 8;}
-    if (typeof value === 'boolean') {return 1;}
-    if (typeof value === 'object') {return JSON.stringify(value).length * 2;}
+    if (value === null || value === undefined) {
+      return 0;
+    }
+    if (typeof value === "string") {
+      return value.length * 2;
+    } // UTF-16
+    if (typeof value === "number") {
+      return 8;
+    }
+    if (typeof value === "boolean") {
+      return 1;
+    }
+    if (typeof value === "object") {
+      return JSON.stringify(value).length * 2;
+    }
     return 0;
   }
 
@@ -684,18 +654,15 @@ export class ColumnarStorageEngine {
       GROUP BY column_name, compression_type, encoding_type
     `);
 
-    const totalCompressed = stats.rows.reduce(
-      (sum, row) => sum + parseInt(row.compressed_size),
-      0,
-    );
+    const totalCompressed = stats.rows.reduce((sum, row) => sum + parseInt(row.compressed_size), 0);
     const totalUncompressed = stats.rows.reduce(
       (sum, row) => sum + parseInt(row.uncompressed_size),
-      0,
+      0
     );
 
     return {
-      totalRows: parseInt(stats.rows[0]?.total_rows || '0'),
-      totalBlocks: parseInt(stats.rows[0]?.total_blocks || '0'),
+      totalRows: parseInt(stats.rows[0]?.total_rows || "0"),
+      totalBlocks: parseInt(stats.rows[0]?.total_blocks || "0"),
       compressedSize: totalCompressed,
       uncompressedSize: totalUncompressed,
       compressionRatio: totalUncompressed / Math.max(totalCompressed, 1),

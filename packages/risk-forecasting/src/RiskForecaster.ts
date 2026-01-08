@@ -9,7 +9,7 @@ import {
   SystemicRisk,
   TippingPoint,
   CascadingEffect,
-} from './types.js';
+} from "./types.js";
 
 export class RiskForecaster {
   private risks: Map<string, GlobalRisk> = new Map();
@@ -35,7 +35,7 @@ export class RiskForecaster {
       risk.cascadingEffects = await this.assessCascadingEffects(risk);
     }
 
-    risks.forEach(risk => this.risks.set(risk.id, risk));
+    risks.forEach((risk) => this.risks.set(risk.id, risk));
     return risks;
   }
 
@@ -52,7 +52,7 @@ export class RiskForecaster {
     const potentialSwans = await this.identifyPotentialBlackSwans(domain);
 
     events.push(...historicalSwans, ...potentialSwans);
-    events.forEach(event => this.blackSwans.set(event.id, event));
+    events.forEach((event) => this.blackSwans.set(event.id, event));
 
     return events;
   }
@@ -110,12 +110,9 @@ export class RiskForecaster {
   /**
    * Forecast risk evolution
    */
-  async forecastRiskEvolution(
-    riskId: string,
-    timeHorizon: number
-  ): Promise<RiskEvolutionForecast> {
+  async forecastRiskEvolution(riskId: string, timeHorizon: number): Promise<RiskEvolutionForecast> {
     const risk = this.risks.get(riskId);
-    if (!risk) throw new Error('Risk not found');
+    if (!risk) throw new Error("Risk not found");
 
     // Project probability evolution
     const probabilityTrajectory = await this.projectProbability(risk, timeHorizon);
@@ -132,7 +129,7 @@ export class RiskForecaster {
       probabilityTrajectory,
       impactTrajectory,
       criticalJunctures,
-      confidence: 'medium',
+      confidence: "medium",
     };
   }
 
@@ -144,20 +141,20 @@ export class RiskForecaster {
 
     if (filter) {
       if (filter.category) {
-        risks = risks.filter(r => r.category === filter.category);
+        risks = risks.filter((r) => r.category === filter.category);
       }
       if (filter.severity) {
-        risks = risks.filter(r => r.severity === filter.severity);
+        risks = risks.filter((r) => r.severity === filter.severity);
       }
     }
 
     return risks.sort((a, b) => {
       const severityOrder = {
-        'catastrophic': 5,
-        'critical': 4,
-        'high': 3,
-        'medium': 2,
-        'low': 1,
+        catastrophic: 5,
+        critical: 4,
+        high: 3,
+        medium: 2,
+        low: 1,
       };
       return (severityOrder[b.severity] || 0) - (severityOrder[a.severity] || 0);
     });
@@ -231,5 +228,5 @@ interface RiskEvolutionForecast {
   probabilityTrajectory: any[];
   impactTrajectory: any[];
   criticalJunctures: any[];
-  confidence: 'low' | 'medium' | 'high';
+  confidence: "low" | "medium" | "high";
 }

@@ -1,5 +1,11 @@
-import { addDays, isAfter } from 'date-fns';
-import { AssessmentEvidence, AssessmentType, RemediationTask, RiskAssessment, RiskTier } from './types';
+import { addDays, isAfter } from "date-fns";
+import {
+  AssessmentEvidence,
+  AssessmentType,
+  RemediationTask,
+  RiskAssessment,
+  RiskTier,
+} from "./types";
 
 export class VRMService {
   private assessments: Map<string, RiskAssessment> = new Map();
@@ -27,9 +33,12 @@ export class VRMService {
     assessment.lastReviewed = new Date();
   }
 
-  addRemediation(vendor: string, task: Omit<RemediationTask, 'status' | 'escalationLevel'>): RemediationTask {
+  addRemediation(
+    vendor: string,
+    task: Omit<RemediationTask, "status" | "escalationLevel">
+  ): RemediationTask {
     const assessment = this.getAssessment(vendor);
-    const remediation: RemediationTask = { ...task, status: 'open', escalationLevel: 0 };
+    const remediation: RemediationTask = { ...task, status: "open", escalationLevel: 0 };
     assessment.remediation.push(remediation);
     return remediation;
   }
@@ -38,9 +47,9 @@ export class VRMService {
     const escalated: RemediationTask[] = [];
     this.assessments.forEach((assessment) => {
       assessment.remediation.forEach((task) => {
-        if (task.status !== 'closed' && isAfter(today, task.dueDate)) {
+        if (task.status !== "closed" && isAfter(today, task.dueDate)) {
           task.escalationLevel += 1;
-          task.status = 'in_progress';
+          task.status = "in_progress";
           escalated.push(task);
         }
       });
@@ -51,10 +60,10 @@ export class VRMService {
   markCompleted(vendor: string): void {
     const assessment = this.getAssessment(vendor);
     const hasOpenHighSeverity = assessment.remediation.some(
-      (task) => task.status !== 'closed' && task.severity === 'high'
+      (task) => task.status !== "closed" && task.severity === "high"
     );
     if (hasOpenHighSeverity) {
-      throw new Error('Cannot complete VRM with open high-severity remediation');
+      throw new Error("Cannot complete VRM with open high-severity remediation");
     }
     assessment.completed = true;
     assessment.lastReviewed = new Date();

@@ -127,13 +127,12 @@ This document outlines the remaining gaps, deliverables, and execution plan requ
 
 ```ts
 // server/src/graphql/validation/costLimit.ts
-import { specifiedRules } from 'graphql';
-import { createComplexityLimitRule } from 'graphql-validation-complexity';
+import { specifiedRules } from "graphql";
+import { createComplexityLimitRule } from "graphql-validation-complexity";
 export const validationRules = [
   ...specifiedRules,
   createComplexityLimitRule(Number(process.env.MAX_COMPLEXITY || 1200), {
-    onCost: (cost) =>
-      cost > 0 && cost % 200 === 0 && console.warn('cost:', cost),
+    onCost: (cost) => cost > 0 && cost % 200 === 0 && console.warn("cost:", cost),
   }),
 ];
 ```
@@ -165,21 +164,21 @@ deny_reason[msg] {
 
 ```js
 // perf/k6-read-queries.js
-import http from 'k6/http';
-import { check, sleep } from 'k6';
+import http from "k6/http";
+import { check, sleep } from "k6";
 export const options = {
   vus: 40,
-  duration: '5m',
+  duration: "5m",
   thresholds: {
-    http_req_failed: ['rate<0.001'],
-    http_req_duration: ['p(95)<350', 'p(99)<800'],
+    http_req_failed: ["rate<0.001"],
+    http_req_duration: ["p(95)<350", "p(99)<800"],
   },
 };
 export default function () {
   const q = `{"query":"query($id:ID!){entity(id:$id){id name degree}}"}`;
-  const r = http.post(__ENV.API + '/graphql', q, {
+  const r = http.post(__ENV.API + "/graphql", q, {
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bearer ${__ENV.TOKEN}`,
     },
   });
@@ -191,14 +190,12 @@ export default function () {
 ### d) Playwright “explainable Cypher”
 
 ```ts
-test('copilot suggests Cypher with citations', async ({ page }) => {
+test("copilot suggests Cypher with citations", async ({ page }) => {
   await page.goto(process.env.APP_URL!);
-  await page
-    .getByPlaceholder('Ask anything…')
-    .fill('Show orgs linked to ACME last 90 days');
-  await page.getByRole('button', { name: 'Generate' }).click();
-  await expect(page.getByTestId('cypher-preview')).toContainText('MATCH');
-  await expect(page.getByTestId('citations')).toHaveCountGreaterThan(0);
+  await page.getByPlaceholder("Ask anything…").fill("Show orgs linked to ACME last 90 days");
+  await page.getByRole("button", { name: "Generate" }).click();
+  await expect(page.getByTestId("cypher-preview")).toContainText("MATCH");
+  await expect(page.getByTestId("citations")).toHaveCountGreaterThan(0);
 });
 ```
 

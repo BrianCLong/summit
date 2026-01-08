@@ -1,11 +1,11 @@
-import { Pool } from 'pg';
-import { logger } from '../utils/logger';
-import { config } from '../config';
-import { ModelBenchmarkingService } from '../benchmarking/ModelBenchmarkingService.js';
-import { ModelRegistry } from '../benchmarking/ModelRegistry.js';
-import { spawn } from 'child_process';
-import path from 'path';
-import fs from 'fs/promises';
+import { Pool } from "pg";
+import { logger } from "../utils/logger";
+import { config } from "../config";
+import { ModelBenchmarkingService } from "../benchmarking/ModelBenchmarkingService.js";
+import { ModelRegistry } from "../benchmarking/ModelRegistry.js";
+import { spawn } from "child_process";
+import path from "path";
+import fs from "fs/promises";
 
 export interface TrainingExample {
   entity1: any;
@@ -50,30 +50,28 @@ export class TrainingPipeline {
   constructor(
     pgPool: Pool,
     private readonly benchmarkingService?: ModelBenchmarkingService,
-    private readonly modelRegistry?: ModelRegistry,
+    private readonly modelRegistry?: ModelRegistry
   ) {
     this.pgPool = pgPool;
-    this.modelsDir = path.join(process.cwd(), 'models');
+    this.modelsDir = path.join(process.cwd(), "models");
     this.ensureModelsDirectory();
   }
 
   private async ensureModelsDirectory(): Promise<void> {
     try {
       await fs.mkdir(this.modelsDir, { recursive: true });
-      await fs.mkdir(path.join(this.modelsDir, 'entity-resolution'), {
+      await fs.mkdir(path.join(this.modelsDir, "entity-resolution"), {
         recursive: true,
       });
-      await fs.mkdir(path.join(this.modelsDir, 'training-data'), {
+      await fs.mkdir(path.join(this.modelsDir, "training-data"), {
         recursive: true,
       });
     } catch (error) {
-      logger.error('Failed to create models directory:', error);
+      logger.error("Failed to create models directory:", error);
     }
   }
 
-  async collectTrainingData(
-    minExamples: number = 100,
-  ): Promise<TrainingExample[]> {
+  async collectTrainingData(minExamples: number = 100): Promise<TrainingExample[]> {
     const query = `
       SELECT 
         er.entity1_id,
@@ -107,34 +105,23 @@ export class TrainingPipeline {
       logger.info(`Collected ${examples.length} training examples`);
 
       if (examples.length < minExamples) {
-        logger.warn(
-          `Only ${examples.length} examples available, minimum required: ${minExamples}`,
-        );
+        logger.warn(`Only ${examples.length} examples available, minimum required: ${minExamples}`);
       }
 
       return examples;
     } catch (error) {
-      logger.error('Error collecting training data:', error);
+      logger.error("Error collecting training data:", error);
       throw error;
     }
   }
 
-  async generateFeatures(
-    examples: TrainingExample[],
-  ): Promise<TrainingExample[]> {
-    logger.info('Generating features for training examples');
+  async generateFeatures(examples: TrainingExample[]): Promise<TrainingExample[]> {
+    logger.info("Generating features for training examples");
 
     // Feature extraction using Python script
-    const pythonScript = path.join(
-      config.ml.python.scriptPath,
-      'feature_extraction.py',
-    );
-    const inputFile = path.join(this.modelsDir, 'training-data', 'input.json');
-    const outputFile = path.join(
-      this.modelsDir,
-      'training-data',
-      'features.json',
-    );
+    const pythonScript = path.join(config.ml.python.scriptPath, "feature_extraction.py");
+    const inputFile = path.join(this.modelsDir, "training-data", "input.json");
+    const outputFile = path.join(this.modelsDir, "training-data", "features.json");
 
     try {
       // Write examples to input file
@@ -144,31 +131,27 @@ export class TrainingPipeline {
       await this.runPythonScript(pythonScript, [inputFile, outputFile]);
 
       // Read generated features
-      const featuresData = await fs.readFile(outputFile, 'utf-8');
+      const featuresData = await fs.readFile(outputFile, "utf-8");
       const featuredExamples = JSON.parse(featuresData);
 
       logger.info(`Generated features for ${featuredExamples.length} examples`);
       return featuredExamples;
     } catch (error) {
-      logger.error('Error generating features:', error);
+      logger.error("Error generating features:", error);
       throw error;
     }
   }
 
   async trainModel(
     examples: TrainingExample[],
-    modelType: string = 'random_forest',
-    hyperparameters: Record<string, any> = {},
+    modelType: string = "random_forest",
+    hyperparameters: Record<string, any> = {}
   ): Promise<ModelVersion> {
     logger.info(`Starting training with ${examples.length} examples`);
 
     const modelId = `er-${modelType}-${Date.now()}`;
-    const versionString = '1.0.0';
-    const modelPath = path.join(
-      this.modelsDir,
-      'entity-resolution',
-      `${modelId}.pkl`,
-    );
+    const versionString = "1.0.0";
+    const modelPath = path.join(this.modelsDir, "entity-resolution", `${modelId}.pkl`);
 
     const startTime = Date.now();
 
@@ -191,28 +174,17 @@ export class TrainingPipeline {
         outputPath: modelPath,
       };
 
-      const trainingFile = path.join(
-        this.modelsDir,
-        'training-data',
-        `training-${modelId}.json`,
-      );
+      const trainingFile = path.join(this.modelsDir, "training-data", `training-${modelId}.json`);
       await fs.writeFile(trainingFile, JSON.stringify(trainingData, null, 2));
 
       // Train model using Python script
-      const pythonScript = path.join(
-        config.ml.python.scriptPath,
-        'train_model.py',
-      );
-      const metricsFile = path.join(
-        this.modelsDir,
-        'training-data',
-        `metrics-${modelId}.json`,
-      );
+      const pythonScript = path.join(config.ml.python.scriptPath, "train_model.py");
+      const metricsFile = path.join(this.modelsDir, "training-data", `metrics-${modelId}.json`);
 
       await this.runPythonScript(pythonScript, [trainingFile, metricsFile]);
 
       // Read training metrics
-      const metricsData = await fs.readFile(metricsFile, 'utf-8');
+      const metricsData = await fs.readFile(metricsFile, "utf-8");
       const metrics: TrainingMetrics = JSON.parse(metricsData);
       metrics.trainingTime = Date.now() - startTime;
 
@@ -238,8 +210,8 @@ export class TrainingPipeline {
       });
 
       await this.recordPerformanceSnapshot(modelVersion, metrics, {
-        stage: 'training',
-        dataset: 'entity_resolution_feedback',
+        stage: "training",
+        dataset: "entity_resolution_feedback",
         trainingExamples: examples.length,
       });
 
@@ -251,18 +223,13 @@ export class TrainingPipeline {
 
       return modelVersion;
     } catch (error) {
-      logger.error('Error during model training:', error);
+      logger.error("Error during model training:", error);
       throw error;
     }
   }
 
-  async evaluateModel(
-    modelId: string,
-    testExamples: TrainingExample[],
-  ): Promise<TrainingMetrics> {
-    logger.info(
-      `Evaluating model ${modelId} with ${testExamples.length} test examples`,
-    );
+  async evaluateModel(modelId: string, testExamples: TrainingExample[]): Promise<TrainingMetrics> {
+    logger.info(`Evaluating model ${modelId} with ${testExamples.length} test examples`);
 
     try {
       const modelVersion = await this.getModelVersion(modelId);
@@ -275,28 +242,21 @@ export class TrainingPipeline {
         modelPath: modelVersion.modelPath,
       };
 
-      const testFile = path.join(
-        this.modelsDir,
-        'training-data',
-        `test-${modelId}.json`,
-      );
+      const testFile = path.join(this.modelsDir, "training-data", `test-${modelId}.json`);
       const metricsFile = path.join(
         this.modelsDir,
-        'training-data',
-        `eval-metrics-${modelId}.json`,
+        "training-data",
+        `eval-metrics-${modelId}.json`
       );
 
       await fs.writeFile(testFile, JSON.stringify(testData, null, 2));
 
       // Evaluate using Python script
-      const pythonScript = path.join(
-        config.ml.python.scriptPath,
-        'evaluate_model.py',
-      );
+      const pythonScript = path.join(config.ml.python.scriptPath, "evaluate_model.py");
       await this.runPythonScript(pythonScript, [testFile, metricsFile]);
 
       // Read evaluation metrics
-      const metricsData = await fs.readFile(metricsFile, 'utf-8');
+      const metricsData = await fs.readFile(metricsFile, "utf-8");
       const metrics: TrainingMetrics = JSON.parse(metricsData);
 
       logger.info(`Evaluation completed for model ${modelId}:`, metrics);
@@ -314,46 +274,39 @@ export class TrainingPipeline {
         },
         metrics,
         {
-          stage: 'evaluation',
-          dataset: 'holdout',
+          stage: "evaluation",
+          dataset: "holdout",
           testExamples: testExamples.length,
-        },
+        }
       );
       return metrics;
     } catch (error) {
-      logger.error('Error evaluating model:', error);
+      logger.error("Error evaluating model:", error);
       throw error;
     }
   }
 
-  private async runPythonScript(
-    scriptPath: string,
-    args: string[],
-  ): Promise<void> {
+  private async runPythonScript(scriptPath: string, args: string[]): Promise<void> {
     return new Promise((resolve, reject) => {
-      const pythonProcess = spawn(
-        config.ml.python.pythonExecutable,
-        [scriptPath, ...args],
-        {
-          stdio: ['ignore', 'pipe', 'pipe'],
-        },
-      );
+      const pythonProcess = spawn(config.ml.python.pythonExecutable, [scriptPath, ...args], {
+        stdio: ["ignore", "pipe", "pipe"],
+      });
 
-      let stdout = '';
-      let stderr = '';
+      let stdout = "";
+      let stderr = "";
 
-      pythonProcess.stdout.on('data', (data) => {
+      pythonProcess.stdout.on("data", (data) => {
         stdout += data.toString();
       });
 
-      pythonProcess.stderr.on('data', (data) => {
+      pythonProcess.stderr.on("data", (data) => {
         stderr += data.toString();
       });
 
-      pythonProcess.on('close', (code) => {
+      pythonProcess.on("close", (code) => {
         if (code === 0) {
           if (stdout.trim()) {
-            logger.info('Python script output:', stdout.trim());
+            logger.info("Python script output:", stdout.trim());
           }
           resolve();
         } else {
@@ -362,8 +315,8 @@ export class TrainingPipeline {
         }
       });
 
-      pythonProcess.on('error', (error) => {
-        logger.error('Failed to start Python script:', error);
+      pythonProcess.on("error", (error) => {
+        logger.error("Failed to start Python script:", error);
         reject(error);
       });
     });
@@ -414,29 +367,21 @@ export class TrainingPipeline {
     };
   }
 
-  private async shouldActivateModel(
-    modelVersion: ModelVersion,
-  ): Promise<boolean> {
+  private async shouldActivateModel(modelVersion: ModelVersion): Promise<boolean> {
     // Get current active model metrics
     const activeModel = await this.getActiveModel(modelVersion.modelType);
 
     if (!activeModel) {
       // No active model, activate if meets minimum criteria
-      return (
-        modelVersion.metrics.f1Score >= 0.7 &&
-        modelVersion.metrics.accuracy >= 0.75
-      );
+      return modelVersion.metrics.f1Score >= 0.7 && modelVersion.metrics.accuracy >= 0.75;
     }
 
     // Compare with active model
-    const improvement =
-      modelVersion.metrics.f1Score - activeModel.metrics.f1Score;
+    const improvement = modelVersion.metrics.f1Score - activeModel.metrics.f1Score;
     return improvement >= 0.02; // 2% improvement threshold
   }
 
-  private async getActiveModel(
-    modelType: string,
-  ): Promise<ModelVersion | null> {
+  private async getActiveModel(modelType: string): Promise<ModelVersion | null> {
     const query = `
       SELECT * FROM ml_model_versions 
       WHERE model_type = $1 AND is_active = true
@@ -469,7 +414,7 @@ export class TrainingPipeline {
     const client = await this.pgPool.connect();
 
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
 
       // Get model to activate
       const modelVersion = await this.getModelVersion(modelId);
@@ -479,45 +424,37 @@ export class TrainingPipeline {
 
       // Deactivate current active model of same type
       await client.query(
-        'UPDATE ml_model_versions SET is_active = false WHERE model_type = $1 AND is_active = true',
-        [modelVersion.modelType],
+        "UPDATE ml_model_versions SET is_active = false WHERE model_type = $1 AND is_active = true",
+        [modelVersion.modelType]
       );
 
       // Activate new model
-      await client.query(
-        'UPDATE ml_model_versions SET is_active = true WHERE id = $1',
-        [modelId],
-      );
+      await client.query("UPDATE ml_model_versions SET is_active = true WHERE id = $1", [modelId]);
 
-      await client.query('COMMIT');
+      await client.query("COMMIT");
 
-      logger.info(
-        `Activated model ${modelId} for type ${modelVersion.modelType}`,
-      );
+      logger.info(`Activated model ${modelId} for type ${modelVersion.modelType}`);
     } catch (error) {
-      await client.query('ROLLBACK');
-      logger.error('Error activating model:', error);
+      await client.query("ROLLBACK");
+      logger.error("Error activating model:", error);
       throw error;
     } finally {
       client.release();
     }
   }
 
-  async getModelHistory(
-    modelType?: string,
-    limit: number = 10,
-  ): Promise<ModelVersion[]> {
+  async getModelHistory(modelType?: string, limit: number = 10): Promise<ModelVersion[]> {
     let query = `
       SELECT * FROM ml_model_versions 
     `;
     const params: any[] = [];
 
     if (modelType) {
-      query += ' WHERE model_type = $1';
+      query += " WHERE model_type = $1";
       params.push(modelType);
     }
 
-    query += ` ORDER BY created_at DESC LIMIT $${  params.length + 1}`;
+    query += ` ORDER BY created_at DESC LIMIT $${params.length + 1}`;
     params.push(limit);
 
     const result = await this.pgPool.query(query, params);
@@ -543,7 +480,7 @@ export class TrainingPipeline {
   private async recordPerformanceSnapshot(
     modelVersion: ModelVersion,
     metrics: TrainingMetrics,
-    context: Record<string, any>,
+    context: Record<string, any>
   ): Promise<void> {
     if (!this.benchmarkingService) {
       return;
@@ -562,7 +499,7 @@ export class TrainingPipeline {
         evaluationContext: context,
       });
     } catch (error) {
-      logger.warn('Failed to record performance snapshot', {
+      logger.warn("Failed to record performance snapshot", {
         modelVersionId: modelVersion.id,
         error: (error as Error).message,
       });

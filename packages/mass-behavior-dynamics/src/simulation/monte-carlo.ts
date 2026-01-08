@@ -4,8 +4,12 @@
  * Runs multiple simulation instances to characterize uncertainty
  */
 
-import { Scenario } from '../index.js';
-import { AgentBasedSimulator, SimulationConfig, SimulationResult } from './agent-based-simulator.js';
+import { Scenario } from "../index.js";
+import {
+  AgentBasedSimulator,
+  SimulationConfig,
+  SimulationResult,
+} from "./agent-based-simulator.js";
 
 export interface MonteCarloConfig {
   iterations: number;
@@ -143,7 +147,10 @@ function percentile(sorted: number[], p: number): number {
   return sorted[lower] * (1 - weight) + sorted[upper] * weight;
 }
 
-function confidenceInterval(values: number[], confidence: number): { lower: number; upper: number } {
+function confidenceInterval(
+  values: number[],
+  confidence: number
+): { lower: number; upper: number } {
   const m = mean(values);
   const se = std(values) / Math.sqrt(values.length);
   const z = 1.96; // 95% CI
@@ -162,7 +169,7 @@ function wilsonScoreInterval(
   const z = 1.96;
   const denominator = 1 + z ** 2 / trials;
   const center = p + z ** 2 / (2 * trials);
-  const spread = z * Math.sqrt(p * (1 - p) / trials + z ** 2 / (4 * trials ** 2));
+  const spread = z * Math.sqrt((p * (1 - p)) / trials + z ** 2 / (4 * trials ** 2));
 
   return {
     lower: Math.max(0, (center - spread) / denominator),

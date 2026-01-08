@@ -8,7 +8,7 @@
  * @module pages/Policies/PolicyEditor
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -33,20 +33,20 @@ import {
   Alert,
   CircularProgress,
   Autocomplete,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
   ExpandMore as ExpandMoreIcon,
-} from '@mui/icons-material';
-import { usePolicyOperations } from '../../hooks/usePolicies';
+} from "@mui/icons-material";
+import { usePolicyOperations } from "../../hooks/usePolicies";
 import {
   ManagedPolicy,
   PolicyRule,
   PolicyScope,
   CreatePolicyInput,
   UpdatePolicyInput,
-} from '../../services/policy-api';
+} from "../../services/policy-api";
 
 // ============================================================================
 // Types
@@ -63,10 +63,10 @@ interface FormData {
   name: string;
   displayName: string;
   description: string;
-  category: ManagedPolicy['category'];
+  category: ManagedPolicy["category"];
   priority: number;
-  action: ManagedPolicy['action'];
-  stages: PolicyScope['stages'];
+  action: ManagedPolicy["action"];
+  stages: PolicyScope["stages"];
   tenants: string[];
   rules: PolicyRule[];
   effectiveFrom: string;
@@ -75,38 +75,44 @@ interface FormData {
 }
 
 const defaultFormData: FormData = {
-  name: '',
-  displayName: '',
-  description: '',
-  category: 'operational',
+  name: "",
+  displayName: "",
+  description: "",
+  category: "operational",
   priority: 100,
-  action: 'ALLOW',
-  stages: ['runtime'],
-  tenants: ['*'],
+  action: "ALLOW",
+  stages: ["runtime"],
+  tenants: ["*"],
   rules: [],
-  effectiveFrom: '',
-  effectiveUntil: '',
-  changelog: '',
+  effectiveFrom: "",
+  effectiveUntil: "",
+  changelog: "",
 };
 
-const CATEGORIES: ManagedPolicy['category'][] = [
-  'access', 'data', 'export', 'retention', 'compliance', 'operational', 'safety'
+const CATEGORIES: ManagedPolicy["category"][] = [
+  "access",
+  "data",
+  "export",
+  "retention",
+  "compliance",
+  "operational",
+  "safety",
 ];
 
-const ACTIONS: ManagedPolicy['action'][] = ['ALLOW', 'DENY', 'ESCALATE', 'WARN'];
+const ACTIONS: ManagedPolicy["action"][] = ["ALLOW", "DENY", "ESCALATE", "WARN"];
 
-const STAGES: PolicyScope['stages'][number][] = ['data', 'train', 'alignment', 'runtime'];
+const STAGES: PolicyScope["stages"][number][] = ["data", "train", "alignment", "runtime"];
 
-const OPERATORS: PolicyRule['operator'][] = ['eq', 'neq', 'lt', 'gt', 'in', 'not_in', 'contains'];
+const OPERATORS: PolicyRule["operator"][] = ["eq", "neq", "lt", "gt", "in", "not_in", "contains"];
 
-const OPERATOR_LABELS: Record<PolicyRule['operator'], string> = {
-  eq: 'Equals (=)',
-  neq: 'Not Equals (!=)',
-  lt: 'Less Than (<)',
-  gt: 'Greater Than (>)',
-  in: 'In List',
-  not_in: 'Not In List',
-  contains: 'Contains',
+const OPERATOR_LABELS: Record<PolicyRule["operator"], string> = {
+  eq: "Equals (=)",
+  neq: "Not Equals (!=)",
+  lt: "Less Than (<)",
+  gt: "Greater Than (>)",
+  in: "In List",
+  not_in: "Not In List",
+  contains: "Contains",
 };
 
 // ============================================================================
@@ -116,25 +122,25 @@ const OPERATOR_LABELS: Record<PolicyRule['operator'], string> = {
 const generatePolicyName = (displayName: string): string => {
   return displayName
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
     .substring(0, 50);
 };
 
-const parseRuleValue = (value: string, operator: PolicyRule['operator']): unknown => {
-  if (operator === 'in' || operator === 'not_in') {
+const parseRuleValue = (value: string, operator: PolicyRule["operator"]): unknown => {
+  if (operator === "in" || operator === "not_in") {
     try {
       return JSON.parse(value);
     } catch {
-      return value.split(',').map(v => v.trim());
+      return value.split(",").map((v) => v.trim());
     }
   }
   // Try to parse as number
   const num = Number(value);
   if (!isNaN(num)) return num;
   // Try to parse as boolean
-  if (value === 'true') return true;
-  if (value === 'false') return false;
+  if (value === "true") return true;
+  if (value === "false") return false;
   // Return as string
   return value;
 };
@@ -150,12 +156,7 @@ const stringifyRuleValue = (value: unknown): string => {
 // Component
 // ============================================================================
 
-const PolicyEditor: React.FC<PolicyEditorProps> = ({
-  open,
-  policy,
-  onClose,
-  onSave,
-}) => {
+const PolicyEditor: React.FC<PolicyEditorProps> = ({ open, policy, onClose, onSave }) => {
   const [formData, setFormData] = useState<FormData>(defaultFormData);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const operations = usePolicyOperations();
@@ -168,16 +169,16 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
       setFormData({
         name: policy.name,
         displayName: policy.displayName,
-        description: policy.description || '',
+        description: policy.description || "",
         category: policy.category,
         priority: policy.priority,
         action: policy.action,
         stages: policy.scope.stages,
         tenants: policy.scope.tenants,
         rules: policy.rules,
-        effectiveFrom: policy.effectiveFrom || '',
-        effectiveUntil: policy.effectiveUntil || '',
-        changelog: '',
+        effectiveFrom: policy.effectiveFrom || "",
+        effectiveUntil: policy.effectiveUntil || "",
+        changelog: "",
       });
     } else {
       setFormData(defaultFormData);
@@ -186,37 +187,43 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
   }, [policy, open]);
 
   // Form field handlers
-  const handleChange = useCallback((field: keyof FormData) => (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | { target: { value: unknown } }
-  ) => {
-    const value = event.target.value;
-    setFormData((prev) => {
-      const updated = { ...prev, [field]: value };
-      // Auto-generate name from displayName for new policies
-      if (field === 'displayName' && !isEditing) {
-        updated.name = generatePolicyName(value as string);
-      }
-      return updated;
-    });
-    // Clear error when field is modified
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: '' }));
-    }
-  }, [errors, isEditing]);
+  const handleChange = useCallback(
+    (field: keyof FormData) =>
+      (
+        event:
+          | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+          | { target: { value: unknown } }
+      ) => {
+        const value = event.target.value;
+        setFormData((prev) => {
+          const updated = { ...prev, [field]: value };
+          // Auto-generate name from displayName for new policies
+          if (field === "displayName" && !isEditing) {
+            updated.name = generatePolicyName(value as string);
+          }
+          return updated;
+        });
+        // Clear error when field is modified
+        if (errors[field]) {
+          setErrors((prev) => ({ ...prev, [field]: "" }));
+        }
+      },
+    [errors, isEditing]
+  );
 
-  const handleStagesChange = useCallback((_: unknown, value: PolicyScope['stages'][number][]) => {
+  const handleStagesChange = useCallback((_: unknown, value: PolicyScope["stages"][number][]) => {
     setFormData((prev) => ({ ...prev, stages: value }));
   }, []);
 
   const handleTenantsChange = useCallback((_: unknown, value: string[]) => {
-    setFormData((prev) => ({ ...prev, tenants: value.length > 0 ? value : ['*'] }));
+    setFormData((prev) => ({ ...prev, tenants: value.length > 0 ? value : ["*"] }));
   }, []);
 
   // Rule handlers
   const handleAddRule = useCallback(() => {
     setFormData((prev) => ({
       ...prev,
-      rules: [...prev.rules, { field: '', operator: 'eq', value: '' }],
+      rules: [...prev.rules, { field: "", operator: "eq", value: "" }],
     }));
   }, []);
 
@@ -227,11 +234,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
     }));
   }, []);
 
-  const handleRuleChange = useCallback((
-    index: number,
-    field: keyof PolicyRule,
-    value: unknown
-  ) => {
+  const handleRuleChange = useCallback((index: number, field: keyof PolicyRule, value: unknown) => {
     setFormData((prev) => ({
       ...prev,
       rules: prev.rules.map((rule, i) => {
@@ -246,32 +249,32 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
+      newErrors.name = "Name is required";
     } else if (!/^[a-z0-9-]+$/.test(formData.name)) {
-      newErrors.name = 'Name must be lowercase alphanumeric with hyphens';
+      newErrors.name = "Name must be lowercase alphanumeric with hyphens";
     }
 
     if (!formData.displayName.trim()) {
-      newErrors.displayName = 'Display name is required';
+      newErrors.displayName = "Display name is required";
     }
 
     if (formData.stages.length === 0) {
-      newErrors.stages = 'At least one stage is required';
+      newErrors.stages = "At least one stage is required";
     }
 
     if (formData.tenants.length === 0) {
-      newErrors.tenants = 'At least one tenant is required';
+      newErrors.tenants = "At least one tenant is required";
     }
 
     // Validate rules
     formData.rules.forEach((rule, index) => {
       if (!rule.field.trim()) {
-        newErrors[`rule_${index}_field`] = 'Field is required';
+        newErrors[`rule_${index}_field`] = "Field is required";
       }
     });
 
     if (isEditing && !formData.changelog.trim()) {
-      newErrors.changelog = 'Changelog is required for updates';
+      newErrors.changelog = "Changelog is required for updates";
     }
 
     setErrors(newErrors);
@@ -337,10 +340,10 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
       onClose={onClose}
       maxWidth="md"
       fullWidth
-      PaperProps={{ sx: { maxHeight: '90vh' } }}
+      PaperProps={{ sx: { maxHeight: "90vh" } }}
     >
       <DialogTitle>
-        {isEditing ? `Edit Policy: ${policy?.displayName}` : 'Create New Policy'}
+        {isEditing ? `Edit Policy: ${policy?.displayName}` : "Create New Policy"}
       </DialogTitle>
       <DialogContent dividers>
         {operations.error && (
@@ -361,7 +364,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
               fullWidth
               label="Display Name"
               value={formData.displayName}
-              onChange={handleChange('displayName')}
+              onChange={handleChange("displayName")}
               error={Boolean(errors.displayName)}
               helperText={errors.displayName}
               required
@@ -372,9 +375,9 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
               fullWidth
               label="Policy Name (ID)"
               value={formData.name}
-              onChange={handleChange('name')}
+              onChange={handleChange("name")}
               error={Boolean(errors.name)}
-              helperText={errors.name || 'Lowercase alphanumeric with hyphens'}
+              helperText={errors.name || "Lowercase alphanumeric with hyphens"}
               disabled={isEditing}
               required
             />
@@ -386,7 +389,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
               rows={2}
               label="Description"
               value={formData.description}
-              onChange={handleChange('description')}
+              onChange={handleChange("description")}
             />
           </Grid>
 
@@ -402,7 +405,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
               <InputLabel>Category</InputLabel>
               <Select
                 value={formData.category}
-                onChange={handleChange('category') as any}
+                onChange={handleChange("category") as any}
                 label="Category"
               >
                 {CATEGORIES.map((cat) => (
@@ -418,7 +421,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
               <InputLabel>Action</InputLabel>
               <Select
                 value={formData.action}
-                onChange={handleChange('action') as any}
+                onChange={handleChange("action") as any}
                 label="Action"
               >
                 {ACTIONS.map((action) => (
@@ -435,7 +438,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
               type="number"
               label="Priority"
               value={formData.priority}
-              onChange={handleChange('priority')}
+              onChange={handleChange("priority")}
               inputProps={{ min: 1, max: 1000 }}
               helperText="Lower = higher priority"
             />
@@ -456,12 +459,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
               onChange={handleStagesChange}
               renderTags={(value, getTagProps) =>
                 value.map((option, index) => (
-                  <Chip
-                    size="small"
-                    label={option}
-                    {...getTagProps({ index })}
-                    key={option}
-                  />
+                  <Chip size="small" label={option} {...getTagProps({ index })} key={option} />
                 ))
               }
               renderInput={(params) => (
@@ -478,14 +476,14 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
             <Autocomplete
               multiple
               freeSolo
-              options={['*']}
+              options={["*"]}
               value={formData.tenants}
               onChange={handleTenantsChange}
               renderTags={(value, getTagProps) =>
                 value.map((option, index) => (
                   <Chip
                     size="small"
-                    label={option === '*' ? 'All Tenants' : option}
+                    label={option === "*" ? "All Tenants" : option}
                     {...getTagProps({ index })}
                     key={option}
                   />
@@ -496,7 +494,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
                   {...params}
                   label="Tenants"
                   error={Boolean(errors.tenants)}
-                  helperText={errors.tenants || 'Use * for all tenants'}
+                  helperText={errors.tenants || "Use * for all tenants"}
                 />
               )}
             />
@@ -509,7 +507,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
               type="datetime-local"
               label="Effective From"
               value={formData.effectiveFrom}
-              onChange={handleChange('effectiveFrom')}
+              onChange={handleChange("effectiveFrom")}
               InputLabelProps={{ shrink: true }}
             />
           </Grid>
@@ -519,7 +517,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
               type="datetime-local"
               label="Effective Until"
               value={formData.effectiveUntil}
-              onChange={handleChange('effectiveUntil')}
+              onChange={handleChange("effectiveUntil")}
               InputLabelProps={{ shrink: true }}
             />
           </Grid>
@@ -527,15 +525,13 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
           {/* Rules */}
           <Grid item xs={12}>
             <Divider sx={{ my: 1 }} />
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+            <Box
+              sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}
+            >
               <Typography variant="subtitle2" color="text.secondary">
                 Rules ({formData.rules.length})
               </Typography>
-              <Button
-                size="small"
-                startIcon={<AddIcon />}
-                onClick={handleAddRule}
-              >
+              <Button size="small" startIcon={<AddIcon />} onClick={handleAddRule}>
                 Add Rule
               </Button>
             </Box>
@@ -549,7 +545,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
               formData.rules.map((rule, index) => (
                 <Accordion key={index} defaultExpanded={index === formData.rules.length - 1}>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%" }}>
                       <Typography variant="body2" fontWeight="medium">
                         Rule {index + 1}
                       </Typography>
@@ -580,9 +576,11 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
                           size="small"
                           label="Field"
                           value={rule.field}
-                          onChange={(e) => handleRuleChange(index, 'field', e.target.value)}
+                          onChange={(e) => handleRuleChange(index, "field", e.target.value)}
                           error={Boolean(errors[`rule_${index}_field`])}
-                          helperText={errors[`rule_${index}_field`] || 'e.g., user.role, request.type'}
+                          helperText={
+                            errors[`rule_${index}_field`] || "e.g., user.role, request.type"
+                          }
                           placeholder="payload.field.path"
                         />
                       </Grid>
@@ -591,7 +589,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
                           <InputLabel>Operator</InputLabel>
                           <Select
                             value={rule.operator}
-                            onChange={(e) => handleRuleChange(index, 'operator', e.target.value)}
+                            onChange={(e) => handleRuleChange(index, "operator", e.target.value)}
                             label="Operator"
                           >
                             {OPERATORS.map((op) => (
@@ -608,11 +606,11 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
                           size="small"
                           label="Value"
                           value={stringifyRuleValue(rule.value)}
-                          onChange={(e) => handleRuleChange(index, 'value', e.target.value)}
+                          onChange={(e) => handleRuleChange(index, "value", e.target.value)}
                           helperText={
-                            rule.operator === 'in' || rule.operator === 'not_in'
+                            rule.operator === "in" || rule.operator === "not_in"
                               ? 'JSON array: ["a","b"]'
-                              : 'String, number, or boolean'
+                              : "String, number, or boolean"
                           }
                         />
                       </Grid>
@@ -633,9 +631,9 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
                 rows={2}
                 label="Changelog"
                 value={formData.changelog}
-                onChange={handleChange('changelog')}
+                onChange={handleChange("changelog")}
                 error={Boolean(errors.changelog)}
-                helperText={errors.changelog || 'Describe what changed in this version'}
+                helperText={errors.changelog || "Describe what changed in this version"}
                 required
               />
             </Grid>
@@ -646,17 +644,13 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
         <Button onClick={onClose} disabled={operations.loading}>
           Cancel
         </Button>
-        <Button
-          onClick={handleSubmit}
-          variant="contained"
-          disabled={operations.loading}
-        >
+        <Button onClick={handleSubmit} variant="contained" disabled={operations.loading}>
           {operations.loading ? (
             <CircularProgress size={20} />
           ) : isEditing ? (
-            'Save Changes'
+            "Save Changes"
           ) : (
-            'Create Policy'
+            "Create Policy"
           )}
         </Button>
       </DialogActions>

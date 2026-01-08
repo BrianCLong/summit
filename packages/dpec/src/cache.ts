@@ -1,4 +1,4 @@
-import { canonicalDigest, sha256, stableStringify } from './hash.js';
+import { canonicalDigest, sha256, stableStringify } from "./hash.js";
 import type {
   CacheFetcher,
   CacheHitProof,
@@ -10,9 +10,9 @@ import type {
   CacheMissResult,
   CacheResolution,
   EvictionProof,
-  MissFillTrace
-} from './types.js';
-import type { CacheArtifact, CacheFetcherResult } from './types.js';
+  MissFillTrace,
+} from "./types.js";
+import type { CacheArtifact, CacheFetcherResult } from "./types.js";
 
 interface CacheEntry {
   key: string;
@@ -39,8 +39,8 @@ function normalizeArtifact(artifact: CacheArtifact): Buffer {
   if (artifact instanceof Uint8Array) {
     return Buffer.from(artifact);
   }
-  if (typeof artifact === 'string') {
-    return Buffer.from(artifact, 'utf8');
+  if (typeof artifact === "string") {
+    return Buffer.from(artifact, "utf8");
   }
   if (Buffer.isBuffer(artifact)) {
     return Buffer.from(artifact);
@@ -54,7 +54,7 @@ function canonicalKey(components: CacheKeyComponents): string {
     tokenizerHash: components.tokenizerHash,
     params: components.params,
     toolsGraphHash: components.toolsGraphHash,
-    promptHash: components.promptHash
+    promptHash: components.promptHash,
   });
 }
 
@@ -84,14 +84,11 @@ export class DeterministicPromptExecutionCache {
   constructor(options: DeterministicPromptExecutionCacheOptions = {}) {
     this.options = {
       maxEntries: options.maxEntries ?? DEFAULT_MAX_ENTRIES,
-      clock: options.clock ?? (() => Date.now())
+      clock: options.clock ?? (() => Date.now()),
     };
   }
 
-  async resolve(
-    components: CacheKeyComponents,
-    fetcher: CacheFetcher
-  ): Promise<CacheResolution> {
+  async resolve(components: CacheKeyComponents, fetcher: CacheFetcher): Promise<CacheResolution> {
     const key = computeKey(components);
     const canonical = canonicalKey(components);
     const existing = this.entries.get(key);
@@ -104,10 +101,10 @@ export class DeterministicPromptExecutionCache {
       const proof = this.buildHitProof(entryManifest);
       this.hitProofs.push(proof);
       return {
-        type: 'hit',
+        type: "hit",
         artifact: Buffer.from(existing.artifact),
         proof,
-        entry: entryManifest
+        entry: entryManifest,
       } satisfies CacheHitResult;
     }
 
@@ -124,7 +121,7 @@ export class DeterministicPromptExecutionCache {
         tokenizerHash: components.tokenizerHash,
         params: structuredClone(components.params),
         toolsGraphHash: components.toolsGraphHash,
-        promptHash: components.promptHash
+        promptHash: components.promptHash,
       },
       artifact: Buffer.from(normalized),
       metadataDigest,
@@ -133,7 +130,7 @@ export class DeterministicPromptExecutionCache {
       lastAccessedAt: timestamp,
       hits: 1,
       sequence: ++this.sequence,
-      accessCounter: ++this.accessCounter
+      accessCounter: ++this.accessCounter,
     };
     this.entries.set(key, entry);
 
@@ -142,11 +139,11 @@ export class DeterministicPromptExecutionCache {
     const manifestEntry = this.toManifestEntry(entry);
 
     return {
-      type: 'miss',
+      type: "miss",
       artifact: Buffer.from(entry.artifact),
       trace,
       entry: manifestEntry,
-      evictionProofs
+      evictionProofs,
     } satisfies CacheMissResult;
   }
 
@@ -158,8 +155,8 @@ export class DeterministicPromptExecutionCache {
         tokenizerHash: trace.input.tokenizerHash,
         params: structuredClone(trace.input.params),
         toolsGraphHash: trace.input.toolsGraphHash,
-        promptHash: trace.input.promptHash
-      }
+        promptHash: trace.input.promptHash,
+      },
     }));
   }
 
@@ -170,8 +167,8 @@ export class DeterministicPromptExecutionCache {
       evictions: this.evictionLog.map((proof) => ({
         ...proof,
         victim: { ...proof.victim },
-        survivors: proof.survivors.map((survivor) => ({ ...survivor }))
-      }))
+        survivors: proof.survivors.map((survivor) => ({ ...survivor })),
+      })),
     } satisfies CacheAuditLog;
   }
 
@@ -182,7 +179,7 @@ export class DeterministicPromptExecutionCache {
     return {
       createdAt: nowISO(this.options.clock),
       digest,
-      entries
+      entries,
     };
   }
 
@@ -196,7 +193,7 @@ export class DeterministicPromptExecutionCache {
       hits: entry.hits,
       sequence: entry.sequence,
       accessCounter: entry.accessCounter,
-      metadataDigest: entry.metadataDigest
+      metadataDigest: entry.metadataDigest,
     };
   }
 
@@ -204,17 +201,17 @@ export class DeterministicPromptExecutionCache {
     const manifestDigest = this.computeManifestDigestSnapshot();
     const timestamp = nowISO(this.options.clock);
     const payload = {
-      type: 'hit' as const,
+      type: "hit" as const,
       key: entry.key,
       artifactDigest: entry.artifactDigest,
       manifestDigest,
       hits: entry.hits,
       sequence: entry.sequence,
-      timestamp
-    } satisfies Omit<CacheHitProof, 'eventDigest'>;
+      timestamp,
+    } satisfies Omit<CacheHitProof, "eventDigest">;
     return {
       ...payload,
-      eventDigest: sha256(Buffer.from(stableStringify(payload)))
+      eventDigest: sha256(Buffer.from(stableStringify(payload))),
     };
   }
 
@@ -227,7 +224,7 @@ export class DeterministicPromptExecutionCache {
 
   private recordTrace(
     entry: CacheEntry,
-    artifact: CacheFetcherResult['artifact'],
+    artifact: CacheFetcherResult["artifact"],
     metadata: Record<string, unknown>
   ): MissFillTrace {
     const artifactBuffer = normalizeArtifact(artifact);
@@ -236,21 +233,21 @@ export class DeterministicPromptExecutionCache {
       tokenizerHash: entry.components.tokenizerHash,
       params: structuredClone(entry.components.params),
       toolsGraphHash: entry.components.toolsGraphHash,
-      promptHash: entry.components.promptHash
+      promptHash: entry.components.promptHash,
     };
     const payload = {
-      type: 'miss-fill' as const,
+      type: "miss-fill" as const,
       key: entry.key,
       canonicalKey: entry.canonicalKey,
       input,
       artifactDigest: sha256(artifactBuffer),
-      artifactBase64: artifactBuffer.toString('base64'),
+      artifactBase64: artifactBuffer.toString("base64"),
       metadataDigest: canonicalDigest(metadata),
-      timestamp: nowISO(this.options.clock)
-    } satisfies Omit<MissFillTrace, 'eventDigest'>;
+      timestamp: nowISO(this.options.clock),
+    } satisfies Omit<MissFillTrace, "eventDigest">;
     const trace: MissFillTrace = {
       ...payload,
-      eventDigest: sha256(Buffer.from(stableStringify(payload)))
+      eventDigest: sha256(Buffer.from(stableStringify(payload))),
     };
     this.traces.push(trace);
     return trace;
@@ -268,15 +265,15 @@ export class DeterministicPromptExecutionCache {
         .map((entry) => ({ key: entry.key, accessCounter: entry.accessCounter }))
         .sort((a, b) => a.accessCounter - b.accessCounter);
       const payload = {
-        type: 'eviction' as const,
-        algorithm: 'LRU' as const,
+        type: "eviction" as const,
+        algorithm: "LRU" as const,
         timestamp: nowISO(this.options.clock),
         victim: this.toManifestEntry(victim),
-        survivors
-      } satisfies Omit<EvictionProof, 'eventDigest'>;
+        survivors,
+      } satisfies Omit<EvictionProof, "eventDigest">;
       const proof: EvictionProof = {
         ...payload,
-        eventDigest: sha256(Buffer.from(stableStringify(payload)))
+        eventDigest: sha256(Buffer.from(stableStringify(payload))),
       };
       this.entries.delete(victim.key);
       proofs.push(proof);
@@ -309,7 +306,7 @@ export class DeterministicPromptExecutionCache {
   }
 
   static verifyHitProof(proof: CacheHitProof, manifest: CacheManifest): boolean {
-    if (proof.type !== 'hit') {
+    if (proof.type !== "hit") {
       return false;
     }
     if (manifest.digest !== proof.manifestDigest) {
@@ -322,8 +319,8 @@ export class DeterministicPromptExecutionCache {
       manifestDigest: proof.manifestDigest,
       hits: proof.hits,
       sequence: proof.sequence,
-      timestamp: proof.timestamp
-    } satisfies Omit<CacheHitProof, 'eventDigest'>;
+      timestamp: proof.timestamp,
+    } satisfies Omit<CacheHitProof, "eventDigest">;
     const canonical = stableStringify(payload);
     if (sha256(Buffer.from(canonical)) !== proof.eventDigest) {
       return false;
@@ -340,7 +337,7 @@ export class DeterministicPromptExecutionCache {
   }
 
   static verifyMissFillTrace(trace: MissFillTrace): boolean {
-    if (trace.type !== 'miss-fill') {
+    if (trace.type !== "miss-fill") {
       return false;
     }
     const recomputedKey = computeKey(trace.input);
@@ -350,7 +347,7 @@ export class DeterministicPromptExecutionCache {
     if (canonicalKey(trace.input) !== trace.canonicalKey) {
       return false;
     }
-    const artifactBuffer = Buffer.from(trace.artifactBase64, 'base64');
+    const artifactBuffer = Buffer.from(trace.artifactBase64, "base64");
     if (sha256(artifactBuffer) !== trace.artifactDigest) {
       return false;
     }
@@ -362,14 +359,14 @@ export class DeterministicPromptExecutionCache {
       artifactDigest: trace.artifactDigest,
       artifactBase64: trace.artifactBase64,
       metadataDigest: trace.metadataDigest,
-      timestamp: trace.timestamp
-    } satisfies Omit<MissFillTrace, 'eventDigest'>;
+      timestamp: trace.timestamp,
+    } satisfies Omit<MissFillTrace, "eventDigest">;
     const canonical = stableStringify(payload);
     return sha256(Buffer.from(canonical)) === trace.eventDigest;
   }
 
   static verifyEvictionProof(proof: EvictionProof): boolean {
-    if (proof.type !== 'eviction' || proof.algorithm !== 'LRU') {
+    if (proof.type !== "eviction" || proof.algorithm !== "LRU") {
       return false;
     }
     const payload = {
@@ -377,8 +374,8 @@ export class DeterministicPromptExecutionCache {
       algorithm: proof.algorithm,
       timestamp: proof.timestamp,
       victim: proof.victim,
-      survivors: proof.survivors
-    } satisfies Omit<EvictionProof, 'eventDigest'>;
+      survivors: proof.survivors,
+    } satisfies Omit<EvictionProof, "eventDigest">;
     const canonical = stableStringify(payload);
     if (sha256(Buffer.from(canonical)) !== proof.eventDigest) {
       return false;
@@ -391,10 +388,7 @@ export class DeterministicPromptExecutionCache {
     return true;
   }
 
-  static async replayTrace(
-    trace: MissFillTrace,
-    fetcher: CacheFetcher
-  ): Promise<boolean> {
+  static async replayTrace(trace: MissFillTrace, fetcher: CacheFetcher): Promise<boolean> {
     const key = computeKey(trace.input);
     if (key !== trace.key) {
       return false;
@@ -406,4 +400,4 @@ export class DeterministicPromptExecutionCache {
   }
 }
 
-export type { CacheResolution, CacheHitResult, CacheMissResult } from './types.js';
+export type { CacheResolution, CacheHitResult, CacheMissResult } from "./types.js";

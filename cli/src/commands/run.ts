@@ -5,49 +5,37 @@
  * with git-native atomic PR workflow support.
  */
 
-import { Command } from 'commander';
-import * as fs from 'fs';
-import { EXIT_CODES } from '../lib/constants.js';
-import {
-  PolicyGate,
-  PolicyError,
-  PolicyAction,
-} from '../lib/policy.js';
-import {
-  Sandbox,
-  SandboxError,
-  createSandbox,
-  detectRepoRoot,
-} from '../lib/sandbox.js';
+import { Command } from "commander";
+import * as fs from "fs";
+import { EXIT_CODES } from "../lib/constants.js";
+import { PolicyGate, PolicyError, PolicyAction } from "../lib/policy.js";
+import { Sandbox, SandboxError, createSandbox, detectRepoRoot } from "../lib/sandbox.js";
 import {
   GitWorkflow,
   GitWorkflowError,
   createGitWorkflow,
   getGitStatus,
-} from '../lib/git-workflow.js';
+} from "../lib/git-workflow.js";
 import {
   ProviderWrapper,
   ProviderError,
   BudgetExceededError,
   createProviderWrapper,
-} from '../lib/provider.js';
+} from "../lib/provider.js";
 import {
   Session,
   createSession,
   listSessions,
   loadSession,
   cleanOldSessions,
-} from '../lib/session.js';
+} from "../lib/session.js";
 import {
   replaySession,
   formatSummaryText,
   formatSummaryJson,
   writeReportArtifact,
-} from '../lib/replay.js';
-import {
-  EventLogger,
-  createEventLogger,
-} from '../lib/event-logger.js';
+} from "../lib/replay.js";
+import { EventLogger, createEventLogger } from "../lib/event-logger.js";
 
 /**
  * Run command options
@@ -68,7 +56,7 @@ interface RunOptions {
   commitMessage?: string;
   generateReview: boolean;
   reviewPath?: string;
-  output: 'text' | 'json';
+  output: "text" | "json";
   dryRun: boolean;
   // Provider reliability options
   maxRetries: number;
@@ -101,11 +89,11 @@ interface ExecutionContext {
 /**
  * Output formatter for deterministic output
  */
-function formatOutput(data: unknown, format: 'text' | 'json'): string {
-  if (format === 'json') {
+function formatOutput(data: unknown, format: "text" | "json"): string {
+  if (format === "json") {
     return JSON.stringify(data, Object.keys(data as object).sort(), 2);
   }
-  if (typeof data === 'string') {
+  if (typeof data === "string") {
     return data;
   }
   return String(data);
@@ -139,7 +127,7 @@ function handleRunError(error: unknown): never {
     console.error(`Error: ${error.message}`);
     process.exit(EXIT_CODES.GENERAL_ERROR);
   }
-  console.error('Unknown error:', String(error));
+  console.error("Unknown error:", String(error));
   process.exit(EXIT_CODES.GENERAL_ERROR);
 }
 
@@ -184,7 +172,7 @@ async function initializeContext(options: RunOptions): Promise<ExecutionContext>
   await gitWorkflow.initialize();
 
   // Initialize provider wrapper
-  const provider = createProviderWrapper('cli', {
+  const provider = createProviderWrapper("cli", {
     maxRetries: options.maxRetries,
     initialBackoffMs: options.initialBackoffMs,
     maxBackoffMs: options.maxBackoffMs,
@@ -200,7 +188,7 @@ async function initializeContext(options: RunOptions): Promise<ExecutionContext>
   // Initialize session for tracking
   const session = createSession({
     repoRoot,
-    command: 'run',
+    command: "run",
     flags: options as unknown as Record<string, unknown>,
     deterministicId: options.ci,
     seed: options.sessionId,
@@ -228,17 +216,15 @@ async function executeAction(
   const startTime = Date.now();
 
   // Evaluate policy
-  const decision = ctx.policyGate.evaluate(
-    'run',
-    { write: action.type === 'write_patch' },
-    [action]
-  );
+  const decision = ctx.policyGate.evaluate("run", { write: action.type === "write_patch" }, [
+    action,
+  ]);
 
   // Record policy evaluation
   ctx.session.recordOperation(
-    'policy',
+    "policy",
     action.type,
-    decision.allow ? 'allowed' : 'denied',
+    decision.allow ? "allowed" : "denied",
     { action_type: action.type },
     Date.now() - startTime
   );
@@ -246,36 +232,36 @@ async function executeAction(
   if (!decision.allow) {
     return {
       success: false,
-      error: `Policy denied: ${decision.deny_reasons.join(', ')}`,
+      error: `Policy denied: ${decision.deny_reasons.join(", ")}`,
     };
   }
 
   // Execute based on action type
   switch (action.type) {
-    case 'read_file': {
-      const readAction = action as { type: 'read_file'; path: string };
+    case "read_file": {
+      const readAction = action as { type: "read_file"; path: string };
       const opStart = Date.now();
       try {
         const content = ctx.sandbox.readFile(readAction.path);
         const duration = Date.now() - opStart;
         ctx.session.recordOperation(
-          'read',
+          "read",
           readAction.path,
-          'success',
+          "success",
           { size: content.length },
           duration
         );
         // Log file read action
         ctx.eventLogger.logAction({
-          action_type: 'read',
+          action_type: "read",
           affected_files: [readAction.path],
         });
         return { success: true, result: { path: readAction.path, content } };
       } catch (error) {
         ctx.session.recordOperation(
-          'read',
+          "read",
           readAction.path,
-          'failure',
+          "failure",
           { error: error instanceof Error ? error.message : String(error) },
           Date.now() - opStart
         );
@@ -286,20 +272,18 @@ async function executeAction(
       }
     }
 
-    case 'write_patch': {
+    case "write_patch": {
       const writeAction = action as {
-        type: 'write_patch';
+        type: "write_patch";
         files: string[];
         diff_bytes: number;
       };
       // In dry-run mode, just report what would happen
       if (ctx.options.dryRun) {
-        ctx.session.recordOperation(
-          'write',
-          writeAction.files.join(','),
-          'success',
-          { dryRun: true, diffBytes: writeAction.diff_bytes }
-        );
+        ctx.session.recordOperation("write", writeAction.files.join(","), "success", {
+          dryRun: true,
+          diffBytes: writeAction.diff_bytes,
+        });
         return {
           success: true,
           result: {
@@ -309,24 +293,22 @@ async function executeAction(
           },
         };
       }
-      ctx.session.recordOperation(
-        'write',
-        writeAction.files.join(','),
-        'success',
-        { filesCount: writeAction.files.length, diffBytes: writeAction.diff_bytes }
-      );
+      ctx.session.recordOperation("write", writeAction.files.join(","), "success", {
+        filesCount: writeAction.files.length,
+        diffBytes: writeAction.diff_bytes,
+      });
       // Log file write action
       ctx.eventLogger.logAction({
-        action_type: 'write',
+        action_type: "write",
         affected_files: writeAction.files,
         diff_bytes: writeAction.diff_bytes,
       });
       return { success: true, result: { files: writeAction.files } };
     }
 
-    case 'exec_tool': {
+    case "exec_tool": {
       const execAction = action as {
-        type: 'exec_tool';
+        type: "exec_tool";
         tool: string;
         args: string[];
       };
@@ -335,9 +317,9 @@ async function executeAction(
         const result = await ctx.sandbox.execTool(execAction.tool, execAction.args);
         const duration = Date.now() - opStart;
         ctx.session.recordOperation(
-          'exec',
+          "exec",
           execAction.tool,
-          result.exitCode === 0 ? 'success' : 'failure',
+          result.exitCode === 0 ? "success" : "failure",
           { args: execAction.args, exitCode: result.exitCode },
           duration
         );
@@ -353,9 +335,9 @@ async function executeAction(
       } catch (error) {
         const duration = Date.now() - opStart;
         ctx.session.recordOperation(
-          'exec',
+          "exec",
           execAction.tool,
-          'failure',
+          "failure",
           { args: execAction.args, error: error instanceof Error ? error.message : String(error) },
           duration
         );
@@ -374,23 +356,17 @@ async function executeAction(
       }
     }
 
-    case 'network': {
+    case "network": {
       const opStart = Date.now();
       try {
         ctx.sandbox.checkNetwork();
-        ctx.session.recordOperation(
-          'network',
-          'check',
-          'allowed',
-          {},
-          Date.now() - opStart
-        );
+        ctx.session.recordOperation("network", "check", "allowed", {}, Date.now() - opStart);
         return { success: true, result: { networkAllowed: true } };
       } catch (error) {
         ctx.session.recordOperation(
-          'network',
-          'check',
-          'denied',
+          "network",
+          "check",
+          "denied",
           { error: error instanceof Error ? error.message : String(error) },
           Date.now() - opStart
         );
@@ -468,11 +444,7 @@ async function runCheck(options: RunOptions): Promise<void> {
 /**
  * Run exec subcommand - execute a tool with sandbox restrictions
  */
-async function runExec(
-  tool: string,
-  args: string[],
-  options: RunOptions
-): Promise<void> {
+async function runExec(tool: string, args: string[], options: RunOptions): Promise<void> {
   let ctx: ExecutionContext | undefined;
   const startTime = Date.now();
   try {
@@ -480,7 +452,7 @@ async function runExec(
 
     // Log run start
     ctx.eventLogger.logRunStart({
-      command: 'exec',
+      command: "exec",
       args: [tool, ...args],
       normalized_env: {},
       repo_root: ctx.repoRoot,
@@ -489,12 +461,12 @@ async function runExec(
     });
 
     ctx.eventLogger.logStepStart({
-      step_name: 'execute_tool',
-      step_id: 'step-1',
+      step_name: "execute_tool",
+      step_id: "step-1",
     });
 
     const action: PolicyAction = {
-      type: 'exec_tool',
+      type: "exec_tool",
       tool,
       args,
     };
@@ -504,12 +476,12 @@ async function runExec(
 
     if (!result.success) {
       ctx.eventLogger.logError({
-        category: 'execution',
-        message: result.error || 'Unknown error',
+        category: "execution",
+        message: result.error || "Unknown error",
         deny_reasons: [],
       });
       ctx.eventLogger.logRunEnd({
-        status: 'failed',
+        status: "failed",
         duration_ms: Date.now() - startTime,
         diagnostics: {
           total_operations: 1,
@@ -529,7 +501,7 @@ async function runExec(
 
     // Log run end
     ctx.eventLogger.logRunEnd({
-      status: 'completed',
+      status: "completed",
       duration_ms: Date.now() - startTime,
       diagnostics: {
         total_operations: 1,
@@ -547,12 +519,12 @@ async function runExec(
     console.log(formatOutput(result.result, options.output));
   } catch (error) {
     ctx?.eventLogger?.logError({
-      category: 'exception',
+      category: "exception",
       message: error instanceof Error ? error.message : String(error),
       deny_reasons: [],
     });
     ctx?.eventLogger?.logRunEnd({
-      status: 'failed',
+      status: "failed",
       duration_ms: Date.now() - startTime,
       diagnostics: {
         total_operations: 1,
@@ -584,7 +556,7 @@ async function runCommit(message: string, options: RunOptions): Promise<void> {
 
     // Log run start
     ctx.eventLogger.logRunStart({
-      command: 'commit',
+      command: "commit",
       args: [message],
       normalized_env: {},
       repo_root: ctx.repoRoot,
@@ -594,8 +566,8 @@ async function runCommit(message: string, options: RunOptions): Promise<void> {
     });
 
     ctx.eventLogger.logStepStart({
-      step_name: 'stage_changes',
-      step_id: 'step-1',
+      step_name: "stage_changes",
+      step_id: "step-1",
     });
 
     // Stage all changes if dirty and allowed
@@ -605,32 +577,29 @@ async function runCommit(message: string, options: RunOptions): Promise<void> {
     }
 
     ctx.eventLogger.logStepStart({
-      step_name: 'create_commit',
-      step_id: 'step-2',
+      step_name: "create_commit",
+      step_id: "step-2",
     });
 
     // Create commit
     const commitHash = await ctx.gitWorkflow.commit(message);
-    ctx.session.recordOperation('git', 'commit', 'success', { commitHash });
+    ctx.session.recordOperation("git", "commit", "success", { commitHash });
 
     // Generate review if requested
     let reviewPath: string | undefined;
     let filesWritten = 0;
     if (options.generateReview) {
       ctx.eventLogger.logStepStart({
-        step_name: 'generate_review',
-        step_id: 'step-3',
+        step_name: "generate_review",
+        step_id: "step-3",
       });
 
-      const review = await ctx.gitWorkflow.generateReview('main');
-      reviewPath = await ctx.gitWorkflow.writeReviewFile(
-        review,
-        options.reviewPath || 'review.md'
-      );
-      ctx.session.recordOperation('write', reviewPath, 'success', { type: 'review' });
+      const review = await ctx.gitWorkflow.generateReview("main");
+      reviewPath = await ctx.gitWorkflow.writeReviewFile(review, options.reviewPath || "review.md");
+      ctx.session.recordOperation("write", reviewPath, "success", { type: "review" });
 
       ctx.eventLogger.logAction({
-        action_type: 'write',
+        action_type: "write",
         affected_files: [reviewPath],
       });
       filesWritten = 1;
@@ -638,7 +607,7 @@ async function runCommit(message: string, options: RunOptions): Promise<void> {
 
     // Log run end
     ctx.eventLogger.logRunEnd({
-      status: 'completed',
+      status: "completed",
       diagnostics: {
         total_operations: options.generateReview ? 3 : 2,
         files_read: 0,
@@ -662,12 +631,12 @@ async function runCommit(message: string, options: RunOptions): Promise<void> {
     console.log(formatOutput(result, options.output));
   } catch (error) {
     ctx?.eventLogger?.logError({
-      category: 'git',
+      category: "git",
       message: error instanceof Error ? error.message : String(error),
       deny_reasons: [],
     });
     ctx?.eventLogger?.logRunEnd({
-      status: 'failed',
+      status: "failed",
       diagnostics: {
         total_operations: 1,
         files_read: 0,
@@ -697,7 +666,7 @@ async function runBranch(branchName: string, options: RunOptions): Promise<void>
 
     // Log run start
     ctx.eventLogger.logRunStart({
-      command: 'branch',
+      command: "branch",
       args: [branchName],
       normalized_env: {},
       repo_root: ctx.repoRoot,
@@ -706,18 +675,18 @@ async function runBranch(branchName: string, options: RunOptions): Promise<void>
     });
 
     ctx.eventLogger.logStepStart({
-      step_name: 'create_branch',
-      step_id: 'step-1',
+      step_name: "create_branch",
+      step_id: "step-1",
     });
 
     await ctx.gitWorkflow.createBranch(branchName);
-    ctx.session.recordOperation('git', 'branch', 'success', { branchName });
+    ctx.session.recordOperation("git", "branch", "success", { branchName });
 
     const status = ctx.gitWorkflow.getStatus();
 
     // Log run end
     ctx.eventLogger.logRunEnd({
-      status: 'completed',
+      status: "completed",
       diagnostics: {
         total_operations: 1,
         files_read: 0,
@@ -741,12 +710,12 @@ async function runBranch(branchName: string, options: RunOptions): Promise<void>
     console.log(formatOutput(result, options.output));
   } catch (error) {
     ctx?.eventLogger?.logError({
-      category: 'git',
+      category: "git",
       message: error instanceof Error ? error.message : String(error),
       deny_reasons: [],
     });
     ctx?.eventLogger?.logRunEnd({
-      status: 'failed',
+      status: "failed",
       diagnostics: {
         total_operations: 1,
         files_read: 0,
@@ -766,17 +735,14 @@ async function runBranch(branchName: string, options: RunOptions): Promise<void>
 /**
  * Run review subcommand - generate review.md artifact
  */
-async function runReview(
-  baseBranch: string,
-  options: RunOptions
-): Promise<void> {
+async function runReview(baseBranch: string, options: RunOptions): Promise<void> {
   let ctx: ExecutionContext | undefined;
   try {
     ctx = await initializeContext(options);
 
     // Log run start
     ctx.eventLogger.logRunStart({
-      command: 'review',
+      command: "review",
       args: [baseBranch],
       normalized_env: {},
       repo_root: ctx.repoRoot,
@@ -786,31 +752,31 @@ async function runReview(
     });
 
     ctx.eventLogger.logStepStart({
-      step_name: 'generate_review',
-      step_id: 'step-1',
+      step_name: "generate_review",
+      step_id: "step-1",
     });
 
     const review = await ctx.gitWorkflow.generateReview(baseBranch);
 
     ctx.eventLogger.logStepStart({
-      step_name: 'write_review',
-      step_id: 'step-2',
+      step_name: "write_review",
+      step_id: "step-2",
     });
 
     const reviewPath = await ctx.gitWorkflow.writeReviewFile(
       review,
-      options.reviewPath || 'review.md'
+      options.reviewPath || "review.md"
     );
-    ctx.session.recordOperation('write', reviewPath, 'success', { type: 'review' });
+    ctx.session.recordOperation("write", reviewPath, "success", { type: "review" });
 
     ctx.eventLogger.logAction({
-      action_type: 'write',
+      action_type: "write",
       affected_files: [reviewPath],
     });
 
     // Log run end
     ctx.eventLogger.logRunEnd({
-      status: 'completed',
+      status: "completed",
       diagnostics: {
         total_operations: 2,
         files_read: 0,
@@ -825,15 +791,17 @@ async function runReview(
 
     ctx.session.complete();
 
-    console.log(formatOutput({ reviewPath, ...review, sessionId: ctx.session.getSessionId() }, options.output));
+    console.log(
+      formatOutput({ reviewPath, ...review, sessionId: ctx.session.getSessionId() }, options.output)
+    );
   } catch (error) {
     ctx?.eventLogger?.logError({
-      category: 'git',
+      category: "git",
       message: error instanceof Error ? error.message : String(error),
       deny_reasons: [],
     });
     ctx?.eventLogger?.logRunEnd({
-      status: 'failed',
+      status: "failed",
       diagnostics: {
         total_operations: 1,
         files_read: 0,
@@ -855,126 +823,115 @@ async function runReview(
  */
 export function registerRunCommands(program: Command): void {
   const run = program
-    .command('run')
-    .description('Execute commands with policy and sandbox guardrails');
+    .command("run")
+    .description("Execute commands with policy and sandbox guardrails");
 
   // Global options for all run subcommands
   const addGlobalOptions = (cmd: Command): Command => {
-    return cmd
-      // Policy and sandbox options
-      .option('--ci', 'Enable CI mode (fail-closed policy)', false)
-      .option('--policy-bundle <dir>', 'Path to OPA policy bundle directory')
-      .option('--allow-path <path...>', 'Additional paths to allow access', [])
-      .option('--deny-path <pattern...>', 'Additional patterns to deny access', [])
-      .option('--allow-tool <tool...>', 'Tools allowed for execution', [])
-      .option('--tool-timeout-ms <ms>', 'Timeout for tool execution', '120000')
-      .option('--allow-network', 'Allow network access', false)
-      .option('--allow-dotenv', 'Allow .env file access', false)
-      .option(
-        '--unsafe-allow-sensitive-paths',
-        'Disable hardcoded security patterns (dangerous)',
-        false
-      )
-      // Git workflow options
-      .option('--allow-dirty', 'Allow operation with uncommitted changes', false)
-      .option('--generate-review', 'Generate review.md artifact', false)
-      .option('--review-path <path>', 'Path for review.md artifact', 'review.md')
-      // Provider reliability options
-      .option('--max-retries <n>', 'Maximum retry attempts for provider calls', '3')
-      .option('--initial-backoff-ms <n>', 'Initial backoff delay in ms', '500')
-      .option('--max-backoff-ms <n>', 'Maximum backoff delay in ms', '8000')
-      .option('--timeout-ms <n>', 'Per-request timeout in ms', '120000')
-      .option('--budget-ms <n>', 'Total time budget for run in ms')
-      .option('--max-requests <n>', 'Maximum provider requests allowed')
-      .option('--token-budget <n>', 'Maximum tokens to use')
-      .option('--session-id <id>', 'Session ID for deterministic jitter')
-      // Event logging options
-      .option('--include-timestamps', 'Include timestamps in event logs', false)
-      .option('--unsafe-log-prompts', 'Log sensitive data without redaction (dangerous)', false)
-      // Output options
-      .option('-o, --output <format>', 'Output format: text or json', 'text')
-      .option('--dry-run', 'Show what would happen without executing', false);
+    return (
+      cmd
+        // Policy and sandbox options
+        .option("--ci", "Enable CI mode (fail-closed policy)", false)
+        .option("--policy-bundle <dir>", "Path to OPA policy bundle directory")
+        .option("--allow-path <path...>", "Additional paths to allow access", [])
+        .option("--deny-path <pattern...>", "Additional patterns to deny access", [])
+        .option("--allow-tool <tool...>", "Tools allowed for execution", [])
+        .option("--tool-timeout-ms <ms>", "Timeout for tool execution", "120000")
+        .option("--allow-network", "Allow network access", false)
+        .option("--allow-dotenv", "Allow .env file access", false)
+        .option(
+          "--unsafe-allow-sensitive-paths",
+          "Disable hardcoded security patterns (dangerous)",
+          false
+        )
+        // Git workflow options
+        .option("--allow-dirty", "Allow operation with uncommitted changes", false)
+        .option("--generate-review", "Generate review.md artifact", false)
+        .option("--review-path <path>", "Path for review.md artifact", "review.md")
+        // Provider reliability options
+        .option("--max-retries <n>", "Maximum retry attempts for provider calls", "3")
+        .option("--initial-backoff-ms <n>", "Initial backoff delay in ms", "500")
+        .option("--max-backoff-ms <n>", "Maximum backoff delay in ms", "8000")
+        .option("--timeout-ms <n>", "Per-request timeout in ms", "120000")
+        .option("--budget-ms <n>", "Total time budget for run in ms")
+        .option("--max-requests <n>", "Maximum provider requests allowed")
+        .option("--token-budget <n>", "Maximum tokens to use")
+        .option("--session-id <id>", "Session ID for deterministic jitter")
+        // Event logging options
+        .option("--include-timestamps", "Include timestamps in event logs", false)
+        .option("--unsafe-log-prompts", "Log sensitive data without redaction (dangerous)", false)
+        // Output options
+        .option("-o, --output <format>", "Output format: text or json", "text")
+        .option("--dry-run", "Show what would happen without executing", false)
+    );
   };
 
   // Helper to parse options with provider defaults
-  const parseOptions = (opts: Record<string, unknown>): RunOptions => ({
-    ...opts,
-    toolTimeoutMs: parseInt(opts.toolTimeoutMs as string, 10),
-    maxRetries: parseInt(opts.maxRetries as string, 10),
-    initialBackoffMs: parseInt(opts.initialBackoffMs as string, 10),
-    maxBackoffMs: parseInt(opts.maxBackoffMs as string, 10),
-    timeoutMs: parseInt(opts.timeoutMs as string, 10),
-    budgetMs: opts.budgetMs ? parseInt(opts.budgetMs as string, 10) : null,
-    maxRequests: opts.maxRequests ? parseInt(opts.maxRequests as string, 10) : null,
-    tokenBudget: opts.tokenBudget ? parseInt(opts.tokenBudget as string, 10) : null,
-    includeTimestamps: Boolean(opts.includeTimestamps),
-    unsafeLogPrompts: Boolean(opts.unsafeLogPrompts),
-  } as RunOptions);
+  const parseOptions = (opts: Record<string, unknown>): RunOptions =>
+    ({
+      ...opts,
+      toolTimeoutMs: parseInt(opts.toolTimeoutMs as string, 10),
+      maxRetries: parseInt(opts.maxRetries as string, 10),
+      initialBackoffMs: parseInt(opts.initialBackoffMs as string, 10),
+      maxBackoffMs: parseInt(opts.maxBackoffMs as string, 10),
+      timeoutMs: parseInt(opts.timeoutMs as string, 10),
+      budgetMs: opts.budgetMs ? parseInt(opts.budgetMs as string, 10) : null,
+      maxRequests: opts.maxRequests ? parseInt(opts.maxRequests as string, 10) : null,
+      tokenBudget: opts.tokenBudget ? parseInt(opts.tokenBudget as string, 10) : null,
+      includeTimestamps: Boolean(opts.includeTimestamps),
+      unsafeLogPrompts: Boolean(opts.unsafeLogPrompts),
+    }) as RunOptions;
 
   // run status
   addGlobalOptions(
-    run
-      .command('status')
-      .description('Show git, policy, and sandbox status')
+    run.command("status").description("Show git, policy, and sandbox status")
   ).action(async (opts) => {
     await runStatus(parseOptions(opts));
   });
 
   // run check
   addGlobalOptions(
-    run
-      .command('check')
-      .description('Validate policy and sandbox configuration')
+    run.command("check").description("Validate policy and sandbox configuration")
   ).action(async (opts) => {
     await runCheck(parseOptions(opts));
   });
 
   // run exec <tool> [args...]
   addGlobalOptions(
-    run
-      .command('exec <tool> [args...]')
-      .description('Execute a tool with sandbox restrictions')
+    run.command("exec <tool> [args...]").description("Execute a tool with sandbox restrictions")
   ).action(async (tool, args, opts) => {
     await runExec(tool, args, parseOptions(opts));
   });
 
   // run commit <message>
   addGlobalOptions(
-    run
-      .command('commit <message>')
-      .description('Create a commit with optional review artifact')
+    run.command("commit <message>").description("Create a commit with optional review artifact")
   ).action(async (message, opts) => {
     await runCommit(message, parseOptions(opts));
   });
 
   // run branch <name>
-  addGlobalOptions(
-    run
-      .command('branch <name>')
-      .description('Create or switch to a branch')
-  ).action(async (name, opts) => {
-    await runBranch(name, parseOptions(opts));
-  });
+  addGlobalOptions(run.command("branch <name>").description("Create or switch to a branch")).action(
+    async (name, opts) => {
+      await runBranch(name, parseOptions(opts));
+    }
+  );
 
   // run review [base-branch]
   addGlobalOptions(
-    run
-      .command('review [base-branch]')
-      .description('Generate review.md artifact')
-  ).action(async (baseBranch = 'main', opts) => {
+    run.command("review [base-branch]").description("Generate review.md artifact")
+  ).action(async (baseBranch = "main", opts) => {
     await runReview(baseBranch, parseOptions(opts));
   });
 
   // run sessions - session management
-  const sessions = run
-    .command('sessions')
-    .description('Manage session audit trails');
+  const sessions = run.command("sessions").description("Manage session audit trails");
 
   // run sessions list
   sessions
-    .command('list')
-    .option('-n, --limit <n>', 'Maximum sessions to list', '10')
-    .option('-o, --output <format>', 'Output format: text or json', 'text')
+    .command("list")
+    .option("-n, --limit <n>", "Maximum sessions to list", "10")
+    .option("-o, --output <format>", "Output format: text or json", "text")
     .action(async (opts) => {
       const repoRoot = detectRepoRoot(process.cwd());
       const sessionDir = `${repoRoot}/.claude/sessions`;
@@ -982,11 +939,11 @@ export function registerRunCommands(program: Command): void {
       const limit = parseInt(opts.limit, 10);
       const sessions = allSessions.slice(0, limit);
 
-      if (opts.output === 'json') {
+      if (opts.output === "json") {
         console.log(JSON.stringify(sessions, null, 2));
       } else {
         if (sessions.length === 0) {
-          console.log('No sessions found.');
+          console.log("No sessions found.");
         } else {
           console.log(`Sessions (${sessions.length} of ${allSessions.length}):\n`);
           for (const s of sessions) {
@@ -995,7 +952,7 @@ export function registerRunCommands(program: Command): void {
             console.log(`    Command: ${s.command}`);
             console.log(`    Started: ${s.startTime}`);
             console.log(`    Operations: ${s.diagnostics.totalOperations}`);
-            console.log('');
+            console.log("");
           }
         }
       }
@@ -1003,8 +960,8 @@ export function registerRunCommands(program: Command): void {
 
   // run sessions show <session-id>
   sessions
-    .command('show <session-id>')
-    .option('-o, --output <format>', 'Output format: text or json', 'text')
+    .command("show <session-id>")
+    .option("-o, --output <format>", "Output format: text or json", "text")
     .action(async (sessionId, opts) => {
       const repoRoot = detectRepoRoot(process.cwd());
       const sessionFile = `${repoRoot}/.claude/sessions/${sessionId}.json`;
@@ -1015,7 +972,7 @@ export function registerRunCommands(program: Command): void {
         process.exit(EXIT_CODES.GENERAL_ERROR);
       }
 
-      if (opts.output === 'json') {
+      if (opts.output === "json") {
         console.log(JSON.stringify(session, null, 2));
       } else {
         console.log(`Session: ${session.sessionId}`);
@@ -1046,8 +1003,8 @@ export function registerRunCommands(program: Command): void {
 
   // run sessions clean
   sessions
-    .command('clean')
-    .option('--max-age-days <days>', 'Maximum age of sessions to keep', '7')
+    .command("clean")
+    .option("--max-age-days <days>", "Maximum age of sessions to keep", "7")
     .action(async (opts) => {
       const repoRoot = detectRepoRoot(process.cwd());
       const sessionDir = `${repoRoot}/.claude/sessions`;
@@ -1058,10 +1015,10 @@ export function registerRunCommands(program: Command): void {
 
   // run replay <session-id> - replay and summarize session events
   run
-    .command('replay <session-id>')
-    .description('Replay and summarize session events')
-    .option('-o, --output <format>', 'Output format: text or json', 'text')
-    .option('--write-report', 'Generate replay.md report artifact', false)
+    .command("replay <session-id>")
+    .description("Replay and summarize session events")
+    .option("-o, --output <format>", "Output format: text or json", "text")
+    .option("--write-report", "Generate replay.md report artifact", false)
     .action(async (sessionId, opts) => {
       const repoRoot = detectRepoRoot(process.cwd());
       const sessionDir = `${repoRoot}/.claude/sessions`;
@@ -1078,7 +1035,7 @@ export function registerRunCommands(program: Command): void {
         }
 
         // Output summary
-        if (opts.output === 'json') {
+        if (opts.output === "json") {
           console.log(formatSummaryJson(summary));
         } else {
           console.log(formatSummaryText(summary));
@@ -1086,19 +1043,17 @@ export function registerRunCommands(program: Command): void {
 
         // Write report if requested
         if (opts.writeReport) {
-          const reportPath = writeReportArtifact(
-            { sessionDir, runId: sessionId },
-            summary,
-            events
-          );
+          const reportPath = writeReportArtifact({ sessionDir, runId: sessionId }, summary, events);
           console.log(`\nReport written to: ${reportPath}`);
         }
       } catch (error) {
-        if (error instanceof Error && error.message.includes('ENOENT')) {
+        if (error instanceof Error && error.message.includes("ENOENT")) {
           console.error(`Session not found: ${sessionId}`);
           process.exit(EXIT_CODES.POLICY_ERROR);
         }
-        console.error(`Error replaying session: ${error instanceof Error ? error.message : String(error)}`);
+        console.error(
+          `Error replaying session: ${error instanceof Error ? error.message : String(error)}`
+        );
         process.exit(EXIT_CODES.GENERAL_ERROR);
       }
     });

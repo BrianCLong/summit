@@ -13,7 +13,7 @@ import type {
   ConnectorQuery,
   ConnectorQueryResult,
   ConnectorEntity,
-} from './types';
+} from "./types";
 
 /**
  * Abstract base class for connectors
@@ -58,7 +58,7 @@ export abstract class BaseConnector implements Connector {
    */
   protected ensureInitialized(): void {
     if (!this.initialized || !this.config) {
-      throw new Error('Connector not initialized. Call initialize() first.');
+      throw new Error("Connector not initialized. Call initialize() first.");
     }
   }
 
@@ -118,7 +118,7 @@ export abstract class BaseConnector implements Connector {
       errorCount: 1,
       errors: [
         {
-          code: 'CONNECTOR_ERROR',
+          code: "CONNECTOR_ERROR",
           message: error.message,
           retryable: true,
           cause: error,
@@ -136,7 +136,7 @@ export abstract class BaseConnector implements Connector {
     return type
       .split(/[_-\s]+/)
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join('');
+      .join("");
   }
 
   /**
@@ -144,7 +144,7 @@ export abstract class BaseConnector implements Connector {
    */
   protected normalizeRelationshipType(type: string): string {
     // Convert to SCREAMING_SNAKE_CASE
-    return type.replace(/[- ]/g, '_').toUpperCase();
+    return type.replace(/[- ]/g, "_").toUpperCase();
   }
 
   /**
@@ -159,7 +159,7 @@ export abstract class BaseConnector implements Connector {
    */
   protected checkAborted(signal: AbortSignal): void {
     if (signal.aborted) {
-      throw new Error('Operation aborted');
+      throw new Error("Operation aborted");
     }
   }
 }

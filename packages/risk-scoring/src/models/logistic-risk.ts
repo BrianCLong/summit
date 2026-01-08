@@ -2,7 +2,7 @@
  * Logistic Risk Scoring Model
  */
 
-import type { RiskScore, RiskFactor } from '../types/index.js';
+import type { RiskScore, RiskFactor } from "../types/index.js";
 
 export class LogisticRiskScorer {
   private coefficients: number[] = [];
@@ -32,7 +32,7 @@ export class LogisticRiskScorer {
       for (let i = 0; i < labels.length; i++) {
         interceptGrad += predictions[i] - labels[i];
       }
-      this.intercept -= learningRate * interceptGrad / labels.length;
+      this.intercept -= (learningRate * interceptGrad) / labels.length;
 
       // Update coefficients
       for (let j = 0; j < this.coefficients.length; j++) {
@@ -40,7 +40,7 @@ export class LogisticRiskScorer {
         for (let i = 0; i < labels.length; i++) {
           grad += (predictions[i] - labels[i]) * features[i][j];
         }
-        this.coefficients[j] -= learningRate * grad / labels.length;
+        this.coefficients[j] -= (learningRate * grad) / labels.length;
       }
     }
 
@@ -52,7 +52,7 @@ export class LogisticRiskScorer {
    */
   score(entityId: string, features: number[]): RiskScore {
     if (!this.fitted) {
-      throw new Error('Model must be fitted before scoring');
+      throw new Error("Model must be fitted before scoring");
     }
 
     const probability = this.predictProbaSingle(features);
@@ -81,7 +81,7 @@ export class LogisticRiskScorer {
    * Predict probabilities
    */
   private predictProba(features: number[][]): number[] {
-    return features.map(f => this.predictProbaSingle(f));
+    return features.map((f) => this.predictProbaSingle(f));
   }
 
   /**
@@ -108,11 +108,11 @@ export class LogisticRiskScorer {
   /**
    * Convert score to risk level
    */
-  private scoreToRiskLevel(score: number): 'low' | 'medium' | 'high' | 'critical' {
-    if (score >= 750) return 'low';
-    if (score >= 500) return 'medium';
-    if (score >= 250) return 'high';
-    return 'critical';
+  private scoreToRiskLevel(score: number): "low" | "medium" | "high" | "critical" {
+    if (score >= 750) return "low";
+    if (score >= 500) return "medium";
+    if (score >= 250) return "high";
+    return "critical";
   }
 
   /**

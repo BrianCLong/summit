@@ -2,66 +2,66 @@
  * Export Commands
  */
 
-import { Command } from 'commander';
-import ora from 'ora';
-import path from 'node:path';
-import type { CLIConfig } from '../lib/config.js';
-import { getProfile } from '../lib/config.js';
-import { GraphClient } from '../lib/graph-client.js';
-import { ExportManager } from '../lib/export-manager.js';
-import { success, error, formatTable } from '../utils/output.js';
-import { handleError, ConnectionError } from '../utils/errors.js';
-import { EXPORT_FORMATS, type ExportFormat } from '../lib/constants.js';
+import { Command } from "commander";
+import ora from "ora";
+import path from "node:path";
+import type { CLIConfig } from "../lib/config.js";
+import { getProfile } from "../lib/config.js";
+import { GraphClient } from "../lib/graph-client.js";
+import { ExportManager } from "../lib/export-manager.js";
+import { success, error, formatTable } from "../utils/output.js";
+import { handleError, ConnectionError } from "../utils/errors.js";
+import { EXPORT_FORMATS, type ExportFormat } from "../lib/constants.js";
 
 export function registerExportCommands(program: Command, config: CLIConfig): void {
   const exportCmd = program
-    .command('export')
-    .alias('x')
-    .description('Air-gapped export operations');
+    .command("export")
+    .alias("x")
+    .description("Air-gapped export operations");
 
   exportCmd
-    .command('graph')
-    .description('Export graph data for air-gapped transfer')
-    .option('-f, --format <format>', `Output format: ${EXPORT_FORMATS.join(', ')}`, 'json')
-    .option('-o, --output <dir>', 'Output directory')
-    .option('--labels <labels>', 'Filter by node labels (comma-separated)')
-    .option('--types <types>', 'Filter by relationship types (comma-separated)')
-    .option('--no-compress', 'Disable compression')
-    .option('--sign', 'Sign export with private key')
-    .option('--no-metadata', 'Exclude metadata')
-    .option('--profile <name>', 'Use named profile')
+    .command("graph")
+    .description("Export graph data for air-gapped transfer")
+    .option("-f, --format <format>", `Output format: ${EXPORT_FORMATS.join(", ")}`, "json")
+    .option("-o, --output <dir>", "Output directory")
+    .option("--labels <labels>", "Filter by node labels (comma-separated)")
+    .option("--types <types>", "Filter by relationship types (comma-separated)")
+    .option("--no-compress", "Disable compression")
+    .option("--sign", "Sign export with private key")
+    .option("--no-metadata", "Exclude metadata")
+    .option("--profile <name>", "Use named profile")
     .action(async (options) => {
       if (!EXPORT_FORMATS.includes(options.format as ExportFormat)) {
-        error(`Invalid format. Must be one of: ${EXPORT_FORMATS.join(', ')}`);
+        error(`Invalid format. Must be one of: ${EXPORT_FORMATS.join(", ")}`);
         process.exit(1);
       }
 
-      const spinner = ora('Preparing export...').start();
+      const spinner = ora("Preparing export...").start();
 
       try {
         const profile = getProfile(config, options.profile);
 
         if (!profile.neo4j) {
-          throw new ConnectionError('Neo4j configuration not found');
+          throw new ConnectionError("Neo4j configuration not found");
         }
 
         const exportConfig = profile.export || {
-          outputDir: './exports',
+          outputDir: "./exports",
           compression: true,
           signExports: false,
         };
 
         // Connect to graph and fetch data
-        spinner.text = 'Connecting to graph database...';
+        spinner.text = "Connecting to graph database...";
         const graphClient = new GraphClient(profile.neo4j);
         await graphClient.connect();
 
-        spinner.text = 'Fetching nodes...';
+        spinner.text = "Fetching nodes...";
         const nodes = await graphClient.queryNodes(undefined, undefined, {
           limit: 100000,
         });
 
-        spinner.text = 'Fetching relationships...';
+        spinner.text = "Fetching relationships...";
         const relationships = await graphClient.queryRelationships(undefined, {
           limit: 100000,
         });
@@ -69,17 +69,20 @@ export function registerExportCommands(program: Command, config: CLIConfig): voi
         await graphClient.disconnect();
 
         // Create export
-        spinner.text = 'Creating export...';
+        spinner.text = "Creating export...";
         const exportManager = new ExportManager(exportConfig);
 
         const manifest = await exportManager.exportGraph(
           {
             nodes,
             relationships,
-            metadata: options.metadata !== false ? {
-              exportedAt: new Date().toISOString(),
-              source: profile.neo4j.uri,
-            } : undefined,
+            metadata:
+              options.metadata !== false
+                ? {
+                    exportedAt: new Date().toISOString(),
+                    source: profile.neo4j.uri,
+                  }
+                : undefined,
           },
           {
             format: options.format as ExportFormat,
@@ -88,8 +91,8 @@ export function registerExportCommands(program: Command, config: CLIConfig): voi
             sign: options.sign,
             includeMetadata: options.metadata !== false,
             filter: {
-              labels: options.labels?.split(','),
-              types: options.types?.split(','),
+              labels: options.labels?.split(","),
+              types: options.types?.split(","),
             },
           }
         );
@@ -99,7 +102,7 @@ export function registerExportCommands(program: Command, config: CLIConfig): voi
         if (program.opts().json) {
           console.log(JSON.stringify(manifest, null, 2));
         } else {
-          success('Export completed successfully');
+          success("Export completed successfully");
           console.log(`\nExport Details:`);
           console.log(`  ID: ${manifest.exportId}`);
           console.log(`  Format: ${manifest.format}`);
@@ -113,7 +116,9 @@ export function registerExportCommands(program: Command, config: CLIConfig): voi
             const sizeKB = (file.size / 1024).toFixed(1);
             console.log(`  - ${file.name} (${sizeKB} KB)`);
           }
-          console.log(`\nOutput: ${path.join(options.output || exportConfig.outputDir, `export-${manifest.exportId}`)}`);
+          console.log(
+            `\nOutput: ${path.join(options.output || exportConfig.outputDir, `export-${manifest.exportId}`)}`
+          );
         }
       } catch (err) {
         spinner.stop();
@@ -122,18 +127,18 @@ export function registerExportCommands(program: Command, config: CLIConfig): voi
     });
 
   exportCmd
-    .command('import <path>')
-    .description('Import graph data from export')
-    .option('--verify', 'Verify integrity before import', true)
-    .option('--dry-run', 'Validate without importing')
-    .option('--profile <name>', 'Use named profile')
+    .command("import <path>")
+    .description("Import graph data from export")
+    .option("--verify", "Verify integrity before import", true)
+    .option("--dry-run", "Validate without importing")
+    .option("--profile <name>", "Use named profile")
     .action(async (exportPath: string, options) => {
-      const spinner = ora('Preparing import...').start();
+      const spinner = ora("Preparing import...").start();
 
       try {
         const profile = getProfile(config, options.profile);
         const exportConfig = profile.export || {
-          outputDir: './exports',
+          outputDir: "./exports",
           compression: true,
           signExports: false,
         };
@@ -141,12 +146,12 @@ export function registerExportCommands(program: Command, config: CLIConfig): voi
         const exportManager = new ExportManager(exportConfig);
 
         if (options.verify) {
-          spinner.text = 'Verifying export integrity...';
+          spinner.text = "Verifying export integrity...";
           const verifyResult = await exportManager.verifyExport(exportPath);
 
           if (!verifyResult.valid) {
             spinner.stop();
-            error('Export verification failed:');
+            error("Export verification failed:");
             for (const err of verifyResult.errors) {
               console.log(`  - ${err}`);
             }
@@ -160,7 +165,7 @@ export function registerExportCommands(program: Command, config: CLIConfig): voi
           }
         }
 
-        spinner.text = options.dryRun ? 'Validating import...' : 'Importing data...';
+        spinner.text = options.dryRun ? "Validating import..." : "Importing data...";
 
         const result = await exportManager.importGraph(exportPath, {
           verify: false, // Already verified
@@ -173,7 +178,7 @@ export function registerExportCommands(program: Command, config: CLIConfig): voi
           console.log(JSON.stringify(result, null, 2));
         } else {
           if (result.success) {
-            success(options.dryRun ? 'Validation successful' : 'Import completed successfully');
+            success(options.dryRun ? "Validation successful" : "Import completed successfully");
             console.log(`\nImport Details:`);
             console.log(`  ID: ${result.importId}`);
             console.log(`  Nodes: ${result.nodesImported.toLocaleString()}`);
@@ -186,7 +191,7 @@ export function registerExportCommands(program: Command, config: CLIConfig): voi
               }
             }
           } else {
-            error('Import failed:');
+            error("Import failed:");
             for (const err of result.errors) {
               console.log(`  - ${err}`);
             }
@@ -199,14 +204,14 @@ export function registerExportCommands(program: Command, config: CLIConfig): voi
     });
 
   exportCmd
-    .command('verify <path>')
-    .description('Verify export integrity')
+    .command("verify <path>")
+    .description("Verify export integrity")
     .action(async (exportPath: string) => {
-      const spinner = ora('Verifying export...').start();
+      const spinner = ora("Verifying export...").start();
 
       try {
         const exportManager = new ExportManager({
-          outputDir: './exports',
+          outputDir: "./exports",
           compression: true,
           signExports: false,
         });
@@ -219,16 +224,16 @@ export function registerExportCommands(program: Command, config: CLIConfig): voi
           console.log(JSON.stringify(result, null, 2));
         } else {
           if (result.valid) {
-            success('Export verification passed');
+            success("Export verification passed");
           } else {
-            error('Export verification failed:');
+            error("Export verification failed:");
             for (const err of result.errors) {
               console.log(`  - ${err}`);
             }
           }
 
           if (result.warnings.length > 0) {
-            console.log('\nWarnings:');
+            console.log("\nWarnings:");
             for (const warn of result.warnings) {
               console.log(`  - ${warn}`);
             }
@@ -241,16 +246,16 @@ export function registerExportCommands(program: Command, config: CLIConfig): voi
     });
 
   exportCmd
-    .command('list')
-    .alias('ls')
-    .description('List available exports')
-    .option('-d, --directory <dir>', 'Export directory')
-    .option('--profile <name>', 'Use named profile')
+    .command("list")
+    .alias("ls")
+    .description("List available exports")
+    .option("-d, --directory <dir>", "Export directory")
+    .option("--profile <name>", "Use named profile")
     .action(async (options) => {
       try {
         const profile = getProfile(config, options.profile);
         const exportConfig = profile.export || {
-          outputDir: './exports',
+          outputDir: "./exports",
           compression: true,
           signExports: false,
         };
@@ -262,15 +267,15 @@ export function registerExportCommands(program: Command, config: CLIConfig): voi
           console.log(JSON.stringify(exports, null, 2));
         } else {
           if (exports.length === 0) {
-            console.log('No exports found');
+            console.log("No exports found");
           } else {
             const tableData = exports.map((e) => ({
-              id: e.manifest.exportId.substring(0, 8) + '...',
+              id: e.manifest.exportId.substring(0, 8) + "...",
               timestamp: e.manifest.timestamp.substring(0, 19),
               format: e.manifest.format,
               nodes: e.manifest.stats.totalNodes.toLocaleString(),
               rels: e.manifest.stats.totalRelationships.toLocaleString(),
-              signed: e.manifest.signed ? 'Yes' : 'No',
+              signed: e.manifest.signed ? "Yes" : "No",
             }));
             console.log(formatTable(tableData));
           }
@@ -281,17 +286,17 @@ export function registerExportCommands(program: Command, config: CLIConfig): voi
     });
 
   exportCmd
-    .command('formats')
-    .description('List supported export formats')
+    .command("formats")
+    .description("List supported export formats")
     .action(() => {
       if (program.opts().json) {
         console.log(JSON.stringify(EXPORT_FORMATS, null, 2));
       } else {
-        console.log('\nSupported Export Formats:');
-        console.log('  - json    : JSON format (default)');
-        console.log('  - csv     : Comma-separated values');
-        console.log('  - graphml : GraphML XML format');
-        console.log('  - parquet : Apache Parquet (columnar)');
+        console.log("\nSupported Export Formats:");
+        console.log("  - json    : JSON format (default)");
+        console.log("  - csv     : Comma-separated values");
+        console.log("  - graphml : GraphML XML format");
+        console.log("  - parquet : Apache Parquet (columnar)");
       }
     });
 }

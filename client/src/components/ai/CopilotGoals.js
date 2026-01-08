@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation, gql } from '@apollo/client';
+import React, { useState } from "react";
+import { useQuery, useMutation, gql } from "@apollo/client";
 import {
   Box,
   Typography,
@@ -18,8 +18,8 @@ import {
   MenuItem,
   CircularProgress,
   Snackbar,
-} from '@mui/material';
-import CopilotRunPanel from './CopilotRunPanel';
+} from "@mui/material";
+import CopilotRunPanel from "./CopilotRunPanel";
 
 const GET_GOALS = gql`
   query CopilotGoals($investigationId: ID) {
@@ -51,9 +51,9 @@ const CREATE_GOAL = gql`
 `;
 
 export default function CopilotGoals() {
-  const [text, setText] = useState('');
-  const [investigationId, setInvestigationId] = useState('');
-  const [toast, setToast] = useState({ open: false, msg: '' });
+  const [text, setText] = useState("");
+  const [investigationId, setInvestigationId] = useState("");
+  const [toast, setToast] = useState({ open: false, msg: "" });
   const [selectedGoalId, setSelectedGoalId] = useState(null);
 
   const { data, loading, error, refetch } = useQuery(GET_GOALS, {
@@ -63,12 +63,11 @@ export default function CopilotGoals() {
 
   const [createGoal, { loading: saving }] = useMutation(CREATE_GOAL, {
     onCompleted: () => {
-      setText('');
+      setText("");
       refetch();
-      setToast({ open: true, msg: 'Goal created' });
+      setToast({ open: true, msg: "Goal created" });
     },
-    onError: (e) =>
-      setToast({ open: true, msg: e.message || 'Failed to create goal' }),
+    onError: (e) => setToast({ open: true, msg: e.message || "Failed to create goal" }),
   });
 
   const onSubmit = async (e) => {
@@ -83,7 +82,7 @@ export default function CopilotGoals() {
   };
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: "flex" }}>
       <Box sx={{ flexGrow: 1, p: 2 }}>
         <Typography variant="h4" gutterBottom>
           Copilot Goals
@@ -128,12 +127,8 @@ export default function CopilotGoals() {
                 placeholder="e.g., Identify likely coordinators in the last 90 days of communications"
                 sx={{ mb: 2 }}
               />
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={saving || !text.trim()}
-              >
-                {saving ? 'Saving…' : 'Create Goal'}
+              <Button type="submit" variant="contained" disabled={saving || !text.trim()}>
+                {saving ? "Saving…" : "Create Goal"}
               </Button>
             </form>
           </CardContent>
@@ -150,18 +145,12 @@ export default function CopilotGoals() {
             <React.Fragment key={g.id}>
               <ListItem
                 secondaryAction={
-                  <Button
-                    variant="outlined"
-                    onClick={() => setSelectedGoalId(g.id)}
-                  >
+                  <Button variant="outlined" onClick={() => setSelectedGoalId(g.id)}>
                     Run Copilot
                   </Button>
                 }
               >
-                <ListItemText
-                  primary={g.text}
-                  secondary={new Date(g.createdAt).toLocaleString()}
-                />
+                <ListItemText primary={g.text} secondary={new Date(g.createdAt).toLocaleString()} />
               </ListItem>
               <Divider component="li" />
             </React.Fragment>
@@ -173,12 +162,12 @@ export default function CopilotGoals() {
 
         <Snackbar
           open={toast.open}
-          onClose={() => setToast({ open: false, msg: '' })}
+          onClose={() => setToast({ open: false, msg: "" })}
           autoHideDuration={2500}
           message={toast.msg}
         />
       </Box>
-      <Box sx={{ width: 400, flexShrink: 0, borderLeft: '1px solid #e0e0e0' }}>
+      <Box sx={{ width: 400, flexShrink: 0, borderLeft: "1px solid #e0e0e0" }}>
         {selectedGoalId && <CopilotRunPanel goalId={selectedGoalId} />}
       </Box>
     </Box>

@@ -7,31 +7,31 @@ on:
   push:
     branches:
       - main
-      - 'feature/v040-*'
-      - 'transcendent/*'
+      - "feature/v040-*"
+      - "transcendent/*"
     paths:
-      - 'graphql/v040/**'
-      - 'policy/v040/**'
-      - 'ops/sandbox/**'
-      - 'ops/qecf/**'
-      - 'server/src/graphql/resolvers/v040/**'
-      - 'helm/overlays/v040/**'
-      - 'monitoring/prometheus/rules/mc-platform-v040.yml'
+      - "graphql/v040/**"
+      - "policy/v040/**"
+      - "ops/sandbox/**"
+      - "ops/qecf/**"
+      - "server/src/graphql/resolvers/v040/**"
+      - "helm/overlays/v040/**"
+      - "monitoring/prometheus/rules/mc-platform-v040.yml"
   pull_request:
     branches:
       - main
     paths:
-      - 'graphql/v040/**'
-      - 'policy/v040/**'
-      - 'ops/sandbox/**'
-      - 'ops/qecf/**'
-      - 'server/src/graphql/resolvers/v040/**'
-      - 'helm/overlays/v040/**'
-      - 'monitoring/prometheus/rules/mc-platform-v040.yml'
+      - "graphql/v040/**"
+      - "policy/v040/**"
+      - "ops/sandbox/**"
+      - "ops/qecf/**"
+      - "server/src/graphql/resolvers/v040/**"
+      - "helm/overlays/v040/**"
+      - "monitoring/prometheus/rules/mc-platform-v040.yml"
 
 env:
-  NODE_VERSION: '20.11.0'
-  PYTHON_VERSION: '3.11'
+  NODE_VERSION: "20.11.0"
+  PYTHON_VERSION: "3.11"
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}/mc-platform
 
@@ -48,7 +48,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -188,7 +188,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -225,15 +225,15 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: 'ops/sandbox/'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
+          scan-type: "fs"
+          scan-ref: "ops/sandbox/"
+          format: "sarif"
+          output: "trivy-results.sarif"
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: "trivy-results.sarif"
 
       - name: Scan for secrets
         uses: trufflesecurity/trufflehog@main
@@ -288,12 +288,7 @@ jobs:
   build-container:
     name: Build Container Image
     runs-on: ubuntu-latest
-    needs:
-      [
-        validate-graphql-schema,
-        validate-opa-policies,
-        test-transcendent-resolvers,
-      ]
+    needs: [validate-graphql-schema, validate-opa-policies, test-transcendent-resolvers]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
@@ -345,7 +340,7 @@ jobs:
       - name: Setup Helm
         uses: azure/setup-helm@v3
         with:
-          version: 'v3.12.0'
+          version: "v3.12.0"
 
       - name: Validate Helm chart syntax
         run: |
@@ -383,7 +378,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install Playwright
         run: |

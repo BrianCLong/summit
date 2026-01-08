@@ -10,7 +10,7 @@
  * @module canonical-entities/policy
  */
 
-import { Sensitivity, PolicyLabels } from './types';
+import { Sensitivity, PolicyLabels } from "./types";
 
 // -----------------------------------------------------------------------------
 // User Context
@@ -43,7 +43,7 @@ export interface UserContext {
 /**
  * Operation types for access control
  */
-export type Operation = 'READ' | 'WRITE' | 'EXPORT' | 'DELETE';
+export type Operation = "READ" | "WRITE" | "EXPORT" | "DELETE";
 
 /**
  * Input for policy check
@@ -85,7 +85,7 @@ export interface PolicyCheckDecision {
 /**
  * Sensitivity level hierarchy (ordered from least to most sensitive)
  */
-const SENSITIVITY_HIERARCHY: Sensitivity[] = ['PUBLIC', 'INTERNAL', 'CONFIDENTIAL', 'SECRET'];
+const SENSITIVITY_HIERARCHY: Sensitivity[] = ["PUBLIC", "INTERNAL", "CONFIDENTIAL", "SECRET"];
 
 /**
  * Check if a clearance level is sufficient for a sensitivity level
@@ -129,9 +129,9 @@ export function getHighestClearance(clearances: Sensitivity[]): Sensitivity | nu
  * Simple license registry (in production, this would be a database)
  */
 const LICENSE_REGISTRY: Map<string, { canExport: boolean; restrictions: string[] }> = new Map([
-  ['EXPORT_LICENSE_US', { canExport: true, restrictions: [] }],
-  ['EXPORT_LICENSE_EU', { canExport: true, restrictions: ['non-commercial'] }],
-  ['NO_EXPORT', { canExport: false, restrictions: ['no-export'] }],
+  ["EXPORT_LICENSE_US", { canExport: true, restrictions: [] }],
+  ["EXPORT_LICENSE_EU", { canExport: true, restrictions: ["non-commercial"] }],
+  ["NO_EXPORT", { canExport: false, restrictions: ["no-export"] }],
 ]);
 
 /**
@@ -198,14 +198,14 @@ export function checkAccess(input: PolicyCheckInput): PolicyCheckDecision {
   const { user, object, operation } = input;
 
   // Rule 1: Check sensitivity level
-  rulesEvaluated.push('sensitivity-clearance');
+  rulesEvaluated.push("sensitivity-clearance");
   if (object.sensitivity) {
     const highestClearance = getHighestClearance(user.clearances);
 
     if (!highestClearance || !hasSufficientClearance(highestClearance, object.sensitivity)) {
       return {
         allow: false,
-        reason: `User clearance level ${highestClearance || 'NONE'} is insufficient for object sensitivity ${object.sensitivity}`,
+        reason: `User clearance level ${highestClearance || "NONE"} is insufficient for object sensitivity ${object.sensitivity}`,
         metadata: {
           rulesEvaluated,
           rulesMatched,
@@ -213,21 +213,21 @@ export function checkAccess(input: PolicyCheckInput): PolicyCheckDecision {
         },
       };
     }
-    rulesMatched.push('sensitivity-clearance');
+    rulesMatched.push("sensitivity-clearance");
   }
 
   // Rule 2: Check purpose limitation
-  rulesEvaluated.push('purpose-limitation');
+  rulesEvaluated.push("purpose-limitation");
   if (object.purpose && object.purpose.length > 0) {
     const objectPurposes = Array.isArray(object.purpose) ? object.purpose : [object.purpose];
     const userPurposes = user.purposes || [];
 
     // User must have at least one purpose that matches object purposes
     const hasMatchingPurpose = objectPurposes.some((objPurpose) =>
-      userPurposes.includes(objPurpose),
+      userPurposes.includes(objPurpose)
     );
 
-    if (!hasMatchingPurpose && (operation === 'READ' || operation === 'EXPORT')) {
+    if (!hasMatchingPurpose && (operation === "READ" || operation === "EXPORT")) {
       return {
         allow: false,
         reason: `User purposes ${JSON.stringify(userPurposes)} do not match required purposes ${JSON.stringify(objectPurposes)}`,
@@ -240,12 +240,12 @@ export function checkAccess(input: PolicyCheckInput): PolicyCheckDecision {
     }
 
     if (hasMatchingPurpose) {
-      rulesMatched.push('purpose-limitation');
+      rulesMatched.push("purpose-limitation");
     }
   }
 
   // Rule 3: Check need-to-know tags
-  rulesEvaluated.push('need-to-know');
+  rulesEvaluated.push("need-to-know");
   if (object.needToKnowTags && object.needToKnowTags.length > 0) {
     const userTags = user.needToKnowTags || [];
 
@@ -263,12 +263,12 @@ export function checkAccess(input: PolicyCheckInput): PolicyCheckDecision {
         },
       };
     }
-    rulesMatched.push('need-to-know');
+    rulesMatched.push("need-to-know");
   }
 
   // Rule 4: Check license for EXPORT operations
-  if (operation === 'EXPORT') {
-    rulesEvaluated.push('export-license');
+  if (operation === "EXPORT") {
+    rulesEvaluated.push("export-license");
     if (object.licenseId) {
       if (!isExportAllowed(object.licenseId, user)) {
         return {
@@ -281,15 +281,15 @@ export function checkAccess(input: PolicyCheckInput): PolicyCheckDecision {
           },
         };
       }
-      rulesMatched.push('export-license');
+      rulesMatched.push("export-license");
     }
   }
 
   // Rule 5: Role-based checks (RBAC component)
-  rulesEvaluated.push('role-based');
-  if (operation === 'DELETE' || operation === 'WRITE') {
+  rulesEvaluated.push("role-based");
+  if (operation === "DELETE" || operation === "WRITE") {
     // Only certain roles can write/delete
-    const writeRoles = ['ADMIN', 'LEAD', 'ANALYST'];
+    const writeRoles = ["ADMIN", "LEAD", "ANALYST"];
     const hasWriteRole = user.roles.some((role) => writeRoles.includes(role));
 
     if (!hasWriteRole) {
@@ -303,13 +303,13 @@ export function checkAccess(input: PolicyCheckInput): PolicyCheckDecision {
         },
       };
     }
-    rulesMatched.push('role-based');
+    rulesMatched.push("role-based");
   }
 
   // All checks passed
   return {
     allow: true,
-    reason: 'Access granted - all policy checks passed',
+    reason: "Access granted - all policy checks passed",
     metadata: {
       rulesEvaluated,
       rulesMatched,
@@ -342,7 +342,7 @@ export function checkAccess(input: PolicyCheckInput): PolicyCheckDecision {
 export function filterByAccess<T extends PolicyLabels & { id: string }>(
   user: UserContext,
   objects: T[],
-  operation: Operation,
+  operation: Operation
 ): T[] {
   return objects.filter((obj) => {
     const decision = checkAccess({ user, object: obj, operation });
@@ -361,7 +361,7 @@ export function filterByAccess<T extends PolicyLabels & { id: string }>(
 export function batchCheckAccess<T extends PolicyLabels & { id: string }>(
   user: UserContext,
   objects: T[],
-  operation: Operation,
+  operation: Operation
 ): Map<string, PolicyCheckDecision> {
   const decisions = new Map<string, PolicyCheckDecision>();
 
@@ -384,7 +384,7 @@ export function createDefaultUserContext(userId: string): UserContext {
   return {
     userId,
     roles: [],
-    clearances: ['PUBLIC'],
+    clearances: ["PUBLIC"],
     jurisdictions: [],
     purposes: [],
     needToKnowTags: [],
@@ -397,11 +397,11 @@ export function createDefaultUserContext(userId: string): UserContext {
 export function createAdminUserContext(userId: string): UserContext {
   return {
     userId,
-    roles: ['ADMIN'],
-    clearances: ['PUBLIC', 'INTERNAL', 'CONFIDENTIAL', 'SECRET'],
-    jurisdictions: ['*'],
-    purposes: ['*'],
-    needToKnowTags: ['*'],
+    roles: ["ADMIN"],
+    clearances: ["PUBLIC", "INTERNAL", "CONFIDENTIAL", "SECRET"],
+    jurisdictions: ["*"],
+    purposes: ["*"],
+    needToKnowTags: ["*"],
   };
 }
 
@@ -410,7 +410,7 @@ export function createAdminUserContext(userId: string): UserContext {
  */
 export function mergeUserContexts(...contexts: UserContext[]): UserContext {
   if (contexts.length === 0) {
-    throw new Error('At least one user context required');
+    throw new Error("At least one user context required");
   }
 
   const merged: UserContext = {

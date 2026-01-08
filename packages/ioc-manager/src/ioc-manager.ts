@@ -1,4 +1,4 @@
-import { IOC, IOCType, IOCStatus, IOCSearchQuery, IOCDeduplicationResult } from './types.js';
+import { IOC, IOCType, IOCStatus, IOCSearchQuery, IOCDeduplicationResult } from "./types.js";
 
 /**
  * IOC Manager
@@ -118,7 +118,7 @@ export class IOCManager {
       if (!ids) return [];
 
       return Array.from(ids)
-        .map(id => this.iocs.get(id))
+        .map((id) => this.iocs.get(id))
         .filter((ioc): ioc is IOC => ioc !== undefined);
     }
 
@@ -141,52 +141,51 @@ export class IOCManager {
     // Apply filters
     if (query.query) {
       const q = query.query.toLowerCase();
-      results = results.filter(ioc =>
-        ioc.value.toLowerCase().includes(q) ||
-        ioc.description?.toLowerCase().includes(q) ||
-        ioc.tags.some(tag => tag.toLowerCase().includes(q))
+      results = results.filter(
+        (ioc) =>
+          ioc.value.toLowerCase().includes(q) ||
+          ioc.description?.toLowerCase().includes(q) ||
+          ioc.tags.some((tag) => tag.toLowerCase().includes(q))
       );
     }
 
     if (query.types && query.types.length > 0) {
-      results = results.filter(ioc => query.types!.includes(ioc.type));
+      results = results.filter((ioc) => query.types!.includes(ioc.type));
     }
 
     if (query.statuses && query.statuses.length > 0) {
-      results = results.filter(ioc => query.statuses!.includes(ioc.status));
+      results = results.filter((ioc) => query.statuses!.includes(ioc.status));
     }
 
     if (query.severities && query.severities.length > 0) {
-      results = results.filter(ioc => query.severities!.includes(ioc.severity));
+      results = results.filter((ioc) => query.severities!.includes(ioc.severity));
     }
 
     if (query.tags && query.tags.length > 0) {
-      results = results.filter(ioc =>
-        query.tags!.some(tag => ioc.tags.includes(tag))
-      );
+      results = results.filter((ioc) => query.tags!.some((tag) => ioc.tags.includes(tag)));
     }
 
     if (query.minConfidence !== undefined) {
-      results = results.filter(ioc => ioc.confidence >= query.minConfidence!);
+      results = results.filter((ioc) => ioc.confidence >= query.minConfidence!);
     }
 
     if (query.startDate) {
-      results = results.filter(ioc => ioc.firstSeen >= query.startDate!);
+      results = results.filter((ioc) => ioc.firstSeen >= query.startDate!);
     }
 
     if (query.endDate) {
-      results = results.filter(ioc => ioc.lastSeen <= query.endDate!);
+      results = results.filter((ioc) => ioc.lastSeen <= query.endDate!);
     }
 
     if (query.sources && query.sources.length > 0) {
-      results = results.filter(ioc =>
-        ioc.sources.some(source => query.sources!.includes(source.name))
+      results = results.filter((ioc) =>
+        ioc.sources.some((source) => query.sources!.includes(source.name))
       );
     }
 
     if (query.relatedThreats && query.relatedThreats.length > 0) {
-      results = results.filter(ioc =>
-        ioc.relatedThreats.some(threat => query.relatedThreats!.includes(threat))
+      results = results.filter((ioc) =>
+        ioc.relatedThreats.some((threat) => query.relatedThreats!.includes(threat))
       );
     }
 
@@ -205,14 +204,14 @@ export class IOCManager {
     // Merge sources
     const sources = [...existing.sources];
     for (const source of newIoc.sources) {
-      if (!sources.some(s => s.name === source.name && s.url === source.url)) {
+      if (!sources.some((s) => s.name === source.name && s.url === source.url)) {
         sources.push(source);
       }
     }
 
     // Update confidence (weighted average)
-    const totalConfidence = existing.confidence * existing.sources.length +
-                          newIoc.confidence * newIoc.sources.length;
+    const totalConfidence =
+      existing.confidence * existing.sources.length + newIoc.confidence * newIoc.sources.length;
     const confidence = totalConfidence / sources.length;
 
     // Merge tags
@@ -223,18 +222,25 @@ export class IOCManager {
 
     // Merge related entities
     const relatedIocs = Array.from(new Set([...existing.relatedIocs, ...newIoc.relatedIocs]));
-    const relatedThreats = Array.from(new Set([...existing.relatedThreats, ...newIoc.relatedThreats]));
-    const relatedCampaigns = Array.from(new Set([...existing.relatedCampaigns, ...newIoc.relatedCampaigns]));
+    const relatedThreats = Array.from(
+      new Set([...existing.relatedThreats, ...newIoc.relatedThreats])
+    );
+    const relatedCampaigns = Array.from(
+      new Set([...existing.relatedCampaigns, ...newIoc.relatedCampaigns])
+    );
 
     // Merge MITRE data
     const mitreTactics = Array.from(new Set([...existing.mitreTactics, ...newIoc.mitreTactics]));
-    const mitreTechniques = Array.from(new Set([...existing.mitreTechniques, ...newIoc.mitreTechniques]));
+    const mitreTechniques = Array.from(
+      new Set([...existing.mitreTechniques, ...newIoc.mitreTechniques])
+    );
 
     // Use higher severity
     const severityOrder = { INFO: 0, LOW: 1, MEDIUM: 2, HIGH: 3, CRITICAL: 4 };
-    const severity = severityOrder[newIoc.severity] > severityOrder[existing.severity]
-      ? newIoc.severity
-      : existing.severity;
+    const severity =
+      severityOrder[newIoc.severity] > severityOrder[existing.severity]
+        ? newIoc.severity
+        : existing.severity;
 
     // Update enrichment
     const enrichment = {
@@ -292,7 +298,7 @@ export class IOCManager {
       duplicatesFound,
       uniqueIocs: this.iocs.size,
       merged,
-      deduplicationMethod: 'EXACT',
+      deduplicationMethod: "EXACT",
       timestamp: new Date().toISOString(),
     };
   }
@@ -308,7 +314,7 @@ export class IOCManager {
 
     const updated: IOC = {
       ...ioc,
-      status: 'FALSE_POSITIVE',
+      status: "FALSE_POSITIVE",
       falsePositiveReports: ioc.falsePositiveReports + 1,
       falsePositiveReason: reason,
       updatedAt: new Date().toISOString(),
@@ -323,7 +329,7 @@ export class IOCManager {
    */
   async whitelistIOC(id: string): Promise<IOC | undefined> {
     return this.updateIOC(id, {
-      status: 'WHITELISTED',
+      status: "WHITELISTED",
       updatedAt: new Date().toISOString(),
     });
   }
@@ -336,9 +342,9 @@ export class IOCManager {
     let expired = 0;
 
     for (const ioc of this.iocs.values()) {
-      if (ioc.expiresAt && ioc.expiresAt < now && ioc.status === 'ACTIVE') {
+      if (ioc.expiresAt && ioc.expiresAt < now && ioc.status === "ACTIVE") {
         await this.updateIOC(ioc.id, {
-          status: 'EXPIRED',
+          status: "EXPIRED",
           updatedAt: now,
         });
         expired++;
@@ -390,20 +396,20 @@ export class IOCManager {
    */
   private normalizeValue(value: string, type: IOCType): string {
     switch (type) {
-      case 'DOMAIN':
-      case 'EMAIL_ADDRESS':
+      case "DOMAIN":
+      case "EMAIL_ADDRESS":
         return value.toLowerCase();
 
-      case 'FILE_HASH_MD5':
-      case 'FILE_HASH_SHA1':
-      case 'FILE_HASH_SHA256':
+      case "FILE_HASH_MD5":
+      case "FILE_HASH_SHA1":
+      case "FILE_HASH_SHA256":
         return value.toLowerCase();
 
-      case 'URL':
+      case "URL":
         // Remove trailing slash
-        return value.replace(/\/$/, '').toLowerCase();
+        return value.replace(/\/$/, "").toLowerCase();
 
-      case 'IP_ADDRESS':
+      case "IP_ADDRESS":
         // Already normalized
         return value;
 
@@ -415,17 +421,17 @@ export class IOCManager {
   /**
    * Export IOCs
    */
-  async exportIOCs(format: 'JSON' | 'CSV' | 'STIX'): Promise<string> {
+  async exportIOCs(format: "JSON" | "CSV" | "STIX"): Promise<string> {
     const iocs = Array.from(this.iocs.values());
 
     switch (format) {
-      case 'JSON':
+      case "JSON":
         return JSON.stringify(iocs, null, 2);
 
-      case 'CSV':
+      case "CSV":
         return this.exportToCSV(iocs);
 
-      case 'STIX':
+      case "STIX":
         return this.exportToSTIX(iocs);
 
       default:
@@ -434,8 +440,18 @@ export class IOCManager {
   }
 
   private exportToCSV(iocs: IOC[]): string {
-    const headers = ['ID', 'Type', 'Value', 'Severity', 'Confidence', 'Status', 'First Seen', 'Last Seen', 'Tags'];
-    const rows = iocs.map(ioc => [
+    const headers = [
+      "ID",
+      "Type",
+      "Value",
+      "Severity",
+      "Confidence",
+      "Status",
+      "First Seen",
+      "Last Seen",
+      "Tags",
+    ];
+    const rows = iocs.map((ioc) => [
       ioc.id,
       ioc.type,
       ioc.value,
@@ -444,26 +460,26 @@ export class IOCManager {
       ioc.status,
       ioc.firstSeen,
       ioc.lastSeen,
-      ioc.tags.join(';'),
+      ioc.tags.join(";"),
     ]);
 
-    return [headers, ...rows].map(row => row.join(',')).join('\n');
+    return [headers, ...rows].map((row) => row.join(",")).join("\n");
   }
 
   private exportToSTIX(iocs: IOC[]): string {
     const stixBundle = {
-      type: 'bundle',
+      type: "bundle",
       id: `bundle--${Date.now()}`,
-      objects: iocs.map(ioc => ({
-        type: 'indicator',
-        spec_version: '2.1',
+      objects: iocs.map((ioc) => ({
+        type: "indicator",
+        spec_version: "2.1",
         id: ioc.id,
         created: ioc.createdAt,
         modified: ioc.updatedAt,
         name: ioc.value,
         description: ioc.description,
         pattern: `[${this.getStixPatternType(ioc.type)}:value = '${ioc.value}']`,
-        pattern_type: 'stix',
+        pattern_type: "stix",
         valid_from: ioc.firstSeen,
         valid_until: ioc.expiresAt,
         labels: ioc.tags,
@@ -476,16 +492,16 @@ export class IOCManager {
 
   private getStixPatternType(type: IOCType): string {
     const mapping: Record<string, string> = {
-      IP_ADDRESS: 'ipv4-addr',
-      DOMAIN: 'domain-name',
-      URL: 'url',
-      FILE_HASH_MD5: 'file:hashes.MD5',
-      FILE_HASH_SHA1: 'file:hashes.SHA-1',
-      FILE_HASH_SHA256: 'file:hashes.SHA-256',
-      EMAIL_ADDRESS: 'email-addr',
+      IP_ADDRESS: "ipv4-addr",
+      DOMAIN: "domain-name",
+      URL: "url",
+      FILE_HASH_MD5: "file:hashes.MD5",
+      FILE_HASH_SHA1: "file:hashes.SHA-1",
+      FILE_HASH_SHA256: "file:hashes.SHA-256",
+      EMAIL_ADDRESS: "email-addr",
     };
 
-    return mapping[type] || 'unknown';
+    return mapping[type] || "unknown";
   }
 
   /**

@@ -4,16 +4,16 @@
  * Provides schema inference, PII detection, and canonical mapping capabilities.
  */
 
-export * from './types';
-export { SchemaInference } from './schema-inference';
-export { PIIDetection } from './pii-detection';
-export { CanonicalMapper } from './canonical-mapper';
-export type { MappingConfig } from './canonical-mapper';
+export * from "./types";
+export { SchemaInference } from "./schema-inference";
+export { PIIDetection } from "./pii-detection";
+export { CanonicalMapper } from "./canonical-mapper";
+export type { MappingConfig } from "./canonical-mapper";
 
 // Re-export for convenience
-import { SchemaInference } from './schema-inference';
-import { PIIDetection } from './pii-detection';
-import { CanonicalMapper } from './canonical-mapper';
+import { SchemaInference } from "./schema-inference";
+import { PIIDetection } from "./pii-detection";
+import { CanonicalMapper } from "./canonical-mapper";
 
 /**
  * ETL Assistant Facade

@@ -17,7 +17,7 @@ The IntelGraph and Maestro platforms now include a comprehensive safe mutations 
 
 ```typescript
 // Count tokens for any supported model
-const result = await countTokens('openai', 'gpt-4o-mini', prompt);
+const result = await countTokens("openai", "gpt-4o-mini", prompt);
 console.log(`Tokens: ${result.total}, Cost: $${result.estimatedCostUSD}`);
 ```
 
@@ -32,46 +32,46 @@ console.log(`Tokens: ${result.total}, Cost: $${result.estimatedCostUSD}`);
 #### Maestro Safe Mutations
 
 ```typescript
-import { MaestroSafeMutations } from './conductor-ui/frontend/src/maestro/mutations/SafeMutations';
+import { MaestroSafeMutations } from "./conductor-ui/frontend/src/maestro/mutations/SafeMutations";
 
 // Create a run with validation and rollback
 const result = await MaestroSafeMutations.createRun({
-  pipeline: 'data-processing',
+  pipeline: "data-processing",
   autonomyLevel: 3,
   budgetCap: 200,
   canaryPercent: 0.1,
 });
 
 if (!result.success) {
-  console.error('Validation failed:', result.validationErrors);
+  console.error("Validation failed:", result.validationErrors);
 }
 ```
 
 #### IntelGraph Safe Mutations
 
 ```typescript
-import { IntelGraphSafeMutations } from './server/src/graphql/mutations/SafeMutations';
+import { IntelGraphSafeMutations } from "./server/src/graphql/mutations/SafeMutations";
 
 // Create an entity with full audit trail
 const context = {
   user: {
-    id: 'user-123',
-    tenantId: 'tenant-123',
-    permissions: ['entity:create'],
+    id: "user-123",
+    tenantId: "tenant-123",
+    permissions: ["entity:create"],
   },
-  requestId: 'req-123',
+  requestId: "req-123",
   timestamp: new Date().toISOString(),
-  source: 'graphql',
+  source: "graphql",
 };
 
 const result = await IntelGraphSafeMutations.createEntity(
   {
-    tenantId: 'tenant-123',
-    kind: 'Person',
-    labels: ['Individual'],
-    props: { name: 'John Doe' },
+    tenantId: "tenant-123",
+    kind: "Person",
+    labels: ["Individual"],
+    props: { name: "John Doe" },
   },
-  context,
+  context
 );
 ```
 
@@ -208,9 +208,9 @@ Pricing is automatically updated in `server/src/lib/tokcount.ts`:
 
 ```typescript
 const MODEL_PRICING: Record<string, { input: number; output: number }> = {
-  'gpt-4o': { input: 0.0025, output: 0.01 },
-  'gpt-4o-mini': { input: 0.00015, output: 0.0006 },
-  'claude-3-5-sonnet-20241022': { input: 0.003, output: 0.015 },
+  "gpt-4o": { input: 0.0025, output: 0.01 },
+  "gpt-4o-mini": { input: 0.00015, output: 0.0006 },
+  "claude-3-5-sonnet-20241022": { input: 0.003, output: 0.015 },
   // ... more models
 };
 ```
@@ -228,10 +228,7 @@ const EntityMutationSchema = z.object({
   kind: z.string().regex(/^[a-zA-Z][a-zA-Z0-9_]*$/),
   props: z
     .record(z.any())
-    .refine(
-      (props) => JSON.stringify(props).length <= 32768,
-      'Entity properties too large',
-    ),
+    .refine((props) => JSON.stringify(props).length <= 32768, "Entity properties too large"),
 });
 ```
 
@@ -240,12 +237,12 @@ const EntityMutationSchema = z.object({
 ```typescript
 // Prevent self-referential relationships
 if (relationship.srcId === relationship.dstId) {
-  throw new Error('Self-referential relationships not allowed');
+  throw new Error("Self-referential relationships not allowed");
 }
 
 // Enforce entity count limits
 if (context.entityCount >= 50000) {
-  throw new Error('Investigation has reached maximum entity limit');
+  throw new Error("Investigation has reached maximum entity limit");
 }
 ```
 
@@ -253,13 +250,10 @@ if (context.entityCount >= 50000) {
 
 ```typescript
 // Detect potential injection attacks
-const sqlInjectionPatterns = [
-  /(\bSELECT\b.*\bFROM\b)/i,
-  /(\bDROP\b.*\bTABLE\b)/i,
-];
+const sqlInjectionPatterns = [/(\bSELECT\b.*\bFROM\b)/i, /(\bDROP\b.*\bTABLE\b)/i];
 
 if (sqlInjectionPatterns.some((pattern) => pattern.test(input))) {
-  throw new Error('Potential SQL injection detected');
+  throw new Error("Potential SQL injection detected");
 }
 ```
 
@@ -328,11 +322,11 @@ npm test -- --grep "Business Rule Validation"
 ### Test Examples
 
 ```typescript
-describe('Token Budget Enforcement', () => {
-  it('should block requests exceeding budget', () => {
+describe("Token Budget Enforcement", () => {
+  it("should block requests exceeding budget", () => {
     const budgetCheck = validateTokenBudget(130000, 120000);
     expect(budgetCheck.withinBudget).toBe(false);
-    expect(budgetCheck.recommendAction).toBe('block');
+    expect(budgetCheck.recommendAction).toBe("block");
   });
 });
 ```
@@ -359,7 +353,7 @@ describe('Token Budget Enforcement', () => {
 
 ```typescript
 // Before
-const entity = await session.run('CREATE (e:Entity {...}) RETURN e', params);
+const entity = await session.run("CREATE (e:Entity {...}) RETURN e", params);
 
 // After
 const result = await IntelGraphSafeMutations.createEntity(entityData, context);
@@ -370,19 +364,19 @@ const result = await IntelGraphSafeMutations.createEntity(entityData, context);
 ```typescript
 // Before
 const response = await openai.chat.completions.create({
-  model: 'gpt-4o-mini',
-  messages: [{ role: 'user', content: prompt }],
+  model: "gpt-4o-mini",
+  messages: [{ role: "user", content: prompt }],
 });
 
 // After
-const tokenCheck = await countTokens('openai', 'gpt-4o-mini', prompt);
-if (tokenCheck.budget.recommendAction === 'block') {
-  throw new Error('Token budget exceeded');
+const tokenCheck = await countTokens("openai", "gpt-4o-mini", prompt);
+if (tokenCheck.budget.recommendAction === "block") {
+  throw new Error("Token budget exceeded");
 }
 
 const response = await openai.chat.completions.create({
-  model: 'gpt-4o-mini',
-  messages: [{ role: 'user', content: prompt }],
+  model: "gpt-4o-mini",
+  messages: [{ role: "user", content: prompt }],
 });
 ```
 

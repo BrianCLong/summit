@@ -62,14 +62,14 @@ The Threat Hunting Platform provides an intelligent, LLM-powered system for proa
 ### Quick Start
 
 ```typescript
-import { threatHuntingOrchestrator } from './hunting';
+import { threatHuntingOrchestrator } from "./hunting";
 
 // Initialize the orchestrator
 await threatHuntingOrchestrator.initialize();
 
 // Start a hunt
 const { huntId } = await threatHuntingOrchestrator.startHunt({
-  scope: 'all',
+  scope: "all",
   timeWindowHours: 24,
   configuration: {
     autoRemediate: false,
@@ -91,16 +91,16 @@ console.log(`Findings: ${results.findings.length}`);
 
 ### Hunt Configuration Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `scope` | string | `'all'` | Hunt scope: `all`, `network`, `endpoint`, `identity`, `cloud` |
-| `timeWindowHours` | number | `24` | Time window for historical analysis |
-| `autoRemediate` | boolean | `false` | Enable automatic remediation |
-| `remediationApprovalRequired` | boolean | `true` | Require approval for remediation actions |
-| `confidenceThreshold` | number | `0.7` | Minimum confidence for findings |
-| `targetPrecision` | number | `0.91` | Target precision rate |
-| `llmModel` | string | `'claude-3-opus'` | LLM model for analysis |
-| `llmTemperature` | number | `0.1` | LLM temperature (lower = more deterministic) |
+| Option                        | Type    | Default           | Description                                                   |
+| ----------------------------- | ------- | ----------------- | ------------------------------------------------------------- |
+| `scope`                       | string  | `'all'`           | Hunt scope: `all`, `network`, `endpoint`, `identity`, `cloud` |
+| `timeWindowHours`             | number  | `24`              | Time window for historical analysis                           |
+| `autoRemediate`               | boolean | `false`           | Enable automatic remediation                                  |
+| `remediationApprovalRequired` | boolean | `true`            | Require approval for remediation actions                      |
+| `confidenceThreshold`         | number  | `0.7`             | Minimum confidence for findings                               |
+| `targetPrecision`             | number  | `0.91`            | Target precision rate                                         |
+| `llmModel`                    | string  | `'claude-3-opus'` | LLM model for analysis                                        |
+| `llmTemperature`              | number  | `0.1`             | LLM temperature (lower = more deterministic)                  |
 
 ### Environment Variables
 
@@ -189,9 +189,9 @@ The platform uses a multi-stage LLM chain:
       hypothesisId: "hypothesis-1",
       query: "MATCH (source)-[:CONNECTED_TO*1..3]->(target)...",
       params: { max_hops: 3, time_window_hours: 24 },
-      estimatedComplexity: 30
-    }
-  ]
+      estimatedComplexity: 30,
+    },
+  ];
 }
 ```
 
@@ -222,17 +222,17 @@ The platform uses a multi-stage LLM chain:
 
 ### Supported Actions
 
-| Action Type | Description | Reversible |
-|-------------|-------------|------------|
-| `BLOCK_IP` | Block IP at firewall | ✓ |
-| `BLOCK_DOMAIN` | Add domain to DNS sinkhole | ✓ |
-| `QUARANTINE_FILE` | Quarantine file across endpoints | ✓ |
-| `DISABLE_ACCOUNT` | Disable user account | ✓ |
-| `ISOLATE_HOST` | Network isolate host | ✓ |
-| `KILL_PROCESS` | Terminate malicious process | ✗ |
-| `REVOKE_CREDENTIALS` | Revoke credentials/tokens | ✓ |
-| `ALERT_TEAM` | Send alert to security team | ✗ |
-| `CREATE_TICKET` | Create incident ticket | ✗ |
+| Action Type          | Description                      | Reversible |
+| -------------------- | -------------------------------- | ---------- |
+| `BLOCK_IP`           | Block IP at firewall             | ✓          |
+| `BLOCK_DOMAIN`       | Add domain to DNS sinkhole       | ✓          |
+| `QUARANTINE_FILE`    | Quarantine file across endpoints | ✓          |
+| `DISABLE_ACCOUNT`    | Disable user account             | ✓          |
+| `ISOLATE_HOST`       | Network isolate host             | ✓          |
+| `KILL_PROCESS`       | Terminate malicious process      | ✗          |
+| `REVOKE_CREDENTIALS` | Revoke credentials/tokens        | ✓          |
+| `ALERT_TEAM`         | Send alert to security team      | ✗          |
+| `CREATE_TICKET`      | Create incident ticket           | ✗          |
 
 ### Safety Controls
 
@@ -247,27 +247,27 @@ The platform uses a multi-stage LLM chain:
 ```typescript
 // Pre-remediation hook
 autoRemediationHooks.registerHook({
-  name: 'custom_validation',
-  type: 'pre',
-  actionTypes: ['ISOLATE_HOST'],
+  name: "custom_validation",
+  type: "pre",
+  actionTypes: ["ISOLATE_HOST"],
   handler: async (action, context) => {
     // Custom validation logic
-    if (action.target.criticality === 'CRITICAL') {
-      return { proceed: false, message: 'Requires manual approval' };
+    if (action.target.criticality === "CRITICAL") {
+      return { proceed: false, message: "Requires manual approval" };
     }
     return { proceed: true };
-  }
+  },
 });
 
 // Post-remediation hook
 autoRemediationHooks.registerHook({
-  name: 'notify_soc',
-  type: 'post',
-  actionTypes: ['BLOCK_IP', 'ISOLATE_HOST'],
+  name: "notify_soc",
+  type: "post",
+  actionTypes: ["BLOCK_IP", "ISOLATE_HOST"],
   handler: async (action, context) => {
     await notifySOC(action, context);
     return { proceed: true };
-  }
+  },
 });
 ```
 
@@ -275,15 +275,15 @@ autoRemediationHooks.registerHook({
 
 ### Supported Sources
 
-| Source | Type | Data |
-|--------|------|------|
-| MISP | CTI | Threat events, IOCs |
-| AlienVault OTX | CTI | Threat pulses, IOCs |
-| VirusTotal | CTI | File/URL analysis |
-| Shodan | OSINT | Internet scanning data |
-| Censys | OSINT | Certificate/host data |
-| Pastebin | OSINT | Paste monitoring |
-| GitHub | OSINT | Code/leak monitoring |
+| Source         | Type  | Data                   |
+| -------------- | ----- | ---------------------- |
+| MISP           | CTI   | Threat events, IOCs    |
+| AlienVault OTX | CTI   | Threat pulses, IOCs    |
+| VirusTotal     | CTI   | File/URL analysis      |
+| Shodan         | OSINT | Internet scanning data |
+| Censys         | OSINT | Certificate/host data  |
+| Pastebin       | OSINT | Paste monitoring       |
+| GitHub         | OSINT | Code/leak monitoring   |
 
 ### Enrichment Flow
 
@@ -300,7 +300,7 @@ Finding → Extract IOCs → Query CTI Sources →
 Main dashboard for hunt orchestration:
 
 ```tsx
-import { ThreatHuntingDashboard } from '@/components/hunting';
+import { ThreatHuntingDashboard } from "@/components/hunting";
 
 function App() {
   return <ThreatHuntingDashboard />;
@@ -308,6 +308,7 @@ function App() {
 ```
 
 Features:
+
 - Start/stop hunts
 - Real-time progress tracking
 - Findings browser with severity filters
@@ -320,7 +321,7 @@ Features:
 Visual query builder for custom hunts:
 
 ```tsx
-import { HuntQueryBuilder } from '@/components/hunting';
+import { HuntQueryBuilder } from "@/components/hunting";
 
 function CustomHuntPage() {
   return <HuntQueryBuilder />;
@@ -328,6 +329,7 @@ function CustomHuntPage() {
 ```
 
 Features:
+
 - Template browser by category
 - Parameter configuration
 - Hypothesis builder with MITRE mapping
@@ -377,13 +379,13 @@ POST /api/v1/remediation/:planId/rollback
 
 ### Key Metrics
 
-| Metric | Description |
-|--------|-------------|
-| `threat_hunt_findings_total` | Total findings discovered |
-| `threat_hunt_precision` | Precision estimate per hunt |
-| `threat_hunt_duration_seconds` | Hunt execution duration |
+| Metric                          | Description                  |
+| ------------------------------- | ---------------------------- |
+| `threat_hunt_findings_total`    | Total findings discovered    |
+| `threat_hunt_precision`         | Precision estimate per hunt  |
+| `threat_hunt_duration_seconds`  | Hunt execution duration      |
 | `threat_hunt_remediation_count` | Remediation actions executed |
-| `llm_tokens_used_total` | Total LLM tokens consumed |
+| `llm_tokens_used_total`         | Total LLM tokens consumed    |
 
 ### Prometheus Labels
 
@@ -395,13 +397,13 @@ threat_hunt_duration_seconds{hunt_type="agentic"}
 
 ## Trade-offs
 
-| Advantage | Trade-off |
-|-----------|-----------|
-| **Proactive Detection** | +Compute cost for LLM inference |
-| **High Precision (91%)** | May miss some edge cases |
-| **Auto-Remediation** | Requires careful tuning to avoid disruption |
-| **CTI Enrichment** | API rate limits on external sources |
-| **Real-time Dashboard** | WebSocket connection overhead |
+| Advantage                | Trade-off                                   |
+| ------------------------ | ------------------------------------------- |
+| **Proactive Detection**  | +Compute cost for LLM inference             |
+| **High Precision (91%)** | May miss some edge cases                    |
+| **Auto-Remediation**     | Requires careful tuning to avoid disruption |
+| **CTI Enrichment**       | API rate limits on external sources         |
+| **Real-time Dashboard**  | WebSocket connection overhead               |
 
 ## Best Practices
 
@@ -418,21 +420,25 @@ threat_hunt_duration_seconds{hunt_type="agentic"}
 ### Common Issues
 
 **Hunt stuck in "executing_queries"**
+
 - Check Neo4j connectivity
 - Verify query timeout settings
 - Review query complexity limits
 
 **Low precision estimate**
+
 - Increase confidence threshold
 - Add more specific hypothesis constraints
 - Review and tune Cypher templates
 
 **CTI enrichment failing**
+
 - Verify API keys are configured
 - Check network connectivity to external sources
 - Review rate limits
 
 **Remediation not executing**
+
 - Check approval queue for pending approvals
 - Verify target criticality settings
 - Review pre-hook validation logs
@@ -449,6 +455,7 @@ threat_hunt_duration_seconds{hunt_type="agentic"}
 ## Support
 
 For issues and feature requests, see:
+
 - Documentation: `/docs/threat-hunting-platform.md`
 - Issues: `https://github.com/BrianCLong/summit/issues`
 - Runbooks: `/RUNBOOKS/threat-hunting.md`

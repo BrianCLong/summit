@@ -4,24 +4,24 @@
 # Core SLOs - Production Targets
 slos:
   graph_query_latency:
-    target: 'p95 ≤ 1.5s'
-    description: 'Graph query response time for intelligence analysis'
+    target: "p95 ≤ 1.5s"
+    description: "Graph query response time for intelligence analysis"
 
   ingest_e2e_delay:
-    target: 'p95 ≤ 5s'
-    description: 'End-to-end ingest processing including PII redaction'
+    target: "p95 ≤ 5s"
+    description: "End-to-end ingest processing including PII redaction"
 
   trace_coverage:
-    target: '≥ 90%'
-    description: 'OTEL trace coverage across gateway→services'
+    target: "≥ 90%"
+    description: "OTEL trace coverage across gateway→services"
 
   provenance_verify:
-    target: '0 failures / 24h'
-    description: 'Provenance bundle verification success rate'
+    target: "0 failures / 24h"
+    description: "Provenance bundle verification success rate"
 
   policy_denial_rate:
-    target: '≤ 15% of GraphQL requests'
-    description: 'Authority-based policy denial rate (outside test tenants)'
+    target: "≤ 15% of GraphQL requests"
+    description: "Authority-based policy denial rate (outside test tenants)"
 
 # PromQL Alert Rules
 alerts:
@@ -32,8 +32,8 @@ alerts:
       severity: warning
       component: graph
     annotations:
-      summary: 'Graph query p95 latency exceeding 1.5s SLO'
-      description: 'p95 graph query latency is {{ $value }}s, above 1.5s threshold'
+      summary: "Graph query p95 latency exceeding 1.5s SLO"
+      description: "p95 graph query latency is {{ $value }}s, above 1.5s threshold"
 
   - alert: IngestBacklogGrowing
     expr: rate(ingest_queue_depth[5m]) > 0 and avg_over_time(ingest_queue_depth[15m]) > 1000
@@ -42,8 +42,8 @@ alerts:
       severity: critical
       component: ingest
     annotations:
-      summary: 'Ingest queue backlog growing consistently'
-      description: 'Ingest backlog at {{ $value }} and growing for 15m'
+      summary: "Ingest queue backlog growing consistently"
+      description: "Ingest backlog at {{ $value }} and growing for 15m"
 
   - alert: ProvenanceVerifyFailures
     expr: increase(prov_ledger_bundle_verify_fail_total[15m]) > 0
@@ -52,8 +52,8 @@ alerts:
       severity: critical
       component: provenance
     annotations:
-      summary: 'Provenance verification failures detected'
-      description: '{{ $value }} provenance verification failures in 15m'
+      summary: "Provenance verification failures detected"
+      description: "{{ $value }} provenance verification failures in 15m"
 
   - alert: PolicyDenialAnomaly
     expr: increase(policy_denial_total[15m]) / increase(graphql_requests_total[15m]) > 0.15
@@ -62,8 +62,8 @@ alerts:
       severity: warning
       component: policy
     annotations:
-      summary: 'Policy denial rate anomaly detected'
-      description: 'Policy denial rate {{ $value | humanizePercentage }} exceeds 15% threshold'
+      summary: "Policy denial rate anomaly detected"
+      description: "Policy denial rate {{ $value | humanizePercentage }} exceeds 15% threshold"
 
   - alert: TraceCoverageLow
     expr: (1 - (sum(rate(otel_spans_untraced_total[5m])) / sum(rate(otel_spans_total[5m])))) < 0.90
@@ -72,60 +72,60 @@ alerts:
       severity: warning
       component: observability
     annotations:
-      summary: 'OTEL trace coverage below 90% threshold'
-      description: 'Trace coverage at {{ $value | humanizePercentage }}, below 90% SLO'
+      summary: "OTEL trace coverage below 90% threshold"
+      description: "Trace coverage at {{ $value | humanizePercentage }}, below 90% SLO"
 
 # Dashboard Configuration
 dashboards:
-  - name: 'GA-Core Operations Overview'
+  - name: "GA-Core Operations Overview"
     panels:
-      - title: 'Query Latency Heatmap'
-        type: 'heatmap'
-        query: 'histogram_quantile([0.50,0.90,0.95,0.99], sum by (le) (rate(graph_query_latency_seconds_bucket[5m])))'
+      - title: "Query Latency Heatmap"
+        type: "heatmap"
+        query: "histogram_quantile([0.50,0.90,0.95,0.99], sum by (le) (rate(graph_query_latency_seconds_bucket[5m])))"
 
-      - title: 'Ingest Throughput'
-        type: 'graph'
-        query: 'rate(ingest_messages_processed_total[5m])'
+      - title: "Ingest Throughput"
+        type: "graph"
+        query: "rate(ingest_messages_processed_total[5m])"
 
-      - title: 'OTEL Coverage'
-        type: 'stat'
-        query: '(1 - (sum(rate(otel_spans_untraced_total[5m])) / sum(rate(otel_spans_total[5m])))) * 100'
+      - title: "OTEL Coverage"
+        type: "stat"
+        query: "(1 - (sum(rate(otel_spans_untraced_total[5m])) / sum(rate(otel_spans_total[5m])))) * 100"
 
-      - title: 'Detector ROC (live)'
-        type: 'graph'
-        query: 'detector_true_positive_rate / (detector_true_positive_rate + detector_false_negative_rate)'
+      - title: "Detector ROC (live)"
+        type: "graph"
+        query: "detector_true_positive_rate / (detector_true_positive_rate + detector_false_negative_rate)"
 
-      - title: 'Policy Decisions'
-        type: 'table'
-        query: 'topk(10, increase(policy_decisions_total[1h]))'
+      - title: "Policy Decisions"
+        type: "table"
+        query: "topk(10, increase(policy_decisions_total[1h]))"
 
-      - title: 'Provenance Coverage'
-        type: 'stat'
-        query: 'provenance_bundles_verified_total / provenance_bundles_created_total * 100'
+      - title: "Provenance Coverage"
+        type: "stat"
+        query: "provenance_bundles_verified_total / provenance_bundles_created_total * 100"
 
-      - title: 'Error Budget Burn-down'
-        type: 'graph'
-        query: '1 - (slo_target - slo_actual) / slo_target'
+      - title: "Error Budget Burn-down"
+        type: "graph"
+        query: "1 - (slo_target - slo_actual) / slo_target"
 
 # Notification Configuration
 notifications:
   channels:
-    - name: 'ops-chat'
-      type: 'slack'
-      url: '${SLACK_WEBHOOK_URL}'
-      title_template: '🚨 GA-Core Alert: {{ .CommonLabels.alertname }}'
+    - name: "ops-chat"
+      type: "slack"
+      url: "${SLACK_WEBHOOK_URL}"
+      title_template: "🚨 GA-Core Alert: {{ .CommonLabels.alertname }}"
 
-    - name: 'on-call'
-      type: 'pagerduty'
-      integration_key: '${PAGERDUTY_INTEGRATION_KEY}'
+    - name: "on-call"
+      type: "pagerduty"
+      integration_key: "${PAGERDUTY_INTEGRATION_KEY}"
       severity_map:
-        critical: 'critical'
-        warning: 'warning'
+        critical: "critical"
+        warning: "warning"
 
   quiet_hours:
-    timezone: 'America/New_York'
-    start: '22:00'
-    end: '06:00'
+    timezone: "America/New_York"
+    start: "22:00"
+    end: "06:00"
     weekends: true
 
 # Canary Configuration
@@ -133,9 +133,9 @@ canary:
   enabled: true
   tenant_slice: 10 # percent
   rollback_triggers:
-    - alert: 'GraphQueryLatencyHigh'
-      duration: '5m'
-    - alert: 'IngestBacklogGrowing'
-      duration: '2m'
-    - alert: 'ProvenanceVerifyFailures'
-      duration: '1m'
+    - alert: "GraphQueryLatencyHigh"
+      duration: "5m"
+    - alert: "IngestBacklogGrowing"
+      duration: "2m"
+    - alert: "ProvenanceVerifyFailures"
+      duration: "1m"

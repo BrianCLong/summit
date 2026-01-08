@@ -39,6 +39,7 @@ cd services/my-service
 ### Step 2: Configure the service
 
 Edit `services/my-service/service.yaml`:
+
 ```yaml
 service: my-service
 owner: my-team
@@ -58,9 +59,10 @@ slo_profile: companyos-default
 ### Step 3: Add to workspace
 
 Edit `pnpm-workspace.yaml` (if not auto-detected):
+
 ```yaml
 packages:
-  - 'services/*'  # Should already include services
+  - "services/*" # Should already include services
 ```
 
 ### Step 4: Install dependencies
@@ -73,6 +75,7 @@ pnpm install
 ### Step 5: Add to Docker Compose (optional)
 
 Edit `docker-compose.dev.yml`:
+
 ```yaml
 services:
   my-service:
@@ -81,11 +84,11 @@ services:
       dockerfile: Dockerfile
     container_name: summit-my-service
     ports:
-      - '4050:4050'
+      - "4050:4050"
     environment:
       PORT: 4050
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:4050/health']
+      test: ["CMD", "curl", "-f", "http://localhost:4050/health"]
     networks:
       - summit
 ```
@@ -105,6 +108,7 @@ make smoke
 ```
 
 ### Checklist
+
 - [ ] Service scaffolded with correct structure
 - [ ] Health endpoint responds
 - [ ] CI workflow created (`.github/workflows/my-service.yml`)
@@ -149,22 +153,26 @@ input CreateMyEntityInput {
 Create `server/src/graphql/resolvers/myFeature.ts`:
 
 ```typescript
-import { MyEntityService } from '../../services/myEntityService';
+import { MyEntityService } from "../../services/myEntityService";
 
 export const myFeatureResolvers = {
   Query: {
     myEntity: async (_parent: unknown, { id }: { id: string }, context: GraphQLContext) => {
-      await context.authorize('myEntity:read');
+      await context.authorize("myEntity:read");
       return MyEntityService.findById(id);
     },
     myEntities: async (_parent: unknown, { limit }: { limit: number }, context: GraphQLContext) => {
-      await context.authorize('myEntity:read');
+      await context.authorize("myEntity:read");
       return MyEntityService.findAll({ limit });
     },
   },
   Mutation: {
-    createMyEntity: async (_parent: unknown, { input }: { input: CreateMyEntityInput }, context: GraphQLContext) => {
-      await context.authorize('myEntity:write');
+    createMyEntity: async (
+      _parent: unknown,
+      { input }: { input: CreateMyEntityInput },
+      context: GraphQLContext
+    ) => {
+      await context.authorize("myEntity:write");
       return MyEntityService.create(input);
     },
   },
@@ -176,11 +184,11 @@ export const myFeatureResolvers = {
 Edit `server/src/graphql/resolvers/index.ts`:
 
 ```typescript
-import { myFeatureResolvers } from './myFeature';
+import { myFeatureResolvers } from "./myFeature";
 
 export const resolvers = merge(
   // ... existing resolvers
-  myFeatureResolvers,
+  myFeatureResolvers
 );
 ```
 
@@ -189,16 +197,16 @@ export const resolvers = merge(
 Create `server/src/graphql/resolvers/__tests__/myFeature.test.ts`:
 
 ```typescript
-import { createTestClient } from 'apollo-server-testing';
+import { createTestClient } from "apollo-server-testing";
 
-describe('MyFeature Resolvers', () => {
-  it('should create entity', async () => {
+describe("MyFeature Resolvers", () => {
+  it("should create entity", async () => {
     const { mutate } = createTestClient(server);
     const result = await mutate({
       mutation: CREATE_MY_ENTITY,
-      variables: { input: { name: 'Test' } },
+      variables: { input: { name: "Test" } },
     });
-    expect(result.data.createMyEntity).toHaveProperty('id');
+    expect(result.data.createMyEntity).toHaveProperty("id");
   });
 });
 ```
@@ -217,6 +225,7 @@ open http://localhost:4000/graphql
 ```
 
 ### Checklist
+
 - [ ] Schema defined with proper types
 - [ ] Resolver implemented with auth checks
 - [ ] Tests written and passing
@@ -303,6 +312,7 @@ SHOW INDEXES;
 ```
 
 ### Checklist
+
 - [ ] Migration file created
 - [ ] Migration applied successfully
 - [ ] Rollback tested (if destructive)
@@ -321,8 +331,8 @@ SHOW INDEXES;
 Create `client/src/components/MyComponent/MyComponent.tsx`:
 
 ```tsx
-import React from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import React from "react";
+import { Box, Typography, Button } from "@mui/material";
 
 interface MyComponentProps {
   title: string;
@@ -331,7 +341,7 @@ interface MyComponentProps {
 
 export const MyComponent: React.FC<MyComponentProps> = ({ title, onAction }) => {
   return (
-    <Box sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+    <Box sx={{ p: 2, border: "1px solid", borderColor: "divider", borderRadius: 1 }}>
       <Typography variant="h6">{title}</Typography>
       {onAction && (
         <Button variant="contained" onClick={onAction}>
@@ -350,8 +360,8 @@ export default MyComponent;
 Create `client/src/components/MyComponent/index.ts`:
 
 ```typescript
-export { MyComponent } from './MyComponent';
-export type { MyComponentProps } from './MyComponent';
+export { MyComponent } from "./MyComponent";
+export type { MyComponentProps } from "./MyComponent";
 ```
 
 ### Step 3: Add tests
@@ -359,19 +369,19 @@ export type { MyComponentProps } from './MyComponent';
 Create `client/src/components/MyComponent/MyComponent.test.tsx`:
 
 ```tsx
-import { render, screen, fireEvent } from '@testing-library/react';
-import { MyComponent } from './MyComponent';
+import { render, screen, fireEvent } from "@testing-library/react";
+import { MyComponent } from "./MyComponent";
 
-describe('MyComponent', () => {
-  it('renders title', () => {
+describe("MyComponent", () => {
+  it("renders title", () => {
     render(<MyComponent title="Test Title" />);
-    expect(screen.getByText('Test Title')).toBeInTheDocument();
+    expect(screen.getByText("Test Title")).toBeInTheDocument();
   });
 
-  it('calls onAction when button clicked', () => {
+  it("calls onAction when button clicked", () => {
     const handleAction = jest.fn();
     render(<MyComponent title="Test" onAction={handleAction} />);
-    fireEvent.click(screen.getByRole('button'));
+    fireEvent.click(screen.getByRole("button"));
     expect(handleAction).toHaveBeenCalled();
   });
 });
@@ -382,11 +392,11 @@ describe('MyComponent', () => {
 Create `client/src/components/MyComponent/MyComponent.stories.tsx`:
 
 ```tsx
-import type { Meta, StoryObj } from '@storybook/react';
-import { MyComponent } from './MyComponent';
+import type { Meta, StoryObj } from "@storybook/react";
+import { MyComponent } from "./MyComponent";
 
 const meta: Meta<typeof MyComponent> = {
-  title: 'Components/MyComponent',
+  title: "Components/MyComponent",
   component: MyComponent,
 };
 
@@ -394,14 +404,14 @@ export default meta;
 
 export const Default: StoryObj<typeof MyComponent> = {
   args: {
-    title: 'Example Title',
+    title: "Example Title",
   },
 };
 
 export const WithAction: StoryObj<typeof MyComponent> = {
   args: {
-    title: 'With Action',
-    onAction: () => alert('Clicked!'),
+    title: "With Action",
+    onAction: () => alert("Clicked!"),
   },
 };
 ```
@@ -417,6 +427,7 @@ pnpm test:client
 ```
 
 ### Checklist
+
 - [ ] Component created with TypeScript types
 - [ ] Index file exports component
 - [ ] Tests written and passing
@@ -443,11 +454,11 @@ pnpm test:watch path/to/test.ts
 
 ```typescript
 // Add console.log or debugger statements
-it('should do something', async () => {
-  console.log('Input:', input);
+it("should do something", async () => {
+  console.log("Input:", input);
   debugger; // Pauses in Node inspector
   const result = await myFunction(input);
-  console.log('Result:', result);
+  console.log("Result:", result);
   expect(result).toBe(expected);
 });
 ```
@@ -465,12 +476,12 @@ pnpm test:debug path/to/test.ts
 
 ```typescript
 // Run only this test
-it.only('should do something', async () => {
+it.only("should do something", async () => {
   // ...
 });
 
 // Skip problematic tests temporarily
-it.skip('broken test', () => {
+it.skip("broken test", () => {
   // ...
 });
 ```
@@ -479,12 +490,12 @@ it.skip('broken test', () => {
 
 ```typescript
 // Ensure proper async handling
-it('async test', async () => {
+it("async test", async () => {
   // Use await
   const result = await asyncFunction();
 
   // Or use done callback
-  asyncFunction().then(result => {
+  asyncFunction().then((result) => {
     expect(result).toBe(expected);
     done();
   });
@@ -493,12 +504,12 @@ it('async test', async () => {
 
 ### Common Issues
 
-| Symptom | Likely Cause | Fix |
-|---------|--------------|-----|
-| Timeout | Missing await | Add `await` to async calls |
-| Random failures | Shared state | Use `beforeEach` to reset |
-| "Not found" | Missing mock | Add mock for external dependency |
-| Type errors | Outdated types | Run `pnpm typecheck` |
+| Symptom         | Likely Cause   | Fix                              |
+| --------------- | -------------- | -------------------------------- |
+| Timeout         | Missing await  | Add `await` to async calls       |
+| Random failures | Shared state   | Use `beforeEach` to reset        |
+| "Not found"     | Missing mock   | Add mock for external dependency |
+| Type errors     | Outdated types | Run `pnpm typecheck`             |
 
 ---
 
@@ -534,6 +545,7 @@ summit logs api | grep -i error
 ### Step 3: Find traces
 
 In Jaeger (localhost:16686):
+
 1. Select service: `summit-api`
 2. Set time range
 3. Search for operation or tags
@@ -542,6 +554,7 @@ In Jaeger (localhost:16686):
 ### Step 4: Check metrics
 
 In Prometheus (localhost:9090):
+
 ```promql
 # Error rate
 rate(http_requests_total{status=~"5.."}[5m])
@@ -577,40 +590,40 @@ curl -X POST http://localhost:4000/graphql \
 ### Logging
 
 ```typescript
-import { logger } from '../utils/logger';
+import { logger } from "../utils/logger";
 
 // Structured logging
-logger.info({ investigationId, userId }, 'Investigation created');
-logger.error({ err, context }, 'Failed to process request');
+logger.info({ investigationId, userId }, "Investigation created");
+logger.error({ err, context }, "Failed to process request");
 
 // With request context (auto-propagated)
-req.log.info('Processing request');
+req.log.info("Processing request");
 ```
 
 ### Metrics
 
 ```typescript
-import { metrics } from '../telemetry';
+import { metrics } from "../telemetry";
 
 // Counter
-const requestsTotal = metrics.createCounter('my_requests_total', {
-  description: 'Total requests processed',
-  labelNames: ['status', 'method'],
+const requestsTotal = metrics.createCounter("my_requests_total", {
+  description: "Total requests processed",
+  labelNames: ["status", "method"],
 });
-requestsTotal.inc({ status: 'success', method: 'GET' });
+requestsTotal.inc({ status: "success", method: "GET" });
 
 // Histogram
-const requestDuration = metrics.createHistogram('my_request_duration_seconds', {
-  description: 'Request duration',
+const requestDuration = metrics.createHistogram("my_request_duration_seconds", {
+  description: "Request duration",
   buckets: [0.1, 0.5, 1, 2, 5],
 });
 const timer = requestDuration.startTimer();
 // ... do work
-timer({ status: 'success' });
+timer({ status: "success" });
 
 // Gauge
-const activeJobs = metrics.createGauge('my_active_jobs', {
-  description: 'Currently active jobs',
+const activeJobs = metrics.createGauge("my_active_jobs", {
+  description: "Currently active jobs",
 });
 activeJobs.inc();
 // ... job completes
@@ -620,14 +633,14 @@ activeJobs.dec();
 ### Tracing
 
 ```typescript
-import { trace } from '@opentelemetry/api';
+import { trace } from "@opentelemetry/api";
 
-const tracer = trace.getTracer('my-service');
+const tracer = trace.getTracer("my-service");
 
 async function myFunction() {
-  return tracer.startActiveSpan('myFunction', async (span) => {
+  return tracer.startActiveSpan("myFunction", async (span) => {
     try {
-      span.setAttribute('custom.attribute', 'value');
+      span.setAttribute("custom.attribute", "value");
       const result = await doWork();
       span.setStatus({ code: SpanStatusCode.OK });
       return result;
@@ -651,6 +664,7 @@ async function myFunction() {
 ### Step 1: Add to environment
 
 Edit `.env.example`:
+
 ```bash
 # Feature Flags
 FEATURE_MY_NEW_FEATURE=false
@@ -659,17 +673,18 @@ FEATURE_MY_NEW_FEATURE=false
 ### Step 2: Add type definition
 
 Edit `server/src/config/featureFlags.ts`:
+
 ```typescript
 export const featureFlags = {
   // ... existing flags
-  MY_NEW_FEATURE: process.env.FEATURE_MY_NEW_FEATURE === 'true',
+  MY_NEW_FEATURE: process.env.FEATURE_MY_NEW_FEATURE === "true",
 };
 ```
 
 ### Step 3: Use in code
 
 ```typescript
-import { featureFlags } from '../config/featureFlags';
+import { featureFlags } from "../config/featureFlags";
 
 if (featureFlags.MY_NEW_FEATURE) {
   // New behavior
@@ -681,12 +696,12 @@ if (featureFlags.MY_NEW_FEATURE) {
 ### Step 4: Test both paths
 
 ```typescript
-describe('with MY_NEW_FEATURE enabled', () => {
+describe("with MY_NEW_FEATURE enabled", () => {
   beforeEach(() => {
-    jest.spyOn(featureFlags, 'MY_NEW_FEATURE', 'get').mockReturnValue(true);
+    jest.spyOn(featureFlags, "MY_NEW_FEATURE", "get").mockReturnValue(true);
   });
 
-  it('should use new behavior', () => {
+  it("should use new behavior", () => {
     // ...
   });
 });
@@ -746,6 +761,7 @@ make smoke
 ```
 
 ### Checklist
+
 - [ ] No security vulnerabilities (`pnpm audit`)
 - [ ] All tests pass
 - [ ] TypeScript compiles
@@ -763,10 +779,10 @@ make smoke
 Create `tests/integration/myFeature.integration.test.ts`:
 
 ```typescript
-import { setupTestDatabase, teardownTestDatabase } from '../helpers/database';
-import { createTestClient } from '../helpers/graphql';
+import { setupTestDatabase, teardownTestDatabase } from "../helpers/database";
+import { createTestClient } from "../helpers/graphql";
 
-describe('MyFeature Integration', () => {
+describe("MyFeature Integration", () => {
   let client: TestClient;
 
   beforeAll(async () => {
@@ -782,11 +798,11 @@ describe('MyFeature Integration', () => {
     await client.resetData();
   });
 
-  it('should create entity and retrieve it', async () => {
+  it("should create entity and retrieve it", async () => {
     // Create
     const createResult = await client.mutate({
       mutation: CREATE_ENTITY,
-      variables: { input: { name: 'Test Entity' } },
+      variables: { input: { name: "Test Entity" } },
     });
     const entityId = createResult.data.createEntity.id;
 
@@ -798,18 +814,18 @@ describe('MyFeature Integration', () => {
 
     expect(getResult.data.entity).toMatchObject({
       id: entityId,
-      name: 'Test Entity',
+      name: "Test Entity",
     });
   });
 
-  it('should handle errors gracefully', async () => {
+  it("should handle errors gracefully", async () => {
     const result = await client.query({
       query: GET_ENTITY,
-      variables: { id: 'non-existent' },
+      variables: { id: "non-existent" },
     });
 
     expect(result.errors).toBeDefined();
-    expect(result.errors[0].message).toContain('not found');
+    expect(result.errors[0].message).toContain("not found");
   });
 });
 ```
@@ -835,15 +851,15 @@ Integration tests run automatically in CI with the full stack.
 
 ## Quick Reference Card
 
-| Task | Command |
-|------|---------|
-| Start dev environment | `make up` |
-| Stop environment | `make down` |
-| Run all tests | `pnpm test` |
-| Run smoke tests | `make smoke` |
-| View logs | `summit logs api` |
-| Create service | `pnpm companyos:new-service --name x` |
-| DB migration | `pnpm db:pg:migrate` |
-| Regenerate types | `pnpm graphql:codegen` |
-| Check for updates | `pnpm outdated` |
-| Full CI locally | `pnpm ci` |
+| Task                  | Command                               |
+| --------------------- | ------------------------------------- |
+| Start dev environment | `make up`                             |
+| Stop environment      | `make down`                           |
+| Run all tests         | `pnpm test`                           |
+| Run smoke tests       | `make smoke`                          |
+| View logs             | `summit logs api`                     |
+| Create service        | `pnpm companyos:new-service --name x` |
+| DB migration          | `pnpm db:pg:migrate`                  |
+| Regenerate types      | `pnpm graphql:codegen`                |
+| Check for updates     | `pnpm outdated`                       |
+| Full CI locally       | `pnpm ci`                             |

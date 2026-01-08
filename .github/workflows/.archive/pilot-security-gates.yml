@@ -3,9 +3,9 @@ name: Pilot Security Gates
 on:
   pull_request:
     paths:
-      - 'security/pilot/**'
-      - 'tools/security-gates/**'
-      - '.github/workflows/pilot-security-gates.yml'
+      - "security/pilot/**"
+      - "tools/security-gates/**"
+      - ".github/workflows/pilot-security-gates.yml"
   workflow_dispatch:
 
 permissions:
@@ -24,8 +24,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@60edb5dd545a775178f764f2a5e5d4e10754957f
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@d667e5d86909ebc1e279160ce0caa49005a140a9

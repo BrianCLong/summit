@@ -23,6 +23,7 @@ Exit codes: `0` success, `2` step failure, `3` SLO breached, `4` config error.
 Grafana dashboard: `observability/grafana/dashboards/golden-paths.json`.
 
 Key panels:
+
 - p95 latency per step (histogram_quantile over `gp_step_latency_seconds`)
 - Journey success ratio
 - Recent step failures with links to Tempo/Jaeger traces

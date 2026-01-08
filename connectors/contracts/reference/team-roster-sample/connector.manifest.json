@@ -29,15 +29,32 @@
   },
   "pii": {
     "fields": [
-      { "field": "email", "category": "high", "policy": "mask", "comment": "mask emails in golden output" },
+      {
+        "field": "email",
+        "category": "high",
+        "policy": "mask",
+        "comment": "mask emails in golden output"
+      },
       { "field": "phone", "category": "medium", "policy": "drop" }
     ]
   },
   "mapping": {
     "handler": "./mapper.js",
     "hints": [
-      { "source": "people[].id", "targetType": "Person", "idField": "id", "nameField": "name", "provenanceTag": "roster-row" },
-      { "source": "people[].team", "targetType": "Team", "idField": "team", "nameField": "team_name", "provenanceTag": "team-dimension" }
+      {
+        "source": "people[].id",
+        "targetType": "Person",
+        "idField": "id",
+        "nameField": "name",
+        "provenanceTag": "roster-row"
+      },
+      {
+        "source": "people[].team",
+        "targetType": "Team",
+        "idField": "team",
+        "nameField": "team_name",
+        "provenanceTag": "team-dimension"
+      }
     ]
   },
   "fixtures": {

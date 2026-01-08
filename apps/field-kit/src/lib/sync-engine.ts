@@ -1,17 +1,17 @@
-import { storage } from './storage';
-import { SyncQueueItem } from '../types';
+import { storage } from "./storage";
+import { SyncQueueItem } from "../types";
 
 class SyncEngine {
   private isSyncing = false;
-  private online = typeof navigator !== 'undefined' ? navigator.onLine : true;
+  private online = typeof navigator !== "undefined" ? navigator.onLine : true;
 
   constructor() {
-    if (typeof window !== 'undefined') {
-      window.addEventListener('online', () => {
+    if (typeof window !== "undefined") {
+      window.addEventListener("online", () => {
         this.online = true;
         this.processQueue();
       });
-      window.addEventListener('offline', () => {
+      window.addEventListener("offline", () => {
         this.online = false;
       });
     }
@@ -51,7 +51,7 @@ class SyncEngine {
     // Mock API call
 
     // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     // In a real implementation, this would use fetch/axios to call the IntelGraph API
     // e.g., await api.post(`/api/v1/ingest/${item.type}`, item.payload);

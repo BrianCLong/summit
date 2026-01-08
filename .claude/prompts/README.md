@@ -31,50 +31,66 @@ This prompt library provides copy-paste-ready instructions for Claude Code to im
 ## Prompt Categories
 
 ### Operations & Reliability (`ops/`)
+
 Focus: Runbooks, testing, observability, deployment scaffolding
+
 - Data Quality & Stewardship Command Center
 - Runbook Engine: Author → Test → Replay
 - Edge/Offline Expedition Kit with CRDT Resync
 
 ### Governance (`governance/`)
+
 Focus: Policy simulation, retention, compliance, audit
+
 - Migration & Interop Verifier (Legacy→Canonical)
 - Policy Change Simulator & License/TOS Engine
 - Retention, Purge & Disclosure Proofs (Dual-Control)
 
 ### Analytics (`analytics/`)
+
 Focus: Graph, geospatial, temporal intelligence
+
 - (Additional prompts to be added)
 
 ### Security (`security/`)
+
 Focus: Abuse detection, counter-deception, integrity
+
 - Model Abuse & Prompt-Injection Watchtower
 - Counter-Deception Lab (Defensive Only)
 - XAI Integrity Overlays & Dissent Capture
 
 ### FinOps (`finops/`)
+
 Focus: Cost control, resource optimization
+
 - FinOps Cost-Guard & Unit-Economics Governor
 - API Gateway with Persisted Queries & Cost Guards
 
 ### Integration (`integration/`)
+
 Focus: Federation, interop, legacy migration
+
 - Migration & Interop Verifier
 - API Gateway with Persisted Queries & Cost Guards
 
 ## Using These Prompts
 
 ### 1. Select a Prompt
+
 Browse the category directories or use the [Prompt Index](#prompt-index) below.
 
 ### 2. Review Prerequisites
+
 Each prompt lists:
+
 - Required services/dependencies
 - Configuration needs
 - Test fixtures
 - Acceptance criteria
 
 ### 3. Execute with Claude Code
+
 ```bash
 # Example workflow
 claude code "Implement prompt: DQ-001-data-quality-dashboard"
@@ -82,7 +98,9 @@ claude code "Implement prompt: DQ-001-data-quality-dashboard"
 ```
 
 ### 4. Validate Deliverables
+
 Every prompt produces:
+
 - ✅ Working code with tests passing
 - ✅ Documentation (README, API docs)
 - ✅ CI/CD pipeline configuration
@@ -91,6 +109,7 @@ Every prompt produces:
 - ✅ Acceptance pack
 
 ### 5. Integration Checklist
+
 - [ ] Code follows CLAUDE.md conventions
 - [ ] `make smoke` passes
 - [ ] `pnpm test` passes (unit + integration)
@@ -102,19 +121,19 @@ Every prompt produces:
 
 ## Prompt Index
 
-| ID | Name | Category | Priority | Dependencies | Status |
-|---|---|---|---|---|---|
-| **DQ-001** | Data Quality & Stewardship Command Center | ops | High | PostgreSQL, OpenTelemetry | ✅ Ready |
-| **MIG-001** | Migration & Interop Verifier | governance | High | Prisma, STIX/TAXII libs | ✅ Ready |
-| **OPS-001** | Runbook Engine | ops | High | DAG runner, k6 | ✅ Ready |
-| **EDGE-001** | Edge/Offline Expedition Kit | ops | Medium | CRDT lib, local DB | ✅ Ready |
-| **SEC-001** | Model Abuse & Prompt-Injection Watchtower | security | High | OpenTelemetry, LLM libs | ✅ Ready |
-| **SEC-002** | Counter-Deception Lab | security | Medium | NLP libs, honeytoken store | ✅ Ready |
-| **GOV-001** | Policy Change Simulator | governance | High | OPA, historical query logs | ✅ Ready |
-| **INT-001** | API Gateway with Persisted Queries | integration | High | GraphQL, Redis | ✅ Ready |
-| **XAI-001** | XAI Integrity Overlays & Dissent Capture | security | High | ML libs, provenance ledger | ✅ Ready |
-| **FIN-001** | FinOps Cost-Guard | finops | Medium | Prometheus, cost APIs | ✅ Ready |
-| **GOV-002** | Retention, Purge & Disclosure Proofs | governance | High | Hash trees, audit ledger | ✅ Ready |
+| ID           | Name                                      | Category    | Priority | Dependencies               | Status   |
+| ------------ | ----------------------------------------- | ----------- | -------- | -------------------------- | -------- |
+| **DQ-001**   | Data Quality & Stewardship Command Center | ops         | High     | PostgreSQL, OpenTelemetry  | ✅ Ready |
+| **MIG-001**  | Migration & Interop Verifier              | governance  | High     | Prisma, STIX/TAXII libs    | ✅ Ready |
+| **OPS-001**  | Runbook Engine                            | ops         | High     | DAG runner, k6             | ✅ Ready |
+| **EDGE-001** | Edge/Offline Expedition Kit               | ops         | Medium   | CRDT lib, local DB         | ✅ Ready |
+| **SEC-001**  | Model Abuse & Prompt-Injection Watchtower | security    | High     | OpenTelemetry, LLM libs    | ✅ Ready |
+| **SEC-002**  | Counter-Deception Lab                     | security    | Medium   | NLP libs, honeytoken store | ✅ Ready |
+| **GOV-001**  | Policy Change Simulator                   | governance  | High     | OPA, historical query logs | ✅ Ready |
+| **INT-001**  | API Gateway with Persisted Queries        | integration | High     | GraphQL, Redis             | ✅ Ready |
+| **XAI-001**  | XAI Integrity Overlays & Dissent Capture  | security    | High     | ML libs, provenance ledger | ✅ Ready |
+| **FIN-001**  | FinOps Cost-Guard                         | finops      | Medium   | Prometheus, cost APIs      | ✅ Ready |
+| **GOV-002**  | Retention, Purge & Disclosure Proofs      | governance  | High     | Hash trees, audit ledger   | ✅ Ready |
 
 ## Prompt Metadata Schema
 
@@ -172,13 +191,16 @@ See [../blueprints/README.md](../blueprints/README.md) for details.
 **Priority**: [high|medium|low]
 
 ## Objective
+
 [What this prompt delivers]
 
 ## Deliverables
+
 - [ ] Item 1
 - [ ] Item 2
 
 ## Acceptance Criteria
+
 - [ ] Criterion 1
 - [ ] Criterion 2
 
@@ -187,13 +209,16 @@ See [../blueprints/README.md](../blueprints/README.md) for details.
 [Full copy-paste prompt text]
 
 ## Integration Notes
+
 [How this integrates with existing services]
 
 ## Test Scenarios
+
 [Key test cases to validate]
 ```
 
 ### Contribution Checklist
+
 - [ ] Follows metadata schema
 - [ ] Includes complete prompt text
 - [ ] Lists clear acceptance criteria

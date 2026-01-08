@@ -19,7 +19,7 @@ export interface RelationshipTemplate {
 }
 
 export interface SignalTemplate {
-  type: 'anomaly' | 'missing_data' | 'conflicting_evidence';
+  type: "anomaly" | "missing_data" | "conflicting_evidence";
   entities?: string[];
   probability?: number;
   count?: number;
@@ -27,10 +27,10 @@ export interface SignalTemplate {
 
 export type AttributeDistribution =
   | string[]
-  | { distribution: 'normal'; mean: number; stddev: number }
-  | { distribution: 'lognormal'; mean: number; stddev: number }
-  | { distribution: 'uniform'; min: number; max: number }
-  | { distribution: 'daterange'; start: string; end: string };
+  | { distribution: "normal"; mean: number; stddev: number }
+  | { distribution: "lognormal"; mean: number; stddev: number }
+  | { distribution: "uniform"; min: number; max: number }
+  | { distribution: "daterange"; start: string; end: string };
 
 export interface ScenarioTemplate {
   name: string;
@@ -94,13 +94,13 @@ export interface ExpectedOutcomes {
 export interface WorkflowStep {
   name: string;
   action:
-    | 'graphql-query'
-    | 'graphql-mutation'
-    | 'rest-get'
-    | 'rest-post'
-    | 'poll'
-    | 'wait'
-    | 'assert';
+    | "graphql-query"
+    | "graphql-mutation"
+    | "rest-get"
+    | "rest-post"
+    | "poll"
+    | "wait"
+    | "assert";
   query?: string;
   endpoint?: string;
   method?: string;
@@ -125,7 +125,7 @@ export interface AnalystSession {
   workflowName: string;
   startTime: string;
   endTime?: string;
-  status: 'running' | 'completed' | 'failed' | 'timeout';
+  status: "running" | "completed" | "failed" | "timeout";
   steps: StepResult[];
   metrics: SessionMetrics;
   errors: string[];
@@ -133,7 +133,7 @@ export interface AnalystSession {
 
 export interface StepResult {
   name: string;
-  status: 'pending' | 'running' | 'success' | 'failed';
+  status: "pending" | "running" | "success" | "failed";
   startTime: string;
   endTime?: string;
   duration?: number;
@@ -232,7 +232,7 @@ export interface HarnessConfig {
   };
   reporting: {
     outputDir: string;
-    formats: ('json' | 'csv' | 'html')[];
+    formats: ("json" | "csv" | "html")[];
     verbose: boolean;
   };
   safety: {

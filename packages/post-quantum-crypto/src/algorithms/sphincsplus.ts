@@ -4,11 +4,17 @@
  * NIST PQC standardized algorithm
  */
 
-import { sha256 } from '@noble/hashes/sha256';
-import { sha512 } from '@noble/hashes/sha512';
-import { DigitalSignatureScheme, KeyPair, Signature, PQCAlgorithm, SecurityLevel } from '../types';
+import { sha256 } from "@noble/hashes/sha256";
+import { sha512 } from "@noble/hashes/sha512";
+import { DigitalSignatureScheme, KeyPair, Signature, PQCAlgorithm, SecurityLevel } from "../types";
 
-type SphincsVariant = 'sphincs-sha256-128f' | 'sphincs-sha256-128s' | 'sphincs-sha256-192f' | 'sphincs-sha256-192s' | 'sphincs-sha256-256f' | 'sphincs-sha256-256s';
+type SphincsVariant =
+  | "sphincs-sha256-128f"
+  | "sphincs-sha256-128s"
+  | "sphincs-sha256-192f"
+  | "sphincs-sha256-192s"
+  | "sphincs-sha256-256f"
+  | "sphincs-sha256-256s";
 
 export class SphincsSignature implements DigitalSignatureScheme {
   private variant: SphincsVariant;
@@ -16,24 +22,24 @@ export class SphincsSignature implements DigitalSignatureScheme {
   private securityLevel: SecurityLevel;
   private fast: boolean; // 'f' variants are faster, 's' variants have smaller signatures
 
-  constructor(variant: SphincsVariant = 'sphincs-sha256-128f') {
+  constructor(variant: SphincsVariant = "sphincs-sha256-128f") {
     this.variant = variant;
-    this.fast = variant.endsWith('f');
+    this.fast = variant.endsWith("f");
 
     // Map variant to algorithm and security level
-    if (variant.includes('128f')) {
+    if (variant.includes("128f")) {
       this.algorithm = PQCAlgorithm.SPHINCS_PLUS_128F;
       this.securityLevel = SecurityLevel.LEVEL_1;
-    } else if (variant.includes('128s')) {
+    } else if (variant.includes("128s")) {
       this.algorithm = PQCAlgorithm.SPHINCS_PLUS_128S;
       this.securityLevel = SecurityLevel.LEVEL_1;
-    } else if (variant.includes('192f')) {
+    } else if (variant.includes("192f")) {
       this.algorithm = PQCAlgorithm.SPHINCS_PLUS_192F;
       this.securityLevel = SecurityLevel.LEVEL_3;
-    } else if (variant.includes('192s')) {
+    } else if (variant.includes("192s")) {
       this.algorithm = PQCAlgorithm.SPHINCS_PLUS_192S;
       this.securityLevel = SecurityLevel.LEVEL_3;
-    } else if (variant.includes('256f')) {
+    } else if (variant.includes("256f")) {
       this.algorithm = PQCAlgorithm.SPHINCS_PLUS_256F;
       this.securityLevel = SecurityLevel.LEVEL_5;
     } else {
@@ -54,7 +60,7 @@ export class SphincsSignature implements DigitalSignatureScheme {
       metadata: {
         variant: this.variant,
         fast: this.fast,
-        hashFunction: 'SHA-256',
+        hashFunction: "SHA-256",
         stateless: true,
       },
     };
@@ -77,7 +83,11 @@ export class SphincsSignature implements DigitalSignatureScheme {
     };
   }
 
-  async verify(message: Uint8Array, signature: Uint8Array, publicKey: Uint8Array): Promise<boolean> {
+  async verify(
+    message: Uint8Array,
+    signature: Uint8Array,
+    publicKey: Uint8Array
+  ): Promise<boolean> {
     this.validatePublicKey(publicKey);
 
     return await this.performVerification(message, signature, publicKey);
@@ -137,7 +147,11 @@ export class SphincsSignature implements DigitalSignatureScheme {
     return signature;
   }
 
-  private async performVerification(message: Uint8Array, signature: Uint8Array, publicKey: Uint8Array): Promise<boolean> {
+  private async performVerification(
+    message: Uint8Array,
+    signature: Uint8Array,
+    publicKey: Uint8Array
+  ): Promise<boolean> {
     try {
       const params = this.getSphincsParameters();
 
@@ -166,17 +180,17 @@ export class SphincsSignature implements DigitalSignatureScheme {
   } {
     // Parameters based on SPHINCS+ specification
     switch (this.variant) {
-      case 'sphincs-sha256-128f':
+      case "sphincs-sha256-128f":
         return { n: 16, publicKeyBytes: 32, privateKeyBytes: 64, signatureBytes: 17088 };
-      case 'sphincs-sha256-128s':
+      case "sphincs-sha256-128s":
         return { n: 16, publicKeyBytes: 32, privateKeyBytes: 64, signatureBytes: 7856 };
-      case 'sphincs-sha256-192f':
+      case "sphincs-sha256-192f":
         return { n: 24, publicKeyBytes: 48, privateKeyBytes: 96, signatureBytes: 35664 };
-      case 'sphincs-sha256-192s':
+      case "sphincs-sha256-192s":
         return { n: 24, publicKeyBytes: 48, privateKeyBytes: 96, signatureBytes: 16224 };
-      case 'sphincs-sha256-256f':
+      case "sphincs-sha256-256f":
         return { n: 32, publicKeyBytes: 64, privateKeyBytes: 128, signatureBytes: 49856 };
-      case 'sphincs-sha256-256s':
+      case "sphincs-sha256-256s":
         return { n: 32, publicKeyBytes: 64, privateKeyBytes: 128, signatureBytes: 29792 };
     }
   }
@@ -184,14 +198,18 @@ export class SphincsSignature implements DigitalSignatureScheme {
   private validatePublicKey(publicKey: Uint8Array): void {
     const params = this.getSphincsParameters();
     if (publicKey.length !== params.publicKeyBytes) {
-      throw new Error(`Invalid public key length: expected ${params.publicKeyBytes}, got ${publicKey.length}`);
+      throw new Error(
+        `Invalid public key length: expected ${params.publicKeyBytes}, got ${publicKey.length}`
+      );
     }
   }
 
   private validatePrivateKey(privateKey: Uint8Array): void {
     const params = this.getSphincsParameters();
     if (privateKey.length !== params.privateKeyBytes) {
-      throw new Error(`Invalid private key length: expected ${params.privateKeyBytes}, got ${privateKey.length}`);
+      throw new Error(
+        `Invalid private key length: expected ${params.privateKeyBytes}, got ${privateKey.length}`
+      );
     }
   }
 }
@@ -200,7 +218,7 @@ export function createSphincsSignature(
   securityLevel: SecurityLevel = SecurityLevel.LEVEL_1,
   fast: boolean = true
 ): SphincsSignature {
-  const suffix = fast ? 'f' : 's';
+  const suffix = fast ? "f" : "s";
 
   switch (securityLevel) {
     case SecurityLevel.LEVEL_1:

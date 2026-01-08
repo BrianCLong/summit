@@ -4,14 +4,14 @@ import {
   PsyOpsFramework,
   DecisionMatrix,
   ValidationResult,
-} from '../../src/psyops/framework';
+} from "../../src/psyops/framework";
 
-describe('PsyOps Framework', () => {
-  describe('generatePlaybook', () => {
-    it('should generate a complete PsyOps framework with default parameters', () => {
+describe("PsyOps Framework", () => {
+  describe("generatePlaybook", () => {
+    it("should generate a complete PsyOps framework with default parameters", () => {
       const tuners = {
         psyopsIntensity: 0.5,
-        doctrineAlignment: 'joint',
+        doctrineAlignment: "joint",
       };
 
       const playbook = generatePlaybook(tuners);
@@ -23,54 +23,48 @@ describe('PsyOps Framework', () => {
       expect(playbook.decisionMatrix).toBeDefined();
     });
 
-    it('should generate appropriate objectives based on intensity level', () => {
+    it("should generate appropriate objectives based on intensity level", () => {
       const lowIntensityTuners = {
         psyopsIntensity: 0.3,
-        doctrineAlignment: 'joint',
+        doctrineAlignment: "joint",
       };
 
       const highIntensityTuners = {
         psyopsIntensity: 0.8,
-        doctrineAlignment: 'joint',
+        doctrineAlignment: "joint",
       };
 
       const lowIntensityPlaybook = generatePlaybook(lowIntensityTuners);
       const highIntensityPlaybook = generatePlaybook(highIntensityTuners);
 
-      expect(
-        lowIntensityPlaybook.strategic.objectives.length,
-      ).toBeGreaterThanOrEqual(4);
+      expect(lowIntensityPlaybook.strategic.objectives.length).toBeGreaterThanOrEqual(4);
       expect(highIntensityPlaybook.strategic.objectives.length).toBeGreaterThan(
-        lowIntensityPlaybook.strategic.objectives.length,
+        lowIntensityPlaybook.strategic.objectives.length
       );
     });
 
-    it('should adapt narrative themes based on doctrine alignment', () => {
+    it("should adapt narrative themes based on doctrine alignment", () => {
       const threeWarfaresTuners = {
         psyopsIntensity: 0.5,
-        doctrineAlignment: 'ThreeWarfares',
+        doctrineAlignment: "ThreeWarfares",
       };
 
       const gerasimovTuners = {
         psyopsIntensity: 0.5,
-        doctrineAlignment: 'Gerasimov',
+        doctrineAlignment: "Gerasimov",
       };
 
       const threeWarfaresPlaybook = generatePlaybook(threeWarfaresTuners);
       const gerasimovPlaybook = generatePlaybook(gerasimovTuners);
 
-      expect(threeWarfaresPlaybook.strategic.narrativeThemes).toContain(
-        'Legal legitimacy',
-      );
-      expect(gerasimovPlaybook.strategic.narrativeThemes).toContain(
-        'Non-linear conflict dynamics',
-      );
+      expect(threeWarfaresPlaybook.strategic.narrativeThemes).toContain("Legal legitimacy");
+      expect(gerasimovPlaybook.strategic.narrativeThemes).toContain("Non-linear conflict dynamics");
     });
 
-    it('should generate campaigns with appropriate duration and methods', () => {
+    it("should generate campaigns with appropriate duration and methods", () => {
       const tuners = {
         psyopsIntensity: 0.7,
-        doctrineAlignment: 'joint',
+        doctrineAlignment: "joint",
       };
 
       const playbook = generatePlaybook(tuners);
@@ -85,27 +79,25 @@ describe('PsyOps Framework', () => {
       });
     });
 
-    it('should include more advanced techniques for high intensity operations', () => {
+    it("should include more advanced techniques for high intensity operations", () => {
       const highIntensityTuners = {
         psyopsIntensity: 0.9,
-        doctrineAlignment: 'joint',
+        doctrineAlignment: "joint",
       };
 
       const playbook = generatePlaybook(highIntensityTuners);
 
       const advancedTechniques = playbook.tactical.techniques.filter(
-        (technique) =>
-          technique.name.includes('Behavioral') ||
-          technique.name.includes('Adaptive'),
+        (technique) => technique.name.includes("Behavioral") || technique.name.includes("Adaptive")
       );
 
       expect(advancedTechniques.length).toBeGreaterThan(0);
     });
 
-    it('should generate decision matrix with risk and effectiveness scores', () => {
+    it("should generate decision matrix with risk and effectiveness scores", () => {
       const tuners = {
         psyopsIntensity: 0.6,
-        doctrineAlignment: 'joint',
+        doctrineAlignment: "joint",
       };
 
       const playbook = generatePlaybook(tuners);
@@ -122,8 +114,8 @@ describe('PsyOps Framework', () => {
     });
   });
 
-  describe('validateOperation', () => {
-    it('should validate a compliant operation', () => {
+  describe("validateOperation", () => {
+    it("should validate a compliant operation", () => {
       const operation = {
         intensity: 0.5,
         targetProfile: { civilians: false },
@@ -143,7 +135,7 @@ describe('PsyOps Framework', () => {
       expect(result.issues.length).toBe(0);
     });
 
-    it('should flag high-intensity operations with low ethical constraints', () => {
+    it("should flag high-intensity operations with low ethical constraints", () => {
       const operation = {
         intensity: 0.9,
         targetProfile: { civilians: false },
@@ -160,12 +152,10 @@ describe('PsyOps Framework', () => {
       const result = validateOperation(operation, constraints);
 
       expect(result.valid).toBe(false);
-      expect(result.issues).toContain(
-        'High-intensity operation with low ethical constraints',
-      );
+      expect(result.issues).toContain("High-intensity operation with low ethical constraints");
     });
 
-    it('should flag civilian targeting with low legal compliance', () => {
+    it("should flag civilian targeting with low legal compliance", () => {
       const operation = {
         intensity: 0.5,
         targetProfile: { civilians: true },
@@ -182,12 +172,10 @@ describe('PsyOps Framework', () => {
       const result = validateOperation(operation, constraints);
 
       expect(result.valid).toBe(false);
-      expect(result.issues).toContain(
-        'Civilian targeting requires high legal compliance',
-      );
+      expect(result.issues).toContain("Civilian targeting requires high legal compliance");
     });
 
-    it('should warn about high attribution techniques when unattributability is required', () => {
+    it("should warn about high attribution techniques when unattributability is required", () => {
       const operation = {
         intensity: 0.5,
         unattributabilityRequirement: 0.9,
@@ -205,11 +193,11 @@ describe('PsyOps Framework', () => {
       const result = validateOperation(operation, constraints);
 
       expect(result.warnings).toContain(
-        'High attribution techniques may compromise unattributability requirement',
+        "High attribution techniques may compromise unattributability requirement"
       );
     });
 
-    it('should flag operations exceeding budget constraints', () => {
+    it("should flag operations exceeding budget constraints", () => {
       const operation = {
         intensity: 0.8, // High intensity = higher cost
         targetProfile: { civilians: false },
@@ -226,12 +214,10 @@ describe('PsyOps Framework', () => {
       const result = validateOperation(operation, constraints);
 
       expect(result.valid).toBe(false);
-      expect(result.issues).toContain(
-        'Operation cost exceeds budget constraints',
-      );
+      expect(result.issues).toContain("Operation cost exceeds budget constraints");
     });
 
-    it('should calculate risk assessment correctly', () => {
+    it("should calculate risk assessment correctly", () => {
       const operation = {
         intensity: 0.7,
         targetProfile: { civilians: false },
@@ -260,27 +246,26 @@ describe('PsyOps Framework', () => {
     });
   });
 
-  describe('Decision Matrix Generation', () => {
-    it('should include escalated methods for high-intensity operations', () => {
+  describe("Decision Matrix Generation", () => {
+    it("should include escalated methods for high-intensity operations", () => {
       const highIntensityTuners = {
         psyopsIntensity: 0.8,
-        doctrineAlignment: 'joint',
+        doctrineAlignment: "joint",
       };
 
       const playbook = generatePlaybook(highIntensityTuners);
 
       const escalatedMethods = playbook.decisionMatrix.filter(
-        (decision) =>
-          decision.method.includes('Advanced') || decision.riskLevel > 0.7,
+        (decision) => decision.method.includes("Advanced") || decision.riskLevel > 0.7
       );
 
       expect(escalatedMethods.length).toBeGreaterThan(0);
     });
 
-    it('should provide implementation guidance for each method', () => {
+    it("should provide implementation guidance for each method", () => {
       const tuners = {
         psyopsIntensity: 0.6,
-        doctrineAlignment: 'joint',
+        doctrineAlignment: "joint",
       };
 
       const playbook = generatePlaybook(tuners);
@@ -294,8 +279,8 @@ describe('PsyOps Framework', () => {
     });
   });
 
-  describe('Resource Allocation', () => {
-    it('should allocate resources proportionally based on constraints', () => {
+  describe("Resource Allocation", () => {
+    it("should allocate resources proportionally based on constraints", () => {
       const tuners = {
         psyopsIntensity: 0.6,
         resourceConstraints: {
@@ -307,45 +292,36 @@ describe('PsyOps Framework', () => {
       const playbook = generatePlaybook(tuners);
 
       expect(playbook.operational.resourceAllocation).toBeDefined();
-      expect(
-        playbook.operational.resourceAllocation.humanResources,
-      ).toBeLessThanOrEqual(100);
+      expect(playbook.operational.resourceAllocation.humanResources).toBeLessThanOrEqual(100);
       expect(
         playbook.operational.resourceAllocation.budgetDistribution.content +
-          playbook.operational.resourceAllocation.budgetDistribution
-            .technology +
+          playbook.operational.resourceAllocation.budgetDistribution.technology +
           playbook.operational.resourceAllocation.budgetDistribution.personnel +
-          playbook.operational.resourceAllocation.budgetDistribution.analytics,
+          playbook.operational.resourceAllocation.budgetDistribution.analytics
       ).toBeLessThanOrEqual(2000000);
     });
   });
 
-  describe('Timing Considerations', () => {
-    it('should include appropriate timing considerations', () => {
+  describe("Timing Considerations", () => {
+    it("should include appropriate timing considerations", () => {
       const tuners = {
         psyopsIntensity: 0.7,
-        doctrineAlignment: 'joint',
+        doctrineAlignment: "joint",
       };
 
       const playbook = generatePlaybook(tuners);
 
-      expect(playbook.operational.timingConsiderations).toContain(
-        'News cycle synchronization',
-      );
-      expect(playbook.operational.timingConsiderations).toContain(
-        'Cultural event alignment',
-      );
-      expect(
-        playbook.operational.timingConsiderations.length,
-      ).toBeGreaterThanOrEqual(3);
+      expect(playbook.operational.timingConsiderations).toContain("News cycle synchronization");
+      expect(playbook.operational.timingConsiderations).toContain("Cultural event alignment");
+      expect(playbook.operational.timingConsiderations.length).toBeGreaterThanOrEqual(3);
     });
   });
 
-  describe('Technique Effectiveness', () => {
-    it('should assign realistic effectiveness scores to techniques', () => {
+  describe("Technique Effectiveness", () => {
+    it("should assign realistic effectiveness scores to techniques", () => {
       const tuners = {
         psyopsIntensity: 0.6,
-        doctrineAlignment: 'joint',
+        doctrineAlignment: "joint",
       };
 
       const playbook = generatePlaybook(tuners);

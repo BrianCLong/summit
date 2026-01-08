@@ -16,13 +16,13 @@ CompanyOS uses progressive delivery with canary deployments to safely roll out c
 
 ## Metrics Monitored
 
-| Metric | Threshold | Description |
-|--------|-----------|-------------|
-| Error Rate | < 5% | HTTP 5xx responses |
-| P95 Latency | < 300ms | 95th percentile response time |
-| Latency Delta | < 1.2x | Canary vs stable latency ratio |
-| Error Delta | < 1.5x | Canary vs stable error ratio |
-| OPA Success | > 99% | Policy decision success rate |
+| Metric        | Threshold | Description                    |
+| ------------- | --------- | ------------------------------ |
+| Error Rate    | < 5%      | HTTP 5xx responses             |
+| P95 Latency   | < 300ms   | 95th percentile response time  |
+| Latency Delta | < 1.2x    | Canary vs stable latency ratio |
+| Error Delta   | < 1.5x    | Canary vs stable error ratio   |
+| OPA Success   | > 99%     | Policy decision success rate   |
 
 ## Triggering a Canary
 
@@ -52,6 +52,7 @@ kubectl argo rollouts get rollout companyos-api --watch
 ### Dashboard
 
 View the canary status in Argo Rollouts dashboard:
+
 ```
 https://argorollouts.example.com/rollouts/companyos/companyos-api
 ```
@@ -153,11 +154,13 @@ kubectl argo rollouts promote companyos-api --full
 ### Canary Stuck
 
 1. Check analysis results:
+
    ```bash
    kubectl get analysisrun -l rollouts-pod-template-hash
    ```
 
 2. Check pod logs:
+
    ```bash
    kubectl logs -l app=companyos-api,rollouts-pod-template-hash=<hash>
    ```

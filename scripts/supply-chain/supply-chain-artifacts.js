@@ -1,9 +1,9 @@
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
-const { spawnSync } = require('child_process');
+const fs = require("fs");
+const path = require("path");
+const crypto = require("crypto");
+const { spawnSync } = require("child_process");
 
-const DEFAULT_TARGETS = ['server', 'web', 'packages'];
+const DEFAULT_TARGETS = ["server", "web", "packages"];
 
 function resolveCommitSha(provided) {
   if (provided) return provided;
@@ -11,8 +11,8 @@ function resolveCommitSha(provided) {
   if (process.env.GITHUB_SHA) return process.env.GITHUB_SHA;
 
   try {
-    const result = spawnSync('git', ['rev-parse', 'HEAD'], {
-      encoding: 'utf-8',
+    const result = spawnSync("git", ["rev-parse", "HEAD"], {
+      encoding: "utf-8",
     });
     if (result.status === 0 && result.stdout) {
       return result.stdout.trim();
@@ -21,13 +21,13 @@ function resolveCommitSha(provided) {
     // fall through
   }
 
-  throw new Error('Unable to determine commit SHA for supply chain artifacts');
+  throw new Error("Unable to determine commit SHA for supply chain artifacts");
 }
 
 function resolveCommitTimestamp(commitSha) {
   try {
-    const result = spawnSync('git', ['show', '-s', '--format=%cI', commitSha], {
-      encoding: 'utf-8',
+    const result = spawnSync("git", ["show", "-s", "--format=%cI", commitSha], {
+      encoding: "utf-8",
     });
     if (result.status === 0 && result.stdout) {
       return result.stdout.trim();
@@ -39,21 +39,21 @@ function resolveCommitTimestamp(commitSha) {
 }
 
 function hashContent(content) {
-  return crypto.createHash('sha256').update(content).digest('hex');
+  return crypto.createHash("sha256").update(content).digest("hex");
 }
 
 function writeJson(filePath, data) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   const serialized = JSON.stringify(data, null, 2);
-  fs.writeFileSync(filePath, serialized + '\n');
+  fs.writeFileSync(filePath, serialized + "\n");
   return hashContent(serialized);
 }
 
 function readPackageJson(targetDir) {
   try {
-    const manifestPath = path.join(targetDir, 'package.json');
+    const manifestPath = path.join(targetDir, "package.json");
     if (fs.existsSync(manifestPath)) {
-      return JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+      return JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
     }
   } catch (error) {
     // ignore – a missing manifest just means fewer components
@@ -67,14 +67,14 @@ function collectComponents(target, rootDir) {
   const pushComponent = (name, version) => {
     if (!name || !version) return;
     components.push({
-      type: 'library',
+      type: "library",
       name,
       version,
     });
   };
 
-  if (target === 'packages') {
-    const packagesDir = path.join(rootDir, 'packages');
+  if (target === "packages") {
+    const packagesDir = path.join(rootDir, "packages");
     if (fs.existsSync(packagesDir)) {
       const packageFolders = fs
         .readdirSync(packagesDir)
@@ -89,7 +89,7 @@ function collectComponents(target, rootDir) {
       }
     }
   } else {
-    const targetDir = path.join(rootDir, target === 'web' ? 'client' : target);
+    const targetDir = path.join(rootDir, target === "web" ? "client" : target);
     const manifest = readPackageJson(targetDir);
     if (manifest?.name && manifest?.version) {
       pushComponent(manifest.name, manifest.version);
@@ -106,21 +106,21 @@ function collectComponents(target, rootDir) {
 
 function buildSbomDocument(target, commitSha, timestamp, components) {
   return {
-    bomFormat: 'CycloneDX',
-    specVersion: '1.4',
+    bomFormat: "CycloneDX",
+    specVersion: "1.4",
     version: 1,
     metadata: {
       timestamp,
       component: {
-        type: 'application',
+        type: "application",
         name: `summit-${target}`,
         version: commitSha,
       },
       tools: [
         {
-          vendor: 'Summit',
-          name: 'supply-chain-artifacts',
-          version: '1.0.0',
+          vendor: "Summit",
+          name: "supply-chain-artifacts",
+          version: "1.0.0",
         },
       ],
     },
@@ -132,19 +132,14 @@ function generateSboms({
   commitSha,
   commitTimestamp,
   rootDir = process.cwd(),
-  artifactsDir = path.join(process.cwd(), 'artifacts', 'sbom'),
+  artifactsDir = path.join(process.cwd(), "artifacts", "sbom"),
   targets = DEFAULT_TARGETS,
 }) {
   const results = [];
 
   for (const target of targets) {
     const components = collectComponents(target, rootDir);
-    const document = buildSbomDocument(
-      target,
-      commitSha,
-      commitTimestamp,
-      components,
-    );
+    const document = buildSbomDocument(target, commitSha, commitTimestamp, components);
 
     const filename = `sbom-${target}-${commitSha}.cdx.json`;
     const destination = path.join(artifactsDir, filename);
@@ -179,7 +174,7 @@ function normalizeAuditSummary(raw) {
   if (source) {
     for (const [severity, value] of Object.entries(source)) {
       if (severity in summary) {
-        const total = typeof value === 'number' ? value : value?.count ?? value;
+        const total = typeof value === "number" ? value : (value?.count ?? value);
         summary[severity] = Number(total) || 0;
       }
     }
@@ -190,14 +185,14 @@ function normalizeAuditSummary(raw) {
 
 function runDependencyAudit({
   cwd = process.cwd(),
-  outputPath = path.join(process.cwd(), 'artifacts', 'dependency-audit.json'),
+  outputPath = path.join(process.cwd(), "artifacts", "dependency-audit.json"),
   auditData,
 } = {}) {
   let parsed = auditData;
   if (!parsed) {
-    const result = spawnSync('pnpm', ['audit', '--json'], {
+    const result = spawnSync("pnpm", ["audit", "--json"], {
       cwd,
-      encoding: 'utf-8',
+      encoding: "utf-8",
     });
 
     if (result.error) {
@@ -208,10 +203,10 @@ function runDependencyAudit({
       try {
         parsed = JSON.parse(result.stdout);
       } catch (error) {
-        throw new Error('Dependency audit returned invalid JSON output');
+        throw new Error("Dependency audit returned invalid JSON output");
       }
     } else {
-      throw new Error('Dependency audit did not produce any output');
+      throw new Error("Dependency audit did not produce any output");
     }
   }
 
@@ -225,9 +220,7 @@ function runDependencyAudit({
   writeJson(outputPath, auditSummary);
 
   if (auditSummary.critical > 0) {
-    const error = new Error(
-      `Critical vulnerabilities detected: ${auditSummary.critical}`,
-    );
+    const error = new Error(`Critical vulnerabilities detected: ${auditSummary.critical}`);
     error.summary = auditSummary;
     throw error;
   }
@@ -238,11 +231,11 @@ function runDependencyAudit({
 function generateProvenance({
   commitSha,
   commitTimestamp,
-  workflowName = process.env.GITHUB_WORKFLOW || 'local-build',
+  workflowName = process.env.GITHUB_WORKFLOW || "local-build",
   nodeVersion = process.version,
   sbomArtifacts,
   auditSummary,
-  outputPath = path.join(process.cwd(), 'artifacts', 'provenance.json'),
+  outputPath = path.join(process.cwd(), "artifacts", "provenance.json"),
   rootDir = process.cwd(),
 }) {
   const outputs = sbomArtifacts.map((artifact) => ({
@@ -272,9 +265,9 @@ function generateProvenance({
 function generateSupplyChainArtifacts({
   commitSha,
   rootDir = process.cwd(),
-  artifactsDir = path.join(process.cwd(), 'artifacts', 'sbom'),
-  provenancePath = path.join(process.cwd(), 'artifacts', 'provenance.json'),
-  auditPath = path.join(process.cwd(), 'artifacts', 'dependency-audit.json'),
+  artifactsDir = path.join(process.cwd(), "artifacts", "sbom"),
+  provenancePath = path.join(process.cwd(), "artifacts", "provenance.json"),
+  auditPath = path.join(process.cwd(), "artifacts", "dependency-audit.json"),
   targets = DEFAULT_TARGETS,
   workflowName,
   auditRunner = runDependencyAudit,
@@ -314,9 +307,9 @@ function generateSupplyChainArtifacts({
 function validateSupplyChainArtifacts({
   commitSha,
   rootDir = process.cwd(),
-  artifactsDir = path.join(process.cwd(), 'artifacts', 'sbom'),
-  provenancePath = path.join(process.cwd(), 'artifacts', 'provenance.json'),
-  auditPath = path.join(process.cwd(), 'artifacts', 'dependency-audit.json'),
+  artifactsDir = path.join(process.cwd(), "artifacts", "sbom"),
+  provenancePath = path.join(process.cwd(), "artifacts", "provenance.json"),
+  auditPath = path.join(process.cwd(), "artifacts", "dependency-audit.json"),
   targets = DEFAULT_TARGETS,
 } = {}) {
   const reasons = [];
@@ -332,7 +325,7 @@ function validateSupplyChainArtifacts({
       reasons.push(`Missing SBOM for ${target}`);
       continue;
     }
-    const content = fs.readFileSync(sbomPath, 'utf-8');
+    const content = fs.readFileSync(sbomPath, "utf-8");
     targetArtifacts.push({
       target,
       path: sbomPath,
@@ -346,20 +339,18 @@ function validateSupplyChainArtifacts({
   if (fs.existsSync(provenancePath)) {
     provenancePresent = true;
     try {
-      const provenance = JSON.parse(fs.readFileSync(provenancePath, 'utf-8'));
+      const provenance = JSON.parse(fs.readFileSync(provenancePath, "utf-8"));
       if (provenance.commit !== resolvedSha) {
-        reasons.push('Provenance commit SHA does not match expected commit');
+        reasons.push("Provenance commit SHA does not match expected commit");
       }
 
       const outputHashes = new Map(
-        (provenance.outputs || []).map((output) => [output.target, output.sha256]),
+        (provenance.outputs || []).map((output) => [output.target, output.sha256])
       );
 
       const missingOutputs = targets.filter((t) => !outputHashes.has(t));
       if (missingOutputs.length) {
-        reasons.push(
-          `Provenance missing outputs for: ${missingOutputs.join(', ')}`,
-        );
+        reasons.push(`Provenance missing outputs for: ${missingOutputs.join(", ")}`);
       }
 
       const mismatched = targetArtifacts.filter((artifact) => {
@@ -368,38 +359,33 @@ function validateSupplyChainArtifacts({
       });
 
       if (mismatched.length) {
-        reasons.push(
-          `Provenance hash mismatch for: ${mismatched
-            .map((a) => a.target)
-            .join(', ')}`,
-        );
+        reasons.push(`Provenance hash mismatch for: ${mismatched.map((a) => a.target).join(", ")}`);
       }
 
       provenanceValid = missingOutputs.length === 0 && mismatched.length === 0;
     } catch (error) {
-      reasons.push('Failed to parse provenance document');
+      reasons.push("Failed to parse provenance document");
     }
   } else {
-    reasons.push('Provenance file is missing');
+    reasons.push("Provenance file is missing");
   }
 
   let dependencyAuditPassed = false;
   if (fs.existsSync(auditPath)) {
     try {
-      const audit = JSON.parse(fs.readFileSync(auditPath, 'utf-8'));
+      const audit = JSON.parse(fs.readFileSync(auditPath, "utf-8"));
       dependencyAuditPassed = Number(audit.critical || 0) === 0;
       if (!dependencyAuditPassed) {
-        reasons.push('Critical vulnerabilities found in dependency audit');
+        reasons.push("Critical vulnerabilities found in dependency audit");
       }
     } catch (error) {
-      reasons.push('Dependency audit summary is invalid');
+      reasons.push("Dependency audit summary is invalid");
     }
   } else {
-    reasons.push('Dependency audit summary is missing');
+    reasons.push("Dependency audit summary is missing");
   }
 
-  const passed =
-    missingTargets.length === 0 && provenanceValid && dependencyAuditPassed;
+  const passed = missingTargets.length === 0 && provenanceValid && dependencyAuditPassed;
 
   return {
     passed,
@@ -416,27 +402,27 @@ function validateSupplyChainArtifacts({
 }
 
 function runCli() {
-  const command = process.argv[2] || 'generate';
+  const command = process.argv[2] || "generate";
   const commitSha = process.env.COMMIT_SHA || process.env.GITHUB_SHA;
 
-  if (command === 'generate') {
+  if (command === "generate") {
     const result = generateSupplyChainArtifacts({ commitSha });
     console.log(
-      `Generated SBOMs for ${result.sboms.length} targets and provenance at ${result.provenance.path}`,
+      `Generated SBOMs for ${result.sboms.length} targets and provenance at ${result.provenance.path}`
     );
     return;
   }
 
-  if (command === 'verify') {
+  if (command === "verify") {
     const validation = validateSupplyChainArtifacts({ commitSha });
     if (!validation.passed) {
-      console.error('Supply chain gate failed:');
+      console.error("Supply chain gate failed:");
       for (const reason of validation.reasons) {
         console.error(`- ${reason}`);
       }
       process.exit(1);
     }
-    console.log('Supply chain gate passed');
+    console.log("Supply chain gate passed");
     return;
   }
 

@@ -7,21 +7,21 @@
  * Manage feature flags across environments with rollout control
  */
 
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
 const FLAG_DEFINITIONS = {
-  'realtime-presence': {
-    description: 'Platform-wide presence indicators with avatar groups',
+  "realtime-presence": {
+    description: "Platform-wide presence indicators with avatar groups",
     defaultEnabled: true,
-    environments: ['development', 'staging', 'production'],
+    environments: ["development", "staging", "production"],
     tenantOverrides: {},
     rolloutPercentage: 100,
   },
-  'graph-streaming': {
-    description: 'Neighborhood streaming with progress indicators',
+  "graph-streaming": {
+    description: "Neighborhood streaming with progress indicators",
     defaultEnabled: true,
-    environments: ['development', 'staging', 'production'],
+    environments: ["development", "staging", "production"],
     tenantOverrides: {},
     rolloutPercentage: 80,
     performanceThreshold: {
@@ -29,70 +29,70 @@ const FLAG_DEFINITIONS = {
       errorRateMaxPercent: 1.0,
     },
   },
-  'k-shortest-paths': {
-    description: 'K-shortest paths UI (k≤5, depth≤6)',
+  "k-shortest-paths": {
+    description: "K-shortest paths UI (k≤5, depth≤6)",
     defaultEnabled: true,
-    environments: ['development', 'staging'],
+    environments: ["development", "staging"],
     tenantOverrides: {
       enterprise: false, // Disable for enterprise initially
     },
     rolloutPercentage: 100,
   },
-  'advanced-search': {
-    description: 'Query chips and keyboard DSL search',
+  "advanced-search": {
+    description: "Query chips and keyboard DSL search",
     defaultEnabled: true,
-    environments: ['development', 'staging', 'production'],
+    environments: ["development", "staging", "production"],
     tenantOverrides: {},
     rolloutPercentage: 100,
   },
-  'bulk-actions': {
-    description: 'Bulk operations on search results',
+  "bulk-actions": {
+    description: "Bulk operations on search results",
     defaultEnabled: true,
-    environments: ['development', 'staging', 'production'],
+    environments: ["development", "staging", "production"],
     tenantOverrides: {},
     rolloutPercentage: 90,
   },
-  'report-templates': {
-    description: 'Executive and Forensics report templates',
+  "report-templates": {
+    description: "Executive and Forensics report templates",
     defaultEnabled: true,
-    environments: ['development', 'staging', 'production'],
+    environments: ["development", "staging", "production"],
     tenantOverrides: {},
     rolloutPercentage: 100,
-    roleRestrictions: ['analyst', 'admin', 'investigator'],
+    roleRestrictions: ["analyst", "admin", "investigator"],
   },
-  'forensics-reports': {
-    description: 'Advanced forensics reporting with chain of custody',
+  "forensics-reports": {
+    description: "Advanced forensics reporting with chain of custody",
     defaultEnabled: true,
-    environments: ['development', 'staging', 'production'],
+    environments: ["development", "staging", "production"],
     tenantOverrides: {},
     rolloutPercentage: 100,
-    roleRestrictions: ['forensics', 'admin', 'legal'],
+    roleRestrictions: ["forensics", "admin", "legal"],
   },
-  'fps-monitor': {
-    description: 'Development FPS monitoring',
-    defaultEnabled: process.env.NODE_ENV === 'development',
-    environments: ['development'],
-    tenantOverrides: {},
-    rolloutPercentage: 100,
-  },
-  'event-inspector': {
-    description: 'Development event inspector for GraphQL subscriptions',
-    defaultEnabled: process.env.NODE_ENV === 'development',
-    environments: ['development'],
+  "fps-monitor": {
+    description: "Development FPS monitoring",
+    defaultEnabled: process.env.NODE_ENV === "development",
+    environments: ["development"],
     tenantOverrides: {},
     rolloutPercentage: 100,
   },
-  'optimistic-updates': {
-    description: 'Optimistic mutations with conflict rollback',
+  "event-inspector": {
+    description: "Development event inspector for GraphQL subscriptions",
+    defaultEnabled: process.env.NODE_ENV === "development",
+    environments: ["development"],
+    tenantOverrides: {},
+    rolloutPercentage: 100,
+  },
+  "optimistic-updates": {
+    description: "Optimistic mutations with conflict rollback",
     defaultEnabled: true,
-    environments: ['development', 'staging', 'production'],
+    environments: ["development", "staging", "production"],
     tenantOverrides: {},
     rolloutPercentage: 75,
   },
-  'multi-language': {
-    description: 'NATO locale support (29 countries)',
+  "multi-language": {
+    description: "NATO locale support (29 countries)",
     defaultEnabled: true,
-    environments: ['staging', 'production'],
+    environments: ["staging", "production"],
     tenantOverrides: {},
     rolloutPercentage: 50,
   },
@@ -100,39 +100,36 @@ const FLAG_DEFINITIONS = {
 
 class FeatureFlagManager {
   constructor() {
-    this.flagsPath = 'client/src/hooks/useFlag.ts';
+    this.flagsPath = "client/src/hooks/useFlag.ts";
   }
 
   listFlags() {
-    console.log('🏁 Feature Flags Configuration');
-    console.log('============================\n');
+    console.log("🏁 Feature Flags Configuration");
+    console.log("============================\n");
 
     Object.entries(FLAG_DEFINITIONS).forEach(([flagKey, config]) => {
-      const status = config.defaultEnabled ? '✅ ENABLED' : '❌ DISABLED';
-      const rollout =
-        config.rolloutPercentage < 100 ? ` (${config.rolloutPercentage}%)` : '';
+      const status = config.defaultEnabled ? "✅ ENABLED" : "❌ DISABLED";
+      const rollout = config.rolloutPercentage < 100 ? ` (${config.rolloutPercentage}%)` : "";
 
       console.log(`${status} ${flagKey}${rollout}`);
       console.log(`   ${config.description}`);
-      console.log(`   Environments: ${config.environments.join(', ')}`);
+      console.log(`   Environments: ${config.environments.join(", ")}`);
 
       if (config.roleRestrictions) {
-        console.log(`   Roles: ${config.roleRestrictions.join(', ')}`);
+        console.log(`   Roles: ${config.roleRestrictions.join(", ")}`);
       }
 
       if (Object.keys(config.tenantOverrides).length > 0) {
-        console.log(
-          `   Tenant overrides: ${JSON.stringify(config.tenantOverrides)}`,
-        );
+        console.log(`   Tenant overrides: ${JSON.stringify(config.tenantOverrides)}`);
       }
 
       if (config.performanceThreshold) {
         console.log(
-          `   Performance gates: p95<${config.performanceThreshold.p95MaxMs}ms, errors<${config.performanceThreshold.errorRateMaxPercent}%`,
+          `   Performance gates: p95<${config.performanceThreshold.p95MaxMs}ms, errors<${config.performanceThreshold.errorRateMaxPercent}%`
         );
       }
 
-      console.log('');
+      console.log("");
     });
   }
 
@@ -145,8 +142,7 @@ class FeatureFlagManager {
 
     const updates = {
       defaultEnabled: true,
-      rolloutPercentage:
-        options.rollout || FLAG_DEFINITIONS[flagKey].rolloutPercentage,
+      rolloutPercentage: options.rollout || FLAG_DEFINITIONS[flagKey].rolloutPercentage,
       ...options,
     };
 
@@ -177,7 +173,7 @@ class FeatureFlagManager {
     }
 
     if (percentage < 0 || percentage > 100) {
-      throw new Error('Rollout percentage must be between 0 and 100');
+      throw new Error("Rollout percentage must be between 0 and 100");
     }
 
     console.log(`📊 Setting rollout for ${flagKey}: ${percentage}%`);
@@ -195,9 +191,7 @@ class FeatureFlagManager {
       throw new Error(`Unknown flag: ${flagKey}`);
     }
 
-    console.log(
-      `🏢 Setting tenant override for ${flagKey}: ${tenant} = ${enabled}`,
-    );
+    console.log(`🏢 Setting tenant override for ${flagKey}: ${tenant} = ${enabled}`);
 
     const currentOverrides = FLAG_DEFINITIONS[flagKey].tenantOverrides || {};
     currentOverrides[tenant] = enabled;
@@ -225,10 +219,7 @@ class FeatureFlagManager {
           },
         };
 
-        if (
-          config.tenantOverrides &&
-          Object.keys(config.tenantOverrides).length > 0
-        ) {
+        if (config.tenantOverrides && Object.keys(config.tenantOverrides).length > 0) {
           envFlags[flagKey].tenantOverrides = config.tenantOverrides;
         }
       }
@@ -252,9 +243,7 @@ class FeatureFlagManager {
 
     console.log(`🔍 Validating performance for ${flagKey}:`);
     console.log(`   p95: ${metrics.p95}ms (limit: ${p95MaxMs}ms)`);
-    console.log(
-      `   Error rate: ${metrics.errorRate}% (limit: ${errorRateMaxPercent}%)`,
-    );
+    console.log(`   Error rate: ${metrics.errorRate}% (limit: ${errorRateMaxPercent}%)`);
 
     const p95Valid = metrics.p95 <= p95MaxMs;
     const errorRateValid = metrics.errorRate <= errorRateMaxPercent;
@@ -269,29 +258,29 @@ class FeatureFlagManager {
     return true;
   }
 
-  emergencyDisableAll(reason = 'Emergency disable') {
+  emergencyDisableAll(reason = "Emergency disable") {
     console.log(`🚨 EMERGENCY: Disabling all non-essential flags`);
     console.log(`   Reason: ${reason}`);
 
-    const essentialFlags = ['advanced-search']; // Keep essential features
+    const essentialFlags = ["advanced-search"]; // Keep essential features
     const emergencyCommands = [];
 
     Object.keys(FLAG_DEFINITIONS).forEach((flagKey) => {
       if (!essentialFlags.includes(flagKey)) {
         emergencyCommands.push(
-          `kubectl set env deployment/ui-prod FEATURE_${flagKey.toUpperCase().replace(/-/g, '_')}_ENABLED=false`,
+          `kubectl set env deployment/ui-prod FEATURE_${flagKey.toUpperCase().replace(/-/g, "_")}_ENABLED=false`
         );
       }
     });
 
-    console.log('\n🔧 Execute these commands:');
+    console.log("\n🔧 Execute these commands:");
     emergencyCommands.forEach((cmd) => console.log(`   ${cmd}`));
 
-    console.log('\n📝 Rollback plan:');
-    console.log('   1. Identify root cause');
-    console.log('   2. Apply targeted fix');
-    console.log('   3. Re-enable flags one by one');
-    console.log('   4. Monitor metrics after each re-enable');
+    console.log("\n📝 Rollback plan:");
+    console.log("   1. Identify root cause");
+    console.log("   2. Apply targeted fix");
+    console.log("   3. Re-enable flags one by one");
+    console.log("   4. Monitor metrics after each re-enable");
 
     return emergencyCommands;
   }
@@ -305,7 +294,7 @@ class FeatureFlagManager {
   }
 
   updateSourceFile() {
-    const sourceFile = fs.readFileSync(this.flagsPath, 'utf8');
+    const sourceFile = fs.readFileSync(this.flagsPath, "utf8");
 
     // Generate new DEFAULT_FLAGS object
     const defaultFlagsObj = {};
@@ -340,7 +329,7 @@ class FeatureFlagManager {
 
     const updatedSource = sourceFile.replace(
       /const DEFAULT_FLAGS: FlagConfig = \{[\s\S]*?\};/,
-      newDefaultFlags,
+      newDefaultFlags
     );
 
     fs.writeFileSync(this.flagsPath, updatedSource);
@@ -352,7 +341,7 @@ class FeatureFlagManager {
 
     Object.entries(FLAG_DEFINITIONS).forEach(([flagKey, config]) => {
       if (config.environments.includes(environment)) {
-        const envName = `FEATURE_${flagKey.toUpperCase().replace(/-/g, '_')}_ENABLED`;
+        const envName = `FEATURE_${flagKey.toUpperCase().replace(/-/g, "_")}_ENABLED`;
         envVars.push({
           name: envName,
           value: config.defaultEnabled.toString(),
@@ -361,11 +350,11 @@ class FeatureFlagManager {
     });
 
     const manifest = {
-      apiVersion: 'v1',
-      kind: 'ConfigMap',
+      apiVersion: "v1",
+      kind: "ConfigMap",
       metadata: {
         name: `feature-flags-${environment}`,
-        namespace: 'default',
+        namespace: "default",
       },
       data: Object.fromEntries(envVars.map((env) => [env.name, env.value])),
     };
@@ -385,43 +374,40 @@ function main() {
 
   try {
     switch (command) {
-      case 'list':
+      case "list":
         manager.listFlags();
         break;
 
-      case 'enable':
-        if (!args[0]) throw new Error('Flag name required');
+      case "enable":
+        if (!args[0]) throw new Error("Flag name required");
         const enableOptions = {};
         if (args[1]) enableOptions.rollout = parseInt(args[1]);
         manager.enableFlag(args[0], enableOptions);
         break;
 
-      case 'disable':
-        if (!args[0]) throw new Error('Flag name required');
+      case "disable":
+        if (!args[0]) throw new Error("Flag name required");
         manager.disableFlag(args[0]);
         break;
 
-      case 'rollout':
-        if (!args[0] || !args[1])
-          throw new Error('Flag name and percentage required');
+      case "rollout":
+        if (!args[0] || !args[1]) throw new Error("Flag name and percentage required");
         manager.setRollout(args[0], parseInt(args[1]));
         break;
 
-      case 'tenant':
+      case "tenant":
         if (!args[0] || !args[1] || !args[2])
-          throw new Error(
-            'Flag name, tenant, and enabled (true/false) required',
-          );
-        manager.setTenantOverride(args[0], args[1], args[2] === 'true');
+          throw new Error("Flag name, tenant, and enabled (true/false) required");
+        manager.setTenantOverride(args[0], args[1], args[2] === "true");
         break;
 
-      case 'export':
-        if (!args[0]) throw new Error('Environment required');
+      case "export":
+        if (!args[0]) throw new Error("Environment required");
         manager.exportForEnvironment(args[0]);
         break;
 
-      case 'validate':
-        if (!args[0]) throw new Error('Flag name required');
+      case "validate":
+        if (!args[0]) throw new Error("Flag name required");
         const metrics = {
           p95: parseFloat(args[1]) || 300,
           errorRate: parseFloat(args[2]) || 0.1,
@@ -429,12 +415,12 @@ function main() {
         manager.validatePerformance(args[0], metrics);
         break;
 
-      case 'emergency-disable':
+      case "emergency-disable":
         manager.emergencyDisableAll(args[0]);
         break;
 
-      case 'k8s-manifest':
-        if (!args[0]) throw new Error('Environment required');
+      case "k8s-manifest":
+        if (!args[0]) throw new Error("Environment required");
         manager.generateKubernetesManifest(args[0]);
         break;
 

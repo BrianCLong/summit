@@ -5,39 +5,39 @@
  * Manages multi-environment deployments, rollbacks, and infrastructure provisioning
  */
 
-import { spawn, exec } from 'child_process';
-import { promisify } from 'util';
-import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs';
-import { join, resolve } from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { spawn, exec } from "child_process";
+import { promisify } from "util";
+import { writeFileSync, readFileSync, existsSync, mkdirSync } from "fs";
+import { join, resolve } from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
 const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const root = resolve(__dirname, '..');
+const root = resolve(__dirname, "..");
 
 class DeploymentManager {
   constructor() {
-    this.configDir = join(root, 'deploy');
-    this.reportDir = join(root, 'test-results', 'deployments');
+    this.configDir = join(root, "deploy");
+    this.reportDir = join(root, "test-results", "deployments");
     this.environments = {
       local: {
-        name: 'Local Development',
-        url: 'http://localhost:5173',
-        healthCheck: '/health',
+        name: "Local Development",
+        url: "http://localhost:5173",
+        healthCheck: "/health",
         requiresAuth: false,
       },
       staging: {
-        name: 'Staging Environment',
-        url: process.env.STAGING_URL || 'https://staging.maestro.dev',
-        healthCheck: '/health',
+        name: "Staging Environment",
+        url: process.env.STAGING_URL || "https://staging.maestro.dev",
+        healthCheck: "/health",
         requiresAuth: true,
       },
       production: {
-        name: 'Production Environment',
-        url: process.env.PRODUCTION_URL || 'https://maestro.dev',
-        healthCheck: '/health',
+        name: "Production Environment",
+        url: process.env.PRODUCTION_URL || "https://maestro.dev",
+        healthCheck: "/health",
         requiresAuth: true,
         requiresApproval: true,
       },
@@ -48,7 +48,7 @@ class DeploymentManager {
 
   async setup() {
     console
-      .log('🚀 Setting up Deployment Manager...')
+      .log("🚀 Setting up Deployment Manager...")
 
       [
         // Create necessary directories
@@ -64,31 +64,31 @@ class DeploymentManager {
   }
 
   loadDeploymentHistory() {
-    const historyFile = join(this.reportDir, 'deployment-history.json');
+    const historyFile = join(this.reportDir, "deployment-history.json");
     if (existsSync(historyFile)) {
       try {
-        this.deploymentHistory = JSON.parse(readFileSync(historyFile, 'utf8'));
+        this.deploymentHistory = JSON.parse(readFileSync(historyFile, "utf8"));
       } catch (error) {
-        console.log('⚠️ Could not load deployment history:', error.message);
+        console.log("⚠️ Could not load deployment history:", error.message);
         this.deploymentHistory = [];
       }
     }
   }
 
   saveDeploymentHistory() {
-    const historyFile = join(this.reportDir, 'deployment-history.json');
+    const historyFile = join(this.reportDir, "deployment-history.json");
     writeFileSync(historyFile, JSON.stringify(this.deploymentHistory, null, 2));
   }
 
   async createDockerDeployment() {
-    console.log('🐳 Creating Docker deployment configuration...');
+    console.log("🐳 Creating Docker deployment configuration...");
 
     const deploymentConfigs = {
-      'docker-compose.production.yml': this.generateProductionDockerCompose(),
-      'docker-compose.staging.yml': this.generateStagingDockerCompose(),
-      'Dockerfile.production': this.generateProductionDockerfile(),
-      'nginx.production.conf': this.generateProductionNginxConfig(),
-      'healthcheck.sh': this.generateHealthCheckScript(),
+      "docker-compose.production.yml": this.generateProductionDockerCompose(),
+      "docker-compose.staging.yml": this.generateStagingDockerCompose(),
+      "Dockerfile.production": this.generateProductionDockerfile(),
+      "nginx.production.conf": this.generateProductionNginxConfig(),
+      "healthcheck.sh": this.generateHealthCheckScript(),
     };
 
     for (const [filename, content] of Object.entries(deploymentConfigs)) {
@@ -96,7 +96,7 @@ class DeploymentManager {
       writeFileSync(filePath, content);
 
       // Make shell scripts executable
-      if (filename.endsWith('.sh')) {
+      if (filename.endsWith(".sh")) {
         await execAsync(`chmod +x "${filePath}"`);
       }
 
@@ -606,19 +606,19 @@ main
   }
 
   async createKubernetesDeployment() {
-    console.log('☸️ Creating Kubernetes deployment configuration...');
+    console.log("☸️ Creating Kubernetes deployment configuration...");
 
     const k8sConfigs = {
-      'namespace.yaml': this.generateK8sNamespace(),
-      'configmap.yaml': this.generateK8sConfigMap(),
-      'deployment.yaml': this.generateK8sDeployment(),
-      'service.yaml': this.generateK8sService(),
-      'ingress.yaml': this.generateK8sIngress(),
-      'hpa.yaml': this.generateK8sHPA(),
-      'servicemonitor.yaml': this.generateK8sServiceMonitor(),
+      "namespace.yaml": this.generateK8sNamespace(),
+      "configmap.yaml": this.generateK8sConfigMap(),
+      "deployment.yaml": this.generateK8sDeployment(),
+      "service.yaml": this.generateK8sService(),
+      "ingress.yaml": this.generateK8sIngress(),
+      "hpa.yaml": this.generateK8sHPA(),
+      "servicemonitor.yaml": this.generateK8sServiceMonitor(),
     };
 
-    const k8sDir = join(this.configDir, 'kubernetes');
+    const k8sDir = join(this.configDir, "kubernetes");
     if (!existsSync(k8sDir)) {
       mkdirSync(k8sDir, { recursive: true });
     }
@@ -1017,7 +1017,7 @@ spec:
 
   async deploy(environment, options = {}) {
     const {
-      version = 'latest',
+      version = "latest",
       skipHealthCheck = false,
       rollback = false,
       approve = false,
@@ -1033,7 +1033,7 @@ spec:
     // Check for approval requirement
     if (env.requiresApproval && !approve) {
       throw new Error(
-        `Deployment to ${environment} requires explicit approval. Use --approve flag.`,
+        `Deployment to ${environment} requires explicit approval. Use --approve flag.`
       );
     }
 
@@ -1047,7 +1047,7 @@ spec:
         environment,
         version,
         startTime: new Date(startTime).toISOString(),
-        status: 'in_progress',
+        status: "in_progress",
         rollback,
         steps: [],
       };
@@ -1055,49 +1055,49 @@ spec:
       this.deploymentHistory.unshift(deployment);
 
       // Step 1: Pre-deployment checks
-      await this.addDeploymentStep(deployment, 'pre_check', async () => {
-        console.log('  🔍 Running pre-deployment checks...');
+      await this.addDeploymentStep(deployment, "pre_check", async () => {
+        console.log("  🔍 Running pre-deployment checks...");
 
         // Check if previous deployment is still running
         const runningDeployments = this.deploymentHistory.filter(
-          (d) => d.status === 'in_progress' && d.id !== deploymentId,
+          (d) => d.status === "in_progress" && d.id !== deploymentId
         );
 
         if (runningDeployments.length > 0) {
-          throw new Error('Another deployment is currently in progress');
+          throw new Error("Another deployment is currently in progress");
         }
 
-        return { status: 'passed' };
+        return { status: "passed" };
       });
 
       // Step 2: Build and prepare
-      await this.addDeploymentStep(deployment, 'build', async () => {
-        console.log('  🏗️ Building application...');
+      await this.addDeploymentStep(deployment, "build", async () => {
+        console.log("  🏗️ Building application...");
 
-        const { stdout } = await execAsync('npm run build', {
+        const { stdout } = await execAsync("npm run build", {
           cwd: root,
           timeout: 300000,
         });
 
         return {
-          status: 'completed',
+          status: "completed",
           output: stdout,
         };
       });
 
       // Step 3: Deploy based on environment
-      if (environment === 'local') {
+      if (environment === "local") {
         await this.deployLocal(deployment);
-      } else if (environment === 'staging') {
+      } else if (environment === "staging") {
         await this.deployStagingDocker(deployment, version);
-      } else if (environment === 'production') {
+      } else if (environment === "production") {
         await this.deployProduction(deployment, version);
       }
 
       // Step 4: Health checks
       if (!skipHealthCheck) {
-        await this.addDeploymentStep(deployment, 'health_check', async () => {
-          console.log('  🏥 Running health checks...');
+        await this.addDeploymentStep(deployment, "health_check", async () => {
+          console.log("  🏥 Running health checks...");
 
           // Wait for deployment to stabilize
           await this.sleep(10000);
@@ -1113,8 +1113,8 @@ spec:
       }
 
       // Step 5: Post-deployment verification
-      await this.addDeploymentStep(deployment, 'verification', async () => {
-        console.log('  ✅ Running post-deployment verification...');
+      await this.addDeploymentStep(deployment, "verification", async () => {
+        console.log("  ✅ Running post-deployment verification...");
 
         // Run smoke tests
         const smokeResults = await this.runSmokeTests(env.url);
@@ -1123,7 +1123,7 @@ spec:
       });
 
       // Mark deployment as successful
-      deployment.status = 'completed';
+      deployment.status = "completed";
       deployment.endTime = new Date().toISOString();
       deployment.duration = Date.now() - startTime;
 
@@ -1138,11 +1138,9 @@ spec:
       return deployment;
     } catch (error) {
       // Mark deployment as failed
-      const deployment = this.deploymentHistory.find(
-        (d) => d.id === deploymentId,
-      );
+      const deployment = this.deploymentHistory.find((d) => d.id === deploymentId);
       if (deployment) {
-        deployment.status = 'failed';
+        deployment.status = "failed";
         deployment.error = error.message;
         deployment.endTime = new Date().toISOString();
         deployment.duration = Date.now() - startTime;
@@ -1156,13 +1154,13 @@ spec:
   }
 
   async deployLocal(deployment) {
-    await this.addDeploymentStep(deployment, 'local_deploy', async () => {
-      console.log('  🏠 Starting local development server...');
+    await this.addDeploymentStep(deployment, "local_deploy", async () => {
+      console.log("  🏠 Starting local development server...");
 
       // For local deployment, we just start the dev server
-      const devProcess = spawn('npm', ['run', 'dev'], {
+      const devProcess = spawn("npm", ["run", "dev"], {
         cwd: root,
-        stdio: 'pipe',
+        stdio: "pipe",
         detached: true,
       });
 
@@ -1170,69 +1168,69 @@ spec:
       await this.sleep(5000);
 
       return {
-        status: 'started',
+        status: "started",
         pid: devProcess.pid,
-        url: 'http://localhost:5173',
+        url: "http://localhost:5173",
       };
     });
   }
 
   async deployStagingDocker(deployment, version) {
-    await this.addDeploymentStep(deployment, 'docker_deploy', async () => {
-      console.log('  🐳 Deploying with Docker Compose...');
+    await this.addDeploymentStep(deployment, "docker_deploy", async () => {
+      console.log("  🐳 Deploying with Docker Compose...");
 
       // Build and deploy using staging compose file
-      const composeFile = join(this.configDir, 'docker-compose.staging.yml');
+      const composeFile = join(this.configDir, "docker-compose.staging.yml");
 
-      const { stdout } = await execAsync(
-        `docker-compose -f "${composeFile}" up --build -d`,
-        { cwd: root, timeout: 600000 },
-      );
+      const { stdout } = await execAsync(`docker-compose -f "${composeFile}" up --build -d`, {
+        cwd: root,
+        timeout: 600000,
+      });
 
       return {
-        status: 'deployed',
+        status: "deployed",
         output: stdout,
       };
     });
   }
 
   async deployProduction(deployment, version) {
-    await this.addDeploymentStep(deployment, 'production_deploy', async () => {
-      console.log('  🏭 Deploying to production...');
+    await this.addDeploymentStep(deployment, "production_deploy", async () => {
+      console.log("  🏭 Deploying to production...");
 
       // This would typically integrate with your production deployment system
       // For example: Kubernetes, AWS ECS, Google Cloud Run, etc.
 
       // Example using kubectl (if Kubernetes manifests exist)
-      const k8sDir = join(this.configDir, 'kubernetes');
+      const k8sDir = join(this.configDir, "kubernetes");
       if (existsSync(k8sDir)) {
         const { stdout } = await execAsync(`kubectl apply -f "${k8sDir}"`, {
           timeout: 300000,
         });
 
         return {
-          status: 'deployed',
-          method: 'kubernetes',
+          status: "deployed",
+          method: "kubernetes",
           output: stdout,
         };
       }
 
       // Example using Docker Compose for production
-      const composeFile = join(this.configDir, 'docker-compose.production.yml');
+      const composeFile = join(this.configDir, "docker-compose.production.yml");
       if (existsSync(composeFile)) {
-        const { stdout } = await execAsync(
-          `docker-compose -f "${composeFile}" up --build -d`,
-          { cwd: root, timeout: 600000 },
-        );
+        const { stdout } = await execAsync(`docker-compose -f "${composeFile}" up --build -d`, {
+          cwd: root,
+          timeout: 600000,
+        });
 
         return {
-          status: 'deployed',
-          method: 'docker-compose',
+          status: "deployed",
+          method: "docker-compose",
           output: stdout,
         };
       }
 
-      throw new Error('No production deployment configuration found');
+      throw new Error("No production deployment configuration found");
     });
   }
 
@@ -1270,8 +1268,8 @@ spec:
     try {
       // Run basic smoke tests
       const tests = [
-        { name: 'homepage', url: baseUrl },
-        { name: 'login', url: `${baseUrl}/maestro/login` },
+        { name: "homepage", url: baseUrl },
+        { name: "login", url: `${baseUrl}/maestro/login` },
       ];
 
       const results = [];
@@ -1315,19 +1313,19 @@ spec:
     const step = {
       name: stepName,
       startTime: new Date().toISOString(),
-      status: 'in_progress',
+      status: "in_progress",
     };
 
     deployment.steps.push(step);
 
     try {
       const result = await stepFunction();
-      step.status = 'completed';
+      step.status = "completed";
       step.endTime = new Date().toISOString();
       step.result = result;
       return result;
     } catch (error) {
-      step.status = 'failed';
+      step.status = "failed";
       step.endTime = new Date().toISOString();
       step.error = error.message;
       throw error;
@@ -1345,19 +1343,14 @@ spec:
     let targetDeployment;
 
     if (deploymentId) {
-      targetDeployment = this.deploymentHistory.find(
-        (d) => d.id === deploymentId,
-      );
+      targetDeployment = this.deploymentHistory.find((d) => d.id === deploymentId);
       if (!targetDeployment) {
         throw new Error(`Deployment ${deploymentId} not found`);
       }
     } else {
       // Find the last successful deployment
       targetDeployment = this.deploymentHistory.find(
-        (d) =>
-          d.environment === environment &&
-          d.status === 'completed' &&
-          !d.rollback,
+        (d) => d.environment === environment && d.status === "completed" && !d.rollback
       );
 
       if (!targetDeployment) {
@@ -1365,9 +1358,7 @@ spec:
       }
     }
 
-    console.log(
-      `Rolling back to deployment ${targetDeployment.id} (${targetDeployment.version})`,
-    );
+    console.log(`Rolling back to deployment ${targetDeployment.id} (${targetDeployment.version})`);
 
     // Perform rollback deployment
     return await this.deploy(environment, {
@@ -1378,7 +1369,7 @@ spec:
   }
 
   async generateReport() {
-    console.log('📄 Generating deployment report...');
+    console.log("📄 Generating deployment report...");
 
     const totalDuration = Date.now() - this.startTime;
     const report = {
@@ -1388,27 +1379,20 @@ spec:
       environments: this.environments,
       summary: {
         totalDeployments: this.deploymentHistory.length,
-        successfulDeployments: this.deploymentHistory.filter(
-          (d) => d.status === 'completed',
-        ).length,
-        failedDeployments: this.deploymentHistory.filter(
-          (d) => d.status === 'failed',
-        ).length,
-        inProgressDeployments: this.deploymentHistory.filter(
-          (d) => d.status === 'in_progress',
-        ).length,
+        successfulDeployments: this.deploymentHistory.filter((d) => d.status === "completed")
+          .length,
+        failedDeployments: this.deploymentHistory.filter((d) => d.status === "failed").length,
+        inProgressDeployments: this.deploymentHistory.filter((d) => d.status === "in_progress")
+          .length,
       },
     };
 
     // Write JSON report
-    writeFileSync(
-      join(this.reportDir, 'deployment-report.json'),
-      JSON.stringify(report, null, 2),
-    );
+    writeFileSync(join(this.reportDir, "deployment-report.json"), JSON.stringify(report, null, 2));
 
     // Write HTML report
     const htmlReport = this.generateHTMLReport(report);
-    writeFileSync(join(this.reportDir, 'deployment-report.html'), htmlReport);
+    writeFileSync(join(this.reportDir, "deployment-report.html"), htmlReport);
 
     return report;
   }
@@ -1485,12 +1469,12 @@ spec:
                     <h3>${env.charAt(0).toUpperCase() + env.slice(1)}</h3>
                     <p><strong>Name:</strong> ${config.name}</p>
                     <p><strong>URL:</strong> <a href="${config.url}" target="_blank">${config.url}</a></p>
-                    <p><strong>Requires Auth:</strong> ${config.requiresAuth ? 'Yes' : 'No'}</p>
-                    ${config.requiresApproval ? '<p><strong>Requires Approval:</strong> Yes</p>' : ''}
+                    <p><strong>Requires Auth:</strong> ${config.requiresAuth ? "Yes" : "No"}</p>
+                    ${config.requiresApproval ? "<p><strong>Requires Approval:</strong> Yes</p>" : ""}
                 </div>
-            `,
+            `
               )
-              .join('')}
+              .join("")}
         </div>
         
         <h2>📋 Recent Deployments</h2>
@@ -1507,8 +1491,8 @@ spec:
                             </h3>
                             <p><strong>Status:</strong> ${deployment.status.toUpperCase()}</p>
                             <p><strong>Started:</strong> ${deployment.startTime}</p>
-                            ${deployment.endTime ? `<p><strong>Duration:</strong> ${(deployment.duration / 1000).toFixed(2)}s</p>` : ''}
-                            ${deployment.rollback ? '<p><strong>Type:</strong> Rollback</p>' : ''}
+                            ${deployment.endTime ? `<p><strong>Duration:</strong> ${(deployment.duration / 1000).toFixed(2)}s</p>` : ""}
+                            ${deployment.rollback ? "<p><strong>Type:</strong> Rollback</p>" : ""}
                         </div>
                     </div>
                     
@@ -1519,7 +1503,7 @@ spec:
                             <strong>Error:</strong> ${deployment.error}
                         </div>
                     `
-                        : ''
+                        : ""
                     }
                     
                     ${
@@ -1531,20 +1515,20 @@ spec:
                               .map(
                                 (step) => `
                                 <div class="step ${step.status}">
-                                    <strong>${step.name.replace(/_/g, ' ').toUpperCase()}</strong> - ${step.status.toUpperCase()}
-                                    ${step.error ? `<br><span style="color: #dc3545;">Error: ${step.error}</span>` : ''}
+                                    <strong>${step.name.replace(/_/g, " ").toUpperCase()}</strong> - ${step.status.toUpperCase()}
+                                    ${step.error ? `<br><span style="color: #dc3545;">Error: ${step.error}</span>` : ""}
                                 </div>
-                            `,
+                            `
                               )
-                              .join('')}
+                              .join("")}
                         </div>
                     `
-                        : ''
+                        : ""
                     }
                 </div>
-            `,
+            `
               )
-              .join('')}
+              .join("")}
         </div>
     </div>
 </body>
@@ -1561,26 +1545,24 @@ spec:
       await this.setup();
 
       switch (command) {
-        case 'create-configs':
+        case "create-configs":
           await this.createDockerDeployment();
           await this.createKubernetesDeployment();
-          console.log('✅ All deployment configurations created!');
+          console.log("✅ All deployment configurations created!");
           break;
 
-        case 'deploy':
-          const environment = options.environment || 'local';
+        case "deploy":
+          const environment = options.environment || "local";
           return await this.deploy(environment, options);
 
-        case 'rollback':
-          const rollbackEnv = options.environment || 'staging';
+        case "rollback":
+          const rollbackEnv = options.environment || "staging";
           return await this.rollback(rollbackEnv, options.deploymentId);
 
-        case 'status':
+        case "status":
           const report = await this.generateReport();
-          console.log('\n📊 Deployment Status:');
-          console.log(
-            `  Total Deployments: ${report.summary.totalDeployments}`,
-          );
+          console.log("\n📊 Deployment Status:");
+          console.log(`  Total Deployments: ${report.summary.totalDeployments}`);
           console.log(`  Successful: ${report.summary.successfulDeployments}`);
           console.log(`  Failed: ${report.summary.failedDeployments}`);
           console.log(`  In Progress: ${report.summary.inProgressDeployments}`);
@@ -1590,7 +1572,7 @@ spec:
           throw new Error(`Unknown command: ${command}`);
       }
     } catch (error) {
-      console.error('❌ Deployment Manager failed:', error);
+      console.error("❌ Deployment Manager failed:", error);
       throw error;
     }
   }
@@ -1599,28 +1581,24 @@ spec:
 // CLI interface
 if (import.meta.url === `file://${process.argv[1]}`) {
   const args = process.argv.slice(2);
-  const command = args[0] || 'create-configs';
+  const command = args[0] || "create-configs";
 
   const options = {
-    environment: args.find((arg) => arg.startsWith('--env='))?.split('=')[1],
-    version:
-      args.find((arg) => arg.startsWith('--version='))?.split('=')[1] ||
-      'latest',
-    deploymentId: args
-      .find((arg) => arg.startsWith('--deployment='))
-      ?.split('=')[1],
-    skipHealthCheck: args.includes('--skip-health-check'),
-    approve: args.includes('--approve'),
+    environment: args.find((arg) => arg.startsWith("--env="))?.split("=")[1],
+    version: args.find((arg) => arg.startsWith("--version="))?.split("=")[1] || "latest",
+    deploymentId: args.find((arg) => arg.startsWith("--deployment="))?.split("=")[1],
+    skipHealthCheck: args.includes("--skip-health-check"),
+    approve: args.includes("--approve"),
   };
 
   const manager = new DeploymentManager();
   manager
     .run(command, options)
     .then(() => {
-      console.log('✅ Deployment Manager completed successfully!');
+      console.log("✅ Deployment Manager completed successfully!");
     })
     .catch((error) => {
-      console.error('❌ Error:', error.message);
+      console.error("❌ Error:", error.message);
       process.exit(1);
     });
 }

@@ -11,14 +11,10 @@ export interface CredentialingNode {
   weight: number;
 }
 
-export function issueHIT(
-  subjectId: string,
-  nodes: CredentialingNode[],
-  signatures: string[],
-): HIT {
+export function issueHIT(subjectId: string, nodes: CredentialingNode[], signatures: string[]): HIT {
   // Placeholder for actual threshold-signature or PBFT logic
   if (signatures.length < nodes.length * (2 / 3)) {
-    throw new Error('Not enough weighted signatures to issue HIT');
+    throw new Error("Not enough weighted signatures to issue HIT");
   }
   const score = signatures.length / nodes.length; // Simple score for MVP
   return {

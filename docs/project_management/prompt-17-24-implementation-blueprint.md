@@ -3,11 +3,13 @@
 ## 1) Requirements Expansion
 
 ### Explicit Requirements
+
 - Deliver feature-flagged, event-coupled services for schema governance, risk scoring, live presence, redaction/DP, synthetic data forging, federated discovery, subgraph caching, and multimodal enrichment.
 - Provide APIs, generators, migrations, CI gates, UI panels, and append-only history guarantees per prompt.
 - Enforce safety constraints: no PII leakage, consent gating, non-destructive defaults, and rollback paths.
 
 ### Implied Requirements (23rd-Order Expansion)
+
 - Zero-downtime deployments with backward-compatible APIs and migrations; blue/green or canary support.
 - Deterministic fixtures, reproducible scores, and drift detection with signed manifests for every artifact.
 - Observability-first: per-service metrics, traces, structured logs with redaction; SLOs and alerting baselines.
@@ -18,6 +20,7 @@
 - Governance: append-only ledgers with signatures, change approvals, rollback playbooks, and feature-flag rollout steps.
 
 ### Non-goals
+
 - Introducing new data stores beyond specified Postgres/Redis/Neo4j; no external SaaS dependencies.
 - Building biometric identification or face recognition; no persistent hot-mic defaults.
 - Cross-tenant data sharing outside consented PSI/Bloom handshake flows.
@@ -25,11 +28,13 @@
 ## 2) Design
 
 ### Selected Design and Rationale
+
 - Use a modular service-per-prompt architecture with shared typed contracts and event topics, enabling independent deployment under feature flags.
 - Choose append-only audit ledgers with signed entries to satisfy governance/rollback across schema registry, discovery, and enrichment manifests.
 - Prefer deterministic pipelines (seeded RNG, reproducible diffing) and stateless API surfaces backed by Redis/Postgres for speed and durability.
 
 ### Data Structures and Interfaces
+
 - Schema Registry: `SchemaManifest` (id, version, graphSDL, graphqlSDL, checksum, signature, createdBy, createdAt, status), diff API returning compatible/breaking sets and migration steps.
 - Risk Engine: `Signal` (entityId, type, weight, ts), `RiskScore` (score, rationalePath, decayParams, policyLabels), emitted `risk.updated` event with explanation.
 - Presence: `PresenceState` (userId, roomId, cursor, selection, lastSeen, consentFlags), session logs with manifest hashes.
@@ -40,6 +45,7 @@
 - Enrichment: `EnrichRequest` (assetId, tasks, hashes), `EnrichResult` (ocr, asr, exif, tags, redactionRects), manifests with provenance.
 
 ### Control Flow and Integration Points
+
 - Feature flags gate request entry; disabled flags return 404/feature-disabled responses.
 - All services emit events with signatures and tenant policy contexts; consumers validate before acting.
 - UI panels consume typed SDK clients and render diff/preview/rollback flows with jQuery micro-interactions as required.
@@ -48,6 +54,7 @@
 ## 3) Implementation Plan
 
 ### Step-by-Step Plan
+
 1. Introduce typed contracts and manifest schemas for all prompts under `schema/` and generate JSON Schema artifacts.
 2. Scaffold services under `services/` with feature-flag middleware, append-only audit tables, and health endpoints.
 3. Implement core logic per service (diffing, scoring, presence, redaction, generators, PSI/Bloom, cache planner, enrichment workers).
@@ -57,6 +64,7 @@
 7. Document architecture, APIs, runbooks, and rollback procedures; add ops playbooks.
 
 ### File-by-File Change Summary
+
 - `schema/` JSON Schemas for manifests across prompts.
 - `services/*` service scaffolds with controllers, domain logic, and audit logging.
 - `ui/` components and jQuery overlays for each prompt’s UI deliverable.
@@ -71,27 +79,39 @@
 ### Service & Domain Skeletons (representative excerpts)
 
 #### `schema/manifest.schema.json` (new)
+
 ```json
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "SchemaManifest",
   "type": "object",
-  "required": ["id", "version", "graphSDL", "graphqlSDL", "checksum", "signature", "createdBy", "createdAt", "status"],
+  "required": [
+    "id",
+    "version",
+    "graphSDL",
+    "graphqlSDL",
+    "checksum",
+    "signature",
+    "createdBy",
+    "createdAt",
+    "status"
+  ],
   "properties": {
-    "id": {"type": "string", "format": "uuid"},
-    "version": {"type": "string", "pattern": "^\n?\\d+\\.\\d+\\.\\d+$"},
-    "graphSDL": {"type": "string"},
-    "graphqlSDL": {"type": "string"},
-    "checksum": {"type": "string"},
-    "signature": {"type": "string"},
-    "createdBy": {"type": "string"},
-    "createdAt": {"type": "string", "format": "date-time"},
-    "status": {"type": "string", "enum": ["draft", "promoted", "rolled_back"]}
+    "id": { "type": "string", "format": "uuid" },
+    "version": { "type": "string", "pattern": "^\n?\\d+\\.\\d+\\.\\d+$" },
+    "graphSDL": { "type": "string" },
+    "graphqlSDL": { "type": "string" },
+    "checksum": { "type": "string" },
+    "signature": { "type": "string" },
+    "createdBy": { "type": "string" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "status": { "type": "string", "enum": ["draft", "promoted", "rolled_back"] }
   }
 }
 ```
 
 #### `services/schema-registry/src/server.ts` (new excerpt)
+
 ```ts
 import express from "express";
 import { featureGuard } from "../../shared/featureGuard";
@@ -112,6 +132,7 @@ export default app;
 ```
 
 #### `services/risk-engine/src/service.py` (new excerpt)
+
 ```python
 from fastapi import FastAPI, Depends
 from .feature import require_feature
@@ -135,11 +156,12 @@ def explain(entity_id: str, payload=Depends(get_explain)):
     return payload
 ```
 
-*(Similar scaffolds would be added for presence, redaction/DP, synth-forge CLI, federated discovery, subgraph cache, and enrichment services.)*
+_(Similar scaffolds would be added for presence, redaction/DP, synth-forge CLI, federated discovery, subgraph cache, and enrichment services.)_
 
 ### Shared Testing Hooks
 
 #### `tests/contract/schema-registry.test.ts` (new excerpt)
+
 ```ts
 import request from "supertest";
 import app from "../../services/schema-registry/src/server";
@@ -158,6 +180,7 @@ describe("Schema Registry contract", () => {
 ## 5) Tests
 
 ### Test Plan
+
 - Unit tests per service for domain logic (diffing, risk scoring determinism, presence reconnection, DP budget arithmetic, PSI/Bloom overlap math, cache planner, enrichment parsers).
 - Integration tests for API routes under feature flags with policy contexts.
 - Contract tests for schemas/manifests and cross-service events.
@@ -165,6 +188,7 @@ describe("Schema Registry contract", () => {
 - k6 load tests for risk-engine and subgraph-cache latency targets.
 
 ### How to Run
+
 - `npm test` (root) for JS/TS services and shared tests.
 - `cd services/risk-engine && poetry run pytest` for Python suite.
 - `npm run test:e2e` for Playwright flows.

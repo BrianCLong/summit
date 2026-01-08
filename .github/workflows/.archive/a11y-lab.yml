@@ -3,12 +3,12 @@ name: a11y-lab quality gates
 on:
   push:
     paths:
-      - 'apps/a11y-lab/**'
-      - '.github/workflows/a11y-lab.yml'
+      - "apps/a11y-lab/**"
+      - ".github/workflows/a11y-lab.yml"
   pull_request:
     paths:
-      - 'apps/a11y-lab/**'
-      - '.github/workflows/a11y-lab.yml'
+      - "apps/a11y-lab/**"
+      - ".github/workflows/a11y-lab.yml"
 
 jobs:
   shellcheck:
@@ -32,7 +32,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: "pnpm"
       - name: Install dependencies (scoped)
         run: pnpm install --filter @intelgraph/a11y-lab...
       - name: Enforce telemetry guard

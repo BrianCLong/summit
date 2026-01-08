@@ -2,13 +2,13 @@ name: CI SDK
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'src/intelgraph/sdk/**'
-      - 'tests/test_sdk_client.py'
-      - 'examples/hello_intelgraph.py'
+      - "src/intelgraph/sdk/**"
+      - "tests/test_sdk_client.py"
+      - "examples/hello_intelgraph.py"
 
 jobs:
   test-sdk:

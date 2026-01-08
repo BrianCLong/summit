@@ -184,7 +184,8 @@ const generateMockComments = (caseId: string): CaseComment[] => [
 
 const PRIORITY_COLORS: Record<Priority, string> = {
   low: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-  medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+  medium:
+    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
   high: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
   critical: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
 }
@@ -296,7 +297,10 @@ export default function CaseDetailPage() {
       <span>
         {parts.map((part, i) =>
           part.startsWith('@') ? (
-            <span key={i} className="text-blue-600 dark:text-blue-400 font-medium">
+            <span
+              key={i}
+              className="text-blue-600 dark:text-blue-400 font-medium"
+            >
               {part}
             </span>
           ) : (
@@ -385,7 +389,9 @@ export default function CaseDetailPage() {
                 <Badge className={PRIORITY_COLORS[caseData.priority]}>
                   {caseData.priority}
                 </Badge>
-                <Badge variant="outline">{caseData.status.replace('_', ' ')}</Badge>
+                <Badge variant="outline">
+                  {caseData.status.replace('_', ' ')}
+                </Badge>
                 {caseData.tags.map(tag => (
                   <Badge key={tag} variant="secondary">
                     {tag}
@@ -399,11 +405,18 @@ export default function CaseDetailPage() {
           </div>
 
           <div className="flex gap-2">
-            <Button variant="default" onClick={() => setExportOpen(true)} aria-label="Export case">
+            <Button
+              variant="default"
+              onClick={() => setExportOpen(true)}
+              aria-label="Export case"
+            >
               <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
-            <Button variant="outline" onClick={() => navigate(`/reports/new?caseId=${caseData.id}`)}>
+            <Button
+              variant="outline"
+              onClick={() => navigate(`/reports/new?caseId=${caseData.id}`)}
+            >
               <FileText className="h-4 w-4 mr-2" />
               Create Report
             </Button>
@@ -523,7 +536,10 @@ export default function CaseDetailPage() {
                               <div className="flex-1">
                                 <div className="flex items-start justify-between">
                                   <p className="font-medium">{task.title}</p>
-                                  <Badge className={PRIORITY_COLORS[task.priority]} variant="outline">
+                                  <Badge
+                                    className={PRIORITY_COLORS[task.priority]}
+                                    variant="outline"
+                                  >
                                     {task.priority}
                                   </Badge>
                                 </div>
@@ -533,9 +549,14 @@ export default function CaseDetailPage() {
                                   </p>
                                 )}
                                 <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                                  {task.assignedTo && <span>{task.assignedTo}</span>}
+                                  {task.assignedTo && (
+                                    <span>{task.assignedTo}</span>
+                                  )}
                                   {task.requiresFourEyes && (
-                                    <Badge variant="secondary" className="text-xs">
+                                    <Badge
+                                      variant="secondary"
+                                      className="text-xs"
+                                    >
                                       <Eye className="h-3 w-3 mr-1" />
                                       4-Eyes
                                       {task.reviewedBy && ' ✓'}
@@ -566,12 +587,19 @@ export default function CaseDetailPage() {
                             >
                               <div className="flex items-start justify-between mb-2">
                                 <div>
-                                  <span className="font-medium">{comment.author}</span>
+                                  <span className="font-medium">
+                                    {comment.author}
+                                  </span>
                                   <span className="text-xs text-muted-foreground ml-2">
-                                    {new Date(comment.createdAt).toLocaleString()}
+                                    {new Date(
+                                      comment.createdAt
+                                    ).toLocaleString()}
                                   </span>
                                 </div>
-                                <Badge variant="outline" className="text-xs font-mono">
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs font-mono"
+                                >
                                   {comment.auditMarker}
                                 </Badge>
                               </div>
@@ -591,13 +619,17 @@ export default function CaseDetailPage() {
                             />
                             <div className="flex items-center justify-between mt-2">
                               <p className="text-xs text-muted-foreground">
-                                Tip: Use @alice-johnson, @bob-smith, @carol-davis to mention team members
+                                Tip: Use @alice-johnson, @bob-smith,
+                                @carol-davis to mention team members
                               </p>
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   {/* Span needed because disabled buttons don't fire events in some browsers/screen readers correctly unless wrapped or configured carefully, though we removed pointer-events-none */}
                                   <span tabIndex={!newComment.trim() ? 0 : -1}>
-                                    <Button onClick={handleSubmitComment} disabled={!newComment.trim()}>
+                                    <Button
+                                      onClick={handleSubmitComment}
+                                      disabled={!newComment.trim()}
+                                    >
                                       Post Comment
                                     </Button>
                                   </span>
@@ -623,7 +655,9 @@ export default function CaseDetailPage() {
                       </CardHeader>
                       <CardContent className="space-y-3">
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">Completed</span>
+                          <span className="text-muted-foreground">
+                            Completed
+                          </span>
                           <span className="font-medium">
                             {taskStats.completed}/{taskStats.total}
                           </span>
@@ -641,13 +675,17 @@ export default function CaseDetailPage() {
                             <div className="text-lg font-bold text-blue-600">
                               {taskStats.inProgress}
                             </div>
-                            <div className="text-xs text-muted-foreground">In Progress</div>
+                            <div className="text-xs text-muted-foreground">
+                              In Progress
+                            </div>
                           </div>
                           <div className="text-center p-2 bg-orange-50 dark:bg-orange-900/20 rounded">
                             <div className="text-lg font-bold text-orange-600">
                               {taskStats.needsReview}
                             </div>
-                            <div className="text-xs text-muted-foreground">Needs Review</div>
+                            <div className="text-xs text-muted-foreground">
+                              Needs Review
+                            </div>
                           </div>
                         </div>
                       </CardContent>
@@ -663,9 +701,14 @@ export default function CaseDetailPage() {
                       <CardContent>
                         <div className="space-y-3">
                           {watchlists.map(watchlist => (
-                            <div key={watchlist.id} className="p-3 rounded-lg border">
+                            <div
+                              key={watchlist.id}
+                              className="p-3 rounded-lg border"
+                            >
                               <div className="flex items-start justify-between mb-1">
-                                <p className="font-medium text-sm">{watchlist.name}</p>
+                                <p className="font-medium text-sm">
+                                  {watchlist.name}
+                                </p>
                                 <Badge variant="secondary" className="text-xs">
                                   {watchlist.entityIds.length}
                                 </Badge>
@@ -724,10 +767,14 @@ export default function CaseDetailPage() {
                             <div className="flex items-start justify-between mb-2">
                               <h3 className="font-semibold">{task.title}</h3>
                               <div className="flex gap-2">
-                                <Badge className={PRIORITY_COLORS[task.priority]}>
+                                <Badge
+                                  className={PRIORITY_COLORS[task.priority]}
+                                >
                                   {task.priority}
                                 </Badge>
-                                <Badge variant="outline">{task.status.replace('_', ' ')}</Badge>
+                                <Badge variant="outline">
+                                  {task.status.replace('_', ' ')}
+                                </Badge>
                               </div>
                             </div>
                             {task.description && (
@@ -752,7 +799,8 @@ export default function CaseDetailPage() {
                               {task.dueDate && (
                                 <div className="flex items-center gap-1">
                                   <Clock className="h-4 w-4" />
-                                  Due {new Date(task.dueDate).toLocaleDateString()}
+                                  Due{' '}
+                                  {new Date(task.dueDate).toLocaleDateString()}
                                 </div>
                               )}
                             </div>
@@ -806,9 +854,7 @@ export default function CaseDetailPage() {
                           </p>
                         )}
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <div>
-                            Created by {watchlist.createdBy}
-                          </div>
+                          <div>Created by {watchlist.createdBy}</div>
                           <div>
                             {new Date(watchlist.createdAt).toLocaleDateString()}
                           </div>

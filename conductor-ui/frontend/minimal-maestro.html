@@ -14,8 +14,7 @@
         box-sizing: border-box;
       }
       body {
-        font-family:
-          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         background: #f1f5f9;
       }
       .container {
@@ -117,7 +116,7 @@
       const { useState, useEffect } = React;
 
       function MaestroApp() {
-        const [currentPage, setCurrentPage] = useState('home');
+        const [currentPage, setCurrentPage] = useState("home");
 
         const Header = () => (
           <div className="header">
@@ -126,9 +125,7 @@
                 <div className="logo"></div>
                 <div>
                   <div className="header-title">Maestro builds IntelGraph</div>
-                  <div className="header-subtitle">
-                    Maestro ≠ IntelGraph — Control Plane
-                  </div>
+                  <div className="header-subtitle">Maestro ≠ IntelGraph — Control Plane</div>
                 </div>
               </div>
             </div>
@@ -138,20 +135,20 @@
         const Navigation = () => (
           <div className="nav">
             {[
-              ['home', 'Home'],
-              ['runs', 'Runs'],
-              ['pipelines', 'Pipelines'],
-              ['observability', 'Observability & SLOs'],
-              ['autonomy', 'Autonomy & Guardrails'],
-              ['recipes', 'Recipes'],
-              ['cost', 'Costs & Budgets'],
-              ['tickets', 'Tickets & Projects'],
-              ['admin', 'Admin Studio'],
+              ["home", "Home"],
+              ["runs", "Runs"],
+              ["pipelines", "Pipelines"],
+              ["observability", "Observability & SLOs"],
+              ["autonomy", "Autonomy & Guardrails"],
+              ["recipes", "Recipes"],
+              ["cost", "Costs & Budgets"],
+              ["tickets", "Tickets & Projects"],
+              ["admin", "Admin Studio"],
             ].map(([key, label]) => (
               <a
                 key={key}
                 href="#"
-                className={`nav-item ${currentPage === key ? 'active' : ''}`}
+                className={`nav-item ${currentPage === key ? "active" : ""}`}
                 onClick={(e) => {
                   e.preventDefault();
                   setCurrentPage(key);
@@ -217,16 +214,10 @@
 
             <div className="card">
               <div className="card-title">Recent Activity</div>
-              <div style={{ fontSize: '14px', color: '#6b7280' }}>
-                <div style={{ marginBottom: '8px' }}>
-                  ✅ Pipeline run-2849 completed
-                </div>
-                <div style={{ marginBottom: '8px' }}>
-                  🔄 Autonomy level updated to L2
-                </div>
-                <div style={{ marginBottom: '8px' }}>
-                  📊 SLO breach detected & resolved
-                </div>
+              <div style={{ fontSize: "14px", color: "#6b7280" }}>
+                <div style={{ marginBottom: "8px" }}>✅ Pipeline run-2849 completed</div>
+                <div style={{ marginBottom: "8px" }}>🔄 Autonomy level updated to L2</div>
+                <div style={{ marginBottom: "8px" }}>📊 SLO breach detected & resolved</div>
                 <div>💰 Budget alert: 75% utilization</div>
               </div>
             </div>
@@ -236,64 +227,64 @@
         const ContentPage = ({ title, description }) => (
           <div className="card">
             <div className="card-title">{title}</div>
-            <p style={{ color: '#6b7280', marginTop: '1rem' }}>{description}</p>
+            <p style={{ color: "#6b7280", marginTop: "1rem" }}>{description}</p>
           </div>
         );
 
         const renderPage = () => {
           switch (currentPage) {
-            case 'home':
+            case "home":
               return <HomePage />;
-            case 'runs':
+            case "runs":
               return (
                 <ContentPage
                   title="Runs"
                   description="View and manage pipeline runs, execution history, and performance metrics."
                 />
               );
-            case 'pipelines':
+            case "pipelines":
               return (
                 <ContentPage
                   title="Pipelines"
                   description="Configure and deploy data processing pipelines with built-in monitoring."
                 />
               );
-            case 'observability':
+            case "observability":
               return (
                 <ContentPage
                   title="Observability & SLOs"
                   description="Monitor system health, track SLOs, and analyze performance metrics."
                 />
               );
-            case 'autonomy':
+            case "autonomy":
               return (
                 <ContentPage
                   title="Autonomy & Guardrails"
                   description="Configure autonomous operation levels and safety guardrails."
                 />
               );
-            case 'recipes':
+            case "recipes":
               return (
                 <ContentPage
                   title="Recipes"
                   description="Browse and deploy pre-built pipeline templates and configurations."
                 />
               );
-            case 'cost':
+            case "cost":
               return (
                 <ContentPage
                   title="Costs & Budgets"
                   description="Track spending, set budgets, and optimize resource utilization."
                 />
               );
-            case 'tickets':
+            case "tickets":
               return (
                 <ContentPage
                   title="Tickets & Projects"
                   description="Manage support tickets, issues, and project tracking."
                 />
               );
-            case 'admin':
+            case "admin":
               return (
                 <ContentPage
                   title="Admin Studio"
@@ -317,7 +308,7 @@
       }
 
       // Render the app
-      ReactDOM.render(<MaestroApp />, document.getElementById('root'));
+      ReactDOM.render(<MaestroApp />, document.getElementById("root"));
     </script>
   </body>
 </html>

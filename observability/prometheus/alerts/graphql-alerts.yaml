@@ -17,12 +17,12 @@ groups:
           severity: critical
           component: graphql-gateway
         annotations:
-          summary: 'GraphQL API p95 latency > 2s for {{ $labels.operation }}'
+          summary: "GraphQL API p95 latency > 2s for {{ $labels.operation }}"
           description: |
             The 95th percentile latency for GraphQL operation {{ $labels.operation }}
             has been above 2 seconds for the past 5 minutes.
             Current value: {{ $value | humanizeDuration }}
-          runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/graphql-high-latency.md'
+          runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/graphql-high-latency.md"
 
       - alert: GraphQLHighErrorRate
         expr: |
@@ -36,12 +36,12 @@ groups:
           severity: critical
           component: graphql-gateway
         annotations:
-          summary: 'GraphQL error rate > 5% for {{ $labels.operation }}'
+          summary: "GraphQL error rate > 5% for {{ $labels.operation }}"
           description: |
             The error rate for GraphQL operation {{ $labels.operation }}
             has exceeded 5% for the past 5 minutes.
             Current error rate: {{ $value | humanizePercentage }}
-          runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/graphql-high-error-rate.md'
+          runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/graphql-high-error-rate.md"
 
       - alert: GoldenPathBroken
         expr: |
@@ -57,12 +57,12 @@ groups:
           component: golden-path
           slo: availability
         annotations:
-          summary: 'Golden path success rate < 95% for step {{ $labels.step }}'
+          summary: "Golden path success rate < 95% for step {{ $labels.step }}"
           description: |
             The golden path step {{ $labels.step }} has a success rate below 95%
             for the past 10 minutes. This violates our core SLO.
             Current success rate: {{ $value | humanizePercentage }}
-          runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/golden-path-failure.md'
+          runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/golden-path-failure.md"
 
       - alert: GraphQLGatewayDown
         expr: up{job="graphql-gateway"} == 0
@@ -71,11 +71,11 @@ groups:
           severity: critical
           component: graphql-gateway
         annotations:
-          summary: 'GraphQL Gateway is down'
+          summary: "GraphQL Gateway is down"
           description: |
             The GraphQL Gateway instance {{ $labels.instance }} has been down
             for more than 1 minute.
-          runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/service-down.md'
+          runbook_url: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/service-down.md"
 
       # === WARNING (Sev-2) Alerts ===
 
@@ -89,7 +89,7 @@ groups:
           severity: warning
           component: graphql-gateway
         annotations:
-          summary: 'GraphQL API p95 latency > 1s for {{ $labels.operation }}'
+          summary: "GraphQL API p95 latency > 1s for {{ $labels.operation }}"
           description: |
             The 95th percentile latency for GraphQL operation {{ $labels.operation }}
             has been above 1 second for the past 10 minutes.
@@ -107,7 +107,7 @@ groups:
           severity: warning
           component: graphql-gateway
         annotations:
-          summary: 'GraphQL error rate > 2% for {{ $labels.operation }}'
+          summary: "GraphQL error rate > 2% for {{ $labels.operation }}"
           description: |
             The error rate for GraphQL operation {{ $labels.operation }}
             has exceeded 2% for the past 10 minutes.
@@ -127,7 +127,7 @@ groups:
           component: golden-path
           slo: availability
         annotations:
-          summary: 'Golden path success rate < 98% for step {{ $labels.step }}'
+          summary: "Golden path success rate < 98% for step {{ $labels.step }}"
           description: |
             The golden path step {{ $labels.step }} has a success rate below 98%
             for the past 15 minutes.
@@ -143,7 +143,7 @@ groups:
           severity: warning
           component: neo4j
         annotations:
-          summary: 'Neo4j p95 query latency > 500ms'
+          summary: "Neo4j p95 query latency > 500ms"
           description: |
             Neo4j queries are running slow. The 95th percentile latency
             has been above 500ms for the past 10 minutes.
@@ -157,7 +157,7 @@ groups:
           severity: warning
           component: graphql-gateway
         annotations:
-          summary: 'GraphQL query complexity > 100 for {{ $labels.operation }}'
+          summary: "GraphQL query complexity > 100 for {{ $labels.operation }}"
           description: |
             The average query complexity for {{ $labels.operation }} is {{ $value }}.
             Consider implementing query cost limits or optimizing the query.
@@ -175,7 +175,7 @@ groups:
           severity: warning
           component: graphql-gateway
         annotations:
-          summary: 'GraphQL cache hit rate < 50% for {{ $labels.operation }}'
+          summary: "GraphQL cache hit rate < 50% for {{ $labels.operation }}"
           description: |
             The cache hit rate for {{ $labels.operation }} is only {{ $value | humanizePercentage }}.
             Consider reviewing cache configuration or TTL settings.

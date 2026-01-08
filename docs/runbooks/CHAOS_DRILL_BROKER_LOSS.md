@@ -3,6 +3,7 @@
 **Goal:** Verify system behavior when the Message Broker (NATS/Redis) is down.
 
 ## Pre-Drill Checklist
+
 - [ ] Notify DevOps channel (#ops-alerts).
 - [ ] Ensure monitoring dashboards are open.
 - [ ] Start background load generation (evidence creation).
@@ -11,6 +12,7 @@
 
 1.  **Induce Failure**
     Kill the NATS pod to simulate a broker outage.
+
     ```bash
     kubectl delete pod nats-0
     ```
@@ -22,6 +24,7 @@
 
 3.  **Restore Service**
     Allow Kubernetes to restart the pod, or manually restart it if necessary.
+
     ```bash
     # Wait for pod to come back up
     kubectl wait --for=condition=ready pod/nats-0
@@ -37,6 +40,8 @@
     - Note any lost data (should be zero).
 
 ## Rollback
+
 If the system does not recover automatically:
+
 1. Restart the `prov-ledger` service.
 2. Manually replay the WAL if needed.

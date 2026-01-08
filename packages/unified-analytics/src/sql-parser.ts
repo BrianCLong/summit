@@ -4,7 +4,7 @@
  */
 
 export interface ParsedQuery {
-  type: 'select' | 'insert' | 'update' | 'delete';
+  type: "select" | "insert" | "update" | "delete";
   tables: string[];
   columns: string[];
   where?: any;
@@ -17,9 +17,9 @@ export class SQLParser {
   parse(sql: string): ParsedQuery {
     // Simple parser implementation
     return {
-      type: 'select',
+      type: "select",
       tables: [],
-      columns: []
+      columns: [],
     };
   }
 }

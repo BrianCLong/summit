@@ -5,14 +5,14 @@
 ## 🚀 Quick Start: Deprecate an Endpoint
 
 ```typescript
-import { deprecated } from './middleware/deprecation';
+import { deprecated } from "./middleware/deprecation";
 
 app.get(
-  '/api/old-endpoint',
+  "/api/old-endpoint",
   deprecated({
-    sunsetDate: '2026-06-30T23:59:59Z',
-    successorUrl: '/api/v2/new-endpoint',
-    message: 'Optional custom message'
+    sunsetDate: "2026-06-30T23:59:59Z",
+    successorUrl: "/api/v2/new-endpoint",
+    message: "Optional custom message",
   }),
   handler
 );
@@ -20,14 +20,14 @@ app.get(
 
 ## 📅 Timeline Cheat Sheet
 
-| Timeframe | Action | Example |
-|-----------|--------|---------|
-| **T+0** | Announce deprecation | Send email to all API consumers |
-| **T+1 month** | Publish migration guide | Create docs with code examples |
-| **T+3 months** | Send halfway reminder | Email active users |
-| **T+5 months** | Send urgent warning | Email with "30 days left" message |
-| **T+1 week** | Final critical notice | Emergency escalation |
-| **T+6 months** | Replace with 410 Gone | Endpoint removed |
+| Timeframe      | Action                  | Example                           |
+| -------------- | ----------------------- | --------------------------------- |
+| **T+0**        | Announce deprecation    | Send email to all API consumers   |
+| **T+1 month**  | Publish migration guide | Create docs with code examples    |
+| **T+3 months** | Send halfway reminder   | Email active users                |
+| **T+5 months** | Send urgent warning     | Email with "30 days left" message |
+| **T+1 week**   | Final critical notice   | Emergency escalation              |
+| **T+6 months** | Replace with 410 Gone   | Endpoint removed                  |
 
 ## 🏷️ Version Numbering
 
@@ -66,23 +66,30 @@ Warning: 299 - "This endpoint is deprecated..."
 ### REST: Mark as Deprecated
 
 ```typescript
-import { deprecated } from './middleware/deprecation';
+import { deprecated } from "./middleware/deprecation";
 
-router.get('/old', deprecated({
-  sunsetDate: '2026-06-30T23:59:59Z',
-  successorUrl: '/api/v2/new'
-}), handler);
+router.get(
+  "/old",
+  deprecated({
+    sunsetDate: "2026-06-30T23:59:59Z",
+    successorUrl: "/api/v2/new",
+  }),
+  handler
+);
 ```
 
 ### REST: Mark as Sunset
 
 ```typescript
-import { sunset } from './middleware/deprecation';
+import { sunset } from "./middleware/deprecation";
 
-router.all('/removed', sunset({
-  successorUrl: '/api/v2/new',
-  message: 'Removed on 2025-12-31'
-}));
+router.all(
+  "/removed",
+  sunset({
+    successorUrl: "/api/v2/new",
+    message: "Removed on 2025-12-31",
+  })
+);
 ```
 
 ### GraphQL: Deprecate Field
@@ -90,9 +97,7 @@ router.all('/removed', sunset({
 ```graphql
 type User {
   id: ID!
-  username: String @deprecated(
-    reason: "Use 'name' instead. Sunset: 2025-12-31"
-  )
+  username: String @deprecated(reason: "Use 'name' instead. Sunset: 2025-12-31")
   name: String!
 }
 ```
@@ -101,9 +106,7 @@ type User {
 
 ```graphql
 type Query {
-  allUsers: [User!]! @deprecated(
-    reason: "Use 'users' query with pagination. Sunset: 2025-12-31"
-  )
+  allUsers: [User!]! @deprecated(reason: "Use 'users' query with pagination. Sunset: 2025-12-31")
   users(page: Int, pageSize: Int): UsersConnection!
 }
 ```
@@ -111,10 +114,10 @@ type Query {
 ### Client: Handle Deprecation
 
 ```typescript
-import { getApiClient } from './services/api-client-with-deprecation';
+import { getApiClient } from "./services/api-client-with-deprecation";
 
 const client = getApiClient();
-const data = await client.fetch('/api/v2/endpoint');
+const data = await client.fetch("/api/v2/endpoint");
 // Automatically logs deprecation warnings
 ```
 
@@ -177,18 +180,21 @@ Need help? Contact us TODAY.
 ## ✅ Deprecation Checklist
 
 **Before Deprecating:**
+
 - [ ] Create v2 endpoint
 - [ ] Write migration guide
 - [ ] Set sunset date (3-6 months out)
 - [ ] Add deprecation middleware
 
 **During Deprecation:**
+
 - [ ] Send announcement email
 - [ ] Update API docs
 - [ ] Monitor usage metrics
 - [ ] Send reminders (3mo, 1mo, 1wk)
 
 **At Sunset:**
+
 - [ ] Replace with 410 Gone
 - [ ] Archive old code
 - [ ] Send completion notice

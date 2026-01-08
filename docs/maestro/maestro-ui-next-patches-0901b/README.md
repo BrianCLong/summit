@@ -40,13 +40,13 @@ In your HTML bootstrap or before app mounts:
 ```html
 <script>
   window.__MAESTRO_CFG__ = Object.assign(window.__MAESTRO_CFG__ || {}, {
-    grafanaBase: 'http://localhost:3000',
+    grafanaBase: "http://localhost:3000",
     grafanaDashboards: {
-      slo: 'maestro-slo',
-      overview: 'maestro-overview',
-      cost: 'maestro-cost',
+      slo: "maestro-slo",
+      overview: "maestro-overview",
+      cost: "maestro-cost",
     },
-    a11y: 'on', // remove or set 'off' to disable axe in dev
+    a11y: "on", // remove or set 'off' to disable axe in dev
   });
 </script>
 ```

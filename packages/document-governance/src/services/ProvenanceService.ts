@@ -4,8 +4,8 @@
  * Tracks AI-assisted document creation and maintains chain of custody.
  */
 
-import { Driver } from 'neo4j-driver';
-import { v4 as uuidv4 } from 'uuid';
+import { Driver } from "neo4j-driver";
+import { v4 as uuidv4 } from "uuid";
 import {
   AIProvenanceMetadata,
   AIAssistSession,
@@ -14,7 +14,7 @@ import {
   ProvenanceQuery,
   ProvenanceReport,
   CreationSource,
-} from '../types/provenance.js';
+} from "../types/provenance.js";
 
 export class ProvenanceService {
   constructor(private driver: Driver) {}
@@ -24,7 +24,7 @@ export class ProvenanceService {
    */
   async createProvenance(
     documentId: string,
-    metadata: Omit<AIProvenanceMetadata, 'id' | 'document_id' | 'created_at' | 'updated_at'>
+    metadata: Omit<AIProvenanceMetadata, "id" | "document_id" | "created_at" | "updated_at">
   ): Promise<AIProvenanceMetadata> {
     const session = this.driver.session();
     try {
@@ -118,18 +118,18 @@ export class ProvenanceService {
         return null;
       }
 
-      const p = result.records[0].get('p').properties;
+      const p = result.records[0].get("p").properties;
       return {
         id: p.id,
         document_id: p.document_id,
         created_by: p.created_by as CreationSource,
         ai_model: p.ai_model,
         ai_model_version: p.ai_model_version,
-        ai_assist_sessions: JSON.parse(p.ai_assist_sessions || '[]'),
-        source_documents: JSON.parse(p.source_documents || '[]'),
-        source_urls: JSON.parse(p.source_urls || '[]'),
+        ai_assist_sessions: JSON.parse(p.ai_assist_sessions || "[]"),
+        source_documents: JSON.parse(p.source_documents || "[]"),
+        source_urls: JSON.parse(p.source_urls || "[]"),
         retrieval_augmented: p.retrieval_augmented,
-        rag_sources: JSON.parse(p.rag_sources || '[]'),
+        rag_sources: JSON.parse(p.rag_sources || "[]"),
         reviewed_by_human: p.reviewed_by_human,
         human_reviewer_id: p.human_reviewer_id,
         human_reviewer_role: p.human_reviewer_role,
@@ -204,11 +204,7 @@ export class ProvenanceService {
   /**
    * Record sign-off
    */
-  async recordSignOff(
-    documentId: string,
-    signOffBy: string,
-    signOffRole: string
-  ): Promise<void> {
+  async recordSignOff(documentId: string, signOffBy: string, signOffRole: string): Promise<void> {
     const session = this.driver.session();
     try {
       await session.run(
@@ -230,7 +226,7 @@ export class ProvenanceService {
   /**
    * Record data lineage
    */
-  async recordLineage(entry: Omit<DataLineageEntry, 'id'>): Promise<DataLineageEntry> {
+  async recordLineage(entry: Omit<DataLineageEntry, "id">): Promise<DataLineageEntry> {
     const session = this.driver.session();
     try {
       const fullEntry: DataLineageEntry = {
@@ -288,7 +284,7 @@ export class ProvenanceService {
       );
 
       return result.records.map((record) => {
-        const l = record.get('l').properties;
+        const l = record.get("l").properties;
         return {
           id: l.id,
           document_id: l.document_id,
@@ -299,7 +295,7 @@ export class ProvenanceService {
           operation: l.operation,
           performed_by: l.performed_by,
           performed_at: l.performed_at.toString(),
-          metadata: JSON.parse(l.metadata || '{}'),
+          metadata: JSON.parse(l.metadata || "{}"),
         };
       });
     } finally {
@@ -326,7 +322,7 @@ export class ProvenanceService {
         throw new Error(`Document not found: ${documentId}`);
       }
 
-      const title = docResult.records[0].get('title');
+      const title = docResult.records[0].get("title");
 
       // Get provenance
       const provenance = await this.getProvenance(documentId);
@@ -348,7 +344,7 @@ export class ProvenanceService {
       );
 
       const transformations: DocumentTransformation[] = transformResult.records.map((record) => {
-        const t = record.get('t').properties;
+        const t = record.get("t").properties;
         return {
           id: t.id,
           document_id: t.document_id,
@@ -356,7 +352,7 @@ export class ProvenanceService {
           input_format: t.input_format,
           output_format: t.output_format,
           transformation_tool: t.transformation_tool,
-          transformation_config: JSON.parse(t.transformation_config || '{}'),
+          transformation_config: JSON.parse(t.transformation_config || "{}"),
           performed_by: t.performed_by,
           performed_at: t.performed_at.toString(),
           ai_assisted: t.ai_assisted,
@@ -367,18 +363,23 @@ export class ProvenanceService {
       });
 
       // Build chain of custody
-      const chainOfCustody: Array<{ action: string; actor: string; timestamp: string; details?: string }> = [];
+      const chainOfCustody: Array<{
+        action: string;
+        actor: string;
+        timestamp: string;
+        details?: string;
+      }> = [];
 
       chainOfCustody.push({
-        action: 'Created',
-        actor: provenance.created_by === 'ai' ? `AI (${provenance.ai_model})` : 'Human',
+        action: "Created",
+        actor: provenance.created_by === "ai" ? `AI (${provenance.ai_model})` : "Human",
         timestamp: provenance.created_at,
       });
 
       if (provenance.reviewed_by_human && provenance.review_timestamp) {
         chainOfCustody.push({
-          action: 'Reviewed',
-          actor: provenance.human_reviewer_id || 'Unknown',
+          action: "Reviewed",
+          actor: provenance.human_reviewer_id || "Unknown",
           timestamp: provenance.review_timestamp,
           details: provenance.review_notes,
         });
@@ -386,7 +387,7 @@ export class ProvenanceService {
 
       if (provenance.sign_off_obtained && provenance.sign_off_timestamp) {
         chainOfCustody.push({
-          action: 'Signed Off',
+          action: "Signed Off",
           actor: `${provenance.sign_off_by} (${provenance.sign_off_role})`,
           timestamp: provenance.sign_off_timestamp,
         });

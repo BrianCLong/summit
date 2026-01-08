@@ -1,9 +1,11 @@
 # ADR-0006: Authority/License Compiler for Policy Enforcement
 
 ## Status
+
 Accepted
 
 ## Date
+
 2025-11-21
 
 ## Context
@@ -23,12 +25,14 @@ Current authentication (JWT/JWKS) and basic role checks are insufficient for Cou
 We will implement an **Authority/License Compiler** that:
 
 ### Policy Definition
+
 - Define policies as data (YAML/JSON schema)
 - Support RBAC + ABAC hybrid model
 - Integrate with OPA for complex evaluations
 - Version and audit policy changes
 
 ### Runtime Enforcement
+
 - Compile policies into optimized runtime format
 - Evaluate access decisions with < 10ms latency
 - Cache decisions with appropriate TTL
@@ -52,12 +56,14 @@ authority:
 ```
 
 ### Two-Person Control
+
 - Define workflows requiring approval
 - Support approval chains and escalation
 - Timeout handling for pending requests
 - Audit all approval decisions
 
 ### Integration Points
+
 - GraphQL directive for resolver-level enforcement
 - Express middleware for REST endpoints
 - Copilot pre-query validation
@@ -66,6 +72,7 @@ authority:
 ## Consequences
 
 ### Positive
+
 - Centralized policy management
 - Consistent enforcement across all services
 - Auditable access decisions
@@ -73,12 +80,14 @@ authority:
 - OPA integration for complex logic
 
 ### Negative
+
 - Additional latency on requests (mitigated by caching)
 - Policy complexity requires expertise
 - Potential for misconfiguration blocking legitimate access
 - OPA learning curve
 
 ### Mitigations
+
 - Comprehensive policy testing framework
 - Default-deny with explicit grants
 - Policy simulation mode for testing
@@ -89,13 +98,15 @@ authority:
 
 ```typescript
 // Middleware integration
-import { createAuthorityMiddleware, PolicyEvaluator } from '@intelgraph/authority-compiler';
+import { createAuthorityMiddleware, PolicyEvaluator } from "@intelgraph/authority-compiler";
 
-app.use(createAuthorityMiddleware({
-  evaluator: new PolicyEvaluator(compiledPolicy),
-  extractUser: (req) => req.user,
-  extractResource: (req) => ({ entityType: req.params.type }),
-}));
+app.use(
+  createAuthorityMiddleware({
+    evaluator: new PolicyEvaluator(compiledPolicy),
+    extractUser: (req) => req.user,
+    extractResource: (req) => ({ entityType: req.params.type }),
+  })
+);
 
 // GraphQL directive
 const typeDefs = gql`
@@ -106,6 +117,7 @@ const typeDefs = gql`
 ```
 
 ## Related
+
 - [Authority Compiler Package](/packages/authority-compiler/)
 - [Governance Integration Points](/docs/governance/INTEGRATION_POINTS.md)
 - ADR-0002: ABAC Step-up

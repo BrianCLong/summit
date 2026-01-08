@@ -1,10 +1,10 @@
-import crypto from 'crypto';
+import crypto from "crypto";
 import {
   ComplianceRequirement,
   ComplianceStatus,
   Certification,
   SupplyChainNode,
-} from '@intelgraph/supply-chain-types';
+} from "@intelgraph/supply-chain-types";
 
 /**
  * Regulatory change tracking
@@ -16,12 +16,12 @@ export interface RegulatoryChange {
   title: string;
   description: string;
   effectiveDate: Date;
-  impactLevel: 'low' | 'medium' | 'high' | 'critical';
+  impactLevel: "low" | "medium" | "high" | "critical";
   affectedNodes: string[];
   affectedComponents: string[];
   actionRequired: boolean;
   deadline?: Date;
-  status: 'identified' | 'assessed' | 'implementing' | 'completed';
+  status: "identified" | "assessed" | "implementing" | "completed";
 }
 
 /**
@@ -31,10 +31,10 @@ export interface ExportControlScreening {
   entityId: string;
   entityName: string;
   screenedAgainst: string[];
-  result: 'clear' | 'potential-match' | 'denied';
+  result: "clear" | "potential-match" | "denied";
   matches: Array<{
     listName: string;
-    matchType: 'exact' | 'fuzzy' | 'alias';
+    matchType: "exact" | "fuzzy" | "alias";
     confidence: number;
     details: string;
   }>;
@@ -50,7 +50,7 @@ export interface ConflictMineralsAssessment {
   componentId: string;
   containsConflictMinerals: boolean;
   minerals: Array<{
-    mineral: 'tin' | 'tantalum' | 'tungsten' | 'gold';
+    mineral: "tin" | "tantalum" | "tungsten" | "gold";
     source: string;
     conflictFree: boolean;
     certificationStatus: string;
@@ -71,7 +71,7 @@ export class ComplianceMonitor {
     node: SupplyChainNode,
     requirements: ComplianceRequirement[]
   ): Promise<{
-    overallCompliance: 'compliant' | 'non-compliant' | 'partial' | 'unknown';
+    overallCompliance: "compliant" | "non-compliant" | "partial" | "unknown";
     compliantCount: number;
     nonCompliantCount: number;
     unknownCount: number;
@@ -90,19 +90,19 @@ export class ComplianceMonitor {
       details.push(status);
     }
 
-    const compliantCount = details.filter(d => d.status === 'compliant').length;
-    const nonCompliantCount = details.filter(d => d.status === 'non-compliant').length;
-    const unknownCount = details.filter(d => d.status === 'under-review').length;
+    const compliantCount = details.filter((d) => d.status === "compliant").length;
+    const nonCompliantCount = details.filter((d) => d.status === "non-compliant").length;
+    const unknownCount = details.filter((d) => d.status === "under-review").length;
 
-    let overallCompliance: 'compliant' | 'non-compliant' | 'partial' | 'unknown';
+    let overallCompliance: "compliant" | "non-compliant" | "partial" | "unknown";
     if (nonCompliantCount > 0) {
-      overallCompliance = 'non-compliant';
+      overallCompliance = "non-compliant";
     } else if (unknownCount > 0) {
-      overallCompliance = 'unknown';
+      overallCompliance = "unknown";
     } else if (compliantCount === details.length && details.length > 0) {
-      overallCompliance = 'compliant';
+      overallCompliance = "compliant";
     } else {
-      overallCompliance = 'partial';
+      overallCompliance = "partial";
     }
 
     return {
@@ -117,24 +117,22 @@ export class ComplianceMonitor {
   /**
    * Track regulatory changes
    */
-  async trackRegulatoryChanges(
-    jurisdiction: string
-  ): Promise<RegulatoryChange[]> {
+  async trackRegulatoryChanges(jurisdiction: string): Promise<RegulatoryChange[]> {
     // Placeholder - would integrate with regulatory monitoring services
     return [
       {
         id: crypto.randomUUID(),
         jurisdiction,
-        category: 'export-control',
-        title: 'Updated Export Control List',
-        description: 'New items added to controlled export list',
+        category: "export-control",
+        title: "Updated Export Control List",
+        description: "New items added to controlled export list",
         effectiveDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        impactLevel: 'medium',
+        impactLevel: "medium",
         affectedNodes: [],
         affectedComponents: [],
         actionRequired: true,
         deadline: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
-        status: 'identified',
+        status: "identified",
       },
     ];
   }
@@ -148,44 +146,44 @@ export class ComplianceMonitor {
     country: string
   ): Promise<ExportControlScreening> {
     const screeningLists = [
-      'OFAC SDN List',
-      'BIS Denied Persons List',
-      'EU Sanctions List',
-      'UN Sanctions List',
+      "OFAC SDN List",
+      "BIS Denied Persons List",
+      "EU Sanctions List",
+      "UN Sanctions List",
     ];
 
     // Simulate screening
     const matches: Array<{
       listName: string;
-      matchType: 'exact' | 'fuzzy' | 'alias';
+      matchType: "exact" | "fuzzy" | "alias";
       confidence: number;
       details: string;
     }> = [];
 
     // Check for high-risk countries
-    const deniedCountries = ['North Korea', 'Iran', 'Syria', 'Cuba'];
-    let result: 'clear' | 'potential-match' | 'denied' = 'clear';
+    const deniedCountries = ["North Korea", "Iran", "Syria", "Cuba"];
+    let result: "clear" | "potential-match" | "denied" = "clear";
 
     if (deniedCountries.includes(country)) {
-      result = 'denied';
+      result = "denied";
       matches.push({
-        listName: 'Country Sanctions',
-        matchType: 'exact',
+        listName: "Country Sanctions",
+        matchType: "exact",
         confidence: 1.0,
         details: `Entity located in sanctioned country: ${country}`,
       });
     }
 
     const recommendations: string[] = [];
-    if (result === 'denied') {
-      recommendations.push('Do not engage in transactions with this entity');
-      recommendations.push('Seek legal counsel for any existing contracts');
-    } else if (result === 'potential-match') {
-      recommendations.push('Conduct enhanced due diligence');
-      recommendations.push('Verify entity identity and ownership');
+    if (result === "denied") {
+      recommendations.push("Do not engage in transactions with this entity");
+      recommendations.push("Seek legal counsel for any existing contracts");
+    } else if (result === "potential-match") {
+      recommendations.push("Conduct enhanced due diligence");
+      recommendations.push("Verify entity identity and ownership");
     } else {
-      recommendations.push('Entity cleared for transactions');
-      recommendations.push('Continue regular screening (quarterly)');
+      recommendations.push("Entity cleared for transactions");
+      recommendations.push("Continue regular screening (quarterly)");
     }
 
     return {
@@ -207,24 +205,24 @@ export class ComplianceMonitor {
     componentId: string,
     bomData: { materials: Array<{ name: string; source?: string }> }
   ): Promise<ConflictMineralsAssessment> {
-    const conflictMinerals: Array<'tin' | 'tantalum' | 'tungsten' | 'gold'> = [
-      'tin',
-      'tantalum',
-      'tungsten',
-      'gold',
+    const conflictMinerals: Array<"tin" | "tantalum" | "tungsten" | "gold"> = [
+      "tin",
+      "tantalum",
+      "tungsten",
+      "gold",
     ];
 
-    const minerals: ConflictMineralsAssessment['minerals'] = [];
+    const minerals: ConflictMineralsAssessment["minerals"] = [];
     let containsConflictMinerals = false;
     let drcCompliant = true;
 
     for (const material of bomData.materials) {
       const mineralName = material.name.toLowerCase();
-      const isConflictMineral = conflictMinerals.some(cm => mineralName.includes(cm));
+      const isConflictMineral = conflictMinerals.some((cm) => mineralName.includes(cm));
 
       if (isConflictMineral) {
         containsConflictMinerals = true;
-        const mineral = conflictMinerals.find(cm => mineralName.includes(cm))!;
+        const mineral = conflictMinerals.find((cm) => mineralName.includes(cm))!;
 
         // Simulate conflict-free certification check
         const conflictFree = Math.random() > 0.3; // 70% are conflict-free
@@ -234,9 +232,9 @@ export class ComplianceMonitor {
 
         minerals.push({
           mineral,
-          source: material.source || 'Unknown',
+          source: material.source || "Unknown",
           conflictFree,
-          certificationStatus: conflictFree ? 'Certified Conflict-Free' : 'Uncertified',
+          certificationStatus: conflictFree ? "Certified Conflict-Free" : "Uncertified",
         });
       }
     }
@@ -264,34 +262,41 @@ export class ComplianceMonitor {
     actions: Array<{
       certificationId: string;
       action: string;
-      priority: 'low' | 'medium' | 'high' | 'critical';
+      priority: "low" | "medium" | "high" | "critical";
       deadline?: Date;
     }>;
   }> {
     const now = new Date();
     const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
-    const valid = certifications.filter(c => {
-      if (c.status !== 'valid') {return false;}
-      if (!c.expirationDate) {return true;}
+    const valid = certifications.filter((c) => {
+      if (c.status !== "valid") {
+        return false;
+      }
+      if (!c.expirationDate) {
+        return true;
+      }
       return c.expirationDate > thirtyDaysFromNow;
     });
 
-    const expiring = certifications.filter(c => {
-      if (c.status !== 'valid') {return false;}
-      if (!c.expirationDate) {return false;}
+    const expiring = certifications.filter((c) => {
+      if (c.status !== "valid") {
+        return false;
+      }
+      if (!c.expirationDate) {
+        return false;
+      }
       return c.expirationDate > now && c.expirationDate <= thirtyDaysFromNow;
     });
 
-    const expired = certifications.filter(c => {
-      return c.status === 'expired' ||
-             (c.expirationDate && c.expirationDate <= now);
+    const expired = certifications.filter((c) => {
+      return c.status === "expired" || (c.expirationDate && c.expirationDate <= now);
     });
 
     const actions: Array<{
       certificationId: string;
       action: string;
-      priority: 'low' | 'medium' | 'high' | 'critical';
+      priority: "low" | "medium" | "high" | "critical";
       deadline?: Date;
     }> = [];
 
@@ -299,7 +304,7 @@ export class ComplianceMonitor {
       actions.push({
         certificationId: cert.id,
         action: `Renew ${cert.name} certification`,
-        priority: 'high',
+        priority: "high",
         deadline: cert.expirationDate,
       });
     }
@@ -308,7 +313,7 @@ export class ComplianceMonitor {
       actions.push({
         certificationId: cert.id,
         action: `Urgent: Restore ${cert.name} certification`,
-        priority: 'critical',
+        priority: "critical",
         deadline: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
       });
     }
@@ -347,7 +352,7 @@ export class ComplianceMonitor {
       nodeId: string;
       nodeName: string;
       requirement: string;
-      severity: 'high' | 'critical';
+      severity: "high" | "critical";
       finding: string;
     }>;
   }> {
@@ -357,29 +362,32 @@ export class ComplianceMonitor {
       nodeId: string;
       nodeName: string;
       requirement: string;
-      severity: 'high' | 'critical';
+      severity: "high" | "critical";
       finding: string;
     }> = [];
 
     for (const nodeId of nodeIds) {
       const node = nodes.get(nodeId);
-      if (!node) {continue;}
+      if (!node) {
+        continue;
+      }
 
       const compliance = await this.checkCompliance(node, requirements);
-      if (compliance.overallCompliance === 'compliant') {
+      if (compliance.overallCompliance === "compliant") {
         compliantCount++;
       } else {
         nonCompliantCount++;
 
         // Add critical findings
         for (const detail of compliance.details) {
-          if (detail.status === 'non-compliant' && detail.findings) {
+          if (detail.status === "non-compliant" && detail.findings) {
             for (const finding of detail.findings) {
-              if (finding.severity === 'high' || finding.severity === 'critical') {
+              if (finding.severity === "high" || finding.severity === "critical") {
                 criticalFindings.push({
                   nodeId,
                   nodeName: node.name,
-                  requirement: requirements.find(r => r.id === detail.requirementId)?.title || 'Unknown',
+                  requirement:
+                    requirements.find((r) => r.id === detail.requirementId)?.title || "Unknown",
                   severity: finding.severity,
                   finding: finding.description,
                 });
@@ -390,10 +398,10 @@ export class ComplianceMonitor {
       }
     }
 
-    const requirementsCoverage = requirements.map(req => ({
+    const requirementsCoverage = requirements.map((req) => ({
       requirementId: req.id,
       requirement: req.title,
-      applicableNodes: nodeIds.filter(id => {
+      applicableNodes: nodeIds.filter((id) => {
         const node = nodes.get(id);
         return node && req.applicableNodeTypes.includes(node.type);
       }).length,
@@ -421,12 +429,12 @@ export class ComplianceMonitor {
     requirement: ComplianceRequirement
   ): Promise<ComplianceStatus> {
     // Simulate compliance assessment
-    const statuses: Array<'compliant' | 'non-compliant' | 'under-review'> = [
-      'compliant',
-      'compliant',
-      'compliant',
-      'non-compliant',
-      'under-review',
+    const statuses: Array<"compliant" | "non-compliant" | "under-review"> = [
+      "compliant",
+      "compliant",
+      "compliant",
+      "non-compliant",
+      "under-review",
     ];
     const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
 

@@ -1,21 +1,21 @@
-name: 'Setup Environment'
-description: 'Sets up Node.js, pnpm, and caching'
+name: "Setup Environment"
+description: "Sets up Node.js, pnpm, and caching"
 inputs:
   node-version:
-    description: 'Node.js version'
+    description: "Node.js version"
     required: false
-    default: '20.x'
+    default: "20.x"
   install:
-    description: 'Install dependencies'
+    description: "Install dependencies"
     required: false
-    default: 'true'
+    default: "true"
   turbo-cache:
-    description: 'Enable Turbo cache'
+    description: "Enable Turbo cache"
     required: false
-    default: 'true'
+    default: "true"
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - name: Setup Node.js
       uses: actions/setup-node@v4

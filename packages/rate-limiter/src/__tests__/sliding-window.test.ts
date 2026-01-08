@@ -5,8 +5,8 @@
  * Copyright (c) 2025 IntelGraph
  */
 
-import { SlidingWindowLimiter } from '../algorithms/sliding-window.js';
-import type { IRateLimitStore, RateLimitState } from '../types.js';
+import { SlidingWindowLimiter } from "../algorithms/sliding-window.js";
+import type { IRateLimitStore, RateLimitState } from "../types.js";
 
 // Mock store implementation for testing
 class MockRateLimitStore implements IRateLimitStore {
@@ -38,7 +38,9 @@ class MockRateLimitStore implements IRateLimitStore {
 
   async get(key: string): Promise<RateLimitState | null> {
     const data = this.data.get(key);
-    if (!data) {return null;}
+    if (!data) {
+      return null;
+    }
 
     return {
       key,
@@ -60,7 +62,7 @@ class MockRateLimitStore implements IRateLimitStore {
   }
 
   async consumeTokens() {
-    throw new Error('Not implemented for sliding window tests');
+    throw new Error("Not implemented for sliding window tests");
   }
 
   async healthCheck(): Promise<boolean> {
@@ -68,7 +70,7 @@ class MockRateLimitStore implements IRateLimitStore {
   }
 }
 
-describe('SlidingWindowLimiter', () => {
+describe("SlidingWindowLimiter", () => {
   let store: MockRateLimitStore;
   let limiter: SlidingWindowLimiter;
 
@@ -77,9 +79,9 @@ describe('SlidingWindowLimiter', () => {
     limiter = new SlidingWindowLimiter(store);
   });
 
-  describe('consume', () => {
-    it('should allow requests within limit', async () => {
-      const state = await limiter.consume('test-key', 10, 60000);
+  describe("consume", () => {
+    it("should allow requests within limit", async () => {
+      const state = await limiter.consume("test-key", 10, 60000);
 
       expect(state.consumed).toBe(1);
       expect(state.limit).toBe(10);
@@ -87,69 +89,69 @@ describe('SlidingWindowLimiter', () => {
       expect(state.isExceeded).toBe(false);
     });
 
-    it('should track multiple requests', async () => {
-      await limiter.consume('test-key', 10, 60000);
-      await limiter.consume('test-key', 10, 60000);
-      const state = await limiter.consume('test-key', 10, 60000);
+    it("should track multiple requests", async () => {
+      await limiter.consume("test-key", 10, 60000);
+      await limiter.consume("test-key", 10, 60000);
+      const state = await limiter.consume("test-key", 10, 60000);
 
       expect(state.consumed).toBe(3);
       expect(state.remaining).toBe(7);
       expect(state.isExceeded).toBe(false);
     });
 
-    it('should exceed limit when max reached', async () => {
+    it("should exceed limit when max reached", async () => {
       // Consume up to limit
       for (let i = 0; i < 10; i++) {
-        await limiter.consume('test-key', 10, 60000);
+        await limiter.consume("test-key", 10, 60000);
       }
 
       // Next request should exceed
-      const state = await limiter.consume('test-key', 10, 60000);
+      const state = await limiter.consume("test-key", 10, 60000);
 
       expect(state.consumed).toBe(11);
       expect(state.remaining).toBe(0);
       expect(state.isExceeded).toBe(true);
     });
 
-    it('should handle different keys independently', async () => {
-      await limiter.consume('key1', 10, 60000);
-      await limiter.consume('key1', 10, 60000);
+    it("should handle different keys independently", async () => {
+      await limiter.consume("key1", 10, 60000);
+      await limiter.consume("key1", 10, 60000);
 
-      await limiter.consume('key2', 10, 60000);
+      await limiter.consume("key2", 10, 60000);
 
-      const state1 = await limiter.peek('key1', 10);
-      const state2 = await limiter.peek('key2', 10);
+      const state1 = await limiter.peek("key1", 10);
+      const state2 = await limiter.peek("key2", 10);
 
       expect(state1?.consumed).toBe(2);
       expect(state2?.consumed).toBe(1);
     });
   });
 
-  describe('peek', () => {
-    it('should return current state without consuming', async () => {
-      await limiter.consume('test-key', 10, 60000);
+  describe("peek", () => {
+    it("should return current state without consuming", async () => {
+      await limiter.consume("test-key", 10, 60000);
 
-      const state1 = await limiter.peek('test-key', 10);
-      const state2 = await limiter.peek('test-key', 10);
+      const state1 = await limiter.peek("test-key", 10);
+      const state2 = await limiter.peek("test-key", 10);
 
       expect(state1?.consumed).toBe(1);
       expect(state2?.consumed).toBe(1);
     });
 
-    it('should return null for non-existent key', async () => {
-      const state = await limiter.peek('non-existent', 10);
+    it("should return null for non-existent key", async () => {
+      const state = await limiter.peek("non-existent", 10);
       expect(state).toBeNull();
     });
   });
 
-  describe('reset', () => {
-    it('should reset rate limit for key', async () => {
-      await limiter.consume('test-key', 10, 60000);
-      await limiter.consume('test-key', 10, 60000);
+  describe("reset", () => {
+    it("should reset rate limit for key", async () => {
+      await limiter.consume("test-key", 10, 60000);
+      await limiter.consume("test-key", 10, 60000);
 
-      await limiter.reset('test-key');
+      await limiter.reset("test-key");
 
-      const state = await limiter.peek('test-key', 10);
+      const state = await limiter.peek("test-key", 10);
       expect(state).toBeNull();
     });
   });

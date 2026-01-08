@@ -1,38 +1,38 @@
 global:
   resolve_timeout: 5m
-  slack_api_url: '${SLACK_WEBHOOK_URL:-}' # Set via env var
+  slack_api_url: "${SLACK_WEBHOOK_URL:-}" # Set via env var
 
 # Root route
 route:
-  receiver: 'default'
-  group_by: ['alertname', 'service', 'severity']
+  receiver: "default"
+  group_by: ["alertname", "service", "severity"]
   group_wait: 30s
   group_interval: 5m
   repeat_interval: 4h
 
   # Child routes for different severities
   routes:
-    - receiver: 'security'
+    - receiver: "security"
       matchers:
         - category = security
       group_wait: 15s
       repeat_interval: 2h
       continue: true
 
-    - receiver: 'critical'
+    - receiver: "critical"
       matchers:
         - severity = critical
       group_wait: 10s
       repeat_interval: 1h
       continue: true
 
-    - receiver: 'warning'
+    - receiver: "warning"
       matchers:
         - severity = warning
       group_wait: 30s
       repeat_interval: 4h
 
-    - receiver: 'info'
+    - receiver: "info"
       matchers:
         - severity = info
       group_wait: 2m
@@ -45,25 +45,25 @@ inhibit_rules:
       - severity = critical
     target_matchers:
       - severity = warning
-    equal: ['service', 'alertname']
+    equal: ["service", "alertname"]
 
   # Inhibit all alerts if service is down
   - source_matchers:
       - alertname = ServiceDown
     target_matchers:
       - service = ~.+
-    equal: ['service']
+    equal: ["service"]
 
 receivers:
-  - name: 'default'
+  - name: "default"
     webhook_configs:
-      - url: 'http://localhost:5001/alerts' # Development webhook
+      - url: "http://localhost:5001/alerts" # Development webhook
         send_resolved: true
 
-  - name: 'critical'
+  - name: "critical"
     slack_configs:
-      - channel: '#alerts-critical'
-        title: '🚨 [{{ .GroupLabels.severity | toUpper }}] {{ .GroupLabels.alertname }}'
+      - channel: "#alerts-critical"
+        title: "🚨 [{{ .GroupLabels.severity | toUpper }}] {{ .GroupLabels.alertname }}"
         text: |-
           {{ range .Alerts }}
           *Alert:* {{ .Annotations.summary }}
@@ -75,14 +75,14 @@ receivers:
           {{ end }}
           {{ end }}
         send_resolved: true
-      - api_url: '${PAGERDUTY_URL:-}'
-        routing_key: '${PAGERDUTY_KEY:-}'
+      - api_url: "${PAGERDUTY_URL:-}"
+        routing_key: "${PAGERDUTY_KEY:-}"
         send_resolved: true
 
-  - name: 'warning'
+  - name: "warning"
     slack_configs:
-      - channel: '#alerts-warning'
-        title: '⚠️ [{{ .GroupLabels.severity | toUpper }}] {{ .GroupLabels.alertname }}'
+      - channel: "#alerts-warning"
+        title: "⚠️ [{{ .GroupLabels.severity | toUpper }}] {{ .GroupLabels.alertname }}"
         text: |-
           {{ range .Alerts }}
           *Alert:* {{ .Annotations.summary }}
@@ -91,20 +91,20 @@ receivers:
           {{ end }}
         send_resolved: true
 
-  - name: 'info'
+  - name: "info"
     webhook_configs:
-      - url: 'http://localhost:5001/alerts/info'
+      - url: "http://localhost:5001/alerts/info"
         send_resolved: true
 
-  - name: 'oncall'
+  - name: "oncall"
     webhook_configs:
-      - url: 'https://runbook-bot/actions/ingest'
+      - url: "https://runbook-bot/actions/ingest"
         send_resolved: true
 
-  - name: 'security'
+  - name: "security"
     slack_configs:
-      - channel: '#alerts-security'
-        title: '🛡️ [{{ .GroupLabels.severity | toUpper }}] {{ .GroupLabels.alertname }}'
+      - channel: "#alerts-security"
+        title: "🛡️ [{{ .GroupLabels.severity | toUpper }}] {{ .GroupLabels.alertname }}"
         text: |-
           {{ range .Alerts }}
           *Alert:* {{ .Annotations.summary }}
@@ -115,4 +115,4 @@ receivers:
         send_resolved: true
 
 templates:
-  - '/etc/alertmanager/templates/*.tmpl'
+  - "/etc/alertmanager/templates/*.tmpl"

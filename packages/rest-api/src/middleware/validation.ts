@@ -4,10 +4,10 @@
  * Validates request data against JSON schemas
  */
 
-import Ajv, { type JSONSchemaType } from 'ajv';
-import addFormats from 'ajv-formats';
-import type { Request, Response, NextFunction, JSONSchema } from '../types';
-import { ValidationException } from './error-handler';
+import Ajv, { type JSONSchemaType } from "ajv";
+import addFormats from "ajv-formats";
+import type { Request, Response, NextFunction, JSONSchema } from "../types";
+import { ValidationException } from "./error-handler";
 
 const ajv = new Ajv({
   allErrors: true,
@@ -39,7 +39,7 @@ export function validate(schemas: ValidationSchemas) {
         const valid = validate(req.body);
 
         if (!valid) {
-          throw new ValidationException('Request body validation failed', {
+          throw new ValidationException("Request body validation failed", {
             errors: validate.errors,
           });
         }
@@ -53,7 +53,7 @@ export function validate(schemas: ValidationSchemas) {
         const valid = validate(req.query);
 
         if (!valid) {
-          throw new ValidationException('Query parameters validation failed', {
+          throw new ValidationException("Query parameters validation failed", {
             errors: validate.errors,
           });
         }
@@ -67,7 +67,7 @@ export function validate(schemas: ValidationSchemas) {
         const valid = validate(req.params);
 
         if (!valid) {
-          throw new ValidationException('Path parameters validation failed', {
+          throw new ValidationException("Path parameters validation failed", {
             errors: validate.errors,
           });
         }
@@ -81,7 +81,7 @@ export function validate(schemas: ValidationSchemas) {
         const valid = validate(req.headers);
 
         if (!valid) {
-          throw new ValidationException('Headers validation failed', {
+          throw new ValidationException("Headers validation failed", {
             errors: validate.errors,
           });
         }

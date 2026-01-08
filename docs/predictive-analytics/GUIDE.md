@@ -49,6 +49,7 @@ The Predictive Analytics and Forecasting Platform provides enterprise-grade capa
 Time-series forecasting with state-of-the-art models.
 
 **Features:**
+
 - ARIMA and SARIMA models
 - Exponential smoothing (Holt-Winters)
 - Prophet-style forecasting with seasonality and holidays
@@ -58,8 +59,9 @@ Time-series forecasting with state-of-the-art models.
 - Backtesting framework
 
 **Example:**
+
 ```typescript
-import { ARIMAForecaster, AutoARIMA } from '@intelgraph/forecasting';
+import { ARIMAForecaster, AutoARIMA } from "@intelgraph/forecasting";
 
 // Automatic parameter selection
 const autoArima = new AutoARIMA();
@@ -72,7 +74,7 @@ forecaster.fit(trainingData);
 // Generate forecasts
 const forecasts = forecaster.forecast(30, 0.95);
 
-forecasts.forEach(f => {
+forecasts.forEach((f) => {
   console.log(`${f.timestamp}: ${f.forecast} [${f.lowerBound}, ${f.upperBound}]`);
 });
 ```
@@ -82,6 +84,7 @@ forecasts.forEach(f => {
 Classification and regression models with explainability.
 
 **Features:**
+
 - Random Forests
 - Gradient Boosting (XGBoost-style)
 - Linear/Ridge/Lasso regression
@@ -90,8 +93,9 @@ Classification and regression models with explainability.
 - Cross-validation
 
 **Example:**
+
 ```typescript
-import { RandomForestClassifier, GridSearchCV, ShapExplainer } from '@intelgraph/predictive-models';
+import { RandomForestClassifier, GridSearchCV, ShapExplainer } from "@intelgraph/predictive-models";
 
 // Train model
 const model = new RandomForestClassifier({
@@ -105,7 +109,7 @@ model.fit(trainingData);
 const predictions = model.predict(testFeatures);
 
 // Feature importance
-const importance = model.getFeatureImportances(['age', 'income', 'tenure']);
+const importance = model.getFeatureImportances(["age", "income", "tenure"]);
 
 // Explain predictions with SHAP
 const explainer = new ShapExplainer(model, backgroundData);
@@ -117,14 +121,16 @@ const explanation = explainer.explainInstance(testInstance);
 Time series utilities and decomposition.
 
 **Features:**
+
 - STL decomposition (Seasonal-Trend-Loess)
 - Stationarity tests (ADF, KPSS)
 - Autocorrelation analysis
 - Trend extraction
 
 **Example:**
+
 ```typescript
-import { STLDecomposer, StationarityTester } from '@intelgraph/time-series';
+import { STLDecomposer, StationarityTester } from "@intelgraph/time-series";
 
 // Decompose time series
 const decomposer = new STLDecomposer(12); // 12-month seasonality
@@ -141,6 +147,7 @@ console.log(`Stationary: ${adfResult.isStationary}, p-value: ${adfResult.pValue}
 Risk scoring and model monitoring.
 
 **Features:**
+
 - Logistic risk models
 - Scorecard development
 - Population Stability Index (PSI)
@@ -148,15 +155,16 @@ Risk scoring and model monitoring.
 - Risk stratification
 
 **Example:**
+
 ```typescript
-import { LogisticRiskScorer, PSICalculator } from '@intelgraph/risk-scoring';
+import { LogisticRiskScorer, PSICalculator } from "@intelgraph/risk-scoring";
 
 // Train risk model
 const scorer = new LogisticRiskScorer();
 scorer.fit(features, labels, featureNames);
 
 // Score entities
-const riskScore = scorer.score('entity_123', entityFeatures);
+const riskScore = scorer.score("entity_123", entityFeatures);
 
 console.log(`Risk Score: ${riskScore.score}`);
 console.log(`Risk Level: ${riskScore.riskLevel}`);
@@ -173,6 +181,7 @@ console.log(`PSI: ${psiResult.psi}, Status: ${psiResult.status}`);
 Causal inference and treatment effect estimation.
 
 **Features:**
+
 - Propensity score matching
 - Difference-in-differences
 - Instrumental variables
@@ -180,8 +189,9 @@ Causal inference and treatment effect estimation.
 - Causal impact analysis
 
 **Example:**
+
 ```typescript
-import { PropensityScoreMatcher, DifferenceInDifferences } from '@intelgraph/causal-inference';
+import { PropensityScoreMatcher, DifferenceInDifferences } from "@intelgraph/causal-inference";
 
 // Estimate treatment effect with propensity matching
 const matcher = new PropensityScoreMatcher();
@@ -206,6 +216,7 @@ const didEffect = did.estimate(
 Automated feature generation and transformation.
 
 **Features:**
+
 - Polynomial feature generation
 - Time-based features (cyclic encoding)
 - Lag features
@@ -213,8 +224,9 @@ Automated feature generation and transformation.
 - Standard/MinMax scaling
 
 **Example:**
+
 ```typescript
-import { AutomatedFeatureGenerator, StandardScaler } from '@intelgraph/feature-engineering';
+import { AutomatedFeatureGenerator, StandardScaler } from "@intelgraph/feature-engineering";
 
 const generator = new AutomatedFeatureGenerator();
 
@@ -249,6 +261,7 @@ GET    /api/v1/health           - Health check
 ```
 
 **Example Request:**
+
 ```bash
 curl -X POST http://localhost:3000/api/v1/predict \
   -H "Content-Type: application/json" \
@@ -278,6 +291,7 @@ GET    /api/v1/health           - Health check
 ```
 
 **Example Request:**
+
 ```bash
 curl -X POST http://localhost:3001/api/v1/train \
   -H "Content-Type: application/json" \
@@ -330,13 +344,13 @@ pnpm start
 ### 4. Make Your First Prediction
 
 ```typescript
-import { ARIMAForecaster } from '@intelgraph/forecasting';
+import { ARIMAForecaster } from "@intelgraph/forecasting";
 
 // Prepare data
 const data = [
-  { timestamp: new Date('2025-01-01'), value: 100 },
-  { timestamp: new Date('2025-01-02'), value: 105 },
-  { timestamp: new Date('2025-01-03'), value: 110 },
+  { timestamp: new Date("2025-01-01"), value: 100 },
+  { timestamp: new Date("2025-01-02"), value: 105 },
+  { timestamp: new Date("2025-01-03"), value: 110 },
   // ... more data
 ];
 
@@ -347,7 +361,7 @@ forecaster.fit(data);
 // Forecast
 const predictions = forecaster.forecast(7, 0.95);
 
-predictions.forEach(p => {
+predictions.forEach((p) => {
   console.log(`${p.timestamp.toISOString()}: ${p.forecast.toFixed(2)}`);
 });
 ```
@@ -359,15 +373,13 @@ predictions.forEach(p => {
 Forecast future cyber threats and attack patterns.
 
 ```typescript
-import { ProphetForecaster } from '@intelgraph/forecasting';
+import { ProphetForecaster } from "@intelgraph/forecasting";
 
 const forecaster = new ProphetForecaster({
   horizon: 30,
   confidenceLevel: 0.95,
-  seasonality: { period: 7, mode: 'multiplicative' },
-  holidays: [
-    { name: 'blackhat', dates: [new Date('2025-08-01')] },
-  ],
+  seasonality: { period: 7, mode: "multiplicative" },
+  holidays: [{ name: "blackhat", dates: [new Date("2025-08-01")] }],
 });
 
 forecaster.fit(threatData);
@@ -379,16 +391,16 @@ const threatForecast = forecaster.forecast();
 Score entities for threat risk.
 
 ```typescript
-import { LogisticRiskScorer } from '@intelgraph/risk-scoring';
+import { LogisticRiskScorer } from "@intelgraph/risk-scoring";
 
 const scorer = new LogisticRiskScorer();
 scorer.fit(historicalFeatures, historicalLabels, [
-  'reputation_score',
-  'connection_count',
-  'anomaly_score',
+  "reputation_score",
+  "connection_count",
+  "anomaly_score",
 ]);
 
-const riskScore = scorer.score('entity_456', [0.3, 15, 0.7]);
+const riskScore = scorer.score("entity_456", [0.3, 15, 0.7]);
 ```
 
 ### 3. Causal Impact of Intelligence Operations
@@ -396,7 +408,7 @@ const riskScore = scorer.score('entity_456', [0.3, 15, 0.7]);
 Measure the causal impact of interventions.
 
 ```typescript
-import { DifferenceInDifferences } from '@intelgraph/causal-inference';
+import { DifferenceInDifferences } from "@intelgraph/causal-inference";
 
 const did = new DifferenceInDifferences();
 const impact = did.estimate(
@@ -414,12 +426,12 @@ console.log(`Causal Impact: ${impact.ate}`);
 Predict which intelligence sources are at risk of becoming inactive.
 
 ```typescript
-import { ChurnPredictor } from '../models/prediction-models/churn/churn-predictor.js';
+import { ChurnPredictor } from "../models/prediction-models/churn/churn-predictor.js";
 
 const predictor = new ChurnPredictor();
 predictor.fit(trainingFeatures, trainingLabels);
 
-const churnPrediction = predictor.predict('source_789', {
+const churnPrediction = predictor.predict("source_789", {
   tenure: 12,
   monthlyReports: 5,
   totalReports: 60,
@@ -471,16 +483,16 @@ if (registry.needsRetraining('model-1')) {
 ### Ensemble Forecasting
 
 ```typescript
-import { EnsembleForecaster } from '@intelgraph/forecasting';
+import { EnsembleForecaster } from "@intelgraph/forecasting";
 
 const ensemble = new EnsembleForecaster({
   models: [
-    { type: 'arima', params: { p: 1, d: 1, q: 1 } },
-    { type: 'exponential', params: { alpha: 0.2 } },
-    { type: 'prophet', params: { horizon: 30, confidenceLevel: 0.95 } },
+    { type: "arima", params: { p: 1, d: 1, q: 1 } },
+    { type: "exponential", params: { alpha: 0.2 } },
+    { type: "prophet", params: { horizon: 30, confidenceLevel: 0.95 } },
   ],
   weights: [0.4, 0.3, 0.3],
-  method: 'weighted',
+  method: "weighted",
 });
 
 ensemble.fit(data);
@@ -490,11 +502,11 @@ const forecasts = ensemble.forecast(30);
 ### Hyperparameter Optimization
 
 ```typescript
-import { GridSearchCV, RandomForestClassifier } from '@intelgraph/predictive-models';
+import { GridSearchCV, RandomForestClassifier } from "@intelgraph/predictive-models";
 
 const gridSearch = new GridSearchCV({
   nFolds: 5,
-  scoringMetric: 'accuracy',
+  scoringMetric: "accuracy",
 });
 
 const paramSpace = {
@@ -509,8 +521,8 @@ const result = gridSearch.search(
   trainingData
 );
 
-console.log('Best parameters:', result.bestParams);
-console.log('Best score:', result.bestScore);
+console.log("Best parameters:", result.bestParams);
+console.log("Best score:", result.bestScore);
 ```
 
 ## API Reference
@@ -521,10 +533,10 @@ console.log('Best score:', result.bestScore);
 
 ```typescript
 class ARIMAForecaster {
-  constructor(params: ARIMAParams)
-  fit(data: TimeSeriesData[]): void
-  forecast(horizon: number, confidenceLevel: number): ForecastResult[]
-  evaluate(testData: TimeSeriesData[]): ModelPerformance
+  constructor(params: ARIMAParams);
+  fit(data: TimeSeriesData[]): void;
+  forecast(horizon: number, confidenceLevel: number): ForecastResult[];
+  evaluate(testData: TimeSeriesData[]): ModelPerformance;
 }
 ```
 
@@ -532,10 +544,10 @@ class ARIMAForecaster {
 
 ```typescript
 class ProphetForecaster {
-  constructor(config: ForecastConfig)
-  fit(data: TimeSeriesData[]): void
-  forecast(horizon?: number, confidenceLevel?: number): ForecastResult[]
-  decompose(): TrendDecomposition
+  constructor(config: ForecastConfig);
+  fit(data: TimeSeriesData[]): void;
+  forecast(horizon?: number, confidenceLevel?: number): ForecastResult[];
+  decompose(): TrendDecomposition;
 }
 ```
 
@@ -545,12 +557,12 @@ class ProphetForecaster {
 
 ```typescript
 class RandomForestClassifier {
-  constructor(config: RandomForestConfig)
-  fit(dataset: Dataset): void
-  predict(features: number[][]): PredictionResult[]
-  predictProba(features: number[][]): number[][]
-  getFeatureImportances(featureNames?: string[]): FeatureImportance[]
-  evaluate(testDataset: Dataset): ModelPerformance
+  constructor(config: RandomForestConfig);
+  fit(dataset: Dataset): void;
+  predict(features: number[][]): PredictionResult[];
+  predictProba(features: number[][]): number[][];
+  getFeatureImportances(featureNames?: string[]): FeatureImportance[];
+  evaluate(testDataset: Dataset): ModelPerformance;
 }
 ```
 
@@ -558,10 +570,10 @@ class RandomForestClassifier {
 
 ```typescript
 class GradientBoostingClassifier {
-  constructor(config: GradientBoostingConfig)
-  fit(dataset: Dataset, validationData?: Dataset): void
-  predict(features: number[][]): PredictionResult[]
-  evaluate(testDataset: Dataset): ModelPerformance
+  constructor(config: GradientBoostingConfig);
+  fit(dataset: Dataset, validationData?: Dataset): void;
+  predict(features: number[][]): PredictionResult[];
+  evaluate(testDataset: Dataset): ModelPerformance;
 }
 ```
 
@@ -571,20 +583,20 @@ class GradientBoostingClassifier {
 
 ```typescript
 class LogisticRiskScorer {
-  fit(features: number[][], labels: number[], featureNames?: string[]): void
-  score(entityId: string, features: number[]): RiskScore
-  scoreBatch(entityIds: string[], features: number[][]): RiskScore[]
+  fit(features: number[][], labels: number[], featureNames?: string[]): void;
+  score(entityId: string, features: number[]): RiskScore;
+  scoreBatch(entityIds: string[], features: number[][]): RiskScore[];
 }
 ```
 
 ## Performance Benchmarks
 
-| Model Type | Training Time (10K samples) | Prediction Time (1K samples) | Memory Usage |
-|------------|----------------------------|------------------------------|--------------|
-| ARIMA      | ~2s                        | ~100ms                       | ~50MB        |
-| Random Forest | ~5s                     | ~50ms                        | ~100MB       |
-| XGBoost    | ~8s                        | ~30ms                        | ~150MB       |
-| Risk Scorer | ~3s                       | ~20ms                        | ~40MB        |
+| Model Type    | Training Time (10K samples) | Prediction Time (1K samples) | Memory Usage |
+| ------------- | --------------------------- | ---------------------------- | ------------ |
+| ARIMA         | ~2s                         | ~100ms                       | ~50MB        |
+| Random Forest | ~5s                         | ~50ms                        | ~100MB       |
+| XGBoost       | ~8s                         | ~30ms                        | ~150MB       |
+| Risk Scorer   | ~3s                         | ~20ms                        | ~40MB        |
 
 ## Troubleshooting
 
@@ -598,6 +610,7 @@ class LogisticRiskScorer {
 ### Support
 
 For issues and questions:
+
 - GitHub Issues: https://github.com/your-org/summit/issues
 - Documentation: https://docs.summit.ai
 - Email: support@summit.ai

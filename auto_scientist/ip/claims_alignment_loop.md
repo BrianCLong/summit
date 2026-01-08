@@ -3,14 +3,18 @@
 ## Independent Claims
 
 ### Claim 1: Telemetry-Driven Alignment Method
+
 A method for aligning a language model, comprising:
+
 1.  Collecting telemetry data from model deployment and training processes, wherein said telemetry data includes performance metrics across a plurality of domains and safety violation rates.
 2.  Identifying underperforming domains or high-risk behaviors based on said telemetry data.
 3.  Constructing a preference dataset by sampling prompt-response pairs, wherein the sampling probability is weighted based on said identified domains or behaviors.
 4.  Optimizing the language model using a direct preference optimization objective on said preference dataset.
 
 ### Claim 2: Multi-Tier Oversight System for Tool-Using Models
+
 A system for overseeing the output of a language model, comprising:
+
 1.  A policy store defining a plurality of oversight policies, including heuristic checks and model-based evaluations.
 2.  An oversight orchestrator configured to receive a generated candidate response from the language model, wherein said candidate response includes tool execution traces or graph operations.
 3.  A routing module that selects a subset of policies to evaluate said candidate response based on the presence of specific tools or graph operations.

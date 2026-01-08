@@ -1,11 +1,11 @@
-import { Observable, Subject } from 'rxjs';
-import { StreamMessage } from '@intelgraph/kafka-integration';
-import pino from 'pino';
-import { JoinType, JoinSpec, WindowSpec } from './types';
-import { DataStream } from './stream';
-import { WindowManager } from './window';
+import { Observable, Subject } from "rxjs";
+import { StreamMessage } from "@intelgraph/kafka-integration";
+import pino from "pino";
+import { JoinType, JoinSpec, WindowSpec } from "./types";
+import { DataStream } from "./stream";
+import { WindowManager } from "./window";
 
-const logger = pino({ name: 'stream-joins' });
+const logger = pino({ name: "stream-joins" });
 
 /**
  * Stream join operations
@@ -32,13 +32,13 @@ export class StreamJoin<L, R, K = string> {
     // Subscribe to left stream
     this.leftStream.asObservable().subscribe({
       next: (message) => this.processLeft(message),
-      error: (error) => logger.error({ error }, 'Left stream error'),
+      error: (error) => logger.error({ error }, "Left stream error"),
     });
 
     // Subscribe to right stream
     this.rightStream.asObservable().subscribe({
       next: (message) => this.processRight(message),
-      error: (error) => logger.error({ error }, 'Right stream error'),
+      error: (error) => logger.error({ error }, "Right stream error"),
     });
 
     // Start window cleanup
@@ -256,13 +256,8 @@ export class StreamJoin<L, R, K = string> {
   /**
    * Check if messages are within join window
    */
-  private isWithinWindow(
-    leftMsg: StreamMessage<L>,
-    rightMsg: StreamMessage<R>
-  ): boolean {
-    const timeDiff = Math.abs(
-      leftMsg.metadata.timestamp - rightMsg.metadata.timestamp
-    );
+  private isWithinWindow(leftMsg: StreamMessage<L>, rightMsg: StreamMessage<R>): boolean {
+    const timeDiff = Math.abs(leftMsg.metadata.timestamp - rightMsg.metadata.timestamp);
     return timeDiff <= this.spec.windowSpec.size;
   }
 
@@ -276,9 +271,7 @@ export class StreamJoin<L, R, K = string> {
 
       // Cleanup left windows
       for (const [key, messages] of this.leftWindows.entries()) {
-        const filtered = messages.filter(
-          (msg) => now - msg.metadata.timestamp < windowSize
-        );
+        const filtered = messages.filter((msg) => now - msg.metadata.timestamp < windowSize);
 
         if (filtered.length === 0) {
           this.leftWindows.delete(key);
@@ -289,9 +282,7 @@ export class StreamJoin<L, R, K = string> {
 
       // Cleanup right windows
       for (const [key, messages] of this.rightWindows.entries()) {
-        const filtered = messages.filter(
-          (msg) => now - msg.metadata.timestamp < windowSize
-        );
+        const filtered = messages.filter((msg) => now - msg.metadata.timestamp < windowSize);
 
         if (filtered.length === 0) {
           this.rightWindows.delete(key);
@@ -340,10 +331,7 @@ export class IntervalJoin<L, R, K = string> extends StreamJoin<L, R, K> {
   /**
    * Check if messages are within interval
    */
-  protected isWithinWindow(
-    leftMsg: StreamMessage<L>,
-    rightMsg: StreamMessage<R>
-  ): boolean {
+  protected isWithinWindow(leftMsg: StreamMessage<L>, rightMsg: StreamMessage<R>): boolean {
     const timeDiff = rightMsg.metadata.timestamp - leftMsg.metadata.timestamp;
     return timeDiff >= this.lowerBound && timeDiff <= this.upperBound;
   }

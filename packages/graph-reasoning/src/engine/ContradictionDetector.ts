@@ -2,9 +2,9 @@
  * Contradiction Detection Engine
  */
 
-import { Driver } from 'neo4j-driver';
-import { v4 as uuidv4 } from 'uuid';
-import { Contradiction, ContradictionSchema } from '../types/inference.js';
+import { Driver } from "neo4j-driver";
+import { v4 as uuidv4 } from "uuid";
+import { Contradiction, ContradictionSchema } from "../types/inference.js";
 
 export class ContradictionDetector {
   constructor(private driver: Driver) {}
@@ -45,7 +45,7 @@ export class ContradictionDetector {
         // This is simplified - in production, parse properties JSON and compare
         RETURN entityId, props
         LIMIT 100
-        `,
+        `
       );
 
       const contradictions: Contradiction[] = [];
@@ -71,7 +71,7 @@ export class ContradictionDetector {
         MATCH (a)-[r1:CONFLICTS_WITH]->(b)
         MATCH (a)-[r2:COMPATIBLE_WITH]->(b)
         RETURN a.id as entity1, b.id as entity2, r1.id as rel1, r2.id as rel2
-        `,
+        `
       );
 
       const contradictions: Contradiction[] = [];
@@ -79,22 +79,22 @@ export class ContradictionDetector {
       for (const record of result.records) {
         const contradiction: Contradiction = {
           id: uuidv4(),
-          contradictionType: 'relationship_conflict',
-          entity1Id: record.get('entity1'),
-          entity2Id: record.get('entity2'),
-          description: 'Mutually exclusive relationships detected',
-          severity: 'high',
+          contradictionType: "relationship_conflict",
+          entity1Id: record.get("entity1"),
+          entity2Id: record.get("entity2"),
+          description: "Mutually exclusive relationships detected",
+          severity: "high",
           conflictingFacts: [
             {
-              factId: record.get('rel1'),
-              value: 'CONFLICTS_WITH',
-              source: 'graph',
+              factId: record.get("rel1"),
+              value: "CONFLICTS_WITH",
+              source: "graph",
               confidence: 1.0,
             },
             {
-              factId: record.get('rel2'),
-              value: 'COMPATIBLE_WITH',
-              source: 'graph',
+              factId: record.get("rel2"),
+              value: "COMPATIBLE_WITH",
+              source: "graph",
               confidence: 1.0,
             },
           ],
@@ -123,35 +123,35 @@ export class ContradictionDetector {
         MATCH (e)
         WHERE size([label in labels(e) WHERE label IN ['Person', 'Organization']]) > 1
         RETURN e.id as entityId, labels(e) as labels
-        `,
+        `
       );
 
       const contradictions: Contradiction[] = [];
 
       for (const record of result.records) {
-        const labels = record.get('labels');
-        if (labels.includes('Person') && labels.includes('Organization')) {
+        const labels = record.get("labels");
+        if (labels.includes("Person") && labels.includes("Organization")) {
           const contradiction: Contradiction = {
             id: uuidv4(),
-            contradictionType: 'type_conflict',
-            entity1Id: record.get('entityId'),
-            description: 'Entity has incompatible types: Person and Organization',
-            severity: 'critical',
+            contradictionType: "type_conflict",
+            entity1Id: record.get("entityId"),
+            description: "Entity has incompatible types: Person and Organization",
+            severity: "critical",
             conflictingFacts: [
               {
-                factId: record.get('entityId'),
-                value: 'Person',
-                source: 'type_system',
+                factId: record.get("entityId"),
+                value: "Person",
+                source: "type_system",
                 confidence: 1.0,
               },
               {
-                factId: record.get('entityId'),
-                value: 'Organization',
-                source: 'type_system',
+                factId: record.get("entityId"),
+                value: "Organization",
+                source: "type_system",
                 confidence: 1.0,
               },
             ],
-            suggestedResolution: 'Remove one of the conflicting type labels',
+            suggestedResolution: "Remove one of the conflicting type labels",
             resolved: false,
             detectedAt: new Date().toISOString(),
           };
@@ -222,7 +222,7 @@ export class ContradictionDetector {
           resolvedBy: validated.resolvedBy || null,
           resolvedAt: validated.resolvedAt || null,
           detectedAt: validated.detectedAt,
-        },
+        }
       );
     } finally {
       await session.close();
@@ -235,7 +235,7 @@ export class ContradictionDetector {
   async resolveContradiction(
     contradictionId: string,
     resolvedBy: string,
-    resolution: string,
+    resolution: string
   ): Promise<void> {
     const session = this.driver.session();
     try {
@@ -247,7 +247,7 @@ export class ContradictionDetector {
             c.resolvedAt = datetime(),
             c.resolution = $resolution
         `,
-        { contradictionId, resolvedBy, resolution },
+        { contradictionId, resolvedBy, resolution }
       );
     } finally {
       await session.close();
@@ -265,11 +265,11 @@ export class ContradictionDetector {
         MATCH (c:Contradiction {resolved: false})
         RETURN c
         ORDER BY c.severity DESC, c.detectedAt DESC
-        `,
+        `
       );
 
       return result.records.map((record) => {
-        const props = record.get('c').properties;
+        const props = record.get("c").properties;
         return ContradictionSchema.parse({
           ...props,
           conflictingFacts: JSON.parse(props.conflictingFacts),

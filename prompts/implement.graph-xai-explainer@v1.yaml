@@ -1,17 +1,17 @@
 meta:
   id: implement.graph-xai-explainer@v1
-  owner: 'intelgraph-advisory-committee'
-  purpose: 'Build counterfactual explainability API for graph analytics with path rationales and minimal flip analysis'
-  tags: ['xai', 'explainability', 'counterfactual', 'graph-analysis', 'interpretability']
+  owner: "intelgraph-advisory-committee"
+  purpose: "Build counterfactual explainability API for graph analytics with path rationales and minimal flip analysis"
+  tags: ["xai", "explainability", "counterfactual", "graph-analysis", "interpretability"]
   guardrails:
-    - 'All explanations must cite provenance IDs'
-    - 'Counterfactuals must be minimal (smallest change set)'
-    - 'Saliency scores must be normalized [0, 1]'
-    - 'Explanations must be human-readable and actionable'
-    - 'Include confidence intervals for probabilistic explanations'
+    - "All explanations must cite provenance IDs"
+    - "Counterfactuals must be minimal (smallest change set)"
+    - "Saliency scores must be normalized [0, 1]"
+    - "Explanations must be human-readable and actionable"
+    - "Include confidence intervals for probabilistic explanations"
 
 modelConfig:
-  model: 'claude-sonnet-4-5'
+  model: "claude-sonnet-4-5"
   temperature: 0.2
   maxTokens: 8000
 
@@ -681,25 +681,25 @@ template: |
   Remember: **Explainability builds trust.** Every decision must be auditable and understandable.
 
 examples:
-  - name: 'shap-react-jupyter'
+  - name: "shap-react-jupyter"
     inputs:
-      explanation_methods: 'SHAP, Counterfactual'
-      ui_framework: 'React'
-      notebook_format: 'ipynb'
+      explanation_methods: "SHAP, Counterfactual"
+      ui_framework: "React"
+      notebook_format: "ipynb"
     expected_contains:
-      - 'SHAP'
-      - 'Counterfactual'
-      - 'React'
-      - 'ipynb'
-      - 'provenance'
+      - "SHAP"
+      - "Counterfactual"
+      - "React"
+      - "ipynb"
+      - "provenance"
 
-  - name: 'lime-vue-rmarkdown'
+  - name: "lime-vue-rmarkdown"
     inputs:
-      explanation_methods: 'LIME, GNNExplainer'
-      ui_framework: 'Vue'
-      notebook_format: 'Rmd'
+      explanation_methods: "LIME, GNNExplainer"
+      ui_framework: "Vue"
+      notebook_format: "Rmd"
     expected_contains:
-      - 'LIME'
-      - 'GNNExplainer'
-      - 'Vue'
-      - 'minimal flip'
+      - "LIME"
+      - "GNNExplainer"
+      - "Vue"
+      - "minimal flip"

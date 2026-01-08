@@ -49,17 +49,10 @@
     "directories": {
       "output": "release/${version}"
     },
-    "files": [
-      "dist/**/*",
-      "dist-electron/**/*",
-      "package.json"
-    ],
+    "files": ["dist/**/*", "dist-electron/**/*", "package.json"],
     "mac": {
       "category": "public.app-category.productivity",
-      "target": [
-        "dmg",
-        "zip"
-      ],
+      "target": ["dmg", "zip"],
       "icon": "build/icon.icns",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
@@ -67,18 +60,11 @@
       "entitlementsInherit": "build/entitlements.mac.plist"
     },
     "win": {
-      "target": [
-        "nsis",
-        "portable"
-      ],
+      "target": ["nsis", "portable"],
       "icon": "build/icon.ico"
     },
     "linux": {
-      "target": [
-        "AppImage",
-        "deb",
-        "rpm"
-      ],
+      "target": ["AppImage", "deb", "rpm"],
       "icon": "build/icon.png",
       "category": "Office"
     },
@@ -94,10 +80,5 @@
       "repo": "summit"
     }
   },
-  "keywords": [
-    "electron",
-    "desktop",
-    "intelligence-analysis",
-    "cross-platform"
-  ]
+  "keywords": ["electron", "desktop", "intelligence-analysis", "cross-platform"]
 }

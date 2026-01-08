@@ -1,4 +1,4 @@
-import type { CostEstimate, CypherPlanEstimate } from './types.js';
+import type { CostEstimate, CypherPlanEstimate } from "./types.js";
 
 const RELATION_PATTERN = /-?\[[^\]]*\]-?>|<-\[[^\]]*\]-?|-->|<--/g;
 const LIMIT_PATTERN = /LIMIT\s+(\d+)/i;
@@ -30,10 +30,7 @@ export function estimateDepth(cypher: string): number {
   return depth;
 }
 
-export function estimateRows(
-  cypher: string,
-  costEstimate?: CostEstimate,
-): number {
+export function estimateRows(cypher: string, costEstimate?: CostEstimate): number {
   const limit = extractLimit(cypher);
   const base = costEstimate?.anticipatedRows ?? 50;
   if (limit !== null) {
@@ -54,7 +51,7 @@ export function buildCostScore(rows: number, depth: number): number {
 
 export function hasWriteIntent(text: string): boolean {
   const normalized = text.toLowerCase();
-  return WRITE_PATTERN.test(normalized) || normalized.includes('delete');
+  return WRITE_PATTERN.test(normalized) || normalized.includes("delete");
 }
 
 export function analyzeCypherPlan(
@@ -64,7 +61,7 @@ export function analyzeCypherPlan(
     approved?: boolean;
     costEstimate?: CostEstimate;
     prompt?: string;
-  } = {},
+  } = {}
 ): { estimate: CypherPlanEstimate; warnings: string[] } {
   const depth = estimateDepth(cypher);
   const rows = estimateRows(cypher, options.costEstimate);
@@ -75,11 +72,11 @@ export function analyzeCypherPlan(
   const maxDepth = options.maxDepth ?? 3;
   if (depth > maxDepth && !options.approved) {
     warnings.push(
-      `Expansion depth ${depth} exceeds sandbox cap of ${maxDepth}. Approved execution is required.`,
+      `Expansion depth ${depth} exceeds sandbox cap of ${maxDepth}. Approved execution is required.`
     );
   }
   if (containsWrite) {
-    warnings.push('write operations are blocked in sandbox mode.');
+    warnings.push("write operations are blocked in sandbox mode.");
   }
   return {
     estimate: { rows, depth, costScore, containsWrite },

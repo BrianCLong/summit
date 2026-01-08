@@ -7,9 +7,9 @@
  * Reports on coverage and missing traces in critical files.
  */
 
-const fs = require('fs');
-const path = require('path');
-const { promisify } = require('util');
+const fs = require("fs");
+const path = require("path");
+const { promisify } = require("util");
 
 const readdir = promisify(fs.readdir);
 const stat = promisify(fs.stat);
@@ -17,20 +17,9 @@ const readFile = promisify(fs.readFile);
 
 // Configuration
 const CONFIG = {
-  include: [
-    'server/src',
-    'intelgraph-mvp/api',
-    'apps/web/src'
-  ],
-  exclude: [
-    'node_modules',
-    'dist',
-    'build',
-    'coverage',
-    '__tests__',
-    'tests'
-  ],
-  extensions: ['.ts', '.js', '.tsx', '.jsx']
+  include: ["server/src", "intelgraph-mvp/api", "apps/web/src"],
+  exclude: ["node_modules", "dist", "build", "coverage", "__tests__", "tests"],
+  extensions: [".ts", ".js", ".tsx", ".jsx"],
 };
 
 // Regex for finding @trace tags
@@ -42,7 +31,7 @@ async function scanDirectory(dir) {
     filesScanned: 0,
     traceTags: 0,
     tags: {},
-    filesWithTrace: []
+    filesWithTrace: [],
   };
 
   try {
@@ -66,7 +55,7 @@ async function scanDirectory(dir) {
         }
       } else if (CONFIG.extensions.includes(path.extname(file))) {
         results.filesScanned++;
-        const content = await readFile(filePath, 'utf8');
+        const content = await readFile(filePath, "utf8");
         let match;
         let fileHasTrace = false;
 
@@ -85,7 +74,7 @@ async function scanDirectory(dir) {
   } catch (err) {
     // Ignore errors for non-existent directories if strictly configured,
     // but warn if it's a root config path.
-    if (err.code !== 'ENOENT') {
+    if (err.code !== "ENOENT") {
       console.error(`Error scanning ${dir}:`, err);
     }
   }
@@ -94,13 +83,13 @@ async function scanDirectory(dir) {
 }
 
 async function main() {
-  console.log('🔍 Starting Traceability Scan...\n');
+  console.log("🔍 Starting Traceability Scan...\n");
 
   let totalResults = {
     filesScanned: 0,
     traceTags: 0,
     tags: {},
-    filesWithTrace: []
+    filesWithTrace: [],
   };
 
   for (const dir of CONFIG.include) {
@@ -121,15 +110,15 @@ async function main() {
     }
   }
 
-  console.log('\n📊 Scan Results:');
-  console.log('------------------');
+  console.log("\n📊 Scan Results:");
+  console.log("------------------");
   console.log(`Files Scanned:      ${totalResults.filesScanned}`);
   console.log(`Trace Tags Found:   ${totalResults.traceTags}`);
   console.log(`Files with Traces:  ${totalResults.filesWithTrace.length}`);
 
-  console.log('\n🏷️  Tag Summary (Top 10):');
+  console.log("\n🏷️  Tag Summary (Top 10):");
   const sortedTags = Object.entries(totalResults.tags)
-    .sort(([,a], [,b]) => b - a)
+    .sort(([, a], [, b]) => b - a)
     .slice(0, 10);
 
   if (sortedTags.length > 0) {
@@ -137,15 +126,15 @@ async function main() {
       console.log(`  - ${tag}: ${count}`);
     });
   } else {
-    console.log('  No tags found.');
+    console.log("  No tags found.");
   }
 
   // Optional: Check for specific requirements if passed as args
   const args = process.argv.slice(2);
   if (args.length > 0) {
-    console.log('\n🔎 Verifying Specific Tags:');
+    console.log("\n🔎 Verifying Specific Tags:");
     let missing = false;
-    args.forEach(arg => {
+    args.forEach((arg) => {
       if (totalResults.tags[arg]) {
         console.log(`  ✅ ${arg} found (${totalResults.tags[arg]} times)`);
       } else {

@@ -572,7 +572,7 @@ Save as `.github/workflows/nightly-load.yml`.
 name: Nightly Load Test
 on:
   schedule:
-    - cron: '0 7 * * *' # 12:00 AM Denver
+    - cron: "0 7 * * *" # 12:00 AM Denver
   workflow_dispatch: {}
 
 jobs:

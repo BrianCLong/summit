@@ -1,18 +1,17 @@
-
 // @ts-ignore
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-grpc";
 // @ts-ignore
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
 // @ts-ignore
-import { Resource } from '@opentelemetry/resources';
+import { Resource } from "@opentelemetry/resources";
 // @ts-ignore
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { SemanticResourceAttributes } from "@opentelemetry/semantic-conventions";
 // @ts-ignore
-import { NodeSDK } from '@opentelemetry/sdk-node';
+import { NodeSDK } from "@opentelemetry/sdk-node";
 
 export const initTelemetry = (serviceName: string) => {
   const traceExporter = new OTLPTraceExporter({
-    url: 'grpc://otel-collector:4317',
+    url: "grpc://otel-collector:4317",
   });
 
   const sdk = new NodeSDK({
@@ -25,10 +24,15 @@ export const initTelemetry = (serviceName: string) => {
 
   sdk.start();
 
-  process.on('SIGTERM', () => {
-    sdk.shutdown()
-      .then(() => { /* do nothing */ })
-      .catch(() => { /* do nothing */ })
+  process.on("SIGTERM", () => {
+    sdk
+      .shutdown()
+      .then(() => {
+        /* do nothing */
+      })
+      .catch(() => {
+        /* do nothing */
+      })
       .finally(() => process.exit(0));
   });
 

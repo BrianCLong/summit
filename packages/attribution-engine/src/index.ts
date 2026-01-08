@@ -2,18 +2,18 @@
  * Attribution Engine - Digital identity attribution and footprint analysis
  */
 
-export * from './core/AttributionEngine.js';
-export * from './analyzers/EmailAnalyzer.js';
-export * from './analyzers/UsernameAnalyzer.js';
-export * from './analyzers/PhoneAnalyzer.js';
-export * from './analyzers/DomainAnalyzer.js';
-export * from './analyzers/IPAnalyzer.js';
-export * from './analyzers/CryptoAnalyzer.js';
-export * from './types/index.js';
+export * from "./core/AttributionEngine.js";
+export * from "./analyzers/EmailAnalyzer.js";
+export * from "./analyzers/UsernameAnalyzer.js";
+export * from "./analyzers/PhoneAnalyzer.js";
+export * from "./analyzers/DomainAnalyzer.js";
+export * from "./analyzers/IPAnalyzer.js";
+export * from "./analyzers/CryptoAnalyzer.js";
+export * from "./types/index.js";
 
 export interface DigitalFootprint {
   identifier: string;
-  type: 'email' | 'username' | 'phone' | 'domain' | 'ip' | 'crypto';
+  type: "email" | "username" | "phone" | "domain" | "ip" | "crypto";
   accounts: Array<{
     platform: string;
     username: string;

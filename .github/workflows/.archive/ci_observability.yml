@@ -2,12 +2,12 @@ name: CI Observability
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'src/intelgraph/observability/**'
-      - 'tests/test_observability_no_otel.py'
+      - "src/intelgraph/observability/**"
+      - "tests/test_observability_no_otel.py"
 
 jobs:
   test-observability:

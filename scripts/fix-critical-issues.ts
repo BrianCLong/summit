@@ -13,10 +13,10 @@
  * 8. Performance optimizations
  */
 
-import { execSync } from 'child_process';
-import * as fs from 'fs';
-import * as path from 'path';
-import { glob } from 'glob';
+import { execSync } from "child_process";
+import * as fs from "fs";
+import * as path from "path";
+import { glob } from "glob";
 
 interface FixReport {
   category: string;
@@ -27,7 +27,7 @@ interface FixReport {
 const reports: FixReport[] = [];
 
 function logFix(category: string, message: string) {
-  const report = reports.find(r => r.category === category);
+  const report = reports.find((r) => r.category === category);
   if (report) {
     report.fixes.push(message);
   } else {
@@ -37,7 +37,7 @@ function logFix(category: string, message: string) {
 }
 
 function logError(category: string, message: string) {
-  const report = reports.find(r => r.category === category);
+  const report = reports.find((r) => r.category === category);
   if (report) {
     report.errors.push(message);
   } else {
@@ -50,17 +50,17 @@ function logError(category: string, message: string) {
  * Fix 1: Update problematic dependency versions
  */
 async function fixDependencyVersions() {
-  console.log('\n🔧 Fixing dependency versions...\n');
+  console.log("\n🔧 Fixing dependency versions...\n");
 
-  const packageJsonPath = path.join(process.cwd(), 'apps/mobile-native/package.json');
+  const packageJsonPath = path.join(process.cwd(), "apps/mobile-native/package.json");
 
   try {
-    const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+    const pkg = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"));
 
     // Fix known version issues
     const fixes = {
-      'react-native-biometrics': '^3.0.1',
-      'react-native-document-picker': '^9.1.1',
+      "react-native-biometrics": "^3.0.1",
+      "react-native-document-picker": "^9.1.1",
     };
 
     let updated = false;
@@ -68,15 +68,15 @@ async function fixDependencyVersions() {
       if (pkg.dependencies[dep] && pkg.dependencies[dep] !== version) {
         pkg.dependencies[dep] = version;
         updated = true;
-        logFix('Dependencies', `Updated ${dep} to ${version}`);
+        logFix("Dependencies", `Updated ${dep} to ${version}`);
       }
     }
 
     if (updated) {
-      fs.writeFileSync(packageJsonPath, JSON.stringify(pkg, null, 2) + '\n');
+      fs.writeFileSync(packageJsonPath, JSON.stringify(pkg, null, 2) + "\n");
     }
   } catch (error) {
-    logError('Dependencies', `Failed to update package.json: ${error}`);
+    logError("Dependencies", `Failed to update package.json: ${error}`);
   }
 }
 
@@ -84,28 +84,28 @@ async function fixDependencyVersions() {
  * Fix 2: Install missing type definitions
  */
 async function installMissingTypes() {
-  console.log('\n🔧 Installing missing type definitions...\n');
+  console.log("\n🔧 Installing missing type definitions...\n");
 
   const missingTypes = [
-    '@types/node',
-    '@types/jest',
-    '@testing-library/jest-dom',
-    'zod',
-    'commander',
-    'node-html-parser',
-    'axios',
-    'uuid',
-    'events',
+    "@types/node",
+    "@types/jest",
+    "@testing-library/jest-dom",
+    "zod",
+    "commander",
+    "node-html-parser",
+    "axios",
+    "uuid",
+    "events",
   ];
 
   try {
-    execSync(`pnpm add -D -w ${missingTypes.join(' ')}`, {
-      stdio: 'inherit',
-      cwd: process.cwd()
+    execSync(`pnpm add -D -w ${missingTypes.join(" ")}`, {
+      stdio: "inherit",
+      cwd: process.cwd(),
     });
-    logFix('TypeScript', `Installed ${missingTypes.length} missing type packages`);
+    logFix("TypeScript", `Installed ${missingTypes.length} missing type packages`);
   } catch (error) {
-    logError('TypeScript', `Failed to install types: ${error}`);
+    logError("TypeScript", `Failed to install types: ${error}`);
   }
 }
 
@@ -113,32 +113,32 @@ async function installMissingTypes() {
  * Fix 3: Update vulnerable dependencies
  */
 async function fixSecurityVulnerabilities() {
-  console.log('\n🔧 Fixing security vulnerabilities...\n');
+  console.log("\n🔧 Fixing security vulnerabilities...\n");
 
   const vulnerablePackages = {
-    'parse-url': '>=8.1.0',
-    'parse-path': '>=5.0.0',
-    'moment': '>=2.29.4',
-    'glob': '>=11.1.0',
-    'esbuild': '>=0.25.0',
-    'body-parser': '>=2.2.1',
+    "parse-url": ">=8.1.0",
+    "parse-path": ">=5.0.0",
+    moment: ">=2.29.4",
+    glob: ">=11.1.0",
+    esbuild: ">=0.25.0",
+    "body-parser": ">=2.2.1",
   };
 
   try {
     for (const [pkg, version] of Object.entries(vulnerablePackages)) {
       try {
         execSync(`pnpm update ${pkg}@${version} --recursive`, {
-          stdio: 'pipe',
-          cwd: process.cwd()
+          stdio: "pipe",
+          cwd: process.cwd(),
         });
-        logFix('Security', `Updated ${pkg} to ${version}`);
+        logFix("Security", `Updated ${pkg} to ${version}`);
       } catch (err) {
         // Package might not be used directly
-        logFix('Security', `Skipped ${pkg} (not a direct dependency)`);
+        logFix("Security", `Skipped ${pkg} (not a direct dependency)`);
       }
     }
   } catch (error) {
-    logError('Security', `Failed to update packages: ${error}`);
+    logError("Security", `Failed to update packages: ${error}`);
   }
 }
 
@@ -146,7 +146,7 @@ async function fixSecurityVulnerabilities() {
  * Fix 4: Replace console.log with proper logging
  */
 async function fixConsoleStatements() {
-  console.log('\n🔧 Creating logging infrastructure...\n');
+  console.log("\n🔧 Creating logging infrastructure...\n");
 
   // Create a comprehensive logger utility
   const loggerContent = `/**
@@ -241,7 +241,7 @@ export function createLogger(serviceName: string, minLevel?: LogLevel): Logger {
 }
 `;
 
-  const loggerPath = path.join(process.cwd(), 'packages/logger/src/index.ts');
+  const loggerPath = path.join(process.cwd(), "packages/logger/src/index.ts");
 
   try {
     fs.mkdirSync(path.dirname(loggerPath), { recursive: true });
@@ -249,47 +249,47 @@ export function createLogger(serviceName: string, minLevel?: LogLevel): Logger {
 
     // Create package.json for logger package
     const packageJson = {
-      name: '@intelgraph/logger',
-      version: '1.0.0',
-      main: 'dist/index.js',
-      types: 'dist/index.d.ts',
+      name: "@intelgraph/logger",
+      version: "1.0.0",
+      main: "dist/index.js",
+      types: "dist/index.d.ts",
       scripts: {
-        build: 'tsc',
-        test: 'jest',
+        build: "tsc",
+        test: "jest",
       },
       dependencies: {},
       devDependencies: {
-        typescript: '^5.3.3',
+        typescript: "^5.3.3",
       },
     };
 
     fs.writeFileSync(
-      path.join(process.cwd(), 'packages/logger/package.json'),
-      JSON.stringify(packageJson, null, 2) + '\n'
+      path.join(process.cwd(), "packages/logger/package.json"),
+      JSON.stringify(packageJson, null, 2) + "\n"
     );
 
     // Create tsconfig.json for logger package
     const tsconfig = {
-      extends: '../../tsconfig.base.json',
+      extends: "../../tsconfig.base.json",
       compilerOptions: {
-        outDir: 'dist',
-        rootDir: 'src',
+        outDir: "dist",
+        rootDir: "src",
         declaration: true,
         composite: true,
-        tsBuildInfoFile: 'dist/.tsbuildinfo',
-        types: ['node'],
+        tsBuildInfoFile: "dist/.tsbuildinfo",
+        types: ["node"],
       },
-      include: ['src'],
+      include: ["src"],
     };
 
     fs.writeFileSync(
-      path.join(process.cwd(), 'packages/logger/tsconfig.json'),
-      JSON.stringify(tsconfig, null, 2) + '\n'
+      path.join(process.cwd(), "packages/logger/tsconfig.json"),
+      JSON.stringify(tsconfig, null, 2) + "\n"
     );
 
-    logFix('Logging', 'Created enterprise logging package @intelgraph/logger');
+    logFix("Logging", "Created enterprise logging package @intelgraph/logger");
   } catch (error) {
-    logError('Logging', `Failed to create logger: ${error}`);
+    logError("Logging", `Failed to create logger: ${error}`);
   }
 }
 
@@ -297,7 +297,7 @@ export function createLogger(serviceName: string, minLevel?: LogLevel): Logger {
  * Fix 5: Add comprehensive error handling
  */
 async function createErrorHandling() {
-  console.log('\n🔧 Creating error handling infrastructure...\n');
+  console.log("\n🔧 Creating error handling infrastructure...\n");
 
   const errorHandlerContent = `/**
  * Enterprise-grade error handling utilities
@@ -430,7 +430,7 @@ export async function tryCatch<T>(
 }
 `;
 
-  const errorHandlerPath = path.join(process.cwd(), 'packages/error-handler/src/index.ts');
+  const errorHandlerPath = path.join(process.cwd(), "packages/error-handler/src/index.ts");
 
   try {
     fs.mkdirSync(path.dirname(errorHandlerPath), { recursive: true });
@@ -438,52 +438,50 @@ export async function tryCatch<T>(
 
     // Create package.json
     const packageJson = {
-      name: '@intelgraph/error-handler',
-      version: '1.0.0',
-      main: 'dist/index.js',
-      types: 'dist/index.d.ts',
+      name: "@intelgraph/error-handler",
+      version: "1.0.0",
+      main: "dist/index.js",
+      types: "dist/index.d.ts",
       scripts: {
-        build: 'tsc',
-        test: 'jest',
+        build: "tsc",
+        test: "jest",
       },
       dependencies: {
-        '@intelgraph/logger': 'workspace:*',
+        "@intelgraph/logger": "workspace:*",
       },
       devDependencies: {
-        typescript: '^5.3.3',
+        typescript: "^5.3.3",
       },
     };
 
     fs.writeFileSync(
-      path.join(process.cwd(), 'packages/error-handler/package.json'),
-      JSON.stringify(packageJson, null, 2) + '\n'
+      path.join(process.cwd(), "packages/error-handler/package.json"),
+      JSON.stringify(packageJson, null, 2) + "\n"
     );
 
     // Create tsconfig.json
     const tsconfig = {
-      extends: '../../tsconfig.base.json',
+      extends: "../../tsconfig.base.json",
       compilerOptions: {
-        outDir: 'dist',
-        rootDir: 'src',
+        outDir: "dist",
+        rootDir: "src",
         declaration: true,
         composite: true,
-        tsBuildInfoFile: 'dist/.tsbuildinfo',
-        types: ['node'],
+        tsBuildInfoFile: "dist/.tsbuildinfo",
+        types: ["node"],
       },
-      include: ['src'],
-      references: [
-        { path: '../logger' },
-      ],
+      include: ["src"],
+      references: [{ path: "../logger" }],
     };
 
     fs.writeFileSync(
-      path.join(process.cwd(), 'packages/error-handler/tsconfig.json'),
-      JSON.stringify(tsconfig, null, 2) + '\n'
+      path.join(process.cwd(), "packages/error-handler/tsconfig.json"),
+      JSON.stringify(tsconfig, null, 2) + "\n"
     );
 
-    logFix('Error Handling', 'Created enterprise error handling package @intelgraph/error-handler');
+    logFix("Error Handling", "Created enterprise error handling package @intelgraph/error-handler");
   } catch (error) {
-    logError('Error Handling', `Failed to create error handler: ${error}`);
+    logError("Error Handling", `Failed to create error handler: ${error}`);
   }
 }
 
@@ -491,7 +489,7 @@ export async function tryCatch<T>(
  * Fix 6: Create comprehensive monitoring infrastructure
  */
 async function createMonitoring() {
-  console.log('\n🔧 Creating monitoring infrastructure...\n');
+  console.log("\n🔧 Creating monitoring infrastructure...\n");
 
   const monitoringContent = `/**
  * Enterprise-grade monitoring and observability
@@ -683,7 +681,7 @@ export const metrics = new MetricsCollector('intelgraph');
 export const health = new HealthMonitor();
 `;
 
-  const monitoringPath = path.join(process.cwd(), 'packages/monitoring/src/index.ts');
+  const monitoringPath = path.join(process.cwd(), "packages/monitoring/src/index.ts");
 
   try {
     fs.mkdirSync(path.dirname(monitoringPath), { recursive: true });
@@ -691,52 +689,50 @@ export const health = new HealthMonitor();
 
     // Create package.json
     const packageJson = {
-      name: '@intelgraph/monitoring',
-      version: '1.0.0',
-      main: 'dist/index.js',
-      types: 'dist/index.d.ts',
+      name: "@intelgraph/monitoring",
+      version: "1.0.0",
+      main: "dist/index.js",
+      types: "dist/index.d.ts",
       scripts: {
-        build: 'tsc',
-        test: 'jest',
+        build: "tsc",
+        test: "jest",
       },
       dependencies: {
-        '@intelgraph/logger': 'workspace:*',
+        "@intelgraph/logger": "workspace:*",
       },
       devDependencies: {
-        typescript: '^5.3.3',
+        typescript: "^5.3.3",
       },
     };
 
     fs.writeFileSync(
-      path.join(process.cwd(), 'packages/monitoring/package.json'),
-      JSON.stringify(packageJson, null, 2) + '\n'
+      path.join(process.cwd(), "packages/monitoring/package.json"),
+      JSON.stringify(packageJson, null, 2) + "\n"
     );
 
     // Create tsconfig.json
     const tsconfig = {
-      extends: '../../tsconfig.base.json',
+      extends: "../../tsconfig.base.json",
       compilerOptions: {
-        outDir: 'dist',
-        rootDir: 'src',
+        outDir: "dist",
+        rootDir: "src",
         declaration: true,
         composite: true,
-        tsBuildInfoFile: 'dist/.tsbuildinfo',
-        types: ['node'],
+        tsBuildInfoFile: "dist/.tsbuildinfo",
+        types: ["node"],
       },
-      include: ['src'],
-      references: [
-        { path: '../logger' },
-      ],
+      include: ["src"],
+      references: [{ path: "../logger" }],
     };
 
     fs.writeFileSync(
-      path.join(process.cwd(), 'packages/monitoring/tsconfig.json'),
-      JSON.stringify(tsconfig, null, 2) + '\n'
+      path.join(process.cwd(), "packages/monitoring/tsconfig.json"),
+      JSON.stringify(tsconfig, null, 2) + "\n"
     );
 
-    logFix('Monitoring', 'Created enterprise monitoring package @intelgraph/monitoring');
+    logFix("Monitoring", "Created enterprise monitoring package @intelgraph/monitoring");
   } catch (error) {
-    logError('Monitoring', `Failed to create monitoring: ${error}`);
+    logError("Monitoring", `Failed to create monitoring: ${error}`);
   }
 }
 
@@ -744,13 +740,13 @@ export const health = new HealthMonitor();
  * Generate comprehensive report
  */
 function generateReport() {
-  console.log('\n' + '='.repeat(80));
-  console.log('📊 COMPREHENSIVE FIX REPORT');
-  console.log('='.repeat(80) + '\n');
+  console.log("\n" + "=".repeat(80));
+  console.log("📊 COMPREHENSIVE FIX REPORT");
+  console.log("=".repeat(80) + "\n");
 
   for (const report of reports) {
     console.log(`\n${report.category}:`);
-    console.log('-'.repeat(40));
+    console.log("-".repeat(40));
 
     if (report.fixes.length > 0) {
       console.log(`\n✓ Fixes applied (${report.fixes.length}):`);
@@ -767,12 +763,12 @@ function generateReport() {
     }
   }
 
-  console.log('\n' + '='.repeat(80));
-  console.log('✨ Fix process complete!');
-  console.log('='.repeat(80) + '\n');
+  console.log("\n" + "=".repeat(80));
+  console.log("✨ Fix process complete!");
+  console.log("=".repeat(80) + "\n");
 
   // Save report to file
-  const reportPath = path.join(process.cwd(), 'CRITICAL_ISSUES_FIX_REPORT.md');
+  const reportPath = path.join(process.cwd(), "CRITICAL_ISSUES_FIX_REPORT.md");
   const reportContent = generateMarkdownReport();
   fs.writeFileSync(reportPath, reportContent);
   console.log(`📝 Detailed report saved to: ${reportPath}\n`);
@@ -824,7 +820,7 @@ function generateMarkdownReport(): string {
  * Main execution
  */
 async function main() {
-  console.log('🚀 Starting comprehensive critical issues fixer...\n');
+  console.log("🚀 Starting comprehensive critical issues fixer...\n");
 
   try {
     await fixDependencyVersions();
@@ -836,7 +832,7 @@ async function main() {
 
     generateReport();
   } catch (error) {
-    console.error('Fatal error during fix process:', error);
+    console.error("Fatal error during fix process:", error);
     process.exit(1);
   }
 }

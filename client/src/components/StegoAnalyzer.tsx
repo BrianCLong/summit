@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useMutation, gql } from '@apollo/client';
-import * as d3 from 'd3';
+import React, { useState, useRef, useEffect } from "react";
+import { useMutation, gql } from "@apollo/client";
+import * as d3 from "d3";
 
 const ANALYZE_STEGO_MUTATION = gql`
   mutation AnalyzeStego($mediaDataInput: JSON!) {
@@ -54,79 +54,65 @@ const MatrixGraph: React.FC<{ matrix: RiskMatrix }> = ({ matrix }) => {
     const height = cellSize * numRows;
 
     const container = d3.select(ref.current);
-    container.selectAll('*').remove();
+    container.selectAll("*").remove();
 
-    const svg = container
-      .append('svg')
-      .attr('width', width)
-      .attr('height', height);
+    const svg = container.append("svg").attr("width", width).attr("height", height);
 
-    const x = d3
-      .scaleBand()
-      .domain(d3.range(numCols))
-      .range([0, width]);
-    const y = d3
-      .scaleBand()
-      .domain(d3.range(numRows))
-      .range([0, height]);
+    const x = d3.scaleBand().domain(d3.range(numCols)).range([0, width]);
+    const y = d3.scaleBand().domain(d3.range(numRows)).range([0, height]);
 
     const maxValue = d3.max(matrix.flat()) ?? 0;
     const color = d3.scaleSequential(d3.interpolateBlues).domain([0, maxValue]);
 
     const tooltip = container
-      .append('div')
-      .style('position', 'absolute')
-      .style('visibility', 'hidden')
-      .style('background', '#fff')
-      .style('padding', '4px 8px')
-      .style('border', '1px solid #ccc')
-      .style('border-radius', '4px')
-      .style('font-size', '12px');
+      .append("div")
+      .style("position", "absolute")
+      .style("visibility", "hidden")
+      .style("background", "#fff")
+      .style("padding", "4px 8px")
+      .style("border", "1px solid #ccc")
+      .style("border-radius", "4px")
+      .style("font-size", "12px");
 
     svg
-      .selectAll('g')
+      .selectAll("g")
       .data(matrix)
       .enter()
-      .append('g')
-      .attr('transform', (_: number, i: number) => `translate(0,${y(i)!})`)
-      .selectAll('rect')
-      .data((row: number[], i: number) =>
-        row.map((value, j) => ({ value, row: i, col: j })),
-      )
+      .append("g")
+      .attr("transform", (_: number, i: number) => `translate(0,${y(i)!})`)
+      .selectAll("rect")
+      .data((row: number[], i: number) => row.map((value, j) => ({ value, row: i, col: j })))
       .enter()
-      .append('rect')
-      .attr('x', (d: MatrixCell) => x(d.col)!)
-      .attr('y', 0)
-      .attr('width', x.bandwidth())
-      .attr('height', y.bandwidth())
-      .attr('fill', (d: MatrixCell) => color(d.value))
-      .on('mouseover', (_event: MouseEvent, d: MatrixCell) => {
+      .append("rect")
+      .attr("x", (d: MatrixCell) => x(d.col)!)
+      .attr("y", 0)
+      .attr("width", x.bandwidth())
+      .attr("height", y.bandwidth())
+      .attr("fill", (d: MatrixCell) => color(d.value))
+      .on("mouseover", (_event: MouseEvent, d: MatrixCell) => {
         tooltip
-          .style('visibility', 'visible')
+          .style("visibility", "visible")
           .text(`Encoded ${d.row}, Decoded ${d.col}: ${d.value}`);
       })
-      .on('mousemove', (event: MouseEvent) => {
-        tooltip
-          .style('top', `${event.pageY - 10}px`)
-          .style('left', `${event.pageX + 10}px`);
+      .on("mousemove", (event: MouseEvent) => {
+        tooltip.style("top", `${event.pageY - 10}px`).style("left", `${event.pageX + 10}px`);
       })
-      .on('mouseout', () => tooltip.style('visibility', 'hidden'));
+      .on("mouseout", () => tooltip.style("visibility", "hidden"));
   }, [matrix]);
 
   return <div ref={ref} className="relative" />;
 };
 
 const StegoAnalyzer: React.FC = () => {
-  const [mediaData, setMediaData] = useState('');
-  const [stegoParams, setStegoParams] = useState('');
-  const [analyzeStego, { data, loading, error }] =
-    useMutation(ANALYZE_STEGO_MUTATION);
+  const [mediaData, setMediaData] = useState("");
+  const [stegoParams, setStegoParams] = useState("");
+  const [analyzeStego, { data, loading, error }] = useMutation(ANALYZE_STEGO_MUTATION);
 
   const handleSubmit = async () => {
     try {
       const parsedMediaData = mediaData.trim();
       if (!parsedMediaData) {
-        throw new Error('Media data cannot be empty.');
+        throw new Error("Media data cannot be empty.");
       }
 
       const parsedStegoParams = stegoParams
@@ -142,7 +128,7 @@ const StegoAnalyzer: React.FC = () => {
       const message =
         e instanceof Error
           ? e.message
-          : 'Invalid input. Media data should be base64 string, params should be JSON.';
+          : "Invalid input. Media data should be base64 string, params should be JSON.";
       alert(message);
       console.error(e);
     }
@@ -169,31 +155,28 @@ const StegoAnalyzer: React.FC = () => {
         onClick={handleSubmit}
         disabled={loading}
       >
-        {loading ? 'Analyzing...' : 'Run Steganographic Analysis'}
+        {loading ? "Analyzing..." : "Run Steganographic Analysis"}
       </button>
 
       {error && <p className="text-red-500 mt-4">Error: {error.message}</p>}
       {(() => {
-        const analysis = (data as AnalyzeStegoResponse | undefined)
-          ?.analyzeStego;
+        const analysis = (data as AnalyzeStegoResponse | undefined)?.analyzeStego;
         const riskMatrix = Array.isArray(analysis?.risk_matrix)
           ? (analysis.risk_matrix as RiskMatrix)
           : null;
         if (!analysis) return null;
 
         return (
-        <div className="mt-4 p-4 bg-gray-100 rounded">
-          <h3 className="font-semibold">Analysis Results:</h3>
-          <pre className="whitespace-pre-wrap text-sm">
-            {JSON.stringify(analysis, null, 2)}
-          </pre>
-          {riskMatrix && (
-            <div className="mt-4">
-              <h4 className="font-semibold mb-2">Encoded vs Decoded Matrix</h4>
-              <MatrixGraph matrix={riskMatrix} />
-            </div>
-          )}
-        </div>
+          <div className="mt-4 p-4 bg-gray-100 rounded">
+            <h3 className="font-semibold">Analysis Results:</h3>
+            <pre className="whitespace-pre-wrap text-sm">{JSON.stringify(analysis, null, 2)}</pre>
+            {riskMatrix && (
+              <div className="mt-4">
+                <h4 className="font-semibold mb-2">Encoded vs Decoded Matrix</h4>
+                <MatrixGraph matrix={riskMatrix} />
+              </div>
+            )}
+          </div>
         );
       })()}
     </div>

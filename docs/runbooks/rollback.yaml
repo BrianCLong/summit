@@ -5,7 +5,7 @@ metadata:
   version: 0.6.0
   owner: platform@summit
   allowList:
-    roles: ['sre', 'release-manager']
+    roles: ["sre", "release-manager"]
 spec:
   inputs:
     - name: service

@@ -4,22 +4,14 @@
       "silo": "Eu",
       "source_alias": "c",
       "dataset": "customers",
-      "pushed_projections": [
-        "customer_id",
-        "loyalty_tier"
-      ],
+      "pushed_projections": ["customer_id", "loyalty_tier"],
       "pushed_filters": []
     },
     {
       "silo": "Us",
       "source_alias": "o",
       "dataset": "orders",
-      "pushed_projections": [
-        "amount",
-        "customer_id",
-        "order_id",
-        "region"
-      ],
+      "pushed_projections": ["amount", "customer_id", "order_id", "region"],
       "pushed_filters": [
         {
           "table": "o",

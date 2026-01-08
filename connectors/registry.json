@@ -10,11 +10,7 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "threat-intelligence",
-      "capabilities": [
-        "pull",
-        "stream",
-        "incremental"
-      ],
+      "capabilities": ["pull", "stream", "incremental"],
       "certificationBadges": [
         {
           "id": "threat-model-certified",
@@ -32,23 +28,9 @@
           "issuedAt": "2025-11-18"
         }
       ],
-      "entityTypes": [
-        "ThreatActor",
-        "Indicator",
-        "Campaign",
-        "Malware",
-        "AttackPattern"
-      ],
-      "relationshipTypes": [
-        "INDICATES",
-        "USES",
-        "TARGETS",
-        "ATTRIBUTED_TO"
-      ],
-      "authentication": [
-        "api-key",
-        "certificate"
-      ],
+      "entityTypes": ["ThreatActor", "Indicator", "Campaign", "Malware", "AttackPattern"],
+      "relationshipTypes": ["INDICATES", "USES", "TARGETS", "ATTRIBUTED_TO"],
+      "authentication": ["api-key", "certificate"],
       "rateLimit": {
         "requestsPerMinute": 60,
         "burstLimit": 10
@@ -65,11 +47,7 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "search-analytics",
-      "capabilities": [
-        "pull",
-        "query",
-        "incremental"
-      ],
+      "capabilities": ["pull", "query", "incremental"],
       "certificationBadges": [
         {
           "id": "schema-mapping-verified",
@@ -87,20 +65,9 @@
           "issuedAt": "2025-11-19"
         }
       ],
-      "entityTypes": [
-        "Document",
-        "Event",
-        "LogEntry"
-      ],
-      "relationshipTypes": [
-        "CONTAINS",
-        "REFERENCES"
-      ],
-      "authentication": [
-        "basic",
-        "api-key",
-        "certificate"
-      ],
+      "entityTypes": ["Document", "Event", "LogEntry"],
+      "relationshipTypes": ["CONTAINS", "REFERENCES"],
+      "authentication": ["basic", "api-key", "certificate"],
       "rateLimit": {
         "requestsPerMinute": 1000,
         "burstLimit": 100
@@ -117,10 +84,7 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "file-import",
-      "capabilities": [
-        "pull",
-        "batch"
-      ],
+      "capabilities": ["pull", "batch"],
       "certificationBadges": [
         {
           "id": "data-contract-ready",
@@ -137,15 +101,9 @@
           "issuedAt": "2025-11-19"
         }
       ],
-      "entityTypes": [
-        "*"
-      ],
-      "relationshipTypes": [
-        "*"
-      ],
-      "authentication": [
-        "none"
-      ],
+      "entityTypes": ["*"],
+      "relationshipTypes": ["*"],
+      "authentication": ["none"],
       "rateLimit": null,
       "license": "MIT",
       "maintainer": "summit-core",
@@ -176,10 +134,7 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "database",
-      "capabilities": [
-        "pull",
-        "query"
-      ],
+      "capabilities": ["pull", "query"],
       "certificationBadges": [
         {
           "id": "query-surface-stabilized",
@@ -196,16 +151,9 @@
           "issuedAt": "2025-11-21"
         }
       ],
-      "entityTypes": [
-        "*"
-      ],
-      "relationshipTypes": [
-        "*"
-      ],
-      "authentication": [
-        "none",
-        "file-path"
-      ],
+      "entityTypes": ["*"],
+      "relationshipTypes": ["*"],
+      "authentication": ["none", "file-path"],
       "rateLimit": null,
       "license": "MIT",
       "maintainer": "summit-core",
@@ -219,10 +167,7 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "geospatial",
-      "capabilities": [
-        "enrich",
-        "geocode"
-      ],
+      "capabilities": ["enrich", "geocode"],
       "certificationBadges": [
         {
           "id": "geo-accuracy",
@@ -239,17 +184,9 @@
           "issuedAt": "2025-11-17"
         }
       ],
-      "entityTypes": [
-        "Location",
-        "Address"
-      ],
-      "relationshipTypes": [
-        "LOCATED_AT",
-        "NEAR"
-      ],
-      "authentication": [
-        "api-key"
-      ],
+      "entityTypes": ["Location", "Address"],
+      "relationshipTypes": ["LOCATED_AT", "NEAR"],
+      "authentication": ["api-key"],
       "rateLimit": {
         "requestsPerMinute": 600,
         "burstLimit": 50
@@ -266,11 +203,7 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "siem",
-      "capabilities": [
-        "pull",
-        "stream",
-        "incremental"
-      ],
+      "capabilities": ["pull", "stream", "incremental"],
       "certificationBadges": [
         {
           "id": "siem-content-verified",
@@ -287,21 +220,9 @@
           "issuedAt": "2025-11-22"
         }
       ],
-      "entityTypes": [
-        "Event",
-        "Alert",
-        "Asset",
-        "User"
-      ],
-      "relationshipTypes": [
-        "TRIGGERED",
-        "ACCESSED",
-        "DETECTED"
-      ],
-      "authentication": [
-        "oauth2",
-        "service-account"
-      ],
+      "entityTypes": ["Event", "Alert", "Asset", "User"],
+      "relationshipTypes": ["TRIGGERED", "ACCESSED", "DETECTED"],
+      "authentication": ["oauth2", "service-account"],
       "rateLimit": {
         "requestsPerMinute": 100,
         "burstLimit": 20
@@ -318,11 +239,7 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "siem",
-      "capabilities": [
-        "pull",
-        "query",
-        "stream"
-      ],
+      "capabilities": ["pull", "query", "stream"],
       "certificationBadges": [
         {
           "id": "search-compatibility",
@@ -339,19 +256,9 @@
           "issuedAt": "2025-11-21"
         }
       ],
-      "entityTypes": [
-        "Event",
-        "Alert",
-        "LogEntry"
-      ],
-      "relationshipTypes": [
-        "TRIGGERED",
-        "CONTAINS"
-      ],
-      "authentication": [
-        "basic",
-        "token"
-      ],
+      "entityTypes": ["Event", "Alert", "LogEntry"],
+      "relationshipTypes": ["TRIGGERED", "CONTAINS"],
+      "authentication": ["basic", "token"],
       "rateLimit": {
         "requestsPerMinute": 200,
         "burstLimit": 30
@@ -368,10 +275,7 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "siem",
-      "capabilities": [
-        "pull",
-        "incremental"
-      ],
+      "capabilities": ["pull", "incremental"],
       "certificationBadges": [
         {
           "id": "azure-hardening",
@@ -388,19 +292,9 @@
           "issuedAt": "2025-11-18"
         }
       ],
-      "entityTypes": [
-        "Alert",
-        "Incident",
-        "Entity"
-      ],
-      "relationshipTypes": [
-        "RELATED_TO",
-        "TRIGGERED"
-      ],
-      "authentication": [
-        "oauth2",
-        "managed-identity"
-      ],
+      "entityTypes": ["Alert", "Incident", "Entity"],
+      "relationshipTypes": ["RELATED_TO", "TRIGGERED"],
+      "authentication": ["oauth2", "managed-identity"],
       "rateLimit": {
         "requestsPerMinute": 100,
         "burstLimit": 20
@@ -417,10 +311,7 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "geospatial",
-      "capabilities": [
-        "pull",
-        "query"
-      ],
+      "capabilities": ["pull", "query"],
       "certificationBadges": [
         {
           "id": "gis-layer-support",
@@ -437,20 +328,9 @@
           "issuedAt": "2025-11-22"
         }
       ],
-      "entityTypes": [
-        "Location",
-        "Feature",
-        "Boundary"
-      ],
-      "relationshipTypes": [
-        "WITHIN",
-        "INTERSECTS",
-        "ADJACENT"
-      ],
-      "authentication": [
-        "api-key",
-        "oauth2"
-      ],
+      "entityTypes": ["Location", "Feature", "Boundary"],
+      "relationshipTypes": ["WITHIN", "INTERSECTS", "ADJACENT"],
+      "authentication": ["api-key", "oauth2"],
       "rateLimit": {
         "requestsPerMinute": 100,
         "burstLimit": 20
@@ -467,10 +347,7 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "file-import",
-      "capabilities": [
-        "pull",
-        "batch"
-      ],
+      "capabilities": ["pull", "batch"],
       "certificationBadges": [
         {
           "id": "schema-flexible",
@@ -487,17 +364,9 @@
           "issuedAt": "2025-11-21"
         }
       ],
-      "entityTypes": [
-        "*"
-      ],
-      "relationshipTypes": [
-        "*"
-      ],
-      "authentication": [
-        "none",
-        "api-key",
-        "bearer"
-      ],
+      "entityTypes": ["*"],
+      "relationshipTypes": ["*"],
+      "authentication": ["none", "api-key", "bearer"],
       "rateLimit": null,
       "license": "MIT",
       "maintainer": "summit-core",
@@ -511,11 +380,7 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "cloud-storage",
-      "capabilities": [
-        "pull",
-        "batch",
-        "incremental"
-      ],
+      "capabilities": ["pull", "batch", "incremental"],
       "certificationBadges": [
         {
           "id": "iam-boundary-reviewed",
@@ -533,16 +398,9 @@
           "issuedAt": "2025-11-20"
         }
       ],
-      "entityTypes": [
-        "*"
-      ],
-      "relationshipTypes": [
-        "*"
-      ],
-      "authentication": [
-        "aws-credentials",
-        "iam-role"
-      ],
+      "entityTypes": ["*"],
+      "relationshipTypes": ["*"],
+      "authentication": ["aws-credentials", "iam-role"],
       "rateLimit": {
         "requestsPerMinute": 1000,
         "burstLimit": 100
@@ -559,10 +417,7 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "compliance",
-      "capabilities": [
-        "pull",
-        "batch"
-      ],
+      "capabilities": ["pull", "batch"],
       "certificationBadges": [
         {
           "id": "compliance-audited",
@@ -579,19 +434,9 @@
           "issuedAt": "2025-11-19"
         }
       ],
-      "entityTypes": [
-        "Person",
-        "Organization",
-        "Vessel",
-        "Aircraft"
-      ],
-      "relationshipTypes": [
-        "ALIAS_OF",
-        "ASSOCIATED_WITH"
-      ],
-      "authentication": [
-        "none"
-      ],
+      "entityTypes": ["Person", "Organization", "Vessel", "Aircraft"],
+      "relationshipTypes": ["ALIAS_OF", "ASSOCIATED_WITH"],
+      "authentication": ["none"],
       "rateLimit": {
         "requestsPerMinute": 10,
         "burstLimit": 2
@@ -608,11 +453,7 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "osint",
-      "capabilities": [
-        "pull",
-        "stream",
-        "incremental"
-      ],
+      "capabilities": ["pull", "stream", "incremental"],
       "certificationBadges": [
         {
           "id": "feed-de-duplication",
@@ -629,19 +470,9 @@
           "issuedAt": "2025-11-23"
         }
       ],
-      "entityTypes": [
-        "Document",
-        "Article",
-        "Event"
-      ],
-      "relationshipTypes": [
-        "MENTIONS",
-        "REFERENCES"
-      ],
-      "authentication": [
-        "none",
-        "api-key"
-      ],
+      "entityTypes": ["Document", "Article", "Event"],
+      "relationshipTypes": ["MENTIONS", "REFERENCES"],
+      "authentication": ["none", "api-key"],
       "rateLimit": {
         "requestsPerMinute": 60,
         "burstLimit": 10

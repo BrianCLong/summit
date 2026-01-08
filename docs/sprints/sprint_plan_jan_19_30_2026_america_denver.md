@@ -37,15 +37,14 @@
 
 ### E1 — Region Sharding GA (Must) — 16 pts
 
-* **S1. Routing health & sticky reads** (5 pts, *Alice*)
+- **S1. Routing health & sticky reads** (5 pts, _Alice_)
+  - Health‑aware router; sticky reads per session; fallback to primary on lag.
 
-  * Health‑aware router; sticky reads per session; fallback to primary on lag.
-* **S2. Lag guardrails & autoscale** (6 pts, *Grace*)
+- **S2. Lag guardrails & autoscale** (6 pts, _Grace_)
+  - HPA on lag/exporter metrics; alert @ 2s/5s; shed load by tenant if needed.
 
-  * HPA on lag/exporter metrics; alert @ 2s/5s; shed load by tenant if needed.
-* **S3. Failover drill (runbook)** (5 pts, *Kay*)
-
-  * 15‑min drill; metrics + postmortem; gaps ticketed.
+- **S3. Failover drill (runbook)** (5 pts, _Kay_)
+  - 15‑min drill; metrics + postmortem; gaps ticketed.
 
 **AC**: p95 for read queries within 10% baseline; lag alerting functional; drill ≤ 15 min; zero data mix across tenants.
 
@@ -53,9 +52,9 @@
 
 ### E2 — Connectors GA (GCS/JDBC) (Must) — 14 pts
 
-* **S1. Throughput tuning & backpressure** (6 pts, *Chen*)
-* **S2. DLQ & retry semantics** (4 pts, *Dana*)
-* **S3. GA docs + samples** (4 pts, *Chen*)
+- **S1. Throughput tuning & backpressure** (6 pts, _Chen_)
+- **S2. DLQ & retry semantics** (4 pts, _Dana_)
+- **S3. GA docs + samples** (4 pts, _Chen_)
 
 **AC**: GCS ≥ 50 MB/s/worker; JDBC ≥ 60k rows/min/worker; DLQ with replay tooling; GA docs published with schema mapping examples.
 
@@ -63,9 +62,9 @@
 
 ### E3 — RTBF E2E + Privacy Sign‑off (Must) — 10 pts
 
-* **S1. Audit bundle & proofs** (4 pts, *Elena*)
-* **S2. DPIA notes + runbook review** (3 pts, *Ivy*)
-* **S3. Negative tests (tamper/partial)** (3 pts, *Elena*)
+- **S1. Audit bundle & proofs** (4 pts, _Elena_)
+- **S2. DPIA notes + runbook review** (3 pts, _Ivy_)
+- **S3. Negative tests (tamper/partial)** (3 pts, _Elena_)
 
 **AC**: Bundle includes proof hash, decision log, redaction map; DPIA signed by Privacy; tamper tests fail with actionable errors.
 
@@ -73,8 +72,8 @@
 
 ### E4 — Explorer Path‑Filters v1 (Should) — 9 pts
 
-* **S1. Filter UI + persisted queries** (5 pts, *Jay*)
-* **S2. Perf budget & a11y** (4 pts, *Jay*)
+- **S1. Filter UI + persisted queries** (5 pts, _Jay_)
+- **S2. Perf budget & a11y** (4 pts, _Jay_)
 
 **AC**: 2–3 hop filtered paths p95 ≤ 1,200 ms; saved views; keyboard navigation; Playwright green.
 
@@ -82,9 +81,9 @@
 
 ### E5 — SLO & Cost Controls (Must) — 9 pts
 
-* **S1. Per‑tenant rate‑limiting** (4 pts, *Bob*)
-* **S2. Cache hit‑rate ≥ 85% hot set** (3 pts, *Bob*)
-* **S3. Egress caps + dashboards** (2 pts, *Grace*)
+- **S1. Per‑tenant rate‑limiting** (4 pts, _Bob_)
+- **S2. Cache hit‑rate ≥ 85% hot set** (3 pts, _Bob_)
+- **S3. Egress caps + dashboards** (2 pts, _Grace_)
 
 **AC**: Burst does not breach API p95/99; cache metrics show target; spend alerts @ 80% budget with links to runbooks.
 
@@ -92,9 +91,9 @@
 
 ### E6 — CI/CD & Security Gates (Must) — 6 pts
 
-* **S1. k6 sharded‑read profile** (2 pts, *Henry*)
-* **S2. SBOM/CVE sweep** (3 pts, *Ivy*)
-* **S3. Policy sim (residency/purpose)** (1 pt, *Ivy*)
+- **S1. k6 sharded‑read profile** (2 pts, _Henry_)
+- **S2. SBOM/CVE sweep** (3 pts, _Ivy_)
+- **S3. Policy sim (residency/purpose)** (1 pt, _Ivy_)
 
 **AC**: Perf gate enforces SLOs; zero High CVEs; policy sim passes.
 
@@ -102,7 +101,7 @@
 
 ## Capacity & Forecast
 
-* Team capacity ≈ **64 pts**; committed **~64 pts** (scope valve: E4 can slip if risk materializes).
+- Team capacity ≈ **64 pts**; committed **~64 pts** (scope valve: E4 can slip if risk materializes).
 
 ---
 
@@ -140,8 +139,14 @@ limits:
 ```graphql
 query FilteredPaths($id: ID!, $filters: PathFilters!, $purpose: Purpose!) {
   paths(entityId: $id, filters: $filters, purpose: $purpose) {
-    nodes { id labels }
-    edges { type weight }
+    nodes {
+      id
+      labels
+    }
+    edges {
+      type
+      weight
+    }
   }
 }
 ```
@@ -150,29 +155,29 @@ query FilteredPaths($id: ID!, $filters: PathFilters!, $purpose: Purpose!) {
 
 ## Security, Privacy & Policy
 
-* OIDC+JWT; mTLS; ABAC via OPA; residency & purpose checks; field‑level encryption.
-* RTBF: redaction map + tombstones; non‑PII lineage preserved; audit proof exported.
+- OIDC+JWT; mTLS; ABAC via OPA; residency & purpose checks; field‑level encryption.
+- RTBF: redaction map + tombstones; non‑PII lineage preserved; audit proof exported.
 
 ---
 
 ## Observability & SLOs
 
-* Metrics: API p50/95/99, cache hit‑rate, rate‑limit rejects, replica lag, connector throughput, egress spend, error‑budget.
-* Alerts: lag >2s/5s; cache miss spike; rate‑limit saturation; spend @80%.
+- Metrics: API p50/95/99, cache hit‑rate, rate‑limit rejects, replica lag, connector throughput, egress spend, error‑budget.
+- Alerts: lag >2s/5s; cache miss spike; rate‑limit saturation; spend @80%.
 
 ---
 
 ## CI/CD & Release
 
-* Gates: lint/type/tests, e2e, perf (sharded read), SBOM/CVE, policy sim.
-* Canary: 10%/15 min; rollback on SLO breach.
-* Evidence bundle: SLO report, k6 artifacts, SBOM, policy logs, RTBF proofs, GA docs hashes.
+- Gates: lint/type/tests, e2e, perf (sharded read), SBOM/CVE, policy sim.
+- Canary: 10%/15 min; rollback on SLO breach.
+- Evidence bundle: SLO report, k6 artifacts, SBOM, policy logs, RTBF proofs, GA docs hashes.
 
 ---
 
 ## RACI
 
-* **R**: Story owners • **A**: Tech Lead (Alice) • **C**: Security (Ivy), SRE (Grace), Privacy • **I**: PM.
+- **R**: Story owners • **A**: Tech Lead (Alice) • **C**: Security (Ivy), SRE (Grace), Privacy • **I**: PM.
 
 ---
 
@@ -180,14 +185,14 @@ query FilteredPaths($id: ID!, $filters: PathFilters!, $purpose: Purpose!) {
 
 **Acceptance Pack**
 
-* [ ] All story ACs green
-* [ ] SLO dashboards 24h green
-* [ ] Perf & e2e gates green
-* [ ] SBOM/CVE clear
-* [ ] Policy sim passes
-* [ ] Privacy sign‑off recorded
-* [ ] Evidence bundle attached
+- [ ] All story ACs green
+- [ ] SLO dashboards 24h green
+- [ ] Perf & e2e gates green
+- [ ] SBOM/CVE clear
+- [ ] Policy sim passes
+- [ ] Privacy sign‑off recorded
+- [ ] Evidence bundle attached
 
 **Backout Plan**
 
-* Disable region routing; rollback rate‑limit config; revert connector images; restore pre‑change policies; invalidate caches.
+- Disable region routing; rollback rate‑limit config; revert connector images; restore pre‑change policies; invalidate caches.

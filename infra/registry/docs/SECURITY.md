@@ -53,15 +53,17 @@ This document describes the security controls implemented in the IntelGraph air-
 **Implementation**: Sigstore Cosign
 
 **Requirements**:
+
 - All images must be signed before deployment
 - Signatures verified against trusted keys/identities
 - Supports keyless (Fulcio/Rekor) and key-based verification
 
 **Trusted Identities**:
+
 ```yaml
 trustedIssuers:
-  - https://token.actions.githubusercontent.com  # GitHub Actions
-  - https://accounts.google.com                  # Google Cloud
+  - https://token.actions.githubusercontent.com # GitHub Actions
+  - https://accounts.google.com # Google Cloud
 ```
 
 **Files**: `cosign/cosign-verifier.ts`, `cosign/policy.yaml`
@@ -71,6 +73,7 @@ trustedIssuers:
 **Implementation**: SLSA Framework Verification
 
 **Requirements**:
+
 - Minimum SLSA Level 3 for production images
 - Non-falsifiable provenance attestations
 - Trusted builder verification
@@ -97,6 +100,7 @@ trustedIssuers:
 | LOW | Log | - |
 
 **Exception Process**:
+
 1. Security team approval required
 2. Time-limited exceptions only
 3. Compensating controls documented
@@ -107,12 +111,14 @@ trustedIssuers:
 ### 5. Supply Chain Security
 
 **Controls**:
+
 - All images synced through verified pipeline
 - Checksums verified on transfer
 - Audit trail for all sync operations
 - No direct pulls from untrusted registries
 
 **Sync Security**:
+
 ```
 Online Environment          Transfer Media         Air-Gapped Environment
      │                           │                        │
@@ -147,6 +153,7 @@ Online Environment          Transfer Media         Air-Gapped Environment
 | Sync Operator | Execute image sync |
 
 **Project-Level Permissions**:
+
 - Each project can have independent access controls
 - Image signing requirements per project
 - Vulnerability thresholds per project
@@ -155,23 +162,25 @@ Online Environment          Transfer Media         Air-Gapped Environment
 
 ### Secret Types
 
-| Secret | Storage | Rotation |
-|--------|---------|----------|
-| Harbor Admin | K8s Secret | 90 days |
-| Database Password | K8s Secret | 90 days |
-| TLS Certificates | K8s Secret/cert-manager | Auto |
-| Cosign Keys | K8s Secret | As needed |
-| API Tokens | K8s Secret | 30 days |
+| Secret            | Storage                 | Rotation  |
+| ----------------- | ----------------------- | --------- |
+| Harbor Admin      | K8s Secret              | 90 days   |
+| Database Password | K8s Secret              | 90 days   |
+| TLS Certificates  | K8s Secret/cert-manager | Auto      |
+| Cosign Keys       | K8s Secret              | As needed |
+| API Tokens        | K8s Secret              | 30 days   |
 
 ### Key Management
 
 **Cosign Signing Keys**:
+
 - Private keys stored in HSM or Kubernetes secrets
 - Never stored in version control
 - Separate keys for dev/staging/prod
 - Key ceremony for production key generation
 
 **Rotation Procedure**:
+
 1. Generate new key pair
 2. Distribute public key to verification endpoints
 3. Sign new images with new key
@@ -183,6 +192,7 @@ Online Environment          Transfer Media         Air-Gapped Environment
 ### Audit Logging
 
 **Events Logged**:
+
 - Image push/pull operations
 - Authentication attempts (success/failure)
 - Policy violations
@@ -190,6 +200,7 @@ Online Environment          Transfer Media         Air-Gapped Environment
 - Sync operations
 
 **Log Format**:
+
 ```json
 {
   "timestamp": "2025-01-15T10:30:00Z",
@@ -206,28 +217,29 @@ Online Environment          Transfer Media         Air-Gapped Environment
 
 ### Compliance Mappings
 
-| Control | PCI-DSS | SOC2 | NIST 800-53 |
-|---------|---------|------|-------------|
-| Image Signing | 6.3.2 | CC6.1 | SI-7 |
-| Vulnerability Scan | 6.2 | CC7.1 | RA-5 |
-| Access Control | 7.1 | CC6.2 | AC-3 |
-| Audit Logging | 10.2 | CC7.2 | AU-2 |
-| Network Isolation | 1.3 | CC6.6 | SC-7 |
+| Control            | PCI-DSS | SOC2  | NIST 800-53 |
+| ------------------ | ------- | ----- | ----------- |
+| Image Signing      | 6.3.2   | CC6.1 | SI-7        |
+| Vulnerability Scan | 6.2     | CC7.1 | RA-5        |
+| Access Control     | 7.1     | CC6.2 | AC-3        |
+| Audit Logging      | 10.2    | CC7.2 | AU-2        |
+| Network Isolation  | 1.3     | CC6.6 | SC-7        |
 
 ## Incident Response
 
 ### Security Incident Classification
 
-| Severity | Description | Response Time |
-|----------|-------------|---------------|
-| P1 - Critical | Compromised image in production | 15 minutes |
-| P2 - High | Vulnerability bypass detected | 1 hour |
-| P3 - Medium | Policy violation | 4 hours |
-| P4 - Low | Audit finding | 24 hours |
+| Severity      | Description                     | Response Time |
+| ------------- | ------------------------------- | ------------- |
+| P1 - Critical | Compromised image in production | 15 minutes    |
+| P2 - High     | Vulnerability bypass detected   | 1 hour        |
+| P3 - Medium   | Policy violation                | 4 hours       |
+| P4 - Low      | Audit finding                   | 24 hours      |
 
 ### Response Procedures
 
 **Compromised Image**:
+
 1. Quarantine image immediately
 2. Identify all deployments using image
 3. Roll back to known-good version
@@ -236,6 +248,7 @@ Online Environment          Transfer Media         Air-Gapped Environment
 6. Conduct root cause analysis
 
 **Vulnerability Bypass**:
+
 1. Review policy configuration
 2. Identify how bypass occurred
 3. Update policies to prevent recurrence
@@ -246,12 +259,12 @@ Online Environment          Transfer Media         Air-Gapped Environment
 
 ### Regular Testing
 
-| Test Type | Frequency | Scope |
-|-----------|-----------|-------|
-| Vulnerability Scan | Continuous | All images |
-| Policy Audit | Weekly | All policies |
-| Penetration Test | Quarterly | Full infrastructure |
-| Disaster Recovery | Semi-annual | Full failover |
+| Test Type          | Frequency   | Scope               |
+| ------------------ | ----------- | ------------------- |
+| Vulnerability Scan | Continuous  | All images          |
+| Policy Audit       | Weekly      | All policies        |
+| Penetration Test   | Quarterly   | Full infrastructure |
+| Disaster Recovery  | Semi-annual | Full failover       |
 
 ### Test Scenarios
 
@@ -299,6 +312,6 @@ Online Environment          Transfer Media         Air-Gapped Environment
 
 ## Document History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | 2025-01-15 | Platform Team | Initial version |
+| Version | Date       | Author        | Changes         |
+| ------- | ---------- | ------------- | --------------- |
+| 1.0     | 2025-01-15 | Platform Team | Initial version |

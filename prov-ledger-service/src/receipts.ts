@@ -7,14 +7,14 @@ import {
   applyRedactions,
   computeReceiptHash,
   computeReceiptPayloadHash,
-} from '@intelgraph/provenance';
+} from "@intelgraph/provenance";
 import {
   generateKeyPairSync,
   randomUUID,
   sign as signCrypto,
   verify as verifyCrypto,
-} from 'crypto';
-import { Manifest } from './ledger';
+} from "crypto";
+import { Manifest } from "./ledger";
 
 export interface ReceiptContext {
   caseId?: string;
@@ -40,28 +40,26 @@ export interface ReceiptSigner {
 }
 
 class LocalReceiptSigner implements ReceiptSigner {
-  private readonly privateKey: ReturnType<typeof generateKeyPairSync>['privateKey'];
+  private readonly privateKey: ReturnType<typeof generateKeyPairSync>["privateKey"];
 
   private readonly publicKey: string;
 
   private readonly keyId: string;
 
-  constructor(keyId = 'local-dev') {
+  constructor(keyId = "local-dev") {
     this.keyId = keyId;
-    const pair = generateKeyPairSync('ed25519');
+    const pair = generateKeyPairSync("ed25519");
     this.privateKey = pair.privateKey;
-    this.publicKey = pair.publicKey
-      .export({ type: 'spki', format: 'der' })
-      .toString('base64');
+    this.publicKey = pair.publicKey.export({ type: "spki", format: "der" }).toString("base64");
   }
 
   async sign(payloadHash: string): Promise<ReceiptSignature> {
     const signedAt = new Date().toISOString();
-    const value = signCrypto(null, Buffer.from(payloadHash, 'hex'), this.privateKey).toString(
-      'base64',
+    const value = signCrypto(null, Buffer.from(payloadHash, "hex"), this.privateKey).toString(
+      "base64"
     );
     return {
-      algorithm: 'ed25519',
+      algorithm: "ed25519",
       keyId: this.keyId,
       publicKey: this.publicKey,
       value,
@@ -72,13 +70,13 @@ class LocalReceiptSigner implements ReceiptSigner {
   async verify(payloadHash: string, signature: ReceiptSignature): Promise<boolean> {
     return verifyCrypto(
       null,
-      Buffer.from(payloadHash, 'hex'),
+      Buffer.from(payloadHash, "hex"),
       {
-        key: Buffer.from(signature.publicKey, 'base64'),
-        format: 'der',
-        type: 'spki',
+        key: Buffer.from(signature.publicKey, "base64"),
+        format: "der",
+        type: "spki",
       },
-      Buffer.from(signature.value, 'base64'),
+      Buffer.from(signature.value, "base64")
     );
   }
 }
@@ -88,8 +86,8 @@ export class HttpReceiptSigner implements ReceiptSigner {
 
   async sign(payloadHash: string): Promise<ReceiptSignature> {
     const res = await fetch(`${this.baseUrl}/sign`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      method: "POST",
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({ payload: payloadHash }),
     });
 
@@ -111,27 +109,27 @@ const defaultSigner: ReceiptSigner = process.env.SIGNER_URL
 export async function issueReceipt(
   manifest: Manifest,
   context: ReceiptContext,
-  signer: ReceiptSigner = defaultSigner,
+  signer: ReceiptSigner = defaultSigner
 ): Promise<Receipt> {
   const issuedAt = new Date().toISOString();
   const receiptBase: Receipt = {
     id: randomUUID(),
     version: RECEIPT_VERSION,
-    caseId: context.caseId ?? 'unassigned',
+    caseId: context.caseId ?? "unassigned",
     claimIds: context.claimIds,
     createdAt: issuedAt,
     actor: context.actor,
     pipeline: context.pipeline,
-    payloadHash: '',
+    payloadHash: "",
     signature: {
-      algorithm: 'ed25519',
-      keyId: 'pending',
-      publicKey: '',
-      value: '',
+      algorithm: "ed25519",
+      keyId: "pending",
+      publicKey: "",
+      value: "",
       signedAt: issuedAt,
     },
     proofs: {
-      receiptHash: '',
+      receiptHash: "",
       manifestMerkleRoot: manifest.merkleRoot,
       claimHashes: manifest.claims.map((c) => c.hash),
     },

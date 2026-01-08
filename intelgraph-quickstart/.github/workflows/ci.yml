@@ -6,7 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: "20" }
       - run: npm ci --prefix api && npm ci --prefix ingest
       - run: npm test --prefix api
       - run: npm test --prefix ingest

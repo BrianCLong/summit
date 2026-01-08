@@ -113,12 +113,7 @@ function PhotoGallery({ photos }: PhotoGalleryProps) {
       </ImageList>
 
       {/* Lightbox */}
-      <Dialog
-        open={!!selectedPhoto}
-        onClose={() => setSelectedPhoto(null)}
-        maxWidth="lg"
-        fullWidth
-      >
+      <Dialog open={!!selectedPhoto} onClose={() => setSelectedPhoto(null)} maxWidth="lg" fullWidth>
         {selectedPhoto && (
           <Box sx={{ position: 'relative' }}>
             <img
@@ -327,7 +322,7 @@ export function EntityDetailPage() {
 
   // Get attribute entries for display
   const attributeEntries = Object.entries(entity.attributes).filter(
-    ([key]) => !['id', 'type', 'name'].includes(key)
+    ([key]) => !['id', 'type', 'name'].includes(key),
   );
 
   return (
@@ -381,11 +376,7 @@ export function EntityDetailPage() {
 
       {/* Tabs */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs
-          value={tabValue}
-          onChange={(_, v) => setTabValue(v)}
-          variant="fullWidth"
-        >
+        <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)} variant="fullWidth">
           <Tab label="Details" />
           <Tab label="Photos" />
           <Tab label="Provenance" />

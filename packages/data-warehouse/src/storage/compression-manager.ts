@@ -11,15 +11,15 @@
  * Automatically selects optimal algorithm based on data characteristics
  */
 
-import { promisify } from 'util';
-import * as zlib from 'zlib';
+import { promisify } from "util";
+import * as zlib from "zlib";
 
 export enum CompressionType {
-  NONE = 'NONE',
-  LZ4 = 'LZ4',
-  ZSTD = 'ZSTD',
-  SNAPPY = 'SNAPPY',
-  GZIP = 'GZIP',
+  NONE = "NONE",
+  LZ4 = "LZ4",
+  ZSTD = "ZSTD",
+  SNAPPY = "SNAPPY",
+  GZIP = "GZIP",
 }
 
 export interface CompressionStats {
@@ -42,9 +42,9 @@ export class CompressionManager {
    */
   async compress(
     data: Buffer | string,
-    type: CompressionType = CompressionType.ZSTD,
+    type: CompressionType = CompressionType.ZSTD
   ): Promise<Buffer> {
-    const buffer = typeof data === 'string' ? Buffer.from(data) : data;
+    const buffer = typeof data === "string" ? Buffer.from(data) : data;
 
     switch (type) {
       case CompressionType.LZ4:
@@ -97,7 +97,7 @@ export class CompressionManager {
    */
   async selectBestCompression(
     data: Buffer,
-    priority: 'ratio' | 'speed' | 'balanced' = 'balanced',
+    priority: "ratio" | "speed" | "balanced" = "balanced"
   ): Promise<{ type: CompressionType; stats: CompressionStats }> {
     const algorithms: CompressionType[] = [
       CompressionType.LZ4,
@@ -126,36 +126,32 @@ export class CompressionManager {
         };
 
         return { type, stats };
-      }),
+      })
     );
 
     // Select based on priority
     let best = results[0];
 
-    if (priority === 'ratio') {
+    if (priority === "ratio") {
       best = results.reduce((prev, curr) =>
-        curr.stats.compressionRatio > prev.stats.compressionRatio ? curr : prev,
+        curr.stats.compressionRatio > prev.stats.compressionRatio ? curr : prev
       );
-    } else if (priority === 'speed') {
+    } else if (priority === "speed") {
       best = results.reduce((prev, curr) =>
-        (curr.stats.compressionTimeMs + (curr.stats.decompressionTimeMs || 0)) <
-        (prev.stats.compressionTimeMs + (prev.stats.decompressionTimeMs || 0))
+        curr.stats.compressionTimeMs + (curr.stats.decompressionTimeMs || 0) <
+        prev.stats.compressionTimeMs + (prev.stats.decompressionTimeMs || 0)
           ? curr
-          : prev,
+          : prev
       );
     } else {
       // Balanced: ratio * speed score
       best = results.reduce((prev, curr) => {
         const currScore =
           curr.stats.compressionRatio /
-          Math.log(
-            curr.stats.compressionTimeMs + (curr.stats.decompressionTimeMs || 0) + 1,
-          );
+          Math.log(curr.stats.compressionTimeMs + (curr.stats.decompressionTimeMs || 0) + 1);
         const prevScore =
           prev.stats.compressionRatio /
-          Math.log(
-            prev.stats.compressionTimeMs + (prev.stats.decompressionTimeMs || 0) + 1,
-          );
+          Math.log(prev.stats.compressionTimeMs + (prev.stats.decompressionTimeMs || 0) + 1);
         return currScore > prevScore ? curr : prev;
       });
     }
@@ -208,10 +204,7 @@ export class CompressionManager {
   /**
    * Estimate compression ratio without actually compressing
    */
-  estimateCompressionRatio(
-    data: Buffer,
-    type: CompressionType,
-  ): number {
+  estimateCompressionRatio(data: Buffer, type: CompressionType): number {
     const sampleSize = Math.min(data.length, 10000);
     const sample = data.slice(0, sampleSize);
 
@@ -252,40 +245,40 @@ export class CompressionManager {
    */
   getCompressionInfo(type: CompressionType): {
     name: string;
-    speed: 'fast' | 'medium' | 'slow';
-    ratio: 'low' | 'medium' | 'high';
-    cpuUsage: 'low' | 'medium' | 'high';
+    speed: "fast" | "medium" | "slow";
+    ratio: "low" | "medium" | "high";
+    cpuUsage: "low" | "medium" | "high";
   } {
     const info = {
       [CompressionType.LZ4]: {
-        name: 'LZ4',
-        speed: 'fast' as const,
-        ratio: 'medium' as const,
-        cpuUsage: 'low' as const,
+        name: "LZ4",
+        speed: "fast" as const,
+        ratio: "medium" as const,
+        cpuUsage: "low" as const,
       },
       [CompressionType.ZSTD]: {
-        name: 'ZSTD',
-        speed: 'medium' as const,
-        ratio: 'high' as const,
-        cpuUsage: 'high' as const,
+        name: "ZSTD",
+        speed: "medium" as const,
+        ratio: "high" as const,
+        cpuUsage: "high" as const,
       },
       [CompressionType.SNAPPY]: {
-        name: 'Snappy',
-        speed: 'fast' as const,
-        ratio: 'medium' as const,
-        cpuUsage: 'medium' as const,
+        name: "Snappy",
+        speed: "fast" as const,
+        ratio: "medium" as const,
+        cpuUsage: "medium" as const,
       },
       [CompressionType.GZIP]: {
-        name: 'GZIP',
-        speed: 'slow' as const,
-        ratio: 'high' as const,
-        cpuUsage: 'high' as const,
+        name: "GZIP",
+        speed: "slow" as const,
+        ratio: "high" as const,
+        cpuUsage: "high" as const,
       },
       [CompressionType.NONE]: {
-        name: 'None',
-        speed: 'fast' as const,
-        ratio: 'low' as const,
-        cpuUsage: 'low' as const,
+        name: "None",
+        speed: "fast" as const,
+        ratio: "low" as const,
+        cpuUsage: "low" as const,
       },
     };
 

@@ -1,8 +1,8 @@
-import { metrics } from '@opentelemetry/api';
-import { randomUUID } from 'crypto';
-import { z } from 'zod';
+import { metrics } from "@opentelemetry/api";
+import { randomUUID } from "crypto";
+import { z } from "zod";
 
-export type SinkRoute = 'hot' | 'warm' | 'cold';
+export type SinkRoute = "hot" | "warm" | "cold";
 
 export interface Sink {
   name: string;
@@ -129,7 +129,7 @@ export class DeadLetterQueue {
       } catch (error) {
         const nextBackoff = Math.min(
           this.config.baseBackoffMs * 2 ** item.attempts,
-          this.config.maxBackoffMs,
+          this.config.maxBackoffMs
         );
         const jitter = Math.floor(Math.random() * this.config.jitterMs);
         const nextAttemptAt = Date.now() + nextBackoff + jitter;
@@ -152,7 +152,7 @@ export class DeadLetterQueue {
 export interface SourceConfig {
   id: string;
   owner: string;
-  transport: 'http' | 'stream' | 's3';
+  transport: "http" | "stream" | "s3";
   retentionDays: number;
   residency: string;
   killSwitch?: boolean;
@@ -212,15 +212,17 @@ export interface ProcessingResult {
 
 export class IntelGraphPipeline {
   private readonly config: PipelineConfig;
-  private readonly histogram = metrics.getMeter('intelgraph').createHistogram('intelgraph.pipeline.duration', {
-    description: 'End-to-end processing duration in ms',
-  });
+  private readonly histogram = metrics
+    .getMeter("intelgraph")
+    .createHistogram("intelgraph.pipeline.duration", {
+      description: "End-to-end processing duration in ms",
+    });
   private readonly processedCounter = metrics
-    .getMeter('intelgraph')
-    .createCounter('intelgraph.pipeline.processed', { description: 'Processed events' });
+    .getMeter("intelgraph")
+    .createCounter("intelgraph.pipeline.processed", { description: "Processed events" });
   private readonly droppedCounter = metrics
-    .getMeter('intelgraph')
-    .createCounter('intelgraph.pipeline.dropped', { description: 'Dropped events' });
+    .getMeter("intelgraph")
+    .createCounter("intelgraph.pipeline.dropped", { description: "Dropped events" });
   private readonly latencies: number[] = [];
 
   constructor(config: PipelineConfig) {
@@ -230,7 +232,7 @@ export class IntelGraphPipeline {
   async process(event: Record<string, any>): Promise<ProcessingResult | null> {
     const source = this.config.registry.get(this.config.sourceId);
     if (source.killSwitch) {
-      this.config.dlq.enqueue(event, 'kill_switch');
+      this.config.dlq.enqueue(event, "kill_switch");
       this.droppedCounter.add(1);
       return null;
     }
@@ -242,7 +244,7 @@ export class IntelGraphPipeline {
     try {
       working = this.config.schema.parse(working);
     } catch (error) {
-      this.config.dlq.enqueue(event, 'validation_failed');
+      this.config.dlq.enqueue(event, "validation_failed");
       this.droppedCounter.add(1);
       return null;
     }
@@ -251,7 +253,7 @@ export class IntelGraphPipeline {
       this.config.residencyAllowList &&
       !this.config.residencyAllowList.includes(working.residency)
     ) {
-      this.config.dlq.enqueue(event, 'residency_blocked');
+      this.config.dlq.enqueue(event, "residency_blocked");
       this.droppedCounter.add(1);
       return null;
     }
@@ -315,7 +317,7 @@ export class IntelGraphPipeline {
       this.latencies.shift();
     }
     if (this.config.sloThresholdMs && this.getP95Latency() > this.config.sloThresholdMs) {
-      this.config.dlq.enqueue({ slo: 'p95_exceeded' }, 'slo_breach');
+      this.config.dlq.enqueue({ slo: "p95_exceeded" }, "slo_breach");
     }
   }
 
@@ -323,7 +325,7 @@ export class IntelGraphPipeline {
     const clone: Record<string, any> = { ...event };
     for (const field of fields) {
       if (field in clone) {
-        clone[field] = '[REDACTED]';
+        clone[field] = "[REDACTED]";
       }
     }
     return clone;
@@ -342,9 +344,8 @@ export class InMemorySink implements Sink {
 
   async write(event: Record<string, any>): Promise<void> {
     if (this.failOn?.(event)) {
-      throw new Error('sink_error');
+      throw new Error("sink_error");
     }
     this.events.push(event);
   }
 }
-

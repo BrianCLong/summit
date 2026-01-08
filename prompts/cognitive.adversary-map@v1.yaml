@@ -1,14 +1,14 @@
 meta:
   id: cognitive.adversary-map@v1
   owner: research
-  purpose: 'Constructs high-level maps of competing strategic worldviews.'
-  tags: ['cognitive', 'adversary', 'worldview']
+  purpose: "Constructs high-level maps of competing strategic worldviews."
+  tags: ["cognitive", "adversary", "worldview"]
   guardrails:
-    - 'Do not profile specific individuals.'
-    - 'Focus on ideological clusters and strategic groups.'
+    - "Do not profile specific individuals."
+    - "Focus on ideological clusters and strategic groups."
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
 
 inputs:

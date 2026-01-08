@@ -24,11 +24,11 @@ export interface DetectedTechnique {
 }
 
 export enum TechniqueCategory {
-  KNOWN = 'known',
-  VARIANT = 'variant',
-  NOVEL = 'novel',
-  ADVERSARIAL = 'adversarial',
-  HYBRID = 'hybrid',
+  KNOWN = "known",
+  VARIANT = "variant",
+  NOVEL = "novel",
+  ADVERSARIAL = "adversarial",
+  HYBRID = "hybrid",
 }
 
 export interface SimilarityMatch {
@@ -153,7 +153,7 @@ export class ZeroShotDeepfakeDetector {
    * Perform zero-shot detection on media
    */
   async detect(media: {
-    type: 'image' | 'video' | 'audio';
+    type: "image" | "video" | "audio";
     data: Buffer | Buffer[];
     context?: any;
   }): Promise<ZeroShotDetectionResult> {
@@ -231,7 +231,10 @@ export class ZeroShotDeepfakeDetector {
     };
   }
 
-  private async analyzeNaturalness(media: any, embeddings: SemanticEmbeddings): Promise<NaturalnessScore> {
+  private async analyzeNaturalness(
+    media: any,
+    embeddings: SemanticEmbeddings
+  ): Promise<NaturalnessScore> {
     // Use learned priors about natural images/videos/audio
     const textureNaturalness = embeddings.textureFeatures.naturalness;
     const colorNaturalness = embeddings.colorFeatures.naturalness;
@@ -242,8 +245,8 @@ export class ZeroShotDeepfakeDetector {
       texture: textureNaturalness,
       color: colorNaturalness,
       geometry: geometryNaturalness,
-      motion: media.type === 'video' ? embeddings.motionFeatures?.naturalness || 0.8 : 1,
-      audio: media.type !== 'image' ? embeddings.audioFeatures?.naturalness || 0.8 : 1,
+      motion: media.type === "video" ? embeddings.motionFeatures?.naturalness || 0.8 : 1,
+      audio: media.type !== "image" ? embeddings.audioFeatures?.naturalness || 0.8 : 1,
     };
   }
 
@@ -256,36 +259,37 @@ export class ZeroShotDeepfakeDetector {
     // Check for lighting inconsistencies
     if (embeddings.lightingConsistency < 0.7) {
       violations.push({
-        type: 'lighting_inconsistency',
+        type: "lighting_inconsistency",
         location: embeddings.lightingInconsistentRegions,
         severity: 1 - embeddings.lightingConsistency,
-        description: 'Lighting direction varies unnaturally across the image',
+        description: "Lighting direction varies unnaturally across the image",
       });
     }
 
     // Check for shadow inconsistencies
     if (embeddings.shadowConsistency < 0.7) {
       violations.push({
-        type: 'shadow_inconsistency',
+        type: "shadow_inconsistency",
         location: embeddings.shadowInconsistentRegions,
         severity: 1 - embeddings.shadowConsistency,
-        description: 'Shadows do not match light source positions',
+        description: "Shadows do not match light source positions",
       });
     }
 
     // Check anatomical accuracy
     if (embeddings.anatomicalAccuracy < 0.8) {
       violations.push({
-        type: 'anatomical_anomaly',
+        type: "anatomical_anomaly",
         location: embeddings.anatomicalAnomalyRegions,
         severity: 1 - embeddings.anatomicalAccuracy,
-        description: 'Human anatomy appears distorted or impossible',
+        description: "Human anatomy appears distorted or impossible",
       });
     }
 
-    const score = violations.length > 0
-      ? 1 - violations.reduce((sum, v) => sum + v.severity, 0) / violations.length
-      : 1;
+    const score =
+      violations.length > 0
+        ? 1 - violations.reduce((sum, v) => sum + v.severity, 0) / violations.length
+        : 1;
 
     return {
       score,
@@ -305,21 +309,19 @@ export class ZeroShotDeepfakeDetector {
     // Check environmental fit
     const environmentalFit = embeddings.environmentalCoherence;
     if (environmentalFit < 0.7) {
-      anomalies.push('Subject does not fit naturally in environment');
+      anomalies.push("Subject does not fit naturally in environment");
     }
 
     // Check temporal logic
-    const temporalLogic = media.type === 'video'
-      ? embeddings.temporalCoherence
-      : 1;
+    const temporalLogic = media.type === "video" ? embeddings.temporalCoherence : 1;
     if (temporalLogic < 0.7) {
-      anomalies.push('Temporal sequence contains logical inconsistencies');
+      anomalies.push("Temporal sequence contains logical inconsistencies");
     }
 
     // Check social context
     const socialContext = embeddings.socialContextScore;
     if (socialContext < 0.7) {
-      anomalies.push('Social interactions appear unnatural');
+      anomalies.push("Social interactions appear unnatural");
     }
 
     return {
@@ -338,7 +340,7 @@ export class ZeroShotDeepfakeDetector {
     return {
       score: (embeddings.facialConsistency + embeddings.behavioralConsistency) / 2,
       facialConsistency: embeddings.facialConsistency,
-      voiceConsistency: media.type !== 'image' ? embeddings.voiceConsistency : 1,
+      voiceConsistency: media.type !== "image" ? embeddings.voiceConsistency : 1,
       behavioralConsistency: embeddings.behavioralConsistency,
       attributeStability: embeddings.attributeStability,
     };
@@ -369,9 +371,9 @@ export class ZeroShotDeepfakeDetector {
     }
 
     // Check for novel techniques
-    if (anomalyAnalysis.emergentPatterns.some(p => p.associatedWithManipulation)) {
+    if (anomalyAnalysis.emergentPatterns.some((p) => p.associatedWithManipulation)) {
       const novelPatterns = anomalyAnalysis.emergentPatterns.filter(
-        p => p.associatedWithManipulation && p.confidence > 0.6
+        (p) => p.associatedWithManipulation && p.confidence > 0.6
       );
 
       for (const pattern of novelPatterns) {
@@ -392,14 +394,11 @@ export class ZeroShotDeepfakeDetector {
   private categorizeMatch(match: TechniqueMatch): TechniqueCategory {
     if (match.confidence > 0.9) return TechniqueCategory.KNOWN;
     if (match.confidence > 0.7) return TechniqueCategory.VARIANT;
-    if (match.similarities.some(s => s.similarity < 0.5)) return TechniqueCategory.NOVEL;
+    if (match.similarities.some((s) => s.similarity < 0.5)) return TechniqueCategory.NOVEL;
     return TechniqueCategory.HYBRID;
   }
 
-  private findNoveltyIndicators(
-    match: TechniqueMatch,
-    anomalyAnalysis: AnomalyAnalysis
-  ): string[] {
+  private findNoveltyIndicators(match: TechniqueMatch, anomalyAnalysis: AnomalyAnalysis): string[] {
     const indicators: string[] = [];
 
     // Find characteristics not matching known techniques
@@ -452,10 +451,10 @@ export class ZeroShotDeepfakeDetector {
 
     // Add contribution from emergent patterns
     const emergentContribution = anomalyAnalysis.emergentPatterns
-      .filter(p => p.associatedWithManipulation)
+      .filter((p) => p.associatedWithManipulation)
       .reduce((sum, p) => sum + p.confidence * 0.2, 0);
 
-    return Math.min((noveltySum / techniques.length) + emergentContribution, 1);
+    return Math.min(noveltySum / techniques.length + emergentContribution, 1);
   }
 
   /**
@@ -503,7 +502,7 @@ export class ZeroShotDeepfakeDetector {
 
     // Detected techniques (weight: 0.15)
     if (detectedTechniques.length > 0) {
-      const maxTechConfidence = Math.max(...detectedTechniques.map(t => t.confidence));
+      const maxTechConfidence = Math.max(...detectedTechniques.map((t) => t.confidence));
       evidence += maxTechConfidence * 0.15;
     }
     totalWeight += 0.15;
@@ -515,17 +514,22 @@ export class ZeroShotDeepfakeDetector {
   }
 
   private computeAnomalyScore(anomalyAnalysis: AnomalyAnalysis): number {
-    const globalScore = anomalyAnalysis.globalAnomalies.length > 0
-      ? anomalyAnalysis.globalAnomalies.reduce((sum, a) => sum + a.score, 0) / anomalyAnalysis.globalAnomalies.length
-      : 0;
+    const globalScore =
+      anomalyAnalysis.globalAnomalies.length > 0
+        ? anomalyAnalysis.globalAnomalies.reduce((sum, a) => sum + a.score, 0) /
+          anomalyAnalysis.globalAnomalies.length
+        : 0;
 
-    const localScore = anomalyAnalysis.localAnomalies.length > 0
-      ? anomalyAnalysis.localAnomalies.reduce((sum, a) => sum + a.score, 0) / anomalyAnalysis.localAnomalies.length
-      : 0;
+    const localScore =
+      anomalyAnalysis.localAnomalies.length > 0
+        ? anomalyAnalysis.localAnomalies.reduce((sum, a) => sum + a.score, 0) /
+          anomalyAnalysis.localAnomalies.length
+        : 0;
 
-    const outlierScore = anomalyAnalysis.statisticalOutliers.length > 0
-      ? Math.min(anomalyAnalysis.statisticalOutliers.length / 10, 1)
-      : 0;
+    const outlierScore =
+      anomalyAnalysis.statisticalOutliers.length > 0
+        ? Math.min(anomalyAnalysis.statisticalOutliers.length / 10, 1)
+        : 0;
 
     return (globalScore + localScore + outlierScore) / 3;
   }
@@ -546,16 +550,16 @@ export class ZeroShotDeepfakeDetector {
 
     // Gather key indicators
     if (semanticAnalysis.naturalness.overall < 0.7) {
-      keyIndicators.push('Unnatural visual characteristics detected');
+      keyIndicators.push("Unnatural visual characteristics detected");
       confidenceFactors.push({
-        factor: 'Visual Naturalness',
+        factor: "Visual Naturalness",
         contribution: (1 - semanticAnalysis.naturalness.overall) * 0.25,
         evidence: `Naturalness score: ${(semanticAnalysis.naturalness.overall * 100).toFixed(1)}%`,
       });
     }
 
     if (semanticAnalysis.physicalPlausibility.violations.length > 0) {
-      keyIndicators.push('Physical impossibilities detected');
+      keyIndicators.push("Physical impossibilities detected");
       for (const violation of semanticAnalysis.physicalPlausibility.violations.slice(0, 2)) {
         keyIndicators.push(violation.description);
       }
@@ -563,7 +567,9 @@ export class ZeroShotDeepfakeDetector {
 
     if (detectedTechniques.length > 0) {
       for (const tech of detectedTechniques.slice(0, 3)) {
-        keyIndicators.push(`${tech.category === TechniqueCategory.NOVEL ? 'Novel' : 'Known'} technique: ${tech.name}`);
+        keyIndicators.push(
+          `${tech.category === TechniqueCategory.NOVEL ? "Novel" : "Known"} technique: ${tech.name}`
+        );
         confidenceFactors.push({
           factor: tech.name,
           contribution: tech.confidence * 0.15,
@@ -573,17 +579,20 @@ export class ZeroShotDeepfakeDetector {
     }
 
     // Identify uncertainty factors
-    if (anomalyAnalysis.globalAnomalies.length === 0 && anomalyAnalysis.localAnomalies.length === 0) {
-      uncertaintyFactors.push('Limited anomaly evidence');
+    if (
+      anomalyAnalysis.globalAnomalies.length === 0 &&
+      anomalyAnalysis.localAnomalies.length === 0
+    ) {
+      uncertaintyFactors.push("Limited anomaly evidence");
     }
 
-    if (detectedTechniques.every(t => t.category === TechniqueCategory.NOVEL)) {
-      uncertaintyFactors.push('No known technique matches - detection based on anomaly analysis');
+    if (detectedTechniques.every((t) => t.category === TechniqueCategory.NOVEL)) {
+      uncertaintyFactors.push("No known technique matches - detection based on anomaly analysis");
     }
 
     // Generate summary
     const summary = isManipulated
-      ? `This content shows signs of manipulation with ${(confidence * 100).toFixed(1)}% confidence. ${keyIndicators.slice(0, 2).join('. ')}.`
+      ? `This content shows signs of manipulation with ${(confidence * 100).toFixed(1)}% confidence. ${keyIndicators.slice(0, 2).join(". ")}.`
       : `This content appears authentic with ${((1 - confidence) * 100).toFixed(1)}% confidence.`;
 
     // Generate detailed analysis
@@ -612,7 +621,7 @@ export class ZeroShotDeepfakeDetector {
     detectedTechniques: DetectedTechnique[]
   ): string {
     let analysis = `## Zero-Shot Analysis Report\n\n`;
-    analysis += `**Verdict:** ${isManipulated ? 'MANIPULATION DETECTED' : 'AUTHENTIC'}\n`;
+    analysis += `**Verdict:** ${isManipulated ? "MANIPULATION DETECTED" : "AUTHENTIC"}\n`;
     analysis += `**Confidence:** ${(confidence * 100).toFixed(1)}%\n\n`;
 
     analysis += `### Semantic Analysis\n`;
@@ -630,7 +639,9 @@ export class ZeroShotDeepfakeDetector {
 
     if (anomalyAnalysis.emergentPatterns.length > 0) {
       analysis += `\n### Novel Patterns Detected\n`;
-      for (const pattern of anomalyAnalysis.emergentPatterns.filter(p => p.associatedWithManipulation)) {
+      for (const pattern of anomalyAnalysis.emergentPatterns.filter(
+        (p) => p.associatedWithManipulation
+      )) {
         analysis += `- ${pattern.pattern}: ${(pattern.confidence * 100).toFixed(1)}% confidence\n`;
       }
     }
@@ -647,7 +658,7 @@ export class ZeroShotDeepfakeDetector {
   ): Promise<void> {
     // Extract embeddings from examples
     const embeddings = await Promise.all(
-      examples.map(ex => this.semanticEncoder.encode(ex.media))
+      examples.map((ex) => this.semanticEncoder.encode(ex.media))
     );
 
     // Update technique database with new prototype
@@ -686,9 +697,24 @@ class SemanticEncoder {
   async encode(media: any): Promise<SemanticEmbeddings> {
     // Simulated semantic encoding
     return {
-      textureFeatures: { naturalness: 0.85, features: Array(256).fill(0).map(() => Math.random()) },
-      colorFeatures: { naturalness: 0.88, features: Array(256).fill(0).map(() => Math.random()) },
-      geometryFeatures: { naturalness: 0.82, features: Array(256).fill(0).map(() => Math.random()) },
+      textureFeatures: {
+        naturalness: 0.85,
+        features: Array(256)
+          .fill(0)
+          .map(() => Math.random()),
+      },
+      colorFeatures: {
+        naturalness: 0.88,
+        features: Array(256)
+          .fill(0)
+          .map(() => Math.random()),
+      },
+      geometryFeatures: {
+        naturalness: 0.82,
+        features: Array(256)
+          .fill(0)
+          .map(() => Math.random()),
+      },
       lightingConsistency: 0.9,
       lightingInconsistentRegions: [],
       shadowConsistency: 0.88,
@@ -702,7 +728,9 @@ class SemanticEncoder {
       voiceConsistency: 0.89,
       behavioralConsistency: 0.87,
       attributeStability: 0.9,
-      embedding: Array(1024).fill(0).map(() => Math.random()),
+      embedding: Array(1024)
+        .fill(0)
+        .map(() => Math.random()),
     };
   }
 }
@@ -733,18 +761,24 @@ class TechniqueKnowledgeBase {
     return [];
   }
 
-  async addTechnique(name: string, embeddings: SemanticEmbeddings[], examples: any[]): Promise<void> {
+  async addTechnique(
+    name: string,
+    embeddings: SemanticEmbeddings[],
+    examples: any[]
+  ): Promise<void> {
     // Add new technique prototype
     this.techniques.set(name, { embeddings, examples });
   }
 }
 
 class ContrastiveLearner {
-  async scoreAgainstDomains(embeddings: SemanticEmbeddings): Promise<Array<{ domain: string; score: number }>> {
+  async scoreAgainstDomains(
+    embeddings: SemanticEmbeddings
+  ): Promise<Array<{ domain: string; score: number }>> {
     return [
-      { domain: 'natural_images', score: 0.85 },
-      { domain: 'synthetic_images', score: 0.3 },
-      { domain: 'manipulated_images', score: 0.25 },
+      { domain: "natural_images", score: 0.85 },
+      { domain: "synthetic_images", score: 0.3 },
+      { domain: "manipulated_images", score: 0.25 },
     ];
   }
 

@@ -66,11 +66,7 @@ export const EntityMarker: React.FC<EntityMarkerProps> = ({
   const { container: containerSize, icon: iconSize } = sizes[size];
 
   return (
-    <TouchableOpacity
-      onPress={onPress}
-      activeOpacity={0.8}
-      className="items-center"
-    >
+    <TouchableOpacity onPress={onPress} activeOpacity={0.8} className="items-center">
       <View
         style={{
           width: containerSize,
@@ -87,9 +83,7 @@ export const EntityMarker: React.FC<EntityMarkerProps> = ({
 
       {/* Priority indicator */}
       {entity.priority === 'CRITICAL' && (
-        <View
-          className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-white"
-        />
+        <View className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-white" />
       )}
 
       {/* Label (shown when selected) */}
@@ -116,9 +110,7 @@ export const EntityMarkerMini: React.FC<{ type: EntityType; count?: number }> = 
       style={{ backgroundColor: color }}
       className="w-4 h-4 rounded-full border border-white items-center justify-center"
     >
-      {count && count > 1 && (
-        <Text className="text-[8px] text-white font-bold">{count}</Text>
-      )}
+      {count && count > 1 && <Text className="text-[8px] text-white font-bold">{count}</Text>}
     </View>
   );
 };

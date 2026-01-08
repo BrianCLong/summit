@@ -11,22 +11,26 @@
 You are Claude Code, an AI software engineer working for Topicality.
 
 Context:
+
 - Every important output in Topicality should have a "claim ledger" with provenance.
 - We want a reusable library that services can use to record claims + provenance in a consistent way and push them into IntelGraph (or a local store for now).
 - Provenance beats persuasion: logging and evidence are first-class.
 
 Goal:
 Implement a small, self-contained "claim ledger" library that:
-1) standardizes claim objects,
-2) attaches provenance and policy labels,
-3) writes to a backend (IntelGraph API or a stub),
-4) can emit a machine-readable manifest (JSON/YAML).
+
+1. standardizes claim objects,
+2. attaches provenance and policy labels,
+3. writes to a backend (IntelGraph API or a stub),
+4. can emit a machine-readable manifest (JSON/YAML).
 
 Assumptions:
+
 - Same language as Prompt 1 OR a language that can integrate easily. If Prompt 1 is unknown, choose TypeScript/Node.
 - Treat IntelGraph as an HTTP API with a base URL; provide a configurable client.
 
 Requirements:
+
 1. Claim object
    - Fields: claim_id, entity_id, property, value, timestamp, actor (who created it), status (draft/verified/deprecated).
 2. Provenance object
@@ -49,6 +53,7 @@ Requirements:
    - Include tests validating schema and round-trip serialization.
 
 Deliverables:
+
 - Library code with types.
 - Simple IntelGraph client stub (configurable endpoint).
 - Examples folder.

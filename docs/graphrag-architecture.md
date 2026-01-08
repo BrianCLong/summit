@@ -149,6 +149,7 @@ The Graph Retriever performs multi-hop traversal through the knowledge graph:
 5. **Evidence Building**: Creates evidence chunks with graph paths and citations
 
 Key features:
+
 - Tenant isolation via WHERE clauses
 - Relationship type filtering
 - Configurable hop depth and node limits
@@ -164,6 +165,7 @@ The Document Retriever performs semantic search over indexed documents:
 4. **Ranking**: Filters by minimum relevance and limits results
 
 Key features:
+
 - Configurable chunking (size, overlap)
 - Embedding caching in Redis
 - Sentence-boundary-aware chunking
@@ -187,6 +189,7 @@ The Policy Retriever enforces access control:
 4. **Audit Logging**: Records all policy decisions
 
 Supported policies:
+
 - Tenant isolation
 - Clearance levels (UNCLASSIFIED → TOP_SECRET)
 - Jurisdiction restrictions
@@ -212,6 +215,7 @@ The LLM Integration layer abstracts LLM operations:
 5. **Summarization**: Condenses multiple evidence chunks
 
 Key features:
+
 - Cost tracking per operation
 - Configurable model and parameters
 - Reasoning extraction support
@@ -259,7 +263,7 @@ interface CitationSource {
   spanEnd: number;
   content: string;
   confidence: number;
-  sourceType: 'document' | 'graph' | 'external' | 'derived';
+  sourceType: "document" | "graph" | "external" | "derived";
   metadata?: Record<string, any>;
 }
 ```
@@ -340,6 +344,7 @@ The service expects authentication to be handled by the API gateway. Tenant ID a
 ### Tracing
 
 OpenTelemetry instrumentation for:
+
 - Request spans
 - Component-level spans
 - LLM call tracing
@@ -348,6 +353,7 @@ OpenTelemetry instrumentation for:
 ### Logging
 
 Structured logging with:
+
 - Request IDs
 - Tenant context
 - Operation metadata

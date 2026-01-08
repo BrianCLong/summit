@@ -4,15 +4,12 @@
  * Adds context information to each request
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import type { Request, Response, NextFunction, RequestContext } from '../types';
+import { v4 as uuidv4 } from "uuid";
+import type { Request, Response, NextFunction, RequestContext } from "../types";
 
-export function contextMiddleware(options?: {
-  requestIdHeader?: string;
-  traceIdHeader?: string;
-}) {
-  const requestIdHeader = options?.requestIdHeader || 'x-request-id';
-  const traceIdHeader = options?.traceIdHeader || 'x-trace-id';
+export function contextMiddleware(options?: { requestIdHeader?: string; traceIdHeader?: string }) {
+  const requestIdHeader = options?.requestIdHeader || "x-request-id";
+  const traceIdHeader = options?.traceIdHeader || "x-trace-id";
 
   return (req: Request, res: Response, next: NextFunction) => {
     // Generate or extract request ID

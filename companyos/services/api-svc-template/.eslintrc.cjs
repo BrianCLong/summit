@@ -1,21 +1,26 @@
 module.exports = {
   env: {
     es2021: true,
-    node: true
+    node: true,
   },
-  parser: '@typescript-eslint/parser',
+  parser: "@typescript-eslint/parser",
   parserOptions: {
-    sourceType: 'module'
+    sourceType: "module",
   },
-  plugins: ['@typescript-eslint', 'import'],
-  extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'plugin:import/recommended', 'prettier'],
+  plugins: ["@typescript-eslint", "import"],
+  extends: [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:import/recommended",
+    "prettier",
+  ],
   rules: {
-    'import/order': [
-      'error',
+    "import/order": [
+      "error",
       {
-        'newlines-between': 'always',
-        alphabetize: { order: 'asc', caseInsensitive: true }
-      }
-    ]
-  }
+        "newlines-between": "always",
+        alphabetize: { order: "asc", caseInsensitive: true },
+      },
+    ],
+  },
 };

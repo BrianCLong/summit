@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export type UIState = {
   tenant: string;
@@ -7,13 +7,13 @@ export type UIState = {
 };
 
 const initialState: UIState = {
-  tenant: 'all',
-  status: 'all',
-  operation: 'all',
+  tenant: "all",
+  status: "all",
+  operation: "all",
 };
 
 const uiSlice = createSlice({
-  name: 'ui',
+  name: "ui",
   initialState,
   reducers: {
     setTenant(state, action: PayloadAction<string>) {

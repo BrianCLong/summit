@@ -39,6 +39,7 @@ The Supply Chain Risk Management Framework provides a structured approach to ide
 **Definition**: Risk of supplier financial distress, insolvency, or inability to fulfill obligations.
 
 **Key Indicators**:
+
 - Credit rating (AAA to D scale)
 - Profit margin (%)
 - Debt-to-equity ratio
@@ -48,12 +49,14 @@ The Supply Chain Risk Management Framework provides a structured approach to ide
 - Bankruptcy probability score
 
 **Data Sources**:
+
 - Credit rating agencies (S&P, Moody's, Fitch)
 - Financial statements (10-K, 10-Q)
 - Commercial credit reports (Dun & Bradstreet)
 - Bankruptcy prediction models (Altman Z-Score)
 
 **Scoring**:
+
 ```
 Score = 100 - (
   (Credit Rating Penalty × 0.3) +
@@ -65,6 +68,7 @@ Score = 100 - (
 ```
 
 **Impact Examples**:
+
 - Supplier unable to deliver due to cash flow constraints
 - Quality degradation due to cost-cutting measures
 - Bankruptcy leading to supply disruption
@@ -75,6 +79,7 @@ Score = 100 - (
 **Definition**: Risk of data breaches, cyber attacks, or inadequate security practices affecting supply chain.
 
 **Key Indicators**:
+
 - Security posture score (0-100)
 - Number of critical/high vulnerabilities
 - Security certifications (ISO 27001, SOC 2, NIST)
@@ -84,6 +89,7 @@ Score = 100 - (
 - Third-party security audits
 
 **Data Sources**:
+
 - Security questionnaires
 - Penetration test results
 - Vulnerability scans
@@ -92,6 +98,7 @@ Score = 100 - (
 - Security ratings services (BitSight, SecurityScorecard)
 
 **Scoring**:
+
 ```
 Score = Base Security Score -
   (Critical Vulnerabilities × 10) -
@@ -101,6 +108,7 @@ Score = Base Security Score -
 ```
 
 **Impact Examples**:
+
 - Data breach exposing sensitive information
 - Ransomware attack disrupting operations
 - Intellectual property theft
@@ -113,6 +121,7 @@ Score = Base Security Score -
 **Key Indicators**:
 
 **Environmental**:
+
 - Carbon emissions
 - Waste management practices
 - Resource consumption
@@ -120,6 +129,7 @@ Score = Base Security Score -
 - Green certifications
 
 **Social**:
+
 - Labor practices
 - Worker safety record
 - Human rights compliance
@@ -127,6 +137,7 @@ Score = Base Security Score -
 - Diversity and inclusion
 
 **Governance**:
+
 - Board structure
 - Executive compensation
 - Shareholder rights
@@ -134,6 +145,7 @@ Score = Base Security Score -
 - Corruption incidents
 
 **Data Sources**:
+
 - ESG rating agencies (MSCI, Sustainalytics)
 - Sustainability reports
 - Regulatory filings
@@ -142,6 +154,7 @@ Score = Base Security Score -
 - Certification bodies
 
 **Scoring**:
+
 ```
 ESG Score = (
   (Environmental Score × 0.35) +
@@ -151,6 +164,7 @@ ESG Score = (
 ```
 
 **Impact Examples**:
+
 - Reputational damage from poor labor practices
 - Regulatory penalties for environmental violations
 - Customer boycotts
@@ -162,6 +176,7 @@ ESG Score = (
 **Definition**: Risk arising from political instability, sanctions, trade restrictions, or international conflicts.
 
 **Key Indicators**:
+
 - Country risk rating
 - Sanctions exposure
 - Political stability index
@@ -171,6 +186,7 @@ ESG Score = (
 - Export control classifications
 
 **Data Sources**:
+
 - World Bank governance indicators
 - OFAC sanctions lists
 - EU sanctions database
@@ -180,6 +196,7 @@ ESG Score = (
 - News monitoring
 
 **Scoring**:
+
 ```
 if (Country in Sanctioned List):
   Score = 0-20 (Critical)
@@ -192,6 +209,7 @@ else:
 ```
 
 **Impact Examples**:
+
 - Sanctions preventing transactions
 - Trade war tariffs increasing costs
 - Political unrest disrupting operations
@@ -203,6 +221,7 @@ else:
 **Definition**: Risk of operational failures, quality issues, or capacity constraints.
 
 **Key Indicators**:
+
 - On-time delivery rate (%)
 - Quality defect rate (PPM)
 - Production capacity utilization (%)
@@ -213,6 +232,7 @@ else:
 - Tier depth in supply chain
 
 **Data Sources**:
+
 - Supplier scorecards
 - Delivery tracking systems
 - Quality management systems
@@ -220,6 +240,7 @@ else:
 - Operational audits
 
 **Scoring**:
+
 ```
 Score = (
   (On-Time Delivery × 0.3) +
@@ -230,6 +251,7 @@ Score = (
 ```
 
 **Impact Examples**:
+
 - Delivery delays causing production stoppage
 - Quality defects leading to product recalls
 - Capacity constraints during demand spikes
@@ -240,6 +262,7 @@ Score = (
 **Definition**: Risk of non-compliance with applicable laws, regulations, and industry standards.
 
 **Key Indicators**:
+
 - Compliance status by regulation
 - Certification validity
 - Audit findings
@@ -249,6 +272,7 @@ Score = (
 - Conflict minerals status
 
 **Data Sources**:
+
 - Regulatory databases
 - Compliance tracking systems
 - Audit reports
@@ -256,6 +280,7 @@ Score = (
 - Legal filings
 
 **Scoring**:
+
 ```
 Score = 100 - (
   (Critical Violations × 30) +
@@ -266,6 +291,7 @@ Score = 100 - (
 ```
 
 **Impact Examples**:
+
 - Export license denial
 - Regulatory fines
 - Product seizure at customs
@@ -277,6 +303,7 @@ Score = 100 - (
 **Definition**: Risk of substandard products or services affecting customer satisfaction.
 
 **Key Indicators**:
+
 - Defect rate (PPM)
 - Customer complaints
 - Return rate
@@ -286,6 +313,7 @@ Score = 100 - (
 - Process capability indices (Cpk)
 
 **Data Sources**:
+
 - Quality management systems
 - Inspection reports
 - Customer feedback
@@ -293,6 +321,7 @@ Score = 100 - (
 - Statistical process control data
 
 **Scoring**:
+
 ```
 Score = 100 - (
   (PPM / 1000) +
@@ -303,6 +332,7 @@ Score = 100 - (
 ```
 
 **Impact Examples**:
+
 - Product recalls
 - Customer dissatisfaction
 - Warranty claims
@@ -314,6 +344,7 @@ Score = 100 - (
 **Definition**: Risk of delays, damage, or loss during transportation and logistics.
 
 **Key Indicators**:
+
 - On-time delivery rate
 - Shipment damage rate
 - Customs clearance time
@@ -323,6 +354,7 @@ Score = 100 - (
 - Insurance coverage
 
 **Data Sources**:
+
 - Transportation management systems
 - Carrier scorecards
 - Port authority data
@@ -330,6 +362,7 @@ Score = 100 - (
 - Insurance records
 
 **Scoring**:
+
 ```
 Score = (
   (On-Time Rate × 0.4) +
@@ -339,6 +372,7 @@ Score = (
 ```
 
 **Impact Examples**:
+
 - Delayed deliveries causing stockouts
 - Damage requiring replacement shipments
 - Customs delays incurring penalties
@@ -349,6 +383,7 @@ Score = (
 **Definition**: Risk that suppliers cannot meet volume requirements or scale with demand.
 
 **Key Indicators**:
+
 - Current capacity utilization
 - Maximum capacity
 - Scalability plans
@@ -358,12 +393,14 @@ Score = (
 - Capital investment plans
 
 **Data Sources**:
+
 - Capacity surveys
 - Production reports
 - Site audits
 - Business reviews
 
 **Scoring**:
+
 ```
 if (Utilization > 95%):
   Score = 20 (Critical)
@@ -376,6 +413,7 @@ else:
 ```
 
 **Impact Examples**:
+
 - Inability to fulfill large orders
 - Extended lead times during demand spikes
 - Quality issues from overutilization
@@ -386,6 +424,7 @@ else:
 **Definition**: Risk from over-reliance on single suppliers, regions, or components.
 
 **Key Indicators**:
+
 - Supplier concentration (Herfindahl-Hirschman Index)
 - Geographic concentration
 - Single-source components
@@ -393,11 +432,13 @@ else:
 - Alternative supplier availability
 
 **Data Sources**:
+
 - Procurement data
 - Supplier mapping
 - Market analysis
 
 **Scoring**:
+
 ```
 HHI = Σ(Market Share²)
 
@@ -410,6 +451,7 @@ else:
 ```
 
 **Impact Examples**:
+
 - Single supplier failure causing major disruption
 - Regional disaster affecting multiple suppliers
 - Lack of negotiating leverage
@@ -427,24 +469,25 @@ Overall Risk Score = Σ(Category Score × Category Weight)
 
 ### Default Category Weights
 
-| Category | Weight | Rationale |
-|----------|--------|-----------|
-| Financial | 25% | Fundamental to supplier viability |
-| Cybersecurity | 20% | Increasing threat landscape |
-| Geopolitical | 15% | Growing importance in global supply chains |
-| Operational | 15% | Direct impact on delivery |
-| Compliance | 10% | Regulatory requirements |
-| ESG | 10% | Stakeholder expectations |
-| Quality | 3% | Covered partly in operational |
-| Delivery | 2% | Covered partly in operational |
-| Capacity | 0% | Assessed situationally |
-| Concentration | 0% | Assessed at portfolio level |
+| Category      | Weight | Rationale                                  |
+| ------------- | ------ | ------------------------------------------ |
+| Financial     | 25%    | Fundamental to supplier viability          |
+| Cybersecurity | 20%    | Increasing threat landscape                |
+| Geopolitical  | 15%    | Growing importance in global supply chains |
+| Operational   | 15%    | Direct impact on delivery                  |
+| Compliance    | 10%    | Regulatory requirements                    |
+| ESG           | 10%    | Stakeholder expectations                   |
+| Quality       | 3%     | Covered partly in operational              |
+| Delivery      | 2%     | Covered partly in operational              |
+| Capacity      | 0%     | Assessed situationally                     |
+| Concentration | 0%     | Assessed at portfolio level                |
 
 **Note**: Weights can be customized based on industry, criticality, and organizational priorities.
 
 ### Score Normalization
 
 All category scores are normalized to a 0-100 scale where:
+
 - **100 = Lowest Risk** (Best)
 - **0 = Highest Risk** (Worst)
 
@@ -464,22 +507,24 @@ Confidence = (
 
 ### Risk Level Definitions
 
-| Risk Level | Score Range | Color | Response Time | Escalation |
-|------------|-------------|-------|---------------|------------|
-| **Low** | 80-100 | 🟢 Green | Standard monitoring | None |
-| **Medium** | 60-79 | 🟡 Yellow | Enhanced monitoring | Procurement Manager |
-| **High** | 40-59 | 🟠 Orange | Immediate review | Supply Chain Director |
-| **Critical** | 0-39 | 🔴 Red | Urgent action | C-Level Executive |
+| Risk Level   | Score Range | Color     | Response Time       | Escalation            |
+| ------------ | ----------- | --------- | ------------------- | --------------------- |
+| **Low**      | 80-100      | 🟢 Green  | Standard monitoring | None                  |
+| **Medium**   | 60-79       | 🟡 Yellow | Enhanced monitoring | Procurement Manager   |
+| **High**     | 40-59       | 🟠 Orange | Immediate review    | Supply Chain Director |
+| **Critical** | 0-39        | 🔴 Red    | Urgent action       | C-Level Executive     |
 
 ### Response Requirements by Level
 
 #### Low Risk (80-100)
+
 - **Monitoring**: Annual assessment
 - **Actions**: Standard supplier management
 - **Reporting**: Quarterly summary report
 - **Approval**: Procurement approval sufficient
 
 #### Medium Risk (60-79)
+
 - **Monitoring**: Quarterly assessment
 - **Actions**:
   - Enhanced monitoring plan
@@ -489,6 +534,7 @@ Confidence = (
 - **Approval**: Supply chain director approval for new contracts
 
 #### High Risk (40-59)
+
 - **Monitoring**: Monthly assessment
 - **Actions**:
   - Mandatory mitigation plan within 30 days
@@ -499,6 +545,7 @@ Confidence = (
 - **Approval**: Executive approval required for new contracts
 
 #### Critical Risk (0-39)
+
 - **Monitoring**: Daily/weekly assessment
 - **Actions**:
   - Immediate mitigation or exit plan
@@ -513,15 +560,15 @@ Confidence = (
 
 ### Standard Assessment Schedule
 
-| Supplier Criticality | Risk Level | Assessment Frequency | Rationale |
-|---------------------|------------|---------------------|-----------|
-| Critical Supplier | Any | Monthly | High business impact |
-| High-Value Supplier | High/Critical | Monthly | Risk mitigation priority |
-| High-Value Supplier | Medium | Quarterly | Balanced monitoring |
-| High-Value Supplier | Low | Semi-Annual | Efficient resource use |
-| Standard Supplier | High/Critical | Quarterly | Risk-based prioritization |
-| Standard Supplier | Medium | Semi-Annual | Standard monitoring |
-| Standard Supplier | Low | Annual | Baseline compliance |
+| Supplier Criticality | Risk Level    | Assessment Frequency | Rationale                 |
+| -------------------- | ------------- | -------------------- | ------------------------- |
+| Critical Supplier    | Any           | Monthly              | High business impact      |
+| High-Value Supplier  | High/Critical | Monthly              | Risk mitigation priority  |
+| High-Value Supplier  | Medium        | Quarterly            | Balanced monitoring       |
+| High-Value Supplier  | Low           | Semi-Annual          | Efficient resource use    |
+| Standard Supplier    | High/Critical | Quarterly            | Risk-based prioritization |
+| Standard Supplier    | Medium        | Semi-Annual          | Standard monitoring       |
+| Standard Supplier    | Low           | Annual               | Baseline compliance       |
 
 ### Trigger-Based Assessments
 
@@ -569,49 +616,52 @@ Immediate reassessment required upon:
 
 #### Financial Risk Mitigations
 
-| Risk Level | Mitigation Strategies |
-|------------|----------------------|
-| Medium | - Quarterly financial reviews<br>- Payment terms adjustment<br>- Financial guarantees for large orders |
-| High | - Monthly financial monitoring<br>- Reduce order sizes<br>- Require letters of credit<br>- Diversify supplier base |
-| Critical | - Identify alternative suppliers immediately<br>- Prepayment only for critical items<br>- Exit strategy planning<br>- Legal review of termination clauses |
+| Risk Level | Mitigation Strategies                                                                                                                                     |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Medium     | - Quarterly financial reviews<br>- Payment terms adjustment<br>- Financial guarantees for large orders                                                    |
+| High       | - Monthly financial monitoring<br>- Reduce order sizes<br>- Require letters of credit<br>- Diversify supplier base                                        |
+| Critical   | - Identify alternative suppliers immediately<br>- Prepayment only for critical items<br>- Exit strategy planning<br>- Legal review of termination clauses |
 
 #### Cybersecurity Risk Mitigations
 
-| Risk Level | Mitigation Strategies |
-|------------|----------------------|
-| Medium | - Annual security assessments<br>- Basic data protection clauses<br>- Incident notification requirements |
-| High | - Quarterly security audits<br>- Enhanced data protection agreements<br>- Segregated networks<br>- Require specific certifications (ISO 27001) |
-| Critical | - Immediate security audit<br>- Air-gapped systems for sensitive data<br>- On-site security team<br>- Consider alternative suppliers |
+| Risk Level | Mitigation Strategies                                                                                                                          |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Medium     | - Annual security assessments<br>- Basic data protection clauses<br>- Incident notification requirements                                       |
+| High       | - Quarterly security audits<br>- Enhanced data protection agreements<br>- Segregated networks<br>- Require specific certifications (ISO 27001) |
+| Critical   | - Immediate security audit<br>- Air-gapped systems for sensitive data<br>- On-site security team<br>- Consider alternative suppliers           |
 
 #### Geopolitical Risk Mitigations
 
-| Risk Level | Mitigation Strategies |
-|------------|----------------------|
-| Medium | - Monitor geopolitical developments<br>- Diversify geographic footprint<br>- Scenario planning |
-| High | - Develop alternative suppliers in different regions<br>- Increase safety stock<br>- Enhanced contract force majeure clauses |
-| Critical | - Immediate geographic diversification<br>- Accelerate alternative supplier qualification<br>- Seek government guidance<br>- Legal review of sanctions implications |
+| Risk Level | Mitigation Strategies                                                                                                                                               |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Medium     | - Monitor geopolitical developments<br>- Diversify geographic footprint<br>- Scenario planning                                                                      |
+| High       | - Develop alternative suppliers in different regions<br>- Increase safety stock<br>- Enhanced contract force majeure clauses                                        |
+| Critical   | - Immediate geographic diversification<br>- Accelerate alternative supplier qualification<br>- Seek government guidance<br>- Legal review of sanctions implications |
 
 #### Operational Risk Mitigations
 
-| Risk Level | Mitigation Strategies |
-|------------|----------------------|
-| Medium | - Performance improvement plans<br>- More frequent communication<br>- Backup suppliers identified |
-| High | - Dual-sourcing implementation<br>- Enhanced SLAs with penalties<br>- Quality improvement programs<br>- On-site support team |
-| Critical | - Activate alternative suppliers<br>- In-source critical operations<br>- Emergency procurement plan<br>- Customer communication strategy |
+| Risk Level | Mitigation Strategies                                                                                                                    |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Medium     | - Performance improvement plans<br>- More frequent communication<br>- Backup suppliers identified                                        |
+| High       | - Dual-sourcing implementation<br>- Enhanced SLAs with penalties<br>- Quality improvement programs<br>- On-site support team             |
+| Critical   | - Activate alternative suppliers<br>- In-source critical operations<br>- Emergency procurement plan<br>- Customer communication strategy |
 
 ### Diversification Strategies
 
 #### Geographic Diversification
+
 - **Target**: <50% of critical components from single country
 - **Strategy**: "China Plus One" or similar regional diversification
 - **Implementation**: 3-5 year roadmap to achieve target mix
 
 #### Supplier Diversification
+
 - **Target**: Maximum 40% market share from single supplier
 - **Metric**: Herfindahl-Hirschman Index (HHI) < 0.3
 - **Strategy**: Multi-source agreements for critical components
 
 #### Transportation Mode Diversification
+
 - **Target**: <60% of shipments via single mode/route
 - **Strategy**: Multimodal transportation for critical shipments
 - **Implementation**: Contract with multiple carriers
@@ -675,31 +725,34 @@ Internal Data Sources:
 
 #### Alert Triggers
 
-| Alert Type | Trigger Condition | Severity | Action |
-|------------|------------------|----------|--------|
-| Credit Downgrade | Rating drops 2+ levels | High | Immediate financial review |
-| Delivery Failure | >20% of orders late | High | Activate backup supplier |
-| Security Breach | Supplier breach reported | Critical | Security assessment |
-| Sanctions Addition | Supplier added to sanctions list | Critical | Cease transactions |
-| Quality Incident | Defect rate >1000 PPM | High | Quality audit |
-| Port Congestion | Wait time >7 days | Medium | Reroute shipments |
-| Capacity Issue | Utilization >95% | Medium | Capacity planning review |
+| Alert Type         | Trigger Condition                | Severity | Action                     |
+| ------------------ | -------------------------------- | -------- | -------------------------- |
+| Credit Downgrade   | Rating drops 2+ levels           | High     | Immediate financial review |
+| Delivery Failure   | >20% of orders late              | High     | Activate backup supplier   |
+| Security Breach    | Supplier breach reported         | Critical | Security assessment        |
+| Sanctions Addition | Supplier added to sanctions list | Critical | Cease transactions         |
+| Quality Incident   | Defect rate >1000 PPM            | High     | Quality audit              |
+| Port Congestion    | Wait time >7 days                | Medium   | Reroute shipments          |
+| Capacity Issue     | Utilization >95%                 | Medium   | Capacity planning review   |
 
 ### Monitoring Dashboards
 
 #### Executive Dashboard (Daily)
+
 - High/Critical risk supplier count
 - Open critical incidents
 - Top 5 risk trends
 - Pending risk actions
 
 #### Supply Chain Dashboard (Real-Time)
+
 - Supplier risk heat map
 - Active alerts by category
 - Incident status
 - Mitigation plan progress
 
 #### Category Dashboards (Weekly)
+
 - Financial risk trends
 - Cybersecurity posture
 - Compliance status
@@ -712,6 +765,7 @@ Internal Data Sources:
 #### Portfolio-Level KRIs
 
 1. **Supplier Risk Distribution**
+
    ```
    % Suppliers by Risk Level:
    - Low Risk: Target >70%
@@ -721,11 +775,13 @@ Internal Data Sources:
    ```
 
 2. **Average Risk Score**
+
    ```
    Weighted Average Risk Score: Target >75
    ```
 
 3. **Risk Trend**
+
    ```
    Month-over-Month Risk Score Change:
    - Improving: >+2 points
@@ -734,6 +790,7 @@ Internal Data Sources:
    ```
 
 4. **Geographic Concentration**
+
    ```
    HHI by Country: Target <0.3
    ```
@@ -746,16 +803,19 @@ Internal Data Sources:
 #### Operational KRIs
 
 1. **Assessment Coverage**
+
    ```
    % Suppliers Assessed Within Schedule: Target 100%
    ```
 
 2. **Mitigation Effectiveness**
+
    ```
    % of High/Critical Risks Mitigated Within SLA: Target >90%
    ```
 
 3. **Incident Response Time**
+
    ```
    Average Time to Incident Resolution:
    - Critical: Target <24 hours
@@ -770,29 +830,32 @@ Internal Data Sources:
 
 ### Reporting Calendar
 
-| Report | Frequency | Audience | Contents |
-|--------|-----------|----------|----------|
-| Risk Flash Report | Daily | Supply Chain Ops | Critical alerts, urgent actions |
-| Risk Dashboard | Weekly | Supply Chain Management | Trends, top risks, action status |
-| Executive Summary | Monthly | C-Level | Portfolio overview, strategic risks |
-| Board Report | Quarterly | Board of Directors | Strategic risks, major incidents, mitigation investments |
-| Annual Risk Report | Annually | Stakeholders | Year in review, lessons learned, strategy |
+| Report             | Frequency | Audience                | Contents                                                 |
+| ------------------ | --------- | ----------------------- | -------------------------------------------------------- |
+| Risk Flash Report  | Daily     | Supply Chain Ops        | Critical alerts, urgent actions                          |
+| Risk Dashboard     | Weekly    | Supply Chain Management | Trends, top risks, action status                         |
+| Executive Summary  | Monthly   | C-Level                 | Portfolio overview, strategic risks                      |
+| Board Report       | Quarterly | Board of Directors      | Strategic risks, major incidents, mitigation investments |
+| Annual Risk Report | Annually  | Stakeholders            | Year in review, lessons learned, strategy                |
 
 ### Metrics for Success
 
 #### Leading Indicators
+
 - Risk assessment completion rate
 - Percentage of suppliers with mitigation plans
 - Diversification progress (HHI trend)
 - Training completion rate
 
 #### Lagging Indicators
+
 - Number of supply disruptions
 - Financial impact of disruptions
 - Supplier risk score trends
 - Incident resolution time
 
 #### Outcome Metrics
+
 - Supply chain resilience score
 - Cost of risk mitigation vs. cost of incidents
 - Supplier satisfaction with risk management process

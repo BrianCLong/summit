@@ -3,23 +3,23 @@ name: Enhanced Testing Suite
 on:
   pull_request:
     paths:
-      - 'tests/**'
-      - 'server/**'
-      - 'client/**'
-      - 'services/**'
+      - "tests/**"
+      - "server/**"
+      - "client/**"
+      - "services/**"
   push:
     branches: [main]
     paths:
-      - 'tests/**'
-      - 'server/**'
-      - 'client/**'
-      - 'services/**'
+      - "tests/**"
+      - "server/**"
+      - "client/**"
+      - "services/**"
   workflow_dispatch:
     inputs:
       test_type:
-        description: 'Test type to run'
+        description: "Test type to run"
         required: false
-        default: 'all'
+        default: "all"
         type: choice
         options:
           - all
@@ -28,7 +28,7 @@ on:
           - error-scenarios
           - graphql
       verbose:
-        description: 'Enable verbose output'
+        description: "Enable verbose output"
         required: false
         default: false
         type: boolean
@@ -51,8 +51,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'pnpm'
+          node-version: "20.x"
+          cache: "pnpm"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -129,8 +129,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'pnpm'
+          node-version: "20.x"
+          cache: "pnpm"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -184,8 +184,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'pnpm'
+          node-version: "20.x"
+          cache: "pnpm"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -223,8 +223,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'pnpm'
+          node-version: "20.x"
+          cache: "pnpm"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2

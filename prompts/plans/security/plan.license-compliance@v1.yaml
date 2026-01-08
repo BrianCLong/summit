@@ -1,7 +1,7 @@
 meta:
   id: plan.license-compliance@v1
-  owner: 'security-engineering'
-  purpose: 'Enforce license policies across CI with automated compliance checks'
+  owner: "security-engineering"
+  purpose: "Enforce license policies across CI with automated compliance checks"
   tags:
     - compliance
     - licensing
@@ -9,13 +9,13 @@ meta:
     - dependencies
     - policy
   guardrails:
-    - 'License policy must be reviewed by legal'
-    - 'Blocking merges requires exception process'
-    - 'New licenses require explicit approval'
-    - 'Audit trail for all decisions'
+    - "License policy must be reviewed by legal"
+    - "Blocking merges requires exception process"
+    - "New licenses require explicit approval"
+    - "Audit trail for all decisions"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -263,15 +263,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'license-compliance-setup'
+  - name: "license-compliance-setup"
     inputs:
-      allowed_licenses: 'MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC'
-      current_violations: '3 GPL packages, 5 unknown licenses'
-      package_managers: 'pnpm (Node.js), pip (Python), go mod (Go)'
-      business_requirements: 'Commercial SaaS, no copyleft distribution'
-      legal_constraints: 'No AGPL, no GPL for core product'
+      allowed_licenses: "MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC"
+      current_violations: "3 GPL packages, 5 unknown licenses"
+      package_managers: "pnpm (Node.js), pip (Python), go mod (Go)"
+      business_requirements: "Commercial SaaS, no copyleft distribution"
+      legal_constraints: "No AGPL, no GPL for core product"
     expected_contains:
-      - 'License Policy'
-      - 'CI Gates'
-      - 'Exception Process'
-      - 'Remediation'
+      - "License Policy"
+      - "CI Gates"
+      - "Exception Process"
+      - "Remediation"

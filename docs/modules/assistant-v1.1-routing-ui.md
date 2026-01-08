@@ -1,9 +1,9 @@
 ---
 name: Assistant v1.1 — Routing UI / Policy
 about: Track per-tenant model routing (UI, policy, dry-run, audit, revert)
-title: 'Assistant v1.1: Routing UI / Policy'
-labels: ['release: v1.1', 'theme: routing', 'area: admin', 'area: server']
-milestone: 'Assistant v1.1'
+title: "Assistant v1.1: Routing UI / Policy"
+labels: ["release: v1.1", "theme: routing", "area: admin", "area: server"]
+milestone: "Assistant v1.1"
 ---
 
 ## Scope

@@ -9,7 +9,15 @@ import type { Entity, Relationship, GraphLayout } from '@/types'
 // Actually, d3-force simulation runs a timer which might need cleanup or mocking.
 
 const MOCK_ENTITIES: Entity[] = [
-  { id: '1', name: 'Test', type: 'PERSON', confidence: 1, properties: {}, createdAt: '', updatedAt: '' }
+  {
+    id: '1',
+    name: 'Test',
+    type: 'PERSON',
+    confidence: 1,
+    properties: {},
+    createdAt: '',
+    updatedAt: '',
+  },
 ]
 const MOCK_RELATIONSHIPS: Relationship[] = []
 const MOCK_LAYOUT: GraphLayout = { type: 'force', settings: {} }

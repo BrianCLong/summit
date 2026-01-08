@@ -1,12 +1,12 @@
-import { test } from 'node:test';
-import assert from 'node:assert/strict';
-import { evaluate } from '../src/policy.js';
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { evaluate } from "../src/policy.js";
 
 function rand() {
   return Math.random().toString(36).substring(2);
 }
 
-test('random inputs without policies are denied', () => {
+test("random inputs without policies are denied", () => {
   for (let i = 0; i < 50; i++) {
     const input = {
       subject: { clearance: rand() },

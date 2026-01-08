@@ -13,12 +13,14 @@ Federated Campaign Radar enables organizations to collaboratively detect and res
 ## Features
 
 ### Signal Normalization
+
 - Normalize diverse inputs into a unified schema (narratives, URLs, media hashes, account handles, coordination patterns)
 - C2PA Content Credentials validation for media provenance
 - Semantic embedding generation for similarity matching
 - Privacy-preserving hashing with HMAC-SHA256
 
 ### Privacy-Preserving Federation
+
 - Differential privacy with configurable epsilon/delta budgets
 - Secure aggregation protocol support
 - MPC-style private set intersection
@@ -26,12 +28,14 @@ Federated Campaign Radar enables organizations to collaboratively detect and res
 - Sharing agreements between organizations
 
 ### Campaign Clustering
+
 - Cosine similarity-based clustering of signals
 - Cross-tenant confidence boosting for network effects
 - Velocity metrics for growth trajectory analysis
 - Coordination pattern detection (synchronized posting, copy-paste campaigns)
 
 ### Early-Warning Alerts
+
 - Configurable alert thresholds
 - Cross-tenant spike detection
 - Auto-escalation for unacknowledged alerts
@@ -42,6 +46,7 @@ Federated Campaign Radar enables organizations to collaboratively detect and res
   - Measurement plan
 
 ### Audit Trail
+
 - NIST AI RMF aligned governance controls
 - Cryptographic hash chain for log integrity
 - Incident management lifecycle
@@ -56,21 +61,21 @@ npm install @summit/federated-campaign-radar
 ## Quick Start
 
 ```typescript
-import { createFederatedCampaignRadar } from '@summit/federated-campaign-radar';
+import { createFederatedCampaignRadar } from "@summit/federated-campaign-radar";
 
 // Create a fully configured instance
 const radar = createFederatedCampaignRadar({
-  participantId: 'my-org-participant-id',
-  organizationId: 'my-org-id',
-  privacyLevel: 'balanced', // 'strict' | 'balanced' | 'permissive'
+  participantId: "my-org-participant-id",
+  organizationId: "my-org-id",
+  privacyLevel: "balanced", // 'strict' | 'balanced' | 'permissive'
   enableC2PA: true,
   enableAudit: true,
 });
 
 // Submit a signal
 const signal = await radar.submitSignal({
-  text: 'Detected narrative about election interference',
-  platform: 'twitter',
+  text: "Detected narrative about election interference",
+  platform: "twitter",
 });
 
 // Run clustering
@@ -87,7 +92,7 @@ const alerts = radar.getActiveAlerts();
 Normalizes raw inputs into standardized campaign signals:
 
 ```typescript
-import { SignalNormalizer, PrivacyLevel } from '@summit/federated-campaign-radar';
+import { SignalNormalizer, PrivacyLevel } from "@summit/federated-campaign-radar";
 
 const normalizer = new SignalNormalizer({
   enableC2PAValidation: true,
@@ -98,21 +103,23 @@ const normalizer = new SignalNormalizer({
 
 // Normalize a narrative
 const narrativeSignal = await normalizer.normalizeNarrative({
-  text: 'Breaking: Viral claim about election fraud...',
-  platform: 'facebook',
+  text: "Breaking: Viral claim about election fraud...",
+  platform: "facebook",
 });
 
 // Normalize a URL
 const urlSignal = await normalizer.normalizeURL({
-  url: 'https://suspicious-domain.com/fake-news',
+  url: "https://suspicious-domain.com/fake-news",
 });
 
 // Normalize a media item with C2PA manifest
 const mediaSignal = await normalizer.normalizeMedia({
-  mediaHash: 'abc123...',
-  mediaType: 'image/jpeg',
-  platform: 'instagram',
-  c2paManifest: { /* ... */ },
+  mediaHash: "abc123...",
+  mediaType: "image/jpeg",
+  platform: "instagram",
+  c2paManifest: {
+    /* ... */
+  },
 });
 ```
 
@@ -121,26 +128,26 @@ const mediaSignal = await normalizer.normalizeMedia({
 Manages privacy-preserving federation between organizations:
 
 ```typescript
-import { FederationService, SignalType, PrivacyLevel } from '@summit/federated-campaign-radar';
+import { FederationService, SignalType, PrivacyLevel } from "@summit/federated-campaign-radar";
 
 const federation = new FederationService({
-  participantId: 'org-alpha',
-  organizationId: 'alpha-inc',
-  epsilon: 0.5,           // Differential privacy budget
+  participantId: "org-alpha",
+  organizationId: "alpha-inc",
+  epsilon: 0.5, // Differential privacy budget
   delta: 1e-6,
   minParticipantsForAggregation: 3,
   enableSecureAggregation: true,
 });
 
 // Register participants
-await federation.registerParticipant('org-beta', 'public-key', ['SIGNAL_SHARING']);
+await federation.registerParticipant("org-beta", "public-key", ["SIGNAL_SHARING"]);
 
 // Create sharing agreement
 const agreement = await federation.createSharingAgreement(
-  ['org-alpha', 'org-beta'],
+  ["org-alpha", "org-beta"],
   [SignalType.NARRATIVE, SignalType.URL],
   [PrivacyLevel.HASHED, PrivacyLevel.AGGREGATE_ONLY],
-  30, // 30 days validity
+  30 // 30 days validity
 );
 
 // Submit signal to federation
@@ -159,7 +166,7 @@ console.log(`Remaining budget: ${budget.remaining}`);
 Performs federated narrative clustering:
 
 ```typescript
-import { ClusteringEngine, ThreatLevel } from '@summit/federated-campaign-radar';
+import { ClusteringEngine, ThreatLevel } from "@summit/federated-campaign-radar";
 
 const clustering = new ClusteringEngine(federationService, {
   similarityThreshold: 0.75,
@@ -168,7 +175,7 @@ const clustering = new ClusteringEngine(federationService, {
 });
 
 // Add signals
-signals.forEach(s => clustering.addSignal(s));
+signals.forEach((s) => clustering.addSignal(s));
 
 // Perform clustering
 const clusters = await clustering.performClustering();
@@ -185,7 +192,7 @@ const overlap = clustering.computeCrossTenantOverlap();
 Early-warning alert system:
 
 ```typescript
-import { AlertEngine, AlertType, AlertSeverity } from '@summit/federated-campaign-radar';
+import { AlertEngine, AlertType, AlertSeverity } from "@summit/federated-campaign-radar";
 
 const alerts = new AlertEngine(clusteringEngine, federationService, {
   defaultCooldownMs: 3600000, // 1 hour
@@ -195,11 +202,11 @@ const alerts = new AlertEngine(clusteringEngine, federationService, {
 
 // Register custom threshold
 alerts.registerThreshold({
-  id: 'high-velocity-campaign',
+  id: "high-velocity-campaign",
   alertType: AlertType.CAMPAIGN_EMERGING,
   conditions: [
-    { metric: 'signalCount', operator: 'gte', value: 50 },
-    { metric: 'crossTenantConfidence', operator: 'gte', value: 0.8 },
+    { metric: "signalCount", operator: "gte", value: 50 },
+    { metric: "crossTenantConfidence", operator: "gte", value: 0.8 },
   ],
   severity: AlertSeverity.HIGH,
   cooldownMs: 1800000,
@@ -217,11 +224,11 @@ const responsePack = await alerts.generateResponsePack(alertId);
 console.log(responsePack.commsPlaybook.recommendedActions);
 
 // Acknowledge and resolve
-alerts.acknowledgeAlert(alertId, 'analyst-1');
-alerts.resolveAlert(alertId, 'analyst-1', {
-  resolutionType: 'MITIGATED',
-  notes: 'Counter-narrative deployed successfully',
-  lessonsLearned: ['Earlier detection needed'],
+alerts.acknowledgeAlert(alertId, "analyst-1");
+alerts.resolveAlert(alertId, "analyst-1", {
+  resolutionType: "MITIGATED",
+  notes: "Counter-narrative deployed successfully",
+  lessonsLearned: ["Earlier detection needed"],
 });
 ```
 
@@ -230,31 +237,31 @@ alerts.resolveAlert(alertId, 'analyst-1', {
 NIST AI RMF aligned audit trail:
 
 ```typescript
-import { AuditService } from '@summit/federated-campaign-radar';
+import { AuditService } from "@summit/federated-campaign-radar";
 
 const audit = new AuditService({
-  organizationId: 'my-org',
+  organizationId: "my-org",
   retentionDays: 365,
   enableIntegrityChecks: true,
 });
 
 // Log audit event
 audit.logEvent({
-  eventType: 'SIGNAL_SUBMISSION',
-  category: 'DATA_PROCESSING',
-  action: 'NORMALIZE_SIGNAL',
-  resourceType: 'SIGNAL',
+  eventType: "SIGNAL_SUBMISSION",
+  category: "DATA_PROCESSING",
+  action: "NORMALIZE_SIGNAL",
+  resourceType: "SIGNAL",
   resourceId: signal.id,
-  outcome: 'SUCCESS',
-  actor: { id: 'system', type: 'SYSTEM' },
-  details: { signalType: 'NARRATIVE' },
+  outcome: "SUCCESS",
+  actor: { id: "system", type: "SYSTEM" },
+  details: { signalType: "NARRATIVE" },
 });
 
 // Create incident
 const incidentId = audit.createIncident({
-  title: 'Coordinated campaign detected',
-  description: 'Cross-tenant cluster with 95% confidence',
-  severity: 'HIGH',
+  title: "Coordinated campaign detected",
+  description: "Cross-tenant cluster with 95% confidence",
+  severity: "HIGH",
   relatedAlertIds: [alertId],
   relatedClusterIds: [clusterId],
 });
@@ -268,7 +275,7 @@ const integrity = audit.verifyIntegrity();
 console.log(`Chain valid: ${integrity.valid}`);
 
 // Export for SIEM
-const cefLogs = audit.exportEvents('SIEM', { startTime: yesterday });
+const cefLogs = audit.exportEvents("SIEM", { startTime: yesterday });
 ```
 
 ## GraphQL API
@@ -276,8 +283,8 @@ const cefLogs = audit.exportEvents('SIEM', { startTime: yesterday });
 The package includes a complete GraphQL API:
 
 ```typescript
-import { schema, resolvers, createResolverContext } from '@summit/federated-campaign-radar';
-import { ApolloServer } from '@apollo/server';
+import { schema, resolvers, createResolverContext } from "@summit/federated-campaign-radar";
+import { ApolloServer } from "@apollo/server";
 
 const server = new ApolloServer({
   typeDefs: schema,
@@ -293,10 +300,7 @@ const context = radar.createResolverContext();
 ```graphql
 # Get active clusters
 query GetClusters {
-  getClusters(
-    filters: { minThreatLevel: MEDIUM, minCrossTenantConfidence: 0.7 }
-    limit: 10
-  ) {
+  getClusters(filters: { minThreatLevel: MEDIUM, minCrossTenantConfidence: 0.7 }, limit: 10) {
     id
     signalCount
     threatLevel
@@ -370,23 +374,23 @@ mutation GenerateResponsePack($alertId: ID!) {
 
 ## Privacy Levels
 
-| Level | Description | Sharing Behavior |
-|-------|-------------|------------------|
-| `PUBLIC` | Can be shared freely | Full content shared |
-| `HASHED` | Content hashed before sharing | Only hashes shared |
-| `ENCRYPTED` | Encrypted for specific recipients | End-to-end encrypted |
-| `AGGREGATE_ONLY` | Only in aggregations | Never shared individually |
-| `INTERNAL_ONLY` | Never leaves organization | Local processing only |
+| Level            | Description                       | Sharing Behavior          |
+| ---------------- | --------------------------------- | ------------------------- |
+| `PUBLIC`         | Can be shared freely              | Full content shared       |
+| `HASHED`         | Content hashed before sharing     | Only hashes shared        |
+| `ENCRYPTED`      | Encrypted for specific recipients | End-to-end encrypted      |
+| `AGGREGATE_ONLY` | Only in aggregations              | Never shared individually |
+| `INTERNAL_ONLY`  | Never leaves organization         | Local processing only     |
 
 ## Threat Levels
 
-| Level | Description | Typical Response |
-|-------|-------------|------------------|
-| `INFORMATIONAL` | Background noise | Monitor |
-| `LOW` | Minor concern | Track |
-| `MEDIUM` | Moderate threat | Investigate |
-| `HIGH` | Significant threat | Respond |
-| `CRITICAL` | Severe threat | Escalate immediately |
+| Level           | Description        | Typical Response     |
+| --------------- | ------------------ | -------------------- |
+| `INFORMATIONAL` | Background noise   | Monitor              |
+| `LOW`           | Minor concern      | Track                |
+| `MEDIUM`        | Moderate threat    | Investigate          |
+| `HIGH`          | Significant threat | Respond              |
+| `CRITICAL`      | Severe threat      | Escalate immediately |
 
 ## Configuration
 
@@ -395,19 +399,19 @@ mutation GenerateResponsePack($alertId: ID!) {
 ```typescript
 // Strict: Maximum privacy, slower detection
 createFederatedCampaignRadar({
-  privacyLevel: 'strict',
+  privacyLevel: "strict",
   // epsilon: 0.1, delta: 1e-8, minParticipants: 5
 });
 
 // Balanced: Good privacy with reasonable utility
 createFederatedCampaignRadar({
-  privacyLevel: 'balanced',
+  privacyLevel: "balanced",
   // epsilon: 0.5, delta: 1e-6, minParticipants: 3
 });
 
 // Permissive: Maximum utility, acceptable privacy
 createFederatedCampaignRadar({
-  privacyLevel: 'permissive',
+  privacyLevel: "permissive",
   // epsilon: 1.0, delta: 1e-5, minParticipants: 2
 });
 ```

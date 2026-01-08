@@ -19,20 +19,20 @@ export interface DetectedManipulation {
 }
 
 export enum ManipulationType {
-  COPY_PASTE = 'copy_paste',
-  SPLICING = 'splicing',
-  CLONING = 'cloning',
-  CONTENT_AWARE_FILL = 'content_aware_fill',
-  COLOR_ADJUSTMENT = 'color_adjustment',
-  TONE_MAPPING = 'tone_mapping',
-  FILTER_APPLICATION = 'filter_application',
-  RESAMPLING = 'resampling',
-  NOISE_ADDITION = 'noise_addition',
-  BLUR_SHARPENING = 'blur_sharpening',
-  OBJECT_REMOVAL = 'object_removal',
-  OBJECT_ADDITION = 'object_addition',
-  PERSPECTIVE_DISTORTION = 'perspective_distortion',
-  COMPRESSION_INCONSISTENCY = 'compression_inconsistency',
+  COPY_PASTE = "copy_paste",
+  SPLICING = "splicing",
+  CLONING = "cloning",
+  CONTENT_AWARE_FILL = "content_aware_fill",
+  COLOR_ADJUSTMENT = "color_adjustment",
+  TONE_MAPPING = "tone_mapping",
+  FILTER_APPLICATION = "filter_application",
+  RESAMPLING = "resampling",
+  NOISE_ADDITION = "noise_addition",
+  BLUR_SHARPENING = "blur_sharpening",
+  OBJECT_REMOVAL = "object_removal",
+  OBJECT_ADDITION = "object_addition",
+  PERSPECTIVE_DISTORTION = "perspective_distortion",
+  COMPRESSION_INCONSISTENCY = "compression_inconsistency",
 }
 
 export interface ManipulationLocation {
@@ -56,14 +56,14 @@ export interface Evidence {
 }
 
 export enum EvidenceType {
-  ERROR_LEVEL_ANALYSIS = 'ela',
-  NOISE_ANALYSIS = 'noise',
-  JPEG_GHOSTS = 'jpeg_ghosts',
-  DCT_ANALYSIS = 'dct',
-  METADATA_INCONSISTENCY = 'metadata',
-  DOUBLE_COMPRESSION = 'double_compression',
-  CLONING_DETECTION = 'cloning',
-  FORGERY_LOCALIZATION = 'forgery_localization',
+  ERROR_LEVEL_ANALYSIS = "ela",
+  NOISE_ANALYSIS = "noise",
+  JPEG_GHOSTS = "jpeg_ghosts",
+  DCT_ANALYSIS = "dct",
+  METADATA_INCONSISTENCY = "metadata",
+  DOUBLE_COMPRESSION = "double_compression",
+  CLONING_DETECTION = "cloning",
+  FORGERY_LOCALIZATION = "forgery_localization",
 }
 
 export interface ManipulationMetadata {
@@ -142,7 +142,7 @@ export interface ClonedRegion {
   source: BoundingBox;
   targets: BoundingBox[];
   similarity: number;
-  method: 'copy_move' | 'rotate' | 'scale' | 'affine';
+  method: "copy_move" | "rotate" | "scale" | "affine";
 }
 
 export interface SplicingDetectionResult {

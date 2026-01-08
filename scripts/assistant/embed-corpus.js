@@ -1,8 +1,6 @@
 // Pseudocode – integrate with your embeddings provider.
-const fs = require('fs');
-const corpus = JSON.parse(
-  fs.readFileSync('docs/ops/assistant/corpus.json', 'utf8'),
-);
+const fs = require("fs");
+const corpus = JSON.parse(fs.readFileSync("docs/ops/assistant/corpus.json", "utf8"));
 // const embed = async (text)=> provider.embed(text)
 (async () => {
   const out = [];
@@ -11,5 +9,5 @@ const corpus = JSON.parse(
     const vec = Array(768).fill(0); // placeholder
     out.push({ id: r.id, version: r.version, vector: vec });
   }
-  fs.writeFileSync('docs/ops/assistant/index.json', JSON.stringify(out));
+  fs.writeFileSync("docs/ops/assistant/index.json", JSON.stringify(out));
 })();

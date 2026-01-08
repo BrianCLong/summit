@@ -5,6 +5,7 @@
 ## Overview
 
 Mission drift rarely happens suddenly. It's a gradual process:
+
 - "Just this once" exceptions become precedents
 - Standards are "temporarily" relaxed and never restored
 - Governance is "streamlined" to remove friction
@@ -25,6 +26,7 @@ Mission drift rarely happens suddenly. It's a gradual process:
 **Pattern**: Gradual lowering of evidence quality or decision rigor
 
 **Examples**:
+
 - Evidence citation requirements loosened
 - Confidence thresholds reduced without approval
 - "Fast-track" processes that skip oversight
@@ -39,6 +41,7 @@ Mission drift rarely happens suddenly. It's a gradual process:
 **Pattern**: Expansion into areas beyond approved boundaries
 
 **Examples**:
+
 - Operating outside defined scope without governance approval
 - "Mission adjacent" projects that violate limitations
 - Partnerships that create new scope obligations
@@ -53,6 +56,7 @@ Mission drift rarely happens suddenly. It's a gradual process:
 **Pattern**: Erosion of oversight and accountability mechanisms
 
 **Examples**:
+
 - Decisions made without required oversight approval
 - Information withheld from oversight board
 - "Emergency" overrides becoming routine
@@ -67,6 +71,7 @@ Mission drift rarely happens suddenly. It's a gradual process:
 **Pattern**: Change in organizational values and norms
 
 **Examples**:
+
 - "Move fast and break things" replacing principled caution
 - Dismissal of constraints as "process" or "bureaucracy"
 - Celebrating shortcuts instead of disciplined refusal
@@ -81,6 +86,7 @@ Mission drift rarely happens suddenly. It's a gradual process:
 **Pattern**: Subtle changes in how mission is described
 
 **Examples**:
+
 - "Evidence-based" becomes "data-informed"
 - "Refusal under uncertainty" becomes "conservative approach"
 - "Mandatory constraints" become "best practices"
@@ -97,6 +103,7 @@ Mission drift rarely happens suddenly. It's a gradual process:
 #### 1.1 Decision Quality Metrics
 
 **Monitored Indicators**:
+
 ```
 - Evidence citation rate (target: 100% for high-stakes)
 - Evidence quality scores (avg, min, trend)
@@ -107,6 +114,7 @@ Mission drift rarely happens suddenly. It's a gradual process:
 ```
 
 **Alert Thresholds**:
+
 ```
 ⚠️ Warning: Evidence citation rate <98% over 7 days
 🚨 Critical: Evidence citation rate <95% over 7 days
@@ -115,6 +123,7 @@ Mission drift rarely happens suddenly. It's a gradual process:
 ```
 
 **Automated Response**:
+
 - Alerts sent to oversight board immediately
 - Detailed decision logs attached
 - Trend analysis and comparison to baseline
@@ -123,6 +132,7 @@ Mission drift rarely happens suddenly. It's a gradual process:
 #### 1.2 Scope Boundary Monitoring
 
 **Monitored Indicators**:
+
 ```
 - Decisions outside approved scope (target: 0)
 - "Edge case" decisions (proximity to scope boundary)
@@ -132,6 +142,7 @@ Mission drift rarely happens suddenly. It's a gradual process:
 ```
 
 **Alert Thresholds**:
+
 ```
 🚨 Critical: Any out-of-scope decision without approval
 ⚠️ Warning: Edge case decisions increasing
@@ -141,6 +152,7 @@ Mission drift rarely happens suddenly. It's a gradual process:
 #### 1.3 Governance Process Compliance
 
 **Monitored Indicators**:
+
 ```
 - Governance-reserved decisions made without board approval
 - Oversight board meeting frequency and attendance
@@ -150,6 +162,7 @@ Mission drift rarely happens suddenly. It's a gradual process:
 ```
 
 **Alert Thresholds**:
+
 ```
 🚨 Critical: Governance-reserved decision without approval
 🚨 Critical: Board information access denied or delayed
@@ -164,18 +177,21 @@ Mission drift rarely happens suddenly. It's a gradual process:
 #### 2.1 Independent Quarterly Audits
 
 **Scope**:
+
 - Sample of decisions reviewed for evidence quality
 - Compliance with invariants verified
 - Governance process adherence checked
 - Comparison to historical baseline
 
 **Deliverables**:
+
 - Compliance scorecard
 - Drift indicators flagged
 - Recommendations for remediation
 - Trend analysis
 
 **Red Flags** (trigger immediate oversight board attention):
+
 - Any invariant violation detected
 - Statistically significant degradation in evidence quality
 - Governance bypasses identified
@@ -184,6 +200,7 @@ Mission drift rarely happens suddenly. It's a gradual process:
 #### 2.2 Annual Deep Audit
 
 **Scope**:
+
 - Comprehensive review of all monitoring systems
 - Validation of automated metrics
 - Long-term trend analysis
@@ -191,6 +208,7 @@ Mission drift rarely happens suddenly. It's a gradual process:
 - External stakeholder perception assessment
 
 **Includes**:
+
 - Forensic review of decisions (larger sample)
 - Interviews with staff (cultural assessment)
 - Review of all governance decisions
@@ -203,12 +221,14 @@ Mission drift rarely happens suddenly. It's a gradual process:
 #### 3.1 Staff Feedback Systems
 
 **Channels**:
+
 - Anonymous reporting channel (direct to oversight board)
 - Regular staff surveys on mission adherence
 - Exit interviews specifically probing drift concerns
 - Skip-level meetings with oversight board members
 
 **Key Questions**:
+
 ```
 - "Do you feel pressure to lower evidence standards?"
 - "Have you witnessed shortcuts or overrides you were uncomfortable with?"
@@ -218,6 +238,7 @@ Mission drift rarely happens suddenly. It's a gradual process:
 ```
 
 **Early Warning Signals**:
+
 - Staff report pressure to compromise
 - Increasing discomfort with decisions
 - Retention problems among mission-aligned staff
@@ -226,6 +247,7 @@ Mission drift rarely happens suddenly. It's a gradual process:
 #### 3.2 Oversight Board Direct Engagement
 
 **Activities**:
+
 - Quarterly unfiltered briefings from operational staff
 - Direct review of decision logs (not summaries)
 - Attendance at operational meetings (observer)
@@ -236,12 +258,14 @@ Mission drift rarely happens suddenly. It's a gradual process:
 #### 3.3 External Stakeholder Feedback
 
 **Sources**:
+
 - Partner feedback on decision quality and consistency
 - Regulator observations and concerns
 - User/customer perception surveys
 - Public sentiment monitoring
 
 **Indicators**:
+
 - Partners expressing concern about changes
 - Regulators asking questions about drift
 - Users noticing inconsistencies
@@ -256,6 +280,7 @@ Mission drift rarely happens suddenly. It's a gradual process:
 **Method**: Compare current metrics to historical baseline
 
 **Metrics**:
+
 ```
 Evidence Quality:
   - Baseline (Year 1): 99.8% citation rate, 4.2/5 avg quality
@@ -319,55 +344,55 @@ Escalation Rate:
 
 ### Standard Erosion Indicators
 
-| Indicator | Threshold | Alert Level |
-|-----------|-----------|-------------|
-| Evidence citation rate decline | <99% (7d) | ⚠️ Warning |
-| Evidence citation rate decline | <95% (7d) | 🚨 Critical |
-| Average evidence quality decline | >10% (30d) | ⚠️ Warning |
-| Minimum evidence threshold not met | Any instance | 🚨 Critical |
-| Override of evidence requirement | >1% decisions | ⚠️ Warning |
-| "Fast-track" decisions without evidence | Any instance | 🚨 Critical |
+| Indicator                               | Threshold     | Alert Level |
+| --------------------------------------- | ------------- | ----------- |
+| Evidence citation rate decline          | <99% (7d)     | ⚠️ Warning  |
+| Evidence citation rate decline          | <95% (7d)     | 🚨 Critical |
+| Average evidence quality decline        | >10% (30d)    | ⚠️ Warning  |
+| Minimum evidence threshold not met      | Any instance  | 🚨 Critical |
+| Override of evidence requirement        | >1% decisions | ⚠️ Warning  |
+| "Fast-track" decisions without evidence | Any instance  | 🚨 Critical |
 
 ### Scope Creep Indicators
 
-| Indicator | Threshold | Alert Level |
-|-----------|-----------|-------------|
-| Out-of-scope decision | Any without approval | 🚨 Critical |
-| Edge case frequency increase | >20% (30d) | ⚠️ Warning |
-| New capability without governance approval | Any instance | 🚨 Critical |
-| Partnership creating scope obligations | Any without review | ⚠️ Warning |
-| User requests for out-of-scope | Trending up | ℹ️ Info |
+| Indicator                                  | Threshold            | Alert Level |
+| ------------------------------------------ | -------------------- | ----------- |
+| Out-of-scope decision                      | Any without approval | 🚨 Critical |
+| Edge case frequency increase               | >20% (30d)           | ⚠️ Warning  |
+| New capability without governance approval | Any instance         | 🚨 Critical |
+| Partnership creating scope obligations     | Any without review   | ⚠️ Warning  |
+| User requests for out-of-scope             | Trending up          | ℹ️ Info     |
 
 ### Governance Bypass Indicators
 
-| Indicator | Threshold | Alert Level |
-|-----------|-----------|-------------|
+| Indicator                                | Threshold    | Alert Level |
+| ---------------------------------------- | ------------ | ----------- |
 | Reserved decision without board approval | Any instance | 🚨 Critical |
-| Board meeting cancelled | Any instance | ⚠️ Warning |
-| Board information access delayed | >24 hours | ⚠️ Warning |
-| Board information access denied | Any instance | 🚨 Critical |
-| Emergency override not reviewed | >72 hours | 🚨 Critical |
-| Whistleblower report | Any received | 🚨 Critical |
+| Board meeting cancelled                  | Any instance | ⚠️ Warning  |
+| Board information access delayed         | >24 hours    | ⚠️ Warning  |
+| Board information access denied          | Any instance | 🚨 Critical |
+| Emergency override not reviewed          | >72 hours    | 🚨 Critical |
+| Whistleblower report                     | Any received | 🚨 Critical |
 
 ### Cultural Drift Indicators
 
-| Indicator | Threshold | Alert Level |
-|-----------|-----------|-------------|
-| Staff pressure to compromise | Any report | ⚠️ Warning |
-| Mission-aligned staff departure | >2/quarter | ⚠️ Warning |
-| Staff survey: mission treated as mandatory | <90% agree | ⚠️ Warning |
-| Staff survey: can refuse without career impact | <80% agree | 🚨 Critical |
-| Internal discourse dismissing constraints | Repeated instances | ⚠️ Warning |
+| Indicator                                      | Threshold          | Alert Level |
+| ---------------------------------------------- | ------------------ | ----------- |
+| Staff pressure to compromise                   | Any report         | ⚠️ Warning  |
+| Mission-aligned staff departure                | >2/quarter         | ⚠️ Warning  |
+| Staff survey: mission treated as mandatory     | <90% agree         | ⚠️ Warning  |
+| Staff survey: can refuse without career impact | <80% agree         | 🚨 Critical |
+| Internal discourse dismissing constraints      | Repeated instances | ⚠️ Warning  |
 
 ### Linguistic Drift Indicators
 
-| Indicator | Detection Method | Alert Level |
-|-----------|-----------------|-------------|
-| "Evidence-based" → "Data-informed" | Document analysis | ⚠️ Warning |
-| "Mandatory" → "Best practice" | Communication review | ⚠️ Warning |
-| "Oversight" → "Advisory" | Governance docs | 🚨 Critical |
-| "Refusal" → "Conservative" | Framing shift | ⚠️ Warning |
-| "Constraints" → "Process" (dismissive) | Cultural signals | ⚠️ Warning |
+| Indicator                              | Detection Method     | Alert Level |
+| -------------------------------------- | -------------------- | ----------- |
+| "Evidence-based" → "Data-informed"     | Document analysis    | ⚠️ Warning  |
+| "Mandatory" → "Best practice"          | Communication review | ⚠️ Warning  |
+| "Oversight" → "Advisory"               | Governance docs      | 🚨 Critical |
+| "Refusal" → "Conservative"             | Framing shift        | ⚠️ Warning  |
+| "Constraints" → "Process" (dismissive) | Cultural signals     | ⚠️ Warning  |
 
 ---
 
@@ -378,6 +403,7 @@ Escalation Rate:
 **Timeline**: 48-72 hours
 
 **Actions**:
+
 1. Oversight board notification (automatic)
 2. Root cause investigation initiated
 3. Remediation plan required within 48 hours
@@ -385,6 +411,7 @@ Escalation Rate:
 5. Follow-up verification within 7 days
 
 **Documentation**:
+
 - Drift indicator logged
 - Investigation findings recorded
 - Remediation plan documented
@@ -397,6 +424,7 @@ Escalation Rate:
 **Timeline**: Immediate (4-24 hours)
 
 **Actions**:
+
 1. Immediate oversight board notification
 2. Emergency board session if needed
 3. Automatic escalation if governance violation
@@ -406,6 +434,7 @@ Escalation Rate:
 7. Personnel accountability review
 
 **Documentation**:
+
 - Incident report filed
 - Full chain of causation documented
 - Accountability determined
@@ -463,6 +492,7 @@ Escalation Rate:
 ## Drift Detection Checklist
 
 ### Technical Infrastructure
+
 - [ ] Automated monitoring systems deployed
 - [ ] Alert thresholds configured
 - [ ] Oversight board dashboard operational
@@ -470,6 +500,7 @@ Escalation Rate:
 - [ ] Anomaly detection algorithms calibrated
 
 ### Audit Mechanisms
+
 - [ ] Quarterly audit schedule established
 - [ ] Independent auditor contracted
 - [ ] Audit scope defined and documented
@@ -477,6 +508,7 @@ Escalation Rate:
 - [ ] Annual deep audit planned
 
 ### Human Intelligence
+
 - [ ] Anonymous reporting channel active
 - [ ] Staff surveys scheduled and conducted
 - [ ] Exit interview protocols include drift questions
@@ -484,6 +516,7 @@ Escalation Rate:
 - [ ] External stakeholder feedback collected
 
 ### Response Protocols
+
 - [ ] Warning-level response protocol documented
 - [ ] Critical-level response protocol documented
 - [ ] Escalation chains defined and tested
@@ -491,6 +524,7 @@ Escalation Rate:
 - [ ] Accountability mechanisms in place
 
 ### Ongoing Maintenance
+
 - [ ] Baseline metrics established
 - [ ] Monitoring systems tested regularly
 - [ ] Alert thresholds reviewed annually

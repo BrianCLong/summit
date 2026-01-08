@@ -94,12 +94,12 @@ Organizations need to enable data exploration and analysis while preventing:
 
 ### Component Responsibilities
 
-| Component | Responsibility |
-|-----------|----------------|
+| Component             | Responsibility                                               |
+| --------------------- | ------------------------------------------------------------ |
 | **Workspace Manager** | CRUD operations, resource allocation, environment versioning |
-| **Data Accessor** | Secure data provisioning, query routing, result caching |
-| **Sandbox Runtime** | Isolated execution, resource limits, network policies |
-| **Governance Engine** | Policy evaluation, approval workflows, audit logging |
+| **Data Accessor**     | Secure data provisioning, query routing, result caching      |
+| **Sandbox Runtime**   | Isolated execution, resource limits, network policies        |
+| **Governance Engine** | Policy evaluation, approval workflows, audit logging         |
 
 ---
 
@@ -107,13 +107,13 @@ Organizations need to enable data exploration and analysis while preventing:
 
 ### Workspace Types
 
-| Type | Description | Typical Use Case | Default TTL |
-|------|-------------|------------------|-------------|
-| `AD_HOC` | Temporary exploration workspace | Quick data investigation | 24 hours |
-| `RECURRING_REPORT` | Scheduled analysis with persistence | Daily/weekly reports | 90 days |
-| `MODEL_DEVELOPMENT` | ML/statistical model development | Feature engineering, training | 30 days |
-| `AUDIT_INVESTIGATION` | Compliance/audit deep dives | Incident response | 7 days |
-| `SHARED_ANALYSIS` | Collaborative team workspaces | Cross-functional projects | 180 days |
+| Type                  | Description                         | Typical Use Case              | Default TTL |
+| --------------------- | ----------------------------------- | ----------------------------- | ----------- |
+| `AD_HOC`              | Temporary exploration workspace     | Quick data investigation      | 24 hours    |
+| `RECURRING_REPORT`    | Scheduled analysis with persistence | Daily/weekly reports          | 90 days     |
+| `MODEL_DEVELOPMENT`   | ML/statistical model development    | Feature engineering, training | 30 days     |
+| `AUDIT_INVESTIGATION` | Compliance/audit deep dives         | Incident response             | 7 days      |
+| `SHARED_ANALYSIS`     | Collaborative team workspaces       | Cross-functional projects     | 180 days    |
 
 ### Workspace States
 
@@ -133,28 +133,28 @@ Organizations need to enable data exploration and analysis while preventing:
 
 ### State Transitions
 
-| From | To | Trigger | Auto/Manual |
-|------|----|---------|-------------|
-| PENDING | ACTIVE | Approval complete | Automatic |
-| PENDING | DELETED | Approval denied | Automatic |
-| ACTIVE | IDLE | No activity > threshold | Automatic |
-| ACTIVE | SUSPENDED | Policy violation | Automatic |
-| IDLE | ACTIVE | User activity | Automatic |
-| IDLE | ARCHIVED | Idle > archive threshold | Automatic |
-| IDLE | SUSPENDED | Extended idle period | Automatic |
-| ARCHIVED | DELETED | Retention period expired | Automatic |
-| SUSPENDED | ACTIVE | Issue resolved + approval | Manual |
-| Any | DELETED | Owner request + approval | Manual |
+| From      | To        | Trigger                   | Auto/Manual |
+| --------- | --------- | ------------------------- | ----------- |
+| PENDING   | ACTIVE    | Approval complete         | Automatic   |
+| PENDING   | DELETED   | Approval denied           | Automatic   |
+| ACTIVE    | IDLE      | No activity > threshold   | Automatic   |
+| ACTIVE    | SUSPENDED | Policy violation          | Automatic   |
+| IDLE      | ACTIVE    | User activity             | Automatic   |
+| IDLE      | ARCHIVED  | Idle > archive threshold  | Automatic   |
+| IDLE      | SUSPENDED | Extended idle period      | Automatic   |
+| ARCHIVED  | DELETED   | Retention period expired  | Automatic   |
+| SUSPENDED | ACTIVE    | Issue resolved + approval | Manual      |
+| Any       | DELETED   | Owner request + approval  | Manual      |
 
 ### User Roles
 
-| Role | Permissions | Typical Users |
-|------|-------------|---------------|
-| `ANALYST` | Query, visualize, export (with limits) | Business analysts |
-| `DATA_SCIENTIST` | Full compute, model training, elevated export | Data science team |
-| `ENGINEER` | Admin access, debugging, performance tuning | Platform engineers |
-| `AUDITOR` | Read-only, full history access, no export | Compliance team |
-| `WORKSPACE_OWNER` | Manage workspace settings, invite collaborators | Project leads |
+| Role              | Permissions                                     | Typical Users      |
+| ----------------- | ----------------------------------------------- | ------------------ |
+| `ANALYST`         | Query, visualize, export (with limits)          | Business analysts  |
+| `DATA_SCIENTIST`  | Full compute, model training, elevated export   | Data science team  |
+| `ENGINEER`        | Admin access, debugging, performance tuning     | Platform engineers |
+| `AUDITOR`         | Read-only, full history access, no export       | Compliance team    |
+| `WORKSPACE_OWNER` | Manage workspace settings, invite collaborators | Project leads      |
 
 ---
 
@@ -162,42 +162,42 @@ Organizations need to enable data exploration and analysis while preventing:
 
 ### Dataset Tiers
 
-| Tier | Description | Access Control | Examples |
-|------|-------------|----------------|----------|
-| **RAW** | Original source data | Explicit approval required | Event streams, logs |
-| **CURATED** | Cleaned, validated datasets | Role-based access | Feature tables, aggregates |
-| **ANONYMIZED** | De-identified/aggregated | Self-service for analysts | Summary statistics |
-| **SYNTHETIC** | Generated test data | Open access | Development datasets |
+| Tier           | Description                 | Access Control             | Examples                   |
+| -------------- | --------------------------- | -------------------------- | -------------------------- |
+| **RAW**        | Original source data        | Explicit approval required | Event streams, logs        |
+| **CURATED**    | Cleaned, validated datasets | Role-based access          | Feature tables, aggregates |
+| **ANONYMIZED** | De-identified/aggregated    | Self-service for analysts  | Summary statistics         |
+| **SYNTHETIC**  | Generated test data         | Open access                | Development datasets       |
 
 ### Data Provisioning Methods
 
 ```typescript
 enum ProvisioningMethod {
   // Read-only view, no data copy
-  LIVE_VIEW = 'LIVE_VIEW',
+  LIVE_VIEW = "LIVE_VIEW",
 
   // Point-in-time snapshot
-  SNAPSHOT = 'SNAPSHOT',
+  SNAPSHOT = "SNAPSHOT",
 
   // Filtered/sampled subset
-  SAMPLE = 'SAMPLE',
+  SAMPLE = "SAMPLE",
 
   // Time-limited access token
-  TOKEN_ACCESS = 'TOKEN_ACCESS',
+  TOKEN_ACCESS = "TOKEN_ACCESS",
 
   // Materialized subset
-  MATERIALIZED = 'MATERIALIZED',
+  MATERIALIZED = "MATERIALIZED",
 }
 ```
 
 ### Query Execution Modes
 
-| Mode | Description | Use Case |
-|------|-------------|----------|
-| `INTERACTIVE` | Sync execution, result streaming | Exploratory queries |
-| `BATCH` | Async execution, result persistence | Large aggregations |
-| `SCHEDULED` | Cron-triggered execution | Recurring reports |
-| `INCREMENTAL` | Delta processing | Time-series analysis |
+| Mode          | Description                         | Use Case             |
+| ------------- | ----------------------------------- | -------------------- |
+| `INTERACTIVE` | Sync execution, result streaming    | Exploratory queries  |
+| `BATCH`       | Async execution, result persistence | Large aggregations   |
+| `SCHEDULED`   | Cron-triggered execution            | Recurring reports    |
+| `INCREMENTAL` | Delta processing                    | Time-series analysis |
 
 ---
 
@@ -205,14 +205,14 @@ enum ProvisioningMethod {
 
 ### Resource Limits (per workspace)
 
-| Resource | AD_HOC | RECURRING_REPORT | MODEL_DEVELOPMENT | AUDIT |
-|----------|--------|------------------|-------------------|-------|
-| vCPU | 2 | 4 | 8 | 2 |
-| Memory | 4 GB | 8 GB | 32 GB | 4 GB |
-| Storage | 10 GB | 50 GB | 200 GB | 20 GB |
-| Query Timeout | 5 min | 30 min | 2 hours | 15 min |
-| Concurrent Queries | 3 | 5 | 10 | 3 |
-| Daily Query Volume | 100 | 500 | 1000 | 200 |
+| Resource           | AD_HOC | RECURRING_REPORT | MODEL_DEVELOPMENT | AUDIT  |
+| ------------------ | ------ | ---------------- | ----------------- | ------ |
+| vCPU               | 2      | 4                | 8                 | 2      |
+| Memory             | 4 GB   | 8 GB             | 32 GB             | 4 GB   |
+| Storage            | 10 GB  | 50 GB            | 200 GB            | 20 GB  |
+| Query Timeout      | 5 min  | 30 min           | 2 hours           | 15 min |
+| Concurrent Queries | 3      | 5                | 10                | 3      |
+| Daily Query Volume | 100    | 500              | 1000              | 200    |
 
 ### Egress Controls
 
@@ -228,16 +228,16 @@ interface EgressPolicy {
   dailyExportLimit: number;
 
   // Allowed export formats
-  allowedFormats: ('CSV' | 'JSON' | 'PARQUET' | 'XLSX')[];
+  allowedFormats: ("CSV" | "JSON" | "PARQUET" | "XLSX")[];
 
   // Allowed destinations
-  allowedDestinations: ('LOCAL' | 'S3' | 'GCS' | 'EMAIL')[];
+  allowedDestinations: ("LOCAL" | "S3" | "GCS" | "EMAIL")[];
 
   // Require approval for exports
   requireApproval: boolean;
 
   // Sensitive column handling
-  sensitiveColumnPolicy: 'MASK' | 'REDACT' | 'HASH' | 'BLOCK';
+  sensitiveColumnPolicy: "MASK" | "REDACT" | "HASH" | "BLOCK";
 
   // PII detection threshold
   piiDetectionEnabled: boolean;
@@ -326,7 +326,7 @@ interface ApprovalWorkflow {
   requiredApprovers: ApproverConfig[];
 
   // Current status
-  status: 'PENDING' | 'APPROVED' | 'DENIED' | 'EXPIRED';
+  status: "PENDING" | "APPROVED" | "DENIED" | "EXPIRED";
 
   // Justification/business case
   justification: string;
@@ -339,16 +339,16 @@ interface ApprovalWorkflow {
 }
 
 enum ApprovalType {
-  WORKSPACE_CREATION = 'WORKSPACE_CREATION',
-  ELEVATED_ACCESS = 'ELEVATED_ACCESS',
-  RAW_DATA_ACCESS = 'RAW_DATA_ACCESS',
-  EXPORT_REQUEST = 'EXPORT_REQUEST',
-  EXTENSION_REQUEST = 'EXTENSION_REQUEST',
-  SENSITIVE_QUERY = 'SENSITIVE_QUERY',
+  WORKSPACE_CREATION = "WORKSPACE_CREATION",
+  ELEVATED_ACCESS = "ELEVATED_ACCESS",
+  RAW_DATA_ACCESS = "RAW_DATA_ACCESS",
+  EXPORT_REQUEST = "EXPORT_REQUEST",
+  EXTENSION_REQUEST = "EXTENSION_REQUEST",
+  SENSITIVE_QUERY = "SENSITIVE_QUERY",
 }
 
 interface ApproverConfig {
-  role: 'DATA_OWNER' | 'SECURITY' | 'COMPLIANCE' | 'MANAGER';
+  role: "DATA_OWNER" | "SECURITY" | "COMPLIANCE" | "MANAGER";
   required: boolean;
   escalationTimeoutHours: number;
 }
@@ -356,14 +356,14 @@ interface ApproverConfig {
 
 ### Lifecycle Automation
 
-| Event | Trigger | Action |
-|-------|---------|--------|
-| Idle Detection | No queries > 24h | Send reminder, mark IDLE |
-| Auto-Archive | IDLE > 7 days | Archive artifacts, release compute |
-| Auto-Delete | ARCHIVED > retention period | Purge all data |
-| Compliance Scan | Weekly cron | Audit all active workspaces |
-| Cost Alert | Usage > 80% budget | Notify owner, throttle queries |
-| Anomaly Detection | Unusual query patterns | Flag for security review |
+| Event             | Trigger                     | Action                             |
+| ----------------- | --------------------------- | ---------------------------------- |
+| Idle Detection    | No queries > 24h            | Send reminder, mark IDLE           |
+| Auto-Archive      | IDLE > 7 days               | Archive artifacts, release compute |
+| Auto-Delete       | ARCHIVED > retention period | Purge all data                     |
+| Compliance Scan   | Weekly cron                 | Audit all active workspaces        |
+| Cost Alert        | Usage > 80% budget          | Notify owner, throttle queries     |
+| Anomaly Detection | Unusual query patterns      | Flag for security review           |
 
 ### Audit Requirements
 
@@ -381,7 +381,7 @@ interface AuditEvent {
 
   // What
   action: AuditAction;
-  resourceType: 'WORKSPACE' | 'QUERY' | 'EXPORT' | 'DATASET';
+  resourceType: "WORKSPACE" | "QUERY" | "EXPORT" | "DATASET";
   resourceId: string;
 
   // Context
@@ -390,7 +390,7 @@ interface AuditEvent {
 
   // Details
   parameters: Record<string, any>;
-  result: 'SUCCESS' | 'FAILURE' | 'DENIED';
+  result: "SUCCESS" | "FAILURE" | "DENIED";
 
   // For queries: sanitized SQL (no literals)
   sanitizedQuery?: string;
@@ -403,18 +403,18 @@ interface AuditEvent {
 }
 
 enum AuditAction {
-  WORKSPACE_CREATE = 'WORKSPACE_CREATE',
-  WORKSPACE_ACCESS = 'WORKSPACE_ACCESS',
-  WORKSPACE_UPDATE = 'WORKSPACE_UPDATE',
-  WORKSPACE_DELETE = 'WORKSPACE_DELETE',
-  QUERY_EXECUTE = 'QUERY_EXECUTE',
-  QUERY_CANCEL = 'QUERY_CANCEL',
-  DATA_ACCESS = 'DATA_ACCESS',
-  DATA_EXPORT = 'DATA_EXPORT',
-  SCHEMA_BROWSE = 'SCHEMA_BROWSE',
-  APPROVAL_REQUEST = 'APPROVAL_REQUEST',
-  APPROVAL_DECISION = 'APPROVAL_DECISION',
-  POLICY_VIOLATION = 'POLICY_VIOLATION',
+  WORKSPACE_CREATE = "WORKSPACE_CREATE",
+  WORKSPACE_ACCESS = "WORKSPACE_ACCESS",
+  WORKSPACE_UPDATE = "WORKSPACE_UPDATE",
+  WORKSPACE_DELETE = "WORKSPACE_DELETE",
+  QUERY_EXECUTE = "QUERY_EXECUTE",
+  QUERY_CANCEL = "QUERY_CANCEL",
+  DATA_ACCESS = "DATA_ACCESS",
+  DATA_EXPORT = "DATA_EXPORT",
+  SCHEMA_BROWSE = "SCHEMA_BROWSE",
+  APPROVAL_REQUEST = "APPROVAL_REQUEST",
+  APPROVAL_DECISION = "APPROVAL_DECISION",
+  POLICY_VIOLATION = "POLICY_VIOLATION",
 }
 ```
 
@@ -700,22 +700,22 @@ type Subscription {
 
 ### REST API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/v1/workspaces` | Create workspace |
-| `GET` | `/api/v1/workspaces` | List workspaces |
-| `GET` | `/api/v1/workspaces/:id` | Get workspace details |
-| `PATCH` | `/api/v1/workspaces/:id` | Update workspace |
-| `DELETE` | `/api/v1/workspaces/:id` | Archive/delete workspace |
-| `POST` | `/api/v1/workspaces/:id/queries` | Execute query |
-| `GET` | `/api/v1/workspaces/:id/queries/:queryId` | Get query result |
-| `POST` | `/api/v1/workspaces/:id/exports` | Request export |
-| `GET` | `/api/v1/workspaces/:id/exports/:exportId` | Download export |
-| `GET` | `/api/v1/datasets` | List available datasets |
-| `GET` | `/api/v1/datasets/:id/schema` | Get dataset schema |
-| `POST` | `/api/v1/approvals` | Create approval request |
-| `POST` | `/api/v1/approvals/:id/decide` | Approve/deny request |
-| `GET` | `/api/v1/audit` | Query audit log |
+| Method   | Endpoint                                   | Description              |
+| -------- | ------------------------------------------ | ------------------------ |
+| `POST`   | `/api/v1/workspaces`                       | Create workspace         |
+| `GET`    | `/api/v1/workspaces`                       | List workspaces          |
+| `GET`    | `/api/v1/workspaces/:id`                   | Get workspace details    |
+| `PATCH`  | `/api/v1/workspaces/:id`                   | Update workspace         |
+| `DELETE` | `/api/v1/workspaces/:id`                   | Archive/delete workspace |
+| `POST`   | `/api/v1/workspaces/:id/queries`           | Execute query            |
+| `GET`    | `/api/v1/workspaces/:id/queries/:queryId`  | Get query result         |
+| `POST`   | `/api/v1/workspaces/:id/exports`           | Request export           |
+| `GET`    | `/api/v1/workspaces/:id/exports/:exportId` | Download export          |
+| `GET`    | `/api/v1/datasets`                         | List available datasets  |
+| `GET`    | `/api/v1/datasets/:id/schema`              | Get dataset schema       |
+| `POST`   | `/api/v1/approvals`                        | Create approval request  |
+| `POST`   | `/api/v1/approvals/:id/decide`             | Approve/deny request     |
+| `GET`    | `/api/v1/audit`                            | Query audit log          |
 
 ---
 
@@ -727,41 +727,41 @@ type Subscription {
 // Key metrics to track
 const metrics = {
   // Workspace metrics
-  workspaces_total: new Gauge('workspaces_total', 'Total workspaces by status'),
-  workspace_creation_duration_seconds: new Histogram('workspace_creation_duration_seconds'),
+  workspaces_total: new Gauge("workspaces_total", "Total workspaces by status"),
+  workspace_creation_duration_seconds: new Histogram("workspace_creation_duration_seconds"),
 
   // Query metrics
-  queries_total: new Counter('queries_total', 'Total queries executed'),
-  query_duration_seconds: new Histogram('query_duration_seconds'),
-  query_rows_returned: new Histogram('query_rows_returned'),
-  query_bytes_scanned: new Histogram('query_bytes_scanned'),
+  queries_total: new Counter("queries_total", "Total queries executed"),
+  query_duration_seconds: new Histogram("query_duration_seconds"),
+  query_rows_returned: new Histogram("query_rows_returned"),
+  query_bytes_scanned: new Histogram("query_bytes_scanned"),
 
   // Export metrics
-  exports_total: new Counter('exports_total', 'Total exports'),
-  export_rows_total: new Counter('export_rows_total'),
-  export_bytes_total: new Counter('export_bytes_total'),
+  exports_total: new Counter("exports_total", "Total exports"),
+  export_rows_total: new Counter("export_rows_total"),
+  export_bytes_total: new Counter("export_bytes_total"),
 
   // Policy metrics
-  policy_decisions_total: new Counter('policy_decisions_total', 'Policy decisions'),
-  policy_violations_total: new Counter('policy_violations_total'),
+  policy_decisions_total: new Counter("policy_decisions_total", "Policy decisions"),
+  policy_violations_total: new Counter("policy_violations_total"),
 
   // Resource metrics
-  workspace_cpu_usage: new Gauge('workspace_cpu_usage'),
-  workspace_memory_usage: new Gauge('workspace_memory_usage'),
-  workspace_storage_usage: new Gauge('workspace_storage_usage'),
+  workspace_cpu_usage: new Gauge("workspace_cpu_usage"),
+  workspace_memory_usage: new Gauge("workspace_memory_usage"),
+  workspace_storage_usage: new Gauge("workspace_storage_usage"),
 };
 ```
 
 ### SLOs
 
-| SLO | Target | Measurement |
-|-----|--------|-------------|
-| Workspace provisioning time | < 5 minutes p99 | Time from request to ACTIVE state |
-| Query latency (interactive) | < 30 seconds p95 | Time to first result |
-| Export availability | < 2 minutes p95 | Time to download ready |
-| API availability | 99.9% | Successful requests / total |
-| Audit log completeness | 100% | Events logged / events generated |
-| Policy evaluation latency | < 50ms p99 | OPA decision time |
+| SLO                         | Target           | Measurement                       |
+| --------------------------- | ---------------- | --------------------------------- |
+| Workspace provisioning time | < 5 minutes p99  | Time from request to ACTIVE state |
+| Query latency (interactive) | < 30 seconds p95 | Time to first result              |
+| Export availability         | < 2 minutes p95  | Time to download ready            |
+| API availability            | 99.9%            | Successful requests / total       |
+| Audit log completeness      | 100%             | Events logged / events generated  |
+| Policy evaluation latency   | < 50ms p99       | OPA decision time                 |
 
 ### Alerting Rules
 
@@ -816,8 +816,8 @@ groups:
 // Structured logging format
 interface WorkbenchLogEntry {
   timestamp: string;
-  level: 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
-  service: 'analytics-workbench';
+  level: "DEBUG" | "INFO" | "WARN" | "ERROR";
+  service: "analytics-workbench";
 
   // Correlation
   traceId: string;
@@ -846,14 +846,14 @@ interface WorkbenchLogEntry {
 
 ### Regulatory Mapping
 
-| Requirement | How We Address |
-|-------------|----------------|
-| **GDPR Art. 5** (Data minimization) | Dataset tiering, sampling, anonymization |
-| **GDPR Art. 17** (Right to erasure) | Workspace deletion cascades to all derivatives |
-| **SOC 2 CC6.1** (Logical access) | RBAC + ABAC via OPA policies |
-| **SOC 2 CC6.7** (Data transmission) | TLS 1.3, egress controls |
-| **HIPAA 164.312(b)** (Audit controls) | Comprehensive audit logging |
-| **PCI DSS 10.2** (Audit trails) | All access logged with user identification |
+| Requirement                           | How We Address                                 |
+| ------------------------------------- | ---------------------------------------------- |
+| **GDPR Art. 5** (Data minimization)   | Dataset tiering, sampling, anonymization       |
+| **GDPR Art. 17** (Right to erasure)   | Workspace deletion cascades to all derivatives |
+| **SOC 2 CC6.1** (Logical access)      | RBAC + ABAC via OPA policies                   |
+| **SOC 2 CC6.7** (Data transmission)   | TLS 1.3, egress controls                       |
+| **HIPAA 164.312(b)** (Audit controls) | Comprehensive audit logging                    |
+| **PCI DSS 10.2** (Audit trails)       | All access logged with user identification     |
 
 ### Compliance Checklist
 
@@ -899,15 +899,15 @@ See: [Analytics Workspace Compliance Checklist](./analytics-workspace-compliance
 
 ## Dependencies
 
-| Dependency | Purpose | Status |
-|------------|---------|--------|
-| `policy` service | OPA integration | Existing |
-| `audit_svc` | Audit event storage | Existing |
-| `data-spine` | Data catalog | Existing |
-| `data-quality` | Data profiling | Existing |
-| PostgreSQL | Workspace metadata | Existing |
-| Redis | Query result cache | Existing |
-| Kafka | Event streaming | Existing |
+| Dependency       | Purpose             | Status   |
+| ---------------- | ------------------- | -------- |
+| `policy` service | OPA integration     | Existing |
+| `audit_svc`      | Audit event storage | Existing |
+| `data-spine`     | Data catalog        | Existing |
+| `data-quality`   | Data profiling      | Existing |
+| PostgreSQL       | Workspace metadata  | Existing |
+| Redis            | Query result cache  | Existing |
+| Kafka            | Event streaming     | Existing |
 
 ---
 
@@ -935,6 +935,6 @@ See: [Analytics Workspace Compliance Checklist](./analytics-workspace-compliance
 
 ## Changelog
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 0.1.0 | 2025-12-07 | Analytics Team | Initial draft |
+| Version | Date       | Author         | Changes       |
+| ------- | ---------- | -------------- | ------------- |
+| 0.1.0   | 2025-12-07 | Analytics Team | Initial draft |

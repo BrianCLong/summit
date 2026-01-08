@@ -86,11 +86,13 @@ class FileProvider implements Provider {
     }
 
     if (Array.isArray(entry.tenants?.deny) && ctx.tenant) {
-      if (entry.tenants.deny.includes(ctx.tenant)) return { key, value: false, source: `${this.name}:deny` };
+      if (entry.tenants.deny.includes(ctx.tenant))
+        return { key, value: false, source: `${this.name}:deny` };
     }
 
     if (Array.isArray(entry.tenants?.allow) && ctx.tenant) {
-      if (entry.tenants.allow.includes(ctx.tenant)) return { key, value: entry.value ?? true, source: `${this.name}:allow` };
+      if (entry.tenants.allow.includes(ctx.tenant))
+        return { key, value: entry.value ?? true, source: `${this.name}:allow` };
     }
 
     if (typeof entry.percentage === "number" && entry.percentage >= 0) {
@@ -186,7 +188,9 @@ function safeLoadYaml(content: string): any {
 
 function simpleYaml(content: string): Record<string, unknown> | null {
   const root: Record<string, unknown> = {};
-  const stack: Array<{ indent: number; node: Record<string, unknown> }> = [{ indent: 0, node: root }];
+  const stack: Array<{ indent: number; node: Record<string, unknown> }> = [
+    { indent: 0, node: root },
+  ];
   const parseVal = (raw: string): unknown => {
     if (raw === "true") return true;
     if (raw === "false") return false;
@@ -198,7 +202,7 @@ function simpleYaml(content: string): Record<string, unknown> | null {
         .map((v) => parseVal(v.trim()))
         .filter((v) => v !== "");
     }
-    if (raw.startsWith("\"") && raw.endsWith("\"")) return raw.slice(1, -1);
+    if (raw.startsWith('"') && raw.endsWith('"')) return raw.slice(1, -1);
     return raw;
   };
   for (const line of content.split(/\r?\n/)) {
@@ -235,7 +239,11 @@ export class FlagClient {
   private catalog: Record<string, FlagDefinition> = {};
 
   constructor(options: FlagSDKOptions) {
-    this.options = { cacheTtlMs: 60_000, targetsDir: path.join(process.cwd(), "flags/targets"), ...options };
+    this.options = {
+      cacheTtlMs: 60_000,
+      targetsDir: path.join(process.cwd(), "flags/targets"),
+      ...options,
+    };
     this.providers = [
       new EnvProvider(),
       new FileProvider(this.options.targetsDir!),
@@ -256,7 +264,11 @@ export class FlagClient {
     });
   }
 
-  async get<T extends FlagPrimitive>(key: string, defaultValue?: T, ctxOverrides?: Partial<FlagContext>): Promise<T> {
+  async get<T extends FlagPrimitive>(
+    key: string,
+    defaultValue?: T,
+    ctxOverrides?: Partial<FlagContext>
+  ): Promise<T> {
     const ctx: FlagContext = { env: this.options.env, ...ctxOverrides } as FlagContext;
     const cached = this.fromCache(key);
     if (cached) return cached.value as T;
@@ -278,7 +290,12 @@ export class FlagClient {
 
   private toCache(resolution: FlagResolution): void {
     const expiresAt = Date.now() + (this.options.cacheTtlMs ?? 60_000);
-    const entry: CacheEntry = { value: resolution.value, source: resolution.source, etag: resolution.etag, expiresAt };
+    const entry: CacheEntry = {
+      value: resolution.value,
+      source: resolution.source,
+      etag: resolution.etag,
+      expiresAt,
+    };
     this.cache.set(resolution.key, entry);
     this.lastKnownGood.set(resolution.key, entry);
   }
@@ -308,6 +325,9 @@ export class FlagClient {
 
 export const defaultClient = new FlagClient({ env: process.env.NODE_ENV ?? "dev" });
 
-export function withFlags<T extends FlagPrimitive>(key: string, ctx: Partial<FlagContext> = {}): Promise<T> {
+export function withFlags<T extends FlagPrimitive>(
+  key: string,
+  ctx: Partial<FlagContext> = {}
+): Promise<T> {
   return defaultClient.get<T>(key, undefined, ctx);
 }

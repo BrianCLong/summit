@@ -1,5 +1,5 @@
 // conductor-ui/frontend/src/components/evidence/EvidenceExportButton.tsx
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const exportEvidenceBundle = async (runId: string) => {
   console.log(`Exporting evidence for run ${runId}...`);
@@ -19,7 +19,7 @@ export const EvidenceExportButton = ({ runId }: { runId: string }) => {
 
   return (
     <button onClick={handleClick} disabled={isExporting}>
-      {isExporting ? 'Exporting...' : 'Export Evidence Bundle v0.2'}
+      {isExporting ? "Exporting..." : "Export Evidence Bundle v0.2"}
     </button>
   );
 };

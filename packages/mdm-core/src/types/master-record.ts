@@ -22,7 +22,7 @@ export interface CrossReference {
   sourceSystem: string;
   sourceRecordId: string;
   masterRecordId: string;
-  linkType: 'exact' | 'fuzzy' | 'manual' | 'derived';
+  linkType: "exact" | "fuzzy" | "manual" | "derived";
   confidence: number;
   createdAt: Date;
   createdBy: string;
@@ -43,13 +43,13 @@ export interface SurvivorshipRule {
 }
 
 export type SurvivorshipStrategy =
-  | 'most_recent'
-  | 'most_complete'
-  | 'most_trusted_source'
-  | 'most_frequent'
-  | 'highest_quality_score'
-  | 'longest_value'
-  | 'custom';
+  | "most_recent"
+  | "most_complete"
+  | "most_trusted_source"
+  | "most_frequent"
+  | "highest_quality_score"
+  | "longest_value"
+  | "custom";
 
 export interface MasterRecord {
   id: MasterRecordId;
@@ -68,11 +68,11 @@ export interface MasterRecord {
 }
 
 export type CertificationStatus =
-  | 'draft'
-  | 'pending_review'
-  | 'certified'
-  | 'deprecated'
-  | 'archived';
+  | "draft"
+  | "pending_review"
+  | "certified"
+  | "deprecated"
+  | "archived";
 
 export interface RecordLineage {
   sourceOperations: LineageOperation[];
@@ -83,7 +83,7 @@ export interface RecordLineage {
 
 export interface LineageOperation {
   operationId: string;
-  operationType: 'create' | 'update' | 'merge' | 'split' | 'delete';
+  operationType: "create" | "update" | "merge" | "split" | "delete";
   timestamp: Date;
   user: string;
   sourceSystem?: string;
@@ -142,7 +142,7 @@ export interface MasterRecordConflictResolution {
 export interface MasterRecordMetadata {
   tags: string[];
   classifications: string[];
-  sensitivity: 'public' | 'internal' | 'confidential' | 'restricted';
+  sensitivity: "public" | "internal" | "confidential" | "restricted";
   retentionPolicy?: string;
   dataOwner?: string;
   lastCertifiedAt?: Date;

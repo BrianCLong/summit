@@ -188,9 +188,7 @@ flowchart TD
   "from": "v1.2.1",
   "to": "v1.2.2",
   "missing": [],
-  "changed": [
-    { "artifact": "schema-diff.json", "delta": "+1 type, -0 fields" }
-  ],
+  "changed": [{ "artifact": "schema-diff.json", "delta": "+1 type, -0 fields" }],
   "score": 0.97
 }
 ```
@@ -261,7 +259,7 @@ if (!ok) useLastGood();
 **Wave Planner (pseudo)**
 
 ```ts
-makeWaves(tenants, { maxWaveQps: 2000, by: 'region' });
+makeWaves(tenants, { maxWaveQps: 2000, by: "region" });
 ```
 
 **Workload Profile Exporter**
@@ -273,8 +271,8 @@ makeWaves(tenants, { maxWaveQps: 2000, by: 'region' });
 **Zero‑Trust Middleware**
 
 ```ts
-if (risk === 'medium' && !stepUp) return res.status(401);
-if (risk === 'high') return res.status(403);
+if (risk === "medium" && !stepUp) return res.status(401);
+if (risk === "high") return res.status(403);
 ```
 
 **Tenant Analytics Panels (Grafana JSON export)**

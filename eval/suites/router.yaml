@@ -7,5 +7,5 @@ tasks:
     metric: rougeL
 candidates:
   - route: nlp/summarize
-    models: ['gpt-4o', 'claude-3.5', 'gemini-1.5-pro']
+    models: ["gpt-4o", "claude-3.5", "gemini-1.5-pro"]
 budget: { max_cost_usd: 50.0 }

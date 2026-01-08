@@ -4,19 +4,25 @@
  * Provides defense-in-depth against quantum attacks
  */
 
-import { KeyEncapsulationMechanism, KeyPair, EncapsulatedSecret, PQCAlgorithm, HybridScheme } from '../types';
-import { KyberKEM } from '../algorithms/kyber';
-import { sha256 } from '@noble/hashes/sha256';
-import { hkdf } from '@noble/hashes/hkdf';
+import {
+  KeyEncapsulationMechanism,
+  KeyPair,
+  EncapsulatedSecret,
+  PQCAlgorithm,
+  HybridScheme,
+} from "../types";
+import { KyberKEM } from "../algorithms/kyber";
+import { sha256 } from "@noble/hashes/sha256";
+import { hkdf } from "@noble/hashes/hkdf";
 
 export class HybridKEM implements KeyEncapsulationMechanism {
-  private classicalAlgorithm: 'x25519' | 'p256';
+  private classicalAlgorithm: "x25519" | "p256";
   private quantumKEM: KyberKEM;
   private hybridScheme: HybridScheme;
 
-  constructor(classicalAlgorithm: 'x25519' | 'p256' = 'x25519', quantumKEM?: KyberKEM) {
+  constructor(classicalAlgorithm: "x25519" | "p256" = "x25519", quantumKEM?: KyberKEM) {
     this.classicalAlgorithm = classicalAlgorithm;
-    this.quantumKEM = quantumKEM || new KyberKEM('kyber768');
+    this.quantumKEM = quantumKEM || new KyberKEM("kyber768");
 
     this.hybridScheme = {
       classicalAlgorithm,
@@ -58,8 +64,14 @@ export class HybridKEM implements KeyEncapsulationMechanism {
     const quantumSecret = await this.quantumKEM.encapsulate(quantumKey);
 
     // Combine secrets using KDF
-    const combinedSecret = this.combineKeys(classicalSecret.sharedSecret, quantumSecret.sharedSecret);
-    const combinedCiphertext = this.concatenateKeys(classicalSecret.ciphertext, quantumSecret.ciphertext);
+    const combinedSecret = this.combineKeys(
+      classicalSecret.sharedSecret,
+      quantumSecret.sharedSecret
+    );
+    const combinedCiphertext = this.concatenateKeys(
+      classicalSecret.ciphertext,
+      quantumSecret.ciphertext
+    );
 
     return {
       ciphertext: combinedCiphertext,
@@ -69,11 +81,16 @@ export class HybridKEM implements KeyEncapsulationMechanism {
 
   async decapsulate(ciphertext: Uint8Array, privateKey: Uint8Array): Promise<Uint8Array> {
     // Split hybrid private key and ciphertext
-    const { classicalKey: classicalPrivateKey, quantumKey: quantumPrivateKey } = this.splitHybridKey(privateKey);
-    const { classicalKey: classicalCiphertext, quantumKey: quantumCiphertext } = this.splitHybridCiphertext(ciphertext);
+    const { classicalKey: classicalPrivateKey, quantumKey: quantumPrivateKey } =
+      this.splitHybridKey(privateKey);
+    const { classicalKey: classicalCiphertext, quantumKey: quantumCiphertext } =
+      this.splitHybridCiphertext(ciphertext);
 
     // Perform both decapsulations
-    const classicalSecret = await this.decapsulateClassical(classicalCiphertext, classicalPrivateKey);
+    const classicalSecret = await this.decapsulateClassical(
+      classicalCiphertext,
+      classicalPrivateKey
+    );
     const quantumSecret = await this.quantumKEM.decapsulate(quantumCiphertext, quantumPrivateKey);
 
     // Combine secrets using same KDF
@@ -90,8 +107,11 @@ export class HybridKEM implements KeyEncapsulationMechanism {
     return this.quantumKEM.getSecurityLevel();
   }
 
-  private async generateClassicalKeyPair(): Promise<{ publicKey: Uint8Array; privateKey: Uint8Array }> {
-    if (this.classicalAlgorithm === 'x25519') {
+  private async generateClassicalKeyPair(): Promise<{
+    publicKey: Uint8Array;
+    privateKey: Uint8Array;
+  }> {
+    if (this.classicalAlgorithm === "x25519") {
       // Generate X25519 key pair
       const privateKey = crypto.getRandomValues(new Uint8Array(32));
       const publicKey = new Uint8Array(32); // Would compute from private key
@@ -122,7 +142,10 @@ export class HybridKEM implements KeyEncapsulationMechanism {
     };
   }
 
-  private async decapsulateClassical(ciphertext: Uint8Array, privateKey: Uint8Array): Promise<Uint8Array> {
+  private async decapsulateClassical(
+    ciphertext: Uint8Array,
+    privateKey: Uint8Array
+  ): Promise<Uint8Array> {
     // Compute shared secret from ephemeral public key and private key
     const sharedSecret = new Uint8Array(32);
     crypto.getRandomValues(sharedSecret);
@@ -135,7 +158,7 @@ export class HybridKEM implements KeyEncapsulationMechanism {
     // This ensures both secrets contribute to final key material
     const combined = new Uint8Array([...classicalKey, ...quantumKey]);
     const salt = new Uint8Array(32);
-    const info = new TextEncoder().encode('hybrid-kem-v1');
+    const info = new TextEncoder().encode("hybrid-kem-v1");
 
     // Derive 32-byte key from combined secrets
     return hkdf(sha256, combined, salt, info, 32);
@@ -160,7 +183,10 @@ export class HybridKEM implements KeyEncapsulationMechanism {
     return combined;
   }
 
-  private splitHybridKey(hybridKey: Uint8Array): { classicalKey: Uint8Array; quantumKey: Uint8Array } {
+  private splitHybridKey(hybridKey: Uint8Array): {
+    classicalKey: Uint8Array;
+    quantumKey: Uint8Array;
+  } {
     const view = new DataView(hybridKey.buffer, hybridKey.byteOffset);
     const classicalKeyLength = view.getUint32(0, false);
 
@@ -170,11 +196,14 @@ export class HybridKEM implements KeyEncapsulationMechanism {
     return { classicalKey, quantumKey };
   }
 
-  private splitHybridCiphertext(ciphertext: Uint8Array): { classicalKey: Uint8Array; quantumKey: Uint8Array } {
+  private splitHybridCiphertext(ciphertext: Uint8Array): {
+    classicalKey: Uint8Array;
+    quantumKey: Uint8Array;
+  } {
     return this.splitHybridKey(ciphertext);
   }
 }
 
-export function createHybridKEM(classicalAlgorithm: 'x25519' | 'p256' = 'x25519'): HybridKEM {
+export function createHybridKEM(classicalAlgorithm: "x25519" | "p256" = "x25519"): HybridKEM {
   return new HybridKEM(classicalAlgorithm);
 }

@@ -7,6 +7,7 @@ The Command Center is a tool to generate a single "state of the world" report fo
 ## Usage
 
 ### Prerequisites
+
 - Node.js 18+
 - `pnpm`
 - `gh` CLI (for live mode) authenticated via `gh auth login`
@@ -14,6 +15,7 @@ The Command Center is a tool to generate a single "state of the world" report fo
 ### Modes
 
 #### 1. Live Mode
+
 Connects to GitHub API via `gh` CLI to fetch real-time data.
 
 ```bash
@@ -23,6 +25,7 @@ node scripts/ops/command-center.ts --mode=live
 ```
 
 #### 2. Offline Mode (Testing / Fallback)
+
 Uses local JSON snapshots located in `scripts/ops/snapshots/`. Useful for testing the generator logic or when offline.
 
 ```bash
@@ -34,6 +37,7 @@ node scripts/ops/command-center.ts --mode=offline --snapshotsDir=scripts/ops/sna
 ## Maintenance
 
 ### Updating Snapshots
+
 To update the offline snapshots with real data (requires `gh`):
 
 ```bash
@@ -44,8 +48,10 @@ gh issue list --limit 100 --json number,title,labels,updatedAt,state > scripts/o
 ```
 
 ### Adding New Failure Clusters
+
 Edit `scripts/ops/command-center.ts` and update the `CLUSTERS` object regex patterns.
 
 ### Claude Integration
+
 To wire this into CI later, add a step in `.github/workflows/ci.yml` that runs:
 `pnpm ops:command-center:offline` (to verify the script runs) or `pnpm ops:command-center` (if GITHUB_TOKEN is available) to generate an artifact.

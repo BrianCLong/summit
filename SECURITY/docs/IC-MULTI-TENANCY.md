@@ -15,6 +15,7 @@ This document describes the security hardening implementation for Summit/IntelGr
 Comprehensive role-based access control with tenant isolation.
 
 **Capabilities:**
+
 - Strict tenant isolation enforcement
 - Hierarchical role inheritance (viewer → analyst → supervisor → admin)
 - Clearance-level based access control
@@ -23,6 +24,7 @@ Comprehensive role-based access control with tenant isolation.
 - Cross-tenant access controls
 
 **Roles Hierarchy:**
+
 ```
 global-admin     → Full system access
   └─ tenant-admin  → Full tenant access
@@ -39,6 +41,7 @@ ot-integrator      → OT system integration access
 Automated credential rotation with encryption at rest.
 
 **Capabilities:**
+
 - Automatic rotation scheduling (configurable per secret type)
 - Version management with grace periods
 - Encryption at rest using AES-256-GCM
@@ -61,6 +64,7 @@ Automated credential rotation with encryption at rest.
 Secure CI/CD authentication using GitHub's OIDC provider.
 
 **Capabilities:**
+
 - Token validation against GitHub's JWKS endpoint
 - Repository/workflow claim verification
 - Branch/environment restrictions
@@ -69,6 +73,7 @@ Secure CI/CD authentication using GitHub's OIDC provider.
 - Token exchange for service credentials
 
 **Configuration Environment Variables:**
+
 ```bash
 GITHUB_OIDC_AUDIENCE=https://github.com/org/repo
 GITHUB_OIDC_ALLOWED_REPOS=org/repo1,org/repo2
@@ -84,6 +89,7 @@ GITHUB_OIDC_ALLOW_PR=false
 Real-time forensics logging using Redis Streams.
 
 **Capabilities:**
+
 - High-throughput, low-latency event streaming
 - Tamper-evident hash chains (SHA-256)
 - Consumer group support for distributed processing
@@ -92,6 +98,7 @@ Real-time forensics logging using Redis Streams.
 - Structured event types and severity levels
 
 **Event Types:**
+
 - `authentication` - Login/logout events
 - `authorization` - Permission checks
 - `access` - Resource access
@@ -107,6 +114,7 @@ Real-time forensics logging using Redis Streams.
 Comprehensive ABAC policy for fine-grained access control.
 
 **Features:**
+
 - Default deny with explicit allow
 - Tenant isolation enforcement
 - Clearance level checks
@@ -151,19 +159,21 @@ Comprehensive ABAC policy for fine-grained access control.
 
 ### Safety vs. Latency
 
-| Feature | Safety Gain | Latency Impact | Mitigation |
-|---------|-------------|----------------|------------|
-| Chain hashing | Tamper detection | +2-5ms per event | Async batching |
-| OPA policy eval | Fine-grained ABAC | +5-10ms per request | LRU caching (60s TTL) |
-| Secret encryption | At-rest protection | +1-2ms on access | In-memory cache |
-| JWT verification | Token integrity | +10-50ms on cache miss | JWKS caching (10min) |
-| Tenant isolation | Data segregation | +1-2ms DB query | Permission caching |
+| Feature           | Safety Gain        | Latency Impact         | Mitigation            |
+| ----------------- | ------------------ | ---------------------- | --------------------- |
+| Chain hashing     | Tamper detection   | +2-5ms per event       | Async batching        |
+| OPA policy eval   | Fine-grained ABAC  | +5-10ms per request    | LRU caching (60s TTL) |
+| Secret encryption | At-rest protection | +1-2ms on access       | In-memory cache       |
+| JWT verification  | Token integrity    | +10-50ms on cache miss | JWKS caching (10min)  |
+| Tenant isolation  | Data segregation   | +1-2ms DB query        | Permission caching    |
 
 ### Design Decisions
 
 #### 1. Redis Streams over Kafka for Forensics
+
 **Chosen:** Redis Streams
 **Rationale:**
+
 - Lower operational complexity
 - Sub-millisecond latency
 - Built-in consumer groups
@@ -173,8 +183,10 @@ Comprehensive ABAC policy for fine-grained access control.
 **Tradeoff:** Less durable than Kafka; mitigated by async archival to durable storage.
 
 #### 2. In-Process OPA over Sidecar
+
 **Chosen:** HTTP client to OPA server
 **Rationale:**
+
 - Centralized policy management
 - Hot-reload without service restart
 - Easier policy debugging
@@ -183,8 +195,10 @@ Comprehensive ABAC policy for fine-grained access control.
 **Tradeoff:** Network latency; mitigated by caching and retry logic.
 
 #### 3. SHA-256 Hash Chains over Merkle Trees
+
 **Chosen:** Linear hash chains
 **Rationale:**
+
 - Simpler implementation
 - Sufficient for sequential audit logs
 - O(n) verification acceptable for audit use case
@@ -193,8 +207,10 @@ Comprehensive ABAC policy for fine-grained access control.
 **Tradeoff:** O(n) verification; acceptable for targeted integrity checks.
 
 #### 4. AES-256-GCM for Secret Encryption
+
 **Chosen:** AES-256-GCM
 **Rationale:**
+
 - Authenticated encryption (integrity + confidentiality)
 - Hardware acceleration (AES-NI)
 - NIST approved, FIPS 140-2 compliant
@@ -206,14 +222,14 @@ Comprehensive ABAC policy for fine-grained access control.
 
 ### Expected Latency Additions
 
-| Operation | P50 | P95 | P99 |
-|-----------|-----|-----|-----|
-| RBAC check (cached) | <1ms | 2ms | 5ms |
-| RBAC check (uncached) | 5ms | 15ms | 30ms |
-| OPA evaluation (cached) | <1ms | 2ms | 5ms |
+| Operation                 | P50  | P95  | P99  |
+| ------------------------- | ---- | ---- | ---- |
+| RBAC check (cached)       | <1ms | 2ms  | 5ms  |
+| RBAC check (uncached)     | 5ms  | 15ms | 30ms |
+| OPA evaluation (cached)   | <1ms | 2ms  | 5ms  |
 | OPA evaluation (uncached) | 10ms | 25ms | 50ms |
-| Forensics log (async) | <1ms | 1ms | 2ms |
-| Secret retrieval (cached) | <1ms | 2ms | 5ms |
+| Forensics log (async)     | <1ms | 1ms  | 2ms  |
+| Secret retrieval (cached) | <1ms | 2ms  | 5ms  |
 
 ### Throughput
 
@@ -234,6 +250,7 @@ Comprehensive ABAC policy for fine-grained access control.
 ### Denied Environments
 
 Configure restricted environments via:
+
 ```bash
 DENIED_ENVIRONMENTS=ot:scada,ot:plc,restricted:nuclear
 DENIED_OT_SYSTEMS=scada,plc,dcs
@@ -250,37 +267,38 @@ DENIED_OT_SYSTEMS=scada,plc,dcs
 ### Multi-Tenant RBAC
 
 ```typescript
-import { getMultiTenantRBAC, requireTenantPermission } from './auth/multi-tenant-rbac';
+import { getMultiTenantRBAC, requireTenantPermission } from "./auth/multi-tenant-rbac";
 
 const rbac = getMultiTenantRBAC();
 
 // Middleware usage
-app.get('/investigations/:id',
+app.get(
+  "/investigations/:id",
   authenticateUser,
-  requireTenantPermission(rbac, 'investigation:read'),
+  requireTenantPermission(rbac, "investigation:read"),
   getInvestigation
 );
 
 // Programmatic check
-const allowed = rbac.hasPermission(user, 'entity:create', 'tenant-123');
+const allowed = rbac.hasPermission(user, "entity:create", "tenant-123");
 ```
 
 ### Secret Rotation
 
 ```typescript
-import { getSecretRotationManager } from './security/secret-rotation';
+import { getSecretRotationManager } from "./security/secret-rotation";
 
 const secrets = getSecretRotationManager();
 await secrets.initialize();
 
 // Register a secret
-const metadata = await secrets.registerSecret('api-key', 'my-api-key', 'secret-value');
+const metadata = await secrets.registerSecret("api-key", "my-api-key", "secret-value");
 
 // Rotate manually
-await secrets.rotateSecret(metadata.id, 'manual');
+await secrets.rotateSecret(metadata.id, "manual");
 
 // Listen for rotation events
-secrets.on('secret:rotated', (event) => {
+secrets.on("secret:rotated", (event) => {
   console.log(`Secret rotated: ${event.secretId}`);
 });
 ```
@@ -288,23 +306,23 @@ secrets.on('secret:rotated', (event) => {
 ### Forensics Logging
 
 ```typescript
-import { getForensicsLogger } from './audit/forensics-logger';
+import { getForensicsLogger } from "./audit/forensics-logger";
 
 const forensics = getForensicsLogger();
 await forensics.initialize();
 
 // Log authentication
 await forensics.logAuthentication(
-  { id: 'user-123', type: 'user', email: 'user@example.com' },
-  'login',
-  'success',
-  { method: 'OIDC', provider: 'okta' }
+  { id: "user-123", type: "user", email: "user@example.com" },
+  "login",
+  "success",
+  { method: "OIDC", provider: "okta" }
 );
 
 // Query events
 const events = await forensics.queryEvents({
-  eventType: 'authentication',
-  actorId: 'user-123',
+  eventType: "authentication",
+  actorId: "user-123",
   startTime: new Date(Date.now() - 24 * 60 * 60 * 1000),
 });
 ```
@@ -312,24 +330,26 @@ const events = await forensics.queryEvents({
 ### GitHub Actions OIDC
 
 ```typescript
-import { getGitHubActionsOIDC, createGitHubActionsAuth } from './auth/github-actions-oidc';
+import { getGitHubActionsOIDC, createGitHubActionsAuth } from "./auth/github-actions-oidc";
 
 const ghAuth = getGitHubActionsOIDC();
 
 // Middleware for CI/CD endpoints
-app.post('/deploy',
+app.post(
+  "/deploy",
   createGitHubActionsAuth(ghAuth),
-  requireGitHubEnvironment(['production']),
+  requireGitHubEnvironment(["production"]),
   deployHandler
 );
 
 // Token exchange
-const credential = await ghAuth.exchangeToken(oidcToken, ['deploy:write']);
+const credential = await ghAuth.exchangeToken(oidcToken, ["deploy:write"]);
 ```
 
 ## Testing
 
 Run tests with:
+
 ```bash
 # All security tests
 pnpm test -- --testPathPattern="auth|security|audit"

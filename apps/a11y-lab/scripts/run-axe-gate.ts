@@ -1,24 +1,24 @@
-import { JSDOM } from 'jsdom';
-import axe from 'axe-core';
+import { JSDOM } from "jsdom";
+import axe from "axe-core";
 
 async function main() {
   const dom = new JSDOM(samplePage);
   const results = await axe.run(dom.window.document, {
-    runOnly: ['wcag2a', 'wcag2aa'],
-    resultTypes: ['violations'],
+    runOnly: ["wcag2a", "wcag2aa"],
+    resultTypes: ["violations"],
   });
-  const critical = results.violations.filter((violation) => violation.impact === 'critical');
+  const critical = results.violations.filter((violation) => violation.impact === "critical");
   if (critical.length > 0) {
-    console.error('Critical accessibility issues detected:');
-    console.error(critical.map((item) => `${item.id}: ${item.description}`).join('\n'));
+    console.error("Critical accessibility issues detected:");
+    console.error(critical.map((item) => `${item.id}: ${item.description}`).join("\n"));
     process.exitCode = 1;
   } else {
-    console.log('axe-core gate passed with zero critical violations');
+    console.log("axe-core gate passed with zero critical violations");
   }
 }
 
 main().catch((error) => {
-  console.error('axe-core gate failed', error);
+  console.error("axe-core gate failed", error);
   process.exitCode = 1;
 });
 

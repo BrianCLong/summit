@@ -17,7 +17,14 @@ import {
   ENTITY_UPDATED_SUBSCRIPTION,
   ALERT_CREATED_SUBSCRIPTION,
 } from './operations';
-import type { Entity, Investigation, OSINTAlert, GEOINTFeature, GEOINTLayer, Priority } from '@/types';
+import type {
+  Entity,
+  Investigation,
+  OSINTAlert,
+  GEOINTFeature,
+  GEOINTLayer,
+  Priority,
+} from '@/types';
 
 // ============================================
 // Entity Hooks
@@ -33,13 +40,10 @@ export interface UseEntitiesOptions {
 export const useEntities = (options: UseEntitiesOptions = {}) => {
   const { filter, search, first = 20, after } = options;
 
-  const { data, loading, error, fetchMore, refetch, subscribeToMore } = useQuery(
-    GET_ENTITIES,
-    {
-      variables: { filter, search, first, after },
-      notifyOnNetworkStatusChange: true,
-    },
-  );
+  const { data, loading, error, fetchMore, refetch, subscribeToMore } = useQuery(GET_ENTITIES, {
+    variables: { filter, search, first, after },
+    notifyOnNetworkStatusChange: true,
+  });
 
   // Subscribe to new entities
   useEffect(() => {
@@ -150,13 +154,10 @@ export interface UseInvestigationsOptions {
 export const useInvestigations = (options: UseInvestigationsOptions = {}) => {
   const { filter, first = 20, after } = options;
 
-  const { data, loading, error, fetchMore, refetch } = useQuery(
-    GET_INVESTIGATIONS,
-    {
-      variables: { filter, first, after },
-      notifyOnNetworkStatusChange: true,
-    },
-  );
+  const { data, loading, error, fetchMore, refetch } = useQuery(GET_INVESTIGATIONS, {
+    variables: { filter, first, after },
+    notifyOnNetworkStatusChange: true,
+  });
 
   const loadMore = useCallback(() => {
     if (data?.investigations?.pageInfo?.hasNextPage) {
@@ -167,8 +168,7 @@ export const useInvestigations = (options: UseInvestigationsOptions = {}) => {
   }, [data, fetchMore]);
 
   return {
-    investigations:
-      data?.investigations?.edges?.map((e: { node: Investigation }) => e.node) || [],
+    investigations: data?.investigations?.edges?.map((e: { node: Investigation }) => e.node) || [],
     totalCount: data?.investigations?.totalCount || 0,
     hasNextPage: data?.investigations?.pageInfo?.hasNextPage || false,
     loading,
@@ -206,13 +206,10 @@ export interface UseAlertsOptions {
 export const useAlerts = (options: UseAlertsOptions = {}) => {
   const { filter, priority, first = 20, after } = options;
 
-  const { data, loading, error, fetchMore, refetch, subscribeToMore } = useQuery(
-    GET_ALERTS,
-    {
-      variables: { filter, priority, first, after },
-      notifyOnNetworkStatusChange: true,
-    },
-  );
+  const { data, loading, error, fetchMore, refetch, subscribeToMore } = useQuery(GET_ALERTS, {
+    variables: { filter, priority, first, after },
+    notifyOnNetworkStatusChange: true,
+  });
 
   // Subscribe to new alerts
   useEffect(() => {

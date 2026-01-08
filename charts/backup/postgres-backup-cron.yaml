@@ -8,8 +8,8 @@ metadata:
     app.kubernetes.io/component: backup
     app.kubernetes.io/part-of: intelgraph
 spec:
-  schedule: '0 1 * * *' # Daily at 1 AM UTC
-  timeZone: 'UTC'
+  schedule: "0 1 * * *" # Daily at 1 AM UTC
+  timeZone: "UTC"
   successfulJobsHistoryLimit: 7
   failedJobsHistoryLimit: 3
   concurrencyPolicy: Forbid
@@ -213,9 +213,9 @@ spec:
 
               env:
                 - name: POSTGRES_HOST
-                  value: 'postgres.database'
+                  value: "postgres.database"
                 - name: POSTGRES_PORT
-                  value: '5432'
+                  value: "5432"
                 - name: POSTGRES_USER
                   valueFrom:
                     secretKeyRef:
@@ -227,7 +227,7 @@ spec:
                       name: postgres-backup-secrets
                       key: password
                 - name: POSTGRES_DB
-                  value: 'intelgraph'
+                  value: "intelgraph"
                 - name: BACKUP_BUCKET
                   valueFrom:
                     configMapKeyRef:
@@ -265,11 +265,11 @@ spec:
                       key: aws-secret-access-key
               resources:
                 requests:
-                  memory: '1Gi'
-                  cpu: '500m'
+                  memory: "1Gi"
+                  cpu: "500m"
                 limits:
-                  memory: '4Gi'
-                  cpu: '2000m'
+                  memory: "4Gi"
+                  cpu: "2000m"
               volumeMounts:
                 - name: backup-storage
                   mountPath: /backups
@@ -283,12 +283,12 @@ spec:
               emptyDir:
                 sizeLimit: 4Gi
           tolerations:
-            - key: 'backup-workload'
-              operator: 'Equal'
-              value: 'true'
-              effect: 'NoSchedule'
+            - key: "backup-workload"
+              operator: "Equal"
+              value: "true"
+              effect: "NoSchedule"
           nodeSelector:
-            node-type: 'backup-optimized'
+            node-type: "backup-optimized"
 ---
 # Continuous WAL archiving configuration
 apiVersion: batch/v1
@@ -300,8 +300,8 @@ metadata:
     app.kubernetes.io/name: postgres-wal-archive
     app.kubernetes.io/component: backup
 spec:
-  schedule: '*/15 * * * *' # Every 15 minutes
-  timeZone: 'UTC'
+  schedule: "*/15 * * * *" # Every 15 minutes
+  timeZone: "UTC"
   successfulJobsHistoryLimit: 24 # Keep 6 hours of history
   failedJobsHistoryLimit: 6
   concurrencyPolicy: Forbid
@@ -349,7 +349,7 @@ spec:
 
               env:
                 - name: POSTGRES_HOST
-                  value: 'postgres.database'
+                  value: "postgres.database"
                 - name: POSTGRES_USER
                   valueFrom:
                     secretKeyRef:
@@ -361,7 +361,7 @@ spec:
                       name: postgres-backup-secrets
                       key: password
                 - name: POSTGRES_DB
-                  value: 'intelgraph'
+                  value: "intelgraph"
                 - name: BACKUP_BUCKET
                   valueFrom:
                     configMapKeyRef:
@@ -379,8 +379,8 @@ spec:
                       key: aws-secret-access-key
               resources:
                 requests:
-                  memory: '128Mi'
-                  cpu: '100m'
+                  memory: "128Mi"
+                  cpu: "100m"
                 limits:
-                  memory: '256Mi'
-                  cpu: '200m'
+                  memory: "256Mi"
+                  cpu: "200m"

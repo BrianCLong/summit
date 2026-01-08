@@ -1,10 +1,10 @@
-import { execute, graphql, parse, type GraphQLSchema } from 'graphql';
-import { composeServices } from './composition.js';
+import { execute, graphql, parse, type GraphQLSchema } from "graphql";
+import { composeServices } from "./composition.js";
 import type {
   EntityResolver,
   FederationCompositionResult,
   FederationServiceDefinition,
-} from './types.js';
+} from "./types.js";
 
 export interface GatewayExecutionResult<T = unknown> {
   data?: T;
@@ -30,7 +30,7 @@ export class FederatedGateway<TContext = unknown> {
   async execute<T = unknown>(
     query: string,
     variables?: Record<string, unknown>,
-    contextValue?: TContext,
+    contextValue?: TContext
   ): Promise<GatewayExecutionResult<T>> {
     const result = await graphql({
       schema: this.schema,
@@ -44,7 +44,7 @@ export class FederatedGateway<TContext = unknown> {
   async resolveEntity(
     reference: { __typename: string; [key: string]: unknown },
     context: TContext,
-    info: Parameters<EntityResolver>[2],
+    info: Parameters<EntityResolver>[2]
   ) {
     const resolver = this.entityResolvers.get(reference.__typename);
     if (!resolver) {
@@ -56,7 +56,7 @@ export class FederatedGateway<TContext = unknown> {
   async executeWithSchema<T = unknown>(
     source: string,
     variables?: Record<string, unknown>,
-    contextValue?: TContext,
+    contextValue?: TContext
   ) {
     return execute({
       schema: this.schema,

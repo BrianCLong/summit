@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import fs from 'fs';
-import path from 'path';
-import { z } from 'zod';
-import { fileURLToPath } from 'url';
+import fs from "fs";
+import path from "path";
+import { z } from "zod";
+import { fileURLToPath } from "url";
 
 // --- Schema Definitions ---
 
@@ -15,12 +15,14 @@ const EvidenceBundleMetaSchema = z.object({
   environment: z.string(),
 });
 
-const ReleaseMetadataSchema = z.object({
-  git_commit: z.string(),
-  build_pipeline: z.string(),
-  build_timestamp: z.string(),
-  approver: z.string(),
-}).passthrough(); // Allow extra fields but validate known ones
+const ReleaseMetadataSchema = z
+  .object({
+    git_commit: z.string(),
+    build_pipeline: z.string(),
+    build_timestamp: z.string(),
+    approver: z.string(),
+  })
+  .passthrough(); // Allow extra fields but validate known ones
 
 const CiQualityGateSchema = z.object({
   name: z.string(),
@@ -75,10 +77,10 @@ function verifySchema(data: any): ValidationReport {
   if (!result.success) {
     return {
       success: false,
-      messages: result.error.errors.map(e => `Schema Error: ${e.path.join('.')} - ${e.message}`),
+      messages: result.error.errors.map((e) => `Schema Error: ${e.path.join(".")} - ${e.message}`),
     };
   }
-  return { success: true, messages: ['Schema validation passed.'] };
+  return { success: true, messages: ["Schema validation passed."] };
 }
 
 function verifyReferencedFiles(data: any, baseDir: string): ValidationReport {
@@ -107,7 +109,7 @@ function verifyReferencedFiles(data: any, baseDir: string): ValidationReport {
   }
 
   if (data.load_tests?.script) {
-    checkFile(data.load_tests.script, 'load_tests.script');
+    checkFile(data.load_tests.script, "load_tests.script");
   }
 
   if (data.chaos_scenarios) {
@@ -117,11 +119,11 @@ function verifyReferencedFiles(data: any, baseDir: string): ValidationReport {
   }
 
   if (data.sbom?.path) {
-    checkFile(data.sbom.path, 'sbom.path');
+    checkFile(data.sbom.path, "sbom.path");
   }
 
   if (success) {
-    messages.push('All referenced files exist.');
+    messages.push("All referenced files exist.");
   }
 
   return { success, messages };
@@ -136,23 +138,25 @@ function verifyRedactionMarkers(data: any): ValidationReport {
   // Pattern: {{ .Release.Field }}
   const templatePattern = /^\{\{\s*\.Release\..+\s*\}\}$/;
 
-  const fieldsToCheck = ['git_commit', 'build_pipeline', 'build_timestamp', 'approver'];
+  const fieldsToCheck = ["git_commit", "build_pipeline", "build_timestamp", "approver"];
 
   if (data.release_metadata) {
     for (const field of fieldsToCheck) {
       if (data.release_metadata[field]) {
         const value = data.release_metadata[field];
         // Allow strict template pattern OR explicit "REDACTED" marker (anywhere in string)
-        if (!templatePattern.test(value) && !value.includes('REDACTED')) {
-           success = false;
-           messages.push(`Redaction Marker Missing: release_metadata.${field} should be a template placeholder or redacted. Found: "${value}"`);
+        if (!templatePattern.test(value) && !value.includes("REDACTED")) {
+          success = false;
+          messages.push(
+            `Redaction Marker Missing: release_metadata.${field} should be a template placeholder or redacted. Found: "${value}"`
+          );
         }
       }
     }
   }
 
   if (success) {
-    messages.push('Redaction markers verified.');
+    messages.push("Redaction markers verified.");
   }
 
   return { success, messages };
@@ -176,7 +180,7 @@ export async function verifyEvidenceBundle(manifestPath: string): Promise<Valida
 
   let rawData;
   try {
-    rawData = fs.readFileSync(fullPath, 'utf-8');
+    rawData = fs.readFileSync(fullPath, "utf-8");
   } catch (e) {
     return {
       success: false,
@@ -224,17 +228,17 @@ const __filename = fileURLToPath(import.meta.url);
 if (process.argv[1] === __filename) {
   const manifestPath = process.argv[2];
   if (!manifestPath) {
-    console.error('Usage: verify-evidence-bundle.ts <path-to-manifest>');
+    console.error("Usage: verify-evidence-bundle.ts <path-to-manifest>");
     process.exit(1);
   }
 
-  verifyEvidenceBundle(manifestPath).then(report => {
-    report.messages.forEach(msg => console.log(msg));
+  verifyEvidenceBundle(manifestPath).then((report) => {
+    report.messages.forEach((msg) => console.log(msg));
     if (report.success) {
-      console.log('SUCCESS: Evidence bundle manifest verified.');
+      console.log("SUCCESS: Evidence bundle manifest verified.");
       process.exit(0);
     } else {
-      console.error('FAILED: Verification failed.');
+      console.error("FAILED: Verification failed.");
       process.exit(1);
     }
   });

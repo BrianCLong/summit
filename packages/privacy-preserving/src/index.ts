@@ -8,20 +8,20 @@ export {
   PrivacyBudgetManager,
   type DPConfig,
   type PrivacyBudget,
-  type BudgetAllocation
-} from './differential-privacy/DifferentialPrivacy';
+  type BudgetAllocation,
+} from "./differential-privacy/DifferentialPrivacy";
 
 export {
   KAnonymity,
   type AnonymizationConfig,
   type AnonymizationResult,
   type AnonymizationMetrics,
-  type EquivalenceClass
-} from './anonymization/KAnonymity';
+  type EquivalenceClass,
+} from "./anonymization/KAnonymity";
 
 export {
   PrivacyValidator,
   type PrivacyAssessment,
   type ComplianceCheck,
-  type ReidentificationRisk
-} from './validation/PrivacyValidator';
+  type ReidentificationRisk,
+} from "./validation/PrivacyValidator";

@@ -12,8 +12,8 @@ import type {
   PolicyResult,
   AgentOutputInput,
   AgentFile,
-} from '../../types/index.js';
-import { pass, fail, warn } from '../PolicyResult.js';
+} from "../../types/index.js";
+import { pass, fail, warn } from "../PolicyResult.js";
 
 export interface AgentOutputValidatorConfig {
   /** Maximum response length */
@@ -37,7 +37,7 @@ export interface AgentOutputValidatorConfig {
 export interface ForbiddenPattern {
   pattern: RegExp;
   message: string;
-  severity?: 'error' | 'warning';
+  severity?: "error" | "warning";
 }
 
 export interface CodeQualityConfig {
@@ -58,29 +58,29 @@ const DEFAULT_CONFIG: AgentOutputValidatorConfig = {
   maxFileSize: 50000, // 50KB
   maxFiles: 20,
   forbiddenPaths: [
-    '.env',
-    '.env.local',
-    '.env.production',
-    'credentials.json',
-    'secrets.yaml',
-    '.git/',
-    'node_modules/',
+    ".env",
+    ".env.local",
+    ".env.production",
+    "credentials.json",
+    "secrets.yaml",
+    ".git/",
+    "node_modules/",
   ],
   forbiddenPatterns: [
     {
       pattern: /TODO(?:\s*:|\s+)/i,
-      message: 'Agent output contains TODO comments',
-      severity: 'warning',
+      message: "Agent output contains TODO comments",
+      severity: "warning",
     },
     {
       pattern: /FIXME(?:\s*:|\s+)/i,
-      message: 'Agent output contains FIXME comments',
-      severity: 'warning',
+      message: "Agent output contains FIXME comments",
+      severity: "warning",
     },
     {
       pattern: /password\s*[:=]\s*["'][^"']+["']/i,
-      message: 'Agent output may contain hardcoded password',
-      severity: 'error',
+      message: "Agent output may contain hardcoded password",
+      severity: "error",
     },
   ],
   codeQuality: {
@@ -100,7 +100,7 @@ export class AgentOutputValidator {
   }
 
   async validate(context: EvaluationContext): Promise<PolicyResult[]> {
-    if (context.type !== 'agent_output') {
+    if (context.type !== "agent_output") {
       return [];
     }
 
@@ -137,12 +137,16 @@ export class AgentOutputValidator {
 
     if (this.config.maxResponseLength && response.length > this.config.maxResponseLength) {
       results.push(
-        warn('pve.agent.response_length', `Response exceeds maximum length of ${this.config.maxResponseLength} characters`, {
-          details: { actual: response.length, maximum: this.config.maxResponseLength },
-        }),
+        warn(
+          "pve.agent.response_length",
+          `Response exceeds maximum length of ${this.config.maxResponseLength} characters`,
+          {
+            details: { actual: response.length, maximum: this.config.maxResponseLength },
+          }
+        )
       );
     } else {
-      results.push(pass('pve.agent.response_length'));
+      results.push(pass("pve.agent.response_length"));
     }
 
     return results;
@@ -154,13 +158,17 @@ export class AgentOutputValidator {
     // Check file count
     if (this.config.maxFiles && files.length > this.config.maxFiles) {
       results.push(
-        fail('pve.agent.max_files', `Agent created ${files.length} files, exceeding maximum of ${this.config.maxFiles}`, {
-          severity: 'warning',
-          details: { actual: files.length, maximum: this.config.maxFiles },
-        }),
+        fail(
+          "pve.agent.max_files",
+          `Agent created ${files.length} files, exceeding maximum of ${this.config.maxFiles}`,
+          {
+            severity: "warning",
+            details: { actual: files.length, maximum: this.config.maxFiles },
+          }
+        )
       );
     } else {
-      results.push(pass('pve.agent.max_files'));
+      results.push(pass("pve.agent.max_files"));
     }
 
     // Check each file
@@ -169,10 +177,14 @@ export class AgentOutputValidator {
       for (const forbidden of this.config.forbiddenPaths || []) {
         if (file.path.includes(forbidden) || file.path.startsWith(forbidden)) {
           results.push(
-            fail('pve.agent.forbidden_path', `Agent attempted to modify forbidden path: ${file.path}`, {
-              severity: 'error',
-              location: { file: file.path },
-            }),
+            fail(
+              "pve.agent.forbidden_path",
+              `Agent attempted to modify forbidden path: ${file.path}`,
+              {
+                severity: "error",
+                location: { file: file.path },
+              }
+            )
           );
         }
       }
@@ -180,22 +192,26 @@ export class AgentOutputValidator {
       // Check file size
       if (this.config.maxFileSize && file.content.length > this.config.maxFileSize) {
         results.push(
-          warn('pve.agent.file_size', `File "${file.path}" exceeds maximum size of ${this.config.maxFileSize} bytes`, {
-            location: { file: file.path },
-            details: { actual: file.content.length, maximum: this.config.maxFileSize },
-          }),
+          warn(
+            "pve.agent.file_size",
+            `File "${file.path}" exceeds maximum size of ${this.config.maxFileSize} bytes`,
+            {
+              location: { file: file.path },
+              details: { actual: file.content.length, maximum: this.config.maxFileSize },
+            }
+          )
         );
       }
 
       // Check allowed file types
       if (this.config.allowedFileTypes && this.config.allowedFileTypes.length > 0) {
-        const ext = file.path.split('.').pop() || '';
+        const ext = file.path.split(".").pop() || "";
         if (!this.config.allowedFileTypes.includes(ext)) {
           results.push(
-            warn('pve.agent.file_type', `File type ".${ext}" is not in allowed list`, {
+            warn("pve.agent.file_type", `File type ".${ext}" is not in allowed list`, {
               location: { file: file.path },
               details: { actual: ext, allowed: this.config.allowedFileTypes },
-            }),
+            })
           );
         }
       }
@@ -216,15 +232,19 @@ export class AgentOutputValidator {
       const isCodeFile = /\.(ts|tsx|js|jsx|py|go|java|rb|rs)$/.test(file.path);
       if (!isCodeFile) continue;
 
-      const lines = file.content.split('\n');
+      const lines = file.content.split("\n");
 
       // Check file length
       if (cq.maxFileLength && lines.length > cq.maxFileLength) {
         results.push(
-          warn('pve.agent.file_length', `File "${file.path}" has ${lines.length} lines, exceeding maximum of ${cq.maxFileLength}`, {
-            location: { file: file.path },
-            fix: 'Consider splitting into smaller modules',
-          }),
+          warn(
+            "pve.agent.file_length",
+            `File "${file.path}" has ${lines.length} lines, exceeding maximum of ${cq.maxFileLength}`,
+            {
+              location: { file: file.path },
+              fix: "Consider splitting into smaller modules",
+            }
+          )
         );
       }
 
@@ -233,10 +253,14 @@ export class AgentOutputValidator {
         const consoleMatches = file.content.match(/console\.(log|debug|info|warn|error)\(/g);
         if (consoleMatches && consoleMatches.length > 0) {
           results.push(
-            warn('pve.agent.console_logs', `File "${file.path}" contains ${consoleMatches.length} console statements`, {
-              location: { file: file.path },
-              fix: 'Use a proper logging library instead of console.log',
-            }),
+            warn(
+              "pve.agent.console_logs",
+              `File "${file.path}" contains ${consoleMatches.length} console statements`,
+              {
+                location: { file: file.path },
+                fix: "Use a proper logging library instead of console.log",
+              }
+            )
           );
         }
       }
@@ -253,11 +277,15 @@ export class AgentOutputValidator {
         for (const pattern of secretPatterns) {
           if (pattern.test(file.content)) {
             results.push(
-              fail('pve.agent.hardcoded_secret', `File "${file.path}" may contain hardcoded secrets`, {
-                severity: 'error',
-                location: { file: file.path },
-                fix: 'Use environment variables or a secrets manager',
-              }),
+              fail(
+                "pve.agent.hardcoded_secret",
+                `File "${file.path}" may contain hardcoded secrets`,
+                {
+                  severity: "error",
+                  location: { file: file.path },
+                  fix: "Use environment variables or a secrets manager",
+                }
+              )
             );
             break;
           }
@@ -266,13 +294,15 @@ export class AgentOutputValidator {
 
       // Check function length (simplified heuristic)
       if (cq.maxFunctionLength) {
-        const functionMatch = file.content.match(/(function\s+\w+|(?:async\s+)?(?:const|let|var)\s+\w+\s*=\s*(?:async\s+)?(?:\([^)]*\)|[^=])\s*=>)[^{]*\{/g);
+        const functionMatch = file.content.match(
+          /(function\s+\w+|(?:async\s+)?(?:const|let|var)\s+\w+\s*=\s*(?:async\s+)?(?:\([^)]*\)|[^=])\s*=>)[^{]*\{/g
+        );
         // This is a simplified check - in production, use AST parsing
       }
     }
 
     if (results.filter((r) => !r.allowed).length === 0) {
-      results.push(pass('pve.agent.code_quality'));
+      results.push(pass("pve.agent.code_quality"));
     }
 
     return results;
@@ -292,20 +322,20 @@ export class AgentOutputValidator {
       }
     }
 
-    const combined = allContent.join('\n');
+    const combined = allContent.join("\n");
 
     for (const fp of this.config.forbiddenPatterns || []) {
       if (fp.pattern.test(combined)) {
         results.push(
-          fail('pve.agent.forbidden_pattern', fp.message, {
-            severity: fp.severity || 'warning',
-          }),
+          fail("pve.agent.forbidden_pattern", fp.message, {
+            severity: fp.severity || "warning",
+          })
         );
       }
     }
 
     if (results.filter((r) => !r.allowed).length === 0) {
-      results.push(pass('pve.agent.forbidden_patterns'));
+      results.push(pass("pve.agent.forbidden_patterns"));
     }
 
     return results;
@@ -321,25 +351,26 @@ export class AgentOutputValidator {
         // This is a placeholder - in production, use semantic analysis
         if (!this.outputMeetsConstraint(input.output, constraint)) {
           results.push(
-            warn('pve.agent.constraint_violation', `Output may not meet constraint: ${constraint}`, {
-              details: { constraint },
-            }),
+            warn(
+              "pve.agent.constraint_violation",
+              `Output may not meet constraint: ${constraint}`,
+              {
+                details: { constraint },
+              }
+            )
           );
         }
       }
     }
 
     if (results.filter((r) => !r.allowed).length === 0) {
-      results.push(pass('pve.agent.task_alignment'));
+      results.push(pass("pve.agent.task_alignment"));
     }
 
     return results;
   }
 
-  private outputMeetsConstraint(
-    _output: AgentOutputInput['output'],
-    _constraint: string,
-  ): boolean {
+  private outputMeetsConstraint(_output: AgentOutputInput["output"], _constraint: string): boolean {
     // Placeholder - implement semantic analysis
     return true;
   }
@@ -348,13 +379,13 @@ export class AgentOutputValidator {
     const results: PolicyResult[] = [];
 
     switch (input.agentType) {
-      case 'claude':
+      case "claude":
         // Claude-specific validations
         break;
-      case 'jules':
+      case "jules":
         // Jules-specific validations
         break;
-      case 'codex':
+      case "codex":
         // Codex-specific validations
         break;
     }

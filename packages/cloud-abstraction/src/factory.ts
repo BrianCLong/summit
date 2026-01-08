@@ -2,8 +2,13 @@
  * Factory for creating cloud provider instances
  */
 
-import { CloudProvider, CloudConfig } from './types';
-import { IStorageProvider, AWSStorageProvider, AzureStorageProvider, GCPStorageProvider } from './storage';
+import { CloudProvider, CloudConfig } from "./types";
+import {
+  IStorageProvider,
+  AWSStorageProvider,
+  AzureStorageProvider,
+  GCPStorageProvider,
+} from "./storage";
 
 export class CloudFactory {
   /**
@@ -35,8 +40,8 @@ export class CloudFactory {
    * Create storage provider from environment
    */
   static createStorageFromEnv(): IStorageProvider {
-    const provider = (process.env.CLOUD_PROVIDER || 'aws') as CloudProvider;
-    const region = process.env.CLOUD_REGION || 'us-east-1';
+    const provider = (process.env.CLOUD_PROVIDER || "aws") as CloudProvider;
+    const region = process.env.CLOUD_REGION || "us-east-1";
 
     return this.createStorage({ provider, region });
   }
@@ -44,9 +49,7 @@ export class CloudFactory {
   /**
    * Create multi-cloud storage with automatic failover
    */
-  static createMultiCloudStorage(
-    configs: CloudConfig[]
-  ): MultiCloudStorageProvider {
+  static createMultiCloudStorage(configs: CloudConfig[]): MultiCloudStorageProvider {
     const providers = configs.map((config) => this.createStorage(config));
     return new MultiCloudStorageProvider(providers);
   }
@@ -62,7 +65,7 @@ export class MultiCloudStorageProvider implements IStorageProvider {
 
   constructor(providers: IStorageProvider[]) {
     if (providers.length === 0) {
-      throw new Error('At least one provider must be specified');
+      throw new Error("At least one provider must be specified");
     }
     this.providers = providers;
   }
@@ -96,50 +99,31 @@ export class MultiCloudStorageProvider implements IStorageProvider {
       }
     }
 
-    throw new Error(
-      `All providers failed: ${errors.map((e) => e.message).join(', ')}`
-    );
+    throw new Error(`All providers failed: ${errors.map((e) => e.message).join(", ")}`);
   }
 
-  async upload(
-    bucket: string,
-    key: string,
-    data: Buffer | string,
-    options?: any
-  ): Promise<void> {
-    return this.executeWithFailover((provider) =>
-      provider.upload(bucket, key, data, options)
-    );
+  async upload(bucket: string, key: string, data: Buffer | string, options?: any): Promise<void> {
+    return this.executeWithFailover((provider) => provider.upload(bucket, key, data, options));
   }
 
   async download(bucket: string, key: string, options?: any): Promise<Buffer> {
-    return this.executeWithFailover((provider) =>
-      provider.download(bucket, key, options)
-    );
+    return this.executeWithFailover((provider) => provider.download(bucket, key, options));
   }
 
   async delete(bucket: string, key: string): Promise<void> {
-    return this.executeWithFailover((provider) =>
-      provider.delete(bucket, key)
-    );
+    return this.executeWithFailover((provider) => provider.delete(bucket, key));
   }
 
   async list(bucket: string, options?: any): Promise<any> {
-    return this.executeWithFailover((provider) =>
-      provider.list(bucket, options)
-    );
+    return this.executeWithFailover((provider) => provider.list(bucket, options));
   }
 
   async getMetadata(bucket: string, key: string): Promise<any> {
-    return this.executeWithFailover((provider) =>
-      provider.getMetadata(bucket, key)
-    );
+    return this.executeWithFailover((provider) => provider.getMetadata(bucket, key));
   }
 
   async exists(bucket: string, key: string): Promise<boolean> {
-    return this.executeWithFailover((provider) =>
-      provider.exists(bucket, key)
-    );
+    return this.executeWithFailover((provider) => provider.exists(bucket, key));
   }
 
   async copy(
@@ -157,7 +141,7 @@ export class MultiCloudStorageProvider implements IStorageProvider {
     bucket: string,
     key: string,
     expiresIn: number,
-    operation: 'get' | 'put'
+    operation: "get" | "put"
   ): Promise<string> {
     return this.executeWithFailover((provider) =>
       provider.getSignedUrl(bucket, key, expiresIn, operation)
@@ -176,7 +160,7 @@ export class MultiCloudStorageProvider implements IStorageProvider {
    */
   setPrimaryProvider(index: number): void {
     if (index < 0 || index >= this.providers.length) {
-      throw new Error('Invalid provider index');
+      throw new Error("Invalid provider index");
     }
     this.primaryIndex = index;
   }

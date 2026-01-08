@@ -1,19 +1,13 @@
-import {
-  OrchestrationKnowledgeGraph,
-  type ServiceRiskProfile,
-} from '@ga-graphai/knowledge-graph';
-import {
-  GuardedPolicyGateway,
-  type GuardedDecision,
-} from '@ga-graphai/policy';
-import type { PolicyEvaluationRequest } from 'common-types';
+import { OrchestrationKnowledgeGraph, type ServiceRiskProfile } from "@ga-graphai/knowledge-graph";
+import { GuardedPolicyGateway, type GuardedDecision } from "@ga-graphai/policy";
+import type { PolicyEvaluationRequest } from "common-types";
 
-export type Persona = 'feature-dev' | 'platform-engineer' | 'sre';
+export type Persona = "feature-dev" | "platform-engineer" | "sre";
 
 export interface DxEvent {
   id: string;
   persona: Persona;
-  channel: 'cli' | 'ui' | 'chatops';
+  channel: "cli" | "ui" | "chatops";
   command: string;
   durationMs: number;
   success: boolean;
@@ -58,27 +52,28 @@ export class DeveloperExperienceGuide {
     persona: Persona,
     context: {
       environmentId?: string;
-      actor: PolicyEvaluationRequest['context'];
-      guardContext?: Parameters<GuardedPolicyGateway['evaluate']>[1];
-    },
+      actor: PolicyEvaluationRequest["context"];
+      guardContext?: Parameters<GuardedPolicyGateway["evaluate"]>[1];
+    }
   ): GoldenPathRecommendation | undefined {
     const serviceContext = this.knowledgeGraph.queryService(serviceId);
     if (!serviceContext) {
       return undefined;
     }
-    const environmentId = context.environmentId ?? serviceContext.environments?.[0]?.id ?? 'unknown';
+    const environmentId =
+      context.environmentId ?? serviceContext.environments?.[0]?.id ?? "unknown";
     const guardrails = this.policyGateway.evaluate(
       {
-        action: persona === 'sre' ? 'orchestration.rollback' : 'orchestration.deploy',
+        action: persona === "sre" ? "orchestration.rollback" : "orchestration.deploy",
         resource: `service:${serviceId}`,
         context: context.actor,
       },
-      context.guardContext,
+      context.guardContext
     );
 
     const steps = this.buildSteps(persona, environmentId, guardrails.requiresApproval);
     const risk = serviceContext.risk;
-    const suggestedSurvey = persona === 'feature-dev' && (!risk || risk.score < 0.4);
+    const suggestedSurvey = persona === "feature-dev" && (!risk || risk.score < 0.4);
 
     return {
       serviceId,
@@ -102,7 +97,7 @@ export class DeveloperExperienceGuide {
     const successes = this.events.filter((event) => event.success).length;
     const satisfactionScores = this.events
       .map((event) => event.satisfactionScore)
-      .filter((score): score is number => typeof score === 'number');
+      .filter((score): score is number => typeof score === "number");
     const frictionHotspots: Record<string, number> = {};
     for (const event of this.events) {
       for (const tag of event.frictionTags ?? []) {
@@ -113,9 +108,8 @@ export class DeveloperExperienceGuide {
       satisfactionScores.length > 0
         ? Number(
             (
-              satisfactionScores.reduce((acc, score) => acc + score, 0) /
-              satisfactionScores.length
-            ).toFixed(2),
+              satisfactionScores.reduce((acc, score) => acc + score, 0) / satisfactionScores.length
+            ).toFixed(2)
           )
         : undefined;
     return {
@@ -127,17 +121,17 @@ export class DeveloperExperienceGuide {
   }
 
   private buildSteps(persona: Persona, environmentId: string, requiresApproval: boolean): string[] {
-    const base = [`Open portal golden path for ${environmentId}`, 'Run pipeline dry-run'];
-    if (persona === 'platform-engineer') {
-      base.unshift('Review knowledge graph diff for service');
+    const base = [`Open portal golden path for ${environmentId}`, "Run pipeline dry-run"];
+    if (persona === "platform-engineer") {
+      base.unshift("Review knowledge graph diff for service");
     }
-    if (persona === 'sre') {
-      base.push('Trigger rehearsal mode for self-healing runbook');
+    if (persona === "sre") {
+      base.push("Trigger rehearsal mode for self-healing runbook");
     }
     if (requiresApproval) {
-      base.push('Request approval via guardrail gateway before execution');
+      base.push("Request approval via guardrail gateway before execution");
     }
-    base.push('Capture DX survey response');
+    base.push("Capture DX survey response");
     return base;
   }
 }

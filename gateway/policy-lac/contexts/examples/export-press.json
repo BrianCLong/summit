@@ -1,1 +1,5 @@
-{ "action": "export:bundle", "resource": "case:123", "attributes": { "purpose": "press", "labels": ["public"], "sensitivity": "S1" } }
+{
+  "action": "export:bundle",
+  "resource": "case:123",
+  "attributes": { "purpose": "press", "labels": ["public"], "sensitivity": "S1" }
+}

@@ -1,8 +1,8 @@
-import { MaterializedViewScheduler } from '../MaterializedViewScheduler';
-import type { Pool } from 'pg';
+import { MaterializedViewScheduler } from "../MaterializedViewScheduler";
+import type { Pool } from "pg";
 
-describe('MaterializedViewScheduler', () => {
-  it('records refresh metrics and staleness', async () => {
+describe("MaterializedViewScheduler", () => {
+  it("records refresh metrics and staleness", async () => {
     const now = new Date();
     const queryMock = jest
       .fn()
@@ -10,11 +10,11 @@ describe('MaterializedViewScheduler', () => {
       .mockResolvedValue({
         rows: [
           {
-            view_name: 'maestro.mv_reporting_entity_activity',
+            view_name: "maestro.mv_reporting_entity_activity",
             refreshed_at: now.toISOString(),
             duration_ms: 25,
             row_count: 12,
-            status: 'ok',
+            status: "ok",
             error: null,
           },
         ],
@@ -26,19 +26,17 @@ describe('MaterializedViewScheduler', () => {
       intervalMs: 10_000,
       stalenessBudgetSeconds: 900,
       useConcurrentRefresh: true,
-      viewNames: ['maestro.mv_reporting_entity_activity'],
+      viewNames: ["maestro.mv_reporting_entity_activity"],
     });
 
     const results = await scheduler.refreshNow();
 
     expect(queryMock).toHaveBeenCalledTimes(2);
     expect(results.length).toBeGreaterThan(0);
-    expect(results[0]!.viewName).toBe('maestro.mv_reporting_entity_activity');
+    expect(results[0]!.viewName).toBe("maestro.mv_reporting_entity_activity");
     expect(scheduler.getStalenessSeconds()).toBeGreaterThanOrEqual(0);
 
     const snapshot = scheduler.getSnapshot();
-    expect(
-      snapshot.views['maestro.mv_reporting_entity_activity']?.rowCount,
-    ).toBe(12);
+    expect(snapshot.views["maestro.mv_reporting_entity_activity"]?.rowCount).toBe(12);
   });
 });

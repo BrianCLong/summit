@@ -25,16 +25,19 @@ All gates are implemented in `.github/workflows/ci-hard-gates.yml` and must pass
 **Purpose:** Enforce code style, quality standards, and catch common errors
 
 **Criteria:**
+
 - ✅ Zero ESLint errors
 - ✅ No new code suppressions above baseline (811)
-- ⚠️  Warnings under 50
+- ⚠️ Warnings under 50
 
 **Blocked By:**
+
 - Any ESLint error
 - New `eslint-disable`, `@ts-ignore`, or `@ts-expect-error` comments
 - Suppressions without specific rule names
 
 **Remediation:**
+
 - Fix all ESLint errors before merge
 - Document suppression justifications in code review
 - Get approval from 2+ reviewers for new suppressions
@@ -46,16 +49,19 @@ All gates are implemented in `.github/workflows/ci-hard-gates.yml` and must pass
 **Purpose:** Ensure type safety and catch type-related bugs
 
 **Criteria:**
+
 - ✅ Zero TypeScript compilation errors
 - ✅ Strict mode enabled
 - ✅ All project references valid
 
 **Blocked By:**
+
 - Any `error TS` from TypeScript compiler
 - Type resolution failures
 - Missing type declarations
 
 **Remediation:**
+
 - Fix all type errors
 - Add proper type annotations
 - Ensure all dependencies have types
@@ -67,17 +73,20 @@ All gates are implemented in `.github/workflows/ci-hard-gates.yml` and must pass
 **Purpose:** Verify code compiles and produces valid artifacts
 
 **Criteria:**
+
 - ✅ Client builds successfully
 - ✅ Server builds successfully
 - ✅ All build artifacts present
 - ✅ Bundle sizes within limits
 
 **Blocked By:**
+
 - Build failures in any package
 - Missing dist/ directories
 - Build script errors
 
 **Remediation:**
+
 - Fix compilation errors
 - Ensure all dependencies installed
 - Check for circular dependencies
@@ -89,22 +98,26 @@ All gates are implemented in `.github/workflows/ci-hard-gates.yml` and must pass
 **Purpose:** Verify core functionality and maintain code coverage
 
 **Criteria:**
+
 - ✅ Zero test failures
 - ✅ 80% code coverage (global)
 - ✅ 85% coverage for critical paths (middleware, services)
 - ✅ No skipped tests in PR changes
 
 **Blocked By:**
+
 - Any failing test
 - Coverage below thresholds
 - Focused tests (`.only`) in committed code
 
 **Remediation:**
+
 - Fix failing tests
 - Add tests for new code
 - Remove `.only` and `.skip` from tests
 
 **Coverage Thresholds:**
+
 ```javascript
 {
   global: {
@@ -125,22 +138,26 @@ All gates are implemented in `.github/workflows/ci-hard-gates.yml` and must pass
 **Purpose:** Ensure compliance with governance policies and security controls
 
 **Criteria:**
+
 - ✅ Governance checks pass
 - ✅ Threat model tests pass
 - ✅ Policy validation tests pass
 - ✅ Autonomous evaluation tests pass
 
 **Blocked By:**
+
 - Failed governance checks
 - Threat model violations
 - Policy test failures
 
 **Test Files:**
+
 - `server/src/quality-evaluation/autonomous/__tests__/abuse-tests/threat-model.test.ts`
 - `**/governance*.test.ts`
 - `scripts/check-governance.cjs`
 
 **Remediation:**
+
 - Review governance policy violations
 - Update threat model if needed
 - Ensure proper authorization checks
@@ -152,18 +169,21 @@ All gates are implemented in `.github/workflows/ci-hard-gates.yml` and must pass
 **Purpose:** Verify supply chain integrity and data provenance
 
 **Criteria:**
+
 - ✅ Minimum 10 provenance tests pass
 - ✅ Data envelope validation passes
 - ✅ Receipt verification passes
 - ✅ Ledger integrity maintained
 
 **Blocked By:**
+
 - Provenance test failures
 - Envelope schema violations
 - Receipt signature failures
 - Ledger integrity checks fail
 
 **Test Coverage:**
+
 - 137+ provenance-related test files
 - Receipt validation
 - Ledger integrity
@@ -171,6 +191,7 @@ All gates are implemented in `.github/workflows/ci-hard-gates.yml` and must pass
 - Export provenance
 
 **Remediation:**
+
 - Fix provenance chain breaks
 - Ensure proper receipt generation
 - Validate envelope schemas
@@ -182,16 +203,19 @@ All gates are implemented in `.github/workflows/ci-hard-gates.yml` and must pass
 **Purpose:** Detect breaking API and database schema changes
 
 **Criteria:**
+
 - ✅ No breaking GraphQL schema changes
 - ✅ Database migrations clean
 - ✅ API contracts maintained
 
 **Blocked By:**
+
 - Breaking GraphQL changes without versioning
 - Unapplied database migrations
 - API contract violations
 
 **Remediation:**
+
 - Version breaking changes
 - Apply migrations
 - Update API documentation
@@ -203,18 +227,21 @@ All gates are implemented in `.github/workflows/ci-hard-gates.yml` and must pass
 **Purpose:** Detect security vulnerabilities and secrets
 
 **Criteria:**
+
 - ✅ Zero critical vulnerabilities
 - ✅ Maximum 5 high vulnerabilities
 - ✅ No secrets in code
 - ✅ npm audit passes
 
 **Blocked By:**
+
 - Critical vulnerabilities in dependencies
 - More than 5 high severity issues
 - Detected secrets/credentials
 - Compromised packages
 
 **Remediation:**
+
 - Update vulnerable dependencies
 - Remove secrets from code
 - Use environment variables
@@ -229,6 +256,7 @@ Upon successful completion of all gates, a **merge-safe artifact** is generated 
 ### Artifact Contents
 
 The artifact includes:
+
 - ✅ Timestamp and commit SHA
 - ✅ Status of all 8 gates
 - ✅ Test counts and coverage metrics
@@ -292,7 +320,7 @@ Configure the following in GitHub repository settings under **Settings > Branche
 
 6. **Do not allow bypassing the above settings**
    - ✅ Include administrators
-   - ⚠️  Restrict who can push to matching branches
+   - ⚠️ Restrict who can push to matching branches
 
 #### Additional Settings:
 
@@ -357,6 +385,7 @@ npm run prepare
 Current suppression baseline: **811 total suppressions**
 
 **Breakdown:**
+
 - `eslint-disable` (TypeScript): 571
 - `eslint-disable` (JavaScript): 118
 - `@ts-ignore`: 105
@@ -405,21 +434,27 @@ See: `audit/ga-evidence/ci/SUPPRESSION_AUDIT.md`
 ### Common Failures
 
 #### "ESLint errors found"
+
 → Run `npm run lint` locally and fix errors
 
 #### "TypeScript compilation failed"
+
 → Run `npm run typecheck` and fix type errors
 
 #### "Tests failed"
+
 → Run `npm test` and fix failing tests
 
 #### "Coverage below threshold"
+
 → Add tests for uncovered code
 
 #### "New suppressions detected"
+
 → Remove suppressions or get approval with justification
 
 #### "Security vulnerabilities"
+
 → Run `npm audit fix` and test
 
 ### Bypass Process (Emergency Only)
@@ -440,15 +475,16 @@ For production hotfixes ONLY:
 
 ### Control Mapping
 
-| Control | Description | Implementation |
-|---------|-------------|----------------|
-| CC7.1 | Detect changes to systems | CI gates detect all code changes |
-| CC7.2 | Manage system changes | Required status checks enforce standards |
-| CC8.1 | Authorize system changes | PR approval + CI gates required |
+| Control | Description               | Implementation                           |
+| ------- | ------------------------- | ---------------------------------------- |
+| CC7.1   | Detect changes to systems | CI gates detect all code changes         |
+| CC7.2   | Manage system changes     | Required status checks enforce standards |
+| CC8.1   | Authorize system changes  | PR approval + CI gates required          |
 
 ### Audit Evidence
 
 All CI runs generate audit evidence stored in:
+
 - `audit/ga-evidence/ci/`
 - GitHub Actions workflow runs (retained 90 days)
 - Merge-safe artifacts attached to releases
@@ -456,6 +492,7 @@ All CI runs generate audit evidence stored in:
 ### Compliance Attestations
 
 Every merge-safe artifact includes:
+
 - ✅ Control compliance status
 - ✅ Evidence trail references
 - ✅ Verification instructions
@@ -482,6 +519,7 @@ ci_metrics:
 ### Alerts
 
 Set up alerts for:
+
 - ❌ Gate pass rate < 90% (investigate CI issues)
 - ❌ Average CI time > 45 minutes (optimize workflow)
 - ❌ Suppression count increases
@@ -523,11 +561,13 @@ Update suppression baseline quarterly:
 ## Support
 
 **Questions?** Contact:
+
 - **Engineering Team:** #engineering
 - **DevOps:** #devops
 - **Security:** #security
 
 **Issues?** File a ticket:
+
 - **CI Failures:** Tag `ci-gates`
 - **Policy Questions:** Tag `governance`
 - **Suppression Approval:** Tag `code-quality`

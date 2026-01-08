@@ -2,7 +2,7 @@
  * HTML Reporter - Generates interactive HTML reports
  */
 
-import type { EvaluationReport } from '../../types/index.js';
+import type { EvaluationReport } from "../../types/index.js";
 
 export class HtmlReporter {
   /**
@@ -176,9 +176,9 @@ export class HtmlReporter {
             <td>${s.metrics.entitiesFound}</td>
             <td>${s.metrics.errorCount}</td>
           </tr>
-        `,
+        `
           )
-          .join('')}
+          .join("")}
       </tbody>
     </table>
 
@@ -191,20 +191,20 @@ export class HtmlReporter {
   }
 
   private getCorrectnessClass(rate: number): string {
-    if (rate >= 0.9) return 'success';
-    if (rate >= 0.7) return 'warning';
-    return 'error';
+    if (rate >= 0.9) return "success";
+    if (rate >= 0.7) return "warning";
+    return "error";
   }
 
   private getReliabilityClass(rate: number): string {
-    if (rate >= 0.95) return 'success';
-    if (rate >= 0.8) return 'warning';
-    return 'error';
+    if (rate >= 0.95) return "success";
+    if (rate >= 0.8) return "warning";
+    return "error";
   }
 
   private renderComparison(report: EvaluationReport): string {
     if (!report.comparison) {
-      return '';
+      return "";
     }
 
     const comp = report.comparison;
@@ -226,36 +226,36 @@ export class HtmlReporter {
         </thead>
         <tbody>
           ${this.renderComparisonRow(
-            'Avg Duration',
+            "Avg Duration",
             comp.baseline.metrics.performance.avgDuration / 1000,
             comp.candidate.metrics.performance.avgDuration / 1000,
             comp.deltas.performance.avgDuration,
-            's',
-            true,
+            "s",
+            true
           )}
           ${this.renderComparisonRow(
-            'Query Latency (p50)',
+            "Query Latency (p50)",
             comp.baseline.metrics.performance.avgQueryLatency.p50,
             comp.candidate.metrics.performance.avgQueryLatency.p50,
             comp.deltas.performance.avgQueryLatency_p50,
-            'ms',
-            true,
+            "ms",
+            true
           )}
           ${this.renderComparisonRow(
-            'Entities Found Rate',
+            "Entities Found Rate",
             comp.baseline.metrics.correctness.entitiesFoundRate * 100,
             comp.candidate.metrics.correctness.entitiesFoundRate * 100,
             comp.deltas.correctness.entitiesFoundRate,
-            '%',
-            false,
+            "%",
+            false
           )}
           ${this.renderComparisonRow(
-            'Success Rate',
+            "Success Rate",
             comp.baseline.metrics.reliability.successRate * 100,
             comp.candidate.metrics.reliability.successRate * 100,
             comp.deltas.reliability.successRate,
-            '%',
-            false,
+            "%",
+            false
           )}
         </tbody>
       </table>
@@ -268,10 +268,10 @@ export class HtmlReporter {
     candidate: number,
     delta: number,
     unit: string,
-    lowerIsBetter: boolean,
+    lowerIsBetter: boolean
   ): string {
     const deltaClass = this.getDeltaClass(delta, lowerIsBetter);
-    const deltaSymbol = delta > 0 ? '+' : '';
+    const deltaSymbol = delta > 0 ? "+" : "";
 
     return `
       <tr>
@@ -284,12 +284,12 @@ export class HtmlReporter {
   }
 
   private getDeltaClass(delta: number, lowerIsBetter: boolean): string {
-    if (Math.abs(delta) < 5) return 'delta-neutral';
+    if (Math.abs(delta) < 5) return "delta-neutral";
 
     if (lowerIsBetter) {
-      return delta < 0 ? 'delta-positive' : 'delta-negative';
+      return delta < 0 ? "delta-positive" : "delta-negative";
     } else {
-      return delta > 0 ? 'delta-positive' : 'delta-negative';
+      return delta > 0 ? "delta-positive" : "delta-negative";
     }
   }
 }

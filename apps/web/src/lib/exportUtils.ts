@@ -9,7 +9,7 @@ export interface ExportParamsInput {
 
 function stableSortObject(value: unknown): unknown {
   if (Array.isArray(value)) {
-    return value.map((item) => stableSortObject(item))
+    return value.map(item => stableSortObject(item))
   }
 
   if (value && typeof value === 'object') {
@@ -63,6 +63,10 @@ export function sanitizeFilename(base: string, format: ExportFormat): string {
   return `${safeBase}.${format === 'pdf' ? 'pdf' : 'zip'}`
 }
 
-export function resolveJobKey(tenantId: string, caseId: string, paramsHash: string): string {
+export function resolveJobKey(
+  tenantId: string,
+  caseId: string,
+  paramsHash: string
+): string {
   return buildExportKey(tenantId, caseId, paramsHash)
 }

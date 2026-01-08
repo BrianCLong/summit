@@ -6,22 +6,22 @@ ECDH-derived secret and optionally adds Laplace noise before sharing
 aggregates.
 
 ```ts
-import { SafeJoinClient, SafeJoinParticipant, preparePayload } from '@intelgraph/safejoin';
+import { SafeJoinClient, SafeJoinParticipant, preparePayload } from "@intelgraph/safejoin";
 
-const client = new SafeJoinClient('http://localhost:8080');
+const client = new SafeJoinClient("http://localhost:8080");
 const alice = new SafeJoinParticipant();
-const sessionId = await client.createSession('aggregate', { epsilon: 1.0 });
+const sessionId = await client.createSession("aggregate", { epsilon: 1.0 });
 
-await client.register(sessionId, 'alice', alice.publicKeyB64);
-const peerKey = await client.waitForPeer(sessionId, 'alice');
+await client.register(sessionId, "alice", alice.publicKeyB64);
+const peerKey = await client.waitForPeer(sessionId, "alice");
 
 const records = [
-  { key: 'user-001', value: 3.1 },
-  { key: 'user-002', value: 1.2 },
+  { key: "user-001", value: 3.1 },
+  { key: "user-002", value: 1.2 },
 ];
 const payload = preparePayload(alice, peerKey, records, 1.0);
 await client.upload(sessionId, {
-  participant_id: 'alice',
+  participant_id: "alice",
   hashed_tokens: payload.tokens,
   bloom_filter: payload.bloom.encode(),
   aggregates: payload.aggregates,

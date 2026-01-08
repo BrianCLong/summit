@@ -6,11 +6,11 @@ on:
       node_version:
         required: false
         type: string
-        default: '20.x'
+        default: "20.x"
       pnpm_cache_folder:
         required: false
         type: string
-        default: '~/.pnpm-store'
+        default: "~/.pnpm-store"
 
 jobs:
   fast-checks:
@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node_version }}
-          cache: 'pnpm'
+          cache: "pnpm"
       - name: Enable corepack
         run: corepack enable
       - uses: pnpm/action-setup@v4
@@ -70,7 +70,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node_version }}
-          cache: 'pnpm'
+          cache: "pnpm"
       - name: Enable corepack
         run: corepack enable
       - uses: pnpm/action-setup@v4

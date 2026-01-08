@@ -3,11 +3,11 @@
  * Sprint 28A: Enterprise-grade key management for sovereign deployments
  */
 
-import { EventEmitter } from 'events';
-import crypto from 'crypto';
+import { EventEmitter } from "events";
+import crypto from "crypto";
 
 export interface HSMProvider {
-  type: 'luna' | 'cloudhsm' | 'thales' | 'keyvault' | 'cloudkms';
+  type: "luna" | "cloudhsm" | "thales" | "keyvault" | "cloudkms";
   name: string;
   endpoint: string;
   credentials: {
@@ -19,14 +19,9 @@ export interface HSMProvider {
     slot?: number;
   };
   configuration: {
-    keyAlgorithm:
-      | 'RSA-2048'
-      | 'RSA-4096'
-      | 'ECDSA-P256'
-      | 'ECDSA-P384'
-      | 'AES-256';
-    hashAlgorithm: 'SHA-256' | 'SHA-384' | 'SHA-512';
-    keyUsage: 'encrypt' | 'sign' | 'both';
+    keyAlgorithm: "RSA-2048" | "RSA-4096" | "ECDSA-P256" | "ECDSA-P384" | "AES-256";
+    hashAlgorithm: "SHA-256" | "SHA-384" | "SHA-512";
+    keyUsage: "encrypt" | "sign" | "both";
     fipsMode: boolean;
     multiAuth: boolean;
   };
@@ -42,13 +37,13 @@ export interface CMKKey {
   keyId: string; // HSM-specific key identifier
   providerId: string;
   algorithm: string;
-  purpose: 'data-encryption' | 'key-encryption' | 'signing' | 'authentication';
+  purpose: "data-encryption" | "key-encryption" | "signing" | "authentication";
   keyMaterial?: {
     publicKey: string;
     keySpec: string;
     keyUsage: string[];
   };
-  status: 'active' | 'pending' | 'disabled' | 'deleted';
+  status: "active" | "pending" | "disabled" | "deleted";
   rotationSchedule?: {
     enabled: boolean;
     intervalDays: number;
@@ -74,17 +69,10 @@ export interface CMKKey {
 export interface KeyOperation {
   id: string;
   keyId: string;
-  operation:
-    | 'encrypt'
-    | 'decrypt'
-    | 'sign'
-    | 'verify'
-    | 'generate'
-    | 'rotate'
-    | 'delete';
+  operation: "encrypt" | "decrypt" | "sign" | "verify" | "generate" | "rotate" | "delete";
   requestor: string;
   approver?: string;
-  status: 'pending' | 'approved' | 'executed' | 'failed' | 'denied';
+  status: "pending" | "approved" | "executed" | "failed" | "denied";
   reason: string;
   attestation?: {
     timestamp: Date;
@@ -130,7 +118,7 @@ export class HSMAdapter extends EventEmitter {
    * Register HSM provider
    */
   async registerProvider(
-    provider: Omit<HSMProvider, 'createdAt' | 'updatedAt'>,
+    provider: Omit<HSMProvider, "createdAt" | "updatedAt">
   ): Promise<HSMProvider> {
     const fullProvider: HSMProvider = {
       ...provider,
@@ -142,7 +130,7 @@ export class HSMAdapter extends EventEmitter {
     await this.testHSMConnection(fullProvider);
 
     this.providers.set(fullProvider.name, fullProvider);
-    this.emit('provider_registered', fullProvider);
+    this.emit("provider_registered", fullProvider);
 
     return fullProvider;
   }
@@ -154,18 +142,18 @@ export class HSMAdapter extends EventEmitter {
     tenantId: string,
     alias: string,
     providerId: string,
-    purpose: CMKKey['purpose'],
+    purpose: CMKKey["purpose"],
     options: {
       algorithm?: string;
       rotationDays?: number;
       dualControl?: boolean;
       classification?: string;
       compliance?: string[];
-    } = {},
+    } = {}
   ): Promise<CMKKey> {
     const provider = this.providers.get(providerId);
     if (!provider || !provider.isActive) {
-      throw new Error('HSM provider not available');
+      throw new Error("HSM provider not available");
     }
 
     // Generate key in HSM
@@ -183,14 +171,12 @@ export class HSMAdapter extends EventEmitter {
       providerId,
       algorithm: options.algorithm || provider.configuration.keyAlgorithm,
       purpose,
-      status: 'active',
+      status: "active",
       rotationSchedule: options.rotationDays
         ? {
             enabled: true,
             intervalDays: options.rotationDays,
-            nextRotation: new Date(
-              Date.now() + options.rotationDays * 24 * 60 * 60 * 1000,
-            ),
+            nextRotation: new Date(Date.now() + options.rotationDays * 24 * 60 * 60 * 1000),
           }
         : undefined,
       accessPolicy: {
@@ -199,10 +185,10 @@ export class HSMAdapter extends EventEmitter {
         auditRequired: true,
       },
       metadata: {
-        classification: options.classification || 'SENSITIVE',
+        classification: options.classification || "SENSITIVE",
         purpose: purpose,
         owner: tenantId,
-        compliance: options.compliance || ['FIPS-140-2'],
+        compliance: options.compliance || ["FIPS-140-2"],
       },
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -213,13 +199,13 @@ export class HSMAdapter extends EventEmitter {
     // Record creation operation
     await this.recordOperation({
       keyId: key.id,
-      operation: 'generate',
-      requestor: 'system',
+      operation: "generate",
+      requestor: "system",
       reason: `Key created for ${purpose}`,
-      status: 'executed',
+      status: "executed",
     });
 
-    this.emit('key_created', key);
+    this.emit("key_created", key);
 
     return key;
   }
@@ -227,33 +213,29 @@ export class HSMAdapter extends EventEmitter {
   /**
    * Rotate CMK key
    */
-  async rotateKey(
-    keyId: string,
-    requestor: string,
-    approver?: string,
-  ): Promise<CMKKey> {
+  async rotateKey(keyId: string, requestor: string, approver?: string): Promise<CMKKey> {
     const key = this.keys.get(keyId);
     if (!key) {
-      throw new Error('Key not found');
+      throw new Error("Key not found");
     }
 
     if (key.accessPolicy.dualControlRequired && !approver) {
-      throw new Error('Dual control required for key rotation');
+      throw new Error("Dual control required for key rotation");
     }
 
     const provider = this.providers.get(key.providerId);
     if (!provider) {
-      throw new Error('HSM provider not found');
+      throw new Error("HSM provider not found");
     }
 
     // Create rotation operation
     const operation = await this.recordOperation({
       keyId,
-      operation: 'rotate',
+      operation: "rotate",
       requestor,
       approver,
-      reason: 'Scheduled key rotation',
-      status: 'pending',
+      reason: "Scheduled key rotation",
+      status: "pending",
     });
 
     try {
@@ -265,22 +247,22 @@ export class HSMAdapter extends EventEmitter {
       key.updatedAt = new Date();
       if (key.rotationSchedule) {
         key.rotationSchedule.nextRotation = new Date(
-          Date.now() + key.rotationSchedule.intervalDays * 24 * 60 * 60 * 1000,
+          Date.now() + key.rotationSchedule.intervalDays * 24 * 60 * 60 * 1000
         );
       }
 
       this.keys.set(keyId, key);
 
       // Update operation status
-      operation.status = 'executed';
+      operation.status = "executed";
       operation.audit.executionTime = new Date();
       this.operations.set(operation.id, operation);
 
-      this.emit('key_rotated', { key, oldKeyId: key.keyId, newKeyId });
+      this.emit("key_rotated", { key, oldKeyId: key.keyId, newKeyId });
 
       return key;
     } catch (error) {
-      operation.status = 'failed';
+      operation.status = "failed";
       operation.audit.error = error.message;
       this.operations.set(operation.id, operation);
       throw error;
@@ -293,23 +275,18 @@ export class HSMAdapter extends EventEmitter {
   async encrypt(
     keyId: string,
     plaintext: Buffer,
-    context?: Record<string, string>,
+    context?: Record<string, string>
   ): Promise<{
     ciphertext: Buffer;
     keyId: string;
     algorithm: string;
     attestation?: any;
   }> {
-    const key = await this.validateKeyOperation(keyId, 'encrypt');
+    const key = await this.validateKeyOperation(keyId, "encrypt");
     const provider = this.providers.get(key.providerId)!;
 
     // Perform encryption in HSM
-    const result = await this.performHSMEncryption(
-      provider,
-      key.keyId,
-      plaintext,
-      context,
-    );
+    const result = await this.performHSMEncryption(provider, key.keyId, plaintext, context);
 
     // Update key usage
     key.lastUsed = new Date();
@@ -318,10 +295,10 @@ export class HSMAdapter extends EventEmitter {
     // Record operation
     await this.recordOperation({
       keyId,
-      operation: 'encrypt',
-      requestor: 'system',
-      reason: 'Data encryption',
-      status: 'executed',
+      operation: "encrypt",
+      requestor: "system",
+      reason: "Data encryption",
+      status: "executed",
     });
 
     return {
@@ -338,21 +315,16 @@ export class HSMAdapter extends EventEmitter {
   async decrypt(
     keyId: string,
     ciphertext: Buffer,
-    context?: Record<string, string>,
+    context?: Record<string, string>
   ): Promise<{
     plaintext: Buffer;
     attestation?: any;
   }> {
-    const key = await this.validateKeyOperation(keyId, 'decrypt');
+    const key = await this.validateKeyOperation(keyId, "decrypt");
     const provider = this.providers.get(key.providerId)!;
 
     // Perform decryption in HSM
-    const result = await this.performHSMDecryption(
-      provider,
-      key.keyId,
-      ciphertext,
-      context,
-    );
+    const result = await this.performHSMDecryption(provider, key.keyId, ciphertext, context);
 
     // Update key usage
     key.lastUsed = new Date();
@@ -361,10 +333,10 @@ export class HSMAdapter extends EventEmitter {
     // Record operation
     await this.recordOperation({
       keyId,
-      operation: 'decrypt',
-      requestor: 'system',
-      reason: 'Data decryption',
-      status: 'executed',
+      operation: "decrypt",
+      requestor: "system",
+      reason: "Data decryption",
+      status: "executed",
     });
 
     return {
@@ -380,15 +352,13 @@ export class HSMAdapter extends EventEmitter {
     tenantId: string,
     datasets: string[],
     requestor: string,
-    approver: string,
+    approver: string
   ): Promise<CryptoErasureEvent> {
     // Find tenant keys
-    const tenantKeys = Array.from(this.keys.values()).filter(
-      (k) => k.tenantId === tenantId,
-    );
+    const tenantKeys = Array.from(this.keys.values()).filter((k) => k.tenantId === tenantId);
 
     if (tenantKeys.length === 0) {
-      throw new Error('No keys found for tenant');
+      throw new Error("No keys found for tenant");
     }
 
     // Calculate before hash of datasets
@@ -404,7 +374,7 @@ export class HSMAdapter extends EventEmitter {
       executedAt: new Date(),
       verification: {
         beforeHash,
-        afterHash: '',
+        afterHash: "",
         success: false,
         affectedRecords: 0,
       },
@@ -414,7 +384,7 @@ export class HSMAdapter extends EventEmitter {
       // Delete/disable all tenant keys
       let affectedRecords = 0;
       for (const key of tenantKeys) {
-        key.status = 'deleted';
+        key.status = "deleted";
         key.updatedAt = new Date();
         this.keys.set(key.id, key);
 
@@ -438,7 +408,7 @@ export class HSMAdapter extends EventEmitter {
       };
 
       this.erasureEvents.set(erasureEvent.id, erasureEvent);
-      this.emit('crypto_erasure_completed', erasureEvent);
+      this.emit("crypto_erasure_completed", erasureEvent);
 
       return erasureEvent;
     } catch (error) {
@@ -454,8 +424,7 @@ export class HSMAdapter extends EventEmitter {
   getKey(tenantId: string, alias: string): CMKKey | null {
     return (
       Array.from(this.keys.values()).find(
-        (k) =>
-          k.tenantId === tenantId && k.alias === alias && k.status === 'active',
+        (k) => k.tenantId === tenantId && k.alias === alias && k.status === "active"
       ) || null
     );
   }
@@ -464,9 +433,7 @@ export class HSMAdapter extends EventEmitter {
    * List tenant keys
    */
   listKeys(tenantId: string): CMKKey[] {
-    return Array.from(this.keys.values()).filter(
-      (k) => k.tenantId === tenantId,
-    );
+    return Array.from(this.keys.values()).filter((k) => k.tenantId === tenantId);
   }
 
   /**
@@ -476,28 +443,26 @@ export class HSMAdapter extends EventEmitter {
     const operations = Array.from(this.operations.values());
 
     return (keyId ? operations.filter((op) => op.keyId === keyId) : operations)
-      .sort(
-        (a, b) => b.audit.requestTime.getTime() - a.audit.requestTime.getTime(),
-      )
+      .sort((a, b) => b.audit.requestTime.getTime() - a.audit.requestTime.getTime())
       .slice(0, limit);
   }
 
   private async testHSMConnection(provider: HSMProvider): Promise<void> {
     // Test HSM connectivity based on provider type
     switch (provider.type) {
-      case 'luna':
+      case "luna":
         await this.testLunaConnection(provider);
         break;
-      case 'cloudhsm':
+      case "cloudhsm":
         await this.testCloudHSMConnection(provider);
         break;
-      case 'thales':
+      case "thales":
         await this.testThalesConnection(provider);
         break;
-      case 'keyvault':
+      case "keyvault":
         await this.testKeyVaultConnection(provider);
         break;
-      case 'cloudkms':
+      case "cloudkms":
         await this.testCloudKMSConnection(provider);
         break;
       default:
@@ -505,18 +470,12 @@ export class HSMAdapter extends EventEmitter {
     }
   }
 
-  private async generateHSMKey(
-    provider: HSMProvider,
-    options: any,
-  ): Promise<string> {
+  private async generateHSMKey(provider: HSMProvider, options: any): Promise<string> {
     // Generate key in HSM and return key ID
     return `hsm-key-${crypto.randomUUID()}`;
   }
 
-  private async rotateHSMKey(
-    provider: HSMProvider,
-    oldKeyId: string,
-  ): Promise<string> {
+  private async rotateHSMKey(provider: HSMProvider, oldKeyId: string): Promise<string> {
     // Rotate key in HSM and return new key ID
     return `hsm-key-${crypto.randomUUID()}`;
   }
@@ -525,7 +484,7 @@ export class HSMAdapter extends EventEmitter {
     provider: HSMProvider,
     keyId: string,
     plaintext: Buffer,
-    context?: Record<string, string>,
+    context?: Record<string, string>
   ): Promise<{ ciphertext: Buffer; attestation?: any }> {
     // Perform encryption in HSM
     const ciphertext = crypto.randomBytes(plaintext.length + 16); // Mock encrypted data
@@ -543,7 +502,7 @@ export class HSMAdapter extends EventEmitter {
     provider: HSMProvider,
     keyId: string,
     ciphertext: Buffer,
-    context?: Record<string, string>,
+    context?: Record<string, string>
   ): Promise<{ plaintext: Buffer; attestation?: any }> {
     // Perform decryption in HSM
     const plaintext = ciphertext.slice(16); // Mock decrypted data
@@ -557,25 +516,19 @@ export class HSMAdapter extends EventEmitter {
     };
   }
 
-  private async deleteHSMKey(
-    provider: HSMProvider,
-    keyId: string,
-  ): Promise<void> {
+  private async deleteHSMKey(provider: HSMProvider, keyId: string): Promise<void> {
     // Delete key from HSM
     console.log(`Deleting key ${keyId} from HSM ${provider.name}`);
   }
 
-  private async validateKeyOperation(
-    keyId: string,
-    operation: string,
-  ): Promise<CMKKey> {
+  private async validateKeyOperation(keyId: string, operation: string): Promise<CMKKey> {
     const key = this.keys.get(keyId);
     if (!key) {
-      throw new Error('Key not found');
+      throw new Error("Key not found");
     }
 
-    if (key.status !== 'active') {
-      throw new Error('Key is not active');
+    if (key.status !== "active") {
+      throw new Error("Key is not active");
     }
 
     if (!key.accessPolicy.allowedOperations.includes(operation)) {
@@ -586,16 +539,16 @@ export class HSMAdapter extends EventEmitter {
   }
 
   private async recordOperation(
-    operation: Omit<KeyOperation, 'id' | 'audit'> & {
-      status: KeyOperation['status'];
-    },
+    operation: Omit<KeyOperation, "id" | "audit"> & {
+      status: KeyOperation["status"];
+    }
   ): Promise<KeyOperation> {
     const fullOperation: KeyOperation = {
       ...operation,
       id: crypto.randomUUID(),
       audit: {
         requestTime: new Date(),
-        ...(operation.status === 'executed' && { executionTime: new Date() }),
+        ...(operation.status === "executed" && { executionTime: new Date() }),
       },
     };
 
@@ -603,28 +556,28 @@ export class HSMAdapter extends EventEmitter {
     return fullOperation;
   }
 
-  private getDefaultOperations(purpose: CMKKey['purpose']): string[] {
+  private getDefaultOperations(purpose: CMKKey["purpose"]): string[] {
     switch (purpose) {
-      case 'data-encryption':
-        return ['encrypt', 'decrypt'];
-      case 'key-encryption':
-        return ['encrypt', 'decrypt', 'generate'];
-      case 'signing':
-        return ['sign', 'verify'];
-      case 'authentication':
-        return ['sign', 'verify', 'encrypt', 'decrypt'];
+      case "data-encryption":
+        return ["encrypt", "decrypt"];
+      case "key-encryption":
+        return ["encrypt", "decrypt", "generate"];
+      case "signing":
+        return ["sign", "verify"];
+      case "authentication":
+        return ["sign", "verify", "encrypt", "decrypt"];
       default:
-        return ['encrypt', 'decrypt'];
+        return ["encrypt", "decrypt"];
     }
   }
 
   private async calculateDatasetHash(datasets: string[]): Promise<string> {
     // Calculate hash of dataset contents for verification
-    const hash = crypto.createHash('sha256');
+    const hash = crypto.createHash("sha256");
     for (const dataset of datasets) {
       hash.update(dataset);
     }
-    return hash.digest('hex');
+    return hash.digest("hex");
   }
 
   private async countKeyUsage(keyId: string): Promise<number> {
@@ -632,8 +585,8 @@ export class HSMAdapter extends EventEmitter {
     return this.operations.filter(
       (op) =>
         op.keyId === keyId &&
-        (op.operation === 'encrypt' || op.operation === 'decrypt') &&
-        op.status === 'executed',
+        (op.operation === "encrypt" || op.operation === "decrypt") &&
+        op.status === "executed"
     ).length;
   }
 

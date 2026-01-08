@@ -1,8 +1,8 @@
-version: '3'
+version: "3"
 services:
   coach:
     build: ..
     ports:
-      - '8080:8080'
+      - "8080:8080"
     volumes:
       - ./models:/models

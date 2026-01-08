@@ -3,12 +3,14 @@
 ## How to Cut a Release
 
 Releases are automated via GitHub Actions when a tag is pushed or manually triggered.
+
 1.  **Draft**: A draft release is created from Conventional Commits.
 2.  **Publish**: When approved, the release is published.
 
 ## Rollback Procedure
 
 If a release is bad:
+
 1.  **Identify**: Check `release/provenance.json` of the bad build to find the previous stable commit.
 2.  **Revert**:
     ```bash

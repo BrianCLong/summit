@@ -1,6 +1,6 @@
-import { Bench } from 'tinybench';
-import { execSync } from 'node:child_process';
-import * as os from 'node:os';
+import { Bench } from "tinybench";
+import { execSync } from "node:child_process";
+import * as os from "node:os";
 import type {
   BenchmarkConfig,
   BenchmarkResult,
@@ -8,16 +8,16 @@ import type {
   MemoryStats,
   BenchmarkThreshold,
   BenchmarkFn,
-} from './types.js';
+} from "./types.js";
 
 /**
  * Get current git commit hash
  */
 function getGitCommit(): string {
   try {
-    return execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
+    return execSync("git rev-parse --short HEAD", { encoding: "utf8" }).trim();
   } catch {
-    return 'unknown';
+    return "unknown";
   }
 }
 
@@ -98,7 +98,7 @@ export class BenchmarkHarness {
     // Get results from first task (we only add one)
     const task = this.bench.tasks[0];
     if (!task || !task.result) {
-      throw new Error('Benchmark did not produce results');
+      throw new Error("Benchmark did not produce results");
     }
 
     const result = task.result;
@@ -153,7 +153,9 @@ export class BenchmarkHarness {
    * Check if results pass threshold
    */
   private checkThreshold(stats: BenchmarkStats): boolean {
-    if (!this.threshold) {return true;}
+    if (!this.threshold) {
+      return true;
+    }
 
     const { maxMean, maxP99, minOpsPerSecond, maxRsd } = this.threshold;
 
@@ -195,7 +197,7 @@ export class BenchmarkHarness {
    * Format bytes in human-readable form
    */
   static formatBytes(bytes: number): string {
-    const units = ['B', 'KB', 'MB', 'GB'];
+    const units = ["B", "KB", "MB", "GB"];
     let unitIndex = 0;
     let value = bytes;
 

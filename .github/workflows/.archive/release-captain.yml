@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Default branch to operate on'
+        description: "Default branch to operate on"
         required: false
-        default: 'main'
+        default: "main"
       work_branch:
-        description: 'Working branch name (optional override)'
+        description: "Working branch name (optional override)"
         required: false
-        default: ''
+        default: ""
 
 jobs:
   run:
@@ -31,8 +31,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20.14.x'
-          cache: 'pnpm'
+          node-version: "20.14.x"
+          cache: "pnpm"
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
       - name: Setup GitHub CLI

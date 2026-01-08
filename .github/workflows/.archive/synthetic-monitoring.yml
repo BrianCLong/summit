@@ -3,15 +3,15 @@ name: Synthetic Monitoring
 on:
   schedule:
     # Run every 1 minute for critical endpoints
-    - cron: '* * * * *'
+    - cron: "* * * * *"
 
   # Allow manual triggering
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Environment to test'
+        description: "Environment to test"
         required: true
-        default: 'production'
+        default: "production"
         type: choice
         options:
           - production
@@ -251,7 +251,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install dependencies
         working-directory: ./monitoring/synthetic
@@ -301,7 +301,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install Playwright
         run: |
@@ -427,7 +427,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install k6
         run: |

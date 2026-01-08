@@ -1,7 +1,7 @@
 name: Task
 description: Track a granular implementation task
-title: 'task: <short title>'
-labels: ['task']
+title: "task: <short title>"
+labels: ["task"]
 body:
   - type: textarea
     id: steps

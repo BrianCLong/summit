@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 
 interface GraphNode {
   id: string;
@@ -37,7 +37,7 @@ function GraphPreview({
   interactive = true,
   showLabels = true,
   onNodeClick,
-  title = 'Graph Preview',
+  title = "Graph Preview",
 }: GraphPreviewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
@@ -51,15 +51,15 @@ function GraphPreview({
   const edges = graphData?.edges || [];
 
   const nodeTypeColors = {
-    person: '#FF5733',
-    organization: '#33FF57',
-    location: '#3357FF',
-    event: '#FF33FF',
-    document: '#FFB533',
-    IP: '#33FFB5',
-    email: '#B533FF',
-    phone: '#FF3333',
-    generic: '#888888',
+    person: "#FF5733",
+    organization: "#33FF57",
+    location: "#3357FF",
+    event: "#FF33FF",
+    document: "#FFB533",
+    IP: "#33FFB5",
+    email: "#B533FF",
+    phone: "#FF3333",
+    generic: "#888888",
   };
 
   // Simple physics simulation for node positioning
@@ -74,17 +74,13 @@ function GraphPreview({
           // Simple circular layout with some randomness
           const angle =
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (nodes.findIndex((n: any) => n.id === node.id) / nodes.length) *
-            Math.PI *
-            2;
+            (nodes.findIndex((n: any) => n.id === node.id) / nodes.length) * Math.PI * 2;
           const radius = Math.min(width, height) * 0.3;
           const centerX = width / 2;
           const centerY = height / 2;
 
-          const targetX =
-            centerX + Math.cos(angle) * radius + (Math.random() - 0.5) * 20;
-          const targetY =
-            centerY + Math.sin(angle) * radius + (Math.random() - 0.5) * 20;
+          const targetX = centerX + Math.cos(angle) * radius + (Math.random() - 0.5) * 20;
+          const targetY = centerY + Math.sin(angle) * radius + (Math.random() - 0.5) * 20;
 
           // Smooth movement towards target position
           const currentX = node.x || centerX;
@@ -106,7 +102,7 @@ function GraphPreview({
         ...node,
         x: width / 2 + (Math.random() - 0.5) * 100,
         y: height / 2 + (Math.random() - 0.5) * 100,
-      })),
+      }))
     );
 
     // Run simulation
@@ -119,7 +115,7 @@ function GraphPreview({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     // Set canvas size
@@ -130,12 +126,12 @@ function GraphPreview({
     ctx.clearRect(0, 0, width, height);
 
     // Draw background
-    ctx.fillStyle = '#fafafa';
+    ctx.fillStyle = "#fafafa";
     ctx.fillRect(0, 0, width, height);
 
     // Draw edges
     if (simulationNodes.length > 0) {
-      ctx.strokeStyle = '#e5e7eb';
+      ctx.strokeStyle = "#e5e7eb";
       ctx.lineWidth = 1;
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -165,8 +161,7 @@ function GraphPreview({
 
       const radius = hoveredNode === node.id ? 8 : 6;
       const color =
-        nodeTypeColors[node.type as keyof typeof nodeTypeColors] ||
-        nodeTypeColors.generic;
+        nodeTypeColors[node.type as keyof typeof nodeTypeColors] || nodeTypeColors.generic;
 
       // Node circle
       ctx.fillStyle = color;
@@ -175,26 +170,26 @@ function GraphPreview({
       ctx.fill();
 
       // Node border
-      ctx.strokeStyle = hoveredNode === node.id ? '#333' : '#fff';
+      ctx.strokeStyle = hoveredNode === node.id ? "#333" : "#fff";
       ctx.lineWidth = 2;
       ctx.stroke();
 
       // Label
       if (showLabels && node.label) {
-        ctx.fillStyle = '#333';
-        ctx.font = '11px sans-serif';
-        ctx.textAlign = 'center';
+        ctx.fillStyle = "#333";
+        ctx.font = "11px sans-serif";
+        ctx.textAlign = "center";
         ctx.fillText(node.label.substring(0, 15), node.x, node.y - radius - 5);
       }
     });
 
     // Draw stats
-    ctx.fillStyle = '#666';
-    ctx.font = '12px sans-serif';
-    ctx.textAlign = 'left';
+    ctx.fillStyle = "#666";
+    ctx.font = "12px sans-serif";
+    ctx.textAlign = "left";
     ctx.fillText(`Nodes: ${simulationNodes.length}`, 10, height - 30);
     ctx.fillText(`Edges: ${edges.length}`, 10, height - 15);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [simulationNodes, hoveredNode, showLabels, width, height, edges]);
 
   // Handle mouse interactions
@@ -212,9 +207,7 @@ function GraphPreview({
     const hoveredNodeId =
       simulationNodes.find((node) => {
         if (!node.x || !node.y) return false;
-        const distance = Math.sqrt(
-          Math.pow(mouseX - node.x, 2) + Math.pow(mouseY - node.y, 2),
-        );
+        const distance = Math.sqrt(Math.pow(mouseX - node.x, 2) + Math.pow(mouseY - node.y, 2));
         return distance <= 8;
       })?.id || null;
 
@@ -234,9 +227,7 @@ function GraphPreview({
     // Find clicked node
     const clickedNode = simulationNodes.find((node) => {
       if (!node.x || !node.y) return false;
-      const distance = Math.sqrt(
-        Math.pow(mouseX - node.x, 2) + Math.pow(mouseY - node.y, 2),
-      );
+      const distance = Math.sqrt(Math.pow(mouseX - node.x, 2) + Math.pow(mouseY - node.y, 2));
       return distance <= 8;
     });
 
@@ -246,45 +237,40 @@ function GraphPreview({
   };
 
   return (
-    <div className="panel" style={{ padding: '16px' }}>
+    <div className="panel" style={{ padding: "16px" }}>
       <div
         style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '12px',
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "12px",
         }}
       >
-        <h3 style={{ fontSize: '1rem', fontWeight: '600', margin: 0 }}>
-          {title}
-        </h3>
+        <h3 style={{ fontSize: "1rem", fontWeight: "600", margin: 0 }}>{title}</h3>
 
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
           {/* Legend */}
-          <div style={{ display: 'flex', gap: '8px', fontSize: '11px' }}>
+          <div style={{ display: "flex", gap: "8px", fontSize: "11px" }}>
             {Object.entries(nodeTypeColors)
               .slice(0, 4)
               .map(([type, color]) => (
-                <div
-                  key={type}
-                  style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
-                >
+                <div key={type} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                   <div
                     style={{
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
+                      width: "8px",
+                      height: "8px",
+                      borderRadius: "50%",
                       backgroundColor: color,
                     }}
                   ></div>
-                  <span style={{ textTransform: 'capitalize' }}>{type}</span>
+                  <span style={{ textTransform: "capitalize" }}>{type}</span>
                 </div>
               ))}
           </div>
         </div>
       </div>
 
-      <div style={{ position: 'relative' }}>
+      <div style={{ position: "relative" }}>
         <canvas
           ref={canvasRef}
           width={width}
@@ -292,33 +278,33 @@ function GraphPreview({
           onMouseMove={handleMouseMove}
           onClick={handleClick}
           style={{
-            border: '1px solid var(--hairline)',
-            borderRadius: '4px',
-            cursor: interactive ? 'pointer' : 'default',
-            backgroundColor: '#fafafa',
+            border: "1px solid var(--hairline)",
+            borderRadius: "4px",
+            cursor: interactive ? "pointer" : "default",
+            backgroundColor: "#fafafa",
           }}
         />
 
         {hoveredNode && (
           <div
             style={{
-              position: 'absolute',
-              top: '10px',
-              left: '10px',
-              backgroundColor: 'rgba(0,0,0,0.8)',
-              color: 'white',
-              padding: '6px 10px',
-              borderRadius: '4px',
-              fontSize: '12px',
-              pointerEvents: 'none',
-              maxWidth: '200px',
+              position: "absolute",
+              top: "10px",
+              left: "10px",
+              backgroundColor: "rgba(0,0,0,0.8)",
+              color: "white",
+              padding: "6px 10px",
+              borderRadius: "4px",
+              fontSize: "12px",
+              pointerEvents: "none",
+              maxWidth: "200px",
             }}
           >
             {(() => {
               const node = simulationNodes.find((n) => n.id === hoveredNode);
               return node ? (
                 <div>
-                  <div style={{ fontWeight: 'bold' }}>{node.label}</div>
+                  <div style={{ fontWeight: "bold" }}>{node.label}</div>
                   <div>Type: {node.type}</div>
                   <div>ID: {node.id}</div>
                   {node.confidence && <div>Confidence: {node.confidence}%</div>}
@@ -332,15 +318,15 @@ function GraphPreview({
       {simulationNodes.length === 0 && (
         <div
           style={{
-            textAlign: 'center',
-            color: '#666',
-            padding: '40px 20px',
-            fontSize: '14px',
+            textAlign: "center",
+            color: "#666",
+            padding: "40px 20px",
+            fontSize: "14px",
           }}
         >
-          <div style={{ fontSize: '32px', marginBottom: '8px' }}>📊</div>
+          <div style={{ fontSize: "32px", marginBottom: "8px" }}>📊</div>
           <div>No graph data available</div>
-          <div style={{ fontSize: '12px', marginTop: '4px' }}>
+          <div style={{ fontSize: "12px", marginTop: "4px" }}>
             Load an investigation to see the graph visualization
           </div>
         </div>

@@ -1,5 +1,5 @@
-import axios, { AxiosInstance } from 'axios';
-import { ThreatFeed, ThreatIntel, ThreatFeedSource } from './types.js';
+import axios, { AxiosInstance } from "axios";
+import { ThreatFeed, ThreatIntel, ThreatFeedSource } from "./types.js";
 
 /**
  * Threat Feed Aggregator
@@ -14,7 +14,7 @@ export class ThreatFeedAggregator {
     this.httpClient = axios.create({
       timeout: 30000,
       headers: {
-        'User-Agent': 'IntelGraph-ThreatIntel/1.0',
+        "User-Agent": "IntelGraph-ThreatIntel/1.0",
       },
     });
   }
@@ -99,15 +99,15 @@ export class ThreatFeedAggregator {
    */
   private async fetchFeedData(feed: ThreatFeed): Promise<ThreatIntel[]> {
     switch (feed.source) {
-      case 'COMMERCIAL':
+      case "COMMERCIAL":
         return this.fetchCommercialFeed(feed);
-      case 'OSINT':
+      case "OSINT":
         return this.fetchOsintFeed(feed);
-      case 'STIX_TAXII':
+      case "STIX_TAXII":
         return this.fetchStixTaxiiFeed(feed);
-      case 'CVE_NVD':
+      case "CVE_NVD":
         return this.fetchCveFeed(feed);
-      case 'EXPLOIT_DB':
+      case "EXPLOIT_DB":
         return this.fetchExploitDbFeed(feed);
       default:
         console.warn(`Unsupported feed source: ${feed.source}`);
@@ -120,12 +120,12 @@ export class ThreatFeedAggregator {
    */
   private async fetchCommercialFeed(feed: ThreatFeed): Promise<ThreatIntel[]> {
     if (!feed.url || !feed.apiKey) {
-      throw new Error('Commercial feed requires URL and API key');
+      throw new Error("Commercial feed requires URL and API key");
     }
 
     const response = await this.httpClient.get(feed.url, {
       headers: {
-        'Authorization': `Bearer ${feed.apiKey}`,
+        Authorization: `Bearer ${feed.apiKey}`,
       },
     });
 
@@ -137,7 +137,7 @@ export class ThreatFeedAggregator {
    */
   private async fetchOsintFeed(feed: ThreatFeed): Promise<ThreatIntel[]> {
     if (!feed.url) {
-      throw new Error('OSINT feed requires URL');
+      throw new Error("OSINT feed requires URL");
     }
 
     const response = await this.httpClient.get(feed.url);
@@ -149,15 +149,15 @@ export class ThreatFeedAggregator {
    */
   private async fetchStixTaxiiFeed(feed: ThreatFeed): Promise<ThreatIntel[]> {
     if (!feed.url) {
-      throw new Error('STIX/TAXII feed requires URL');
+      throw new Error("STIX/TAXII feed requires URL");
     }
 
     const headers: Record<string, string> = {
-      'Accept': 'application/taxii+json;version=2.1',
+      Accept: "application/taxii+json;version=2.1",
     };
 
     if (feed.apiKey) {
-      headers['Authorization'] = `Bearer ${feed.apiKey}`;
+      headers["Authorization"] = `Bearer ${feed.apiKey}`;
     }
 
     const response = await this.httpClient.get(feed.url, { headers });
@@ -168,11 +168,11 @@ export class ThreatFeedAggregator {
    * Fetch CVE data from NVD
    */
   private async fetchCveFeed(feed: ThreatFeed): Promise<ThreatIntel[]> {
-    const nvdUrl = 'https://services.nvd.nist.gov/rest/json/cves/2.0';
+    const nvdUrl = "https://services.nvd.nist.gov/rest/json/cves/2.0";
 
     const params: Record<string, string> = {};
     if (feed.apiKey) {
-      params['apiKey'] = feed.apiKey;
+      params["apiKey"] = feed.apiKey;
     }
 
     const response = await this.httpClient.get(nvdUrl, { params });
@@ -183,7 +183,7 @@ export class ThreatFeedAggregator {
    * Fetch from Exploit-DB
    */
   private async fetchExploitDbFeed(feed: ThreatFeed): Promise<ThreatIntel[]> {
-    const exploitDbUrl = 'https://www.exploit-db.com/exploits.json';
+    const exploitDbUrl = "https://www.exploit-db.com/exploits.json";
 
     const response = await this.httpClient.get(exploitDbUrl);
     return this.parseExploitDbFeed(response.data, feed);
@@ -202,10 +202,10 @@ export class ThreatFeedAggregator {
         threats.push({
           id: item.id || this.generateId(),
           feedId: feed.id,
-          title: item.title || 'Unknown Threat',
-          description: item.description || '',
-          severity: item.severity || 'MEDIUM',
-          type: item.type || 'MALWARE',
+          title: item.title || "Unknown Threat",
+          description: item.description || "",
+          severity: item.severity || "MEDIUM",
+          type: item.type || "MALWARE",
           tlp: item.tlp || feed.tlp,
           iocs: item.iocs || [],
           tags: item.tags || [],
@@ -222,7 +222,7 @@ export class ThreatFeedAggregator {
           relatedThreats: item.relatedThreats || [],
           mitreTactics: item.mitreTactics || [],
           mitreTechniques: item.mitreTechniques || [],
-          tenantId: 'default',
+          tenantId: "default",
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         });
@@ -246,8 +246,8 @@ export class ThreatFeedAggregator {
       threats.push({
         id: this.generateId(),
         feedId: feed.id,
-        title: item.title || item.name || 'OSINT Finding',
-        description: item.description || item.summary || '',
+        title: item.title || item.name || "OSINT Finding",
+        description: item.description || item.summary || "",
         severity: this.mapSeverity(item.severity || item.risk),
         type: this.mapThreatType(item.type || item.category),
         tlp: feed.tlp,
@@ -265,7 +265,7 @@ export class ThreatFeedAggregator {
         relatedThreats: [],
         mitreTactics: item.mitre_tactics || [],
         mitreTechniques: item.mitre_techniques || [],
-        tenantId: 'default',
+        tenantId: "default",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
@@ -282,12 +282,12 @@ export class ThreatFeedAggregator {
 
     if (data.objects && Array.isArray(data.objects)) {
       for (const obj of data.objects) {
-        if (obj.type === 'indicator' || obj.type === 'malware' || obj.type === 'threat-actor') {
+        if (obj.type === "indicator" || obj.type === "malware" || obj.type === "threat-actor") {
           threats.push({
             id: obj.id,
             feedId: feed.id,
-            title: obj.name || 'STIX Object',
-            description: obj.description || '',
+            title: obj.name || "STIX Object",
+            description: obj.description || "",
             severity: this.mapSeverity(obj.threat_level),
             type: this.mapStixType(obj.type),
             tlp: feed.tlp,
@@ -305,7 +305,7 @@ export class ThreatFeedAggregator {
             relatedThreats: [],
             mitreTactics: [],
             mitreTechniques: [],
-            tenantId: 'default',
+            tenantId: "default",
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           });
@@ -329,15 +329,15 @@ export class ThreatFeedAggregator {
           id: cve.id,
           feedId: feed.id,
           title: cve.id,
-          description: cve.descriptions?.[0]?.value || '',
+          description: cve.descriptions?.[0]?.value || "",
           severity: this.mapCvssToSeverity(cve.metrics),
-          type: 'VULNERABILITY',
-          tlp: 'WHITE',
+          type: "VULNERABILITY",
+          tlp: "WHITE",
           iocs: [],
           tags: cve.references?.map((r: any) => r.tags || []).flat() || [],
           confidence: 90,
           source: {
-            name: 'NVD',
+            name: "NVD",
             url: `https://nvd.nist.gov/vuln/detail/${cve.id}`,
             feedId: feed.id,
           },
@@ -347,7 +347,7 @@ export class ThreatFeedAggregator {
           relatedThreats: [],
           mitreTactics: [],
           mitreTechniques: [],
-          tenantId: 'default',
+          tenantId: "default",
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         });
@@ -368,16 +368,16 @@ export class ThreatFeedAggregator {
         threats.push({
           id: `exploit-db-${exploit.id}`,
           feedId: feed.id,
-          title: exploit.description || 'Exploit',
-          description: exploit.description || '',
-          severity: 'HIGH',
-          type: 'EXPLOIT',
-          tlp: 'WHITE',
+          title: exploit.description || "Exploit",
+          description: exploit.description || "",
+          severity: "HIGH",
+          type: "EXPLOIT",
+          tlp: "WHITE",
           iocs: [],
           tags: [exploit.platform, exploit.type].filter(Boolean),
           confidence: 95,
           source: {
-            name: 'Exploit-DB',
+            name: "Exploit-DB",
             url: `https://www.exploit-db.com/exploits/${exploit.id}`,
             feedId: feed.id,
           },
@@ -387,7 +387,7 @@ export class ThreatFeedAggregator {
           relatedThreats: [],
           mitreTactics: [],
           mitreTechniques: [],
-          tenantId: 'default',
+          tenantId: "default",
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         });
@@ -404,40 +404,47 @@ export class ThreatFeedAggregator {
     return `threat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  private mapSeverity(severity: string | undefined): 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'INFO' {
-    if (!severity) return 'MEDIUM';
+  private mapSeverity(
+    severity: string | undefined
+  ): "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" | "INFO" {
+    if (!severity) return "MEDIUM";
 
     const s = severity.toLowerCase();
-    if (s.includes('critical') || s.includes('urgent')) return 'CRITICAL';
-    if (s.includes('high')) return 'HIGH';
-    if (s.includes('medium') || s.includes('moderate')) return 'MEDIUM';
-    if (s.includes('low')) return 'LOW';
-    return 'INFO';
+    if (s.includes("critical") || s.includes("urgent")) return "CRITICAL";
+    if (s.includes("high")) return "HIGH";
+    if (s.includes("medium") || s.includes("moderate")) return "MEDIUM";
+    if (s.includes("low")) return "LOW";
+    return "INFO";
   }
 
   private mapThreatType(type: string | undefined): any {
-    if (!type) return 'MALWARE';
+    if (!type) return "MALWARE";
 
     const t = type.toLowerCase();
-    if (t.includes('phish')) return 'PHISHING';
-    if (t.includes('ransom')) return 'RANSOMWARE';
-    if (t.includes('apt') || t.includes('advanced')) return 'APT';
-    if (t.includes('exploit')) return 'EXPLOIT';
-    if (t.includes('vuln')) return 'VULNERABILITY';
-    if (t.includes('botnet')) return 'BOTNET';
-    if (t.includes('c2') || t.includes('command')) return 'C2';
-    if (t.includes('leak')) return 'DATA_LEAK';
-    if (t.includes('cred')) return 'CREDENTIAL_DUMP';
-    return 'MALWARE';
+    if (t.includes("phish")) return "PHISHING";
+    if (t.includes("ransom")) return "RANSOMWARE";
+    if (t.includes("apt") || t.includes("advanced")) return "APT";
+    if (t.includes("exploit")) return "EXPLOIT";
+    if (t.includes("vuln")) return "VULNERABILITY";
+    if (t.includes("botnet")) return "BOTNET";
+    if (t.includes("c2") || t.includes("command")) return "C2";
+    if (t.includes("leak")) return "DATA_LEAK";
+    if (t.includes("cred")) return "CREDENTIAL_DUMP";
+    return "MALWARE";
   }
 
   private mapStixType(type: string): any {
     switch (type) {
-      case 'malware': return 'MALWARE';
-      case 'threat-actor': return 'THREAT_ACTOR';
-      case 'campaign': return 'APT';
-      case 'indicator': return 'MALWARE';
-      default: return 'MALWARE';
+      case "malware":
+        return "MALWARE";
+      case "threat-actor":
+        return "THREAT_ACTOR";
+      case "campaign":
+        return "APT";
+      case "indicator":
+        return "MALWARE";
+      default:
+        return "MALWARE";
     }
   }
 
@@ -469,17 +476,18 @@ export class ThreatFeedAggregator {
     return iocs;
   }
 
-  private mapCvssToSeverity(metrics: any): 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'INFO' {
-    const score = metrics?.cvssMetricV31?.[0]?.cvssData?.baseScore ||
-                  metrics?.cvssMetricV30?.[0]?.cvssData?.baseScore ||
-                  metrics?.cvssMetricV2?.[0]?.cvssData?.baseScore ||
-                  0;
+  private mapCvssToSeverity(metrics: any): "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" | "INFO" {
+    const score =
+      metrics?.cvssMetricV31?.[0]?.cvssData?.baseScore ||
+      metrics?.cvssMetricV30?.[0]?.cvssData?.baseScore ||
+      metrics?.cvssMetricV2?.[0]?.cvssData?.baseScore ||
+      0;
 
-    if (score >= 9.0) return 'CRITICAL';
-    if (score >= 7.0) return 'HIGH';
-    if (score >= 4.0) return 'MEDIUM';
-    if (score > 0) return 'LOW';
-    return 'INFO';
+    if (score >= 9.0) return "CRITICAL";
+    if (score >= 7.0) return "HIGH";
+    if (score >= 4.0) return "MEDIUM";
+    if (score > 0) return "LOW";
+    return "INFO";
   }
 
   /**

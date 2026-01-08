@@ -22,9 +22,9 @@ jobs:
       - name: ZAP Baseline
         uses: zaproxy/action-baseline@3cf792928d9a9035a348545e51f08c7910574555 # v0.14.0
         with:
-          target: 'http://localhost:3000'
-          rules_file_name: '.zap/rules.tsv'
-          cmd_options: '-a -m 5'
+          target: "http://localhost:3000"
+          rules_file_name: ".zap/rules.tsv"
+          cmd_options: "-a -m 5"
       - name: Upload ZAP report
         uses: actions/upload-artifact@0b7f8f6 # v4
         with:

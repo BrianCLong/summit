@@ -7,9 +7,10 @@ This guide outlines the security standards and services available in the Summit/
 **Do not access `process.env` directly.** Use the `SecretsService`.
 
 ### Usage
+
 ```typescript
-import { secretsService } from '../services/SecretsService.js';
-import { SECRETS } from '../config/secretRefs.js';
+import { secretsService } from "../services/SecretsService.js";
+import { SECRETS } from "../config/secretRefs.js";
 
 async function connectToDb() {
   const password = await secretsService.getSecret(SECRETS.POSTGRES_PASSWORD);
@@ -18,6 +19,7 @@ async function connectToDb() {
 ```
 
 ### Adding a New Secret
+
 1. Add the environment variable to `.env.example` (empty value) and your local `.env`.
 2. Define the secret reference in `server/src/config/secretRefs.ts`.
 
@@ -26,6 +28,7 @@ async function connectToDb() {
 We use a unified `PolicyService` to make access control decisions. This replaces ad-hoc RBAC checks.
 
 ### Usage
+
 ```typescript
 import { policyService } from '../services/PolicyService.js';
 
@@ -47,15 +50,20 @@ if (!decision.allow) {
 All LLM interactions must be guarded by `LlmSecurityService`.
 
 ### Usage
-```typescript
-import { llmSecurityService } from '../services/LlmSecurityService.js';
 
-const check = await llmSecurityService.validatePrompt(prompt, {
-  tenantId,
-  principal,
-  purpose: 'analysis',
-  dataSensitivity: 'internal'
-}, 'gpt-4');
+```typescript
+import { llmSecurityService } from "../services/LlmSecurityService.js";
+
+const check = await llmSecurityService.validatePrompt(
+  prompt,
+  {
+    tenantId,
+    principal,
+    purpose: "analysis",
+    dataSensitivity: "internal",
+  },
+  "gpt-4"
+);
 
 if (!check.allowed) {
   // Handle rejection (e.g. PII detected, policy violation)
@@ -84,6 +92,6 @@ await writeAudit({
 
 ## 5. Software Supply Chain
 
-*   **Dependencies**: Use `pnpm`. Do not use `npm` or `yarn`.
-*   **SBOM**: Generated automatically on build.
-*   **Signing**: Artifacts are signed in the CI pipeline.
+- **Dependencies**: Use `pnpm`. Do not use `npm` or `yarn`.
+- **SBOM**: Generated automatically on build.
+- **Signing**: Artifacts are signed in the CI pipeline.

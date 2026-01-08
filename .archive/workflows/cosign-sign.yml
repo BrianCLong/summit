@@ -2,11 +2,11 @@ name: cosign-sign
 
 on:
   push:
-    tags: ['v*'] # sign on tag push (e.g., v2025.09.02-maestro.1)
+    tags: ["v*"] # sign on tag push (e.g., v2025.09.02-maestro.1)
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Container tag to build & sign (e.g., v2025.09.02-maestro.1)'
+        description: "Container tag to build & sign (e.g., v2025.09.02-maestro.1)"
         required: true
         type: string
 
@@ -61,14 +61,14 @@ jobs:
 
       - name: Sign image (keyless via OIDC)
         env:
-          COSIGN_EXPERIMENTAL: '1'
+          COSIGN_EXPERIMENTAL: "1"
           IMAGE_REF: ${{ env.REGISTRY }}/${{ env.OWNER_SLUG }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.TAG }}
         run: |
           cosign sign --yes "${IMAGE_REF}"
 
       - name: Generate attestation
         env:
-          COSIGN_EXPERIMENTAL: '1'
+          COSIGN_EXPERIMENTAL: "1"
           IMAGE_REF: ${{ env.REGISTRY }}/${{ env.OWNER_SLUG }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.TAG }}
         run: |
           echo '{"buildType":"github-actions","builder":{"id":"${{ github.workflow }}@${{ github.repository }}"},"metadata":{"buildInvocationId":"${{ github.run_id }}","completeness":{"arguments":true,"environment":false,"materials":false},"reproducible":false},"materials":[{"uri":"git+${{ github.repository }}","digest":{"sha1":"${{ github.sha }}"}}]}' > attestation.json
@@ -76,7 +76,7 @@ jobs:
 
       - name: Export Cosign bundle
         env:
-          COSIGN_EXPERIMENTAL: '1'
+          COSIGN_EXPERIMENTAL: "1"
           IMAGE_REF: ${{ env.REGISTRY }}/${{ env.OWNER_SLUG }}/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.TAG }}
         run: |
           # Export signature bundle

@@ -2,9 +2,9 @@
  * Time-series anomaly detection (ARIMA-like, seasonal decomposition)
  */
 
-import { IAnomalyDetector } from '@intelgraph/threat-detection-core';
-import { AnomalyScore } from '@intelgraph/threat-detection-core';
-import * as stats from 'simple-statistics';
+import { IAnomalyDetector } from "@intelgraph/threat-detection-core";
+import { AnomalyScore } from "@intelgraph/threat-detection-core";
+import * as stats from "simple-statistics";
 
 export interface TimeSeriesDetectorConfig {
   windowSize: number; // Number of data points for analysis
@@ -33,7 +33,7 @@ export class TimeSeriesDetector implements IAnomalyDetector {
     let count = 0;
 
     for (const [feature, value] of Object.entries(data)) {
-      if (typeof value !== 'number' || feature === 'timestamp') continue;
+      if (typeof value !== "number" || feature === "timestamp") continue;
 
       const history = this.historicalData.get(feature) || [];
 
@@ -43,11 +43,7 @@ export class TimeSeriesDetector implements IAnomalyDetector {
         continue;
       }
 
-      const anomalyScore = this.detectTimeSeriesAnomaly(
-        feature,
-        { timestamp, value },
-        history
-      );
+      const anomalyScore = this.detectTimeSeriesAnomaly(feature, { timestamp, value }, history);
 
       scores[feature] = anomalyScore;
       totalScore += anomalyScore;
@@ -58,9 +54,9 @@ export class TimeSeriesDetector implements IAnomalyDetector {
 
     return {
       score: overallScore,
-      method: 'time_series',
+      method: "time_series",
       features: scores,
-      explanation: this.generateExplanation(scores)
+      explanation: this.generateExplanation(scores),
     };
   }
 
@@ -68,7 +64,7 @@ export class TimeSeriesDetector implements IAnomalyDetector {
     const timestamp = data.timestamp || Date.now();
 
     for (const [feature, value] of Object.entries(data)) {
-      if (typeof value !== 'number' || feature === 'timestamp') continue;
+      if (typeof value !== "number" || feature === "timestamp") continue;
 
       if (!this.historicalData.has(feature)) {
         this.historicalData.set(feature, []);
@@ -89,14 +85,14 @@ export class TimeSeriesDetector implements IAnomalyDetector {
 
     for (const [feature, data] of this.historicalData.entries()) {
       if (data.length > 0) {
-        const values = data.map(d => d.value);
+        const values = data.map((d) => d.value);
         baseline[feature] = {
           mean: stats.mean(values),
           median: stats.median(values),
           stdDev: stats.standardDeviation(values),
           trend: this.calculateTrend(data),
           seasonality: this.config.seasonality,
-          dataPoints: data.length
+          dataPoints: data.length,
         };
       }
     }
@@ -122,7 +118,7 @@ export class TimeSeriesDetector implements IAnomalyDetector {
     }
 
     // Calculate residuals
-    const values = deseasoned.map(d => d.value);
+    const values = deseasoned.map((d) => d.value);
     const mean = stats.mean(values);
     const stdDev = stats.standardDeviation(values);
 
@@ -146,27 +142,21 @@ export class TimeSeriesDetector implements IAnomalyDetector {
 
     return data.map((point, index) => ({
       timestamp: point.timestamp,
-      value: point.value - (trend.slope * index + trend.intercept)
+      value: point.value - (trend.slope * index + trend.intercept),
     }));
   }
 
-  private removeSeasonality(
-    data: TimeSeriesData[],
-    period: number
-  ): TimeSeriesData[] {
+  private removeSeasonality(data: TimeSeriesData[], period: number): TimeSeriesData[] {
     // Calculate seasonal indices
     const seasonalIndices = this.calculateSeasonalIndices(data, period);
 
     return data.map((point, index) => ({
       timestamp: point.timestamp,
-      value: point.value - seasonalIndices[index % period]
+      value: point.value - seasonalIndices[index % period],
     }));
   }
 
-  private calculateSeasonalIndices(
-    data: TimeSeriesData[],
-    period: number
-  ): number[] {
+  private calculateSeasonalIndices(data: TimeSeriesData[], period: number): number[] {
     const indices = new Array(period).fill(0);
     const counts = new Array(period).fill(0);
 
@@ -178,7 +168,7 @@ export class TimeSeriesDetector implements IAnomalyDetector {
     });
 
     // Average and center around mean
-    const overallMean = stats.mean(data.map(d => d.value));
+    const overallMean = stats.mean(data.map((d) => d.value));
 
     return indices.map((sum, i) => {
       const avg = counts[i] > 0 ? sum / counts[i] : 0;
@@ -195,13 +185,13 @@ export class TimeSeriesDetector implements IAnomalyDetector {
     }
 
     const x = data.map((_, i) => i);
-    const y = data.map(d => d.value);
+    const y = data.map((d) => d.value);
 
     const result = stats.linearRegression([x, y]);
 
     return {
       slope: result.m,
-      intercept: result.b
+      intercept: result.b,
     };
   }
 
@@ -224,12 +214,12 @@ export class TimeSeriesDetector implements IAnomalyDetector {
       .sort(([_, a], [__, b]) => b - a);
 
     if (anomalies.length === 0) {
-      return 'Time-series behavior within expected range';
+      return "Time-series behavior within expected range";
     }
 
     const featureList = anomalies
       .map(([feature, score]) => `${feature} (${(score * 100).toFixed(1)}%)`)
-      .join(', ');
+      .join(", ");
 
     return `Time-series anomalies in: ${featureList}`;
   }

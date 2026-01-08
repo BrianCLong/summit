@@ -27,11 +27,11 @@ experiments:
 ## Using the Helper Library
 
 ```ts
-import { ExperimentManager } from '@/experimentation';
+import { ExperimentManager } from "@/experimentation";
 
 const manager = new ExperimentManager();
-const variant = manager.getVariant('sample-experiment', userId);
-manager.logExposure('sample-experiment', userId, variant, {
+const variant = manager.getVariant("sample-experiment", userId);
+manager.logExposure("sample-experiment", userId, variant, {
   latency_ms: 120,
   error_rate: 0,
   click_through_rate: 0.3,

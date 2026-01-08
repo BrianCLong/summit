@@ -18,15 +18,15 @@ This guide captures the merge automation playbook, reusable prompt, and the `gh`
 >
 > **Hard rules:**
 >
-> * Default branch is `${DEFAULT_BRANCH:=main}`; read it from the repo and don’t assume.
-> * Only merge PRs with labels in `{ready-to-merge, automerge}` and with passing required checks & required reviews.
-> * Respect branch protection and required status checks. Never force-push to protected branches.
-> * Prefer **merge queue** (if enabled) else sequential merges; strategy: `--merge` (no squash) to preserve authored commits.
-> * If a PR body contains lines like `Depends on #<id>`, topologically sort so dependencies merge first.
-> * If checks fail or merge conflicts exist, add labels `{blocked/ci}` or `{blocked/conflict}`, post a helpful comment, and skip.
-> * For non-PR branches ahead of default by >0 commits, open draft PRs titled `Branch sweep: <branch>` (unless branch matches ignore globs: `release/*`, `wip/*`, `archive/*`).
-> * After merges complete, trigger CI on default branch, then cut a prerelease tag `v0.0.0-merge-<YYYYMMDD-HHMM>` with generated notes.
-> * Everything must be idempotent and support `DRY_RUN=1`. Log every action.
+> - Default branch is `${DEFAULT_BRANCH:=main}`; read it from the repo and don’t assume.
+> - Only merge PRs with labels in `{ready-to-merge, automerge}` and with passing required checks & required reviews.
+> - Respect branch protection and required status checks. Never force-push to protected branches.
+> - Prefer **merge queue** (if enabled) else sequential merges; strategy: `--merge` (no squash) to preserve authored commits.
+> - If a PR body contains lines like `Depends on #<id>`, topologically sort so dependencies merge first.
+> - If checks fail or merge conflicts exist, add labels `{blocked/ci}` or `{blocked/conflict}`, post a helpful comment, and skip.
+> - For non-PR branches ahead of default by >0 commits, open draft PRs titled `Branch sweep: <branch>` (unless branch matches ignore globs: `release/*`, `wip/*`, `archive/*`).
+> - After merges complete, trigger CI on default branch, then cut a prerelease tag `v0.0.0-merge-<YYYYMMDD-HHMM>` with generated notes.
+> - Everything must be idempotent and support `DRY_RUN=1`. Log every action.
 >
 > **Deliverables:**
 >

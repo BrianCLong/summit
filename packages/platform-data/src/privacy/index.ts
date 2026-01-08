@@ -1,1 +1,1 @@
-export * from './anonymizer.js';
+export * from "./anonymizer.js";

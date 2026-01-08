@@ -1,14 +1,14 @@
 export type ActivityType =
-  | 'thread_created'
-  | 'post_created'
-  | 'post_replied'
-  | 'post_reacted'
-  | 'badge_awarded'
-  | 'profile_updated'
-  | 'moderation_event'
-  | 'notification_sent'
-  | 'thread_locked'
-  | 'thread_unlocked';
+  | "thread_created"
+  | "post_created"
+  | "post_replied"
+  | "post_reacted"
+  | "badge_awarded"
+  | "profile_updated"
+  | "moderation_event"
+  | "notification_sent"
+  | "thread_locked"
+  | "thread_unlocked";
 
 export interface AccessibilityPreferences {
   readonly highContrast: boolean;
@@ -92,7 +92,7 @@ export interface Notification {
   readonly link: string | null;
   readonly createdAt: Date;
   readonly readAt: Date | null;
-  readonly priority: 'low' | 'medium' | 'high';
+  readonly priority: "low" | "medium" | "high";
   readonly metadata: Readonly<Record<string, unknown>>;
 }
 
@@ -112,12 +112,12 @@ export interface ModerationAction {
   readonly id: string;
   readonly moderatorId: string;
   readonly targetPostId: string;
-  readonly action: 'remove' | 'restore' | 'lock-thread' | 'unlock-thread';
+  readonly action: "remove" | "restore" | "lock-thread" | "unlock-thread";
   readonly reason: string;
   readonly createdAt: Date;
 }
 
-export interface SearchResult<T extends 'thread' | 'post' | 'profile'> {
+export interface SearchResult<T extends "thread" | "post" | "profile"> {
   readonly id: string;
   readonly type: T;
   readonly score: number;

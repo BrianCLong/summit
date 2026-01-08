@@ -9,44 +9,44 @@ on:
   push:
     branches: [main]
     paths:
-      - 'server/**'
-      - 'conductor-ui/**'
-      - 'deploy/aws/**'
-      - '.github/workflows/aws-deploy.yml'
+      - "server/**"
+      - "conductor-ui/**"
+      - "deploy/aws/**"
+      - ".github/workflows/aws-deploy.yml"
 
   pull_request:
     branches: [main]
     paths:
-      - 'server/**'
-      - 'conductor-ui/**'
-      - 'deploy/aws/**'
+      - "server/**"
+      - "conductor-ui/**"
+      - "deploy/aws/**"
 
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Deployment environment'
+        description: "Deployment environment"
         required: true
-        default: 'staging'
+        default: "staging"
         type: choice
         options:
           - staging
           - production
 
       force_rebuild:
-        description: 'Force rebuild of infrastructure'
+        description: "Force rebuild of infrastructure"
         required: false
         default: false
         type: boolean
 
       skip_tests:
-        description: 'Skip test execution'
+        description: "Skip test execution"
         required: false
         default: false
         type: boolean
 
 env:
   AWS_REGION: us-east-1
-  NODE_VERSION: '18'
+  NODE_VERSION: "18"
   DOCKER_BUILDKIT: 1
   COSIGN_EXPERIMENTAL: 1
 
@@ -103,16 +103,16 @@ jobs:
         if: ${{ !inputs.skip_tests }}
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
+          scan-type: "fs"
+          scan-ref: "."
+          format: "sarif"
+          output: "trivy-results.sarif"
 
       - name: Upload security scan results
         if: ${{ !inputs.skip_tests }}
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: "trivy-results.sarif"
 
   # Build and test Maestro application
   build-test:
@@ -135,8 +135,8 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: |
@@ -206,8 +206,8 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ steps.build.outputs.imageid }}
-          format: 'json'
-          output: 'trivy-image-results.json'
+          format: "json"
+          output: "trivy-image-results.json"
 
       - name: Upload image scan results
         uses: actions/upload-artifact@v4

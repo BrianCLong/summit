@@ -19,7 +19,7 @@ groups:
           team: platform
           runbook: https://docs.intelgraph.com/runbooks/service-down
         annotations:
-          summary: 'CRITICAL: Service {{ $labels.instance }} is DOWN'
+          summary: "CRITICAL: Service {{ $labels.instance }} is DOWN"
           description: |
             Service {{ $labels.job }} at {{ $labels.instance }} has been unreachable for more than 1 minute.
 
@@ -41,7 +41,7 @@ groups:
           team: platform
           runbook: https://docs.intelgraph.com/runbooks/high-error-rate
         annotations:
-          summary: 'CRITICAL: Error rate >1% for {{ $labels.service }}'
+          summary: "CRITICAL: Error rate >1% for {{ $labels.service }}"
           description: |
             Error rate is {{ $value | humanizePercentage }} for {{ $labels.service }} at {{ $labels.instance }}
 
@@ -65,7 +65,7 @@ groups:
           team: platform
           runbook: https://docs.intelgraph.com/runbooks/database-connections
         annotations:
-          summary: 'CRITICAL: Database connections at {{ $value | humanizePercentage }}'
+          summary: "CRITICAL: Database connections at {{ $value | humanizePercentage }}"
           description: |
             Database {{ $labels.database }} is using {{ $value | humanizePercentage }} of available connections
 
@@ -89,7 +89,7 @@ groups:
           team: platform
           runbook: https://docs.intelgraph.com/runbooks/disk-space
         annotations:
-          summary: 'CRITICAL: Disk space <20% on {{ $labels.instance }}'
+          summary: "CRITICAL: Disk space <20% on {{ $labels.instance }}"
           description: |
             Available disk space is {{ $value | humanizePercentage }} on {{ $labels.instance }}
 
@@ -109,7 +109,7 @@ groups:
           team: platform
           runbook: https://docs.intelgraph.com/runbooks/database-failure
         annotations:
-          summary: 'CRITICAL: PostgreSQL is DOWN'
+          summary: "CRITICAL: PostgreSQL is DOWN"
           description: |
             PostgreSQL database {{ $labels.database }} is unreachable
 
@@ -127,7 +127,7 @@ groups:
           team: platform
           runbook: https://docs.intelgraph.com/runbooks/neo4j-failure
         annotations:
-          summary: 'CRITICAL: Neo4j is DOWN'
+          summary: "CRITICAL: Neo4j is DOWN"
           description: |
             Neo4j graph database is unreachable at {{ $labels.instance }}
 
@@ -145,7 +145,7 @@ groups:
           team: platform
           runbook: https://docs.intelgraph.com/runbooks/redis-failure
         annotations:
-          summary: 'CRITICAL: Redis is DOWN'
+          summary: "CRITICAL: Redis is DOWN"
           description: |
             Redis cache is unreachable at {{ $labels.instance }}
 
@@ -167,7 +167,7 @@ groups:
           team: platform
           runbook: https://docs.intelgraph.com/runbooks/memory-exhaustion
         annotations:
-          summary: 'CRITICAL: Memory exhaustion on {{ $labels.instance }}'
+          summary: "CRITICAL: Memory exhaustion on {{ $labels.instance }}"
           description: |
             Available memory is {{ $value | humanizePercentage }} on {{ $labels.instance }}
 
@@ -194,10 +194,10 @@ groups:
           severity: warning
           priority: P1
           team: platform
-          channel: '#alerts-warning'
+          channel: "#alerts-warning"
           runbook: https://docs.intelgraph.com/runbooks/high-latency
         annotations:
-          summary: 'WARNING: API p95 latency >1s for {{ $labels.service }}'
+          summary: "WARNING: API p95 latency >1s for {{ $labels.service }}"
           description: |
             95th percentile response time is {{ $value }}s for {{ $labels.service }}
 
@@ -219,10 +219,10 @@ groups:
           severity: warning
           priority: P1
           team: platform
-          channel: '#alerts-warning'
+          channel: "#alerts-warning"
           runbook: https://docs.intelgraph.com/runbooks/database-connections
         annotations:
-          summary: 'WARNING: Database connections at {{ $value | humanizePercentage }}'
+          summary: "WARNING: Database connections at {{ $value | humanizePercentage }}"
           description: |
             Database {{ $labels.database }} is using {{ $value | humanizePercentage }} of available connections
 
@@ -241,9 +241,9 @@ groups:
           severity: warning
           priority: P1
           team: platform
-          channel: '#alerts-warning'
+          channel: "#alerts-warning"
         annotations:
-          summary: 'WARNING: High CPU usage on {{ $labels.instance }}'
+          summary: "WARNING: High CPU usage on {{ $labels.instance }}"
           description: |
             CPU usage is {{ $value }}% on {{ $labels.instance }}
 
@@ -262,9 +262,9 @@ groups:
           severity: warning
           priority: P1
           team: platform
-          channel: '#alerts-warning'
+          channel: "#alerts-warning"
         annotations:
-          summary: 'WARNING: High memory usage on {{ $labels.instance }}'
+          summary: "WARNING: High memory usage on {{ $labels.instance }}"
           description: |
             Memory usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}
 
@@ -284,9 +284,9 @@ groups:
           severity: warning
           priority: P1
           team: platform
-          channel: '#alerts-warning'
+          channel: "#alerts-warning"
         annotations:
-          summary: 'WARNING: Disk space <30% on {{ $labels.instance }}'
+          summary: "WARNING: Disk space <30% on {{ $labels.instance }}"
           description: |
             Available disk space is {{ $value | humanizePercentage }} on {{ $labels.instance }}
 
@@ -305,9 +305,9 @@ groups:
           severity: warning
           priority: P1
           team: platform
-          channel: '#alerts-warning'
+          channel: "#alerts-warning"
         annotations:
-          summary: 'WARNING: Slow database queries (p95 >1s)'
+          summary: "WARNING: Slow database queries (p95 >1s)"
           description: |
             95th percentile database query time is {{ $value }}s
 
@@ -326,9 +326,9 @@ groups:
           severity: warning
           priority: P1
           team: platform
-          channel: '#alerts-warning'
+          channel: "#alerts-warning"
         annotations:
-          summary: 'WARNING: GraphQL error rate >5%'
+          summary: "WARNING: GraphQL error rate >5%"
           description: |
             GraphQL error rate is {{ $value | humanizePercentage }}
 
@@ -354,9 +354,9 @@ groups:
           severity: warning
           priority: P1
           team: product
-          channel: '#alerts-business'
+          channel: "#alerts-business"
         annotations:
-          summary: 'WARNING: Active users dropped by >30%'
+          summary: "WARNING: Active users dropped by >30%"
           description: |
             Active users dropped by {{ $value | humanizePercentage }} in the last hour
 
@@ -374,9 +374,9 @@ groups:
           severity: warning
           priority: P2
           team: platform
-          channel: '#alerts-business'
+          channel: "#alerts-business"
         annotations:
-          summary: 'INFO: API traffic 2x higher than normal'
+          summary: "INFO: API traffic 2x higher than normal"
           description: |
             API request rate is {{ $value }} req/s, which is 2x higher than hourly average
 
@@ -391,9 +391,9 @@ groups:
           severity: warning
           priority: P1
           team: platform
-          channel: '#alerts-business'
+          channel: "#alerts-business"
         annotations:
-          summary: 'WARNING: Graph analysis job backlog >100'
+          summary: "WARNING: Graph analysis job backlog >100"
           description: |
             {{ $value }} graph analysis jobs are queued
 
@@ -410,9 +410,9 @@ groups:
           severity: warning
           priority: P2
           team: data
-          channel: '#alerts-business'
+          channel: "#alerts-business"
         annotations:
-          summary: 'WARNING: Data ingestion rate abnormally low'
+          summary: "WARNING: Data ingestion rate abnormally low"
           description: |
             Data ingestion rate is {{ $value }} records/sec
 
@@ -432,9 +432,9 @@ groups:
           severity: warning
           priority: P1
           team: platform
-          channel: '#alerts-business'
+          channel: "#alerts-business"
         annotations:
-          summary: 'WARNING: Graph analysis failure rate >10%'
+          summary: "WARNING: Graph analysis failure rate >10%"
           description: |
             Graph analysis job failure rate is {{ $value | humanizePercentage }}
 
@@ -457,9 +457,9 @@ groups:
           severity: warning
           priority: P1
           team: platform
-          channel: '#alerts-infrastructure'
+          channel: "#alerts-infrastructure"
         annotations:
-          summary: 'WARNING: Container {{ $labels.container }} restarting frequently'
+          summary: "WARNING: Container {{ $labels.container }} restarting frequently"
           description: |
             Container {{ $labels.container }} in pod {{ $labels.pod }} is restarting frequently
 
@@ -475,9 +475,9 @@ groups:
           severity: warning
           priority: P1
           team: platform
-          channel: '#alerts-infrastructure'
+          channel: "#alerts-infrastructure"
         annotations:
-          summary: 'WARNING: Pod {{ $labels.pod }} not ready'
+          summary: "WARNING: Pod {{ $labels.pod }} not ready"
           description: |
             Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is in {{ $labels.phase }} phase
 
@@ -494,9 +494,9 @@ groups:
           severity: warning
           priority: P2
           team: platform
-          channel: '#alerts-infrastructure'
+          channel: "#alerts-infrastructure"
         annotations:
-          summary: 'WARNING: High network traffic on {{ $labels.instance }}'
+          summary: "WARNING: High network traffic on {{ $labels.instance }}"
           description: |
             Network receive rate is {{ $value | humanizeBytes }}/s on {{ $labels.instance }}
 
@@ -522,10 +522,10 @@ groups:
           severity: critical
           priority: P0
           team: platform
-          channel: '#alerts-slo'
+          channel: "#alerts-slo"
           runbook: https://docs.intelgraph.com/runbooks/slo-breach
         annotations:
-          summary: 'CRITICAL: Availability SLO breach imminent'
+          summary: "CRITICAL: Availability SLO breach imminent"
           description: |
             Availability is {{ $value | humanizePercentage }}, breaching 99.9% SLO
 
@@ -546,9 +546,9 @@ groups:
           severity: warning
           priority: P1
           team: platform
-          channel: '#alerts-slo'
+          channel: "#alerts-slo"
         annotations:
-          summary: 'WARNING: Latency SLO breach'
+          summary: "WARNING: Latency SLO breach"
           description: |
             P95 latency is {{ $value }}s, breaching <500ms SLO
 
@@ -568,9 +568,9 @@ groups:
           severity: warning
           priority: P1
           team: platform
-          channel: '#alerts-slo'
+          channel: "#alerts-slo"
         annotations:
-          summary: 'WARNING: Error rate SLO breach'
+          summary: "WARNING: Error rate SLO breach"
           description: |
             Error rate is {{ $value | humanizePercentage }}, breaching <1% SLO
 

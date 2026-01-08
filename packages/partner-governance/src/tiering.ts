@@ -1,4 +1,4 @@
-import { PartnerSegment, TierCriteria, TierScore, TierWeights } from './types';
+import { PartnerSegment, TierCriteria, TierScore, TierWeights } from "./types";
 
 export const DEFAULT_WEIGHTS: TierWeights = {
   revenueInfluence: 0.4,
@@ -13,7 +13,10 @@ export const SEGMENT_THRESHOLDS: Record<PartnerSegment, number> = {
   [PartnerSegment.LONG_TAIL]: 0,
 };
 
-export function scoreTier(criteria: TierCriteria, weights: TierWeights = DEFAULT_WEIGHTS): TierScore {
+export function scoreTier(
+  criteria: TierCriteria,
+  weights: TierWeights = DEFAULT_WEIGHTS
+): TierScore {
   const weightedScore =
     criteria.revenueInfluence * weights.revenueInfluence +
     criteria.deliveryQuality * weights.deliveryQuality +

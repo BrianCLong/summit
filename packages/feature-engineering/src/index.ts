@@ -4,10 +4,10 @@
  */
 
 // Types
-export * from './types/index.js';
+export * from "./types/index.js";
 
 // Generators
-export { AutomatedFeatureGenerator } from './generators/automated-features.js';
+export { AutomatedFeatureGenerator } from "./generators/automated-features.js";
 
 // Transformers
-export { StandardScaler, MinMaxScaler } from './transformers/scalers.js';
+export { StandardScaler, MinMaxScaler } from "./transformers/scalers.js";

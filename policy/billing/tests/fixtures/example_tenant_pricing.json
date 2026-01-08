@@ -6,7 +6,7 @@
       "storage_gb": 0.22
     },
     "discounts": {
-      "default": 0.10
+      "default": 0.1
     }
   },
   "override_plan": {

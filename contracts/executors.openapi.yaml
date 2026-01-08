@@ -6,9 +6,5 @@ servers:
   - url: /api/maestro/v1
 paths:
   /executors:
-    get: { summary: List executors, responses: { '200': { description: OK } } }
-    post:
-      {
-        summary: Register executor,
-        responses: { '201': { description: Created } },
-      }
+    get: { summary: List executors, responses: { "200": { description: OK } } }
+    post: { summary: Register executor, responses: { "201": { description: Created } } }

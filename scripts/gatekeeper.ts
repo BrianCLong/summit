@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-import { ArtifactVerifier } from '../server/src/lib/deployment/admission-control';
+import { ArtifactVerifier } from "../server/src/lib/deployment/admission-control";
 
 // Simple CLI wrapper
 async function main() {
   const imageRef = process.argv[2];
   if (!imageRef) {
-    console.error('Usage: verify-admission <image-ref>');
+    console.error("Usage: verify-admission <image-ref>");
     process.exit(1);
   }
 
@@ -22,7 +22,7 @@ async function main() {
   process.exit(0);
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error(err);
   process.exit(1);
 });

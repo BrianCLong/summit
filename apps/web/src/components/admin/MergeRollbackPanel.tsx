@@ -1,13 +1,6 @@
-import React, { useState } from 'react';
-import { gql, useMutation } from '@apollo/client';
-import {
-  Alert,
-  Box,
-  Button,
-  Paper,
-  TextField,
-  Typography,
-} from '@mui/material';
+import React, { useState } from 'react'
+import { gql, useMutation } from '@apollo/client'
+import { Alert, Box, Button, Paper, TextField, Typography } from '@mui/material'
 
 const ROLLBACK_MERGE = gql`
   mutation RollbackMergeSnapshot($mergeId: String!, $reason: String!) {
@@ -17,27 +10,27 @@ const ROLLBACK_MERGE = gql`
       decisionId
     }
   }
-`;
+`
 
 export default function MergeRollbackPanel() {
-  const [mergeId, setMergeId] = useState('');
-  const [reason, setReason] = useState('');
+  const [mergeId, setMergeId] = useState('')
+  const [reason, setReason] = useState('')
 
-  const [rollbackMerge, { data, loading, error }] = useMutation(ROLLBACK_MERGE);
+  const [rollbackMerge, { data, loading, error }] = useMutation(ROLLBACK_MERGE)
 
   const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
+    event.preventDefault()
     await rollbackMerge({
       variables: {
         mergeId,
         reason,
       },
-    });
-  };
+    })
+  }
 
   const successMessage = data?.rollbackMergeSnapshot?.success
     ? `Rollback queued. Snapshot ${data.rollbackMergeSnapshot.snapshotId} restored.`
-    : null;
+    : null
 
   return (
     <Paper sx={{ p: 3 }}>
@@ -45,22 +38,26 @@ export default function MergeRollbackPanel() {
         Merge Rollback
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Restore a merge using its idempotency key (merge ID) and capture a reason
-        for audit.
+        Restore a merge using its idempotency key (merge ID) and capture a
+        reason for audit.
       </Typography>
 
-      <Box component="form" onSubmit={handleSubmit} sx={{ display: 'grid', gap: 2 }}>
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{ display: 'grid', gap: 2 }}
+      >
         <TextField
           label="Merge ID"
           value={mergeId}
-          onChange={(event) => setMergeId(event.target.value)}
+          onChange={event => setMergeId(event.target.value)}
           required
           fullWidth
         />
         <TextField
           label="Rollback reason"
           value={reason}
-          onChange={(event) => setReason(event.target.value)}
+          onChange={event => setReason(event.target.value)}
           required
           fullWidth
           multiline
@@ -88,5 +85,5 @@ export default function MergeRollbackPanel() {
         </Alert>
       )}
     </Paper>
-  );
+  )
 }

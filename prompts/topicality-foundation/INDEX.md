@@ -12,6 +12,7 @@
 ## 📁 Files in This Directory
 
 ### 🎯 Start Here
+
 - **[QUICK_START.md](QUICK_START.md)** - Choose your execution path (15 min read)
 - **[README.md](README.md)** - Complete overview and integration guide (30 min read)
 - **[MAESTRO_PLAN.md](MAESTRO_PLAN.md)** - Detailed 8-week execution plan (45 min read)
@@ -19,6 +20,7 @@
 ### 📝 Prompt Files
 
 #### Tier 0: Foundation (Weeks 1-2)
+
 1. **[01-intelgraph-core.md](01-intelgraph-core.md)** - IntelGraph Core Data Model & Service
    - **Priority:** ⭐️ CRITICAL PATH
    - **Effort:** 2 weeks
@@ -30,6 +32,7 @@
    - **Start:** After #1
 
 #### Tier 1: Platform Services (Weeks 3-4)
+
 3. **[03-maestro-conductor.md](03-maestro-conductor.md)** - Maestro Conductor Orchestration
    - **Priority:** ⭐️ HIGH
    - **Effort:** 1.5 weeks
@@ -46,6 +49,7 @@
    - **Start:** Week 3 (parallel)
 
 #### Tier 2: Application Features (Weeks 5-6)
+
 6. **[11-white-label-configuration.md](11-white-label-configuration.md)** - White-Label Configuration
    - **Priority:** Medium
    - **Effort:** 1 week
@@ -57,6 +61,7 @@
    - **Start:** Week 5 (parallel)
 
 #### Tier 3: Automation & Tooling (Weeks 7-8)
+
 8. **[05-disclosure-pack-generator.md](05-disclosure-pack-generator.md)** - Disclosure Pack Generator
    - **Priority:** ⭐️ RELEASE BLOCKER
    - **Effort:** 1 week
@@ -82,12 +87,14 @@
 ## 🚀 Quick Start Commands
 
 ### Check Current Location
+
 ```bash
 pwd
 # Should output: /home/user/summit/prompts/topicality-foundation
 ```
 
 ### Read Documentation (choose one)
+
 ```bash
 # Quick start guide
 cat QUICK_START.md
@@ -100,6 +107,7 @@ cat MAESTRO_PLAN.md
 ```
 
 ### Start Prompt #1 (Sequential Approach)
+
 ```bash
 # Create workspace
 mkdir -p ~/topicality-platform/intelgraph-core
@@ -111,6 +119,7 @@ cat /home/user/summit/prompts/topicality-foundation/01-intelgraph-core.md
 ```
 
 ### Start Week 3 (Parallel Approach)
+
 ```bash
 # Terminal 1: Maestro
 cd ~/topicality-platform/maestro
@@ -129,33 +138,37 @@ cat /home/user/summit/prompts/topicality-foundation/07-metrics-observability.md
 
 ## 📊 Execution Matrix
 
-| Week | Focus | Prompts | Parallelizable? | Gate |
-|------|-------|---------|-----------------|------|
-| 1-2 | Foundation | #1, #2 | No (sequential) | IntelGraph Core working |
-| 3-4 | Platform | #3, #4, #7 | **Yes (3 parallel)** | Platform services integrated |
-| 5-6 | Features | #6, #10, #11 | **Yes (2-3 parallel)** | Application features ready |
-| 6 | Integration | Testing | N/A | System hardened |
-| 7-8 | Automation | #5, #6, #8, #9 | **Partial (3 parallel)** | Release automation live |
+| Week | Focus       | Prompts        | Parallelizable?          | Gate                         |
+| ---- | ----------- | -------------- | ------------------------ | ---------------------------- |
+| 1-2  | Foundation  | #1, #2         | No (sequential)          | IntelGraph Core working      |
+| 3-4  | Platform    | #3, #4, #7     | **Yes (3 parallel)**     | Platform services integrated |
+| 5-6  | Features    | #6, #10, #11   | **Yes (2-3 parallel)**   | Application features ready   |
+| 6    | Integration | Testing        | N/A                      | System hardened              |
+| 7-8  | Automation  | #5, #6, #8, #9 | **Partial (3 parallel)** | Release automation live      |
 
 ---
 
 ## 🎯 Success Criteria
 
 ### By Week 2
+
 - ✅ Can create entities with claims
 - ✅ Can attach provenance to claims
 - ✅ Can query claim history
 
 ### By Week 4
+
 - ✅ Can orchestrate runs with Maestro
 - ✅ Can enforce ABAC policies
 - ✅ Can expose KPI metrics
 
 ### By Week 6
+
 - ✅ Multi-tenant configuration working
 - ✅ Risk tracking operational
 
 ### By Week 8
+
 - ✅ Can generate disclosure packs
 - ✅ Release gates enforced in CI
 - ✅ CEO dispatch auto-generated
@@ -198,25 +211,30 @@ Prompt #1 (IntelGraph Core)
 Use this checklist as you execute:
 
 ### Foundation Tier
+
 - [ ] Prompt #1: IntelGraph Core (Week 1-2)
 - [ ] Prompt #2: Claim Ledger Library (Week 2-3)
 
 ### Platform Tier
+
 - [ ] Prompt #3: Maestro Conductor (Week 3-4)
 - [ ] Prompt #4: OPA ABAC Governance (Week 3-4)
 - [ ] Prompt #7: Metrics & Observability (Week 3-4)
 
 ### Application Tier
+
 - [ ] Prompt #11: White-Label Configuration (Week 5)
 - [ ] Prompt #10: Risk & Incident Tracker (Week 5)
 
 ### Automation Tier
+
 - [ ] Prompt #5: Disclosure Pack Generator (Week 7)
 - [ ] Prompt #8: Release Gate Checker (Week 8)
 - [ ] Prompt #6: CEO Daily Dispatch (Week 7)
 - [ ] Prompt #9: Canonical Templates (Week 7-8)
 
 ### Final Validation
+
 - [ ] End-to-end integration tests pass
 - [ ] Security review completed
 - [ ] Documentation finalized
@@ -238,14 +256,17 @@ Use this checklist as you execute:
 ## 🆘 Getting Help
 
 **Before starting:**
+
 - Read: `QUICK_START.md` → `README.md` → Specific prompt file
 
 **During execution:**
+
 - Stuck on a prompt? Check its "Requirements" and "Deliverables" sections
 - Integration issues? See `README.md` "Integration Points"
 - Timeline slipping? See `MAESTRO_PLAN.md` "Risk Management"
 
 **After completion:**
+
 - Generate claim ledger manifests for each artifact
 - Document any deviations in a RETROSPECTIVE.md
 - Share learnings with the team
@@ -291,17 +312,20 @@ By the end of this plan, you will have:
 ## 🎬 Next Action
 
 **Right now:**
+
 ```bash
 cat QUICK_START.md
 ```
 
 **In 30 minutes:**
+
 ```bash
 cat 01-intelgraph-core.md
 # Then paste into Claude Code to begin
 ```
 
 **In 2 weeks:**
+
 - Have IntelGraph Core running
 - Be ready for parallel execution in Week 3
 

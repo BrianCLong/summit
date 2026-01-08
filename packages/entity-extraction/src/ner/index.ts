@@ -2,7 +2,7 @@
  * Named Entity Recognition (NER)
  */
 
-import type { Entity, EntityType, NEROptions } from '../types';
+import type { Entity, EntityType, NEROptions } from "../types";
 
 export class NERExtractor {
   private options: Required<NEROptions>;
@@ -10,7 +10,7 @@ export class NERExtractor {
 
   constructor(options: NEROptions = {}) {
     this.options = {
-      language: options.language ?? 'en',
+      language: options.language ?? "en",
       customTypes: options.customTypes ?? [],
       minConfidence: options.minConfidence ?? 0.5,
       includeNested: options.includeNested ?? false,
@@ -72,13 +72,14 @@ export class NERExtractor {
 
     // Simplified person name extraction
     // In production, use a proper NER model or library
-    const titlePattern = /\b(Mr|Mrs|Ms|Dr|Prof|Sir|Lord|Lady|Captain|Colonel)\.\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/g;
+    const titlePattern =
+      /\b(Mr|Mrs|Ms|Dr|Prof|Sir|Lord|Lady|Captain|Colonel)\.\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/g;
     let match;
 
     while ((match = titlePattern.exec(text)) !== null) {
       entities.push({
         text: match[0],
-        type: 'PERSON',
+        type: "PERSON",
         start: match.index,
         end: match.index + match[0].length,
         confidence: 0.9,
@@ -91,14 +92,12 @@ export class NERExtractor {
 
     while ((match = namePattern.exec(text)) !== null) {
       // Check if not already captured
-      const overlaps = entities.some(
-        (e) => match.index >= e.start && match.index < e.end
-      );
+      const overlaps = entities.some((e) => match.index >= e.start && match.index < e.end);
 
       if (!overlaps) {
         entities.push({
           text: match[0],
-          type: 'PERSON',
+          type: "PERSON",
           start: match.index,
           end: match.index + match[0].length,
           confidence: 0.7,
@@ -126,7 +125,7 @@ export class NERExtractor {
       while ((match = pattern.exec(text)) !== null) {
         entities.push({
           text: match[0],
-          type: 'ORGANIZATION',
+          type: "ORGANIZATION",
           start: match.index,
           end: match.index + match[0].length,
           confidence: 0.8,
@@ -150,7 +149,7 @@ export class NERExtractor {
     while ((match = cityStatePattern.exec(text)) !== null) {
       entities.push({
         text: match[0],
-        type: 'LOCATION',
+        type: "LOCATION",
         start: match.index,
         end: match.index + match[0].length,
         confidence: 0.9,
@@ -159,12 +158,13 @@ export class NERExtractor {
     }
 
     // Countries and cities (simplified)
-    const locationPattern = /\b(United States|United Kingdom|China|Russia|Japan|Germany|France|New York|London|Paris|Tokyo|Beijing|Moscow)\b/g;
+    const locationPattern =
+      /\b(United States|United Kingdom|China|Russia|Japan|Germany|France|New York|London|Paris|Tokyo|Beijing|Moscow)\b/g;
 
     while ((match = locationPattern.exec(text)) !== null) {
       entities.push({
         text: match[0],
-        type: 'LOCATION',
+        type: "LOCATION",
         start: match.index,
         end: match.index + match[0].length,
         confidence: 0.95,
@@ -193,7 +193,7 @@ export class NERExtractor {
       while ((match = pattern.exec(text)) !== null) {
         entities.push({
           text: match[0],
-          type: 'DATE',
+          type: "DATE",
           start: match.index,
           end: match.index + match[0].length,
           confidence: 0.95,
@@ -216,7 +216,7 @@ export class NERExtractor {
     while ((match = timePattern.exec(text)) !== null) {
       entities.push({
         text: match[0],
-        type: 'TIME',
+        type: "TIME",
         start: match.index,
         end: match.index + match[0].length,
         confidence: 0.95,
@@ -232,13 +232,14 @@ export class NERExtractor {
   private extractMoney(text: string): Entity[] {
     const entities: Entity[] = [];
 
-    const moneyPattern = /\$\d+(?:,\d{3})*(?:\.\d{2})?|\d+(?:,\d{3})*(?:\.\d{2})?\s*(?:USD|EUR|GBP|JPY)/gi;
+    const moneyPattern =
+      /\$\d+(?:,\d{3})*(?:\.\d{2})?|\d+(?:,\d{3})*(?:\.\d{2})?\s*(?:USD|EUR|GBP|JPY)/gi;
     let match;
 
     while ((match = moneyPattern.exec(text)) !== null) {
       entities.push({
         text: match[0],
-        type: 'MONEY',
+        type: "MONEY",
         start: match.index,
         end: match.index + match[0].length,
         confidence: 0.95,
@@ -260,7 +261,7 @@ export class NERExtractor {
     while ((match = percentPattern.exec(text)) !== null) {
       entities.push({
         text: match[0],
-        type: 'PERCENT',
+        type: "PERCENT",
         start: match.index,
         end: match.index + match[0].length,
         confidence: 0.98,
@@ -281,7 +282,7 @@ export class NERExtractor {
       while ((match = pattern.exec(text)) !== null) {
         entities.push({
           text: match[0],
-          type: 'CUSTOM',
+          type: "CUSTOM",
           start: match.index,
           end: match.index + match[0].length,
           confidence: 0.8,
@@ -304,7 +305,9 @@ export class NERExtractor {
    * Remove overlapping entities
    */
   private removeOverlapping(entities: Entity[]): Entity[] {
-    if (entities.length === 0) {return [];}
+    if (entities.length === 0) {
+      return [];
+    }
 
     const result: Entity[] = [entities[0]];
 
@@ -330,23 +333,23 @@ export class NERExtractor {
   private initializePatterns(): void {
     // Weapon patterns
     this.addCustomPattern(
-      'WEAPON',
+      "WEAPON",
       /\b(AK-47|M16|pistol|rifle|handgun|firearm|explosive|bomb|missile|grenade)\b/gi
     );
 
     // Vehicle patterns
     this.addCustomPattern(
-      'VEHICLE',
+      "VEHICLE",
       /\b(Toyota|Honda|Ford|Chevrolet|BMW|Mercedes|aircraft|helicopter|ship|submarine)\b/gi
     );
 
     // Facility patterns
     this.addCustomPattern(
-      'FACILITY',
+      "FACILITY",
       /\b(airport|hospital|school|university|prison|facility|base|compound)\b/gi
     );
   }
 }
 
-export * from './multilingual';
-export * from './confidence';
+export * from "./multilingual";
+export * from "./confidence";

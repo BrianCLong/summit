@@ -94,10 +94,7 @@ interface DualControlDelete {
   ): Promise<DeleteRequest>;
 
   // Approve delete (second person)
-  approveDelete(
-    requestId: string,
-    approver: User
-  ): Promise<DeleteRequest>;
+  approveDelete(requestId: string, approver: User): Promise<DeleteRequest>;
 
   // Execute deletion (only after dual approval)
   executePurge(requestId: string): Promise<PurgeManifest>;
@@ -109,7 +106,7 @@ interface DeleteRequest {
   requestor: User;
   justification: string;
   approver?: User;
-  status: 'pending' | 'approved' | 'denied' | 'executed';
+  status: "pending" | "approved" | "denied" | "executed";
   createdAt: Date;
   approvedAt?: Date;
   executedAt?: Date;
@@ -118,9 +115,9 @@ interface DeleteRequest {
 // Workflow
 // 1. Analyst requests delete
 const request = await dualControl.requestDelete(
-  ['e-123', 'e-456'],
+  ["e-123", "e-456"],
   currentUser,
-  'Records duplicated in error'
+  "Records duplicated in error"
 );
 
 // 2. Supervisor approves
@@ -138,7 +135,7 @@ Prevent deletion of records under legal hold:
 interface LegalHold {
   id: string;
   caseId: string;
-  recordIds: string[];  // Or query filter
+  recordIds: string[]; // Or query filter
   reason: string;
   placedBy: User;
   placedAt: Date;
@@ -148,11 +145,7 @@ interface LegalHold {
 
 interface LegalHoldService {
   // Place hold
-  placeHold(
-    caseId: string,
-    recordSelector: RecordSelector,
-    reason: string
-  ): Promise<LegalHold>;
+  placeHold(caseId: string, recordSelector: RecordSelector, reason: string): Promise<LegalHold>;
 
   // Lift hold
   liftHold(holdId: string, user: User): Promise<void>;
@@ -181,9 +174,9 @@ interface PurgeManifest {
   id: string;
   purgeRequestId: string;
   purgedRecords: PurgedRecord[];
-  merkleRoot: string;  // Root hash of Merkle tree
+  merkleRoot: string; // Root hash of Merkle tree
   manifestHash: string;
-  signature: string;   // Signed by purge service
+  signature: string; // Signed by purge service
   timestamp: Date;
 }
 
@@ -191,24 +184,24 @@ interface PurgedRecord {
   id: string;
   type: string;
   purgedAt: Date;
-  hash: string;  // Hash of record before deletion
+  hash: string; // Hash of record before deletion
 }
 
 // Build Merkle tree from purged records
 function buildPurgeManifest(records: PurgedRecord[]): PurgeManifest {
   // 1. Hash each record
-  const leaves = records.map(r => sha256(JSON.stringify(r)));
+  const leaves = records.map((r) => sha256(JSON.stringify(r)));
 
   // 2. Build Merkle tree
   const tree = new MerkleTree(leaves, sha256);
-  const root = tree.getRoot().toString('hex');
+  const root = tree.getRoot().toString("hex");
 
   // 3. Create manifest
   const manifest = {
     id: uuidv4(),
     purgedRecords: records,
     merkleRoot: root,
-    timestamp: new Date()
+    timestamp: new Date(),
   };
 
   // 4. Sign manifest
@@ -219,11 +212,7 @@ function buildPurgeManifest(records: PurgedRecord[]): PurgeManifest {
 }
 
 // Verify record was purged
-function verifyPurge(
-  recordId: string,
-  manifest: PurgeManifest,
-  proof: string[]
-): boolean {
+function verifyPurge(recordId: string, manifest: PurgeManifest, proof: string[]): boolean {
   const leaf = sha256(recordId);
   const tree = new MerkleTree([], sha256);
   return tree.verify(proof, leaf, manifest.merkleRoot);
@@ -258,6 +247,7 @@ policies:
 ```
 
 Scheduler runs daily:
+
 ```typescript
 async function runRetentionSweep(): Promise<void> {
   const policies = await loadRetentionPolicies();
@@ -265,14 +255,14 @@ async function runRetentionSweep(): Promise<void> {
   for (const policy of policies) {
     const expiredRecords = await findExpiredRecords(policy);
 
-    if (policy.action === 'auto_purge') {
+    if (policy.action === "auto_purge") {
       // Initiate dual-control delete
       await dualControl.requestDelete(
-        expiredRecords.map(r => r.id),
+        expiredRecords.map((r) => r.id),
         systemUser,
         `Auto-purge per policy: ${policy.name}`
       );
-    } else if (policy.action === 'manual_review') {
+    } else if (policy.action === "manual_review") {
       // Notify data steward
       await notifySteward(expiredRecords, policy);
     }
@@ -301,12 +291,12 @@ interface Audience {
   organizationId: string;
   users?: string[];
   clearanceLevel: string;
-  purpose: string;  // e.g., "Court testimony in Case XYZ"
+  purpose: string; // e.g., "Court testimony in Case XYZ"
 }
 
 interface DisclosureFilter {
   // Redact sensitive fields
-  redact: string[];  // e.g., ["ssn", "dob"]
+  redact: string[]; // e.g., ["ssn", "dob"]
 
   // Downgrade classification
   maxClassification: string;
@@ -317,28 +307,28 @@ interface DisclosureFilter {
   // Anonymize entities
   anonymize: {
     entityTypes: string[];
-    strategy: 'hash' | 'pseudonym' | 'remove';
+    strategy: "hash" | "pseudonym" | "remove";
   };
 }
 
 // Create disclosure package
 const package = await disclosureService.createPackage({
-  recordIds: ['e-1', 'e-2', 'e-3'],
+  recordIds: ["e-1", "e-2", "e-3"],
   audience: {
-    organizationId: 'partner-agency-001',
-    clearanceLevel: 'CONFIDENTIAL',
-    purpose: 'Joint investigation XYZ'
+    organizationId: "partner-agency-001",
+    clearanceLevel: "CONFIDENTIAL",
+    purpose: "Joint investigation XYZ",
   },
   filters: {
-    redact: ['ssn', 'phone'],
-    maxClassification: 'CONFIDENTIAL',
+    redact: ["ssn", "phone"],
+    maxClassification: "CONFIDENTIAL",
     stripProvenance: true,
     anonymize: {
-      entityTypes: ['Person'],
-      strategy: 'pseudonym'
-    }
+      entityTypes: ["Person"],
+      strategy: "pseudonym",
+    },
   },
-  expiresAt: addDays(new Date(), 30)
+  expiresAt: addDays(new Date(), 30),
 });
 
 // Package includes:
@@ -383,9 +373,9 @@ class DisclosureWatchdogImpl implements DisclosureWatchdog {
 
     // Log to audit
     await auditService.log({
-      action: 'disclosure_revoked',
+      action: "disclosure_revoked",
       packageId,
-      reason
+      reason,
     });
   }
 }
@@ -398,54 +388,55 @@ All lifecycle events logged to provenance ledger:
 ```typescript
 // Delete request
 await provLedger.recordActivity({
-  type: 'deletion_requested',
+  type: "deletion_requested",
   actor: requestor.id,
   entities: recordIds,
   justification,
-  timestamp: new Date()
+  timestamp: new Date(),
 });
 
 // Dual approval
 await provLedger.recordActivity({
-  type: 'deletion_approved',
+  type: "deletion_approved",
   actor: approver.id,
   request: requestId,
-  timestamp: new Date()
+  timestamp: new Date(),
 });
 
 // Purge execution
 await provLedger.recordActivity({
-  type: 'records_purged',
-  actor: 'purge_service',
+  type: "records_purged",
+  actor: "purge_service",
   entities: recordIds,
   manifestId: manifest.id,
   merkleRoot: manifest.merkleRoot,
-  timestamp: new Date()
+  timestamp: new Date(),
 });
 
 // Disclosure created
 await provLedger.recordActivity({
-  type: 'disclosure_package_created',
+  type: "disclosure_package_created",
   actor: creator.id,
   package: packageId,
   audience: audience.organizationId,
   records: recordIds,
   filters,
-  timestamp: new Date()
+  timestamp: new Date(),
 });
 
 // Disclosure revoked
 await provLedger.recordActivity({
-  type: 'disclosure_revoked',
+  type: "disclosure_revoked",
   package: packageId,
   reason,
-  timestamp: new Date()
+  timestamp: new Date(),
 });
 ```
 
 ### Technical Specifications
 
 **Service Structure**:
+
 ```
 services/retention-engine/
 ├── src/
@@ -464,6 +455,7 @@ services/retention-engine/
 ```
 
 **Database Schema**:
+
 ```sql
 CREATE TABLE delete_requests (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -563,15 +555,16 @@ CREATE TABLE disclosure_packages (
 ### Merkle Tree Libraries
 
 Use `merkletreejs`:
+
 ```typescript
-import { MerkleTree } from 'merkletreejs';
-import crypto from 'crypto';
+import { MerkleTree } from "merkletreejs";
+import crypto from "crypto";
 
-const sha256 = (data: string) => crypto.createHash('sha256').update(data).digest();
+const sha256 = (data: string) => crypto.createHash("sha256").update(data).digest();
 
-const leaves = recordIds.map(id => sha256(id));
+const leaves = recordIds.map((id) => sha256(id));
 const tree = new MerkleTree(leaves, sha256);
-const root = tree.getRoot().toString('hex');
+const root = tree.getRoot().toString("hex");
 const proof = tree.getProof(leaves[0]);
 const verified = tree.verify(proof, leaves[0], root);
 ```

@@ -218,7 +218,7 @@
 }
 
 .traversal-indicator::before {
-  content: '';
+  content: "";
   @apply w-2 h-2 bg-primary-foreground rounded-full animate-pulse;
 }
 
@@ -228,7 +228,7 @@
 }
 
 .rag-loading::after {
-  content: '';
+  content: "";
   @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent;
   animation: shimmer 1.5s infinite;
 }

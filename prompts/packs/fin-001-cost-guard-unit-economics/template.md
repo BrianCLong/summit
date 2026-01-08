@@ -85,13 +85,13 @@ Track cost and energy per analytical operation:
 ```typescript
 interface UnitEconomics {
   operationId: string;
-  operationType: 'query' | 'analysis' | 'export' | 'ml_inference';
+  operationType: "query" | "analysis" | "export" | "ml_inference";
   timestamp: Date;
   costs: {
-    compute: number;  // $ (CPU/GPU time)
-    storage: number;  // $ (data accessed)
-    network: number;  // $ (data transfer)
-    external: number;  // $ (third-party API calls)
+    compute: number; // $ (CPU/GPU time)
+    storage: number; // $ (data accessed)
+    network: number; // $ (data transfer)
+    external: number; // $ (third-party API calls)
     total: number;
   };
   energy: {
@@ -99,10 +99,10 @@ interface UnitEconomics {
     gpuJoules: number;
     networkJoules: number;
     totalJoules: number;
-    carbonGrams: number;  // CO2 emissions
+    carbonGrams: number; // CO2 emissions
   };
-  insights: number;  // Insights generated (entities discovered, relationships identified)
-  costPerInsight: number;  // $/insight
+  insights: number; // Insights generated (entities discovered, relationships identified)
+  costPerInsight: number; // $/insight
   joulesPerInsight: number;
 }
 
@@ -110,19 +110,19 @@ interface UnitEconomics {
 async function trackQueryCost(query: Query, result: QueryResult): Promise<void> {
   const economics: UnitEconomics = {
     operationId: query.id,
-    operationType: 'query',
+    operationType: "query",
     timestamp: new Date(),
     costs: {
       compute: await computeCost(query),
       storage: await storageCost(query),
       network: await networkCost(query),
       external: await externalAPICost(query),
-      total: 0  // Computed below
+      total: 0, // Computed below
     },
     energy: await computeEnergy(query),
     insights: result.entities.length + result.relationships.length,
-    costPerInsight: 0,  // Computed below
-    joulesPerInsight: 0
+    costPerInsight: 0, // Computed below
+    joulesPerInsight: 0,
   };
 
   economics.costs.total = Object.values(economics.costs).reduce((a, b) => a + b, 0);
@@ -133,16 +133,16 @@ async function trackQueryCost(query: Query, result: QueryResult): Promise<void> 
   await unitEconomicsDb.insert(economics);
 
   // Export metrics
-  prometheusClient.histogram('query_cost_usd', economics.costs.total);
-  prometheusClient.histogram('query_energy_joules', economics.energy.totalJoules);
-  prometheusClient.histogram('cost_per_insight_usd', economics.costPerInsight);
+  prometheusClient.histogram("query_cost_usd", economics.costs.total);
+  prometheusClient.histogram("query_energy_joules", economics.energy.totalJoules);
+  prometheusClient.histogram("cost_per_insight_usd", economics.costPerInsight);
 }
 
 // Compute cost (example: AWS pricing)
 async function computeCost(query: Query): Promise<number> {
   const executionTimeMs = query.metadata.executionTime;
   const cpuCoreHours = (executionTimeMs / 3600000) * query.metadata.cpuCores;
-  const costPerCoreHour = 0.05;  // $0.05/core-hour (example)
+  const costPerCoreHour = 0.05; // $0.05/core-hour (example)
   return cpuCoreHours * costPerCoreHour;
 }
 
@@ -153,12 +153,12 @@ async function computeEnergy(query: Query): Promise<Energy> {
   const gpuJoules = await raplReader.getGPUEnergy(query.startTime, query.endTime);
 
   // Estimate network energy
-  const networkJoules = query.metadata.bytesTransferred * 0.001;  // 1J/KB estimate
+  const networkJoules = query.metadata.bytesTransferred * 0.001; // 1J/KB estimate
 
   const totalJoules = cpuJoules + gpuJoules + networkJoules;
 
   // Carbon intensity (g CO2/kWh varies by region, use 400g/kWh average)
-  const carbonGrams = (totalJoules / 3600000) * 400;  // kWh * g/kWh
+  const carbonGrams = (totalJoules / 3600000) * 400; // kWh * g/kWh
 
   return { cpuJoules, gpuJoules, networkJoules, totalJoules, carbonGrams };
 }
@@ -171,13 +171,13 @@ Prevent cost overruns:
 ```typescript
 interface Budget {
   id: string;
-  scope: 'user' | 'team' | 'project';
+  scope: "user" | "team" | "project";
   scopeId: string;
-  period: 'daily' | 'weekly' | 'monthly';
+  period: "daily" | "weekly" | "monthly";
   limits: {
-    totalCost: number;  // $ cap
-    totalEnergy: number;  // Joules cap
-    queryCount: number;  // # queries
+    totalCost: number; // $ cap
+    totalEnergy: number; // Joules cap
+    queryCount: number; // # queries
   };
   current: {
     totalCost: number;
@@ -209,8 +209,8 @@ async function executeQuery(query: Query, user: User): Promise<QueryResult> {
   if (!budgetCheck.allowed) {
     throw new Error(
       `Budget exceeded: ${budgetCheck.reason}\n` +
-      `Current: $${budgetCheck.current.toFixed(2)} / $${budgetCheck.limit.toFixed(2)}\n` +
-      `Resets: ${budgetCheck.resetAt.toISOString()}`
+        `Current: $${budgetCheck.current.toFixed(2)} / $${budgetCheck.limit.toFixed(2)}\n` +
+        `Resets: ${budgetCheck.resetAt.toISOString()}`
     );
   }
 
@@ -234,24 +234,24 @@ Move infrequently accessed data to cold storage:
 ```typescript
 interface ArchivalPolicy {
   dataType: string;
-  coldThreshold: number;  // Days since last access
-  archiveTo: 'glacier' | 's3-ia' | 'tape';
-  retentionPeriod: number;  // Days to keep in cold storage
+  coldThreshold: number; // Days since last access
+  archiveTo: "glacier" | "s3-ia" | "tape";
+  retentionPeriod: number; // Days to keep in cold storage
 }
 
 const archivalPolicies: ArchivalPolicy[] = [
   {
-    dataType: 'investigation',
-    coldThreshold: 180,  // 6 months
-    archiveTo: 's3-ia',
-    retentionPeriod: 2555  // 7 years
+    dataType: "investigation",
+    coldThreshold: 180, // 6 months
+    archiveTo: "s3-ia",
+    retentionPeriod: 2555, // 7 years
   },
   {
-    dataType: 'entity',
-    coldThreshold: 365,  // 1 year
-    archiveTo: 'glacier',
-    retentionPeriod: 3650  // 10 years
-  }
+    dataType: "entity",
+    coldThreshold: 365, // 1 year
+    archiveTo: "glacier",
+    retentionPeriod: 3650, // 10 years
+  },
 ];
 
 // Daily archival job
@@ -277,13 +277,16 @@ async function findColdRecords(policy: ArchivalPolicy): Promise<Record[]> {
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - policy.coldThreshold);
 
-  return db.query(`
+  return db.query(
+    `
     SELECT id, data
     FROM records
     WHERE type = $1
       AND last_accessed_at < $2
       AND archived_at IS NULL
-  `, [policy.dataType, cutoffDate]);
+  `,
+    [policy.dataType, cutoffDate]
+  );
 }
 
 // Cost savings
@@ -303,29 +306,32 @@ interface CostOptimization {
   currentCost: number;
   optimizedQuery: string;
   estimatedCost: number;
-  savings: number;  // $
+  savings: number; // $
   savingsPercent: number;
   proofOfEquivalence: EquivalenceProof;
 }
 
 interface EquivalenceProof {
-  method: 'pca_replay' | 'sampling' | 'approximation';
+  method: "pca_replay" | "sampling" | "approximation";
   testCases: number;
-  matchRate: number;  // % of test cases with same result
+  matchRate: number; // % of test cases with same result
   confidence: number;
 }
 
 // Detect expensive queries
 async function detectExpensiveQueries(): Promise<Query[]> {
-  const threshold = 1.00;  // $1/query
+  const threshold = 1.0; // $1/query
 
-  return unitEconomicsDb.query(`
+  return unitEconomicsDb.query(
+    `
     SELECT *
     FROM unit_economics
     WHERE costs->>'total' > $1
     ORDER BY (costs->>'total')::numeric DESC
     LIMIT 100
-  `, [threshold]);
+  `,
+    [threshold]
+  );
 }
 
 // Generate optimization
@@ -348,15 +354,12 @@ async function optimizeQuery(query: Query): Promise<CostOptimization> {
     estimatedCost: await costEstimator.estimate(optimized).totalCost,
     savings: query.cost - optimized.cost,
     savingsPercent: ((query.cost - optimized.cost) / query.cost) * 100,
-    proofOfEquivalence: proof
+    proofOfEquivalence: proof,
   };
 }
 
 // Prove equivalence
-async function proveEquivalence(
-  original: Query,
-  optimized: Query
-): Promise<EquivalenceProof> {
+async function proveEquivalence(original: Query, optimized: Query): Promise<EquivalenceProof> {
   const testCases = await generateTestCases(original, 100);
   let matches = 0;
 
@@ -370,10 +373,10 @@ async function proveEquivalence(
   }
 
   return {
-    method: 'pca_replay',
+    method: "pca_replay",
     testCases: testCases.length,
     matchRate: matches / testCases.length,
-    confidence: matches / testCases.length
+    confidence: matches / testCases.length,
   };
 }
 ```
@@ -455,7 +458,7 @@ levers:
     action: decrease_cold_threshold
     from: 180_days
     to: 90_days
-    estimated_savings: 1200  # $/month
+    estimated_savings: 1200 # $/month
 
   - id: limit-ml-inference
     name: "Limit ML inference to high-value queries"
@@ -475,6 +478,7 @@ levers:
 ```
 
 Execute lever:
+
 ```bash
 finops apply-lever reduce-retention --dry-run
 finops apply-lever reduce-retention --confirm

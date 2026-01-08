@@ -1,4 +1,4 @@
-import type { EvalMetrics, ScenarioResult, Trace } from '../types.js';
+import type { EvalMetrics, ScenarioResult, Trace } from "../types.js";
 
 /**
  * MetricsCollector - Aggregate and compute evaluation metrics
@@ -39,10 +39,10 @@ export class MetricsCollector {
     const metrics = this.results.map((r) => r.metrics);
 
     // Aggregate token metrics
-    const totalTokens = this.sum(metrics, 'totalTokens');
-    const inputTokens = this.sum(metrics, 'inputTokens');
-    const outputTokens = this.sum(metrics, 'outputTokens');
-    const totalCostUsd = this.sum(metrics, 'totalCostUsd');
+    const totalTokens = this.sum(metrics, "totalTokens");
+    const inputTokens = this.sum(metrics, "inputTokens");
+    const outputTokens = this.sum(metrics, "outputTokens");
+    const totalCostUsd = this.sum(metrics, "totalCostUsd");
 
     // Calculate latency percentiles
     const latencies = metrics.map((m) => m.avgLatencyMs).sort((a, b) => a - b);
@@ -52,31 +52,26 @@ export class MetricsCollector {
     const avgLatency = this.average(latencies);
 
     // Tool metrics
-    const toolCallCount = this.sum(metrics, 'toolCallCount');
-    const toolSuccessRate = this.average(
-      metrics.map((m) => m.toolSuccessRate),
-    );
-    const avgToolLatency = this.average(
-      metrics.map((m) => m.avgToolLatencyMs),
-    );
+    const toolCallCount = this.sum(metrics, "toolCallCount");
+    const toolSuccessRate = this.average(metrics.map((m) => m.toolSuccessRate));
+    const avgToolLatency = this.average(metrics.map((m) => m.avgToolLatencyMs));
 
     // Safety metrics
-    const safetyViolationCount = this.sum(metrics, 'safetyViolationCount');
-    const jailbreakAttempts = this.sum(metrics, 'jailbreakAttempts');
-    const jailbreakSuccesses = this.sum(metrics, 'jailbreakSuccesses');
+    const safetyViolationCount = this.sum(metrics, "safetyViolationCount");
+    const jailbreakAttempts = this.sum(metrics, "jailbreakAttempts");
+    const jailbreakSuccesses = this.sum(metrics, "jailbreakSuccesses");
 
     // Routing metrics
-    const routingDecisionCount = this.sum(metrics, 'routingDecisionCount');
+    const routingDecisionCount = this.sum(metrics, "routingDecisionCount");
 
     return {
       taskSuccessRate: successCount / this.results.length,
-      taskCompletionTime: this.sum(metrics, 'taskCompletionTime'),
+      taskCompletionTime: this.sum(metrics, "taskCompletionTime"),
       totalTokens,
       inputTokens,
       outputTokens,
       totalCostUsd,
-      costPerSuccessfulTask:
-        successCount > 0 ? totalCostUsd / successCount : 0,
+      costPerSuccessfulTask: successCount > 0 ? totalCostUsd / successCount : 0,
       p50LatencyMs: p50,
       p95LatencyMs: p95,
       p99LatencyMs: p99,
@@ -85,17 +80,12 @@ export class MetricsCollector {
       toolSuccessRate,
       avgToolLatencyMs: avgToolLatency,
       safetyViolationCount,
-      safetyViolationRate:
-        this.results.length > 0
-          ? safetyViolationCount / this.results.length
-          : 0,
+      safetyViolationRate: this.results.length > 0 ? safetyViolationCount / this.results.length : 0,
       jailbreakAttempts,
       jailbreakSuccesses,
       routingDecisionCount,
       routingAccuracy: this.average(metrics.map((m) => m.routingAccuracy)),
-      costSavingsVsBaseline: this.average(
-        metrics.map((m) => m.costSavingsVsBaseline),
-      ),
+      costSavingsVsBaseline: this.average(metrics.map((m) => m.costSavingsVsBaseline)),
     };
   }
 
@@ -106,7 +96,7 @@ export class MetricsCollector {
     const byCategory = new Map<string, ScenarioResult[]>();
 
     for (const result of this.results) {
-      const category = result.trace.metadata?.category as string ?? 'unknown';
+      const category = (result.trace.metadata?.category as string) ?? "unknown";
       if (!byCategory.has(category)) {
         byCategory.set(category, []);
       }
@@ -138,23 +128,23 @@ export class MetricsCollector {
 
     // Metrics where higher is better
     const higherIsBetter = [
-      'taskSuccessRate',
-      'toolSuccessRate',
-      'routingAccuracy',
-      'costSavingsVsBaseline',
+      "taskSuccessRate",
+      "toolSuccessRate",
+      "routingAccuracy",
+      "costSavingsVsBaseline",
     ];
 
     // Metrics where lower is better
     const lowerIsBetter = [
-      'totalCostUsd',
-      'costPerSuccessfulTask',
-      'p50LatencyMs',
-      'p95LatencyMs',
-      'p99LatencyMs',
-      'avgLatencyMs',
-      'safetyViolationCount',
-      'safetyViolationRate',
-      'jailbreakSuccesses',
+      "totalCostUsd",
+      "costPerSuccessfulTask",
+      "p50LatencyMs",
+      "p95LatencyMs",
+      "p99LatencyMs",
+      "avgLatencyMs",
+      "safetyViolationCount",
+      "safetyViolationRate",
+      "jailbreakSuccesses",
     ];
 
     for (const key of higherIsBetter) {
@@ -188,39 +178,39 @@ export class MetricsCollector {
   generateSummary(): string {
     const metrics = this.computeMetrics();
     const lines = [
-      '=== Evaluation Summary ===',
-      '',
+      "=== Evaluation Summary ===",
+      "",
       `Total Scenarios: ${this.results.length}`,
       `Success Rate: ${(metrics.taskSuccessRate * 100).toFixed(1)}%`,
-      '',
-      '--- Cost Metrics ---',
+      "",
+      "--- Cost Metrics ---",
       `Total Tokens: ${metrics.totalTokens.toLocaleString()}`,
       `Total Cost: $${metrics.totalCostUsd.toFixed(4)}`,
       `Cost per Success: $${metrics.costPerSuccessfulTask.toFixed(4)}`,
-      '',
-      '--- Latency Metrics ---',
+      "",
+      "--- Latency Metrics ---",
       `P50: ${metrics.p50LatencyMs.toFixed(0)}ms`,
       `P95: ${metrics.p95LatencyMs.toFixed(0)}ms`,
       `P99: ${metrics.p99LatencyMs.toFixed(0)}ms`,
       `Avg: ${metrics.avgLatencyMs.toFixed(0)}ms`,
-      '',
-      '--- Tool Metrics ---',
+      "",
+      "--- Tool Metrics ---",
       `Tool Calls: ${metrics.toolCallCount}`,
       `Tool Success Rate: ${(metrics.toolSuccessRate * 100).toFixed(1)}%`,
       `Avg Tool Latency: ${metrics.avgToolLatencyMs.toFixed(0)}ms`,
-      '',
-      '--- Safety Metrics ---',
+      "",
+      "--- Safety Metrics ---",
       `Safety Violations: ${metrics.safetyViolationCount}`,
       `Jailbreak Attempts: ${metrics.jailbreakAttempts}`,
       `Jailbreak Successes: ${metrics.jailbreakSuccesses}`,
-      '',
-      '--- Routing Metrics ---',
+      "",
+      "--- Routing Metrics ---",
       `Routing Decisions: ${metrics.routingDecisionCount}`,
       `Routing Accuracy: ${(metrics.routingAccuracy * 100).toFixed(1)}%`,
       `Cost Savings vs Baseline: ${(metrics.costSavingsVsBaseline * 100).toFixed(1)}%`,
     ];
 
-    return lines.join('\n');
+    return lines.join("\n");
   }
 
   /**
@@ -312,16 +302,12 @@ export function calculateMetricsFromTraces(traces: Trace[]): EvalMetrics {
         toolCallCount: summary.toolCallCount,
         toolSuccessRate: summary.errorCount === 0 ? 1 : 0,
         avgToolLatencyMs:
-          summary.toolCallCount > 0
-            ? summary.totalDurationMs / summary.toolCallCount
-            : 0,
+          summary.toolCallCount > 0 ? summary.totalDurationMs / summary.toolCallCount : 0,
         safetyViolationCount: summary.safetyViolations,
         safetyViolationRate: summary.safetyViolations > 0 ? 1 : 0,
         jailbreakAttempts: 0,
         jailbreakSuccesses: 0,
-        routingDecisionCount: trace.events.filter(
-          (e) => e.type === 'routing_decision',
-        ).length,
+        routingDecisionCount: trace.events.filter((e) => e.type === "routing_decision").length,
         routingAccuracy: 1,
         costSavingsVsBaseline: 0,
       },

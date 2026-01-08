@@ -1,15 +1,15 @@
-import { AssetDiscoveryEngine } from './discovery';
-import { AnomalyDetector } from './anomaly';
-import { HealthMonitor } from './monitoring';
-import { SelfHealingOrchestrator } from './self-healing';
-import { CostLatencyOptimizer } from './optimization';
-import { JobRouter } from './job-router';
-import { StructuredEventEmitter } from '@ga-graphai/common-types';
+import { AssetDiscoveryEngine } from "./discovery";
+import { AnomalyDetector } from "./anomaly";
+import { HealthMonitor } from "./monitoring";
+import { SelfHealingOrchestrator } from "./self-healing";
+import { CostLatencyOptimizer } from "./optimization";
+import { JobRouter } from "./job-router";
+import { StructuredEventEmitter } from "@ga-graphai/common-types";
 import {
   PredictiveInsightEngine,
   type PredictiveInsightEngineOptions,
   type PredictiveInsight,
-} from './predictive-insights';
+} from "./predictive-insights";
 import type {
   AnomalySignal,
   DiscoveryEvent,
@@ -20,12 +20,12 @@ import type {
   PolicyHook,
   ResponseStrategy,
   RoutingPlan,
-} from './types';
-import type { AnomalyDetectorOptions } from './anomaly';
-import type { SelfHealingOrchestratorOptions } from './self-healing';
-import type { CostLatencyOptimizerOptions } from './optimization';
-import type { JobRouterOptions } from './job-router';
-import type { JobSpec } from './types';
+} from "./types";
+import type { AnomalyDetectorOptions } from "./anomaly";
+import type { SelfHealingOrchestratorOptions } from "./self-healing";
+import type { CostLatencyOptimizerOptions } from "./optimization";
+import type { JobRouterOptions } from "./job-router";
+import type { JobSpec } from "./types";
 
 export interface MaestroConductorOptions {
   anomaly?: AnomalyDetectorOptions;
@@ -73,7 +73,7 @@ export class MaestroConductor {
   }
 
   onDiscovery(listener: (event: DiscoveryEvent) => void): void {
-    this.discovery.on('event', listener);
+    this.discovery.on("event", listener);
   }
 
   async scanAssets(): Promise<DiscoveryEvent[]> {
@@ -110,7 +110,7 @@ export class MaestroConductor {
     }
     if (serviceId) {
       const asset = this.discovery.getAsset(serviceId);
-      const environmentId = asset?.region ?? asset?.labels?.environment ?? 'unknown';
+      const environmentId = asset?.region ?? asset?.labels?.environment ?? "unknown";
       const insight = this.insights.buildInsight(serviceId, environmentId);
       return insight ? [insight] : [];
     }
@@ -134,32 +134,30 @@ export class MaestroConductor {
     const assets = this.discovery.listAssets();
     const performance = this.optimizer.listSnapshots();
     if (assets.length === 0) {
-      throw new Error('no assets registered');
+      throw new Error("no assets registered");
     }
     return this.jobRouter.route(job, assets, performance, this.policyHooks);
   }
 
-  private toOptimizationSample(
-    signal: HealthSignal,
-  ): OptimizationSample | undefined {
+  private toOptimizationSample(signal: HealthSignal): OptimizationSample | undefined {
     const sample: OptimizationSample = {
       assetId: signal.assetId,
       timestamp: signal.timestamp,
     };
     const metric = signal.metric.toLowerCase();
-    if (metric.includes('latency')) {
+    if (metric.includes("latency")) {
       sample.latencyMs = signal.value;
     }
-    if (metric.includes('cost')) {
+    if (metric.includes("cost")) {
       sample.costPerHour = signal.value;
     }
-    if (metric.includes('throughput') || metric.includes('qps')) {
+    if (metric.includes("throughput") || metric.includes("qps")) {
       sample.throughput = signal.value;
     }
-    if (metric.includes('error')) {
+    if (metric.includes("error")) {
       sample.errorRate = signal.value;
     }
-    if (metric.includes('saturation') || metric.includes('utilization')) {
+    if (metric.includes("saturation") || metric.includes("utilization")) {
       sample.saturation = signal.value;
       sample.computeUtilization = signal.value;
     }
@@ -183,7 +181,7 @@ export class MaestroConductor {
       ({
         id: anomaly.assetId,
         name: anomaly.assetId,
-        kind: 'microservice',
+        kind: "microservice",
       } as const);
     const snapshot =
       this.monitor.getSnapshot(anomaly.assetId) ??
@@ -209,7 +207,7 @@ export class MaestroConductor {
       plans,
       timestamp: new Date(),
     };
-    this.events.emitEvent('summit.incident.detected', {
+    this.events.emitEvent("summit.incident.detected", {
       incidentId: incident.id,
       assetId: incident.asset.id,
       severity: incident.anomaly.severity,

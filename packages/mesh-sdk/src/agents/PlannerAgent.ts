@@ -6,14 +6,8 @@
  * Acts as the primary orchestrator for multi-step workflows.
  */
 
-import { BaseAgent, type AgentServices } from '../Agent.js';
-import type {
-  AgentDescriptor,
-  TaskInput,
-  TaskOutput,
-  UUID,
-  SubtaskResult,
-} from '../types.js';
+import { BaseAgent, type AgentServices } from "../Agent.js";
+import type { AgentDescriptor, TaskInput, TaskOutput, UUID, SubtaskResult } from "../types.js";
 
 interface PlannerInput {
   objective: string;
@@ -47,17 +41,17 @@ interface PlanStep {
  * and coordinates their execution across specialized agents.
  */
 export class PlannerAgent extends BaseAgent {
-  getDescriptor(): Omit<AgentDescriptor, 'id' | 'status' | 'registeredAt' | 'lastHeartbeat'> {
+  getDescriptor(): Omit<AgentDescriptor, "id" | "status" | "registeredAt" | "lastHeartbeat"> {
     return {
-      name: 'planner-agent',
-      version: '1.0.0',
-      role: 'planner',
-      riskTier: 'medium',
-      capabilities: ['task_decomposition', 'workflow_coordination', 'resource_allocation'],
+      name: "planner-agent",
+      version: "1.0.0",
+      role: "planner",
+      riskTier: "medium",
+      capabilities: ["task_decomposition", "workflow_coordination", "resource_allocation"],
       requiredTools: [],
       modelPreference: {
-        provider: 'anthropic',
-        model: 'claude-sonnet-4-5-20250929',
+        provider: "anthropic",
+        model: "claude-sonnet-4-5-20250929",
         temperature: 0.3,
         maxTokens: 4096,
       },
@@ -65,7 +59,7 @@ export class PlannerAgent extends BaseAgent {
       costProfile: {
         inputTokenCost: 0.003,
         outputTokenCost: 0.015,
-        currency: 'USD',
+        currency: "USD",
       },
     };
   }
@@ -77,7 +71,7 @@ export class PlannerAgent extends BaseAgent {
     const { task, payload } = input;
     const startTime = Date.now();
 
-    services.logger.info('Planning task', { taskId: task.id, objective: payload.objective });
+    services.logger.info("Planning task", { taskId: task.id, objective: payload.objective });
 
     try {
       // Step 1: Generate plan using model
@@ -92,29 +86,30 @@ export class PlannerAgent extends BaseAgent {
       // Step 4: Synthesize final output
       const summary = await this.synthesizeResults(payload.objective, subtaskResults, services);
 
-      return this.success(task.id, { plan, subtaskResults, summary }, {
-        latencyMs: Date.now() - startTime,
-        modelCallCount: 2,
-      });
+      return this.success(
+        task.id,
+        { plan, subtaskResults, summary },
+        {
+          latencyMs: Date.now() - startTime,
+          modelCallCount: 2,
+        }
+      );
     } catch (error) {
       return this.failure(task.id, {
-        code: 'PLANNING_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        code: "PLANNING_FAILED",
+        message: error instanceof Error ? error.message : "Unknown error",
         recoverable: true,
-        suggestedAction: 'Retry with simplified objective',
+        suggestedAction: "Retry with simplified objective",
       });
     }
   }
 
-  private async generatePlan(
-    payload: PlannerInput,
-    services: AgentServices
-  ): Promise<TaskPlan> {
+  private async generatePlan(payload: PlannerInput, services: AgentServices): Promise<TaskPlan> {
     const prompt = `You are a task planning agent. Decompose this objective into concrete steps.
 
 Objective: ${payload.objective}
-${payload.constraints ? `Constraints: ${payload.constraints.join(', ')}` : ''}
-${payload.maxSubtasks ? `Maximum subtasks: ${payload.maxSubtasks}` : ''}
+${payload.constraints ? `Constraints: ${payload.constraints.join(", ")}` : ""}
+${payload.maxSubtasks ? `Maximum subtasks: ${payload.maxSubtasks}` : ""}
 
 Respond with a JSON plan:
 {
@@ -130,7 +125,7 @@ Respond with a JSON plan:
     // Parse JSON from response
     const jsonMatch = response.content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      throw new Error('Failed to parse plan from model response');
+      throw new Error("Failed to parse plan from model response");
     }
 
     return JSON.parse(jsonMatch[0]) as TaskPlan;
@@ -144,7 +139,9 @@ Respond with a JSON plan:
     const subtaskIds = new Map<string, UUID>();
 
     // Sort by dependencies (topological sort would be better, but simple for now)
-    const sortedSteps = [...plan.steps].sort((a, b) => a.dependencies.length - b.dependencies.length);
+    const sortedSteps = [...plan.steps].sort(
+      (a, b) => a.dependencies.length - b.dependencies.length
+    );
 
     for (const step of sortedSteps) {
       const subtaskId = await services.mesh.spawnSubtask(
@@ -173,14 +170,14 @@ Respond with a JSON plan:
         const result = await services.mesh.awaitSubtask(subtaskId, 60000);
         results.push({
           subtaskId,
-          status: result.status === 'completed' ? 'completed' : 'failed',
+          status: result.status === "completed" ? "completed" : "failed",
           agentId: subtaskId, // Would come from actual result
           summary: `Step ${stepId} ${result.status}`,
         });
       } catch {
         results.push({
           subtaskId,
-          status: 'failed',
+          status: "failed",
           agentId: subtaskId,
           summary: `Step ${stepId} timed out`,
         });
@@ -195,13 +192,13 @@ Respond with a JSON plan:
     results: SubtaskResult[],
     services: AgentServices
   ): Promise<string> {
-    const successful = results.filter((r) => r.status === 'completed').length;
-    const failed = results.filter((r) => r.status === 'failed').length;
+    const successful = results.filter((r) => r.status === "completed").length;
+    const failed = results.filter((r) => r.status === "failed").length;
 
     const prompt = `Summarize the execution of this plan:
 Objective: ${objective}
 Results: ${successful} succeeded, ${failed} failed
-Details: ${results.map((r) => r.summary).join('; ')}
+Details: ${results.map((r) => r.summary).join("; ")}
 
 Provide a brief executive summary.`;
 

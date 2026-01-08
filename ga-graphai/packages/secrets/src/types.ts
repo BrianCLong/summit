@@ -1,4 +1,4 @@
-import type { SecretRef, SecretRotationPolicy } from 'common-types';
+import type { SecretRef, SecretRotationPolicy } from "common-types";
 
 export interface RotationStatus {
   intervalDays?: number;
@@ -34,7 +34,7 @@ export type HttpClient = (
     method?: string;
     headers?: Record<string, string>;
     body?: string;
-  },
+  }
 ) => Promise<{ status: number; json(): Promise<unknown> }>;
 
 export type { SecretRef, SecretRotationPolicy };

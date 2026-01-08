@@ -1,17 +1,17 @@
-import { BaseModule, ModuleHandler } from './moduleBase';
-import { ModuleDefinition } from './types';
+import { BaseModule, ModuleHandler } from "./moduleBase";
+import { ModuleDefinition } from "./types";
 
 const simulate = async (duration = 35): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, duration));
 
 const asString = (value: unknown, fallback: string): string =>
-  typeof value === 'string' && value.trim().length > 0 ? value : fallback;
+  typeof value === "string" && value.trim().length > 0 ? value : fallback;
 
 const asNumber = (value: unknown, fallback: number): number =>
-  typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+  typeof value === "number" && Number.isFinite(value) ? value : fallback;
 
 const asStringArray = (value: unknown, fallback: string[]): string[] => {
-  if (Array.isArray(value) && value.every((item) => typeof item === 'string')) {
+  if (Array.isArray(value) && value.every((item) => typeof item === "string")) {
     return value;
   }
   return fallback;
@@ -19,7 +19,7 @@ const asStringArray = (value: unknown, fallback: string[]): string[] => {
 
 function createModule(
   definition: ModuleDefinition,
-  handlers: Record<string, ModuleHandler>,
+  handlers: Record<string, ModuleHandler>
 ): BaseModule {
   return new BaseModule(definition, handlers);
 }
@@ -27,16 +27,11 @@ function createModule(
 export function createMaestroComposer(): BaseModule {
   return createModule(
     {
-      id: 'maestro-composer',
-      displayName: 'Maestro Composer',
-      summary:
-        'Coordinates complex workflow blueprints and ensures cross-domain alignment.',
-      kind: 'orchestrator',
-      capabilities: [
-        'compose-blueprint',
-        'schedule-symphony',
-        'publish-runbook',
-      ],
+      id: "maestro-composer",
+      displayName: "Maestro Composer",
+      summary: "Coordinates complex workflow blueprints and ensures cross-domain alignment.",
+      kind: "orchestrator",
+      capabilities: ["compose-blueprint", "schedule-symphony", "publish-runbook"],
       serviceLevelObjectives: {
         availability: 0.999,
         latencyMs: 120,
@@ -44,12 +39,9 @@ export function createMaestroComposer(): BaseModule {
       },
     },
     {
-      'compose-blueprint': async ({ action, task }) => {
+      "compose-blueprint": async ({ action, task }) => {
         await simulate();
-        const pipeline = asString(
-          action.payload?.pipeline,
-          `${task.name}-blueprint`,
-        );
+        const pipeline = asString(action.payload?.pipeline, `${task.name}-blueprint`);
         return {
           message: `Blueprint ${pipeline} composed`,
           output: {
@@ -65,14 +57,14 @@ export function createMaestroComposer(): BaseModule {
           },
         };
       },
-      'schedule-symphony': async ({ action }) => {
+      "schedule-symphony": async ({ action }) => {
         await simulate();
-        const window = asString(action.payload?.window, 'next-available');
+        const window = asString(action.payload?.window, "next-available");
         return {
           message: `Maestro symphony scheduled for ${window}`,
           output: {
             window,
-            approvalsRequired: ['security', 'compliance'],
+            approvalsRequired: ["security", "compliance"],
           },
           telemetry: {
             latencyMs: 60,
@@ -82,10 +74,10 @@ export function createMaestroComposer(): BaseModule {
           },
         };
       },
-      'publish-runbook': async ({ action }) => {
+      "publish-runbook": async ({ action }) => {
         await simulate(20);
-        const audience = asString(action.payload?.audience, 'global');
-        const version = asString(action.payload?.version, 'v1.0.0');
+        const audience = asString(action.payload?.audience, "global");
+        const version = asString(action.payload?.version, "v1.0.0");
         return {
           message: `Runbook published to ${audience} audience`,
           output: {
@@ -100,23 +92,18 @@ export function createMaestroComposer(): BaseModule {
           },
         };
       },
-    },
+    }
   );
 }
 
 export function createBuildPlane(): BaseModule {
   return createModule(
     {
-      id: 'build-plane',
-      displayName: 'Build Plane',
-      summary:
-        'Handles artifact assembly, validation, and secure distribution pipelines.',
-      kind: 'build-system',
-      capabilities: [
-        'prepare-artifacts',
-        'validate-supply-chain',
-        'promote-build',
-      ],
+      id: "build-plane",
+      displayName: "Build Plane",
+      summary: "Handles artifact assembly, validation, and secure distribution pipelines.",
+      kind: "build-system",
+      capabilities: ["prepare-artifacts", "validate-supply-chain", "promote-build"],
       serviceLevelObjectives: {
         availability: 0.998,
         latencyMs: 180,
@@ -124,14 +111,11 @@ export function createBuildPlane(): BaseModule {
       },
     },
     {
-      'prepare-artifacts': async ({ action }) => {
+      "prepare-artifacts": async ({ action }) => {
         await simulate(45);
-        const components = asStringArray(action.payload?.components, [
-          'ui',
-          'api',
-        ]);
+        const components = asStringArray(action.payload?.components, ["ui", "api"]);
         return {
-          message: `Artifacts staged for ${components.join(', ')}`,
+          message: `Artifacts staged for ${components.join(", ")}`,
           output: {
             components,
             checksums: components.map((component) => `${component}-sha256`),
@@ -144,9 +128,9 @@ export function createBuildPlane(): BaseModule {
           },
         };
       },
-      'validate-supply-chain': async ({ action }) => {
+      "validate-supply-chain": async ({ action }) => {
         await simulate(50);
-        const policyPack = asString(action.payload?.policyPack, 'default');
+        const policyPack = asString(action.payload?.policyPack, "default");
         return {
           message: `Supply chain policy ${policyPack} verified`,
           output: {
@@ -162,13 +146,10 @@ export function createBuildPlane(): BaseModule {
           },
         };
       },
-      'promote-build': async ({ action }) => {
+      "promote-build": async ({ action }) => {
         await simulate(30);
-        const target = asString(action.payload?.target, 'staging');
-        const changeWindow = asString(
-          action.payload?.changeWindow,
-          'immediate',
-        );
+        const target = asString(action.payload?.target, "staging");
+        const changeWindow = asString(action.payload?.changeWindow, "immediate");
         return {
           message: `Build promoted to ${target}`,
           output: {
@@ -183,19 +164,18 @@ export function createBuildPlane(): BaseModule {
           },
         };
       },
-    },
+    }
   );
 }
 
 export function createBuildPlatform(): BaseModule {
   return createModule(
     {
-      id: 'build-platform',
-      displayName: 'Build Platform',
-      summary:
-        'Provides end-to-end CI/CD orchestration with governance controls.',
-      kind: 'platform',
-      capabilities: ['plan-release', 'enforce-guardrails', 'verify-deployment'],
+      id: "build-platform",
+      displayName: "Build Platform",
+      summary: "Provides end-to-end CI/CD orchestration with governance controls.",
+      kind: "platform",
+      capabilities: ["plan-release", "enforce-guardrails", "verify-deployment"],
       serviceLevelObjectives: {
         availability: 0.999,
         latencyMs: 160,
@@ -203,14 +183,14 @@ export function createBuildPlatform(): BaseModule {
       },
     },
     {
-      'plan-release': async ({ action }) => {
+      "plan-release": async ({ action }) => {
         await simulate(35);
-        const release = asString(action.payload?.release, 'vNext');
+        const release = asString(action.payload?.release, "vNext");
         return {
           message: `Release ${release} planned with approvals`,
           output: {
             release,
-            approvals: ['SRE', 'Security', 'Product'],
+            approvals: ["SRE", "Security", "Product"],
           },
           telemetry: {
             latencyMs: 120,
@@ -220,13 +200,13 @@ export function createBuildPlatform(): BaseModule {
           },
         };
       },
-      'enforce-guardrails': async () => {
+      "enforce-guardrails": async () => {
         await simulate(25);
         return {
-          message: 'Guardrails enforced: policy checks passed',
+          message: "Guardrails enforced: policy checks passed",
           output: {
-            controls: ['policy-as-code', 'runtime-scan'],
-            result: 'pass',
+            controls: ["policy-as-code", "runtime-scan"],
+            result: "pass",
           },
           telemetry: {
             latencyMs: 80,
@@ -236,17 +216,14 @@ export function createBuildPlatform(): BaseModule {
           },
         };
       },
-      'verify-deployment': async ({ action }) => {
+      "verify-deployment": async ({ action }) => {
         await simulate(40);
-        const environment = asString(
-          action.payload?.environment,
-          'production',
-        );
+        const environment = asString(action.payload?.environment, "production");
         return {
           message: `Deployment to ${environment} verified`,
           output: {
             environment,
-            smokeTests: 'pass',
+            smokeTests: "pass",
             errorBudget: 0.02,
           },
           telemetry: {
@@ -257,23 +234,18 @@ export function createBuildPlatform(): BaseModule {
           },
         };
       },
-    },
+    }
   );
 }
 
 export function createCompanyOS(): BaseModule {
   return createModule(
     {
-      id: 'company-os',
-      displayName: 'CompanyOS',
-      summary:
-        'Unifies governance, telemetry, and workforce enablement systems.',
-      kind: 'operating-system',
-      capabilities: [
-        'provision-workspace',
-        'synchronize-policies',
-        'broadcast-update',
-      ],
+      id: "company-os",
+      displayName: "CompanyOS",
+      summary: "Unifies governance, telemetry, and workforce enablement systems.",
+      kind: "operating-system",
+      capabilities: ["provision-workspace", "synchronize-policies", "broadcast-update"],
       serviceLevelObjectives: {
         availability: 0.999,
         latencyMs: 140,
@@ -281,14 +253,14 @@ export function createCompanyOS(): BaseModule {
       },
     },
     {
-      'provision-workspace': async ({ action }) => {
+      "provision-workspace": async ({ action }) => {
         await simulate(30);
-        const team = asString(action.payload?.team, 'core-platform');
+        const team = asString(action.payload?.team, "core-platform");
         return {
           message: `Workspace provisioned for ${team}`,
           output: {
             team,
-            accessGranted: ['jira', 'confluence', 'sentry'],
+            accessGranted: ["jira", "confluence", "sentry"],
           },
           telemetry: {
             latencyMs: 115,
@@ -298,13 +270,10 @@ export function createCompanyOS(): BaseModule {
           },
         };
       },
-      'synchronize-policies': async ({ action }) => {
+      "synchronize-policies": async ({ action }) => {
         await simulate(20);
-        const domains = asStringArray(action.payload?.domains, [
-          'security',
-          'privacy',
-        ]);
-        const version = asString(action.payload?.version, '2025.1');
+        const domains = asStringArray(action.payload?.domains, ["security", "privacy"]);
+        const version = asString(action.payload?.version, "2025.1");
         return {
           message: `Policies synchronized across ${domains.length} domains`,
           output: {
@@ -319,9 +288,9 @@ export function createCompanyOS(): BaseModule {
           },
         };
       },
-      'broadcast-update': async ({ action }) => {
+      "broadcast-update": async ({ action }) => {
         await simulate(25);
-        const channel = asString(action.payload?.channel, 'all-hands');
+        const channel = asString(action.payload?.channel, "all-hands");
         return {
           message: `Update broadcast to ${channel}`,
           output: {
@@ -336,19 +305,18 @@ export function createCompanyOS(): BaseModule {
           },
         };
       },
-    },
+    }
   );
 }
 
 export function createSwitchboard(): BaseModule {
   return createModule(
     {
-      id: 'switchboard',
-      displayName: 'Switchboard',
-      summary:
-        'Provides cross-surface signal routing and incident triage automation.',
-      kind: 'switchboard',
-      capabilities: ['route-signal', 'elevate-incident', 'sync-webhooks'],
+      id: "switchboard",
+      displayName: "Switchboard",
+      summary: "Provides cross-surface signal routing and incident triage automation.",
+      kind: "switchboard",
+      capabilities: ["route-signal", "elevate-incident", "sync-webhooks"],
       serviceLevelObjectives: {
         availability: 0.9999,
         latencyMs: 90,
@@ -356,9 +324,9 @@ export function createSwitchboard(): BaseModule {
       },
     },
     {
-      'route-signal': async ({ action }) => {
+      "route-signal": async ({ action }) => {
         await simulate(15);
-        const signal = asString(action.payload?.signal, 'deployment-ready');
+        const signal = asString(action.payload?.signal, "deployment-ready");
         const subscribers = asNumber(action.payload?.subscribers, 8);
         return {
           message: `Signal ${signal} routed to subscribers`,
@@ -374,14 +342,14 @@ export function createSwitchboard(): BaseModule {
           },
         };
       },
-      'elevate-incident': async ({ action }) => {
+      "elevate-incident": async ({ action }) => {
         await simulate(35);
-        const severity = asString(action.payload?.severity, 'medium');
+        const severity = asString(action.payload?.severity, "medium");
         return {
           message: `Incident elevated with severity ${severity}`,
           output: {
             severity,
-            stakeholders: ['sre-oncall', 'product-owner'],
+            stakeholders: ["sre-oncall", "product-owner"],
           },
           telemetry: {
             latencyMs: 100,
@@ -391,14 +359,11 @@ export function createSwitchboard(): BaseModule {
           },
         };
       },
-      'sync-webhooks': async ({ action }) => {
+      "sync-webhooks": async ({ action }) => {
         await simulate(20);
-        const integrations = asStringArray(action.payload?.integrations, [
-          'slack',
-          'pagerduty',
-        ]);
+        const integrations = asStringArray(action.payload?.integrations, ["slack", "pagerduty"]);
         return {
-          message: `Webhooks synchronized (${integrations.join(', ')})`,
+          message: `Webhooks synchronized (${integrations.join(", ")})`,
           output: {
             integrations,
             driftDetected: false,
@@ -411,19 +376,18 @@ export function createSwitchboard(): BaseModule {
           },
         };
       },
-    },
+    }
   );
 }
 
 export function createIntelGraph(): BaseModule {
   return createModule(
     {
-      id: 'intelgraph',
-      displayName: 'IntelGraph',
-      summary:
-        'Graph intelligence fabric powering investigations and insights.',
-      kind: 'analysis',
-      capabilities: ['analyze-graph', 'enrich-entities', 'publish-findings'],
+      id: "intelgraph",
+      displayName: "IntelGraph",
+      summary: "Graph intelligence fabric powering investigations and insights.",
+      kind: "analysis",
+      capabilities: ["analyze-graph", "enrich-entities", "publish-findings"],
       serviceLevelObjectives: {
         availability: 0.999,
         latencyMs: 110,
@@ -431,7 +395,7 @@ export function createIntelGraph(): BaseModule {
       },
     },
     {
-      'analyze-graph': async ({ action }) => {
+      "analyze-graph": async ({ action }) => {
         await simulate(45);
         const nodes = asNumber(action.payload?.nodes, 1250);
         return {
@@ -449,14 +413,11 @@ export function createIntelGraph(): BaseModule {
           },
         };
       },
-      'enrich-entities': async ({ action }) => {
+      "enrich-entities": async ({ action }) => {
         await simulate(30);
-        const providers = asStringArray(action.payload?.providers, [
-          'openintel',
-          'signals',
-        ]);
+        const providers = asStringArray(action.payload?.providers, ["openintel", "signals"]);
         return {
-          message: `Entities enriched using ${providers.join(', ')}`,
+          message: `Entities enriched using ${providers.join(", ")}`,
           output: {
             providers,
             enrichmentScore: 0.91,
@@ -469,13 +430,10 @@ export function createIntelGraph(): BaseModule {
           },
         };
       },
-      'publish-findings': async ({ action }) => {
+      "publish-findings": async ({ action }) => {
         await simulate(20);
-        const audience = asString(action.payload?.audience, 'executive');
-        const summary = asString(
-          action.payload?.summary,
-          'All systems nominal',
-        );
+        const audience = asString(action.payload?.audience, "executive");
+        const summary = asString(action.payload?.summary, "All systems nominal");
         return {
           message: `Findings published to ${audience} briefing`,
           output: {
@@ -490,18 +448,18 @@ export function createIntelGraph(): BaseModule {
           },
         };
       },
-    },
+    }
   );
 }
 
 export function createActivitiesModule(): BaseModule {
   return createModule(
     {
-      id: 'activities',
-      displayName: 'Activities',
-      summary: 'Tracks cross-team operational activities and success metrics.',
-      kind: 'operations',
-      capabilities: ['synchronize-cadence', 'log-activity', 'generate-report'],
+      id: "activities",
+      displayName: "Activities",
+      summary: "Tracks cross-team operational activities and success metrics.",
+      kind: "operations",
+      capabilities: ["synchronize-cadence", "log-activity", "generate-report"],
       serviceLevelObjectives: {
         availability: 0.997,
         latencyMs: 150,
@@ -509,14 +467,14 @@ export function createActivitiesModule(): BaseModule {
       },
     },
     {
-      'synchronize-cadence': async ({ action }) => {
+      "synchronize-cadence": async ({ action }) => {
         await simulate(25);
-        const cadence = asString(action.payload?.cadence, 'weekly');
+        const cadence = asString(action.payload?.cadence, "weekly");
         return {
           message: `Cadence synchronized for ${cadence} rituals`,
           output: {
             cadence,
-            rituals: ['standup', 'retro', 'demo'],
+            rituals: ["standup", "retro", "demo"],
           },
           telemetry: {
             latencyMs: 90,
@@ -526,10 +484,10 @@ export function createActivitiesModule(): BaseModule {
           },
         };
       },
-      'log-activity': async ({ action }) => {
+      "log-activity": async ({ action }) => {
         await simulate(20);
-        const activity = asString(action.payload?.activity, 'deployment');
-        const owner = asString(action.payload?.owner, 'orchestrator');
+        const activity = asString(action.payload?.activity, "deployment");
+        const owner = asString(action.payload?.owner, "orchestrator");
         return {
           message: `Activity ${activity} recorded`,
           output: {
@@ -544,9 +502,9 @@ export function createActivitiesModule(): BaseModule {
           },
         };
       },
-      'generate-report': async ({ action }) => {
+      "generate-report": async ({ action }) => {
         await simulate(35);
-        const scope = asString(action.payload?.scope, 'launch-readiness');
+        const scope = asString(action.payload?.scope, "launch-readiness");
         return {
           message: `Activity report generated for ${scope}`,
           output: {
@@ -561,7 +519,7 @@ export function createActivitiesModule(): BaseModule {
           },
         };
       },
-    },
+    }
   );
 }
 

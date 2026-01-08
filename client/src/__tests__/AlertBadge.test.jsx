@@ -1,9 +1,9 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import Navigation from '../components/Navigation';
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import Navigation from "../components/Navigation";
 
-jest.mock('../services/socket.js', () => {
+jest.mock("../services/socket.js", () => {
   const listeners = {};
   return {
     getSocket: () => ({
@@ -20,16 +20,16 @@ jest.mock('../services/socket.js', () => {
   };
 });
 
-test('increments alert badge on ALERT_EVT', async () => {
-  const { getSocket } = require('../services/socket.js');
+test("increments alert badge on ALERT_EVT", async () => {
+  const { getSocket } = require("../services/socket.js");
   render(
     <MemoryRouter>
       <Navigation />
-    </MemoryRouter>,
+    </MemoryRouter>
   );
   // emit event
-  getSocket().__emit('ALERT_EVT', { count: 1 });
+  getSocket().__emit("ALERT_EVT", { count: 1 });
   // find badge
-  const badge = await screen.findByText('1');
+  const badge = await screen.findByText("1");
   expect(badge).toBeInTheDocument();
 });

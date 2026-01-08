@@ -3,10 +3,7 @@ import fs from "node:fs";
 
 console.log("🔎 MVP-2: Invariant enforcement gate");
 
-const required = [
-  "packages/governance/src/invariants.ts",
-  "packages/governance/src/middleware.ts",
-];
+const required = ["packages/governance/src/invariants.ts", "packages/governance/src/middleware.ts"];
 
 for (const p of required) {
   if (!fs.existsSync(p)) {

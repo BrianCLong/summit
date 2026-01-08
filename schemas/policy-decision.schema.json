@@ -3,13 +3,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Policy Decision",
   "type": "object",
-  "required": [
-    "id",
-    "timestamp",
-    "policy",
-    "input",
-    "result"
-  ],
+  "required": ["id", "timestamp", "policy", "input", "result"],
   "properties": {
     "id": {
       "type": "string",
@@ -21,10 +15,7 @@
     },
     "policy": {
       "type": "object",
-      "required": [
-        "package",
-        "version"
-      ],
+      "required": ["package", "version"],
       "properties": {
         "package": {
           "type": "string"
@@ -44,9 +35,7 @@
     },
     "result": {
       "type": "object",
-      "required": [
-        "allow"
-      ],
+      "required": ["allow"],
       "properties": {
         "allow": {
           "type": "boolean"

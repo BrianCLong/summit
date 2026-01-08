@@ -11,7 +11,7 @@ import type {
   SplicingDetectionResult,
   SpliceBoundary,
   BoundingBox,
-} from '../types';
+} from "../types";
 
 export class PhotoForensicsAnalyzer {
   private modelLoaded: boolean = false;
@@ -81,7 +81,7 @@ export class PhotoForensicsAnalyzer {
    * Detects areas saved at different quality levels
    */
   private async performELA(
-    imageBuffer: Buffer,
+    imageBuffer: Buffer
   ): Promise<{ edits: PhotoEdit[]; toolUsed?: string }> {
     // ELA Process:
     // 1. Resave image at known quality (95%)
@@ -105,7 +105,7 @@ export class PhotoForensicsAnalyzer {
    * Detects inconsistencies in noise patterns
    */
   private async analyzeNoise(
-    imageBuffer: Buffer,
+    imageBuffer: Buffer
   ): Promise<{ edits: PhotoEdit[]; toolUsed?: string }> {
     // Natural photos have consistent noise patterns
     // Edited regions often have:
@@ -380,19 +380,19 @@ export class PhotoForensicsAnalyzer {
     // Analyze histogram for unnatural distributions
     const histogramAnomalies = await this.analyzeHistogram(imageBuffer);
     if (histogramAnomalies.length > 0) {
-      manipulations.push('histogram_manipulation');
+      manipulations.push("histogram_manipulation");
     }
 
     // Check for tone mapping artifacts
     const toneMappingDetected = await this.detectToneMapping(imageBuffer);
     if (toneMappingDetected) {
-      manipulations.push('tone_mapping');
+      manipulations.push("tone_mapping");
     }
 
     // Check for selective color adjustments
     const selectiveColorDetected = await this.detectSelectiveColor(imageBuffer);
     if (selectiveColorDetected) {
-      manipulations.push('selective_color');
+      manipulations.push("selective_color");
     }
 
     return {
@@ -446,8 +446,7 @@ export class PhotoForensicsAnalyzer {
   private calculateSplicingConfidence(boundaries: SpliceBoundary[]): number {
     if (boundaries.length === 0) return 0;
 
-    const avgConfidence =
-      boundaries.reduce((sum, b) => sum + b.confidence, 0) / boundaries.length;
+    const avgConfidence = boundaries.reduce((sum, b) => sum + b.confidence, 0) / boundaries.length;
     return avgConfidence;
   }
 }

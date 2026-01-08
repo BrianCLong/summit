@@ -16,7 +16,7 @@ export interface AstroturfingResult {
 export interface AstroturfingIndicator {
   type: string;
   description: string;
-  severity: 'low' | 'medium' | 'high';
+  severity: "low" | "medium" | "high";
   evidence: string[];
 }
 
@@ -85,14 +85,12 @@ export class AstroturfingDetector {
       astroturfingScore,
       authenticity,
       indicators,
-      participants: activities.map(a => a.accountId),
+      participants: activities.map((a) => a.accountId),
       timeline: this.extractTimeline(activities),
     };
   }
 
-  private checkAccountProfiles(
-    activities: CampaignActivity[]
-  ): AstroturfingIndicator | null {
+  private checkAccountProfiles(activities: CampaignActivity[]): AstroturfingIndicator | null {
     const suspiciousAccounts: string[] = [];
 
     for (const activity of activities) {
@@ -111,12 +109,12 @@ export class AstroturfingDetector {
 
     if (suspiciousAccounts.length > activities.length * 0.3) {
       return {
-        type: 'suspicious_profiles',
+        type: "suspicious_profiles",
         description: `${suspiciousAccounts.length} accounts have suspicious profiles`,
-        severity: 'high',
+        severity: "high",
         evidence: [
           `${suspiciousAccounts.length}/${activities.length} accounts are new or have low activity`,
-          'Many accounts created recently with minimal history',
+          "Many accounts created recently with minimal history",
         ],
       };
     }
@@ -124,10 +122,8 @@ export class AstroturfingDetector {
     return null;
   }
 
-  private checkCoordinatedMessaging(
-    activities: CampaignActivity[]
-  ): AstroturfingIndicator | null {
-    const messages = activities.flatMap(a => a.posts.map(p => p.content));
+  private checkCoordinatedMessaging(activities: CampaignActivity[]): AstroturfingIndicator | null {
+    const messages = activities.flatMap((a) => a.posts.map((p) => p.content));
 
     if (messages.length < 3) return null;
 
@@ -141,29 +137,26 @@ export class AstroturfingDetector {
       }
     }
 
-    const avgSimilarity =
-      similarities.reduce((a, b) => a + b, 0) / similarities.length;
+    const avgSimilarity = similarities.reduce((a, b) => a + b, 0) / similarities.length;
 
     if (avgSimilarity > 0.7) {
       return {
-        type: 'coordinated_messaging',
-        description: 'High similarity in messaging suggests coordination',
-        severity: 'high',
+        type: "coordinated_messaging",
+        description: "High similarity in messaging suggests coordination",
+        severity: "high",
         evidence: [
           `Average message similarity: ${(avgSimilarity * 100).toFixed(1)}%`,
-          'Many identical or near-identical posts detected',
+          "Many identical or near-identical posts detected",
         ],
       };
     }
 
     if (avgSimilarity > 0.5) {
       return {
-        type: 'similar_messaging',
-        description: 'Moderate similarity in messaging',
-        severity: 'medium',
-        evidence: [
-          `Average message similarity: ${(avgSimilarity * 100).toFixed(1)}%`,
-        ],
+        type: "similar_messaging",
+        description: "Moderate similarity in messaging",
+        severity: "medium",
+        evidence: [`Average message similarity: ${(avgSimilarity * 100).toFixed(1)}%`],
       };
     }
 
@@ -195,12 +188,12 @@ export class AstroturfingDetector {
 
     if (suspiciousEngagement.length > activities.length * 0.2) {
       return {
-        type: 'artificial_amplification',
-        description: 'Engagement metrics suggest artificial amplification',
-        severity: 'high',
+        type: "artificial_amplification",
+        description: "Engagement metrics suggest artificial amplification",
+        severity: "high",
         evidence: [
           `${suspiciousEngagement.length} accounts show suspicious engagement patterns`,
-          'Engagement disproportionate to organic follower base',
+          "Engagement disproportionate to organic follower base",
         ],
       };
     }
@@ -208,10 +201,8 @@ export class AstroturfingDetector {
     return null;
   }
 
-  private checkSuddenSurge(
-    activities: CampaignActivity[]
-  ): AstroturfingIndicator | null {
-    const timestamps = activities.flatMap(a => a.posts.map(p => p.timestamp));
+  private checkSuddenSurge(activities: CampaignActivity[]): AstroturfingIndicator | null {
+    const timestamps = activities.flatMap((a) => a.posts.map((p) => p.timestamp));
 
     if (timestamps.length < 10) return null;
 
@@ -226,12 +217,12 @@ export class AstroturfingDetector {
 
     if (hoursSpan < 24 && timestamps.length > 50) {
       return {
-        type: 'sudden_surge',
-        description: 'Sudden surge of activity in short time period',
-        severity: 'high',
+        type: "sudden_surge",
+        description: "Sudden surge of activity in short time period",
+        severity: "high",
         evidence: [
           `${timestamps.length} posts in ${hoursSpan.toFixed(1)} hours`,
-          'Unnatural spike suggests coordinated campaign',
+          "Unnatural spike suggests coordinated campaign",
         ],
       };
     }
@@ -239,9 +230,7 @@ export class AstroturfingDetector {
     return null;
   }
 
-  private checkOrganicEngagement(
-    activities: CampaignActivity[]
-  ): AstroturfingIndicator | null {
+  private checkOrganicEngagement(activities: CampaignActivity[]): AstroturfingIndicator | null {
     let totalLikes = 0;
     let totalShares = 0;
     let totalComments = 0;
@@ -260,12 +249,12 @@ export class AstroturfingDetector {
 
     if (commentRatio < 0.05) {
       return {
-        type: 'low_organic_engagement',
-        description: 'Low comment ratio suggests inauthentic engagement',
-        severity: 'medium',
+        type: "low_organic_engagement",
+        description: "Low comment ratio suggests inauthentic engagement",
+        severity: "medium",
         evidence: [
           `Comment ratio: ${(commentRatio * 100).toFixed(2)}%`,
-          'Real campaigns typically have higher comment engagement',
+          "Real campaigns typically have higher comment engagement",
         ],
       };
     }
@@ -294,19 +283,19 @@ export class AstroturfingDetector {
     const words1 = new Set(text1.toLowerCase().split(/\s+/));
     const words2 = new Set(text2.toLowerCase().split(/\s+/));
 
-    const intersection = new Set([...words1].filter(x => words2.has(x)));
+    const intersection = new Set([...words1].filter((x) => words2.has(x)));
     const union = new Set([...words1, ...words2]);
 
     return intersection.size / union.size;
   }
 
   private extractTimeline(activities: CampaignActivity[]): Date[] {
-    const timestamps = activities.flatMap(a => a.posts.map(p => p.timestamp));
+    const timestamps = activities.flatMap((a) => a.posts.map((p) => p.timestamp));
     return timestamps.sort((a, b) => a.getTime() - b.getTime());
   }
 
   private generateCampaignId(topic: string): string {
-    const hash = topic.split('').reduce((a, b) => {
+    const hash = topic.split("").reduce((a, b) => {
       a = (a << 5) - a + b.charCodeAt(0);
       return a & a;
     }, 0);

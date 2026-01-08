@@ -4,7 +4,7 @@
  * Implements cross-modal consistency checks and semantic validation.
  */
 
-import pino from 'pino';
+import pino from "pino";
 
 import type {
   HallucinationCheckResult,
@@ -17,9 +17,9 @@ import type {
   TextEmbedding,
   ImageEmbedding,
   VideoEmbedding,
-} from './types.js';
+} from "./types.js";
 
-const logger = pino({ name: 'hallucination-guard' });
+const logger = pino({ name: "hallucination-guard" });
 
 export interface HallucinationGuardConfig {
   crossModalThreshold: number;
@@ -94,7 +94,7 @@ export class HallucinationGuard {
 
     this.validationStats = new ValidationStats();
 
-    logger.info('Hallucination Guard initialized', {
+    logger.info("Hallucination Guard initialized", {
       crossModalThreshold: this.config.crossModalThreshold,
       autoRejectThreshold: this.config.autoRejectThreshold,
     });
@@ -105,7 +105,7 @@ export class HallucinationGuard {
    */
   async validate(
     fusedEmbedding: FusedEmbedding,
-    sourceEmbeddings: Array<TextEmbedding | ImageEmbedding | VideoEmbedding>,
+    sourceEmbeddings: Array<TextEmbedding | ImageEmbedding | VideoEmbedding>
   ): Promise<HallucinationCheckResult> {
     const startTime = Date.now();
 
@@ -118,26 +118,20 @@ export class HallucinationGuard {
       // 1. Cross-modal consistency check
       const crossModalResult = await this.checkCrossModalConsistency(
         fusedEmbedding,
-        sourceEmbeddings,
+        sourceEmbeddings
       );
       if (crossModalResult) {
         reasons.push(crossModalResult);
       }
 
       // 2. Semantic consistency check
-      const semanticResult = this.checkSemanticConsistency(
-        fusedEmbedding,
-        sourceEmbeddings,
-      );
+      const semanticResult = this.checkSemanticConsistency(fusedEmbedding, sourceEmbeddings);
       if (semanticResult) {
         reasons.push(semanticResult);
       }
 
       // 3. Confidence anomaly check
-      const confidenceResult = this.checkConfidenceAnomaly(
-        fusedEmbedding,
-        sourceEmbeddings,
-      );
+      const confidenceResult = this.checkConfidenceAnomaly(fusedEmbedding, sourceEmbeddings);
       if (confidenceResult) {
         reasons.push(confidenceResult);
       }
@@ -149,19 +143,13 @@ export class HallucinationGuard {
       }
 
       // 5. Temporal consistency check
-      const temporalResult = this.checkTemporalConsistency(
-        fusedEmbedding,
-        sourceEmbeddings,
-      );
+      const temporalResult = this.checkTemporalConsistency(fusedEmbedding, sourceEmbeddings);
       if (temporalResult) {
         reasons.push(temporalResult);
       }
 
       // 6. Entity conflict check
-      const entityResult = this.checkEntityConflicts(
-        fusedEmbedding,
-        sourceEmbeddings,
-      );
+      const entityResult = this.checkEntityConflicts(fusedEmbedding, sourceEmbeddings);
       if (entityResult) {
         reasons.push(entityResult);
       }
@@ -182,7 +170,7 @@ export class HallucinationGuard {
         suggestedAction,
       };
 
-      logger.info('Hallucination check completed', {
+      logger.info("Hallucination check completed", {
         sourceId: fusedEmbedding.entityId,
         score,
         isHallucination,
@@ -192,9 +180,9 @@ export class HallucinationGuard {
 
       return result;
     } catch (error) {
-      logger.error('Hallucination check failed', {
+      logger.error("Hallucination check failed", {
         entityId: fusedEmbedding.entityId,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
       });
 
       // Return safe default (flag for review)
@@ -202,13 +190,15 @@ export class HallucinationGuard {
         sourceId: fusedEmbedding.entityId,
         isHallucination: false,
         score: 0.5,
-        reasons: [{
-          type: 'semantic_inconsistency',
-          description: 'Validation failed - flagging for manual review',
-          evidence: error instanceof Error ? error.message : 'Unknown error',
-          severity: 'medium',
-        }],
-        suggestedAction: 'flag_for_review',
+        reasons: [
+          {
+            type: "semantic_inconsistency",
+            description: "Validation failed - flagging for manual review",
+            evidence: error instanceof Error ? error.message : "Unknown error",
+            severity: "medium",
+          },
+        ],
+        suggestedAction: "flag_for_review",
       };
     }
   }
@@ -218,7 +208,7 @@ export class HallucinationGuard {
    */
   async validateBatch(
     fusedEmbeddings: FusedEmbedding[],
-    sourceEmbeddingsMap: Map<string, Array<TextEmbedding | ImageEmbedding | VideoEmbedding>>,
+    sourceEmbeddingsMap: Map<string, Array<TextEmbedding | ImageEmbedding | VideoEmbedding>>
   ): Promise<HallucinationCheckResult[]> {
     const results: HallucinationCheckResult[] = [];
 
@@ -236,7 +226,7 @@ export class HallucinationGuard {
    */
   private async checkCrossModalConsistency(
     fusedEmbedding: FusedEmbedding,
-    sourceEmbeddings: Array<TextEmbedding | ImageEmbedding | VideoEmbedding>,
+    sourceEmbeddings: Array<TextEmbedding | ImageEmbedding | VideoEmbedding>
   ): Promise<HallucinationReason | null> {
     if (fusedEmbedding.modalityVectors.length < 2) {
       return null;
@@ -255,7 +245,7 @@ export class HallucinationGuard {
           a.vector,
           b.vector,
           a.modality,
-          b.modality,
+          b.modality
         );
 
         pairs.push({
@@ -266,16 +256,14 @@ export class HallucinationGuard {
     }
 
     // Find lowest similarity pair
-    const worstPair = pairs.reduce((min, p) =>
-      p.similarity < min.similarity ? p : min,
-    );
+    const worstPair = pairs.reduce((min, p) => (p.similarity < min.similarity ? p : min));
 
     if (worstPair.similarity < this.config.crossModalThreshold) {
       return {
-        type: 'cross_modal_mismatch',
+        type: "cross_modal_mismatch",
         description: `Low cross-modal consistency between ${worstPair.modalities}`,
         evidence: `Similarity score: ${worstPair.similarity.toFixed(3)} (threshold: ${this.config.crossModalThreshold})`,
-        severity: worstPair.similarity < 0.3 ? 'critical' : 'high',
+        severity: worstPair.similarity < 0.3 ? "critical" : "high",
       };
     }
 
@@ -287,7 +275,7 @@ export class HallucinationGuard {
    */
   private checkSemanticConsistency(
     fusedEmbedding: FusedEmbedding,
-    sourceEmbeddings: Array<TextEmbedding | ImageEmbedding | VideoEmbedding>,
+    sourceEmbeddings: Array<TextEmbedding | ImageEmbedding | VideoEmbedding>
   ): HallucinationReason | null {
     // Check that fused embedding is semantically close to sources
     const similarities = fusedEmbedding.modalityVectors.map((mv) => {
@@ -298,10 +286,10 @@ export class HallucinationGuard {
 
     if (avgSimilarity < this.config.semanticConsistencyThreshold) {
       return {
-        type: 'semantic_inconsistency',
-        description: 'Fused embedding diverges significantly from source embeddings',
+        type: "semantic_inconsistency",
+        description: "Fused embedding diverges significantly from source embeddings",
         evidence: `Average similarity to sources: ${avgSimilarity.toFixed(3)} (threshold: ${this.config.semanticConsistencyThreshold})`,
-        severity: avgSimilarity < 0.5 ? 'high' : 'medium',
+        severity: avgSimilarity < 0.5 ? "high" : "medium",
       };
     }
 
@@ -313,21 +301,21 @@ export class HallucinationGuard {
    */
   private checkConfidenceAnomaly(
     fusedEmbedding: FusedEmbedding,
-    sourceEmbeddings: Array<TextEmbedding | ImageEmbedding | VideoEmbedding>,
+    sourceEmbeddings: Array<TextEmbedding | ImageEmbedding | VideoEmbedding>
   ): HallucinationReason | null {
     const sourceConfidences = sourceEmbeddings.map((e) => e.metadata.confidence);
-    const avgSourceConfidence = sourceConfidences.reduce((a, b) => a + b, 0) /
-      sourceConfidences.length;
+    const avgSourceConfidence =
+      sourceConfidences.reduce((a, b) => a + b, 0) / sourceConfidences.length;
 
     // Check if fused confidence is anomalously high compared to sources
     const confidenceRatio = fusedEmbedding.crossModalScore / avgSourceConfidence;
 
-    if (confidenceRatio > (1 + this.config.confidenceAnomalyThreshold)) {
+    if (confidenceRatio > 1 + this.config.confidenceAnomalyThreshold) {
       return {
-        type: 'confidence_anomaly',
-        description: 'Fused confidence is anomalously high compared to source confidences',
+        type: "confidence_anomaly",
+        description: "Fused confidence is anomalously high compared to source confidences",
         evidence: `Fused confidence: ${fusedEmbedding.crossModalScore.toFixed(3)}, Avg source: ${avgSourceConfidence.toFixed(3)}`,
-        severity: 'medium',
+        severity: "medium",
       };
     }
 
@@ -335,10 +323,10 @@ export class HallucinationGuard {
     const minSourceConfidence = Math.min(...sourceConfidences);
     if (minSourceConfidence < 0.3) {
       return {
-        type: 'confidence_anomaly',
-        description: 'One or more source embeddings have very low confidence',
+        type: "confidence_anomaly",
+        description: "One or more source embeddings have very low confidence",
         evidence: `Minimum source confidence: ${minSourceConfidence.toFixed(3)}`,
-        severity: 'low',
+        severity: "low",
       };
     }
 
@@ -348,15 +336,12 @@ export class HallucinationGuard {
   /**
    * Check if embedding is an outlier
    */
-  private checkEmbeddingOutlier(
-    fusedEmbedding: FusedEmbedding,
-  ): HallucinationReason | null {
+  private checkEmbeddingOutlier(fusedEmbedding: FusedEmbedding): HallucinationReason | null {
     // Calculate z-scores for embedding components
     const embedding = fusedEmbedding.fusedVector;
 
     const mean = embedding.reduce((a, b) => a + b, 0) / embedding.length;
-    const variance = embedding.reduce((sum, v) => sum + (v - mean) ** 2, 0) /
-      embedding.length;
+    const variance = embedding.reduce((sum, v) => sum + (v - mean) ** 2, 0) / embedding.length;
     const stdDev = Math.sqrt(variance);
 
     // Check for extreme values
@@ -372,10 +357,10 @@ export class HallucinationGuard {
 
     if (outlierRatio > 0.05) {
       return {
-        type: 'embedding_outlier',
-        description: 'Fused embedding contains unusual number of outlier values',
+        type: "embedding_outlier",
+        description: "Fused embedding contains unusual number of outlier values",
         evidence: `Outlier ratio: ${(outlierRatio * 100).toFixed(1)}% (threshold: 5%)`,
-        severity: outlierRatio > 0.1 ? 'high' : 'medium',
+        severity: outlierRatio > 0.1 ? "high" : "medium",
       };
     }
 
@@ -387,7 +372,7 @@ export class HallucinationGuard {
    */
   private checkTemporalConsistency(
     fusedEmbedding: FusedEmbedding,
-    sourceEmbeddings: Array<TextEmbedding | ImageEmbedding | VideoEmbedding>,
+    sourceEmbeddings: Array<TextEmbedding | ImageEmbedding | VideoEmbedding>
   ): HallucinationReason | null {
     // Check if temporal order of sources makes sense
     const timestamps = sourceEmbeddings.map((e) => e.timestamp.getTime());
@@ -397,10 +382,10 @@ export class HallucinationGuard {
     const uniqueTimestamps = new Set(timestamps);
     if (uniqueTimestamps.size < timestamps.length * 0.5) {
       return {
-        type: 'temporal_inconsistency',
-        description: 'Multiple sources have identical timestamps',
+        type: "temporal_inconsistency",
+        description: "Multiple sources have identical timestamps",
         evidence: `Unique timestamps: ${uniqueTimestamps.size}/${timestamps.length}`,
-        severity: 'low',
+        severity: "low",
       };
     }
 
@@ -410,10 +395,10 @@ export class HallucinationGuard {
       // If gap is more than 1 year, flag it
       if (gap > 365 * 24 * 60 * 60 * 1000) {
         return {
-          type: 'temporal_inconsistency',
-          description: 'Suspicious time gap between source timestamps',
+          type: "temporal_inconsistency",
+          description: "Suspicious time gap between source timestamps",
           evidence: `Gap of ${Math.floor(gap / (24 * 60 * 60 * 1000))} days detected`,
-          severity: 'medium',
+          severity: "medium",
         };
       }
     }
@@ -426,11 +411,11 @@ export class HallucinationGuard {
    */
   private checkEntityConflicts(
     fusedEmbedding: FusedEmbedding,
-    sourceEmbeddings: Array<TextEmbedding | ImageEmbedding | VideoEmbedding>,
+    sourceEmbeddings: Array<TextEmbedding | ImageEmbedding | VideoEmbedding>
   ): HallucinationReason | null {
     // Check for conflicting entity information across sources
     const textEmbeddings = sourceEmbeddings.filter(
-      (e): e is TextEmbedding => e.modality === 'text',
+      (e): e is TextEmbedding => e.modality === "text"
     );
 
     if (textEmbeddings.length < 2) {
@@ -440,7 +425,7 @@ export class HallucinationGuard {
     // Compare extracted entities across text sources
     const entitySets = textEmbeddings.map((te) => {
       const entities = te.entities || [];
-      return new Map(entities.map((e) => [e.type + ':' + e.text, e]));
+      return new Map(entities.map((e) => [e.type + ":" + e.text, e]));
     });
 
     // Check for conflicting entities
@@ -455,8 +440,9 @@ export class HallucinationGuard {
         // Find same-type entities with different values
         for (const [key, entity] of set1) {
           const type = entity.type;
-          const otherEntities = Array.from(set2.entries())
-            .filter(([k]) => k.startsWith(type + ':'));
+          const otherEntities = Array.from(set2.entries()).filter(([k]) =>
+            k.startsWith(type + ":")
+          );
 
           for (const [otherKey, otherEntity] of otherEntities) {
             if (key !== otherKey && entity.type === otherEntity.type) {
@@ -473,10 +459,10 @@ export class HallucinationGuard {
 
     if (conflictCount > 0) {
       return {
-        type: 'entity_conflict',
-        description: 'Conflicting entity information across sources',
-        evidence: `Conflicts found: ${conflicts.slice(0, 3).join('; ')}`,
-        severity: conflictCount > 2 ? 'high' : 'medium',
+        type: "entity_conflict",
+        description: "Conflicting entity information across sources",
+        evidence: `Conflicts found: ${conflicts.slice(0, 3).join("; ")}`,
+        severity: conflictCount > 2 ? "high" : "medium",
       };
     }
 
@@ -519,7 +505,7 @@ export class HallucinationGuard {
     vectorA: number[],
     vectorB: number[],
     modalityA: ModalityType,
-    modalityB: ModalityType,
+    modalityB: ModalityType
   ): number {
     // If dimensions match, use cosine similarity directly
     if (vectorA.length === vectorB.length) {
@@ -605,46 +591,40 @@ export class HallucinationGuard {
    */
   private determineSuggestedAction(
     score: number,
-    reasons: HallucinationReason[],
+    reasons: HallucinationReason[]
   ): HallucinationAction {
     if (score >= this.config.autoRejectThreshold) {
-      return 'reject';
+      return "reject";
     }
 
     if (score <= this.config.autoAcceptThreshold) {
-      return 'accept';
+      return "accept";
     }
 
     // Check for critical reasons
-    const hasCritical = reasons.some((r) => r.severity === 'critical');
+    const hasCritical = reasons.some((r) => r.severity === "critical");
     if (hasCritical) {
-      return 'reject';
+      return "reject";
     }
 
     // Check for correctable issues
-    const correctableTypes: HallucinationType[] = [
-      'confidence_anomaly',
-      'embedding_outlier',
-    ];
+    const correctableTypes: HallucinationType[] = ["confidence_anomaly", "embedding_outlier"];
     const allCorrectable = reasons.every((r) => correctableTypes.includes(r.type));
     if (allCorrectable && score < 0.5) {
-      return 'auto_correct';
+      return "auto_correct";
     }
 
-    return 'flag_for_review';
+    return "flag_for_review";
   }
 
   /**
    * Update validation context with new embeddings
    */
   private updateContext(
-    sourceEmbeddings: Array<TextEmbedding | ImageEmbedding | VideoEmbedding>,
+    sourceEmbeddings: Array<TextEmbedding | ImageEmbedding | VideoEmbedding>
   ): void {
     for (const embedding of sourceEmbeddings) {
-      this.validationContext.sourceEmbeddings.set(
-        embedding.id,
-        embedding.vector,
-      );
+      this.validationContext.sourceEmbeddings.set(embedding.id, embedding.vector);
 
       // Add temporal event
       this.validationContext.temporalSequence.push({
@@ -657,8 +637,7 @@ export class HallucinationGuard {
 
     // Limit context size
     if (this.validationContext.temporalSequence.length > 1000) {
-      this.validationContext.temporalSequence =
-        this.validationContext.temporalSequence.slice(-500);
+      this.validationContext.temporalSequence = this.validationContext.temporalSequence.slice(-500);
     }
   }
 
@@ -700,7 +679,7 @@ export class HallucinationGuard {
       crossModalPairs: [],
     };
     this.validationStats.reset();
-    logger.info('Hallucination guard context reset');
+    logger.info("Hallucination guard context reset");
   }
 }
 
@@ -738,12 +717,9 @@ class ValidationStats {
     return {
       totalValidations: this.totalValidations,
       hallucinationCount: this.hallucinationCount,
-      hallucinationRate: this.totalValidations > 0
-        ? this.hallucinationCount / this.totalValidations
-        : 0,
-      averageScore: this.totalValidations > 0
-        ? this.scoreSum / this.totalValidations
-        : 0,
+      hallucinationRate:
+        this.totalValidations > 0 ? this.hallucinationCount / this.totalValidations : 0,
+      averageScore: this.totalValidations > 0 ? this.scoreSum / this.totalValidations : 0,
       maxScore: this.scoreMax,
       reasonCounts: { ...this.reasonCounts },
     };

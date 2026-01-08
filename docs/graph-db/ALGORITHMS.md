@@ -22,27 +22,33 @@ This document provides detailed information about the graph algorithms available
 **Complexity**: O((V + E) log V)
 
 **Example**:
+
 ```typescript
 const pathfinding = new ShortestPathAlgorithms(storage);
 const path = pathfinding.dijkstra(sourceId, targetId);
 
-console.log('Path length:', path.length);
-console.log('Total weight:', path.weight);
-console.log('Nodes:', path.nodes.map(n => n.id));
+console.log("Path length:", path.length);
+console.log("Total weight:", path.weight);
+console.log(
+  "Nodes:",
+  path.nodes.map((n) => n.id)
+);
 ```
 
 **When to Use**:
+
 - All edge weights are non-negative
 - Need guaranteed shortest path
 - Moderate graph size (< 100K nodes)
 
-### A* Algorithm
+### A\* Algorithm
 
 **Use Case**: Shortest path with heuristic guidance
 
 **Complexity**: O(E) with good heuristic
 
 **Example**:
+
 ```typescript
 // Heuristic based on geographic distance
 const heuristic = (nodeId: string, targetId: string) => {
@@ -61,6 +67,7 @@ const path = pathfinding.aStar(sourceId, targetId, heuristic);
 ```
 
 **When to Use**:
+
 - Have good heuristic function
 - Spatial or geometric graphs
 - Need faster performance than Dijkstra
@@ -69,18 +76,20 @@ const path = pathfinding.aStar(sourceId, targetId, heuristic);
 
 **Use Case**: Shortest path with negative edge weights
 
-**Complexity**: O(V * E)
+**Complexity**: O(V \* E)
 
 **Example**:
+
 ```typescript
 try {
   const path = pathfinding.bellmanFord(sourceId, targetId);
 } catch (error) {
-  console.error('Graph contains negative cycle');
+  console.error("Graph contains negative cycle");
 }
 ```
 
 **When to Use**:
+
 - Graph may have negative weights
 - Need to detect negative cycles
 - Financial or debt networks
@@ -90,6 +99,7 @@ try {
 **Use Case**: Find multiple alternative paths
 
 **Example**:
+
 ```typescript
 const paths = pathfinding.kShortestPaths(sourceId, targetId, 5);
 
@@ -99,6 +109,7 @@ for (const [index, path] of paths.entries()) {
 ```
 
 **When to Use**:
+
 - Need backup routes
 - Analyzing communication alternatives
 - Redundancy analysis
@@ -109,11 +120,12 @@ for (const [index, path] of paths.entries()) {
 
 **Use Case**: Measure importance based on incoming connections
 
-**Complexity**: O(E * iterations)
+**Complexity**: O(E \* iterations)
 
 **Formula**: `PR(A) = (1-d)/N + d * Σ(PR(Ti)/C(Ti))`
 
 **Example**:
+
 ```typescript
 const centrality = new CentralityMeasures(storage);
 const pageRank = centrality.pageRank(0.85, 100, 1e-6);
@@ -126,11 +138,13 @@ for (const { nodeId, score } of topNodes) {
 ```
 
 **Parameters**:
+
 - `dampingFactor` (0.85): Probability of following links
 - `maxIterations` (100): Maximum iterations
 - `tolerance` (1e-6): Convergence threshold
 
 **When to Use**:
+
 - Identifying influential entities
 - Ranking by importance
 - Web-like networks
@@ -139,17 +153,19 @@ for (const { nodeId, score } of topNodes) {
 
 **Use Case**: Measure importance based on bridging position
 
-**Complexity**: O(V * E)
+**Complexity**: O(V \* E)
 
 **Formula**: `CB(v) = Σ(σst(v)/σst)` for all s,t pairs
 
 **Example**:
+
 ```typescript
 const betweenness = centrality.betweennessCentrality();
 const bridges = centrality.getTopK(betweenness, 10);
 ```
 
 **When to Use**:
+
 - Finding critical communication nodes
 - Identifying bottlenecks
 - Network vulnerability analysis
@@ -158,16 +174,18 @@ const bridges = centrality.getTopK(betweenness, 10);
 
 **Use Case**: Measure average distance to all other nodes
 
-**Complexity**: O(V * E)
+**Complexity**: O(V \* E)
 
 **Formula**: `CC(v) = (n-1) / Σd(v,u)` for all u
 
 **Example**:
+
 ```typescript
 const closeness = centrality.closenessCentrality();
 ```
 
 **When to Use**:
+
 - Finding central coordinators
 - Optimizing information spread
 - Accessibility analysis
@@ -176,14 +194,16 @@ const closeness = centrality.closenessCentrality();
 
 **Use Case**: Importance based on importance of neighbors
 
-**Complexity**: O(V * iterations)
+**Complexity**: O(V \* iterations)
 
 **Example**:
+
 ```typescript
 const eigenvector = centrality.eigenvectorCentrality();
 ```
 
 **When to Use**:
+
 - Quality over quantity of connections
 - Social network analysis
 - Influence propagation
@@ -195,13 +215,15 @@ const eigenvector = centrality.eigenvectorCentrality();
 **Complexity**: O(V)
 
 **Example**:
+
 ```typescript
-const degree = centrality.degreeCentrality('both');
-const inDegree = centrality.degreeCentrality('in');
-const outDegree = centrality.degreeCentrality('out');
+const degree = centrality.degreeCentrality("both");
+const inDegree = centrality.degreeCentrality("in");
+const outDegree = centrality.degreeCentrality("out");
 ```
 
 **When to Use**:
+
 - Quick initial analysis
 - Identifying hubs
 - Simple popularity measure
@@ -212,9 +234,10 @@ const outDegree = centrality.degreeCentrality('out');
 
 **Use Case**: Detect communities by optimizing modularity
 
-**Complexity**: O(V * log V)
+**Complexity**: O(V \* log V)
 
 **Example**:
+
 ```typescript
 const community = new CommunityDetection(storage);
 const communities = community.louvain(1.0);
@@ -230,9 +253,11 @@ for (const group of groups) {
 ```
 
 **Parameters**:
+
 - `resolution` (1.0): Controls community size (higher = smaller communities)
 
 **When to Use**:
+
 - Large graphs (millions of nodes)
 - Hierarchical community structure
 - Fast community detection needed
@@ -241,15 +266,17 @@ for (const group of groups) {
 
 **Use Case**: Fast community detection via label spreading
 
-**Complexity**: O(E * iterations)
+**Complexity**: O(E \* iterations)
 
 **Example**:
+
 ```typescript
 const communities = community.labelPropagation(100);
 const groups = community.getCommunities(communities);
 ```
 
 **When to Use**:
+
 - Very large graphs
 - Speed is critical
 - Don't need optimal solution
@@ -261,6 +288,7 @@ const groups = community.getCommunities(communities);
 **Complexity**: O(V + E)
 
 **Example**:
+
 ```typescript
 const components = community.connectedComponents();
 const groups = community.getCommunities(components);
@@ -269,6 +297,7 @@ console.log(`Graph has ${groups.length} connected components`);
 ```
 
 **When to Use**:
+
 - Graph connectivity analysis
 - Finding isolated clusters
 - Data quality checks
@@ -277,14 +306,16 @@ console.log(`Graph has ${groups.length} connected components`);
 
 **Use Case**: Hierarchical community detection
 
-**Complexity**: O(V² * E)
+**Complexity**: O(V² \* E)
 
 **Example**:
+
 ```typescript
 const communities = community.girvanNewman(5); // 5 communities
 ```
 
 **When to Use**:
+
 - Need specific number of communities
 - Hierarchical structure important
 - Smaller graphs
@@ -296,6 +327,7 @@ const communities = community.girvanNewman(5); // 5 communities
 **Use Case**: Count triangles in graph
 
 **Example**:
+
 ```typescript
 const clustering = new GraphClustering(storage);
 const triangles = clustering.countTriangles();
@@ -303,6 +335,7 @@ console.log(`Graph contains ${triangles} triangles`);
 ```
 
 **When to Use**:
+
 - Measuring network cohesion
 - Social network analysis
 - Transitivity measurement
@@ -312,6 +345,7 @@ console.log(`Graph contains ${triangles} triangles`);
 **Use Case**: Measure local clustering
 
 **Example**:
+
 ```typescript
 // Single node
 const coeff = clustering.localClusteringCoefficient(nodeId);
@@ -325,6 +359,7 @@ const average = clustering.averageClusteringCoefficient();
 ```
 
 **When to Use**:
+
 - Analyzing network structure
 - Comparing graphs
 - Identifying tightly-knit groups
@@ -334,6 +369,7 @@ const average = clustering.averageClusteringCoefficient();
 **Use Case**: Find complete subgraphs
 
 **Example**:
+
 ```typescript
 // All maximal cliques
 const cliques = clustering.findMaximalCliques();
@@ -346,6 +382,7 @@ const maxClique = clustering.findMaximumClique();
 ```
 
 **When to Use**:
+
 - Finding tight-knit groups
 - Fraud detection
 - Collaborative networks
@@ -355,6 +392,7 @@ const maxClique = clustering.findMaximumClique();
 **Use Case**: Color nodes with no adjacent same-color nodes
 
 **Example**:
+
 ```typescript
 const colors = clustering.graphColoring();
 const chromatic = clustering.chromaticNumber();
@@ -363,6 +401,7 @@ console.log(`Graph can be colored with ${chromatic} colors`);
 ```
 
 **When to Use**:
+
 - Resource allocation
 - Scheduling problems
 - Conflict resolution
@@ -372,12 +411,14 @@ console.log(`Graph can be colored with ${chromatic} colors`);
 **Use Case**: Find subgraphs with minimum degree k
 
 **Example**:
+
 ```typescript
 const core3 = clustering.kCore(3); // All nodes with degree >= 3
 const coreNumbers = clustering.coreNumbers();
 ```
 
 **When to Use**:
+
 - Finding cohesive subgraphs
 - Network resilience
 - Identifying core members
@@ -389,6 +430,7 @@ const coreNumbers = clustering.coreNumbers();
 **Use Case**: Find common patterns in graph
 
 **Example**:
+
 ```typescript
 const mining = new PatternMining(storage);
 const patterns = mining.frequentSubgraphs(0.1, 5);
@@ -400,10 +442,12 @@ for (const pattern of patterns) {
 ```
 
 **Parameters**:
+
 - `minSupport` (0.1): Minimum frequency (10%)
 - `maxSize` (5): Maximum pattern size
 
 **When to Use**:
+
 - Identifying common behaviors
 - Network motif discovery
 - Pattern-based classification
@@ -413,6 +457,7 @@ for (const pattern of patterns) {
 **Use Case**: Find specific network patterns
 
 **Example**:
+
 ```typescript
 const motifs = mining.detectMotifs();
 
@@ -423,12 +468,14 @@ for (const motif of motifs) {
 ```
 
 **Motif Types**:
+
 - Triangle: Three mutually connected nodes
 - Star: Hub with spokes
 - Chain: Linear path
 - Bipartite: Two disconnected groups
 
 **When to Use**:
+
 - Understanding network structure
 - Comparing to random graphs
 - Functional analysis
@@ -438,6 +485,7 @@ for (const motif of motifs) {
 **Use Case**: Find unusual relationships
 
 **Example**:
+
 ```typescript
 const anomalies = mining.detectAnomalousRelationships(0.7);
 
@@ -449,6 +497,7 @@ for (const anomaly of anomalies) {
 ```
 
 **When to Use**:
+
 - Fraud detection
 - Threat identification
 - Quality control
@@ -460,12 +509,14 @@ for (const anomaly of anomalies) {
 **Use Case**: Simple shared neighbor count
 
 **Example**:
+
 ```typescript
 const predictor = new LinkPredictor(storage);
 const score = predictor.commonNeighbors(sourceId, targetId);
 ```
 
 **When to Use**:
+
 - Quick baseline prediction
 - Social networks
 - Collaborative filtering
@@ -475,11 +526,13 @@ const score = predictor.commonNeighbors(sourceId, targetId);
 **Use Case**: Normalized common neighbors
 
 **Example**:
+
 ```typescript
 const jaccard = predictor.jaccardCoefficient(sourceId, targetId);
 ```
 
 **When to Use**:
+
 - Normalizing for degree
 - Recommendation systems
 - Similarity measurement
@@ -491,11 +544,13 @@ const jaccard = predictor.jaccardCoefficient(sourceId, targetId);
 **Formula**: `Σ 1/log(k(z))` for common neighbors z
 
 **Example**:
+
 ```typescript
 const aa = predictor.adamicAdar(sourceId, targetId);
 ```
 
 **When to Use**:
+
 - Better than common neighbors
 - Social network prediction
 - Academic citations
@@ -505,6 +560,7 @@ const aa = predictor.adamicAdar(sourceId, targetId);
 **Use Case**: Combine multiple methods
 
 **Example**:
+
 ```typescript
 const prediction = predictor.ensemblePrediction(sourceId, targetId);
 
@@ -514,6 +570,7 @@ console.log(`Explanation: ${prediction.explanation}`);
 ```
 
 **When to Use**:
+
 - Production systems
 - High accuracy needed
 - Comprehensive analysis
@@ -523,6 +580,7 @@ console.log(`Explanation: ${prediction.explanation}`);
 **Use Case**: Predict many links efficiently
 
 **Example**:
+
 ```typescript
 // Predict links for specific node
 const predictions = predictor.predictLinksForNode(nodeId, 10);
@@ -532,20 +590,21 @@ const missing = predictor.predictMissingLinks(0.5, 100);
 ```
 
 **When to Use**:
+
 - Recommendation systems
 - Network completion
 - Proactive monitoring
 
 ## Algorithm Selection Guide
 
-| Task | Algorithm | Time | Space | Accuracy |
-|------|-----------|------|-------|----------|
-| Shortest Path | Dijkstra | Medium | Low | Exact |
-| Importance | PageRank | Medium | Medium | Good |
-| Bridges | Betweenness | High | Low | Exact |
-| Communities | Louvain | Low | Medium | Good |
-| Patterns | Subgraph Mining | High | High | Exact |
-| Link Pred | Ensemble | Medium | Low | Best |
+| Task          | Algorithm       | Time   | Space  | Accuracy |
+| ------------- | --------------- | ------ | ------ | -------- |
+| Shortest Path | Dijkstra        | Medium | Low    | Exact    |
+| Importance    | PageRank        | Medium | Medium | Good     |
+| Bridges       | Betweenness     | High   | Low    | Exact    |
+| Communities   | Louvain         | Low    | Medium | Good     |
+| Patterns      | Subgraph Mining | High   | High   | Exact    |
+| Link Pred     | Ensemble        | Medium | Low    | Best     |
 
 ## Performance Tips
 

@@ -3,10 +3,10 @@ name: API Documentation Validation
 on:
   pull_request:
     paths:
-      - 'openapi/**'
-      - 'services/api/src/**'
-      - 'docs/api/**'
-      - '.github/workflows/api-docs-validation.yml'
+      - "openapi/**"
+      - "services/api/src/**"
+      - "docs/api/**"
+      - ".github/workflows/api-docs-validation.yml"
   push:
     branches:
       - main
@@ -24,8 +24,8 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'pnpm'
+          node-version: "18"
+          cache: "pnpm"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
@@ -79,8 +79,8 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'pnpm'
+          node-version: "18"
+          cache: "pnpm"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
@@ -141,8 +141,8 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'pnpm'
+          node-version: "18"
+          cache: "pnpm"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
@@ -175,8 +175,8 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'pnpm'
+          node-version: "18"
+          cache: "pnpm"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2

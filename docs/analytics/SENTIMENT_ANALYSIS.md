@@ -63,6 +63,7 @@ The Sentiment and Narrative Analysis System provides comprehensive tools for:
 **Location**: `packages/sentiment-analysis/`
 
 **Core Classes**:
+
 - `SentimentAnalyzer`: Main orchestrator for sentiment analysis
 - `BertSentimentModel`: BERT-based sentiment model
 - `EmotionClassifier`: RoBERTa-based emotion classifier
@@ -71,6 +72,7 @@ The Sentiment and Narrative Analysis System provides comprehensive tools for:
 - `TemporalSentimentTracker`: Time-series sentiment tracking
 
 **Features**:
+
 - Overall sentiment scoring (positive, negative, neutral, compound)
 - 7-class emotion detection
 - Aspect-based sentiment for granular analysis
@@ -83,12 +85,14 @@ The Sentiment and Narrative Analysis System provides comprehensive tools for:
 **Location**: `packages/narrative-tracking/`
 
 **Core Classes**:
+
 - `NarrativeExtractor`: Extracts narratives from text
 - `FramingAnalyzer`: Analyzes narrative framing
 - `NarrativeTracker`: Tracks narratives over time
 - `CounterNarrativeDetector`: Detects counter-narratives
 
 **Features**:
+
 - Story arc identification (exposition, rising action, climax, falling action, resolution)
 - Narrative framing analysis (metaphors, causal, conflict, moral framing)
 - Theme extraction
@@ -101,12 +105,14 @@ The Sentiment and Narrative Analysis System provides comprehensive tools for:
 **Location**: `packages/influence-detection/`
 
 **Core Classes**:
+
 - `BotDetector`: Automated account detection
 - `CIBDetector`: Coordinated inauthentic behavior detection
 - `AstroturfingDetector`: Fake grassroots campaign detection
 - `AmplificationDetector`: Amplification network identification
 
 **Features**:
+
 - Bot behavior pattern recognition
 - Coordinated campaign detection
 - Astroturfing indicators
@@ -118,6 +124,7 @@ The Sentiment and Narrative Analysis System provides comprehensive tools for:
 **Location**: `services/ml-inference/`
 
 **Features**:
+
 - REST API for all analysis capabilities
 - Model initialization and management
 - Batch processing support
@@ -169,68 +176,62 @@ BATCH_SIZE=8
 #### Sentiment Analysis
 
 ```typescript
-import { SentimentAnalyzer } from '@intelgraph/sentiment-analysis';
+import { SentimentAnalyzer } from "@intelgraph/sentiment-analysis";
 
 const analyzer = new SentimentAnalyzer();
 await analyzer.initialize();
 
-const result = await analyzer.analyze(
-  "This is a significant threat to national security",
-  {
-    includeEmotions: true,
-    includeAspects: true,
-    detectSarcasm: true,
-    detectIrony: true
-  }
-);
+const result = await analyzer.analyze("This is a significant threat to national security", {
+  includeEmotions: true,
+  includeAspects: true,
+  detectSarcasm: true,
+  detectIrony: true,
+});
 
-console.log('Sentiment:', result.overallSentiment);
-console.log('Emotions:', result.emotions);
-console.log('Aspects:', result.aspects);
-console.log('Sarcasm Score:', result.sarcasmScore);
+console.log("Sentiment:", result.overallSentiment);
+console.log("Emotions:", result.emotions);
+console.log("Aspects:", result.aspects);
+console.log("Sarcasm Score:", result.sarcasmScore);
 ```
 
 #### Narrative Extraction
 
 ```typescript
-import { NarrativeExtractor, FramingAnalyzer } from '@intelgraph/narrative-tracking';
+import { NarrativeExtractor, FramingAnalyzer } from "@intelgraph/narrative-tracking";
 
 const extractor = new NarrativeExtractor();
 const framingAnalyzer = new FramingAnalyzer();
 
-const narrative = await extractor.extractNarrative(
-  "Your text here...",
-  "source-id"
-);
+const narrative = await extractor.extractNarrative("Your text here...", "source-id");
 
-const framing = await framingAnalyzer.analyzeFraming(
-  "Your text here..."
-);
+const framing = await framingAnalyzer.analyzeFraming("Your text here...");
 
-console.log('Narrative:', narrative);
-console.log('Framing:', framing);
+console.log("Narrative:", narrative);
+console.log("Framing:", framing);
 ```
 
 #### Bot Detection
 
 ```typescript
-import { BotDetector } from '@intelgraph/influence-detection';
+import { BotDetector } from "@intelgraph/influence-detection";
 
 const detector = new BotDetector();
 
 const result = await detector.detectBot({
-  accountId: 'user123',
-  creationDate: new Date('2024-01-01'),
+  accountId: "user123",
+  creationDate: new Date("2024-01-01"),
   postCount: 500,
   followerCount: 50,
   followingCount: 1000,
   postingPattern: [5, 3, 2, 1, 0, 0, 0, 0, 1, 2, 4, 6, 8, 10, 12, 10, 8, 6, 4, 3, 2, 1, 1, 1],
-  recentPosts: [/* ... */]
+  recentPosts: [
+    /* ... */
+  ],
 });
 
-console.log('Bot Score:', result.botScore);
-console.log('Classification:', result.classification);
-console.log('Indicators:', result.indicators);
+console.log("Bot Score:", result.botScore);
+console.log("Classification:", result.classification);
+console.log("Indicators:", result.indicators);
 ```
 
 ### REST API Usage
@@ -296,9 +297,11 @@ curl -X POST http://localhost:3500/api/influence/bot-detection \
 ### Sentiment Analysis Endpoints
 
 #### POST `/api/sentiment/analyze`
+
 Analyze sentiment of a single text.
 
 **Request**:
+
 ```json
 {
   "text": "string",
@@ -312,6 +315,7 @@ Analyze sentiment of a single text.
 ```
 
 **Response**:
+
 ```json
 {
   "text": "string",
@@ -342,29 +346,37 @@ Analyze sentiment of a single text.
 ### Narrative Analysis Endpoints
 
 #### POST `/api/narrative/extract`
+
 Extract narrative from text.
 
 #### POST `/api/narrative/framing`
+
 Analyze narrative framing.
 
 #### GET `/api/narrative/active`
+
 Get active narratives.
 
 #### GET `/api/narrative/trending`
+
 Get trending narratives.
 
 ### Influence Detection Endpoints
 
 #### POST `/api/influence/bot-detection`
+
 Detect bot behavior.
 
 #### POST `/api/influence/cib-detection`
+
 Detect coordinated inauthentic behavior.
 
 #### POST `/api/influence/astroturfing`
+
 Detect astroturfing campaigns.
 
 #### POST `/api/influence/amplification`
+
 Detect amplification networks.
 
 ## Integration
@@ -372,7 +384,7 @@ Detect amplification networks.
 ### With Graph Analytics
 
 ```typescript
-import { SentimentAnalyzer } from '@intelgraph/sentiment-analysis';
+import { SentimentAnalyzer } from "@intelgraph/sentiment-analysis";
 // Assuming graph service integration
 
 const analyzer = new SentimentAnalyzer();
@@ -385,7 +397,7 @@ for (const node of graphNodes) {
   // Update node with sentiment data
   await graphService.updateNode(node.id, {
     sentiment: sentiment.overallSentiment.compound,
-    emotions: sentiment.emotions
+    emotions: sentiment.emotions,
   });
 }
 ```
@@ -393,19 +405,19 @@ for (const node of graphNodes) {
 ### With Event Stream
 
 ```typescript
-import { TemporalSentimentTracker } from '@intelgraph/sentiment-analysis';
+import { TemporalSentimentTracker } from "@intelgraph/sentiment-analysis";
 
 const tracker = new TemporalSentimentTracker();
 
 // Track sentiment over time
-eventStream.on('message', async (event) => {
+eventStream.on("message", async (event) => {
   const sentiment = await analyzer.analyze(event.content);
   tracker.trackSentiment(event.entityId, sentiment.overallSentiment, event.timestamp);
 
   // Check for shifts
   const shifts = tracker.analyzeShifts(event.entityId);
   if (shifts.length > 0) {
-    console.log('Sentiment shifts detected:', shifts);
+    console.log("Sentiment shifts detected:", shifts);
   }
 });
 ```
@@ -473,16 +485,19 @@ eventStream.on('message', async (event) => {
 ### Common Issues
 
 **Models fail to load**:
+
 - Check available memory (need 2GB+)
 - Verify network connectivity for model downloads
 - Check disk space in model cache directory
 
 **Slow inference**:
+
 - Enable GPU acceleration if available
 - Increase batch size
 - Use quantized models
 
 **High memory usage**:
+
 - Reduce batch size
 - Enable model quantization
 - Clear old temporal data
@@ -490,6 +505,7 @@ eventStream.on('message', async (event) => {
 ## Support
 
 For issues, questions, or contributions:
+
 - GitHub Issues: [Create Issue](https://github.com/your-org/intelgraph/issues)
 - Documentation: [Full Docs](https://docs.intelgraph.com)
 - Email: support@intelgraph.com

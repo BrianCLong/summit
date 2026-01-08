@@ -1,8 +1,8 @@
-import { Actor } from '../entities/Actor.js';
-import { NarrativeState } from './NarrativeState.js';
-import { EventProcessor } from './EventProcessor.js';
-import type { Event, SimConfig, StateUpdate } from './types.js';
-import { NarrativeTelemetry, simulationTelemetry } from '../telemetry.js';
+import { Actor } from "../entities/Actor.js";
+import { NarrativeState } from "./NarrativeState.js";
+import { EventProcessor } from "./EventProcessor.js";
+import type { Event, SimConfig, StateUpdate } from "./types.js";
+import { NarrativeTelemetry, simulationTelemetry } from "../telemetry.js";
 
 export class SimulationEngine {
   constructor(private readonly telemetry: NarrativeTelemetry = simulationTelemetry) {}
@@ -77,9 +77,7 @@ export class SimulationEngine {
   injectEvent(event: Event): void {
     this.ensureState();
     const timestamp =
-      typeof event.timestamp === 'number'
-        ? event.timestamp
-        : (this.state?.timestamp ?? 0);
+      typeof event.timestamp === "number" ? event.timestamp : (this.state?.timestamp ?? 0);
     this.eventQueue.push({ ...event, timestamp });
     this.telemetry.recordInjection({
       queuedEvents: this.eventQueue.length,
@@ -104,17 +102,17 @@ export class SimulationEngine {
 
   private ensureState(): NarrativeState {
     if (!this.initialized || !this.state) {
-      throw new Error('Simulation engine has not been initialized');
+      throw new Error("Simulation engine has not been initialized");
     }
     return this.state;
   }
 
   private ensureProcessor(): EventProcessor {
     if (!this.processor) {
-      throw new Error('Simulation engine missing event processor');
+      throw new Error("Simulation engine missing event processor");
     }
     return this.processor;
   }
 }
 
-export type { SimConfig, Event } from './types.js';
+export type { SimConfig, Event } from "./types.js";

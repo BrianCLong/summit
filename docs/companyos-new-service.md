@@ -10,12 +10,12 @@ Use kebab-case service names (e.g., `companyos-foo`) so generated manifests, Pro
 
 This will:
 
-* Create `companyos/services/companyos-foo` with a Node/Express skeleton.
-* Create `companyos/services/companyos-foo/service.yaml`.
-* Add `companyos/services/companyos-foo/tests/README.md` with starter testing guidance.
-* Generate SLO + Prometheus rules under `observability/.../generated`.
-* Add `.github/workflows/companyos-foo.yml` calling the standard deployment template.
-* Add an ADR stub under `companyos/adr/`.
+- Create `companyos/services/companyos-foo` with a Node/Express skeleton.
+- Create `companyos/services/companyos-foo/service.yaml`.
+- Add `companyos/services/companyos-foo/tests/README.md` with starter testing guidance.
+- Generate SLO + Prometheus rules under `observability/.../generated`.
+- Add `.github/workflows/companyos-foo.yml` calling the standard deployment template.
+- Add an ADR stub under `companyos/adr/`.
 
 **Next steps for the team:**
 

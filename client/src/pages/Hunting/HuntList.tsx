@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -22,8 +22,8 @@ import {
   DialogActions,
   TextField,
   ChipProps,
-} from '@mui/material';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+} from "@mui/material";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import {
   PlayArrow,
   Stop,
@@ -35,153 +35,149 @@ import {
   Timeline,
   Security,
   Assessment,
-} from '@mui/icons-material';
-import { useSafeQuery } from '../../hooks/useSafeQuery';
+} from "@mui/icons-material";
+import { useSafeQuery } from "../../hooks/useSafeQuery";
 
 interface Hunt {
   id: string;
   name: string;
-  status: 'RUNNING' | 'SCHEDULED' | 'COMPLETED' | 'FAILED' | 'PAUSED';
-  type: 'IOC' | 'BEHAVIORAL' | 'NETWORK' | 'FINANCIAL' | 'MITRE_ATT&CK';
+  status: "RUNNING" | "SCHEDULED" | "COMPLETED" | "FAILED" | "PAUSED";
+  type: "IOC" | "BEHAVIORAL" | "NETWORK" | "FINANCIAL" | "MITRE_ATT&CK";
   tactic: string;
   lastRun: string;
   findings: number;
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   progress?: number;
   description: string;
 }
 
-const getStatusColor = (status: Hunt['status']): ChipProps['color'] => {
+const getStatusColor = (status: Hunt["status"]): ChipProps["color"] => {
   switch (status) {
-    case 'RUNNING':
-      return 'primary';
-    case 'SCHEDULED':
-      return 'warning';
-    case 'COMPLETED':
-      return 'success';
-    case 'FAILED':
-      return 'error';
-    case 'PAUSED':
-      return 'default';
+    case "RUNNING":
+      return "primary";
+    case "SCHEDULED":
+      return "warning";
+    case "COMPLETED":
+      return "success";
+    case "FAILED":
+      return "error";
+    case "PAUSED":
+      return "default";
     default:
-      return 'default';
+      return "default";
   }
 };
 
-const getStatusIcon = (status: Hunt['status']) => {
+const getStatusIcon = (status: Hunt["status"]) => {
   switch (status) {
-    case 'RUNNING':
+    case "RUNNING":
       return <PlayArrow />;
-    case 'SCHEDULED':
+    case "SCHEDULED":
       return <Schedule />;
-    case 'COMPLETED':
+    case "COMPLETED":
       return <CheckCircle />;
-    case 'FAILED':
+    case "FAILED":
       return <Error />;
-    case 'PAUSED':
+    case "PAUSED":
       return <Stop />;
     default:
       return null;
   }
 };
 
-const getSeverityColor = (severity: Hunt['severity']): ChipProps['color'] => {
+const getSeverityColor = (severity: Hunt["severity"]): ChipProps["color"] => {
   switch (severity) {
-    case 'CRITICAL':
-      return 'error';
-    case 'HIGH':
-      return 'warning';
-    case 'MEDIUM':
-      return 'info';
-    case 'LOW':
-      return 'success';
+    case "CRITICAL":
+      return "error";
+    case "HIGH":
+      return "warning";
+    case "MEDIUM":
+      return "info";
+    case "LOW":
+      return "success";
     default:
-      return 'default';
+      return "default";
   }
 };
 
 export default function HuntList() {
   const [selectedTab, setSelectedTab] = useState(0);
-  const [filterType, setFilterType] = useState('ALL');
-  const [filterStatus, setFilterStatus] = useState('ALL');
+  const [filterType, setFilterType] = useState("ALL");
+  const [filterStatus, setFilterStatus] = useState("ALL");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   const { data: hunts, loading } = useSafeQuery<Hunt[]>({
     queryKey: `hunt_list_${filterType}_${filterStatus}`,
     mock: [
       {
-        id: 'hunt1',
-        name: 'APT29 IOC Hunt - Cozy Bear Indicators',
-        status: 'RUNNING',
-        type: 'IOC',
-        tactic: 'Initial Access',
-        lastRun: '2025-08-27T02:30:00Z',
+        id: "hunt1",
+        name: "APT29 IOC Hunt - Cozy Bear Indicators",
+        status: "RUNNING",
+        type: "IOC",
+        tactic: "Initial Access",
+        lastRun: "2025-08-27T02:30:00Z",
         findings: 12,
-        severity: 'HIGH',
+        severity: "HIGH",
         progress: 65,
         description:
-          'Hunting for known APT29 indicators including file hashes, domains, and network signatures',
+          "Hunting for known APT29 indicators including file hashes, domains, and network signatures",
       },
       {
-        id: 'hunt2',
-        name: 'Suspicious Network Beaconing',
-        status: 'COMPLETED',
-        type: 'NETWORK',
-        tactic: 'Command and Control',
-        lastRun: '2025-08-27T01:15:00Z',
+        id: "hunt2",
+        name: "Suspicious Network Beaconing",
+        status: "COMPLETED",
+        type: "NETWORK",
+        tactic: "Command and Control",
+        lastRun: "2025-08-27T01:15:00Z",
         findings: 3,
-        severity: 'MEDIUM',
-        description:
-          'Detecting periodic outbound connections that may indicate C2 communication',
+        severity: "MEDIUM",
+        description: "Detecting periodic outbound connections that may indicate C2 communication",
       },
       {
-        id: 'hunt3',
-        name: 'Financial Transaction Anomaly Detection',
-        status: 'SCHEDULED',
-        type: 'FINANCIAL',
-        tactic: 'Impact',
-        lastRun: '2025-08-26T22:00:00Z',
+        id: "hunt3",
+        name: "Financial Transaction Anomaly Detection",
+        status: "SCHEDULED",
+        type: "FINANCIAL",
+        tactic: "Impact",
+        lastRun: "2025-08-26T22:00:00Z",
         findings: 0,
-        severity: 'LOW',
-        description:
-          'Machine learning based detection of unusual financial transaction patterns',
+        severity: "LOW",
+        description: "Machine learning based detection of unusual financial transaction patterns",
       },
       {
-        id: 'hunt4',
-        name: 'Insider Threat - Credential Access',
-        status: 'FAILED',
-        type: 'BEHAVIORAL',
-        tactic: 'Credential Access',
-        lastRun: '2025-08-26T20:45:00Z',
+        id: "hunt4",
+        name: "Insider Threat - Credential Access",
+        status: "FAILED",
+        type: "BEHAVIORAL",
+        tactic: "Credential Access",
+        lastRun: "2025-08-26T20:45:00Z",
         findings: 0,
-        severity: 'CRITICAL',
+        severity: "CRITICAL",
         description:
-          'Behavioral analysis for detecting insider threats attempting credential harvesting',
+          "Behavioral analysis for detecting insider threats attempting credential harvesting",
       },
       {
-        id: 'hunt5',
-        name: 'Living Off The Land - PowerShell',
-        status: 'RUNNING',
-        type: 'MITRE_ATT&CK',
-        tactic: 'Defense Evasion',
-        lastRun: '2025-08-27T03:00:00Z',
+        id: "hunt5",
+        name: "Living Off The Land - PowerShell",
+        status: "RUNNING",
+        type: "MITRE_ATT&CK",
+        tactic: "Defense Evasion",
+        lastRun: "2025-08-27T03:00:00Z",
         findings: 8,
-        severity: 'HIGH',
+        severity: "HIGH",
         progress: 25,
-        description:
-          'Detection of malicious PowerShell usage leveraging built-in Windows tools',
+        description: "Detection of malicious PowerShell usage leveraging built-in Windows tools",
       },
       {
-        id: 'hunt6',
-        name: 'Data Exfiltration via DNS',
-        status: 'PAUSED',
-        type: 'NETWORK',
-        tactic: 'Exfiltration',
-        lastRun: '2025-08-26T18:30:00Z',
+        id: "hunt6",
+        name: "Data Exfiltration via DNS",
+        status: "PAUSED",
+        type: "NETWORK",
+        tactic: "Exfiltration",
+        lastRun: "2025-08-26T18:30:00Z",
         findings: 2,
-        severity: 'MEDIUM',
-        description:
-          'Detecting data exfiltration through DNS tunneling techniques',
+        severity: "MEDIUM",
+        description: "Detecting data exfiltration through DNS tunneling techniques",
       },
     ],
     deps: [filterType, filterStatus],
@@ -189,11 +185,11 @@ export default function HuntList() {
 
   const columns: GridColDef<Hunt>[] = [
     {
-      field: 'name',
-      headerName: 'Hunt Name',
+      field: "name",
+      headerName: "Hunt Name",
       flex: 1,
       renderCell: (params) => (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           {getStatusIcon(params.row.status)}
           <Box>
             <Typography variant="body2" sx={{ fontWeight: 500 }}>
@@ -207,31 +203,31 @@ export default function HuntList() {
       ),
     },
     {
-      field: 'type',
-      headerName: 'Type',
+      field: "type",
+      headerName: "Type",
       width: 140,
       renderCell: (params) => (
         <Chip
           label={params.value}
           size="small"
           variant="outlined"
-          icon={params.value === 'MITRE_ATT&CK' ? <Security /> : undefined}
+          icon={params.value === "MITRE_ATT&CK" ? <Security /> : undefined}
         />
       ),
     },
     {
-      field: 'tactic',
-      headerName: 'MITRE Tactic',
+      field: "tactic",
+      headerName: "MITRE Tactic",
       width: 160,
       renderCell: (params) => (
-        <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+        <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
           {params.value}
         </Typography>
       ),
     },
     {
-      field: 'status',
-      headerName: 'Status',
+      field: "status",
+      headerName: "Status",
       width: 120,
       renderCell: (params) => (
         <Chip
@@ -243,23 +239,19 @@ export default function HuntList() {
       ),
     },
     {
-      field: 'findings',
-      headerName: 'Findings',
+      field: "findings",
+      headerName: "Findings",
       width: 100,
-      type: 'number',
+      type: "number",
       renderCell: (params) => (
-        <Badge
-          badgeContent={params.value}
-          color={params.value > 0 ? 'error' : 'default'}
-          showZero
-        >
+        <Badge badgeContent={params.value} color={params.value > 0 ? "error" : "default"} showZero>
           <Assessment />
         </Badge>
       ),
     },
     {
-      field: 'severity',
-      headerName: 'Severity',
+      field: "severity",
+      headerName: "Severity",
       width: 100,
       renderCell: (params) => (
         <Chip
@@ -271,24 +263,22 @@ export default function HuntList() {
       ),
     },
     {
-      field: 'lastRun',
-      headerName: 'Last Run',
+      field: "lastRun",
+      headerName: "Last Run",
       width: 160,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       valueFormatter: (params: any) => new Date(params.value).toLocaleString(),
     },
     {
-      field: 'actions',
-      headerName: 'Actions',
+      field: "actions",
+      headerName: "Actions",
       width: 120,
       sortable: false,
       renderCell: (params) => (
         <Stack direction="row" spacing={1}>
-          <Tooltip
-            title={params.row.status === 'RUNNING' ? 'Stop Hunt' : 'Start Hunt'}
-          >
+          <Tooltip title={params.row.status === "RUNNING" ? "Stop Hunt" : "Start Hunt"}>
             <IconButton size="small">
-              {params.row.status === 'RUNNING' ? <Stop /> : <PlayArrow />}
+              {params.row.status === "RUNNING" ? <Stop /> : <PlayArrow />}
             </IconButton>
           </Tooltip>
           <Tooltip title="View Timeline">
@@ -303,18 +293,16 @@ export default function HuntList() {
 
   const filteredHunts =
     hunts?.filter((hunt) => {
-      if (selectedTab === 1 && hunt.status !== 'RUNNING') return false;
-      if (selectedTab === 2 && hunt.status !== 'SCHEDULED') return false;
+      if (selectedTab === 1 && hunt.status !== "RUNNING") return false;
+      if (selectedTab === 2 && hunt.status !== "SCHEDULED") return false;
       if (selectedTab === 3 && hunt.findings === 0) return false;
       return true;
     }) || [];
 
-  const runningHunts = hunts?.filter((h) => h.status === 'RUNNING').length || 0;
-  const totalFindings =
-    hunts?.reduce((sum, hunt) => sum + hunt.findings, 0) || 0;
-  const criticalHunts =
-    hunts?.filter((h) => h.severity === 'CRITICAL').length || 0;
-  const failedHunts = hunts?.filter((h) => h.status === 'FAILED').length || 0;
+  const runningHunts = hunts?.filter((h) => h.status === "RUNNING").length || 0;
+  const totalFindings = hunts?.reduce((sum, hunt) => sum + hunt.findings, 0) || 0;
+  const criticalHunts = hunts?.filter((h) => h.severity === "CRITICAL").length || 0;
+  const failedHunts = hunts?.filter((h) => h.status === "FAILED").length || 0;
 
   return (
     <Box sx={{ m: 2 }}>
@@ -385,12 +373,7 @@ export default function HuntList() {
       {/* Main Hunt List */}
       <Card sx={{ borderRadius: 3 }}>
         <CardContent>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-            sx={{ mb: 2 }}
-          >
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
             <Typography variant="h6">Threat Hunting Operations</Typography>
             <Stack direction="row" spacing={2}>
               <FormControl size="small" sx={{ minWidth: 120 }}>
@@ -437,16 +420,14 @@ export default function HuntList() {
             </Stack>
           </Stack>
 
-          <Box sx={{ width: '100%' }}>
+          <Box sx={{ width: "100%" }}>
             <Tabs value={selectedTab} onChange={(_, v) => setSelectedTab(v)}>
               <Tab label={`All Hunts (${hunts?.length || 0})`} />
               <Tab label={`Running (${runningHunts})`} />
               <Tab
-                label={`Scheduled (${hunts?.filter((h) => h.status === 'SCHEDULED').length || 0})`}
+                label={`Scheduled (${hunts?.filter((h) => h.status === "SCHEDULED").length || 0})`}
               />
-              <Tab
-                label={`With Findings (${hunts?.filter((h) => h.findings > 0).length || 0})`}
-              />
+              <Tab label={`With Findings (${hunts?.filter((h) => h.findings > 0).length || 0})`} />
             </Tabs>
           </Box>
 
@@ -461,8 +442,8 @@ export default function HuntList() {
                 // TODO: Navigate to hunt detail page
               }}
               sx={{
-                '& .MuiDataGrid-row:hover': {
-                  backgroundColor: 'action.hover',
+                "& .MuiDataGrid-row:hover": {
+                  backgroundColor: "action.hover",
                 },
               }}
             />
@@ -491,9 +472,7 @@ export default function HuntList() {
                 <MenuItem value="IOC">IOC-based Hunt</MenuItem>
                 <MenuItem value="BEHAVIORAL">Behavioral Analysis</MenuItem>
                 <MenuItem value="NETWORK">Network Traffic Analysis</MenuItem>
-                <MenuItem value="FINANCIAL">
-                  Financial Anomaly Detection
-                </MenuItem>
+                <MenuItem value="FINANCIAL">Financial Anomaly Detection</MenuItem>
                 <MenuItem value="MITRE_ATT&CK">MITRE ATT&CK Framework</MenuItem>
               </Select>
             </FormControl>
@@ -503,17 +482,13 @@ export default function HuntList() {
                 <MenuItem value="Initial Access">Initial Access</MenuItem>
                 <MenuItem value="Execution">Execution</MenuItem>
                 <MenuItem value="Persistence">Persistence</MenuItem>
-                <MenuItem value="Privilege Escalation">
-                  Privilege Escalation
-                </MenuItem>
+                <MenuItem value="Privilege Escalation">Privilege Escalation</MenuItem>
                 <MenuItem value="Defense Evasion">Defense Evasion</MenuItem>
                 <MenuItem value="Credential Access">Credential Access</MenuItem>
                 <MenuItem value="Discovery">Discovery</MenuItem>
                 <MenuItem value="Lateral Movement">Lateral Movement</MenuItem>
                 <MenuItem value="Collection">Collection</MenuItem>
-                <MenuItem value="Command and Control">
-                  Command and Control
-                </MenuItem>
+                <MenuItem value="Command and Control">Command and Control</MenuItem>
                 <MenuItem value="Exfiltration">Exfiltration</MenuItem>
                 <MenuItem value="Impact">Impact</MenuItem>
               </Select>

@@ -198,7 +198,7 @@ spec:
       initContainers:
         - name: init-chmod
           image: busybox:1.36
-          command: ['sh', '-c', 'chmod 700 /var/lib/postgresql/data']
+          command: ["sh", "-c", "chmod 700 /var/lib/postgresql/data"]
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data

@@ -3,20 +3,20 @@
  * Optimize storage costs with compression
  */
 
-import { CompressionCodec } from '@intelgraph/lakehouse';
-import pino from 'pino';
+import { CompressionCodec } from "@intelgraph/lakehouse";
+import pino from "pino";
 
-const logger = pino({ name: 'compression' });
+const logger = pino({ name: "compression" });
 
 export class CompressionManager {
   async compress(data: Buffer, codec: CompressionCodec): Promise<Buffer> {
-    logger.info({ codec, originalSize: data.length }, 'Compressing data');
+    logger.info({ codec, originalSize: data.length }, "Compressing data");
     // Implementation would use actual compression libraries
     return data;
   }
 
   async decompress(data: Buffer, codec: CompressionCodec): Promise<Buffer> {
-    logger.info({ codec, compressedSize: data.length }, 'Decompressing data');
+    logger.info({ codec, compressedSize: data.length }, "Decompressing data");
     return data;
   }
 
@@ -29,7 +29,7 @@ export class CompressionManager {
     return {
       codec: CompressionCodec.SNAPPY,
       ratio: 0.5,
-      recommendation: 'Snappy recommended for balanced compression and speed'
+      recommendation: "Snappy recommended for balanced compression and speed",
     };
   }
 }

@@ -1,99 +1,126 @@
 // @ts-nocheck
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { useAuth } from './AuthContext';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from 'react'
+import { useAuth } from './AuthContext'
 
 export interface FlagEvaluation {
-  key: string;
-  value: any;
-  variation?: string;
-  reason?: string;
+  key: string
+  value: any
+  variation?: string
+  reason?: string
 }
 
 interface FeatureFlagContextType {
-  flags: Record<string, any>;
-  isEnabled: (key: string, defaultValue?: boolean) => boolean;
-  getVariant: <T>(key: string, defaultValue: T) => T;
-  reloadFlags: () => Promise<void>;
-  loading: boolean;
-  error: Error | null;
+  flags: Record<string, any>
+  isEnabled: (key: string, defaultValue?: boolean) => boolean
+  getVariant: <T>(key: string, defaultValue: T) => T
+  reloadFlags: () => Promise<void>
+  loading: boolean
+  error: Error | null
 }
 
-const FeatureFlagContext = createContext<FeatureFlagContextType | undefined>(undefined);
+const FeatureFlagContext = createContext<FeatureFlagContextType | undefined>(
+  undefined
+)
 
-export function FeatureFlagProvider({ children }: { children: React.ReactNode }) {
-  const [flags, setFlags] = useState<Record<string, any>>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const { user, token } = useAuth();
+export function FeatureFlagProvider({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const [flags, setFlags] = useState<Record<string, any>>({})
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+  const { user, token } = useAuth()
 
   const fetchFlags = useCallback(async () => {
-    if (!token) return;
+    if (!token) return
 
     try {
       const response = await fetch('/api/feature-flags/evaluate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           context: {
             // Context is augmented by server based on token,
             // but we can add client-side context here (e.g., URL params, device info)
             url: window.location.href,
-            userAgent: navigator.userAgent
-          }
-        })
-      });
+            userAgent: navigator.userAgent,
+          },
+        }),
+      })
 
       if (!response.ok) {
-        throw new Error('Failed to fetch feature flags');
+        throw new Error('Failed to fetch feature flags')
       }
 
-      const data = await response.json();
-      setFlags(data);
-      setError(null);
+      const data = await response.json()
+      setFlags(data)
+      setError(null)
     } catch (err) {
-      console.error('Error loading feature flags:', err);
-      setError(err as Error);
+      console.error('Error loading feature flags:', err)
+      setError(err as Error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  }, [token]);
+  }, [token])
 
   useEffect(() => {
     if (user) {
-      fetchFlags();
+      fetchFlags()
     } else {
-      setLoading(false);
+      setLoading(false)
     }
-  }, [user, fetchFlags]);
+  }, [user, fetchFlags])
 
-  const isEnabled = useCallback((key: string, defaultValue = false): boolean => {
-    if (flags[key] !== undefined) {
-      return Boolean(flags[key]);
-    }
-    return defaultValue;
-  }, [flags]);
+  const isEnabled = useCallback(
+    (key: string, defaultValue = false): boolean => {
+      if (flags[key] !== undefined) {
+        return Boolean(flags[key])
+      }
+      return defaultValue
+    },
+    [flags]
+  )
 
-  const getVariant = useCallback(<T,>(key: string, defaultValue: T): T => {
-    if (flags[key] !== undefined) {
-      return flags[key] as T;
-    }
-    return defaultValue;
-  }, [flags]);
+  const getVariant = useCallback(
+    <T,>(key: string, defaultValue: T): T => {
+      if (flags[key] !== undefined) {
+        return flags[key] as T
+      }
+      return defaultValue
+    },
+    [flags]
+  )
 
   return (
-    <FeatureFlagContext.Provider value={{ flags, isEnabled, getVariant, reloadFlags: fetchFlags, loading, error }}>
+    <FeatureFlagContext.Provider
+      value={{
+        flags,
+        isEnabled,
+        getVariant,
+        reloadFlags: fetchFlags,
+        loading,
+        error,
+      }}
+    >
       {children}
     </FeatureFlagContext.Provider>
-  );
+  )
 }
 
 export function useFeatureFlags() {
-  const context = useContext(FeatureFlagContext);
+  const context = useContext(FeatureFlagContext)
   if (context === undefined) {
-    throw new Error('useFeatureFlags must be used within a FeatureFlagProvider');
+    throw new Error('useFeatureFlags must be used within a FeatureFlagProvider')
   }
-  return context;
+  return context
 }

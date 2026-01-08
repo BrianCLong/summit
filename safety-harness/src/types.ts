@@ -2,51 +2,51 @@
  * Core types for Safety Harness system
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================================================
 // Test Pack Schemas
 // ============================================================================
 
-export const RiskLevelSchema = z.enum(['low', 'medium', 'high', 'critical']);
+export const RiskLevelSchema = z.enum(["low", "medium", "high", "critical"]);
 export type RiskLevel = z.infer<typeof RiskLevelSchema>;
 
 export const AttackTypeSchema = z.enum([
-  'data-exfiltration',
-  'profiling',
-  'discrimination',
-  'overreach',
-  'prompt-injection',
-  'jailbreak',
-  'pii-leak',
-  'toxicity',
-  'bias',
-  'policy-bypass',
-  'unauthorized-access',
-  'privilege-escalation',
-  'denial-of-service',
+  "data-exfiltration",
+  "profiling",
+  "discrimination",
+  "overreach",
+  "prompt-injection",
+  "jailbreak",
+  "pii-leak",
+  "toxicity",
+  "bias",
+  "policy-bypass",
+  "unauthorized-access",
+  "privilege-escalation",
+  "denial-of-service",
 ]);
 export type AttackType = z.infer<typeof AttackTypeSchema>;
 
 export const ComponentSchema = z.enum([
-  'copilot',
-  'analytics',
-  'case',
-  'export',
-  'graph-query',
-  'search',
-  'api-gateway',
+  "copilot",
+  "analytics",
+  "case",
+  "export",
+  "graph-query",
+  "search",
+  "api-gateway",
 ]);
 export type Component = z.infer<typeof ComponentSchema>;
 
 export const ExpectedOutcomeSchema = z.enum([
-  'block',
-  'warn',
-  'redact',
-  'escalate',
-  'require-approval',
-  'allow-with-logging',
-  'deny',
+  "block",
+  "warn",
+  "redact",
+  "escalate",
+  "require-approval",
+  "allow-with-logging",
+  "deny",
 ]);
 export type ExpectedOutcome = z.infer<typeof ExpectedOutcomeSchema>;
 
@@ -153,11 +153,13 @@ export const TestResultSchema = z.object({
   }),
 
   // Failure details
-  failure: z.object({
-    reason: z.string(),
-    details: z.record(z.unknown()),
-    severity: RiskLevelSchema,
-  }).optional(),
+  failure: z
+    .object({
+      reason: z.string(),
+      details: z.record(z.unknown()),
+      severity: RiskLevelSchema,
+    })
+    .optional(),
 });
 export type TestResult = z.infer<typeof TestResultSchema>;
 
@@ -196,34 +198,44 @@ export const TestRunSchema = z.object({
     errorRate: z.number(),
 
     // By risk level
-    byRiskLevel: z.record(z.object({
-      total: z.number(),
-      passed: z.number(),
-      failed: z.number(),
-    })),
+    byRiskLevel: z.record(
+      z.object({
+        total: z.number(),
+        passed: z.number(),
+        failed: z.number(),
+      })
+    ),
 
     // By component
-    byComponent: z.record(z.object({
-      total: z.number(),
-      passed: z.number(),
-      failed: z.number(),
-    })),
+    byComponent: z.record(
+      z.object({
+        total: z.number(),
+        passed: z.number(),
+        failed: z.number(),
+      })
+    ),
 
     // By attack type
-    byAttackType: z.record(z.object({
-      total: z.number(),
-      passed: z.number(),
-      failed: z.number(),
-    })),
+    byAttackType: z.record(
+      z.object({
+        total: z.number(),
+        passed: z.number(),
+        failed: z.number(),
+      })
+    ),
   }),
 
   // Regressions from previous run
-  regressions: z.array(z.object({
-    scenarioId: z.string(),
-    previousResult: z.string(),
-    currentResult: z.string(),
-    severity: RiskLevelSchema,
-  })).optional(),
+  regressions: z
+    .array(
+      z.object({
+        scenarioId: z.string(),
+        previousResult: z.string(),
+        currentResult: z.string(),
+        severity: RiskLevelSchema,
+      })
+    )
+    .optional(),
 });
 export type TestRun = z.infer<typeof TestRunSchema>;
 
@@ -265,7 +277,7 @@ export const DifferentialResultSchema = z.object({
     improvements: z.array(z.string()),
     unchanged: z.array(z.string()),
 
-    verdict: z.enum(['pass', 'fail', 'warning']),
+    verdict: z.enum(["pass", "fail", "warning"]),
     reason: z.string(),
   }),
 });
@@ -275,7 +287,7 @@ export type DifferentialResult = z.infer<typeof DifferentialResultSchema>;
 // Report Schemas
 // ============================================================================
 
-export const ReportFormatSchema = z.enum(['json', 'html', 'markdown', 'junit', 'csv']);
+export const ReportFormatSchema = z.enum(["json", "html", "markdown", "junit", "csv"]);
 export type ReportFormat = z.infer<typeof ReportFormatSchema>;
 
 export const ReportConfigSchema = z.object({

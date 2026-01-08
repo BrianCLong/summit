@@ -84,25 +84,25 @@ Multi-dimensional credibility assessment:
 ```typescript
 interface CredibilityScore {
   sourceId: string;
-  overallScore: number;  // 0-100
+  overallScore: number; // 0-100
   dimensions: {
-    historicalAccuracy: number;  // Track record
-    metadataConsistency: number;  // Metadata checks
-    corroboration: number;  // Cross-source validation
-    authorCredibility: number;  // Author reputation
-    recency: number;  // Timeliness of information
+    historicalAccuracy: number; // Track record
+    metadataConsistency: number; // Metadata checks
+    corroboration: number; // Cross-source validation
+    authorCredibility: number; // Author reputation
+    recency: number; // Timeliness of information
   };
   flags: CredibilityFlag[];
   computedAt: Date;
 }
 
 enum CredibilityFlag {
-  METADATA_MISMATCH = 'metadata_mismatch',
-  UNCORROBORATED = 'uncorroborated',
-  STYLOMETRY_ANOMALY = 'stylometry_anomaly',
-  TEMPORAL_INCONSISTENCY = 'temporal_inconsistency',
-  KNOWN_DISINFORMATION_SOURCE = 'known_disinformation_source',
-  CONTENT_MANIPULATION = 'content_manipulation'
+  METADATA_MISMATCH = "metadata_mismatch",
+  UNCORROBORATED = "uncorroborated",
+  STYLOMETRY_ANOMALY = "stylometry_anomaly",
+  TEMPORAL_INCONSISTENCY = "temporal_inconsistency",
+  KNOWN_DISINFORMATION_SOURCE = "known_disinformation_source",
+  CONTENT_MANIPULATION = "content_manipulation",
 }
 
 interface CredibilityScorer {
@@ -152,10 +152,10 @@ class CredibilityScorerImpl implements CredibilityScorer {
         metadataConsistency: metadataScore,
         corroboration,
         authorCredibility: authorScore,
-        recency
+        recency,
       },
       flags: await this.detectFlags(source),
-      computedAt: new Date()
+      computedAt: new Date(),
     };
   }
 
@@ -166,11 +166,11 @@ class CredibilityScorerImpl implements CredibilityScorer {
       // Geolocation plausible
       this.verifyGeolocation(source),
       // Timestamp consistent with content
-      this.verifyTimestamp(source)
+      this.verifyTimestamp(source),
     ];
 
     const results = await Promise.all(checks);
-    const passRate = results.filter(r => r.passed).length / results.length;
+    const passRate = results.filter((r) => r.passed).length / results.length;
     return passRate * 100;
   }
 }
@@ -181,62 +181,63 @@ class CredibilityScorerImpl implements CredibilityScorer {
 Detect anomalies indicative of manipulation:
 
 **Metadata Mismatches**:
+
 ```typescript
 interface MetadataMismatch {
   // Image EXIF vs claimed location
   exifLocationMismatch: {
     claimed: GeoPoint;
     exif: GeoPoint;
-    distance: number;  // km
+    distance: number; // km
   };
 
   // Document creation date vs claimed date
   creationDateMismatch: {
     claimed: Date;
     metadata: Date;
-    delta: number;  // hours
+    delta: number; // hours
   };
 
   // File hash in known manipulation DB
   knownManipulation: boolean;
 }
 
-async function detectMetadataMismatches(
-  content: Content
-): Promise<MetadataMismatch[]> {
+async function detectMetadataMismatches(content: Content): Promise<MetadataMismatch[]> {
   const mismatches: MetadataMismatch[] = [];
 
   // Check image EXIF
-  if (content.type === 'image') {
+  if (content.type === "image") {
     const exif = await extractEXIF(content.file);
     if (exif.gps && content.metadata.location) {
       const distance = haversine(exif.gps, content.metadata.location);
-      if (distance > 100) {  // >100km mismatch
+      if (distance > 100) {
+        // >100km mismatch
         mismatches.push({
           exifLocationMismatch: {
             claimed: content.metadata.location,
             exif: exif.gps,
-            distance
-          }
+            distance,
+          },
         });
       }
     }
   }
 
   // Check document metadata
-  if (content.type === 'document') {
+  if (content.type === "document") {
     const fileMetadata = await extractFileMetadata(content.file);
     if (fileMetadata.createdAt && content.metadata.createdAt) {
-      const delta = Math.abs(
-        fileMetadata.createdAt.getTime() - content.metadata.createdAt.getTime()
-      ) / (1000 * 60 * 60);  // hours
-      if (delta > 24) {  // >24h mismatch
+      const delta =
+        Math.abs(fileMetadata.createdAt.getTime() - content.metadata.createdAt.getTime()) /
+        (1000 * 60 * 60); // hours
+      if (delta > 24) {
+        // >24h mismatch
         mismatches.push({
           creationDateMismatch: {
             claimed: content.metadata.createdAt,
             metadata: fileMetadata.createdAt,
-            delta
-          }
+            delta,
+          },
         });
       }
     }
@@ -254,24 +255,22 @@ async function detectMetadataMismatches(
 ```
 
 **Stylometry Analysis (Non-Biometric)**:
+
 ```typescript
 // Detect anomalies in writing style (NOT for attribution)
 interface StylometryAnalysis {
   averageSentenceLength: number;
-  vocabularyRichness: number;  // Type-token ratio
-  readabilityScore: number;  // Flesch-Kincaid
-  anomalyScore: number;  // Deviation from author's baseline
+  vocabularyRichness: number; // Type-token ratio
+  readabilityScore: number; // Flesch-Kincaid
+  anomalyScore: number; // Deviation from author's baseline
 }
 
-async function analyzeStylometry(
-  text: string,
-  authorId: string
-): Promise<StylometryAnalysis> {
+async function analyzeStylometry(text: string, authorId: string): Promise<StylometryAnalysis> {
   // Compute metrics
   const metrics = {
     averageSentenceLength: computeAvgSentenceLength(text),
     vocabularyRichness: computeTypeTokenRatio(text),
-    readabilityScore: computeFleschKincaid(text)
+    readabilityScore: computeFleschKincaid(text),
   };
 
   // Compare to author's baseline
@@ -294,7 +293,7 @@ Plant decoy data to detect infiltration:
 ```typescript
 interface Honeytoken {
   id: string;
-  type: 'entity' | 'document' | 'credential';
+  type: "entity" | "document" | "credential";
   decoyData: any;
   createdAt: Date;
   accessLog: HoneytokenAccess[];
@@ -304,7 +303,7 @@ interface HoneytokenAccess {
   timestamp: Date;
   userId: string;
   ipAddress: string;
-  action: string;  // 'view', 'export', 'query'
+  action: string; // 'view', 'export', 'query'
   context: any;
 }
 
@@ -326,40 +325,40 @@ interface HoneytokenService {
 const honeytokens = [
   // Decoy entity
   {
-    id: 'e-honeytoken-001',
-    type: 'entity',
+    id: "e-honeytoken-001",
+    type: "entity",
     data: {
-      name: 'Fabricated Person Alpha',
-      type: 'Person',
+      name: "Fabricated Person Alpha",
+      type: "Person",
       attributes: {
         // Realistic but false data
-        nationality: 'Atlantis',  // Non-existent
-        dob: '1990-01-01',
-        clearanceLevel: 'TOP_SECRET'  // Enticing
-      }
-    }
+        nationality: "Atlantis", // Non-existent
+        dob: "1990-01-01",
+        clearanceLevel: "TOP_SECRET", // Enticing
+      },
+    },
   },
 
   // Decoy document
   {
-    id: 'doc-honeytoken-001',
-    type: 'document',
+    id: "doc-honeytoken-001",
+    type: "document",
     data: {
-      title: 'Classified Operation Canary',
-      classification: 'SECRET',
-      content: 'This is a honeytoken. Any access will be logged and investigated.'
-    }
+      title: "Classified Operation Canary",
+      classification: "SECRET",
+      content: "This is a honeytoken. Any access will be logged and investigated.",
+    },
   },
 
   // Decoy credential
   {
-    id: 'cred-honeytoken-001',
-    type: 'credential',
+    id: "cred-honeytoken-001",
+    type: "credential",
     data: {
-      username: 'admin_backup',
-      apiKey: 'hk_decoy_12345'  // Non-functional but realistic
-    }
-  }
+      username: "admin_backup",
+      apiKey: "hk_decoy_12345", // Non-functional but realistic
+    },
+  },
 ];
 
 for (const token of honeytokens) {
@@ -367,24 +366,24 @@ for (const token of honeytokens) {
 }
 
 // Alert on access
-honeytokenService.onAccess('*', async (access) => {
+honeytokenService.onAccess("*", async (access) => {
   console.error(`🚨 HONEYTOKEN ACCESSED: ${access.userId} at ${access.timestamp}`);
 
   // Immediate alert
   await pagerduty.trigger({
-    summary: 'Honeytoken accessed - potential infiltration',
-    severity: 'critical',
-    details: access
+    summary: "Honeytoken accessed - potential infiltration",
+    severity: "critical",
+    details: access,
   });
 
   // Log to audit
   await audit.log({
-    event: 'honeytoken_accessed',
-    ...access
+    event: "honeytoken_accessed",
+    ...access,
   });
 
   // Initiate response drill
-  await responseDrill.execute('honeytoken-access', access);
+  await responseDrill.execute("honeytoken-access", access);
 });
 ```
 
@@ -425,6 +424,7 @@ drills:
 ```
 
 Execute drill:
+
 ```typescript
 async function executeDrill(drillId: string, event: any): Promise<void> {
   const drill = await loadDrill(drillId);
@@ -436,9 +436,9 @@ async function executeDrill(drillId: string, event: any): Promise<void> {
 
   // Log drill execution
   await audit.log({
-    event: 'response_drill_executed',
+    event: "response_drill_executed",
     drillId,
-    trigger: event
+    trigger: event,
   });
 }
 ```
@@ -450,12 +450,12 @@ Test defensive messaging with risk caps:
 ```typescript
 interface CounterNarrativeExperiment {
   id: string;
-  narrativeId: string;  // Adversarial narrative to counter
+  narrativeId: string; // Adversarial narrative to counter
   counterNarrative: string;
   targetAudience: Audience;
   riskCaps: {
-    maxReach: number;  // Max users exposed
-    maxDuration: number;  // Max hours active
+    maxReach: number; // Max users exposed
+    maxDuration: number; // Max hours active
     approvalRequired: boolean;
   };
   metrics: {
@@ -473,7 +473,7 @@ async function runCounterNarrativeExperiment(
   if (experiment.riskCaps.approvalRequired) {
     const approval = await ombudsService.requestApproval(experiment);
     if (!approval.approved) {
-      throw new Error('Experiment denied by ombuds');
+      throw new Error("Experiment denied by ombuds");
     }
   }
 
@@ -481,15 +481,17 @@ async function runCounterNarrativeExperiment(
   const startTime = Date.now();
   let reach = 0;
 
-  while (reach < experiment.riskCaps.maxReach &&
-         (Date.now() - startTime) < experiment.riskCaps.maxDuration * 3600000) {
+  while (
+    reach < experiment.riskCaps.maxReach &&
+    Date.now() - startTime < experiment.riskCaps.maxDuration * 3600000
+  ) {
     // Expose counter-narrative to small cohort
     const cohort = await sampleAudience(experiment.targetAudience, 100);
     await exposeNarrative(cohort, experiment.counterNarrative);
     reach += cohort.length;
 
     // Measure impact
-    await sleep(3600000);  // 1 hour
+    await sleep(3600000); // 1 hour
   }
 
   // Measure effectiveness

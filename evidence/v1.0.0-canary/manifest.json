@@ -1,11 +1,7 @@
 {
   "release": "v1.0.0-canary",
   "timestamp": "2025-10-27T10:00:00Z",
-  "artifacts": [
-    "charts/intelgraph/values.yaml",
-    "terraform/variables.tf",
-    "terraform/backend.tf"
-  ],
+  "artifacts": ["charts/intelgraph/values.yaml", "terraform/variables.tf", "terraform/backend.tf"],
   "compliance": {
     "security_scan": "PASS",
     "license_check": "PASS",

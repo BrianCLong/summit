@@ -4,18 +4,18 @@
  * Comprehensive dependency auditing with severity filtering and reporting
  */
 
-import { execSync, spawnSync } from 'node:child_process';
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { execSync, spawnSync } from "node:child_process";
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT_DIR = join(__dirname, '../..');
+const ROOT_DIR = join(__dirname, "../..");
 
 interface AuditVulnerability {
   id: string;
   title: string;
-  severity: 'critical' | 'high' | 'moderate' | 'low' | 'info';
+  severity: "critical" | "high" | "moderate" | "low" | "info";
   module: string;
   version: string;
   fixAvailable: boolean;
@@ -47,7 +47,7 @@ interface OutdatedPackage {
   current: string;
   wanted: string;
   latest: string;
-  type: 'dependencies' | 'devDependencies' | 'peerDependencies';
+  type: "dependencies" | "devDependencies" | "peerDependencies";
   workspace?: string;
 }
 
@@ -58,67 +58,69 @@ interface DuplicatePackage {
 }
 
 interface AuditConfig {
-  failOnSeverity: 'critical' | 'high' | 'moderate' | 'low' | 'none';
+  failOnSeverity: "critical" | "high" | "moderate" | "low" | "none";
   ignoreIds: string[];
   ignorePatterns: string[];
   checkOutdated: boolean;
   checkDuplicates: boolean;
-  outputFormat: 'json' | 'markdown' | 'console';
+  outputFormat: "json" | "markdown" | "console";
   outputPath?: string;
 }
 
 const DEFAULT_CONFIG: AuditConfig = {
-  failOnSeverity: 'high',
+  failOnSeverity: "high",
   ignoreIds: [],
   ignorePatterns: [],
   checkOutdated: true,
   checkDuplicates: true,
-  outputFormat: 'console',
+  outputFormat: "console",
 };
 
 function loadConfig(): AuditConfig {
-  const configPath = join(ROOT_DIR, '.audit-config.json');
+  const configPath = join(ROOT_DIR, ".audit-config.json");
   if (existsSync(configPath)) {
-    const config = JSON.parse(readFileSync(configPath, 'utf-8'));
+    const config = JSON.parse(readFileSync(configPath, "utf-8"));
     return { ...DEFAULT_CONFIG, ...config };
   }
   return DEFAULT_CONFIG;
 }
 
 function runPnpmAudit(): AuditVulnerability[] {
-  console.log('Running pnpm audit...');
+  console.log("Running pnpm audit...");
 
   try {
-    const result = spawnSync('pnpm', ['audit', '--json'], {
+    const result = spawnSync("pnpm", ["audit", "--json"], {
       cwd: ROOT_DIR,
-      encoding: 'utf-8',
+      encoding: "utf-8",
       maxBuffer: 10 * 1024 * 1024,
     });
 
     if (result.error) {
-      console.error('Error running pnpm audit:', result.error);
+      console.error("Error running pnpm audit:", result.error);
       return [];
     }
 
-    const output = result.stdout || '{}';
+    const output = result.stdout || "{}";
     const auditData = JSON.parse(output);
 
     const vulnerabilities: AuditVulnerability[] = [];
 
     if (auditData.advisories) {
-      for (const [id, advisory] of Object.entries(auditData.advisories as Record<string, unknown>)) {
+      for (const [id, advisory] of Object.entries(
+        auditData.advisories as Record<string, unknown>
+      )) {
         const adv = advisory as Record<string, unknown>;
         vulnerabilities.push({
           id,
           title: adv.title as string,
-          severity: adv.severity as AuditVulnerability['severity'],
+          severity: adv.severity as AuditVulnerability["severity"],
           module: adv.module_name as string,
           version: adv.vulnerable_versions as string,
           fixAvailable: Boolean(adv.patched_versions),
           path: (adv.findings as Array<{ paths: string[] }>)?.[0]?.paths || [],
-          recommendation: adv.recommendation as string || 'Update to patched version',
+          recommendation: (adv.recommendation as string) || "Update to patched version",
           cwe: (adv.cwe as string[]) || [],
-          cvss: adv.cvss?.score as number || null,
+          cvss: (adv.cvss?.score as number) || null,
           url: adv.url as string,
         });
       }
@@ -126,22 +128,22 @@ function runPnpmAudit(): AuditVulnerability[] {
 
     return vulnerabilities;
   } catch (error) {
-    console.error('Failed to parse audit output:', error);
+    console.error("Failed to parse audit output:", error);
     return [];
   }
 }
 
 function checkOutdated(): OutdatedPackage[] {
-  console.log('Checking for outdated packages...');
+  console.log("Checking for outdated packages...");
 
   try {
-    const result = spawnSync('pnpm', ['outdated', '--json'], {
+    const result = spawnSync("pnpm", ["outdated", "--json"], {
       cwd: ROOT_DIR,
-      encoding: 'utf-8',
+      encoding: "utf-8",
       maxBuffer: 10 * 1024 * 1024,
     });
 
-    const output = result.stdout || '{}';
+    const output = result.stdout || "{}";
     const outdatedData = JSON.parse(output);
 
     const packages: OutdatedPackage[] = [];
@@ -153,7 +155,7 @@ function checkOutdated(): OutdatedPackage[] {
         current: pkg.current,
         wanted: pkg.wanted,
         latest: pkg.latest,
-        type: pkg.dependencyType as OutdatedPackage['type'],
+        type: pkg.dependencyType as OutdatedPackage["type"],
         workspace: pkg.workspace,
       });
     }
@@ -165,22 +167,22 @@ function checkOutdated(): OutdatedPackage[] {
 }
 
 function findDuplicates(): DuplicatePackage[] {
-  console.log('Checking for duplicate packages...');
+  console.log("Checking for duplicate packages...");
 
   try {
-    const result = spawnSync('pnpm', ['why', '--json'], {
+    const result = spawnSync("pnpm", ["why", "--json"], {
       cwd: ROOT_DIR,
-      encoding: 'utf-8',
+      encoding: "utf-8",
       maxBuffer: 10 * 1024 * 1024,
     });
 
     // Parse pnpm-lock.yaml to find duplicates
-    const lockfilePath = join(ROOT_DIR, 'pnpm-lock.yaml');
+    const lockfilePath = join(ROOT_DIR, "pnpm-lock.yaml");
     if (!existsSync(lockfilePath)) {
       return [];
     }
 
-    const lockfile = readFileSync(lockfilePath, 'utf-8');
+    const lockfile = readFileSync(lockfilePath, "utf-8");
     const versionMap = new Map<string, Set<string>>();
 
     // Simple regex-based parsing for version detection
@@ -214,15 +216,17 @@ function findDuplicates(): DuplicatePackage[] {
 
 function countDependencies(): number {
   try {
-    const result = spawnSync('pnpm', ['list', '--depth=0', '--json'], {
+    const result = spawnSync("pnpm", ["list", "--depth=0", "--json"], {
       cwd: ROOT_DIR,
-      encoding: 'utf-8',
+      encoding: "utf-8",
     });
-    const data = JSON.parse(result.stdout || '[]');
+    const data = JSON.parse(result.stdout || "[]");
     return data.reduce((acc: number, pkg: { dependencies?: object; devDependencies?: object }) => {
-      return acc +
+      return (
+        acc +
         Object.keys(pkg.dependencies || {}).length +
-        Object.keys(pkg.devDependencies || {}).length;
+        Object.keys(pkg.devDependencies || {}).length
+      );
     }, 0);
   } catch {
     return 0;
@@ -233,7 +237,7 @@ function filterVulnerabilities(
   vulnerabilities: AuditVulnerability[],
   config: AuditConfig
 ): AuditVulnerability[] {
-  return vulnerabilities.filter(v => {
+  return vulnerabilities.filter((v) => {
     // Check ignored IDs
     if (config.ignoreIds.includes(v.id)) {
       return false;
@@ -252,57 +256,57 @@ function filterVulnerabilities(
 
 function formatMarkdown(report: AuditReport): string {
   const lines: string[] = [
-    '# Dependency Audit Report',
-    '',
+    "# Dependency Audit Report",
+    "",
     `**Generated:** ${report.timestamp}`,
     `**Total Dependencies:** ${report.totalDependencies}`,
-    '',
-    '## Vulnerability Summary',
-    '',
-    '| Severity | Count |',
-    '|----------|-------|',
+    "",
+    "## Vulnerability Summary",
+    "",
+    "| Severity | Count |",
+    "|----------|-------|",
     `| Critical | ${report.summary.critical} |`,
     `| High | ${report.summary.high} |`,
     `| Moderate | ${report.summary.moderate} |`,
     `| Low | ${report.summary.low} |`,
     `| Info | ${report.summary.info} |`,
     `| **Total** | **${report.summary.total}** |`,
-    '',
+    "",
   ];
 
   if (report.vulnerabilities.length > 0) {
-    lines.push('## Vulnerabilities');
-    lines.push('');
+    lines.push("## Vulnerabilities");
+    lines.push("");
 
     for (const v of report.vulnerabilities) {
       const severityBadge = {
-        critical: '🔴',
-        high: '🟠',
-        moderate: '🟡',
-        low: '🟢',
-        info: '🔵',
+        critical: "🔴",
+        high: "🟠",
+        moderate: "🟡",
+        low: "🟢",
+        info: "🔵",
       }[v.severity];
 
       lines.push(`### ${severityBadge} ${v.title}`);
-      lines.push('');
+      lines.push("");
       lines.push(`- **Module:** ${v.module}`);
       lines.push(`- **Severity:** ${v.severity.toUpperCase()}`);
       lines.push(`- **Version:** ${v.version}`);
-      lines.push(`- **Fix Available:** ${v.fixAvailable ? 'Yes' : 'No'}`);
+      lines.push(`- **Fix Available:** ${v.fixAvailable ? "Yes" : "No"}`);
       if (v.cvss) {
         lines.push(`- **CVSS Score:** ${v.cvss}`);
       }
       lines.push(`- **URL:** ${v.url}`);
       lines.push(`- **Recommendation:** ${v.recommendation}`);
-      lines.push('');
+      lines.push("");
     }
   }
 
   if (report.outdated.length > 0) {
-    lines.push('## Outdated Packages');
-    lines.push('');
-    lines.push('| Package | Current | Wanted | Latest |');
-    lines.push('|---------|---------|--------|--------|');
+    lines.push("## Outdated Packages");
+    lines.push("");
+    lines.push("| Package | Current | Wanted | Latest |");
+    lines.push("|---------|---------|--------|--------|");
 
     for (const pkg of report.outdated.slice(0, 50)) {
       lines.push(`| ${pkg.name} | ${pkg.current} | ${pkg.wanted} | ${pkg.latest} |`);
@@ -311,33 +315,33 @@ function formatMarkdown(report: AuditReport): string {
     if (report.outdated.length > 50) {
       lines.push(`| ... and ${report.outdated.length - 50} more | | | |`);
     }
-    lines.push('');
+    lines.push("");
   }
 
   if (report.duplicates.length > 0) {
-    lines.push('## Duplicate Packages');
-    lines.push('');
-    lines.push('| Package | Versions | Count |');
-    lines.push('|---------|----------|-------|');
+    lines.push("## Duplicate Packages");
+    lines.push("");
+    lines.push("| Package | Versions | Count |");
+    lines.push("|---------|----------|-------|");
 
     for (const dup of report.duplicates.slice(0, 30)) {
-      lines.push(`| ${dup.name} | ${dup.versions.join(', ')} | ${dup.count} |`);
+      lines.push(`| ${dup.name} | ${dup.versions.join(", ")} | ${dup.count} |`);
     }
-    lines.push('');
+    lines.push("");
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 function formatConsole(report: AuditReport): void {
-  console.log('\n========================================');
-  console.log('       DEPENDENCY AUDIT REPORT');
-  console.log('========================================\n');
+  console.log("\n========================================");
+  console.log("       DEPENDENCY AUDIT REPORT");
+  console.log("========================================\n");
 
   console.log(`Timestamp: ${report.timestamp}`);
   console.log(`Total Dependencies: ${report.totalDependencies}`);
 
-  console.log('\n--- Vulnerability Summary ---');
+  console.log("\n--- Vulnerability Summary ---");
   console.log(`  Critical: ${report.summary.critical}`);
   console.log(`  High:     ${report.summary.high}`);
   console.log(`  Moderate: ${report.summary.moderate}`);
@@ -346,18 +350,18 @@ function formatConsole(report: AuditReport): void {
   console.log(`  Total:    ${report.summary.total}`);
 
   if (report.vulnerabilities.length > 0) {
-    console.log('\n--- Vulnerabilities ---');
+    console.log("\n--- Vulnerabilities ---");
     for (const v of report.vulnerabilities) {
       const icon = {
-        critical: '🔴',
-        high: '🟠',
-        moderate: '🟡',
-        low: '🟢',
-        info: '🔵',
+        critical: "🔴",
+        high: "🟠",
+        moderate: "🟡",
+        low: "🟢",
+        info: "🔵",
       }[v.severity];
       console.log(`\n${icon} [${v.severity.toUpperCase()}] ${v.title}`);
       console.log(`   Module: ${v.module}@${v.version}`);
-      console.log(`   Fix Available: ${v.fixAvailable ? 'Yes' : 'No'}`);
+      console.log(`   Fix Available: ${v.fixAvailable ? "Yes" : "No"}`);
       console.log(`   URL: ${v.url}`);
     }
   }
@@ -375,18 +379,18 @@ function formatConsole(report: AuditReport): void {
   if (report.duplicates.length > 0) {
     console.log(`\n--- Duplicate Packages (${report.duplicates.length} total) ---`);
     for (const dup of report.duplicates.slice(0, 10)) {
-      console.log(`  ${dup.name}: ${dup.count} versions (${dup.versions.join(', ')})`);
+      console.log(`  ${dup.name}: ${dup.count} versions (${dup.versions.join(", ")})`);
     }
   }
 
-  console.log('\n========================================\n');
+  console.log("\n========================================\n");
 }
 
 function shouldFail(report: AuditReport, config: AuditConfig): boolean {
-  const severityOrder = ['info', 'low', 'moderate', 'high', 'critical'];
+  const severityOrder = ["info", "low", "moderate", "high", "critical"];
   const thresholdIndex = severityOrder.indexOf(config.failOnSeverity);
 
-  if (config.failOnSeverity === 'none') {
+  if (config.failOnSeverity === "none") {
     return false;
   }
 
@@ -405,20 +409,20 @@ async function main(): Promise<void> {
 
   // Parse CLI arguments
   const args = process.argv.slice(2);
-  if (args.includes('--json')) {
-    config.outputFormat = 'json';
+  if (args.includes("--json")) {
+    config.outputFormat = "json";
   }
-  if (args.includes('--markdown')) {
-    config.outputFormat = 'markdown';
+  if (args.includes("--markdown")) {
+    config.outputFormat = "markdown";
   }
-  if (args.includes('--fail-on-high')) {
-    config.failOnSeverity = 'high';
+  if (args.includes("--fail-on-high")) {
+    config.failOnSeverity = "high";
   }
-  if (args.includes('--fail-on-critical')) {
-    config.failOnSeverity = 'critical';
+  if (args.includes("--fail-on-critical")) {
+    config.failOnSeverity = "critical";
   }
 
-  const outputIndex = args.indexOf('--output');
+  const outputIndex = args.indexOf("--output");
   if (outputIndex !== -1 && args[outputIndex + 1]) {
     config.outputPath = args[outputIndex + 1];
   }
@@ -435,11 +439,11 @@ async function main(): Promise<void> {
     totalDependencies,
     vulnerabilities,
     summary: {
-      critical: vulnerabilities.filter(v => v.severity === 'critical').length,
-      high: vulnerabilities.filter(v => v.severity === 'high').length,
-      moderate: vulnerabilities.filter(v => v.severity === 'moderate').length,
-      low: vulnerabilities.filter(v => v.severity === 'low').length,
-      info: vulnerabilities.filter(v => v.severity === 'info').length,
+      critical: vulnerabilities.filter((v) => v.severity === "critical").length,
+      high: vulnerabilities.filter((v) => v.severity === "high").length,
+      moderate: vulnerabilities.filter((v) => v.severity === "moderate").length,
+      low: vulnerabilities.filter((v) => v.severity === "low").length,
+      info: vulnerabilities.filter((v) => v.severity === "info").length,
       total: vulnerabilities.length,
     },
     outdated,
@@ -448,7 +452,7 @@ async function main(): Promise<void> {
 
   // Output
   switch (config.outputFormat) {
-    case 'json':
+    case "json":
       const jsonOutput = JSON.stringify(report, null, 2);
       if (config.outputPath) {
         writeFileSync(config.outputPath, jsonOutput);
@@ -458,7 +462,7 @@ async function main(): Promise<void> {
       }
       break;
 
-    case 'markdown':
+    case "markdown":
       const mdOutput = formatMarkdown(report);
       if (config.outputPath) {
         writeFileSync(config.outputPath, mdOutput);
@@ -474,14 +478,16 @@ async function main(): Promise<void> {
 
   // Exit with error if vulnerabilities exceed threshold
   if (shouldFail(report, config)) {
-    console.error(`\n❌ Audit failed: Found vulnerabilities at or above ${config.failOnSeverity} severity`);
+    console.error(
+      `\n❌ Audit failed: Found vulnerabilities at or above ${config.failOnSeverity} severity`
+    );
     process.exit(1);
   }
 
-  console.log('\n✅ Audit passed');
+  console.log("\n✅ Audit passed");
 }
 
-main().catch(error => {
-  console.error('Audit failed:', error);
+main().catch((error) => {
+  console.error("Audit failed:", error);
   process.exit(1);
 });

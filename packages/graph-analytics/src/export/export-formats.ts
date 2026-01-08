@@ -30,13 +30,13 @@ export interface GraphData {
  */
 export function exportToGEXF(graph: GraphData): string {
   const directed = graph.metadata?.directed ?? false;
-  const mode = directed ? 'directed' : 'undirected';
+  const mode = directed ? "directed" : "undirected";
 
   let gexf = `<?xml version="1.0" encoding="UTF-8"?>
 <gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">
   <meta>
-    <creator>${escapeXml(graph.metadata?.creator || 'IntelGraph')}</creator>
-    <description>${escapeXml(graph.metadata?.description || 'Intelligence Network Graph')}</description>
+    <creator>${escapeXml(graph.metadata?.creator || "IntelGraph")}</creator>
+    <description>${escapeXml(graph.metadata?.description || "Intelligence Network Graph")}</description>
   </meta>
   <graph mode="static" defaultedgetype="${mode}">
     <attributes class="node">
@@ -86,8 +86,8 @@ export function exportToGEXF(graph: GraphData): string {
 
   // Add edges
   graph.edges.forEach((edge, index) => {
-    const weight = edge.weight !== undefined ? ` weight="${edge.weight}"` : '';
-    const label = edge.label ? ` label="${escapeXml(edge.label)}"` : '';
+    const weight = edge.weight !== undefined ? ` weight="${edge.weight}"` : "";
+    const label = edge.label ? ` label="${escapeXml(edge.label)}"` : "";
     gexf += `      <edge id="${index}" source="${escapeXml(edge.source)}" target="${escapeXml(edge.target)}"${weight}${label}/>\n`;
   });
 
@@ -104,7 +104,7 @@ export function exportToGEXF(graph: GraphData): string {
  */
 export function exportToGraphML(graph: GraphData): string {
   const directed = graph.metadata?.directed ?? false;
-  const edgeDefault = directed ? 'directed' : 'undirected';
+  const edgeDefault = directed ? "directed" : "undirected";
 
   let graphml = `<?xml version="1.0" encoding="UTF-8"?>
 <graphml xmlns="http://graphml.graphdrawing.org/xmlns"
@@ -128,7 +128,7 @@ export function exportToGraphML(graph: GraphData): string {
 
   // Add edges
   graph.edges.forEach((edge, index) => {
-    const directed = graph.metadata?.directed ? ' directed="true"' : '';
+    const directed = graph.metadata?.directed ? ' directed="true"' : "";
     graphml += `    <edge id="e${index}" source="${escapeXml(edge.source)}" target="${escapeXml(edge.target)}"${directed}>
 `;
     if (edge.weight !== undefined) {
@@ -149,12 +149,12 @@ export function exportToGraphML(graph: GraphData): string {
  */
 export function exportToDOT(graph: GraphData): string {
   const directed = graph.metadata?.directed ?? false;
-  const graphType = directed ? 'digraph' : 'graph';
-  const edgeOp = directed ? '->' : '--';
+  const graphType = directed ? "digraph" : "graph";
+  const edgeOp = directed ? "->" : "--";
 
   let dot = `${graphType} G {\n`;
-  dot += `  // ${graph.metadata?.title || 'Intelligence Network Graph'}\n`;
-  dot += `  // ${graph.metadata?.description || ''}\n\n`;
+  dot += `  // ${graph.metadata?.title || "Intelligence Network Graph"}\n`;
+  dot += `  // ${graph.metadata?.description || ""}\n\n`;
 
   // Graph attributes
   dot += `  graph [rankdir=LR, overlap=false, splines=true];\n`;
@@ -168,16 +168,16 @@ export function exportToDOT(graph: GraphData): string {
     if (node.properties?.importance) {
       const importance = Number(node.properties.importance);
       if (importance > 0.7) {
-        attrs.push('fillcolor=red');
+        attrs.push("fillcolor=red");
       } else if (importance > 0.4) {
-        attrs.push('fillcolor=orange');
+        attrs.push("fillcolor=orange");
       }
     }
 
-    dot += `  "${escapeDot(node.id)}" [${attrs.join(', ')}];\n`;
+    dot += `  "${escapeDot(node.id)}" [${attrs.join(", ")}];\n`;
   });
 
-  dot += '\n';
+  dot += "\n";
 
   // Add edges
   graph.edges.forEach((edge) => {
@@ -192,11 +192,11 @@ export function exportToDOT(graph: GraphData): string {
       attrs.push(`label="${escapeDot(edge.label)}"`);
     }
 
-    const attrStr = attrs.length > 0 ? ` [${attrs.join(', ')}]` : '';
+    const attrStr = attrs.length > 0 ? ` [${attrs.join(", ")}]` : "";
     dot += `  "${escapeDot(edge.source)}" ${edgeOp} "${escapeDot(edge.target)}"${attrStr};\n`;
   });
 
-  dot += '}\n';
+  dot += "}\n";
 
   return dot;
 }
@@ -218,7 +218,7 @@ export function exportToJSON(graph: GraphData): string {
       metadata: graph.metadata,
     },
     null,
-    2,
+    2
   );
 }
 
@@ -227,35 +227,31 @@ export function exportToJSON(graph: GraphData): string {
  */
 export function exportToCSV(graph: GraphData): { nodes: string; edges: string } {
   // Nodes CSV
-  const nodeHeaders = ['id', 'label', ...getAllPropertyKeys(graph.nodes)];
-  let nodesCsv = `${nodeHeaders.join(',')  }\n`;
+  const nodeHeaders = ["id", "label", ...getAllPropertyKeys(graph.nodes)];
+  let nodesCsv = `${nodeHeaders.join(",")}\n`;
 
   graph.nodes.forEach((node) => {
     const row = [
       escapeCsv(node.id),
-      escapeCsv(node.label || ''),
-      ...nodeHeaders
-        .slice(2)
-        .map((h) => escapeCsv(String(node.properties?.[h] || ''))),
+      escapeCsv(node.label || ""),
+      ...nodeHeaders.slice(2).map((h) => escapeCsv(String(node.properties?.[h] || ""))),
     ];
-    nodesCsv += `${row.join(',')  }\n`;
+    nodesCsv += `${row.join(",")}\n`;
   });
 
   // Edges CSV
-  const edgeHeaders = ['source', 'target', 'weight', 'label', ...getAllPropertyKeys(graph.edges)];
-  let edgesCsv = `${edgeHeaders.join(',')  }\n`;
+  const edgeHeaders = ["source", "target", "weight", "label", ...getAllPropertyKeys(graph.edges)];
+  let edgesCsv = `${edgeHeaders.join(",")}\n`;
 
   graph.edges.forEach((edge) => {
     const row = [
       escapeCsv(edge.source),
       escapeCsv(edge.target),
-      escapeCsv(String(edge.weight || '')),
-      escapeCsv(edge.label || ''),
-      ...edgeHeaders
-        .slice(4)
-        .map((h) => escapeCsv(String(edge.properties?.[h] || ''))),
+      escapeCsv(String(edge.weight || "")),
+      escapeCsv(edge.label || ""),
+      ...edgeHeaders.slice(4).map((h) => escapeCsv(String(edge.properties?.[h] || ""))),
     ];
-    edgesCsv += `${row.join(',')  }\n`;
+    edgesCsv += `${row.join(",")}\n`;
   });
 
   return { nodes: nodesCsv, edges: edgesCsv };
@@ -265,19 +261,19 @@ export function exportToCSV(graph: GraphData): { nodes: string; edges: string } 
 
 function escapeXml(text: string): string {
   return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
 }
 
 function escapeDot(text: string): string {
-  return text.replace(/"/g, '\\"').replace(/\n/g, '\\n');
+  return text.replace(/"/g, '\\"').replace(/\n/g, "\\n");
 }
 
 function escapeCsv(text: string): string {
-  if (text.includes(',') || text.includes('"') || text.includes('\n')) {
+  if (text.includes(",") || text.includes('"') || text.includes("\n")) {
     return `"${text.replace(/"/g, '""')}"`;
   }
   return text;

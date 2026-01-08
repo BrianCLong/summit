@@ -7,11 +7,13 @@
 Absorbed systems must not maintain siloed "Sources of Truth". Data must be projected into the Summit Knowledge Lattice.
 
 ### The Lattice Pattern
-*   **Entities**: Map local entities (e.g., `User`, `Customer`) to Canonical Entities (`Person`, `Organization`).
-*   **Edges**: Relationship logic must be converted to Graph Edges.
-*   **Provenance**: All data mutations must generate a Provenance Event linked to the `ProvenanceLedger`.
+
+- **Entities**: Map local entities (e.g., `User`, `Customer`) to Canonical Entities (`Person`, `Organization`).
+- **Edges**: Relationship logic must be converted to Graph Edges.
+- **Provenance**: All data mutations must generate a Provenance Event linked to the `ProvenanceLedger`.
 
 ### Migration Strategy
+
 1.  **Double Write**: Write to Legacy DB and Summit Graph simultaneously (controlled by Summit).
 2.  **Backfill**: Batch process historical data into the Graph.
 3.  **Read Switch**: Switch read paths to Summit Graph.
@@ -20,15 +22,17 @@ Absorbed systems must not maintain siloed "Sources of Truth". Data must be proje
 ## Identity & Policy Unification
 
 ### Authentication (AuthN)
-*   **Legacy Auth**: Must be disabled.
-*   **Summit Auth**: All requests must be authenticated via Summit's `AuthService` (OIDC/JWT).
-*   **Service Accounts**: Absorbed backend services must use mTLS/SPIFFE or Summit-issued Service Tokens.
+
+- **Legacy Auth**: Must be disabled.
+- **Summit Auth**: All requests must be authenticated via Summit's `AuthService` (OIDC/JWT).
+- **Service Accounts**: Absorbed backend services must use mTLS/SPIFFE or Summit-issued Service Tokens.
 
 ### Authorization (AuthZ)
-*   **Legacy Logic**: Hardcoded checks (e.g., `if user.role == 'admin'`) must be removed.
-*   **OPA Policy**: Access decisions must be delegated to Open Policy Agent (OPA).
-    *   *Input*: `user`, `resource`, `action`.
-    *   *Policy*: defined in `policy/`.
+
+- **Legacy Logic**: Hardcoded checks (e.g., `if user.role == 'admin'`) must be removed.
+- **OPA Policy**: Access decisions must be delegated to Open Policy Agent (OPA).
+  - _Input_: `user`, `resource`, `action`.
+  - _Policy_: defined in `policy/`.
 
 ## The "Hard Rules" of Convergence
 
@@ -40,6 +44,7 @@ Absorbed systems must not maintain siloed "Sources of Truth". Data must be proje
 ## Decommissioning Protocol
 
 Legacy systems are "Life Support" only.
-*   **Read-Only Mode**: Enforce at the database level where possible.
-*   **Traffic Tapping**: Verify no undocumented clients are connecting.
-*   **Scream Test**: Temporarily disable access to identify hidden dependencies.
+
+- **Read-Only Mode**: Enforce at the database level where possible.
+- **Traffic Tapping**: Verify no undocumented clients are connecting.
+- **Scream Test**: Temporarily disable access to identify hidden dependencies.

@@ -9,11 +9,7 @@
       "tier": "tier_3",
       "enabled": true,
       "safety_threshold": 0.8,
-      "allowed_actions": [
-        "query_optimization",
-        "load_balancing",
-        "cache_management"
-      ],
+      "allowed_actions": ["query_optimization", "load_balancing", "cache_management"],
       "max_actions_per_hour": 5
     },
     "TENANT_005": {

@@ -4,7 +4,7 @@
  * Provides defense-in-depth against quantum attacks
  */
 
-import { sha256 } from '@noble/hashes/sha256';
+import { sha256 } from "@noble/hashes/sha256";
 import {
   DigitalSignatureScheme,
   KeyPair,
@@ -12,8 +12,8 @@ import {
   PQCAlgorithm,
   SecurityLevel,
   HybridScheme,
-} from '../types';
-import { DilithiumSignature } from '../algorithms/dilithium';
+} from "../types";
+import { DilithiumSignature } from "../algorithms/dilithium";
 
 export interface HybridSignature extends Signature {
   classicalSignature: Uint8Array;
@@ -21,16 +21,16 @@ export interface HybridSignature extends Signature {
 }
 
 export class HybridSignatureScheme implements DigitalSignatureScheme {
-  private classicalAlgorithm: 'ecdsa-p256' | 'ecdsa-p384';
+  private classicalAlgorithm: "ecdsa-p256" | "ecdsa-p384";
   private quantumSigner: DilithiumSignature;
   private hybridScheme: HybridScheme;
 
   constructor(
-    classicalAlgorithm: 'ecdsa-p256' | 'ecdsa-p384' = 'ecdsa-p256',
+    classicalAlgorithm: "ecdsa-p256" | "ecdsa-p384" = "ecdsa-p256",
     quantumSigner?: DilithiumSignature
   ) {
     this.classicalAlgorithm = classicalAlgorithm;
-    this.quantumSigner = quantumSigner || new DilithiumSignature('dilithium3');
+    this.quantumSigner = quantumSigner || new DilithiumSignature("dilithium3");
 
     this.hybridScheme = {
       classicalAlgorithm,
@@ -158,7 +158,7 @@ export class HybridSignatureScheme implements DigitalSignatureScheme {
     publicKey: Uint8Array;
     privateKey: Uint8Array;
   }> {
-    if (this.classicalAlgorithm === 'ecdsa-p256') {
+    if (this.classicalAlgorithm === "ecdsa-p256") {
       // P-256 key generation
       const privateKey = crypto.getRandomValues(new Uint8Array(32));
       const publicKey = new Uint8Array(65); // Uncompressed P-256 point
@@ -182,7 +182,7 @@ export class HybridSignatureScheme implements DigitalSignatureScheme {
     const messageHash = sha256(message);
 
     // Generate ECDSA signature (placeholder)
-    const signatureSize = this.classicalAlgorithm === 'ecdsa-p256' ? 64 : 96;
+    const signatureSize = this.classicalAlgorithm === "ecdsa-p256" ? 64 : 96;
     const signature = new Uint8Array(signatureSize);
 
     // In real implementation: use WebCrypto or noble-curves for ECDSA
@@ -264,23 +264,23 @@ export class HybridSignatureScheme implements DigitalSignatureScheme {
 }
 
 export function createHybridSignature(
-  classicalAlgorithm: 'ecdsa-p256' | 'ecdsa-p384' = 'ecdsa-p256',
+  classicalAlgorithm: "ecdsa-p256" | "ecdsa-p384" = "ecdsa-p256",
   securityLevel: SecurityLevel = SecurityLevel.LEVEL_3
 ): HybridSignatureScheme {
   let quantumSigner: DilithiumSignature;
 
   switch (securityLevel) {
     case SecurityLevel.LEVEL_2:
-      quantumSigner = new DilithiumSignature('dilithium2');
+      quantumSigner = new DilithiumSignature("dilithium2");
       break;
     case SecurityLevel.LEVEL_3:
-      quantumSigner = new DilithiumSignature('dilithium3');
+      quantumSigner = new DilithiumSignature("dilithium3");
       break;
     case SecurityLevel.LEVEL_5:
-      quantumSigner = new DilithiumSignature('dilithium5');
+      quantumSigner = new DilithiumSignature("dilithium5");
       break;
     default:
-      quantumSigner = new DilithiumSignature('dilithium3');
+      quantumSigner = new DilithiumSignature("dilithium3");
   }
 
   return new HybridSignatureScheme(classicalAlgorithm, quantumSigner);

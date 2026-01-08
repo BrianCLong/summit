@@ -310,11 +310,7 @@
       "locale": "zh-CN",
       "title": "您的隐私选择",
       "summary": "我们使用数据来提供、衡量并个性化 Summit 服务。",
-      "bulletPoints": [
-        "必要功能保障服务安全",
-        "分析帮助我们改进",
-        "个性化提供相关内容"
-      ],
+      "bulletPoints": ["必要功能保障服务安全", "分析帮助我们改进", "个性化提供相关内容"],
       "acceptCta": "全部接受",
       "rejectCta": "仅保留必要",
       "manageCta": "管理设置",

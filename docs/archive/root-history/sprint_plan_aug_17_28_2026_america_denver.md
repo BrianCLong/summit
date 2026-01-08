@@ -60,19 +60,19 @@ Ship the enterprise features that most often block procurement—private connect
 
 ## 5) Backlog (Ready for Sprint)
 
-| ID        | Title                                                     | Owner       | Est | Dependencies | Acceptance Criteria (summary)                               |
-| --------- | --------------------------------------------------------- | ----------- | --: | ------------ | ----------------------------------------------------------- |
-| NET-301   | PrivateLink / VPC Peering (tenant-scoped + private-only)  | Infra       |   8 | AWS accounts | Private endpoint or peering works; private-only denies pub. |
-| NET-311   | Dual-Control + Receipts + Metering for Networking         | Platform    |   4 | NET-301      | Dual-approval toggle; receipts; billing line items.         |
-| OBS-321   | OTel Export Adapter + Redaction Policies                  | BE          |   6 | —            | Export to customer sink; remove/hash/drop rules enforceable.|
-| OBS-331   | DLQ + Replay + Health + Evidence Bundle                   | BE+Ops      |   4 | OBS-321      | DLQ/replay; health metrics; bundle downloadable.            |
-| UI-341    | Switchboard UI for Observability Sinks                    | FE          |   4 | OBS-321      | Configure/test sinks; view status; receipts surfaced.       |
-| SEC-351   | Pen-test Mode Hardening (staging)                         | Ops+Sec     |   5 | —            | Debug off; rate limits/WAF; least-privilege SAs.            |
-| SEC-361   | Pen-test Evidence Pack (SBOM/SLSA/DR/diagrams/scans)      | Sec+Docs    |   4 | SEC-351      | Bundle published; 0 critical vulns in gate.                 |
-| QA-371    | Security Answer Pack Generator + Approvals                | BE+Docs     |   5 | —            | Template populated <30m; evidence links + redaction noted.  |
-| ONB-381   | Day 0–7 Onboarding Checklist + Readiness Score            | FE+BE       |   5 | —            | Checklist complete; readiness dashboard; signed bundle.     |
-| STRETCH-1 | Private-only staged rollout + rollback switch             | Infra       |   3 | NET-301      | Toggle per segment; safe rollback.                          |
-| STRETCH-2 | Evidence Bundle Diffing                                   | Platform    |   3 | OBS-331      | Diffs between bundles available.                            |
+| ID        | Title                                                    | Owner    | Est | Dependencies | Acceptance Criteria (summary)                                |
+| --------- | -------------------------------------------------------- | -------- | --: | ------------ | ------------------------------------------------------------ |
+| NET-301   | PrivateLink / VPC Peering (tenant-scoped + private-only) | Infra    |   8 | AWS accounts | Private endpoint or peering works; private-only denies pub.  |
+| NET-311   | Dual-Control + Receipts + Metering for Networking        | Platform |   4 | NET-301      | Dual-approval toggle; receipts; billing line items.          |
+| OBS-321   | OTel Export Adapter + Redaction Policies                 | BE       |   6 | —            | Export to customer sink; remove/hash/drop rules enforceable. |
+| OBS-331   | DLQ + Replay + Health + Evidence Bundle                  | BE+Ops   |   4 | OBS-321      | DLQ/replay; health metrics; bundle downloadable.             |
+| UI-341    | Switchboard UI for Observability Sinks                   | FE       |   4 | OBS-321      | Configure/test sinks; view status; receipts surfaced.        |
+| SEC-351   | Pen-test Mode Hardening (staging)                        | Ops+Sec  |   5 | —            | Debug off; rate limits/WAF; least-privilege SAs.             |
+| SEC-361   | Pen-test Evidence Pack (SBOM/SLSA/DR/diagrams/scans)     | Sec+Docs |   4 | SEC-351      | Bundle published; 0 critical vulns in gate.                  |
+| QA-371    | Security Answer Pack Generator + Approvals               | BE+Docs  |   5 | —            | Template populated <30m; evidence links + redaction noted.   |
+| ONB-381   | Day 0–7 Onboarding Checklist + Readiness Score           | FE+BE    |   5 | —            | Checklist complete; readiness dashboard; signed bundle.      |
+| STRETCH-1 | Private-only staged rollout + rollback switch            | Infra    |   3 | NET-301      | Toggle per segment; safe rollback.                           |
+| STRETCH-2 | Evidence Bundle Diffing                                  | Platform |   3 | OBS-331      | Diffs between bundles available.                             |
 
 > **Planned:** 45–47 pts including optional stretch.
 

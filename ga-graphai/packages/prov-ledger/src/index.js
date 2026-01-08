@@ -1,9 +1,9 @@
-import crypto from 'node:crypto';
+import crypto from "node:crypto";
 
-import { createDecisionRecord } from 'common-types';
+import { createDecisionRecord } from "common-types";
 
 function deepFreeze(object) {
-  if (object && typeof object === 'object' && !Object.isFrozen(object)) {
+  if (object && typeof object === "object" && !Object.isFrozen(object)) {
     Object.freeze(object);
     for (const value of Object.values(object)) {
       deepFreeze(value);
@@ -18,7 +18,7 @@ function serializeForHash(input) {
 
 export class ProvenanceLedger {
   constructor(options = {}) {
-    this.namespace = options.namespace ?? 'default';
+    this.namespace = options.namespace ?? "default";
     this.entries = [];
   }
 
@@ -60,9 +60,9 @@ export class ProvenanceLedger {
       decision: entry.decision,
       metadata: entry.metadata,
     };
-    const hash = crypto.createHash('sha256');
+    const hash = crypto.createHash("sha256");
     hash.update(serializeForHash(payload));
-    return hash.digest('hex');
+    return hash.digest("hex");
   }
 
   /**
@@ -98,7 +98,7 @@ export class ProvenanceLedger {
         acc.totalSavingsUSD += entry.metadata.savingsUSD;
         return acc;
       },
-      { count: 0, totalBudgetDeltaUSD: 0, totalSavingsUSD: 0 },
+      { count: 0, totalBudgetDeltaUSD: 0, totalSavingsUSD: 0 }
     );
   }
 }
@@ -121,16 +121,16 @@ export function buildEvidencePayload(input) {
   const signature =
     input.signature ??
     `stub-signature:${crypto
-      .createHash('sha256')
+      .createHash("sha256")
       .update(
         JSON.stringify({
           tenant: base.tenant,
           caseId: base.caseId,
           operation: base.operation,
           correlationId: base.correlationId,
-        }),
+        })
       )
-      .digest('hex')}`;
+      .digest("hex")}`;
 
   return {
     ...base,

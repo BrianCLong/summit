@@ -7,6 +7,7 @@ This document defines the standard lifecycle events for the Order-to-Cash proces
 The following events track the progression of a receipt from ingestion to reconciliation.
 
 ### 1. RECEIPT_INGESTED
+
 - **Description**: Triggered when a raw receipt file or data stream is first received by the system.
 - **Trigger**: File upload, API webhook, or email attachment ingestion.
 - **Required Provenance Fields**:
@@ -16,6 +17,7 @@ The following events track the progression of a receipt from ingestion to reconc
   - `tenant_id`: The tenant associated with the ingestion channel.
 
 ### 2. RECEIPT_VALIDATED
+
 - **Description**: Triggered after the raw payload passes structural and schema validation.
 - **Trigger**: Successful execution of schema validation logic (e.g., JSON Schema, XML XSD).
 - **Required Provenance Fields**:
@@ -24,6 +26,7 @@ The following events track the progression of a receipt from ingestion to reconc
   - `parser_version`: Version of the parser used.
 
 ### 3. RECEIPT_DEDUPED
+
 - **Description**: Triggered when the system confirms this receipt is unique and not a duplicate of a previously processed receipt.
 - **Trigger**: Successful check against the deduplication index (e.g., hash or invoice number check).
 - **Required Provenance Fields**:
@@ -31,6 +34,7 @@ The following events track the progression of a receipt from ingestion to reconc
   - `unique_identifier`: The derived ID used for uniqueness (e.g., Invoice Number + Vendor ID).
 
 ### 4. RECEIPT_PERSISTED
+
 - **Description**: Triggered when the validated and unique receipt data is durably stored in the primary database.
 - **Trigger**: Successful database commit.
 - **Required Provenance Fields**:
@@ -39,6 +43,7 @@ The following events track the progression of a receipt from ingestion to reconc
   - `encryption_key_id`: ID of the key used for encryption at rest (if applicable).
 
 ### 5. RECEIPT_POSTED
+
 - **Description**: Triggered when the financial transaction corresponding to the receipt is posted to the General Ledger (GL) or sub-ledger.
 - **Trigger**: Confirmation from the ERP system or internal ledger service.
 - **Required Provenance Fields**:
@@ -48,6 +53,7 @@ The following events track the progression of a receipt from ingestion to reconc
   - `currency`: Currency code.
 
 ### 6. RECEIPT_RECONCILED
+
 - **Description**: Triggered when the posted receipt is matched against a bank statement or payment record, closing the loop.
 - **Trigger**: Successful execution of the reconciliation job.
 - **Required Provenance Fields**:

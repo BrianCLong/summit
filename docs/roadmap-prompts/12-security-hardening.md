@@ -24,7 +24,7 @@ git log --grep="security\|cve\|vuln" | head -20
 
 ## Claude Prompt
 
-```
+````
 You are implementing security hardening for IntelGraph Core GA - zero criticals before release.
 
 CONTEXT:
@@ -223,23 +223,27 @@ export class WebAuthnManager {
     return verification;
   }
 }
-```
+````
 
 SAMPLE TRIPWIRE DETECTION:
+
 ```typescript
 export class TripwireMonitor {
   async detectMassAccess(userId: string, threshold: number = 1000): Promise<boolean> {
     // Query audit log for recent entity accesses
-    const count = await db.query(`
+    const count = await db.query(
+      `
       SELECT COUNT(*) FROM audit_log
       WHERE user_id = $1
         AND action = 'read'
         AND resource_type = 'entity'
         AND timestamp > NOW() - INTERVAL '1 hour'
-    `, [userId]);
+    `,
+      [userId]
+    );
 
     if (count > threshold) {
-      await this.triggerAlert('mass_access', { userId, count, threshold });
+      await this.triggerAlert("mass_access", { userId, count, threshold });
       return true;
     }
     return false;
@@ -250,7 +254,7 @@ export class TripwireMonitor {
     const isOffHours = hour < 9 || hour > 17; // 9am-5pm
 
     if (isOffHours) {
-      await this.triggerAlert('off_hours_access', { userId, hour });
+      await this.triggerAlert("off_hours_access", { userId, hour });
       return true;
     }
     return false;
@@ -266,6 +270,7 @@ export class TripwireMonitor {
 ```
 
 SAMPLE POLICY SIMULATION:
+
 ```typescript
 export async function simulatePolicyChange(req: Request, res: Response) {
   const { proposedPolicyChanges, affectedUsers } = req.body;
@@ -273,7 +278,11 @@ export async function simulatePolicyChange(req: Request, res: Response) {
   // Evaluate current policy for each user
   const currentAccess = await Promise.all(
     affectedUsers.map(async (userId) => {
-      const allowed = await opa.evaluate('intelgraph/allow', { user: { id: userId }, action: 'read', resource: { type: 'entity' } });
+      const allowed = await opa.evaluate("intelgraph/allow", {
+        user: { id: userId },
+        action: "read",
+        resource: { type: "entity" },
+      });
       return { userId, allowed };
     })
   );
@@ -284,7 +293,11 @@ export async function simulatePolicyChange(req: Request, res: Response) {
   // Re-evaluate
   const newAccess = await Promise.all(
     affectedUsers.map(async (userId) => {
-      const allowed = await opa.evaluate('intelgraph/allow', { user: { id: userId }, action: 'read', resource: { type: 'entity' } });
+      const allowed = await opa.evaluate("intelgraph/allow", {
+        user: { id: userId },
+        action: "read",
+        resource: { type: "entity" },
+      });
       return { userId, allowed };
     })
   );
@@ -299,18 +312,20 @@ export async function simulatePolicyChange(req: Request, res: Response) {
   res.json({
     impactReport: {
       usersAffected: affectedUsers.length,
-      accessGranted: accessGranted.map(a => a.userId),
-      accessRevoked: accessRevoked.map(a => a.userId),
+      accessGranted: accessGranted.map((a) => a.userId),
+      accessRevoked: accessRevoked.map((a) => a.userId),
     },
   });
 }
 ```
 
 SAMPLE STRIDE THREAT MODEL (SECURITY/STRIDE-threat-model.md):
+
 ```markdown
 # STRIDE Threat Model - IntelGraph
 
 ## Spoofing
+
 - **Threat**: Attacker impersonates user
 - **Impact**: High
 - **Likelihood**: Medium
@@ -321,6 +336,7 @@ SAMPLE STRIDE THREAT MODEL (SECURITY/STRIDE-threat-model.md):
 - **Status**: ✅ Implemented
 
 ## Tampering
+
 - **Threat**: Attacker modifies audit logs
 - **Impact**: Critical
 - **Likelihood**: Low
@@ -331,6 +347,7 @@ SAMPLE STRIDE THREAT MODEL (SECURITY/STRIDE-threat-model.md):
 - **Status**: ✅ Implemented
 
 ## Repudiation
+
 - **Threat**: User denies action
 - **Impact**: Medium
 - **Likelihood**: Low
@@ -340,6 +357,7 @@ SAMPLE STRIDE THREAT MODEL (SECURITY/STRIDE-threat-model.md):
 - **Status**: ✅ Implemented
 
 ## Information Disclosure
+
 - **Threat**: Unauthorized data access
 - **Impact**: Critical
 - **Likelihood**: Medium
@@ -350,6 +368,7 @@ SAMPLE STRIDE THREAT MODEL (SECURITY/STRIDE-threat-model.md):
 - **Status**: ✅ Implemented
 
 ## Denial of Service
+
 - **Threat**: Attacker overwhelms system
 - **Impact**: High
 - **Likelihood**: Medium
@@ -360,6 +379,7 @@ SAMPLE STRIDE THREAT MODEL (SECURITY/STRIDE-threat-model.md):
 - **Status**: ✅ Implemented
 
 ## Elevation of Privilege
+
 - **Threat**: User gains unauthorized privileges
 - **Impact**: Critical
 - **Likelihood**: Low
@@ -381,6 +401,7 @@ Provide:
 (g) Security scanning scripts
 (h) Tests (WebAuthn, tripwires, policy simulation)
 (i) Security audit report (pre-GA)
+
 ```
 
 ---
@@ -411,3 +432,4 @@ Provide:
 - @simplewebauthn/server: https://simplewebauthn.dev/
 - STRIDE: https://docs.microsoft.com/en-us/azure/security/develop/threat-modeling-tool-threats
 - SCIM 2.0: https://scim.cloud/
+```

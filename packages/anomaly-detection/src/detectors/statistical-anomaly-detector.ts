@@ -2,17 +2,17 @@
  * Statistical anomaly detection using Z-score, IQR, MAD, etc.
  */
 
-import { IAnomalyDetector } from '@intelgraph/threat-detection-core';
-import { AnomalyScore } from '@intelgraph/threat-detection-core';
+import { IAnomalyDetector } from "@intelgraph/threat-detection-core";
+import { AnomalyScore } from "@intelgraph/threat-detection-core";
 import {
   calculateZScore,
   calculateIQRScore,
-  zScoreToAnomalyScore
-} from '@intelgraph/threat-detection-core';
-import * as stats from 'simple-statistics';
+  zScoreToAnomalyScore,
+} from "@intelgraph/threat-detection-core";
+import * as stats from "simple-statistics";
 
 export interface StatisticalAnomalyDetectorConfig {
-  method: 'zscore' | 'iqr' | 'mad' | 'grubbs' | 'ensemble';
+  method: "zscore" | "iqr" | "mad" | "grubbs" | "ensemble";
   sensitivity: number; // 0-1, higher = more sensitive
   windowSize?: number; // Number of historical data points to consider
   autoUpdate: boolean; // Automatically update baseline
@@ -33,7 +33,7 @@ export class StatisticalAnomalyDetector implements IAnomalyDetector {
 
     // Analyze each numeric feature
     for (const [feature, value] of Object.entries(data)) {
-      if (typeof value !== 'number') continue;
+      if (typeof value !== "number") continue;
 
       const baselineData = this.baseline.get(feature);
       if (!baselineData || baselineData.length < 2) {
@@ -42,11 +42,7 @@ export class StatisticalAnomalyDetector implements IAnomalyDetector {
         continue;
       }
 
-      const anomalyScore = await this.detectFeatureAnomaly(
-        feature,
-        value,
-        baselineData
-      );
+      const anomalyScore = await this.detectFeatureAnomaly(feature, value, baselineData);
 
       scores[feature] = anomalyScore;
       totalScore += anomalyScore;
@@ -64,7 +60,7 @@ export class StatisticalAnomalyDetector implements IAnomalyDetector {
       score: Math.min(1, overallScore * (1 + this.config.sensitivity)),
       method: this.config.method,
       features: scores,
-      explanation: this.generateExplanation(scores, overallScore)
+      explanation: this.generateExplanation(scores, overallScore),
     };
   }
 
@@ -74,19 +70,19 @@ export class StatisticalAnomalyDetector implements IAnomalyDetector {
     baselineData: number[]
   ): Promise<number> {
     switch (this.config.method) {
-      case 'zscore':
+      case "zscore":
         return this.zScoreMethod(value, baselineData);
 
-      case 'iqr':
+      case "iqr":
         return this.iqrMethod(value, baselineData);
 
-      case 'mad':
+      case "mad":
         return this.madMethod(value, baselineData);
 
-      case 'grubbs':
+      case "grubbs":
         return this.grubbsMethod(value, baselineData);
 
-      case 'ensemble':
+      case "ensemble":
         return this.ensembleMethod(value, baselineData);
 
       default:
@@ -115,12 +111,12 @@ export class StatisticalAnomalyDetector implements IAnomalyDetector {
   private madMethod(value: number, baselineData: number[]): number {
     // Median Absolute Deviation
     const median = stats.median(baselineData);
-    const absoluteDeviations = baselineData.map(x => Math.abs(x - median));
+    const absoluteDeviations = baselineData.map((x) => Math.abs(x - median));
     const mad = stats.median(absoluteDeviations);
 
     if (mad === 0) return 0;
 
-    const modifiedZScore = 0.6745 * (value - median) / mad;
+    const modifiedZScore = (0.6745 * (value - median)) / mad;
     return zScoreToAnomalyScore(modifiedZScore);
   }
 
@@ -136,8 +132,8 @@ export class StatisticalAnomalyDetector implements IAnomalyDetector {
 
     // Critical value approximation for 95% confidence
     const tDist = 1.96; // Approximation
-    const gCritical = ((n - 1) / Math.sqrt(n)) *
-      Math.sqrt(Math.pow(tDist, 2) / (n - 2 + Math.pow(tDist, 2)));
+    const gCritical =
+      ((n - 1) / Math.sqrt(n)) * Math.sqrt(Math.pow(tDist, 2) / (n - 2 + Math.pow(tDist, 2)));
 
     return g > gCritical ? Math.min(1, g / (2 * gCritical)) : 0;
   }
@@ -147,7 +143,7 @@ export class StatisticalAnomalyDetector implements IAnomalyDetector {
     const scores = [
       this.zScoreMethod(value, baselineData),
       this.iqrMethod(value, baselineData),
-      this.madMethod(value, baselineData)
+      this.madMethod(value, baselineData),
     ];
 
     // Return max score (most conservative)
@@ -156,7 +152,7 @@ export class StatisticalAnomalyDetector implements IAnomalyDetector {
 
   async updateBaseline(data: Record<string, any>): Promise<void> {
     for (const [feature, value] of Object.entries(data)) {
-      if (typeof value !== 'number') continue;
+      if (typeof value !== "number") continue;
 
       if (!this.baseline.has(feature)) {
         this.baseline.set(feature, []);
@@ -185,7 +181,7 @@ export class StatisticalAnomalyDetector implements IAnomalyDetector {
           max: stats.max(data),
           q1: stats.quantile(data, 0.25),
           q3: stats.quantile(data, 0.75),
-          sampleSize: data.length
+          sampleSize: data.length,
         };
       }
     }
@@ -193,22 +189,19 @@ export class StatisticalAnomalyDetector implements IAnomalyDetector {
     return baseline;
   }
 
-  private generateExplanation(
-    featureScores: Record<string, number>,
-    overallScore: number
-  ): string {
+  private generateExplanation(featureScores: Record<string, number>, overallScore: number): string {
     const anomalousFeatures = Object.entries(featureScores)
       .filter(([_, score]) => score > 0.5)
       .sort(([_, a], [__, b]) => b - a)
       .slice(0, 3);
 
     if (anomalousFeatures.length === 0) {
-      return 'No significant anomalies detected';
+      return "No significant anomalies detected";
     }
 
     const featureList = anomalousFeatures
       .map(([feature, score]) => `${feature} (${(score * 100).toFixed(1)}%)`)
-      .join(', ');
+      .join(", ");
 
     return `Anomaly detected in ${anomalousFeatures.length} feature(s): ${featureList}`;
   }

@@ -540,7 +540,7 @@ name: release
 on:
   workflow_dispatch:
   push:
-    tags: ['v*']
+    tags: ["v*"]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -667,22 +667,22 @@ spec:
           - resources:
               kinds: [Pod]
       validate:
-        message: 'Raw Secret volumes are not allowed; use Vault CSI (secrets-store.csi.k8s.io).'
+        message: "Raw Secret volumes are not allowed; use Vault CSI (secrets-store.csi.k8s.io)."
         pattern:
           spec:
             =(volumes):
               - X(all):
                   X(anyPattern):
                     - X(not):
-                        secret: '*'
+                        secret: "*"
     - name: require-vault-csi-volume
       match:
         any:
           - resources:
               kinds: [Pod]
-              namespaces: ['ingest', 'nl2cypher', 'conductor']
+              namespaces: ["ingest", "nl2cypher", "conductor"]
       validate:
-        message: 'Pods must mount a CSI volume using secrets-store.csi.k8s.io'
+        message: "Pods must mount a CSI volume using secrets-store.csi.k8s.io"
         pattern:
           spec:
             volumes:
@@ -700,9 +700,9 @@ metadata:
 spec:
   match:
     kinds:
-      - apiGroups: ['']
-        kinds: ['Pod']
-    namespaces: ['ingest', 'nl2cypher', 'conductor']
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    namespaces: ["ingest", "nl2cypher", "conductor"]
   parameters:
     driver: secrets-store.csi.k8s.io
 ```
@@ -987,7 +987,7 @@ opa:
       # base64 or inline JSON for policies/data
 kyverno:
   enabled: true
-  policyNamespaces: ['ingest', 'nl2cypher', 'conductor']
+  policyNamespaces: ["ingest", "nl2cypher", "conductor"]
 prometheus:
   recordingRules: |
     {{- "" | nindent 0 }}
@@ -1163,12 +1163,12 @@ allow { count(risk) == 0 }
 **k6 skeleton**
 
 ```js
-import http from 'k6/http';
-import { sleep, check } from 'k6';
-export const options = { stages: [{ duration: '5m', target: 200 }] };
+import http from "k6/http";
+import { sleep, check } from "k6";
+export const options = { stages: [{ duration: "5m", target: 200 }] };
 export default function () {
-  const res = http.post('https://api/graph/rag', JSON.stringify({ q: 'test' }));
-  check(res, { 'status 200': (r) => r.status === 200 });
+  const res = http.post("https://api/graph/rag", JSON.stringify({ q: "test" }));
+  check(res, { "status 200": (r) => r.status === 200 });
   sleep(1);
 }
 ```
@@ -1327,7 +1327,7 @@ opa:
 
 kyverno:
   enabled: true
-  policyNamespaces: ['ingest', 'nl2cypher', 'conductor']
+  policyNamespaces: ["ingest", "nl2cypher", "conductor"]
   policy: |
     apiVersion: kyverno.io/v1
     kind: ClusterPolicy
@@ -1458,5 +1458,5 @@ profiles:
       max_fanout: 20000
       pii_block: true
     dashboards:
-      import: ['ig-ops-v1']
+      import: ["ig-ops-v1"]
 ```

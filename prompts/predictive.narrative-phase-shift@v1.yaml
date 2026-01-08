@@ -1,14 +1,14 @@
 meta:
   id: predictive.narrative-phase-shift@v1
   owner: research
-  purpose: 'Detects early-stage pressure buildup and forecasts narrative phase transitions.'
-  tags: ['predictive', 'narrative', 'phase-shift']
+  purpose: "Detects early-stage pressure buildup and forecasts narrative phase transitions."
+  tags: ["predictive", "narrative", "phase-shift"]
   guardrails:
-    - 'Ensure analysis remains objective and data-driven.'
-    - 'Do not generate synthetic narratives that could destabilize without authorization.'
+    - "Ensure analysis remains objective and data-driven."
+    - "Do not generate synthetic narratives that could destabilize without authorization."
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.3
 
 inputs:

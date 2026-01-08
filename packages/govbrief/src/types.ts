@@ -15,7 +15,7 @@ export interface ArticleRecord {
   sections: ArticleSection[];
 }
 
-export type ConfidenceValue = 'low' | 'medium' | 'high';
+export type ConfidenceValue = "low" | "medium" | "high";
 
 export interface ClaimEvidence {
   snippet: string;
@@ -48,7 +48,7 @@ export interface ProvenanceRecord {
   toolVersions: Record<string, string>;
 }
 
-export type SafetySeverity = 'low' | 'medium' | 'high';
+export type SafetySeverity = "low" | "medium" | "high";
 
 export interface SafetyFlag {
   severity: SafetySeverity;

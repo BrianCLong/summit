@@ -3,7 +3,7 @@ name: Build, Test, and Release Summit Docker Image
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 permissions:
   contents: read
@@ -20,7 +20,7 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
         with:
-          cosign-release: 'v2.2.4'
+          cosign-release: "v2.2.4"
 
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@v0.17.1
@@ -59,7 +59,7 @@ jobs:
       - name: Cosign sign and attest
         id: cosign-sign
         env:
-          COSIGN_EXPERIMENTAL: '1'
+          COSIGN_EXPERIMENTAL: "1"
           IMAGE: ghcr.io/${{ github.repository }}/summit:${{ github.ref_name }}
           DIGEST: ${{ steps.build.outputs.digest }}
         run: |

@@ -6,6 +6,6 @@
  * like vehicle routing, network design, and multi-objective optimization.
  */
 
-export * from './types';
-export * from './QuantumOptimizer';
-export { QuantumOptimizer, quantumOptimizer } from './QuantumOptimizer';
+export * from "./types";
+export * from "./QuantumOptimizer";
+export { QuantumOptimizer, quantumOptimizer } from "./QuantumOptimizer";

@@ -208,7 +208,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: '3.11', cache: 'pip' }
+        with: { python-version: "3.11", cache: "pip" }
       - run: pip install -U pip
       - run: pip install -e .[dev]
       - run: pytest -q || true
@@ -391,10 +391,10 @@ print(store.neighbors("alice"))
 ```yaml
 intelgraph-py:
   image: python:3.11-slim
-  volumes: ['./intelgraph:/work', './apps/streamlit_app:/app']
+  volumes: ["./intelgraph:/work", "./apps/streamlit_app:/app"]
   working_dir: /work
   command: bash -lc "pip install -e .[dev] && python -m streamlit run /app/app.py --server.port 8501 --server.address 0.0.0.0"
-  ports: ['8501:8501']
+  ports: ["8501:8501"]
   depends_on: [neo4j]
 ```
 

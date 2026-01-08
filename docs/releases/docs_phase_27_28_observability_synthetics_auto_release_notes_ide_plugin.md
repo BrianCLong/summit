@@ -34,30 +34,30 @@ version: latest
       navigator.sendBeacon?.(url, JSON.stringify(body));
     } catch (e) {}
   }
-  const endpoint = '/telemetry'; // replace with your collector/edge fn
+  const endpoint = "/telemetry"; // replace with your collector/edge fn
   function send(ev, attrs) {
     post(endpoint, { ev, t: Date.now(), attrs });
   }
   // Page views
-  send('page_view', { path: sha1(location.pathname) });
+  send("page_view", { path: sha1(location.pathname) });
   // DocSearch queries (DocSearch attaches to .DocSearch-Button or input)
-  document.addEventListener('input', (e) => {
+  document.addEventListener("input", (e) => {
     const el = e.target;
     if (!el || !el.matches) return;
     if (el.matches('input[type="search"], .DocSearch-Input')) {
-      const q = (el.value || '').trim();
-      if (q.length > 2) send('search', { qlen: q.length });
+      const q = (el.value || "").trim();
+      if (q.length > 2) send("search", { qlen: q.length });
     }
   });
   // Broken links (client-side navigations that 404)
   window.addEventListener(
-    'error',
+    "error",
     (e) => {
-      if (e && e.target && e.target.tagName === 'A') {
-        send('link_error', { href: e.target.href });
+      if (e && e.target && e.target.tagName === "A") {
+        send("link_error", { href: e.target.href });
       }
     },
-    true,
+    true
   );
 })();
 ```
@@ -65,7 +65,7 @@ version: latest
 **`docusaurus.config.js`** (inject script)
 
 ```js
-scripts: [{ src: '/otel-init.js', async: true }];
+scripts: [{ src: "/otel-init.js", async: true }];
 ```
 
 ## A2) Build telemetry (warnings/errors)
@@ -73,11 +73,11 @@ scripts: [{ src: '/otel-init.js', async: true }];
 **`scripts/docs/collect-build-telemetry.js`**
 
 ```js
-const fs = require('fs');
+const fs = require("fs");
 const out = { ts: new Date().toISOString(), warnings: 0, errors: 0 };
 // Hook your build output parsing here; this is a stub
-fs.mkdirSync('docs/ops/telemetry', { recursive: true });
-fs.writeFileSync('docs/ops/telemetry/build.json', JSON.stringify(out, null, 2));
+fs.mkdirSync("docs/ops/telemetry", { recursive: true });
+fs.writeFileSync("docs/ops/telemetry/build.json", JSON.stringify(out, null, 2));
 ```
 
 **CI** (append to build):
@@ -104,7 +104,7 @@ fs.writeFileSync('docs/ops/telemetry/build.json', JSON.stringify(out, null, 2));
 ```yaml
 name: Docs Synthetics
 on:
-  schedule: [{ cron: '*/30 * * * *' }]
+  schedule: [{ cron: "*/30 * * * *" }]
   workflow_dispatch:
 jobs:
   ping:
@@ -171,27 +171,27 @@ owner: docs
 **`scripts/docs/diff-to-release-notes.js`**
 
 ```js
-const { execSync } = require('child_process');
-const fs = require('fs');
-const tag = process.env.RELEASE_TAG || 'vNEXT';
-const base = process.env.BASE_REF || 'origin/main~1';
+const { execSync } = require("child_process");
+const fs = require("fs");
+const tag = process.env.RELEASE_TAG || "vNEXT";
+const base = process.env.BASE_REF || "origin/main~1";
 const diff = execSync(`git diff --name-status ${base}... -- docs`, {
-  encoding: 'utf8',
+  encoding: "utf8",
 })
   .trim()
-  .split('\n');
+  .split("\n");
 const changes = { added: [], modified: [], removed: [] };
 for (const line of diff) {
   if (!line) continue;
   const [t, file] = line.split(/\s+/);
-  if (t === 'A') changes.added.push(file);
-  else if (t === 'M') changes.modified.push(file);
-  else if (t === 'D') changes.removed.push(file);
+  if (t === "A") changes.added.push(file);
+  else if (t === "M") changes.modified.push(file);
+  else if (t === "D") changes.removed.push(file);
 }
-const md = `---\ntitle: Docs Changes — ${tag}\nsummary: Additions, updates, and removals in docs for ${tag}.\nowner: docs\n---\n\n## Added\n${changes.added.map((f) => `- ${f}`).join('\n') || '- None'}\n\n## Updated\n${changes.modified.map((f) => `- ${f}`).join('\n') || '- None'}\n\n## Removed\n${changes.removed.map((f) => `- ${f}`).join('\n') || '- None'}\n`;
-fs.mkdirSync('docs/releases', { recursive: true });
+const md = `---\ntitle: Docs Changes — ${tag}\nsummary: Additions, updates, and removals in docs for ${tag}.\nowner: docs\n---\n\n## Added\n${changes.added.map((f) => `- ${f}`).join("\n") || "- None"}\n\n## Updated\n${changes.modified.map((f) => `- ${f}`).join("\n") || "- None"}\n\n## Removed\n${changes.removed.map((f) => `- ${f}`).join("\n") || "- None"}\n`;
+fs.mkdirSync("docs/releases", { recursive: true });
 fs.writeFileSync(`docs/releases/changes-${tag}.md`, md);
-console.log('Wrote docs/releases/changes-' + tag + '.md');
+console.log("Wrote docs/releases/changes-" + tag + ".md");
 ```
 
 **CI** (on tag):
@@ -220,10 +220,7 @@ console.log('Wrote docs/releases/changes-' + tag + '.md');
   "publisher": "intelgraph",
   "version": "0.0.1",
   "engines": { "vscode": "+1.75.0" },
-  "activationEvents": [
-    "onCommand:intelgraph.docs.new",
-    "onCommand:intelgraph.docs.search"
-  ],
+  "activationEvents": ["onCommand:intelgraph.docs.new", "onCommand:intelgraph.docs.search"],
   "contributes": {
     "commands": [
       { "command": "intelgraph.docs.new", "title": "Docs: New Page" },
@@ -237,47 +234,40 @@ console.log('Wrote docs/releases/changes-' + tag + '.md');
 **`tools/vscode/intelgraph-docs/extension.js`**
 
 ```js
-const vscode = require('vscode');
-const fs = require('fs');
-const path = require('path');
+const vscode = require("vscode");
+const fs = require("fs");
+const path = require("path");
 function activate(context) {
   context.subscriptions.push(
-    vscode.commands.registerCommand('intelgraph.docs.new', async () => {
-      const type = await vscode.window.showQuickPick(
-        ['how-to', 'tutorial', 'concept'],
-        { placeHolder: 'Doc type' },
-      );
-      const title = await vscode.window.showInputBox({ prompt: 'Page title' });
+    vscode.commands.registerCommand("intelgraph.docs.new", async () => {
+      const type = await vscode.window.showQuickPick(["how-to", "tutorial", "concept"], {
+        placeHolder: "Doc type",
+      });
+      const title = await vscode.window.showInputBox({ prompt: "Page title" });
       if (!type || !title) return;
-      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-      const tplPath = path.join(
-        vscode.workspace.rootPath,
-        'docs/_templates',
-        `${type}.md`,
-      );
+      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+      const tplPath = path.join(vscode.workspace.rootPath, "docs/_templates", `${type}.md`);
       const tpl = fs
-        .readFileSync(tplPath, 'utf8')
-        .replace('<Task-oriented title>', title)
-        .replace('<End-to-end tutorial>', title)
-        .replace('<Concept name>', title);
+        .readFileSync(tplPath, "utf8")
+        .replace("<Task-oriented title>", title)
+        .replace("<End-to-end tutorial>", title)
+        .replace("<Concept name>", title);
       const out = path.join(
         vscode.workspace.rootPath,
-        'docs',
-        type === 'concept' ? 'concepts' : type,
-        `${slug}.md`,
+        "docs",
+        type === "concept" ? "concepts" : type,
+        `${slug}.md`
       );
       fs.mkdirSync(path.dirname(out), { recursive: true });
       fs.writeFileSync(out, tpl);
       const doc = await vscode.workspace.openTextDocument(out);
       vscode.window.showTextDocument(doc);
-    }),
+    })
   );
   context.subscriptions.push(
-    vscode.commands.registerCommand('intelgraph.docs.search', async () => {
-      vscode.env.openExternal(
-        vscode.Uri.parse('https://docs.intelgraph.example/?q='),
-      );
-    }),
+    vscode.commands.registerCommand("intelgraph.docs.search", async () => {
+      vscode.env.openExternal(vscode.Uri.parse("https://docs.intelgraph.example/?q="));
+    })
   );
 }
 exports.activate = activate;

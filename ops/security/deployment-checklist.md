@@ -25,6 +25,7 @@ This checklist captures the hardening controls implemented in `ops/helm` and the
 - **Audit logging**: ConfigMap with API audit policy, retention, and size limits carried via annotations for downstream log processors.
 
 ## Preflight validation steps
+
 - [ ] **Render and lint**: `helm template ops/helm --namespace intelgraph-secure | kubeval --strict` (ensure API compatibility and namespace labels). The template now fails fast if inline secret values are present, guaranteeing chart-sourced YAML cannot leak credentials.
 - [ ] **Namespace safety**: `kubectl get ns intelgraph-secure -o jsonpath='{.metadata.labels}' | jq` verifies PodSecurity and Istio labels; apply only with `--create-namespace` when desired.
 - [ ] **ServiceAccount hardening**: `kubectl get sa gateway ui -n intelgraph-secure -o jsonpath='{.items[*].automountServiceAccountToken}'` should return `false false` (workloads) while `external-secrets` can remain `true` for provider auth.

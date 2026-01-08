@@ -1,8 +1,8 @@
-version: '3.9'
+version: "3.9"
 services:
   opa:
     image: openpolicyagent/opa:0.65.0-rootless@sha256:4ef3a5b5833f7c0b5bf65b55c7d12c5e17b65b9ae1b3b1a6b5c6b5c8f2b5b9ae
-    command: ["run","--server","--log-level=info"]
+    command: ["run", "--server", "--log-level=info"]
     ports: ["8181:8181"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8181/health"]
@@ -15,7 +15,7 @@ services:
     image: mc-local:latest
     environment:
       - NODE_ENV=development
-    ports: ['4000:4000']
+    ports: ["4000:4000"]
     volumes:
       - ../contracts:/app/contracts
       - ../dist:/app/dist
@@ -72,4 +72,4 @@ services:
       timeout: 10s
       retries: 3
     depends_on: [mc]
-    command: ['node', '/app/traffic.js']
+    command: ["node", "/app/traffic.js"]

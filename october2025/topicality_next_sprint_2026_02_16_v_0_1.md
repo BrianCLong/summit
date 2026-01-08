@@ -162,17 +162,17 @@ owners:
 
 kpis:
   - name: preview_latency_p95_ms
-    target: '<=175'
+    target: "<=175"
   - name: cache_hit_rate
-    target: '>=0.965'
+    target: ">=0.965"
   - name: mapping_coverage
-    target: '>=0.95'
+    target: ">=0.95"
   - name: sso_green_tenants
-    target: '>=0.93'
+    target: ">=0.93"
   - name: reconciliation_delta_pct
-    target: '<=0.3'
+    target: "<=0.3"
   - name: export_latency_p95_ms
-    target: '<=250'
+    target: "<=250"
 ```
 
 ---
@@ -267,9 +267,9 @@ jobs:
 // tools/connectors/mapping_coverage.js (stub)
 console.log(
   JSON.stringify({
-    connector: process.argv[2] || 'sharepoint',
+    connector: process.argv[2] || "sharepoint",
     coverage: 0.96,
-  }),
+  })
 );
 ```
 

@@ -17,8 +17,8 @@ permissions:
   pull-requests: write
 
 env:
-  NODE_VERSION: '20'
-  PNPM_VERSION: '9'
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9"
 
 jobs:
   setup:
@@ -91,7 +91,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ needs.setup.outputs.node }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -130,7 +130,7 @@ jobs:
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: summit_test
-        ports: ['5432:5432']
+        ports: ["5432:5432"]
         options: >-
           --health-cmd="pg_isready -U postgres"
           --health-interval=5s
@@ -139,7 +139,7 @@ jobs:
 
       redis:
         image: redis:7-alpine
-        ports: ['6379:6379']
+        ports: ["6379:6379"]
         options: >-
           --health-cmd="redis-cli ping"
           --health-interval=5s
@@ -151,7 +151,7 @@ jobs:
         env:
           NEO4J_AUTH: neo4j/testpassword
           NEO4J_PLUGINS: '["apoc"]'
-        ports: ['7474:7474', '7687:7687']
+        ports: ["7474:7474", "7687:7687"]
         options: >-
           --health-cmd="neo4j status"
           --health-interval=10s
@@ -171,7 +171,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ needs.setup.outputs.node }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -229,7 +229,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ needs.setup.outputs.node }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -270,19 +270,19 @@ jobs:
       - name: SBOM Generation (Syft)
         uses: anchore/sbom-action@v0.17.1
         with:
-          path: '.'
-          format: 'spdx-json'
-          output-file: 'sbom.spdx.json'
+          path: "."
+          format: "spdx-json"
+          output-file: "sbom.spdx.json"
 
       - name: Vulnerability Scan (Trivy)
         uses: aquasecurity/trivy-action@0.24.0
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH'
-          exit-code: '0' # Don't fail on vulnerabilities, just report
+          scan-type: "fs"
+          scan-ref: "."
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "CRITICAL,HIGH"
+          exit-code: "0" # Don't fail on vulnerabilities, just report
 
       - name: Secret Scanning (gitleaks)
         uses: gitleaks/gitleaks-action@v2
@@ -294,8 +294,8 @@ jobs:
         if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: 'trivy-results.sarif'
-          category: 'trivy-security-scan'
+          sarif_file: "trivy-results.sarif"
+          category: "trivy-security-scan"
 
       - name: SBOM attestation (Cosign)
         if: github.ref == 'refs/heads/main'
@@ -338,7 +338,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ needs.setup.outputs.node }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

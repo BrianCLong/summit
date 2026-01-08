@@ -3,61 +3,65 @@
     "number": 1,
     "title": "feat: add new metric",
     "updatedAt": "2024-05-20T10:00:00Z",
-    "labels": [{"name": "enhancement"}, {"name": "metrics"}],
+    "labels": [{ "name": "enhancement" }, { "name": "metrics" }],
     "headRefName": "feat/new-metric",
     "statusCheckRollup": {
       "state": "SUCCESS"
     },
-    "files": [{"path": "packages/metrics/src/index.ts"}]
+    "files": [{ "path": "packages/metrics/src/index.ts" }]
   },
   {
     "number": 2,
     "title": "fix: ci workflow typo",
     "updatedAt": "2024-05-20T11:00:00Z",
-    "labels": [{"name": "bug"}, {"name": "ci"}],
+    "labels": [{ "name": "bug" }, { "name": "ci" }],
     "headRefName": "fix/ci-typo",
     "statusCheckRollup": {
       "state": "FAILURE",
       "contexts": [
-        {"context": "ci/workflow-check", "state": "FAILURE", "description": "Workflow syntax error"}
+        {
+          "context": "ci/workflow-check",
+          "state": "FAILURE",
+          "description": "Workflow syntax error"
+        }
       ]
     },
-    "files": [{"path": ".github/workflows/ci.yml"}]
+    "files": [{ "path": ".github/workflows/ci.yml" }]
   },
   {
     "number": 3,
     "title": "chore: update deps",
     "updatedAt": "2024-05-20T12:00:00Z",
-    "labels": [{"name": "dependencies"}],
+    "labels": [{ "name": "dependencies" }],
     "headRefName": "chore/deps",
     "statusCheckRollup": {
       "state": "PENDING"
     },
-    "files": [{"path": "package.json"}, {"path": "apps/web/package.json"}]
+    "files": [{ "path": "package.json" }, { "path": "apps/web/package.json" }]
   },
   {
     "number": 4,
     "title": "docs: update readme",
     "updatedAt": "2024-05-20T13:00:00Z",
-    "labels": [{"name": "documentation"}],
+    "labels": [{ "name": "documentation" }],
     "headRefName": "docs/readme",
     "statusCheckRollup": {
       "state": "SUCCESS"
     },
-    "files": [{"path": "README.md"}]
+    "files": [{ "path": "README.md" }]
   },
   {
     "number": 5,
     "title": "feat: failing test",
     "updatedAt": "2024-05-20T14:00:00Z",
-    "labels": [{"name": "feat"}],
+    "labels": [{ "name": "feat" }],
     "headRefName": "feat/failing",
     "statusCheckRollup": {
       "state": "FAILURE",
       "contexts": [
-        {"context": "test", "state": "FAILURE", "description": "Error: ERR_MODULE_NOT_FOUND"}
+        { "context": "test", "state": "FAILURE", "description": "Error: ERR_MODULE_NOT_FOUND" }
       ]
     },
-    "files": [{"path": "apps/web/src/utils.ts"}]
+    "files": [{ "path": "apps/web/src/utils.ts" }]
   }
 ]

@@ -1,16 +1,16 @@
 /**
  * GitHub API integration for fetching issues and PRs
  */
-import { TriageItem } from '../types.js';
+import { TriageItem } from "../types.js";
 export interface GitHubFetchOptions {
-    owner: string;
-    repo: string;
-    token?: string;
-    includeIssues?: boolean;
-    includePRs?: boolean;
-    state?: 'open' | 'closed' | 'all';
-    labels?: string[];
-    maxResults?: number;
+  owner: string;
+  repo: string;
+  token?: string;
+  includeIssues?: boolean;
+  includePRs?: boolean;
+  state?: "open" | "closed" | "all";
+  labels?: string[];
+  maxResults?: number;
 }
 export declare function fetchGitHubIssues(options: GitHubFetchOptions): Promise<TriageItem[]>;
 /**

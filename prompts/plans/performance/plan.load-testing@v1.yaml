@@ -1,7 +1,7 @@
 meta:
   id: plan.load-testing@v1
-  owner: 'platform-engineering'
-  purpose: 'Design and execute load testing strategy to validate scalability under peak load'
+  owner: "platform-engineering"
+  purpose: "Design and execute load testing strategy to validate scalability under peak load"
   tags:
     - performance
     - load-testing
@@ -9,13 +9,13 @@ meta:
     - stress-testing
     - capacity
   guardrails:
-    - 'Load tests must not affect production systems'
-    - 'Test data must not contain PII'
-    - 'Graceful degradation must be verified'
-    - 'Results must inform capacity planning'
+    - "Load tests must not affect production systems"
+    - "Test data must not contain PII"
+    - "Graceful degradation must be verified"
+    - "Results must inform capacity planning"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -120,15 +120,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'graphql-load-testing'
+  - name: "graphql-load-testing"
     inputs:
-      target_endpoints: 'POST /graphql (queries, mutations), GET /health'
-      expected_peak_load: '2000 concurrent users, 5000 req/min'
-      current_capacity: '500 concurrent, 1000 req/min'
-      infrastructure_limits: '8 pods max, 4 CPU / 8GB each'
-      sli_targets: 'p99 < 500ms, error rate < 1%, availability > 99.9%'
+      target_endpoints: "POST /graphql (queries, mutations), GET /health"
+      expected_peak_load: "2000 concurrent users, 5000 req/min"
+      current_capacity: "500 concurrent, 1000 req/min"
+      infrastructure_limits: "8 pods max, 4 CPU / 8GB each"
+      sli_targets: "p99 < 500ms, error rate < 1%, availability > 99.9%"
     expected_contains:
-      - 'scenarios'
-      - 'Test Matrix'
-      - 'SLIs'
-      - 'CI Integration'
+      - "scenarios"
+      - "Test Matrix"
+      - "SLIs"
+      - "CI Integration"

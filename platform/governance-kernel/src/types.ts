@@ -1,6 +1,11 @@
-export type RiskCategory = 'defensive_security' | 'analytics' | 'foresight' | 'influence_operations' | 'authoritarian_surveillance';
+export type RiskCategory =
+  | "defensive_security"
+  | "analytics"
+  | "foresight"
+  | "influence_operations"
+  | "authoritarian_surveillance";
 
-export type PolicyResult = 'ALLOWED' | 'CONDITIONAL' | 'DENIED';
+export type PolicyResult = "ALLOWED" | "CONDITIONAL" | "DENIED";
 
 export interface GovernanceDecision {
   id: string;

@@ -12,7 +12,7 @@ class SecurityManager {
   }
 
   private setupActivityListeners() {
-    ['mousedown', 'keydown', 'touchstart'].forEach(event => {
+    ["mousedown", "keydown", "touchstart"].forEach((event) => {
       window.addEventListener(event, () => this.recordActivity());
     });
 
@@ -38,7 +38,7 @@ class SecurityManager {
 
   public unlock(pin: string): boolean {
     // Mock PIN check
-    if (pin === '1234') {
+    if (pin === "1234") {
       this.isLocked = false;
       this.lastActivity = Date.now();
       if (this.lockListener) this.lockListener(false);
@@ -55,7 +55,7 @@ class SecurityManager {
   private startWipeCheck() {
     setInterval(async () => {
       // In a real app, this would check an endpoint or a special flag in the sync response
-      const shouldWipe = localStorage.getItem('__simulate_remote_wipe') === 'true';
+      const shouldWipe = localStorage.getItem("__simulate_remote_wipe") === "true";
       if (shouldWipe) {
         await this.wipeDevice();
       }
@@ -63,22 +63,22 @@ class SecurityManager {
   }
 
   private async wipeDevice() {
-    console.warn('EXECUTING REMOTE WIPE');
+    console.warn("EXECUTING REMOTE WIPE");
     // Clear IndexedDB
     // Note: In a real app we would iterate all stores and clear them
     // For this demo we just rely on the storage abstraction if it had a clear method,
     // or manually delete the DB.
     try {
-        const dbs = await window.indexedDB.databases();
-        dbs.forEach(db => {
-            if (db.name) window.indexedDB.deleteDatabase(db.name);
-        });
-        localStorage.clear();
-        sessionStorage.clear();
-        if (this.wipeListener) this.wipeListener(true);
-        window.location.reload();
+      const dbs = await window.indexedDB.databases();
+      dbs.forEach((db) => {
+        if (db.name) window.indexedDB.deleteDatabase(db.name);
+      });
+      localStorage.clear();
+      sessionStorage.clear();
+      if (this.wipeListener) this.wipeListener(true);
+      window.location.reload();
     } catch (e) {
-        console.error('Wipe failed', e);
+      console.error("Wipe failed", e);
     }
   }
 

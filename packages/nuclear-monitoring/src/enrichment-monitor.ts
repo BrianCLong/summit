@@ -5,11 +5,7 @@
  * and Separative Work Unit (SWU) capacity assessment.
  */
 
-import type {
-  EnrichmentActivity,
-  EnrichmentIndicator,
-  ConfidenceLevel
-} from './types.js';
+import type { EnrichmentActivity, EnrichmentIndicator, ConfidenceLevel } from "./types.js";
 
 export class EnrichmentMonitor {
   private activities: Map<string, EnrichmentActivity[]>;
@@ -63,7 +59,7 @@ export class EnrichmentMonitor {
 
     // Use most recent activity with SWU data
     const withSWU = activities
-      .filter(a => a.swu_capacity)
+      .filter((a) => a.swu_capacity)
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
     return withSWU[0]?.swu_capacity || 0;
@@ -72,7 +68,10 @@ export class EnrichmentMonitor {
   /**
    * Estimate time to produce significant quantity (SQ) of HEU
    */
-  estimateTimeToSQ(facilityId: string, targetEnrichment: number = 90): {
+  estimateTimeToSQ(
+    facilityId: string,
+    targetEnrichment: number = 90
+  ): {
     days: number;
     swu_required: number;
     feasible: boolean;
@@ -100,7 +99,7 @@ export class EnrichmentMonitor {
     return {
       days: Math.ceil(daysRequired),
       swu_required: totalSWU,
-      feasible: daysRequired < 365 // Feasible if less than a year
+      feasible: daysRequired < 365, // Feasible if less than a year
     };
   }
 
@@ -109,8 +108,11 @@ export class EnrichmentMonitor {
    */
   private calculateSWUperKg(feed: number, product: number, tails: number): number {
     const V = (p: number) => (2 * p - 1) * Math.log(p / (1 - p));
-    return V(product) + (feed - product) / (feed - tails) * V(tails) -
-           feed / (feed - tails) * V(feed);
+    return (
+      V(product) +
+      ((feed - product) / (feed - tails)) * V(tails) -
+      (feed / (feed - tails)) * V(feed)
+    );
   }
 
   /**
@@ -123,8 +125,8 @@ export class EnrichmentMonitor {
     if (activities.length < 2) return anomalies;
 
     // Check for rapid enrichment level increase
-    const sorted = activities.sort((a, b) =>
-      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    const sorted = activities.sort(
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
     );
 
     for (let i = 1; i < sorted.length; i++) {
@@ -134,11 +136,11 @@ export class EnrichmentMonitor {
       const levelIncrease = curr.enrichment_level - prev.enrichment_level;
       if (levelIncrease > 10) {
         anomalies.push({
-          type: 'rapid_enrichment_increase',
+          type: "rapid_enrichment_increase",
           value: levelIncrease,
-          unit: '% U-235',
-          significance: 'high',
-          description: `Enrichment level increased by ${levelIncrease.toFixed(2)}% in short period`
+          unit: "% U-235",
+          significance: "high",
+          description: `Enrichment level increased by ${levelIncrease.toFixed(2)}% in short period`,
         });
       }
 
@@ -147,11 +149,11 @@ export class EnrichmentMonitor {
         const increase = curr.centrifuge_count - prev.centrifuge_count;
         if (increase > 1000) {
           anomalies.push({
-            type: 'capacity_expansion',
+            type: "capacity_expansion",
             value: increase,
-            unit: 'centrifuges',
-            significance: 'high',
-            description: `Added ${increase} centrifuges`
+            unit: "centrifuges",
+            significance: "high",
+            description: `Added ${increase} centrifuges`,
           });
         }
       }
@@ -162,11 +164,11 @@ export class EnrichmentMonitor {
         const percentIncrease = (powerIncrease / prev.power_consumption) * 100;
         if (percentIncrease > 50) {
           anomalies.push({
-            type: 'power_surge',
+            type: "power_surge",
             value: percentIncrease,
-            unit: '%',
-            significance: 'medium',
-            description: `Power consumption increased by ${percentIncrease.toFixed(1)}%`
+            unit: "%",
+            significance: "medium",
+            description: `Power consumption increased by ${percentIncrease.toFixed(1)}%`,
           });
         }
       }
@@ -179,13 +181,13 @@ export class EnrichmentMonitor {
    * Assess proliferation risk based on enrichment activities
    */
   assessProliferationRisk(facilityId: string): {
-    risk_level: 'critical' | 'high' | 'medium' | 'low';
+    risk_level: "critical" | "high" | "medium" | "low";
     risk_score: number;
     factors: string[];
   } {
     const activities = this.getActivities(facilityId);
     if (activities.length === 0) {
-      return { risk_level: 'low', risk_score: 0, factors: ['No activity data'] };
+      return { risk_level: "low", risk_score: 0, factors: ["No activity data"] };
     }
 
     const latest = activities[activities.length - 1];
@@ -195,21 +197,21 @@ export class EnrichmentMonitor {
     // Enrichment level risk
     if (latest.enrichment_level >= this.WEAPONS_GRADE_THRESHOLD) {
       riskScore += 50;
-      factors.push('Weapons-grade enrichment detected');
+      factors.push("Weapons-grade enrichment detected");
     } else if (latest.enrichment_level >= this.HEU_THRESHOLD) {
       riskScore += 30;
-      factors.push('HEU production capability');
+      factors.push("HEU production capability");
     }
 
     // Capacity risk
     if (latest.swu_capacity && latest.swu_capacity > 10000) {
       riskScore += 20;
-      factors.push('High SWU capacity');
+      factors.push("High SWU capacity");
     }
 
     if (latest.centrifuge_count && latest.centrifuge_count > 5000) {
       riskScore += 15;
-      factors.push('Large centrifuge cascade');
+      factors.push("Large centrifuge cascade");
     }
 
     // Anomaly detection
@@ -220,15 +222,15 @@ export class EnrichmentMonitor {
     }
 
     // Determine risk level
-    let risk_level: 'critical' | 'high' | 'medium' | 'low';
+    let risk_level: "critical" | "high" | "medium" | "low";
     if (riskScore >= 70) {
-      risk_level = 'critical';
+      risk_level = "critical";
     } else if (riskScore >= 50) {
-      risk_level = 'high';
+      risk_level = "high";
     } else if (riskScore >= 30) {
-      risk_level = 'medium';
+      risk_level = "medium";
     } else {
-      risk_level = 'low';
+      risk_level = "low";
     }
 
     return { risk_level, risk_score: riskScore, factors };
@@ -238,19 +240,20 @@ export class EnrichmentMonitor {
    * Get enrichment trend over time
    */
   getEnrichmentTrend(facilityId: string): {
-    trend: 'increasing' | 'stable' | 'decreasing' | 'unknown';
+    trend: "increasing" | "stable" | "decreasing" | "unknown";
     data_points: Array<{ timestamp: string; enrichment_level: number }>;
   } {
-    const activities = this.getActivities(facilityId)
-      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    const activities = this.getActivities(facilityId).sort(
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    );
 
     if (activities.length < 2) {
-      return { trend: 'unknown', data_points: [] };
+      return { trend: "unknown", data_points: [] };
     }
 
-    const data_points = activities.map(a => ({
+    const data_points = activities.map((a) => ({
       timestamp: a.timestamp,
-      enrichment_level: a.enrichment_level
+      enrichment_level: a.enrichment_level,
     }));
 
     // Simple trend analysis
@@ -258,13 +261,13 @@ export class EnrichmentMonitor {
     const last = activities[activities.length - 1].enrichment_level;
     const diff = last - first;
 
-    let trend: 'increasing' | 'stable' | 'decreasing';
+    let trend: "increasing" | "stable" | "decreasing";
     if (diff > 5) {
-      trend = 'increasing';
+      trend = "increasing";
     } else if (diff < -5) {
-      trend = 'decreasing';
+      trend = "decreasing";
     } else {
-      trend = 'stable';
+      trend = "stable";
     }
 
     return { trend, data_points };
@@ -284,17 +287,16 @@ export class EnrichmentMonitor {
     swu_required: number;
   } {
     // Material balance equations
-    const P = feedRate * (feedAssay - tailsAssay) / (productAssay - tailsAssay);
+    const P = (feedRate * (feedAssay - tailsAssay)) / (productAssay - tailsAssay);
     const T = feedRate - P;
 
     const V = (p: number) => (2 * p - 1) * Math.log(p / (1 - p));
-    const swu = P * V(productAssay / 100) + T * V(tailsAssay / 100) -
-                feedRate * V(feedAssay / 100);
+    const swu = P * V(productAssay / 100) + T * V(tailsAssay / 100) - feedRate * V(feedAssay / 100);
 
     return {
       product_rate: P,
       tails_rate: T,
-      swu_required: swu
+      swu_required: swu,
     };
   }
 }

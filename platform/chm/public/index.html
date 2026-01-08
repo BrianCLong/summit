@@ -6,18 +6,46 @@
     <title>CHM Controls</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
     <style>
-      body { padding: 1.5rem; }
-      .banner { border: 2px solid #b00020; padding: 0.75rem; margin-bottom: 1rem; background: #ffe8e8; }
-      .ribbon { background: linear-gradient(45deg, #b00020, #e65100); color: white; padding: 0.25rem 0.75rem; border-radius: 4px; font-weight: bold; }
-      .stamp { border: 2px dashed #0f766e; padding: 0.5rem; display: inline-block; margin-top: 0.5rem; text-transform: uppercase; font-weight: 700; }
-      .disclaimer { font-size: 0.95rem; color: #4b5563; }
-      #derived-label { display: none; }
+      body {
+        padding: 1.5rem;
+      }
+      .banner {
+        border: 2px solid #b00020;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        background: #ffe8e8;
+      }
+      .ribbon {
+        background: linear-gradient(45deg, #b00020, #e65100);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        font-weight: bold;
+      }
+      .stamp {
+        border: 2px dashed #0f766e;
+        padding: 0.5rem;
+        display: inline-block;
+        margin-top: 0.5rem;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+      .disclaimer {
+        font-size: 0.95rem;
+        color: #4b5563;
+      }
+      #derived-label {
+        display: none;
+      }
     </style>
   </head>
   <body>
     <section class="banner">
       <div class="ribbon">Controlled Handling & Markings</div>
-      <p class="disclaimer">Exports require residency and license conformance. Unauthorized export attempts are recorded.</p>
+      <p class="disclaimer">
+        Exports require residency and license conformance. Unauthorized export attempts are
+        recorded.
+      </p>
       <p id="derived-label" class="stamp">Derived from controlled source</p>
     </section>
 
@@ -48,10 +76,10 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
       $(function () {
-        $('#derived-toggle').on('change', function () {
-          const checked = $(this).is(':checked');
-          $('#derived-label').toggle(checked);
-          $('#status').text(checked ? 'Derived-from marking applied' : 'No export initiated');
+        $("#derived-toggle").on("change", function () {
+          const checked = $(this).is(":checked");
+          $("#derived-label").toggle(checked);
+          $("#status").text(checked ? "Derived-from marking applied" : "No export initiated");
         });
       });
     </script>

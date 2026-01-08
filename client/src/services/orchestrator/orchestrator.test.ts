@@ -4,18 +4,18 @@ import {
   defaultModules,
   ModuleSnapshot,
   OrchestratorTask,
-} from './index';
+} from "./index";
 
 jest.setTimeout(10000);
 
-describe('LaunchableOrchestrator', () => {
-  it('starts all modules and exposes running statuses', async () => {
+describe("LaunchableOrchestrator", () => {
+  it("starts all modules and exposes running statuses", async () => {
     const orchestrator = createLaunchableOrchestrator();
     const snapshots = await orchestrator.startAll();
 
     expect(snapshots).toHaveLength(defaultModules.length);
     snapshots.forEach((snapshot: ModuleSnapshot) => {
-      expect(snapshot.status.state).toBe('running');
+      expect(snapshot.status.state).toBe("running");
       expect(snapshot.definition.capabilities.length).toBeGreaterThan(0);
     });
 
@@ -25,110 +25,108 @@ describe('LaunchableOrchestrator', () => {
     });
   });
 
-  it('dispatches composite launch task across all modules', async () => {
+  it("dispatches composite launch task across all modules", async () => {
     const orchestrator = createLaunchableOrchestrator();
     await orchestrator.startAll();
 
     const task: OrchestratorTask = {
-      id: 'launch-001',
-      name: 'Enterprise Launch Readiness',
+      id: "launch-001",
+      name: "Enterprise Launch Readiness",
       createdAt: new Date().toISOString(),
-      priority: 'critical',
-      requestedBy: 'launch-director',
+      priority: "critical",
+      requestedBy: "launch-director",
       actions: [
-        { moduleId: 'maestro-composer', action: 'compose-blueprint' },
-        { moduleId: 'build-plane', action: 'prepare-artifacts' },
-        { moduleId: 'build-platform', action: 'plan-release' },
-        { moduleId: 'company-os', action: 'synchronize-policies' },
-        { moduleId: 'switchboard', action: 'route-signal' },
-        { moduleId: 'intelgraph', action: 'analyze-graph' },
-        { moduleId: 'activities', action: 'generate-report' },
+        { moduleId: "maestro-composer", action: "compose-blueprint" },
+        { moduleId: "build-plane", action: "prepare-artifacts" },
+        { moduleId: "build-platform", action: "plan-release" },
+        { moduleId: "company-os", action: "synchronize-policies" },
+        { moduleId: "switchboard", action: "route-signal" },
+        { moduleId: "intelgraph", action: "analyze-graph" },
+        { moduleId: "activities", action: "generate-report" },
       ],
       metadata: {
-        release: 'v24.0.0',
-        changeWindow: '2025-01-07T09:00:00Z',
+        release: "v24.0.0",
+        changeWindow: "2025-01-07T09:00:00Z",
       },
     };
 
     const record = await orchestrator.dispatchTask(task);
-    expect(record.status).toBe('completed');
+    expect(record.status).toBe("completed");
     expect(record.results).toHaveLength(task.actions.length);
     record.results.forEach((result) => {
-      expect(result.status).toBe('success');
+      expect(result.status).toBe("success");
       expect(result.message.length).toBeGreaterThan(0);
     });
   });
 
-  it('surfaces errors when an action is unsupported', async () => {
+  it("surfaces errors when an action is unsupported", async () => {
     const orchestrator = createLaunchableOrchestrator();
     await orchestrator.startAll();
 
     const task: OrchestratorTask = {
-      id: 'unsupported-001',
-      name: 'Unsupported Action',
+      id: "unsupported-001",
+      name: "Unsupported Action",
       createdAt: new Date().toISOString(),
-      priority: 'normal',
-      requestedBy: 'qa-lead',
-      actions: [
-        { moduleId: 'maestro-composer', action: 'non-existent-action' },
-      ],
+      priority: "normal",
+      requestedBy: "qa-lead",
+      actions: [{ moduleId: "maestro-composer", action: "non-existent-action" }],
     };
 
     const record = await orchestrator.dispatchTask(task);
-    expect(record.status).toBe('error');
-    expect(record.results[0].status).toBe('error');
-    expect(record.results[0].message).toContain('does not support action');
+    expect(record.status).toBe("error");
+    expect(record.results[0].status).toBe("error");
+    expect(record.results[0].message).toContain("does not support action");
   });
 
-  it('surfaces errors when a module is missing', async () => {
+  it("surfaces errors when a module is missing", async () => {
     const orchestrator = createLaunchableOrchestrator();
     await orchestrator.startAll();
 
     const task: OrchestratorTask = {
-      id: 'missing-module-001',
-      name: 'Missing Module',
+      id: "missing-module-001",
+      name: "Missing Module",
       createdAt: new Date().toISOString(),
-      priority: 'normal',
-      requestedBy: 'qa-lead',
-      actions: [{ moduleId: 'non-existent', action: 'anything' }],
+      priority: "normal",
+      requestedBy: "qa-lead",
+      actions: [{ moduleId: "non-existent", action: "anything" }],
     };
 
     const record = await orchestrator.dispatchTask(task);
-    expect(record.status).toBe('error');
-    expect(record.results[0].status).toBe('error');
-    expect(record.results[0].message).toContain('is not registered');
+    expect(record.status).toBe("error");
+    expect(record.results[0].status).toBe("error");
+    expect(record.results[0].message).toContain("is not registered");
   });
 
-  it('emits task lifecycle events', async () => {
+  it("emits task lifecycle events", async () => {
     const orchestrator = createLaunchableOrchestrator();
     await orchestrator.startAll();
 
     const events: string[] = [];
-    orchestrator.on('task:started', (record) => {
+    orchestrator.on("task:started", (record) => {
       events.push(`started:${record.task.id}`);
     });
-    orchestrator.on('task:completed', (record) => {
+    orchestrator.on("task:completed", (record) => {
       events.push(`completed:${record.task.id}`);
     });
 
     const task: OrchestratorTask = {
-      id: 'event-001',
-      name: 'Event Emission Test',
+      id: "event-001",
+      name: "Event Emission Test",
       createdAt: new Date().toISOString(),
-      priority: 'high',
-      requestedBy: 'platform-ops',
+      priority: "high",
+      requestedBy: "platform-ops",
       actions: [
-        { moduleId: 'switchboard', action: 'sync-webhooks' },
-        { moduleId: 'activities', action: 'log-activity' },
+        { moduleId: "switchboard", action: "sync-webhooks" },
+        { moduleId: "activities", action: "log-activity" },
       ],
     };
 
     const record = await orchestrator.dispatchTask(task);
-    expect(record.status).toBe('completed');
+    expect(record.status).toBe("completed");
     expect(events).toEqual([`started:${task.id}`, `completed:${task.id}`]);
   });
 
-  it('validates mission presets against the orchestrator catalog', async () => {
+  it("validates mission presets against the orchestrator catalog", async () => {
     const orchestrator = createLaunchableOrchestrator();
     await orchestrator.startAll();
 

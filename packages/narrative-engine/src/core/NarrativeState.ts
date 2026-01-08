@@ -1,6 +1,6 @@
-import { Actor } from '../entities/Actor.js';
-import { Relationship } from '../entities/Relationship.js';
-import type { Event, RelationshipConfig } from './types.js';
+import { Actor } from "../entities/Actor.js";
+import { Relationship } from "../entities/Relationship.js";
+import type { Event, RelationshipConfig } from "./types.js";
 
 export class NarrativeState {
   actors: Map<string, Actor> = new Map();
@@ -43,13 +43,13 @@ export class NarrativeState {
       sourceId: config.targetId,
       targetId: config.sourceId,
       type:
-        config.type === 'ally'
-          ? 'ally'
-          : config.type === 'rival'
-            ? 'rival'
-            : config.type === 'family'
-              ? 'family'
-              : 'neutral',
+        config.type === "ally"
+          ? "ally"
+          : config.type === "rival"
+            ? "rival"
+            : config.type === "family"
+              ? "family"
+              : "neutral",
       intensity: config.intensity,
       trust: config.trust,
     });
@@ -78,7 +78,7 @@ export class NarrativeState {
   toJSON(): {
     timestamp: number;
     events: Event[];
-    actors: ReturnType<Actor['snapshot']>[];
+    actors: ReturnType<Actor["snapshot"]>[];
     logs: string[];
   } {
     return {

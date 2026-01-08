@@ -3,13 +3,8 @@
  * Provides field-level RBAC with role and permission-based access control
  */
 
-import {
-  defaultFieldResolver,
-  GraphQLField,
-  GraphQLFieldResolver,
-  GraphQLSchema,
-} from 'graphql';
-import { mapSchema, getDirective, MapperKind } from '@graphql-tools/utils';
+import { defaultFieldResolver, GraphQLField, GraphQLFieldResolver, GraphQLSchema } from "graphql";
+import { mapSchema, getDirective, MapperKind } from "@graphql-tools/utils";
 
 // Authorization context interface
 export interface AuthContext {
@@ -34,14 +29,14 @@ export class AuthorizationError extends Error {
     public readonly userPermissions?: string[]
   ) {
     super(message);
-    this.name = 'AuthorizationError';
+    this.name = "AuthorizationError";
   }
 }
 
 /**
  * @auth directive - Requires authentication
  */
-export function authDirective(directiveName = 'auth') {
+export function authDirective(directiveName = "auth") {
   const typeDefs = `
     directive @${directiveName}(
       """Required roles (OR logic - user must have at least one)"""
@@ -64,12 +59,7 @@ export function authDirective(directiveName = 'auth') {
         const directive = getDirective(schema, fieldConfig, directiveName)?.[0];
         if (!directive) return fieldConfig;
 
-        const {
-          roles,
-          permissions,
-          requireOwnership,
-          ownerField,
-        } = directive as {
+        const { roles, permissions, requireOwnership, ownerField } = directive as {
           roles?: string[];
           permissions?: string[];
           requireOwnership?: boolean;
@@ -86,21 +76,15 @@ export function authDirective(directiveName = 'auth') {
         ) => {
           // Check if user is authenticated
           if (!context.user) {
-            throw new AuthorizationError(
-              'Authentication required',
-              roles,
-              permissions
-            );
+            throw new AuthorizationError("Authentication required", roles, permissions);
           }
 
           // Check roles (OR logic - user needs at least one)
           if (roles && roles.length > 0) {
-            const hasRole = roles.some((role) =>
-              context.user!.roles.includes(role)
-            );
+            const hasRole = roles.some((role) => context.user!.roles.includes(role));
             if (!hasRole) {
               throw new AuthorizationError(
-                `Access denied. Required roles: ${roles.join(' OR ')}`,
+                `Access denied. Required roles: ${roles.join(" OR ")}`,
                 roles,
                 permissions,
                 context.user.roles,
@@ -119,7 +103,7 @@ export function authDirective(directiveName = 'auth') {
                 (p) => !context.user!.permissions.includes(p)
               );
               throw new AuthorizationError(
-                `Access denied. Missing permissions: ${missingPermissions.join(', ')}`,
+                `Access denied. Missing permissions: ${missingPermissions.join(", ")}`,
                 roles,
                 permissions,
                 context.user.roles,
@@ -136,10 +120,10 @@ export function authDirective(directiveName = 'auth') {
 
             if (ownerId && ownerId !== context.user.id) {
               // Allow admins to bypass ownership check
-              const isAdmin = context.user.roles.includes('admin');
+              const isAdmin = context.user.roles.includes("admin");
               if (!isAdmin) {
                 throw new AuthorizationError(
-                  'Access denied. You can only access your own resources',
+                  "Access denied. You can only access your own resources",
                   roles,
                   permissions,
                   context.user.roles,
@@ -166,7 +150,7 @@ export function authDirective(directiveName = 'auth') {
 /**
  * @rateLimit directive - Rate limiting per user/tenant
  */
-export function rateLimitDirective(directiveName = 'rateLimit') {
+export function rateLimitDirective(directiveName = "rateLimit") {
   const typeDefs = `
     directive @${directiveName}(
       """Maximum requests per window"""
@@ -198,7 +182,7 @@ export function rateLimitDirective(directiveName = 'rateLimit') {
         const { max, window, scope } = directive as {
           max: number;
           window: number;
-          scope: 'USER' | 'TENANT' | 'IP';
+          scope: "USER" | "TENANT" | "IP";
         };
 
         const originalResolve = fieldConfig.resolve ?? defaultFieldResolver;
@@ -212,17 +196,17 @@ export function rateLimitDirective(directiveName = 'rateLimit') {
           // Determine rate limit key based on scope
           let key: string;
           switch (scope) {
-            case 'TENANT':
-              key = `${info.fieldName}:tenant:${context.user?.tenantId || 'anonymous'}`;
+            case "TENANT":
+              key = `${info.fieldName}:tenant:${context.user?.tenantId || "anonymous"}`;
               break;
-            case 'USER':
-              key = `${info.fieldName}:user:${context.user?.id || 'anonymous'}`;
+            case "USER":
+              key = `${info.fieldName}:user:${context.user?.id || "anonymous"}`;
               break;
-            case 'IP':
-              key = `${info.fieldName}:ip:${(context as any).ip || 'unknown'}`;
+            case "IP":
+              key = `${info.fieldName}:ip:${(context as any).ip || "unknown"}`;
               break;
             default:
-              key = `${info.fieldName}:user:${context.user?.id || 'anonymous'}`;
+              key = `${info.fieldName}:user:${context.user?.id || "anonymous"}`;
           }
 
           const now = Date.now();
@@ -232,9 +216,7 @@ export function rateLimitDirective(directiveName = 'rateLimit') {
             // Within window
             if (record.count >= max) {
               const resetIn = Math.ceil((record.resetAt - now) / 1000);
-              throw new Error(
-                `Rate limit exceeded. Try again in ${resetIn} seconds.`
-              );
+              throw new Error(`Rate limit exceeded. Try again in ${resetIn} seconds.`);
             }
             record.count++;
           } else {
@@ -270,7 +252,7 @@ export function rateLimitDirective(directiveName = 'rateLimit') {
 /**
  * @deprecated directive - Mark fields as deprecated with migration info
  */
-export function deprecatedDirective(directiveName = 'deprecated') {
+export function deprecatedDirective(directiveName = "deprecated") {
   const typeDefs = `
     directive @${directiveName}(
       """Deprecation reason"""
@@ -306,15 +288,12 @@ export function deprecatedDirective(directiveName = 'deprecated') {
           info
         ) => {
           // Log usage of deprecated field
-          console.warn(
-            `Deprecated field used: ${info.parentType}.${info.fieldName}`,
-            {
-              reason,
-              removeBy,
-              replaceWith,
-              user: (context as AuthContext).user?.id,
-            }
-          );
+          console.warn(`Deprecated field used: ${info.parentType}.${info.fieldName}`, {
+            reason,
+            removeBy,
+            replaceWith,
+            user: (context as AuthContext).user?.id,
+          });
 
           return originalResolve(source, args, context, info);
         };
@@ -333,11 +312,7 @@ export function deprecatedDirective(directiveName = 'deprecated') {
 /**
  * Helper to format deprecation reason
  */
-function formatDeprecationReason(
-  reason: string,
-  removeBy?: string,
-  replaceWith?: string
-): string {
+function formatDeprecationReason(reason: string, removeBy?: string, replaceWith?: string): string {
   let formatted = reason;
   if (replaceWith) {
     formatted += ` Use \`${replaceWith}\` instead.`;
@@ -352,7 +327,7 @@ function formatDeprecationReason(
  * Helper to get nested value from object
  */
 function getNestedValue(obj: any, path: string): any {
-  return path.split('.').reduce((current, prop) => current?.[prop], obj);
+  return path.split(".").reduce((current, prop) => current?.[prop], obj);
 }
 
 /**
@@ -408,28 +383,28 @@ export class RolePermissionMapper {
 export const defaultRolePermissions = new RolePermissionMapper();
 
 // Define standard roles
-defaultRolePermissions.defineRole('admin', [
-  'read:all',
-  'write:all',
-  'delete:all',
-  'manage:users',
-  'manage:roles',
-  'manage:investigations',
+defaultRolePermissions.defineRole("admin", [
+  "read:all",
+  "write:all",
+  "delete:all",
+  "manage:users",
+  "manage:roles",
+  "manage:investigations",
 ]);
 
-defaultRolePermissions.defineRole('analyst', [
-  'read:investigations',
-  'write:investigations',
-  'read:entities',
-  'write:entities',
-  'read:relationships',
-  'write:relationships',
+defaultRolePermissions.defineRole("analyst", [
+  "read:investigations",
+  "write:investigations",
+  "read:entities",
+  "write:entities",
+  "read:relationships",
+  "write:relationships",
 ]);
 
-defaultRolePermissions.defineRole('viewer', [
-  'read:investigations',
-  'read:entities',
-  'read:relationships',
+defaultRolePermissions.defineRole("viewer", [
+  "read:investigations",
+  "read:entities",
+  "read:relationships",
 ]);
 
-defaultRolePermissions.defineRole('guest', ['read:public']);
+defaultRolePermissions.defineRole("guest", ["read:public"]);

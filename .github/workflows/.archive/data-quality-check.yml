@@ -2,9 +2,9 @@ name: Data Quality Checks
 
 on:
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   schedule:
-    - cron: '0 0 * * *' # Daily at midnight
+    - cron: "0 0 * * *" # Daily at midnight
   workflow_dispatch:
 
 jobs:
@@ -43,7 +43,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install Dependencies
         run: |
@@ -64,8 +64,8 @@ jobs:
           NEO4J_USER: neo4j
           NEO4J_PASSWORD: password
         run: |
-           # Attempt to run migrations
-           pnpm migrate || echo "Migration script failed or missing, skipping..."
+          # Attempt to run migrations
+          pnpm migrate || echo "Migration script failed or missing, skipping..."
 
       - name: Run Data Quality Checks
         env:

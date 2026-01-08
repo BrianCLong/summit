@@ -17,7 +17,7 @@ jobs:
         uses: lewagon/wait-on-check-action@v1.3.1 # v1.3.1
         with:
           ref: ${{ github.ref }}
-          check-name: 'ci-test'
+          check-name: "ci-test"
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           wait-interval: 60
 
@@ -26,7 +26,7 @@ jobs:
         uses: fastify/github-action-merge-dependabot@9e3b0035baf695d18723687b4f9ed38e9978d28a # v3.10.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          target: 'patch'
+          target: "patch"
 
   batch-dependabot:
     runs-on: ubuntu-latest
@@ -50,11 +50,11 @@ jobs:
         uses: peter-evans/create-pull-request@522d288e3c1218536da6b035514144653547d0a1 # v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: 'chore(deps): batch update dependabot PRs'
-          title: 'chore(deps): batch update dependabot PRs'
+          commit-message: "chore(deps): batch update dependabot PRs"
+          title: "chore(deps): batch update dependabot PRs"
           body: "This PR batches the following dependabot PRs:\n${{ steps.get_prs.outputs.result }}"
-          branch: 'dependabot-batch'
-          base: 'main'
+          branch: "dependabot-batch"
+          base: "main"
           delete-branch: true
           script: |
             for (const branch of ${{ steps.get_prs.outputs.result }}) {

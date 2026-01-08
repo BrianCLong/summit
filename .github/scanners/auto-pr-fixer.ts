@@ -3,17 +3,22 @@
  * @module .github/scanners/auto-pr-fixer
  */
 
-import { spawn } from 'node:child_process';
-import fs from 'node:fs/promises';
-import path from 'node:path';
+import { spawn } from "node:child_process";
+import fs from "node:fs/promises";
+import path from "node:path";
 
-import { loadConfig, SUPPORTED_ECOSYSTEMS, FIX_CONFIDENCE, type SupportedEcosystem } from './config.js';
+import {
+  loadConfig,
+  SUPPORTED_ECOSYSTEMS,
+  FIX_CONFIDENCE,
+  type SupportedEcosystem,
+} from "./config.js";
 import type {
   Vulnerability,
   VulnerabilityScanResult,
   FixSuggestion,
   AutoFixResult,
-} from './types.js';
+} from "./types.js";
 
 export interface AutoFixOptions {
   scanResult: VulnerabilityScanResult;
@@ -22,7 +27,7 @@ export interface AutoFixOptions {
   createPR?: boolean;
   baseBranch?: string;
   maxFixes?: number;
-  minConfidence?: 'high' | 'medium' | 'low';
+  minConfidence?: "high" | "medium" | "low";
   excludeBreakingChanges?: boolean;
   commitPrefix?: string;
 }
@@ -89,11 +94,11 @@ export class AutoPRFixer {
       workingDirectory = this.workingDirectory,
       dryRun = false,
       createPR = false,
-      baseBranch = 'main',
+      baseBranch = "main",
       maxFixes = 10,
-      minConfidence = 'medium',
+      minConfidence = "medium",
       excludeBreakingChanges = true,
-      commitPrefix = 'fix(security):',
+      commitPrefix = "fix(security):",
     } = options;
 
     const result: AutoFixResult = {
@@ -132,7 +137,7 @@ export class AutoPRFixer {
       const fixesToApply = filteredSuggestions.slice(0, maxFixes);
 
       if (fixesToApply.length === 0) {
-        console.log('ℹ️  No applicable fixes found');
+        console.log("ℹ️  No applicable fixes found");
         return result;
       }
 
@@ -142,7 +147,7 @@ export class AutoPRFixer {
       let branchName: string | undefined;
       if (createPR && !dryRun) {
         branchName = `security/auto-fix-${Date.now()}`;
-        await this.executeCommand('git', ['checkout', '-b', branchName], workingDirectory);
+        await this.executeCommand("git", ["checkout", "-b", branchName], workingDirectory);
       }
 
       // Apply each fix
@@ -150,7 +155,9 @@ export class AutoPRFixer {
         result.summary.attempted++;
 
         if (dryRun) {
-          console.log(`[DRY RUN] Would apply fix for ${fix.vulnerabilityId}: ${fix.package} ${fix.currentVersion} -> ${fix.fixedVersion}`);
+          console.log(
+            `[DRY RUN] Would apply fix for ${fix.vulnerabilityId}: ${fix.package} ${fix.currentVersion} -> ${fix.fixedVersion}`
+          );
           result.fixesApplied.push(fix);
           result.summary.succeeded++;
           continue;
@@ -162,14 +169,14 @@ export class AutoPRFixer {
           result.summary.succeeded++;
 
           // Commit the fix
+          await this.executeCommand("git", ["add", "-A"], workingDirectory);
           await this.executeCommand(
-            'git',
-            ['add', '-A'],
-            workingDirectory
-          );
-          await this.executeCommand(
-            'git',
-            ['commit', '-m', `${commitPrefix} update ${fix.package} to ${fix.fixedVersion} (${fix.vulnerabilityId})`],
+            "git",
+            [
+              "commit",
+              "-m",
+              `${commitPrefix} update ${fix.package} to ${fix.fixedVersion} (${fix.vulnerabilityId})`,
+            ],
             workingDirectory
           );
 
@@ -180,7 +187,9 @@ export class AutoPRFixer {
             error: error instanceof Error ? error.message : String(error),
           });
           result.summary.failed++;
-          console.log(`❌ Failed to fix ${fix.vulnerabilityId}: ${error instanceof Error ? error.message : String(error)}`);
+          console.log(
+            `❌ Failed to fix ${fix.vulnerabilityId}: ${error instanceof Error ? error.message : String(error)}`
+          );
         }
       }
 
@@ -206,7 +215,7 @@ export class AutoPRFixer {
       return result;
     } catch (error: unknown) {
       result.success = false;
-      console.error('Auto-fix failed:', error);
+      console.error("Auto-fix failed:", error);
       return result;
     }
   }
@@ -224,21 +233,11 @@ export class AutoPRFixer {
       return null;
     }
 
-    const confidence = this.calculateConfidence(
-      vuln.installedVersion,
-      vuln.fixedVersion
-    );
+    const confidence = this.calculateConfidence(vuln.installedVersion, vuln.fixedVersion);
 
-    const breakingChange = this.isBreakingChange(
-      vuln.installedVersion,
-      vuln.fixedVersion
-    );
+    const breakingChange = this.isBreakingChange(vuln.installedVersion, vuln.fixedVersion);
 
-    const commands = this.getUpdateCommands(
-      ecosystem,
-      vuln.affectedPackage,
-      vuln.fixedVersion
-    );
+    const commands = this.getUpdateCommands(ecosystem, vuln.affectedPackage, vuln.fixedVersion);
 
     return {
       vulnerabilityId: vuln.id,
@@ -259,11 +258,11 @@ export class AutoPRFixer {
    */
   private async applyFix(fix: FixSuggestion, workingDirectory: string): Promise<void> {
     if (!fix.commands || fix.commands.length === 0) {
-      throw new Error('No update commands available');
+      throw new Error("No update commands available");
     }
 
     for (const command of fix.commands) {
-      const [cmd, ...args] = command.split(' ');
+      const [cmd, ...args] = command.split(" ");
       const result = await this.executeCommand(cmd, args, workingDirectory);
 
       if (!result.success) {
@@ -283,30 +282,31 @@ export class AutoPRFixer {
   ): Promise<{ success: boolean; prNumber?: number; prUrl?: string; error?: string }> {
     try {
       // Push branch
-      await this.executeCommand('git', ['push', '-u', 'origin', branchName], workingDirectory);
+      await this.executeCommand("git", ["push", "-u", "origin", branchName], workingDirectory);
 
       // Create PR using GitHub CLI
-      const title = fixes.length === 1
-        ? fixes[0].prTitle!
-        : `fix(security): remediate ${fixes.length} vulnerabilities`;
+      const title =
+        fixes.length === 1
+          ? fixes[0].prTitle!
+          : `fix(security): remediate ${fixes.length} vulnerabilities`;
 
       const body = this.generateCombinedPRBody(fixes);
 
       const result = await this.executeCommand(
-        'gh',
+        "gh",
         [
-          'pr',
-          'create',
-          '--base',
+          "pr",
+          "create",
+          "--base",
           baseBranch,
-          '--head',
+          "--head",
           branchName,
-          '--title',
+          "--title",
           title,
-          '--body',
+          "--body",
           body,
-          '--label',
-          'security,automated',
+          "--label",
+          "security,automated",
         ],
         workingDirectory
       );
@@ -317,7 +317,7 @@ export class AutoPRFixer {
 
       // Parse PR URL from output
       const prUrl = result.stdout.trim();
-      const prNumber = parseInt(prUrl.split('/').pop() || '0', 10);
+      const prNumber = parseInt(prUrl.split("/").pop() || "0", 10);
 
       return { success: true, prNumber, prUrl };
     } catch (error: unknown) {
@@ -331,15 +331,15 @@ export class AutoPRFixer {
   private async detectEcosystem(packageName: string): Promise<SupportedEcosystem | null> {
     // Check for lock files to determine ecosystem
     const lockFiles: Record<string, SupportedEcosystem> = {
-      'package-lock.json': 'npm',
-      'yarn.lock': 'yarn',
-      'pnpm-lock.yaml': 'pnpm',
-      'Pipfile.lock': 'pip',
-      'poetry.lock': 'poetry',
-      'go.sum': 'go',
-      'Cargo.lock': 'cargo',
-      'Gemfile.lock': 'rubygems',
-      'composer.lock': 'composer',
+      "package-lock.json": "npm",
+      "yarn.lock": "yarn",
+      "pnpm-lock.yaml": "pnpm",
+      "Pipfile.lock": "pip",
+      "poetry.lock": "poetry",
+      "go.sum": "go",
+      "Cargo.lock": "cargo",
+      "Gemfile.lock": "rubygems",
+      "composer.lock": "composer",
     };
 
     for (const [lockFile, ecosystem] of Object.entries(lockFiles)) {
@@ -352,7 +352,7 @@ export class AutoPRFixer {
     }
 
     // Default to npm for JavaScript packages
-    return 'npm';
+    return "npm";
   }
 
   /**
@@ -361,26 +361,26 @@ export class AutoPRFixer {
   private calculateConfidence(
     currentVersion: string,
     fixedVersion: string
-  ): 'high' | 'medium' | 'low' {
+  ): "high" | "medium" | "low" {
     const current = this.parseVersion(currentVersion);
     const fixed = this.parseVersion(fixedVersion);
 
     if (!current || !fixed) {
-      return 'low';
+      return "low";
     }
 
     // Same major version
     if (current.major === fixed.major) {
       // Same minor version (patch update)
       if (current.minor === fixed.minor) {
-        return 'high';
+        return "high";
       }
       // Minor version bump
-      return 'medium';
+      return "medium";
     }
 
     // Major version change
-    return 'low';
+    return "low";
   }
 
   /**
@@ -422,23 +422,23 @@ export class AutoPRFixer {
     version: string
   ): string[] {
     switch (ecosystem) {
-      case 'npm':
+      case "npm":
         return [`npm install ${packageName}@${version}`];
-      case 'yarn':
+      case "yarn":
         return [`yarn upgrade ${packageName}@${version}`];
-      case 'pnpm':
+      case "pnpm":
         return [`pnpm update ${packageName}@${version}`];
-      case 'pip':
+      case "pip":
         return [`pip install ${packageName}==${version}`];
-      case 'poetry':
+      case "poetry":
         return [`poetry add ${packageName}@${version}`];
-      case 'go':
+      case "go":
         return [`go get ${packageName}@v${version}`];
-      case 'cargo':
+      case "cargo":
         return [`cargo update -p ${packageName} --precise ${version}`];
-      case 'rubygems':
+      case "rubygems":
         return [`bundle update ${packageName}`];
-      case 'composer':
+      case "composer":
         return [`composer require ${packageName}:${version}`];
       default:
         return [];
@@ -457,18 +457,18 @@ This PR addresses a security vulnerability.
 
 - **ID**: ${vuln.id}
 - **Severity**: ${vuln.severity.toUpperCase()}
-- **CVSS Score**: ${vuln.cvssScore || 'N/A'}
+- **CVSS Score**: ${vuln.cvssScore || "N/A"}
 - **Package**: ${vuln.affectedPackage}
 - **Current Version**: ${vuln.installedVersion}
 - **Fixed Version**: ${vuln.fixedVersion}
 
 ### Description
 
-${vuln.description || 'No description available.'}
+${vuln.description || "No description available."}
 
 ### References
 
-${vuln.references?.map((ref) => `- ${ref}`).join('\n') || 'No references available.'}
+${vuln.references?.map((ref) => `- ${ref}`).join("\n") || "No references available."}
 
 ---
 *This PR was automatically generated by the security auto-fix system.*
@@ -480,8 +480,10 @@ ${vuln.references?.map((ref) => `- ${ref}`).join('\n') || 'No references availab
    */
   private generateCombinedPRBody(fixes: FixSuggestion[]): string {
     const fixList = fixes
-      .map((f) => `- **${f.vulnerabilityId}**: ${f.package} ${f.currentVersion} → ${f.fixedVersion}`)
-      .join('\n');
+      .map(
+        (f) => `- **${f.vulnerabilityId}**: ${f.package} ${f.currentVersion} → ${f.fixedVersion}`
+      )
+      .join("\n");
 
     return `## Security Fixes
 
@@ -495,9 +497,9 @@ ${fixList}
 
 | Confidence | Count |
 |------------|-------|
-| High | ${fixes.filter((f) => f.confidence === 'high').length} |
-| Medium | ${fixes.filter((f) => f.confidence === 'medium').length} |
-| Low | ${fixes.filter((f) => f.confidence === 'low').length} |
+| High | ${fixes.filter((f) => f.confidence === "high").length} |
+| Medium | ${fixes.filter((f) => f.confidence === "medium").length} |
+| Low | ${fixes.filter((f) => f.confidence === "low").length} |
 
 ---
 *This PR was automatically generated by the security auto-fix system.*
@@ -515,22 +517,22 @@ ${fixList}
     return new Promise((resolve) => {
       const proc = spawn(command, args, { cwd: cwd || this.workingDirectory });
 
-      let stdout = '';
-      let stderr = '';
+      let stdout = "";
+      let stderr = "";
 
-      proc.stdout.on('data', (data) => {
+      proc.stdout.on("data", (data) => {
         stdout += data.toString();
       });
 
-      proc.stderr.on('data', (data) => {
+      proc.stderr.on("data", (data) => {
         stderr += data.toString();
       });
 
-      proc.on('close', (code) => {
+      proc.on("close", (code) => {
         resolve({ success: code === 0, stdout, stderr });
       });
 
-      proc.on('error', (error) => {
+      proc.on("error", (error) => {
         resolve({ success: false, stdout, stderr: error.message });
       });
     });

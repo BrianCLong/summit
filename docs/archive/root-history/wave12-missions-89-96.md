@@ -3,6 +3,7 @@
 This blueprint stitches the eight parallel tracks into merge-safe, additive deliverables. Each section expands the scope, core models, APIs, control/telemetry patterns, testing, rollout, and operational guardrails so teams can build independently without regressions. The appendix adds execution phases, shared contracts, and production-readiness checklists so teams can move from blueprint to delivery without guessing.
 
 ## Program-Wide Operating Model
+
 - **Principles**: data- and config-driven, additive releases, versioned schemas, monotonic safety (never reduce protections), fleet-safe blast-radius limits, and deterministic tests/fixtures.
 - **Shared platform building blocks**: config-center (versioned bundles), governance/PDP, privacy-engine + redaction-view, notify/alerting, reliability-service, audit/event bus, feature-flag service, product-analytics, data-catalog, integration-hub, and mesh-security.
 - **Observability**: structured logs (action_id, tenant_id, cluster_id, profile), metrics (latency, success/failure, retries, drift counts), traces on fan-out operations, and meta-alerts for watcher silence. All modules emit audit events.
@@ -15,6 +16,7 @@ This blueprint stitches the eight parallel tracks into merge-safe, additive deli
 ---
 
 ## 89. `control-plane/` — Fleet Management & Policy Fan-Out
+
 - **Core models**
   - `Cluster`: id, display_name, region, env, api_endpoint(s), capabilities, control-plane version, SLO targets, health signals (uptime, error budget burn, policy sync freshness), blast-radius group, labels (e.g., `prod`, `staging`), ownership metadata.
   - `Inventory`: per cluster service versions, config hashes, feature-flag snapshots, governance policy bundle fingerprints, last_verified_at, drift_reason.
@@ -41,6 +43,7 @@ This blueprint stitches the eight parallel tracks into merge-safe, additive deli
   - Runbooks for rollback: revert to previous bundle or stop rollout stage with automatic backpressure.
 
 ## 90. `semantic-diff/` — Meaning-Level Change Reviews
+
 - **Artifact types**: schemas (JSON/YAML/OpenAPI/GraphQL), policy/config, prompt library entries, feature-flag manifests.
 - **Risk taxonomy**: `breaking` (removals/tightening/renames without aliases), `behavioral` (logic/policy shifts, prompt capability/refusal change), `cosmetic` (comments/whitespace/reordering).
 - **Pipeline**
@@ -57,6 +60,7 @@ This blueprint stitches the eight parallel tracks into merge-safe, additive deli
   - Performance: large-schema diff completes within budgeted latency; memory caps enforced.
 
 ## 91. `safety-workflows/` — Guardrails for Error-Prone Actions
+
 - **Catalog**: high-risk actions (mass delete, high-volume export, cross-tenant copy, policy override) stored as data with thresholds, actor roles, tenant sensitivity, and required controls (dual-control, justification, timed holds).
 - **Engine**
   - Pre-flight evaluator builds context summary (who/where/what), runs sanity rules (volume, tenant isolation, incompatible policies), and returns required confirmations (dual-control, justification, time-delayed execution for destructive ops).
@@ -71,6 +75,7 @@ This blueprint stitches the eight parallel tracks into merge-safe, additive deli
   - Chaos tests: drop HITL/governance dependencies and ensure system degrades safely (blocks or escalates rather than allows silently).
 
 ## 92. `tenant-benchmark/` — Readiness & Maturity Scoring
+
 - **Signals**: feature coverage, training completion, governance configuration health, data-quality scores, incident history, automation adoption, and response SLAs.
 - **Profiles**: regulator-facing, CSM/internal, technical-ops; each defines weightings, badge thresholds, and narrative snippets for CSM decks.
 - **Computation**
@@ -84,6 +89,7 @@ This blueprint stitches the eight parallel tracks into merge-safe, additive deli
   - Bias guard: ensure no single factor can dominate score without justification; detect missing data handling and fallback behavior.
 
 ## 93. `autoconfig/` — Safe Defaults & Opinionated Profiles
+
 - **Profiles**: secure-by-default baseline; sandbox/demo with constrained capabilities; regulated/PII-heavy profile with stricter logging and retention; versioned config bundles with change logs.
 - **Apply flow**
   - On tenant/env creation, orchestrator applies governance/privacy/logging/lifecycle baselines via config-center + governance APIs; idempotent and monotonic (cannot reduce safety); supports staged application with dependency ordering.
@@ -96,6 +102,7 @@ This blueprint stitches the eight parallel tracks into merge-safe, additive deli
   - Concurrency tests to prove multiple provisioning events cannot interleave into inconsistent state.
 
 ## 94. `meta-monitor/` — Watching the Watchers
+
 - **Scope of watchers**: data-quality, governance/PDP, safety-console, llm-eval, perf-lab, threat modeling, product-analytics, audit pipeline, feature-flag evaluations.
 - **Signals**: expected event cadence, freshness windows, anomaly thresholds per watcher; configurable silence budgets and seasonal exceptions.
 - **Engine**
@@ -108,6 +115,7 @@ This blueprint stitches the eight parallel tracks into merge-safe, additive deli
   - Replay tests to ensure duplicate heartbeats do not skew silence detection windows.
 
 ## 95. `rtx-export/` — Right-to-Explanation Bundles
+
 - **Inputs**: graph-xai, prov-ledger, governance, model-serving, privacy-engine, compliance contexts; includes model version and feature provenance.
 - **Bundle schema** (versioned)
   - Subject + timeframe, decisions/actions, model scores and XAI payloads, policies/warrants in force, provenance chain, redactions applied, access log entries, applied consent/authorization context, signature for tamper-evidence.
@@ -121,6 +129,7 @@ This blueprint stitches the eight parallel tracks into merge-safe, additive deli
   - Volume tests for large subject histories; latency budget for streaming vs batch assembly.
 
 ## 96. `dark-inventory/` — Shadow Data & Rogue Paths
+
 - **Discovery sources**: infra metadata (cloud inventories), logs, service configs, mesh-security, integration-hub, ingress controllers, CI/CD artifacts (new endpoints), and data movement telemetry.
 - **Correlation**
   - Match discovered resources against data-catalog/config-center; anything unregistered or ungoverned becomes a finding with severity/age and lineage where known.
@@ -133,6 +142,7 @@ This blueprint stitches the eight parallel tracks into merge-safe, additive deli
   - Duplicate suppression ensures identical resources discovered via multiple sources collapse into one finding with merged provenance.
 
 ## Cross-Cutting Delivery Notes
+
 - Config/data-first: detection rules, profiles, thresholds, rollout plans, and schema versions live in versioned configs for safe iteration with config tests.
 - Interfaces default to REST stubs; gRPC/GraphQL gateways can be layered later without breaking clients; CLI wrappers for operators.
 - Logging/telemetry: structured logs for fan-out and meta-monitor events; audit trails for safety workflows and rtx exports; metrics for drift counts, silent-watcher intervals, export latency, and dark-inventory burn-down.

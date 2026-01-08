@@ -1,4 +1,4 @@
-import { ContextProcessor, Session, WorkingContext, CompilationOptions } from '../types.js';
+import { ContextProcessor, Session, WorkingContext, CompilationOptions } from "../types.js";
 
 /**
  * InstructionProcessor
@@ -7,7 +7,7 @@ import { ContextProcessor, Session, WorkingContext, CompilationOptions } from '.
  * Ensures stable prefix for context caching.
  */
 export class InstructionProcessor implements ContextProcessor {
-  name = 'InstructionProcessor';
+  name = "InstructionProcessor";
 
   constructor(private readonly instructions: string[]) {}
 
@@ -21,7 +21,7 @@ export class InstructionProcessor implements ContextProcessor {
 
     // Add any session-specific override instructions if present
     if (session.metadata?.systemInstructions) {
-        context.instructions.push(session.metadata.systemInstructions as string);
+      context.instructions.push(session.metadata.systemInstructions as string);
     }
 
     return context;

@@ -1,9 +1,11 @@
 # 2027 Risk Register (v1)
 
 ## Structure
+
 Each risk contains: trigger signals, owner, likelihood, impact, mitigation, evidence artifacts, and stage gate mapping.
 
 ## Risks
+
 1. **Security incident / supply chain compromise**
    - Triggers: CVE backlog > SLA; unsigned dependency; anomalous signing events; SBOM freshness >30d.
    - Owner: Security Lead
@@ -40,6 +42,7 @@ Each risk contains: trigger signals, owner, likelihood, impact, mitigation, evid
    - Gates: Prove gate requires multi-region SLO validation; Operate gate enforces regression monitors.
 
 ## Governance
+
 - All risks tracked with Decision Receipts linking mitigation evidence.
 - Quarterly review tied to Board Pack Lite with status (green/yellow/red) and updated triggers.
 - Mitigation tasks mapped to OKRs and budget lines; deviations require sign-off.

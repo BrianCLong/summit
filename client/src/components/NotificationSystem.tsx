@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useSubscription, gql } from '@apollo/client';
+import React, { useState, useEffect, useRef } from "react";
+import { useSubscription, gql } from "@apollo/client";
 
 const NOTIFICATION_SUBSCRIPTION = gql`
   subscription NotificationUpdates {
@@ -21,14 +21,14 @@ const NOTIFICATION_SUBSCRIPTION = gql`
 interface Notification {
   id: string;
   type:
-    | 'action_safety'
-    | 'investigation_update'
-    | 'system_alert'
-    | 'user_mention'
-    | 'data_ingestion';
+    | "action_safety"
+    | "investigation_update"
+    | "system_alert"
+    | "user_mention"
+    | "data_ingestion";
   title: string;
   message: string;
-  severity: 'info' | 'warning' | 'error' | 'success';
+  severity: "info" | "warning" | "error" | "success";
   timestamp: string;
   actionId?: string;
   investigationId?: string;
@@ -38,13 +38,13 @@ interface Notification {
 }
 
 interface NotificationSystemProps {
-  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+  position?: "top-right" | "top-left" | "bottom-right" | "bottom-left";
   maxNotifications?: number;
   autoHideDuration?: number;
 }
 
 function NotificationSystem({
-  position = 'top-right',
+  position = "top-right",
   maxNotifications = 5,
   autoHideDuration = 5000,
 }: NotificationSystemProps) {
@@ -54,12 +54,9 @@ function NotificationSystem({
   const audioRef = useRef<HTMLAudioElement>(null);
 
   // Subscribe to real-time notifications
-  const { data: subscriptionData } = useSubscription(
-    NOTIFICATION_SUBSCRIPTION,
-    {
-      errorPolicy: 'all',
-    },
-  );
+  const { data: subscriptionData } = useSubscription(NOTIFICATION_SUBSCRIPTION, {
+    errorPolicy: "all",
+  });
 
   // Handle new notifications from subscription
   useEffect(() => {
@@ -67,25 +64,20 @@ function NotificationSystem({
       const newNotification = subscriptionData.notificationUpdates;
       addNotification(newNotification);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subscriptionData]);
 
   const addNotification = (notification: Notification) => {
     setNotifications((prev) => {
       // Remove expired notifications
       const now = new Date();
-      const active = prev.filter(
-        (n) => !n.expiresAt || new Date(n.expiresAt) > now,
-      );
+      const active = prev.filter((n) => !n.expiresAt || new Date(n.expiresAt) > now);
 
       // Add new notification at the beginning
       const updated = [notification, ...active].slice(0, maxNotifications);
 
       // Play sound for important notifications
-      if (
-        notification.severity === 'error' ||
-        notification.severity === 'warning'
-      ) {
+      if (notification.severity === "error" || notification.severity === "warning") {
         playNotificationSound();
       }
 
@@ -109,9 +101,11 @@ function NotificationSystem({
   const playNotificationSound = () => {
     // Create a subtle notification sound using Web Audio API
     try {
-      const audioContext = new (window.AudioContext ||
+      const audioContext = new (
+        window.AudioContext ||
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (window as any).webkitAudioContext)();
+        (window as any).webkitAudioContext
+      )();
       const oscillator = audioContext.createOscillator();
       const gain = audioContext.createGain();
 
@@ -120,82 +114,78 @@ function NotificationSystem({
 
       oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
       gain.gain.setValueAtTime(0.1, audioContext.currentTime);
-      gain.gain.exponentialRampToValueAtTime(
-        0.01,
-        audioContext.currentTime + 0.3,
-      );
+      gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
 
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 0.3);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       // Fallback: silent
     }
   };
 
   const getNotificationIcon = (type: string, severity: string) => {
-    if (severity === 'error') return '❌';
-    if (severity === 'warning') return '⚠️';
-    if (severity === 'success') return '✅';
+    if (severity === "error") return "❌";
+    if (severity === "warning") return "⚠️";
+    if (severity === "success") return "✅";
 
     switch (type) {
-      case 'action_safety':
-        return '🛡️';
-      case 'investigation_update':
-        return '🔍';
-      case 'system_alert':
-        return '⚙️';
-      case 'user_mention':
-        return '👤';
-      case 'data_ingestion':
-        return '📊';
+      case "action_safety":
+        return "🛡️";
+      case "investigation_update":
+        return "🔍";
+      case "system_alert":
+        return "⚙️";
+      case "user_mention":
+        return "👤";
+      case "data_ingestion":
+        return "📊";
       default:
-        return 'ℹ️';
+        return "ℹ️";
     }
   };
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'error':
-        return '#dc2626';
-      case 'warning':
-        return '#d97706';
-      case 'success':
-        return '#059669';
-      case 'info':
+      case "error":
+        return "#dc2626";
+      case "warning":
+        return "#d97706";
+      case "success":
+        return "#059669";
+      case "info":
       default:
-        return '#1a73e8';
+        return "#1a73e8";
     }
   };
 
   const positionStyles = {
-    'top-right': { top: '20px', right: '20px' },
-    'top-left': { top: '20px', left: '20px' },
-    'bottom-right': { bottom: '20px', right: '20px' },
-    'bottom-left': { bottom: '20px', left: '20px' },
+    "top-right": { top: "20px", right: "20px" },
+    "top-left": { top: "20px", left: "20px" },
+    "bottom-right": { bottom: "20px", right: "20px" },
+    "bottom-left": { bottom: "20px", left: "20px" },
   };
 
   // Mock notifications for demo (remove in production)
   useEffect(() => {
     const mockNotifications = [
       {
-        id: 'demo-1',
-        type: 'action_safety' as const,
-        title: 'Action Blocked',
-        message: 'Action test-action-123 was blocked due to safety concerns',
-        severity: 'warning' as const,
+        id: "demo-1",
+        type: "action_safety" as const,
+        title: "Action Blocked",
+        message: "Action test-action-123 was blocked due to safety concerns",
+        severity: "warning" as const,
         timestamp: new Date().toISOString(),
-        actionId: 'test-action-123',
+        actionId: "test-action-123",
       },
       {
-        id: 'demo-2',
-        type: 'investigation_update' as const,
-        title: 'Investigation Updated',
-        message:
-          'New entities discovered in investigation sample-investigation',
-        severity: 'info' as const,
+        id: "demo-2",
+        type: "investigation_update" as const,
+        title: "Investigation Updated",
+        message: "New entities discovered in investigation sample-investigation",
+        severity: "info" as const,
         timestamp: new Date().toISOString(),
-        investigationId: 'sample-investigation',
+        investigationId: "sample-investigation",
       },
     ];
 
@@ -205,45 +195,45 @@ function NotificationSystem({
         setTimeout(() => addNotification(notification), index * 1000);
       });
     }, 2000);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <>
       {/* Notification Bell Icon */}
-      <div style={{ position: 'relative' }}>
+      <div style={{ position: "relative" }}>
         <button
           onClick={() => setShowPanel(!showPanel)}
           style={{
-            padding: '8px',
-            backgroundColor: 'transparent',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '16px',
-            position: 'relative',
+            padding: "8px",
+            backgroundColor: "transparent",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+            fontSize: "16px",
+            position: "relative",
           }}
         >
           🔔
           {notifications.length > 0 && (
             <span
               style={{
-                position: 'absolute',
-                top: '0px',
-                right: '0px',
-                backgroundColor: '#ef4444',
-                color: 'white',
-                borderRadius: '50%',
-                width: '16px',
-                height: '16px',
-                fontSize: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 'bold',
+                position: "absolute",
+                top: "0px",
+                right: "0px",
+                backgroundColor: "#ef4444",
+                color: "white",
+                borderRadius: "50%",
+                width: "16px",
+                height: "16px",
+                fontSize: "10px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: "bold",
               }}
             >
-              {notifications.length > 9 ? '9+' : notifications.length}
+              {notifications.length > 9 ? "9+" : notifications.length}
             </span>
           )}
         </button>
@@ -253,37 +243,37 @@ function NotificationSystem({
           <div
             className="panel"
             style={{
-              position: 'absolute',
-              top: '100%',
-              right: '0',
+              position: "absolute",
+              top: "100%",
+              right: "0",
               zIndex: 1000,
-              width: '350px',
-              maxHeight: '500px',
-              overflowY: 'auto',
-              marginTop: '8px',
+              width: "350px",
+              maxHeight: "500px",
+              overflowY: "auto",
+              marginTop: "8px",
             }}
           >
             <div
               style={{
-                padding: '16px',
-                borderBottom: '1px solid var(--hairline)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
+                padding: "16px",
+                borderBottom: "1px solid var(--hairline)",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
               }}
             >
-              <h3 style={{ fontSize: '1rem', fontWeight: '600', margin: 0 }}>
+              <h3 style={{ fontSize: "1rem", fontWeight: "600", margin: 0 }}>
                 Notifications ({notifications.length})
               </h3>
               {notifications.length > 0 && (
                 <button
                   onClick={clearAllNotifications}
                   style={{
-                    color: '#666',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: '12px',
+                    color: "#666",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: "12px",
                   }}
                 >
                   Clear All
@@ -294,14 +284,14 @@ function NotificationSystem({
             {notifications.length === 0 ? (
               <div
                 style={{
-                  padding: '40px 20px',
-                  textAlign: 'center',
-                  color: '#666',
+                  padding: "40px 20px",
+                  textAlign: "center",
+                  color: "#666",
                 }}
               >
-                <div style={{ fontSize: '32px', marginBottom: '8px' }}>🔔</div>
+                <div style={{ fontSize: "32px", marginBottom: "8px" }}>🔔</div>
                 <div>No notifications</div>
-                <div style={{ fontSize: '12px', marginTop: '4px' }}>
+                <div style={{ fontSize: "12px", marginTop: "4px" }}>
                   You'll see real-time updates here
                 </div>
               </div>
@@ -310,38 +300,35 @@ function NotificationSystem({
                 <div
                   key={notification.id}
                   style={{
-                    padding: '16px',
-                    borderBottom: '1px solid var(--hairline)',
-                    position: 'relative',
+                    padding: "16px",
+                    borderBottom: "1px solid var(--hairline)",
+                    position: "relative",
                   }}
                 >
                   <div
                     style={{
-                      display: 'flex',
-                      alignItems: 'flex-start',
-                      gap: '12px',
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: "12px",
                     }}
                   >
-                    <div style={{ fontSize: '18px', marginTop: '2px' }}>
-                      {getNotificationIcon(
-                        notification.type,
-                        notification.severity,
-                      )}
+                    <div style={{ fontSize: "18px", marginTop: "2px" }}>
+                      {getNotificationIcon(notification.type, notification.severity)}
                     </div>
 
                     <div style={{ flex: 1 }}>
                       <div
                         style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'flex-start',
-                          marginBottom: '4px',
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "flex-start",
+                          marginBottom: "4px",
                         }}
                       >
                         <h4
                           style={{
-                            fontSize: '14px',
-                            fontWeight: '600',
+                            fontSize: "14px",
+                            fontWeight: "600",
                             margin: 0,
                             color: getSeverityColor(notification.severity),
                           }}
@@ -351,12 +338,12 @@ function NotificationSystem({
                         <button
                           onClick={() => removeNotification(notification.id)}
                           style={{
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            color: '#999',
-                            fontSize: '12px',
-                            padding: '2px',
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            color: "#999",
+                            fontSize: "12px",
+                            padding: "2px",
                           }}
                         >
                           ✕
@@ -365,9 +352,9 @@ function NotificationSystem({
 
                       <p
                         style={{
-                          fontSize: '13px',
-                          color: '#666',
-                          margin: '0 0 8px 0',
+                          fontSize: "13px",
+                          color: "#666",
+                          margin: "0 0 8px 0",
                           lineHeight: 1.4,
                         }}
                       >
@@ -376,30 +363,24 @@ function NotificationSystem({
 
                       <div
                         style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          fontSize: '11px',
-                          color: '#999',
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          fontSize: "11px",
+                          color: "#999",
                         }}
                       >
-                        <span>
-                          {new Date(
-                            notification.timestamp,
-                          ).toLocaleTimeString()}
-                        </span>
-                        {(notification.actionId ||
-                          notification.investigationId) && (
+                        <span>{new Date(notification.timestamp).toLocaleTimeString()}</span>
+                        {(notification.actionId || notification.investigationId) && (
                           <span
                             style={{
-                              backgroundColor: '#f3f4f6',
-                              padding: '2px 6px',
-                              borderRadius: '3px',
-                              fontSize: '10px',
+                              backgroundColor: "#f3f4f6",
+                              padding: "2px 6px",
+                              borderRadius: "3px",
+                              fontSize: "10px",
                             }}
                           >
-                            {notification.actionId ||
-                              notification.investigationId}
+                            {notification.actionId || notification.investigationId}
                           </span>
                         )}
                       </div>
@@ -415,10 +396,10 @@ function NotificationSystem({
       {/* Toast Notifications */}
       <div
         style={{
-          position: 'fixed',
+          position: "fixed",
           ...positionStyles[position],
           zIndex: 10000,
-          pointerEvents: 'none',
+          pointerEvents: "none",
         }}
       >
         {notifications.slice(0, 3).map((notification) => (
@@ -426,26 +407,24 @@ function NotificationSystem({
             key={`toast-${notification.id}`}
             className="panel"
             style={{
-              marginBottom: '8px',
-              padding: '16px',
-              maxWidth: '350px',
-              boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-              pointerEvents: 'auto',
-              animation: 'slideIn 0.3s ease-out',
+              marginBottom: "8px",
+              padding: "16px",
+              maxWidth: "350px",
+              boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+              pointerEvents: "auto",
+              animation: "slideIn 0.3s ease-out",
             }}
           >
-            <div
-              style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}
-            >
-              <div style={{ fontSize: '16px' }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
+              <div style={{ fontSize: "16px" }}>
                 {getNotificationIcon(notification.type, notification.severity)}
               </div>
               <div style={{ flex: 1 }}>
                 <h4
                   style={{
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    margin: '0 0 4px 0',
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    margin: "0 0 4px 0",
                     color: getSeverityColor(notification.severity),
                   }}
                 >
@@ -453,8 +432,8 @@ function NotificationSystem({
                 </h4>
                 <p
                   style={{
-                    fontSize: '13px',
-                    color: '#666',
+                    fontSize: "13px",
+                    color: "#666",
                     margin: 0,
                     lineHeight: 1.4,
                   }}
@@ -465,11 +444,11 @@ function NotificationSystem({
               <button
                 onClick={() => removeNotification(notification.id)}
                 style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: '#999',
-                  fontSize: '12px',
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "#999",
+                  fontSize: "12px",
                 }}
               >
                 ✕
@@ -483,7 +462,7 @@ function NotificationSystem({
       {showPanel && (
         <div
           style={{
-            position: 'fixed',
+            position: "fixed",
             top: 0,
             left: 0,
             right: 0,
@@ -499,7 +478,7 @@ function NotificationSystem({
         {`
           @keyframes slideIn {
             from {
-              transform: translateX(${position.includes('right') ? '100%' : '-100%'});
+              transform: translateX(${position.includes("right") ? "100%" : "-100%"});
               opacity: 0;
             }
             to {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
   Paper,
@@ -28,7 +28,7 @@ import {
   Chip,
   Avatar,
   AvatarGroup,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Group,
   Chat,
@@ -48,11 +48,11 @@ import {
   Warning,
   CheckCircle,
   Info,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
-import SharedCursors from './SharedCursors';
-import LiveChat from './LiveChat';
-import UserPresence from './UserPresence';
+import SharedCursors from "./SharedCursors";
+import LiveChat from "./LiveChat";
+import UserPresence from "./UserPresence";
 
 function CollaborationHub({
   websocketService,
@@ -70,12 +70,12 @@ function CollaborationHub({
   const [notifications, setNotifications] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [inviteDialog, setInviteDialog] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState('connected');
+  const [connectionStatus, setConnectionStatus] = useState("connected");
   const [collaborationStats, setCollaborationStats] = useState({
     activeUsers: 0,
     totalMessages: 0,
     totalSessions: 0,
-    averageSessionTime: '0m',
+    averageSessionTime: "0m",
   });
 
   // Activity tracking
@@ -86,13 +86,13 @@ function CollaborationHub({
     if (!websocketService) return;
 
     // Connection status monitoring
-    const handleConnect = () => setConnectionStatus('connected');
-    const handleDisconnect = () => setConnectionStatus('disconnected');
-    const handleReconnect = () => setConnectionStatus('reconnecting');
+    const handleConnect = () => setConnectionStatus("connected");
+    const handleDisconnect = () => setConnectionStatus("disconnected");
+    const handleReconnect = () => setConnectionStatus("reconnecting");
 
-    websocketService.on('connect', handleConnect);
-    websocketService.on('disconnect', handleDisconnect);
-    websocketService.on('reconnecting', handleReconnect);
+    websocketService.on("connect", handleConnect);
+    websocketService.on("disconnect", handleDisconnect);
+    websocketService.on("reconnecting", handleReconnect);
 
     // Collaboration events
     const handleCollaborationEvent = (data) => {
@@ -106,7 +106,7 @@ function CollaborationHub({
       ]); // Keep last 50 activities
 
       // Update stats
-      if (data.type === 'user_joined') {
+      if (data.type === "user_joined") {
         setCollaborationStats((prev) => ({
           ...prev,
           activeUsers: data.activeUserCount || prev.activeUsers + 1,
@@ -134,43 +134,43 @@ function CollaborationHub({
       setCollaborationStats(stats);
     };
 
-    websocketService.on('collaboration_event', handleCollaborationEvent);
-    websocketService.on('conflict_alert', handleConflictAlert);
-    websocketService.on('collaboration_stats', handleStatsUpdate);
+    websocketService.on("collaboration_event", handleCollaborationEvent);
+    websocketService.on("conflict_alert", handleConflictAlert);
+    websocketService.on("collaboration_stats", handleStatsUpdate);
 
     return () => {
-      websocketService.off('connect', handleConnect);
-      websocketService.off('disconnect', handleDisconnect);
-      websocketService.off('reconnecting', handleReconnect);
-      websocketService.off('collaboration_event', handleCollaborationEvent);
-      websocketService.off('conflict_alert', handleConflictAlert);
-      websocketService.off('collaboration_stats', handleStatsUpdate);
+      websocketService.off("connect", handleConnect);
+      websocketService.off("disconnect", handleDisconnect);
+      websocketService.off("reconnecting", handleReconnect);
+      websocketService.off("collaboration_event", handleCollaborationEvent);
+      websocketService.off("conflict_alert", handleConflictAlert);
+      websocketService.off("collaboration_stats", handleStatsUpdate);
     };
   }, [websocketService, onUserActivity]);
 
   const getConnectionStatusColor = () => {
     switch (connectionStatus) {
-      case 'connected':
-        return 'success';
-      case 'disconnected':
-        return 'error';
-      case 'reconnecting':
-        return 'warning';
+      case "connected":
+        return "success";
+      case "disconnected":
+        return "error";
+      case "reconnecting":
+        return "warning";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   const getConnectionStatusText = () => {
     switch (connectionStatus) {
-      case 'connected':
-        return 'Connected';
-      case 'disconnected':
-        return 'Disconnected';
-      case 'reconnecting':
-        return 'Reconnecting...';
+      case "connected":
+        return "Connected";
+      case "disconnected":
+        return "Disconnected";
+      case "reconnecting":
+        return "Reconnecting...";
       default:
-        return 'Unknown';
+        return "Unknown";
     }
   };
 
@@ -179,7 +179,7 @@ function CollaborationHub({
   };
 
   const ActivityFeed = () => (
-    <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
+    <Box sx={{ maxHeight: 400, overflow: "auto" }}>
       <Typography variant="h6" gutterBottom>
         Recent Activity
       </Typography>
@@ -187,26 +187,21 @@ function CollaborationHub({
         {recentActivities.map((activity) => (
           <ListItem key={activity.id}>
             <ListItemIcon>
-              {activity.type === 'user_joined' && <PersonAdd />}
-              {activity.type === 'message_sent' && <Chat />}
-              {activity.type === 'graph_edited' && <Assessment />}
-              {activity.type === 'analysis_run' && <Assessment />}
+              {activity.type === "user_joined" && <PersonAdd />}
+              {activity.type === "message_sent" && <Chat />}
+              {activity.type === "graph_edited" && <Assessment />}
+              {activity.type === "analysis_run" && <Assessment />}
             </ListItemIcon>
             <ListItemText
               primary={
-                activity.description ||
-                `${activity.userName} ${activity.type.replace('_', ' ')}`
+                activity.description || `${activity.userName} ${activity.type.replace("_", " ")}`
               }
               secondary={activity.timestamp.toLocaleTimeString()}
             />
           </ListItem>
         ))}
         {recentActivities.length === 0 && (
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ p: 2, textAlign: 'center' }}
-          >
+          <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: "center" }}>
             No recent activity
           </Typography>
         )}
@@ -222,15 +217,13 @@ function CollaborationHub({
       {conflictAlerts.map((alert) => (
         <Alert
           key={alert.id}
-          severity={alert.severity || 'warning'}
+          severity={alert.severity || "warning"}
           sx={{ mb: 1 }}
           action={
             <Button
               size="small"
               onClick={() => {
-                setConflictAlerts((prev) =>
-                  prev.filter((a) => a.id !== alert.id),
-                );
+                setConflictAlerts((prev) => prev.filter((a) => a.id !== alert.id));
               }}
             >
               Resolve
@@ -244,11 +237,7 @@ function CollaborationHub({
         </Alert>
       ))}
       {conflictAlerts.length === 0 && (
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ p: 2, textAlign: 'center' }}
-        >
+        <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: "center" }}>
           No conflicts detected
         </Typography>
       )}
@@ -263,13 +252,10 @@ function CollaborationHub({
 
       <FormControlLabel
         control={
-          <Switch
-            checked={cursorsEnabled}
-            onChange={(e) => setCursorsEnabled(e.target.checked)}
-          />
+          <Switch checked={cursorsEnabled} onChange={(e) => setCursorsEnabled(e.target.checked)} />
         }
         label="Show shared cursors"
-        sx={{ mb: 2, display: 'block' }}
+        sx={{ mb: 2, display: "block" }}
       />
 
       <FormControlLabel
@@ -280,29 +266,23 @@ function CollaborationHub({
           />
         }
         label="Show user presence"
-        sx={{ mb: 2, display: 'block' }}
+        sx={{ mb: 2, display: "block" }}
       />
 
       <FormControlLabel
         control={
-          <Switch
-            checked={notifications}
-            onChange={(e) => setNotifications(e.target.checked)}
-          />
+          <Switch checked={notifications} onChange={(e) => setNotifications(e.target.checked)} />
         }
         label="Enable notifications"
-        sx={{ mb: 2, display: 'block' }}
+        sx={{ mb: 2, display: "block" }}
       />
 
       <FormControlLabel
         control={
-          <Switch
-            checked={!chatMinimized}
-            onChange={(e) => setChatMinimized(!e.target.checked)}
-          />
+          <Switch checked={!chatMinimized} onChange={(e) => setChatMinimized(!e.target.checked)} />
         }
         label="Keep chat expanded"
-        sx={{ mb: 2, display: 'block' }}
+        sx={{ mb: 2, display: "block" }}
       />
 
       <Divider sx={{ my: 2 }} />
@@ -311,7 +291,7 @@ function CollaborationHub({
         Connection Status
       </Typography>
       <Chip
-        icon={connectionStatus === 'connected' ? <CheckCircle /> : <Warning />}
+        icon={connectionStatus === "connected" ? <CheckCircle /> : <Warning />}
         label={getConnectionStatusText()}
         color={getConnectionStatusColor()}
         variant="outlined"
@@ -321,22 +301,16 @@ function CollaborationHub({
       <Typography variant="subtitle2" gutterBottom>
         Collaboration Statistics
       </Typography>
-      <Box
-        sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, mb: 2 }}
-      >
+      <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1, mb: 2 }}>
         <Card variant="outlined">
           <CardContent sx={{ p: 1 }}>
-            <Typography variant="h6">
-              {collaborationStats.activeUsers}
-            </Typography>
+            <Typography variant="h6">{collaborationStats.activeUsers}</Typography>
             <Typography variant="caption">Active Users</Typography>
           </CardContent>
         </Card>
         <Card variant="outlined">
           <CardContent sx={{ p: 1 }}>
-            <Typography variant="h6">
-              {collaborationStats.totalMessages}
-            </Typography>
+            <Typography variant="h6">{collaborationStats.totalMessages}</Typography>
             <Typography variant="caption">Messages</Typography>
           </CardContent>
         </Card>
@@ -345,12 +319,7 @@ function CollaborationHub({
   );
 
   const InviteDialog = () => (
-    <Dialog
-      open={inviteDialog}
-      onClose={() => setInviteDialog(false)}
-      maxWidth="sm"
-      fullWidth
-    >
+    <Dialog open={inviteDialog} onClose={() => setInviteDialog(false)} maxWidth="sm" fullWidth>
       <DialogTitle>Invite Collaborators</DialogTitle>
       <DialogContent>
         <TextField
@@ -370,8 +339,7 @@ function CollaborationHub({
           sx={{ mb: 2 }}
         />
         <Alert severity="info">
-          Invited users will receive an email with a link to join this
-          investigation.
+          Invited users will receive an email with a link to join this investigation.
         </Alert>
       </DialogContent>
       <DialogActions>
@@ -418,7 +386,7 @@ function CollaborationHub({
           showDetailed={false}
           onUserClick={(user) => {
             // Handle user click - could open profile or start chat
-            console.log('User clicked:', user);
+            console.log("User clicked:", user);
           }}
           onInviteUser={handleInviteUser}
         />
@@ -428,13 +396,13 @@ function CollaborationHub({
       <Tooltip title="Collaboration Hub">
         <IconButton
           sx={{
-            position: 'fixed',
+            position: "fixed",
             top: 100,
             right: 16,
             zIndex: 1000,
-            bgcolor: 'background.paper',
+            bgcolor: "background.paper",
             boxShadow: 2,
-            '&:hover': { boxShadow: 3 },
+            "&:hover": { boxShadow: 3 },
           }}
           onClick={() => setSidebarOpen(true)}
         >
@@ -451,12 +419,12 @@ function CollaborationHub({
         onClose={() => setSidebarOpen(false)}
         PaperProps={{ sx: { width: 400 } }}
       >
-        <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+        <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider" }}>
           <Box
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
             }}
           >
             <Typography variant="h6">Collaboration Hub</Typography>
@@ -464,11 +432,9 @@ function CollaborationHub({
               <Close />
             </IconButton>
           </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
             <Chip
-              icon={
-                connectionStatus === 'connected' ? <CheckCircle /> : <Warning />
-              }
+              icon={connectionStatus === "connected" ? <CheckCircle /> : <Warning />}
               label={getConnectionStatusText()}
               color={getConnectionStatusColor()}
               size="small"
@@ -484,7 +450,7 @@ function CollaborationHub({
           value={activeTab}
           onChange={(e, v) => setActiveTab(v)}
           variant="fullWidth"
-          sx={{ borderBottom: 1, borderColor: 'divider' }}
+          sx={{ borderBottom: 1, borderColor: "divider" }}
         >
           <Tab label="Activity" icon={<History />} iconPosition="start" />
           <Tab
@@ -499,19 +465,14 @@ function CollaborationHub({
           <Tab label="Settings" icon={<Settings />} iconPosition="start" />
         </Tabs>
 
-        <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
+        <Box sx={{ flex: 1, overflow: "auto", p: 2 }}>
           {activeTab === 0 && <ActivityFeed />}
           {activeTab === 1 && <ConflictAlerts />}
           {activeTab === 2 && <CollaborationSettings />}
         </Box>
 
-        <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
-          <Button
-            fullWidth
-            variant="outlined"
-            startIcon={<PersonAdd />}
-            onClick={handleInviteUser}
-          >
+        <Box sx={{ p: 2, borderTop: 1, borderColor: "divider" }}>
+          <Button fullWidth variant="outlined" startIcon={<PersonAdd />} onClick={handleInviteUser}>
             Invite Collaborators
           </Button>
         </Box>

@@ -111,20 +111,23 @@ constraints:
 Three router implementations are available:
 
 ### Random Router (Baseline)
+
 ```typescript
-import { createRandomRouter } from '@intelgraph/plan-eval-platform/routing';
+import { createRandomRouter } from "@intelgraph/plan-eval-platform/routing";
 const router = createRandomRouter();
 ```
 
 ### Greedy Cost-Aware Router
+
 ```typescript
-import { createGreedyCostRouter } from '@intelgraph/plan-eval-platform/routing';
+import { createGreedyCostRouter } from "@intelgraph/plan-eval-platform/routing";
 const router = createGreedyCostRouter(0.5); // costWeight: 0=quality, 1=cost
 ```
 
 ### Adaptive Router
+
 ```typescript
-import { createAdaptiveRouter } from '@intelgraph/plan-eval-platform/routing';
+import { createAdaptiveRouter } from "@intelgraph/plan-eval-platform/routing";
 const router = createAdaptiveRouter({ learningRate: 0.1 });
 
 // Record outcomes for learning
@@ -142,13 +145,13 @@ Built-in safety checks:
 - Data exfiltration prevention
 
 ```typescript
-import { createSafetyChecker } from '@intelgraph/plan-eval-platform/safety';
+import { createSafetyChecker } from "@intelgraph/plan-eval-platform/safety";
 
 const checker = createSafetyChecker();
 const result = await checker.checkInput(userInput);
 
 if (!result.passed) {
-  console.log('Violations:', result.violations);
+  console.log("Violations:", result.violations);
 }
 ```
 
@@ -157,9 +160,9 @@ if (!result.passed) {
 Traces are output in JSONL format for analysis:
 
 ```typescript
-import { createTelemetryClient } from '@intelgraph/plan-eval-platform/runtime';
+import { createTelemetryClient } from "@intelgraph/plan-eval-platform/runtime";
 
-const telemetry = createTelemetryClient('./traces.jsonl');
+const telemetry = createTelemetryClient("./traces.jsonl");
 telemetry.recordTrace(trace);
 ```
 
@@ -169,10 +172,10 @@ telemetry.recordTrace(trace);
 
 ```typescript
 const runner = createEvalRunner({
-  scenariosPath: './scenarios',
-  outputPath: './traces.jsonl',
+  scenariosPath: "./scenarios",
+  outputPath: "./traces.jsonl",
   routingConfig: {
-    type: 'greedy_cost',
+    type: "greedy_cost",
     costWeight: 0.5,
     latencyBudgetMs: 5000,
   },
@@ -195,9 +198,9 @@ const summary = collector.generateSummary();
 
 ```typescript
 const trace = new TraceBuilder(scenarioId, runId);
-const eventId = trace.startEvent('tool_call_start', 'code_interpreter');
+const eventId = trace.startEvent("tool_call_start", "code_interpreter");
 // ... execute tool
-trace.endEvent(eventId, 'success', { durationMs: 150 });
+trace.endEvent(eventId, "success", { durationMs: 150 });
 const finalTrace = trace.build();
 ```
 

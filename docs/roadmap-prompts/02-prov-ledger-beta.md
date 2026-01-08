@@ -27,7 +27,7 @@ ls -la charts/ig-platform/values.yaml | grep provLedger
 
 ## Claude Prompt
 
-```
+````
 You are implementing the Prov-Ledger beta service for IntelGraph.
 
 CONTEXT:
@@ -170,7 +170,7 @@ SAMPLE MANIFEST STRUCTURE:
     {"step": "export", "timestamp": "..."}
   ]
 }
-```
+````
 
 OUTPUT:
 Provide:
@@ -180,6 +180,7 @@ Provide:
 (d) CLI verifier tool with --help docs
 (e) Integration test suite
 (f) API documentation (OpenAPI/Swagger)
+
 ```
 
 ---
@@ -207,3 +208,4 @@ Provide:
 - Helm chart: `charts/ig-platform/values.yaml` (provLedger service)
 - Merkle trees: https://en.wikipedia.org/wiki/Merkle_tree
 - HMAC: https://nodejs.org/api/crypto.html#crypto_crypto_createhmac_algorithm_key_options
+```

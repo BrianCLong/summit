@@ -3,12 +3,12 @@
  * Export modules for programmatic usage
  */
 
-export { GraphClient, type GraphQueryResult } from './lib/graph-client.js';
-export { AgentClient, type AgentConfig, type AgentStatus } from './lib/agent-client.js';
-export { ExportManager, type ExportOptions, type ExportManifest } from './lib/export-manager.js';
-export { PgVectorSync, type SyncOptions, type SyncStatus } from './lib/pgvector-sync.js';
-export { loadConfig, type CLIConfig } from './lib/config.js';
-export { VERSION, EXIT_CODES } from './lib/constants.js';
+export { GraphClient, type GraphQueryResult } from "./lib/graph-client.js";
+export { AgentClient, type AgentConfig, type AgentStatus } from "./lib/agent-client.js";
+export { ExportManager, type ExportOptions, type ExportManifest } from "./lib/export-manager.js";
+export { PgVectorSync, type SyncOptions, type SyncStatus } from "./lib/pgvector-sync.js";
+export { loadConfig, type CLIConfig } from "./lib/config.js";
+export { VERSION, EXIT_CODES } from "./lib/constants.js";
 
 // Policy and sandbox modules
 export {
@@ -23,7 +23,7 @@ export {
   loadPolicyBundle,
   computePolicyBundleHash,
   POLICY_EXIT_CODE,
-} from './lib/policy.js';
+} from "./lib/policy.js";
 
 export {
   Sandbox,
@@ -38,7 +38,7 @@ export {
   HARDCODED_DENY_PATTERNS,
   type SandboxOptions,
   type ToolResult,
-} from './lib/sandbox.js';
+} from "./lib/sandbox.js";
 
 // Git workflow module
 export {
@@ -54,7 +54,7 @@ export {
   type ReviewArtifact,
   type CommitInfo,
   type FileChange,
-} from './lib/git-workflow.js';
+} from "./lib/git-workflow.js";
 
 // Provider reliability module
 export {
@@ -73,7 +73,7 @@ export {
   type ProviderResult,
   type ProviderDiagnostics,
   type RequestHistoryEntry,
-} from './lib/provider.js';
+} from "./lib/provider.js";
 
 // Session management module
 export {
@@ -88,7 +88,7 @@ export {
   type SessionOptions,
   type SessionDiagnostics,
   type OperationRecord,
-} from './lib/session.js';
+} from "./lib/session.js";
 
 // Event logger module
 export {
@@ -110,7 +110,7 @@ export {
   type ErrorData,
   type PolicyDecisionData,
   type EventLoggerOptions,
-} from './lib/event-logger.js';
+} from "./lib/event-logger.js";
 
 // Replay module
 export {
@@ -128,7 +128,7 @@ export {
   type ToolSummary,
   type ErrorSummary,
   type DiagnosticsSummary,
-} from './lib/replay.js';
+} from "./lib/replay.js";
 
 // Determinism harness module
 export {
@@ -153,4 +153,4 @@ export {
   type RunResult,
   type PackageTestResult,
   type EvidenceArtifact,
-} from './lib/determinism.js';
+} from "./lib/determinism.js";

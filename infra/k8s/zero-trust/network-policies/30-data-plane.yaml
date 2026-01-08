@@ -59,7 +59,7 @@ spec:
               name: mesh-ops
       ports:
         - protocol: TCP
-          port: 9091  # Metrics
+          port: 9091 # Metrics
 
 ---
 # Allow tool executors ingress from agent runtimes
@@ -108,7 +108,7 @@ spec:
               app: mesh-orchestrator
       ports:
         - protocol: TCP
-          port: 9090  # gRPC
+          port: 9090 # gRPC
 
     # To policy-enforcer for authorization checks
     - to:

@@ -9,23 +9,27 @@
 ## Context
 
 Summit's multi-tenant MCP deployment shares infrastructure across tenants:
+
 - MCP servers
 - Orchestrator instances
 - Model inference infrastructure
 - Memory, CPU, caches
 
 **Attack vectors in multi-tenant clouds:**
+
 - **Cache timing attacks:** Tenant A infers Tenant B's prompts via shared CPU cache
 - **Memory residuals:** Context from Tenant A leaks to Tenant B after deallocation
 - **Model contamination:** Fine-tuning for Tenant A affects Tenant B's outputs
 - **Malicious operator:** Cloud admin with root access reads tenant context
 
 **Current defenses (insufficient for highest security tiers):**
+
 - Query-scoped isolation (PostgreSQL RLS) - protects database, not in-memory processing
 - Process isolation (containers) - doesn't protect against privileged insider
 - Encryption at rest/transit - context is plaintext during processing
 
 **Business drivers:**
+
 - **FedRAMP High:** Requires hardware-enforced isolation (FIPS 140-3)
 - **DoD IL5+:** Requires Trusted Execution Environments
 - **Swiss Banking:** Confidential computing mandates (FINMA regulations)
@@ -40,6 +44,7 @@ Implement **hardware-enforced confidential computing** using Trusted Execution E
 ### Key Components
 
 #### 1. Confidential Context Enclaves
+
 - Each MCP server runs in TEE:
   - **Intel SGX** (Software Guard Extensions)
   - **AMD SEV-SNP** (Secure Encrypted Virtualization)
@@ -50,6 +55,7 @@ Implement **hardware-enforced confidential computing** using Trusted Execution E
   - No debugger/root access (even cloud admin cannot inspect)
 
 #### 2. Remote Attestation Protocol
+
 - Before sending context to MCP server, client verifies enclave:
   - Request **attestation quote:** cryptographic proof of enclave code
   - Quote: `{code_hash, data_hash, cpu_svn, timestamp, signature}`
@@ -58,6 +64,7 @@ Implement **hardware-enforced confidential computing** using Trusted Execution E
 - Only send context if attestation valid (and recent <5min)
 
 #### 3. Sealed Storage
+
 - Enclave encrypts context before writing to disk:
   - **Sealing key** derived from enclave identity + CPU fused key
   - Encrypted blobs can only be decrypted by same enclave version on same CPU
@@ -66,19 +73,22 @@ Implement **hardware-enforced confidential computing** using Trusted Execution E
   - Migration to untrusted environment
 
 #### 4. Secure Multi-Party Computation for Aggregation
+
 - If orchestrator needs aggregate stats ("average response time across all tenants"):
   - **Homomorphic encryption:** Compute on encrypted data
   - **Or secure enclaves with differential privacy:** Add noise before leaving enclave
 - Never expose individual tenant data
 
 #### 5. Enclave-Based Policy Enforcement
-- OPA policy engine runs *inside enclave*
+
+- OPA policy engine runs _inside enclave_
 - Policy decisions on encrypted context (never leaves TEE)
 - Audit logs sealed before writing to untrusted storage
 
 ### Implementation Details
 
 **Enclave Lifecycle:**
+
 ```
 1. Server boots → initialize SGX/SEV enclave → generate ephemeral keys
 2. Client requests attestation → enclave provides quote
@@ -88,6 +98,7 @@ Implement **hardware-enforced confidential computing** using Trusted Execution E
 ```
 
 **API:**
+
 ```json
 {
   "method": "mcp.enclave.requestAttestation",
@@ -113,6 +124,7 @@ Implement **hardware-enforced confidential computing** using Trusted Execution E
 ```
 
 **Performance:**
+
 - Attestation overhead: ~200ms (one-time per connection)
 - Enclave processing: ~10-20% slower than native (encryption overhead)
 - Sealed storage I/O: ~2x slower (encryption)
@@ -120,17 +132,20 @@ Implement **hardware-enforced confidential computing** using Trusted Execution E
 ## Alternatives Considered
 
 ### Alternative 1: Software-Only Encryption (No TEE)
+
 - **Pros:** No hardware dependency, cloud-portable
 - **Cons:** Operators can access encryption keys in memory
 - **Rejected:** Doesn't meet FedRAMP High hardware isolation requirement
 - **Note:** This is addressed by ADR-0023 (Cryptographic Context Confinement) as complementary
 
 ### Alternative 2: Dedicated Hardware per Tenant
+
 - **Pros:** Perfect isolation
 - **Cons:** Prohibitively expensive (100x cost), poor utilization
 - **Rejected:** Not economically viable for cloud SaaS
 
 ### Alternative 3: Fully Homomorphic Encryption (FHE)
+
 - **Pros:** Strongest confidentiality (compute on encrypted data)
 - **Cons:** 100-1000x performance overhead, can't run LLMs
 - **Rejected:** Research-grade, not production-ready for LLMs
@@ -138,6 +153,7 @@ Implement **hardware-enforced confidential computing** using Trusted Execution E
 ## Consequences
 
 ### Positive
+
 - **Hardware-enforced isolation:** Military-grade confidentiality
 - **Insider threat mitigation:** Cloud admins cannot read encrypted context (even with root)
 - **Attestation:** Cryptographic proof that code is unmodified
@@ -145,6 +161,7 @@ Implement **hardware-enforced confidential computing** using Trusted Execution E
 - **Premium pricing:** Justify 2-3x pricing for confidential tier
 
 ### Negative
+
 - **Hardware dependency:** Requires Intel Xeon E-series (Ice Lake+) or AMD EPYC with SEV-SNP
   - Limits cloud portability (not all regions have SGX/SEV)
 - **Enclave memory limits:** 512MB-256GB (depending on CPU)
@@ -154,6 +171,7 @@ Implement **hardware-enforced confidential computing** using Trusted Execution E
 - **Maintenance:** CPU microcode updates may break enclaves (need careful patch management)
 
 ### Operational Impact
+
 - **Monitoring:**
   - Metrics: `enclave_attestation_failures`, `sealed_storage_latency`, `enclave_memory_usage`
   - Alert: Attestation failure rate >0.1%
@@ -170,6 +188,7 @@ Implement **hardware-enforced confidential computing** using Trusted Execution E
 ## Code References
 
 ### Core Implementation
+
 - `services/mcp-server-sgx/enclave/` (~3000 lines C++) - Enclave code
   - Entry points: `ecall_process_context()`, `ecall_seal_output()`
   - Sealing/unsealing logic
@@ -178,10 +197,12 @@ Implement **hardware-enforced confidential computing** using Trusted Execution E
 - `server/src/conductor/mcp/attestation-client.ts` (~400 lines) - Client-side attestation
 
 ### Data Models
+
 - No new database tables (enclave state is ephemeral)
 - Sealed blobs stored in S3/Minio (opaque to database)
 
 ### Infrastructure
+
 - `docker-compose.mcp-sgx.yml`:
   ```yaml
   services:
@@ -197,6 +218,7 @@ Implement **hardware-enforced confidential computing** using Trusted Execution E
 ## Tests & Validation
 
 ### Evaluation Criteria
+
 - **Security:**
   - Attempt to read enclave memory with debugger (should fail)
   - Attempt to decrypt sealed storage without enclave (should fail)
@@ -207,6 +229,7 @@ Implement **hardware-enforced confidential computing** using Trusted Execution E
   - Sealed I/O: <2x native
 
 ### CI Enforcement
+
 - **Simulation mode:** Unit tests run with SGX_MODE=SIM (software emulation)
 - **Hardware tests:** Integration tests on SGX-enabled CI runners (dedicated hardware)
 - **Golden path:** "E2E confidential context processing with attestation"
@@ -214,6 +237,7 @@ Implement **hardware-enforced confidential computing** using Trusted Execution E
 ## Migration & Rollout
 
 ### Migration Steps
+
 1. **Phase 1 (Months 1-3):** Research + prototype (SGX SDK, Gramine LibOS evaluation)
 2. **Phase 2 (Months 4-6):** Enclave development (core MCP logic port to C++)
 3. **Phase 3 (Months 7-9):** Attestation service integration (Intel Attestation Service, Azure Attestation)
@@ -222,11 +246,13 @@ Implement **hardware-enforced confidential computing** using Trusted Execution E
 6. **Phase 6 (Months 16-18):** Pilot with FedRAMP High customers
 
 ### Rollback Plan
+
 - **Dual deployment:** Run both confidential and standard MCP servers
 - **Tenant opt-in:** Confidential tier is premium feature (not mandatory)
 - **No data migration:** Sealed storage is new (doesn't affect existing provenance)
 
 ### Timeline
+
 - **Research:** Months 1-6
 - **Development:** Months 7-12
 - **Pilot:** Months 13-15
@@ -235,10 +261,12 @@ Implement **hardware-enforced confidential computing** using Trusted Execution E
 ## References
 
 ### Related ADRs
+
 - ADR-0010: Multi-Tenant Compartment Model (tenant isolation foundation)
 - ADR-0023: Cryptographic Context Confinement (software-based alternative)
 
 ### External Resources
+
 - [Intel SGX](https://www.intel.com/content/www/us/en/architecture-and-technology/software-guard-extensions.html)
 - [AMD SEV-SNP](https://www.amd.com/en/developer/sev.html)
 - [Gramine LibOS](https://gramineproject.io/) - Run unmodified applications in SGX
@@ -247,6 +275,7 @@ Implement **hardware-enforced confidential computing** using Trusted Execution E
 - [FedRAMP High Baseline](https://www.fedramp.gov/assets/resources/documents/FedRAMP_High_Security_Controls.xlsx)
 
 ### Discussion
+
 - Internal RFC: "TEE Strategy for Summit" (link TBD)
 - External audit: Trail of Bits security review (planned)
 
@@ -254,6 +283,6 @@ Implement **hardware-enforced confidential computing** using Trusted Execution E
 
 ## Revision History
 
-| Date | Author | Change |
-|------|--------|--------|
+| Date       | Author              | Change                                         |
+| ---------- | ------------------- | ---------------------------------------------- |
 | 2026-01-01 | Infrastructure Team | Initial version (patent defensive publication) |

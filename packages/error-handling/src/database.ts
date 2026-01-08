@@ -2,19 +2,16 @@
  * Database operation wrappers with integrated resilience patterns
  */
 
-import pino from 'pino';
-import {
-  DatabaseError,
-  toAppError,
-} from './errors.js';
+import pino from "pino";
+import { DatabaseError, toAppError } from "./errors.js";
 import {
   executeWithRetry,
   executeWithTimeout,
   RetryPolicies,
   withGracefulDegradation,
-} from './resilience.js';
+} from "./resilience.js";
 
-const logger = pino({ name: 'DatabaseResilience' });
+const logger = pino({ name: "DatabaseResilience" });
 
 /**
  * Execute Neo4j query with retry and timeout
@@ -25,19 +22,18 @@ export async function executeNeo4jQuery<T>(
   options?: {
     timeoutMs?: number;
     retryable?: boolean;
-  },
+  }
 ): Promise<T> {
   const timeoutMs = options?.timeoutMs || 30000;
   const retryable = options?.retryable !== false;
 
   try {
-    const fnWithTimeout = () =>
-      executeWithTimeout(fn, timeoutMs, `neo4j.${operation}`);
+    const fnWithTimeout = () => executeWithTimeout(fn, timeoutMs, `neo4j.${operation}`);
 
     if (retryable) {
       return await executeWithRetry(fnWithTimeout, RetryPolicies.database, {
         operation,
-        service: 'neo4j',
+        service: "neo4j",
       });
     }
 
@@ -48,14 +44,14 @@ export async function executeNeo4jQuery<T>(
         operation,
         error: error instanceof Error ? error.message : String(error),
       },
-      'Neo4j query failed',
+      "Neo4j query failed"
     );
 
     throw new DatabaseError(
-      'NEO4J_ERROR',
+      "NEO4J_ERROR",
       `Neo4j ${operation} failed: ${error.message}`,
       { operation },
-      error,
+      error
     );
   }
 }
@@ -69,19 +65,18 @@ export async function executePostgresQuery<T>(
   options?: {
     timeoutMs?: number;
     retryable?: boolean;
-  },
+  }
 ): Promise<T> {
   const timeoutMs = options?.timeoutMs || 10000;
   const retryable = options?.retryable !== false;
 
   try {
-    const fnWithTimeout = () =>
-      executeWithTimeout(fn, timeoutMs, `postgres.${operation}`);
+    const fnWithTimeout = () => executeWithTimeout(fn, timeoutMs, `postgres.${operation}`);
 
     if (retryable) {
       return await executeWithRetry(fnWithTimeout, RetryPolicies.database, {
         operation,
-        service: 'postgres',
+        service: "postgres",
       });
     }
 
@@ -92,14 +87,14 @@ export async function executePostgresQuery<T>(
         operation,
         error: error instanceof Error ? error.message : String(error),
       },
-      'PostgreSQL query failed',
+      "PostgreSQL query failed"
     );
 
     throw new DatabaseError(
-      'POSTGRES_ERROR',
+      "POSTGRES_ERROR",
       `PostgreSQL ${operation} failed: ${error.message}`,
       { operation },
-      error,
+      error
     );
   }
 }
@@ -111,10 +106,10 @@ export async function executePostgresQuery<T>(
 export async function executeRedisOperation<T>(
   operation: string,
   fn: () => Promise<T>,
-  fallback: T,
+  fallback: T
 ): Promise<T> {
   return withGracefulDegradation(fn, fallback, {
-    serviceName: 'redis',
+    serviceName: "redis",
     operation,
     logError: true,
   });
@@ -127,7 +122,7 @@ export async function withDatabaseTransaction<T>(
   beginFn: () => Promise<void>,
   commitFn: () => Promise<void>,
   rollbackFn: () => Promise<void>,
-  transactionFn: () => Promise<T>,
+  transactionFn: () => Promise<T>
 ): Promise<T> {
   try {
     await beginFn();
@@ -139,7 +134,7 @@ export async function withDatabaseTransaction<T>(
       {
         error: error instanceof Error ? error.message : String(error),
       },
-      'Transaction failed, rolling back',
+      "Transaction failed, rolling back"
     );
 
     try {
@@ -149,7 +144,7 @@ export async function withDatabaseTransaction<T>(
         {
           error: rollbackError instanceof Error ? rollbackError.message : String(rollbackError),
         },
-        'Transaction rollback failed',
+        "Transaction rollback failed"
       );
     }
 
@@ -166,7 +161,7 @@ export async function executeBatchOperation<T, R>(
   options?: {
     continueOnError?: boolean;
     batchSize?: number;
-  },
+  }
 ): Promise<{
   results: R[];
   errors: Array<{ item: T; error: Error }>;
@@ -208,7 +203,7 @@ export async function executeBatchOperation<T, R>(
         successful: results.length,
         failed: errors.length,
       },
-      'Batch operation completed with errors',
+      "Batch operation completed with errors"
     );
   }
 

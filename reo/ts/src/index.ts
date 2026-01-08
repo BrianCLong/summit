@@ -1,6 +1,6 @@
 export interface MetricDelta {
   metric: string;
-  goal: 'maximize' | 'minimize';
+  goal: "maximize" | "minimize";
   delta: number;
   stderr: number;
   ci: [number, number];
@@ -26,7 +26,7 @@ export interface RegressionHighlight {
   metric: string;
   delta: number;
   ci: [number, number];
-  severity: 'critical' | 'warning';
+  severity: "critical" | "warning";
 }
 
 export interface TrendPoint {
@@ -41,13 +41,14 @@ export function summarizeRegressions(data: ComparisonData): RegressionHighlight[
   for (const task of data.taskDeltas) {
     for (const metric of task.metrics) {
       if (!metric.isRegression) continue;
-      const severity = metric.goal === 'maximize'
-        ? metric.delta < -0.05
-          ? 'critical'
-          : 'warning'
-        : metric.delta > 0.05
-          ? 'critical'
-          : 'warning';
+      const severity =
+        metric.goal === "maximize"
+          ? metric.delta < -0.05
+            ? "critical"
+            : "warning"
+          : metric.delta > 0.05
+            ? "critical"
+            : "warning";
       highlights.push({
         taskId: task.taskId,
         metric: metric.metric,
@@ -62,7 +63,7 @@ export function summarizeRegressions(data: ComparisonData): RegressionHighlight[
 
 export function toTrendPoints(
   versionScores: { version: string; score: number; stderr: number }[],
-  confidence = 0.95,
+  confidence = 0.95
 ): TrendPoint[] {
   const z = 1.959963984540054; // approx for 95%
   return versionScores.map(({ version, score, stderr }) => {
@@ -72,8 +73,8 @@ export function toTrendPoints(
 }
 
 export function mergeComparisonPayload(payload: any): ComparisonData {
-  if (!payload || typeof payload !== 'object') {
-    throw new Error('Invalid payload');
+  if (!payload || typeof payload !== "object") {
+    throw new Error("Invalid payload");
   }
   const taskDeltas: TaskDelta[] = (payload.task_deltas || payload.taskDeltas || []).map(
     (task: any) => ({
@@ -81,18 +82,18 @@ export function mergeComparisonPayload(payload: any): ComparisonData {
       scoreDelta: Number(task.score_delta ?? task.scoreDelta ?? 0),
       metrics: (task.metrics || []).map((metric: any) => ({
         metric: metric.metric,
-        goal: metric.goal ?? 'maximize',
+        goal: metric.goal ?? "maximize",
         delta: Number(metric.delta ?? 0),
         stderr: Number(metric.stderr ?? 0),
         ci: metric.ci ?? [0, 0],
         isRegression: Boolean(metric.is_regression ?? metric.isRegression ?? false),
       })),
-    }),
+    })
   );
   const regressions = payload.regressions ?? {};
   return {
-    baselineVersion: payload.baseline_version ?? payload.baselineVersion ?? 'baseline',
-    candidateVersion: payload.candidate_version ?? payload.candidateVersion ?? 'candidate',
+    baselineVersion: payload.baseline_version ?? payload.baselineVersion ?? "baseline",
+    candidateVersion: payload.candidate_version ?? payload.candidateVersion ?? "candidate",
     overallDelta: Number(payload.overall_delta ?? payload.overallDelta ?? 0),
     taskDeltas,
     regressions,
@@ -101,7 +102,7 @@ export function mergeComparisonPayload(payload: any): ComparisonData {
 
 export function regressionHeatmapMatrix(data: ComparisonData): number[][] {
   const rows = data.taskDeltas.length;
-  const cols = Math.max(...data.taskDeltas.map(task => task.metrics.length), 0);
+  const cols = Math.max(...data.taskDeltas.map((task) => task.metrics.length), 0);
   const matrix: number[][] = Array.from({ length: rows }, () => Array(cols).fill(0));
   data.taskDeltas.forEach((task, rowIndex) => {
     task.metrics.forEach((metric, colIndex) => {

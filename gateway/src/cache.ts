@@ -1,11 +1,11 @@
-import { createClient, RedisClientType } from 'redis';
+import { createClient, RedisClientType } from "redis";
 
 let client: RedisClientType | null = null;
 
 function getClient() {
   if (!client) {
     client = createClient({ url: process.env.REDIS_URL });
-    client.on('error', (err) => console.error('Redis error', err));
+    client.on("error", (err) => console.error("Redis error", err));
     client.connect().catch(() => {});
   }
   return client;

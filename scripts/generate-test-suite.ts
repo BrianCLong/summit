@@ -6,12 +6,12 @@
  * for files that don't have adequate test coverage
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import { glob } from 'glob';
+import * as fs from "fs";
+import * as path from "path";
+import { glob } from "glob";
 
 interface TestTemplate {
-  type: 'unit' | 'integration' | 'e2e';
+  type: "unit" | "integration" | "e2e";
   template: string;
 }
 
@@ -23,10 +23,12 @@ function generateUnitTest(filePath: string, sourceCode: string): string {
   const relativePath = path.relative(process.cwd(), filePath);
 
   // Extract exports from the file
-  const exportMatches = sourceCode.matchAll(/export\s+(class|function|const|interface|type)\s+(\w+)/g);
-  const exports = Array.from(exportMatches).map(match => ({
+  const exportMatches = sourceCode.matchAll(
+    /export\s+(class|function|const|interface|type)\s+(\w+)/g
+  );
+  const exports = Array.from(exportMatches).map((match) => ({
     type: match[1],
-    name: match[2]
+    name: match[2],
   }));
 
   let testContent = `/**
@@ -40,11 +42,11 @@ import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
   // Add imports for all exports
   if (exports.length > 0) {
     const exportNames = exports
-      .filter(e => e.type !== 'interface' && e.type !== 'type')
-      .map(e => e.name);
+      .filter((e) => e.type !== "interface" && e.type !== "type")
+      .map((e) => e.name);
 
     if (exportNames.length > 0) {
-      testContent += `import { ${exportNames.join(', ')} } from './${fileName}';\n`;
+      testContent += `import { ${exportNames.join(", ")} } from './${fileName}';\n`;
     }
   }
 
@@ -52,12 +54,12 @@ import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 
   // Generate test suites for each export
   for (const exp of exports) {
-    if (exp.type === 'interface' || exp.type === 'type') continue;
+    if (exp.type === "interface" || exp.type === "type") continue;
 
     testContent += `describe('${exp.name}', () => {
 `;
 
-    if (exp.type === 'class') {
+    if (exp.type === "class") {
       testContent += `  let instance: ${exp.name};
 
   beforeEach(() => {
@@ -80,7 +82,7 @@ import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 
   // TODO: Add more specific tests for methods and properties
 `;
-    } else if (exp.type === 'function') {
+    } else if (exp.type === "function") {
       testContent += `  it('should be defined', () => {
     expect(${exp.name}).toBeDefined();
     expect(typeof ${exp.name}).toBe('function');
@@ -101,7 +103,7 @@ import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
     // TODO: Add edge case tests
   });
 `;
-    } else if (exp.type === 'const') {
+    } else if (exp.type === "const") {
       testContent += `  it('should be defined', () => {
     expect(${exp.name}).toBeDefined();
   });
@@ -326,29 +328,28 @@ test.describe('${featureName} E2E Tests', () => {
  * Find files that need tests
  */
 async function findFilesNeedingTests(): Promise<string[]> {
-  const sourceFiles = await glob('**/*.{ts,tsx}', {
+  const sourceFiles = await glob("**/*.{ts,tsx}", {
     ignore: [
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/build/**',
-      '**/*.test.{ts,tsx}',
-      '**/*.spec.{ts,tsx}',
-      '**/__tests__/**',
-      '**/tests/**',
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/*.test.{ts,tsx}",
+      "**/*.spec.{ts,tsx}",
+      "**/__tests__/**",
+      "**/tests/**",
     ],
     cwd: process.cwd(),
   });
 
-  const filesNeedingTests: string[]= [];
+  const filesNeedingTests: string[] = [];
 
   for (const file of sourceFiles) {
-    const testFile1 = file.replace(/\.tsx?$/, '.test.ts');
-    const testFile2 = file.replace(/\.tsx?$/, '.spec.ts');
-    const testFile3 = file.replace(/\.tsx?$/, '.test.tsx');
+    const testFile1 = file.replace(/\.tsx?$/, ".test.ts");
+    const testFile2 = file.replace(/\.tsx?$/, ".spec.ts");
+    const testFile3 = file.replace(/\.tsx?$/, ".test.tsx");
 
-    const hasTest = fs.existsSync(testFile1) ||
-                    fs.existsSync(testFile2) ||
-                    fs.existsSync(testFile3);
+    const hasTest =
+      fs.existsSync(testFile1) || fs.existsSync(testFile2) || fs.existsSync(testFile3);
 
     if (!hasTest) {
       filesNeedingTests.push(file);
@@ -362,7 +363,7 @@ async function findFilesNeedingTests(): Promise<string[]> {
  * Main execution
  */
 async function main() {
-  console.log('🧪 Generating comprehensive test suite...\n');
+  console.log("🧪 Generating comprehensive test suite...\n");
 
   const filesNeedingTests = await findFilesNeedingTests();
 
@@ -371,12 +372,13 @@ async function main() {
   let generated = 0;
   let skipped = 0;
 
-  for (const file of filesNeedingTests.slice(0, 50)) {  // Limit to first 50 for now
+  for (const file of filesNeedingTests.slice(0, 50)) {
+    // Limit to first 50 for now
     try {
-      const sourceCode = fs.readFileSync(file, 'utf-8');
+      const sourceCode = fs.readFileSync(file, "utf-8");
       const testContent = generateUnitTest(file, sourceCode);
 
-      const testFilePath = file.replace(/\.tsx?$/, '.test.ts');
+      const testFilePath = file.replace(/\.tsx?$/, ".test.ts");
       const testDir = path.dirname(testFilePath);
 
       fs.mkdirSync(testDir, { recursive: true });
@@ -391,18 +393,21 @@ async function main() {
   }
 
   // Generate integration test examples
-  const servicesDir = path.join(process.cwd(), 'services');
+  const servicesDir = path.join(process.cwd(), "services");
   if (fs.existsSync(servicesDir)) {
-    const services = fs.readdirSync(servicesDir).filter(f => {
-      return fs.statSync(path.join(servicesDir, f)).isDirectory();
-    }).slice(0, 10);
+    const services = fs
+      .readdirSync(servicesDir)
+      .filter((f) => {
+        return fs.statSync(path.join(servicesDir, f)).isDirectory();
+      })
+      .slice(0, 10);
 
     for (const service of services) {
       const integrationTestPath = path.join(
         servicesDir,
         service,
-        '__tests__',
-        'integration',
+        "__tests__",
+        "integration",
         `${service}.integration.test.ts`
       );
 
@@ -416,10 +421,10 @@ async function main() {
   }
 
   // Generate E2E test examples
-  const e2eDir = path.join(process.cwd(), 'tests/e2e');
+  const e2eDir = path.join(process.cwd(), "tests/e2e");
   fs.mkdirSync(e2eDir, { recursive: true });
 
-  const features = ['Dashboard', 'EntityGraph', 'Search', 'Collaboration'];
+  const features = ["Dashboard", "EntityGraph", "Search", "Collaboration"];
   for (const feature of features) {
     const e2eTestPath = path.join(e2eDir, `${feature.toLowerCase()}.spec.ts`);
 
@@ -433,7 +438,9 @@ async function main() {
   console.log(`\n📊 Test Generation Complete:`);
   console.log(`   • Generated: ${generated} test files`);
   console.log(`   • Skipped: ${skipped} files`);
-  console.log(`   • Remaining: ${filesNeedingTests.length - 50} files (run again to generate more)\n`);
+  console.log(
+    `   • Remaining: ${filesNeedingTests.length - 50} files (run again to generate more)\n`
+  );
 
   // Generate test utilities
   const testUtilsContent = `/**
@@ -515,7 +522,7 @@ export function generateTestData<T>(factory: () => T, count: number = 10): T[] {
 }
 `;
 
-  const testUtilsPath = path.join(process.cwd(), 'tests/utils/test-helpers.ts');
+  const testUtilsPath = path.join(process.cwd(), "tests/utils/test-helpers.ts");
   fs.mkdirSync(path.dirname(testUtilsPath), { recursive: true });
   fs.writeFileSync(testUtilsPath, testUtilsContent);
   console.log(`✓ Created test utilities: tests/utils/test-helpers.ts\n`);

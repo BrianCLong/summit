@@ -129,24 +129,24 @@ Observability: mobile sync panels; geo motif dashboards.
 // apps/web/src/mobile/offline-queue.ts
 export type Op = {
   id: string;
-  type: 'note.create' | 'note.update' | 'note.delete' | 'pin.set' | 'pin.unset';
+  type: "note.create" | "note.update" | "note.delete" | "pin.set" | "pin.unset";
   payload: any;
   ts: number;
   deviceId: string;
 };
-const KEY = 'ig-mobile-ops-v1';
+const KEY = "ig-mobile-ops-v1";
 export function enqueue(op: Op) {
-  const q = JSON.parse(localStorage.getItem(KEY) || '[]');
+  const q = JSON.parse(localStorage.getItem(KEY) || "[]");
   q.push(op);
   localStorage.setItem(KEY, JSON.stringify(q));
 }
 export function drain() {
-  const q = JSON.parse(localStorage.getItem(KEY) || '[]');
-  localStorage.setItem(KEY, '[]');
+  const q = JSON.parse(localStorage.getItem(KEY) || "[]");
+  localStorage.setItem(KEY, "[]");
   return q as Op[];
 }
 export function peek() {
-  return JSON.parse(localStorage.getItem(KEY) || '[]') as Op[];
+  return JSON.parse(localStorage.getItem(KEY) || "[]") as Op[];
 }
 ```
 
@@ -154,14 +154,7 @@ export function peek() {
 
 ```ts
 // apps/web/src/mobile/crdt.ts
-export function lwwMerge(
-  a: any,
-  b: any,
-  aTs: number,
-  bTs: number,
-  aDev: string,
-  bDev: string,
-) {
+export function lwwMerge(a: any, b: any, aTs: number, bTs: number, aDev: string, bDev: string) {
   if (aTs === bTs) return aDev < bDev ? a : b; // deterministic tie‑break
   return aTs > bTs ? a : b;
 }
@@ -171,19 +164,19 @@ export function lwwMerge(
 
 ```tsx
 // apps/web/src/mobile/WriteOps.tsx
-import React, { useState } from 'react';
-import { enqueue } from './offline-queue';
+import React, { useState } from "react";
+import { enqueue } from "./offline-queue";
 export default function WriteOps({ deviceId }: { deviceId: string }) {
-  const [note, setNote] = useState('');
+  const [note, setNote] = useState("");
   function create() {
     enqueue({
       id: crypto.randomUUID(),
-      type: 'note.create',
+      type: "note.create",
       payload: { text: note },
       ts: Date.now(),
       deviceId,
     });
-    setNote('');
+    setNote("");
   }
   return (
     <div className="p-2">
@@ -205,16 +198,15 @@ export default function WriteOps({ deviceId }: { deviceId: string }) {
 
 ```ts
 // server/src/mobile/sync.ts
-import type { Request, Response } from 'express';
+import type { Request, Response } from "express";
 export async function syncOps(req: Request, res: Response) {
   const { ops, deviceId } = req.body || {};
-  if (!Array.isArray(ops))
-    return res.status(400).json({ error: 'ops required' });
+  if (!Array.isArray(ops)) return res.status(400).json({ error: "ops required" });
   // TODO: OPA posture gate checked earlier in middleware
   const results = [] as any[];
   for (const op of ops) {
     // idempotency via op.id ledger
-    results.push({ id: op.id, status: 'applied' });
+    results.push({ id: op.id, status: "applied" });
   }
   res.json({ results });
 }
@@ -269,16 +261,13 @@ export function churn(cells: Cell[], threshold = 2.0) {
 
 ```ts
 // server/src/security/mtls.ts
-import fs from 'fs';
-import https from 'https';
+import fs from "fs";
+import https from "https";
 export function httpsServer(app: any) {
   const key = fs.readFileSync(process.env.TLS_KEY as string);
   const cert = fs.readFileSync(process.env.TLS_CERT as string);
   const ca = fs.readFileSync(process.env.TLS_CA as string);
-  return https.createServer(
-    { key, cert, ca, requestCert: true, rejectUnauthorized: true },
-    app,
-  );
+  return https.createServer({ key, cert, ca, requestCert: true, rejectUnauthorized: true }, app);
 }
 ```
 
@@ -303,8 +292,8 @@ allow if {
 
 ```ts
 // server/src/graph/cache_tiers.ts
-import LRU from 'lru-cache';
-import { createClient } from 'redis';
+import LRU from "lru-cache";
+import { createClient } from "redis";
 const l1 = new LRU<string, any>({ max: 2000, ttl: 10000 });
 const r = createClient({ url: process.env.REDIS_URL });
 export async function init() {
@@ -331,27 +320,24 @@ export async function set(key: string, val: any, ttl = 60) {
 
 ```tsx
 // apps/web/src/features/er-queue/batch.tsx
-import React, { useState } from 'react';
-import $ from 'jquery';
+import React, { useState } from "react";
+import $ from "jquery";
 export default function Batch() {
   const [sel, setSel] = useState<string[]>([]);
-  function act(decision: 'accept' | 'decline') {
+  function act(decision: "accept" | "decline") {
     $.ajax({
-      url: '/api/er/decision/batch',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/api/er/decision/batch",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({ ids: sel, decision }),
     });
   }
   return (
     <div className="p-2">
-      <button
-        className="rounded-2xl p-2 shadow mr-2"
-        onClick={() => act('accept')}
-      >
+      <button className="rounded-2xl p-2 shadow mr-2" onClick={() => act("accept")}>
         Accept Selected
       </button>
-      <button className="rounded-2xl p-2 shadow" onClick={() => act('decline')}>
+      <button className="rounded-2xl p-2 shadow" onClick={() => act("decline")}>
         Decline Selected
       </button>
     </div>
@@ -435,7 +421,7 @@ cache:
   l1: enabled
   l2: redis
 motifs:
-  geo: ['clusters', 'route_overlap', 'hotspot_churn']
+  geo: ["clusters", "route_overlap", "hotspot_churn"]
 observability:
   mobileSyncPanels: true
 ```

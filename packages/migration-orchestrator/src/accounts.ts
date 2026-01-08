@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+import crypto from "node:crypto";
 
 export class AccountLinkService {
   constructor() {
@@ -24,15 +24,15 @@ export class AccountLinkService {
 
   checkpoint(oldTenantId, newTenantId, note) {
     const link = this.links.get(`${oldTenantId}:${newTenantId}`);
-    if (!link) throw new Error('link not found');
+    if (!link) throw new Error("link not found");
     link.checkpoints.push(note);
     link.auditTrail.push(`checkpoint:${note}`);
   }
 
   rollback(oldTenantId, newTenantId, reason) {
     const link = this.links.get(`${oldTenantId}:${newTenantId}`);
-    if (!link) throw new Error('link not found');
-    if (!link.reversible) throw new Error('rollback not permitted');
+    if (!link) throw new Error("link not found");
+    if (!link.reversible) throw new Error("rollback not permitted");
     link.auditTrail.push(`rollback:${reason}`);
   }
 
@@ -45,13 +45,13 @@ export class AccountLinkService {
 
   resolveException(id) {
     const entry = this.exceptionRegistry.get(id);
-    if (!entry) throw new Error('unknown exception');
+    if (!entry) throw new Error("unknown exception");
     entry.resolved = true;
   }
 
   listExceptions() {
     return Array.from(this.exceptionRegistry.values()).sort(
-      (a, b) => a.expiresAt.getTime() - b.expiresAt.getTime(),
+      (a, b) => a.expiresAt.getTime() - b.expiresAt.getTime()
     );
   }
 }
@@ -67,7 +67,7 @@ export class TenantLifecycle {
   }
 
   getPhase(tenantId) {
-    return this.phases.get(tenantId) ?? 'inventory';
+    return this.phases.get(tenantId) ?? "inventory";
   }
 
   activateFreeze(tenantId) {

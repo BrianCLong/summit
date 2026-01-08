@@ -2,12 +2,12 @@ name: CI Policy
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'src/intelgraph/policy/**'
-      - 'tests/test_policy_default_allow.py'
+      - "src/intelgraph/policy/**"
+      - "tests/test_policy_default_allow.py"
 
 jobs:
   test-policy:

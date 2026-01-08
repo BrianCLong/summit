@@ -102,7 +102,7 @@ resource "aws_globalaccelerator_endpoint_group" "west" {
 # .github/workflows/adaptive-traffic.yml
 name: Adaptive Traffic (SLO‑aware)
 on:
-  schedule: [{ cron: '*/5 * * * *' }]
+  schedule: [{ cron: "*/5 * * * *" }]
   workflow_dispatch: {}
 permissions: { contents: read, id-token: write }
 jobs:
@@ -172,7 +172,7 @@ jobs:
 name: Perf Budgets (PR)
 on:
   pull_request:
-    paths: ['services/**', 'gateway/**', 'web/**']
+    paths: ["services/**", "gateway/**", "web/**"]
 jobs:
   api_benchmark:
     runs-on: ubuntu-latest
@@ -271,7 +271,7 @@ default_context:
 name: Contract Tests (PR)
 on:
   pull_request:
-    paths: ['api/**', 'contracts/**']
+    paths: ["api/**", "contracts/**"]
 jobs:
   contract:
     runs-on: ubuntu-latest

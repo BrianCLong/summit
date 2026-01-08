@@ -4,16 +4,16 @@ on:
   workflow_dispatch:
     inputs:
       run_grafana_render:
-        description: 'Render Grafana SLO panels (requires creds)'
+        description: "Render Grafana SLO panels (requires creds)"
         required: false
-        default: 'false'
+        default: "false"
   pull_request:
     branches: [main, master]
     types: [opened, synchronize, reopened, ready_for_review]
     paths-ignore:
-      - '**.md'
-      - '**/*.png'
-      - '**/*.jpg'
+      - "**.md"
+      - "**/*.png"
+      - "**/*.jpg"
 
 permissions:
   contents: read
@@ -30,9 +30,9 @@ jobs:
     timeout-minutes: 60
     env:
       COMPOSE_PROFILES: dev
-      API_PORT: '4000'
-      GATEWAY_PORT: '4100'
-      GRAFANA_URL: 'http://localhost:3000'
+      API_PORT: "4000"
+      GATEWAY_PORT: "4100"
+      GRAFANA_URL: "http://localhost:3000"
       GRAFANA_USER: ${{ secrets.GRAFANA_USER }}
       GRAFANA_PASS: ${{ secrets.GRAFANA_PASS }}
       RUN_GRAFANA_RENDER: ${{ github.event.inputs.run_grafana_render || 'false' }}
@@ -42,7 +42,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: ['18.x', '20.x']
+        node: ["18.x", "20.x"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -127,8 +127,8 @@ jobs:
           format: table
           severity: CRITICAL,HIGH
           ignore-unfixed: true
-          exit-code: '1'
-          vuln-type: 'os,library'
+          exit-code: "1"
+          vuln-type: "os,library"
 
       - name: Prepare artifacts dir
         run: mkdir -p artifacts

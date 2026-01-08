@@ -13,18 +13,21 @@ Successfully enhanced Summit's monitoring and observability infrastructure with 
 ### 1. ✅ Distributed Tracing with OpenTelemetry
 
 **Infrastructure:**
+
 - Jaeger all-in-one deployment (UI: http://localhost:16686)
 - OTLP gRPC receiver (port 4317)
 - OTLP HTTP receiver (port 4318)
 - In-memory span storage (easily upgradeable to persistent)
 
 **Instrumentation:**
+
 - Enhanced existing OpenTelemetry in server (server/src/monitoring/opentelemetry.ts)
 - Added OpenTelemetry to gateway service (services/dev-gateway/otel.js)
 - Automatic instrumentation for HTTP, GraphQL, databases, background jobs
 - W3C trace context propagation across services
 
 **Integration:**
+
 - Grafana ↔ Jaeger integration with trace-to-logs correlation
 - Clickable links from logs to traces and vice versa
 - Trace exemplars in metrics (future enhancement)
@@ -32,12 +35,14 @@ Successfully enhanced Summit's monitoring and observability infrastructure with 
 ### 2. ✅ Structured Logging with Loki
 
 **Infrastructure:**
+
 - Loki deployment (API: http://localhost:3100)
 - Promtail for Docker container log collection
 - 30-day log retention with compaction
 - Automatic log ingestion from all Docker services
 
 **Shared Logger Package:**
+
 - Created `@intelgraph/logger` package in `packages/logger/`
 - Pino-based structured JSON logging
 - Automatic OpenTelemetry trace correlation (traceId, spanId in every log)
@@ -47,6 +52,7 @@ Successfully enhanced Summit's monitoring and observability infrastructure with 
 - Comprehensive documentation and examples
 
 **Integration:**
+
 - Grafana ↔ Loki integration with log exploration
 - Derived fields for automatic trace linking
 - LogQL query support in Grafana Explore
@@ -68,6 +74,7 @@ Successfully enhanced Summit's monitoring and observability infrastructure with 
    - Real-time compliance tracking
 
 **Enhanced Prometheus Configuration:**
+
 - Extended scrape targets (API, Gateway, Prometheus, AlertManager, Loki, Jaeger)
 - AlertManager integration
 - Recording rules support
@@ -78,27 +85,28 @@ Successfully enhanced Summit's monitoring and observability infrastructure with 
 
 **SLO Definitions** (`observability/slo/comprehensive-slos.yaml`):
 
-| Service | Availability SLO | Latency SLO | Error Budget |
-|---------|------------------|-------------|--------------|
-| API | 99.9% | P99 < 500ms | 43.8 min/month |
-| Gateway | 99.95% | P99 < 100ms | 21.9 min/month |
-| Web | 99.9% | P95 < 2s | 43.8 min/month |
-| Neo4j | 99.99% | P99 < 1s | 4.38 min/month |
-| PostgreSQL | 99.99% | P99 < 1s | 4.38 min/month |
-| Redis | 99.99% | P99 < 10ms | 4.38 min/month |
-| Background Jobs | 99.0% | P99 < 5min | 7.2 hours/month |
+| Service         | Availability SLO | Latency SLO | Error Budget    |
+| --------------- | ---------------- | ----------- | --------------- |
+| API             | 99.9%            | P99 < 500ms | 43.8 min/month  |
+| Gateway         | 99.95%           | P99 < 100ms | 21.9 min/month  |
+| Web             | 99.9%            | P95 < 2s    | 43.8 min/month  |
+| Neo4j           | 99.99%           | P99 < 1s    | 4.38 min/month  |
+| PostgreSQL      | 99.99%           | P99 < 1s    | 4.38 min/month  |
+| Redis           | 99.99%           | P99 < 10ms  | 4.38 min/month  |
+| Background Jobs | 99.0%            | P99 < 5min  | 7.2 hours/month |
 
 **Multi-Window Burn Rate Alerts** (`comprehensive-slo-burn-alerts.yaml`):
 
 Based on Google SRE Workbook methodology:
 
-| Severity | Burn Rate | Detection Window | Budget Consumed | Response |
-|----------|-----------|------------------|-----------------|----------|
-| Critical | 14.4x | 1h & 5m | 5% in 1 hour | Page immediately |
-| High | 6x | 6h & 30m | 5% in 6 hours | Page in hours |
-| Medium | 1x | 3d & 6h | 10% in 3 days | Create ticket |
+| Severity | Burn Rate | Detection Window | Budget Consumed | Response         |
+| -------- | --------- | ---------------- | --------------- | ---------------- |
+| Critical | 14.4x     | 1h & 5m          | 5% in 1 hour    | Page immediately |
+| High     | 6x        | 6h & 30m         | 5% in 6 hours   | Page in hours    |
+| Medium   | 1x        | 3d & 6h          | 10% in 3 days   | Create ticket    |
 
 **Alert Rules:**
+
 - API availability burn rate (critical, high, medium)
 - Gateway availability burn rate (critical, high)
 - Latency SLO violations (API, Gateway)
@@ -106,6 +114,7 @@ Based on Google SRE Workbook methodology:
 - Resource utilization alerts (memory, CPU, disk, connection pools)
 
 **AlertManager Configuration:**
+
 - Severity-based routing (critical, warning, info)
 - Inhibition rules to reduce alert noise
 - Slack integration templates (#alerts-critical, #alerts-warning)
@@ -163,17 +172,20 @@ Based on Google SRE Workbook methodology:
 ### Infrastructure as Code
 
 **New Services in docker-compose.dev.yml:**
+
 - Jaeger (tracing backend)
 - Loki (log aggregation)
 - Promtail (log shipper)
 - AlertManager (alert routing)
 
 **New Volumes:**
+
 - prometheus_data (30-day TSDB retention)
 - loki_data (30-day log retention)
 - alertmanager_data (alert state persistence)
 
 **Environment Variables:**
+
 - OTEL_SERVICE_NAME (service identification)
 - OTEL_SERVICE_VERSION (version tracking)
 - JAEGER_ENDPOINT (trace export destination)
@@ -182,6 +194,7 @@ Based on Google SRE Workbook methodology:
 ### Code Quality
 
 **New Package: @intelgraph/logger**
+
 - Full TypeScript support with type definitions
 - Comprehensive README with examples
 - Migration guide from Winston
@@ -189,6 +202,7 @@ Based on Google SRE Workbook methodology:
 - Follows monorepo conventions
 
 **Configuration Files:**
+
 - Loki: `observability/loki/loki-config.yaml`
 - Promtail: `observability/promtail/promtail-config.yaml`
 - Prometheus: Enhanced `observability/prometheus/prometheus-dev.yml`
@@ -314,6 +328,7 @@ logger.info({ userId: '123' }, 'User action');
 **Deletions**: 7 lines
 
 **Key Files:**
+
 - `docker-compose.dev.yml` - Added Jaeger, Loki, Promtail, AlertManager
 - `packages/logger/*` - New shared logging package
 - `observability/*` - Enhanced configurations and new dashboards
@@ -345,6 +360,7 @@ logger.info({ userId: '123' }, 'User action');
 ## Resources
 
 ### Documentation
+
 - [Observability Guide](docs/OBSERVABILITY.md)
 - [Observability Audit](docs/OBSERVABILITY_AUDIT.md)
 - [High Latency Runbook](RUNBOOKS/observability/high-latency.md)
@@ -352,10 +368,12 @@ logger.info({ userId: '123' }, 'User action');
 - [Logger Package README](packages/logger/README.md)
 
 ### Dashboards
+
 - [Golden Signals](http://localhost:3001/d/summit-golden-signals)
 - [SLO Overview](http://localhost:3001/d/summit-slo-overview)
 
 ### UIs
+
 - [Jaeger](http://localhost:16686)
 - [Grafana](http://localhost:3001)
 - [Prometheus](http://localhost:9090)
@@ -364,6 +382,7 @@ logger.info({ userId: '123' }, 'User action');
 ## Acknowledgments
 
 Implemented using:
+
 - **Google SRE Workbook** methodology for burn rate alerts
 - **OpenTelemetry** standards for distributed tracing
 - **The Twelve-Factor App** principles for logging

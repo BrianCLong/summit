@@ -1,11 +1,11 @@
-import { Redis } from 'ioredis';
-import { Mutex } from 'async-mutex';
-import { trace } from '@opentelemetry/api';
-import pino from 'pino';
-import { StampedeConfig } from './types';
+import { Redis } from "ioredis";
+import { Mutex } from "async-mutex";
+import { trace } from "@opentelemetry/api";
+import pino from "pino";
+import { StampedeConfig } from "./types";
 
-const logger = pino({ name: 'StampedeProtection' });
-const tracer = trace.getTracer('advanced-caching');
+const logger = pino({ name: "StampedeProtection" });
+const tracer = trace.getTracer("advanced-caching");
 
 /**
  * Prevents cache stampede using distributed locks
@@ -22,11 +22,8 @@ export class StampedeProtection {
    * Execute function with stampede protection
    * Only one process/thread will execute the loader, others will wait
    */
-  async execute<T>(
-    key: string,
-    loader: () => Promise<T>
-  ): Promise<T> {
-    const span = tracer.startSpan('StampedeProtection.execute');
+  async execute<T>(key: string, loader: () => Promise<T>): Promise<T> {
+    const span = tracer.startSpan("StampedeProtection.execute");
     const lockKey = `lock:${key}`;
 
     try {
@@ -34,8 +31,8 @@ export class StampedeProtection {
       const lockAcquired = await this.acquireLock(lockKey);
 
       if (lockAcquired) {
-        span.setAttribute('lock.acquired', true);
-        logger.debug({ key }, 'Lock acquired, executing loader');
+        span.setAttribute("lock.acquired", true);
+        logger.debug({ key }, "Lock acquired, executing loader");
 
         try {
           // Execute the loader
@@ -50,8 +47,8 @@ export class StampedeProtection {
           throw error;
         }
       } else {
-        span.setAttribute('lock.acquired', false);
-        logger.debug({ key }, 'Lock not acquired, waiting...');
+        span.setAttribute("lock.acquired", false);
+        logger.debug({ key }, "Lock not acquired, waiting...");
 
         // Wait and retry
         return await this.waitForValue(key, loader);
@@ -68,15 +65,9 @@ export class StampedeProtection {
    * Acquire distributed lock using Redis
    */
   private async acquireLock(lockKey: string): Promise<boolean> {
-    const result = await this.redis.set(
-      lockKey,
-      '1',
-      'PX',
-      this.config.lockTTL,
-      'NX'
-    );
+    const result = await this.redis.set(lockKey, "1", "PX", this.config.lockTTL, "NX");
 
-    return result === 'OK';
+    return result === "OK";
   }
 
   /**
@@ -89,17 +80,12 @@ export class StampedeProtection {
   /**
    * Wait for another process to populate the value
    */
-  private async waitForValue<T>(
-    key: string,
-    loader: () => Promise<T>
-  ): Promise<T> {
+  private async waitForValue<T>(key: string, loader: () => Promise<T>): Promise<T> {
     const lockKey = `lock:${key}`;
 
     for (let i = 0; i < this.config.maxRetries; i++) {
       // Wait before retry
-      await new Promise((resolve) =>
-        setTimeout(resolve, this.config.lockRetryDelay)
-      );
+      await new Promise((resolve) => setTimeout(resolve, this.config.lockRetryDelay));
 
       // Check if lock is released
       const lockExists = await this.redis.exists(lockKey);
@@ -122,7 +108,7 @@ export class StampedeProtection {
     }
 
     // Timeout: execute anyway (fallback)
-    logger.warn({ key }, 'Stampede protection timeout, executing anyway');
+    logger.warn({ key }, "Stampede protection timeout, executing anyway");
     return await loader();
   }
 
@@ -139,10 +125,7 @@ export class StampedeProtection {
   /**
    * Execute with local mutex (for single-process stampede prevention)
    */
-  async executeLocal<T>(
-    key: string,
-    loader: () => Promise<T>
-  ): Promise<T> {
+  async executeLocal<T>(key: string, loader: () => Promise<T>): Promise<T> {
     const mutex = this.getLocalMutex(key);
     const release = await mutex.acquire();
 

@@ -2,12 +2,12 @@ name: CI Provenance
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'src/intelgraph/provenance/**'
-      - 'tests/test_provenance_minimal.py'
+      - "src/intelgraph/provenance/**"
+      - "tests/test_provenance_minimal.py"
 
 jobs:
   test-provenance:

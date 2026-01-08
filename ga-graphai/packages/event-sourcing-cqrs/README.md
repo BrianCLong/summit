@@ -3,6 +3,7 @@
 A lightweight toolkit for building event-driven flows with optimistic concurrency, snapshots, sagas, and eventual consistency primitives.
 
 ## Features
+
 - In-memory event store with optimistic concurrency control
 - Command bus wiring handlers to event persistence and publication
 - Projection helpers for query/read models
@@ -11,6 +12,7 @@ A lightweight toolkit for building event-driven flows with optimistic concurrenc
 - Eventual consistency coordinator to advance projections safely using offsets
 
 ## Usage
+
 ```ts
 import {
   CommandBus,
@@ -21,7 +23,7 @@ import {
   InMemoryProjection,
   InMemorySnapshotStore,
   SagaOrchestrator,
-} from '@ga-graphai/event-sourcing';
+} from "@ga-graphai/event-sourcing";
 
 const eventStore = new InMemoryEventStore();
 const eventBus = new EventBus();

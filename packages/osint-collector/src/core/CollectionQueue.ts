@@ -2,8 +2,8 @@
  * Collection Queue - Priority queue for managing collection tasks
  */
 
-import { EventEmitter } from 'events';
-import type { CollectionTask, TaskStatus } from '../types/index.js';
+import { EventEmitter } from "events";
+import type { CollectionTask, TaskStatus } from "../types/index.js";
 
 export class CollectionQueue extends EventEmitter {
   private queue: CollectionTask[] = [];
@@ -20,10 +20,10 @@ export class CollectionQueue extends EventEmitter {
    * Add a task to the queue
    */
   enqueue(task: CollectionTask): void {
-    task.status = 'pending' as TaskStatus;
+    task.status = "pending" as TaskStatus;
     this.queue.push(task);
     this.sortQueue();
-    this.emit('task:enqueued', task);
+    this.emit("task:enqueued", task);
     this.processNext();
   }
 
@@ -32,11 +32,11 @@ export class CollectionQueue extends EventEmitter {
    */
   enqueueBatch(tasks: CollectionTask[]): void {
     for (const task of tasks) {
-      task.status = 'pending' as TaskStatus;
+      task.status = "pending" as TaskStatus;
       this.queue.push(task);
     }
     this.sortQueue();
-    this.emit('batch:enqueued', { count: tasks.length });
+    this.emit("batch:enqueued", { count: tasks.length });
     this.processNext();
   }
 
@@ -61,9 +61,9 @@ export class CollectionQueue extends EventEmitter {
     }
 
     this.currentWorkers++;
-    task.status = 'in_progress' as TaskStatus;
+    task.status = "in_progress" as TaskStatus;
     this.processing.set(task.id, task);
-    this.emit('task:processing', task);
+    this.emit("task:processing", task);
   }
 
   /**
@@ -72,10 +72,10 @@ export class CollectionQueue extends EventEmitter {
   completeTask(taskId: string): void {
     const task = this.processing.get(taskId);
     if (task) {
-      task.status = 'completed' as TaskStatus;
+      task.status = "completed" as TaskStatus;
       this.processing.delete(taskId);
       this.currentWorkers--;
-      this.emit('task:completed', task);
+      this.emit("task:completed", task);
       this.processNext();
     }
   }
@@ -86,10 +86,10 @@ export class CollectionQueue extends EventEmitter {
   failTask(taskId: string, error: Error): void {
     const task = this.processing.get(taskId);
     if (task) {
-      task.status = 'failed' as TaskStatus;
+      task.status = "failed" as TaskStatus;
       this.processing.delete(taskId);
       this.currentWorkers--;
-      this.emit('task:failed', { task, error: error.message });
+      this.emit("task:failed", { task, error: error.message });
       this.processNext();
     }
   }
@@ -107,7 +107,7 @@ export class CollectionQueue extends EventEmitter {
       pending: this.queue.length,
       processing: this.processing.size,
       workers: this.currentWorkers,
-      maxConcurrent: this.maxConcurrent
+      maxConcurrent: this.maxConcurrent,
     };
   }
 
@@ -116,7 +116,7 @@ export class CollectionQueue extends EventEmitter {
    */
   clear(): void {
     this.queue = [];
-    this.emit('queue:cleared');
+    this.emit("queue:cleared");
   }
 
   /**

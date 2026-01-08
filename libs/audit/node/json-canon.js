@@ -6,27 +6,26 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.stableStringify = stableStringify;
 function stableStringify(obj) {
-    const allKeys = [];
-    JSON.stringify(obj, (key, value) => {
-        allKeys.push(key);
-        return value;
-    });
-    // This is tricky because JSON.stringify doesn't guarantee order except for non-integer keys in some engines.
-    // The reliable way is to recursively rebuild the object with sorted keys.
-    function sortObject(v) {
-        if (Array.isArray(v)) {
-            return v.map(sortObject);
-        }
-        else if (v !== null && typeof v === 'object') {
-            const sortedKeys = Object.keys(v).sort();
-            const result = {};
-            sortedKeys.forEach(key => {
-                result[key] = sortObject(v[key]);
-            });
-            return result;
-        }
-        return v;
+  const allKeys = [];
+  JSON.stringify(obj, (key, value) => {
+    allKeys.push(key);
+    return value;
+  });
+  // This is tricky because JSON.stringify doesn't guarantee order except for non-integer keys in some engines.
+  // The reliable way is to recursively rebuild the object with sorted keys.
+  function sortObject(v) {
+    if (Array.isArray(v)) {
+      return v.map(sortObject);
+    } else if (v !== null && typeof v === "object") {
+      const sortedKeys = Object.keys(v).sort();
+      const result = {};
+      sortedKeys.forEach((key) => {
+        result[key] = sortObject(v[key]);
+      });
+      return result;
     }
-    const sortedObj = sortObject(obj);
-    return JSON.stringify(sortedObj);
+    return v;
+  }
+  const sortedObj = sortObject(obj);
+  return JSON.stringify(sortedObj);
 }

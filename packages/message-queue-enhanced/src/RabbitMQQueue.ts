@@ -1,17 +1,11 @@
-import amqp, { Channel, Connection, ConsumeMessage } from 'amqplib';
-import { trace } from '@opentelemetry/api';
-import pino = require('pino');
-import {
-  RabbitMQConfig,
-  QueueConfig,
-  Message,
-  MessageHandler,
-  MessageStats,
-} from './types';
-import { DeadLetterQueue } from './DeadLetterQueue';
+import amqp, { Channel, Connection, ConsumeMessage } from "amqplib";
+import { trace } from "@opentelemetry/api";
+import pino = require("pino");
+import { RabbitMQConfig, QueueConfig, Message, MessageHandler, MessageStats } from "./types";
+import { DeadLetterQueue } from "./DeadLetterQueue";
 
-const logger = pino({ name: 'RabbitMQQueue' });
-const tracer = trace.getTracer('message-queue-enhanced');
+const logger = pino({ name: "RabbitMQQueue" });
+const tracer = trace.getTracer("message-queue-enhanced");
 
 /**
  * RabbitMQ-based reliable task queuing
@@ -30,13 +24,13 @@ export class RabbitMQQueue {
     avgProcessingTime: 0,
   };
 
-  constructor(private config: RabbitMQConfig) { }
+  constructor(private config: RabbitMQConfig) {}
 
   /**
    * Initialize connection and channel
    */
   async initialize(): Promise<void> {
-    const span = tracer.startSpan('RabbitMQQueue.initialize');
+    const span = tracer.startSpan("RabbitMQQueue.initialize");
 
     try {
       this.connection = await amqp.connect(this.config.url);
@@ -51,7 +45,7 @@ export class RabbitMQQueue {
       this.deadLetterQueue = new DeadLetterQueue(this.channel);
       await this.deadLetterQueue.initialize();
 
-      logger.info('RabbitMQ initialized');
+      logger.info("RabbitMQ initialized");
     } catch (error) {
       span.recordException(error as Error);
       throw error;
@@ -64,11 +58,11 @@ export class RabbitMQQueue {
    * Create queue with configuration
    */
   async createQueue(config: QueueConfig): Promise<void> {
-    const span = tracer.startSpan('RabbitMQQueue.createQueue');
+    const span = tracer.startSpan("RabbitMQQueue.createQueue");
 
     try {
       if (!this.channel) {
-        throw new Error('Channel not initialized');
+        throw new Error("Channel not initialized");
       }
 
       const queueOptions: any = {
@@ -97,7 +91,7 @@ export class RabbitMQQueue {
 
       await this.channel.assertQueue(config.name, queueOptions);
 
-      logger.info({ queue: config.name }, 'Queue created');
+      logger.info({ queue: config.name }, "Queue created");
     } catch (error) {
       span.recordException(error as Error);
       throw error;
@@ -109,15 +103,12 @@ export class RabbitMQQueue {
   /**
    * Publish message to queue
    */
-  async publish<T = any>(
-    queueName: string,
-    message: Message<T>
-  ): Promise<void> {
-    const span = tracer.startSpan('RabbitMQQueue.publish');
+  async publish<T = any>(queueName: string, message: Message<T>): Promise<void> {
+    const span = tracer.startSpan("RabbitMQQueue.publish");
 
     try {
       if (!this.channel) {
-        throw new Error('Channel not initialized');
+        throw new Error("Channel not initialized");
       }
 
       const options: any = {
@@ -137,11 +128,7 @@ export class RabbitMQQueue {
         options.priority = priorityMap[message.priority];
       }
 
-      this.channel.sendToQueue(
-        queueName,
-        Buffer.from(JSON.stringify(message.payload)),
-        options
-      );
+      this.channel.sendToQueue(queueName, Buffer.from(JSON.stringify(message.payload)), options);
 
       this.stats.total++;
       this.stats.success++;
@@ -151,7 +138,7 @@ export class RabbitMQQueue {
         messageId: message.id,
       });
 
-      logger.debug({ queue: queueName, messageId: message.id }, 'Message published');
+      logger.debug({ queue: queueName, messageId: message.id }, "Message published");
     } catch (error) {
       this.stats.failed++;
       span.recordException(error as Error);
@@ -165,11 +152,11 @@ export class RabbitMQQueue {
    * Consume messages from queue
    */
   async consume(queueName: string, handler: MessageHandler): Promise<void> {
-    const span = tracer.startSpan('RabbitMQQueue.consume');
+    const span = tracer.startSpan("RabbitMQQueue.consume");
 
     try {
       if (!this.channel) {
-        throw new Error('Channel not initialized');
+        throw new Error("Channel not initialized");
       }
 
       this.handlers.set(queueName, handler);
@@ -178,14 +165,16 @@ export class RabbitMQQueue {
         queueName,
         async (msg: ConsumeMessage | null) => {
           if (!msg) return;
-          if (!msg) { return; }
+          if (!msg) {
+            return;
+          }
 
           await this.handleMessage(queueName, msg);
         },
         { noAck: false }
       );
 
-      logger.info({ queue: queueName }, 'Started consuming');
+      logger.info({ queue: queueName }, "Started consuming");
     } catch (error) {
       span.recordException(error as Error);
       throw error;
@@ -197,26 +186,25 @@ export class RabbitMQQueue {
   /**
    * Handle incoming message
    */
-  private async handleMessage(
-    queueName: string,
-    msg: ConsumeMessage
-  ): Promise<void> {
-    const span = tracer.startSpan('RabbitMQQueue.handleMessage');
+  private async handleMessage(queueName: string, msg: ConsumeMessage): Promise<void> {
+    const span = tracer.startSpan("RabbitMQQueue.handleMessage");
     const startTime = Date.now();
 
     try {
       if (!this.channel) return;
-      if (!this.channel) { return; }
+      if (!this.channel) {
+        return;
+      }
 
       const handler = this.handlers.get(queueName);
       if (!handler) {
-        logger.warn({ queue: queueName }, 'No handler for queue');
+        logger.warn({ queue: queueName }, "No handler for queue");
         this.channel.nack(msg, false, false);
         return;
       }
 
       const message: Message = {
-        id: msg.properties.messageId || '',
+        id: msg.properties.messageId || "",
         topic: queueName,
         payload: JSON.parse(msg.content.toString()),
         headers: msg.properties.headers || {},
@@ -241,7 +229,7 @@ export class RabbitMQQueue {
       });
     } catch (error) {
       span.recordException(error as Error);
-      logger.error({ error, queue: queueName }, 'Message handling failed');
+      logger.error({ error, queue: queueName }, "Message handling failed");
 
       // Handle retry logic
       await this.handleFailure(queueName, msg);
@@ -253,12 +241,11 @@ export class RabbitMQQueue {
   /**
    * Handle message failure with retry logic
    */
-  private async handleFailure(
-    queueName: string,
-    msg: ConsumeMessage
-  ): Promise<void> {
+  private async handleFailure(queueName: string, msg: ConsumeMessage): Promise<void> {
     if (!this.channel) return;
-    if (!this.channel) { return; }
+    if (!this.channel) {
+      return;
+    }
 
     const retryCount = (msg.properties.headers?.retryCount || 0) + 1;
     const maxRetries = msg.properties.headers?.maxRetries || 3;
@@ -269,25 +256,23 @@ export class RabbitMQQueue {
 
       setTimeout(() => {
         if (!this.channel) return;
-        if (!this.channel) { return; }
+        if (!this.channel) {
+          return;
+        }
 
-        this.channel.sendToQueue(
-          queueName,
-          msg.content,
-          {
-            ...msg.properties,
-            headers: {
-              ...msg.properties.headers,
-              retryCount,
-            },
-          }
-        );
+        this.channel.sendToQueue(queueName, msg.content, {
+          ...msg.properties,
+          headers: {
+            ...msg.properties.headers,
+            retryCount,
+          },
+        });
 
         this.channel.ack(msg);
       }, retryDelay);
 
       this.stats.retried++;
-      logger.info({ retryCount, maxRetries }, 'Message queued for retry');
+      logger.info({ retryCount, maxRetries }, "Message queued for retry");
     } else {
       // Send to dead letter queue
       if (this.deadLetterQueue) {
@@ -296,7 +281,7 @@ export class RabbitMQQueue {
       }
 
       this.channel.ack(msg);
-      logger.warn('Message sent to dead letter queue');
+      logger.warn("Message sent to dead letter queue");
     }
   }
 
@@ -305,11 +290,11 @@ export class RabbitMQQueue {
    */
   async purgeQueue(queueName: string): Promise<void> {
     if (!this.channel) {
-      throw new Error('Channel not initialized');
+      throw new Error("Channel not initialized");
     }
 
     await this.channel.purgeQueue(queueName);
-    logger.info({ queue: queueName }, 'Queue purged');
+    logger.info({ queue: queueName }, "Queue purged");
   }
 
   /**
@@ -317,7 +302,7 @@ export class RabbitMQQueue {
    */
   async getQueueInfo(queueName: string): Promise<any> {
     if (!this.channel) {
-      throw new Error('Channel not initialized');
+      throw new Error("Channel not initialized");
     }
 
     return await this.channel.checkQueue(queueName);
@@ -342,12 +327,11 @@ export class RabbitMQQueue {
       await this.connection.close();
     }
 
-    logger.info('RabbitMQ disconnected');
+    logger.info("RabbitMQ disconnected");
   }
 
   private updateProcessingTime(time: number): void {
     const total = this.stats.success + this.stats.failed;
-    this.stats.avgProcessingTime =
-      (this.stats.avgProcessingTime * (total - 1) + time) / total;
+    this.stats.avgProcessingTime = (this.stats.avgProcessingTime * (total - 1) + time) / total;
   }
 }

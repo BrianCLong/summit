@@ -6,23 +6,23 @@ on:
   push:
     branches:
       - main
-      - 'feat/airgapped-deploy'
-      - 'claude/*'
+      - "feat/airgapped-deploy"
+      - "claude/*"
     paths:
-      - 'infra/airgap/**'
-      - '.github/workflows/airgap-deployment.yml'
+      - "infra/airgap/**"
+      - ".github/workflows/airgap-deployment.yml"
   pull_request:
     branches:
       - main
     paths:
-      - 'infra/airgap/**'
-      - '.github/workflows/airgap-deployment.yml'
+      - "infra/airgap/**"
+      - ".github/workflows/airgap-deployment.yml"
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Target environment'
+        description: "Target environment"
         required: true
-        default: 'dev'
+        default: "dev"
         type: choice
         options:
           - dev
@@ -36,10 +36,10 @@ permissions:
   packages: write
 
 env:
-  TF_VERSION: '1.6.0'
-  COSIGN_VERSION: '2.2.0'
-  SYFT_VERSION: '0.98.0'
-  GRYPE_VERSION: '0.72.0'
+  TF_VERSION: "1.6.0"
+  COSIGN_VERSION: "2.2.0"
+  SYFT_VERSION: "0.98.0"
+  GRYPE_VERSION: "0.72.0"
 
 jobs:
   # ============================================================================
@@ -142,7 +142,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install Test Dependencies
         run: |
@@ -263,7 +263,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install markdownlint
         run: npm install -g markdownlint-cli

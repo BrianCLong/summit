@@ -1,6 +1,6 @@
-import { BaseExtension } from './BaseExtension.js';
-import { PluginContext, PluginManifest } from '../types/plugin.js';
-import { Entity, Relationship } from './AnalyticsExtension.js';
+import { BaseExtension } from "./BaseExtension.js";
+import { PluginContext, PluginManifest } from "../types/plugin.js";
+import { Entity, Relationship } from "./AnalyticsExtension.js";
 
 /**
  * Base class for connector plugins
@@ -44,26 +44,26 @@ export abstract class ConnectorExtension extends BaseExtension {
   }
 
   protected async onStart(): Promise<void> {
-    this.log.info('Connector plugin started');
+    this.log.info("Connector plugin started");
   }
 
   protected async onStop(): Promise<void> {
-    this.log.info('Connector plugin stopped');
+    this.log.info("Connector plugin stopped");
   }
 
   protected async onDestroy(): Promise<void> {
-    this.log.info('Connector plugin cleaned up');
+    this.log.info("Connector plugin cleaned up");
   }
 
   private async validatePermissions(_context: PluginContext): Promise<void> {
-    const requiredPermissions = ['network:access', 'write:data'];
-    const hasPermissions = requiredPermissions.every(perm =>
-      this.manifest.permissions.map(p => p.toString()).includes(perm)
+    const requiredPermissions = ["network:access", "write:data"];
+    const hasPermissions = requiredPermissions.every((perm) =>
+      this.manifest.permissions.map((p) => p.toString()).includes(perm)
     );
 
     if (!hasPermissions) {
       throw new Error(
-        `Connector plugin ${this.manifest.id} missing required permissions: ${requiredPermissions.join(', ')}`
+        `Connector plugin ${this.manifest.id} missing required permissions: ${requiredPermissions.join(", ")}`
       );
     }
   }
@@ -76,7 +76,7 @@ export interface ConnectionConfig {
   /**
    * Connection type
    */
-  type: 'api' | 'database' | 'file' | 'stream';
+  type: "api" | "database" | "file" | "stream";
 
   /**
    * Endpoint or connection string
@@ -87,7 +87,7 @@ export interface ConnectionConfig {
    * Authentication
    */
   auth?: {
-    type: 'none' | 'basic' | 'bearer' | 'oauth' | 'apikey' | 'custom';
+    type: "none" | "basic" | "bearer" | "oauth" | "apikey" | "custom";
     credentials?: Record<string, string>;
   };
 
@@ -112,7 +112,7 @@ export interface ConnectionConfig {
   retry?: {
     attempts: number;
     delay: number;
-    backoff?: 'linear' | 'exponential';
+    backoff?: "linear" | "exponential";
   };
 
   /**
@@ -166,7 +166,7 @@ export interface FetchRequest {
    */
   sort?: {
     field: string;
-    order: 'asc' | 'desc';
+    order: "asc" | "desc";
   }[];
 
   /**
@@ -191,7 +191,7 @@ export interface FetchRequest {
 
 export interface Filter {
   field: string;
-  operator: 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'contains' | 'in' | 'nin';
+  operator: "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "contains" | "in" | "nin";
   value: any;
 }
 
@@ -279,7 +279,7 @@ export interface RelationshipTypeSchema {
 
 export interface PropertySchema {
   name: string;
-  type: 'string' | 'number' | 'boolean' | 'date' | 'object' | 'array';
+  type: "string" | "number" | "boolean" | "date" | "object" | "array";
   description?: string;
   required: boolean;
   indexed?: boolean;
@@ -302,7 +302,7 @@ export interface ConnectorMetadata {
   /**
    * Connector type
    */
-  connectorType: 'push' | 'pull' | 'stream' | 'bidirectional';
+  connectorType: "push" | "pull" | "stream" | "bidirectional";
 
   /**
    * Supported protocols

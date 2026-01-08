@@ -2,9 +2,7 @@
   "id": "730b9e0a31269b29",
   "createdAt": "2023-10-27T11:00:00Z",
   "createdBy": "policy-auto-tuning-engine",
-  "inputEvidenceRefs": [
-    "ev-2"
-  ],
+  "inputEvidenceRefs": ["ev-2"],
   "rationale": "Tenant tenant-x exceeded burst thresholds (150 RPS). Proposing specific quota limit.",
   "machineRationale": {
     "trigger": "burst_behavior",
@@ -28,17 +26,11 @@
   "riskAssessment": {
     "blastRadius": "medium",
     "falsePositiveRisk": "low",
-    "rollbackSteps": [
-      "Remove quotas.tenant-x from policy/governance-config.yaml"
-    ]
+    "rollbackSteps": ["Remove quotas.tenant-x from policy/governance-config.yaml"]
   },
   "verification": {
-    "commands": [
-      "k6 run scripts/load-test.js --env TENANT=tenant-x"
-    ],
-    "expectedSignals": [
-      "429 Too Many Requests"
-    ]
+    "commands": ["k6 run scripts/load-test.js --env TENANT=tenant-x"],
+    "expectedSignals": ["429 Too Many Requests"]
   },
   "status": "proposed"
 }

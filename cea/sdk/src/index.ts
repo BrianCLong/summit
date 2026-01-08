@@ -1,4 +1,4 @@
-import { createHash } from 'crypto';
+import { createHash } from "crypto";
 
 export interface ConsentGrant {
   granted: boolean;
@@ -51,7 +51,7 @@ export interface Assignment {
 
 export interface LedgerEntry {
   timestamp: Date;
-  event: 'assigned' | 'rebalanced' | 'revoked';
+  event: "assigned" | "rebalanced" | "revoked";
   experimentId: string;
   tenantId: string;
   subjectId: string;
@@ -124,29 +124,33 @@ export class ConsentAwareAllocator {
         this.assignments.delete(assignKey);
         this.record({
           timestamp: new Date(),
-          event: 'revoked',
+          event: "revoked",
           experimentId: assignment.experimentId,
           tenantId,
           subjectId,
           variant: assignment.variant,
           stratum: assignment.stratum,
-          reason: 'subject removed',
+          reason: "subject removed",
         });
       }
     }
   }
 
-  async assign(experimentConfig: ExperimentConfig, tenantId: string, subjectId: string): Promise<Assignment> {
+  async assign(
+    experimentConfig: ExperimentConfig,
+    tenantId: string,
+    subjectId: string
+  ): Promise<Assignment> {
     const experiment = normalizeExperiment(experimentConfig);
     this.experiments.set(experiment.id, experiment);
 
     const key = subjectKey(tenantId, subjectId);
     const subject = this.subjects.get(key);
     if (!subject) {
-      throw new Error('subject not registered with allocator');
+      throw new Error("subject not registered with allocator");
     }
     if (subject.tenantId !== experiment.tenantId) {
-      throw new Error('tenant mismatch between subject and experiment');
+      throw new Error("tenant mismatch between subject and experiment");
     }
 
     await this.rebalance(experiment.id);
@@ -154,7 +158,7 @@ export class ConsentAwareAllocator {
     const aKey = assignmentKey(experiment.id, tenantId, subjectId);
     const assignment = this.assignments.get(aKey);
     if (!assignment) {
-      throw new Error('subject has not granted consent for purpose');
+      throw new Error("subject has not granted consent for purpose");
     }
     return assignment;
   }
@@ -177,17 +181,22 @@ export class ConsentAwareAllocator {
       }
       const subjKey = subjectKey(assignment.tenantId, assignment.subjectId);
       const subject = this.subjects.get(subjKey);
-      if (!subject || subject.tenantId !== experiment.tenantId || !hasConsent(subject, experiment.purpose) || matchesExclusion(experiment.exclusions, subject)) {
+      if (
+        !subject ||
+        subject.tenantId !== experiment.tenantId ||
+        !hasConsent(subject, experiment.purpose) ||
+        matchesExclusion(experiment.exclusions, subject)
+      ) {
         this.assignments.delete(key);
         this.record({
           timestamp: new Date(),
-          event: 'revoked',
+          event: "revoked",
           experimentId,
           tenantId: assignment.tenantId,
           subjectId: assignment.subjectId,
           variant: assignment.variant,
           stratum: assignment.stratum,
-          reason: subject ? 'consent or exclusion updated' : 'subject missing',
+          reason: subject ? "consent or exclusion updated" : "subject missing",
         });
       }
     }
@@ -213,13 +222,13 @@ export class ConsentAwareAllocator {
           this.assignments.delete(key);
           this.record({
             timestamp: new Date(),
-            event: 'rebalanced',
+            event: "rebalanced",
             experimentId,
             tenantId: subject.tenantId,
             subjectId: subject.subjectId,
             variant: assignment.variant,
             stratum: assignment.stratum,
-            reason: 'stratum changed',
+            reason: "stratum changed",
           });
         } else {
           existing = true;
@@ -236,7 +245,11 @@ export class ConsentAwareAllocator {
     }
   }
 
-  private rebalanceStratum(experiment: ExperimentConfig, stratum: string, subjects: SubjectState[]): void {
+  private rebalanceStratum(
+    experiment: ExperimentConfig,
+    stratum: string,
+    subjects: SubjectState[]
+  ): void {
     if (subjects.length === 0) {
       return;
     }
@@ -249,7 +262,10 @@ export class ConsentAwareAllocator {
 
     for (const state of subjects) {
       if (state.existing && state.existingVariant) {
-        currentCounts.set(state.existingVariant, (currentCounts.get(state.existingVariant) ?? 0) + 1);
+        currentCounts.set(
+          state.existingVariant,
+          (currentCounts.get(state.existingVariant) ?? 0) + 1
+        );
         const bucket = assignmentsByVariant.get(state.existingVariant) ?? [];
         bucket.push(state);
         assignmentsByVariant.set(state.existingVariant, bucket);
@@ -271,13 +287,17 @@ export class ConsentAwareAllocator {
       const bucket = assignmentsByVariant.get(variant) ?? [];
       bucket.push({ ...state, existing: true, existingVariant: variant });
       assignmentsByVariant.set(variant, bucket);
-      this.applyAssignment(experiment, variant, stratum, state.subject, 'assigned');
+      this.applyAssignment(experiment, variant, stratum, state.subject, "assigned");
     }
 
     let iterationGuard = subjects.length * experiment.variants.length;
     while (iterationGuard > 0) {
       iterationGuard--;
-      const { surplus, deficit } = findSurplusAndDeficit(experiment.variants, targetCounts, currentCounts);
+      const { surplus, deficit } = findSurplusAndDeficit(
+        experiment.variants,
+        targetCounts,
+        currentCounts
+      );
       if (!surplus || !deficit) {
         break;
       }
@@ -298,15 +318,23 @@ export class ConsentAwareAllocator {
       const bucket = assignmentsByVariant.get(deficit) ?? [];
       bucket.push({ ...moving, existingVariant: deficit });
       assignmentsByVariant.set(deficit, bucket);
-      this.applyAssignment(experiment, deficit, stratum, moving.subject, 'rebalanced');
+      this.applyAssignment(experiment, deficit, stratum, moving.subject, "rebalanced");
     }
 
     if (!withinTolerance(experiment, stratum, currentCounts)) {
-      throw new Error(`rebalance tolerance exceeded for experiment ${experiment.id} stratum ${stratum}`);
+      throw new Error(
+        `rebalance tolerance exceeded for experiment ${experiment.id} stratum ${stratum}`
+      );
     }
   }
 
-  private applyAssignment(experiment: ExperimentConfig, variant: string, stratum: string, subject: Subject, event: LedgerEntry['event']): void {
+  private applyAssignment(
+    experiment: ExperimentConfig,
+    variant: string,
+    stratum: string,
+    subject: Subject,
+    event: LedgerEntry["event"]
+  ): void {
     const key = assignmentKey(experiment.id, subject.tenantId, subject.subjectId);
     const previous = this.assignments.get(key);
     const assignment: Assignment = {
@@ -359,18 +387,23 @@ function matchesExclusion(rules: ExclusionRule[] | undefined, subject: Subject):
   }
   return rules.some((rule) => {
     const value = subject.attributes?.[rule.attribute];
-    return rule.values.some((candidate) => candidate.localeCompare(value ?? '', undefined, { sensitivity: 'accent' }) === 0);
+    return rule.values.some(
+      (candidate) =>
+        candidate.localeCompare(value ?? "", undefined, { sensitivity: "accent" }) === 0
+    );
   });
 }
 
 function resolveStratum(experiment: ExperimentConfig, subject: Subject): string {
   for (const stratum of experiment.strata ?? []) {
-    const matches = Object.entries(stratum.criteria).every(([key, value]) => subject.attributes?.[key] === value);
+    const matches = Object.entries(stratum.criteria).every(
+      ([key, value]) => subject.attributes?.[key] === value
+    );
     if (matches) {
       return stratum.name;
     }
   }
-  return 'default';
+  return "default";
 }
 
 function weightMapForStratum(experiment: ExperimentConfig, stratum: string): Map<string, number> {
@@ -388,13 +421,17 @@ function weightMapForStratum(experiment: ExperimentConfig, stratum: string): Map
   for (const variant of experiment.variants) {
     const weight = weights.get(variant.name) ?? 0;
     if (weight <= 0) {
-      throw new Error('experiment must define positive weights for variants');
+      throw new Error("experiment must define positive weights for variants");
     }
   }
   return weights;
 }
 
-function computeTargetCounts(total: number, variants: VariantConfig[], weights: Map<string, number>): Map<string, number> {
+function computeTargetCounts(
+  total: number,
+  variants: VariantConfig[],
+  weights: Map<string, number>
+): Map<string, number> {
   let sumWeights = 0;
   for (const variant of variants) {
     sumWeights += weights.get(variant.name) ?? 0;
@@ -424,7 +461,11 @@ function computeTargetCounts(total: number, variants: VariantConfig[], weights: 
   return counts;
 }
 
-function nextVariantWithDeficit(variants: VariantConfig[], target: Map<string, number>, current: Map<string, number>): string {
+function nextVariantWithDeficit(
+  variants: VariantConfig[],
+  target: Map<string, number>,
+  current: Map<string, number>
+): string {
   const candidates = variants.map((variant) => ({
     name: variant.name,
     diff: (target.get(variant.name) ?? 0) - (current.get(variant.name) ?? 0),
@@ -438,7 +479,11 @@ function nextVariantWithDeficit(variants: VariantConfig[], target: Map<string, n
   return candidates[0].name;
 }
 
-function findSurplusAndDeficit(variants: VariantConfig[], target: Map<string, number>, current: Map<string, number>): { surplus?: string; deficit?: string } {
+function findSurplusAndDeficit(
+  variants: VariantConfig[],
+  target: Map<string, number>,
+  current: Map<string, number>
+): { surplus?: string; deficit?: string } {
   let surplusName: string | undefined;
   let surplusDiff = 0;
   let deficitName: string | undefined;
@@ -460,7 +505,11 @@ function findSurplusAndDeficit(variants: VariantConfig[], target: Map<string, nu
   return {};
 }
 
-function withinTolerance(experiment: ExperimentConfig, stratum: string, current: Map<string, number>): boolean {
+function withinTolerance(
+  experiment: ExperimentConfig,
+  stratum: string,
+  current: Map<string, number>
+): boolean {
   let total = 0;
   for (const count of current.values()) {
     total += count;
@@ -490,15 +539,17 @@ function withinTolerance(experiment: ExperimentConfig, stratum: string, current:
 }
 
 function stableHash(experiment: ExperimentConfig, stratum: string, subject: Subject): bigint {
-  const stickinessValues = (experiment.stickinessKeys ?? []).map((key) => subject.attributes?.[key] ?? '');
+  const stickinessValues = (experiment.stickinessKeys ?? []).map(
+    (key) => subject.attributes?.[key] ?? ""
+  );
   const payload = [
     experiment.id,
     experiment.purpose,
     stratum,
     subject.tenantId,
     subject.subjectId,
-    stickinessValues.join('|'),
-  ].join('|');
-  const digest = createHash('sha256').update(payload).digest();
+    stickinessValues.join("|"),
+  ].join("|");
+  const digest = createHash("sha256").update(payload).digest();
   return digest.readBigUInt64BE(0);
 }

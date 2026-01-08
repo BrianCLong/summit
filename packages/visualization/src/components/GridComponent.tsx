@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React from 'react';
+import React from "react";
 
 export interface GridProps {
   xScale?: any;
@@ -14,7 +14,7 @@ export const Grid: React.FC<GridProps> = ({
   yScale,
   width,
   height,
-  strokeDasharray = '3,3',
+  strokeDasharray = "3,3",
 }) => {
   return <g className="grid"></g>;
 };

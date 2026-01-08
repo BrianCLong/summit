@@ -267,7 +267,7 @@ name: Evidence Bundle
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
   workflow_dispatch: {}
 jobs:
   build-evidence:

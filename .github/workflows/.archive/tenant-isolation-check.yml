@@ -2,12 +2,12 @@ name: Tenant Isolation Check
 
 on:
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
     paths:
-      - 'server/src/**/*.ts'
-      - 'server/src/**/*.js'
-      - 'scripts/security/**/*.ts'
-      - '.github/workflows/tenant-isolation-check.yml'
+      - "server/src/**/*.ts"
+      - "server/src/**/*.js"
+      - "scripts/security/**/*.ts"
+      - ".github/workflows/tenant-isolation-check.yml"
 
 jobs:
   static-analysis:
@@ -19,7 +19,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install dependencies (root)
         run: npm install -g pnpm && pnpm install
@@ -58,7 +58,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install dependencies (root)
         run: npm install -g pnpm && pnpm install

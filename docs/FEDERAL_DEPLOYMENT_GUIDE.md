@@ -46,15 +46,15 @@ This guide covers deployment of IntelGraph Maestro Conductor v1.0 GA with Federa
 ```yaml
 # Kubernetes node labels required
 labels:
-  classification: 'UNCLASSIFIED' # or SECRET, TOP_SECRET
-  fips-validated: 'true'
-  air-gap: 'true' # if air-gapped deployment
+  classification: "UNCLASSIFIED" # or SECRET, TOP_SECRET
+  fips-validated: "true"
+  air-gap: "true" # if air-gapped deployment
 
 # Node taints for workload isolation
 taints:
-  - key: 'classification'
-    value: 'UNCLASSIFIED'
-    effect: 'NoSchedule'
+  - key: "classification"
+    value: "UNCLASSIFIED"
+    effect: "NoSchedule"
 ```
 
 #### Storage Requirements
@@ -203,20 +203,20 @@ $ kubectl create secret generic aws-credentials-federal \
 # values-federal.yaml
 federal:
   enabled: true
-  classification: 'UNCLASSIFIED'
+  classification: "UNCLASSIFIED"
 
   fips:
     enabled: true
     level: 3
     hsm:
-      provider: 'AWS_CloudHSM'
-      endpoint: '10.0.0.100'
-      partition: 'PARTITION_1'
+      provider: "AWS_CloudHSM"
+      endpoint: "10.0.0.100"
+      partition: "PARTITION_1"
 
   airGap:
     enabled: true
-    mode: 'STRICT'
-    offlineRegistry: '/opt/intelgraph/registry'
+    mode: "STRICT"
+    offlineRegistry: "/opt/intelgraph/registry"
 
   breakGlass:
     enabled: true
@@ -225,11 +225,11 @@ federal:
 
 spire:
   enabled: true
-  trustDomain: 'federal.intelgraph.local'
+  trustDomain: "federal.intelgraph.local"
 
 audit:
   wormEnabled: true
-  bucket: 'federal-audit-worm-bucket'
+  bucket: "federal-audit-worm-bucket"
   retentionDays: 7300 # 20 years
 
 zeroTrust:
@@ -328,7 +328,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      air-gap: 'true'
+      air-gap: "true"
   policyTypes:
     - Ingress
     - Egress
@@ -338,13 +338,13 @@ spec:
     - from:
         - namespaceSelector:
             matchLabels:
-              classification: 'UNCLASSIFIED'
+              classification: "UNCLASSIFIED"
 
   egress:
     - to:
         - namespaceSelector:
             matchLabels:
-              classification: 'UNCLASSIFIED'
+              classification: "UNCLASSIFIED"
     # Block all external egress
     - to: []
       ports: []
@@ -505,12 +505,12 @@ spec:
 ```yaml
 resources:
   requests:
-    memory: '1Gi'
-    cpu: '500m'
+    memory: "1Gi"
+    cpu: "500m"
     # FIPS operations require more CPU
   limits:
-    memory: '2Gi'
-    cpu: '1000m'
+    memory: "2Gi"
+    cpu: "1000m"
 ```
 
 ## Compliance & Certification

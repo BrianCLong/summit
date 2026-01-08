@@ -2,10 +2,14 @@
  * Tests for Regressors
  */
 
-import { LinearRegression, RidgeRegression, LassoRegression } from '../src/regressors/linear-regression.js';
-import type { Dataset } from '../src/types/index.js';
+import {
+  LinearRegression,
+  RidgeRegression,
+  LassoRegression,
+} from "../src/regressors/linear-regression.js";
+import type { Dataset } from "../src/types/index.js";
 
-describe('LinearRegression', () => {
+describe("LinearRegression", () => {
   const generateDataset = (n: number): Dataset => {
     const features: number[][] = [];
     const labels: number[] = [];
@@ -20,15 +24,15 @@ describe('LinearRegression', () => {
     return { features, labels };
   };
 
-  describe('fit', () => {
-    it('should fit linear regression model', () => {
+  describe("fit", () => {
+    it("should fit linear regression model", () => {
       const model = new LinearRegression();
       const dataset = generateDataset(100);
 
       expect(() => model.fit(dataset)).not.toThrow();
     });
 
-    it('should fit with normalization', () => {
+    it("should fit with normalization", () => {
       const model = new LinearRegression({ normalize: true });
       const dataset = generateDataset(100);
 
@@ -36,24 +40,27 @@ describe('LinearRegression', () => {
     });
   });
 
-  describe('predict', () => {
-    it('should predict values', () => {
+  describe("predict", () => {
+    it("should predict values", () => {
       const model = new LinearRegression();
       const dataset = generateDataset(100);
 
       model.fit(dataset);
-      const predictions = model.predict([[5, 5], [0, 0]]);
+      const predictions = model.predict([
+        [5, 5],
+        [0, 0],
+      ]);
 
       expect(predictions).toHaveLength(2);
-      predictions.forEach(p => {
-        expect(typeof p).toBe('number');
+      predictions.forEach((p) => {
+        expect(typeof p).toBe("number");
         expect(!isNaN(p)).toBe(true);
       });
     });
 
-    it('should produce reasonable predictions for known relationship', () => {
+    it("should produce reasonable predictions for known relationship", () => {
       const features = Array.from({ length: 100 }, (_, i) => [i]);
-      const labels = features.map(f => 2 * f[0] + 10);
+      const labels = features.map((f) => 2 * f[0] + 10);
 
       const model = new LinearRegression();
       model.fit({ features, labels });
@@ -65,8 +72,8 @@ describe('LinearRegression', () => {
     });
   });
 
-  describe('getCoefficients', () => {
-    it('should return coefficients and intercept', () => {
+  describe("getCoefficients", () => {
+    it("should return coefficients and intercept", () => {
       const model = new LinearRegression();
       const dataset = generateDataset(100);
 
@@ -74,12 +81,12 @@ describe('LinearRegression', () => {
       const { coefficients, intercept } = model.getCoefficients();
 
       expect(coefficients).toHaveLength(2);
-      expect(typeof intercept).toBe('number');
+      expect(typeof intercept).toBe("number");
     });
   });
 
-  describe('evaluate', () => {
-    it('should calculate regression metrics', () => {
+  describe("evaluate", () => {
+    it("should calculate regression metrics", () => {
       const model = new LinearRegression();
       const trainDataset = generateDataset(100);
       const testDataset = generateDataset(30);
@@ -87,16 +94,16 @@ describe('LinearRegression', () => {
       model.fit(trainDataset);
       const performance = model.evaluate(testDataset);
 
-      expect(typeof performance.mae).toBe('number');
-      expect(typeof performance.rmse).toBe('number');
-      expect(typeof performance.r2).toBe('number');
+      expect(typeof performance.mae).toBe("number");
+      expect(typeof performance.rmse).toBe("number");
+      expect(typeof performance.r2).toBe("number");
       expect(performance.mae).toBeGreaterThanOrEqual(0);
       expect(performance.rmse).toBeGreaterThanOrEqual(0);
     });
   });
 });
 
-describe('RidgeRegression', () => {
+describe("RidgeRegression", () => {
   const generateDataset = (n: number): Dataset => {
     const features: number[][] = [];
     const labels: number[] = [];
@@ -111,8 +118,8 @@ describe('RidgeRegression', () => {
     return { features, labels };
   };
 
-  describe('fit and predict', () => {
-    it('should fit Ridge regression with regularization', () => {
+  describe("fit and predict", () => {
+    it("should fit Ridge regression with regularization", () => {
       const model = new RidgeRegression(1.0);
       const dataset = generateDataset(100);
 
@@ -120,16 +127,16 @@ describe('RidgeRegression', () => {
       const predictions = model.predict([[5, 5]]);
 
       expect(predictions).toHaveLength(1);
-      expect(typeof predictions[0]).toBe('number');
+      expect(typeof predictions[0]).toBe("number");
     });
 
-    it('should produce more stable coefficients than OLS', () => {
+    it("should produce more stable coefficients than OLS", () => {
       // Create dataset with collinear features
       const features = Array.from({ length: 50 }, () => {
         const x = Math.random();
         return [x, x + Math.random() * 0.01]; // Nearly collinear
       });
-      const labels = features.map(f => f[0] + f[1]);
+      const labels = features.map((f) => f[0] + f[1]);
 
       const ols = new LinearRegression();
       const ridge = new RidgeRegression(1.0);
@@ -144,14 +151,18 @@ describe('RidgeRegression', () => {
   });
 });
 
-describe('LassoRegression', () => {
-  describe('fit and predict', () => {
-    it('should fit Lasso regression with sparsity', () => {
+describe("LassoRegression", () => {
+  describe("fit and predict", () => {
+    it("should fit Lasso regression with sparsity", () => {
       const features = Array.from({ length: 100 }, () => [
-        Math.random(), Math.random(), Math.random(), Math.random(), Math.random()
+        Math.random(),
+        Math.random(),
+        Math.random(),
+        Math.random(),
+        Math.random(),
       ]);
       // Only first two features matter
-      const labels = features.map(f => 2 * f[0] + 3 * f[1] + Math.random() * 0.1);
+      const labels = features.map((f) => 2 * f[0] + 3 * f[1] + Math.random() * 0.1);
 
       const model = new LassoRegression(0.5);
       model.fit({ features, labels });
@@ -160,11 +171,14 @@ describe('LassoRegression', () => {
       expect(predictions).toHaveLength(1);
     });
 
-    it('should produce sparse coefficients', () => {
+    it("should produce sparse coefficients", () => {
       const features = Array.from({ length: 100 }, () => [
-        Math.random(), Math.random(), Math.random(), Math.random()
+        Math.random(),
+        Math.random(),
+        Math.random(),
+        Math.random(),
       ]);
-      const labels = features.map(f => 5 * f[0]); // Only first feature matters
+      const labels = features.map((f) => 5 * f[0]); // Only first feature matters
 
       const model = new LassoRegression(1.0);
       model.fit({ features, labels });

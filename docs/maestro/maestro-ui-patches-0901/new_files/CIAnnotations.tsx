@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 
 type Annotation = {
   runId: string;
-  level: 'notice' | 'warning' | 'failure';
+  level: "notice" | "warning" | "failure";
   file: string;
   line: number;
   message: string;
@@ -12,19 +12,18 @@ type Annotation = {
 };
 
 async function fetchAnnotations(since?: string): Promise<Annotation[]> {
-  const base =
-    (window as any).__MAESTRO_CFG__?.gatewayBase ?? '/api/maestro/v1';
+  const base = (window as any).__MAESTRO_CFG__?.gatewayBase ?? "/api/maestro/v1";
   const qs = new URLSearchParams();
-  if (since) qs.set('since', since);
+  if (since) qs.set("since", since);
   const res = await fetch(`${base}/ci/annotations?${qs.toString()}`, {
-    credentials: 'omit',
+    credentials: "omit",
   });
-  if (!res.ok) throw new Error('Failed to load annotations');
+  if (!res.ok) throw new Error("Failed to load annotations");
   return res.json();
 }
 
 export default function CIAnnotationsPage() {
-  const [since, setSince] = useState<string>(''); // ISO string or blank
+  const [since, setSince] = useState<string>(""); // ISO string or blank
   const [data, setData] = useState<Annotation[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -67,23 +66,18 @@ export default function CIAnnotationsPage() {
 
       {data && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {(['failure', 'warning', 'notice'] as const).map((level) => (
+          {(["failure", "warning", "notice"] as const).map((level) => (
             <section key={level} className="border rounded-xl p-4 shadow-sm">
               <h2 className="text-lg font-medium capitalize">
-                {level}{' '}
-                <span className="text-sm text-gray-500">
-                  ({grouped[level]?.length ?? 0})
-                </span>
+                {level}{" "}
+                <span className="text-sm text-gray-500">({grouped[level]?.length ?? 0})</span>
               </h2>
               <ul className="mt-2 space-y-2 max-h-[60vh] overflow-auto pr-2">
                 {(grouped[level] ?? []).map((a, idx) => (
                   <li key={idx} className="border rounded p-2">
                     <div className="text-sm text-gray-600">
-                      Run{' '}
-                      <Link
-                        className="underline"
-                        to={`/maestro/runs/${a.runId}`}
-                      >
+                      Run{" "}
+                      <Link className="underline" to={`/maestro/runs/${a.runId}`}>
                         #{a.runId}
                       </Link>
                     </div>

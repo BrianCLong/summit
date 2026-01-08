@@ -11,6 +11,7 @@ This platform provides comprehensive adversarial AI capabilities, red team simul
 Adversarial machine learning and AI robustness testing capabilities.
 
 **Key Features:**
+
 - White-box attacks: FGSM, PGD, C&W, DeepFool
 - Black-box attacks: ZOO, Boundary Attack, Score-based
 - Universal adversarial perturbations
@@ -21,13 +22,14 @@ Adversarial machine learning and AI robustness testing capabilities.
 - Defense evaluation
 
 **Usage:**
+
 ```typescript
 import {
   FGSMAttack,
   PGDAttack,
   RobustnessTester,
-  AdversarialAttackType
-} from '@intelgraph/adversarial-ai';
+  AdversarialAttackType,
+} from "@intelgraph/adversarial-ai";
 
 // Generate adversarial example with FGSM
 const fgsm = new FGSMAttack();
@@ -50,6 +52,7 @@ const result = await tester.testRobustness(
 Red team simulation and attack scenario orchestration.
 
 **Key Features:**
+
 - MITRE ATT&CK technique library
 - Attack scenario generation
 - Kill chain simulation
@@ -58,30 +61,30 @@ Red team simulation and attack scenario orchestration.
 - Network reconnaissance simulation
 
 **Usage:**
+
 ```typescript
 import {
   MITRELibrary,
   ScenarioGenerator,
   SocialEngineeringEngine,
-  AttackSurfaceMapper
-} from '@intelgraph/red-team';
+  AttackSurfaceMapper,
+} from "@intelgraph/red-team";
 
 // Generate attack scenario
 const generator = new ScenarioGenerator();
 const scenario = generator.generateScenario(
-  'Data Exfiltration Test',
-  ['Initial Access', 'Data Collection', 'Exfiltration'],
+  "Data Exfiltration Test",
+  ["Initial Access", "Data Collection", "Exfiltration"],
   targetEnvironment,
-  { sophistication: 'high', stealthLevel: 'high' }
+  { sophistication: "high", stealthLevel: "high" }
 );
 
 // Generate phishing campaign
 const social = new SocialEngineeringEngine();
-const campaign = social.generatePhishingCampaign(
-  'Security Awareness Test',
-  targets,
-  { theme: 'it-support', urgency: 'medium' }
-);
+const campaign = social.generatePhishingCampaign("Security Awareness Test", targets, {
+  theme: "it-support",
+  urgency: "medium",
+});
 ```
 
 ### @intelgraph/vulnerability-intelligence
@@ -89,6 +92,7 @@ const campaign = social.generatePhishingCampaign(
 Vulnerability tracking and risk assessment.
 
 **Key Features:**
+
 - CVE database integration
 - CVSS scoring and severity calculation
 - Vulnerability risk assessment
@@ -97,26 +101,27 @@ Vulnerability tracking and risk assessment.
 - Prioritization algorithms
 
 **Usage:**
+
 ```typescript
 import {
   CVEDatabase,
   VulnerabilityRiskCalculator,
-  CVSSSeverity
-} from '@intelgraph/vulnerability-intelligence';
+  CVSSSeverity,
+} from "@intelgraph/vulnerability-intelligence";
 
 // Search vulnerabilities
 const db = new CVEDatabase();
 const cves = db.searchCVEs({
   severity: CVSSSeverity.CRITICAL,
-  vendor: 'microsoft'
+  vendor: "microsoft",
 });
 
 // Calculate risk
 const calculator = new VulnerabilityRiskCalculator();
 const assessment = calculator.calculateRisk(
   vulnerability,
-  'critical', // asset criticality
-  'public'    // network exposure
+  "critical", // asset criticality
+  "public" // network exposure
 );
 ```
 
@@ -125,6 +130,7 @@ const assessment = calculator.calculateRisk(
 Purple team collaboration and exercise management.
 
 **Key Features:**
+
 - Exercise creation and management
 - Detection validation
 - SIEM rule testing
@@ -134,32 +140,33 @@ Purple team collaboration and exercise management.
 - Metrics tracking
 
 **Usage:**
+
 ```typescript
 import {
   ExerciseManager,
   SIEMRuleValidator,
   IOCGenerator,
-  ExerciseType
-} from '@intelgraph/purple-team';
+  ExerciseType,
+} from "@intelgraph/purple-team";
 
 // Create purple team exercise
 const manager = new ExerciseManager();
 const exercise = manager.createExercise(
-  'Q4 Security Assessment',
+  "Q4 Security Assessment",
   ExerciseType.LIVE_FIRE,
   scenario,
-  ['Test detection capabilities', 'Validate response procedures']
+  ["Test detection capabilities", "Validate response procedures"]
 );
 
 // Start and record detections
 manager.startExercise(exercise.id);
 manager.recordDetection(exercise.id, {
-  source: 'SIEM',
-  type: 'alert',
-  description: 'Suspicious PowerShell execution detected',
-  severity: 'high',
+  source: "SIEM",
+  type: "alert",
+  description: "Suspicious PowerShell execution detected",
+  severity: "high",
   truePositive: true,
-  timeToDetect: 5
+  timeToDetect: 5,
 });
 
 // Generate after-action report
@@ -171,6 +178,7 @@ const report = manager.generateAfterActionReport(exercise.id);
 Threat actor TTP libraries and emulation planning.
 
 **Key Features:**
+
 - APT group profiles (APT29, APT28, Lazarus, etc.)
 - Threat actor TTP mapping
 - Emulation plan generation
@@ -179,29 +187,26 @@ Threat actor TTP libraries and emulation planning.
 - Tool and malware tracking
 
 **Usage:**
+
 ```typescript
 import {
   APTLibrary,
   EmulationPlanGenerator,
-  ThreatActorCategory
-} from '@intelgraph/threat-emulation';
+  ThreatActorCategory,
+} from "@intelgraph/threat-emulation";
 
 // Get threat actor profile
 const library = new APTLibrary();
-const apt29 = library.getActor('apt29');
+const apt29 = library.getActor("apt29");
 
 // Generate emulation plan
 const generator = new EmulationPlanGenerator();
-const plan = generator.generatePlan(
-  'apt29',
-  ['Test detection of APT29 TTPs'],
-  {
-    targetSystems: ['test-server-01'],
-    targetNetworks: ['10.0.0.0/24'],
-    excludedSystems: ['prod-*'],
-    duration: 7 // days
-  }
-);
+const plan = generator.generatePlan("apt29", ["Test detection of APT29 TTPs"], {
+  targetSystems: ["test-server-01"],
+  targetNetworks: ["10.0.0.0/24"],
+  excludedSystems: ["prod-*"],
+  duration: 7, // days
+});
 ```
 
 ## Services
@@ -211,26 +216,27 @@ const plan = generator.generatePlan(
 Centralized service for orchestrating red team operations.
 
 **Usage:**
+
 ```typescript
-import { RedTeamService } from '@intelgraph/red-team-service';
+import { RedTeamService } from "@intelgraph/red-team-service";
 
 const service = new RedTeamService({
-  organizationId: 'org-123',
-  authorizedScopes: ['*.test.internal'],
-  safetyEnabled: true
+  organizationId: "org-123",
+  authorizedScopes: ["*.test.internal"],
+  safetyEnabled: true,
 });
 
 // Execute operation
 const result = await service.executeOperation({
-  type: 'emulation',
-  name: 'APT29 Emulation Exercise',
-  objectives: ['Test lateral movement detection'],
+  type: "emulation",
+  name: "APT29 Emulation Exercise",
+  objectives: ["Test lateral movement detection"],
   scope: {
-    targets: ['test-network.internal'],
-    excluded: ['prod-*']
+    targets: ["test-network.internal"],
+    excluded: ["prod-*"],
   },
   duration: 7,
-  options: { actorId: 'apt29' }
+  options: { actorId: "apt29" },
 });
 
 console.log(result.report);
@@ -241,6 +247,7 @@ console.log(result.report);
 **IMPORTANT**: This platform is designed for authorized security testing only.
 
 ### Requirements
+
 1. Written authorization from system owners
 2. Defined scope boundaries
 3. Emergency contact procedures
@@ -248,6 +255,7 @@ console.log(result.report);
 5. Safety checks enabled
 
 ### Safety Features
+
 - Scope validation before any operation
 - Configurable safety checks
 - Automatic rollback procedures
@@ -257,6 +265,7 @@ console.log(result.report);
 ## Best Practices
 
 ### Before Testing
+
 1. Obtain written authorization
 2. Define clear scope boundaries
 3. Document excluded systems
@@ -264,6 +273,7 @@ console.log(result.report);
 5. Prepare rollback procedures
 
 ### During Testing
+
 1. Monitor for unexpected impacts
 2. Maintain communication with stakeholders
 3. Document all actions
@@ -271,6 +281,7 @@ console.log(result.report);
 5. Report critical findings immediately
 
 ### After Testing
+
 1. Generate comprehensive reports
 2. Remove all test artifacts
 3. Verify system integrity
@@ -297,6 +308,7 @@ console.log(result.report);
 ## API Reference
 
 See individual package documentation for detailed API references:
+
 - [Adversarial AI API](./adversarial-ai-api.md)
 - [Red Team API](./red-team-api.md)
 - [Vulnerability Intelligence API](./vulnerability-api.md)

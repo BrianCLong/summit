@@ -5,6 +5,7 @@ Automated triage and classification system for Summit's backlog, bug-bash result
 ## Overview
 
 The Autotriage Engine automatically:
+
 - **Parses** issues from multiple sources (backlog.json, bug-bash markdown, GitHub API)
 - **Classifies** issues by area, impact, and type
 - **Clusters** similar issues to identify themes
@@ -71,7 +72,9 @@ The engine collects issues from:
 ### Intelligent Classification
 
 #### Area Detection
+
 Automatically detects which areas an issue belongs to:
+
 - **copilot** - AI assistant, LLM, MCP, tools
 - **ingestion** - Data import, crawlers, parsers, ETL
 - **graph** - Neo4j, relationships, entities, Cypher
@@ -82,14 +85,18 @@ Automatically detects which areas an issue belongs to:
 - **security** - Auth, permissions, compliance, audit
 
 #### Impact Analysis
+
 Classifies impact level based on keywords and patterns:
+
 - **blocker** (P0) - Critical issues, crashes, production down
 - **high** (P1) - Major issues, degraded performance
 - **medium** (P2) - Moderate impact
 - **low** (P3/P4) - Minor issues, papercuts
 
 #### Type Classification
+
 Identifies issue type:
+
 - **bug** - Errors, broken functionality
 - **tech-debt** - Refactoring, cleanup, legacy code
 - **feature** - New functionality
@@ -98,12 +105,14 @@ Identifies issue type:
 ### Issue Clustering
 
 Uses TF-IDF and hierarchical clustering to:
+
 - Group similar issues together
 - Identify recurring themes
 - Detect duplicate issues
 - Surface patterns across the backlog
 
 Configuration:
+
 - `similarityThreshold`: 0.65 (adjust for tighter/looser clustering)
 - `minClusterSize`: 2 (minimum issues per cluster)
 - `maxClusters`: 20 (maximum clusters to report)
@@ -111,6 +120,7 @@ Configuration:
 ### Good First Issue Detection
 
 Automatically identifies beginner-friendly issues based on:
+
 - Complexity score (calculated from dependencies, acceptance criteria)
 - Clear descriptions and steps
 - Limited scope
@@ -125,25 +135,30 @@ Default threshold: complexity ≤ 30
 The weekly triage report includes:
 
 #### Summary Statistics
+
 - Total items by source, area, impact, type
 - Distribution charts and counts
 
 #### Recommendations
+
 - Actionable insights (blockers, themes, concentrations)
 - Sprint planning suggestions
 - Good first issues callout
 
 #### Top 10 Blocking Themes
+
 - Clustered issues by theme
 - Average impact score
 - Related issues with links
 
 #### Top Priority Issues
+
 - Sorted by impact score
 - Quick reference table
 - Area and type labels
 
 #### Good First Issues
+
 - Beginner-friendly issues
 - Complexity scores
 - Area tags
@@ -151,6 +166,7 @@ The weekly triage report includes:
 ### JSON Output
 
 Machine-readable format for integration:
+
 - Full structured data
 - All classification metadata
 - Cluster information
@@ -159,11 +175,13 @@ Machine-readable format for integration:
 ### Label Suggestions
 
 `triage-labels.json` contains:
+
 - Issue ID
 - Suggested labels (area:X, priority:X, type:X)
 - Confidence score
 
 Format:
+
 ```json
 {
   "issueId": "S-001-01",
@@ -175,11 +193,13 @@ Format:
 ### Comment Drafts
 
 `triage-comments.json` contains:
+
 - Auto-triage summaries
 - Deduplication notices
 - Cluster summaries
 
 Format:
+
 ```json
 {
   "issueId": "P0-001",
@@ -194,7 +214,9 @@ Format:
 Edit `assistant/autotriage/config.ts` to customize:
 
 ### Areas
+
 Add or modify area detection:
+
 ```typescript
 {
   name: 'new-area',
@@ -205,7 +227,9 @@ Add or modify area detection:
 ```
 
 ### Impact Rules
+
 Adjust impact detection:
+
 ```typescript
 {
   level: 'blocker',
@@ -216,7 +240,9 @@ Adjust impact detection:
 ```
 
 ### Clustering Parameters
+
 Fine-tune clustering:
+
 ```typescript
 clustering: {
   similarityThreshold: 0.65,  // 0-1 (higher = stricter)
@@ -239,6 +265,7 @@ export GITHUB_REPO=summit
 ```
 
 GitHub API rate limits:
+
 - Without token: 60 requests/hour
 - With token: 5000 requests/hour
 
@@ -395,6 +422,7 @@ npm run build
 ### Customizing Clustering
 
 Adjust in `config.ts`:
+
 ```typescript
 clustering: {
   similarityThreshold: 0.7,  // Increase for stricter clustering
@@ -406,16 +434,19 @@ clustering: {
 ## Troubleshooting
 
 ### "No items to triage"
+
 - Check `backlog/backlog.json` exists
 - Verify `bug-bash-results/20250922/` has markdown files
 - Use `--github` to include GitHub issues
 
 ### GitHub API Rate Limit
+
 - Set `GITHUB_TOKEN` environment variable
 - Use personal access token with `repo` scope
 - Check rate limit: `curl -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/rate_limit`
 
 ### TypeScript Compilation Errors
+
 ```bash
 cd assistant/autotriage
 npm install
@@ -423,7 +454,9 @@ npx tsc --skipLibCheck
 ```
 
 ### Clustering Too Loose/Strict
+
 Adjust `similarityThreshold` in `config.ts`:
+
 - Too loose (many unrelated items): increase threshold (0.7-0.8)
 - Too strict (no clusters): decrease threshold (0.5-0.6)
 

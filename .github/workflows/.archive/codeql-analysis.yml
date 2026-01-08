@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: '0 2 * * *' # Daily at 02:00 UTC
+    - cron: "0 2 * * *" # Daily at 02:00 UTC
 
 # Prevent concurrent CodeQL runs
 concurrency:
@@ -25,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: ['javascript', 'typescript']
+        language: ["javascript", "typescript"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -37,8 +37,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.11.1'
-          cache: 'pnpm'
+          node-version: "20.11.1"
+          cache: "pnpm"
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
@@ -50,7 +50,7 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
-          category: '/language:${{matrix.language}}'
+          category: "/language:${{matrix.language}}"
           output: sarif-results
           upload: true
     # CodeQL automatically uploads SARIF and this already has built-in fork protection
@@ -66,8 +66,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.11.1'
-          cache: 'pnpm'
+          node-version: "20.11.1"
+          cache: "pnpm"
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
@@ -101,8 +101,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.11.1'
-          cache: 'pnpm'
+          node-version: "20.11.1"
+          cache: "pnpm"
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:

@@ -1,5 +1,5 @@
-import { nanoid } from 'nanoid';
-import { EventEmitter } from 'events';
+import { nanoid } from "nanoid";
+import { EventEmitter } from "events";
 import {
   Operation,
   DocumentState,
@@ -7,9 +7,9 @@ import {
   SyncMessage,
   SyncSession,
   DocumentLock,
-  ConflictResolution
-} from './types';
-import { OperationalTransform } from './OperationalTransform';
+  ConflictResolution,
+} from "./types";
+import { OperationalTransform } from "./OperationalTransform";
 
 export interface SyncEngineOptions {
   conflictResolution?: ConflictResolution;
@@ -46,11 +46,14 @@ export class SyncEngine extends EventEmitter {
   private processingQueue: Map<string, Promise<void>> = new Map();
   private defaultResolution: ConflictResolution;
 
-  constructor(private store: SyncStore, options: SyncEngineOptions = {}) {
+  constructor(
+    private store: SyncStore,
+    options: SyncEngineOptions = {}
+  ) {
     super();
     this.ot = new OperationalTransform();
     this.defaultResolution =
-      options.conflictResolution ?? ({ strategy: 'last_write_wins' } as ConflictResolution);
+      options.conflictResolution ?? ({ strategy: "last_write_wins" } as ConflictResolution);
   }
 
   /**
@@ -69,7 +72,7 @@ export class SyncEngine extends EventEmitter {
       workspaceId,
       connectedAt: new Date(),
       lastHeartbeat: new Date(),
-      permissions
+      permissions,
     };
 
     await this.store.createSession(session);
@@ -77,7 +80,7 @@ export class SyncEngine extends EventEmitter {
     // Get current document state
     const state = await this.store.getDocumentState(documentId);
     if (state) {
-      this.emit('session:created', { session, state });
+      this.emit("session:created", { session, state });
     }
 
     return session;
@@ -89,19 +92,19 @@ export class SyncEngine extends EventEmitter {
   async handleOperation(sessionId: string, operation: Operation): Promise<void> {
     const session = await this.store.getSession(sessionId);
     if (!session) {
-      throw new Error('Invalid session');
+      throw new Error("Invalid session");
     }
 
     // Check permissions
-    if (!session.permissions.includes('write')) {
-      throw new Error('No write permission');
+    if (!session.permissions.includes("write")) {
+      throw new Error("No write permission");
     }
 
     // Add to pending queue
     const docId = session.documentId;
     const queuedOperation: Operation = {
       ...operation,
-      baseVersion: operation.baseVersion ?? operation.version
+      baseVersion: operation.baseVersion ?? operation.version,
     };
     if (!this.pendingOperations.has(docId)) {
       this.pendingOperations.set(docId, []);
@@ -139,11 +142,11 @@ export class SyncEngine extends EventEmitter {
       // Get current document state
       const state = await this.store.getDocumentState(documentId);
       if (!state) {
-        throw new Error('Document not found');
+        throw new Error("Document not found");
       }
 
       // Get all operations since the oldest pending operation's version
-      const oldestVersion = Math.min(...pending.map(op => op.version));
+      const oldestVersion = Math.min(...pending.map((op) => op.version));
       const existingOps = await this.store.getOperations(documentId, oldestVersion);
 
       // Ensure deterministic ordering when transforming
@@ -153,11 +156,7 @@ export class SyncEngine extends EventEmitter {
       let currentVersion = state.version;
 
       for (const pendingOp of pending) {
-        const transformedOp = this.transformAgainstHistory(
-          pendingOp,
-          existingOps,
-          appliedOps
-        );
+        const transformedOp = this.transformAgainstHistory(pendingOp, existingOps, appliedOps);
 
         const conflictingApplied = this.findConflicts(transformedOp, appliedOps);
 
@@ -169,20 +168,23 @@ export class SyncEngine extends EventEmitter {
             this.defaultResolution
           );
 
-          this.emit('conflicts:resolved', {
+          this.emit("conflicts:resolved", {
             documentId,
             winner: resolutionWinner,
             losers: [transformedOp, ...conflictingApplied].filter(
-              op => op.id !== resolutionWinner.id
-            )
+              (op) => op.id !== resolutionWinner.id
+            ),
           });
         }
 
         if (resolutionWinner.id !== transformedOp.id) {
           // Conflict resolution discarded the incoming operation in favor of history
-          this.emit('operation:skipped', {
+          this.emit("operation:skipped", {
             documentId,
-            operation: { ...transformedOp, attributes: { ...transformedOp.attributes, overridden: true } }
+            operation: {
+              ...transformedOp,
+              attributes: { ...transformedOp.attributes, overridden: true },
+            },
           });
           continue;
         }
@@ -190,11 +192,11 @@ export class SyncEngine extends EventEmitter {
         const opWithVersion: Operation = {
           ...resolutionWinner,
           version: currentVersion + 1,
-          baseVersion: resolutionWinner.baseVersion ?? resolutionWinner.version
+          baseVersion: resolutionWinner.baseVersion ?? resolutionWinner.version,
         };
 
         // Apply operation to document
-        if (typeof state.content === 'string') {
+        if (typeof state.content === "string") {
           state.content = this.ot.apply(state.content, opWithVersion);
         } else {
           // For non-string content, apply custom logic
@@ -213,19 +215,19 @@ export class SyncEngine extends EventEmitter {
         appliedOps.push(opWithVersion);
 
         // Emit operation to other clients
-        this.emit('operation:applied', {
+        this.emit("operation:applied", {
           documentId,
           operation: opWithVersion,
-          state
+          state,
         });
       }
 
       // Check for conflicts in the applied set to surface combined clashes
       const conflicts = this.detectConflicts(appliedOps);
       if (conflicts.length > 0) {
-        this.emit('conflicts:detected', {
+        this.emit("conflicts:detected", {
           documentId,
-          conflicts
+          conflicts,
         });
       }
     }
@@ -238,7 +240,7 @@ export class SyncEngine extends EventEmitter {
     await this.store.updatePresence(presence);
 
     // Broadcast to other users
-    this.emit('presence:updated', { presence });
+    this.emit("presence:updated", { presence });
   }
 
   /**
@@ -251,13 +253,16 @@ export class SyncEngine extends EventEmitter {
   /**
    * Sync a client to the latest document state
    */
-  async syncClient(documentId: string, clientVersion: number): Promise<{
+  async syncClient(
+    documentId: string,
+    clientVersion: number
+  ): Promise<{
     state: DocumentState;
     operations: Operation[];
   }> {
     const state = await this.store.getDocumentState(documentId);
     if (!state) {
-      throw new Error('Document not found');
+      throw new Error("Document not found");
     }
 
     // Get all operations since client's version
@@ -272,7 +277,7 @@ export class SyncEngine extends EventEmitter {
   async acquireLock(
     documentId: string,
     userId: string,
-    lockType: 'read' | 'write' | 'exclusive' = 'write',
+    lockType: "read" | "write" | "exclusive" = "write",
     duration: number = 30000 // 30 seconds default
   ): Promise<boolean> {
     const lock: DocumentLock = {
@@ -280,13 +285,13 @@ export class SyncEngine extends EventEmitter {
       userId,
       lockedAt: new Date(),
       expiresAt: new Date(Date.now() + duration),
-      lockType
+      lockType,
     };
 
     const acquired = await this.store.acquireLock(lock);
 
     if (acquired) {
-      this.emit('lock:acquired', { lock });
+      this.emit("lock:acquired", { lock });
 
       // Auto-release after duration
       setTimeout(() => {
@@ -302,7 +307,7 @@ export class SyncEngine extends EventEmitter {
    */
   async releaseLock(documentId: string, userId: string): Promise<void> {
     await this.store.releaseLock(documentId, userId);
-    this.emit('lock:released', { documentId, userId });
+    this.emit("lock:released", { documentId, userId });
   }
 
   /**
@@ -314,7 +319,7 @@ export class SyncEngine extends EventEmitter {
 
     // Implementation would depend on store capabilities
     // For now, emit event for external cleanup
-    this.emit('cleanup:sessions', { cutoff });
+    this.emit("cleanup:sessions", { cutoff });
   }
 
   /**
@@ -376,7 +381,7 @@ export class SyncEngine extends EventEmitter {
    * Locate already-applied operations that conflict with the provided operation.
    */
   private findConflicts(operation: Operation, applied: Operation[]): Operation[] {
-    return applied.filter(appliedOp => this.ot.hasConflict(operation, appliedOp));
+    return applied.filter((appliedOp) => this.ot.hasConflict(operation, appliedOp));
   }
 
   /**
@@ -390,7 +395,7 @@ export class SyncEngine extends EventEmitter {
         if (this.ot.hasConflict(operations[i], operations[j])) {
           conflicts.push({
             ops: [operations[i], operations[j]],
-            reason: 'Overlapping operations'
+            reason: "Overlapping operations",
           });
         }
       }
@@ -408,24 +413,24 @@ export class SyncEngine extends EventEmitter {
     resolution: ConflictResolution
   ): Promise<Operation> {
     switch (resolution.strategy) {
-      case 'last_write_wins':
+      case "last_write_wins":
         return conflictingOps.sort((a, b) => b.timestamp - a.timestamp)[0];
 
-      case 'first_write_wins':
+      case "first_write_wins":
         return conflictingOps.sort((a, b) => a.timestamp - b.timestamp)[0];
 
-      case 'merge':
+      case "merge":
         // Attempt to merge operations
         return this.mergeOperations(conflictingOps);
 
-      case 'manual':
+      case "manual":
         if (!resolution.mergedOperation) {
-          throw new Error('Manual resolution requires merged operation');
+          throw new Error("Manual resolution requires merged operation");
         }
         return resolution.mergedOperation;
 
       default:
-        throw new Error('Unknown resolution strategy');
+        throw new Error("Unknown resolution strategy");
     }
   }
 

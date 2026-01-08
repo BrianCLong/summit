@@ -2,14 +2,14 @@ name: CLI Build & Test
 
 on:
   push:
-    branches: [main, 'feat/**', 'claude/**']
+    branches: [main, "feat/**", "claude/**"]
     paths:
-      - 'cli/**'
-      - '.github/workflows/cli.yml'
+      - "cli/**"
+      - ".github/workflows/cli.yml"
   pull_request:
     branches: [main]
     paths:
-      - 'cli/**'
+      - "cli/**"
 
 jobs:
   test:
@@ -33,7 +33,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
+          cache: "pnpm"
           cache-dependency-path: cli/pnpm-lock.yaml
 
       - name: Install dependencies
@@ -89,7 +89,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: "pnpm"
           cache-dependency-path: cli/pnpm-lock.yaml
 
       - name: Install dependencies
@@ -165,8 +165,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          registry-url: 'https://registry.npmjs.org'
-          cache: 'pnpm'
+          registry-url: "https://registry.npmjs.org"
+          cache: "pnpm"
           cache-dependency-path: cli/pnpm-lock.yaml
 
       - name: Install dependencies

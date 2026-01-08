@@ -10,17 +10,17 @@
 /**
  * Trust tier classification for context segments
  */
-export type TrustTier = 'system' | 'verified' | 'user' | 'external';
+export type TrustTier = "system" | "verified" | "user" | "external";
 
 /**
  * Verification status for cryptographic integrity
  */
-export type VerificationStatus = 'signed' | 'unsigned' | 'revoked';
+export type VerificationStatus = "signed" | "unsigned" | "revoked";
 
 /**
  * Context segment types
  */
-export type SegmentType = 'instruction' | 'event' | 'artifact' | 'memory';
+export type SegmentType = "instruction" | "event" | "artifact" | "memory";
 
 /**
  * Metadata associated with each context segment
@@ -69,11 +69,11 @@ export interface ContextSegment {
  * Edge types in the provenance graph
  */
 export type EdgeType =
-  | 'DERIVED_FROM'   // Segment B was transformed from Segment A
-  | 'INCLUDES'       // Compiled context includes this segment
-  | 'ORIGINATED_BY'  // Segment was created by Agent X
-  | 'SUPERSEDES'     // New segment replaces old (versioning)
-  | 'VIOLATES_INVARIANT'; // Segment violated an invariant
+  | "DERIVED_FROM" // Segment B was transformed from Segment A
+  | "INCLUDES" // Compiled context includes this segment
+  | "ORIGINATED_BY" // Segment was created by Agent X
+  | "SUPERSEDES" // New segment replaces old (versioning)
+  | "VIOLATES_INVARIANT"; // Segment violated an invariant
 
 /**
  * Directed edge in the provenance graph
@@ -162,13 +162,13 @@ export interface PolicyRule {
   condition: (segment: ContextSegment) => boolean;
 
   /** Action to take if condition is true */
-  action: 'permit' | 'deny' | 'redact' | 'flag';
+  action: "permit" | "deny" | "redact" | "flag";
 
   /** Justification for the rule */
   justification: string;
 
   /** Severity level */
-  severity: 'info' | 'warn' | 'block';
+  severity: "info" | "warn" | "block";
 }
 
 /**
@@ -185,7 +185,7 @@ export interface PolicyViolation {
   message: string;
 
   /** Action taken */
-  action: 'permit' | 'deny' | 'redact' | 'flag';
+  action: "permit" | "deny" | "redact" | "flag";
 
   /** Timestamp of violation */
   timestamp: Date;

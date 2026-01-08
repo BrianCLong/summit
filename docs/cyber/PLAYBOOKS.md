@@ -21,6 +21,7 @@ This document contains operational playbooks for threat intelligence analysis, t
 **Objective:** Integrate and validate a new threat intelligence feed
 
 **Prerequisites:**
+
 - Feed API credentials
 - Feed documentation
 - Test environment
@@ -28,15 +29,16 @@ This document contains operational playbooks for threat intelligence analysis, t
 **Steps:**
 
 1. **Feed Registration**
+
    ```typescript
    await aggregator.registerFeed({
-     id: 'new-feed-001',
-     name: 'New Threat Provider',
-     source: 'COMMERCIAL',
-     url: 'https://api.provider.com/threats',
+     id: "new-feed-001",
+     name: "New Threat Provider",
+     source: "COMMERCIAL",
+     url: "https://api.provider.com/threats",
      apiKey: process.env.FEED_API_KEY,
      refreshInterval: 3600,
-     tlp: 'AMBER',
+     tlp: "AMBER",
      enabled: false, // Start disabled for testing
      createdAt: new Date().toISOString(),
      updatedAt: new Date().toISOString(),
@@ -67,6 +69,7 @@ This document contains operational playbooks for threat intelligence analysis, t
    - Adjust confidence thresholds
 
 **Success Criteria:**
+
 - Feed syncs successfully every hour
 - False positive rate < 5%
 - At least 3 validated detections in validation period
@@ -82,6 +85,7 @@ This document contains operational playbooks for threat intelligence analysis, t
 **Steps:**
 
 1. **Initial Classification**
+
    ```typescript
    const ioc = await iocManager.getIOC(iocId);
 
@@ -90,12 +94,13 @@ This document contains operational playbooks for threat intelligence analysis, t
    ```
 
 2. **Automated Enrichment**
+
    ```typescript
    const enriched = await enrichment.enrichIOC(ioc, [
-     'VIRUSTOTAL',
-     'ABUSEIPDB',
-     'ALIENVAULT_OTX',
-     'SHODAN'
+     "VIRUSTOTAL",
+     "ABUSEIPDB",
+     "ALIENVAULT_OTX",
+     "SHODAN",
    ]);
    ```
 
@@ -105,13 +110,14 @@ This document contains operational playbooks for threat intelligence analysis, t
    - Map to MITRE ATT&CK techniques
 
 4. **Risk Scoring**
+
    ```typescript
    const riskScore = calculateRiskScore({
      severity: ioc.severity,
      confidence: ioc.confidence,
      enrichment: enriched.enrichment,
      prevalence: getPrevalence(ioc.value),
-     age: getAge(ioc.firstSeen)
+     age: getAge(ioc.firstSeen),
    });
    ```
 
@@ -121,6 +127,7 @@ This document contains operational playbooks for threat intelligence analysis, t
    - If risk score < 50: Log for correlation
 
 **Automation:**
+
 ```javascript
 // Automated enrichment pipeline
 async function processNewIOC(ioc) {
@@ -199,6 +206,7 @@ async function processNewIOC(ioc) {
 **MITRE ATT&CK:** T1021 (Remote Services), T1570 (Lateral Tool Transfer)
 
 **Data Sources:**
+
 - Windows Event Logs (4624, 4648, 4697, 5140)
 - Process Creation Logs
 - Network Traffic (SMB, RDP)
@@ -206,6 +214,7 @@ async function processNewIOC(ioc) {
 **Hunt Steps:**
 
 1. **Query for Service Creation**
+
    ```sql
    SELECT *
    FROM process_logs
@@ -216,6 +225,7 @@ async function processNewIOC(ioc) {
    ```
 
 2. **Identify Unusual Service Accounts**
+
    ```sql
    SELECT source_user, COUNT(DISTINCT destination_host) as host_count
    FROM authentication_logs
@@ -227,6 +237,7 @@ async function processNewIOC(ioc) {
    ```
 
 3. **Check for Admin Share Access**
+
    ```sql
    SELECT source_ip, destination_ip, share_name
    FROM smb_logs
@@ -246,12 +257,14 @@ async function processNewIOC(ioc) {
    - Verify user legitimacy
 
 **Indicators of Compromise:**
+
 - Multiple admin share accesses from single source
 - Service creation on multiple hosts
 - Unusual account usage patterns
 - Process execution from network shares
 
 **Response:**
+
 - Isolate affected systems
 - Revoke compromised credentials
 - Collect forensic evidence
@@ -266,6 +279,7 @@ async function processNewIOC(ioc) {
 **MITRE ATT&CK:** T1071 (Application Layer Protocol), T1573 (Encrypted Channel)
 
 **Data Sources:**
+
 - Network flow data
 - DNS logs
 - Proxy logs
@@ -274,6 +288,7 @@ async function processNewIOC(ioc) {
 **Hunt Steps:**
 
 1. **Identify Beaconing Behavior**
+
    ```python
    # Detect regular intervals (beaconing)
    connections = get_external_connections(hours=24)
@@ -286,6 +301,7 @@ async function processNewIOC(ioc) {
    ```
 
 2. **Check Domain Generation Algorithms (DGA)**
+
    ```sql
    SELECT domain, COUNT(*) as query_count
    FROM dns_logs
@@ -297,6 +313,7 @@ async function processNewIOC(ioc) {
    ```
 
 3. **Analyze TLS Certificates**
+
    ```sql
    SELECT dest_ip, ssl_subject, ssl_issuer
    FROM tls_logs
@@ -306,6 +323,7 @@ async function processNewIOC(ioc) {
    ```
 
 4. **Detect Fast Flux**
+
    ```python
    # Multiple IPs for same domain in short period
    dns_records = get_dns_records(hours=24)
@@ -322,12 +340,13 @@ async function processNewIOC(ioc) {
    // Sweep network for known C2 indicators
    await huntingService.sweepIOCs({
      iocs: c2_indicators,
-     scope: 'network',
-     lookback_hours: 168 // 7 days
+     scope: "network",
+     lookback_hours: 168, // 7 days
    });
    ```
 
 **Automation:**
+
 ```javascript
 // Automated C2 detection
 async function detectC2() {
@@ -354,6 +373,7 @@ async function detectC2() {
 **MITRE ATT&CK:** T1048 (Exfiltration Over Alternative Protocol), T1567 (Exfiltration Over Web Service)
 
 **Data Sources:**
+
 - Network traffic analysis
 - DNS logs
 - Cloud service logs
@@ -362,6 +382,7 @@ async function detectC2() {
 **Hunt Steps:**
 
 1. **Detect Large Outbound Transfers**
+
    ```sql
    SELECT source_ip, destination_ip, SUM(bytes_out) as total_bytes
    FROM netflow
@@ -373,6 +394,7 @@ async function detectC2() {
    ```
 
 2. **Check for DNS Tunneling**
+
    ```python
    # Detect DNS tunneling
    dns_queries = get_dns_queries(hours=24)
@@ -387,6 +409,7 @@ async function detectC2() {
    ```
 
 3. **Identify Cloud Storage Uploads**
+
    ```sql
    SELECT user, destination_domain, SUM(bytes_uploaded)
    FROM proxy_logs
@@ -399,6 +422,7 @@ async function detectC2() {
    ```
 
 4. **Detect Steganography**
+
    ```python
    # Look for image uploads to unusual locations
    uploads = get_file_uploads(hours=24)
@@ -459,12 +483,13 @@ async function detectC2() {
 3. **CONTAINMENT (4-12 hours)**
 
    **IOC Hunt:**
+
    ```typescript
    // Sweep for ransomware IOCs
    const sweepResults = await huntingService.sweepIOCs({
      iocs: ransomware_iocs,
-     scope: 'all',
-     lookback_hours: 72
+     scope: "all",
+     lookback_hours: 72,
    });
    ```
 
@@ -475,27 +500,25 @@ async function detectC2() {
    - Monitor for lateral movement
 
 4. **ERADICATION (12-24 hours)**
-
    - Remove ransomware from all systems
    - Rebuild compromised systems from known-good backups
    - Verify backup integrity
    - Scan restored systems
 
 5. **RECOVERY (24+ hours)**
-
    - Restore systems in priority order
    - Validate decryption if available
    - Test critical business functions
    - Gradually restore network connectivity
 
 6. **POST-INCIDENT**
-
    - Root cause analysis
    - Update defenses
    - Threat intelligence sharing
    - Lessons learned documentation
 
 **Decision Tree:**
+
 ```
 Do NOT pay ransom → Check backup availability
   ↓
@@ -574,6 +597,7 @@ No decryption? → Data loss assessment
 **Objective:** Analyze suspicious file for malicious behavior
 
 **Prerequisites:**
+
 - Isolated analysis environment
 - Sandbox access
 - Static analysis tools
@@ -581,6 +605,7 @@ No decryption? → Data loss assessment
 **Steps:**
 
 1. **Initial Triage**
+
    ```bash
    # Basic file information
    file suspicious.exe
@@ -592,6 +617,7 @@ No decryption? → Data loss assessment
    ```
 
 2. **Static Analysis**
+
    ```python
    # Extract strings
    strings -n 10 suspicious.exe > strings.txt
@@ -604,12 +630,10 @@ No decryption? → Data loss assessment
    ```
 
 3. **Sandbox Analysis**
+
    ```typescript
    // Submit to sandbox
-   const analysis = await malwareAnalyzer.performDynamicAnalysis(
-     'sample-id',
-     'CUCKOO'
-   );
+   const analysis = await malwareAnalyzer.performDynamicAnalysis("sample-id", "CUCKOO");
    ```
 
 4. **Behavioral Analysis**
@@ -620,6 +644,7 @@ No decryption? → Data loss assessment
    - Check for persistence mechanisms
 
 5. **IOC Extraction**
+
    ```typescript
    // Extract IOCs from analysis
    const iocs = extractIOCs(analysis);
@@ -693,16 +718,14 @@ No decryption? → Data loss assessment
        exploitAvailable: vuln.exploitAvailable,
        internetFacing: asset.internetFacing,
        dataClassification: asset.dataClassification,
-       businessCriticality: asset.criticality
+       businessCriticality: asset.criticality,
      });
 
      asset.riskScore = risk;
    }
 
    // Sort by risk score
-   const prioritized = affectedAssets.sort((a, b) =>
-     b.riskScore - a.riskScore
-   );
+   const prioritized = affectedAssets.sort((a, b) => b.riskScore - a.riskScore);
    ```
 
 4. **REMEDIATION (12-72 hours)**
@@ -838,6 +861,6 @@ THEN notify_soc('Potential lateral movement detected')
 
 ---
 
-*Document Version: 1.0*
-*Last Updated: 2024*
-*Next Review: Quarterly*
+_Document Version: 1.0_
+_Last Updated: 2024_
+_Next Review: Quarterly_

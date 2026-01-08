@@ -1,10 +1,10 @@
-import { CommunityStore } from '../store.js';
-import type { DiscussionThread, ForumCategory, Post } from '../types.js';
-import { createId } from '../utils.js';
-import { ActivityFeedService } from './activityFeedService.js';
-import { ContributionTracker } from './contributionTracker.js';
-import { GamificationService } from './gamificationService.js';
-import { NotificationService } from './notificationService.js';
+import { CommunityStore } from "../store.js";
+import type { DiscussionThread, ForumCategory, Post } from "../types.js";
+import { createId } from "../utils.js";
+import { ActivityFeedService } from "./activityFeedService.js";
+import { ContributionTracker } from "./contributionTracker.js";
+import { GamificationService } from "./gamificationService.js";
+import { NotificationService } from "./notificationService.js";
 
 export interface CreateCategoryInput {
   readonly name: string;
@@ -32,12 +32,12 @@ export class DiscussionForumService {
     private readonly activity: ActivityFeedService,
     private readonly contributions: ContributionTracker,
     private readonly gamification: GamificationService,
-    private readonly notifications: NotificationService,
+    private readonly notifications: NotificationService
   ) {}
 
   public createCategory(input: CreateCategoryInput): ForumCategory {
     const category: ForumCategory = {
-      id: createId('cat'),
+      id: createId("cat"),
       name: input.name.trim(),
       description: input.description.trim(),
       createdAt: new Date(),
@@ -53,7 +53,7 @@ export class DiscussionForumService {
 
     const now = new Date();
     const thread: DiscussionThread = {
-      id: createId('thr'),
+      id: createId("thr"),
       title: input.title.trim(),
       categoryId: input.categoryId,
       authorId: input.authorId,
@@ -68,7 +68,7 @@ export class DiscussionForumService {
     this.store.upsertThread(thread);
     this.activity.record({
       userId: input.authorId,
-      type: 'thread_created',
+      type: "thread_created",
       summary: `Thread created: ${thread.title}`,
       metadata: { threadId: thread.id, categoryId: thread.categoryId },
     });
@@ -104,12 +104,12 @@ export class DiscussionForumService {
       throw new Error(`Unknown thread ${input.threadId}`);
     }
     if (thread.isLocked) {
-      throw new Error('Thread is locked');
+      throw new Error("Thread is locked");
     }
 
     const now = new Date();
     const post: Post = {
-      id: createId('pst'),
+      id: createId("pst"),
       threadId: input.threadId,
       parentPostId: input.parentPostId ?? null,
       authorId: input.authorId,
@@ -132,14 +132,11 @@ export class DiscussionForumService {
 
     this.activity.record({
       userId: input.authorId,
-      type: post.parentPostId ? 'post_replied' : 'post_created',
+      type: post.parentPostId ? "post_replied" : "post_created",
       summary: `Post added to ${thread.title}`,
       metadata: { threadId: thread.id, postId: post.id },
     });
-    this.contributions.incrementPosts(
-      input.authorId,
-      Boolean(post.parentPostId),
-    );
+    this.contributions.incrementPosts(input.authorId, Boolean(post.parentPostId));
     this.gamification.awardPoints(input.authorId, 5);
 
     if (post.parentPostId) {
@@ -147,7 +144,7 @@ export class DiscussionForumService {
       if (parent && parent.authorId !== input.authorId) {
         this.notifications.notify({
           userId: parent.authorId,
-          message: 'Someone replied to your post',
+          message: "Someone replied to your post",
           link: `/threads/${thread.id}#${post.id}`,
           metadata: { threadId: thread.id, postId: post.id },
         });
@@ -157,7 +154,7 @@ export class DiscussionForumService {
     if (!post.parentPostId && thread.authorId !== input.authorId) {
       this.notifications.notify({
         userId: thread.authorId,
-        message: 'Your thread received a new post',
+        message: "Your thread received a new post",
         link: `/threads/${thread.id}#${post.id}`,
         metadata: { threadId: thread.id, postId: post.id },
       });
@@ -172,7 +169,7 @@ export class DiscussionForumService {
       throw new Error(`Unknown post ${postId}`);
     }
     if (post.isRemoved) {
-      throw new Error('Cannot react to removed post');
+      throw new Error("Cannot react to removed post");
     }
     const updated: Post = { ...post, reactionCount: post.reactionCount + 1 };
     this.store.upsertPost(updated);
@@ -180,7 +177,7 @@ export class DiscussionForumService {
       this.contributions.addReactionReceived(post.authorId);
       this.notifications.notify({
         userId: post.authorId,
-        message: 'Your contribution received appreciation',
+        message: "Your contribution received appreciation",
         metadata: { postId: post.id },
       });
     }
@@ -200,7 +197,7 @@ export class DiscussionForumService {
     this.store.upsertThread(updated);
     this.activity.record({
       userId: moderatorId,
-      type: 'thread_locked',
+      type: "thread_locked",
       summary: `Thread locked: ${thread.title}`,
       metadata: { threadId: thread.id },
     });
@@ -220,7 +217,7 @@ export class DiscussionForumService {
     this.store.upsertThread(updated);
     this.activity.record({
       userId: moderatorId,
-      type: 'thread_unlocked',
+      type: "thread_unlocked",
       summary: `Thread unlocked: ${thread.title}`,
       metadata: { threadId: thread.id },
     });

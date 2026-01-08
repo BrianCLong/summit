@@ -1,7 +1,7 @@
-import { describe, expect, it, vi } from 'vitest';
-import { TriPaneController, type EvidenceNode } from '../src/index.js';
+import { describe, expect, it, vi } from "vitest";
+import { TriPaneController, type EvidenceNode } from "../src/index.js";
 
-vi.mock('policy', () => ({
+vi.mock("policy", () => ({
   computeWorkflowEstimates: () => ({
     criticalPath: [],
     totalLatencyMs: 0,
@@ -21,207 +21,201 @@ vi.mock('policy', () => ({
 
 const evidence: EvidenceNode[] = [
   {
-    id: 'ev-1',
-    label: 'email:alice@example.com',
+    id: "ev-1",
+    label: "email:alice@example.com",
     confidence: 0.9,
-    policies: ['policy:export'],
+    policies: ["policy:export"],
     time: Date.UTC(2024, 0, 1),
   },
   {
-    id: 'ev-2',
-    label: 'geo:berlin',
+    id: "ev-2",
+    label: "geo:berlin",
     confidence: 0.8,
-    policies: ['policy:retention'],
+    policies: ["policy:retention"],
     time: Date.UTC(2024, 0, 2),
   },
   {
-    id: 'ev-3',
-    label: 'case:orion-breach',
+    id: "ev-3",
+    label: "case:orion-breach",
     confidence: 0.85,
-    policies: ['policy:export'],
+    policies: ["policy:export"],
     time: Date.UTC(2024, 0, 3),
   },
 ];
 
-describe('TriPaneController', () => {
-  it('synchronizes selections across panels', () => {
+describe("TriPaneController", () => {
+  it("synchronizes selections across panels", () => {
     const controller = new TriPaneController();
     let mapUpdates = 0;
-    controller.on('map', (state) => {
+    controller.on("map", (state) => {
       mapUpdates += 1;
-      expect(state.mapSelection).toBe('ev-1');
+      expect(state.mapSelection).toBe("ev-1");
     });
-    controller.selectFromGraph('person-1', evidence);
-    expect(controller.current.timelineSelection).toBe('ev-3');
+    controller.selectFromGraph("person-1", evidence);
+    expect(controller.current.timelineSelection).toBe("ev-3");
     expect(controller.current.policyBindings.sort()).toEqual(
-      ['policy:export', 'policy:retention'].sort(),
+      ["policy:export", "policy:retention"].sort()
     );
     expect(controller.current.confidenceOpacity).toBeLessThanOrEqual(1);
-    expect(controller.current.activePanel).toBe('graph');
+    expect(controller.current.activePanel).toBe("graph");
     expect(mapUpdates).toBeGreaterThan(0);
   });
 
-  it('saves and restores views with explain output', () => {
+  it("saves and restores views with explain output", () => {
     const controller = new TriPaneController(evidence);
-    controller.selectFromGraph('person-1', evidence);
-    controller.saveView('orion');
-    controller.selectFromGraph('person-2', [evidence[1]]);
-    const restored = controller.restoreView('orion');
-    expect(restored?.graphSelection).toBe('person-1');
+    controller.selectFromGraph("person-1", evidence);
+    controller.saveView("orion");
+    controller.selectFromGraph("person-2", [evidence[1]]);
+    const restored = controller.restoreView("orion");
+    expect(restored?.graphSelection).toBe("person-1");
     const explain = controller.explainCurrentView();
-    expect(explain.focus).toBe('person-1');
+    expect(explain.focus).toBe("person-1");
     expect(explain.evidence.length).toBe(3);
-    expect(explain.activePanel).toBe('graph');
-    expect(explain.policyHighlights).toContain('policy:export');
-    expect(explain.navigationTips).toContain(
-      'Ctrl+1 Graph · Ctrl+2 Timeline · Ctrl+3 Map',
-    );
+    expect(explain.activePanel).toBe("graph");
+    expect(explain.policyHighlights).toContain("policy:export");
+    expect(explain.navigationTips).toContain("Ctrl+1 Graph · Ctrl+2 Timeline · Ctrl+3 Map");
     expect(explain.timeWindow).toBeUndefined();
   });
 
-  it('restores saved views without later mutations leaking through', () => {
+  it("restores saved views without later mutations leaking through", () => {
     const localEvidence = evidence.map((item) => ({
       ...item,
       policies: [...item.policies],
     }));
     const controller = new TriPaneController(localEvidence);
-    controller.selectFromGraph('person-1', localEvidence);
-    controller.saveView('orion');
+    controller.selectFromGraph("person-1", localEvidence);
+    controller.saveView("orion");
 
-    localEvidence[0].label = 'mutated-label';
-    controller.selectFromGraph('person-2', localEvidence);
+    localEvidence[0].label = "mutated-label";
+    controller.selectFromGraph("person-2", localEvidence);
 
-    const restored = controller.restoreView('orion');
-    expect(restored?.graphSelection).toBe('person-1');
-    expect(restored?.evidence[0]?.label).toBe('email:alice@example.com');
+    const restored = controller.restoreView("orion");
+    expect(restored?.graphSelection).toBe("person-1");
+    expect(restored?.evidence[0]?.label).toBe("email:alice@example.com");
   });
 
-  it('guards state against external evidence mutation after selection', () => {
+  it("guards state against external evidence mutation after selection", () => {
     const mutableEvidence = evidence.map((item) => ({
       ...item,
       policies: [...item.policies],
     }));
     const controller = new TriPaneController();
 
-    controller.selectFromGraph('person-1', mutableEvidence);
-    mutableEvidence[0].label = 'mutated';
-    mutableEvidence[0].policies.push('policy:tamper');
+    controller.selectFromGraph("person-1", mutableEvidence);
+    mutableEvidence[0].label = "mutated";
+    mutableEvidence[0].policies.push("policy:tamper");
 
     const current = controller.current;
-    expect(current.evidence[0]?.label).toBe('email:alice@example.com');
-    expect(current.evidence[0]?.policies).toEqual(['policy:export']);
+    expect(current.evidence[0]?.label).toBe("email:alice@example.com");
+    expect(current.evidence[0]?.policies).toEqual(["policy:export"]);
   });
 
-  it('returns explain view clones so consumers cannot mutate controller state', () => {
+  it("returns explain view clones so consumers cannot mutate controller state", () => {
     const controller = new TriPaneController();
-    controller.selectFromGraph('person-1', evidence);
+    controller.selectFromGraph("person-1", evidence);
 
     const explain = controller.explainCurrentView();
-    explain.evidence[0]!.label = 'mutated';
-    explain.evidence[0]!.policies.push('policy:tamper');
+    explain.evidence[0]!.label = "mutated";
+    explain.evidence[0]!.policies.push("policy:tamper");
 
     const current = controller.current;
-    expect(current.evidence[0]?.label).toBe('email:alice@example.com');
-    expect(current.evidence[0]?.policies).toEqual(['policy:export']);
+    expect(current.evidence[0]?.label).toBe("email:alice@example.com");
+    expect(current.evidence[0]?.policies).toEqual(["policy:export"]);
   });
 
-  it('tracks time-to-path metric', () => {
+  it("tracks time-to-path metric", () => {
     const controller = new TriPaneController();
     controller.recordPathDiscovery(1200);
     controller.recordPathDiscovery(800);
     expect(controller.averageTimeToPath()).toBe(1000);
   });
 
-  it('builds unified layout with explain panel and command palette', () => {
+  it("builds unified layout with explain panel and command palette", () => {
     const controller = new TriPaneController(evidence);
-    controller.selectFromGraph('person-1', evidence);
-    const layout = controller.buildUnifiedLayout('graph');
-    expect(layout.activePanel).toBe('graph');
-    expect(layout.panes.find((pane) => pane.id === 'graph')?.linkedTo).toEqual([
-      'timeline',
-      'map',
-    ]);
-    expect(layout.commandPalette.commands.some((cmd) => cmd.id === 'focus.graph'))
-      .toBe(true);
-    expect(layout.explainPanel.summary).toContain('Active pane: graph');
-    expect(layout.explainPanel.policyHighlights).toContain('policy:export');
+    controller.selectFromGraph("person-1", evidence);
+    const layout = controller.buildUnifiedLayout("graph");
+    expect(layout.activePanel).toBe("graph");
+    expect(layout.panes.find((pane) => pane.id === "graph")?.linkedTo).toEqual(["timeline", "map"]);
+    expect(layout.commandPalette.commands.some((cmd) => cmd.id === "focus.graph")).toBe(true);
+    expect(layout.explainPanel.summary).toContain("Active pane: graph");
+    expect(layout.explainPanel.policyHighlights).toContain("policy:export");
   });
 
-  it('supports command palette commands and keyboard shortcuts', () => {
+  it("supports command palette commands and keyboard shortcuts", () => {
     const controller = new TriPaneController(evidence);
     controller.registerCommand({
-      id: 'save.snapshot',
-      label: 'Save snapshot',
-      shortcut: 'cmd+s',
-      run: () => controller.saveView('snapshot'),
+      id: "save.snapshot",
+      label: "Save snapshot",
+      shortcut: "cmd+s",
+      run: () => controller.saveView("snapshot"),
     });
-    expect(controller.handleShortcut('ctrl+2')).toBe(true);
-    expect(controller.current.activePanel).toBe('timeline');
+    expect(controller.handleShortcut("ctrl+2")).toBe(true);
+    expect(controller.current.activePanel).toBe("timeline");
     expect(
-      controller.commandPalette('snapshot').commands.find(
-        (command) => command.id === 'save.snapshot',
-      ),
+      controller
+        .commandPalette("snapshot")
+        .commands.find((command) => command.id === "save.snapshot")
     ).toBeDefined();
-    controller.selectFromMap('ev-2');
-    expect(controller.handleShortcut('cmd+s')).toBe(true);
-    expect(controller.restoreView('snapshot')).toBeDefined();
+    controller.selectFromMap("ev-2");
+    expect(controller.handleShortcut("cmd+s")).toBe(true);
+    expect(controller.restoreView("snapshot")).toBeDefined();
   });
 
-  it('captures time window as SSOT and injects it into queries and keys', () => {
+  it("captures time window as SSOT and injects it into queries and keys", () => {
     const controller = new TriPaneController([], {
-      tenantId: 'tenant-a',
-      caseId: 'case-99',
+      tenantId: "tenant-a",
+      caseId: "case-99",
     });
     controller.setTimeWindow({
       start: Date.UTC(2024, 0, 1),
       end: Date.UTC(2024, 0, 3),
-      timezone: 'UTC',
+      timezone: "UTC",
     });
 
-    controller.selectFromGraph('person-1', evidence);
+    controller.selectFromGraph("person-1", evidence);
 
-    const payload = controller.buildQueryPayload({ filter: 'active' });
+    const payload = controller.buildQueryPayload({ filter: "active" });
     expect(payload.timeWindow?.start).toBe(Date.UTC(2024, 0, 1));
     expect(payload.timeWindow?.end).toBe(Date.UTC(2024, 0, 3));
-    expect(payload.timeWindow?.timezone).toBe('UTC');
-    expect(payload.tenantId).toBe('tenant-a');
-    expect(payload.caseId).toBe('case-99');
+    expect(payload.timeWindow?.timezone).toBe("UTC");
+    expect(payload.tenantId).toBe("tenant-a");
+    expect(payload.caseId).toBe("case-99");
 
-    const key = controller.buildQueryKey('graph.fetch');
-    expect(key).toContain('tenant-a');
-    expect(key).toContain('case-99');
+    const key = controller.buildQueryKey("graph.fetch");
+    expect(key).toContain("tenant-a");
+    expect(key).toContain("case-99");
     expect(key).toContain(`${Date.UTC(2024, 0, 1)}-${Date.UTC(2024, 0, 3)}`);
-    expect(key).toContain('UTC');
+    expect(key).toContain("UTC");
     expect(controller.current.evidence.length).toBe(3);
   });
 
-  it('recomputes bindings and opacity when time window filters evidence', () => {
+  it("recomputes bindings and opacity when time window filters evidence", () => {
     const controller = new TriPaneController(evidence);
-    controller.selectFromGraph('person-1', evidence);
+    controller.selectFromGraph("person-1", evidence);
     controller.setTimeWindow({
       start: Date.UTC(2024, 0, 2),
       end: Date.UTC(2024, 0, 2),
     });
 
-    expect(controller.current.evidence.map((item) => item.id)).toEqual(['ev-2']);
-    expect(controller.current.policyBindings).toEqual(['policy:retention']);
+    expect(controller.current.evidence.map((item) => item.id)).toEqual(["ev-2"]);
+    expect(controller.current.policyBindings).toEqual(["policy:retention"]);
     expect(controller.current.confidenceOpacity).toBeCloseTo(0.8);
   });
 
-  it('supports undo/redo for time window and selections', () => {
+  it("supports undo/redo for time window and selections", () => {
     const controller = new TriPaneController(evidence);
-    controller.selectFromGraph('person-1', evidence);
+    controller.selectFromGraph("person-1", evidence);
     controller.setTimeWindow({
       start: Date.UTC(2024, 0, 2),
       end: Date.UTC(2024, 0, 3),
     });
-    controller.selectFromTimeline('ev-3');
+    controller.selectFromTimeline("ev-3");
 
-    expect(controller.current.timelineSelection).toBe('ev-3');
+    expect(controller.current.timelineSelection).toBe("ev-3");
     expect(controller.current.timeWindow?.start).toBe(Date.UTC(2024, 0, 2));
 
     controller.undo();
-    expect(controller.current.timelineSelection).toBe('ev-3');
+    expect(controller.current.timelineSelection).toBe("ev-3");
     expect(controller.current.timeWindow?.start).toBe(Date.UTC(2024, 0, 2));
 
     controller.undo();
@@ -231,7 +225,7 @@ describe('TriPaneController', () => {
     expect(controller.current.timeWindow?.start).toBe(Date.UTC(2024, 0, 2));
   });
 
-  it('exposes keyboard-friendly time brush handles that adjust the window', () => {
+  it("exposes keyboard-friendly time brush handles that adjust the window", () => {
     const controller = new TriPaneController();
     controller.setTimeWindow({
       start: Date.UTC(2024, 0, 1),
@@ -239,19 +233,23 @@ describe('TriPaneController', () => {
     });
 
     const handles = controller.getTimeBrushHandles(24 * 60 * 60 * 1000);
-    const startKeyDown = handles.startHandle.onKeyDown as (
-      event: { key: string; shiftKey?: boolean; preventDefault?: () => void },
-    ) => void;
-    startKeyDown({ key: 'ArrowLeft' });
+    const startKeyDown = handles.startHandle.onKeyDown as (event: {
+      key: string;
+      shiftKey?: boolean;
+      preventDefault?: () => void;
+    }) => void;
+    startKeyDown({ key: "ArrowLeft" });
     expect(controller.current.timeWindow?.start).toBe(Date.UTC(2023, 11, 31));
 
-    const endKeyDown = handles.endHandle.onKeyDown as (
-      event: { key: string; shiftKey?: boolean; preventDefault?: () => void },
-    ) => void;
-    endKeyDown({ key: 'ArrowRight', shiftKey: true });
+    const endKeyDown = handles.endHandle.onKeyDown as (event: {
+      key: string;
+      shiftKey?: boolean;
+      preventDefault?: () => void;
+    }) => void;
+    endKeyDown({ key: "ArrowRight", shiftKey: true });
     expect(controller.current.timeWindow?.end).toBe(Date.UTC(2024, 0, 4));
-    expect(handles.startHandle.role).toBe('slider');
-    expect(handles.endHandle['aria-label']).toBe('Time brush end');
-    expect(typeof handles.liveRegion()).toBe('string');
+    expect(handles.startHandle.role).toBe("slider");
+    expect(handles.endHandle["aria-label"]).toBe("Time brush end");
+    expect(typeof handles.liveRegion()).toBe("string");
   });
 });

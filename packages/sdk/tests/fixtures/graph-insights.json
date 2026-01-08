@@ -29,9 +29,7 @@
       "severity": "medium",
       "confidence": 0.88,
       "tags": ["anomaly", "payments"],
-      "relatedEntities": [
-        { "id": "entity-833", "type": "Transfer", "score": 0.71 }
-      ],
+      "relatedEntities": [{ "id": "entity-833", "type": "Transfer", "score": 0.71 }],
       "remediation": "Escalate to tier-2 review and pause outbound settlements in the flagged community.",
       "generatedAt": "2025-01-15T11:40:00Z"
     }

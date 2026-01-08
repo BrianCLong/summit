@@ -1,4 +1,4 @@
-import type { BoundingBox, GeoPoint } from '../types/geospatial.js';
+import type { BoundingBox, GeoPoint } from "../types/geospatial.js";
 
 export interface ImageryRecord {
   id: string;
@@ -32,11 +32,12 @@ export class SatelliteImageryCatalog {
   }
 
   bestCoverage(point: GeoPoint, toleranceMeters = 2000): ImageryRecord | null {
-    const candidates = this.records.filter((record) =>
-      record.bbox.minLon <= point.longitude &&
-      record.bbox.maxLon >= point.longitude &&
-      record.bbox.minLat <= point.latitude &&
-      record.bbox.maxLat >= point.latitude
+    const candidates = this.records.filter(
+      (record) =>
+        record.bbox.minLon <= point.longitude &&
+        record.bbox.maxLon >= point.longitude &&
+        record.bbox.minLat <= point.latitude &&
+        record.bbox.maxLat >= point.latitude
     );
 
     if (!candidates.length) return null;

@@ -4,10 +4,7 @@
   "serialNumber": "urn:uuid:mc-platform-v0.4.5-$(date +%s)",
   "creationInfo": {
     "created": "$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)",
-    "creators": [
-      "Tool: MC Platform SBOM Generator",
-      "Organization: MC Platform Engineering"
-    ]
+    "creators": ["Tool: MC Platform SBOM Generator", "Organization: MC Platform Engineering"]
   },
   "name": "MC Platform v0.4.5 Adaptive Quantum Excellence",
   "packages": [

@@ -1,6 +1,6 @@
-import { fetch as undiciFetch } from 'undici';
+import { fetch as undiciFetch } from "undici";
 
-export type ConsistencyMode = 'strong' | 'bounded-staleness' | 'read-my-writes';
+export type ConsistencyMode = "strong" | "bounded-staleness" | "read-my-writes";
 
 export interface PolicyTags {
   dataClass: string;
@@ -10,7 +10,7 @@ export interface PolicyTags {
 
 export interface PlanRequest extends PolicyTags {
   id?: string;
-  operation: 'read' | 'write';
+  operation: "read" | "write";
   session?: string;
   metadata?: Record<string, unknown>;
 }
@@ -66,8 +66,8 @@ export interface ClientOptions {
 }
 
 const JSON_HEADERS = {
-  'content-type': 'application/json',
-  accept: 'application/json'
+  "content-type": "application/json",
+  accept: "application/json",
 } as const;
 
 export class ACCClient {
@@ -77,19 +77,19 @@ export class ACCClient {
 
   constructor(options: ClientOptions) {
     if (!options?.baseUrl) {
-      throw new Error('ACCClient requires a baseUrl');
+      throw new Error("ACCClient requires a baseUrl");
     }
-    this.baseUrl = options.baseUrl.replace(/\/$/, '');
-    this.fetchImpl = options.fetchImpl ?? (globalThis.fetch ?? undiciFetch);
+    this.baseUrl = options.baseUrl.replace(/\/$/, "");
+    this.fetchImpl = options.fetchImpl ?? globalThis.fetch ?? undiciFetch;
     this.defaultHeaders = { ...JSON_HEADERS, ...(options.defaultHeaders ?? {}) };
   }
 
   async plan(request: PlanRequest, options: PlanOptions = {}): Promise<PlanResponse> {
     const response = await this.fetchImpl(`${this.baseUrl}/plan`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(request),
       headers: { ...this.defaultHeaders, ...(options.headers ?? {}) },
-      signal: options.signal
+      signal: options.signal,
     });
 
     if (!response.ok) {
@@ -100,12 +100,15 @@ export class ACCClient {
     return (await response.json()) as PlanResponse;
   }
 
-  async updateReplicaMetrics(update: ReplicaMetricsUpdate, options: PlanOptions = {}): Promise<void> {
+  async updateReplicaMetrics(
+    update: ReplicaMetricsUpdate,
+    options: PlanOptions = {}
+  ): Promise<void> {
     const response = await this.fetchImpl(`${this.baseUrl}/replica`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(update),
       headers: { ...this.defaultHeaders, ...(options.headers ?? {}) },
-      signal: options.signal
+      signal: options.signal,
     });
 
     if (!response.ok) {
@@ -117,10 +120,10 @@ export class ACCClient {
   formatExplain(plan: PlanResponse): string {
     return plan.explain
       .map((step, idx) => {
-        const meta = step.meta ? ` ${JSON.stringify(step.meta)}` : '';
+        const meta = step.meta ? ` ${JSON.stringify(step.meta)}` : "";
         return `${idx + 1}. [${step.stage}] ${step.message}${meta}`;
       })
-      .join('\n');
+      .join("\n");
   }
 }
 
@@ -132,20 +135,23 @@ async function safeText(response: Response): Promise<string> {
   }
 }
 
-export function withPolicyTags<T extends Record<string, unknown>>(request: T, tags: PolicyTags): T & {
-  'x-acc-data-class': string;
-  'x-acc-purpose': string;
-  'x-acc-jurisdiction': string;
+export function withPolicyTags<T extends Record<string, unknown>>(
+  request: T,
+  tags: PolicyTags
+): T & {
+  "x-acc-data-class": string;
+  "x-acc-purpose": string;
+  "x-acc-jurisdiction": string;
 } {
   return {
     ...request,
-    'x-acc-data-class': tags.dataClass,
-    'x-acc-purpose': tags.purpose,
-    'x-acc-jurisdiction': tags.jurisdiction
+    "x-acc-data-class": tags.dataClass,
+    "x-acc-purpose": tags.purpose,
+    "x-acc-jurisdiction": tags.jurisdiction,
   };
 }
 
 export function explainSummary(plan: PlanResponse): string {
   const steps = plan.explain.map((step) => step.stage);
-  return `${plan.mode} via ${steps.join(' -> ')}`;
+  return `${plan.mode} via ${steps.join(" -> ")}`;
 }

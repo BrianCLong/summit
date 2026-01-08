@@ -5,6 +5,7 @@ This document describes the end-to-end claim and evidence provenance model for t
 ## Core Concepts
 
 ### Claim
+
 A **claim** expresses an analytic assertion about an entity (for example, a network, actor, or incident). Every claim references:
 
 - The entity and scope to which the assertion applies.
@@ -12,6 +13,7 @@ A **claim** expresses an analytic assertion about an entity (for example, a netw
 - A collection of evidence links proving how the claim was produced.
 
 ### Evidence
+
 **Evidence** captures the observable artifacts, transformations, and decision points that justify a claim. Evidence is recorded at three control points:
 
 1. **Ingest** – raw collection as it enters the platform.
@@ -27,21 +29,25 @@ Each evidence record carries:
 - Ledger sequence pointer used for verification.
 
 ### Ledger
+
 All evidence events are appended to a tamper-evident ledger. Entries are chained by hash and signed with an Ed25519 key registered in the ledger header. The ledger root hash is exported with each bundle for downstream verification.
 
 ## Lifecycle Attach Points
 
 ### 1. Ingest Pipeline
+
 - The ingest service computes a `sha256` over canonicalized raw payloads.
 - `appendLedgerEntry` is invoked with stage `ingest`, storing the hash, collection metadata, and ingestion actor.
 - The claim skeleton is created with a placeholder evidence pointer referencing the ledger sequence.
 
 ### 2. Transform & Analytics
+
 - Each transformation step (feature extraction, model inference, analyst review) records a new ledger entry referencing the upstream evidence via `prevHash` and `claimId`.
 - Transformation metadata captures algorithm identifiers, model versions, and configuration digests.
 - Claims accumulate evidence nodes; `transformChain` is maintained so exports can show the path of derivations.
 
 ### 3. API Response / Export
+
 - When the API aggregates and returns an entity, the service materializes the claim with all ledger-backed evidence pointers.
 - The `buildEvidenceChain` helper assembles chronological evidence with actor, timestamp, and artifact URIs for the API response.
 - The export manifest is generated, hashed, and signed with the export-signing key. The manifest references the ledger root hash and every included ledger sequence, making tampering detectable.

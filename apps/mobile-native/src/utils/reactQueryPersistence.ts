@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { QueryClient } from '@tanstack/react-query';
-import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
-import { persistQueryClient } from '@tanstack/react-query-persist-client';
-import { performanceMonitor } from '../services/PerformanceMonitor';
+import {QueryClient} from '@tanstack/react-query';
+import {createAsyncStoragePersister} from '@tanstack/query-async-storage-persister';
+import {persistQueryClient} from '@tanstack/react-query-persist-client';
+import {performanceMonitor} from '../services/PerformanceMonitor';
 
 const CACHE_TIME = 1000 * 60 * 60 * 24 * 7; // 7 days
 const MAX_AGE = 1000 * 60 * 60 * 24; // 24 hours
@@ -27,7 +27,7 @@ export const createPersistedQueryClient = (): QueryClient => {
       mutations: {
         networkMode: 'offlineFirst',
         retry: 3,
-        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+        retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
       },
     },
   });
@@ -47,8 +47,8 @@ const setupPersistence = async (queryClient: QueryClient) => {
   const persister = createAsyncStoragePersister({
     storage: AsyncStorage,
     throttleTime: 1000, // Throttle writes to reduce I/O
-    serialize: (data) => JSON.stringify(data),
-    deserialize: (data) => JSON.parse(data),
+    serialize: data => JSON.stringify(data),
+    deserialize: data => JSON.parse(data),
   });
 
   await persistQueryClient({
@@ -66,7 +66,7 @@ const setupPersistence = async (queryClient: QueryClient) => {
     },
     dehydrateOptions: {
       // Only persist successful queries
-      shouldDehydrateQuery: (query) => {
+      shouldDehydrateQuery: query => {
         return query.state.status === 'success';
       },
     },
@@ -82,7 +82,7 @@ const setupPersistence = async (queryClient: QueryClient) => {
 export const clearPersistedQueries = async (): Promise<void> => {
   try {
     const keys = await AsyncStorage.getAllKeys();
-    const queryKeys = keys.filter((key) => key.startsWith('REACT_QUERY_OFFLINE_CACHE'));
+    const queryKeys = keys.filter(key => key.startsWith('REACT_QUERY_OFFLINE_CACHE'));
     await AsyncStorage.multiRemove(queryKeys);
     console.log('[ReactQuery] Cleared all persisted queries');
   } catch (error) {
@@ -96,7 +96,7 @@ export const clearPersistedQueries = async (): Promise<void> => {
 export const getPersistedCacheSize = async (): Promise<number> => {
   try {
     const keys = await AsyncStorage.getAllKeys();
-    const queryKeys = keys.filter((key) => key.startsWith('REACT_QUERY_OFFLINE_CACHE'));
+    const queryKeys = keys.filter(key => key.startsWith('REACT_QUERY_OFFLINE_CACHE'));
 
     let totalSize = 0;
     for (const key of queryKeys) {
@@ -119,7 +119,7 @@ export const getPersistedCacheSize = async (): Promise<number> => {
 export const pruneOldQueries = async (maxAgeMs: number = MAX_AGE): Promise<void> => {
   try {
     const keys = await AsyncStorage.getAllKeys();
-    const queryKeys = keys.filter((key) => key.startsWith('REACT_QUERY_OFFLINE_CACHE'));
+    const queryKeys = keys.filter(key => key.startsWith('REACT_QUERY_OFFLINE_CACHE'));
 
     const now = Date.now();
     const keysToRemove: string[] = [];
@@ -156,15 +156,15 @@ export const createOptimisticUpdate = <TData, TVariables>(
   return {
     onMutate: async (variables: TVariables) => {
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey });
+      await queryClient.cancelQueries({queryKey});
 
       // Snapshot previous value
       const previousData = queryClient.getQueryData<TData>(queryKey);
 
       // Optimistically update
-      queryClient.setQueryData<TData>(queryKey, (old) => updater(old, variables));
+      queryClient.setQueryData<TData>(queryKey, old => updater(old, variables));
 
-      return { previousData };
+      return {previousData};
     },
     onError: (_err: any, _variables: TVariables, context: any) => {
       // Rollback on error
@@ -174,7 +174,7 @@ export const createOptimisticUpdate = <TData, TVariables>(
     },
     onSettled: () => {
       // Refetch after mutation
-      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({queryKey});
     },
   };
 };

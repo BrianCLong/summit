@@ -11,9 +11,9 @@ import neo4j, {
   Result,
   Record as Neo4jRecord,
   Integer,
-} from 'neo4j-driver';
-import { Geometry, Position, Point as GeoJSONPoint } from 'geojson';
-import * as turf from '@turf/turf';
+} from "neo4j-driver";
+import { Geometry, Position, Point as GeoJSONPoint } from "geojson";
+import * as turf from "@turf/turf";
 import {
   GeoNode,
   GeoNodeType,
@@ -25,8 +25,8 @@ import {
   ChangeDetectionResult,
   ProvenanceRecord,
   BoundingBox,
-} from '../types/satellite.js';
-import { GeoPoint } from '../types/geospatial.js';
+} from "../types/satellite.js";
+import { GeoPoint } from "../types/geospatial.js";
 
 export interface Neo4jConfig {
   uri: string;
@@ -67,18 +67,14 @@ export class GeoRepository {
   private isConnected = false;
 
   constructor(config: Neo4jConfig) {
-    this.driver = neo4j.driver(
-      config.uri,
-      neo4j.auth.basic(config.user, config.password),
-      {
-        maxConnectionLifetime: 3 * 60 * 60 * 1000, // 3 hours
-        maxConnectionPoolSize: config.maxConnectionPoolSize ?? 50,
-        connectionAcquisitionTimeout: config.connectionAcquisitionTimeout ?? 60000,
-        disableLosslessIntegers: true,
-        encrypted: config.encrypted ? 'ENCRYPTION_ON' : 'ENCRYPTION_OFF',
-      }
-    );
-    this.database = config.database ?? 'neo4j';
+    this.driver = neo4j.driver(config.uri, neo4j.auth.basic(config.user, config.password), {
+      maxConnectionLifetime: 3 * 60 * 60 * 1000, // 3 hours
+      maxConnectionPoolSize: config.maxConnectionPoolSize ?? 50,
+      connectionAcquisitionTimeout: config.connectionAcquisitionTimeout ?? 60000,
+      disableLosslessIntegers: true,
+      encrypted: config.encrypted ? "ENCRYPTION_ON" : "ENCRYPTION_OFF",
+    });
+    this.database = config.database ?? "neo4j";
   }
 
   /**
@@ -101,17 +97,17 @@ export class GeoRepository {
     try {
       // Constraints for unique IDs
       const constraints = [
-        'CREATE CONSTRAINT geo_node_id IF NOT EXISTS FOR (n:GeoNode) REQUIRE n.nodeId IS UNIQUE',
-        'CREATE CONSTRAINT scene_id IF NOT EXISTS FOR (s:SatelliteScene) REQUIRE s.sceneId IS UNIQUE',
-        'CREATE CONSTRAINT change_id IF NOT EXISTS FOR (c:ChangeEvent) REQUIRE c.changeId IS UNIQUE',
-        'CREATE CONSTRAINT provenance_id IF NOT EXISTS FOR (p:Provenance) REQUIRE p.provenanceId IS UNIQUE',
+        "CREATE CONSTRAINT geo_node_id IF NOT EXISTS FOR (n:GeoNode) REQUIRE n.nodeId IS UNIQUE",
+        "CREATE CONSTRAINT scene_id IF NOT EXISTS FOR (s:SatelliteScene) REQUIRE s.sceneId IS UNIQUE",
+        "CREATE CONSTRAINT change_id IF NOT EXISTS FOR (c:ChangeEvent) REQUIRE c.changeId IS UNIQUE",
+        "CREATE CONSTRAINT provenance_id IF NOT EXISTS FOR (p:Provenance) REQUIRE p.provenanceId IS UNIQUE",
       ];
 
       for (const constraint of constraints) {
         try {
           await session.run(constraint);
         } catch (error: any) {
-          if (!error.message?.includes('already exists')) {
+          if (!error.message?.includes("already exists")) {
             console.warn(`Failed to create constraint: ${error.message}`);
           }
         }
@@ -120,21 +116,21 @@ export class GeoRepository {
       // Indexes for efficient querying
       const indexes = [
         // Spatial index using point type
-        'CREATE POINT INDEX geo_node_location IF NOT EXISTS FOR (n:GeoNode) ON (n.location)',
+        "CREATE POINT INDEX geo_node_location IF NOT EXISTS FOR (n:GeoNode) ON (n.location)",
         // Composite indexes for common queries
-        'CREATE INDEX geo_node_type_confidence IF NOT EXISTS FOR (n:GeoNode) ON (n.nodeType, n.confidence)',
-        'CREATE INDEX geo_node_observed IF NOT EXISTS FOR (n:GeoNode) ON (n.lastObserved)',
-        'CREATE INDEX scene_acquisition IF NOT EXISTS FOR (s:SatelliteScene) ON (s.acquisitionDate)',
-        'CREATE INDEX scene_platform IF NOT EXISTS FOR (s:SatelliteScene) ON (s.platform)',
-        'CREATE INDEX change_type IF NOT EXISTS FOR (c:ChangeEvent) ON (c.changeType)',
-        'CREATE INDEX change_confidence IF NOT EXISTS FOR (c:ChangeEvent) ON (c.confidence)',
+        "CREATE INDEX geo_node_type_confidence IF NOT EXISTS FOR (n:GeoNode) ON (n.nodeType, n.confidence)",
+        "CREATE INDEX geo_node_observed IF NOT EXISTS FOR (n:GeoNode) ON (n.lastObserved)",
+        "CREATE INDEX scene_acquisition IF NOT EXISTS FOR (s:SatelliteScene) ON (s.acquisitionDate)",
+        "CREATE INDEX scene_platform IF NOT EXISTS FOR (s:SatelliteScene) ON (s.platform)",
+        "CREATE INDEX change_type IF NOT EXISTS FOR (c:ChangeEvent) ON (c.changeType)",
+        "CREATE INDEX change_confidence IF NOT EXISTS FOR (c:ChangeEvent) ON (c.confidence)",
       ];
 
       for (const index of indexes) {
         try {
           await session.run(index);
         } catch (error: any) {
-          if (!error.message?.includes('already exists')) {
+          if (!error.message?.includes("already exists")) {
             console.warn(`Failed to create index: ${error.message}`);
           }
         }
@@ -168,7 +164,8 @@ export class GeoRepository {
       const centroid = turf.centroid(feature);
       const bbox = turf.bbox(feature);
 
-      const nodeId = feature.properties.entityId ||
+      const nodeId =
+        feature.properties.entityId ||
         `geo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
       const query = `
@@ -243,35 +240,35 @@ export class GeoRepository {
         properties: JSON.stringify(feature.properties),
         confidence: feature.properties.detectionConfidence ?? 1.0,
         timestamp: new Date().toISOString(),
-        classification: feature.properties.classification ?? 'unclassified',
-        sceneId: feature.properties.sceneId ?? '',
+        classification: feature.properties.classification ?? "unclassified",
+        sceneId: feature.properties.sceneId ?? "",
         provenanceId: provenance.id,
         provenanceSource: provenance.source,
         provenanceMethod: provenance.method,
         provenanceTimestamp: provenance.timestamp.toISOString(),
-        provenancePipeline: provenance.pipeline ?? '',
+        provenancePipeline: provenance.pipeline ?? "",
       });
 
       const record = result.records[0];
 
       return {
-        nodeId: record.get('nodeId'),
-        nodeType: record.get('nodeType'),
-        geometry: JSON.parse(record.get('geometry')),
-        centroid: [record.get('centroidLon'), record.get('centroidLat')],
+        nodeId: record.get("nodeId"),
+        nodeType: record.get("nodeType"),
+        geometry: JSON.parse(record.get("geometry")),
+        centroid: [record.get("centroidLon"), record.get("centroidLat")],
         bbox: {
-          minLon: record.get('bboxMinLon'),
-          minLat: record.get('bboxMinLat'),
-          maxLon: record.get('bboxMaxLon'),
-          maxLat: record.get('bboxMaxLat'),
+          minLon: record.get("bboxMinLon"),
+          minLat: record.get("bboxMinLat"),
+          maxLon: record.get("bboxMaxLon"),
+          maxLat: record.get("bboxMaxLat"),
         },
-        properties: JSON.parse(record.get('properties')),
-        sceneIds: record.get('sceneIds'),
-        confidence: record.get('confidence'),
-        firstObserved: new Date(record.get('firstObserved').toString()),
-        lastObserved: new Date(record.get('lastObserved').toString()),
-        observationCount: record.get('observationCount'),
-        classification: record.get('classification'),
+        properties: JSON.parse(record.get("properties")),
+        sceneIds: record.get("sceneIds"),
+        confidence: record.get("confidence"),
+        firstObserved: new Date(record.get("firstObserved").toString()),
+        lastObserved: new Date(record.get("lastObserved").toString()),
+        observationCount: record.get("observationCount"),
+        classification: record.get("classification"),
         provenance,
       };
     } finally {
@@ -370,7 +367,7 @@ export class GeoRepository {
         bboxMaxLat: scene.bbox.maxLat,
         ingestTimestamp: scene.ingestTimestamp.toISOString(),
         source: scene.source,
-        localPath: scene.localPath ?? '',
+        localPath: scene.localPath ?? "",
       });
     } finally {
       await session.close();
@@ -422,13 +419,13 @@ export class GeoRepository {
       const record = result.records[0];
 
       return {
-        relationshipId: record.get('relationshipId'),
-        relationshipType: record.get('relationshipType').toLowerCase() as GeoRelationshipType,
-        sourceNodeId: record.get('sourceNodeId'),
-        targetNodeId: record.get('targetNodeId'),
-        properties: JSON.parse(record.get('properties')),
-        confidence: record.get('confidence'),
-        observedAt: new Date(record.get('observedAt').toString()),
+        relationshipId: record.get("relationshipId"),
+        relationshipType: record.get("relationshipType").toLowerCase() as GeoRelationshipType,
+        sourceNodeId: record.get("sourceNodeId"),
+        targetNodeId: record.get("targetNodeId"),
+        properties: JSON.parse(record.get("properties")),
+        confidence: record.get("confidence"),
+        observedAt: new Date(record.get("observedAt").toString()),
       };
     } finally {
       await session.close();
@@ -472,13 +469,13 @@ export class GeoRepository {
       });
 
       return result.records.map((record) => ({
-        relationshipId: record.get('relationshipId'),
-        relationshipType: 'near' as GeoRelationshipType,
-        sourceNodeId: record.get('sourceNodeId'),
-        targetNodeId: record.get('targetNodeId'),
-        properties: { distance: record.get('distance') },
-        confidence: record.get('confidence'),
-        observedAt: new Date(record.get('observedAt').toString()),
+        relationshipId: record.get("relationshipId"),
+        relationshipType: "near" as GeoRelationshipType,
+        sourceNodeId: record.get("sourceNodeId"),
+        targetNodeId: record.get("targetNodeId"),
+        properties: { distance: record.get("distance") },
+        confidence: record.get("confidence"),
+        observedAt: new Date(record.get("observedAt").toString()),
       }));
     } finally {
       await session.close();
@@ -494,7 +491,8 @@ export class GeoRepository {
 
     try {
       // Create change detection run node
-      await tx.run(`
+      await tx.run(
+        `
         CREATE (cdr:ChangeDetectionRun {
           id: $id,
           beforeSceneId: $beforeSceneId,
@@ -505,22 +503,25 @@ export class GeoRepository {
           processingTimeMs: $processingTimeMs,
           changeCount: $changeCount
         })
-      `, {
-        id: result.id,
-        beforeSceneId: result.beforeSceneId,
-        afterSceneId: result.afterSceneId,
-        method: result.method,
-        detectionTimestamp: result.detectionTimestamp.toISOString(),
-        overallConfidence: result.overallConfidence,
-        processingTimeMs: result.processingTimeMs,
-        changeCount: result.changes.length,
-      });
+      `,
+        {
+          id: result.id,
+          beforeSceneId: result.beforeSceneId,
+          afterSceneId: result.afterSceneId,
+          method: result.method,
+          detectionTimestamp: result.detectionTimestamp.toISOString(),
+          overallConfidence: result.overallConfidence,
+          processingTimeMs: result.processingTimeMs,
+          changeCount: result.changes.length,
+        }
+      );
 
       // Create individual change nodes
       for (const change of result.changes) {
         const centroid = turf.centroid(change.geometry);
 
-        await tx.run(`
+        await tx.run(
+          `
           MATCH (cdr:ChangeDetectionRun {id: $runId})
           CREATE (c:ChangeEvent {
             changeId: $changeId,
@@ -533,44 +534,52 @@ export class GeoRepository {
             description: $description
           })
           CREATE (cdr)-[:DETECTED]->(c)
-        `, {
-          runId: result.id,
-          changeId: change.id,
-          changeType: change.type,
-          lon: centroid.geometry.coordinates[0],
-          lat: centroid.geometry.coordinates[1],
-          geometry: JSON.stringify(change.geometry),
-          areaSqMeters: change.areaSqMeters,
-          confidence: change.confidence,
-          magnitudeScore: change.magnitudeScore,
-          description: change.description ?? '',
-        });
+        `,
+          {
+            runId: result.id,
+            changeId: change.id,
+            changeType: change.type,
+            lon: centroid.geometry.coordinates[0],
+            lat: centroid.geometry.coordinates[1],
+            geometry: JSON.stringify(change.geometry),
+            areaSqMeters: change.areaSqMeters,
+            confidence: change.confidence,
+            magnitudeScore: change.magnitudeScore,
+            description: change.description ?? "",
+          }
+        );
 
         // Link to existing entity if specified
         if (change.linkedEntityId) {
-          await tx.run(`
+          await tx.run(
+            `
             MATCH (c:ChangeEvent {changeId: $changeId})
             MATCH (n:GeoNode {nodeId: $entityId})
             CREATE (c)-[:AFFECTS]->(n)
-          `, {
-            changeId: change.id,
-            entityId: change.linkedEntityId,
-          });
+          `,
+            {
+              changeId: change.id,
+              entityId: change.linkedEntityId,
+            }
+          );
         }
       }
 
       // Link to scenes
-      await tx.run(`
+      await tx.run(
+        `
         MATCH (cdr:ChangeDetectionRun {id: $runId})
         MATCH (before:SatelliteScene {sceneId: $beforeSceneId})
         MATCH (after:SatelliteScene {sceneId: $afterSceneId})
         CREATE (cdr)-[:USES_BEFORE]->(before)
         CREATE (cdr)-[:USES_AFTER]->(after)
-      `, {
-        runId: result.id,
-        beforeSceneId: result.beforeSceneId,
-        afterSceneId: result.afterSceneId,
-      });
+      `,
+        {
+          runId: result.id,
+          beforeSceneId: result.beforeSceneId,
+          afterSceneId: result.afterSceneId,
+        }
+      );
 
       await tx.commit();
     } catch (error) {
@@ -632,8 +641,8 @@ export class GeoRepository {
           maxLat: bbox.maxLat,
           nodeTypes: options.nodeTypes ?? [],
           minConfidence: options.minConfidence ?? 0,
-          timeStart: options.timeRange?.start.toISOString() ?? '1970-01-01T00:00:00Z',
-          timeEnd: options.timeRange?.end.toISOString() ?? '2100-01-01T00:00:00Z',
+          timeStart: options.timeRange?.start.toISOString() ?? "1970-01-01T00:00:00Z",
+          timeEnd: options.timeRange?.end.toISOString() ?? "2100-01-01T00:00:00Z",
           offset: options.offset ?? 0,
           limit: options.limit ?? 100,
         }),
@@ -644,13 +653,13 @@ export class GeoRepository {
           maxLat: bbox.maxLat,
           nodeTypes: options.nodeTypes ?? [],
           minConfidence: options.minConfidence ?? 0,
-          timeStart: options.timeRange?.start.toISOString() ?? '1970-01-01T00:00:00Z',
-          timeEnd: options.timeRange?.end.toISOString() ?? '2100-01-01T00:00:00Z',
+          timeStart: options.timeRange?.start.toISOString() ?? "1970-01-01T00:00:00Z",
+          timeEnd: options.timeRange?.end.toISOString() ?? "2100-01-01T00:00:00Z",
         }),
       ]);
 
-      const items = dataResult.records.map((record) => this.recordToGeoNode(record.get('n')));
-      const totalCount = countResult.records[0].get('total').toNumber();
+      const items = dataResult.records.map((record) => this.recordToGeoNode(record.get("n")));
+      const totalCount = countResult.records[0].get("total").toNumber();
 
       return {
         items,
@@ -707,7 +716,7 @@ export class GeoRepository {
         limit: options.limit ?? 100,
       });
 
-      const items = result.records.map((record) => this.recordToGeoNode(record.get('n')));
+      const items = result.records.map((record) => this.recordToGeoNode(record.get("n")));
 
       return {
         items,
@@ -745,11 +754,9 @@ export class GeoRepository {
 
       const centerLon = (bbox.minLon + bbox.maxLon) / 2;
       const centerLat = (bbox.minLat + bbox.maxLat) / 2;
-      const maxDistance = turf.distance(
-        [bbox.minLon, bbox.minLat],
-        [bbox.maxLon, bbox.maxLat],
-        { units: 'meters' }
-      ) / 2;
+      const maxDistance =
+        turf.distance([bbox.minLon, bbox.minLat], [bbox.maxLon, bbox.maxLat], { units: "meters" }) /
+        2;
 
       const query = `
         MATCH (cdr:ChangeDetectionRun)-[:DETECTED]->(c:ChangeEvent)
@@ -763,13 +770,13 @@ export class GeoRepository {
         centerLon,
         centerLat,
         maxDistance,
-        timeStart: timeRange?.start.toISOString() ?? '1970-01-01T00:00:00Z',
-        timeEnd: timeRange?.end.toISOString() ?? '2100-01-01T00:00:00Z',
+        timeStart: timeRange?.start.toISOString() ?? "1970-01-01T00:00:00Z",
+        timeEnd: timeRange?.end.toISOString() ?? "2100-01-01T00:00:00Z",
         changeTypes: changeTypes ?? [],
       });
 
       return result.records.map((record) => {
-        const c = record.get('c').properties;
+        const c = record.get("c").properties;
         return {
           id: c.changeId,
           type: c.changeType,
@@ -810,21 +817,25 @@ export class GeoRepository {
       }
 
       const record = result.records[0];
-      const node = this.recordToGeoNode(record.get('n'));
+      const node = this.recordToGeoNode(record.get("n"));
 
-      const relationships: GeoRelationship[] = record.get('relationships')
+      const relationships: GeoRelationship[] = record
+        .get("relationships")
         .filter((r: any) => r !== null)
         .map((r: any) => ({
-          relationshipId: r.properties.relationshipId ?? '',
+          relationshipId: r.properties.relationshipId ?? "",
           relationshipType: r.type.toLowerCase() as GeoRelationshipType,
           sourceNodeId: r.startNodeElementId,
           targetNodeId: r.endNodeElementId,
           properties: r.properties,
           confidence: r.properties.confidence ?? 1.0,
-          observedAt: r.properties.observedAt ? new Date(r.properties.observedAt.toString()) : new Date(),
+          observedAt: r.properties.observedAt
+            ? new Date(r.properties.observedAt.toString())
+            : new Date(),
         }));
 
-      const relatedNodes = record.get('relatedNodes')
+      const relatedNodes = record
+        .get("relatedNodes")
         .filter((n: any) => n !== null)
         .map((n: any) => this.recordToGeoNode(n));
 
@@ -859,9 +870,9 @@ export class GeoRepository {
       observationCount: props.observationCount,
       classification: props.classification,
       provenance: {
-        id: '',
-        source: '',
-        method: '',
+        id: "",
+        source: "",
+        method: "",
         timestamp: new Date(),
         inputIds: [],
       },
@@ -876,7 +887,7 @@ export class GeoRepository {
 
     try {
       const session = this.getSession();
-      await session.run('RETURN 1');
+      await session.run("RETURN 1");
       await session.close();
 
       return {

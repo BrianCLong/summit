@@ -1,10 +1,10 @@
-import { ExtensionPoint } from '../ExtensionPoint.js';
+import { ExtensionPoint } from "../ExtensionPoint.js";
 
 /**
  * Custom analyzer extension point
  */
 export interface AnalyzerExtension extends ExtensionPoint<AnalyzerInput, AnalyzerResult> {
-  type: 'analyzer';
+  type: "analyzer";
   name: string;
   description: string;
   supportedDataTypes: string[];
@@ -48,7 +48,7 @@ export interface Relationship {
  * Base class for analyzer extensions
  */
 export abstract class BaseAnalyzerExtension implements AnalyzerExtension {
-  readonly type = 'analyzer' as const;
+  readonly type = "analyzer" as const;
 
   constructor(
     public readonly id: string,

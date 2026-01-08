@@ -4,8 +4,8 @@
  * @module @intelgraph/strands-agents/tools/analysis-tools
  */
 
-import { z } from 'zod';
-import type { Driver, Session } from 'neo4j-driver';
+import { z } from "zod";
+import type { Driver, Session } from "neo4j-driver";
 
 // ============================================================================
 // Tool Input Schemas
@@ -13,72 +13,82 @@ import type { Driver, Session } from 'neo4j-driver';
 
 export const DetectPatternsInputSchema = z.object({
   investigationId: z.string().uuid().optional(),
-  patternTypes: z.array(z.enum([
-    'star',           // Hub with many connections
-    'chain',          // Linear sequence
-    'cycle',          // Circular relationships
-    'clique',         // Fully connected subgraph
-    'bridge',         // Node connecting communities
-    'isolate',        // Disconnected entity
-  ])).default(['star', 'chain', 'bridge']),
+  patternTypes: z
+    .array(
+      z.enum([
+        "star", // Hub with many connections
+        "chain", // Linear sequence
+        "cycle", // Circular relationships
+        "clique", // Fully connected subgraph
+        "bridge", // Node connecting communities
+        "isolate", // Disconnected entity
+      ])
+    )
+    .default(["star", "chain", "bridge"]),
   minSize: z.number().min(2).max(20).default(3),
   limit: z.number().min(1).max(50).default(10),
 });
 
 export const CentralityAnalysisInputSchema = z.object({
-  scope: z.enum(['global', 'investigation', 'subgraph']).default('global'),
+  scope: z.enum(["global", "investigation", "subgraph"]).default("global"),
   scopeId: z.string().uuid().optional(),
-  algorithm: z.enum([
-    'degree',         // Count of connections
-    'betweenness',    // Bridge importance
-    'pagerank',       // Influence propagation
-    'closeness',      // Average distance to others
-    'eigenvector',    // Connection to important nodes
-  ]).default('pagerank'),
+  algorithm: z
+    .enum([
+      "degree", // Count of connections
+      "betweenness", // Bridge importance
+      "pagerank", // Influence propagation
+      "closeness", // Average distance to others
+      "eigenvector", // Connection to important nodes
+    ])
+    .default("pagerank"),
   limit: z.number().min(1).max(100).default(20),
 });
 
 export const CommunityDetectionInputSchema = z.object({
   investigationId: z.string().uuid().optional(),
-  algorithm: z.enum(['louvain', 'labelPropagation', 'modularity']).default('louvain'),
+  algorithm: z.enum(["louvain", "labelPropagation", "modularity"]).default("louvain"),
   minCommunitySize: z.number().min(2).default(3),
   includeMembers: z.boolean().default(true),
 });
 
 export const AnomalyDetectionInputSchema = z.object({
   investigationId: z.string().uuid().optional(),
-  anomalyTypes: z.array(z.enum([
-    'degree_outlier',        // Unusually high/low connections
-    'temporal_outlier',      // Unusual timing patterns
-    'attribute_outlier',     // Unusual property values
-    'structural_hole',       // Missing expected connections
-    'sudden_appearance',     // Entities appearing without history
-  ])).default(['degree_outlier', 'structural_hole']),
+  anomalyTypes: z
+    .array(
+      z.enum([
+        "degree_outlier", // Unusually high/low connections
+        "temporal_outlier", // Unusual timing patterns
+        "attribute_outlier", // Unusual property values
+        "structural_hole", // Missing expected connections
+        "sudden_appearance", // Entities appearing without history
+      ])
+    )
+    .default(["degree_outlier", "structural_hole"]),
   sensitivityThreshold: z.number().min(0).max(1).default(0.8),
 });
 
 export const GenerateInsightsInputSchema = z.object({
   investigationId: z.string().uuid(),
-  insightTypes: z.array(z.enum([
-    'key_entities',          // Most important entities
-    'hidden_connections',    // Non-obvious relationships
-    'risk_indicators',       // Potential threats
-    'knowledge_gaps',        // Missing information
-    'temporal_patterns',     // Time-based patterns
-    'network_structure',     // Overall topology insights
-  ])).default(['key_entities', 'hidden_connections', 'knowledge_gaps']),
+  insightTypes: z
+    .array(
+      z.enum([
+        "key_entities", // Most important entities
+        "hidden_connections", // Non-obvious relationships
+        "risk_indicators", // Potential threats
+        "knowledge_gaps", // Missing information
+        "temporal_patterns", // Time-based patterns
+        "network_structure", // Overall topology insights
+      ])
+    )
+    .default(["key_entities", "hidden_connections", "knowledge_gaps"]),
   maxInsights: z.number().min(1).max(20).default(10),
 });
 
 export const CompareEntitiesInputSchema = z.object({
   entityIds: z.array(z.string().uuid()).min(2).max(10),
-  comparisonAspects: z.array(z.enum([
-    'properties',
-    'connections',
-    'neighborhood',
-    'centrality',
-    'temporal',
-  ])).default(['properties', 'connections']),
+  comparisonAspects: z
+    .array(z.enum(["properties", "connections", "neighborhood", "centrality", "temporal"]))
+    .default(["properties", "connections"]),
 });
 
 // ============================================================================
@@ -95,7 +105,7 @@ export interface AnalysisToolsConfig {
  * Creates analysis and reasoning tools for Strands Agents
  */
 export function createAnalysisTools(config: AnalysisToolsConfig) {
-  const { driver, database = 'neo4j', auditLog } = config;
+  const { driver, database = "neo4j", auditLog } = config;
 
   const logAudit = (action: string, details: Record<string, unknown>) => {
     if (auditLog) {
@@ -107,7 +117,7 @@ export function createAnalysisTools(config: AnalysisToolsConfig) {
   // Detect Patterns Tool
   // ---------------------------------------------------------------------------
   const detectPatterns = {
-    name: 'detect_patterns',
+    name: "detect_patterns",
     description: `Detect structural patterns in the knowledge graph.
 Finds stars (hubs), chains, cycles, cliques, bridges, and isolates.
 Useful for identifying organizational structures and communication patterns.`,
@@ -118,7 +128,7 @@ Useful for identifying organizational structures and communication patterns.`,
 
       let session: Session | null = null;
       try {
-        session = driver.session({ database, defaultAccessMode: 'READ' });
+        session = driver.session({ database, defaultAccessMode: "READ" });
 
         const patterns: Array<{
           type: string;
@@ -132,7 +142,7 @@ Useful for identifying organizational structures and communication patterns.`,
           : `MATCH (e:Entity)`;
 
         // Star pattern (hub with many connections)
-        if (patternTypes.includes('star')) {
+        if (patternTypes.includes("star")) {
           const starQuery = `
             ${scopeClause}
             WITH e
@@ -146,16 +156,16 @@ Useful for identifying organizational structures and communication patterns.`,
           const starResult = await session.run(starQuery, { investigationId, minSize, limit });
           starResult.records.forEach((r) => {
             patterns.push({
-              type: 'star',
-              entities: [r.get('hub')],
-              score: r.get('degree').toNumber() / 100,
-              description: `Hub entity with ${r.get('degree')} connections`,
+              type: "star",
+              entities: [r.get("hub")],
+              score: r.get("degree").toNumber() / 100,
+              description: `Hub entity with ${r.get("degree")} connections`,
             });
           });
         }
 
         // Chain pattern (linear path)
-        if (patternTypes.includes('chain')) {
+        if (patternTypes.includes("chain")) {
           const chainQuery = `
             ${scopeClause}
             WITH collect(e) as entities
@@ -173,10 +183,10 @@ Useful for identifying organizational structures and communication patterns.`,
             const chainResult = await session.run(chainQuery, { investigationId, minSize, limit });
             chainResult.records.forEach((r) => {
               patterns.push({
-                type: 'chain',
-                entities: r.get('chain'),
-                score: r.get('pathLength').toNumber() / 10,
-                description: `Linear chain of ${r.get('pathLength')} entities`,
+                type: "chain",
+                entities: r.get("chain"),
+                score: r.get("pathLength").toNumber() / 10,
+                description: `Linear chain of ${r.get("pathLength")} entities`,
               });
             });
           } catch {
@@ -185,7 +195,7 @@ Useful for identifying organizational structures and communication patterns.`,
         }
 
         // Bridge pattern (nodes connecting different communities)
-        if (patternTypes.includes('bridge')) {
+        if (patternTypes.includes("bridge")) {
           const bridgeQuery = `
             ${scopeClause}
             WITH e
@@ -200,16 +210,16 @@ Useful for identifying organizational structures and communication patterns.`,
           const bridgeResult = await session.run(bridgeQuery, { investigationId, minSize, limit });
           bridgeResult.records.forEach((r) => {
             patterns.push({
-              type: 'bridge',
-              entities: [r.get('bridge')],
-              score: Math.min(r.get('bridgeScore').toNumber() / 50, 1),
-              description: `Bridge entity connecting ${r.get('bridgeScore')} disconnected pairs`,
+              type: "bridge",
+              entities: [r.get("bridge")],
+              score: Math.min(r.get("bridgeScore").toNumber() / 50, 1),
+              description: `Bridge entity connecting ${r.get("bridgeScore")} disconnected pairs`,
             });
           });
         }
 
         const executionTimeMs = Date.now() - startTime;
-        logAudit('patterns_detected', { patternTypes, count: patterns.length });
+        logAudit("patterns_detected", { patternTypes, count: patterns.length });
 
         return JSON.stringify({
           success: true,
@@ -223,7 +233,7 @@ Useful for identifying organizational structures and communication patterns.`,
           },
         });
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         return JSON.stringify({
           success: false,
           error: `Pattern detection failed: ${errorMessage}`,
@@ -240,7 +250,7 @@ Useful for identifying organizational structures and communication patterns.`,
   // Centrality Analysis Tool
   // ---------------------------------------------------------------------------
   const analyzeCentrality = {
-    name: 'analyze_centrality',
+    name: "analyze_centrality",
     description: `Identify the most important or influential entities using centrality algorithms.
 Supports degree (connections), betweenness (bridges), PageRank (influence),
 closeness (accessibility), and eigenvector (connection quality) centrality.`,
@@ -251,20 +261,21 @@ closeness (accessibility), and eigenvector (connection quality) centrality.`,
 
       let session: Session | null = null;
       try {
-        session = driver.session({ database, defaultAccessMode: 'READ' });
+        session = driver.session({ database, defaultAccessMode: "READ" });
 
         let query: string;
         const params: Record<string, unknown> = { limit };
 
-        const scopeMatch = scope === 'investigation' && scopeId
-          ? `MATCH (i:Investigation {id: $scopeId})-[:CONTAINS]->(e:Entity)
+        const scopeMatch =
+          scope === "investigation" && scopeId
+            ? `MATCH (i:Investigation {id: $scopeId})-[:CONTAINS]->(e:Entity)
              WITH collect(e) as nodes`
-          : 'MATCH (e:Entity) WITH collect(e) as nodes';
+            : "MATCH (e:Entity) WITH collect(e) as nodes";
 
         params.scopeId = scopeId;
 
         switch (algorithm) {
-          case 'degree':
+          case "degree":
             query = `
               ${scopeMatch}
               UNWIND nodes as e
@@ -277,7 +288,7 @@ closeness (accessibility), and eigenvector (connection quality) centrality.`,
             `;
             break;
 
-          case 'betweenness':
+          case "betweenness":
             query = `
               ${scopeMatch}
               CALL gds.betweenness.stream({
@@ -292,7 +303,7 @@ closeness (accessibility), and eigenvector (connection quality) centrality.`,
             `;
             break;
 
-          case 'pagerank':
+          case "pagerank":
             query = `
               ${scopeMatch}
               CALL gds.pageRank.stream({
@@ -307,7 +318,7 @@ closeness (accessibility), and eigenvector (connection quality) centrality.`,
             `;
             break;
 
-          case 'closeness':
+          case "closeness":
             query = `
               ${scopeMatch}
               CALL gds.closeness.stream({
@@ -340,10 +351,10 @@ closeness (accessibility), and eigenvector (connection quality) centrality.`,
         // Fallback to simple degree if GDS not available
         try {
           const result = await session.run(query, params);
-          const entities = result.records.map((r) => r.get('entity'));
+          const entities = result.records.map((r) => r.get("entity"));
           const executionTimeMs = Date.now() - startTime;
 
-          logAudit('centrality_analyzed', { algorithm, count: entities.length });
+          logAudit("centrality_analyzed", { algorithm, count: entities.length });
 
           return JSON.stringify({
             success: true,
@@ -369,20 +380,20 @@ closeness (accessibility), and eigenvector (connection quality) centrality.`,
             LIMIT $limit
           `;
           const result = await session.run(fallbackQuery, params);
-          const entities = result.records.map((r) => r.get('entity'));
+          const entities = result.records.map((r) => r.get("entity"));
 
           return JSON.stringify({
             success: true,
             data: {
-              algorithm: 'degree',
-              note: 'Fallback to degree centrality (GDS not available)',
+              algorithm: "degree",
+              note: "Fallback to degree centrality (GDS not available)",
               entities,
               metadata: { executionTimeMs: Date.now() - startTime },
             },
           });
         }
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         return JSON.stringify({
           success: false,
           error: `Centrality analysis failed: ${errorMessage}`,
@@ -399,7 +410,7 @@ closeness (accessibility), and eigenvector (connection quality) centrality.`,
   // Anomaly Detection Tool
   // ---------------------------------------------------------------------------
   const detectAnomalies = {
-    name: 'detect_anomalies',
+    name: "detect_anomalies",
     description: `Detect anomalous entities or patterns in the graph.
 Identifies degree outliers, temporal anomalies, structural holes, and sudden appearances.
 Critical for threat detection and data quality assessment.`,
@@ -410,7 +421,7 @@ Critical for threat detection and data quality assessment.`,
 
       let session: Session | null = null;
       try {
-        session = driver.session({ database, defaultAccessMode: 'READ' });
+        session = driver.session({ database, defaultAccessMode: "READ" });
 
         const anomalies: Array<{
           type: string;
@@ -424,7 +435,7 @@ Critical for threat detection and data quality assessment.`,
           : `MATCH (e:Entity)`;
 
         // Degree outliers
-        if (anomalyTypes.includes('degree_outlier')) {
+        if (anomalyTypes.includes("degree_outlier")) {
           const degreeQuery = `
             ${scopeClause}
             WITH e
@@ -444,10 +455,10 @@ Critical for threat detection and data quality assessment.`,
             });
             result.records.forEach((r) => {
               anomalies.push({
-                type: 'degree_outlier',
-                entity: r.get('entity'),
+                type: "degree_outlier",
+                entity: r.get("entity"),
                 score: 0.8,
-                description: `Unusually ${r.get('outlierType')} number of connections (${r.get('degree')})`,
+                description: `Unusually ${r.get("outlierType")} number of connections (${r.get("degree")})`,
               });
             });
           } catch {
@@ -456,7 +467,7 @@ Critical for threat detection and data quality assessment.`,
         }
 
         // Structural holes (missing expected connections)
-        if (anomalyTypes.includes('structural_hole')) {
+        if (anomalyTypes.includes("structural_hole")) {
           const holeQuery = `
             ${scopeClause}
             WITH e
@@ -474,10 +485,10 @@ Critical for threat detection and data quality assessment.`,
             const result = await session.run(holeQuery, { investigationId });
             result.records.forEach((r) => {
               anomalies.push({
-                type: 'structural_hole',
-                entity: r.get('entity'),
+                type: "structural_hole",
+                entity: r.get("entity"),
                 score: 0.7,
-                description: `${r.get('missingLinks')} expected connections missing between neighbors`,
+                description: `${r.get("missingLinks")} expected connections missing between neighbors`,
               });
             });
           } catch {
@@ -486,7 +497,7 @@ Critical for threat detection and data quality assessment.`,
         }
 
         // Sudden appearance (entities with recent creation but no history)
-        if (anomalyTypes.includes('sudden_appearance')) {
+        if (anomalyTypes.includes("sudden_appearance")) {
           const appearanceQuery = `
             ${scopeClause}
             WHERE e.createdAt IS NOT NULL
@@ -503,10 +514,10 @@ Critical for threat detection and data quality assessment.`,
             const result = await session.run(appearanceQuery, { investigationId });
             result.records.forEach((r) => {
               anomalies.push({
-                type: 'sudden_appearance',
-                entity: r.get('entity'),
+                type: "sudden_appearance",
+                entity: r.get("entity"),
                 score: 0.75,
-                description: `Recent entity with ${r.get('connections')} connections (potential fabrication)`,
+                description: `Recent entity with ${r.get("connections")} connections (potential fabrication)`,
               });
             });
           } catch {
@@ -515,7 +526,7 @@ Critical for threat detection and data quality assessment.`,
         }
 
         const executionTimeMs = Date.now() - startTime;
-        logAudit('anomalies_detected', { anomalyTypes, count: anomalies.length });
+        logAudit("anomalies_detected", { anomalyTypes, count: anomalies.length });
 
         return JSON.stringify({
           success: true,
@@ -530,7 +541,7 @@ Critical for threat detection and data quality assessment.`,
           },
         });
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         return JSON.stringify({
           success: false,
           error: `Anomaly detection failed: ${errorMessage}`,
@@ -547,7 +558,7 @@ Critical for threat detection and data quality assessment.`,
   // Compare Entities Tool
   // ---------------------------------------------------------------------------
   const compareEntities = {
-    name: 'compare_entities',
+    name: "compare_entities",
     description: `Compare multiple entities across various aspects.
 Useful for identifying similarities, differences, and relationships.
 Supports property, connection, neighborhood, and centrality comparison.`,
@@ -558,7 +569,7 @@ Supports property, connection, neighborhood, and centrality comparison.`,
 
       let session: Session | null = null;
       try {
-        session = driver.session({ database, defaultAccessMode: 'READ' });
+        session = driver.session({ database, defaultAccessMode: "READ" });
 
         const comparison: Record<string, Record<string, unknown>> = {};
 
@@ -571,7 +582,7 @@ Supports property, connection, neighborhood, and centrality comparison.`,
         const basicResult = await session.run(basicQuery, { entityIds });
 
         basicResult.records.forEach((r) => {
-          const entity = r.get('entity');
+          const entity = r.get("entity");
           comparison[entity.id] = {
             id: entity.id,
             type: entity.type,
@@ -581,7 +592,7 @@ Supports property, connection, neighborhood, and centrality comparison.`,
         });
 
         // Connections comparison
-        if (comparisonAspects.includes('connections')) {
+        if (comparisonAspects.includes("connections")) {
           const connQuery = `
             UNWIND $entityIds as id
             MATCH (e:Entity {id: id})-[r]-(neighbor:Entity)
@@ -590,15 +601,15 @@ Supports property, connection, neighborhood, and centrality comparison.`,
           `;
           const connResult = await session.run(connQuery, { entityIds });
           connResult.records.forEach((r) => {
-            const entityId = r.get('entityId');
+            const entityId = r.get("entityId");
             if (comparison[entityId]) {
-              comparison[entityId].connections = r.get('connections');
+              comparison[entityId].connections = r.get("connections");
             }
           });
         }
 
         // Common neighbors
-        if (comparisonAspects.includes('neighborhood') && entityIds.length === 2) {
+        if (comparisonAspects.includes("neighborhood") && entityIds.length === 2) {
           const neighborQuery = `
             MATCH (e1:Entity {id: $id1})-[]-(common)-[]-(e2:Entity {id: $id2})
             WHERE common:Entity
@@ -608,7 +619,7 @@ Supports property, connection, neighborhood, and centrality comparison.`,
             id1: entityIds[0],
             id2: entityIds[1],
           });
-          const commonNeighbors = neighborResult.records[0]?.get('commonNeighbors') || [];
+          const commonNeighbors = neighborResult.records[0]?.get("commonNeighbors") || [];
           entityIds.forEach((id) => {
             if (comparison[id]) {
               comparison[id].commonNeighbors = commonNeighbors;
@@ -627,7 +638,7 @@ Supports property, connection, neighborhood, and centrality comparison.`,
           },
         });
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         return JSON.stringify({
           success: false,
           error: `Entity comparison failed: ${errorMessage}`,

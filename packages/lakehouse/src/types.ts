@@ -3,43 +3,43 @@
  * Types for lakehouse architecture with ACID transactions
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // Table Format Types
 export enum TableFormat {
-  DELTA_LAKE = 'delta',
-  ICEBERG = 'iceberg',
-  HUDI = 'hudi',
-  PARQUET = 'parquet'
+  DELTA_LAKE = "delta",
+  ICEBERG = "iceberg",
+  HUDI = "hudi",
+  PARQUET = "parquet",
 }
 
 export enum CompressionCodec {
-  NONE = 'none',
-  SNAPPY = 'snappy',
-  GZIP = 'gzip',
-  LZ4 = 'lz4',
-  ZSTD = 'zstd'
+  NONE = "none",
+  SNAPPY = "snappy",
+  GZIP = "gzip",
+  LZ4 = "lz4",
+  ZSTD = "zstd",
 }
 
 // Schema Types
 export const ColumnSchema = z.object({
   name: z.string(),
   type: z.enum([
-    'string',
-    'int',
-    'bigint',
-    'float',
-    'double',
-    'boolean',
-    'timestamp',
-    'date',
-    'binary',
-    'array',
-    'map',
-    'struct'
+    "string",
+    "int",
+    "bigint",
+    "float",
+    "double",
+    "boolean",
+    "timestamp",
+    "date",
+    "binary",
+    "array",
+    "map",
+    "struct",
   ]),
   nullable: z.boolean().default(true),
-  metadata: z.record(z.string(), z.any()).optional()
+  metadata: z.record(z.string(), z.any()).optional(),
 });
 
 export type Column = z.infer<typeof ColumnSchema>;
@@ -47,7 +47,7 @@ export type Column = z.infer<typeof ColumnSchema>;
 export const TableSchema = z.object({
   columns: z.array(ColumnSchema),
   partitionKeys: z.array(z.string()).optional(),
-  sortKeys: z.array(z.string()).optional()
+  sortKeys: z.array(z.string()).optional(),
 });
 
 export type TableSchemaType = z.infer<typeof TableSchema>;
@@ -59,7 +59,7 @@ export const TableConfigSchema = z.object({
   schema: TableSchema,
   location: z.string(),
   compression: z.nativeEnum(CompressionCodec).default(CompressionCodec.SNAPPY),
-  properties: z.record(z.string(), z.any()).optional()
+  properties: z.record(z.string(), z.any()).optional(),
 });
 
 export type TableConfig = z.infer<typeof TableConfigSchema>;
@@ -68,10 +68,10 @@ export type TableConfig = z.infer<typeof TableConfigSchema>;
 export interface Transaction {
   id: string;
   tableId: string;
-  operation: 'insert' | 'update' | 'delete' | 'merge';
+  operation: "insert" | "update" | "delete" | "merge";
   timestamp: Date;
   version: number;
-  status: 'pending' | 'committed' | 'aborted';
+  status: "pending" | "committed" | "aborted";
   metadata: Record<string, any>;
 }
 
@@ -98,13 +98,13 @@ export interface TimeTravel {
 
 // Partitioning
 export enum PartitionTransform {
-  IDENTITY = 'identity',
-  YEAR = 'year',
-  MONTH = 'month',
-  DAY = 'day',
-  HOUR = 'hour',
-  BUCKET = 'bucket',
-  TRUNCATE = 'truncate'
+  IDENTITY = "identity",
+  YEAR = "year",
+  MONTH = "month",
+  DAY = "day",
+  HOUR = "hour",
+  BUCKET = "bucket",
+  TRUNCATE = "truncate",
 }
 
 export interface PartitionSpec {
@@ -117,7 +117,7 @@ export interface PartitionSpec {
 // File Management
 export interface DataFile {
   path: string;
-  format: 'parquet' | 'orc' | 'avro';
+  format: "parquet" | "orc" | "avro";
   partition: Record<string, any>;
   recordCount: number;
   fileSizeBytes: number;
@@ -185,13 +185,13 @@ export interface QueryPlan {
 
 export interface Filter {
   column: string;
-  operator: 'eq' | 'ne' | 'lt' | 'lte' | 'gt' | 'gte' | 'in' | 'like';
+  operator: "eq" | "ne" | "lt" | "lte" | "gt" | "gte" | "in" | "like";
   value: any;
 }
 
 // Change Data Capture (CDC)
 export interface CDCRecord {
-  operation: 'insert' | 'update' | 'delete';
+  operation: "insert" | "update" | "delete";
   key: Record<string, any>;
   before?: Record<string, any>;
   after?: Record<string, any>;

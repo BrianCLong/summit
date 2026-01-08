@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 export const EXPAND_NEIGHBORS = gql`
   mutation ExpandNeighbors($entityId: ID!, $limit: Int) {

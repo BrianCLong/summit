@@ -1,7 +1,7 @@
 name: Policy Tests
 on:
   pull_request:
-    paths: [ 'policies/rego/**' ]
+    paths: ["policies/rego/**"]
 
 jobs:
   conftest:

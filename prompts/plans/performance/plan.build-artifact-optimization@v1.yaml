@@ -1,7 +1,7 @@
 meta:
   id: plan.build-artifact-optimization@v1
-  owner: 'platform-engineering'
-  purpose: 'Reduce artifact size and build times for faster CI/CD'
+  owner: "platform-engineering"
+  purpose: "Reduce artifact size and build times for faster CI/CD"
   tags:
     - build
     - ci-cd
@@ -9,13 +9,13 @@ meta:
     - optimization
     - reproducibility
   guardrails:
-    - 'Optimizations must not break functionality'
-    - 'Reproducible builds must be maintained'
-    - 'Security scanning must still complete'
-    - 'Build cache invalidation must be predictable'
+    - "Optimizations must not break functionality"
+    - "Reproducible builds must be maintained"
+    - "Security scanning must still complete"
+    - "Build cache invalidation must be predictable"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -159,15 +159,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'docker-optimization'
+  - name: "docker-optimization"
     inputs:
-      current_artifacts: 'api-server (Docker), web-client (static), worker (Docker)'
-      build_times: 'Full CI: 15 minutes, Docker builds: 5 minutes each'
-      artifact_sizes: 'api-server: 500MB, web-client: 5MB, worker: 300MB'
-      ci_platform: 'GitHub Actions with self-hosted runners'
-      target_improvements: '50% size reduction, 60% build time reduction'
+      current_artifacts: "api-server (Docker), web-client (static), worker (Docker)"
+      build_times: "Full CI: 15 minutes, Docker builds: 5 minutes each"
+      artifact_sizes: "api-server: 500MB, web-client: 5MB, worker: 300MB"
+      ci_platform: "GitHub Actions with self-hosted runners"
+      target_improvements: "50% size reduction, 60% build time reduction"
     expected_contains:
-      - 'multi-stage'
-      - 'Trimmed Artifact'
-      - 'Reproducibility'
-      - 'layer caching'
+      - "multi-stage"
+      - "Trimmed Artifact"
+      - "Reproducibility"
+      - "layer caching"

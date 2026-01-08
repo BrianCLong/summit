@@ -1,7 +1,4 @@
-import {
-  SupplyChainNode,
-  SupplyChainRelationship,
-} from '@intelgraph/supply-chain-types';
+import { SupplyChainNode, SupplyChainRelationship } from "@intelgraph/supply-chain-types";
 
 /**
  * Network topology analysis results
@@ -28,7 +25,7 @@ export interface CriticalPath {
   bottlenecks: Array<{
     nodeId: string;
     reason: string;
-    impact: 'low' | 'medium' | 'high' | 'critical';
+    impact: "low" | "medium" | "high" | "critical";
   }>;
   singlePointsOfFailure: string[]; // node IDs
   alternativePaths: Array<{
@@ -47,13 +44,13 @@ export interface DependencyAnalysis {
   upstreamDependencies: Array<{
     nodeId: string;
     tier: number;
-    criticality: 'low' | 'medium' | 'high' | 'critical';
+    criticality: "low" | "medium" | "high" | "critical";
     distance: number;
   }>;
   downstreamDependents: Array<{
     nodeId: string;
     tier: number;
-    criticality: 'low' | 'medium' | 'high' | 'critical';
+    criticality: "low" | "medium" | "high" | "critical";
     distance: number;
   }>;
   totalDependencies: number;
@@ -90,12 +87,14 @@ export class NetworkAnalyzer {
     nodes: SupplyChainNode[],
     relationships: SupplyChainRelationship[]
   ): NetworkTopology {
-    const nodeMap = new Map(nodes.map(n => [n.id, n]));
+    const nodeMap = new Map(nodes.map((n) => [n.id, n]));
     const adjacencyList = new Map<string, string[]>();
 
     // Build adjacency list
     for (const rel of relationships) {
-      if (!rel.isActive) {continue;}
+      if (!rel.isActive) {
+        continue;
+      }
 
       if (!adjacencyList.has(rel.sourceNodeId)) {
         adjacencyList.set(rel.sourceNodeId, []);
@@ -109,13 +108,13 @@ export class NetworkAnalyzer {
     }
 
     // Calculate degree statistics
-    const degrees = Array.from(adjacencyList.values()).map(neighbors => neighbors.length);
+    const degrees = Array.from(adjacencyList.values()).map((neighbors) => neighbors.length);
     const totalDegree = degrees.reduce((sum, d) => sum + d, 0);
     const avgDegree = degrees.length > 0 ? totalDegree / degrees.length : 0;
     const maxDegree = degrees.length > 0 ? Math.max(...degrees) : 0;
 
     // Network density
-    const maxPossibleEdges = nodes.length * (nodes.length - 1) / 2;
+    const maxPossibleEdges = (nodes.length * (nodes.length - 1)) / 2;
     const networkDensity = maxPossibleEdges > 0 ? relationships.length / maxPossibleEdges : 0;
 
     // Clustering coefficient
@@ -132,7 +131,7 @@ export class NetworkAnalyzer {
 
     return {
       totalNodes: nodes.length,
-      totalRelationships: relationships.filter(r => r.isActive).length,
+      totalRelationships: relationships.filter((r) => r.isActive).length,
       averageDegree: avgDegree,
       maxDegree,
       networkDensity,
@@ -152,12 +151,14 @@ export class NetworkAnalyzer {
     nodes: SupplyChainNode[],
     relationships: SupplyChainRelationship[]
   ): CriticalPath {
-    const nodeMap = new Map(nodes.map(n => [n.id, n]));
+    const nodeMap = new Map(nodes.map((n) => [n.id, n]));
     const relMap = new Map<string, SupplyChainRelationship[]>();
 
     // Build relationship map
     for (const rel of relationships) {
-      if (!rel.isActive) {continue;}
+      if (!rel.isActive) {
+        continue;
+      }
       if (!relMap.has(rel.sourceNodeId)) {
         relMap.set(rel.sourceNodeId, []);
       }
@@ -167,7 +168,7 @@ export class NetworkAnalyzer {
     // Find shortest path using Dijkstra's algorithm
     const distances = new Map<string, number>();
     const previous = new Map<string, string>();
-    const unvisited = new Set(nodes.map(n => n.id));
+    const unvisited = new Set(nodes.map((n) => n.id));
 
     distances.set(sourceNodeId, 0);
 
@@ -183,7 +184,9 @@ export class NetworkAnalyzer {
         }
       }
 
-      if (!current || minDist === Infinity) {break;}
+      if (!current || minDist === Infinity) {
+        break;
+      }
       unvisited.delete(current);
 
       const neighbors = relMap.get(current) || [];
@@ -209,7 +212,7 @@ export class NetworkAnalyzer {
     let totalCost = 0;
     for (let i = 0; i < path.length - 1; i++) {
       const rels = relMap.get(path[i]) || [];
-      const rel = rels.find(r => r.targetNodeId === path[i + 1]);
+      const rel = rels.find((r) => r.targetNodeId === path[i + 1]);
       if (rel) {
         totalLeadTime += rel.leadTimeDays || 0;
         totalCost += rel.cost || 0;
@@ -247,7 +250,7 @@ export class NetworkAnalyzer {
     nodes: SupplyChainNode[],
     relationships: SupplyChainRelationship[]
   ): DependencyAnalysis {
-    const nodeMap = new Map(nodes.map(n => [n.id, n]));
+    const nodeMap = new Map(nodes.map((n) => [n.id, n]));
     const node = nodeMap.get(nodeId);
     if (!node) {
       throw new Error(`Node ${nodeId} not found`);
@@ -258,7 +261,9 @@ export class NetworkAnalyzer {
     const downstream = new Map<string, SupplyChainRelationship[]>();
 
     for (const rel of relationships) {
-      if (!rel.isActive) {continue;}
+      if (!rel.isActive) {
+        continue;
+      }
 
       if (!upstream.has(rel.targetNodeId)) {
         upstream.set(rel.targetNodeId, []);
@@ -272,15 +277,11 @@ export class NetworkAnalyzer {
     }
 
     // Traverse upstream
-    const upstreamDeps = this.traverseDependencies(nodeId, upstream, nodeMap, 'upstream');
-    const downstreamDeps = this.traverseDependencies(nodeId, downstream, nodeMap, 'downstream');
+    const upstreamDeps = this.traverseDependencies(nodeId, upstream, nodeMap, "upstream");
+    const downstreamDeps = this.traverseDependencies(nodeId, downstream, nodeMap, "downstream");
 
     // Calculate impact score
-    const impactScore = this.calculateImpactScore(
-      node,
-      upstreamDeps.length,
-      downstreamDeps.length
-    );
+    const impactScore = this.calculateImpactScore(node, upstreamDeps.length, downstreamDeps.length);
 
     return {
       nodeId,
@@ -302,42 +303,40 @@ export class NetworkAnalyzer {
   ): DiversificationAnalysis {
     // Find all suppliers for this component
     const suppliers = relationships
-      .filter(r => r.isActive && r.materialFlow?.includes(componentId))
-      .map(r => r.sourceNodeId)
+      .filter((r) => r.isActive && r.materialFlow?.includes(componentId))
+      .map((r) => r.sourceNodeId)
       .filter((id, index, self) => self.indexOf(id) === index);
 
-    const nodeMap = new Map(nodes.map(n => [n.id, n]));
-    const supplierNodes = suppliers.map(id => nodeMap.get(id)).filter(Boolean) as SupplyChainNode[];
+    const nodeMap = new Map(nodes.map((n) => [n.id, n]));
+    const supplierNodes = suppliers
+      .map((id) => nodeMap.get(id))
+      .filter(Boolean) as SupplyChainNode[];
 
     // Calculate market shares (simplified - based on relationship volume)
     const totalVolume = relationships
-      .filter(r => r.isActive && r.materialFlow?.includes(componentId))
+      .filter((r) => r.isActive && r.materialFlow?.includes(componentId))
       .reduce((sum, r) => sum + (r.volume || 0), 0);
 
-    const supplierData = supplierNodes.map(supplier => {
+    const supplierData = supplierNodes.map((supplier) => {
       const volume = relationships
-        .filter(r => r.sourceNodeId === supplier.id && r.materialFlow?.includes(componentId))
+        .filter((r) => r.sourceNodeId === supplier.id && r.materialFlow?.includes(componentId))
         .reduce((sum, r) => sum + (r.volume || 0), 0);
 
       return {
         nodeId: supplier.id,
         marketShare: totalVolume > 0 ? volume / totalVolume : 1 / suppliers.length,
-        location: supplier.location?.country || 'Unknown',
+        location: supplier.location?.country || "Unknown",
         tier: supplier.tier,
       };
     });
 
     // Calculate Herfindahl-Hirschman Index (HHI)
-    const hhi = supplierData.reduce(
-      (sum, s) => sum + Math.pow(s.marketShare, 2),
-      0
-    );
+    const hhi = supplierData.reduce((sum, s) => sum + Math.pow(s.marketShare, 2), 0);
 
     // Geographic diversification
-    const uniqueLocations = new Set(supplierData.map(s => s.location)).size;
-    const geoDiversification = supplierNodes.length > 0
-      ? uniqueLocations / supplierNodes.length
-      : 0;
+    const uniqueLocations = new Set(supplierData.map((s) => s.location)).size;
+    const geoDiversification =
+      supplierNodes.length > 0 ? uniqueLocations / supplierNodes.length : 0;
 
     // Concentration risk (inverse of diversification)
     const concentrationRisk = hhi;
@@ -345,13 +344,15 @@ export class NetworkAnalyzer {
     // Recommendations
     const recommendations: string[] = [];
     if (suppliers.length < 2) {
-      recommendations.push('Add alternative suppliers to reduce single-source dependency');
+      recommendations.push("Add alternative suppliers to reduce single-source dependency");
     }
     if (hhi > 0.5) {
-      recommendations.push('High market concentration - diversify supplier base');
+      recommendations.push("High market concentration - diversify supplier base");
     }
     if (geoDiversification < 0.5) {
-      recommendations.push('Low geographic diversification - consider suppliers in different regions');
+      recommendations.push(
+        "Low geographic diversification - consider suppliers in different regions"
+      );
     }
 
     return {
@@ -372,7 +373,9 @@ export class NetworkAnalyzer {
     let nodeCount = 0;
 
     for (const [nodeId, neighbors] of adjacencyList) {
-      if (neighbors.length < 2) {continue;}
+      if (neighbors.length < 2) {
+        continue;
+      }
 
       let edges = 0;
       for (let i = 0; i < neighbors.length; i++) {
@@ -446,31 +449,37 @@ export class NetworkAnalyzer {
     path: string[],
     nodes: SupplyChainNode[],
     relationships: SupplyChainRelationship[]
-  ): Array<{ nodeId: string; reason: string; impact: 'low' | 'medium' | 'high' | 'critical' }> {
-    const bottlenecks: Array<{ nodeId: string; reason: string; impact: 'low' | 'medium' | 'high' | 'critical' }> = [];
-    const nodeMap = new Map(nodes.map(n => [n.id, n]));
+  ): Array<{ nodeId: string; reason: string; impact: "low" | "medium" | "high" | "critical" }> {
+    const bottlenecks: Array<{
+      nodeId: string;
+      reason: string;
+      impact: "low" | "medium" | "high" | "critical";
+    }> = [];
+    const nodeMap = new Map(nodes.map((n) => [n.id, n]));
 
     for (const nodeId of path) {
       const node = nodeMap.get(nodeId);
-      if (!node) {continue;}
+      if (!node) {
+        continue;
+      }
 
       // Check for high criticality
-      if (node.criticality === 'critical') {
+      if (node.criticality === "critical") {
         bottlenecks.push({
           nodeId,
-          reason: 'Critical node in supply chain',
-          impact: 'critical',
+          reason: "Critical node in supply chain",
+          impact: "critical",
         });
       }
 
       // Check for long lead times
-      const incomingRels = relationships.filter(r => r.targetNodeId === nodeId);
-      const maxLeadTime = Math.max(...incomingRels.map(r => r.leadTimeDays || 0));
+      const incomingRels = relationships.filter((r) => r.targetNodeId === nodeId);
+      const maxLeadTime = Math.max(...incomingRels.map((r) => r.leadTimeDays || 0));
       if (maxLeadTime > 30) {
         bottlenecks.push({
           nodeId,
           reason: `Long lead time: ${maxLeadTime} days`,
-          impact: maxLeadTime > 60 ? 'high' : 'medium',
+          impact: maxLeadTime > 60 ? "high" : "medium",
         });
       }
     }
@@ -487,7 +496,9 @@ export class NetworkAnalyzer {
     const relMap = new Map<string, SupplyChainRelationship[]>();
 
     for (const rel of relationships) {
-      if (!rel.isActive) {continue;}
+      if (!rel.isActive) {
+        continue;
+      }
       if (!relMap.has(rel.sourceNodeId)) {
         relMap.set(rel.sourceNodeId, []);
       }
@@ -498,9 +509,8 @@ export class NetworkAnalyzer {
       const currentNodeId = path[i];
       const nextNodeId = path[i + 1];
 
-      const alternatives = relMap.get(currentNodeId)?.filter(
-        r => r.targetNodeId !== nextNodeId
-      ) || [];
+      const alternatives =
+        relMap.get(currentNodeId)?.filter((r) => r.targetNodeId !== nextNodeId) || [];
 
       if (alternatives.length === 0) {
         spof.push(currentNodeId);
@@ -526,11 +536,11 @@ export class NetworkAnalyzer {
     nodeId: string,
     graph: Map<string, SupplyChainRelationship[]>,
     nodeMap: Map<string, SupplyChainNode>,
-    direction: 'upstream' | 'downstream'
+    direction: "upstream" | "downstream"
   ): Array<{
     nodeId: string;
     tier: number;
-    criticality: 'low' | 'medium' | 'high' | 'critical';
+    criticality: "low" | "medium" | "high" | "critical";
     distance: number;
   }> {
     const visited = new Set<string>();
@@ -538,14 +548,16 @@ export class NetworkAnalyzer {
     const dependencies: Array<{
       nodeId: string;
       tier: number;
-      criticality: 'low' | 'medium' | 'high' | 'critical';
+      criticality: "low" | "medium" | "high" | "critical";
       distance: number;
     }> = [];
 
     while (queue.length > 0) {
       const { nodeId: current, distance } = queue.shift()!;
 
-      if (visited.has(current)) {continue;}
+      if (visited.has(current)) {
+        continue;
+      }
       visited.add(current);
 
       if (current !== nodeId) {
@@ -562,7 +574,7 @@ export class NetworkAnalyzer {
 
       const rels = graph.get(current) || [];
       for (const rel of rels) {
-        const nextNodeId = direction === 'upstream' ? rel.sourceNodeId : rel.targetNodeId;
+        const nextNodeId = direction === "upstream" ? rel.sourceNodeId : rel.targetNodeId;
         if (!visited.has(nextNodeId)) {
           queue.push({ nodeId: nextNodeId, distance: distance + 1 });
         }

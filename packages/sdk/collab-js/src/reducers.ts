@@ -12,10 +12,10 @@ export function presenceReducer(
     sessionId?: string;
     userId?: string;
     tenantId?: string;
-  },
+  }
 ): PresenceState {
   switch (action.type) {
-    case 'presence.join':
+    case "presence.join":
       return {
         ...state,
         [action.sessionId]: {
@@ -23,7 +23,7 @@ export function presenceReducer(
           tenantId: action.tenantId,
         },
       };
-    case 'presence.leave': {
+    case "presence.leave": {
       const next = { ...state };
       delete next[action.sessionId];
       return next;

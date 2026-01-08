@@ -16,23 +16,17 @@ root workspace install.
 ## Usage
 
 ```ts
-import express from 'express';
-import { createNarrativeRouter } from './src/api/routes';
-import {
-  SimulationEngine,
-  type SimConfig,
-  type Event,
-} from './src/core/SimulationEngine';
+import express from "express";
+import { createNarrativeRouter } from "./src/api/routes";
+import { SimulationEngine, type SimConfig, type Event } from "./src/core/SimulationEngine";
 
 const config: SimConfig = {
   initialTimestamp: 0,
   actors: [
-    { id: 'mayor', name: 'Mayor Reed', mood: 2, resilience: 0.3 },
-    { id: 'chief', name: 'Chief Silva', mood: 1, resilience: 0.5 },
+    { id: "mayor", name: "Mayor Reed", mood: 2, resilience: 0.3 },
+    { id: "chief", name: "Chief Silva", mood: 1, resilience: 0.5 },
   ],
-  relationships: [
-    { sourceId: 'mayor', targetId: 'chief', type: 'ally', intensity: 0.8 },
-  ],
+  relationships: [{ sourceId: "mayor", targetId: "chief", type: "ally", intensity: 0.8 }],
 };
 
 const engine = new SimulationEngine();
@@ -42,16 +36,16 @@ const app = express();
 app.use(express.json());
 app.use(createNarrativeRouter(engine));
 
-app.listen(3000, () => console.log('Narrative engine ready'));
+app.listen(3000, () => console.log("Narrative engine ready"));
 ```
 
 ### Injecting Events
 
 ```ts
 const event: Event = {
-  id: 'ev-1',
-  type: 'crisis',
-  actorId: 'mayor',
+  id: "ev-1",
+  type: "crisis",
+  actorId: "mayor",
   intensity: 2,
   timestamp: 1,
 };
@@ -90,7 +84,7 @@ engine. It turns higher-level plans into queued events while surfacing
 mitigation and effectiveness scores that can be visualized in dashboards.
 
 ```ts
-import { NarrativeSimulationStudio, SimulationEngine } from './src/index.js';
+import { NarrativeSimulationStudio, SimulationEngine } from "./src/index.js";
 
 const engine = new SimulationEngine();
 engine.initialize(config);
@@ -98,35 +92,35 @@ engine.initialize(config);
 const studio = new NarrativeSimulationStudio(engine);
 studio.configureCampaigns([
   {
-    id: 'campaign-alpha',
-    sponsor: 'Frontier Group',
-    objective: 'Shift public sentiment on water policy',
-    narratives: ['river-restoration-is-a-failure'],
-    channels: ['social', 'radio'],
-    targetAudiences: ['civic-leaders', 'youth'],
+    id: "campaign-alpha",
+    sponsor: "Frontier Group",
+    objective: "Shift public sentiment on water policy",
+    narratives: ["river-restoration-is-a-failure"],
+    channels: ["social", "radio"],
+    targetAudiences: ["civic-leaders", "youth"],
     intensity: 0.8,
   },
 ]);
 studio.configureCounterNarratives([
   {
-    id: 'cn-alpha',
-    campaignId: 'campaign-alpha',
-    approach: 'prebunk',
+    id: "cn-alpha",
+    campaignId: "campaign-alpha",
+    approach: "prebunk",
     confidence: 0.6,
     channelAlignment: 0.8,
   },
 ]);
 studio.configureInformationOperations([
   {
-    id: 'io-alpha',
-    campaignId: 'campaign-alpha',
-    tactic: 'bot-swarm',
+    id: "io-alpha",
+    campaignId: "campaign-alpha",
+    tactic: "bot-swarm",
     amplification: 0.7,
     deception: 0.5,
     reach: 0.6,
   },
 ]);
 
-const tick = studio.modelInfluenceTick(['mayor', 'chief']);
-console.log(tick.operationEffectiveness['io-alpha']);
+const tick = studio.modelInfluenceTick(["mayor", "chief"]);
+console.log(tick.operationEffectiveness["io-alpha"]);
 ```

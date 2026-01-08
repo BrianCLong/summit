@@ -32,14 +32,14 @@ This guide defines the **observability strategy** for Summit MVP-4-GA, covering 
 
 ### 1.1 Technology Stack
 
-| Component | Technology | Purpose | Retention |
-|-----------|-----------|---------|-----------|
-| **Metrics** | Prometheus + VictoriaMetrics | Time-series metrics | 30 days |
-| **Logs** | Loki + Grafana | Structured logging | 90 days |
-| **Traces** | Tempo + OpenTelemetry | Distributed tracing | 7 days |
-| **Dashboards** | Grafana | Visualization | N/A |
-| **Alerting** | Alertmanager + PagerDuty | Incident notification | 30 days |
-| **APM** | OpenTelemetry Collector | Application performance | 7 days |
+| Component      | Technology                   | Purpose                 | Retention |
+| -------------- | ---------------------------- | ----------------------- | --------- |
+| **Metrics**    | Prometheus + VictoriaMetrics | Time-series metrics     | 30 days   |
+| **Logs**       | Loki + Grafana               | Structured logging      | 90 days   |
+| **Traces**     | Tempo + OpenTelemetry        | Distributed tracing     | 7 days    |
+| **Dashboards** | Grafana                      | Visualization           | N/A       |
+| **Alerting**   | Alertmanager + PagerDuty     | Incident notification   | 30 days   |
+| **APM**        | OpenTelemetry Collector      | Application performance | 7 days    |
 
 ### 1.2 Architecture
 
@@ -84,6 +84,7 @@ This guide defines the **observability strategy** for Summit MVP-4-GA, covering 
 ### 2.1 Golden Signals
 
 #### Latency
+
 ```promql
 # P95 request latency by endpoint
 histogram_quantile(0.95,
@@ -94,6 +95,7 @@ histogram_quantile(0.95,
 ```
 
 #### Traffic
+
 ```promql
 # Requests per second
 sum(rate(http_requests_total[5m])) by (service, method, status)
@@ -102,6 +104,7 @@ sum(rate(http_requests_total[5m])) by (service, method, status)
 ```
 
 #### Errors
+
 ```promql
 # Error rate (4xx + 5xx)
 sum(rate(http_requests_total{status=~"[45].."}[5m])) by (service, status)
@@ -111,6 +114,7 @@ sum(rate(http_requests_total{status=~"[45].."}[5m])) by (service, status)
 ```
 
 #### Saturation
+
 ```promql
 # CPU utilization
 avg(rate(container_cpu_usage_seconds_total[5m])) by (pod)
@@ -139,32 +143,32 @@ sum(active_sessions) by (service)
 
 ### 2.3 Custom Metrics
 
-| Metric Name | Type | Labels | Purpose |
-|-------------|------|--------|---------|
-| `policy_evaluation_duration_seconds` | Histogram | `decision`, `policy_path` | Policy eval latency |
-| `attestation_verification_duration_seconds` | Histogram | `result`, `slsa_level` | Attestation verify latency |
-| `approval_workflow_duration_seconds` | Histogram | `workflow_type`, `outcome` | Approval time |
-| `audit_ingestion_rate` | Counter | `event_type`, `severity` | Audit events/sec |
-| `tenant_isolation_violations_total` | Counter | `tenant_id`, `resource_type` | Isolation breaches |
-| `rate_limit_exceeded_total` | Counter | `endpoint`, `tenant_id` | Rate limit hits |
+| Metric Name                                 | Type      | Labels                       | Purpose                    |
+| ------------------------------------------- | --------- | ---------------------------- | -------------------------- |
+| `policy_evaluation_duration_seconds`        | Histogram | `decision`, `policy_path`    | Policy eval latency        |
+| `attestation_verification_duration_seconds` | Histogram | `result`, `slsa_level`       | Attestation verify latency |
+| `approval_workflow_duration_seconds`        | Histogram | `workflow_type`, `outcome`   | Approval time              |
+| `audit_ingestion_rate`                      | Counter   | `event_type`, `severity`     | Audit events/sec           |
+| `tenant_isolation_violations_total`         | Counter   | `tenant_id`, `resource_type` | Isolation breaches         |
+| `rate_limit_exceeded_total`                 | Counter   | `endpoint`, `tenant_id`      | Rate limit hits            |
 
 ### 2.4 Instrumentation Example
 
 ```typescript
-import { register, Counter, Histogram } from 'prom-client';
+import { register, Counter, Histogram } from "prom-client";
 
 // Counter: Policy evaluations
 const policyEvaluations = new Counter({
-  name: 'policy_evaluations_total',
-  help: 'Total policy evaluations',
-  labelNames: ['decision', 'policy_path', 'tenant_id'],
+  name: "policy_evaluations_total",
+  help: "Total policy evaluations",
+  labelNames: ["decision", "policy_path", "tenant_id"],
 });
 
 // Histogram: Latency
 const policyLatency = new Histogram({
-  name: 'policy_evaluation_duration_seconds',
-  help: 'Policy evaluation latency',
-  labelNames: ['decision', 'policy_path'],
+  name: "policy_evaluation_duration_seconds",
+  help: "Policy evaluation latency",
+  labelNames: ["decision", "policy_path"],
   buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 5],
 });
 
@@ -173,11 +177,15 @@ async function evaluatePolicy(input: PolicyInput): Promise<Verdict> {
   const end = policyLatency.startTimer();
   try {
     const verdict = await opa.evaluate(input);
-    policyEvaluations.inc({ decision: verdict.decision, policy_path: input.policyPath, tenant_id: input.tenant });
+    policyEvaluations.inc({
+      decision: verdict.decision,
+      policy_path: input.policyPath,
+      tenant_id: input.tenant,
+    });
     end({ decision: verdict.decision, policy_path: input.policyPath });
     return verdict;
   } catch (error) {
-    end({ decision: 'ERROR', policy_path: input.policyPath });
+    end({ decision: "ERROR", policy_path: input.policyPath });
     throw error;
   }
 }
@@ -210,17 +218,18 @@ async function evaluatePolicy(input: PolicyInput): Promise<Verdict> {
 
 ### 3.2 Log Levels
 
-| Level | When to Use | Examples |
-|-------|-------------|----------|
-| **DEBUG** | Development/troubleshooting | Variable values, internal state |
-| **INFO** | Normal operation | Request started, policy evaluated |
-| **WARN** | Recoverable errors | Cache miss, retry attempted |
-| **ERROR** | Unrecoverable errors | Database connection failed |
-| **CRITICAL** | System-wide failure | Service unavailable, data corruption |
+| Level        | When to Use                 | Examples                             |
+| ------------ | --------------------------- | ------------------------------------ |
+| **DEBUG**    | Development/troubleshooting | Variable values, internal state      |
+| **INFO**     | Normal operation            | Request started, policy evaluated    |
+| **WARN**     | Recoverable errors          | Cache miss, retry attempted          |
+| **ERROR**    | Unrecoverable errors        | Database connection failed           |
+| **CRITICAL** | System-wide failure         | Service unavailable, data corruption |
 
 ### 3.3 Required Log Context
 
 **Every log entry MUST include**:
+
 - `timestamp` (ISO 8601)
 - `level` (DEBUG/INFO/WARN/ERROR/CRITICAL)
 - `service` (service name)
@@ -229,6 +238,7 @@ async function evaluatePolicy(input: PolicyInput): Promise<Verdict> {
 - `message` (human-readable)
 
 **Optional but recommended**:
+
 - `user_id` (authenticated user)
 - `tenant_id` (multi-tenancy)
 - `duration_ms` (operation duration)
@@ -295,19 +305,19 @@ Trace: User Request → Policy → Service → Database
 ### 4.3 Instrumentation
 
 ```typescript
-import { trace, context, SpanStatusCode } from '@opentelemetry/api';
+import { trace, context, SpanStatusCode } from "@opentelemetry/api";
 
-const tracer = trace.getTracer('summit-server', 'v4.0.0');
+const tracer = trace.getTracer("summit-server", "v4.0.0");
 
 async function evaluatePolicy(input: PolicyInput): Promise<Verdict> {
-  return tracer.startActiveSpan('policy.evaluate', async (span) => {
-    span.setAttribute('policy.path', input.policyPath);
-    span.setAttribute('tenant.id', input.tenant);
+  return tracer.startActiveSpan("policy.evaluate", async (span) => {
+    span.setAttribute("policy.path", input.policyPath);
+    span.setAttribute("tenant.id", input.tenant);
 
     try {
       const verdict = await opa.evaluate(input);
-      span.setAttribute('decision', verdict.decision);
-      span.setAttribute('policy.version', verdict.policyVersion);
+      span.setAttribute("decision", verdict.decision);
+      span.setAttribute("policy.version", verdict.policyVersion);
       span.setStatus({ code: SpanStatusCode.OK });
       return verdict;
     } catch (error) {
@@ -346,6 +356,7 @@ async function evaluatePolicy(input: PolicyInput): Promise<Verdict> {
 **URL**: `https://grafana.summit.internal/d/overview`
 
 **Panels**:
+
 1. **Request Rate** (Graph)
    - Query: `sum(rate(http_requests_total[5m])) by (service)`
    - Threshold: Red if < 100 req/s (anomaly)
@@ -369,6 +380,7 @@ async function evaluatePolicy(input: PolicyInput): Promise<Verdict> {
 **URL**: `https://grafana.summit.internal/d/service-health`
 
 **Per-Service Panels**:
+
 - CPU Usage
 - Memory Usage
 - Request Rate
@@ -380,6 +392,7 @@ async function evaluatePolicy(input: PolicyInput): Promise<Verdict> {
 **URL**: `https://grafana.summit.internal/d/policy-engine`
 
 **Panels**:
+
 1. **Policy Evaluations/sec** by decision
 2. **Policy Bundle Version** (gauge)
 3. **Policy Load Time** (histogram)
@@ -391,6 +404,7 @@ async function evaluatePolicy(input: PolicyInput): Promise<Verdict> {
 **URL**: `https://grafana.summit.internal/d/audit-trail`
 
 **Panels**:
+
 1. **Audit Events/sec** by event type
 2. **Decision Distribution** (ALLOW vs DENY)
 3. **Top Users by Activity**
@@ -403,12 +417,12 @@ async function evaluatePolicy(input: PolicyInput): Promise<Verdict> {
 
 ### 6.1 Alert Severity Levels
 
-| Severity | Response Time | Notification | Examples |
-|----------|--------------|--------------|----------|
-| **P0 (Critical)** | Immediate | PagerDuty (page) | Service down, data corruption |
-| **P1 (High)** | <15 min | PagerDuty + Slack | High error rate, SLO breach |
-| **P2 (Medium)** | <1 hour | Slack | Elevated latency, warning logs |
-| **P3 (Low)** | Next business day | Email | Info logs, capacity planning |
+| Severity          | Response Time     | Notification      | Examples                       |
+| ----------------- | ----------------- | ----------------- | ------------------------------ |
+| **P0 (Critical)** | Immediate         | PagerDuty (page)  | Service down, data corruption  |
+| **P1 (High)**     | <15 min           | PagerDuty + Slack | High error rate, SLO breach    |
+| **P2 (Medium)**   | <1 hour           | Slack             | Elevated latency, warning logs |
+| **P3 (Low)**      | Next business day | Email             | Info logs, capacity planning   |
 
 ### 6.2 Alert Rules
 
@@ -522,8 +536,8 @@ receivers:
 
   - name: slack-alerts
     slack_configs:
-      - channel: '#summit-alerts'
-        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+      - channel: "#summit-alerts"
+        text: "{{ range .Alerts }}{{ .Annotations.description }}{{ end }}"
 ```
 
 ---
@@ -532,12 +546,12 @@ receivers:
 
 ### 7.1 Service Level Objectives
 
-| SLO | Target | Measurement Window | Error Budget (30d) |
-|-----|--------|-------------------|-------------------|
-| **Availability** | 99.9% | 30 days | 43 minutes |
-| **Latency (P95)** | <200ms | 1 hour | 5% of requests |
-| **Error Rate** | <0.1% | 1 hour | 1000 errors per 1M requests |
-| **Policy Eval (P99)** | <20ms | 1 hour | 1% of evals |
+| SLO                   | Target | Measurement Window | Error Budget (30d)          |
+| --------------------- | ------ | ------------------ | --------------------------- |
+| **Availability**      | 99.9%  | 30 days            | 43 minutes                  |
+| **Latency (P95)**     | <200ms | 1 hour             | 5% of requests              |
+| **Error Rate**        | <0.1%  | 1 hour             | 1000 errors per 1M requests |
+| **Policy Eval (P99)** | <20ms  | 1 hour             | 1% of evals                 |
 
 ### 7.2 Error Budget Calculation
 
@@ -560,12 +574,14 @@ sum(rate(http_requests_total{status=~"5.."}[30d]))
 ### 7.3 Error Budget Policy
 
 **When error budget is exhausted**:
+
 1. **Freeze feature releases**: No new features until budget recovers
 2. **Focus on reliability**: All hands on stability improvements
 3. **Root cause analysis**: Mandatory postmortems for all incidents
 4. **Escalate**: Inform leadership of budget status
 
 **Budget recovery**:
+
 - Review after 7 days
 - Gradual re-enablement of feature releases
 
@@ -578,6 +594,7 @@ sum(rate(http_requests_total{status=~"5.."}[30d]))
 **Runbook**: `docs/runbooks/high-latency.md`
 
 **Steps**:
+
 1. Check current P95: `curl prometheus/query?query=http_p95_latency`
 2. Identify slow endpoints: Check trace samples in Tempo
 3. Check database:
@@ -591,6 +608,7 @@ sum(rate(http_requests_total{status=~"5.."}[30d]))
 **Runbook**: `docs/runbooks/policy-failures.md`
 
 **Steps**:
+
 1. Check OPA health: `curl opa.internal/health?bundle=true`
 2. Verify bundle version: `curl opa.internal/v1/data/system/bundles`
 3. Check policy tests: `opa test policies/ -v`
@@ -602,6 +620,7 @@ sum(rate(http_requests_total{status=~"5.."}[30d]))
 **Runbook**: `docs/runbooks/db-connection-issues.md`
 
 **Steps**:
+
 1. Check connection pool: `SELECT count(*) FROM pg_stat_activity;`
 2. Check for locks: `SELECT * FROM pg_locks WHERE NOT granted;`
 3. Restart connection pool: `kubectl rollout restart deployment/summit-server`
@@ -610,6 +629,7 @@ sum(rate(http_requests_total{status=~"5.."}[30d]))
 ---
 
 **Document Control**:
+
 - **Version**: 1.0
 - **Owner**: SRE Team
 - **Approvers**: Infrastructure Lead, On-Call Lead

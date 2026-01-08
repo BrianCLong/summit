@@ -1,7 +1,7 @@
-import { Driver } from 'neo4j-driver';
-import { Pool } from 'pg';
-import { RedisClientType } from 'redis';
-import { logger } from '../utils/logger';
+import { Driver } from "neo4j-driver";
+import { Pool } from "pg";
+import { RedisClientType } from "redis";
+import { logger } from "../utils/logger";
 import {
   Graph,
   PathResult,
@@ -13,21 +13,18 @@ import {
   PatternAnalysisResult,
   PatternMinerParams,
   SubgraphQuery,
-} from '../types/analytics';
-import { Neo4jGraphRepository } from '../repositories/GraphRepository';
-import {
-  shortestPath,
-  kShortestPaths,
-} from '../algorithms/pathfinding';
-import { computeCentrality } from '../algorithms/centrality';
-import { detectCommunities } from '../algorithms/community';
-import { runPatternMiner } from '../algorithms/patterns';
+} from "../types/analytics";
+import { Neo4jGraphRepository } from "../repositories/GraphRepository";
+import { shortestPath, kShortestPaths } from "../algorithms/pathfinding";
+import { computeCentrality } from "../algorithms/centrality";
+import { detectCommunities } from "../algorithms/community";
+import { runPatternMiner } from "../algorithms/patterns";
 import {
   explainPathAnalysis,
   explainCommunityAnalysis,
   explainCentralityAnalysis,
   explainPatternAnalysis,
-} from '../algorithms/explainability';
+} from "../algorithms/explainability";
 
 /**
  * Enhanced Graph Analytics Service
@@ -45,7 +42,7 @@ export class EnhancedGraphAnalyticsService {
   constructor(
     private neo4jDriver: Driver,
     private pgPool: Pool,
-    private redisClient: RedisClientType,
+    private redisClient: RedisClientType
   ) {
     this.graphRepository = new Neo4jGraphRepository(neo4jDriver);
   }
@@ -64,7 +61,7 @@ export class EnhancedGraphAnalyticsService {
     const startTime = Date.now();
     const k = input.k || 1;
 
-    logger.info('Analyzing paths', {
+    logger.info("Analyzing paths", {
       start: input.startNodeId,
       end: input.endNodeId,
       k,
@@ -75,28 +72,26 @@ export class EnhancedGraphAnalyticsService {
       const graph = await this.fetchPathSubgraph(
         input.startNodeId,
         input.endNodeId,
-        input.constraints,
+        input.constraints
       );
 
       // Find K-shortest paths
-      const { paths, filteredNodesCount, filteredEdgesCount } =
-        kShortestPaths(
-          graph,
-          input.startNodeId,
-          input.endNodeId,
-          k,
-          input.constraints,
-          input.nodePolicyFilter,
-          input.edgePolicyFilter,
-        );
+      const { paths, filteredNodesCount, filteredEdgesCount } = kShortestPaths(
+        graph,
+        input.startNodeId,
+        input.endNodeId,
+        k,
+        input.constraints,
+        input.nodePolicyFilter,
+        input.edgePolicyFilter
+      );
 
       // Calculate statistics
       const lengths = paths.map((p) => p.length);
       const stats = {
         totalPaths: paths.length,
-        averageLength: lengths.length > 0
-          ? lengths.reduce((sum, l) => sum + l, 0) / lengths.length
-          : 0,
+        averageLength:
+          lengths.length > 0 ? lengths.reduce((sum, l) => sum + l, 0) / lengths.length : 0,
         minLength: lengths.length > 0 ? Math.min(...lengths) : 0,
         maxLength: lengths.length > 0 ? Math.max(...lengths) : 0,
         policyFilteredNodes: filteredNodesCount,
@@ -104,12 +99,7 @@ export class EnhancedGraphAnalyticsService {
       };
 
       // Generate explanation
-      const explanation = explainPathAnalysis(
-        input.startNodeId,
-        input.endNodeId,
-        paths,
-        stats,
-      );
+      const explanation = explainPathAnalysis(input.startNodeId, input.endNodeId, paths, stats);
 
       const result: PathResult = {
         source: input.startNodeId,
@@ -121,20 +111,16 @@ export class EnhancedGraphAnalyticsService {
       };
 
       // Cache result
-      await this.cacheResult(
-        `paths:${input.startNodeId}:${input.endNodeId}:${k}`,
-        result,
-        3600,
-      );
+      await this.cacheResult(`paths:${input.startNodeId}:${input.endNodeId}:${k}`, result, 3600);
 
-      logger.info('Path analysis completed', {
+      logger.info("Path analysis completed", {
         elapsed: `${Date.now() - startTime}ms`,
         pathsFound: paths.length,
       });
 
       return result;
     } catch (error) {
-      logger.error('Error analyzing paths:', error);
+      logger.error("Error analyzing paths:", error);
       throw error;
     }
   }
@@ -146,13 +132,13 @@ export class EnhancedGraphAnalyticsService {
     nodeIds?: string[];
     depth?: number;
     limit?: number;
-    algorithm?: 'louvain' | 'label_propagation';
+    algorithm?: "louvain" | "label_propagation";
   }): Promise<CommunityAnalysisResult> {
     const startTime = Date.now();
-    const algorithm = input.algorithm || 'louvain';
+    const algorithm = input.algorithm || "louvain";
 
-    logger.info('Analyzing communities', {
-      nodeIds: input.nodeIds?.length || 'all',
+    logger.info("Analyzing communities", {
+      nodeIds: input.nodeIds?.length || "all",
       algorithm,
     });
 
@@ -182,19 +168,19 @@ export class EnhancedGraphAnalyticsService {
 
       // Cache result
       await this.cacheResult(
-        `communities:${input.nodeIds?.join(',') || 'all'}:${algorithm}`,
+        `communities:${input.nodeIds?.join(",") || "all"}:${algorithm}`,
         result,
-        3600,
+        3600
       );
 
-      logger.info('Community analysis completed', {
+      logger.info("Community analysis completed", {
         elapsed: `${Date.now() - startTime}ms`,
         communities: communities.numCommunities,
       });
 
       return result;
     } catch (error) {
-      logger.error('Error analyzing communities:', error);
+      logger.error("Error analyzing communities:", error);
       throw error;
     }
   }
@@ -210,8 +196,8 @@ export class EnhancedGraphAnalyticsService {
   }): Promise<CentralityAnalysisResult> {
     const startTime = Date.now();
 
-    logger.info('Analyzing centrality', {
-      nodeIds: input.nodeIds?.length || 'all',
+    logger.info("Analyzing centrality", {
+      nodeIds: input.nodeIds?.length || "all",
       includeEigenvector: input.includeEigenvector,
     });
 
@@ -233,34 +219,28 @@ export class EnhancedGraphAnalyticsService {
       // Generate explanation
       const explanation = explainCentralityAnalysis(
         centrality,
-        'degree, betweenness' +
-          (input.includeEigenvector ? ', eigenvector' : '') +
-          (input.includeCloseness ? ', closeness' : ''),
+        "degree, betweenness" +
+          (input.includeEigenvector ? ", eigenvector" : "") +
+          (input.includeCloseness ? ", closeness" : "")
       );
 
       const result: CentralityAnalysisResult = {
         centrality,
         explanation,
-        algorithm:
-          'degree, betweenness' +
-          (input.includeEigenvector ? ', eigenvector' : ''),
+        algorithm: "degree, betweenness" + (input.includeEigenvector ? ", eigenvector" : ""),
       };
 
       // Cache result
-      await this.cacheResult(
-        `centrality:${input.nodeIds?.join(',') || 'all'}`,
-        result,
-        3600,
-      );
+      await this.cacheResult(`centrality:${input.nodeIds?.join(",") || "all"}`, result, 3600);
 
-      logger.info('Centrality analysis completed', {
+      logger.info("Centrality analysis completed", {
         elapsed: `${Date.now() - startTime}ms`,
         nodes: graph.nodes.length,
       });
 
       return result;
     } catch (error) {
-      logger.error('Error analyzing centrality:', error);
+      logger.error("Error analyzing centrality:", error);
       throw error;
     }
   }
@@ -275,8 +255,8 @@ export class EnhancedGraphAnalyticsService {
   }): Promise<PatternAnalysisResult> {
     const startTime = Date.now();
 
-    logger.info('Analyzing patterns', {
-      nodeIds: input.nodeIds?.length || 'all',
+    logger.info("Analyzing patterns", {
+      nodeIds: input.nodeIds?.length || "all",
       patterns: Object.keys(input.patternParams),
     });
 
@@ -297,7 +277,7 @@ export class EnhancedGraphAnalyticsService {
           acc[p.patternType] = (acc[p.patternType] || 0) + 1;
           return acc;
         },
-        {} as Record<string, number>,
+        {} as Record<string, number>
       );
 
       // Generate explanation
@@ -313,20 +293,16 @@ export class EnhancedGraphAnalyticsService {
       };
 
       // Cache result
-      await this.cacheResult(
-        `patterns:${input.nodeIds?.join(',') || 'all'}`,
-        result,
-        3600,
-      );
+      await this.cacheResult(`patterns:${input.nodeIds?.join(",") || "all"}`, result, 3600);
 
-      logger.info('Pattern analysis completed', {
+      logger.info("Pattern analysis completed", {
         elapsed: `${Date.now() - startTime}ms`,
         patternsFound: patterns.length,
       });
 
       return result;
     } catch (error) {
-      logger.error('Error analyzing patterns:', error);
+      logger.error("Error analyzing patterns:", error);
       throw error;
     }
   }
@@ -344,7 +320,7 @@ export class EnhancedGraphAnalyticsService {
     centrality: CentralityAnalysisResult;
     patterns?: PatternAnalysisResult;
   }> {
-    logger.info('Running comprehensive analysis');
+    logger.info("Running comprehensive analysis");
 
     const [communities, centrality, patterns] = await Promise.all([
       this.analyzeCommunities({
@@ -378,7 +354,7 @@ export class EnhancedGraphAnalyticsService {
   private async fetchPathSubgraph(
     startNodeId: string,
     endNodeId: string,
-    constraints?: PathQueryConstraints,
+    constraints?: PathQueryConstraints
   ): Promise<Graph> {
     const maxDepth = constraints?.maxDepth || 6;
 
@@ -413,19 +389,11 @@ export class EnhancedGraphAnalyticsService {
   /**
    * Cache analysis result
    */
-  private async cacheResult(
-    key: string,
-    data: any,
-    ttl: number,
-  ): Promise<void> {
+  private async cacheResult(key: string, data: any, ttl: number): Promise<void> {
     try {
-      await this.redisClient.setEx(
-        `graph-analytics:enhanced:${key}`,
-        ttl,
-        JSON.stringify(data),
-      );
+      await this.redisClient.setEx(`graph-analytics:enhanced:${key}`, ttl, JSON.stringify(data));
     } catch (error) {
-      logger.warn('Failed to cache result:', error);
+      logger.warn("Failed to cache result:", error);
     }
   }
 
@@ -434,12 +402,10 @@ export class EnhancedGraphAnalyticsService {
    */
   private async getCachedResult(key: string): Promise<any> {
     try {
-      const cached = await this.redisClient.get(
-        `graph-analytics:enhanced:${key}`,
-      );
+      const cached = await this.redisClient.get(`graph-analytics:enhanced:${key}`);
       return cached ? JSON.parse(cached as string) : null;
     } catch (error) {
-      logger.warn('Failed to get cached result:', error);
+      logger.warn("Failed to get cached result:", error);
       return null;
     }
   }

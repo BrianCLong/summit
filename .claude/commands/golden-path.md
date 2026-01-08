@@ -9,6 +9,7 @@ Run the complete Summit golden path: Bootstrap → Up → Smoke.
 ```
 
 Or step by step:
+
 ```bash
 make bootstrap && make up && make smoke
 ```
@@ -16,6 +17,7 @@ make bootstrap && make up && make smoke
 ## What This Does
 
 ### 1. Bootstrap
+
 ```bash
 make bootstrap
 ```
@@ -27,6 +29,7 @@ make bootstrap
 - Creates development tools
 
 ### 2. Start Services
+
 ```bash
 make up
 ```
@@ -44,6 +47,7 @@ make up
 - Waits for health checks
 
 ### 3. Validate
+
 ```bash
 make smoke
 ```
@@ -86,6 +90,7 @@ Golden path validated successfully! You're ready to develop.
 ## Troubleshooting
 
 ### Docker Not Running
+
 ```bash
 # Start Docker Desktop
 open -a Docker
@@ -95,6 +100,7 @@ docker info
 ```
 
 ### Port Conflicts
+
 ```bash
 # Check what's using ports
 lsof -i :4000 -i :3000 -i :5432
@@ -103,6 +109,7 @@ lsof -i :4000 -i :3000 -i :5432
 ```
 
 ### Services Won't Start
+
 ```bash
 # Clean restart
 make down
@@ -111,6 +118,7 @@ make up
 ```
 
 ### Smoke Tests Fail
+
 ```bash
 # Check logs
 docker-compose logs api
@@ -125,6 +133,7 @@ docker-compose restart api
 ## CI Equivalence
 
 The golden path runs identically in CI:
+
 - Same `make bootstrap && make up && make smoke`
 - Same test data
 - Same health checks
@@ -134,6 +143,7 @@ The golden path runs identically in CI:
 ## After Golden Path
 
 You're ready to develop:
+
 1. Create feature branch
 2. Make changes
 3. Run `pnpm lint && pnpm typecheck && pnpm test`

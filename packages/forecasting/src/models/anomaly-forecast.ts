@@ -2,7 +2,7 @@
  * Anomaly Forecasting and Detection
  */
 
-import type { TimeSeriesData, ForecastResult, ChangePoint } from '../types/index.js';
+import type { TimeSeriesData, ForecastResult, ChangePoint } from "../types/index.js";
 
 export class AnomalyForecaster {
   private threshold: number;
@@ -28,13 +28,13 @@ export class AnomalyForecaster {
     timestamp: Date;
     probability: number;
     expectedValue: number;
-    anomalyType: 'spike' | 'drop' | 'changepoint' | 'seasonal';
+    anomalyType: "spike" | "drop" | "changepoint" | "seasonal";
   }> {
     const results: Array<{
       timestamp: Date;
       probability: number;
       expectedValue: number;
-      anomalyType: 'spike' | 'drop' | 'changepoint' | 'seasonal';
+      anomalyType: "spike" | "drop" | "changepoint" | "seasonal";
     }> = [];
 
     // Analyze historical patterns
@@ -51,7 +51,7 @@ export class AnomalyForecaster {
         timestamp,
         probability: Math.max(spikeProbability, seasonalProb),
         expectedValue: this.forecastValue(h),
-        anomalyType: seasonalProb > spikeProbability ? 'seasonal' : 'spike',
+        anomalyType: seasonalProb > spikeProbability ? "seasonal" : "spike",
       });
     }
 
@@ -62,7 +62,7 @@ export class AnomalyForecaster {
    * Detect outbreak/spike patterns
    */
   detectOutbreaks(): ChangePoint[] {
-    const values = this.historicalData.map(d => d.value);
+    const values = this.historicalData.map((d) => d.value);
     const outbreaks: ChangePoint[] = [];
 
     for (let i = this.windowSize; i < values.length; i++) {
@@ -89,7 +89,7 @@ export class AnomalyForecaster {
    * Detect trend reversals
    */
   detectTrendReversals(): ChangePoint[] {
-    const values = this.historicalData.map(d => d.value);
+    const values = this.historicalData.map((d) => d.value);
     const reversals: ChangePoint[] = [];
 
     for (let i = this.windowSize; i < values.length - this.windowSize; i++) {
@@ -134,7 +134,7 @@ export class AnomalyForecaster {
 
       const timestamp = new Date(
         this.historicalData[this.historicalData.length - 1].timestamp.getTime() +
-        h * 24 * 60 * 60 * 1000
+          h * 24 * 60 * 60 * 1000
       );
 
       results.push({
@@ -142,7 +142,7 @@ export class AnomalyForecaster {
         forecast: currentVol,
         lowerBound: currentVol * 0.8,
         upperBound: currentVol * 1.2,
-        confidence: 0.90,
+        confidence: 0.9,
       });
     }
 
@@ -153,7 +153,7 @@ export class AnomalyForecaster {
    * Calculate spike probability based on historical data
    */
   private calculateSpikeProbability(): number {
-    const values = this.historicalData.map(d => d.value);
+    const values = this.historicalData.map((d) => d.value);
     const mean = this.mean(values);
     const std = this.std(values);
 
@@ -174,12 +174,10 @@ export class AnomalyForecaster {
     const anomaliesByDayOfWeek = new Map<number, number>();
 
     for (let dow = 0; dow < 7; dow++) {
-      const dayData = this.historicalData.filter(d =>
-        d.timestamp.getDay() === dow
-      );
+      const dayData = this.historicalData.filter((d) => d.timestamp.getDay() === dow);
 
       if (dayData.length > 0) {
-        const values = dayData.map(d => d.value);
+        const values = dayData.map((d) => d.value);
         const mean = this.mean(values);
         const std = this.std(values);
 
@@ -212,9 +210,7 @@ export class AnomalyForecaster {
    * Forecast value using simple method
    */
   private forecastValue(horizon: number): number {
-    const recentValues = this.historicalData
-      .slice(-this.windowSize)
-      .map(d => d.value);
+    const recentValues = this.historicalData.slice(-this.windowSize).map((d) => d.value);
     return this.mean(recentValues);
   }
 
@@ -222,7 +218,7 @@ export class AnomalyForecaster {
    * Calculate returns
    */
   private calculateReturns(): number[] {
-    const values = this.historicalData.map(d => d.value);
+    const values = this.historicalData.map((d) => d.value);
     const returns: number[] = [];
 
     for (let i = 1; i < values.length; i++) {
@@ -269,7 +265,7 @@ export class AnomalyForecaster {
 
   private std(arr: number[]): number {
     const avg = this.mean(arr);
-    const squareDiffs = arr.map(x => Math.pow(x - avg, 2));
+    const squareDiffs = arr.map((x) => Math.pow(x - avg, 2));
     return Math.sqrt(this.mean(squareDiffs));
   }
 }

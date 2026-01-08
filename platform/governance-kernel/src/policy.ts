@@ -1,6 +1,6 @@
-import { GovernanceDecision, PolicyResult, RiskCategory } from './types.js';
-import { getRiskProfile } from './registry.js';
-import { randomUUID } from 'crypto';
+import { GovernanceDecision, PolicyResult, RiskCategory } from "./types.js";
+import { getRiskProfile } from "./registry.js";
+import { randomUUID } from "crypto";
 
 export interface GovernanceContext {
   tenantId: string;
@@ -15,19 +15,19 @@ export function evaluateGovernancePolicy(
 ): GovernanceDecision {
   const profile = getRiskProfile(category);
 
-  let outcome: PolicyResult = 'DENIED';
-  let reason = '';
+  let outcome: PolicyResult = "DENIED";
+  let reason = "";
 
   if (profile.allowed) {
-    if (profile.color === 'yellow') {
-      outcome = 'CONDITIONAL';
-      reason = 'Requires human review or additional logging';
+    if (profile.color === "yellow") {
+      outcome = "CONDITIONAL";
+      reason = "Requires human review or additional logging";
     } else {
-      outcome = 'ALLOWED';
-      reason = 'Low risk approved activity';
+      outcome = "ALLOWED";
+      reason = "Low risk approved activity";
     }
   } else {
-    outcome = 'DENIED';
+    outcome = "DENIED";
     reason = `Category ${category} is strictly prohibited by governance policy`;
   }
 
@@ -37,6 +37,6 @@ export function evaluateGovernancePolicy(
     timestamp: new Date(),
     outcome,
     reason,
-    riskCategory: category
+    riskCategory: category,
   };
 }

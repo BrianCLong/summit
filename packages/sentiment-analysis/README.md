@@ -20,7 +20,7 @@ pnpm add @intelgraph/sentiment-analysis
 ## Quick Start
 
 ```typescript
-import { SentimentAnalyzer } from '@intelgraph/sentiment-analysis';
+import { SentimentAnalyzer } from "@intelgraph/sentiment-analysis";
 
 const analyzer = new SentimentAnalyzer();
 await analyzer.initialize();

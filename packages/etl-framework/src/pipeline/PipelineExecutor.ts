@@ -2,20 +2,20 @@
  * Pipeline executor - orchestrates ETL/ELT pipeline execution
  */
 
-import { EventEmitter } from 'events';
-import { Logger } from 'winston';
+import { EventEmitter } from "events";
+import { Logger } from "winston";
 import {
   DataSourceConfig,
   PipelineRun,
   PipelineStatus,
   PipelineError,
-  PipelineMetrics
-} from '@intelgraph/data-integration/src/types';
-import { BaseConnector } from '@intelgraph/data-integration/src/core/BaseConnector';
-import { DataTransformer } from '../transformation/DataTransformer';
-import { DataValidator } from '../validation/DataValidator';
-import { DataEnricher } from '../enrichment/DataEnricher';
-import { DataLoader } from '../loading/DataLoader';
+  PipelineMetrics,
+} from "@intelgraph/data-integration/src/types";
+import { BaseConnector } from "@intelgraph/data-integration/src/core/BaseConnector";
+import { DataTransformer } from "../transformation/DataTransformer";
+import { DataValidator } from "../validation/DataValidator";
+import { DataEnricher } from "../enrichment/DataEnricher";
+import { DataLoader } from "../loading/DataLoader";
 
 export class PipelineExecutor extends EventEmitter {
   private logger: Logger;
@@ -28,10 +28,7 @@ export class PipelineExecutor extends EventEmitter {
   /**
    * Execute complete ETL/ELT pipeline
    */
-  async execute(
-    connector: BaseConnector,
-    config: DataSourceConfig
-  ): Promise<PipelineRun> {
+  async execute(connector: BaseConnector, config: DataSourceConfig): Promise<PipelineRun> {
     const run: PipelineRun = {
       id: this.generateRunId(),
       pipelineId: config.id,
@@ -45,10 +42,10 @@ export class PipelineExecutor extends EventEmitter {
       bytesProcessed: 0,
       errors: [],
       metrics: this.initializeMetrics(),
-      lineage: []
+      lineage: [],
     };
 
-    this.emit('pipeline:started', run);
+    this.emit("pipeline:started", run);
 
     try {
       // 1. Extraction phase
@@ -79,11 +76,13 @@ export class PipelineExecutor extends EventEmitter {
             run.errors.push(...validationResult.errors);
 
             // Filter out invalid records if configured to skip
-            const validRecords = transformedData.filter((_, idx) =>
-              !validationResult.failedRecords.includes(idx)
+            const validRecords = transformedData.filter(
+              (_, idx) => !validationResult.failedRecords.includes(idx)
             );
 
-            if (validRecords.length === 0) {continue;}
+            if (validRecords.length === 0) {
+              continue;
+            }
           }
 
           // 4. Enrichment phase
@@ -102,23 +101,24 @@ export class PipelineExecutor extends EventEmitter {
           run.lineage.push({
             sourceEntity: config.name,
             targetEntity: config.loadConfig.targetTable,
-            transformations: config.transformationConfig?.transformations.map(t => t.name) || [],
+            transformations: config.transformationConfig?.transformations.map((t) => t.name) || [],
             timestamp: new Date(),
             metadata: {
               batchSize: batch.length,
-              recordsLoaded: loadResult.recordsLoaded
-            }
+              recordsLoaded: loadResult.recordsLoaded,
+            },
           });
 
-          this.emit('pipeline:progress', {
+          this.emit("pipeline:progress", {
             runId: run.id,
             recordsExtracted: run.recordsExtracted,
-            recordsLoaded: run.recordsLoaded
+            recordsLoaded: run.recordsLoaded,
           });
         }
 
         run.metrics.extractionDurationMs = Date.now() - extractionStart;
-        run.status = run.recordsFailed > 0 ? PipelineStatus.PARTIAL_SUCCESS : PipelineStatus.SUCCESS;
+        run.status =
+          run.recordsFailed > 0 ? PipelineStatus.PARTIAL_SUCCESS : PipelineStatus.SUCCESS;
       } finally {
         await connector.disconnect();
         await loader.disconnect();
@@ -126,14 +126,15 @@ export class PipelineExecutor extends EventEmitter {
 
       run.endTime = new Date();
       run.metrics.totalDurationMs = run.endTime.getTime() - run.startTime.getTime();
-      run.metrics.throughputRecordsPerSecond = run.recordsLoaded / (run.metrics.totalDurationMs / 1000);
+      run.metrics.throughputRecordsPerSecond =
+        run.recordsLoaded / (run.metrics.totalDurationMs / 1000);
 
-      this.emit('pipeline:completed', run);
+      this.emit("pipeline:completed", run);
       this.logger.info(`Pipeline ${run.pipelineId} completed successfully`, {
         recordsExtracted: run.recordsExtracted,
         recordsLoaded: run.recordsLoaded,
         recordsFailed: run.recordsFailed,
-        durationMs: run.metrics.totalDurationMs
+        durationMs: run.metrics.totalDurationMs,
       });
 
       return run;
@@ -142,12 +143,12 @@ export class PipelineExecutor extends EventEmitter {
       run.endTime = new Date();
       run.errors.push({
         timestamp: new Date(),
-        stage: 'extraction',
-        message: error instanceof Error ? error.message : 'Unknown error',
-        details: error
+        stage: "extraction",
+        message: error instanceof Error ? error.message : "Unknown error",
+        details: error,
       });
 
-      this.emit('pipeline:failed', run);
+      this.emit("pipeline:failed", run);
       this.logger.error(`Pipeline ${run.pipelineId} failed`, { error });
 
       return run;
@@ -167,7 +168,7 @@ export class PipelineExecutor extends EventEmitter {
       loadingDurationMs: 0,
       totalDurationMs: 0,
       throughputRecordsPerSecond: 0,
-      throughputMbPerSecond: 0
+      throughputMbPerSecond: 0,
     };
   }
 }

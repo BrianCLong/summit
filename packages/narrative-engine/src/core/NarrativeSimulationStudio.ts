@@ -1,11 +1,11 @@
-import { SimulationEngine } from './SimulationEngine.js';
+import { SimulationEngine } from "./SimulationEngine.js";
 import type {
   CounterNarrativeStrategy,
   Event,
   InfluenceCampaign,
   InformationOperation,
   StudioTickResult,
-} from './types.js';
+} from "./types.js";
 
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(max, Math.max(min, value));
@@ -54,19 +54,22 @@ export class NarrativeSimulationStudio {
         const susceptibility = 1 - actor.getResilience();
         const adjustedIntensity = this.applyMitigation(campaign.intensity, mitigation);
         const weightedIntensity = Number(
-          Math.max(0.1, adjustedIntensity * susceptibility * (1 + actor.getInfluence() / 10)).toFixed(2),
+          Math.max(
+            0.1,
+            adjustedIntensity * susceptibility * (1 + actor.getInfluence() / 10)
+          ).toFixed(2)
         );
 
         const event: Event = {
           id: `${campaign.id}-${targetId}-${ts}-${generatedEvents.length}`,
-          type: 'influence-campaign',
+          type: "influence-campaign",
           actorId: targetId,
           intensity: weightedIntensity,
           timestamp: ts,
           payload: {
             campaignId: campaign.id,
             sponsor: campaign.sponsor,
-            narrative: campaign.narratives[0] ?? 'influence-push',
+            narrative: campaign.narratives[0] ?? "influence-push",
             channels: campaign.channels,
             targetAudiences: campaign.targetAudiences,
             mitigation,
@@ -79,11 +82,14 @@ export class NarrativeSimulationStudio {
 
       const strategies = this.counterStrategies.get(campaign.id) ?? [];
       for (const strategy of strategies) {
-        const counterWeight = Math.max(0.1, strategy.confidence * (strategy.channelAlignment ?? 0.5));
+        const counterWeight = Math.max(
+          0.1,
+          strategy.confidence * (strategy.channelAlignment ?? 0.5)
+        );
         for (const targetId of targetActorIds) {
           const counterEvent: Event = {
             id: `${strategy.id}-${targetId}-${ts}-${generatedEvents.length}`,
-            type: 'counter-narrative',
+            type: "counter-narrative",
             actorId: targetId,
             intensity: Number(counterWeight.toFixed(2)),
             timestamp: ts,
@@ -99,7 +105,7 @@ export class NarrativeSimulationStudio {
       }
 
       notes.push(
-        `Campaign ${campaign.id} targeted ${targetActorIds.length} actors with mitigation ${mitigation.toFixed(2)}.`,
+        `Campaign ${campaign.id} targeted ${targetActorIds.length} actors with mitigation ${mitigation.toFixed(2)}.`
       );
     }
 
@@ -119,12 +125,18 @@ export class NarrativeSimulationStudio {
       const score = clamp(
         baseEffect * (0.6 + susceptibility) * (1 - mitigation) - moraleDrag,
         0,
-        1,
+        1
       );
       operationEffectiveness[operation.id] = Number(score.toFixed(3));
     }
 
-    return { timestamp: ts, generatedEvents, counterNarrativeCoverage, operationEffectiveness, notes };
+    return {
+      timestamp: ts,
+      generatedEvents,
+      counterNarrativeCoverage,
+      operationEffectiveness,
+      notes,
+    };
   }
 
   private calculateMitigation(campaignId: string): number {

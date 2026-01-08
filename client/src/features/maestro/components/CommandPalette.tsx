@@ -1,7 +1,7 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { useNavigate } from "react-router-dom";
 // @ts-expect-error - AuthContext is a JS file
-import { useAuth } from '../../context/AuthContext.jsx';
+import { useAuth } from "../../context/AuthContext.jsx";
 
 interface Command {
   id: string;
@@ -22,75 +22,73 @@ export function CommandPalette({
 }) {
   const navigate = useNavigate();
   const { hasPermission } = useAuth();
-  const [query, setQuery] = React.useState('');
+  const [query, setQuery] = React.useState("");
 
   const commands = React.useMemo<Command[]>(
     () => [
       {
-        id: 'dashboard',
-        label: 'Go to Dashboard',
-        shortcut: 'g d',
+        id: "dashboard",
+        label: "Go to Dashboard",
+        shortcut: "g d",
         onSelect: () => navigate(`${basePath}dashboard`),
       },
       {
-        id: 'pipelines',
-        label: 'Open Pipelines',
-        shortcut: 'g p',
+        id: "pipelines",
+        label: "Open Pipelines",
+        shortcut: "g p",
         onSelect: () => navigate(`${basePath}pipelines`),
       },
       {
-        id: 'runs',
-        label: 'Open Latest Run',
-        shortcut: 'g r',
+        id: "runs",
+        label: "Open Latest Run",
+        shortcut: "g r",
         onSelect: () => navigate(`${basePath}runs/run-1`),
-        requires: 'run_maestro',
+        requires: "run_maestro",
       },
       {
-        id: 'releases',
-        label: 'View Releases',
-        shortcut: 'g l',
+        id: "releases",
+        label: "View Releases",
+        shortcut: "g l",
         onSelect: () => navigate(`${basePath}releases`),
       },
       {
-        id: 'observability',
-        label: 'Open Observability',
-        shortcut: 'g o',
+        id: "observability",
+        label: "Open Observability",
+        shortcut: "g o",
         onSelect: () => navigate(`${basePath}observability`),
       },
       {
-        id: 'admin',
-        label: 'View Audit Log',
-        shortcut: 'g a',
+        id: "admin",
+        label: "View Audit Log",
+        shortcut: "g a",
         onSelect: () => navigate(`${basePath}admin`),
-        requires: 'manage_users',
+        requires: "manage_users",
       },
     ],
-    [basePath, navigate],
+    [basePath, navigate]
   );
 
   const filtered = React.useMemo(() => {
     const trimmed = query.trim().toLowerCase();
     const commandPool = commands.filter(
-      (command) => !command.requires || hasPermission?.(command.requires),
+      (command) => !command.requires || hasPermission?.(command.requires)
     );
 
     if (!trimmed) return commandPool;
-    return commandPool.filter((command) =>
-      command.label.toLowerCase().includes(trimmed),
-    );
+    return commandPool.filter((command) => command.label.toLowerCase().includes(trimmed));
   }, [commands, hasPermission, query]);
 
   React.useEffect(() => {
-    if (!open) setQuery('');
+    if (!open) setQuery("");
   }, [open]);
 
   React.useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') onClose();
+      if (event.key === "Escape") onClose();
     }
     if (open) {
-      window.addEventListener('keydown', onKeyDown);
-      return () => window.removeEventListener('keydown', onKeyDown);
+      window.addEventListener("keydown", onKeyDown);
+      return () => window.removeEventListener("keydown", onKeyDown);
     }
     return undefined;
   }, [open, onClose]);

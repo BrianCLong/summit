@@ -27,7 +27,9 @@ docs/
 ## Key Modules
 
 ### `maestro/models.py`
+
 Domain models with Pydantic:
+
 - `Run`: Workflow/computation tracker
 - `Artifact`: Build outputs, SBOMs, provenance files
 - `DisclosurePack`: Summarizes runs with artifact manifests
@@ -35,19 +37,25 @@ Domain models with Pydantic:
 - `ArtifactMetadata`: Governance flags (SBOM, SLSA, risk)
 
 ### `maestro/storage.py`
+
 In-memory storage (MaestroStore):
+
 - `create_run()`, `get_run()`, `list_runs()`, `update_run()`
 - `create_artifact()`, `get_artifact()`, `list_artifacts()`
 - `create_disclosure_pack()`, `get_disclosure_pack()`, `list_disclosure_packs()`
 
 ### `maestro/checks.py`
+
 Release gate validation:
+
 - `check_release_gate(store, run_id)`: Validates compliance
 - `generate_compliance_report(store, run_id)`: Detailed report
 - `check_artifact_compliance(artifact)`: Per-artifact check
 
 ### `api/maestro.py`
+
 FastAPI router with endpoints:
+
 - **Runs**: POST/GET/PATCH `/maestro/runs`
 - **Artifacts**: POST/GET `/maestro/artifacts`
 - **Disclosure Packs**: POST/GET `/maestro/disclosure-packs`
@@ -109,6 +117,7 @@ curl -X POST http://localhost:8001/maestro/runs \
 ```
 
 **Response:**
+
 ```json
 {
   "id": "abc-123-def-456",
@@ -165,6 +174,7 @@ curl http://localhost:8001/maestro/runs/$RUN_ID/manifest | jq
 ```
 
 **Response includes:**
+
 - Run details
 - All artifacts
 - Disclosure pack (if created)
@@ -187,6 +197,7 @@ curl http://localhost:8001/maestro/runs/$RUN_ID/release-gate | jq
 ```
 
 **Passing Response:**
+
 ```json
 {
   "run_id": "abc-123-def-456",
@@ -309,6 +320,7 @@ These IDs should reference entities and decisions from the IntelGraph MVP.
 **Problem**: Import errors when running tests
 
 **Solution**: Ensure you're running from the summit root:
+
 ```bash
 cd /home/user/summit
 pytest tests/maestro/ -v
@@ -317,6 +329,7 @@ pytest tests/maestro/ -v
 **Problem**: Port 8001 already in use
 
 **Solution**: Stop existing process or use different port:
+
 ```bash
 python -m uvicorn maestro.app:app --host 0.0.0.0 --port 8002 --reload
 ```
@@ -324,6 +337,7 @@ python -m uvicorn maestro.app:app --host 0.0.0.0 --port 8002 --reload
 **Problem**: Release gate fails
 
 **Solution**: Check compliance report for details:
+
 ```bash
 curl http://localhost:8001/maestro/runs/$RUN_ID/manifest | jq '.compliance_report'
 ```

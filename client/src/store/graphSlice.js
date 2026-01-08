@@ -1,4 +1,4 @@
-import * as graphSliceModule from './slices/graphSlice';
+import * as graphSliceModule from "./slices/graphSlice";
 const graphSlice = graphSliceModule.default || graphSliceModule;
 export default graphSlice.reducer;
 export const {
@@ -30,7 +30,7 @@ export const {
   setErrorMessage,
   setNodeTypeFilter,
   setMinConfidenceFilter,
-  fetchGraphData
+  fetchGraphData,
 } = graphSlice.actions;
 
-export { fetchGraphData as fetchGraphDataThunk } from './slices/graphSlice';
+export { fetchGraphData as fetchGraphDataThunk } from "./slices/graphSlice";

@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { FftAnalyzer } from './fft.js';
-import { FrequencyDomainFrame, NumericArray, SpectralMetrics } from './types.js';
+import { FftAnalyzer } from "./fft.js";
+import { FrequencyDomainFrame, NumericArray, SpectralMetrics } from "./types.js";
 
 export interface BandDefinition {
   name: string;
@@ -9,20 +9,24 @@ export interface BandDefinition {
 }
 
 const DEFAULT_BANDS: BandDefinition[] = [
-  { name: 'low', fromHz: 0, toHz: 300 },
-  { name: 'mid', fromHz: 300, toHz: 3000 },
-  { name: 'high', fromHz: 3000, toHz: 20000 },
+  { name: "low", fromHz: 0, toHz: 300 },
+  { name: "mid", fromHz: 300, toHz: 3000 },
+  { name: "high", fromHz: 3000, toHz: 20000 },
 ];
 
 export class SpectralAnalyzer {
   constructor(private readonly fftAnalyzer: FftAnalyzer) {}
 
-  analyze(samples: NumericArray, sampleRate: number, bands: BandDefinition[] = DEFAULT_BANDS): SpectralMetrics {
+  analyze(
+    samples: NumericArray,
+    sampleRate: number,
+    bands: BandDefinition[] = DEFAULT_BANDS
+  ): SpectralMetrics {
     if (sampleRate <= 0) {
-      throw new Error('Sample rate must be positive');
+      throw new Error("Sample rate must be positive");
     }
     if (bands.length === 0) {
-      throw new Error('At least one band definition is required');
+      throw new Error("At least one band definition is required");
     }
     const frame = this.fftAnalyzer.analyze(samples, sampleRate);
     const { frequencies, magnitudes, powerSpectralDensity } = frame;
@@ -31,16 +35,22 @@ export class SpectralAnalyzer {
     const centroidNumerator = frequencies.reduce((acc, f, idx) => acc + f * magnitudes[idx], 0);
     const spectralCentroid = centroidNumerator / sumMagnitude;
 
-    const bandwidthNumerator = frequencies.reduce((acc, f, idx) => acc + (f - spectralCentroid) ** 2 * magnitudes[idx], 0);
+    const bandwidthNumerator = frequencies.reduce(
+      (acc, f, idx) => acc + (f - spectralCentroid) ** 2 * magnitudes[idx],
+      0
+    );
     const spectralBandwidth = Math.sqrt(bandwidthNumerator / sumMagnitude);
 
     const geometricMean = Math.exp(
-      magnitudes.reduce((acc, mag) => acc + Math.log(mag + Number.EPSILON), 0) / magnitudes.length,
+      magnitudes.reduce((acc, mag) => acc + Math.log(mag + Number.EPSILON), 0) / magnitudes.length
     );
     const arithmeticMean = sumMagnitude / magnitudes.length;
     const spectralFlatness = geometricMean / arithmeticMean;
 
-    const dominantIdx = magnitudes.reduce((maxIdx, mag, idx) => (mag > magnitudes[maxIdx] ? idx : maxIdx), 0);
+    const dominantIdx = magnitudes.reduce(
+      (maxIdx, mag, idx) => (mag > magnitudes[maxIdx] ? idx : maxIdx),
+      0
+    );
     const dominantFrequency = frequencies[dominantIdx];
 
     const bandPower: Record<string, number> = {};

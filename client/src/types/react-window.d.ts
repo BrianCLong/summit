@@ -1,5 +1,5 @@
-declare module 'react-window' {
-  import * as React from 'react';
+declare module "react-window" {
+  import * as React from "react";
   export interface ListChildComponentProps<T = any> {
     index: number;
     style: React.CSSProperties;

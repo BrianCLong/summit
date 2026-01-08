@@ -3,8 +3,8 @@
  * Identifies statistically significant spatial clusters of high and low values
  */
 
-import { GeoPoint, Hotspot } from '@intelgraph/geospatial';
-import { haversineDistance } from '@intelgraph/geospatial';
+import { GeoPoint, Hotspot } from "@intelgraph/geospatial";
+import { haversineDistance } from "@intelgraph/geospatial";
 
 export interface HotspotPoint extends GeoPoint {
   value: number; // The attribute value to analyze (e.g., incident count)
@@ -49,7 +49,7 @@ export class GetisOrdAnalysis {
       const pValue = this.getPValue(giStar.zScore);
       const significance = this.getSignificance(giStar.zScore, pValue);
 
-      if (significance !== 'none') {
+      if (significance !== "none") {
         hotspots.push({
           location: {
             latitude: point.latitude,
@@ -127,10 +127,7 @@ export class GetisOrdAnalysis {
     const t = 1 / (1 + 0.2316419 * absZ);
     const d = 0.3989423 * Math.exp((-zScore * zScore) / 2);
     const p =
-      d *
-      t *
-      (0.3193815 +
-        t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+      d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
 
     return 2 * p; // Two-tailed
   }
@@ -138,24 +135,21 @@ export class GetisOrdAnalysis {
   /**
    * Determine significance level from z-score and p-value
    */
-  private getSignificance(
-    zScore: number,
-    pValue: number
-  ): 'high' | 'medium' | 'low' | 'none' {
+  private getSignificance(zScore: number, pValue: number): "high" | "medium" | "low" | "none" {
     if (pValue > this.significanceLevel) {
-      return 'none';
+      return "none";
     }
 
     const absZ = Math.abs(zScore);
 
     if (absZ >= 2.58) {
-      return 'high'; // 99% confidence
+      return "high"; // 99% confidence
     } else if (absZ >= 1.96) {
-      return 'high'; // 95% confidence
+      return "high"; // 95% confidence
     } else if (absZ >= 1.65) {
-      return 'medium'; // 90% confidence
+      return "medium"; // 90% confidence
     } else {
-      return 'low';
+      return "low";
     }
   }
 }

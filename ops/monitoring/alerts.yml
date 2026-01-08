@@ -17,7 +17,7 @@ groups:
           team: platform
         annotations:
           summary: "High CPU usage detected"
-          description: "CPU usage is {{ $value | printf \"%.1f\" }}% (threshold: 80%)"
+          description: 'CPU usage is {{ $value | printf "%.1f" }}% (threshold: 80%)'
           runbook: "ops/runbooks/high-cpu.md"
 
       - alert: CriticalCPUUsage
@@ -29,7 +29,7 @@ groups:
           page: "true"
         annotations:
           summary: "Critical CPU usage - immediate action required"
-          description: "CPU usage is {{ $value | printf \"%.1f\" }}% (threshold: 95%)"
+          description: 'CPU usage is {{ $value | printf "%.1f" }}% (threshold: 95%)'
           runbook: "ops/runbooks/high-cpu.md"
 
       - alert: HighMemoryUsage
@@ -40,7 +40,7 @@ groups:
           team: platform
         annotations:
           summary: "High memory usage detected"
-          description: "Memory usage is {{ $value | printf \"%.1f\" }}%"
+          description: 'Memory usage is {{ $value | printf "%.1f" }}%'
           runbook: "ops/runbooks/high-memory.md"
 
       - alert: DiskSpaceLow
@@ -51,7 +51,7 @@ groups:
           team: platform
         annotations:
           summary: "Low disk space"
-          description: "Available disk space is {{ $value | printf \"%.1f\" }}%"
+          description: 'Available disk space is {{ $value | printf "%.1f" }}%'
 
   # =============================================================================
   # Application Health Alerts
@@ -68,7 +68,7 @@ groups:
           team: backend
         annotations:
           summary: "Elevated error rate detected"
-          description: "Error rate is {{ $value | printf \"%.2f\" }}% (threshold: 1%)"
+          description: 'Error rate is {{ $value | printf "%.2f" }}% (threshold: 1%)'
           runbook: "ops/runbooks/high-error-rate.md"
 
       - alert: CriticalErrorRate
@@ -82,7 +82,7 @@ groups:
           page: "true"
         annotations:
           summary: "Critical error rate - service degradation"
-          description: "Error rate is {{ $value | printf \"%.2f\" }}% (threshold: 5%)"
+          description: 'Error rate is {{ $value | printf "%.2f" }}% (threshold: 5%)'
           runbook: "ops/runbooks/high-error-rate.md"
 
       - alert: HighLatency
@@ -93,7 +93,7 @@ groups:
           team: backend
         annotations:
           summary: "High API latency detected"
-          description: "P95 latency is {{ $value | printf \"%.2f\" }}s (threshold: 2s)"
+          description: 'P95 latency is {{ $value | printf "%.2f" }}s (threshold: 2s)'
           runbook: "ops/runbooks/high-latency.md"
 
       - alert: ServiceDown
@@ -123,7 +123,7 @@ groups:
           team: governance
         annotations:
           summary: "High governance denial rate"
-          description: "{{ $value | printf \"%.1f\" }}% of requests being denied"
+          description: '{{ $value | printf "%.1f" }}% of requests being denied'
           runbook: "ops/runbooks/governance-denials.md"
 
       - alert: GovernanceServiceDegraded
@@ -158,7 +158,7 @@ groups:
           team: compliance
         annotations:
           summary: "Audit log gap detected"
-          description: "No audit events written in {{ $value | printf \"%.0f\" }}s"
+          description: 'No audit events written in {{ $value | printf "%.0f" }}s'
           runbook: "ops/runbooks/audit-gap.md"
 
   # =============================================================================
@@ -184,7 +184,7 @@ groups:
           team: platform
         annotations:
           summary: "Neo4j query latency elevated"
-          description: "P99 query latency is {{ $value | printf \"%.2f\" }}s"
+          description: 'P99 query latency is {{ $value | printf "%.2f" }}s'
 
       - alert: RedisConnectionFailed
         expr: redis_connected_clients == 0
@@ -210,7 +210,7 @@ groups:
           team: security
         annotations:
           summary: "High rate of unauthorized access attempts"
-          description: "{{ $value | printf \"%.1f\" }} auth failures per second"
+          description: '{{ $value | printf "%.1f" }} auth failures per second'
           runbook: "ops/runbooks/auth-failures.md"
 
       - alert: TenantIsolationViolation
@@ -254,7 +254,7 @@ groups:
           team: platform
         annotations:
           summary: "SLO availability breach risk"
-          description: "24h availability is {{ $value | printf \"%.4f\" }} below target"
+          description: '24h availability is {{ $value | printf "%.4f" }} below target'
 
       - alert: SLOLatencyBreach
         expr: |
@@ -265,7 +265,7 @@ groups:
           team: platform
         annotations:
           summary: "SLO latency breach risk"
-          description: "P99 latency over 24h is {{ $value | printf \"%.2f\" }}s"
+          description: 'P99 latency over 24h is {{ $value | printf "%.2f" }}s'
 
   # =============================================================================
   # Post-GA Evolution Services (v3.1.0+)
@@ -283,7 +283,7 @@ groups:
           team: product
         annotations:
           summary: "Low onboarding completion rate"
-          description: "Only {{ $value | printf \"%.1f\" }}% of users completing onboarding (target: >80%)"
+          description: 'Only {{ $value | printf "%.1f" }}% of users completing onboarding (target: >80%)'
           runbook: "ops/runbooks/onboarding-issues.md"
 
       - alert: OnboardingStepFailures
@@ -294,7 +294,7 @@ groups:
           team: product
         annotations:
           summary: "High onboarding step failure rate"
-          description: "{{ $value | printf \"%.1f\" }} failures per second in onboarding steps"
+          description: '{{ $value | printf "%.1f" }} failures per second in onboarding steps'
 
       # Experimentation Alerts
       - alert: ExperimentAssignmentErrors
@@ -305,7 +305,7 @@ groups:
           team: platform
         annotations:
           summary: "Experiment assignment errors occurring"
-          description: "{{ $value | printf \"%.2f\" }} assignment errors per second"
+          description: '{{ $value | printf "%.2f" }} assignment errors per second'
 
       - alert: ExperimentStatisticalPowerLow
         expr: experiment_statistical_power < 0.8
@@ -315,7 +315,7 @@ groups:
           team: product
         annotations:
           summary: "Experiment has low statistical power"
-          description: "Experiment {{ $labels.experiment_id }} has power {{ $value | printf \"%.2f\" }}"
+          description: 'Experiment {{ $labels.experiment_id }} has power {{ $value | printf "%.2f" }}'
 
       # i18n Alerts
       - alert: TranslationMissing
@@ -336,7 +336,7 @@ groups:
           team: platform
         annotations:
           summary: "High locale detection failure rate"
-          description: "{{ $value | printf \"%.1f\" }} locale detection failures per second"
+          description: '{{ $value | printf "%.1f" }} locale detection failures per second'
 
       # Support Center Alerts
       - alert: SupportTicketBacklogHigh
@@ -357,7 +357,7 @@ groups:
           team: support
         annotations:
           summary: "High support escalation rate"
-          description: "{{ $value | printf \"%.1f\" }} escalations per hour"
+          description: '{{ $value | printf "%.1f" }} escalations per hour'
 
       - alert: KnowledgeBaseSearchFailing
         expr: rate(support_kb_search_errors_total[5m]) > 1
@@ -367,7 +367,7 @@ groups:
           team: platform
         annotations:
           summary: "Knowledge base search errors"
-          description: "{{ $value | printf \"%.2f\" }} search errors per second"
+          description: '{{ $value | printf "%.2f" }} search errors per second'
 
       # Adoption Analytics Alerts
       - alert: AnalyticsEventDropped
@@ -378,7 +378,7 @@ groups:
           team: platform
         annotations:
           summary: "Analytics events being dropped"
-          description: "{{ $value | printf \"%.1f\" }} events dropped per second"
+          description: '{{ $value | printf "%.1f" }} events dropped per second'
 
       - alert: AnalyticsIngestionLatencyHigh
         expr: histogram_quantile(0.95, rate(adoption_event_ingestion_seconds_bucket[5m])) > 1
@@ -388,7 +388,7 @@ groups:
           team: platform
         annotations:
           summary: "Analytics ingestion latency high"
-          description: "P95 ingestion latency is {{ $value | printf \"%.2f\" }}s"
+          description: 'P95 ingestion latency is {{ $value | printf "%.2f" }}s'
 
       - alert: DAUDropSignificant
         expr: |
@@ -399,4 +399,4 @@ groups:
           team: product
         annotations:
           summary: "Significant DAU drop week-over-week"
-          description: "DAU dropped {{ $value | printf \"%.1f\" }}% compared to last week"
+          description: 'DAU dropped {{ $value | printf "%.1f" }}% compared to last week'

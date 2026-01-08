@@ -56,6 +56,7 @@ Updates lodash from 4.17.20 to 4.17.21
 ### What it does
 
 Automatically applies labels to PRs based on:
+
 - **Files changed** (from `.github/labeler.yml` config)
 - **PR title** (conventional commit patterns)
 - **PR body content** (keywords and markers)
@@ -63,6 +64,7 @@ Automatically applies labels to PRs based on:
 ### Label Categories
 
 #### Type Labels
+
 - `type: documentation` - Docs, markdown files
 - `type: dependencies` - Package.json, lock files
 - `type: security` - Security-related changes
@@ -77,6 +79,7 @@ Automatically applies labels to PRs based on:
 - `type: performance` - Performance improvements (from title)
 
 #### Area Labels
+
 - `area: frontend` - Client, React, UI components
 - `area: backend` - Server, API, services
 - `area: graphql` - GraphQL schema, resolvers
@@ -85,10 +88,12 @@ Automatically applies labels to PRs based on:
 - `area: observability` - Monitoring, metrics, tracing
 
 #### Priority Labels
+
 - `priority: high` - Critical files changed
 - `breaking-change` - Breaking changes detected
 
 #### Size Labels
+
 - `size: XS` - < 10 files changed
 - `size: S` - 10-29 files changed
 - `size: M` - 30-99 files changed
@@ -96,6 +101,7 @@ Automatically applies labels to PRs based on:
 - `size: XL` - 500+ files changed
 
 #### Status Labels
+
 - `status: wip` - Work in progress
 - `status: needs-review` - Ready for review
 
@@ -176,13 +182,13 @@ package.json                  @devops-team
 
 ### Size Thresholds
 
-| Size | Lines Changed | Files | Label | Action |
-|------|---------------|-------|-------|--------|
-| XS   | < 50          | < 5   | `size: XS` | None |
-| S    | < 200         | < 15  | `size: S` | None |
-| M    | < 500         | < 30  | `size: M` | None |
-| L    | < 1000        | < 50  | `size: L` | ⚠️ Warning comment |
-| XL   | > 1000        | > 50  | `size: XL` | 🚨 Strong warning |
+| Size | Lines Changed | Files | Label      | Action             |
+| ---- | ------------- | ----- | ---------- | ------------------ |
+| XS   | < 50          | < 5   | `size: XS` | None               |
+| S    | < 200         | < 15  | `size: S`  | None               |
+| M    | < 500         | < 30  | `size: M`  | None               |
+| L    | < 1000        | < 50  | `size: L`  | ⚠️ Warning comment |
+| XL   | > 1000        | > 50  | `size: XL` | 🚨 Strong warning  |
 
 ### Features
 
@@ -214,6 +220,7 @@ This PR has **1500 lines changed** across **75 files**.
 ### 🔍 Analysis
 
 **Top directories changed:**
+
 - `client`: 30 files
 - `server`: 25 files
 - `.github`: 20 files
@@ -244,6 +251,7 @@ This PR has **1500 lines changed** across **75 files**.
 ### Test Detection Patterns
 
 Recognizes these as test files:
+
 - `*.test.{ts,tsx,js,jsx}`
 - `*.spec.{ts,tsx,js,jsx}`
 - `__tests__/**/*`
@@ -272,6 +280,7 @@ This PR modifies **5 source file(s)** but doesn't include any test changes.
 ### 🧪 Test Coverage Recommendations
 
 Please consider adding tests for:
+
 - `src/services/auth.ts`
 - `src/utils/validation.ts`
 - ...
@@ -279,6 +288,7 @@ Please consider adding tests for:
 ### 📝 Test File Conventions
 
 For `src/foo/bar.ts`, add tests at:
+
 - `src/foo/bar.test.ts` (co-located)
 - `src/foo/__tests__/bar.test.ts`
 - `tests/foo/bar.test.ts`
@@ -300,7 +310,7 @@ All workflows use these permissions:
 permissions:
   contents: read
   pull-requests: write
-  checks: read  # for dependabot workflow
+  checks: read # for dependabot workflow
 ```
 
 ### Required Secrets

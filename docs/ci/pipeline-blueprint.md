@@ -16,21 +16,25 @@ This document outlines the current state and the upgraded design of the Summit C
 The upgraded pipeline consolidates testing into clear lanes and adds a delivery stage.
 
 ### 1. Quality Lane (Fast)
+
 - **Lint**: ESLint for all packages.
 - **Typecheck**: TypeScript validation.
 - **Security**: SBOM generation and Trivy scan.
 - **Policy**: OPA policy checks.
 
 ### 2. Test Lane (Parallel)
+
 - **Backend Unit**: Jest tests for `server` and `services` (Sharded).
 - **Frontend Unit**: Vitest tests for `apps/web` and `client`.
 - **Integration**: Jest integration tests.
 
 ### 3. Verification Lane (Heavy)
+
 - **Golden Path Smoke**: Docker Compose up + API smoke script (validates wiring).
 - **E2E**: Playwright tests running against the containerized stack.
 
 ### 4. Delivery Lane (Conditional)
+
 - **Push to Registry**: Build and push Docker images (if on `main`).
 - **Deploy**: Trigger deployment to Staging (mock/blueprint).
 

@@ -12,8 +12,8 @@ concurrency:
 
 env:
   PNPM_CACHE_FOLDER: ~/.pnpm-store
-  NODE_VERSION: '20.x'
-  PNPM_VERSION: '9.12.0'
+  NODE_VERSION: "20.x"
+  PNPM_VERSION: "9.12.0"
 
 jobs:
   # Fast feedback lane: Static Analysis & Security
@@ -152,8 +152,8 @@ jobs:
       - name: Build Docker Images
         # Building strictly what is needed for smoke tests
         run: |
-           docker build -f server/Dockerfile.dev -t summit/api:ci ./server
-           docker build -f client/Dockerfile.dev -t summit/web:ci ./client
+          docker build -f server/Dockerfile.dev -t summit/api:ci ./server
+          docker build -f client/Dockerfile.dev -t summit/web:ci ./client
 
       - name: Start Environment
         run: make up
@@ -293,7 +293,17 @@ jobs:
   pr-quality-gate-status:
     name: PR Quality Gate Status
     runs-on: ubuntu-latest
-    needs: [static-checks, unit-tests, smoke-tests, sonarqube-sast, compliance-drift-check, threat-model-drift-check, agent-governance-check, ownership-check]
+    needs:
+      [
+        static-checks,
+        unit-tests,
+        smoke-tests,
+        sonarqube-sast,
+        compliance-drift-check,
+        threat-model-drift-check,
+        agent-governance-check,
+        ownership-check,
+      ]
     if: always() # This ensures the job runs even if previous jobs fail
     steps:
       - name: Check Status of All Jobs

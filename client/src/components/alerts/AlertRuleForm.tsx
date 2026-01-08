@@ -1,5 +1,5 @@
 // client/src/components/alerts/AlertRuleForm.tsx
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   TextField,
   Button,
@@ -10,7 +10,7 @@ import {
   Box,
   Typography,
   SelectChangeEvent,
-} from '@mui/material';
+} from "@mui/material";
 
 // Placeholder for the AlertRule type
 interface AlertRule {
@@ -20,25 +20,25 @@ interface AlertRule {
   threshold: number;
   operator: string;
   durationSeconds: number;
-  severity: 'warning' | 'critical' | 'info';
+  severity: "warning" | "critical" | "info";
   notificationChannelId: string;
 }
 
 interface AlertRuleFormProps {
   rule?: AlertRule;
-  onSubmit: (rule: Omit<AlertRule, 'id'>) => void;
+  onSubmit: (rule: Omit<AlertRule, "id">) => void;
 }
 
 const AlertRuleForm: React.FC<AlertRuleFormProps> = ({ rule, onSubmit }) => {
-  const [formData, setFormData] = useState<Omit<AlertRule, 'id'>>(
+  const [formData, setFormData] = useState<Omit<AlertRule, "id">>(
     rule || {
-      name: '',
-      metric: '',
+      name: "",
+      metric: "",
       threshold: 0,
-      operator: '>',
+      operator: ">",
       durationSeconds: 60,
-      severity: 'warning',
-      notificationChannelId: '',
+      severity: "warning",
+      notificationChannelId: "",
     }
   );
 
@@ -58,8 +58,12 @@ const AlertRuleForm: React.FC<AlertRuleFormProps> = ({ rule, onSubmit }) => {
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ '& .MuiTextField-root': { m: 1, width: '25ch' } }}>
-      <Typography variant="h6">{rule ? 'Edit' : 'Create'} Alert Rule</Typography>
+    <Box
+      component="form"
+      onSubmit={handleSubmit}
+      sx={{ "& .MuiTextField-root": { m: 1, width: "25ch" } }}
+    >
+      <Typography variant="h6">{rule ? "Edit" : "Create"} Alert Rule</Typography>
       <div>
         <TextField
           label="Name"
@@ -87,11 +91,7 @@ const AlertRuleForm: React.FC<AlertRuleFormProps> = ({ rule, onSubmit }) => {
         />
         <FormControl sx={{ m: 1, minWidth: 120 }}>
           <InputLabel>Operator</InputLabel>
-          <Select
-            name="operator"
-            value={formData.operator}
-            onChange={handleSelectChange}
-          >
+          <Select name="operator" value={formData.operator} onChange={handleSelectChange}>
             <MenuItem value=">">&gt;</MenuItem>
             <MenuItem value="<">&lt;</MenuItem>
             <MenuItem value="=">=</MenuItem>
@@ -109,11 +109,7 @@ const AlertRuleForm: React.FC<AlertRuleFormProps> = ({ rule, onSubmit }) => {
         />
         <FormControl sx={{ m: 1, minWidth: 120 }}>
           <InputLabel>Severity</InputLabel>
-          <Select
-            name="severity"
-            value={formData.severity}
-            onChange={handleSelectChange}
-          >
+          <Select name="severity" value={formData.severity} onChange={handleSelectChange}>
             <MenuItem value="info">Info</MenuItem>
             <MenuItem value="warning">Warning</MenuItem>
             <MenuItem value="critical">Critical</MenuItem>
@@ -130,7 +126,7 @@ const AlertRuleForm: React.FC<AlertRuleFormProps> = ({ rule, onSubmit }) => {
         />
       </div>
       <Button type="submit" variant="contained" sx={{ m: 1 }}>
-        {rule ? 'Save Changes' : 'Create Rule'}
+        {rule ? "Save Changes" : "Create Rule"}
       </Button>
     </Box>
   );

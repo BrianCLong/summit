@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       immediate_analysis:
-        description: 'Run immediate performance analysis'
+        description: "Run immediate performance analysis"
         required: false
         default: false
         type: boolean
@@ -24,7 +24,7 @@ permissions:
   issues: write # For creating performance alerts
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: "20"
 
 jobs:
   queue-performance-check:

@@ -12,8 +12,8 @@
  * @see docs/performance/DATABASE_OPTIMIZATION.md
  */
 
-import { Driver, Session, auth, driver as createDriver, ServerInfo } from 'neo4j-driver';
-import pino from 'pino';
+import { Driver, Session, auth, driver as createDriver, ServerInfo } from "neo4j-driver";
+import pino from "pino";
 
 const logger = pino();
 
@@ -58,7 +58,7 @@ export interface QueryCacheEntry {
 export interface IndexDefinition {
   label: string;
   properties: string[];
-  type?: 'BTREE' | 'FULLTEXT' | 'RANGE' | 'TEXT';
+  type?: "BTREE" | "FULLTEXT" | "RANGE" | "TEXT";
 }
 
 /**
@@ -67,7 +67,7 @@ export interface IndexDefinition {
 export interface ConstraintDefinition {
   label: string;
   properties: string[];
-  type: 'UNIQUE' | 'NODE_KEY' | 'EXISTS';
+  type: "UNIQUE" | "NODE_KEY" | "EXISTS";
 }
 
 /**
@@ -98,7 +98,7 @@ export const defaultNeo4jConfig: Partial<Neo4jConfig> = {
 export class Neo4jConfigError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'Neo4jConfigError';
+    this.name = "Neo4jConfigError";
   }
 }
 
@@ -106,9 +106,13 @@ export class Neo4jConfigError extends Error {
  * Custom error class for Neo4j query errors
  */
 export class Neo4jQueryError extends Error {
-  constructor(message: string, public readonly query?: string, public readonly originalError?: Error) {
+  constructor(
+    message: string,
+    public readonly query?: string,
+    public readonly originalError?: Error
+  ) {
     super(message);
-    this.name = 'Neo4jQueryError';
+    this.name = "Neo4jQueryError";
   }
 }
 
@@ -119,11 +123,11 @@ export class Neo4jQueryError extends Error {
  */
 function validateConfig(config: Neo4jConfig): void {
   if (!config.uri) {
-    throw new Neo4jConfigError('Neo4j URI is required');
+    throw new Neo4jConfigError("Neo4j URI is required");
   }
 
   if (!config.username || !config.password) {
-    throw new Neo4jConfigError('Neo4j username and password are required');
+    throw new Neo4jConfigError("Neo4j username and password are required");
   }
 
   // Validate URI format
@@ -133,15 +137,15 @@ function validateConfig(config: Neo4jConfig): void {
 
   // Validate numeric configurations
   if (config.maxConnectionPoolSize !== undefined && config.maxConnectionPoolSize < 1) {
-    throw new Neo4jConfigError('maxConnectionPoolSize must be at least 1');
+    throw new Neo4jConfigError("maxConnectionPoolSize must be at least 1");
   }
 
   if (config.connectionTimeout !== undefined && config.connectionTimeout < 0) {
-    throw new Neo4jConfigError('connectionTimeout cannot be negative');
+    throw new Neo4jConfigError("connectionTimeout cannot be negative");
   }
 
   if (config.slowQueryThreshold !== undefined && config.slowQueryThreshold < 0) {
-    throw new Neo4jConfigError('slowQueryThreshold cannot be negative');
+    throw new Neo4jConfigError("slowQueryThreshold cannot be negative");
   }
 }
 
@@ -169,20 +173,23 @@ export function createOptimizedNeo4jDriver(config: Neo4jConfig): Driver {
 
     const driverConfig: any = {
       // Connection pool configuration
-      maxConnectionPoolSize: config.maxConnectionPoolSize ?? defaultNeo4jConfig.maxConnectionPoolSize,
-      connectionAcquisitionTimeout: config.connectionAcquisitionTimeout ?? defaultNeo4jConfig.connectionAcquisitionTimeout,
-      maxTransactionRetryTime: config.maxTransactionRetryTime ?? defaultNeo4jConfig.maxTransactionRetryTime,
+      maxConnectionPoolSize:
+        config.maxConnectionPoolSize ?? defaultNeo4jConfig.maxConnectionPoolSize,
+      connectionAcquisitionTimeout:
+        config.connectionAcquisitionTimeout ?? defaultNeo4jConfig.connectionAcquisitionTimeout,
+      maxTransactionRetryTime:
+        config.maxTransactionRetryTime ?? defaultNeo4jConfig.maxTransactionRetryTime,
       connectionTimeout: config.connectionTimeout ?? defaultNeo4jConfig.connectionTimeout,
 
       // Enable logging for connection pool events
       // This helps with debugging connection issues in production
       logging: {
-        level: process.env.NEO4J_LOG_LEVEL || 'info',
+        level: process.env.NEO4J_LOG_LEVEL || "info",
         logger: (level: string, message: string) => {
           // Route Neo4j driver logs through our logger
           const logMethod = logger[level as keyof typeof logger];
-          if (typeof logMethod === 'function') {
-            logMethod.call(logger, { msg: message, component: 'neo4j-driver' });
+          if (typeof logMethod === "function") {
+            logMethod.call(logger, { msg: message, component: "neo4j-driver" });
           }
         },
       },
@@ -192,7 +199,7 @@ export function createOptimizedNeo4jDriver(config: Neo4jConfig): Driver {
     const driver = createDriver(config.uri, authToken, driverConfig);
 
     logger.info({
-      msg: 'Neo4j driver created successfully',
+      msg: "Neo4j driver created successfully",
       uri: config.uri,
       database: config.database,
       maxPoolSize: driverConfig.maxConnectionPoolSize,
@@ -201,7 +208,7 @@ export function createOptimizedNeo4jDriver(config: Neo4jConfig): Driver {
     return driver;
   } catch (error) {
     logger.error({
-      msg: 'Failed to create Neo4j driver',
+      msg: "Failed to create Neo4j driver",
       error: error instanceof Error ? error.message : String(error),
     });
     throw error;
@@ -242,10 +249,10 @@ export class Neo4jQueryCache {
    */
   constructor(maxSize: number = 1000, defaultTTL: number = 300000) {
     if (maxSize < 1) {
-      throw new Error('Cache maxSize must be at least 1');
+      throw new Error("Cache maxSize must be at least 1");
     }
     if (defaultTTL < 0) {
-      throw new Error('Cache defaultTTL cannot be negative');
+      throw new Error("Cache defaultTTL cannot be negative");
     }
 
     this.cache = new Map();
@@ -253,7 +260,7 @@ export class Neo4jQueryCache {
     this.defaultTTL = defaultTTL;
 
     logger.debug({
-      msg: 'Neo4j query cache initialized',
+      msg: "Neo4j query cache initialized",
       maxSize,
       defaultTTL,
     });
@@ -270,12 +277,12 @@ export class Neo4jQueryCache {
    */
   private getCacheKey(cypher: string, params?: any): string {
     try {
-      const paramsStr = params ? JSON.stringify(params) : '';
+      const paramsStr = params ? JSON.stringify(params) : "";
       return `${cypher}:${paramsStr}`;
     } catch (error) {
       // If params can't be stringified (circular reference, etc), create a simple key
       logger.warn({
-        msg: 'Failed to stringify query params for cache key',
+        msg: "Failed to stringify query params for cache key",
         error: error instanceof Error ? error.message : String(error),
       });
       return cypher;
@@ -307,7 +314,7 @@ export class Neo4jQueryCache {
         this.cache.delete(key);
         this.misses++;
         logger.debug({
-          msg: 'Cache entry expired',
+          msg: "Cache entry expired",
           age,
           ttl: entry.ttl,
         });
@@ -316,14 +323,14 @@ export class Neo4jQueryCache {
 
       this.hits++;
       logger.debug({
-        msg: 'Cache hit',
+        msg: "Cache hit",
         age,
         hitRate: this.getHitRate(),
       });
       return entry.result;
     } catch (error) {
       logger.error({
-        msg: 'Error retrieving from cache',
+        msg: "Error retrieving from cache",
         error: error instanceof Error ? error.message : String(error),
       });
       this.misses++;
@@ -351,7 +358,7 @@ export class Neo4jQueryCache {
         if (firstKey) {
           this.cache.delete(firstKey);
           logger.debug({
-            msg: 'Cache eviction (LRU)',
+            msg: "Cache eviction (LRU)",
             evictedKey: firstKey.substring(0, 50),
           });
         }
@@ -364,13 +371,13 @@ export class Neo4jQueryCache {
       });
 
       logger.debug({
-        msg: 'Query result cached',
+        msg: "Query result cached",
         cacheSize: this.cache.size,
         maxSize: this.maxSize,
       });
     } catch (error) {
       logger.error({
-        msg: 'Error caching query result',
+        msg: "Error caching query result",
         error: error instanceof Error ? error.message : String(error),
       });
       // Don't throw - caching failures shouldn't break the application
@@ -398,7 +405,7 @@ export class Neo4jQueryCache {
       if (!pattern) {
         const size = this.cache.size;
         this.cache.clear();
-        logger.info({ msg: 'Cache cleared', entriesRemoved: size });
+        logger.info({ msg: "Cache cleared", entriesRemoved: size });
         return size;
       }
 
@@ -413,7 +420,7 @@ export class Neo4jQueryCache {
       }
 
       logger.info({
-        msg: 'Cache invalidated by pattern',
+        msg: "Cache invalidated by pattern",
         pattern,
         entriesRemoved: count,
       });
@@ -421,7 +428,7 @@ export class Neo4jQueryCache {
       return count;
     } catch (error) {
       logger.error({
-        msg: 'Error invalidating cache',
+        msg: "Error invalidating cache",
         pattern,
         error: error instanceof Error ? error.message : String(error),
       });
@@ -462,7 +469,7 @@ export class Neo4jQueryCache {
   resetStats(): void {
     this.hits = 0;
     this.misses = 0;
-    logger.debug({ msg: 'Cache stats reset' });
+    logger.debug({ msg: "Cache stats reset" });
   }
 }
 
@@ -472,64 +479,64 @@ export class Neo4jQueryCache {
  */
 export const ENTITY_INDEXES: IndexDefinition[] = [
   // Single property indexes for basic lookups
-  { label: 'Entity', properties: ['id'] },
-  { label: 'Entity', properties: ['type'] },
-  { label: 'Entity', properties: ['tenantId'] },
-  { label: 'Entity', properties: ['createdAt'] },
-  { label: 'Entity', properties: ['updatedAt'] },
-  { label: 'Entity', properties: ['confidence'] },
-  { label: 'Entity', properties: ['canonicalId'] },
+  { label: "Entity", properties: ["id"] },
+  { label: "Entity", properties: ["type"] },
+  { label: "Entity", properties: ["tenantId"] },
+  { label: "Entity", properties: ["createdAt"] },
+  { label: "Entity", properties: ["updatedAt"] },
+  { label: "Entity", properties: ["confidence"] },
+  { label: "Entity", properties: ["canonicalId"] },
 
   // Composite indexes for common multi-property queries
   // Order matters: most selective property first
-  { label: 'Entity', properties: ['tenantId', 'type'] },
-  { label: 'Entity', properties: ['tenantId', 'createdAt'] },
-  { label: 'Entity', properties: ['type', 'confidence'] },
+  { label: "Entity", properties: ["tenantId", "type"] },
+  { label: "Entity", properties: ["tenantId", "createdAt"] },
+  { label: "Entity", properties: ["type", "confidence"] },
 
   // Temporal indexes for bitemporal querying
-  { label: 'Entity', properties: ['validFrom'] },
-  { label: 'Entity', properties: ['validTo'] },
+  { label: "Entity", properties: ["validFrom"] },
+  { label: "Entity", properties: ["validTo"] },
 
   // Full-text search indexes for text search capabilities
-  { label: 'Entity', properties: ['name'], type: 'FULLTEXT' },
-  { label: 'Entity', properties: ['description'], type: 'FULLTEXT' },
+  { label: "Entity", properties: ["name"], type: "FULLTEXT" },
+  { label: "Entity", properties: ["description"], type: "FULLTEXT" },
 ];
 
 /**
  * Recommended indexes for Relationship edges
  */
 export const RELATIONSHIP_INDEXES: IndexDefinition[] = [
-  { label: 'RELATED_TO', properties: ['type'] },
-  { label: 'RELATED_TO', properties: ['tenantId'] },
-  { label: 'RELATED_TO', properties: ['createdAt'] },
-  { label: 'RELATED_TO', properties: ['confidence'] },
-  { label: 'RELATED_TO', properties: ['tenantId', 'type'] },
-  { label: 'RELATED_TO', properties: ['validFrom'] },
-  { label: 'RELATED_TO', properties: ['validTo'] },
+  { label: "RELATED_TO", properties: ["type"] },
+  { label: "RELATED_TO", properties: ["tenantId"] },
+  { label: "RELATED_TO", properties: ["createdAt"] },
+  { label: "RELATED_TO", properties: ["confidence"] },
+  { label: "RELATED_TO", properties: ["tenantId", "type"] },
+  { label: "RELATED_TO", properties: ["validFrom"] },
+  { label: "RELATED_TO", properties: ["validTo"] },
 ];
 
 /**
  * Recommended indexes for Investigation nodes
  */
 export const INVESTIGATION_INDEXES: IndexDefinition[] = [
-  { label: 'Investigation', properties: ['id'] },
-  { label: 'Investigation', properties: ['status'] },
-  { label: 'Investigation', properties: ['tenantId'] },
-  { label: 'Investigation', properties: ['priority'] },
-  { label: 'Investigation', properties: ['createdAt'] },
-  { label: 'Investigation', properties: ['tenantId', 'status'] },
-  { label: 'Investigation', properties: ['name'], type: 'FULLTEXT' },
+  { label: "Investigation", properties: ["id"] },
+  { label: "Investigation", properties: ["status"] },
+  { label: "Investigation", properties: ["tenantId"] },
+  { label: "Investigation", properties: ["priority"] },
+  { label: "Investigation", properties: ["createdAt"] },
+  { label: "Investigation", properties: ["tenantId", "status"] },
+  { label: "Investigation", properties: ["name"], type: "FULLTEXT" },
 ];
 
 /**
  * Recommended indexes for User nodes
  */
 export const USER_INDEXES: IndexDefinition[] = [
-  { label: 'User', properties: ['id'] },
-  { label: 'User', properties: ['email'] },
-  { label: 'User', properties: ['tenantId'] },
-  { label: 'User', properties: ['role'] },
-  { label: 'User', properties: ['tenantId', 'email'] },
+  { label: "User", properties: ["id"] },
+  { label: "User", properties: ["email"] },
+  { label: "User", properties: ["tenantId"] },
+  { label: "User", properties: ["role"] },
+  { label: "User", properties: ["tenantId", "email"] },
 ];
 
 /**
@@ -538,13 +545,13 @@ export const USER_INDEXES: IndexDefinition[] = [
  */
 export const RECOMMENDED_CONSTRAINTS: ConstraintDefinition[] = [
   // Uniqueness constraints prevent duplicate data
-  { label: 'Entity', properties: ['id'], type: 'UNIQUE' },
+  { label: "Entity", properties: ["id"], type: "UNIQUE" },
 
   // Node keys ensure both uniqueness AND existence of properties
-  { label: 'Entity', properties: ['id', 'tenantId'], type: 'NODE_KEY' },
-  { label: 'Investigation', properties: ['id'], type: 'UNIQUE' },
-  { label: 'User', properties: ['email', 'tenantId'], type: 'UNIQUE' },
-  { label: 'RELATED_TO', properties: ['id'], type: 'UNIQUE' },
+  { label: "Entity", properties: ["id", "tenantId"], type: "NODE_KEY" },
+  { label: "Investigation", properties: ["id"], type: "UNIQUE" },
+  { label: "User", properties: ["email", "tenantId"], type: "UNIQUE" },
+  { label: "RELATED_TO", properties: ["id"], type: "UNIQUE" },
 ];
 
 /**
@@ -580,14 +587,14 @@ export async function applyIndexes(
     try {
       // Validate index definition
       if (!index.label || !index.properties || index.properties.length === 0) {
-        throw new Error('Invalid index definition: label and properties are required');
+        throw new Error("Invalid index definition: label and properties are required");
       }
 
-      const indexName = `idx_${index.label.toLowerCase()}_${index.properties.join('_')}`;
-      const properties = index.properties.map(p => `n.${p}`).join(', ');
+      const indexName = `idx_${index.label.toLowerCase()}_${index.properties.join("_")}`;
+      const properties = index.properties.map((p) => `n.${p}`).join(", ");
 
       let query: string;
-      if (index.type === 'FULLTEXT') {
+      if (index.type === "FULLTEXT") {
         // Full-text indexes use different syntax
         query = `CREATE FULLTEXT INDEX ${indexName} IF NOT EXISTS FOR (n:${index.label}) ON EACH [${properties}]`;
       } else {
@@ -599,19 +606,19 @@ export async function applyIndexes(
       results.success++;
 
       logger.info({
-        msg: 'Index created successfully',
+        msg: "Index created successfully",
         indexName,
         label: index.label,
         properties: index.properties,
-        type: index.type || 'BTREE',
+        type: index.type || "BTREE",
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
 
       // Don't fail on "already exists" errors if skipExisting is true
-      if (options.skipExisting && errorMessage.includes('already exists')) {
+      if (options.skipExisting && errorMessage.includes("already exists")) {
         logger.debug({
-          msg: 'Index already exists, skipping',
+          msg: "Index already exists, skipping",
           label: index.label,
           properties: index.properties,
         });
@@ -620,7 +627,7 @@ export async function applyIndexes(
       }
 
       logger.error({
-        msg: 'Failed to create index',
+        msg: "Failed to create index",
         label: index.label,
         properties: index.properties,
         error: errorMessage,
@@ -645,8 +652,11 @@ export async function applyIndexes(
  */
 export async function applyConstraints(
   session: Session,
-  constraints: ConstraintDefinition[],
-): Promise<{ success: number; errors: Array<{ constraint: ConstraintDefinition; error: string }> }> {
+  constraints: ConstraintDefinition[]
+): Promise<{
+  success: number;
+  errors: Array<{ constraint: ConstraintDefinition; error: string }>;
+}> {
   const results = {
     success: 0,
     errors: [] as Array<{ constraint: ConstraintDefinition; error: string }>,
@@ -656,17 +666,17 @@ export async function applyConstraints(
     try {
       // Validate constraint definition
       if (!constraint.label || !constraint.properties || constraint.properties.length === 0) {
-        throw new Error('Invalid constraint definition: label and properties are required');
+        throw new Error("Invalid constraint definition: label and properties are required");
       }
 
-      const constraintName = `constraint_${constraint.label.toLowerCase()}_${constraint.properties.join('_')}`;
-      const properties = constraint.properties.map(p => `n.${p}`).join(', ');
+      const constraintName = `constraint_${constraint.label.toLowerCase()}_${constraint.properties.join("_")}`;
+      const properties = constraint.properties.map((p) => `n.${p}`).join(", ");
 
       let query: string;
-      if (constraint.type === 'UNIQUE') {
+      if (constraint.type === "UNIQUE") {
         // Unique constraint on single property
         query = `CREATE CONSTRAINT ${constraintName} IF NOT EXISTS FOR (n:${constraint.label}) REQUIRE n.${constraint.properties[0]} IS UNIQUE`;
-      } else if (constraint.type === 'NODE_KEY') {
+      } else if (constraint.type === "NODE_KEY") {
         // Node key constraint (composite unique + existence)
         query = `CREATE CONSTRAINT ${constraintName} IF NOT EXISTS FOR (n:${constraint.label}) REQUIRE (${properties}) IS NODE KEY`;
       } else {
@@ -678,7 +688,7 @@ export async function applyConstraints(
       results.success++;
 
       logger.info({
-        msg: 'Constraint created successfully',
+        msg: "Constraint created successfully",
         constraintName,
         label: constraint.label,
         properties: constraint.properties,
@@ -688,7 +698,7 @@ export async function applyConstraints(
       const errorMessage = error instanceof Error ? error.message : String(error);
 
       logger.error({
-        msg: 'Failed to create constraint',
+        msg: "Failed to create constraint",
         label: constraint.label,
         properties: constraint.properties,
         error: errorMessage,
@@ -722,11 +732,7 @@ export async function applyConstraints(
  * console.log('DB hits:', profile.dbHits);
  * ```
  */
-export async function profileQuery(
-  session: Session,
-  cypher: string,
-  params?: any,
-): Promise<any> {
+export async function profileQuery(session: Session, cypher: string, params?: any): Promise<any> {
   try {
     const profiledQuery = `PROFILE ${cypher}`;
     const result = await session.run(profiledQuery, params);
@@ -734,7 +740,7 @@ export async function profileQuery(
     const profile = result.summary.profile;
 
     logger.info({
-      msg: 'Query profiled',
+      msg: "Query profiled",
       dbHits: profile?.dbHits,
       rows: result.records.length,
     });
@@ -742,12 +748,12 @@ export async function profileQuery(
     return profile;
   } catch (error) {
     logger.error({
-      msg: 'Failed to profile query',
+      msg: "Failed to profile query",
       query: cypher.substring(0, 100),
       error: error instanceof Error ? error.message : String(error),
     });
     throw new Neo4jQueryError(
-      'Failed to profile query',
+      "Failed to profile query",
       cypher,
       error instanceof Error ? error : undefined
     );
@@ -763,11 +769,7 @@ export async function profileQuery(
  * @param params Query parameters
  * @returns Query execution plan
  */
-export async function explainQuery(
-  session: Session,
-  cypher: string,
-  params?: any,
-): Promise<any> {
+export async function explainQuery(session: Session, cypher: string, params?: any): Promise<any> {
   try {
     const explainedQuery = `EXPLAIN ${cypher}`;
     const result = await session.run(explainedQuery, params);
@@ -775,7 +777,7 @@ export async function explainQuery(
     const plan = result.summary.plan;
 
     logger.info({
-      msg: 'Query explained',
+      msg: "Query explained",
       operatorType: plan?.operatorType,
       estimatedRows: plan?.arguments?.EstimatedRows,
     });
@@ -783,12 +785,12 @@ export async function explainQuery(
     return plan;
   } catch (error) {
     logger.error({
-      msg: 'Failed to explain query',
+      msg: "Failed to explain query",
       query: cypher.substring(0, 100),
       error: error instanceof Error ? error.message : String(error),
     });
     throw new Neo4jQueryError(
-      'Failed to explain query',
+      "Failed to explain query",
       cypher,
       error instanceof Error ? error : undefined
     );
@@ -839,14 +841,14 @@ export async function verifyConnectivity(driver: Driver): Promise<ServerInfo> {
   try {
     const serverInfo = await driver.verifyConnectivity();
     logger.info({
-      msg: 'Neo4j connectivity verified',
+      msg: "Neo4j connectivity verified",
       address: serverInfo.address,
       version: serverInfo.agent,
     });
     return serverInfo;
   } catch (error) {
     logger.error({
-      msg: 'Neo4j connectivity check failed',
+      msg: "Neo4j connectivity check failed",
       error: error instanceof Error ? error.message : String(error),
     });
     throw error;

@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       baseURL:
-        description: 'Preview Base URL (e.g., https://pr-123.preview.app)'
+        description: "Preview Base URL (e.g., https://pr-123.preview.app)"
         required: true
 permissions: { contents: read }
 jobs:

@@ -32,12 +32,14 @@ Examples:
 ### Naming Guidelines
 
 ✅ **Good Names:**
+
 - `new-entity-search` - Clear feature description
 - `beta-graph-analytics` - Indicates beta status
 - `experiment-pricing-page-a` - A/B test variant
 - `kill-switch-external-api` - Emergency control
 
 ❌ **Bad Names:**
+
 - `flag1` - Non-descriptive
 - `test` - Too vague
 - `new-feature` - What feature?
@@ -62,15 +64,14 @@ Use prefixes to categorize flags:
 ```typescript
 // Create flag with targeting for internal users
 const rule = {
-  id: 'internal-users',
-  conditions: [
-    targetAttribute('email', 'ends_with', '@intelgraph.com'),
-  ],
-  variation: 'enabled',
+  id: "internal-users",
+  conditions: [targetAttribute("email", "ends_with", "@intelgraph.com")],
+  variation: "enabled",
 };
 ```
 
 **Best Practices:**
+
 - Default to `false`
 - Target internal users/testers
 - Monitor error rates closely
@@ -82,10 +83,11 @@ const rule = {
 
 ```typescript
 // Gradual rollout to beta users
-const rollout = createGradualRollout('enabled', 'disabled', 25);
+const rollout = createGradualRollout("enabled", "disabled", 25);
 ```
 
 **Best Practices:**
+
 - Gradually increase percentage
 - Monitor key metrics
 - A/B test if needed
@@ -97,10 +99,11 @@ const rollout = createGradualRollout('enabled', 'disabled', 25);
 
 ```typescript
 // Full rollout
-const rollout = createGradualRollout('enabled', 'disabled', 100);
+const rollout = createGradualRollout("enabled", "disabled", 100);
 ```
 
 **Best Practices:**
+
 - Continue monitoring
 - Prepare rollback plan
 - Document the feature
@@ -110,6 +113,7 @@ const rollout = createGradualRollout('enabled', 'disabled', 100);
 **Rollout:** Flag at 100% for 2+ weeks
 
 **Best Practices:**
+
 - Remove flag checks from code
 - Replace with permanent implementation
 - Archive flag in provider
@@ -117,7 +121,7 @@ const rollout = createGradualRollout('enabled', 'disabled', 100);
 
 ```typescript
 // Before cleanup:
-if (await featureFlags.getBooleanFlag('new-feature', false)) {
+if (await featureFlags.getBooleanFlag("new-feature", false)) {
   return newImplementation();
 } else {
   return oldImplementation();
@@ -154,13 +158,13 @@ Emergency disable for problematic features:
 ```typescript
 // Default to true - service should be on
 const serviceEnabled = await featureFlags.getBooleanFlag(
-  'kill-switch-payment-gateway',
+  "kill-switch-payment-gateway",
   true,
   context
 );
 
 if (!serviceEnabled) {
-  throw new Error('Payment service temporarily unavailable');
+  throw new Error("Payment service temporarily unavailable");
 }
 ```
 
@@ -172,13 +176,13 @@ Slowly release to users:
 
 ```typescript
 // Start at 5%
-const rollout = createGradualRollout('new', 'old', 5);
+const rollout = createGradualRollout("new", "old", 5);
 
 // Increase to 25%
-const rollout = createGradualRollout('new', 'old', 25);
+const rollout = createGradualRollout("new", "old", 25);
 
 // Full rollout
-const rollout = createGradualRollout('new', 'old', 100);
+const rollout = createGradualRollout("new", "old", 100);
 ```
 
 ### 4. A/B Testing
@@ -214,7 +218,7 @@ Runtime configuration:
 
 ```typescript
 const config = await featureFlags.getJSONFlag(
-  'config-api-rate-limits',
+  "config-api-rate-limits",
   { requestsPerMinute: 60, burstSize: 10 },
   context
 );
@@ -229,18 +233,15 @@ User/role-based features:
 ```typescript
 // Target premium users only
 const rule = {
-  id: 'premium-users',
-  conditions: [
-    targetAttribute('plan', 'in', ['premium', 'enterprise']),
-  ],
-  variation: 'enabled',
+  id: "premium-users",
+  conditions: [targetAttribute("plan", "in", ["premium", "enterprise"])],
+  variation: "enabled",
 };
 
-const hasAdvancedFeatures = await featureFlags.getBooleanFlag(
-  'advanced-analytics',
-  false,
-  { userId: user.id, attributes: { plan: user.plan } }
-);
+const hasAdvancedFeatures = await featureFlags.getBooleanFlag("advanced-analytics", false, {
+  userId: user.id,
+  attributes: { plan: user.plan },
+});
 ```
 
 ### 7. Environment Toggle
@@ -248,14 +249,12 @@ const hasAdvancedFeatures = await featureFlags.getBooleanFlag(
 Different behavior per environment:
 
 ```typescript
-const debugMode = await featureFlags.getBooleanFlag(
-  'enable-debug-logging',
-  false,
-  { environment: process.env.NODE_ENV }
-);
+const debugMode = await featureFlags.getBooleanFlag("enable-debug-logging", false, {
+  environment: process.env.NODE_ENV,
+});
 
 if (debugMode) {
-  logger.level = 'debug';
+  logger.level = "debug";
 }
 ```
 
@@ -273,6 +272,7 @@ const service = new FeatureFlagService({
 ```
 
 **Guidelines:**
+
 - Use longer TTL for stable flags (1 hour)
 - Use shorter TTL for actively changing flags (1 minute)
 - Critical flags should have shorter TTL
@@ -281,9 +281,9 @@ const service = new FeatureFlagService({
 
 ```typescript
 // ❌ Bad: Multiple individual calls
-const flag1 = await featureFlags.getBooleanFlag('flag1', false);
-const flag2 = await featureFlags.getBooleanFlag('flag2', false);
-const flag3 = await featureFlags.getBooleanFlag('flag3', false);
+const flag1 = await featureFlags.getBooleanFlag("flag1", false);
+const flag2 = await featureFlags.getBooleanFlag("flag2", false);
+const flag3 = await featureFlags.getBooleanFlag("flag3", false);
 
 // ✅ Good: Single call for all flags
 const allFlags = await featureFlags.getAllFlags(context);
@@ -301,15 +301,11 @@ async function handleRequest(req, res) {
   const data = await fetchData();
 
   // Feature flag evaluation (can be async)
-  const showNewUI = await featureFlags.getBooleanFlag(
-    'new-ui',
-    false,
-    { userId: req.user.id }
-  );
+  const showNewUI = await featureFlags.getBooleanFlag("new-ui", false, { userId: req.user.id });
 
   res.json({
     data,
-    ui: showNewUI ? 'v2' : 'v1',
+    ui: showNewUI ? "v2" : "v1",
   });
 }
 ```
@@ -346,17 +342,16 @@ const context = {
 
 ```typescript
 // ❌ Bad: Exposing all flags to frontend
-app.get('/api/feature-flags', (req, res) => {
+app.get("/api/feature-flags", (req, res) => {
   const allFlags = await featureFlags.getAllFlags();
   res.json(allFlags); // Includes internal/admin flags
 });
 
 // ✅ Good: Filter flags for client
-app.get('/api/feature-flags', (req, res) => {
+app.get("/api/feature-flags", (req, res) => {
   const allFlags = await featureFlags.getAllFlags();
   const clientFlags = Object.fromEntries(
-    Object.entries(allFlags)
-      .filter(([key]) => !key.startsWith('internal-'))
+    Object.entries(allFlags).filter(([key]) => !key.startsWith("internal-"))
   );
   res.json(clientFlags);
 });
@@ -381,12 +376,9 @@ function buildContext(req) {
 
 ```typescript
 // Protect admin flags
-app.post('/api/admin/feature-flags/:key/toggle',
-  requireAdmin,
-  async (req, res) => {
-    // Admin-only flag management
-  }
-);
+app.post("/api/admin/feature-flags/:key/toggle", requireAdmin, async (req, res) => {
+  // Admin-only flag management
+});
 ```
 
 ## Testing
@@ -417,11 +409,11 @@ describe('UserDashboard', () => {
 ### 2. Integration Tests
 
 ```typescript
-describe('Feature Flag Integration', () => {
-  it('should evaluate flags correctly', async () => {
+describe("Feature Flag Integration", () => {
+  it("should evaluate flags correctly", async () => {
     const result = await request(app)
-      .get('/api/features')
-      .set('Authorization', `Bearer ${userToken}`)
+      .get("/api/features")
+      .set("Authorization", `Bearer ${userToken}`)
       .expect(200);
 
     expect(result.body.newFeature).toBe(true);
@@ -433,14 +425,14 @@ describe('Feature Flag Integration', () => {
 
 ```typescript
 // Test both variations
-describe('Checkout Flow', () => {
-  it('should complete checkout with variant A', async () => {
-    await setFeatureFlag('checkout-variant', 'a');
+describe("Checkout Flow", () => {
+  it("should complete checkout with variant A", async () => {
+    await setFeatureFlag("checkout-variant", "a");
     await testCheckoutFlow();
   });
 
-  it('should complete checkout with variant B', async () => {
-    await setFeatureFlag('checkout-variant', 'b');
+  it("should complete checkout with variant B", async () => {
+    await setFeatureFlag("checkout-variant", "b");
     await testCheckoutFlow();
   });
 });
@@ -452,8 +444,8 @@ describe('Checkout Flow', () => {
 
 ```typescript
 // Log flag evaluations
-featureFlags.on('evaluation', (event) => {
-  logger.info('Flag evaluated', {
+featureFlags.on("evaluation", (event) => {
+  logger.info("Flag evaluated", {
     flag: event.flagKey,
     variation: event.variation,
     userId: event.context.userId,
@@ -470,7 +462,7 @@ featureFlags.setMetrics(metrics);
 
 // Alert on high error rates
 if (errorRate > threshold) {
-  alert('High feature flag error rate');
+  alert("High feature flag error rate");
 }
 ```
 
@@ -478,9 +470,9 @@ if (errorRate > threshold) {
 
 ```typescript
 // Track conversions
-const variant = await featureFlags.getStringFlag('pricing-test', 'control');
+const variant = await featureFlags.getStringFlag("pricing-test", "control");
 
-await featureFlags.track('purchase-completed', context, {
+await featureFlags.track("purchase-completed", context, {
   variant,
   amount: total,
   plan: selectedPlan,
@@ -507,9 +499,9 @@ rate(feature_flags_errors_total[5m])
 
 ```typescript
 // Bad
-if (await featureFlags.getBooleanFlag('feature-a', false)) {
-  if (await featureFlags.getBooleanFlag('feature-b', false)) {
-    if (await featureFlags.getBooleanFlag('feature-c', false)) {
+if (await featureFlags.getBooleanFlag("feature-a", false)) {
+  if (await featureFlags.getBooleanFlag("feature-b", false)) {
+    if (await featureFlags.getBooleanFlag("feature-c", false)) {
       // Too complex!
     }
   }
@@ -524,7 +516,7 @@ Don't keep flags indefinitely:
 
 ```typescript
 // Flag that's been at 100% for 6 months
-if (await featureFlags.getBooleanFlag('old-feature-from-2023', false)) {
+if (await featureFlags.getBooleanFlag("old-feature-from-2023", false)) {
   // This should be permanent code now
 }
 ```
@@ -536,10 +528,10 @@ if (await featureFlags.getBooleanFlag('old-feature-from-2023', false)) {
 ```typescript
 // Bad: Using feature flags in database migrations
 async function migrate() {
-  const useNewSchema = await featureFlags.getBooleanFlag('new-schema', false);
+  const useNewSchema = await featureFlags.getBooleanFlag("new-schema", false);
 
   if (useNewSchema) {
-    await db.migrate('new-schema');
+    await db.migrate("new-schema");
   }
 }
 ```
@@ -550,7 +542,7 @@ async function migrate() {
 
 ```typescript
 // Bad: Using flags to control bug fixes
-if (await featureFlags.getBooleanFlag('fix-critical-bug', false)) {
+if (await featureFlags.getBooleanFlag("fix-critical-bug", false)) {
   return fixedImplementation();
 } else {
   return buggyImplementation();
@@ -579,7 +571,7 @@ switch (variant) {
 
 ```typescript
 // Bad: No tracking
-const newFeature = await featureFlags.getBooleanFlag('new-feature', false);
+const newFeature = await featureFlags.getBooleanFlag("new-feature", false);
 
 if (newFeature) {
   return newImplementation();

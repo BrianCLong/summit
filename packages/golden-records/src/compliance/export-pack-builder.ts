@@ -1,5 +1,11 @@
-import { createHash } from 'crypto';
-import type { AuditEvent, CertifiedExportPack, ExportManifest, MasterRecord, RecordVersion } from '@intelgraph/mdm-core';
+import { createHash } from "crypto";
+import type {
+  AuditEvent,
+  CertifiedExportPack,
+  ExportManifest,
+  MasterRecord,
+  RecordVersion,
+} from "@intelgraph/mdm-core";
 
 export interface ExportContext {
   recordType: string;
@@ -42,6 +48,6 @@ export class ExportPackBuilder {
   }
 
   private hashPayload(payload: unknown): string {
-    return createHash('sha256').update(JSON.stringify(payload)).digest('hex');
+    return createHash("sha256").update(JSON.stringify(payload)).digest("hex");
   }
 }

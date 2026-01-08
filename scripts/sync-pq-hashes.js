@@ -11,24 +11,24 @@
  *   node scripts/sync-pq-hashes.js --source=file --file=./pq-hashes.json
  */
 
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
-const { createClient } = require('redis');
+const fs = require("fs");
+const path = require("path");
+const crypto = require("crypto");
+const { createClient } = require("redis");
 
 // Configuration
 const config = {
   redis: {
-    url: process.env.REDIS_URL || 'redis://localhost:6379',
-    keyPrefix: 'pq:',
-    allowlistKey: 'pq:allowlist',
-    metadataKey: 'pq:metadata',
+    url: process.env.REDIS_URL || "redis://localhost:6379",
+    keyPrefix: "pq:",
+    allowlistKey: "pq:allowlist",
+    metadataKey: "pq:metadata",
     ttl: 86400 * 7, // 7 days default TTL
   },
   ci: {
     artifactsUrl: process.env.CI_ARTIFACTS_URL,
     token: process.env.CI_TOKEN,
-    hashFile: 'persisted-queries.json',
+    hashFile: "persisted-queries.json",
   },
   sync: {
     batchSize: 100,
@@ -53,18 +53,18 @@ class PQHashSyncer {
   async connect() {
     this.redis = createClient({ url: config.redis.url });
 
-    this.redis.on('error', (err) => {
-      console.error('Redis connection error:', err);
+    this.redis.on("error", (err) => {
+      console.error("Redis connection error:", err);
     });
 
     await this.redis.connect();
-    console.log('✅ Connected to Redis');
+    console.log("✅ Connected to Redis");
   }
 
   async disconnect() {
     if (this.redis) {
       await this.redis.quit();
-      console.log('✅ Disconnected from Redis');
+      console.log("✅ Disconnected from Redis");
     }
   }
 
@@ -72,12 +72,12 @@ class PQHashSyncer {
     const { artifactsUrl, token, hashFile } = config.ci;
 
     if (!artifactsUrl) {
-      throw new Error('CI_ARTIFACTS_URL environment variable required');
+      throw new Error("CI_ARTIFACTS_URL environment variable required");
     }
 
     const url = `${artifactsUrl}/${hashFile}`;
     const headers = {
-      'User-Agent': 'intelgraph-pq-sync/1.0',
+      "User-Agent": "intelgraph-pq-sync/1.0",
       ...(token && { Authorization: `Bearer ${token}` }),
     };
 
@@ -86,15 +86,11 @@ class PQHashSyncer {
     const response = await fetch(url, { headers });
 
     if (!response.ok) {
-      throw new Error(
-        `Failed to fetch artifacts: HTTP ${response.status} ${response.statusText}`,
-      );
+      throw new Error(`Failed to fetch artifacts: HTTP ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
-    console.log(
-      `📦 Downloaded ${Object.keys(data.hashes || {}).length} hashes from artifacts`,
-    );
+    console.log(`📦 Downloaded ${Object.keys(data.hashes || {}).length} hashes from artifacts`);
 
     return this.validateAndTransformHashes(data);
   }
@@ -105,24 +101,22 @@ class PQHashSyncer {
     }
 
     console.log(`📁 Loading hashes from: ${filePath}`);
-    const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    console.log(
-      `📦 Loaded ${Object.keys(data.hashes || {}).length} hashes from file`,
-    );
+    const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    console.log(`📦 Loaded ${Object.keys(data.hashes || {}).length} hashes from file`);
 
     return this.validateAndTransformHashes(data);
   }
 
   validateAndTransformHashes(data) {
-    if (!data.hashes || typeof data.hashes !== 'object') {
+    if (!data.hashes || typeof data.hashes !== "object") {
       throw new Error('Invalid hash data format: missing "hashes" object');
     }
 
     const validated = [];
     const metadata = {
-      version: data.version || '1.0',
+      version: data.version || "1.0",
       generated_at: data.generated_at || new Date().toISOString(),
-      source: data.source || 'unknown',
+      source: data.source || "unknown",
       checksum: data.checksum,
     };
 
@@ -137,16 +131,14 @@ class PQHashSyncer {
       validated.push({
         hash,
         query_name: info.query_name || info.name,
-        operation_type: info.operation_type || 'unknown',
+        operation_type: info.operation_type || "unknown",
         created_at: info.created_at || metadata.generated_at,
-        risk_level: info.risk_level || 'low',
+        risk_level: info.risk_level || "low",
         estimated_cost: info.estimated_cost || 0,
       });
     }
 
-    console.log(
-      `✅ Validated ${validated.length} hashes (${this.stats.errors} errors)`,
-    );
+    console.log(`✅ Validated ${validated.length} hashes (${this.stats.errors} errors)`);
 
     return { hashes: validated, metadata };
   }
@@ -154,9 +146,9 @@ class PQHashSyncer {
   async backupCurrentAllowlist() {
     if (!config.sync.backupEnabled) return null;
 
-    console.log('💾 Creating backup of current allowlist...');
+    console.log("💾 Creating backup of current allowlist...");
 
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     const backupKey = `${config.redis.keyPrefix}backup:${timestamp}`;
 
     const currentHashes = await this.redis.sMembers(config.redis.allowlistKey);
@@ -170,9 +162,7 @@ class PQHashSyncer {
     };
 
     await this.redis.setEx(backupKey, 86400 * 30, JSON.stringify(backup)); // 30-day retention
-    console.log(
-      `💾 Backup created: ${backupKey} (${currentHashes.length} hashes)`,
-    );
+    console.log(`💾 Backup created: ${backupKey} (${currentHashes.length} hashes)`);
 
     return backupKey;
   }
@@ -187,9 +177,7 @@ class PQHashSyncer {
     await this.backupCurrentAllowlist();
 
     // Get current allowlist for comparison
-    const currentHashes = new Set(
-      await this.redis.sMembers(config.redis.allowlistKey),
-    );
+    const currentHashes = new Set(await this.redis.sMembers(config.redis.allowlistKey));
     const newHashes = new Set(hashes.map((h) => h.hash));
 
     // Calculate changes
@@ -197,14 +185,14 @@ class PQHashSyncer {
     const toRemove = [...currentHashes].filter((hash) => !newHashes.has(hash));
 
     console.log(
-      `📊 Sync plan: +${toAdd.length} new, -${toRemove.length} removed, ${currentHashes.size} existing`,
+      `📊 Sync plan: +${toAdd.length} new, -${toRemove.length} removed, ${currentHashes.size} existing`
     );
 
     // Remove stale hashes (with confirmation)
     if (toRemove.length > 0) {
       if (toRemove.length > currentHashes.size * 0.5) {
         throw new Error(
-          `⚠️  Safety check: Attempting to remove ${toRemove.length}/${currentHashes.size} hashes (>50%). This may indicate a data issue.`,
+          `⚠️  Safety check: Attempting to remove ${toRemove.length}/${currentHashes.size} hashes (>50%). This may indicate a data issue.`
         );
       }
 
@@ -227,7 +215,7 @@ class PQHashSyncer {
         this.stats.added += batch.length;
 
         console.log(
-          `  📈 Batch ${Math.floor(i / config.sync.batchSize) + 1}/${Math.ceil(toAdd.length / config.sync.batchSize)}: +${batch.length} hashes`,
+          `  📈 Batch ${Math.floor(i / config.sync.batchSize) + 1}/${Math.ceil(toAdd.length / config.sync.batchSize)}: +${batch.length} hashes`
         );
       }
     }
@@ -253,21 +241,19 @@ class PQHashSyncer {
   }
 
   async verifySync(expectedCount) {
-    console.log('🔍 Verifying sync results...');
+    console.log("🔍 Verifying sync results...");
 
     const actualCount = await this.redis.sCard(config.redis.allowlistKey);
     const metadata = await this.redis.hGetAll(config.redis.metadataKey);
 
     if (actualCount !== expectedCount) {
       throw new Error(
-        `Verification failed: Expected ${expectedCount} hashes, found ${actualCount}`,
+        `Verification failed: Expected ${expectedCount} hashes, found ${actualCount}`
       );
     }
 
     console.log(`✅ Verification passed: ${actualCount} hashes in allowlist`);
-    console.log(
-      `📋 Metadata: synced_at=${metadata.synced_at}, version=${metadata.version}`,
-    );
+    console.log(`📋 Metadata: synced_at=${metadata.synced_at}, version=${metadata.version}`);
 
     return { actualCount, metadata };
   }
@@ -275,15 +261,13 @@ class PQHashSyncer {
   printStats() {
     const duration = (Date.now() - this.stats.startTime) / 1000;
 
-    console.log('\n📊 Sync Statistics:');
+    console.log("\n📊 Sync Statistics:");
     console.log(`  Total processed: ${this.stats.total}`);
     console.log(`  Added: ${this.stats.added}`);
     console.log(`  Removed: ${this.stats.removed}`);
     console.log(`  Errors: ${this.stats.errors}`);
     console.log(`  Duration: ${duration.toFixed(2)}s`);
-    console.log(
-      `  Rate: ${(this.stats.total / duration).toFixed(2)} hashes/sec`,
-    );
+    console.log(`  Rate: ${(this.stats.total / duration).toFixed(2)} hashes/sec`);
   }
 }
 
@@ -292,22 +276,17 @@ async function main() {
   const options = {};
 
   args.forEach((arg) => {
-    const [key, value] = arg.split('=');
-    options[key.replace(/^--/, '')] = value || true;
+    const [key, value] = arg.split("=");
+    options[key.replace(/^--/, "")] = value || true;
   });
 
-  const {
-    source = 'artifacts',
-    file,
-    env = 'development',
-    dryRun = false,
-  } = options;
+  const { source = "artifacts", file, env = "development", dryRun = false } = options;
 
-  console.log('🚀 IntelGraph Persisted Query Hash Sync');
+  console.log("🚀 IntelGraph Persisted Query Hash Sync");
   console.log(`   Environment: ${env}`);
   console.log(`   Source: ${source}`);
   console.log(`   Dry Run: ${dryRun}`);
-  console.log('');
+  console.log("");
 
   const syncer = new PQHashSyncer();
 
@@ -315,9 +294,9 @@ async function main() {
     await syncer.connect();
 
     let hashData;
-    if (source === 'file') {
+    if (source === "file") {
       if (!file) {
-        throw new Error('--file parameter required when --source=file');
+        throw new Error("--file parameter required when --source=file");
       }
       hashData = await syncer.loadHashesFromFile(file);
     } else {
@@ -325,7 +304,7 @@ async function main() {
     }
 
     if (dryRun) {
-      console.log('🔍 DRY RUN: Would sync the following changes:');
+      console.log("🔍 DRY RUN: Would sync the following changes:");
       console.log(`  Total hashes to process: ${hashData.hashes.length}`);
       console.log(`  Metadata version: ${hashData.metadata.version}`);
       console.log(`  Generated at: ${hashData.metadata.generated_at}`);
@@ -336,9 +315,9 @@ async function main() {
     await syncer.verifySync(hashData.hashes.length);
     syncer.printStats();
 
-    console.log('\n🎉 Hash sync completed successfully!');
+    console.log("\n🎉 Hash sync completed successfully!");
   } catch (error) {
-    console.error('\n❌ Sync failed:', error.message);
+    console.error("\n❌ Sync failed:", error.message);
     if (process.env.DEBUG) {
       console.error(error.stack);
     }

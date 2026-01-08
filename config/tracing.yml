@@ -6,10 +6,10 @@ tracing:
 
   # Service Information
   service:
-    name: 'intelgraph'
-    version: '${APP_VERSION}'
-    environment: '${NODE_ENV}'
-    instance_id: '${HOSTNAME}'
+    name: "intelgraph"
+    version: "${APP_VERSION}"
+    environment: "${NODE_ENV}"
+    instance_id: "${HOSTNAME}"
 
   # OpenTelemetry Configuration
   otel:
@@ -20,23 +20,23 @@ tracing:
 
     # Resource Attributes
     resource:
-      service.name: 'intelgraph'
-      service.version: '${APP_VERSION}'
-      service.instance.id: '${HOSTNAME}'
-      deployment.environment: '${NODE_ENV}'
+      service.name: "intelgraph"
+      service.version: "${APP_VERSION}"
+      service.instance.id: "${HOSTNAME}"
+      deployment.environment: "${NODE_ENV}"
       # Custom attributes
-      team: 'platform'
-      component: 'intelligence-analysis'
-      layer: 'application'
+      team: "platform"
+      component: "intelligence-analysis"
+      layer: "application"
 
   # Trace Exporters
   exporters:
     # Jaeger Exporter
     jaeger:
       enabled: true
-      endpoint: '${JAEGER_ENDPOINT}'
+      endpoint: "${JAEGER_ENDPOINT}"
       headers:
-        authorization: 'Bearer ${JAEGER_API_KEY}'
+        authorization: "Bearer ${JAEGER_API_KEY}"
       batch_timeout: 5000 # 5 seconds
       max_export_batch_size: 512
       max_queue_size: 2048
@@ -44,16 +44,16 @@ tracing:
     # Zipkin Exporter
     zipkin:
       enabled: false
-      endpoint: '${ZIPKIN_ENDPOINT}'
+      endpoint: "${ZIPKIN_ENDPOINT}"
       headers: {}
 
     # OTLP Exporter (OpenTelemetry Protocol)
     otlp:
       enabled: true
-      endpoint: '${OTEL_EXPORTER_OTLP_ENDPOINT}'
+      endpoint: "${OTEL_EXPORTER_OTLP_ENDPOINT}"
       headers:
-        authorization: 'Bearer ${OTEL_API_KEY}'
-      compression: 'gzip'
+        authorization: "Bearer ${OTEL_API_KEY}"
+      compression: "gzip"
       timeout: 10000 # 10 seconds
 
     # Console Exporter (for development)
@@ -67,20 +67,20 @@ tracing:
 
     # Rules-based sampling
     rules:
-      - service_name: 'intelgraph'
-        operation_name: '/health'
+      - service_name: "intelgraph"
+        operation_name: "/health"
         sampling_ratio: 0.01 # 1% for health checks
 
-      - service_name: 'intelgraph'
-        operation_name: '/api/v1/*'
+      - service_name: "intelgraph"
+        operation_name: "/api/v1/*"
         sampling_ratio: 0.3 # 30% for API calls
 
-      - service_name: 'intelgraph'
-        operation_name: 'graphql*'
+      - service_name: "intelgraph"
+        operation_name: "graphql*"
         sampling_ratio: 0.5 # 50% for GraphQL operations
 
-      - service_name: 'intelgraph'
-        span_kind: 'CONSUMER'
+      - service_name: "intelgraph"
+        span_kind: "CONSUMER"
         sampling_ratio: 1.0 # 100% for message consumers
 
     # Error-based sampling (always sample errors)
@@ -97,9 +97,9 @@ tracing:
       capture_headers: true
       sanitize_headers: true
       ignored_paths:
-        - '/health'
-        - '/metrics'
-        - '/favicon.ico'
+        - "/health"
+        - "/metrics"
+        - "/favicon.ico"
       request_hook: true
       response_hook: true
 
@@ -120,12 +120,12 @@ tracing:
       enabled: true
       enhanced_database_reporting: true
       capture_statement: true
-      db_statement_serializer: 'default'
+      db_statement_serializer: "default"
 
     redis:
       enabled: true
       capture_statement: true
-      db_statement_serializer: 'redis'
+      db_statement_serializer: "redis"
 
     neo4j:
       enabled: true
@@ -179,17 +179,17 @@ tracing:
   attributes:
     # Always added to spans
     global:
-      environment: '${NODE_ENV}'
-      region: '${AWS_REGION}'
-      cluster: '${CLUSTER_NAME}'
-      pod_name: '${POD_NAME}'
-      node_name: '${NODE_NAME}'
+      environment: "${NODE_ENV}"
+      region: "${AWS_REGION}"
+      cluster: "${CLUSTER_NAME}"
+      pod_name: "${POD_NAME}"
+      node_name: "${NODE_NAME}"
 
     # Service-specific attributes
     service_specific:
-      intelgraph.component: 'core'
-      intelgraph.version: '${APP_VERSION}'
-      intelgraph.deployment_id: '${DEPLOYMENT_ID}'
+      intelgraph.component: "core"
+      intelgraph.version: "${APP_VERSION}"
+      intelgraph.deployment_id: "${DEPLOYMENT_ID}"
 
   # Baggage Configuration
   baggage:
@@ -199,19 +199,19 @@ tracing:
 
     # Propagation keys
     propagate:
-      - 'user.id'
-      - 'session.id'
-      - 'trace.feature'
-      - 'tenant.id'
+      - "user.id"
+      - "session.id"
+      - "trace.feature"
+      - "tenant.id"
 
   # Context Propagation
   propagation:
     # Propagators to use
     propagators:
-      - 'tracecontext' # W3C Trace Context
-      - 'baggage' # W3C Baggage
-      - 'b3' # B3 (Zipkin)
-      - 'jaeger' # Jaeger
+      - "tracecontext" # W3C Trace Context
+      - "baggage" # W3C Baggage
+      - "b3" # B3 (Zipkin)
+      - "jaeger" # Jaeger
 
   # Span Configuration
   spans:
@@ -241,30 +241,15 @@ tracing:
     traces:
       enabled: true
       histogram_buckets:
-        [
-          0.005,
-          0.01,
-          0.025,
-          0.05,
-          0.075,
-          0.1,
-          0.25,
-          0.5,
-          0.75,
-          1.0,
-          2.5,
-          5.0,
-          7.5,
-          10.0,
-        ]
+        [0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1.0, 2.5, 5.0, 7.5, 10.0]
 
   # Logging Integration
   logging:
     # Correlation
     correlation:
       enabled: true
-      trace_id_key: 'trace_id'
-      span_id_key: 'span_id'
+      trace_id_key: "trace_id"
+      span_id_key: "span_id"
 
     # Log injection
     inject_trace_id: true
@@ -275,10 +260,10 @@ tracing:
 
     # Error attributes to capture
     capture_attributes:
-      - 'error.type'
-      - 'error.message'
-      - 'error.stack'
-      - 'error.code'
+      - "error.type"
+      - "error.message"
+      - "error.stack"
+      - "error.code"
 
     # Stack trace configuration
     stack_traces:
@@ -313,17 +298,17 @@ tracing:
 
       # Sanitize HTTP headers
       sanitize_headers:
-        - 'authorization'
-        - 'cookie'
-        - 'x-api-key'
-        - 'x-auth-token'
+        - "authorization"
+        - "cookie"
+        - "x-api-key"
+        - "x-auth-token"
 
       # Sanitize URL parameters
       sanitize_params:
-        - 'password'
-        - 'token'
-        - 'secret'
-        - 'key'
+        - "password"
+        - "token"
+        - "secret"
+        - "key"
 
       # Sanitize SQL queries
       sanitize_sql: true
@@ -336,7 +321,7 @@ tracing:
   # Development and Debug
   debug:
     enabled: false
-    log_level: 'info' # error, warn, info, debug
+    log_level: "info" # error, warn, info, debug
     console_span_exporter: false
 
   # Advanced Configuration
@@ -345,15 +330,15 @@ tracing:
     resource_detection:
       enabled: true
       detectors:
-        - 'env'
-        - 'host'
-        - 'os'
-        - 'process'
-        - 'docker'
-        - 'k8s'
-        - 'aws'
-        - 'gcp'
-        - 'azure'
+        - "env"
+        - "host"
+        - "os"
+        - "process"
+        - "docker"
+        - "k8s"
+        - "aws"
+        - "gcp"
+        - "azure"
 
     # Batch Span Processor
     batch_processor:
@@ -377,10 +362,10 @@ environments:
         console:
           enabled: true
         jaeger:
-          endpoint: 'http://localhost:14268/api/traces'
+          endpoint: "http://localhost:14268/api/traces"
       debug:
         enabled: true
-        log_level: 'debug'
+        log_level: "debug"
         console_span_exporter: true
 
   staging:
@@ -389,9 +374,9 @@ environments:
         ratio: 0.5 # 50% sampling in staging
       exporters:
         jaeger:
-          endpoint: '${JAEGER_STAGING_ENDPOINT}'
+          endpoint: "${JAEGER_STAGING_ENDPOINT}"
         otlp:
-          endpoint: '${OTEL_STAGING_ENDPOINT}'
+          endpoint: "${OTEL_STAGING_ENDPOINT}"
 
   production:
     tracing:
@@ -400,10 +385,10 @@ environments:
       exporters:
         jaeger:
           enabled: true
-          endpoint: '${JAEGER_PROD_ENDPOINT}'
+          endpoint: "${JAEGER_PROD_ENDPOINT}"
         otlp:
           enabled: true
-          endpoint: '${OTEL_PROD_ENDPOINT}'
+          endpoint: "${OTEL_PROD_ENDPOINT}"
       profiling:
         cpu:
           duration: 60000 # 1 minute in production

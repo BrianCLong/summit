@@ -4,9 +4,9 @@
  * Handle failed messages and provide replay capabilities
  */
 
-import Redis from 'ioredis';
-import { EventEmitter } from 'events';
-import type { MessageEnvelope } from '../core/types.js';
+import Redis from "ioredis";
+import { EventEmitter } from "events";
+import type { MessageEnvelope } from "../core/types.js";
 
 export interface DLQMessage<T = any> {
   envelope: MessageEnvelope<T>;
@@ -46,37 +46,30 @@ export class DeadLetterQueue extends EventEmitter {
       failureReason,
       failedAt: new Date(),
       originalTopic: originalDestination?.topic,
-      originalQueue: originalDestination?.queue
+      originalQueue: originalDestination?.queue,
     };
 
     const key = `dlq:${this.name}`;
     await this.redis.lpush(key, JSON.stringify(dlqMessage));
 
     // Update stats
-    await this.redis.hincrby(`dlq:${this.name}:stats`, 'total', 1);
-    await this.redis.hincrby(
-      `dlq:${this.name}:stats`,
-      `reason:${failureReason}`,
-      1
-    );
+    await this.redis.hincrby(`dlq:${this.name}:stats`, "total", 1);
+    await this.redis.hincrby(`dlq:${this.name}:stats`, `reason:${failureReason}`, 1);
 
-    this.emit('message:added', {
+    this.emit("message:added", {
       messageId: envelope.metadata.messageId,
-      reason: failureReason
+      reason: failureReason,
     });
   }
 
   /**
    * Get messages from DLQ
    */
-  async getMessages<T = any>(
-    offset: number = 0,
-    limit: number = 100
-  ): Promise<DLQMessage<T>[]> {
+  async getMessages<T = any>(offset: number = 0, limit: number = 100): Promise<DLQMessage<T>[]> {
     const key = `dlq:${this.name}`;
     const messages = await this.redis.lrange(key, offset, offset + limit - 1);
 
-    return messages.map(msg => JSON.parse(msg) as DLQMessage<T>);
+    return messages.map((msg) => JSON.parse(msg) as DLQMessage<T>);
   }
 
   /**
@@ -90,7 +83,7 @@ export class DeadLetterQueue extends EventEmitter {
       const msg = JSON.parse(msgStr) as DLQMessage;
       if (msg.envelope.metadata.messageId === messageId) {
         await this.redis.lrem(key, 1, msgStr);
-        await this.redis.hincrby(`dlq:${this.name}:stats`, 'total', -1);
+        await this.redis.hincrby(`dlq:${this.name}:stats`, "total", -1);
         return true;
       }
     }
@@ -103,19 +96,17 @@ export class DeadLetterQueue extends EventEmitter {
    */
   async replay(messageId: string): Promise<boolean> {
     const messages = await this.getMessages();
-    const dlqMessage = messages.find(
-      m => m.envelope.metadata.messageId === messageId
-    );
+    const dlqMessage = messages.find((m) => m.envelope.metadata.messageId === messageId);
 
     if (!dlqMessage) {
       return false;
     }
 
     // Message would be replayed by the caller
-    this.emit('message:replay', {
+    this.emit("message:replay", {
       messageId,
       originalTopic: dlqMessage.originalTopic,
-      originalQueue: dlqMessage.originalQueue
+      originalQueue: dlqMessage.originalQueue,
     });
 
     await this.remove(messageId);
@@ -144,7 +135,7 @@ export class DeadLetterQueue extends EventEmitter {
     await this.redis.del(key);
     await this.redis.del(`dlq:${this.name}:stats`);
 
-    this.emit('dlq:purged', { count });
+    this.emit("dlq:purged", { count });
 
     return count;
   }
@@ -159,7 +150,7 @@ export class DeadLetterQueue extends EventEmitter {
 
     const messagesByReason: Record<string, number> = {};
     for (const [key, value] of Object.entries(stats)) {
-      if (key.startsWith('reason:')) {
+      if (key.startsWith("reason:")) {
         const reason = key.substring(7);
         messagesByReason[reason] = parseInt(value, 10);
       }
@@ -169,9 +160,7 @@ export class DeadLetterQueue extends EventEmitter {
     let newestMessage: Date | undefined;
 
     if (messages.length > 0) {
-      oldestMessage = new Date(
-        messages[messages.length - 1].failedAt
-      );
+      oldestMessage = new Date(messages[messages.length - 1].failedAt);
       newestMessage = new Date(messages[0].failedAt);
     }
 
@@ -179,7 +168,7 @@ export class DeadLetterQueue extends EventEmitter {
       totalMessages: messages.length,
       oldestMessage,
       newestMessage,
-      messagesByReason
+      messagesByReason,
     };
   }
 

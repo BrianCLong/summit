@@ -23,35 +23,35 @@ This directory contains **12 production-ready Claude prompts** aligned with Inte
 
 ### **Core GA (Q3 2025)**
 
-| # | Prompt | Target | Key Deliverables | Depends On |
-|---|--------|--------|------------------|------------|
-| **01** | [NL → Cypher](./01-nl-to-cypher-core-ga.md) | Core GA | Cost estimator, sandbox executor, UI panel | Neo4j, APOC, existing NLQ code |
-| **03** | [ABAC/OPA + Audit](./03-abac-opa-audit.md) | Core GA | OPA policies, authority binding, audit search | SSO/SCIM (existing), PostgreSQL |
-| **08** | [Ingest Wizard + PII](./08-ingest-wizard-pii.md) | Core GA | 10 connectors, AI mapper, PII classifier, DPIA | Ingest service (existing) |
-| **09** | [Entity Resolution v1](./09-entity-resolution-v1.md) | Core GA | ER service, explainable merges, human-in-the-loop | Neo4j, ML features |
-| **11** | [Runbook Runner](./11-runbook-runner-provers.md) | Core GA | DAG runner, attestations, *.pcq manifests, provers | Agent runtime, OPA |
-| **12** | [Security Hardening](./12-security-hardening.md) | Core GA | WebAuthn, tripwires, STRIDE, red team | SSO (existing), audit |
+| #      | Prompt                                               | Target  | Key Deliverables                                    | Depends On                      |
+| ------ | ---------------------------------------------------- | ------- | --------------------------------------------------- | ------------------------------- |
+| **01** | [NL → Cypher](./01-nl-to-cypher-core-ga.md)          | Core GA | Cost estimator, sandbox executor, UI panel          | Neo4j, APOC, existing NLQ code  |
+| **03** | [ABAC/OPA + Audit](./03-abac-opa-audit.md)           | Core GA | OPA policies, authority binding, audit search       | SSO/SCIM (existing), PostgreSQL |
+| **08** | [Ingest Wizard + PII](./08-ingest-wizard-pii.md)     | Core GA | 10 connectors, AI mapper, PII classifier, DPIA      | Ingest service (existing)       |
+| **09** | [Entity Resolution v1](./09-entity-resolution-v1.md) | Core GA | ER service, explainable merges, human-in-the-loop   | Neo4j, ML features              |
+| **11** | [Runbook Runner](./11-runbook-runner-provers.md)     | Core GA | DAG runner, attestations, \*.pcq manifests, provers | Agent runtime, OPA              |
+| **12** | [Security Hardening](./12-security-hardening.md)     | Core GA | WebAuthn, tripwires, STRIDE, red team               | SSO (existing), audit           |
 
 ### **Beta Features (Q4 2025)**
 
-| # | Prompt | Target | Key Deliverables | Depends On |
-|---|--------|--------|------------------|------------|
-| **02** | [Prov-Ledger Beta](./02-prov-ledger-beta.md) | Beta | Evidence registry, claim graphs, export manifests | Neo4j, Redis Streams |
-| **10** | [Disclosure Packager](./10-disclosure-packager.md) | Beta | Selective disclosure, signed bundles, revocation | Prov-Ledger (Prompt #2) |
+| #      | Prompt                                             | Target | Key Deliverables                                  | Depends On              |
+| ------ | -------------------------------------------------- | ------ | ------------------------------------------------- | ----------------------- |
+| **02** | [Prov-Ledger Beta](./02-prov-ledger-beta.md)       | Beta   | Evidence registry, claim graphs, export manifests | Neo4j, Redis Streams    |
+| **10** | [Disclosure Packager](./10-disclosure-packager.md) | Beta   | Selective disclosure, signed bundles, revocation  | Prov-Ledger (Prompt #2) |
 
 ### **Alpha Features (Q4 2025)**
 
-| # | Prompt | Target | Key Deliverables | Depends On |
-|---|--------|--------|------------------|------------|
-| **07** | [Predictive Suite](./07-predictive-suite-alpha.md) | Alpha | Forecast API, counterfactual, XAI | Graph analytics, ML |
+| #      | Prompt                                             | Target | Key Deliverables                  | Depends On          |
+| ------ | -------------------------------------------------- | ------ | --------------------------------- | ------------------- |
+| **07** | [Predictive Suite](./07-predictive-suite-alpha.md) | Alpha  | Forecast API, counterfactual, XAI | Graph analytics, ML |
 
 ### **Ops & Edge (Q4 2025)**
 
-| # | Prompt | Target | Key Deliverables | Depends On |
-|---|--------|--------|------------------|------------|
-| **04** | [Cost Guard](./04-cost-guard.md) | Ops | Budget manager, slow-query killer, archival tiering | Neo4j, S3, Prometheus |
-| **05** | [SLO Dashboards](./05-slo-dashboards.md) | Ops | OTEL tracing, Prometheus metrics, Grafana dashboards | Observability stack |
-| **06** | [Offline Expedition Kit](./06-offline-expedition-kit.md) | Edge | Electron app, CRDT sync, signature chain | Core GA, Yjs/Automerge |
+| #      | Prompt                                                   | Target | Key Deliverables                                     | Depends On             |
+| ------ | -------------------------------------------------------- | ------ | ---------------------------------------------------- | ---------------------- |
+| **04** | [Cost Guard](./04-cost-guard.md)                         | Ops    | Budget manager, slow-query killer, archival tiering  | Neo4j, S3, Prometheus  |
+| **05** | [SLO Dashboards](./05-slo-dashboards.md)                 | Ops    | OTEL tracing, Prometheus metrics, Grafana dashboards | Observability stack    |
+| **06** | [Offline Expedition Kit](./06-offline-expedition-kit.md) | Edge   | Electron app, CRDT sync, signature chain             | Core GA, Yjs/Automerge |
 
 ---
 
@@ -60,6 +60,7 @@ This directory contains **12 production-ready Claude prompts** aligned with Inte
 ### 1. Pick a Prompt
 
 Choose based on priority:
+
 - **Start with #01** (NL → Cypher) if you need Core GA graph querying
 - **Start with #03** (ABAC/OPA) if security is blocking GA
 - **Start with #08** (Ingest Wizard) if data ingestion is top priority
@@ -86,6 +87,7 @@ Open the prompt file (e.g., `01-nl-to-cypher-core-ga.md`), copy the section unde
 ### 4. Review Outputs
 
 Claude will provide:
+
 - (a) File tree diff
 - (b) TypeScript/Python code with JSDoc/docstrings
 - (c) Jest/pytest tests
@@ -112,52 +114,55 @@ All prompts have been validated against the **actual** codebase structure as of 
 
 ### ✅ Verified Paths
 
-| Prompt Reference | Actual Path | Status |
-|------------------|-------------|--------|
-| `apps/web/components/` | `apps/web/src/components/` | ✅ Corrected |
-| `server/ai/nlq/` | `server/src/ai/nl-graph-query/` | ✅ Extends existing |
-| `services/prov-ledger/` | `services/prov-ledger/` | ✅ Scaffolded |
-| `services/authz/` | `services/opa-policy-engine/` (new) + `services/enterprise/` (extend) | ✅ Clarified |
-| `services/er/` | `services/er/` (new) | ✅ To be created |
+| Prompt Reference        | Actual Path                                                           | Status              |
+| ----------------------- | --------------------------------------------------------------------- | ------------------- |
+| `apps/web/components/`  | `apps/web/src/components/`                                            | ✅ Corrected        |
+| `server/ai/nlq/`        | `server/src/ai/nl-graph-query/`                                       | ✅ Extends existing |
+| `services/prov-ledger/` | `services/prov-ledger/`                                               | ✅ Scaffolded       |
+| `services/authz/`       | `services/opa-policy-engine/` (new) + `services/enterprise/` (extend) | ✅ Clarified        |
+| `services/er/`          | `services/er/` (new)                                                  | ✅ To be created    |
 
 ### ✅ Verified Dependencies
 
-| Technology | Version | Verified |
-|------------|---------|----------|
-| Neo4j | 5.24.0-community | ✅ docker-compose.dev.yml:42 |
-| APOC | Enabled (apoc.*) | ✅ Line 47 |
-| GDS | Enabled (gds.*) | ✅ Line 48 |
-| SSO/SCIM | Implemented | ✅ services/enterprise/src/sso-manager.ts |
-| Ingest | FastAPI, CSV/JSON/S3/Postgres | ✅ services/ingest/README.md |
-| Observability | Prometheus, Grafana, Jaeger, Loki | ✅ docker-compose.dev.yml |
+| Technology    | Version                           | Verified                                  |
+| ------------- | --------------------------------- | ----------------------------------------- |
+| Neo4j         | 5.24.0-community                  | ✅ docker-compose.dev.yml:42              |
+| APOC          | Enabled (apoc.\*)                 | ✅ Line 47                                |
+| GDS           | Enabled (gds.\*)                  | ✅ Line 48                                |
+| SSO/SCIM      | Implemented                       | ✅ services/enterprise/src/sso-manager.ts |
+| Ingest        | FastAPI, CSV/JSON/S3/Postgres     | ✅ services/ingest/README.md              |
+| Observability | Prometheus, Grafana, Jaeger, Loki | ✅ docker-compose.dev.yml                 |
 
 ---
 
 ## 📊 Coverage Matrix
 
-| Roadmap Goal | Prompts | Status |
-|--------------|---------|--------|
-| **Core GA** | #01, #03, #08, #09, #11, #12 | 🟢 Ready |
-| **Prov-Ledger Beta** | #02, #10 | 🟢 Ready |
-| **Predictive Alpha** | #07 | 🟢 Ready |
-| **Ops (SLO, Cost, Chaos)** | #04, #05 | 🟢 Ready |
-| **Offline/Edge Kit** | #06 | 🟢 Ready |
+| Roadmap Goal               | Prompts                      | Status   |
+| -------------------------- | ---------------------------- | -------- |
+| **Core GA**                | #01, #03, #08, #09, #11, #12 | 🟢 Ready |
+| **Prov-Ledger Beta**       | #02, #10                     | 🟢 Ready |
+| **Predictive Alpha**       | #07                          | 🟢 Ready |
+| **Ops (SLO, Cost, Chaos)** | #04, #05                     | 🟢 Ready |
+| **Offline/Edge Kit**       | #06                          | 🟢 Ready |
 
 ---
 
 ## 🎓 Answers to Original Questions
 
 ### 1. Repo Reality Check
+
 - ✅ **Actual paths**: `apps/web/src/components/`, `server/src/`, `services/`
 - ✅ **Existing code**: NLQ at `server/src/ai/nl-graph-query/`, Prov-Ledger scaffolded, SSO/SCIM implemented
 
 ### 2. Neo4j Version + APOC
+
 - ✅ **Neo4j**: 5.24.0-community
-- ✅ **APOC**: Unrestricted (apoc.*)
-- ✅ **GDS**: Available (gds.*)
+- ✅ **APOC**: Unrestricted (apoc.\*)
+- ✅ **GDS**: Available (gds.\*)
 - ✅ **Cost estimation**: Use `EXPLAIN`, `PROFILE`, `apoc.meta.stats()`, `gds.alpha.shortestPath.*`
 
 ### 3. Authentication Providers
+
 - ✅ **OIDC**: Generic (Okta, Auth0, Keycloak, AzureAD)
 - ✅ **SAML 2.0**: Enterprise SSO
 - ✅ **LDAP**: Active Directory
@@ -165,12 +170,14 @@ All prompts have been validated against the **actual** codebase structure as of 
 - ✅ **Extend**: `services/enterprise/` for SSO/SCIM, add `services/opa-policy-engine/` for OPA
 
 ### 4. Target Infra (Helm/K8s)
+
 - ✅ **Single-cluster** dev with autoscaling
 - ✅ **Multi-region**: Helm umbrella chart supports it
 - ✅ **SLO**: p95 < 1.5s for graph queries (3-hop, 50k nodes)
 - ✅ **Observability**: Prometheus, Grafana, Jaeger (already wired)
 
 ### 5. Ingest Wizard Connectors (First 10)
+
 - ✅ **CSV/TSV** (exists)
 - ✅ **JSON/NDJSON** (exists)
 - ✅ **PostgreSQL** (exists)
@@ -189,9 +196,11 @@ All prompts have been validated against the **actual** codebase structure as of 
 ### When to Use Each Prompt
 
 **Before Core GA:**
+
 - Prompts #01, #03, #08, #09, #11, #12 (all Core GA features)
 
 **After Core GA:**
+
 - Prompts #02, #10 (Prov-Ledger beta)
 - Prompt #07 (Predictive alpha)
 - Prompts #04, #05 (Ops hardening)
@@ -200,6 +209,7 @@ All prompts have been validated against the **actual** codebase structure as of 
 ### Customization
 
 Each prompt is a **template**. Customize:
+
 - Connector list (Prompt #08)
 - SLO thresholds (Prompt #05)
 - Budget limits (Prompt #04)
@@ -208,11 +218,13 @@ Each prompt is a **template**. Customize:
 ### Sequential Dependencies
 
 Some prompts depend on others:
+
 - **Prompt #10** (Disclosure) depends on **Prompt #02** (Prov-Ledger)
 - **Prompt #04** (Cost Guard) depends on **Prompt #01** (Cost estimator from NL→Cypher)
 - **Prompt #11** (Runbook Runner) depends on **Prompt #03** (OPA for provers)
 
 **Recommended order:**
+
 1. #01 (NL→Cypher) → #04 (Cost Guard)
 2. #03 (ABAC/OPA) → #11 (Runbook Runner) → #12 (Security)
 3. #02 (Prov-Ledger) → #10 (Disclosure)
@@ -226,6 +238,7 @@ Some prompts depend on others:
 ### Per-Prompt Tests
 
 Each prompt includes:
+
 - **Unit tests**: Jest/pytest for core logic
 - **Integration tests**: API endpoints, database operations
 - **E2E tests**: Playwright/Cypress for UI flows
@@ -250,18 +263,21 @@ make smoke
 ### Issue: Paths don't match
 
 **Solution**: Prompts use corrected paths. If you see mismatches, check:
+
 - `apps/web/src/components/` (not `apps/web/components/`)
 - `server/src/` (not `server/`)
 
 ### Issue: Existing code conflicts
 
 **Solution**: Prompts are designed to **extend** existing code. Look for:
+
 - "Extend: `server/src/ai/nl-graph-query/nl-graph-query.service.ts`"
 - "Verify: `services/enterprise/src/sso-manager.ts`"
 
 ### Issue: Missing dependencies
 
 **Solution**: Run pre-flight checks. Example:
+
 ```bash
 ls -la services/prov-ledger/  # Should exist (scaffolded)
 grep -r "OIDC" services/enterprise/  # Should find SSO code

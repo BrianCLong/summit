@@ -4,47 +4,47 @@
  * @module mesh-eval-sdk/validators
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================================================
 // Scenario Validators
 // ============================================================================
 
 export const ScenarioTypeSchema = z.enum([
-  'code_transformation',
-  'incident_investigation',
-  'research_synthesis',
-  'policy_sensitive',
-  'export_controlled',
-  'adversarial_prompting',
-  'multi_step_reasoning',
-  'tool_usage',
-  'custom',
+  "code_transformation",
+  "incident_investigation",
+  "research_synthesis",
+  "policy_sensitive",
+  "export_controlled",
+  "adversarial_prompting",
+  "multi_step_reasoning",
+  "tool_usage",
+  "custom",
 ]);
 
-export const DifficultyLevelSchema = z.enum(['trivial', 'easy', 'medium', 'hard', 'expert']);
+export const DifficultyLevelSchema = z.enum(["trivial", "easy", "medium", "hard", "expert"]);
 
 export const ScenarioInputSchema = z.object({
-  type: z.enum(['text', 'code', 'file', 'structured']),
+  type: z.enum(["text", "code", "file", "structured"]),
   content: z.union([z.string(), z.record(z.unknown())]),
   metadata: z.record(z.unknown()).optional(),
 });
 
 export const ConstraintSchema = z.object({
-  type: z.enum(['time_limit', 'cost_limit', 'policy_requirement', 'tool_restriction']),
+  type: z.enum(["time_limit", "cost_limit", "policy_requirement", "tool_restriction"]),
   value: z.unknown(),
   strict: z.boolean(),
 });
 
 export const ExpectedOutputSchema = z.object({
-  type: z.enum(['exact_match', 'regex', 'semantic_similarity', 'assertion', 'custom']),
+  type: z.enum(["exact_match", "regex", "semantic_similarity", "assertion", "custom"]),
   value: z.unknown(),
   tolerance: z.number().optional(),
   description: z.string().optional(),
 });
 
 export const AssertionSchema = z.object({
-  type: z.enum(['contains', 'not_contains', 'regex_match', 'json_valid', 'custom']),
+  type: z.enum(["contains", "not_contains", "regex_match", "json_valid", "custom"]),
   value: z.unknown(),
   path: z.string().optional(),
   weight: z.number().optional(),
@@ -52,11 +52,11 @@ export const AssertionSchema = z.object({
 });
 
 export const ScoringStrategySchema = z.object({
-  method: z.enum(['rule_based', 'llm_judged', 'policy_based', 'hybrid']),
+  method: z.enum(["rule_based", "llm_judged", "policy_based", "hybrid"]),
   rules: z
     .object({
       assertions: z.array(AssertionSchema),
-      aggregation: z.enum(['all', 'any', 'weighted_average']).optional(),
+      aggregation: z.enum(["all", "any", "weighted_average"]).optional(),
     })
     .optional(),
   llmJudge: z
@@ -138,7 +138,7 @@ export const AgentConfigSchema = z.object({
 
 export const ModelConfigSchema = z.object({
   id: z.string(),
-  provider: z.enum(['anthropic', 'openai', 'google', 'custom']),
+  provider: z.enum(["anthropic", "openai", "google", "custom"]),
   name: z.string(),
   parameters: z
     .object({
@@ -162,7 +162,7 @@ export const EvalConfigSchema = z.object({
   parallelism: z.number().positive().optional(),
   timeout: z.number().positive().optional(),
   outputPath: z.string().optional(),
-  reportFormat: z.enum(['json', 'markdown', 'html', 'all']).optional(),
+  reportFormat: z.enum(["json", "markdown", "html", "all"]).optional(),
   metadata: z.record(z.unknown()).optional(),
 });
 
@@ -170,24 +170,30 @@ export const EvalConfigSchema = z.object({
 // Execution & Results Validators
 // ============================================================================
 
-export const EvalRunStatusSchema = z.enum(['pending', 'running', 'completed', 'failed', 'cancelled']);
+export const EvalRunStatusSchema = z.enum([
+  "pending",
+  "running",
+  "completed",
+  "failed",
+  "cancelled",
+]);
 
-export const ScenarioResultStatusSchema = z.enum(['pass', 'fail', 'skip', 'error']);
+export const ScenarioResultStatusSchema = z.enum(["pass", "fail", "skip", "error"]);
 
 export const PolicyEventSchema = z.object({
   timestamp: z.date(),
   policyId: z.string(),
-  action: z.enum(['allow', 'deny', 'redact', 'escalate', 'log']),
+  action: z.enum(["allow", "deny", "redact", "escalate", "log"]),
   reason: z.string(),
-  severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
+  severity: z.enum(["low", "medium", "high", "critical"]).optional(),
   context: z.record(z.unknown()).optional(),
 });
 
-export const PassFailStatusSchema = z.enum(['pass', 'fail', 'partial', 'uncertain']);
+export const PassFailStatusSchema = z.enum(["pass", "fail", "partial", "uncertain"]);
 
-export const RiskLevelSchema = z.enum(['low', 'medium', 'high', 'critical']);
+export const RiskLevelSchema = z.enum(["low", "medium", "high", "critical"]);
 
-export const ScoringMethodSchema = z.enum(['rule_based', 'llm_judged', 'policy_based', 'hybrid']);
+export const ScoringMethodSchema = z.enum(["rule_based", "llm_judged", "policy_based", "hybrid"]);
 
 export const EvalScoreSchema = z.object({
   overall: z.number().min(0).max(1),
@@ -203,19 +209,19 @@ export const EvalScoreSchema = z.object({
 });
 
 export const FindingTypeSchema = z.enum([
-  'correctness_issue',
-  'safety_violation',
-  'policy_breach',
-  'performance_regression',
-  'cost_anomaly',
-  'tool_misuse',
-  'reasoning_error',
-  'hallucination',
-  'prompt_injection',
-  'data_leakage',
+  "correctness_issue",
+  "safety_violation",
+  "policy_breach",
+  "performance_regression",
+  "cost_anomaly",
+  "tool_misuse",
+  "reasoning_error",
+  "hallucination",
+  "prompt_injection",
+  "data_leakage",
 ]);
 
-export const FindingSeveritySchema = z.enum(['info', 'warning', 'error', 'critical']);
+export const FindingSeveritySchema = z.enum(["info", "warning", "error", "critical"]);
 
 export const FindingLocationSchema = z.object({
   agent: z.string().optional(),
@@ -288,7 +294,7 @@ export const EvalRunSchema = z.object({
 // Baseline Validators
 // ============================================================================
 
-export const BaselineTrackSchema = z.enum(['release', 'branch', 'experimental']);
+export const BaselineTrackSchema = z.enum(["release", "branch", "experimental"]);
 
 export const ScenarioBaselineSchema = z.object({
   scenarioId: z.string(),
@@ -341,9 +347,9 @@ export const BaselineComparisonSchema = z.object({
 // Update Proposal Validators
 // ============================================================================
 
-export const UpdateProposalTypeSchema = z.enum(['routing', 'policy', 'agent_config']);
+export const UpdateProposalTypeSchema = z.enum(["routing", "policy", "agent_config"]);
 
-export const ProposalStatusSchema = z.enum(['pending', 'approved', 'rejected', 'implemented']);
+export const ProposalStatusSchema = z.enum(["pending", "approved", "rejected", "implemented"]);
 
 export const ConfigDiffSchema = z.object({
   changed: z.record(z.object({ old: z.unknown(), new: z.unknown() })),
@@ -378,7 +384,7 @@ export const UpdateProposalSchema = z.object({
 // Self-Play Validators
 // ============================================================================
 
-export const SelfPlayModeSchema = z.enum(['adversarial', 'collaborative', 'exploratory']);
+export const SelfPlayModeSchema = z.enum(["adversarial", "collaborative", "exploratory"]);
 
 export const SelfPlayConfigSchema = z.object({
   mode: SelfPlayModeSchema,
@@ -387,7 +393,7 @@ export const SelfPlayConfigSchema = z.object({
   baseScenarioId: z.string().optional(),
   variationStrategy: z
     .object({
-      perturbation: z.enum(['input', 'constraint', 'difficulty']),
+      perturbation: z.enum(["input", "constraint", "difficulty"]),
       amount: z.number(),
     })
     .optional(),
@@ -427,7 +433,7 @@ export const SelfPlayResultSchema = z.object({
 // Curriculum Validators
 // ============================================================================
 
-export const CurriculumStrategySchema = z.enum(['coverage', 'difficulty', 'error_driven']);
+export const CurriculumStrategySchema = z.enum(["coverage", "difficulty", "error_driven"]);
 
 export const CurriculumConfigSchema = z.object({
   strategy: CurriculumStrategySchema,
@@ -444,14 +450,14 @@ export const CurriculumStateSchema = z.object({
     z.object({
       passRate: z.number().min(0).max(1),
       avgScore: z.number().min(0).max(1),
-    }),
+    })
   ),
   gaps: z.array(
     z.object({
       scenarioType: ScenarioTypeSchema,
       severity: z.number(),
       recommendedScenarios: z.number().nonnegative(),
-    }),
+    })
   ),
   updatedAt: z.date(),
 });

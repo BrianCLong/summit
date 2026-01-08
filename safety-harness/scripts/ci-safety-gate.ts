@@ -5,10 +5,10 @@
  * Runs safety harness and enforces quality gates for CI/CD pipelines.
  */
 
-import { SafetyHarnessRunner, RunnerConfig } from '../src/runner.js';
-import { SafetyReporter } from '../src/reporter.js';
-import { CISafetyGateConfig, CIReport } from '../src/types.js';
-import chalk from 'chalk';
+import { SafetyHarnessRunner, RunnerConfig } from "../src/runner.js";
+import { SafetyReporter } from "../src/reporter.js";
+import { CISafetyGateConfig, CIReport } from "../src/types.js";
+import chalk from "chalk";
 
 interface CIGateOptions {
   testPacksDir: string;
@@ -20,7 +20,7 @@ interface CIGateOptions {
 }
 
 async function runSafetyGate(options: CIGateOptions): Promise<CIReport> {
-  console.log(chalk.bold.cyan('\n🛡️  CI Safety Gate\n'));
+  console.log(chalk.bold.cyan("\n🛡️  CI Safety Gate\n"));
 
   const runnerConfig: RunnerConfig = {
     testPacksDir: options.testPacksDir,
@@ -35,19 +35,19 @@ async function runSafetyGate(options: CIGateOptions): Promise<CIReport> {
   const runner = new SafetyHarnessRunner(runnerConfig);
 
   // Load and run tests
-  console.log(chalk.yellow('📦 Loading test packs...'));
+  console.log(chalk.yellow("📦 Loading test packs..."));
   await runner.loadTestPacks();
 
-  console.log(chalk.yellow('🚀 Executing safety tests...\n'));
+  console.log(chalk.yellow("🚀 Executing safety tests...\n"));
   const testRun = await runner.runAll();
 
   // Generate reports
-  console.log(chalk.yellow('\n📄 Generating reports...'));
+  console.log(chalk.yellow("\n📄 Generating reports..."));
   const reporter = new SafetyReporter(testRun);
 
   // Save JSON report
   await reporter.generate({
-    format: 'json',
+    format: "json",
     outputPath: `${options.outputDir}/safety-report.json`,
     includeDetails: true,
     includeLogs: true,
@@ -56,7 +56,7 @@ async function runSafetyGate(options: CIGateOptions): Promise<CIReport> {
 
   // Save JUnit report for CI integration
   await reporter.generate({
-    format: 'junit',
+    format: "junit",
     outputPath: `${options.outputDir}/safety-junit.xml`,
     includeDetails: false,
     includeLogs: false,
@@ -65,14 +65,14 @@ async function runSafetyGate(options: CIGateOptions): Promise<CIReport> {
 
   // Save HTML report for artifacts
   await reporter.generate({
-    format: 'html',
+    format: "html",
     outputPath: `${options.outputDir}/safety-report.html`,
     includeDetails: true,
     includeLogs: false,
     highlightFailures: true,
   });
 
-  console.log(chalk.green('✓ Reports generated'));
+  console.log(chalk.green("✓ Reports generated"));
 
   // Print console summary
   reporter.printConsoleSummary();
@@ -82,19 +82,19 @@ async function runSafetyGate(options: CIGateOptions): Promise<CIReport> {
 
   // Count failures by severity
   const criticalFailures = testRun.results.filter(
-    r => !r.passed && r.failure?.severity === 'critical'
+    (r) => !r.passed && r.failure?.severity === "critical"
   ).length;
 
   const highFailures = testRun.results.filter(
-    r => !r.passed && r.failure?.severity === 'high'
+    (r) => !r.passed && r.failure?.severity === "high"
   ).length;
 
   const mediumFailures = testRun.results.filter(
-    r => !r.passed && r.failure?.severity === 'medium'
+    (r) => !r.passed && r.failure?.severity === "medium"
   ).length;
 
   const lowFailures = testRun.results.filter(
-    r => !r.passed && r.failure?.severity === 'low'
+    (r) => !r.passed && r.failure?.severity === "low"
   ).length;
 
   // Determine pass/fail based on config
@@ -102,7 +102,9 @@ async function runSafetyGate(options: CIGateOptions): Promise<CIReport> {
   const reasons: string[] = [];
 
   if (!options.config.enabled) {
-    console.log(chalk.yellow('\n⚠️  Safety gate is DISABLED - tests run for informational purposes only'));
+    console.log(
+      chalk.yellow("\n⚠️  Safety gate is DISABLED - tests run for informational purposes only")
+    );
     passed = true;
   } else {
     if (options.config.failOnCritical && criticalFailures > 0) {
@@ -127,9 +129,7 @@ async function runSafetyGate(options: CIGateOptions): Promise<CIReport> {
   // Build CI report
   const report: CIReport = {
     passed,
-    summary: passed
-      ? '✅ Safety gate PASSED'
-      : `❌ Safety gate FAILED: ${reasons.join('; ')}`,
+    summary: passed ? "✅ Safety gate PASSED" : `❌ Safety gate FAILED: ${reasons.join("; ")}`,
     details: {
       totalTests: summary.total,
       passed: summary.passed,
@@ -141,15 +141,15 @@ async function runSafetyGate(options: CIGateOptions): Promise<CIReport> {
   };
 
   // Print gate result
-  console.log(chalk.bold('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
+  console.log(chalk.bold("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
   if (passed) {
-    console.log(chalk.bold.green('✅ SAFETY GATE PASSED'));
+    console.log(chalk.bold.green("✅ SAFETY GATE PASSED"));
   } else {
-    console.log(chalk.bold.red('❌ SAFETY GATE FAILED'));
-    console.log(chalk.red('\nFailure reasons:'));
-    reasons.forEach(reason => console.log(chalk.red(`  • ${reason}`)));
+    console.log(chalk.bold.red("❌ SAFETY GATE FAILED"));
+    console.log(chalk.red("\nFailure reasons:"));
+    reasons.forEach((reason) => console.log(chalk.red(`  • ${reason}`)));
   }
-  console.log(chalk.bold('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'));
+  console.log(chalk.bold("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
 
   return report;
 }
@@ -157,29 +157,29 @@ async function runSafetyGate(options: CIGateOptions): Promise<CIReport> {
 // CLI execution
 if (require.main === module) {
   const config: CISafetyGateConfig = {
-    enabled: process.env.CI_SAFETY_GATE_ENABLED !== 'false',
-    failOnCritical: process.env.CI_FAIL_ON_CRITICAL !== 'false',
-    failOnHigh: process.env.CI_FAIL_ON_HIGH === 'true',
-    maxFailureRate: parseFloat(process.env.CI_MAX_FAILURE_RATE || '0.1'),
-    requireAllPacks: process.env.CI_REQUIRE_ALL_PACKS === 'true',
+    enabled: process.env.CI_SAFETY_GATE_ENABLED !== "false",
+    failOnCritical: process.env.CI_FAIL_ON_CRITICAL !== "false",
+    failOnHigh: process.env.CI_FAIL_ON_HIGH === "true",
+    maxFailureRate: parseFloat(process.env.CI_MAX_FAILURE_RATE || "0.1"),
+    requireAllPacks: process.env.CI_REQUIRE_ALL_PACKS === "true",
   };
 
   const options: CIGateOptions = {
-    testPacksDir: process.env.TESTPACKS_DIR || '../testpacks',
-    targetEndpoint: process.env.TARGET_ENDPOINT || 'http://localhost:4000',
-    environment: process.env.ENVIRONMENT || 'ci',
+    testPacksDir: process.env.TESTPACKS_DIR || "../testpacks",
+    targetEndpoint: process.env.TARGET_ENDPOINT || "http://localhost:4000",
+    environment: process.env.ENVIRONMENT || "ci",
     buildVersion: process.env.BUILD_VERSION || process.env.GITHUB_SHA,
-    outputDir: process.env.OUTPUT_DIR || './safety-reports',
+    outputDir: process.env.OUTPUT_DIR || "./safety-reports",
     config,
   };
 
   runSafetyGate(options)
-    .then(report => {
+    .then((report) => {
       console.log(chalk.gray(`\nReports saved to: ${options.outputDir}/`));
       process.exit(report.exitCode);
     })
-    .catch(error => {
-      console.error(chalk.red('\n✗ Safety gate execution failed:'), error.message);
+    .catch((error) => {
+      console.error(chalk.red("\n✗ Safety gate execution failed:"), error.message);
       console.error(error.stack);
       process.exit(1);
     });

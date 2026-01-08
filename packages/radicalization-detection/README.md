@@ -17,27 +17,27 @@ Comprehensive radicalization monitoring and pathway detection for early interven
 ## Usage
 
 ```typescript
-import { RadicalizationMonitor } from '@intelgraph/radicalization-detection';
+import { RadicalizationMonitor } from "@intelgraph/radicalization-detection";
 
 const monitor = new RadicalizationMonitor();
 
 // Monitor an individual
 await monitor.monitorIndividual({
-  id: 'profile-001',
-  individualId: 'person-123',
-  status: 'AT_RISK',
-  stage: 'IDENTIFICATION',
-  pathway: { primary: 'ONLINE', description: 'Social media radicalization' },
+  id: "profile-001",
+  individualId: "person-123",
+  status: "AT_RISK",
+  stage: "IDENTIFICATION",
+  pathway: { primary: "ONLINE", description: "Social media radicalization" },
   indicators: [],
   timeline: { profileCreated: new Date(), stageProgression: [], criticalEvents: [] },
   influences: [],
   interventions: [],
   riskScore: 0.5,
-  lastAssessed: new Date()
+  lastAssessed: new Date(),
 });
 
 // Get intervention recommendations
-const interventions = await monitor.recommendInterventions('person-123');
+const interventions = await monitor.recommendInterventions("person-123");
 ```
 
 ## Security Notice

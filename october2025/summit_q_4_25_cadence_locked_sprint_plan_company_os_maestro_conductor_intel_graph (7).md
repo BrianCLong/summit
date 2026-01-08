@@ -904,10 +904,10 @@ step_up_required {
 labels:
   sensitivity:
     confidential:
-      redact: ['pii.email', 'pii.phone', 'keys.*']
+      redact: ["pii.email", "pii.phone", "keys.*"]
     restricted:
-      redact: ['*']
-watermark: 'Summit Confidential — {{slug}} — {{timestamp}}'
+      redact: ["*"]
+watermark: "Summit Confidential — {{slug}} — {{timestamp}}"
 ```
 
 ---

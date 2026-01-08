@@ -3,7 +3,7 @@
  * EXIF data analysis and tampering detection
  */
 
-import type { ExifAnalysisResult, ExifInconsistency } from '../types';
+import type { ExifAnalysisResult, ExifInconsistency } from "../types";
 
 export class MetadataAnalyzer {
   /**
@@ -19,10 +19,10 @@ export class MetadataAnalyzer {
         exifData: {},
         inconsistencies: [
           {
-            field: 'all',
-            issue: 'no_exif_data',
+            field: "all",
+            issue: "no_exif_data",
             severity: 0.5,
-            explanation: 'Image has no EXIF data - may have been stripped or never captured',
+            explanation: "Image has no EXIF data - may have been stripped or never captured",
           },
         ],
         tamperingDetected: false,
@@ -59,16 +59,16 @@ export class MetadataAnalyzer {
     // - etc.
 
     return {
-      Make: 'Canon',
-      Model: 'Canon EOS 5D Mark IV',
-      DateTime: '2024:01:15 14:30:22',
-      Software: 'Adobe Photoshop 2024',
+      Make: "Canon",
+      Model: "Canon EOS 5D Mark IV",
+      DateTime: "2024:01:15 14:30:22",
+      Software: "Adobe Photoshop 2024",
       GPSLatitude: 37.7749,
       GPSLongitude: -122.4194,
-      ExposureTime: '1/250',
-      FNumber: 'f/5.6',
+      ExposureTime: "1/250",
+      FNumber: "f/5.6",
       ISO: 400,
-      FocalLength: '85mm',
+      FocalLength: "85mm",
     };
   }
 
@@ -81,8 +81,8 @@ export class MetadataAnalyzer {
     // 1. Check for software modifications
     if (exifData.Software && this.isEditingSoftware(exifData.Software)) {
       inconsistencies.push({
-        field: 'Software',
-        issue: 'editing_software_detected',
+        field: "Software",
+        issue: "editing_software_detected",
         severity: 0.6,
         explanation: `Image processed by editing software: ${exifData.Software}`,
       });
@@ -117,13 +117,13 @@ export class MetadataAnalyzer {
 
   private isEditingSoftware(software: string): boolean {
     const editingSoftware = [
-      'photoshop',
-      'gimp',
-      'lightroom',
-      'affinity',
-      'pixlr',
-      'paint.net',
-      'capture one',
+      "photoshop",
+      "gimp",
+      "lightroom",
+      "affinity",
+      "pixlr",
+      "paint.net",
+      "capture one",
     ];
 
     return editingSoftware.some((s) => software.toLowerCase().includes(s));
@@ -134,11 +134,11 @@ export class MetadataAnalyzer {
 
     // Check for inconsistent dates
     const dateFields = [
-      'DateTime',
-      'DateTimeOriginal',
-      'DateTimeDigitized',
-      'CreateDate',
-      'ModifyDate',
+      "DateTime",
+      "DateTimeOriginal",
+      "DateTimeDigitized",
+      "CreateDate",
+      "ModifyDate",
     ];
 
     const dates: Date[] = [];
@@ -150,7 +150,7 @@ export class MetadataAnalyzer {
         } catch (e) {
           issues.push({
             field,
-            issue: 'invalid_date_format',
+            issue: "invalid_date_format",
             severity: 0.5,
             explanation: `Invalid date format in ${field}`,
           });
@@ -166,10 +166,10 @@ export class MetadataAnalyzer {
       for (const date of dates) {
         if (date > now) {
           issues.push({
-            field: 'DateTime',
-            issue: 'future_date',
+            field: "DateTime",
+            issue: "future_date",
             severity: 0.9,
-            explanation: 'Image has a date in the future',
+            explanation: "Image has a date in the future",
           });
         }
       }
@@ -213,20 +213,20 @@ export class MetadataAnalyzer {
       // Check for invalid coordinates
       if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
         issues.push({
-          field: 'GPS',
-          issue: 'invalid_coordinates',
+          field: "GPS",
+          issue: "invalid_coordinates",
           severity: 0.8,
-          explanation: 'GPS coordinates are outside valid range',
+          explanation: "GPS coordinates are outside valid range",
         });
       }
 
       // Check for null island (0,0) which is suspicious
       if (lat === 0 && lon === 0) {
         issues.push({
-          field: 'GPS',
-          issue: 'null_island',
+          field: "GPS",
+          issue: "null_island",
           severity: 0.6,
-          explanation: 'GPS coordinates at (0,0) - likely default or error',
+          explanation: "GPS coordinates at (0,0) - likely default or error",
         });
       }
     }
@@ -235,7 +235,7 @@ export class MetadataAnalyzer {
   }
 
   private async checkThumbnailConsistency(
-    exifData: Record<string, any>,
+    exifData: Record<string, any>
   ): Promise<ExifInconsistency[]> {
     const issues: ExifInconsistency[] = [];
 
@@ -259,10 +259,10 @@ export class MetadataAnalyzer {
 
     if (!exifData.MakerNotes && exifData.Make) {
       issues.push({
-        field: 'MakerNotes',
-        issue: 'missing_maker_notes',
+        field: "MakerNotes",
+        issue: "missing_maker_notes",
         severity: 0.5,
-        explanation: 'Maker notes missing - may indicate EXIF manipulation',
+        explanation: "Maker notes missing - may indicate EXIF manipulation",
       });
     }
 
@@ -274,7 +274,7 @@ export class MetadataAnalyzer {
    */
   private calculateTrustScore(
     exifData: Record<string, any>,
-    inconsistencies: ExifInconsistency[],
+    inconsistencies: ExifInconsistency[]
   ): number {
     let score = 1.0;
 
@@ -284,7 +284,7 @@ export class MetadataAnalyzer {
     }
 
     // Deduct for missing important fields
-    const importantFields = ['Make', 'Model', 'DateTime', 'DateTimeOriginal'];
+    const importantFields = ["Make", "Model", "DateTime", "DateTimeOriginal"];
     const missingFields = importantFields.filter((field) => !exifData[field]);
     score -= missingFields.length * 0.1;
 
@@ -320,7 +320,7 @@ export class MetadataAnalyzer {
     // Missing important metadata
     if (!analysis.hasExif || Object.keys(analysis.exifData).length < 5) {
       tamperingScore += 0.2;
-      evidence.push('Minimal or missing EXIF data');
+      evidence.push("Minimal or missing EXIF data");
     }
 
     // Low trust score

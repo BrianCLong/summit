@@ -8,18 +8,20 @@ When working on this repository, follow these conventions to avoid introducing f
 
 1. **DO NOT add Jest tests for verification-style checks** (structure, feature presence, config schemas)
 2. **DO NOT mock third-party libraries by hand inside node_modules/**
-3. **DO use node-native tests (tsx + node:assert) for verification** 
+3. **DO use node-native tests (tsx + node:assert) for verification**
 4. **DO use Jest only for true unit/integration behavior tests**
 
 ### When to Use Each Approach
 
 #### Use Jest (`*.test.ts` in test directories)
+
 - Testing function/class behavior
 - Unit testing with straightforward mocking
 - React component testing
 - Integration tests requiring test database
 
 #### Use Node-Native Verification (`server/scripts/verify-*.ts`)
+
 - GA feature presence checks (auth, rate limits, policies)
 - Route/middleware configuration verification
 - Config schema validation
@@ -28,24 +30,26 @@ When working on this repository, follow these conventions to avoid introducing f
 ### Adding a New Verification
 
 1. Create `server/scripts/verify-your-feature.ts`:
+
 ```typescript
-import assert from 'assert/strict';
+import assert from "assert/strict";
 
 async function run() {
-  console.log('--- Your Feature Verification ---');
-  
+  console.log("--- Your Feature Verification ---");
+
   // Your checks here using assert.equal(), assert.ok(), etc.
-  
-  console.log('✅ All checks passed');
+
+  console.log("✅ All checks passed");
 }
 
-run().catch(err => {
-  console.error('Verification failed:', err);
+run().catch((err) => {
+  console.error("Verification failed:", err);
   process.exit(1);
 });
 ```
 
 2. Add to `scripts/verify.ts`:
+
 ```typescript
 {
   name: 'Your Feature',
@@ -60,6 +64,7 @@ run().catch(err => {
 ### CI Golden Path
 
 The CI pipeline runs:
+
 1. **Bootstrap** - Install deps, validate versions
 2. **Lint** - ESLint + Ruff
 3. **Verify** - Run verification suite (BLOCKS on failure)
@@ -83,6 +88,7 @@ The CI pipeline runs:
 ### Examples
 
 **Good Verification Script** (server/scripts/verify-route-rate-limit.ts):
+
 - Direct imports
 - Mock only what's needed
 - Fast execution
@@ -90,6 +96,7 @@ The CI pipeline runs:
 - No Jest dependency
 
 **Good Jest Test** (server/tests/utils/encryption.test.ts):
+
 - Tests behavior of encryption functions
 - Uses Jest's mocking features appropriately
 - Isolated unit test

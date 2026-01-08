@@ -1,16 +1,16 @@
 #!/usr/bin/env node
-import { readFileSync, writeFileSync, appendFileSync, existsSync } from 'fs';
-import { join } from 'path';
+import { readFileSync, writeFileSync, appendFileSync, existsSync } from "fs";
+import { join } from "path";
 
-const DIST_DIR = process.env.DIST_DIR || 'dist/release';
-const OUT_FILE = join(DIST_DIR, 'release-status.json');
+const DIST_DIR = process.env.DIST_DIR || "dist/release";
+const OUT_FILE = join(DIST_DIR, "release-status.json");
 
 // Helper to read JSON
 function readJson(filename) {
   const path = join(DIST_DIR, filename);
   if (!existsSync(path)) return null;
   try {
-    return JSON.parse(readFileSync(path, 'utf8'));
+    return JSON.parse(readFileSync(path, "utf8"));
   } catch (e) {
     console.error(`Error reading ${filename}:`, e.message);
     return null;
@@ -19,33 +19,34 @@ function readJson(filename) {
 
 function main() {
   const statusObj = {
-    tag: process.env.GITHUB_REF_NAME || 'unknown',
-    channel: 'unknown',
-    status: 'blocked',
+    tag: process.env.GITHUB_REF_NAME || "unknown",
+    channel: "unknown",
+    status: "blocked",
     blockedReasons: [],
     checks: {},
     artifactsDir: DIST_DIR,
     run: {
       id: process.env.GITHUB_RUN_ID,
-      url: process.env.GITHUB_SERVER_URL && process.env.GITHUB_REPOSITORY && process.env.GITHUB_RUN_ID
-        ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
-        : null
+      url:
+        process.env.GITHUB_SERVER_URL && process.env.GITHUB_REPOSITORY && process.env.GITHUB_RUN_ID
+          ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
+          : null,
     },
     generatedAt: new Date().toISOString(),
   };
 
   // Try to determine channel from channel.json
-  const channelData = readJson('channel.json');
+  const channelData = readJson("channel.json");
   if (channelData && channelData.channel) {
     statusObj.channel = channelData.channel;
   } else {
-     // Fallback inference
-     if (statusObj.tag.includes('-rc')) statusObj.channel = 'rc';
-     else if (statusObj.tag.startsWith('v')) statusObj.channel = 'ga';
+    // Fallback inference
+    if (statusObj.tag.includes("-rc")) statusObj.channel = "rc";
+    else if (statusObj.tag.startsWith("v")) statusObj.channel = "ga";
   }
 
   // Required checks
-  const requiredChecks = ['preflight', 'freeze', 'verify'];
+  const requiredChecks = ["preflight", "freeze", "verify"];
 
   let allOk = true;
 
@@ -56,15 +57,15 @@ function main() {
     // Initialize check info
     statusObj.checks[checkName] = {
       ok: false,
-      path: join(DIST_DIR, filename)
+      path: join(DIST_DIR, filename),
     };
 
     if (!data) {
       allOk = false;
       statusObj.blockedReasons.push({
-        code: 'MISSING_ARTIFACTS',
+        code: "MISSING_ARTIFACTS",
         message: `Required check output missing: ${filename}`,
-        details: { file: filename }
+        details: { file: filename },
       });
     } else {
       statusObj.checks[checkName].ok = !!data.ok;
@@ -74,18 +75,25 @@ function main() {
         // Determine code
         let code = data.code;
         if (!code) {
-          switch(checkName) {
-            case 'freeze': code = 'FREEZE_WINDOW'; break;
-            case 'verify': code = 'VERIFY_FAILED'; break;
-            case 'preflight': code = 'PREFLIGHT_ANCESTRY'; break;
-            default: code = 'UNKNOWN';
+          switch (checkName) {
+            case "freeze":
+              code = "FREEZE_WINDOW";
+              break;
+            case "verify":
+              code = "VERIFY_FAILED";
+              break;
+            case "preflight":
+              code = "PREFLIGHT_ANCESTRY";
+              break;
+            default:
+              code = "UNKNOWN";
           }
         }
 
         statusObj.blockedReasons.push({
           code: code,
           message: data.message || data.error || `${checkName} check failed`,
-          details: data
+          details: data,
         });
       }
     }
@@ -93,19 +101,22 @@ function main() {
 
   // Determine backport context
   let backportContext = null;
-  const preflight = readJson('preflight.json');
+  const preflight = readJson("preflight.json");
   if (preflight) {
-    if (preflight.ancestryAcceptedVia === 'series') {
+    if (preflight.ancestryAcceptedVia === "series") {
       backportContext = {
-        mode: 'series-branch',
+        mode: "series-branch",
         series: preflight.series,
         seriesBranch: preflight.seriesBranch,
-        ancestryAcceptedVia: 'series'
+        ancestryAcceptedVia: "series",
       };
-    } else if (preflight.ancestryAcceptedVia === 'default' || preflight.reachableFromDefaultBranch) {
+    } else if (
+      preflight.ancestryAcceptedVia === "default" ||
+      preflight.reachableFromDefaultBranch
+    ) {
       backportContext = {
-        mode: 'default-branch',
-        ancestryAcceptedVia: 'default'
+        mode: "default-branch",
+        ancestryAcceptedVia: "default",
       };
     }
   }
@@ -115,16 +126,16 @@ function main() {
   }
 
   if (allOk) {
-    statusObj.status = 'ready';
+    statusObj.status = "ready";
   } else {
-    statusObj.status = 'blocked';
+    statusObj.status = "blocked";
   }
 
   // Write output
   try {
     writeFileSync(OUT_FILE, JSON.stringify(statusObj, null, 2));
     console.log(`Generated ${OUT_FILE}`);
-  } catch(e) {
+  } catch (e) {
     console.error("Failed to write status file:", e);
     process.exit(1);
   }
@@ -132,18 +143,19 @@ function main() {
   // One-line summary
   const summary = `Release status: ${statusObj.status.toUpperCase()}`;
   console.log(summary);
-  if (statusObj.status === 'blocked') {
-    console.log('Blocked reasons:', statusObj.blockedReasons.map(r => r.code).join(', '));
+  if (statusObj.status === "blocked") {
+    console.log("Blocked reasons:", statusObj.blockedReasons.map((r) => r.code).join(", "));
   }
 
   // GitHub Step Summary
   if (process.env.GITHUB_STEP_SUMMARY) {
     try {
-      const summaryMd = `### Release Status: ${statusObj.status.toUpperCase()}\n` +
-        `**Ancestry source:** ${statusObj.backportContext ? (statusObj.backportContext.mode === 'series-branch' ? `series (${statusObj.backportContext.seriesBranch})` : 'default (main)') : 'unknown'}\n` +
-        (statusObj.blockedReasons.length > 0 ?
-          `**Blocked Reasons:**\n${statusObj.blockedReasons.map(r => `- \`${r.code}\`: ${r.message}`).join('\n')}\n` :
-          'All checks passed. Release is ready.\n');
+      const summaryMd =
+        `### Release Status: ${statusObj.status.toUpperCase()}\n` +
+        `**Ancestry source:** ${statusObj.backportContext ? (statusObj.backportContext.mode === "series-branch" ? `series (${statusObj.backportContext.seriesBranch})` : "default (main)") : "unknown"}\n` +
+        (statusObj.blockedReasons.length > 0
+          ? `**Blocked Reasons:**\n${statusObj.blockedReasons.map((r) => `- \`${r.code}\`: ${r.message}`).join("\n")}\n`
+          : "All checks passed. Release is ready.\n");
 
       appendFileSync(process.env.GITHUB_STEP_SUMMARY, summaryMd);
     } catch (e) {

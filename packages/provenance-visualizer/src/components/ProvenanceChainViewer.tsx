@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Card,
@@ -11,11 +11,11 @@ import {
   Step,
   StepLabel,
   StepContent,
-} from '@mui/material';
-import { AccountTree, Verified, Warning } from '@mui/icons-material';
-import { format } from 'date-fns';
-import type { ProvenanceChain, Claim } from '../types';
-import { ProvenanceLedgerClient } from '../api/client';
+} from "@mui/material";
+import { AccountTree, Verified, Warning } from "@mui/icons-material";
+import { format } from "date-fns";
+import type { ProvenanceChain, Claim } from "../types";
+import { ProvenanceLedgerClient } from "../api/client";
 
 interface ProvenanceChainViewerProps {
   claimId: string;
@@ -56,7 +56,7 @@ export const ProvenanceChainViewer: React.FC<ProvenanceChainViewerProps> = ({
       setVerified(verification.valid);
       onVerify?.(verification.valid);
     } catch (err: any) {
-      setError(err.message || 'Failed to load provenance chain');
+      setError(err.message || "Failed to load provenance chain");
     } finally {
       setLoading(false);
     }
@@ -91,8 +91,8 @@ export const ProvenanceChainViewer: React.FC<ProvenanceChainViewerProps> = ({
             {verified !== null && (
               <Chip
                 icon={verified ? <Verified /> : <Warning />}
-                label={verified ? 'Verified' : 'Integrity Issue'}
-                color={verified ? 'success' : 'error'}
+                label={verified ? "Verified" : "Integrity Issue"}
+                color={verified ? "success" : "error"}
                 size="small"
               />
             )}
@@ -105,7 +105,7 @@ export const ProvenanceChainViewer: React.FC<ProvenanceChainViewerProps> = ({
             Hash: <code>{claim.hash}</code>
           </Typography>
           <Typography variant="body2" color="text.secondary" gutterBottom>
-            Created: {format(new Date(claim.created_at), 'PPpp')}
+            Created: {format(new Date(claim.created_at), "PPpp")}
           </Typography>
 
           {claim.policyLabels.length > 0 && (
@@ -129,11 +129,9 @@ export const ProvenanceChainViewer: React.FC<ProvenanceChainViewerProps> = ({
               {chain.map((entry, index) => (
                 <Step key={entry.id} active completed>
                   <StepLabel>
-                    <Typography variant="subtitle2">
-                      Provenance Entry {index + 1}
-                    </Typography>
+                    <Typography variant="subtitle2">Provenance Entry {index + 1}</Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {format(new Date(entry.created_at), 'PPpp')}
+                      {format(new Date(entry.created_at), "PPpp")}
                     </Typography>
                   </StepLabel>
                   <StepContent>
@@ -179,11 +177,11 @@ export const ProvenanceChainViewer: React.FC<ProvenanceChainViewerProps> = ({
                           <Box
                             component="pre"
                             sx={{
-                              fontSize: '0.75rem',
-                              bgcolor: 'grey.100',
+                              fontSize: "0.75rem",
+                              bgcolor: "grey.100",
                               p: 1,
                               borderRadius: 1,
-                              overflow: 'auto',
+                              overflow: "auto",
                               maxHeight: 200,
                             }}
                           >

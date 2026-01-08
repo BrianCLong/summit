@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { prefersReducedMotion, prefersHighContrast, prefersDarkMode } from './accessibility-utils';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { prefersReducedMotion, prefersHighContrast, prefersDarkMode } from "./accessibility-utils";
 
 // Create accessibility context
 const AccessibilityContext = createContext();
@@ -19,21 +19,21 @@ export const AccessibilityProvider = ({ children }) => {
     setPrefersDarkMode(prefersDarkMode());
 
     // Listen for changes in accessibility preferences
-    const motionMediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const contrastMediaQuery = window.matchMedia('(prefers-contrast: high)');
-    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const motionMediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const contrastMediaQuery = window.matchMedia("(prefers-contrast: high)");
+    const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
     const handleMotionChange = (e) => setPrefersReducedMotion(e.matches);
     const handleContrastChange = (e) => setPrefersHighContrast(e.matches);
     const handleDarkModeChange = (e) => setPrefersDarkMode(e.matches);
 
-    motionMediaQuery.addEventListener('change', handleMotionChange);
-    contrastMediaQuery.addEventListener('change', handleContrastChange);
-    darkModeMediaQuery.addEventListener('change', handleDarkModeChange);
+    motionMediaQuery.addEventListener("change", handleMotionChange);
+    contrastMediaQuery.addEventListener("change", handleContrastChange);
+    darkModeMediaQuery.addEventListener("change", handleDarkModeChange);
 
     // Enable keyboard navigation detection
     const handleKeyDown = (e) => {
-      if (e.key === 'Tab') {
+      if (e.key === "Tab") {
         setKeyboardNavigation(true);
       }
     };
@@ -42,15 +42,15 @@ export const AccessibilityProvider = ({ children }) => {
       setKeyboardNavigation(false);
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("mousedown", handleMouseDown);
 
     return () => {
-      motionMediaQuery.removeEventListener('change', handleMotionChange);
-      contrastMediaQuery.removeEventListener('change', handleContrastChange);
-      darkModeMediaQuery.removeEventListener('change', handleDarkModeChange);
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('mousedown', handleMouseDown);
+      motionMediaQuery.removeEventListener("change", handleMotionChange);
+      contrastMediaQuery.removeEventListener("change", handleContrastChange);
+      darkModeMediaQuery.removeEventListener("change", handleDarkModeChange);
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("mousedown", handleMouseDown);
     };
   }, []);
 
@@ -67,18 +67,14 @@ export const AccessibilityProvider = ({ children }) => {
     toggleHighContrast,
   };
 
-  return (
-    <AccessibilityContext.Provider value={value}>
-      {children}
-    </AccessibilityContext.Provider>
-  );
+  return <AccessibilityContext.Provider value={value}>{children}</AccessibilityContext.Provider>;
 };
 
 // Custom hook to use accessibility context
 export const useAccessibility = () => {
   const context = useContext(AccessibilityContext);
   if (!context) {
-    throw new Error('useAccessibility must be used within an AccessibilityProvider');
+    throw new Error("useAccessibility must be used within an AccessibilityProvider");
   }
   return context;
 };

@@ -1,2 +1,2 @@
-declare module 'glob';
-declare module 'js-yaml';
+declare module "glob";
+declare module "js-yaml";

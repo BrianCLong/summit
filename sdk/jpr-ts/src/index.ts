@@ -1,9 +1,16 @@
-import { readFileSync } from 'fs';
-import { spawnSync } from 'child_process';
-import path from 'path';
-import crypto from 'crypto';
-import yaml from 'yaml';
-import { CompiledEngine, CompiledRule, Decision, EvaluationInput, Explanation, RuleTrace } from './types';
+import { readFileSync } from "fs";
+import { spawnSync } from "child_process";
+import path from "path";
+import crypto from "crypto";
+import yaml from "yaml";
+import {
+  CompiledEngine,
+  CompiledRule,
+  Decision,
+  EvaluationInput,
+  Explanation,
+  RuleTrace,
+} from "./types";
 
 export interface BindingOptions {
   policiesPath: string;
@@ -22,12 +29,12 @@ export class JurisdictionalPolicyResolver {
 
   constructor(options: BindingOptions) {
     if (!options.policiesPath) {
-      throw new Error('policiesPath is required');
+      throw new Error("policiesPath is required");
     }
     this.options = {
-      cliCommand: ['go', 'run', './cmd/jprcli'],
-      cliCwd: path.resolve(__dirname, '..', '..', '..', 'jpr'),
-      ...options
+      cliCommand: ["go", "run", "./cmd/jprcli"],
+      cliCwd: path.resolve(__dirname, "..", "..", "..", "jpr"),
+      ...options,
     };
   }
 
@@ -47,25 +54,29 @@ export class JurisdictionalPolicyResolver {
 
   private ensureEngine(): CompiledEngine {
     const etag = this.computeEtag();
-    if (this.cacheEntry && this.cacheEntry.compiled.etag === etag && Date.now() < this.cacheEntry.expiresAt) {
+    if (
+      this.cacheEntry &&
+      this.cacheEntry.compiled.etag === etag &&
+      Date.now() < this.cacheEntry.expiresAt
+    ) {
       return this.cacheEntry.compiled;
     }
     const compiled = this.compileWithGo();
     const ttlMs = Math.max(compiled.ttl / 1_000_000, 0);
     this.cacheEntry = {
       compiled,
-      expiresAt: Date.now() + ttlMs
+      expiresAt: Date.now() + ttlMs,
     };
     return compiled;
   }
 
   private compileWithGo(): CompiledEngine {
-    const command = this.options.cliCommand ?? ['go', 'run', './cmd/jprcli'];
+    const command = this.options.cliCommand ?? ["go", "run", "./cmd/jprcli"];
     const [exec, ...args] = command;
-    const finalArgs = [...args, '--policies', this.options.policiesPath, '--mode', 'compile'];
+    const finalArgs = [...args, "--policies", this.options.policiesPath, "--mode", "compile"];
     const result = spawnSync(exec, finalArgs, {
       cwd: this.options.cliCwd,
-      encoding: 'utf8'
+      encoding: "utf8",
     });
     if (result.error) {
       throw result.error;
@@ -81,11 +92,11 @@ export class JurisdictionalPolicyResolver {
   }
 
   private computeEtag(): string {
-    const source = readFileSync(this.options.policiesPath, 'utf8');
+    const source = readFileSync(this.options.policiesPath, "utf8");
     const parsed = yaml.parse(source);
-    const h = crypto.createHash('sha256');
+    const h = crypto.createHash("sha256");
     h.update(JSON.stringify(parsed));
-    return h.digest('hex');
+    return h.digest("hex");
   }
 }
 
@@ -108,17 +119,17 @@ function evaluate(engine: CompiledEngine, input: EvaluationInput): Explanation {
         effectiveFrom: rule.effectiveFrom,
         effectiveTo: rule.effectiveTo,
         matched,
-        reason
+        reason,
       };
       traces.push(trace);
       if (matched) {
         const decision: Decision = {
-          allowed: rule.effect === 'allow',
+          allowed: rule.effect === "allow",
           effect: rule.effect,
           policyId: rule.policyId,
           evaluated: decisionTime.toISOString(),
           reason,
-          matchedKey: key
+          matchedKey: key,
         };
         return { decision, chain: traces };
       }
@@ -126,23 +137,23 @@ function evaluate(engine: CompiledEngine, input: EvaluationInput): Explanation {
   }
 
   const decision: Decision = {
-    allowed: engine.defaultEffect === 'allow',
+    allowed: engine.defaultEffect === "allow",
     effect: engine.defaultEffect,
-    policyId: '',
+    policyId: "",
     evaluated: decisionTime.toISOString(),
     reason: `default-effect:${engine.defaultEffect}`,
-    matchedKey: ''
+    matchedKey: "",
   };
   return { decision, chain: traces };
 }
 
 function buildKeyCandidates(input: EvaluationInput): string[] {
-  const jurisdiction = input.jurisdiction || '*';
-  const dataClass = input.dataClass || '*';
-  const purpose = input.purpose || '*';
+  const jurisdiction = input.jurisdiction || "*";
+  const dataClass = input.dataClass || "*";
+  const purpose = input.purpose || "*";
   const action = input.action;
   if (!action) {
-    throw new Error('action is required');
+    throw new Error("action is required");
   }
   return [
     `${jurisdiction}|${dataClass}|${purpose}|${action}`,
@@ -152,11 +163,15 @@ function buildKeyCandidates(input: EvaluationInput): string[] {
     `*|${dataClass}|${purpose}|${action}`,
     `*|*|${purpose}|${action}`,
     `*|${dataClass}|*|${action}`,
-    `*|*|*|${action}`
+    `*|*|*|${action}`,
   ];
 }
 
-function evaluateRule(rule: CompiledRule, input: EvaluationInput, when: Date): { matched: boolean; reason: string } {
+function evaluateRule(
+  rule: CompiledRule,
+  input: EvaluationInput,
+  when: Date
+): { matched: boolean; reason: string } {
   if (!withinRange(rule.effectiveFrom, rule.effectiveTo, when)) {
     return { matched: false, reason: `out-of-range:${rule.effectiveFrom}-${rule.effectiveTo}` };
   }
@@ -189,7 +204,7 @@ function evaluateRule(rule: CompiledRule, input: EvaluationInput, when: Date): {
     }
   }
 
-  return { matched: true, reason: 'matched' };
+  return { matched: true, reason: "matched" };
 }
 
 function withinRange(start: string, end: string, current: Date): boolean {
@@ -205,7 +220,7 @@ function withinRange(start: string, end: string, current: Date): boolean {
 }
 
 function toDate(value: string): Date | undefined {
-  if (!value || value.startsWith('0001-01-01')) {
+  if (!value || value.startsWith("0001-01-01")) {
     return undefined;
   }
   const date = new Date(value);
@@ -216,14 +231,13 @@ function toDate(value: string): Date | undefined {
 }
 
 function matchesValue(ruleValue: string, inputValue: string | undefined): boolean {
-  if (!ruleValue || ruleValue === '*') {
+  if (!ruleValue || ruleValue === "*") {
     return true;
   }
   if (!inputValue) {
     return false;
   }
-  return ruleValue.localeCompare(inputValue, undefined, { sensitivity: 'accent' }) === 0;
+  return ruleValue.localeCompare(inputValue, undefined, { sensitivity: "accent" }) === 0;
 }
 
-export * from './types';
-
+export * from "./types";

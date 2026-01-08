@@ -2,12 +2,12 @@ name: Policy CI
 on:
   push:
     paths:
-      - 'policy/**.rego'
-      - 'policy/**.yaml'
+      - "policy/**.rego"
+      - "policy/**.yaml"
   pull_request:
     paths:
-      - 'policy/**.rego'
-      - 'policy/**.yaml'
+      - "policy/**.rego"
+      - "policy/**.yaml"
 jobs:
   opa-test:
     runs-on: ubuntu-latest

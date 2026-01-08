@@ -1,14 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
 type UseRestoreFocusOptions = {
   enabled?: boolean;
   fallbackRef?: React.RefObject<HTMLElement>;
 };
 
-export function useRestoreFocus(
-  isOpen: boolean,
-  options: UseRestoreFocusOptions = {},
-) {
+export function useRestoreFocus(isOpen: boolean, options: UseRestoreFocusOptions = {}) {
   const { enabled = true, fallbackRef } = options;
   const wasOpenRef = useRef<boolean>(isOpen);
   const previouslyFocusedRef = useRef<HTMLElement | null>(null);
@@ -20,8 +17,7 @@ export function useRestoreFocus(
 
     if (isOpen) {
       previouslyFocusedRef.current =
-        document.activeElement instanceof HTMLElement &&
-        document.activeElement !== document.body
+        document.activeElement instanceof HTMLElement && document.activeElement !== document.body
           ? document.activeElement
           : null;
     } else if (wasOpenRef.current) {

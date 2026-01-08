@@ -14,12 +14,10 @@ export interface Logger {
 export function createLogger(name: string): Logger {
   return {
     debug: (msg: string, meta?: Record<string, any>) =>
-      console.debug(`[${name}] ${msg}`, meta || ''),
-    info: (msg: string, meta?: Record<string, any>) =>
-      console.info(`[${name}] ${msg}`, meta || ''),
-    warn: (msg: string, meta?: Record<string, any>) =>
-      console.warn(`[${name}] ${msg}`, meta || ''),
+      console.debug(`[${name}] ${msg}`, meta || ""),
+    info: (msg: string, meta?: Record<string, any>) => console.info(`[${name}] ${msg}`, meta || ""),
+    warn: (msg: string, meta?: Record<string, any>) => console.warn(`[${name}] ${msg}`, meta || ""),
     error: (msg: string, meta?: Record<string, any>) =>
-      console.error(`[${name}] ${msg}`, meta || ''),
+      console.error(`[${name}] ${msg}`, meta || ""),
   };
 }

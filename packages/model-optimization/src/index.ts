@@ -3,12 +3,12 @@
  * Model optimization and acceleration tools
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // Quantization
 export const QuantizationConfigSchema = z.object({
-  bitWidth: z.enum(['int8', 'int4', 'int2']),
-  method: z.enum(['dynamic', 'static', 'qat']),
+  bitWidth: z.enum(["int8", "int4", "int2"]),
+  method: z.enum(["dynamic", "static", "qat"]),
   calibrationSamples: z.number().optional(),
 });
 
@@ -21,16 +21,19 @@ export class ModelQuantizer {
     this.config = config;
   }
 
-  async quantize(modelPath: string, outputPath: string): Promise<{
+  async quantize(
+    modelPath: string,
+    outputPath: string
+  ): Promise<{
     originalSize: number;
     quantizedSize: number;
     compressionRatio: number;
   }> {
     console.log(`Quantizing model to ${this.config.bitWidth} with ${this.config.method} method`);
-    
+
     const originalSize = 100 * 1024 * 1024; // 100MB
     const quantizedSize = originalSize / 4; // 25MB after INT8 quantization
-    
+
     return {
       originalSize,
       quantizedSize,
@@ -41,7 +44,7 @@ export class ModelQuantizer {
 
 // Pruning
 export interface PruningConfig {
-  method: 'magnitude' | 'structured' | 'movement';
+  method: "magnitude" | "structured" | "movement";
   pruningRate: number;
   fineTuneEpochs?: number;
 }
@@ -60,7 +63,7 @@ export class ModelPruner {
   }> {
     const originalParams = 1000000;
     const prunedParams = Math.floor(originalParams * (1 - this.config.pruningRate));
-    
+
     return {
       originalParams,
       prunedParams,
@@ -75,7 +78,7 @@ export interface DistillationConfig {
   studentModelId: string;
   temperature: number;
   alpha: number; // Weight for distillation loss
-  beta: number;  // Weight for student loss
+  beta: number; // Weight for student loss
 }
 
 export class KnowledgeDistiller {
@@ -89,8 +92,10 @@ export class KnowledgeDistiller {
     studentModelPath: string;
     metrics: Record<string, number>;
   }> {
-    console.log(`Distilling knowledge from ${this.config.teacherModelId} to ${this.config.studentModelId}`);
-    
+    console.log(
+      `Distilling knowledge from ${this.config.teacherModelId} to ${this.config.studentModelId}`
+    );
+
     return {
       studentModelPath: `/models/${this.config.studentModelId}_distilled.ckpt`,
       metrics: {
@@ -104,10 +109,14 @@ export class KnowledgeDistiller {
 
 // ONNX export
 export class ONNXExporter {
-  async export(modelPath: string, outputPath: string, options?: {
-    opsetVersion?: number;
-    dynamicAxes?: Record<string, number[]>;
-  }): Promise<string> {
+  async export(
+    modelPath: string,
+    outputPath: string,
+    options?: {
+      opsetVersion?: number;
+      dynamicAxes?: Record<string, number[]>;
+    }
+  ): Promise<string> {
     console.log(`Exporting model to ONNX format: ${outputPath}`);
     return outputPath;
   }
@@ -119,16 +128,19 @@ export class ONNXExporter {
 
 // TensorRT integration
 export class TensorRTOptimizer {
-  async optimize(modelPath: string, options: {
-    precision: 'fp32' | 'fp16' | 'int8';
-    maxBatchSize: number;
-    workspace: number;
-  }): Promise<{
+  async optimize(
+    modelPath: string,
+    options: {
+      precision: "fp32" | "fp16" | "int8";
+      maxBatchSize: number;
+      workspace: number;
+    }
+  ): Promise<{
     enginePath: string;
     speedup: number;
   }> {
     console.log(`Optimizing model with TensorRT (${options.precision})`);
-    
+
     return {
       enginePath: `${modelPath}.trt`,
       speedup: 3.5, // 3.5x speedup
@@ -138,13 +150,16 @@ export class TensorRTOptimizer {
 
 // Mobile optimization
 export class MobileOptimizer {
-  async optimizeForMobile(modelPath: string, target: 'ios' | 'android'): Promise<{
+  async optimizeForMobile(
+    modelPath: string,
+    target: "ios" | "android"
+  ): Promise<{
     modelSize: number;
     inferenceTime: number;
     memoryUsage: number;
   }> {
     console.log(`Optimizing model for ${target} deployment`);
-    
+
     return {
       modelSize: 5 * 1024 * 1024, // 5MB
       inferenceTime: 50, // 50ms

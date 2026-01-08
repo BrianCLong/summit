@@ -3,10 +3,10 @@ name: Persisted Queries
 on:
   push:
     paths:
-      - 'persisted/**/*.graphql'
+      - "persisted/**/*.graphql"
   pull_request:
     paths:
-      - 'persisted/**/*.graphql'
+      - "persisted/**/*.graphql"
 
 permissions:
   contents: write
@@ -22,7 +22,7 @@ jobs:
       - run: node tools/pq/build-manifest.mjs
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: 'chore(pq): update persisted manifest'
+          commit_message: "chore(pq): update persisted manifest"
           file_pattern: persisted/manifest.json
 
   check-drift:
@@ -31,7 +31,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
       - name: Check persisted query drift
         run: node scripts/check-persisted-queries.js
 
@@ -42,8 +42,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
       - name: Install deps (server)
         run: pnpm install --frozen-lockfile --prefix server
       - name: Check persisted query enforcement

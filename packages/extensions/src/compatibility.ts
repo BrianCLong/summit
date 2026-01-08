@@ -1,5 +1,5 @@
-import semver from 'semver';
-import { ExtensionManifest } from './types.js';
+import semver from "semver";
+import { ExtensionManifest } from "./types.js";
 
 export interface CompatibilityWindowOptions {
   platformVersion: string;

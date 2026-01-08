@@ -164,12 +164,12 @@ spec:
           protocol: UDP
         - port: 6514
           protocol: TCP
-        - port: 5044  # Beats/Logstash
+        - port: 5044 # Beats/Logstash
           protocol: TCP
     # Accept OT sensor data
     - from:
         - ipBlock:
-            cidr: 10.100.40.0/24  # OT sensor CIDR
+            cidr: 10.100.40.0/24 # OT sensor CIDR
       ports:
         - port: 5044
           protocol: TCP
@@ -206,7 +206,7 @@ spec:
             matchLabels:
               app.kubernetes.io/name: prometheus
       ports:
-        - port: 9116  # SNMP exporter
+        - port: 9116 # SNMP exporter
           protocol: TCP
   egress:
     # SNMP polling to all zones

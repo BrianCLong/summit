@@ -1,31 +1,20 @@
 #!/usr/bin/env node
 
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const ROOT_DIR = path.resolve(__dirname, '..');
+const ROOT_DIR = path.resolve(__dirname, "..");
 
 // Configuration
-const DOCS_DIR = path.join(ROOT_DIR, 'docs');
-const IGNORE_FILE_PATH = path.join(ROOT_DIR, '.doclinkignore');
+const DOCS_DIR = path.join(ROOT_DIR, "docs");
+const IGNORE_FILE_PATH = path.join(ROOT_DIR, ".doclinkignore");
 
-const IGNORE_PATTERNS = [
-  /node_modules/,
-  /^\./,
-  /_includes/,
-  /_site/,
-  /dist/,
-  /build/,
-];
+const IGNORE_PATTERNS = [/node_modules/, /^\./, /_includes/, /_site/, /dist/, /build/];
 
-const IGNORE_LINKS = [
-  /^http/,
-  /^mailto:/,
-  /^#/,
-];
+const IGNORE_LINKS = [/^http/, /^mailto:/, /^#/];
 
 // Statistics
 let totalFiles = 0;
@@ -39,30 +28,30 @@ const knownBrokenLinks = new Set();
 
 // Load ignore file
 if (fs.existsSync(IGNORE_FILE_PATH)) {
-  const content = fs.readFileSync(IGNORE_FILE_PATH, 'utf-8');
-  content.split('\n').forEach(line => {
+  const content = fs.readFileSync(IGNORE_FILE_PATH, "utf-8");
+  content.split("\n").forEach((line) => {
     const trimmed = line.trim();
-    if (trimmed && !trimmed.startsWith('#')) {
+    if (trimmed && !trimmed.startsWith("#")) {
       knownBrokenLinks.add(trimmed);
     }
   });
 }
 
-const generateIgnoreMode = process.argv.includes('--generate-ignore');
+const generateIgnoreMode = process.argv.includes("--generate-ignore");
 
 function getAllFiles(dirPath, arrayOfFiles = []) {
   if (!fs.existsSync(dirPath)) return arrayOfFiles;
 
   const files = fs.readdirSync(dirPath);
 
-  files.forEach(file => {
+  files.forEach((file) => {
     const fullPath = path.join(dirPath, file);
     if (fs.statSync(fullPath).isDirectory()) {
-      if (!IGNORE_PATTERNS.some(p => p.test(file))) {
+      if (!IGNORE_PATTERNS.some((p) => p.test(file))) {
         getAllFiles(fullPath, arrayOfFiles);
       }
     } else {
-      if (file.endsWith('.md')) {
+      if (file.endsWith(".md")) {
         arrayOfFiles.push(fullPath);
       }
     }
@@ -82,14 +71,14 @@ function checkFileExists(filePath) {
 
 function stripCodeBlocks(content) {
   // Remove fenced code blocks
-  let stripped = content.replace(/```[\s\S]*?```/g, '');
+  let stripped = content.replace(/```[\s\S]*?```/g, "");
   // Remove inline code
-  stripped = stripped.replace(/`[^`]*`/g, '');
+  stripped = stripped.replace(/`[^`]*`/g, "");
   return stripped;
 }
 
 function checkLinks(filePath) {
-  let content = fs.readFileSync(filePath, 'utf-8');
+  let content = fs.readFileSync(filePath, "utf-8");
 
   // Strip code blocks to avoid false positives
   content = stripCodeBlocks(content);
@@ -106,35 +95,35 @@ function checkLinks(filePath) {
 
     // Clean up title attribute if present: [text](url "title")
     if (linkUrl.includes(' "')) {
-        linkUrl = linkUrl.split(' "')[0];
+      linkUrl = linkUrl.split(' "')[0];
     }
 
     const originalLinkUrl = linkUrl;
-    linkUrl = linkUrl.split('#')[0]; // Remove anchor
+    linkUrl = linkUrl.split("#")[0]; // Remove anchor
 
-    if (IGNORE_LINKS.some(regex => regex.test(linkUrl)) || linkUrl === '') {
-        continue;
+    if (IGNORE_LINKS.some((regex) => regex.test(linkUrl)) || linkUrl === "") {
+      continue;
     }
 
     totalLinks++;
 
     // Resolve path relative to the current file
     let targetPath;
-    if (linkUrl.startsWith('/')) {
-        // Root relative
-        targetPath = path.join(ROOT_DIR, linkUrl);
+    if (linkUrl.startsWith("/")) {
+      // Root relative
+      targetPath = path.join(ROOT_DIR, linkUrl);
     } else {
-        targetPath = path.join(fileDir, linkUrl);
+      targetPath = path.join(fileDir, linkUrl);
     }
 
     // Simple query string stripping
-    targetPath = targetPath.split('?')[0];
+    targetPath = targetPath.split("?")[0];
 
     // Decode URL
     try {
-        targetPath = decodeURIComponent(targetPath);
+      targetPath = decodeURIComponent(targetPath);
     } catch (e) {
-        // If decoding fails, treat as broken
+      // If decoding fails, treat as broken
     }
 
     if (!checkFileExists(targetPath)) {
@@ -158,14 +147,14 @@ function checkLinks(filePath) {
 
 async function main() {
   if (!generateIgnoreMode) {
-    console.log('🔍 Starting documentation link check...');
+    console.log("🔍 Starting documentation link check...");
   }
 
   const start = Date.now();
 
   const files = getAllFiles(DOCS_DIR);
   // Also check README.md in root
-  const rootReadme = path.join(ROOT_DIR, 'README.md');
+  const rootReadme = path.join(ROOT_DIR, "README.md");
   if (fs.existsSync(rootReadme)) {
     files.push(rootReadme);
   }
@@ -176,20 +165,22 @@ async function main() {
     console.log(`Checking ${totalFiles} markdown files...`);
   }
 
-  files.forEach(file => {
+  files.forEach((file) => {
     checkLinks(file);
   });
 
   if (!generateIgnoreMode) {
     const duration = (Date.now() - start) / 1000;
     console.log(`\n🏁 Finished in ${duration.toFixed(2)}s`);
-    console.log(`📊 Stats: ${totalFiles} files, ${totalLinks} links, ${brokenLinks} broken, ${ignoredBrokenLinks} ignored`);
+    console.log(
+      `📊 Stats: ${totalFiles} files, ${totalLinks} links, ${brokenLinks} broken, ${ignoredBrokenLinks} ignored`
+    );
 
     if (brokenLinks > 0) {
-      console.error('❌ Documentation link check failed!');
+      console.error("❌ Documentation link check failed!");
       process.exit(1);
     } else {
-      console.log('✅ All (non-ignored) internal links are valid.');
+      console.log("✅ All (non-ignored) internal links are valid.");
     }
   }
 }

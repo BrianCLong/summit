@@ -2,7 +2,7 @@
  * Language detection for 100+ languages
  */
 
-import type { LanguageDetectionResult } from '../types';
+import type { LanguageDetectionResult } from "../types";
 
 export class LanguageDetector {
   private cache: Map<string, LanguageDetectionResult> = new Map();
@@ -60,28 +60,28 @@ export class LanguageDetector {
 
     const charStats = this.analyzeCharacters(text);
 
-    let language = 'en'; // Default to English
+    let language = "en"; // Default to English
     let confidence = 0.5;
 
     // Detect based on character patterns
     if (charStats.cyrillic > 0.5) {
-      language = 'ru';
+      language = "ru";
       confidence = charStats.cyrillic;
     } else if (charStats.chinese > 0.5) {
-      language = 'zh';
+      language = "zh";
       confidence = charStats.chinese;
     } else if (charStats.arabic > 0.5) {
-      language = 'ar';
+      language = "ar";
       confidence = charStats.arabic;
     } else if (charStats.japanese > 0.3) {
-      language = 'ja';
+      language = "ja";
       confidence = charStats.japanese;
     } else if (charStats.korean > 0.3) {
-      language = 'ko';
+      language = "ko";
       confidence = charStats.korean;
     } else {
       // Default to English with moderate confidence
-      language = 'en';
+      language = "en";
       confidence = 0.7;
     }
 
@@ -92,12 +92,12 @@ export class LanguageDetector {
 
     if (detailed) {
       result.allLanguages = [
-        { language: 'en', confidence: 1 - charStats.nonLatin },
-        { language: 'ru', confidence: charStats.cyrillic },
-        { language: 'zh', confidence: charStats.chinese },
-        { language: 'ar', confidence: charStats.arabic },
-        { language: 'ja', confidence: charStats.japanese },
-        { language: 'ko', confidence: charStats.korean },
+        { language: "en", confidence: 1 - charStats.nonLatin },
+        { language: "ru", confidence: charStats.cyrillic },
+        { language: "zh", confidence: charStats.chinese },
+        { language: "ar", confidence: charStats.arabic },
+        { language: "ja", confidence: charStats.japanese },
+        { language: "ko", confidence: charStats.korean },
       ]
         .filter((l) => l.confidence > 0.1)
         .sort((a, b) => b.confidence - a.confidence);
@@ -124,7 +124,7 @@ export class LanguageDetector {
     let koreanCount = 0;
     let nonLatinCount = 0;
 
-    const totalChars = text.replace(/\s/g, '').length;
+    const totalChars = text.replace(/\s/g, "").length;
 
     for (const char of text) {
       const code = char.charCodeAt(0);
@@ -177,12 +177,66 @@ export class LanguageDetector {
  * Supported language codes (ISO 639-1)
  */
 export const SUPPORTED_LANGUAGES = [
-  'en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'zh', 'ja', 'ko',
-  'ar', 'hi', 'bn', 'pa', 'te', 'mr', 'ta', 'ur', 'gu', 'kn',
-  'ml', 'or', 'as', 'ne', 'si', 'th', 'vi', 'id', 'ms', 'tl',
-  'nl', 'pl', 'uk', 'ro', 'cs', 'sv', 'hu', 'el', 'he', 'fa',
-  'tr', 'fi', 'da', 'no', 'sk', 'bg', 'hr', 'sr', 'sl', 'et',
-  'lv', 'lt', 'sq', 'mk', 'bs', 'cy', 'ga', 'is', 'mt', 'lb',
+  "en",
+  "es",
+  "fr",
+  "de",
+  "it",
+  "pt",
+  "ru",
+  "zh",
+  "ja",
+  "ko",
+  "ar",
+  "hi",
+  "bn",
+  "pa",
+  "te",
+  "mr",
+  "ta",
+  "ur",
+  "gu",
+  "kn",
+  "ml",
+  "or",
+  "as",
+  "ne",
+  "si",
+  "th",
+  "vi",
+  "id",
+  "ms",
+  "tl",
+  "nl",
+  "pl",
+  "uk",
+  "ro",
+  "cs",
+  "sv",
+  "hu",
+  "el",
+  "he",
+  "fa",
+  "tr",
+  "fi",
+  "da",
+  "no",
+  "sk",
+  "bg",
+  "hr",
+  "sr",
+  "sl",
+  "et",
+  "lv",
+  "lt",
+  "sq",
+  "mk",
+  "bs",
+  "cy",
+  "ga",
+  "is",
+  "mt",
+  "lb",
   // Add more language codes as needed
 ] as const;
 

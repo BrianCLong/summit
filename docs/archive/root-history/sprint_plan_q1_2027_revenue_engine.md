@@ -6,6 +6,7 @@
 ---
 
 ## Sprint 26 — Self-Serve v2 + Activation to "First Value"
+
 **Window:** **Dec 7–18, 2026**  
 **Goal:** New customer gets to "first proof" fast (first approval + receipt + trust export).
 
@@ -26,6 +27,7 @@
 ---
 
 ## Sprint 27 — Pricing/Entitlements GA Hardening + Invoice Pack v2
+
 **Window:** **Jan 4–15, 2027**  
 **Goal:** Everything you sell is enforceable, metered, and invoice-ready.
 
@@ -45,6 +47,7 @@
 ---
 
 ## Sprint 28 — Partner Distribution v2 (White-Label Growth Pack)
+
 **Window:** **Jan 18–29, 2027**  
 **Goal:** Partners can repeatedly deploy + rebrand + upgrade without Summit heroics.
 
@@ -66,6 +69,7 @@
 ---
 
 ## Sprint 29 — Sales Demo Factory + Objection Handling Packs
+
 **Window:** **Feb 1–12, 2027**  
 **Goal:** Any seller can run a consistent, high-converting demo and answer security/procurement objections with proofs.
 
@@ -87,6 +91,7 @@
 ---
 
 ## Sprint 30 — Renewal Defense + QBR Automation v2
+
 **Window:** **Feb 15–26, 2027**  
 **Goal:** Detect churn risk early and automate "value proof" for renewals.
 
@@ -109,6 +114,7 @@
 ---
 
 ## Sprint 31 — Pipeline-to-Revenue Ops: Lead→Tenant→Invoice Loop + Governance
+
 **Window:** **Mar 1–19, 2027**  
 **Goal:** Close the loop operationally: sales pipeline, onboarding, plan enforcement, invoicing, and customer proofs—governed and repeatable.
 

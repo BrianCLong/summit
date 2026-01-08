@@ -1,15 +1,15 @@
-import React from 'react';
+import React from "react";
 // Lightweight wrapper: renders only if recharts is installed.
 let Recharts: any = null;
 try {
-  Recharts = require('recharts');
+  Recharts = require("recharts");
 } catch {}
 type Point = { x: number | string; y: number };
 export default function LineTimeseries({
   title,
   data,
-  xKey = 'x',
-  yKey = 'y',
+  xKey = "x",
+  yKey = "y",
   height = 240,
   ariaLabel,
 }: {
@@ -37,24 +37,13 @@ export default function LineTimeseries({
       </section>
     );
   }
-  const {
-    LineChart,
-    Line,
-    XAxis,
-    YAxis,
-    Tooltip,
-    ResponsiveContainer,
-    CartesianGrid,
-  } = Recharts;
+  const { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } = Recharts;
   return (
     <section className="border rounded p-3">
       {title && <h3 className="font-medium">{title}</h3>}
-      <div role="img" aria-label={ariaLabel || title || 'timeseries'}>
+      <div role="img" aria-label={ariaLabel || title || "timeseries"}>
         <ResponsiveContainer width="100%" height={height}>
-          <LineChart
-            data={data}
-            margin={{ left: 8, right: 8, top: 8, bottom: 8 }}
-          >
+          <LineChart data={data} margin={{ left: 8, right: 8, top: 8, bottom: 8 }}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey={xKey} />
             <YAxis />

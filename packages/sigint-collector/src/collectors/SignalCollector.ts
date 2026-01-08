@@ -3,21 +3,21 @@
  * TRAINING/SIMULATION ONLY - No actual collection capabilities
  */
 
-import { EventEmitter } from 'eventemitter3';
-import { v4 as uuid } from 'uuid';
+import { EventEmitter } from "eventemitter3";
+import { v4 as uuid } from "uuid";
 import {
   SignalMetadata,
   RawSignal,
   SignalType,
   IntelligenceCategory,
   ClassificationLevel,
-  CollectionTask
-} from '../types';
+  CollectionTask,
+} from "../types";
 
 export interface CollectorConfig {
   id: string;
   name: string;
-  type: 'SDR' | 'NETWORK' | 'SATELLITE' | 'TACTICAL' | 'STRATEGIC' | 'SIMULATION';
+  type: "SDR" | "NETWORK" | "SATELLITE" | "TACTICAL" | "STRATEGIC" | "SIMULATION";
   capabilities: {
     frequencyRange?: { min: number; max: number };
     bandwidthMax?: number;
@@ -33,19 +33,25 @@ export interface CollectorConfig {
 }
 
 export interface CollectorEvents {
-  'signal:received': (signal: RawSignal) => void;
-  'signal:processed': (signal: RawSignal) => void;
-  'task:started': (task: CollectionTask) => void;
-  'task:completed': (task: CollectionTask) => void;
-  'error': (error: Error) => void;
-  'status:changed': (status: CollectorStatus) => void;
+  "signal:received": (signal: RawSignal) => void;
+  "signal:processed": (signal: RawSignal) => void;
+  "task:started": (task: CollectionTask) => void;
+  "task:completed": (task: CollectionTask) => void;
+  error: (error: Error) => void;
+  "status:changed": (status: CollectorStatus) => void;
 }
 
-export type CollectorStatus = 'OFFLINE' | 'INITIALIZING' | 'READY' | 'COLLECTING' | 'PAUSED' | 'ERROR';
+export type CollectorStatus =
+  | "OFFLINE"
+  | "INITIALIZING"
+  | "READY"
+  | "COLLECTING"
+  | "PAUSED"
+  | "ERROR";
 
 export class SignalCollector extends EventEmitter<CollectorEvents> {
   private config: CollectorConfig;
-  private status: CollectorStatus = 'OFFLINE';
+  private status: CollectorStatus = "OFFLINE";
   private activeTasks: Map<string, CollectionTask> = new Map();
   private collectedSignals: RawSignal[] = [];
   private simulationInterval?: ReturnType<typeof setInterval>;
@@ -56,32 +62,32 @@ export class SignalCollector extends EventEmitter<CollectorEvents> {
   }
 
   async initialize(): Promise<void> {
-    this.setStatus('INITIALIZING');
+    this.setStatus("INITIALIZING");
 
     // Simulate initialization delay
     await this.delay(500);
 
     console.log(`[SIGINT] Collector ${this.config.name} initialized (SIMULATION MODE)`);
-    this.setStatus('READY');
+    this.setStatus("READY");
   }
 
   async startCollection(task: CollectionTask): Promise<void> {
-    if (this.status !== 'READY' && this.status !== 'COLLECTING') {
+    if (this.status !== "READY" && this.status !== "COLLECTING") {
       throw new Error(`Collector not ready. Current status: ${this.status}`);
     }
 
     // Validate legal authority for training
     if (!task.legalAuthority) {
-      throw new Error('Legal authority required for collection task');
+      throw new Error("Legal authority required for collection task");
     }
 
     if (task.expirationDate < new Date()) {
-      throw new Error('Collection authority has expired');
+      throw new Error("Collection authority has expired");
     }
 
     this.activeTasks.set(task.id, task);
-    this.setStatus('COLLECTING');
-    this.emit('task:started', task);
+    this.setStatus("COLLECTING");
+    this.emit("task:started", task);
 
     console.log(`[SIGINT] Started collection task: ${task.name} (SIMULATED)`);
 
@@ -95,26 +101,31 @@ export class SignalCollector extends EventEmitter<CollectorEvents> {
       throw new Error(`Task ${taskId} not found`);
     }
 
-    task.status = 'COMPLETED';
+    task.status = "COMPLETED";
     this.activeTasks.delete(taskId);
-    this.emit('task:completed', task);
+    this.emit("task:completed", task);
 
     if (this.activeTasks.size === 0) {
       this.stopSimulation();
-      this.setStatus('READY');
+      this.setStatus("READY");
     }
 
     console.log(`[SIGINT] Stopped collection task: ${task.name}`);
   }
 
   private startSimulation(task: CollectionTask): void {
-    if (this.simulationInterval) {return;}
+    if (this.simulationInterval) {
+      return;
+    }
 
-    this.simulationInterval = setInterval(() => {
-      const signal = this.generateSimulatedSignal(task);
-      this.collectedSignals.push(signal);
-      this.emit('signal:received', signal);
-    }, 1000 + Math.random() * 2000);
+    this.simulationInterval = setInterval(
+      () => {
+        const signal = this.generateSimulatedSignal(task);
+        this.collectedSignals.push(signal);
+        this.emit("signal:received", signal);
+      },
+      1000 + Math.random() * 2000
+    );
   }
 
   private stopSimulation(): void {
@@ -130,11 +141,11 @@ export class SignalCollector extends EventEmitter<CollectorEvents> {
       ? targetFreq.center + (Math.random() - 0.5) * targetFreq.bandwidth
       : 100e6 + Math.random() * 5900e6;
 
-    const signalType = task.targetSignalTypes?.[
-      Math.floor(Math.random() * task.targetSignalTypes.length)
-    ] || this.config.capabilities.signalTypes[
-      Math.floor(Math.random() * this.config.capabilities.signalTypes.length)
-    ];
+    const signalType =
+      task.targetSignalTypes?.[Math.floor(Math.random() * task.targetSignalTypes.length)] ||
+      this.config.capabilities.signalTypes[
+        Math.floor(Math.random() * this.config.capabilities.signalTypes.length)
+      ];
 
     const metadata: SignalMetadata = {
       id: uuid(),
@@ -146,7 +157,7 @@ export class SignalCollector extends EventEmitter<CollectorEvents> {
       bandwidth: 10000 + Math.random() * 100000,
       signalStrength: -90 + Math.random() * 60,
       snr: 5 + Math.random() * 30,
-      modulation: 'UNKNOWN',
+      modulation: "UNKNOWN",
       location: this.generateSimulatedLocation(task),
       collectorId: this.config.id,
       sensorId: `${this.config.id}-sensor-1`,
@@ -155,7 +166,7 @@ export class SignalCollector extends EventEmitter<CollectorEvents> {
       priority: task.targetFrequencies[0]?.priority || 3,
       legalAuthority: task.legalAuthority,
       minimized: false,
-      isSimulated: true
+      isSimulated: true,
     };
 
     // Generate simulated I/Q data
@@ -171,11 +182,11 @@ export class SignalCollector extends EventEmitter<CollectorEvents> {
     return {
       metadata,
       iqData: { i, q },
-      decodedContent: '[SIMULATED SIGNAL DATA]'
+      decodedContent: "[SIMULATED SIGNAL DATA]",
     };
   }
 
-  private generateSimulatedLocation(task: CollectionTask): SignalMetadata['location'] | undefined {
+  private generateSimulatedLocation(task: CollectionTask): SignalMetadata["location"] | undefined {
     const targetLoc = task.targetLocations?.[0];
     if (targetLoc) {
       const angle = Math.random() * 2 * Math.PI;
@@ -184,7 +195,7 @@ export class SignalCollector extends EventEmitter<CollectorEvents> {
         latitude: targetLoc.latitude + (distance / 111) * Math.cos(angle),
         longitude: targetLoc.longitude + (distance / 111) * Math.sin(angle),
         accuracy: 100 + Math.random() * 500,
-        method: 'SIMULATED'
+        method: "SIMULATED",
       };
     }
     return undefined;
@@ -192,23 +203,35 @@ export class SignalCollector extends EventEmitter<CollectorEvents> {
 
   private inferCategory(signalType: SignalType): IntelligenceCategory {
     const comintTypes: SignalType[] = [
-      'CELLULAR_2G', 'CELLULAR_3G', 'CELLULAR_4G', 'CELLULAR_5G',
-      'WIFI', 'BLUETOOTH', 'SATELLITE', 'SHORTWAVE', 'VHF', 'UHF'
+      "CELLULAR_2G",
+      "CELLULAR_3G",
+      "CELLULAR_4G",
+      "CELLULAR_5G",
+      "WIFI",
+      "BLUETOOTH",
+      "SATELLITE",
+      "SHORTWAVE",
+      "VHF",
+      "UHF",
     ];
-    const elintTypes: SignalType[] = ['RADAR', 'NAVIGATION', 'TELEMETRY'];
+    const elintTypes: SignalType[] = ["RADAR", "NAVIGATION", "TELEMETRY"];
 
-    if (comintTypes.includes(signalType)) {return 'COMINT';}
-    if (elintTypes.includes(signalType)) {return 'ELINT';}
-    return 'TECHINT';
+    if (comintTypes.includes(signalType)) {
+      return "COMINT";
+    }
+    if (elintTypes.includes(signalType)) {
+      return "ELINT";
+    }
+    return "TECHINT";
   }
 
   private setStatus(status: CollectorStatus): void {
     this.status = status;
-    this.emit('status:changed', status);
+    this.emit("status:changed", status);
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   getStatus(): CollectorStatus {
@@ -232,7 +255,7 @@ export class SignalCollector extends EventEmitter<CollectorEvents> {
     for (const taskId of this.activeTasks.keys()) {
       await this.stopCollection(taskId);
     }
-    this.setStatus('OFFLINE');
+    this.setStatus("OFFLINE");
     console.log(`[SIGINT] Collector ${this.config.name} shut down`);
   }
 }

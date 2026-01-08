@@ -4,9 +4,9 @@
  * Implements intelligent retry strategies for failed requests
  */
 
-import { createLogger } from '../utils/logger.js';
+import { createLogger } from "../utils/logger.js";
 
-const logger = createLogger('retry-policy');
+const logger = createLogger("retry-policy");
 
 export interface RetryConfig {
   maxRetries: number;
@@ -24,7 +24,7 @@ export class RetryPolicy {
   constructor(config: RetryConfig) {
     this.config = {
       retryableStatusCodes: [408, 429, 500, 502, 503, 504],
-      retryableErrors: ['ECONNRESET', 'ETIMEDOUT', 'ENOTFOUND'],
+      retryableErrors: ["ECONNRESET", "ETIMEDOUT", "ENOTFOUND"],
       jitter: true,
       ...config,
     };
@@ -42,17 +42,14 @@ export class RetryPolicy {
 
     // Check error type
     const errorMessage = error.message || String(error);
-    return this.config.retryableErrors?.some(err => errorMessage.includes(err)) || false;
+    return this.config.retryableErrors?.some((err) => errorMessage.includes(err)) || false;
   }
 
   calculateDelay(attempt: number): number {
     let delay: number;
 
     if (this.config.exponentialBackoff) {
-      delay = Math.min(
-        this.config.initialDelay * Math.pow(2, attempt),
-        this.config.maxDelay
-      );
+      delay = Math.min(this.config.initialDelay * Math.pow(2, attempt), this.config.maxDelay);
     } else {
       delay = this.config.initialDelay;
     }
@@ -84,7 +81,7 @@ export class RetryPolicy {
 
         const delay = this.calculateDelay(attempt);
 
-        logger.warn('Request failed, retrying', {
+        logger.warn("Request failed, retrying", {
           attempt: attempt + 1,
           maxRetries: this.config.maxRetries,
           delay,
@@ -97,11 +94,11 @@ export class RetryPolicy {
       }
     }
 
-    throw lastError || new Error('Max retries exceeded');
+    throw lastError || new Error("Max retries exceeded");
   }
 
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   getConfig(): RetryConfig {

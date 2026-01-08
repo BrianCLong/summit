@@ -1,6 +1,6 @@
-import axios from 'axios';
+import axios from "axios";
 
-type Role = 'admin' | 'reviewer' | 'auditor';
+type Role = "admin" | "reviewer" | "auditor";
 
 export type Actor = {
   id: string;
@@ -10,14 +10,14 @@ export type Actor = {
 
 export const createClient = (actor: Actor | null) => {
   const instance = axios.create({
-    baseURL: '/api',
+    baseURL: "/api",
     headers: actor
       ? {
-          'x-user-id': actor.id,
-          'x-user-role': actor.role,
-          'x-user-name': actor.name || actor.id
+          "x-user-id": actor.id,
+          "x-user-role": actor.role,
+          "x-user-name": actor.name || actor.id,
         }
-      : undefined
+      : undefined,
   });
 
   return instance;

@@ -3,13 +3,13 @@
  * Classifies issue type (bug/tech-debt/feature/enhancement)
  */
 
-import { TriageItem } from '../types.js';
-import { TypeRule } from '../config.js';
+import { TriageItem } from "../types.js";
+import { TypeRule } from "../config.js";
 
 export function classifyType(
   item: TriageItem,
-  typeRules: TypeRule[],
-): 'bug' | 'tech-debt' | 'feature' | 'enhancement' {
+  typeRules: TypeRule[]
+): "bug" | "tech-debt" | "feature" | "enhancement" {
   // If already has type from source, use it as baseline
   const baselineType = item.type;
   const text = `${item.title} ${item.description}`.toLowerCase();
@@ -46,5 +46,5 @@ export function classifyType(
   }
 
   const sortedTypes = Array.from(typeScores.entries()).sort((a, b) => b[1] - a[1]);
-  return sortedTypes[0][0] as 'bug' | 'tech-debt' | 'feature' | 'enhancement';
+  return sortedTypes[0][0] as "bug" | "tech-debt" | "feature" | "enhancement";
 }

@@ -9,6 +9,7 @@ All new feature flags must use the **`@intelgraph/feature-flags`** package locat
 ### Usage
 
 1.  **Install**:
+
     ```bash
     pnpm add @intelgraph/feature-flags --filter <your-service>
     ```
@@ -18,15 +19,16 @@ All new feature flags must use the **`@intelgraph/feature-flags`** package locat
 
 3.  **Check Flags**:
     ```typescript
-    const isEnabled = await featureFlags.getBooleanFlag('my-new-feature', false, { userId });
+    const isEnabled = await featureFlags.getBooleanFlag("my-new-feature", false, { userId });
     ```
 
 ## Deprecated Approaches
 
 The following modules are **DEPRECATED** and should not be used for new code:
-*   `server/src/flags.ts`
-*   `server/src/featureFlags/flagsmith.ts`
-*   `server/src/flags/store.ts`
+
+- `server/src/flags.ts`
+- `server/src/featureFlags/flagsmith.ts`
+- `server/src/flags/store.ts`
 
 ## Principles
 

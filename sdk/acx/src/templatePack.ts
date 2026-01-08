@@ -1,6 +1,6 @@
-import { createRequire } from 'node:module';
+import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
-const darkPatterns: string[] = require('./dark-patterns.json');
+const darkPatterns: string[] = require("./dark-patterns.json");
 
 import {
   ConsentDialog,
@@ -11,10 +11,10 @@ import {
   PolicyTemplatePack,
   PurposeDefinition,
   PurposeScope,
-  RenderOptions
-} from './types.js';
-import { DarkPatternLinter } from './validators.js';
-import { ExperimentEngine } from './variants.js';
+  RenderOptions,
+} from "./types.js";
+import { DarkPatternLinter } from "./validators.js";
+import { ExperimentEngine } from "./variants.js";
 
 export class TemplatePack {
   private readonly linter: DarkPatternLinter;
@@ -29,13 +29,13 @@ export class TemplatePack {
 
   private assertIntegrity(): void {
     if (!this.pack.policyId) {
-      throw new Error('policyId is required');
+      throw new Error("policyId is required");
     }
     if (!this.pack.version) {
-      throw new Error('version is required');
+      throw new Error("version is required");
     }
     if (!this.pack.defaultLocale) {
-      throw new Error('defaultLocale is required');
+      throw new Error("defaultLocale is required");
     }
     if (!this.pack.locales[this.pack.defaultLocale]) {
       throw new Error(`defaultLocale ${this.pack.defaultLocale} is not defined`);
@@ -43,7 +43,7 @@ export class TemplatePack {
 
     const lintResults = this.linter.lintPack(this.pack);
     if (lintResults.length > 0) {
-      const message = lintResults.map((result) => `${result.locale}: ${result.message}`).join('\n');
+      const message = lintResults.map((result) => `${result.locale}: ${result.message}`).join("\n");
       throw new Error(`Dark pattern linter failed:\n${message}`);
     }
   }
@@ -58,7 +58,11 @@ export class TemplatePack {
     const locales = Object.keys(this.pack.locales);
     locales.forEach((locale) => {
       const base = this.pack.locales[locale];
-      const controlCopy = this.applyOverrides(base, definition.controlVariant.uiOverrides, definition.controlVariant.id);
+      const controlCopy = this.applyOverrides(
+        base,
+        definition.controlVariant.uiOverrides,
+        definition.controlVariant.id
+      );
       definition.variants.forEach((variant) => {
         const variantCopy = this.applyOverrides(base, variant.uiOverrides, variant.id);
         this.assertSemanticParity(controlCopy, variantCopy, locale, variant.id);
@@ -66,7 +70,12 @@ export class TemplatePack {
     });
   }
 
-  private assertSemanticParity(control: LocaleCopy, variant: LocaleCopy, locale: string, variantId: string): void {
+  private assertSemanticParity(
+    control: LocaleCopy,
+    variant: LocaleCopy,
+    locale: string,
+    variantId: string
+  ): void {
     const canonicalControl = this.semanticSignature(control);
     const canonicalVariant = this.semanticSignature(variant);
     if (canonicalControl !== canonicalVariant) {
@@ -77,7 +86,7 @@ export class TemplatePack {
   }
 
   private semanticSignature(copy: LocaleCopy): string {
-    return [copy.summary, ...copy.bulletPoints, copy.footer].join('|').toLowerCase();
+    return [copy.summary, ...copy.bulletPoints, copy.footer].join("|").toLowerCase();
   }
 
   private applyOverrides(
@@ -93,7 +102,7 @@ export class TemplatePack {
       acceptCta: base.acceptCta,
       rejectCta: base.rejectCta,
       manageCta: base.manageCta,
-      footer: base.footer
+      footer: base.footer,
     };
 
     const layers = [variantOverrides, overrides].filter(Boolean);
@@ -125,7 +134,10 @@ export class TemplatePack {
     return this.pack.purposes.filter((purpose) => requestedSet.has(purpose.id));
   }
 
-  private normalizeScopes(purposes: PurposeDefinition[], scopedPurposes?: string[]): PurposeScope[] {
+  private normalizeScopes(
+    purposes: PurposeDefinition[],
+    scopedPurposes?: string[]
+  ): PurposeScope[] {
     const scopeSet = new Set(scopedPurposes ?? purposes.map((p) => p.id));
     return purposes.map((purpose) => ({ id: purpose.id, enabled: scopeSet.has(purpose.id) }));
   }
@@ -134,7 +146,7 @@ export class TemplatePack {
     const localeTemplate = this.getLocale(options.locale);
     const purposes = this.scopePurposes(options.scopedPurposes);
     const selection = this.experimentEngine.select(options.experiment);
-    const variantId = selection?.id ?? 'control';
+    const variantId = selection?.id ?? "control";
     const overrides = selection?.uiOverrides;
     const copy = this.applyOverrides(localeTemplate, overrides, variantId);
 
@@ -144,13 +156,13 @@ export class TemplatePack {
       purposes,
       policyId: this.pack.policyId,
       policyVersion: this.pack.version,
-      variant: variantId
+      variant: variantId,
     };
   }
 
   public createConsentRecord(
     userId: string,
-    decision: 'accept' | 'reject' | 'custom',
+    decision: "accept" | "reject" | "custom",
     options: RenderOptions
   ): ConsentRecordWithScopes {
     const dialog = this.render(options);
@@ -163,11 +175,11 @@ export class TemplatePack {
       decision,
       purposes: scopes,
       timestamp: new Date().toISOString(),
-      variant: dialog.variant
+      variant: dialog.variant,
     };
     return {
       dialog,
-      record
+      record,
     };
   }
 

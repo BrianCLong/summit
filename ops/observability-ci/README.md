@@ -7,9 +7,9 @@ This package provides reusable CI workflows and observability helpers used acros
 ### Node.js
 
 ```ts
-import { initTracing } from './otel/node-tracing';
-const tracer = initTracing('my-service');
-tracer.startSpan('startup').end();
+import { initTracing } from "./otel/node-tracing";
+const tracer = initTracing("my-service");
+tracer.startSpan("startup").end();
 ```
 
 ### Python

@@ -1,6 +1,6 @@
-import { createHash, createSign, createVerify, generateKeyPairSync, randomUUID } from 'node:crypto';
-import type { EvidenceBundle, LedgerEntry } from 'common-types';
-import { stableHash } from '@ga-graphai/data-integrity';
+import { createHash, createSign, createVerify, generateKeyPairSync, randomUUID } from "node:crypto";
+import type { EvidenceBundle, LedgerEntry } from "common-types";
+import { stableHash } from "@ga-graphai/data-integrity";
 
 export interface ManifestTransformNode {
   id: string;
@@ -26,7 +26,7 @@ export interface ExportManifest {
 export interface ManifestSignature {
   issuer: string;
   keyId: string;
-  algorithm: 'rsa-sha256';
+  algorithm: "rsa-sha256";
   signedAt: string;
   snapshotId: string;
   commitment: string;
@@ -40,7 +40,7 @@ function hashPayload(payload: unknown): string {
 
 function buildMerkleRoot(hashes: string[]): string {
   if (hashes.length === 0) {
-    return '';
+    return "";
   }
   let layer = [...hashes];
   while (layer.length > 1) {
@@ -49,9 +49,9 @@ function buildMerkleRoot(hashes: string[]): string {
       const left = layer[i];
       const right = layer[i + 1] ?? left;
       next.push(
-        createHash('sha256')
+        createHash("sha256")
           .update(left + right)
-          .digest('hex'),
+          .digest("hex")
       );
     }
     layer = next;
@@ -59,9 +59,7 @@ function buildMerkleRoot(hashes: string[]): string {
   return layer[0];
 }
 
-function deriveTransforms(
-  entries: readonly LedgerEntry[],
-): ManifestTransformNode[] {
+function deriveTransforms(entries: readonly LedgerEntry[]): ManifestTransformNode[] {
   return entries.map((entry) => ({
     id: entry.id,
     category: entry.category,
@@ -87,44 +85,44 @@ export interface ManifestOptions {
   now?: () => Date;
 }
 
-const defaultKeyPair = generateKeyPairSync('rsa', { modulusLength: 2048 });
+const defaultKeyPair = generateKeyPairSync("rsa", { modulusLength: 2048 });
 const DEFAULT_PRIVATE_KEY = defaultKeyPair.privateKey
-  .export({ format: 'pem', type: 'pkcs1' })
+  .export({ format: "pem", type: "pkcs1" })
   .toString();
 const DEFAULT_PUBLIC_KEY = defaultKeyPair.publicKey
-  .export({ format: 'pem', type: 'pkcs1' })
+  .export({ format: "pem", type: "pkcs1" })
   .toString();
 
 export function createExportManifest(options: ManifestOptions): ExportManifest {
   const now = options.now ?? (() => new Date());
   const transforms = deriveTransforms(options.ledger);
   const hashes = transforms.map((node) =>
-    createHash('sha256')
+    createHash("sha256")
       .update(node.id + node.payloadHash)
-      .digest('hex'),
+      .digest("hex")
   );
-  const ledgerHead = options.ledger.at(-1)?.hash ?? '';
+  const ledgerHead = options.ledger.at(-1)?.hash ?? "";
   const snapshotId = options.snapshotId ?? randomUUID();
-  const issuer = options.issuer ?? 'prov-ledger';
-  const keyId = options.keyId ?? 'issuer-key';
+  const issuer = options.issuer ?? "prov-ledger";
+  const keyId = options.keyId ?? "issuer-key";
   const privateKey = options.privateKey ?? DEFAULT_PRIVATE_KEY;
   const publicKey = options.publicKey ?? DEFAULT_PUBLIC_KEY;
   const merkleRoot = buildMerkleRoot(hashes);
   const commitment = stableHash({ merkleRoot, ledgerHead, snapshotId });
-  const signer = createSign('RSA-SHA256');
+  const signer = createSign("RSA-SHA256");
   signer.update(commitment);
-  const signature = signer.sign(privateKey, 'base64');
+  const signature = signer.sign(privateKey, "base64");
   const manifest: ExportManifest = {
     caseId: options.caseId,
     generatedAt: now().toISOString(),
-    version: '1.0.0',
+    version: "1.0.0",
     ledgerHead,
     merkleRoot,
     transforms,
     signature: {
       issuer,
       keyId,
-      algorithm: 'rsa-sha256',
+      algorithm: "rsa-sha256",
       signedAt: now().toISOString(),
       snapshotId,
       commitment,
@@ -139,7 +137,7 @@ export function createExportManifest(options: ManifestOptions): ExportManifest {
 export function verifyManifest(
   manifest: ExportManifest,
   ledger: readonly LedgerEntry[],
-  options: VerificationOptions = {},
+  options: VerificationOptions = {}
 ): {
   valid: boolean;
   reasons: string[];
@@ -148,7 +146,7 @@ export function verifyManifest(
   const { evidence, publicKey, transparencyLog, requireSignature = true } = options;
   const expectedTransforms = deriveTransforms(ledger);
   if (expectedTransforms.length !== manifest.transforms.length) {
-    reasons.push('Transform count mismatch');
+    reasons.push("Transform count mismatch");
   }
   expectedTransforms.forEach((transform, index) => {
     const candidate = manifest.transforms[index];
@@ -163,25 +161,25 @@ export function verifyManifest(
     }
   });
   const expectedHashes = expectedTransforms.map((node) =>
-    createHash('sha256')
+    createHash("sha256")
       .update(node.id + node.payloadHash)
-      .digest('hex'),
+      .digest("hex")
   );
   const expectedRoot = buildMerkleRoot(expectedHashes);
   if (expectedRoot !== manifest.merkleRoot) {
-    reasons.push('Merkle root mismatch');
+    reasons.push("Merkle root mismatch");
   }
-  const ledgerHead = ledger.at(-1)?.hash ?? '';
+  const ledgerHead = ledger.at(-1)?.hash ?? "";
   if (ledgerHead !== manifest.ledgerHead) {
-    reasons.push('Ledger head hash mismatch');
+    reasons.push("Ledger head hash mismatch");
   }
   if (evidence && evidence.headHash !== manifest.ledgerHead) {
-    reasons.push('Evidence bundle head hash mismatch');
+    reasons.push("Evidence bundle head hash mismatch");
   }
   if (requireSignature) {
     const signature = manifest.signature;
     if (!signature) {
-      reasons.push('Missing issuer signature');
+      reasons.push("Missing issuer signature");
     } else {
       const commitment = stableHash({
         merkleRoot: manifest.merkleRoot,
@@ -189,18 +187,18 @@ export function verifyManifest(
         snapshotId: signature.snapshotId,
       });
       if (commitment !== signature.commitment) {
-        reasons.push('Commitment mismatch');
+        reasons.push("Commitment mismatch");
       }
-      const verifier = createVerify('RSA-SHA256');
+      const verifier = createVerify("RSA-SHA256");
       verifier.update(signature.commitment);
       const keyToUse = publicKey ?? signature.publicKey;
       if (!keyToUse) {
-        reasons.push('Missing issuer public key');
-      } else if (!verifier.verify(keyToUse, signature.signature, 'base64')) {
-        reasons.push('Invalid issuer signature');
+        reasons.push("Missing issuer public key");
+      } else if (!verifier.verify(keyToUse, signature.signature, "base64")) {
+        reasons.push("Invalid issuer signature");
       }
       if (transparencyLog && !transparencyLog.verify(manifest)) {
-        reasons.push('Transparency log replay or omission detected');
+        reasons.push("Transparency log replay or omission detected");
       }
     }
   }
@@ -235,7 +233,7 @@ export class TransparencyLog {
     const existing = this.bySnapshot.get(snapshotId);
     if (existing) {
       if (existing.commitment !== commitment) {
-        throw new Error('Snapshot replay detected');
+        throw new Error("Snapshot replay detected");
       }
       return existing;
     }

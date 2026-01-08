@@ -1,8 +1,8 @@
-import { EventEmitter } from 'eventemitter3';
-import pino from 'pino';
-import { StateMachine, State, Transition } from './types';
+import { EventEmitter } from "eventemitter3";
+import pino from "pino";
+import { StateMachine, State, Transition } from "./types";
 
-const logger = pino({ name: 'state-machine' });
+const logger = pino({ name: "state-machine" });
 
 /**
  * State machine executor for workflow tracking
@@ -69,8 +69,8 @@ export class StateMachineExecutor extends EventEmitter {
       timestamp: Date.now(),
     };
 
-    this.emit('state-transition', result);
-    logger.info(result, 'State transition');
+    this.emit("state-transition", result);
+    logger.info(result, "State transition");
 
     return result;
   }
@@ -78,11 +78,7 @@ export class StateMachineExecutor extends EventEmitter {
   /**
    * Find applicable transition
    */
-  private findTransition(
-    fromState: string,
-    trigger: string,
-    event: any
-  ): Transition | null {
+  private findTransition(fromState: string, trigger: string, event: any): Transition | null {
     const transitions = this.machine.transitions.filter(
       (t) => t.from === fromState && t.trigger === trigger
     );
@@ -108,7 +104,7 @@ export class StateMachineExecutor extends EventEmitter {
    */
   isInFinalState(): boolean {
     const state = this.machine.states.get(this.currentState);
-    return state?.type === 'final';
+    return state?.type === "final";
   }
 
   /**
@@ -131,7 +127,7 @@ export class StateMachineExecutor extends EventEmitter {
   reset(): void {
     this.currentState = this.machine.initialState;
     this.context.clear();
-    this.emit('reset');
+    this.emit("reset");
   }
 }
 

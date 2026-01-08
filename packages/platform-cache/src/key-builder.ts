@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash } from "node:crypto";
 
 /**
  * Cache key builder for consistent key generation
@@ -68,14 +68,11 @@ export class CacheKeyBuilder {
    * Build the final key
    */
   build(): string {
-    let key = this.parts.join(':');
+    let key = this.parts.join(":");
 
     if (this.hashData.length > 0) {
       const dataStr = JSON.stringify(this.hashData);
-      const hash = createHash('sha256')
-        .update(dataStr)
-        .digest('hex')
-        .substring(0, 16);
+      const hash = createHash("sha256").update(dataStr).digest("hex").substring(0, 16);
       key += `:${hash}`;
     }
 
@@ -106,32 +103,23 @@ export const SummitKeys = {
   /**
    * Entity cache key
    */
-  entity: (id: string) =>
-    new CacheKeyBuilder()
-      .namespace('summit')
-      .entity('entity')
-      .id(id)
-      .build(),
+  entity: (id: string) => new CacheKeyBuilder().namespace("summit").entity("entity").id(id).build(),
 
   /**
    * Investigation cache key
    */
   investigation: (id: string) =>
-    new CacheKeyBuilder()
-      .namespace('summit')
-      .entity('investigation')
-      .id(id)
-      .build(),
+    new CacheKeyBuilder().namespace("summit").entity("investigation").id(id).build(),
 
   /**
    * Entity relationships cache key
    */
   relationships: (entityId: string, depth: number) =>
     new CacheKeyBuilder()
-      .namespace('summit')
-      .entity('entity')
+      .namespace("summit")
+      .entity("entity")
       .id(entityId)
-      .action('relationships')
+      .action("relationships")
       .hash({ depth })
       .build(),
 
@@ -139,39 +127,27 @@ export const SummitKeys = {
    * Search results cache key
    */
   search: (query: string, filters: Record<string, unknown>) =>
-    new CacheKeyBuilder()
-      .namespace('summit')
-      .action('search')
-      .hash({ query, filters })
-      .build(),
+    new CacheKeyBuilder().namespace("summit").action("search").hash({ query, filters }).build(),
 
   /**
    * User session cache key
    */
   session: (token: string) =>
-    new CacheKeyBuilder()
-      .namespace('summit')
-      .entity('session')
-      .hash(token)
-      .build(),
+    new CacheKeyBuilder().namespace("summit").entity("session").hash(token).build(),
 
   /**
    * Query result cache key
    */
   query: (queryHash: string) =>
-    new CacheKeyBuilder()
-      .namespace('summit')
-      .action('query')
-      .id(queryHash)
-      .build(),
+    new CacheKeyBuilder().namespace("summit").action("query").id(queryHash).build(),
 
   /**
    * Graph traversal cache key
    */
   traversal: (startNode: string, pattern: string, depth: number) =>
     new CacheKeyBuilder()
-      .namespace('summit')
-      .action('traversal')
+      .namespace("summit")
+      .action("traversal")
       .id(startNode)
       .hash({ pattern, depth })
       .build(),

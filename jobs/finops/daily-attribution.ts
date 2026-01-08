@@ -1,11 +1,7 @@
 #!/usr/bin/env ts-node
 
-import { pg } from '../../server/src/db/pg';
-import {
-  allocateCostBuckets,
-  defaultMeteringRatios,
-  MeteredUsage,
-} from '../../finops/allocation';
+import { pg } from "../../server/src/db/pg";
+import { allocateCostBuckets, defaultMeteringRatios, MeteredUsage } from "../../finops/allocation";
 
 interface UsageRow {
   tenant_id: string;
@@ -23,10 +19,8 @@ interface RollupWindow {
 
 function parseWindow(): RollupWindow {
   const args = process.argv.slice(2);
-  const dateArg = args.find((a) => a.startsWith('--date='));
-  const targetDate = dateArg
-    ? new Date(`${dateArg.split('=')[1]}T00:00:00Z`)
-    : new Date();
+  const dateArg = args.find((a) => a.startsWith("--date="));
+  const targetDate = dateArg ? new Date(`${dateArg.split("=")[1]}T00:00:00Z`) : new Date();
 
   // Default to yesterday to avoid partial data for the current day
   if (!dateArg) {
@@ -34,7 +28,14 @@ function parseWindow(): RollupWindow {
   }
 
   const start = new Date(
-    Date.UTC(targetDate.getUTCFullYear(), targetDate.getUTCMonth(), targetDate.getUTCDate(), 0, 0, 0),
+    Date.UTC(
+      targetDate.getUTCFullYear(),
+      targetDate.getUTCMonth(),
+      targetDate.getUTCDate(),
+      0,
+      0,
+      0
+    )
   );
   const end = new Date(start);
   end.setUTCDate(end.getUTCDate() + 1);
@@ -59,7 +60,7 @@ async function fetchTenantUsage(window: RollupWindow): Promise<UsageRow[]> {
     WHERE timestamp >= $1 AND timestamp < $2
     GROUP BY tenant_id
   `,
-    [window.start, window.end],
+    [window.start, window.end]
   )) as UsageRow[];
 
   return result;
@@ -68,7 +69,7 @@ async function fetchTenantUsage(window: RollupWindow): Promise<UsageRow[]> {
 async function upsertRollup(
   window: RollupWindow,
   row: UsageRow,
-  meteringSnapshot = defaultMeteringRatios,
+  meteringSnapshot = defaultMeteringRatios
 ): Promise<void> {
   const usage: MeteredUsage = {
     computeUnits: Number(row.compute_units || 0),
@@ -78,9 +79,7 @@ async function upsertRollup(
   };
 
   const allocation = allocateCostBuckets(usage, meteringSnapshot);
-  const bucketMap = Object.fromEntries(
-    allocation.buckets.map((b) => [b.bucket, b]),
-  );
+  const bucketMap = Object.fromEntries(allocation.buckets.map((b) => [b.bucket, b]));
 
   await pg.write(
     `
@@ -128,23 +127,21 @@ async function upsertRollup(
         meteringSnapshot,
         allocationPct: allocation.buckets.reduce(
           (acc, bucket) => ({ ...acc, [bucket.bucket]: bucket.allocationPct }),
-          {},
+          {}
         ),
       }),
-    ],
+    ]
   );
 }
 
 async function main() {
   const window = parseWindow();
-  const dryRun = process.argv.includes('--dry-run');
-  console.log(
-    `📊 FinOps daily attribution for ${window.usageDate} (dryRun=${dryRun})`,
-  );
+  const dryRun = process.argv.includes("--dry-run");
+  console.log(`📊 FinOps daily attribution for ${window.usageDate} (dryRun=${dryRun})`);
 
   const usageRows = await fetchTenantUsage(window);
   if (!usageRows.length) {
-    console.log('No tenant usage found for window; nothing to attribute.');
+    console.log("No tenant usage found for window; nothing to attribute.");
     return;
   }
 
@@ -157,30 +154,26 @@ async function main() {
           egressGb: Number(row.network_gb || 0),
           thirdPartyRequests: Number(row.api_calls || 0),
         },
-        defaultMeteringRatios,
+        defaultMeteringRatios
       );
       console.log(
-        `${row.tenant_id}: $${allocation.totalCostUsd.toFixed(
-          4,
-        )} | compute=${allocation.buckets.find((b) => b.bucket === 'compute')?.costUsd ?? 0
-        } storage=${allocation.buckets.find((b) => b.bucket === 'storage')?.costUsd ?? 0
-        } egress=${allocation.buckets.find((b) => b.bucket === 'egress')?.costUsd ?? 0
-        } thirdParty=${allocation.buckets.find((b) => b.bucket === 'third_party')?.costUsd ?? 0
-        }`,
+        `${row.tenant_id}: $${allocation.totalCostUsd.toFixed(4)} | compute=${
+          allocation.buckets.find((b) => b.bucket === "compute")?.costUsd ?? 0
+        } storage=${allocation.buckets.find((b) => b.bucket === "storage")?.costUsd ?? 0} egress=${
+          allocation.buckets.find((b) => b.bucket === "egress")?.costUsd ?? 0
+        } thirdParty=${allocation.buckets.find((b) => b.bucket === "third_party")?.costUsd ?? 0}`
       );
       continue;
     }
     await upsertRollup(window, row);
   }
 
-  console.log(
-    `✅ Processed ${usageRows.length} tenant rollups for ${window.usageDate}`,
-  );
+  console.log(`✅ Processed ${usageRows.length} tenant rollups for ${window.usageDate}`);
 }
 
 if (require.main === module) {
   main().catch((error) => {
-    console.error('FinOps daily attribution failed', error);
+    console.error("FinOps daily attribution failed", error);
     process.exit(1);
   });
 }

@@ -31,13 +31,7 @@
               "description": "Governance gate result for the bundle publication."
             }
           },
-          "required": [
-            "bundle_id",
-            "version",
-            "checksum",
-            "change_type",
-            "changed_by"
-          ]
+          "required": ["bundle_id", "version", "checksum", "change_type", "changed_by"]
         }
       }
     }

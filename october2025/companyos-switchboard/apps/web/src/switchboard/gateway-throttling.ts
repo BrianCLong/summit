@@ -4,16 +4,28 @@
  * to protect upstream Summit services from overload and abuse.
  */
 
-import { z } from 'zod';
-import { EventEmitter } from 'events';
-import { createHash, createHmac } from 'crypto';
+import { z } from "zod";
+import { EventEmitter } from "events";
+import { createHash, createHmac } from "crypto";
 
 // Rate limit algorithm types
-export const RateLimitAlgorithmSchema = z.enum(['token_bucket', 'sliding_window', 'fixed_window', 'leaky_bucket']);
+export const RateLimitAlgorithmSchema = z.enum([
+  "token_bucket",
+  "sliding_window",
+  "fixed_window",
+  "leaky_bucket",
+]);
 export type RateLimitAlgorithm = z.infer<typeof RateLimitAlgorithmSchema>;
 
 // Rate limit tier
-export const RateLimitTierSchema = z.enum(['free', 'basic', 'premium', 'enterprise', 'internal', 'unlimited']);
+export const RateLimitTierSchema = z.enum([
+  "free",
+  "basic",
+  "premium",
+  "enterprise",
+  "internal",
+  "unlimited",
+]);
 export type RateLimitTier = z.infer<typeof RateLimitTierSchema>;
 
 // Tier configuration
@@ -35,7 +47,7 @@ export type TierConfig = z.infer<typeof TierConfigSchema>;
 // Default tier configurations
 export const DEFAULT_TIER_CONFIGS: Record<RateLimitTier, TierConfig> = {
   free: {
-    tier: 'free',
+    tier: "free",
     requestsPerSecond: 1,
     requestsPerMinute: 10,
     requestsPerHour: 100,
@@ -46,7 +58,7 @@ export const DEFAULT_TIER_CONFIGS: Record<RateLimitTier, TierConfig> = {
     priority: 10,
   },
   basic: {
-    tier: 'basic',
+    tier: "basic",
     requestsPerSecond: 10,
     requestsPerMinute: 60,
     requestsPerHour: 1000,
@@ -57,7 +69,7 @@ export const DEFAULT_TIER_CONFIGS: Record<RateLimitTier, TierConfig> = {
     priority: 30,
   },
   premium: {
-    tier: 'premium',
+    tier: "premium",
     requestsPerSecond: 50,
     requestsPerMinute: 300,
     requestsPerHour: 10000,
@@ -68,7 +80,7 @@ export const DEFAULT_TIER_CONFIGS: Record<RateLimitTier, TierConfig> = {
     priority: 50,
   },
   enterprise: {
-    tier: 'enterprise',
+    tier: "enterprise",
     requestsPerSecond: 200,
     requestsPerMinute: 1000,
     requestsPerHour: 50000,
@@ -79,7 +91,7 @@ export const DEFAULT_TIER_CONFIGS: Record<RateLimitTier, TierConfig> = {
     priority: 70,
   },
   internal: {
-    tier: 'internal',
+    tier: "internal",
     requestsPerSecond: 1000,
     requestsPerMinute: 10000,
     requestsPerHour: 500000,
@@ -89,7 +101,7 @@ export const DEFAULT_TIER_CONFIGS: Record<RateLimitTier, TierConfig> = {
     priority: 90,
   },
   unlimited: {
-    tier: 'unlimited',
+    tier: "unlimited",
     requestsPerSecond: 0, // 0 = unlimited
     requestsPerMinute: 0,
     requestsPerHour: 0,
@@ -245,7 +257,7 @@ class InMemoryStorage implements ThrottlerStorage {
 
   async incr(key: string): Promise<number> {
     const current = await this.get(key);
-    const newValue = (parseInt(current || '0', 10) + 1).toString();
+    const newValue = (parseInt(current || "0", 10) + 1).toString();
     const entry = this.data.get(key);
     await this.set(key, newValue, entry?.expiresAt ? entry.expiresAt - Date.now() : undefined);
     return parseInt(newValue, 10);
@@ -264,10 +276,18 @@ class InMemoryStorage implements ThrottlerStorage {
 }
 
 class ConsoleLogger implements Logger {
-  info(m: string, meta?: Record<string, unknown>) { console.log(JSON.stringify({ level: 'info', message: m, ...meta })); }
-  warn(m: string, meta?: Record<string, unknown>) { console.warn(JSON.stringify({ level: 'warn', message: m, ...meta })); }
-  error(m: string, meta?: Record<string, unknown>) { console.error(JSON.stringify({ level: 'error', message: m, ...meta })); }
-  debug(m: string, meta?: Record<string, unknown>) { console.debug(JSON.stringify({ level: 'debug', message: m, ...meta })); }
+  info(m: string, meta?: Record<string, unknown>) {
+    console.log(JSON.stringify({ level: "info", message: m, ...meta }));
+  }
+  warn(m: string, meta?: Record<string, unknown>) {
+    console.warn(JSON.stringify({ level: "warn", message: m, ...meta }));
+  }
+  error(m: string, meta?: Record<string, unknown>) {
+    console.error(JSON.stringify({ level: "error", message: m, ...meta }));
+  }
+  debug(m: string, meta?: Record<string, unknown>) {
+    console.debug(JSON.stringify({ level: "debug", message: m, ...meta }));
+  }
 }
 
 /**
@@ -284,9 +304,9 @@ export class GatewayThrottler extends EventEmitter {
   constructor(config: GatewayThrottlerConfig = {}) {
     super();
     this.config = {
-      algorithm: config.algorithm || 'token_bucket',
+      algorithm: config.algorithm || "token_bucket",
       tierConfigs: config.tierConfigs || DEFAULT_TIER_CONFIGS,
-      defaultTier: config.defaultTier || 'free',
+      defaultTier: config.defaultTier || "free",
       enableQuotas: config.enableQuotas ?? true,
       quotaResetDay: config.quotaResetDay || 1,
       bypassTokens: config.bypassTokens || [],
@@ -301,7 +321,7 @@ export class GatewayThrottler extends EventEmitter {
    */
   registerApiKey(apiKey: ApiKey): void {
     this.apiKeys.set(apiKey.id, apiKey);
-    this.config.logger.info('API key registered', { keyId: apiKey.id, tier: apiKey.tier });
+    this.config.logger.info("API key registered", { keyId: apiKey.id, tier: apiKey.tier });
   }
 
   /**
@@ -313,12 +333,12 @@ export class GatewayThrottler extends EventEmitter {
     for (const [id, apiKey] of this.apiKeys) {
       if (apiKey.key === hashedKey) {
         if (!apiKey.isActive) {
-          this.config.logger.warn('Inactive API key used', { keyId: id });
+          this.config.logger.warn("Inactive API key used", { keyId: id });
           return null;
         }
 
         if (apiKey.expiresAt && apiKey.expiresAt < new Date()) {
-          this.config.logger.warn('Expired API key used', { keyId: id });
+          this.config.logger.warn("Expired API key used", { keyId: id });
           return null;
         }
 
@@ -339,7 +359,7 @@ export class GatewayThrottler extends EventEmitter {
 
     // Check bypass tokens
     if (rawApiKey && this.config.bypassTokens.includes(rawApiKey)) {
-      return this.buildAllowedDecision('unlimited', true);
+      return this.buildAllowedDecision("unlimited", true);
     }
 
     // Authenticate API key
@@ -353,18 +373,24 @@ export class GatewayThrottler extends EventEmitter {
 
         // Check IP allowlist
         if (apiKey.allowedIPs?.length && !apiKey.allowedIPs.includes(context.ipAddress)) {
-          this.config.metrics.increment('gateway.throttle.blocked', { reason: 'ip_not_allowed' });
-          return this.buildBlockedDecision(tier, 'IP_NOT_ALLOWED', 'IP address not in allowlist');
+          this.config.metrics.increment("gateway.throttle.blocked", { reason: "ip_not_allowed" });
+          return this.buildBlockedDecision(tier, "IP_NOT_ALLOWED", "IP address not in allowlist");
         }
 
         // Check origin allowlist
-        if (apiKey.allowedOrigins?.length && context.origin && !apiKey.allowedOrigins.includes(context.origin)) {
-          this.config.metrics.increment('gateway.throttle.blocked', { reason: 'origin_not_allowed' });
-          return this.buildBlockedDecision(tier, 'ORIGIN_NOT_ALLOWED', 'Origin not in allowlist');
+        if (
+          apiKey.allowedOrigins?.length &&
+          context.origin &&
+          !apiKey.allowedOrigins.includes(context.origin)
+        ) {
+          this.config.metrics.increment("gateway.throttle.blocked", {
+            reason: "origin_not_allowed",
+          });
+          return this.buildBlockedDecision(tier, "ORIGIN_NOT_ALLOWED", "Origin not in allowlist");
         }
       } else {
-        this.config.metrics.increment('gateway.throttle.blocked', { reason: 'invalid_api_key' });
-        return this.buildBlockedDecision(tier, 'INVALID_API_KEY', 'Invalid or expired API key');
+        this.config.metrics.increment("gateway.throttle.blocked", { reason: "invalid_api_key" });
+        return this.buildBlockedDecision(tier, "INVALID_API_KEY", "Invalid or expired API key");
       }
     }
 
@@ -376,14 +402,22 @@ export class GatewayThrottler extends EventEmitter {
     const currentConcurrent = this.concurrentRequests.get(concurrentKey) || 0;
 
     if (tierConfig.concurrentRequests > 0 && currentConcurrent >= tierConfig.concurrentRequests) {
-      this.config.metrics.increment('gateway.throttle.blocked', { reason: 'concurrent_limit', tier });
-      return this.buildBlockedDecision(tier, 'CONCURRENT_LIMIT', 'Too many concurrent requests', 1000);
+      this.config.metrics.increment("gateway.throttle.blocked", {
+        reason: "concurrent_limit",
+        tier,
+      });
+      return this.buildBlockedDecision(
+        tier,
+        "CONCURRENT_LIMIT",
+        "Too many concurrent requests",
+        1000
+      );
     }
 
     // Check rate limit
     const rateLimitResult = await this.checkRateLimit(context, apiKey, tierConfig);
     if (!rateLimitResult.allowed) {
-      this.config.metrics.increment('gateway.throttle.blocked', { reason: 'rate_limit', tier });
+      this.config.metrics.increment("gateway.throttle.blocked", { reason: "rate_limit", tier });
       return {
         allowed: false,
         rateLimit: rateLimitResult,
@@ -391,8 +425,8 @@ export class GatewayThrottler extends EventEmitter {
         tier,
         headers: this.buildRateLimitHeaders(rateLimitResult),
         blocked: {
-          reason: rateLimitResult.reason || 'Rate limit exceeded',
-          code: 'RATE_LIMIT_EXCEEDED',
+          reason: rateLimitResult.reason || "Rate limit exceeded",
+          code: "RATE_LIMIT_EXCEEDED",
           retryAfterMs: rateLimitResult.retryAfterMs,
         },
       };
@@ -403,7 +437,7 @@ export class GatewayThrottler extends EventEmitter {
     if (this.config.enableQuotas && tierConfig.quotaLimit) {
       quotaResult = await this.checkQuota(context, apiKey, tierConfig);
       if (!quotaResult.allowed) {
-        this.config.metrics.increment('gateway.throttle.blocked', { reason: 'quota', tier });
+        this.config.metrics.increment("gateway.throttle.blocked", { reason: "quota", tier });
         return {
           allowed: false,
           rateLimit: rateLimitResult,
@@ -412,8 +446,8 @@ export class GatewayThrottler extends EventEmitter {
           tier,
           headers: this.buildRateLimitHeaders(rateLimitResult, quotaResult),
           blocked: {
-            reason: 'Monthly quota exceeded',
-            code: 'QUOTA_EXCEEDED',
+            reason: "Monthly quota exceeded",
+            code: "QUOTA_EXCEEDED",
           },
         };
       }
@@ -424,8 +458,8 @@ export class GatewayThrottler extends EventEmitter {
 
     // Record metrics
     const duration = performance.now() - startTime;
-    this.config.metrics.increment('gateway.throttle.allowed', { tier });
-    this.config.metrics.histogram('gateway.throttle.check_duration', duration);
+    this.config.metrics.increment("gateway.throttle.allowed", { tier });
+    this.config.metrics.histogram("gateway.throttle.check_duration", duration);
 
     return {
       allowed: true,
@@ -457,13 +491,13 @@ export class GatewayThrottler extends EventEmitter {
     tierConfig: TierConfig
   ): Promise<RateLimitResult> {
     switch (this.config.algorithm) {
-      case 'token_bucket':
+      case "token_bucket":
         return this.checkTokenBucket(context, apiKey, tierConfig);
-      case 'sliding_window':
+      case "sliding_window":
         return this.checkSlidingWindow(context, apiKey, tierConfig);
-      case 'fixed_window':
+      case "fixed_window":
         return this.checkFixedWindow(context, apiKey, tierConfig);
-      case 'leaky_bucket':
+      case "leaky_bucket":
         return this.checkLeakyBucket(context, apiKey, tierConfig);
       default:
         return this.checkTokenBucket(context, apiKey, tierConfig);
@@ -521,7 +555,7 @@ export class GatewayThrottler extends EventEmitter {
       resetAt: new Date(now + retryAfterMs),
       retryAfterMs,
       tier: tierConfig.tier,
-      reason: 'Token bucket exhausted',
+      reason: "Token bucket exhausted",
     };
   }
 
@@ -556,7 +590,7 @@ export class GatewayThrottler extends EventEmitter {
         resetAt: new Date(now + retryAfterMs),
         retryAfterMs,
         tier: tierConfig.tier,
-        reason: 'Sliding window limit exceeded',
+        reason: "Sliding window limit exceeded",
       };
     }
 
@@ -587,7 +621,7 @@ export class GatewayThrottler extends EventEmitter {
     const windowKey = `${key}:${windowStart}`;
 
     const countStr = await this.config.storage.get(windowKey);
-    const count = parseInt(countStr || '0', 10);
+    const count = parseInt(countStr || "0", 10);
 
     if (count >= tierConfig.requestsPerMinute) {
       const resetAt = new Date(windowStart + windowMs);
@@ -600,7 +634,7 @@ export class GatewayThrottler extends EventEmitter {
         resetAt,
         retryAfterMs,
         tier: tierConfig.tier,
-        reason: 'Fixed window limit exceeded',
+        reason: "Fixed window limit exceeded",
       };
     }
 
@@ -648,7 +682,7 @@ export class GatewayThrottler extends EventEmitter {
 
     const quotaKey = this.getQuotaKey(context, apiKey);
     const usedStr = await this.config.storage.get(quotaKey);
-    const used = parseInt(usedStr || '0', 10);
+    const used = parseInt(usedStr || "0", 10);
 
     // Calculate reset date (first of next month)
     const now = new Date();
@@ -667,7 +701,11 @@ export class GatewayThrottler extends EventEmitter {
     }
 
     // Increment usage
-    await this.config.storage.set(quotaKey, (used + cost).toString(), resetAt.getTime() - Date.now());
+    await this.config.storage.set(
+      quotaKey,
+      (used + cost).toString(),
+      resetAt.getTime() - Date.now()
+    );
 
     // Update API key if present
     if (apiKey) {
@@ -741,7 +779,7 @@ export class GatewayThrottler extends EventEmitter {
       },
       authenticated: false,
       tier,
-      headers: retryAfterMs ? { 'Retry-After': String(Math.ceil(retryAfterMs / 1000)) } : {},
+      headers: retryAfterMs ? { "Retry-After": String(Math.ceil(retryAfterMs / 1000)) } : {},
       blocked: { reason, code, retryAfterMs },
     };
   }
@@ -754,19 +792,19 @@ export class GatewayThrottler extends EventEmitter {
     quota?: QuotaCheckResult
   ): Record<string, string> {
     const headers: Record<string, string> = {
-      'X-RateLimit-Limit': String(rateLimit.limit),
-      'X-RateLimit-Remaining': String(rateLimit.remaining),
-      'X-RateLimit-Reset': String(Math.floor(rateLimit.resetAt.getTime() / 1000)),
+      "X-RateLimit-Limit": String(rateLimit.limit),
+      "X-RateLimit-Remaining": String(rateLimit.remaining),
+      "X-RateLimit-Reset": String(Math.floor(rateLimit.resetAt.getTime() / 1000)),
     };
 
     if (rateLimit.retryAfterMs) {
-      headers['Retry-After'] = String(Math.ceil(rateLimit.retryAfterMs / 1000));
+      headers["Retry-After"] = String(Math.ceil(rateLimit.retryAfterMs / 1000));
     }
 
     if (quota) {
-      headers['X-Quota-Limit'] = String(quota.limit);
-      headers['X-Quota-Remaining'] = String(quota.remaining);
-      headers['X-Quota-Reset'] = String(Math.floor(quota.resetAt.getTime() / 1000));
+      headers["X-Quota-Limit"] = String(quota.limit);
+      headers["X-Quota-Remaining"] = String(quota.remaining);
+      headers["X-Quota-Reset"] = String(Math.floor(quota.resetAt.getTime() / 1000));
     }
 
     return headers;
@@ -787,7 +825,7 @@ export class GatewayThrottler extends EventEmitter {
    */
   private getQuotaKey(context: ThrottleContext, apiKey: ApiKey | null): string {
     const now = new Date();
-    const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
     if (apiKey) {
       return `quota:${apiKey.id}:${month}`;
@@ -809,16 +847,17 @@ export class GatewayThrottler extends EventEmitter {
    * Hash API key
    */
   private hashApiKey(rawKey: string): string {
-    return createHash('sha256').update(rawKey).digest('hex');
+    return createHash("sha256").update(rawKey).digest("hex");
   }
 
   /**
    * Generate new API key
    */
-  generateApiKey(
-    data: Omit<ApiKey, 'id' | 'key' | 'quotaUsed' | 'createdAt' | 'updatedAt'>
-  ): { apiKey: ApiKey; rawKey: string } {
-    const rawKey = `sk_${crypto.randomUUID().replace(/-/g, '')}`;
+  generateApiKey(data: Omit<ApiKey, "id" | "key" | "quotaUsed" | "createdAt" | "updatedAt">): {
+    apiKey: ApiKey;
+    rawKey: string;
+  } {
+    const rawKey = `sk_${crypto.randomUUID().replace(/-/g, "")}`;
     const hashedKey = this.hashApiKey(rawKey);
 
     const apiKey: ApiKey = {
@@ -843,7 +882,7 @@ export class GatewayThrottler extends EventEmitter {
     if (apiKey) {
       apiKey.isActive = false;
       apiKey.updatedAt = new Date();
-      this.config.logger.info('API key revoked', { keyId });
+      this.config.logger.info("API key revoked", { keyId });
       return true;
     }
     return false;

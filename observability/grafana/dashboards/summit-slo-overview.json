@@ -26,16 +26,16 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "red", "value": null},
-              {"color": "yellow", "value": 99.5},
-              {"color": "green", "value": 99.9}
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 99.5 },
+              { "color": "green", "value": 99.9 }
             ]
           },
           "unit": "percent"
         },
         "overrides": []
       },
-      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 0},
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
       "id": 1,
       "options": {
         "orientation": "horizontal",
@@ -81,23 +81,23 @@
           },
           "custom": {
             "align": "center",
-            "cellOptions": {"type": "color-background"},
+            "cellOptions": { "type": "color-background" },
             "inspect": false
           },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "red", "value": null},
-              {"color": "yellow", "value": 50},
-              {"color": "green", "value": 80}
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 50 },
+              { "color": "green", "value": 80 }
             ]
           },
           "unit": "percent"
         },
         "overrides": []
       },
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
       "id": 2,
       "options": {
         "showHeader": true,
@@ -118,8 +118,8 @@
         {
           "id": "organize",
           "options": {
-            "excludeByName": {"Time": true},
-            "renameByName": {"Value": "Budget %"}
+            "excludeByName": { "Time": true },
+            "renameByName": { "Value": "Budget %" }
           }
         }
       ],
@@ -148,15 +148,15 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "green", "value": null},
-              {"color": "yellow", "value": 1},
-              {"color": "orange", "value": 6},
-              {"color": "red", "value": 14.4}
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "orange", "value": 6 },
+              { "color": "red", "value": 14.4 }
             ]
           }
         }
       },
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
       "id": 3,
       "options": {
         "legend": {
@@ -190,16 +190,16 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "red", "value": null},
-              {"color": "yellow", "value": 99.9},
-              {"color": "green", "value": 99.99}
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 99.9 },
+              { "color": "green", "value": 99.99 }
             ]
           },
           "unit": "percent"
         },
         "overrides": []
       },
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
       "id": 4,
       "options": {
         "legend": {
@@ -241,16 +241,16 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "green", "value": null},
-              {"color": "yellow", "value": 0.3},
-              {"color": "red", "value": 0.4}
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.3 },
+              { "color": "red", "value": 0.4 }
             ]
           },
           "unit": "s"
         },
         "overrides": []
       },
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
       "id": 5,
       "options": {
         "legend": {
@@ -292,16 +292,16 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "green", "value": null},
-              {"color": "yellow", "value": 60},
-              {"color": "red", "value": 120}
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 60 },
+              { "color": "red", "value": 120 }
             ]
           },
           "unit": "s"
         },
         "overrides": []
       },
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24},
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
       "id": 6,
       "options": {
         "legend": {
@@ -336,16 +336,16 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "green", "value": null},
-              {"color": "yellow", "value": 0.03},
-              {"color": "red", "value": 0.05}
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.03 },
+              { "color": "red", "value": 0.05 }
             ]
           },
           "unit": "percent"
         },
         "overrides": []
       },
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24},
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
       "id": 7,
       "options": {
         "legend": {
@@ -369,8 +369,8 @@
   "schemaVersion": 38,
   "style": "dark",
   "tags": ["summit", "slo", "sre"],
-  "templating": {"list": []},
-  "time": {"from": "now-24h", "to": "now"},
+  "templating": { "list": [] },
+  "time": { "from": "now-24h", "to": "now" },
   "timezone": "",
   "title": "Summit - SLO Overview",
   "uid": "summit-slo-overview",

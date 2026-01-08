@@ -3,7 +3,7 @@ name: Merge Train Health Check
 on:
   schedule:
     # Run nightly at 2:07 AM UTC (jittered to avoid cron herd)
-    - cron: '7 2 * * *'
+    - cron: "7 2 * * *"
   workflow_dispatch: # Allow manual trigger
 
 concurrency:

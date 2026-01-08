@@ -30,15 +30,15 @@ go run ./cmd/jprdiff --policies ../jpr/testdata/policies.yaml --before 2024-05-3
 The `sdk/jpr-ts` package wraps the Go CLI. Provide the policy path and it will compile/cache the engine on-demand:
 
 ```ts
-import { JurisdictionalPolicyResolver } from '@intelgraph/jpr';
+import { JurisdictionalPolicyResolver } from "@intelgraph/jpr";
 
-const jpr = new JurisdictionalPolicyResolver({ policiesPath: 'path/to/policies.yaml' });
+const jpr = new JurisdictionalPolicyResolver({ policiesPath: "path/to/policies.yaml" });
 const decision = jpr.can({
-  action: 'share',
-  jurisdiction: 'DE',
-  dataClass: 'sensitive',
-  purpose: 'marketing',
-  decisionTime: new Date('2024-06-01')
+  action: "share",
+  jurisdiction: "DE",
+  dataClass: "sensitive",
+  purpose: "marketing",
+  decisionTime: new Date("2024-06-01"),
 });
 ```
 
@@ -52,4 +52,3 @@ go test ./...
 ```
 
 The benchmark included in `engine_test.go` measures the steady-state latency and ensures p95 is maintained under the 1ms budget on modern hardware.
-

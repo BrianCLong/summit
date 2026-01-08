@@ -1,13 +1,13 @@
-import Docker from 'dockerode';
-import EventEmitter from 'eventemitter3';
-import { pino, type Logger } from 'pino';
+import Docker from "dockerode";
+import EventEmitter from "eventemitter3";
+import { pino, type Logger } from "pino";
 
 export interface ContainerInfo {
   id: string;
   name: string;
   image: string;
-  status: 'created' | 'running' | 'paused' | 'stopped' | 'exited' | 'dead';
-  state: Docker.ContainerInspectInfo['State'];
+  status: "created" | "running" | "paused" | "stopped" | "exited" | "dead";
+  state: Docker.ContainerInspectInfo["State"];
   created: Date;
   ports: Array<{
     privatePort: number;
@@ -25,7 +25,7 @@ export interface DeploymentOptions {
   volumes?: Array<{ host: string; container: string; readOnly?: boolean }>;
   memory?: number; // bytes
   cpus?: number;
-  restartPolicy?: 'no' | 'always' | 'on-failure' | 'unless-stopped';
+  restartPolicy?: "no" | "always" | "on-failure" | "unless-stopped";
   healthCheck?: {
     test: string[];
     interval?: number;
@@ -47,8 +47,8 @@ export class ContainerOrchestrator extends EventEmitter {
 
   constructor(dockerOptions?: Docker.DockerOptions, logger?: Logger) {
     super();
-    this.docker = new Docker(dockerOptions || { socketPath: '/var/run/docker.sock' });
-    this.logger = logger || pino({ name: 'ContainerOrchestrator' });
+    this.docker = new Docker(dockerOptions || { socketPath: "/var/run/docker.sock" });
+    this.logger = logger || pino({ name: "ContainerOrchestrator" });
   }
 
   /**
@@ -56,7 +56,7 @@ export class ContainerOrchestrator extends EventEmitter {
    */
   async deployContainer(options: DeploymentOptions): Promise<string> {
     try {
-      this.logger.info({ image: options.image }, 'Deploying container');
+      this.logger.info({ image: options.image }, "Deploying container");
 
       // Pull image if not available
       await this.pullImage(options.image);
@@ -69,22 +69,28 @@ export class ContainerOrchestrator extends EventEmitter {
         ExposedPorts: options.ports ? this.formatExposedPorts(options.ports) : undefined,
         HostConfig: {
           PortBindings: options.ports ? this.formatPortBindings(options.ports) : undefined,
-          Binds: options.volumes?.map(v => `${v.host}:${v.container}${v.readOnly ? ':ro' : ''}`) || undefined,
+          Binds:
+            options.volumes?.map((v) => `${v.host}:${v.container}${v.readOnly ? ":ro" : ""}`) ||
+            undefined,
           Memory: options.memory,
           NanoCpus: options.cpus ? options.cpus * 1e9 : undefined,
           RestartPolicy: {
-            Name: options.restartPolicy || 'unless-stopped',
-            MaximumRetryCount: options.restartPolicy === 'on-failure' ? 3 : 0
+            Name: options.restartPolicy || "unless-stopped",
+            MaximumRetryCount: options.restartPolicy === "on-failure" ? 3 : 0,
           },
-          NetworkMode: options.network
+          NetworkMode: options.network,
         },
         Labels: options.labels,
-        Healthcheck: options.healthCheck ? {
-          Test: options.healthCheck.test,
-          Interval: options.healthCheck.interval ? options.healthCheck.interval * 1e6 : undefined,
-          Timeout: options.healthCheck.timeout ? options.healthCheck.timeout * 1e6 : undefined,
-          Retries: options.healthCheck.retries
-        } : undefined
+        Healthcheck: options.healthCheck
+          ? {
+              Test: options.healthCheck.test,
+              Interval: options.healthCheck.interval
+                ? options.healthCheck.interval * 1e6
+                : undefined,
+              Timeout: options.healthCheck.timeout ? options.healthCheck.timeout * 1e6 : undefined,
+              Retries: options.healthCheck.retries,
+            }
+          : undefined,
       };
 
       const container = await this.docker.createContainer(createOptions);
@@ -93,12 +99,12 @@ export class ContainerOrchestrator extends EventEmitter {
       const info = await this.getContainerInfo(container.id);
       this.containers.set(container.id, info);
 
-      this.logger.info({ containerId: container.id, name: options.name }, 'Container deployed');
-      this.emit('container-deployed', { containerId: container.id, info });
+      this.logger.info({ containerId: container.id, name: options.name }, "Container deployed");
+      this.emit("container-deployed", { containerId: container.id, info });
 
       return container.id;
     } catch (error) {
-      this.logger.error({ error, image: options.image }, 'Failed to deploy container');
+      this.logger.error({ error, image: options.image }, "Failed to deploy container");
       throw error;
     }
   }
@@ -108,7 +114,7 @@ export class ContainerOrchestrator extends EventEmitter {
    */
   private async pullImage(image: string): Promise<void> {
     try {
-      this.logger.info({ image }, 'Pulling image');
+      this.logger.info({ image }, "Pulling image");
 
       await new Promise<void>((resolve, reject) => {
         this.docker.pull(image, (err: Error | null, stream: NodeJS.ReadableStream) => {
@@ -127,9 +133,9 @@ export class ContainerOrchestrator extends EventEmitter {
         });
       });
 
-      this.logger.info({ image }, 'Image pulled successfully');
+      this.logger.info({ image }, "Image pulled successfully");
     } catch (error) {
-      this.logger.error({ error, image }, 'Failed to pull image');
+      this.logger.error({ error, image }, "Failed to pull image");
       throw error;
     }
   }
@@ -145,10 +151,10 @@ export class ContainerOrchestrator extends EventEmitter {
       const info = await this.getContainerInfo(containerId);
       this.containers.set(containerId, info);
 
-      this.logger.info({ containerId }, 'Container stopped');
-      this.emit('container-stopped', { containerId });
+      this.logger.info({ containerId }, "Container stopped");
+      this.emit("container-stopped", { containerId });
     } catch (error) {
-      this.logger.error({ error, containerId }, 'Failed to stop container');
+      this.logger.error({ error, containerId }, "Failed to stop container");
       throw error;
     }
   }
@@ -164,10 +170,10 @@ export class ContainerOrchestrator extends EventEmitter {
       const info = await this.getContainerInfo(containerId);
       this.containers.set(containerId, info);
 
-      this.logger.info({ containerId }, 'Container started');
-      this.emit('container-started', { containerId });
+      this.logger.info({ containerId }, "Container started");
+      this.emit("container-started", { containerId });
     } catch (error) {
-      this.logger.error({ error, containerId }, 'Failed to start container');
+      this.logger.error({ error, containerId }, "Failed to start container");
       throw error;
     }
   }
@@ -182,10 +188,10 @@ export class ContainerOrchestrator extends EventEmitter {
 
       this.containers.delete(containerId);
 
-      this.logger.info({ containerId }, 'Container removed');
-      this.emit('container-removed', { containerId });
+      this.logger.info({ containerId }, "Container removed");
+      this.emit("container-removed", { containerId });
     } catch (error) {
-      this.logger.error({ error, containerId }, 'Failed to remove container');
+      this.logger.error({ error, containerId }, "Failed to remove container");
       throw error;
     }
   }
@@ -201,10 +207,10 @@ export class ContainerOrchestrator extends EventEmitter {
       const info = await this.getContainerInfo(containerId);
       this.containers.set(containerId, info);
 
-      this.logger.info({ containerId }, 'Container restarted');
-      this.emit('container-restarted', { containerId });
+      this.logger.info({ containerId }, "Container restarted");
+      this.emit("container-restarted", { containerId });
     } catch (error) {
-      this.logger.error({ error, containerId }, 'Failed to restart container');
+      this.logger.error({ error, containerId }, "Failed to restart container");
       throw error;
     }
   }
@@ -227,12 +233,12 @@ export class ContainerOrchestrator extends EventEmitter {
         stderr: true,
         tail: options?.tail || 100,
         since: options?.since,
-        timestamps: options?.timestamps || true
+        timestamps: options?.timestamps || true,
       });
 
-      return logs.toString('utf-8');
+      return logs.toString("utf-8");
     } catch (error) {
-      this.logger.error({ error, containerId }, 'Failed to get container logs');
+      this.logger.error({ error, containerId }, "Failed to get container logs");
       throw error;
     }
   }
@@ -256,28 +262,28 @@ export class ContainerOrchestrator extends EventEmitter {
         AttachStdout: true,
         AttachStderr: true,
         Env: options?.env,
-        WorkingDir: options?.workingDir
+        WorkingDir: options?.workingDir,
       });
 
       const stream = await exec.start({ Detach: false });
 
-      let output = '';
-      stream.on('data', (chunk: Buffer) => {
-        output += chunk.toString('utf-8');
+      let output = "";
+      stream.on("data", (chunk: Buffer) => {
+        output += chunk.toString("utf-8");
       });
 
       await new Promise((resolve) => {
-        stream.on('end', resolve);
+        stream.on("end", resolve);
       });
 
       const inspect = await exec.inspect();
 
       return {
         exitCode: inspect.ExitCode || 0,
-        output
+        output,
       };
     } catch (error) {
-      this.logger.error({ error, containerId, cmd }, 'Failed to execute command in container');
+      this.logger.error({ error, containerId, cmd }, "Failed to execute command in container");
       throw error;
     }
   }
@@ -292,23 +298,27 @@ export class ContainerOrchestrator extends EventEmitter {
 
       return {
         id: data.Id,
-        name: data.Name.replace(/^\//, ''),
+        name: data.Name.replace(/^\//, ""),
         image: data.Config.Image,
-        status: data.State.Status as ContainerInfo['status'],
+        status: data.State.Status as ContainerInfo["status"],
         state: data.State,
         created: new Date(data.Created),
-        ports: Object.entries(data.NetworkSettings.Ports || {}).flatMap(([containerPort, bindings]) => {
-          if (!bindings) {return [];}
-          return bindings.map(binding => ({
-            privatePort: parseInt(containerPort.split('/')[0]),
-            publicPort: binding.HostPort ? parseInt(binding.HostPort) : undefined,
-            type: containerPort.split('/')[1] || 'tcp'
-          }));
-        }),
-        labels: data.Config.Labels || {}
+        ports: Object.entries(data.NetworkSettings.Ports || {}).flatMap(
+          ([containerPort, bindings]) => {
+            if (!bindings) {
+              return [];
+            }
+            return bindings.map((binding) => ({
+              privatePort: parseInt(containerPort.split("/")[0]),
+              publicPort: binding.HostPort ? parseInt(binding.HostPort) : undefined,
+              type: containerPort.split("/")[1] || "tcp",
+            }));
+          }
+        ),
+        labels: data.Config.Labels || {},
       };
     } catch (error) {
-      this.logger.error({ error, containerId }, 'Failed to get container info');
+      this.logger.error({ error, containerId }, "Failed to get container info");
       throw error;
     }
   }
@@ -320,11 +330,9 @@ export class ContainerOrchestrator extends EventEmitter {
     try {
       const containers = await this.docker.listContainers({ all });
 
-      return Promise.all(
-        containers.map(c => this.getContainerInfo(c.Id))
-      );
+      return Promise.all(containers.map((c) => this.getContainerInfo(c.Id)));
     } catch (error) {
-      this.logger.error({ error }, 'Failed to list containers');
+      this.logger.error({ error }, "Failed to list containers");
       throw error;
     }
   }
@@ -342,7 +350,8 @@ export class ContainerOrchestrator extends EventEmitter {
       const container = this.docker.getContainer(containerId);
       const stats = await container.stats({ stream: false });
 
-      const cpuDelta = stats.cpu_stats.cpu_usage.total_usage - stats.precpu_stats.cpu_usage.total_usage;
+      const cpuDelta =
+        stats.cpu_stats.cpu_usage.total_usage - stats.precpu_stats.cpu_usage.total_usage;
       const systemDelta = stats.cpu_stats.system_cpu_usage - stats.precpu_stats.system_cpu_usage;
       const cpuPercent = (cpuDelta / systemDelta) * stats.cpu_stats.online_cpus * 100;
 
@@ -351,19 +360,29 @@ export class ContainerOrchestrator extends EventEmitter {
         memory: {
           usage: stats.memory_stats.usage || 0,
           limit: stats.memory_stats.limit || 0,
-          percent: ((stats.memory_stats.usage || 0) / (stats.memory_stats.limit || 1)) * 100
+          percent: ((stats.memory_stats.usage || 0) / (stats.memory_stats.limit || 1)) * 100,
         },
         network: {
-          rx: Object.values(stats.networks || {}).reduce((sum: number, n: any) => sum + (n.rx_bytes || 0), 0),
-          tx: Object.values(stats.networks || {}).reduce((sum: number, n: any) => sum + (n.tx_bytes || 0), 0)
+          rx: Object.values(stats.networks || {}).reduce(
+            (sum: number, n: any) => sum + (n.rx_bytes || 0),
+            0
+          ),
+          tx: Object.values(stats.networks || {}).reduce(
+            (sum: number, n: any) => sum + (n.tx_bytes || 0),
+            0
+          ),
         },
         blockIO: {
-          read: stats.blkio_stats?.io_service_bytes_recursive?.find((io: any) => io.op === 'Read')?.value || 0,
-          write: stats.blkio_stats?.io_service_bytes_recursive?.find((io: any) => io.op === 'Write')?.value || 0
-        }
+          read:
+            stats.blkio_stats?.io_service_bytes_recursive?.find((io: any) => io.op === "Read")
+              ?.value || 0,
+          write:
+            stats.blkio_stats?.io_service_bytes_recursive?.find((io: any) => io.op === "Write")
+              ?.value || 0,
+        },
       };
     } catch (error) {
-      this.logger.error({ error, containerId }, 'Failed to get container stats');
+      this.logger.error({ error, containerId }, "Failed to get container stats");
       throw error;
     }
   }
@@ -371,7 +390,9 @@ export class ContainerOrchestrator extends EventEmitter {
   /**
    * Format exposed ports for Docker API
    */
-  private formatExposedPorts(ports: Array<{ container: number; host?: number }>): Record<string, {}> {
+  private formatExposedPorts(
+    ports: Array<{ container: number; host?: number }>
+  ): Record<string, {}> {
     const exposedPorts: Record<string, {}> = {};
     for (const port of ports) {
       exposedPorts[`${port.container}/tcp`] = {};
@@ -387,9 +408,7 @@ export class ContainerOrchestrator extends EventEmitter {
   ): Record<string, Array<{ HostPort: string }>> {
     const bindings: Record<string, Array<{ HostPort: string }>> = {};
     for (const port of ports) {
-      bindings[`${port.container}/tcp`] = [
-        { HostPort: port.host ? port.host.toString() : '' }
-      ];
+      bindings[`${port.container}/tcp`] = [{ HostPort: port.host ? port.host.toString() : "" }];
     }
     return bindings;
   }
@@ -403,17 +422,17 @@ export class ContainerOrchestrator extends EventEmitter {
         const info = await this.getContainerInfo(containerId);
 
         if (info.state.Health) {
-          this.emit('health-status', {
+          this.emit("health-status", {
             containerId,
             status: info.state.Health.Status,
-            log: info.state.Health.Log
+            log: info.state.Health.Log,
           });
         }
 
         const stats = await this.getContainerStats(containerId);
-        this.emit('container-stats', { containerId, stats });
+        this.emit("container-stats", { containerId, stats });
       } catch (error) {
-        this.logger.error({ error, containerId }, 'Health check failed');
+        this.logger.error({ error, containerId }, "Health check failed");
       }
     };
 
@@ -435,15 +454,15 @@ export class ContainerOrchestrator extends EventEmitter {
 
       this.logger.info(
         { count: result.ContainersDeleted?.length || 0, space: result.SpaceReclaimed },
-        'Containers pruned'
+        "Containers pruned"
       );
 
       return {
         containersDeleted: result.ContainersDeleted || [],
-        spaceReclaimed: result.SpaceReclaimed || 0
+        spaceReclaimed: result.SpaceReclaimed || 0,
       };
     } catch (error) {
-      this.logger.error({ error }, 'Failed to prune containers');
+      this.logger.error({ error }, "Failed to prune containers");
       throw error;
     }
   }

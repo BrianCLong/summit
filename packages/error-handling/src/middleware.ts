@@ -2,12 +2,12 @@
  * Error Handling Middleware for Express and GraphQL
  */
 
-import { Request, Response, NextFunction } from 'express';
-import { GraphQLError, GraphQLFormattedError } from 'graphql';
-import pino from 'pino';
-import { AppError, toAppError, sanitizeError } from './errors.js';
+import { Request, Response, NextFunction } from "express";
+import { GraphQLError, GraphQLFormattedError } from "graphql";
+import pino from "pino";
+import { AppError, toAppError, sanitizeError } from "./errors.js";
 
-const logger = pino({ name: 'ErrorMiddleware' });
+const logger = pino({ name: "ErrorMiddleware" });
 
 /**
  * Express error handling middleware
@@ -18,10 +18,10 @@ export function errorHandler(
   req: Request,
   res: Response,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  next: NextFunction,
+  next: NextFunction
 ): void {
   const appError = toAppError(err);
-  const isProduction = process.env.NODE_ENV === 'production';
+  const isProduction = process.env.NODE_ENV === "production";
 
   // Log error with context
   const logContext = {
@@ -33,25 +33,25 @@ export function errorHandler(
       query: req.query,
       params: req.params,
       headers: {
-        'user-agent': req.headers['user-agent'],
-        'content-type': req.headers['content-type'],
+        "user-agent": req.headers["user-agent"],
+        "content-type": req.headers["content-type"],
       },
       ip: req.ip,
-      correlationId: req.headers['x-correlation-id'] || req.headers['x-request-id'],
+      correlationId: req.headers["x-correlation-id"] || req.headers["x-request-id"],
     },
   };
 
   if (appError.httpStatus >= 500) {
-    logger.error(logContext, 'Server error occurred');
+    logger.error(logContext, "Server error occurred");
   } else {
-    logger.warn(logContext, 'Client error occurred');
+    logger.warn(logContext, "Client error occurred");
   }
 
   // Send error response
   const errorResponse = sanitizeError(appError, isProduction);
   res.status(appError.httpStatus).json({
     ...errorResponse.error,
-    requestId: req.headers['x-request-id'] as string,
+    requestId: req.headers["x-request-id"] as string,
     path: req.path,
   });
 }
@@ -61,7 +61,7 @@ export function errorHandler(
  * Automatically catches async errors and passes to error middleware
  */
 export function asyncHandler(
-  fn: (req: Request, res: Response, next: NextFunction) => Promise<any>,
+  fn: (req: Request, res: Response, next: NextFunction) => Promise<any>
 ) {
   return (req: Request, res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch(next);
@@ -74,15 +74,14 @@ export function asyncHandler(
  */
 export function formatGraphQLError(
   error: GraphQLError,
-  isProduction: boolean = process.env.NODE_ENV === 'production',
+  isProduction: boolean = process.env.NODE_ENV === "production"
 ): GraphQLFormattedError {
   // Extract original error
   const originalError = error.originalError;
 
   // Convert to AppError if not already
-  const appError = originalError instanceof AppError
-    ? originalError
-    : toAppError(originalError || error);
+  const appError =
+    originalError instanceof AppError ? originalError : toAppError(originalError || error);
 
   // Log error
   const logContext = {
@@ -95,9 +94,9 @@ export function formatGraphQLError(
   };
 
   if (appError.httpStatus >= 500) {
-    logger.error(logContext, 'GraphQL error occurred');
+    logger.error(logContext, "GraphQL error occurred");
   } else {
-    logger.warn(logContext, 'GraphQL validation error');
+    logger.warn(logContext, "GraphQL validation error");
   }
 
   // Format error response
@@ -121,7 +120,7 @@ export function formatGraphQLError(
  * Create GraphQL error formatter function
  */
 export function createGraphQLErrorFormatter(isProduction?: boolean) {
-  const isProd = isProduction ?? process.env.NODE_ENV === 'production';
+  const isProd = isProduction ?? process.env.NODE_ENV === "production";
   return (error: GraphQLError) => formatGraphQLError(error, isProd);
 }
 
@@ -129,15 +128,11 @@ export function createGraphQLErrorFormatter(isProduction?: boolean) {
  * Not found middleware for Express
  * Should be added before error handler
  */
-export function notFoundHandler(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): void {
+export function notFoundHandler(req: Request, res: Response, next: NextFunction): void {
   const appError = toAppError(new Error(`Route ${req.method} ${req.path} not found`));
   res.status(404).json({
     error: {
-      code: 'RESOURCE_NOT_FOUND',
+      code: "RESOURCE_NOT_FOUND",
       message: `Route not found: ${req.method} ${req.path}`,
       traceId: appError.traceId,
       timestamp: appError.timestamp.toISOString(),
@@ -150,25 +145,20 @@ export function notFoundHandler(
  * Request correlation ID middleware
  * Adds correlation ID to requests for tracing
  */
-export function correlationIdMiddleware(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): void {
+export function correlationIdMiddleware(req: Request, res: Response, next: NextFunction): void {
   const correlationId =
-    (req.headers['x-correlation-id'] as string) ||
-    (req.headers['x-request-id'] as string) ||
+    (req.headers["x-correlation-id"] as string) ||
+    (req.headers["x-request-id"] as string) ||
     randomUUID();
 
-  req.headers['x-correlation-id'] = correlationId;
-  res.setHeader('x-correlation-id', correlationId);
+  req.headers["x-correlation-id"] = correlationId;
+  res.setHeader("x-correlation-id", correlationId);
 
   next();
 }
 
 function randomUUID(): string {
-  return Math.random().toString(36).substring(2, 15) +
-    Math.random().toString(36).substring(2, 15);
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
 /**
@@ -179,14 +169,14 @@ export function errorRecoveryMiddleware(
   err: Error,
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ): void {
   const appError = toAppError(err);
 
   // For retryable errors, suggest retry with backoff
   if (appError.retryable) {
     const retryAfter = calculateRetryAfter(appError);
-    res.setHeader('Retry-After', retryAfter.toString());
+    res.setHeader("Retry-After", retryAfter.toString());
   }
 
   // Pass to error handler
@@ -197,11 +187,11 @@ export function errorRecoveryMiddleware(
  * Calculate retry-after value based on error type
  */
 function calculateRetryAfter(error: AppError): number {
-  if (error.code === 'RATE_LIMIT_EXCEEDED') {
+  if (error.code === "RATE_LIMIT_EXCEEDED") {
     return error.details?.retryAfter || 60;
   }
 
-  if (error.code === 'CIRCUIT_BREAKER_OPEN') {
+  if (error.code === "CIRCUIT_BREAKER_OPEN") {
     return error.details?.retryAfter || 30;
   }
 

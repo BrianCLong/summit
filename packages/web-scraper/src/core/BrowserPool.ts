@@ -2,11 +2,11 @@
  * Browser Pool - Manages browser instances for dynamic scraping
  */
 
-import { Browser, Page, chromium } from 'playwright';
+import { Browser, Page, chromium } from "playwright";
 
 export interface BrowserPoolConfig {
   maxBrowsers: number;
-  browserType?: 'chromium' | 'firefox' | 'webkit';
+  browserType?: "chromium" | "firefox" | "webkit";
   headless?: boolean;
   args?: string[];
 }
@@ -19,9 +19,9 @@ export class BrowserPool {
 
   constructor(config: BrowserPoolConfig) {
     this.config = {
-      browserType: 'chromium',
+      browserType: "chromium",
       headless: true,
-      ...config
+      ...config,
     };
   }
 
@@ -99,7 +99,7 @@ export class BrowserPool {
    * Shutdown the browser pool
    */
   async shutdown(): Promise<void> {
-    await Promise.all(this.browsers.map(browser => browser.close()));
+    await Promise.all(this.browsers.map((browser) => browser.close()));
     this.browsers = [];
     this.availableBrowsers = [];
     this.activeBrowsers.clear();
@@ -124,16 +124,16 @@ export class BrowserPool {
    */
   private async launchBrowser(): Promise<Browser> {
     const args = this.config.args || [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--disable-gpu'
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-accelerated-2d-canvas",
+      "--disable-gpu",
     ];
 
     return await chromium.launch({
       headless: this.config.headless,
-      args
+      args,
     });
   }
 }

@@ -4,8 +4,8 @@
  * Fine-tuned for domain-specific sentiment detection
  */
 
-import { pipeline, type Pipeline } from '@xenova/transformers';
-import type { SentimentScore, ModelConfig, AnalysisOptions } from '../core/types.js';
+import { pipeline, type Pipeline } from "@xenova/transformers";
+import type { SentimentScore, ModelConfig, AnalysisOptions } from "../core/types.js";
 
 export class BertSentimentModel {
   private pipeline: Pipeline | null = null;
@@ -14,10 +14,10 @@ export class BertSentimentModel {
 
   constructor(config: Partial<ModelConfig> = {}) {
     this.config = {
-      modelName: config.modelName || 'Xenova/distilbert-base-uncased-finetuned-sst-2-english',
+      modelName: config.modelName || "Xenova/distilbert-base-uncased-finetuned-sst-2-english",
       maxLength: config.maxLength || 512,
       batchSize: config.batchSize || 8,
-      device: config.device || 'cpu',
+      device: config.device || "cpu",
       quantize: config.quantize ?? true,
     };
   }
@@ -28,13 +28,13 @@ export class BertSentimentModel {
     }
 
     try {
-      this.pipeline = await pipeline('sentiment-analysis', this.config.modelName, {
+      this.pipeline = await pipeline("sentiment-analysis", this.config.modelName, {
         quantized: this.config.quantize,
       });
       this.isInitialized = true;
       console.log(`BERT sentiment model initialized: ${this.config.modelName}`);
     } catch (error) {
-      console.error('Failed to initialize BERT model:', error);
+      console.error("Failed to initialize BERT model:", error);
       throw new Error(`Model initialization failed: ${error}`);
     }
   }
@@ -53,7 +53,7 @@ export class BertSentimentModel {
       // Transform Hugging Face output to our format
       return this.transformToSentimentScore(result);
     } catch (error) {
-      console.error('Sentiment analysis failed:', error);
+      console.error("Sentiment analysis failed:", error);
       throw new Error(`Sentiment analysis error: ${error}`);
     }
   }
@@ -69,7 +69,7 @@ export class BertSentimentModel {
     for (let i = 0; i < texts.length; i += this.config.batchSize) {
       const batch = texts.slice(i, i + this.config.batchSize);
       const batchResults = await Promise.all(
-        batch.map(text => this.analyzeSentiment(text, options))
+        batch.map((text) => this.analyzeSentiment(text, options))
       );
       results.push(...batchResults);
     }
@@ -89,20 +89,20 @@ export class BertSentimentModel {
         const label = item.label.toLowerCase();
         const score = item.score;
 
-        if (label.includes('positive')) {
+        if (label.includes("positive")) {
           positive = score;
-        } else if (label.includes('negative')) {
+        } else if (label.includes("negative")) {
           negative = score;
-        } else if (label.includes('neutral')) {
+        } else if (label.includes("neutral")) {
           neutral = score;
         }
       }
     } else if (result.label) {
       const label = result.label.toLowerCase();
-      if (label.includes('positive')) {
+      if (label.includes("positive")) {
         positive = result.score;
         negative = 1 - result.score;
-      } else if (label.includes('negative')) {
+      } else if (label.includes("negative")) {
         negative = result.score;
         positive = 1 - result.score;
       }

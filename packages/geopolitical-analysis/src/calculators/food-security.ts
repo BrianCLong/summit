@@ -3,9 +3,9 @@
  * @module @intelgraph/geopolitical-analysis/calculators/food-security
  */
 
-import { FoodSecurityIndicator } from '../types/index.js';
-import { BaseCalculator, IndicatorInput } from './base.js';
-import { weightedAverage, normalize } from '../utils/scoring.js';
+import { FoodSecurityIndicator } from "../types/index.js";
+import { BaseCalculator, IndicatorInput } from "./base.js";
+import { weightedAverage, normalize } from "../utils/scoring.js";
 
 /**
  * Input for food security calculation
@@ -46,22 +46,22 @@ export class FoodSecurityCalculator extends BaseCalculator<FoodSecurityIndicator
     // Overall food security risk (higher = more at risk)
     const overallRisk = weightedAverage([
       { value: reserveRisk, weight: 0.25 },
-      { value: priceRisk, weight: 0.20 },
-      { value: importRisk, weight: 0.20 },
-      { value: productionRisk, weight: 0.20 },
+      { value: priceRisk, weight: 0.2 },
+      { value: importRisk, weight: 0.2 },
+      { value: productionRisk, weight: 0.2 },
       { value: supplyChainRisk, weight: 0.15 },
     ]);
 
     const base = this.createBase(input, overallRisk, {
-      source: 'food-security-calculator',
+      source: "food-security-calculator",
       dataRecencyDays: 15,
       sourceReliability: 80,
-      methodology: 'weighted-composite-indicator',
+      methodology: "weighted-composite-indicator",
     });
 
     return {
       ...base,
-      type: 'FOOD_SECURITY',
+      type: "FOOD_SECURITY",
       grainReservesDays: input.grainReservesDays,
       foodPriceInflation: input.foodPriceInflation,
       importDependence: input.importDependence,
@@ -103,15 +103,11 @@ export class FoodSecurityCalculator extends BaseCalculator<FoodSecurityIndicator
     }
 
     if (Math.abs(input.foodPriceInflation) > 1000) {
-      throw new Error(
-        `foodPriceInflation seems unrealistic: ${input.foodPriceInflation}%`
-      );
+      throw new Error(`foodPriceInflation seems unrealistic: ${input.foodPriceInflation}%`);
     }
 
     if (!this.isValidRange(input.importDependence, 0, 100)) {
-      throw new Error(
-        `importDependence must be between 0 and 100, got ${input.importDependence}`
-      );
+      throw new Error(`importDependence must be between 0 and 100, got ${input.importDependence}`);
     }
 
     if (input.agriculturalProduction < 0 || input.agriculturalProduction > 300) {
@@ -129,11 +125,11 @@ export class FoodSecurityCalculator extends BaseCalculator<FoodSecurityIndicator
 
   protected getRequiredFields(): string[] {
     return [
-      'grainReservesDays',
-      'foodPriceInflation',
-      'importDependence',
-      'agriculturalProduction',
-      'supplyChainDisruption',
+      "grainReservesDays",
+      "foodPriceInflation",
+      "importDependence",
+      "agriculturalProduction",
+      "supplyChainDisruption",
     ];
   }
 }

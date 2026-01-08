@@ -63,15 +63,15 @@ services/<service-name>/
 
 ```typescript
 // src/server.ts
-import express from 'express';
-import { config } from './config.js';
-import { healthRoutes } from './routes/health.js';
+import express from "express";
+import { config } from "./config.js";
+import { healthRoutes } from "./routes/health.js";
 
 export function createServer() {
   const app = express();
 
   app.use(express.json());
-  app.use('/health', healthRoutes);
+  app.use("/health", healthRoutes);
 
   return app;
 }
@@ -92,19 +92,19 @@ export function startServer() {
 
 ```typescript
 // src/routes/health.ts
-import { Router } from 'express';
+import { Router } from "express";
 
 export const healthRoutes = Router();
 
-healthRoutes.get('/', (req, res) => {
-  res.json({ status: 'healthy' });
+healthRoutes.get("/", (req, res) => {
+  res.json({ status: "healthy" });
 });
 
-healthRoutes.get('/ready', (req, res) => {
+healthRoutes.get("/ready", (req, res) => {
   res.json({ ready: true });
 });
 
-healthRoutes.get('/live', (req, res) => {
+healthRoutes.get("/live", (req, res) => {
   res.json({ live: true });
 });
 ```
@@ -114,9 +114,9 @@ healthRoutes.get('/live', (req, res) => {
 ```typescript
 // src/config.ts
 export const config = {
-  serviceName: '<service-name>',
-  port: parseInt(process.env.PORT || '3000', 10),
-  nodeEnv: process.env.NODE_ENV || 'development',
+  serviceName: "<service-name>",
+  port: parseInt(process.env.PORT || "3000", 10),
+  nodeEnv: process.env.NODE_ENV || "development",
 };
 ```
 
@@ -124,16 +124,16 @@ export const config = {
 
 ```typescript
 // __tests__/<service-name>.test.ts
-import { createServer } from '../src/server';
-import request from 'supertest';
+import { createServer } from "../src/server";
+import request from "supertest";
 
-describe('<ServiceName> Service', () => {
+describe("<ServiceName> Service", () => {
   const app = createServer();
 
-  it('should return healthy status', async () => {
-    const response = await request(app).get('/health');
+  it("should return healthy status", async () => {
+    const response = await request(app).get("/health");
     expect(response.status).toBe(200);
-    expect(response.body.status).toBe('healthy');
+    expect(response.body.status).toBe("healthy");
   });
 });
 ```
@@ -160,6 +160,7 @@ CMD ["node", "dist/index.js"]
 ## After Creation
 
 1. Install dependencies:
+
    ```bash
    pnpm install
    ```

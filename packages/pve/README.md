@@ -5,6 +5,7 @@ OPA-driven governance and invariant enforcement for the Summit platform.
 ## Overview
 
 PVE (Policy Validation Engine) provides unified policy enforcement across:
+
 - Pull request validation
 - Schema drift detection
 - Metadata invariants
@@ -24,44 +25,45 @@ pnpm add @intelgraph/pve
 ### Basic Usage
 
 ```typescript
-import { createPolicyEngine, validate } from '@intelgraph/pve';
+import { createPolicyEngine, validate } from "@intelgraph/pve";
 
 // Quick validation
 const report = await validate({
-  type: 'pr_diff',
+  type: "pr_diff",
   input: {
-    type: 'pr_diff',
-    base: 'main',
-    head: 'feature-branch',
-    files: [
-      { path: 'src/index.ts', status: 'modified', additions: 10, deletions: 5 }
-    ]
-  }
+    type: "pr_diff",
+    base: "main",
+    head: "feature-branch",
+    files: [{ path: "src/index.ts", status: "modified", additions: 10, deletions: 5 }],
+  },
 });
 
 if (report.passed) {
-  console.log('All checks passed!');
+  console.log("All checks passed!");
 } else {
-  console.log('Validation failed:', report.results.filter(r => !r.allowed));
+  console.log(
+    "Validation failed:",
+    report.results.filter((r) => !r.allowed)
+  );
 }
 ```
 
 ### PR Validation
 
 ```typescript
-import { createPRValidator } from '@intelgraph/pve';
+import { createPRValidator } from "@intelgraph/pve";
 
 const validator = createPRValidator({
-  owner: 'your-org',
-  repo: 'your-repo',
-  githubToken: process.env.GITHUB_TOKEN
+  owner: "your-org",
+  repo: "your-repo",
+  githubToken: process.env.GITHUB_TOKEN,
 });
 
 // Validate from diff string
 const result = await validator.validateDiff(diffString, {
-  title: 'Add new feature',
-  body: 'This PR adds...',
-  author: 'developer'
+  title: "Add new feature",
+  body: "This PR adds...",
+  author: "developer",
 });
 
 // Or validate directly from GitHub
@@ -71,56 +73,54 @@ const result = await validator.validateFromGitHub(prNumber);
 ### Agent Output Validation
 
 ```typescript
-import { createPolicyEngine } from '@intelgraph/pve';
+import { createPolicyEngine } from "@intelgraph/pve";
 
 const engine = createPolicyEngine();
 
 const report = await engine.evaluate({
-  type: 'agent_output',
+  type: "agent_output",
   input: {
-    type: 'agent_output',
-    agentId: 'claude-1',
-    agentType: 'claude',
+    type: "agent_output",
+    agentId: "claude-1",
+    agentType: "claude",
     output: {
-      outputType: 'code',
-      files: [
-        { path: 'src/feature.ts', content: '...', action: 'create' }
-      ]
-    }
-  }
+      outputType: "code",
+      files: [{ path: "src/feature.ts", content: "...", action: "create" }],
+    },
+  },
 });
 ```
 
 ### Security Scanning
 
 ```typescript
-import { SecurityScanValidator } from '@intelgraph/pve';
+import { SecurityScanValidator } from "@intelgraph/pve";
 
 const scanner = new SecurityScanValidator();
 
 const results = await scanner.validate({
-  type: 'security_scan',
+  type: "security_scan",
   input: {
-    type: 'security_scan',
-    scanType: 'secrets',
+    type: "security_scan",
+    scanType: "secrets",
     content: fileContent,
-    filePaths: ['src/config.ts']
-  }
+    filePaths: ["src/config.ts"],
+  },
 });
 ```
 
 ## Built-in Validators
 
-| Validator | Purpose |
-|-----------|---------|
-| `PRDiffValidator` | Validates PR size, forbidden files, secrets in patches |
-| `SchemaDriftValidator` | Detects breaking schema changes |
-| `TSConfigValidator` | Validates TypeScript configuration |
-| `AgentOutputValidator` | Validates AI agent outputs |
-| `MetadataInvariantValidator` | Enforces metadata schemas |
-| `CIIntegrityValidator` | Validates CI/CD configurations |
-| `DependencyAuditValidator` | Checks dependencies for vulnerabilities |
-| `SecurityScanValidator` | Scans for secrets and SAST patterns |
+| Validator                    | Purpose                                                |
+| ---------------------------- | ------------------------------------------------------ |
+| `PRDiffValidator`            | Validates PR size, forbidden files, secrets in patches |
+| `SchemaDriftValidator`       | Detects breaking schema changes                        |
+| `TSConfigValidator`          | Validates TypeScript configuration                     |
+| `AgentOutputValidator`       | Validates AI agent outputs                             |
+| `MetadataInvariantValidator` | Enforces metadata schemas                              |
+| `CIIntegrityValidator`       | Validates CI/CD configurations                         |
+| `DependencyAuditValidator`   | Checks dependencies for vulnerabilities                |
+| `SecurityScanValidator`      | Scans for secrets and SAST patterns                    |
 
 ## Rego Policies
 
@@ -144,21 +144,19 @@ src/policies/
 ## Custom Validators
 
 ```typescript
-import { createPolicyEngine, type CustomValidator } from '@intelgraph/pve';
+import { createPolicyEngine, type CustomValidator } from "@intelgraph/pve";
 
 const myValidator: CustomValidator = {
-  id: 'my-company.custom-check',
-  handles: ['pr_diff'],
+  id: "my-company.custom-check",
+  handles: ["pr_diff"],
   validate: async (context) => {
     // Your validation logic
-    return [
-      { policy: 'my-company.custom-check', allowed: true }
-    ];
-  }
+    return [{ policy: "my-company.custom-check", allowed: true }];
+  },
 };
 
 const engine = createPolicyEngine({
-  validators: [myValidator]
+  validators: [myValidator],
 });
 ```
 
@@ -219,13 +217,13 @@ formatResults(results: PolicyResult[], options?: FormatOptions): string
 
 ```typescript
 interface PolicyEngineConfig {
-  policiesDir?: string;        // Directory containing policy files
-  opa?: OPAConfig;             // OPA adapter configuration
-  useBuiltIn?: boolean;        // Use built-in policies (default: true)
+  policiesDir?: string; // Directory containing policy files
+  opa?: OPAConfig; // OPA adapter configuration
+  useBuiltIn?: boolean; // Use built-in policies (default: true)
   validators?: CustomValidator[]; // Custom validators
-  failFast?: boolean;          // Stop on first error
+  failFast?: boolean; // Stop on first error
   defaultSeverity?: PolicySeverity;
-  cacheResults?: boolean;      // Cache evaluation results
+  cacheResults?: boolean; // Cache evaluation results
 }
 ```
 

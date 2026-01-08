@@ -1,12 +1,15 @@
 # Ultra-Prime Recursive Meta-Extrapolation — Wave 13 Prompts 97–104
 
 ## 1. Ultra-Prime Interpretation
+
 - **Decomposition approach:** Broke the original wave request into lanes (97–104), governance constraints, integration touchpoints, and lifecycle expectations; then recursively expanded each dimension (product intent, operations, compliance, observability, evolution) to surface hidden requirements.
 - **Meta-extrapolation:** Considered not just the immediate asks (blueprints) but their future-proofing (policy churn, infra changes, model drift), interoperability (standards, registries, control planes), and provability (auditability, simulations, attestation).
 - **Outcome reframing:** Recast the goal from documenting prompts to defining a production-grade, testable, and evidence-driven execution program that can survive regulatory scrutiny and platform evolution.
 
 ## 2. Perfected Prompt Expansion
+
 Transform the original prompts into a single, production-ready directive:
+
 - **Objective:** Deliver eight independently deployable capabilities (geo-policy, model-distill, dpia-wizard, fairness-lab, gameday, interop-standards, help-center, carbon-accounting) with shared guarantees: immutable core schemas, additive tagging/config, explicit enforcement hooks, full observability, and compliance-ready evidence.
 - **Architecture:**
   - **Control Surface:** All enforcement/queries exposed via typed APIs and policy engines; no implicit behavior. Every decision emits structured telemetry with reason codes.
@@ -26,6 +29,7 @@ Transform the original prompts into a single, production-ready directive:
 - **Operations:** SLOs, dashboards, alerts per lane; chaos drills via gameday; backup/restore for configs and registries; rollout strategies with canaries and kill-switches.
 
 ## 3. Maximal Implication Mapping (1st → 20th order)
+
 1. Residency tagging required → enforce ingest schemas → introduce validation pipelines → need audit trails → auditors demand evidence export → require residency attestation bundles.
 2. Distillation adds new models → registry updates → promotion gates must compare fidelity/fairness → edge deployments require resource SLAs → triggers carbon tracking alignment.
 3. DPIA drafts auto-generated → legal review workflow → version pinning → drift detection when upstream configs change → triggers re-review and audit trail updates.
@@ -48,6 +52,7 @@ Transform the original prompts into a single, production-ready directive:
 20. Future evolution → new standards (OpenAPI security events, CSAF) → new metrics (water usage) → new fairness axes → architecture must admit additive configs without rewrites.
 
 ## 4. Recursive Refinements Applied
+
 - Tightened objectives from “describe prompts” to “deliver enforceable, observable, versioned capabilities with audit-ready evidence.”
 - Ensured every lane has: data/config versioning, telemetry, safety rails, CI gates, rollback paths, and integration identifiers.
 - Added security/privacy hardening (signing, redaction, least-privilege pulls) and operational readiness (SLOs, dashboards, canaries, kill-switches, backups).
@@ -56,7 +61,9 @@ Transform the original prompts into a single, production-ready directive:
 - Incorporated offline/edge, multi-tenant maturity, and partner variant handling to future-proof beyond initial scope.
 
 ## 5. Final Deliverable — Maximally Powerful Prompt
+
 Deliver eight independently deployable yet interoperable services (geo-policy, model-distill, dpia-wizard, fairness-lab, gameday, interop-standards, help-center, carbon-accounting) with these non-negotiables:
+
 - **Additive by design:** Core schemas untouched; capabilities added via tagging, policy engines, and versioned configs/templates/mappings/factors.
 - **Explicit control surfaces:** Typed APIs for enforcement, validation, simulation, draft generation, fairness audits, scenario runs, import/export, help retrieval, and carbon queries. All decisions emit structured telemetry with reason codes and audit IDs.
 - **Evidence-first:** CI gates and runtime checks for residency, replication safety, distillation fidelity, fairness thresholds, scenario safety, interop conformance, help analytics integrity, and carbon reconciliation. Outputs are signed, reproducible scorecards/attestations.

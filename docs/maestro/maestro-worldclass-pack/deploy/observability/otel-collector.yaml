@@ -8,7 +8,7 @@ processors:
   batch: {}
 exporters:
   prometheus:
-    endpoint: ':8889'
+    endpoint: ":8889"
   loki:
     endpoint: http://loki:3100/loki/api/v1/push
 service:

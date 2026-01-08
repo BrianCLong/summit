@@ -1,10 +1,12 @@
 # Product Telemetry & Experiments Spec v0
 
 ## Purpose and scope
+
 - Establish a unified telemetry, feedback, and experimentation backbone for CompanyOS that prioritizes measurable outcomes, privacy, and rapid learning loops.
 - Applies to all product surfaces (web, mobile, services, APIs) and all tenants.
 
 ## Event taxonomy
+
 - **Page/Screen Views**: navigation, impressions, load performance milestones.
 - **Actions**: intentional user-initiated events (clicks, submissions, uploads, config changes, API calls). Actions must specify the **feature area** and **intent**.
 - **Outcomes**: successful completion of workflows (e.g., resource created, task completed, policy saved, automation run finished), including quantitative outputs (duration, size, counts).
@@ -12,7 +14,9 @@
 - **System Health**: background job status, queue depth, circuit breaker trips; aligned to SLO error budgets.
 
 ## Core event envelope
+
 All events share a normalized envelope to simplify downstream joins and privacy enforcement:
+
 - `event_id` (UUID v4), `event_name`, `event_type` (view|action|outcome|error|system_health).
 - `timestamp` (ISO-8601 UTC), `source` (client|server|worker|api), `platform` (web|ios|android|cli|api), `app_version`.
 - **Tenant & actor**: `tenant_id` (hash or pseudonym), `user_id` (stable hash), `user_role`, `session_id`, `auth_context` (sso|scim|passwordless|api_token), `is_internal`.
@@ -21,6 +25,7 @@ All events share a normalized envelope to simplify downstream joins and privacy 
 - **Privacy flags**: `pii_classification` (none|low|medium|high) and `data_sensitivity` (public|internal|restricted) to drive routing/retention.
 
 ## PII minimization and aggregation rules
+
 - Default to **pseudonymous identifiers** (hashed user_id/tenant_id) with rotation every 30 days; no raw emails, names, or IPs in events.
 - Collect only coarse geolocation (country/region) and only when consented; never log exact coordinates.
 - Payload fields must be enumerated allowlists per `event_name`; disallow arbitrary key/value blobs.
@@ -31,6 +36,7 @@ All events share a normalized envelope to simplify downstream joins and privacy 
 - Aggregation defaults for dashboards: p50/p90 latencies, counts, conversion rates; no user-level drill-down without compliance approval.
 
 ## Feedback collection design
+
 - **In-app widgets**: per-surface microfeedback (thumbs up/down + optional tags), contextual CSAT/NPS, and friction logging prompts triggered on drop-off.
 - **Workflow-level flows**: end-of-flow surveys capturing outcome success, effort score, and blockers; pre-fill feature/workflow context.
 - **Structured fields**: score (1–5), sentiment (positive/neutral/negative), tags (enum: usability, performance, policy, docs, support), component identifier, and blocking severity.
@@ -39,6 +45,7 @@ All events share a normalized envelope to simplify downstream joins and privacy 
 - **Storage & linkage**: feedback events share the same envelope and can reference preceding telemetry via `correlation_id` to join behavior with sentiment.
 
 ## Experimentation and rollout framework
+
 - **Experiment types**: A/B/n, multivariate, interleaving (for ranking), and phased rollouts via feature flags.
 - **Bucketing**: deterministic assignment on stable hashed `(tenant_id, user_id)` with namespace separation; support stratification (role, segment, region). Store bucket in `experiment_assignments` and emit on every relevant event.
 - **Guardrails**: enforce SLOs (latency, error budget, availability), privacy constraints, and compliance segments (e.g., restricted tenants cannot be randomized without approval). Auto-kill switches if guardrail breaches persist >2 sampling intervals.
@@ -48,12 +55,14 @@ All events share a normalized envelope to simplify downstream joins and privacy 
 - **Rollout policy**: start at 5–10% canary → 25% → 50% → 100% upon guardrail health and effect confidence; restricted tenants require explicit allowlist.
 
 ## Governance and quality
+
 - **Schema registry**: versioned schemas (JSON Schema) per `event_name` with lint checks in CI; breaking changes require migration plans.
 - **Data contract checks**: CI validation for required fields, allowed enums, and PII classification; contract violations block merges.
 - **Observability**: distributed tracing IDs propagate through events; sampling configurable by feature area. Ship metrics on event drop rates and client SDK health.
 - **Documentation**: every feature PR must link to hypothesis, target metrics, and corresponding event schemas.
 
 ## Example event schemas — Workflow: Project creation and task assignment
+
 - **project_viewed** (type: view)
   - Required: event envelope, `feature_area="projects"`, `workflow_name="project_creation"`, `surface="project_create_page"`.
   - Properties: `template_id` (optional), `prepopulated` (bool), `time_to_first_paint_ms`.
@@ -67,14 +76,17 @@ All events share a normalized envelope to simplify downstream joins and privacy 
   - Properties: `score` (1–5), `sentiment`, `tags` (array enum), `comment_present` (bool), `correlation_id` (links to recent events), `blocked` (bool), `blocker_type` (enum or null).
 
 ## Data flow and storage blueprint
+
 - Client/SDK → Edge collector (PII scrubbing, sampling) → Streaming bus (e.g., Kafka) with topic partitioning by tenant → Real-time processors (enrichment, privacy classification) → Data lake/warehouse (raw + curated) → Metrics store and dashboards.
 - Error handling: DLQs for malformed events; retry with exponential backoff; alert on sustained drop rates.
 - Access patterns: curated marts for product analytics, experimentation, and support insights; joinable via `event_id`, `session_id`, and `correlation_id`.
 
 ## Innovation: Adaptive telemetry budgets
+
 - Introduce **adaptive sampling and payload shaping** that prioritize high-risk segments (new releases, new tenants, elevated error rates) while throttling stable flows. Integrate with feature flags to adjust sampling dynamically per experiment phase.
 
 ## Success criteria
+
 - Every major feature ships with defined hypothesis, event schemas, and feedback prompts.
 - Dashboards live within 24 hours of launch with guardrails monitored; rollback switch wired to feature flag platform.
 - <1% event rejection due to schema violations; <0.1% PII violations detected post-ingestion.

@@ -1,6 +1,6 @@
 const mockRedis = {
   get: jest.fn(() => Promise.resolve(null)),
-  set: jest.fn(() => Promise.resolve('OK')),
+  set: jest.fn(() => Promise.resolve("OK")),
   del: jest.fn(() => Promise.resolve(1)),
   exists: jest.fn(() => Promise.resolve(0)),
   expire: jest.fn(() => Promise.resolve(1)),
@@ -18,8 +18,8 @@ const mockRedis = {
   zadd: jest.fn(() => Promise.resolve(1)),
   zrange: jest.fn(() => Promise.resolve([])),
   zrem: jest.fn(() => Promise.resolve(1)),
-  flushdb: jest.fn(() => Promise.resolve('OK')),
-  quit: jest.fn(() => Promise.resolve('OK')),
+  flushdb: jest.fn(() => Promise.resolve("OK")),
+  quit: jest.fn(() => Promise.resolve("OK")),
   disconnect: jest.fn(() => Promise.resolve()),
   on: jest.fn(),
   off: jest.fn(),

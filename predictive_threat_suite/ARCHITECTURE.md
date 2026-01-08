@@ -212,13 +212,13 @@ predictive_simulation_confidence{scenario_id="uuid", entity_id="auth_service"} 0
 
 ```yaml
 scrape_configs:
-  - job_name: 'predictive-suite'
+  - job_name: "predictive-suite"
     scrape_interval: 15s
     static_configs:
       - targets:
-        - 'predictive-forecasting:8091'
-        - 'predictive-simulator:8092'
-        - 'predictive-metrics:8093'
+          - "predictive-forecasting:8091"
+          - "predictive-simulator:8092"
+          - "predictive-metrics:8093"
 ```
 
 ### Feature Flags

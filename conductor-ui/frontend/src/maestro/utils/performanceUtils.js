@@ -1,5 +1,5 @@
 // Performance monitoring and optimization utilities
-import React from 'react';
+import React from "react";
 const DEFAULT_BUDGETS = {
   lcp: { target: 2500, warning: 4000 },
   fid: { target: 100, warning: 300 },
@@ -16,7 +16,7 @@ export class PerformanceMonitor {
     this.setupObservers();
   }
   setupObservers() {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     // Core Web Vitals
     this.observeWebVitals();
     // Navigation timing
@@ -26,58 +26,53 @@ export class PerformanceMonitor {
   }
   observeWebVitals() {
     // Largest Contentful Paint
-    this.createObserver('largest-contentful-paint', (entries) => {
+    this.createObserver("largest-contentful-paint", (entries) => {
       const lcp = entries[entries.length - 1];
-      this.recordMetric('lcp', lcp.startTime);
-      this.checkBudget('lcp', lcp.startTime);
+      this.recordMetric("lcp", lcp.startTime);
+      this.checkBudget("lcp", lcp.startTime);
     });
     // First Input Delay
-    this.createObserver('first-input', (entries) => {
+    this.createObserver("first-input", (entries) => {
       const fid = entries[0];
-      this.recordMetric('fid', fid.processingStart - fid.startTime);
-      this.checkBudget('fid', fid.processingStart - fid.startTime);
+      this.recordMetric("fid", fid.processingStart - fid.startTime);
+      this.checkBudget("fid", fid.processingStart - fid.startTime);
     });
     // Cumulative Layout Shift
-    this.createObserver('layout-shift', (entries) => {
+    this.createObserver("layout-shift", (entries) => {
       const cls = entries.reduce((sum, entry) => {
         if (!entry.hadRecentInput) {
           sum += entry.value;
         }
         return sum;
       }, 0);
-      this.recordMetric('cls', cls);
-      this.checkBudget('cls', cls);
+      this.recordMetric("cls", cls);
+      this.checkBudget("cls", cls);
     });
   }
   observeNavigationTiming() {
-    window.addEventListener('load', () => {
-      const navigation = performance.getEntriesByType('navigation')[0];
+    window.addEventListener("load", () => {
+      const navigation = performance.getEntriesByType("navigation")[0];
       if (navigation) {
         // First Contentful Paint
-        const paintEntries = performance.getEntriesByType('paint');
-        const fcp = paintEntries.find(
-          (entry) => entry.name === 'first-contentful-paint',
-        );
+        const paintEntries = performance.getEntriesByType("paint");
+        const fcp = paintEntries.find((entry) => entry.name === "first-contentful-paint");
         if (fcp) {
-          this.recordMetric('fcp', fcp.startTime);
-          this.checkBudget('fcp', fcp.startTime);
+          this.recordMetric("fcp", fcp.startTime);
+          this.checkBudget("fcp", fcp.startTime);
         }
         // Time to First Byte
         const ttfb = navigation.responseStart - navigation.requestStart;
-        this.recordMetric('ttfb', ttfb);
+        this.recordMetric("ttfb", ttfb);
       }
     });
   }
   observeResourceTiming() {
-    this.createObserver('resource', (entries) => {
+    this.createObserver("resource", (entries) => {
       entries.forEach((entry) => {
         const resource = entry;
-        if (resource.name.includes('/api/')) {
+        if (resource.name.includes("/api/")) {
           const apiPath = new URL(resource.name).pathname;
-          this.recordApiResponse(
-            apiPath,
-            resource.responseEnd - resource.responseStart,
-          );
+          this.recordApiResponse(apiPath, resource.responseEnd - resource.responseStart);
         }
       });
     });
@@ -106,7 +101,7 @@ export class PerformanceMonitor {
     const budget = this.budgets[metric];
     if (budget && value > budget.warning) {
       console.warn(
-        `Performance budget violation: ${metric} ${value.toFixed(2)}ms > ${budget.warning}ms`,
+        `Performance budget violation: ${metric} ${value.toFixed(2)}ms > ${budget.warning}ms`
       );
       this.onViolation?.(metric, value, budget.warning);
     }
@@ -119,8 +114,8 @@ export class PerformanceMonitor {
         this.metrics.renderTime = {};
       }
       this.metrics.renderTime[routeName] = duration;
-      this.recordMetric('routeChangeTime', duration);
-      this.checkBudget('routeChange', duration);
+      this.recordMetric("routeChangeTime", duration);
+      this.checkBudget("routeChange", duration);
     });
   }
   onBudgetViolation(callback) {
@@ -134,9 +129,9 @@ export class PerformanceMonitor {
     Object.entries(this.budgets).forEach(([metric, budget]) => {
       const value = this.metrics[metric];
       if (value !== undefined) {
-        let status = 'good';
-        if (value > budget.warning) status = 'poor';
-        else if (value > budget.target) status = 'warning';
+        let status = "good";
+        if (value > budget.warning) status = "poor";
+        else if (value > budget.target) status = "warning";
         results.push({ metric, value, budget: budget.target, status });
       }
     });
@@ -144,22 +139,21 @@ export class PerformanceMonitor {
   }
   generateReport() {
     const status = this.getBudgetStatus();
-    const violations = status.filter((s) => s.status !== 'good');
-    let report = '# Performance Report\n\n';
+    const violations = status.filter((s) => s.status !== "good");
+    let report = "# Performance Report\n\n";
     report += `Generated: ${new Date().toISOString()}\n\n`;
     if (violations.length === 0) {
-      report += '✅ All performance budgets are within target ranges.\n\n';
+      report += "✅ All performance budgets are within target ranges.\n\n";
     } else {
       report += `⚠️ ${violations.length} performance budget violations detected:\n\n`;
       violations.forEach((v) => {
         report += `- **${v.metric}**: ${v.value.toFixed(2)}ms (budget: ${v.budget}ms) - ${v.status}\n`;
       });
-      report += '\n';
+      report += "\n";
     }
-    report += '## All Metrics\n\n';
+    report += "## All Metrics\n\n";
     status.forEach((s) => {
-      const icon =
-        s.status === 'good' ? '✅' : s.status === 'warning' ? '⚠️' : '❌';
+      const icon = s.status === "good" ? "✅" : s.status === "warning" ? "⚠️" : "❌";
       report += `${icon} **${s.metric}**: ${s.value.toFixed(2)}ms (budget: ${s.budget}ms)\n`;
     });
     return report;
@@ -204,16 +198,16 @@ export const createLazyComponent = (importFn, fallback) => {
       {
         fallback: fallback
           ? React.createElement(fallback)
-          : React.createElement('div', null, 'Loading...'),
+          : React.createElement("div", null, "Loading..."),
       },
-      React.createElement(LazyComponent, props),
+      React.createElement(LazyComponent, props)
     );
 };
 // Bundle splitting utility
 export const preloadRoute = (routePath) => {
-  if (typeof window !== 'undefined') {
-    const link = document.createElement('link');
-    link.rel = 'prefetch';
+  if (typeof window !== "undefined") {
+    const link = document.createElement("link");
+    link.rel = "prefetch";
     link.href = routePath;
     document.head.appendChild(link);
   }

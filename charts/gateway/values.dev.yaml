@@ -24,7 +24,7 @@ opentelemetry:
   collector:
     endpoint: "otel-collector.observability.svc.cluster.local:4317"
   sampling:
-    ratio: 1.0  # 100% sampling in dev
+    ratio: 1.0 # 100% sampling in dev
 
 # ============================================================================
 # Prometheus Metrics - Enabled by Default
@@ -49,7 +49,7 @@ featureFlags:
   enabled: true
   provider: flagd
   defaults:
-    enableRateLimiting: false  # Relaxed in dev
+    enableRateLimiting: false # Relaxed in dev
     enableCORS: true
     enableRequestLogging: true
 
@@ -58,11 +58,11 @@ featureFlags:
 # ============================================================================
 env:
   - name: NODE_ENV
-    value: 'development'
+    value: "development"
   - name: LOG_LEVEL
-    value: 'debug'
+    value: "debug"
   - name: PORT
-    value: '8080'
+    value: "8080"
 
   # OTEL Configuration
   - name: OTEL_EXPORTER_OTLP_ENDPOINT

@@ -4,9 +4,9 @@
  * @module @intelgraph/strands-agents/memory/graph-memory
  */
 
-import type { Driver, Session } from 'neo4j-driver';
-import { v4 as uuidv4 } from 'uuid';
-import { MemoryEntrySchema, type MemoryEntry } from '../types.js';
+import type { Driver, Session } from "neo4j-driver";
+import { v4 as uuidv4 } from "uuid";
+import { MemoryEntrySchema, type MemoryEntry } from "../types.js";
 
 // ============================================================================
 // Types
@@ -29,7 +29,7 @@ export interface MemorySearchOptions {
   /** Session ID to search within */
   sessionId?: string;
   /** Memory types to filter */
-  types?: MemoryEntry['type'][];
+  types?: MemoryEntry["type"][];
   /** Minimum importance threshold */
   minImportance?: number;
   /** Text search query */
@@ -43,7 +43,7 @@ export interface MemorySearchOptions {
 export interface ConversationContext {
   /** Recent conversation turns */
   recentTurns: Array<{
-    role: 'user' | 'assistant';
+    role: "user" | "assistant";
     content: string;
     timestamp: string;
   }>;
@@ -106,10 +106,10 @@ export interface ConversationContext {
 export function createGraphMemory(config: GraphMemoryConfig) {
   const {
     driver,
-    database = 'neo4j',
+    database = "neo4j",
     agentId,
     maxEntriesPerSession = 1000,
-    defaultTTL = 'P7D', // 7 days
+    defaultTTL = "P7D", // 7 days
   } = config;
 
   let currentSessionId = uuidv4();
@@ -132,7 +132,7 @@ export function createGraphMemory(config: GraphMemoryConfig) {
   /**
    * Store a memory entry
    */
-  async function remember(entry: Omit<MemoryEntry, 'id' | 'agentId' | 'sessionId' | 'timestamp'>) {
+  async function remember(entry: Omit<MemoryEntry, "id" | "agentId" | "sessionId" | "timestamp">) {
     const memoryEntry: MemoryEntry = {
       ...entry,
       id: uuidv4(),
@@ -147,7 +147,7 @@ export function createGraphMemory(config: GraphMemoryConfig) {
 
     let session: Session | null = null;
     try {
-      session = driver.session({ database, defaultAccessMode: 'WRITE' });
+      session = driver.session({ database, defaultAccessMode: "WRITE" });
 
       const query = `
         MERGE (a:Agent {id: $agentId})
@@ -192,7 +192,7 @@ export function createGraphMemory(config: GraphMemoryConfig) {
         mentionedLabels,
       });
 
-      return result.records[0]?.get('memory');
+      return result.records[0]?.get("memory");
     } finally {
       if (session) {
         await session.close();
@@ -215,21 +215,21 @@ export function createGraphMemory(config: GraphMemoryConfig) {
 
     let session: Session | null = null;
     try {
-      session = driver.session({ database, defaultAccessMode: 'READ' });
+      session = driver.session({ database, defaultAccessMode: "READ" });
 
-      const filters: string[] = ['m.agentId = $agentId'];
+      const filters: string[] = ["m.agentId = $agentId"];
 
       if (sessionId) {
-        filters.push('s.id = $sessionId');
+        filters.push("s.id = $sessionId");
       }
       if (types?.length) {
-        filters.push('m.type IN $types');
+        filters.push("m.type IN $types");
       }
       if (minImportance > 0) {
-        filters.push('m.importance >= $minImportance');
+        filters.push("m.importance >= $minImportance");
       }
       if (!includeExpired) {
-        filters.push('(m.expiresAt IS NULL OR m.expiresAt > datetime())');
+        filters.push("(m.expiresAt IS NULL OR m.expiresAt > datetime())");
       }
 
       let cypher: string;
@@ -239,7 +239,7 @@ export function createGraphMemory(config: GraphMemoryConfig) {
           CALL db.index.fulltext.queryNodes('memory_search', $query)
           YIELD node as m, score
           MATCH (s:MemorySession)-[:CONTAINS_MEMORY]->(m)
-          WHERE ${filters.join(' AND ')}
+          WHERE ${filters.join(" AND ")}
           RETURN m { .*, relevance: score } as memory
           ORDER BY score DESC, m.importance DESC, m.timestamp DESC
           LIMIT $limit
@@ -247,7 +247,7 @@ export function createGraphMemory(config: GraphMemoryConfig) {
       } else {
         cypher = `
           MATCH (s:MemorySession)-[:CONTAINS_MEMORY]->(m:Memory)
-          WHERE ${filters.join(' AND ')}
+          WHERE ${filters.join(" AND ")}
           RETURN m { .* } as memory
           ORDER BY m.importance DESC, m.timestamp DESC
           LIMIT $limit
@@ -263,7 +263,7 @@ export function createGraphMemory(config: GraphMemoryConfig) {
         limit,
       });
 
-      return result.records.map((r) => r.get('memory'));
+      return result.records.map((r) => r.get("memory"));
     } finally {
       if (session) {
         await session.close();
@@ -277,7 +277,7 @@ export function createGraphMemory(config: GraphMemoryConfig) {
   async function getContext(maxTurns = 10): Promise<ConversationContext> {
     let session: Session | null = null;
     try {
-      session = driver.session({ database, defaultAccessMode: 'READ' });
+      session = driver.session({ database, defaultAccessMode: "READ" });
 
       // Get recent memories of type ACTION (conversation turns)
       const turnsQuery = `
@@ -295,9 +295,9 @@ export function createGraphMemory(config: GraphMemoryConfig) {
 
       const recentTurns = turnsResult.records
         .map((r) => {
-          const m = r.get('memory');
+          const m = r.get("memory");
           return {
-            role: m.metadata?.role || 'assistant',
+            role: m.metadata?.role || "assistant",
             content: m.content,
             timestamp: m.timestamp,
           };
@@ -319,7 +319,7 @@ export function createGraphMemory(config: GraphMemoryConfig) {
         sessionId: currentSessionId,
       });
 
-      const relevantFacts = factsResult.records.map((r) => r.get('fact'));
+      const relevantFacts = factsResult.records.map((r) => r.get("fact"));
 
       // Get active entities
       const entitiesQuery = `
@@ -333,7 +333,7 @@ export function createGraphMemory(config: GraphMemoryConfig) {
         sessionId: currentSessionId,
       });
 
-      const activeEntities = entitiesResult.records.map((r) => r.get('entity'));
+      const activeEntities = entitiesResult.records.map((r) => r.get("entity"));
 
       // Get current investigation if any
       const investigationQuery = `
@@ -350,7 +350,7 @@ export function createGraphMemory(config: GraphMemoryConfig) {
         sessionId: currentSessionId,
       });
 
-      const investigation = invResult.records[0]?.get('investigation');
+      const investigation = invResult.records[0]?.get("investigation");
 
       return {
         recentTurns,
@@ -371,7 +371,7 @@ export function createGraphMemory(config: GraphMemoryConfig) {
   async function forget(memoryIds: string[]) {
     let session: Session | null = null;
     try {
-      session = driver.session({ database, defaultAccessMode: 'WRITE' });
+      session = driver.session({ database, defaultAccessMode: "WRITE" });
 
       const query = `
         MATCH (m:Memory)
@@ -381,7 +381,7 @@ export function createGraphMemory(config: GraphMemoryConfig) {
       `;
 
       const result = await session.run(query, { memoryIds, agentId });
-      return result.records[0]?.get('forgotten')?.toNumber() || 0;
+      return result.records[0]?.get("forgotten")?.toNumber() || 0;
     } finally {
       if (session) {
         await session.close();
@@ -395,7 +395,7 @@ export function createGraphMemory(config: GraphMemoryConfig) {
   async function consolidate() {
     let session: Session | null = null;
     try {
-      session = driver.session({ database, defaultAccessMode: 'WRITE' });
+      session = driver.session({ database, defaultAccessMode: "WRITE" });
 
       // Increase importance of frequently accessed memories
       const boostQuery = `
@@ -423,7 +423,7 @@ export function createGraphMemory(config: GraphMemoryConfig) {
       `;
 
       const cleanupResult = await session.run(cleanupQuery, { agentId });
-      return cleanupResult.records[0]?.get('deleted')?.toNumber() || 0;
+      return cleanupResult.records[0]?.get("deleted")?.toNumber() || 0;
     } finally {
       if (session) {
         await session.close();
@@ -437,7 +437,7 @@ export function createGraphMemory(config: GraphMemoryConfig) {
   async function getStats() {
     let session: Session | null = null;
     try {
-      session = driver.session({ database, defaultAccessMode: 'READ' });
+      session = driver.session({ database, defaultAccessMode: "READ" });
 
       const query = `
         MATCH (a:Agent {id: $agentId})-[:HAS_SESSION]->(s:MemorySession)-[:CONTAINS_MEMORY]->(m:Memory)
@@ -456,11 +456,11 @@ export function createGraphMemory(config: GraphMemoryConfig) {
 
       return {
         agentId,
-        sessionCount: record?.get('sessionCount')?.toNumber() || 0,
-        totalMemories: record?.get('totalMemories')?.toNumber() || 0,
-        avgImportance: record?.get('avgImportance') || 0,
-        memoryTypes: record?.get('memoryTypes') || [],
-        lastActivity: record?.get('lastActivity'),
+        sessionCount: record?.get("sessionCount")?.toNumber() || 0,
+        totalMemories: record?.get("totalMemories")?.toNumber() || 0,
+        avgImportance: record?.get("avgImportance") || 0,
+        memoryTypes: record?.get("memoryTypes") || [],
+        lastActivity: record?.get("lastActivity"),
       };
     } finally {
       if (session) {

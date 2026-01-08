@@ -2,20 +2,20 @@
  * Worker Library Types
  */
 
-export type WorkerState = 'idle' | 'running' | 'draining' | 'brownout' | 'paused' | 'stopped';
+export type WorkerState = "idle" | "running" | "draining" | "brownout" | "paused" | "stopped";
 
 export type DLQReasonCode =
-  | 'SCHEMA_DRIFT'
-  | 'VALIDATION_FAIL'
-  | 'OLDER_REVISION'
-  | 'SINK_TIMEOUT'
-  | 'CONSTRAINT_VIOLATION'
-  | 'SERIALIZATION_ERROR'
-  | 'CONNECTION_ERROR'
-  | 'RATE_LIMITED'
-  | 'CIRCUIT_OPEN'
-  | 'MAX_RETRIES_EXCEEDED'
-  | 'UNKNOWN';
+  | "SCHEMA_DRIFT"
+  | "VALIDATION_FAIL"
+  | "OLDER_REVISION"
+  | "SINK_TIMEOUT"
+  | "CONSTRAINT_VIOLATION"
+  | "SERIALIZATION_ERROR"
+  | "CONNECTION_ERROR"
+  | "RATE_LIMITED"
+  | "CIRCUIT_OPEN"
+  | "MAX_RETRIES_EXCEEDED"
+  | "UNKNOWN";
 
 export interface WorkerConfig {
   /** Worker name for logging and metrics */
@@ -99,7 +99,7 @@ export interface IdempotencyConfig {
   enabled: boolean;
 
   /** Store type for idempotency keys */
-  storeType: 'redis' | 'postgres';
+  storeType: "redis" | "postgres";
 
   /** TTL for idempotency keys in seconds */
   ttlSeconds: number;
@@ -119,7 +119,7 @@ export interface WorkerMetrics {
   totalFailed: number;
   totalRetried: number;
   totalDropped: number;
-  circuitState: 'closed' | 'open' | 'half-open';
+  circuitState: "closed" | "open" | "half-open";
 }
 
 export interface Task<T = unknown> {
@@ -195,7 +195,7 @@ export interface WorkerEvents<T> {
   onTaskDrop?: (task: Task<T>, reason: string) => void;
 
   /** Called when circuit breaker state changes */
-  onCircuitStateChange?: (state: 'closed' | 'open' | 'half-open') => void;
+  onCircuitStateChange?: (state: "closed" | "open" | "half-open") => void;
 
   /** Called when backpressure state changes */
   onBackpressure?: (metrics: WorkerMetrics) => void;

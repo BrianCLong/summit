@@ -540,7 +540,7 @@ name: release
 on:
   workflow_dispatch:
   push:
-    tags: ['v*']
+    tags: ["v*"]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -667,22 +667,22 @@ spec:
           - resources:
               kinds: [Pod]
       validate:
-        message: 'Raw Secret volumes are not allowed; use Vault CSI (secrets-store.csi.k8s.io).'
+        message: "Raw Secret volumes are not allowed; use Vault CSI (secrets-store.csi.k8s.io)."
         pattern:
           spec:
             =(volumes):
               - X(all):
                   X(anyPattern):
                     - X(not):
-                        secret: '*'
+                        secret: "*"
     - name: require-vault-csi-volume
       match:
         any:
           - resources:
               kinds: [Pod]
-              namespaces: ['ingest', 'nl2cypher', 'conductor']
+              namespaces: ["ingest", "nl2cypher", "conductor"]
       validate:
-        message: 'Pods must mount a CSI volume using secrets-store.csi.k8s.io'
+        message: "Pods must mount a CSI volume using secrets-store.csi.k8s.io"
         pattern:
           spec:
             volumes:
@@ -700,9 +700,9 @@ metadata:
 spec:
   match:
     kinds:
-      - apiGroups: ['']
-        kinds: ['Pod']
-    namespaces: ['ingest', 'nl2cypher', 'conductor']
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    namespaces: ["ingest", "nl2cypher", "conductor"]
   parameters:
     driver: secrets-store.csi.k8s.io
 ```

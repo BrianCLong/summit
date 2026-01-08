@@ -3,7 +3,7 @@
  * Fluent API for building quantum circuits
  */
 
-import { QuantumCircuit, QuantumGate, GateType } from '../types';
+import { QuantumCircuit, QuantumGate, GateType } from "../types";
 
 export class CircuitBuilder {
   private circuit: QuantumCircuit;
@@ -83,7 +83,8 @@ export class CircuitBuilder {
 
   // Measurements
   measure(qubits?: number[]): this {
-    this.circuit.measurements = qubits || Array.from({ length: this.circuit.numQubits }, (_, i) => i);
+    this.circuit.measurements =
+      qubits || Array.from({ length: this.circuit.numQubits }, (_, i) => i);
     return this;
   }
 
@@ -99,7 +100,7 @@ export class CircuitBuilder {
   }
 
   // Apply gate to all qubits
-  applyToAll(gate: 'x' | 'y' | 'z' | 'h' | 's' | 't'): this {
+  applyToAll(gate: "x" | "y" | "z" | "h" | "s" | "t"): this {
     for (let i = 0; i < this.circuit.numQubits; i++) {
       this[gate](i);
     }
@@ -114,7 +115,7 @@ export class CircuitBuilder {
   // Create GHZ state
   createGHZState(qubits: number[]): this {
     if (qubits.length < 2) {
-      throw new Error('GHZ state requires at least 2 qubits');
+      throw new Error("GHZ state requires at least 2 qubits");
     }
 
     this.h(qubits[0]);
@@ -133,7 +134,7 @@ export class CircuitBuilder {
       this.h(qubits[i]);
 
       for (let j = i + 1; j < n; j++) {
-        const angle = Math.PI / (2 ** (j - i));
+        const angle = Math.PI / 2 ** (j - i);
         // Controlled phase rotation
         this.rz(qubits[j], angle);
       }

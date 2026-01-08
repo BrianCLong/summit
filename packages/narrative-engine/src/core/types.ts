@@ -1,4 +1,4 @@
-export type RelationshipType = 'ally' | 'rival' | 'neutral' | 'family';
+export type RelationshipType = "ally" | "rival" | "neutral" | "family";
 
 export interface InfluenceCampaign {
   id: string;

@@ -1,7 +1,7 @@
 name: Audit Artifacts
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   generate-evidence:

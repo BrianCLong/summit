@@ -63,18 +63,18 @@ Prove that CompanyOS can run Summit’s own product and business decisions by No
 
 ## 5) Backlog (Ready for Sprint)
 
-| ID        | Title                                                        | Owner     | Est | Dependencies | Acceptance Criteria (summary)                                  |
-| --------- | ------------------------------------------------------------ | --------- | --: | ------------ | ---------------------------------------------------------------- |
-| ROAD-241  | Telemetry + CS Signal Ingestion & Evidence Digests          | Data/BE   |   5 | —            | Activation/churn/usage/incidents/COGS/QBR/adapter signals ingested; evidence digests built |
-| ROAD-242  | Transparent Prioritization Model + Ranked Proposals         | Data/PM   |   5 | ROAD-241     | Scoring across revenue/churn/cost/reliability/compliance/effort; ranked list with “why” + evidence |
-| ROAD-243  | Roadmap Review Workflow + Decision Receipts                 | PM/Apps   |   5 | ROAD-242     | Propose→debate→approve flow; receipts with rationale + alternatives + evidence links |
-| OPT-251   | Optimization Recommendation Engine (proposal-first)         | Ops/BE    |   5 | —            | Proposals (cache TTLs, pool moves, retention, rollups, upsell) include impact, risk, rollback, approvals |
-| OPT-252   | Guardrails + Simulation Reports                             | Ops/BE    |   5 | OPT-251      | Policy preflight; cost/SLO estimate; auto-reject on risk; attach simulation report |
-| OPT-253   | Execution Pipeline + Post-change Verification               | Ops/Platform | 4 | OPT-252      | Plan→approvals→execute→verify; receipts + rollback checklists |
-| OPS-261   | Exec Operating Dashboard + Weekly Exec Ops Pack Export      | Apps/Ops  |   5 | —            | Dashboard tiles (ARR, churn risk, uptime/SLOs, cost/margin, roadmap, security/compliance); PDF export |
-| OPS-262   | Decision Auditability + Operating Effectiveness Report Draft | Data/PM   |   3 | ROAD-243     | Query by period; evidence + approvers; before/after metrics captured; draft report ready |
-| STR-271   | Investor Decision Receipt Bundle Export *(Stretch)*         | Apps      |   3 | OPS-262      | One-click export of decisions + evidence + guardrails for a period |
-| STR-272   | Upsell Assist on Optimization Guardrail Blocks *(Stretch)*  | PM/BE     |   3 | OPT-251      | Suggest upsell vs overprovision when risk blocks; includes evidence + approval flow |
+| ID       | Title                                                        | Owner        | Est | Dependencies | Acceptance Criteria (summary)                                                                            |
+| -------- | ------------------------------------------------------------ | ------------ | --: | ------------ | -------------------------------------------------------------------------------------------------------- |
+| ROAD-241 | Telemetry + CS Signal Ingestion & Evidence Digests           | Data/BE      |   5 | —            | Activation/churn/usage/incidents/COGS/QBR/adapter signals ingested; evidence digests built               |
+| ROAD-242 | Transparent Prioritization Model + Ranked Proposals          | Data/PM      |   5 | ROAD-241     | Scoring across revenue/churn/cost/reliability/compliance/effort; ranked list with “why” + evidence       |
+| ROAD-243 | Roadmap Review Workflow + Decision Receipts                  | PM/Apps      |   5 | ROAD-242     | Propose→debate→approve flow; receipts with rationale + alternatives + evidence links                     |
+| OPT-251  | Optimization Recommendation Engine (proposal-first)          | Ops/BE       |   5 | —            | Proposals (cache TTLs, pool moves, retention, rollups, upsell) include impact, risk, rollback, approvals |
+| OPT-252  | Guardrails + Simulation Reports                              | Ops/BE       |   5 | OPT-251      | Policy preflight; cost/SLO estimate; auto-reject on risk; attach simulation report                       |
+| OPT-253  | Execution Pipeline + Post-change Verification                | Ops/Platform |   4 | OPT-252      | Plan→approvals→execute→verify; receipts + rollback checklists                                            |
+| OPS-261  | Exec Operating Dashboard + Weekly Exec Ops Pack Export       | Apps/Ops     |   5 | —            | Dashboard tiles (ARR, churn risk, uptime/SLOs, cost/margin, roadmap, security/compliance); PDF export    |
+| OPS-262  | Decision Auditability + Operating Effectiveness Report Draft | Data/PM      |   3 | ROAD-243     | Query by period; evidence + approvers; before/after metrics captured; draft report ready                 |
+| STR-271  | Investor Decision Receipt Bundle Export _(Stretch)_          | Apps         |   3 | OPS-262      | One-click export of decisions + evidence + guardrails for a period                                       |
+| STR-272  | Upsell Assist on Optimization Guardrail Blocks _(Stretch)_   | PM/BE        |   3 | OPT-251      | Suggest upsell vs overprovision when risk blocks; includes evidence + approval flow                      |
 
 > **Planned:** 42–45 pts including stretch.
 

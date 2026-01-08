@@ -22,7 +22,7 @@ jobs:
             const title = context.payload.issue?.title || context.payload.pull_request?.title || '';
             const body = context.payload.issue?.body || context.payload.pull_request?.body || '';
             const labels = [];
-            
+
             // Type labels
             if (title.match(/\[(bug|BUG)\]/i) || body.match(/##\s*bug/i)) {
               labels.push('bug');
@@ -42,7 +42,7 @@ jobs:
             if (title.match(/\[(test|TEST|tests)\]/i)) {
               labels.push('tests');
             }
-            
+
             // Component labels
             if (body.match(/api|gateway/i) || title.match(/api|gateway/i)) {
               labels.push('api');
@@ -68,19 +68,19 @@ jobs:
             if (body.match(/integration|webhook|api/i)) {
               labels.push('integration');
             }
-            
+
             // Priority labels based on severity
             if (body.match(/critical|urgent|blocker/i) || title.match(/critical|urgent/i)) {
               labels.push('priority:critical');
             } else if (body.match(/high priority|important/i)) {
               labels.push('priority:high');
             }
-            
+
             // Security
             if (body.match(/security|vulnerability|cve/i) || title.match(/security|vuln/i)) {
               labels.push('security');
             }
-            
+
             // Size estimation for PRs
             if (context.payload.pull_request) {
               const additions = context.payload.pull_request.additions || 0;
@@ -99,7 +99,7 @@ jobs:
                 labels.push('size:XL');
               }
             }
-            
+
             // Add labels if any were found
             if (labels.length > 0) {
               const issue_number = context.payload.issue?.number || context.payload.pull_request?.number;

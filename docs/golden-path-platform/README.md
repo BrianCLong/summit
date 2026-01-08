@@ -24,25 +24,25 @@ pnpm dlx @intelgraph/scaffold doctor
 
 ## Documentation
 
-| Document | Description |
-|----------|-------------|
-| [Platform Blueprint](./PLATFORM_BLUEPRINT.md) | Service types, tech stack, directory structures |
-| [Scaffolding Templates](./SCAFFOLDING_TEMPLATES.md) | Template specifications and CLI usage |
-| [CI/CD Pipeline](./CICD_PIPELINE.md) | Pipeline stages, policy gates, rollback strategies |
-| [C4 Architecture](./C4_ARCHITECTURE.md) | System context, containers, and data flow |
-| [Onboarding Checklist](./ONBOARDING_CHECKLIST.md) | Requirements for Golden Path Ready status |
-| [ADR-0014](./ADR-0014-golden-path-platform.md) | Architecture decision record |
+| Document                                            | Description                                        |
+| --------------------------------------------------- | -------------------------------------------------- |
+| [Platform Blueprint](./PLATFORM_BLUEPRINT.md)       | Service types, tech stack, directory structures    |
+| [Scaffolding Templates](./SCAFFOLDING_TEMPLATES.md) | Template specifications and CLI usage              |
+| [CI/CD Pipeline](./CICD_PIPELINE.md)                | Pipeline stages, policy gates, rollback strategies |
+| [C4 Architecture](./C4_ARCHITECTURE.md)             | System context, containers, and data flow          |
+| [Onboarding Checklist](./ONBOARDING_CHECKLIST.md)   | Requirements for Golden Path Ready status          |
+| [ADR-0014](./ADR-0014-golden-path-platform.md)      | Architecture decision record                       |
 
 ## Service Types
 
-| Type | Description | Example |
-|------|-------------|---------|
-| **API Service** | Synchronous REST/GraphQL endpoints | User API, Gateway |
-| **Worker** | Async message/event consumers | Notification handler |
-| **Batch Job** | Scheduled data processing | ETL pipeline |
-| **Data Service** | Database access layer | Graph data service |
-| **Frontend** | SPAs and micro-frontends | Console UI |
-| **Library** | Shared packages | Auth utilities |
+| Type             | Description                        | Example              |
+| ---------------- | ---------------------------------- | -------------------- |
+| **API Service**  | Synchronous REST/GraphQL endpoints | User API, Gateway    |
+| **Worker**       | Async message/event consumers      | Notification handler |
+| **Batch Job**    | Scheduled data processing          | ETL pipeline         |
+| **Data Service** | Database access layer              | Graph data service   |
+| **Frontend**     | SPAs and micro-frontends           | Console UI           |
+| **Library**      | Shared packages                    | Auth utilities       |
 
 ## Pipeline Stages
 
@@ -51,6 +51,7 @@ Lint → Test → Security → Build → Publish → Deploy → Verify → Promo
 ```
 
 All stages include automatic policy enforcement:
+
 - Secret detection blocks merge
 - Critical CVEs block deployment
 - Unsigned images rejected

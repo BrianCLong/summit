@@ -2,18 +2,18 @@ name: Evals
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'prompts/**'
-      - 'eval/**'
-      - 'GOLDEN/datasets/**'
+      - "prompts/**"
+      - "eval/**"
+      - "GOLDEN/datasets/**"
   pull_request:
     paths:
-      - 'prompts/**'
-      - 'eval/**'
-      - 'GOLDEN/datasets/**'
+      - "prompts/**"
+      - "eval/**"
+      - "GOLDEN/datasets/**"
   schedule:
-    - cron: '0 0 * * *' # Nightly
+    - cron: "0 0 * * *" # Nightly
 
 jobs:
   eval-runner:
@@ -24,7 +24,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       - name: Install dependencies
         run: |

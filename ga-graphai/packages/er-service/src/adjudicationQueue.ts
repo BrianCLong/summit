@@ -1,10 +1,10 @@
-import { randomUUID } from 'node:crypto';
+import { randomUUID } from "node:crypto";
 
 import type {
   AdjudicationDecision,
   AdjudicationDecisionInput,
   AdjudicationQuery,
-} from './types.js';
+} from "./types.js";
 
 interface QueueOptions {
   clock?: () => Date;
@@ -26,8 +26,8 @@ export class AdjudicationQueue {
   enqueue(input: AdjudicationDecisionInput): AdjudicationDecision {
     const decision: AdjudicationDecision = {
       ...input,
-      id: this.idFactory('adj'),
-      status: 'queued',
+      id: this.idFactory("adj"),
+      status: "queued",
       createdAt: this.clock().toISOString(),
     };
     this.decisions.push(decision);
@@ -39,7 +39,7 @@ export class AdjudicationQueue {
     if (!decision) {
       throw new Error(`Adjudication decision ${id} not found`);
     }
-    decision.status = 'resolved';
+    decision.status = "resolved";
     decision.resolutionNote = resolutionNote;
     decision.resolvedAt = this.clock().toISOString();
     return decision;

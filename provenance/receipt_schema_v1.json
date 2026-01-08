@@ -67,7 +67,10 @@
       "required": ["decision_id", "policy_set"],
       "properties": {
         "decision_id": { "type": "string" },
-        "policy_set": { "type": "string", "description": "Hash or version of the policy bundle used" },
+        "policy_set": {
+          "type": "string",
+          "description": "Hash or version of the policy bundle used"
+        },
         "evaluation_timestamp": { "type": "string", "format": "date-time" }
       }
     },
@@ -77,7 +80,10 @@
       "properties": {
         "status": { "type": "string", "enum": ["success", "failure", "denied"] },
         "details": { "type": "string" },
-        "rationale_hash": { "type": "string", "description": "SHA-256 hash of the approval rationale if applicable" }
+        "rationale_hash": {
+          "type": "string",
+          "description": "SHA-256 hash of the approval rationale if applicable"
+        }
       }
     },
     "signature": {

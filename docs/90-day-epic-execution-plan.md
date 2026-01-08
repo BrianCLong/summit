@@ -1,9 +1,11 @@
 # 90-Day Execution Order for Platform Hardening and Velocity
 
 ## Context
+
 Assumptions based on Summit/IntelGraph: B2B intelligence SaaS with heightened security and reliability requirements. Primary pains: deploy safety, noisy alerts, fragmented governance, and inconsistent data/observability standards. Plan optimizes for user trust, incident reduction, and faster delivery while paying down systemic debt.
 
 ## Phased Roadmap (Weeks 1–12)
+
 - **Weeks 1–2: Reliability & Guardrails**
   - Establish 3–5 SLOs per critical journey; publish burn-rate alerts and dashboards.
   - Normalize timeouts/retries/circuit breakers via shared library; roll out to critical services.
@@ -31,6 +33,7 @@ Assumptions based on Summit/IntelGraph: B2B intelligence SaaS with heightened se
   - Performance budgets in CI (page weight/API latency); monthly FinOps review cadence.
 
 ## Milestones & Owners
+
 - **SRE Lead (Weeks 1–4):** SLOs, alert quality, rollout of resilience library, automated rollback, incident workflow.
 - **Security Lead (Weeks 3–6):** SSO+MFA, IAM hardening, secrets mgmt, vuln scanning, audit/WAF.
 - **DevEx Lead (Weeks 5–8):** Branch protections, CI speedups, preview envs, service template, migration checks.
@@ -39,6 +42,7 @@ Assumptions based on Summit/IntelGraph: B2B intelligence SaaS with heightened se
 - **Ops/FinOps Lead (Weeks 11–12):** Risk register, change mgmt, cost guardrails, perf budgets, log sampling.
 
 ## Success Metrics
+
 - **Reliability:** ≤2% monthly SLO burn across critical journeys; ≥30% reduction in noisy alerts; MTTR ≤30 minutes for P1s.
 - **Security:** 100% staff/admin SSO+MFA; zero secrets in repos; ≥95% high/critical deps patched within 7 days.
 - **Velocity:** CI p95 reduced by ≥30%; zero flaky tests in quarantine backlog; branch protections enforced on 100% main services.
@@ -47,6 +51,7 @@ Assumptions based on Summit/IntelGraph: B2B intelligence SaaS with heightened se
 - **Cost/Performance:** Top 10 cost drivers with guardrails; compute spend per request ↓20%; log volume ↓30% via sampling/retention; performance budgets enforced in CI.
 
 ## Execution Notes
+
 - Use feature flags with owners/expiry for all risky changes; automated rollback on failed health/SLO guardrails.
 - Require runbook links for every alert; enforce RFC/architecture review (≤30 min SLA) for high-impact changes.
 - Incorporate load tests for peak flows before major launches; include chaos drills (gameday) on top 3 failure modes.

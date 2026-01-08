@@ -1,15 +1,15 @@
 meta:
   id: review.security-check@v1
-  owner: 'platform-security'
-  purpose: 'Perform security review of code changes'
+  owner: "platform-security"
+  purpose: "Perform security review of code changes"
   guardrails:
-    - 'Must identify potential security vulnerabilities'
-    - 'Check for credential leaks and secrets'
-    - 'Validate input sanitization and output encoding'
-    - 'Ensure proper authentication and authorization'
+    - "Must identify potential security vulnerabilities"
+    - "Check for credential leaks and secrets"
+    - "Validate input sanitization and output encoding"
+    - "Ensure proper authentication and authorization"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.0
   maxTokens: 2500
 
@@ -74,25 +74,25 @@ template: |
   **Approval Status:** APPROVED | REQUIRES_CHANGES | BLOCKED
 
 examples:
-  - name: 'auth-endpoint-review'
+  - name: "auth-endpoint-review"
     inputs:
       diff_content: "+app.post('/login', (req, res) => {\n+  const user = findUser(req.body.username);\n+  if (user.password === req.body.password) {\n+    res.json({token: generateToken(user)});\n+  }\n+});"
-      file_paths: ['src/auth.js']
-      pr_description: 'Add login endpoint'
+      file_paths: ["src/auth.js"]
+      pr_description: "Add login endpoint"
       budget_usd: 3.0
     expected_contains:
-      - 'password'
-      - 'security'
-      - 'vulnerability'
-      - 'REQUIRES_CHANGES'
+      - "password"
+      - "security"
+      - "vulnerability"
+      - "REQUIRES_CHANGES"
 
-  - name: 'database-query-review'
+  - name: "database-query-review"
     inputs:
       diff_content: "+const query = `SELECT * FROM users WHERE id = ${userId}`;\\n+db.query(query);"
-      file_paths: ['src/database.js']
-      pr_description: 'Add user lookup query'
+      file_paths: ["src/database.js"]
+      pr_description: "Add user lookup query"
       budget_usd: 2.5
     expected_contains:
-      - 'SQL injection'
-      - 'parameterized'
-      - 'Critical Issues'
+      - "SQL injection"
+      - "parameterized"
+      - "Critical Issues"

@@ -1,13 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { api } from '../api';
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from 'recharts';
+import React, { useEffect, useState } from "react";
+import { api } from "../api";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from "recharts";
 
 export default function TenantCost({ tenant }: { tenant: string }) {
   const { getTenantCostSummary, getTenantCostSeries } = api();
@@ -48,9 +41,7 @@ export default function TenantCost({ tenant }: { tenant: string }) {
       <div className="flex items-center justify-between rounded-2xl border p-4">
         <div>
           <div className="text-sm text-gray-500">Total spend</div>
-          <div className="text-3xl font-semibold">
-            ${sum?.totalUsd?.toFixed?.(2) ?? '—'}
-          </div>
+          <div className="text-3xl font-semibold">${sum?.totalUsd?.toFixed?.(2) ?? "—"}</div>
         </div>
         <div className="text-sm text-gray-500">
           Tenant: <span className="font-medium">{tenant}</span>
@@ -149,10 +140,7 @@ export default function TenantCost({ tenant }: { tenant: string }) {
             {(sum?.recentRuns || []).map((r: any) => (
               <tr key={r.runId}>
                 <td>
-                  <a
-                    href={`#/maestro/runs/${r.runId}`}
-                    className="text-blue-600 underline"
-                  >
+                  <a href={`#/maestro/runs/${r.runId}`} className="text-blue-600 underline">
                     {r.runId.slice(0, 8)}
                   </a>
                 </td>

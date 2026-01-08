@@ -8,16 +8,16 @@
  * - PKCE support
  */
 
-import { randomBytes } from 'crypto';
-import { createLogger } from '../utils/logger.js';
+import { randomBytes } from "crypto";
+import { createLogger } from "../utils/logger.js";
 
-const logger = createLogger('oauth-provider');
+const logger = createLogger("oauth-provider");
 
 export enum GrantType {
-  AUTHORIZATION_CODE = 'authorization_code',
-  CLIENT_CREDENTIALS = 'client_credentials',
-  REFRESH_TOKEN = 'refresh_token',
-  PASSWORD = 'password', // Not recommended for production
+  AUTHORIZATION_CODE = "authorization_code",
+  CLIENT_CREDENTIALS = "client_credentials",
+  REFRESH_TOKEN = "refresh_token",
+  PASSWORD = "password", // Not recommended for production
 }
 
 export interface OAuthConfig {
@@ -31,13 +31,13 @@ export interface OAuthConfig {
 }
 
 export interface AuthorizationRequest {
-  responseType: 'code' | 'token';
+  responseType: "code" | "token";
   clientId: string;
   redirectUri: string;
   scope: string;
   state: string;
   codeChallenge?: string;
-  codeChallengeMethod?: 'S256' | 'plain';
+  codeChallengeMethod?: "S256" | "plain";
 }
 
 export interface TokenRequest {
@@ -52,7 +52,7 @@ export interface TokenRequest {
 
 export interface TokenResponse {
   accessToken: string;
-  tokenType: 'Bearer';
+  tokenType: "Bearer";
   expiresIn: number;
   refreshToken?: string;
   scope?: string;
@@ -67,31 +67,24 @@ export class OAuthProvider {
     this.config = config;
   }
 
-  generateAuthorizationUrl(
-    scopes: string[],
-    state?: string,
-    codeChallenge?: string
-  ): string {
+  generateAuthorizationUrl(scopes: string[], state?: string, codeChallenge?: string): string {
     const params = new URLSearchParams({
-      response_type: 'code',
+      response_type: "code",
       client_id: this.config.clientId,
       redirect_uri: this.config.redirectUri,
-      scope: scopes.join(' '),
+      scope: scopes.join(" "),
       state: state || this.generateState(),
     });
 
     if (codeChallenge && this.config.usePKCE) {
-      params.append('code_challenge', codeChallenge);
-      params.append('code_challenge_method', 'S256');
+      params.append("code_challenge", codeChallenge);
+      params.append("code_challenge_method", "S256");
     }
 
     return `${this.config.authorizationEndpoint}?${params.toString()}`;
   }
 
-  async handleAuthorizationRequest(
-    request: AuthorizationRequest,
-    userId: string
-  ): Promise<string> {
+  async handleAuthorizationRequest(request: AuthorizationRequest, userId: string): Promise<string> {
     // Validate request
     this.validateAuthorizationRequest(request);
 
@@ -109,44 +102,44 @@ export class OAuthProvider {
       expiresAt: Date.now() + 10 * 60 * 1000, // 10 minutes
     });
 
-    logger.info('Authorization code generated', { userId, clientId: request.clientId });
+    logger.info("Authorization code generated", { userId, clientId: request.clientId });
 
     return code;
   }
 
   async exchangeCodeForToken(request: TokenRequest): Promise<TokenResponse> {
     if (request.grantType !== GrantType.AUTHORIZATION_CODE) {
-      throw new Error('Invalid grant type');
+      throw new Error("Invalid grant type");
     }
 
     if (!request.code) {
-      throw new Error('Authorization code required');
+      throw new Error("Authorization code required");
     }
 
     // Retrieve authorization code data
     const codeData = this.authorizationCodes.get(request.code);
 
     if (!codeData) {
-      throw new Error('Invalid authorization code');
+      throw new Error("Invalid authorization code");
     }
 
     // Validate authorization code
     if (Date.now() > codeData.expiresAt) {
       this.authorizationCodes.delete(request.code);
-      throw new Error('Authorization code expired');
+      throw new Error("Authorization code expired");
     }
 
     if (codeData.clientId !== request.clientId) {
-      throw new Error('Client ID mismatch');
+      throw new Error("Client ID mismatch");
     }
 
     if (codeData.redirectUri !== request.redirectUri) {
-      throw new Error('Redirect URI mismatch');
+      throw new Error("Redirect URI mismatch");
     }
 
     // Validate PKCE if used
     if (codeData.codeChallenge && !request.codeVerifier) {
-      throw new Error('Code verifier required');
+      throw new Error("Code verifier required");
     }
 
     // Delete authorization code (one-time use)
@@ -164,11 +157,11 @@ export class OAuthProvider {
       createdAt: Date.now(),
     });
 
-    logger.info('Token exchange successful', { userId: codeData.userId });
+    logger.info("Token exchange successful", { userId: codeData.userId });
 
     return {
       accessToken,
-      tokenType: 'Bearer',
+      tokenType: "Bearer",
       expiresIn: 3600,
       refreshToken,
       scope: codeData.scope,
@@ -179,17 +172,17 @@ export class OAuthProvider {
     const tokenData = this.refreshTokens.get(refreshToken);
 
     if (!tokenData) {
-      throw new Error('Invalid refresh token');
+      throw new Error("Invalid refresh token");
     }
 
     // Generate new access token
     const accessToken = this.generateAccessToken(tokenData.userId, tokenData.scope);
 
-    logger.info('Access token refreshed', { userId: tokenData.userId });
+    logger.info("Access token refreshed", { userId: tokenData.userId });
 
     return {
       accessToken,
-      tokenType: 'Bearer',
+      tokenType: "Bearer",
       expiresIn: 3600,
       scope: tokenData.scope,
     };
@@ -197,38 +190,38 @@ export class OAuthProvider {
 
   revokeToken(token: string): void {
     this.refreshTokens.delete(token);
-    logger.info('Token revoked');
+    logger.info("Token revoked");
   }
 
   private validateAuthorizationRequest(request: AuthorizationRequest): void {
     if (!request.clientId || !request.redirectUri || !request.scope) {
-      throw new Error('Invalid authorization request');
+      throw new Error("Invalid authorization request");
     }
 
     if (request.clientId !== this.config.clientId) {
-      throw new Error('Invalid client ID');
+      throw new Error("Invalid client ID");
     }
 
     if (request.redirectUri !== this.config.redirectUri) {
-      throw new Error('Invalid redirect URI');
+      throw new Error("Invalid redirect URI");
     }
   }
 
   private generateAuthorizationCode(): string {
-    return randomBytes(32).toString('base64url');
+    return randomBytes(32).toString("base64url");
   }
 
   private generateAccessToken(userId: string, scope: string): string {
     // This should use JWTManager in production
-    return randomBytes(32).toString('base64url');
+    return randomBytes(32).toString("base64url");
   }
 
   private generateRefreshToken(userId: string): string {
-    return randomBytes(32).toString('base64url');
+    return randomBytes(32).toString("base64url");
   }
 
   private generateState(): string {
-    return randomBytes(16).toString('base64url');
+    return randomBytes(16).toString("base64url");
   }
 }
 

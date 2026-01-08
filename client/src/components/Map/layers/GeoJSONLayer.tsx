@@ -4,10 +4,10 @@
  * GeoJSON Layer Component
  */
 
-import React, { useEffect, useRef } from 'react';
-import L from 'leaflet';
-import { useMap } from '../MapContainer';
-import type { FeatureCollection, Feature } from 'geojson';
+import React, { useEffect, useRef } from "react";
+import L from "leaflet";
+import { useMap } from "../MapContainer";
+import type { FeatureCollection, Feature } from "geojson";
 
 export interface GeoJSONLayerProps {
   data: FeatureCollection | Feature;
@@ -36,7 +36,7 @@ export const GeoJSONLayer: React.FC<GeoJSONLayerProps> = ({
     if (!map) return;
 
     const defaultStyle: L.PathOptions = {
-      color: '#3388ff',
+      color: "#3388ff",
       weight: 2,
       opacity: 0.8,
       fillOpacity: 0.2,
@@ -44,11 +44,11 @@ export const GeoJSONLayer: React.FC<GeoJSONLayerProps> = ({
 
     // Create GeoJSON layer
     const geoJsonLayer = L.geoJSON(data, {
-      style: typeof style === 'function' ? style : style || defaultStyle,
+      style: typeof style === "function" ? style : style || defaultStyle,
       onEachFeature: (feature, layer) => {
         // Add click handler
         if (onFeatureClick) {
-          layer.on('click', () => onFeatureClick(feature));
+          layer.on("click", () => onFeatureClick(feature));
         }
 
         // Custom feature handler
@@ -60,7 +60,7 @@ export const GeoJSONLayer: React.FC<GeoJSONLayerProps> = ({
         if (feature.properties) {
           const popupContent = Object.entries(feature.properties)
             .map(([key, value]) => `<strong>${key}:</strong> ${value}`)
-            .join('<br>');
+            .join("<br>");
           layer.bindPopup(popupContent);
         }
       },
@@ -88,17 +88,17 @@ export const GeoJSONLayer: React.FC<GeoJSONLayerProps> = ({
 
     // Create new layer with updated data
     const defaultStyle: L.PathOptions = {
-      color: '#3388ff',
+      color: "#3388ff",
       weight: 2,
       opacity: 0.8,
       fillOpacity: 0.2,
     };
 
     const geoJsonLayer = L.geoJSON(data, {
-      style: typeof style === 'function' ? style : style || defaultStyle,
+      style: typeof style === "function" ? style : style || defaultStyle,
       onEachFeature: (feature, layer) => {
         if (onFeatureClick) {
-          layer.on('click', () => onFeatureClick(feature));
+          layer.on("click", () => onFeatureClick(feature));
         }
         if (onEachFeature) {
           onEachFeature(feature, layer);
@@ -106,7 +106,7 @@ export const GeoJSONLayer: React.FC<GeoJSONLayerProps> = ({
         if (feature.properties) {
           const popupContent = Object.entries(feature.properties)
             .map(([key, value]) => `<strong>${key}:</strong> ${value}`)
-            .join('<br>');
+            .join("<br>");
           layer.bindPopup(popupContent);
         }
       },
@@ -139,17 +139,17 @@ export const ChoroplethLayer: React.FC<ChoroplethLayerProps> = ({
 }) => {
   const style = (feature?: Feature): L.PathOptions => {
     if (!feature || !feature.properties) {
-      return { fillColor: '#cccccc', weight: 1, opacity: 1, fillOpacity: 0.7 };
+      return { fillColor: "#cccccc", weight: 1, opacity: 1, fillOpacity: 0.7 };
     }
 
     const value = feature.properties[valueProperty];
-    const fillColor = typeof value === 'number' ? colorScale(value) : '#cccccc';
+    const fillColor = typeof value === "number" ? colorScale(value) : "#cccccc";
 
     return {
       fillColor,
       weight: 1,
       opacity: 1,
-      color: 'white',
+      color: "white",
       fillOpacity: 0.7,
     };
   };
@@ -162,7 +162,7 @@ export const ChoroplethLayer: React.FC<ChoroplethLayerProps> = ({
         const layer = e.target;
         layer.setStyle({
           weight: 3,
-          color: '#666',
+          color: "#666",
           fillOpacity: 0.9,
         });
       },

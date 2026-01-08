@@ -26,7 +26,8 @@ export default function WorkflowPanel(): React.ReactElement {
   const [info, setInfo] = useState<CaseInfo | null>(null)
 
   useEffect(() => {
-    const handler = (_e: JQuery.Event, node: { id: () => string }) => setCaseId(node.id())
+    const handler = (_e: JQuery.Event, node: { id: () => string }) =>
+      setCaseId(node.id())
     $(document).on('cy:selected', handler)
     return () => $(document).off('cy:selected', handler)
   }, [])
@@ -45,7 +46,9 @@ export default function WorkflowPanel(): React.ReactElement {
     return () => clearInterval(timer)
   }, [caseId])
 
-  if (!info) {return <Typography tabIndex={0}>Select a case</Typography>}
+  if (!info) {
+    return <Typography tabIndex={0}>Select a case</Typography>
+  }
 
   return (
     <div aria-label="workflow panel">
@@ -66,7 +69,7 @@ export default function WorkflowPanel(): React.ReactElement {
         onClick={() => {
           if (caseId) {
             void fetch(`/wf/cases/${caseId}`)
-              .then((r) => r.json())
+              .then(r => r.json())
               .then(setInfo)
           }
         }}

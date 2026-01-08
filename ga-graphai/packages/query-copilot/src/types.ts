@@ -8,7 +8,7 @@ export interface GraphRelationship {
   type: string;
   from: string;
   to: string;
-  direction?: 'out' | 'in';
+  direction?: "out" | "in";
   properties?: string[];
   synonyms?: string[];
 }
@@ -98,7 +98,7 @@ export interface QueryPlan {
   containsAggregation: boolean;
 }
 
-export type { QueryMonitoringResult } from './queryMonitor.js';
+export type { QueryMonitoringResult } from "./queryMonitor.js";
 
 export type UndoRedoCommand<TState> = {
   description: string;

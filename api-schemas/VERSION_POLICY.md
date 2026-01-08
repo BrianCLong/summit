@@ -8,6 +8,7 @@
 ## Purpose
 
 This document establishes the API versioning policy for Summit GA, ensuring:
+
 - **Contract Stability**: Breaking changes are never introduced to existing versions
 - **Predictable Evolution**: Clear rules for when version bumps are required
 - **Client Protection**: Guaranteed backward compatibility within major versions
@@ -28,6 +29,7 @@ Summit uses **simplified semantic versioning** for API contracts:
 The following changes **MUST** trigger a new major version:
 
 #### REST API Breaking Changes
+
 - ❌ Removing an endpoint
 - ❌ Removing a request/response field
 - ❌ Renaming a field
@@ -41,6 +43,7 @@ The following changes **MUST** trigger a new major version:
 - ❌ Modifying URL structure
 
 #### GraphQL Breaking Changes
+
 - ❌ Removing a type or field
 - ❌ Renaming a type or field
 - ❌ Changing field types in incompatible ways
@@ -53,6 +56,7 @@ The following changes **MUST** trigger a new major version:
 The following changes are **ALLOWED** without version bump:
 
 #### REST API Safe Changes
+
 - ✅ Adding new endpoints
 - ✅ Adding optional request parameters
 - ✅ Adding new fields to responses
@@ -62,6 +66,7 @@ The following changes are **ALLOWED** without version bump:
 - ✅ Relaxing validation rules
 
 #### GraphQL Safe Changes
+
 - ✅ Adding new types
 - ✅ Adding new fields to existing types
 - ✅ Adding new queries/mutations
@@ -79,6 +84,7 @@ https://api.summit.io/api/v2/runbooks
 ```
 
 **Benefits:**
+
 - Explicit and visible in logs
 - Easy to cache at CDN/proxy level
 - Simple to test with curl/Postman
@@ -94,6 +100,7 @@ Accept-Version: v1
 ```
 
 **Priority Order:**
+
 1. URL path (`/api/v1/`) - highest priority
 2. `Accept-Version` header
 3. Default version (currently v1)
@@ -229,6 +236,7 @@ Content-Type: application/json
 When breaking changes are needed:
 
 1. **Create new schema snapshots**:
+
    ```bash
    npm run schema:snapshot -- --version v2
    ```
@@ -280,6 +288,7 @@ Maintained in `/api-schemas/registry.json`:
 This policy supports the following SOC 2 controls:
 
 ### CC8.1 - Change Management Authorization
+
 - **Control**: All API changes require approval and follow defined process
 - **Evidence**:
   - Schema diff reports in PRs
@@ -288,6 +297,7 @@ This policy supports the following SOC 2 controls:
   - CI/CD validation results
 
 ### CC3.1 - Risk Management in Design
+
 - **Control**: Risk assessment before introducing changes
 - **Evidence**:
   - Breaking vs non-breaking change categorization
@@ -295,6 +305,7 @@ This policy supports the following SOC 2 controls:
   - Deprecation timeline enforcement
 
 ### PI1.5 - Processing Integrity at System Boundaries
+
 - **Control**: Inputs and outputs meet specifications
 - **Evidence**:
   - Schema validation in CI/CD
@@ -306,20 +317,22 @@ This policy supports the following SOC 2 controls:
 ### For API Consumers
 
 1. **Always specify version explicitly**
+
    ```javascript
    // Good
-   fetch('/api/v1/runbooks')
+   fetch("/api/v1/runbooks");
 
    // Bad - relies on default
-   fetch('/api/runbooks')
+   fetch("/api/runbooks");
    ```
 
 2. **Monitor deprecation headers**
+
    ```javascript
-   if (response.headers.get('X-API-Deprecation') === 'true') {
-     logger.warn('API version deprecated', {
-       version: response.headers.get('X-API-Version'),
-       sunsetDate: response.headers.get('X-API-Sunset-Date')
+   if (response.headers.get("X-API-Deprecation") === "true") {
+     logger.warn("API version deprecated", {
+       version: response.headers.get("X-API-Version"),
+       sunsetDate: response.headers.get("X-API-Sunset-Date"),
      });
    }
    ```
@@ -353,9 +366,9 @@ This policy supports the following SOC 2 controls:
 
 ## Changelog
 
-| Date | Version | Changes |
-|------|---------|---------|
-| 2025-12-27 | 1.0.0 | Initial version policy created for GA hardening |
+| Date       | Version | Changes                                         |
+| ---------- | ------- | ----------------------------------------------- |
+| 2025-12-27 | 1.0.0   | Initial version policy created for GA hardening |
 
 ---
 

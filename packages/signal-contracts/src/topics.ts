@@ -7,14 +7,14 @@
  * @module topics
  */
 
-import { SignalCategory, SignalTypeId, type SignalTypeIdType } from './signal-types.js';
+import { SignalCategory, SignalTypeId, type SignalTypeIdType } from "./signal-types.js";
 
 /**
  * Topic naming convention:
  * - Format: {namespace}.{domain}.{name}.{version}
  * - Example: intelgraph.signals.raw.v1
  */
-export const TopicNamespace = 'intelgraph' as const;
+export const TopicNamespace = "intelgraph" as const;
 
 /**
  * Signal Bus topic names
@@ -65,7 +65,7 @@ export interface TopicConfig {
   partitions: number;
   replicationFactor: number;
   retentionMs: number;
-  cleanupPolicy: 'delete' | 'compact' | 'compact,delete';
+  cleanupPolicy: "delete" | "compact" | "compact,delete";
   maxMessageBytes: number;
   minInsyncReplicas: number;
 }
@@ -79,7 +79,7 @@ export const TopicConfigs: Record<string, TopicConfig> = {
     partitions: 32,
     replicationFactor: 3,
     retentionMs: 7 * 24 * 60 * 60 * 1000, // 7 days
-    cleanupPolicy: 'delete',
+    cleanupPolicy: "delete",
     maxMessageBytes: 1048576, // 1MB
     minInsyncReplicas: 2,
   },
@@ -88,7 +88,7 @@ export const TopicConfigs: Record<string, TopicConfig> = {
     partitions: 8,
     replicationFactor: 3,
     retentionMs: 30 * 24 * 60 * 60 * 1000, // 30 days
-    cleanupPolicy: 'delete',
+    cleanupPolicy: "delete",
     maxMessageBytes: 1048576,
     minInsyncReplicas: 2,
   },
@@ -97,7 +97,7 @@ export const TopicConfigs: Record<string, TopicConfig> = {
     partitions: 32,
     replicationFactor: 3,
     retentionMs: 3 * 24 * 60 * 60 * 1000, // 3 days
-    cleanupPolicy: 'delete',
+    cleanupPolicy: "delete",
     maxMessageBytes: 1048576,
     minInsyncReplicas: 2,
   },
@@ -106,7 +106,7 @@ export const TopicConfigs: Record<string, TopicConfig> = {
     partitions: 32,
     replicationFactor: 3,
     retentionMs: 3 * 24 * 60 * 60 * 1000, // 3 days
-    cleanupPolicy: 'delete',
+    cleanupPolicy: "delete",
     maxMessageBytes: 2097152, // 2MB (enriched payloads larger)
     minInsyncReplicas: 2,
   },
@@ -115,7 +115,7 @@ export const TopicConfigs: Record<string, TopicConfig> = {
     partitions: 16,
     replicationFactor: 3,
     retentionMs: 30 * 24 * 60 * 60 * 1000, // 30 days
-    cleanupPolicy: 'delete',
+    cleanupPolicy: "delete",
     maxMessageBytes: 1048576,
     minInsyncReplicas: 2,
   },
@@ -124,7 +124,7 @@ export const TopicConfigs: Record<string, TopicConfig> = {
     partitions: 8,
     replicationFactor: 3,
     retentionMs: 30 * 24 * 60 * 60 * 1000, // 30 days
-    cleanupPolicy: 'delete',
+    cleanupPolicy: "delete",
     maxMessageBytes: 1048576,
     minInsyncReplicas: 2,
   },
@@ -133,7 +133,7 @@ export const TopicConfigs: Record<string, TopicConfig> = {
     partitions: 16,
     replicationFactor: 3,
     retentionMs: 7 * 24 * 60 * 60 * 1000, // 7 days
-    cleanupPolicy: 'delete',
+    cleanupPolicy: "delete",
     maxMessageBytes: 1048576,
     minInsyncReplicas: 2,
   },
@@ -142,7 +142,7 @@ export const TopicConfigs: Record<string, TopicConfig> = {
     partitions: 16,
     replicationFactor: 3,
     retentionMs: 7 * 24 * 60 * 60 * 1000, // 7 days
-    cleanupPolicy: 'delete',
+    cleanupPolicy: "delete",
     maxMessageBytes: 1048576,
     minInsyncReplicas: 2,
   },
@@ -151,7 +151,7 @@ export const TopicConfigs: Record<string, TopicConfig> = {
     partitions: 8,
     replicationFactor: 3,
     retentionMs: 7 * 24 * 60 * 60 * 1000, // 7 days
-    cleanupPolicy: 'delete',
+    cleanupPolicy: "delete",
     maxMessageBytes: 1048576,
     minInsyncReplicas: 2,
   },
@@ -160,7 +160,7 @@ export const TopicConfigs: Record<string, TopicConfig> = {
     partitions: 16,
     replicationFactor: 3,
     retentionMs: 3 * 24 * 60 * 60 * 1000, // 3 days
-    cleanupPolicy: 'delete',
+    cleanupPolicy: "delete",
     maxMessageBytes: 1048576,
     minInsyncReplicas: 2,
   },
@@ -169,7 +169,7 @@ export const TopicConfigs: Record<string, TopicConfig> = {
     partitions: 1,
     replicationFactor: 3,
     retentionMs: -1, // Infinite (compacted)
-    cleanupPolicy: 'compact',
+    cleanupPolicy: "compact",
     maxMessageBytes: 1048576,
     minInsyncReplicas: 2,
   },
@@ -203,7 +203,7 @@ export type ConsumerGroupType = (typeof ConsumerGroups)[keyof typeof ConsumerGro
  * Get the category topic for a signal type
  */
 export function getCategoryTopic(signalType: SignalTypeIdType): string {
-  const category = signalType.split('.')[0];
+  const category = signalType.split(".")[0];
 
   switch (category) {
     case SignalCategory.SENSOR:
@@ -243,16 +243,16 @@ export function getAlertPartitionKey(tenantId: string): string {
  * Get downstream topic for event type
  */
 export function getDownstreamTopic(eventType: string): string {
-  const domain = eventType.split('.')[0];
+  const domain = eventType.split(".")[0];
 
   switch (domain) {
-    case 'graph':
+    case "graph":
       return SignalTopics.DOWNSTREAM_GRAPH;
-    case 'spacetime':
+    case "spacetime":
       return SignalTopics.DOWNSTREAM_SPACETIME;
-    case 'case':
+    case "case":
       return SignalTopics.DOWNSTREAM_CASE;
-    case 'analytics':
+    case "analytics":
       return SignalTopics.DOWNSTREAM_ANALYTICS;
     default:
       throw new Error(`Unknown downstream domain: ${domain}`);
@@ -263,7 +263,7 @@ export function getDownstreamTopic(eventType: string): string {
  * Check if alert should go to high-priority topic
  */
 export function isHighPriorityAlert(severity: string): boolean {
-  return severity === 'critical' || severity === 'high';
+  return severity === "critical" || severity === "high";
 }
 
 /**

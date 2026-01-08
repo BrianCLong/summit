@@ -5,6 +5,7 @@
 This document provides step-by-step runbooks for handling incidents that may occur during chaos engineering experiments or in production.
 
 **Acceptance Criteria:**
+
 - **P95 query latency**: < 1.5s on benchmark
 - **RTO** (Recovery Time Objective): ≤ 1 hour
 - **RPO** (Recovery Point Objective): ≤ 5 minutes
@@ -28,14 +29,17 @@ This document provides step-by-step runbooks for handling incidents that may occ
 ## 1. Pod Kill - API Server
 
 ### Scenario
+
 One or more API server pods are killed unexpectedly.
 
 ### Detection
+
 - **Alert**: Pod restart count increasing
 - **Symptom**: Increased 5xx errors, client connection failures
 - **Metrics**: `kube_pod_container_status_restarts_total{pod=~"intelgraph-server.*"}`
 
 ### Impact
+
 - **Severity**: Medium
 - **User Impact**: Brief service interruption for users connected to killed pod
 - **Expected Recovery**: < 30 seconds (Kubernetes automatic restart)
@@ -45,18 +49,21 @@ One or more API server pods are killed unexpectedly.
 #### Immediate (0-5 minutes)
 
 1. **Verify pod status**:
+
    ```bash
    kubectl get pods -l app=intelgraph-server -n default
    kubectl describe pod <pod-name>
    ```
 
 2. **Check pod logs**:
+
    ```bash
    kubectl logs <pod-name> --previous
    kubectl logs <pod-name> --tail=100
    ```
 
 3. **Verify replacement pod is healthy**:
+
    ```bash
    kubectl get pods -l app=intelgraph-server -w
    ```
@@ -69,11 +76,13 @@ One or more API server pods are killed unexpectedly.
 #### Short-term (5-15 minutes)
 
 5. **Verify traffic routing**:
+
    ```bash
    curl -f http://intelgraph-server:4000/health
    ```
 
 6. **Check error rates in Prometheus**:
+
    ```promql
    rate(intelgraph_http_request_duration_seconds_count{status=~"5.."}[5m])
    ```
@@ -86,6 +95,7 @@ One or more API server pods are killed unexpectedly.
 #### Long-term (15-60 minutes)
 
 8. **Review HPA status** (if autoscaling is enabled):
+
    ```bash
    kubectl get hpa intelgraph-server
    ```
@@ -98,6 +108,7 @@ One or more API server pods are killed unexpectedly.
 10. **Document in incident log**
 
 ### Success Criteria
+
 - ✅ All pods in `Running` state
 - ✅ Health endpoint returns 200 OK
 - ✅ P95 latency < 1.5s
@@ -105,7 +116,9 @@ One or more API server pods are killed unexpectedly.
 - ✅ RTO achieved: < 30s
 
 ### Rollback Procedure
+
 If new pods fail to start:
+
 ```bash
 kubectl rollout undo deployment/intelgraph-server
 kubectl rollout status deployment/intelgraph-server
@@ -116,14 +129,17 @@ kubectl rollout status deployment/intelgraph-server
 ## 2. Pod Kill - PostgreSQL Database
 
 ### Scenario
+
 PostgreSQL primary pod is killed or becomes unavailable.
 
 ### Detection
+
 - **Alert**: PostgreSQL pod down, connection failures
 - **Symptom**: Database query errors, connection timeouts
 - **Metrics**: `up{job="postgres-exporter"} == 0`
 
 ### Impact
+
 - **Severity**: Critical
 - **User Impact**: All database operations fail
 - **Expected Recovery**: < 2 minutes (if using HA setup), < 10 minutes (if single instance)
@@ -133,17 +149,20 @@ PostgreSQL primary pod is killed or becomes unavailable.
 #### Immediate (0-5 minutes)
 
 1. **Verify PostgreSQL pod status**:
+
    ```bash
    kubectl get pods -l app=postgres -n default
    kubectl describe pod postgres-0
    ```
 
 2. **Check StatefulSet health**:
+
    ```bash
    kubectl get statefulset postgres
    ```
 
 3. **Verify PVC (Persistent Volume Claim)**:
+
    ```bash
    kubectl get pvc -l app=postgres
    ```
@@ -156,16 +175,19 @@ PostgreSQL primary pod is killed or becomes unavailable.
 #### Short-term (5-15 minutes)
 
 5. **Wait for automatic recovery or trigger manual restart**:
+
    ```bash
    kubectl rollout restart statefulset/postgres
    ```
 
 6. **Verify database is accepting connections**:
+
    ```bash
    kubectl exec -it postgres-0 -- psql -U postgres -c "SELECT 1;"
    ```
 
 7. **Check replication lag** (if using replica):
+
    ```bash
    kubectl exec -it postgres-0 -- psql -U postgres -c "SELECT pg_last_wal_replay_lsn();"
    ```
@@ -178,11 +200,13 @@ PostgreSQL primary pod is killed or becomes unavailable.
 #### Long-term (15-60 minutes)
 
 9. **Verify data integrity**:
+
    ```bash
    kubectl exec -it postgres-0 -- psql -U postgres -c "SELECT COUNT(*) FROM entities;"
    ```
 
 10. **Check for any corrupted tables**:
+
     ```sql
     SELECT * FROM pg_stat_database WHERE datname = 'intelgraph';
     ```
@@ -192,6 +216,7 @@ PostgreSQL primary pod is killed or becomes unavailable.
 12. **Document RPO/RTO achieved**
 
 ### Success Criteria
+
 - ✅ PostgreSQL pod in `Running` state
 - ✅ Database accepting connections
 - ✅ Replication lag < 5s (if applicable)
@@ -200,7 +225,9 @@ PostgreSQL primary pod is killed or becomes unavailable.
 - ✅ RPO achieved: < 5 minutes
 
 ### Rollback Procedure
+
 If new pod fails to mount PVC or has data corruption:
+
 ```bash
 # Restore from latest backup
 ./scripts/restore-postgres.sh --timestamp latest --target postgres-0
@@ -211,9 +238,11 @@ If new pod fails to mount PVC or has data corruption:
 ## 3. Pod Kill - Neo4j Graph Database
 
 ### Scenario
+
 Neo4j pod is killed or becomes unavailable.
 
 ### Detection
+
 - **Alert**: Neo4j pod down, Cypher query failures
 - **Symptom**: Graph operations fail, relationship queries timeout
 - **Metrics**: `neo4j_database_status{status="offline"}`
@@ -223,12 +252,14 @@ Neo4j pod is killed or becomes unavailable.
 #### Immediate (0-5 minutes)
 
 1. **Verify Neo4j pod status**:
+
    ```bash
    kubectl get pods -l app=neo4j
    kubectl logs neo4j-0 --tail=50
    ```
 
 2. **Check if cluster mode is active** (if using causal cluster):
+
    ```bash
    kubectl exec -it neo4j-0 -- cypher-shell "CALL dbms.cluster.overview();"
    ```
@@ -241,19 +272,22 @@ Neo4j pod is killed or becomes unavailable.
 #### Short-term (5-15 minutes)
 
 4. **Wait for pod to restart or trigger manual restart**:
+
    ```bash
    kubectl rollout restart statefulset/neo4j
    ```
 
 5. **Verify Neo4j is accepting connections**:
+
    ```bash
    kubectl exec -it neo4j-0 -- cypher-shell "RETURN 1;"
    ```
 
 6. **Check database consistency**:
+
    ```cypher
-   CALL dbms.listConfig() YIELD name, value 
-   WHERE name = 'dbms.recovery.state' 
+   CALL dbms.listConfig() YIELD name, value
+   WHERE name = 'dbms.recovery.state'
    RETURN name, value;
    ```
 
@@ -263,6 +297,7 @@ Neo4j pod is killed or becomes unavailable.
    ```
 
 ### Success Criteria
+
 - ✅ Neo4j pod in `Running` state
 - ✅ Cypher queries executing successfully
 - ✅ P95 graph query latency < 2s
@@ -273,9 +308,11 @@ Neo4j pod is killed or becomes unavailable.
 ## 4. Network Partition - API to Database
 
 ### Scenario
+
 Network partition between API server and database(s).
 
 ### Detection
+
 - **Alert**: High database connection timeout rate
 - **Symptom**: Queries hang, connection pool exhausted
 - **Metrics**: `intelgraph_db_connection_wait_seconds > 5`
@@ -285,12 +322,14 @@ Network partition between API server and database(s).
 #### Immediate (0-5 minutes)
 
 1. **Verify network connectivity**:
+
    ```bash
    kubectl exec -it <api-pod> -- ping postgres
    kubectl exec -it <api-pod> -- nc -zv postgres 5432
    ```
 
 2. **Check Network Policies**:
+
    ```bash
    kubectl get networkpolicies -n default
    kubectl describe networkpolicy <policy-name>
@@ -304,11 +343,13 @@ Network partition between API server and database(s).
 #### Short-term (5-15 minutes)
 
 4. **Check kube-proxy logs**:
+
    ```bash
    kubectl logs -n kube-system -l k8s-app=kube-proxy --tail=100
    ```
 
 5. **Verify service endpoints**:
+
    ```bash
    kubectl get endpoints postgres
    ```
@@ -320,6 +361,7 @@ Network partition between API server and database(s).
    ```
 
 ### Success Criteria
+
 - ✅ Network connectivity restored
 - ✅ Database connections < 5s wait time
 - ✅ Error rate < 1%
@@ -330,9 +372,11 @@ Network partition between API server and database(s).
 ## 5. Redis Broker Failure
 
 ### Scenario
+
 Redis broker (used for queues and caching) fails.
 
 ### Detection
+
 - **Alert**: Redis connection errors, job queue stalled
 - **Symptom**: Background jobs not processing, cache misses
 - **Metrics**: `redis_up == 0`
@@ -342,12 +386,14 @@ Redis broker (used for queues and caching) fails.
 #### Immediate (0-5 minutes)
 
 1. **Verify Redis pod status**:
+
    ```bash
    kubectl get pods -l app=redis
    kubectl logs redis-0
    ```
 
 2. **Check Redis cluster health** (if using cluster mode):
+
    ```bash
    kubectl exec -it redis-0 -- redis-cli cluster info
    ```
@@ -360,22 +406,25 @@ Redis broker (used for queues and caching) fails.
 #### Short-term (5-15 minutes)
 
 4. **Restart Redis if needed**:
+
    ```bash
    kubectl rollout restart statefulset/redis
    ```
 
 5. **Verify job queues are processing**:
+
    ```bash
    kubectl exec -it redis-0 -- redis-cli LLEN bull:queue:default
    ```
 
 6. **Monitor cache hit rate**:
    ```promql
-   rate(redis_keyspace_hits_total[5m]) / 
+   rate(redis_keyspace_hits_total[5m]) /
    (rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m]))
    ```
 
 ### Success Criteria
+
 - ✅ Redis accepting connections
 - ✅ Job queues processing
 - ✅ Cache hit rate > 80%
@@ -386,9 +435,11 @@ Redis broker (used for queues and caching) fails.
 ## 6. High Query Latency
 
 ### Scenario
+
 Query latency exceeds acceptable thresholds (P95 > 1.5s).
 
 ### Detection
+
 - **Alert**: `intelgraph_query_latency_seconds > 1.5`
 - **Symptom**: Slow page loads, timeout errors
 - **Metrics**: P95, P99 latency elevated
@@ -398,13 +449,15 @@ Query latency exceeds acceptable thresholds (P95 > 1.5s).
 #### Immediate (0-5 minutes)
 
 1. **Check slow query killer is active**:
+
    ```bash
    curl http://localhost:4000/api/observability/slow-queries
    ```
 
 2. **Identify slow queries in PostgreSQL**:
+
    ```sql
-   SELECT pid, usename, state, query, 
+   SELECT pid, usename, state, query,
           EXTRACT(EPOCH FROM (now() - query_start)) as duration
    FROM pg_stat_activity
    WHERE state = 'active'
@@ -420,6 +473,7 @@ Query latency exceeds acceptable thresholds (P95 > 1.5s).
 #### Short-term (5-15 minutes)
 
 4. **Kill slow queries manually if killer is not working**:
+
    ```sql
    SELECT pg_terminate_backend(pid)
    FROM pg_stat_activity
@@ -428,6 +482,7 @@ Query latency exceeds acceptable thresholds (P95 > 1.5s).
    ```
 
 5. **Check for missing indexes**:
+
    ```sql
    SELECT schemaname, tablename, indexname, idx_scan
    FROM pg_stat_user_indexes
@@ -444,6 +499,7 @@ Query latency exceeds acceptable thresholds (P95 > 1.5s).
 #### Long-term (15-60 minutes)
 
 7. **Scale up resources if needed**:
+
    ```bash
    kubectl scale deployment intelgraph-server --replicas=5
    ```
@@ -456,6 +512,7 @@ Query latency exceeds acceptable thresholds (P95 > 1.5s).
 9. **Consider moving to read replicas for read-heavy queries**
 
 ### Success Criteria
+
 - ✅ P95 latency < 1.5s
 - ✅ P99 latency < 3s
 - ✅ No queries running > 5s
@@ -466,6 +523,7 @@ Query latency exceeds acceptable thresholds (P95 > 1.5s).
 ## 7. Disk I/O Failure
 
 ### Scenario
+
 Disk I/O errors or high latency on database volumes.
 
 ### Response Steps
@@ -473,12 +531,14 @@ Disk I/O errors or high latency on database volumes.
 #### Immediate (0-5 minutes)
 
 1. **Check disk health**:
+
    ```bash
    kubectl exec -it postgres-0 -- df -h
    kubectl exec -it postgres-0 -- iostat -x 1 5
    ```
 
 2. **Verify PVC status**:
+
    ```bash
    kubectl get pvc
    kubectl describe pvc postgres-data
@@ -492,6 +552,7 @@ Disk I/O errors or high latency on database volumes.
 #### Short-term (5-15 minutes)
 
 4. **If using cloud provider, check volume health**:
+
    ```bash
    aws ec2 describe-volumes --volume-ids <volume-id>
    ```
@@ -499,6 +560,7 @@ Disk I/O errors or high latency on database volumes.
 5. **Consider failing over to DR region if disk is failing**
 
 ### Success Criteria
+
 - ✅ Disk I/O latency < 10ms
 - ✅ No disk errors in logs
 - ✅ RTO achieved: < 30 minutes
@@ -508,6 +570,7 @@ Disk I/O errors or high latency on database volumes.
 ## 8. Memory/CPU Stress
 
 ### Scenario
+
 High memory or CPU usage causing performance degradation.
 
 ### Response Steps
@@ -515,6 +578,7 @@ High memory or CPU usage causing performance degradation.
 #### Immediate (0-5 minutes)
 
 1. **Check resource usage**:
+
    ```bash
    kubectl top pods
    kubectl top nodes
@@ -528,11 +592,13 @@ High memory or CPU usage causing performance degradation.
 #### Short-term (5-15 minutes)
 
 3. **Scale horizontally if HPA is not responding fast enough**:
+
    ```bash
    kubectl scale deployment intelgraph-server --replicas=10
    ```
 
 4. **Check for memory leaks**:
+
    ```promql
    rate(nodejs_heap_size_used_bytes[5m]) > 0.8 * nodejs_heap_size_total_bytes
    ```
@@ -543,6 +609,7 @@ High memory or CPU usage causing performance degradation.
    ```
 
 ### Success Criteria
+
 - ✅ CPU usage < 80%
 - ✅ Memory usage < 85%
 - ✅ No OOMKilled pods
@@ -554,6 +621,7 @@ High memory or CPU usage causing performance degradation.
 ### When to Trigger DR Failover
 
 Trigger failover to DR region if:
+
 - Primary region is unavailable for > 15 minutes
 - Data corruption detected in primary
 - Network partition isolating primary region
@@ -562,16 +630,19 @@ Trigger failover to DR region if:
 ### DR Failover Steps
 
 1. **Activate DR runbook**:
+
    ```bash
    ./scripts/dr-failover.sh --region us-west-2 --dry-run=false
    ```
 
 2. **Update DNS to point to DR region**:
+
    ```bash
    aws route53 change-resource-record-sets --hosted-zone-id Z123 --change-batch file://failover-dns.json
    ```
 
 3. **Promote read replica to primary**:
+
    ```bash
    aws rds promote-read-replica --db-instance-identifier intelgraph-dr
    ```
@@ -581,6 +652,7 @@ Trigger failover to DR region if:
 5. **Communicate to stakeholders**
 
 ### DR Failover RTO Target
+
 - **RTO**: ≤ 1 hour
 - **RPO**: ≤ 5 minutes
 
@@ -628,4 +700,3 @@ intelgraph_dr_rto_actual_seconds <= 3600
 - **Database Team**: #db-ops Slack channel
 - **DevOps Team**: #devops Slack channel
 - **Security Team**: #security Slack channel
-

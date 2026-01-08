@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from "react";
 import {
   Box,
   Card,
@@ -22,7 +22,7 @@ import {
   AccordionSummary,
   AccordionDetails,
   LinearProgress,
-} from '@mui/material';
+} from "@mui/material";
 import {
   ThumbUp,
   ThumbDown,
@@ -32,9 +32,9 @@ import {
   Security,
   Timeline,
   Assessment,
-} from '@mui/icons-material';
-import { useMutation, useQuery } from '@apollo/client';
-import { gql } from '@apollo/client';
+} from "@mui/icons-material";
+import { useMutation, useQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
 
 const RECORD_FEEDBACK_MUTATION = gql`
   mutation RecordAnalystFeedback($input: AnalystFeedbackInput!) {
@@ -104,30 +104,30 @@ interface AlertTriageV2PanelProps {
 
 const FEEDBACK_TYPES = [
   {
-    value: 'thumbs_up',
-    label: 'Accurate',
+    value: "thumbs_up",
+    label: "Accurate",
     icon: <ThumbUp />,
-    color: 'success',
+    color: "success",
   },
   {
-    value: 'thumbs_down',
-    label: 'Inaccurate',
+    value: "thumbs_down",
+    label: "Inaccurate",
     icon: <ThumbDown />,
-    color: 'error',
+    color: "error",
   },
-  { value: 'escalate', label: 'Escalate', icon: <Flag />, color: 'warning' },
-  { value: 'dismiss', label: 'Dismiss', icon: <Close />, color: 'default' },
+  { value: "escalate", label: "Escalate", icon: <Flag />, color: "warning" },
+  { value: "dismiss", label: "Dismiss", icon: <Close />, color: "default" },
 ];
 
 const REASON_CODES = [
-  'false_positive',
-  'true_positive',
-  'needs_investigation',
-  'benign_activity',
-  'insufficient_data',
-  'duplicate_alert',
-  'policy_violation',
-  'security_incident',
+  "false_positive",
+  "true_positive",
+  "needs_investigation",
+  "benign_activity",
+  "insufficient_data",
+  "duplicate_alert",
+  "policy_violation",
+  "security_incident",
 ];
 
 export default function AlertTriageV2Panel({
@@ -138,50 +138,44 @@ export default function AlertTriageV2Panel({
   onAction,
 }: AlertTriageV2PanelProps) {
   const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
-  const [selectedFeedbackType, setSelectedFeedbackType] = useState('');
-  const [reasonCode, setReasonCode] = useState('');
-  const [rationale, setRationale] = useState('');
+  const [selectedFeedbackType, setSelectedFeedbackType] = useState("");
+  const [reasonCode, setReasonCode] = useState("");
+  const [rationale, setRationale] = useState("");
   const [confidence, setConfidence] = useState(3);
 
-  const { data: feedbackData, refetch: refetchFeedback } = useQuery(
-    GET_ALERT_FEEDBACK_QUERY,
-    {
-      variables: { alertId },
-      skip: !alertId,
-    },
-  );
+  const { data: feedbackData, refetch: refetchFeedback } = useQuery(GET_ALERT_FEEDBACK_QUERY, {
+    variables: { alertId },
+    skip: !alertId,
+  });
 
   const { data: scoringData } = useQuery(TRIAGE_SCORING_QUERY, {
     variables: { alertId },
     skip: !alertId,
   });
 
-  const [recordFeedback, { loading: feedbackLoading }] = useMutation(
-    RECORD_FEEDBACK_MUTATION,
-    {
-      onCompleted: () => {
-        setFeedbackDialogOpen(false);
-        refetchFeedback();
-        setSelectedFeedbackType('');
-        setReasonCode('');
-        setRationale('');
-        setConfidence(3);
-      },
-      onError: (error) => {
-        console.error('Failed to record feedback:', error);
-      },
+  const [recordFeedback, { loading: feedbackLoading }] = useMutation(RECORD_FEEDBACK_MUTATION, {
+    onCompleted: () => {
+      setFeedbackDialogOpen(false);
+      refetchFeedback();
+      setSelectedFeedbackType("");
+      setReasonCode("");
+      setRationale("");
+      setConfidence(3);
     },
-  );
+    onError: (error) => {
+      console.error("Failed to record feedback:", error);
+    },
+  });
 
   const handleQuickAction = useCallback(
     (action: string) => {
-      if (action === 'feedback') {
+      if (action === "feedback") {
         setFeedbackDialogOpen(true);
       } else {
         onAction(action, { alertId });
       }
     },
-    [alertId, onAction],
+    [alertId, onAction]
   );
 
   const handleFeedbackSubmit = async () => {
@@ -204,23 +198,18 @@ export default function AlertTriageV2Panel({
     if (!scoringData?.triageScoring) return null;
 
     const { score, confidence, reasoning, factors } = scoringData.triageScoring;
-    const scoreColor =
-      score >= 0.8 ? 'error' : score >= 0.6 ? 'warning' : 'success';
+    const scoreColor = score >= 0.8 ? "error" : score >= 0.6 ? "warning" : "success";
 
     return (
       <Card sx={{ mb: 2 }}>
         <CardContent>
           <Box display="flex" alignItems="center" mb={2}>
-            <Assessment sx={{ mr: 1, color: 'primary.main' }} />
+            <Assessment sx={{ mr: 1, color: "primary.main" }} />
             <Typography variant="h6">Triage Scoring</Typography>
           </Box>
 
           <Box display="flex" alignItems="center" mb={2}>
-            <Typography
-              variant="h4"
-              color={`${scoreColor}.main`}
-              sx={{ mr: 2 }}
-            >
+            <Typography variant="h4" color={`${scoreColor}.main`} sx={{ mr: 2 }}>
               {(score * 100).toFixed(0)}%
             </Typography>
             <Box flex={1}>
@@ -256,18 +245,10 @@ export default function AlertTriageV2Panel({
                   >
                     <Typography variant="body2">{factor.name}</Typography>
                     <Box display="flex" alignItems="center">
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ mr: 1 }}
-                      >
+                      <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
                         {(factor.contribution * 100).toFixed(1)}%
                       </Typography>
-                      <Chip
-                        size="small"
-                        label={factor.value}
-                        variant="outlined"
-                      />
+                      <Chip size="small" label={factor.value} variant="outlined" />
                     </Box>
                   </Box>
                 ))}
@@ -283,7 +264,7 @@ export default function AlertTriageV2Panel({
     <Card sx={{ mb: 2 }}>
       <CardContent>
         <Typography variant="h6" gutterBottom>
-          <Security sx={{ mr: 1, verticalAlign: 'middle' }} />
+          <Security sx={{ mr: 1, verticalAlign: "middle" }} />
           Quick Actions
         </Typography>
 
@@ -291,7 +272,7 @@ export default function AlertTriageV2Panel({
           <Button
             variant="contained"
             color="primary"
-            onClick={() => handleQuickAction('contain')}
+            onClick={() => handleQuickAction("contain")}
             startIcon={<Security />}
           >
             Contain
@@ -299,14 +280,14 @@ export default function AlertTriageV2Panel({
           <Button
             variant="contained"
             color="warning"
-            onClick={() => handleQuickAction('escalate')}
+            onClick={() => handleQuickAction("escalate")}
             startIcon={<Flag />}
           >
             Escalate
           </Button>
           <Button
             variant="outlined"
-            onClick={() => handleQuickAction('dismiss')}
+            onClick={() => handleQuickAction("dismiss")}
             startIcon={<Close />}
           >
             Dismiss
@@ -314,7 +295,7 @@ export default function AlertTriageV2Panel({
           <Button
             variant="outlined"
             color="primary"
-            onClick={() => handleQuickAction('investigate')}
+            onClick={() => handleQuickAction("investigate")}
             startIcon={<Assessment />}
           >
             Investigate
@@ -322,7 +303,7 @@ export default function AlertTriageV2Panel({
           <Button
             variant="outlined"
             color="secondary"
-            onClick={() => handleQuickAction('feedback')}
+            onClick={() => handleQuickAction("feedback")}
             startIcon={<Timeline />}
           >
             Provide Feedback
@@ -343,10 +324,7 @@ export default function AlertTriageV2Panel({
           </Typography>
 
           {alertData.evidenceSnippets.map((snippet: any, index: number) => (
-            <Box
-              key={index}
-              sx={{ mb: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}
-            >
+            <Box key={index} sx={{ mb: 2, p: 2, bgcolor: "grey.50", borderRadius: 1 }}>
               <Typography variant="body2" gutterBottom>
                 {snippet.summary}
               </Typography>
@@ -384,36 +362,19 @@ export default function AlertTriageV2Panel({
           </Typography>
 
           {feedbackData.alertFeedback.map((feedback: any) => (
-            <Box
-              key={feedback.id}
-              sx={{ mb: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}
-            >
+            <Box key={feedback.id} sx={{ mb: 2, p: 2, bgcolor: "grey.50", borderRadius: 1 }}>
               <Box display="flex" alignItems="center" mb={1}>
                 <Chip
                   size="small"
-                  label={
-                    FEEDBACK_TYPES.find(
-                      (ft) => ft.value === feedback.feedbackType,
-                    )?.label
-                  }
+                  label={FEEDBACK_TYPES.find((ft) => ft.value === feedback.feedbackType)?.label}
                   color={
-                    (FEEDBACK_TYPES.find(
-                      (ft) => ft.value === feedback.feedbackType,
-                    )?.color as any) ?? 'default'
+                    (FEEDBACK_TYPES.find((ft) => ft.value === feedback.feedbackType)
+                      ?.color as any) ?? "default"
                   }
-                  icon={
-                    FEEDBACK_TYPES.find(
-                      (ft) => ft.value === feedback.feedbackType,
-                    )?.icon
-                  }
+                  icon={FEEDBACK_TYPES.find((ft) => ft.value === feedback.feedbackType)?.icon}
                 />
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ ml: 2 }}
-                >
-                  by {feedback.analyst.name} •{' '}
-                  {new Date(feedback.createdAt).toLocaleString()}
+                <Typography variant="body2" color="text.secondary" sx={{ ml: 2 }}>
+                  by {feedback.analyst.name} • {new Date(feedback.createdAt).toLocaleString()}
                 </Typography>
               </Box>
 
@@ -428,11 +389,7 @@ export default function AlertTriageV2Panel({
               )}
 
               <Box display="flex" alignItems="center" mt={1}>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ mr: 1 }}
-                >
+                <Typography variant="caption" color="text.secondary" sx={{ mr: 1 }}>
                   Confidence:
                 </Typography>
                 <Rating value={feedback.confidence * 5} size="small" readOnly />
@@ -450,15 +407,15 @@ export default function AlertTriageV2Panel({
     <>
       <Box
         sx={{
-          position: 'fixed',
+          position: "fixed",
           top: 0,
           right: 0,
           width: 400,
-          height: '100vh',
-          bgcolor: 'background.paper',
+          height: "100vh",
+          bgcolor: "background.paper",
           boxShadow: 3,
           zIndex: 1300,
-          overflow: 'auto',
+          overflow: "auto",
           p: 2,
         }}
       >
@@ -517,7 +474,7 @@ export default function AlertTriageV2Panel({
             >
               {REASON_CODES.map((code) => (
                 <MenuItem key={code} value={code}>
-                  {code.replace('_', ' ').toUpperCase()}
+                  {code.replace("_", " ").toUpperCase()}
                 </MenuItem>
               ))}
             </Select>

@@ -7,7 +7,7 @@
  * @module services/admin-api
  */
 
-import { apiFetch } from './api.js';
+import { apiFetch } from "./api.js";
 
 // ============================================================================
 // Types
@@ -51,7 +51,7 @@ export interface Role {
   inherits: string[];
   isSystem: boolean;
   isBuiltIn: boolean;
-  scope: 'full' | 'restricted' | 'readonly';
+  scope: "full" | "restricted" | "readonly";
   tenantId: string;
   createdAt: string;
   updatedAt: string;
@@ -102,7 +102,7 @@ export interface OperationResult {
 export interface GovernanceVerdict {
   verdictId: string;
   policyId: string;
-  result: 'ALLOW' | 'DENY' | 'FLAG' | 'REVIEW_REQUIRED';
+  result: "ALLOW" | "DENY" | "FLAG" | "REVIEW_REQUIRED";
   decidedAt: string;
   reason?: string;
   evaluator: string;
@@ -129,8 +129,8 @@ export interface ListUsersParams {
   search?: string;
   role?: string;
   isActive?: boolean;
-  sortBy?: 'email' | 'firstName' | 'lastName' | 'createdAt' | 'lastLogin';
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: "email" | "firstName" | "lastName" | "createdAt" | "lastLogin";
+  sortOrder?: "asc" | "desc";
 }
 
 export interface CreateUserPayload {
@@ -157,7 +157,7 @@ export interface CreateRolePayload {
   description?: string;
   permissions: string[];
   inherits?: string[];
-  scope?: 'full' | 'restricted' | 'readonly';
+  scope?: "full" | "restricted" | "readonly";
 }
 
 export interface UpdateRolePayload {
@@ -165,7 +165,7 @@ export interface UpdateRolePayload {
   description?: string;
   permissions?: string[];
   inherits?: string[];
-  scope?: 'full' | 'restricted' | 'readonly';
+  scope?: "full" | "restricted" | "readonly";
 }
 
 // ============================================================================
@@ -178,15 +178,15 @@ export const UserManagementAPI = {
    */
   list: (params: ListUsersParams = {}): Promise<DataEnvelope<UserListResult>> => {
     const qs = new URLSearchParams();
-    if (params.page) qs.set('page', String(params.page));
-    if (params.pageSize) qs.set('pageSize', String(params.pageSize));
-    if (params.search) qs.set('search', params.search);
-    if (params.role) qs.set('role', params.role);
-    if (params.isActive !== undefined) qs.set('isActive', String(params.isActive));
-    if (params.sortBy) qs.set('sortBy', params.sortBy);
-    if (params.sortOrder) qs.set('sortOrder', params.sortOrder);
+    if (params.page) qs.set("page", String(params.page));
+    if (params.pageSize) qs.set("pageSize", String(params.pageSize));
+    if (params.search) qs.set("search", params.search);
+    if (params.role) qs.set("role", params.role);
+    if (params.isActive !== undefined) qs.set("isActive", String(params.isActive));
+    if (params.sortBy) qs.set("sortBy", params.sortBy);
+    if (params.sortOrder) qs.set("sortOrder", params.sortOrder);
     const query = qs.toString();
-    return apiFetch(`/api/admin/users${query ? `?${query}` : ''}`);
+    return apiFetch(`/api/admin/users${query ? `?${query}` : ""}`);
   },
 
   /**
@@ -200,8 +200,8 @@ export const UserManagementAPI = {
    * Create a new user
    */
   create: (payload: CreateUserPayload): Promise<DataEnvelope<OperationResult>> => {
-    return apiFetch('/api/admin/users', {
-      method: 'POST',
+    return apiFetch("/api/admin/users", {
+      method: "POST",
       body: JSON.stringify(payload),
     });
   },
@@ -211,7 +211,7 @@ export const UserManagementAPI = {
    */
   update: (userId: string, payload: UpdateUserPayload): Promise<DataEnvelope<OperationResult>> => {
     return apiFetch(`/api/admin/users/${encodeURIComponent(userId)}`, {
-      method: 'PATCH',
+      method: "PATCH",
       body: JSON.stringify(payload),
     });
   },
@@ -220,9 +220,9 @@ export const UserManagementAPI = {
    * Delete (deactivate) a user
    */
   delete: (userId: string, hard = false): Promise<DataEnvelope<OperationResult>> => {
-    const qs = hard ? '?hard=true' : '';
+    const qs = hard ? "?hard=true" : "";
     return apiFetch(`/api/admin/users/${encodeURIComponent(userId)}${qs}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   },
 
@@ -231,7 +231,7 @@ export const UserManagementAPI = {
    */
   lock: (userId: string, reason: string): Promise<DataEnvelope<OperationResult>> => {
     return apiFetch(`/api/admin/users/${encodeURIComponent(userId)}/lock`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify({ reason }),
     });
   },
@@ -241,16 +241,20 @@ export const UserManagementAPI = {
    */
   unlock: (userId: string): Promise<DataEnvelope<OperationResult>> => {
     return apiFetch(`/api/admin/users/${encodeURIComponent(userId)}/unlock`, {
-      method: 'POST',
+      method: "POST",
     });
   },
 
   /**
    * Add user to tenant
    */
-  addToTenant: (userId: string, tenantId: string, roles: string[]): Promise<DataEnvelope<OperationResult>> => {
+  addToTenant: (
+    userId: string,
+    tenantId: string,
+    roles: string[]
+  ): Promise<DataEnvelope<OperationResult>> => {
     return apiFetch(`/api/admin/users/${encodeURIComponent(userId)}/tenants`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify({ tenantId, roles }),
     });
   },
@@ -259,9 +263,12 @@ export const UserManagementAPI = {
    * Remove user from tenant
    */
   removeFromTenant: (userId: string, tenantId: string): Promise<DataEnvelope<OperationResult>> => {
-    return apiFetch(`/api/admin/users/${encodeURIComponent(userId)}/tenants/${encodeURIComponent(tenantId)}`, {
-      method: 'DELETE',
-    });
+    return apiFetch(
+      `/api/admin/users/${encodeURIComponent(userId)}/tenants/${encodeURIComponent(tenantId)}`,
+      {
+        method: "DELETE",
+      }
+    );
   },
 };
 
@@ -274,7 +281,7 @@ export const RoleManagementAPI = {
    * List all roles
    */
   list: (): Promise<DataEnvelope<RoleListResult>> => {
-    return apiFetch('/api/admin/roles');
+    return apiFetch("/api/admin/roles");
   },
 
   /**
@@ -288,8 +295,8 @@ export const RoleManagementAPI = {
    * Create a custom role
    */
   create: (payload: CreateRolePayload): Promise<DataEnvelope<OperationResult>> => {
-    return apiFetch('/api/admin/roles', {
-      method: 'POST',
+    return apiFetch("/api/admin/roles", {
+      method: "POST",
       body: JSON.stringify(payload),
     });
   },
@@ -299,7 +306,7 @@ export const RoleManagementAPI = {
    */
   update: (roleId: string, payload: UpdateRolePayload): Promise<DataEnvelope<OperationResult>> => {
     return apiFetch(`/api/admin/roles/${encodeURIComponent(roleId)}`, {
-      method: 'PATCH',
+      method: "PATCH",
       body: JSON.stringify(payload),
     });
   },
@@ -309,7 +316,7 @@ export const RoleManagementAPI = {
    */
   delete: (roleId: string): Promise<DataEnvelope<OperationResult>> => {
     return apiFetch(`/api/admin/roles/${encodeURIComponent(roleId)}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   },
 
@@ -317,7 +324,7 @@ export const RoleManagementAPI = {
    * List all available permissions
    */
   listPermissions: (): Promise<DataEnvelope<PermissionListResult>> => {
-    return apiFetch('/api/admin/roles/permissions/list');
+    return apiFetch("/api/admin/roles/permissions/list");
   },
 
   /**
@@ -330,9 +337,13 @@ export const RoleManagementAPI = {
   /**
    * Assign role to user
    */
-  assignToUser: (userId: string, roleId: string, expiresAt?: string): Promise<DataEnvelope<OperationResult>> => {
-    return apiFetch('/api/admin/roles/assign', {
-      method: 'POST',
+  assignToUser: (
+    userId: string,
+    roleId: string,
+    expiresAt?: string
+  ): Promise<DataEnvelope<OperationResult>> => {
+    return apiFetch("/api/admin/roles/assign", {
+      method: "POST",
       body: JSON.stringify({ userId, roleId, expiresAt }),
     });
   },
@@ -341,8 +352,8 @@ export const RoleManagementAPI = {
    * Revoke role from user
    */
   revokeFromUser: (userId: string, roleId: string): Promise<DataEnvelope<OperationResult>> => {
-    return apiFetch('/api/admin/roles/revoke', {
-      method: 'POST',
+    return apiFetch("/api/admin/roles/revoke", {
+      method: "POST",
       body: JSON.stringify({ userId, roleId }),
     });
   },

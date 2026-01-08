@@ -1,7 +1,7 @@
 meta:
   id: plan.threat-modeling@v1
-  owner: 'security-engineering'
-  purpose: 'Extend threat modeling to additional subsystems with attack surface mapping'
+  owner: "security-engineering"
+  purpose: "Extend threat modeling to additional subsystems with attack surface mapping"
   tags:
     - security
     - threat-modeling
@@ -9,13 +9,13 @@ meta:
     - stride
     - mitigations
   guardrails:
-    - 'Focus on realistic, high-impact threats'
-    - 'Prioritize based on exploitability and impact'
-    - 'Document mitigations with implementation details'
-    - 'Review with security team before implementation'
+    - "Focus on realistic, high-impact threats"
+    - "Prioritize based on exploitability and impact"
+    - "Document mitigations with implementation details"
+    - "Review with security team before implementation"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 5000
 
@@ -203,15 +203,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'summit-threat-model'
+  - name: "summit-threat-model"
     inputs:
-      subsystems: 'API Gateway, Graph Engine, Auth Service, ML Pipeline, Databases'
-      data_flows: 'User → API → Graph → Database, API → ML → Results'
-      trust_boundaries: 'Internet | DMZ | Internal | Database tier'
-      existing_controls: 'TLS, JWT auth, RBAC, basic logging'
-      threat_intelligence: 'APT groups targeting similar platforms, credential stuffing'
+      subsystems: "API Gateway, Graph Engine, Auth Service, ML Pipeline, Databases"
+      data_flows: "User → API → Graph → Database, API → ML → Results"
+      trust_boundaries: "Internet | DMZ | Internal | Database tier"
+      existing_controls: "TLS, JWT auth, RBAC, basic logging"
+      threat_intelligence: "APT groups targeting similar platforms, credential stuffing"
     expected_contains:
-      - 'Attack Surface'
-      - 'STRIDE'
-      - 'Asset Criticality'
-      - 'Mitigations Catalog'
+      - "Attack Surface"
+      - "STRIDE"
+      - "Asset Criticality"
+      - "Mitigations Catalog"

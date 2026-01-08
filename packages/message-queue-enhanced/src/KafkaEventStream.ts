@@ -1,10 +1,10 @@
-import { Kafka, Producer, Consumer, EachMessagePayload } from 'kafkajs';
-import { trace } from '@opentelemetry/api';
-import pino = require('pino');
-import { KafkaConfig, Message, MessageHandler, MessageStats } from './types';
+import { Kafka, Producer, Consumer, EachMessagePayload } from "kafkajs";
+import { trace } from "@opentelemetry/api";
+import pino = require("pino");
+import { KafkaConfig, Message, MessageHandler, MessageStats } from "./types";
 
-const logger = pino({ name: 'KafkaEventStream' });
-const tracer = trace.getTracer('message-queue-enhanced');
+const logger = pino({ name: "KafkaEventStream" });
+const tracer = trace.getTracer("message-queue-enhanced");
 
 /**
  * Kafka-based high-throughput event streaming
@@ -34,7 +34,7 @@ export class KafkaEventStream {
    * Initialize producer and consumer
    */
   async initialize(): Promise<void> {
-    const span = tracer.startSpan('KafkaEventStream.initialize');
+    const span = tracer.startSpan("KafkaEventStream.initialize");
 
     try {
       this.producer = this.kafka.producer({
@@ -54,7 +54,7 @@ export class KafkaEventStream {
         await this.consumer.connect();
       }
 
-      logger.info({ clientId: this.config.clientId }, 'Kafka initialized');
+      logger.info({ clientId: this.config.clientId }, "Kafka initialized");
     } catch (error) {
       span.recordException(error as Error);
       throw error;
@@ -67,11 +67,11 @@ export class KafkaEventStream {
    * Publish message to topic
    */
   async publish<T = any>(topic: string, message: Message<T>): Promise<void> {
-    const span = tracer.startSpan('KafkaEventStream.publish');
+    const span = tracer.startSpan("KafkaEventStream.publish");
 
     try {
       if (!this.producer) {
-        throw new Error('Producer not initialized');
+        throw new Error("Producer not initialized");
       }
 
       await this.producer.send({
@@ -84,7 +84,7 @@ export class KafkaEventStream {
               ...message.headers,
               messageId: message.id,
               timestamp: message.timestamp.toString(),
-              priority: message.priority || 'normal',
+              priority: message.priority || "normal",
             },
           },
         ],
@@ -98,7 +98,7 @@ export class KafkaEventStream {
         messageId: message.id,
       });
 
-      logger.debug({ topic, messageId: message.id }, 'Message published');
+      logger.debug({ topic, messageId: message.id }, "Message published");
     } catch (error) {
       this.stats.failed++;
       span.recordException(error as Error);
@@ -111,15 +111,12 @@ export class KafkaEventStream {
   /**
    * Publish batch of messages
    */
-  async publishBatch<T = any>(
-    topic: string,
-    messages: Message<T>[]
-  ): Promise<void> {
-    const span = tracer.startSpan('KafkaEventStream.publishBatch');
+  async publishBatch<T = any>(topic: string, messages: Message<T>[]): Promise<void> {
+    const span = tracer.startSpan("KafkaEventStream.publishBatch");
 
     try {
       if (!this.producer) {
-        throw new Error('Producer not initialized');
+        throw new Error("Producer not initialized");
       }
 
       await this.producer.send({
@@ -131,7 +128,7 @@ export class KafkaEventStream {
             ...msg.headers,
             messageId: msg.id,
             timestamp: msg.timestamp.toString(),
-            priority: msg.priority || 'normal',
+            priority: msg.priority || "normal",
           },
         })),
       });
@@ -139,8 +136,8 @@ export class KafkaEventStream {
       this.stats.total += messages.length;
       this.stats.success += messages.length;
 
-      span.setAttribute('messageCount', messages.length);
-      logger.info({ topic, count: messages.length }, 'Batch published');
+      span.setAttribute("messageCount", messages.length);
+      logger.info({ topic, count: messages.length }, "Batch published");
     } catch (error) {
       this.stats.failed += messages.length;
       span.recordException(error as Error);
@@ -154,11 +151,11 @@ export class KafkaEventStream {
    * Subscribe to topic with handler
    */
   async subscribe(topic: string, handler: MessageHandler): Promise<void> {
-    const span = tracer.startSpan('KafkaEventStream.subscribe');
+    const span = tracer.startSpan("KafkaEventStream.subscribe");
 
     try {
       if (!this.consumer) {
-        throw new Error('Consumer not initialized');
+        throw new Error("Consumer not initialized");
       }
 
       // Register handler
@@ -178,7 +175,7 @@ export class KafkaEventStream {
         await this.startConsuming();
       }
 
-      logger.info({ topic }, 'Subscribed to topic');
+      logger.info({ topic }, "Subscribed to topic");
     } catch (error) {
       span.recordException(error as Error);
       throw error;
@@ -194,7 +191,9 @@ export class KafkaEventStream {
    */
   private async startConsuming(): Promise<void> {
     if (!this.consumer || this.isConsuming) return;
-    if (!this.consumer || this.isConsuming) { return; }
+    if (!this.consumer || this.isConsuming) {
+      return;
+    }
 
     this.isConsuming = true;
 
@@ -209,7 +208,7 @@ export class KafkaEventStream {
    * Handle incoming message
    */
   private async handleMessage(payload: EachMessagePayload): Promise<void> {
-    const span = tracer.startSpan('KafkaEventStream.handleMessage');
+    const span = tracer.startSpan("KafkaEventStream.handleMessage");
     const startTime = Date.now();
 
     try {
@@ -217,25 +216,22 @@ export class KafkaEventStream {
       const handlers = this.handlers.get(topic) || [];
 
       if (handlers.length === 0) {
-        logger.warn({ topic }, 'No handlers for topic');
+        logger.warn({ topic }, "No handlers for topic");
         return;
       }
 
       const message: Message = {
-        id: kafkaMessage.headers?.messageId?.toString() || '',
+        id: kafkaMessage.headers?.messageId?.toString() || "",
         topic,
-        payload: JSON.parse(kafkaMessage.value?.toString() || '{}'),
+        payload: JSON.parse(kafkaMessage.value?.toString() || "{}"),
         headers: Object.entries(kafkaMessage.headers || {}).reduce(
           (acc, [key, value]) => {
-            acc[key] = value?.toString() || '';
+            acc[key] = value?.toString() || "";
             return acc;
           },
           {} as Record<string, string>
         ),
-        timestamp: parseInt(
-          kafkaMessage.headers?.timestamp?.toString() || '0',
-          10
-        ),
+        timestamp: parseInt(kafkaMessage.headers?.timestamp?.toString() || "0", 10),
         priority: kafkaMessage.headers?.priority?.toString() as any,
       };
 
@@ -252,7 +248,7 @@ export class KafkaEventStream {
       });
     } catch (error) {
       span.recordException(error as Error);
-      logger.error({ error }, 'Message handling failed');
+      logger.error({ error }, "Message handling failed");
       throw error;
     } finally {
       span.end();
@@ -264,11 +260,11 @@ export class KafkaEventStream {
    */
   async seek(topic: string, partition: number, offset: string): Promise<void> {
     if (!this.consumer) {
-      throw new Error('Consumer not initialized');
+      throw new Error("Consumer not initialized");
     }
 
     await this.consumer.seek({ topic, partition, offset });
-    logger.info({ topic, partition, offset }, 'Seeked to offset');
+    logger.info({ topic, partition, offset }, "Seeked to offset");
   }
 
   /**
@@ -276,10 +272,12 @@ export class KafkaEventStream {
    */
   async pause(topics: string[]): Promise<void> {
     if (!this.consumer) return;
-    if (!this.consumer) { return; }
+    if (!this.consumer) {
+      return;
+    }
 
     this.consumer.pause(topics.map((topic) => ({ topic })));
-    logger.info({ topics }, 'Consumption paused');
+    logger.info({ topics }, "Consumption paused");
   }
 
   /**
@@ -287,10 +285,12 @@ export class KafkaEventStream {
    */
   async resume(topics: string[]): Promise<void> {
     if (!this.consumer) return;
-    if (!this.consumer) { return; }
+    if (!this.consumer) {
+      return;
+    }
 
     this.consumer.resume(topics.map((topic) => ({ topic })));
-    logger.info({ topics }, 'Consumption resumed');
+    logger.info({ topics }, "Consumption resumed");
   }
 
   /**
@@ -312,12 +312,11 @@ export class KafkaEventStream {
       await this.consumer.disconnect();
     }
 
-    logger.info('Kafka disconnected');
+    logger.info("Kafka disconnected");
   }
 
   private updateProcessingTime(time: number): void {
     const total = this.stats.success + this.stats.failed;
-    this.stats.avgProcessingTime =
-      (this.stats.avgProcessingTime * (total - 1) + time) / total;
+    this.stats.avgProcessingTime = (this.stats.avgProcessingTime * (total - 1) + time) / total;
   }
 }

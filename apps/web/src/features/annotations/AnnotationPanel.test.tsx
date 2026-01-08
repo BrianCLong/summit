@@ -3,7 +3,9 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
-import annotationsReducer, { getInitialAnnotationState } from './annotationsSlice'
+import annotationsReducer, {
+  getInitialAnnotationState,
+} from './annotationsSlice'
 import { AnnotationPanel } from './AnnotationPanel'
 
 const renderWithStore = (ui: React.ReactElement) => {
@@ -27,7 +29,9 @@ describe('AnnotationPanel', () => {
     await user.type(body, 'Draft note survives reload')
 
     await waitFor(() => {
-      expect(localStorage.getItem('annotations.draft')).toContain('Draft note survives reload')
+      expect(localStorage.getItem('annotations.draft')).toContain(
+        'Draft note survives reload'
+      )
     })
 
     unmount()
@@ -49,6 +53,8 @@ describe('AnnotationPanel', () => {
 
     await user.click(screen.getByRole('button', { name: /restore/i }))
 
-    expect(screen.getByLabelText('Annotation body')).toHaveValue('Draft note survives reload')
+    expect(screen.getByLabelText('Annotation body')).toHaveValue(
+      'Draft note survives reload'
+    )
   })
 })

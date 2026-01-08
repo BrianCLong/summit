@@ -6,9 +6,9 @@ metadata:
   owner: sre@summit
   approvals:
     required: true
-    approvers: ['sre-oncall', 'data-lead']
+    approvers: ["sre-oncall", "data-lead"]
   allowList:
-    roles: ['sre', 'platform-engineer']
+    roles: ["sre", "platform-engineer"]
   schedule: null
 spec:
   inputs:

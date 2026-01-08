@@ -7,16 +7,15 @@ export interface Rule {
 
 const post = async (url: string, body: unknown) => {
   const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error(`Request failed: ${res.status}`);
   return res.json();
 };
 
-export const createRule = (base: string, rule: Rule) =>
-  post(`${base}/dq/rules`, rule);
+export const createRule = (base: string, rule: Rule) => post(`${base}/dq/rules`, rule);
 export const evaluate = (base: string, payload: unknown, rules: Rule[]) =>
   post(`${base}/dq/evaluate`, { payload, rules });
 export const quarantineRetry = (base: string, id: string) =>

@@ -7,17 +7,20 @@ This guide provides everything you need to know about being on-call for the Inte
 ## On-Call Overview
 
 ### Rotation Schedule
+
 - **Primary On-Call**: Weekly rotation, Monday 9 AM to Monday 9 AM
 - **Secondary On-Call**: Bi-weekly rotation, escalation backup
 - **Schedule**: View in PagerDuty or Opsgenie
 
 ### Response Time SLAs
+
 - **P0 (Critical)**: Acknowledge within 2 minutes, respond immediately
 - **P1 (High)**: Acknowledge within 5 minutes, respond immediately
 - **P2 (Medium)**: Acknowledge within 15 minutes, respond within 1 hour
 - **P3 (Low)**: Next business day
 
 ### Compensation
+
 - On-call stipend: $X per week
 - Incident response: Additional compensation per incident
 - Time off: Comp time for major incidents outside business hours
@@ -27,6 +30,7 @@ This guide provides everything you need to know about being on-call for the Inte
 ### Setup Checklist (Do This Before Your First Shift)
 
 #### 1. Install Required Tools
+
 ```bash
 # Install PagerDuty mobile app
 # iOS: https://apps.apple.com/app/pagerduty/id594039512
@@ -53,6 +57,7 @@ brew install helm
 ```
 
 #### 2. Verify Access
+
 ```bash
 # Test Kubernetes access
 kubectl get pods -n intelgraph
@@ -68,6 +73,7 @@ git ls-remote git@github.com:intelgraph/platform.git
 ```
 
 #### 3. Configure Monitoring Access
+
 - [ ] Grafana: https://grafana.intelgraph.com (use SSO)
 - [ ] DataDog: https://app.datadoghq.com (use SSO)
 - [ ] PagerDuty: https://intelgraph.pagerduty.com
@@ -75,6 +81,7 @@ git ls-remote git@github.com:intelgraph/platform.git
 - [ ] Status Page: https://manage.statuspage.io/intelgraph
 
 #### 4. Familiarize Yourself with Runbooks
+
 - [Service Degradation](../runbooks/service-degradation.md)
 - [Database Failure Recovery](../runbooks/database-failure-recovery.md)
 - [API Rate Limit Exceeded](../runbooks/api-rate-limit-exceeded.md)
@@ -82,6 +89,7 @@ git ls-remote git@github.com:intelgraph/platform.git
 - [Incident Response Procedures](INCIDENT_RESPONSE.md)
 
 #### 5. Test Alert Reception
+
 - Send yourself a test page
 - Verify phone notification works
 - Verify SMS works
@@ -89,6 +97,7 @@ git ls-remote git@github.com:intelgraph/platform.git
 - Test acknowledgment workflow
 
 #### 6. Set Up Your Environment
+
 ```bash
 # Create shortcut commands
 cat >> ~/.zshrc << 'EOF'
@@ -106,6 +115,7 @@ source ~/.zshrc
 ### Handoff Checklist (Do This Every Shift Start)
 
 #### Pre-Shift Meeting (15 minutes before shift)
+
 Meet with outgoing on-call engineer:
 
 - [ ] Review any ongoing incidents
@@ -117,6 +127,7 @@ Meet with outgoing on-call engineer:
 - [ ] Ask questions about anything unclear
 
 #### Review Current State
+
 ```bash
 # Check for active alerts
 open https://grafana.intelgraph.com/alerting/list
@@ -135,7 +146,9 @@ open https://intelgraph.pagerduty.com/incidents
 ```
 
 #### Document Handoff
+
 Post in #on-call channel:
+
 ```
 🔄 On-Call Handoff
 
@@ -156,6 +169,7 @@ Ready to respond! 📱
 ### Daily Responsibilities
 
 #### Morning Check (9 AM)
+
 ```bash
 # 1. Check overnight alerts
 # Review in PagerDuty or Slack #monitoring
@@ -179,6 +193,7 @@ helm history intelgraph -n intelgraph | head -5
 ```
 
 #### Mid-Day Check (2 PM)
+
 ```bash
 # Quick health check
 curl -s https://api.intelgraph.com/health/detailed | jq '.status'
@@ -188,6 +203,7 @@ curl -s https://api.intelgraph.com/health/detailed | jq '.status'
 ```
 
 #### Evening Check (6 PM)
+
 ```bash
 # Review day's activity
 # Check for any warnings or degradations
@@ -197,6 +213,7 @@ curl -s https://api.intelgraph.com/health/detailed | jq '.status'
 ### When You Get Paged
 
 #### Step 1: Acknowledge (Within 2 minutes for P0/P1)
+
 ```bash
 # Acknowledge in PagerDuty
 # - Via mobile app: Tap notification → Acknowledge
@@ -208,6 +225,7 @@ curl -s https://api.intelgraph.com/health/detailed | jq '.status'
 ```
 
 #### Step 2: Assess (Within 5 minutes)
+
 ```bash
 # Open monitoring dashboards
 open https://grafana.intelgraph.com/d/production-health
@@ -229,6 +247,7 @@ kubectl get events -n intelgraph --sort-by='.lastTimestamp'
 ```
 
 #### Step 3: Create Incident (For P0/P1)
+
 ```bash
 # In Slack #incident-response
 /incident create P0 "Brief description"
@@ -243,12 +262,14 @@ kubectl get events -n intelgraph --sort-by='.lastTimestamp'
 ```
 
 #### Step 4: Follow Runbook
+
 - Find appropriate runbook for the issue
 - Follow steps systematically
 - Document what you do
 - Update stakeholders regularly
 
 #### Step 5: Resolve & Document
+
 - Verify resolution (metrics normal, alerts cleared)
 - Announce resolution
 - Update status page
@@ -257,6 +278,7 @@ kubectl get events -n intelgraph --sort-by='.lastTimestamp'
 ### Decision Making Guidelines
 
 #### When to Escalate
+
 - Unable to resolve within 15 min (P0) or 30 min (P1)
 - Need specialized knowledge (database, networking, etc.)
 - Multiple systems affected
@@ -264,39 +286,48 @@ kubectl get events -n intelgraph --sort-by='.lastTimestamp'
 - Need management decision
 
 #### When to Rollback
+
 ✅ **Do rollback if:**
+
 - Issue started after recent deployment
 - Quick rollback path available
 - Low risk of rollback
 - User impact is severe
 
 ⚠️ **Don't rollback if:**
+
 - Issue is unrelated to deployment
 - Rollback would cause data loss
 - Database migration can't be reversed
 - Rollback path is complex/risky
 
 #### When to Scale
+
 ✅ **Scale up if:**
+
 - High CPU/memory usage (>80%)
 - Request queue building up
 - Slow response times
 - Known traffic spike expected
 
 ⚠️ **Don't scale if:**
+
 - Root cause is software bug (fix the bug)
 - Database is the bottleneck (scale DB instead)
 - Would exceed cost budget significantly
 - Issue is connection/network-related
 
 #### When to Restart
+
 ✅ **Restart if:**
+
 - Memory leak suspected
 - Hung processes
 - Connection pool exhausted
 - Config changes need to apply
 
 ⚠️ **Don't restart if:**
+
 - Active incident with unclear cause
 - Restart would lose important diagnostic state
 - Database has active long-running transactions
@@ -304,6 +335,7 @@ kubectl get events -n intelgraph --sort-by='.lastTimestamp'
 ### Communication Best Practices
 
 #### Internal Updates (Slack)
+
 ```
 📊 UPDATE: <Incident Name> [HH:MM]
 
@@ -315,6 +347,7 @@ Next update: <timestamp>
 ```
 
 #### Status Page Updates
+
 - P0/P1: Update immediately
 - Use customer-friendly language
 - Focus on impact, not technical details
@@ -322,6 +355,7 @@ Next update: <timestamp>
 - Update as status changes
 
 #### Customer Communication
+
 - Let Communications Lead handle
 - Provide technical summary
 - Focus on customer impact
@@ -330,12 +364,14 @@ Next update: <timestamp>
 ### Handling Multiple Alerts
 
 #### Priority Order
+
 1. **P0**: Drop everything, focus here
 2. **P1**: Handle after P0 resolved or delegate
 3. **P2**: Delegate to other engineers
 4. **P3**: Create ticket, handle during business hours
 
 #### Getting Help
+
 ```
 # In #incident-response channel
 "Need help with [brief description]. Looking for:
@@ -347,6 +383,7 @@ Next update: <timestamp>
 ### Common Issues and Quick Fixes
 
 #### High Error Rate
+
 ```bash
 # Check recent deployments
 helm history intelgraph -n intelgraph
@@ -359,6 +396,7 @@ helm rollback intelgraph -n intelgraph
 ```
 
 #### Slow Response Times
+
 ```bash
 # Check database
 psql -h postgres -c "
@@ -375,6 +413,7 @@ kubectl scale deployment intelgraph-api -n intelgraph --replicas=10
 ```
 
 #### Database Connections Exhausted
+
 ```bash
 # Kill idle connections
 psql -h postgres -d intelgraph -c "
@@ -388,6 +427,7 @@ kubectl rollout restart deployment intelgraph-api -n intelgraph
 ```
 
 #### Disk Space Critical
+
 ```bash
 # Check disk usage
 kubectl exec -it statefulset/postgres-0 -n intelgraph -- df -h
@@ -406,6 +446,7 @@ kubectl exec -it statefulset/postgres-0 -n intelgraph -- \
 ### Handoff Checklist
 
 #### Prepare Handoff Summary
+
 ```
 # Document in #on-call channel
 
@@ -436,6 +477,7 @@ Passing on-call to @next-oncall 🎯
 ```
 
 #### Handoff Meeting (15 minutes)
+
 - Walk through shift summary
 - Explain any ongoing issues
 - Answer questions
@@ -443,12 +485,14 @@ Passing on-call to @next-oncall 🎯
 - Share lessons learned
 
 #### Update Documentation
+
 - [ ] Update runbooks if you found gaps
 - [ ] File tickets for improvements
 - [ ] Document any workarounds discovered
 - [ ] Share learnings in #engineering
 
 ### Post-Incident Actions
+
 - [ ] Schedule post-mortem (within 24-48h)
 - [ ] Document timeline
 - [ ] Create follow-up tickets
@@ -458,6 +502,7 @@ Passing on-call to @next-oncall 🎯
 ## Tips for Success
 
 ### Stay Prepared
+
 - Keep laptop charged and nearby
 - Have stable internet connection
 - Test VPN connection before traveling
@@ -465,6 +510,7 @@ Passing on-call to @next-oncall 🎯
 - Have backup communication method
 
 ### Stay Calm
+
 - Deep breath - you've got this!
 - Use runbooks - don't improvise
 - Ask for help when needed
@@ -472,6 +518,7 @@ Passing on-call to @next-oncall 🎯
 - Focus on impact mitigation first
 
 ### Stay Informed
+
 - Read incident post-mortems
 - Review updated runbooks
 - Understand recent architecture changes
@@ -479,6 +526,7 @@ Passing on-call to @next-oncall 🎯
 - Understand customer use cases
 
 ### Stay Healthy
+
 - Get enough sleep
 - Take breaks during quiet periods
 - Hand off gracefully if sick
@@ -488,6 +536,7 @@ Passing on-call to @next-oncall 🎯
 ## Resources
 
 ### Essential Links
+
 - **Monitoring**: https://grafana.intelgraph.com
 - **APM**: https://app.datadoghq.com/apm
 - **PagerDuty**: https://intelgraph.pagerduty.com
@@ -496,6 +545,7 @@ Passing on-call to @next-oncall 🎯
 - **Incident Response**: `INCIDENT_RESPONSE.md`
 
 ### Key Commands
+
 ```bash
 # Health check
 curl https://api.intelgraph.com/health/detailed | jq
@@ -520,6 +570,7 @@ psql -h postgres -d intelgraph -c "SELECT 1;"
 ```
 
 ### Support Contacts
+
 - **Primary On-Call**: Check PagerDuty
 - **Secondary On-Call**: Check PagerDuty
 - **Engineering Manager**: [contact]
@@ -527,6 +578,7 @@ psql -h postgres -d intelgraph -c "SELECT 1;"
 - **24/7 Eng Slack**: #incident-response
 
 ### Common Mistakes to Avoid
+
 - ❌ Not acknowledging alerts quickly
 - ❌ Making changes without documenting
 - ❌ Skipping the runbook
@@ -537,6 +589,7 @@ psql -h postgres -d intelgraph -c "SELECT 1;"
 - ❌ Not verifying resolution before closing
 
 ### Remember
+
 - **You're not alone**: Team is here to help
 - **Use runbooks**: They're there for a reason
 - **Ask questions**: Better to ask than guess

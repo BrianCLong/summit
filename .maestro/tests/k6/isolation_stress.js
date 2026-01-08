@@ -1,45 +1,45 @@
-import http from 'k6/http';
-import { check, sleep, group } from 'k6';
-import { Rate, Counter, Trend } from 'k6/metrics';
+import http from "k6/http";
+import { check, sleep, group } from "k6";
+import { Rate, Counter, Trend } from "k6/metrics";
 
 // SLO: 0 cross-tenant data leakage under 10x normal load
 export const options = {
   stages: [
-    { duration: '2m', target: 100 }, // Ramp up
-    { duration: '5m', target: 500 }, // 10x normal load
-    { duration: '2m', target: 1000 }, // Stress spike
-    { duration: '1m', target: 1000 }, // Sustain stress
-    { duration: '2m', target: 0 }, // Ramp down
+    { duration: "2m", target: 100 }, // Ramp up
+    { duration: "5m", target: 500 }, // 10x normal load
+    { duration: "2m", target: 1000 }, // Stress spike
+    { duration: "1m", target: 1000 }, // Sustain stress
+    { duration: "2m", target: 0 }, // Ramp down
   ],
   thresholds: {
-    isolation_violations: ['rate==0'], // 0% isolation violations
-    cross_tenant_leaks: ['count==0'], // 0 cross-tenant leaks
-    http_req_duration: ['p(95)<1000'], // p95 under stress
-    http_req_failed: ['rate<0.01'], // 99% availability under stress
-    checks: ['rate>0.99'], // 99% checks pass
+    isolation_violations: ["rate==0"], // 0% isolation violations
+    cross_tenant_leaks: ["count==0"], // 0 cross-tenant leaks
+    http_req_duration: ["p(95)<1000"], // p95 under stress
+    http_req_failed: ["rate<0.01"], // 99% availability under stress
+    checks: ["rate>0.99"], // 99% checks pass
   },
 };
 
 // Custom metrics for isolation monitoring
-const isolationViolations = new Rate('isolation_violations');
-const crossTenantLeaks = new Counter('cross_tenant_leaks');
-const tenantBoundaryChecks = new Counter('tenant_boundary_checks');
-const concurrentTenantOps = new Trend('concurrent_tenant_operations');
+const isolationViolations = new Rate("isolation_violations");
+const crossTenantLeaks = new Counter("cross_tenant_leaks");
+const tenantBoundaryChecks = new Counter("tenant_boundary_checks");
+const concurrentTenantOps = new Trend("concurrent_tenant_operations");
 
-const BASE_URL = __ENV.BASE_URL || 'http://localhost:4000';
+const BASE_URL = __ENV.BASE_URL || "http://localhost:4000";
 const GRAPHQL_URL = __ENV.GRAPHQL_URL || `${BASE_URL}/graphql`;
-const JWT_TOKEN = __ENV.JWT || 'test-token';
+const JWT_TOKEN = __ENV.JWT || "test-token";
 
 // Test tenants with known data
 const TEST_TENANTS = [
-  { id: 'isolation-victim-001', secrets: ['victim-key-1', 'victim-key-2'] },
-  { id: 'isolation-victim-002', secrets: ['victim-key-3', 'victim-key-4'] },
-  { id: 'isolation-attacker-001', secrets: ['attacker-key-1'] },
-  { id: 'isolation-attacker-002', secrets: ['attacker-key-2'] },
+  { id: "isolation-victim-001", secrets: ["victim-key-1", "victim-key-2"] },
+  { id: "isolation-victim-002", secrets: ["victim-key-3", "victim-key-4"] },
+  { id: "isolation-attacker-001", secrets: ["attacker-key-1"] },
+  { id: "isolation-attacker-002", secrets: ["attacker-key-2"] },
 ];
 
 export function setup() {
-  console.log('Setting up isolation stress test data...');
+  console.log("Setting up isolation stress test data...");
 
   // Seed test data for each tenant
   TEST_TENANTS.forEach((tenant) => {
@@ -48,29 +48,25 @@ export function setup() {
       tenantId: tenant.id,
       type: `test-signal-${i}`,
       value: Math.random() * 2 - 1,
-      source: 'isolation-stress-test',
+      source: "isolation-stress-test",
       ts: new Date().toISOString(),
-      purpose: 'investigation',
+      purpose: "investigation",
       metadata: { tenant: tenant.id, index: i },
     }));
 
     const payload = { signals, batch: true };
     const params = {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${JWT_TOKEN}`,
-        'x-tenant-id': tenant.id,
-        'x-idempotency-key': `setup-${tenant.id}-${Date.now()}`,
+        "x-tenant-id": tenant.id,
+        "x-idempotency-key": `setup-${tenant.id}-${Date.now()}`,
       },
     };
 
-    const response = http.post(
-      `${BASE_URL}/ingest/stream`,
-      JSON.stringify(payload),
-      params,
-    );
+    const response = http.post(`${BASE_URL}/ingest/stream`, JSON.stringify(payload), params);
     check(response, {
-      'setup data ingested': (r) => r.status === 202,
+      "setup data ingested": (r) => r.status === 202,
     });
   });
 
@@ -82,9 +78,9 @@ export default function (data) {
   const currentVU = __VU;
   const currentIter = __ITER;
 
-  group('Multi-Tenant Isolation Stress Test', function () {
+  group("Multi-Tenant Isolation Stress Test", function () {
     // Test 1: Concurrent tenant data access
-    group('Concurrent Tenant Access', function () {
+    group("Concurrent Tenant Access", function () {
       const startTime = new Date();
 
       // Select a different tenant to attempt cross-access
@@ -93,7 +89,7 @@ export default function (data) {
       const responses = http.batch([
         // Legitimate tenant access
         {
-          method: 'POST',
+          method: "POST",
           url: GRAPHQL_URL,
           body: JSON.stringify({
             query: `
@@ -110,17 +106,17 @@ export default function (data) {
           }),
           params: {
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
               Authorization: `Bearer ${JWT_TOKEN}`,
-              'x-tenant-id': tenant.id,
+              "x-tenant-id": tenant.id,
             },
-            tags: { tenant: tenant.id, operation: 'legitimate_access' },
+            tags: { tenant: tenant.id, operation: "legitimate_access" },
           },
         },
 
         // Attempted cross-tenant access (should be blocked)
         {
-          method: 'POST',
+          method: "POST",
           url: GRAPHQL_URL,
           body: JSON.stringify({
             query: `
@@ -137,11 +133,11 @@ export default function (data) {
           }),
           params: {
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
               Authorization: `Bearer ${JWT_TOKEN}`,
-              'x-tenant-id': tenant.id, // Wrong tenant context
+              "x-tenant-id": tenant.id, // Wrong tenant context
             },
-            tags: { tenant: tenant.id, operation: 'cross_tenant_attempt' },
+            tags: { tenant: tenant.id, operation: "cross_tenant_attempt" },
           },
         },
       ]);
@@ -150,17 +146,15 @@ export default function (data) {
 
       // Verify legitimate access works
       const legitimateCheck = check(legitimateResponse, {
-        'legitimate access succeeds': (r) => r.status === 200,
-        'legitimate data returned': (r) => {
+        "legitimate access succeeds": (r) => r.status === 200,
+        "legitimate data returned": (r) => {
           const data = r.json();
           return data.data && data.data.signals && data.data.signals.length > 0;
         },
-        'legitimate data is own tenant': (r) => {
+        "legitimate data is own tenant": (r) => {
           const data = r.json();
           if (data.data && data.data.signals) {
-            return data.data.signals.every(
-              (signal) => signal.tenantId === tenant.id,
-            );
+            return data.data.signals.every((signal) => signal.tenantId === tenant.id);
           }
           return true;
         },
@@ -168,14 +162,14 @@ export default function (data) {
 
       // Verify cross-tenant access is blocked
       const crossTenantBlocked = check(crossTenantResponse, {
-        'cross-tenant blocked or empty': (r) => {
+        "cross-tenant blocked or empty": (r) => {
           if (r.status !== 200) return true; // Access denied
           const data = r.json();
           if (data.errors) return true; // GraphQL error
           if (data.data && data.data.signals) {
             // If data returned, it should NOT contain other tenant's data
             const hasOtherTenantData = data.data.signals.some(
-              (signal) => signal.tenantId === otherTenant.id,
+              (signal) => signal.tenantId === otherTenant.id
             );
             return !hasOtherTenantData;
           }
@@ -189,7 +183,7 @@ export default function (data) {
         isolationViolations.add(1);
         crossTenantLeaks.add(1);
         console.error(
-          `ISOLATION VIOLATION: VU${currentVU} iter${currentIter} - Tenant ${tenant.id} accessed ${otherTenant.id} data`,
+          `ISOLATION VIOLATION: VU${currentVU} iter${currentIter} - Tenant ${tenant.id} accessed ${otherTenant.id} data`
         );
       } else {
         isolationViolations.add(0);
@@ -200,14 +194,14 @@ export default function (data) {
     });
 
     // Test 2: Rapid tenant switching
-    group('Rapid Tenant Switching', function () {
+    group("Rapid Tenant Switching", function () {
       const rapidSwitches = [];
 
       for (let i = 0; i < 5; i++) {
         const switchTenant = data.tenants[i % data.tenants.length];
 
         rapidSwitches.push({
-          method: 'POST',
+          method: "POST",
           url: `${BASE_URL}/ingest/stream`,
           body: JSON.stringify({
             signals: [
@@ -215,20 +209,20 @@ export default function (data) {
                 tenantId: switchTenant.id,
                 type: `rapid-switch-${i}`,
                 value: Math.random(),
-                source: 'isolation-stress',
+                source: "isolation-stress",
                 ts: new Date().toISOString(),
-                purpose: 'investigation',
+                purpose: "investigation",
               },
             ],
           }),
           params: {
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
               Authorization: `Bearer ${JWT_TOKEN}`,
-              'x-tenant-id': switchTenant.id,
-              'x-idempotency-key': `rapid-${currentVU}-${currentIter}-${i}-${Date.now()}`,
+              "x-tenant-id": switchTenant.id,
+              "x-idempotency-key": `rapid-${currentVU}-${currentIter}-${i}-${Date.now()}`,
             },
-            tags: { tenant: switchTenant.id, operation: 'rapid_ingest' },
+            tags: { tenant: switchTenant.id, operation: "rapid_ingest" },
           },
         });
       }
@@ -241,8 +235,8 @@ export default function (data) {
         check(
           response,
           {
-            'rapid switch accepted': (r) => r.status === 202,
-            'rapid switch isolated': (r) => {
+            "rapid switch accepted": (r) => r.status === 202,
+            "rapid switch isolated": (r) => {
               const data = r.json();
               // Check that response doesn't leak other tenant info
               if (data.tenant && data.tenant !== expectedTenant.id) {
@@ -253,15 +247,15 @@ export default function (data) {
               return true;
             },
           },
-          { tenant: expectedTenant.id },
+          { tenant: expectedTenant.id }
         );
       });
     });
 
     // Test 3: Concurrent operations on same tenant
-    group('Same Tenant Concurrency', function () {
+    group("Same Tenant Concurrency", function () {
       const concurrentOps = Array.from({ length: 3 }, (_, i) => ({
-        method: 'POST',
+        method: "POST",
         url: GRAPHQL_URL,
         body: JSON.stringify({
           query: `
@@ -276,9 +270,9 @@ export default function (data) {
         }),
         params: {
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
             Authorization: `Bearer ${JWT_TOKEN}`,
-            'x-tenant-id': tenant.id,
+            "x-tenant-id": tenant.id,
           },
           tags: { tenant: tenant.id, operation: `concurrent_${i}` },
         },
@@ -290,12 +284,12 @@ export default function (data) {
         check(
           response,
           {
-            'concurrent op succeeds': (r) => r.status === 200,
-            'concurrent op isolated': (r) => {
+            "concurrent op succeeds": (r) => r.status === 200,
+            "concurrent op isolated": (r) => {
               const data = r.json();
               if (data.data && data.data.signals) {
                 const hasWrongTenant = data.data.signals.some(
-                  (signal) => signal.tenantId !== tenant.id,
+                  (signal) => signal.tenantId !== tenant.id
                 );
                 if (hasWrongTenant) {
                   isolationViolations.add(1);
@@ -306,7 +300,7 @@ export default function (data) {
               return true;
             },
           },
-          { tenant: tenant.id, concurrent_op: i },
+          { tenant: tenant.id, concurrent_op: i }
         );
       });
     });
@@ -314,9 +308,9 @@ export default function (data) {
     // Test 4: Memory pressure with large queries
     if (Math.random() < 0.1) {
       // 10% of requests create memory pressure
-      group('Memory Pressure Test', function () {
+      group("Memory Pressure Test", function () {
         const largeQuery = {
-          method: 'POST',
+          method: "POST",
           url: GRAPHQL_URL,
           body: JSON.stringify({
             query: `
@@ -334,11 +328,11 @@ export default function (data) {
           }),
           params: {
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
               Authorization: `Bearer ${JWT_TOKEN}`,
-              'x-tenant-id': tenant.id,
+              "x-tenant-id": tenant.id,
             },
-            tags: { tenant: tenant.id, operation: 'memory_pressure' },
+            tags: { tenant: tenant.id, operation: "memory_pressure" },
           },
         };
 
@@ -346,22 +340,22 @@ export default function (data) {
           largeQuery.method,
           largeQuery.url,
           largeQuery.body,
-          largeQuery.params,
+          largeQuery.params
         );
 
         check(response, {
-          'memory pressure handled': (r) => r.status === 200,
-          'memory pressure isolated': (r) => {
+          "memory pressure handled": (r) => r.status === 200,
+          "memory pressure isolated": (r) => {
             const data = r.json();
             if (data.data && data.data.signals) {
               const hasWrongTenant = data.data.signals.some(
-                (signal) => signal.tenantId !== tenant.id,
+                (signal) => signal.tenantId !== tenant.id
               );
               if (hasWrongTenant) {
                 isolationViolations.add(1);
                 crossTenantLeaks.add(1);
                 console.error(
-                  `MEMORY CORRUPTION: Tenant ${tenant.id} saw other tenant data under memory pressure`,
+                  `MEMORY CORRUPTION: Tenant ${tenant.id} saw other tenant data under memory pressure`
                 );
                 return false;
               }
@@ -378,17 +372,15 @@ export default function (data) {
 }
 
 export function teardown(data) {
-  console.log('Cleaning up isolation stress test...');
+  console.log("Cleaning up isolation stress test...");
 
   // Note: In a real scenario, you might want to clean up test data
   // For now, we'll let the retention policies handle it
 }
 
 export function handleSummary(data) {
-  const isolationViolationRate =
-    data.metrics.isolation_violations?.values?.rate || 0;
-  const crossTenantLeakCount =
-    data.metrics.cross_tenant_leaks?.values?.count || 0;
+  const isolationViolationRate = data.metrics.isolation_violations?.values?.rate || 0;
+  const crossTenantLeakCount = data.metrics.cross_tenant_leaks?.values?.count || 0;
   const totalChecks = data.metrics.tenant_boundary_checks?.values?.count || 0;
 
   const passed = data.metrics.checks.values.passes;
@@ -397,11 +389,11 @@ export function handleSummary(data) {
   const passRate = ((passed / total) * 100).toFixed(2);
 
   const avgDuration = data.metrics.http_req_duration.values.avg.toFixed(2);
-  const p95Duration = data.metrics.http_req_duration.values['p(95)'].toFixed(2);
+  const p95Duration = data.metrics.http_req_duration.values["p(95)"].toFixed(2);
 
   const report = {
-    'isolation-stress-summary.json': JSON.stringify(data, null, 2),
-    'isolation-stress-report.html': `
+    "isolation-stress-summary.json": JSON.stringify(data, null, 2),
+    "isolation-stress-report.html": `
       <html>
       <head><title>Multi-Tenant Isolation Stress Test Results</title></head>
       <body>
@@ -425,10 +417,10 @@ export function handleSummary(data) {
         
         <h2>🎯 SLO Compliance</h2>
         <ul>
-          <li><strong>Zero Cross-Tenant Leaks:</strong> ${crossTenantLeakCount === 0 ? '✅ PASS' : '❌ FAIL'}</li>
-          <li><strong>Zero Isolation Violations:</strong> ${isolationViolationRate === 0 ? '✅ PASS' : '❌ FAIL'}</li>
-          <li><strong>Stress Performance:</strong> ${p95Duration < 1000 ? '✅ PASS' : '❌ FAIL'}</li>
-          <li><strong>Availability:</strong> ${data.metrics.http_req_failed.values.rate < 0.01 ? '✅ PASS' : '❌ FAIL'}</li>
+          <li><strong>Zero Cross-Tenant Leaks:</strong> ${crossTenantLeakCount === 0 ? "✅ PASS" : "❌ FAIL"}</li>
+          <li><strong>Zero Isolation Violations:</strong> ${isolationViolationRate === 0 ? "✅ PASS" : "❌ FAIL"}</li>
+          <li><strong>Stress Performance:</strong> ${p95Duration < 1000 ? "✅ PASS" : "❌ FAIL"}</li>
+          <li><strong>Availability:</strong> ${data.metrics.http_req_failed.values.rate < 0.01 ? "✅ PASS" : "❌ FAIL"}</li>
         </ul>
         
         <h2>📊 Test Configuration</h2>

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {
   evaluateCanary,
   extractAvailabilityObjective,
-  resolveThresholds
+  resolveThresholds,
 } from "./check-canary-slo.mjs";
 
 const baseThresholds = {
@@ -13,7 +13,7 @@ const baseThresholds = {
   latencyFactor: 2,
   latencyAbsoluteLimitSec: 0.3,
   errorAbsoluteLimit: 0.02,
-  availabilityObjective: 0.995
+  availabilityObjective: 0.995,
 };
 
 describe("extractAvailabilityObjective", () => {
@@ -24,7 +24,7 @@ describe("extractAvailabilityObjective", () => {
 
   it("reads objective from availability SLO", () => {
     const objective = extractAvailabilityObjective({
-      slos: [{ name: "availability", objective: 0.99 }]
+      slos: [{ name: "availability", objective: 0.99 }],
     });
     assert.equal(objective, 0.99);
   });
@@ -38,9 +38,9 @@ describe("resolveThresholds", () => {
         error_rate_factor: 1.5,
         latency_factor: 1.8,
         latency_abs_seconds: 0.25,
-        error_rate_abs: 0.015
+        error_rate_abs: 0.015,
       },
-      slos: [{ name: "availability", objective: 0.99 }]
+      slos: [{ name: "availability", objective: 0.99 }],
     });
 
     assert.equal(thresholds.window, "5m");
@@ -59,7 +59,7 @@ describe("evaluateCanary", () => {
       errorBaseline: 0.01,
       latencyNow: 0.15,
       latencyBaseline: 0.12,
-      availabilityNow: 0.997
+      availabilityNow: 0.997,
     };
 
     const problems = evaluateCanary(metrics, baseThresholds);
@@ -72,14 +72,12 @@ describe("evaluateCanary", () => {
       errorBaseline: 0.01,
       latencyNow: 0.1,
       latencyBaseline: 0.1,
-      availabilityNow: 0.999
+      availabilityNow: 0.999,
     };
 
     const problems = evaluateCanary(metrics, baseThresholds);
     assert.ok(
-      problems.some(p =>
-        p.includes("Error rate ratio exceeded") && p.includes("factor=2")
-      )
+      problems.some((p) => p.includes("Error rate ratio exceeded") && p.includes("factor=2"))
     );
   });
 
@@ -89,13 +87,11 @@ describe("evaluateCanary", () => {
       errorBaseline: 0,
       latencyNow: 0.35,
       latencyBaseline: 0,
-      availabilityNow: 0.999
+      availabilityNow: 0.999,
     };
 
     const problems = evaluateCanary(metrics, baseThresholds);
-    assert.ok(
-      problems.some(p => p.includes("Latency went from ~0") && p.includes("300ms"))
-    );
+    assert.ok(problems.some((p) => p.includes("Latency went from ~0") && p.includes("300ms")));
   });
 
   it("fails on availability below objective", () => {
@@ -104,12 +100,10 @@ describe("evaluateCanary", () => {
       errorBaseline: 0,
       latencyNow: 0.1,
       latencyBaseline: 0.1,
-      availabilityNow: 0.990
+      availabilityNow: 0.99,
     };
 
     const problems = evaluateCanary(metrics, baseThresholds);
-    assert.ok(
-      problems.some(p => p.includes("Availability 0.9900 is below objective"))
-    );
+    assert.ok(problems.some((p) => p.includes("Availability 0.9900 is below objective")));
   });
 });

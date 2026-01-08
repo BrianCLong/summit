@@ -13,10 +13,10 @@
  */
 
 // Types
-export * from './types/index.js';
+export * from "./types/index.js";
 
 // Services
-export * from './services/index.js';
+export * from "./services/index.js";
 
 // Re-export key types for convenience
 export type {
@@ -25,29 +25,19 @@ export type {
   ClassificationLevel,
   RiskLevel,
   LifecycleType,
-} from './types/document.js';
+} from "./types/document.js";
 
-export type {
-  RelationshipTypeId,
-  DocumentRelationship,
-} from './types/relationship.js';
+export type { RelationshipTypeId, DocumentRelationship } from "./types/relationship.js";
 
 export type {
   LifecycleDefinition,
   TransitionResult,
   AvailableTransitions,
-} from './types/lifecycle.js';
+} from "./types/lifecycle.js";
 
-export type {
-  ComplianceCheckResult,
-  RiskScore,
-  ComplianceReport,
-} from './types/compliance.js';
+export type { ComplianceCheckResult, RiskScore, ComplianceReport } from "./types/compliance.js";
 
-export type {
-  AIProvenanceMetadata,
-  ProvenanceReport,
-} from './types/provenance.js';
+export type { AIProvenanceMetadata, ProvenanceReport } from "./types/provenance.js";
 
 // Version
-export const VERSION = '1.0.0';
+export const VERSION = "1.0.0";

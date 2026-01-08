@@ -2,11 +2,15 @@
  * Tests for Ensemble Forecasting
  */
 
-import { EnsembleForecaster, OptimalEnsemble } from '../src/models/ensemble.js';
-import { MonteCarloSimulator, ScenarioAnalyzer, Backtester } from '../src/utils/scenario-simulation.js';
-import type { TimeSeriesData, ForecastResult } from '../src/types/index.js';
+import { EnsembleForecaster, OptimalEnsemble } from "../src/models/ensemble.js";
+import {
+  MonteCarloSimulator,
+  ScenarioAnalyzer,
+  Backtester,
+} from "../src/utils/scenario-simulation.js";
+import type { TimeSeriesData, ForecastResult } from "../src/types/index.js";
 
-describe('EnsembleForecaster', () => {
+describe("EnsembleForecaster", () => {
   const generateTestData = (n: number): TimeSeriesData[] => {
     const data: TimeSeriesData[] = [];
     let value = 100;
@@ -22,14 +26,14 @@ describe('EnsembleForecaster', () => {
     return data;
   };
 
-  describe('fit and forecast', () => {
-    it('should fit ensemble with multiple model types', () => {
+  describe("fit and forecast", () => {
+    it("should fit ensemble with multiple model types", () => {
       const ensemble = new EnsembleForecaster({
         models: [
-          { type: 'arima', params: { p: 1, d: 1, q: 1 } },
-          { type: 'exponential', params: { alpha: 0.3 } },
+          { type: "arima", params: { p: 1, d: 1, q: 1 } },
+          { type: "exponential", params: { alpha: 0.3 } },
         ],
-        method: 'average',
+        method: "average",
       });
 
       const data = generateTestData(100);
@@ -37,14 +41,14 @@ describe('EnsembleForecaster', () => {
       expect(() => ensemble.fit(data)).not.toThrow();
     });
 
-    it('should generate weighted ensemble forecasts', () => {
+    it("should generate weighted ensemble forecasts", () => {
       const ensemble = new EnsembleForecaster({
         models: [
-          { type: 'arima', params: { p: 1, d: 1, q: 1 } },
-          { type: 'exponential', params: { alpha: 0.3 } },
+          { type: "arima", params: { p: 1, d: 1, q: 1 } },
+          { type: "exponential", params: { alpha: 0.3 } },
         ],
         weights: [0.6, 0.4],
-        method: 'weighted',
+        method: "weighted",
       });
 
       const data = generateTestData(100);
@@ -53,15 +57,15 @@ describe('EnsembleForecaster', () => {
       const forecasts = ensemble.forecast(10);
 
       expect(forecasts).toHaveLength(10);
-      forecasts.forEach(f => {
-        expect(typeof f.forecast).toBe('number');
+      forecasts.forEach((f) => {
+        expect(typeof f.forecast).toBe("number");
         expect(!isNaN(f.forecast)).toBe(true);
       });
     });
   });
 });
 
-describe('MonteCarloSimulator', () => {
+describe("MonteCarloSimulator", () => {
   const createBaseForecast = (): ForecastResult[] => {
     return Array.from({ length: 10 }, (_, i) => ({
       timestamp: new Date(2025, 0, i + 1),
@@ -72,8 +76,8 @@ describe('MonteCarloSimulator', () => {
     }));
   };
 
-  describe('simulate', () => {
-    it('should run Monte Carlo simulation', () => {
+  describe("simulate", () => {
+    it("should run Monte Carlo simulation", () => {
       const simulator = new MonteCarloSimulator(100);
       const baseForecast = createBaseForecast();
 
@@ -85,7 +89,7 @@ describe('MonteCarloSimulator', () => {
       expect(result.median).toHaveLength(baseForecast.length);
     });
 
-    it('should calculate correct percentiles', () => {
+    it("should calculate correct percentiles", () => {
       const simulator = new MonteCarloSimulator(1000);
       const baseForecast = createBaseForecast();
 
@@ -98,36 +102,36 @@ describe('MonteCarloSimulator', () => {
   });
 });
 
-describe('ScenarioAnalyzer', () => {
-  describe('compareScenarios', () => {
-    it('should rank scenarios by impact', () => {
+describe("ScenarioAnalyzer", () => {
+  describe("compareScenarios", () => {
+    it("should rank scenarios by impact", () => {
       const analyzer = new ScenarioAnalyzer();
 
       const scenarios = [
-        { name: 'optimistic', assumptions: new Map([['growth', 1.2]]) },
-        { name: 'pessimistic', assumptions: new Map([['growth', 0.8]]) },
-        { name: 'baseline', assumptions: new Map([['growth', 1.0]]) },
+        { name: "optimistic", assumptions: new Map([["growth", 1.2]]) },
+        { name: "pessimistic", assumptions: new Map([["growth", 0.8]]) },
+        { name: "baseline", assumptions: new Map([["growth", 1.0]]) },
       ];
 
       const results = analyzer.compareScenarios(scenarios);
 
       expect(results).toHaveLength(3);
-      results.forEach(r => {
-        expect(typeof r.impact).toBe('number');
-        expect(typeof r.ranking).toBe('number');
+      results.forEach((r) => {
+        expect(typeof r.impact).toBe("number");
+        expect(typeof r.ranking).toBe("number");
       });
     });
   });
 
-  describe('stressTest', () => {
-    it('should apply stress factors to forecasts', () => {
+  describe("stressTest", () => {
+    it("should apply stress factors to forecasts", () => {
       const analyzer = new ScenarioAnalyzer();
 
       const forecasts: ForecastResult[] = [
         { timestamp: new Date(), forecast: 100, lowerBound: 90, upperBound: 110, confidence: 0.95 },
       ];
 
-      const stressFactors = new Map([['market_crash', 0.7]]);
+      const stressFactors = new Map([["market_crash", 0.7]]);
       const stressed = analyzer.stressTest(forecasts, stressFactors);
 
       expect(stressed[0].forecast).toBe(70);
@@ -135,7 +139,7 @@ describe('ScenarioAnalyzer', () => {
   });
 });
 
-describe('Backtester', () => {
+describe("Backtester", () => {
   const generateTestData = (n: number): TimeSeriesData[] => {
     return Array.from({ length: n }, (_, i) => ({
       timestamp: new Date(2025, 0, i + 1),
@@ -143,8 +147,8 @@ describe('Backtester', () => {
     }));
   };
 
-  describe('backtest', () => {
-    it('should run backtesting on forecasting model', () => {
+  describe("backtest", () => {
+    it("should run backtesting on forecasting model", () => {
       const backtester = new Backtester();
       const data = generateTestData(100);
 
@@ -161,7 +165,7 @@ describe('Backtester', () => {
 
       const result = backtester.backtest(data, forecastFn, 5, 50);
 
-      expect(typeof result.accuracy).toBe('number');
+      expect(typeof result.accuracy).toBe("number");
       expect(result.forecasts.length).toBeGreaterThan(0);
       expect(result.actuals.length).toBe(result.forecasts.length);
       expect(result.errors.length).toBe(result.forecasts.length);

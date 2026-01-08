@@ -6,8 +6,8 @@
  * This file is a reference implementation - adapt to your database and schema.
  */
 
-import { LOCALE_CONFIGS, getAvailableLocales } from '@intelgraph/i18n';
-import type { Locale } from '@intelgraph/i18n';
+import { LOCALE_CONFIGS, getAvailableLocales } from "@intelgraph/i18n";
+import type { Locale } from "@intelgraph/i18n";
 
 // Example user preferences type
 interface UserPreferences {
@@ -21,12 +21,12 @@ interface UserPreferences {
 
 // Convert GraphQL enum (EN_US) to locale code (en-US)
 function gqlToLocaleCode(gqlLocale: string): Locale {
-  return gqlLocale.replace('_', '-') as Locale;
+  return gqlLocale.replace("_", "-") as Locale;
 }
 
 // Convert locale code (en-US) to GraphQL enum (EN_US)
 function localeToGqlEnum(locale: Locale): string {
-  return locale.replace('-', '_');
+  return locale.replace("-", "_");
 }
 
 /**
@@ -37,13 +37,9 @@ export const resolvers = {
     /**
      * Get user preferences including locale
      */
-    userPreferences: async (
-      _parent: any,
-      { userId }: { userId: string },
-      context: any
-    ) => {
+    userPreferences: async (_parent: any, { userId }: { userId: string }, context: any) => {
       // Check authorization
-      await context.authorize('user:read', { userId });
+      await context.authorize("user:read", { userId });
 
       // Fetch from database
       const user = await context.db.user.findUnique({
@@ -52,7 +48,7 @@ export const resolvers = {
       });
 
       if (!user) {
-        throw new Error('User not found');
+        throw new Error("User not found");
       }
 
       return user.preferences;
@@ -71,8 +67,8 @@ export const resolvers = {
         englishName: locale.englishName,
         flag: locale.flag,
         direction: locale.direction.toUpperCase(),
-        fullyTranslated: locale.code === 'en-US' || locale.code === 'es-ES',
-        coverage: locale.code === 'en-US' ? 100 : locale.code === 'es-ES' ? 100 : 70,
+        fullyTranslated: locale.code === "en-US" || locale.code === "es-ES",
+        coverage: locale.code === "en-US" ? 100 : locale.code === "es-ES" ? 100 : 70,
       }));
     },
   },
@@ -83,14 +79,11 @@ export const resolvers = {
      */
     updateUserPreferences: async (
       _parent: any,
-      {
-        userId,
-        preferences,
-      }: { userId: string; preferences: Partial<UserPreferences> },
+      { userId, preferences }: { userId: string; preferences: Partial<UserPreferences> },
       context: any
     ) => {
       // Check authorization
-      await context.authorize('user:update', { userId });
+      await context.authorize("user:update", { userId });
 
       // Convert GraphQL enum to locale code if locale is provided
       if (preferences.locale) {
@@ -112,7 +105,7 @@ export const resolvers = {
 
       // Log audit event
       await context.audit.log({
-        action: 'user.preferences.update',
+        action: "user.preferences.update",
         userId,
         metadata: { preferences },
       });
@@ -129,7 +122,7 @@ export const resolvers = {
       context: any
     ) => {
       // Check authorization
-      await context.authorize('user:update', { userId });
+      await context.authorize("user:update", { userId });
 
       const localeCode = gqlToLocaleCode(locale);
 
@@ -155,7 +148,7 @@ export const resolvers = {
 
       // Log audit event
       await context.audit.log({
-        action: 'user.locale.update',
+        action: "user.locale.update",
         userId,
         metadata: { locale: localeCode },
       });
@@ -179,11 +172,13 @@ export const resolvers = {
         select: { preferences: true },
       });
 
-      return userData?.preferences || {
-        locale: 'en-US',
-        theme: 'light',
-        timezone: 'UTC',
-      };
+      return (
+        userData?.preferences || {
+          locale: "en-US",
+          theme: "light",
+          timezone: "UTC",
+        }
+      );
     },
   },
 

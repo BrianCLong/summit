@@ -195,9 +195,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
-        with: { go-version: '1.22' }
+        with: { go-version: "1.22" }
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: "20" }
       - name: Go build & test
         run: |
           make go-build
@@ -336,16 +336,16 @@ labels: bug, needs-triage
 ### 9.2 k6 Smoke Script (skeleton)
 
 ```js
-import http from 'k6/http';
-import { sleep, check } from 'k6';
-export const options = { vus: 10, duration: '2m' };
+import http from "k6/http";
+import { sleep, check } from "k6";
+export const options = { vus: 10, duration: "2m" };
 export default function () {
-  const r = http.post('https://api.local/query', {
-    cypher: 'MATCH (n)-[r*1..3]->(m) RETURN n LIMIT 100',
+  const r = http.post("https://api.local/query", {
+    cypher: "MATCH (n)-[r*1..3]->(m) RETURN n LIMIT 100",
   });
   check(r, {
-    'status 200': (res) => res.status === 200,
-    'latency ok': (res) => res.timings.duration < 1500,
+    "status 200": (res) => res.status === 200,
+    "latency ok": (res) => res.timings.duration < 1500,
   });
   sleep(1);
 }
@@ -692,7 +692,7 @@ paths:
                 hash: { type: string, description: sha256 }
                 metadata: { type: object }
       responses:
-        '201': { description: Created }
+        "201": { description: Created }
   /claim/parse:
     post:
       summary: Parse claim and attach to case
@@ -707,7 +707,7 @@ paths:
                 caseId: { type: string }
                 claim: { type: string }
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
   /export/manifest:
     get:
       summary: Export verifiable manifest
@@ -717,7 +717,7 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200':
+        "200":
           description: Manifest
           content:
             application/json:
@@ -740,13 +740,9 @@ paths:
             schema:
               {
                 type: object,
-                properties:
-                  {
-                    block: { type: string },
-                    limit: { type: integer, default: 100 },
-                  },
+                properties: { block: { type: string }, limit: { type: integer, default: 100 } },
               }
-      responses: { '200': { description: OK } }
+      responses: { "200": { description: OK } }
   /er/merge:
     post:
       summary: Merge entities (reversible)
@@ -761,7 +757,7 @@ paths:
                 leftId: { type: string }
                 rightId: { type: string }
                 policy: { type: string }
-      responses: { '200': { description: OK } }
+      responses: { "200": { description: OK } }
   /er/explain:
     get:
       summary: Explain decision
@@ -770,7 +766,7 @@ paths:
           name: id
           required: true
           schema: { type: string }
-      responses: { '200': { description: OK } }
+      responses: { "200": { description: OK } }
 ```
 
 `services/cost-guard/openapi.yaml`
@@ -787,12 +783,8 @@ paths:
         content:
           application/json:
             schema:
-              {
-                type: object,
-                properties:
-                  { tenant: { type: string }, plan: { type: object } },
-              }
-      responses: { '200': { description: allowed|throttle|kill } }
+              { type: object, properties: { tenant: { type: string }, plan: { type: object } } }
+      responses: { "200": { description: allowed|throttle|kill } }
   /kill:
     post:
       summary: Kill slow query by id
@@ -801,7 +793,7 @@ paths:
         content:
           application/json:
             schema: { type: object, properties: { queryId: { type: string } } }
-      responses: { '202': { description: accepted } }
+      responses: { "202": { description: accepted } }
 ```
 
 ---
@@ -910,23 +902,23 @@ _(duplicate skeletons for er-service, cost-guard as needed)_
 `docker-compose.yml`
 
 ```yaml
-version: '3.9'
+version: "3.9"
 services:
   prov-ledger:
     build: ./services/prov-ledger
-    ports: ['8081:8080']
+    ports: ["8081:8080"]
   er-service:
     build: ./services/er-service
-    ports: ['8082:8080']
+    ports: ["8082:8080"]
   api-gateway:
     build: ./packages/api-gateway
-    ports: ['4000:4000']
+    ports: ["4000:4000"]
   grafana:
     image: grafana/grafana:latest
-    ports: ['3000:3000']
+    ports: ["3000:3000"]
   prometheus:
     image: prom/prometheus:latest
-    ports: ['9090:9090']
+    ports: ["9090:9090"]
 ```
 
 `.env.sample`
@@ -944,14 +936,14 @@ WEBAuthn_RP_ID=localhost
 **Cypress** `apps/web/cypress/e2e/time_to_path.cy.ts`
 
 ```ts
-describe('Time to path discovery', () => {
-  it('reduces baseline by threshold', () => {
-    cy.visit('/case/demo/explore');
+describe("Time to path discovery", () => {
+  it("reduces baseline by threshold", () => {
+    cy.visit("/case/demo/explore");
     cy.clock();
     // simulate interactions
-    cy.get('[data-testid=prompt]').type('show relationships from A to B');
-    cy.get('[data-testid=preview-run]').click();
-    cy.get('[data-testid=graph]').should('be.visible');
+    cy.get("[data-testid=prompt]").type("show relationships from A to B");
+    cy.get("[data-testid=preview-run]").click();
+    cy.get("[data-testid=graph]").should("be.visible");
     // assert timer budget
   });
 });
@@ -960,21 +952,20 @@ describe('Time to path discovery', () => {
 **k6** `tests/load/smoke.js`
 
 ```js
-import http from 'k6/http';
-import { sleep, check } from 'k6';
-export const options = { vus: 20, duration: '3m' };
+import http from "k6/http";
+import { sleep, check } from "k6";
+export const options = { vus: 20, duration: "3m" };
 export default function () {
   const r = http.post(
-    'http://localhost:4000/graphql',
+    "http://localhost:4000/graphql",
     JSON.stringify({
-      query:
-        'mutation($c:String!,$id:String!){ runSandbox(cypher:$c, caseId:$id){ latencyMs } }',
+      query: "mutation($c:String!,$id:String!){ runSandbox(cypher:$c, caseId:$id){ latencyMs } }",
       variables: {
-        c: 'MATCH (n)-[r*1..3]->(m) RETURN n LIMIT 100',
-        id: 'demo',
+        c: "MATCH (n)-[r*1..3]->(m) RETURN n LIMIT 100",
+        id: "demo",
       },
     }),
-    { headers: { 'Content-Type': 'application/json' } },
+    { headers: { "Content-Type": "application/json" } }
   );
   check(r, { 200: (res) => res.status === 200 });
   sleep(1);
@@ -1065,18 +1056,15 @@ blocked[case] { input.sanctions_list[case] }
 `scripts/seed-graph.js`
 
 ```js
-const fs = require('fs');
-const nodes = [...Array(100)].map((_, i) => ({ id: `n${i}`, label: 'Person' }));
+const fs = require("fs");
+const nodes = [...Array(100)].map((_, i) => ({ id: `n${i}`, label: "Person" }));
 const edges = [...Array(200)].map((_, i) => ({
   from: `n${i % 100}`,
   to: `n${(i * 7) % 100}`,
-  rel: 'KNOWS',
+  rel: "KNOWS",
 }));
-fs.writeFileSync(
-  'fixtures/case-demo/demo.graph.json',
-  JSON.stringify({ nodes, edges }, null, 2),
-);
-console.log('Seed graph written.');
+fs.writeFileSync("fixtures/case-demo/demo.graph.json", JSON.stringify({ nodes, edges }, null, 2));
+console.log("Seed graph written.");
 ```
 
 ---
@@ -1208,15 +1196,15 @@ _(copy & adjust path for other services)_
 `packages/api-gateway/src/server.ts`
 
 ```ts
-import { createServer } from 'http';
-import { createYoga, createSchema } from 'graphql-yoga';
-import typeDefs from './typeDefs';
+import { createServer } from "http";
+import { createYoga, createSchema } from "graphql-yoga";
+import typeDefs from "./typeDefs";
 
 const resolvers = {
   Query: {
     case: (_: any, { id }: { id: string }) => ({
       id,
-      title: 'Demo',
+      title: "Demo",
       createdAt: new Date().toISOString(),
     }),
     search: () => [],
@@ -1228,20 +1216,20 @@ const resolvers = {
   Mutation: {
     runSandbox: async () => ({ rows: [], latencyMs: 42 }),
     registerEvidence: async (_: any, { input }: { input: any }) => ({
-      id: 'ev-1',
+      id: "ev-1",
       ...input,
     }),
     erMerge: async () => ({
-      mergedId: 'm-1',
+      mergedId: "m-1",
       reversible: true,
-      auditId: 'a-1',
+      auditId: "a-1",
     }),
   },
 };
 
 const yoga = createYoga({ schema: createSchema({ typeDefs, resolvers }) });
 const server = createServer(yoga);
-server.listen(4000, () => console.log('api-gateway on :4000'));
+server.listen(4000, () => console.log("api-gateway on :4000"));
 ```
 
 `packages/api-gateway/src/typeDefs.ts`
@@ -1326,9 +1314,9 @@ export default /* GraphQL */ `
 **Persisted queries scaffold** `packages/api-gateway/scripts/persisted.js`
 
 ```js
-import fs from 'fs';
-const queries = { getCase: 'query($id:ID!){case(id:$id){id}}' };
-fs.writeFileSync('persisted.json', JSON.stringify(queries, null, 2));
+import fs from "fs";
+const queries = { getCase: "query($id:ID!){case(id:$id){id}}" };
+fs.writeFileSync("persisted.json", JSON.stringify(queries, null, 2));
 ```
 
 ---
@@ -1338,9 +1326,9 @@ fs.writeFileSync('persisted.json', JSON.stringify(queries, null, 2));
 `apps/web/src/App.tsx`
 
 ```tsx
-import { useState } from 'react';
+import { useState } from "react";
 export default function App() {
-  const [prompt, setPrompt] = useState('');
+  const [prompt, setPrompt] = useState("");
   return (
     <div className="grid grid-cols-12 h-screen">
       <aside className="col-span-3 p-4 border-r">
@@ -1352,10 +1340,7 @@ export default function App() {
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="Show relationships from A to B"
         />
-        <button
-          data-testid="preview-run"
-          className="mt-2 px-3 py-2 border rounded"
-        >
+        <button data-testid="preview-run" className="mt-2 px-3 py-2 border rounded">
           Preview
         </button>
       </aside>
@@ -1391,10 +1376,10 @@ export default function App() {
 `apps/web/src/main.tsx`
 
 ```tsx
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import App from './App';
-createRoot(document.getElementById('root')!).render(<App />);
+import React from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App";
+createRoot(document.getElementById("root")!).render(<App />);
 ```
 
 `apps/web/package.json`
@@ -1422,7 +1407,7 @@ createRoot(document.getElementById('root')!).render(<App />);
 
 ```js
 export default {
-  content: ['./index.html', './src/**/*.{ts,tsx}'],
+  content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: { extend: {} },
   plugins: [],
 };
@@ -1517,9 +1502,9 @@ node packages/api-gateway/scripts/persisted.js
 ```ts
 export function enforceCost(max = 10000) {
   return async (req: any, _res: any, next: any) => {
-    const est = Number(req.headers['x-estimated-cost'] || 0);
+    const est = Number(req.headers["x-estimated-cost"] || 0);
     if (est > max) {
-      return next(new Error('Query exceeds cost budget'));
+      return next(new Error("Query exceeds cost budget"));
     }
     next();
   };

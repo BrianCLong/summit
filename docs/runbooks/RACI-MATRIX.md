@@ -3,6 +3,7 @@
 **Purpose**: Clearly define roles and responsibilities during incident response
 
 **RACI Legend**:
+
 - **R** = Responsible (does the work)
 - **A** = Accountable (decision maker, only one per activity)
 - **C** = Consulted (provides input)
@@ -12,25 +13,25 @@
 
 ## Incident Lifecycle RACI
 
-| Activity | Incident Commander (IC) | Technical Lead | On-Call Engineer | Scribe | Communications | SRE Lead | Eng Manager | VP Eng | Customer Support |
-|----------|------------------------|----------------|------------------|--------|----------------|----------|-------------|--------|------------------|
-| **Detect & Acknowledge Alert** | I | I | R/A | I | I | I | I | I | I |
-| **Assess Severity** | R/A | C | C | I | I | C | I | I | I |
-| **Declare Incident** | R/A | C | C | I | I | C | I | I | I |
-| **Create Incident Channel** | R/A | I | I | R | I | I | I | I | I |
-| **Assign Roles** | R/A | I | C | I | I | C | I | I | I |
-| **Investigate Root Cause** | A | R | R | I | I | C | I | I | I |
-| **Develop Mitigation Plan** | A | R | R | I | I | C | I | I | I |
-| **Execute Mitigation** | A | R | R | I | I | C | I | I | I |
-| **Internal Status Updates** | A | C | C | R | I | I | I | I | I |
-| **External Status Updates** | A | I | I | C | R | I | C | I | C |
-| **Customer Communications** | A | I | I | C | R | I | C | I | C |
-| **Escalate to Leadership** | R/A | C | I | I | C | C | I | I | I |
-| **Verify Resolution** | A | R | R | I | I | C | I | I | I |
-| **Close Incident** | R/A | C | C | I | I | C | I | I | I |
-| **Write Postmortem** | A | R | C | R | C | C | I | I | I |
-| **Review Postmortem** | C | C | C | I | I | R/A | C | C | I |
-| **Implement Action Items** | C | R | R | I | I | A | C | I | I |
+| Activity                       | Incident Commander (IC) | Technical Lead | On-Call Engineer | Scribe | Communications | SRE Lead | Eng Manager | VP Eng | Customer Support |
+| ------------------------------ | ----------------------- | -------------- | ---------------- | ------ | -------------- | -------- | ----------- | ------ | ---------------- |
+| **Detect & Acknowledge Alert** | I                       | I              | R/A              | I      | I              | I        | I           | I      | I                |
+| **Assess Severity**            | R/A                     | C              | C                | I      | I              | C        | I           | I      | I                |
+| **Declare Incident**           | R/A                     | C              | C                | I      | I              | C        | I           | I      | I                |
+| **Create Incident Channel**    | R/A                     | I              | I                | R      | I              | I        | I           | I      | I                |
+| **Assign Roles**               | R/A                     | I              | C                | I      | I              | C        | I           | I      | I                |
+| **Investigate Root Cause**     | A                       | R              | R                | I      | I              | C        | I           | I      | I                |
+| **Develop Mitigation Plan**    | A                       | R              | R                | I      | I              | C        | I           | I      | I                |
+| **Execute Mitigation**         | A                       | R              | R                | I      | I              | C        | I           | I      | I                |
+| **Internal Status Updates**    | A                       | C              | C                | R      | I              | I        | I           | I      | I                |
+| **External Status Updates**    | A                       | I              | I                | C      | R              | I        | C           | I      | C                |
+| **Customer Communications**    | A                       | I              | I                | C      | R              | I        | C           | I      | C                |
+| **Escalate to Leadership**     | R/A                     | C              | I                | I      | C              | C        | I           | I      | I                |
+| **Verify Resolution**          | A                       | R              | R                | I      | I              | C        | I           | I      | I                |
+| **Close Incident**             | R/A                     | C              | C                | I      | I              | C        | I           | I      | I                |
+| **Write Postmortem**           | A                       | R              | C                | R      | C              | C        | I           | I      | I                |
+| **Review Postmortem**          | C                       | C              | C                | I      | I              | R/A      | C           | C      | I                |
+| **Implement Action Items**     | C                       | R              | R                | I      | I              | A        | C           | I      | I                |
 
 ---
 
@@ -43,6 +44,7 @@
 **Who**: Rotates among senior engineers/SREs on-call
 
 **Key Activities**:
+
 - Assess severity and declare incident
 - Assign roles (Technical Lead, Scribe, Comms)
 - Coordinate between teams
@@ -64,6 +66,7 @@
 **Who**: Subject matter expert for affected system (auto-assigned or selected by IC)
 
 **Key Activities**:
+
 - Investigate root cause
 - Develop mitigation plan
 - Execute technical fixes (or delegate)
@@ -84,6 +87,7 @@
 **Who**: Engineer on PagerDuty rotation
 
 **Key Activities**:
+
 - Acknowledge alert within 5 minutes
 - Perform initial triage
 - Assess severity
@@ -104,6 +108,7 @@
 **Who**: Assigned by IC (often junior engineer for learning opportunity)
 
 **Key Activities**:
+
 - Maintain real-time timeline in incident channel
 - Document all decisions and actions
 - Record timestamps for all events
@@ -124,6 +129,7 @@
 **Who**: Assigned by IC (often customer support lead or dedicated comms person)
 
 **Key Activities**:
+
 - Send initial status update (5 min for SEV1)
 - Provide regular updates (15-30 min)
 - Update status page
@@ -144,6 +150,7 @@
 **Who**: SRE team lead (paged for SEV1)
 
 **Key Activities**:
+
 - Monitor incident progress
 - Provide guidance to IC/Technical Lead
 - Allocate additional resources if needed
@@ -165,6 +172,7 @@
 **Who**: Manager of affected team (paged for SEV1, notified for SEV2)
 
 **Key Activities**:
+
 - Ensure team has resources needed
 - Provide subject matter experts
 - Update leadership
@@ -186,6 +194,7 @@
 **Who**: VP Engineering (paged only for SEV1 with major impact)
 
 **Key Activities**:
+
 - Monitor high-severity incidents
 - Provide executive communication
 - Authorize emergency measures (e.g., infrastructure spending)
@@ -205,6 +214,7 @@
 **Who**: Customer Support Lead
 
 **Key Activities**:
+
 - Monitor support tickets for incident reports
 - Provide user impact data
 - Route customer questions to Comms
@@ -221,64 +231,65 @@
 
 ### SEV1 (Complete Outage)
 
-| Role | Who | Page/Notify | When |
-|------|-----|-------------|------|
-| IC | Senior SRE | Page | Immediately |
-| Technical Lead | SME for affected system | Page | Immediately |
-| On-Call | Current on-call engineer | Page | Immediately |
-| Scribe | Available engineer | Assign | Within 5 min |
-| Comms | Customer Support Lead | Page | Within 5 min |
-| SRE Lead | SRE team lead | Page | Within 5 min |
-| Eng Manager | Manager of affected team | Notify | Within 10 min |
-| VP Engineering | VP Engineering | Notify | Within 15 min |
+| Role           | Who                      | Page/Notify | When          |
+| -------------- | ------------------------ | ----------- | ------------- |
+| IC             | Senior SRE               | Page        | Immediately   |
+| Technical Lead | SME for affected system  | Page        | Immediately   |
+| On-Call        | Current on-call engineer | Page        | Immediately   |
+| Scribe         | Available engineer       | Assign      | Within 5 min  |
+| Comms          | Customer Support Lead    | Page        | Within 5 min  |
+| SRE Lead       | SRE team lead            | Page        | Within 5 min  |
+| Eng Manager    | Manager of affected team | Notify      | Within 10 min |
+| VP Engineering | VP Engineering           | Notify      | Within 15 min |
 
 ### SEV2 (Major Degradation)
 
-| Role | Who | Page/Notify | When |
-|------|-----|-------------|------|
-| IC | Senior Engineer or SRE | Assign | Within 15 min |
-| Technical Lead | SME for affected system | Assign | Within 15 min |
-| On-Call | Current on-call engineer | Page | Immediately |
-| Scribe | Available engineer | Assign | Within 15 min |
-| Comms | Customer Support | Notify | Within 30 min |
-| SRE Lead | SRE team lead | Notify | Within 30 min |
-| Eng Manager | Manager of affected team | Notify | Within 30 min |
+| Role           | Who                      | Page/Notify | When          |
+| -------------- | ------------------------ | ----------- | ------------- |
+| IC             | Senior Engineer or SRE   | Assign      | Within 15 min |
+| Technical Lead | SME for affected system  | Assign      | Within 15 min |
+| On-Call        | Current on-call engineer | Page        | Immediately   |
+| Scribe         | Available engineer       | Assign      | Within 15 min |
+| Comms          | Customer Support         | Notify      | Within 30 min |
+| SRE Lead       | SRE team lead            | Notify      | Within 30 min |
+| Eng Manager    | Manager of affected team | Notify      | Within 30 min |
 
 ### SEV3 (Minor Issue)
 
-| Role | Who | Page/Notify | When |
-|------|-----|-------------|------|
-| IC | On-call engineer (acts as IC) | — | — |
-| Technical Lead | On-call engineer or SME | Assign | As needed |
-| Scribe | Not required | — | — |
-| Comms | Not required | — | — |
+| Role           | Who                           | Page/Notify | When      |
+| -------------- | ----------------------------- | ----------- | --------- |
+| IC             | On-call engineer (acts as IC) | —           | —         |
+| Technical Lead | On-call engineer or SME       | Assign      | As needed |
+| Scribe         | Not required                  | —           | —         |
+| Comms          | Not required                  | —           | —         |
 
 ### SEV4 (Cosmetic)
 
-| Role | Who | Page/Notify | When |
-|------|-----|-------------|------|
-| IC | Not required | — | — |
-| Technical Lead | Engineer who found issue | — | — |
+| Role           | Who                      | Page/Notify | When |
+| -------------- | ------------------------ | ----------- | ---- |
+| IC             | Not required             | —           | —    |
+| Technical Lead | Engineer who found issue | —           | —    |
 
 ---
 
 ## Decision Authority Matrix
 
-| Decision | IC | Technical Lead | SRE Lead | Eng Manager | VP Eng |
-|----------|----|--------------|---------|-----------|----|
-| Rollback deployment | **A** | R | C | I | I |
-| Scale up infrastructure | **A** | R | C | I | I |
-| Emergency code change | **A** | R | C | I | I |
-| Disable feature | **A** | R | C | C | I |
-| Failover to backup region | C | C | **A** | C | I |
-| Emergency spend >$1k | C | I | C | **A** | I |
-| Emergency spend >$10k | I | I | I | C | **A** |
-| Declare incident | **A** | C | C | I | I |
-| Escalate to SEV1 | **A** | C | C | I | I |
-| Close incident | **A** | C | C | I | I |
-| Customer communication | **A** | I | I | C | I |
+| Decision                  | IC    | Technical Lead | SRE Lead | Eng Manager | VP Eng |
+| ------------------------- | ----- | -------------- | -------- | ----------- | ------ |
+| Rollback deployment       | **A** | R              | C        | I           | I      |
+| Scale up infrastructure   | **A** | R              | C        | I           | I      |
+| Emergency code change     | **A** | R              | C        | I           | I      |
+| Disable feature           | **A** | R              | C        | C           | I      |
+| Failover to backup region | C     | C              | **A**    | C           | I      |
+| Emergency spend >$1k      | C     | I              | C        | **A**       | I      |
+| Emergency spend >$10k     | I     | I              | I        | C           | **A**  |
+| Declare incident          | **A** | C              | C        | I           | I      |
+| Escalate to SEV1          | **A** | C              | C        | I           | I      |
+| Close incident            | **A** | C              | C        | I           | I      |
+| Customer communication    | **A** | I              | I        | C           | I      |
 
 **Legend**:
+
 - **A** = Final decision authority
 - R = Recommends
 - C = Consulted
@@ -314,14 +325,14 @@ IC → Eng Manager → VP Eng (>$10k) → CFO
 
 _Maintain up-to-date contact info for all roles_
 
-| Role | Name | Slack | Phone | PagerDuty |
-|------|------|-------|-------|-----------|
-| SRE Lead | [Name] | @username | [###] | [Link] |
-| Eng Manager (API) | [Name] | @username | [###] | [Link] |
-| Eng Manager (Frontend) | [Name] | @username | [###] | [Link] |
-| VP Engineering | [Name] | @username | [###] | [Link] |
-| Customer Support Lead | [Name] | @username | [###] | — |
-| On-Call (Current) | [Check PagerDuty] | — | — | [Link] |
+| Role                   | Name              | Slack     | Phone | PagerDuty |
+| ---------------------- | ----------------- | --------- | ----- | --------- |
+| SRE Lead               | [Name]            | @username | [###] | [Link]    |
+| Eng Manager (API)      | [Name]            | @username | [###] | [Link]    |
+| Eng Manager (Frontend) | [Name]            | @username | [###] | [Link]    |
+| VP Engineering         | [Name]            | @username | [###] | [Link]    |
+| Customer Support Lead  | [Name]            | @username | [###] | —         |
+| On-Call (Current)      | [Check PagerDuty] | —         | —     | [Link]    |
 
 **PagerDuty Schedules**: https://[your-org].pagerduty.com/schedules
 
@@ -334,6 +345,7 @@ _Maintain up-to-date contact info for all roles_
 **When**: After 4-6 hours or end of shift
 
 **Process**:
+
 1. Incoming IC reviews timeline in incident channel
 2. Outgoing IC provides 5-minute verbal brief:
    - Current status
@@ -356,6 +368,7 @@ _Maintain up-to-date contact info for all roles_
 **When**: SME changes or shift change
 
 **Process**:
+
 1. Review of technical state
 2. Share of relevant logs/metrics/traces
 3. Document current hypothesis
@@ -368,11 +381,13 @@ _Maintain up-to-date contact info for all roles_
 ### Incident Commander Training
 
 **Required for**:
+
 - Senior Engineers
 - All SREs
 - Engineering Managers
 
 **Topics**:
+
 - Incident severity assessment
 - Role assignment
 - Decision-making under pressure
@@ -384,9 +399,11 @@ _Maintain up-to-date contact info for all roles_
 ### On-Call Training
 
 **Required for**:
+
 - All engineers
 
 **Topics**:
+
 - Alert acknowledgement
 - Initial triage
 - Runbook navigation

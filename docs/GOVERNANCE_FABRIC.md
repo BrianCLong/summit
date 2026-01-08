@@ -8,6 +8,7 @@ The Unified Governance & Policy Fabric enforces security, compliance, and audita
 
 Policies are configured in `policy/governance-config.yaml`.
 Environments support:
+
 - `dev`: Permissive, logging-only.
 - `staging`: Strict enforcement.
 - `prod`: Strict enforcement.
@@ -25,18 +26,18 @@ It integrates with `AdvancedAuditSystem` to log all decisions.
 ### Usage in Code
 
 ```typescript
-import { PolicyEngine } from '../services/PolicyEngine';
+import { PolicyEngine } from "../services/PolicyEngine";
 
 const engine = PolicyEngine.getInstance();
 const decision = await engine.evaluate({
-  environment: 'prod',
+  environment: "prod",
   user: req.user,
-  action: 'access_data',
-  resource: { type: 'sensitive_document' }
+  action: "access_data",
+  resource: { type: "sensitive_document" },
 });
 
 if (!decision.allow) {
-  throw new Error('Access Denied');
+  throw new Error("Access Denied");
 }
 ```
 

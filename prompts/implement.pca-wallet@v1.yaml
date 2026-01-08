@@ -1,17 +1,17 @@
 meta:
   id: implement.pca-wallet@v1
-  owner: 'intelgraph-advisory-committee'
-  purpose: 'Implement Proof-Carrying Analytics with attestations, wallet export, and selective disclosure for verifiable results'
-  tags: ['pca', 'attestation', 'verifiable-analytics', 'zero-knowledge', 'wallet']
+  owner: "intelgraph-advisory-committee"
+  purpose: "Implement Proof-Carrying Analytics with attestations, wallet export, and selective disclosure for verifiable results"
+  tags: ["pca", "attestation", "verifiable-analytics", "zero-knowledge", "wallet"]
   guardrails:
-    - 'All analytical results must include signed attestations'
-    - 'Lineage must trace back to source evidence'
-    - 'Model cards required for all ML predictions'
-    - 'Hyperparameters and checksums must be recorded'
-    - 'Revocation checking must be enforced'
+    - "All analytical results must include signed attestations"
+    - "Lineage must trace back to source evidence"
+    - "Model cards required for all ML predictions"
+    - "Hyperparameters and checksums must be recorded"
+    - "Revocation checking must be enforced"
 
 modelConfig:
-  model: 'claude-sonnet-4-5'
+  model: "claude-sonnet-4-5"
   temperature: 0.1
   maxTokens: 8000
 
@@ -561,25 +561,25 @@ template: |
   Remember: **Attestations are currency.** Every claim must be verifiable, revocable, and traceable.
 
 examples:
-  - name: 'ed25519-w3c-zksnark'
+  - name: "ed25519-w3c-zksnark"
     inputs:
-      signature_algorithm: 'Ed25519'
-      wallet_format: 'W3C Verifiable Credentials'
-      disclosure_protocol: 'zk-SNARK'
+      signature_algorithm: "Ed25519"
+      wallet_format: "W3C Verifiable Credentials"
+      disclosure_protocol: "zk-SNARK"
     expected_contains:
-      - 'Ed25519'
-      - 'W3C'
-      - 'zk-SNARK'
-      - 'selective disclosure'
-      - 'revocation'
+      - "Ed25519"
+      - "W3C"
+      - "zk-SNARK"
+      - "selective disclosure"
+      - "revocation"
 
-  - name: 'ecdsa-json-zkstark'
+  - name: "ecdsa-json-zkstark"
     inputs:
-      signature_algorithm: 'ECDSA'
-      wallet_format: 'JSON'
-      disclosure_protocol: 'zk-STARK'
+      signature_algorithm: "ECDSA"
+      wallet_format: "JSON"
+      disclosure_protocol: "zk-STARK"
     expected_contains:
-      - 'ECDSA'
-      - 'JSON'
-      - 'zk-STARK'
-      - 'attestation'
+      - "ECDSA"
+      - "JSON"
+      - "zk-STARK"
+      - "attestation"

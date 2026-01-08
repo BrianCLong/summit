@@ -5,12 +5,8 @@ import {
   WorkflowDefinition,
   WorkflowRunRecord,
   type NodeRunStatus,
-} from 'common-types';
-import {
-  computeWorkflowEstimates,
-  topologicalSort,
-  validateWorkflow,
-} from 'policy';
+} from "common-types";
+import { computeWorkflowEstimates, topologicalSort, validateWorkflow } from "policy";
 
 export interface CanvasNodePosition {
   x: number;
@@ -57,7 +53,7 @@ export interface ObserverState {
 }
 
 export interface PlaybackOptions {
-  direction?: 'forward' | 'backward';
+  direction?: "forward" | "backward";
   step?: number;
   loop?: boolean;
 }
@@ -110,7 +106,7 @@ export function createCanvasState(workflow: WorkflowDefinition): CanvasState {
   const positions = computeConstraintAwareLayout(
     validation.normalized,
     { criticalLane: 0 },
-    criticalPath,
+    criticalPath
   );
   return {
     workflow: validation.normalized,
@@ -123,16 +119,9 @@ export function createCanvasState(workflow: WorkflowDefinition): CanvasState {
   };
 }
 
-export function autoLayout(
-  state: CanvasState,
-  options: LayoutOptions = {},
-): CanvasState {
+export function autoLayout(state: CanvasState, options: LayoutOptions = {}): CanvasState {
   const criticalPath = state.validation.analysis.estimated.criticalPath;
-  const positions = computeConstraintAwareLayout(
-    state.workflow,
-    options,
-    criticalPath,
-  );
+  const positions = computeConstraintAwareLayout(state.workflow, options, criticalPath);
   return {
     ...state,
     positions,
@@ -142,7 +131,7 @@ export function autoLayout(
 export function updateNodePosition(
   state: CanvasState,
   nodeId: string,
-  patch: Partial<CanvasNodePosition>,
+  patch: Partial<CanvasNodePosition>
 ): CanvasState {
   const current = state.positions[nodeId] ?? {
     x: 0,
@@ -161,20 +150,14 @@ export function updateNodePosition(
   };
 }
 
-export function selectNodes(
-  state: CanvasState,
-  nodeIds: string[],
-): CanvasState {
+export function selectNodes(state: CanvasState, nodeIds: string[]): CanvasState {
   return {
     ...state,
     selectedNodeIds: [...new Set(nodeIds)],
   };
 }
 
-export function applyRunUpdate(
-  state: CanvasState,
-  run: WorkflowRunRecord,
-): CanvasState {
+export function applyRunUpdate(state: CanvasState, run: WorkflowRunRecord): CanvasState {
   const runtime: Record<string, CanvasRuntimeState> = { ...state.runtime };
   for (const snapshot of run.nodes ?? []) {
     runtime[snapshot.nodeId] = {
@@ -192,21 +175,13 @@ export function applyRunUpdate(
 
 export function computeWorkflowDiff(
   current: WorkflowDefinition,
-  next: WorkflowDefinition,
+  next: WorkflowDefinition
 ): WorkflowDiff {
-  const currentNodeMap = new Map(
-    current.nodes.map((node) => [node.id, node] as const),
-  );
-  const nextNodeMap = new Map(
-    next.nodes.map((node) => [node.id, node] as const),
-  );
+  const currentNodeMap = new Map(current.nodes.map((node) => [node.id, node] as const));
+  const nextNodeMap = new Map(next.nodes.map((node) => [node.id, node] as const));
 
-  const addedNodes = [...nextNodeMap.keys()].filter(
-    (id) => !currentNodeMap.has(id),
-  );
-  const removedNodes = [...currentNodeMap.keys()].filter(
-    (id) => !nextNodeMap.has(id),
-  );
+  const addedNodes = [...nextNodeMap.keys()].filter((id) => !currentNodeMap.has(id));
+  const removedNodes = [...currentNodeMap.keys()].filter((id) => !nextNodeMap.has(id));
   const changedNodes: string[] = [];
 
   for (const [id, node] of currentNodeMap.entries()) {
@@ -217,19 +192,16 @@ export function computeWorkflowDiff(
     if (
       node.type !== candidate.type ||
       JSON.stringify(node.params) !== JSON.stringify(candidate.params) ||
-      JSON.stringify(node.evidenceOutputs ?? []) !==
-        JSON.stringify(candidate.evidenceOutputs ?? [])
+      JSON.stringify(node.evidenceOutputs ?? []) !== JSON.stringify(candidate.evidenceOutputs ?? [])
     ) {
       changedNodes.push(id);
     }
   }
 
   const currentEdges = new Set(
-    current.edges.map((edge) => serializeEdge(edge.from, edge.to, edge.on)),
+    current.edges.map((edge) => serializeEdge(edge.from, edge.to, edge.on))
   );
-  const nextEdges = new Set(
-    next.edges.map((edge) => serializeEdge(edge.from, edge.to, edge.on)),
-  );
+  const nextEdges = new Set(next.edges.map((edge) => serializeEdge(edge.from, edge.to, edge.on)));
   const addedEdges = [...nextEdges].filter((edge) => !currentEdges.has(edge));
   const removedEdges = [...currentEdges].filter((edge) => !nextEdges.has(edge));
 
@@ -247,9 +219,7 @@ export function createObserverState(run: WorkflowRunRecord): ObserverState {
   };
 }
 
-export function buildObserverTimeline(
-  run: WorkflowRunRecord,
-): ObserverTimeline {
+export function buildObserverTimeline(run: WorkflowRunRecord): ObserverTimeline {
   const frames: ObserverTimelineFrame[] = [];
   const nodeIds = new Set(run.nodes?.map((node) => node.nodeId));
   for (const nodeId of run.stats.criticalPath ?? []) {
@@ -257,7 +227,7 @@ export function buildObserverTimeline(
   }
   const baselineStatuses: Record<string, NodeRunStatus> = {};
   for (const nodeId of nodeIds) {
-    baselineStatuses[nodeId] = 'queued';
+    baselineStatuses[nodeId] = "queued";
   }
 
   frames.push(
@@ -270,8 +240,8 @@ export function buildObserverTimeline(
         latencyMs: 0,
         criticalPath: [],
       },
-      nodeIds.size,
-    ),
+      nodeIds.size
+    )
   );
 
   const events = buildNodeEvents(run);
@@ -286,16 +256,12 @@ export function buildObserverTimeline(
           timestamp: event.timestamp,
           nodeStatuses: previous,
           costUSD: interpolateCost(run.stats.costUSD, index, events.length),
-          latencyMs: interpolateLatency(
-            run.stats.latencyMs,
-            index,
-            events.length,
-          ),
+          latencyMs: interpolateLatency(run.stats.latencyMs, index, events.length),
           criticalPath: run.stats.criticalPath,
           delta: { nodeId: event.nodeId, status: event.status },
         },
-        nodeIds.size,
-      ),
+        nodeIds.size
+      )
     );
     index += 1;
   }
@@ -310,8 +276,8 @@ export function buildObserverTimeline(
         latencyMs: run.stats.latencyMs,
         criticalPath: run.stats.criticalPath,
       },
-      nodeIds.size,
-    ),
+      nodeIds.size
+    )
   );
 
   return { frames };
@@ -319,19 +285,15 @@ export function buildObserverTimeline(
 
 export function buildDependencyGraphSnapshot(
   state: CanvasState,
-  frame?: ObserverTimelineFrame,
+  frame?: ObserverTimelineFrame
 ): DependencyGraphSnapshot {
   const nodeStatuses: Record<string, NodeRunStatus> = {};
   for (const node of state.workflow.nodes) {
     const runtimeStatus = state.runtime[node.id]?.status;
-    nodeStatuses[node.id] =
-      frame?.nodeStatuses[node.id] ?? runtimeStatus ?? 'queued';
+    nodeStatuses[node.id] = frame?.nodeStatuses[node.id] ?? runtimeStatus ?? "queued";
   }
 
-  const { counts, progressPercent } = summarizeStatuses(
-    nodeStatuses,
-    state.workflow.nodes.length,
-  );
+  const { counts, progressPercent } = summarizeStatuses(nodeStatuses, state.workflow.nodes.length);
 
   const dependencies = new Map<string, string[]>();
   const dependents = new Map<string, string[]>();
@@ -362,7 +324,7 @@ export function buildDependencyGraphSnapshot(
     : constraintAwareAutoLayout(state.workflow);
 
   const nodes: DependencyGraphNodeState[] = state.workflow.nodes.map((node) => {
-    const status = nodeStatuses[node.id] ?? 'queued';
+    const status = nodeStatuses[node.id] ?? "queued";
     const deps = dependencies.get(node.id) ?? [];
     const nodePosition = positions[node.id] ?? {
       x: 0,
@@ -373,12 +335,10 @@ export function buildDependencyGraphSnapshot(
       height: DEFAULT_NODE_HEIGHT,
     };
     const completedDeps = deps.filter((dependencyId) =>
-      isCompletedStatus(nodeStatuses[dependencyId]),
+      isCompletedStatus(nodeStatuses[dependencyId])
     );
     const isBlocked =
-      status === 'queued' &&
-      completedDeps.length !== deps.length &&
-      deps.length > 0;
+      status === "queued" && completedDeps.length !== deps.length && deps.length > 0;
     return {
       id: node.id,
       label: node.name ?? node.id,
@@ -397,7 +357,7 @@ export function buildDependencyGraphSnapshot(
 
   const edges: DependencyGraphEdgeState[] = state.workflow.edges.map((edge) => {
     const id = serializeEdge(edge.from, edge.to, edge.on);
-    const sourceStatus = nodeStatuses[edge.from] ?? 'queued';
+    const sourceStatus = nodeStatuses[edge.from] ?? "queued";
     return {
       id,
       from: edge.from,
@@ -418,9 +378,9 @@ export function buildDependencyGraphSnapshot(
 
 export function advancePlayback(
   state: ObserverState,
-  options: PlaybackOptions = {},
+  options: PlaybackOptions = {}
 ): ObserverState {
-  const direction = options.direction === 'backward' ? -1 : 1;
+  const direction = options.direction === "backward" ? -1 : 1;
   const step = options.step ?? 1;
   const nextIndex = state.currentIndex + direction * step;
   if (options.loop) {
@@ -430,29 +390,22 @@ export function advancePlayback(
   }
   return {
     ...state,
-    currentIndex: Math.max(
-      0,
-      Math.min(nextIndex, state.timeline.frames.length - 1),
-    ),
+    currentIndex: Math.max(0, Math.min(nextIndex, state.timeline.frames.length - 1)),
   };
 }
 
 export function constraintAwareAutoLayout(
   workflow: WorkflowDefinition,
-  options: LayoutOptions = {},
+  options: LayoutOptions = {}
 ): Record<string, CanvasNodePosition> {
   const estimates = computeWorkflowEstimates(workflow);
-  return computeConstraintAwareLayout(
-    workflow,
-    options,
-    estimates.criticalPath,
-  );
+  return computeConstraintAwareLayout(workflow, options, estimates.criticalPath);
 }
 
 function computeConstraintAwareLayout(
   workflow: WorkflowDefinition,
   options: LayoutOptions,
-  criticalPath: string[],
+  criticalPath: string[]
 ): Record<string, CanvasNodePosition> {
   const columnSpacing = options.columnSpacing ?? 280;
   const rowSpacing = options.rowSpacing ?? 180;
@@ -532,7 +485,7 @@ function buildNodeEvents(run: WorkflowRunRecord): NodeEvent[] {
     if (node.startedAt) {
       events.push({
         nodeId: node.nodeId,
-        status: 'running',
+        status: "running",
         timestamp: node.startedAt,
       });
     }
@@ -544,27 +497,17 @@ function buildNodeEvents(run: WorkflowRunRecord): NodeEvent[] {
       });
     }
   }
-  return events.sort(
-    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-  );
+  return events.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 }
 
-function interpolateCost(
-  total: number,
-  index: number,
-  totalEvents: number,
-): number {
+function interpolateCost(total: number, index: number, totalEvents: number): number {
   if (totalEvents === 0) {
     return total;
   }
   return Number(((total * index) / totalEvents).toFixed(2));
 }
 
-function interpolateLatency(
-  total: number,
-  index: number,
-  totalEvents: number,
-): number {
+function interpolateLatency(total: number, index: number, totalEvents: number): number {
   if (totalEvents === 0) {
     return total;
   }
@@ -572,13 +515,10 @@ function interpolateLatency(
 }
 
 function attachTimelineMetadata(
-  frame: Omit<ObserverTimelineFrame, 'statusCounts' | 'progressPercent'>,
-  totalNodes: number,
+  frame: Omit<ObserverTimelineFrame, "statusCounts" | "progressPercent">,
+  totalNodes: number
 ): ObserverTimelineFrame {
-  const { counts, progressPercent } = summarizeStatuses(
-    frame.nodeStatuses,
-    totalNodes,
-  );
+  const { counts, progressPercent } = summarizeStatuses(frame.nodeStatuses, totalNodes);
   return {
     ...frame,
     statusCounts: counts,
@@ -588,7 +528,7 @@ function attachTimelineMetadata(
 
 function summarizeStatuses(
   nodeStatuses: Record<string, NodeRunStatus>,
-  totalNodes: number,
+  totalNodes: number
 ): { counts: TimelineStatusCounts; progressPercent: number } {
   const counts: TimelineStatusCounts = {
     total: totalNodes,
@@ -602,22 +542,22 @@ function summarizeStatuses(
 
   for (const status of Object.values(nodeStatuses)) {
     switch (status) {
-      case 'succeeded':
+      case "succeeded":
         counts.succeeded += 1;
         counts.completed += 1;
         break;
-      case 'skipped':
+      case "skipped":
         counts.skipped += 1;
         counts.completed += 1;
         break;
-      case 'failed':
+      case "failed":
         counts.failed += 1;
         counts.completed += 1;
         break;
-      case 'running':
+      case "running":
         counts.running += 1;
         break;
-      case 'queued':
+      case "queued":
       default:
         counts.queued += 1;
         break;
@@ -625,15 +565,13 @@ function summarizeStatuses(
   }
 
   const progressPercent =
-    totalNodes === 0
-      ? 100
-      : Math.round((counts.completed / Math.max(totalNodes, 1)) * 100);
+    totalNodes === 0 ? 100 : Math.round((counts.completed / Math.max(totalNodes, 1)) * 100);
 
   return { counts, progressPercent };
 }
 
 function isCompletedStatus(status: NodeRunStatus | undefined): boolean {
-  return status === 'succeeded' || status === 'skipped' || status === 'failed';
+  return status === "succeeded" || status === "skipped" || status === "failed";
 }
 
 function buildEdgePairKey(from: string, to: string): string {

@@ -23,32 +23,29 @@ version: latest
 **`scripts/ui/crawl-ui.ts`**
 
 ```ts
-import { chromium } from 'playwright';
-import * as fs from 'fs';
+import { chromium } from "playwright";
+import * as fs from "fs";
 (async () => {
-  const base = process.env.APP_BASE_URL || 'http://localhost:5173';
+  const base = process.env.APP_BASE_URL || "http://localhost:5173";
   const browser = await chromium.launch();
   const page = await browser.newPage();
-  const paths = ['/', '/settings', '/projects', '/exports'];
+  const paths = ["/", "/settings", "/projects", "/exports"];
   const catalog: Record<string, string[]> = {};
   for (const p of paths) {
-    await page.goto(base + p, { waitUntil: 'networkidle' });
-    const texts = await page.$$eval('body *', (els) =>
+    await page.goto(base + p, { waitUntil: "networkidle" });
+    const texts = await page.$$eval("body *", (els) =>
       els
         .map((el) => ({
-          t: (el as HTMLElement).innerText?.trim() || '',
-          a: el.getAttribute('aria-label') || '',
+          t: (el as HTMLElement).innerText?.trim() || "",
+          a: el.getAttribute("aria-label") || "",
         }))
         .filter((x) => (x.t && x.t.length < 200) || x.a)
-        .map((x) => x.a || x.t),
+        .map((x) => x.a || x.t)
     );
     catalog[p] = Array.from(new Set(texts.filter(Boolean)));
   }
-  fs.mkdirSync('docs/ops/ui', { recursive: true });
-  fs.writeFileSync(
-    'docs/ops/ui/ui-catalog.json',
-    JSON.stringify({ base, catalog }, null, 2),
-  );
+  fs.mkdirSync("docs/ops/ui", { recursive: true });
+  fs.writeFileSync("docs/ops/ui/ui-catalog.json", JSON.stringify({ base, catalog }, null, 2));
   await browser.close();
 })();
 ```
@@ -58,12 +55,10 @@ import * as fs from 'fs';
 **`scripts/ui/compare-docs-ui.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
-const ui = JSON.parse(
-  fs.readFileSync('docs/ops/ui/ui-catalog.json', 'utf8'),
-).catalog;
+const fs = require("fs");
+const path = require("path");
+const matter = require("gray-matter");
+const ui = JSON.parse(fs.readFileSync("docs/ops/ui/ui-catalog.json", "utf8")).catalog;
 const labels = new Set(Object.values(ui).flat());
 const pages = [];
 (function walk(d) {
@@ -72,20 +67,20 @@ const pages = [];
     const s = fs.statSync(p);
     s.isDirectory() ? walk(p) : /\.mdx?$/.test(f) && pages.push(p);
   }
-})('docs');
+})("docs");
 const drift = [];
 for (const p of pages) {
-  const src = fs.readFileSync(p, 'utf8');
+  const src = fs.readFileSync(p, "utf8");
   // Extract quoted UI tokens (e.g., menu labels)
-  const hits = [...src.matchAll(/`([^`]{2,40})`|\*\*([^*]{2,40})\*\*/g)].map(
-    (m) => (m[1] || m[2] || '').trim(),
+  const hits = [...src.matchAll(/`([^`]{2,40})`|\*\*([^*]{2,40})\*\*/g)].map((m) =>
+    (m[1] || m[2] || "").trim()
   );
   for (const h of hits) {
     if (h && !labels.has(h)) drift.push({ page: p, token: h });
   }
 }
-fs.writeFileSync('docs/ops/ui/drift.json', JSON.stringify(drift, null, 2));
-console.log('Drift tokens:', drift.length);
+fs.writeFileSync("docs/ops/ui/drift.json", JSON.stringify(drift, null, 2));
+console.log("Drift tokens:", drift.length);
 ```
 
 ## A3) Screenshot diffs (optional)
@@ -93,18 +88,18 @@ console.log('Drift tokens:', drift.length);
 **`scripts/ui/screenshot-diff.ts`**
 
 ```ts
-import { chromium } from 'playwright';
-import * as fs from 'fs';
+import { chromium } from "playwright";
+import * as fs from "fs";
 (async () => {
-  const base = process.env.APP_BASE_URL || 'http://localhost:5173';
-  const out = 'docs/ops/ui/shots';
+  const base = process.env.APP_BASE_URL || "http://localhost:5173";
+  const out = "docs/ops/ui/shots";
   fs.mkdirSync(out, { recursive: true });
   const browser = await chromium.launch();
   const page = await browser.newPage();
-  for (const p of ['/', '/settings', '/projects']) {
-    await page.goto(base + p, { waitUntil: 'networkidle' });
+  for (const p of ["/", "/settings", "/projects"]) {
+    await page.goto(base + p, { waitUntil: "networkidle" });
     await page.screenshot({
-      path: `${out}${p.replace(/\/$/, '') || '/home'}.png`,
+      path: `${out}${p.replace(/\/$/, "") || "/home"}.png`,
       fullPage: true,
     });
   }
@@ -119,7 +114,7 @@ import * as fs from 'fs';
 ```yaml
 name: UI Drift Watcher
 on:
-  schedule: [{ cron: '0 13 * * 1' }]
+  schedule: [{ cron: "0 13 * * 1" }]
   workflow_dispatch:
 jobs:
   drift:
@@ -170,15 +165,15 @@ deps:
 **`scripts/docpkg/pack.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const yaml = require('js-yaml');
-const zlib = require('zlib');
-const { execSync } = require('child_process');
-const dir = process.argv[2] || 'docs/_packages/ingest';
-const m = yaml.load(fs.readFileSync(path.join(dir, 'docpkg.yaml'), 'utf8'));
+const fs = require("fs");
+const path = require("path");
+const yaml = require("js-yaml");
+const zlib = require("zlib");
+const { execSync } = require("child_process");
+const dir = process.argv[2] || "docs/_packages/ingest";
+const m = yaml.load(fs.readFileSync(path.join(dir, "docpkg.yaml"), "utf8"));
 const files = m.exports;
-const tmp = 'docpkg';
+const tmp = "docpkg";
 fs.mkdirSync(tmp, { recursive: true });
 for (const f of files) {
   const out = path.join(tmp, f);
@@ -189,17 +184,17 @@ const tar = `${m.name}-${m.version}.tar`;
 execSync(`tar -cf ${tar} -C ${tmp} .`);
 const gz = `${tar}.gz`;
 fs.writeFileSync(gz, zlib.gzipSync(fs.readFileSync(tar)));
-fs.mkdirSync('dist/docpkg', { recursive: true });
+fs.mkdirSync("dist/docpkg", { recursive: true });
 fs.renameSync(gz, `dist/docpkg/${gz}`);
-console.log('Packed', `dist/docpkg/${gz}`);
+console.log("Packed", `dist/docpkg/${gz}`);
 ```
 
 **`scripts/docpkg/publish.js`** (GHCR artifact stub)
 
 ```js
-const { execSync } = require('child_process');
-const fs = require('fs');
-const f = fs.readdirSync('dist/docpkg').find((x) => x.endsWith('.tar.gz'));
+const { execSync } = require("child_process");
+const fs = require("fs");
+const f = fs.readdirSync("dist/docpkg").find((x) => x.endsWith(".tar.gz"));
 execSync(`gh release upload docpkg-${Date.now()} dist/docpkg/${f} --clobber`);
 ```
 
@@ -217,27 +212,27 @@ deps:
 **`scripts/docpkg/import.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const yaml = require('js-yaml');
-const https = require('https');
-const lock = yaml.load(fs.readFileSync('docs/docpkg.lock', 'utf8'));
+const fs = require("fs");
+const path = require("path");
+const yaml = require("js-yaml");
+const https = require("https");
+const lock = yaml.load(fs.readFileSync("docs/docpkg.lock", "utf8"));
 function fetch(url) {
   return new Promise((res) =>
     https.get(url, (r) => {
       const chunks = [];
-      r.on('data', (d) => chunks.push(d));
-      r.on('end', () => res(Buffer.concat(chunks)));
-    }),
+      r.on("data", (d) => chunks.push(d));
+      r.on("end", () => res(Buffer.concat(chunks)));
+    })
   );
 }
 (async () => {
   for (const d of lock.deps) {
     const buf = await fetch(d.url);
-    const tgz = 'pkg.tgz';
+    const tgz = "pkg.tgz";
     fs.writeFileSync(tgz, buf);
-    require('child_process').execSync(
-      `mkdir -p vendor/${d.name} && tar -xzf ${tgz} -C vendor/${d.name}`,
+    require("child_process").execSync(
+      `mkdir -p vendor/${d.name} && tar -xzf ${tgz} -C vendor/${d.name}`
     );
   }
 })();
@@ -260,14 +255,12 @@ const {
   createConnection,
   TextDocuments,
   DiagnosticSeverity,
-} = require('vscode-languageserver/node');
-const matter = require('gray-matter');
-const Ajv = require('ajv').default;
-const addFormats = require('ajv-formats');
-const fs = require('fs');
-const schema = JSON.parse(
-  fs.readFileSync('docs/_meta/frontmatter.schema.json', 'utf8'),
-);
+} = require("vscode-languageserver/node");
+const matter = require("gray-matter");
+const Ajv = require("ajv").default;
+const addFormats = require("ajv-formats");
+const fs = require("fs");
+const schema = JSON.parse(fs.readFileSync("docs/_meta/frontmatter.schema.json", "utf8"));
 const ajv = new Ajv({ allErrors: true, strict: false });
 addFormats(ajv);
 const validate = ajv.compile(schema);
@@ -286,7 +279,7 @@ function lint(text) {
       },
     });
   }
-  if (!/##\s*See also/i.test(g.content || ''))
+  if (!/##\s*See also/i.test(g.content || ""))
     res.push({
       message: 'Missing "See also" section',
       severity: 2,
@@ -313,24 +306,24 @@ conn.listen();
 **`tools/vscode/doc-lsp/extension.js`**
 
 ```js
-const path = require('path');
-const { workspace, ExtensionContext, window } = require('vscode');
-const { LanguageClient, TransportKind } = require('vscode-languageclient/node');
+const path = require("path");
+const { workspace, ExtensionContext, window } = require("vscode");
+const { LanguageClient, TransportKind } = require("vscode-languageclient/node");
 function activate(context) {
-  const serverModule = context.asAbsolutePath(path.join('server.js'));
+  const serverModule = context.asAbsolutePath(path.join("server.js"));
   const client = new LanguageClient(
-    'docLsp',
-    'Docs Lint',
+    "docLsp",
+    "Docs Lint",
     {
       run: { module: serverModule, transport: TransportKind.ipc },
       debug: { module: serverModule, transport: TransportKind.ipc },
     },
     {
       documentSelector: [
-        { scheme: 'file', language: 'markdown' },
-        { scheme: 'file', language: 'mdx' },
+        { scheme: "file", language: "markdown" },
+        { scheme: "file", language: "mdx" },
       ],
-    },
+    }
   );
   context.subscriptions.push(client.start());
 }
@@ -363,26 +356,20 @@ exports.deactivate = function () {};
 **`scripts/media/hash-images.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
+const fs = require("fs");
+const path = require("path");
+const crypto = require("crypto");
 function sha256(p) {
-  return crypto
-    .createHash('sha256')
-    .update(fs.readFileSync(p))
-    .digest('hex')
-    .slice(0, 16);
+  return crypto.createHash("sha256").update(fs.readFileSync(p)).digest("hex").slice(0, 16);
 }
 const imgs = [];
 (function walk(d) {
   for (const f of fs.readdirSync(d)) {
     const p = path.join(d, f),
       s = fs.statSync(p);
-    s.isDirectory()
-      ? walk(p)
-      : /\.(png|jpe?g|gif|svg)$/i.test(f) && imgs.push(p);
+    s.isDirectory() ? walk(p) : /\.(png|jpe?g|gif|svg)$/i.test(f) && imgs.push(p);
   }
-})('docs');
+})("docs");
 const map = new Map();
 for (const p of imgs) {
   const h = sha256(p);
@@ -390,12 +377,9 @@ for (const p of imgs) {
   const dir = path.dirname(p);
   const newp = path.join(dir, `${h}${ext}`);
   if (!fs.existsSync(newp)) fs.copyFileSync(p, newp);
-  map.set(p.replace(/^docs\//, ''), newp.replace(/^docs\//, ''));
+  map.set(p.replace(/^docs\//, ""), newp.replace(/^docs\//, ""));
 }
-fs.writeFileSync(
-  'docs/ops/media/hash-map.json',
-  JSON.stringify(Object.fromEntries(map), null, 2),
-);
+fs.writeFileSync("docs/ops/media/hash-map.json", JSON.stringify(Object.fromEntries(map), null, 2));
 ```
 
 ## D2) Update references
@@ -403,23 +387,20 @@ fs.writeFileSync(
 **`scripts/media/replace-refs.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const map = JSON.parse(fs.readFileSync('docs/ops/media/hash-map.json', 'utf8'));
+const fs = require("fs");
+const path = require("path");
+const map = JSON.parse(fs.readFileSync("docs/ops/media/hash-map.json", "utf8"));
 (function walk(d) {
   for (const f of fs.readdirSync(d)) {
     const p = path.join(d, f),
       s = fs.statSync(p);
     s.isDirectory() ? walk(p) : /\.mdx?$/.test(f) && rewrite(p);
   }
-})('docs');
+})("docs");
 function rewrite(p) {
-  let src = fs.readFileSync(p, 'utf8');
+  let src = fs.readFileSync(p, "utf8");
   for (const [oldp, newp] of Object.entries(map)) {
-    src = src.replace(
-      new RegExp(oldp.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
-      newp,
-    );
+    src = src.replace(new RegExp(oldp.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"), newp);
   }
   fs.writeFileSync(p, src);
 }

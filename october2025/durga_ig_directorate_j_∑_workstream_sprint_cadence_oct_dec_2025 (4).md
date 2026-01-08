@@ -347,14 +347,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "PCQ Manifest",
   "type": "object",
-  "required": [
-    "id",
-    "actor",
-    "graph",
-    "inputs",
-    "policy_bundle_digest",
-    "attestations"
-  ],
+  "required": ["id", "actor", "graph", "inputs", "policy_bundle_digest", "attestations"],
   "properties": {
     "id": { "type": "string", "pattern": "^[a-f0-9-]{16,}$" },
     "actor": {
@@ -540,7 +533,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: "20" }
       - name: Install OPA
         run: |
           curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64

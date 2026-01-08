@@ -35,15 +35,15 @@ interface Decision {
 }
 
 const DEFAULT_DECISION_URL =
-  process.env.OPA_DECISION_URL ||
-  "http://localhost:8181/v1/data/policy/authz/abac/decision";
+  process.env.OPA_DECISION_URL || "http://localhost:8181/v1/data/policy/authz/abac/decision";
 
 const redacted = (value?: string) =>
   value ? createHash("sha256").update(value).digest("hex").slice(0, 8) : undefined;
 
 function buildInput(req: Request): AuthzInput {
   const roles = (req.headers["x-roles"] as string | undefined)?.split(",") || [];
-  const tenantHeader = (req.headers["x-tenant"] as string | undefined) ||
+  const tenantHeader =
+    (req.headers["x-tenant"] as string | undefined) ||
     (req.headers["x-tenant-id"] as string | undefined) ||
     "unknown";
   const classification =
@@ -71,7 +71,7 @@ function buildInput(req: Request): AuthzInput {
       (req.headers["x-action"] as string | undefined) || `${req.method.toLowerCase()}:${req.path}`,
     context: {
       env: (req.headers["x-env"] as string | undefined) || "dev",
-      request_ip: req.ip || 'unknown',
+      request_ip: req.ip || "unknown",
       time: new Date().toISOString(),
       reason,
       risk: (req.headers["x-risk"] as string | undefined) || "low",
@@ -129,9 +129,7 @@ export async function authzMiddleware(req: Request, res: Response, next: NextFun
       if (denyReasons.length > 0) {
         res.setHeader("x-deny-reason", denyReasons.join(","));
       }
-      return res
-        .status(403)
-        .json({ error: "forbidden", reasons: denyReasons, traceId });
+      return res.status(403).json({ error: "forbidden", reasons: denyReasons, traceId });
     }
 
     return next();

@@ -10,7 +10,7 @@ metadata:
     component: neo4j-backup
     version: v24.3.0
 spec:
-  schedule: '2,7,12,17,22,27,32,37,42,47,52,57 * * * *' # Every 5 minutes, offset by 2 from PG
+  schedule: "2,7,12,17,22,27,32,37,42,47,52,57 * * * *" # Every 5 minutes, offset by 2 from PG
   concurrencyPolicy: Forbid
   failedJobsHistoryLimit: 3
   successfulJobsHistoryLimit: 10
@@ -28,7 +28,7 @@ spec:
               image: neo4j:5.15-enterprise
               env:
                 - name: NEO4J_URI
-                  value: 'bolt://maestro-neo4j:7687'
+                  value: "bolt://maestro-neo4j:7687"
                 - name: NEO4J_USERNAME
                   valueFrom:
                     secretKeyRef:
@@ -50,11 +50,11 @@ spec:
                       name: maestro-backup-secret
                       key: aws_secret_access_key
                 - name: AWS_DEFAULT_REGION
-                  value: 'us-east-1'
+                  value: "us-east-1"
                 - name: S3_BUCKET
-                  value: 'maestro-backups-primary'
+                  value: "maestro-backups-primary"
                 - name: BACKUP_RETENTION_DAYS
-                  value: '30'
+                  value: "30"
               command:
                 - /bin/bash
                 - -c
@@ -174,11 +174,11 @@ spec:
 
               resources:
                 requests:
-                  memory: '1Gi'
-                  cpu: '500m'
+                  memory: "1Gi"
+                  cpu: "500m"
                 limits:
-                  memory: '4Gi'
-                  cpu: '2000m'
+                  memory: "4Gi"
+                  cpu: "2000m"
 
               volumeMounts:
                 - name: backup-temp

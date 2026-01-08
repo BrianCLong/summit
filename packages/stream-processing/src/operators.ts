@@ -1,7 +1,7 @@
-import { StreamOperator } from './types';
-import pino from 'pino';
+import { StreamOperator } from "./types";
+import pino from "pino";
 
-const logger = pino({ name: 'stream-operators' });
+const logger = pino({ name: "stream-operators" });
 
 /**
  * Common stream operators
@@ -11,7 +11,7 @@ const logger = pino({ name: 'stream-operators' });
  * Deduplicate operator
  */
 export class DeduplicateOperator<T> implements StreamOperator<T, T> {
-  name = 'deduplicate';
+  name = "deduplicate";
   private seen: Set<string> = new Set();
   private maxSize: number = 100000;
 
@@ -47,7 +47,7 @@ export class DeduplicateOperator<T> implements StreamOperator<T, T> {
  * Throttle operator
  */
 export class ThrottleOperator<T> implements StreamOperator<T, T> {
-  name = 'throttle';
+  name = "throttle";
   private lastEmit: number = 0;
 
   constructor(private intervalMs: number) {}
@@ -68,7 +68,7 @@ export class ThrottleOperator<T> implements StreamOperator<T, T> {
  * Debounce operator
  */
 export class DebounceOperator<T> implements StreamOperator<T, T> {
-  name = 'debounce';
+  name = "debounce";
   private timer: NodeJS.Timeout | null = null;
   private pendingValue: T | null = null;
   private resolver: ((value: T | T[]) => void) | null = null;
@@ -99,7 +99,7 @@ export class DebounceOperator<T> implements StreamOperator<T, T> {
  * Sample operator (take every Nth element)
  */
 export class SampleOperator<T> implements StreamOperator<T, T> {
-  name = 'sample';
+  name = "sample";
   private count: number = 0;
 
   constructor(private n: number) {}
@@ -119,7 +119,7 @@ export class SampleOperator<T> implements StreamOperator<T, T> {
  * Batch operator
  */
 export class BatchOperator<T> implements StreamOperator<T, T[]> {
-  name = 'batch';
+  name = "batch";
   private batch: T[] = [];
 
   constructor(
@@ -156,7 +156,7 @@ export class BatchOperator<T> implements StreamOperator<T, T[]> {
  * Retry operator
  */
 export class RetryOperator<T> implements StreamOperator<T, T> {
-  name = 'retry';
+  name = "retry";
 
   constructor(
     private operation: (value: T) => Promise<T>,
@@ -172,10 +172,7 @@ export class RetryOperator<T> implements StreamOperator<T, T> {
         return await this.operation(input);
       } catch (error) {
         lastError = error as Error;
-        logger.warn(
-          { error, attempt, maxRetries: this.maxRetries },
-          'Retry attempt failed'
-        );
+        logger.warn({ error, attempt, maxRetries: this.maxRetries }, "Retry attempt failed");
 
         if (attempt < this.maxRetries) {
           await new Promise((resolve) =>
@@ -193,10 +190,10 @@ export class RetryOperator<T> implements StreamOperator<T, T> {
  * Circuit breaker operator
  */
 export class CircuitBreakerOperator<T> implements StreamOperator<T, T> {
-  name = 'circuit-breaker';
+  name = "circuit-breaker";
   private failureCount: number = 0;
   private lastFailureTime: number = 0;
-  private state: 'CLOSED' | 'OPEN' | 'HALF_OPEN' = 'CLOSED';
+  private state: "CLOSED" | "OPEN" | "HALF_OPEN" = "CLOSED";
 
   constructor(
     private operation: (value: T) => Promise<T>,
@@ -206,28 +203,25 @@ export class CircuitBreakerOperator<T> implements StreamOperator<T, T> {
 
   async process(input: T): Promise<T | T[]> {
     // Check if circuit should be reset
-    if (
-      this.state === 'OPEN' &&
-      Date.now() - this.lastFailureTime > this.resetTimeoutMs
-    ) {
-      this.state = 'HALF_OPEN';
+    if (this.state === "OPEN" && Date.now() - this.lastFailureTime > this.resetTimeoutMs) {
+      this.state = "HALF_OPEN";
       this.failureCount = 0;
-      logger.info('Circuit breaker half-open');
+      logger.info("Circuit breaker half-open");
     }
 
     // Reject if circuit is open
-    if (this.state === 'OPEN') {
-      throw new Error('Circuit breaker is OPEN');
+    if (this.state === "OPEN") {
+      throw new Error("Circuit breaker is OPEN");
     }
 
     try {
       const result = await this.operation(input);
 
       // Success in half-open state closes circuit
-      if (this.state === 'HALF_OPEN') {
-        this.state = 'CLOSED';
+      if (this.state === "HALF_OPEN") {
+        this.state = "CLOSED";
         this.failureCount = 0;
-        logger.info('Circuit breaker closed');
+        logger.info("Circuit breaker closed");
       }
 
       return result;
@@ -236,8 +230,8 @@ export class CircuitBreakerOperator<T> implements StreamOperator<T, T> {
       this.lastFailureTime = Date.now();
 
       if (this.failureCount >= this.failureThreshold) {
-        this.state = 'OPEN';
-        logger.warn('Circuit breaker opened');
+        this.state = "OPEN";
+        logger.warn("Circuit breaker opened");
       }
 
       throw error;
@@ -249,11 +243,9 @@ export class CircuitBreakerOperator<T> implements StreamOperator<T, T> {
  * Enrich operator
  */
 export class EnrichOperator<T, E> implements StreamOperator<T, T & E> {
-  name = 'enrich';
+  name = "enrich";
 
-  constructor(
-    private enrichmentFunction: (value: T) => Promise<E>
-  ) {}
+  constructor(private enrichmentFunction: (value: T) => Promise<E>) {}
 
   async process(input: T): Promise<(T & E) | (T & E)[]> {
     const enrichment = await this.enrichmentFunction(input);
@@ -265,7 +257,7 @@ export class EnrichOperator<T, E> implements StreamOperator<T, T & E> {
  * Split operator
  */
 export class SplitOperator<T> implements StreamOperator<T, T> {
-  name = 'split';
+  name = "split";
   private outputs: Map<string, T[]> = new Map();
 
   constructor(

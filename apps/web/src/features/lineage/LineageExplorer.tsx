@@ -9,14 +9,19 @@ interface LineageExplorerProps {
 
 function TagBadge({ tag }: { tag: string }) {
   const tagTone = useMemo(() => {
-    if (tag.toLowerCase().includes('pii')) return 'bg-red-100 text-red-700 border-red-200'
-    if (tag.toLowerCase().includes('warrant')) return 'bg-amber-100 text-amber-700 border-amber-200'
-    if (tag.toLowerCase().includes('license')) return 'bg-blue-100 text-blue-700 border-blue-200'
+    if (tag.toLowerCase().includes('pii'))
+      return 'bg-red-100 text-red-700 border-red-200'
+    if (tag.toLowerCase().includes('warrant'))
+      return 'bg-amber-100 text-amber-700 border-amber-200'
+    if (tag.toLowerCase().includes('license'))
+      return 'bg-blue-100 text-blue-700 border-blue-200'
     return 'bg-slate-100 text-slate-700 border-slate-200'
   }, [tag])
 
   return (
-    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${tagTone}`}>
+    <span
+      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${tagTone}`}
+    >
       {tag}
     </span>
   )
@@ -33,7 +38,7 @@ function LinkList({ title, links }: { title: string; links: LineageLink[] }) {
         <p className="text-sm text-slate-500">No linked nodes available.</p>
       ) : (
         <ul className="space-y-2">
-          {links.map((link) => (
+          {links.map(link => (
             <li
               key={link.id}
               className="rounded-md border border-slate-100 bg-slate-50 p-3"
@@ -41,8 +46,12 @@ function LinkList({ title, links }: { title: string; links: LineageLink[] }) {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-900">{link.label}</p>
-                  <p className="text-xs uppercase tracking-wide text-slate-500">{link.type}</p>
+                  <p className="text-sm font-medium text-slate-900">
+                    {link.label}
+                  </p>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">
+                    {link.type}
+                  </p>
                 </div>
                 {link.restricted && (
                   <span className="rounded bg-amber-100 px-2 py-1 text-[10px] font-semibold text-amber-700">
@@ -51,7 +60,7 @@ function LinkList({ title, links }: { title: string; links: LineageLink[] }) {
                 )}
               </div>
               <div className="mt-2 flex flex-wrap gap-2">
-                {link.tags.map((tag) => (
+                {link.tags.map(tag => (
                   <TagBadge key={`${link.id}-${tag}`} tag={tag} />
                 ))}
               </div>
@@ -63,7 +72,10 @@ function LinkList({ title, links }: { title: string; links: LineageLink[] }) {
   )
 }
 
-export function LineageExplorer({ entityId, initialGraph }: LineageExplorerProps) {
+export function LineageExplorer({
+  entityId,
+  initialGraph,
+}: LineageExplorerProps) {
   const [graph, setGraph] = useState<LineageGraph | null>(initialGraph ?? null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(!initialGraph)
@@ -74,7 +86,7 @@ export function LineageExplorer({ entityId, initialGraph }: LineageExplorerProps
 
     setLoading(true)
     fetchLineageGraph(entityId)
-      .then((data) => {
+      .then(data => {
         if (mounted) {
           setGraph(data)
           setError(null)
@@ -92,7 +104,10 @@ export function LineageExplorer({ entityId, initialGraph }: LineageExplorerProps
 
   if (error) {
     return (
-      <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert">
+      <div
+        className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+        role="alert"
+      >
         {error}
       </div>
     )
@@ -110,12 +125,16 @@ export function LineageExplorer({ entityId, initialGraph }: LineageExplorerProps
     <div className="space-y-4" aria-label="lineage-explorer">
       <header className="flex items-start justify-between">
         <div>
-          <p className="text-xs uppercase tracking-wide text-slate-500">Read-only</p>
-          <h2 className="text-lg font-semibold text-slate-900">Lineage Explorer</h2>
+          <p className="text-xs uppercase tracking-wide text-slate-500">
+            Read-only
+          </p>
+          <h2 className="text-lg font-semibold text-slate-900">
+            Lineage Explorer
+          </h2>
           <p className="text-sm text-slate-600">Context for {graph.targetId}</p>
         </div>
         <div className="flex flex-wrap gap-2" aria-label="policy-tags">
-          {graph.policyTags.map((tag) => (
+          {graph.policyTags.map(tag => (
             <TagBadge key={tag} tag={tag} />
           ))}
         </div>
@@ -123,7 +142,8 @@ export function LineageExplorer({ entityId, initialGraph }: LineageExplorerProps
 
       {graph.restricted && (
         <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-          {graph.restrictionReason || 'Lineage is partially redacted for this viewer.'}
+          {graph.restrictionReason ||
+            'Lineage is partially redacted for this viewer.'}
         </div>
       )}
 

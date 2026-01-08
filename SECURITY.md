@@ -15,9 +15,9 @@ We will acknowledge receipt within 24 hours and provide a timeline for triage an
 
 ### Disclosure Policy
 
-*   **Embargo:** We request a 30-day embargo on public disclosure to allow for remediation.
-*   **Bounty:** We do not currently offer a bug bounty program.
-*   **Safe Harbor:** We will not take legal action against researchers who discover and report vulnerabilities in good faith and in accordance with this policy.
+- **Embargo:** We request a 30-day embargo on public disclosure to allow for remediation.
+- **Bounty:** We do not currently offer a bug bounty program.
+- **Safe Harbor:** We will not take legal action against researchers who discover and report vulnerabilities in good faith and in accordance with this policy.
 
 ### Incident Response
 
@@ -31,33 +31,35 @@ For compliance evidence regarding vulnerability management, see [Evidence Index]
 
 ### Assets
 
-*   **Customer Data:** PII, usage metrics, and proprietary graph data stored in **Neo4j** and **PostgreSQL**.
-*   **Intellectual Property:** Source code, ML models (PyTorch/ONNX), and proprietary algorithms (Rust crates for graph processing).
-*   **Availability:** The ability for the platform to serve requests via the **IntelGraph API**.
+- **Customer Data:** PII, usage metrics, and proprietary graph data stored in **Neo4j** and **PostgreSQL**.
+- **Intellectual Property:** Source code, ML models (PyTorch/ONNX), and proprietary algorithms (Rust crates for graph processing).
+- **Availability:** The ability for the platform to serve requests via the **IntelGraph API**.
 
 ### Threats
 
-*   **Unauthorized Access:** External attackers gaining access to data or systems.
-*   **Insider Threat:** Malicious or negligent employees compromising security.
-*   **Supply Chain Attack:** Compromise of third-party dependencies (Rust crates, NPM packages, Python libs) or build tools.
-*   **Denial of Service:** Attacks aiming to disrupt service availability.
+- **Unauthorized Access:** External attackers gaining access to data or systems.
+- **Insider Threat:** Malicious or negligent employees compromising security.
+- **Supply Chain Attack:** Compromise of third-party dependencies (Rust crates, NPM packages, Python libs) or build tools.
+- **Denial of Service:** Attacks aiming to disrupt service availability.
 
 ### Mitigations
 
-*   **Identity & Access Management:** Strong authentication (MFA), least privilege (RBAC) enforced via API Gateway.
-*   **Encryption:** Data encrypted at rest (AES-256 via **HashiCorp Vault/KMS**) and in transit (TLS 1.2+).
-*   **Vulnerability Management:** Regular scanning of code and dependencies (**Trivy**, **Dependabot**).
-*   **Policy Enforcement:** **OPA/Conftest** policies for configuration validation in CI/CD.
-*   **Monitoring & Alerting:** Comprehensive observability stack (**Prometheus**, **Grafana**) to detect anomalies.
+- **Identity & Access Management:** Strong authentication (MFA), least privilege (RBAC) enforced via API Gateway.
+- **Encryption:** Data encrypted at rest (AES-256 via **HashiCorp Vault/KMS**) and in transit (TLS 1.2+).
+- **Vulnerability Management:** Regular scanning of code and dependencies (**Trivy**, **Dependabot**).
+- **Policy Enforcement:** **OPA/Conftest** policies for configuration validation in CI/CD.
+- **Monitoring & Alerting:** Comprehensive observability stack (**Prometheus**, **Grafana**) to detect anomalies.
 
 ## Scope & Exclusions
 
 **Covered:**
-*   Application security (code, dependencies, build pipeline).
-*   Infrastructure as Code configuration.
-*   Operational runbooks and incident response policies.
+
+- Application security (code, dependencies, build pipeline).
+- Infrastructure as Code configuration.
+- Operational runbooks and incident response policies.
 
 **Excluded (Out of Scope):**
-*   Physical security of data centers (managed by Cloud Provider).
-*   Personnel security (background checks, HR policies).
-*   Third-party audits (SOC2/ISO certification reports are available upon request but not stored in this repo).
+
+- Physical security of data centers (managed by Cloud Provider).
+- Personnel security (background checks, HR policies).
+- Third-party audits (SOC2/ISO certification reports are available upon request but not stored in this repo).

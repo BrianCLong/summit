@@ -34,14 +34,14 @@ This document defines how service ownership is assigned, displayed, tracked, and
 
 ### What Ownership Means
 
-| Aspect | Owner Responsibility |
-|--------|---------------------|
-| **Reliability** | Meet SLOs, respond to incidents, maintain error budget |
-| **Security** | Address vulnerabilities, maintain compliance, review access |
-| **Documentation** | Keep docs current, maintain runbooks, update catalog |
-| **Evolution** | Plan deprecation, coordinate with consumers, drive improvements |
-| **Dependencies** | Communicate breaking changes, maintain contracts |
-| **On-Call** | Staff rotation, respond within SLA, participate in incidents |
+| Aspect            | Owner Responsibility                                            |
+| ----------------- | --------------------------------------------------------------- |
+| **Reliability**   | Meet SLOs, respond to incidents, maintain error budget          |
+| **Security**      | Address vulnerabilities, maintain compliance, review access     |
+| **Documentation** | Keep docs current, maintain runbooks, update catalog            |
+| **Evolution**     | Plan deprecation, coordinate with consumers, drive improvements |
+| **Dependencies**  | Communicate breaking changes, maintain contracts                |
+| **On-Call**       | Staff rotation, respond within SLA, participate in incidents    |
 
 ### What Ownership Does NOT Mean
 
@@ -193,17 +193,17 @@ Every service in the catalog MUST have:
 
 ```yaml
 ownership:
-  primary_owner: string         # Required - team ID
-  backup_owner: string          # Required - team ID
-  escalation_owner: string      # Required for tier: critical
-  oncall_schedule: string       # Required for tier: critical, high
+  primary_owner: string # Required - team ID
+  backup_owner: string # Required - team ID
+  escalation_owner: string # Required for tier: critical
+  oncall_schedule: string # Required for tier: critical, high
 
   contacts:
-    slack_channel: string       # Required
-    email: string               # Required
-    pagerduty_service: string   # Required for tier: critical, high
+    slack_channel: string # Required
+    email: string # Required
+    pagerduty_service: string # Required for tier: critical, high
 
-  last_ownership_review: date   # Required - must be < 90 days old
+  last_ownership_review: date # Required - must be < 90 days old
 ```
 
 ---
@@ -246,15 +246,15 @@ Service-level SLOs roll up to owners:
 
 ### Incident Ownership
 
-| Incident Aspect | Responsible Party |
-|-----------------|-------------------|
-| **Detection** | On-call engineer (any team) |
-| **Initial Response** | Service primary owner |
-| **Incident Commander** | Primary owner lead or delegate |
-| **Communication** | IC (internal), Comms lead (external) |
-| **Resolution** | Primary owner + involved teams |
-| **Postmortem** | Primary owner facilitates |
-| **Action Items** | Assigned to relevant owners |
+| Incident Aspect        | Responsible Party                    |
+| ---------------------- | ------------------------------------ |
+| **Detection**          | On-call engineer (any team)          |
+| **Initial Response**   | Service primary owner                |
+| **Incident Commander** | Primary owner lead or delegate       |
+| **Communication**      | IC (internal), Comms lead (external) |
+| **Resolution**         | Primary owner + involved teams       |
+| **Postmortem**         | Primary owner facilitates            |
+| **Action Items**       | Assigned to relevant owners          |
 
 ### Incident Escalation Path
 
@@ -296,18 +296,18 @@ Each service's error budget is owned by the primary owner:
 
 ```yaml
 error_budget:
-  owner: platform-engineering    # Primary owner
+  owner: platform-engineering # Primary owner
 
   budget:
-    monthly_minutes: 43.2       # For 99.9% availability (30 days)
-    current_remaining: 38.5     # Minutes remaining
-    burn_rate: 0.8x             # Current burn rate vs expected
+    monthly_minutes: 43.2 # For 99.9% availability (30 days)
+    current_remaining: 38.5 # Minutes remaining
+    burn_rate: 0.8x # Current burn rate vs expected
 
   thresholds:
-    green: 75-100               # >75% remaining - normal operations
-    yellow: 50-75               # 50-75% remaining - increased caution
-    orange: 25-50               # 25-50% remaining - freeze non-critical changes
-    red: 0-25                   # <25% remaining - incident mode
+    green: 75-100 # >75% remaining - normal operations
+    yellow: 50-75 # 50-75% remaining - increased caution
+    orange: 25-50 # 25-50% remaining - freeze non-critical changes
+    red: 0-25 # <25% remaining - incident mode
 
   notifications:
     - threshold: 50
@@ -320,13 +320,13 @@ error_budget:
 
 ### Error Budget Policies
 
-| Budget Status | Policy |
-|--------------|--------|
-| **Green (>75%)** | Normal development, deployments allowed |
-| **Yellow (50-75%)** | Extra review on changes, limit experiments |
+| Budget Status       | Policy                                            |
+| ------------------- | ------------------------------------------------- |
+| **Green (>75%)**    | Normal development, deployments allowed           |
+| **Yellow (50-75%)** | Extra review on changes, limit experiments        |
 | **Orange (25-50%)** | Freeze non-critical changes, focus on reliability |
-| **Red (<25%)** | Emergency mode, reliability-only changes |
-| **Exhausted (0%)** | All changes require escalation owner approval |
+| **Red (<25%)**      | Emergency mode, reliability-only changes          |
+| **Exhausted (0%)**  | All changes require escalation owner approval     |
 
 ### Budget Burn Attribution
 
@@ -481,12 +481,14 @@ temporary_ownership:
 
 ```markdown
 ## Pre-Transfer
+
 - [ ] New owner identified and capacity confirmed
 - [ ] Architecture review completed
 - [ ] Transfer timeline agreed by all parties
 - [ ] Escalation owner approves transfer
 
 ## Knowledge Transfer
+
 - [ ] Documentation reviewed and updated
 - [ ] Architecture walkthrough completed
 - [ ] Key decision history shared
@@ -495,6 +497,7 @@ temporary_ownership:
 - [ ] On-call shadowing completed (minimum 2 incidents or 2 weeks)
 
 ## Technical Access
+
 - [ ] Repository access granted
 - [ ] Production environment access granted
 - [ ] Monitoring dashboards shared
@@ -503,6 +506,7 @@ temporary_ownership:
 - [ ] Secrets/credentials rotated (if required)
 
 ## Documentation Updates
+
 - [ ] Service catalog updated
 - [ ] CODEOWNERS file updated
 - [ ] README ownership section updated
@@ -510,12 +514,14 @@ temporary_ownership:
 - [ ] Architecture diagrams updated (if ownership affects design)
 
 ## Validation
+
 - [ ] New owner successfully handles incident (or drill)
 - [ ] New owner deploys change successfully
 - [ ] Old owner confirms knowledge transfer complete
 - [ ] 30-day support period scheduled
 
 ## Completion
+
 - [ ] Transfer retrospective conducted
 - [ ] Lessons learned documented
 - [ ] Announcement to stakeholders
@@ -574,13 +580,13 @@ quarterly_audit:
 
 ### Enforcement Mechanisms
 
-| Violation | Consequence |
-|-----------|-------------|
-| Missing primary owner | Service blocked from production deployment |
-| Invalid contacts | Weekly escalation until resolved |
-| Stale ownership (>90 days) | Flagged as potentially orphaned |
+| Violation                       | Consequence                                        |
+| ------------------------------- | -------------------------------------------------- |
+| Missing primary owner           | Service blocked from production deployment         |
+| Invalid contacts                | Weekly escalation until resolved                   |
+| Stale ownership (>90 days)      | Flagged as potentially orphaned                    |
 | No on-call (tier critical/high) | Escalation owner notified, service tier downgraded |
-| Failed audit | Remediation plan required within 14 days |
+| Failed audit                    | Remediation plan required within 14 days           |
 
 ### CODEOWNERS Integration
 
@@ -655,12 +661,12 @@ ownership_metrics:
 
 ### Ownership Role Summary
 
-| Role | Count per Service | Responsibility |
-|------|-------------------|----------------|
-| Primary Owner | Exactly 1 | Full accountability |
-| Backup Owner | Exactly 1 | Coverage and escalation |
-| Escalation Owner | 1 (for critical) | Business decisions |
-| On-Call | 1+ engineers | Incident response |
+| Role             | Count per Service | Responsibility          |
+| ---------------- | ----------------- | ----------------------- |
+| Primary Owner    | Exactly 1         | Full accountability     |
+| Backup Owner     | Exactly 1         | Coverage and escalation |
+| Escalation Owner | 1 (for critical)  | Business decisions      |
+| On-Call          | 1+ engineers      | Incident response       |
 
 ---
 

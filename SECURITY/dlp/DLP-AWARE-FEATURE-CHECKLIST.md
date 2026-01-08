@@ -10,16 +10,16 @@
 
 Answer these questions to determine DLP requirements:
 
-| Question | Yes → Action Required |
-|----------|----------------------|
-| Does the feature handle user-provided content? | Content inspection at ingestion |
-| Does the feature display data to users? | Classification-aware rendering |
-| Does the feature export or download data? | Egress controls and redaction |
-| Does the feature share data between users? | Barrier enforcement |
-| Does the feature transfer data externally? | Cross-boundary controls |
-| Does the feature store data? | Encryption and classification labels |
-| Does the feature search across data? | Access control in queries |
-| Does the feature aggregate data? | Aggregation risk assessment |
+| Question                                       | Yes → Action Required                |
+| ---------------------------------------------- | ------------------------------------ |
+| Does the feature handle user-provided content? | Content inspection at ingestion      |
+| Does the feature display data to users?        | Classification-aware rendering       |
+| Does the feature export or download data?      | Egress controls and redaction        |
+| Does the feature share data between users?     | Barrier enforcement                  |
+| Does the feature transfer data externally?     | Cross-boundary controls              |
+| Does the feature store data?                   | Encryption and classification labels |
+| Does the feature search across data?           | Access control in queries            |
+| Does the feature aggregate data?               | Aggregation risk assessment          |
 
 ---
 
@@ -49,7 +49,7 @@ const result = await dlpService.scan({
   contentType: file.mimetype,
   context: {
     actor: currentUser,
-    purpose: 'FILE_UPLOAD',
+    purpose: "FILE_UPLOAD",
   },
 });
 
@@ -82,7 +82,7 @@ const barrierResult = await barrierEnforcer.check({
   target: requestContext,
   actor: currentUser,
   resource: dataResource,
-  operation: 'READ',
+  operation: "READ",
 });
 
 if (!barrierResult.allowed) {
@@ -114,8 +114,8 @@ const displayData = await redactionEngine.redact({
   content: rawData,
   detections: scanResult.detections,
   configs: {
-    SSN: { strategy: 'FULL_MASK' },
-    EMAIL: { strategy: 'PARTIAL_DOMAIN' },
+    SSN: { strategy: "FULL_MASK" },
+    EMAIL: { strategy: "PARTIAL_DOMAIN" },
   },
 });
 ```
@@ -147,13 +147,13 @@ const displayData = await redactionEngine.redact({
 const exportResult = await dlpService.scan({
   content: exportData,
   context: {
-    operation: 'EXPORT',
-    destination: { type: 'EXTERNAL', domain: targetDomain },
+    operation: "EXPORT",
+    destination: { type: "EXTERNAL", domain: targetDomain },
     volume: { recordCount: records.length },
   },
 });
 
-if (exportResult.action === 'REQUIRE_APPROVAL') {
+if (exportResult.action === "REQUIRE_APPROVAL") {
   return await initiateApprovalWorkflow(exportRequest);
 }
 ```
@@ -197,10 +197,10 @@ if (exportResult.action === 'REQUIRE_APPROVAL') {
 await storageService.store({
   data: encryptedContent,
   metadata: {
-    classification: 'CONFIDENTIAL',
-    categories: ['PII', 'FINANCIAL'],
+    classification: "CONFIDENTIAL",
+    categories: ["PII", "FINANCIAL"],
     retentionDays: 365 * 3,
-    deletionPolicy: 'CRYPTO_SHRED',
+    deletionPolicy: "CRYPTO_SHRED",
   },
 });
 ```
@@ -241,11 +241,14 @@ await storageService.store({
 
 ```typescript
 // Example: DLP middleware
-app.use('/api/*', dlpMiddleware.inspect({
-  inspectionPoints: ['request', 'response'],
-  asyncMode: false,
-  failOpen: false,
-}));
+app.use(
+  "/api/*",
+  dlpMiddleware.inspect({
+    inspectionPoints: ["request", "response"],
+    asyncMode: false,
+    failOpen: false,
+  })
+);
 ```
 
 ### 9. Audit and Compliance
@@ -268,16 +271,16 @@ app.use('/api/*', dlpMiddleware.inspect({
 ```typescript
 // Example: Audit logging
 await auditService.log({
-  eventType: 'EGRESS_SCAN',
+  eventType: "EGRESS_SCAN",
   actor: currentUser,
   resource: exportedData,
   policy: {
-    policyId: 'cross-region-pii',
-    decision: 'ALLOW',
-    redactionsApplied: ['SSN', 'EMAIL'],
+    policyId: "cross-region-pii",
+    decision: "ALLOW",
+    redactionsApplied: ["SSN", "EMAIL"],
   },
   outcome: {
-    action: 'REDACT',
+    action: "REDACT",
     destination: targetSystem,
   },
 });
@@ -305,6 +308,7 @@ await auditService.log({
 ## Integration Checklist by Feature Type
 
 ### File Upload Feature
+
 - [ ] Scan file content before storage
 - [ ] Classify based on content
 - [ ] Apply appropriate encryption
@@ -312,6 +316,7 @@ await auditService.log({
 - [ ] Quarantine suspicious files
 
 ### Data Export Feature
+
 - [ ] Apply egress scanning
 - [ ] Enforce volume limits
 - [ ] Require justification for bulk
@@ -319,6 +324,7 @@ await auditService.log({
 - [ ] Log all exports
 
 ### Search Feature
+
 - [ ] Filter results by authorization
 - [ ] Redact snippets
 - [ ] Limit result counts
@@ -326,6 +332,7 @@ await auditService.log({
 - [ ] Prevent data mining
 
 ### Sharing Feature
+
 - [ ] Verify recipient authorization
 - [ ] Check information barriers
 - [ ] Apply share-specific controls
@@ -333,6 +340,7 @@ await auditService.log({
 - [ ] Enable time-limited access
 
 ### API Endpoint
+
 - [ ] Add DLP middleware
 - [ ] Validate destinations
 - [ ] Rate limit requests
@@ -340,6 +348,7 @@ await auditService.log({
 - [ ] Log all calls
 
 ### Report/Dashboard
+
 - [ ] Aggregate appropriately
 - [ ] Redact sensitive details
 - [ ] Enforce access by role
@@ -351,21 +360,25 @@ await auditService.log({
 ## Testing Requirements
 
 ### Unit Tests
+
 - [ ] Detection engine correctly identifies patterns
 - [ ] Redaction produces expected output
 - [ ] Barrier checks return correct decisions
 
 ### Integration Tests
+
 - [ ] DLP middleware blocks sensitive content
 - [ ] Redacted data displays correctly
 - [ ] Audit events are recorded
 
 ### E2E Tests
+
 - [ ] Full flow with DLP enabled
 - [ ] Block scenarios handled gracefully
 - [ ] Approval workflows function
 
 ### Security Tests
+
 - [ ] Bypass attempts blocked
 - [ ] Edge cases handled
 - [ ] Error messages don't leak data
@@ -384,26 +397,28 @@ await auditService.log({
 
 ## Sign-off
 
-| Role | Name | Date | Signature |
-|------|------|------|-----------|
-| Developer | | | |
-| Security Review | | | |
-| Privacy Review | | | |
-| QA | | | |
+| Role            | Name | Date | Signature |
+| --------------- | ---- | ---- | --------- |
+| Developer       |      |      |           |
+| Security Review |      |      |           |
+| Privacy Review  |      |      |           |
+| QA              |      |      |           |
 
 ---
 
 ## Quick Reference: Common Patterns
 
 ### Block on Detection
+
 ```typescript
 const result = await dlpService.scan(request);
-if (result.action === 'BLOCK') {
+if (result.action === "BLOCK") {
   throw new DLPBlockedError(result.violations);
 }
 ```
 
 ### Redact Before Display
+
 ```typescript
 const safe = await redactionEngine.redact({
   content: data,
@@ -413,9 +428,14 @@ return safe.redactedContent;
 ```
 
 ### Check Barrier
+
 ```typescript
 const allowed = await barrierEnforcer.check({
-  source, target, actor, resource, operation
+  source,
+  target,
+  actor,
+  resource,
+  operation,
 });
 if (!allowed.allowed) {
   throw new BarrierViolationError(allowed.violations);
@@ -423,17 +443,22 @@ if (!allowed.allowed) {
 ```
 
 ### Require Justification
+
 ```typescript
-if (result.action === 'REQUIRE_JUSTIFICATION') {
+if (result.action === "REQUIRE_JUSTIFICATION") {
   return { requiresJustification: true, fields: result.obligations };
 }
 ```
 
 ### Audit Everything
+
 ```typescript
 await auditService.log({
-  eventType: 'EGRESS_SCAN',
-  actor, resource, policy, outcome
+  eventType: "EGRESS_SCAN",
+  actor,
+  resource,
+  policy,
+  outcome,
 });
 ```
 

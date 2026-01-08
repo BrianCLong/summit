@@ -9,16 +9,16 @@ on:
   push:
     branches: [main]
     paths:
-      - 'Dockerfile*'
-      - '**/Dockerfile*'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'pnpm-lock.yaml'
-      - 'src/**'
-      - 'server/**'
-      - 'client/**'
-      - 'apps/**'
-      - 'services/**'
+      - "Dockerfile*"
+      - "**/Dockerfile*"
+      - "package.json"
+      - "package-lock.json"
+      - "pnpm-lock.yaml"
+      - "src/**"
+      - "server/**"
+      - "client/**"
+      - "apps/**"
+      - "services/**"
   workflow_dispatch:
 
 permissions:
@@ -62,7 +62,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -86,7 +86,7 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
         with:
-          cosign-release: 'v2.2.4'
+          cosign-release: "v2.2.4"
 
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@v0.17.1
@@ -181,7 +181,7 @@ jobs:
         if: steps.dockerfile-check.outputs.exists == 'true'
         id: cosign-sign
         env:
-          COSIGN_EXPERIMENTAL: '1'
+          COSIGN_EXPERIMENTAL: "1"
         run: |
           IMAGE_REF=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.component.name }}@${{ steps.build.outputs.digest }}
           cosign sign --yes "$IMAGE_REF"
@@ -190,7 +190,7 @@ jobs:
       - name: Attach SBOM attestation (cosign)
         if: steps.dockerfile-check.outputs.exists == 'true'
         env:
-          COSIGN_EXPERIMENTAL: '1'
+          COSIGN_EXPERIMENTAL: "1"
         run: |
           cosign attest --yes \
             --predicate sbom-${{ matrix.component.name }}.spdx.json \

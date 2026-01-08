@@ -60,6 +60,7 @@ The AI Copilot service translates natural language questions into safe graph (Cy
 Generate a draft query from natural language.
 
 **Request:**
+
 ```json
 {
   "userText": "Who is connected to Alice?",
@@ -70,6 +71,7 @@ Generate a draft query from natural language.
 ```
 
 **Response:**
+
 ```json
 {
   "draft": {
@@ -110,6 +112,7 @@ Generate a draft query from natural language.
 Execute a confirmed draft query.
 
 **Request:**
+
 ```json
 {
   "draftId": "draft-abc123",
@@ -119,6 +122,7 @@ Execute a confirmed draft query.
 ```
 
 **Response:**
+
 ```json
 {
   "draftId": "draft-abc123",
@@ -155,15 +159,15 @@ Service health check.
 
 The SafetyAnalyzer performs the following checks on every generated query:
 
-| Check | Description | Severity |
-|-------|-------------|----------|
-| **Forbidden Operations** | Blocks DELETE, DROP, CREATE, MERGE, SET | CRITICAL |
-| **Row Limits** | Requires LIMIT clause ≤ policy max | ERROR |
-| **Depth Limits** | Traversal depth ≤ policy max (default 6) | ERROR |
-| **Disallowed Labels** | Blocks access to restricted node/edge types | CRITICAL |
-| **Unbounded Patterns** | Rejects `[*]` without upper bound | ERROR |
-| **Injection Patterns** | Detects SQL/Cypher injection attempts | CRITICAL |
-| **Syntax Validation** | Basic query structure validation | ERROR |
+| Check                    | Description                                 | Severity |
+| ------------------------ | ------------------------------------------- | -------- |
+| **Forbidden Operations** | Blocks DELETE, DROP, CREATE, MERGE, SET     | CRITICAL |
+| **Row Limits**           | Requires LIMIT clause ≤ policy max          | ERROR    |
+| **Depth Limits**         | Traversal depth ≤ policy max (default 6)    | ERROR    |
+| **Disallowed Labels**    | Blocks access to restricted node/edge types | CRITICAL |
+| **Unbounded Patterns**   | Rejects `[*]` without upper bound           | ERROR    |
+| **Injection Patterns**   | Detects SQL/Cypher injection attempts       | CRITICAL |
+| **Syntax Validation**    | Basic query structure validation            | ERROR    |
 
 ### Policy Integration
 
@@ -171,8 +175,8 @@ Policies are enforced based on user context:
 
 ```typescript
 interface PolicyContext {
-  maxDepth: number;           // Max traversal depth (default: 6)
-  maxRows: number;            // Max result rows (default: 100)
+  maxDepth: number; // Max traversal depth (default: 6)
+  maxRows: number; // Max result rows (default: 100)
   disallowedLabels: string[]; // Restricted labels
   restrictedSensitivityLevels: string[];
 }
@@ -204,26 +208,30 @@ Privileged users (ADMIN, SUPERVISOR) can override safety checks:
 When `safety.passesStaticChecks === false`:
 
 ```jsx
-{draft.safety.violations.map(v => (
-  <Alert severity={v.severity === 'CRITICAL' ? 'error' : 'warning'}>
-    <AlertTitle>{v.code}</AlertTitle>
-    {v.message}
-  </Alert>
-))}
+{
+  draft.safety.violations.map((v) => (
+    <Alert severity={v.severity === "CRITICAL" ? "error" : "warning"}>
+      <AlertTitle>{v.code}</AlertTitle>
+      {v.message}
+    </Alert>
+  ));
+}
 
-{draft.safety.suggestedFixes?.map(fix => (
-  <Typography variant="body2">Suggestion: {fix}</Typography>
-))}
+{
+  draft.safety.suggestedFixes?.map((fix) => (
+    <Typography variant="body2">Suggestion: {fix}</Typography>
+  ));
+}
 ```
 
 ### Example Integration
 
 ```typescript
 // Preview
-const previewResponse = await fetch('/copilot/preview', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ userText: question })
+const previewResponse = await fetch("/copilot/preview", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ userText: question }),
 });
 const { draft } = await previewResponse.json();
 
@@ -231,13 +239,13 @@ const { draft } = await previewResponse.json();
 
 // Execute (after user confirmation)
 if (userConfirmed) {
-  const executeResponse = await fetch('/copilot/execute', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+  const executeResponse = await fetch("/copilot/execute", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       draftId: draft.id,
-      confirm: true
-    })
+      confirm: true,
+    }),
   });
   const results = await executeResponse.json();
 }
@@ -254,25 +262,25 @@ const DEFAULT_SCHEMA: GraphSchemaDescription = {
   nodeTypes: [
     // Add new node types here
     {
-      name: 'Vehicle',
-      labels: ['Entity', 'Vehicle'],
+      name: "Vehicle",
+      labels: ["Entity", "Vehicle"],
       fields: [
-        { name: 'id', type: 'id' },
-        { name: 'make', type: 'string' },
-        { name: 'model', type: 'string' },
-        { name: 'plate', type: 'string' }
-      ]
-    }
+        { name: "id", type: "id" },
+        { name: "make", type: "string" },
+        { name: "model", type: "string" },
+        { name: "plate", type: "string" },
+      ],
+    },
   ],
   edgeTypes: [
     // Add new edge types here
     {
-      name: 'OWNS',
-      from: 'Person',
-      to: 'Vehicle',
-      fields: [{ name: 'since', type: 'datetime' }]
-    }
-  ]
+      name: "OWNS",
+      from: "Person",
+      to: "Vehicle",
+      fields: [{ name: "since", type: "datetime" }],
+    },
+  ],
 };
 ```
 
@@ -284,8 +292,8 @@ Modify policy resolver in `routes.ts`:
 export function createDefaultPolicyResolver() {
   return (policyContextId?: string, user?: UserContext) => ({
     maxDepth: 6,
-    maxRows: user?.roles.includes('ADMIN') ? 500 : 100,
-    disallowedLabels: ['SensitivePerson'],
+    maxRows: user?.roles.includes("ADMIN") ? 500 : 100,
+    disallowedLabels: ["SensitivePerson"],
     // ...
   });
 }
@@ -305,11 +313,11 @@ export class OpenAILlmAdapter implements LlmAdapter {
 
     // Call OpenAI API
     const response = await openai.chat.completions.create({
-      model: 'gpt-4',
+      model: "gpt-4",
       messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: input.userText }
-      ]
+        { role: "system", content: systemPrompt },
+        { role: "user", content: input.userText },
+      ],
     });
 
     // Parse response
@@ -322,14 +330,15 @@ export class OpenAILlmAdapter implements LlmAdapter {
 
 Every operation is logged:
 
-| Action | When Logged |
-|--------|-------------|
-| `PREVIEW` | Draft query generated |
-| `EXECUTE` | Query executed successfully |
-| `EXECUTE_DENIED` | Execution blocked (safety/policy) |
-| `SAFETY_OVERRIDE` | Safety checks bypassed by admin |
+| Action            | When Logged                       |
+| ----------------- | --------------------------------- |
+| `PREVIEW`         | Draft query generated             |
+| `EXECUTE`         | Query executed successfully       |
+| `EXECUTE_DENIED`  | Execution blocked (safety/policy) |
+| `SAFETY_OVERRIDE` | Safety checks bypassed by admin   |
 
 Audit records include:
+
 - User ID and tenant
 - Draft ID and query text
 - Safety summary
@@ -340,11 +349,11 @@ Audit records include:
 
 Environment variables:
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PORT` | 8003 | Service port |
-| `LOG_LEVEL` | info | Logging level |
-| `CORS_ORIGIN` | * | CORS allowed origins |
+| Variable      | Default | Description          |
+| ------------- | ------- | -------------------- |
+| `PORT`        | 8003    | Service port         |
+| `LOG_LEVEL`   | info    | Logging level        |
+| `CORS_ORIGIN` | \*      | CORS allowed origins |
 
 Service configuration (in code):
 

@@ -444,15 +444,15 @@ Create `production-values.yaml`:
 ```yaml
 # production-values.yaml
 global:
-  imageRegistry: 'registry.intelgraph.ai'
-  imageTag: 'v2.5.0'
-  environment: 'production'
+  imageRegistry: "registry.intelgraph.ai"
+  imageTag: "v2.5.0"
+  environment: "production"
 
 intelgraph:
   replicaCount: 5
   image:
     repository: intelgraph/core
-    tag: 'v2.5.0'
+    tag: "v2.5.0"
     pullPolicy: IfNotPresent
 
   service:
@@ -464,7 +464,7 @@ intelgraph:
     className: nginx
     annotations:
       cert-manager.io/cluster-issuer: letsencrypt-prod
-      nginx.ingress.kubernetes.io/rate-limit: '1000'
+      nginx.ingress.kubernetes.io/rate-limit: "1000"
     hosts:
       - host: api.intelgraph.ai
         paths:
@@ -495,7 +495,7 @@ maestro:
   replicaCount: 3
   image:
     repository: intelgraph/maestro
-    tag: 'v2.5.0'
+    tag: "v2.5.0"
 
   autonomousOrchestrator:
     enabled: true
@@ -928,11 +928,11 @@ spec:
     - name: intelgraph-core
       resources:
         requests:
-          cpu: '2000m'
-          memory: '4Gi'
+          cpu: "2000m"
+          memory: "4Gi"
         limits:
-          cpu: '8000m'
-          memory: '16Gi'
+          cpu: "8000m"
+          memory: "16Gi"
 ```
 
 #### **JVM Tuning (for Neo4j)**
@@ -940,13 +940,13 @@ spec:
 ```yaml
 env:
   - name: NEO4J_dbms_memory_heap_initial_size
-    value: '4g'
+    value: "4g"
   - name: NEO4J_dbms_memory_heap_max_size
-    value: '8g'
+    value: "8g"
   - name: NEO4J_dbms_memory_pagecache_size
-    value: '4g'
+    value: "4g"
   - name: NEO4J_dbms_jvm_additional
-    value: '-XX:+UseG1GC -XX:+UnlockExperimentalVMOptions'
+    value: "-XX:+UseG1GC -XX:+UnlockExperimentalVMOptions"
 ```
 
 ### 2. Database Performance

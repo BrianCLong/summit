@@ -41,6 +41,7 @@ Use the migration generator:
 ```
 
 **Parameters:**
+
 - `--type`: `schema`, `data`, `security`, or `perf`
 - `--database`: `postgresql`, `neo4j`, or `timescale`
 - `--description`: Brief description (e.g., `add_email_verification`)
@@ -48,6 +49,7 @@ Use the migration generator:
 - `--depends-on` (optional): Comma-separated migration IDs
 
 **Example:**
+
 ```bash
 ./scripts/create-migration.sh \
   --type schema \
@@ -113,6 +115,7 @@ git push origin feature/user-preferences
 ```
 
 CI will automatically:
+
 - ✅ Validate migration format
 - ✅ Run migration in test environment
 - ✅ Test rollback
@@ -126,11 +129,13 @@ CI will automatically:
 ### Adding a Column
 
 #### ❌ Don't (requires downtime):
+
 ```sql
 ALTER TABLE users ADD COLUMN email_verified BOOLEAN NOT NULL;
 ```
 
 #### ✅ Do (zero-downtime):
+
 ```sql
 -- Phase 1: Add nullable column
 ALTER TABLE users ADD COLUMN email_verified BOOLEAN DEFAULT FALSE;
@@ -147,11 +152,13 @@ ALTER TABLE users ALTER COLUMN email_verified SET NOT NULL;
 ### Creating an Index
 
 #### ❌ Don't (locks table):
+
 ```sql
 CREATE INDEX idx_users_email ON users(email);
 ```
 
 #### ✅ Do (no locks):
+
 ```sql
 CREATE INDEX CONCURRENTLY idx_users_email ON users(email);
 ```
@@ -306,6 +313,7 @@ psql $DATABASE_URL -c "ROLLBACK;"
 ### CI Migration Validation Fails
 
 Check the GitHub Actions workflow for details:
+
 1. Go to PR → Checks → "Migration Dry-Run"
 2. Review logs for specific error
 3. Fix and push updated migration
@@ -313,6 +321,7 @@ Check the GitHub Actions workflow for details:
 ### Schema Drift Detected
 
 If CI detects schema drift:
+
 1. Review the drift report artifact
 2. Determine if drift is intentional
 3. If intentional, update expected schema:

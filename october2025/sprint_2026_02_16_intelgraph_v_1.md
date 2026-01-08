@@ -168,37 +168,37 @@ type Query {
 
 ```ts
 // server/src/video/extract.ts
-import { spawn } from 'child_process';
-import { createHash } from 'crypto';
+import { spawn } from "child_process";
+import { createHash } from "crypto";
 export async function extractKeyframes(path: string, everyMs = 1000) {
   return new Promise((resolve, reject) => {
     const args = [
-      '-i',
+      "-i",
       path,
-      '-vf',
+      "-vf",
       `fps=1/${everyMs / 1000}`,
-      '-qscale:v',
-      '2',
-      '-f',
-      'image2pipe',
-      '-',
+      "-qscale:v",
+      "2",
+      "-f",
+      "image2pipe",
+      "-",
     ];
-    const ff = spawn('ffmpeg', args);
+    const ff = spawn("ffmpeg", args);
     const frames: Buffer[] = [];
-    ff.stdout.on('data', (d) => frames.push(Buffer.from(d)));
-    ff.on('close', () => {
+    ff.stdout.on("data", (d) => frames.push(Buffer.from(d)));
+    ff.on("close", () => {
       const thumbs = frames.map((buf, i) => ({
         t: (i * everyMs) / 1000,
-        thumb: buf.toString('base64'),
+        thumb: buf.toString("base64"),
         phash: ahash(buf),
       }));
       resolve(thumbs);
     });
-    ff.on('error', reject);
+    ff.on("error", reject);
   });
 }
 function ahash(buf: Buffer) {
-  return createHash('sha256').update(buf).digest('hex').slice(0, 16);
+  return createHash("sha256").update(buf).digest("hex").slice(0, 16);
 }
 ```
 
@@ -234,7 +234,7 @@ async def detect(frames: List[Frame]):
 export async function writeClaims(
   videoId: string,
   detections: { t: number; bbox: number[]; label: string; conf: number }[],
-  ctx: any,
+  ctx: any
 ) {
   for (const d of detections) {
     await ctx.driver.executeQuery(
@@ -248,7 +248,7 @@ export async function writeClaims(
         conf: d.conf,
         t: Math.floor(d.t),
         bbox: d.bbox,
-      },
+      }
     );
   }
 }
@@ -275,7 +275,7 @@ CREATE INDEX IF NOT EXISTS idx_geo_events_geom ON geo_events USING GIST (geom);
 
 ```ts
 // server/src/graphql/resolvers/geo.ts
-import { sql } from '../pg';
+import { sql } from "../pg";
 export default {
   Query: {
     geofenceEntities: async (
@@ -290,7 +290,7 @@ export default {
         from: string;
         to: string;
         minDwellMinutes: number;
-      },
+      }
     ) => {
       const wkt = polyToWKT(polygon);
       const rows = await sql`
@@ -307,12 +307,7 @@ export default {
     },
     coLocated: async (
       _: any,
-      {
-        a,
-        b,
-        meters,
-        deltaSeconds,
-      }: { a: string; b: string; meters: number; deltaSeconds: number },
+      { a, b, meters, deltaSeconds }: { a: string; b: string; meters: number; deltaSeconds: number }
     ) => {
       const rows = await sql`
         SELECT 1 FROM geo_events ga JOIN geo_events gb
@@ -324,7 +319,7 @@ export default {
   },
 };
 function polyToWKT(poly: number[][]) {
-  const s = poly.map(([lat, lon]) => `${lon} ${lat}`).join(',');
+  const s = poly.map(([lat, lon]) => `${lon} ${lat}`).join(",");
   return `POLYGON((${s}))`;
 }
 ```
@@ -334,17 +329,17 @@ function polyToWKT(poly: number[][]) {
 ```js
 // apps/web/src/features/video/jquery-overlays.js
 $(function () {
-  const $vid = $('#video');
-  const $ovl = $('#overlay');
-  $(document).on('timeupdate', '#video', function () {
+  const $vid = $("#video");
+  const $ovl = $("#overlay");
+  $(document).on("timeupdate", "#video", function () {
     const t = this.currentTime;
     // fetch bboxes for t and draw
     $.ajax({
-      url: '/graphql',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/graphql",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({
-        query: `{ bboxesAt(videoId:"${$vid.data('id')}", t:${t.toFixed(2)}){ bbox, label, conf } }`,
+        query: `{ bboxesAt(videoId:"${$vid.data("id")}", t:${t.toFixed(2)}){ bbox, label, conf } }`,
       }),
     });
   });
@@ -355,17 +350,17 @@ $(function () {
 // apps/web/src/features/geo/jquery-geofence.js
 $(function () {
   let fence = [];
-  $('#map').on('click', function (e) {
+  $("#map").on("click", function (e) {
     fence.push([e.latlng.lat, e.latlng.lng]);
     drawFence(fence);
   });
-  $('#run-geofence').on('click', function () {
+  $("#run-geofence").on("click", function () {
     $.ajax({
-      url: '/graphql',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/graphql",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({
-        query: `{ geofenceEntities(polygon:${JSON.stringify(fence)}, from:"${$('#t0').val()}", to:"${$('#t1').val()}"){ entityId, lat, lon, t } }`,
+        query: `{ geofenceEntities(polygon:${JSON.stringify(fence)}, from:"${$("#t0").val()}", to:"${$("#t1").val()}"){ entityId, lat, lon, t } }`,
       }),
     });
   });
@@ -399,7 +394,7 @@ workers:
   video:
     nodeSelector: { accelerator: nvidia }
     resources:
-      limits: { nvidia.com/gpu: 1, cpu: '2', memory: '8Gi' }
+      limits: { nvidia.com/gpu: 1, cpu: "2", memory: "8Gi" }
     autoscaling:
       enabled: true
       minReplicas: 1
@@ -410,16 +405,16 @@ workers:
 ### 4.10 k6 — Ingest + Geo Query Mix
 
 ```js
-import http from 'k6/http';
-export const options = { vus: 50, duration: '3m' };
+import http from "k6/http";
+export const options = { vus: 50, duration: "3m" };
 export default function () {
   http.post(
-    'http://localhost:4000/graphql',
+    "http://localhost:4000/graphql",
     JSON.stringify({
       query:
         '{ geofenceEntities(polygon:[[40.7,-74.0],[40.8,-74.0],[40.8,-73.9],[40.7,-73.9],[40.7,-74.0]], from:"2026-02-16T00:00:00Z", to:"2026-02-17T00:00:00Z"){ entityId } }',
     }),
-    { headers: { 'Content-Type': 'application/json' } },
+    { headers: { "Content-Type": "application/json" } }
   );
 }
 ```

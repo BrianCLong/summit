@@ -4,10 +4,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled, edited]
     paths:
-      - 'docs/security/zk-*'
-      - 'packages/types/src/zk.ts'
-      - 'packages/types/src/index.ts'
-      - '.github/workflows/zk-deconfliction-guard.yml'
+      - "docs/security/zk-*"
+      - "packages/types/src/zk.ts"
+      - "packages/types/src/index.ts"
+      - ".github/workflows/zk-deconfliction-guard.yml"
 
 permissions:
   contents: read

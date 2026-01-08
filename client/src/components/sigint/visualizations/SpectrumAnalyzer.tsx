@@ -2,8 +2,8 @@
  * SpectrumAnalyzer - FFT-based frequency spectrum display
  * Real-time spectrum analysis with peak detection and markers.
  */
-import React, { useRef, useEffect, useCallback, useMemo } from 'react';
-import type { SignalSample, FrequencyBand } from '../types';
+import React, { useRef, useEffect, useCallback, useMemo } from "react";
+import type { SignalSample, FrequencyBand } from "../types";
 
 interface SpectrumAnalyzerProps {
   samples: SignalSample[];
@@ -17,14 +17,14 @@ interface SpectrumAnalyzerProps {
 }
 
 const FREQUENCY_BANDS: Record<FrequencyBand, { min: number; max: number; color: string }> = {
-  VLF: { min: 3, max: 30000, color: '#ff6b6b' },
-  LF: { min: 30000, max: 300000, color: '#ffa502' },
-  MF: { min: 300000, max: 3000000, color: '#ffd43b' },
-  HF: { min: 3000000, max: 30000000, color: '#69db7c' },
-  VHF: { min: 30000000, max: 300000000, color: '#4dabf7' },
-  UHF: { min: 300000000, max: 3000000000, color: '#9775fa' },
-  SHF: { min: 3000000000, max: 30000000000, color: '#f783ac' },
-  EHF: { min: 30000000000, max: 300000000000, color: '#e599f7' },
+  VLF: { min: 3, max: 30000, color: "#ff6b6b" },
+  LF: { min: 30000, max: 300000, color: "#ffa502" },
+  MF: { min: 300000, max: 3000000, color: "#ffd43b" },
+  HF: { min: 3000000, max: 30000000, color: "#69db7c" },
+  VHF: { min: 30000000, max: 300000000, color: "#4dabf7" },
+  UHF: { min: 300000000, max: 3000000000, color: "#9775fa" },
+  SHF: { min: 3000000000, max: 30000000000, color: "#f783ac" },
+  EHF: { min: 30000000000, max: 300000000000, color: "#e599f7" },
 };
 
 export const SpectrumAnalyzer: React.FC<SpectrumAnalyzerProps> = ({
@@ -115,18 +115,18 @@ export const SpectrumAnalyzer: React.FC<SpectrumAnalyzerProps> = ({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const { width, height } = canvas;
     const dbRange = maxDecibels - minDecibels;
 
     // Clear canvas
-    ctx.fillStyle = '#0a0e14';
+    ctx.fillStyle = "#0a0e14";
     ctx.fillRect(0, 0, width, height);
 
     // Draw grid
-    ctx.strokeStyle = '#1e2832';
+    ctx.strokeStyle = "#1e2832";
     ctx.lineWidth = 1;
 
     // Horizontal grid lines (dB)
@@ -137,8 +137,8 @@ export const SpectrumAnalyzer: React.FC<SpectrumAnalyzerProps> = ({
       ctx.lineTo(width, y);
       ctx.stroke();
 
-      ctx.fillStyle = '#4a5568';
-      ctx.font = '10px monospace';
+      ctx.fillStyle = "#4a5568";
+      ctx.font = "10px monospace";
       ctx.fillText(`${db} dB`, 4, y - 2);
     }
 
@@ -151,7 +151,7 @@ export const SpectrumAnalyzer: React.FC<SpectrumAnalyzerProps> = ({
       ctx.lineTo(x, height);
       ctx.stroke();
 
-      ctx.fillStyle = '#4a5568';
+      ctx.fillStyle = "#4a5568";
       ctx.fillText(formatFreq(freq), x + 2, height - 4);
     });
 
@@ -174,9 +174,9 @@ export const SpectrumAnalyzer: React.FC<SpectrumAnalyzerProps> = ({
 
     // Draw spectrum bars with gradient
     const gradient = ctx.createLinearGradient(0, height, 0, 0);
-    gradient.addColorStop(0, '#00ff88');
-    gradient.addColorStop(0.5, '#00ccff');
-    gradient.addColorStop(1, '#ff6b6b');
+    gradient.addColorStop(0, "#00ff88");
+    gradient.addColorStop(0.5, "#00ccff");
+    gradient.addColorStop(1, "#ff6b6b");
 
     const barWidth = Math.max(1, width / spectrum.length);
 
@@ -194,8 +194,8 @@ export const SpectrumAnalyzer: React.FC<SpectrumAnalyzerProps> = ({
     if (showPeaks) {
       peaksRef.current = detectPeaks(spectrum, width);
 
-      ctx.fillStyle = '#ff6b6b';
-      ctx.strokeStyle = '#ff6b6b';
+      ctx.fillStyle = "#ff6b6b";
+      ctx.strokeStyle = "#ff6b6b";
       peaksRef.current.forEach((peak) => {
         const y = height - ((peak.db - minDecibels) / dbRange) * height;
 
@@ -205,7 +205,7 @@ export const SpectrumAnalyzer: React.FC<SpectrumAnalyzerProps> = ({
         ctx.fill();
 
         // Peak label
-        ctx.font = '9px monospace';
+        ctx.font = "9px monospace";
         ctx.fillText(`${formatFreq(peak.freq)}`, peak.x - 15, y - 8);
       });
     }
@@ -230,7 +230,7 @@ export const SpectrumAnalyzer: React.FC<SpectrumAnalyzerProps> = ({
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
 
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
       if (ctx) {
         ctx.scale(dpr, dpr);
       }
@@ -258,7 +258,7 @@ export const SpectrumAnalyzer: React.FC<SpectrumAnalyzerProps> = ({
   }, [render]);
 
   return (
-    <div className={`relative w-full h-full min-h-[150px] ${className || ''}`}>
+    <div className={`relative w-full h-full min-h-[150px] ${className || ""}`}>
       <canvas ref={canvasRef} className="w-full h-full rounded-lg" />
       {/* Legend */}
       <div className="absolute bottom-2 left-2 flex gap-2">

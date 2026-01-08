@@ -25,9 +25,7 @@ export const Switch: React.FC<SwitchProps> = ({
       {(label || description) && (
         <View className="flex-1 mr-4">
           {label && (
-            <Text className={cn('text-base text-white', disabled && 'opacity-50')}>
-              {label}
-            </Text>
+            <Text className={cn('text-base text-white', disabled && 'opacity-50')}>{label}</Text>
           )}
           {description && (
             <Text className={cn('text-sm text-dark-muted mt-0.5', disabled && 'opacity-50')}>

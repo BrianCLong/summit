@@ -9,7 +9,7 @@ export {
   type TextSample,
   type NamedEntity,
   type ConversationalData,
-  type ConversationTurn
-} from './gpt/TextSynthesizer';
+  type ConversationTurn,
+} from "./gpt/TextSynthesizer";
 
-export { NamedEntityGenerator } from './entities/NamedEntityGenerator';
+export { NamedEntityGenerator } from "./entities/NamedEntityGenerator";

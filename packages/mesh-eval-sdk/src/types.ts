@@ -13,27 +13,27 @@
  * Categorization of evaluation scenarios
  */
 export type ScenarioType =
-  | 'code_transformation'
-  | 'incident_investigation'
-  | 'research_synthesis'
-  | 'policy_sensitive'
-  | 'export_controlled'
-  | 'adversarial_prompting'
-  | 'multi_step_reasoning'
-  | 'tool_usage'
-  | 'custom';
+  | "code_transformation"
+  | "incident_investigation"
+  | "research_synthesis"
+  | "policy_sensitive"
+  | "export_controlled"
+  | "adversarial_prompting"
+  | "multi_step_reasoning"
+  | "tool_usage"
+  | "custom";
 
 /**
  * Difficulty level of a scenario
  */
-export type DifficultyLevel = 'trivial' | 'easy' | 'medium' | 'hard' | 'expert';
+export type DifficultyLevel = "trivial" | "easy" | "medium" | "hard" | "expert";
 
 /**
  * Input artifact for a scenario
  */
 export interface ScenarioInput {
   /** Type of input */
-  type: 'text' | 'code' | 'file' | 'structured';
+  type: "text" | "code" | "file" | "structured";
 
   /** Content of the input */
   content: string | object;
@@ -47,7 +47,7 @@ export interface ScenarioInput {
  */
 export interface Constraint {
   /** Type of constraint */
-  type: 'time_limit' | 'cost_limit' | 'policy_requirement' | 'tool_restriction';
+  type: "time_limit" | "cost_limit" | "policy_requirement" | "tool_restriction";
 
   /** Constraint value (type depends on constraint type) */
   value: unknown;
@@ -61,7 +61,7 @@ export interface Constraint {
  */
 export interface ExpectedOutput {
   /** Type of expected output */
-  type: 'exact_match' | 'regex' | 'semantic_similarity' | 'assertion' | 'custom';
+  type: "exact_match" | "regex" | "semantic_similarity" | "assertion" | "custom";
 
   /** Expected value or pattern */
   value: unknown;
@@ -78,12 +78,12 @@ export interface ExpectedOutput {
  */
 export interface ScoringStrategy {
   /** Primary scoring method */
-  method: 'rule_based' | 'llm_judged' | 'policy_based' | 'hybrid';
+  method: "rule_based" | "llm_judged" | "policy_based" | "hybrid";
 
   /** Rule-based configuration */
   rules?: {
     assertions: Assertion[];
-    aggregation?: 'all' | 'any' | 'weighted_average';
+    aggregation?: "all" | "any" | "weighted_average";
   };
 
   /** LLM judge configuration */
@@ -109,7 +109,7 @@ export interface ScoringStrategy {
  */
 export interface Assertion {
   /** Assertion type */
-  type: 'contains' | 'not_contains' | 'regex_match' | 'json_valid' | 'custom';
+  type: "contains" | "not_contains" | "regex_match" | "json_valid" | "custom";
 
   /** Expected value */
   value: unknown;
@@ -280,7 +280,7 @@ export interface ModelConfig {
   id: string;
 
   /** Model provider */
-  provider: 'anthropic' | 'openai' | 'google' | 'custom';
+  provider: "anthropic" | "openai" | "google" | "custom";
 
   /** Model name/version */
   name: string;
@@ -332,7 +332,7 @@ export interface EvalConfig {
   outputPath?: string;
 
   /** Report format(s) */
-  reportFormat?: 'json' | 'markdown' | 'html' | 'all';
+  reportFormat?: "json" | "markdown" | "html" | "all";
 
   /** Additional metadata */
   metadata?: Record<string, unknown>;
@@ -345,12 +345,12 @@ export interface EvalConfig {
 /**
  * Status of an evaluation run
  */
-export type EvalRunStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+export type EvalRunStatus = "pending" | "running" | "completed" | "failed" | "cancelled";
 
 /**
  * Status of a scenario execution
  */
-export type ScenarioResultStatus = 'pass' | 'fail' | 'skip' | 'error';
+export type ScenarioResultStatus = "pass" | "fail" | "skip" | "error";
 
 /**
  * Policy event captured during evaluation
@@ -363,13 +363,13 @@ export interface PolicyEvent {
   policyId: string;
 
   /** Action taken */
-  action: 'allow' | 'deny' | 'redact' | 'escalate' | 'log';
+  action: "allow" | "deny" | "redact" | "escalate" | "log";
 
   /** Reason for the action */
   reason: string;
 
   /** Severity level */
-  severity?: 'low' | 'medium' | 'high' | 'critical';
+  severity?: "low" | "medium" | "high" | "critical";
 
   /** Additional context */
   context?: Record<string, unknown>;
@@ -502,17 +502,17 @@ export interface EvalRun {
 /**
  * Scoring method used
  */
-export type ScoringMethod = 'rule_based' | 'llm_judged' | 'policy_based' | 'hybrid';
+export type ScoringMethod = "rule_based" | "llm_judged" | "policy_based" | "hybrid";
 
 /**
  * Pass/fail status with partial support
  */
-export type PassFailStatus = 'pass' | 'fail' | 'partial' | 'uncertain';
+export type PassFailStatus = "pass" | "fail" | "partial" | "uncertain";
 
 /**
  * Risk level assessment
  */
-export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
+export type RiskLevel = "low" | "medium" | "high" | "critical";
 
 /**
  * Structured evaluation score
@@ -564,21 +564,21 @@ export interface EvalScore {
  * Type of finding/issue
  */
 export type FindingType =
-  | 'correctness_issue'
-  | 'safety_violation'
-  | 'policy_breach'
-  | 'performance_regression'
-  | 'cost_anomaly'
-  | 'tool_misuse'
-  | 'reasoning_error'
-  | 'hallucination'
-  | 'prompt_injection'
-  | 'data_leakage';
+  | "correctness_issue"
+  | "safety_violation"
+  | "policy_breach"
+  | "performance_regression"
+  | "cost_anomaly"
+  | "tool_misuse"
+  | "reasoning_error"
+  | "hallucination"
+  | "prompt_injection"
+  | "data_leakage";
 
 /**
  * Severity of finding
  */
-export type FindingSeverity = 'info' | 'warning' | 'error' | 'critical';
+export type FindingSeverity = "info" | "warning" | "error" | "critical";
 
 /**
  * Location information for a finding
@@ -648,7 +648,7 @@ export interface EvalFinding {
 /**
  * Baseline track type
  */
-export type BaselineTrack = 'release' | 'branch' | 'experimental';
+export type BaselineTrack = "release" | "branch" | "experimental";
 
 /**
  * Per-scenario baseline metrics
@@ -785,12 +785,12 @@ export interface ImprovementInfo {
 /**
  * Type of configuration update
  */
-export type UpdateProposalType = 'routing' | 'policy' | 'agent_config';
+export type UpdateProposalType = "routing" | "policy" | "agent_config";
 
 /**
  * Status of update proposal
  */
-export type ProposalStatus = 'pending' | 'approved' | 'rejected' | 'implemented';
+export type ProposalStatus = "pending" | "approved" | "rejected" | "implemented";
 
 /**
  * Structured configuration diff
@@ -874,7 +874,7 @@ export interface UpdateProposal {
 /**
  * Self-play mode
  */
-export type SelfPlayMode = 'adversarial' | 'collaborative' | 'exploratory';
+export type SelfPlayMode = "adversarial" | "collaborative" | "exploratory";
 
 /**
  * Self-play configuration
@@ -900,7 +900,7 @@ export interface SelfPlayConfig {
 
   /** Variation strategy */
   variationStrategy?: {
-    perturbation: 'input' | 'constraint' | 'difficulty';
+    perturbation: "input" | "constraint" | "difficulty";
     amount: number;
   };
 
@@ -972,7 +972,7 @@ export interface SelfPlayResult {
 /**
  * Curriculum strategy
  */
-export type CurriculumStrategy = 'coverage' | 'difficulty' | 'error_driven';
+export type CurriculumStrategy = "coverage" | "difficulty" | "error_driven";
 
 /**
  * Curriculum configuration
@@ -1019,6 +1019,5 @@ export interface CurriculumState {
 // Export all types
 // ============================================================================
 
-export type {
-  // Scenario types already exported inline above
-};
+export // Scenario types already exported inline above
+ type {};

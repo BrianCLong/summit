@@ -1,17 +1,17 @@
 meta:
   id: implement.attribution-runbook@v1
-  owner: 'intelgraph-advisory-committee'
-  purpose: 'Encode Rapid Attribution methodology as replayable DAG with machine-checkable gates and proof artifacts'
-  tags: ['attribution', 'cti', 'runbook', 'dag', 'proof-carrying']
+  owner: "intelgraph-advisory-committee"
+  purpose: "Encode Rapid Attribution methodology as replayable DAG with machine-checkable gates and proof artifacts"
+  tags: ["attribution", "cti", "runbook", "dag", "proof-carrying"]
   guardrails:
-    - 'All analytical steps must have pre/post-conditions'
-    - 'Legal basis and license scope must be verified before execution'
-    - 'KPIs and citations required in proof artifacts'
-    - 'Export blocked on gate failures'
-    - 'Runbook must be deterministic and replayable'
+    - "All analytical steps must have pre/post-conditions"
+    - "Legal basis and license scope must be verified before execution"
+    - "KPIs and citations required in proof artifacts"
+    - "Export blocked on gate failures"
+    - "Runbook must be deterministic and replayable"
 
 modelConfig:
-  model: 'claude-sonnet-4-5'
+  model: "claude-sonnet-4-5"
   temperature: 0.2
   maxTokens: 7000
 
@@ -486,25 +486,25 @@ template: |
   Remember: **Gates are non-negotiable.** No export without passing all checks.
 
 examples:
-  - name: 'airflow-yaml-30min'
+  - name: "airflow-yaml-30min"
     inputs:
-      dag_engine: 'Airflow'
-      runbook_format: 'YAML'
-      target_completion_time_minutes: '30'
+      dag_engine: "Airflow"
+      runbook_format: "YAML"
+      target_completion_time_minutes: "30"
     expected_contains:
-      - 'Airflow'
-      - 'YAML'
-      - '30 minutes'
-      - 'gates'
-      - 'proof artifact'
+      - "Airflow"
+      - "YAML"
+      - "30 minutes"
+      - "gates"
+      - "proof artifact"
 
-  - name: 'prefect-json-45min'
+  - name: "prefect-json-45min"
     inputs:
-      dag_engine: 'Prefect'
-      runbook_format: 'JSON'
-      target_completion_time_minutes: '45'
+      dag_engine: "Prefect"
+      runbook_format: "JSON"
+      target_completion_time_minutes: "45"
     expected_contains:
-      - 'Prefect'
-      - 'JSON'
-      - 'KPI'
-      - 'legal basis'
+      - "Prefect"
+      - "JSON"
+      - "KPI"
+      - "legal basis"

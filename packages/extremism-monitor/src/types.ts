@@ -19,25 +19,25 @@ export interface AttackPlan {
 }
 
 export enum AttackStatus {
-  PLANNING = 'PLANNING',
-  PREPARATION = 'PREPARATION',
-  IMMINENT = 'IMMINENT',
-  EXECUTED = 'EXECUTED',
-  DISRUPTED = 'DISRUPTED',
-  ABANDONED = 'ABANDONED'
+  PLANNING = "PLANNING",
+  PREPARATION = "PREPARATION",
+  IMMINENT = "IMMINENT",
+  EXECUTED = "EXECUTED",
+  DISRUPTED = "DISRUPTED",
+  ABANDONED = "ABANDONED",
 }
 
 export enum TargetType {
-  CIVILIAN = 'CIVILIAN',
-  GOVERNMENT = 'GOVERNMENT',
-  MILITARY = 'MILITARY',
-  INFRASTRUCTURE = 'INFRASTRUCTURE',
-  RELIGIOUS = 'RELIGIOUS',
-  ECONOMIC = 'ECONOMIC',
-  SYMBOLIC = 'SYMBOLIC',
-  MASS_GATHERING = 'MASS_GATHERING',
-  TRANSPORTATION = 'TRANSPORTATION',
-  UTILITY = 'UTILITY'
+  CIVILIAN = "CIVILIAN",
+  GOVERNMENT = "GOVERNMENT",
+  MILITARY = "MILITARY",
+  INFRASTRUCTURE = "INFRASTRUCTURE",
+  RELIGIOUS = "RELIGIOUS",
+  ECONOMIC = "ECONOMIC",
+  SYMBOLIC = "SYMBOLIC",
+  MASS_GATHERING = "MASS_GATHERING",
+  TRANSPORTATION = "TRANSPORTATION",
+  UTILITY = "UTILITY",
 }
 
 export interface Target {
@@ -47,7 +47,7 @@ export interface Target {
   location: Location;
   vulnerability: VulnerabilityAssessment;
   surveillance: SurveillanceActivity[];
-  significance: 'HIGH' | 'MEDIUM' | 'LOW';
+  significance: "HIGH" | "MEDIUM" | "LOW";
 }
 
 export interface Location {
@@ -71,7 +71,7 @@ export interface VulnerabilityAssessment {
 export interface SurveillanceActivity {
   id: string;
   date: Date;
-  type: 'PHYSICAL' | 'DIGITAL' | 'RECONNAISSANCE';
+  type: "PHYSICAL" | "DIGITAL" | "RECONNAISSANCE";
   description: string;
   individuals?: string[];
   detected: boolean;
@@ -92,7 +92,7 @@ export interface Milestone {
   date: Date;
   description: string;
   completed: boolean;
-  significance: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  significance: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
 }
 
 export interface AttackIndicator {
@@ -107,31 +107,31 @@ export interface AttackIndicator {
 }
 
 export enum IndicatorType {
-  TARGET_SURVEILLANCE = 'TARGET_SURVEILLANCE',
-  WEAPONS_PROCUREMENT = 'WEAPONS_PROCUREMENT',
-  EXPLOSIVES_ACQUISITION = 'EXPLOSIVES_ACQUISITION',
-  ATTACK_REHEARSAL = 'ATTACK_REHEARSAL',
-  COMMUNICATION_PATTERN = 'COMMUNICATION_PATTERN',
-  TRAVEL_PATTERN = 'TRAVEL_PATTERN',
-  TRAINING_ACTIVITY = 'TRAINING_ACTIVITY',
-  OPSEC_LAPSE = 'OPSEC_LAPSE',
-  MARTYRDOM_VIDEO = 'MARTYRDOM_VIDEO',
-  LAST_TESTAMENT = 'LAST_TESTAMENT',
-  FUNDING_TRANSFER = 'FUNDING_TRANSFER',
-  SAFEHOUSE_RENTAL = 'SAFEHOUSE_RENTAL'
+  TARGET_SURVEILLANCE = "TARGET_SURVEILLANCE",
+  WEAPONS_PROCUREMENT = "WEAPONS_PROCUREMENT",
+  EXPLOSIVES_ACQUISITION = "EXPLOSIVES_ACQUISITION",
+  ATTACK_REHEARSAL = "ATTACK_REHEARSAL",
+  COMMUNICATION_PATTERN = "COMMUNICATION_PATTERN",
+  TRAVEL_PATTERN = "TRAVEL_PATTERN",
+  TRAINING_ACTIVITY = "TRAINING_ACTIVITY",
+  OPSEC_LAPSE = "OPSEC_LAPSE",
+  MARTYRDOM_VIDEO = "MARTYRDOM_VIDEO",
+  LAST_TESTAMENT = "LAST_TESTAMENT",
+  FUNDING_TRANSFER = "FUNDING_TRANSFER",
+  SAFEHOUSE_RENTAL = "SAFEHOUSE_RENTAL",
 }
 
 export enum ThreatSeverity {
-  CRITICAL = 'CRITICAL',
-  HIGH = 'HIGH',
-  MEDIUM = 'MEDIUM',
-  LOW = 'LOW',
-  INFORMATIONAL = 'INFORMATIONAL'
+  CRITICAL = "CRITICAL",
+  HIGH = "HIGH",
+  MEDIUM = "MEDIUM",
+  LOW = "LOW",
+  INFORMATIONAL = "INFORMATIONAL",
 }
 
 export interface IntelligenceSource {
-  type: 'HUMINT' | 'SIGINT' | 'OSINT' | 'IMINT' | 'TECHINT';
-  reliability: 'CONFIRMED' | 'PROBABLE' | 'DOUBTFUL' | 'UNCONFIRMED';
+  type: "HUMINT" | "SIGINT" | "OSINT" | "IMINT" | "TECHINT";
+  reliability: "CONFIRMED" | "PROBABLE" | "DOUBTFUL" | "UNCONFIRMED";
   description: string;
   collected: Date;
   classification?: string;
@@ -151,15 +151,15 @@ export interface WeaponsProcurement {
 }
 
 export enum WeaponType {
-  SMALL_ARMS = 'SMALL_ARMS',
-  EXPLOSIVES = 'EXPLOSIVES',
-  IED_COMPONENTS = 'IED_COMPONENTS',
-  CHEMICAL = 'CHEMICAL',
-  BIOLOGICAL = 'BIOLOGICAL',
-  VEHICLE = 'VEHICLE',
-  DRONE = 'DRONE',
-  AMMUNITION = 'AMMUNITION',
-  DETONATORS = 'DETONATORS'
+  SMALL_ARMS = "SMALL_ARMS",
+  EXPLOSIVES = "EXPLOSIVES",
+  IED_COMPONENTS = "IED_COMPONENTS",
+  CHEMICAL = "CHEMICAL",
+  BIOLOGICAL = "BIOLOGICAL",
+  VEHICLE = "VEHICLE",
+  DRONE = "DRONE",
+  AMMUNITION = "AMMUNITION",
+  DETONATORS = "DETONATORS",
 }
 
 export interface ExplosivesMaterial {
@@ -174,13 +174,13 @@ export interface ExplosivesMaterial {
 }
 
 export enum ExplosiveType {
-  COMMERCIAL = 'COMMERCIAL',
-  MILITARY = 'MILITARY',
-  HOMEMADE = 'HOMEMADE',
-  PRECURSOR_CHEMICAL = 'PRECURSOR_CHEMICAL',
-  FERTILIZER = 'FERTILIZER',
-  FUEL = 'FUEL',
-  INITIATOR = 'INITIATOR'
+  COMMERCIAL = "COMMERCIAL",
+  MILITARY = "MILITARY",
+  HOMEMADE = "HOMEMADE",
+  PRECURSOR_CHEMICAL = "PRECURSOR_CHEMICAL",
+  FERTILIZER = "FERTILIZER",
+  FUEL = "FUEL",
+  INITIATOR = "INITIATOR",
 }
 
 export interface TrainingActivity {
@@ -196,14 +196,14 @@ export interface TrainingActivity {
 }
 
 export enum TrainingType {
-  WEAPONS = 'WEAPONS',
-  EXPLOSIVES = 'EXPLOSIVES',
-  TACTICS = 'TACTICS',
-  OPERATIONAL_SECURITY = 'OPERATIONAL_SECURITY',
-  SURVEILLANCE = 'SURVEILLANCE',
-  CYBER = 'CYBER',
-  MEDICAL = 'MEDICAL',
-  PHYSICAL = 'PHYSICAL'
+  WEAPONS = "WEAPONS",
+  EXPLOSIVES = "EXPLOSIVES",
+  TACTICS = "TACTICS",
+  OPERATIONAL_SECURITY = "OPERATIONAL_SECURITY",
+  SURVEILLANCE = "SURVEILLANCE",
+  CYBER = "CYBER",
+  MEDICAL = "MEDICAL",
+  PHYSICAL = "PHYSICAL",
 }
 
 export interface CommunicationPattern {
@@ -220,14 +220,14 @@ export interface CommunicationPattern {
 }
 
 export enum CommunicationMedium {
-  PHONE = 'PHONE',
-  EMAIL = 'EMAIL',
-  MESSAGING_APP = 'MESSAGING_APP',
-  SOCIAL_MEDIA = 'SOCIAL_MEDIA',
-  FORUM = 'FORUM',
-  ENCRYPTED_CHANNEL = 'ENCRYPTED_CHANNEL',
-  IN_PERSON = 'IN_PERSON',
-  COURIER = 'COURIER'
+  PHONE = "PHONE",
+  EMAIL = "EMAIL",
+  MESSAGING_APP = "MESSAGING_APP",
+  SOCIAL_MEDIA = "SOCIAL_MEDIA",
+  FORUM = "FORUM",
+  ENCRYPTED_CHANNEL = "ENCRYPTED_CHANNEL",
+  IN_PERSON = "IN_PERSON",
+  COURIER = "COURIER",
 }
 
 export interface CommunicationAnomaly {
@@ -252,7 +252,7 @@ export interface TravelPattern {
 export interface BorderCrossing {
   location: string;
   date: Date;
-  method: 'LEGAL' | 'ILLEGAL' | 'UNKNOWN';
+  method: "LEGAL" | "ILLEGAL" | "UNKNOWN";
   documents: string[];
   flagged: boolean;
 }
@@ -272,7 +272,7 @@ export interface OperationalSecurityLapse {
 export interface MartyrdomMaterial {
   id: string;
   individualId: string;
-  type: 'VIDEO' | 'AUDIO' | 'WRITTEN';
+  type: "VIDEO" | "AUDIO" | "WRITTEN";
   created: Date;
   discovered: Date;
   content: string;
@@ -314,7 +314,7 @@ export interface MonitoringResult {
 
 export interface ThreatTrend {
   type: string;
-  direction: 'INCREASING' | 'DECREASING' | 'STABLE';
+  direction: "INCREASING" | "DECREASING" | "STABLE";
   magnitude: number;
   period: string;
   description: string;

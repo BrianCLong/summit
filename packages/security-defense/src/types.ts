@@ -1,4 +1,4 @@
-export type CheckStatus = 'pass' | 'fail';
+export type CheckStatus = "pass" | "fail";
 
 export interface CheckResult {
   epic: string;

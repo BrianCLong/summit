@@ -4,23 +4,19 @@
  * Bridges to Python YOLO implementation
  */
 
-import { spawn } from 'child_process';
-import { promisify } from 'util';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { spawn } from "child_process";
+import { promisify } from "util";
+import { promises as fs } from "fs";
+import path from "path";
 import {
   IObjectDetector,
   ModelConfig,
   Detection,
   BaseComputerVisionModel,
-} from '@intelgraph/computer-vision';
-import {
-  ObjectDetectionConfig,
-  ObjectDetectionResult,
-  InstanceSegmentation,
-} from './types.js';
+} from "@intelgraph/computer-vision";
+import { ObjectDetectionConfig, ObjectDetectionResult, InstanceSegmentation } from "./types.js";
 
-const execFile = promisify(require('child_process').execFile);
+const execFile = promisify(require("child_process").execFile);
 
 /**
  * YOLO Detector for real-time object detection
@@ -33,8 +29,8 @@ export class YOLODetector extends BaseComputerVisionModel implements IObjectDete
 
   constructor(config: Partial<ObjectDetectionConfig> = {}) {
     const modelConfig: ModelConfig = {
-      model_name: config.model_type || 'yolov8',
-      device: config.device || 'auto',
+      model_name: config.model_type || "yolov8",
+      device: config.device || "auto",
       confidence_threshold: config.confidence_threshold || 0.5,
       nms_threshold: config.nms_threshold || 0.4,
       max_detections: config.max_detections || 100,
@@ -46,12 +42,12 @@ export class YOLODetector extends BaseComputerVisionModel implements IObjectDete
     super(modelConfig);
 
     this.detectionConfig = {
-      model_type: config.model_type || 'yolov8',
-      model_size: config.model_size || 'medium',
+      model_type: config.model_type || "yolov8",
+      model_size: config.model_size || "medium",
       confidence_threshold: config.confidence_threshold || 0.5,
       nms_threshold: config.nms_threshold || 0.4,
       max_detections: config.max_detections || 100,
-      device: config.device || 'auto',
+      device: config.device || "auto",
       classes: config.classes,
       enable_tracking: config.enable_tracking || false,
       batch_size: config.batch_size || 1,
@@ -59,8 +55,9 @@ export class YOLODetector extends BaseComputerVisionModel implements IObjectDete
     };
 
     // Default paths (can be overridden)
-    this.pythonScriptPath = process.env.YOLO_SCRIPT_PATH ||
-      path.join(process.cwd(), 'server/src/ai/models/yolo_detection.py');
+    this.pythonScriptPath =
+      process.env.YOLO_SCRIPT_PATH ||
+      path.join(process.cwd(), "server/src/ai/models/yolo_detection.py");
     this.modelPath = this.getModelPath();
   }
 
@@ -69,15 +66,15 @@ export class YOLODetector extends BaseComputerVisionModel implements IObjectDete
    */
   private getModelPath(): string {
     const sizeMap: Record<string, string> = {
-      nano: 'yolov8n.pt',
-      small: 'yolov8s.pt',
-      medium: 'yolov8m.pt',
-      large: 'yolov8l.pt',
-      xlarge: 'yolov8x.pt',
+      nano: "yolov8n.pt",
+      small: "yolov8s.pt",
+      medium: "yolov8m.pt",
+      large: "yolov8l.pt",
+      xlarge: "yolov8x.pt",
     };
 
-    if (this.detectionConfig.model_type === 'yolov9') {
-      return sizeMap[this.detectionConfig.model_size].replace('yolov8', 'yolov9');
+    if (this.detectionConfig.model_type === "yolov9") {
+      return sizeMap[this.detectionConfig.model_size].replace("yolov8", "yolov9");
     }
 
     return sizeMap[this.detectionConfig.model_size];
@@ -171,32 +168,38 @@ export class YOLODetector extends BaseComputerVisionModel implements IObjectDete
   ): Promise<ObjectDetectionResult> {
     const args = [
       this.pythonScriptPath,
-      '--image', imagePath,
-      '--model', this.modelPath,
-      '--confidence', String(options?.confidenceThreshold || this.config.confidence_threshold),
-      '--nms', String(options?.nmsThreshold || this.config.nms_threshold),
-      '--max-detections', String(options?.maxDetections || this.config.max_detections),
-      '--device', this.config.device,
+      "--image",
+      imagePath,
+      "--model",
+      this.modelPath,
+      "--confidence",
+      String(options?.confidenceThreshold || this.config.confidence_threshold),
+      "--nms",
+      String(options?.nmsThreshold || this.config.nms_threshold),
+      "--max-detections",
+      String(options?.maxDetections || this.config.max_detections),
+      "--device",
+      this.config.device,
     ];
 
     if (options?.classes && options.classes.length > 0) {
-      args.push('--classes', options.classes.join(','));
+      args.push("--classes", options.classes.join(","));
     }
 
     return new Promise((resolve, reject) => {
-      const python = spawn('python3', args);
-      let stdout = '';
-      let stderr = '';
+      const python = spawn("python3", args);
+      let stdout = "";
+      let stderr = "";
 
-      python.stdout.on('data', (data) => {
+      python.stdout.on("data", (data) => {
         stdout += data.toString();
       });
 
-      python.stderr.on('data', (data) => {
+      python.stderr.on("data", (data) => {
         stderr += data.toString();
       });
 
-      python.on('close', (code) => {
+      python.on("close", (code) => {
         if (code !== 0) {
           reject(new Error(`Python script failed: ${stderr}`));
           return;
@@ -265,10 +268,7 @@ export class YOLODetector extends BaseComputerVisionModel implements IObjectDete
   /**
    * Track objects across frames
    */
-  async track(
-    imagePaths: string[],
-    options?: Record<string, any>
-  ): Promise<any> {
+  async track(imagePaths: string[], options?: Record<string, any>): Promise<any> {
     // Multi-object tracking implementation
     // Would use ByteTrack or similar
     const detections = await this.processBatch(imagePaths, options);
@@ -298,18 +298,21 @@ export class YOLODetector extends BaseComputerVisionModel implements IObjectDete
     // Call Python script to draw
     const args = [
       this.pythonScriptPath,
-      '--image', imagePath,
-      '--model', this.modelPath,
-      '--output-image', outputPath,
+      "--image",
+      imagePath,
+      "--model",
+      this.modelPath,
+      "--output-image",
+      outputPath,
     ];
 
     await new Promise((resolve, reject) => {
-      const python = spawn('python3', args);
-      python.on('close', (code) => {
+      const python = spawn("python3", args);
+      python.on("close", (code) => {
         if (code === 0) {
           resolve(outputPath);
         } else {
-          reject(new Error('Failed to draw detections'));
+          reject(new Error("Failed to draw detections"));
         }
       });
     });
@@ -323,18 +326,86 @@ export class YOLODetector extends BaseComputerVisionModel implements IObjectDete
   getSupportedClasses(): string[] {
     // COCO classes for YOLOv8
     return [
-      'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck',
-      'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench',
-      'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra',
-      'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee',
-      'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove',
-      'skateboard', 'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup',
-      'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange',
-      'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch',
-      'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse',
-      'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink',
-      'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier',
-      'toothbrush',
+      "person",
+      "bicycle",
+      "car",
+      "motorcycle",
+      "airplane",
+      "bus",
+      "train",
+      "truck",
+      "boat",
+      "traffic light",
+      "fire hydrant",
+      "stop sign",
+      "parking meter",
+      "bench",
+      "bird",
+      "cat",
+      "dog",
+      "horse",
+      "sheep",
+      "cow",
+      "elephant",
+      "bear",
+      "zebra",
+      "giraffe",
+      "backpack",
+      "umbrella",
+      "handbag",
+      "tie",
+      "suitcase",
+      "frisbee",
+      "skis",
+      "snowboard",
+      "sports ball",
+      "kite",
+      "baseball bat",
+      "baseball glove",
+      "skateboard",
+      "surfboard",
+      "tennis racket",
+      "bottle",
+      "wine glass",
+      "cup",
+      "fork",
+      "knife",
+      "spoon",
+      "bowl",
+      "banana",
+      "apple",
+      "sandwich",
+      "orange",
+      "broccoli",
+      "carrot",
+      "hot dog",
+      "pizza",
+      "donut",
+      "cake",
+      "chair",
+      "couch",
+      "potted plant",
+      "bed",
+      "dining table",
+      "toilet",
+      "tv",
+      "laptop",
+      "mouse",
+      "remote",
+      "keyboard",
+      "cell phone",
+      "microwave",
+      "oven",
+      "toaster",
+      "sink",
+      "refrigerator",
+      "book",
+      "clock",
+      "vase",
+      "scissors",
+      "teddy bear",
+      "hair drier",
+      "toothbrush",
     ];
   }
 
@@ -349,8 +420,6 @@ export class YOLODetector extends BaseComputerVisionModel implements IObjectDete
 /**
  * Create YOLO detector with default configuration
  */
-export function createYOLODetector(
-  config?: Partial<ObjectDetectionConfig>
-): YOLODetector {
+export function createYOLODetector(config?: Partial<ObjectDetectionConfig>): YOLODetector {
   return new YOLODetector(config);
 }

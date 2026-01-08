@@ -19,8 +19,8 @@ import type {
   FinancialNetwork,
   MoneyLaunderingScheme,
   FinanceQuery,
-  FinanceResult
-} from './types.js';
+  FinanceResult,
+} from "./types.js";
 
 export class FinanceTracker {
   private entities: Map<string, FinancialEntity> = new Map();
@@ -123,7 +123,7 @@ export class FinanceTracker {
     // Update entity status
     const entity = this.entities.get(freeze.entityId);
     if (entity) {
-      entity.status = 'FROZEN';
+      entity.status = "FROZEN";
     }
   }
 
@@ -164,40 +164,31 @@ export class FinanceTracker {
     let filteredTransactions = [...this.transactions];
 
     if (query.entityTypes && query.entityTypes.length > 0) {
-      filteredEntities = filteredEntities.filter(e =>
-        query.entityTypes!.includes(e.type)
-      );
+      filteredEntities = filteredEntities.filter((e) => query.entityTypes!.includes(e.type));
     }
 
     if (query.sanctioned !== undefined) {
-      filteredEntities = filteredEntities.filter(e =>
-        e.sanctioned === query.sanctioned
-      );
+      filteredEntities = filteredEntities.filter((e) => e.sanctioned === query.sanctioned);
     }
 
     if (query.transactionMethods && query.transactionMethods.length > 0) {
-      filteredTransactions = filteredTransactions.filter(t =>
+      filteredTransactions = filteredTransactions.filter((t) =>
         query.transactionMethods!.includes(t.method)
       );
     }
 
     if (query.minAmount !== undefined) {
-      filteredTransactions = filteredTransactions.filter(t =>
-        t.amount >= query.minAmount!
-      );
+      filteredTransactions = filteredTransactions.filter((t) => t.amount >= query.minAmount!);
     }
 
-    const totalFlow = filteredTransactions.reduce(
-      (sum, t) => sum + t.amount,
-      0
-    );
+    const totalFlow = filteredTransactions.reduce((sum, t) => sum + t.amount, 0);
 
     return {
       entities: filteredEntities,
       transactions: filteredTransactions,
       networks: Array.from(this.networks.values()),
       totalFlow,
-      trends: this.calculateTrends()
+      trends: this.calculateTrends(),
     };
   }
 
@@ -213,18 +204,18 @@ export class FinanceTracker {
     charities: CharityOperation[];
   }> {
     return {
-      extortion: this.extortionOps.filter(e => e.organizationId === entityId),
-      kidnapping: this.kidnappings.filter(k => k.organizationId === entityId),
-      drugTrafficking: this.drugTrafficking.filter(d => d.organizationId === entityId),
-      stateSponsor: Array.from(this.stateSponsors.values()).find(s =>
+      extortion: this.extortionOps.filter((e) => e.organizationId === entityId),
+      kidnapping: this.kidnappings.filter((k) => k.organizationId === entityId),
+      drugTrafficking: this.drugTrafficking.filter((d) => d.organizationId === entityId),
+      stateSponsor: Array.from(this.stateSponsors.values()).find((s) =>
         s.recipients.includes(entityId)
       ),
-      frontCompanies: Array.from(this.frontCompanies.values()).filter(f =>
+      frontCompanies: Array.from(this.frontCompanies.values()).filter((f) =>
         f.linked.includes(entityId)
       ),
-      charities: Array.from(this.charities.values()).filter(c =>
-        c.diversion && c.name.includes(entityId)
-      )
+      charities: Array.from(this.charities.values()).filter(
+        (c) => c.diversion && c.name.includes(entityId)
+      ),
     };
   }
 
@@ -233,15 +224,17 @@ export class FinanceTracker {
    */
   async traceTransactionChain(transactionId: string): Promise<Transaction[]> {
     const chain: Transaction[] = [];
-    const transaction = this.transactions.find(t => t.id === transactionId);
+    const transaction = this.transactions.find((t) => t.id === transactionId);
 
-    if (!transaction) {return chain;}
+    if (!transaction) {
+      return chain;
+    }
 
     chain.push(transaction);
 
     // Find subsequent transactions (simplified)
     const related = this.transactions.filter(
-      t => t.from === transaction.to && t.date > transaction.date
+      (t) => t.from === transaction.to && t.date > transaction.date
     );
 
     chain.push(...related);
@@ -258,28 +251,23 @@ export class FinanceTracker {
   }> {
     const entity = this.entities.get(entityId);
     if (!entity) {
-      return { financialImpact: 0, networkImpact: 0, recommendation: 'Entity not found' };
+      return { financialImpact: 0, networkImpact: 0, recommendation: "Entity not found" };
     }
 
     // Calculate financial impact
     const relatedTransactions = this.transactions.filter(
-      t => t.from === entityId || t.to === entityId
+      (t) => t.from === entityId || t.to === entityId
     );
-    const financialImpact = relatedTransactions.reduce(
-      (sum, t) => sum + t.amount,
-      0
-    );
+    const financialImpact = relatedTransactions.reduce((sum, t) => sum + t.amount, 0);
 
     // Calculate network impact
     const connectedEntities = new Set(
-      relatedTransactions.map(t => (t.from === entityId ? t.to : t.from))
+      relatedTransactions.map((t) => (t.from === entityId ? t.to : t.from))
     );
     const networkImpact = connectedEntities.size;
 
     const recommendation =
-      entity.riskScore > 0.7
-        ? 'High priority for disruption'
-        : 'Consider for monitoring';
+      entity.riskScore > 0.7 ? "High priority for disruption" : "Consider for monitoring";
 
     return { financialImpact, networkImpact, recommendation };
   }
@@ -295,12 +283,12 @@ export class FinanceTracker {
   private calculateTrends() {
     return [
       {
-        type: 'Transaction Volume',
-        direction: 'STABLE' as const,
+        type: "Transaction Volume",
+        direction: "STABLE" as const,
         magnitude: this.transactions.length,
-        period: '30-days',
-        description: `${this.transactions.length} transactions tracked`
-      }
+        period: "30-days",
+        description: `${this.transactions.length} transactions tracked`,
+      },
     ];
   }
 }

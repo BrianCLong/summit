@@ -1,5 +1,5 @@
-import { LRUCache } from 'lru-cache';
-import type { CacheProvider } from '../types.js';
+import { LRUCache } from "lru-cache";
+import type { CacheProvider } from "../types.js";
 
 /**
  * Memory provider options
@@ -15,7 +15,7 @@ export interface MemoryProviderOptions {
  * In-memory LRU cache provider
  */
 export class MemoryProvider implements CacheProvider {
-  readonly name = 'memory';
+  readonly name = "memory";
   private cache: LRUCache<string, string>;
 
   constructor(options: MemoryProviderOptions = {}) {
@@ -62,9 +62,7 @@ export class MemoryProvider implements CacheProvider {
 
   async deletePattern(pattern: string): Promise<number> {
     // Convert glob pattern to regex
-    const regex = new RegExp(
-      '^' + pattern.replace(/\*/g, '.*').replace(/\?/g, '.') + '$'
-    );
+    const regex = new RegExp("^" + pattern.replace(/\*/g, ".*").replace(/\?/g, ".") + "$");
 
     let count = 0;
     for (const key of this.cache.keys()) {
@@ -78,7 +76,7 @@ export class MemoryProvider implements CacheProvider {
   }
 
   async mget<T>(keys: string[]): Promise<(T | null)[]> {
-    return Promise.all(keys.map(key => this.get<T>(key)));
+    return Promise.all(keys.map((key) => this.get<T>(key)));
   }
 
   async mset<T>(entries: Array<{ key: string; value: T; ttl?: number }>): Promise<void> {

@@ -3,22 +3,22 @@
  * TRAINING/SIMULATION ONLY
  */
 
-import { EventEmitter } from 'eventemitter3';
-import { v4 as uuid } from 'uuid';
-import { SignalCollector, CollectorConfig, CollectorStatus } from './SignalCollector';
+import { EventEmitter } from "eventemitter3";
+import { v4 as uuid } from "uuid";
+import { SignalCollector, CollectorConfig, CollectorStatus } from "./SignalCollector";
 import {
   RawSignal,
   CollectionTask,
   SignalType,
   IntelligenceCategory,
-  ClassificationLevel
-} from '../types';
+  ClassificationLevel,
+} from "../types";
 
 export interface CollectionManagerConfig {
   maxConcurrentTasks: number;
   signalRetentionHours: number;
   autoMinimization: boolean;
-  complianceMode: 'TRAINING' | 'EXERCISE' | 'DEMONSTRATION';
+  complianceMode: "TRAINING" | "EXERCISE" | "DEMONSTRATION";
 }
 
 export interface CollectionStats {
@@ -30,14 +30,14 @@ export interface CollectionStats {
 }
 
 export interface CollectionManagerEvents {
-  'collector:added': (collector: SignalCollector) => void;
-  'collector:removed': (collectorId: string) => void;
-  'signal:collected': (signal: RawSignal) => void;
-  'signal:processed': (signal: RawSignal) => void;
-  'task:created': (task: CollectionTask) => void;
-  'task:assigned': (task: CollectionTask, collectorId: string) => void;
-  'compliance:violation': (message: string) => void;
-  'error': (error: Error) => void;
+  "collector:added": (collector: SignalCollector) => void;
+  "collector:removed": (collectorId: string) => void;
+  "signal:collected": (signal: RawSignal) => void;
+  "signal:processed": (signal: RawSignal) => void;
+  "task:created": (task: CollectionTask) => void;
+  "task:assigned": (task: CollectionTask, collectorId: string) => void;
+  "compliance:violation": (message: string) => void;
+  error: (error: Error) => void;
 }
 
 export class CollectionManager extends EventEmitter<CollectionManagerEvents> {
@@ -58,7 +58,7 @@ export class CollectionManager extends EventEmitter<CollectionManagerEvents> {
       maxConcurrentTasks: config.maxConcurrentTasks || 10,
       signalRetentionHours: config.signalRetentionHours || 72,
       autoMinimization: config.autoMinimization ?? true,
-      complianceMode: config.complianceMode || 'TRAINING'
+      complianceMode: config.complianceMode || "TRAINING",
     };
 
     console.log(`[SIGINT] Collection Manager initialized in ${this.config.complianceMode} mode`);
@@ -67,19 +67,19 @@ export class CollectionManager extends EventEmitter<CollectionManagerEvents> {
   async addCollector(config: CollectorConfig): Promise<SignalCollector> {
     const collector = new SignalCollector(config);
 
-    collector.on('signal:received', (signal) => {
+    collector.on("signal:received", (signal) => {
       this.handleSignal(signal);
     });
 
-    collector.on('error', (error) => {
-      this.emit('error', error);
+    collector.on("error", (error) => {
+      this.emit("error", error);
     });
 
     await collector.initialize();
     this.collectors.set(config.id, collector);
-    this.emit('collector:added', collector);
+    this.emit("collector:added", collector);
 
-    this.logCompliance('COLLECTOR_ADDED', undefined, `Added collector: ${config.name}`);
+    this.logCompliance("COLLECTOR_ADDED", undefined, `Added collector: ${config.name}`);
 
     return collector;
   }
@@ -89,8 +89,8 @@ export class CollectionManager extends EventEmitter<CollectionManagerEvents> {
     if (collector) {
       await collector.shutdown();
       this.collectors.delete(collectorId);
-      this.emit('collector:removed', collectorId);
-      this.logCompliance('COLLECTOR_REMOVED', undefined, `Removed collector: ${collectorId}`);
+      this.emit("collector:removed", collectorId);
+      this.logCompliance("COLLECTOR_REMOVED", undefined, `Removed collector: ${collectorId}`);
     }
   }
 
@@ -106,7 +106,7 @@ export class CollectionManager extends EventEmitter<CollectionManagerEvents> {
   }): Promise<CollectionTask> {
     // Validate legal authority
     if (!params.legalAuthority) {
-      throw new Error('Legal authority is required for all collection tasks');
+      throw new Error("Legal authority is required for all collection tasks");
     }
 
     const now = new Date();
@@ -123,13 +123,17 @@ export class CollectionManager extends EventEmitter<CollectionManagerEvents> {
       legalAuthority: params.legalAuthority,
       expirationDate: new Date(now.getTime() + params.durationHours * 3600000),
       minimizationRequired: params.minimizationRequired ?? true,
-      status: 'PENDING',
-      isTrainingTask: true
+      status: "PENDING",
+      isTrainingTask: true,
     };
 
     this.tasks.set(task.id, task);
-    this.emit('task:created', task);
-    this.logCompliance('TASK_CREATED', task.id, `Created task: ${task.name}, Authority: ${task.legalAuthority}`);
+    this.emit("task:created", task);
+    this.logCompliance(
+      "TASK_CREATED",
+      task.id,
+      `Created task: ${task.name}, Authority: ${task.legalAuthority}`
+    );
 
     return task;
   }
@@ -138,24 +142,28 @@ export class CollectionManager extends EventEmitter<CollectionManagerEvents> {
     const task = this.tasks.get(taskId);
     const collector = this.collectors.get(collectorId);
 
-    if (!task) {throw new Error(`Task ${taskId} not found`);}
-    if (!collector) {throw new Error(`Collector ${collectorId} not found`);}
+    if (!task) {
+      throw new Error(`Task ${taskId} not found`);
+    }
+    if (!collector) {
+      throw new Error(`Collector ${collectorId} not found`);
+    }
 
     // Check task expiration
     if (task.expirationDate < new Date()) {
-      throw new Error('Cannot assign expired task');
+      throw new Error("Cannot assign expired task");
     }
 
     // Check concurrent task limit
-    const activeTasks = Array.from(this.tasks.values()).filter(t => t.status === 'ACTIVE');
+    const activeTasks = Array.from(this.tasks.values()).filter((t) => t.status === "ACTIVE");
     if (activeTasks.length >= this.config.maxConcurrentTasks) {
       throw new Error(`Maximum concurrent tasks (${this.config.maxConcurrentTasks}) reached`);
     }
 
-    task.status = 'ACTIVE';
+    task.status = "ACTIVE";
     await collector.startCollection(task);
-    this.emit('task:assigned', task, collectorId);
-    this.logCompliance('TASK_ASSIGNED', taskId, `Assigned to collector: ${collectorId}`);
+    this.emit("task:assigned", task, collectorId);
+    this.logCompliance("TASK_ASSIGNED", taskId, `Assigned to collector: ${collectorId}`);
   }
 
   private handleSignal(signal: RawSignal): void {
@@ -165,7 +173,7 @@ export class CollectionManager extends EventEmitter<CollectionManagerEvents> {
     }
 
     this.signals.push(signal);
-    this.emit('signal:collected', signal);
+    this.emit("signal:collected", signal);
 
     // Clean old signals
     this.cleanOldSignals();
@@ -177,7 +185,7 @@ export class CollectionManager extends EventEmitter<CollectionManagerEvents> {
 
     // Log minimization action
     this.logCompliance(
-      'MINIMIZATION_APPLIED',
+      "MINIMIZATION_APPLIED",
       signal.metadata.missionId,
       `Signal ${signal.metadata.id} minimized`
     );
@@ -185,7 +193,7 @@ export class CollectionManager extends EventEmitter<CollectionManagerEvents> {
 
   private cleanOldSignals(): void {
     const cutoff = new Date(Date.now() - this.config.signalRetentionHours * 3600000);
-    this.signals = this.signals.filter(s => s.metadata.timestamp > cutoff);
+    this.signals = this.signals.filter((s) => s.metadata.timestamp > cutoff);
   }
 
   private logCompliance(action: string, taskId: string | undefined, details: string): void {
@@ -193,7 +201,7 @@ export class CollectionManager extends EventEmitter<CollectionManagerEvents> {
       timestamp: new Date(),
       action,
       taskId,
-      details
+      details,
     });
   }
 
@@ -208,18 +216,18 @@ export class CollectionManager extends EventEmitter<CollectionManagerEvents> {
       signalsByCategory[category] = (signalsByCategory[category] || 0) + 1;
     }
 
-    const activeCollectors = Array.from(this.collectors.values())
-      .filter(c => c.getStatus() === 'COLLECTING').length;
+    const activeCollectors = Array.from(this.collectors.values()).filter(
+      (c) => c.getStatus() === "COLLECTING"
+    ).length;
 
-    const activeTasks = Array.from(this.tasks.values())
-      .filter(t => t.status === 'ACTIVE').length;
+    const activeTasks = Array.from(this.tasks.values()).filter((t) => t.status === "ACTIVE").length;
 
     return {
       totalSignals: this.signals.length,
       signalsByType,
       signalsByCategory,
       activeCollectors,
-      activeTasks
+      activeTasks,
     };
   }
 
@@ -239,13 +247,13 @@ export class CollectionManager extends EventEmitter<CollectionManagerEvents> {
     let result = [...this.signals];
 
     if (filter?.signalType) {
-      result = result.filter(s => s.metadata.signalType === filter.signalType);
+      result = result.filter((s) => s.metadata.signalType === filter.signalType);
     }
     if (filter?.category) {
-      result = result.filter(s => s.metadata.category === filter.category);
+      result = result.filter((s) => s.metadata.category === filter.category);
     }
     if (filter?.since) {
-      result = result.filter(s => s.metadata.timestamp >= filter.since!);
+      result = result.filter((s) => s.metadata.timestamp >= filter.since!);
     }
 
     return result;
@@ -261,7 +269,7 @@ export class CollectionManager extends EventEmitter<CollectionManagerEvents> {
     }
     this.collectors.clear();
     this.tasks.clear();
-    this.logCompliance('SYSTEM_SHUTDOWN', undefined, 'Collection manager shut down');
-    console.log('[SIGINT] Collection Manager shut down');
+    this.logCompliance("SYSTEM_SHUTDOWN", undefined, "Collection manager shut down");
+    console.log("[SIGINT] Collection Manager shut down");
   }
 }

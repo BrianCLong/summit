@@ -10,25 +10,25 @@
  *   node scripts/generate-pq-hashes.js --output=./artifacts/persisted-queries.json
  */
 
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
-const { glob } = require('glob');
+const fs = require("fs");
+const path = require("path");
+const crypto = require("crypto");
+const { glob } = require("glob");
 
 // Configuration
 const config = {
   scan: {
     patterns: [
-      'client/src/**/*.{ts,tsx,js,jsx}',
-      'server/src/**/*.graphql',
-      'client/src/**/*.graphql',
+      "client/src/**/*.{ts,tsx,js,jsx}",
+      "server/src/**/*.graphql",
+      "client/src/**/*.graphql",
     ],
     excludePatterns: [
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/build/**',
-      '**/*.test.*',
-      '**/*.spec.*',
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/*.test.*",
+      "**/*.spec.*",
     ],
   },
   operations: {
@@ -40,9 +40,9 @@ const config = {
     },
   },
   output: {
-    format: 'json',
+    format: "json",
     includeMetadata: true,
-    checksumAlgorithm: 'sha256',
+    checksumAlgorithm: "sha256",
   },
 };
 
@@ -58,7 +58,7 @@ class PQHashGenerator {
   }
 
   async scanCodebase() {
-    console.log('🔍 Scanning codebase for GraphQL operations...');
+    console.log("🔍 Scanning codebase for GraphQL operations...");
 
     const files = await glob(config.scan.patterns, {
       ignore: config.scan.excludePatterns,
@@ -72,19 +72,17 @@ class PQHashGenerator {
     }
 
     console.log(
-      `✅ Scan complete: ${this.stats.operationsFound} operations found in ${this.stats.filesScanned} files`,
+      `✅ Scan complete: ${this.stats.operationsFound} operations found in ${this.stats.filesScanned} files`
     );
   }
 
   async scanFile(filePath) {
     try {
-      const content = fs.readFileSync(filePath, 'utf8');
+      const content = fs.readFileSync(filePath, "utf8");
       this.stats.filesScanned++;
 
       // Extract operations using different patterns
-      for (const [patternName, pattern] of Object.entries(
-        config.operations.patterns,
-      )) {
+      for (const [patternName, pattern] of Object.entries(config.operations.patterns)) {
         let match;
         while ((match = pattern.exec(content)) !== null) {
           const operation = this.normalizeOperation(match[0]);
@@ -122,60 +120,58 @@ class PQHashGenerator {
   normalizeOperation(operation) {
     // Normalize whitespace and remove comments
     return operation
-      .replace(/\s+/g, ' ') // Normalize whitespace
-      .replace(/#[^\r\n]*/g, '') // Remove comments
-      .replace(/^\s+|\s+$/g, '') // Trim
-      .replace(/\s*{\s*/g, ' { ') // Normalize braces
-      .replace(/\s*}\s*/g, ' } ')
-      .replace(/\s*\(\s*/g, '(') // Normalize parentheses
-      .replace(/\s*\)\s*/g, ')')
-      .replace(/\s*,\s*/g, ', '); // Normalize commas
+      .replace(/\s+/g, " ") // Normalize whitespace
+      .replace(/#[^\r\n]*/g, "") // Remove comments
+      .replace(/^\s+|\s+$/g, "") // Trim
+      .replace(/\s*{\s*/g, " { ") // Normalize braces
+      .replace(/\s*}\s*/g, " } ")
+      .replace(/\s*\(\s*/g, "(") // Normalize parentheses
+      .replace(/\s*\)\s*/g, ")")
+      .replace(/\s*,\s*/g, ", "); // Normalize commas
   }
 
   generateHash(operation) {
-    return crypto.createHash('sha256').update(operation, 'utf8').digest('hex');
+    return crypto.createHash("sha256").update(operation, "utf8").digest("hex");
   }
 
   extractQueryName(operation) {
     // Try to extract operation name
     const nameMatch = operation.match(/(query|mutation|subscription)\s+(\w+)/i);
-    return nameMatch ? nameMatch[2] : 'anonymous';
+    return nameMatch ? nameMatch[2] : "anonymous";
   }
 
   extractOperationType(operation) {
     const typeMatch = operation.match(/^(query|mutation|subscription)/i);
-    return typeMatch ? typeMatch[1].toLowerCase() : 'unknown';
+    return typeMatch ? typeMatch[1].toLowerCase() : "unknown";
   }
 
   assessRiskLevel(operation) {
     // Assess risk based on operation content
     const riskKeywords = [
-      'delete',
-      'remove',
-      'destroy',
-      'purge',
-      'drop',
-      'truncate',
-      'clear',
-      'reset',
-      'wipe',
-      'bulk',
-      'mass',
-      'admin',
-      'superuser',
-      'privilege',
+      "delete",
+      "remove",
+      "destroy",
+      "purge",
+      "drop",
+      "truncate",
+      "clear",
+      "reset",
+      "wipe",
+      "bulk",
+      "mass",
+      "admin",
+      "superuser",
+      "privilege",
     ];
 
     const lowerOp = operation.toLowerCase();
-    const hasRiskKeywords = riskKeywords.some((keyword) =>
-      lowerOp.includes(keyword),
-    );
+    const hasRiskKeywords = riskKeywords.some((keyword) => lowerOp.includes(keyword));
 
     if (operation.match(/mutation/i)) {
-      return hasRiskKeywords ? 'high' : 'medium';
+      return hasRiskKeywords ? "high" : "medium";
     }
 
-    return hasRiskKeywords ? 'medium' : 'low';
+    return hasRiskKeywords ? "medium" : "low";
   }
 
   estimateCost(operation) {
@@ -199,14 +195,14 @@ class PQHashGenerator {
   }
 
   generateOutput(outputPath) {
-    console.log('📝 Generating hash file...');
+    console.log("📝 Generating hash file...");
 
     const hashes = {};
     const metadata = {
-      version: '1.0',
+      version: "1.0",
       generated_at: new Date().toISOString(),
-      source: 'codebase-scan',
-      generator_version: '1.0.0',
+      source: "codebase-scan",
+      generator_version: "1.0.0",
       scan_config: {
         patterns: config.scan.patterns,
         excludes: config.scan.excludePatterns,
@@ -251,14 +247,11 @@ class PQHashGenerator {
 
   generateChecksum(data) {
     const content = JSON.stringify(data, null, 0); // No formatting for checksum
-    return crypto
-      .createHash(config.output.checksumAlgorithm)
-      .update(content)
-      .digest('hex');
+    return crypto.createHash(config.output.checksumAlgorithm).update(content).digest("hex");
   }
 
   printStats() {
-    console.log('\n📊 Generation Statistics:');
+    console.log("\n📊 Generation Statistics:");
     console.log(`  Files scanned: ${this.stats.filesScanned}`);
     console.log(`  Operations found: ${this.stats.operationsFound}`);
     console.log(`  Duplicates: ${this.stats.duplicates}`);
@@ -266,11 +259,10 @@ class PQHashGenerator {
 
     const riskBreakdown = {};
     for (const operation of this.operations.values()) {
-      riskBreakdown[operation.risk_level] =
-        (riskBreakdown[operation.risk_level] || 0) + 1;
+      riskBreakdown[operation.risk_level] = (riskBreakdown[operation.risk_level] || 0) + 1;
     }
 
-    console.log('\n🎯 Risk Level Breakdown:');
+    console.log("\n🎯 Risk Level Breakdown:");
     for (const [level, count] of Object.entries(riskBreakdown)) {
       console.log(`  ${level}: ${count} operations`);
     }
@@ -282,15 +274,15 @@ async function main() {
   const options = {};
 
   args.forEach((arg) => {
-    const [key, value] = arg.split('=');
-    options[key.replace(/^--/, '')] = value || true;
+    const [key, value] = arg.split("=");
+    options[key.replace(/^--/, "")] = value || true;
   });
 
-  const { output = './persisted-queries.json' } = options;
+  const { output = "./persisted-queries.json" } = options;
 
-  console.log('🚀 IntelGraph PQ Hash Generator');
+  console.log("🚀 IntelGraph PQ Hash Generator");
   console.log(`   Output: ${output}`);
-  console.log('');
+  console.log("");
 
   const generator = new PQHashGenerator();
 
@@ -299,9 +291,9 @@ async function main() {
     generator.generateOutput(output);
     generator.printStats();
 
-    console.log('\n🎉 Hash generation completed successfully!');
+    console.log("\n🎉 Hash generation completed successfully!");
   } catch (error) {
-    console.error('\n❌ Generation failed:', error.message);
+    console.error("\n❌ Generation failed:", error.message);
     if (process.env.DEBUG) {
       console.error(error.stack);
     }

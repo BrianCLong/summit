@@ -17,7 +17,7 @@ export interface Hypothesis {
 
 export interface HypothesisStore {
   hypotheses: Hypothesis[];
-  addHypothesis: (h: Omit<Hypothesis, 'posterior'>) => void;
+  addHypothesis: (h: Omit<Hypothesis, "posterior">) => void;
   addEvidence: (id: string, e: Evidence) => void;
   addDissent: (id: string, note: string) => void;
 }

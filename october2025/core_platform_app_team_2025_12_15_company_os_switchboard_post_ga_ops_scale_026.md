@@ -106,8 +106,8 @@ pause_ramps { input.burn_rate > 1.0 }
 
 ```ts
 if (burnRate > 1.0) {
-  flags.pause('new_features');
-  receipts.log({ action: 'ramp.pause', reason: 'error_budget' });
+  flags.pause("new_features");
+  receipts.log({ action: "ramp.pause", reason: "error_budget" });
 }
 ```
 
@@ -184,7 +184,7 @@ companyos:
   image.tag: 0.26.0
   residency:
     enforce: true
-    regions: ['us-east-1', 'eu-west-1']
+    regions: ["us-east-1", "eu-west-1"]
 switchboard:
   image.tag: 0.26.0
   features:

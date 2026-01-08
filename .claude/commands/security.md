@@ -13,21 +13,25 @@ This runs both dependency audit and security linting.
 ## Individual Scans
 
 ### Dependency Audit
+
 ```bash
 pnpm security:audit
 ```
 
 ### Security Linting
+
 ```bash
 pnpm security:lint
 ```
 
 ### Check Outdated Dependencies
+
 ```bash
 pnpm security:outdated
 ```
 
 ### Auto-Fix Audit Issues
+
 ```bash
 pnpm security:audit:fix
 ```
@@ -35,14 +39,17 @@ pnpm security:audit:fix
 ## Secret Scanning
 
 ### Pre-Commit (Automatic)
+
 Gitleaks runs automatically on commit via Husky hooks.
 
 ### Manual Scan
+
 ```bash
 gitleaks detect --source=. --verbose
 ```
 
 ### Check Staged Files Only
+
 ```bash
 gitleaks protect --staged --verbose
 ```
@@ -50,11 +57,13 @@ gitleaks protect --staged --verbose
 ## Production Config Guard
 
 Validates production configuration security:
+
 ```bash
 pnpm ci:prod-guard
 ```
 
 Checks for:
+
 - Default JWT secrets
 - Default database passwords
 - Localhost in CORS allowlists
@@ -97,21 +106,25 @@ For security-sensitive changes, check:
 ## Security Checklist
 
 ### Input Validation
+
 - [ ] All user input validated
 - [ ] Parameterized queries used
 - [ ] File uploads validated
 
 ### Authentication/Authorization
+
 - [ ] Auth checks on all endpoints
 - [ ] RBAC/ABAC policies correct
 - [ ] Session handling secure
 
 ### Data Protection
+
 - [ ] No secrets in code
 - [ ] Sensitive data encrypted
 - [ ] Logs sanitized
 
 ### API Security
+
 - [ ] Rate limiting configured
 - [ ] CORS properly set
 - [ ] Input size limits
@@ -120,6 +133,7 @@ For security-sensitive changes, check:
 ## CI Security Checks
 
 The CI pipeline includes:
+
 - `security.yml`: CodeQL analysis
 - `trivy.yml`: Container scanning
 - `sbom.yml`: SBOM generation
@@ -128,6 +142,7 @@ The CI pipeline includes:
 ## Reporting Vulnerabilities
 
 If you find a security issue:
+
 1. Do NOT create public issue
 2. Contact security team directly
 3. Provide detailed reproduction steps

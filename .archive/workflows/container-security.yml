@@ -10,21 +10,21 @@ permissions:
 
 on:
   push:
-    branches: [main, develop, 'security/**']
+    branches: [main, develop, "security/**"]
     paths:
-      - 'Dockerfile*'
-      - 'package*.json'
-      - 'server/**'
-      - '.github/workflows/container-security.yml'
+      - "Dockerfile*"
+      - "package*.json"
+      - "server/**"
+      - ".github/workflows/container-security.yml"
   pull_request:
     branches: [main, develop]
     paths:
-      - 'Dockerfile*'
-      - 'package*.json'
-      - 'server/**'
+      - "Dockerfile*"
+      - "package*.json"
+      - "server/**"
   schedule:
     # Run security scans daily at 02:00 UTC
-    - cron: '0 2 * * *'
+    - cron: "0 2 * * *"
 
 env:
   REGISTRY: ghcr.io
@@ -56,8 +56,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -154,16 +154,16 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH,MEDIUM'
-          exit-code: '1'
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "CRITICAL,HIGH,MEDIUM"
+          exit-code: "1"
 
       - name: Upload Trivy scan results to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: "trivy-results.sarif"
 
       - name: Run Grype vulnerability scanner
         uses: anchore/scan-action@v3
@@ -238,7 +238,7 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
         with:
-          cosign-release: 'v2.2.3'
+          cosign-release: "v2.2.3"
 
       - name: Log in to Container Registry
         uses: docker/login-action@v3
@@ -360,14 +360,7 @@ jobs:
   notify:
     name: Security Notifications
     runs-on: ubuntu-latest
-    needs:
-      [
-        dependency-scan,
-        container-scan,
-        sign-image,
-        runtime-security,
-        policy-validation,
-      ]
+    needs: [dependency-scan, container-scan, sign-image, runtime-security, policy-validation]
     if: always()
 
     steps:
@@ -376,7 +369,7 @@ jobs:
         uses: 8398a7/action-slack@v3
         with:
           status: failure
-          channel: '#security-alerts'
+          channel: "#security-alerts"
           webhook_url: ${{ secrets.SLACK_WEBHOOK_SECURITY }}
           fields: repo,author,eventName,ref,workflow
 

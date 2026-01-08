@@ -1,10 +1,18 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
 // Configuration
-const STRATEGIC_BETS_FILE = 'docs/strategy/STRATEGIC_BETS.md';
-const REQUIRED_TAGS = ['[Bet:Agents]', '[Bet:Assurance]', '[Bet:Defense]', '[Bet:AutoScientist]', '[Bet:Infra]', '[Bet:Docs]', '[Bet:None]'];
-const PR_DESCRIPTION_FILE = process.env.PR_DESCRIPTION_FILE || 'PR_SUMMARY.md'; // Fallback for testing
+const STRATEGIC_BETS_FILE = "docs/strategy/STRATEGIC_BETS.md";
+const REQUIRED_TAGS = [
+  "[Bet:Agents]",
+  "[Bet:Assurance]",
+  "[Bet:Defense]",
+  "[Bet:AutoScientist]",
+  "[Bet:Infra]",
+  "[Bet:Docs]",
+  "[Bet:None]",
+];
+const PR_DESCRIPTION_FILE = process.env.PR_DESCRIPTION_FILE || "PR_SUMMARY.md"; // Fallback for testing
 
 // 1. Verify Strategy File Exists
 if (!fs.existsSync(STRATEGIC_BETS_FILE)) {

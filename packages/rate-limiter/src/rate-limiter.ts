@@ -5,19 +5,19 @@
  * Copyright (c) 2025 IntelGraph
  */
 
-import Redis from 'ioredis';
-import pino from 'pino';
-import { RedisRateLimitStore } from './store/redis-store.js';
-import { SlidingWindowLimiter } from './algorithms/sliding-window.js';
-import { TokenBucketLimiter } from './algorithms/token-bucket.js';
-import { DEFAULT_CONFIG, getPolicyForEndpoint } from './config.js';
+import Redis from "ioredis";
+import pino from "pino";
+import { RedisRateLimitStore } from "./store/redis-store.js";
+import { SlidingWindowLimiter } from "./algorithms/sliding-window.js";
+import { TokenBucketLimiter } from "./algorithms/token-bucket.js";
+import { DEFAULT_CONFIG, getPolicyForEndpoint } from "./config.js";
 import type {
   RateLimiterOptions,
   RateLimitState,
   RateLimitPolicy,
   UserTier,
   RateLimitConfig,
-} from './types.js';
+} from "./types.js";
 
 const logger = pino();
 
@@ -28,10 +28,7 @@ export class RateLimiter {
   private config: RateLimitConfig;
   private keyPrefix: string;
 
-  constructor(
-    redisClient: Redis,
-    config: Partial<RateLimitConfig> = {},
-  ) {
+  constructor(redisClient: Redis, config: Partial<RateLimitConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.keyPrefix = this.config.global.keyPrefix;
     this.store = new RedisRateLimitStore(redisClient, this.keyPrefix);
@@ -42,11 +39,7 @@ export class RateLimiter {
   /**
    * Check if request should be rate limited
    */
-  async check(
-    identifier: string,
-    endpoint: string,
-    tier?: UserTier,
-  ): Promise<RateLimitState> {
+  async check(identifier: string, endpoint: string, tier?: UserTier): Promise<RateLimitState> {
     if (!this.config.global.enabled) {
       // Rate limiting disabled, allow all requests
       return {
@@ -83,29 +76,21 @@ export class RateLimiter {
       let state: RateLimitState;
 
       switch (policy.algorithm) {
-        case 'sliding-window':
-          state = await this.slidingWindow.consume(
-            key,
-            policy.max,
-            policy.windowMs,
-          );
+        case "sliding-window":
+          state = await this.slidingWindow.consume(key, policy.max, policy.windowMs);
           break;
 
-        case 'token-bucket':
+        case "token-bucket":
           state = await this.tokenBucket.consume(
             key,
             policy.capacity || policy.max,
-            policy.refillRate || policy.max / (policy.windowMs / 1000),
+            policy.refillRate || policy.max / (policy.windowMs / 1000)
           );
           break;
 
-        case 'fixed-window':
+        case "fixed-window":
           // Fixed window is similar to sliding window but with fixed reset times
-          state = await this.slidingWindow.consume(
-            key,
-            policy.max,
-            policy.windowMs,
-          );
+          state = await this.slidingWindow.consume(key, policy.max, policy.windowMs);
           break;
 
         default:
@@ -115,7 +100,7 @@ export class RateLimiter {
       // Log violation if threshold exceeded
       if (state.isExceeded) {
         logger.warn({
-          message: 'Rate limit exceeded',
+          message: "Rate limit exceeded",
           identifier,
           endpoint,
           tier,
@@ -127,7 +112,7 @@ export class RateLimiter {
       return state;
     } catch (error) {
       logger.error({
-        message: 'Rate limit check failed',
+        message: "Rate limit check failed",
         identifier,
         endpoint,
         tier,
@@ -153,21 +138,21 @@ export class RateLimiter {
   async peek(
     identifier: string,
     endpoint: string,
-    tier?: UserTier,
+    tier?: UserTier
   ): Promise<RateLimitState | null> {
     const policy = getPolicyForEndpoint(endpoint, tier, this.config);
     const key = this.generateKey(identifier, endpoint, tier);
 
     switch (policy.algorithm) {
-      case 'sliding-window':
-      case 'fixed-window':
+      case "sliding-window":
+      case "fixed-window":
         return this.slidingWindow.peek(key, policy.max);
 
-      case 'token-bucket':
+      case "token-bucket":
         return this.tokenBucket.peek(
           key,
           policy.capacity || policy.max,
-          policy.refillRate || policy.max / (policy.windowMs / 1000),
+          policy.refillRate || policy.max / (policy.windowMs / 1000)
         );
 
       default:
@@ -183,12 +168,12 @@ export class RateLimiter {
     const policy = getPolicyForEndpoint(endpoint, tier, this.config);
 
     switch (policy.algorithm) {
-      case 'sliding-window':
-      case 'fixed-window':
+      case "sliding-window":
+      case "fixed-window":
         await this.slidingWindow.reset(key);
         break;
 
-      case 'token-bucket':
+      case "token-bucket":
         await this.tokenBucket.reset(key);
         break;
     }
@@ -202,7 +187,7 @@ export class RateLimiter {
     if (tier) {
       parts.push(tier);
     }
-    return parts.join(':');
+    return parts.join(":");
   }
 
   /**
@@ -232,7 +217,7 @@ export class RateLimiter {
  */
 export function createRateLimiter(
   redisClient: Redis,
-  config?: Partial<RateLimitConfig>,
+  config?: Partial<RateLimitConfig>
 ): RateLimiter {
   return new RateLimiter(redisClient, config);
 }

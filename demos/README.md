@@ -5,6 +5,7 @@ End-to-end demo stories for flagship use cases.
 ## Use Cases
 
 ### 1. Adversarial Misinformation Defense
+
 **Purpose**: Demonstrate multi-modal detection of misinformation across text, images, video, and social media.
 
 **Flow**: Ingest → Multi-Modal Analysis → Detection Dashboard → Copilot Explanation
@@ -14,6 +15,7 @@ End-to-end demo stories for flagship use cases.
 **Duration**: ~5 minutes
 
 **Key Features**:
+
 - Real-time deepfake detection
 - Meme manipulation analysis
 - Cross-platform narrative tracking
@@ -21,6 +23,7 @@ End-to-end demo stories for flagship use cases.
 - Counter-narrative suggestions (policy-bounded)
 
 ### 2. De-escalation Coaching
+
 **Purpose**: Show AI-assisted communication coaching for high-tension customer service scenarios.
 
 **Flow**: Ingest Conversation → Tone Analysis → Rewrite Suggestions → Copilot Guidance
@@ -30,6 +33,7 @@ End-to-end demo stories for flagship use cases.
 **Duration**: ~3 minutes
 
 **Key Features**:
+
 - Multi-dimensional sentiment analysis
 - PII auto-redaction
 - Toxicity scoring
@@ -74,6 +78,7 @@ demos/
 ## Safety & Compliance
 
 All demos enforce:
+
 - Authority/License checks
 - PII redaction
 - Policy boundaries (no harmful content generation)

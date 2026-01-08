@@ -21,11 +21,11 @@ pnpm add @intelgraph/platform-cache
 ## Quick Start
 
 ```typescript
-import { createCacheManager, SummitKeys } from '@intelgraph/platform-cache';
+import { createCacheManager, SummitKeys } from "@intelgraph/platform-cache";
 
 // Create cache manager with configuration
 const cache = createCacheManager({
-  namespace: 'myapp',
+  namespace: "myapp",
   defaultTtl: 300, // 5 minutes
   local: {
     enabled: true,
@@ -34,7 +34,7 @@ const cache = createCacheManager({
   },
   redis: {
     enabled: true,
-    host: 'localhost',
+    host: "localhost",
     port: 6379,
   },
 });
@@ -43,18 +43,22 @@ const cache = createCacheManager({
 const client = await cache.getClient();
 
 // Basic operations
-await client.set('user:123', { name: 'John', email: 'john@example.com' });
-const user = await client.get('user:123');
+await client.set("user:123", { name: "John", email: "john@example.com" });
+const user = await client.get("user:123");
 
 // Get-or-set pattern (cache-aside)
-const profile = await client.getOrSet('profile:123', async () => {
-  // Fetch from database if not cached
-  return await db.profiles.findById('123');
-}, { ttl: 600 });
+const profile = await client.getOrSet(
+  "profile:123",
+  async () => {
+    // Fetch from database if not cached
+    return await db.profiles.findById("123");
+  },
+  { ttl: 600 }
+);
 
 // Use predefined Summit keys
-const entityKey = SummitKeys.entity('ent-456');
-const searchKey = SummitKeys.search('test query', { type: 'person' });
+const entityKey = SummitKeys.entity("ent-456");
+const searchKey = SummitKeys.search("test query", { type: "person" });
 ```
 
 ## Architecture
@@ -90,10 +94,10 @@ const searchKey = SummitKeys.search('test query', { type: 'person' });
 ### CacheManager
 
 ```typescript
-import { createCacheManager, CacheManager } from '@intelgraph/platform-cache';
+import { createCacheManager, CacheManager } from "@intelgraph/platform-cache";
 
 const manager = createCacheManager({
-  namespace: 'summit',
+  namespace: "summit",
   defaultTtl: 300,
   maxTtl: 86400,
   enableMetrics: true,
@@ -104,13 +108,13 @@ const manager = createCacheManager({
   },
   redis: {
     enabled: true,
-    url: 'redis://localhost:6379',
+    url: "redis://localhost:6379",
     // or
-    host: 'localhost',
+    host: "localhost",
     port: 6379,
-    password: 'secret',
+    password: "secret",
     db: 0,
-    keyPrefix: 'cache:',
+    keyPrefix: "cache:",
   },
 });
 
@@ -128,66 +132,66 @@ await manager.close();
 
 ```typescript
 // Get value
-const entry = await client.get<User>('user:123');
+const entry = await client.get<User>("user:123");
 // Returns: { value: User, createdAt, expiresAt, source: 'local' | 'redis' | 'origin' }
 
 // Set value
-await client.set('user:123', userData, { ttl: 600 });
+await client.set("user:123", userData, { ttl: 600 });
 
 // Get or set (cache-aside pattern)
-const entry = await client.getOrSet('user:123', fetchFromDb, { ttl: 600 });
+const entry = await client.getOrSet("user:123", fetchFromDb, { ttl: 600 });
 
 // Check existence
-const exists = await client.exists('user:123');
+const exists = await client.exists("user:123");
 
 // Delete
-const deleted = await client.delete('user:123');
+const deleted = await client.delete("user:123");
 
 // Invalidate by pattern
-const count = await client.invalidatePattern('user:*');
+const count = await client.invalidatePattern("user:*");
 
 // Invalidate by tags
-await client.set('post:1', post, { tags: ['posts', 'user:123'] });
-await client.invalidateByTags(['user:123']); // Invalidates all cached data tagged with user:123
+await client.set("post:1", post, { tags: ["posts", "user:123"] });
+await client.invalidateByTags(["user:123"]); // Invalidates all cached data tagged with user:123
 ```
 
 ### CacheKeyBuilder
 
 ```typescript
-import { CacheKeyBuilder, SummitKeys } from '@intelgraph/platform-cache';
+import { CacheKeyBuilder, SummitKeys } from "@intelgraph/platform-cache";
 
 // Manual key building
 const key = new CacheKeyBuilder()
-  .namespace('summit')
-  .entity('user')
-  .id('123')
-  .action('profile')
+  .namespace("summit")
+  .entity("user")
+  .id("123")
+  .action("profile")
   .build();
 // Result: 'summit:user:123:profile'
 
 // With hashing for complex data
 const searchKey = new CacheKeyBuilder()
-  .namespace('summit')
-  .action('search')
-  .hash({ query: 'test', filters: { status: 'active' } })
+  .namespace("summit")
+  .action("search")
+  .hash({ query: "test", filters: { status: "active" } })
   .build();
 // Result: 'summit:search:a1b2c3d4e5f67890'
 
 // With time bucket (for time-based invalidation)
 const key = new CacheKeyBuilder()
-  .namespace('summit')
-  .entity('stats')
+  .namespace("summit")
+  .entity("stats")
   .timeBucket(3600) // 1-hour buckets
   .build();
 
 // Predefined Summit keys
-SummitKeys.entity('ent-123');           // 'summit:entity:ent-123'
-SummitKeys.investigation('inv-456');    // 'summit:investigation:inv-456'
-SummitKeys.relationships('ent-123', 3); // 'summit:entity:ent-123:relationships:<hash>'
-SummitKeys.search('query', { filters }); // 'summit:search:<hash>'
-SummitKeys.session('token');            // 'summit:session:<hash>'
-SummitKeys.query('queryHash');          // 'summit:query:queryHash'
-SummitKeys.traversal('start', 'pattern', 5); // 'summit:traversal:start:<hash>'
+SummitKeys.entity("ent-123"); // 'summit:entity:ent-123'
+SummitKeys.investigation("inv-456"); // 'summit:investigation:inv-456'
+SummitKeys.relationships("ent-123", 3); // 'summit:entity:ent-123:relationships:<hash>'
+SummitKeys.search("query", { filters }); // 'summit:search:<hash>'
+SummitKeys.session("token"); // 'summit:session:<hash>'
+SummitKeys.query("queryHash"); // 'summit:query:queryHash'
+SummitKeys.traversal("start", "pattern", 5); // 'summit:traversal:start:<hash>'
 ```
 
 ### Memoization
@@ -201,14 +205,14 @@ const cachedFetch = manager.memoize(
     return await db.users.findById(userId);
   },
   {
-    keyPrefix: 'user',
+    keyPrefix: "user",
     ttl: 300,
     keyGenerator: (userId) => userId, // Optional custom key generator
   }
 );
 
 // Use like a normal function
-const user = await cachedFetch('123'); // Cached automatically
+const user = await cachedFetch("123"); // Cached automatically
 ```
 
 ## Providers
@@ -218,11 +222,11 @@ const user = await cachedFetch('123'); // Cached automatically
 In-process LRU cache using `lru-cache`:
 
 ```typescript
-import { MemoryProvider } from '@intelgraph/platform-cache/providers';
+import { MemoryProvider } from "@intelgraph/platform-cache/providers";
 
 const provider = new MemoryProvider({
-  maxSize: 1000,    // Maximum entries
-  ttl: 60000,       // Default TTL in milliseconds
+  maxSize: 1000, // Maximum entries
+  ttl: 60000, // Default TTL in milliseconds
 });
 ```
 
@@ -231,16 +235,16 @@ const provider = new MemoryProvider({
 Distributed cache using `ioredis`:
 
 ```typescript
-import { RedisProvider } from '@intelgraph/platform-cache/providers';
+import { RedisProvider } from "@intelgraph/platform-cache/providers";
 
 const provider = new RedisProvider({
-  url: 'redis://localhost:6379',
+  url: "redis://localhost:6379",
   // or
-  host: 'localhost',
+  host: "localhost",
   port: 6379,
-  password: 'secret',
+  password: "secret",
   db: 0,
-  keyPrefix: 'cache:',
+  keyPrefix: "cache:",
   maxRetriesPerRequest: 3,
   connectTimeout: 10000,
 });
@@ -257,7 +261,7 @@ const redisClient = provider.getClient();
 Testing provider that does nothing:
 
 ```typescript
-import { NoOpProvider } from '@intelgraph/platform-cache/providers';
+import { NoOpProvider } from "@intelgraph/platform-cache/providers";
 
 const provider = new NoOpProvider();
 // All operations are no-ops, useful for testing
@@ -305,11 +309,11 @@ CACHE_LOCAL_TTL=60
 ### Zod Schema
 
 ```typescript
-import { CacheConfigSchema } from '@intelgraph/platform-cache';
+import { CacheConfigSchema } from "@intelgraph/platform-cache";
 
 // Validate configuration
 const config = CacheConfigSchema.parse({
-  namespace: 'myapp',
+  namespace: "myapp",
   defaultTtl: 300,
   // ... other options
 });
@@ -318,7 +322,7 @@ const config = CacheConfigSchema.parse({
 ## Testing
 
 ```typescript
-import { createCacheManager, NoOpProvider } from '@intelgraph/platform-cache';
+import { createCacheManager, NoOpProvider } from "@intelgraph/platform-cache";
 
 // Use NoOp provider for unit tests
 const testManager = createCacheManager({
@@ -327,7 +331,7 @@ const testManager = createCacheManager({
 });
 
 // Or mock the entire cache client
-import { vi } from 'vitest';
+import { vi } from "vitest";
 
 const mockClient = {
   get: vi.fn().mockResolvedValue(null),
@@ -345,12 +349,7 @@ const mockClient = {
 const key = SummitKeys.entity(entityId);
 
 // Good: Use CacheKeyBuilder for custom patterns
-const key = new CacheKeyBuilder()
-  .namespace('summit')
-  .entity('custom')
-  .id(id)
-  .version(2)
-  .build();
+const key = new CacheKeyBuilder().namespace("summit").entity("custom").id(id).version(2).build();
 
 // Bad: Manual string concatenation
 const key = `summit:entity:${entityId}`; // Inconsistent, error-prone
@@ -361,7 +360,7 @@ const key = `summit:entity:${entityId}`; // Inconsistent, error-prone
 ```typescript
 // Cache with tags
 await client.set(`post:${postId}`, post, {
-  tags: ['posts', `user:${post.authorId}`, `category:${post.category}`],
+  tags: ["posts", `user:${post.authorId}`, `category:${post.category}`],
 });
 
 // Invalidate all posts by user
@@ -372,7 +371,7 @@ await client.invalidateByTags([`user:${userId}`]);
 
 ```typescript
 // Static reference data - long TTL
-await client.set('config:features', features, { ttl: 3600 });
+await client.set("config:features", features, { ttl: 3600 });
 
 // User session data - medium TTL
 await client.set(`session:${token}`, session, { ttl: 900 });
@@ -385,11 +384,11 @@ await client.set(`stats:live`, stats, { ttl: 30 });
 
 ```typescript
 try {
-  const cached = await client.get('key');
+  const cached = await client.get("key");
   if (cached) return cached.value;
 } catch (error) {
   // Log but don't fail
-  console.warn('Cache read failed:', error);
+  console.warn("Cache read failed:", error);
 }
 
 // Always fall back to origin

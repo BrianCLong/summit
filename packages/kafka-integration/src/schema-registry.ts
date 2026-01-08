@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment, @typescript-eslint/no-non-null-assertion */
 // @ts-nocheck
-import { SchemaRegistry, SchemaType } from '@kafkajs/confluent-schema-registry';
-import { StreamMessage, SchemaRegistryConfig } from './types';
-import pino from 'pino';
+import { SchemaRegistry, SchemaType } from "@kafkajs/confluent-schema-registry";
+import { StreamMessage, SchemaRegistryConfig } from "./types";
+import pino from "pino";
 
-const logger = pino({ name: 'schema-registry' });
+const logger = pino({ name: "schema-registry" });
 
 /**
  * Schema Registry client for message schema management
@@ -37,10 +37,10 @@ export class SchemaRegistryClient {
 
       this.schemaCache.set(subject, { id, schema });
 
-      logger.info({ subject, id }, 'Schema registered');
+      logger.info({ subject, id }, "Schema registered");
       return id;
     } catch (error) {
-      logger.error({ error, subject }, 'Failed to register schema');
+      logger.error({ error, subject }, "Failed to register schema");
       throw error;
     }
   }
@@ -58,7 +58,7 @@ export class SchemaRegistryClient {
       const schema = await this.registry.getLatestSchemaId(subject);
       return schema;
     } catch (error) {
-      logger.error({ error, subject }, 'Failed to get schema');
+      logger.error({ error, subject }, "Failed to get schema");
       throw error;
     }
   }
@@ -66,16 +66,13 @@ export class SchemaRegistryClient {
   /**
    * Encode message using schema
    */
-  async encode<T = unknown>(
-    subject: string,
-    message: StreamMessage<T>
-  ): Promise<Buffer> {
+  async encode<T = unknown>(subject: string, message: StreamMessage<T>): Promise<Buffer> {
     try {
       const schemaId = await this.registry.getLatestSchemaId(subject);
       const encoded = await this.registry.encode(schemaId, message);
       return encoded;
     } catch (error) {
-      logger.error({ error, subject }, 'Failed to encode message');
+      logger.error({ error, subject }, "Failed to encode message");
       throw error;
     }
   }
@@ -88,7 +85,7 @@ export class SchemaRegistryClient {
       const decoded = await this.registry.decode(buffer);
       return decoded as StreamMessage;
     } catch (error) {
-      logger.error({ error }, 'Failed to decode message');
+      logger.error({ error }, "Failed to decode message");
       throw error;
     }
   }
@@ -108,7 +105,7 @@ export class SchemaRegistryClient {
       });
       return result.compatible;
     } catch (error) {
-      logger.error({ error, subject }, 'Failed to check compatibility');
+      logger.error({ error, subject }, "Failed to check compatibility");
       throw error;
     }
   }

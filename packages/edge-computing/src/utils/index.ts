@@ -1,4 +1,4 @@
-import type { GeoLocation, ResourceCapacity } from '../types';
+import type { GeoLocation, ResourceCapacity } from "../types";
 
 /**
  * Calculate distance between two geographic locations using Haversine formula
@@ -14,9 +14,9 @@ export function calculateDistance(loc1: GeoLocation, loc2: GeoLocation): number 
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRadians(loc1.latitude)) *
-    Math.cos(toRadians(loc2.latitude)) *
-    Math.sin(dLon / 2) *
-    Math.sin(dLon / 2);
+      Math.cos(toRadians(loc2.latitude)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
@@ -37,30 +37,27 @@ export function calculateResourceScore(capacity: ResourceCapacity): number {
   const cpuScore = 100 - capacity.cpu.utilization;
   const memoryScore = 100 - capacity.memory.utilization;
   const storageScore = 100 - capacity.storage.utilization;
-  const networkScore = Math.max(0, 100 - (capacity.network.latency / 10));
+  const networkScore = Math.max(0, 100 - capacity.network.latency / 10);
 
   // Weighted average
-  return (
-    cpuScore * 0.3 +
-    memoryScore * 0.3 +
-    storageScore * 0.2 +
-    networkScore * 0.2
-  );
+  return cpuScore * 0.3 + memoryScore * 0.3 + storageScore * 0.2 + networkScore * 0.2;
 }
 
 /**
  * Format bytes to human readable format
  */
 export function formatBytes(bytes: number, decimals = 2): string {
-  if (bytes === 0) {return '0 Bytes';}
+  if (bytes === 0) {
+    return "0 Bytes";
+  }
 
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB'];
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB"];
 
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))  } ${  sizes[i]}`;
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }
 
 /**
@@ -73,18 +70,26 @@ export function formatUptime(seconds: number): string {
   const secs = Math.floor(seconds % 60);
 
   const parts: string[] = [];
-  if (days > 0) {parts.push(`${days}d`);}
-  if (hours > 0) {parts.push(`${hours}h`);}
-  if (minutes > 0) {parts.push(`${minutes}m`);}
-  if (secs > 0 || parts.length === 0) {parts.push(`${secs}s`);}
+  if (days > 0) {
+    parts.push(`${days}d`);
+  }
+  if (hours > 0) {
+    parts.push(`${hours}h`);
+  }
+  if (minutes > 0) {
+    parts.push(`${minutes}m`);
+  }
+  if (secs > 0 || parts.length === 0) {
+    parts.push(`${secs}s`);
+  }
 
-  return parts.join(' ');
+  return parts.join(" ");
 }
 
 /**
  * Generate unique identifier for edge resources
  */
-export function generateEdgeId(prefix: string = 'edge'): string {
+export function generateEdgeId(prefix: string = "edge"): string {
   const timestamp = Date.now().toString(36);
   const random = Math.random().toString(36).substring(2, 15);
   return `${prefix}-${timestamp}-${random}`;
@@ -114,20 +119,23 @@ export async function retryWithBackoff<T>(
     }
   }
 
-  throw lastError || new Error('Retry failed');
+  throw lastError || new Error("Retry failed");
 }
 
 /**
  * Sleep utility
  */
 export function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
  * Validate edge node health based on metrics
  */
-export function validateNodeHealth(capacity: ResourceCapacity, lastHeartbeat: Date): {
+export function validateNodeHealth(
+  capacity: ResourceCapacity,
+  lastHeartbeat: Date
+): {
   isHealthy: boolean;
   issues: string[];
 } {
@@ -167,19 +175,16 @@ export function validateNodeHealth(capacity: ResourceCapacity, lastHeartbeat: Da
 
   return {
     isHealthy: issues.length === 0,
-    issues
+    issues,
   };
 }
 
 /**
  * Calculate estimated network transfer time
  */
-export function estimateTransferTime(
-  sizeBytes: number,
-  bandwidthBps: number
-): number {
+export function estimateTransferTime(sizeBytes: number, bandwidthBps: number): number {
   // Convert to seconds, add 10% overhead
-  return (sizeBytes * 8) / bandwidthBps * 1.1;
+  return ((sizeBytes * 8) / bandwidthBps) * 1.1;
 }
 
 /**
@@ -226,7 +231,9 @@ export class RoundRobinBalancer<T> {
   }
 
   next(): T | undefined {
-    if (this.items.length === 0) {return undefined;}
+    if (this.items.length === 0) {
+      return undefined;
+    }
 
     const item = this.items[this.currentIndex];
     this.currentIndex = (this.currentIndex + 1) % this.items.length;

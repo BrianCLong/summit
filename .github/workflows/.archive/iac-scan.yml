@@ -2,25 +2,25 @@ name: Infrastructure as Code (IaC) Scan
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
     paths:
-      - 'terraform/**'
-      - 'kubernetes/**'
-      - 'helm/**'
-      - '**/*.tf'
-      - '**/*.yaml'
-      - '**/*.yml'
+      - "terraform/**"
+      - "kubernetes/**"
+      - "helm/**"
+      - "**/*.tf"
+      - "**/*.yaml"
+      - "**/*.yml"
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
     paths:
-      - 'terraform/**'
-      - 'kubernetes/**'
-      - 'helm/**'
-      - '**/*.tf'
-      - '**/*.yaml'
-      - '**/*.yml'
+      - "terraform/**"
+      - "kubernetes/**"
+      - "helm/**"
+      - "**/*.tf"
+      - "**/*.yaml"
+      - "**/*.yml"
   schedule:
-    - cron: '0 4 * * 1' # Weekly on Mondays
+    - cron: "0 4 * * 1" # Weekly on Mondays
 
 permissions:
   contents: read

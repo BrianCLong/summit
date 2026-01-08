@@ -4,57 +4,56 @@
  * @module @intelgraph/strands-agents/tools/graph-tools
  */
 
-import { z } from 'zod';
-import type { Driver, Session, QueryResult as Neo4jResult } from 'neo4j-driver';
-import { v4 as uuidv4 } from 'uuid';
-import { QueryResultSchema, CypherQuerySchema, type QueryResult } from '../types.js';
+import { z } from "zod";
+import type { Driver, Session, QueryResult as Neo4jResult } from "neo4j-driver";
+import { v4 as uuidv4 } from "uuid";
+import { QueryResultSchema, CypherQuerySchema, type QueryResult } from "../types.js";
 
 // ============================================================================
 // Tool Input Schemas (Zod for type safety)
 // ============================================================================
 
 export const ExecuteCypherInputSchema = z.object({
-  query: z.string()
-    .min(1, 'Query cannot be empty')
-    .describe('Cypher query to execute against Neo4j'),
-  parameters: z.record(z.unknown())
+  query: z
+    .string()
+    .min(1, "Query cannot be empty")
+    .describe("Cypher query to execute against Neo4j"),
+  parameters: z
+    .record(z.unknown())
     .optional()
-    .describe('Query parameters for parameterized queries'),
-  readOnly: z.boolean()
-    .default(true)
-    .describe('Whether this is a read-only query (safer)'),
-  explain: z.boolean()
-    .default(false)
-    .describe('Return query plan instead of executing'),
+    .describe("Query parameters for parameterized queries"),
+  readOnly: z.boolean().default(true).describe("Whether this is a read-only query (safer)"),
+  explain: z.boolean().default(false).describe("Return query plan instead of executing"),
 });
 
 export const FindPathInputSchema = z.object({
-  sourceId: z.string().uuid().describe('Starting entity UUID'),
-  targetId: z.string().uuid().describe('Target entity UUID'),
-  maxDepth: z.number().min(1).max(10).default(4).describe('Maximum path length'),
-  relationshipTypes: z.array(z.string()).optional().describe('Filter by relationship types'),
-  algorithm: z.enum(['shortestPath', 'allShortestPaths', 'dijkstra'])
-    .default('shortestPath')
-    .describe('Pathfinding algorithm'),
+  sourceId: z.string().uuid().describe("Starting entity UUID"),
+  targetId: z.string().uuid().describe("Target entity UUID"),
+  maxDepth: z.number().min(1).max(10).default(4).describe("Maximum path length"),
+  relationshipTypes: z.array(z.string()).optional().describe("Filter by relationship types"),
+  algorithm: z
+    .enum(["shortestPath", "allShortestPaths", "dijkstra"])
+    .default("shortestPath")
+    .describe("Pathfinding algorithm"),
 });
 
 export const GetNeighborsInputSchema = z.object({
-  entityId: z.string().uuid().describe('Entity UUID to get neighbors for'),
-  depth: z.number().min(1).max(3).default(1).describe('Traversal depth'),
-  direction: z.enum(['OUTGOING', 'INCOMING', 'BOTH']).default('BOTH'),
+  entityId: z.string().uuid().describe("Entity UUID to get neighbors for"),
+  depth: z.number().min(1).max(3).default(1).describe("Traversal depth"),
+  direction: z.enum(["OUTGOING", "INCOMING", "BOTH"]).default("BOTH"),
   relationshipTypes: z.array(z.string()).optional(),
   limit: z.number().min(1).max(100).default(25),
 });
 
 export const SubgraphQueryInputSchema = z.object({
-  centerEntityId: z.string().uuid().describe('Center of subgraph'),
+  centerEntityId: z.string().uuid().describe("Center of subgraph"),
   radius: z.number().min(1).max(5).default(2),
   includeProperties: z.boolean().default(true),
   maxNodes: z.number().min(1).max(500).default(100),
 });
 
 export const GraphStatsInputSchema = z.object({
-  scope: z.enum(['global', 'investigation', 'entity']).default('global'),
+  scope: z.enum(["global", "investigation", "entity"]).default("global"),
   scopeId: z.string().uuid().optional(),
 });
 
@@ -106,7 +105,7 @@ export interface GraphToolsConfig {
  * These tools integrate with Neo4j and enforce security policies
  */
 export function createGraphTools(config: GraphToolsConfig) {
-  const { driver, database = 'neo4j', auditLog, maxExecutionTimeMs = 30000 } = config;
+  const { driver, database = "neo4j", auditLog, maxExecutionTimeMs = 30000 } = config;
 
   const logAudit = (action: string, details: Record<string, unknown>) => {
     if (auditLog) {
@@ -118,7 +117,7 @@ export function createGraphTools(config: GraphToolsConfig) {
   // Execute Cypher Query Tool
   // ---------------------------------------------------------------------------
   const executeCypher = {
-    name: 'execute_cypher',
+    name: "execute_cypher",
     description: `Execute a Cypher query against the Neo4j graph database.
 Use this for custom graph queries when other tools don't fit your needs.
 IMPORTANT: Prefer read-only queries. Write operations require explicit approval.
@@ -131,7 +130,7 @@ Returns query results with execution statistics.`,
       // Security check
       const safetyCheck = isQuerySafe(query, readOnly);
       if (!safetyCheck.safe) {
-        logAudit('cypher_blocked', { query, reason: safetyCheck.reason });
+        logAudit("cypher_blocked", { query, reason: safetyCheck.reason });
         return JSON.stringify({
           success: false,
           error: `Query blocked: ${safetyCheck.reason}`,
@@ -142,7 +141,7 @@ Returns query results with execution statistics.`,
       try {
         session = driver.session({
           database,
-          defaultAccessMode: readOnly ? 'READ' : 'WRITE',
+          defaultAccessMode: readOnly ? "READ" : "WRITE",
         });
 
         const finalQuery = explain ? `EXPLAIN ${query}` : query;
@@ -159,7 +158,7 @@ Returns query results with execution statistics.`,
 
         const executionTimeMs = Date.now() - startTime;
 
-        logAudit('cypher_executed', {
+        logAudit("cypher_executed", {
           query,
           readOnly,
           recordCount: records.length,
@@ -179,8 +178,8 @@ Returns query results with execution statistics.`,
           },
         });
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        logAudit('cypher_error', { query, error: errorMessage });
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        logAudit("cypher_error", { query, error: errorMessage });
         return JSON.stringify({
           success: false,
           error: `Query execution failed: ${errorMessage}`,
@@ -197,7 +196,7 @@ Returns query results with execution statistics.`,
   // Find Path Tool
   // ---------------------------------------------------------------------------
   const findPath = {
-    name: 'find_path',
+    name: "find_path",
     description: `Find paths between two entities in the knowledge graph.
 Use this to discover connections, influence chains, or communication paths.
 Supports shortest path, all shortest paths, and weighted (Dijkstra) algorithms.`,
@@ -208,15 +207,13 @@ Supports shortest path, all shortest paths, and weighted (Dijkstra) algorithms.`
 
       let session: Session | null = null;
       try {
-        session = driver.session({ database, defaultAccessMode: 'READ' });
+        session = driver.session({ database, defaultAccessMode: "READ" });
 
-        const relFilter = relationshipTypes?.length
-          ? `:${relationshipTypes.join('|')}`
-          : '';
+        const relFilter = relationshipTypes?.length ? `:${relationshipTypes.join("|")}` : "";
 
         let query: string;
         switch (algorithm) {
-          case 'allShortestPaths':
+          case "allShortestPaths":
             query = `
               MATCH (source:Entity {id: $sourceId}), (target:Entity {id: $targetId})
               MATCH paths = allShortestPaths((source)-[${relFilter}*..${maxDepth}]-(target))
@@ -224,7 +221,7 @@ Supports shortest path, all shortest paths, and weighted (Dijkstra) algorithms.`
               LIMIT 10
             `;
             break;
-          case 'dijkstra':
+          case "dijkstra":
             query = `
               MATCH (source:Entity {id: $sourceId}), (target:Entity {id: $targetId})
               CALL gds.shortestPath.dijkstra.stream({
@@ -249,7 +246,7 @@ Supports shortest path, all shortest paths, and weighted (Dijkstra) algorithms.`
         const paths = result.records.map((record) => record.toObject());
         const executionTimeMs = Date.now() - startTime;
 
-        logAudit('path_found', { sourceId, targetId, algorithm, pathCount: paths.length });
+        logAudit("path_found", { sourceId, targetId, algorithm, pathCount: paths.length });
 
         return JSON.stringify({
           success: true,
@@ -266,7 +263,7 @@ Supports shortest path, all shortest paths, and weighted (Dijkstra) algorithms.`
           },
         });
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         return JSON.stringify({
           success: false,
           error: `Path finding failed: ${errorMessage}`,
@@ -283,7 +280,7 @@ Supports shortest path, all shortest paths, and weighted (Dijkstra) algorithms.`
   // Get Neighbors Tool
   // ---------------------------------------------------------------------------
   const getNeighbors = {
-    name: 'get_neighbors',
+    name: "get_neighbors",
     description: `Get neighboring entities connected to a given entity.
 Use this to explore the local graph structure around a specific entity.
 Useful for understanding an entity's connections and context.`,
@@ -294,16 +291,16 @@ Useful for understanding an entity's connections and context.`,
 
       let session: Session | null = null;
       try {
-        session = driver.session({ database, defaultAccessMode: 'READ' });
+        session = driver.session({ database, defaultAccessMode: "READ" });
 
-        const relFilter = relationshipTypes?.length
-          ? `:${relationshipTypes.join('|')}`
-          : '';
+        const relFilter = relationshipTypes?.length ? `:${relationshipTypes.join("|")}` : "";
 
         const directionPattern =
-          direction === 'OUTGOING' ? `-[r${relFilter}*1..${depth}]->` :
-          direction === 'INCOMING' ? `<-[r${relFilter}*1..${depth}]-` :
-          `-[r${relFilter}*1..${depth}]-`;
+          direction === "OUTGOING"
+            ? `-[r${relFilter}*1..${depth}]->`
+            : direction === "INCOMING"
+              ? `<-[r${relFilter}*1..${depth}]-`
+              : `-[r${relFilter}*1..${depth}]-`;
 
         const query = `
           MATCH (center:Entity {id: $entityId})
@@ -320,10 +317,10 @@ Useful for understanding an entity's connections and context.`,
 
         const result = await session.run(query, { entityId, limit: limit });
 
-        const neighbors = result.records.map((r) => r.get('entity'));
+        const neighbors = result.records.map((r) => r.get("entity"));
         const executionTimeMs = Date.now() - startTime;
 
-        logAudit('neighbors_retrieved', { entityId, neighborCount: neighbors.length });
+        logAudit("neighbors_retrieved", { entityId, neighborCount: neighbors.length });
 
         return JSON.stringify({
           success: true,
@@ -339,7 +336,7 @@ Useful for understanding an entity's connections and context.`,
           },
         });
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         return JSON.stringify({
           success: false,
           error: `Failed to get neighbors: ${errorMessage}`,
@@ -356,7 +353,7 @@ Useful for understanding an entity's connections and context.`,
   // Get Subgraph Tool
   // ---------------------------------------------------------------------------
   const getSubgraph = {
-    name: 'get_subgraph',
+    name: "get_subgraph",
     description: `Extract a subgraph centered on an entity with a given radius.
 Returns nodes and relationships within the specified distance.
 Useful for visualizing local network structure or exporting subsets.`,
@@ -367,11 +364,9 @@ Useful for visualizing local network structure or exporting subsets.`,
 
       let session: Session | null = null;
       try {
-        session = driver.session({ database, defaultAccessMode: 'READ' });
+        session = driver.session({ database, defaultAccessMode: "READ" });
 
-        const nodeProjection = includeProperties
-          ? 'node { .* }'
-          : 'node { .id, .type, .label }';
+        const nodeProjection = includeProperties ? "node { .* }" : "node { .id, .type, .label }";
 
         const query = `
           MATCH (center:Entity {id: $centerEntityId})
@@ -381,7 +376,7 @@ Useful for visualizing local network structure or exporting subsets.`,
           })
           YIELD nodes, relationships
           RETURN
-            [n IN nodes | ${nodeProjection.replace('node', 'n')}] as nodes,
+            [n IN nodes | ${nodeProjection.replace("node", "n")}] as nodes,
             [r IN relationships | {
               id: r.id,
               type: type(r),
@@ -401,11 +396,11 @@ Useful for visualizing local network structure or exporting subsets.`,
         }
 
         const record = result.records[0];
-        const nodes = record.get('nodes');
-        const relationships = record.get('relationships');
+        const nodes = record.get("nodes");
+        const relationships = record.get("relationships");
         const executionTimeMs = Date.now() - startTime;
 
-        logAudit('subgraph_extracted', {
+        logAudit("subgraph_extracted", {
           centerEntityId,
           radius,
           nodeCount: nodes.length,
@@ -427,7 +422,7 @@ Useful for visualizing local network structure or exporting subsets.`,
           },
         });
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         return JSON.stringify({
           success: false,
           error: `Subgraph extraction failed: ${errorMessage}`,
@@ -444,7 +439,7 @@ Useful for visualizing local network structure or exporting subsets.`,
   // Graph Statistics Tool
   // ---------------------------------------------------------------------------
   const getGraphStats = {
-    name: 'get_graph_stats',
+    name: "get_graph_stats",
     description: `Get statistics about the knowledge graph.
 Returns counts of nodes, relationships, and their distributions.
 Useful for understanding the scope and shape of the data.`,
@@ -455,15 +450,18 @@ Useful for understanding the scope and shape of the data.`,
 
       let session: Session | null = null;
       try {
-        session = driver.session({ database, defaultAccessMode: 'READ' });
+        session = driver.session({ database, defaultAccessMode: "READ" });
 
         let query: string;
         const params: Record<string, unknown> = {};
 
         switch (scope) {
-          case 'investigation':
+          case "investigation":
             if (!scopeId) {
-              return JSON.stringify({ success: false, error: 'scopeId required for investigation scope' });
+              return JSON.stringify({
+                success: false,
+                error: "scopeId required for investigation scope",
+              });
             }
             params.investigationId = scopeId;
             query = `
@@ -477,9 +475,9 @@ Useful for understanding the scope and shape of the data.`,
                 apoc.coll.frequencies([type(r)]) as relationshipTypeDistribution
             `;
             break;
-          case 'entity':
+          case "entity":
             if (!scopeId) {
-              return JSON.stringify({ success: false, error: 'scopeId required for entity scope' });
+              return JSON.stringify({ success: false, error: "scopeId required for entity scope" });
             }
             params.entityId = scopeId;
             query = `
@@ -512,7 +510,7 @@ Useful for understanding the scope and shape of the data.`,
           },
         });
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         return JSON.stringify({
           success: false,
           error: `Failed to get graph stats: ${errorMessage}`,

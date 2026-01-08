@@ -13,13 +13,13 @@ export interface EventDefinition {
 export interface ReadModelDefinition {
   name: string;
   projection: string;
-  storage: 'postgres' | 'neo4j' | 'redis' | 'kafka';
+  storage: "postgres" | "neo4j" | "redis" | "kafka";
 }
 
 export interface WritePathDefinition {
   name: string;
   adapter: string;
-  storage: 'postgres' | 'neo4j' | 'redis' | 'kafka';
+  storage: "postgres" | "neo4j" | "redis" | "kafka";
 }
 
 export interface DomainSLO {
@@ -39,12 +39,16 @@ export interface DomainDefinition {
 }
 
 export interface BoundaryViolation {
-  type: 'CROSS_DOMAIN_DB_ACCESS' | 'MULTIPLE_WRITE_PATHS' | 'MISSING_ERROR_MODEL' | 'STRANGLER_BYPASS';
+  type:
+    | "CROSS_DOMAIN_DB_ACCESS"
+    | "MULTIPLE_WRITE_PATHS"
+    | "MISSING_ERROR_MODEL"
+    | "STRANGLER_BYPASS";
   sourceService: string;
   sourceDomain: string;
   targetDomain: string;
   resource: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   details?: string;
   timestamp: Date;
 }
@@ -61,8 +65,8 @@ export interface ErrorEnvelope {
   code: string;
   message: string;
   domain: string;
-  boundary: 'internal' | 'external';
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  boundary: "internal" | "external";
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   correlationId: string;
   timestamp: string;
   retryable: boolean;

@@ -1,6 +1,6 @@
-import type { SlotErrorDetail } from './errors.js';
+import type { SlotErrorDetail } from "./errors.js";
 
-export type SlotKind = 'string' | 'number' | 'enum' | 'boolean';
+export type SlotKind = "string" | "number" | "enum" | "boolean";
 
 export interface BaseSlotSchema<T> {
   readonly kind: SlotKind;
@@ -23,21 +23,21 @@ export interface NumberConstraints {
 }
 
 export interface StringSlotSchema extends BaseSlotSchema<string> {
-  readonly kind: 'string';
+  readonly kind: "string";
   readonly constraints?: StringConstraints;
 }
 
 export interface NumberSlotSchema extends BaseSlotSchema<number> {
-  readonly kind: 'number';
+  readonly kind: "number";
   readonly constraints?: NumberConstraints;
 }
 
 export interface BooleanSlotSchema extends BaseSlotSchema<boolean> {
-  readonly kind: 'boolean';
+  readonly kind: "boolean";
 }
 
 export interface EnumSlotSchema<T extends string> extends BaseSlotSchema<T> {
-  readonly kind: 'enum';
+  readonly kind: "enum";
   readonly values: readonly T[];
 }
 
@@ -63,9 +63,7 @@ export type SlotValues<TSlots extends SlotSchemaMap> = {
   [K in keyof TSlots]: SlotValue<TSlots[K]>;
 };
 
-export type PartialSlotValues<TSlots extends SlotSchemaMap> = Partial<
-  SlotValues<TSlots>
->;
+export type PartialSlotValues<TSlots extends SlotSchemaMap> = Partial<SlotValues<TSlots>>;
 
 export interface SlotValidationSuccess<T> {
   readonly valid: true;
@@ -77,31 +75,23 @@ export interface SlotValidationFailure {
   readonly errors: SlotErrorDetail[];
 }
 
-export type SlotValidationOutcome<T> =
-  | SlotValidationSuccess<T>
-  | SlotValidationFailure;
+export type SlotValidationOutcome<T> = SlotValidationSuccess<T> | SlotValidationFailure;
 
-export function stringSlot(
-  options: Omit<StringSlotSchema, 'kind'> = {},
-): StringSlotSchema {
-  return { kind: 'string', ...options };
+export function stringSlot(options: Omit<StringSlotSchema, "kind"> = {}): StringSlotSchema {
+  return { kind: "string", ...options };
 }
 
-export function numberSlot(
-  options: Omit<NumberSlotSchema, 'kind'> = {},
-): NumberSlotSchema {
-  return { kind: 'number', ...options };
+export function numberSlot(options: Omit<NumberSlotSchema, "kind"> = {}): NumberSlotSchema {
+  return { kind: "number", ...options };
 }
 
-export function booleanSlot(
-  options: Omit<BooleanSlotSchema, 'kind'> = {},
-): BooleanSlotSchema {
-  return { kind: 'boolean', ...options };
+export function booleanSlot(options: Omit<BooleanSlotSchema, "kind"> = {}): BooleanSlotSchema {
+  return { kind: "boolean", ...options };
 }
 
 export function enumSlot<T extends string>(
   values: readonly T[],
-  options: Omit<EnumSlotSchema<T>, 'kind' | 'values'> = {},
+  options: Omit<EnumSlotSchema<T>, "kind" | "values"> = {}
 ): EnumSlotSchema<T> {
-  return { kind: 'enum', values, ...options };
+  return { kind: "enum", values, ...options };
 }

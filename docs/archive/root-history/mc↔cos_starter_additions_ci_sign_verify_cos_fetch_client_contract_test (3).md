@@ -17,8 +17,8 @@ name: policy-pack-v0
 on:
   push:
     paths:
-      - 'contracts/policy-pack/v0/**'
-      - '.github/workflows/policy-pack.yml'
+      - "contracts/policy-pack/v0/**"
+      - ".github/workflows/policy-pack.yml"
   workflow_dispatch: {}
 
 jobs:
@@ -40,7 +40,7 @@ jobs:
       - name: Setup Cosign
         uses: sigstore/cosign-installer@v3
         with:
-          cosign-release: 'v2.2.4'
+          cosign-release: "v2.2.4"
 
       - name: Make dist dir
         run: |
@@ -140,32 +140,24 @@ cosign verify-blob --bundle "$BUNDLE" "$BLOB"
 
 ```ts
 // add near existing imports
-import path from 'node:path';
-import fs from 'node:fs';
+import path from "node:path";
+import fs from "node:fs";
 
 // inside router definition
-router.get('/policy/packs/:packId', async (req, res) => {
+router.get("/policy/packs/:packId", async (req, res) => {
   const { packId } = req.params; // expect 'policy-pack-v0'
-  if (packId !== 'policy-pack-v0')
-    return res.status(404).json({ error: 'unknown pack' });
-  const packTar = path.resolve(
-    process.cwd(),
-    'dist/policy-pack/v0/policy-pack-v0.tar',
-  );
+  if (packId !== "policy-pack-v0") return res.status(404).json({ error: "unknown pack" });
+  const packTar = path.resolve(process.cwd(), "dist/policy-pack/v0/policy-pack-v0.tar");
   const bundleJson = path.resolve(
     process.cwd(),
-    'contracts/policy-pack/v0/signing/cosign.bundle.json',
+    "contracts/policy-pack/v0/signing/cosign.bundle.json"
   );
-  const manifestPath = path.resolve(
-    process.cwd(),
-    'contracts/policy-pack/v0/manifest.json',
-  );
-  if (!fs.existsSync(packTar))
-    return res.status(503).json({ error: 'pack not built yet' });
-  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-  res.setHeader('Content-Type', 'application/vnd.intelgraph.policy+tar');
-  res.setHeader('Digest', `sha-256=${manifest.manifest.digest.value}`);
-  res.setHeader('X-Cosign-Bundle', fs.readFileSync(bundleJson, 'utf8'));
+  const manifestPath = path.resolve(process.cwd(), "contracts/policy-pack/v0/manifest.json");
+  if (!fs.existsSync(packTar)) return res.status(503).json({ error: "pack not built yet" });
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  res.setHeader("Content-Type", "application/vnd.intelgraph.policy+tar");
+  res.setHeader("Digest", `sha-256=${manifest.manifest.digest.value}`);
+  res.setHeader("X-Cosign-Bundle", fs.readFileSync(bundleJson, "utf8"));
   fs.createReadStream(packTar).pipe(res);
 });
 ```
@@ -222,78 +214,76 @@ router.get('/policy/packs/:packId', async (req, res) => {
 **File:** `clients/cos-policy-fetcher/src/index.ts`
 
 ```ts
-import { createWriteStream, promises as fs } from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
-import { request } from 'undici';
-import { extract } from 'tar';
-import { spawn } from 'node:child_process';
+import { createWriteStream, promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { request } from "undici";
+import { extract } from "tar";
+import { spawn } from "node:child_process";
 
 export type FetchOptions = { url: string; cosignPath?: string };
 
 function sh(
   cmd: string,
   args: string[],
-  input?: string,
+  input?: string
 ): Promise<{ code: number; stdout: string; stderr: string }> {
   return new Promise((resolve) => {
-    const p = spawn(cmd, args, { stdio: ['pipe', 'pipe', 'pipe'] });
-    let stdout = '',
-      stderr = '';
-    p.stdout.on('data', (d) => (stdout += d.toString()));
-    p.stderr.on('data', (d) => (stderr += d.toString()));
-    p.on('close', (code) => resolve({ code: code ?? 1, stdout, stderr }));
+    const p = spawn(cmd, args, { stdio: ["pipe", "pipe", "pipe"] });
+    let stdout = "",
+      stderr = "";
+    p.stdout.on("data", (d) => (stdout += d.toString()));
+    p.stderr.on("data", (d) => (stderr += d.toString()));
+    p.on("close", (code) => resolve({ code: code ?? 1, stdout, stderr }));
     if (input) p.stdin.end(input);
   });
 }
 
 export async function fetchAndVerify({
   url,
-  cosignPath = 'cosign',
+  cosignPath = "cosign",
 }: FetchOptions): Promise<string> {
-  const tmpdir = await fs.mkdtemp(path.join(os.tmpdir(), 'policy-pack-'));
-  const tarPath = path.join(tmpdir, 'pack.tar');
-  const { body, headers, statusCode } = await request(url, { method: 'GET' });
+  const tmpdir = await fs.mkdtemp(path.join(os.tmpdir(), "policy-pack-"));
+  const tarPath = path.join(tmpdir, "pack.tar");
+  const { body, headers, statusCode } = await request(url, { method: "GET" });
   if (statusCode !== 200) throw new Error(`HTTP ${statusCode}`);
-  const digestHeader = headers['digest'];
-  const bundleHeader = headers['x-cosign-bundle'];
-  if (!digestHeader || !bundleHeader)
-    throw new Error('missing verification headers');
+  const digestHeader = headers["digest"];
+  const bundleHeader = headers["x-cosign-bundle"];
+  if (!digestHeader || !bundleHeader) throw new Error("missing verification headers");
 
   const file = createWriteStream(tarPath);
   await new Promise<void>((res, rej) => {
     body.pipe(file);
-    body.on('error', rej);
-    file.on('finish', () => res());
+    body.on("error", rej);
+    file.on("finish", () => res());
   });
 
   // Verify SHA-256
-  const { stdout: shaOut } = await sh('sha256sum', [tarPath]);
-  const sha = shaOut.trim().split(' ')[0];
-  const expected = String(digestHeader).replace('sha-256=', '').trim();
-  if (sha !== expected)
-    throw new Error(`digest mismatch: ${sha} != ${expected}`);
+  const { stdout: shaOut } = await sh("sha256sum", [tarPath]);
+  const sha = shaOut.trim().split(" ")[0];
+  const expected = String(digestHeader).replace("sha-256=", "").trim();
+  if (sha !== expected) throw new Error(`digest mismatch: ${sha} != ${expected}`);
 
   // Verify cosign bundle (offline)
-  process.env.COSIGN_EXPERIMENTAL = '1';
+  process.env.COSIGN_EXPERIMENTAL = "1";
   const { code, stderr } = await sh(
     cosignPath,
-    ['verify-blob', '--bundle', '-', tarPath],
-    String(bundleHeader),
+    ["verify-blob", "--bundle", "-", tarPath],
+    String(bundleHeader)
   );
   if (code !== 0) throw new Error(`cosign verify failed: ${stderr}`);
 
   // Extract to a directory and return path
-  const extractDir = path.join(tmpdir, 'unpacked');
+  const extractDir = path.join(tmpdir, "unpacked");
   await fs.mkdir(extractDir, { recursive: true });
   await extract({ file: tarPath, cwd: extractDir });
   return extractDir;
 }
 
 // Example usage when run directly
-if (process.env.NODE_ENV !== 'test' && process.argv[2]) {
+if (process.env.NODE_ENV !== "test" && process.argv[2]) {
   fetchAndVerify({ url: process.argv[2] })
-    .then((dir) => console.log('verified pack at:', dir))
+    .then((dir) => console.log("verified pack at:", dir))
     .catch((e) => {
       console.error(e);
       process.exit(1);
@@ -311,41 +301,35 @@ if (process.env.NODE_ENV !== 'test' && process.argv[2]) {
 
 ```js
 module.exports = {
-  testEnvironment: 'node',
-  transform: { '^.+\\.(ts|tsx)$': ['ts-jest', { tsconfig: 'tsconfig.json' }] },
+  testEnvironment: "node",
+  transform: { "^.+\\.(ts|tsx)$": ["ts-jest", { tsconfig: "tsconfig.json" }] },
 };
 ```
 
 **File:** `tests/contract/policy_pack.contract.test.ts`
 
 ```ts
-import http from 'node:http';
-import path from 'node:path';
-import fs from 'node:fs';
-import { fetchAndVerify } from '../../clients/cos-policy-fetcher/src/index';
-import { spawnSync } from 'node:child_process';
+import http from "node:http";
+import path from "node:path";
+import fs from "node:fs";
+import { fetchAndVerify } from "../../clients/cos-policy-fetcher/src/index";
+import { spawnSync } from "node:child_process";
 
-const PACK_TAR = path.resolve(
-  process.cwd(),
-  'dist/policy-pack/v0/policy-pack-v0.tar',
-);
+const PACK_TAR = path.resolve(process.cwd(), "dist/policy-pack/v0/policy-pack-v0.tar");
 const BUNDLE_JSON = path.resolve(
   process.cwd(),
-  'contracts/policy-pack/v0/signing/cosign.bundle.json',
+  "contracts/policy-pack/v0/signing/cosign.bundle.json"
 );
-const MANIFEST = path.resolve(
-  process.cwd(),
-  'contracts/policy-pack/v0/manifest.json',
-);
+const MANIFEST = path.resolve(process.cwd(), "contracts/policy-pack/v0/manifest.json");
 
 function startStubServer(): Promise<{ url: string; close: () => void }> {
   return new Promise((resolve) => {
     const srv = http.createServer((req, res) => {
-      if (req.url?.includes('/v1/policy/packs/policy-pack-v0')) {
-        const manifest = JSON.parse(fs.readFileSync(MANIFEST, 'utf8'));
-        res.setHeader('Content-Type', 'application/vnd.intelgraph.policy+tar');
-        res.setHeader('Digest', `sha-256=${manifest.manifest.digest.value}`);
-        res.setHeader('X-Cosign-Bundle', fs.readFileSync(BUNDLE_JSON, 'utf8'));
+      if (req.url?.includes("/v1/policy/packs/policy-pack-v0")) {
+        const manifest = JSON.parse(fs.readFileSync(MANIFEST, "utf8"));
+        res.setHeader("Content-Type", "application/vnd.intelgraph.policy+tar");
+        res.setHeader("Digest", `sha-256=${manifest.manifest.digest.value}`);
+        res.setHeader("X-Cosign-Bundle", fs.readFileSync(BUNDLE_JSON, "utf8"));
         fs.createReadStream(PACK_TAR).pipe(res);
       } else {
         res.statusCode = 404;
@@ -354,7 +338,7 @@ function startStubServer(): Promise<{ url: string; close: () => void }> {
     });
     srv.listen(0, () => {
       const addr = srv.address();
-      const port = typeof addr === 'object' && addr ? addr.port : 0;
+      const port = typeof addr === "object" && addr ? addr.port : 0;
       resolve({
         url: `http://127.0.0.1:${port}/v1/policy/packs/policy-pack-v0`,
         close: () => srv.close(),
@@ -366,28 +350,19 @@ function startStubServer(): Promise<{ url: string; close: () => void }> {
 // Utility: opa eval via CLI to confirm policy semantics did not drift
 function opaEval(query: string, input: object, policyDir: string) {
   const r = spawnSync(
-    'opa',
-    [
-      'eval',
-      query,
-      '--format',
-      'values',
-      '--data',
-      path.join(policyDir, 'opa'),
-      '--input',
-      '-',
-    ],
+    "opa",
+    ["eval", query, "--format", "values", "--data", path.join(policyDir, "opa"), "--input", "-"],
     {
       input: JSON.stringify(input),
-      encoding: 'utf8',
-    },
+      encoding: "utf8",
+    }
   );
   if (r.status !== 0) throw new Error(r.stderr.toString());
   return r.stdout.toString().trim();
 }
 
-describe('Policy Pack contract', () => {
-  it('verifies signature and enforces ABAC allow for same-tenant', async () => {
+describe("Policy Pack contract", () => {
+  it("verifies signature and enforces ABAC allow for same-tenant", async () => {
     // Precondition: artifacts exist (built + signed)
     expect(fs.existsSync(PACK_TAR)).toBe(true);
     expect(fs.existsSync(BUNDLE_JSON)).toBe(true);
@@ -396,32 +371,32 @@ describe('Policy Pack contract', () => {
     try {
       const unpacked = await fetchAndVerify({ url });
       const decision = opaEval(
-        'data.cos.abac.allow',
+        "data.cos.abac.allow",
         {
-          subject: { tenant: 't1', purpose: 'investigation' },
-          resource: { tenant: 't1', retention_until: '2099-01-01T00:00:00Z' },
+          subject: { tenant: "t1", purpose: "investigation" },
+          resource: { tenant: "t1", retention_until: "2099-01-01T00:00:00Z" },
         },
-        unpacked,
+        unpacked
       );
-      expect(decision).toEqual('true');
+      expect(decision).toEqual("true");
     } finally {
       close();
     }
   });
 
-  it('denies cross-tenant access', async () => {
+  it("denies cross-tenant access", async () => {
     const { url, close } = await startStubServer();
     try {
       const unpacked = await fetchAndVerify({ url });
       const decision = opaEval(
-        'data.cos.abac.allow',
+        "data.cos.abac.allow",
         {
-          subject: { tenant: 'tA', purpose: 'investigation' },
-          resource: { tenant: 'tB', retention_until: '2099-01-01T00:00:00Z' },
+          subject: { tenant: "tA", purpose: "investigation" },
+          resource: { tenant: "tB", retention_until: "2099-01-01T00:00:00Z" },
         },
-        unpacked,
+        unpacked
       );
-      expect(decision).toEqual('false');
+      expect(decision).toEqual("false");
     } finally {
       close();
     }
@@ -448,15 +423,15 @@ name: contract-tests
 on:
   push:
     paths:
-      - 'contracts/policy-pack/v0/**'
-      - 'clients/cos-policy-fetcher/**'
-      - 'tests/contract/**'
-      - '.github/workflows/contract-tests.yml'
+      - "contracts/policy-pack/v0/**"
+      - "clients/cos-policy-fetcher/**"
+      - "tests/contract/**"
+      - ".github/workflows/contract-tests.yml"
   pull_request:
     paths:
-      - 'contracts/policy-pack/v0/**'
-      - 'clients/cos-policy-fetcher/**'
-      - 'tests/contract/**'
+      - "contracts/policy-pack/v0/**"
+      - "clients/cos-policy-fetcher/**"
+      - "tests/contract/**"
 
 jobs:
   run:
@@ -464,7 +439,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: sigstore/cosign-installer@v3
-        with: { cosign-release: 'v2.2.4' }
+        with: { cosign-release: "v2.2.4" }
       - name: Install OPA
         run: |
           curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
@@ -473,7 +448,7 @@ jobs:
       - name: Node setup
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
       - name: Build pack (if not present)
         run: |
           bash scripts/build_policy_pack.sh
@@ -494,7 +469,7 @@ jobs:
 **File:** `companyos/src/policy/loader.ts`
 
 ```ts
-import { fetchAndVerify } from '../../../clients/cos-policy-fetcher/src/index';
+import { fetchAndVerify } from "../../../clients/cos-policy-fetcher/src/index";
 
 export async function loadPolicyPack(url: string) {
   const dir = await fetchAndVerify({ url });
@@ -647,25 +622,25 @@ router.get('/policy/packs/:packId/attestation', (req, res) => {
 
 ```ts
 export async function fetchAttestation(url: string): Promise<string> {
-  const { body, statusCode } = await request(url, { method: 'GET' });
+  const { body, statusCode } = await request(url, { method: "GET" });
   if (statusCode !== 200) throw new Error(`HTTP ${statusCode}`);
-  let data = '';
-  for await (const chunk of body) data += chunk.toString('utf8');
+  let data = "";
+  for await (const chunk of body) data += chunk.toString("utf8");
   return data;
 }
 
 export async function fetchAndVerify({
   url,
-  cosignPath = 'cosign',
+  cosignPath = "cosign",
 }: FetchOptions): Promise<string> {
   // ... existing code above ...
-  const attUrl = url.endsWith('/attestation') ? url : `${url}/attestation`;
+  const attUrl = url.endsWith("/attestation") ? url : `${url}/attestation`;
   const bundle = bundleHeader ?? (await fetchAttestation(attUrl));
   // use `bundle` in verify-blob call
   const { code, stderr } = await sh(
     cosignPath,
-    ['verify-blob', '--bundle', '-', tarPath],
-    String(bundle),
+    ["verify-blob", "--bundle", "-", tarPath],
+    String(bundle)
   );
   // ... rest unchanged ...
 }
@@ -690,48 +665,36 @@ paths:
           required: true
           schema: { type: string, enum: [policy-pack-v0] }
       responses:
-        '200':
+        "200":
           description: OK
           headers:
             Digest: { description: sha-256 of tar, schema: { type: string } }
-            ETag:
-              {
-                description: Weak ETag keyed to digest,
-                schema: { type: string },
-              }
+            ETag: { description: Weak ETag keyed to digest, schema: { type: string } }
             X-Cosign-Bundle:
-              {
-                description: Optional inline Sigstore bundle,
-                schema: { type: string },
-              }
+              { description: Optional inline Sigstore bundle, schema: { type: string } }
           content:
-            application/vnd.intelgraph.policy+tar:
-              { schema: { type: string, format: binary } }
-        '503': { description: Pack not built }
+            application/vnd.intelgraph.policy+tar: { schema: { type: string, format: binary } }
+        "503": { description: Pack not built }
     head:
       summary: Probe for digest/etag without body
       parameters:
-        - $ref: '#/paths/~1v1~1policy~1packs~1{packId}/get/parameters/0'
+        - $ref: "#/paths/~1v1~1policy~1packs~1{packId}/get/parameters/0"
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
   /v1/policy/packs/{packId}/attestation:
     get:
       summary: Fetch Sigstore verification bundle (for offline verify)
       parameters:
-        - $ref: '#/paths/~1v1~1policy~1packs~1{packId}/get/parameters/0'
+        - $ref: "#/paths/~1v1~1policy~1packs~1{packId}/get/parameters/0"
       responses:
-        '200':
+        "200":
           description: OK
           headers:
-            ETag:
-              {
-                description: Weak ETag keyed to pack digest,
-                schema: { type: string },
-              }
+            ETag: { description: Weak ETag keyed to pack digest, schema: { type: string } }
           content:
             application/vnd.sigstore.bundle+json:
               { schema: { type: object, additionalProperties: true } }
-        '503': { description: Attestation not available }
+        "503": { description: Attestation not available }
 ```
 
 ### Docs additions
@@ -816,58 +779,50 @@ fi
 **Patch:** `server/src/routes/contracts.ts`
 
 ```ts
-router.get('/policy/packs/:packId', async (req, res) => {
+router.get("/policy/packs/:packId", async (req, res) => {
   const { packId } = req.params;
-  if (packId !== 'policy-pack-v0')
-    return res.status(404).json({ error: 'unknown pack' });
+  if (packId !== "policy-pack-v0") return res.status(404).json({ error: "unknown pack" });
 
-  const packTar = path.resolve(
-    process.cwd(),
-    'dist/policy-pack/v0/policy-pack-v0.tar',
-  );
+  const packTar = path.resolve(process.cwd(), "dist/policy-pack/v0/policy-pack-v0.tar");
   const bundleJson = path.resolve(
     process.cwd(),
-    'contracts/policy-pack/v0/signing/cosign.bundle.json',
+    "contracts/policy-pack/v0/signing/cosign.bundle.json"
   );
-  const manifestPath = path.resolve(
-    process.cwd(),
-    'contracts/policy-pack/v0/manifest.json',
-  );
+  const manifestPath = path.resolve(process.cwd(), "contracts/policy-pack/v0/manifest.json");
 
   if (!fs.existsSync(packTar)) ensurePackBuiltDevOnly();
-  if (!fs.existsSync(packTar))
-    return res.status(503).json({ error: 'pack not built yet' });
+  if (!fs.existsSync(packTar)) return res.status(503).json({ error: "pack not built yet" });
 
-  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   const digest = manifest.manifest?.digest?.value;
   const stat = fs.statSync(packTar);
   const etag = `W/"sha-256:${digest}"`;
   const lastMod = stat.mtime.toUTCString();
 
   // Precondition checks
-  const ifNoneMatch = req.headers['if-none-match'];
-  const ifModifiedSince = req.headers['if-modified-since'];
+  const ifNoneMatch = req.headers["if-none-match"];
+  const ifModifiedSince = req.headers["if-modified-since"];
   if (
     (ifNoneMatch && ifNoneMatch === etag) ||
     (ifModifiedSince && new Date(ifModifiedSince) >= stat.mtime)
   ) {
-    res.setHeader('ETag', etag);
-    res.setHeader('Last-Modified', lastMod);
+    res.setHeader("ETag", etag);
+    res.setHeader("Last-Modified", lastMod);
     res.status(304).end();
     return;
   }
 
-  res.setHeader('Content-Type', 'application/vnd.intelgraph.policy+tar');
-  res.setHeader('Digest', `sha-256=${digest}`);
-  res.setHeader('ETag', etag);
-  res.setHeader('Last-Modified', lastMod);
-  res.setHeader('Cache-Control', 'public, max-age=60, immutable');
+  res.setHeader("Content-Type", "application/vnd.intelgraph.policy+tar");
+  res.setHeader("Digest", `sha-256=${digest}`);
+  res.setHeader("ETag", etag);
+  res.setHeader("Last-Modified", lastMod);
+  res.setHeader("Cache-Control", "public, max-age=60, immutable");
 
-  if (process.env.MC_INLINE_BUNDLE === 'true') {
-    res.setHeader('X-Cosign-Bundle', fs.readFileSync(bundleJson, 'utf8'));
+  if (process.env.MC_INLINE_BUNDLE === "true") {
+    res.setHeader("X-Cosign-Bundle", fs.readFileSync(bundleJson, "utf8"));
   }
 
-  res.setHeader('Content-Length', String(stat.size));
+  res.setHeader("Content-Length", String(stat.size));
   fs.createReadStream(packTar).pipe(res);
 });
 ```
@@ -875,26 +830,19 @@ router.get('/policy/packs/:packId', async (req, res) => {
 **HEAD route** (match headers)
 
 ```ts
-router.head('/policy/packs/:packId', (req, res) => {
+router.head("/policy/packs/:packId", (req, res) => {
   const { packId } = req.params;
-  if (packId !== 'policy-pack-v0') return res.status(404).end();
-  const packTar = path.resolve(
-    process.cwd(),
-    'dist/policy-pack/v0/policy-pack-v0.tar',
-  );
-  const manifestPath = path.resolve(
-    process.cwd(),
-    'contracts/policy-pack/v0/manifest.json',
-  );
-  if (!fs.existsSync(packTar) || !fs.existsSync(manifestPath))
-    return res.status(503).end();
-  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  if (packId !== "policy-pack-v0") return res.status(404).end();
+  const packTar = path.resolve(process.cwd(), "dist/policy-pack/v0/policy-pack-v0.tar");
+  const manifestPath = path.resolve(process.cwd(), "contracts/policy-pack/v0/manifest.json");
+  if (!fs.existsSync(packTar) || !fs.existsSync(manifestPath)) return res.status(503).end();
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   const digest = manifest.manifest?.digest?.value;
   const stat = fs.statSync(packTar);
-  res.setHeader('ETag', `W/"sha-256:${digest}"`);
-  res.setHeader('Last-Modified', stat.mtime.toUTCString());
-  res.setHeader('Digest', `sha-256=${digest}`);
-  res.setHeader('Content-Type', 'application/vnd.intelgraph.policy+tar');
+  res.setHeader("ETag", `W/"sha-256:${digest}"`);
+  res.setHeader("Last-Modified", stat.mtime.toUTCString());
+  res.setHeader("Digest", `sha-256=${digest}`);
+  res.setHeader("Content-Type", "application/vnd.intelgraph.policy+tar");
   res.status(200).end();
 });
 ```
@@ -904,45 +852,39 @@ router.head('/policy/packs/:packId', (req, res) => {
 **File:** `tests/contract/policy_pack.etag.test.ts`
 
 ```ts
-import http from 'node:http';
-import fs from 'node:fs';
-import path from 'node:path';
+import http from "node:http";
+import fs from "node:fs";
+import path from "node:path";
 
-const PACK_TAR = path.resolve(
-  process.cwd(),
-  'dist/policy-pack/v0/policy-pack-v0.tar',
-);
-const MANIFEST = path.resolve(
-  process.cwd(),
-  'contracts/policy-pack/v0/manifest.json',
-);
+const PACK_TAR = path.resolve(process.cwd(), "dist/policy-pack/v0/policy-pack-v0.tar");
+const MANIFEST = path.resolve(process.cwd(), "contracts/policy-pack/v0/manifest.json");
 
 function startRealServer() {
-  const app = require('../../server/dist/app').default; // assuming build emits app default export
+  const app = require("../../server/dist/app").default; // assuming build emits app default export
   return new Promise<{ url: string; close: () => void }>((resolve) => {
     const srv = http.createServer(app);
     srv.listen(0, () => {
       const addr = srv.address();
-      const port = typeof addr === 'object' && addr ? addr.port : 0;
+      const port = typeof addr === "object" && addr ? addr.port : 0;
       resolve({ url: `http://127.0.0.1:${port}`, close: () => srv.close() });
     });
   });
 }
 
-describe('ETag / 304 behavior', () => {
-  it('returns 304 when If-None-Match matches current ETag', async () => {
+describe("ETag / 304 behavior", () => {
+  it("returns 304 when If-None-Match matches current ETag", async () => {
     expect(fs.existsSync(PACK_TAR)).toBe(true);
-    const manifest = JSON.parse(fs.readFileSync(MANIFEST, 'utf8'));
+    const manifest = JSON.parse(fs.readFileSync(MANIFEST, "utf8"));
     const etag = `W/"sha-256:${manifest.manifest.digest.value}"`;
 
     const { url, close } = await startRealServer();
     try {
       const res = await fetch(`${url}/v1/policy/packs/policy-pack-v0`, {
-        method: 'GET',
-        headers: { 'If-None-Match': etag },
+        method: "GET",
+        headers: { "If-None-Match": etag },
       });
       expect(res.status).toBe(304);
-      expect(res.headers.get('ETag')).toBe(etag);
+      expect(res.headers.get("ETag")).toBe(etag);
     } finally {
       close();
     }
@@ -984,9 +926,9 @@ describe('ETag / 304 behavior', () => {
 **File:** `tests/contract/policy_pack.conditional-get.test.ts`
 
 ```ts
-import http from 'node:http';
-import path from 'node:path';
-import fs from 'node:fs';
+import http from "node:http";
+import path from "node:path";
+import fs from "node:fs";
 
 function startBuiltServer(): Promise<{ url: string; close: () => void }> {
   // assumes `server/dist/app.js` exports default express app
@@ -995,57 +937,49 @@ function startBuiltServer(): Promise<{ url: string; close: () => void }> {
   // e.g., add a step: `npm run build:server`
   // and ensure outDir is `server/dist`
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const app = require('../../server/dist/app').default;
+  const app = require("../../server/dist/app").default;
   return new Promise((resolve) => {
     const srv = http.createServer(app);
     srv.listen(0, () => {
       const addr = srv.address();
-      const port = typeof addr === 'object' && addr ? addr.port : 0;
+      const port = typeof addr === "object" && addr ? addr.port : 0;
       resolve({ url: `http://127.0.0.1:${port}`, close: () => srv.close() });
     });
   });
 }
 
-describe('Policy pack route — conditional GET', () => {
-  const manifestPath = path.resolve(
-    process.cwd(),
-    'contracts/policy-pack/v0/manifest.json',
-  );
-  const tarPath = path.resolve(
-    process.cwd(),
-    'dist/policy-pack/v0/policy-pack-v0.tar',
-  );
+describe("Policy pack route — conditional GET", () => {
+  const manifestPath = path.resolve(process.cwd(), "contracts/policy-pack/v0/manifest.json");
+  const tarPath = path.resolve(process.cwd(), "dist/policy-pack/v0/policy-pack-v0.tar");
 
   beforeAll(() => {
     expect(fs.existsSync(tarPath)).toBe(true);
   });
 
-  it('responds 304 with matching If-None-Match', async () => {
-    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  it("responds 304 with matching If-None-Match", async () => {
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
     const etag = `W/"sha-256:${manifest.manifest.digest.value}"`;
     const { url, close } = await startBuiltServer();
     try {
       const res = await fetch(`${url}/v1/policy/packs/policy-pack-v0`, {
-        headers: { 'If-None-Match': etag },
+        headers: { "If-None-Match": etag },
       });
       expect(res.status).toBe(304);
-      expect(res.headers.get('ETag')).toBe(etag);
-      expect(res.headers.get('Last-Modified')).toBeTruthy();
+      expect(res.headers.get("ETag")).toBe(etag);
+      expect(res.headers.get("Last-Modified")).toBeTruthy();
     } finally {
       close();
     }
   });
 
-  it('responds 200 with body when ETag does not match', async () => {
+  it("responds 200 with body when ETag does not match", async () => {
     const { url, close } = await startBuiltServer();
     try {
       const res = await fetch(`${url}/v1/policy/packs/policy-pack-v0`, {
-        headers: { 'If-None-Match': 'W/"sha-256:deadbeef"' },
+        headers: { "If-None-Match": 'W/"sha-256:deadbeef"' },
       });
       expect(res.status).toBe(200);
-      expect(res.headers.get('Content-Type')).toContain(
-        'application/vnd.intelgraph.policy+tar',
-      );
+      expect(res.headers.get("Content-Type")).toContain("application/vnd.intelgraph.policy+tar");
       const buf = Buffer.from(await res.arrayBuffer());
       expect(buf.byteLength).toBeGreaterThan(0);
     } finally {
@@ -1113,7 +1047,7 @@ metadata:
   namespace: production
 type: Opaque
 stringData:
-  token: '${MC_API_TOKEN}'
+  token: "${MC_API_TOKEN}"
 ```
 
 #### 3) AnalysisTemplate — **Web provider**
@@ -1138,7 +1072,7 @@ spec:
       failureLimit: 1
       provider:
         web:
-          url: '{{args.mcUrl}}/graphql'
+          url: "{{args.mcUrl}}/graphql"
           method: POST
           timeout: 15s
           headers:
@@ -1151,9 +1085,9 @@ spec:
             queryFrom:
               configMapKeyRef: { name: mc-evidence-query, key: query.graphql }
             variables:
-              service: '{{args.service}}'
-              releaseId: '{{args.releaseId}}'
-          jsonPath: '$.data.evidenceOk'
+              service: "{{args.service}}"
+              releaseId: "{{args.releaseId}}"
+          jsonPath: "$.data.evidenceOk"
 ```
 
 #### 4) AnalysisTemplate — **Job provider** (portable)
@@ -1184,14 +1118,14 @@ spec:
                 containers:
                   - name: check
                     image: curlimages/curl:8.10.1
-                    command: ['/bin/sh', '-c']
+                    command: ["/bin/sh", "-c"]
                     env:
                       - name: MC_URL
-                        value: '{{args.mcUrl}}'
+                        value: "{{args.mcUrl}}"
                       - name: SERVICE
-                        value: '{{args.service}}'
+                        value: "{{args.service}}"
                       - name: RELEASE_ID
-                        value: '{{args.releaseId}}'
+                        value: "{{args.releaseId}}"
                       - name: TOKEN
                         valueFrom:
                           secretKeyRef: { name: mc-api-token, key: token }
@@ -1246,7 +1180,7 @@ spec:
 **File:** `server/src/graphql/schema.evidenceOk.ts`
 
 ```ts
-import { gql } from 'apollo-server-express';
+import { gql } from "apollo-server-express";
 
 export const evidenceOkTypeDefs = gql /* GraphQL */ `
   type CostSnapshot {
@@ -1268,7 +1202,7 @@ export const evidenceOkTypeDefs = gql /* GraphQL */ `
 **File:** `server/src/graphql/resolvers/evidenceOk.ts`
 
 ```ts
-import type { IResolvers } from '@graphql-tools/utils';
+import type { IResolvers } from "@graphql-tools/utils";
 
 const READ_P95_BUDGET = 350; // ms
 const WRITE_P95_BUDGET = 700; // ms (if you split metrics by op, adapt accordingly)
@@ -1285,7 +1219,7 @@ export const evidenceOkResolvers: IResolvers = {
         p95Ms: 320,
         p99Ms: 800,
         errorRate: 0.01,
-        window: '15m',
+        window: "15m",
       };
       const cost = { graphqlPerMillionUsd: 1.8, ingestPerThousandUsd: 0.08 };
       const reasons: string[] = [];
@@ -1294,9 +1228,7 @@ export const evidenceOkResolvers: IResolvers = {
       if (snapshot.errorRate > ERROR_RATE_BUDGET)
         reasons.push(`errorRate ${snapshot.errorRate} > ${ERROR_RATE_BUDGET}`);
       if ((cost.graphqlPerMillionUsd ?? 0) > GRAPHQL_COST_BUDGET)
-        reasons.push(
-          `graphql cost ${cost.graphqlPerMillionUsd} > ${GRAPHQL_COST_BUDGET}`,
-        );
+        reasons.push(`graphql cost ${cost.graphqlPerMillionUsd} > ${GRAPHQL_COST_BUDGET}`);
       return { ok: reasons.length === 0, reasons, snapshot, cost };
     },
   },

@@ -4,46 +4,35 @@
  */
 
 module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  roots: [
-    '<rootDir>/SECURITY',
-    '<rootDir>/active-measures-module',
-    '<rootDir>/activities',
-  ],
-  testMatch: [
-    '**/__tests__/**/*.test.ts',
-    '**/__tests__/**/*.spec.ts',
-  ],
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
+  preset: "ts-jest",
+  testEnvironment: "node",
+  roots: ["<rootDir>/SECURITY", "<rootDir>/active-measures-module", "<rootDir>/activities"],
+  testMatch: ["**/__tests__/**/*.test.ts", "**/__tests__/**/*.spec.ts"],
+  moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json"],
   transform: {
-    '^.+\\.tsx?$': ['ts-jest', {
-      tsconfig: {
-        esModuleInterop: true,
-        allowSyntheticDefaultImports: true,
+    "^.+\\.tsx?$": [
+      "ts-jest",
+      {
+        tsconfig: {
+          esModuleInterop: true,
+          allowSyntheticDefaultImports: true,
+        },
       },
-    }],
+    ],
   },
   collectCoverage: true,
-  coverageDirectory: '<rootDir>/coverage',
-  coverageReporters: [
-    'text',
-    'text-summary',
-    'html',
-    'lcov',
-    'json',
-    'cobertura',
-  ],
+  coverageDirectory: "<rootDir>/coverage",
+  coverageReporters: ["text", "text-summary", "html", "lcov", "json", "cobertura"],
   collectCoverageFrom: [
-    'SECURITY/**/*.ts',
-    'active-measures-module/src/**/*.ts',
-    'activities/src/**/*.ts',
-    '!**/__tests__/**',
-    '!**/__mocks__/**',
-    '!**/node_modules/**',
-    '!**/dist/**',
-    '!**/build/**',
-    '!**/*.d.ts',
+    "SECURITY/**/*.ts",
+    "active-measures-module/src/**/*.ts",
+    "activities/src/**/*.ts",
+    "!**/__tests__/**",
+    "!**/__mocks__/**",
+    "!**/node_modules/**",
+    "!**/dist/**",
+    "!**/build/**",
+    "!**/*.d.ts",
   ],
   coverageThresholds: {
     global: {
@@ -52,13 +41,13 @@ module.exports = {
       lines: 75,
       statements: 75,
     },
-    './SECURITY/policy/': {
+    "./SECURITY/policy/": {
       branches: 80,
       functions: 85,
       lines: 85,
       statements: 85,
     },
-    './SECURITY/secrets/': {
+    "./SECURITY/secrets/": {
       branches: 80,
       functions: 85,
       lines: 85,
@@ -67,8 +56,8 @@ module.exports = {
   },
   testTimeout: 10000,
   verbose: true,
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/$1',
+    "^@/(.*)$": "<rootDir>/$1",
   },
 };

@@ -1,2 +1,2 @@
-export * from './types';
-export { RarlClient, verifySnapshot } from './client';
+export * from "./types";
+export { RarlClient, verifySnapshot } from "./client";

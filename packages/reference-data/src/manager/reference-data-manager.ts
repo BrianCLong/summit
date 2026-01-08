@@ -3,7 +3,7 @@
  * Manages code lists, lookup tables, and standard nomenclature
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 export interface CodeList {
   id: string;
@@ -12,7 +12,7 @@ export interface CodeList {
   domain: string;
   codes: Code[];
   version: number;
-  status: 'draft' | 'active' | 'deprecated';
+  status: "draft" | "active" | "deprecated";
   validFrom?: Date;
   validTo?: Date;
   metadata: CodeListMetadata;
@@ -75,7 +75,7 @@ export class ReferenceDataManager {
     name: string,
     description: string,
     domain: string,
-    codes: Omit<Code, 'sortOrder' | 'active' | 'attributes'>[],
+    codes: Omit<Code, "sortOrder" | "active" | "attributes">[],
     owner: string
   ): Promise<CodeList> {
     const codeList: CodeList = {
@@ -87,20 +87,20 @@ export class ReferenceDataManager {
         ...c,
         sortOrder: i,
         active: true,
-        attributes: {}
+        attributes: {},
       })),
       version: 1,
-      status: 'active',
+      status: "active",
       metadata: {
         owner,
         steward: owner,
-        classification: 'standard',
+        classification: "standard",
         tags: [],
         createdAt: new Date(),
         updatedAt: new Date(),
         createdBy: owner,
-        updatedBy: owner
-      }
+        updatedBy: owner,
+      },
     };
 
     this.codeLists.set(codeList.id, codeList);
@@ -120,7 +120,7 @@ export class ReferenceDataManager {
    * Get code list by name
    */
   async getCodeListByName(name: string): Promise<CodeList | undefined> {
-    return Array.from(this.codeLists.values()).find(cl => cl.name === name);
+    return Array.from(this.codeLists.values()).find((cl) => cl.name === name);
   }
 
   /**
@@ -128,7 +128,7 @@ export class ReferenceDataManager {
    */
   async addCode(
     codeListId: string,
-    code: Omit<Code, 'sortOrder' | 'active' | 'attributes'>
+    code: Omit<Code, "sortOrder" | "active" | "attributes">
   ): Promise<CodeList> {
     const codeList = this.codeLists.get(codeListId);
     if (!codeList) {
@@ -139,7 +139,7 @@ export class ReferenceDataManager {
       ...code,
       sortOrder: codeList.codes.length,
       active: true,
-      attributes: {}
+      attributes: {},
     };
 
     codeList.codes.push(newCode);
@@ -177,7 +177,7 @@ export class ReferenceDataManager {
       targetFields,
       mappings,
       version: 1,
-      cacheEnabled: true
+      cacheEnabled: true,
     };
 
     this.lookupTables.set(table.id, table);
@@ -192,7 +192,7 @@ export class ReferenceDataManager {
     tableName: string,
     sourceValues: Record<string, unknown>
   ): Promise<Record<string, unknown> | undefined> {
-    const table = Array.from(this.lookupTables.values()).find(t => t.name === tableName);
+    const table = Array.from(this.lookupTables.values()).find((t) => t.name === tableName);
     if (!table) return undefined;
 
     for (const mapping of table.mappings) {
@@ -231,7 +231,7 @@ export class ReferenceDataManager {
    * Get all active code lists
    */
   async getActiveCodeLists(): Promise<CodeList[]> {
-    return Array.from(this.codeLists.values()).filter(cl => cl.status === 'active');
+    return Array.from(this.codeLists.values()).filter((cl) => cl.status === "active");
   }
 
   /**
@@ -243,7 +243,7 @@ export class ReferenceDataManager {
       throw new Error(`Code list ${id} not found`);
     }
 
-    codeList.status = 'deprecated';
+    codeList.status = "deprecated";
     codeList.validTo = new Date();
     codeList.metadata.updatedAt = new Date();
     codeList.metadata.updatedBy = updatedBy;

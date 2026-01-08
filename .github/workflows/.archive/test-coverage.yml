@@ -4,19 +4,19 @@ on:
   push:
     branches: [main, develop]
     paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - 'LICENSE'
-      - '.gitignore'
-      - '.dockerignore'
+      - "**.md"
+      - "docs/**"
+      - "LICENSE"
+      - ".gitignore"
+      - ".dockerignore"
   pull_request:
     branches: [main, develop]
     paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - 'LICENSE'
-      - '.gitignore'
-      - '.dockerignore'
+      - "**.md"
+      - "docs/**"
+      - "LICENSE"
+      - ".gitignore"
+      - ".dockerignore"
 
 jobs:
   coverage:
@@ -57,7 +57,7 @@ jobs:
         image: neo4j:5
         env:
           NEO4J_AUTH: neo4j/test123456
-          NEO4J_ACCEPT_LICENSE_AGREEMENT: 'yes'
+          NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
         ports:
           - 7474:7474
           - 7687:7687

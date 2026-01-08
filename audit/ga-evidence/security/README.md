@@ -25,19 +25,21 @@ This directory contains comprehensive security threat models and gap analysis fo
 ## Summary
 
 ### Threats Identified
+
 - **Total Threats:** 84
 - **Critical:** 47 (56%)
 - **High:** 23 (27%)
 - **Medium:** 14 (17%)
 
 ### Subsystem Breakdown
-| Subsystem | Critical | High | Medium | Total |
-|-----------|----------|------|--------|-------|
-| Graph Database | 13 | 3 | 2 | 18 |
-| Agent Execution | 12 | 5 | 4 | 21 |
-| Data Ingest | 9 | 4 | 3 | 16 |
-| AI Copilot | 8 | 5 | 3 | 16 |
-| API Gateway | 5 | 6 | 2 | 13 |
+
+| Subsystem       | Critical | High | Medium | Total |
+| --------------- | -------- | ---- | ------ | ----- |
+| Graph Database  | 13       | 3    | 2      | 18    |
+| Agent Execution | 12       | 5    | 4      | 21    |
+| Data Ingest     | 9        | 4    | 3      | 16    |
+| AI Copilot      | 8        | 5    | 3      | 16    |
+| API Gateway     | 5        | 6    | 2      | 13    |
 
 ### SOC 2 Compliance Status
 
@@ -72,6 +74,7 @@ This directory contains comprehensive security threat models and gap analysis fo
 **DO NOT PROCEED WITH GA RELEASE** until critical security gaps are addressed.
 
 Recommended approach:
+
 1. Implement Week 1 emergency controls
 2. Complete Month 1-2 remediation
 3. Conduct external security assessment
@@ -86,6 +89,7 @@ Recommended approach:
 ## Evidence Integrity
 
 All threat models were generated through:
+
 1. Code review of actual implementation
 2. Architecture analysis
 3. Dependency assessment

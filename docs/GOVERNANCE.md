@@ -10,12 +10,14 @@ To maintain focus and high value density, all new additions must adhere to the *
 
 **1. ROI Rationale Requirement**
 Every new feature, integration, or experimental module PR must include an "ROI Rationale" section in the PR description, answering:
+
 - **Why Now?** (Urgency/Timeliness)
 - **Who pays/benefits?** (Customer value)
 - **What is the maintenance cost?**
 - **What happens if we don't do it?**
 
 **2. Focus Guardrails**
+
 - **Zero-Sum Capacity:** If a new large initiative is added, an existing low-ROI item must be nominated for retirement.
 - **Experimental Cap:** A maximum of 3 concurrent "Incubation" or "Black Project" tracks are allowed active at any time. Excess experiments must be paused or retired.
 

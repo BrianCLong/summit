@@ -19,7 +19,7 @@ pnpm add @intelgraph/influence-detection
 ## Quick Start
 
 ```typescript
-import { BotDetector } from '@intelgraph/influence-detection';
+import { BotDetector } from "@intelgraph/influence-detection";
 
 const detector = new BotDetector();
 const result = await detector.detectBot(accountActivity);

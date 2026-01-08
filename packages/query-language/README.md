@@ -22,7 +22,7 @@ npm install @intelgraph/query-language
 ## Quick Start
 
 ```typescript
-import { SummitQL } from '@intelgraph/query-language';
+import { SummitQL } from "@intelgraph/query-language";
 
 const ql = new SummitQL({
   optimize: true,

@@ -2,7 +2,7 @@
  * Topic modeling and clustering
  */
 
-import type { Topic, TopicAssignment, DocumentCluster } from '../types';
+import type { Topic, TopicAssignment, DocumentCluster } from "../types";
 
 export class TopicModeler {
   /**
@@ -18,7 +18,7 @@ export class TopicModeler {
         id: `topic_${i}`,
         keywords: keywords.map((word, idx) => ({
           word,
-          weight: 1.0 - (idx * 0.1),
+          weight: 1.0 - idx * 0.1,
         })),
         documents: [],
         coherence: 0.8,
@@ -73,7 +73,10 @@ export class TopicModeler {
     const windows = this.groupByTimeWindows(documents, timeWindows);
 
     for (const [window, docs] of windows) {
-      const topics = this.lda(docs.map((d) => d.text), 5);
+      const topics = this.lda(
+        docs.map((d) => d.text),
+        5
+      );
       timeline.set(window, topics);
     }
 
@@ -86,10 +89,13 @@ export class TopicModeler {
   assignDocuments(documents: string[], topics: Topic[]): TopicAssignment[] {
     return documents.map((doc, idx) => ({
       documentId: idx,
-      topics: topics.map((topic, topicIdx) => ({
-        topicId: topic.id,
-        probability: Math.random(), // Simplified
-      })).sort((a, b) => b.probability - a.probability).slice(0, 3),
+      topics: topics
+        .map((topic, topicIdx) => ({
+          topicId: topic.id,
+          probability: Math.random(), // Simplified
+        }))
+        .sort((a, b) => b.probability - a.probability)
+        .slice(0, 3),
     }));
   }
 
@@ -133,5 +139,5 @@ export class TopicModeler {
   }
 }
 
-export * from './clustering';
-export * from './coherence';
+export * from "./clustering";
+export * from "./coherence";

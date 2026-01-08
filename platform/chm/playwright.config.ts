@@ -1,9 +1,9 @@
-import { defineConfig } from '@playwright/test';
+import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
-  testDir: './tests/e2e',
-  reporter: 'list',
+  testDir: "./tests/e2e",
+  reporter: "list",
   use: {
-    headless: true
-  }
+    headless: true,
+  },
 });

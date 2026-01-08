@@ -3,17 +3,17 @@ on:
   workflow_dispatch:
     inputs:
       release:
-        description: 'Release tag/commit'
+        description: "Release tag/commit"
         required: true
       environment:
-        description: 'Target environment'
+        description: "Target environment"
         required: true
         type: choice
         options:
           - staging
           - production
       evidence_bundle_id:
-        description: 'Evidence bundle artifact ID'
+        description: "Evidence bundle artifact ID"
         required: true
 permissions:
   contents: read

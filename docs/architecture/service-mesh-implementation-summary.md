@@ -47,30 +47,30 @@ This document provides a high-level summary of the service mesh implementation f
 
 ### Configuration Files
 
-| File | Location | Description |
-|------|----------|-------------|
-| Circuit Breakers | `infra/service-mesh/circuit-breakers.yaml` | Service-specific circuit breaker configurations |
-| Retry Policies | `infra/service-mesh/retry-policies.yaml` | Intelligent retry strategies for all services |
-| Distributed Tracing | `infra/service-mesh/distributed-tracing.yaml` | OpenTelemetry and Jaeger deployment |
-| Load Balancing | `infra/service-mesh/load-balancing.yaml` | Load balancing strategies and routing rules |
-| mTLS Config | `infra/service-mesh/mtls-config.yaml` | Mutual TLS and identity configuration |
+| File                | Location                                      | Description                                     |
+| ------------------- | --------------------------------------------- | ----------------------------------------------- |
+| Circuit Breakers    | `infra/service-mesh/circuit-breakers.yaml`    | Service-specific circuit breaker configurations |
+| Retry Policies      | `infra/service-mesh/retry-policies.yaml`      | Intelligent retry strategies for all services   |
+| Distributed Tracing | `infra/service-mesh/distributed-tracing.yaml` | OpenTelemetry and Jaeger deployment             |
+| Load Balancing      | `infra/service-mesh/load-balancing.yaml`      | Load balancing strategies and routing rules     |
+| mTLS Config         | `infra/service-mesh/mtls-config.yaml`         | Mutual TLS and identity configuration           |
 
 ### Documentation
 
-| Document | Location | Description |
-|----------|----------|-------------|
-| Architecture | `docs/architecture/service-mesh-architecture.md` | Complete architecture overview |
-| Best Practices | `docs/architecture/service-mesh-best-practices.md` | Development and operations best practices |
-| Operations Runbook | `RUNBOOKS/service-mesh-operations.md` | Day 1 & Day 2 operations procedures |
-| Implementation Summary | `docs/architecture/service-mesh-implementation-summary.md` | This document |
+| Document               | Location                                                   | Description                               |
+| ---------------------- | ---------------------------------------------------------- | ----------------------------------------- |
+| Architecture           | `docs/architecture/service-mesh-architecture.md`           | Complete architecture overview            |
+| Best Practices         | `docs/architecture/service-mesh-best-practices.md`         | Development and operations best practices |
+| Operations Runbook     | `RUNBOOKS/service-mesh-operations.md`                      | Day 1 & Day 2 operations procedures       |
+| Implementation Summary | `docs/architecture/service-mesh-implementation-summary.md` | This document                             |
 
 ### Existing Infrastructure
 
-| Resource | Location | Description |
-|----------|----------|-------------|
-| ADR-0006 | `docs/ADR/0006-mtls-mesh-layout.md` | Architecture decision record for mTLS |
-| Istio Operator | `infrastructure/kubernetes/multi-cluster/istio/primary-cluster.yaml` | Primary cluster Istio configuration |
-| Multi-Cluster Setup | `infrastructure/kubernetes/multi-cluster/README.md` | Multi-cluster deployment guide |
+| Resource            | Location                                                             | Description                           |
+| ------------------- | -------------------------------------------------------------------- | ------------------------------------- |
+| ADR-0006            | `docs/ADR/0006-mtls-mesh-layout.md`                                  | Architecture decision record for mTLS |
+| Istio Operator      | `infrastructure/kubernetes/multi-cluster/istio/primary-cluster.yaml` | Primary cluster Istio configuration   |
+| Multi-Cluster Setup | `infrastructure/kubernetes/multi-cluster/README.md`                  | Multi-cluster deployment guide        |
 
 ## Architecture Highlights
 
@@ -156,10 +156,12 @@ This document provides a high-level summary of the service mesh implementation f
 ### Resource Utilization
 
 **Per Sidecar:**
+
 - CPU: 10-100m (idle to loaded)
 - Memory: 50-200MB
 
 **Control Plane:**
+
 - 3 istiod replicas: 500m CPU, 2GB RAM each
 - OpenTelemetry Collector: 200m CPU, 512MB RAM
 - Jaeger: 100m CPU, 256MB RAM
@@ -317,12 +319,12 @@ kubectl logs <pod> -n summit -c istio-proxy
 
 ### Common Issues
 
-| Issue | Diagnosis | Resolution |
-|-------|-----------|------------|
-| 503 Errors | Circuit breaker tripped | Check connection limits, scale service |
-| High Latency | Too many retries | Reduce retry attempts, increase timeout |
-| mTLS Failures | Certificate issues | Check PeerAuthentication, restart pods |
-| Control Plane Down | Istiod crashed | Check logs, restart istiod |
+| Issue              | Diagnosis               | Resolution                              |
+| ------------------ | ----------------------- | --------------------------------------- |
+| 503 Errors         | Circuit breaker tripped | Check connection limits, scale service  |
+| High Latency       | Too many retries        | Reduce retry attempts, increase timeout |
+| mTLS Failures      | Certificate issues      | Check PeerAuthentication, restart pods  |
+| Control Plane Down | Istiod crashed          | Check logs, restart istiod              |
 
 ### Useful Commands
 

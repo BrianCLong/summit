@@ -4,18 +4,18 @@
  * Generates CycloneDX and SPDX format SBOMs for compliance
  */
 
-import { execSync, spawnSync } from 'node:child_process';
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { createHash } from 'node:crypto';
+import { execSync, spawnSync } from "node:child_process";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { createHash } from "node:crypto";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT_DIR = join(__dirname, '../..');
-const OUTPUT_DIR = join(ROOT_DIR, 'sbom');
+const ROOT_DIR = join(__dirname, "../..");
+const OUTPUT_DIR = join(ROOT_DIR, "sbom");
 
 interface SBOMConfig {
-  format: 'cyclonedx' | 'spdx' | 'both';
+  format: "cyclonedx" | "spdx" | "both";
   includeDevDeps: boolean;
   includeContainers: boolean;
   outputDir: string;
@@ -37,7 +37,7 @@ interface PackageInfo {
 }
 
 interface CycloneDXBOM {
-  bomFormat: 'CycloneDX';
+  bomFormat: "CycloneDX";
   specVersion: string;
   serialNumber: string;
   version: number;
@@ -53,7 +53,7 @@ interface CycloneDXBOM {
 
 interface CycloneDXComponent {
   type: string;
-  'bom-ref': string;
+  "bom-ref": string;
   name: string;
   version: string;
   description?: string;
@@ -64,54 +64,54 @@ interface CycloneDXComponent {
 }
 
 const DEFAULT_CONFIG: SBOMConfig = {
-  format: 'both',
+  format: "both",
   includeDevDeps: false,
   includeContainers: true,
   outputDir: OUTPUT_DIR,
-  organizationName: 'Summit Platform',
-  organizationUrl: 'https://github.com/BrianCLong/summit',
+  organizationName: "Summit Platform",
+  organizationUrl: "https://github.com/BrianCLong/summit",
 };
 
 function loadConfig(): SBOMConfig {
-  const configPath = join(ROOT_DIR, '.sbom-config.json');
+  const configPath = join(ROOT_DIR, ".sbom-config.json");
   if (existsSync(configPath)) {
-    const config = JSON.parse(readFileSync(configPath, 'utf-8'));
+    const config = JSON.parse(readFileSync(configPath, "utf-8"));
     return { ...DEFAULT_CONFIG, ...config };
   }
   return DEFAULT_CONFIG;
 }
 
 function generateUUID(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }
 
 function getProjectInfo(): { name: string; version: string } {
-  const pkgPath = join(ROOT_DIR, 'package.json');
+  const pkgPath = join(ROOT_DIR, "package.json");
   if (existsSync(pkgPath)) {
-    const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+    const pkg = JSON.parse(readFileSync(pkgPath, "utf-8"));
     return {
-      name: pkg.name || 'summit',
-      version: pkg.version || '0.0.0',
+      name: pkg.name || "summit",
+      version: pkg.version || "0.0.0",
     };
   }
-  return { name: 'summit', version: '0.0.0' };
+  return { name: "summit", version: "0.0.0" };
 }
 
 function getAllPackages(includeDevDeps: boolean): PackageInfo[] {
-  console.log('Collecting package information...');
+  console.log("Collecting package information...");
 
-  const args = ['list', '--json', '--depth=Infinity'];
+  const args = ["list", "--json", "--depth=Infinity"];
   if (!includeDevDeps) {
-    args.push('--prod');
+    args.push("--prod");
   }
 
-  const result = spawnSync('pnpm', args, {
+  const result = spawnSync("pnpm", args, {
     cwd: ROOT_DIR,
-    encoding: 'utf-8',
+    encoding: "utf-8",
     maxBuffer: 50 * 1024 * 1024,
   });
 
@@ -119,70 +119,75 @@ function getAllPackages(includeDevDeps: boolean): PackageInfo[] {
   const seen = new Set<string>();
 
   try {
-    const data = JSON.parse(result.stdout || '[]');
+    const data = JSON.parse(result.stdout || "[]");
 
     function extractPackages(deps: Record<string, unknown> | undefined, type: string) {
       if (!deps) return;
 
       for (const [name, info] of Object.entries(deps)) {
-        const pkg = info as { version?: string; from?: string; dependencies?: Record<string, unknown> };
-        const version = pkg.version || (typeof pkg.from === 'string' ? pkg.from.split('@').pop() : 'unknown');
+        const pkg = info as {
+          version?: string;
+          from?: string;
+          dependencies?: Record<string, unknown>;
+        };
+        const version =
+          pkg.version || (typeof pkg.from === "string" ? pkg.from.split("@").pop() : "unknown");
         const key = `${name}@${version}`;
 
         if (!seen.has(key)) {
           seen.add(key);
           packages.push({
             name,
-            version: version || 'unknown',
-            license: 'UNKNOWN', // Will be enriched later
-            purl: `pkg:npm/${name.replace('@', '%40')}@${version}`,
+            version: version || "unknown",
+            license: "UNKNOWN", // Will be enriched later
+            purl: `pkg:npm/${name.replace("@", "%40")}@${version}`,
           });
         }
 
         // Recurse into nested dependencies
         if (pkg.dependencies) {
-          extractPackages(pkg.dependencies, 'transitive');
+          extractPackages(pkg.dependencies, "transitive");
         }
       }
     }
 
     // Process each workspace
     for (const workspace of Array.isArray(data) ? data : [data]) {
-      extractPackages(workspace.dependencies, 'runtime');
+      extractPackages(workspace.dependencies, "runtime");
       if (includeDevDeps) {
-        extractPackages(workspace.devDependencies, 'development');
+        extractPackages(workspace.devDependencies, "development");
       }
     }
   } catch (error) {
-    console.error('Error parsing pnpm list output:', error);
+    console.error("Error parsing pnpm list output:", error);
   }
 
   return packages;
 }
 
 function enrichPackageInfo(packages: PackageInfo[]): PackageInfo[] {
-  console.log('Enriching package information with license data...');
+  console.log("Enriching package information with license data...");
 
   // Get license information
-  const licenseResult = spawnSync('npx', ['license-checker', '--json', '--production'], {
+  const licenseResult = spawnSync("npx", ["license-checker", "--json", "--production"], {
     cwd: ROOT_DIR,
-    encoding: 'utf-8',
+    encoding: "utf-8",
     maxBuffer: 50 * 1024 * 1024,
   });
 
   const licenseMap = new Map<string, { license: string; repository?: string }>();
 
   try {
-    const licenseData = JSON.parse(licenseResult.stdout || '{}');
+    const licenseData = JSON.parse(licenseResult.stdout || "{}");
     for (const [pkgKey, info] of Object.entries(licenseData as Record<string, unknown>)) {
       const pkgInfo = info as { licenses?: string; repository?: string };
       licenseMap.set(pkgKey, {
-        license: pkgInfo.licenses || 'UNKNOWN',
+        license: pkgInfo.licenses || "UNKNOWN",
         repository: pkgInfo.repository,
       });
     }
   } catch {
-    console.warn('Could not parse license data');
+    console.warn("Could not parse license data");
   }
 
   return packages.map((pkg) => {
@@ -201,21 +206,21 @@ function generateCycloneDX(packages: PackageInfo[], config: SBOMConfig): Cyclone
   const projectInfo = getProjectInfo();
 
   const bom: CycloneDXBOM = {
-    bomFormat: 'CycloneDX',
-    specVersion: '1.5',
+    bomFormat: "CycloneDX",
+    specVersion: "1.5",
     serialNumber: `urn:uuid:${generateUUID()}`,
     version: 1,
     metadata: {
       timestamp: new Date().toISOString(),
       tools: [
         {
-          vendor: 'Summit',
-          name: 'sbom-generator',
-          version: '1.0.0',
+          vendor: "Summit",
+          name: "sbom-generator",
+          version: "1.0.0",
         },
       ],
       component: {
-        type: 'application',
+        type: "application",
         name: projectInfo.name,
         version: projectInfo.version,
       },
@@ -231,8 +236,8 @@ function generateCycloneDX(packages: PackageInfo[], config: SBOMConfig): Cyclone
   // Add components
   for (const pkg of packages) {
     const component: CycloneDXComponent = {
-      type: 'library',
-      'bom-ref': `pkg:npm/${pkg.name.replace('@', '%40')}@${pkg.version}`,
+      type: "library",
+      "bom-ref": `pkg:npm/${pkg.name.replace("@", "%40")}@${pkg.version}`,
       name: pkg.name,
       version: pkg.version,
     };
@@ -241,7 +246,7 @@ function generateCycloneDX(packages: PackageInfo[], config: SBOMConfig): Cyclone
       component.description = pkg.description;
     }
 
-    if (pkg.license && pkg.license !== 'UNKNOWN') {
+    if (pkg.license && pkg.license !== "UNKNOWN") {
       component.licenses = [
         {
           license: {
@@ -258,7 +263,7 @@ function generateCycloneDX(packages: PackageInfo[], config: SBOMConfig): Cyclone
     if (pkg.repository) {
       component.externalReferences = [
         {
-          type: 'vcs',
+          type: "vcs",
           url: pkg.repository,
         },
       ];
@@ -270,7 +275,10 @@ function generateCycloneDX(packages: PackageInfo[], config: SBOMConfig): Cyclone
   // Add dependencies (simplified - just root deps)
   bom.dependencies.push({
     ref: `pkg:npm/${projectInfo.name}@${projectInfo.version}`,
-    dependsOn: packages.slice(0, 100).map((p) => p.purl!).filter(Boolean),
+    dependsOn: packages
+      .slice(0, 100)
+      .map((p) => p.purl!)
+      .filter(Boolean),
   });
 
   return bom;
@@ -280,31 +288,28 @@ function generateSPDX(packages: PackageInfo[], config: SBOMConfig): object {
   const projectInfo = getProjectInfo();
 
   return {
-    spdxVersion: 'SPDX-2.3',
-    dataLicense: 'CC0-1.0',
-    SPDXID: 'SPDXRef-DOCUMENT',
+    spdxVersion: "SPDX-2.3",
+    dataLicense: "CC0-1.0",
+    SPDXID: "SPDXRef-DOCUMENT",
     name: projectInfo.name,
     documentNamespace: `https://spdx.org/spdxdocs/${projectInfo.name}-${projectInfo.version}-${generateUUID()}`,
     creationInfo: {
       created: new Date().toISOString(),
-      creators: [
-        `Tool: summit-sbom-generator-1.0.0`,
-        `Organization: ${config.organizationName}`,
-      ],
+      creators: [`Tool: summit-sbom-generator-1.0.0`, `Organization: ${config.organizationName}`],
     },
     packages: packages.map((pkg, index) => ({
       SPDXID: `SPDXRef-Package-${index}`,
       name: pkg.name,
       versionInfo: pkg.version,
-      downloadLocation: pkg.repository || 'NOASSERTION',
-      licenseConcluded: pkg.license !== 'UNKNOWN' ? pkg.license : 'NOASSERTION',
-      licenseDeclared: pkg.license !== 'UNKNOWN' ? pkg.license : 'NOASSERTION',
-      copyrightText: 'NOASSERTION',
+      downloadLocation: pkg.repository || "NOASSERTION",
+      licenseConcluded: pkg.license !== "UNKNOWN" ? pkg.license : "NOASSERTION",
+      licenseDeclared: pkg.license !== "UNKNOWN" ? pkg.license : "NOASSERTION",
+      copyrightText: "NOASSERTION",
       externalRefs: pkg.purl
         ? [
             {
-              referenceCategory: 'PACKAGE-MANAGER',
-              referenceType: 'purl',
+              referenceCategory: "PACKAGE-MANAGER",
+              referenceType: "purl",
               referenceLocator: pkg.purl,
             },
           ]
@@ -312,9 +317,9 @@ function generateSPDX(packages: PackageInfo[], config: SBOMConfig): object {
     })),
     relationships: [
       {
-        spdxElementId: 'SPDXRef-DOCUMENT',
-        relatedSpdxElement: 'SPDXRef-Package-0',
-        relationshipType: 'DESCRIBES',
+        spdxElementId: "SPDXRef-DOCUMENT",
+        relatedSpdxElement: "SPDXRef-Package-0",
+        relationshipType: "DESCRIBES",
       },
     ],
   };
@@ -325,22 +330,22 @@ async function main(): Promise<void> {
 
   // Parse CLI arguments
   const args = process.argv.slice(2);
-  if (args.includes('--cyclonedx')) config.format = 'cyclonedx';
-  if (args.includes('--spdx')) config.format = 'spdx';
-  if (args.includes('--dev')) config.includeDevDeps = true;
+  if (args.includes("--cyclonedx")) config.format = "cyclonedx";
+  if (args.includes("--spdx")) config.format = "spdx";
+  if (args.includes("--dev")) config.includeDevDeps = true;
 
-  const outputIndex = args.indexOf('--output');
+  const outputIndex = args.indexOf("--output");
   if (outputIndex !== -1 && args[outputIndex + 1]) {
     config.outputDir = args[outputIndex + 1];
   }
 
-  console.log('========================================');
-  console.log('     SBOM GENERATOR');
-  console.log('========================================');
+  console.log("========================================");
+  console.log("     SBOM GENERATOR");
+  console.log("========================================");
   console.log(`Format: ${config.format}`);
   console.log(`Include dev deps: ${config.includeDevDeps}`);
   console.log(`Output directory: ${config.outputDir}`);
-  console.log('');
+  console.log("");
 
   // Ensure output directory exists
   if (!existsSync(config.outputDir)) {
@@ -355,10 +360,10 @@ async function main(): Promise<void> {
   packages = enrichPackageInfo(packages);
 
   const projectInfo = getProjectInfo();
-  const timestamp = new Date().toISOString().split('T')[0];
+  const timestamp = new Date().toISOString().split("T")[0];
 
   // Generate CycloneDX
-  if (config.format === 'cyclonedx' || config.format === 'both') {
+  if (config.format === "cyclonedx" || config.format === "both") {
     const cyclonedx = generateCycloneDX(packages, config);
     const cyclonedxPath = join(
       config.outputDir,
@@ -369,7 +374,7 @@ async function main(): Promise<void> {
   }
 
   // Generate SPDX
-  if (config.format === 'spdx' || config.format === 'both') {
+  if (config.format === "spdx" || config.format === "both") {
     const spdx = generateSPDX(packages, config);
     const spdxPath = join(
       config.outputDir,
@@ -382,22 +387,22 @@ async function main(): Promise<void> {
   // Generate summary
   const licenseBreakdown = new Map<string, number>();
   for (const pkg of packages) {
-    const license = pkg.license || 'UNKNOWN';
+    const license = pkg.license || "UNKNOWN";
     licenseBreakdown.set(license, (licenseBreakdown.get(license) || 0) + 1);
   }
 
-  console.log('\n--- License Breakdown ---');
+  console.log("\n--- License Breakdown ---");
   const sortedLicenses = [...licenseBreakdown.entries()].sort((a, b) => b[1] - a[1]);
   for (const [license, count] of sortedLicenses.slice(0, 15)) {
     console.log(`  ${license}: ${count}`);
   }
 
-  console.log('\n========================================');
-  console.log('✅ SBOM generation complete');
-  console.log('========================================');
+  console.log("\n========================================");
+  console.log("✅ SBOM generation complete");
+  console.log("========================================");
 }
 
 main().catch((error) => {
-  console.error('SBOM generation failed:', error);
+  console.error("SBOM generation failed:", error);
   process.exit(1);
 });

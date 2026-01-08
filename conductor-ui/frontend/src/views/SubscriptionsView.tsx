@@ -1,5 +1,5 @@
 // conductor-ui/frontend/src/views/SubscriptionsView.tsx
-import React from 'react';
+import React from "react";
 
 export const SubscriptionsView = () => {
   // Placeholder for managing notification subscriptions (email, webhook).

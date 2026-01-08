@@ -69,6 +69,7 @@ The Summit Plugin System is a comprehensive extensibility framework built on the
 The foundation of the plugin architecture.
 
 **Key Classes:**
+
 - `PluginManager` - Central orchestrator for plugin lifecycle
 - `PluginLoader` - Loads and caches plugin code
 - `PluginSandbox` - Isolated execution environment
@@ -77,6 +78,7 @@ The foundation of the plugin architecture.
 - `PluginSecurity` - Security scanning and permission enforcement
 
 **Responsibilities:**
+
 - Plugin discovery and loading
 - Lifecycle management (install, enable, disable, uninstall)
 - Dependency resolution and version checking
@@ -89,6 +91,7 @@ The foundation of the plugin architecture.
 Developer-friendly SDK for building plugins.
 
 **Features:**
+
 - Fluent API builder pattern
 - TypeScript decorators for metadata
 - Testing utilities and mocks
@@ -96,6 +99,7 @@ Developer-friendly SDK for building plugins.
 - Type-safe context and APIs
 
 **Example:**
+
 ```typescript
 createPlugin()
   .withMetadata({...})
@@ -109,6 +113,7 @@ createPlugin()
 Defines extension points and interfaces.
 
 **Extension Points:**
+
 - **DataSourceExtension** - Connect external data sources
 - **AnalyzerExtension** - Custom analysis algorithms
 - **VisualizationExtension** - UI components and charts
@@ -119,24 +124,28 @@ Defines extension points and interfaces.
 ### 4. Services
 
 #### Plugin Registry Service
+
 - Stores plugin metadata and versions
 - Handles plugin discovery and search
 - Manages installation tracking
 - Provides plugin statistics
 
 **Tech Stack:**
+
 - Express.js REST API
 - PostgreSQL for persistence
 - Redis for caching
 - Rate limiting and authentication
 
 #### Plugin Executor Service
+
 - Executes plugins in isolated environments
 - Job queue for async operations
 - Resource monitoring and limits
 - Performance metrics
 
 **Tech Stack:**
+
 - Bull queue for job processing
 - isolated-vm for sandboxing
 - Resource usage tracking
@@ -157,6 +166,7 @@ const context = await isolate.createContext();
 ```
 
 **Isolation Features:**
+
 - Memory limits
 - CPU usage limits
 - No direct file system access
@@ -169,9 +179,9 @@ Granular permission model:
 
 ```typescript
 enum PluginPermission {
-  READ_DATA = 'read:data',
-  WRITE_DATA = 'write:data',
-  NETWORK_ACCESS = 'network:access',
+  READ_DATA = "read:data",
+  WRITE_DATA = "write:data",
+  NETWORK_ACCESS = "network:access",
   // ... more permissions
 }
 ```
@@ -191,6 +201,7 @@ Multi-layer security:
 ### Threat Model
 
 **Protected Against:**
+
 - Malicious code execution
 - Resource exhaustion (DoS)
 - Data exfiltration
@@ -198,6 +209,7 @@ Multi-layer security:
 - Supply chain attacks (via dependency scanning)
 
 **Trust Boundaries:**
+
 - Platform ↔ Plugin (sandboxed)
 - Plugin ↔ Plugin (no direct communication)
 - Plugin ↔ External services (controlled via permissions)
@@ -265,7 +277,7 @@ Extension points use a pipeline pattern:
 class ExtensionPointRegistry {
   async executeAll<T>(type: string, input: T): Promise<T[]> {
     const extensions = this.getExtensions(type);
-    return Promise.all(extensions.map(ext => ext.execute(input)));
+    return Promise.all(extensions.map((ext) => ext.execute(input)));
   }
 
   async executePipeline<T>(type: string, input: T): Promise<T> {
@@ -287,10 +299,10 @@ Each plugin has resource limits:
 
 ```typescript
 interface ResourceQuota {
-  maxMemoryMB: number;      // 256 MB default
-  maxCpuPercent: number;    // 50% default
-  maxStorageMB: number;     // 100 MB default
-  maxNetworkMbps: number;   // 10 Mbps default
+  maxMemoryMB: number; // 256 MB default
+  maxCpuPercent: number; // 50% default
+  maxStorageMB: number; // 100 MB default
+  maxNetworkMbps: number; // 10 Mbps default
 }
 ```
 
@@ -316,7 +328,7 @@ Rate limiting per plugin:
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // requests per window per plugin
-  keyGenerator: (req) => req.headers['x-plugin-id'],
+  keyGenerator: (req) => req.headers["x-plugin-id"],
 });
 ```
 
@@ -345,21 +357,25 @@ const limiter = rateLimit({
 ## Testing Strategy
 
 ### Unit Tests
+
 - Individual plugin components
 - Mocked platform services
 - Fast, isolated tests
 
 ### Integration Tests
+
 - Plugin ↔ Platform interaction
 - Extension point registration
 - Event bus communication
 
 ### Security Tests
+
 - Permission enforcement
 - Resource limit compliance
 - Sandbox escape attempts
 
 ### Performance Tests
+
 - Load testing
 - Memory leak detection
 - Resource usage profiling
@@ -367,17 +383,20 @@ const limiter = rateLimit({
 ## Deployment
 
 ### Development
+
 ```bash
 npm run dev
 ```
 
 ### Production
+
 ```bash
 npm run build
 npm run start
 ```
 
 ### Docker
+
 ```dockerfile
 FROM node:18-alpine
 WORKDIR /app
@@ -390,17 +409,20 @@ CMD ["node", "dist/server.js"]
 ## Scaling Considerations
 
 ### Horizontal Scaling
+
 - Stateless plugin execution
 - Shared registry via PostgreSQL
 - Distributed job queue via Redis
 
 ### Performance Optimization
+
 - Plugin code caching
 - Lazy loading of heavy modules
 - Connection pooling
 - Query optimization
 
 ### High Availability
+
 - Health checks for all services
 - Graceful shutdown
 - Circuit breakers for external calls

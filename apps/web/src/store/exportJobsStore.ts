@@ -21,16 +21,16 @@ export const useExportJobsStore = create<ExportJobsStore>()(
   persist(
     (set, get) => ({
       jobs: {},
-      getJob: (key) => get().jobs[key],
+      getJob: key => get().jobs[key],
       upsertJob: (key, job) =>
-        set((state) => ({
+        set(state => ({
           jobs: {
             ...state.jobs,
             [key]: job,
           },
         })),
       updateStatus: (key, status, updates) =>
-        set((state) => {
+        set(state => {
           const existing = state.jobs[key]
           if (!existing) return state
           return {
@@ -45,15 +45,15 @@ export const useExportJobsStore = create<ExportJobsStore>()(
             },
           }
         }),
-      clearJob: (key) =>
-        set((state) => {
+      clearJob: key =>
+        set(state => {
           const { [key]: _, ...rest } = state.jobs
           return { jobs: rest }
         }),
     }),
     {
       name: 'export-jobs',
-      partialize: (state) => ({ jobs: state.jobs }),
+      partialize: state => ({ jobs: state.jobs }),
     }
   )
 )

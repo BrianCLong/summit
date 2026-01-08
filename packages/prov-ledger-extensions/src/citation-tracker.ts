@@ -12,7 +12,7 @@ export interface Citation {
   /** Citation ID */
   id: string;
   /** Type of citation */
-  type: 'entity' | 'relationship' | 'document' | 'claim' | 'external';
+  type: "entity" | "relationship" | "document" | "claim" | "external";
   /** Referenced item ID */
   referenceId: string;
   /** Reference type (entity type, document type, etc.) */
@@ -73,10 +73,10 @@ export interface CitationQuality {
 }
 
 export interface CitationIssue {
-  type: 'missing_citation' | 'low_confidence' | 'stale_reference' | 'circular_reference';
+  type: "missing_citation" | "low_confidence" | "stale_reference" | "circular_reference";
   description: string;
   position?: { start: number; end: number };
-  severity: 'low' | 'medium' | 'high';
+  severity: "low" | "medium" | "high";
 }
 
 // -----------------------------------------------------------------------------
@@ -89,11 +89,7 @@ export class CitationTracker {
   /**
    * Create a new cited response
    */
-  createResponse(
-    query: string,
-    answer: string,
-    metadata: CitedResponse['metadata']
-  ): string {
+  createResponse(query: string, answer: string, metadata: CitedResponse["metadata"]): string {
     const responseId = this.generateId();
     const response: CitedResponse = {
       responseId,
@@ -113,7 +109,7 @@ export class CitationTracker {
   /**
    * Add a citation to a response
    */
-  addCitation(responseId: string, citation: Omit<Citation, 'id'>): string {
+  addCitation(responseId: string, citation: Omit<Citation, "id">): string {
     const response = this.responses.get(responseId);
     if (!response) {
       throw new Error(`Response ${responseId} not found`);
@@ -128,10 +124,13 @@ export class CitationTracker {
     response.citations.push(fullCitation);
 
     // Update referenced lists
-    if (citation.type === 'entity' && !response.referencedEntities.includes(citation.referenceId)) {
+    if (citation.type === "entity" && !response.referencedEntities.includes(citation.referenceId)) {
       response.referencedEntities.push(citation.referenceId);
     }
-    if (citation.type === 'document' && !response.referencedDocuments.includes(citation.referenceId)) {
+    if (
+      citation.type === "document" &&
+      !response.referencedDocuments.includes(citation.referenceId)
+    ) {
       response.referencedDocuments.push(citation.referenceId);
     }
 
@@ -167,10 +166,10 @@ export class CitationTracker {
       );
       if (!hasCitation && this.isFactualClaim(sentence.text)) {
         issues.push({
-          type: 'missing_citation',
+          type: "missing_citation",
           description: `Factual claim without citation: "${sentence.text.substring(0, 50)}..."`,
           position: { start: sentence.start, end: sentence.end },
-          severity: 'medium',
+          severity: "medium",
         });
       }
     }
@@ -179,10 +178,10 @@ export class CitationTracker {
     for (const citation of response.citations) {
       if (citation.confidence < 0.5) {
         issues.push({
-          type: 'low_confidence',
+          type: "low_confidence",
           description: `Low confidence citation (${citation.confidence.toFixed(2)}): ${citation.citationText.substring(0, 50)}`,
           position: citation.position,
-          severity: citation.confidence < 0.3 ? 'high' : 'medium',
+          severity: citation.confidence < 0.3 ? "high" : "medium",
         });
       }
     }
@@ -191,9 +190,10 @@ export class CitationTracker {
       citationCount: response.citations.length,
       coverage: response.citationCoverage,
       averageConfidence: response.confidence,
-      averageRelevance: response.citations.length > 0
-        ? response.citations.reduce((sum, c) => sum + c.relevance, 0) / response.citations.length
-        : 0,
+      averageRelevance:
+        response.citations.length > 0
+          ? response.citations.reduce((sum, c) => sum + c.relevance, 0) / response.citations.length
+          : 0,
       issues,
     };
   }
@@ -202,8 +202,9 @@ export class CitationTracker {
    * Generate citation report for investigation
    */
   generateInvestigationReport(investigationId: string): InvestigationCitationReport {
-    const responses = Array.from(this.responses.values())
-      .filter((r) => r.metadata.investigationId === investigationId);
+    const responses = Array.from(this.responses.values()).filter(
+      (r) => r.metadata.investigationId === investigationId
+    );
 
     const entityCitationCounts = new Map<string, number>();
     const documentCitationCounts = new Map<string, number>();
@@ -256,7 +257,8 @@ export class CitationTracker {
     }
 
     // Calculate average confidence
-    response.confidence = response.citations.reduce((sum, c) => sum + c.confidence, 0) / response.citations.length;
+    response.confidence =
+      response.citations.reduce((sum, c) => sum + c.confidence, 0) / response.citations.length;
 
     // Calculate coverage (simplified - % of answer covered by citations)
     const answerLength = response.answer.length;

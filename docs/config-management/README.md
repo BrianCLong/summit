@@ -28,12 +28,14 @@ The Configuration Management System provides a comprehensive solution for managi
 ### 1. Multi-Backend Storage
 
 **Architecture:**
+
 ```
 Write: All backends (Consul + PostgreSQL + Cache)
 Read: Cache → Consul → PostgreSQL (failover)
 ```
 
 **Benefits:**
+
 - **Real-time updates** via Consul
 - **Persistence** via PostgreSQL
 - **Performance** via In-Memory cache
@@ -42,6 +44,7 @@ Read: Cache → Consul → PostgreSQL (failover)
 ### 2. Configuration Versioning
 
 Every configuration change creates a new version with:
+
 - Unique version number
 - SHA-256 checksum
 - Full audit metadata
@@ -49,24 +52,25 @@ Every configuration change creates a new version with:
 
 ```typescript
 // Create version
-const v1 = await configService.createOrUpdate('api/config', {
+const v1 = await configService.createOrUpdate("api/config", {
   config: { timeout: 30000 },
-  metadata: { actor: 'alice@summit.com', message: 'Initial config' },
+  metadata: { actor: "alice@summit.com", message: "Initial config" },
 });
 
 // Update (creates v2)
-const v2 = await configService.createOrUpdate('api/config', {
+const v2 = await configService.createOrUpdate("api/config", {
   config: { timeout: 60000 },
-  metadata: { actor: 'bob@summit.com', message: 'Increase timeout' },
+  metadata: { actor: "bob@summit.com", message: "Increase timeout" },
 });
 
 // Rollback to v1
-await configService.rollback('api/config', 1, 'alice@summit.com');
+await configService.rollback("api/config", 1, "alice@summit.com");
 ```
 
 ### 3. Secrets Management
 
 **Features:**
+
 - Multi-provider support (AWS, GCP, Azure, Vault)
 - Automatic rotation policies
 - Graceful migration (old + new valid during grace period)
@@ -76,10 +80,10 @@ await configService.rollback('api/config', 1, 'alice@summit.com');
 ```typescript
 // Set rotation policy
 await secretsManager.setRotationPolicy({
-  secretId: 'database/password',
+  secretId: "database/password",
   rotationIntervalDays: 90,
   gracePeriodDays: 7,
-  notifyOnRotation: ['security@summit.com'],
+  notifyOnRotation: ["security@summit.com"],
   enabled: true,
 });
 
@@ -90,6 +94,7 @@ await secretsManager.setRotationPolicy({
 ### 4. Approval Workflows
 
 **Workflow States:**
+
 ```
 PENDING → APPROVED → APPLIED
          ↓
@@ -97,6 +102,7 @@ PENDING → APPROVED → APPLIED
 ```
 
 **Features:**
+
 - Multi-approver support
 - Environment-based auto-approval
 - Rejection with reasons
@@ -105,15 +111,15 @@ PENDING → APPROVED → APPLIED
 ```typescript
 // Request approval
 const workflow = await approvalManager.createWorkflow(
-  'database/config',
+  "database/config",
   proposedVersion,
-  'dev@summit.com',
-  { environment: 'production' },
+  "dev@summit.com",
+  { environment: "production" }
 );
 
 // Approve
-await approvalManager.approve(workflow.changeId, 'lead@summit.com');
-await approvalManager.approve(workflow.changeId, 'cto@summit.com');
+await approvalManager.approve(workflow.changeId, "lead@summit.com");
+await approvalManager.approve(workflow.changeId, "cto@summit.com");
 
 // Apply
 await approvalManager.markApplied(workflow.changeId);
@@ -124,14 +130,10 @@ await approvalManager.markApplied(workflow.changeId);
 Continuous monitoring of configuration drift:
 
 ```typescript
-const report = await configService.detectDrift(
-  'api/config',
-  'production',
-  actualConfig,
-);
+const report = await configService.detectDrift("api/config", "production", actualConfig);
 
 if (report.driftDetected) {
-  console.warn('Drift detected:', report.deltas);
+  console.warn("Drift detected:", report.deltas);
   // Alert operations team
   // Auto-remediate or request review
 }
@@ -142,24 +144,24 @@ if (report.driftDetected) {
 Base configuration with environment-specific overrides:
 
 ```typescript
-await configService.createOrUpdate('api/config', {
+await configService.createOrUpdate("api/config", {
   config: {
-    apiUrl: 'https://api.summit.com',
+    apiUrl: "https://api.summit.com",
     timeout: 30000,
   },
   overrides: {
     development: {
-      apiUrl: 'http://localhost:4000',
+      apiUrl: "http://localhost:4000",
     },
     staging: {
-      apiUrl: 'https://staging-api.summit.com',
+      apiUrl: "https://staging-api.summit.com",
     },
   },
 });
 
 // Get dev config
-const { effectiveConfig } = await configService.getConfig('api/config', {
-  environment: 'development',
+const { effectiveConfig } = await configService.getConfig("api/config", {
+  environment: "development",
 });
 // apiUrl = 'http://localhost:4000'
 ```
@@ -167,14 +169,15 @@ const { effectiveConfig } = await configService.getConfig('api/config', {
 ### 7. A/B Testing & Canary Rollouts
 
 **A/B Testing:**
+
 ```typescript
-await configService.createOrUpdate('ui/theme', {
-  config: { theme: 'light' },
+await configService.createOrUpdate("ui/theme", {
+  config: { theme: "light" },
   abTest: {
-    experimentId: 'theme-exp-001',
+    experimentId: "theme-exp-001",
     variants: [
-      { name: 'control', weight: 0.5, config: { theme: 'light' } },
-      { name: 'dark', weight: 0.5, config: { theme: 'dark' } },
+      { name: "control", weight: 0.5, config: { theme: "light" } },
+      { name: "dark", weight: 0.5, config: { theme: "dark" } },
     ],
     startAt: new Date(),
     endAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
@@ -183,15 +186,16 @@ await configService.createOrUpdate('ui/theme', {
 ```
 
 **Canary Rollouts:**
+
 ```typescript
-await configService.createOrUpdate('api/config', {
+await configService.createOrUpdate("api/config", {
   config: { timeout: 30000 },
   canary: {
-    environment: 'production',
-    trafficPercent: 10,  // 10% of traffic
+    environment: "production",
+    trafficPercent: 10, // 10% of traffic
     config: { timeout: 60000 },
     startAt: new Date(),
-    guardRailMetrics: ['error_rate', 'latency_p99'],
+    guardRailMetrics: ["error_rate", "latency_p99"],
   },
 });
 ```
@@ -229,9 +233,11 @@ await configService.createOrUpdate('api/config', {
 ## Components
 
 ### 1. DistributedConfigService
+
 Central service for configuration management.
 
 **Methods:**
+
 - `createOrUpdate()` - Create or update configuration
 - `getConfig()` - Retrieve effective configuration
 - `rollback()` - Rollback to previous version
@@ -240,32 +246,39 @@ Central service for configuration management.
 - `registerWatcher()` - Watch for configuration changes
 
 ### 2. MultiBackendRepository
+
 Multi-backend storage with automatic failover.
 
 **Backends:**
+
 - **Primary**: Consul (real-time, distributed)
 - **Fallback**: PostgreSQL (persistent, reliable)
 - **Cache**: In-Memory (fast, local)
 
 **Methods:**
+
 - `saveVersion()` - Save to all backends
 - `getLatestVersion()` - Read from cache → primary → fallback
 - `getHealthStatus()` - Check backend health
 - `failoverToFallback()` - Manual failover
 
 ### 3. SecretsManager
+
 Secrets management with automatic rotation.
 
 **Methods:**
+
 - `setRotationPolicy()` - Configure rotation policy
 - `rotateSecret()` - Manually rotate secret
 - `resolve()` - Resolve secret reference
 - `cleanupExpired()` - Clean up expired secrets
 
 ### 4. ApprovalWorkflowManager
+
 Change approval workflows.
 
 **Methods:**
+
 - `createWorkflow()` - Create approval request
 - `approve()` - Approve change
 - `reject()` - Reject change
@@ -306,7 +319,7 @@ psql $DATABASE_URL < migrations/config-management.sql
 ### 4. Initialize
 
 ```typescript
-import { Pool } from 'pg';
+import { Pool } from "pg";
 import {
   ConsulConfigRepository,
   PostgresConfigRepository,
@@ -315,12 +328,12 @@ import {
   DistributedConfigService,
   SecretsManager,
   ApprovalWorkflowManager,
-} from './server/src/config/distributed';
+} from "./server/src/config/distributed";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 // Initialize repositories
-const consulRepo = new ConsulConfigRepository({ host: 'localhost' });
+const consulRepo = new ConsulConfigRepository({ host: "localhost" });
 const postgresRepo = new PostgresConfigRepository({ pool });
 await postgresRepo.initialize();
 
@@ -354,27 +367,27 @@ const schema = z.object({
   ]),
 });
 
-configService.registerSchema('database/config', schema);
+configService.registerSchema("database/config", schema);
 
 // 2. Create configuration
-await configService.createOrUpdate('database/config', {
+await configService.createOrUpdate("database/config", {
   config: {
-    host: 'localhost',
+    host: "localhost",
     port: 5432,
-    password: { __secretRef: { provider: 'aws', key: 'db/password' } },
+    password: { __secretRef: { provider: "aws", key: "db/password" } },
   },
   overrides: {
-    production: { host: 'prod-db.summit.com' },
+    production: { host: "prod-db.summit.com" },
   },
   metadata: {
-    actor: 'admin@summit.com',
-    message: 'Initialize database config',
+    actor: "admin@summit.com",
+    message: "Initialize database config",
   },
 });
 
 // 3. Retrieve configuration
-const { effectiveConfig } = await configService.getConfig('database/config', {
-  environment: 'production',
+const { effectiveConfig } = await configService.getConfig("database/config", {
+  environment: "production",
   resolveSecrets: true,
 });
 
@@ -393,6 +406,7 @@ const client = new DatabaseClient(effectiveConfig);
 ## Examples
 
 See [examples/](./examples/) directory for:
+
 - Basic configuration management
 - Environment overrides
 - Secrets rotation
@@ -421,16 +435,17 @@ pnpm test:coverage
 ```typescript
 // Check backend health
 const health = await multiRepo.getHealthStatus();
-console.log('Health:', health);
+console.log("Health:", health);
 
 // Check active primary
 const activePrimary = multiRepo.getActivePrimary();
-console.log('Active:', activePrimary);
+console.log("Active:", activePrimary);
 ```
 
 ### Metrics
 
 Key metrics to monitor:
+
 - `config.changes.total` - Total configuration changes
 - `config.drift.detected` - Drift occurrences
 - `secrets.rotations.success` - Successful rotations
@@ -443,22 +458,22 @@ Listen for important events:
 
 ```typescript
 // Configuration events
-configService.on('config:updated', (version) => {
-  console.log('Config updated:', version);
+configService.on("config:updated", (version) => {
+  console.log("Config updated:", version);
 });
 
 // Secrets events
-secretsManager.on('secret:rotated', ({ secretId, newVersion }) => {
+secretsManager.on("secret:rotated", ({ secretId, newVersion }) => {
   console.log(`Secret ${secretId} rotated to v${newVersion}`);
 });
 
 // Workflow events
-approvalManager.on('workflow:approved', (workflow) => {
-  console.log('Workflow approved:', workflow.changeId);
+approvalManager.on("workflow:approved", (workflow) => {
+  console.log("Workflow approved:", workflow.changeId);
 });
 
 // Backend events
-multiRepo.on('failover', ({ from, to }) => {
+multiRepo.on("failover", ({ from, to }) => {
   console.warn(`Failover from ${from} to ${to}`);
 });
 ```
@@ -468,6 +483,7 @@ multiRepo.on('failover', ({ from, to }) => {
 ### Common Issues
 
 **1. Consul Connection Failed**
+
 ```bash
 # Check Consul status
 curl http://localhost:8500/v1/status/leader
@@ -477,17 +493,19 @@ docker-compose -f docker-compose.consul.yml restart consul
 ```
 
 **2. Secret Resolution Failed**
+
 ```typescript
 // Register secret resolver
-secretsManager.resolvers.set('aws', awsSecretResolver);
+secretsManager.resolvers.set("aws", awsSecretResolver);
 ```
 
 **3. Approval Stuck**
+
 ```typescript
 // Check workflow
 const workflow = await approvalManager.getWorkflow(changeId);
-console.log('Status:', workflow.status);
-console.log('Approvals:', workflow.approvals.length, '/', workflow.requiredApprovals);
+console.log("Status:", workflow.status);
+console.log("Approvals:", workflow.approvals.length, "/", workflow.requiredApprovals);
 ```
 
 See [Troubleshooting Guide](./TROUBLESHOOTING.md) for more details.

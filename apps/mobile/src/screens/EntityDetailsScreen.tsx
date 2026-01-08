@@ -1,10 +1,5 @@
 import React, { useCallback } from 'react';
-import {
-  View,
-  ScrollView,
-  TouchableOpacity,
-  Share,
-} from 'react-native';
+import { View, ScrollView, TouchableOpacity, Share } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import {
@@ -63,12 +58,15 @@ export const EntityDetailsScreen: React.FC = () => {
 
   const handleViewOnMap = useCallback(() => {
     if (entity?.location) {
-      navigation.navigate('MapFullScreen' as never, {
-        centerOn: {
-          lat: entity.location.latitude,
-          lng: entity.location.longitude,
-        },
-      } as never);
+      navigation.navigate(
+        'MapFullScreen' as never,
+        {
+          centerOn: {
+            lat: entity.location.latitude,
+            lng: entity.location.longitude,
+          },
+        } as never,
+      );
     }
   }, [entity, navigation]);
 
@@ -153,8 +151,8 @@ export const EntityDetailsScreen: React.FC = () => {
                   entity.confidence >= 80
                     ? 'success'
                     : entity.confidence >= 50
-                    ? 'warning'
-                    : 'destructive'
+                      ? 'warning'
+                      : 'destructive'
                 }
               />
             </View>
@@ -225,9 +223,12 @@ export const EntityDetailsScreen: React.FC = () => {
                 <TouchableOpacity
                   key={rel.id}
                   onPress={() =>
-                    navigation.navigate('EntityDetails' as never, {
-                      entityId: rel.targetId,
-                    } as never)
+                    navigation.navigate(
+                      'EntityDetails' as never,
+                      {
+                        entityId: rel.targetId,
+                      } as never,
+                    )
                   }
                   className={cn(
                     'flex-row items-center justify-between py-3',

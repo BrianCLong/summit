@@ -18,7 +18,7 @@ Technology convergence monitoring and analysis for identifying synergies and cro
 ## Usage
 
 ```typescript
-import { ConvergenceTracker } from '@intelgraph/convergence-tracking';
+import { ConvergenceTracker } from "@intelgraph/convergence-tracking";
 
 const tracker = new ConvergenceTracker();
 

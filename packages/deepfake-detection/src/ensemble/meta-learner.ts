@@ -32,14 +32,14 @@ export interface ModelOutput {
 }
 
 export enum ModelType {
-  CNN_CLASSIFIER = 'cnn_classifier',
-  TRANSFORMER = 'transformer',
-  FREQUENCY_ANALYZER = 'frequency_analyzer',
-  TEMPORAL_NETWORK = 'temporal_network',
-  GAN_DISCRIMINATOR = 'gan_discriminator',
-  AUDIO_SPECTROGRAM = 'audio_spectrogram',
-  MULTIMODAL_FUSION = 'multimodal_fusion',
-  ADVERSARIAL_ROBUST = 'adversarial_robust',
+  CNN_CLASSIFIER = "cnn_classifier",
+  TRANSFORMER = "transformer",
+  FREQUENCY_ANALYZER = "frequency_analyzer",
+  TEMPORAL_NETWORK = "temporal_network",
+  GAN_DISCRIMINATOR = "gan_discriminator",
+  AUDIO_SPECTROGRAM = "audio_spectrogram",
+  MULTIMODAL_FUSION = "multimodal_fusion",
+  ADVERSARIAL_ROBUST = "adversarial_robust",
 }
 
 export interface AggregationResult {
@@ -51,12 +51,12 @@ export interface AggregationResult {
 }
 
 export enum AggregationMethod {
-  WEIGHTED_AVERAGE = 'weighted_average',
-  STACKING = 'stacking',
-  VOTING = 'voting',
-  BAYESIAN = 'bayesian',
-  ATTENTION = 'attention',
-  DYNAMIC = 'dynamic',
+  WEIGHTED_AVERAGE = "weighted_average",
+  STACKING = "stacking",
+  VOTING = "voting",
+  BAYESIAN = "bayesian",
+  ATTENTION = "attention",
+  DYNAMIC = "dynamic",
 }
 
 export interface CalibrationResult {
@@ -68,11 +68,11 @@ export interface CalibrationResult {
 }
 
 export enum CalibrationMethod {
-  PLATT_SCALING = 'platt_scaling',
-  ISOTONIC_REGRESSION = 'isotonic_regression',
-  TEMPERATURE_SCALING = 'temperature_scaling',
-  BETA_CALIBRATION = 'beta_calibration',
-  HISTOGRAM_BINNING = 'histogram_binning',
+  PLATT_SCALING = "platt_scaling",
+  ISOTONIC_REGRESSION = "isotonic_regression",
+  TEMPERATURE_SCALING = "temperature_scaling",
+  BETA_CALIBRATION = "beta_calibration",
+  HISTOGRAM_BINNING = "histogram_binning",
 }
 
 export interface ReliabilityBin {
@@ -134,7 +134,7 @@ export class EnsembleMetaLearner {
    * Run ensemble detection with meta-learning
    */
   async detect(media: {
-    type: 'image' | 'video' | 'audio';
+    type: "image" | "video" | "audio";
     data: Buffer | Buffer[];
     context?: any;
   }): Promise<EnsembleResult> {
@@ -240,8 +240,8 @@ export class EnsembleMetaLearner {
     // Identify outlier models (> 2 std from mean)
     const stdDev = disagreement;
     const outlierModels = outputs
-      .filter(o => Math.abs(o.rawScore - mean) > 2 * stdDev)
-      .map(o => o.modelId);
+      .filter((o) => Math.abs(o.rawScore - mean) > 2 * stdDev)
+      .map((o) => o.modelId);
 
     return {
       method: AggregationMethod.DYNAMIC,
@@ -258,8 +258,8 @@ export class EnsembleMetaLearner {
   private calculateConsensus(outputs: ModelOutput[]): number {
     if (outputs.length === 0) return 0;
 
-    const predictions = outputs.map(o => o.prediction);
-    const positiveCount = predictions.filter(p => p).length;
+    const predictions = outputs.map((o) => o.prediction);
+    const positiveCount = predictions.filter((p) => p).length;
     const majorityRatio = Math.max(positiveCount, outputs.length - positiveCount) / outputs.length;
 
     return majorityRatio;
@@ -273,13 +273,13 @@ export class EnsembleMetaLearner {
     metaPrediction: { prediction: boolean; confidence: number; strength: number }
   ): UncertaintyEstimate {
     // Aleatoric uncertainty from prediction variance
-    const scores = outputs.map(o => o.rawScore);
+    const scores = outputs.map((o) => o.rawScore);
     const mean = scores.reduce((a, b) => a + b, 0) / scores.length;
     const variance = scores.reduce((sum, s) => sum + Math.pow(s - mean, 2), 0) / scores.length;
     const aleatoric = Math.sqrt(variance);
 
     // Epistemic uncertainty from model disagreement
-    const predictions = outputs.map(o => o.prediction);
+    const predictions = outputs.map((o) => o.prediction);
     const uniquePredictions = new Set(predictions).size;
     const epistemic = uniquePredictions > 1 ? 1 - this.calculateConsensus(outputs) : 0;
 
@@ -321,19 +321,23 @@ export class EnsembleMetaLearner {
     const sortedByWeight = [...outputs].sort(
       (a, b) => aggregation.weights[b.modelId] - aggregation.weights[a.modelId]
     );
-    const dominantModels = sortedByWeight.slice(0, 3).map(o => o.modelId);
+    const dominantModels = sortedByWeight.slice(0, 3).map((o) => o.modelId);
 
     // Find agreement factors
     const agreementFactors: string[] = [];
     const disagreementFactors: string[] = [];
 
-    const majorityPrediction = outputs.filter(o => o.prediction).length > outputs.length / 2;
+    const majorityPrediction = outputs.filter((o) => o.prediction).length > outputs.length / 2;
 
     for (const output of outputs) {
       if (output.prediction === majorityPrediction) {
-        agreementFactors.push(`${output.modelId}: ${(output.confidence * 100).toFixed(1)}% confident`);
+        agreementFactors.push(
+          `${output.modelId}: ${(output.confidence * 100).toFixed(1)}% confident`
+        );
       } else {
-        disagreementFactors.push(`${output.modelId}: disagrees with ${(output.confidence * 100).toFixed(1)}% confidence`);
+        disagreementFactors.push(
+          `${output.modelId}: disagrees with ${(output.confidence * 100).toFixed(1)}% confidence`
+        );
       }
     }
 
@@ -483,21 +487,18 @@ class MetaModel {
     return { prediction, confidence, strength };
   }
 
-  private extractMetaFeatures(
-    outputs: ModelOutput[],
-    aggregation: AggregationResult
-  ): number[] {
+  private extractMetaFeatures(outputs: ModelOutput[], aggregation: AggregationResult): number[] {
     return [
       aggregation.aggregatedScore,
       aggregation.disagreement,
       outputs.length,
       this.calculateConsensus(outputs),
-      ...outputs.map(o => o.rawScore),
+      ...outputs.map((o) => o.rawScore),
     ];
   }
 
   private calculateConsensus(outputs: ModelOutput[]): number {
-    const positive = outputs.filter(o => o.prediction).length;
+    const positive = outputs.filter((o) => o.prediction).length;
     return Math.max(positive, outputs.length - positive) / outputs.length;
   }
 
@@ -592,10 +593,7 @@ class ConfidenceCalibrator {
 class DynamicWeighter {
   private inputProfiles: Map<string, number[]> = new Map();
 
-  async computeWeights(
-    media: any,
-    outputs: ModelOutput[]
-  ): Promise<Record<string, number>> {
+  async computeWeights(media: any, outputs: ModelOutput[]): Promise<Record<string, number>> {
     const weights: Record<string, number> = {};
 
     // Compute input characteristics
@@ -606,10 +604,10 @@ class DynamicWeighter {
       let weight = output.weight;
 
       // Boost certain model types based on media type
-      if (media.type === 'video' && output.modelType === ModelType.TEMPORAL_NETWORK) {
+      if (media.type === "video" && output.modelType === ModelType.TEMPORAL_NETWORK) {
         weight *= 1.3;
       }
-      if (media.type === 'audio' && output.modelType === ModelType.AUDIO_SPECTROGRAM) {
+      if (media.type === "audio" && output.modelType === ModelType.AUDIO_SPECTROGRAM) {
         weight *= 1.3;
       }
       if (output.modelType === ModelType.ADVERSARIAL_ROBUST) {
@@ -632,11 +630,7 @@ class DynamicWeighter {
     return [0.5, 0.5, 0.5];
   }
 
-  async update(
-    media: any,
-    outputs: ModelOutput[],
-    groundTruth: boolean
-  ): Promise<void> {
+  async update(media: any, outputs: ModelOutput[], groundTruth: boolean): Promise<void> {
     // Learn optimal weights for different input types
   }
 }

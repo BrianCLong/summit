@@ -95,7 +95,7 @@ grafana:
       providers:
         - name: intelgraph
           orgId: 1
-          folder: ''
+          folder: ""
           type: file
           disableDeletion: false
           options:

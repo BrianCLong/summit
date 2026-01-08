@@ -15,9 +15,9 @@ metadata:
 
 spec:
   schedule:
-    cron: "*/15 * * * *"  # Every 15 minutes
+    cron: "*/15 * * * *" # Every 15 minutes
     timezone: UTC
-    enabled: false  # Manual trigger only
+    enabled: false # Manual trigger only
 
   inputs:
     - name: demo_config
@@ -153,7 +153,7 @@ spec:
     budget:
       per_run_usd: 0.10
     slo:
-      latency_p95_ms: 120000  # 2 minutes
+      latency_p95_ms: 120000 # 2 minutes
       success_rate_percent: 99.9
 
   observability:

@@ -1,16 +1,8 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
-import {
-  parseDocument,
-  isMap,
-  isSeq,
-  YAMLMap,
-  YAMLSeq,
-  Scalar,
-  Document,
-} from 'yaml';
-import type { Diagnostic, LoadResult, Position } from './types';
-import { interpolateConfig } from './interpolate';
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { parseDocument, isMap, isSeq, YAMLMap, YAMLSeq, Scalar, Document } from "yaml";
+import type { Diagnostic, LoadResult, Position } from "./types";
+import { interpolateConfig } from "./interpolate";
 
 export interface ParsedConfig<T = unknown> {
   document: Document.Parsed;
@@ -21,7 +13,7 @@ export interface ParsedConfig<T = unknown> {
 
 export function parseConfigFile(filePath: string): ParsedConfig {
   const absolute = resolve(filePath);
-  const raw = readFileSync(absolute, 'utf8');
+  const raw = readFileSync(absolute, "utf8");
   const doc = parseDocument(raw, {
     prettyErrors: true,
     keepCstNodes: true,
@@ -34,9 +26,9 @@ export function parseConfigFile(filePath: string): ParsedConfig {
   if (doc.errors.length) {
     for (const err of doc.errors) {
       diagnostics.push({
-        severity: 'error',
+        severity: "error",
         message: err.message,
-        pointer: '',
+        pointer: "",
         line: err.linePos?.[0]?.line ?? err.line ?? 0,
         column: err.linePos?.[0]?.col ?? err.col ?? 0,
       });
@@ -46,9 +38,9 @@ export function parseConfigFile(filePath: string): ParsedConfig {
   if (doc.warnings.length) {
     for (const warning of doc.warnings) {
       diagnostics.push({
-        severity: 'warning',
+        severity: "warning",
         message: warning.message,
-        pointer: '',
+        pointer: "",
         line: warning.linePos?.[0]?.line ?? warning.line ?? 0,
         column: warning.linePos?.[0]?.col ?? warning.col ?? 0,
       });
@@ -60,11 +52,11 @@ export function parseConfigFile(filePath: string): ParsedConfig {
   }
 
   if (!doc.contents) {
-    pointerMap[''] = { line: 1, column: 1 };
+    pointerMap[""] = { line: 1, column: 1 };
     return { document: doc, value: null, diagnostics, pointerMap };
   }
 
-  collectPointers(doc.contents, '', doc, pointerMap);
+  collectPointers(doc.contents, "", doc, pointerMap);
   const value = doc.toJS({ mapAsMap: false, merge: true }) as unknown;
   return { document: doc, value, diagnostics, pointerMap };
 }
@@ -72,7 +64,7 @@ export function parseConfigFile(filePath: string): ParsedConfig {
 export function loadConfig(
   filePath: string,
   schema: object | string,
-  options: LoadOptions = {},
+  options: LoadOptions = {}
 ): LoadResult {
   const parsed = parseConfigFile(filePath);
   const diagnostics = [...parsed.diagnostics];
@@ -84,9 +76,9 @@ export function loadConfig(
   const interpolationPolicy = options.interpolation ?? {};
   const interpolated = interpolateConfig(
     parsed.value,
-    '',
+    "",
     { policy: interpolationPolicy, pointerMap: parsed.pointerMap },
-    diagnostics,
+    diagnostics
   );
 
   const validationDiagnostics = validate(interpolated, schema, {
@@ -97,8 +89,7 @@ export function loadConfig(
 
   return {
     config:
-      validationDiagnostics.some((d) => d.severity === 'error') &&
-      options.strict
+      validationDiagnostics.some((d) => d.severity === "error") && options.strict
         ? null
         : interpolated,
     diagnostics,
@@ -110,7 +101,7 @@ function collectPointers(
   node: YAMLMap.Parsed | YAMLSeq.Parsed | Scalar.Parsed | null,
   pointer: string,
   doc: Document.Parsed,
-  pointerMap: Record<string, Position>,
+  pointerMap: Record<string, Position>
 ): void {
   if (!node) {
     return;
@@ -129,12 +120,8 @@ function collectPointers(
   if (isMap(node)) {
     for (const item of node.items) {
       const key = item.key as Scalar.Parsed;
-      const value = item.value as
-        | YAMLMap.Parsed
-        | YAMLSeq.Parsed
-        | Scalar.Parsed
-        | null;
-      const keyValue = key?.value?.toString() ?? '';
+      const value = item.value as YAMLMap.Parsed | YAMLSeq.Parsed | Scalar.Parsed | null;
+      const keyValue = key?.value?.toString() ?? "";
       const childPointer = pointer
         ? `${pointer}/${escapeJsonPointerSegment(keyValue)}`
         : `/${escapeJsonPointerSegment(keyValue)}`;
@@ -147,6 +134,6 @@ function collectPointers(
   }
 }
 
-import type { LoadOptions } from './types';
-import { validate } from './validate';
-import { escapeJsonPointerSegment } from './interpolate';
+import type { LoadOptions } from "./types";
+import { validate } from "./validate";
+import { escapeJsonPointerSegment } from "./interpolate";

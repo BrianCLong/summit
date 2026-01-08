@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from "react";
 
 // Minimal safe query wrapper. In production, generated hooks should be used.
 // While codegen is pending, this wrapper can return mocked data in DEV/tests.
@@ -18,8 +18,7 @@ export function useSafeQuery<T = any>({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<any>(null);
 
-  const shouldMock =
-    (import.meta as any).env?.DEV || process.env.NODE_ENV === 'test';
+  const shouldMock = (import.meta as any).env?.DEV || process.env.NODE_ENV === "test";
 
   const memoDeps = useMemo(() => deps, deps);
 

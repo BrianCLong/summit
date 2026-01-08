@@ -1,19 +1,19 @@
-import { PubSub, withFilter } from 'graphql-subscriptions';
-import { realtimeManager } from '../realtimeManager';
+import { PubSub, withFilter } from "graphql-subscriptions";
+import { realtimeManager } from "../realtimeManager";
 
 // Use local PubSub because realtimeManager is already listening to Redis
 const pubsub = new PubSub();
 
 // Bridge RealtimeManager -> PubSub
-realtimeManager.on('event', (event) => {
-  pubsub.publish('GRAPH_EVENT', { onGraphEvent: event });
+realtimeManager.on("event", (event) => {
+  pubsub.publish("GRAPH_EVENT", { onGraphEvent: event });
 });
 
 export const resolvers = {
   Subscription: {
     onGraphEvent: {
       subscribe: withFilter(
-        () => pubsub.asyncIterator(['GRAPH_EVENT']),
+        () => pubsub.asyncIterator(["GRAPH_EVENT"]),
         (payload: any, variables: any, context: any) => {
           const event = payload.onGraphEvent;
 

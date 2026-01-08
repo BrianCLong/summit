@@ -6,7 +6,7 @@ export type Operation = {
 export class TextCRDT {
   private text: string;
 
-  constructor(initial = '') {
+  constructor(initial = "") {
     this.text = initial;
   }
 

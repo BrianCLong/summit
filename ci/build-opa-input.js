@@ -31,16 +31,16 @@ function main() {
     pr: {
       approvals,
       labels,
-      checks
+      checks,
     },
     artifact: {
       sbom: {
-        signed: sbomSigned
-      }
+        signed: sbomSigned,
+      },
     },
     security: {
-      failures: securityFailures
-    }
+      failures: securityFailures,
+    },
   };
 
   process.stdout.write(`${JSON.stringify(input, null, 2)}\n`);

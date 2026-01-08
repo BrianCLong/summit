@@ -4,31 +4,31 @@
  */
 
 export enum PredictionType {
-  RELATIONSHIP_TRAJECTORY = 'RELATIONSHIP_TRAJECTORY',
-  POLICY_SHIFT = 'POLICY_SHIFT',
-  ALLIANCE_CHANGE = 'ALLIANCE_CHANGE',
-  NEGOTIATION_OUTCOME = 'NEGOTIATION_OUTCOME',
-  TREATY_RATIFICATION = 'TREATY_RATIFICATION',
-  DIPLOMATIC_INCIDENT = 'DIPLOMATIC_INCIDENT',
-  CRISIS_ESCALATION = 'CRISIS_ESCALATION',
-  LEADERSHIP_TRANSITION_IMPACT = 'LEADERSHIP_TRANSITION_IMPACT',
-  REGIONAL_STABILITY = 'REGIONAL_STABILITY',
-  MULTILATERAL_INITIATIVE = 'MULTILATERAL_INITIATIVE'
+  RELATIONSHIP_TRAJECTORY = "RELATIONSHIP_TRAJECTORY",
+  POLICY_SHIFT = "POLICY_SHIFT",
+  ALLIANCE_CHANGE = "ALLIANCE_CHANGE",
+  NEGOTIATION_OUTCOME = "NEGOTIATION_OUTCOME",
+  TREATY_RATIFICATION = "TREATY_RATIFICATION",
+  DIPLOMATIC_INCIDENT = "DIPLOMATIC_INCIDENT",
+  CRISIS_ESCALATION = "CRISIS_ESCALATION",
+  LEADERSHIP_TRANSITION_IMPACT = "LEADERSHIP_TRANSITION_IMPACT",
+  REGIONAL_STABILITY = "REGIONAL_STABILITY",
+  MULTILATERAL_INITIATIVE = "MULTILATERAL_INITIATIVE",
 }
 
 export enum PredictionTimeframe {
-  IMMEDIATE = 'IMMEDIATE', // 0-3 months
-  SHORT_TERM = 'SHORT_TERM', // 3-12 months
-  MEDIUM_TERM = 'MEDIUM_TERM', // 1-3 years
-  LONG_TERM = 'LONG_TERM' // 3+ years
+  IMMEDIATE = "IMMEDIATE", // 0-3 months
+  SHORT_TERM = "SHORT_TERM", // 3-12 months
+  MEDIUM_TERM = "MEDIUM_TERM", // 1-3 years
+  LONG_TERM = "LONG_TERM", // 3+ years
 }
 
 export enum Confidence {
-  VERY_HIGH = 'VERY_HIGH', // 90-100%
-  HIGH = 'HIGH', // 75-90%
-  MEDIUM = 'MEDIUM', // 50-75%
-  LOW = 'LOW', // 25-50%
-  VERY_LOW = 'VERY_LOW' // 0-25%
+  VERY_HIGH = "VERY_HIGH", // 90-100%
+  HIGH = "HIGH", // 75-90%
+  MEDIUM = "MEDIUM", // 50-75%
+  LOW = "LOW", // 25-50%
+  VERY_LOW = "VERY_LOW", // 0-25%
 }
 
 export interface Prediction {
@@ -84,12 +84,12 @@ export interface Prediction {
 
 export interface Indicator {
   id: string;
-  type: 'LEADING' | 'COINCIDENT' | 'LAGGING';
+  type: "LEADING" | "COINCIDENT" | "LAGGING";
   category: string;
   description: string;
   currentValue: number | string;
   threshold?: number;
-  trend: 'INCREASING' | 'DECREASING' | 'STABLE' | 'VOLATILE';
+  trend: "INCREASING" | "DECREASING" | "STABLE" | "VOLATILE";
   weight: number; // importance 0-1
   reliability: number; // 0-1
   lastUpdated: Date;
@@ -117,9 +117,9 @@ export interface Scenario {
   triggers: string[];
   timeline: ScenarioEvent[];
   impact: {
-    geopolitical: 'MINIMAL' | 'MODERATE' | 'SIGNIFICANT' | 'MAJOR' | 'TRANSFORMATIVE';
-    economic: 'MINIMAL' | 'MODERATE' | 'SIGNIFICANT' | 'MAJOR' | 'TRANSFORMATIVE';
-    security: 'MINIMAL' | 'MODERATE' | 'SIGNIFICANT' | 'MAJOR' | 'TRANSFORMATIVE';
+    geopolitical: "MINIMAL" | "MODERATE" | "SIGNIFICANT" | "MAJOR" | "TRANSFORMATIVE";
+    economic: "MINIMAL" | "MODERATE" | "SIGNIFICANT" | "MAJOR" | "TRANSFORMATIVE";
+    security: "MINIMAL" | "MODERATE" | "SIGNIFICANT" | "MAJOR" | "TRANSFORMATIVE";
   };
   keyActors: string[];
   dependencies: string[];
@@ -140,7 +140,7 @@ export interface PredictedOutcome {
   implications: string[];
   stakeholders: {
     actor: string;
-    impact: 'VERY_POSITIVE' | 'POSITIVE' | 'NEUTRAL' | 'NEGATIVE' | 'VERY_NEGATIVE';
+    impact: "VERY_POSITIVE" | "POSITIVE" | "NEUTRAL" | "NEGATIVE" | "VERY_NEGATIVE";
     response?: string;
   }[];
 }
@@ -151,7 +151,7 @@ export interface VerificationMilestone {
   actualEvent?: string;
   verified: boolean;
   verificationDate?: Date;
-  impact: 'STRENGTHENS' | 'NEUTRAL' | 'WEAKENS' | 'INVALIDATES';
+  impact: "STRENGTHENS" | "NEUTRAL" | "WEAKENS" | "INVALIDATES";
 }
 
 export interface PredictionUpdate {
@@ -171,7 +171,13 @@ export interface TrendAnalysis {
   domain: string;
   timeRange: { start: Date; end: Date };
 
-  overallTrend: 'STRONGLY_POSITIVE' | 'POSITIVE' | 'STABLE' | 'NEGATIVE' | 'STRONGLY_NEGATIVE' | 'VOLATILE';
+  overallTrend:
+    | "STRONGLY_POSITIVE"
+    | "POSITIVE"
+    | "STABLE"
+    | "NEGATIVE"
+    | "STRONGLY_NEGATIVE"
+    | "VOLATILE";
   trendStrength: number; // 0-100
   volatility: number; // 0-100
 
@@ -196,13 +202,13 @@ export interface TrendAnalysis {
   drivers: {
     driver: string;
     impact: number; // -100 to 100
-    persistence: 'TEMPORARY' | 'MEDIUM_TERM' | 'LONG_TERM' | 'STRUCTURAL';
+    persistence: "TEMPORARY" | "MEDIUM_TERM" | "LONG_TERM" | "STRUCTURAL";
   }[];
 }
 
 export interface RiskScenario {
   id: string;
-  riskType: 'DIPLOMATIC' | 'MILITARY' | 'ECONOMIC' | 'HUMANITARIAN' | 'ENVIRONMENTAL' | 'HEALTH';
+  riskType: "DIPLOMATIC" | "MILITARY" | "ECONOMIC" | "HUMANITARIAN" | "ENVIRONMENTAL" | "HEALTH";
   title: string;
   description: string;
 
@@ -227,7 +233,7 @@ export interface RiskScenario {
   mitigationStrategies: {
     strategy: string;
     effectiveness: number; // 0-100
-    cost: 'LOW' | 'MEDIUM' | 'HIGH' | 'VERY_HIGH';
+    cost: "LOW" | "MEDIUM" | "HIGH" | "VERY_HIGH";
     timeToImplement: number; // days
     stakeholders: string[];
   }[];
@@ -238,7 +244,7 @@ export interface RiskScenario {
 
 export interface OpportunityForecast {
   id: string;
-  opportunityType: 'DIPLOMATIC' | 'ECONOMIC' | 'STRATEGIC' | 'MULTILATERAL' | 'BILATERAL';
+  opportunityType: "DIPLOMATIC" | "ECONOMIC" | "STRATEGIC" | "MULTILATERAL" | "BILATERAL";
   title: string;
   description: string;
 
@@ -250,8 +256,8 @@ export interface OpportunityForecast {
 
   preconditions: {
     condition: string;
-    currentStatus: 'MET' | 'PARTIALLY_MET' | 'NOT_MET';
-    importance: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+    currentStatus: "MET" | "PARTIALLY_MET" | "NOT_MET";
+    importance: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
   }[];
 
   exploitationStrategies: {
@@ -274,7 +280,7 @@ export interface OpportunityForecast {
 
 export interface DiplomaticForecast {
   id: string;
-  scope: 'BILATERAL' | 'REGIONAL' | 'GLOBAL';
+  scope: "BILATERAL" | "REGIONAL" | "GLOBAL";
   subject: string;
   timeframe: PredictionTimeframe;
   generatedDate: Date;
@@ -317,7 +323,7 @@ export interface AllianceShiftPrediction {
 
 export interface LeadershipTransitionImpact {
   country: string;
-  transitionType: 'ELECTION' | 'APPOINTMENT' | 'SUCCESSION' | 'COUP' | 'REVOLUTION';
+  transitionType: "ELECTION" | "APPOINTMENT" | "SUCCESSION" | "COUP" | "REVOLUTION";
   expectedDate?: Date;
   probability: number;
 
@@ -338,7 +344,7 @@ export interface LeadershipTransitionImpact {
 
   regionalImpact: string;
   globalImpact: string;
-  stability: 'STABILIZING' | 'NEUTRAL' | 'DESTABILIZING';
+  stability: "STABILIZING" | "NEUTRAL" | "DESTABILIZING";
 }
 
 export interface NegotiationOutcomePrediction {
@@ -368,7 +374,7 @@ export interface NegotiationOutcomePrediction {
 
   externalFactors: {
     factor: string;
-    impact: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL';
+    impact: "POSITIVE" | "NEGATIVE" | "NEUTRAL";
     controllable: boolean;
   }[];
 }
@@ -377,7 +383,7 @@ export interface RegionalStabilityForecast {
   region: string;
   timeframe: PredictionTimeframe;
   overallStability: number; // 0-100
-  trend: 'IMPROVING' | 'STABLE' | 'DETERIORATING';
+  trend: "IMPROVING" | "STABLE" | "DETERIORATING";
 
   flashpoints: {
     location: string;
@@ -393,7 +399,7 @@ export interface RegionalStabilityForecast {
   countryStability: {
     country: string;
     stability: number;
-    trend: 'IMPROVING' | 'STABLE' | 'DETERIORATING';
+    trend: "IMPROVING" | "STABLE" | "DETERIORATING";
   }[];
 
   spilloverRisks: {

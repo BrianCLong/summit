@@ -1,10 +1,10 @@
-import { trace } from '@opentelemetry/api';
-import pino from 'pino';
-import { Redis } from 'ioredis';
-import { MultiTierCache } from './MultiTierCache';
+import { trace } from "@opentelemetry/api";
+import pino from "pino";
+import { Redis } from "ioredis";
+import { MultiTierCache } from "./MultiTierCache";
 
-const logger = pino({ name: 'CacheVersionManager' });
-const tracer = trace.getTracer('advanced-caching');
+const logger = pino({ name: "CacheVersionManager" });
+const tracer = trace.getTracer("advanced-caching");
 
 /**
  * Manages cache versioning for safe updates
@@ -48,7 +48,7 @@ export class CacheVersionManager {
    * Increment version (invalidates old cached versions)
    */
   async incrementVersion(key: string): Promise<number> {
-    const span = tracer.startSpan('CacheVersionManager.incrementVersion');
+    const span = tracer.startSpan("CacheVersionManager.incrementVersion");
 
     try {
       const currentVersion = await this.getVersion(key);
@@ -71,7 +71,7 @@ export class CacheVersionManager {
         newVersion,
       });
 
-      logger.info({ key, version: newVersion }, 'Cache version incremented');
+      logger.info({ key, version: newVersion }, "Cache version incremented");
 
       return newVersion;
     } catch (error) {
@@ -92,7 +92,7 @@ export class CacheVersionManager {
       await this.redis.set(`cache:version:${key}`, version.toString());
     }
 
-    logger.debug({ key, version }, 'Cache version set');
+    logger.debug({ key, version }, "Cache version set");
   }
 
   /**
@@ -120,26 +120,26 @@ export class CacheVersionManager {
    */
   async incrementVersions(keys: string[]): Promise<void> {
     await Promise.all(keys.map((key) => this.incrementVersion(key)));
-    logger.info({ count: keys.length }, 'Batch version increment completed');
+    logger.info({ count: keys.length }, "Batch version increment completed");
   }
 
   /**
    * Increment version by pattern
    */
   async incrementVersionsByPattern(pattern: string): Promise<number> {
-    const span = tracer.startSpan('CacheVersionManager.incrementVersionsByPattern');
+    const span = tracer.startSpan("CacheVersionManager.incrementVersionsByPattern");
 
     try {
       if (!this.redis) {
-        throw new Error('Redis required for pattern operations');
+        throw new Error("Redis required for pattern operations");
       }
 
       const versionKeys = await this.redis.keys(`cache:version:${pattern}`);
-      const keys = versionKeys.map((k) => k.replace('cache:version:', ''));
+      const keys = versionKeys.map((k) => k.replace("cache:version:", ""));
 
       await this.incrementVersions(keys);
 
-      span.setAttribute('count', keys.length);
+      span.setAttribute("count", keys.length);
       return keys.length;
     } catch (error) {
       span.recordException(error as Error);
@@ -154,13 +154,15 @@ export class CacheVersionManager {
    */
   private async loadVersions(): Promise<void> {
     if (!this.redis) return;
-    if (!this.redis) {return;}
+    if (!this.redis) {
+      return;
+    }
 
     try {
-      const keys = await this.redis.keys('cache:version:*');
+      const keys = await this.redis.keys("cache:version:*");
 
       for (const key of keys) {
-        const cacheKey = key.replace('cache:version:', '');
+        const cacheKey = key.replace("cache:version:", "");
         const version = await this.redis.get(key);
 
         if (version) {
@@ -168,9 +170,9 @@ export class CacheVersionManager {
         }
       }
 
-      logger.info({ count: keys.length }, 'Cache versions loaded');
+      logger.info({ count: keys.length }, "Cache versions loaded");
     } catch (error) {
-      logger.error({ error }, 'Failed to load cache versions');
+      logger.error({ error }, "Failed to load cache versions");
     }
   }
 
@@ -181,13 +183,13 @@ export class CacheVersionManager {
     this.currentVersions.clear();
 
     if (this.redis) {
-      const keys = await this.redis.keys('cache:version:*');
+      const keys = await this.redis.keys("cache:version:*");
       if (keys.length > 0) {
         await this.redis.del(...keys);
       }
     }
 
-    logger.info('Cache versions cleared');
+    logger.info("Cache versions cleared");
   }
 
   /**
@@ -196,9 +198,10 @@ export class CacheVersionManager {
   getStats() {
     return {
       totalKeys: this.currentVersions.size,
-      versions: Array.from(this.currentVersions.entries()).map(
-        ([key, version]) => ({ key, version })
-      ),
+      versions: Array.from(this.currentVersions.entries()).map(([key, version]) => ({
+        key,
+        version,
+      })),
     };
   }
 }

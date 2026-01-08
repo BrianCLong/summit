@@ -1,11 +1,11 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance } from "axios";
 import type {
   Claim,
   Evidence,
   ProvenanceChain,
   DisclosureBundle,
   VerificationResult,
-} from '../types';
+} from "../types";
 
 export class ProvenanceLedgerClient {
   private client: AxiosInstance;
@@ -14,9 +14,9 @@ export class ProvenanceLedgerClient {
     this.client = axios.create({
       baseURL,
       headers: {
-        'Content-Type': 'application/json',
-        ...(authorityId && { 'X-Authority-Id': authorityId }),
-        ...(reasonForAccess && { 'X-Reason-For-Access': reasonForAccess }),
+        "Content-Type": "application/json",
+        ...(authorityId && { "X-Authority-Id": authorityId }),
+        ...(reasonForAccess && { "X-Reason-For-Access": reasonForAccess }),
       },
     });
   }
@@ -41,7 +41,7 @@ export class ProvenanceLedgerClient {
    * Get provenance chain for a claim
    */
   async getProvenanceChain(claimId: string): Promise<ProvenanceChain[]> {
-    const response = await this.client.get('/provenance', {
+    const response = await this.client.get("/provenance", {
       params: { claimId },
     });
     return response.data;
@@ -59,7 +59,7 @@ export class ProvenanceLedgerClient {
    * Verify hash
    */
   async verifyHash(content: any, expectedHash: string): Promise<VerificationResult> {
-    const response = await this.client.post('/hash/verify', {
+    const response = await this.client.post("/hash/verify", {
       content,
       expectedHash,
     });
@@ -70,7 +70,7 @@ export class ProvenanceLedgerClient {
    * Export manifest
    */
   async exportManifest(): Promise<any> {
-    const response = await this.client.get('/export/manifest');
+    const response = await this.client.get("/export/manifest");
     return response.data;
   }
 
@@ -78,7 +78,7 @@ export class ProvenanceLedgerClient {
    * Health check
    */
   async healthCheck(): Promise<any> {
-    const response = await this.client.get('/health');
+    const response = await this.client.get("/health");
     return response.data;
   }
 }

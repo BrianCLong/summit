@@ -2,7 +2,7 @@ import type {
   AssetPerformanceSnapshot,
   OptimizationRecommendation,
   OptimizationSample,
-} from './types';
+} from "./types";
 
 class RollingSeries {
   private readonly values: number[] = [];
@@ -31,9 +31,7 @@ class RollingSeries {
     if (this.values.length === 0) {
       return undefined;
     }
-    return (
-      this.values.reduce((sum, value) => sum + value, 0) / this.values.length
-    );
+    return this.values.reduce((sum, value) => sum + value, 0) / this.values.length;
   }
 
   get min(): number | undefined {
@@ -96,8 +94,7 @@ export class CostLatencyOptimizer {
   }
 
   update(sample: OptimizationSample): void {
-    const series =
-      this.metrics.get(sample.assetId) ?? createSeries(this.options.windowSize);
+    const series = this.metrics.get(sample.assetId) ?? createSeries(this.options.windowSize);
     if (sample.latencyMs !== undefined) {
       series.latency.push(sample.latencyMs);
     }
@@ -140,7 +137,7 @@ export class CostLatencyOptimizer {
         series.throughput.length,
         series.errorRate.length,
         series.saturation.length,
-        series.computeUtilization.length,
+        series.computeUtilization.length
       ),
     };
   }
@@ -148,9 +145,7 @@ export class CostLatencyOptimizer {
   listSnapshots(): AssetPerformanceSnapshot[] {
     return [...this.metrics.entries()]
       .map(([assetId]) => this.getSnapshot(assetId))
-      .filter((snapshot): snapshot is AssetPerformanceSnapshot =>
-        Boolean(snapshot),
-      )
+      .filter((snapshot): snapshot is AssetPerformanceSnapshot => Boolean(snapshot))
       .sort((a, b) => a.assetId.localeCompare(b.assetId));
   }
 
@@ -168,31 +163,28 @@ export class CostLatencyOptimizer {
       if (
         latencyMean !== undefined &&
         latencyLatest !== undefined &&
-        (latencyLatest > this.options.latencyThresholdMs ||
-          latencyLatest > latencyMean * 1.35)
+        (latencyLatest > this.options.latencyThresholdMs || latencyLatest > latencyMean * 1.35)
       ) {
-        actions.push('scale-out');
-        actions.push('enable-adaptive-routing');
+        actions.push("scale-out");
+        actions.push("enable-adaptive-routing");
         justification.push(
-          `latency spiked to ${latencyLatest.toFixed(1)}ms vs avg ${latencyMean.toFixed(1)}ms`,
+          `latency spiked to ${latencyLatest.toFixed(1)}ms vs avg ${latencyMean.toFixed(1)}ms`
         );
       }
 
       const errorRate = series.errorRate.latest ?? 0;
       if (errorRate > this.options.errorRateThreshold) {
-        actions.push('deploy-fallback');
-        actions.push('activate-runbook');
-        justification.push(
-          `error rate ${Math.round(errorRate * 100)}% above threshold`,
-        );
+        actions.push("deploy-fallback");
+        actions.push("activate-runbook");
+        justification.push(`error rate ${Math.round(errorRate * 100)}% above threshold`);
       }
 
       const saturation = series.saturation.latest ?? 0;
       const utilization = series.computeUtilization.latest ?? 0;
       if (saturation > this.options.saturationThreshold && utilization > 0.75) {
-        actions.push('rebalance-workload');
+        actions.push("rebalance-workload");
         justification.push(
-          `saturation ${Math.round(saturation * 100)}% indicates capacity pressure`,
+          `saturation ${Math.round(saturation * 100)}% indicates capacity pressure`
         );
       }
 
@@ -203,22 +195,19 @@ export class CostLatencyOptimizer {
         saturation < 0.4 &&
         series.cost.latest > costMean * 1.25
       ) {
-        actions.push('scale-in');
-        justification.push('cost increasing while capacity is underutilised');
+        actions.push("scale-in");
+        justification.push("cost increasing while capacity is underutilised");
       }
 
       if (actions.length === 0) {
         continue;
       }
 
-      const confidence = Math.min(
-        1,
-        Math.max(series.latency.length, series.cost.length) / 10,
-      );
+      const confidence = Math.min(1, Math.max(series.latency.length, series.cost.length) / 10);
       recommendations.push({
         assetId,
         actions: [...new Set(actions)],
-        justification: justification.join('; '),
+        justification: justification.join("; "),
         confidence: Number(confidence.toFixed(2)),
       });
     }

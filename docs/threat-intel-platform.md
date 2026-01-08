@@ -28,59 +28,64 @@ This document describes the design and usage of the in-repo threat intelligence 
 ## Usage Example
 
 ```ts
-import { ThreatIntelPlatform } from '../src/threat-intel/platform';
+import { ThreatIntelPlatform } from "../src/threat-intel/platform";
 
 const platform = new ThreatIntelPlatform();
 
-platform.ingestStixFeed('taxii-lab', [
+platform.ingestStixFeed("taxii-lab", [
   {
-    id: 'indicator--1',
-    type: 'indicator',
-    name: 'Beacon',
+    id: "indicator--1",
+    type: "indicator",
+    name: "Beacon",
     created: new Date(),
     modified: new Date(),
   },
 ]);
 
 platform.addThreatActorProfile({
-  id: 'actor-1',
-  name: 'APT Atlas',
-  motivations: ['espionage'],
-  sophistication: 'apt',
-  region: 'global',
-  sectors: ['cloud'],
-  knownTechniques: ['T1190'],
-  preferredKillChainPhases: ['exploitation'],
+  id: "actor-1",
+  name: "APT Atlas",
+  motivations: ["espionage"],
+  sophistication: "apt",
+  region: "global",
+  sectors: ["cloud"],
+  knownTechniques: ["T1190"],
+  preferredKillChainPhases: ["exploitation"],
   confidence: 90,
-  tlp: 'AMBER',
+  tlp: "AMBER",
 });
 
 platform.addIoc({
-  id: 'ioc-1',
-  type: 'domain',
-  value: 'apt-atlas.onion',
-  source: 'sinkhole',
+  id: "ioc-1",
+  type: "domain",
+  value: "apt-atlas.onion",
+  source: "sinkhole",
   confidence: 70,
-  tlp: 'AMBER',
+  tlp: "AMBER",
   sightings: 5,
-  tags: ['geo:global'],
-  relatedTechniques: ['T1190'],
+  tags: ["geo:global"],
+  relatedTechniques: ["T1190"],
 });
 
 const correlated = platform.correlate();
-const partnerView = platform.shareIntelligence({ id: 'p1', name: 'analyst', maxTlp: 'GREEN', acceptedFeeds: [] });
+const partnerView = platform.shareIntelligence({
+  id: "p1",
+  name: "analyst",
+  maxTlp: "GREEN",
+  acceptedFeeds: [],
+});
 
 // TAXII bundle ingestion with TLP inference
-platform.ingestTaxiiBundle('taxii-bundle', {
-  type: 'bundle',
+platform.ingestTaxiiBundle("taxii-bundle", {
+  type: "bundle",
   objects: [
     {
-      id: 'indicator--10',
-      type: 'indicator',
-      name: 'Beacon infrastructure',
+      id: "indicator--10",
+      type: "indicator",
+      name: "Beacon infrastructure",
       created: new Date(),
       modified: new Date(),
-      object_marking_refs: ['marking-definition--tlp:red'],
+      object_marking_refs: ["marking-definition--tlp:red"],
     },
   ],
 });

@@ -4,7 +4,7 @@
  * Counts requests within fixed time windows
  */
 
-import { RateLimiter, RateLimitConfig, RateLimitResult } from '../rate-limiter.js';
+import { RateLimiter, RateLimitConfig, RateLimitResult } from "../rate-limiter.js";
 
 export class FixedWindowLimiter extends RateLimiter {
   private windows = new Map<string, WindowData>();

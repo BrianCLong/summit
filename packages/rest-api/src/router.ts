@@ -4,7 +4,7 @@
  * Provides a fluent API for defining REST routes with automatic OpenAPI generation
  */
 
-import express, { Router, RequestHandler } from 'express';
+import express, { Router, RequestHandler } from "express";
 import type {
   RouteDefinition,
   HTTPMethod,
@@ -12,7 +12,7 @@ import type {
   APIConfig,
   RateLimitOptions,
   CacheOptions,
-} from './types';
+} from "./types";
 
 export class APIRouter {
   private router: Router;
@@ -22,7 +22,7 @@ export class APIRouter {
 
   constructor(config: APIConfig) {
     this.router = express.Router();
-    this.basePath = config.basePath || '';
+    this.basePath = config.basePath || "";
     this.config = config;
   }
 
@@ -32,9 +32,9 @@ export class APIRouter {
   get(
     path: string,
     handler: RequestHandler | RequestHandler[],
-    options?: Partial<Omit<RouteDefinition, 'method' | 'path' | 'handler'>>
+    options?: Partial<Omit<RouteDefinition, "method" | "path" | "handler">>
   ): this {
-    return this.route('GET', path, handler, options);
+    return this.route("GET", path, handler, options);
   }
 
   /**
@@ -43,9 +43,9 @@ export class APIRouter {
   post(
     path: string,
     handler: RequestHandler | RequestHandler[],
-    options?: Partial<Omit<RouteDefinition, 'method' | 'path' | 'handler'>>
+    options?: Partial<Omit<RouteDefinition, "method" | "path" | "handler">>
   ): this {
-    return this.route('POST', path, handler, options);
+    return this.route("POST", path, handler, options);
   }
 
   /**
@@ -54,9 +54,9 @@ export class APIRouter {
   put(
     path: string,
     handler: RequestHandler | RequestHandler[],
-    options?: Partial<Omit<RouteDefinition, 'method' | 'path' | 'handler'>>
+    options?: Partial<Omit<RouteDefinition, "method" | "path" | "handler">>
   ): this {
-    return this.route('PUT', path, handler, options);
+    return this.route("PUT", path, handler, options);
   }
 
   /**
@@ -65,9 +65,9 @@ export class APIRouter {
   patch(
     path: string,
     handler: RequestHandler | RequestHandler[],
-    options?: Partial<Omit<RouteDefinition, 'method' | 'path' | 'handler'>>
+    options?: Partial<Omit<RouteDefinition, "method" | "path" | "handler">>
   ): this {
-    return this.route('PATCH', path, handler, options);
+    return this.route("PATCH", path, handler, options);
   }
 
   /**
@@ -76,9 +76,9 @@ export class APIRouter {
   delete(
     path: string,
     handler: RequestHandler | RequestHandler[],
-    options?: Partial<Omit<RouteDefinition, 'method' | 'path' | 'handler'>>
+    options?: Partial<Omit<RouteDefinition, "method" | "path" | "handler">>
   ): this {
-    return this.route('DELETE', path, handler, options);
+    return this.route("DELETE", path, handler, options);
   }
 
   /**
@@ -88,7 +88,7 @@ export class APIRouter {
     method: HTTPMethod,
     path: string,
     handler: RequestHandler | RequestHandler[],
-    options?: Partial<Omit<RouteDefinition, 'method' | 'path' | 'handler'>>
+    options?: Partial<Omit<RouteDefinition, "method" | "path" | "handler">>
   ): this {
     const routeDefinition: RouteDefinition = {
       method,
@@ -117,19 +117,19 @@ export class APIRouter {
     const allHandlers = [...middleware, ...handlers];
 
     switch (method) {
-      case 'GET':
+      case "GET":
         this.router.get(path, ...allHandlers);
         break;
-      case 'POST':
+      case "POST":
         this.router.post(path, ...allHandlers);
         break;
-      case 'PUT':
+      case "PUT":
         this.router.put(path, ...allHandlers);
         break;
-      case 'PATCH':
+      case "PATCH":
         this.router.patch(path, ...allHandlers);
         break;
-      case 'DELETE':
+      case "DELETE":
         this.router.delete(path, ...allHandlers);
         break;
     }
@@ -165,7 +165,7 @@ export class APIRouter {
           summary: `List ${resourceName}`,
           tags: [resourceName],
           responses: {
-            '200': {
+            "200": {
               description: `List of ${resourceName}`,
             },
           },
@@ -181,18 +181,18 @@ export class APIRouter {
           tags: [resourceName],
           parameters: [
             {
-              name: 'id',
-              in: 'path',
+              name: "id",
+              in: "path",
               required: true,
-              schema: { type: 'string' },
+              schema: { type: "string" },
             },
           ],
           responses: {
-            '200': {
+            "200": {
               description: `${resourceName} details`,
             },
-            '404': {
-              description: 'Not found',
+            "404": {
+              description: "Not found",
             },
           },
         },
@@ -206,11 +206,11 @@ export class APIRouter {
           summary: `Create ${resourceName}`,
           tags: [resourceName],
           responses: {
-            '201': {
+            "201": {
               description: `${resourceName} created`,
             },
-            '400': {
-              description: 'Validation error',
+            "400": {
+              description: "Validation error",
             },
           },
         },
@@ -225,18 +225,18 @@ export class APIRouter {
           tags: [resourceName],
           parameters: [
             {
-              name: 'id',
-              in: 'path',
+              name: "id",
+              in: "path",
               required: true,
-              schema: { type: 'string' },
+              schema: { type: "string" },
             },
           ],
           responses: {
-            '200': {
+            "200": {
               description: `${resourceName} updated`,
             },
-            '404': {
-              description: 'Not found',
+            "404": {
+              description: "Not found",
             },
           },
         },
@@ -251,18 +251,18 @@ export class APIRouter {
           tags: [resourceName],
           parameters: [
             {
-              name: 'id',
-              in: 'path',
+              name: "id",
+              in: "path",
               required: true,
-              schema: { type: 'string' },
+              schema: { type: "string" },
             },
           ],
           responses: {
-            '200': {
+            "200": {
               description: `${resourceName} updated`,
             },
-            '404': {
-              description: 'Not found',
+            "404": {
+              description: "Not found",
             },
           },
         },
@@ -277,18 +277,18 @@ export class APIRouter {
           tags: [resourceName],
           parameters: [
             {
-              name: 'id',
-              in: 'path',
+              name: "id",
+              in: "path",
               required: true,
-              schema: { type: 'string' },
+              schema: { type: "string" },
             },
           ],
           responses: {
-            '204': {
-              description: 'Deleted successfully',
+            "204": {
+              description: "Deleted successfully",
             },
-            '404': {
-              description: 'Not found',
+            "404": {
+              description: "Not found",
             },
           },
         },

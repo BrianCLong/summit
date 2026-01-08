@@ -3,16 +3,16 @@ name: Release Train
 on:
   schedule:
     # Weekly release train - Wednesday 17:00 UTC
-    - cron: '0 17 * * 3'
+    - cron: "0 17 * * 3"
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Dry run - skip actual branch creation and deployment'
+        description: "Dry run - skip actual branch creation and deployment"
         required: false
-        default: 'false'
+        default: "false"
         type: boolean
       force_version:
-        description: 'Force specific version (e.g., 1.2.3)'
+        description: "Force specific version (e.g., 1.2.3)"
         required: false
         type: string
 
@@ -154,7 +154,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Calculate semantic version
         id: semver
@@ -209,7 +209,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -381,7 +381,7 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@v4
         with:
-          version: 'v3.11.1'
+          version: "v3.11.1"
 
       - name: Create Kubeconfig
         if: inputs.dry_run != 'true'
@@ -523,7 +523,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install script dependencies
         run: pnpm install --frozen-lockfile
@@ -577,7 +577,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

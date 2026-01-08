@@ -72,7 +72,7 @@ export class LinUCB {
   }
   private I() {
     const m = Array.from({ length: this.d }, (_, i) =>
-      Array.from({ length: this.d }, (_, j) => (i === j ? this.lambda : 0)),
+      Array.from({ length: this.d }, (_, j) => (i === j ? this.lambda : 0))
     );
     return m;
   }
@@ -94,7 +94,7 @@ export class LinUCB {
     const n = M.length;
     const A = M.map((r) => r.slice());
     const I = Array.from({ length: n }, (_, i) =>
-      Array.from({ length: n }, (_, j) => (i === j ? 1 : 0)),
+      Array.from({ length: n }, (_, j) => (i === j ? 1 : 0))
     );
     for (let i = 0; i < n; i++) {
       let p = i;
@@ -128,8 +128,7 @@ export class LinUCB {
     }
   }
   pick(arms: Arm[], ctx: Context) {
-    let best: { arm: Arm; ucb: number; mu: number; sigma: number } | null =
-      null;
+    let best: { arm: Arm; ucb: number; mu: number; sigma: number } | null = null;
     for (const arm of arms) {
       this.ensure(arm.id);
       const A = this.A.get(arm.id)!;
@@ -138,17 +137,12 @@ export class LinUCB {
       const theta = this.matvec(Ainv, b);
       const mu = ctx.x.reduce((s, xi, i) => s + theta[i] * xi, 0);
       const sigma = Math.sqrt(
-        ctx.x.reduce(
-          (s, xi, i) =>
-            s + xi * Ainv[i].reduce((a, aij, j) => a + aij * ctx.x[j], 0),
-          0,
-        ),
+        ctx.x.reduce((s, xi, i) => s + xi * Ainv[i].reduce((a, aij, j) => a + aij * ctx.x[j], 0), 0)
       );
       const ucb = mu + this.alpha * sigma;
       const lcb = mu - this.alpha * sigma;
       // safety: cost + expected eval threshold
-      const safe =
-        arm.priceUSD <= ctx.safety.maxUSD && lcb >= ctx.safety.minEval;
+      const safe = arm.priceUSD <= ctx.safety.maxUSD && lcb >= ctx.safety.minEval;
       const score = safe ? ucb : -Infinity;
       if (!best || score > best.ucb) best = { arm, ucb: score, mu, sigma };
     }
@@ -159,7 +153,7 @@ export class LinUCB {
     this.addOuter(this.A.get(arm)!, x);
     this.add(
       this.b.get(arm)!,
-      x.map((v) => v * reward),
+      x.map((v) => v * reward)
     );
   }
 }
@@ -258,19 +252,19 @@ violation[reason] {
 **Node wrapper**
 
 ```ts
-import { spawn } from 'child_process';
+import { spawn } from "child_process";
 export async function opaEval(input: any) {
   return new Promise<string>((res, rej) => {
-    const p = spawn('opa', ['eval', '-f', 'values', '-I', '-d', 'policy/'], {
-      stdio: ['pipe', 'pipe', 'pipe'],
+    const p = spawn("opa", ["eval", "-f", "values", "-I", "-d", "policy/"], {
+      stdio: ["pipe", "pipe", "pipe"],
     });
     p.stdin.write(JSON.stringify(input));
     p.stdin.end();
-    let out = '';
-    p.stdout.on('data', (d) => (out += d));
-    let err = '';
-    p.stderr.on('data', (d) => (err += d));
-    p.on('close', (c) => (c ? rej(new Error(err || 'opa failed')) : res(out)));
+    let out = "";
+    p.stdout.on("data", (d) => (out += d));
+    let err = "";
+    p.stderr.on("data", (d) => (err += d));
+    p.on("close", (c) => (c ? rej(new Error(err || "opa failed")) : res(out)));
   });
 }
 ```
@@ -316,19 +310,12 @@ RETURN DISTINCT t.path AS tests;
 
 ```ts
 // server/ai/quota.ts
-import Redis from 'ioredis';
-const r = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
-export async function take(
-  tenant: string,
-  capacity: number,
-  refillPerMin: number,
-  cost: number,
-) {
+import Redis from "ioredis";
+const r = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
+export async function take(tenant: string, capacity: number, refillPerMin: number, cost: number) {
   const key = `q:${tenant}`;
   const now = Date.now();
-  const s = JSON.parse(
-    (await r.get(key)) || `{"tokens":${capacity},"ts":${now}}`,
-  );
+  const s = JSON.parse((await r.get(key)) || `{"tokens":${capacity},"ts":${now}}`);
   const elapsed = (now - s.ts) / 60000;
   s.tokens = Math.min(capacity, s.tokens + elapsed * refillPerMin);
   if (s.tokens < cost)

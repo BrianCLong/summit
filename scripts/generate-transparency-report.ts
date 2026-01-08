@@ -19,11 +19,11 @@
  *   npm run transparency-report -- --tenant <tenant-id> --start <date> --end <date> [--format md|html|json]
  */
 
-import { program } from 'commander';
-import { pg } from '../server/src/db/pg.js';
-import fs from 'fs/promises';
-import path from 'path';
-import crypto from 'crypto';
+import { program } from "commander";
+import { pg } from "../server/src/db/pg.js";
+import fs from "fs/promises";
+import path from "path";
+import crypto from "crypto";
 
 interface TransparencyReportData {
   metadata: {
@@ -120,11 +120,7 @@ class TransparencyReportGenerator {
     const agentUsage = await this.collectAgentUsage(tenantId, periodStart, periodEnd);
 
     // Collect security posture metrics
-    const securityPosture = await this.collectSecurityPosture(
-      tenantId,
-      periodStart,
-      periodEnd
-    );
+    const securityPosture = await this.collectSecurityPosture(tenantId, periodStart, periodEnd);
 
     // Collect compliance posture
     const compliancePosture = await this.collectCompliancePosture(tenantId);
@@ -139,13 +135,13 @@ class TransparencyReportGenerator {
         periodStart: periodStart.toISOString(),
         periodEnd: periodEnd.toISOString(),
         generatedAt: new Date().toISOString(),
-        reportHash: '' // Calculated after report assembly
+        reportHash: "", // Calculated after report assembly
       },
       dataUsage,
       agentUsage,
       securityPosture,
       compliancePosture,
-      provenance
+      provenance,
     };
 
     // Calculate report hash for integrity
@@ -158,19 +154,19 @@ class TransparencyReportGenerator {
     tenantId: string,
     periodStart: Date,
     periodEnd: Date
-  ): Promise<TransparencyReportData['dataUsage']> {
+  ): Promise<TransparencyReportData["dataUsage"]> {
     return {
       summary:
-        'Summit processes data exclusively for agent orchestration, policy enforcement, and compliance monitoring.',
+        "Summit processes data exclusively for agent orchestration, policy enforcement, and compliance monitoring.",
       purposes: [
-        'Agent execution and orchestration',
-        'Security policy enforcement',
-        'Compliance monitoring and reporting',
-        'Audit trail maintenance',
-        'Performance analytics'
+        "Agent execution and orchestration",
+        "Security policy enforcement",
+        "Compliance monitoring and reporting",
+        "Audit trail maintenance",
+        "Performance analytics",
       ],
-      retentionPolicy: '7 years for audit data (SOX compliance), 90 days for operational data',
-      deletionRights: 'Customers may request data deletion subject to legal retention requirements'
+      retentionPolicy: "7 years for audit data (SOX compliance), 90 days for operational data",
+      deletionRights: "Customers may request data deletion subject to legal retention requirements",
     };
   }
 
@@ -178,7 +174,7 @@ class TransparencyReportGenerator {
     tenantId: string,
     periodStart: Date,
     periodEnd: Date
-  ): Promise<TransparencyReportData['agentUsage']> {
+  ): Promise<TransparencyReportData["agentUsage"]> {
     // Total agent runs
     const totalRunsResult = await pg.query(
       `SELECT COUNT(*) as count
@@ -228,19 +224,19 @@ class TransparencyReportGenerator {
       [tenantId, periodStart, periodEnd]
     );
 
-    const totalRuns = parseInt(totalRunsResult.rows[0]?.count || '0');
-    const successfulRuns = parseInt(successRateResult.rows[0]?.successful || '0');
-    const totalForRate = parseInt(successRateResult.rows[0]?.total || '1');
+    const totalRuns = parseInt(totalRunsResult.rows[0]?.count || "0");
+    const successfulRuns = parseInt(successRateResult.rows[0]?.successful || "0");
+    const totalForRate = parseInt(successRateResult.rows[0]?.total || "1");
 
     return {
       totalRuns,
       successRate: totalForRate > 0 ? (successfulRuns / totalForRate) * 100 : 0,
-      averageDuration: parseFloat(avgDurationResult.rows[0]?.avg_duration || '0'),
-      topAgents: topAgentsResult.rows.map(row => ({
+      averageDuration: parseFloat(avgDurationResult.rows[0]?.avg_duration || "0"),
+      topAgents: topAgentsResult.rows.map((row) => ({
         agentId: row.agent_id,
         runs: parseInt(row.runs),
-        successRate: row.runs > 0 ? (parseInt(row.successful) / parseInt(row.runs)) * 100 : 0
-      }))
+        successRate: row.runs > 0 ? (parseInt(row.successful) / parseInt(row.runs)) * 100 : 0,
+      })),
     };
   }
 
@@ -248,7 +244,7 @@ class TransparencyReportGenerator {
     tenantId: string,
     periodStart: Date,
     periodEnd: Date
-  ): Promise<TransparencyReportData['securityPosture']> {
+  ): Promise<TransparencyReportData["securityPosture"]> {
     // Authentication events
     const authEventsResult = await pg.query(
       `SELECT
@@ -305,32 +301,32 @@ class TransparencyReportGenerator {
 
     return {
       authenticationEvents: {
-        total: parseInt(authEventsResult.rows[0]?.total || '0'),
-        successful: parseInt(authEventsResult.rows[0]?.successful || '0'),
-        failed: parseInt(authEventsResult.rows[0]?.failed || '0')
+        total: parseInt(authEventsResult.rows[0]?.total || "0"),
+        successful: parseInt(authEventsResult.rows[0]?.successful || "0"),
+        failed: parseInt(authEventsResult.rows[0]?.failed || "0"),
       },
       authorizationDecisions: {
-        total: parseInt(authzEventsResult.rows[0]?.total || '0'),
-        allowed: parseInt(authzEventsResult.rows[0]?.allowed || '0'),
-        denied: parseInt(authzEventsResult.rows[0]?.denied || '0')
+        total: parseInt(authzEventsResult.rows[0]?.total || "0"),
+        allowed: parseInt(authzEventsResult.rows[0]?.allowed || "0"),
+        denied: parseInt(authzEventsResult.rows[0]?.denied || "0"),
       },
       securityIncidents: {
-        critical: parseInt(incidentsResult.rows[0]?.critical || '0'),
-        high: parseInt(incidentsResult.rows[0]?.high || '0'),
-        medium: parseInt(incidentsResult.rows[0]?.medium || '0'),
-        low: parseInt(incidentsResult.rows[0]?.low || '0')
+        critical: parseInt(incidentsResult.rows[0]?.critical || "0"),
+        high: parseInt(incidentsResult.rows[0]?.high || "0"),
+        medium: parseInt(incidentsResult.rows[0]?.medium || "0"),
+        low: parseInt(incidentsResult.rows[0]?.low || "0"),
       },
       dataAccess: {
-        reads: parseInt(dataAccessResult.rows[0]?.reads || '0'),
-        writes: parseInt(dataAccessResult.rows[0]?.writes || '0'),
-        deletes: parseInt(dataAccessResult.rows[0]?.deletes || '0')
-      }
+        reads: parseInt(dataAccessResult.rows[0]?.reads || "0"),
+        writes: parseInt(dataAccessResult.rows[0]?.writes || "0"),
+        deletes: parseInt(dataAccessResult.rows[0]?.deletes || "0"),
+      },
     };
   }
 
   private async collectCompliancePosture(
     tenantId: string
-  ): Promise<TransparencyReportData['compliancePosture']> {
+  ): Promise<TransparencyReportData["compliancePosture"]> {
     // Compliance frameworks
     const frameworksResult = await pg.query(
       `SELECT
@@ -353,17 +349,17 @@ class TransparencyReportGenerator {
     );
 
     return {
-      frameworks: frameworksResult.rows.map(row => ({
+      frameworks: frameworksResult.rows.map((row) => ({
         name: row.framework,
         controlsImplemented: parseInt(row.controls_implemented),
         controlsVerified: parseInt(row.controls_verified),
-        lastAudit: row.last_audit?.toISOString() || 'Never'
+        lastAudit: row.last_audit?.toISOString() || "Never",
       })),
       auditTrail: {
-        totalEvents: parseInt(auditTrailResult.rows[0]?.total_events || '0'),
-        retentionPeriod: '7 years',
-        integrityVerified: true // Verified via hash chain
-      }
+        totalEvents: parseInt(auditTrailResult.rows[0]?.total_events || "0"),
+        retentionPeriod: "7 years",
+        integrityVerified: true, // Verified via hash chain
+      },
     };
   }
 
@@ -371,7 +367,7 @@ class TransparencyReportGenerator {
     tenantId: string,
     periodStart: Date,
     periodEnd: Date
-  ): Promise<TransparencyReportData['provenance']> {
+  ): Promise<TransparencyReportData["provenance"]> {
     // Verify hash chain integrity (sample check)
     const integrityResult = await pg.query(
       `SELECT
@@ -386,28 +382,28 @@ class TransparencyReportGenerator {
       [tenantId, periodStart, periodEnd]
     );
 
-    const total = parseInt(integrityResult.rows[0]?.total || '0');
-    const withHash = parseInt(integrityResult.rows[0]?.with_hash || '0');
-    const withSignature = parseInt(integrityResult.rows[0]?.with_signature || '0');
+    const total = parseInt(integrityResult.rows[0]?.total || "0");
+    const withHash = parseInt(integrityResult.rows[0]?.with_hash || "0");
+    const withSignature = parseInt(integrityResult.rows[0]?.with_signature || "0");
 
     return {
       auditTrailIntegrity: {
         verified: total > 0,
         hashChainValid: total > 0 && withHash === total,
-        signatureValid: total > 0 && withSignature === total
+        signatureValid: total > 0 && withSignature === total,
       },
       reproducibility: {
         exportAvailable: true,
-        exportFormats: ['JSON', 'CSV', 'PDF'],
-        exportRetention: '7 days'
-      }
+        exportFormats: ["JSON", "CSV", "PDF"],
+        exportRetention: "7 days",
+      },
     };
   }
 
   private calculateReportHash(report: TransparencyReportData): string {
-    const reportCopy = { ...report, metadata: { ...report.metadata, reportHash: '' } };
+    const reportCopy = { ...report, metadata: { ...report.metadata, reportHash: "" } };
     const reportJson = JSON.stringify(reportCopy);
-    return crypto.createHash('sha256').update(reportJson).digest('hex');
+    return crypto.createHash("sha256").update(reportJson).digest("hex");
   }
 
   async renderMarkdown(report: TransparencyReportData): Promise<string> {
@@ -426,7 +422,7 @@ class TransparencyReportGenerator {
 **Summary:** ${report.dataUsage.summary}
 
 **Purposes:**
-${report.dataUsage.purposes.map(p => `- ${p}`).join('\n')}
+${report.dataUsage.purposes.map((p) => `- ${p}`).join("\n")}
 
 **Retention Policy:** ${report.dataUsage.retentionPolicy}
 
@@ -445,11 +441,8 @@ ${report.dataUsage.purposes.map(p => `- ${p}`).join('\n')}
 | Agent ID | Runs | Success Rate |
 |----------|------|--------------|
 ${report.agentUsage.topAgents
-  .map(
-    a =>
-      `| ${a.agentId} | ${a.runs} | ${a.successRate.toFixed(2)}% |`
-  )
-  .join('\n')}
+  .map((a) => `| ${a.agentId} | ${a.runs} | ${a.successRate.toFixed(2)}% |`)
+  .join("\n")}
 
 ---
 
@@ -483,31 +476,28 @@ ${report.agentUsage.topAgents
 **Audit Trail:**
 - **Total Events:** ${report.compliancePosture.auditTrail.totalEvents}
 - **Retention Period:** ${report.compliancePosture.auditTrail.retentionPeriod}
-- **Integrity Verified:** ${report.compliancePosture.auditTrail.integrityVerified ? 'Yes' : 'No'}
+- **Integrity Verified:** ${report.compliancePosture.auditTrail.integrityVerified ? "Yes" : "No"}
 
 **Compliance Frameworks:**
 
 | Framework | Controls Implemented | Controls Verified | Last Audit |
 |-----------|---------------------|-------------------|------------|
 ${report.compliancePosture.frameworks
-  .map(
-    f =>
-      `| ${f.name} | ${f.controlsImplemented} | ${f.controlsVerified} | ${f.lastAudit} |`
-  )
-  .join('\n')}
+  .map((f) => `| ${f.name} | ${f.controlsImplemented} | ${f.controlsVerified} | ${f.lastAudit} |`)
+  .join("\n")}
 
 ---
 
 ## 5. Provenance & Reproducibility
 
 ### Audit Trail Integrity
-- **Verified:** ${report.provenance.auditTrailIntegrity.verified ? 'Yes' : 'No'}
-- **Hash Chain Valid:** ${report.provenance.auditTrailIntegrity.hashChainValid ? 'Yes' : 'No'}
-- **Signature Valid:** ${report.provenance.auditTrailIntegrity.signatureValid ? 'Yes' : 'No'}
+- **Verified:** ${report.provenance.auditTrailIntegrity.verified ? "Yes" : "No"}
+- **Hash Chain Valid:** ${report.provenance.auditTrailIntegrity.hashChainValid ? "Yes" : "No"}
+- **Signature Valid:** ${report.provenance.auditTrailIntegrity.signatureValid ? "Yes" : "No"}
 
 ### Reproducibility
-- **Export Available:** ${report.provenance.reproducibility.exportAvailable ? 'Yes' : 'No'}
-- **Export Formats:** ${report.provenance.reproducibility.exportFormats.join(', ')}
+- **Export Available:** ${report.provenance.reproducibility.exportAvailable ? "Yes" : "No"}
+- **Export Formats:** ${report.provenance.reproducibility.exportFormats.join(", ")}
 - **Export Retention:** ${report.provenance.reproducibility.exportRetention}
 
 ---
@@ -556,14 +546,14 @@ echo "${report.metadata.reportHash}" | sha256sum --check
 
 // CLI
 program
-  .name('generate-transparency-report')
-  .description('Generate transparency reports from audited data')
-  .requiredOption('--tenant <tenant-id>', 'Tenant ID')
-  .requiredOption('--start <date>', 'Start date (ISO 8601)')
-  .requiredOption('--end <date>', 'End date (ISO 8601)')
-  .option('--format <format>', 'Output format (md|html|json)', 'md')
-  .option('--output <path>', 'Output file path')
-  .action(async options => {
+  .name("generate-transparency-report")
+  .description("Generate transparency reports from audited data")
+  .requiredOption("--tenant <tenant-id>", "Tenant ID")
+  .requiredOption("--start <date>", "Start date (ISO 8601)")
+  .requiredOption("--end <date>", "End date (ISO 8601)")
+  .option("--format <format>", "Output format (md|html|json)", "md")
+  .option("--output <path>", "Output file path")
+  .action(async (options) => {
     const generator = new TransparencyReportGenerator();
 
     const report = await generator.generate(
@@ -573,16 +563,16 @@ program
     );
 
     let output: string;
-    if (options.format === 'md') {
+    if (options.format === "md") {
       output = await generator.renderMarkdown(report);
-    } else if (options.format === 'html') {
+    } else if (options.format === "html") {
       output = await generator.renderHTML(report);
     } else {
       output = JSON.stringify(report, null, 2);
     }
 
     if (options.output) {
-      await fs.writeFile(options.output, output, 'utf-8');
+      await fs.writeFile(options.output, output, "utf-8");
       console.log(`Transparency report written to: ${options.output}`);
     } else {
       console.log(output);

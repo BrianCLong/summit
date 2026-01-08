@@ -2,8 +2,8 @@ import type {
   PolicyEvaluationRequest,
   PolicyEvaluationResult,
   PolicyObligation,
-} from 'common-types';
-import { PolicyEngine } from './index.js';
+} from "common-types";
+import { PolicyEngine } from "./index.js";
 
 export interface GuardedEvaluationContext {
   riskScore?: number;
@@ -46,17 +46,13 @@ export interface GuardedAuditEntry {
 const DEFAULT_RISK_THRESHOLD = 0.55;
 
 function buildAuditId(request: PolicyEvaluationRequest, correlationId?: string) {
-  return [
-    correlationId ?? `${Date.now()}`,
-    request.action,
-    request.resource,
-  ].join(':');
+  return [correlationId ?? `${Date.now()}`, request.action, request.resource].join(":");
 }
 
 export class GuardedPolicyGateway {
   private readonly engine: PolicyEngine;
   private readonly riskThreshold: number;
-  private readonly auditSink?: GuardedPolicyGatewayOptions['auditSink'];
+  private readonly auditSink?: GuardedPolicyGatewayOptions["auditSink"];
   private readonly approvalQueue = new Map<string, ApprovalRecord>();
 
   constructor(options?: GuardedPolicyGatewayOptions) {
@@ -65,10 +61,7 @@ export class GuardedPolicyGateway {
     this.auditSink = options?.auditSink;
   }
 
-  evaluate(
-    request: PolicyEvaluationRequest,
-    context?: GuardedEvaluationContext,
-  ): GuardedDecision {
+  evaluate(request: PolicyEvaluationRequest, context?: GuardedEvaluationContext): GuardedDecision {
     const evaluation = this.engine.evaluate(request);
     if (!evaluation.allowed) {
       const auditRef = buildAuditId(request, context?.correlationId);
@@ -123,8 +116,19 @@ export class GuardedPolicyGateway {
     this.emitAudit({
       id: auditRef,
       timestamp: record.approvedAt,
-      request: { action: 'approval', resource: auditRef, context: { tenantId: '', userId: approver, roles: [] } },
-      evaluation: { allowed: true, effect: 'allow', matchedRules: [], reasons: [], obligations: [], trace: [] },
+      request: {
+        action: "approval",
+        resource: auditRef,
+        context: { tenantId: "", userId: approver, roles: [] },
+      },
+      evaluation: {
+        allowed: true,
+        effect: "allow",
+        matchedRules: [],
+        reasons: [],
+        obligations: [],
+        trace: [],
+      },
       requiresApproval: false,
       approval: record,
     });
@@ -137,10 +141,10 @@ export class GuardedPolicyGateway {
 
   private requiresApproval(
     evaluation: PolicyEvaluationResult,
-    context?: GuardedEvaluationContext,
+    context?: GuardedEvaluationContext
   ): boolean {
     const riskScore = context?.riskScore ?? 0;
-    const hasHighRiskTag = evaluation.matchedRules.some((rule) => rule.includes('high-risk'));
+    const hasHighRiskTag = evaluation.matchedRules.some((rule) => rule.includes("high-risk"));
     return hasHighRiskTag || riskScore >= this.riskThreshold;
   }
 

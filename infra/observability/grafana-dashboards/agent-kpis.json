@@ -1,5 +1,15 @@
 {
-  "annotations": {"list": [{"builtIn": 1, "type": "dashboard", "hide": true, "name": "Annotations & Alerts", "enable": true}]},
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "type": "dashboard",
+        "hide": true,
+        "name": "Annotations & Alerts",
+        "enable": true
+      }
+    ]
+  },
   "editable": true,
   "fiscalYearStartMonth": 0,
   "gnetId": null,
@@ -12,7 +22,7 @@
       "type": "stat",
       "title": "Agent Success Rate",
       "id": 1,
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
           "expr": "sum(rate(agent_runs_total{status='success'}[5m])) / sum(rate(agent_runs_total[5m]))",
@@ -20,13 +30,24 @@
           "refId": "A"
         }
       ],
-      "fieldConfig": {"defaults": {"unit": "percentunit", "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 0.98}]}}}
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 0.98 }
+            ]
+          }
+        }
+      }
     },
     {
       "type": "timeseries",
       "title": "Agent Cost per Run",
       "id": 2,
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
           "expr": "rate(agent_cost_tokens_total[5m]) / rate(agent_runs_total[5m])",
@@ -34,14 +55,14 @@
           "refId": "A"
         }
       ],
-      "fieldConfig": {"defaults": {"unit": "short"}},
-      "options": {"legend": {"displayMode": "list"}, "tooltip": {"mode": "single"}}
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "options": { "legend": { "displayMode": "list" }, "tooltip": { "mode": "single" } }
     },
     {
       "type": "timeseries",
       "title": "Mesh p99 Latency",
       "id": 3,
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
           "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket[5m])) by (le, destination_workload))",
@@ -49,25 +70,33 @@
           "refId": "A"
         }
       ],
-      "fieldConfig": {"defaults": {"unit": "ms"}},
-      "options": {"legend": {"displayMode": "table"}, "tooltip": {"mode": "multi"}}
+      "fieldConfig": { "defaults": { "unit": "ms" } },
+      "options": { "legend": { "displayMode": "table" }, "tooltip": { "mode": "multi" } }
     },
     {
       "type": "timeseries",
       "title": "CPU & Memory",
       "id": 4,
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
-        {"expr": "avg(container_cpu_usage_seconds_total{container!='',pod!~'otel-collector|vector-agent'} offset 0s)", "legendFormat": "cpu", "refId": "A"},
-        {"expr": "avg(container_memory_working_set_bytes{container!='',pod!~'otel-collector|vector-agent'} )", "legendFormat": "memory", "refId": "B"}
+        {
+          "expr": "avg(container_cpu_usage_seconds_total{container!='',pod!~'otel-collector|vector-agent'} offset 0s)",
+          "legendFormat": "cpu",
+          "refId": "A"
+        },
+        {
+          "expr": "avg(container_memory_working_set_bytes{container!='',pod!~'otel-collector|vector-agent'} )",
+          "legendFormat": "memory",
+          "refId": "B"
+        }
       ],
-      "fieldConfig": {"defaults": {"unit": "short"}}
+      "fieldConfig": { "defaults": { "unit": "short" } }
     },
     {
       "type": "table",
       "title": "Top Erroring Services",
       "id": 5,
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
           "expr": "topk(5, rate(http_requests_total{code=~'5..'}[5m]))",
@@ -75,16 +104,16 @@
           "refId": "A"
         }
       ],
-      "fieldConfig": {"defaults": {"unit": "short"}},
-      "options": {"showHeader": true}
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "options": { "showHeader": true }
     }
   ],
   "refresh": "30s",
   "schemaVersion": 38,
   "style": "dark",
   "tags": ["agent", "mesh", "observability"],
-  "templating": {"list": []},
-  "time": {"from": "now-6h", "to": "now"},
+  "templating": { "list": [] },
+  "time": { "from": "now-6h", "to": "now" },
   "timezone": "",
   "title": "Agent KPIs & Mesh Health",
   "uid": "agent-kpis",

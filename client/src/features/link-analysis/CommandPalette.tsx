@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { useAnalysisStore } from './store';
+import React, { useEffect, useState } from "react";
+import { useAnalysisStore } from "./store";
 
-const SAVED_QUERIES = ['recent-incidents', 'top-entities'];
+const SAVED_QUERIES = ["recent-incidents", "top-entities"];
 
 function openNlqModal() {
-  const event = new CustomEvent('intelgraph:nlq:open');
+  const event = new CustomEvent("intelgraph:nlq:open");
   window.dispatchEvent(event);
 }
 
@@ -14,14 +14,14 @@ export const CommandPalette: React.FC = () => {
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setOpen((v) => !v);
       }
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === "Escape") setOpen(false);
     };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
   }, []);
 
   if (!open) return null;

@@ -1,13 +1,9 @@
-export type DisclosureArtifact =
-  | 'audit-trail'
-  | 'sbom'
-  | 'attestations'
-  | 'policy-reports';
+export type DisclosureArtifact = "audit-trail" | "sbom" | "attestations" | "policy-reports";
 
 export interface DisclosureJob {
   id: string;
   tenantId: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
+  status: "pending" | "running" | "completed" | "failed";
   createdAt: string;
   startedAt?: string;
   completedAt?: string;
@@ -36,11 +32,11 @@ export interface RuntimeEvidenceBundle {
   };
 }
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
 
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
-    const text = await response.text().catch(() => '');
+    const text = await response.text().catch(() => "");
     throw new Error(text || `Request failed with status ${response.status}`);
   }
   return response.json() as Promise<T>;
@@ -54,69 +50,64 @@ export async function createDisclosureExport(payload: {
   callbackUrl?: string;
 }): Promise<DisclosureJob> {
   const response = await fetch(`${API_BASE}/disclosures/export`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'content-type': 'application/json',
-      'x-tenant-id': payload.tenantId,
+      "content-type": "application/json",
+      "x-tenant-id": payload.tenantId,
     },
-    credentials: 'include',
+    credentials: "include",
     body: JSON.stringify(payload),
   });
   const body = await handleResponse<{ job: DisclosureJob }>(response);
   return body.job;
 }
 
-export async function getDisclosureJob(
-  tenantId: string,
-  jobId: string,
-): Promise<DisclosureJob> {
+export async function getDisclosureJob(tenantId: string, jobId: string): Promise<DisclosureJob> {
   const response = await fetch(`${API_BASE}/disclosures/export/${jobId}`, {
     headers: {
-      'x-tenant-id': tenantId,
+      "x-tenant-id": tenantId,
     },
-    credentials: 'include',
+    credentials: "include",
   });
   const body = await handleResponse<{ job: DisclosureJob }>(response);
   return body.job;
 }
 
-export async function listDisclosureJobs(
-  tenantId: string,
-): Promise<DisclosureJob[]> {
+export async function listDisclosureJobs(tenantId: string): Promise<DisclosureJob[]> {
   const response = await fetch(`${API_BASE}/disclosures/export`, {
     headers: {
-      'x-tenant-id': tenantId,
+      "x-tenant-id": tenantId,
     },
-    credentials: 'include',
+    credentials: "include",
   });
   const body = await handleResponse<{ jobs: DisclosureJob[] }>(response);
   return body.jobs;
 }
 
 export async function sendDisclosureAnalyticsEvent(
-  event: 'view' | 'start',
+  event: "view" | "start",
   tenantId: string,
-  context?: Record<string, unknown>,
+  context?: Record<string, unknown>
 ) {
   try {
     const payload = JSON.stringify({ event, tenantId, context });
     if (navigator.sendBeacon) {
-      const blob = new Blob([payload], { type: 'application/json' });
+      const blob = new Blob([payload], { type: "application/json" });
       navigator.sendBeacon(`${API_BASE}/disclosures/analytics`, blob);
       return;
     }
 
     await fetch(`${API_BASE}/disclosures/analytics`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'content-type': 'application/json',
-        'x-tenant-id': tenantId,
+        "content-type": "application/json",
+        "x-tenant-id": tenantId,
       },
-      credentials: 'include',
+      credentials: "include",
       body: payload,
     });
   } catch (error) {
-    console.warn('Disclosure analytics event failed', error);
+    console.warn("Disclosure analytics event failed", error);
   }
 }
 
@@ -130,12 +121,12 @@ export async function createRuntimeEvidenceBundle(payload: {
   provenancePaths?: string[];
 }): Promise<RuntimeEvidenceBundle> {
   const response = await fetch(`${API_BASE}/disclosures/runtime-bundle`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'content-type': 'application/json',
-      'x-tenant-id': payload.tenantId,
+      "content-type": "application/json",
+      "x-tenant-id": payload.tenantId,
     },
-    credentials: 'include',
+    credentials: "include",
     body: JSON.stringify(payload),
   });
 

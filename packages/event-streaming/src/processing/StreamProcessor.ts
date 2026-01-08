@@ -4,9 +4,9 @@
  * Process event streams with transformations, filtering, and aggregation
  */
 
-import { EventEmitter } from 'events';
-import { EventBus, Message } from '@intelgraph/event-bus';
-import pino from 'pino';
+import { EventEmitter } from "events";
+import { EventBus, Message } from "@intelgraph/event-bus";
+import pino from "pino";
 
 export interface StreamEvent<T = any> {
   key: string;
@@ -36,20 +36,18 @@ export class StreamProcessor extends EventEmitter {
   constructor(eventBus: EventBus) {
     super();
     this.eventBus = eventBus;
-    this.logger = pino({ name: 'StreamProcessor' });
+    this.logger = pino({ name: "StreamProcessor" });
   }
 
   /**
    * Define a stream processing pipeline
    */
-  definePipeline<TIn = any, TOut = any>(
-    pipeline: StreamPipeline<TIn, TOut>
-  ): void {
+  definePipeline<TIn = any, TOut = any>(pipeline: StreamPipeline<TIn, TOut>): void {
     this.pipelines.set(pipeline.name, pipeline);
 
     this.logger.info(
       { name: pipeline.name, operators: pipeline.operators.length },
-      'Pipeline defined'
+      "Pipeline defined"
     );
   }
 
@@ -63,7 +61,7 @@ export class StreamProcessor extends EventEmitter {
     }
 
     if (this.running.has(pipelineName)) {
-      this.logger.warn({ pipelineName }, 'Pipeline already running');
+      this.logger.warn({ pipelineName }, "Pipeline already running");
       return;
     }
 
@@ -74,8 +72,8 @@ export class StreamProcessor extends EventEmitter {
       await this.processEvent(pipeline, message);
     });
 
-    this.logger.info({ pipelineName }, 'Pipeline started');
-    this.emit('pipeline:started', pipelineName);
+    this.logger.info({ pipelineName }, "Pipeline started");
+    this.emit("pipeline:started", pipelineName);
   }
 
   /**
@@ -84,22 +82,19 @@ export class StreamProcessor extends EventEmitter {
   async stop(pipelineName: string): Promise<void> {
     this.running.delete(pipelineName);
 
-    this.logger.info({ pipelineName }, 'Pipeline stopped');
-    this.emit('pipeline:stopped', pipelineName);
+    this.logger.info({ pipelineName }, "Pipeline stopped");
+    this.emit("pipeline:stopped", pipelineName);
   }
 
   /**
    * Process event through pipeline
    */
-  private async processEvent(
-    pipeline: StreamPipeline,
-    message: Message
-  ): Promise<void> {
+  private async processEvent(pipeline: StreamPipeline, message: Message): Promise<void> {
     try {
       let events: StreamEvent | StreamEvent[] = {
         key: message.metadata.messageId,
         value: message.payload,
-        timestamp: message.metadata.timestamp
+        timestamp: message.metadata.timestamp,
       };
 
       // Apply operators sequentially
@@ -140,24 +135,21 @@ export class StreamProcessor extends EventEmitter {
 
         for (const event of outputEvents) {
           await this.eventBus.publish(pipeline.output, event.value, {
-            persistent: true
+            persistent: true,
           });
         }
       }
 
-      this.emit('event:processed', {
+      this.emit("event:processed", {
         pipeline: pipeline.name,
-        count: Array.isArray(events) ? events.length : 1
+        count: Array.isArray(events) ? events.length : 1,
       });
     } catch (err) {
-      this.logger.error(
-        { err, pipeline: pipeline.name },
-        'Event processing error'
-      );
+      this.logger.error({ err, pipeline: pipeline.name }, "Event processing error");
 
-      this.emit('event:error', {
+      this.emit("event:error", {
         pipeline: pipeline.name,
-        error: err
+        error: err,
       });
     }
   }
@@ -187,12 +179,10 @@ export class PipelineBuilder {
   /**
    * Add a map operator
    */
-  map<TIn = any, TOut = any>(
-    mapper: (value: TIn) => TOut | Promise<TOut>
-  ): this {
+  map<TIn = any, TOut = any>(mapper: (value: TIn) => TOut | Promise<TOut>): this {
     this.operators.push(async (event) => ({
       ...event,
-      value: await mapper(event.value)
+      value: await mapper(event.value),
     }));
     return this;
   }
@@ -200,9 +190,7 @@ export class PipelineBuilder {
   /**
    * Add a filter operator
    */
-  filter<T = any>(
-    predicate: (value: T) => boolean | Promise<boolean>
-  ): this {
+  filter<T = any>(predicate: (value: T) => boolean | Promise<boolean>): this {
     this.operators.push(async (event) => {
       const matches = await predicate(event.value);
       return matches ? event : null;
@@ -213,14 +201,12 @@ export class PipelineBuilder {
   /**
    * Add a flatMap operator
    */
-  flatMap<TIn = any, TOut = any>(
-    mapper: (value: TIn) => TOut[] | Promise<TOut[]>
-  ): this {
+  flatMap<TIn = any, TOut = any>(mapper: (value: TIn) => TOut[] | Promise<TOut[]>): this {
     this.operators.push(async (event) => {
       const values = await mapper(event.value);
-      return values.map(value => ({
+      return values.map((value) => ({
         ...event,
-        value
+        value,
       }));
     });
     return this;
@@ -242,7 +228,7 @@ export class PipelineBuilder {
       name: this.name,
       input: this.input,
       output: this.output,
-      operators: this.operators
+      operators: this.operators,
     };
   }
 }

@@ -3,16 +3,16 @@
  * GraphQL hooks for live graph data synchronization
  */
 
-import { useQuery, useMutation, useSubscription, gql } from '@apollo/client';
-import { useCallback, useMemo } from 'react';
-import type { GraphData, Node, Edge } from '../../generated/graphql';
+import { useQuery, useMutation, useSubscription, gql } from "@apollo/client";
+import { useCallback, useMemo } from "react";
+import type { GraphData, Node, Edge } from "../../generated/graphql";
 import {
   GraphNode,
   GraphEdge,
   transformToGraphNode,
   transformToGraphEdge,
   toCytoscapeElements,
-} from './types';
+} from "./types";
 
 // GraphQL Queries
 export const GET_GRAPH_DATA = gql`
@@ -177,7 +177,7 @@ export function useGraphData({
     variables: { investigationId },
     pollInterval,
     skip: !investigationId,
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: "cache-and-network",
   });
 
   // Subscribe to real-time updates when enabled
@@ -200,10 +200,7 @@ export function useGraphData({
     return data.graphData.edges.map(transformToGraphEdge);
   }, [data?.graphData?.edges]);
 
-  const cytoscapeElements = useMemo(
-    () => toCytoscapeElements(nodes, edges),
-    [nodes, edges],
-  );
+  const cytoscapeElements = useMemo(() => toCytoscapeElements(nodes, edges), [nodes, edges]);
 
   const handleRefetch = useCallback(async () => {
     await refetch();
@@ -228,14 +225,11 @@ export interface UseEntityDetailsResult {
 }
 
 export function useEntityDetails(entityId: string | null): UseEntityDetailsResult {
-  const { data, loading, error } = useQuery<{ getEntityDetails: Node }>(
-    GET_ENTITY_DETAILS,
-    {
-      variables: { entityId },
-      skip: !entityId,
-      fetchPolicy: 'cache-first',
-    },
-  );
+  const { data, loading, error } = useQuery<{ getEntityDetails: Node }>(GET_ENTITY_DETAILS, {
+    variables: { entityId },
+    skip: !entityId,
+    fetchPolicy: "cache-first",
+  });
 
   const entity = useMemo(() => {
     if (!data?.getEntityDetails) return null;
@@ -274,7 +268,7 @@ export function useEntitySearch(): UseEntitySearchResult {
         refetch({ query, limit });
       }
     },
-    [refetch],
+    [refetch]
   );
 
   return {
@@ -316,7 +310,7 @@ export function useEnrichment(entityId: string | null): UseEnrichmentResult {
   const { data, loading, error } = useQuery(GET_ENRICHMENT, {
     variables: { entityId },
     skip: !entityId,
-    fetchPolicy: 'cache-first',
+    fetchPolicy: "cache-first",
   });
 
   const enrichment = useMemo(() => {

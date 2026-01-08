@@ -1,16 +1,16 @@
 export enum PartnerArchetype {
-  PLATFORM = 'platform',
-  SYSTEM_INTEGRATOR = 'system_integrator',
-  AGENCY = 'agency',
-  RESELLER = 'reseller',
-  OEM = 'oem_embedded',
-  DATA_PROVIDER = 'data_provider',
+  PLATFORM = "platform",
+  SYSTEM_INTEGRATOR = "system_integrator",
+  AGENCY = "agency",
+  RESELLER = "reseller",
+  OEM = "oem_embedded",
+  DATA_PROVIDER = "data_provider",
 }
 
 export enum PartnerSegment {
-  STRATEGIC = 'strategic',
-  GROWTH = 'growth',
-  LONG_TAIL = 'long_tail',
+  STRATEGIC = "strategic",
+  GROWTH = "growth",
+  LONG_TAIL = "long_tail",
 }
 
 export interface TierCriteria {
@@ -56,7 +56,7 @@ export interface DealRegistration {
   tierScore: number;
   registeredAt: Date;
   expiresAt: Date;
-  status: 'active' | 'expired' | 'closed';
+  status: "active" | "expired" | "closed";
   activityLog: Array<{
     at: Date;
     description: string;
@@ -94,7 +94,7 @@ export interface OnboardingState {
   intake: IntakeProfile;
   security: SecurityQuestionnaireResult;
   technical: TechnicalOnboardingChecklist;
-  certificationStatus: 'pending' | 'passed' | 'failed';
+  certificationStatus: "pending" | "passed" | "failed";
   enablementKitIssued: boolean;
   portalAccountIssued: boolean;
   createdAt: Date;
@@ -102,16 +102,16 @@ export interface OnboardingState {
 }
 
 export interface IntegrationContract {
-  versioningStrategy: 'semver' | 'dated' | 'none';
-  pagination: 'cursor' | 'offset' | 'none';
-  errorModel: 'typed' | 'http-status-only';
+  versioningStrategy: "semver" | "dated" | "none";
+  pagination: "cursor" | "offset" | "none";
+  errorModel: "typed" | "http-status-only";
   idempotencyKeys: boolean;
   webhooksSigned: boolean;
   replayWindowSeconds: number;
   scopedPermissions: string[];
   dependencyScanning: boolean;
-  secretHandling: 'vaulted' | 'plaintext';
-  egressPolicy: 'restricted' | 'open';
+  secretHandling: "vaulted" | "plaintext";
+  egressPolicy: "restricted" | "open";
 }
 
 export interface IntegrationCertificationResult {
@@ -121,7 +121,7 @@ export interface IntegrationCertificationResult {
 
 export interface RiskRegisterEntry {
   partnerId: string;
-  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  riskLevel: "low" | "medium" | "high" | "critical";
   dataAccess: string;
   geography: string;
   dependencies: string[];
@@ -134,13 +134,13 @@ export interface AccessGrant {
   issuedAt: Date;
   expiresAt: Date;
   scopes: string[];
-  type: 'user' | 'service_token';
+  type: "user" | "service_token";
 }
 
-export type EnforcementAction = 'warn' | 'throttle' | 'suspend' | 'terminate';
+export type EnforcementAction = "warn" | "throttle" | "suspend" | "terminate";
 
 export interface HealthSignal {
-  metric: 'errorRate' | 'volume' | 'abuse';
+  metric: "errorRate" | "volume" | "abuse";
   value: number;
   threshold: number;
   partnerId: string;
@@ -149,7 +149,7 @@ export interface HealthSignal {
 
 export interface PayoutLineItem {
   partnerId: string;
-  model: 'rev_share' | 'referral' | 'usage' | 'oem';
+  model: "rev_share" | "referral" | "usage" | "oem";
   gross: number;
   sharePercentage: number;
   refunds: number;

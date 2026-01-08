@@ -1,6 +1,6 @@
-import type { CompiledPrompt } from '../compiler.js';
-import type { SlotSchemaMap } from '../schema.js';
-import type { LLMAdapter } from './types.js';
+import type { CompiledPrompt } from "../compiler.js";
+import type { SlotSchemaMap } from "../schema.js";
+import type { LLMAdapter } from "./types.js";
 
 export interface AnthropicAdapterOptions {
   readonly model?: string;
@@ -8,18 +8,18 @@ export interface AnthropicAdapterOptions {
 }
 
 export class AnthropicAdapter implements LLMAdapter {
-  public readonly name = 'anthropic:messages';
+  public readonly name = "anthropic:messages";
   private readonly defaultModel: string;
   private readonly defaultSystemPrompt?: string;
 
   constructor(options: AnthropicAdapterOptions = {}) {
-    this.defaultModel = options.model ?? 'claude-3-5-sonnet-20241022';
+    this.defaultModel = options.model ?? "claude-3-5-sonnet-20241022";
     this.defaultSystemPrompt = options.systemPrompt;
   }
 
   format<TSlots extends SlotSchemaMap>(
     compiled: CompiledPrompt<TSlots>,
-    options: Record<string, unknown> = {},
+    options: Record<string, unknown> = {}
   ) {
     const system =
       (options.systemPrompt as string | undefined) ??
@@ -32,8 +32,8 @@ export class AnthropicAdapter implements LLMAdapter {
       system,
       messages: [
         {
-          role: 'user',
-          content: [{ type: 'text', text: compiled.rendered }],
+          role: "user",
+          content: [{ type: "text", text: compiled.rendered }],
         },
       ],
       metadata: {

@@ -1,86 +1,92 @@
-import { Router, Request, Response } from 'express';
-import { typesenseClient } from '../lib/typesense';
+import { Router, Request, Response } from "express";
+import { typesenseClient } from "../lib/typesense";
 
 const router = Router();
 
 function getTenantId(req: Request): string {
-    return (req as any).user?.tenantId || req.headers['x-tenant-id'] || 'default-tenant';
+  return (req as any).user?.tenantId || req.headers["x-tenant-id"] || "default-tenant";
 }
 
-router.post('/v1/search', async (req: Request, res: Response) => {
-    try {
-        const { collection, q, query_by, filter_by, page, per_page, facet_by, ...rest } = req.body;
-        const tenantId = getTenantId(req);
+router.post("/v1/search", async (req: Request, res: Response) => {
+  try {
+    const { collection, q, query_by, filter_by, page, per_page, facet_by, ...rest } = req.body;
+    const tenantId = getTenantId(req);
 
-        if (!collection) {
-             return res.status(400).json({ error: 'Missing collection' });
-        }
-
-        const userClearance = (req as any).user?.clearance || 0;
-        const tenantFilter = `tenant:=${tenantId}`;
-        const securityFilter = `classification:<= ${userClearance}`;
-        const baseFilter = `${tenantFilter} && ${securityFilter}`;
-
-        const finalFilter = filter_by ? `${baseFilter} && (${filter_by})` : baseFilter;
-
-        const safePerPage = Math.min(Math.max(Number(per_page) || 10, 1), 50);
-        const safePage = Math.min(Math.max(Number(page) || 1, 1), 50);
-
-        const searchParams = {
-            q: q || '*',
-            query_by: query_by || 'title,body',
-            filter_by: finalFilter,
-            page: safePage,
-            per_page: safePerPage,
-            facet_by: facet_by,
-            ...rest
-        };
-
-        const collectionAlias = `${collection}@current`;
-
-        const result = await typesenseClient.collections(collectionAlias).documents().search(searchParams);
-        res.json(result);
-    } catch (err: any) {
-        console.error(err);
-        res.status(500).json({ error: err.message });
+    if (!collection) {
+      return res.status(400).json({ error: "Missing collection" });
     }
+
+    const userClearance = (req as any).user?.clearance || 0;
+    const tenantFilter = `tenant:=${tenantId}`;
+    const securityFilter = `classification:<= ${userClearance}`;
+    const baseFilter = `${tenantFilter} && ${securityFilter}`;
+
+    const finalFilter = filter_by ? `${baseFilter} && (${filter_by})` : baseFilter;
+
+    const safePerPage = Math.min(Math.max(Number(per_page) || 10, 1), 50);
+    const safePage = Math.min(Math.max(Number(page) || 1, 1), 50);
+
+    const searchParams = {
+      q: q || "*",
+      query_by: query_by || "title,body",
+      filter_by: finalFilter,
+      page: safePage,
+      per_page: safePerPage,
+      facet_by: facet_by,
+      ...rest,
+    };
+
+    const collectionAlias = `${collection}@current`;
+
+    const result = await typesenseClient
+      .collections(collectionAlias)
+      .documents()
+      .search(searchParams);
+    res.json(result);
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.post('/v1/search/suggest', async (req: Request, res: Response) => {
-     try {
-        const { collection, q, query_by, filter_by, ...rest } = req.body;
-        const tenantId = getTenantId(req);
+router.post("/v1/search/suggest", async (req: Request, res: Response) => {
+  try {
+    const { collection, q, query_by, filter_by, ...rest } = req.body;
+    const tenantId = getTenantId(req);
 
-        if (!collection) {
-             return res.status(400).json({ error: 'Missing collection' });
-        }
-
-        const userClearance = (req as any).user?.clearance || 0;
-        const tenantFilter = `tenant:=${tenantId}`;
-        const securityFilter = `classification:<= ${userClearance}`;
-        const baseFilter = `${tenantFilter} && ${securityFilter}`;
-
-        const finalFilter = filter_by ? `${baseFilter} && (${filter_by})` : baseFilter;
-
-        const searchParams = {
-            q: q || '',
-            query_by: query_by || 'title',
-            filter_by: finalFilter,
-            per_page: 5,
-            ...rest
-        };
-
-         const collectionAlias = `${collection}@current`;
-         const result = await typesenseClient.collections(collectionAlias).documents().search(searchParams);
-         res.json(result);
-     } catch (err: any) {
-        res.status(500).json({ error: err.message });
+    if (!collection) {
+      return res.status(400).json({ error: "Missing collection" });
     }
+
+    const userClearance = (req as any).user?.clearance || 0;
+    const tenantFilter = `tenant:=${tenantId}`;
+    const securityFilter = `classification:<= ${userClearance}`;
+    const baseFilter = `${tenantFilter} && ${securityFilter}`;
+
+    const finalFilter = filter_by ? `${baseFilter} && (${filter_by})` : baseFilter;
+
+    const searchParams = {
+      q: q || "",
+      query_by: query_by || "title",
+      filter_by: finalFilter,
+      per_page: 5,
+      ...rest,
+    };
+
+    const collectionAlias = `${collection}@current`;
+    const result = await typesenseClient
+      .collections(collectionAlias)
+      .documents()
+      .search(searchParams);
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.post('/v1/search/admin/reindex', async (req: Request, res: Response) => {
-    // TODO: Add proper RBAC here
-    res.json({ status: 'triggered', job_id: 'job-' + Date.now() });
+router.post("/v1/search/admin/reindex", async (req: Request, res: Response) => {
+  // TODO: Add proper RBAC here
+  res.json({ status: "triggered", job_id: "job-" + Date.now() });
 });
 
 export default router;

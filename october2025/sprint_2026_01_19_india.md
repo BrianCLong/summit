@@ -17,12 +17,12 @@ roles:
   - FinOps Lead
   - Repo Maintainer / Arborist
 objectives:
-  - 'Zero-trust runtime: service-to-service mTLS with SPIFFE/SPIRE; mesh canary on gateway→docs-api path.'
-  - 'Data-privacy by default in previews: Test Data Management (TDM) with masking/synthesis and access logging.'
-  - 'Performance budgets enforced in CI (latency/error/cpu/mem) with automatic regress guard.'
-  - 'Incident automation: runbook-as-code checks + PagerDuty/Jira hooks; MTTA ≤ 5m in stage drills.'
-  - 'Cost & efficiency: autoscaling polish, idle scale-to-zero, and build cache hit ≥ 85%.'
-  - 'Governance: Terraform/Helm policy-as-code via Conftest/OPA with versioned bundle + audit.'
+  - "Zero-trust runtime: service-to-service mTLS with SPIFFE/SPIRE; mesh canary on gateway→docs-api path."
+  - "Data-privacy by default in previews: Test Data Management (TDM) with masking/synthesis and access logging."
+  - "Performance budgets enforced in CI (latency/error/cpu/mem) with automatic regress guard."
+  - "Incident automation: runbook-as-code checks + PagerDuty/Jira hooks; MTTA ≤ 5m in stage drills."
+  - "Cost & efficiency: autoscaling polish, idle scale-to-zero, and build cache hit ≥ 85%."
+  - "Governance: Terraform/Helm policy-as-code via Conftest/OPA with versioned bundle + audit."
 ---
 
 # Sprint 31 Plan — Zero‑Trust Mesh, Privacy‑Safe Previews, and Budget Guards
@@ -191,7 +191,7 @@ spec:
   rules:
     - from:
         - source:
-            principals: ['spiffe://org/prod/gateway']
+            principals: ["spiffe://org/prod/gateway"]
 ```
 
 ### 5.3 Preview TDM Seeder (Job)
@@ -209,11 +209,8 @@ spec:
         - name: seed
           image: ghcr.io/your-org/tdm:latest
           env:
-            - {
-                name: DATABASE_URL,
-                valueFrom: { secretKeyRef: { name: db, key: url } },
-              }
-            - { name: MASK_RULES, value: '/rules/mask.yaml' }
+            - { name: DATABASE_URL, valueFrom: { secretKeyRef: { name: db, key: url } } }
+            - { name: MASK_RULES, value: "/rules/mask.yaml" }
           volumeMounts: [{ name: rules, mountPath: /rules }]
       restartPolicy: OnFailure
       volumes:
@@ -265,20 +262,20 @@ jobs:
 **Path:** `tests/k6/budgets.js`
 
 ```js
-import http from 'k6/http';
-import { check } from 'k6';
+import http from "k6/http";
+import { check } from "k6";
 export const options = {
   thresholds: {
-    'http_req_duration{endpoint:/search}': ['p(95)<1200'],
-    'http_req_duration{endpoint:/docs/:id}': ['p(95)<1200'],
-    http_req_failed: ['rate<0.02'],
+    "http_req_duration{endpoint:/search}": ["p(95)<1200"],
+    "http_req_duration{endpoint:/docs/:id}": ["p(95)<1200"],
+    http_req_failed: ["rate<0.02"],
   },
 };
 export default function () {
   const s = http.get(`${__ENV.BASE_URL}/search?q=ok`, {
-    tags: { endpoint: '/search' },
+    tags: { endpoint: "/search" },
   });
-  check(s, { 'search 200': (r) => r.status === 200 });
+  check(s, { "search 200": (r) => r.status === 200 });
 }
 ```
 
@@ -342,7 +339,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: instrumenta/conftest-action@v0.3.0
-        with: { files: 'infra/**.tf, charts/**/values.yaml' }
+        with: { files: "infra/**.tf, charts/**/values.yaml" }
 ```
 
 ### 5.9 KEDA Scale-to-Zero (example)
@@ -363,7 +360,7 @@ spec:
       metadata:
         serverAddress: http://prometheus:9090
         metricName: queue_depth
-        threshold: '10'
+        threshold: "10"
         query: sum(queue_depth)
 ```
 

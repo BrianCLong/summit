@@ -1,7 +1,7 @@
 meta:
   id: plan.realtime-analytics@v1
-  owner: 'platform-engineering'
-  purpose: 'Create lightweight real-time dashboards for demonstrations and monitoring'
+  owner: "platform-engineering"
+  purpose: "Create lightweight real-time dashboards for demonstrations and monitoring"
   tags:
     - analytics
     - streaming
@@ -9,13 +9,13 @@ meta:
     - demos
     - realtime
   guardrails:
-    - 'Demo data must not contain real user data'
-    - 'Streaming must handle backpressure'
-    - 'Dashboards must be responsive'
-    - 'Data freshness must be documented'
+    - "Demo data must not contain real user data"
+    - "Streaming must handle backpressure"
+    - "Dashboards must be responsive"
+    - "Data freshness must be documented"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -239,15 +239,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'demo-dashboards'
+  - name: "demo-dashboards"
     inputs:
-      demo_scenarios: 'Sales demo, investor pitch, customer POC'
-      data_sources: 'Kafka events, metrics, synthetic activities'
-      latency_requirements: '< 2 second end-to-end'
-      audience: 'Non-technical executives, security analysts'
-      infrastructure_constraints: 'Must work on demo laptop, cloud optional'
+      demo_scenarios: "Sales demo, investor pitch, customer POC"
+      data_sources: "Kafka events, metrics, synthetic activities"
+      latency_requirements: "< 2 second end-to-end"
+      audience: "Non-technical executives, security analysts"
+      infrastructure_constraints: "Must work on demo laptop, cloud optional"
     expected_contains:
-      - 'Demo Dashboard'
-      - 'Streaming Architecture'
-      - 'Demo Datasets'
-      - 'Performance Considerations'
+      - "Demo Dashboard"
+      - "Streaming Architecture"
+      - "Demo Datasets"
+      - "Performance Considerations"

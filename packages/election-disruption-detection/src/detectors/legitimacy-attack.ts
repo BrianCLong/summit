@@ -6,31 +6,24 @@
  * democratic trust rather than vote counts.
  */
 
-import { ThreatDetector } from '../base/index.js';
-import type {
-  RawSignal,
-  ElectionContext,
-  ElectionThreatSignal,
-} from '../types.js';
+import { ThreatDetector } from "../base/index.js";
+import type { RawSignal, ElectionContext, ElectionThreatSignal } from "../types.js";
 
 export type LegitimacyAttackType =
-  | 'INSTITUTIONAL_DELEGITIMIZATION'
-  | 'PROCESS_DISTRUST_CAMPAIGN'
-  | 'OFFICIAL_TARGETING'
-  | 'MEDIA_DELEGITIMIZATION'
-  | 'CONSTITUTIONAL_CRISIS_SEEDING'
-  | 'PARALLEL_COUNT_NARRATIVE'
-  | 'CERTIFICATION_OBSTRUCTION';
+  | "INSTITUTIONAL_DELEGITIMIZATION"
+  | "PROCESS_DISTRUST_CAMPAIGN"
+  | "OFFICIAL_TARGETING"
+  | "MEDIA_DELEGITIMIZATION"
+  | "CONSTITUTIONAL_CRISIS_SEEDING"
+  | "PARALLEL_COUNT_NARRATIVE"
+  | "CERTIFICATION_OBSTRUCTION";
 
 export class LegitimacyAttackDetector extends ThreatDetector {
   constructor(config: unknown) {
     super();
   }
 
-  async analyze(
-    signals: RawSignal[],
-    context: ElectionContext
-  ): Promise<ElectionThreatSignal[]> {
+  async analyze(signals: RawSignal[], context: ElectionContext): Promise<ElectionThreatSignal[]> {
     const threats: ElectionThreatSignal[] = [];
 
     // Detect attacks on election officials
@@ -42,7 +35,7 @@ export class LegitimacyAttackDetector extends ThreatDetector {
     threats.push(...institutionalAttacks);
 
     // Detect certification obstruction patterns
-    if (context.currentPhase === 'CERTIFICATION' || context.currentPhase === 'COUNTING') {
+    if (context.currentPhase === "CERTIFICATION" || context.currentPhase === "COUNTING") {
       const certificationThreats = await this.detectCertificationObstruction(signals, context);
       threats.push(...certificationThreats);
     }

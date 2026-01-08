@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import ReactFlow, {
   Node as FlowNode,
   Edge as FlowEdge,
@@ -10,13 +10,13 @@ import ReactFlow, {
   Panel,
   MarkerType,
   Position,
-} from 'reactflow';
-import 'reactflow/dist/style.css';
+} from "reactflow";
+import "reactflow/dist/style.css";
 
 interface RunStep {
   id: string;
   name: string;
-  state: 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
+  state: "pending" | "running" | "completed" | "failed" | "skipped";
   parents: string[];
   traceId?: string;
   duration?: number;
@@ -28,7 +28,7 @@ interface RunStep {
 interface RunData {
   id: string;
   name: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  status: "pending" | "running" | "completed" | "failed" | "cancelled";
   steps: RunStep[];
   startTime?: string;
   endTime?: string;
@@ -37,35 +37,35 @@ interface RunData {
 
 const getNodeColor = (state: string) => {
   switch (state) {
-    case 'pending':
-      return { bg: '#f3f4f6', border: '#d1d5db', text: '#374151' };
-    case 'running':
-      return { bg: '#dbeafe', border: '#3b82f6', text: '#1e40af' };
-    case 'completed':
-      return { bg: '#dcfce7', border: '#22c55e', text: '#166534' };
-    case 'failed':
-      return { bg: '#fecaca', border: '#ef4444', text: '#991b1b' };
-    case 'skipped':
-      return { bg: '#fef3c7', border: '#f59e0b', text: '#92400e' };
+    case "pending":
+      return { bg: "#f3f4f6", border: "#d1d5db", text: "#374151" };
+    case "running":
+      return { bg: "#dbeafe", border: "#3b82f6", text: "#1e40af" };
+    case "completed":
+      return { bg: "#dcfce7", border: "#22c55e", text: "#166534" };
+    case "failed":
+      return { bg: "#fecaca", border: "#ef4444", text: "#991b1b" };
+    case "skipped":
+      return { bg: "#fef3c7", border: "#f59e0b", text: "#92400e" };
     default:
-      return { bg: '#f3f4f6', border: '#d1d5db', text: '#374151' };
+      return { bg: "#f3f4f6", border: "#d1d5db", text: "#374151" };
   }
 };
 
 const getStatusIcon = (state: string) => {
   switch (state) {
-    case 'pending':
-      return '⏳';
-    case 'running':
-      return '🏃‍♂️';
-    case 'completed':
-      return '✅';
-    case 'failed':
-      return '❌';
-    case 'skipped':
-      return '⏭️';
+    case "pending":
+      return "⏳";
+    case "running":
+      return "🏃‍♂️";
+    case "completed":
+      return "✅";
+    case "failed":
+      return "❌";
+    case "skipped":
+      return "⏭️";
     default:
-      return '❓';
+      return "❓";
   }
 };
 
@@ -89,9 +89,7 @@ const CustomNode = ({ data }: { data: any }) => {
 
       <div className="text-xs mt-1">
         <div>State: {data.state}</div>
-        {data.duration && (
-          <div>Duration: {Math.round(data.duration / 1000)}s</div>
-        )}
+        {data.duration && <div>Duration: {Math.round(data.duration / 1000)}s</div>}
       </div>
 
       {data.traceId && (
@@ -117,18 +115,18 @@ const nodeTypes = {
 
 export default function RunViewer() {
   const [searchParams] = useSearchParams();
-  const runId = searchParams.get('runId');
+  const runId = searchParams.get("runId");
 
   const [runData, setRunData] = useState<RunData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string>("");
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
   // Fetch run data with polling
   const fetchRunData = useCallback(async () => {
     if (!runId) {
-      setError('No runId provided in query parameters');
+      setError("No runId provided in query parameters");
       setLoading(false);
       return;
     }
@@ -141,10 +139,10 @@ export default function RunViewer() {
 
       const data = await response.json();
       setRunData(data);
-      setError('');
+      setError("");
     } catch (err) {
-      console.error('Failed to fetch run data:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch run data');
+      console.error("Failed to fetch run data:", err);
+      setError(err instanceof Error ? err.message : "Failed to fetch run data");
     } finally {
       setLoading(false);
     }
@@ -156,7 +154,7 @@ export default function RunViewer() {
 
     // Set up polling every 5 seconds if run is still active
     const pollInterval = setInterval(() => {
-      if (runData?.status === 'running' || runData?.status === 'pending') {
+      if (runData?.status === "running" || runData?.status === "pending") {
         fetchRunData();
       }
     }, 5000);
@@ -187,9 +185,7 @@ export default function RunViewer() {
         return 0;
       }
 
-      const parentLevels = step.parents.map((parentId) =>
-        calculateLevel(parentId),
-      );
+      const parentLevels = step.parents.map((parentId) => calculateLevel(parentId));
       const level = Math.max(...parentLevels) + 1;
       levels.set(stepId, level);
       return level;
@@ -227,7 +223,7 @@ export default function RunViewer() {
 
       return {
         id: step.id,
-        type: 'custom',
+        type: "custom",
         position: { x, y },
         data: {
           name: step.name,
@@ -251,10 +247,10 @@ export default function RunViewer() {
           target: step.id,
           markerEnd: {
             type: MarkerType.ArrowClosed,
-            color: '#6b7280',
+            color: "#6b7280",
           },
           style: {
-            stroke: '#6b7280',
+            stroke: "#6b7280",
             strokeWidth: 2,
           },
         });
@@ -331,9 +327,7 @@ export default function RunViewer() {
       <div className="p-4 border-b bg-white">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">
-              {runData.name || `Run ${runId}`}
-            </h1>
+            <h1 className="text-2xl font-bold">{runData.name || `Run ${runId}`}</h1>
             <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
               <span>
                 ID: <code className="bg-gray-100 px-1 rounded">{runId}</code>
@@ -348,9 +342,7 @@ export default function RunViewer() {
               >
                 {runData.status.toUpperCase()}
               </span>
-              {runData.duration && (
-                <span>Duration: {Math.round(runData.duration / 1000)}s</span>
-              )}
+              {runData.duration && <span>Duration: {Math.round(runData.duration / 1000)}s</span>}
             </div>
           </div>
 
@@ -361,7 +353,7 @@ export default function RunViewer() {
             >
               Refresh
             </button>
-            {runData.status === 'running' && (
+            {runData.status === "running" && (
               <div className="px-3 py-1 text-sm bg-green-100 text-green-700 rounded">
                 Auto-refreshing (5s)
               </div>
@@ -421,21 +413,10 @@ export default function RunViewer() {
         <div className="flex justify-between">
           <span>Steps: {runData.steps.length}</span>
           <div className="flex gap-4">
-            <span>
-              Completed:{' '}
-              {runData.steps.filter((s) => s.state === 'completed').length}
-            </span>
-            <span>
-              Running:{' '}
-              {runData.steps.filter((s) => s.state === 'running').length}
-            </span>
-            <span>
-              Failed: {runData.steps.filter((s) => s.state === 'failed').length}
-            </span>
-            <span>
-              Pending:{' '}
-              {runData.steps.filter((s) => s.state === 'pending').length}
-            </span>
+            <span>Completed: {runData.steps.filter((s) => s.state === "completed").length}</span>
+            <span>Running: {runData.steps.filter((s) => s.state === "running").length}</span>
+            <span>Failed: {runData.steps.filter((s) => s.state === "failed").length}</span>
+            <span>Pending: {runData.steps.filter((s) => s.state === "pending").length}</span>
           </div>
         </div>
       </div>

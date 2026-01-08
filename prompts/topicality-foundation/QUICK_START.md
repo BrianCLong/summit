@@ -7,6 +7,7 @@
 ## Fastest Path to Value
 
 ### Option A: Start Immediately with Prompt #1
+
 **Best for:** Getting started now, single-threaded execution
 
 ```bash
@@ -24,6 +25,7 @@ claude
 ```
 
 **What happens next:**
+
 - Claude Code will propose a stack (TypeScript/Node or Python/FastAPI)
 - You'll review and approve
 - Claude will implement IntelGraph Core over ~2 weeks
@@ -32,9 +34,11 @@ claude
 ---
 
 ### Option B: Parallel Execution (Week 3+)
+
 **Best for:** Maximum velocity after foundation is complete
 
 **Prerequisites:**
+
 - Prompts #1 and #2 completed
 - 3 developers or 3 Claude Code sessions
 
@@ -57,11 +61,13 @@ claude --prompt "$(cat /home/user/summit/prompts/topicality-foundation/07-metric
 ---
 
 ### Option C: Use Existing Summit Infrastructure
+
 **Best for:** Integrating with your current Summit/IntelGraph deployment
 
 **Steps:**
 
 1. **Audit current state:**
+
    ```bash
    cd /home/user/summit
 
@@ -134,6 +140,7 @@ cat prompts/01-intelgraph-core.md
 ```
 
 **Time investment:**
+
 - Setup: 30 minutes
 - Prompt #1 completion: 2 weeks (with Claude Code doing most work)
 - Learning curve: Minimal (Claude Code guides you)
@@ -145,11 +152,13 @@ cat prompts/01-intelgraph-core.md
 **Recommended:** Fast-track critical path only
 
 **Prompts to run:**
+
 1. ✅ Prompt #1 (IntelGraph Core) - 2 weeks
 2. ⏭️ Skip Prompt #2 for now (use inline provenance)
 3. ⏭️ Skip governance/metrics (use stubs)
 
 **Fast-track approach:**
+
 ```bash
 # Modify Prompt #1 to focus on:
 # - Entities and claims (skip full provenance initially)
@@ -160,6 +169,7 @@ cat prompts/01-intelgraph-core.md
 ```
 
 **Demo deliverable:**
+
 - Entity CRUD API
 - Basic claim tracking
 - Simple query examples
@@ -189,6 +199,7 @@ claude
 ```
 
 **Time investment:**
+
 - Reading: 2 hours
 - Architecture Q&A with Claude: 1 hour
 - Decision to proceed: immediate
@@ -201,18 +212,20 @@ claude
 
 **Team assignment:**
 
-| Developer | Week 1-2 | Week 3-4 | Week 5-6 | Week 7-8 |
-|-----------|----------|----------|----------|----------|
-| Dev 1 (Backend) | Prompt #1 | Prompt #3 (Maestro) | Integration | Prompt #8 (Release Gate) |
-| Dev 2 (Security) | Support #1 | Prompt #4 (OPA) | Prompt #6 (Config) | Prompt #9 (Templates) |
-| Dev 3 (Infra) | Support #1 | Prompt #7 (Metrics) | Prompt #10 (Risk) | Prompt #11 (CEO Dispatch) |
+| Developer        | Week 1-2   | Week 3-4            | Week 5-6           | Week 7-8                  |
+| ---------------- | ---------- | ------------------- | ------------------ | ------------------------- |
+| Dev 1 (Backend)  | Prompt #1  | Prompt #3 (Maestro) | Integration        | Prompt #8 (Release Gate)  |
+| Dev 2 (Security) | Support #1 | Prompt #4 (OPA)     | Prompt #6 (Config) | Prompt #9 (Templates)     |
+| Dev 3 (Infra)    | Support #1 | Prompt #7 (Metrics) | Prompt #10 (Risk)  | Prompt #11 (CEO Dispatch) |
 
 **Coordination points:**
+
 - Daily standups (15 min)
 - End-of-week integration sessions (2 hours)
 - Week 2, 4, 6 gates (must pass before next phase)
 
 **Delivery:**
+
 - End of Week 2: IntelGraph Core + Claim Ledger
 - End of Week 4: Platform services integrated
 - End of Week 6: Full system ready
@@ -225,10 +238,12 @@ claude
 ### "Claude Code keeps suggesting a different stack than I want"
 
 **Fix:**
+
 1. Edit the prompt file (e.g., `01-intelgraph-core.md`)
 2. Update "Assumptions" section to be more prescriptive:
    ```markdown
    Assumptions:
+
    - MUST use TypeScript + Node.js + PostgreSQL (no alternatives)
    - MUST use Express for HTTP server
    - MUST use Prisma for database ORM
@@ -240,14 +255,17 @@ claude
 ### "I completed Prompt #1 but Prompt #2 won't integrate"
 
 **Fix:**
+
 1. Check Prompt #1 deliverables:
    - Does `intelgraph-core/` have an HTTP API?
    - Is there a `/entities` and `/claims` endpoint?
    - Is there API documentation?
 
 2. Update Prompt #2 assumptions:
+
    ```markdown
    Assumptions:
+
    - IntelGraph API is at http://localhost:3000
    - Endpoints: POST /entities, POST /claims, GET /entities/:id
    ```
@@ -264,6 +282,7 @@ claude
 ### "I'm stuck on Week 3 - too many parallel tasks"
 
 **Fix:**
+
 1. **Reduce parallelism:**
    - Do Prompt #3 (Maestro) first (Week 3)
    - Do Prompts #4 + #7 together (Week 4)
@@ -282,12 +301,14 @@ claude
 ### "Our compliance team needs to review everything"
 
 **Fix:**
+
 1. **Add review gates:**
    - After Prompt #1: Architecture review
    - After Prompt #4: Security/ABAC policy review
    - After Prompt #8: Release process review
 
 2. **Generate review artifacts:**
+
    ```bash
    claude
    # Prompt: "Generate a security review document for the IntelGraph Core
@@ -306,23 +327,27 @@ claude
 Track these to know you're on track:
 
 ### Week 2 (after Prompt #1)
+
 - [ ] Can create an entity via API
 - [ ] Can add a claim to an entity
 - [ ] Can query claim history with provenance
 - [ ] Tests pass with >70% coverage
 
 ### Week 4 (after Prompts #2, #3, #4, #7)
+
 - [ ] Can create a Maestro run
 - [ ] Can attach claim ledger manifest to run
 - [ ] ABAC policies block unauthorized access
 - [ ] Metrics endpoint returns KPIs
 
 ### Week 6 (after Prompts #6, #10)
+
 - [ ] Can configure tenant-specific settings
 - [ ] Can record and query incidents
 - [ ] Risk summary generates correctly
 
 ### Week 8 (after Prompts #5, #8, #9, #11)
+
 - [ ] Can generate disclosure pack for a release
 - [ ] Release gate blocks non-compliant releases
 - [ ] CEO dispatch generates from live data
@@ -333,20 +358,24 @@ Track these to know you're on track:
 ## What to Do Right Now
 
 **If you have 5 minutes:**
+
 - Read `README.md` in this directory
 - Decide which option (A/B/C) fits your situation
 
 **If you have 30 minutes:**
+
 - Read `README.md` and `MAESTRO_PLAN.md`
 - Review Prompt #1 (`01-intelgraph-core.md`)
 - Set up your workspace directory
 
 **If you have 2 hours:**
+
 - Do all of the above
 - Start Prompt #1 with Claude Code
 - Complete stack selection and architecture design (STEP-001)
 
 **If you're ready to commit 2 weeks:**
+
 - Execute Prompt #1 end-to-end
 - Get IntelGraph Core to production-ready state
 - Then decide on next phase
@@ -356,19 +385,23 @@ Track these to know you're on track:
 ## Getting Help
 
 **Prompt-specific questions:**
+
 - Each prompt has a "Context" and "Requirements" section
 - Read these carefully before starting
 - If unclear, ask Claude Code: "Explain the requirements for this prompt"
 
 **Integration questions:**
+
 - See `README.md` "Integration Points" section
 - Check `MAESTRO_PLAN.md` for run dependencies
 
 **Architecture questions:**
+
 - Review the architecture diagram in `README.md`
 - Ask Claude Code to explain: "Explain how Prompt X integrates with Prompt Y"
 
 **Stuck on implementation:**
+
 - Share error messages with Claude Code
 - Ask for: "Debug this error in the context of Prompt #X"
 - Check tests - they often reveal integration issues

@@ -2,8 +2,8 @@
  * Semantic search
  */
 
-import type { SemanticSearchResult } from '../types';
-import { EmbeddingGenerator } from '../embeddings';
+import type { SemanticSearchResult } from "../types";
+import { EmbeddingGenerator } from "../embeddings";
 
 export class SemanticSearch {
   private embedder: EmbeddingGenerator;
@@ -35,9 +35,7 @@ export class SemanticSearch {
 
     const results = documents.map((doc) => {
       const docVector = this.index.get(doc.id);
-      const score = docVector
-        ? this.calculateSimilarity(queryEmbedding.vector, docVector)
-        : 0;
+      const score = docVector ? this.calculateSimilarity(queryEmbedding.vector, docVector) : 0;
 
       return {
         documentId: doc.id,

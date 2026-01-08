@@ -5,4 +5,4 @@
  * influence operations, political interference, and sabotage activities.
  */
 
-export * from './operations-detector.js';
+export * from "./operations-detector.js";

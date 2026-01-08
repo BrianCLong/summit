@@ -1,8 +1,10 @@
 # Network Policy Guide
 
 ## Overview
+
 This application uses a default-deny Network Policy to enforce strict egress and ingress controls.
 By default:
+
 - **Ingress**: Only allowed from the Ingress Controller and other pods in the same namespace.
 - **Egress**: Only allowed to Kubernetes DNS. All other outbound traffic is BLOCKED.
 
@@ -11,6 +13,7 @@ By default:
 The policy is defined in `templates/networkpolicy.yaml`.
 
 ### Allowing External Traffic
+
 To allow the application to connect to an external service (e.g., a database, third-party API):
 
 1. **Identify the Destination**:
@@ -21,6 +24,7 @@ To allow the application to connect to an external service (e.g., a database, th
    Add a new rule under the `egress` section.
 
    **Example: Allow Access to External Postgres (RDS)**
+
    ```yaml
    - to:
        - ipBlock:
@@ -31,7 +35,8 @@ To allow the application to connect to an external service (e.g., a database, th
    ```
 
    **Example: Allow Access to Public Internet (e.g., for 3rd party API)**
-   *Warning: Be as specific as possible with CIDR blocks.*
+   _Warning: Be as specific as possible with CIDR blocks._
+
    ```yaml
    - to:
        - ipBlock:
@@ -46,8 +51,11 @@ To allow the application to connect to an external service (e.g., a database, th
    ```
 
 ### Verification
+
 After applying changes, verify connectivity:
+
 ```bash
 kubectl exec -it <pod-name> -- curl -v https://target-service.com
 ```
+
 If the connection hangs, the Network Policy is likely dropping the packet. Check `kubectl get networkpolicy` and ensure labels match.

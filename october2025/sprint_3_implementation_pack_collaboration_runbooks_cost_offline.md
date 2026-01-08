@@ -89,8 +89,8 @@ minio:
   environment:
     MINIO_ROOT_USER: intelgraph
     MINIO_ROOT_PASSWORD: intelgraphsecret
-  ports: ['9000:9000', '9001:9001']
-  volumes: ['./.data/minio:/data']
+  ports: ["9000:9000", "9001:9001"]
+  volumes: ["./.data/minio:/data"]
 ```
 
 Lifecycle config (archive after 7 days → glacier simulation after 30):
@@ -129,35 +129,33 @@ model Audit { id String @id @default(cuid()) actor String action String target S
 
 ```ts
 // services/case-service/src/index.ts
-import express from 'express';
-import { PrismaClient } from '@prisma/client';
-import { startOtel } from './otel';
-import { checkAccess } from './authz';
+import express from "express";
+import { PrismaClient } from "@prisma/client";
+import { startOtel } from "./otel";
+import { checkAccess } from "./authz";
 startOtel();
 const app = express();
 app.use(express.json());
 const db = new PrismaClient();
 
-app.post('/cases', async (req, res) => {
-  await checkAccess(req, 'WRITE', 'case');
+app.post("/cases", async (req, res) => {
+  await checkAccess(req, "WRITE", "case");
   const c = await db.case.create({ data: req.body });
   res.json(c);
 });
-app.get('/cases', async (_req, res) => {
+app.get("/cases", async (_req, res) => {
   res.json(await db.case.findMany());
 });
-app.post('/cases/:id/tasks', async (req, res) => {
-  await checkAccess(req, 'WRITE', 'task');
-  res.json(
-    await db.task.create({ data: { ...req.body, caseId: req.params.id } }),
-  );
+app.post("/cases/:id/tasks", async (req, res) => {
+  await checkAccess(req, "WRITE", "task");
+  res.json(await db.task.create({ data: { ...req.body, caseId: req.params.id } }));
 });
-app.post('/cases/:id/reports', async (req, res) => {
-  await checkAccess(req, 'WRITE', 'report');
+app.post("/cases/:id/reports", async (req, res) => {
+  await checkAccess(req, "WRITE", "report");
   res.json(
     await db.reportMeta.create({
       data: { ...req.body, caseId: req.params.id },
-    }),
+    })
   );
 });
 
@@ -167,24 +165,23 @@ app.listen(PORT, () => console.log(`[CASE] ${PORT}`));
 
 ```ts
 // services/case-service/src/authz.ts
-import fetch from 'node-fetch';
+import fetch from "node-fetch";
 export async function checkAccess(
   req: any,
-  action: 'READ' | 'WRITE' | 'EXPORT',
-  resourceKind: string,
+  action: "READ" | "WRITE" | "EXPORT",
+  resourceKind: string
 ) {
-  const LAC_URL = process.env.LAC_URL || 'http://lac:7001';
-  const subject = req.user || { sub: 'dev', roles: ['analyst'] };
-  const resource = { kind: resourceKind, sensitivity: 'restricted' };
-  const ctx = { purpose: 'investigation' };
+  const LAC_URL = process.env.LAC_URL || "http://lac:7001";
+  const subject = req.user || { sub: "dev", roles: ["analyst"] };
+  const resource = { kind: resourceKind, sensitivity: "restricted" };
+  const ctx = { purpose: "investigation" };
   const r = await fetch(`${LAC_URL}/enforce`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    method: "POST",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify({ subject, resource, action, context: ctx }),
   });
   const d = await r.json();
-  if (d.decision !== 'allow')
-    throw Object.assign(new Error(`deny ${d.reason}`), { status: 403 });
+  if (d.decision !== "allow") throw Object.assign(new Error(`deny ${d.reason}`), { status: 403 });
 }
 ```
 
@@ -197,8 +194,8 @@ export async function checkAccess(
 export function redact(html: string, selectors: string[]) {
   let out = html;
   for (const sel of selectors) {
-    const re = new RegExp(sel, 'gi');
-    out = out.replace(re, '█'.repeat(8));
+    const re = new RegExp(sel, "gi");
+    out = out.replace(re, "█".repeat(8));
   }
   return out;
 }
@@ -206,25 +203,25 @@ export function redact(html: string, selectors: string[]) {
 
 ```ts
 // services/report-service/src/index.ts
-import express from 'express';
-import { startOtel } from './otel';
-import { redact } from './redact';
-import fs from 'fs';
+import express from "express";
+import { startOtel } from "./otel";
+import { redact } from "./redact";
+import fs from "fs";
 startOtel();
 const app = express();
 app.use(express.json());
 
-app.post('/render', async (req, res) => {
+app.post("/render", async (req, res) => {
   const { title, sections, redactions } = req.body as {
     title: string;
     sections: { h: string; p: string }[];
     redactions?: string[];
   };
-  const base = fs.readFileSync(__dirname + '/templates/brief.html', 'utf8');
-  const body = sections.map((s) => `<h2>${s.h}</h2><p>${s.p}</p>`).join('');
-  let html = base.replace('{{TITLE}}', title).replace('{{BODY}}', body);
+  const base = fs.readFileSync(__dirname + "/templates/brief.html", "utf8");
+  const body = sections.map((s) => `<h2>${s.h}</h2><p>${s.p}</p>`).join("");
+  let html = base.replace("{{TITLE}}", title).replace("{{BODY}}", body);
   if (redactions?.length) html = redact(html, redactions);
-  res.setHeader('content-type', 'text/html');
+  res.setHeader("content-type", "text/html");
   res.send(html);
 });
 
@@ -258,7 +255,7 @@ Template:
 // services/runbook-engine/src/schema.ts
 export type RBNode = {
   id: string;
-  type: 'analytics' | 'query' | 'nl2cypher';
+  type: "analytics" | "query" | "nl2cypher";
   params: any;
   requires?: string[];
   pre?: string[];
@@ -279,60 +276,54 @@ export type Execution = {
 
 ```ts
 // services/runbook-engine/src/index.ts
-import express from 'express';
-import { Runbook } from './schema';
-import { startOtel } from './otel';
-import fetch from 'node-fetch';
-import { genProof } from './proofs';
+import express from "express";
+import { Runbook } from "./schema";
+import { startOtel } from "./otel";
+import fetch from "node-fetch";
+import { genProof } from "./proofs";
 startOtel();
 const app = express();
 app.use(express.json());
 
-app.post('/run', async (req, res) => {
+app.post("/run", async (req, res) => {
   const rb = req.body as Runbook;
   const artifacts: Record<string, any> = {};
   const proofs: string[] = [];
   for (const n of rb.nodes) {
     // preconditions
-    for (const p of n.pre || []) proofs.push(genProof('pre', n.id, p));
-    if (n.type === 'nl2cypher') {
-      const r = await fetch(
-        process.env.NL_URL || 'http://nl2cypher:7005/generate',
-        {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ text: n.params.text }),
-        },
-      );
+    for (const p of n.pre || []) proofs.push(genProof("pre", n.id, p));
+    if (n.type === "nl2cypher") {
+      const r = await fetch(process.env.NL_URL || "http://nl2cypher:7005/generate", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ text: n.params.text }),
+      });
       artifacts[n.id] = await r.json();
     }
-    if (n.type === 'query') {
-      const r = await fetch(
-        process.env.GATEWAY_URL || 'http://gateway:7000/graphql',
-        {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({
-            query: n.params.query,
-            variables: n.params.variables,
-          }),
-        },
-      );
+    if (n.type === "query") {
+      const r = await fetch(process.env.GATEWAY_URL || "http://gateway:7000/graphql", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          query: n.params.query,
+          variables: n.params.variables,
+        }),
+      });
       artifacts[n.id] = await r.json();
     }
-    if (n.type === 'analytics') {
+    if (n.type === "analytics") {
       const r = await fetch(
-        `${process.env.ANALYTICS_URL || 'http://analytics:7003'}/run/${n.params.name}`,
+        `${process.env.ANALYTICS_URL || "http://analytics:7003"}/run/${n.params.name}`,
         {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
+          method: "POST",
+          headers: { "content-type": "application/json" },
           body: JSON.stringify(n.params.params || {}),
-        },
+        }
       );
       artifacts[n.id] = await r.json();
     }
     // postconditions
-    for (const p of n.post || []) proofs.push(genProof('post', n.id, p));
+    for (const p of n.post || []) proofs.push(genProof("post", n.id, p));
   }
   res.json({ artifacts, proofs });
 });
@@ -345,10 +336,10 @@ app.listen(PORT, () => console.log(`[RUNBOOK] ${PORT}`));
 
 ```ts
 // services/runbook-engine/src/proofs.ts
-import crypto from 'crypto';
-export function genProof(kind: 'pre' | 'post', nodeId: string, clause: string) {
+import crypto from "crypto";
+export function genProof(kind: "pre" | "post", nodeId: string, clause: string) {
   const s = `${kind}|${nodeId}|${clause}`;
-  return crypto.createHash('sha256').update(s).digest('hex');
+  return crypto.createHash("sha256").update(s).digest("hex");
 }
 ```
 
@@ -379,9 +370,9 @@ Tests:
 
 ```ts
 // services/runbook-engine/test/runtime.spec.ts
-test('runbook returns proofs', async () => {
-  const { genProof } = require('../src/proofs');
-  expect(genProof('pre', 'n1', 'ok')).toMatch(/^[a-f0-9]{64}$/);
+test("runbook returns proofs", async () => {
+  const { genProof } = require("../src/proofs");
+  expect(genProof("pre", "n1", "ok")).toMatch(/^[a-f0-9]{64}$/);
 });
 ```
 
@@ -397,22 +388,21 @@ export type Budget = {
   ms: number;
   rows: number;
 };
-export const budgets: Budget[] = [{ tenant: 'demo', ms: 2500, rows: 100000 }];
+export const budgets: Budget[] = [{ tenant: "demo", ms: 2500, rows: 100000 }];
 ```
 
 ```ts
 // services/budget-guard/src/index.ts
-import express from 'express';
-import { budgets } from './models';
+import express from "express";
+import { budgets } from "./models";
 const app = express();
 app.use(express.json());
-app.post('/check', (req, res) => {
+app.post("/check", (req, res) => {
   const { tenant, caseId, estMs, estRows } = req.body;
   const b =
-    budgets.find(
-      (x) => x.tenant === tenant && (!x.caseId || x.caseId === caseId),
-    ) || budgets.find((x) => x.tenant === tenant);
-  if (!b) return res.json({ ok: true, reason: 'no budget set' });
+    budgets.find((x) => x.tenant === tenant && (!x.caseId || x.caseId === caseId)) ||
+    budgets.find((x) => x.tenant === tenant);
+  if (!b) return res.json({ ok: true, reason: "no budget set" });
   const over = estMs > b.ms || estRows > b.rows;
   res.json({
     ok: !over,
@@ -428,23 +418,17 @@ Gateway hook:
 
 ```ts
 // services/gateway-graphql/src/index.ts (snippet)
-async function checkBudget(
-  ctx: any,
-  est: { estimateMs: number; estimateRows: number },
-) {
-  const r = await fetch(
-    (process.env.BUDGET_URL || 'http://budget:7009') + '/check',
-    {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        tenant: ctx.tenant || 'demo',
-        caseId: ctx.caseId,
-        estMs: est.estimateMs,
-        estRows: est.estimateRows,
-      }),
-    },
-  );
+async function checkBudget(ctx: any, est: { estimateMs: number; estimateRows: number }) {
+  const r = await fetch((process.env.BUDGET_URL || "http://budget:7009") + "/check", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      tenant: ctx.tenant || "demo",
+      caseId: ctx.caseId,
+      estMs: est.estimateMs,
+      estRows: est.estimateRows,
+    }),
+  });
   const d = await r.json();
   if (!d.ok) throw new Error(`Budget exceeded: ${JSON.stringify(d.over)}`);
 }
@@ -456,34 +440,30 @@ async function checkBudget(
 
 ```ts
 // services/archive-tier/src/s3.ts
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 export const s3 = new S3Client({
-  region: 'us-east-1',
-  endpoint: process.env.S3_ENDPOINT || 'http://localhost:9000',
+  region: "us-east-1",
+  endpoint: process.env.S3_ENDPOINT || "http://localhost:9000",
   credentials: {
-    accessKeyId: process.env.S3_KEY || 'intelgraph',
-    secretAccessKey: process.env.S3_SECRET || 'intelgraphsecret',
+    accessKeyId: process.env.S3_KEY || "intelgraph",
+    secretAccessKey: process.env.S3_SECRET || "intelgraphsecret",
   },
   forcePathStyle: true,
 });
-export async function putObject(
-  bucket: string,
-  key: string,
-  body: Buffer | string,
-) {
+export async function putObject(bucket: string, key: string, body: Buffer | string) {
   await s3.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: body }));
 }
 ```
 
 ```ts
 // services/archive-tier/src/index.ts
-import express from 'express';
-import { putObject } from './s3';
-import { startOtel } from './otel';
+import express from "express";
+import { putObject } from "./s3";
+import { startOtel } from "./otel";
 startOtel();
 const app = express();
 app.use(express.json());
-app.post('/archive', async (req, res) => {
+app.post("/archive", async (req, res) => {
   const { bucket, key, payload } = req.body;
   await putObject(bucket, key, Buffer.from(JSON.stringify(payload)));
   res.json({ ok: true });
@@ -500,23 +480,23 @@ app.listen(PORT, () => console.log(`[ARCHIVE] ${PORT}`));
 
 ```ts
 // services/offline-sync/src/index.ts
-import express from 'express';
-import * as Y from 'yjs';
-import crypto from 'crypto';
+import express from "express";
+import * as Y from "yjs";
+import crypto from "crypto";
 const app = express();
 app.use(express.json());
 const docs: Record<string, Y.Doc> = {};
 function sign(buf: Buffer) {
-  return crypto.createHash('sha256').update(buf).digest('hex');
+  return crypto.createHash("sha256").update(buf).digest("hex");
 }
 
-app.post('/sync/:id', (req, res) => {
+app.post("/sync/:id", (req, res) => {
   const id = req.params.id;
-  const update = Buffer.from(req.body.update, 'base64');
+  const update = Buffer.from(req.body.update, "base64");
   const sig = sign(update);
   const doc = docs[id] || (docs[id] = new Y.Doc());
   Y.applyUpdate(doc, update);
-  const state = Buffer.from(Y.encodeStateAsUpdate(doc)).toString('base64');
+  const state = Buffer.from(Y.encodeStateAsUpdate(doc)).toString("base64");
   res.json({ state, sig });
 });
 
@@ -535,22 +515,22 @@ Playwright UI test focuses on **conflict resolution UI** stub (map + graph note 
 
 ```tsx
 // webapp/src/features/case/ReportStudio.tsx
-import React, { useState } from 'react';
-import $ from 'jquery';
+import React, { useState } from "react";
+import $ from "jquery";
 export default function ReportStudio() {
-  const [title, setTitle] = useState('IntelGraph Brief');
-  const [sections, setSections] = useState([{ h: 'Summary', p: '...' }]);
+  const [title, setTitle] = useState("IntelGraph Brief");
+  const [sections, setSections] = useState([{ h: "Summary", p: "..." }]);
   function addSection() {
-    setSections([...sections, { h: 'New Section', p: '' }]);
+    setSections([...sections, { h: "New Section", p: "" }]);
   }
   function render() {
     $.ajax({
-      url: '/report/render',
-      method: 'POST',
-      contentType: 'application/json',
-      data: JSON.stringify({ title, sections, redactions: ['SSN', 'DOB'] }),
+      url: "/report/render",
+      method: "POST",
+      contentType: "application/json",
+      data: JSON.stringify({ title, sections, redactions: ["SSN", "DOB"] }),
       success: (html) => {
-        const w = window.open('about:blank');
+        const w = window.open("about:blank");
         w!.document.write(html);
       },
     });
@@ -569,11 +549,11 @@ E2E:
 
 ```ts
 // webapp/tests/e2e/report-studio.spec.ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test('render report', async ({ page }) => {
-  await page.goto('http://localhost:5173');
-  await page.getByText('Render').click();
+test("render report", async ({ page }) => {
+  await page.goto("http://localhost:5173");
+  await page.getByText("Render").click();
   // window open is hard to assert; check network 200 via service worker fixture or stub
   expect(true).toBeTruthy();
 });
@@ -592,13 +572,13 @@ test('render report', async ({ page }) => {
 
 ```js
 // ops/k6/report-export.js
-import http from 'k6/http';
-import { check, sleep } from 'k6';
-export const options = { vus: 10, duration: '1m' };
+import http from "k6/http";
+import { check, sleep } from "k6";
+export const options = { vus: 10, duration: "1m" };
 export default function () {
-  const body = { title: 'Brief', sections: [{ h: 'Summary', p: 'Lorem' }] };
-  const res = http.post('http://localhost:7007/render', JSON.stringify(body), {
-    headers: { 'content-type': 'application/json' },
+  const body = { title: "Brief", sections: [{ h: "Summary", p: "Lorem" }] };
+  const res = http.post("http://localhost:7007/render", JSON.stringify(body), {
+    headers: { "content-type": "application/json" },
   });
   check(res, { 200: (r) => r.status === 200 });
   sleep(1);

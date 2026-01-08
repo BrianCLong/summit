@@ -20,30 +20,25 @@ pnpm add @intelgraph/supplier-risk
 ## Usage
 
 ```typescript
-import { SupplierRiskAssessor } from '@intelgraph/supplier-risk';
+import { SupplierRiskAssessor } from "@intelgraph/supplier-risk";
 import {
   SupplyChainNode,
   FinancialHealthMetrics,
   CybersecurityPosture,
   ESGScore,
-} from '@intelgraph/supply-chain-types';
+} from "@intelgraph/supply-chain-types";
 
 const assessor = new SupplierRiskAssessor();
 
 // Perform comprehensive risk assessment
-const assessment = await assessor.assessSupplier(
-  node,
-  financialMetrics,
-  cyberPosture,
-  esgScore
-);
+const assessment = await assessor.assessSupplier(node, financialMetrics, cyberPosture, esgScore);
 
 console.log(`Overall Risk Score: ${assessment.overallRiskScore}/100`);
 console.log(`Risk Level: ${assessment.overallRiskLevel}`);
 console.log(`Category Risks: ${assessment.categoryRisks.length}`);
 
 // Review recommendations
-assessment.recommendations.forEach(rec => {
+assessment.recommendations.forEach((rec) => {
   console.log(`- ${rec}`);
 });
 
@@ -69,7 +64,7 @@ const esgRisk = assessor.assessESG(nodeId, esgScore);
 console.log(`ESG Risk Score: ${esgRisk.score}/100`);
 
 // Assess geopolitical risk
-const geoRisk = assessor.assessGeopoliticalRisk(nodeId, 'China');
+const geoRisk = assessor.assessGeopoliticalRisk(nodeId, "China");
 console.log(`Geopolitical Risk Level: ${geoRisk.level}`);
 ```
 

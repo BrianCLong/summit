@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach } from '@jest/globals';
-import { EREngine } from '../../src/core/er-engine';
-import type { EntityRecord, MergeRequest } from '../../src/types';
+import { describe, it, expect, beforeEach } from "@jest/globals";
+import { EREngine } from "../../src/core/er-engine";
+import type { EntityRecord, MergeRequest } from "../../src/types";
 
-describe('Performance Benchmarks', () => {
+describe("Performance Benchmarks", () => {
   let engine: EREngine;
 
   beforeEach(() => {
@@ -17,7 +17,7 @@ describe('Performance Benchmarks', () => {
     for (let i = 0; i < count; i++) {
       entities.push({
         id: `entity-${i}`,
-        type: 'person',
+        type: "person",
         name: `Person ${i}`,
         tenantId,
         attributes: {
@@ -32,9 +32,9 @@ describe('Performance Benchmarks', () => {
     return entities;
   }
 
-  describe('Merge Operation Performance', () => {
-    it('should handle 100 merge operations per second', () => {
-      const tenantId = 'perf-test-tenant';
+  describe("Merge Operation Performance", () => {
+    it("should handle 100 merge operations per second", () => {
+      const tenantId = "perf-test-tenant";
       generateEntities(200, tenantId);
 
       const merges: MergeRequest[] = [];
@@ -42,8 +42,8 @@ describe('Performance Benchmarks', () => {
         merges.push({
           tenantId,
           entityIds: [`entity-${i * 2}`, `entity-${i * 2 + 1}`],
-          actor: 'benchmark@example.com',
-          reason: 'Performance test',
+          actor: "benchmark@example.com",
+          reason: "Performance test",
         });
       }
 
@@ -65,8 +65,8 @@ describe('Performance Benchmarks', () => {
       expect(durationMs / 100).toBeLessThanOrEqual(10);
     });
 
-    it('should handle batch merge operations efficiently', () => {
-      const tenantId = 'batch-test-tenant';
+    it("should handle batch merge operations efficiently", () => {
+      const tenantId = "batch-test-tenant";
       generateEntities(1000, tenantId);
 
       const startTime = Date.now();
@@ -76,8 +76,8 @@ describe('Performance Benchmarks', () => {
         engine.merge({
           tenantId,
           entityIds: [`entity-${i * 2}`, `entity-${i * 2 + 1}`],
-          actor: 'batch@example.com',
-          reason: 'Batch test',
+          actor: "batch@example.com",
+          reason: "Batch test",
         });
       }
 
@@ -91,9 +91,9 @@ describe('Performance Benchmarks', () => {
     });
   });
 
-  describe('Candidate Finding Performance', () => {
-    it('should find candidates efficiently in large populations', () => {
-      const tenantId = 'candidate-perf-test';
+  describe("Candidate Finding Performance", () => {
+    it("should find candidates efficiently in large populations", () => {
+      const tenantId = "candidate-perf-test";
       const population = generateEntities(1000, tenantId);
       const testEntity = population[0];
 
@@ -119,8 +119,8 @@ describe('Performance Benchmarks', () => {
       expect(avgTimeMs).toBeLessThan(100);
     });
 
-    it('should scale linearly with population size', () => {
-      const tenantId = 'scaling-test';
+    it("should scale linearly with population size", () => {
+      const tenantId = "scaling-test";
 
       const sizes = [100, 500, 1000];
       const times: number[] = [];
@@ -149,9 +149,9 @@ describe('Performance Benchmarks', () => {
     });
   });
 
-  describe('Memory and Storage Performance', () => {
-    it('should handle large audit logs efficiently', () => {
-      const tenantId = 'audit-perf-test';
+  describe("Memory and Storage Performance", () => {
+    it("should handle large audit logs efficiently", () => {
+      const tenantId = "audit-perf-test";
       generateEntities(200, tenantId);
 
       // Create 1000 merge operations
@@ -159,7 +159,7 @@ describe('Performance Benchmarks', () => {
         engine.merge({
           tenantId,
           entityIds: [`entity-${i % 100}`, `entity-${(i + 1) % 100}`],
-          actor: 'audit-test@example.com',
+          actor: "audit-test@example.com",
           reason: `Test ${i}`,
         });
       }
@@ -179,8 +179,8 @@ describe('Performance Benchmarks', () => {
       expect(auditLog.length).toBe(100);
     });
 
-    it('should retrieve statistics quickly', () => {
-      const tenantId = 'stats-test';
+    it("should retrieve statistics quickly", () => {
+      const tenantId = "stats-test";
       generateEntities(1000, tenantId);
 
       const startTime = Date.now();
@@ -193,9 +193,9 @@ describe('Performance Benchmarks', () => {
     });
   });
 
-  describe('Concurrent Operations', () => {
-    it('should handle concurrent merge requests', async () => {
-      const tenantId = 'concurrent-test';
+  describe("Concurrent Operations", () => {
+    it("should handle concurrent merge requests", async () => {
+      const tenantId = "concurrent-test";
       generateEntities(200, tenantId);
 
       const mergePromises: Promise<void>[] = [];
@@ -208,10 +208,10 @@ describe('Performance Benchmarks', () => {
             engine.merge({
               tenantId,
               entityIds: [`entity-${i * 2}`, `entity-${i * 2 + 1}`],
-              actor: 'concurrent@example.com',
-              reason: 'Concurrent test',
+              actor: "concurrent@example.com",
+              reason: "Concurrent test",
             });
-          }),
+          })
         );
       }
 

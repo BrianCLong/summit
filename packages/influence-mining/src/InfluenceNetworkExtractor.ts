@@ -1,7 +1,7 @@
-import { DataIngester } from './DataIngester.js';
-import { GraphBuilder } from './GraphBuilder.js';
-import { MotifAnalyzer } from './MotifAnalyzer.js';
-import { RelationshipDetector } from './RelationshipDetector.js';
+import { DataIngester } from "./DataIngester.js";
+import { GraphBuilder } from "./GraphBuilder.js";
+import { MotifAnalyzer } from "./MotifAnalyzer.js";
+import { RelationshipDetector } from "./RelationshipDetector.js";
 import {
   EnrichedNetwork,
   Entity,
@@ -9,7 +9,7 @@ import {
   NodeRanking,
   RankedNetwork,
   SourceData,
-} from './types.js';
+} from "./types.js";
 
 export class InfluenceNetworkExtractor {
   private readonly relationshipDetector: RelationshipDetector;
@@ -19,7 +19,7 @@ export class InfluenceNetworkExtractor {
   constructor(
     relationshipDetector = new RelationshipDetector(),
     dataIngester = new DataIngester(relationshipDetector),
-    motifAnalyzer = new MotifAnalyzer(),
+    motifAnalyzer = new MotifAnalyzer()
   ) {
     this.relationshipDetector = relationshipDetector;
     this.dataIngester = dataIngester;
@@ -43,11 +43,11 @@ export class InfluenceNetworkExtractor {
     for (const relationship of initialRelationships) {
       const from = entityMap.get(relationship.from) ?? {
         id: relationship.from,
-        type: 'actor',
+        type: "actor",
       };
       const to = entityMap.get(relationship.to) ?? {
         id: relationship.to,
-        type: 'actor',
+        type: "actor",
       };
       graphBuilder.addNode(from);
       graphBuilder.addNode(to);
@@ -55,9 +55,7 @@ export class InfluenceNetworkExtractor {
     }
 
     const graph = graphBuilder.build();
-    const entities = Array.from(
-      new Map(graph.nodes.map((entity) => [entity.id, entity])).values(),
-    );
+    const entities = Array.from(new Map(graph.nodes.map((entity) => [entity.id, entity])).values());
 
     return {
       graph,
@@ -69,12 +67,8 @@ export class InfluenceNetworkExtractor {
   enrich(network: InfluenceNetwork): EnrichedNetwork {
     const motifs = {
       botNetworks: this.motifAnalyzer.detectBotNetworks(network.graph),
-      amplifierClusters: this.motifAnalyzer.findAmplifierClusters(
-        network.graph,
-      ),
-      coordinatedBehaviors: this.motifAnalyzer.identifyCoordinatedBehavior(
-        network.graph,
-      ),
+      amplifierClusters: this.motifAnalyzer.findAmplifierClusters(network.graph),
+      coordinatedBehaviors: this.motifAnalyzer.identifyCoordinatedBehavior(network.graph),
     };
 
     return {
@@ -88,14 +82,8 @@ export class InfluenceNetworkExtractor {
     const outbound = new Map<string, number>();
 
     for (const relationship of network.relationships) {
-      outbound.set(
-        relationship.from,
-        (outbound.get(relationship.from) ?? 0) + relationship.weight,
-      );
-      inbound.set(
-        relationship.to,
-        (inbound.get(relationship.to) ?? 0) + relationship.weight,
-      );
+      outbound.set(relationship.from, (outbound.get(relationship.from) ?? 0) + relationship.weight);
+      inbound.set(relationship.to, (inbound.get(relationship.to) ?? 0) + relationship.weight);
     }
 
     const rankings: NodeRanking[] = network.graph.nodes.map((entity) => {
@@ -110,9 +98,7 @@ export class InfluenceNetworkExtractor {
       };
     });
 
-    rankings.sort(
-      (a, b) => b.score - a.score || a.entity.id.localeCompare(b.entity.id),
-    );
+    rankings.sort((a, b) => b.score - a.score || a.entity.id.localeCompare(b.entity.id));
 
     return {
       ...network,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 
 interface Retraction {
   id: string;
@@ -11,9 +11,9 @@ export default function RetractionQueue() {
   const [items, setItems] = useState<Retraction[]>([]);
   async function load(controller?: AbortController) {
     try {
-      const r = await fetch('/graphql', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
+      const r = await fetch("/graphql", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
         body: JSON.stringify({
           query: `{ retractions { id subject status reason createdAt } }`,
         }),
@@ -22,8 +22,8 @@ export default function RetractionQueue() {
       const j = await r.json();
       setItems(j.data?.retractions || []);
     } catch (err: any) {
-      if (err.name !== 'AbortError') {
-        console.error('Fetch error:', err);
+      if (err.name !== "AbortError") {
+        console.error("Fetch error:", err);
       }
     }
   }

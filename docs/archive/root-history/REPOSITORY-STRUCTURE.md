@@ -19,6 +19,7 @@ The **summit** repository is a **deployable-first monorepo** housing the IntelGr
 ### Architecture Pattern
 
 **Deployable-First Principles**:
+
 - Golden path validation (`make smoke`) before any development
 - Smoke tests gate all deployments and merges
 - Clear separation of active vs. archived code
@@ -104,6 +105,7 @@ summit/
 These services are **actively deployed and maintained**, referenced in `docker-compose.yml` and CI workflows:
 
 #### 1. **api** (IntelGraph GraphQL API)
+
 - **Path**: `server/`
 - **Language**: TypeScript (Node.js 20+)
 - **Entrypoint**: `src/index.ts`
@@ -113,6 +115,7 @@ These services are **actively deployed and maintained**, referenced in `docker-c
 - **SLO Critical**: ✅ Yes
 
 #### 2. **web** (React Frontend)
+
 - **Path**: `client/`
 - **Language**: TypeScript/React 18
 - **Entrypoint**: `src/main.jsx`
@@ -123,6 +126,7 @@ These services are **actively deployed and maintained**, referenced in `docker-c
 - **SLO Critical**: ✅ Yes
 
 #### 3. **worker** (Background Worker)
+
 - **Path**: `server/`
 - **Entrypoint**: `src/conductor/worker-entrypoint.ts`
 - **Port**: 4100
@@ -133,17 +137,20 @@ These services are **actively deployed and maintained**, referenced in `docker-c
 ### Database Services
 
 #### 4. **postgres** (PostgreSQL 16)
+
 - **Port**: 5432
 - **Purpose**: Relational data, user accounts, metadata, audit logs
 - **Extensions**: pgvector
 - **SLO Critical**: ✅ Yes
 
 #### 5. **redis** (Redis 7)
+
 - **Port**: 6379
 - **Purpose**: Sessions, caching, BullMQ queues, rate limiting, pub/sub
 - **SLO Critical**: ✅ Yes
 
 #### 6. **neo4j** (Neo4j 5.8)
+
 - **Ports**: 7474 (HTTP), 7687 (Bolt)
 - **Purpose**: Graph database for entity relationships and analytics
 - **Plugins**: APOC, Graph Data Science
@@ -152,22 +159,27 @@ These services are **actively deployed and maintained**, referenced in `docker-c
 ### Observability Stack
 
 #### 7. **prometheus** (Metrics)
+
 - **Port**: 9090
 - **Config**: `ops/observability/prometheus.yml`
 
 #### 8. **grafana** (Dashboards)
+
 - **Port**: 8080
 - **Provisioning**: `ops/observability/grafana/`
 
 #### 9. **jaeger** (Distributed Tracing)
+
 - **Port**: 16686
 
 #### 10. **otel-collector** (OpenTelemetry)
+
 - **Ports**: 4317 (gRPC), 4318 (HTTP), 9464 (Prometheus)
 
 ### Policy & Security
 
 #### 11. **opa** (Open Policy Agent)
+
 - **Port**: 8181
 - **Policy Path**: `policy/opa/`
 - **Purpose**: Policy-based authorization (ABAC)
@@ -176,14 +188,17 @@ These services are **actively deployed and maintained**, referenced in `docker-c
 ### Development Support
 
 #### 12. **mock-services** (Dev Mocks)
+
 - **Port**: 4010
 - **Script**: `scripts/devkit/mock-services.js`
 
 #### 13. **migrations** (DB Migrations)
+
 - **Type**: One-time job
 - **Script**: `scripts/db_migrate.cjs`
 
 #### 14. **seed-fixtures** (Demo Data)
+
 - **Type**: One-time job
 - **Script**: `scripts/devkit/seed-fixtures.js`
 
@@ -192,6 +207,7 @@ These services are **actively deployed and maintained**, referenced in `docker-c
 These services are **active but optional**, enabled via Docker Compose profiles:
 
 #### 15. **ai-worker** (Multimodal AI)
+
 - **Profile**: `ai`
 - **Language**: Python 3.8+
 - **Dockerfile**: `Dockerfile.ai`
@@ -199,18 +215,22 @@ These services are **active but optional**, enabled via Docker Compose profiles:
 - **Technologies**: Tesseract, YOLO, Whisper, spaCy, Sentence Transformers
 
 #### 16. **kafka** + **zookeeper** (Event Streaming)
+
 - **Profile**: `kafka`
 - **Ports**: 9092, 29092
 
 #### 17. **ingestion-service** (Data Pipelines)
+
 - **Profile**: `kafka`
 - **Language**: Python
 
 #### 18. **nlp-service** (NLP Processing)
+
 - **Profile**: `ai`
 - **Language**: Python (spaCy)
 
 #### 19. **reliability-service** (Credibility Scoring)
+
 - **Profile**: `kafka`
 - **Language**: Python
 - **Port**: 8001
@@ -244,6 +264,7 @@ The following directories contain **historical code** explicitly excluded from t
 ### Primary Pipelines (Required for Merge)
 
 #### 1. **ci.yml** (Continuous Integration)
+
 - **Triggers**: PRs, pushes to main
 - **Jobs**:
   - `build-test`: Lint, typecheck, build, unit tests (Node 18.x, 20.x matrix)
@@ -252,6 +273,7 @@ The following directories contain **historical code** explicitly excluded from t
 - **SLO Gate**: ✅ Yes
 
 #### 2. **security.yml** (Security Scanning)
+
 - **Triggers**: PRs, pushes to main, nightly cron
 - **Jobs**:
   - `codeql`: JavaScript/Python analysis
@@ -260,6 +282,7 @@ The following directories contain **historical code** explicitly excluded from t
 - **Required**: ✅ Yes
 
 #### 3. **release.yml** (Release Automation)
+
 - **Triggers**: Pushes to main (package.json, docker-compose changes)
 - **Artifacts**: `summit-deployable-bundle` (compose files, start.sh, observability configs)
 
@@ -275,36 +298,38 @@ The following directories contain **historical code** explicitly excluded from t
 
 ### Package Organization
 
-| Pattern | Count | Description | Examples |
-|---------|-------|-------------|----------|
-| `apps/*` | 21 | Application entrypoints | `apps/server`, `apps/web`, `apps/gateway` |
-| `packages/*` | 60+ | Shared libraries | `packages/contracts`, `packages/sdk-ts`, `packages/maestro-cli` |
-| `services/*` | 150+ | Microservices & modules | `services/api`, `services/graph-core`, `services/authz-gateway` |
-| `contracts/*` | - | API contracts | GraphQL schemas, OpenAPI specs |
-| `server` | 1 | Main backend (singleton) | Primary GraphQL API |
-| `client` | 1 | Main frontend (singleton) | React SPA |
-| `tools/*` | - | Dev tools | Build scripts, generators |
+| Pattern       | Count | Description               | Examples                                                        |
+| ------------- | ----- | ------------------------- | --------------------------------------------------------------- |
+| `apps/*`      | 21    | Application entrypoints   | `apps/server`, `apps/web`, `apps/gateway`                       |
+| `packages/*`  | 60+   | Shared libraries          | `packages/contracts`, `packages/sdk-ts`, `packages/maestro-cli` |
+| `services/*`  | 150+  | Microservices & modules   | `services/api`, `services/graph-core`, `services/authz-gateway` |
+| `contracts/*` | -     | API contracts             | GraphQL schemas, OpenAPI specs                                  |
+| `server`      | 1     | Main backend (singleton)  | Primary GraphQL API                                             |
+| `client`      | 1     | Main frontend (singleton) | React SPA                                                       |
+| `tools/*`     | -     | Dev tools                 | Build scripts, generators                                       |
 
 ### Workspace Configuration
 
 ```yaml
 # pnpm-workspace.yaml
 packages:
-  - 'apps/*'
-  - 'packages/*'
-  - 'services/*'
-  - 'contracts/*'
-  - 'server'
-  - 'client'
-  - 'tools/*'
+  - "apps/*"
+  - "packages/*"
+  - "services/*"
+  - "contracts/*"
+  - "server"
+  - "client"
+  - "tools/*"
 exclude:
-  - 'archive/**'
+  - "archive/**"
 ```
 
 ## Service Classification Methodology
 
 ### Active Services
+
 Services classified as **active** meet one or more criteria:
+
 - ✅ Referenced in `docker-compose.yml` or `docker-compose.dev.yml`
 - ✅ Has a `compose_service` entry with health checks
 - ✅ Referenced in primary CI workflows (`ci.yml`, `security.yml`, `release.yml`)
@@ -312,10 +337,13 @@ Services classified as **active** meet one or more criteria:
 - ✅ Has active SLO targets
 
 ### Active Optional Services
+
 Services in Docker Compose **profiles** (`ai`, `kafka`) for optional capabilities.
 
 ### Archived Services
+
 Code in designated archive directories:
+
 - `.archive/`, `archive/`, `.disabled/`
 - Excluded from `pnpm-workspace.yaml`
 - Not referenced in any docker-compose or CI files
@@ -328,39 +356,42 @@ Code in designated archive directories:
 
 ### Performance SLOs
 
-| Metric | Target | Criticality |
-|--------|--------|-------------|
-| GraphQL Read (p95) | ≤ 350 ms | Critical |
-| GraphQL Read (p99) | ≤ 900 ms | Critical |
-| GraphQL Write (p95) | ≤ 700 ms | Critical |
-| Subscriptions (p95) | ≤ 250 ms | Critical |
-| Neo4j 1-hop (p95) | ≤ 300 ms | Critical |
-| Neo4j 2-3 hop (p95) | ≤ 1200 ms | Critical |
-| Availability | ≥ 99.9% | Critical |
+| Metric              | Target    | Criticality |
+| ------------------- | --------- | ----------- |
+| GraphQL Read (p95)  | ≤ 350 ms  | Critical    |
+| GraphQL Read (p99)  | ≤ 900 ms  | Critical    |
+| GraphQL Write (p95) | ≤ 700 ms  | Critical    |
+| Subscriptions (p95) | ≤ 250 ms  | Critical    |
+| Neo4j 1-hop (p95)   | ≤ 300 ms  | Critical    |
+| Neo4j 2-3 hop (p95) | ≤ 1200 ms | Critical    |
+| Availability        | ≥ 99.9%   | Critical    |
 
 ### Cost Targets
 
-| Environment | Monthly Budget (USD) |
-|-------------|----------------------|
-| Dev | $1,000 |
-| Staging | $3,000 |
-| Production | $18,000 |
+| Environment  | Monthly Budget (USD)  |
+| ------------ | --------------------- |
+| Dev          | $1,000                |
+| Staging      | $3,000                |
+| Production   | $18,000               |
 | LLM Services | $5,000 (alert at 80%) |
 
 ## Security & Compliance
 
 ### Authentication & Authorization
+
 - **OIDC + JWT**: Stateless token-based auth
 - **ABAC via OPA**: Attribute-based access control
 - **mTLS**: Service-to-service encryption
 - **RBAC**: Role-based access control
 
 ### Data Protection
+
 - **Field-level encryption**: Sensitive data at rest
 - **Provenance ledger**: Audit trail for all operations
 - **Retention policies**: Data lifecycle management
 
 ### Compliance Frameworks
+
 - GDPR ready
 - SOC 2 Type II controls
 - NIST Cybersecurity Framework alignment
@@ -416,16 +447,19 @@ pnpm build
 ## Documentation Index
 
 ### Primary Documentation
+
 - [README.md](./README.md) - Main repository documentation
 - [ARCHITECTURE_MAP.generated.yaml](./ARCHITECTURE_MAP.generated.yaml) - Machine-readable service map
 - [REPOSITORY-STRUCTURE.md](./REPOSITORY-STRUCTURE.md) - This document
 
 ### Technical Guides
+
 - `docs/architecture/` - Architecture diagrams, C4 models, trust boundaries
 - `docs/api/` - API documentation, GraphQL schema
 - `docs/deployment/` - Deployment guides (K8s, Helm, Terraform)
 
 ### Operational Runbooks
+
 - `RUNBOOKS/INDEX.md` - Runbook catalog
 - `RUNBOOKS/dev-bootstrap.yaml` - Development setup
 - `RUNBOOKS/disaster-recovery.json` - DR procedures
@@ -433,16 +467,19 @@ pnpm build
 - `RUNBOOKS/release-captain-quick-reference.md` - Release process
 
 ### Architecture Decisions
+
 - `adr/` - Architecture Decision Records
 
 ## Related Resources
 
 ### External Documentation
+
 - [GraphQL Best Practices](docs/graphql-guide.md)
 - [React Development Guide](docs/react-guide.md)
 - [Neo4j Query Patterns](docs/neo4j-guide.md)
 
 ### Community
+
 - [GitHub Issues](https://github.com/BrianCLong/summit/issues)
 - [GitHub Discussions](https://github.com/BrianCLong/summit/discussions)
 - [CHANGELOG.md](./CHANGELOG.md)
@@ -454,6 +491,7 @@ pnpm build
 ### Updating This Document
 
 This document should be regenerated when:
+
 1. New services are added to docker-compose files
 2. Services are deprecated or moved to archives
 3. CI/CD pipelines are significantly restructured
@@ -469,6 +507,7 @@ This document should be regenerated when:
 ### Verification
 
 To verify this map is accurate:
+
 1. Check services match `docker-compose.yml` entries
 2. Confirm CI workflows match `.github/workflows/ci.yml`
 3. Validate archive paths exist and are excluded from workspace

@@ -3,10 +3,10 @@
  * Interface for spinning up and managing IntelGraph agents
  */
 
-import { z } from 'zod';
-import { v4 as uuidv4 } from 'uuid';
-import type { AgentConfig as AgentConfigFromConfig } from './config.js';
-import { AGENT_TYPES, type AgentType, DEFAULT_TIMEOUT_MS } from './constants.js';
+import { z } from "zod";
+import { v4 as uuidv4 } from "uuid";
+import type { AgentConfig as AgentConfigFromConfig } from "./config.js";
+import { AGENT_TYPES, type AgentType, DEFAULT_TIMEOUT_MS } from "./constants.js";
 
 export interface AgentConfig {
   id: string;
@@ -23,7 +23,7 @@ export interface AgentStatus {
   id: string;
   name: string;
   type: AgentType;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  status: "pending" | "running" | "completed" | "failed" | "cancelled";
   progress: number;
   startedAt?: Date;
   completedAt?: Date;
@@ -34,7 +34,7 @@ export interface AgentStatus {
 
 export interface AgentLogEntry {
   timestamp: Date;
-  level: 'debug' | 'info' | 'warn' | 'error';
+  level: "debug" | "info" | "warn" | "error";
   message: string;
   data?: Record<string, unknown>;
 }
@@ -68,7 +68,7 @@ export class AgentClient {
   }
 
   async spin(
-    agentConfig: Omit<AgentConfig, 'id'> | AgentConfig,
+    agentConfig: Omit<AgentConfig, "id"> | AgentConfig,
     options: SpinOptions = {}
   ): Promise<AgentStatus> {
     const config = AgentConfigSchema.parse({
@@ -80,7 +80,7 @@ export class AgentClient {
       id: config.id,
       name: config.name,
       type: config.type,
-      status: 'pending',
+      status: "pending",
       progress: 0,
       logs: [],
     };
@@ -98,7 +98,7 @@ export class AgentClient {
   }
 
   async spinBatch(
-    configs: Array<Omit<AgentConfig, 'id'> | AgentConfig>,
+    configs: Array<Omit<AgentConfig, "id"> | AgentConfig>,
     options: SpinOptions & { parallel?: boolean; maxConcurrent?: number } = {}
   ): Promise<AgentStatus[]> {
     const { parallel = false, maxConcurrent = this.config.maxConcurrent } = options;
@@ -169,11 +169,11 @@ export class AgentClient {
       return false;
     }
 
-    if (status.status === 'completed' || status.status === 'failed') {
+    if (status.status === "completed" || status.status === "failed") {
       return false;
     }
 
-    status.status = 'cancelled';
+    status.status = "cancelled";
     status.completedAt = new Date();
     this.notifyListeners(agentId, status);
 
@@ -181,7 +181,7 @@ export class AgentClient {
     if (this.config.endpoint) {
       try {
         await fetch(`${this.config.endpoint}/agents/${agentId}/cancel`, {
-          method: 'POST',
+          method: "POST",
           headers: this.getHeaders(),
         });
       } catch {
@@ -194,7 +194,7 @@ export class AgentClient {
 
   async list(filter?: {
     type?: AgentType;
-    status?: AgentStatus['status'];
+    status?: AgentStatus["status"];
   }): Promise<AgentStatus[]> {
     let agents = Array.from(this.agents.values());
 
@@ -227,15 +227,12 @@ export class AgentClient {
     };
   }
 
-  private async runAgent(
-    config: AgentConfig,
-    options: SpinOptions
-  ): Promise<AgentStatus> {
+  private async runAgent(config: AgentConfig, options: SpinOptions): Promise<AgentStatus> {
     const status = this.agents.get(config.id)!;
 
-    status.status = 'running';
+    status.status = "running";
     status.startedAt = new Date();
-    this.addLog(status, 'info', `Starting agent: ${config.name}`);
+    this.addLog(status, "info", `Starting agent: ${config.name}`);
     this.notifyListeners(config.id, status);
     options.onProgress?.(status);
 
@@ -243,16 +240,16 @@ export class AgentClient {
       // Execute agent logic based on type
       const result = await this.executeAgent(config, status, options);
 
-      status.status = 'completed';
+      status.status = "completed";
       status.progress = 100;
       status.completedAt = new Date();
       status.result = result;
-      this.addLog(status, 'info', `Agent completed successfully`);
+      this.addLog(status, "info", `Agent completed successfully`);
     } catch (error) {
-      status.status = 'failed';
+      status.status = "failed";
       status.completedAt = new Date();
       status.error = error instanceof Error ? error.message : String(error);
-      this.addLog(status, 'error', `Agent failed: ${status.error}`);
+      this.addLog(status, "error", `Agent failed: ${status.error}`);
     }
 
     this.notifyListeners(config.id, status);
@@ -261,10 +258,7 @@ export class AgentClient {
     return status;
   }
 
-  private async runAgentAsync(
-    config: AgentConfig,
-    options: SpinOptions
-  ): Promise<void> {
+  private async runAgentAsync(config: AgentConfig, options: SpinOptions): Promise<void> {
     // Run in background
     this.runAgent(config, options).catch(() => {
       // Errors are handled in runAgent
@@ -283,15 +277,15 @@ export class AgentClient {
 
     // Local execution based on agent type
     switch (config.type) {
-      case 'investigation':
+      case "investigation":
         return this.executeInvestigationAgent(config, status, options);
-      case 'enrichment':
+      case "enrichment":
         return this.executeEnrichmentAgent(config, status, options);
-      case 'analysis':
+      case "analysis":
         return this.executeAnalysisAgent(config, status, options);
-      case 'correlation':
+      case "correlation":
         return this.executeCorrelationAgent(config, status, options);
-      case 'report':
+      case "report":
         return this.executeReportAgent(config, status, options);
       default:
         throw new Error(`Unknown agent type: ${config.type}`);
@@ -304,10 +298,10 @@ export class AgentClient {
     options: SpinOptions
   ): Promise<unknown> {
     const response = await fetch(`${this.config.endpoint}/agents`, {
-      method: 'POST',
+      method: "POST",
       headers: {
         ...this.getHeaders(),
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(config),
     });
@@ -316,7 +310,7 @@ export class AgentClient {
       throw new Error(`Remote agent creation failed: ${response.statusText}`);
     }
 
-    const { id } = await response.json() as { id: string };
+    const { id } = (await response.json()) as { id: string };
 
     // Poll for completion
     const pollInterval = options.pollInterval || 1000;
@@ -332,23 +326,23 @@ export class AgentClient {
         this.notifyListeners(config.id, status);
         options.onProgress?.(status);
 
-        if (remoteStatus.status === 'completed') {
+        if (remoteStatus.status === "completed") {
           return remoteStatus.result;
         }
 
-        if (remoteStatus.status === 'failed') {
-          throw new Error(remoteStatus.error || 'Agent failed');
+        if (remoteStatus.status === "failed") {
+          throw new Error(remoteStatus.error || "Agent failed");
         }
 
-        if (remoteStatus.status === 'cancelled') {
-          throw new Error('Agent was cancelled');
+        if (remoteStatus.status === "cancelled") {
+          throw new Error("Agent was cancelled");
         }
       }
 
       await this.sleep(pollInterval);
     }
 
-    throw new Error('Agent execution timed out');
+    throw new Error("Agent execution timed out");
   }
 
   private async executeInvestigationAgent(
@@ -356,7 +350,7 @@ export class AgentClient {
     status: AgentStatus,
     options: SpinOptions
   ): Promise<unknown> {
-    this.addLog(status, 'info', 'Running investigation agent');
+    this.addLog(status, "info", "Running investigation agent");
     status.progress = 10;
     this.notifyListeners(config.id, status);
     options.onProgress?.(status);
@@ -364,17 +358,17 @@ export class AgentClient {
     // Simulate investigation steps
     await this.sleep(500);
     status.progress = 30;
-    this.addLog(status, 'info', 'Collecting evidence');
+    this.addLog(status, "info", "Collecting evidence");
     this.notifyListeners(config.id, status);
 
     await this.sleep(500);
     status.progress = 60;
-    this.addLog(status, 'info', 'Analyzing patterns');
+    this.addLog(status, "info", "Analyzing patterns");
     this.notifyListeners(config.id, status);
 
     await this.sleep(500);
     status.progress = 90;
-    this.addLog(status, 'info', 'Generating findings');
+    this.addLog(status, "info", "Generating findings");
     this.notifyListeners(config.id, status);
 
     return {
@@ -389,18 +383,18 @@ export class AgentClient {
     status: AgentStatus,
     _options: SpinOptions
   ): Promise<unknown> {
-    this.addLog(status, 'info', 'Running enrichment agent');
+    this.addLog(status, "info", "Running enrichment agent");
     status.progress = 25;
     this.notifyListeners(config.id, status);
 
     await this.sleep(300);
     status.progress = 50;
-    this.addLog(status, 'info', 'Fetching external data');
+    this.addLog(status, "info", "Fetching external data");
     this.notifyListeners(config.id, status);
 
     await this.sleep(300);
     status.progress = 75;
-    this.addLog(status, 'info', 'Merging enrichments');
+    this.addLog(status, "info", "Merging enrichments");
     this.notifyListeners(config.id, status);
 
     return {
@@ -414,18 +408,18 @@ export class AgentClient {
     status: AgentStatus,
     _options: SpinOptions
   ): Promise<unknown> {
-    this.addLog(status, 'info', 'Running analysis agent');
+    this.addLog(status, "info", "Running analysis agent");
     status.progress = 20;
     this.notifyListeners(config.id, status);
 
     await this.sleep(400);
     status.progress = 50;
-    this.addLog(status, 'info', 'Computing metrics');
+    this.addLog(status, "info", "Computing metrics");
     this.notifyListeners(config.id, status);
 
     await this.sleep(400);
     status.progress = 80;
-    this.addLog(status, 'info', 'Generating insights');
+    this.addLog(status, "info", "Generating insights");
     this.notifyListeners(config.id, status);
 
     return {
@@ -439,18 +433,18 @@ export class AgentClient {
     status: AgentStatus,
     _options: SpinOptions
   ): Promise<unknown> {
-    this.addLog(status, 'info', 'Running correlation agent');
+    this.addLog(status, "info", "Running correlation agent");
     status.progress = 15;
     this.notifyListeners(config.id, status);
 
     await this.sleep(600);
     status.progress = 45;
-    this.addLog(status, 'info', 'Finding connections');
+    this.addLog(status, "info", "Finding connections");
     this.notifyListeners(config.id, status);
 
     await this.sleep(600);
     status.progress = 85;
-    this.addLog(status, 'info', 'Scoring correlations');
+    this.addLog(status, "info", "Scoring correlations");
     this.notifyListeners(config.id, status);
 
     return {
@@ -464,30 +458,30 @@ export class AgentClient {
     status: AgentStatus,
     _options: SpinOptions
   ): Promise<unknown> {
-    this.addLog(status, 'info', 'Running report agent');
+    this.addLog(status, "info", "Running report agent");
     status.progress = 20;
     this.notifyListeners(config.id, status);
 
     await this.sleep(200);
     status.progress = 60;
-    this.addLog(status, 'info', 'Compiling report');
+    this.addLog(status, "info", "Compiling report");
     this.notifyListeners(config.id, status);
 
     await this.sleep(200);
     status.progress = 90;
-    this.addLog(status, 'info', 'Formatting output');
+    this.addLog(status, "info", "Formatting output");
     this.notifyListeners(config.id, status);
 
     return {
       reportId: uuidv4(),
-      format: 'pdf',
+      format: "pdf",
       sections: [],
     };
   }
 
   private addLog(
     status: AgentStatus,
-    level: AgentLogEntry['level'],
+    level: AgentLogEntry["level"],
     message: string,
     data?: Record<string, unknown>
   ): void {
@@ -513,7 +507,7 @@ export class AgentClient {
     const headers: Record<string, string> = {};
 
     if (this.config.apiKey) {
-      headers['Authorization'] = `Bearer ${this.config.apiKey}`;
+      headers["Authorization"] = `Bearer ${this.config.apiKey}`;
     }
 
     return headers;

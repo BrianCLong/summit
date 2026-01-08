@@ -5,11 +5,13 @@ Run the test suites for the Summit platform. Supports unit, integration, and E2E
 ## Instructions
 
 ### Quick Test (Unit Tests Only)
+
 ```bash
 pnpm test:jest
 ```
 
 ### Full Test Suite
+
 ```bash
 pnpm test
 ```
@@ -17,16 +19,19 @@ pnpm test
 ### Specific Test Types
 
 **Integration Tests:**
+
 ```bash
 pnpm test:integration
 ```
 
 **E2E Tests (Playwright):**
+
 ```bash
 pnpm e2e
 ```
 
 **Smoke Tests (Golden Path):**
+
 ```bash
 pnpm smoke
 ```
@@ -34,26 +39,31 @@ pnpm smoke
 ### Running Specific Tests
 
 **By file pattern:**
+
 ```bash
 pnpm test:jest -- --testPathPattern="EntityService"
 ```
 
 **By test name:**
+
 ```bash
 pnpm test:jest -- --testNamePattern="should create entity"
 ```
 
 **Specific package:**
+
 ```bash
 pnpm --filter @intelgraph/api test
 ```
 
 ### Watch Mode (Development)
+
 ```bash
 pnpm test:jest -- --watch
 ```
 
 ### Coverage Report
+
 ```bash
 pnpm test:coverage
 ```
@@ -68,11 +78,13 @@ pnpm test:coverage
 ## Troubleshooting
 
 **Clear Jest cache if tests behave unexpectedly:**
+
 ```bash
 jest --clearCache
 ```
 
 **Run with verbose output:**
+
 ```bash
 pnpm test:jest -- --verbose
 ```

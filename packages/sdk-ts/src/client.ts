@@ -1,4 +1,3 @@
-
 // packages/sdk-ts/src/client.ts
 
 export interface IntelGraphConfig {
@@ -15,22 +14,26 @@ export class IntelGraphClient {
   constructor(config: IntelGraphConfig) {
     this.url = config.url;
     this.token = config.token;
-    this.onError = config.onError || ((err) => { throw err; });
+    this.onError =
+      config.onError ||
+      ((err) => {
+        throw err;
+      });
   }
 
   async gql<T>(query: string, variables?: Record<string, any>): Promise<T> {
     try {
       const response = await fetch(this.url, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.token}`,
         },
-        body: JSON.stringify({ query, variables })
+        body: JSON.stringify({ query, variables }),
       });
 
       if (response.status === 429) {
-        throw new Error('RATE_LIMITED');
+        throw new Error("RATE_LIMITED");
       }
 
       const json = await response.json();
@@ -45,7 +48,9 @@ export class IntelGraphClient {
   }
 
   searchEntities(q: string) {
-    return this.gql<{search:{id:string,name:string,type:string}[]}>(
-      `query($q:String!){ search(q:$q){ id name type } }`, { q });
+    return this.gql<{ search: { id: string; name: string; type: string }[] }>(
+      `query($q:String!){ search(q:$q){ id name type } }`,
+      { q }
+    );
   }
 }

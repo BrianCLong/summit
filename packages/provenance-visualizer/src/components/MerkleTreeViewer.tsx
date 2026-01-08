@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Box,
   Card,
@@ -9,12 +9,12 @@ import {
   Alert,
   Chip,
   Tooltip,
-} from '@mui/material';
-import { AccountTree, CheckCircle, Error as ErrorIcon } from '@mui/icons-material';
-import Tree from 'react-d3-tree';
-import CryptoJS from 'crypto-js';
-import type { DisclosureBundle, MerkleNode } from '../types';
-import { ProvenanceLedgerClient } from '../api/client';
+} from "@mui/material";
+import { AccountTree, CheckCircle, Error as ErrorIcon } from "@mui/icons-material";
+import Tree from "react-d3-tree";
+import CryptoJS from "crypto-js";
+import type { DisclosureBundle, MerkleNode } from "../types";
+import { ProvenanceLedgerClient } from "../api/client";
 
 interface MerkleTreeViewerProps {
   caseId: string;
@@ -22,11 +22,7 @@ interface MerkleTreeViewerProps {
   onVerify?: (valid: boolean, tamperedNodes?: string[]) => void;
 }
 
-export const MerkleTreeViewer: React.FC<MerkleTreeViewerProps> = ({
-  caseId,
-  client,
-  onVerify,
-}) => {
+export const MerkleTreeViewer: React.FC<MerkleTreeViewerProps> = ({ caseId, client, onVerify }) => {
   const [bundle, setBundle] = useState<DisclosureBundle | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +45,7 @@ export const MerkleTreeViewer: React.FC<MerkleTreeViewerProps> = ({
       setTamperedNodes(new Set(tampered));
       onVerify?.(tampered.length === 0, tampered);
     } catch (err: any) {
-      setError(err.message || 'Failed to load disclosure bundle');
+      setError(err.message || "Failed to load disclosure bundle");
     } finally {
       setLoading(false);
     }
@@ -60,7 +56,7 @@ export const MerkleTreeViewer: React.FC<MerkleTreeViewerProps> = ({
    */
   const buildMerkleTree = (hashes: string[]): MerkleNode => {
     if (hashes.length === 0) {
-      return { hash: '', level: 0, isLeaf: false };
+      return { hash: "", level: 0, isLeaf: false };
     }
 
     const leaves: MerkleNode[] = hashes.map((hash, index) => ({
@@ -128,7 +124,7 @@ export const MerkleTreeViewer: React.FC<MerkleTreeViewerProps> = ({
 
     // Verify root matches
     if (tree.hash !== bundleData.merkleRoot) {
-      tampered.push('root');
+      tampered.push("root");
     }
 
     return tampered;
@@ -150,19 +146,19 @@ export const MerkleTreeViewer: React.FC<MerkleTreeViewerProps> = ({
           ? `Evidence ${node.evidenceId?.slice(-8)}`
           : `Node ${node.hash.slice(0, 8)}...`,
         attributes: {
-          Hash: node.hash.slice(0, 16) + '...',
+          Hash: node.hash.slice(0, 16) + "...",
           Level: node.level.toString(),
-          Status: isTampered ? '⚠️ Tampered' : '✓ Verified',
+          Status: isTampered ? "⚠️ Tampered" : "✓ Verified",
         },
         nodeSvgShape: {
-          shape: node.isLeaf ? 'circle' : 'rect',
+          shape: node.isLeaf ? "circle" : "rect",
           shapeProps: {
             r: 10,
             width: 20,
             height: 20,
             x: -10,
             y: -10,
-            fill: isTampered ? '#f44336' : '#4caf50',
+            fill: isTampered ? "#f44336" : "#4caf50",
           },
         },
         children:
@@ -205,8 +201,8 @@ export const MerkleTreeViewer: React.FC<MerkleTreeViewerProps> = ({
             </Typography>
             <Chip
               icon={isValid ? <CheckCircle /> : <ErrorIcon />}
-              label={isValid ? 'Integrity Verified' : `${tamperedNodes.size} Node(s) Tampered`}
-              color={isValid ? 'success' : 'error'}
+              label={isValid ? "Integrity Verified" : `${tamperedNodes.size} Node(s) Tampered`}
+              color={isValid ? "success" : "error"}
             />
           </Box>
 
@@ -217,7 +213,7 @@ export const MerkleTreeViewer: React.FC<MerkleTreeViewerProps> = ({
             Evidence Count: {bundle.evidence.length}
           </Typography>
           <Typography variant="body2" color="text.secondary" gutterBottom>
-            Merkle Root:{' '}
+            Merkle Root:{" "}
             <Tooltip title={bundle.merkleRoot}>
               <code>{bundle.merkleRoot.slice(0, 16)}...</code>
             </Tooltip>
@@ -244,13 +240,11 @@ export const MerkleTreeViewer: React.FC<MerkleTreeViewerProps> = ({
                   <circle
                     r={20}
                     fill={
-                      nodeDatum.attributes?.Status?.includes('Tampered')
-                        ? '#f44336'
-                        : '#4caf50'
+                      nodeDatum.attributes?.Status?.includes("Tampered") ? "#f44336" : "#4caf50"
                     }
                   />
                   <text fill="white" strokeWidth="0" x="0" y="5" textAnchor="middle">
-                    {nodeDatum.attributes?.Status?.includes('Tampered') ? '⚠' : '✓'}
+                    {nodeDatum.attributes?.Status?.includes("Tampered") ? "⚠" : "✓"}
                   </text>
                   <text fill="black" x="30" y="5" fontSize="12">
                     {nodeDatum.name}
@@ -277,10 +271,10 @@ export const MerkleTreeViewer: React.FC<MerkleTreeViewerProps> = ({
               sx={{
                 p: 1.5,
                 mb: 1,
-                border: '1px solid',
-                borderColor: 'grey.300',
+                border: "1px solid",
+                borderColor: "grey.300",
                 borderRadius: 1,
-                bgcolor: 'grey.50',
+                bgcolor: "grey.50",
               }}
             >
               <Typography variant="body2" fontWeight="medium">

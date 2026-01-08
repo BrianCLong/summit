@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useEffect, useMemo, useReducer } from 'react';
-import { SAVED_VIEWS_VERSION } from '../config';
-import { geofences, layers, nodes } from '../data';
+import React, { createContext, useContext, useEffect, useMemo, useReducer } from "react";
+import { SAVED_VIEWS_VERSION } from "../config";
+import { geofences, layers, nodes } from "../data";
 import {
   LayoutMode,
   SavedViewRecord,
@@ -8,37 +8,37 @@ import {
   ToastMessage,
   TriPaneAction,
   TriPaneState,
-  ViewSnapshot
-} from '../types';
+  ViewSnapshot,
+} from "../types";
 
-const STORAGE_KEY = 'tri-pane:saved-views';
+const STORAGE_KEY = "tri-pane:saved-views";
 const STORAGE_VERSION = SAVED_VIEWS_VERSION;
 const initialRange: TimeRange = { start: 1, end: 17 };
 const MIN_TIME = 0;
 const MAX_TIME = 24;
 
 const defaultSnapshot: ViewSnapshot = {
-  name: 'Active ops',
+  name: "Active ops",
   timeRange: initialRange,
   pinnedNodes: [],
-  activeLayers: ['signals', 'comms', 'logistics'],
+  activeLayers: ["signals", "comms", "logistics"],
   geofence: geofences[0]?.id ?? null,
-  filterText: '',
-  layoutMode: 'grid',
-  focusNodeId: undefined
+  filterText: "",
+  layoutMode: "grid",
+  focusNodeId: undefined,
 };
 
 const defaultRecord: SavedViewRecord = {
-  id: 'default-active',
+  id: "default-active",
   version: STORAGE_VERSION,
   createdAt: new Date().toISOString(),
-  snapshot: defaultSnapshot
+  snapshot: defaultSnapshot,
 };
 
 const initialState: TriPaneState = {
   ...defaultSnapshot,
   savedViews: [defaultRecord],
-  toast: null
+  toast: null,
 };
 
 interface PersistedViews {
@@ -52,11 +52,11 @@ function normalizeSnapshot(snapshot: ViewSnapshot): ViewSnapshot {
 
   return {
     ...snapshot,
-    layoutMode: snapshot.layoutMode ?? 'grid',
+    layoutMode: snapshot.layoutMode ?? "grid",
     activeLayers: snapshot.activeLayers ?? [],
     pinnedNodes: snapshot.pinnedNodes ?? [],
-    filterText: snapshot.filterText ?? '',
-    timeRange: { start, end }
+    filterText: snapshot.filterText ?? "",
+    timeRange: { start, end },
   };
 }
 
@@ -67,45 +67,45 @@ const TriPaneContext = createContext<{
 
 function reducer(state: TriPaneState, action: TriPaneAction): TriPaneState {
   switch (action.type) {
-    case 'setTimeRange':
+    case "setTimeRange":
       return { ...state, timeRange: action.payload };
-    case 'toggleLayer': {
+    case "toggleLayer": {
       const exists = state.activeLayers.includes(action.payload);
       const nextLayers = exists
         ? state.activeLayers.filter((layer) => layer !== action.payload)
         : [...state.activeLayers, action.payload];
       return { ...state, activeLayers: nextLayers };
     }
-    case 'setGeofence':
+    case "setGeofence":
       return { ...state, geofence: action.payload };
-    case 'togglePin': {
+    case "togglePin": {
       const pinned = state.pinnedNodes.includes(action.payload);
       const nextPins = pinned
         ? state.pinnedNodes.filter((id) => id !== action.payload)
         : [...state.pinnedNodes, action.payload];
       return { ...state, pinnedNodes: nextPins };
     }
-    case 'setFilterText':
+    case "setFilterText":
       return { ...state, filterText: action.payload };
-    case 'setFocusNode':
+    case "setFocusNode":
       return { ...state, focusNodeId: action.payload };
-    case 'setLayoutMode':
+    case "setLayoutMode":
       return { ...state, layoutMode: action.payload };
-    case 'saveView': {
+    case "saveView": {
       const snapshot: ViewSnapshot = normalizeSnapshot({
-        name: action.payload.trim() || 'Untitled view',
+        name: action.payload.trim() || "Untitled view",
         timeRange: state.timeRange,
         pinnedNodes: state.pinnedNodes,
         activeLayers: state.activeLayers,
         geofence: state.geofence,
         filterText: state.filterText,
         layoutMode: state.layoutMode,
-        focusNodeId: state.focusNodeId
+        focusNodeId: state.focusNodeId,
       });
 
       const existing = state.savedViews.find((record) => record.snapshot.name === snapshot.name);
       const recordId =
-        typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
           ? crypto.randomUUID()
           : `view-${Date.now()}`;
       const record: SavedViewRecord = existing
@@ -114,13 +114,13 @@ function reducer(state: TriPaneState, action: TriPaneAction): TriPaneState {
             id: recordId,
             version: STORAGE_VERSION,
             createdAt: new Date().toISOString(),
-            snapshot
+            snapshot,
           };
 
       const withoutExisting = state.savedViews.filter((entry) => entry.id !== record.id);
       return { ...state, savedViews: [...withoutExisting, record] };
     }
-    case 'loadView': {
+    case "loadView": {
       const record = state.savedViews.find((v) => v.id === action.payload);
       if (!record) return state;
 
@@ -139,25 +139,25 @@ function reducer(state: TriPaneState, action: TriPaneAction): TriPaneState {
         ...record.snapshot,
         geofence: invalidGeofence ? null : record.snapshot.geofence,
         activeLayers: validLayers,
-        pinnedNodes: validPins
+        pinnedNodes: validPins,
       });
 
       let toast: ToastMessage | null = null;
       if (invalidGeofence || missingLayers || missingPins) {
         toast = {
           id: `toast-${Date.now()}`,
-          tone: 'warning',
-          message: 'Restored with omissions: missing geofence or filtered entities were removed.'
+          tone: "warning",
+          message: "Restored with omissions: missing geofence or filtered entities were removed.",
         };
       }
 
       return { ...state, ...nextSnapshot, toast };
     }
-    case 'replaceViews':
+    case "replaceViews":
       return { ...state, savedViews: action.payload };
-    case 'showToast':
+    case "showToast":
       return { ...state, toast: action.payload };
-    case 'dismissToast':
+    case "dismissToast":
       return { ...state, toast: null };
     default:
       return state;
@@ -166,7 +166,7 @@ function reducer(state: TriPaneState, action: TriPaneAction): TriPaneState {
 
 export function TriPaneProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState, (base) => {
-    if (typeof window === 'undefined') return base;
+    if (typeof window === "undefined") return base;
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return base;
@@ -178,26 +178,26 @@ export function TriPaneProvider({ children }: { children: React.ReactNode }) {
         .filter((view) => view.version === STORAGE_VERSION)
         .map((view) => ({
           ...view,
-          snapshot: normalizeSnapshot(view.snapshot)
+          snapshot: normalizeSnapshot(view.snapshot),
         }));
       const hydratedViews = views.length > 0 ? views : [defaultRecord];
       const latest = hydratedViews[hydratedViews.length - 1]?.snapshot ?? base;
       return { ...base, ...latest, savedViews: hydratedViews };
     } catch (error) {
-      console.warn('Failed to read saved views; falling back to defaults', error);
+      console.warn("Failed to read saved views; falling back to defaults", error);
       return base;
     }
   });
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     const payload: PersistedViews = { version: STORAGE_VERSION, views: state.savedViews };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
   }, [state.savedViews]);
 
   useEffect(() => {
     if (!state.toast) return;
-    const timer = setTimeout(() => dispatch({ type: 'dismissToast' }), 4000);
+    const timer = setTimeout(() => dispatch({ type: "dismissToast" }), 4000);
     return () => clearTimeout(timer);
   }, [state.toast]);
 
@@ -208,6 +208,6 @@ export function TriPaneProvider({ children }: { children: React.ReactNode }) {
 
 export function useTriPane() {
   const ctx = useContext(TriPaneContext);
-  if (!ctx) throw new Error('TriPaneContext missing');
+  if (!ctx) throw new Error("TriPaneContext missing");
   return ctx;
 }

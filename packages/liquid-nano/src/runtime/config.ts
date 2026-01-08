@@ -1,34 +1,36 @@
-import * as crypto from 'node:crypto';
-import type { RuntimeConfig, RuntimeSecurityPolicy, RuntimeTelemetryConfig } from './types.js';
+import * as crypto from "node:crypto";
+import type { RuntimeConfig, RuntimeSecurityPolicy, RuntimeTelemetryConfig } from "./types.js";
 
-export interface PartialRuntimeConfig extends Partial<Omit<RuntimeConfig, 'telemetry' | 'security' | 'performance' | 'auditTrail'>> {
+export interface PartialRuntimeConfig extends Partial<
+  Omit<RuntimeConfig, "telemetry" | "security" | "performance" | "auditTrail">
+> {
   readonly telemetry?: Partial<RuntimeTelemetryConfig>;
   readonly security?: Partial<RuntimeSecurityPolicy>;
-  readonly performance?: Partial<RuntimeConfig['performance']>;
-  readonly auditTrail?: Partial<RuntimeConfig['auditTrail']>;
+  readonly performance?: Partial<RuntimeConfig["performance"]>;
+  readonly auditTrail?: Partial<RuntimeConfig["auditTrail"]>;
 }
 
 const DEFAULT_CONFIG: RuntimeConfig = {
   id: crypto.randomUUID(),
-  environment: 'dev',
+  environment: "dev",
   telemetry: {
-    mode: 'console',
-    sampleRate: 0.1
+    mode: "console",
+    sampleRate: 0.1,
   },
   security: {
     allowDynamicPlugins: false,
-    redactFields: ['secret', 'token'],
-    validateSignatures: true
+    redactFields: ["secret", "token"],
+    validateSignatures: true,
   },
   performance: {
     maxConcurrency: 4,
     highWatermark: 100,
-    adaptiveThrottling: true
+    adaptiveThrottling: true,
   },
   auditTrail: {
     enabled: true,
-    sink: 'memory'
-  }
+    sink: "memory",
+  },
 };
 
 export function loadConfig(partial: PartialRuntimeConfig = {}): RuntimeConfig {
@@ -37,20 +39,20 @@ export function loadConfig(partial: PartialRuntimeConfig = {}): RuntimeConfig {
     ...partial,
     telemetry: {
       ...DEFAULT_CONFIG.telemetry,
-      ...partial.telemetry
+      ...partial.telemetry,
     },
     security: {
       ...DEFAULT_CONFIG.security,
-      ...partial.security
+      ...partial.security,
     },
     performance: {
       ...DEFAULT_CONFIG.performance,
-      ...partial.performance
+      ...partial.performance,
     },
     auditTrail: {
       ...DEFAULT_CONFIG.auditTrail,
-      ...partial.auditTrail
-    }
+      ...partial.auditTrail,
+    },
   };
   validateConfig(merged);
   return merged;
@@ -58,18 +60,18 @@ export function loadConfig(partial: PartialRuntimeConfig = {}): RuntimeConfig {
 
 export function validateConfig(config: RuntimeConfig): void {
   if (!config.id) {
-    throw new Error('runtime config must include an id');
+    throw new Error("runtime config must include an id");
   }
   if (config.performance.maxConcurrency <= 0) {
-    throw new Error('maxConcurrency must be greater than zero');
+    throw new Error("maxConcurrency must be greater than zero");
   }
   if (config.performance.highWatermark < config.performance.maxConcurrency) {
-    throw new Error('highWatermark must be >= maxConcurrency');
+    throw new Error("highWatermark must be >= maxConcurrency");
   }
-  if (config.telemetry.mode === 'otlp' && !config.telemetry.endpoint) {
-    throw new Error('otlp telemetry requires an endpoint');
+  if (config.telemetry.mode === "otlp" && !config.telemetry.endpoint) {
+    throw new Error("otlp telemetry requires an endpoint");
   }
-  if (!['dev', 'staging', 'prod', 'test'].includes(config.environment)) {
+  if (!["dev", "staging", "prod", "test"].includes(config.environment)) {
     throw new Error(`invalid environment: ${config.environment}`);
   }
 }

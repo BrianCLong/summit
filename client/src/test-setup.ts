@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom';
+import "@testing-library/jest-dom";
 
 // Mock ResizeObserver
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
@@ -15,7 +15,7 @@ global.IntersectionObserver = jest.fn().mockImplementation(() => ({
 }));
 
 // Mock matchMedia
-Object.defineProperty(window, 'matchMedia', {
+Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: jest.fn().mockImplementation((query) => ({
     matches: false,
@@ -66,12 +66,12 @@ const mockCanvas = {
   removeEventListener: jest.fn(),
 };
 
-Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
+Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
   value: mockCanvas.getContext,
 });
 
 // Mock performance API
-Object.defineProperty(window, 'performance', {
+Object.defineProperty(window, "performance", {
   writable: true,
   value: {
     now: jest.fn(() => Date.now()),
@@ -94,23 +94,23 @@ const localStorageMock = {
   key: jest.fn(),
 };
 
-Object.defineProperty(window, 'localStorage', {
+Object.defineProperty(window, "localStorage", {
   value: localStorageMock,
 });
 
 // Mock sessionStorage
-Object.defineProperty(window, 'sessionStorage', {
+Object.defineProperty(window, "sessionStorage", {
   value: localStorageMock,
 });
 
 // Mock URL.createObjectURL
-Object.defineProperty(URL, 'createObjectURL', {
+Object.defineProperty(URL, "createObjectURL", {
   writable: true,
-  value: jest.fn(() => 'mocked-url'),
+  value: jest.fn(() => "mocked-url"),
 });
 
 // Mock URL.revokeObjectURL
-Object.defineProperty(URL, 'revokeObjectURL', {
+Object.defineProperty(URL, "revokeObjectURL", {
   writable: true,
   value: jest.fn(),
 });
@@ -133,9 +133,9 @@ global.fetch = jest.fn(() =>
   Promise.resolve({
     ok: true,
     json: () => Promise.resolve({}),
-    text: () => Promise.resolve(''),
+    text: () => Promise.resolve(""),
     blob: () => Promise.resolve(new Blob()),
-  }),
+  })
 ) as jest.Mock;
 
 // Mock console methods to reduce noise in tests
@@ -146,10 +146,10 @@ beforeAll(() => {
   // Suppress specific console warnings/errors during tests
   console.error = jest.fn((message) => {
     if (
-      typeof message === 'string' &&
-      (message.includes('Warning: ReactDOM.render is deprecated') ||
-        message.includes('Warning: React.createFactory is deprecated') ||
-        message.includes('Warning: componentWillReceiveProps has been renamed'))
+      typeof message === "string" &&
+      (message.includes("Warning: ReactDOM.render is deprecated") ||
+        message.includes("Warning: React.createFactory is deprecated") ||
+        message.includes("Warning: componentWillReceiveProps has been renamed"))
     ) {
       return;
     }
@@ -158,9 +158,9 @@ beforeAll(() => {
 
   console.warn = jest.fn((message) => {
     if (
-      typeof message === 'string' &&
-      (message.includes('componentWillMount has been renamed') ||
-        message.includes('componentWillReceiveProps has been renamed'))
+      typeof message === "string" &&
+      (message.includes("componentWillMount has been renamed") ||
+        message.includes("componentWillReceiveProps has been renamed"))
     ) {
       return;
     }
@@ -177,8 +177,8 @@ afterAll(() => {
 afterEach(() => {
   jest.clearAllMocks();
   // Reset any global state
-  document.body.innerHTML = '';
+  document.body.innerHTML = "";
 });
 
 // Mock environment variables
-process.env.NODE_ENV = 'test';
+process.env.NODE_ENV = "test";

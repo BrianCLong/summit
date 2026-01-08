@@ -1,26 +1,26 @@
 #!/usr/bin/env node
 
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+const { execSync } = require("child_process");
+const fs = require("fs");
+const path = require("path");
 
 function getChangedFiles() {
   try {
-    return execSync('git diff --name-only origin/main...HEAD', {
-      stdio: ['pipe', 'pipe', 'pipe'],
+    return execSync("git diff --name-only origin/main...HEAD", {
+      stdio: ["pipe", "pipe", "pipe"],
     })
       .toString()
       .trim()
-      .split('\n')
+      .split("\n")
       .filter(Boolean);
   } catch {
     try {
-      return execSync('git diff --name-only --staged', {
-        stdio: ['pipe', 'pipe', 'pipe'],
+      return execSync("git diff --name-only --staged", {
+        stdio: ["pipe", "pipe", "pipe"],
       })
         .toString()
         .trim()
-        .split('\n')
+        .split("\n")
         .filter(Boolean);
     } catch {
       return [];
@@ -29,17 +29,17 @@ function getChangedFiles() {
 }
 
 function patternToRegex(pattern) {
-  let p = pattern.startsWith('/') ? pattern.slice(1) : pattern;
-  p = p.replace(/[.+^${}()|[\]\\]/g, '\\$&');
-  p = p.replace(/\*\*/g, '.*').replace(/\*/g, '[^/]*');
-  return new RegExp('^' + p);
+  let p = pattern.startsWith("/") ? pattern.slice(1) : pattern;
+  p = p.replace(/[.+^${}()|[\]\\]/g, "\\$&");
+  p = p.replace(/\*\*/g, ".*").replace(/\*/g, "[^/]*");
+  return new RegExp("^" + p);
 }
 
 function loadRules() {
   const content = fs
-    .readFileSync(path.join(__dirname, '..', 'CODEOWNERS'), 'utf8')
+    .readFileSync(path.join(__dirname, "..", "CODEOWNERS"), "utf8")
     .split(/\r?\n/)
-    .filter((line) => line.trim() && !line.trim().startsWith('#'));
+    .filter((line) => line.trim() && !line.trim().startsWith("#"));
 
   return content.map((line) => {
     const [pattern, ...owners] = line.trim().split(/\s+/);
@@ -55,7 +55,7 @@ function ownersForFile(file, rules) {
       owners = rule.owners;
     }
   }
-  return owners.filter((o) => o.startsWith('@team-'));
+  return owners.filter((o) => o.startsWith("@team-"));
 }
 
 const files = getChangedFiles();
@@ -68,10 +68,8 @@ for (const file of files) {
 }
 
 if (teams.size > 1) {
-  console.error(
-    `PR touches multiple team-owned areas: ${Array.from(teams).join(', ')}`,
-  );
+  console.error(`PR touches multiple team-owned areas: ${Array.from(teams).join(", ")}`);
   process.exit(1);
 }
 
-console.log('Team ownership check passed.');
+console.log("Team ownership check passed.");

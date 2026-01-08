@@ -4,20 +4,20 @@
  * Demonstrates how to test Summit plugins using the PluginTestHarness.
  */
 
-import { createTestHarness, createTestSuite } from '@intelgraph/plugin-sdk';
-import { createHelloWorldPlugin } from '../src/index';
+import { createTestHarness, createTestSuite } from "@intelgraph/plugin-sdk";
+import { createHelloWorldPlugin } from "../src/index";
 
-describe('Hello World Plugin', () => {
+describe("Hello World Plugin", () => {
   // Create a test harness for the plugin
   const harness = createTestHarness({
-    pluginId: 'hello-world',
-    version: '1.0.0',
+    pluginId: "hello-world",
+    version: "1.0.0",
   });
 
   beforeEach(async () => {
     // Load a fresh plugin instance before each test
     const plugin = createHelloWorldPlugin({
-      greeting: 'Test greeting',
+      greeting: "Test greeting",
       enableEventLogging: false,
     });
     await harness.load(plugin);
@@ -28,40 +28,40 @@ describe('Hello World Plugin', () => {
     await harness.reset();
   });
 
-  describe('Lifecycle', () => {
-    it('should initialize successfully', async () => {
+  describe("Lifecycle", () => {
+    it("should initialize successfully", async () => {
       await harness.initialize();
 
       // Check that initialization logged the greeting
       const logs = harness.getLogger().getLogs();
       expect(logs).toContainEqual(
         expect.objectContaining({
-          level: 'info',
-          message: 'Test greeting',
+          level: "info",
+          message: "Test greeting",
         })
       );
       expect(logs).toContainEqual(
         expect.objectContaining({
-          level: 'info',
-          message: 'Plugin initialized',
+          level: "info",
+          message: "Plugin initialized",
         })
       );
     });
 
-    it('should start successfully after initialization', async () => {
+    it("should start successfully after initialization", async () => {
       await harness.initialize();
       await harness.start();
 
       const logs = harness.getLogger().getLogs();
       expect(logs).toContainEqual(
         expect.objectContaining({
-          level: 'info',
-          message: 'Plugin started',
+          level: "info",
+          message: "Plugin started",
         })
       );
     });
 
-    it('should stop gracefully', async () => {
+    it("should stop gracefully", async () => {
       await harness.initialize();
       await harness.start();
       await harness.stop();
@@ -69,13 +69,13 @@ describe('Hello World Plugin', () => {
       const logs = harness.getLogger().getLogs();
       expect(logs).toContainEqual(
         expect.objectContaining({
-          level: 'info',
-          message: 'Plugin stopping',
+          level: "info",
+          message: "Plugin stopping",
         })
       );
     });
 
-    it('should run full lifecycle test', async () => {
+    it("should run full lifecycle test", async () => {
       const result = await harness.runLifecycleTest();
 
       expect(result.passed).toBe(true);
@@ -87,8 +87,8 @@ describe('Hello World Plugin', () => {
     });
   });
 
-  describe('Health Check', () => {
-    it('should report healthy when started', async () => {
+  describe("Health Check", () => {
+    it("should report healthy when started", async () => {
       await harness.initialize();
       await harness.start();
 
@@ -99,42 +99,42 @@ describe('Hello World Plugin', () => {
     });
   });
 
-  describe('Storage', () => {
-    it('should store initialization timestamp', async () => {
+  describe("Storage", () => {
+    it("should store initialization timestamp", async () => {
       await harness.initialize();
 
       const storage = harness.getStorage();
       const storedData = storage.getAll();
-      expect(storedData.has('initialized_at')).toBe(true);
+      expect(storedData.has("initialized_at")).toBe(true);
     });
 
-    it('should store start timestamp', async () => {
+    it("should store start timestamp", async () => {
       await harness.initialize();
       await harness.start();
 
       const storage = harness.getStorage();
       const storedData = storage.getAll();
-      expect(storedData.has('started_at')).toBe(true);
+      expect(storedData.has("started_at")).toBe(true);
     });
   });
 });
 
 // Example of using the test suite runner for more comprehensive tests
-describe('Hello World Plugin - Test Suite', () => {
-  it('should pass all standard tests', async () => {
+describe("Hello World Plugin - Test Suite", () => {
+  it("should pass all standard tests", async () => {
     const plugin = createHelloWorldPlugin();
     const suite = createTestSuite({
-      pluginId: 'hello-world',
-      version: '1.0.0',
+      pluginId: "hello-world",
+      version: "1.0.0",
     });
 
-    suite.addTest('lifecycle', 'Lifecycle test', async (harness) => {
+    suite.addTest("lifecycle", "Lifecycle test", async (harness) => {
       await harness.load(plugin);
       const result = await harness.runLifecycleTest();
       return result.passed;
     });
 
-    suite.addTest('health', 'Health check test', async (harness) => {
+    suite.addTest("health", "Health check test", async (harness) => {
       await harness.load(plugin);
       await harness.initialize();
       await harness.start();

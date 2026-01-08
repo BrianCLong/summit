@@ -5,9 +5,9 @@ permissions:
 on:
   push:
     branches: [main]
-    paths: ['policies/opa/**']
+    paths: ["policies/opa/**"]
   tags:
-    - 'v*'
+    - "v*"
 
 jobs:
   publish:
@@ -57,13 +57,13 @@ jobs:
 
       - name: Sign the policy bundle
         env:
-          COSIGN_EXPERIMENTAL: '1'
+          COSIGN_EXPERIMENTAL: "1"
         run: |
           cosign sign --yes ghcr.io/${{ github.repository_owner }}/composer-policy-bundle:latest
 
       - name: Cosign verify (keyless, pin identity)
         env:
-          COSIGN_EXPERIMENTAL: '1'
+          COSIGN_EXPERIMENTAL: "1"
         run: |
           IDENTITY_RE="https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/.+" 
           ISSUER="https://token.actions.githubusercontent.com"

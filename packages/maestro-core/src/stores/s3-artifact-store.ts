@@ -9,10 +9,10 @@ import {
   GetObjectCommand,
   ListObjectsV2Command,
   HeadObjectCommand,
-} from '@aws-sdk/client-s3';
-import { Upload } from '@aws-sdk/lib-storage';
-import { createHash } from 'crypto';
-import { ArtifactStore } from '../engine';
+} from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
+import { createHash } from "crypto";
+import { ArtifactStore } from "../engine";
 
 export interface S3ArtifactStoreConfig {
   bucket: string;
@@ -30,10 +30,10 @@ export class S3ArtifactStore implements ArtifactStore {
 
   constructor(config: S3ArtifactStoreConfig) {
     this.bucket = config.bucket;
-    this.pathPrefix = config.pathPrefix || 'maestro-artifacts';
+    this.pathPrefix = config.pathPrefix || "maestro-artifacts";
 
     this.s3 = new S3Client({
-      region: config.region || 'us-east-1',
+      region: config.region || "us-east-1",
       endpoint: config.endpoint,
       credentials:
         config.accessKeyId && config.secretAccessKey
@@ -45,14 +45,9 @@ export class S3ArtifactStore implements ArtifactStore {
     });
   }
 
-  async store(
-    runId: string,
-    stepId: string,
-    name: string,
-    data: Buffer,
-  ): Promise<string> {
+  async store(runId: string, stepId: string, name: string, data: Buffer): Promise<string> {
     // Create content-addressable key
-    const checksum = createHash('sha256').update(data).digest('hex');
+    const checksum = createHash("sha256").update(data).digest("hex");
     const key = `${this.pathPrefix}/${runId}/${stepId}/${name}`;
     const contentAddressableKey = `${this.pathPrefix}/content/${checksum.substring(0, 2)}/${checksum}`;
 
@@ -63,16 +58,11 @@ export class S3ArtifactStore implements ArtifactStore {
           new HeadObjectCommand({
             Bucket: this.bucket,
             Key: contentAddressableKey,
-          }),
+          })
         );
 
         // Content exists, just create a reference
-        await this.createReference(
-          key,
-          contentAddressableKey,
-          data.length,
-          checksum,
-        );
+        await this.createReference(key, contentAddressableKey, data.length, checksum);
         return key;
       } catch (error) {
         // Content doesn't exist, store it
@@ -86,26 +76,21 @@ export class S3ArtifactStore implements ArtifactStore {
           Key: contentAddressableKey,
           Body: data,
           Metadata: {
-            'maestro-checksum-sha256': checksum,
-            'maestro-run-id': runId,
-            'maestro-step-id': stepId,
-            'maestro-original-name': name,
-            'maestro-size': data.length.toString(),
+            "maestro-checksum-sha256": checksum,
+            "maestro-run-id": runId,
+            "maestro-step-id": stepId,
+            "maestro-original-name": name,
+            "maestro-size": data.length.toString(),
           },
           ContentType: this.detectContentType(name),
-          ServerSideEncryption: 'AES256',
+          ServerSideEncryption: "AES256",
         },
       });
 
       await upload.done();
 
       // Create reference link
-      await this.createReference(
-        key,
-        contentAddressableKey,
-        data.length,
-        checksum,
-      );
+      await this.createReference(key, contentAddressableKey, data.length, checksum);
 
       return key;
     } catch (error) {
@@ -125,13 +110,13 @@ export class S3ArtifactStore implements ArtifactStore {
           new GetObjectCommand({
             Bucket: this.bucket,
             Key: key,
-          }),
+          })
         );
 
         // Check if this is a reference file
         const metadata = response.Metadata;
-        if (metadata?.['maestro-content-key']) {
-          objectKey = metadata['maestro-content-key'];
+        if (metadata?.["maestro-content-key"]) {
+          objectKey = metadata["maestro-content-key"];
         }
       } catch (error) {
         // Key not found, might be content-addressable only
@@ -142,11 +127,11 @@ export class S3ArtifactStore implements ArtifactStore {
         new GetObjectCommand({
           Bucket: this.bucket,
           Key: objectKey,
-        }),
+        })
       );
 
       if (!response.Body) {
-        throw new Error('Empty response body');
+        throw new Error("Empty response body");
       }
 
       // Convert stream to buffer
@@ -161,9 +146,7 @@ export class S3ArtifactStore implements ArtifactStore {
 
       return Buffer.concat(chunks);
     } catch (error) {
-      throw new Error(
-        `Failed to retrieve artifact: ${(error as Error).message}`,
-      );
+      throw new Error(`Failed to retrieve artifact: ${(error as Error).message}`);
     }
   }
 
@@ -175,7 +158,7 @@ export class S3ArtifactStore implements ArtifactStore {
         new ListObjectsV2Command({
           Bucket: this.bucket,
           Prefix: prefix,
-        }),
+        })
       );
 
       return (response.Contents || [])
@@ -190,7 +173,7 @@ export class S3ArtifactStore implements ArtifactStore {
   async getArtifactInfo(
     runId: string,
     stepId: string,
-    name: string,
+    name: string
   ): Promise<{
     size: number;
     checksum: string;
@@ -204,13 +187,13 @@ export class S3ArtifactStore implements ArtifactStore {
         new HeadObjectCommand({
           Bucket: this.bucket,
           Key: key,
-        }),
+        })
       );
 
       return {
         size: response.ContentLength || 0,
-        checksum: response.Metadata?.['maestro-checksum-sha256'] || '',
-        contentType: response.ContentType || 'application/octet-stream',
+        checksum: response.Metadata?.["maestro-checksum-sha256"] || "",
+        contentType: response.ContentType || "application/octet-stream",
         lastModified: response.LastModified || new Date(),
       };
     } catch (error) {
@@ -231,7 +214,7 @@ export class S3ArtifactStore implements ArtifactStore {
         new GetObjectCommand({
           Bucket: this.bucket,
           Key: key,
-        }),
+        })
       );
     });
 
@@ -242,14 +225,14 @@ export class S3ArtifactStore implements ArtifactStore {
     referenceKey: string,
     contentKey: string,
     size: number,
-    checksum: string,
+    checksum: string
   ): Promise<void> {
     // Create a small reference file pointing to the content-addressable storage
     const referenceData = JSON.stringify({
       contentKey,
       size,
       checksum,
-      type: 'maestro-artifact-reference',
+      type: "maestro-artifact-reference",
     });
 
     await this.s3.send(
@@ -258,33 +241,33 @@ export class S3ArtifactStore implements ArtifactStore {
         Key: referenceKey,
         Body: referenceData,
         Metadata: {
-          'maestro-content-key': contentKey,
-          'maestro-checksum-sha256': checksum,
-          'maestro-size': size.toString(),
+          "maestro-content-key": contentKey,
+          "maestro-checksum-sha256": checksum,
+          "maestro-size": size.toString(),
         },
-        ContentType: 'application/json',
-      }),
+        ContentType: "application/json",
+      })
     );
   }
 
   private detectContentType(filename: string): string {
-    const ext = filename.toLowerCase().split('.').pop();
+    const ext = filename.toLowerCase().split(".").pop();
     const contentTypes: Record<string, string> = {
-      json: 'application/json',
-      xml: 'application/xml',
-      html: 'text/html',
-      txt: 'text/plain',
-      csv: 'text/csv',
-      pdf: 'application/pdf',
-      png: 'image/png',
-      jpg: 'image/jpeg',
-      jpeg: 'image/jpeg',
-      gif: 'image/gif',
-      zip: 'application/zip',
-      tar: 'application/x-tar',
-      gz: 'application/gzip',
+      json: "application/json",
+      xml: "application/xml",
+      html: "text/html",
+      txt: "text/plain",
+      csv: "text/csv",
+      pdf: "application/pdf",
+      png: "image/png",
+      jpg: "image/jpeg",
+      jpeg: "image/jpeg",
+      gif: "image/gif",
+      zip: "application/zip",
+      tar: "application/x-tar",
+      gz: "application/gzip",
     };
 
-    return contentTypes[ext || ''] || 'application/octet-stream';
+    return contentTypes[ext || ""] || "application/octet-stream";
   }
 }

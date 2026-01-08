@@ -3,10 +3,10 @@ name: GraphQL Schema Validation
 on:
   pull_request:
     paths:
-      - 'graphql/**'
-      - 'server/src/graphql/**'
-      - '**/schema.graphql'
-      - '**/schema*.ts'
+      - "graphql/**"
+      - "server/src/graphql/**"
+      - "**/schema.graphql"
+      - "**/schema*.ts"
   push:
     branches:
       - main
@@ -27,8 +27,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'pnpm'
+          node-version: "18"
+          cache: "pnpm"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
@@ -274,8 +274,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'pnpm'
+          node-version: "18"
+          cache: "pnpm"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3

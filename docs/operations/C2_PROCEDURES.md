@@ -67,6 +67,7 @@
    - Create execution timeline
 
 **Roles**:
+
 - **Mission Planner**: Overall plan development
 - **Intelligence Officer**: Requirements and intelligence review
 - **Legal Advisor**: Legal compliance review
@@ -75,6 +76,7 @@
 - **Commander**: Final approval authority
 
 **Documentation**:
+
 - Mission Plan (using MissionPlan schema)
 - Intelligence Requirements (IntelligenceRequirement)
 - Risk Assessment (RiskAssessment)
@@ -132,12 +134,13 @@
 **Procedure**:
 
 1. **Asset Availability Check**
+
    ```typescript
    const available = coordinator.getAvailableAssets({
      type: requiredType,
      startTime: taskStart,
      endTime: taskEnd,
-     capabilities: requiredCapabilities
+     capabilities: requiredCapabilities,
    });
    ```
 
@@ -170,6 +173,7 @@
    - Close task
 
 **Deconfliction Process**:
+
 - Identify conflicts automatically using system
 - Contact affected parties
 - Negotiate resolution
@@ -195,9 +199,11 @@
    - Identify scheduling windows
 
 3. **Optimization**
+
    ```typescript
    const optimization = coordinator.optimizeCoverage(allTasks);
    ```
+
    - Assign tasks to optimal assets
    - Minimize gaps in coverage
    - Balance asset utilization
@@ -319,16 +325,17 @@
    - Maintain watch log
 
 3. **Watch Log Maintenance**
+
    ```typescript
    const logEntry = {
      id: generateId(),
      shiftId: currentShift.id,
      timestamp: new Date().toISOString(),
-     type: 'OBSERVATION',
-     entry: 'Significant event description',
-     classification: 'SECRET',
+     type: "OBSERVATION",
+     entry: "Significant event description",
+     classification: "SECRET",
      author: watchOfficer,
-     relatedEvents: ['event-001']
+     relatedEvents: ["event-001"],
    };
    ```
 
@@ -355,9 +362,10 @@
 **Procedure**:
 
 1. **Report Ingestion**
+
    ```typescript
    const report = fusion.ingestReport({
-     discipline: 'SIGINT',
+     discipline: "SIGINT",
      source: sourceData,
      // ... complete report data
    });
@@ -661,6 +669,7 @@
 **Purpose**: Properly manage classified information.
 
 **Requirements**:
+
 - Set appropriate classification levels
 - Apply all required caveats
 - Honor dissemination restrictions
@@ -668,6 +677,7 @@
 - Maintain audit trails
 
 **Classification Levels**:
+
 - UNCLASSIFIED: No classification required
 - CONFIDENTIAL: Low-level classified
 - SECRET: Standard classified operations
@@ -675,6 +685,7 @@
 - TOP SECRET/SCI: Compartmented information
 
 **Dissemination Controls**:
+
 - NOFORN: No foreign nationals
 - ORCON: Originator controlled
 - RELIDO: Releasable to [specific countries]
@@ -685,6 +696,7 @@
 **Purpose**: Maintain compliance with legal and policy requirements.
 
 **Procedures**:
+
 - Document all decisions
 - Maintain approval chains
 - Record all accesses
@@ -698,6 +710,7 @@
 **Purpose**: Protect sensitive operational information.
 
 **Procedures**:
+
 - Identify critical information
 - Recognize indicators
 - Assess threats
@@ -711,12 +724,14 @@
 ### Appendix A: Quick Reference
 
 **Emergency Contacts**:
+
 - Operations Center: [Contact Info]
 - Legal: [Contact Info]
 - Security: [Contact Info]
 - IT Support: [Contact Info]
 
 **System URLs**:
+
 - Operations C2 Service: [URL]
 - Mission Coordination: [URL]
 - Documentation: [URL]
@@ -724,6 +739,7 @@
 ### Appendix B: Forms and Templates
 
 See system documentation for:
+
 - Mission Plan Template
 - Intelligence Requirement Form
 - Target Package Format
@@ -735,6 +751,7 @@ See system documentation for:
 ### Appendix C: Approval Authorities
 
 Refer to organizational directive for:
+
 - Mission approval authorities
 - Target approval authorities
 - Strike approval authorities
@@ -758,6 +775,7 @@ Refer to organizational directive for:
 ---
 
 **Document Control**
+
 - Version: 1.0
 - Last Updated: 2025-01-20
 - Classification: UNCLASSIFIED

@@ -16,7 +16,7 @@ jobs:
       - name: Setup toolchain
         uses: actions/setup-node@v4
         if: ${{ inputs.language == 'node' }}
-        with: { node-version: '22.x', cache: 'npm' }
+        with: { node-version: "22.x", cache: "npm" }
       - name: Compute cache key
         id: cache
         run: echo "key=${{ inputs.cache-key }}-${{ hashFiles('**/package-lock.json','**/pnpm-lock.yaml','**/yarn.lock','**/poetry.lock','**/Cargo.lock') }}" >> $GITHUB_OUTPUT

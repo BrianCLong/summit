@@ -17,12 +17,12 @@ roles:
   - FinOps Lead
   - Repo Maintainer / Arborist
 objectives:
-  - 'Blue/Green deploys for gateway + docs-api with zero-downtime flips and traffic mirroring.'
-  - 'WAF + DDoS posture: managed rules, anomaly scoring, and synthetic attack drills.'
-  - 'Secrets lifecycle: quarterly rotation automated end‑to‑end with attestations.'
-  - 'Infra drift detection + auto-remediation proposals (Terraform + K8s).'
-  - 'Perf focus: p95 < 1.2s on top 3 endpoints via profiling + caching; reduce cold-starts.'
-  - 'Audit & compliance: SOC2/SOX-friendly evidence collection automated in CI.'
+  - "Blue/Green deploys for gateway + docs-api with zero-downtime flips and traffic mirroring."
+  - "WAF + DDoS posture: managed rules, anomaly scoring, and synthetic attack drills."
+  - "Secrets lifecycle: quarterly rotation automated end‑to‑end with attestations."
+  - "Infra drift detection + auto-remediation proposals (Terraform + K8s)."
+  - "Perf focus: p95 < 1.2s on top 3 endpoints via profiling + caching; reduce cold-starts."
+  - "Audit & compliance: SOC2/SOX-friendly evidence collection automated in CI."
 ---
 
 # Sprint 28 Plan — Blue/Green, Secrets Rotation, and Edge Security
@@ -202,7 +202,7 @@ data:
 **Ingress annotations (log-only → enforce)**
 
 ```yaml
-nginx.ingress.kubernetes.io/enable-modsecurity: 'true'
+nginx.ingress.kubernetes.io/enable-modsecurity: "true"
 nginx.ingress.kubernetes.io/modsecurity-snippet: |
   SecRuleEngine DetectionOnly
 ```
@@ -259,10 +259,10 @@ SCOPE=${1:-all}
 **Path:** `services/audit-writer/rotation.ts`
 
 ```ts
-import { writeAudit } from './main';
+import { writeAudit } from "./main";
 export async function attestRotation(subject: string, items: string[]) {
   await writeAudit({
-    type: 'secrets-rotation',
+    type: "secrets-rotation",
     subject,
     items,
     at: new Date().toISOString(),
@@ -278,7 +278,7 @@ export async function attestRotation(subject: string, items: string[]) {
 ```yaml
 name: tf-drift
 on:
-  schedule: [{ cron: '0 */6 * * *' }]
+  schedule: [{ cron: "0 */6 * * *" }]
   workflow_dispatch:
 jobs:
   drift:
@@ -301,7 +301,7 @@ jobs:
 ```yaml
 name: k8s-guard
 on:
-  schedule: [{ cron: '*/30 * * * *' }]
+  schedule: [{ cron: "*/30 * * * *" }]
 jobs:
   guard:
     runs-on: ubuntu-latest
@@ -330,7 +330,7 @@ node --cpu-prof --cpu-prof-dir=./profiles server.js
 name: evidence
 on:
   workflow_run:
-    workflows: ['deploy', 'supply-chain', 'migration-gate', 'secrets-rotation']
+    workflows: ["deploy", "supply-chain", "migration-gate", "secrets-rotation"]
     types: [completed]
 jobs:
   collect:

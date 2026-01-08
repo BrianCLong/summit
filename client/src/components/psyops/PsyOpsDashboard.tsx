@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import Grid from '@mui/material/Grid';
+import React, { useState } from "react";
+import Grid from "@mui/material/Grid";
 import {
   Box,
   Typography,
@@ -23,7 +23,7 @@ import {
   FormControlLabel,
   TextField,
   MenuItem,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Security,
   Psychology,
@@ -34,8 +34,8 @@ import {
   Shield,
   Speed,
   Analytics,
-} from '@mui/icons-material';
-import { useQuery, useMutation, gql } from '@apollo/client';
+} from "@mui/icons-material";
+import { useQuery, useMutation, gql } from "@apollo/client";
 
 interface CounterPsyOpsEngineStatus {
   status: string;
@@ -169,33 +169,24 @@ const PsyOpsDashboard: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
   const [simulationDialog, setSimulationDialog] = useState(false);
   const [engineEnabled, setEngineEnabled] = useState(true);
-  const [simulationConfig, setSimulationConfig] =
-    useState<AdversarySimulationInput>({
-      adversaryType: 'APT',
-      temperature: 0.7,
-      persistence: 'high',
-    });
+  const [simulationConfig, setSimulationConfig] = useState<AdversarySimulationInput>({
+    adversaryType: "APT",
+    temperature: 0.7,
+    persistence: "high",
+  });
 
-  const { loading, error, data, refetch } = useQuery<PsyOpsStatusResponse>(
-    GET_PSYOPS_STATUS,
-    {
-      pollInterval: 5000,
-    },
+  const { loading, error, data, refetch } = useQuery<PsyOpsStatusResponse>(GET_PSYOPS_STATUS, {
+    pollInterval: 5000,
+  });
+
+  const [toggleEngine] = useMutation<ToggleEngineResponse, ToggleEngineVariables>(
+    TOGGLE_PSYOPS_ENGINE
+  );
+  const [generateSimulation] = useMutation<GenerateSimulationResponse, GenerateSimulationVariables>(
+    GENERATE_ADVERSARY_SIMULATION
   );
 
-  const [toggleEngine] = useMutation<
-    ToggleEngineResponse,
-    ToggleEngineVariables
-  >(TOGGLE_PSYOPS_ENGINE);
-  const [generateSimulation] = useMutation<
-    GenerateSimulationResponse,
-    GenerateSimulationVariables
-  >(GENERATE_ADVERSARY_SIMULATION);
-
-  const handleTabChange = (
-    _event: React.SyntheticEvent,
-    newValue: number,
-  ) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
@@ -205,7 +196,7 @@ const PsyOpsDashboard: React.FC = () => {
       setEngineEnabled(enabled);
       refetch();
     } catch (err) {
-      console.error('Failed to toggle psyops engine:', err);
+      console.error("Failed to toggle psyops engine:", err);
     }
   };
 
@@ -215,36 +206,26 @@ const PsyOpsDashboard: React.FC = () => {
       setSimulationDialog(false);
       refetch();
     } catch (err) {
-      console.error('Failed to generate simulation:', err);
+      console.error("Failed to generate simulation:", err);
     }
   };
 
   if (loading) return <CircularProgress />;
-  if (error)
-    return (
-      <Alert severity="error">
-        Error loading PsyOps dashboard: {error.message}
-      </Alert>
-    );
+  if (error) return <Alert severity="error">Error loading PsyOps dashboard: {error.message}</Alert>;
 
-  const { counterPsyOpsEngine, disinformationDetection, adversarySimulation } =
-    data || {};
+  const { counterPsyOpsEngine, disinformationDetection, adversarySimulation } = data || {};
 
   return (
-    <Box sx={{ width: '100%' }}>
-      <Typography
-        variant="h4"
-        gutterBottom
-        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-      >
+    <Box sx={{ width: "100%" }}>
+      <Typography variant="h4" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
         <Shield color="primary" />
         PsyOps & Counter-Intelligence Dashboard
       </Typography>
 
       <Alert severity="warning" sx={{ mb: 3 }}>
-        <strong>DEFENSIVE SECURITY TOOL:</strong> This dashboard is designed for
-        defensive security operations, threat analysis, and simulation-based
-        training only. All features comply with ethical AI guidelines.
+        <strong>DEFENSIVE SECURITY TOOL:</strong> This dashboard is designed for defensive security
+        operations, threat analysis, and simulation-based training only. All features comply with
+        ethical AI guidelines.
       </Alert>
 
       {/* Status Overview Cards */}
@@ -252,26 +233,22 @@ const PsyOpsDashboard: React.FC = () => {
         <Grid item xs={12} md={4}>
           <Card
             sx={{
-              height: '100%',
-              background: 'linear-gradient(135deg, #4caf50 0%, #81c784 100%)',
-              color: 'white',
+              height: "100%",
+              background: "linear-gradient(135deg, #4caf50 0%, #81c784 100%)",
+              color: "white",
             }}
           >
             <CardContent>
-              <Box
-                sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
-              >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
                 <Security />
                 <Typography variant="h6">Counter-PsyOps Engine</Typography>
               </Box>
-              <Typography variant="h4">
-                {counterPsyOpsEngine?.detectedThreats || 0}
-              </Typography>
+              <Typography variant="h4">{counterPsyOpsEngine?.detectedThreats || 0}</Typography>
               <Typography variant="body2">Threats Detected</Typography>
               <LinearProgress
                 variant="determinate"
                 value={75}
-                sx={{ mt: 1, backgroundColor: 'rgba(255,255,255,0.3)' }}
+                sx={{ mt: 1, backgroundColor: "rgba(255,255,255,0.3)" }}
               />
             </CardContent>
           </Card>
@@ -280,15 +257,13 @@ const PsyOpsDashboard: React.FC = () => {
         <Grid item xs={12} md={4}>
           <Card
             sx={{
-              height: '100%',
-              background: 'linear-gradient(135deg, #ff9800 0%, #ffb74d 100%)',
-              color: 'white',
+              height: "100%",
+              background: "linear-gradient(135deg, #ff9800 0%, #ffb74d 100%)",
+              color: "white",
             }}
           >
             <CardContent>
-              <Box
-                sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
-              >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
                 <Report />
                 <Typography variant="h6">Disinformation Detection</Typography>
               </Box>
@@ -299,7 +274,7 @@ const PsyOpsDashboard: React.FC = () => {
               <LinearProgress
                 variant="determinate"
                 value={85}
-                sx={{ mt: 1, backgroundColor: 'rgba(255,255,255,0.3)' }}
+                sx={{ mt: 1, backgroundColor: "rgba(255,255,255,0.3)" }}
               />
             </CardContent>
           </Card>
@@ -308,26 +283,22 @@ const PsyOpsDashboard: React.FC = () => {
         <Grid item xs={12} md={4}>
           <Card
             sx={{
-              height: '100%',
-              background: 'linear-gradient(135deg, #9c27b0 0%, #ba68c8 100%)',
-              color: 'white',
+              height: "100%",
+              background: "linear-gradient(135deg, #9c27b0 0%, #ba68c8 100%)",
+              color: "white",
             }}
           >
             <CardContent>
-              <Box
-                sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
-              >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
                 <Psychology />
                 <Typography variant="h6">Adversary Simulation</Typography>
               </Box>
-              <Typography variant="h4">
-                {adversarySimulation?.generatedTTPs || 0}
-              </Typography>
+              <Typography variant="h4">{adversarySimulation?.generatedTTPs || 0}</Typography>
               <Typography variant="body2">TTPs Generated</Typography>
               <LinearProgress
                 variant="determinate"
                 value={60}
-                sx={{ mt: 1, backgroundColor: 'rgba(255,255,255,0.3)' }}
+                sx={{ mt: 1, backgroundColor: "rgba(255,255,255,0.3)" }}
               />
             </CardContent>
           </Card>
@@ -336,12 +307,8 @@ const PsyOpsDashboard: React.FC = () => {
 
       {/* Main Dashboard Tabs */}
       <Card>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs
-            value={tabValue}
-            onChange={handleTabChange}
-            aria-label="psyops dashboard tabs"
-          >
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <Tabs value={tabValue} onChange={handleTabChange} aria-label="psyops dashboard tabs">
             <Tab label="Counter-PsyOps Engine" icon={<Security />} />
             <Tab label="Disinformation Detection" icon={<Report />} />
             <Tab label="Adversary Simulation" icon={<Psychology />} />
@@ -365,22 +332,16 @@ const PsyOpsDashboard: React.FC = () => {
                         onChange={(e) => handleEngineToggle(e.target.checked)}
                       />
                     }
-                    label={`Counter-PsyOps Engine ${engineEnabled ? 'Active' : 'Inactive'}`}
+                    label={`Counter-PsyOps Engine ${engineEnabled ? "Active" : "Inactive"}`}
                   />
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mt: 1 }}
-                  >
-                    Status: {counterPsyOpsEngine?.status || 'Unknown'}
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    Status: {counterPsyOpsEngine?.status || "Unknown"}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Last Update:{' '}
+                    Last Update:{" "}
                     {counterPsyOpsEngine?.lastUpdate
-                      ? new Date(
-                          counterPsyOpsEngine.lastUpdate,
-                        ).toLocaleString()
-                      : 'Never'}
+                      ? new Date(counterPsyOpsEngine.lastUpdate).toLocaleString()
+                      : "Never"}
                   </Typography>
                 </CardContent>
               </Card>
@@ -426,8 +387,8 @@ const PsyOpsDashboard: React.FC = () => {
                     Recent Threat Analysis
                   </Typography>
                   <Alert severity="info" sx={{ mb: 2 }}>
-                    All threat data shown is simulated for training purposes and
-                    does not represent real threats.
+                    All threat data shown is simulated for training purposes and does not represent
+                    real threats.
                   </Alert>
                   <List>
                     <ListItem>
@@ -442,11 +403,7 @@ const PsyOpsDashboard: React.FC = () => {
                         primary="Narrative Amplification Campaign"
                         secondary="Detected synchronized messaging across multiple platforms"
                       />
-                      <Chip
-                        label="Medium Priority"
-                        color="warning"
-                        size="small"
-                      />
+                      <Chip label="Medium Priority" color="warning" size="small" />
                     </ListItem>
                     <ListItem>
                       <ListItemText
@@ -474,24 +431,18 @@ const PsyOpsDashboard: React.FC = () => {
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="body2">Content Processed</Typography>
                     <Typography variant="h4" color="primary">
-                      {disinformationDetection?.processedContent?.toLocaleString() ||
-                        '0'}
+                      {disinformationDetection?.processedContent?.toLocaleString() || "0"}
                     </Typography>
                   </Box>
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="body2">Confidence Score</Typography>
                     <LinearProgress
                       variant="determinate"
-                      value={
-                        (disinformationDetection?.confidenceScore || 0) * 100
-                      }
+                      value={(disinformationDetection?.confidenceScore || 0) * 100}
                       sx={{ height: 10, borderRadius: 5, mt: 1 }}
                     />
                     <Typography variant="caption">
-                      {(
-                        (disinformationDetection?.confidenceScore || 0) * 100
-                      ).toFixed(1)}
-                      %
+                      {((disinformationDetection?.confidenceScore || 0) * 100).toFixed(1)}%
                     </Typography>
                   </Box>
                 </CardContent>
@@ -533,61 +484,39 @@ const PsyOpsDashboard: React.FC = () => {
                     Detected Campaigns
                   </Typography>
                   <Alert severity="warning" sx={{ mb: 2 }}>
-                    Campaign data is anonymized and used for defensive analysis
-                    only.
+                    Campaign data is anonymized and used for defensive analysis only.
                   </Alert>
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={4}>
                       <Card variant="outlined">
                         <CardContent>
-                          <Typography variant="subtitle1">
-                            Campaign Alpha
-                          </Typography>
+                          <Typography variant="subtitle1">Campaign Alpha</Typography>
                           <Typography variant="body2" color="text.secondary">
                             Cross-platform narrative coordination
                           </Typography>
-                          <Chip
-                            label="Ongoing"
-                            color="error"
-                            size="small"
-                            sx={{ mt: 1 }}
-                          />
+                          <Chip label="Ongoing" color="error" size="small" sx={{ mt: 1 }} />
                         </CardContent>
                       </Card>
                     </Grid>
                     <Grid item xs={12} md={4}>
                       <Card variant="outlined">
                         <CardContent>
-                          <Typography variant="subtitle1">
-                            Campaign Beta
-                          </Typography>
+                          <Typography variant="subtitle1">Campaign Beta</Typography>
                           <Typography variant="body2" color="text.secondary">
                             Sentiment manipulation targeting
                           </Typography>
-                          <Chip
-                            label="Monitored"
-                            color="warning"
-                            size="small"
-                            sx={{ mt: 1 }}
-                          />
+                          <Chip label="Monitored" color="warning" size="small" sx={{ mt: 1 }} />
                         </CardContent>
                       </Card>
                     </Grid>
                     <Grid item xs={12} md={4}>
                       <Card variant="outlined">
                         <CardContent>
-                          <Typography variant="subtitle1">
-                            Campaign Gamma
-                          </Typography>
+                          <Typography variant="subtitle1">Campaign Gamma</Typography>
                           <Typography variant="body2" color="text.secondary">
                             Bot network amplification
                           </Typography>
-                          <Chip
-                            label="Contained"
-                            color="success"
-                            size="small"
-                            sx={{ mt: 1 }}
-                          />
+                          <Chip label="Contained" color="success" size="small" sx={{ mt: 1 }} />
                         </CardContent>
                       </Card>
                     </Grid>
@@ -616,11 +545,10 @@ const PsyOpsDashboard: React.FC = () => {
                     Generate New Simulation
                   </Button>
                   <Typography variant="body2" color="text.secondary">
-                    Status: {adversarySimulation?.status || 'Idle'}
+                    Status: {adversarySimulation?.status || "Idle"}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Active Simulations:{' '}
-                    {adversarySimulation?.activeSimulations || 0}
+                    Active Simulations: {adversarySimulation?.activeSimulations || 0}
                   </Typography>
                 </CardContent>
               </Card>
@@ -657,8 +585,7 @@ const PsyOpsDashboard: React.FC = () => {
                     Recent Simulations
                   </Typography>
                   <Alert severity="info" sx={{ mb: 2 }}>
-                    All simulations are hypothetical and for training/research
-                    purposes only.
+                    All simulations are hypothetical and for training/research purposes only.
                   </Alert>
                   <List>
                     <ListItem>
@@ -692,18 +619,18 @@ const PsyOpsDashboard: React.FC = () => {
                     Live Monitoring Dashboard
                   </Typography>
                   <Alert severity="info" sx={{ mb: 2 }}>
-                    Real-time monitoring provides continuous threat assessment
-                    and response capabilities.
+                    Real-time monitoring provides continuous threat assessment and response
+                    capabilities.
                   </Alert>
 
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={3}>
                       <Box
                         sx={{
-                          textAlign: 'center',
+                          textAlign: "center",
                           p: 2,
-                          border: '1px solid',
-                          borderColor: 'divider',
+                          border: "1px solid",
+                          borderColor: "divider",
                           borderRadius: 1,
                         }}
                       >
@@ -717,10 +644,10 @@ const PsyOpsDashboard: React.FC = () => {
                     <Grid item xs={12} md={3}>
                       <Box
                         sx={{
-                          textAlign: 'center',
+                          textAlign: "center",
                           p: 2,
-                          border: '1px solid',
-                          borderColor: 'divider',
+                          border: "1px solid",
+                          borderColor: "divider",
                           borderRadius: 1,
                         }}
                       >
@@ -734,10 +661,10 @@ const PsyOpsDashboard: React.FC = () => {
                     <Grid item xs={12} md={3}>
                       <Box
                         sx={{
-                          textAlign: 'center',
+                          textAlign: "center",
                           p: 2,
-                          border: '1px solid',
-                          borderColor: 'divider',
+                          border: "1px solid",
+                          borderColor: "divider",
                           borderRadius: 1,
                         }}
                       >
@@ -751,10 +678,10 @@ const PsyOpsDashboard: React.FC = () => {
                     <Grid item xs={12} md={3}>
                       <Box
                         sx={{
-                          textAlign: 'center',
+                          textAlign: "center",
                           p: 2,
-                          border: '1px solid',
-                          borderColor: 'divider',
+                          border: "1px solid",
+                          borderColor: "divider",
                           borderRadius: 1,
                         }}
                       >
@@ -783,8 +710,8 @@ const PsyOpsDashboard: React.FC = () => {
         <DialogTitle>Generate Adversary Simulation</DialogTitle>
         <DialogContent>
           <Alert severity="warning" sx={{ mb: 2 }}>
-            This will generate a hypothetical adversary simulation for defensive
-            training purposes only.
+            This will generate a hypothetical adversary simulation for defensive training purposes
+            only.
           </Alert>
           <TextField
             select

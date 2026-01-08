@@ -1,4 +1,9 @@
-import { EvidenceEvent, RegionId, ResidencySimulationOutcome, ScreeningQualityResult } from './types.js';
+import {
+  EvidenceEvent,
+  RegionId,
+  ResidencySimulationOutcome,
+  ScreeningQualityResult,
+} from "./types.js";
 
 export class EvidenceExporter {
   buildEvidencePack(events: EvidenceEvent[], regionId: RegionId) {
@@ -24,12 +29,16 @@ export class EvidenceExporter {
 }
 
 export class RegionalDigitalTwin {
-  simulate(scenario: string, residencyStrict: boolean, availabilityWeight: number): ResidencySimulationOutcome {
+  simulate(
+    scenario: string,
+    residencyStrict: boolean,
+    availabilityWeight: number
+  ): ResidencySimulationOutcome {
     const residencyRiskScore = residencyStrict ? 0.05 : 0.35;
     const availabilityScore = Math.min(1, 0.6 + availabilityWeight * 0.4);
     const recommendation = residencyStrict
-      ? 'Maintain hard residency; use in-region failover only'
-      : 'Permit controlled cross-region failover with contractual guardrails';
+      ? "Maintain hard residency; use in-region failover only"
+      : "Permit controlled cross-region failover with contractual guardrails";
 
     return {
       scenario,

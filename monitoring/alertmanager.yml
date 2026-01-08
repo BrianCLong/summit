@@ -1,21 +1,21 @@
 # Alertmanager configuration for IntelGraph
 global:
-  smtp_smarthost: 'localhost:587'
-  smtp_from: 'alerts@intelgraph.com'
-  smtp_auth_username: ''
-  smtp_auth_password: ''
+  smtp_smarthost: "localhost:587"
+  smtp_from: "alerts@intelgraph.com"
+  smtp_auth_username: ""
+  smtp_auth_password: ""
 
 # Notification templates
 templates:
-  - '/etc/alertmanager/templates/*.tmpl'
+  - "/etc/alertmanager/templates/*.tmpl"
 
 # Routing tree for alerts
 route:
-  group_by: ['alertname', 'cluster', 'service']
+  group_by: ["alertname", "cluster", "service"]
   group_wait: 10s
   group_interval: 10s
   repeat_interval: 1h
-  receiver: 'web.hook'
+  receiver: "web.hook"
   routes:
     # SLO alerts
     - match:
@@ -47,18 +47,18 @@ route:
 # Alert receivers
 receivers:
   # Default webhook receiver
-  - name: 'web.hook'
+  - name: "web.hook"
     webhook_configs:
-      - url: 'http://server:4000/api/monitoring/alerts'
+      - url: "http://server:4000/api/monitoring/alerts"
         send_resolved: true
         http_config:
-          bearer_token: '${WEBHOOK_TOKEN}'
+          bearer_token: "${WEBHOOK_TOKEN}"
 
   # Critical alerts - immediate notification
-  - name: 'critical-alerts'
+  - name: "critical-alerts"
     email_configs:
-      - to: 'oncall@intelgraph.com'
-        subject: '🚨 CRITICAL Alert: {{ .GroupLabels.alertname }}'
+      - to: "oncall@intelgraph.com"
+        subject: "🚨 CRITICAL Alert: {{ .GroupLabels.alertname }}"
         body: |
           Alert: {{ .GroupLabels.alertname }}
           Severity: {{ .CommonLabels.severity }}
@@ -74,9 +74,9 @@ receivers:
 
     # Slack integration for critical alerts
     slack_configs:
-      - api_url: '${SLACK_WEBHOOK_URL}'
-        channel: '#alerts-critical'
-        title: '🚨 Critical Alert: {{ .GroupLabels.alertname }}'
+      - api_url: "${SLACK_WEBHOOK_URL}"
+        channel: "#alerts-critical"
+        title: "🚨 Critical Alert: {{ .GroupLabels.alertname }}"
         text: |
           {{ range .Alerts }}
           *{{ .Annotations.summary }}*
@@ -87,10 +87,10 @@ receivers:
         send_resolved: true
 
   # Warning alerts - batched notification
-  - name: 'warning-alerts'
+  - name: "warning-alerts"
     email_configs:
-      - to: 'monitoring@intelgraph.com'
-        subject: '⚠️ Warning Alerts ({{ .Alerts | len }})'
+      - to: "monitoring@intelgraph.com"
+        subject: "⚠️ Warning Alerts ({{ .Alerts | len }})"
         body: |
           {{ .Alerts | len }} warning alerts triggered:
 
@@ -101,9 +101,9 @@ receivers:
           {{ end }}
 
     slack_configs:
-      - api_url: '${SLACK_WEBHOOK_URL}'
-        channel: '#alerts-warning'
-        title: '⚠️ Warning Alerts ({{ .Alerts | len }})'
+      - api_url: "${SLACK_WEBHOOK_URL}"
+        channel: "#alerts-warning"
+        title: "⚠️ Warning Alerts ({{ .Alerts | len }})"
         text: |
           {{ range .Alerts }}
           *{{ .Annotations.summary }}*
@@ -111,21 +111,21 @@ receivers:
           {{ end }}
 
   # Info alerts - low priority
-  - name: 'info-alerts'
+  - name: "info-alerts"
     slack_configs:
-      - api_url: '${SLACK_WEBHOOK_URL}'
-        channel: '#monitoring'
-        title: 'ℹ️ Info Alerts ({{ .Alerts | len }})'
+      - api_url: "${SLACK_WEBHOOK_URL}"
+        channel: "#monitoring"
+        title: "ℹ️ Info Alerts ({{ .Alerts | len }})"
         text: |
           {{ range .Alerts }}
           {{ .Annotations.summary }}
           {{ end }}
   # SLO alerts
-  - name: 'slo-alerts'
+  - name: "slo-alerts"
     slack_configs:
-      - api_url: '${SLACK_WEBHOOK_URL}'
-        channel: '#slo-alerts'
-        title: '🔥 SLO Breach: {{ .GroupLabels.alertname }}'
+      - api_url: "${SLACK_WEBHOOK_URL}"
+        channel: "#slo-alerts"
+        title: "🔥 SLO Breach: {{ .GroupLabels.alertname }}"
         text: |
           {{ range .Alerts }}
           *{{ .Annotations.summary }}*
@@ -141,11 +141,11 @@ inhibit_rules:
       alertname: ServiceDown
     target_match:
       alertname: HighErrorRate
-    equal: ['instance']
+    equal: ["instance"]
 
   # If there's a critical alert, suppress related warnings
   - source_match:
       severity: critical
     target_match:
       severity: warning
-    equal: ['service', 'instance']
+    equal: ["service", "instance"]

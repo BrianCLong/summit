@@ -2,9 +2,9 @@ name: Deployment Consistency Check
 
 on:
   push:
-    branches: [ main, develop, 'feature/**' ]
+    branches: [main, develop, "feature/**"]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   workflow_dispatch:
 
 jobs:
@@ -16,12 +16,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: 1. Bootstrap
         run: ./scripts/bootstrap.sh

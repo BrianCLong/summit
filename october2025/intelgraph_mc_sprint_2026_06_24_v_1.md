@@ -188,7 +188,7 @@ redact[field] {
 ```yaml
 anon:
   k: 5
-  quasi_identifiers: ['city', 'age_band']
+  quasi_identifiers: ["city", "age_band"]
 dp:
   epsilon: 2
   delta: 1e-6
@@ -221,10 +221,8 @@ input RedactionRuleInput {
 }
 
 type Mutation {
-  setRedactionRule(rule: RedactionRuleInput!): Boolean
-    @auth(abac: "admin.write")
-  approveCostShape(opId: String!, capUSD: Float!): Boolean
-    @auth(abac: "admin.write")
+  setRedactionRule(rule: RedactionRuleInput!): Boolean @auth(abac: "admin.write")
+  approveCostShape(opId: String!, capUSD: Float!): Boolean @auth(abac: "admin.write")
   requestRTBF(subjectId: ID!, scope: String!): ID! @auth(abac: "privacy.write")
 }
 

@@ -7,7 +7,7 @@
  * @module @summit/sdk
  */
 
-import type { SummitClient, PaginatedResponse } from './SummitClient.js';
+import type { SummitClient, PaginatedResponse } from "./SummitClient.js";
 
 // ============================================================================
 // Types and Interfaces
@@ -17,25 +17,30 @@ import type { SummitClient, PaginatedResponse } from './SummitClient.js';
  * Compliance framework
  */
 export type ComplianceFramework =
-  | 'SOC2'
-  | 'ISO27001'
-  | 'GDPR'
-  | 'HIPAA'
-  | 'PCI-DSS'
-  | 'NIST'
-  | 'FedRAMP'
-  | 'NIST-CSF'
-  | 'CMMC';
+  | "SOC2"
+  | "ISO27001"
+  | "GDPR"
+  | "HIPAA"
+  | "PCI-DSS"
+  | "NIST"
+  | "FedRAMP"
+  | "NIST-CSF"
+  | "CMMC";
 
 /**
  * Control status
  */
-export type ControlStatus = 'not_started' | 'in_progress' | 'implemented' | 'not_applicable' | 'failed';
+export type ControlStatus =
+  | "not_started"
+  | "in_progress"
+  | "implemented"
+  | "not_applicable"
+  | "failed";
 
 /**
  * Assessment status
  */
-export type AssessmentStatus = 'pending' | 'in_progress' | 'completed' | 'failed';
+export type AssessmentStatus = "pending" | "in_progress" | "completed" | "failed";
 
 /**
  * Compliance control
@@ -62,7 +67,7 @@ export interface ComplianceControl {
 export interface Evidence {
   id: string;
   controlId: string;
-  type: 'document' | 'screenshot' | 'log' | 'configuration' | 'attestation';
+  type: "document" | "screenshot" | "log" | "configuration" | "attestation";
   title: string;
   description: string;
   fileUrl?: string;
@@ -70,7 +75,7 @@ export interface Evidence {
   collectedAt: string;
   collectedBy: string;
   expiresAt?: string;
-  verificationStatus: 'pending' | 'verified' | 'rejected';
+  verificationStatus: "pending" | "verified" | "rejected";
 }
 
 /**
@@ -99,11 +104,11 @@ export interface Assessment {
 export interface AssessmentFinding {
   id: string;
   controlId: string;
-  severity: 'critical' | 'high' | 'medium' | 'low' | 'informational';
+  severity: "critical" | "high" | "medium" | "low" | "informational";
   title: string;
   description: string;
   recommendation: string;
-  status: 'open' | 'in_remediation' | 'resolved' | 'accepted';
+  status: "open" | "in_remediation" | "resolved" | "accepted";
   dueDate?: string;
   resolvedAt?: string;
 }
@@ -114,7 +119,7 @@ export interface AssessmentFinding {
 export interface ComplianceReport {
   id: string;
   framework: ComplianceFramework;
-  reportType: 'summary' | 'detailed' | 'executive' | 'audit';
+  reportType: "summary" | "detailed" | "executive" | "audit";
   generatedAt: string;
   generatedBy: string;
   period: {
@@ -124,7 +129,7 @@ export interface ComplianceReport {
   overallScore: number;
   sections: ReportSection[];
   downloadUrl: string;
-  format: 'pdf' | 'xlsx' | 'json';
+  format: "pdf" | "xlsx" | "json";
 }
 
 /**
@@ -156,8 +161,8 @@ export interface GapAnalysis {
   prioritizedActions: Array<{
     controlId: string;
     action: string;
-    effort: 'low' | 'medium' | 'high';
-    impact: 'low' | 'medium' | 'high';
+    effort: "low" | "medium" | "high";
+    impact: "low" | "medium" | "high";
     priority: number;
   }>;
 }
@@ -172,7 +177,7 @@ export interface RemediationPlan {
   title: string;
   description: string;
   steps: RemediationStep[];
-  status: 'draft' | 'approved' | 'in_progress' | 'completed';
+  status: "draft" | "approved" | "in_progress" | "completed";
   assignedTo: string;
   dueDate: string;
   createdAt: string;
@@ -188,7 +193,7 @@ export interface RemediationStep {
   description: string;
   assignedTo?: string;
   dueDate?: string;
-  status: 'pending' | 'in_progress' | 'completed';
+  status: "pending" | "in_progress" | "completed";
   completedAt?: string;
 }
 
@@ -210,7 +215,7 @@ export interface ListControlsOptions {
  */
 export interface CreateEvidenceRequest {
   controlId: string;
-  type: Evidence['type'];
+  type: Evidence["type"];
   title: string;
   description?: string;
   fileUrl?: string;
@@ -233,12 +238,12 @@ export interface StartAssessmentRequest {
  */
 export interface GenerateReportRequest {
   framework: ComplianceFramework;
-  reportType: ComplianceReport['reportType'];
+  reportType: ComplianceReport["reportType"];
   period: {
     start: string;
     end: string;
   };
-  format: ComplianceReport['format'];
+  format: ComplianceReport["format"];
   includeEvidence?: boolean;
   includeRemediations?: boolean;
 }
@@ -249,7 +254,7 @@ export interface GenerateReportRequest {
 
 export class ComplianceClient {
   private client: SummitClient;
-  private basePath = '/api/v1/compliance';
+  private basePath = "/api/v1/compliance";
 
   constructor(client: SummitClient) {
     this.client = client;
@@ -262,8 +267,13 @@ export class ComplianceClient {
   /**
    * List compliance controls
    */
-  public async listControls(options: ListControlsOptions = {}): Promise<PaginatedResponse<ComplianceControl>> {
-    const response = await this.client.get<PaginatedResponse<ComplianceControl>>(`${this.basePath}/controls`, options);
+  public async listControls(
+    options: ListControlsOptions = {}
+  ): Promise<PaginatedResponse<ComplianceControl>> {
+    const response = await this.client.get<PaginatedResponse<ComplianceControl>>(
+      `${this.basePath}/controls`,
+      options
+    );
     return response.data;
   }
 
@@ -293,19 +303,30 @@ export class ComplianceClient {
   /**
    * Assign control to user
    */
-  public async assignControl(id: string, userId: string, dueDate?: string): Promise<ComplianceControl> {
-    const response = await this.client.post<ComplianceControl>(`${this.basePath}/controls/${id}/assign`, {
-      userId,
-      dueDate,
-    });
+  public async assignControl(
+    id: string,
+    userId: string,
+    dueDate?: string
+  ): Promise<ComplianceControl> {
+    const response = await this.client.post<ComplianceControl>(
+      `${this.basePath}/controls/${id}/assign`,
+      {
+        userId,
+        dueDate,
+      }
+    );
     return response.data;
   }
 
   /**
    * Get controls by framework
    */
-  public async getControlsByFramework(framework: ComplianceFramework): Promise<ComplianceControl[]> {
-    const response = await this.client.get<ComplianceControl[]>(`${this.basePath}/frameworks/${framework}/controls`);
+  public async getControlsByFramework(
+    framework: ComplianceFramework
+  ): Promise<ComplianceControl[]> {
+    const response = await this.client.get<ComplianceControl[]>(
+      `${this.basePath}/frameworks/${framework}/controls`
+    );
     return response.data;
   }
 
@@ -317,7 +338,9 @@ export class ComplianceClient {
    * List evidence for a control
    */
   public async listEvidence(controlId: string): Promise<Evidence[]> {
-    const response = await this.client.get<Evidence[]>(`${this.basePath}/controls/${controlId}/evidence`);
+    const response = await this.client.get<Evidence[]>(
+      `${this.basePath}/controls/${controlId}/evidence`
+    );
     return response.data;
   }
 
@@ -349,7 +372,7 @@ export class ComplianceClient {
    */
   public async verifyEvidence(
     id: string,
-    status: 'verified' | 'rejected',
+    status: "verified" | "rejected",
     notes?: string
   ): Promise<Evidence> {
     const response = await this.client.post<Evidence>(`${this.basePath}/evidence/${id}/verify`, {
@@ -403,7 +426,9 @@ export class ComplianceClient {
    * Complete an assessment
    */
   public async completeAssessment(id: string): Promise<Assessment> {
-    const response = await this.client.post<Assessment>(`${this.basePath}/assessments/${id}/complete`);
+    const response = await this.client.post<Assessment>(
+      `${this.basePath}/assessments/${id}/complete`
+    );
     return response.data;
   }
 
@@ -412,7 +437,7 @@ export class ComplianceClient {
    */
   public async addFinding(
     assessmentId: string,
-    finding: Omit<AssessmentFinding, 'id' | 'status'>
+    finding: Omit<AssessmentFinding, "id" | "status">
   ): Promise<AssessmentFinding> {
     const response = await this.client.post<AssessmentFinding>(
       `${this.basePath}/assessments/${assessmentId}/findings`,
@@ -427,7 +452,7 @@ export class ComplianceClient {
   public async updateFindingStatus(
     assessmentId: string,
     findingId: string,
-    status: AssessmentFinding['status']
+    status: AssessmentFinding["status"]
   ): Promise<AssessmentFinding> {
     const response = await this.client.patch<AssessmentFinding>(
       `${this.basePath}/assessments/${assessmentId}/findings/${findingId}`,
@@ -444,7 +469,9 @@ export class ComplianceClient {
    * Perform gap analysis
    */
   public async performGapAnalysis(framework: ComplianceFramework): Promise<GapAnalysis> {
-    const response = await this.client.post<GapAnalysis>(`${this.basePath}/gap-analysis`, { framework });
+    const response = await this.client.post<GapAnalysis>(`${this.basePath}/gap-analysis`, {
+      framework,
+    });
     return response.data;
   }
 
@@ -453,7 +480,9 @@ export class ComplianceClient {
    */
   public async getGapAnalysis(framework: ComplianceFramework): Promise<GapAnalysis | null> {
     try {
-      const response = await this.client.get<GapAnalysis>(`${this.basePath}/frameworks/${framework}/gap-analysis`);
+      const response = await this.client.get<GapAnalysis>(
+        `${this.basePath}/frameworks/${framework}/gap-analysis`
+      );
       return response.data;
     } catch (error) {
       if ((error as Error & { status?: number }).status === 404) {
@@ -472,7 +501,7 @@ export class ComplianceClient {
    */
   public async createRemediationPlan(
     findingId: string,
-    plan: Omit<RemediationPlan, 'id' | 'findingId' | 'createdAt' | 'completedAt' | 'status'>
+    plan: Omit<RemediationPlan, "id" | "findingId" | "createdAt" | "completedAt" | "status">
   ): Promise<RemediationPlan> {
     const response = await this.client.post<RemediationPlan>(`${this.basePath}/remediations`, {
       ...plan,
@@ -496,7 +525,10 @@ export class ComplianceClient {
     id: string,
     updates: Partial<RemediationPlan>
   ): Promise<RemediationPlan> {
-    const response = await this.client.patch<RemediationPlan>(`${this.basePath}/remediations/${id}`, updates);
+    const response = await this.client.patch<RemediationPlan>(
+      `${this.basePath}/remediations/${id}`,
+      updates
+    );
     return response.data;
   }
 
@@ -514,7 +546,9 @@ export class ComplianceClient {
    * List remediation plans for a finding
    */
   public async listRemediationPlans(findingId: string): Promise<RemediationPlan[]> {
-    const response = await this.client.get<RemediationPlan[]>(`${this.basePath}/findings/${findingId}/remediations`);
+    const response = await this.client.get<RemediationPlan[]>(
+      `${this.basePath}/findings/${findingId}/remediations`
+    );
     return response.data;
   }
 
@@ -534,7 +568,9 @@ export class ComplianceClient {
    * List reports
    */
   public async listReports(framework?: ComplianceFramework): Promise<ComplianceReport[]> {
-    const response = await this.client.get<ComplianceReport[]>(`${this.basePath}/reports`, { framework });
+    const response = await this.client.get<ComplianceReport[]>(`${this.basePath}/reports`, {
+      framework,
+    });
     return response.data;
   }
 
@@ -568,7 +604,7 @@ export class ComplianceClient {
       score: number;
       totalControls: number;
       implementedControls: number;
-      trend: 'improving' | 'stable' | 'declining';
+      trend: "improving" | "stable" | "declining";
     }>;
     overallScore: number;
     openFindings: number;
@@ -583,14 +619,18 @@ export class ComplianceClient {
    */
   public async getTrends(
     framework: ComplianceFramework,
-    period: 'week' | 'month' | 'quarter' | 'year'
-  ): Promise<Array<{
-    date: string;
-    score: number;
-    implementedControls: number;
-    openFindings: number;
-  }>> {
-    const response = await this.client.get(`${this.basePath}/frameworks/${framework}/trends`, { period });
+    period: "week" | "month" | "quarter" | "year"
+  ): Promise<
+    Array<{
+      date: string;
+      score: number;
+      implementedControls: number;
+      openFindings: number;
+    }>
+  > {
+    const response = await this.client.get(`${this.basePath}/frameworks/${framework}/trends`, {
+      period,
+    });
     return response.data;
   }
 

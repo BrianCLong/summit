@@ -2,7 +2,7 @@
  * Text generation
  */
 
-import type { GenerationResult } from '../types';
+import type { GenerationResult } from "../types";
 // Mock interfaces to decouple from server
 interface UsageMeteringService {
   record(event: any): Promise<void>;
@@ -32,7 +32,7 @@ export class TextGenerator {
   ): Promise<GenerationResult> {
     await this.quotaService.assert({
       tenantId,
-      dimension: 'llm.tokens',
+      dimension: "llm.tokens",
       quantity: maxLength,
     });
 
@@ -41,18 +41,18 @@ export class TextGenerator {
     const result = {
       text: `${prompt} [generated text]`,
       tokens: maxLength,
-      finishReason: 'completed' as const,
+      finishReason: "completed" as const,
     };
 
     await this.usageMeteringService.record({
-      id: '',
+      id: "",
       tenantId,
-      dimension: 'llm.tokens',
+      dimension: "llm.tokens",
       quantity: result.tokens,
-      unit: 'tokens',
-      source: 'TextGenerator',
+      unit: "tokens",
+      source: "TextGenerator",
       metadata: {
-        model: 'placeholder',
+        model: "placeholder",
       },
       occurredAt: new Date().toISOString(),
       recordedAt: new Date().toISOString(),

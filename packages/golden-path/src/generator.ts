@@ -1,6 +1,6 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { promises as fs } from 'node:fs';
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { promises as fs } from "node:fs";
 
 async function copyTemplate(src: string, dest: string, replacements: Record<string, string>) {
   const entries = await fs.readdir(src, { withFileTypes: true });
@@ -11,19 +11,19 @@ async function copyTemplate(src: string, dest: string, replacements: Record<stri
     if (entry.isDirectory()) {
       await copyTemplate(srcPath, destPath, replacements);
     } else {
-      const content = await fs.readFile(srcPath, 'utf-8');
+      const content = await fs.readFile(srcPath, "utf-8");
       const replaced = Object.entries(replacements).reduce(
         (acc, [key, value]) => acc.replaceAll(key, value),
-        content,
+        content
       );
-      await fs.writeFile(destPath, replaced, 'utf-8');
+      await fs.writeFile(destPath, replaced, "utf-8");
     }
   }
 }
 
 export async function scaffoldService(targetDir: string, serviceName: string) {
   const here = path.dirname(fileURLToPath(import.meta.url));
-  const templateDir = path.join(here, '../template');
+  const templateDir = path.join(here, "../template");
   await copyTemplate(templateDir, targetDir, {
     __SERVICE_NAME__: serviceName,
     __service_name__: serviceName,

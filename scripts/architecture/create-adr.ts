@@ -13,31 +13,31 @@
  *   pnpm adr:create --title "My Decision" --area "Data"
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
+import * as fs from "fs";
+import * as path from "path";
+import { fileURLToPath } from "url";
 
 // ESM compatibility
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Configuration
-const ADR_DIR = path.resolve(__dirname, '../../docs/architecture/adr');
-const INDEX_FILE = path.resolve(__dirname, '../../docs/architecture/ADR_INDEX.md');
-const TEMPLATE_FILE = path.join(ADR_DIR, 'adr-template.md');
+const ADR_DIR = path.resolve(__dirname, "../../docs/architecture/adr");
+const INDEX_FILE = path.resolve(__dirname, "../../docs/architecture/ADR_INDEX.md");
+const TEMPLATE_FILE = path.join(ADR_DIR, "adr-template.md");
 
 const VALID_AREAS = [
-  'Data',
-  'AI/ML',
-  'Infrastructure',
-  'Auth/Security',
-  'API',
-  'UX',
-  'Observability',
-  'Compliance',
+  "Data",
+  "AI/ML",
+  "Infrastructure",
+  "Auth/Security",
+  "API",
+  "UX",
+  "Observability",
+  "Compliance",
 ];
 
-const VALID_STATUSES = ['Proposed', 'Accepted', 'Deprecated', 'Superseded'];
+const VALID_STATUSES = ["Proposed", "Accepted", "Deprecated", "Superseded"];
 
 interface ADROptions {
   title: string;
@@ -59,32 +59,32 @@ function parseArgs(): ADROptions {
     const value = args[i + 1];
 
     switch (arg) {
-      case '--title':
-      case '-t':
+      case "--title":
+      case "-t":
         options.title = value;
         i++;
         break;
-      case '--area':
-      case '-a':
+      case "--area":
+      case "-a":
         options.area = value;
         i++;
         break;
-      case '--status':
-      case '-s':
+      case "--status":
+      case "-s":
         options.status = value;
         i++;
         break;
-      case '--owner':
-      case '-o':
+      case "--owner":
+      case "-o":
         options.owner = value;
         i++;
         break;
-      case '--tags':
-        options.tags = value?.split(',').map((t) => t.trim());
+      case "--tags":
+        options.tags = value?.split(",").map((t) => t.trim());
         i++;
         break;
-      case '--help':
-      case '-h':
+      case "--help":
+      case "-h":
         printHelp();
         process.exit(0);
     }
@@ -92,28 +92,28 @@ function parseArgs(): ADROptions {
 
   // Validate required fields
   if (!options.title) {
-    console.error('Error: --title is required');
+    console.error("Error: --title is required");
     printHelp();
     process.exit(1);
   }
 
   if (!options.area) {
-    console.error('Error: --area is required');
+    console.error("Error: --area is required");
     printHelp();
     process.exit(1);
   }
 
   if (!VALID_AREAS.includes(options.area)) {
     console.error(`Error: Invalid area "${options.area}"`);
-    console.error(`Valid areas: ${VALID_AREAS.join(', ')}`);
+    console.error(`Valid areas: ${VALID_AREAS.join(", ")}`);
     process.exit(1);
   }
 
   return {
     title: options.title,
     area: options.area,
-    status: options.status || 'Proposed',
-    owner: options.owner || 'TBD',
+    status: options.status || "Proposed",
+    owner: options.owner || "TBD",
     tags: options.tags || [],
   };
 }
@@ -130,8 +130,8 @@ Usage:
 
 Options:
   --title, -t    (required) Title of the ADR
-  --area, -a     (required) Area: ${VALID_AREAS.join(', ')}
-  --status, -s   Status: ${VALID_STATUSES.join(', ')} (default: Proposed)
+  --area, -a     (required) Area: ${VALID_AREAS.join(", ")}
+  --status, -s   Status: ${VALID_STATUSES.join(", ")} (default: Proposed)
   --owner, -o    Owner team/guild (default: TBD)
   --tags         Comma-separated tags
   --help, -h     Show this help
@@ -165,8 +165,8 @@ function getNextADRNumber(): number {
 function titleToSlug(title: string): string {
   return title
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 /**
@@ -174,7 +174,7 @@ function titleToSlug(title: string): string {
  */
 function getCurrentDate(): string {
   const now = new Date();
-  return now.toISOString().split('T')[0];
+  return now.toISOString().split("T")[0];
 }
 
 /**
@@ -184,7 +184,7 @@ function generateADRContent(options: ADROptions, number: number): string {
   let template: string;
 
   try {
-    template = fs.readFileSync(TEMPLATE_FILE, 'utf-8');
+    template = fs.readFileSync(TEMPLATE_FILE, "utf-8");
   } catch {
     // Fallback template if file doesn't exist
     template = `# ADR-NNNN: [Short Title of Decision]
@@ -237,28 +237,28 @@ How do we enforce this decision?
 `;
   }
 
-  const paddedNumber = String(number).padStart(4, '0');
+  const paddedNumber = String(number).padStart(4, "0");
   const date = getCurrentDate();
-  const tags = options.tags?.length ? options.tags.join(', ') : 'tbd';
+  const tags = options.tags?.length ? options.tags.join(", ") : "tbd";
 
   // Replace placeholders
   let content = template
-    .replace('ADR-NNNN:', `ADR-${paddedNumber}:`)
-    .replace('[Short Title of Decision]', options.title)
-    .replace('YYYY-MM-DD', date)
+    .replace("ADR-NNNN:", `ADR-${paddedNumber}:`)
+    .replace("[Short Title of Decision]", options.title)
+    .replace("YYYY-MM-DD", date)
     .replace(
-      'Proposed | Accepted | Deprecated | Superseded by ADR-XXXX',
-      options.status || 'Proposed'
+      "Proposed | Accepted | Deprecated | Superseded by ADR-XXXX",
+      options.status || "Proposed"
     )
     .replace(
-      'Data | AI/ML | Infrastructure | Auth/Security | API | UX | Observability | Compliance',
+      "Data | AI/ML | Infrastructure | Auth/Security | API | UX | Observability | Compliance",
       options.area
     )
-    .replace('[Team/Guild name]', options.owner || 'TBD')
-    .replace('[comma, separated, tags]', tags);
+    .replace("[Team/Guild name]", options.owner || "TBD")
+    .replace("[comma, separated, tags]", tags);
 
   // Update revision history date
-  content = content.replace(/\| YYYY-MM-DD \| Name \|/, `| ${date} | ${options.owner || 'TBD'} |`);
+  content = content.replace(/\| YYYY-MM-DD \| Name \|/, `| ${date} | ${options.owner || "TBD"} |`);
 
   return content;
 }
@@ -268,30 +268,31 @@ How do we enforce this decision?
  */
 function updateIndex(options: ADROptions, number: number, filename: string): void {
   if (!fs.existsSync(INDEX_FILE)) {
-    console.warn('Warning: Index file not found, skipping index update');
+    console.warn("Warning: Index file not found, skipping index update");
     return;
   }
 
-  let indexContent = fs.readFileSync(INDEX_FILE, 'utf-8');
-  const paddedNumber = String(number).padStart(4, '0');
+  let indexContent = fs.readFileSync(INDEX_FILE, "utf-8");
+  const paddedNumber = String(number).padStart(4, "0");
   const date = getCurrentDate();
 
   // Find the table and add new entry
-  const tablePattern = /(\| ---- \| ------------------------------------------------ \| -------- \| -------------- \| ---------- \|)/;
+  const tablePattern =
+    /(\| ---- \| ------------------------------------------------ \| -------- \| -------------- \| ---------- \|)/;
 
   if (!tablePattern.test(indexContent)) {
-    console.warn('Warning: Could not find index table, skipping index update');
+    console.warn("Warning: Could not find index table, skipping index update");
     return;
   }
 
-  const newRow = `| ${paddedNumber} | [${options.title}](adr/${filename}) | ${options.status || 'Proposed'} | ${options.area} | ${date} |`;
+  const newRow = `| ${paddedNumber} | [${options.title}](adr/${filename}) | ${options.status || "Proposed"} | ${options.area} | ${date} |`;
 
   // Find the last table row and add after it
-  const lines = indexContent.split('\n');
+  const lines = indexContent.split("\n");
   let lastTableRowIndex = -1;
 
   for (let i = 0; i < lines.length; i++) {
-    if (lines[i].startsWith('| 0')) {
+    if (lines[i].startsWith("| 0")) {
       lastTableRowIndex = i;
     }
   }
@@ -299,7 +300,7 @@ function updateIndex(options: ADROptions, number: number, filename: string): voi
   if (lastTableRowIndex === -1) {
     // No existing entries, add after header separator
     for (let i = 0; i < lines.length; i++) {
-      if (lines[i].includes('| ---- |')) {
+      if (lines[i].includes("| ---- |")) {
         lastTableRowIndex = i;
         break;
       }
@@ -308,24 +309,24 @@ function updateIndex(options: ADROptions, number: number, filename: string): voi
 
   if (lastTableRowIndex !== -1) {
     lines.splice(lastTableRowIndex + 1, 0, newRow);
-    indexContent = lines.join('\n');
+    indexContent = lines.join("\n");
 
     // Also add to the area section
     const areaSection = `### ${options.area}`;
     const areaIndex = indexContent.indexOf(areaSection);
 
     if (areaIndex !== -1) {
-      const nextSectionIndex = indexContent.indexOf('\n### ', areaIndex + 1);
+      const nextSectionIndex = indexContent.indexOf("\n### ", areaIndex + 1);
       const insertPoint = nextSectionIndex !== -1 ? nextSectionIndex : indexContent.length;
 
       // Find where to insert in the area section
       const areaContent = indexContent.substring(areaIndex, insertPoint);
-      const areaLines = areaContent.split('\n');
+      const areaLines = areaContent.split("\n");
 
       // Find the last list item or add after header
       let insertLineIndex = 1; // After the header
       for (let i = 1; i < areaLines.length; i++) {
-        if (areaLines[i].startsWith('- [ADR-')) {
+        if (areaLines[i].startsWith("- [ADR-")) {
           insertLineIndex = i + 1;
         }
       }
@@ -333,13 +334,13 @@ function updateIndex(options: ADROptions, number: number, filename: string): voi
       const newAreaEntry = `- [ADR-${paddedNumber}: ${options.title}](adr/${filename})`;
 
       // Check if there's a "No ADRs" message and remove it
-      if (areaLines.some((l) => l.includes('No ADRs in this category'))) {
+      if (areaLines.some((l) => l.includes("No ADRs in this category"))) {
         areaLines[insertLineIndex] = newAreaEntry;
       } else {
         areaLines.splice(insertLineIndex, 0, newAreaEntry);
       }
 
-      const newAreaContent = areaLines.join('\n');
+      const newAreaContent = areaLines.join("\n");
       indexContent =
         indexContent.substring(0, areaIndex) + newAreaContent + indexContent.substring(insertPoint);
     }
@@ -362,7 +363,7 @@ function main(): void {
   const options = parseArgs();
   const number = getNextADRNumber();
   const slug = titleToSlug(options.title);
-  const filename = `${String(number).padStart(4, '0')}-${slug}.md`;
+  const filename = `${String(number).padStart(4, "0")}-${slug}.md`;
   const filepath = path.join(ADR_DIR, filename);
 
   // Check if file already exists
@@ -387,7 +388,7 @@ function main(): void {
   updateIndex(options, number, filename);
 
   console.log(`
-ADR-${String(number).padStart(4, '0')} created successfully!
+ADR-${String(number).padStart(4, "0")} created successfully!
 
 Next steps:
 1. Edit ${filepath} with your decision details

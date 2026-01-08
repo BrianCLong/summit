@@ -1,8 +1,8 @@
-import Redis from 'ioredis';
-import pino from 'pino';
-import { StateBackend, StateDescriptor } from './types';
+import Redis from "ioredis";
+import pino from "pino";
+import { StateBackend, StateDescriptor } from "./types";
 
-const logger = pino({ name: 'state-manager' });
+const logger = pino({ name: "state-manager" });
 
 /**
  * State manager for stateful stream operations
@@ -20,7 +20,7 @@ export class StateManager {
 
     if (backend === StateBackend.REDIS && redisUrl) {
       this.redis = new Redis(redisUrl);
-      logger.info('Redis state backend initialized');
+      logger.info("Redis state backend initialized");
     }
   }
 
@@ -36,7 +36,7 @@ export class StateManager {
 
       case StateBackend.REDIS:
         if (!this.redis) {
-          throw new Error('Redis not initialized');
+          throw new Error("Redis not initialized");
         }
 
         const value = await this.redis.get(stateKey);
@@ -58,11 +58,7 @@ export class StateManager {
   /**
    * Update state value
    */
-  async update<T>(
-    descriptor: StateDescriptor<T>,
-    key: string,
-    value: T
-  ): Promise<void> {
+  async update<T>(descriptor: StateDescriptor<T>, key: string, value: T): Promise<void> {
     const stateKey = this.buildKey(descriptor.name, key);
 
     switch (this.backend) {
@@ -77,10 +73,10 @@ export class StateManager {
 
       case StateBackend.REDIS:
         if (!this.redis) {
-          throw new Error('Redis not initialized');
+          throw new Error("Redis not initialized");
         }
 
-        const serialized = typeof value === 'string' ? value : JSON.stringify(value);
+        const serialized = typeof value === "string" ? value : JSON.stringify(value);
 
         if (descriptor.ttl) {
           await this.redis.setex(stateKey, Math.floor(descriptor.ttl / 1000), serialized);
@@ -93,7 +89,7 @@ export class StateManager {
         throw new Error(`Unsupported state backend: ${this.backend}`);
     }
 
-    logger.debug({ key: stateKey }, 'State updated');
+    logger.debug({ key: stateKey }, "State updated");
   }
 
   /**
@@ -110,7 +106,7 @@ export class StateManager {
 
       case StateBackend.REDIS:
         if (!this.redis) {
-          throw new Error('Redis not initialized');
+          throw new Error("Redis not initialized");
         }
         await this.redis.del(stateKey);
         break;
@@ -119,7 +115,7 @@ export class StateManager {
         throw new Error(`Unsupported state backend: ${this.backend}`);
     }
 
-    logger.debug({ key: stateKey }, 'State deleted');
+    logger.debug({ key: stateKey }, "State deleted");
   }
 
   /**
@@ -139,7 +135,7 @@ export class StateManager {
 
       case StateBackend.REDIS:
         if (!this.redis) {
-          throw new Error('Redis not initialized');
+          throw new Error("Redis not initialized");
         }
 
         const pattern = `${descriptorName}:*`;
@@ -154,7 +150,7 @@ export class StateManager {
         throw new Error(`Unsupported state backend: ${this.backend}`);
     }
 
-    logger.info({ descriptorName }, 'State cleared');
+    logger.info({ descriptorName }, "State cleared");
   }
 
   /**
@@ -175,7 +171,7 @@ export class StateManager {
     const timer = setTimeout(() => {
       this.memoryStore.delete(key);
       this.ttlTimers.delete(key);
-      logger.debug({ key }, 'State expired');
+      logger.debug({ key }, "State expired");
     }, ttl);
 
     this.ttlTimers.set(key, timer);
@@ -207,7 +203,7 @@ export class StateManager {
     }
     this.ttlTimers.clear();
 
-    logger.info('State manager disconnected');
+    logger.info("State manager disconnected");
   }
 }
 

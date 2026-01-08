@@ -31,7 +31,7 @@ This framework enables Summit to offer enterprise customers **cryptographic guar
 
 ### 1.1 The Rise of Model Context Protocol
 
-Large language models (LLMs) excel at *reasoning* but have limited *knowledge*. The Model Context Protocol (MCP), pioneered by Anthropic and rapidly adopted across the industry, addresses this by enabling LLMs to:
+Large language models (LLMs) excel at _reasoning_ but have limited _knowledge_. The Model Context Protocol (MCP), pioneered by Anthropic and rapidly adopted across the industry, addresses this by enabling LLMs to:
 
 - Query databases for real-time data
 - Invoke APIs to interact with external systems
@@ -44,18 +44,19 @@ MCP is essentially **dependency injection for LLMs**—a standardized protocol f
 
 Existing MCP systems (OpenAI tools, Anthropic MCP, LangChain) make implicit security assumptions:
 
-| Assumption | Reality in Enterprise Environments |
-|------------|-----------------------------------|
-| **Trust by default** | Agents may be compromised, models poisoned |
-| **Perimeter security** | Insider threats, cloud admin access |
-| **Whole-document provenance** | GDPR requires token-level deletion |
-| **Action-time policies** | Context contamination occurs *before* actions |
-| **Single-agent execution** | Multi-agent workflows amplify failures |
+| Assumption                    | Reality in Enterprise Environments            |
+| ----------------------------- | --------------------------------------------- |
+| **Trust by default**          | Agents may be compromised, models poisoned    |
+| **Perimeter security**        | Insider threats, cloud admin access           |
+| **Whole-document provenance** | GDPR requires token-level deletion            |
+| **Action-time policies**      | Context contamination occurs _before_ actions |
+| **Single-agent execution**    | Multi-agent workflows amplify failures        |
 
 These assumptions fail in regulated environments where:
+
 - **Healthcare:** HIPAA mandates that patient data cannot leak to unauthorized parties, even within the same organization
 - **Finance:** SEC requires audit trails proving AI trading decisions weren't based on poisoned data
-- **Defense:** NIST SP 800-53 AC-4 requires *cryptographic proof* of information flow enforcement, not just access logs
+- **Defense:** NIST SP 800-53 AC-4 requires _cryptographic proof_ of information flow enforcement, not just access logs
 
 ### 1.3 Threat Model
 
@@ -73,7 +74,7 @@ We consider an adversary who may:
 
 ## 2. Zero-Trust Model Context Framework
 
-We adapt the **zero-trust networking** mantra—*never trust, always verify*—to MCP:
+We adapt the **zero-trust networking** mantra—_never trust, always verify_—to MCP:
 
 > **"Context is untrusted by default until cryptographically verified to comply with security policies at every stage of processing."**
 
@@ -134,10 +135,11 @@ The framework operates across seven layers:
 
 ### 3.1 Cryptographic Context Confinement
 
-**Problem:** In multi-agent systems, how do you *prove* that context didn't leak across agent boundaries?
+**Problem:** In multi-agent systems, how do you _prove_ that context didn't leak across agent boundaries?
 
 **Existing Approaches (Insufficient):**
-- Access control lists (ACLs) - Don't prove what *didn't* happen
+
+- Access control lists (ACLs) - Don't prove what _didn't_ happen
 - TLS encryption - Protects transport, not end-to-end flow
 - SLSA provenance - Tracks outputs, not intermediate context visibility
 
@@ -147,9 +149,10 @@ The framework operates across seven layers:
 2. **Zero-Knowledge Boundary Proofs:** Agent B proves to orchestrator "I possess valid context" without revealing contents (zk-SNARK)
 3. **Confinement Ledger:** Immutable log of all context handoffs with cryptographic commitments
 
-**Key Innovation:** Using zero-knowledge proofs for *authorization* (not just privacy) enables forensic queries: "Did context X ever leak to agent Y?"
+**Key Innovation:** Using zero-knowledge proofs for _authorization_ (not just privacy) enables forensic queries: "Did context X ever leak to agent Y?"
 
 **Applications:**
+
 - Government: Cryptographic proof of cross-domain isolation (TOP SECRET → SECRET = forbidden)
 - Healthcare: HIPAA compliance—prove patient data never crossed hospital boundaries
 - Finance: Prove trading AI didn't combine insider information with market data
@@ -159,6 +162,7 @@ The framework operates across seven layers:
 **Problem:** Malicious APIs can inject adversarial context (prompt injections) that passes schema validation but corrupts reasoning.
 
 **Existing Defenses (Insufficient):**
+
 - Regex pattern matching - Easily bypassed with paraphrasing
 - Single LLM classification - Vulnerable to adversarial examples
 
@@ -169,7 +173,7 @@ The framework operates across seven layers:
 3. **Perturbation Sensitivity:** Adversarial inputs are "brittle"—minor perturbations change meaning drastically
 4. **LSH Injection Corpus:** Fuzzy matching against known attacks (updated daily from red team)
 
-**Key Innovation:** Using model *disagreement* as signal (adversarial examples exploit specific vulnerabilities; diverse models won't all fail the same way).
+**Key Innovation:** Using model _disagreement_ as signal (adversarial examples exploit specific vulnerabilities; diverse models won't all fail the same way).
 
 **Performance:** 94% detection rate for known attacks, 78% for zero-day, <50ms p99 latency (cascade optimization: lightweight checks first, expensive consensus only if needed).
 
@@ -178,6 +182,7 @@ The framework operates across seven layers:
 **Problem:** GDPR Right to Erasure requires "delete my data," but provenance only tracks whole documents.
 
 **Existing Approaches (Insufficient):**
+
 - Whole-document provenance (SLSA) - Can't answer "which sentence contains PII?"
 - LLM self-citation - Unreliable (hallucinates references)
 
@@ -191,6 +196,7 @@ The framework operates across seven layers:
 **Key Innovation:** Combining constrained decoding (usually for structured output) with attention weight analysis for provenance (not just formatting).
 
 **Applications:**
+
 - Healthcare: "Delete all diagnoses containing patient 12345's data" (HIPAA compliance)
 - Finance: "Which parts of this trade recommendation came from proprietary models vs. public data?" (IP protection)
 
@@ -199,6 +205,7 @@ The framework operates across seven layers:
 **Problem:** Policies check individual data access ("can I read X?"), not combinations ("can I reason about X + Y together?").
 
 **Attack Example:**
+
 - Load customer PII (allowed)
 - Load competitor pricing (allowed)
 - Reason: "Generate personalized offers to undercut competitors" (combined = violation)
@@ -207,12 +214,13 @@ The framework operates across seven layers:
 
 1. **Security Lattice Labels:** Every context has `{confidentiality, integrity, purpose}` label
 2. **Lattice Join Operation:** Combining contexts A + B computes least upper bound (LUB)
-3. **Pre-Execution Policy:** "Is resulting label allowed for this agent?" checked *before* LLM sees data
+3. **Pre-Execution Policy:** "Is resulting label allowed for this agent?" checked _before_ LLM sees data
 4. **Non-Interference Validation:** Information-theoretic check: "Can agent A infer forbidden data from B given C?"
 
 **Key Innovation:** Applying formal methods (lattice theory, non-interference) to practical LLM context composition (previously only used in military OS like Trusted Solaris).
 
 **Applications:**
+
 - Defense: Prevent mixing TOP SECRET + PUBLIC data (classification downgrade attack)
 - Finance: Prevent "legal" data used for "marketing" purposes (purpose-bound computation)
 
@@ -221,7 +229,8 @@ The framework operates across seven layers:
 **Problem:** Multi-agent systems trust outputs by default. If one agent is compromised, entire workflow is poisoned.
 
 **Existing Approaches (Insufficient):**
-- Circuit breakers - React *after* failures (not proactive)
+
+- Circuit breakers - React _after_ failures (not proactive)
 - Static trust lists - Don't adapt to agent degradation
 
 **Our Approach:**
@@ -237,9 +246,10 @@ The framework operates across seven layers:
 
 ### 3.6 Provenance Revocation with Merkle Tree Propagation
 
-**Problem:** If model is discovered to be poisoned *after* deployment, how do you identify all affected outputs?
+**Problem:** If model is discovered to be poisoned _after_ deployment, how do you identify all affected outputs?
 
 **Existing Approaches (Insufficient):**
+
 - Manual audits - Too slow, error-prone
 - Certificate Revocation Lists (CRLs) - Designed for single-entity revocation, not transitive contamination
 
@@ -251,7 +261,7 @@ The framework operates across seven layers:
 4. **Taint Proofs:** Merkle path proving contamination chain (Output → Intermediate → Revoked Root)
 5. **Automated Remediation:** Quarantine, notify consumers, regenerate with clean inputs
 
-**Key Innovation:** Using Merkle trees (designed for version control) for *contamination propagation* (not just integrity verification).
+**Key Innovation:** Using Merkle trees (designed for version control) for _contamination propagation_ (not just integrity verification).
 
 **Performance:** <30s propagation for 100K outputs, <5ms revocation check (Bloom filter), O(log N) complexity.
 
@@ -260,6 +270,7 @@ The framework operates across seven layers:
 **Problem:** Multi-tenant clouds share CPU/memory. Privileged insiders (cloud admins) can read tenant context.
 
 **Existing Defenses (Insufficient):**
+
 - Software encryption - Keys accessible to operators
 - Process isolation - Doesn't protect against root access
 
@@ -268,11 +279,12 @@ The framework operates across seven layers:
 1. **Trusted Execution Environments:** Run MCP in Intel SGX / AMD SEV enclaves
 2. **Remote Attestation:** Clients verify enclave integrity before sending context
 3. **Sealed Storage:** Encrypt context with CPU-fused keys (only decryptable by same enclave)
-4. **Enclave-Based Policy:** OPA runs *inside* enclave on encrypted context
+4. **Enclave-Based Policy:** OPA runs _inside_ enclave on encrypted context
 
 **Key Innovation:** First MCP implementation with hardware TEE integration (Azure Confidential Computing exists, but not MCP-specific).
 
 **Applications:**
+
 - FedRAMP High: Hardware isolation requirement
 - Swiss Banking: FINMA confidential computing mandates
 - DoD IL5+: Trusted execution for classified data
@@ -281,15 +293,15 @@ The framework operates across seven layers:
 
 ## 4. Implementation Feasibility
 
-| Mechanism | Complexity | Timeline | Key Dependencies |
-|-----------|-----------|----------|------------------|
-| **Provenance Revocation** | Low-Medium | 0-6 months | PostgreSQL, Merkle trees (well-understood) |
-| **Semantic Validation** | Medium | 0-6 months | HuggingFace models (off-the-shelf), GPU inference |
-| **Token Attribution** | Medium-High | 6-12 months | LLM streaming API access, attention weights |
-| **Context Assembly Policy** | High | 6-12 months | Formal methods expertise, lattice theory |
-| **Cryptographic Confinement** | High | 6-12 months | zk-SNARK circuit design, proof optimization |
-| **Byzantine Trust** | Medium-High | 6-12 months | PBFT consensus engineering, reputation algorithms |
-| **Confidential TEEs** | High (Research) | 12-18 months | SGX/SEV hardware, enclave development expertise |
+| Mechanism                     | Complexity      | Timeline     | Key Dependencies                                  |
+| ----------------------------- | --------------- | ------------ | ------------------------------------------------- |
+| **Provenance Revocation**     | Low-Medium      | 0-6 months   | PostgreSQL, Merkle trees (well-understood)        |
+| **Semantic Validation**       | Medium          | 0-6 months   | HuggingFace models (off-the-shelf), GPU inference |
+| **Token Attribution**         | Medium-High     | 6-12 months  | LLM streaming API access, attention weights       |
+| **Context Assembly Policy**   | High            | 6-12 months  | Formal methods expertise, lattice theory          |
+| **Cryptographic Confinement** | High            | 6-12 months  | zk-SNARK circuit design, proof optimization       |
+| **Byzantine Trust**           | Medium-High     | 6-12 months  | PBFT consensus engineering, reputation algorithms |
+| **Confidential TEEs**         | High (Research) | 12-18 months | SGX/SEV hardware, enclave development expertise   |
 
 **Conclusion:** Six of seven mechanisms achievable within 12 months using existing cryptographic primitives and open-source libraries. TEE integration is longer-term (hardware dependency) but offers premium tier differentiation.
 
@@ -297,15 +309,16 @@ The framework operates across seven layers:
 
 ## 5. Comparison to Existing Work
 
-| System | Context Isolation | Adversarial Validation | Fine-Grained Provenance | Multi-Agent Trust | Revocation |
-|--------|------------------|------------------------|------------------------|------------------|------------|
-| **OpenAI Tools** | ACLs only | None | Document-level | None | None |
-| **Anthropic MCP** | TLS transport | Constitutional AI (training-time) | Document-level | None | None |
-| **LangChain** | Process isolation | Regex patterns | None | None | None |
-| **AutoGen** | Process isolation | None | None | Simple voting (no Byzantine resistance) | None |
-| **Zero-Trust MCP (Ours)** | ✅ Cryptographic + zk-proofs | ✅ Multi-model consensus | ✅ Token-level | ✅ PBFT consensus | ✅ Merkle propagation |
+| System                    | Context Isolation            | Adversarial Validation            | Fine-Grained Provenance | Multi-Agent Trust                       | Revocation            |
+| ------------------------- | ---------------------------- | --------------------------------- | ----------------------- | --------------------------------------- | --------------------- |
+| **OpenAI Tools**          | ACLs only                    | None                              | Document-level          | None                                    | None                  |
+| **Anthropic MCP**         | TLS transport                | Constitutional AI (training-time) | Document-level          | None                                    | None                  |
+| **LangChain**             | Process isolation            | Regex patterns                    | None                    | None                                    | None                  |
+| **AutoGen**               | Process isolation            | None                              | None                    | Simple voting (no Byzantine resistance) | None                  |
+| **Zero-Trust MCP (Ours)** | ✅ Cryptographic + zk-proofs | ✅ Multi-model consensus          | ✅ Token-level          | ✅ PBFT consensus                       | ✅ Merkle propagation |
 
 **Key Differentiators:**
+
 1. **Only system** with cryptographic context isolation proofs
 2. **Only system** with Byzantine-resistant multi-agent consensus
 3. **Only system** with token-level provenance for GDPR compliance
@@ -318,6 +331,7 @@ The framework operates across seven layers:
 ### 6.1 FedRAMP High / DoD IL5+
 
 **Requirements:**
+
 - NIST SP 800-53 AC-4 (Information Flow Enforcement) - ✅ Context Assembly Policy Engine
 - FIPS 140-3 cryptographic modules - ✅ All mechanisms use FIPS-validated primitives
 - Hardware isolation - ✅ Confidential TEE execution
@@ -325,18 +339,21 @@ The framework operates across seven layers:
 ### 6.2 HIPAA (Healthcare)
 
 **Requirements:**
+
 - 164.524 (Right of Access) - ✅ Token-level attribution enables patient data queries
 - 164.308 (Administrative Safeguards) - ✅ Provenance revocation for breach response
 
 ### 6.3 GDPR (EU Privacy)
 
 **Requirements:**
+
 - Article 17 (Right to Erasure) - ✅ Token attribution enables fine-grained deletion
 - Article 22 (Automated Decision-Making) - ✅ Explainability via attribution graphs
 
 ### 6.4 SEC (Financial Services)
 
 **Requirements:**
+
 - Rule 15c3-5 (Market Access Rule) - ✅ Semantic validation prevents manipulation-based trades
 - Regulation SCI (Systems Compliance) - ✅ Provenance revocation for contaminated model recall
 
@@ -413,9 +430,9 @@ This whitepaper represents ongoing research at Summit. We welcome collaboration 
 ---
 
 **Document Control:**
+
 - **Version:** 1.0 (Initial Public Release)
 - **Date:** 2026-01-01
 - **Classification:** Public
 - **License:** Creative Commons Attribution 4.0 International (CC BY 4.0)
 - **DOI:** [To be assigned upon arXiv publication]
-

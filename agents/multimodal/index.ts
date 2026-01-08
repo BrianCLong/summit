@@ -6,44 +6,44 @@
  */
 
 // Core Types
-export * from './types.js';
+export * from "./types.js";
 
 // Pipeline Components
-export { CLIPPipeline } from './clip-pipeline.js';
-export type { CLIPPipelineConfig } from './clip-pipeline.js';
+export { CLIPPipeline } from "./clip-pipeline.js";
+export type { CLIPPipelineConfig } from "./clip-pipeline.js";
 
-export { TextPipeline } from './text-pipeline.js';
-export type { TextPipelineConfig } from './text-pipeline.js';
+export { TextPipeline } from "./text-pipeline.js";
+export type { TextPipelineConfig } from "./text-pipeline.js";
 
-export { VideoPipeline } from './video-pipeline.js';
-export type { VideoPipelineConfig } from './video-pipeline.js';
+export { VideoPipeline } from "./video-pipeline.js";
+export type { VideoPipelineConfig } from "./video-pipeline.js";
 
 // Fusion Orchestration
-export { FusionOrchestrator } from './fusion-orchestrator.js';
-export type { FusionOrchestratorConfig } from './fusion-orchestrator.js';
+export { FusionOrchestrator } from "./fusion-orchestrator.js";
+export type { FusionOrchestratorConfig } from "./fusion-orchestrator.js";
 
 // Storage and Retrieval
-export { PgVectorStore } from './pgvector-store.js';
-export type { PgVectorStoreConfig } from './pgvector-store.js';
+export { PgVectorStore } from "./pgvector-store.js";
+export type { PgVectorStoreConfig } from "./pgvector-store.js";
 
-export { Neo4jEmbeddings } from './neo4j-embeddings.js';
-export type { Neo4jEmbeddingsConfig } from './neo4j-embeddings.js';
+export { Neo4jEmbeddings } from "./neo4j-embeddings.js";
+export type { Neo4jEmbeddingsConfig } from "./neo4j-embeddings.js";
 
 // Hallucination Detection
-export { HallucinationGuard } from './hallucination-guard.js';
-export type { HallucinationGuardConfig } from './hallucination-guard.js';
+export { HallucinationGuard } from "./hallucination-guard.js";
+export type { HallucinationGuardConfig } from "./hallucination-guard.js";
 
 // Convenience factory function
-import { FusionOrchestrator, FusionOrchestratorConfig } from './fusion-orchestrator.js';
+import { FusionOrchestrator, FusionOrchestratorConfig } from "./fusion-orchestrator.js";
 
 /**
  * Create a pre-configured fusion pipeline for OSINT analysis
  */
 export function createOSINTFusionPipeline(
-  config: Partial<FusionOrchestratorConfig> = {},
+  config: Partial<FusionOrchestratorConfig> = {}
 ): FusionOrchestrator {
   return new FusionOrchestrator({
-    fusionMethod: 'weighted_average',
+    fusionMethod: "weighted_average",
     targetDimension: 768,
     enableGraphEmbeddings: true,
     enablePgVectorStorage: true,
@@ -60,10 +60,10 @@ export function createOSINTFusionPipeline(
  * Create a lightweight fusion pipeline (no external dependencies)
  */
 export function createLightweightFusionPipeline(
-  config: Partial<FusionOrchestratorConfig> = {},
+  config: Partial<FusionOrchestratorConfig> = {}
 ): FusionOrchestrator {
   return new FusionOrchestrator({
-    fusionMethod: 'average',
+    fusionMethod: "average",
     targetDimension: 768,
     enableGraphEmbeddings: false,
     enablePgVectorStorage: false,

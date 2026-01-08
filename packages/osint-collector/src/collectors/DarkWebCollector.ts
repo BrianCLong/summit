@@ -2,8 +2,8 @@
  * Dark Web Collector - Monitors Tor hidden services and dark web sources
  */
 
-import { CollectorBase } from '../core/CollectorBase.js';
-import type { CollectionTask } from '../types/index.js';
+import { CollectorBase } from "../core/CollectorBase.js";
+import type { CollectionTask } from "../types/index.js";
 
 export interface DarkWebListing {
   source: string;
@@ -29,19 +29,19 @@ export class DarkWebCollector extends CollectorBase {
 
   protected async performCollection(task: CollectionTask): Promise<unknown> {
     if (!this.torEnabled) {
-      throw new Error('Tor connection not available');
+      throw new Error("Tor connection not available");
     }
 
     const targetType = task.config?.targetType as string;
 
     switch (targetType) {
-      case 'marketplace':
+      case "marketplace":
         return await this.monitorMarketplace(task.target);
-      case 'forum':
+      case "forum":
         return await this.monitorForum(task.target);
-      case 'paste':
+      case "paste":
         return await this.monitorPasteSites();
-      case 'leak':
+      case "leak":
         return await this.monitorLeakedDatabases();
       default:
         return await this.crawlHiddenService(task.target);
@@ -106,13 +106,13 @@ export class DarkWebCollector extends CollectorBase {
    */
   private async crawlHiddenService(onionUrl: string): Promise<any> {
     // Would use Tor SOCKS proxy to access .onion sites
-    return { url: onionUrl, status: 'not_implemented' };
+    return { url: onionUrl, status: "not_implemented" };
   }
 
   /**
    * Search for cryptocurrency transactions
    */
-  async trackCryptoAddress(address: string, blockchain: string = 'bitcoin'): Promise<any> {
+  async trackCryptoAddress(address: string, blockchain: string = "bitcoin"): Promise<any> {
     // Would integrate with blockchain explorers
     return { address, blockchain, transactions: [] };
   }

@@ -15,28 +15,28 @@ Comprehensive terrorist organization monitoring and tracking system for intellig
 ## Usage
 
 ```typescript
-import { OrganizationTracker, NetworkAnalyzer } from '@intelgraph/terrorist-tracking';
+import { OrganizationTracker, NetworkAnalyzer } from "@intelgraph/terrorist-tracking";
 
 // Initialize tracker
 const tracker = new OrganizationTracker();
 
 // Track an organization
 await tracker.trackOrganization({
-  id: 'org-001',
-  name: 'Example Organization',
-  aliases: ['Alias 1', 'Alias 2'],
+  id: "org-001",
+  name: "Example Organization",
+  aliases: ["Alias 1", "Alias 2"],
   type: OrganizationType.PRIMARY,
   ideology: [Ideology.RELIGIOUS_EXTREMISM],
-  operatingRegions: ['Region A', 'Region B'],
+  operatingRegions: ["Region A", "Region B"],
   status: OrganizationStatus.ACTIVE,
   affiliates: [],
-  metadata: {}
+  metadata: {},
 });
 
 // Query organizations
 const results = await tracker.queryOrganizations({
-  regions: ['Region A'],
-  status: [OrganizationStatus.ACTIVE]
+  regions: ["Region A"],
+  status: [OrganizationStatus.ACTIVE],
 });
 
 // Analyze network

@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 services:
   zookeeper:
@@ -6,9 +6,9 @@ services:
     container_name: summit-zookeeper
     restart: unless-stopped
     environment:
-      ALLOW_ANONYMOUS_LOGIN: 'yes'
+      ALLOW_ANONYMOUS_LOGIN: "yes"
     ports:
-      - '2181:2181'
+      - "2181:2181"
 
   kafka:
     image: bitnami/kafka:3.7
@@ -16,11 +16,11 @@ services:
     restart: unless-stopped
     environment:
       KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
-      ALLOW_PLAINTEXT_LISTENER: 'yes'
+      ALLOW_PLAINTEXT_LISTENER: "yes"
       KAFKA_CFG_LISTENERS: PLAINTEXT://:9092
       KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
     ports:
-      - '9092:9092'
+      - "9092:9092"
     depends_on:
       zookeeper:
         condition: service_started
@@ -51,12 +51,12 @@ services:
     container_name: summit-strategic-foresight
     restart: unless-stopped
     ports:
-      - '8003:8003'
+      - "8003:8003"
     environment:
       PORT: 8003
       REDIS_URL: redis://redis:6379/2
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:8003/health']
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
       interval: 30s
       timeout: 10s
       retries: 3

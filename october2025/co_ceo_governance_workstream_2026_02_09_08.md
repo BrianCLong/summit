@@ -109,14 +109,8 @@ allow_field[f] { f == data.audit.allowed[_] }
 **Node SDK stub** `sdk/node/index.ts`
 
 ```ts
-export async function verifyPack({
-  packUrl,
-  sigUrl,
-}: {
-  packUrl: string;
-  sigUrl: string;
-}) {
-  /* fetch + cosign-wasm */ return { verified: true, sha256: '...' };
+export async function verifyPack({ packUrl, sigUrl }: { packUrl: string; sigUrl: string }) {
+  /* fetch + cosign-wasm */ return { verified: true, sha256: "..." };
 }
 export async function getRelease(tag: string) {
   return fetch(`/releases/${tag}`).then((r) => r.json());
@@ -185,8 +179,8 @@ allow_feature { data.plan[input.tenant.plan][input.feature] == true }
 
 ```js
 // Resolve tenant plan; enforce rate and feature access
-if (!policy.allow_feature({ tenant, feature: 'vendor_attestations' }))
-  return res.status(403).json({ error: 'plan' });
+if (!policy.allow_feature({ tenant, feature: "vendor_attestations" }))
+  return res.status(403).json({ error: "plan" });
 ```
 
 ### 5.4 Portal Enhancements (Badges + Drilldown)
@@ -194,17 +188,9 @@ if (!policy.allow_feature({ tenant, feature: 'vendor_attestations' }))
 **Path:** `tools/trust-portal/components/Badges.tsx`
 
 ```tsx
-export function PlanBadge({
-  plan,
-}: {
-  plan: 'Starter' | 'Pro' | 'Enterprise';
-}) {
+export function PlanBadge({ plan }: { plan: "Starter" | "Pro" | "Enterprise" }) {
   const color =
-    plan === 'Enterprise'
-      ? 'bg-purple-100'
-      : plan === 'Pro'
-        ? 'bg-blue-100'
-        : 'bg-gray-100';
+    plan === "Enterprise" ? "bg-purple-100" : plan === "Pro" ? "bg-blue-100" : "bg-gray-100";
   return <span className={`px-2 py-1 rounded-2xl ${color}`}>{plan}</span>;
 }
 ```

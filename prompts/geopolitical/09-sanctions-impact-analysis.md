@@ -1,6 +1,7 @@
 # Sanctions Impact Analysis
 
 ## Objective
+
 Assess the effectiveness and impacts of economic sanctions, including unintended consequences and evasion strategies.
 
 ## Analysis Framework
@@ -36,6 +37,7 @@ Assess the effectiveness and impacts of economic sanctions, including unintended
    - Allied countries' support
 
 ### Effectiveness Metrics (0-100)
+
 - **Policy Change Progress**: Stated objectives achieved
 - **Economic Pressure**: Target country economic degradation
 - **Political Impact**: Regime behavior modification
@@ -43,6 +45,7 @@ Assess the effectiveness and impacts of economic sanctions, including unintended
 - **Humanitarian Cost**: Unintended civilian harm
 
 ### Unintended Consequences
+
 - Humanitarian suffering
 - Strengthened authoritarianism ("rally around the flag")
 - Criminal network growth
@@ -50,7 +53,9 @@ Assess the effectiveness and impacts of economic sanctions, including unintended
 - Geopolitical backlash
 
 ### Alternative Trade Patterns
+
 Identify emerging:
+
 - Transshipment routes
 - Intermediary countries
 - Shell company networks
@@ -60,6 +65,7 @@ Identify emerging:
 ### Recommendations
 
 **For Sanction Designers:**
+
 - Humanitarian exemptions needed
 - Enforcement gap remediation
 - Secondary sanctions consideration
@@ -67,12 +73,14 @@ Identify emerging:
 - Exit ramps and negotiation paths
 
 **For Target Countries:**
+
 - Economic diversification options
 - Alternative partnership opportunities
 - Humanitarian mitigation measures
 - Negotiation pathway analysis
 
 ### Ethical Considerations
+
 - Minimize civilian harm
 - Proportionality assessment
 - Humanitarian exemptions
@@ -81,6 +89,7 @@ Identify emerging:
 - Respect international law
 
 ### Monitoring Plan
+
 - Monthly economic indicators
 - Quarterly effectiveness assessment
 - Humanitarian impact tracking
@@ -88,6 +97,7 @@ Identify emerging:
 - Policy recommendation updates
 
 ### Applications
+
 - Sanctions policy development
 - Diplomatic strategy planning
 - Humanitarian program design

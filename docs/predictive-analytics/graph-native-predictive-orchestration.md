@@ -10,6 +10,7 @@
 **Graph-Native Predictive Orchestration™** is a breakthrough system that transforms predictions from passive insights into active, autonomous workflows. By binding predictive models directly to graph nodes and edges, the system enables **prediction-driven automation** where forecasts, risk scores, and anomaly detections automatically trigger workflows, rewire operational pathways, and execute decisions—all governed by graph-embedded policies.
 
 This creates a **living intelligence system** where:
+
 - **Predictions activate workflows**: High-risk predictions automatically trigger investigation workflows
 - **Graph topology adapts**: Critical pathways dynamically rewire based on predictive signals
 - **Decisions execute autonomously**: OPA policies evaluate predictions and authorize actions
@@ -17,12 +18,12 @@ This creates a **living intelligence system** where:
 
 ### Key Differentiators
 
-| Traditional Systems | Graph-Native Predictive Orchestration |
-|---------------------|--------------------------------------|
-| Predictions are reports | Predictions are execution triggers |
-| Static workflows | Dynamic, topology-aware flows |
-| Manual decision-making | Policy-driven autonomy |
-| Siloed analytics | Graph-embedded intelligence |
+| Traditional Systems     | Graph-Native Predictive Orchestration |
+| ----------------------- | ------------------------------------- |
+| Predictions are reports | Predictions are execution triggers    |
+| Static workflows        | Dynamic, topology-aware flows         |
+| Manual decision-making  | Policy-driven autonomy                |
+| Siloed analytics        | Graph-embedded intelligence           |
 
 ## Problem Statement
 
@@ -85,6 +86,7 @@ This creates a **living intelligence system** where:
 **Purpose**: Bind predictive model outputs to graph nodes/edges as first-class metadata
 
 **Process**:
+
 ```
 INPUT: prediction, targetNode, bindingConfig
 OUTPUT: bindingId, triggerRules
@@ -102,6 +104,7 @@ OUTPUT: bindingId, triggerRules
 ```
 
 **Neo4j Cypher**:
+
 ```cypher
 MATCH (n:Entity {id: $nodeId})
 CREATE (p:Prediction {
@@ -126,6 +129,7 @@ RETURN p, n
 **Purpose**: Evaluate prediction bindings and trigger autonomous decision flows
 
 **Process**:
+
 ```
 INPUT: predictionBinding
 OUTPUT: triggeredFlows[]
@@ -146,17 +150,18 @@ OUTPUT: triggeredFlows[]
 ```
 
 **Trigger Rule Schema**:
+
 ```typescript
 interface TriggerRule {
   id: string;
   condition: {
-    field: string;           // 'value' | 'confidence' | 'graph.degree'
-    operator: '>' | '<' | '==' | 'in' | 'between';
+    field: string; // 'value' | 'confidence' | 'graph.degree'
+    operator: ">" | "<" | "==" | "in" | "between";
     threshold: number | number[];
   };
-  workflowTemplate: string;  // 'investigate_entity' | 'rewire_pathway'
+  workflowTemplate: string; // 'investigate_entity' | 'rewire_pathway'
   parameters: Record<string, any>;
-  policyCheck: string;       // OPA policy path
+  policyCheck: string; // OPA policy path
   priority: number;
 }
 ```
@@ -166,6 +171,7 @@ interface TriggerRule {
 **Purpose**: Dynamically rewire operational pathways based on predictive signals
 
 **Process**:
+
 ```
 INPUT: prediction, pathwayId, rewiringStrategy
 OUTPUT: newPathway, affectedNodes
@@ -196,6 +202,7 @@ OUTPUT: newPathway, affectedNodes
 ```
 
 **Neo4j Rewiring Cypher**:
+
 ```cypher
 MATCH (start:Node {id: $startId})
 MATCH (end:Node {id: $endId})
@@ -227,6 +234,7 @@ RETURN start, bypass, end
 **Purpose**: Execute autonomous decisions with full policy governance
 
 **Process**:
+
 ```
 INPUT: decisionFlow
 OUTPUT: executionResult
@@ -264,9 +272,9 @@ OUTPUT: executionResult
 ```typescript
 interface PredictionBinding {
   id: string;
-  nodeId: string;                    // Target graph node
-  edgeId?: string;                   // Optional: bind to edge
-  predictionType: 'forecast' | 'risk_score' | 'anomaly' | 'classification';
+  nodeId: string; // Target graph node
+  edgeId?: string; // Optional: bind to edge
+  predictionType: "forecast" | "risk_score" | "anomaly" | "classification";
   modelId: string;
   modelVersion: string;
   prediction: {
@@ -277,7 +285,7 @@ interface PredictionBinding {
     metadata?: Record<string, any>;
   };
   triggerRules: TriggerRule[];
-  status: 'active' | 'triggered' | 'expired';
+  status: "active" | "triggered" | "expired";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -291,9 +299,9 @@ interface DecisionFlow {
   bindingId: string;
   triggeredBy: TriggerRule;
   workflowTemplate: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
+  status: "pending" | "running" | "completed" | "failed";
   context: {
-    prediction: PredictionBinding['prediction'];
+    prediction: PredictionBinding["prediction"];
     graphContext: {
       nodeProperties: Record<string, any>;
       neighborhoodSize: number;
@@ -309,7 +317,7 @@ interface DecisionFlow {
     startedAt: Date;
     completedAt?: Date;
     steps: ExecutionStep[];
-    outcome: 'success' | 'failure' | 'partial';
+    outcome: "success" | "failure" | "partial";
   };
   createdAt: Date;
 }
@@ -321,14 +329,14 @@ interface DecisionFlow {
 interface OperationalPathway {
   id: string;
   name: string;
-  type: 'supply_chain' | 'data_flow' | 'investigation' | 'response';
+  type: "supply_chain" | "data_flow" | "investigation" | "response";
   topology: {
     startNodeId: string;
     endNodeId: string;
     intermediateNodes: string[];
     edges: PathwayEdge[];
   };
-  status: 'active' | 'deprecated' | 'rewired';
+  status: "active" | "deprecated" | "rewired";
   metrics: {
     throughput: number;
     latency: number;
@@ -583,13 +591,19 @@ enum RewiringStrategy {
 
 # Queries
 type Query {
-  """Get prediction binding by ID"""
+  """
+  Get prediction binding by ID
+  """
   predictionBinding(id: ID!): PredictionBinding
 
-  """Get all bindings for a node"""
+  """
+  Get all bindings for a node
+  """
   nodeBindings(nodeId: String!): [PredictionBinding!]!
 
-  """Get active bindings across graph"""
+  """
+  Get active bindings across graph
+  """
   activeBindings(
     predictionType: PredictionType
     minConfidence: Float
@@ -597,10 +611,14 @@ type Query {
     offset: Int
   ): [PredictionBinding!]!
 
-  """Get decision flow by ID"""
+  """
+  Get decision flow by ID
+  """
   decisionFlow(id: ID!): DecisionFlow
 
-  """Get active decision flows"""
+  """
+  Get active decision flows
+  """
   activeFlows(
     status: FlowStatus
     workflowTemplate: String
@@ -608,19 +626,24 @@ type Query {
     offset: Int
   ): [DecisionFlow!]!
 
-  """Get operational pathway by ID"""
+  """
+  Get operational pathway by ID
+  """
   operationalPathway(id: ID!): OperationalPathway
 
-  """Get all pathways"""
-  operationalPathways(
-    type: PathwayType
-    status: PathwayStatus
-  ): [OperationalPathway!]!
+  """
+  Get all pathways
+  """
+  operationalPathways(type: PathwayType, status: PathwayStatus): [OperationalPathway!]!
 
-  """Evaluate trigger rules against a binding"""
+  """
+  Evaluate trigger rules against a binding
+  """
   evaluateTriggers(bindingId: ID!): [TriggerRule!]!
 
-  """Simulate pathway rewiring"""
+  """
+  Simulate pathway rewiring
+  """
   simulateRewiring(input: RewirePathwayInput!): RewiringSimulation!
 }
 
@@ -633,34 +656,52 @@ type RewiringSimulation {
 
 # Mutations
 type Mutation {
-  """Bind a prediction to a graph node/edge"""
+  """
+  Bind a prediction to a graph node/edge
+  """
   bindPrediction(input: BindPredictionInput!): PredictionBinding!
 
-  """Manually trigger a decision flow"""
+  """
+  Manually trigger a decision flow
+  """
   createDecisionFlow(input: CreateFlowInput!): DecisionFlow!
 
-  """Rewire an operational pathway"""
+  """
+  Rewire an operational pathway
+  """
   rewirePathway(input: RewirePathwayInput!): OperationalPathway!
 
-  """Execute a decision (with policy check)"""
+  """
+  Execute a decision (with policy check)
+  """
   executeDecision(flowId: ID!): FlowExecution!
 
-  """Cancel a running flow"""
+  """
+  Cancel a running flow
+  """
   cancelFlow(flowId: ID!): Boolean!
 
-  """Expire a prediction binding"""
+  """
+  Expire a prediction binding
+  """
   expireBinding(bindingId: ID!): Boolean!
 }
 
 # Subscriptions
 type Subscription {
-  """Subscribe to new prediction bindings"""
+  """
+  Subscribe to new prediction bindings
+  """
   predictionBound(nodeId: String): PredictionBinding!
 
-  """Subscribe to flow status changes"""
+  """
+  Subscribe to flow status changes
+  """
   flowUpdated(flowId: ID): DecisionFlow!
 
-  """Subscribe to pathway rewiring events"""
+  """
+  Subscribe to pathway rewiring events
+  """
   pathwayRewired(pathwayId: ID): OperationalPathway!
 }
 ```
@@ -715,6 +756,7 @@ FOR ()-[r:HAS_PREDICTION]-() ON (r.status, r.confidence);
 ### Optimized Cypher Queries
 
 **Find High-Risk Entities with Active Bindings**:
+
 ```cypher
 MATCH (e:Entity)-[b:HAS_PREDICTION]->(p:Prediction)
 WHERE p.type = 'risk_score'
@@ -727,6 +769,7 @@ LIMIT 100
 ```
 
 **Find Pathways Affected by Prediction**:
+
 ```cypher
 MATCH (n:Node {id: $nodeId})-[:HAS_PREDICTION]->(p:Prediction)
 MATCH path=(n)-[:PATHWAY*1..5]-(affected)
@@ -738,6 +781,7 @@ ORDER BY distance
 ```
 
 **Atomic Pathway Rewiring**:
+
 ```cypher
 CALL apoc.lock.nodes([start, end]) YIELD node
 WITH start, end
@@ -784,6 +828,7 @@ policies/
 ### Example Policies
 
 **Binding Authorization** (`bindings.rego`):
+
 ```rego
 package orchestration.bindings
 
@@ -816,6 +861,7 @@ valid_target_node if {
 ```
 
 **Flow Execution Policy** (`execution.rego`):
+
 ```rego
 package orchestration.execution
 
@@ -848,6 +894,7 @@ no_rate_limit_violation if {
 ```
 
 **Rewiring Policy** (`rewiring.rego`):
+
 ```rego
 package orchestration.rewiring
 
@@ -917,6 +964,7 @@ backup_pathway_exists if {
 ### Audit Trail
 
 Every orchestration action generates:
+
 ```json
 {
   "eventType": "prediction_binding_created",
@@ -997,35 +1045,35 @@ spec:
         app: graph-predictive-orchestration
     spec:
       containers:
-      - name: orchestrator
-        image: summit/graph-predictive-orchestration:1.0.0
-        ports:
-        - containerPort: 3000
-        env:
-        - name: NEO4J_URI
-          valueFrom:
-            secretKeyRef:
-              name: neo4j-creds
-              key: uri
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "500m"
-          limits:
-            memory: "2Gi"
-            cpu: "2000m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 3000
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /health/ready
-            port: 3000
-          initialDelaySeconds: 10
-          periodSeconds: 5
+        - name: orchestrator
+          image: summit/graph-predictive-orchestration:1.0.0
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NEO4J_URI
+              valueFrom:
+                secretKeyRef:
+                  name: neo4j-creds
+                  key: uri
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "2000m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
 ```
 
 ## Use Cases & Examples
@@ -1037,30 +1085,30 @@ spec:
 ```typescript
 // 1. Bind prediction to entity
 const binding = await orchestrator.bindPrediction({
-  nodeId: 'entity_suspect_123',
-  predictionType: 'risk_score',
-  modelId: 'threat_risk_model',
-  modelVersion: 'v2.1.0',
+  nodeId: "entity_suspect_123",
+  predictionType: "risk_score",
+  modelId: "threat_risk_model",
+  modelVersion: "v2.1.0",
   prediction: {
     value: 0.92,
     confidence: 0.95,
     metadata: {
-      riskFactors: ['darknet_activity', 'suspicious_transactions'],
+      riskFactors: ["darknet_activity", "suspicious_transactions"],
     },
   },
   triggerRules: [
     {
       condition: {
-        field: 'value',
-        operator: 'GT',
+        field: "value",
+        operator: "GT",
         threshold: 0.8,
       },
-      workflowTemplate: 'auto_investigate_entity',
+      workflowTemplate: "auto_investigate_entity",
       parameters: {
         depth: 3,
         includeAssociates: true,
       },
-      policyCheck: 'orchestration.execution.allow',
+      policyCheck: "orchestration.execution.allow",
       priority: 1,
     },
   ],
@@ -1090,14 +1138,14 @@ const binding = await orchestrator.bindPrediction({
 
 ```typescript
 // 1. Forecast detects upcoming congestion
-const forecast = await forecaster.forecast('port_shanghai', 7);
+const forecast = await forecaster.forecast("port_shanghai", 7);
 
 // 2. Bind forecast to port node
 const binding = await orchestrator.bindPrediction({
-  nodeId: 'port_shanghai',
-  predictionType: 'forecast',
-  modelId: 'capacity_forecast',
-  modelVersion: 'v1.5.0',
+  nodeId: "port_shanghai",
+  predictionType: "forecast",
+  modelId: "capacity_forecast",
+  modelVersion: "v1.5.0",
   prediction: {
     value: {
       congestionProbability: 0.87,
@@ -1108,15 +1156,15 @@ const binding = await orchestrator.bindPrediction({
   triggerRules: [
     {
       condition: {
-        field: 'value.congestionProbability',
-        operator: 'GT',
+        field: "value.congestionProbability",
+        operator: "GT",
         threshold: 0.7,
       },
-      workflowTemplate: 'rewire_supply_chain',
+      workflowTemplate: "rewire_supply_chain",
       parameters: {
-        strategy: 'BYPASS',
+        strategy: "BYPASS",
       },
-      policyCheck: 'orchestration.rewiring.allow',
+      policyCheck: "orchestration.rewiring.allow",
       priority: 2,
     },
   ],
@@ -1140,30 +1188,30 @@ const binding = await orchestrator.bindPrediction({
 ```typescript
 // 1. Anomaly detected in user behavior
 const binding = await orchestrator.bindPrediction({
-  nodeId: 'user_jane_doe',
-  predictionType: 'anomaly',
-  modelId: 'user_behavior_anomaly',
-  modelVersion: 'v3.0.0',
+  nodeId: "user_jane_doe",
+  predictionType: "anomaly",
+  modelId: "user_behavior_anomaly",
+  modelVersion: "v3.0.0",
   prediction: {
     value: {
       anomalyScore: 0.94,
-      anomalyType: 'privilege_escalation',
+      anomalyType: "privilege_escalation",
     },
     confidence: 0.88,
   },
   triggerRules: [
     {
       condition: {
-        field: 'value.anomalyScore',
-        operator: 'GT',
+        field: "value.anomalyScore",
+        operator: "GT",
         threshold: 0.85,
       },
-      workflowTemplate: 'security_response',
+      workflowTemplate: "security_response",
       parameters: {
-        action: 'suspend_access',
+        action: "suspend_access",
         requireApproval: false, // Auto-execute
       },
-      policyCheck: 'orchestration.security.allow',
+      policyCheck: "orchestration.security.allow",
       priority: 0, // Highest priority
     },
   ],
@@ -1242,22 +1290,26 @@ orchestration_graph_query_duration_seconds
 ## Roadmap
 
 ### Phase 1 (Current): Core Orchestration
+
 - ✅ Prediction binding
 - ✅ Trigger evaluation
 - ✅ Decision flows
 - ✅ OPA integration
 
 ### Phase 2: Advanced Rewiring
+
 - 🔄 Multi-objective optimization
 - 🔄 ML-driven pathway selection
 - 🔄 Predictive capacity planning
 
 ### Phase 3: Autonomous Learning
+
 - 📅 Reinforcement learning for workflow optimization
 - 📅 Causal impact analysis of orchestration decisions
 - 📅 Self-tuning trigger thresholds
 
 ### Phase 4: Federation
+
 - 📅 Multi-graph orchestration
 - 📅 Cross-domain pathway coordination
 - 📅 Federated policy management

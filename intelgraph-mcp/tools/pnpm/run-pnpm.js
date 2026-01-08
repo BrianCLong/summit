@@ -8,14 +8,14 @@
  * 3. system pnpm on PATH
  */
 
-const { spawn } = require('node:child_process');
-const { existsSync } = require('node:fs');
-const { resolve } = require('node:path');
+const { spawn } = require("node:child_process");
+const { existsSync } = require("node:fs");
+const { resolve } = require("node:path");
 
 const __dirname = __dirname_self();
 
 const envBin = process.env.PNPM_BIN;
-const vendored = resolve(__dirname, 'pnpm-9.6.0.cjs');
+const vendored = resolve(__dirname, "pnpm-9.6.0.cjs");
 
 let bin = envBin;
 if (!bin) {
@@ -23,9 +23,9 @@ if (!bin) {
     bin = vendored;
   } else {
     try {
-      bin = require.resolve('pnpm');
+      bin = require.resolve("pnpm");
     } catch (err) {
-      bin = 'pnpm';
+      bin = "pnpm";
     }
   }
 }
@@ -33,12 +33,12 @@ if (!bin) {
 const args = process.argv.slice(2);
 
 const child = spawn(process.execPath, [bin, ...args], {
-  stdio: 'inherit',
+  stdio: "inherit",
   env: process.env,
 });
 
-child.on('exit', (code) => process.exit(code ?? 0));
+child.on("exit", (code) => process.exit(code ?? 0));
 
 function __dirname_self() {
-  return require('node:path').dirname(__filename);
+  return require("node:path").dirname(__filename);
 }

@@ -55,6 +55,7 @@ The AI Copilot for IntelGraph provides intelligent, natural-language-powered ana
 **Purpose**: Unified entry point for all AI-powered queries. Intelligently routes requests to the appropriate service.
 
 **Mode Selection**:
+
 - **Auto Mode**: Analyzes query characteristics to select best mode
   - Structured queries (e.g., "show all entities") → NL2Cypher
   - Contextual questions (e.g., "why is X connected to Y?") → GraphRAG
@@ -65,6 +66,7 @@ The AI Copilot for IntelGraph provides intelligent, natural-language-powered ana
 **Location**: `server/src/services/GraphRAGQueryServiceEnhanced.ts`
 
 **Capabilities**:
+
 - Natural language understanding with context
 - Graph traversal and relationship reasoning
 - Answer generation with inline citations
@@ -73,6 +75,7 @@ The AI Copilot for IntelGraph provides intelligent, natural-language-powered ana
 - Registration of answers as verifiable claims
 
 **Workflow**:
+
 ```
 Question
   ↓
@@ -96,6 +99,7 @@ Response with Citations
 **Location**: `server/src/services/NLToCypherService.ts`
 
 **Capabilities**:
+
 - LLM-powered translation of NL → Cypher
 - Schema-aware query generation
 - Cost estimation and complexity analysis
@@ -105,18 +109,23 @@ Response with Citations
 ### 4. Supporting Services
 
 #### Query Preview Service
+
 **Purpose**: Generate query previews with cost estimates and risk assessment before execution.
 
 #### Glass-Box Run Service
+
 **Purpose**: Capture complete execution traces for observability and replay.
 
 #### Redaction Service
+
 **Purpose**: Apply policy-driven redaction to protect PII, financial data, and sensitive information.
 
 #### Prov-Ledger Client
+
 **Purpose**: Track provenance of all evidence and claims, enabling verification and audit.
 
 #### Guardrails Service
+
 **Purpose**: Detect and block prompt injection, jailbreak attempts, and other adversarial inputs.
 
 ## API Reference
@@ -258,6 +267,7 @@ curl -X POST http://localhost:4000/api/ai-copilot/query \
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -304,6 +314,7 @@ curl -X POST http://localhost:4000/api/ai-copilot/query \
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -347,6 +358,7 @@ curl -X POST http://localhost:4000/api/ai-copilot/query \
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -415,14 +427,14 @@ Models are configurable per use case in `server/src/config/graphrag.ts`:
 export default {
   useCases: {
     default: {
-      llmModel: 'gpt-4',
+      llmModel: "gpt-4",
       tokenBudget: 1000,
       latencyBudgetMs: 5000,
       promptSchema: z.object({ question: z.string() }),
       outputSchema: GraphRAGResponseSchema,
     },
-    'quick-summary': {
-      llmModel: 'gpt-3.5-turbo',
+    "quick-summary": {
+      llmModel: "gpt-3.5-turbo",
       tokenBudget: 500,
       latencyBudgetMs: 2000,
       // ...
@@ -436,6 +448,7 @@ export default {
 ### Guardrails
 
 The system defends against:
+
 - **Prompt Injection**: Detection of "ignore previous instructions" and variants
 - **Jailbreak Attempts**: Blocking of DAN mode, developer mode, etc.
 - **Data Exfiltration**: Prevention of attempts to extract secrets or credentials
@@ -444,6 +457,7 @@ The system defends against:
 ### Redaction
 
 Automatic redaction of:
+
 - **PII**: Email, phone, SSN, passport numbers
 - **Financial**: Credit cards, bank accounts
 - **Sensitive**: IP addresses, user IDs, session tokens
@@ -451,6 +465,7 @@ Automatic redaction of:
 ### Provenance
 
 Every answer can be traced to:
+
 - **Source Entities**: Which graph entities contributed
 - **Evidence Records**: Original data sources
 - **Transform Chains**: How data was processed
@@ -459,6 +474,7 @@ Every answer can be traced to:
 ### Audit Trail
 
 All operations logged via Glass-Box Runs:
+
 - User, tenant, investigation context
 - Full prompt and parameters
 - Execution steps and timing
@@ -514,6 +530,7 @@ The following Prometheus metrics are exposed:
 ### Logging
 
 Structured JSON logs include:
+
 - Investigation, tenant, user IDs
 - Query text (if not sensitive)
 - Mode selection reasoning
@@ -523,6 +540,7 @@ Structured JSON logs include:
 ### Tracing
 
 OpenTelemetry spans capture:
+
 - Query orchestration flow
 - LLM API calls
 - Database queries
@@ -538,6 +556,7 @@ OpenTelemetry spans capture:
 **Symptom**: Queries fail with "blocked by guardrails" error
 
 **Solution**:
+
 - Review query for prompt injection patterns
 - Adjust `riskTolerance` if appropriate
 - Check guardrail logs for specific trigger
@@ -547,6 +566,7 @@ OpenTelemetry spans capture:
 **Symptom**: Queries take >5 seconds
 
 **Solution**:
+
 - Enable query preview to see cost estimates
 - Narrow focus with `focusEntityIds`
 - Reduce `maxHops` parameter
@@ -557,6 +577,7 @@ OpenTelemetry spans capture:
 **Symptom**: `provenanceVerified: false` in responses
 
 **Solution**:
+
 - Ensure entities have `evidenceId` property
 - Verify prov-ledger service is running
 - Check `provenanceContext` is provided in request
@@ -566,6 +587,7 @@ OpenTelemetry spans capture:
 **Symptom**: PII visible in responses despite redaction policy
 
 **Solution**:
+
 - Verify `redactionPolicy.enabled: true`
 - Check field patterns match redaction rules
 - Ensure classification level is appropriate
@@ -590,6 +612,7 @@ OpenTelemetry spans capture:
 ## Support
 
 For issues or questions:
+
 - **GitHub Issues**: https://github.com/BrianCLong/summit/issues
 - **Documentation**: https://intelgraph.io/docs/ai-copilot
 - **Team**: ai-copilot-team@intelgraph.io

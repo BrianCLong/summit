@@ -90,11 +90,8 @@ Replace the existing rate limit middleware in `services/api/src/app.ts`:
 // import { rateLimitMiddleware } from './middleware/rateLimit.js';
 
 // New imports:
-import {
-  rateLimitMiddleware,
-  graphqlRateLimitPlugin,
-} from './middleware/rateLimit.new.js';
-import { adminRateLimitRouter } from './routes/admin.rateLimit.new.js';
+import { rateLimitMiddleware, graphqlRateLimitPlugin } from "./middleware/rateLimit.new.js";
+import { adminRateLimitRouter } from "./routes/admin.rateLimit.new.js";
 
 // Add GraphQL plugin:
 const server = new ApolloServer({
@@ -107,7 +104,7 @@ const server = new ApolloServer({
 });
 
 // Mount admin routes:
-app.use('/api/admin/rate-limits', adminRateLimitRouter);
+app.use("/api/admin/rate-limits", adminRateLimitRouter);
 ```
 
 ### 4. Build the Package
@@ -128,8 +125,8 @@ pnpm test
 ### Express Middleware
 
 ```typescript
-import { createRateLimiter, createRateLimitMiddleware } from '@intelgraph/rate-limiter';
-import Redis from 'ioredis';
+import { createRateLimiter, createRateLimitMiddleware } from "@intelgraph/rate-limiter";
+import Redis from "ioredis";
 
 const redisClient = new Redis();
 const rateLimiter = createRateLimiter(redisClient);
@@ -138,13 +135,13 @@ const rateLimiter = createRateLimiter(redisClient);
 app.use(createRateLimitMiddleware(rateLimiter));
 
 // Endpoint-specific
-app.post('/api/auth/login', createEndpointRateLimiter(rateLimiter, '/auth/login'));
+app.post("/api/auth/login", createEndpointRateLimiter(rateLimiter, "/auth/login"));
 ```
 
 ### GraphQL Plugin
 
 ```typescript
-import { createGraphQLRateLimitPlugin } from '@intelgraph/rate-limiter';
+import { createGraphQLRateLimitPlugin } from "@intelgraph/rate-limiter";
 
 const server = new ApolloServer({
   typeDefs,
@@ -160,9 +157,9 @@ const server = new ApolloServer({
 ### Admin API
 
 ```typescript
-import { createAdminRateLimitRouter } from '@intelgraph/rate-limiter/dist/admin/routes.js';
+import { createAdminRateLimitRouter } from "@intelgraph/rate-limiter/dist/admin/routes.js";
 
-app.use('/api/admin/rate-limits', createAdminRateLimitRouter(rateLimiter, metricsCollector));
+app.use("/api/admin/rate-limits", createAdminRateLimitRouter(rateLimiter, metricsCollector));
 ```
 
 ## Monitoring
@@ -222,6 +219,7 @@ rate_limit_current_usage{tier="premium",endpoint="/api/analytics"} 0.75
 **Cause**: Too many keys in Redis
 
 **Solution**:
+
 ```bash
 # Check key count
 redis-cli --scan --pattern "ratelimit:*" | wc -l
@@ -235,6 +233,7 @@ redis-cli --scan --pattern "ratelimit:*" | wc -l
 **Cause**: Multiple Redis instances or clock skew
 
 **Solution**:
+
 - Ensure all servers connect to same Redis instance
 - Use NTP for clock synchronization
 - Consider using Redis Cluster for high availability
@@ -244,6 +243,7 @@ redis-cli --scan --pattern "ratelimit:*" | wc -l
 **Cause**: Shared IP addresses (NAT, proxies)
 
 **Solution**:
+
 ```typescript
 // Use authenticated user ID instead of IP
 keyGenerator: (req) => {
@@ -252,7 +252,7 @@ keyGenerator: (req) => {
   }
   // Fallback to IP
   return `ip:${req.ip}`;
-}
+};
 ```
 
 ### Performance Issues
@@ -260,6 +260,7 @@ keyGenerator: (req) => {
 **Cause**: Lua script execution time
 
 **Solution**:
+
 - Use pipeline for batch operations
 - Consider read replicas for read-heavy workloads
 - Profile with Redis SLOWLOG
@@ -343,11 +344,13 @@ appendonly no
 If issues occur:
 
 1. **Immediate**: Disable via environment variable
+
    ```bash
    RATE_LIMIT_ENABLED=false
    ```
 
 2. **Partial**: Increase limits to very high values
+
    ```bash
    RATE_LIMIT_MAX_REQUESTS=100000
    ```

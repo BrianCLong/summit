@@ -1,11 +1,13 @@
 # Military Capability Assessment
 
 ## Objective
+
 Assess military capabilities and force posture to understand regional power balances, deterrence stability, and potential for military conflict.
 
 ## Analysis Framework
 
 ### Capability Dimensions
+
 1. **Force Structure**
    - Active and reserve personnel
    - Major platforms (aircraft, ships, armor)
@@ -31,6 +33,7 @@ Assess military capabilities and force posture to understand regional power bala
    - Allocation priorities
 
 ### Civil-Military Relations
+
 - Civilian control strength
 - Military political role
 - Coup risk factors
@@ -38,6 +41,7 @@ Assess military capabilities and force posture to understand regional power bala
 - Institutional professionalism
 
 ### Regional Balance Assessment
+
 - Relative capabilities vs. neighbors
 - Alliance contributions
 - Power projection capacity
@@ -45,6 +49,7 @@ Assess military capabilities and force posture to understand regional power bala
 - Escalation risks
 
 ### Risk Indicators
+
 - Rapid militarization
 - Aggressive posture or rhetoric
 - Border deployments
@@ -52,18 +57,21 @@ Assess military capabilities and force posture to understand regional power bala
 - Arms race dynamics
 
 ### Stability Scoring
+
 - **HIGH STABILITY**: Civilian control, defensive posture, regional balance
 - **MODERATE**: Some tensions, stable civil-military relations
 - **LOW**: Arms racing, weak civilian control, high regional tensions
 - **CRITICAL**: Active conflict risk, coup potential, escalation likely
 
 ### Scenario Planning
+
 - **Continued Buildup**: Trajectory and implications
 - **Regional Competition**: Arms race scenarios
 - **Conflict Scenarios**: Most likely military contingencies
 - **Internal Instability**: Military intervention risks
 
 ### Ethical Framework
+
 - Support peaceful resolution of disputes
 - Promote civilian control of military
 - Encourage defensive sufficiency
@@ -71,6 +79,7 @@ Assess military capabilities and force posture to understand regional power bala
 - Focus on stability and deterrence
 
 ### Applications
+
 - Regional security analysis
 - Arms control planning
 - Diplomatic engagement strategy

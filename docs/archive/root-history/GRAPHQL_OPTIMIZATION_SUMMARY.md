@@ -13,6 +13,7 @@ This document summarizes the comprehensive GraphQL performance optimizations imp
 **Solution**: Implemented comprehensive DataLoader infrastructure for all major data sources
 
 **Files Created**:
+
 - `server/src/graphql/dataloaders/index.ts` - Main DataLoader factory and types
 - `server/src/graphql/dataloaders/entityLoader.ts` - Entity batch loading from Neo4j
 - `server/src/graphql/dataloaders/relationshipLoader.ts` - Relationship batch loading from Neo4j
@@ -21,6 +22,7 @@ This document summarizes the comprehensive GraphQL performance optimizations imp
 - `server/src/graphql/dataloaders/__tests__/entityLoader.test.ts` - Comprehensive tests
 
 **Impact**:
+
 - **90% reduction** in database queries for list operations
 - **50-70% reduction** in query execution time
 - Automatic batching with 10ms window
@@ -28,20 +30,19 @@ This document summarizes the comprehensive GraphQL performance optimizations imp
 - Max batch size: 100 items per query
 
 **Example Before/After**:
+
 ```typescript
 // BEFORE: 101 queries for 50 entities with relationships
 for (const id of entityIds) {
-  const entity = await fetchEntity(id);  // 50 queries
-  const rels = await fetchRelationships(id);  // 50 queries
+  const entity = await fetchEntity(id); // 50 queries
+  const rels = await fetchRelationships(id); // 50 queries
 }
 
 // AFTER: 2 batched queries
-const entities = await Promise.all(
-  entityIds.map(id => context.loaders.entityLoader.load(id))
-);  // 1 batched query
+const entities = await Promise.all(entityIds.map((id) => context.loaders.entityLoader.load(id))); // 1 batched query
 const relationships = await Promise.all(
-  entityIds.map(id => context.loaders.relationshipsBySourceLoader.load(id))
-);  // 1 batched query
+  entityIds.map((id) => context.loaders.relationshipsBySourceLoader.load(id))
+); // 1 batched query
 ```
 
 ### 2. Query Complexity Analysis & Cost Limits
@@ -51,9 +52,11 @@ const relationships = await Promise.all(
 **Solution**: Implemented query complexity analysis with role-based limits
 
 **Files Created**:
+
 - `server/src/graphql/plugins/queryComplexityPlugin.ts`
 
 **Features**:
+
 - Pre-execution query cost calculation
 - Role-based complexity limits:
   - Admin/Superuser: 5000
@@ -65,6 +68,7 @@ const relationships = await Promise.all(
 - Automatic rejection of queries exceeding limits
 
 **Impact**:
+
 - Prevents expensive queries from blocking the server
 - Fair resource allocation based on user role
 - Detailed logging of query complexity
@@ -77,9 +81,11 @@ const relationships = await Promise.all(
 **Solution**: Implemented APQ protocol with Redis caching
 
 **Files Created**:
+
 - `server/src/graphql/plugins/apqPlugin.ts`
 
 **Features**:
+
 - APQ protocol version 1 support
 - SHA-256 query hashing
 - Redis-backed distributed cache (with fallback to memory)
@@ -87,12 +93,14 @@ const relationships = await Promise.all(
 - Automatic cache management
 
 **Impact**:
+
 - **60% reduction** in network bandwidth for typical queries
 - Improved CDN caching (GET requests for hashed queries)
 - Reduced server-side parsing overhead
 - Better performance for mobile clients
 
 **Protocol Flow**:
+
 1. Client sends query hash
 2. Server returns `PersistedQueryNotFound` if not cached
 3. Client sends full query + hash
@@ -106,9 +114,11 @@ const relationships = await Promise.all(
 **Solution**: Implemented detailed performance monitoring plugin
 
 **Files Created**:
+
 - `server/src/graphql/plugins/performanceMonitoringPlugin.ts`
 
 **Metrics Tracked**:
+
 - Query duration
 - Resolver execution count
 - DataLoader statistics (calls, cache hits)
@@ -117,12 +127,14 @@ const relationships = await Promise.all(
 - Per-field resolution timing
 
 **Features**:
+
 - Automatic N+1 detection (warns when resolver called >10 times)
 - Performance metrics in response extensions (development)
 - Detailed logging with structured data
 - Integration with existing Prometheus metrics
 
 **Example Output**:
+
 ```json
 {
   "operationName": "GetInvestigation",
@@ -146,10 +158,12 @@ const relationships = await Promise.all(
 ### 5. Resolver Optimizations
 
 **Files Modified**:
+
 - `server/src/graphql/resolvers/entity.ts` - Migrated to use DataLoaders
 - `server/src/graphql/apollo-v5-server.ts` - Integrated all plugins
 
 **Changes**:
+
 - Entity resolver now uses `context.loaders.entityLoader`
 - Semantic search optimized to batch entity fetches
 - Apollo Server context includes DataLoaders
@@ -262,6 +276,7 @@ Added comprehensive tests:
 ### For Developers
 
 1. **Use DataLoaders in new resolvers**:
+
    ```typescript
    const entity = await context.loaders.entityLoader.load(id);
    ```
@@ -277,8 +292,9 @@ Added comprehensive tests:
 ### For Clients
 
 1. **Enable APQ** (optional but recommended):
+
    ```typescript
-   import { createPersistedQueryLink } from '@apollo/client/link/persisted-queries';
+   import { createPersistedQueryLink } from "@apollo/client/link/persisted-queries";
 
    const link = createPersistedQueryLink({ sha256 }).concat(httpLink);
    ```
@@ -343,16 +359,19 @@ rate(graphql_resolver_errors_total[5m])
 ## Rollout Plan
 
 ### Phase 1: Development Testing (Current)
+
 - All optimizations deployed to development
 - Monitor for issues
 - Gather performance metrics
 
 ### Phase 2: Staging Validation
+
 - Deploy to staging environment
 - Run load tests
 - Validate APQ with production-like traffic
 
 ### Phase 3: Production Rollout
+
 - Enable with feature flags
 - Gradual rollout by tenant
 - Monitor performance improvements
@@ -360,6 +379,7 @@ rate(graphql_resolver_errors_total[5m])
 ## Support & Troubleshooting
 
 See `server/docs/GRAPHQL_OPTIMIZATION.md` for:
+
 - Common issues and solutions
 - Performance debugging tips
 - Configuration tuning guide
@@ -377,6 +397,7 @@ This optimization implementation addresses all major GraphQL performance concern
 ✅ Fully documented and tested
 
 **Expected Production Impact**:
+
 - 90% reduction in database queries
 - 60% reduction in network bandwidth
 - 50-70% faster query execution

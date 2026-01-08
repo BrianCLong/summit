@@ -1,20 +1,13 @@
-const fs = require('node:fs');
-const { createResult } = require('./lib/reporting.cjs');
-const { getAddedLineNumbers, getChangedFiles } = require('./lib/git-utils.cjs');
+const fs = require("node:fs");
+const { createResult } = require("./lib/reporting.cjs");
+const { getAddedLineNumbers, getChangedFiles } = require("./lib/git-utils.cjs");
 
-const PRODUCTION_DIRECTORIES = [
-  /^src\//,
-  /^client\//,
-  /^apps\//,
-  /^services\//,
-  /^packages\//,
-];
+const PRODUCTION_DIRECTORIES = [/^src\//, /^client\//, /^apps\//, /^services\//, /^packages\//];
 
 function runConsoleLogScan({ baseRef }) {
-  const description =
-    'Prevents new console.log statements from landing in production code paths.';
+  const description = "Prevents new console.log statements from landing in production code paths.";
   const remediation =
-    'Replace console.log with structured logging utilities or remove the statement before committing.';
+    "Replace console.log with structured logging utilities or remove the statement before committing.";
   const changedFiles = getChangedFiles(baseRef).filter(isRelevantFile);
   const violations = [];
   for (const filePath of changedFiles) {
@@ -22,7 +15,7 @@ function runConsoleLogScan({ baseRef }) {
     if (addedLines.size === 0) {
       continue;
     }
-    const content = fs.readFileSync(filePath, 'utf8');
+    const content = fs.readFileSync(filePath, "utf8");
     const fileViolations = findConsoleLogViolations(content, addedLines);
     if (fileViolations.length > 0) {
       violations.push({ filePath, occurrences: fileViolations });
@@ -30,21 +23,21 @@ function runConsoleLogScan({ baseRef }) {
   }
   if (violations.length === 0) {
     return createResult({
-      name: 'console-log-scan',
+      name: "console-log-scan",
       description,
       passed: true,
-      details: ['No new console.log statements detected in production code.'],
+      details: ["No new console.log statements detected in production code."],
       remediation,
     });
   }
   const details = violations.map((violation) => {
     const occurrences = violation.occurrences
       .map((entry) => `line ${entry.line}: ${entry.code.trim()}`)
-      .join('; ');
+      .join("; ");
     return `${violation.filePath} → ${occurrences}`;
   });
   return createResult({
-    name: 'console-log-scan',
+    name: "console-log-scan",
     description,
     passed: false,
     details,
@@ -69,7 +62,7 @@ function findConsoleLogViolations(content, addedLines) {
 }
 
 function isRelevantFile(filePath) {
-  const normalized = filePath.replace(/\\\\/g, '/');
+  const normalized = filePath.replace(/\\\\/g, "/");
   if (!/(\.tsx?|\.jsx?)$/i.test(normalized)) {
     return false;
   }

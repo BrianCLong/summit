@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Card,
@@ -31,7 +31,7 @@ import {
   Paper,
   Switch,
   FormControlLabel,
-} from '@mui/material';
+} from "@mui/material";
 import {
   History,
   RestoreFromTrash,
@@ -59,8 +59,8 @@ import {
   Info,
   Backup,
   CloudDownload,
-} from '@mui/icons-material';
-import { formatDistanceToNow, format } from 'date-fns';
+} from "@mui/icons-material";
+import { formatDistanceToNow, format } from "date-fns";
 
 function GraphVersionHistory({
   graphId,
@@ -80,9 +80,9 @@ function GraphVersionHistory({
   const [tagDialog, setTagDialog] = useState(false);
   const [contextMenu, setContextMenu] = useState(null);
   const [selectedVersion, setSelectedVersion] = useState(null);
-  const [newVersionName, setNewVersionName] = useState('');
-  const [newVersionDescription, setNewVersionDescription] = useState('');
-  const [newTag, setNewTag] = useState('');
+  const [newVersionName, setNewVersionName] = useState("");
+  const [newVersionDescription, setNewVersionDescription] = useState("");
+  const [newTag, setNewTag] = useState("");
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
   const [showDetails, setShowDetails] = useState(false);
 
@@ -93,108 +93,105 @@ function GraphVersionHistory({
     setTimeout(() => {
       setVersions([
         {
-          id: 'v1.0.0',
-          name: 'Initial Investigation Setup',
-          description:
-            'Created base graph with initial entities and relationships',
+          id: "v1.0.0",
+          name: "Initial Investigation Setup",
+          description: "Created base graph with initial entities and relationships",
           timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7), // 7 days ago
-          author: 'John Analyst',
-          authorId: 'user1',
+          author: "John Analyst",
+          authorId: "user1",
           avatar: null,
           isCurrent: false,
           isStarred: true,
-          tags: ['milestone', 'initial'],
+          tags: ["milestone", "initial"],
           stats: {
             nodes: 45,
             edges: 67,
             changes: 112,
           },
           changes: [
-            { type: 'add', entity: 'Person', count: 15 },
-            { type: 'add', entity: 'Organization', count: 8 },
-            { type: 'add', entity: 'Location', count: 12 },
-            { type: 'add', entity: 'Connection', count: 67 },
+            { type: "add", entity: "Person", count: 15 },
+            { type: "add", entity: "Organization", count: 8 },
+            { type: "add", entity: "Location", count: 12 },
+            { type: "add", entity: "Connection", count: 67 },
           ],
-          size: '2.4 MB',
-          commitHash: 'a1b2c3d4',
+          size: "2.4 MB",
+          commitHash: "a1b2c3d4",
         },
         {
-          id: 'v1.1.0',
-          name: 'Added Financial Entities',
-          description:
-            'Integrated financial records and bank account information',
+          id: "v1.1.0",
+          name: "Added Financial Entities",
+          description: "Integrated financial records and bank account information",
           timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5), // 5 days ago
-          author: 'Sarah Detective',
-          authorId: 'user2',
+          author: "Sarah Detective",
+          authorId: "user2",
           avatar: null,
           isCurrent: false,
           isStarred: false,
-          tags: ['financial', 'enhancement'],
+          tags: ["financial", "enhancement"],
           stats: {
             nodes: 67,
             edges: 89,
             changes: 44,
           },
           changes: [
-            { type: 'add', entity: 'Bank Account', count: 12 },
-            { type: 'add', entity: 'Transaction', count: 22 },
-            { type: 'edit', entity: 'Person', count: 5 },
-            { type: 'add', entity: 'Connection', count: 22 },
+            { type: "add", entity: "Bank Account", count: 12 },
+            { type: "add", entity: "Transaction", count: 22 },
+            { type: "edit", entity: "Person", count: 5 },
+            { type: "add", entity: "Connection", count: 22 },
           ],
-          size: '3.1 MB',
-          commitHash: 'e5f6g7h8',
-          parentVersion: 'v1.0.0',
+          size: "3.1 MB",
+          commitHash: "e5f6g7h8",
+          parentVersion: "v1.0.0",
         },
         {
-          id: 'v1.2.0',
-          name: 'Geographic Analysis Update',
-          description:
-            'Added location clustering and geographic relationship mapping',
+          id: "v1.2.0",
+          name: "Geographic Analysis Update",
+          description: "Added location clustering and geographic relationship mapping",
           timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), // 2 days ago
-          author: 'Mike Operative',
-          authorId: 'user3',
+          author: "Mike Operative",
+          authorId: "user3",
           avatar: null,
           isCurrent: false,
           isStarred: true,
-          tags: ['geospatial', 'analysis'],
+          tags: ["geospatial", "analysis"],
           stats: {
             nodes: 89,
             edges: 134,
             changes: 67,
           },
           changes: [
-            { type: 'add', entity: 'Location Cluster', count: 8 },
-            { type: 'edit', entity: 'Location', count: 14 },
-            { type: 'add', entity: 'Geographic Link', count: 45 },
+            { type: "add", entity: "Location Cluster", count: 8 },
+            { type: "edit", entity: "Location", count: 14 },
+            { type: "add", entity: "Geographic Link", count: 45 },
           ],
-          size: '4.7 MB',
-          commitHash: 'i9j0k1l2',
-          parentVersion: 'v1.1.0',
+          size: "4.7 MB",
+          commitHash: "i9j0k1l2",
+          parentVersion: "v1.1.0",
         },
         {
-          id: 'v1.3.0',
-          name: 'Current Working Version',
-          description: 'Latest changes with sentiment analysis integration',
+          id: "v1.3.0",
+          name: "Current Working Version",
+          description: "Latest changes with sentiment analysis integration",
           timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-          author: 'John Analyst',
-          authorId: 'user1',
+          author: "John Analyst",
+          authorId: "user1",
           avatar: null,
           isCurrent: true,
           isStarred: false,
-          tags: ['current', 'ai-enhanced'],
+          tags: ["current", "ai-enhanced"],
           stats: {
             nodes: 112,
             edges: 178,
             changes: 44,
           },
           changes: [
-            { type: 'add', entity: 'Communication', count: 23 },
-            { type: 'edit', entity: 'Person', count: 12 },
-            { type: 'add', entity: 'Sentiment Link', count: 44 },
+            { type: "add", entity: "Communication", count: 23 },
+            { type: "edit", entity: "Person", count: 12 },
+            { type: "add", entity: "Sentiment Link", count: 44 },
           ],
-          size: '6.2 MB',
-          commitHash: 'm3n4o5p6',
-          parentVersion: 'v1.2.0',
+          size: "6.2 MB",
+          commitHash: "m3n4o5p6",
+          parentVersion: "v1.2.0",
         },
       ]);
       setLoading(false);
@@ -228,8 +225,8 @@ function GraphVersionHistory({
         description: newVersionDescription,
       });
       setCreateDialog(false);
-      setNewVersionName('');
-      setNewVersionDescription('');
+      setNewVersionName("");
+      setNewVersionDescription("");
     }
   };
 
@@ -237,7 +234,7 @@ function GraphVersionHistory({
     if (selectedVersion && newTag && onVersionTag) {
       onVersionTag(selectedVersion.id, newTag);
       setTagDialog(false);
-      setNewTag('');
+      setNewTag("");
       setSelectedVersion(null);
     }
   };
@@ -253,11 +250,11 @@ function GraphVersionHistory({
 
   const getChangeTypeIcon = (type) => {
     switch (type) {
-      case 'add':
+      case "add":
         return <Add color="success" />;
-      case 'remove':
+      case "remove":
         return <Remove color="error" />;
-      case 'edit':
+      case "edit":
         return <Edit color="warning" />;
       default:
         return <Changes />;
@@ -266,14 +263,14 @@ function GraphVersionHistory({
 
   const getChangeTypeColor = (type) => {
     switch (type) {
-      case 'add':
-        return 'success';
-      case 'remove':
-        return 'error';
-      case 'edit':
-        return 'warning';
+      case "add":
+        return "success";
+      case "remove":
+        return "error";
+      case "edit":
+        return "warning";
       default:
-        return 'default';
+        return "default";
     }
   };
 
@@ -282,29 +279,24 @@ function GraphVersionHistory({
       <Box>
         <Box
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
             mb: 1,
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
               {version.name}
             </Typography>
-            {version.isCurrent && (
-              <Chip label="Current" color="primary" size="small" />
-            )}
+            {version.isCurrent && <Chip label="Current" color="primary" size="small" />}
             {version.isStarred && <Star color="warning" fontSize="small" />}
           </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Typography variant="caption" color="text.secondary">
               {version.commitHash}
             </Typography>
-            <IconButton
-              size="small"
-              onClick={(e) => handleContextMenu(e, version)}
-            >
+            <IconButton size="small" onClick={(e) => handleContextMenu(e, version)}>
               <MoreVert />
             </IconButton>
           </Box>
@@ -314,12 +306,12 @@ function GraphVersionHistory({
           {version.description}
         </Typography>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
             <Person fontSize="small" />
             <Typography variant="caption">{version.author}</Typography>
           </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
             <Schedule fontSize="small" />
             <Typography variant="caption">
               {formatDistanceToNow(version.timestamp, { addSuffix: true })}
@@ -331,21 +323,21 @@ function GraphVersionHistory({
         </Box>
 
         {version.tags && version.tags.length > 0 && (
-          <Box sx={{ display: 'flex', gap: 0.5, mb: 1, flexWrap: 'wrap' }}>
+          <Box sx={{ display: "flex", gap: 0.5, mb: 1, flexWrap: "wrap" }}>
             {version.tags.map((tag) => (
               <Chip key={tag} label={tag} size="small" variant="outlined" />
             ))}
           </Box>
         )}
 
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1 }}>
-          <Typography variant="caption" sx={{ fontWeight: 'bold' }}>
+        <Box sx={{ display: "flex", gap: 1, alignItems: "center", mb: 1 }}>
+          <Typography variant="caption" sx={{ fontWeight: "bold" }}>
             {version.stats.nodes} nodes
           </Typography>
-          <Typography variant="caption" sx={{ fontWeight: 'bold' }}>
+          <Typography variant="caption" sx={{ fontWeight: "bold" }}>
             {version.stats.edges} edges
           </Typography>
-          <Typography variant="caption" sx={{ fontWeight: 'bold' }}>
+          <Typography variant="caption" sx={{ fontWeight: "bold" }}>
             {version.stats.changes} changes
           </Typography>
         </Box>
@@ -359,14 +351,10 @@ function GraphVersionHistory({
               <List dense>
                 {version.changes.map((change, index) => (
                   <ListItem key={index}>
-                    <ListItemAvatar>
-                      {getChangeTypeIcon(change.type)}
-                    </ListItemAvatar>
+                    <ListItemAvatar>{getChangeTypeIcon(change.type)}</ListItemAvatar>
                     <ListItemText
                       primary={
-                        <Box
-                          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                        >
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                           <Chip
                             label={change.type}
                             size="small"
@@ -386,7 +374,7 @@ function GraphVersionHistory({
           </Accordion>
         )}
 
-        <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
+        <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
           {!version.isCurrent && (
             <>
               <Button
@@ -410,14 +398,12 @@ function GraphVersionHistory({
             startIcon={<Compare />}
             onClick={() => {
               if (selectedVersions.includes(version)) {
-                setSelectedVersions((prev) =>
-                  prev.filter((v) => v.id !== version.id),
-                );
+                setSelectedVersions((prev) => prev.filter((v) => v.id !== version.id));
               } else if (selectedVersions.length < 2) {
                 setSelectedVersions((prev) => [...prev, version]);
               }
             }}
-            color={selectedVersions.includes(version) ? 'primary' : 'inherit'}
+            color={selectedVersions.includes(version) ? "primary" : "inherit"}
           >
             Compare
           </Button>
@@ -430,7 +416,7 @@ function GraphVersionHistory({
         sx={{
           mb: 2,
           border: version.isCurrent ? 2 : 1,
-          borderColor: version.isCurrent ? 'primary.main' : 'divider',
+          borderColor: version.isCurrent ? "primary.main" : "divider",
         }}
       >
         <CardContent>{ItemContent}</CardContent>
@@ -443,30 +429,23 @@ function GraphVersionHistory({
       {/* Header */}
       <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
           mb: 3,
         }}
       >
-        <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+        <Typography variant="h5" sx={{ fontWeight: "bold" }}>
           Version History
         </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: "flex", gap: 1 }}>
           <FormControlLabel
             control={
-              <Switch
-                checked={showDetails}
-                onChange={(e) => setShowDetails(e.target.checked)}
-              />
+              <Switch checked={showDetails} onChange={(e) => setShowDetails(e.target.checked)} />
             }
             label="Show details"
           />
-          <Button
-            variant="outlined"
-            startIcon={<Save />}
-            onClick={() => setCreateDialog(true)}
-          >
+          <Button variant="outlined" startIcon={<Save />} onClick={() => setCreateDialog(true)}>
             Create Snapshot
           </Button>
           {selectedVersions.length === 2 && (
@@ -509,9 +488,7 @@ function GraphVersionHistory({
         onClose={() => setContextMenu(null)}
         anchorReference="anchorPosition"
         anchorPosition={
-          contextMenu !== null
-            ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
-            : undefined
+          contextMenu !== null ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined
         }
       >
         <MenuItem onClick={() => setTagDialog(true)}>
@@ -527,12 +504,8 @@ function GraphVersionHistory({
             setContextMenu(null);
           }}
         >
-          {selectedVersion?.isStarred ? (
-            <StarBorder sx={{ mr: 1 }} />
-          ) : (
-            <Star sx={{ mr: 1 }} />
-          )}
-          {selectedVersion?.isStarred ? 'Unstar' : 'Star'}
+          {selectedVersion?.isStarred ? <StarBorder sx={{ mr: 1 }} /> : <Star sx={{ mr: 1 }} />}
+          {selectedVersion?.isStarred ? "Unstar" : "Star"}
         </MenuItem>
         <MenuItem>
           <Download sx={{ mr: 1 }} />
@@ -550,23 +523,17 @@ function GraphVersionHistory({
       </Menu>
 
       {/* Compare Dialog */}
-      <Dialog
-        open={compareDialog}
-        onClose={() => setCompareDialog(false)}
-        maxWidth="md"
-        fullWidth
-      >
+      <Dialog open={compareDialog} onClose={() => setCompareDialog(false)} maxWidth="md" fullWidth>
         <DialogTitle>Compare Versions</DialogTitle>
         <DialogContent>
           {selectedVersions.length === 2 && (
             <Box>
               <Typography variant="h6" gutterBottom>
-                Comparing: {selectedVersions[0].name} vs{' '}
-                {selectedVersions[1].name}
+                Comparing: {selectedVersions[0].name} vs {selectedVersions[1].name}
               </Typography>
               <Alert severity="info">
-                This will open a side-by-side comparison view showing the
-                differences between these two versions.
+                This will open a side-by-side comparison view showing the differences between these
+                two versions.
               </Alert>
             </Box>
           )}
@@ -580,12 +547,7 @@ function GraphVersionHistory({
       </Dialog>
 
       {/* Create Snapshot Dialog */}
-      <Dialog
-        open={createDialog}
-        onClose={() => setCreateDialog(false)}
-        maxWidth="sm"
-        fullWidth
-      >
+      <Dialog open={createDialog} onClose={() => setCreateDialog(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Create Version Snapshot</DialogTitle>
         <DialogContent>
           <TextField
@@ -619,12 +581,7 @@ function GraphVersionHistory({
       </Dialog>
 
       {/* Tag Dialog */}
-      <Dialog
-        open={tagDialog}
-        onClose={() => setTagDialog(false)}
-        maxWidth="xs"
-        fullWidth
-      >
+      <Dialog open={tagDialog} onClose={() => setTagDialog(false)} maxWidth="xs" fullWidth>
         <DialogTitle>Add Tag</DialogTitle>
         <DialogContent>
           <TextField
@@ -638,11 +595,7 @@ function GraphVersionHistory({
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setTagDialog(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={handleAddTag}
-            disabled={!newTag.trim()}
-          >
+          <Button variant="contained" onClick={handleAddTag} disabled={!newTag.trim()}>
             Add Tag
           </Button>
         </DialogActions>

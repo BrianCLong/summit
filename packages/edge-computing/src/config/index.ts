@@ -25,7 +25,7 @@ export interface EdgeConfig {
       cooldownPeriod: number; // seconds
     };
     loadBalancing: {
-      algorithm: 'round-robin' | 'least-connections' | 'ip-hash' | 'weighted';
+      algorithm: "round-robin" | "least-connections" | "ip-hash" | "weighted";
       healthCheckInterval: number;
       healthCheckTimeout: number;
       healthCheckRetries: number;
@@ -59,12 +59,12 @@ export interface EdgeConfig {
     maxBatchSize: number;
     modelCacheSizeMB: number;
     quantizationEnabled: boolean;
-    accelerator?: 'cpu' | 'gpu' | 'tpu' | 'npu';
+    accelerator?: "cpu" | "gpu" | "tpu" | "npu";
   };
   observability: {
     metricsEnabled: boolean;
     tracingEnabled: boolean;
-    loggingLevel: 'debug' | 'info' | 'warn' | 'error';
+    loggingLevel: "debug" | "info" | "warn" | "error";
     metricsPort: number;
     tracingEndpoint?: string;
   };
@@ -75,14 +75,14 @@ export interface EdgeConfig {
  */
 export const defaultEdgeConfig: EdgeConfig = {
   orchestrator: {
-    url: 'http://localhost',
-    port: 8080
+    url: "http://localhost",
+    port: 8080,
   },
   node: {
     heartbeatInterval: 30,
     healthCheckInterval: 60,
     metricsInterval: 60,
-    syncInterval: 300
+    syncInterval: 300,
   },
   cluster: {
     autoScaling: {
@@ -93,47 +93,47 @@ export const defaultEdgeConfig: EdgeConfig = {
       targetMemoryUtilization: 80,
       scaleUpThreshold: 80,
       scaleDownThreshold: 30,
-      cooldownPeriod: 300
+      cooldownPeriod: 300,
     },
     loadBalancing: {
-      algorithm: 'round-robin',
+      algorithm: "round-robin",
       healthCheckInterval: 30,
       healthCheckTimeout: 5,
-      healthCheckRetries: 3
-    }
+      healthCheckRetries: 3,
+    },
   },
   sync: {
     maxConcurrent: 5,
     maxRetries: 3,
     retryDelay: 1000,
     compressionEnabled: true,
-    encryptionEnabled: true
+    encryptionEnabled: true,
   },
   security: {
     tlsEnabled: true,
     mtlsEnabled: false,
-    tokenExpiry: 3600
+    tokenExpiry: 3600,
   },
   storage: {
-    dataPath: '/var/lib/edge/data',
-    logsPath: '/var/log/edge',
-    modelsPath: '/var/lib/edge/models',
+    dataPath: "/var/lib/edge/data",
+    logsPath: "/var/log/edge",
+    modelsPath: "/var/lib/edge/models",
     maxLogSize: 100 * 1024 * 1024, // 100MB
-    logRetentionDays: 7
+    logRetentionDays: 7,
   },
   ai: {
     inferenceTimeout: 5000,
     maxBatchSize: 32,
     modelCacheSizeMB: 1024,
     quantizationEnabled: true,
-    accelerator: 'cpu'
+    accelerator: "cpu",
   },
   observability: {
     metricsEnabled: true,
     tracingEnabled: true,
-    loggingLevel: 'info',
-    metricsPort: 9090
-  }
+    loggingLevel: "info",
+    metricsPort: 9090,
+  },
 };
 
 /**
@@ -145,42 +145,42 @@ export function mergeEdgeConfig(custom: Partial<EdgeConfig>): EdgeConfig {
     ...custom,
     orchestrator: {
       ...defaultEdgeConfig.orchestrator,
-      ...custom.orchestrator
+      ...custom.orchestrator,
     },
     node: {
       ...defaultEdgeConfig.node,
-      ...custom.node
+      ...custom.node,
     },
     cluster: {
       autoScaling: {
         ...defaultEdgeConfig.cluster.autoScaling,
-        ...custom.cluster?.autoScaling
+        ...custom.cluster?.autoScaling,
       },
       loadBalancing: {
         ...defaultEdgeConfig.cluster.loadBalancing,
-        ...custom.cluster?.loadBalancing
-      }
+        ...custom.cluster?.loadBalancing,
+      },
     },
     sync: {
       ...defaultEdgeConfig.sync,
-      ...custom.sync
+      ...custom.sync,
     },
     security: {
       ...defaultEdgeConfig.security,
-      ...custom.security
+      ...custom.security,
     },
     storage: {
       ...defaultEdgeConfig.storage,
-      ...custom.storage
+      ...custom.storage,
     },
     ai: {
       ...defaultEdgeConfig.ai,
-      ...custom.ai
+      ...custom.ai,
     },
     observability: {
       ...defaultEdgeConfig.observability,
-      ...custom.observability
-    }
+      ...custom.observability,
+    },
   };
 }
 
@@ -194,31 +194,31 @@ export function validateEdgeConfig(config: EdgeConfig): {
   const errors: string[] = [];
 
   if (config.node.heartbeatInterval < 1) {
-    errors.push('Heartbeat interval must be at least 1 second');
+    errors.push("Heartbeat interval must be at least 1 second");
   }
 
   if (config.cluster.autoScaling.minNodes < 1) {
-    errors.push('Minimum nodes must be at least 1');
+    errors.push("Minimum nodes must be at least 1");
   }
 
   if (config.cluster.autoScaling.maxNodes < config.cluster.autoScaling.minNodes) {
-    errors.push('Maximum nodes must be greater than or equal to minimum nodes');
+    errors.push("Maximum nodes must be greater than or equal to minimum nodes");
   }
 
   if (config.sync.maxConcurrent < 1) {
-    errors.push('Max concurrent syncs must be at least 1');
+    errors.push("Max concurrent syncs must be at least 1");
   }
 
   if (config.ai.inferenceTimeout < 100) {
-    errors.push('Inference timeout must be at least 100ms');
+    errors.push("Inference timeout must be at least 100ms");
   }
 
   if (config.ai.maxBatchSize < 1) {
-    errors.push('Max batch size must be at least 1');
+    errors.push("Max batch size must be at least 1");
   }
 
   return {
     valid: errors.length === 0,
-    errors
+    errors,
   };
 }

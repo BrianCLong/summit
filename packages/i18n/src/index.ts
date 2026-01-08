@@ -51,7 +51,7 @@ export type {
   ExtractedString,
   I18nHook,
   I18nProviderProps,
-} from './types';
+} from "./types";
 
 // Configuration
 export {
@@ -61,7 +61,7 @@ export {
   getLocaleConfig,
   getAvailableLocales,
   getLocalesByRegion,
-} from './config/locales';
+} from "./config/locales";
 
 export {
   initI18n,
@@ -69,19 +69,19 @@ export {
   loadTranslationBundle,
   getI18nInstance,
   isI18nInitialized,
-} from './config/i18next';
+} from "./config/i18next";
 
 // Hooks
-export { useI18n } from './hooks/useI18n';
+export { useI18n } from "./hooks/useI18n";
 
 // Components
-export { I18nProvider, withI18n } from './components/I18nProvider';
+export { I18nProvider, withI18n } from "./components/I18nProvider";
 export {
   LanguageSwitcher,
   FlagSelector,
   CompactLanguageSelector,
   FullLanguageSelector,
-} from './components/LanguageSwitcher';
+} from "./components/LanguageSwitcher";
 
 // Utilities
 export {
@@ -93,4 +93,4 @@ export {
   findUntranslatedStrings,
   validateICUFormat,
   generateCoverageReport,
-} from './utils/validation';
+} from "./utils/validation";

@@ -253,15 +253,15 @@ metadata:
 spec:
   match:
     kinds:
-      - apiGroups: ['']
-        kinds: ['Pod']
+      - apiGroups: [""]
+        kinds: ["Pod"]
   parameters:
     exemptImages:
-      - 'k8s.gcr.io/pause'
-      - 'rancher/pause'
+      - "k8s.gcr.io/pause"
+      - "rancher/pause"
     exemptNamespaces:
-      - 'kube-system'
-      - 'gatekeeper-system'
+      - "kube-system"
+      - "gatekeeper-system"
 ---
 # Require resource limits and requests
 apiVersion: templates.gatekeeper.sh/v1beta1
@@ -323,12 +323,12 @@ metadata:
 spec:
   match:
     kinds:
-      - apiGroups: ['']
-        kinds: ['Pod']
+      - apiGroups: [""]
+        kinds: ["Pod"]
   parameters:
     exemptNamespaces:
-      - 'kube-system'
-      - 'gatekeeper-system'
+      - "kube-system"
+      - "gatekeeper-system"
 ---
 # Disallow privileged containers
 apiVersion: templates.gatekeeper.sh/v1beta1
@@ -364,8 +364,8 @@ metadata:
 spec:
   match:
     kinds:
-      - apiGroups: ['']
-        kinds: ['Pod']
+      - apiGroups: [""]
+        kinds: ["Pod"]
 ---
 # Require security context
 apiVersion: templates.gatekeeper.sh/v1beta1
@@ -407,8 +407,8 @@ metadata:
 spec:
   match:
     kinds:
-      - apiGroups: ['']
-        kinds: ['Pod']
+      - apiGroups: [""]
+        kinds: ["Pod"]
 ---
 # Falco configuration for runtime security
 apiVersion: v1
@@ -531,8 +531,8 @@ spec:
       labels:
         app: falco
       annotations:
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: '8765'
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8765"
     spec:
       serviceAccountName: falco
       tolerations:
@@ -641,15 +641,15 @@ kind: ClusterRole
 metadata:
   name: falco
 rules:
-  - apiGroups: ['']
-    resources: ['nodes', 'pods', 'namespaces', 'services', 'events']
-    verbs: ['get', 'list', 'watch']
-  - apiGroups: ['apps']
-    resources: ['deployments', 'daemonsets', 'replicasets']
-    verbs: ['get', 'list', 'watch']
-  - apiGroups: ['extensions']
-    resources: ['deployments', 'daemonsets', 'replicasets']
-    verbs: ['get', 'list', 'watch']
+  - apiGroups: [""]
+    resources: ["nodes", "pods", "namespaces", "services", "events"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "daemonsets", "replicasets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["extensions"]
+    resources: ["deployments", "daemonsets", "replicasets"]
+    verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -672,8 +672,8 @@ metadata:
   labels:
     app: falco
   annotations:
-    prometheus.io/scrape: 'true'
-    prometheus.io/port: '8765'
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8765"
 spec:
   ports:
     - port: 8765
@@ -707,7 +707,7 @@ spec:
               - maestro-staging
               - maestro-prod
       validate:
-        message: 'Pod must define securityContext with runAsNonRoot=true'
+        message: "Pod must define securityContext with runAsNonRoot=true"
         pattern:
           spec:
             securityContext:
@@ -727,7 +727,7 @@ metadata:
   name: trivy-scanner
   namespace: security-system
 spec:
-  schedule: '0 2 * * *' # Run daily at 2 AM
+  schedule: "0 2 * * *" # Run daily at 2 AM
   jobTemplate:
     spec:
       template:
@@ -780,9 +780,9 @@ kind: ClusterRole
 metadata:
   name: trivy-scanner
 rules:
-  - apiGroups: ['']
-    resources: ['pods']
-    verbs: ['get', 'list']
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

@@ -37,6 +37,7 @@ The TypeScript API layer exposes these endpoints (see `server/src/etl-assistant-
 Infer schema from sample rows and suggest canonical mappings.
 
 **Request:**
+
 ```json
 {
   "sample_rows": [{"field1": "value1", ...}],
@@ -45,6 +46,7 @@ Infer schema from sample rows and suggest canonical mappings.
 ```
 
 **Response:**
+
 ```json
 {
   "fields": [
@@ -75,6 +77,7 @@ Infer schema from sample rows and suggest canonical mappings.
 Scan sample data for PII and recommend redactions.
 
 **Request:**
+
 ```json
 {
   "sample_rows": [{"ssn": "123-45-6789", ...}],
@@ -83,6 +86,7 @@ Scan sample data for PII and recommend redactions.
 ```
 
 **Response:**
+
 ```json
 {
   "pii_matches": [
@@ -108,6 +112,7 @@ Scan sample data for PII and recommend redactions.
 Verify source against license registry.
 
 **Request:**
+
 ```json
 {
   "source_name": "my-data-source",
@@ -118,6 +123,7 @@ Verify source against license registry.
 ```
 
 **Response:**
+
 ```json
 {
   "compliance_status": "allow",
@@ -146,18 +152,18 @@ The system maps to these canonical entity types:
 
 Detected PII categories with severity levels:
 
-| Category | Severity | Recommended Strategy |
-|----------|----------|----------------------|
-| SSN | Critical | Hash |
-| Credit Card | Critical | Hash |
-| Passport | Critical | Hash |
-| Medical | Critical | Encrypt |
-| Email | Medium | Tokenize |
-| Phone | Medium | Mask |
-| Date of Birth | Medium | Mask |
-| Full Name | Medium | Tokenize |
-| IP Address | Low | Mask |
-| Geolocation | Low | Mask |
+| Category      | Severity | Recommended Strategy |
+| ------------- | -------- | -------------------- |
+| SSN           | Critical | Hash                 |
+| Credit Card   | Critical | Hash                 |
+| Passport      | Critical | Hash                 |
+| Medical       | Critical | Encrypt              |
+| Email         | Medium   | Tokenize             |
+| Phone         | Medium   | Mask                 |
+| Date of Birth | Medium   | Mask                 |
+| Full Name     | Medium   | Tokenize             |
+| IP Address    | Low      | Mask                 |
+| Geolocation   | Low      | Mask                 |
 
 ## Redaction Strategies
 
@@ -227,6 +233,7 @@ python -m pytest tests/ -v
 ```
 
 Golden fixtures are in `tests/fixtures/`:
+
 - `sample_person_data.json`: Person entity test data
 - `sample_org_data.json`: Organization entity test data
 - `expected_person_mappings.json`: Expected mapping results
@@ -253,6 +260,7 @@ The ETL Assistant integrates with:
 ## Database Schema
 
 See `server/src/etl-assistant-api/migrations.sql` for:
+
 - `etl_configurations`: Stores mapping configurations
 - `etl_lineage_events`: Tracks configuration changes and usage
 

@@ -84,7 +84,7 @@ export function useSnapshotHandler(
   React.useEffect(() => {
     return register(id, {
       get: () => currentHandler.current.get(),
-      restore: (data) => currentHandler.current.restore(data),
+      restore: data => currentHandler.current.restore(data),
     })
   }, [id, register])
 }

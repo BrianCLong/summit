@@ -35,5 +35,5 @@ export function cosineSimilarity(a: number[], b: number[]): number {
 
 export type TokenEstimator = (text: string) => number;
 
-export const defaultTokenEstimator: TokenEstimator = text =>
+export const defaultTokenEstimator: TokenEstimator = (text) =>
   text.trim().length === 0 ? 0 : text.trim().split(/\s+/).length;

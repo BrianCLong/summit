@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Paper,
@@ -14,8 +14,8 @@ import {
   List,
   ListItem,
   ListItemText,
-} from '@mui/material';
-import { gql, useMutation, useLazyQuery } from '@apollo/client';
+} from "@mui/material";
+import { gql, useMutation, useLazyQuery } from "@apollo/client";
 
 const ENRICH_WIKI = gql`
   mutation Enrich($entityId: ID, $title: String!) {
@@ -33,16 +33,8 @@ const INGEST_RSS = gql`
 `;
 
 const SOCIAL_QUERY = gql`
-  mutation SocialQuery(
-    $provider: String!
-    $query: String!
-    $investigationId: ID!
-  ) {
-    socialQuery(
-      provider: $provider
-      query: $query
-      investigationId: $investigationId
-    )
+  mutation SocialQuery($provider: String!, $query: String!, $investigationId: ID!) {
+    socialQuery(provider: $provider, query: $query, investigationId: $investigationId)
   }
 `;
 
@@ -58,72 +50,61 @@ const GET_PROVENANCE = gql`
   }
 `;
 
-export default function EnrichmentPanel({
-  entityId,
-  entityLabel,
-  investigationId,
-}) {
-  const [provider, setProvider] = useState('wikipedia');
-  const [title, setTitle] = useState(entityLabel || '');
-  const [feedUrl, setFeedUrl] = useState('');
-  const [query, setQuery] = useState(entityLabel || '');
-  const [status, setStatus] = useState('idle');
-  const [message, setMessage] = useState('');
+export default function EnrichmentPanel({ entityId, entityLabel, investigationId }) {
+  const [provider, setProvider] = useState("wikipedia");
+  const [title, setTitle] = useState(entityLabel || "");
+  const [feedUrl, setFeedUrl] = useState("");
+  const [query, setQuery] = useState(entityLabel || "");
+  const [status, setStatus] = useState("idle");
+  const [message, setMessage] = useState("");
 
   const [enrichWiki] = useMutation(ENRICH_WIKI);
   const [ingestRSS] = useMutation(INGEST_RSS);
   const [socialQuery] = useMutation(SOCIAL_QUERY);
-  const [loadProv, { data: provData, refetch: refetchProv }] =
-    useLazyQuery(GET_PROVENANCE);
+  const [loadProv, { data: provData, refetch: refetchProv }] = useLazyQuery(GET_PROVENANCE);
 
   useEffect(() => {
-    if (entityId)
-      loadProv({ variables: { resourceType: 'entity', resourceId: entityId } });
+    if (entityId) loadProv({ variables: { resourceType: "entity", resourceId: entityId } });
   }, [entityId]);
 
   const handleRun = async () => {
     try {
-      setStatus('running');
-      setMessage('');
-      if (provider === 'wikipedia') {
-        if (!title) throw new Error('Title required');
+      setStatus("running");
+      setMessage("");
+      if (provider === "wikipedia") {
+        if (!title) throw new Error("Title required");
         await enrichWiki({ variables: { entityId, title } });
-        setMessage('Wikipedia enrichment complete.');
+        setMessage("Wikipedia enrichment complete.");
         await loadProv({
-          variables: { resourceType: 'entity', resourceId: entityId },
+          variables: { resourceType: "entity", resourceId: entityId },
         });
-      } else if (provider === 'rss') {
-        if (!feedUrl) throw new Error('Feed URL required');
+      } else if (provider === "rss") {
+        if (!feedUrl) throw new Error("Feed URL required");
         const res = await ingestRSS({ variables: { feedUrl } });
         setMessage(`Ingested ${res?.data?.ingestRSS || 0} RSS items.`);
       } else {
-        if (!query) throw new Error('Query required');
+        if (!query) throw new Error("Query required");
         const host =
-          provider === 'mastodon'
-            ? window.prompt(
-                'Mastodon host (e.g., mastodon.social)',
-                'mastodon.social',
-              )
+          provider === "mastodon"
+            ? window.prompt("Mastodon host (e.g., mastodon.social)", "mastodon.social")
             : null;
         const res = await socialQuery({
           variables: { provider, query, investigationId, host },
         });
-        setMessage(
-          `Queried ${provider}: ${res?.data?.socialQuery || 0} items processed.`,
-        );
+        setMessage(`Queried ${provider}: ${res?.data?.socialQuery || 0} items processed.`);
       }
-      setStatus('done');
+      setStatus("done");
       if (refetchProv) refetchProv();
     } catch (e) {
-      setStatus('error');
-      setMessage(e.message || 'Unknown error');
+      setStatus("error");
+      setMessage(e.message || "Unknown error");
     }
   };
 
   return (
     <Paper sx={{ p: 1.5, minWidth: 360 }}>
       <Typography variant="subtitle2">Enrichment</Typography>
-      <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+      <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
         <FormControl size="small" fullWidth>
           <InputLabel id="provider-label">Provider</InputLabel>
           <Select
@@ -141,7 +122,7 @@ export default function EnrichmentPanel({
           </Select>
         </FormControl>
       </Box>
-      {provider === 'wikipedia' && (
+      {provider === "wikipedia" && (
         <TextField
           size="small"
           label="Title"
@@ -151,7 +132,7 @@ export default function EnrichmentPanel({
           onChange={(e) => setTitle(e.target.value)}
         />
       )}
-      {provider === 'rss' && (
+      {provider === "rss" && (
         <TextField
           size="small"
           label="Feed URL"
@@ -161,7 +142,7 @@ export default function EnrichmentPanel({
           onChange={(e) => setFeedUrl(e.target.value)}
         />
       )}
-      {['reddit', 'mastodon', 'bluesky', 'x'].includes(provider) && (
+      {["reddit", "mastodon", "bluesky", "x"].includes(provider) && (
         <TextField
           size="small"
           label="Query"
@@ -171,7 +152,7 @@ export default function EnrichmentPanel({
           onChange={(e) => setQuery(e.target.value)}
         />
       )}
-      <Box sx={{ display: 'flex', gap: 1, mt: 1, alignItems: 'center' }}>
+      <Box sx={{ display: "flex", gap: 1, mt: 1, alignItems: "center" }}>
         <Button size="small" variant="contained" onClick={handleRun}>
           Run
         </Button>
@@ -179,18 +160,18 @@ export default function EnrichmentPanel({
           size="small"
           label={status}
           color={
-            status === 'done'
-              ? 'success'
-              : status === 'error'
-                ? 'error'
-                : status === 'running'
-                  ? 'warning'
-                  : 'default'
+            status === "done"
+              ? "success"
+              : status === "error"
+                ? "error"
+                : status === "running"
+                  ? "warning"
+                  : "default"
           }
         />
       </Box>
       {message && (
-        <Typography variant="caption" sx={{ display: 'block', mt: 1 }}>
+        <Typography variant="caption" sx={{ display: "block", mt: 1 }}>
           {message}
         </Typography>
       )}
@@ -200,7 +181,7 @@ export default function EnrichmentPanel({
         {(provData?.provenance || []).map((p) => (
           <ListItem key={p.id}>
             <ListItemText
-              primary={`${p.source}: ${p.uri || ''}`}
+              primary={`${p.source}: ${p.uri || ""}`}
               secondary={new Date(p.createdAt).toLocaleString()}
             />
           </ListItem>

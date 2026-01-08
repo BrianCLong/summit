@@ -5,7 +5,7 @@
  * Implements A2: Tenant Onboarding Flow
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 import {
   Tenant,
   TenantStatus,
@@ -28,12 +28,12 @@ import {
   VALID_STATUS_TRANSITIONS,
   DEFAULT_QUOTAS,
   DEFAULT_FEATURES,
-} from '../types/tenant.js';
-import { AuditService } from './audit.service.js';
-import { OPAService } from './opa.service.js';
-import { createLogger } from '../utils/logger.js';
+} from "../types/tenant.js";
+import { AuditService } from "./audit.service.js";
+import { OPAService } from "./opa.service.js";
+import { createLogger } from "../utils/logger.js";
 
-const logger = createLogger('tenant-service');
+const logger = createLogger("tenant-service");
 
 export interface TenantServiceConfig {
   defaultRegion: string;
@@ -59,7 +59,7 @@ export class TenantService {
     opaService: OPAService
   ) {
     this.config = {
-      defaultRegion: 'us-east-1',
+      defaultRegion: "us-east-1",
       defaultTier: TenantTier.STARTER,
       requireApprovalForDeletion: true,
       softDeleteOnly: true,
@@ -68,7 +68,7 @@ export class TenantService {
     this.auditService = auditService;
     this.opaService = opaService;
 
-    logger.info('TenantService initialized', { config: this.config });
+    logger.info("TenantService initialized", { config: this.config });
   }
 
   // ============================================================================
@@ -80,10 +80,10 @@ export class TenantService {
     actorId: string,
     context: RequestContext
   ): Promise<TenantLifecycleResult> {
-    logger.info('Creating tenant', { externalId: input.externalId, actorId });
+    logger.info("Creating tenant", { externalId: input.externalId, actorId });
 
     // Check OPA authorization
-    await this.opaService.checkPermission('tenant:create', actorId, context);
+    await this.opaService.checkPermission("tenant:create", actorId, context);
 
     // Validate external ID uniqueness
     const existing = Array.from(this.tenants.values()).find(
@@ -104,7 +104,7 @@ export class TenantService {
       status: TenantStatus.PENDING,
       tier,
       region: input.region || this.config.defaultRegion,
-      residencyClass: input.residencyClass || 'standard',
+      residencyClass: input.residencyClass || "standard",
       allowedRegions: input.allowedRegions || [input.region || this.config.defaultRegion],
       features: { ...DEFAULT_FEATURES[tier], ...input.features },
       quotas: { ...DEFAULT_QUOTAS[tier], ...input.quotas },
@@ -145,21 +145,24 @@ export class TenantService {
       tenant.id,
       undefined,
       TenantStatus.PENDING,
-      'Tenant created',
+      "Tenant created",
       actorId,
       context
     );
 
     // Audit log
     await this.auditService.logTenantEvent({
-      eventType: 'tenant.created',
+      eventType: "tenant.created",
       tenantId: tenant.id,
       actorId,
       details: { externalId: input.externalId, tier, region: tenant.region },
       context,
     });
 
-    logger.info('Tenant created successfully', { tenantId: tenant.id, externalId: tenant.externalId });
+    logger.info("Tenant created successfully", {
+      tenantId: tenant.id,
+      externalId: tenant.externalId,
+    });
 
     return {
       success: true,
@@ -169,8 +172,12 @@ export class TenantService {
     };
   }
 
-  async getTenant(tenantId: string, actorId: string, context: RequestContext): Promise<Tenant | null> {
-    await this.opaService.checkPermission('tenant:read', actorId, context, { tenantId });
+  async getTenant(
+    tenantId: string,
+    actorId: string,
+    context: RequestContext
+  ): Promise<Tenant | null> {
+    await this.opaService.checkPermission("tenant:read", actorId, context, { tenantId });
 
     const tenant = this.tenants.get(tenantId);
     if (!tenant) {
@@ -179,9 +186,9 @@ export class TenantService {
 
     // Block access to DELETED tenants except for admins
     if (tenant.status === TenantStatus.DELETED) {
-      const hasAdminAccess = await this.opaService.hasRole(actorId, 'global-admin', context);
+      const hasAdminAccess = await this.opaService.hasRole(actorId, "global-admin", context);
       if (!hasAdminAccess) {
-        throw new Error('Tenant not found');
+        throw new Error("Tenant not found");
       }
     }
 
@@ -195,7 +202,7 @@ export class TenantService {
     limit = 25,
     offset = 0
   ): Promise<PaginatedTenants> {
-    await this.opaService.checkPermission('tenant:list', actorId, context);
+    await this.opaService.checkPermission("tenant:list", actorId, context);
 
     let tenants = Array.from(this.tenants.values());
 
@@ -241,13 +248,13 @@ export class TenantService {
     actorId: string,
     context: RequestContext
   ): Promise<Tenant> {
-    await this.opaService.checkPermission('tenant:update', actorId, context, { tenantId });
+    await this.opaService.checkPermission("tenant:update", actorId, context, { tenantId });
 
     const tenant = await this.getTenantOrThrow(tenantId);
 
     // Can't update DELETED tenants
     if (tenant.status === TenantStatus.DELETED) {
-      throw new Error('Cannot update deleted tenant');
+      throw new Error("Cannot update deleted tenant");
     }
 
     const updatedTenant: Tenant = {
@@ -268,14 +275,14 @@ export class TenantService {
     this.tenants.set(tenantId, updatedTenant);
 
     await this.auditService.logTenantEvent({
-      eventType: 'tenant.updated',
+      eventType: "tenant.updated",
       tenantId,
       actorId,
       details: { changes: input },
       context,
     });
 
-    logger.info('Tenant updated', { tenantId, changes: Object.keys(input) });
+    logger.info("Tenant updated", { tenantId, changes: Object.keys(input) });
 
     return updatedTenant;
   }
@@ -290,7 +297,7 @@ export class TenantService {
     actorId: string,
     context: RequestContext
   ): Promise<TenantLifecycleResult> {
-    await this.opaService.checkPermission('tenant:activate', actorId, context, { tenantId });
+    await this.opaService.checkPermission("tenant:activate", actorId, context, { tenantId });
 
     const tenant = await this.getTenantOrThrow(tenantId);
 
@@ -310,20 +317,20 @@ export class TenantService {
       tenantId,
       tenant.status,
       TenantStatus.ACTIVE,
-      input.reason || 'Tenant activated',
+      input.reason || "Tenant activated",
       actorId,
       context
     );
 
     await this.auditService.logTenantEvent({
-      eventType: 'tenant.activated',
+      eventType: "tenant.activated",
       tenantId,
       actorId,
       details: { previousStatus: tenant.status, reason: input.reason },
       context,
     });
 
-    logger.info('Tenant activated', { tenantId, previousStatus: tenant.status });
+    logger.info("Tenant activated", { tenantId, previousStatus: tenant.status });
 
     return {
       success: true,
@@ -339,7 +346,7 @@ export class TenantService {
     actorId: string,
     context: RequestContext
   ): Promise<TenantLifecycleResult> {
-    await this.opaService.checkPermission('tenant:suspend', actorId, context, { tenantId });
+    await this.opaService.checkPermission("tenant:suspend", actorId, context, { tenantId });
 
     const tenant = await this.getTenantOrThrow(tenantId);
 
@@ -365,14 +372,14 @@ export class TenantService {
     );
 
     await this.auditService.logTenantEvent({
-      eventType: 'tenant.suspended',
+      eventType: "tenant.suspended",
       tenantId,
       actorId,
       details: { previousStatus: tenant.status, reason: input.reason },
       context,
     });
 
-    logger.warn('Tenant suspended', { tenantId, reason: input.reason });
+    logger.warn("Tenant suspended", { tenantId, reason: input.reason });
 
     return {
       success: true,
@@ -388,7 +395,7 @@ export class TenantService {
     actorId: string,
     context: RequestContext
   ): Promise<TenantLifecycleResult> {
-    await this.opaService.checkPermission('tenant:delete', actorId, context, { tenantId });
+    await this.opaService.checkPermission("tenant:delete", actorId, context, { tenantId });
 
     const tenant = await this.getTenantOrThrow(tenantId);
 
@@ -414,14 +421,14 @@ export class TenantService {
     );
 
     await this.auditService.logTenantEvent({
-      eventType: 'tenant.deletion_requested',
+      eventType: "tenant.deletion_requested",
       tenantId,
       actorId,
       details: { previousStatus: tenant.status, reason: input.reason },
       context,
     });
 
-    logger.warn('Tenant deletion requested', { tenantId, reason: input.reason });
+    logger.warn("Tenant deletion requested", { tenantId, reason: input.reason });
 
     return {
       success: true,
@@ -436,12 +443,12 @@ export class TenantService {
     actorId: string,
     context: RequestContext
   ): Promise<TenantLifecycleResult> {
-    await this.opaService.checkPermission('tenant:delete:confirm', actorId, context, { tenantId });
+    await this.opaService.checkPermission("tenant:delete:confirm", actorId, context, { tenantId });
 
     const tenant = await this.getTenantOrThrow(tenantId);
 
     if (tenant.status !== TenantStatus.DELETION_REQUESTED) {
-      throw new Error('Tenant must be in DELETION_REQUESTED status to complete deletion');
+      throw new Error("Tenant must be in DELETION_REQUESTED status to complete deletion");
     }
 
     if (this.config.softDeleteOnly) {
@@ -459,20 +466,20 @@ export class TenantService {
         tenantId,
         tenant.status,
         TenantStatus.DELETED,
-        'Deletion completed (soft delete)',
+        "Deletion completed (soft delete)",
         actorId,
         context
       );
 
       await this.auditService.logTenantEvent({
-        eventType: 'tenant.deleted',
+        eventType: "tenant.deleted",
         tenantId,
         actorId,
-        details: { deletionType: 'soft', previousStatus: tenant.status },
+        details: { deletionType: "soft", previousStatus: tenant.status },
         context,
       });
 
-      logger.warn('Tenant soft deleted', { tenantId });
+      logger.warn("Tenant soft deleted", { tenantId });
 
       return {
         success: true,
@@ -482,7 +489,7 @@ export class TenantService {
       };
     } else {
       // Hard delete - remove all data (not implemented in this sprint)
-      throw new Error('Hard delete not yet implemented. Only soft delete is available.');
+      throw new Error("Hard delete not yet implemented. Only soft delete is available.");
     }
   }
 
@@ -496,7 +503,7 @@ export class TenantService {
     actorId: string,
     context: RequestContext
   ): Promise<OnboardingResult> {
-    logger.info('Starting tenant onboarding', { externalId: input.externalId });
+    logger.info("Starting tenant onboarding", { externalId: input.externalId });
 
     // Step 1: Create tenant
     const createResult = await this.createTenant(input, actorId, context);
@@ -518,7 +525,7 @@ export class TenantService {
     this.onboardings.set(tenant.id, onboarding);
 
     await this.auditService.logTenantEvent({
-      eventType: 'tenant.onboarding_started',
+      eventType: "tenant.onboarding_started",
       tenantId: tenant.id,
       actorId,
       details: { adminCount: assignedAdmins.length },
@@ -541,13 +548,15 @@ export class TenantService {
     actorId: string,
     context: RequestContext
   ): Promise<OnboardingResult> {
-    await this.opaService.checkPermission('tenant:onboarding:complete', actorId, context, { tenantId });
+    await this.opaService.checkPermission("tenant:onboarding:complete", actorId, context, {
+      tenantId,
+    });
 
     const tenant = await this.getTenantOrThrow(tenantId);
     const onboarding = this.onboardings.get(tenantId);
 
     if (!onboarding) {
-      throw new Error('Onboarding record not found');
+      throw new Error("Onboarding record not found");
     }
 
     // Mark all steps complete
@@ -563,7 +572,7 @@ export class TenantService {
     if (tenant.status === TenantStatus.PENDING) {
       const activateResult = await this.activateTenant(
         tenantId,
-        { reason: 'Onboarding completed' },
+        { reason: "Onboarding completed" },
         actorId,
         context
       );
@@ -571,14 +580,14 @@ export class TenantService {
     }
 
     await this.auditService.logTenantEvent({
-      eventType: 'tenant.onboarding_completed',
+      eventType: "tenant.onboarding_completed",
       tenantId,
       actorId,
       details: { completedBy: actorId },
       context,
     });
 
-    logger.info('Tenant onboarding completed', { tenantId });
+    logger.info("Tenant onboarding completed", { tenantId });
 
     return {
       success: true,
@@ -594,7 +603,7 @@ export class TenantService {
     actorId: string,
     context: RequestContext
   ): Promise<TenantOnboarding | null> {
-    await this.opaService.checkPermission('tenant:onboarding:read', actorId, context, { tenantId });
+    await this.opaService.checkPermission("tenant:onboarding:read", actorId, context, { tenantId });
 
     return this.onboardings.get(tenantId) || null;
   }
@@ -609,7 +618,7 @@ export class TenantService {
     actorId: string,
     context: RequestContext
   ): Promise<TenantAdmin> {
-    await this.opaService.checkPermission('tenant:admin:assign', actorId, context, { tenantId });
+    await this.opaService.checkPermission("tenant:admin:assign", actorId, context, { tenantId });
 
     const tenant = await this.getTenantOrThrow(tenantId);
 
@@ -620,7 +629,7 @@ export class TenantService {
       email: input.email,
       displayName: input.displayName,
       role: input.role || TenantAdminRole.ADMIN,
-      status: 'INVITED',
+      status: "INVITED",
       invitedAt: new Date(),
       invitedBy: actorId,
       metadata: {},
@@ -631,14 +640,14 @@ export class TenantService {
     this.admins.set(tenantId, existingAdmins);
 
     await this.auditService.logTenantEvent({
-      eventType: 'tenant.admin_assigned',
+      eventType: "tenant.admin_assigned",
       tenantId,
       actorId,
       details: { adminEmail: input.email, role: admin.role },
       context,
     });
 
-    logger.info('Tenant admin assigned', { tenantId, adminEmail: input.email });
+    logger.info("Tenant admin assigned", { tenantId, adminEmail: input.email });
 
     return admin;
   }
@@ -648,7 +657,7 @@ export class TenantService {
     actorId: string,
     context: RequestContext
   ): Promise<TenantAdmin[]> {
-    await this.opaService.checkPermission('tenant:admin:list', actorId, context, { tenantId });
+    await this.opaService.checkPermission("tenant:admin:list", actorId, context, { tenantId });
 
     return this.admins.get(tenantId) || [];
   }
@@ -662,7 +671,9 @@ export class TenantService {
     actorId: string,
     context: RequestContext
   ): Promise<TenantStatusTransition[]> {
-    await this.opaService.checkPermission('tenant:transitions:read', actorId, context, { tenantId });
+    await this.opaService.checkPermission("tenant:transitions:read", actorId, context, {
+      tenantId,
+    });
 
     return this.transitions.get(tenantId) || [];
   }
@@ -684,7 +695,7 @@ export class TenantService {
     if (!validTransitions.includes(toStatus)) {
       throw new Error(
         `Invalid status transition from ${fromStatus} to ${toStatus}. ` +
-        `Valid transitions: ${validTransitions.join(', ') || 'none'}`
+          `Valid transitions: ${validTransitions.join(", ") || "none"}`
       );
     }
   }
@@ -737,7 +748,7 @@ export class TenantService {
       features: tenant.features,
       quotas: tenant.quotas,
       createdAt: new Date().toISOString(),
-      version: '1.0.0',
+      version: "1.0.0",
     };
   }
 
@@ -745,22 +756,22 @@ export class TenantService {
     const steps: string[] = [];
 
     if (!onboarding.stepMetadataComplete) {
-      steps.push('Complete tenant metadata configuration');
+      steps.push("Complete tenant metadata configuration");
     }
     if (!onboarding.stepAdminAssigned) {
-      steps.push('Assign at least one admin user');
+      steps.push("Assign at least one admin user");
     }
     if (!onboarding.stepFeaturesConfigured) {
-      steps.push('Configure feature flags');
+      steps.push("Configure feature flags");
     }
     if (!onboarding.stepQuotasSet) {
-      steps.push('Set quota limits');
+      steps.push("Set quota limits");
     }
     if (!onboarding.stepWelcomeSent) {
-      steps.push('Send welcome email to admins');
+      steps.push("Send welcome email to admins");
     }
     if (!onboarding.stepVerified) {
-      steps.push('Verify tenant configuration and complete onboarding');
+      steps.push("Verify tenant configuration and complete onboarding");
     }
 
     return steps;
@@ -787,7 +798,7 @@ export function getTenantService(
     tenantServiceInstance = new TenantService(config, auditService, opaService);
   }
   if (!tenantServiceInstance) {
-    throw new Error('TenantService not initialized. Call with dependencies first.');
+    throw new Error("TenantService not initialized. Call with dependencies first.");
   }
   return tenantServiceInstance;
 }

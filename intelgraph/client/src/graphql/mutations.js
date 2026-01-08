@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 export const DEPLOY_COLLABORATIVE = gql`
   mutation DeployCollaborative($ids: [ID!]!, $config: ConfigInput) {

@@ -1,10 +1,10 @@
-import { AccountLinkService, TenantLifecycle } from './accounts.ts';
-import { EntitlementService } from './entitlements.ts';
-import { IntegrationService } from './integrations.ts';
-import { ParityEngine } from './parity.ts';
-import { ReliabilityManager } from './reliability.ts';
-import { SupportManager } from './support.ts';
-import { UXParityService } from './ux.ts';
+import { AccountLinkService, TenantLifecycle } from "./accounts.ts";
+import { EntitlementService } from "./entitlements.ts";
+import { IntegrationService } from "./integrations.ts";
+import { ParityEngine } from "./parity.ts";
+import { ReliabilityManager } from "./reliability.ts";
+import { SupportManager } from "./support.ts";
+import { UXParityService } from "./ux.ts";
 
 export class DashboardBuilder {
   constructor(sources) {
@@ -17,8 +17,8 @@ export class DashboardBuilder {
         input.entity,
         input.legacy,
         input.target,
-        input.invariants,
-      ),
+        input.invariants
+      )
     );
 
     const phase = this.sources.lifecycle.getPhase(tenantId);
@@ -46,8 +46,7 @@ export class DashboardBuilder {
         invariantPassRate:
           parityReports.length === 0
             ? 1
-            : parityReports.reduce((sum, p) => sum + p.invariantPassRate, 0) /
-              parityReports.length,
+            : parityReports.reduce((sum, p) => sum + p.invariantPassRate, 0) / parityReports.length,
         rpoMinutes: metrics.rpoMinutes,
         rtoMinutes: metrics.rtoMinutes,
         errorDriftTrend: metrics.errorDriftTrend,
@@ -58,31 +57,39 @@ export class DashboardBuilder {
 
   deriveCutoverWindow(phase) {
     switch (phase) {
-      case 'canary':
-        return 'T-2 to T0';
-      case 'ramp':
-        return 'T0 to T+1';
-      case 'full':
-        return 'T+1 to T+3';
-      case 'stabilization':
-        return 'T+3 to T+14';
+      case "canary":
+        return "T-2 to T0";
+      case "ramp":
+        return "T0 to T+1";
+      case "full":
+        return "T+1 to T+3";
+      case "stabilization":
+        return "T+3 to T+14";
       default:
-        return 'T-14 planning';
+        return "T-14 planning";
     }
   }
 
   nextActionsForPhase(phase) {
     const actions = {
-      inventory: [{ action: 'inventory integrations and data mappings', owner: 'eng', eta: 'T-60' }],
-      mapping: [{ action: 'publish field mapping and entitlement preview', owner: 'data', eta: 'T-30' }],
-      'dry-run': [{ action: 'execute dry-run backfill with invariants', owner: 'data', eta: 'T-20' }],
-      canary: [{ action: 'run canary cutover with rollback proof', owner: 'sre', eta: 'T-2' }],
-      ramp: [{ action: 'ramp tenants and monitor drift', owner: 'sre', eta: 'T0' }],
-      full: [{ action: 'complete cutover and enforce sunset', owner: 'eng', eta: 'T+1' }],
-      stabilization: [
-        { action: 'reconcile drift and remove legacy auth/UI paths', owner: 'eng', eta: 'T+7' },
+      inventory: [
+        { action: "inventory integrations and data mappings", owner: "eng", eta: "T-60" },
       ],
-      decommissioned: [{ action: 'archive data and revoke credentials', owner: 'sec', eta: 'T+15' }],
+      mapping: [
+        { action: "publish field mapping and entitlement preview", owner: "data", eta: "T-30" },
+      ],
+      "dry-run": [
+        { action: "execute dry-run backfill with invariants", owner: "data", eta: "T-20" },
+      ],
+      canary: [{ action: "run canary cutover with rollback proof", owner: "sre", eta: "T-2" }],
+      ramp: [{ action: "ramp tenants and monitor drift", owner: "sre", eta: "T0" }],
+      full: [{ action: "complete cutover and enforce sunset", owner: "eng", eta: "T+1" }],
+      stabilization: [
+        { action: "reconcile drift and remove legacy auth/UI paths", owner: "eng", eta: "T+7" },
+      ],
+      decommissioned: [
+        { action: "archive data and revoke credentials", owner: "sec", eta: "T+15" },
+      ],
     };
     return actions[phase];
   }

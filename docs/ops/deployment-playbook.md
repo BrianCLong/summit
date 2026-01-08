@@ -268,8 +268,8 @@ metadata:
   name: maestro-lb
   namespace: maestro-prod
   annotations:
-    service.beta.kubernetes.io/aws-load-balancer-type: 'nlb'
-    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: 'true'
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
 spec:
   type: LoadBalancer
   ports:
@@ -290,8 +290,8 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
-    nginx.ingress.kubernetes.io/proxy-body-size: '50m'
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
 spec:
   tls:
     - hosts:
@@ -405,7 +405,7 @@ spec:
               name: http
           env:
             - name: NODE_ENV
-              value: 'production'
+              value: "production"
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
@@ -423,11 +423,11 @@ spec:
                   key: jwt-secret
           resources:
             requests:
-              memory: '512Mi'
-              cpu: '250m'
+              memory: "512Mi"
+              cpu: "250m"
             limits:
-              memory: '1Gi'
-              cpu: '500m'
+              memory: "1Gi"
+              cpu: "500m"
           livenessProbe:
             httpGet:
               path: /health
@@ -507,16 +507,16 @@ spec:
                   name: maestro-secrets
                   key: redis-url
             - name: WORKER_CONCURRENCY
-              value: '10'
+              value: "10"
             - name: MAX_MEMORY_MB
-              value: '1024'
+              value: "1024"
           resources:
             requests:
-              memory: '256Mi'
-              cpu: '200m'
+              memory: "256Mi"
+              cpu: "200m"
             limits:
-              memory: '1Gi'
-              cpu: '800m'
+              memory: "1Gi"
+              cpu: "800m"
           livenessProbe:
             exec:
               command:
@@ -722,33 +722,33 @@ echo "Environment $ENVIRONMENT configured successfully"
 
 ```typescript
 // health-checks.ts
-import express from 'express';
-import { createConnection } from 'typeorm';
-import Redis from 'ioredis';
+import express from "express";
+import { createConnection } from "typeorm";
+import Redis from "ioredis";
 
 const app = express();
 const redis = new Redis(process.env.REDIS_URL);
 
 // Liveness probe - basic service health
-app.get('/health', async (req, res) => {
+app.get("/health", async (req, res) => {
   try {
     // Check if the application is running
     res.status(200).json({
-      status: 'healthy',
+      status: "healthy",
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
-      version: process.env.VERSION || 'unknown',
+      version: process.env.VERSION || "unknown",
     });
   } catch (error) {
     res.status(503).json({
-      status: 'unhealthy',
+      status: "unhealthy",
       error: error.message,
     });
   }
 });
 
 // Readiness probe - dependencies check
-app.get('/ready', async (req, res) => {
+app.get("/ready", async (req, res) => {
   const checks = {
     database: false,
     redis: false,
@@ -758,11 +758,11 @@ app.get('/ready', async (req, res) => {
   try {
     // Check database connection
     const connection = await createConnection();
-    await connection.query('SELECT 1');
+    await connection.query("SELECT 1");
     checks.database = true;
     await connection.close();
   } catch (error) {
-    console.error('Database check failed:', error);
+    console.error("Database check failed:", error);
   }
 
   try {
@@ -770,30 +770,30 @@ app.get('/ready', async (req, res) => {
     await redis.ping();
     checks.redis = true;
   } catch (error) {
-    console.error('Redis check failed:', error);
+    console.error("Redis check failed:", error);
   }
 
   try {
     // Check filesystem
-    await fs.access('/tmp', fs.constants.W_OK);
+    await fs.access("/tmp", fs.constants.W_OK);
     checks.filesystem = true;
   } catch (error) {
-    console.error('Filesystem check failed:', error);
+    console.error("Filesystem check failed:", error);
   }
 
   const allHealthy = Object.values(checks).every((check) => check === true);
 
   res.status(allHealthy ? 200 : 503).json({
-    status: allHealthy ? 'ready' : 'not ready',
+    status: allHealthy ? "ready" : "not ready",
     checks,
     timestamp: new Date().toISOString(),
   });
 });
 
 // Metrics endpoint for Prometheus
-app.get('/metrics', (req, res) => {
+app.get("/metrics", (req, res) => {
   // Export Prometheus metrics
-  res.set('Content-Type', 'text/plain');
+  res.set("Content-Type", "text/plain");
   res.send(prometheusMetrics.register.metrics());
 });
 

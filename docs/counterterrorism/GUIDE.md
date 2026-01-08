@@ -9,6 +9,7 @@ The Counterterrorism Intelligence Platform is a comprehensive system for trackin
 ### Core Packages
 
 #### 1. Terrorist Tracking (@intelgraph/terrorist-tracking)
+
 - Monitor known terrorist organizations and leadership
 - Track organization hierarchies and affiliations
 - Map financing sources and recruitment networks
@@ -16,6 +17,7 @@ The Counterterrorism Intelligence Platform is a comprehensive system for trackin
 - Analyze organizational evolution and threats
 
 **Key Features:**
+
 - Organization profiling with leadership mapping
 - Affiliate and franchise tracking
 - Splinter organization identification
@@ -23,6 +25,7 @@ The Counterterrorism Intelligence Platform is a comprehensive system for trackin
 - Comprehensive organization profiles
 
 #### 2. Extremism Monitor (@intelgraph/extremism-monitor)
+
 - Detect attack planning indicators
 - Monitor weapons and explosives procurement
 - Track training activities and rehearsals
@@ -31,6 +34,7 @@ The Counterterrorism Intelligence Platform is a comprehensive system for trackin
 - Detect martyrdom materials and last testaments
 
 **Key Features:**
+
 - Multi-indicator attack detection
 - Risk assessment and probability scoring
 - Threat timeline estimation
@@ -38,6 +42,7 @@ The Counterterrorism Intelligence Platform is a comprehensive system for trackin
 - Real-time threat escalation
 
 #### 3. Radicalization Detection (@intelgraph/radicalization-detection)
+
 - Monitor radicalization pathways
 - Track online radicalization activities
 - Identify extremist content propagation
@@ -46,6 +51,7 @@ The Counterterrorism Intelligence Platform is a comprehensive system for trackin
 - Recommend intervention strategies
 
 **Key Features:**
+
 - Stage-based radicalization profiling
 - Online pathway analysis
 - Gateway content identification
@@ -53,6 +59,7 @@ The Counterterrorism Intelligence Platform is a comprehensive system for trackin
 - Deradicalization recommendations
 
 #### 4. Foreign Fighters (@intelgraph/foreign-fighters)
+
 - Track foreign fighters traveling to conflict zones
 - Monitor border crossings and travel patterns
 - Document combat experience and training
@@ -61,6 +68,7 @@ The Counterterrorism Intelligence Platform is a comprehensive system for trackin
 - Monitor skills transfer
 
 **Key Features:**
+
 - Journey mapping and facilitation networks
 - Returnee risk assessment
 - Reintegration program monitoring
@@ -68,6 +76,7 @@ The Counterterrorism Intelligence Platform is a comprehensive system for trackin
 - Border alert coordination
 
 #### 5. Terrorist Finance (@intelgraph/terrorist-finance)
+
 - Track terrorist funding sources
 - Monitor hawala and informal value transfer
 - Detect cryptocurrency usage
@@ -76,6 +85,7 @@ The Counterterrorism Intelligence Platform is a comprehensive system for trackin
 - Coordinate asset freezes and sanctions
 
 **Key Features:**
+
 - Multi-source financing tracking
 - Transaction pattern analysis
 - Money laundering detection
@@ -83,6 +93,7 @@ The Counterterrorism Intelligence Platform is a comprehensive system for trackin
 - Disruption impact assessment
 
 #### 6. Propaganda Analysis (@intelgraph/propaganda-analysis)
+
 - Analyze terrorist propaganda content
 - Track media production and distribution
 - Monitor narrative evolution
@@ -91,6 +102,7 @@ The Counterterrorism Intelligence Platform is a comprehensive system for trackin
 - Identify counter-narrative opportunities
 
 **Key Features:**
+
 - Content narrative analysis
 - Distribution network mapping
 - Impact assessment and metrics
@@ -100,9 +112,11 @@ The Counterterrorism Intelligence Platform is a comprehensive system for trackin
 ### Core Services
 
 #### Counterterrorism Service
+
 Integrates all intelligence packages into a unified operational platform.
 
 **Capabilities:**
+
 - Comprehensive threat picture generation
 - Interdiction opportunity identification
 - Disruption target analysis
@@ -112,6 +126,7 @@ Integrates all intelligence packages into a unified operational platform.
 - Operation effectiveness assessment
 
 **API Endpoints:**
+
 ```
 GET /api/threat-picture
 GET /api/interdiction-opportunities
@@ -120,9 +135,11 @@ GET /api/services/:service
 ```
 
 #### Threat Assessment Service
+
 Provides comprehensive threat assessment and risk analysis.
 
 **Capabilities:**
+
 - Multi-factor threat assessment
 - Attack probability calculation
 - Vulnerability analysis
@@ -132,6 +149,7 @@ Provides comprehensive threat assessment and risk analysis.
 - Risk matrix generation
 
 **API Endpoints:**
+
 ```
 GET /api/attack-probability/:targetId
 GET /api/geographic-threats
@@ -243,8 +261,8 @@ const interventions = await monitor.recommendInterventions('person-456');
 ### 4. Comprehensive Threat Assessment
 
 ```typescript
-import { CounterterrorismService } from '@intelgraph/counterterrorism-service';
-import { ThreatAssessmentService } from '@intelgraph/threat-assessment-service';
+import { CounterterrorismService } from "@intelgraph/counterterrorism-service";
+import { ThreatAssessmentService } from "@intelgraph/threat-assessment-service";
 
 const ctService = new CounterterrorismService();
 const taService = new ThreatAssessmentService();
@@ -256,7 +274,7 @@ const threatPicture = await ctService.getThreatPicture();
 const opportunities = await ctService.identifyInterdictionOpportunities();
 
 // Calculate attack probability
-const probability = await taService.calculateAttackProbability('target-001');
+const probability = await taService.calculateAttackProbability("target-001");
 
 // Generate risk matrix
 const matrix = await taService.generateRiskMatrix();
@@ -267,6 +285,7 @@ const matrix = await taService.generateRiskMatrix();
 ### 1. Legal and Ethical Compliance
 
 **Always ensure:**
+
 - Operations have proper legal authorization
 - Human rights compliance is verified
 - Oversight mechanisms are in place
@@ -299,10 +318,10 @@ Combine intelligence from multiple sources:
 const services = ctService.getServices();
 
 const [orgData, attackData, radicalData, financeData] = await Promise.all([
-  services.organizations.getOrganization('target-001'),
-  services.attacks.getEntityIndicators('target-001'),
-  services.radicalization.getIndividualAnalysis('target-001'),
-  services.finance.getFundingSources('target-001')
+  services.organizations.getOrganization("target-001"),
+  services.attacks.getEntityIndicators("target-001"),
+  services.radicalization.getIndividualAnalysis("target-001"),
+  services.finance.getFundingSources("target-001"),
 ]);
 
 // Fuse intelligence for comprehensive picture
@@ -310,7 +329,7 @@ const fusedIntelligence = {
   organization: orgData,
   attackIndicators: attackData,
   radicalization: radicalData,
-  financing: financeData
+  financing: financeData,
 };
 ```
 
@@ -337,31 +356,34 @@ setInterval(async () => {
 ```typescript
 // Share intelligence with partner agencies
 await ctService.shareInformation({
-  id: 'share-001',
-  fromAgency: 'FBI',
-  toAgency: 'DHS',
-  classification: 'SECRET//NOFORN',
-  content: 'Intelligence package on threat...',
+  id: "share-001",
+  fromAgency: "FBI",
+  toAgency: "DHS",
+  classification: "SECRET//NOFORN",
+  content: "Intelligence package on threat...",
   shared: new Date(),
-  acknowledged: false
+  acknowledged: false,
 });
 ```
 
 ## Security Considerations
 
 ### Access Control
+
 - Implement role-based access control (RBAC)
 - Enforce need-to-know principles
 - Maintain audit logs of all access
 - Regular access reviews
 
 ### Data Protection
+
 - Encrypt data at rest and in transit
 - Implement secure key management
 - Regular security assessments
 - Incident response procedures
 
 ### Classification Handling
+
 - Properly mark classified information
 - Implement classification-appropriate controls
 - Secure communications channels
@@ -370,6 +392,7 @@ await ctService.shareInformation({
 ## Integration Points
 
 ### External Systems
+
 - Law enforcement databases
 - Intelligence community systems
 - Border security systems
@@ -377,6 +400,7 @@ await ctService.shareInformation({
 - International partners
 
 ### Data Sources
+
 - HUMINT (Human Intelligence)
 - SIGINT (Signals Intelligence)
 - OSINT (Open Source Intelligence)
@@ -386,6 +410,7 @@ await ctService.shareInformation({
 ## Performance Optimization
 
 ### Caching Strategy
+
 ```typescript
 // Implement caching for frequently accessed data
 const cache = new Map();
@@ -402,18 +427,18 @@ async function getCachedThreatAssessment(targetId: string) {
 ```
 
 ### Batch Processing
+
 ```typescript
 // Process multiple assessments in batch
-const targetIds = ['target-001', 'target-002', 'target-003'];
+const targetIds = ["target-001", "target-002", "target-003"];
 
-const assessments = await Promise.all(
-  targetIds.map(id => taService.getAssessment(id))
-);
+const assessments = await Promise.all(targetIds.map((id) => taService.getAssessment(id)));
 ```
 
 ## Monitoring and Alerting
 
 ### Health Checks
+
 ```bash
 # Check service health
 curl http://localhost:3020/health  # Counterterrorism service
@@ -421,6 +446,7 @@ curl http://localhost:3021/health  # Threat assessment service
 ```
 
 ### Metrics to Track
+
 - Threat detection rates
 - False positive rates
 - Response times
@@ -430,12 +456,14 @@ curl http://localhost:3021/health  # Threat assessment service
 ## Support and Maintenance
 
 ### Regular Updates
+
 - Update threat indicators database
 - Refresh organization profiles
 - Update vulnerability assessments
 - Review and update risk models
 
 ### Training
+
 - Regular operator training
 - Scenario-based exercises
 - Red team assessments

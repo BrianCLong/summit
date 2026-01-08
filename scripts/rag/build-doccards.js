@@ -1,15 +1,15 @@
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
-const crypto = require('crypto');
+const fs = require("fs");
+const path = require("path");
+const matter = require("gray-matter");
+const crypto = require("crypto");
 
 function mdToPlain(md) {
   return md
-    .replace(/```[\s\S]*?```/g, (m) => m.replace(/`/g, '')) // keep code text
-    .replace(/<[^>]+>/g, '')
-    .replace(/^>\s?/gm, '') // strip blockquotes
-    .replace(/[\[\]]+([^[\]]+)[\]\]]+\(([^)]+)\)/g, '$1') // links -> text
-    .replace(/\![^[]*\]\([^)]*\)/g, ''); // images
+    .replace(/```[\s\S]*?```/g, (m) => m.replace(/`/g, "")) // keep code text
+    .replace(/<[^>]+>/g, "")
+    .replace(/^>\s?/gm, "") // strip blockquotes
+    .replace(/[\[\]]+([^[\]]+)[\]\]]+\(([^)]+)\)/g, "$1") // links -> text
+    .replace(/\![^[]*\]\([^)]*\)/g, ""); // images
 }
 
 function chunkText(text, max = 900) {
@@ -21,18 +21,18 @@ function chunkText(text, max = 900) {
     cur.push(w);
     len += w.length + 1;
     if (len > max) {
-      chunks.push(cur.join(' '));
+      chunks.push(cur.join(" "));
       cur = [];
       len = 0;
     }
   }
-  if (cur.length) chunks.push(cur.join(' '));
+  if (cur.length) chunks.push(cur.join(" "));
   return chunks.filter((c) => c.trim().length > 0);
 }
 
-const outDir = 'docs/ops/rag';
+const outDir = "docs/ops/rag";
 fs.mkdirSync(outDir, { recursive: true });
-const outPath = path.join(outDir, 'doccards.jsonl');
+const outPath = path.join(outDir, "doccards.jsonl");
 const fp = fs.createWriteStream(outPath);
 let count = 0;
 (function walk(d) {
@@ -42,14 +42,14 @@ let count = 0;
     if (s.isDirectory()) walk(p);
     else if (/\.mdx?$/.test(f)) emit(p);
   }
-})('docs');
+})("docs");
 
 function emit(p) {
-  const raw = fs.readFileSync(p, 'utf8');
+  const raw = fs.readFileSync(p, "utf8");
   const g = matter(raw);
-  const slug = p.replace(/^docs\//, '').replace(/\.mdx?$/, '');
+  const slug = p.replace(/^docs\//, "").replace(/\.mdx?$/, "");
   const title = g.data.title || path.basename(p);
-  const version = g.data.version || 'latest';
+  const version = g.data.version || "latest";
   const tags = g.data.tags || [];
   const plain = mdToPlain(g.content);
   const paragraphs = plain
@@ -61,7 +61,7 @@ function emit(p) {
     const chunks = chunkText(para, 900);
     for (const c of chunks) {
       const id = `${slug}#c${ordinal++}`;
-      const hash = crypto.createHmac('sha256', c).update(c).digest('hex');
+      const hash = crypto.createHmac("sha256", c).update(c).digest("hex");
       const rec = {
         id,
         slug,
@@ -74,7 +74,7 @@ function emit(p) {
         tokens: Math.ceil(c.length / 4),
         tags,
       };
-      fp.write(JSON.stringify(rec) + '\n');
+      fp.write(JSON.stringify(rec) + "\n");
       count++;
     }
   }
@@ -82,8 +82,8 @@ function emit(p) {
 
 fp.end(() => {
   fs.writeFileSync(
-    path.join(outDir, 'manifest.json'),
-    JSON.stringify({ created: new Date().toISOString(), count }, null, 2),
+    path.join(outDir, "manifest.json"),
+    JSON.stringify({ created: new Date().toISOString(), count }, null, 2)
   );
-  console.log('DocCards:', count);
+  console.log("DocCards:", count);
 });

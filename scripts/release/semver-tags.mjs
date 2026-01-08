@@ -6,14 +6,14 @@
  * @returns {{major: number, minor: number, patch: number, channel: 'ga' | 'rc', rc?: number}}
  */
 export function parseTag(tag) {
-  if (!tag.startsWith('v')) {
+  if (!tag.startsWith("v")) {
     throw new Error(`Invalid tag format: ${tag}. Must start with 'v'.`);
   }
 
   const tagWithoutV = tag.slice(1);
-  const parts = tagWithoutV.split('-rc.');
+  const parts = tagWithoutV.split("-rc.");
 
-  const [major, minor, patch] = parts[0].split('.').map(Number);
+  const [major, minor, patch] = parts[0].split(".").map(Number);
 
   if (isNaN(major) || isNaN(minor) || isNaN(patch)) {
     throw new Error(`Invalid tag format: ${tag}. Could not parse version numbers.`);
@@ -24,10 +24,10 @@ export function parseTag(tag) {
     if (isNaN(rc)) {
       throw new Error(`Invalid tag format: ${tag}. Could not parse RC number.`);
     }
-    return { major, minor, patch, channel: 'rc', rc };
+    return { major, minor, patch, channel: "rc", rc };
   }
 
-  return { major, minor, patch, channel: 'ga' };
+  return { major, minor, patch, channel: "ga" };
 }
 
 /**
@@ -51,14 +51,14 @@ export function compareTags(a, b) {
   }
 
   // GA release is > than RC release
-  if (tagA.channel === 'ga' && tagB.channel === 'rc') {
+  if (tagA.channel === "ga" && tagB.channel === "rc") {
     return 1;
   }
-  if (tagA.channel === 'rc' && tagB.channel === 'ga') {
+  if (tagA.channel === "rc" && tagB.channel === "ga") {
     return -1;
   }
 
-  if (tagA.channel === 'rc' && tagB.channel === 'rc') {
+  if (tagA.channel === "rc" && tagB.channel === "rc") {
     if (tagA.rc !== tagB.rc) {
       return tagA.rc > tagB.rc ? 1 : -1;
     }

@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { geofences, layers } from '../data';
-import { featureFlags } from '../config';
-import { useTriPane } from './EventBus';
+import React, { useEffect, useMemo, useState } from "react";
+import { geofences, layers } from "../data";
+import { featureFlags } from "../config";
+import { useTriPane } from "./EventBus";
 
 interface PaletteAction {
   id: string;
@@ -14,20 +14,20 @@ interface PaletteAction {
 export function CommandPalette() {
   const { state, dispatch } = useTriPane();
   const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     const handleKey = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
         setOpen((prev) => !prev);
       }
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         setOpen(false);
       }
     };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
   }, []);
 
   const actions: PaletteAction[] = useMemo(
@@ -35,59 +35,61 @@ export function CommandPalette() {
       ...(featureFlags.savedViews
         ? [
             {
-              id: 'save-view',
-              label: 'Save current view',
-              hint: 'Capture time brush, pins, and layout',
-              shortcut: '↵',
+              id: "save-view",
+              label: "Save current view",
+              hint: "Capture time brush, pins, and layout",
+              shortcut: "↵",
               run: () => {
                 const name = `View ${state.savedViews.length + 1}`;
-                dispatch({ type: 'saveView', payload: name });
-                setQuery('');
+                dispatch({ type: "saveView", payload: name });
+                setQuery("");
                 setOpen(false);
-              }
+              },
             },
             ...state.savedViews.map((view) => ({
               id: `restore-${view.id}`,
               label: `Restore: ${view.snapshot.name}`,
               hint: `${view.snapshot.timeRange.start}h → ${view.snapshot.timeRange.end} · layout ${view.snapshot.layoutMode}`,
-              run: () => dispatch({ type: 'loadView', payload: view.id })
-            }))
+              run: () => dispatch({ type: "loadView", payload: view.id }),
+            })),
           ]
         : []),
       {
-        id: 'layout-grid',
-        label: 'Layout: Grid',
-        hint: 'Spatial grid for dense exploration',
-        run: () => dispatch({ type: 'setLayoutMode', payload: 'grid' })
+        id: "layout-grid",
+        label: "Layout: Grid",
+        hint: "Spatial grid for dense exploration",
+        run: () => dispatch({ type: "setLayoutMode", payload: "grid" }),
       },
       {
-        id: 'layout-timeline',
-        label: 'Layout: Timeline',
-        hint: 'Align nodes along time axis for brushing',
-        run: () => dispatch({ type: 'setLayoutMode', payload: 'timeline' })
+        id: "layout-timeline",
+        label: "Layout: Timeline",
+        hint: "Align nodes along time axis for brushing",
+        run: () => dispatch({ type: "setLayoutMode", payload: "timeline" }),
       },
       ...layers.map((layer) => ({
         id: `layer-${layer.id}`,
-        label: `${state.activeLayers.includes(layer.id) ? 'Disable' : 'Enable'} ${layer.label}`,
+        label: `${state.activeLayers.includes(layer.id) ? "Disable" : "Enable"} ${layer.label}`,
         hint: layer.description,
-        run: () => dispatch({ type: 'toggleLayer', payload: layer.id })
+        run: () => dispatch({ type: "toggleLayer", payload: layer.id }),
       })),
       ...geofences.map((fence) => ({
         id: `geofence-${fence.id}`,
         label: `Focus ${fence.name}`,
         hint: fence.description,
-        run: () => dispatch({ type: 'setGeofence', payload: fence.id })
+        run: () => dispatch({ type: "setGeofence", payload: fence.id }),
       })),
       {
-        id: 'clear-geofence',
-        label: 'Clear geofence',
-        run: () => dispatch({ type: 'setGeofence', payload: null })
-      }
+        id: "clear-geofence",
+        label: "Clear geofence",
+        run: () => dispatch({ type: "setGeofence", payload: null }),
+      },
     ],
     [dispatch, state.activeLayers, state.savedViews]
   );
 
-  const filtered = actions.filter((action) => action.label.toLowerCase().includes(query.toLowerCase()));
+  const filtered = actions.filter((action) =>
+    action.label.toLowerCase().includes(query.toLowerCase())
+  );
 
   return (
     <div>
@@ -138,12 +140,18 @@ export function CommandPalette() {
                       <p className="font-semibold text-sand">{action.label}</p>
                       {action.hint && <p className="text-xs text-sand/70">{action.hint}</p>}
                     </div>
-                    {action.shortcut && <span className="rounded bg-ink px-2 py-1 text-[11px] text-sand/70">{action.shortcut}</span>}
+                    {action.shortcut && (
+                      <span className="rounded bg-ink px-2 py-1 text-[11px] text-sand/70">
+                        {action.shortcut}
+                      </span>
+                    )}
                   </button>
                 </li>
               ))}
               {filtered.length === 0 && (
-                <li className="rounded-lg border border-sand/10 bg-horizon/60 px-3 py-2 text-sm text-sand/70">No actions.</li>
+                <li className="rounded-lg border border-sand/10 bg-horizon/60 px-3 py-2 text-sm text-sand/70">
+                  No actions.
+                </li>
               )}
             </ul>
           </div>

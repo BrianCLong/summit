@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Alert,
@@ -13,27 +13,27 @@ import {
   Button,
   Tooltip,
   alpha,
-} from '@mui/material';
-import Grid from '@mui/material/Grid';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
-import TimelineIcon from '@mui/icons-material/Timeline';
-import ChecklistIcon from '@mui/icons-material/Checklist';
-import SyncAltIcon from '@mui/icons-material/SyncAlt';
-import InsightsIcon from '@mui/icons-material/Insights';
+} from "@mui/material";
+import Grid from "@mui/material/Grid";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
+import TimelineIcon from "@mui/icons-material/Timeline";
+import ChecklistIcon from "@mui/icons-material/Checklist";
+import SyncAltIcon from "@mui/icons-material/SyncAlt";
+import InsightsIcon from "@mui/icons-material/Insights";
 import {
   createDefaultMissionPresets,
   createLaunchableOrchestrator,
   MissionPreset,
   ModuleSnapshot,
   OrchestratorSnapshot,
-} from '../../services/orchestrator';
+} from "../../services/orchestrator";
 
 type MissionPresetWithIcon = MissionPreset & { icon: React.ReactNode };
 
 const formatUptime = (uptimeMs: number): string => {
   if (!uptimeMs || uptimeMs <= 0) {
-    return '0s';
+    return "0s";
   }
   const seconds = Math.floor(uptimeMs / 1000);
   const minutes = Math.floor(seconds / 60);
@@ -44,30 +44,25 @@ const formatUptime = (uptimeMs: number): string => {
   return `${minutes}m ${remainingSeconds}s`;
 };
 
-const moduleStateColor: Record<
-  string,
-  'success' | 'warning' | 'error' | 'default'
-> = {
-  running: 'success',
-  starting: 'warning',
-  error: 'error',
-  offline: 'default',
+const moduleStateColor: Record<string, "success" | "warning" | "error" | "default"> = {
+  running: "success",
+  starting: "warning",
+  error: "error",
+  offline: "default",
 };
 
 const presetIcons: Record<string, React.ReactNode> = {
-  'launch-readiness': <RocketLaunchIcon fontSize="small" />,
-  'stability-check': <ChecklistIcon fontSize="small" />,
-  'insight-sync': <InsightsIcon fontSize="small" />,
-  'rapid-response': <SyncAltIcon fontSize="small" />,
+  "launch-readiness": <RocketLaunchIcon fontSize="small" />,
+  "stability-check": <ChecklistIcon fontSize="small" />,
+  "insight-sync": <InsightsIcon fontSize="small" />,
+  "rapid-response": <SyncAltIcon fontSize="small" />,
 };
 
 const metricValue = (value: number): string => `${Math.round(value * 100) / 100}`;
 
 const OrchestratorDashboard: React.FC = () => {
   const orchestrator = useMemo(() => createLaunchableOrchestrator(), []);
-  const [snapshot, setSnapshot] = useState<OrchestratorSnapshot>(
-    orchestrator.getSnapshot(),
-  );
+  const [snapshot, setSnapshot] = useState<OrchestratorSnapshot>(orchestrator.getSnapshot());
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
   const [initialized, setInitialized] = useState(false);
 
@@ -81,18 +76,18 @@ const OrchestratorDashboard: React.FC = () => {
 
   useEffect(() => {
     const unsubscribers = [
-      orchestrator.on('module:status', () => {
+      orchestrator.on("module:status", () => {
         setSnapshot(orchestrator.getSnapshot());
       }),
-      orchestrator.on('task:started', (record) => {
+      orchestrator.on("task:started", (record) => {
         setActiveTaskId(record.task.id);
         setSnapshot(orchestrator.getSnapshot());
       }),
-      orchestrator.on('task:completed', () => {
+      orchestrator.on("task:completed", () => {
         setActiveTaskId(null);
         setSnapshot(orchestrator.getSnapshot());
       }),
-      orchestrator.on('task:error', () => {
+      orchestrator.on("task:error", () => {
         setActiveTaskId(null);
         setSnapshot(orchestrator.getSnapshot());
       }),
@@ -115,34 +110,26 @@ const OrchestratorDashboard: React.FC = () => {
       setActiveTaskId(task.id);
       orchestrator.dispatchTask(task);
     },
-    [orchestrator],
+    [orchestrator]
   );
 
   const renderModuleCard = (module: ModuleSnapshot) => {
     const { definition, status } = module;
-    const color = moduleStateColor[status.state] ?? 'default';
+    const color = moduleStateColor[status.state] ?? "default";
     const reliabilityPercent = Math.round(status.telemetry.reliability * 100);
 
     return (
       <Grid xs={12} md={6} lg={4} key={definition.id}>
-        <Card elevation={3} sx={{ height: '100%' }}>
+        <Card elevation={3} sx={{ height: "100%" }}>
           <CardContent>
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-            >
+            <Stack direction="row" justifyContent="space-between" alignItems="center">
               <Box>
                 <Typography variant="h6">{definition.displayName}</Typography>
                 <Typography variant="body2" color="text.secondary">
                   {definition.summary}
                 </Typography>
               </Box>
-              <Chip
-                label={status.state.toUpperCase()}
-                color={color}
-                size="small"
-              />
+              <Chip label={status.state.toUpperCase()} color={color} size="small" />
             </Stack>
 
             <Stack spacing={1.5} sx={{ mt: 2 }}>
@@ -164,9 +151,7 @@ const OrchestratorDashboard: React.FC = () => {
                 <Tooltip title="Average execution latency for the module">
                   <Stack direction="row" justifyContent="space-between">
                     <Typography variant="body2">Latency</Typography>
-                    <Typography variant="body2">
-                      {status.telemetry.latencyMs} ms
-                    </Typography>
+                    <Typography variant="body2">{status.telemetry.latencyMs} ms</Typography>
                   </Stack>
                 </Tooltip>
                 <Tooltip title="Average module utilization">
@@ -181,9 +166,7 @@ const OrchestratorDashboard: React.FC = () => {
                   <Stack>
                     <Stack direction="row" justifyContent="space-between">
                       <Typography variant="body2">Reliability</Typography>
-                      <Typography variant="body2">
-                        {reliabilityPercent}%
-                      </Typography>
+                      <Typography variant="body2">{reliabilityPercent}%</Typography>
                     </Stack>
                     <LinearProgress
                       variant="determinate"
@@ -194,15 +177,11 @@ const OrchestratorDashboard: React.FC = () => {
                 </Tooltip>
                 <Stack direction="row" justifyContent="space-between">
                   <Typography variant="body2">Tasks Processed</Typography>
-                  <Typography variant="body2">
-                    {status.tasksProcessed}
-                  </Typography>
+                  <Typography variant="body2">{status.tasksProcessed}</Typography>
                 </Stack>
                 <Stack direction="row" justifyContent="space-between">
                   <Typography variant="body2">Uptime</Typography>
-                  <Typography variant="body2">
-                    {formatUptime(status.uptimeMs)}
-                  </Typography>
+                  <Typography variant="body2">{formatUptime(status.uptimeMs)}</Typography>
                 </Stack>
               </Stack>
             </Stack>
@@ -220,34 +199,29 @@ const OrchestratorDashboard: React.FC = () => {
           variant="outlined"
           sx={{
             borderColor:
-              record.status === 'completed'
+              record.status === "completed"
                 ? (theme) => alpha(theme.palette.success.main, 0.4)
-                : record.status === 'error'
+                : record.status === "error"
                   ? (theme) => alpha(theme.palette.error.main, 0.4)
                   : undefined,
           }}
         >
           <CardContent>
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-            >
+            <Stack direction="row" justifyContent="space-between" alignItems="center">
               <Box>
                 <Typography variant="subtitle1">{record.task.name}</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {record.task.requestedBy} •{' '}
-                  {new Date(record.startedAt).toLocaleTimeString()}
+                  {record.task.requestedBy} • {new Date(record.startedAt).toLocaleTimeString()}
                 </Typography>
               </Box>
               <Chip
                 label={record.status.toUpperCase()}
                 color={
-                  record.status === 'completed'
-                    ? 'success'
-                    : record.status === 'error'
-                      ? 'error'
-                      : 'warning'
+                  record.status === "completed"
+                    ? "success"
+                    : record.status === "error"
+                      ? "error"
+                      : "warning"
                 }
                 size="small"
               />
@@ -255,11 +229,7 @@ const OrchestratorDashboard: React.FC = () => {
             <Divider sx={{ my: 2 }} />
             <Grid container spacing={2}>
               {record.results.map((result) => (
-                <Grid
-                  xs={12}
-                  md={6}
-                  key={`${result.moduleId} -${result.action} `}
-                >
+                <Grid xs={12} md={6} key={`${result.moduleId} -${result.action} `}>
                   <Stack spacing={0.5}>
                     <Typography variant="body2" fontWeight={600}>
                       {result.moduleId} — {result.action}
@@ -292,24 +262,17 @@ const OrchestratorDashboard: React.FC = () => {
               <Box>
                 <Stack direction="row" spacing={1} alignItems="center">
                   <TimelineIcon color="primary" />
-                  <Typography variant="h5">
-                    Launchable Orchestrator Control Center
-                  </Typography>
+                  <Typography variant="h5">Launchable Orchestrator Control Center</Typography>
                 </Stack>
-                <Typography
-                  variant="body1"
-                  color="text.secondary"
-                  sx={{ mt: 1 }}
-                >
-                  Coordinate Maestro Composer, Build Plane, Build Platform,
-                  CompanyOS, Switchboard, IntelGraph, and Activities from a
-                  single real-time control surface.
+                <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+                  Coordinate Maestro Composer, Build Plane, Build Platform, CompanyOS, Switchboard,
+                  IntelGraph, and Activities from a single real-time control surface.
                 </Typography>
               </Box>
               <Chip
                 icon={<PlayArrowIcon />}
-                label={initialized ? 'Online' : 'Initializing'}
-                color={initialized ? 'success' : 'warning'}
+                label={initialized ? "Online" : "Initializing"}
+                color={initialized ? "success" : "warning"}
               />
             </Stack>
           </CardContent>
@@ -321,27 +284,19 @@ const OrchestratorDashboard: React.FC = () => {
               <Typography variant="h6">Mission Presets</Typography>
               <Grid container spacing={2}>
                 {presets.map((preset) => {
-                  const isActive = Boolean(
-                    activeTaskId && activeTaskId.startsWith(preset.id),
-                  );
+                  const isActive = Boolean(activeTaskId && activeTaskId.startsWith(preset.id));
                   return (
                     <Grid xs={12} md={6} lg={3} key={preset.id}>
                       <Card
                         variant="outlined"
                         sx={{
-                          height: '100%',
-                          borderColor: isActive
-                            ? (theme) => theme.palette.primary.main
-                            : undefined,
+                          height: "100%",
+                          borderColor: isActive ? (theme) => theme.palette.primary.main : undefined,
                         }}
                       >
                         <CardContent>
                           <Stack spacing={2}>
-                            <Stack
-                              direction="row"
-                              spacing={1}
-                              alignItems="center"
-                            >
+                            <Stack direction="row" spacing={1} alignItems="center">
                               <Chip
                                 icon={preset.icon as React.ReactElement}
                                 label={preset.name}
@@ -376,12 +331,7 @@ const OrchestratorDashboard: React.FC = () => {
 
         <Card elevation={3}>
           <CardContent>
-            <Stack
-              direction="row"
-              spacing={1}
-              alignItems="center"
-              sx={{ mb: 2 }}
-            >
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
               <ChecklistIcon color="primary" />
               <Typography variant="h6">Recent Missions</Typography>
             </Stack>

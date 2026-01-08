@@ -1,5 +1,5 @@
-import { useEffect, useRef, useCallback } from 'react';
-import { useNetworkStatus } from './useNetworkStatus';
+import { useEffect, useRef, useCallback } from "react";
+import { useNetworkStatus } from "./useNetworkStatus";
 
 export interface ResilientPollingOptions {
   /** Polling interval in milliseconds */
@@ -26,12 +26,7 @@ export function useResilientPolling(
   pollingFn: () => Promise<void>,
   options: ResilientPollingOptions
 ) {
-  const {
-    interval,
-    enabled = true,
-    refreshOnReconnect = true,
-    preventConcurrent = true,
-  } = options;
+  const { interval, enabled = true, refreshOnReconnect = true, preventConcurrent = true } = options;
   const { isOnline, wasOffline } = useNetworkStatus();
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -58,7 +53,7 @@ export function useResilientPolling(
     try {
       await pollingFnRef.current();
     } catch (error) {
-      console.error('Polling error:', error);
+      console.error("Polling error:", error);
     } finally {
       isPollingRef.current = false;
     }

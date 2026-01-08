@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 services:
   postgres:
@@ -10,11 +10,11 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-summit}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (see .env.example)}
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-summit} -d ${POSTGRES_DB:-summit_dev}']
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-summit} -d ${POSTGRES_DB:-summit_dev}"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -27,11 +27,11 @@ services:
     restart: unless-stopped
     command: redis-server --appendonly yes
     ports:
-      - '6379:6379'
+      - "6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -47,14 +47,14 @@ services:
       NEO4J_dbms_security_procedures_unrestricted: gds.*,apoc.*
       NEO4J_PLUGINS: '["apoc","graph-data-science"]'
     ports:
-      - '7474:7474'
-      - '7687:7687'
+      - "7474:7474"
+      - "7687:7687"
     volumes:
       - neo4j_data:/data
       - neo4j_logs:/logs
     healthcheck:
       test:
-        ['CMD-SHELL', 'cypher-shell -u ${NEO4J_USERNAME:-neo4j} -p ${NEO4J_PASSWORD} "RETURN 1"']
+        ["CMD-SHELL", 'cypher-shell -u ${NEO4J_USERNAME:-neo4j} -p ${NEO4J_PASSWORD} "RETURN 1"']
       interval: 15s
       timeout: 10s
       retries: 10
@@ -83,20 +83,24 @@ services:
         soft: 65536
         hard: 65536
     ports:
-      - '9200:9200'
-      - '9300:9300'
+      - "9200:9200"
+      - "9300:9300"
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
     healthcheck:
-      test: ['CMD-SHELL', 'curl -f -u elastic:${ELASTICSEARCH_PASSWORD:-devpassword} http://localhost:9200/_cluster/health || exit 1']
+      test:
+        [
+          "CMD-SHELL",
+          "curl -f -u elastic:${ELASTICSEARCH_PASSWORD:-devpassword} http://localhost:9200/_cluster/health || exit 1",
+        ]
       interval: 15s
       timeout: 30s
       retries: 20
     networks:
       - summit
     labels:
-      - 'prometheus.job=summit_elasticsearch'
-      - 'prometheus.port=9200'
+      - "prometheus.job=summit_elasticsearch"
+      - "prometheus.port=9200"
 
   api:
     build:
@@ -127,7 +131,7 @@ services:
       JAEGER_ENDPOINT: http://jaeger:14268/api/traces
       OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
     ports:
-      - '4000:4000'
+      - "4000:4000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -138,15 +142,15 @@ services:
       elasticsearch:
         condition: service_healthy
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:4000/health/ready']
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health/ready"]
       interval: 15s
       timeout: 30s
       retries: 20
     networks:
       - summit
     labels:
-      - 'prometheus.job=summit_api'
-      - 'prometheus.port=4000'
+      - "prometheus.job=summit_api"
+      - "prometheus.port=4000"
 
   gateway:
     build:
@@ -164,17 +168,17 @@ services:
       api:
         condition: service_healthy
     ports:
-      - '4100:4100'
+      - "4100:4100"
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:4100/health']
+      test: ["CMD", "curl", "-f", "http://localhost:4100/health"]
       interval: 15s
       timeout: 5s
       retries: 10
     networks:
       - summit
     labels:
-      - 'prometheus.job=summit_gateway'
-      - 'prometheus.port=4100'
+      - "prometheus.job=summit_gateway"
+      - "prometheus.port=4100"
 
   slo-exporter:
     build:
@@ -187,7 +191,7 @@ services:
       PROMETHEUS_URL: http://prometheus:9090
       API_URL: http://api:4000
     ports:
-      - '9092:9092'
+      - "9092:9092"
     depends_on:
       prometheus:
         condition: service_started
@@ -196,8 +200,8 @@ services:
     networks:
       - summit
     labels:
-      - 'prometheus.job=slo_exporter'
-      - 'prometheus.port=9092'
+      - "prometheus.job=slo_exporter"
+      - "prometheus.port=9092"
 
   web:
     build:
@@ -213,12 +217,12 @@ services:
       VITE_WEBSOCKET_URL: ws://websocket-server:9001
       VITE_PORT: 3000
     ports:
-      - '3000:3000'
+      - "3000:3000"
     depends_on:
       api:
         condition: service_healthy
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:3000']
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
       interval: 15s
       timeout: 5s
       retries: 10
@@ -252,20 +256,26 @@ services:
       HEARTBEAT_INTERVAL: "30000"
       HEARTBEAT_TIMEOUT: "60000"
     ports:
-      - '9001:9001'
+      - "9001:9001"
     depends_on:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ['CMD', 'node', '-e', 'require("http").get("http://localhost:9001/health/live", (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })']
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          'require("http").get("http://localhost:9001/health/live", (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })',
+        ]
       interval: 15s
       timeout: 10s
       retries: 3
     networks:
       - summit
     labels:
-      - 'prometheus.job=websocket_server'
-      - 'prometheus.port=9001'
+      - "prometheus.job=websocket_server"
+      - "prometheus.port=9001"
 
   prometheus:
     image: prom/prometheus:v2.54.1
@@ -277,12 +287,12 @@ services:
       - ./observability/prometheus/recording-rules.yaml:/etc/prometheus/recording-rules.yaml:ro
       - prometheus_data:/prometheus
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.enable-lifecycle'
-      - '--storage.tsdb.retention.time=30d'
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
+      - "--storage.tsdb.retention.time=30d"
     ports:
-      - '9090:9090'
+      - "9090:9090"
     networks:
       - summit
 
@@ -296,7 +306,7 @@ services:
       GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-piechart-panel
       GF_FEATURE_TOGGLES_ENABLE: tempoSearch tempoBackendSearch
     ports:
-      - '3001:3000'
+      - "3001:3000"
     volumes:
       - grafana_data:/var/lib/grafana
       - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
@@ -318,10 +328,10 @@ services:
       COLLECTOR_OTLP_ENABLED: true
       SPAN_STORAGE_TYPE: memory
     ports:
-      - '16686:16686' # Jaeger UI
-      - '4317:4317'   # OTLP gRPC receiver
-      - '4318:4318'   # OTLP HTTP receiver
-      - '14268:14268' # Jaeger collector HTTP
+      - "16686:16686" # Jaeger UI
+      - "4317:4317" # OTLP gRPC receiver
+      - "4318:4318" # OTLP HTTP receiver
+      - "14268:14268" # Jaeger collector HTTP
     networks:
       - summit
 
@@ -330,7 +340,7 @@ services:
     container_name: summit-loki
     restart: unless-stopped
     ports:
-      - '3100:3100'
+      - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
       - ./observability/loki/loki-config.yaml:/etc/loki/local-config.yaml:ro
@@ -357,13 +367,13 @@ services:
     container_name: summit-alertmanager
     restart: unless-stopped
     ports:
-      - '9093:9093'
+      - "9093:9093"
     volumes:
       - ./observability/alertmanager/alertmanager.yaml:/etc/alertmanager/alertmanager.yaml:ro
       - alertmanager_data:/alertmanager
     command:
-      - '--config.file=/etc/alertmanager/alertmanager.yaml'
-      - '--storage.path=/alertmanager'
+      - "--config.file=/etc/alertmanager/alertmanager.yaml"
+      - "--storage.path=/alertmanager"
     networks:
       - summit
 
@@ -383,20 +393,20 @@ services:
       WORKER_CONCURRENCY: 4
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
     ports:
-      - '4020:4020'
+      - "4020:4020"
     depends_on:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:4020/health']
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4020/health"]
       interval: 15s
       timeout: 5s
       retries: 10
     networks:
       - summit
     labels:
-      - 'prometheus.job=summit_ai_sandbox'
-      - 'prometheus.port=4020'
+      - "prometheus.job=summit_ai_sandbox"
+      - "prometheus.port=4020"
 
   agentic-mesh-evaluation:
     build:
@@ -411,21 +421,27 @@ services:
       REDIS_URL: redis://redis:6379
       LOG_LEVEL: info
     ports:
-      - '4200:4200'
+      - "4200:4200"
     depends_on:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ['CMD', 'node', '-e', 'require("http").get("http://localhost:4200/health", (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})']
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          'require("http").get("http://localhost:4200/health", (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})',
+        ]
       interval: 15s
       timeout: 5s
       retries: 10
     networks:
       - summit
     labels:
-      - 'prometheus.job=agentic_mesh_evaluation'
-      - 'prometheus.port=4200'
-      - 'prometheus.path=/metrics'
+      - "prometheus.job=agentic_mesh_evaluation"
+      - "prometheus.port=4200"
+      - "prometheus.path=/metrics"
 
 volumes:
   postgres_data:

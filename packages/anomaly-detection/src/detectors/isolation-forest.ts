@@ -3,8 +3,8 @@
  * Based on the paper: "Isolation Forest" by Liu, Ting, and Zhou (2008)
  */
 
-import { IAnomalyDetector } from '@intelgraph/threat-detection-core';
-import { AnomalyScore } from '@intelgraph/threat-detection-core';
+import { IAnomalyDetector } from "@intelgraph/threat-detection-core";
+import { AnomalyScore } from "@intelgraph/threat-detection-core";
 
 export interface IsolationForestConfig {
   numTrees: number; // Number of trees in the forest
@@ -38,9 +38,9 @@ export class IsolationForest implements IAnomalyDetector {
       return {
         score: 0,
         isolationScore: 0,
-        method: 'isolation_forest',
+        method: "isolation_forest",
         features: {},
-        explanation: 'Model not trained yet'
+        explanation: "Model not trained yet",
       };
     }
 
@@ -60,9 +60,9 @@ export class IsolationForest implements IAnomalyDetector {
     return {
       score: anomalyScore,
       isolationScore: avgPathLength,
-      method: 'isolation_forest',
+      method: "isolation_forest",
       features: featureImportance,
-      explanation: this.generateExplanation(anomalyScore, featureImportance)
+      explanation: this.generateExplanation(anomalyScore, featureImportance),
     };
   }
 
@@ -86,13 +86,13 @@ export class IsolationForest implements IAnomalyDetector {
       maxDepth: this.config.maxDepth,
       trained: this.trained,
       trainingDataSize: this.trainingData.length,
-      features: this.features
+      features: this.features,
     };
   }
 
   async train(): Promise<void> {
     if (this.trainingData.length < this.config.sampleSize) {
-      throw new Error('Insufficient training data');
+      throw new Error("Insufficient training data");
     }
 
     // Build isolation trees
@@ -113,12 +113,10 @@ export class IsolationForest implements IAnomalyDetector {
   private extractFeatures(data: Record<string, any>): number[] {
     if (this.features.length === 0) {
       // First time - determine features
-      this.features = Object.keys(data).filter(
-        key => typeof data[key] === 'number'
-      );
+      this.features = Object.keys(data).filter((key) => typeof data[key] === "number");
     }
 
-    return this.features.map(feature => data[feature] || 0);
+    return this.features.map((feature) => data[feature] || 0);
   }
 
   private sampleData(data: number[][], size: number): number[][] {
@@ -136,10 +134,7 @@ export class IsolationForest implements IAnomalyDetector {
     return sample;
   }
 
-  private buildTree(
-    data: number[][],
-    currentDepth: number
-  ): IsolationTree {
+  private buildTree(data: number[][], currentDepth: number): IsolationTree {
     // Stopping criteria
     if (currentDepth >= this.config.maxDepth! || data.length <= 1) {
       return { size: data.length };
@@ -147,7 +142,7 @@ export class IsolationForest implements IAnomalyDetector {
 
     // Randomly select feature and split value
     const featureIndex = Math.floor(Math.random() * this.features.length);
-    const featureValues = data.map(row => row[featureIndex]);
+    const featureValues = data.map((row) => row[featureIndex]);
     const minVal = Math.min(...featureValues);
     const maxVal = Math.max(...featureValues);
 
@@ -158,8 +153,8 @@ export class IsolationForest implements IAnomalyDetector {
     const splitValue = minVal + Math.random() * (maxVal - minVal);
 
     // Split data
-    const leftData = data.filter(row => row[featureIndex] < splitValue);
-    const rightData = data.filter(row => row[featureIndex] >= splitValue);
+    const leftData = data.filter((row) => row[featureIndex] < splitValue);
+    const rightData = data.filter((row) => row[featureIndex] >= splitValue);
 
     if (leftData.length === 0 || rightData.length === 0) {
       return { size: data.length };
@@ -169,7 +164,7 @@ export class IsolationForest implements IAnomalyDetector {
       splitFeature: featureIndex,
       splitValue,
       left: this.buildTree(leftData, currentDepth + 1),
-      right: this.buildTree(rightData, currentDepth + 1)
+      right: this.buildTree(rightData, currentDepth + 1),
     };
   }
 
@@ -194,9 +189,7 @@ export class IsolationForest implements IAnomalyDetector {
   }
 
   private getAveragePathLength(featureVector: number[]): number {
-    const pathLengths = this.forest.map(tree =>
-      this.getPathLength(featureVector, tree)
-    );
+    const pathLengths = this.forest.map((tree) => this.getPathLength(featureVector, tree));
 
     return pathLengths.reduce((sum, length) => sum + length, 0) / this.forest.length;
   }
@@ -207,14 +200,14 @@ export class IsolationForest implements IAnomalyDetector {
 
     // Harmonic number approximation
     const harmonicNumber = Math.log(n - 1) + 0.5772156649; // Euler's constant
-    return 2 * harmonicNumber - (2 * (n - 1) / n);
+    return 2 * harmonicNumber - (2 * (n - 1)) / n;
   }
 
   private calculateFeatureImportance(featureVector: number[]): Record<string, number> {
     const importance: Record<string, number> = {};
 
     // Initialize all features
-    this.features.forEach(feature => {
+    this.features.forEach((feature) => {
       importance[feature] = 0;
     });
 
@@ -227,7 +220,7 @@ export class IsolationForest implements IAnomalyDetector {
     const total = Object.values(importance).reduce((sum, val) => sum + val, 0);
 
     if (total > 0) {
-      Object.keys(importance).forEach(key => {
+      Object.keys(importance).forEach((key) => {
         importance[key] /= total;
       });
     }
@@ -245,12 +238,9 @@ export class IsolationForest implements IAnomalyDetector {
     }
   }
 
-  private generateExplanation(
-    score: number,
-    featureImportance: Record<string, number>
-  ): string {
+  private generateExplanation(score: number, featureImportance: Record<string, number>): string {
     if (score < 0.5) {
-      return 'Data point appears normal';
+      return "Data point appears normal";
     }
 
     const topFeatures = Object.entries(featureImportance)
@@ -258,7 +248,7 @@ export class IsolationForest implements IAnomalyDetector {
       .slice(0, 3)
       .map(([feature]) => feature);
 
-    return `Anomaly detected (isolation score: ${score.toFixed(2)}). Key features: ${topFeatures.join(', ')}`;
+    return `Anomaly detected (isolation score: ${score.toFixed(2)}). Key features: ${topFeatures.join(", ")}`;
   }
 
   reset(): void {
@@ -269,6 +259,6 @@ export class IsolationForest implements IAnomalyDetector {
   }
 
   setTrainingData(data: Record<string, any>[]): void {
-    this.trainingData = data.map(d => this.extractFeatures(d));
+    this.trainingData = data.map((d) => this.extractFeatures(d));
   }
 }

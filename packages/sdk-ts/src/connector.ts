@@ -1,4 +1,4 @@
-import type { RunContext } from './types.js';
+import type { RunContext } from "./types.js";
 
 export interface ConnectorConfig {
   [k: string]: unknown;
@@ -10,7 +10,7 @@ export interface Connector<TIn = unknown, TOut = unknown> {
 }
 
 export function defineConnector<TIn = unknown, TOut = unknown>(
-  c: Connector<TIn, TOut>,
+  c: Connector<TIn, TOut>
 ): Connector<TIn, TOut> {
   return c;
 }

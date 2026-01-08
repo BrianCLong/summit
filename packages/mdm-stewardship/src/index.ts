@@ -3,11 +3,7 @@
  * Data stewardship workflows and processes
  */
 
-export * from './workflow-manager.js';
+export * from "./workflow-manager.js";
 
 // Re-export types
-export type {
-  StewardshipWorkflow,
-  ChangeRequest,
-  DataCertification
-} from '@intelgraph/mdm-core';
+export type { StewardshipWorkflow, ChangeRequest, DataCertification } from "@intelgraph/mdm-core";

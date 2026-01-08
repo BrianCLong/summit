@@ -12,7 +12,7 @@ import type {
   TemporalDiscontinuity,
   PhysicsViolation,
   CompressionAnomaly,
-} from '../types';
+} from "../types";
 
 export class VideoDeepfakeAnalyzer {
   private modelLoaded: boolean = false;
@@ -28,10 +28,13 @@ export class VideoDeepfakeAnalyzer {
   /**
    * Analyze video for deepfake indicators
    */
-  async analyzeVideo(frames: Buffer[], metadata: {
-    frameRate: number;
-    resolution: { width: number; height: number };
-  }): Promise<VideoAnalysisResult> {
+  async analyzeVideo(
+    frames: Buffer[],
+    metadata: {
+      frameRate: number;
+      resolution: { width: number; height: number };
+    }
+  ): Promise<VideoAnalysisResult> {
     await this.ensureModelsLoaded();
 
     const temporalConsistency = await this.analyzeTemporalConsistency(frames, metadata.frameRate);
@@ -43,7 +46,7 @@ export class VideoDeepfakeAnalyzer {
       temporalConsistency,
       lightingAnalysis,
       physicsValidation,
-      compressionAnalysis,
+      compressionAnalysis
     );
 
     return {
@@ -67,7 +70,7 @@ export class VideoDeepfakeAnalyzer {
    */
   private async analyzeTemporalConsistency(
     frames: Buffer[],
-    frameRate: number,
+    frameRate: number
   ): Promise<TemporalConsistency> {
     const discontinuities: TemporalDiscontinuity[] = [];
 
@@ -132,13 +135,13 @@ export class VideoDeepfakeAnalyzer {
     // - Natural head/body movements
     // - Realistic eye movements
 
-    return 0.90;
+    return 0.9;
   }
 
   private async detectDiscontinuity(
     frame1: Buffer,
     frame2: Buffer,
-    frameIndex: number,
+    frameIndex: number
   ): Promise<TemporalDiscontinuity | null> {
     // Detect abrupt changes between frames
     // Calculate structural similarity, histogram differences, etc.
@@ -151,7 +154,7 @@ export class VideoDeepfakeAnalyzer {
         frameStart: frameIndex - 1,
         frameEnd: frameIndex,
         severity: difference,
-        type: 'abrupt_change',
+        type: "abrupt_change",
       };
     }
 
@@ -168,11 +171,9 @@ export class VideoDeepfakeAnalyzer {
     const reflectionAnalysis = await this.analyzeReflections(frames);
     const colorTemperature = await this.analyzeColorTemperature(frames);
 
-    const consistency = (
-      shadowAnalysis.naturalness +
-      reflectionAnalysis.naturalness +
-      colorTemperature.consistency
-    ) / 3;
+    const consistency =
+      (shadowAnalysis.naturalness + reflectionAnalysis.naturalness + colorTemperature.consistency) /
+      3;
 
     return {
       consistency,
@@ -236,17 +237,14 @@ export class VideoDeepfakeAnalyzer {
 
     return {
       value: 5500, // Kelvin
-      consistency: 0.90,
+      consistency: 0.9,
     };
   }
 
   /**
    * Validate physics realism
    */
-  private async validatePhysics(
-    frames: Buffer[],
-    frameRate: number,
-  ): Promise<PhysicsValidation> {
+  private async validatePhysics(frames: Buffer[], frameRate: number): Promise<PhysicsValidation> {
     const violations: PhysicsViolation[] = [];
 
     // 1. Gravity and motion physics
@@ -271,7 +269,7 @@ export class VideoDeepfakeAnalyzer {
 
   private async validateMotionPhysics(
     frames: Buffer[],
-    frameRate: number,
+    frameRate: number
   ): Promise<PhysicsViolation[]> {
     // Check for:
     // - Unrealistic acceleration
@@ -360,7 +358,7 @@ export class VideoDeepfakeAnalyzer {
     // Identify the compression algorithm used
     // H.264, H.265, VP9, AV1, etc.
 
-    return 'H.264';
+    return "H.264";
   }
 
   /**
@@ -370,7 +368,7 @@ export class VideoDeepfakeAnalyzer {
     temporalConsistency: TemporalConsistency,
     lightingAnalysis: LightingAnalysis,
     physicsValidation: PhysicsValidation,
-    compressionAnalysis: CompressionAnalysis,
+    compressionAnalysis: CompressionAnalysis
   ): number {
     // Weighted scoring
     let score = 0;
@@ -383,10 +381,10 @@ export class VideoDeepfakeAnalyzer {
     score += (1 - lightingAnalysis.consistency) * 0.25;
 
     // Physics validation (20% weight)
-    score += (1 - physicsValidation.score) * 0.20;
+    score += (1 - physicsValidation.score) * 0.2;
 
     // Compression analysis (20% weight)
-    score += (1 - compressionAnalysis.consistency) * 0.20;
+    score += (1 - compressionAnalysis.consistency) * 0.2;
 
     return Math.min(score, 1);
   }
@@ -406,30 +404,30 @@ export class VideoDeepfakeAnalyzer {
 
     // 1. Face swap
     const faceSwapScore = await this.detectFaceSwapVideo(frames);
-    techniques.push({ name: 'face_swap', score: faceSwapScore });
+    techniques.push({ name: "face_swap", score: faceSwapScore });
     if (faceSwapScore > 0.5) {
-      evidence.push('Face swap indicators detected');
+      evidence.push("Face swap indicators detected");
     }
 
     // 2. Face reenactment
     const reenactmentScore = await this.detectFaceReenactment(frames);
-    techniques.push({ name: 'face_reenactment', score: reenactmentScore });
+    techniques.push({ name: "face_reenactment", score: reenactmentScore });
     if (reenactmentScore > 0.5) {
-      evidence.push('Face reenactment patterns detected');
+      evidence.push("Face reenactment patterns detected");
     }
 
     // 3. Lip sync manipulation
     const lipSyncScore = await this.detectLipSyncManipulation(frames);
-    techniques.push({ name: 'lip_sync', score: lipSyncScore });
+    techniques.push({ name: "lip_sync", score: lipSyncScore });
     if (lipSyncScore > 0.5) {
-      evidence.push('Lip sync manipulation detected');
+      evidence.push("Lip sync manipulation detected");
     }
 
     // 4. Frame splicing
     const splicingScore = await this.detectFrameSplicing(frames);
-    techniques.push({ name: 'frame_splicing', score: splicingScore });
+    techniques.push({ name: "frame_splicing", score: splicingScore });
     if (splicingScore > 0.5) {
-      evidence.push('Frame splicing detected');
+      evidence.push("Frame splicing detected");
     }
 
     // Find the most likely technique

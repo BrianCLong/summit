@@ -56,8 +56,8 @@
 
 ## Sign-off
 
-| Role | Name | Date | Signature |
-|------|------|------|-----------|
-| SRE Lead | | | |
-| Observability Engineer | | | |
-| On-Call Manager | | | |
+| Role                   | Name | Date | Signature |
+| ---------------------- | ---- | ---- | --------- |
+| SRE Lead               |      |      |           |
+| Observability Engineer |      |      |           |
+| On-Call Manager        |      |      |           |

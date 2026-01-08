@@ -49,7 +49,7 @@ export class FhemClient {
     this.cliPath = options?.cliPath;
     const defaultManifest = resolve(
       fileURLToPath(new URL('../../../../', import.meta.url)),
-      'services/fhem/Cargo.toml'
+      'services/fhem/Cargo.toml',
     );
     this.manifestPath = options?.manifestPath ?? defaultManifest;
   }
@@ -126,7 +126,7 @@ export class FhemClient {
     const result = spawnSync(
       'cargo',
       ['run', '--quiet', '--manifest-path', this.manifestPath, '--bin', 'fhem-cli', '--', ...args],
-      { encoding: 'utf8' }
+      { encoding: 'utf8' },
     );
 
     if (result.error) {

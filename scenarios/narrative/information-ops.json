@@ -82,9 +82,7 @@
       "intensity": 1,
       "sentimentShift": -0.35,
       "influenceShift": 0.15,
-      "parameterAdjustments": [
-        { "name": "misinformation_velocity", "delta": 0.15 }
-      ],
+      "parameterAdjustments": [{ "name": "misinformation_velocity", "delta": 0.15 }],
       "description": "Coordinated drop of manipulated videos",
       "scheduledTick": 1
     },
@@ -97,9 +95,7 @@
       "intensity": 0.9,
       "sentimentShift": 0.25,
       "influenceShift": 0.1,
-      "parameterAdjustments": [
-        { "name": "countermessage_reach", "delta": 0.2 }
-      ],
+      "parameterAdjustments": [{ "name": "countermessage_reach", "delta": 0.2 }],
       "description": "Rapid fact-check package deployed",
       "scheduledTick": 2
     },

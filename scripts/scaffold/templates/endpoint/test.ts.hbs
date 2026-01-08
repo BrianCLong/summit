@@ -1,43 +1,14 @@
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import request from 'supertest';
-import express from 'express';
-import {{CAMEL_NAME}}Router from '../{{KEBAB_NAME}}.js';
-
-// Mock dependencies
-jest.mock('../../db/postgres.js', () => ({
-  getPostgresPool: jest.fn(() => ({
-    query: jest.fn(),
-  })),
-}));
-
-jest.mock('../../middleware/auth.js', () => ({
-  ensureAuthenticated: (req: any, res: any, next: any) => {
-    req.user = { id: 'test-user', tenantId: 'test-tenant' };
-    next();
-  },
-}));
-
-describe('{{PASCAL_NAME}} Routes', () => {
-  let app: express.Express;
-
-  beforeEach(() => {
-    app = express();
-    app.use(express.json());
-    app.use('/api/{{KEBAB_NAME}}', {{CAMEL_NAME}}Router);
-  });
-
-  it('GET /api/{{KEBAB_NAME}} should return 200', async () => {
-    const response = await request(app).get('/api/{{KEBAB_NAME}}');
-    expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty('data');
-  });
-
-  it('POST /api/{{KEBAB_NAME}} should create resource', async () => {
-    const response = await request(app)
-      .post('/api/{{KEBAB_NAME}}')
-      .send({ name: 'Test' });
-
-    expect(response.status).toBe(201);
-    expect(response.body).toHaveProperty('id');
-  });
-});
+import { jest, describe, it, expect, beforeEach } from '@jest/globals'; import request from
+'supertest'; import express from 'express'; import
+{{CAMEL_NAME}}Router from '../{{KEBAB_NAME}}.js'; // Mock dependencies
+jest.mock('../../db/postgres.js', () => ({ getPostgresPool: jest.fn(() => ({ query: jest.fn(), })),
+})); jest.mock('../../middleware/auth.js', () => ({ ensureAuthenticated: (req: any, res: any, next:
+any) => { req.user = { id: 'test-user', tenantId: 'test-tenant' }; next(); }, })); describe('{{PASCAL_NAME}}
+Routes', () => { let app: express.Express; beforeEach(() => { app = express();
+app.use(express.json()); app.use('/api/{{KEBAB_NAME}}',
+{{CAMEL_NAME}}Router); }); it('GET /api/{{KEBAB_NAME}}
+should return 200', async () => { const response = await request(app).get('/api/{{KEBAB_NAME}}');
+expect(response.status).toBe(200); expect(response.body).toHaveProperty('data'); }); it('POST /api/{{KEBAB_NAME}}
+should create resource', async () => { const response = await request(app) .post('/api/{{KEBAB_NAME}}')
+.send({ name: 'Test' }); expect(response.status).toBe(201);
+expect(response.body).toHaveProperty('id'); }); });

@@ -9,8 +9,8 @@
  * - Cache hit/miss rate monitoring
  */
 
-import Redis from 'ioredis';
-import pino from 'pino';
+import Redis from "ioredis";
+import pino from "pino";
 
 const logger = pino();
 
@@ -32,14 +32,14 @@ export const CACHE_TTL = {
  * Cache key prefixes for organization
  */
 export const CACHE_PREFIX = {
-  GRAPHQL: 'gql',
-  SESSION: 'session',
-  METRICS: 'metrics',
-  ENTITY: 'entity',
-  RELATIONSHIP: 'rel',
-  INVESTIGATION: 'inv',
-  USER: 'user',
-  DATALOADER: 'dl',
+  GRAPHQL: "gql",
+  SESSION: "session",
+  METRICS: "metrics",
+  ENTITY: "entity",
+  RELATIONSHIP: "rel",
+  INVESTIGATION: "inv",
+  USER: "user",
+  DATALOADER: "dl",
 } as const;
 
 export interface RedisCacheConfig {
@@ -107,11 +107,16 @@ export class RedisCacheManager {
   /**
    * Update cache statistics
    */
-  private updateStats(prefix: string, operation: 'hit' | 'miss' | 'set' | 'delete' | 'error'): void {
-    if (!this.enableMetrics) {return;}
+  private updateStats(
+    prefix: string,
+    operation: "hit" | "miss" | "set" | "delete" | "error"
+  ): void {
+    if (!this.enableMetrics) {
+      return;
+    }
 
     const stats = this.getStats(prefix);
-    stats[operation === 'hit' || operation === 'miss' ? `${operation  }s` : `${operation  }s`]++;
+    stats[operation === "hit" || operation === "miss" ? `${operation}s` : `${operation}s`]++;
 
     const total = stats.hits + stats.misses;
     stats.hitRate = total > 0 ? stats.hits / total : 0;
@@ -124,15 +129,15 @@ export class RedisCacheManager {
     queryHash: string,
     result: any,
     tenantId?: string,
-    ttl: number = CACHE_TTL.GRAPHQL_QUERY,
+    ttl: number = CACHE_TTL.GRAPHQL_QUERY
   ): Promise<void> {
     try {
       const key = this.getCacheKey(CACHE_PREFIX.GRAPHQL, queryHash, tenantId);
       await this.client.setex(key, ttl, JSON.stringify(result));
-      this.updateStats(CACHE_PREFIX.GRAPHQL, 'set');
+      this.updateStats(CACHE_PREFIX.GRAPHQL, "set");
     } catch (error) {
-      logger.error('Failed to cache GraphQL query:', error);
-      this.updateStats(CACHE_PREFIX.GRAPHQL, 'error');
+      logger.error("Failed to cache GraphQL query:", error);
+      this.updateStats(CACHE_PREFIX.GRAPHQL, "error");
     }
   }
 
@@ -145,15 +150,15 @@ export class RedisCacheManager {
       const cached = await this.client.get(key);
 
       if (cached) {
-        this.updateStats(CACHE_PREFIX.GRAPHQL, 'hit');
+        this.updateStats(CACHE_PREFIX.GRAPHQL, "hit");
         return JSON.parse(cached);
       }
 
-      this.updateStats(CACHE_PREFIX.GRAPHQL, 'miss');
+      this.updateStats(CACHE_PREFIX.GRAPHQL, "miss");
       return null;
     } catch (error) {
-      logger.error('Failed to get cached GraphQL query:', error);
-      this.updateStats(CACHE_PREFIX.GRAPHQL, 'error');
+      logger.error("Failed to get cached GraphQL query:", error);
+      this.updateStats(CACHE_PREFIX.GRAPHQL, "error");
       return null;
     }
   }
@@ -170,7 +175,7 @@ export class RedisCacheManager {
       await this.deleteByPattern(pattern);
       logger.info(`Invalidated GraphQL caches for pattern: ${pattern}`);
     } catch (error) {
-      logger.error('Failed to invalidate GraphQL caches:', error);
+      logger.error("Failed to invalidate GraphQL caches:", error);
     }
   }
 
@@ -180,15 +185,15 @@ export class RedisCacheManager {
   async cacheUserSession(
     sessionId: string,
     sessionData: any,
-    ttl: number = CACHE_TTL.USER_SESSION,
+    ttl: number = CACHE_TTL.USER_SESSION
   ): Promise<void> {
     try {
       const key = this.getCacheKey(CACHE_PREFIX.SESSION, sessionId);
       await this.client.setex(key, ttl, JSON.stringify(sessionData));
-      this.updateStats(CACHE_PREFIX.SESSION, 'set');
+      this.updateStats(CACHE_PREFIX.SESSION, "set");
     } catch (error) {
-      logger.error('Failed to cache user session:', error);
-      this.updateStats(CACHE_PREFIX.SESSION, 'error');
+      logger.error("Failed to cache user session:", error);
+      this.updateStats(CACHE_PREFIX.SESSION, "error");
     }
   }
 
@@ -201,15 +206,15 @@ export class RedisCacheManager {
       const cached = await this.client.get(key);
 
       if (cached) {
-        this.updateStats(CACHE_PREFIX.SESSION, 'hit');
+        this.updateStats(CACHE_PREFIX.SESSION, "hit");
         return JSON.parse(cached);
       }
 
-      this.updateStats(CACHE_PREFIX.SESSION, 'miss');
+      this.updateStats(CACHE_PREFIX.SESSION, "miss");
       return null;
     } catch (error) {
-      logger.error('Failed to get cached user session:', error);
-      this.updateStats(CACHE_PREFIX.SESSION, 'error');
+      logger.error("Failed to get cached user session:", error);
+      this.updateStats(CACHE_PREFIX.SESSION, "error");
       return null;
     }
   }
@@ -221,10 +226,10 @@ export class RedisCacheManager {
     try {
       const key = this.getCacheKey(CACHE_PREFIX.SESSION, sessionId);
       await this.client.del(key);
-      this.updateStats(CACHE_PREFIX.SESSION, 'delete');
+      this.updateStats(CACHE_PREFIX.SESSION, "delete");
     } catch (error) {
-      logger.error('Failed to delete user session:', error);
-      this.updateStats(CACHE_PREFIX.SESSION, 'error');
+      logger.error("Failed to delete user session:", error);
+      this.updateStats(CACHE_PREFIX.SESSION, "error");
     }
   }
 
@@ -235,15 +240,15 @@ export class RedisCacheManager {
     metricName: string,
     metricData: any,
     tenantId?: string,
-    ttl: number = CACHE_TTL.GRAPH_METRICS,
+    ttl: number = CACHE_TTL.GRAPH_METRICS
   ): Promise<void> {
     try {
       const key = this.getCacheKey(CACHE_PREFIX.METRICS, metricName, tenantId);
       await this.client.setex(key, ttl, JSON.stringify(metricData));
-      this.updateStats(CACHE_PREFIX.METRICS, 'set');
+      this.updateStats(CACHE_PREFIX.METRICS, "set");
     } catch (error) {
-      logger.error('Failed to cache graph metrics:', error);
-      this.updateStats(CACHE_PREFIX.METRICS, 'error');
+      logger.error("Failed to cache graph metrics:", error);
+      this.updateStats(CACHE_PREFIX.METRICS, "error");
     }
   }
 
@@ -256,15 +261,15 @@ export class RedisCacheManager {
       const cached = await this.client.get(key);
 
       if (cached) {
-        this.updateStats(CACHE_PREFIX.METRICS, 'hit');
+        this.updateStats(CACHE_PREFIX.METRICS, "hit");
         return JSON.parse(cached);
       }
 
-      this.updateStats(CACHE_PREFIX.METRICS, 'miss');
+      this.updateStats(CACHE_PREFIX.METRICS, "miss");
       return null;
     } catch (error) {
-      logger.error('Failed to get cached graph metrics:', error);
-      this.updateStats(CACHE_PREFIX.METRICS, 'error');
+      logger.error("Failed to get cached graph metrics:", error);
+      this.updateStats(CACHE_PREFIX.METRICS, "error");
       return null;
     }
   }
@@ -281,7 +286,7 @@ export class RedisCacheManager {
       await this.deleteByPattern(pattern);
       logger.info(`Invalidated graph metrics for pattern: ${pattern}`);
     } catch (error) {
-      logger.error('Failed to invalidate graph metrics:', error);
+      logger.error("Failed to invalidate graph metrics:", error);
     }
   }
 
@@ -294,15 +299,15 @@ export class RedisCacheManager {
       const cached = await this.client.get(cacheKey);
 
       if (cached) {
-        this.updateStats(prefix, 'hit');
+        this.updateStats(prefix, "hit");
         return JSON.parse(cached);
       }
 
-      this.updateStats(prefix, 'miss');
+      this.updateStats(prefix, "miss");
       return null;
     } catch (error) {
       logger.error(`Failed to get cached value for ${prefix}:${key}:`, error);
-      this.updateStats(prefix, 'error');
+      this.updateStats(prefix, "error");
       return null;
     }
   }
@@ -315,7 +320,7 @@ export class RedisCacheManager {
     key: string,
     value: T,
     tenantId?: string,
-    ttl?: number,
+    ttl?: number
   ): Promise<void> {
     try {
       const cacheKey = this.getCacheKey(prefix, key, tenantId);
@@ -326,10 +331,10 @@ export class RedisCacheManager {
         await this.client.set(cacheKey, JSON.stringify(value));
       }
 
-      this.updateStats(prefix, 'set');
+      this.updateStats(prefix, "set");
     } catch (error) {
       logger.error(`Failed to cache value for ${prefix}:${key}:`, error);
-      this.updateStats(prefix, 'error');
+      this.updateStats(prefix, "error");
     }
   }
 
@@ -340,10 +345,10 @@ export class RedisCacheManager {
     try {
       const cacheKey = this.getCacheKey(prefix, key, tenantId);
       await this.client.del(cacheKey);
-      this.updateStats(prefix, 'delete');
+      this.updateStats(prefix, "delete");
     } catch (error) {
       logger.error(`Failed to delete cache for ${prefix}:${key}:`, error);
-      this.updateStats(prefix, 'error');
+      this.updateStats(prefix, "error");
     }
   }
 
@@ -351,25 +356,19 @@ export class RedisCacheManager {
    * Delete keys by pattern (using SCAN for safety)
    */
   async deleteByPattern(pattern: string): Promise<number> {
-    let cursor = '0';
+    let cursor = "0";
     let deletedCount = 0;
 
     try {
       do {
-        const [newCursor, keys] = await this.client.scan(
-          cursor,
-          'MATCH',
-          pattern,
-          'COUNT',
-          100,
-        );
+        const [newCursor, keys] = await this.client.scan(cursor, "MATCH", pattern, "COUNT", 100);
         cursor = newCursor;
 
         if (keys.length > 0) {
           await this.client.del(...keys);
           deletedCount += keys.length;
         }
-      } while (cursor !== '0');
+      } while (cursor !== "0");
 
       return deletedCount;
     } catch (error) {
@@ -386,7 +385,7 @@ export class RedisCacheManager {
     key: string,
     fetcher: () => Promise<T>,
     ttl: number,
-    tenantId?: string,
+    tenantId?: string
   ): Promise<T> {
     // Try cache first
     const cached = await this.get<T>(prefix, key, tenantId);
@@ -444,18 +443,18 @@ export class RedisCacheManager {
    * Invalidate all caches on mutation
    */
   async invalidateOnMutation(
-    mutationType: 'entity' | 'relationship' | 'investigation',
+    mutationType: "entity" | "relationship" | "investigation",
     id: string,
-    tenantId?: string,
+    tenantId?: string
   ): Promise<void> {
     switch (mutationType) {
-      case 'entity':
+      case "entity":
         await this.invalidateEntity(id, tenantId);
         break;
-      case 'relationship':
+      case "relationship":
         await this.invalidateRelationship(id, tenantId);
         break;
-      case 'investigation':
+      case "investigation":
         await this.delete(CACHE_PREFIX.INVESTIGATION, id, tenantId);
         await this.invalidateGraphQLQueries(tenantId);
         break;
@@ -519,7 +518,7 @@ export function createRedisCacheManager(config: RedisCacheConfig): RedisCacheMan
     port: config.port,
     password: config.password,
     db: config.db ?? 0,
-    keyPrefix: config.keyPrefix ?? 'intelgraph:',
+    keyPrefix: config.keyPrefix ?? "intelgraph:",
     retryStrategy: (times) => {
       const delay = Math.min(times * 50, 2000);
       return delay;
@@ -535,9 +534,9 @@ export function createRedisCacheManager(config: RedisCacheConfig): RedisCacheMan
  * GraphQL query hash generator for caching
  */
 export function hashGraphQLQuery(query: string, variables?: any): string {
-  const crypto = require('crypto');
+  const crypto = require("crypto");
   const content = query + JSON.stringify(variables || {});
-  return crypto.createHash('sha256').update(content).digest('hex');
+  return crypto.createHash("sha256").update(content).digest("hex");
 }
 
 export default {

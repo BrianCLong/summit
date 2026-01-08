@@ -1,7 +1,7 @@
-import { promises as fs } from 'node:fs';
-import { dirname } from 'node:path';
-import { mkdir } from 'node:fs/promises';
-import { MutableRevocationRegistry } from './types.js';
+import { promises as fs } from "node:fs";
+import { dirname } from "node:path";
+import { mkdir } from "node:fs/promises";
+import { MutableRevocationRegistry } from "./types.js";
 
 export class InMemoryRevocationRegistry implements MutableRevocationRegistry {
   protected revoked = new Set<string>();
@@ -48,13 +48,13 @@ export class FileRevocationRegistry extends InMemoryRevocationRegistry {
 
   private async load(): Promise<void> {
     try {
-      const contents = await fs.readFile(this.filePath, 'utf8');
+      const contents = await fs.readFile(this.filePath, "utf8");
       const parsed = JSON.parse(contents);
       if (Array.isArray(parsed.revoked)) {
         this.revoked = new Set(parsed.revoked);
       }
     } catch (error: unknown) {
-      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
         return;
       }
       throw error;
@@ -64,6 +64,6 @@ export class FileRevocationRegistry extends InMemoryRevocationRegistry {
   private async persist(): Promise<void> {
     await mkdir(dirname(this.filePath), { recursive: true });
     const data = JSON.stringify({ revoked: await super.list() }, null, 2);
-    await fs.writeFile(this.filePath, data, 'utf8');
+    await fs.writeFile(this.filePath, data, "utf8");
   }
 }

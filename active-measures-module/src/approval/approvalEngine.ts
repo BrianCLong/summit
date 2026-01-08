@@ -11,7 +11,7 @@ import {
   AuditActor,
   ClassificationLevel,
   UserRole,
-} from '../audit/auditEngine';
+} from "../audit/auditEngine";
 
 export interface ApprovalConfig {
   enableMultiStageApproval: boolean;
@@ -362,147 +362,147 @@ export interface ResourceRequirement {
 // Enums
 
 export enum UrgencyLevel {
-  LOW = 'low',
-  NORMAL = 'normal',
-  HIGH = 'high',
-  CRITICAL = 'critical',
-  EMERGENCY = 'emergency',
+  LOW = "low",
+  NORMAL = "normal",
+  HIGH = "high",
+  CRITICAL = "critical",
+  EMERGENCY = "emergency",
 }
 
 export enum OperationType {
-  INFORMATION_OPERATION = 'information_operation',
-  PSYCHOLOGICAL_OPERATION = 'psychological_operation',
-  INFLUENCE_CAMPAIGN = 'influence_campaign',
-  COUNTER_NARRATIVE = 'counter_narrative',
-  DISRUPTION_OPERATION = 'disruption_operation',
-  DEFENSIVE_OPERATION = 'defensive_operation',
+  INFORMATION_OPERATION = "information_operation",
+  PSYCHOLOGICAL_OPERATION = "psychological_operation",
+  INFLUENCE_CAMPAIGN = "influence_campaign",
+  COUNTER_NARRATIVE = "counter_narrative",
+  DISRUPTION_OPERATION = "disruption_operation",
+  DEFENSIVE_OPERATION = "defensive_operation",
 }
 
 export enum ApprovalStatus {
-  DRAFT = 'draft',
-  SUBMITTED = 'submitted',
-  UNDER_REVIEW = 'under_review',
-  APPROVED = 'approved',
-  CONDITIONALLY_APPROVED = 'conditionally_approved',
-  REJECTED = 'rejected',
-  WITHDRAWN = 'withdrawn',
-  EXPIRED = 'expired',
+  DRAFT = "draft",
+  SUBMITTED = "submitted",
+  UNDER_REVIEW = "under_review",
+  APPROVED = "approved",
+  CONDITIONALLY_APPROVED = "conditionally_approved",
+  REJECTED = "rejected",
+  WITHDRAWN = "withdrawn",
+  EXPIRED = "expired",
 }
 
 export enum ApprovalStageType {
-  AUTOMATIC = 'automatic',
-  HUMAN_REVIEW = 'human_review',
-  TECHNICAL_REVIEW = 'technical_review',
-  LEGAL_REVIEW = 'legal_review',
-  ETHICAL_REVIEW = 'ethical_review',
-  RISK_ASSESSMENT = 'risk_assessment',
-  SENIOR_APPROVAL = 'senior_approval',
-  FINAL_AUTHORIZATION = 'final_authorization',
+  AUTOMATIC = "automatic",
+  HUMAN_REVIEW = "human_review",
+  TECHNICAL_REVIEW = "technical_review",
+  LEGAL_REVIEW = "legal_review",
+  ETHICAL_REVIEW = "ethical_review",
+  RISK_ASSESSMENT = "risk_assessment",
+  SENIOR_APPROVAL = "senior_approval",
+  FINAL_AUTHORIZATION = "final_authorization",
 }
 
 export enum StageStatus {
-  PENDING = 'pending',
-  IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed',
-  SKIPPED = 'skipped',
-  FAILED = 'failed',
+  PENDING = "pending",
+  IN_PROGRESS = "in_progress",
+  COMPLETED = "completed",
+  SKIPPED = "skipped",
+  FAILED = "failed",
 }
 
 export enum DecisionType {
-  APPROVE = 'approve',
-  REJECT = 'reject',
-  CONDITIONAL_APPROVAL = 'conditional_approval',
-  ABSTAIN = 'abstain',
-  DEFER = 'defer',
-  REQUEST_MORE_INFO = 'request_more_info',
+  APPROVE = "approve",
+  REJECT = "reject",
+  CONDITIONAL_APPROVAL = "conditional_approval",
+  ABSTAIN = "abstain",
+  DEFER = "defer",
+  REQUEST_MORE_INFO = "request_more_info",
 }
 
 export enum AuthenticationMethod {
-  PASSWORD = 'password',
-  CERTIFICATE = 'certificate',
-  BIOMETRIC = 'biometric',
-  MULTI_FACTOR = 'multi_factor',
-  SMART_CARD = 'smart_card',
+  PASSWORD = "password",
+  CERTIFICATE = "certificate",
+  BIOMETRIC = "biometric",
+  MULTI_FACTOR = "multi_factor",
+  SMART_CARD = "smart_card",
 }
 
 export enum MeasureCategory {
-  INFORMATION_WARFARE = 'information_warfare',
-  PSYCHOLOGICAL_WARFARE = 'psychological_warfare',
-  CYBER_OPERATIONS = 'cyber_operations',
-  SOCIAL_ENGINEERING = 'social_engineering',
-  ECONOMIC_PRESSURE = 'economic_pressure',
-  DIPLOMATIC_INFLUENCE = 'diplomatic_influence',
+  INFORMATION_WARFARE = "information_warfare",
+  PSYCHOLOGICAL_WARFARE = "psychological_warfare",
+  CYBER_OPERATIONS = "cyber_operations",
+  SOCIAL_ENGINEERING = "social_engineering",
+  ECONOMIC_PRESSURE = "economic_pressure",
+  DIPLOMATIC_INFLUENCE = "diplomatic_influence",
 }
 
 export enum EffectType {
-  PERCEPTION_CHANGE = 'perception_change',
-  BEHAVIOR_CHANGE = 'behavior_change',
-  DECISION_INFLUENCE = 'decision_influence',
-  CAPABILITY_DEGRADATION = 'capability_degradation',
-  RELATIONSHIP_DISRUPTION = 'relationship_disruption',
-  INFORMATION_CONTROL = 'information_control',
+  PERCEPTION_CHANGE = "perception_change",
+  BEHAVIOR_CHANGE = "behavior_change",
+  DECISION_INFLUENCE = "decision_influence",
+  CAPABILITY_DEGRADATION = "capability_degradation",
+  RELATIONSHIP_DISRUPTION = "relationship_disruption",
+  INFORMATION_CONTROL = "information_control",
 }
 
 export enum RiskLevel {
-  MINIMAL = 'minimal',
-  LOW = 'low',
-  MODERATE = 'moderate',
-  HIGH = 'high',
-  CRITICAL = 'critical',
+  MINIMAL = "minimal",
+  LOW = "low",
+  MODERATE = "moderate",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 export enum RiskType {
-  OPERATIONAL = 'operational',
-  STRATEGIC = 'strategic',
-  LEGAL = 'legal',
-  ETHICAL = 'ethical',
-  REPUTATIONAL = 'reputational',
-  TECHNICAL = 'technical',
-  POLITICAL = 'political',
+  OPERATIONAL = "operational",
+  STRATEGIC = "strategic",
+  LEGAL = "legal",
+  ETHICAL = "ethical",
+  REPUTATIONAL = "reputational",
+  TECHNICAL = "technical",
+  POLITICAL = "political",
 }
 
 export enum ComplianceStatus {
-  COMPLIANT = 'compliant',
-  NON_COMPLIANT = 'non_compliant',
-  PARTIALLY_COMPLIANT = 'partially_compliant',
-  UNDER_REVIEW = 'under_review',
-  EXEMPTION_GRANTED = 'exemption_granted',
+  COMPLIANT = "compliant",
+  NON_COMPLIANT = "non_compliant",
+  PARTIALLY_COMPLIANT = "partially_compliant",
+  UNDER_REVIEW = "under_review",
+  EXEMPTION_GRANTED = "exemption_granted",
 }
 
 export enum ConditionType {
-  RISK_THRESHOLD = 'risk_threshold',
-  CLASSIFICATION_LEVEL = 'classification_level',
-  TARGET_TYPE = 'target_type',
-  RESOURCE_LIMIT = 'resource_limit',
-  TIME_CONSTRAINT = 'time_constraint',
-  LEGAL_REQUIREMENT = 'legal_requirement',
-  ETHICAL_REQUIREMENT = 'ethical_requirement',
+  RISK_THRESHOLD = "risk_threshold",
+  CLASSIFICATION_LEVEL = "classification_level",
+  TARGET_TYPE = "target_type",
+  RESOURCE_LIMIT = "resource_limit",
+  TIME_CONSTRAINT = "time_constraint",
+  LEGAL_REQUIREMENT = "legal_requirement",
+  ETHICAL_REQUIREMENT = "ethical_requirement",
 }
 
 export enum TriggerType {
-  TIME_BASED = 'time_based',
-  EVENT_BASED = 'event_based',
-  CONDITION_BASED = 'condition_based',
-  APPROVAL_BASED = 'approval_based',
-  EXTERNAL_SIGNAL = 'external_signal',
+  TIME_BASED = "time_based",
+  EVENT_BASED = "event_based",
+  CONDITION_BASED = "condition_based",
+  APPROVAL_BASED = "approval_based",
+  EXTERNAL_SIGNAL = "external_signal",
 }
 
 export enum TriggerAction {
-  ADVANCE_STAGE = 'advance_stage',
-  ESCALATE = 'escalate',
-  NOTIFY = 'notify',
-  REJECT = 'reject',
-  REQUEST_INFO = 'request_info',
-  DELEGATE = 'delegate',
+  ADVANCE_STAGE = "advance_stage",
+  ESCALATE = "escalate",
+  NOTIFY = "notify",
+  REJECT = "reject",
+  REQUEST_INFO = "request_info",
+  DELEGATE = "delegate",
 }
 
 export enum ResourceType {
-  PERSONNEL = 'personnel',
-  BUDGET = 'budget',
-  TECHNOLOGY = 'technology',
-  INFRASTRUCTURE = 'infrastructure',
-  INTELLIGENCE = 'intelligence',
-  LEGAL_SUPPORT = 'legal_support',
+  PERSONNEL = "personnel",
+  BUDGET = "budget",
+  TECHNOLOGY = "technology",
+  INFRASTRUCTURE = "infrastructure",
+  INTELLIGENCE = "intelligence",
+  LEGAL_SUPPORT = "legal_support",
 }
 
 /**
@@ -528,7 +528,7 @@ export class ApprovalEngine {
   async submitApprovalRequest(
     operationId: string,
     requesterId: string,
-    requestDetails: Partial<ApprovalRequest>,
+    requestDetails: Partial<ApprovalRequest>
   ): Promise<string> {
     const requestId = this.generateRequestId();
 
@@ -542,27 +542,20 @@ export class ApprovalEngine {
         ? new Date(Date.now() + this.config.maxApprovalTimeout * 60 * 1000)
         : undefined,
 
-      title: requestDetails.title || '',
-      description: requestDetails.description || '',
-      justification: requestDetails.justification || '',
+      title: requestDetails.title || "",
+      description: requestDetails.description || "",
+      justification: requestDetails.justification || "",
       urgency: requestDetails.urgency || UrgencyLevel.NORMAL,
-      classification:
-        requestDetails.classification || ClassificationLevel.CONFIDENTIAL,
+      classification: requestDetails.classification || ClassificationLevel.CONFIDENTIAL,
 
-      operationType:
-        requestDetails.operationType || OperationType.INFORMATION_OPERATION,
-      targetProfile:
-        requestDetails.targetProfile || this.createDefaultTargetProfile(),
+      operationType: requestDetails.operationType || OperationType.INFORMATION_OPERATION,
+      targetProfile: requestDetails.targetProfile || this.createDefaultTargetProfile(),
       proposedMeasures: requestDetails.proposedMeasures || [],
-      estimatedImpact:
-        requestDetails.estimatedImpact || this.createDefaultImpactAssessment(),
-      riskAssessment:
-        requestDetails.riskAssessment || this.createDefaultRiskAssessment(),
+      estimatedImpact: requestDetails.estimatedImpact || this.createDefaultImpactAssessment(),
+      riskAssessment: requestDetails.riskAssessment || this.createDefaultRiskAssessment(),
 
-      legalReview:
-        requestDetails.legalReview || this.createDefaultLegalReview(),
-      ethicalReview:
-        requestDetails.ethicalReview || this.createDefaultEthicalReview(),
+      legalReview: requestDetails.legalReview || this.createDefaultLegalReview(),
+      ethicalReview: requestDetails.ethicalReview || this.createDefaultEthicalReview(),
       complianceChecks: requestDetails.complianceChecks || [],
 
       approvalChain: this.generateApprovalChain(requestDetails),
@@ -570,9 +563,9 @@ export class ApprovalEngine {
       status: ApprovalStatus.SUBMITTED,
 
       metadata: {
-        version: '1.0',
-        submissionMethod: 'api',
-        sourceSystem: 'active-measures',
+        version: "1.0",
+        submissionMethod: "api",
+        sourceSystem: "active-measures",
         correlationId: this.generateCorrelationId(),
         tags: requestDetails.metadata?.tags || [],
         attachments: requestDetails.metadata?.attachments || [],
@@ -591,7 +584,7 @@ export class ApprovalEngine {
       AuditAction.OPERATION_CREATED,
       {
         id: requestId,
-        type: 'approval_request' as any,
+        type: "approval_request" as any,
         classification: request.classification,
         owner: requesterId,
       },
@@ -600,16 +593,16 @@ export class ApprovalEngine {
         businessJustification: request.justification,
         urgencyLevel: request.urgency as any,
         riskLevel: request.riskAssessment.overallRisk as any,
-        complianceFramework: ['NIST', 'SOX'],
-        tags: ['approval', 'submission'],
+        complianceFramework: ["NIST", "SOX"],
+        tags: ["approval", "submission"],
       },
       {
-        result: 'success' as any,
+        result: "success" as any,
         duration: 0,
         dataModified: true,
         recordsAffected: 1,
-        complianceStatus: 'compliant' as any,
-      },
+        complianceStatus: "compliant" as any,
+      }
     );
 
     // Start approval workflow
@@ -627,7 +620,7 @@ export class ApprovalEngine {
     decision: DecisionType,
     comments: string,
     conditions?: string[],
-    authMethod: AuthenticationMethod = AuthenticationMethod.PASSWORD,
+    authMethod: AuthenticationMethod = AuthenticationMethod.PASSWORD
   ): Promise<{
     success: boolean;
     nextStage?: string;
@@ -640,14 +633,12 @@ export class ApprovalEngine {
     }
 
     if (request.status !== ApprovalStatus.UNDER_REVIEW) {
-      throw new Error(
-        `Cannot process decision for request in status: ${request.status}`,
-      );
+      throw new Error(`Cannot process decision for request in status: ${request.status}`);
     }
 
     const currentStage = request.approvalChain[request.currentStage];
     if (!currentStage) {
-      throw new Error('No current stage found');
+      throw new Error("No current stage found");
     }
 
     // Validate approver authorization
@@ -668,10 +659,7 @@ export class ApprovalEngine {
       informationReviewed: [],
       consultationsHeld: [],
       authenticationMethod: authMethod,
-      cryptographicSignature: await this.generateCryptographicSignature(
-        decision,
-        approverId,
-      ),
+      cryptographicSignature: await this.generateCryptographicSignature(decision, approverId),
     };
 
     // Add decision to current stage
@@ -688,7 +676,7 @@ export class ApprovalEngine {
         : AuditAction.OPERATION_REJECTED,
       {
         id: requestId,
-        type: 'approval_request' as any,
+        type: "approval_request" as any,
         classification: request.classification,
         owner: request.requesterId,
       },
@@ -697,16 +685,16 @@ export class ApprovalEngine {
         businessJustification: comments,
         urgencyLevel: request.urgency as any,
         riskLevel: request.riskAssessment.overallRisk as any,
-        complianceFramework: ['NIST', 'SOX'],
-        tags: ['approval', 'decision', currentStage.name],
+        complianceFramework: ["NIST", "SOX"],
+        tags: ["approval", "decision", currentStage.name],
       },
       {
-        result: 'success' as any,
+        result: "success" as any,
         duration: decisionRecord.reviewDuration,
         dataModified: true,
         recordsAffected: 1,
-        complianceStatus: 'compliant' as any,
-      },
+        complianceStatus: "compliant" as any,
+      }
     );
 
     if (stageResult.completed) {
@@ -728,7 +716,7 @@ export class ApprovalEngine {
         return {
           success: true,
           finalDecision: ApprovalStatus.REJECTED,
-          message: 'Approval request rejected',
+          message: "Approval request rejected",
         };
       }
     }
@@ -752,7 +740,7 @@ export class ApprovalEngine {
   getPendingApprovals(
     approverId: string,
     role?: UserRole,
-    clearance?: ClassificationLevel,
+    clearance?: ClassificationLevel
   ): ApprovalRequest[] {
     return Array.from(this.approvalStore.values()).filter((request) => {
       if (request.status !== ApprovalStatus.UNDER_REVIEW) {
@@ -774,7 +762,7 @@ export class ApprovalEngine {
    */
   getApprovalHistory(operationId: string): ApprovalRequest[] {
     return Array.from(this.approvalStore.values()).filter(
-      (request) => request.operationId === operationId,
+      (request) => request.operationId === operationId
     );
   }
 
@@ -784,7 +772,7 @@ export class ApprovalEngine {
   async withdrawApprovalRequest(
     requestId: string,
     requesterId: string,
-    reason: string,
+    reason: string
   ): Promise<void> {
     const request = this.approvalStore.get(requestId);
     if (!request) {
@@ -792,14 +780,11 @@ export class ApprovalEngine {
     }
 
     if (request.requesterId !== requesterId) {
-      throw new Error('Only the requester can withdraw the approval request');
+      throw new Error("Only the requester can withdraw the approval request");
     }
 
-    if (
-      request.status === ApprovalStatus.APPROVED ||
-      request.status === ApprovalStatus.REJECTED
-    ) {
-      throw new Error('Cannot withdraw completed approval request');
+    if (request.status === ApprovalStatus.APPROVED || request.status === ApprovalStatus.REJECTED) {
+      throw new Error("Cannot withdraw completed approval request");
     }
 
     request.status = ApprovalStatus.WITHDRAWN;
@@ -810,7 +795,7 @@ export class ApprovalEngine {
       AuditAction.DELETE,
       {
         id: requestId,
-        type: 'approval_request' as any,
+        type: "approval_request" as any,
         classification: request.classification,
         owner: requesterId,
       },
@@ -819,16 +804,16 @@ export class ApprovalEngine {
         businessJustification: reason,
         urgencyLevel: request.urgency as any,
         riskLevel: request.riskAssessment.overallRisk as any,
-        complianceFramework: ['NIST', 'SOX'],
-        tags: ['approval', 'withdrawal'],
+        complianceFramework: ["NIST", "SOX"],
+        tags: ["approval", "withdrawal"],
       },
       {
-        result: 'success' as any,
+        result: "success" as any,
         duration: 0,
         dataModified: true,
         recordsAffected: 1,
-        complianceStatus: 'compliant' as any,
-      },
+        complianceStatus: "compliant" as any,
+      }
     );
   }
 
@@ -839,10 +824,10 @@ export class ApprovalEngine {
     requestId: string,
     fromApproverId: string,
     toApproverId: string,
-    reason: string,
+    reason: string
   ): Promise<void> {
     if (!this.config.enableDelegation) {
-      throw new Error('Delegation is not enabled');
+      throw new Error("Delegation is not enabled");
     }
 
     const request = this.approvalStore.get(requestId);
@@ -852,7 +837,7 @@ export class ApprovalEngine {
 
     const currentStage = request.approvalChain[request.currentStage];
     if (!currentStage.allowDelegation) {
-      throw new Error('Delegation not allowed for this stage');
+      throw new Error("Delegation not allowed for this stage");
     }
 
     // Validate both approvers
@@ -871,7 +856,7 @@ export class ApprovalEngine {
       AuditAction.ROLE_ASSUMED,
       {
         id: requestId,
-        type: 'approval_request' as any,
+        type: "approval_request" as any,
         classification: request.classification,
         owner: request.requesterId,
       },
@@ -880,16 +865,16 @@ export class ApprovalEngine {
         businessJustification: reason,
         urgencyLevel: request.urgency as any,
         riskLevel: request.riskAssessment.overallRisk as any,
-        complianceFramework: ['NIST', 'SOX'],
-        tags: ['approval', 'delegation'],
+        complianceFramework: ["NIST", "SOX"],
+        tags: ["approval", "delegation"],
       },
       {
-        result: 'success' as any,
+        result: "success" as any,
         duration: 0,
         dataModified: true,
         recordsAffected: 1,
-        complianceStatus: 'compliant' as any,
-      },
+        complianceStatus: "compliant" as any,
+      }
     );
   }
 
@@ -913,45 +898,30 @@ export class ApprovalEngine {
 
     if (timeRange) {
       requests = requests.filter(
-        (r) =>
-          r.submittedAt >= timeRange.start && r.submittedAt <= timeRange.end,
+        (r) => r.submittedAt >= timeRange.start && r.submittedAt <= timeRange.end
       );
     }
 
     const totalRequests = requests.length;
-    const approved = requests.filter(
-      (r) => r.status === ApprovalStatus.APPROVED,
-    ).length;
-    const rejected = requests.filter(
-      (r) => r.status === ApprovalStatus.REJECTED,
-    ).length;
-    const pending = requests.filter(
-      (r) => r.status === ApprovalStatus.UNDER_REVIEW,
-    ).length;
+    const approved = requests.filter((r) => r.status === ApprovalStatus.APPROVED).length;
+    const rejected = requests.filter((r) => r.status === ApprovalStatus.REJECTED).length;
+    const pending = requests.filter((r) => r.status === ApprovalStatus.UNDER_REVIEW).length;
 
     // Calculate average approval time
     const completedRequests = requests.filter(
-      (r) =>
-        r.status === ApprovalStatus.APPROVED ||
-        r.status === ApprovalStatus.REJECTED,
+      (r) => r.status === ApprovalStatus.APPROVED || r.status === ApprovalStatus.REJECTED
     );
 
     const totalApprovalTime = completedRequests.reduce((sum, request) => {
       const completedStage = request.approvalChain.find((s) => s.completedAt);
       if (completedStage) {
-        return (
-          sum +
-          (completedStage.completedAt!.getTime() -
-            request.submittedAt.getTime())
-        );
+        return sum + (completedStage.completedAt!.getTime() - request.submittedAt.getTime());
       }
       return sum;
     }, 0);
 
     const averageApprovalTime =
-      completedRequests.length > 0
-        ? totalApprovalTime / completedRequests.length / (1000 * 60)
-        : 0; // minutes
+      completedRequests.length > 0 ? totalApprovalTime / completedRequests.length / (1000 * 60) : 0; // minutes
 
     const approvalRate = totalRequests > 0 ? approved / totalRequests : 0;
 
@@ -975,9 +945,9 @@ export class ApprovalEngine {
     // Standard workflow template
     const standardWorkflow: ApprovalStage[] = [
       {
-        id: 'technical_review',
-        name: 'Technical Review',
-        description: 'Technical feasibility and implementation review',
+        id: "technical_review",
+        name: "Technical Review",
+        description: "Technical feasibility and implementation review",
         stageType: ApprovalStageType.TECHNICAL_REVIEW,
         sequence: 1,
         requiredRole: UserRole.ANALYST,
@@ -993,9 +963,9 @@ export class ApprovalEngine {
         status: StageStatus.PENDING,
       },
       {
-        id: 'risk_assessment',
-        name: 'Risk Assessment',
-        description: 'Comprehensive risk evaluation',
+        id: "risk_assessment",
+        name: "Risk Assessment",
+        description: "Comprehensive risk evaluation",
         stageType: ApprovalStageType.RISK_ASSESSMENT,
         sequence: 2,
         requiredRole: UserRole.SUPERVISOR,
@@ -1011,9 +981,9 @@ export class ApprovalEngine {
         status: StageStatus.PENDING,
       },
       {
-        id: 'legal_review',
-        name: 'Legal Review',
-        description: 'Legal compliance and risk assessment',
+        id: "legal_review",
+        name: "Legal Review",
+        description: "Legal compliance and risk assessment",
         stageType: ApprovalStageType.LEGAL_REVIEW,
         sequence: 3,
         requiredRole: UserRole.ADMINISTRATOR,
@@ -1029,9 +999,9 @@ export class ApprovalEngine {
         status: StageStatus.PENDING,
       },
       {
-        id: 'final_authorization',
-        name: 'Final Authorization',
-        description: 'Senior leadership final approval',
+        id: "final_authorization",
+        name: "Final Authorization",
+        description: "Senior leadership final approval",
         stageType: ApprovalStageType.FINAL_AUTHORIZATION,
         sequence: 4,
         requiredRole: UserRole.APPROVER,
@@ -1048,7 +1018,7 @@ export class ApprovalEngine {
       },
     ];
 
-    this.workflowTemplates.set('standard', standardWorkflow);
+    this.workflowTemplates.set("standard", standardWorkflow);
   }
 
   private generateRequestId(): string {
@@ -1065,25 +1035,21 @@ export class ApprovalEngine {
 
   private validateApprovalRequest(request: ApprovalRequest): void {
     if (!request.title || !request.description || !request.justification) {
-      throw new Error(
-        'Missing required fields: title, description, or justification',
-      );
+      throw new Error("Missing required fields: title, description, or justification");
     }
 
     if (request.proposedMeasures.length === 0) {
-      throw new Error('At least one proposed measure is required');
+      throw new Error("At least one proposed measure is required");
     }
 
     if (request.approvalChain.length === 0) {
-      throw new Error('Approval chain cannot be empty');
+      throw new Error("Approval chain cannot be empty");
     }
   }
 
-  private generateApprovalChain(
-    requestDetails: Partial<ApprovalRequest>,
-  ): ApprovalStage[] {
+  private generateApprovalChain(requestDetails: Partial<ApprovalRequest>): ApprovalStage[] {
     // Use standard workflow template by default
-    const template = this.workflowTemplates.get('standard')!;
+    const template = this.workflowTemplates.get("standard")!;
 
     // Clone template and customize based on request details
     return template.map((stage) => ({
@@ -1096,16 +1062,16 @@ export class ApprovalEngine {
 
   private generateStageConditions(
     stage: ApprovalStage,
-    requestDetails: Partial<ApprovalRequest>,
+    requestDetails: Partial<ApprovalRequest>
   ): ApprovalCondition[] {
     const conditions: ApprovalCondition[] = [];
 
     // Add classification-based conditions
     if (requestDetails.classification === ClassificationLevel.TOP_SECRET) {
       conditions.push({
-        id: 'ts_clearance_required',
+        id: "ts_clearance_required",
         type: ConditionType.CLASSIFICATION_LEVEL,
-        description: 'TOP SECRET clearance required',
+        description: "TOP SECRET clearance required",
         parameters: { requiredClearance: ClassificationLevel.TOP_SECRET },
         mandatory: true,
         autoEvaluate: true,
@@ -1118,9 +1084,9 @@ export class ApprovalEngine {
       requestDetails.riskAssessment?.overallRisk === RiskLevel.CRITICAL
     ) {
       conditions.push({
-        id: 'high_risk_review',
+        id: "high_risk_review",
         type: ConditionType.RISK_THRESHOLD,
-        description: 'Additional review required for high-risk operations',
+        description: "Additional review required for high-risk operations",
         parameters: { maxRiskLevel: RiskLevel.MODERATE },
         mandatory: true,
         autoEvaluate: false,
@@ -1132,14 +1098,14 @@ export class ApprovalEngine {
 
   private generateStageTriggers(
     stage: ApprovalStage,
-    requestDetails: Partial<ApprovalRequest>,
+    requestDetails: Partial<ApprovalRequest>
   ): ApprovalTrigger[] {
     const triggers: ApprovalTrigger[] = [];
 
     // Add timeout trigger
     if (stage.timeoutMinutes) {
       triggers.push({
-        id: 'timeout_escalation',
+        id: "timeout_escalation",
         type: TriggerType.TIME_BASED,
         condition: `timeout_minutes > ${stage.timeoutMinutes}`,
         action: TriggerAction.ESCALATE,
@@ -1153,11 +1119,11 @@ export class ApprovalEngine {
       requestDetails.urgency === UrgencyLevel.EMERGENCY
     ) {
       triggers.push({
-        id: 'urgency_notification',
+        id: "urgency_notification",
         type: TriggerType.EVENT_BASED,
-        condition: 'stage_started',
+        condition: "stage_started",
         action: TriggerAction.NOTIFY,
-        parameters: { notificationLevel: 'immediate' },
+        parameters: { notificationLevel: "immediate" },
       });
     }
 
@@ -1166,10 +1132,10 @@ export class ApprovalEngine {
 
   private createDefaultTargetProfile(): TargetProfile {
     return {
-      entityTypes: ['organization'],
-      geographicalScope: ['unknown'],
-      demographicProfiles: ['general_population'],
-      psychographicProfiles: ['general'],
+      entityTypes: ["organization"],
+      geographicalScope: ["unknown"],
+      demographicProfiles: ["general_population"],
+      psychographicProfiles: ["general"],
       estimatedReach: 1000,
       civilianProximity: 0.1,
     };
@@ -1200,17 +1166,17 @@ export class ApprovalEngine {
       contingencyPlans: [],
       monitoringPlan: {
         indicators: [],
-        frequency: 'daily',
-        responsible: 'system',
+        frequency: "daily",
+        responsible: "system",
         escalationThresholds: [],
-        reportingSchedule: 'weekly',
+        reportingSchedule: "weekly",
       },
     };
   }
 
   private createDefaultLegalReview(): LegalReview {
     return {
-      reviewerId: 'system',
+      reviewerId: "system",
       reviewDate: new Date(),
       legalFramework: [],
       complianceStatus: ComplianceStatus.UNDER_REVIEW,
@@ -1222,7 +1188,7 @@ export class ApprovalEngine {
 
   private createDefaultEthicalReview(): EthicalReview {
     return {
-      reviewerId: 'system',
+      reviewerId: "system",
       reviewDate: new Date(),
       ethicalFramework: [],
       principlesApplied: [],
@@ -1245,25 +1211,20 @@ export class ApprovalEngine {
 
   private async validateApproverAuthorization(
     approverId: string,
-    stage: ApprovalStage,
+    stage: ApprovalStage
   ): Promise<void> {
     // In a real implementation, this would check against user database
     // For now, we'll do basic validation
 
-    if (
-      stage.specificApprovers &&
-      !stage.specificApprovers.includes(approverId)
-    ) {
-      throw new Error('Approver not authorized for this stage');
+    if (stage.specificApprovers && !stage.specificApprovers.includes(approverId)) {
+      throw new Error("Approver not authorized for this stage");
     }
 
     // Check for unique approver requirement
     if (stage.requireUniqueApprover) {
-      const existingDecision = stage.decisions.find(
-        (d) => d.approverId === approverId,
-      );
+      const existingDecision = stage.decisions.find((d) => d.approverId === approverId);
       if (existingDecision) {
-        throw new Error('Approver has already made a decision for this stage');
+        throw new Error("Approver has already made a decision for this stage");
       }
     }
   }
@@ -1274,10 +1235,10 @@ export class ApprovalEngine {
 
   private async generateCryptographicSignature(
     decision: DecisionType,
-    approverId: string,
+    approverId: string
   ): Promise<string> {
     const data = `${decision}:${approverId}:${Date.now()}`;
-    return Buffer.from(data).toString('base64');
+    return Buffer.from(data).toString("base64");
   }
 
   private async evaluateStageCompletion(stage: ApprovalStage): Promise<{
@@ -1285,12 +1246,8 @@ export class ApprovalEngine {
     approved: boolean;
     reason: string;
   }> {
-    const approvals = stage.decisions.filter(
-      (d) => d.decision === DecisionType.APPROVE,
-    ).length;
-    const rejections = stage.decisions.filter(
-      (d) => d.decision === DecisionType.REJECT,
-    ).length;
+    const approvals = stage.decisions.filter((d) => d.decision === DecisionType.APPROVE).length;
+    const rejections = stage.decisions.filter((d) => d.decision === DecisionType.REJECT).length;
 
     // Check if minimum approvals met
     if (approvals >= stage.minimumApprovers) {
@@ -1299,7 +1256,7 @@ export class ApprovalEngine {
       return {
         completed: true,
         approved: true,
-        reason: 'Minimum approvals reached',
+        reason: "Minimum approvals reached",
       };
     }
 
@@ -1310,14 +1267,14 @@ export class ApprovalEngine {
       return {
         completed: true,
         approved: false,
-        reason: 'Maximum dissent exceeded',
+        reason: "Maximum dissent exceeded",
       };
     }
 
     return {
       completed: false,
       approved: false,
-      reason: 'Waiting for more decisions',
+      reason: "Waiting for more decisions",
     };
   }
 
@@ -1333,7 +1290,7 @@ export class ApprovalEngine {
       request.status = ApprovalStatus.APPROVED;
       return {
         finalDecision: ApprovalStatus.APPROVED,
-        message: 'Approval request fully approved',
+        message: "Approval request fully approved",
       };
     }
 
@@ -1352,21 +1309,15 @@ export class ApprovalEngine {
     approverId: string,
     stage: ApprovalStage,
     role?: UserRole,
-    clearance?: ClassificationLevel,
+    clearance?: ClassificationLevel
   ): boolean {
     // Check specific approvers
-    if (
-      stage.specificApprovers &&
-      !stage.specificApprovers.includes(approverId)
-    ) {
+    if (stage.specificApprovers && !stage.specificApprovers.includes(approverId)) {
       return false;
     }
 
     // Check alternate approvers
-    if (
-      stage.alternateApprovers &&
-      !stage.alternateApprovers.includes(approverId)
-    ) {
+    if (stage.alternateApprovers && !stage.alternateApprovers.includes(approverId)) {
       return false;
     }
 
@@ -1402,17 +1353,11 @@ export class ApprovalEngine {
     averageTime: number;
     rejectionRate: number;
   }> {
-    const stageStats = new Map<
-      string,
-      { totalTime: number; count: number; rejections: number }
-    >();
+    const stageStats = new Map<string, { totalTime: number; count: number; rejections: number }>();
 
     requests.forEach((request) => {
       request.approvalChain.forEach((stage) => {
-        if (
-          stage.status === StageStatus.COMPLETED ||
-          stage.status === StageStatus.FAILED
-        ) {
+        if (stage.status === StageStatus.COMPLETED || stage.status === StageStatus.FAILED) {
           const key = stage.name;
           const existing = stageStats.get(key) || {
             totalTime: 0,
@@ -1421,8 +1366,7 @@ export class ApprovalEngine {
           };
 
           if (stage.startedAt && stage.completedAt) {
-            existing.totalTime +=
-              stage.completedAt.getTime() - stage.startedAt.getTime();
+            existing.totalTime += stage.completedAt.getTime() - stage.startedAt.getTime();
             existing.count++;
 
             if (stage.status === StageStatus.FAILED) {
@@ -1437,8 +1381,7 @@ export class ApprovalEngine {
 
     return Array.from(stageStats.entries()).map(([stage, stats]) => ({
       stage,
-      averageTime:
-        stats.count > 0 ? stats.totalTime / stats.count / (1000 * 60) : 0, // minutes
+      averageTime: stats.count > 0 ? stats.totalTime / stats.count / (1000 * 60) : 0, // minutes
       rejectionRate: stats.count > 0 ? stats.rejections / stats.count : 0,
     }));
   }
@@ -1446,12 +1389,12 @@ export class ApprovalEngine {
   private createAuditActor(userId: string): AuditActor {
     return {
       id: userId,
-      type: 'human_operator' as any,
+      type: "human_operator" as any,
       name: userId,
       role: UserRole.OPERATOR,
       clearanceLevel: ClassificationLevel.SECRET,
       authentication: {
-        method: 'password' as any,
+        method: "password" as any,
         strength: 0.8,
         mfaUsed: false,
         certificateUsed: false,

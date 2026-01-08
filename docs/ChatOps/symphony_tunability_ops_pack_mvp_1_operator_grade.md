@@ -60,14 +60,7 @@ flowchart LR
       "type": "array",
       "items": {
         "type": "object",
-        "required": [
-          "name",
-          "provider",
-          "class",
-          "context_tokens",
-          "rpm_cap",
-          "tpm_cap"
-        ],
+        "required": ["name", "provider", "class", "context_tokens", "rpm_cap", "tpm_cap"],
         "properties": {
           "name": { "type": "string" },
           "provider": { "type": "string" },
@@ -150,12 +143,12 @@ flowchart LR
 **File:** `services/proxy/src/router/scheduler.ts` (TypeScript, robust window‑aware routing)
 
 ```ts
-import { DateTime } from 'luxon';
+import { DateTime } from "luxon";
 
 export type Window = { start: string; end: string; days?: number[] };
 export type ModelCaps = {
   name: string;
-  class: 'local' | 'hosted';
+  class: "local" | "hosted";
   rpm_cap: number;
   tpm_cap: number;
   daily_usd_cap?: number;
@@ -168,27 +161,19 @@ export type ModelCaps = {
   };
 };
 
-export function isWindowOpen(
-  windows: Window[] | undefined,
-  now = DateTime.local(),
-): boolean {
+export function isWindowOpen(windows: Window[] | undefined, now = DateTime.local()): boolean {
   if (!windows || windows.length === 0) return true; // no windows means always on
   const wd = now.weekday % 7; // 1..7 → 0..6
-  const hm = now.toFormat('HH:mm');
-  return windows.some(
-    (w) => (w.days ? w.days.includes(wd) : true) && hm >= w.start && hm < w.end,
-  );
+  const hm = now.toFormat("HH:mm");
+  return windows.some((w) => (w.days ? w.days.includes(wd) : true) && hm >= w.start && hm < w.end);
 }
 
 export function canRoute(model: ModelCaps): { ok: boolean; reason?: string } {
-  if (!isWindowOpen(model.usage_windows))
-    return { ok: false, reason: 'window_closed' };
-  if (model.counters.rpm >= model.rpm_cap)
-    return { ok: false, reason: 'rpm_exhausted' };
-  if (model.counters.tpm >= model.tpm_cap)
-    return { ok: false, reason: 'tpm_exhausted' };
+  if (!isWindowOpen(model.usage_windows)) return { ok: false, reason: "window_closed" };
+  if (model.counters.rpm >= model.rpm_cap) return { ok: false, reason: "rpm_exhausted" };
+  if (model.counters.tpm >= model.tpm_cap) return { ok: false, reason: "tpm_exhausted" };
   if (model.daily_usd_cap && model.counters.usd_today >= model.daily_usd_cap) {
-    return { ok: false, reason: 'budget_exhausted' };
+    return { ok: false, reason: "budget_exhausted" };
   }
   return { ok: true };
 }
@@ -196,7 +181,7 @@ export function canRoute(model: ModelCaps): { ok: boolean; reason?: string } {
 export function pickModel(
   candidates: ModelCaps[],
   pref: string[] = [],
-  fallback: string[] = [],
+  fallback: string[] = []
 ): { chosen?: ModelCaps; denied: Record<string, string> } {
   const denied: Record<string, string> = {};
   const order = [
@@ -209,7 +194,7 @@ export function pickModel(
     if (!m) continue;
     const gate = canRoute(m);
     if (gate.ok) return { chosen: m, denied };
-    denied[name] = gate.reason || 'unknown';
+    denied[name] = gate.reason || "unknown";
   }
   return { denied };
 }
@@ -218,9 +203,9 @@ export function pickModel(
 **File:** `services/proxy/src/router/policy.ts` (validate + explainable decision)
 
 ```ts
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
-import schema from './policy.schema.json';
+import Ajv from "ajv";
+import addFormats from "ajv-formats";
+import schema from "./policy.schema.json";
 
 const ajv = new Ajv({ allErrors: true, allowUnionTypes: true });
 addFormats(ajv);
@@ -233,12 +218,9 @@ export type Decision = {
   reasons: Array<{ model: string; reason: string }>; // for Explain Route
 };
 
-export function decide(
-  policy: any,
-  req: { task: string; loa: number; risk?: string },
-): Decision {
+export function decide(policy: any, req: { task: string; loa: number; risk?: string }): Decision {
   if (!validate(policy)) {
-    return { allow: false, denial: 'policy_invalid', reasons: [] };
+    return { allow: false, denial: "policy_invalid", reasons: [] };
   }
   const candidates = policy.models.map((m: any) => ({
     ...m,
@@ -247,19 +229,15 @@ export function decide(
   const rule = policy.rules.find(
     (r: any) =>
       (!r.match.task || r.match.task === req.task) &&
-      (r.match.loa === undefined || r.match.loa >= req.loa),
+      (r.match.loa === undefined || r.match.loa >= req.loa)
   );
-  if (!rule) return { allow: false, denial: 'no_matching_rule', reasons: [] };
-  const { pickModel } = require('./scheduler');
-  const { chosen, denied } = pickModel(
-    candidates,
-    rule.route.prefer,
-    rule.route.fallback,
-  );
+  if (!rule) return { allow: false, denial: "no_matching_rule", reasons: [] };
+  const { pickModel } = require("./scheduler");
+  const { chosen, denied } = pickModel(candidates, rule.route.prefer, rule.route.fallback);
   if (!chosen) {
     return {
       allow: false,
-      denial: 'no_model_available',
+      denial: "no_model_available",
       reasons: Object.entries(denied).map(([model, reason]) => ({
         model,
         reason,
@@ -284,36 +262,36 @@ export function decide(
 **File:** `services/proxy/src/metrics.ts`
 
 ```ts
-import client from 'prom-client';
-import { Request, Response, NextFunction } from 'express';
+import client from "prom-client";
+import { Request, Response, NextFunction } from "express";
 
 export const register = new client.Registry();
 client.collectDefaultMetrics({ register });
 
 export const httpReqLatency = new client.Histogram({
-  name: 'symphony_http_request_duration_seconds',
-  help: 'HTTP request latency',
-  labelNames: ['route', 'method', 'status'],
+  name: "symphony_http_request_duration_seconds",
+  help: "HTTP request latency",
+  labelNames: ["route", "method", "status"],
   buckets: [0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10],
 });
 register.registerMetric(httpReqLatency);
 
 export const routeExecuteLatency = new client.Histogram({
-  name: 'symphony_route_execute_latency_seconds',
-  help: 'Latency for /route/execute',
-  labelNames: ['model', 'stream', 'status'],
+  name: "symphony_route_execute_latency_seconds",
+  help: "Latency for /route/execute",
+  labelNames: ["model", "stream", "status"],
 });
 register.registerMetric(routeExecuteLatency);
 
 export const budgetFraction = new client.Gauge({
-  name: 'symphony_model_budget_fraction_used',
-  help: 'Fraction of daily budget used',
-  labelNames: ['model'],
+  name: "symphony_model_budget_fraction_used",
+  help: "Fraction of daily budget used",
+  labelNames: ["model"],
 });
 register.registerMetric(budgetFraction);
 
 export function metricsHandler(req: Request, res: Response) {
-  res.set('Content-Type', register.contentType);
+  res.set("Content-Type", register.contentType);
   res.end(register.metrics());
 }
 
@@ -323,7 +301,7 @@ export function timed(routeLabel: string) {
       route: routeLabel,
       method: req.method,
     });
-    res.on('finish', () => end({ status: String(res.statusCode) }));
+    res.on("finish", () => end({ status: String(res.statusCode) }));
     next();
   };
 }
@@ -332,17 +310,17 @@ export function timed(routeLabel: string) {
 **File:** `services/proxy/src/routes/status.ts`
 
 ```ts
-import { Router } from 'express';
+import { Router } from "express";
 const r = Router();
 
-r.get('/status/health.json', (_req, res) => {
+r.get("/status/health.json", (_req, res) => {
   res.json({
     services: { litellm: true, ollama: true, gateway: true },
-    version: process.env.APP_VERSION || 'dev',
+    version: process.env.APP_VERSION || "dev",
   });
 });
 
-r.get('/status/burndown.json', (_req, res) => {
+r.get("/status/burndown.json", (_req, res) => {
   const now = new Date().toISOString();
   res.json({ generated_at: now, windows: { m1: {}, h1: {}, d1: {} } });
 });
@@ -353,17 +331,17 @@ export default r;
 **File:** `services/proxy/src/server.ts` (excerpt: wire metrics + status)
 
 ```ts
-import express from 'express';
-import statusRoutes from './routes/status';
-import { metricsHandler, timed } from './metrics';
+import express from "express";
+import statusRoutes from "./routes/status";
+import { metricsHandler, timed } from "./metrics";
 
 const app = express();
-app.use(express.json({ limit: '2mb' }));
-app.use(timed('all'));
+app.use(express.json({ limit: "2mb" }));
+app.use(timed("all"));
 app.use(statusRoutes);
-app.get('/metrics', metricsHandler);
+app.get("/metrics", metricsHandler);
 
-app.listen(8787, () => console.log('Proxy listening on :8787'));
+app.listen(8787, () => console.log("Proxy listening on :8787"));
 ```
 
 **File:** `prometheus/prometheus.yml`
@@ -373,7 +351,7 @@ scrape_configs:
   - job_name: symphony-proxy
     metrics_path: /metrics
     static_configs:
-      - targets: ['host.docker.internal:8787']
+      - targets: ["host.docker.internal:8787"]
 ```
 
 **File:** `prometheus/alerting-rules.yml`
@@ -387,13 +365,13 @@ groups:
         for: 10m
         labels: { severity: page }
         annotations:
-          summary: 'p95 route/execute over SLO'
+          summary: "p95 route/execute over SLO"
       - alert: BudgetExhaustion
         expr: max_over_time(symphony_model_budget_fraction_used[5m]) > 0.8
         for: 2m
         labels: { severity: warn }
         annotations:
-          summary: 'Model budget at >80%'
+          summary: "Model budget at >80%"
 ```
 
 ---
@@ -403,7 +381,7 @@ groups:
 **File:** `services/proxy/src/integrations/github.ts`
 
 ```ts
-import { Octokit } from '@octokit/rest';
+import { Octokit } from "@octokit/rest";
 
 const owner = process.env.GH_OWNER!;
 const repo = process.env.GH_REPO!;
@@ -413,25 +391,22 @@ const octo = new Octokit({ auth: token });
 export async function fileIncident(
   title: string,
   body: string,
-  labels: string[] = ['incident'],
+  labels: string[] = ["incident"]
 ): Promise<number> {
   const r = await octo.issues.create({ owner, repo, title, body, labels });
   return r.data.number;
 }
 
-export async function upsertRunReport(
-  auditId: string,
-  jsonl: string,
-): Promise<void> {
+export async function upsertRunReport(auditId: string, jsonl: string): Promise<void> {
   const path = `runs/${auditId}.jsonl`;
   await octo.repos.createOrUpdateFileContents({
     owner,
     repo,
     path,
     message: `chore(run-report): ${auditId}`,
-    content: Buffer.from(jsonl).toString('base64'),
-    committer: { name: 'sym‑bot', email: 'bot@symphony.local' },
-    author: { name: 'sym‑bot', email: 'bot@symphony.local' },
+    content: Buffer.from(jsonl).toString("base64"),
+    committer: { name: "sym‑bot", email: "bot@symphony.local" },
+    author: { name: "sym‑bot", email: "bot@symphony.local" },
   });
 }
 ```
@@ -439,7 +414,7 @@ export async function upsertRunReport(
 **File:** `services/proxy/src/integrations/jira.ts`
 
 ```ts
-import fetch from 'node-fetch';
+import fetch from "node-fetch";
 
 export async function createJiraIssue({
   baseUrl,
@@ -451,24 +426,22 @@ export async function createJiraIssue({
 }: any) {
   const url = `${baseUrl}/rest/api/3/issue`;
   const res = await fetch(url, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      Authorization:
-        'Basic ' + Buffer.from(`${email}:${apiToken}`).toString('base64'),
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
+      Authorization: "Basic " + Buffer.from(`${email}:${apiToken}`).toString("base64"),
+      Accept: "application/json",
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       fields: {
         project: { key: projectKey },
         summary,
         description,
-        issuetype: { name: 'Task' },
+        issuetype: { name: "Task" },
       },
     }),
   });
-  if (!res.ok)
-    throw new Error(`Jira create failed: ${res.status} ${await res.text()}`);
+  if (!res.ok) throw new Error(`Jira create failed: ${res.status} ${await res.text()}`);
   return res.json();
 }
 ```
@@ -480,21 +453,21 @@ export async function createJiraIssue({
 **File:** `services/proxy/src/routes/route.ts` (excerpts)
 
 ```ts
-import { Router } from 'express';
-import { decide } from '../router/policy';
-import { routeExecuteLatency } from '../metrics';
-import { upsertRunReport } from '../integrations/github';
+import { Router } from "express";
+import { decide } from "../router/policy";
+import { routeExecuteLatency } from "../metrics";
+import { upsertRunReport } from "../integrations/github";
 
 const r = Router();
 
-r.post('/route/plan', (req, res) => {
-  const decision = decide(req.app.get('policy'), req.body);
+r.post("/route/plan", (req, res) => {
+  const decision = decide(req.app.get("policy"), req.body);
   res.json({ decision, policy: { allow: decision.allow } });
 });
 
-r.post('/route/execute', async (req, res) => {
+r.post("/route/execute", async (req, res) => {
   const start = process.hrtime.bigint();
-  const decision = decide(req.app.get('policy'), req.body);
+  const decision = decide(req.app.get("policy"), req.body);
   if (!decision.allow || !decision.model) return res.status(429).json(decision);
 
   // pseudo‑call to gateway here (replace with real client)
@@ -503,14 +476,11 @@ r.post('/route/execute', async (req, res) => {
     const output = { text: `hello from ${model}` };
     const latencyMs = Number((process.hrtime.bigint() - start) / 1000000n);
     routeExecuteLatency.observe(
-      { model, stream: String(Boolean(req.body.stream)), status: 'ok' },
-      latencyMs / 1000,
+      { model, stream: String(Boolean(req.body.stream)), status: "ok" },
+      latencyMs / 1000
     );
     const audit_id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    await upsertRunReport(
-      audit_id,
-      JSON.stringify({ decision, req }, null, 0) + '\n',
-    );
+    await upsertRunReport(audit_id, JSON.stringify({ decision, req }, null, 0) + "\n");
     res.json({
       audit_id,
       latency_ms: latencyMs,
@@ -519,10 +489,10 @@ r.post('/route/execute', async (req, res) => {
     });
   } catch (e: any) {
     routeExecuteLatency.observe(
-      { model, stream: String(Boolean(req.body.stream)), status: 'err' },
-      0,
+      { model, stream: String(Boolean(req.body.stream)), status: "err" },
+      0
     );
-    return res.status(502).json({ error: 'gateway_failed', detail: e.message });
+    return res.status(502).json({ error: "gateway_failed", detail: e.message });
   }
 });
 
@@ -538,17 +508,17 @@ export default r;
 **File:** `apps/web/src/features/ModelMatrix.tsx`
 
 ```tsx
-import React, { useEffect, useState } from 'react';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { io } from 'socket.io-client';
-import $ from 'jquery';
+import React, { useEffect, useState } from "react";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { io } from "socket.io-client";
+import $ from "jquery";
 
-const socket = io('/', { path: '/events' });
+const socket = io("/", { path: "/events" });
 
 type Row = {
   id: string;
-  class: 'local' | 'hosted';
-  window: 'open' | 'closed';
+  class: "local" | "hosted";
+  window: "open" | "closed";
   rpm: number;
   rpmCap: number;
   tpm: number;
@@ -559,34 +529,34 @@ type Row = {
 };
 
 const cols: GridColDef[] = [
-  { field: 'id', headerName: 'Model', flex: 1 },
-  { field: 'class', headerName: 'Class', width: 100 },
-  { field: 'window', headerName: 'Window', width: 110 },
-  { field: 'rpm', headerName: 'RPM', width: 90 },
-  { field: 'rpmCap', headerName: 'RPM Cap', width: 110 },
-  { field: 'tpm', headerName: 'TPM', width: 100 },
-  { field: 'tpmCap', headerName: 'TPM Cap', width: 120 },
+  { field: "id", headerName: "Model", flex: 1 },
+  { field: "class", headerName: "Class", width: 100 },
+  { field: "window", headerName: "Window", width: 110 },
+  { field: "rpm", headerName: "RPM", width: 90 },
+  { field: "rpmCap", headerName: "RPM Cap", width: 110 },
+  { field: "tpm", headerName: "TPM", width: 100 },
+  { field: "tpmCap", headerName: "TPM Cap", width: 120 },
   {
-    field: 'budgetFrac',
-    headerName: 'Budget',
+    field: "budgetFrac",
+    headerName: "Budget",
     width: 110,
     valueFormatter: (v) => `${Math.round(Number(v) * 100)}%`,
   },
-  { field: 'p95ms', headerName: 'p95', width: 90 },
-  { field: 'ttfbms', headerName: 'TTFB', width: 90 },
+  { field: "p95ms", headerName: "p95", width: 90 },
+  { field: "ttfbms", headerName: "TTFB", width: 90 },
 ];
 
 export default function ModelMatrix() {
   const [rows, setRows] = useState<Row[]>([]);
   useEffect(() => {
-    socket.on('model_stats', (payload: Row[]) => setRows(payload));
-    return () => socket.off('model_stats');
+    socket.on("model_stats", (payload: Row[]) => setRows(payload));
+    return () => socket.off("model_stats");
   }, []);
 
   useEffect(() => {
     // subtle attention jQuery pulse on critical thresholds
     rows.forEach((r) => {
-      if (r.budgetFrac > 0.8 || r.window === 'closed') {
+      if (r.budgetFrac > 0.8 || r.window === "closed") {
         const el = $(`div[role=row][data-id="${r.id}"]`);
         el.stop(true, true).fadeOut(100).fadeIn(100);
       }
@@ -594,13 +564,8 @@ export default function ModelMatrix() {
   }, [rows]);
 
   return (
-    <div style={{ height: 420, width: '100%' }}>
-      <DataGrid
-        density="compact"
-        rows={rows}
-        columns={cols}
-        disableRowSelectionOnClick
-      />
+    <div style={{ height: 420, width: "100%" }}>
+      <DataGrid density="compact" rows={rows} columns={cols} disableRowSelectionOnClick />
     </div>
   );
 }
@@ -609,8 +574,8 @@ export default function ModelMatrix() {
 **File:** `apps/web/src/features/ExplainRouteDrawer.tsx`
 
 ```tsx
-import React from 'react';
-import { Drawer, List, ListItem, ListItemText, Chip } from '@mui/material';
+import React from "react";
+import { Drawer, List, ListItem, ListItemText, Chip } from "@mui/material";
 
 export function ExplainRouteDrawer({
   open,
@@ -642,41 +607,30 @@ export function ExplainRouteDrawer({
 **File:** `apps/web/src/features/RunbookPlanner.tsx`
 
 ```tsx
-import React, { useState } from 'react';
-import {
-  Button,
-  TextField,
-  Stack,
-  Switch,
-  FormControlLabel,
-} from '@mui/material';
-import $ from 'jquery';
+import React, { useState } from "react";
+import { Button, TextField, Stack, Switch, FormControlLabel } from "@mui/material";
+import $ from "jquery";
 
 export default function RunbookPlanner() {
-  const [task, setTask] = useState('qa');
+  const [task, setTask] = useState("qa");
   const [loa, setLoa] = useState(1);
   const [stream, setStream] = useState(true);
-  const [input, setInput] = useState('say hello');
+  const [input, setInput] = useState("say hello");
 
   function execute() {
     $.ajax({
-      url: '/route/execute',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/route/execute",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({ task, loa, input, stream }),
-      success: (resp) => console.log('audit_id', resp.audit_id),
+      success: (resp) => console.log("audit_id", resp.audit_id),
       error: (xhr) => console.error(xhr.responseText),
     });
   }
 
   return (
     <Stack spacing={2} direction="row" alignItems="center">
-      <TextField
-        size="small"
-        label="Task"
-        value={task}
-        onChange={(e) => setTask(e.target.value)}
-      />
+      <TextField size="small" label="Task" value={task} onChange={(e) => setTask(e.target.value)} />
       <TextField
         size="small"
         label="LoA"
@@ -692,12 +646,7 @@ export default function RunbookPlanner() {
         style={{ minWidth: 280 }}
       />
       <FormControlLabel
-        control={
-          <Switch
-            checked={stream}
-            onChange={(e) => setStream(e.target.checked)}
-          />
-        }
+        control={<Switch checked={stream} onChange={(e) => setStream(e.target.checked)} />}
         label="Stream"
       />
       <Button variant="contained" onClick={execute}>
@@ -711,14 +660,14 @@ export default function RunbookPlanner() {
 **File:** `apps/web/src/theme.ts`
 
 ```ts
-import { createTheme } from '@mui/material/styles';
+import { createTheme } from "@mui/material/styles";
 export const theme = createTheme({
-  palette: { mode: 'dark' },
+  palette: { mode: "dark" },
   shape: { borderRadius: 16 },
   components: {
     MuiPaper: { styleOverrides: { root: { borderRadius: 16 } } },
     MuiButton: {
-      styleOverrides: { root: { textTransform: 'none', borderRadius: 9999 } },
+      styleOverrides: { root: { textTransform: "none", borderRadius: 9999 } },
     },
   },
 });
@@ -733,22 +682,22 @@ Content-Security-Policy: default-src 'self'; connect-src 'self' http://127.0.0.1
 **Mermaid Hardening (React)**
 
 ```tsx
-import mermaid from 'mermaid';
-import { useEffect } from 'react';
+import mermaid from "mermaid";
+import { useEffect } from "react";
 useEffect(() => {
   mermaid.initialize({
     startOnLoad: false,
-    securityLevel: 'strict',
-    theme: 'neutral',
+    securityLevel: "strict",
+    theme: "neutral",
   });
 }, []);
 useEffect(
   () => {
-    mermaid.run({ querySelector: '.mermaid' });
+    mermaid.run({ querySelector: ".mermaid" });
   },
   [
     /* activeTab or visibility */
-  ],
+  ]
 );
 ```
 
@@ -759,18 +708,18 @@ useEffect(
 **File:** `services/proxy/src/events.ts`
 
 ```ts
-import { Server } from 'socket.io';
-import http from 'http';
+import { Server } from "socket.io";
+import http from "http";
 
 export function attach(ioServer: http.Server) {
-  const io = new Server(ioServer, { path: '/events', cors: { origin: '*' } });
+  const io = new Server(ioServer, { path: "/events", cors: { origin: "*" } });
   setInterval(() => {
     // emit synthetic stats until wired to real counters
-    io.emit('model_stats', [
+    io.emit("model_stats", [
       {
-        id: 'local/ollama',
-        class: 'local',
-        window: 'open',
+        id: "local/ollama",
+        class: "local",
+        window: "open",
         rpm: 3,
         rpmCap: 120,
         tpm: 10000,
@@ -780,9 +729,9 @@ export function attach(ioServer: http.Server) {
         ttfbms: 120,
       },
       {
-        id: 'gemini/1.5-pro',
-        class: 'hosted',
-        window: 'open',
+        id: "gemini/1.5-pro",
+        class: "hosted",
+        window: "open",
         rpm: 1,
         rpmCap: 30,
         tpm: 5000,
@@ -847,7 +796,7 @@ export function attach(ioServer: http.Server) {
 **File:** `services/proxy/src/middleware/ratelimit.ts`
 
 ```ts
-import rateLimit from 'express-rate-limit';
+import rateLimit from "express-rate-limit";
 export const strictRate = rateLimit({
   windowMs: 60_000,
   max: 60,
@@ -887,35 +836,35 @@ symphony-drill:
 **File:** `services/proxy/test/scheduler.test.ts`
 
 ```ts
-import { isWindowOpen, pickModel } from '../src/router/scheduler';
-import { DateTime } from 'luxon';
+import { isWindowOpen, pickModel } from "../src/router/scheduler";
+import { DateTime } from "luxon";
 
-test('window open/closed', () => {
-  const w = [{ start: '09:00', end: '17:00', days: [1, 2, 3, 4, 5] }];
-  expect(isWindowOpen(w, DateTime.fromISO('2025-08-29T10:00:00'))).toBe(true);
-  expect(isWindowOpen(w, DateTime.fromISO('2025-08-30T10:00:00'))).toBe(false); // Saturday
+test("window open/closed", () => {
+  const w = [{ start: "09:00", end: "17:00", days: [1, 2, 3, 4, 5] }];
+  expect(isWindowOpen(w, DateTime.fromISO("2025-08-29T10:00:00"))).toBe(true);
+  expect(isWindowOpen(w, DateTime.fromISO("2025-08-30T10:00:00"))).toBe(false); // Saturday
 });
 
-test('pick prefers open model', () => {
+test("pick prefers open model", () => {
   const c = [
     {
-      name: 'A',
-      class: 'hosted',
+      name: "A",
+      class: "hosted",
       rpm_cap: 1,
       tpm_cap: 1,
-      usage_windows: [{ start: '00:00', end: '00:01' }],
+      usage_windows: [{ start: "00:00", end: "00:01" }],
       counters: { rpm: 0, tpm: 0, usd_today: 0, window_open: false },
     },
     {
-      name: 'B',
-      class: 'local',
+      name: "B",
+      class: "local",
       rpm_cap: 100,
       tpm_cap: 1_000_000,
       counters: { rpm: 0, tpm: 0, usd_today: 0, window_open: true },
     },
   ];
-  const { chosen } = pickModel(c as any, ['A', 'B']);
-  expect(chosen!.name).toBe('B');
+  const { chosen } = pickModel(c as any, ["A", "B"]);
+  expect(chosen!.name).toBe("B");
 });
 ```
 

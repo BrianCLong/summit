@@ -3,13 +3,13 @@
  * Combines quantum circuits with classical neural networks
  */
 
-import { QuantumSimulator } from '@intelgraph/quantum-simulation';
-import { QuantumNeuralNetwork, QNNParams } from '../circuits/quantum-neural-network';
+import { QuantumSimulator } from "@intelgraph/quantum-simulation";
+import { QuantumNeuralNetwork, QNNParams } from "../circuits/quantum-neural-network";
 
 export interface HybridModelConfig {
   quantumParams: QNNParams;
   classicalLayers: number[];
-  activation: 'relu' | 'sigmoid' | 'tanh';
+  activation: "relu" | "sigmoid" | "tanh";
 }
 
 export class HybridQuantumClassicalModel {
@@ -70,12 +70,12 @@ export class HybridQuantumClassicalModel {
 
   private applyActivation(input: number[]): number[] {
     switch (this.config.activation) {
-      case 'relu':
-        return input.map(x => Math.max(0, x));
-      case 'sigmoid':
-        return input.map(x => 1 / (1 + Math.exp(-x)));
-      case 'tanh':
-        return input.map(x => Math.tanh(x));
+      case "relu":
+        return input.map((x) => Math.max(0, x));
+      case "sigmoid":
+        return input.map((x) => 1 / (1 + Math.exp(-x)));
+      case "tanh":
+        return input.map((x) => Math.tanh(x));
       default:
         return input;
     }
@@ -85,7 +85,11 @@ export class HybridQuantumClassicalModel {
     return predicted.reduce((sum, p, i) => sum + (p - target[i]) ** 2, 0) / predicted.length;
   }
 
-  private async backpropagate(input: number[], target: number[], learningRate: number): Promise<void> {
+  private async backpropagate(
+    input: number[],
+    target: number[],
+    learningRate: number
+  ): Promise<void> {
     // Simplified backpropagation
     // In practice, would use automatic differentiation
     const epsilon = 0.01;
@@ -150,6 +154,9 @@ export class HybridQuantumClassicalModel {
   }
 }
 
-export function createHybridModel(config: HybridModelConfig, simulator: QuantumSimulator): HybridQuantumClassicalModel {
+export function createHybridModel(
+  config: HybridModelConfig,
+  simulator: QuantumSimulator
+): HybridQuantumClassicalModel {
   return new HybridQuantumClassicalModel(config, simulator);
 }

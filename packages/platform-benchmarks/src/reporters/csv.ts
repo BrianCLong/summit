@@ -1,11 +1,11 @@
-import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 import type {
   BenchmarkConfig,
   BenchmarkReporter,
   BenchmarkResult,
   BenchmarkSuiteConfig,
-} from '../types.js';
+} from "../types.js";
 
 /**
  * CSV reporter for data analysis
@@ -32,25 +32,25 @@ export class CsvReporter implements BenchmarkReporter {
 
   async onSuiteComplete(results: BenchmarkResult[]): Promise<void> {
     const headers = [
-      'name',
-      'subsystem',
-      'language',
-      'workload_type',
-      'iterations',
-      'mean_ns',
-      'stddev_ns',
-      'min_ns',
-      'max_ns',
-      'p50_ns',
-      'p75_ns',
-      'p90_ns',
-      'p95_ns',
-      'p99_ns',
-      'ops_per_second',
-      'rme_percent',
-      'passed',
-      'git_commit',
-      'timestamp',
+      "name",
+      "subsystem",
+      "language",
+      "workload_type",
+      "iterations",
+      "mean_ns",
+      "stddev_ns",
+      "min_ns",
+      "max_ns",
+      "p50_ns",
+      "p75_ns",
+      "p90_ns",
+      "p95_ns",
+      "p99_ns",
+      "ops_per_second",
+      "rme_percent",
+      "passed",
+      "git_commit",
+      "timestamp",
     ];
 
     const rows = results.map((r) => [
@@ -75,20 +75,19 @@ export class CsvReporter implements BenchmarkReporter {
       r.timestamp,
     ]);
 
-    const csv = [
-      headers.join(','),
-      ...rows.map((row) => row.map((v) => `"${v}"`).join(',')),
-    ].join('\n');
+    const csv = [headers.join(","), ...rows.map((row) => row.map((v) => `"${v}"`).join(","))].join(
+      "\n"
+    );
 
     if (this.outputPath) {
       await fs.mkdir(path.dirname(this.outputPath), { recursive: true });
-      await fs.writeFile(this.outputPath, csv, 'utf8');
+      await fs.writeFile(this.outputPath, csv, "utf8");
     } else {
       console.log(csv);
     }
   }
 
   async onError(error: Error, config?: BenchmarkConfig): Promise<void> {
-    console.error(`Error in ${config?.name ?? 'unknown'}: ${error.message}`);
+    console.error(`Error in ${config?.name ?? "unknown"}: ${error.message}`);
   }
 }

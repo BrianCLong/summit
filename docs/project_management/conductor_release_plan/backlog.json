@@ -7,9 +7,7 @@
     "releaseWindow": "Cut 1 (Week 1)",
     "tenantCapability": "FedRAMP High; CJIS / Governance",
     "acceptanceCriteria": "Scope covers tagging, audit logging, and staged rollout across regulated tenants.",
-    "verificationSteps": [
-      "PM/Eng sign-off on scope review"
-    ],
+    "verificationSteps": ["PM/Eng sign-off on scope review"],
     "evidenceHook": "Scope doc linked in Conductor evidence store (#EC-101)"
   },
   {
@@ -20,9 +18,7 @@
     "releaseWindow": "Cut 1 (Week 1)",
     "tenantCapability": "FedRAMP High / Orchestration Policy",
     "acceptanceCriteria": "Tagged workloads carry tenant IDs end-to-end with <5 ms latency impact.",
-    "verificationSteps": [
-      "Run orchestration integration tests with tenant fixtures"
-    ],
+    "verificationSteps": ["Run orchestration integration tests with tenant fixtures"],
     "evidenceHook": "CI pipeline artifact orchestrator-tagging-report.html"
   },
   {
@@ -48,11 +44,7 @@
     "releaseWindow": "Cut 1 (Week 1)",
     "tenantCapability": "CJIS / Policy Enforcement",
     "acceptanceCriteria": "Requests without tenant_id fail with 400 and audit event; allowlist for system jobs documented.",
-    "verificationSteps": [
-      "Contract test suite",
-      "Negative API tests",
-      "Audit log inspected"
-    ],
+    "verificationSteps": ["Contract test suite", "Negative API tests", "Audit log inspected"],
     "evidenceHook": "Audit event export audit-tenant-tagging.json"
   },
   {
@@ -63,10 +55,7 @@
     "releaseWindow": "Cut 1 (Week 1)",
     "tenantCapability": "FedRAMP High / Compliance Reporting",
     "acceptanceCriteria": "Change log captures actor, diff, approval for all tenant-affecting configs within 5 min of merge.",
-    "verificationSteps": [
-      "End-to-end test writing entry",
-      "Manual review of log retention"
-    ],
+    "verificationSteps": ["End-to-end test writing entry", "Manual review of log retention"],
     "evidenceHook": "Ledger entry ledger://change-log/CL-552"
   },
   {
@@ -77,10 +66,7 @@
     "releaseWindow": "Cut 1 (Week 1)",
     "tenantCapability": "FedRAMP High / Audit Trail",
     "acceptanceCriteria": "Webhook posts payload with commit SHA, tenant scope, reviewer; retries on failure.",
-    "verificationSteps": [
-      "Webhook integration test",
-      "Chaos retry drill (2 failures)"
-    ],
+    "verificationSteps": ["Webhook integration test", "Chaos retry drill (2 failures)"],
     "evidenceHook": "Ledger screenshot + webhook retry log"
   },
   {
@@ -91,10 +77,7 @@
     "releaseWindow": "Cut 1 (Week 1)",
     "tenantCapability": "CJIS / Monitoring",
     "acceptanceCriteria": "Dashboard surfaces last 7 days of tenant-tagged changes, filters by tenant.",
-    "verificationSteps": [
-      "Dashboard smoke test",
-      "Sec sign-off recorded"
-    ],
+    "verificationSteps": ["Dashboard smoke test", "Sec sign-off recorded"],
     "evidenceHook": "Grafana export tenant-change-dashboard.json"
   },
   {
@@ -105,9 +88,7 @@
     "releaseWindow": "Cut 2 (Week 2)",
     "tenantCapability": "Shared / Cost Optimization",
     "acceptanceCriteria": "Scope: automated cost guardrail evaluation and budget alerts across environments.",
-    "verificationSteps": [
-      "PM/FinOps scope review recorded"
-    ],
+    "verificationSteps": ["PM/FinOps scope review recorded"],
     "evidenceHook": "Scope doc cost-guardrails-cut2.md"
   },
   {
@@ -118,10 +99,7 @@
     "releaseWindow": "Cut 2 (Week 2)",
     "tenantCapability": "Shared / Cost Analytics",
     "acceptanceCriteria": "Telemetry ingested hourly with <15 min lag, covers dev/stage/prod budgets.",
-    "verificationSteps": [
-      "Data freshness monitor",
-      "Unit tests for ingestion transforms"
-    ],
+    "verificationSteps": ["Data freshness monitor", "Unit tests for ingestion transforms"],
     "evidenceHook": "DataDog check env-cost-lag report"
   },
   {
@@ -132,10 +110,7 @@
     "releaseWindow": "Cut 2 (Week 2)",
     "tenantCapability": "Shared / Cost Analytics",
     "acceptanceCriteria": "Collector publishes spend, compares to $4k/$7k/$12k budgets, raises event at 80%.",
-    "verificationSteps": [
-      "Integration test with mock billing feed",
-      "Threshold alert simulation"
-    ],
+    "verificationSteps": ["Integration test with mock billing feed", "Threshold alert simulation"],
     "evidenceHook": "Alert transcript + collector runbook snippet (#FIN-77)"
   },
   {
@@ -146,10 +121,7 @@
     "releaseWindow": "Cut 2 (Week 2)",
     "tenantCapability": "Shared / Ops Automation",
     "acceptanceCriteria": "Slack channel receives alert with env tag and recommended action in <2 min.",
-    "verificationSteps": [
-      "Slack webhook test",
-      "On-call ack workflow verified"
-    ],
+    "verificationSteps": ["Slack webhook test", "On-call ack workflow verified"],
     "evidenceHook": "Slack export + PagerDuty ack screenshot"
   },
   {
@@ -160,10 +132,7 @@
     "releaseWindow": "Cut 2 (Week 2)",
     "tenantCapability": "Shared / Executive Reporting",
     "acceptanceCriteria": "Scorecard auto-generates before cut review with SLOs and cost variance.",
-    "verificationSteps": [
-      "Scheduled pipeline run",
-      "Report render QA"
-    ],
+    "verificationSteps": ["Scheduled pipeline run", "Report render QA"],
     "evidenceHook": "Scorecard artifact scorecard-weekly.pdf"
   },
   {
@@ -174,10 +143,7 @@
     "releaseWindow": "Cut 2 (Week 2)",
     "tenantCapability": "Shared / Analytics",
     "acceptanceCriteria": "Report includes 99.9% SLO KPI, cost delta, and highlight of breaches.",
-    "verificationSteps": [
-      "Data validation tests",
-      "Review with PM + SRE"
-    ],
+    "verificationSteps": ["Data validation tests", "Review with PM + SRE"],
     "evidenceHook": "dbt test log + signed meeting notes"
   },
   {
@@ -188,9 +154,7 @@
     "releaseWindow": "Cut 2 (Week 2)",
     "tenantCapability": "FedRAMP High; CJIS / Compliance Ops",
     "acceptanceCriteria": "Scope ensures every control emits machine-readable evidence each cut.",
-    "verificationSteps": [
-      "PM/Sec/QA alignment recorded"
-    ],
+    "verificationSteps": ["PM/Sec/QA alignment recorded"],
     "evidenceHook": "Control coverage matrix evidence-map.xlsx"
   },
   {
@@ -201,10 +165,7 @@
     "releaseWindow": "Cut 2 (Week 2)",
     "tenantCapability": "FedRAMP High / Compliance Ops",
     "acceptanceCriteria": "Coverage map shows control→evidence hook mapping with status updated daily.",
-    "verificationSteps": [
-      "Generate coverage matrix",
-      "Spot check 3 controls"
-    ],
+    "verificationSteps": ["Generate coverage matrix", "Spot check 3 controls"],
     "evidenceHook": "Evidence repo item CTRL-12"
   },
   {
@@ -215,11 +176,7 @@
     "releaseWindow": "Cut 2 (Week 2)",
     "tenantCapability": "CJIS / Compliance Ops",
     "acceptanceCriteria": "Each pipeline emits evidence metadata (control id, location, owner).",
-    "verificationSteps": [
-      "Pipeline unit tests",
-      "Nightly ingestion check",
-      "QA sign-off"
-    ],
+    "verificationSteps": ["Pipeline unit tests", "Nightly ingestion check", "QA sign-off"],
     "evidenceHook": "Evidence ingestion log + QA checklist"
   },
   {
@@ -230,10 +187,7 @@
     "releaseWindow": "Cut 2 (Week 2)",
     "tenantCapability": "FedRAMP High / Stakeholder Comms",
     "acceptanceCriteria": "Digest summarizes control status, delivered weekly.",
-    "verificationSteps": [
-      "Render digest",
-      "Portal availability test"
-    ],
+    "verificationSteps": ["Render digest", "Portal availability test"],
     "evidenceHook": "Portal screenshot + delivery log"
   }
 ]

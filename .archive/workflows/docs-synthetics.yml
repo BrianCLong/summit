@@ -3,7 +3,7 @@ name: docs-synthetics
 permissions:
   contents: read
 on:
-  schedule: [{ cron: '*/30 * * * *' }]
+  schedule: [{ cron: "*/30 * * * *" }]
   workflow_dispatch:
 jobs:
   ping:

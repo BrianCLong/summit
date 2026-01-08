@@ -1,14 +1,20 @@
-import bodyParser from 'body-parser';
-import express, { Request, Response } from 'express';
-import helmet from 'helmet';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { Pool } from 'pg';
-import { v4 as uuidv4 } from 'uuid';
-import { ChmConfig } from './config.js';
-import { createDocument, evaluateExport, evaluateHandle, evaluateView, getDocument } from './rules.js';
-import { createDowngradeRequest, approveDowngrade } from './workflows.js';
-import { defaultTaxonomy, normalizeCode } from './taxonomy.js';
+import bodyParser from "body-parser";
+import express, { Request, Response } from "express";
+import helmet from "helmet";
+import path from "path";
+import { fileURLToPath } from "url";
+import { Pool } from "pg";
+import { v4 as uuidv4 } from "uuid";
+import { ChmConfig } from "./config.js";
+import {
+  createDocument,
+  evaluateExport,
+  evaluateHandle,
+  evaluateView,
+  getDocument,
+} from "./rules.js";
+import { createDowngradeRequest, approveDowngrade } from "./workflows.js";
+import { defaultTaxonomy, normalizeCode } from "./taxonomy.js";
 
 export interface ServerDeps {
   pool: Pool;
@@ -20,9 +26,9 @@ export const createApp = ({ pool, config }: ServerDeps) => {
   const app = express();
   app.use(helmet());
   app.use(bodyParser.json());
-  app.use(express.static(path.join(__dirname, '..', 'public')));
+  app.use(express.static(path.join(__dirname, "..", "public")));
 
-  app.post('/taxonomy/seed', async (_req: Request, res: Response) => {
+  app.post("/taxonomy/seed", async (_req: Request, res: Response) => {
     await Promise.all(
       defaultTaxonomy.map((level) =>
         pool.query(
@@ -33,10 +39,10 @@ export const createApp = ({ pool, config }: ServerDeps) => {
         )
       )
     );
-    res.json({ status: 'ok', count: defaultTaxonomy.length });
+    res.json({ status: "ok", count: defaultTaxonomy.length });
   });
 
-  app.post('/documents', async (req: Request, res: Response) => {
+  app.post("/documents", async (req: Request, res: Response) => {
     const { id, title, classificationCode, residency, license, derivedFrom, actor } = req.body;
     try {
       const documentId = id || uuidv4();
@@ -48,50 +54,50 @@ export const createApp = ({ pool, config }: ServerDeps) => {
           classificationCode: normalizeCode(classificationCode),
           residency,
           license,
-          derivedFrom: Boolean(derivedFrom)
+          derivedFrom: Boolean(derivedFrom),
         },
-        actor || 'system'
+        actor || "system"
       );
-      res.status(201).json({ status: 'created', id: documentId });
+      res.status(201).json({ status: "created", id: documentId });
     } catch (err) {
       res.status(400).json({ error: (err as Error).message });
     }
   });
 
-  app.post('/export/:id', async (req: Request, res: Response) => {
+  app.post("/export/:id", async (req: Request, res: Response) => {
     const decision = await evaluateExport(pool, req.params.id, config);
     res.json(decision);
   });
 
-  app.get('/rules/:id', async (req: Request, res: Response) => {
+  app.get("/rules/:id", async (req: Request, res: Response) => {
     const doc = await getDocument(pool, req.params.id);
     if (!doc) {
-      res.status(404).json({ error: 'Document not found' });
+      res.status(404).json({ error: "Document not found" });
       return;
     }
     res.json({
       view: evaluateView(doc),
       handle: evaluateHandle(doc),
-      export: await evaluateExport(pool, req.params.id, config)
+      export: await evaluateExport(pool, req.params.id, config),
     });
   });
 
-  app.post('/downgrade/requests', async (req: Request, res: Response) => {
+  app.post("/downgrade/requests", async (req: Request, res: Response) => {
     const { documentId, requestedCode, justification, actor } = req.body;
     try {
       const id = await createDowngradeRequest(pool, {
         documentId,
         requestedCode,
         justification,
-        actor: actor || 'system'
+        actor: actor || "system",
       });
-      res.status(201).json({ id, status: 'pending' });
+      res.status(201).json({ id, status: "pending" });
     } catch (err) {
       res.status(400).json({ error: (err as Error).message });
     }
   });
 
-  app.post('/downgrade/approve', async (req: Request, res: Response) => {
+  app.post("/downgrade/approve", async (req: Request, res: Response) => {
     const { requestId, approver } = req.body;
     try {
       const status = await approveDowngrade(pool, { requestId, approver });
@@ -101,7 +107,7 @@ export const createApp = ({ pool, config }: ServerDeps) => {
     }
   });
 
-  app.get('/audit/:documentId', async (req: Request, res: Response) => {
+  app.get("/audit/:documentId", async (req: Request, res: Response) => {
     const rows = await pool.query(
       `SELECT id, action, actor, details, created_at FROM audit_receipts WHERE document_id = $1 ORDER BY created_at DESC`,
       [req.params.documentId]

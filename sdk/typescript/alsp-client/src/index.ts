@@ -1,4 +1,4 @@
-import { createHash } from "crypto";
+import { createHash } from 'crypto';
 
 export interface Range {
   start: number;
@@ -69,29 +69,32 @@ export interface AlspTransport {
 export class HttpTransport implements AlspTransport {
   private readonly fetchImpl: typeof fetch;
 
-  constructor(private readonly baseUrl: string, fetchImpl?: typeof fetch) {
+  constructor(
+    private readonly baseUrl: string,
+    fetchImpl?: typeof fetch,
+  ) {
     this.fetchImpl = fetchImpl ?? globalThis.fetch;
     if (!this.fetchImpl) {
-      throw new Error("fetch implementation is required in this environment");
+      throw new Error('fetch implementation is required in this environment');
     }
   }
 
   async proveRange(range: Range): Promise<RangeProof> {
-    return this.post<RangeProof>("/proveRange", range);
+    return this.post<RangeProof>('/proveRange', range);
   }
 
   async proveEvent(index: number): Promise<EventProof> {
-    return this.post<EventProof>("/proveEvent", { index });
+    return this.post<EventProof>('/proveEvent', { index });
   }
 
   async proveGap(start: number, end: number): Promise<GapProof> {
-    return this.post<GapProof>("/proveGap", { start, end });
+    return this.post<GapProof>('/proveGap', { start, end });
   }
 
   private async post<T>(path: string, body: unknown): Promise<T> {
     const response = await this.fetchImpl(`${this.baseUrl}${path}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
     if (!response.ok) {
@@ -121,7 +124,7 @@ export class MemoryTransport implements AlspTransport {
   async proveRange(range: Range): Promise<RangeProof> {
     const proof = this.rangeProofs.get(rangeKey(range));
     if (!proof) {
-      throw new Error("no cached range proof available");
+      throw new Error('no cached range proof available');
     }
     return proof;
   }
@@ -129,7 +132,7 @@ export class MemoryTransport implements AlspTransport {
   async proveEvent(index: number): Promise<EventProof> {
     const proof = this.eventProofs.get(index);
     if (!proof) {
-      throw new Error("no cached event proof available");
+      throw new Error('no cached event proof available');
     }
     return proof;
   }
@@ -137,7 +140,7 @@ export class MemoryTransport implements AlspTransport {
   async proveGap(start: number, end: number): Promise<GapProof> {
     const proof = this.gapProofs.get(rangeKey({ start, end }));
     if (!proof) {
-      throw new Error("no cached gap proof available");
+      throw new Error('no cached gap proof available');
     }
     return proof;
   }
@@ -153,11 +156,11 @@ export class AlspVerifier {
   verifyRange(proof: RangeProof): VerificationResult {
     validateRange(proof.query);
     if (!proof.blocks.length) {
-      throw new Error("range proof missing blocks");
+      throw new Error('range proof missing blocks');
     }
     this.ensureAnchor(proof.headDigest);
     if (!equalDigests(proof.startAnchor, proof.blocks[0].header.prevDigest)) {
-      throw new Error("range start anchor mismatch");
+      throw new Error('range start anchor mismatch');
     }
 
     const covered: number[] = [];
@@ -169,10 +172,10 @@ export class AlspVerifier {
         const membership = block.proofs[i];
         const digest = digestEvent(event);
         if (!equalDigests(encodeDigest(digest), membership.leafDigest)) {
-          throw new Error("event digest mismatch");
+          throw new Error('event digest mismatch');
         }
         if (!verifyMerkleProof(block.header.merkleRoot, membership)) {
-          throw new Error("invalid merkle proof");
+          throw new Error('invalid merkle proof');
         }
         covered.push(event.index);
       }
@@ -180,25 +183,29 @@ export class AlspVerifier {
     }
     ensureCoverage(proof.query, covered);
     this.anchor = proof.headDigest;
-    return { headDigest: proof.headDigest, coveredRange: proof.query, startAnchor: proof.startAnchor };
+    return {
+      headDigest: proof.headDigest,
+      coveredRange: proof.query,
+      startAnchor: proof.startAnchor,
+    };
   }
 
   verifyEvent(proof: EventProof): VerificationResult {
     this.ensureAnchor(proof.headDigest);
     if (proof.block.events.length !== 1 || proof.block.proofs.length !== 1) {
-      throw new Error("event proof must contain a single membership witness");
+      throw new Error('event proof must contain a single membership witness');
     }
     this.validateBlock(proof.block);
     const event = proof.block.events[0];
     if (event.index !== proof.index) {
-      throw new Error("event index mismatch");
+      throw new Error('event index mismatch');
     }
     const digest = digestEvent(event);
     if (!equalDigests(encodeDigest(digest), proof.block.proofs[0].leafDigest)) {
-      throw new Error("event digest mismatch");
+      throw new Error('event digest mismatch');
     }
     if (!verifyMerkleProof(proof.block.header.merkleRoot, proof.block.proofs[0])) {
-      throw new Error("invalid merkle proof");
+      throw new Error('invalid merkle proof');
     }
     this.anchor = proof.headDigest;
     return {
@@ -210,38 +217,42 @@ export class AlspVerifier {
 
   verifyGap(proof: GapProof): VerificationResult {
     if (proof.end < proof.start) {
-      throw new Error("invalid gap range");
+      throw new Error('invalid gap range');
     }
     this.ensureAnchor(proof.headDigest);
     validateHeader(proof.left);
     validateHeader(proof.right);
     if (proof.right.index !== proof.left.index + 1) {
-      throw new Error("gap proof requires consecutive blocks");
+      throw new Error('gap proof requires consecutive blocks');
     }
     if (!equalDigests(proof.right.prevDigest, proof.left.digest)) {
-      throw new Error("gap proof digest chain mismatch");
+      throw new Error('gap proof digest chain mismatch');
     }
     if (proof.start <= proof.left.endIndex) {
-      throw new Error("gap start overlaps left block");
+      throw new Error('gap start overlaps left block');
     }
     if (proof.end >= proof.right.startIndex) {
-      throw new Error("gap end overlaps right block");
+      throw new Error('gap end overlaps right block');
     }
     this.anchor = proof.headDigest;
-    return { headDigest: proof.headDigest, coveredRange: { start: proof.start, end: proof.end }, startAnchor: proof.left.prevDigest };
+    return {
+      headDigest: proof.headDigest,
+      coveredRange: { start: proof.start, end: proof.end },
+      startAnchor: proof.left.prevDigest,
+    };
   }
 
   private validateBlock(block: BlockProof, previous?: BlockHeader): void {
     validateHeader(block.header);
     if (block.events.length !== block.proofs.length) {
-      throw new Error("membership proof count mismatch");
+      throw new Error('membership proof count mismatch');
     }
     if (previous) {
       if (!equalDigests(block.header.prevDigest, previous.digest)) {
-        throw new Error("block chain digest mismatch");
+        throw new Error('block chain digest mismatch');
       }
       if (block.header.startIndex <= previous.endIndex) {
-        throw new Error("block event indices must increase");
+        throw new Error('block event indices must increase');
       }
     }
   }
@@ -252,7 +263,7 @@ export class AlspVerifier {
       return;
     }
     if (!equalDigests(this.anchor, digest)) {
-      throw new Error("head digest mismatch");
+      throw new Error('head digest mismatch');
     }
   }
 }
@@ -263,7 +274,10 @@ export interface ClientResult<TProof> {
 }
 
 export class AlspClient {
-  constructor(private readonly transport: AlspTransport, private readonly verifier: AlspVerifier) {}
+  constructor(
+    private readonly transport: AlspTransport,
+    private readonly verifier: AlspVerifier,
+  ) {}
 
   async proveRange(range: Range): Promise<ClientResult<RangeProof>> {
     const proof = await this.transport.proveRange(range);
@@ -285,9 +299,9 @@ export class AlspClient {
 }
 
 export type ReplayEntry =
-  | { type: "range"; proof: RangeProof }
-  | { type: "event"; proof: EventProof }
-  | { type: "gap"; proof: GapProof };
+  | { type: 'range'; proof: RangeProof }
+  | { type: 'event'; proof: EventProof }
+  | { type: 'gap'; proof: GapProof };
 
 export interface ReplayOutcome {
   entry: ReplayEntry;
@@ -303,9 +317,9 @@ export class ReplaySession {
     for (const entry of entries) {
       try {
         let result: VerificationResult;
-        if (entry.type === "range") {
+        if (entry.type === 'range') {
           result = this.verifier.verifyRange(entry.proof);
-        } else if (entry.type === "event") {
+        } else if (entry.type === 'event') {
           result = this.verifier.verifyEvent(entry.proof);
         } else {
           result = this.verifier.verifyGap(entry.proof);
@@ -326,24 +340,24 @@ function rangeKey(range: Range): string {
 
 function validateRange(range: Range): void {
   if (range.end < range.start) {
-    throw new Error("invalid range");
+    throw new Error('invalid range');
   }
 }
 
 function ensureCoverage(range: Range, indices: number[]): void {
   if (!indices.length) {
-    throw new Error("range proof contained no events");
+    throw new Error('range proof contained no events');
   }
   const sorted = [...indices].sort((a, b) => a - b);
   if (sorted[0] !== range.start) {
-    throw new Error("range proof missing start index");
+    throw new Error('range proof missing start index');
   }
   if (sorted[sorted.length - 1] !== range.end) {
-    throw new Error("range proof missing end index");
+    throw new Error('range proof missing end index');
   }
   for (let i = 1; i < sorted.length; i += 1) {
     if (sorted[i] !== sorted[i - 1] + 1) {
-      throw new Error("range proof skipped event indices");
+      throw new Error('range proof skipped event indices');
     }
   }
 }
@@ -351,13 +365,13 @@ function ensureCoverage(range: Range, indices: number[]): void {
 function validateHeader(header: BlockHeader): void {
   const expected = deriveBlockDigest(header);
   if (!equalDigests(expected, header.digest)) {
-    throw new Error("block header digest mismatch");
+    throw new Error('block header digest mismatch');
   }
 }
 
 function deriveBlockDigest(header: BlockHeader): string {
-  const hash = createHash("sha256");
-  hash.update(Buffer.from("alsp.block"));
+  const hash = createHash('sha256');
+  hash.update(Buffer.from('alsp.block'));
   hash.update(writeUint64(header.index));
   hash.update(writeUint64(header.startIndex));
   hash.update(writeUint64(header.endIndex));
@@ -367,10 +381,10 @@ function deriveBlockDigest(header: BlockHeader): string {
 }
 
 function digestEvent(event: Event): Buffer {
-  const hash = createHash("sha256");
+  const hash = createHash('sha256');
   hash.update(writeUint64(event.index));
   hash.update(writeUint64(parseTimestamp(event.timestamp)));
-  hash.update(Buffer.from(event.payload, "base64"));
+  hash.update(Buffer.from(event.payload, 'base64'));
   return hash.digest();
 }
 
@@ -388,15 +402,15 @@ function verifyMerkleProof(rootDigest: string, proof: MerkleProof): boolean {
 }
 
 function leafHash(leaf: Buffer): Buffer {
-  const hash = createHash("sha256");
-  hash.update(Buffer.from("leaf"));
+  const hash = createHash('sha256');
+  hash.update(Buffer.from('leaf'));
   hash.update(leaf);
   return hash.digest();
 }
 
 function nodeHash(left: Buffer, right: Buffer): Buffer {
-  const hash = createHash("sha256");
-  hash.update(Buffer.from("node"));
+  const hash = createHash('sha256');
+  hash.update(Buffer.from('node'));
   hash.update(left);
   hash.update(right);
   return hash.digest();
@@ -410,18 +424,18 @@ function decodeDigest(value: string): Buffer {
   if (!value) {
     return Buffer.alloc(0);
   }
-  return Buffer.from(value, "base64");
+  return Buffer.from(value, 'base64');
 }
 
 function encodeDigest(value: Buffer): string {
-  return value.toString("base64");
+  return value.toString('base64');
 }
 
 function writeUint64(value: number | bigint): Buffer {
   let big = BigInt(value);
   const mod = 1n << 64n;
   if (big < 0) {
-    big = (big % mod + mod) % mod;
+    big = ((big % mod) + mod) % mod;
   }
   const buffer = Buffer.alloc(8);
   buffer.writeBigUInt64BE(big);
@@ -437,6 +451,6 @@ function parseTimestamp(timestamp: string): bigint {
   if (Number.isNaN(base)) {
     throw new Error(`invalid timestamp: ${timestamp}`);
   }
-  const fraction = match[2] ? (match[2] + "000000000").slice(0, 9) : "000000000";
+  const fraction = match[2] ? (match[2] + '000000000').slice(0, 9) : '000000000';
   return BigInt(base) * 1_000_000n + BigInt(fraction);
 }

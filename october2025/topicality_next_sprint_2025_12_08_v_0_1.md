@@ -156,15 +156,15 @@ owners:
 
 kpis:
   - name: sso_scim_coverage
-    target: '>=0.95'
+    target: ">=0.95"
   - name: cost_per_req_delta
-    target: '<=-0.05'
+    target: "<=-0.05"
   - name: cache_hit_rate
-    target: '>=0.92'
+    target: ">=0.92"
   - name: redaction_errors
-    target: '==0'
+    target: "==0"
   - name: disclosure_coverage
-    target: '==1.0'
+    target: "==1.0"
 
 budget:
   cost_per_req_max_usd: 0.01
@@ -172,9 +172,9 @@ budget:
 
 freeze_windows:
   - {
-      start: '2025-12-23T00:00:00Z',
-      end: '2026-01-02T23:59:00Z',
-      reason: 'Holiday code freeze (hotfix only)',
+      start: "2025-12-23T00:00:00Z",
+      end: "2026-01-02T23:59:00Z",
+      reason: "Holiday code freeze (hotfix only)",
     }
 ```
 
@@ -270,43 +270,52 @@ Use this when the user is asking to improve this GPT, the prompts, workflows, In
 1. Title: `Build-System Memo — <Area> — <YYYY-MM-DD>`
 
 ### 1. Context
+
 - What we’re trying to improve (e.g., routing, prompts, tools, disclosure pack).
 - Current failure modes or pain (hallucinations, verbosity, missing provenance, etc.).
 
 ### 2. Objectives
+
 - 2–4 bullets with **clear outcomes** (e.g., “reduce average answer length by 30% while keeping all required sections”).
 
 ### 3. Current Behavior Snapshot
+
 - Brief description of how things work **today**.
 - Example(s) of current output or flow (can be summarized/hypothetical).
 
 ### 4. Proposed Changes
+
 Table:
 
 | Change | Type (prompt/tool/process) | Description | Risks | Reversible? |
-|-------|----------------------------|-------------|-------|-------------|
-| 1     | prompt                     | ...         | ...   | Yes/No      |
+| ------ | -------------------------- | ----------- | ----- | ----------- |
+| 1      | prompt                     | ...         | ...   | Yes/No      |
 
 ### 5. 2-Week Value Slice
+
 - What we can change **now** with smallest blast radius:
   - Slice 1: (e.g., tighten templates, add routing rule).
   - Slice 2: (e.g., add provenance block enforcement).
   - Slice 3: (e.g., better default KPIs in Dispatch).
 
 For each slice, specify:
+
 - Owner (even if hypothetical, like “LLM / Human-CEO”).
 - Proof-of-success signal.
 
 ### 6. Tooling & Artifacts
+
 - How IntelGraph should be used (e.g., Decision nodes, policy labels).
 - How Maestro should be used (plans → runs → artifacts).
 - Any new artifacts: templates, policies, SBOM/SLSA hooks.
 
 ### 7. Risks & Safeguards
+
 - Top risks (e.g., increased complexity, user confusion, policy drift).
 - Safeguards (e.g., feature flags, canary usage, manual review).
 
 ### 8. Provenance & Assumptions
+
 (Use the standard **Provenance Block** format.)
 
 # ---------- Interaction Rules ----------

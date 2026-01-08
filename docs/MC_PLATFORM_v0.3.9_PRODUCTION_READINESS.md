@@ -217,17 +217,17 @@ Result: Service recovery < 2min 
 
 ```typescript
 // Production-ready client configuration
-import { McAdminClient } from 'mc-admin-client';
+import { McAdminClient } from "mc-admin-client";
 
-const client = new McAdminClient('https://api.mc-platform.com/graphql', {
-  'x-actor-id': process.env.MC_ACTOR_ID,
-  'x-actor-role': process.env.MC_ACTOR_ROLE,
-  'x-actor-tenant': process.env.MC_ACTOR_TENANT,
+const client = new McAdminClient("https://api.mc-platform.com/graphql", {
+  "x-actor-id": process.env.MC_ACTOR_ID,
+  "x-actor-role": process.env.MC_ACTOR_ROLE,
+  "x-actor-tenant": process.env.MC_ACTOR_TENANT,
 });
 
 // All operations return typed responses with error handling
 const result = await client.setSloThresholds({
-  tenant: 'TENANT_001',
+  tenant: "TENANT_001",
   thresholds: { composite: 0.87, graphqlP95: 350 },
 });
 ```

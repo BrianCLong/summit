@@ -37,16 +37,16 @@ export type {
   PluginEventBus,
   PluginPermission,
   PluginState,
-} from '@intelgraph/plugin-system';
+} from "@intelgraph/plugin-system";
 
-export { PluginManifestSchema } from '@intelgraph/plugin-system';
+export { PluginManifestSchema } from "@intelgraph/plugin-system";
 
 // SDK utilities
-export { PluginBuilder, createPlugin } from './PluginBuilder.js';
-export * from './decorators.js';
+export { PluginBuilder, createPlugin } from "./PluginBuilder.js";
+export * from "./decorators.js";
 
 // Testing utilities
-export * from './testing/PluginTestUtils.js';
+export * from "./testing/PluginTestUtils.js";
 export {
   PluginTestHarness,
   PluginTestSuite,
@@ -69,8 +69,8 @@ export {
   type TestResult,
   type TestSuiteResult,
   type HarnessOptions,
-} from './testing/PluginTestHarness.js';
+} from "./testing/PluginTestHarness.js";
 
 // Template generators
-export { generatePluginTemplate } from './templates/PluginTemplate.js';
-export { generateManifest } from './templates/ManifestGenerator.js';
+export { generatePluginTemplate } from "./templates/PluginTemplate.js";
+export { generateManifest } from "./templates/ManifestGenerator.js";

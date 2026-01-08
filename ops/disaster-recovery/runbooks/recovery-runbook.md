@@ -1,17 +1,20 @@
 # Disaster Recovery Runbook
 
 ## Incident Signals
+
 - Backup failures or verification failures
 - Replica lag > 15 minutes or replication halted
 - Primary region instability (loss of quorum, network isolation)
 - Corrupted data detected via integrity checks or application errors
 
 ## Roles
+
 - **Incident Commander (IC)**: coordinates communication and approvals.
 - **DB Operator**: executes recovery steps and validates data.
 - **SRE Oncall**: handles infra automation and observability.
 
 ## 1. Point-in-Time Recovery (PITR)
+
 1. Freeze writes (application maintenance mode).
 2. Identify target timestamp or WAL LSN from incident timeline.
 3. Retrieve latest full backup and WAL files from object storage.
@@ -27,6 +30,7 @@
 7. Cut over traffic (update DNS/GLB) after IC approval.
 
 ## 2. Cross-Region Failover (Warm Standby Promotion)
+
 1. Confirm primary health degradation and quorum decision (IC + DB Operator).
 2. Verify standby replication state:
    - `SELECT pg_last_wal_receive_lsn(), pg_last_wal_replay_lsn(), pg_is_in_recovery();`
@@ -43,20 +47,24 @@
 6. Backfill old primary once healthy as new standby (follow `re-seed standby` in section 4).
 
 ## 3. Backup Verification Testing
+
 1. Trigger `ops/disaster-recovery/scripts/backup_verify.sh` or wait for nightly schedule.
 2. Review job logs and metrics (verification duration, checksum status).
 3. Track `minimum_successful_verifications` per `config/backup-policy.yaml`; alert if below threshold.
 
 ## 4. Re-seed Standby After Failover
+
 1. Stop old primary and wipe data directory to avoid divergence.
 2. Provision fresh standby VM/instance; install matching PostgreSQL version.
 3. Perform base backup from new primary: `pg_basebackup --write-recovery-conf ...`.
 4. Start standby and confirm replication with `pg_stat_replication`.
 
 ## 5. Communication & Reporting
+
 - IC posts updates every 15 minutes in incident channel.
 - File post-incident review within 48 hours, including RPO/RTO achieved, gaps, and improvements.
 
 ## 6. Rollback Plan
+
 - If new primary is unstable, execute reverse promotion: promote prior primary (if consistent) or restore from last good backup and repeat cutover.
 - Maintain WAL archive continuity to preserve PITR capabilities during rollback.

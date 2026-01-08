@@ -1,26 +1,43 @@
-import { CollaborativeContextBroker, type AgentAssignment, type BrokerOptions } from './collaboration.js';
+import {
+  CollaborativeContextBroker,
+  type AgentAssignment,
+  type BrokerOptions,
+} from "./collaboration.js";
 import {
   ContextAwareDecomposer,
   type ContextAwareDecompositionOptions,
   type ContextSegment,
-  type DecomposedContext
-} from './contextDecomposer.js';
-import { HierarchicalSummarizer, type HierarchicalSummarizerOptions, type HierarchicalSummaryResult } from './summarizer.js';
-import { MetaPromptPlanner, type PlannedPrompt, type PlannerFeedback, type PlannerOptions } from './planner.js';
+  type DecomposedContext,
+} from "./contextDecomposer.js";
+import {
+  HierarchicalSummarizer,
+  type HierarchicalSummarizerOptions,
+  type HierarchicalSummaryResult,
+} from "./summarizer.js";
+import {
+  MetaPromptPlanner,
+  type PlannedPrompt,
+  type PlannerFeedback,
+  type PlannerOptions,
+} from "./planner.js";
 import {
   RecursiveSelfImprovementEngine,
   type RSIPIterationLog,
   type RSIPOptions,
-  type RSIPRunResult
-} from './rsip.js';
-import { SelfConsensusEngine, type CandidateGenerationOptions, type ConsensusResult } from './consensus.js';
+  type RSIPRunResult,
+} from "./rsip.js";
+import {
+  SelfConsensusEngine,
+  type CandidateGenerationOptions,
+  type ConsensusResult,
+} from "./consensus.js";
 import {
   TokenAwareRetriever,
   type RetrievedContext,
   type RetrievableDocument,
-  type TokenAwareRetrievalOptions
-} from './retriever.js';
-import { cosineSimilarity } from './utils.js';
+  type TokenAwareRetrievalOptions,
+} from "./retriever.js";
+import { cosineSimilarity } from "./utils.js";
 
 export interface PromptEngineeringToolkitOptions {
   decomposition: ContextAwareDecompositionOptions;
@@ -61,7 +78,7 @@ export class PromptEngineeringToolkit {
   private readonly rsip: RecursiveSelfImprovementEngine;
   private readonly consensus: SelfConsensusEngine;
   private readonly broker: CollaborativeContextBroker;
-  private readonly embed: ContextAwareDecompositionOptions['embed'];
+  private readonly embed: ContextAwareDecompositionOptions["embed"];
 
   constructor(options: PromptEngineeringToolkitOptions) {
     this.decomposer = new ContextAwareDecomposer(options.decomposition);
@@ -80,7 +97,7 @@ export class PromptEngineeringToolkit {
 
     const plannedPrompt = this.planner.plan({ task: input.task, complexity: input.complexity });
     const summary = await this.summarizer.summarize(
-      retrieval.documents.map(document => document.text).join('\n\n') || input.initialPrompt
+      retrieval.documents.map((document) => document.text).join("\n\n") || input.initialPrompt
     );
 
     const rsipResult = await this.rsip.run(`${plannedPrompt.prompt}\n\n${summary.finalSummary}`);
@@ -88,8 +105,9 @@ export class PromptEngineeringToolkit {
     const consensus = await this.consensus.generateConsensus({
       prompt: rsipResult.finalOutput,
       variants: 3,
-      generator: async (prompt, index) => `${prompt}\n\nPerspective ${index + 1}: ${summary.finalSummary}`,
-      embed: this.embed
+      generator: async (prompt, index) =>
+        `${prompt}\n\nPerspective ${index + 1}: ${summary.finalSummary}`,
+      embed: this.embed,
     } as CandidateGenerationOptions);
 
     for (const segment of decomposition.selected) {
@@ -106,7 +124,7 @@ export class PromptEngineeringToolkit {
       consensus,
       summarization: summary,
       assignments,
-      iterationLogs: rsipResult.logs
+      iterationLogs: rsipResult.logs,
     };
   }
 

@@ -1,4 +1,4 @@
-import transformers from 'sentence-transformers';
+import transformers from "sentence-transformers";
 
 export function truthSync(config) {
   const validation = transformers.validate({

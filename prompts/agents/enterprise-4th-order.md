@@ -5,6 +5,7 @@ Every implementation, regardless of agent, MUST consider these overarching princ
 ## GOVERNANCE
 
 ### Maintainability
+
 - Code should be easier to change than it was before
 - Reduce cognitive load for future developers
 - Improve discoverability of functionality
@@ -12,6 +13,7 @@ Every implementation, regardless of agent, MUST consider these overarching princ
 - Explicit over implicit
 
 ### Auditability
+
 - All changes traceable to requirements
 - Comprehensive logging at boundaries
 - Structured events for analysis
@@ -19,6 +21,7 @@ Every implementation, regardless of agent, MUST consider these overarching princ
 - Change history preserved
 
 ### Policy Compliance
+
 - Legal requirements embedded
 - Security policies enforced
 - Data governance rules applied
@@ -30,6 +33,7 @@ Every implementation, regardless of agent, MUST consider these overarching princ
 ## OPERATIONS
 
 ### Reliability
+
 - Reduce future operational load
 - Lower Mean Time To Recovery (MTTR)
 - Increase system resilience
@@ -37,6 +41,7 @@ Every implementation, regardless of agent, MUST consider these overarching princ
 - Circuit breakers and bulkheads
 
 ### Observability
+
 - Structured logging with context
 - Distributed tracing
 - Metrics at all boundaries
@@ -44,6 +49,7 @@ Every implementation, regardless of agent, MUST consider these overarching princ
 - SLI/SLO tracking
 
 ### Scalability
+
 - Horizontal scaling support
 - Resource efficiency
 - Performance under load
@@ -55,6 +61,7 @@ Every implementation, regardless of agent, MUST consider these overarching princ
 ## SECURITY
 
 ### Defense in Depth
+
 - Multiple security layers
 - Zero trust architecture
 - Principle of least privilege
@@ -62,6 +69,7 @@ Every implementation, regardless of agent, MUST consider these overarching princ
 - Fail securely
 
 ### Data Protection
+
 - Encryption at rest and in transit
 - PII/PHI handling
 - Data retention policies
@@ -69,6 +77,7 @@ Every implementation, regardless of agent, MUST consider these overarching princ
 - Access control and audit
 
 ### Threat Mitigation
+
 - Input validation
 - Output encoding
 - SQL injection prevention
@@ -82,6 +91,7 @@ Every implementation, regardless of agent, MUST consider these overarching princ
 ## ARCHITECTURE
 
 ### Coupling Reduction
+
 - Loose coupling between services
 - Interface-based design
 - Dependency injection
@@ -89,6 +99,7 @@ Every implementation, regardless of agent, MUST consider these overarching princ
 - Minimize shared state
 
 ### Coherence Improvement
+
 - Consistent patterns
 - Clear boundaries
 - Unified error handling
@@ -96,6 +107,7 @@ Every implementation, regardless of agent, MUST consider these overarching princ
 - Shared vocabulary
 
 ### Drift Prevention
+
 - Align with existing patterns
 - Document deviations
 - Refactor toward standards
@@ -103,6 +115,7 @@ Every implementation, regardless of agent, MUST consider these overarching princ
 - Keep dependencies current
 
 ### Module Clarity
+
 - Single responsibility
 - Clear interfaces
 - Documented contracts
@@ -114,6 +127,7 @@ Every implementation, regardless of agent, MUST consider these overarching princ
 ## ORGANIZATIONAL EFFECTIVENESS
 
 ### Developer Experience
+
 - Clear documentation
 - Helpful error messages
 - Fast feedback loops
@@ -121,6 +135,7 @@ Every implementation, regardless of agent, MUST consider these overarching princ
 - Comprehensive examples
 
 ### Knowledge Transfer
+
 - Self-documenting code
 - Architecture Decision Records
 - Runbooks for operations
@@ -128,6 +143,7 @@ Every implementation, regardless of agent, MUST consider these overarching princ
 - Learning resources
 
 ### Velocity Sustainability
+
 - Technical debt management
 - Continuous refactoring
 - Test coverage maintenance
@@ -141,6 +157,7 @@ Every implementation, regardless of agent, MUST consider these overarching princ
 Before considering any task complete, verify:
 
 ### Governance
+
 - [ ] Code is more maintainable than before
 - [ ] Changes are fully auditable
 - [ ] All policies complied with
@@ -148,6 +165,7 @@ Before considering any task complete, verify:
 - [ ] Knowledge captured
 
 ### Operations
+
 - [ ] Reliability improved or maintained
 - [ ] Full observability instrumented
 - [ ] Scalability considered
@@ -155,6 +173,7 @@ Before considering any task complete, verify:
 - [ ] Runbooks updated
 
 ### Security
+
 - [ ] Multiple security layers
 - [ ] Data protection verified
 - [ ] Threats mitigated
@@ -162,6 +181,7 @@ Before considering any task complete, verify:
 - [ ] Penetration testing considered
 
 ### Architecture
+
 - [ ] Coupling reduced
 - [ ] Coherence improved
 - [ ] No architectural drift
@@ -169,6 +189,7 @@ Before considering any task complete, verify:
 - [ ] Patterns followed
 
 ### Organization
+
 - [ ] Developer experience improved
 - [ ] Knowledge transfer artifacts created
 - [ ] Velocity sustained or improved

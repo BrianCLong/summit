@@ -13,10 +13,10 @@
 
 ## 2. Timeline
 
-* **[HH:MM UTC]**: Incident detected by [User/System].
-* **[HH:MM UTC]**: Kill-switch activated.
-* **[HH:MM UTC]**: Rollback initiated.
-* **[HH:MM UTC]**: System stabilized.
+- **[HH:MM UTC]**: Incident detected by [User/System].
+- **[HH:MM UTC]**: Kill-switch activated.
+- **[HH:MM UTC]**: Rollback initiated.
+- **[HH:MM UTC]**: System stabilized.
 
 ## 3. Root Cause Analysis (RCA)
 
@@ -34,8 +34,8 @@
 
 ## 4. Remediation
 
-* [ ] Action Item 1
-* [ ] Action Item 2
+- [ ] Action Item 1
+- [ ] Action Item 2
 
 ## 5. Prevention
 

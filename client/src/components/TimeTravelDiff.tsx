@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 interface DiffRow {
   stepId: string;
-  type: 'artifact' | 'metric' | 'log' | 'duration';
+  type: "artifact" | "metric" | "log" | "duration";
   before: unknown;
   after: unknown;
-  severity: 'info' | 'warn' | 'error';
+  severity: "info" | "warn" | "error";
 }
 
 export default function TimeTravelDiff() {
-  const [a, setA] = useState('');
-  const [b, setB] = useState('');
+  const [a, setA] = useState("");
+  const [b, setB] = useState("");
   const [rows, setRows] = useState<DiffRow[]>([]);
   async function run() {
     const r = await fetch(`/api/replay/diff?a=${a}&b=${b}`);
@@ -32,18 +32,11 @@ export default function TimeTravelDiff() {
         <button onClick={run} className="px-3 py-1 rounded-2xl shadow">
           Diff
         </button>
-        <input
-          id="f"
-          className="border rounded px-2 py-1 ml-auto"
-          placeholder="filter…"
-        />
+        <input id="f" className="border rounded px-2 py-1 ml-auto" placeholder="filter…" />
       </div>
       <ul className="text-sm">
         {rows.map((d: DiffRow, i: number) => (
-          <li
-            key={i}
-            className={`border-b py-1 ${d.severity != 'info' ? 'bg-yellow-50' : ''}`}
-          >
+          <li key={i} className={`border-b py-1 ${d.severity != "info" ? "bg-yellow-50" : ""}`}>
             {d.stepId} • {d.type} • {d.severity}
           </li>
         ))}

@@ -70,14 +70,14 @@ csi:
   secretProviderClass: intelgraph-vault
 resources:
   gateway:
-    requests: { cpu: '250m', memory: '512Mi' }
-    limits: { cpu: '1', memory: '1Gi' }
+    requests: { cpu: "250m", memory: "512Mi" }
+    limits: { cpu: "1", memory: "1Gi" }
   analytics:
-    requests: { cpu: '500m', memory: '1Gi' }
-    limits: { cpu: '2', memory: '4Gi' }
+    requests: { cpu: "500m", memory: "1Gi" }
+    limits: { cpu: "2", memory: "4Gi" }
   ledger:
-    requests: { cpu: '200m', memory: '512Mi' }
-    limits: { cpu: '1', memory: '1Gi' }
+    requests: { cpu: "200m", memory: "512Mi" }
+    limits: { cpu: "1", memory: "1Gi" }
   # (repeat per service as needed)
 notes:
   oidcRedirectUris:
@@ -146,12 +146,7 @@ name: stage-promo
 on:
   workflow_dispatch:
     inputs:
-      imageTag:
-        {
-          description: 'Image tag (e.g., v1.0.0-uni)',
-          required: true,
-          type: string,
-        }
+      imageTag: { description: "Image tag (e.g., v1.0.0-uni)", required: true, type: string }
 
 jobs:
   deploy:

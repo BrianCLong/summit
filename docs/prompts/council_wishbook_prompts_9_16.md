@@ -3,6 +3,7 @@
 These prompts extend the wishbook backlog with eight parallelizable missions. Each is scoped to stay behind its feature flag and integrate only through typed APIs or events.
 
 ## Prompt #9 — Entity Resolution & Identity Service (ERIS)
+
 - **Mission:** Ship a standalone ER microservice that scores, clusters, and adjudicates merges with explainability and reversibility.
 - **Deliverables:** `/services/eris` (Python 3.12 + FastAPI) with MinHash/LSH blocking, pairwise classifier, clusterer; `/er/explain` exposes feature vectors/rationale. Human-in-the-loop UI with candidate queue, side-by-side diff, reversible merge/split, override reason capture. APIs `/er/candidates`, `/er/merge`, `/er/split`, `/er/explain`; Kafka events `er.candidate`, `er.merged`, `er.split`. Golden datasets plus reproducible scoring harness.
 - **Constraints:** No biometric identification; perceptual hashes only for dedupe. Policy labels on merges; confidence decays over time.
@@ -10,6 +11,7 @@ These prompts extend the wishbook backlog with eight parallelizable missions. Ea
 - **Tuning:** Start with email, phone, alias, and geo co-occurrence as feature sources. Recommend three-band adjudication: ≥0.9 auto-merge, 0.7–0.89 manual review, <0.7 reject/queue for enrichment.
 
 ## Prompt #10 — Temporal Engine (Bitemporal Truth + Time-Travel Queries)
+
 - **Mission:** Implement bitemporal storage and APIs for snapshot-at-time semantics with cadence/gap highlighting.
 - **Deliverables:** Neo4j/Cypher patterns and GraphQL wrappers for `validFrom/validTo` and `observedAt/recordedAt`; `GET /time/snapshot?at=…` materializer; timeline gap detector + UI hooks; costed time-slice plans with persisted queries.
 - **Constraints:** Read-only initially; no historical mutation rewriting. Redaction-aware results.
@@ -17,6 +19,7 @@ These prompts extend the wishbook backlog with eight parallelizable missions. Ea
 - **Tuning:** Default “as-of” precision at second-level; guarantee at least 18 months of snapshot retention unless overridden by data governance.
 
 ## Prompt #11 — Graph Analytics Kernel (Link, Community, Centrality)
+
 - **Mission:** Provide deterministic analytics (shortest paths, Louvain/Leiden, betweenness/eigenvector) with reproducibility and tolerance bands.
 - **Deliverables:** `/analytics/kernel` (Node/TS + worker pool) with K-shortest paths, policy-aware routes, Louvain/Leiden, betweenness/eigenvector using snapshot pins; result schema + caching; per-algorithm explainers; reproducibility seed handling; conformance suite reproducing published examples within tolerance.
 - **Constraints:** No PII in metrics storage; cache invalidation on policy or snapshot change.
@@ -24,6 +27,7 @@ These prompts extend the wishbook backlog with eight parallelizable missions. Ea
 - **Tuning:** Prioritize Leiden first for better community stability; allow ±3% tolerance for centrality metrics in tests.
 
 ## Prompt #12 — Evidence-First GraphRAG (with Path Rationales)
+
 - **Mission:** Build retrieval over case subgraphs returning answers only with path-based rationales and citation pointers; missing citations block publish.
 - **Deliverables:** `/ai/graphrag` service with subgraph indexer (paths + node/edge facets) and retriever returning answers, paths, exhibits. UI “Why?” panel with inline citations and path visualization; redaction-aware snippets. Publication gate rejects outputs lacking resolvable citations.
 - **Constraints:** Always return paths + exhibit IDs; no free-text without provenance.
@@ -31,6 +35,7 @@ These prompts extend the wishbook backlog with eight parallelizable missions. Ea
 - **Tuning:** Cap explanation path length at 5 hops to stay reviewable; include counter-evidence suggestions in v1 to aid analyst validation.
 
 ## Prompt #13 — Case Spaces & Brief/Report Studio
+
 - **Mission:** Ship collaborative case rooms (tasks/roles/watchlists, 4-eyes) and a report studio exporting redaction-safe PDF/HTML bundles.
 - **Deliverables:** `/apps/web/case-spaces` with tasks, roles, SLA timers, legal hold, immutable comments, @mentions. `/apps/web/brief-studio` with figure composer (graph/timeline/map), caption assistant, one-click PDF/HTML export with redaction maps. Manifest verifier hook on export.
 - **Constraints:** Full audit trail; dual-control for risky steps; cross-tenant deconfliction via hashed IDs.
@@ -38,6 +43,7 @@ These prompts extend the wishbook backlog with eight parallelizable missions. Ea
 - **Tuning:** Provide three starter templates (court, partner briefing, internal update). Default SLA timers: 24h for triage, 72h for investigations, 7d for strategic reports.
 
 ## Prompt #14 — Edge/Offline Expedition Kit (CRDT Sync + Signed Logs)
+
 - **Mission:** Deliver offline tri-pane workspace with CRDT-based annotations, signed sync logs, and divergence reports on reconnect.
 - **Deliverables:** Desktop kit with local vaults, CRDT for docs (RGA/WOOT) and LWW-element-set for annotations. Sync service supporting windowed sync, operator approval, conflict UI; signed resync logs; USB escrow packaging flows.
 - **Constraints:** Per-case crypto; tamper-evident local logs; delayed visibility options.
@@ -45,6 +51,7 @@ These prompts extend the wishbook backlog with eight parallelizable missions. Ea
 - **Tuning:** Minimum viable CRDT set should cover notes + tags alongside annotations. Require explicit operator approval for the first sync per case.
 
 ## Prompt #15 — API Surface & Contracts (Gateway + Events + Webhooks)
+
 - **Mission:** Establish authoritative GraphQL gateway with persisted queries, cost limits, field-level authz, signed webhooks, and SDKs.
 - **Deliverables:** GraphQL gateway with persisted queries, cost planner, field-level ABAC hooks. Eventing topics + outbox pattern; signed webhooks (HMAC) with retries + DLQs. SDKs (TS/Java/Python) with conformance tests and “hello world” examples.
 - **Constraints:** Rate/cost controls per tenant; query planners return cost estimates; no secret leakage in webhook payloads.
@@ -52,6 +59,7 @@ These prompts extend the wishbook backlog with eight parallelizable missions. Ea
 - **Tuning:** Seed persisted queries for core reads (case summary, entity detail, timeline slice). Prefer `X-Webhook-Signature` carrying algo, key ID, and HMAC.
 
 ## Prompt #16 — Data Quality & Stewardship Dashboards
+
 - **Mission:** Stand up DQ metrics and stewardship workflows for completeness, consistency, timeliness, duplication, and provenance coverage per connector and case.
 - **Deliverables:** `/ops/dq` jobs computing DQ scores; dashboards for per-connector health, ER quality, contradiction density. Steward roles and approval flows with change logs and alert thresholds.
 - **Constraints:** No raw PII in metrics; link license + provenance coverage to remediation.
@@ -59,6 +67,7 @@ These prompts extend the wishbook backlog with eight parallelizable missions. Ea
 - **Tuning:** Treat completeness, timeliness, and provenance coverage as gating; contradiction density and duplication as informative. Steward approvals owned per connector with tenant-level override when flagged by compliance.
 
 ## Parallelization Map
+
 - #9 (ERIS) emits events only; no shared DB → safe alongside #11 (kernel).
 - #10 (Temporal) is read-path; #11 (kernel) consumes snapshots; interfaces stable.
 - #12 (GraphRAG) reads from snapshots and provenance; publish blocked if citations missing—no write conflicts.
@@ -68,6 +77,7 @@ These prompts extend the wishbook backlog with eight parallelizable missions. Ea
 - #16 (DQ) reads; only writes DQ indices and steward logs.
 
 ## Meta Prompt (Reused Verbatim for Teams)
+
 “Build to the acceptance criteria above, gate behind the specified feature flag, keep services and DBs isolated, depend on other teams only via events or typed APIs, and ship with unit + contract + E2E tests and golden fixtures. Prefer append-only logs, explicit manifests, and verifiable proofs. Target p95 ≤ 1.5s for standard graph queries and never log PII. Every PR spins a preview environment, runs k6 smoke, Playwright E2E, and contract tests. Canary + auto-rollback required.”
 
 ## 23rd-Order Extrapolated Implications (Maximally Ideal)

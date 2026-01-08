@@ -8,11 +8,11 @@ Ship **MVP-3 GA** with progressive delivery, hard gates (SLO/SBOM/migrations/per
 
 ## Global Guardrails (apply to every agent)
 
-* **Observability-first:** OTEL traces + Prom metrics + JSON logs with `release`, `env`, `tenant`, `trace_id`.
-* **Supply chain:** SBOM (SPDX), SLSA provenance, cosign signatures; **verify at deploy**, not just build.
-* **Security & data:** OPA RBAC/ABAC; WebAuthn step-up + Reason-for-Access for elevated actions; secrets via **SOPS + Sealed-Secrets**.
-* **Delivery:** Canary 10→50→100 with **auto-rollback**; migration expand/contract with **shadow reads & dual-write**.
-* **Evidence:** Immutable audit; retain artifacts ≥ 1y.
+- **Observability-first:** OTEL traces + Prom metrics + JSON logs with `release`, `env`, `tenant`, `trace_id`.
+- **Supply chain:** SBOM (SPDX), SLSA provenance, cosign signatures; **verify at deploy**, not just build.
+- **Security & data:** OPA RBAC/ABAC; WebAuthn step-up + Reason-for-Access for elevated actions; secrets via **SOPS + Sealed-Secrets**.
+- **Delivery:** Canary 10→50→100 with **auto-rollback**; migration expand/contract with **shadow reads & dual-write**.
+- **Evidence:** Immutable audit; retain artifacts ≥ 1y.
 
 ## Inputs
 
@@ -29,11 +29,11 @@ OIDC_ISSUER={{...}}  SCIM_BASEURL={{...}}  GA_FLAGS={{search,realtime,reports}}
 
 ## Required Outputs
 
-* `artifacts/release/{{TARGET_VERSION}}/evidence.zip` (signed)
-* `release_notes/{{TARGET_VERSION}}.md` (semver, changes, risks, rollback)
-* Green dashboards (SLO, perf headroom, supply chain, DR freshness)
-* GA flags flipped w/ audit: `{{GA_FLAGS}}.enabled=true`
-* +24h KPI delta report & auto file regressions
+- `artifacts/release/{{TARGET_VERSION}}/evidence.zip` (signed)
+- `release_notes/{{TARGET_VERSION}}.md` (semver, changes, risks, rollback)
+- Green dashboards (SLO, perf headroom, supply chain, DR freshness)
+- GA flags flipped w/ audit: `{{GA_FLAGS}}.enabled=true`
+- +24h KPI delta report & auto file regressions
 
 ---
 
@@ -56,71 +56,71 @@ RESPONSE:
 
 **A1 Release Conductor (Chair/Owner)**
 
-* Orchestrates phases, verifies gates, promotes/rolls back, packages evidence.
+- Orchestrates phases, verifies gates, promotes/rolls back, packages evidence.
 
 **A2 CI/CD Engineer (R)**
 
-* Owns workflows, required checks, preview TTL/budgets.
+- Owns workflows, required checks, preview TTL/budgets.
 
 **A3 Platform/DevOps (R)**
 
-* Helm/Terraform, security contexts, HPA/VPA/KEDA, pgBouncer, netpols.
+- Helm/Terraform, security contexts, HPA/VPA/KEDA, pgBouncer, netpols.
 
 **A4 Observability Lead (R)**
 
-* Golden paths (catalog + probes), SLO burn rules, dashboards.
+- Golden paths (catalog + probes), SLO burn rules, dashboards.
 
 **A5 Supply Chain (R)**
 
-* SBOM, provenance, signing, vuln diff budgets, policy-as-code.
+- SBOM, provenance, signing, vuln diff budgets, policy-as-code.
 
 **A6 Schema/Migrations (R)**
 
-* Migration gate, shadow reads/dual-write, backfill, rollback.
+- Migration gate, shadow reads/dual-write, backfill, rollback.
 
 **A7 Data Plane (R)**
 
-* Postgres/Neo4j/Redis/Typesense readiness, index hygiene, RLS.
+- Postgres/Neo4j/Redis/Typesense readiness, index hygiene, RLS.
 
 **A8 Flags & Rollout (R)**
 
-* Typed SDKs, catalog, kill-switch, auto-ramp tied to canary.
+- Typed SDKs, catalog, kill-switch, auto-ramp tied to canary.
 
 **A9 AuthZ/Compliance (A/R)**
 
-* OPA RBAC/ABAC, obligations (step-up/RFA), decision logging.
+- OPA RBAC/ABAC, obligations (step-up/RFA), decision logging.
 
 **A10 DR/BCP (R)**
 
-* Cross-region backups, failover/cutback drills.
+- Cross-region backups, failover/cutback drills.
 
 **A11 Performance (R)**
 
-* k6 models, perf gates, headroom/predictor, HPA tuning.
+- k6 models, perf gates, headroom/predictor, HPA tuning.
 
 **A12 Realtime (R)**
 
-* WS/SSE fanout, ordered per tenant, resume from checkpoint.
+- WS/SSE fanout, ordered per tenant, resume from checkpoint.
 
 **A13 Reporting/PDF (R)**
 
-* Playwright renderer, redaction, signing/provenance.
+- Playwright renderer, redaction, signing/provenance.
 
 **A14 Search/Typesense (R)**
 
-* Schemas, indexer, alias reindex, relevance tuning.
+- Schemas, indexer, alias reindex, relevance tuning.
 
 **A15 Ingest/ETL (R)**
 
-* Backpressure, DLQ, replayctl, exactly-once-effect.
+- Backpressure, DLQ, replayctl, exactly-once-effect.
 
 **A16 Chaos Captain (R)**
 
-* Stage chaos + canary rollback drills.
+- Stage chaos + canary rollback drills.
 
 **A17 Runbook/Alert Arborist (R)**
 
-* Alert catalog→PrometheusRules; runbooks; noise reduction.
+- Alert catalog→PrometheusRules; runbooks; noise reduction.
 
 (Conductor is **Accountable**; others Responsible; Security/Compliance **Consulted** across.)
 
@@ -130,47 +130,47 @@ RESPONSE:
 
 **P0 Readiness (A2, A3, A5)**
 
-* Required checks wired (`slo-gates`, `migration-gate`, `supply-chain`, `performance-gate`, `policy-ci`).
-* Containers hardened (non-root, read-only FS), size budgets enforced.
-* **Gate:** All checks green on two demo PRs; image sign/verify passes.
+- Required checks wired (`slo-gates`, `migration-gate`, `supply-chain`, `performance-gate`, `policy-ci`).
+- Containers hardened (non-root, read-only FS), size budgets enforced.
+- **Gate:** All checks green on two demo PRs; image sign/verify passes.
 
 **P1 Baselines (A4, A2, A11)**
 
-* `golden_paths.yaml` live; probes running in previews/stage; perf baseline & headroom ≥20%.
-* **Gate:** SLO gates + performance gate passing; preview TTL/budgets enforced.
+- `golden_paths.yaml` live; probes running in previews/stage; perf baseline & headroom ≥20%.
+- **Gate:** SLO gates + performance gate passing; preview TTL/budgets enforced.
 
 **P2 Data Safety (A6, A7)**
 
-* Migration dry-runs + shadow parity; dual-write flags; pgBouncer; RLS/tenant guards; index catalog.
-* **Gate:** Demo Postgres+Neo4j migrations pass; 48h data budgets green.
+- Migration dry-runs + shadow parity; dual-write flags; pgBouncer; RLS/tenant guards; index catalog.
+- **Gate:** Demo Postgres+Neo4j migrations pass; 48h data budgets green.
 
 **P3 Security/Compliance (A9, A5, A8, Identity sidecar)**
 
-* OPA obligations (step-up/RFA) enforced; audit hash-chain; OIDC+WebAuthn; SCIM dry-run.
-* **Gate:** Decision logs/identity dashboards green; exceptions time-boxed.
+- OPA obligations (step-up/RFA) enforced; audit hash-chain; OIDC+WebAuthn; SCIM dry-run.
+- **Gate:** Decision logs/identity dashboards green; exceptions time-boxed.
 
 **P4 Product GA (A12–A15)**
 
-* Realtime WS/SSE; Reporting deterministic + redaction; Search GA w/ alias swap; Ingest backpressure+replay.
-* **Gate:** 48h SLOs green; reindex parity; ingest lag <60s.
+- Realtime WS/SSE; Reporting deterministic + redaction; Search GA w/ alias swap; Ingest backpressure+replay.
+- **Gate:** 48h SLOs green; reindex parity; ingest lag <60s.
 
 **P5 DR/Chaos (A10, A16)**
 
-* DR drill (RTO≤30m/RPO≤5m); chaos drills including one auto-rollback.
-* **Gate:** Evidence signed; gaps filed.
+- DR drill (RTO≤30m/RPO≤5m); chaos drills including one auto-rollback.
+- **Gate:** Evidence signed; gaps filed.
 
 **P6 Release Train (A1)**
 
-* Cut `release/v{{X.Y.Z}}-rc.N`; stage canary; prod 10→50→100 gated; notes; evidence.zip.
-* **Gate:** Tag signed + evidence uploaded; rollback drill simulated.
+- Cut `release/v{{X.Y.Z}}-rc.N`; stage canary; prod 10→50→100 gated; notes; evidence.zip.
+- **Gate:** Tag signed + evidence uploaded; rollback drill simulated.
 
 **P7 Alert Hygiene (A17)**
 
-* 100% Sev1/2 alerts have owners + runbooks; noise ↓ ≥40%; drills pass.
+- 100% Sev1/2 alerts have owners + runbooks; noise ↓ ≥40%; drills pass.
 
 **P8 GA Flip & KPI (+24h) (A1)**
 
-* GA flags flipped with audit; KPI deltas posted; regressions auto-ticketed.
+- GA flags flipped with audit; KPI deltas posted; regressions auto-ticketed.
 
 ---
 
@@ -257,15 +257,15 @@ ROLLBACK TRIGGER:
 
 ## Stop Conditions
 
-* Any **critical** (security, data integrity, SLO burn) → **HALT**, auto-rollback, open incident with runbook link, evidence capture, exec notify.
+- Any **critical** (security, data integrity, SLO burn) → **HALT**, auto-rollback, open incident with runbook link, evidence capture, exec notify.
 
 ---
 
 ## Parallelization Hints
 
-* P0/P1 can run in parallel with A5 vs A3 vs A4.
-* P4 product tracks (Realtime/Search/Reporting/Ingest) can run concurrently once P1–P3 gates are green.
-* P5 drills must happen after P4 stable for 48h in stage.
+- P0/P1 can run in parallel with A5 vs A3 vs A4.
+- P4 product tracks (Realtime/Search/Reporting/Ingest) can run concurrently once P1–P3 gates are green.
+- P5 drills must happen after P4 stable for 48h in stage.
 
 ---
 

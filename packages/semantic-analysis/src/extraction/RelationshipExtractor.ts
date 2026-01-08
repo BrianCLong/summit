@@ -2,8 +2,8 @@
  * Relationship Extraction Engine
  */
 
-import { Driver } from 'neo4j-driver';
-import { v4 as uuidv4 } from 'uuid';
+import { Driver } from "neo4j-driver";
+import { v4 as uuidv4 } from "uuid";
 import {
   SemanticRelation,
   SemanticRelationSchema,
@@ -13,7 +13,7 @@ import {
   TemporalRelationSchema,
   CausalRelationship,
   CausalRelationshipSchema,
-} from '../types/semantic.js';
+} from "../types/semantic.js";
 
 export class RelationshipExtractor {
   constructor(private driver: Driver) {}
@@ -24,7 +24,7 @@ export class RelationshipExtractor {
   async extractSemanticRelations(
     text: string,
     sourceDocumentId: string,
-    method: 'rule_based' | 'ml_model' | 'manual' = 'rule_based',
+    method: "rule_based" | "ml_model" | "manual" = "rule_based"
   ): Promise<SemanticRelation[]> {
     // This is a simplified implementation
     // In production, you would use NLP libraries like spaCy, Stanford CoreNLP, or transformers
@@ -42,7 +42,7 @@ export class RelationshipExtractor {
     while ((match = patterns.cause.exec(text)) !== null) {
       relations.push({
         id: uuidv4(),
-        type: 'cause',
+        type: "cause",
         sourceEntityId: match[1], // In practice, resolve to actual entity ID
         targetEntityId: match[3],
         confidence: 0.7,
@@ -87,7 +87,7 @@ export class RelationshipExtractor {
           extractionMethod: validated.extractionMethod,
           metadata: JSON.stringify(validated.metadata || {}),
           createdAt: validated.createdAt,
-        },
+        }
       );
     } finally {
       await session.close();
@@ -97,10 +97,7 @@ export class RelationshipExtractor {
   /**
    * Extract events from text
    */
-  async extractEvents(
-    text: string,
-    sourceDocumentId: string,
-  ): Promise<Event[]> {
+  async extractEvents(text: string, sourceDocumentId: string): Promise<Event[]> {
     // Simplified event extraction
     // In production, use event extraction models
     const events: Event[] = [];
@@ -109,13 +106,13 @@ export class RelationshipExtractor {
     const eventPatterns = [
       {
         pattern: /(\w+)\s+met\s+with\s+(\w+)/gi,
-        type: 'meeting',
-        trigger: 'met',
+        type: "meeting",
+        trigger: "met",
       },
       {
         pattern: /(\w+)\s+transferred\s+.*\s+to\s+(\w+)/gi,
-        type: 'transaction',
-        trigger: 'transferred',
+        type: "transaction",
+        trigger: "transferred",
       },
     ];
 
@@ -129,12 +126,12 @@ export class RelationshipExtractor {
           participants: [
             {
               entityId: match[1], // Resolve to actual entity
-              role: 'agent',
+              role: "agent",
               confidence: 0.8,
             },
             {
               entityId: match[2],
-              role: 'patient',
+              role: "patient",
               confidence: 0.8,
             },
           ],
@@ -183,7 +180,7 @@ export class RelationshipExtractor {
           confidence: validated.confidence,
           extractedFrom: validated.extractedFrom,
           createdAt: validated.createdAt,
-        },
+        }
       );
 
       // Link participants to the event
@@ -202,7 +199,7 @@ export class RelationshipExtractor {
             participantId: participant.entityId,
             role: participant.role,
             confidence: participant.confidence,
-          },
+          }
         );
       }
     } finally {
@@ -215,7 +212,7 @@ export class RelationshipExtractor {
    */
   async extractTemporalRelations(
     events: Event[],
-    sourceDocumentId: string,
+    sourceDocumentId: string
   ): Promise<TemporalRelation[]> {
     const relations: TemporalRelation[] = [];
 
@@ -229,13 +226,13 @@ export class RelationshipExtractor {
           const time1 = new Date(event1.temporalInfo.startTime);
           const time2 = new Date(event2.temporalInfo.startTime);
 
-          let type: TemporalRelation['type'] = 'before';
+          let type: TemporalRelation["type"] = "before";
           if (time1 < time2) {
-            type = 'before';
+            type = "before";
           } else if (time1 > time2) {
-            type = 'after';
+            type = "after";
           } else {
-            type = 'equals';
+            type = "equals";
           }
 
           relations.push({
@@ -260,7 +257,7 @@ export class RelationshipExtractor {
   async detectCausalRelationships(
     entityId1: string,
     entityId2: string,
-    evidence: string[],
+    evidence: string[]
   ): Promise<CausalRelationship> {
     // Simplified causal detection
     // In production, use causal inference models
@@ -268,11 +265,11 @@ export class RelationshipExtractor {
       id: uuidv4(),
       causeEntityId: entityId1,
       effectEntityId: entityId2,
-      causalityType: 'probabilistic',
+      causalityType: "probabilistic",
       strength: 0.7,
       confidence: 0.6,
       evidence,
-      extractedFrom: 'analysis',
+      extractedFrom: "analysis",
       createdAt: new Date().toISOString(),
     };
 
@@ -313,7 +310,7 @@ export class RelationshipExtractor {
           extractedFrom: validated.extractedFrom,
           metadata: JSON.stringify(validated.metadata || {}),
           createdAt: validated.createdAt,
-        },
+        }
       );
     } finally {
       await session.close();
@@ -331,16 +328,16 @@ export class RelationshipExtractor {
         MATCH (e {id: $entityId})-[r:SEMANTIC_RELATION]-(other)
         RETURN r, startNode(r).id as sourceId, endNode(r).id as targetId
         `,
-        { entityId },
+        { entityId }
       );
 
       return result.records.map((record) => {
-        const props = record.get('r').properties;
+        const props = record.get("r").properties;
         return SemanticRelationSchema.parse({
           ...props,
-          sourceEntityId: record.get('sourceId'),
-          targetEntityId: record.get('targetId'),
-          metadata: JSON.parse(props.metadata || '{}'),
+          sourceEntityId: record.get("sourceId"),
+          targetEntityId: record.get("targetId"),
+          metadata: JSON.parse(props.metadata || "{}"),
         });
       });
     } finally {

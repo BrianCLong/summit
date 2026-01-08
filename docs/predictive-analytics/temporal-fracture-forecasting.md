@@ -5,6 +5,7 @@
 Temporal Fracture Forecasting™ is a breakthrough predictive analytics system that detects and forecasts system instabilities before traditional metrics show abnormality. By analyzing phase transitions, stability boundaries, and temporal dynamics, it identifies "fracture points" where systems transition from stable to unstable states—often hours or days before conventional monitoring systems detect issues.
 
 **Key Capabilities:**
+
 - Predict system instabilities 24-72 hours before traditional metrics
 - Detect invisible inflection points in system behavior
 - Identify phase transitions and stability boundaries
@@ -12,6 +13,7 @@ Temporal Fracture Forecasting™ is a breakthrough predictive analytics system t
 - Real-time monitoring with sub-second latency
 
 **Business Impact:**
+
 - Reduce downtime by 60-80% through proactive intervention
 - Lower incident response costs by 50%
 - Improve system reliability and user trust
@@ -26,6 +28,7 @@ Temporal Fracture Forecasting™ is a breakthrough predictive analytics system t
 Traditional monitoring systems are **reactive**—they detect problems after metrics cross thresholds. But by the time CPU hits 90% or memory reaches 80%, the system is already in crisis mode. The real inflection point—the moment where stability begins to fracture—occurred much earlier, invisible to conventional tools.
 
 **The Challenge:**
+
 - Systems exhibit non-linear dynamics with sudden phase transitions
 - Stability degradation happens gradually, then suddenly (the "boiling frog" problem)
 - Traditional thresholds miss early warning signals in system dynamics
@@ -33,6 +36,7 @@ Traditional monitoring systems are **reactive**—they detect problems after met
 - By the time metrics breach thresholds, recovery is difficult and costly
 
 **Example Scenario:**
+
 ```
 T-48h: API latency variance increases by 5% → Invisible to traditional monitoring
 T-24h: Request queue depth oscillation begins → No alerts triggered
@@ -45,6 +49,7 @@ Total damage: 2 hours downtime, $500K revenue loss, customer trust erosion
 ```
 
 **What Temporal Fracture Forecasting Does:**
+
 ```
 T-48h: Detects phase transition in latency variance → Alert: "System entering pre-fracture phase"
 T-36h: Predicts fracture point in 36-48 hours → Recovery plan generated
@@ -161,7 +166,7 @@ function detectPhaseTransition(timeSeries: TimeSeriesData[]): PhaseTransition[] 
           fromPhase: currentPhase,
           toPhase: newPhase,
           confidence: calculateConfidence(cusumScore),
-          metrics: { mean, variance, skewness }
+          metrics: { mean, variance, skewness },
         });
         currentPhase = newPhase;
       }
@@ -173,6 +178,7 @@ function detectPhaseTransition(timeSeries: TimeSeriesData[]): PhaseTransition[] 
 ```
 
 **Key Concepts**:
+
 - **CUSUM**: Detects small shifts in mean/variance over time
 - **Phases**: STABLE, PRE_FRACTURE, UNSTABLE, CRITICAL, RECOVERING
 - **Confidence**: Bayesian posterior probability of phase transition
@@ -184,6 +190,7 @@ function detectPhaseTransition(timeSeries: TimeSeriesData[]): PhaseTransition[] 
 **Algorithm**: Lyapunov Exponent Approximation
 
 The Lyapunov exponent measures how quickly nearby trajectories diverge:
+
 - λ < 0: Stable (trajectories converge)
 - λ = 0: Neutral (trajectories remain close)
 - λ > 0: Unstable (trajectories diverge exponentially)
@@ -191,7 +198,7 @@ The Lyapunov exponent measures how quickly nearby trajectories diverge:
 ```typescript
 function calculateStabilityMetrics(timeSeries: TimeSeriesData[]): StabilityMetric {
   // Reconstruct phase space using time-delay embedding
-  const embedding = reconstructPhaseSpace(timeSeries, dimension = 3, delay = 1);
+  const embedding = reconstructPhaseSpace(timeSeries, (dimension = 3), (delay = 1));
 
   // Compute largest Lyapunov exponent
   const lyapunovExponent = computeLyapunovExponent(embedding);
@@ -206,19 +213,20 @@ function calculateStabilityMetrics(timeSeries: TimeSeriesData[]): StabilityMetri
     lyapunov: lyapunovExponent,
     hurst,
     entropy,
-    detrended
+    detrended,
   });
 
   return {
     lyapunovExponent,
     stabilityScore,
     isStable: lyapunovExponent < 0 && stabilityScore > 0.7,
-    timeToInstability: predictInstabilityTime(lyapunovExponent, stabilityScore)
+    timeToInstability: predictInstabilityTime(lyapunovExponent, stabilityScore),
   };
 }
 ```
 
 **Key Metrics**:
+
 - **Lyapunov Exponent**: Primary stability indicator
 - **Hurst Exponent**: H > 0.5 indicates persistence (trend following)
 - **Approximate Entropy**: Measures predictability
@@ -250,12 +258,7 @@ function predictFracturePoints(
   const predictions = [];
 
   for (let i = 0; i < simulations; i++) {
-    const trajectory = simulateTrajectory(
-      currentMetrics,
-      currentPhase,
-      patterns,
-      horizon
-    );
+    const trajectory = simulateTrajectory(currentMetrics, currentPhase, patterns, horizon);
 
     // Find fracture points in trajectory
     const fractures = findFracturePoints(trajectory);
@@ -265,17 +268,18 @@ function predictFracturePoints(
   // Aggregate predictions
   const aggregated = aggregatePredictions(predictions);
 
-  return aggregated.map(fp => ({
+  return aggregated.map((fp) => ({
     predictedTime: fp.timestamp,
     confidence: fp.probability,
     severity: fp.severity,
     triggeringFactors: fp.factors,
-    leadTime: fp.timestamp - Date.now()
+    leadTime: fp.timestamp - Date.now(),
   }));
 }
 ```
 
 **Key Techniques**:
+
 - **Pattern Matching**: Identify historical signatures
 - **Monte Carlo**: Account for uncertainty
 - **Ensemble Methods**: Combine multiple prediction models
@@ -307,7 +311,7 @@ function generateRecoveryPlan(fracturePoint: FracturePoint): RecoveryPlan {
         estimatedImpact: impact.stabilityImprovement,
         timeToEffect: impact.timeToEffect,
         riskLevel: impact.riskLevel,
-        cost: estimateImplementationCost(action)
+        cost: estimateImplementationCost(action),
       });
     }
   }
@@ -321,12 +325,13 @@ function generateRecoveryPlan(fracturePoint: FracturePoint): RecoveryPlan {
     recommendedActions: ranked.slice(0, 3), // Top 3
     fallbackActions: ranked.slice(3, 6),
     estimatedRecoveryTime: estimateRecoveryTime(ranked[0]),
-    successProbability: calculateSuccessProbability(ranked[0], fracturePoint)
+    successProbability: calculateSuccessProbability(ranked[0], fracturePoint),
   };
 }
 ```
 
 **Intervention Categories**:
+
 1. **Resource Scaling**: Increase CPU, memory, replicas
 2. **Rate Limiting**: Throttle requests to reduce load
 3. **Circuit Breaking**: Isolate failing components
@@ -533,7 +538,7 @@ Models are defined as TypeScript classes in `src/models/`:
 ### TimescaleDB Integration
 
 ```typescript
-import { Pool } from 'pg';
+import { Pool } from "pg";
 
 class TimeSeriesRepository {
   private pool: Pool;
@@ -553,12 +558,7 @@ class TimeSeriesRepository {
       ORDER BY time ASC
     `;
 
-    const result = await this.pool.query(query, [
-      systemId,
-      metricNames,
-      startTime,
-      endTime
-    ]);
+    const result = await this.pool.query(query, [systemId, metricNames, startTime, endTime]);
 
     return result.rows;
   }
@@ -579,7 +579,7 @@ class TimeSeriesRepository {
       metric.hurstExponent,
       metric.entropy,
       metric.isStable,
-      metric.timeToInstability
+      metric.timeToInstability,
     ]);
   }
 }
@@ -590,25 +590,25 @@ class TimeSeriesRepository {
 Export fracture forecasting metrics to Prometheus:
 
 ```typescript
-import { Counter, Gauge, Histogram } from 'prom-client';
+import { Counter, Gauge, Histogram } from "prom-client";
 
 // Metrics
 const fracturesDetected = new Counter({
-  name: 'temporal_fractures_detected_total',
-  help: 'Total fractures detected',
-  labelNames: ['system_id', 'severity']
+  name: "temporal_fractures_detected_total",
+  help: "Total fractures detected",
+  labelNames: ["system_id", "severity"],
 });
 
 const stabilityScore = new Gauge({
-  name: 'system_stability_score',
-  help: 'Current stability score',
-  labelNames: ['system_id']
+  name: "system_stability_score",
+  help: "Current stability score",
+  labelNames: ["system_id"],
 });
 
 const predictionLatency = new Histogram({
-  name: 'fracture_prediction_duration_seconds',
-  help: 'Time to generate fracture predictions',
-  labelNames: ['system_id']
+  name: "fracture_prediction_duration_seconds",
+  help: "Time to generate fracture predictions",
+  labelNames: ["system_id"],
 });
 ```
 
@@ -619,7 +619,7 @@ const predictionLatency = new Histogram({
 ### Computational Complexity
 
 | Algorithm                  | Time Complexity | Space Complexity | Notes                        |
-|----------------------------|-----------------|------------------|------------------------------|
+| -------------------------- | --------------- | ---------------- | ---------------------------- |
 | Phase Transition Detection | O(n)            | O(w)             | w = window size              |
 | Lyapunov Calculation       | O(n · d²)       | O(n · d)         | d = embedding dimension      |
 | Fracture Prediction        | O(s · n)        | O(s · h)         | s = simulations, h = horizon |
@@ -635,11 +635,13 @@ const predictionLatency = new Histogram({
 ### Resource Requirements
 
 **Minimum**:
+
 - 2 CPU cores
 - 4 GB RAM
 - 50 GB SSD (TimescaleDB)
 
 **Recommended** (production):
+
 - 8 CPU cores
 - 16 GB RAM
 - 500 GB SSD (TimescaleDB with retention)
@@ -659,13 +661,13 @@ const predictionLatency = new Histogram({
 
 Based on simulations and pilot deployments:
 
-| Metric                     | Target | Actual (Pilot) |
-|----------------------------|--------|----------------|
-| Fracture Detection Rate    | > 85%  | 91%            |
-| False Positive Rate        | < 10%  | 7%             |
-| Lead Time (avg)            | 24h    | 36h            |
-| Prediction Accuracy (72h)  | > 75%  | 82%            |
-| Recovery Success Rate      | > 80%  | 87%            |
+| Metric                    | Target | Actual (Pilot) |
+| ------------------------- | ------ | -------------- |
+| Fracture Detection Rate   | > 85%  | 91%            |
+| False Positive Rate       | < 10%  | 7%             |
+| Lead Time (avg)           | 24h    | 36h            |
+| Prediction Accuracy (72h) | > 75%  | 82%            |
+| Recovery Success Rate     | > 80%  | 87%            |
 
 ---
 
@@ -696,7 +698,7 @@ Based on simulations and pilot deployments:
 ### Docker Compose
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   temporal-fracture-forecasting:
@@ -760,6 +762,7 @@ helm install temporal-fracture-forecasting ./helm/temporal-fracture-forecasting 
 ### Grafana Dashboards
 
 Pre-built dashboards available:
+
 - **Fracture Overview**: Real-time fracture map
 - **Prediction Performance**: Accuracy metrics over time
 - **System Health**: Service-level metrics
@@ -770,24 +773,28 @@ Pre-built dashboards available:
 ## Roadmap
 
 ### Phase 1 (Current): Core Functionality
+
 - ✅ Phase transition detection
 - ✅ Stability analysis
 - ✅ Fracture prediction
 - ✅ Recovery recommendation
 
 ### Phase 2 (Q1 2026): Advanced Analytics
+
 - Multi-system correlation analysis
 - Causal graph construction
 - Automated intervention execution
 - Anomaly detection integration
 
 ### Phase 3 (Q2 2026): AI/ML Enhancement
+
 - Deep learning for pattern recognition
 - Reinforcement learning for recovery strategies
 - Transfer learning across similar systems
 - Natural language explanations
 
 ### Phase 4 (Q3 2026): Platform Integration
+
 - Kubernetes auto-remediation
 - Cloud provider integration (AWS, GCP, Azure)
 - Incident management system integration
@@ -824,6 +831,7 @@ Pre-built dashboards available:
 ### Contributing
 
 See `CONTRIBUTING.md` for guidelines on:
+
 - Algorithm improvements
 - New intervention strategies
 - Performance optimizations

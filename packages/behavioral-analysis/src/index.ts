@@ -5,4 +5,4 @@
  * mouse patterns, touch behavior, and comprehensive behavioral profiling.
  */
 
-export * from './types.js';
+export * from "./types.js";

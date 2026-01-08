@@ -1,5 +1,5 @@
-import fs from 'node:fs';
-import path from 'node:path';
+import fs from "node:fs";
+import path from "node:path";
 import {
   buildDependencyGraph,
   buildRiskTable,
@@ -8,17 +8,21 @@ import {
   renderMermaidPng,
   toDot,
   toMermaid,
-} from './architecture/dependency-graph.js';
+} from "./architecture/dependency-graph.js";
 
 function writeRiskTableMarkdown(tablePath: string, table: ReturnType<typeof buildRiskTable>) {
-  const lines = ['| Service | Inbound | Outbound | Risk Score | Critical Dependencies |', '| --- | ---: | ---: | ---: | --- |'];
+  const lines = [
+    "| Service | Inbound | Outbound | Risk Score | Critical Dependencies |",
+    "| --- | ---: | ---: | ---: | --- |",
+  ];
   table.forEach((row) => {
     lines.push(
-      `| ${row.service} | ${row.inbound} | ${row.outbound} | ${row.riskScore} | ${row.criticalDependencies.join(', ') ||
-        '—'} |`,
+      `| ${row.service} | ${row.inbound} | ${row.outbound} | ${row.riskScore} | ${
+        row.criticalDependencies.join(", ") || "—"
+      } |`
     );
   });
-  fs.writeFileSync(tablePath, `${lines.join('\n')}\n`);
+  fs.writeFileSync(tablePath, `${lines.join("\n")}\n`);
 }
 
 async function main() {
@@ -35,7 +39,7 @@ async function main() {
 
   await renderMermaidPng(mermaid, paths.dependencyGraphPng);
 
-  console.log('Dependency graph generated');
+  console.log("Dependency graph generated");
   console.log(`Nodes: ${graph.nodes.length}`);
   console.log(`Edges: ${graph.edges.length}`);
   console.log(`Complexity: ${graph.complexity.toFixed(2)}`);

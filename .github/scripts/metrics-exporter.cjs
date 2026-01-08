@@ -7,8 +7,8 @@
  * Provides observability into deployment patterns, gate failures, and system health.
  */
 
-const fs = require('fs');
-const { execSync } = require('child_process');
+const fs = require("fs");
+const { execSync } = require("child_process");
 
 class MetricsExporter {
   constructor() {
@@ -48,7 +48,7 @@ class MetricsExporter {
     this.setGauge(
       `${name}_sum`,
       labels,
-      (this.metrics.get(this.getMetricKey(`${name}_sum`, labels)) || 0) + value,
+      (this.metrics.get(this.getMetricKey(`${name}_sum`, labels)) || 0) + value
     );
   }
 
@@ -56,55 +56,50 @@ class MetricsExporter {
     const labelStr = Object.entries(labels)
       .sort()
       .map(([k, v]) => `${k}="${v}"`)
-      .join(',');
+      .join(",");
     return labelStr ? `${name}{${labelStr}}` : name;
   }
 
   // Collect Release Captain metrics from GitHub API
   async collectReleaseMetrics() {
     try {
-      console.log('📊 Collecting Release Captain metrics...');
+      console.log("📊 Collecting Release Captain metrics...");
 
       // Get recent workflow runs
-      const runs = await this.getWorkflowRuns('release-captain.yml', 50);
+      const runs = await this.getWorkflowRuns("release-captain.yml", 50);
 
       for (const run of runs) {
         const labels = {
-          conclusion: run.conclusion || 'unknown',
-          event: run.event || 'unknown',
-          branch: run.head_branch || 'unknown',
+          conclusion: run.conclusion || "unknown",
+          event: run.event || "unknown",
+          branch: run.head_branch || "unknown",
         };
 
-        this.incrementCounter('rc_workflow_runs_total', labels);
+        this.incrementCounter("rc_workflow_runs_total", labels);
 
-        if (run.conclusion === 'success') {
-          this.incrementCounter('rc_workflow_success_total', labels);
-        } else if (run.conclusion === 'failure') {
-          this.incrementCounter('rc_workflow_failure_total', labels);
+        if (run.conclusion === "success") {
+          this.incrementCounter("rc_workflow_success_total", labels);
+        } else if (run.conclusion === "failure") {
+          this.incrementCounter("rc_workflow_failure_total", labels);
         }
 
         // Record timing
         if (run.created_at && run.updated_at) {
-          const duration =
-            (new Date(run.updated_at) - new Date(run.created_at)) / 1000;
-          this.recordHistogram(
-            'rc_workflow_duration_seconds',
-            labels,
-            duration,
-          );
+          const duration = (new Date(run.updated_at) - new Date(run.created_at)) / 1000;
+          this.recordHistogram("rc_workflow_duration_seconds", labels, duration);
         }
       }
 
       console.log(`✅ Processed ${runs.length} workflow runs`);
     } catch (error) {
-      console.warn('Failed to collect release metrics:', error.message);
+      console.warn("Failed to collect release metrics:", error.message);
     }
   }
 
   // Collect PR analysis metrics
   async collectPRMetrics() {
     try {
-      console.log('📊 Collecting PR metrics...');
+      console.log("📊 Collecting PR metrics...");
 
       const prs = await this.getRecentPRs(50);
 
@@ -118,49 +113,44 @@ class MetricsExporter {
           draft: pr.draft.toString(),
         };
 
-        this.incrementCounter('rc_pr_analyzed_total', labels);
+        this.incrementCounter("rc_pr_analyzed_total", labels);
 
         if (pr.merged_at) {
-          this.incrementCounter('rc_pr_merged_total', labels);
+          this.incrementCounter("rc_pr_merged_total", labels);
 
           // Time to merge
-          const timeToMerge =
-            (new Date(pr.merged_at) - new Date(pr.created_at)) / 1000;
-          this.recordHistogram(
-            'rc_pr_time_to_merge_seconds',
-            labels,
-            timeToMerge,
-          );
+          const timeToMerge = (new Date(pr.merged_at) - new Date(pr.created_at)) / 1000;
+          this.recordHistogram("rc_pr_time_to_merge_seconds", labels, timeToMerge);
         }
       }
 
       console.log(`✅ Processed ${prs.length} PRs`);
     } catch (error) {
-      console.warn('Failed to collect PR metrics:', error.message);
+      console.warn("Failed to collect PR metrics:", error.message);
     }
   }
 
   // Collect quality gate metrics
   async collectQualityGateMetrics() {
     try {
-      console.log('📊 Collecting quality gate metrics...');
+      console.log("📊 Collecting quality gate metrics...");
 
-      const gates = ['build', 'typecheck', 'lint', 'tests', 'security', 'helm'];
+      const gates = ["build", "typecheck", "lint", "tests", "security", "helm"];
 
       // Get recent PR validation runs
-      const runs = await this.getWorkflowRuns('pr-validation.yml', 100);
+      const runs = await this.getWorkflowRuns("pr-validation.yml", 100);
 
       for (const run of runs) {
         if (run.conclusion) {
           for (const gate of gates) {
             // Simulate gate results based on run outcome
             // In practice, you'd parse job results
-            const gateResult = run.conclusion === 'success' ? 'pass' : 'fail';
+            const gateResult = run.conclusion === "success" ? "pass" : "fail";
 
-            this.incrementCounter('rc_gate_total', {
+            this.incrementCounter("rc_gate_total", {
               gate: gate,
               result: gateResult,
-              pr: run.pull_requests?.[0]?.number?.toString() || 'unknown',
+              pr: run.pull_requests?.[0]?.number?.toString() || "unknown",
             });
           }
         }
@@ -168,14 +158,14 @@ class MetricsExporter {
 
       console.log(`✅ Processed quality gate metrics`);
     } catch (error) {
-      console.warn('Failed to collect quality gate metrics:', error.message);
+      console.warn("Failed to collect quality gate metrics:", error.message);
     }
   }
 
   // Collect auto-fix metrics
   async collectAutoFixMetrics() {
     try {
-      console.log('📊 Collecting auto-fix metrics...');
+      console.log("📊 Collecting auto-fix metrics...");
 
       // Search for auto-fix commits
       const commits = await this.getAutoFixCommits();
@@ -184,29 +174,29 @@ class MetricsExporter {
         const fixTypes = this.parseAutoFixTypes(commit.message);
 
         for (const fixType of fixTypes) {
-          this.incrementCounter('rc_autofix_applied_total', {
+          this.incrementCounter("rc_autofix_applied_total", {
             type: fixType,
-            author: commit.author?.login || 'unknown',
+            author: commit.author?.login || "unknown",
           });
         }
       }
 
       console.log(`✅ Processed ${commits.length} auto-fix commits`);
     } catch (error) {
-      console.warn('Failed to collect auto-fix metrics:', error.message);
+      console.warn("Failed to collect auto-fix metrics:", error.message);
     }
   }
 
   // Collect deployment health metrics
   async collectDeploymentHealthMetrics() {
     try {
-      console.log('📊 Collecting deployment health metrics...');
+      console.log("📊 Collecting deployment health metrics...");
 
       // Check health endpoints
       const endpoints = [
-        { name: 'api', url: 'https://api.summit.dev/health' },
-        { name: 'web', url: 'https://summit.dev/health' },
-        { name: 'gateway', url: 'https://gateway.summit.dev/health' },
+        { name: "api", url: "https://api.summit.dev/health" },
+        { name: "web", url: "https://summit.dev/health" },
+        { name: "gateway", url: "https://gateway.summit.dev/health" },
       ];
 
       for (const endpoint of endpoints) {
@@ -220,67 +210,59 @@ class MetricsExporter {
           const isHealthy = Math.random() > 0.05; // 95% uptime simulation
 
           this.setGauge(
-            'rc_deploy_health_ratio',
+            "rc_deploy_health_ratio",
             {
               service: endpoint.name,
             },
-            isHealthy ? 1 : 0,
+            isHealthy ? 1 : 0
           );
 
           this.recordHistogram(
-            'rc_health_check_duration_seconds',
+            "rc_health_check_duration_seconds",
             {
               service: endpoint.name,
             },
-            responseTime,
+            responseTime
           );
         } catch (error) {
           this.setGauge(
-            'rc_deploy_health_ratio',
+            "rc_deploy_health_ratio",
             {
               service: endpoint.name,
             },
-            0,
+            0
           );
         }
       }
 
-      console.log(
-        `✅ Processed health metrics for ${endpoints.length} services`,
-      );
+      console.log(`✅ Processed health metrics for ${endpoints.length} services`);
     } catch (error) {
-      console.warn(
-        'Failed to collect deployment health metrics:',
-        error.message,
-      );
+      console.warn("Failed to collect deployment health metrics:", error.message);
     }
   }
 
   // Collect circuit breaker metrics
   async collectCircuitBreakerMetrics() {
     try {
-      console.log('📊 Collecting circuit breaker metrics...');
+      console.log("📊 Collecting circuit breaker metrics...");
 
       // Get circuit state from safety circuit
-      let circuitState = 'unknown';
+      let circuitState = "unknown";
       let failureCount = 0;
       let recentDeployments = 0;
 
       try {
-        const statusOutput = execSync(
-          'node .github/scripts/safety-circuit.cjs status',
-          {
-            encoding: 'utf8',
-            timeout: 5000,
-          },
-        );
+        const statusOutput = execSync("node .github/scripts/safety-circuit.cjs status", {
+          encoding: "utf8",
+          timeout: 5000,
+        });
 
         const status = JSON.parse(statusOutput);
-        circuitState = status.circuit?.toLowerCase() || 'unknown';
+        circuitState = status.circuit?.toLowerCase() || "unknown";
         failureCount = status.failureCount || 0;
         recentDeployments = status.recentDeployments || 0;
       } catch (error) {
-        console.warn('Could not get circuit status:', error.message);
+        console.warn("Could not get circuit status:", error.message);
       }
 
       // Map circuit states to numeric values
@@ -291,48 +273,41 @@ class MetricsExporter {
           open: 2,
         }[circuitState] || -1;
 
-      this.setGauge('rc_circuit_state', {}, circuitStateValue);
-      this.setGauge('rc_circuit_failure_count', {}, failureCount);
-      this.setGauge('rc_recent_deployments', {}, recentDeployments);
+      this.setGauge("rc_circuit_state", {}, circuitStateValue);
+      this.setGauge("rc_circuit_failure_count", {}, failureCount);
+      this.setGauge("rc_recent_deployments", {}, recentDeployments);
 
-      console.log(
-        `✅ Circuit state: ${circuitState}, failures: ${failureCount}`,
-      );
+      console.log(`✅ Circuit state: ${circuitState}, failures: ${failureCount}`);
     } catch (error) {
-      console.warn('Failed to collect circuit breaker metrics:', error.message);
+      console.warn("Failed to collect circuit breaker metrics:", error.message);
     }
   }
 
   // Collect rollback metrics
   async collectRollbackMetrics() {
     try {
-      console.log('📊 Collecting rollback metrics...');
+      console.log("📊 Collecting rollback metrics...");
 
       // Get recent auto-rollback runs
-      const runs = await this.getWorkflowRuns('auto-rollback.yml', 20);
+      const runs = await this.getWorkflowRuns("auto-rollback.yml", 20);
 
       for (const run of runs) {
         const labels = {
-          success: run.conclusion === 'success' ? 'true' : 'false',
-          trigger: run.event || 'unknown',
+          success: run.conclusion === "success" ? "true" : "false",
+          trigger: run.event || "unknown",
         };
 
-        this.incrementCounter('rc_rollback_total', labels);
+        this.incrementCounter("rc_rollback_total", labels);
 
         if (run.created_at && run.updated_at) {
-          const duration =
-            (new Date(run.updated_at) - new Date(run.created_at)) / 1000;
-          this.recordHistogram(
-            'rc_rollback_duration_seconds',
-            labels,
-            duration,
-          );
+          const duration = (new Date(run.updated_at) - new Date(run.created_at)) / 1000;
+          this.recordHistogram("rc_rollback_duration_seconds", labels, duration);
         }
       }
 
       console.log(`✅ Processed ${runs.length} rollback events`);
     } catch (error) {
-      console.warn('Failed to collect rollback metrics:', error.message);
+      console.warn("Failed to collect rollback metrics:", error.message);
     }
   }
 
@@ -342,16 +317,13 @@ class MetricsExporter {
       const output = execSync(
         `gh run list --workflow=${workflowFile} --limit=${limit} --json status,conclusion,createdAt,updatedAt,event,headBranch,pullRequests`,
         {
-          encoding: 'utf8',
+          encoding: "utf8",
           timeout: 10000,
-        },
+        }
       );
       return JSON.parse(output);
     } catch (error) {
-      console.warn(
-        `Failed to get workflow runs for ${workflowFile}:`,
-        error.message,
-      );
+      console.warn(`Failed to get workflow runs for ${workflowFile}:`, error.message);
       return [];
     }
   }
@@ -361,13 +333,13 @@ class MetricsExporter {
       const output = execSync(
         `gh pr list --state all --limit=${limit} --json number,state,createdAt,mergedAt,draft,title,additions,deletions`,
         {
-          encoding: 'utf8',
+          encoding: "utf8",
           timeout: 10000,
-        },
+        }
       );
       return JSON.parse(output);
     } catch (error) {
-      console.warn('Failed to get recent PRs:', error.message);
+      console.warn("Failed to get recent PRs:", error.message);
       return [];
     }
   }
@@ -377,18 +349,18 @@ class MetricsExporter {
       const output = execSync(
         'gh api "/repos/{owner}/{repo}/commits?author=release-captain[bot]&per_page=50" --jq ".[].commit | {message: .message, author: .author}"',
         {
-          encoding: 'utf8',
+          encoding: "utf8",
           timeout: 10000,
-        },
+        }
       );
       return JSON.parse(
         `[${output
-          .split('\n')
+          .split("\n")
           .filter((line) => line.trim())
-          .join(',')}]`,
+          .join(",")}]`
       );
     } catch (error) {
-      console.warn('Failed to get auto-fix commits:', error.message);
+      console.warn("Failed to get auto-fix commits:", error.message);
       return [];
     }
   }
@@ -398,33 +370,33 @@ class MetricsExporter {
     let riskScore = 0;
 
     if (pr.additions + pr.deletions > 500) riskScore += 2;
-    if (pr.title.toLowerCase().includes('migration')) riskScore += 3;
-    if (pr.title.toLowerCase().includes('breaking')) riskScore += 2;
-    if (pr.title.toLowerCase().includes('security')) riskScore += 1;
+    if (pr.title.toLowerCase().includes("migration")) riskScore += 3;
+    if (pr.title.toLowerCase().includes("breaking")) riskScore += 2;
+    if (pr.title.toLowerCase().includes("security")) riskScore += 1;
 
-    if (riskScore >= 5) return 'HIGH';
-    if (riskScore >= 3) return 'MEDIUM';
-    return 'LOW';
+    if (riskScore >= 5) return "HIGH";
+    if (riskScore >= 3) return "MEDIUM";
+    return "LOW";
   }
 
   parseAutoFixTypes(message) {
     const types = [];
-    if (message.includes('lint')) types.push('lint');
-    if (message.includes('format')) types.push('format');
-    if (message.includes('import')) types.push('imports');
-    if (message.includes('sort')) types.push('sort');
-    return types.length > 0 ? types : ['unknown'];
+    if (message.includes("lint")) types.push("lint");
+    if (message.includes("format")) types.push("format");
+    if (message.includes("import")) types.push("imports");
+    if (message.includes("sort")) types.push("sort");
+    return types.length > 0 ? types : ["unknown"];
   }
 
   // Export metrics in Prometheus format
   exportPrometheus() {
-    let output = '';
+    let output = "";
 
     // Group metrics by name
     const metricGroups = new Map();
 
     for (const [key, value] of this.metrics) {
-      const [metricName] = key.split('{');
+      const [metricName] = key.split("{");
       if (!metricGroups.has(metricName)) {
         metricGroups.set(metricName, []);
       }
@@ -436,12 +408,9 @@ class MetricsExporter {
       // Add help and type comments
       output += `# HELP ${metricName} Release Captain metric\n`;
 
-      if (metricName.includes('_total') || metricName.includes('_count')) {
+      if (metricName.includes("_total") || metricName.includes("_count")) {
         output += `# TYPE ${metricName} counter\n`;
-      } else if (
-        metricName.includes('_bucket') ||
-        metricName.includes('_sum')
-      ) {
+      } else if (metricName.includes("_bucket") || metricName.includes("_sum")) {
         output += `# TYPE ${metricName} histogram\n`;
       } else {
         output += `# TYPE ${metricName} gauge\n`;
@@ -452,7 +421,7 @@ class MetricsExporter {
         output += `${key} ${value}\n`;
       }
 
-      output += '\n';
+      output += "\n";
     }
 
     // Add metadata
@@ -463,7 +432,7 @@ class MetricsExporter {
   }
 
   // Export metrics to file
-  async exportToFile(filename = '/tmp/release-captain-metrics.prom') {
+  async exportToFile(filename = "/tmp/release-captain-metrics.prom") {
     const prometheus = this.exportPrometheus();
     fs.writeFileSync(filename, prometheus);
     console.log(`📄 Metrics exported to: ${filename}`);
@@ -472,7 +441,7 @@ class MetricsExporter {
 
   // Main collection method
   async collectAllMetrics() {
-    console.log('🚀 Starting Release Captain metrics collection...');
+    console.log("🚀 Starting Release Captain metrics collection...");
 
     await this.collectReleaseMetrics();
     await this.collectPRMetrics();
@@ -496,39 +465,39 @@ async function main() {
 
   try {
     switch (command) {
-      case 'collect':
+      case "collect":
         await exporter.collectAllMetrics();
         console.log(`📊 Collected ${exporter.metrics.size} metrics`);
         break;
 
-      case 'export':
+      case "export":
         await exporter.collectAllMetrics();
         const filename = await exporter.exportToFile();
         console.log(`📤 Metrics exported to ${filename}`);
         break;
 
-      case 'prometheus':
+      case "prometheus":
         await exporter.collectAllMetrics();
         console.log(exporter.exportPrometheus());
         break;
 
-      case 'health':
+      case "health":
         await exporter.collectDeploymentHealthMetrics();
-        console.log('Health metrics collected');
+        console.log("Health metrics collected");
         break;
 
       default:
-        console.log('Release Captain Metrics Exporter');
-        console.log('Usage: metrics-exporter.cjs <command>');
-        console.log('Commands:');
-        console.log('  collect     - Collect all metrics');
-        console.log('  export      - Collect and export to file');
-        console.log('  prometheus  - Output Prometheus format');
-        console.log('  health      - Check deployment health only');
+        console.log("Release Captain Metrics Exporter");
+        console.log("Usage: metrics-exporter.cjs <command>");
+        console.log("Commands:");
+        console.log("  collect     - Collect all metrics");
+        console.log("  export      - Collect and export to file");
+        console.log("  prometheus  - Output Prometheus format");
+        console.log("  health      - Check deployment health only");
         break;
     }
   } catch (error) {
-    console.error('Metrics collection failed:', error.message);
+    console.error("Metrics collection failed:", error.message);
     process.exit(1);
   }
 }

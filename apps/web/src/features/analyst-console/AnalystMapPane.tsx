@@ -20,17 +20,15 @@ import type { MapPaneProps, AnalystLocation, AnalystEvent } from './types'
 /**
  * AnalystMapPane component with synchronized selection
  */
-export function AnalystMapPane({
-  locations,
-  events,
-  className,
-}: MapPaneProps) {
+export function AnalystMapPane({ locations, events, className }: MapPaneProps) {
   const { state } = useAnalystView()
   const { selection, setSelection } = useSelection()
   const { timeWindow } = useGlobalTimeBrush()
 
   const [zoom, setZoom] = useState(2)
-  const [hoveredLocationId, setHoveredLocationId] = useState<string | null>(null)
+  const [hoveredLocationId, setHoveredLocationId] = useState<string | null>(
+    null
+  )
 
   // Parse time window
   const { startMs: fromTime, endMs: toTime } = timeWindow
@@ -88,10 +86,7 @@ export function AnalystMapPane({
   )
 
   // Get color based on selection/hover state
-  const getMarkerColor = (
-    locationId: string,
-    isHovered: boolean
-  ) => {
+  const getMarkerColor = (locationId: string, isHovered: boolean) => {
     const isSelected = selection.selectedLocationIds.includes(locationId)
     if (isSelected) return 'text-yellow-400'
     if (isHovered) return 'text-yellow-200'
@@ -105,7 +100,10 @@ export function AnalystMapPane({
 
   return (
     <div
-      className={cn('relative w-full h-full overflow-hidden bg-slate-900', className)}
+      className={cn(
+        'relative w-full h-full overflow-hidden bg-slate-900',
+        className
+      )}
       role="region"
       aria-label="Geographic map view"
     >
@@ -214,11 +212,13 @@ export function AnalystMapPane({
                   </div>
                   <div className="text-xs text-muted-foreground space-y-1">
                     <div>
-                      Coordinates: {firstLoc.lat.toFixed(4)}, {firstLoc.lon.toFixed(4)}
+                      Coordinates: {firstLoc.lat.toFixed(4)},{' '}
+                      {firstLoc.lon.toFixed(4)}
                     </div>
                     {firstLoc.firstSeenAt && (
                       <div>
-                        First seen: {new Date(firstLoc.firstSeenAt).toLocaleDateString()}
+                        First seen:{' '}
+                        {new Date(firstLoc.firstSeenAt).toLocaleDateString()}
                       </div>
                     )}
                     {locs.length > 1 && (

@@ -1,5 +1,5 @@
-import { readFile } from 'node:fs/promises';
-import { FederatedPlan, SiloId, SiloSubplan, TraceEvent } from './types.js';
+import { readFile } from "node:fs/promises";
+import { FederatedPlan, SiloId, SiloSubplan, TraceEvent } from "./types.js";
 
 type RawFederatedPlan = {
   subplans: Array<{
@@ -32,19 +32,19 @@ type RawFederatedPlan = {
 };
 
 function assertValidPlan(value: unknown): asserts value is RawFederatedPlan {
-  if (!value || typeof value !== 'object') {
-    throw new Error('Plan payload must be an object');
+  if (!value || typeof value !== "object") {
+    throw new Error("Plan payload must be an object");
   }
   const raw = value as Record<string, unknown>;
   if (!Array.isArray(raw.subplans)) {
-    throw new Error('Plan must include an array of subplans');
+    throw new Error("Plan must include an array of subplans");
   }
-  if (typeof raw.coordinator !== 'object' || raw.coordinator === null) {
-    throw new Error('Plan must include a coordinator block');
+  if (typeof raw.coordinator !== "object" || raw.coordinator === null) {
+    throw new Error("Plan must include a coordinator block");
   }
   const compliance = raw.compliance as Record<string, unknown> | undefined;
   if (!compliance || !Array.isArray(compliance.events)) {
-    throw new Error('Plan must include compliance events');
+    throw new Error("Plan must include compliance events");
   }
 }
 
@@ -81,12 +81,12 @@ function normalizePlan(raw: RawFederatedPlan): FederatedPlan {
 }
 
 export async function loadPlanFromFile(path: string): Promise<FederatedPlan> {
-  const raw = await readFile(path, 'utf-8');
+  const raw = await readFile(path, "utf-8");
   return parseFederatedPlan(raw);
 }
 
 export function parseFederatedPlan(payload: string | object): FederatedPlan {
-  const rawValue = typeof payload === 'string' ? JSON.parse(payload) : payload;
+  const rawValue = typeof payload === "string" ? JSON.parse(payload) : payload;
   assertValidPlan(rawValue);
   return normalizePlan(rawValue);
 }
@@ -107,8 +107,11 @@ export function complianceTimeline(plan: FederatedPlan): string[] {
   return plan.compliance.events.map((event) => `${event.policyId} :: ${event.message}`);
 }
 
-export function findFirstPolicyEvent(plan: FederatedPlan, policyId: string): TraceEvent | undefined {
+export function findFirstPolicyEvent(
+  plan: FederatedPlan,
+  policyId: string
+): TraceEvent | undefined {
   return plan.compliance.events.find((event) => event.policyId === policyId);
 }
 
-export * from './types.js';
+export * from "./types.js";

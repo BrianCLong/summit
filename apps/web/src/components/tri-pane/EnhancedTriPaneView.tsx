@@ -298,7 +298,11 @@ export function EnhancedTriPaneView({
               Enhanced Tri-Pane Analysis
             </h1>
 
-            <div className="flex items-center gap-2" role="status" aria-live="polite">
+            <div
+              className="flex items-center gap-2"
+              role="status"
+              aria-live="polite"
+            >
               <Badge variant="outline" className="flex items-center gap-1">
                 <Network className="h-3 w-3" />
                 {filteredData.entities.length} entities
@@ -387,9 +391,17 @@ export function EnhancedTriPaneView({
               : ''
           }`}
         >
-          <Card className="h-full" tabIndex={0} role="region" aria-labelledby="timeline-title">
+          <Card
+            className="h-full"
+            tabIndex={0}
+            role="region"
+            aria-labelledby="timeline-title"
+          >
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-sm" id="timeline-title">
+              <CardTitle
+                className="flex items-center gap-2 text-sm"
+                id="timeline-title"
+              >
                 <Clock className="h-4 w-4" />
                 Timeline
                 <kbd className="ml-auto text-xs px-1.5 py-0.5 bg-muted rounded">
@@ -407,25 +419,32 @@ export function EnhancedTriPaneView({
               {timeBrush && (
                 <div className="px-4 py-2 bg-accent border-b">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">Time Brush Active</span>
+                    <span className="text-muted-foreground">
+                      Time Brush Active
+                    </span>
                     <span className="font-medium">
                       {timeBrush.start.toLocaleDateString()} -{' '}
                       {timeBrush.end.toLocaleDateString()}
                     </span>
                   </div>
                   <div className="mt-2 flex gap-1 h-8">
-                    {Array.from(timeHistogram.entries()).map(([date, count]) => {
-                      const maxCount = Math.max(...timeHistogram.values())
-                      const height = (count / maxCount) * 100
-                      return (
-                        <div
-                          key={date}
-                          className="flex-1 bg-primary/20 hover:bg-primary/40 cursor-pointer transition-colors"
-                          style={{ height: `${height}%`, alignSelf: 'flex-end' }}
-                          title={`${date}: ${count} events`}
-                        />
-                      )
-                    })}
+                    {Array.from(timeHistogram.entries()).map(
+                      ([date, count]) => {
+                        const maxCount = Math.max(...timeHistogram.values())
+                        const height = (count / maxCount) * 100
+                        return (
+                          <div
+                            key={date}
+                            className="flex-1 bg-primary/20 hover:bg-primary/40 cursor-pointer transition-colors"
+                            style={{
+                              height: `${height}%`,
+                              alignSelf: 'flex-end',
+                            }}
+                            title={`${date}: ${count} events`}
+                          />
+                        )
+                      }
+                    )}
                   </div>
                 </div>
               )}
@@ -447,9 +466,17 @@ export function EnhancedTriPaneView({
             focusedPane === 'graph' ? 'ring-2 ring-primary shadow-lg z-10' : ''
           }`}
         >
-          <Card className="h-full" tabIndex={0} role="region" aria-labelledby="graph-title">
+          <Card
+            className="h-full"
+            tabIndex={0}
+            role="region"
+            aria-labelledby="graph-title"
+          >
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-sm" id="graph-title">
+              <CardTitle
+                className="flex items-center gap-2 text-sm"
+                id="graph-title"
+              >
                 <Network className="h-4 w-4" />
                 Entity Graph
                 <kbd className="ml-auto text-xs px-1.5 py-0.5 bg-muted rounded">
@@ -503,7 +530,8 @@ export function EnhancedTriPaneView({
                           <>
                             <div>• {connections.length} connections</div>
                             <div>
-                              • {Math.round(entity.confidence * 100)}% confidence
+                              • {Math.round(entity.confidence * 100)}%
+                              confidence
                             </div>
                             <div>• Type: {entity.type}</div>
                             {connections.length > 5 && (
@@ -526,9 +554,17 @@ export function EnhancedTriPaneView({
             focusedPane === 'map' ? 'ring-2 ring-primary shadow-lg z-10' : ''
           }`}
         >
-          <Card className="h-full" tabIndex={0} role="region" aria-labelledby="map-title">
+          <Card
+            className="h-full"
+            tabIndex={0}
+            role="region"
+            aria-labelledby="map-title"
+          >
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-sm" id="map-title">
+              <CardTitle
+                className="flex items-center gap-2 text-sm"
+                id="map-title"
+              >
                 <MapPin className="h-4 w-4" />
                 Geographic View
                 <kbd className="ml-auto text-xs px-1.5 py-0.5 bg-muted rounded">

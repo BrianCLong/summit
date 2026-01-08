@@ -2,7 +2,7 @@ name: milestone-nudges
 
 on:
   schedule:
-    - cron: '0 */6 * * *' # every 6h
+    - cron: "0 */6 * * *" # every 6h
   workflow_dispatch: {}
 
 permissions:

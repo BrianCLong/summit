@@ -1,5 +1,5 @@
-import crypto from 'crypto';
-import { PluginManifest, PluginPermission } from '../types/plugin.js';
+import crypto from "crypto";
+import { PluginManifest, PluginPermission } from "../types/plugin.js";
 
 /**
  * Plugin security framework
@@ -23,11 +23,11 @@ export class PluginSecurity {
     publicKey: string
   ): Promise<boolean> {
     try {
-      const verify = crypto.createVerify('RSA-SHA256');
+      const verify = crypto.createVerify("RSA-SHA256");
       verify.update(content);
       verify.end();
 
-      return verify.verify(publicKey, signature, 'base64');
+      return verify.verify(publicKey, signature, "base64");
     } catch (error) {
       return false;
     }
@@ -43,15 +43,15 @@ export class PluginSecurity {
     // Check if plugin is blacklisted
     if (this.blacklistedPlugins.has(manifest.id)) {
       vulnerabilities.push({
-        severity: 'critical',
-        type: 'blacklisted',
+        severity: "critical",
+        type: "blacklisted",
         message: `Plugin ${manifest.id} is blacklisted`,
         cve: undefined,
       });
     }
 
     // Check publisher trust
-    if (!this.trustedPublishers.has(manifest.author.email || '')) {
+    if (!this.trustedPublishers.has(manifest.author.email || "")) {
       warnings.push(`Publisher ${manifest.author.name} is not in trusted list`);
     }
 
@@ -68,7 +68,7 @@ export class PluginSecurity {
     vulnerabilities.push(...depVulnerabilities);
 
     return {
-      safe: vulnerabilities.filter(v => v.severity === 'critical').length === 0,
+      safe: vulnerabilities.filter((v) => v.severity === "critical").length === 0,
       vulnerabilities,
       warnings,
       scannedAt: new Date(),
@@ -87,7 +87,7 @@ export class PluginSecurity {
     if (!manifest.permissions.includes(permission)) {
       return {
         allowed: false,
-        reason: 'Permission not requested in manifest',
+        reason: "Permission not requested in manifest",
       };
     }
 
@@ -177,9 +177,7 @@ export class PluginSecurity {
 
     for (const permission of manifest.permissions) {
       if (dangerousPermissions.includes(permission)) {
-        warnings.push(
-          `Plugin requests dangerous permission: ${permission}. Review carefully.`
-        );
+        warnings.push(`Plugin requests dangerous permission: ${permission}. Review carefully.`);
       }
     }
 
@@ -207,10 +205,10 @@ export class PluginSecurity {
     // Example: Network access requires approval for unknown publishers
     this.permissionPolicies.set(PluginPermission.NETWORK_ACCESS, {
       evaluate: (manifest, context) => {
-        if (!this.trustedPublishers.has(manifest.author.email || '')) {
+        if (!this.trustedPublishers.has(manifest.author.email || "")) {
           return {
             allowed: false,
-            reason: 'Network access requires trusted publisher for first-time plugins',
+            reason: "Network access requires trusted publisher for first-time plugins",
             requiresApproval: true,
           };
         }
@@ -223,7 +221,7 @@ export class PluginSecurity {
       evaluate: (manifest, context) => {
         return {
           allowed: false,
-          reason: 'File system access is restricted',
+          reason: "File system access is restricted",
           requiresApproval: true,
         };
       },
@@ -239,7 +237,7 @@ export interface ScanResult {
 }
 
 export interface Vulnerability {
-  severity: 'critical' | 'high' | 'medium' | 'low';
+  severity: "critical" | "high" | "medium" | "low";
   type: string;
   message: string;
   cve?: string;
@@ -252,7 +250,7 @@ export interface PermissionPolicy {
 export interface PermissionContext {
   userId?: string;
   tenantId?: string;
-  environment: 'development' | 'staging' | 'production';
+  environment: "development" | "staging" | "production";
 }
 
 export interface PermissionCheckResult {

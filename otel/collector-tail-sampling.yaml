@@ -17,7 +17,7 @@ processors:
         string_attribute:
           {
             key: http.target,
-            values: ['/health', '/healthz'],
+            values: ["/health", "/healthz"],
             enabled_regex_matching: true,
             invert_match: true,
           }
@@ -29,10 +29,5 @@ extensions: { health_check: {} }
 service:
   extensions: [health_check]
   pipelines:
-    traces:
-      {
-        receivers: [otlp],
-        processors: [tail_sampling, batch],
-        exporters: [otlphttp],
-      }
+    traces: { receivers: [otlp], processors: [tail_sampling, batch], exporters: [otlphttp] }
     metrics: { receivers: [otlp], processors: [batch], exporters: [prometheus] }

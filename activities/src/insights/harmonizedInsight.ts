@@ -1,5 +1,5 @@
-import biopython from 'biopython';
-import torch from 'torch';
+import biopython from "biopython";
+import torch from "torch";
 
 export function harmonizedInsight(config) {
   const insightMap = torch.rl({ bio: biopython.analyzePatterns() });

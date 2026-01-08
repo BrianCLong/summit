@@ -1,4 +1,4 @@
-import { ExecutionReceipt, applyRedaction } from '@intelgraph/provenance';
+import { ExecutionReceipt, applyRedaction } from "@intelgraph/provenance";
 
 export interface ExportRequest {
   id: string;

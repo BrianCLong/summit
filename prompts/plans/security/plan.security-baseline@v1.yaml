@@ -1,7 +1,7 @@
 meta:
   id: plan.security-baseline@v1
-  owner: 'security-engineering'
-  purpose: 'Establish minimal secure defaults and runtime hardening across subsystems'
+  owner: "security-engineering"
+  purpose: "Establish minimal secure defaults and runtime hardening across subsystems"
   tags:
     - security
     - hardening
@@ -9,13 +9,13 @@ meta:
     - containers
     - runtime
   guardrails:
-    - 'Security defaults must not break functionality'
-    - 'All changes must be tested in staging first'
-    - 'Hardening must not significantly impact performance'
-    - 'Emergency bypass procedures must be documented'
+    - "Security defaults must not break functionality"
+    - "All changes must be tested in staging first"
+    - "Hardening must not significantly impact performance"
+    - "Emergency bypass procedures must be documented"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -202,15 +202,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'summit-security-baseline'
+  - name: "summit-security-baseline"
     inputs:
-      subsystems: 'API Server, Graph Engine, Web Client, Workers, Databases'
-      current_security_posture: 'Basic auth, TLS enabled, no mTLS, container scanning in CI'
-      compliance_requirements: 'SOC2, GDPR, internal security policy'
-      threat_environment: 'Enterprise SaaS, sensitive data, targeted attacks possible'
-      risk_tolerance: 'Low - security is priority'
+      subsystems: "API Server, Graph Engine, Web Client, Workers, Databases"
+      current_security_posture: "Basic auth, TLS enabled, no mTLS, container scanning in CI"
+      compliance_requirements: "SOC2, GDPR, internal security policy"
+      threat_environment: "Enterprise SaaS, sensitive data, targeted attacks possible"
+      risk_tolerance: "Low - security is priority"
     expected_contains:
-      - 'baseline'
-      - 'hardening'
-      - 'Container Security'
-      - 'CI Security Checks'
+      - "baseline"
+      - "hardening"
+      - "Container Security"
+      - "CI Security Checks"

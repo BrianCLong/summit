@@ -12,9 +12,7 @@
       "title": "AuthZ decisions",
       "id": 1,
       "datasource": "Prometheus",
-      "targets": [
-        { "expr": "sum by (decision) (rate(authz_decisions_total[5m]))" }
-      ],
+      "targets": [{ "expr": "sum by (decision) (rate(authz_decisions_total[5m]))" }],
       "lines": true,
       "linewidth": 2,
       "legend": { "show": true }
@@ -24,9 +22,7 @@
       "title": "AuthZ denies by reason",
       "id": 2,
       "datasource": "Prometheus",
-      "targets": [
-        { "expr": "sum by (reason) (rate(authz_denies_total[5m]))" }
-      ],
+      "targets": [{ "expr": "sum by (reason) (rate(authz_denies_total[5m]))" }],
       "lines": true,
       "linewidth": 2,
       "legend": { "show": true }

@@ -1,17 +1,12 @@
-import React, { useEffect } from 'react';
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from 'react-router-dom';
-import { Provider } from 'react-redux';
-import { ThemeProvider, CssBaseline, Container, Box } from '@mui/material';
-import { getIntelGraphTheme } from './theme/intelgraphTheme';
+import React, { useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { Provider } from "react-redux";
+import { ThemeProvider, CssBaseline, Container, Box } from "@mui/material";
+import { getIntelGraphTheme } from "./theme/intelgraphTheme";
 
 // Store setup (no Apollo for now)
-import { store } from './store';
-import { useSelector } from 'react-redux';
+import { store } from "./store";
+import { useSelector } from "react-redux";
 
 // Simple Dashboard component
 function SimpleDashboard() {
@@ -22,10 +17,10 @@ function SimpleDashboard() {
         <p>🎉 React app is working!</p>
         <div
           style={{
-            padding: '20px',
-            background: '#e3f2fd',
-            borderRadius: '8px',
-            margin: '20px 0',
+            padding: "20px",
+            background: "#e3f2fd",
+            borderRadius: "8px",
+            margin: "20px 0",
           }}
         >
           <h2>✅ System Status</h2>
@@ -40,10 +35,10 @@ function SimpleDashboard() {
 
         <div
           style={{
-            padding: '20px',
-            background: '#f3e5f5',
-            borderRadius: '8px',
-            margin: '20px 0',
+            padding: "20px",
+            background: "#f3e5f5",
+            borderRadius: "8px",
+            margin: "20px 0",
           }}
         >
           <h3>🔗 Quick Links</h3>
@@ -65,7 +60,7 @@ function SimpleDashboard() {
 }
 
 function ThemedAppShell({ children }) {
-  const mode = useSelector((state) => state.ui?.theme || 'light');
+  const mode = useSelector((state) => state.ui?.theme || "light");
   const theme = React.useMemo(() => getIntelGraphTheme(mode), [mode]);
 
   return (
@@ -79,9 +74,9 @@ function ThemedAppShell({ children }) {
 function App() {
   useEffect(() => {
     // eslint-disable-next-line no-console
-    console.log('🚀 IntelGraph Platform Starting...');
+    console.log("🚀 IntelGraph Platform Starting...");
     // eslint-disable-next-line no-console
-    console.log('✅ App component mounted successfully');
+    console.log("✅ App component mounted successfully");
   }, []);
 
   return (

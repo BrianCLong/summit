@@ -9,14 +9,15 @@
 
 Current build performance is significantly below optimal:
 
-| Metric | Current | Industry Best | Gap |
-|--------|---------|---------------|-----|
-| Cold build | 15-25 min | 5-8 min | 2-3x slower |
-| Cached build | 3-8 min | 30s-2 min | 4-6x slower |
-| `pnpm install` | 2-3 min | <1 min | 2-3x slower |
-| Test execution | 10-15 min | 3-5 min | 2-3x slower |
+| Metric         | Current   | Industry Best | Gap         |
+| -------------- | --------- | ------------- | ----------- |
+| Cold build     | 15-25 min | 5-8 min       | 2-3x slower |
+| Cached build   | 3-8 min   | 30s-2 min     | 4-6x slower |
+| `pnpm install` | 2-3 min   | <1 min        | 2-3x slower |
+| Test execution | 10-15 min | 3-5 min       | 2-3x slower |
 
 **Root causes identified:**
+
 1. Only **46/417 workspaces** in TypeScript project references
 2. Serial build chains (`test → build → ^build`)
 3. **35 separate Jest configs** with duplicated setup
@@ -31,14 +32,17 @@ Current build performance is significantly below optimal:
 ## Considered Options
 
 ### Option 1: Incremental Optimization (Recommended)
+
 Fix TypeScript project references, optimize Turbo, consolidate test configs.
 
 ### Option 2: Alternative Build System
+
 Switch to Nx, Bazel, or other build system.
 
 **Rejected**: High migration cost, team unfamiliar with alternatives, Turbo is sufficient when properly configured.
 
 ### Option 3: Minimal Changes
+
 Add more CI runners to parallelize builds.
 
 **Rejected**: Treats symptoms not causes, increases costs without addressing core issues.
@@ -50,12 +54,13 @@ Add more CI runners to parallelize builds.
 ### TypeScript Project References
 
 #### Current State
+
 ```json
 // tsconfig.build.json - only 46 projects listed
 {
   "references": [
     { "path": "packages/common-types" },
-    { "path": "packages/sdk-ts" },
+    { "path": "packages/sdk-ts" }
     // ... 44 more
     // MISSING: 371 other workspaces!
   ]
@@ -63,6 +68,7 @@ Add more CI runners to parallelize builds.
 ```
 
 #### Target State
+
 ```json
 // tsconfig.build.json - all workspaces included
 {
@@ -71,7 +77,7 @@ Add more CI runners to parallelize builds.
     // Auto-generated from pnpm-workspace.yaml
     { "path": "apps/web" },
     { "path": "apps/gateway" },
-    { "path": "packages/common-types" },
+    { "path": "packages/common-types" }
     // ... all 417 workspaces
   ],
   "compilerOptions": {
@@ -84,6 +90,7 @@ Add more CI runners to parallelize builds.
 ```
 
 #### Implementation Script
+
 ```bash
 #!/bin/bash
 # scripts/generate-ts-references.sh
@@ -99,16 +106,17 @@ done
 ### Turbo Pipeline Optimization
 
 #### Current State
+
 ```json
 // turbo.json
 {
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],  // Serial chain
+      "dependsOn": ["^build"], // Serial chain
       "outputs": ["dist/**"]
     },
     "test": {
-      "dependsOn": ["build"],  // Waits for build
+      "dependsOn": ["build"], // Waits for build
       "outputs": ["coverage/**"]
     }
   }
@@ -116,6 +124,7 @@ done
 ```
 
 #### Target State
+
 ```json
 // turbo.json - optimized
 {
@@ -130,12 +139,12 @@ done
       "cache": true
     },
     "typecheck": {
-      "dependsOn": ["^typecheck"],  // Parallel with build
+      "dependsOn": ["^typecheck"], // Parallel with build
       "outputs": ["*.tsbuildinfo"],
       "cache": true
     },
     "test": {
-      "dependsOn": [],  // No build dependency - tests can run in parallel
+      "dependsOn": [], // No build dependency - tests can run in parallel
       "outputs": ["coverage/**"],
       "cache": true,
       "env": ["CI", "NODE_ENV"]
@@ -146,25 +155,26 @@ done
       "cache": true
     },
     "test:integration": {
-      "dependsOn": ["build"],  // Integration tests need build
+      "dependsOn": ["build"], // Integration tests need build
       "outputs": ["coverage/**"],
       "cache": true
     },
     "lint": {
-      "dependsOn": [],  // Fully parallel
+      "dependsOn": [], // Fully parallel
       "outputs": [],
       "cache": true
     },
     "smoke": {
       "dependsOn": ["build"],
       "outputs": [],
-      "cache": false  // Always run
+      "cache": false // Always run
     }
   }
 }
 ```
 
 **Key changes:**
+
 - `test` no longer depends on `build` (unit tests can run on source)
 - `typecheck` runs in parallel with `build`
 - `lint` has no dependencies (fully parallel)
@@ -173,55 +183,63 @@ done
 ### Jest Configuration Consolidation
 
 #### Current State
+
 - **35 separate Jest config files** across workspaces
 - Duplicated transforms, module mappers, setup files
 - Inconsistent test patterns
 
 #### Target State
+
 **Single root config with project inheritance:**
 
 ```javascript
 // jest.config.js (root)
 module.exports = {
   projects: [
-    '<rootDir>/apps/*/jest.config.js',
-    '<rootDir>/packages/*/jest.config.js',
-    '<rootDir>/services/*/jest.config.js',
+    "<rootDir>/apps/*/jest.config.js",
+    "<rootDir>/packages/*/jest.config.js",
+    "<rootDir>/services/*/jest.config.js",
   ],
 
   // Shared defaults
-  preset: 'ts-jest',
-  testEnvironment: 'node',
+  preset: "ts-jest",
+  testEnvironment: "node",
   transform: {
-    '^.+\\.tsx?$': ['@swc/jest', { /* SWC config */ }],
+    "^.+\\.tsx?$": [
+      "@swc/jest",
+      {
+        /* SWC config */
+      },
+    ],
   },
   moduleNameMapper: {
-    '^@intelgraph/(.*)$': '<rootDir>/packages/$1/src',
+    "^@intelgraph/(.*)$": "<rootDir>/packages/$1/src",
   },
-  coverageDirectory: '<rootDir>/coverage',
-  coverageReporters: ['text', 'lcov', 'html'],
+  coverageDirectory: "<rootDir>/coverage",
+  coverageReporters: ["text", "lcov", "html"],
 
   // Performance
-  maxWorkers: '50%',
+  maxWorkers: "50%",
   cache: true,
-  cacheDirectory: '<rootDir>/.jest-cache',
+  cacheDirectory: "<rootDir>/.jest-cache",
 };
 ```
 
 ```javascript
 // packages/common-types/jest.config.js (workspace)
 module.exports = {
-  displayName: 'common-types',
+  displayName: "common-types",
   rootDir: __dirname,
   // Inherits all defaults from root
   // Only override what's necessary
-  testMatch: ['<rootDir>/src/**/*.test.ts'],
+  testMatch: ["<rootDir>/src/**/*.test.ts"],
 };
 ```
 
 ### Docker Build Optimization
 
 #### Multi-Stage Builds
+
 ```dockerfile
 # Dockerfile.optimized
 # Stage 1: Dependencies
@@ -246,6 +264,7 @@ CMD ["node", "dist/index.js"]
 ```
 
 #### BuildKit Caching
+
 ```yaml
 # docker-compose.dev.yml
 services:
@@ -261,34 +280,36 @@ services:
 
 ### Expected Performance Gains
 
-| Optimization | Expected Improvement |
-|--------------|---------------------|
-| TS Project References | 30-50% faster incremental builds |
-| Turbo Pipeline | 40% faster CI (parallel execution) |
-| Jest Consolidation | 20% faster test setup |
-| Docker BuildKit | 50% faster image builds (cached) |
-| **Combined** | **2-3x overall improvement** |
+| Optimization          | Expected Improvement               |
+| --------------------- | ---------------------------------- |
+| TS Project References | 30-50% faster incremental builds   |
+| Turbo Pipeline        | 40% faster CI (parallel execution) |
+| Jest Consolidation    | 20% faster test setup              |
+| Docker BuildKit       | 50% faster image builds (cached)   |
+| **Combined**          | **2-3x overall improvement**       |
 
 ## Consequences
 
 ### Positive
+
 - Build times reduced from 15-25 min to 5-8 min
 - Cached builds under 2 minutes
 - Better developer experience (faster feedback)
 - Lower CI costs
 
 ### Negative
+
 - Initial setup effort for project references
 - Need to regenerate references when adding packages
 - Some tests may need adjustment to run without build
 
 ### Risks
 
-| Risk | Mitigation |
-|------|------------|
-| Broken project references | Automated generation script |
+| Risk                        | Mitigation                           |
+| --------------------------- | ------------------------------------ |
+| Broken project references   | Automated generation script          |
 | Test failures without build | Separate unit/integration test tasks |
-| Cache invalidation issues | Global dependencies in turbo.json |
+| Cache invalidation issues   | Global dependencies in turbo.json    |
 
 ## Implementation Plan
 

@@ -1,8 +1,8 @@
-import { getPostgresPool } from '../../server/src/db/postgres';
-import baseLogger from '../../server/src/config/logger';
-import { telemetry } from '../../server/src/lib/telemetry/comprehensive-telemetry';
+import { getPostgresPool } from "../../server/src/db/postgres";
+import baseLogger from "../../server/src/config/logger";
+import { telemetry } from "../../server/src/lib/telemetry/comprehensive-telemetry";
 
-const logger = baseLogger.child({ name: 'SlowQueryKiller' });
+const logger = baseLogger.child({ name: "SlowQueryKiller" });
 
 /**
  * Configuration for the slow query killer.
@@ -50,17 +50,16 @@ export async function terminateSlowQuery(config: SlowQueryKillerConfig): Promise
 
     for (const row of result.rows) {
       const pid = row.pid;
-      logger.warn({ pid, query: row.query, timeoutMs }, 'Terminating slow query.');
+      logger.warn({ pid, query: row.query, timeoutMs }, "Terminating slow query.");
 
       // Use pg_cancel_backend to safely terminate the query.
-      await pool.write('SELECT pg_cancel_backend($1)', [pid]);
+      await pool.write("SELECT pg_cancel_backend($1)", [pid]);
       telemetry.slowQueriesKilled.add(1);
     }
 
     return true;
-
   } catch (error) {
-    logger.error({ err: error, queryLabel }, 'Error while trying to terminate a slow query.');
+    logger.error({ err: error, queryLabel }, "Error while trying to terminate a slow query.");
     // We don't re-throw here as this is a background/cleanup task.
     return false;
   }

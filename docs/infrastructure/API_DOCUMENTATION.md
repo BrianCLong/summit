@@ -5,6 +5,7 @@
 ## Overview
 
 The IntelGraph Platform provides comprehensive API documentation through:
+
 - **OpenAPI 3.0 Specification** - Machine-readable API contract
 - **Swagger UI** - Interactive API explorer with "Try it out" functionality
 - **ReDoc** - Clean, professional documentation viewer
@@ -27,6 +28,7 @@ Start the server and access documentation at:
 ### Production
 
 Documentation endpoints are available in production at:
+
 ```
 https://api.intelgraph.example.com/api/docs
 ```
@@ -66,7 +68,7 @@ paths:
     get:
       summary: List all cases
       responses:
-        '200':
+        "200":
           description: Successful response
 components:
   securitySchemes:
@@ -96,17 +98,17 @@ Generated TypeScript types and fetch client:
 
 ```typescript
 // Import generated types
-import type { paths } from './generated-clients/typescript/api-types';
+import type { paths } from "./generated-clients/typescript/api-types";
 
 // Type-safe API calls
-const response = await fetch('http://localhost:4000/api/cases', {
+const response = await fetch("http://localhost:4000/api/cases", {
   headers: {
-    'Authorization': 'Bearer YOUR_JWT_TOKEN',
+    Authorization: "Bearer YOUR_JWT_TOKEN",
   },
 });
 
-const cases: paths['/api/cases']['get']['responses']['200']['content']['application/json']
-  = await response.json();
+const cases: paths["/api/cases"]["get"]["responses"]["200"]["content"]["application/json"] =
+  await response.json();
 ```
 
 ### Python SDK
@@ -140,6 +142,7 @@ with ApiClient(configuration) as api_client:
 ### Schema Access
 
 The GraphQL schema is automatically documented and available at:
+
 - Playground: http://localhost:4000/api/docs/graphql-playground
 - Raw Schema: http://localhost:4000/api/docs/graphql-schema
 
@@ -179,11 +182,13 @@ curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
 ## Rate Limiting
 
 API requests are rate-limited based on:
+
 - User role
 - Endpoint sensitivity
 - Request window (default: 60 seconds)
 
 Rate limit headers in responses:
+
 ```
 X-RateLimit-Limit: 600
 X-RateLimit-Remaining: 599
@@ -221,6 +226,7 @@ curl -X POST \
 ### OpenAPI spec not loading
 
 Check that `/openapi/spec.yaml` exists and is valid YAML:
+
 ```bash
 python3 -c "import yaml; yaml.safe_load(open('openapi/spec.yaml', 'r'))"
 ```
@@ -234,6 +240,7 @@ python3 -c "import yaml; yaml.safe_load(open('openapi/spec.yaml', 'r'))"
 ### SDK generation fails
 
 Ensure Docker is running for Python client generation:
+
 ```bash
 docker ps
 ```

@@ -14,12 +14,12 @@ import type {
   ValidationResult,
   ValidationError,
   ValidationWarning,
-} from '../types';
+} from "../types";
 
 export interface CompilerOptions {
   optimize?: boolean;
   validate?: boolean;
-  target?: 'postgres' | 'neo4j' | 'elasticsearch' | 'generic';
+  target?: "postgres" | "neo4j" | "elasticsearch" | "generic";
   maxComplexity?: number;
   allowedResources?: string[];
 }
@@ -31,7 +31,7 @@ export class QueryCompiler {
     this.options = {
       optimize: options.optimize ?? true,
       validate: options.validate ?? true,
-      target: options.target ?? 'generic',
+      target: options.target ?? "generic",
       maxComplexity: options.maxComplexity ?? 1000,
       allowedResources: options.allowedResources ?? [],
     };
@@ -46,7 +46,7 @@ export class QueryCompiler {
       const validation = this.validate(ast);
       if (!validation.valid) {
         throw new Error(
-          `Validation failed:\n${validation.errors.map((e) => e.message).join('\n')}`
+          `Validation failed:\n${validation.errors.map((e) => e.message).join("\n")}`
         );
       }
     }
@@ -55,9 +55,7 @@ export class QueryCompiler {
     const logicalPlan = this.generateLogicalPlan(ast);
 
     // Optimize if enabled
-    const optimizedPlan = this.options.optimize
-      ? this.optimize(logicalPlan)
-      : logicalPlan;
+    const optimizedPlan = this.options.optimize ? this.optimize(logicalPlan) : logicalPlan;
 
     // Generate physical plan
     const physicalPlan = this.generatePhysicalPlan(optimizedPlan);
@@ -107,7 +105,7 @@ export class QueryCompiler {
     });
 
     return {
-      type: 'logical',
+      type: "logical",
       steps,
       estimatedCost: this.estimateCost(steps),
       estimatedRows: this.estimateRows(steps),
@@ -139,12 +137,10 @@ export class QueryCompiler {
    * Generate a physical execution plan
    */
   private generatePhysicalPlan(logicalPlan: ExecutionPlan): ExecutionPlan {
-    const physicalSteps = logicalPlan.steps.map((step) =>
-      this.createPhysicalStep(step)
-    );
+    const physicalSteps = logicalPlan.steps.map((step) => this.createPhysicalStep(step));
 
     return {
-      type: 'physical',
+      type: "physical",
       steps: physicalSteps,
       estimatedCost: this.estimateCost(physicalSteps),
       estimatedRows: this.estimateRows(physicalSteps),
@@ -163,13 +159,13 @@ export class QueryCompiler {
       const step = steps[i];
 
       // If this is a filter, try to push it down
-      if (step.operator === 'Filter') {
+      if (step.operator === "Filter") {
         let pushed = false;
 
         // Look for scan operations before this filter
         for (let j = i - 1; j >= 0; j--) {
           const prevStep = steps[j];
-          if (prevStep.operator === 'Scan' || prevStep.operator === 'IndexScan') {
+          if (prevStep.operator === "Scan" || prevStep.operator === "IndexScan") {
             // Push filter to scan
             prevStep.metadata = {
               ...prevStep.metadata,
@@ -199,8 +195,8 @@ export class QueryCompiler {
    */
   private joinReordering(steps: ExecutionStep[]): ExecutionStep[] {
     // Use greedy algorithm to order joins by estimated cardinality
-    const joins = steps.filter((s) => s.operator.includes('Join'));
-    const nonJoins = steps.filter((s) => !s.operator.includes('Join'));
+    const joins = steps.filter((s) => s.operator.includes("Join"));
+    const nonJoins = steps.filter((s) => !s.operator.includes("Join"));
 
     // Sort joins by estimated rows (smallest first)
     joins.sort((a, b) => a.rows - b.rows);
@@ -232,14 +228,14 @@ export class QueryCompiler {
    */
   private indexSelection(steps: ExecutionStep[]): ExecutionStep[] {
     return steps.map((step) => {
-      if (step.operator === 'Scan') {
+      if (step.operator === "Scan") {
         const filters = step.metadata?.pushdownFilters || [];
         const index = this.selectBestIndex(step.metadata?.resource, filters);
 
         if (index) {
           return {
             ...step,
-            operator: 'IndexScan',
+            operator: "IndexScan",
             metadata: {
               ...step.metadata,
               index,
@@ -269,10 +265,8 @@ export class QueryCompiler {
 
     // Forward pass to prune unused projections
     return steps.map((step) => {
-      if (step.operator === 'Project') {
-        const prunedFields = step.metadata?.fields?.filter((f: string) =>
-          usedFields.has(f)
-        );
+      if (step.operator === "Project") {
+        const prunedFields = step.metadata?.fields?.filter((f: string) => usedFields.has(f));
         return {
           ...step,
           metadata: {
@@ -291,7 +285,7 @@ export class QueryCompiler {
     // Type validation logic
     this.visitNode(ast, (node) => {
       // Check type compatibility for operations
-      if (node.type === 'Filter') {
+      if (node.type === "Filter") {
         // Validate filter expression types
       }
     });
@@ -300,13 +294,13 @@ export class QueryCompiler {
   private validateResources(ast: ASTNode, errors: ValidationError[]): void {
     if (this.options.allowedResources.length > 0) {
       this.visitNode(ast, (node) => {
-        if (node.type === 'Query') {
+        if (node.type === "Query") {
           const queryNode = node as QueryNode;
           if (!this.options.allowedResources.includes(queryNode.resource)) {
             errors.push({
               message: `Resource '${queryNode.resource}' is not allowed`,
-              code: 'RESOURCE_NOT_ALLOWED',
-              severity: 'error',
+              code: "RESOURCE_NOT_ALLOWED",
+              severity: "error",
             });
           }
         }
@@ -324,14 +318,14 @@ export class QueryCompiler {
     if (complexity > this.options.maxComplexity) {
       errors.push({
         message: `Query complexity ${complexity} exceeds maximum ${this.options.maxComplexity}`,
-        code: 'COMPLEXITY_TOO_HIGH',
-        severity: 'error',
+        code: "COMPLEXITY_TOO_HIGH",
+        severity: "error",
       });
     } else if (complexity > this.options.maxComplexity * 0.8) {
       warnings.push({
         message: `Query complexity ${complexity} is approaching the maximum`,
-        code: 'COMPLEXITY_WARNING',
-        severity: 'warning',
+        code: "COMPLEXITY_WARNING",
+        severity: "warning",
       });
     }
   }
@@ -346,47 +340,47 @@ export class QueryCompiler {
   private visitNode(node: ASTNode, visitor: (node: ASTNode) => void): void {
     visitor(node);
 
-    if ('children' in node && Array.isArray(node.children)) {
+    if ("children" in node && Array.isArray(node.children)) {
       node.children.forEach((child) => this.visitNode(child, visitor));
     }
   }
 
   private createLogicalStep(node: ASTNode, id: number): ExecutionStep | null {
     switch (node.type) {
-      case 'Query':
+      case "Query":
         return {
           id: `step_${id}`,
-          operator: 'Scan',
+          operator: "Scan",
           description: `Scan ${(node as QueryNode).resource}`,
           cost: 100,
           rows: 10000,
           metadata: { resource: (node as QueryNode).resource },
         };
 
-      case 'Filter':
+      case "Filter":
         return {
           id: `step_${id}`,
-          operator: 'Filter',
-          description: 'Apply filters',
+          operator: "Filter",
+          description: "Apply filters",
           cost: 10,
           rows: 1000,
           metadata: { filter: node },
         };
 
-      case 'Sort':
+      case "Sort":
         return {
           id: `step_${id}`,
-          operator: 'Sort',
-          description: 'Sort results',
+          operator: "Sort",
+          description: "Sort results",
           cost: 50,
           rows: 1000,
         };
 
-      case 'Join':
+      case "Join":
         return {
           id: `step_${id}`,
-          operator: 'HashJoin',
-          description: 'Join tables',
+          operator: "HashJoin",
+          description: "Join tables",
           cost: 200,
           rows: 5000,
         };
@@ -409,22 +403,22 @@ export class QueryCompiler {
   private selectPhysicalOperator(logicalOperator: string): string {
     const operatorMap: Record<string, Record<string, string>> = {
       postgres: {
-        Scan: 'SeqScan',
-        IndexScan: 'IndexScan',
-        Join: 'HashJoin',
-        Sort: 'Sort',
+        Scan: "SeqScan",
+        IndexScan: "IndexScan",
+        Join: "HashJoin",
+        Sort: "Sort",
       },
       neo4j: {
-        Scan: 'NodeByLabelScan',
-        IndexScan: 'NodeIndexSeek',
-        Join: 'Expand',
-        Sort: 'Sort',
+        Scan: "NodeByLabelScan",
+        IndexScan: "NodeIndexSeek",
+        Join: "Expand",
+        Sort: "Sort",
       },
       elasticsearch: {
-        Scan: 'QueryStringQuery',
-        IndexScan: 'TermQuery',
-        Join: 'NestedQuery',
-        Sort: 'Sort',
+        Scan: "QueryStringQuery",
+        IndexScan: "TermQuery",
+        Join: "NestedQuery",
+        Sort: "Sort",
       },
       generic: {},
     };
@@ -445,19 +439,19 @@ export class QueryCompiler {
 
     this.visitNode(ast, (node) => {
       switch (node.type) {
-        case 'Query':
+        case "Query":
           complexity += 1;
           break;
-        case 'Join':
+        case "Join":
           complexity += 10;
           break;
-        case 'Filter':
+        case "Filter":
           complexity += 2;
           break;
-        case 'Sort':
+        case "Sort":
           complexity += 5;
           break;
-        case 'Aggregation':
+        case "Aggregation":
           complexity += 5;
           break;
         default:
@@ -478,7 +472,7 @@ export class QueryCompiler {
     // Index selection would require schema and statistics
     // This is a placeholder
     if (filters.length > 0) {
-      return 'idx_' + resource + '_default';
+      return "idx_" + resource + "_default";
     }
     return null;
   }
@@ -494,12 +488,12 @@ export class QueryCompiler {
 
   private formatExplainPlan(plan: ExecutionPlan, indent = 0): string {
     const lines: string[] = [];
-    const prefix = '  '.repeat(indent);
+    const prefix = "  ".repeat(indent);
 
     lines.push(`${prefix}Execution Plan (${plan.type}):`);
     lines.push(`${prefix}Estimated Cost: ${plan.estimatedCost}`);
     lines.push(`${prefix}Estimated Rows: ${plan.estimatedRows}`);
-    lines.push('');
+    lines.push("");
 
     plan.steps.forEach((step, i) => {
       lines.push(`${prefix}${i + 1}. ${step.operator}: ${step.description}`);
@@ -513,7 +507,7 @@ export class QueryCompiler {
         step.children.forEach((child) => {
           lines.push(
             this.formatExplainPlan(
-              { type: 'physical', steps: [child], estimatedCost: 0, estimatedRows: 0 },
+              { type: "physical", steps: [child], estimatedCost: 0, estimatedRows: 0 },
               indent + 2
             )
           );
@@ -521,7 +515,7 @@ export class QueryCompiler {
       }
     });
 
-    return lines.join('\n');
+    return lines.join("\n");
   }
 }
 

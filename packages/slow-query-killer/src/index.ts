@@ -5,7 +5,7 @@
  * Monitors query execution time and kills queries that exceed budgets.
  */
 
-import EventEmitter from 'events';
+import EventEmitter from "events";
 
 export interface QueryBudget {
   /** Maximum query execution time in milliseconds */
@@ -33,7 +33,7 @@ export interface QueryContext {
   /** Tenant identifier */
   tenantId: string;
   /** Database type */
-  database: 'neo4j' | 'postgres' | 'redis';
+  database: "neo4j" | "postgres" | "redis";
   /** Query text (for logging) */
   query: string;
   /** Query parameters */
@@ -94,7 +94,7 @@ export class SlowQueryKiller extends EventEmitter {
     };
 
     this.tenantBudgets.set(tenantId, mergedBudget);
-    this.emit('tenant_budget_set', { tenantId, budget: mergedBudget });
+    this.emit("tenant_budget_set", { tenantId, budget: mergedBudget });
   }
 
   /**
@@ -120,11 +120,8 @@ export class SlowQueryKiller extends EventEmitter {
       (q) => q.tenantId === context.tenantId
     );
 
-    if (
-      budget.maxConcurrentQueries &&
-      tenantQueries.length >= budget.maxConcurrentQueries
-    ) {
-      this.emit('concurrent_limit_exceeded', {
+    if (budget.maxConcurrentQueries && tenantQueries.length >= budget.maxConcurrentQueries) {
+      this.emit("concurrent_limit_exceeded", {
         tenantId: context.tenantId,
         limit: budget.maxConcurrentQueries,
         current: tenantQueries.length,
@@ -132,12 +129,8 @@ export class SlowQueryKiller extends EventEmitter {
     }
 
     // Check complexity limit
-    if (
-      budget.maxComplexity &&
-      context.complexity &&
-      context.complexity > budget.maxComplexity
-    ) {
-      this.emit('complexity_limit_exceeded', {
+    if (budget.maxComplexity && context.complexity && context.complexity > budget.maxComplexity) {
+      this.emit("complexity_limit_exceeded", {
         tenantId: context.tenantId,
         limit: budget.maxComplexity,
         actual: context.complexity,
@@ -148,7 +141,7 @@ export class SlowQueryKiller extends EventEmitter {
     this.runningQueries.set(context.queryId, context);
     this.stats.totalQueries++;
 
-    this.emit('query_registered', {
+    this.emit("query_registered", {
       queryId: context.queryId,
       tenantId: context.tenantId,
       database: context.database,
@@ -181,8 +174,7 @@ export class SlowQueryKiller extends EventEmitter {
 
     // Check execution time
     if (executionTimeMs > budget.maxExecutionTimeMs) {
-      const softThresholdMs =
-        budget.maxExecutionTimeMs * budget.softThreshold;
+      const softThresholdMs = budget.maxExecutionTimeMs * budget.softThreshold;
 
       if (executionTimeMs > softThresholdMs && budget.killEnabled) {
         return {
@@ -209,8 +201,7 @@ export class SlowQueryKiller extends EventEmitter {
     }
 
     // Issue warning if approaching limits
-    const timePercentage =
-      (executionTimeMs / budget.maxExecutionTimeMs) * 100;
+    const timePercentage = (executionTimeMs / budget.maxExecutionTimeMs) * 100;
     const costPercentage = (costIncurred / budget.maxCostDollars) * 100;
 
     if (
@@ -218,7 +209,7 @@ export class SlowQueryKiller extends EventEmitter {
       costPercentage > budget.softThreshold * 100
     ) {
       this.stats.warningsIssued++;
-      this.emit('query_warning', {
+      this.emit("query_warning", {
         queryId,
         tenantId: context.tenantId,
         executionTimeMs,
@@ -240,7 +231,7 @@ export class SlowQueryKiller extends EventEmitter {
    */
   async killQuery(
     queryId: string,
-    database: 'neo4j' | 'postgres' | 'redis',
+    database: "neo4j" | "postgres" | "redis",
     connectionHandle: any
   ): Promise<boolean> {
     const context = this.runningQueries.get(queryId);
@@ -250,13 +241,13 @@ export class SlowQueryKiller extends EventEmitter {
 
     try {
       switch (database) {
-        case 'neo4j':
+        case "neo4j":
           await this.killNeo4jQuery(queryId, connectionHandle);
           break;
-        case 'postgres':
+        case "postgres":
           await this.killPostgresQuery(queryId, connectionHandle);
           break;
-        case 'redis':
+        case "redis":
           // Redis doesn't have long-running queries typically
           // but we can close the connection
           await this.killRedisCommand(queryId, connectionHandle);
@@ -269,11 +260,10 @@ export class SlowQueryKiller extends EventEmitter {
       this.stats.killedQueries++;
       this.stats.totalCostSaved += context.estimatedCost - costIncurred;
 
-      const reason = this.shouldKillQuery(queryId).reason || 'Manual kill';
-      this.stats.killsByReason[reason] =
-        (this.stats.killsByReason[reason] || 0) + 1;
+      const reason = this.shouldKillQuery(queryId).reason || "Manual kill";
+      this.stats.killsByReason[reason] = (this.stats.killsByReason[reason] || 0) + 1;
 
-      this.emit('query_killed', {
+      this.emit("query_killed", {
         queryId,
         tenantId: context.tenantId,
         database: context.database,
@@ -286,7 +276,7 @@ export class SlowQueryKiller extends EventEmitter {
       this.unregisterQuery(queryId);
       return true;
     } catch (error) {
-      this.emit('kill_error', {
+      this.emit("kill_error", {
         queryId,
         database,
         error: error instanceof Error ? error.message : String(error),
@@ -327,7 +317,7 @@ export class SlowQueryKiller extends EventEmitter {
    */
   clearTenantBudgets(): void {
     this.tenantBudgets.clear();
-    this.emit('budgets_cleared');
+    this.emit("budgets_cleared");
   }
 
   /**
@@ -351,7 +341,7 @@ export class SlowQueryKiller extends EventEmitter {
         if (result.killed) {
           // Emit event for external handler to kill the query
           // (we can't kill directly without database connection handle)
-          this.emit('should_kill_query', {
+          this.emit("should_kill_query", {
             queryId,
             reason: result.reason,
             executionTimeMs: result.executionTimeMs,
@@ -365,10 +355,7 @@ export class SlowQueryKiller extends EventEmitter {
   /**
    * Calculate cost incurred so far
    */
-  private calculateCostIncurred(
-    context: QueryContext,
-    executionTimeMs: number
-  ): number {
+  private calculateCostIncurred(context: QueryContext, executionTimeMs: number): number {
     // Simple linear interpolation based on execution time
     // Actual cost would be measured, but this is an estimate
     const estimatedTotalTime = context.estimatedCost * 10000; // Assume $0.0001 per 1ms
@@ -379,14 +366,11 @@ export class SlowQueryKiller extends EventEmitter {
   /**
    * Kill Neo4j query
    */
-  private async killNeo4jQuery(
-    queryId: string,
-    driver: any
-  ): Promise<void> {
+  private async killNeo4jQuery(queryId: string, driver: any): Promise<void> {
     const session = driver.session();
     try {
       // Neo4j CALL dbms.listQueries() and CALL dbms.killQuery()
-      await session.run('CALL dbms.killQuery($queryId)', { queryId });
+      await session.run("CALL dbms.killQuery($queryId)", { queryId });
     } finally {
       await session.close();
     }
@@ -395,21 +379,15 @@ export class SlowQueryKiller extends EventEmitter {
   /**
    * Kill PostgreSQL query
    */
-  private async killPostgresQuery(
-    processId: string,
-    client: any
-  ): Promise<void> {
+  private async killPostgresQuery(processId: string, client: any): Promise<void> {
     // PostgreSQL pg_cancel_backend() or pg_terminate_backend()
-    await client.query('SELECT pg_cancel_backend($1)', [processId]);
+    await client.query("SELECT pg_cancel_backend($1)", [processId]);
   }
 
   /**
    * Kill Redis command (close connection)
    */
-  private async killRedisCommand(
-    _queryId: string,
-    client: any
-  ): Promise<void> {
+  private async killRedisCommand(_queryId: string, client: any): Promise<void> {
     // Redis doesn't have long-running queries, but we can disconnect
     await client.quit();
   }
@@ -430,8 +408,7 @@ export class QueryComplexityAnalyzer {
     complexity += matchCount * 5;
 
     // Optional match is more expensive
-    const optionalMatchCount = (cypher.match(/OPTIONAL\s+MATCH/gi) || [])
-      .length;
+    const optionalMatchCount = (cypher.match(/OPTIONAL\s+MATCH/gi) || []).length;
     complexity += optionalMatchCount * 10;
 
     // Cartesian products (multiple patterns in same MATCH)
@@ -439,9 +416,7 @@ export class QueryComplexityAnalyzer {
     complexity += commas * 3;
 
     // Aggregations
-    const aggregations = (
-      cypher.match(/\b(count|sum|avg|max|min|collect)\s*\(/gi) || []
-    ).length;
+    const aggregations = (cypher.match(/\b(count|sum|avg|max|min|collect)\s*\(/gi) || []).length;
     complexity += aggregations * 5;
 
     // Sorting
@@ -467,8 +442,7 @@ export class QueryComplexityAnalyzer {
     complexity += mergeCount * 8;
 
     // DELETE operations
-    const deleteCount = (cypher.match(/DELETE|DETACH\s+DELETE/gi) || [])
-      .length;
+    const deleteCount = (cypher.match(/DELETE|DETACH\s+DELETE/gi) || []).length;
     complexity += deleteCount * 5;
 
     // Subqueries
@@ -529,10 +503,7 @@ export class QueryCostEstimator {
   /**
    * Estimate Neo4j query cost
    */
-  static estimateNeo4jCost(
-    cypher: string,
-    estimatedResultCount: number = 100
-  ): number {
+  static estimateNeo4jCost(cypher: string, estimatedResultCount: number = 100): number {
     const complexity = QueryComplexityAnalyzer.analyzeCypherComplexity(cypher);
 
     // Base cost per result
@@ -541,18 +512,13 @@ export class QueryCostEstimator {
     // Complexity multiplier (1x to 5x)
     const complexityMultiplier = 1 + (complexity / 100) * 4;
 
-    return (
-      baseCostPerResult * estimatedResultCount * complexityMultiplier
-    );
+    return baseCostPerResult * estimatedResultCount * complexityMultiplier;
   }
 
   /**
    * Estimate PostgreSQL query cost
    */
-  static estimatePostgresCost(
-    sql: string,
-    estimatedRows: number = 1000
-  ): number {
+  static estimatePostgresCost(sql: string, estimatedRows: number = 1000): number {
     const complexity = QueryComplexityAnalyzer.analyzeSQLComplexity(sql);
 
     const baseCostPerRow = 0.000001; // $0.000001 per row
@@ -568,18 +534,15 @@ export class QueryCostEstimator {
  */
 export function createQueryBudgetMiddleware(killer: SlowQueryKiller) {
   return async (req: any, res: any, next: any) => {
-    const tenantId = req.user?.tenantId || req.headers['x-tenant-id'] || 'default';
+    const tenantId = req.user?.tenantId || req.headers["x-tenant-id"] || "default";
     const budget = killer.getTenantBudget(tenantId);
 
     if (budget) {
       const runningQueries = killer.getRunningQueries(tenantId);
 
-      if (
-        budget.maxConcurrentQueries &&
-        runningQueries.length >= budget.maxConcurrentQueries
-      ) {
+      if (budget.maxConcurrentQueries && runningQueries.length >= budget.maxConcurrentQueries) {
         return res.status(429).json({
-          error: 'Too many concurrent queries',
+          error: "Too many concurrent queries",
           limit: budget.maxConcurrentQueries,
           current: runningQueries.length,
         });
@@ -591,4 +554,4 @@ export function createQueryBudgetMiddleware(killer: SlowQueryKiller) {
 }
 
 export default SlowQueryKiller;
-export * from './pgStatBudgeter';
+export * from "./pgStatBudgeter";

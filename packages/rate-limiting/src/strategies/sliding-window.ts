@@ -4,7 +4,7 @@
  * More accurate than fixed window, considers requests in a rolling time period
  */
 
-import { RateLimiter, RateLimitConfig, RateLimitResult } from '../rate-limiter.js';
+import { RateLimiter, RateLimitConfig, RateLimitResult } from "../rate-limiter.js";
 
 export class SlidingWindowLimiter extends RateLimiter {
   private requests = new Map<string, number[]>();
@@ -22,7 +22,7 @@ export class SlidingWindowLimiter extends RateLimiter {
     let timestamps = this.requests.get(fullKey) || [];
 
     // Remove old timestamps outside the window
-    timestamps = timestamps.filter(ts => ts > windowStart);
+    timestamps = timestamps.filter((ts) => ts > windowStart);
 
     // Add current timestamp
     timestamps.push(now);
@@ -39,7 +39,9 @@ export class SlidingWindowLimiter extends RateLimiter {
         remaining: Math.max(0, this.config.maxRequests - timestamps.length),
         resetTime: timestamps[0] + this.config.windowMs,
       },
-      retryAfter: allowed ? undefined : Math.ceil((timestamps[0] + this.config.windowMs - now) / 1000),
+      retryAfter: allowed
+        ? undefined
+        : Math.ceil((timestamps[0] + this.config.windowMs - now) / 1000),
     };
 
     this.logRateLimit(key, result);
@@ -55,7 +57,7 @@ export class SlidingWindowLimiter extends RateLimiter {
   cleanup(): void {
     const now = Date.now();
     for (const [key, timestamps] of this.requests.entries()) {
-      const filtered = timestamps.filter(ts => ts > now - this.config.windowMs);
+      const filtered = timestamps.filter((ts) => ts > now - this.config.windowMs);
       if (filtered.length === 0) {
         this.requests.delete(key);
       } else {

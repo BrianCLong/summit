@@ -28,9 +28,16 @@ export interface ConnectorContext {
 
 export interface ConnectorHook {
   /** Called before entity ingestion */
-  beforeIngest?: (entity: ConnectorEntity, context: ConnectorContext) => Promise<ConnectorEntity | null>;
+  beforeIngest?: (
+    entity: ConnectorEntity,
+    context: ConnectorContext
+  ) => Promise<ConnectorEntity | null>;
   /** Called after entity ingestion */
-  afterIngest?: (entity: ConnectorEntity, context: ConnectorContext, entityId: string) => Promise<void>;
+  afterIngest?: (
+    entity: ConnectorEntity,
+    context: ConnectorContext,
+    entityId: string
+  ) => Promise<void>;
   /** Called on ingestion error */
   onError?: (entity: ConnectorEntity, context: ConnectorContext, error: Error) => Promise<void>;
 }
@@ -45,7 +52,7 @@ export interface PIIDetectionConfig {
     regex: RegExp;
     fields?: string[]; // Specific fields to check
   }>;
-  action: 'block' | 'flag' | 'redact' | 'log';
+  action: "block" | "flag" | "redact" | "log";
   flagField: string; // Field name to set when PII is flagged
 }
 
@@ -56,17 +63,21 @@ export function createConnectorPIIHook(config: PIIDetectionConfig): ConnectorHoo
 
       // Check each field in props
       for (const [key, value] of Object.entries(entity.props)) {
-        if (typeof value !== 'string') {continue;}
+        if (typeof value !== "string") {
+          continue;
+        }
 
         for (const pattern of config.patterns) {
           // Skip if pattern specifies fields and this isn't one
-          if (pattern.fields && !pattern.fields.includes(key)) {continue;}
+          if (pattern.fields && !pattern.fields.includes(key)) {
+            continue;
+          }
 
           if (pattern.regex.test(value)) {
             piiFound.push(`${pattern.name} in ${key}`);
 
-            if (config.action === 'redact') {
-              entity.props[key] = value.replace(pattern.regex, '[PII_REDACTED]');
+            if (config.action === "redact") {
+              entity.props[key] = value.replace(pattern.regex, "[PII_REDACTED]");
             }
           }
         }
@@ -74,15 +85,17 @@ export function createConnectorPIIHook(config: PIIDetectionConfig): ConnectorHoo
 
       if (piiFound.length > 0) {
         switch (config.action) {
-          case 'block':
-            console.warn(`[ConnectorPII] Blocked entity with PII: ${piiFound.join(', ')}`);
+          case "block":
+            console.warn(`[ConnectorPII] Blocked entity with PII: ${piiFound.join(", ")}`);
             return null;
-          case 'flag':
+          case "flag":
             entity.props[config.flagField] = true;
             entity.props[`${config.flagField}_types`] = piiFound;
             break;
-          case 'log':
-            console.warn(`[ConnectorPII] Entity ${entity.externalId} contains PII: ${piiFound.join(', ')}`);
+          case "log":
+            console.warn(
+              `[ConnectorPII] Entity ${entity.externalId} contains PII: ${piiFound.join(", ")}`
+            );
             break;
         }
       }
@@ -116,12 +129,14 @@ export function createClassificationHook(config: ClassificationConfig): Connecto
       // Apply rules
       for (const rule of config.rules) {
         // Check entity type match
-        if (rule.entityType && entity.type !== rule.entityType) {continue;}
+        if (rule.entityType && entity.type !== rule.entityType) {
+          continue;
+        }
 
         // Check field pattern match
         if (rule.fieldPattern) {
           const fieldValue = entity.props[rule.fieldPattern.field];
-          if (typeof fieldValue !== 'string' || !rule.fieldPattern.pattern.test(fieldValue)) {
+          if (typeof fieldValue !== "string" || !rule.fieldPattern.pattern.test(fieldValue)) {
             continue;
           }
         }
@@ -137,7 +152,7 @@ export function createClassificationHook(config: ClassificationConfig): Connecto
 }
 
 function higherClassification(a: string, b: string): string {
-  const order = ['UNCLASSIFIED', 'CUI', 'CONFIDENTIAL', 'SECRET', 'TOP_SECRET'];
+  const order = ["UNCLASSIFIED", "CUI", "CONFIDENTIAL", "SECRET", "TOP_SECRET"];
   const aIndex = order.indexOf(a);
   const bIndex = order.indexOf(b);
   return aIndex >= bIndex ? a : b;
@@ -155,7 +170,7 @@ export interface DeduplicationConfig {
   /** TTL for dedup keys in seconds */
   ttlSeconds: number;
   /** Action when duplicate found */
-  action: 'skip' | 'update' | 'merge';
+  action: "skip" | "update" | "merge";
 }
 
 export function createDeduplicationHook(config: DeduplicationConfig): ConnectorHook {
@@ -171,7 +186,7 @@ export function createDeduplicationHook(config: DeduplicationConfig): ConnectorH
           keyParts.push(String(value));
         }
       }
-      const dedupKey = `dedup:${context.tenantId}:${keyParts.join(':')}`;
+      const dedupKey = `dedup:${context.tenantId}:${keyParts.join(":")}`;
 
       // Check for duplicate
       let isDuplicate = false;
@@ -180,7 +195,7 @@ export function createDeduplicationHook(config: DeduplicationConfig): ConnectorH
         const exists = await config.redisClient.get(dedupKey);
         isDuplicate = Boolean(exists);
         if (!isDuplicate) {
-          await config.redisClient.setex(dedupKey, config.ttlSeconds, '1');
+          await config.redisClient.setex(dedupKey, config.ttlSeconds, "1");
         }
       } else {
         isDuplicate = localCache.has(dedupKey);
@@ -189,12 +204,14 @@ export function createDeduplicationHook(config: DeduplicationConfig): ConnectorH
           // Clean old entries
           const cutoff = Date.now() - config.ttlSeconds * 1000;
           for (const [k, v] of localCache.entries()) {
-            if (v < cutoff) {localCache.delete(k);}
+            if (v < cutoff) {
+              localCache.delete(k);
+            }
           }
         }
       }
 
-      if (isDuplicate && config.action === 'skip') {
+      if (isDuplicate && config.action === "skip") {
         return null;
       }
 
@@ -217,7 +234,7 @@ export interface LicenseValidationConfig {
   /** License field in entity props */
   licenseField: string;
   /** Action when license invalid */
-  action: 'block' | 'flag' | 'warn';
+  action: "block" | "flag" | "warn";
 }
 
 export function createLicenseValidationHook(config: LicenseValidationConfig): ConnectorHook {
@@ -227,15 +244,17 @@ export function createLicenseValidationHook(config: LicenseValidationConfig): Co
 
       if (!license || !config.allowedLicenses.includes(String(license))) {
         switch (config.action) {
-          case 'block':
+          case "block":
             console.warn(`[ConnectorLicense] Blocked entity with invalid license: ${license}`);
             return null;
-          case 'flag':
+          case "flag":
             entity.props._licenseInvalid = true;
             entity.props._originalLicense = license;
             break;
-          case 'warn':
-            console.warn(`[ConnectorLicense] Entity ${entity.externalId} has invalid license: ${license}`);
+          case "warn":
+            console.warn(
+              `[ConnectorLicense] Entity ${entity.externalId} has invalid license: ${license}`
+            );
             break;
         }
       }
@@ -264,7 +283,9 @@ export interface ConnectorProvenanceEvent {
   metadata?: Record<string, unknown>;
 }
 
-export function createConnectorProvenanceHook(recorder: ConnectorProvenanceRecorder): ConnectorHook {
+export function createConnectorProvenanceHook(
+  recorder: ConnectorProvenanceRecorder
+): ConnectorHook {
   return {
     async afterIngest(entity: ConnectorEntity, context: ConnectorContext, entityId: string) {
       const sourceHash = hashEntity(entity);
@@ -295,7 +316,7 @@ function hashEntity(entity: ConnectorEntity): string {
   // Simple hash - use crypto in production
   let hash = 0;
   for (let i = 0; i < data.length; i++) {
-    hash = ((hash << 5) - hash) + data.charCodeAt(i);
+    hash = (hash << 5) - hash + data.charCodeAt(i);
     hash = hash & hash;
   }
   return hash.toString(16);
@@ -311,7 +332,7 @@ export interface ConnectorRateLimitConfig {
   /** Max entities per hour */
   maxEntitiesPerHour: number;
   /** Action when limit exceeded */
-  action: 'block' | 'queue' | 'warn';
+  action: "block" | "queue" | "warn";
 }
 
 export function createConnectorRateLimitHook(config: ConnectorRateLimitConfig): ConnectorHook {
@@ -332,18 +353,18 @@ export function createConnectorRateLimitHook(config: ConnectorRateLimitConfig): 
 
       // Check limits
       if (minuteWindow.length >= config.maxEntitiesPerMinute) {
-        if (config.action === 'block') {
-          throw new Error('Rate limit exceeded: max entities per minute');
-        } else if (config.action === 'warn') {
-          console.warn('[ConnectorRateLimit] Minute rate limit exceeded');
+        if (config.action === "block") {
+          throw new Error("Rate limit exceeded: max entities per minute");
+        } else if (config.action === "warn") {
+          console.warn("[ConnectorRateLimit] Minute rate limit exceeded");
         }
       }
 
       if (hourWindow.length >= config.maxEntitiesPerHour) {
-        if (config.action === 'block') {
-          throw new Error('Rate limit exceeded: max entities per hour');
-        } else if (config.action === 'warn') {
-          console.warn('[ConnectorRateLimit] Hour rate limit exceeded');
+        if (config.action === "block") {
+          throw new Error("Rate limit exceeded: max entities per hour");
+        } else if (config.action === "warn") {
+          console.warn("[ConnectorRateLimit] Hour rate limit exceeded");
         }
       }
 

@@ -3,8 +3,8 @@
  * Prometheus metrics collection for observability
  */
 
-import { Request, Response, NextFunction } from 'express';
-import { config } from '../config.js';
+import { Request, Response, NextFunction } from "express";
+import { config } from "../config.js";
 
 // ============================================================================
 // METRICS STORAGE (In production, use prom-client)
@@ -73,11 +73,7 @@ export const metrics = {
 /**
  * Metrics collection middleware
  */
-export function metricsMiddleware(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void {
+export function metricsMiddleware(req: Request, res: Response, next: NextFunction): void {
   if (!config.metricsEnabled) {
     next();
     return;
@@ -85,7 +81,7 @@ export function metricsMiddleware(
 
   const start = Date.now();
 
-  res.on('finish', () => {
+  res.on("finish", () => {
     const duration = (Date.now() - start) / 1000;
     const labels = {
       method: req.method,
@@ -108,47 +104,47 @@ export function metricsHandler(req: Request, res: Response): void {
   const lines: string[] = [];
 
   // HTTP requests total
-  lines.push('# HELP http_requests_total Total HTTP requests');
-  lines.push('# TYPE http_requests_total counter');
+  lines.push("# HELP http_requests_total Total HTTP requests");
+  lines.push("# TYPE http_requests_total counter");
   for (const { value, labels } of metrics.httpRequestsTotal.getValues()) {
     const labelStr = Object.entries(labels)
       .map(([k, v]) => `${k}="${v}"`)
-      .join(',');
+      .join(",");
     lines.push(`http_requests_total{${labelStr}} ${value}`);
   }
 
   // HTTP request duration
-  lines.push('# HELP http_request_duration_seconds HTTP request duration');
-  lines.push('# TYPE http_request_duration_seconds histogram');
+  lines.push("# HELP http_request_duration_seconds HTTP request duration");
+  lines.push("# TYPE http_request_duration_seconds histogram");
   for (const { value, labels } of metrics.httpRequestDuration.getValues()) {
     const labelStr = Object.entries(labels)
       .map(([k, v]) => `${k}="${v}"`)
-      .join(',');
+      .join(",");
     lines.push(`http_request_duration_seconds{${labelStr}} ${value}`);
   }
 
   // OPA decisions
-  lines.push('# HELP opa_decisions_total Total OPA decisions');
-  lines.push('# TYPE opa_decisions_total counter');
+  lines.push("# HELP opa_decisions_total Total OPA decisions");
+  lines.push("# TYPE opa_decisions_total counter");
   for (const { value, labels } of metrics.opaDecisionsTotal.getValues()) {
     const labelStr = Object.entries(labels)
       .map(([k, v]) => `${k}="${v}"`)
-      .join(',');
+      .join(",");
     lines.push(`opa_decisions_total{${labelStr}} ${value}`);
   }
 
   // Rate limit blocks
-  lines.push('# HELP rate_limit_blocks_total Total rate limit blocks');
-  lines.push('# TYPE rate_limit_blocks_total counter');
+  lines.push("# HELP rate_limit_blocks_total Total rate limit blocks");
+  lines.push("# TYPE rate_limit_blocks_total counter");
   for (const { value, labels } of metrics.rateLimitBlocks.getValues()) {
     const labelStr = Object.entries(labels)
       .map(([k, v]) => `${k}="${v}"`)
-      .join(',');
+      .join(",");
     lines.push(`rate_limit_blocks_total{${labelStr}} ${value}`);
   }
 
-  res.set('Content-Type', 'text/plain');
-  res.send(lines.join('\n'));
+  res.set("Content-Type", "text/plain");
+  res.send(lines.join("\n"));
 }
 
 /**
@@ -156,6 +152,6 @@ export function metricsHandler(req: Request, res: Response): void {
  */
 function normalizePath(path: string): string {
   return path
-    .replace(/\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, '/:id')
-    .replace(/\/\d+/g, '/:id');
+    .replace(/\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, "/:id")
+    .replace(/\/\d+/g, "/:id");
 }

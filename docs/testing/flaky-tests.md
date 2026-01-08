@@ -45,9 +45,9 @@ Quarantined tests should be run in a dedicated CI lane and excluded from the mai
 
 Status is tracked in both `testing/flaky-metadata.json` and the table below. Owners should update the table as remediation work progresses.
 
-| Test name | File | Flakiness symptoms | Owner | Last seen | Status |
-| --- | --- | --- | --- | --- | --- |
-| _Example_: should recover after reconnect | packages/notifications/__tests__/reconnect.test.ts | Timeout after reconnect | @qa | 2026-02-05 | quarantined |
+| Test name                                 | File                                               | Flakiness symptoms      | Owner | Last seen  | Status      |
+| ----------------------------------------- | -------------------------------------------------- | ----------------------- | ----- | ---------- | ----------- |
+| _Example_: should recover after reconnect | packages/notifications/**tests**/reconnect.test.ts | Timeout after reconnect | @qa   | 2026-02-05 | quarantined |
 
 Status values: `quarantined` (skipped from the main lane), `fixing`, `resolved` (removed from quarantine after stability holds for several runs).
 

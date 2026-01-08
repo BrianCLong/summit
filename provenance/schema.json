@@ -11,12 +11,7 @@
     },
     "evidence": {
       "type": "object",
-      "required": [
-        "evidenceId",
-        "stage",
-        "artifactHash",
-        "ledgerSequence"
-      ],
+      "required": ["evidenceId", "stage", "artifactHash", "ledgerSequence"],
       "properties": {
         "evidenceId": {
           "type": "string",
@@ -195,14 +190,7 @@
     },
     "bundle": {
       "type": "object",
-      "required": [
-        "id",
-        "generatedAt",
-        "sourceSystem",
-        "environment",
-        "exportType",
-        "itemCount"
-      ],
+      "required": ["id", "generatedAt", "sourceSystem", "environment", "exportType", "itemCount"],
       "properties": {
         "id": {
           "type": "string"
@@ -231,14 +219,7 @@
       }
     }
   },
-  "required": [
-    "version",
-    "bundle",
-    "claims",
-    "artifacts",
-    "ledger",
-    "integrity"
-  ],
+  "required": ["version", "bundle", "claims", "artifacts", "ledger", "integrity"],
   "properties": {
     "version": {
       "type": "string"

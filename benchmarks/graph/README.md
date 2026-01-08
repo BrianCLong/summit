@@ -5,6 +5,7 @@ A comprehensive benchmark suite for testing Neo4j graph query performance in the
 ## Overview
 
 This benchmark harness helps you:
+
 - **Measure performance** of core graph queries (k-hop traversal, centrality, shortest paths, etc.)
 - **Detect regressions** by comparing against performance budgets
 - **Generate reports** showing latency distributions (p50, p95, p99) and memory usage
@@ -15,6 +16,7 @@ This benchmark harness helps you:
 ### Prerequisites
 
 1. **Neo4j running locally:**
+
    ```bash
    # From repository root
    docker compose -f docker-compose.neo4j.yml up -d
@@ -29,21 +31,25 @@ This benchmark harness helps you:
 ### Running Benchmarks
 
 **Quick benchmark (small dataset, essential queries):**
+
 ```bash
 npm run bench:quick
 ```
 
 **Full benchmark (all dataset sizes, all scenarios):**
+
 ```bash
 npm run bench:full
 ```
 
 **CI mode (small/medium datasets with budget checking):**
+
 ```bash
 npm run bench:ci
 ```
 
 **Custom benchmark:**
+
 ```bash
 node runner/index.js \
   --size medium,large \
@@ -57,16 +63,19 @@ node runner/index.js \
 ### Viewing Results
 
 **Generate reports:**
+
 ```bash
 npm run report
 ```
 
 This creates:
+
 - `reports/report.md` - Markdown report with tables
 - `reports/report.html` - Interactive HTML report
 - `reports/latest.json` - Raw benchmark data
 
 **Open HTML report:**
+
 ```bash
 open reports/report.html  # macOS
 xdg-open reports/report.html  # Linux
@@ -96,14 +105,15 @@ benchmarks/graph/
 
 The harness generates synthetic investigation graphs with realistic properties:
 
-| Size   | Nodes    | Edges     | Avg Degree | Use Case                          |
-|--------|----------|-----------|------------|-----------------------------------|
-| small  | 100      | 250       | 5.0        | Quick smoke tests, CI             |
-| medium | 1,000    | 3,000     | 6.0        | Typical investigation size        |
-| large  | 10,000   | 30,000    | 6.0        | Large investigations, stress test |
-| xl     | 50,000   | 150,000   | 6.0        | Enterprise scale, perf profiling  |
+| Size   | Nodes  | Edges   | Avg Degree | Use Case                          |
+| ------ | ------ | ------- | ---------- | --------------------------------- |
+| small  | 100    | 250     | 5.0        | Quick smoke tests, CI             |
+| medium | 1,000  | 3,000   | 6.0        | Typical investigation size        |
+| large  | 10,000 | 30,000  | 6.0        | Large investigations, stress test |
+| xl     | 50,000 | 150,000 | 6.0        | Enterprise scale, perf profiling  |
 
 **Dataset characteristics:**
+
 - **Scale-free topology** (preferential attachment) - realistic network structure
 - **Multiple entity types**: Person, Organization, Asset, Communication
 - **Relationship types**: KNOWS, WORKS_FOR, OWNS, COMMUNICATES_WITH, RELATED_TO
@@ -113,6 +123,7 @@ The harness generates synthetic investigation graphs with realistic properties:
 ## Benchmark Scenarios
 
 ### Entity CRUD (`entity_crud`)
+
 - **entity_read**: Single entity lookup by ID
 - **entity_update**: Entity property updates
 - **relationship_read**: Fetch entity's neighbors
@@ -120,6 +131,7 @@ The harness generates synthetic investigation graphs with realistic properties:
 **Performance budgets:** p95 < 50ms
 
 ### K-Hop Traversal (`k_hop_traversal`)
+
 Matches GraphRAG subgraph retrieval patterns.
 
 - **k_hop_1**: 1-hop neighborhood expansion
@@ -127,17 +139,20 @@ Matches GraphRAG subgraph retrieval patterns.
 - **k_hop_3**: 3-hop deep traversal
 
 **Performance budgets:**
+
 - 1-hop: p95 < 75ms
 - 2-hop: p95 < 150ms (critical)
 - 3-hop: p95 < 300ms
 
 ### Shortest Path (`shortest_path`)
+
 - **shortest_path_single**: Single shortest path between nodes
 - **all_shortest_paths**: All shortest paths (limited to 10)
 
 **Performance budgets:** p95 < 100ms (critical for single path)
 
 ### Centrality (`centrality`)
+
 Based on `GraphAnalyticsService.js` patterns.
 
 - **degree_centrality**: Count relationships per node
@@ -147,12 +162,14 @@ Based on `GraphAnalyticsService.js` patterns.
 **Performance budgets:** p95 < 150-500ms depending on algorithm
 
 ### Community Detection (`community_detection`)
+
 - **connected_components**: Find strongly connected components
 - **relationship_pattern_analysis**: Relationship type frequency
 
 **Performance budgets:** p95 < 300ms
 
 ### Graph Metrics (`graph_metrics`)
+
 - **basic_metrics**: Node count, edge count, degree distribution stats
 - **degree_distribution**: Histogram of node degrees
 
@@ -171,6 +188,7 @@ Predefined scenario combinations for different use cases:
 Performance budgets are defined in `config/budgets.json` and specify acceptable latency thresholds.
 
 **Example budget:**
+
 ```json
 {
   "k_hop_traversal_2": {
@@ -192,6 +210,7 @@ Performance budgets are defined in `config/budgets.json` and specify acceptable 
 ### Adjusting Budgets
 
 Edit `config/budgets.json` to update thresholds based on:
+
 - Infrastructure changes (faster hardware)
 - Query optimizations (indexes, query rewrites)
 - Business requirements (stricter SLAs)
@@ -201,6 +220,7 @@ Edit `config/budgets.json` to update thresholds based on:
 The benchmark runs automatically on PRs that modify graph-related code:
 
 **Trigger paths:**
+
 - `server/src/services/GraphRAGService.ts`
 - `server/src/services/GraphAnalyticsService.js`
 - `server/src/repos/EntityRepo.ts`
@@ -211,6 +231,7 @@ The benchmark runs automatically on PRs that modify graph-related code:
 - `docker-compose.neo4j.yml`
 
 **CI behavior:**
+
 1. Spins up Neo4j service container
 2. Runs benchmarks with small/medium datasets
 3. Checks against performance budgets
@@ -218,6 +239,7 @@ The benchmark runs automatically on PRs that modify graph-related code:
 5. **Fails PR if critical budgets exceeded**
 
 **Manual trigger:**
+
 ```bash
 gh workflow run graph-benchmark.yml \
   -f size=small,medium \
@@ -232,16 +254,16 @@ gh workflow run graph-benchmark.yml \
 node runner/index.js [options]
 ```
 
-| Option              | Description                           | Default           |
-|---------------------|---------------------------------------|-------------------|
-| `--size`            | Dataset sizes (comma-separated)       | `small`           |
-| `--scenarios`       | Scenario group: quick, ci, all        | `all`             |
-| `--iterations`      | Iterations per query                  | `100`             |
-| `--warmup`          | Warmup iterations                     | `10`              |
-| `--budget-check`    | Check budgets and exit 1 if exceeded  | `false`           |
-| `--neo4j-uri`       | Neo4j connection URI                  | `bolt://localhost:7687` |
-| `--neo4j-user`      | Neo4j username                        | `neo4j`           |
-| `--neo4j-password`  | Neo4j password                        | `testtest1`       |
+| Option             | Description                          | Default                 |
+| ------------------ | ------------------------------------ | ----------------------- |
+| `--size`           | Dataset sizes (comma-separated)      | `small`                 |
+| `--scenarios`      | Scenario group: quick, ci, all       | `all`                   |
+| `--iterations`     | Iterations per query                 | `100`                   |
+| `--warmup`         | Warmup iterations                    | `10`                    |
+| `--budget-check`   | Check budgets and exit 1 if exceeded | `false`                 |
+| `--neo4j-uri`      | Neo4j connection URI                 | `bolt://localhost:7687` |
+| `--neo4j-user`     | Neo4j username                       | `neo4j`                 |
+| `--neo4j-password` | Neo4j password                       | `testtest1`             |
 
 ### NPM Scripts
 
@@ -263,9 +285,11 @@ node runner/index.js [options]
 - **stddev**: Standard deviation (consistency indicator)
 
 **Example:**
+
 ```
 k_hop_2: p50: 45.2ms, p95: 132.7ms, p99: 201.3ms
 ```
+
 - Typical query: ~45ms
 - SLA target: <150ms (95% of requests)
 - Worst case: ~200ms (1% of requests)
@@ -279,18 +303,21 @@ k_hop_2: p50: 45.2ms, p95: 132.7ms, p99: 201.3ms
 ### Common Patterns
 
 **Query too slow?**
+
 1. Check Neo4j indexes: `CREATE INDEX entity_investigation IF NOT EXISTS FOR (e:Entity) ON (e.investigationId)`
 2. Add query limits: `LIMIT 100`
 3. Use APOC for k-hop traversal instead of variable-length patterns
 4. Profile query: `EXPLAIN` / `PROFILE` in Neo4j Browser
 
 **High variance (large stddev)?**
+
 - JVM warmup issues (increase `--warmup`)
 - Garbage collection pauses (tune Neo4j heap)
 - Query plan changes (missing indexes)
 - Cache thrashing (dataset too large for page cache)
 
 **Memory growth?**
+
 - Result set too large (add `LIMIT`)
 - Relationship explosion in k-hop traversal
 - Neo4j driver not releasing sessions
@@ -355,19 +382,21 @@ Add new scenarios in `scenarios/index.js`:
 
 ```javascript
 export const myCustomScenario = {
-  name: 'my_scenario',
-  description: 'My custom benchmark',
+  name: "my_scenario",
+  description: "My custom benchmark",
   setup: async (session, dataset) => {
     // Setup phase (e.g., precompute anchors)
-    return { /* context */ };
+    return {
+      /* context */
+    };
   },
   queries: [
     {
-      name: 'my_query',
+      name: "my_query",
       query: `MATCH (n) WHERE n.id = $id RETURN n`,
-      params: (ctx, dataset) => ({ id: 'entity-123' })
-    }
-  ]
+      params: (ctx, dataset) => ({ id: "entity-123" }),
+    },
+  ],
 };
 ```
 
@@ -375,7 +404,7 @@ Then add to scenario groups:
 
 ```javascript
 export const scenarioGroups = {
-  all: [...existingScenarios, myCustomScenario]
+  all: [...existingScenarios, myCustomScenario],
 };
 ```
 
@@ -436,8 +465,8 @@ Increase Neo4j heap size in `docker-compose.neo4j.yml`:
 
 ```yaml
 environment:
-  - NEO4J_server_memory_heap_max__size=1g  # Increase from 512m
-  - NEO4J_dbms_memory_pagecache_size=512m  # Increase from 256m
+  - NEO4J_server_memory_heap_max__size=1g # Increase from 512m
+  - NEO4J_dbms_memory_pagecache_size=512m # Increase from 256m
 ```
 
 ### Benchmarks too slow
@@ -506,6 +535,7 @@ A: **No.** Benchmarks load synthetic data and can affect production. Always use 
 **Q: What if a query is consistently over budget?**
 
 A:
+
 1. Optimize the query (indexes, limits, APOC)
 2. If optimization isn't feasible, update the budget with justification
 3. Consider caching at the application layer

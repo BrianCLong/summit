@@ -180,7 +180,7 @@ case:
 secureTransform:
   enabled: true
   attestation: required
-  allowedTools: ['ocr-v4', 'redactor-v3']
+  allowedTools: ["ocr-v4", "redactor-v3"]
 ```
 
 ### 5.6 Auditor Export (CSV headers)

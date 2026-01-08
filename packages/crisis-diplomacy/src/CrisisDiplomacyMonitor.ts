@@ -13,8 +13,8 @@ import {
   TrajectoryPrediction,
   ResolutionProspects,
   CrisisComparison,
-  EarlyWarningIndicator
-} from './types.js';
+  EarlyWarningIndicator,
+} from "./types.js";
 
 /**
  * CrisisDiplomacyMonitor
@@ -60,10 +60,8 @@ export class CrisisDiplomacyMonitor {
    */
   getActiveCrises(): Crisis[] {
     return Array.from(this.crises.values())
-      .filter(c =>
-        c.phase !== CrisisPhase.RESOLVED &&
-        c.phase !== CrisisPhase.FROZEN &&
-        c.monitoring
+      .filter(
+        (c) => c.phase !== CrisisPhase.RESOLVED && c.phase !== CrisisPhase.FROZEN && c.monitoring
       )
       .sort((a, b) => b.escalationLevel.localeCompare(a.escalationLevel));
   }
@@ -74,7 +72,7 @@ export class CrisisDiplomacyMonitor {
   getCrisesByType(type: CrisisType): Crisis[] {
     const crisisIds = this.crisesByType.get(type) || new Set();
     return Array.from(crisisIds)
-      .map(id => this.crises.get(id))
+      .map((id) => this.crises.get(id))
       .filter((c): c is Crisis => c !== undefined);
   }
 
@@ -84,7 +82,7 @@ export class CrisisDiplomacyMonitor {
   getCrisesByPhase(phase: CrisisPhase): Crisis[] {
     const crisisIds = this.crisesByPhase.get(phase) || new Set();
     return Array.from(crisisIds)
-      .map(id => this.crises.get(id))
+      .map((id) => this.crises.get(id))
       .filter((c): c is Crisis => c !== undefined);
   }
 
@@ -97,7 +95,7 @@ export class CrisisDiplomacyMonitor {
     immediateRisks: EscalationRisk[];
     criticalIndicators: string[];
     mitigationOptions: string[];
-    urgency: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+    urgency: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   } {
     const crisis = this.crises.get(crisisId);
     if (!crisis) {
@@ -107,7 +105,7 @@ export class CrisisDiplomacyMonitor {
         immediateRisks: [],
         criticalIndicators: [],
         mitigationOptions: [],
-        urgency: 'LOW'
+        urgency: "LOW",
       };
     }
 
@@ -117,7 +115,7 @@ export class CrisisDiplomacyMonitor {
       IMMEDIATE: 1.0,
       SHORT_TERM: 0.7,
       MEDIUM_TERM: 0.4,
-      LONG_TERM: 0.2
+      LONG_TERM: 0.2,
     };
 
     for (const risk of crisis.escalationRisks) {
@@ -129,13 +127,13 @@ export class CrisisDiplomacyMonitor {
 
     // Get immediate risks
     const immediateRisks = crisis.escalationRisks
-      .filter(r => r.timeframe === 'IMMEDIATE' || r.timeframe === 'SHORT_TERM')
-      .sort((a, b) => (b.probability * b.severity) - (a.probability * a.severity))
+      .filter((r) => r.timeframe === "IMMEDIATE" || r.timeframe === "SHORT_TERM")
+      .sort((a, b) => b.probability * b.severity - a.probability * a.severity)
       .slice(0, 5);
 
     // Critical indicators
     const criticalIndicators = immediateRisks
-      .flatMap(r => r.indicators)
+      .flatMap((r) => r.indicators)
       .filter(Boolean)
       .slice(0, 10);
 
@@ -150,13 +148,13 @@ export class CrisisDiplomacyMonitor {
     const mitigationOptions = this.generateMitigationOptions(crisis, immediateRisks);
 
     // Urgency
-    let urgency: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' = 'LOW';
+    let urgency: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" = "LOW";
     if (level === EscalationLevel.MAXIMUM || level === EscalationLevel.CRITICAL) {
-      urgency = 'CRITICAL';
+      urgency = "CRITICAL";
     } else if (level === EscalationLevel.HIGH) {
-      urgency = 'HIGH';
+      urgency = "HIGH";
     } else if (level === EscalationLevel.MODERATE) {
-      urgency = 'MEDIUM';
+      urgency = "MEDIUM";
     }
 
     return {
@@ -165,7 +163,7 @@ export class CrisisDiplomacyMonitor {
       immediateRisks,
       criticalIndicators,
       mitigationOptions,
-      urgency
+      urgency,
     };
   }
 
@@ -184,18 +182,19 @@ export class CrisisDiplomacyMonitor {
         opportunities: [],
         immediateActions: [],
         diplomaticWindows: [],
-        confidence: 0
+        confidence: 0,
       };
     }
 
     // Sort opportunities by feasibility and impact
-    const opportunities = crisis.deescalationOpportunities
-      .sort((a, b) => (b.feasibility * b.impact) - (a.feasibility * a.impact));
+    const opportunities = crisis.deescalationOpportunities.sort(
+      (a, b) => b.feasibility * b.impact - a.feasibility * a.impact
+    );
 
     // Immediate actions (high feasibility, immediate timeframe)
     const immediateActions = opportunities
-      .filter(o => o.timeframe === 'IMMEDIATE' && o.feasibility > 60)
-      .flatMap(o => o.requirements)
+      .filter((o) => o.timeframe === "IMMEDIATE" && o.feasibility > 60)
+      .flatMap((o) => o.requirements)
       .filter(Boolean)
       .slice(0, 5);
 
@@ -203,9 +202,7 @@ export class CrisisDiplomacyMonitor {
     const diplomaticWindows: string[] = [];
     for (const opp of opportunities.slice(0, 3)) {
       if (opp.sponsors && opp.sponsors.length > 0) {
-        diplomaticWindows.push(
-          `${opp.opportunity} (Sponsored by: ${opp.sponsors.join(', ')})`
-        );
+        diplomaticWindows.push(`${opp.opportunity} (Sponsored by: ${opp.sponsors.join(", ")})`);
       } else {
         diplomaticWindows.push(opp.opportunity);
       }
@@ -221,7 +218,7 @@ export class CrisisDiplomacyMonitor {
       opportunities,
       immediateActions,
       diplomaticWindows,
-      confidence: Math.min(100, confidence)
+      confidence: Math.min(100, confidence),
     };
   }
 
@@ -233,12 +230,12 @@ export class CrisisDiplomacyMonitor {
 
     // Add to crisis if exists
     for (const crisis of this.crises.values()) {
-      const hasMediationForCrisis = crisis.primaryParties.some(p =>
+      const hasMediationForCrisis = crisis.primaryParties.some((p) =>
         effort.parties.includes(p.name)
       );
 
       if (hasMediationForCrisis) {
-        const existingIndex = crisis.mediationEfforts.findIndex(m => m.id === effort.id);
+        const existingIndex = crisis.mediationEfforts.findIndex((m) => m.id === effort.id);
         if (existingIndex >= 0) {
           crisis.mediationEfforts[existingIndex] = effort;
         } else {
@@ -266,8 +263,8 @@ export class CrisisDiplomacyMonitor {
         effectivenessScore: 0,
         strengths: [],
         weaknesses: [],
-        prospects: 'Unknown',
-        recommendations: []
+        prospects: "Unknown",
+        recommendations: [],
       };
     }
 
@@ -276,30 +273,29 @@ export class CrisisDiplomacyMonitor {
 
     // Analyze factors
     if (effort.factors.mediatorCredibility > 70) {
-      strengths.push('High mediator credibility');
+      strengths.push("High mediator credibility");
     } else if (effort.factors.mediatorCredibility < 40) {
-      weaknesses.push('Low mediator credibility');
+      weaknesses.push("Low mediator credibility");
     }
 
     if (effort.factors.partyWillingness > 70) {
-      strengths.push('Strong party willingness to negotiate');
+      strengths.push("Strong party willingness to negotiate");
     } else if (effort.factors.partyWillingness < 40) {
-      weaknesses.push('Limited party willingness');
+      weaknesses.push("Limited party willingness");
     }
 
     if (effort.factors.externalSupport > 70) {
-      strengths.push('Strong external support');
+      strengths.push("Strong external support");
     } else if (effort.factors.externalSupport < 40) {
-      weaknesses.push('Weak external support');
+      weaknesses.push("Weak external support");
     }
 
     // Calculate effectiveness score
-    const effectivenessScore = (
+    const effectivenessScore =
       effort.factors.mediatorCredibility * 0.3 +
       effort.factors.partyWillingness * 0.4 +
       effort.factors.externalSupport * 0.2 +
-      effort.factors.timing * 0.1
-    );
+      effort.factors.timing * 0.1;
 
     // Breakthroughs and setbacks
     if (effort.breakthroughs && effort.breakthroughs.length > 0) {
@@ -311,15 +307,15 @@ export class CrisisDiplomacyMonitor {
     }
 
     // Prospects
-    let prospects = 'Uncertain';
-    if (effectivenessScore > 70 && effort.status === 'ACTIVE') {
-      prospects = 'Promising - likely to yield results';
-    } else if (effectivenessScore > 50 && effort.status === 'ACTIVE') {
-      prospects = 'Moderate - progress possible with sustained effort';
-    } else if (effectivenessScore < 30 || effort.status === 'FAILED') {
-      prospects = 'Poor - alternative approaches needed';
-    } else if (effort.status === 'SUSPENDED') {
-      prospects = 'Stalled - requires renewed commitment';
+    let prospects = "Uncertain";
+    if (effectivenessScore > 70 && effort.status === "ACTIVE") {
+      prospects = "Promising - likely to yield results";
+    } else if (effectivenessScore > 50 && effort.status === "ACTIVE") {
+      prospects = "Moderate - progress possible with sustained effort";
+    } else if (effectivenessScore < 30 || effort.status === "FAILED") {
+      prospects = "Poor - alternative approaches needed";
+    } else if (effort.status === "SUSPENDED") {
+      prospects = "Stalled - requires renewed commitment";
     }
 
     // Recommendations
@@ -331,7 +327,7 @@ export class CrisisDiplomacyMonitor {
       strengths,
       weaknesses,
       prospects,
-      recommendations
+      recommendations,
     };
   }
 
@@ -361,7 +357,7 @@ export class CrisisDiplomacyMonitor {
         supportingFactors: [],
         threateningFactors: [],
         criticalPeriods: [],
-        prognosis: 'Unknown'
+        prognosis: "Unknown",
       };
     }
 
@@ -369,36 +365,38 @@ export class CrisisDiplomacyMonitor {
     const threateningFactors: string[] = [];
 
     // Analyze momentum
-    if (process.momentum === 'STRONG') {
-      supportingFactors.push('Strong process momentum');
-    } else if (process.momentum === 'STALLED') {
-      threateningFactors.push('Process has stalled');
+    if (process.momentum === "STRONG") {
+      supportingFactors.push("Strong process momentum");
+    } else if (process.momentum === "STALLED") {
+      threateningFactors.push("Process has stalled");
     }
 
     // Analyze public support
-    const avgSupport = process.publicSupport.reduce((sum, s) => sum + s.support, 0) /
+    const avgSupport =
+      process.publicSupport.reduce((sum, s) => sum + s.support, 0) /
       (process.publicSupport.length || 1);
 
     if (avgSupport > 70) {
-      supportingFactors.push('Strong public support across parties');
+      supportingFactors.push("Strong public support across parties");
     } else if (avgSupport < 40) {
-      threateningFactors.push('Weak public support');
+      threateningFactors.push("Weak public support");
     }
 
     // Analyze stakeholder commitment
-    const avgCommitment = process.stakeholders.reduce((sum, s) => sum + s.commitment, 0) /
+    const avgCommitment =
+      process.stakeholders.reduce((sum, s) => sum + s.commitment, 0) /
       (process.stakeholders.length || 1);
 
     if (avgCommitment > 70) {
-      supportingFactors.push('High stakeholder commitment');
+      supportingFactors.push("High stakeholder commitment");
     } else if (avgCommitment < 40) {
-      threateningFactors.push('Low stakeholder commitment');
+      threateningFactors.push("Low stakeholder commitment");
     }
 
     // Identify critical periods
     const criticalPeriods: string[] = [];
     for (const phase of process.phases) {
-      if (phase.status === 'STALLED') {
+      if (phase.status === "STALLED") {
         criticalPeriods.push(`Phase ${phase.number}: ${phase.name} is stalled`);
       } else if (phase.challenges.length > 3) {
         criticalPeriods.push(`Phase ${phase.number}: Multiple challenges`);
@@ -407,20 +405,20 @@ export class CrisisDiplomacyMonitor {
 
     // Calculate sustainability score
     let sustainabilityScore = process.sustainability;
-    if (process.momentum === 'STRONG') sustainabilityScore += 10;
-    if (process.momentum === 'STALLED') sustainabilityScore -= 20;
+    if (process.momentum === "STRONG") sustainabilityScore += 10;
+    if (process.momentum === "STALLED") sustainabilityScore -= 20;
     sustainabilityScore = Math.max(0, Math.min(100, sustainabilityScore));
 
     // Prognosis
-    let prognosis = '';
+    let prognosis = "";
     if (sustainabilityScore > 75) {
-      prognosis = 'Excellent - process likely to succeed';
+      prognosis = "Excellent - process likely to succeed";
     } else if (sustainabilityScore > 60) {
-      prognosis = 'Good - process on track with manageable risks';
+      prognosis = "Good - process on track with manageable risks";
     } else if (sustainabilityScore > 40) {
-      prognosis = 'Uncertain - requires attention to address challenges';
+      prognosis = "Uncertain - requires attention to address challenges";
     } else {
-      prognosis = 'Poor - significant risks to process continuation';
+      prognosis = "Poor - significant risks to process continuation";
     }
 
     return {
@@ -429,7 +427,7 @@ export class CrisisDiplomacyMonitor {
       supportingFactors,
       threateningFactors,
       criticalPeriods,
-      prognosis
+      prognosis,
     };
   }
 
@@ -441,8 +439,8 @@ export class CrisisDiplomacyMonitor {
     activeCount: number;
     averageCompliance: number;
     violations: number;
-    trend: 'IMPROVING' | 'STABLE' | 'DETERIORATING';
-    riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+    trend: "IMPROVING" | "STABLE" | "DETERIORATING";
+    riskLevel: "LOW" | "MEDIUM" | "HIGH";
   } {
     const crisis = this.crises.get(crisisId);
     if (!crisis) {
@@ -451,18 +449,19 @@ export class CrisisDiplomacyMonitor {
         activeCount: 0,
         averageCompliance: 0,
         violations: 0,
-        trend: 'STABLE',
-        riskLevel: 'LOW'
+        trend: "STABLE",
+        riskLevel: "LOW",
       };
     }
 
-    const activeCeasefires = crisis.ceasefires.filter(c =>
-      c.status === 'HOLDING' || c.status === 'VIOLATED'
+    const activeCeasefires = crisis.ceasefires.filter(
+      (c) => c.status === "HOLDING" || c.status === "VIOLATED"
     );
 
-    const avgCompliance = activeCeasefires.length > 0
-      ? activeCeasefires.reduce((sum, c) => sum + c.compliance, 0) / activeCeasefires.length
-      : 0;
+    const avgCompliance =
+      activeCeasefires.length > 0
+        ? activeCeasefires.reduce((sum, c) => sum + c.compliance, 0) / activeCeasefires.length
+        : 0;
 
     const totalViolations = crisis.ceasefires.reduce(
       (sum, c) => sum + (c.violations?.length || 0),
@@ -470,19 +469,19 @@ export class CrisisDiplomacyMonitor {
     );
 
     // Determine trend
-    let trend: 'IMPROVING' | 'STABLE' | 'DETERIORATING' = 'STABLE';
+    let trend: "IMPROVING" | "STABLE" | "DETERIORATING" = "STABLE";
     if (activeCeasefires.length >= 2) {
       const recent = activeCeasefires[activeCeasefires.length - 1];
       const previous = activeCeasefires[activeCeasefires.length - 2];
 
-      if (recent.compliance > previous.compliance + 10) trend = 'IMPROVING';
-      else if (recent.compliance < previous.compliance - 10) trend = 'DETERIORATING';
+      if (recent.compliance > previous.compliance + 10) trend = "IMPROVING";
+      else if (recent.compliance < previous.compliance - 10) trend = "DETERIORATING";
     }
 
     // Risk level
-    let riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' = 'LOW';
-    if (avgCompliance < 50 || trend === 'DETERIORATING') riskLevel = 'HIGH';
-    else if (avgCompliance < 70) riskLevel = 'MEDIUM';
+    let riskLevel: "LOW" | "MEDIUM" | "HIGH" = "LOW";
+    if (avgCompliance < 50 || trend === "DETERIORATING") riskLevel = "HIGH";
+    else if (avgCompliance < 70) riskLevel = "MEDIUM";
 
     return {
       ceasefires: crisis.ceasefires,
@@ -490,7 +489,7 @@ export class CrisisDiplomacyMonitor {
       averageCompliance: avgCompliance,
       violations: totalViolations,
       trend,
-      riskLevel
+      riskLevel,
     };
   }
 
@@ -504,19 +503,19 @@ export class CrisisDiplomacyMonitor {
         shortTerm: {
           phase: CrisisPhase.EMERGING,
           probability: 0,
-          keyFactors: []
+          keyFactors: [],
         },
         mediumTerm: {
           phase: CrisisPhase.EMERGING,
           probability: 0,
-          keyFactors: []
+          keyFactors: [],
         },
         longTerm: {
           phase: CrisisPhase.EMERGING,
           probability: 0,
-          keyFactors: []
+          keyFactors: [],
         },
-        confidence: 0
+        confidence: 0,
       };
     }
 
@@ -537,7 +536,7 @@ export class CrisisDiplomacyMonitor {
       mediumTermPhase = CrisisPhase.DE_ESCALATING;
       longTermPhase = CrisisPhase.STABILIZING;
     } else if (crisis.mediationEfforts.length > 0) {
-      const activeMediations = crisis.mediationEfforts.filter(m => m.status === 'ACTIVE');
+      const activeMediations = crisis.mediationEfforts.filter((m) => m.status === "ACTIVE");
       if (activeMediations.length > 0) {
         shortTermPhase = CrisisPhase.STABILIZING;
         mediumTermPhase = CrisisPhase.DE_ESCALATING;
@@ -549,19 +548,19 @@ export class CrisisDiplomacyMonitor {
       shortTerm: {
         phase: shortTermPhase,
         probability: 60,
-        keyFactors: ['Current escalation level', 'Active mediation efforts']
+        keyFactors: ["Current escalation level", "Active mediation efforts"],
       },
       mediumTerm: {
         phase: mediumTermPhase,
         probability: 50,
-        keyFactors: ['Mediation effectiveness', 'Regional stability']
+        keyFactors: ["Mediation effectiveness", "Regional stability"],
       },
       longTerm: {
         phase: longTermPhase,
         probability: 40,
-        keyFactors: ['Root causes resolution', 'Political will']
+        keyFactors: ["Root causes resolution", "Political will"],
       },
-      confidence: 50
+      confidence: 50,
     };
   }
 
@@ -570,7 +569,7 @@ export class CrisisDiplomacyMonitor {
    */
   compareCrises(crisisIds: string[]): CrisisComparison {
     const crises = crisisIds
-      .map(id => this.crises.get(id))
+      .map((id) => this.crises.get(id))
       .filter((c): c is Crisis => c !== undefined);
 
     const similarities: string[] = [];
@@ -583,28 +582,26 @@ export class CrisisDiplomacyMonitor {
     }
 
     // Find similarities
-    const types = new Set(crises.map(c => c.type));
+    const types = new Set(crises.map((c) => c.type));
     if (types.size === 1) {
       similarities.push(`All crises are of type: ${Array.from(types)[0]}`);
     }
 
-    const scopes = new Set(crises.map(c => c.scope));
+    const scopes = new Set(crises.map((c) => c.scope));
     if (scopes.size === 1) {
       similarities.push(`Similar scope: ${Array.from(scopes)[0]}`);
     }
 
     // Check for common mediation approaches
-    const mediationTypes = new Set(
-      crises.flatMap(c => c.mediationEfforts.map(m => m.type))
-    );
+    const mediationTypes = new Set(crises.flatMap((c) => c.mediationEfforts.map((m) => m.type)));
     if (mediationTypes.size > 0) {
-      similarities.push(`Common mediation approaches: ${Array.from(mediationTypes).join(', ')}`);
+      similarities.push(`Common mediation approaches: ${Array.from(mediationTypes).join(", ")}`);
     }
 
     // Find differences
-    const escalationLevels = new Set(crises.map(c => c.escalationLevel));
+    const escalationLevels = new Set(crises.map((c) => c.escalationLevel));
     if (escalationLevels.size > 1) {
-      differences.push(`Varying escalation levels: ${Array.from(escalationLevels).join(', ')}`);
+      differences.push(`Varying escalation levels: ${Array.from(escalationLevels).join(", ")}`);
     }
 
     // Extract lessons from resolved crises
@@ -619,8 +616,8 @@ export class CrisisDiplomacyMonitor {
     // Identify applicable strategies from successful mediations
     for (const crisis of crises) {
       for (const mediation of crisis.mediationEfforts) {
-        if (mediation.status === 'CONCLUDED' && mediation.outcomes) {
-          applicableStrategies.push(`${mediation.type}: ${mediation.outcomes.join(', ')}`);
+        if (mediation.status === "CONCLUDED" && mediation.outcomes) {
+          applicableStrategies.push(`${mediation.type}: ${mediation.outcomes.join(", ")}`);
         }
       }
     }
@@ -630,7 +627,7 @@ export class CrisisDiplomacyMonitor {
       similarities,
       differences,
       lessons: Array.from(new Set(lessons)),
-      applicableStrategies: Array.from(new Set(applicableStrategies))
+      applicableStrategies: Array.from(new Set(applicableStrategies)),
     };
   }
 
@@ -638,58 +635,60 @@ export class CrisisDiplomacyMonitor {
    * Generate early warning assessment
    */
   generateEarlyWarning(indicators: EarlyWarningIndicator[]): {
-    overallThreatLevel: 'LOW' | 'MODERATE' | 'HIGH' | 'SEVERE';
+    overallThreatLevel: "LOW" | "MODERATE" | "HIGH" | "SEVERE";
     criticalIndicators: EarlyWarningIndicator[];
     deterioratingIndicators: EarlyWarningIndicator[];
     recommendations: string[];
   } {
-    const criticalIndicators = indicators.filter(i => i.urgency === 'CRITICAL' || i.urgency === 'HIGH');
-    const deterioratingIndicators = indicators.filter(i => i.trend === 'DETERIORATING');
+    const criticalIndicators = indicators.filter(
+      (i) => i.urgency === "CRITICAL" || i.urgency === "HIGH"
+    );
+    const deterioratingIndicators = indicators.filter((i) => i.trend === "DETERIORATING");
 
-    let overallThreatLevel: 'LOW' | 'MODERATE' | 'HIGH' | 'SEVERE' = 'LOW';
+    let overallThreatLevel: "LOW" | "MODERATE" | "HIGH" | "SEVERE" = "LOW";
     const criticalCount = criticalIndicators.length;
     const deterioratingCount = deterioratingIndicators.length;
 
     if (criticalCount >= 3 || deterioratingCount >= 5) {
-      overallThreatLevel = 'SEVERE';
+      overallThreatLevel = "SEVERE";
     } else if (criticalCount >= 2 || deterioratingCount >= 3) {
-      overallThreatLevel = 'HIGH';
+      overallThreatLevel = "HIGH";
     } else if (criticalCount >= 1 || deterioratingCount >= 2) {
-      overallThreatLevel = 'MODERATE';
+      overallThreatLevel = "MODERATE";
     }
 
     const recommendations: string[] = [];
-    if (overallThreatLevel === 'SEVERE' || overallThreatLevel === 'HIGH') {
-      recommendations.push('Immediate diplomatic engagement required');
-      recommendations.push('Activate crisis response mechanisms');
-      recommendations.push('Engage regional and international partners');
+    if (overallThreatLevel === "SEVERE" || overallThreatLevel === "HIGH") {
+      recommendations.push("Immediate diplomatic engagement required");
+      recommendations.push("Activate crisis response mechanisms");
+      recommendations.push("Engage regional and international partners");
     }
 
     if (deterioratingCount > 0) {
-      recommendations.push('Monitor deteriorating indicators closely');
-      recommendations.push('Prepare contingency plans');
+      recommendations.push("Monitor deteriorating indicators closely");
+      recommendations.push("Prepare contingency plans");
     }
 
     return {
       overallThreatLevel,
       criticalIndicators,
       deterioratingIndicators,
-      recommendations
+      recommendations,
     };
   }
 
   private generateMitigationOptions(crisis: Crisis, risks: EscalationRisk[]): string[] {
     const options: string[] = [];
 
-    options.push('Establish direct communication channels between parties');
-    options.push('Deploy preventive diplomacy measures');
+    options.push("Establish direct communication channels between parties");
+    options.push("Deploy preventive diplomacy measures");
 
     if (crisis.mediationEfforts.length === 0) {
-      options.push('Initiate third-party mediation');
+      options.push("Initiate third-party mediation");
     }
 
     if (crisis.ceasefires.length === 0) {
-      options.push('Negotiate humanitarian ceasefire');
+      options.push("Negotiate humanitarian ceasefire");
     }
 
     for (const risk of risks.slice(0, 3)) {
@@ -705,23 +704,23 @@ export class CrisisDiplomacyMonitor {
     const recommendations: string[] = [];
 
     if (effort.factors.mediatorCredibility < 60) {
-      recommendations.push('Strengthen mediator credibility through coalition building');
+      recommendations.push("Strengthen mediator credibility through coalition building");
     }
 
     if (effort.factors.partyWillingness < 60) {
-      recommendations.push('Build confidence through incremental agreements');
+      recommendations.push("Build confidence through incremental agreements");
     }
 
     if (effort.factors.externalSupport < 60) {
-      recommendations.push('Mobilize international support and guarantees');
+      recommendations.push("Mobilize international support and guarantees");
     }
 
     if (score < 50) {
-      recommendations.push('Consider alternative mediation approaches');
+      recommendations.push("Consider alternative mediation approaches");
     }
 
     if (effort.setbacks && effort.setbacks.length > 2) {
-      recommendations.push('Review strategy and address recurring obstacles');
+      recommendations.push("Review strategy and address recurring obstacles");
     }
 
     return recommendations;
@@ -748,8 +747,10 @@ export class CrisisDiplomacyMonitor {
       byType[crisis.type] = (byType[crisis.type] || 0) + 1;
       totalIntensity += crisis.intensity;
 
-      if (crisis.escalationLevel === EscalationLevel.CRITICAL ||
-          crisis.escalationLevel === EscalationLevel.MAXIMUM) {
+      if (
+        crisis.escalationLevel === EscalationLevel.CRITICAL ||
+        crisis.escalationLevel === EscalationLevel.MAXIMUM
+      ) {
         criticalCount++;
       }
     }
@@ -762,7 +763,7 @@ export class CrisisDiplomacyMonitor {
       byPhase,
       byType,
       averageIntensity: this.crises.size > 0 ? totalIntensity / this.crises.size : 0,
-      criticalCrises: criticalCount
+      criticalCrises: criticalCount,
     };
   }
 }

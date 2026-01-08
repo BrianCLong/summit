@@ -1,12 +1,12 @@
-import { z } from 'zod';
+import { z } from "zod";
 import {
   classificationLevels,
   taxonomySchema,
   type Classification,
   type DocumentTag,
-  type TaxonomyEntry
-} from './config.js';
-import { ChmEventBus } from './events.js';
+  type TaxonomyEntry,
+} from "./config.js";
+import { ChmEventBus } from "./events.js";
 
 export class TaxonomyRegistry {
   private readonly taxonomy = new Map<string, TaxonomyEntry>();
@@ -37,7 +37,7 @@ export class TaxonomyRegistry {
       documentId,
       tag: code,
       classification: entry.level,
-      derivedFrom
+      derivedFrom,
     };
     this.bus.emitTagApplied(tag);
     return tag;
@@ -50,15 +50,22 @@ export class TaxonomyRegistry {
     return targetIdx >= 0 && targetIdx > currentIdx;
   }
 
-  downgradeTag(existing: DocumentTag, targetLevel: Classification, approvers: string[]): DocumentTag {
+  downgradeTag(
+    existing: DocumentTag,
+    targetLevel: Classification,
+    approvers: string[]
+  ): DocumentTag {
     const entry = this.taxonomy.get(existing.tag);
     if (!entry) throw new Error(`Unknown taxonomy code ${existing.tag}`);
-    if (!entry.downgradeTo.includes(targetLevel) || !this.canDowngrade(existing.classification, targetLevel)) {
+    if (
+      !entry.downgradeTo.includes(targetLevel) ||
+      !this.canDowngrade(existing.classification, targetLevel)
+    ) {
       throw new Error(`Downgrade from ${existing.classification} to ${targetLevel} not permitted`);
     }
     const downgraded: DocumentTag = {
       ...existing,
-      classification: targetLevel
+      classification: targetLevel,
     };
     this.bus.emitTagDowngraded(existing, downgraded, approvers);
     return downgraded;
@@ -72,29 +79,29 @@ export class TaxonomyRegistry {
 
 export const defaultTaxonomy = [
   {
-    code: 'CHM-TS',
-    description: 'Top secret handling with strict residency',
-    level: 'TS',
-    downgradeTo: ['S', 'C']
+    code: "CHM-TS",
+    description: "Top secret handling with strict residency",
+    level: "TS",
+    downgradeTo: ["S", "C"],
   },
   {
-    code: 'CHM-S',
-    description: 'Secret handling with controlled distribution',
-    level: 'S',
-    downgradeTo: ['C', 'U']
+    code: "CHM-S",
+    description: "Secret handling with controlled distribution",
+    level: "S",
+    downgradeTo: ["C", "U"],
   },
   {
-    code: 'CHM-C',
-    description: 'Confidential materials',
-    level: 'C',
-    downgradeTo: ['U']
+    code: "CHM-C",
+    description: "Confidential materials",
+    level: "C",
+    downgradeTo: ["U"],
   },
   {
-    code: 'CHM-U',
-    description: 'Unclassified but tracked content',
-    level: 'U',
-    downgradeTo: ['U']
-  }
+    code: "CHM-U",
+    description: "Unclassified but tracked content",
+    level: "U",
+    downgradeTo: ["U"],
+  },
 ];
 
 export function parseTaxonomy(input: unknown): TaxonomyEntry[] {

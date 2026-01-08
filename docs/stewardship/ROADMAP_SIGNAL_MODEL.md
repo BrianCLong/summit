@@ -15,13 +15,13 @@ The Roadmap Signal Model replaces intuition-based planning with evidence-based p
 
 The model produces **Pressure Signals**, ranked by urgency:
 
-*   **Scale Risk**: Evidence that current architecture cannot support projected load.
-*   **Governance Debt**: Evidence that policies are outdated or overly restrictive (high override rate).
-*   **Model Decay**: Evidence that core models are losing relevance or accuracy.
-*   **Cost Efficiency**: Evidence of unsustainable spending trajectory.
+- **Scale Risk**: Evidence that current architecture cannot support projected load.
+- **Governance Debt**: Evidence that policies are outdated or overly restrictive (high override rate).
+- **Model Decay**: Evidence that core models are losing relevance or accuracy.
+- **Cost Efficiency**: Evidence of unsustainable spending trajectory.
 
 ## Principles
 
-*   **Advisory Only**: Signals inform human decision-making; they do not automatically trigger work items.
-*   **Evidence-Backed**: Every signal must cite specific metrics or historical data.
-*   **No Micro-Management**: Signals suggest *areas* of investment, not specific tasks.
+- **Advisory Only**: Signals inform human decision-making; they do not automatically trigger work items.
+- **Evidence-Backed**: Every signal must cite specific metrics or historical data.
+- **No Micro-Management**: Signals suggest _areas_ of investment, not specific tasks.

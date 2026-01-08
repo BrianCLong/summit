@@ -4,9 +4,9 @@
  * Coordinates rate limiting strategies and policies
  */
 
-import { createLogger } from './utils/logger.js';
+import { createLogger } from "./utils/logger.js";
 
-const logger = createLogger('rate-limiter');
+const logger = createLogger("rate-limiter");
 
 export interface RateLimitConfig {
   windowMs: number;
@@ -34,7 +34,7 @@ export abstract class RateLimiter {
 
   constructor(config: RateLimitConfig) {
     this.config = {
-      keyPrefix: 'ratelimit',
+      keyPrefix: "ratelimit",
       skipFailedRequests: false,
       skipSuccessfulRequests: false,
       ...config,
@@ -50,14 +50,14 @@ export abstract class RateLimiter {
 
   protected logRateLimit(key: string, result: RateLimitResult): void {
     if (!result.allowed) {
-      logger.warn('Rate limit exceeded', {
+      logger.warn("Rate limit exceeded", {
         key,
         limit: result.info.limit,
         current: result.info.current,
         resetTime: new Date(result.info.resetTime),
       });
     } else {
-      logger.debug('Rate limit check passed', {
+      logger.debug("Rate limit check passed", {
         key,
         remaining: result.info.remaining,
       });

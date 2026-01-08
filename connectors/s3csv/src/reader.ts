@@ -1,34 +1,34 @@
-import { Readable, Transform } from 'stream';
-import { parse } from 'csv-parse';
-import AWS from 'aws-sdk';
-import { trace, Span } from '@opentelemetry/api';
-import { register, Counter, Histogram, Gauge } from 'prom-client';
+import { Readable, Transform } from "stream";
+import { parse } from "csv-parse";
+import AWS from "aws-sdk";
+import { trace, Span } from "@opentelemetry/api";
+import { register, Counter, Histogram, Gauge } from "prom-client";
 
-const tracer = trace.getTracer('s3csv-connector', '24.2.0');
+const tracer = trace.getTracer("s3csv-connector", "24.2.0");
 
 // Metrics
 const processedRows = new Counter({
-  name: 'ingest_rows_total',
-  help: 'Total CSV rows processed',
-  labelNames: ['bucket', 'key', 'status'],
+  name: "ingest_rows_total",
+  help: "Total CSV rows processed",
+  labelNames: ["bucket", "key", "status"],
 });
 
 const ingestThroughput = new Gauge({
-  name: 'ingest_rows_sec',
-  help: 'Current ingest throughput in rows/sec',
-  labelNames: ['worker_id'],
+  name: "ingest_rows_sec",
+  help: "Current ingest throughput in rows/sec",
+  labelNames: ["worker_id"],
 });
 
 const ingestLag = new Histogram({
-  name: 'ingest_lag_ms',
-  help: 'Processing lag from CSV row to storage',
+  name: "ingest_lag_ms",
+  help: "Processing lag from CSV row to storage",
   buckets: [10, 50, 100, 200, 500, 1000, 2000, 5000],
 });
 
 const memoryUsage = new Gauge({
-  name: 'ingest_memory_bytes',
-  help: 'Memory usage of CSV processor',
-  labelNames: ['worker_id'],
+  name: "ingest_memory_bytes",
+  help: "Memory usage of CSV processor",
+  labelNames: ["worker_id"],
 });
 
 interface CSVRow {
@@ -92,10 +92,7 @@ export class S3CSVReader {
   constructor(workerId: string, queueConfig?: { high: number; low: number }) {
     this.s3 = new AWS.S3();
     this.workerId = workerId;
-    this.queue = new BackpressureQueue(
-      queueConfig?.high || 10000,
-      queueConfig?.low || 5000,
-    );
+    this.queue = new BackpressureQueue(queueConfig?.high || 10000, queueConfig?.low || 5000);
 
     this.startMetricsCollection();
   }
@@ -104,7 +101,7 @@ export class S3CSVReader {
     this.metricsInterval = setInterval(() => {
       const currentRows = processedRows
         .get()
-        .values.filter((v) => v.labels.status === 'success')
+        .values.filter((v) => v.labels.status === "success")
         .reduce((sum, v) => sum + v.value, 0);
 
       const rowsPerSec = (currentRows - this.lastRowCount) / 5; // 5 second interval
@@ -125,22 +122,20 @@ export class S3CSVReader {
       batchSize?: number;
       skipHeader?: boolean;
       delimiter?: string;
-    } = {},
+    } = {}
   ): Promise<void> {
-    const { batchSize = 1000, skipHeader = true, delimiter = ',' } = options;
+    const { batchSize = 1000, skipHeader = true, delimiter = "," } = options;
 
-    return tracer.startActiveSpan('s3csv.stream', async (span: Span) => {
+    return tracer.startActiveSpan("s3csv.stream", async (span: Span) => {
       span.setAttributes({
-        's3.bucket': bucket,
-        's3.key': key,
-        'csv.batch_size': batchSize,
-        'worker.id': this.workerId,
+        "s3.bucket": bucket,
+        "s3.key": key,
+        "csv.batch_size": batchSize,
+        "worker.id": this.workerId,
       });
 
       try {
-        const s3Stream = this.s3
-          .getObject({ Bucket: bucket, Key: key })
-          .createReadStream();
+        const s3Stream = this.s3.getObject({ Bucket: bucket, Key: key }).createReadStream();
         let rowCount = 0;
         let batch: CSVRow[] = [];
         const startTime = Date.now();
@@ -149,15 +144,7 @@ export class S3CSVReader {
           delimiter,
           columns: skipHeader
             ? true
-            : [
-                'tenantId',
-                'type',
-                'value',
-                'weight',
-                'source',
-                'timestamp',
-                'metadata',
-              ],
+            : ["tenantId", "type", "value", "weight", "source", "timestamp", "metadata"],
           skip_empty_lines: true,
           trim: true,
           cast: true,
@@ -183,7 +170,7 @@ export class S3CSVReader {
 
               callback();
             } catch (error) {
-              processedRows.inc({ bucket, key, status: 'error' });
+              processedRows.inc({ bucket, key, status: "error" });
               span.recordException(error as Error);
               callback(error);
             }
@@ -194,20 +181,20 @@ export class S3CSVReader {
           s3Stream
             .pipe(csvParser)
             .pipe(processor)
-            .on('finish', async () => {
+            .on("finish", async () => {
               // Process remaining batch
               if (batch.length > 0) {
                 await this.processBatch(batch, onBatch, startTime);
               }
 
               span.setAttributes({
-                'csv.rows_processed': rowCount,
-                'csv.duration_ms': Date.now() - startTime,
+                "csv.rows_processed": rowCount,
+                "csv.duration_ms": Date.now() - startTime,
               });
 
               resolve();
             })
-            .on('error', (error) => {
+            .on("error", (error) => {
               span.recordException(error);
               span.setStatus({ code: 2, message: error.message });
               reject(error);
@@ -229,7 +216,7 @@ export class S3CSVReader {
       type: row.type,
       value: parseFloat(row.value),
       weight: row.weight ? parseFloat(row.weight) : 1.0,
-      source: row.source || 's3-csv',
+      source: row.source || "s3-csv",
       timestamp: row.timestamp || new Date().toISOString(),
       metadata: row.metadata ? JSON.parse(row.metadata) : undefined,
     };
@@ -245,7 +232,7 @@ export class S3CSVReader {
   private async processBatch(
     batch: CSVRow[],
     onBatch: (rows: CSVRow[]) => Promise<void>,
-    startTime: number,
+    startTime: number
   ): Promise<void> {
     const batchStartTime = Date.now();
 
@@ -254,11 +241,11 @@ export class S3CSVReader {
 
       processedRows.inc(
         {
-          bucket: 'current',
-          key: 'current',
-          status: 'success',
+          bucket: "current",
+          key: "current",
+          status: "success",
         },
-        batch.length,
+        batch.length
       );
 
       const lagMs = Date.now() - startTime;
@@ -266,11 +253,11 @@ export class S3CSVReader {
     } catch (error) {
       processedRows.inc(
         {
-          bucket: 'current',
-          key: 'current',
-          status: 'error',
+          bucket: "current",
+          key: "current",
+          status: "error",
         },
-        batch.length,
+        batch.length
       );
       throw error;
     }

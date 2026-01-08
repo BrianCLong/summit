@@ -15,12 +15,14 @@ Large language models (LLMs) increasingly operate with access to external tools,
 3. **Random or round-robin selection**: Simple distribution across available tools
 
 These approaches suffer from several limitations:
+
 - No optimization for cost efficiency
 - Limited ability to learn from outcomes
 - No integration between evaluation metrics and routing decisions
 - Lack of session-level tracing for multi-turn interactions
 
 There exists a need for systems that can:
+
 - Learn optimal routing policies from evaluation outcomes
 - Balance cost and quality constraints dynamically
 - Provide unified tracing for multi-step tool-augmented workflows
@@ -36,6 +38,7 @@ Disclosed herein are systems and methods for evaluation-aware routing in tool-au
 4. **Adaptive learning**: Routing policies that improve based on aggregated evaluation metrics
 
 In one embodiment, a method comprises:
+
 - Receiving a task request requiring tool invocation
 - Generating candidate tool selections with estimated quality and cost
 - Scoring candidates using a cost-quality tradeoff function with configurable weight parameter λ
@@ -49,33 +52,39 @@ In one embodiment, a method comprises:
 The disclosed system comprises the following components:
 
 **1. Evaluation Engine**
+
 - Scenario loader for YAML-based scenario definitions
 - Runner that executes scenarios through the target system
 - Metrics collector that aggregates results across runs
 
 **2. Trace Schema**
+
 - Canonical JSON schema for trace events
 - Event types: request_start, request_end, tool_call_start, tool_call_end, routing_decision, safety_check, error, metric
 - Automatic aggregation of summary metrics (duration, tokens, cost, errors, safety violations)
 
 **3. Routing Engine**
+
 - Base router interface with pluggable implementations
 - Random router (baseline)
 - Greedy cost-aware router with scoring function: `score = quality × (1 - λ) - normalizedCost × λ`
 - Adaptive router that learns from evaluation outcomes
 
 **4. Cost Model**
+
 - Configurable token-based pricing (input/output tokens)
 - Tool-specific cost configuration
 - Latency penalty modeling
 - Aggregation utilities for cost estimation
 
 **5. Safety Module**
+
 - Pattern-based detection for jailbreak, PII, harmful content, injection attacks
 - Red-team scenario library for adversarial testing
 - Violation logging and statistics
 
 **6. Telemetry Client**
+
 - JSONL trace output for persistence
 - Prometheus/OpenTelemetry export stubs
 - Real-time metrics aggregation
@@ -113,6 +122,7 @@ After each evaluation outcome:
 #### Trace Schema
 
 Each trace event includes:
+
 - Unique event ID and trace ID
 - Parent event ID for hierarchical tracing
 - Timestamp (ISO 8601)
@@ -124,6 +134,7 @@ Each trace event includes:
 - Error details (if applicable)
 
 Traces aggregate to summary metrics:
+
 - Success rate
 - Total duration
 - Token counts
@@ -135,6 +146,7 @@ Traces aggregate to summary metrics:
 #### Evaluation Scenarios
 
 Scenarios are defined in YAML with:
+
 - Unique identifier and metadata
 - Category (code_correction, data_analysis, agentic_flow, etc.)
 - Tool definitions with cost and latency estimates
@@ -152,6 +164,6 @@ A system and method for evaluation-aware routing in tool-augmented language mode
 
 ---
 
-*Document Status: DRAFT - For Internal Review*
-*Version: 1.0*
-*Date: 2024*
+_Document Status: DRAFT - For Internal Review_
+_Version: 1.0_
+_Date: 2024_

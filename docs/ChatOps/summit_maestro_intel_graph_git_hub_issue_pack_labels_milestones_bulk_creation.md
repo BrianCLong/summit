@@ -159,7 +159,7 @@ Create in `/.github/ISSUE_TEMPLATE/`.
 ```yaml
 name: Feature request
 description: Propose new functionality
-labels: ['type:feature']
+labels: ["type:feature"]
 body:
   - type: textarea
     id: problem
@@ -184,7 +184,7 @@ body:
 
 ```yaml
 name: Bug report
-labels: ['type:bug']
+labels: ["type:bug"]
 body:
   - type: input
     id: version

@@ -190,24 +190,24 @@ Entrypoints define how to invoke your extension code:
 Your extension's `activate` function is called when Summit loads it:
 
 ```typescript
-import type { ExtensionContext, ExtensionActivation } from '@intelgraph/extensions';
+import type { ExtensionContext, ExtensionActivation } from "@intelgraph/extensions";
 
 export async function activate(context: ExtensionContext): Promise<ExtensionActivation> {
   const { logger, config, api, extensionPath, storagePath } = context;
 
-  logger.info('Extension activating...');
+  logger.info("Extension activating...");
 
   // Initialize your extension
   // ...
 
   return {
     dispose: async () => {
-      logger.info('Extension deactivating...');
+      logger.info("Extension deactivating...");
       // Clean up resources
     },
     exports: {
       // Public API for other extensions
-      myFunction: () => 'Hello!',
+      myFunction: () => "Hello!",
     },
   };
 }
@@ -229,28 +229,28 @@ Access Summit functionality via `context.api`:
 
 ```typescript
 // Entities
-const entities = await api.entities.query({ type: 'person' });
-await api.entities.create({ type: 'person', name: 'John Doe' });
-await api.entities.update(id, { name: 'Jane Doe' });
+const entities = await api.entities.query({ type: "person" });
+await api.entities.create({ type: "person", name: "John Doe" });
+await api.entities.update(id, { name: "Jane Doe" });
 await api.entities.delete(id);
 
 // Relationships
-await api.relationships.create({ from: id1, to: id2, type: 'knows' });
-const rels = await api.relationships.query({ type: 'knows' });
+await api.relationships.create({ from: id1, to: id2, type: "knows" });
+const rels = await api.relationships.query({ type: "knows" });
 
 // Investigations
-const inv = await api.investigations.create({ title: 'New Investigation' });
+const inv = await api.investigations.create({ title: "New Investigation" });
 const invData = await api.investigations.get(invId);
-await api.investigations.update(invId, { status: 'active' });
+await api.investigations.update(invId, { status: "active" });
 
 // Storage (persistent key-value store for your extension)
-await api.storage.set('myKey', { data: 'value' });
-const data = await api.storage.get('myKey');
-await api.storage.delete('myKey');
+await api.storage.set("myKey", { data: "value" });
+const data = await api.storage.get("myKey");
+await api.storage.delete("myKey");
 
 // HTTP client (if network:access permission granted)
-const response = await api.http?.get('https://api.example.com/data');
-await api.http?.post('https://api.example.com/data', { key: 'value' });
+const response = await api.http?.get("https://api.example.com/data");
+await api.http?.post("https://api.example.com/data", { key: "value" });
 ```
 
 ## Capabilities
@@ -364,10 +364,7 @@ Implement the command:
 
 ```typescript
 // src/commands/analyze.ts
-export async function analyzeCommand(
-  args: { input: string },
-  options: { output: string }
-) {
+export async function analyzeCommand(args: { input: string }, options: { output: string }) {
   const { input } = args;
   const { output } = options;
   // Command logic...
@@ -457,10 +454,10 @@ Create tests using Jest or your preferred framework:
 
 ```typescript
 // src/index.test.ts
-import { activate } from './index.js';
+import { activate } from "./index.js";
 
-describe('My Extension', () => {
-  it('activates successfully', async () => {
+describe("My Extension", () => {
+  it("activates successfully", async () => {
     const context = createMockContext();
     const activation = await activate(context);
     expect(activation).toBeDefined();
@@ -574,6 +571,7 @@ See the complete example extension:
 - **Analytics Dashboard**: `extensions/examples/analytics-dashboard/`
 
 Key features demonstrated:
+
 - Multiple entrypoints
 - Copilot tools
 - UI commands

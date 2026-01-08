@@ -3,7 +3,12 @@
  * Measures performance of post-quantum cryptographic operations
  */
 
-import { PQCAlgorithm, PQCBenchmark, KeyEncapsulationMechanism, DigitalSignatureScheme } from '../types';
+import {
+  PQCAlgorithm,
+  PQCBenchmark,
+  KeyEncapsulationMechanism,
+  DigitalSignatureScheme,
+} from "../types";
 
 export class PQCBenchmarker {
   private iterations: number;
@@ -16,23 +21,41 @@ export class PQCBenchmarker {
     const results: PQCBenchmark[] = [];
 
     // Benchmark key generation
-    results.push(await this.benchmarkOperation('keygen', async () => {
-      await kem.generateKeyPair();
-    }, kem.getAlgorithm()));
+    results.push(
+      await this.benchmarkOperation(
+        "keygen",
+        async () => {
+          await kem.generateKeyPair();
+        },
+        kem.getAlgorithm()
+      )
+    );
 
     // Generate a key pair for encapsulation/decapsulation benchmarks
     const keyPair = await kem.generateKeyPair();
 
     // Benchmark encapsulation
-    results.push(await this.benchmarkOperation('encapsulate', async () => {
-      await kem.encapsulate(keyPair.publicKey);
-    }, kem.getAlgorithm()));
+    results.push(
+      await this.benchmarkOperation(
+        "encapsulate",
+        async () => {
+          await kem.encapsulate(keyPair.publicKey);
+        },
+        kem.getAlgorithm()
+      )
+    );
 
     // Benchmark decapsulation
     const { ciphertext } = await kem.encapsulate(keyPair.publicKey);
-    results.push(await this.benchmarkOperation('decapsulate', async () => {
-      await kem.decapsulate(ciphertext, keyPair.privateKey);
-    }, kem.getAlgorithm()));
+    results.push(
+      await this.benchmarkOperation(
+        "decapsulate",
+        async () => {
+          await kem.decapsulate(ciphertext, keyPair.privateKey);
+        },
+        kem.getAlgorithm()
+      )
+    );
 
     return results;
   }
@@ -41,30 +64,48 @@ export class PQCBenchmarker {
     const results: PQCBenchmark[] = [];
 
     // Benchmark key generation
-    results.push(await this.benchmarkOperation('keygen', async () => {
-      await dss.generateKeyPair();
-    }, dss.getAlgorithm()));
+    results.push(
+      await this.benchmarkOperation(
+        "keygen",
+        async () => {
+          await dss.generateKeyPair();
+        },
+        dss.getAlgorithm()
+      )
+    );
 
     // Generate a key pair for signing/verification benchmarks
     const keyPair = await dss.generateKeyPair();
     const message = crypto.getRandomValues(new Uint8Array(1024));
 
     // Benchmark signing
-    results.push(await this.benchmarkOperation('sign', async () => {
-      await dss.sign(message, keyPair.privateKey);
-    }, dss.getAlgorithm()));
+    results.push(
+      await this.benchmarkOperation(
+        "sign",
+        async () => {
+          await dss.sign(message, keyPair.privateKey);
+        },
+        dss.getAlgorithm()
+      )
+    );
 
     // Benchmark verification
     const { signature } = await dss.sign(message, keyPair.privateKey);
-    results.push(await this.benchmarkOperation('verify', async () => {
-      await dss.verify(message, signature, keyPair.publicKey);
-    }, dss.getAlgorithm()));
+    results.push(
+      await this.benchmarkOperation(
+        "verify",
+        async () => {
+          await dss.verify(message, signature, keyPair.publicKey);
+        },
+        dss.getAlgorithm()
+      )
+    );
 
     return results;
   }
 
   private async benchmarkOperation(
-    operation: 'keygen' | 'encapsulate' | 'decapsulate' | 'sign' | 'verify',
+    operation: "keygen" | "encapsulate" | "decapsulate" | "sign" | "verify",
     fn: () => Promise<void>,
     algorithm: PQCAlgorithm
   ): Promise<PQCBenchmark> {
@@ -103,14 +144,14 @@ export class PQCBenchmarker {
   }
 
   private getMemoryUsage(): number {
-    if (typeof process !== 'undefined' && process.memoryUsage) {
+    if (typeof process !== "undefined" && process.memoryUsage) {
       return process.memoryUsage().heapUsed;
     }
     return 0;
   }
 
   formatResults(benchmarks: PQCBenchmark[]): string {
-    let output = '=== PQC Performance Benchmark Results ===\n\n';
+    let output = "=== PQC Performance Benchmark Results ===\n\n";
 
     for (const benchmark of benchmarks) {
       output += `Algorithm: ${benchmark.algorithm}\n`;
@@ -121,7 +162,7 @@ export class PQCBenchmarker {
       output += `Max Time: ${benchmark.maxTime.toFixed(2)}ms\n`;
       output += `Throughput: ${benchmark.throughput.toFixed(2)} ops/sec\n`;
       output += `Memory Usage: ${(benchmark.memoryUsage / 1024 / 1024).toFixed(2)}MB\n`;
-      output += '---\n\n';
+      output += "---\n\n";
     }
 
     return output;

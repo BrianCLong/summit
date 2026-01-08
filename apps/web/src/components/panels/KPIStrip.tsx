@@ -40,7 +40,9 @@ export function KPIStrip({
   }
 
   const formatValue = (value: number | string, format: string) => {
-    if (typeof value === 'string') {return value}
+    if (typeof value === 'string') {
+      return value
+    }
 
     switch (format) {
       case 'number':
@@ -53,8 +55,12 @@ export function KPIStrip({
           currency: 'USD',
         }).format(value)
       case 'duration':
-        if (value < 60) {return `${value}s`}
-        if (value < 3600) {return `${Math.floor(value / 60)}m`}
+        if (value < 60) {
+          return `${value}s`
+        }
+        if (value < 3600) {
+          return `${Math.floor(value / 60)}m`
+        }
         return `${Math.floor(value / 3600)}h`
       default:
         return value.toString()

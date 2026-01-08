@@ -35,12 +35,12 @@ All 11 services are now implemented and integrated into the Summit/IntelGraph mo
    - Explainable scorecards
    - Integration: `EntityRepo`, `prov-ledger`
 
-8. **GraphRAG Copilot** (`services/graphrag-copilot`)
+6. **GraphRAG Copilot** (`services/graphrag-copilot`)
    - Natural language → Cypher + citations
    - Policy-aware redaction
    - Integration: Neo4j, `policy-compiler`, `copilot` service
 
-9. **Tri-Pane UX** (`packages/tri-pane-ux`)
+7. **Tri-Pane UX** (`packages/tri-pane-ux`)
    - Graph + Timeline + Map synchronized views
    - "Explain this View" panel
    - Integration: React UI, `web` app
@@ -57,10 +57,10 @@ All 11 services are now implemented and integrated into the Summit/IntelGraph mo
    - Monte Carlo "what-if" simulation
    - Integration: Decision workflows, `investigation`
 
-10. **Dialectic Agents (DCQ)** (`services/dialectic-agents`)
-    - Paired adversarial reasoners
-    - Decision Debate Record (DDR)
-    - Integration: `copilot`, analysis workflows
+8. **Dialectic Agents (DCQ)** (`services/dialectic-agents`)
+   - Paired adversarial reasoners
+   - Decision Debate Record (DDR)
+   - Integration: `copilot`, analysis workflows
 
 ### Process Acceleration (Prompt #11)
 
@@ -137,17 +137,17 @@ pnpm install && pnpm build
 
 ```typescript
 // 1. Ingest with lineage
-import { SchemaMapper } from '@intelgraph/schema-ingest-wizard';
+import { SchemaMapper } from "@intelgraph/schema-ingest-wizard";
 const wizard = new SchemaMapper();
 const entities = wizard.ingest(data, config);
 
 // 2. Resolve entities with audit
-import { EntityResolver } from '@intelgraph/entity-resolution';
+import { EntityResolver } from "@intelgraph/entity-resolution";
 const resolver = new EntityResolver();
 const scorecard = resolver.match(entityA, entityB);
 
 // 3. Build PCA manifest
-import { ManifestBuilder } from '@intelgraph/pca-verifier';
+import { ManifestBuilder } from "@intelgraph/pca-verifier";
 const manifest = await ManifestBuilder.buildFromDAG(dag, inputData, executor);
 
 // 4. Store in provenance ledger
@@ -158,15 +158,15 @@ await provLedger.store(manifest);
 
 ```typescript
 // 1. Load policy
-import { PolicyCompiler } from '@intelgraph/policy-compiler';
+import { PolicyCompiler } from "@intelgraph/policy-compiler";
 const compiler = new PolicyCompiler();
 const policy = compiler.loadFromYAML(policyYAML);
 
 // 2. Query with policy enforcement
-import { GraphRAGCopilot } from '@intelgraph/graphrag-copilot';
+import { GraphRAGCopilot } from "@intelgraph/graphrag-copilot";
 const copilot = new GraphRAGCopilot();
-copilot.setPolicyRule('SECRET', ['ssn', 'email']);
-const response = await copilot.query('Who is Alice?', graphData);
+copilot.setPolicyRule("SECRET", ["ssn", "email"]);
+const response = await copilot.query("Who is Alice?", graphData);
 
 // 3. Audit decision
 await auditLogger.log(response);
@@ -176,21 +176,21 @@ await auditLogger.log(response);
 
 ```typescript
 // 1. Hypothesis workbench
-import { HypothesisWorkbench } from '@intelgraph/hypothesis-workbench';
+import { HypothesisWorkbench } from "@intelgraph/hypothesis-workbench";
 const bench = new HypothesisWorkbench();
 bench.addHypothesis(h1);
 bench.addEvidence(e1);
 bench.updateBelief();
 
 // 2. COA planning
-import { COAPlanner } from '@intelgraph/coa-planner';
+import { COAPlanner } from "@intelgraph/coa-planner";
 const planner = new COAPlanner();
-const simulation = planner.simulate('coa-1', 1000);
+const simulation = planner.simulate("coa-1", 1000);
 
 // 3. Dialectic debate
-import { DialecticAgents } from '@intelgraph/dialectic-agents';
+import { DialecticAgents } from "@intelgraph/dialectic-agents";
 const agents = new DialecticAgents();
-const ddr = await agents.debate('Should we proceed?', 5);
+const ddr = await agents.debate("Should we proceed?", 5);
 
 // 4. Export disclosure pack
 const pack = {
@@ -241,6 +241,7 @@ services:
 ## Roadmap & Extensions
 
 ### Near-term (Q1 2025)
+
 - [ ] Integrate PCA manifests with blockchain/S3 Object Lock
 - [ ] Add true ZK-SNARKs to ZK-TX
 - [ ] Extend policy compiler to full OPA/Rego
@@ -248,6 +249,7 @@ services:
 - [ ] Build COA visual planner
 
 ### Mid-term (Q2 2025)
+
 - [ ] Multi-party ZK deconfliction
 - [ ] Differential privacy in PCA
 - [ ] Real-time tri-pane UX updates
@@ -255,6 +257,7 @@ services:
 - [ ] PRD generator with AI assistance
 
 ### Long-term (Ascent Beyond)
+
 - [ ] Proof-carrying reality (PCR) integration
 - [ ] Quantified coverage metrics for DCQ
 - [ ] Federated GraphRAG across tenants
@@ -264,6 +267,7 @@ services:
 ## Support & Documentation
 
 Each service has its own README:
+
 - `services/pca-verifier/README.md`
 - `services/zk-deconfliction/README.md`
 - `services/policy-compiler/README.md`
@@ -279,6 +283,7 @@ Each service has its own README:
 ## Contribution Guidelines
 
 When extending these services:
+
 1. **Maintain provenance**: All data transformations must be logged
 2. **Respect policies**: Always check authorization before operations
 3. **Provide explanations**: Scorecards, citations, and audit trails required

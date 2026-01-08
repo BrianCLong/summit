@@ -1,4 +1,4 @@
-import statsmodels from 'statsmodels';
+import statsmodels from "statsmodels";
 
 export function planningStudio(config) {
   const risk = statsmodels.forecast({ risk: config.integrityThreshold });

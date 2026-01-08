@@ -5,13 +5,16 @@
 **Theme:** “Conductor as the shared automation fabric for many tenants (internal + white-label + SaaS)”
 
 ## Objectives (end-of-sprint truths)
+
 1. **Multi-tenant Conductor is safe to share** – Isolation, noisy-neighbor protections, and per-tenant limits are enforced and observable.
 2. **Conductor is productized for partners** – White-label knobs, config profiles, and docs let a design partner deploy with light help.
 3. **Core CompanyOS workflows run on Maestro by default** – A real library of “golden” CompanyOS workflows is live and policy-gated.
 4. **SaaS readiness for SRE + billing** – Rate limiting, incident runbooks, DR drills, and usage signals exist for hosted Conductor.
 
 ## Workstreams & Stories
+
 ### Workstream 1 — Multi-Tenant Isolation & Limits
+
 - **Story 1.1 – Tenant Isolation & Resource Quotas**
   _Goal:_ One tenant can’t starve or break others; guardrails are visible and tunable.
   _Deliverables:_ Per-tenant max concurrent runs, max queued runs, max task concurrency, and execution classes (`standard`, `bulk`, `low-priority`) controlling scheduling.
@@ -23,6 +26,7 @@
   _Acceptance:_ Cross-tenant API calls rejected and logged with structured security events; tests simulate mis-tagging and verify policy blocks; secrets access logged with tenant/environment/workflow context; threat model doc updated for multi-tenancy and secrets.
 
 ### Workstream 2 — Workflow Developer Experience & SDK
+
 - **Story 2.1 – Conductor Workflow SDK (TypeScript-first)**
   _Goal:_ Internal/partner devs author typed workflows.
   _Deliverables:_ TS SDK for defining workflows (steps, tasks, retries, timeouts), metadata (`risk_level`, `tenant_scope`, `category`, `tags`, `runbook_link`), and structured events/evidence hooks.
@@ -34,6 +38,7 @@
   _Acceptance:_ Triggerable from Switchboard palette or New Workflow UI; demo runs end-to-end in staging with real-ish data.
 
 ### Workstream 3 — White-Label & Partner Readiness
+
 - **Story 3.1 – Conductor Configuration Profiles (Internal / White-Label / Hosted SaaS)**
   _Goal:_ Same binary, three deployment personas.
   _Deliverables:_ Profile configs (`internal-edition`, `white-label-edition`, `hosted-saas`) toggling default policies, risk thresholds, limits/quotas, and logging/retention. Example files: `values.conductor.internal.yaml`, `values.conductor.white-label.yaml`, `values.conductor.saas.yaml`.
@@ -45,6 +50,7 @@
   _Acceptance:_ Walk-through validated by non-core engineer; commands/snippets tested in CI; guide referenced from white-label kit.
 
 ### Workstream 4 — Hosted SaaS: Rate Limits, Incidents, DR
+
 - **Story 4.1 – Tenant-Aware Rate Limiting & Abuse Protection**
   _Goal:_ Prevent abuse and protect global SLOs.
   _Deliverables:_ Tenant/IP-based API + workflow-trigger rate limits; abuse patterns & alarms (e.g., rapid create/cancel cycles).
@@ -56,6 +62,7 @@
   _Acceptance:_ Kill-switch gated to specific roles, emits receipts; DR report with actions, recovery time, gaps; backups/restores observable with metrics/logs.
 
 ### Workstream 5 — FinOps & Usage-Based Pricing Inputs
+
 - **Story 5.1 – Enriched Metering for Pricing Experiments**
   _Goal:_ Finance/product can simulate pricing from real usage.
   _Deliverables:_ Metering events enriched with workflow complexity hints (steps, external calls), duration bands, and data volume/weight estimates; pricing model dashboard or spreadsheet exploring per-run/per-task/blended axes.
@@ -70,6 +77,7 @@
   _Acceptance:_ Cross-tenant API calls rejected and logged with structured security events; tests simulate mis-tagging and verify policy blocks; secrets access logged with tenant/environment/workflow context; threat model doc updated for multi-tenancy and secrets.
 
 ### Workstream 2 — Workflow Developer Experience & SDK
+
 - **Story 2.1 – Conductor Workflow SDK (TypeScript-first)**  
   _Goal:_ Internal/partner devs author typed workflows.  
   _Deliverables:_ TS SDK for defining workflows (steps, tasks, retries, timeouts), metadata (`risk_level`, `tenant_scope`, `category`, `tags`, `runbook_link`), and structured events/evidence hooks.  
@@ -81,6 +89,7 @@
   _Acceptance:_ Triggerable from Switchboard palette or New Workflow UI; demo runs end-to-end in staging with real-ish data.
 
 ### Workstream 3 — White-Label & Partner Readiness
+
 - **Story 3.1 – Conductor Configuration Profiles (Internal / White-Label / Hosted SaaS)**  
   _Goal:_ Same binary, three deployment personas.  
   _Deliverables:_ Profile configs (`internal-edition`, `white-label-edition`, `hosted-saas`) toggling default policies, risk thresholds, limits/quotas, and logging/retention. Example files: `values.conductor.internal.yaml`, `values.conductor.white-label.yaml`, `values.conductor.saas.yaml`.  
@@ -92,6 +101,7 @@
   _Acceptance:_ Walk-through validated by non-core engineer; commands/snippets tested in CI; guide referenced from white-label kit.
 
 ### Workstream 4 — Hosted SaaS: Rate Limits, Incidents, DR
+
 - **Story 4.1 – Tenant-Aware Rate Limiting & Abuse Protection**  
   _Goal:_ Prevent abuse and protect global SLOs.  
   _Deliverables:_ Tenant/IP-based API + workflow-trigger rate limits; abuse patterns & alarms (e.g., rapid create/cancel cycles).  
@@ -103,12 +113,14 @@
   _Acceptance:_ Kill-switch gated to specific roles, emits receipts; DR report with actions, recovery time, gaps; backups/restores observable with metrics/logs.
 
 ### Workstream 5 — FinOps & Usage-Based Pricing Inputs
+
 - **Story 5.1 – Enriched Metering for Pricing Experiments**  
   _Goal:_ Finance/product can simulate pricing from real usage.  
   _Deliverables:_ Metering events enriched with workflow complexity hints (steps, external calls), duration bands, and data volume/weight estimates; pricing model dashboard or spreadsheet exploring per-run/per-task/blended axes.  
   _Acceptance:_ Enriched events live in metering store; ≥2 candidate pricing axes documented with pros/cons; per-tenant usage view includes runs, tasks, and complexity score; write-up: “Conductor Pricing Inputs v0.”
 
 ## Global Definition of Done (reaffirmed)
+
 1. **Spec / ADR** captured with rationale and alternatives.
 2. **Policy** updates to OPA/ABAC bundles plus simulation tests.
 3. **Tests** for new critical paths (≥80% coverage target).
@@ -118,6 +130,7 @@
 7. **Changelog** with performance + cost impact, especially multi-tenant/concurrency changes.
 
 ## Execution Blueprint (architecture, ops, and verification)
+
 - **Isolation & Limits Architecture**:
   - Scheduler supports execution classes with weighted fair sharing; per-tenant tokens for concurrent runs/tasks and backlog ceilings. Default leak-free queueing with bulk deferral.
   - Admission control enforces tenant quota snapshot + circuit-breaker for misbehaving tenants; structured status reasons and tenant-scoped metrics (`quota_hits_total`, `queued_runs`, `running_tasks`).
@@ -143,6 +156,7 @@
   - Enriched events emit complexity/duration/volume hints; per-tenant dashboards and pricing simulation workbook.
 
 ## Validation & Runbooks (minimum set)
+
 - **Load & Noisy-Neighbor Tests:** Stress Tenant A while monitoring Tenant B SLOs; verify limits and isolation metrics.
 - **Security & Tagging Tests:** Simulate cross-tenant API calls and mis-tagged resources; ensure OPA and validation blocks with structured audit logs.
 - **SDK Quality Gates:** Type safety checks, schema validation for workflow definitions, and failure readability tests.
@@ -154,12 +168,14 @@
   - Kill-switch toggle (policy approval, evidence capture, rollback).
 
 ## Innovation & Forward-Looking Enhancements
+
 - **Predictive quota rebalancing** using multi-armed bandit signals to preempt noisy neighbors without over-throttling low-risk tenants.
 - **Typed policy graph** linking SDK metadata to OPA schemas for safer evolutions and automated migration hints.
 - **Provenance-backed DR rehearsals** that auto-generate evidence bundles and ledger entries for audits.
 - **Adaptive pricing sandbox** that replays historical metering with configurable tariff curves.
 
 ## Deliverables Checklist (for PR reviewers)
+
 - ADR/spec updates per story with alternatives and decision records.
 - Updated OPA/ABAC bundles + simulation tests for multi-tenant, rate-limit, kill-switch, and SDK metadata policies.
 - Unit/integration/load/security test coverage ≥80% on new paths; CI jobs for guide-snippet verification.
@@ -168,6 +184,7 @@
 - Changelog entry noting perf/cost impacts from isolation + concurrency changes.
 
 ## Post-Sprint Readiness
+
 - Demo script: staging run of golden workflows via Switchboard palette/New Workflow UI with provenance receipts.
 - SaaS readiness: profile-specific rate limits and billing signals live; incident/DR runbooks validated; partner guide linked from white-label kit.
 - Pricing inputs v0 published with per-tenant usage views and candidate pricing axes.

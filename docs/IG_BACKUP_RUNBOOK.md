@@ -20,6 +20,7 @@ node tools/ig-backup/index.js backup create \
 ```
 
 Key flags:
+
 - `--case <id>`: limit backup to one case (repeat for multiple).
 - `--dry-run`: compute hashes and metadata without writing the backup file.
 - `--no-encrypt`: write a plain JSON backup (not recommended).
@@ -35,6 +36,7 @@ node tools/ig-backup/index.js backup restore \
 ```
 
 Key flags:
+
 - `--case <id>`: restore only the selected case(s).
 - `--dry-run`: verify checksums/hashes and show counts without writing to the database file.
 - `--input <path>`: required; the CLI refuses to restore without an explicit source file.

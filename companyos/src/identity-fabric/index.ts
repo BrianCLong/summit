@@ -59,7 +59,7 @@ export type {
   AuthenticationMethod,
   MfaMethod,
   CredentialRotationPolicy,
-} from './identity/types.js';
+} from "./identity/types.js";
 
 // ============================================================================
 // Identity Service Exports
@@ -74,7 +74,7 @@ export {
   TenantNotFoundError,
   TenantAccessDeniedError,
   IdentityValidationError,
-} from './identity/identity-service.js';
+} from "./identity/identity-service.js";
 
 export type {
   IdentityServiceConfig,
@@ -84,7 +84,7 @@ export type {
   TenantStore,
   RoleStore,
   IdentityStores,
-} from './identity/identity-service.js';
+} from "./identity/identity-service.js";
 
 // ============================================================================
 // Policy Decision Service Exports
@@ -94,7 +94,7 @@ export {
   PolicyDecisionService,
   PolicyInputBuilder,
   PolicyEvaluationError,
-} from './policy/policy-decision-service.js';
+} from "./policy/policy-decision-service.js";
 
 export type {
   PolicyDecisionServiceConfig,
@@ -106,16 +106,13 @@ export type {
   ResourceContext,
   EnvironmentContext,
   TenantContext,
-} from './policy/policy-decision-service.js';
+} from "./policy/policy-decision-service.js";
 
 // ============================================================================
 // Policy Bundle Manager Exports
 // ============================================================================
 
-export {
-  PolicyBundleManager,
-  BUNDLE_STRUCTURE,
-} from './policy/bundle-manager.js';
+export { PolicyBundleManager, BUNDLE_STRUCTURE } from "./policy/bundle-manager.js";
 
 export type {
   PolicyBundle,
@@ -126,13 +123,13 @@ export type {
   BundleDependency,
   BundleSignature,
   BundleManagerConfig,
-} from './policy/bundle-manager.js';
+} from "./policy/bundle-manager.js";
 
 // ============================================================================
 // Authentication Service Exports
 // ============================================================================
 
-export { AuthenticationService } from './auth/authentication-service.js';
+export { AuthenticationService } from "./auth/authentication-service.js";
 
 export type {
   AuthenticationServiceConfig,
@@ -160,16 +157,28 @@ export type {
   SAMLProviderConfig,
   IdentityLookup,
   TenantLookup,
-} from './auth/authentication-service.js';
+} from "./auth/authentication-service.js";
 
 // ============================================================================
 // Factory Functions
 // ============================================================================
 
-import { IdentityService, type IdentityServiceConfig, type IdentityStores } from './identity/identity-service.js';
-import { PolicyDecisionService, type PolicyDecisionServiceConfig } from './policy/policy-decision-service.js';
-import { PolicyBundleManager, type BundleManagerConfig } from './policy/bundle-manager.js';
-import { AuthenticationService, type AuthenticationServiceConfig, type IdentityLookup, type TenantLookup } from './auth/authentication-service.js';
+import {
+  IdentityService,
+  type IdentityServiceConfig,
+  type IdentityStores,
+} from "./identity/identity-service.js";
+import {
+  PolicyDecisionService,
+  type PolicyDecisionServiceConfig,
+} from "./policy/policy-decision-service.js";
+import { PolicyBundleManager, type BundleManagerConfig } from "./policy/bundle-manager.js";
+import {
+  AuthenticationService,
+  type AuthenticationServiceConfig,
+  type IdentityLookup,
+  type TenantLookup,
+} from "./auth/authentication-service.js";
 
 /**
  * Create a fully configured Identity & Policy Fabric.
@@ -220,7 +229,7 @@ export function createIdentityFabric(config: IdentityFabricConfig = {}): Identit
     findUserByEmail: async (email, tenantId) => {
       try {
         const result = await identity.resolveByEmail(email, tenantId);
-        return result.identity.type === 'human' ? result.identity as any : null;
+        return result.identity.type === "human" ? (result.identity as any) : null;
       } catch {
         return null;
       }
@@ -232,7 +241,7 @@ export function createIdentityFabric(config: IdentityFabricConfig = {}): Identit
     findWorkloadBySpiffeId: async (spiffeId) => {
       try {
         const result = await identity.resolveBySpiffeId(spiffeId);
-        return result.identity.type === 'workload' ? result.identity as any : null;
+        return result.identity.type === "workload" ? (result.identity as any) : null;
       } catch {
         return null;
       }
@@ -261,4 +270,4 @@ export function createIdentityFabric(config: IdentityFabricConfig = {}): Identit
 // Version
 // ============================================================================
 
-export const VERSION = '1.0.0';
+export const VERSION = "1.0.0";

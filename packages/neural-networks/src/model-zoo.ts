@@ -2,8 +2,8 @@
  * Model zoo with pre-trained models and transfer learning utilities
  */
 
-import type { ModelMetadata } from '@intelgraph/deep-learning-core';
-import type { NeuralNetworkArchitecture } from './index';
+import type { ModelMetadata } from "@intelgraph/deep-learning-core";
+import type { NeuralNetworkArchitecture } from "./index";
 
 export interface PreTrainedModel {
   id: string;
@@ -11,7 +11,7 @@ export interface PreTrainedModel {
   architecture: NeuralNetworkArchitecture;
   weightsUrl?: string;
   dataset: string;
-  taskType: 'classification' | 'detection' | 'segmentation' | 'embedding';
+  taskType: "classification" | "detection" | "segmentation" | "embedding";
   metrics: Record<string, number>;
   license: string;
   citation?: string;
@@ -30,72 +30,109 @@ export class ModelZoo {
   private initializeModels(): void {
     // ImageNet classification models
     this.registerModel({
-      id: 'resnet50-imagenet',
-      name: 'ResNet-50 (ImageNet)',
-      architecture: { name: 'ResNet-50', type: 'convolutional', layers: [], inputShape: [224, 224, 3], outputShape: [1000] },
-      dataset: 'ImageNet',
-      taskType: 'classification',
+      id: "resnet50-imagenet",
+      name: "ResNet-50 (ImageNet)",
+      architecture: {
+        name: "ResNet-50",
+        type: "convolutional",
+        layers: [],
+        inputShape: [224, 224, 3],
+        outputShape: [1000],
+      },
+      dataset: "ImageNet",
+      taskType: "classification",
       metrics: { top1_accuracy: 0.759, top5_accuracy: 0.929 },
-      license: 'Apache-2.0',
-      citation: 'He et al., Deep Residual Learning for Image Recognition, 2015',
+      license: "Apache-2.0",
+      citation: "He et al., Deep Residual Learning for Image Recognition, 2015",
     });
 
     this.registerModel({
-      id: 'vgg16-imagenet',
-      name: 'VGG-16 (ImageNet)',
-      architecture: { name: 'VGG-16', type: 'convolutional', layers: [], inputShape: [224, 224, 3], outputShape: [1000] },
-      dataset: 'ImageNet',
-      taskType: 'classification',
+      id: "vgg16-imagenet",
+      name: "VGG-16 (ImageNet)",
+      architecture: {
+        name: "VGG-16",
+        type: "convolutional",
+        layers: [],
+        inputShape: [224, 224, 3],
+        outputShape: [1000],
+      },
+      dataset: "ImageNet",
+      taskType: "classification",
       metrics: { top1_accuracy: 0.715, top5_accuracy: 0.901 },
-      license: 'MIT',
-      citation: 'Simonyan & Zisserman, Very Deep Convolutional Networks, 2014',
+      license: "MIT",
+      citation: "Simonyan & Zisserman, Very Deep Convolutional Networks, 2014",
     });
 
     this.registerModel({
-      id: 'efficientnet-b0-imagenet',
-      name: 'EfficientNet-B0 (ImageNet)',
-      architecture: { name: 'EfficientNet-B0', type: 'convolutional', layers: [], inputShape: [224, 224, 3], outputShape: [1000] },
-      dataset: 'ImageNet',
-      taskType: 'classification',
+      id: "efficientnet-b0-imagenet",
+      name: "EfficientNet-B0 (ImageNet)",
+      architecture: {
+        name: "EfficientNet-B0",
+        type: "convolutional",
+        layers: [],
+        inputShape: [224, 224, 3],
+        outputShape: [1000],
+      },
+      dataset: "ImageNet",
+      taskType: "classification",
       metrics: { top1_accuracy: 0.773, top5_accuracy: 0.936 },
-      license: 'Apache-2.0',
-      citation: 'Tan & Le, EfficientNet: Rethinking Model Scaling, 2019',
+      license: "Apache-2.0",
+      citation: "Tan & Le, EfficientNet: Rethinking Model Scaling, 2019",
     });
 
     // Object detection models
     this.registerModel({
-      id: 'yolov5-coco',
-      name: 'YOLOv5 (COCO)',
-      architecture: { name: 'YOLOv5', type: 'convolutional', layers: [], inputShape: [640, 640, 3], outputShape: [80] },
-      dataset: 'COCO',
-      taskType: 'detection',
+      id: "yolov5-coco",
+      name: "YOLOv5 (COCO)",
+      architecture: {
+        name: "YOLOv5",
+        type: "convolutional",
+        layers: [],
+        inputShape: [640, 640, 3],
+        outputShape: [80],
+      },
+      dataset: "COCO",
+      taskType: "detection",
       metrics: { map: 0.456, map50: 0.632 },
-      license: 'GPL-3.0',
-      citation: 'Ultralytics YOLOv5, 2020',
+      license: "GPL-3.0",
+      citation: "Ultralytics YOLOv5, 2020",
     });
 
     // Segmentation models
     this.registerModel({
-      id: 'unet-medical',
-      name: 'U-Net (Medical Imaging)',
-      architecture: { name: 'U-Net', type: 'convolutional', layers: [], inputShape: [256, 256, 1], outputShape: [256, 256, 2] },
-      dataset: 'Medical Segmentation',
-      taskType: 'segmentation',
+      id: "unet-medical",
+      name: "U-Net (Medical Imaging)",
+      architecture: {
+        name: "U-Net",
+        type: "convolutional",
+        layers: [],
+        inputShape: [256, 256, 1],
+        outputShape: [256, 256, 2],
+      },
+      dataset: "Medical Segmentation",
+      taskType: "segmentation",
       metrics: { dice_coefficient: 0.923, iou: 0.857 },
-      license: 'MIT',
-      citation: 'Ronneberger et al., U-Net: Convolutional Networks for Biomedical Image Segmentation, 2015',
+      license: "MIT",
+      citation:
+        "Ronneberger et al., U-Net: Convolutional Networks for Biomedical Image Segmentation, 2015",
     });
 
     // Embedding models
     this.registerModel({
-      id: 'facenet',
-      name: 'FaceNet',
-      architecture: { name: 'Inception', type: 'convolutional', layers: [], inputShape: [160, 160, 3], outputShape: [128] },
-      dataset: 'Face Recognition',
-      taskType: 'embedding',
+      id: "facenet",
+      name: "FaceNet",
+      architecture: {
+        name: "Inception",
+        type: "convolutional",
+        layers: [],
+        inputShape: [160, 160, 3],
+        outputShape: [128],
+      },
+      dataset: "Face Recognition",
+      taskType: "embedding",
       metrics: { accuracy: 0.9965 },
-      license: 'Apache-2.0',
-      citation: 'Schroff et al., FaceNet: A Unified Embedding for Face Recognition, 2015',
+      license: "Apache-2.0",
+      citation: "Schroff et al., FaceNet: A Unified Embedding for Face Recognition, 2015",
     });
   }
 
@@ -139,7 +176,7 @@ export class ModelZoo {
       (m) =>
         m.name.toLowerCase().includes(lowerQuery) ||
         m.architecture.name.toLowerCase().includes(lowerQuery) ||
-        m.dataset.toLowerCase().includes(lowerQuery),
+        m.dataset.toLowerCase().includes(lowerQuery)
     );
   }
 }
@@ -153,7 +190,7 @@ export class TransferLearning {
    */
   static freezeLayers(
     architecture: NeuralNetworkArchitecture,
-    numLayersToFreeze: number,
+    numLayersToFreeze: number
   ): NeuralNetworkArchitecture {
     const frozenLayers = architecture.layers.map((layer, index) => ({
       ...layer,
@@ -174,13 +211,13 @@ export class TransferLearning {
    */
   static replaceHead(
     architecture: NeuralNetworkArchitecture,
-    numClasses: number,
+    numClasses: number
   ): NeuralNetworkArchitecture {
     const layers = architecture.layers.slice(0, -1);
     layers.push({
-      type: 'dense',
-      name: 'new_output',
-      config: { units: numClasses, activation: 'softmax' },
+      type: "dense",
+      name: "new_output",
+      config: { units: numClasses, activation: "softmax" },
     });
 
     return {
@@ -197,7 +234,7 @@ export class TransferLearning {
     baseModelId: string,
     numClasses: number,
     learningRate: number,
-    frozenLayers: number,
+    frozenLayers: number
   ): {
     baseModelId: string;
     numClasses: number;

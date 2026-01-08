@@ -119,104 +119,103 @@ python main.py
 ### Threat Intelligence Collection
 
 ```typescript
-import { ThreatFeedAggregator } from '@intelgraph/threat-intelligence';
+import { ThreatFeedAggregator } from "@intelgraph/threat-intelligence";
 
 const aggregator = new ThreatFeedAggregator();
 
 // Register a threat feed
 await aggregator.registerFeed({
-  id: 'feed-1',
-  name: 'Commercial TI Feed',
-  source: 'COMMERCIAL',
-  url: 'https://api.threatprovider.com/feed',
-  apiKey: 'your-api-key',
+  id: "feed-1",
+  name: "Commercial TI Feed",
+  source: "COMMERCIAL",
+  url: "https://api.threatprovider.com/feed",
+  apiKey: "your-api-key",
   refreshInterval: 3600,
-  tlp: 'AMBER',
+  tlp: "AMBER",
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 });
 
 // Sync feed
-const threats = await aggregator.syncFeed('feed-1');
+const threats = await aggregator.syncFeed("feed-1");
 ```
 
 ### IOC Management
 
 ```typescript
-import { IOCManager } from '@intelgraph/ioc-manager';
+import { IOCManager } from "@intelgraph/ioc-manager";
 
 const iocManager = new IOCManager();
 
 // Add IOC
 await iocManager.addIOC({
-  id: 'ioc-1',
-  type: 'IP_ADDRESS',
-  value: '192.0.2.1',
-  severity: 'HIGH',
+  id: "ioc-1",
+  type: "IP_ADDRESS",
+  value: "192.0.2.1",
+  severity: "HIGH",
   confidence: 85,
-  status: 'ACTIVE',
-  tags: ['malware', 'botnet'],
+  status: "ACTIVE",
+  tags: ["malware", "botnet"],
   firstSeen: new Date().toISOString(),
   lastSeen: new Date().toISOString(),
-  sources: [{
-    name: 'ThreatFeed',
-    confidence: 85,
-    timestamp: new Date().toISOString(),
-  }],
-  tenantId: 'default',
+  sources: [
+    {
+      name: "ThreatFeed",
+      confidence: 85,
+      timestamp: new Date().toISOString(),
+    },
+  ],
+  tenantId: "default",
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 });
 
 // Search IOCs
 const { iocs, total } = await iocManager.search({
-  types: ['IP_ADDRESS'],
-  severities: ['HIGH', 'CRITICAL'],
+  types: ["IP_ADDRESS"],
+  severities: ["HIGH", "CRITICAL"],
   minConfidence: 80,
   limit: 100,
   offset: 0,
 });
 
 // Enrich IOC
-import { IOCEnrichmentService } from '@intelgraph/ioc-manager';
+import { IOCEnrichmentService } from "@intelgraph/ioc-manager";
 
 const enrichment = new IOCEnrichmentService();
-enrichment.setApiKey('VIRUSTOTAL', 'your-vt-api-key');
+enrichment.setApiKey("VIRUSTOTAL", "your-vt-api-key");
 
-const enriched = await enrichment.enrichIOC(
-  iocs[0],
-  ['VIRUSTOTAL', 'ABUSEIPDB']
-);
+const enriched = await enrichment.enrichIOC(iocs[0], ["VIRUSTOTAL", "ABUSEIPDB"]);
 ```
 
 ### Dark Web Monitoring
 
 ```typescript
-import { DarkWebMonitorService } from '@intelgraph/threat-intelligence';
+import { DarkWebMonitorService } from "@intelgraph/threat-intelligence";
 
 const darkWebMonitor = new DarkWebMonitorService();
 
 // Register monitor
 await darkWebMonitor.registerMonitor({
-  id: 'monitor-1',
-  name: 'Underground Forum Monitor',
-  sourceType: 'FORUM',
-  url: 'http://darkwebforum.onion',
-  keywords: ['ransomware', 'exploit', 'database'],
+  id: "monitor-1",
+  name: "Underground Forum Monitor",
+  sourceType: "FORUM",
+  url: "http://darkwebforum.onion",
+  keywords: ["ransomware", "exploit", "database"],
   enabled: true,
   scanFrequency: 3600,
   proxyConfig: {
     enabled: true,
-    host: 'localhost',
+    host: "localhost",
     port: 9050,
-    protocol: 'socks5',
+    protocol: "socks5",
   },
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 });
 
 // Scan source
-const findings = await darkWebMonitor.scanSource('monitor-1');
+const findings = await darkWebMonitor.scanSource("monitor-1");
 ```
 
 ### Threat Hunting
@@ -387,13 +386,13 @@ for ioc in iocs:
 
 ```javascript
 // Automated playbook in SOAR
-const response = await fetch('http://localhost:8001/api/v1/playbooks/incident-response/execute', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+const response = await fetch("http://localhost:8001/api/v1/playbooks/incident-response/execute", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    incident_id: 'INC-12345',
-    iocs: ['192.0.2.1', 'evil.com']
-  })
+    incident_id: "INC-12345",
+    iocs: ["192.0.2.1", "evil.com"],
+  }),
 });
 ```
 
@@ -449,6 +448,7 @@ const response = await fetch('http://localhost:8001/api/v1/playbooks/incident-re
 ## Support
 
 For issues and questions:
+
 - GitHub Issues: `https://github.com/your-org/intelgraph/issues`
 - Documentation: `https://docs.intelgraph.io`
 - Email: `support@intelgraph.io`

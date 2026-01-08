@@ -22,12 +22,11 @@ version: latest
 **`scripts/assistant/build-corpus.js`**
 
 ````js
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
-const removeMd = (s) =>
-  s.replace(/```[\s\S]*?```/g, '').replace(/<[^>]+>/g, '');
-const docsDir = 'docs';
+const fs = require("fs");
+const path = require("path");
+const matter = require("gray-matter");
+const removeMd = (s) => s.replace(/```[\s\S]*?```/g, "").replace(/<[^>]+>/g, "");
+const docsDir = "docs";
 const out = [];
 (function walk(d) {
   for (const f of fs.readdirSync(d)) {
@@ -35,26 +34,23 @@ const out = [];
     const st = fs.statSync(p);
     if (st.isDirectory()) walk(p);
     else if (/\.mdx?$/.test(f)) {
-      const raw = fs.readFileSync(p, 'utf8');
+      const raw = fs.readFileSync(p, "utf8");
       const g = matter(raw);
       out.push({
-        id: p.replace(/^docs\//, ''),
+        id: p.replace(/^docs\//, ""),
         title: g.data.title || path.basename(p),
-        summary: g.data.summary || '',
-        version: g.data.version || 'latest',
-        owner: g.data.owner || 'unknown',
+        summary: g.data.summary || "",
+        version: g.data.version || "latest",
+        owner: g.data.owner || "unknown",
         tags: g.data.tags || [],
         body: removeMd(g.content),
       });
     }
   }
 })(docsDir);
-fs.mkdirSync('docs/ops/assistant', { recursive: true });
-fs.writeFileSync(
-  'docs/ops/assistant/corpus.json',
-  JSON.stringify(out, null, 2),
-);
-console.log('Corpus size', out.length);
+fs.mkdirSync("docs/ops/assistant", { recursive: true });
+fs.writeFileSync("docs/ops/assistant/corpus.json", JSON.stringify(out, null, 2));
+console.log("Corpus size", out.length);
 ````
 
 Add to **docs build** workflow so corpus ships with the site.
@@ -65,10 +61,8 @@ Add to **docs build** workflow so corpus ships with the site.
 
 ```js
 // Pseudocode – integrate with your embeddings provider.
-const fs = require('fs');
-const corpus = JSON.parse(
-  fs.readFileSync('docs/ops/assistant/corpus.json', 'utf8'),
-);
+const fs = require("fs");
+const corpus = JSON.parse(fs.readFileSync("docs/ops/assistant/corpus.json", "utf8"));
 // const embed = async (text)=> provider.embed(text)
 (async () => {
   const out = [];
@@ -77,7 +71,7 @@ const corpus = JSON.parse(
     const vec = Array(768).fill(0); // placeholder
     out.push({ id: r.id, version: r.version, vector: vec });
   }
-  fs.writeFileSync('docs/ops/assistant/index.json', JSON.stringify(out));
+  fs.writeFileSync("docs/ops/assistant/index.json", JSON.stringify(out));
 })();
 ```
 
@@ -87,14 +81,10 @@ const corpus = JSON.parse(
 
 ```js
 // Minimal retrieval: cosine-similarity against index.json, return top-k snippets + source ids.
-const fs = require('fs');
-const idx = JSON.parse(
-  fs.readFileSync('docs/ops/assistant/index.json', 'utf8'),
-);
+const fs = require("fs");
+const idx = JSON.parse(fs.readFileSync("docs/ops/assistant/index.json", "utf8"));
 const corpus = Object.fromEntries(
-  JSON.parse(fs.readFileSync('docs/ops/assistant/corpus.json', 'utf8')).map(
-    (x) => [x.id, x],
-  ),
+  JSON.parse(fs.readFileSync("docs/ops/assistant/corpus.json", "utf8")).map((x) => [x.id, x])
 );
 function dot(a, b) {
   let s = 0;
@@ -153,13 +143,13 @@ In docs, mark blocks like:
 **`scripts/docs/validate-examples.js`**
 
 ````js
-const fs = require('fs');
-const path = require('path');
-const { default: $RefParser } = require('@apidevtools/json-schema-ref-parser');
-const Ajv = require('ajv').default;
+const fs = require("fs");
+const path = require("path");
+const { default: $RefParser } = require("@apidevtools/json-schema-ref-parser");
+const Ajv = require("ajv").default;
 
 async function main() {
-  const specPath = 'api/intelgraph-core-api.yaml';
+  const specPath = "api/intelgraph-core-api.yaml";
   const spec = await $RefParser.dereference(specPath);
   const schemas = spec.components?.schemas || {};
   const files = [];
@@ -169,25 +159,25 @@ async function main() {
       const s = fs.statSync(p);
       s.isDirectory() ? walk(p) : /\.mdx?$/.test(f) && files.push(p);
     }
-  })('docs');
+  })("docs");
   const rx = /```json\s+test\s+schema=([^\s\n]+)[\s\n]([\s\S]*?)```/g;
   const ajv = new Ajv({ allErrors: true, strict: false });
   let fail = 0;
   for (const f of files) {
-    const src = fs.readFileSync(f, 'utf8');
+    const src = fs.readFileSync(f, "utf8");
     for (const m of src.matchAll(rx)) {
       const ref = m[1];
       const json = JSON.parse(m[2]);
-      const key = ref.split('#/components/schemas/')[1];
+      const key = ref.split("#/components/schemas/")[1];
       const schema = schemas[key];
       if (!schema) {
-        console.error('Unknown schema', ref, 'in', f);
+        console.error("Unknown schema", ref, "in", f);
         fail++;
         continue;
       }
       const ok = ajv.validate(schema, json);
       if (!ok) {
-        console.error('Schema validation failed in', f, ajv.errorsText());
+        console.error("Schema validation failed in", f, ajv.errorsText());
         fail++;
       }
     }
@@ -223,36 +213,31 @@ main();
 **`src/theme/DocItem/Footer/SeoJsonLd.tsx`**
 
 ```tsx
-import React from 'react';
-import { useDoc } from '@docusaurus/theme-common/internal';
+import React from "react";
+import { useDoc } from "@docusaurus/theme-common/internal";
 export default function SeoJsonLd() {
   const { metadata } = useDoc();
   const ld = {
-    '@context': 'https://schema.org',
-    '@type': 'TechArticle',
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
     headline: metadata.title,
     dateModified: metadata.lastUpdatedAt || new Date().toISOString(),
-    author: { '@type': 'Organization', name: 'IntelGraph' },
+    author: { "@type": "Organization", name: "IntelGraph" },
     breadcrumb: {
-      '@type': 'BreadcrumbList',
-      itemListElement: (metadata?.frontMatter?.slug || '')
-        .split('/')
-        .map((p, i) => ({
-          '@type': 'ListItem',
-          position: i + 1,
-          name: p,
-          item: `/${(metadata?.frontMatter?.slug || '')
-            .split('/')
-            .slice(0, i + 1)
-            .join('/')}`,
-        })),
+      "@type": "BreadcrumbList",
+      itemListElement: (metadata?.frontMatter?.slug || "").split("/").map((p, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        name: p,
+        item: `/${(metadata?.frontMatter?.slug || "")
+          .split("/")
+          .slice(0, i + 1)
+          .join("/")}`,
+      })),
     },
   };
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
-    />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
   );
 }
 ```
@@ -280,11 +265,9 @@ export default function SeoJsonLd() {
 **`src/components/VerifiedBadge.tsx`**
 
 ```tsx
-import React from 'react';
+import React from "react";
 export default function VerifiedBadge({ version }: { version: string }) {
-  return (
-    <span className="badge badge--success">Verified against {version}</span>
-  );
+  return <span className="badge badge--success">Verified against {version}</span>;
 }
 ```
 

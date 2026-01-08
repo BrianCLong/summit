@@ -7,7 +7,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Python
         uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
+        with: { python-version: "3.11" }
       - name: Install DuckDB
         run: python -m pip install duckdb
       - name: Fast smoke
@@ -30,7 +30,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Python
         uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
+        with: { python-version: "3.11" }
       - name: Install PyYAML and jsonschema
         run: pip install PyYAML jsonschema
       - name: Validate orchestration.yml

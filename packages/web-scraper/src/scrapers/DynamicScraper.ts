@@ -2,9 +2,9 @@
  * Dynamic Scraper - JavaScript rendering with Playwright
  */
 
-import type { BrowserPool } from '../core/BrowserPool.js';
-import { ContentExtractor } from '../core/ContentExtractor.js';
-import type { ScrapeResult, ScrapeOptions } from '../types/index.js';
+import type { BrowserPool } from "../core/BrowserPool.js";
+import { ContentExtractor } from "../core/ContentExtractor.js";
+import type { ScrapeResult, ScrapeOptions } from "../types/index.js";
 
 export class DynamicScraper {
   private browserPool: BrowserPool;
@@ -26,7 +26,7 @@ export class DynamicScraper {
       // Set user agent
       if (options?.userAgent) {
         await page.setExtraHTTPHeaders({
-          'User-Agent': options.userAgent
+          "User-Agent": options.userAgent,
         });
       }
 
@@ -42,14 +42,14 @@ export class DynamicScraper {
 
       // Navigate to page
       const response = await page.goto(url, {
-        waitUntil: 'networkidle',
-        timeout: options?.timeout || 30000
+        waitUntil: "networkidle",
+        timeout: options?.timeout || 30000,
       });
 
       // Wait for custom selector if specified
       if (options?.waitForSelector) {
         await page.waitForSelector(options.waitForSelector, {
-          timeout: options?.waitForTimeout || 10000
+          timeout: options?.waitForTimeout || 10000,
         });
       }
 
@@ -60,11 +60,13 @@ export class DynamicScraper {
 
       // Get performance metrics
       const performanceData = await page.evaluate(() => {
-        const perfData = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+        const perfData = performance.getEntriesByType(
+          "navigation"
+        )[0] as PerformanceNavigationTiming;
         return {
           domContentLoaded: perfData.domContentLoadedEventEnd - perfData.fetchStart,
           loadTime: perfData.loadEventEnd - perfData.fetchStart,
-          firstContentfulPaint: 0
+          firstContentfulPaint: 0,
         };
       });
 
@@ -84,13 +86,13 @@ export class DynamicScraper {
           text,
           markdown,
           title: metadata.title,
-          description: metadata.description
+          description: metadata.description,
         },
         metadata,
         performance: {
           ...performanceData,
-          loadTime: Date.now() - startTime
-        }
+          loadTime: Date.now() - startTime,
+        },
       };
 
       if (options?.extractLinks) {
@@ -116,8 +118,8 @@ export class DynamicScraper {
         error: error instanceof Error ? error.message : String(error),
         performance: {
           loadTime: Date.now() - startTime,
-          domContentLoaded: 0
-        }
+          domContentLoaded: 0,
+        },
       };
     } finally {
       await this.browserPool.closePage(browser, page);

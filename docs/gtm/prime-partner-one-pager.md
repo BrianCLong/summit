@@ -22,14 +22,14 @@ Your teams rebuild these components program-by-program—driving cost, risk, and
 
 Summit provides a **production-ready platform** that slots under your mission-specific solutions:
 
-| Layer | What Summit Provides | What You Add |
-|-------|---------------------|--------------|
-| **Data Ingestion** | Connectors (STIX/TAXII, REST, documents, OSINT APIs) | Mission-specific sources, custom parsers |
-| **Graph + Provenance** | Neo4j-backed graph with chain-of-custody | Domain ontology, relationship rules |
-| **Policy/Governance** | ABAC/OPA, DLP, redaction, audit logs | Customer-specific policies, classification schemes |
-| **AI Orchestration** | NL-to-Cypher, RAG, workflow automation | Mission prompts, domain models |
-| **Analyst UX** | Graph + Timeline + Map workbench | Custom views, branding, workflow extensions |
-| **Deployment** | Cloud, on-prem, air-gap patterns | Integration with customer infrastructure |
+| Layer                  | What Summit Provides                                 | What You Add                                       |
+| ---------------------- | ---------------------------------------------------- | -------------------------------------------------- |
+| **Data Ingestion**     | Connectors (STIX/TAXII, REST, documents, OSINT APIs) | Mission-specific sources, custom parsers           |
+| **Graph + Provenance** | Neo4j-backed graph with chain-of-custody             | Domain ontology, relationship rules                |
+| **Policy/Governance**  | ABAC/OPA, DLP, redaction, audit logs                 | Customer-specific policies, classification schemes |
+| **AI Orchestration**   | NL-to-Cypher, RAG, workflow automation               | Mission prompts, domain models                     |
+| **Analyst UX**         | Graph + Timeline + Map workbench                     | Custom views, branding, workflow extensions        |
+| **Deployment**         | Cloud, on-prem, air-gap patterns                     | Integration with customer infrastructure           |
 
 **Result:** Faster proposal wins, accelerated delivery, reduced technical risk.
 
@@ -39,30 +39,33 @@ Summit provides a **production-ready platform** that slots under your mission-sp
 
 When your proposals need to demonstrate:
 
-| RFP Requirement | Summit Answer |
-|-----------------|---------------|
-| "Explainable AI" | Policy-gated AI with provenance; every answer traceable to source |
-| "Data Governance" | ABAC/OPA, DLP hooks, classification tagging, audit logs |
-| "Audit & Compliance" | SBOM/SLSA, exportable chain-of-custody, FedRAMP path |
-| "Deploy Anywhere" | K8s/Helm patterns for cloud, on-prem, air-gap |
-| "Interoperability" | STIX/TAXII, GraphQL/REST APIs, open standards |
-| "Analyst Productivity" | Tri-pane workbench, NL queries, saved playbooks |
+| RFP Requirement        | Summit Answer                                                     |
+| ---------------------- | ----------------------------------------------------------------- |
+| "Explainable AI"       | Policy-gated AI with provenance; every answer traceable to source |
+| "Data Governance"      | ABAC/OPA, DLP hooks, classification tagging, audit logs           |
+| "Audit & Compliance"   | SBOM/SLSA, exportable chain-of-custody, FedRAMP path              |
+| "Deploy Anywhere"      | K8s/Helm patterns for cloud, on-prem, air-gap                     |
+| "Interoperability"     | STIX/TAXII, GraphQL/REST APIs, open standards                     |
+| "Analyst Productivity" | Tri-pane workbench, NL queries, saved playbooks                   |
 
 ---
 
 ## Partnership Model
 
 ### Option A: Referral Partner (Lightest Touch)
+
 - You identify opportunities; we close and deliver
 - **20% referral fee** on Year 1 TCV
 - No delivery responsibility on your side
 
 ### Option B: Resell Partner
+
 - You contract with customer; we deliver through you
 - **10–25% margin** (based on volume and commitment)
 - Joint delivery support available
 
 ### Option C: Co-Delivery / OEM
+
 - Summit embedded in your solution stack
 - Per-program or per-seat licensing
 - Joint go-to-market on specific pursuits
@@ -77,6 +80,7 @@ When your proposals need to demonstrate:
 **Objective:** Prove fit for a specific pursuit or program.
 
 **Scope:**
+
 - Discovery session with your capture/solution team
 - Reference architecture aligned to pursuit requirements
 - Demo environment with sample data
@@ -91,12 +95,14 @@ When your proposals need to demonstrate:
 ### Joint Pursuit Motion
 
 **Phase 1: Capture Support**
+
 - Technical discriminators language
 - Architecture diagrams for proposals
 - Compliance/security documentation
 - Demo support for orals/tech evals
 
 **Phase 2: Delivery (Post-Award)**
+
 - Summit platform deployment
 - Data source integration
 - Training and enablement
@@ -115,6 +121,7 @@ Summit is strongest on pursuits involving:
 - **Analyst Modernization** — replacing legacy tools, reducing swivel-chair
 
 **Example Agencies/Programs:**
+
 - DHS I&A, CISA JCDC, FBI Cyber, USSOCOM J2, Service intel (A2/G2/N2)
 - Intel community modernization programs
 - State/local fusion centers
@@ -124,13 +131,13 @@ Summit is strongest on pursuits involving:
 
 ## Why Partner With Summit
 
-| Your Challenge | How Summit Helps |
-|----------------|------------------|
-| "We keep rebuilding graph/AI foundations" | Reusable substrate; focus your team on mission value-add |
-| "Compliance is eating our margin" | Pre-built compliance artifacts; SBOM/SLSA, audit logs, FedRAMP path |
-| "We need discriminators for proposals" | Explainable AI, provenance, policy guardrails—language ready for RFP responses |
-| "Delivery timelines are too tight" | Pre-integrated platform; reduce integration sprint count |
-| "Customer wants 'deploy anywhere'" | Cloud, on-prem, air-gap patterns validated |
+| Your Challenge                            | How Summit Helps                                                               |
+| ----------------------------------------- | ------------------------------------------------------------------------------ |
+| "We keep rebuilding graph/AI foundations" | Reusable substrate; focus your team on mission value-add                       |
+| "Compliance is eating our margin"         | Pre-built compliance artifacts; SBOM/SLSA, audit logs, FedRAMP path            |
+| "We need discriminators for proposals"    | Explainable AI, provenance, policy guardrails—language ready for RFP responses |
+| "Delivery timelines are too tight"        | Pre-integrated platform; reduce integration sprint count                       |
+| "Customer wants 'deploy anywhere'"        | Cloud, on-prem, air-gap patterns validated                                     |
 
 ---
 

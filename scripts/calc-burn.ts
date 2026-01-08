@@ -1,7 +1,7 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import yaml from 'js-yaml';
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import yaml from "js-yaml";
 
 export interface AlertWindow {
   window: string;
@@ -74,28 +74,28 @@ export interface BurnReport {
 }
 
 function ensureNumber(value: unknown, message: string): number {
-  if (typeof value !== 'number' || Number.isNaN(value)) {
+  if (typeof value !== "number" || Number.isNaN(value)) {
     throw new Error(message);
   }
   return value;
 }
 
 export function loadBudget(filePath: string): BudgetFile {
-  const raw = fs.readFileSync(filePath, 'utf8');
+  const raw = fs.readFileSync(filePath, "utf8");
   const ext = path.extname(filePath).toLowerCase();
-  const parsed = ext === '.yaml' || ext === '.yml' ? yaml.load(raw) : JSON.parse(raw);
+  const parsed = ext === ".yaml" || ext === ".yml" ? yaml.load(raw) : JSON.parse(raw);
 
-  if (!parsed || typeof parsed !== 'object') {
-    throw new Error('Budget file must contain an object');
+  if (!parsed || typeof parsed !== "object") {
+    throw new Error("Budget file must contain an object");
   }
 
   const budget = parsed as BudgetFile;
 
   if (!budget.service) {
-    throw new Error('Budget file is missing required field: service');
+    throw new Error("Budget file is missing required field: service");
   }
   if (!Array.isArray(budget.slos) || budget.slos.length === 0) {
-    throw new Error('Budget file must define at least one SLO');
+    throw new Error("Budget file must define at least one SLO");
   }
 
   budget.slos = budget.slos.map((slo) => {
@@ -113,7 +113,10 @@ export function loadBudget(filePath: string): BudgetFile {
       window_days: windowDays,
       alert_windows: (slo.alert_windows ?? []).map((aw) => ({
         window: aw.window,
-        burn_rate: ensureNumber(aw.burn_rate, `SLO ${slo.name} alert window burn_rate must be numeric`),
+        burn_rate: ensureNumber(
+          aw.burn_rate,
+          `SLO ${slo.name} alert window burn_rate must be numeric`
+        ),
       })),
     } satisfies SLODefinition;
   });
@@ -122,18 +125,18 @@ export function loadBudget(filePath: string): BudgetFile {
 }
 
 export function loadMetrics(filePath: string): MetricsInput {
-  const parsed = JSON.parse(fs.readFileSync(filePath, 'utf8')) as MetricsInput;
+  const parsed = JSON.parse(fs.readFileSync(filePath, "utf8")) as MetricsInput;
   if (!parsed.service) {
-    throw new Error('Metrics input missing service');
+    throw new Error("Metrics input missing service");
   }
   if (!Array.isArray(parsed.measurements)) {
-    throw new Error('Metrics input missing measurements');
+    throw new Error("Metrics input missing measurements");
   }
 
   parsed.measurements = parsed.measurements.map((m) => ({
     ...m,
-    good: ensureNumber(m.good, 'Measurement good must be numeric'),
-    total: ensureNumber(m.total, 'Measurement total must be numeric'),
+    good: ensureNumber(m.good, "Measurement good must be numeric"),
+    total: ensureNumber(m.total, "Measurement total must be numeric"),
   }));
 
   return parsed;
@@ -154,7 +157,9 @@ function computeBudgetRemaining(errorRate: number, errorBudget: number): number 
 
 export function calculateBurnReport(budget: BudgetFile, metrics: MetricsInput): BurnReport {
   if (budget.service !== metrics.service) {
-    throw new Error(`Service mismatch between budget (${budget.service}) and metrics (${metrics.service})`);
+    throw new Error(
+      `Service mismatch between budget (${budget.service}) and metrics (${metrics.service})`
+    );
   }
 
   const generatedAt = metrics.generatedAt || new Date().toISOString();
@@ -164,7 +169,8 @@ export function calculateBurnReport(budget: BudgetFile, metrics: MetricsInput): 
     const windows = metrics.measurements
       .filter((m) => m.slo === slo.name)
       .map((measurement) => {
-        const errorRate = measurement.total === 0 ? 0 : (measurement.total - measurement.good) / measurement.total;
+        const errorRate =
+          measurement.total === 0 ? 0 : (measurement.total - measurement.good) / measurement.total;
         const burnRate = computeBurn(errorRate, errorBudget);
         const budgetRemaining = computeBudgetRemaining(errorRate, errorBudget);
         return {
@@ -180,7 +186,8 @@ export function calculateBurnReport(budget: BudgetFile, metrics: MetricsInput): 
 
     const aggregateGood = windows.reduce((acc, item) => acc + item.good, 0);
     const aggregateTotal = windows.reduce((acc, item) => acc + item.total, 0);
-    const aggregateErrorRate = aggregateTotal === 0 ? 0 : (aggregateTotal - aggregateGood) / aggregateTotal;
+    const aggregateErrorRate =
+      aggregateTotal === 0 ? 0 : (aggregateTotal - aggregateGood) / aggregateTotal;
     const aggregateBurn = computeBurn(aggregateErrorRate, errorBudget);
 
     return {
@@ -212,7 +219,7 @@ export function calculateBurnReport(budget: BudgetFile, metrics: MetricsInput): 
 function runCli(): void {
   const [, , budgetPath, metricsPath] = process.argv;
   if (!budgetPath || !metricsPath) {
-    console.error('Usage: ts-node scripts/calc-burn.ts <budget-file> <metrics-input.json>');
+    console.error("Usage: ts-node scripts/calc-burn.ts <budget-file> <metrics-input.json>");
     process.exit(1);
   }
 
@@ -222,7 +229,7 @@ function runCli(): void {
   console.log(JSON.stringify(report, null, 2));
 }
 
-const isMain = fileURLToPath(import.meta.url) === path.resolve(process.argv[1] ?? '');
+const isMain = fileURLToPath(import.meta.url) === path.resolve(process.argv[1] ?? "");
 if (isMain) {
   runCli();
 }

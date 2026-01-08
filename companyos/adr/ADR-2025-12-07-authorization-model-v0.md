@@ -52,11 +52,12 @@ function checkPermission(
   user: AuthUser | undefined,
   action: string,
   resource: string,
-  resourceTenantId?: string,
-): AccessDecision
+  resourceTenantId?: string
+): AccessDecision;
 ```
 
 Returns:
+
 ```typescript
 interface AccessDecision {
   allowed: boolean;
@@ -73,23 +74,23 @@ interface AccessDecision {
 
 Standard actions for tenant operations:
 
-| Action | Description |
-|--------|-------------|
-| tenant:create | Create new tenants |
-| tenant:read | View tenant details |
-| tenant:update | Modify tenant settings |
-| tenant:delete | Archive tenants |
-| tenant:list | List all tenants |
-| tenant:manage_features | Toggle feature flags |
-| tenant:view_audit | View audit logs |
+| Action                 | Description            |
+| ---------------------- | ---------------------- |
+| tenant:create          | Create new tenants     |
+| tenant:read            | View tenant details    |
+| tenant:update          | Modify tenant settings |
+| tenant:delete          | Archive tenants        |
+| tenant:list            | List all tenants       |
+| tenant:manage_features | Toggle feature flags   |
+| tenant:view_audit      | View audit logs        |
 
 ### Role Definitions
 
-| Role | Permissions |
-|------|-------------|
-| platform-admin | All actions (full access) |
-| tenant-admin | read, update, view_audit (within tenant) |
-| tenant-viewer | read only (within tenant) |
+| Role           | Permissions                              |
+| -------------- | ---------------------------------------- |
+| platform-admin | All actions (full access)                |
+| tenant-admin   | read, update, view_audit (within tenant) |
+| tenant-viewer  | read only (within tenant)                |
 
 ### Tenant Isolation Rules
 
@@ -112,9 +113,9 @@ TODO markers indicate where OPA policy evaluation will replace hardcoded rules:
 
 ```typescript
 // Protect routes
-app.use(stubIdentity);           // Extract user from JWT
-app.use(validateTenantId);       // Validate tenant ID format
-app.use(requirePermission('tenant:read'));  // Check permission
+app.use(stubIdentity); // Extract user from JWT
+app.use(validateTenantId); // Validate tenant ID format
+app.use(requirePermission("tenant:read")); // Check permission
 ```
 
 ## Consequences

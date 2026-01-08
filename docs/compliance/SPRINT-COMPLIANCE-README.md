@@ -11,14 +11,14 @@
 
 ## Automated Enforcement
 
-*   **Governance Integrity:** `verify:governance` ensures key policy documents exist.
-*   **Evidence Validity:** `verify:compliance` fails CI if any artifact listed in the Evidence Index is deleted or moved.
-*   **Weekly Audits:** A scheduled GitHub Action runs these verifications weekly.
+- **Governance Integrity:** `verify:governance` ensures key policy documents exist.
+- **Evidence Validity:** `verify:compliance` fails CI if any artifact listed in the Evidence Index is deleted or moved.
+- **Weekly Audits:** A scheduled GitHub Action runs these verifications weekly.
 
 ## Out of Scope
 
 The following are explicitly **not** part of this repo's automated compliance system:
 
-*   Manual evidence collection (screenshots, emails).
-*   External auditor coordination.
-*   Legal interpretation of regulatory text.
+- Manual evidence collection (screenshots, emails).
+- External auditor coordination.
+- Legal interpretation of regulatory text.

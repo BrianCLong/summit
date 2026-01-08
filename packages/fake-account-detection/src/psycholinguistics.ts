@@ -67,14 +67,14 @@ export interface DeceptionIndicator {
 }
 
 export enum DeceptionType {
-  DISTANCING = 'distancing',
-  QUALIFICATION = 'qualification',
-  NEGATION_EXCESS = 'negation_excess',
-  VAGUENESS = 'vagueness',
-  DETAIL_MANIPULATION = 'detail_manipulation',
-  TEMPORAL_INCONSISTENCY = 'temporal_inconsistency',
-  EMOTIONAL_INCONGRUENCE = 'emotional_incongruence',
-  PRONOUN_SHIFTING = 'pronoun_shifting',
+  DISTANCING = "distancing",
+  QUALIFICATION = "qualification",
+  NEGATION_EXCESS = "negation_excess",
+  VAGUENESS = "vagueness",
+  DETAIL_MANIPULATION = "detail_manipulation",
+  TEMPORAL_INCONSISTENCY = "temporal_inconsistency",
+  EMOTIONAL_INCONGRUENCE = "emotional_incongruence",
+  PRONOUN_SHIFTING = "pronoun_shifting",
 }
 
 export interface LinguisticClue {
@@ -188,24 +188,42 @@ export class PsycholinguisticAnalyzer {
 
   private initializeDictionaries(): void {
     // Initialize LIWC-like dictionaries
-    this.liwcDictionary.set('positive_emotion', ['happy', 'joy', 'love', 'good', 'great', 'excellent']);
-    this.liwcDictionary.set('negative_emotion', ['sad', 'angry', 'hate', 'bad', 'terrible', 'awful']);
-    this.liwcDictionary.set('cognitive', ['think', 'know', 'believe', 'understand', 'realize']);
-    this.liwcDictionary.set('tentative', ['maybe', 'perhaps', 'might', 'possibly', 'could']);
-    this.liwcDictionary.set('certainty', ['always', 'never', 'definitely', 'certainly', 'absolutely']);
-    this.liwcDictionary.set('first_person', ['i', 'me', 'my', 'mine', 'myself']);
-    this.liwcDictionary.set('third_person', ['he', 'she', 'they', 'them', 'their']);
-    this.liwcDictionary.set('negation', ['no', 'not', 'never', "don't", "won't", "can't"]);
+    this.liwcDictionary.set("positive_emotion", [
+      "happy",
+      "joy",
+      "love",
+      "good",
+      "great",
+      "excellent",
+    ]);
+    this.liwcDictionary.set("negative_emotion", [
+      "sad",
+      "angry",
+      "hate",
+      "bad",
+      "terrible",
+      "awful",
+    ]);
+    this.liwcDictionary.set("cognitive", ["think", "know", "believe", "understand", "realize"]);
+    this.liwcDictionary.set("tentative", ["maybe", "perhaps", "might", "possibly", "could"]);
+    this.liwcDictionary.set("certainty", [
+      "always",
+      "never",
+      "definitely",
+      "certainly",
+      "absolutely",
+    ]);
+    this.liwcDictionary.set("first_person", ["i", "me", "my", "mine", "myself"]);
+    this.liwcDictionary.set("third_person", ["he", "she", "they", "them", "their"]);
+    this.liwcDictionary.set("negation", ["no", "not", "never", "don't", "won't", "can't"]);
   }
 
   private initializeModels(): void {
     // Initialize personality and deception models
-    this.personalityModels = [
-      { name: 'big_five', version: '2.0', accuracy: 0.82 },
-    ];
+    this.personalityModels = [{ name: "big_five", version: "2.0", accuracy: 0.82 }];
     this.deceptionModels = [
-      { name: 'linguistic_inquiry', version: '1.5', accuracy: 0.75 },
-      { name: 'statement_analysis', version: '2.0', accuracy: 0.78 },
+      { name: "linguistic_inquiry", version: "1.5", accuracy: 0.75 },
+      { name: "statement_analysis", version: "2.0", accuracy: 0.78 },
     ];
   }
 
@@ -213,7 +231,7 @@ export class PsycholinguisticAnalyzer {
    * Comprehensive psycholinguistic analysis
    */
   async analyzeProfile(texts: string[]): Promise<PsycholinguisticProfile> {
-    const combinedText = texts.join(' ');
+    const combinedText = texts.join(" ");
 
     // Extract all features
     const personalityTraits = await this.analyzePersonality(texts);
@@ -228,14 +246,14 @@ export class PsycholinguisticAnalyzer {
       personalityTraits,
       emotionalProfile,
       linguisticFingerprint,
-      temporalEvolution,
+      temporalEvolution
     );
 
     // Calculate authenticity score
     const authenticityScore = this.calculateAuthenticityScore(
       deceptionIndicators,
       anomalies,
-      temporalEvolution,
+      temporalEvolution
     );
 
     return {
@@ -254,31 +272,55 @@ export class PsycholinguisticAnalyzer {
    * Analyze Big Five personality traits from text
    */
   private async analyzePersonality(texts: string[]): Promise<BigFivePersonality> {
-    const combinedText = texts.join(' ').toLowerCase();
+    const combinedText = texts.join(" ").toLowerCase();
     const words = combinedText.split(/\s+/);
 
     // Linguistic markers for each trait
     // Based on research in computational personality recognition
 
     // Openness: creative, intellectual vocabulary
-    const opennessMarkers = ['creative', 'imagine', 'wonder', 'curious', 'explore', 'idea', 'theory'];
-    const openness = this.countMarkers(words, opennessMarkers) / words.length * 100;
+    const opennessMarkers = [
+      "creative",
+      "imagine",
+      "wonder",
+      "curious",
+      "explore",
+      "idea",
+      "theory",
+    ];
+    const openness = (this.countMarkers(words, opennessMarkers) / words.length) * 100;
 
     // Conscientiousness: organized, methodical language
-    const conscientiousnessMarkers = ['plan', 'organize', 'careful', 'detailed', 'responsible', 'schedule'];
-    const conscientiousness = this.countMarkers(words, conscientiousnessMarkers) / words.length * 100;
+    const conscientiousnessMarkers = [
+      "plan",
+      "organize",
+      "careful",
+      "detailed",
+      "responsible",
+      "schedule",
+    ];
+    const conscientiousness =
+      (this.countMarkers(words, conscientiousnessMarkers) / words.length) * 100;
 
     // Extraversion: social, enthusiastic language
-    const extraversionMarkers = ['party', 'friend', 'fun', 'exciting', 'social', 'talk', 'people'];
-    const extraversion = this.countMarkers(words, extraversionMarkers) / words.length * 100;
+    const extraversionMarkers = ["party", "friend", "fun", "exciting", "social", "talk", "people"];
+    const extraversion = (this.countMarkers(words, extraversionMarkers) / words.length) * 100;
 
     // Agreeableness: warm, cooperative language
-    const agreeablenessMarkers = ['help', 'kind', 'care', 'understand', 'support', 'together', 'share'];
-    const agreeableness = this.countMarkers(words, agreeablenessMarkers) / words.length * 100;
+    const agreeablenessMarkers = [
+      "help",
+      "kind",
+      "care",
+      "understand",
+      "support",
+      "together",
+      "share",
+    ];
+    const agreeableness = (this.countMarkers(words, agreeablenessMarkers) / words.length) * 100;
 
     // Neuroticism: negative emotion, worry language
-    const neuroticismMarkers = ['worry', 'anxious', 'stress', 'nervous', 'afraid', 'upset', 'sad'];
-    const neuroticism = this.countMarkers(words, neuroticismMarkers) / words.length * 100;
+    const neuroticismMarkers = ["worry", "anxious", "stress", "nervous", "afraid", "upset", "sad"];
+    const neuroticism = (this.countMarkers(words, neuroticismMarkers) / words.length) * 100;
 
     // Normalize to 0-1 scale
     const normalize = (value: number) => Math.min(value * 10, 1);
@@ -305,7 +347,7 @@ export class PsycholinguisticAnalyzer {
     const sentimentProgression: number[] = [];
 
     // Analyze each text for emotions
-    const emotions = ['joy', 'sadness', 'anger', 'fear', 'surprise', 'disgust'];
+    const emotions = ["joy", "sadness", "anger", "fear", "surprise", "disgust"];
     const emotionCounts: Record<string, number> = {};
 
     for (const emotion of emotions) {
@@ -362,12 +404,12 @@ export class PsycholinguisticAnalyzer {
     };
 
     const emotionWords: Record<string, string[]> = {
-      joy: ['happy', 'joy', 'excited', 'love', 'wonderful', 'great', 'amazing'],
-      sadness: ['sad', 'unhappy', 'depressed', 'crying', 'miserable', 'lonely'],
-      anger: ['angry', 'furious', 'mad', 'annoyed', 'frustrated', 'hate'],
-      fear: ['afraid', 'scared', 'terrified', 'worried', 'anxious', 'nervous'],
-      surprise: ['surprised', 'shocked', 'amazed', 'unexpected', 'wow'],
-      disgust: ['disgusted', 'gross', 'awful', 'horrible', 'repulsed'],
+      joy: ["happy", "joy", "excited", "love", "wonderful", "great", "amazing"],
+      sadness: ["sad", "unhappy", "depressed", "crying", "miserable", "lonely"],
+      anger: ["angry", "furious", "mad", "annoyed", "frustrated", "hate"],
+      fear: ["afraid", "scared", "terrified", "worried", "anxious", "nervous"],
+      surprise: ["surprised", "shocked", "amazed", "unexpected", "wow"],
+      disgust: ["disgusted", "gross", "awful", "horrible", "repulsed"],
     };
 
     for (const [emotion, markers] of Object.entries(emotionWords)) {
@@ -378,8 +420,8 @@ export class PsycholinguisticAnalyzer {
   }
 
   private calculateSentiment(text: string): number {
-    const positiveWords = this.liwcDictionary.get('positive_emotion') || [];
-    const negativeWords = this.liwcDictionary.get('negative_emotion') || [];
+    const positiveWords = this.liwcDictionary.get("positive_emotion") || [];
+    const negativeWords = this.liwcDictionary.get("negative_emotion") || [];
     const words = text.toLowerCase().split(/\s+/);
 
     const positive = this.countMarkers(words, positiveWords);
@@ -409,21 +451,21 @@ export class PsycholinguisticAnalyzer {
    * Analyze cognitive style
    */
   private async analyzeCognitiveStyle(texts: string[]): Promise<CognitiveStyle> {
-    const combinedText = texts.join(' ').toLowerCase();
+    const combinedText = texts.join(" ").toLowerCase();
     const words = combinedText.split(/\s+/);
 
     // Analytical thinking markers
-    const analyticalMarkers = ['because', 'therefore', 'thus', 'hence', 'consequently', 'analysis'];
-    const analyticalThinking = this.countMarkers(words, analyticalMarkers) / words.length * 100;
+    const analyticalMarkers = ["because", "therefore", "thus", "hence", "consequently", "analysis"];
+    const analyticalThinking = (this.countMarkers(words, analyticalMarkers) / words.length) * 100;
 
     // Narrative thinking markers
-    const narrativeMarkers = ['story', 'then', 'after', 'before', 'while', 'during'];
-    const narrativeThinking = this.countMarkers(words, narrativeMarkers) / words.length * 100;
+    const narrativeMarkers = ["story", "then", "after", "before", "while", "during"];
+    const narrativeThinking = (this.countMarkers(words, narrativeMarkers) / words.length) * 100;
 
     // Temporal orientation
-    const pastMarkers = ['was', 'were', 'did', 'had', 'used', 'ago', 'before'];
-    const presentMarkers = ['is', 'are', 'am', 'do', 'now', 'today', 'currently'];
-    const futureMarkers = ['will', 'going', 'plan', 'tomorrow', 'soon', 'later'];
+    const pastMarkers = ["was", "were", "did", "had", "used", "ago", "before"];
+    const presentMarkers = ["is", "are", "am", "do", "now", "today", "currently"];
+    const futureMarkers = ["will", "going", "plan", "tomorrow", "soon", "later"];
 
     const pastFocus = this.countMarkers(words, pastMarkers);
     const presentFocus = this.countMarkers(words, presentMarkers);
@@ -431,8 +473,8 @@ export class PsycholinguisticAnalyzer {
     const totalTemporal = pastFocus + presentFocus + futureFocus || 1;
 
     // Certainty level
-    const certaintyWords = this.liwcDictionary.get('certainty') || [];
-    const tentativeWords = this.liwcDictionary.get('tentative') || [];
+    const certaintyWords = this.liwcDictionary.get("certainty") || [];
+    const tentativeWords = this.liwcDictionary.get("tentative") || [];
     const certainty = this.countMarkers(words, certaintyWords);
     const tentative = this.countMarkers(words, tentativeWords);
     const certaintyLevel = (certainty - tentative + 10) / 20;
@@ -506,9 +548,11 @@ export class PsycholinguisticAnalyzer {
     }
 
     // Calculate overall deception score
-    const overallDeceptionScore = specificIndicators.length > 0
-      ? specificIndicators.reduce((sum, ind) => sum + ind.strength * ind.confidence, 0) / specificIndicators.length
-      : 0;
+    const overallDeceptionScore =
+      specificIndicators.length > 0
+        ? specificIndicators.reduce((sum, ind) => sum + ind.strength * ind.confidence, 0) /
+          specificIndicators.length
+        : 0;
 
     return {
       overallDeceptionScore,
@@ -518,26 +562,30 @@ export class PsycholinguisticAnalyzer {
     };
   }
 
-  private detectDistancing(text: string): { detected: boolean; strength: number; evidence: string[] } {
+  private detectDistancing(text: string): {
+    detected: boolean;
+    strength: number;
+    evidence: string[];
+  } {
     const words = text.toLowerCase().split(/\s+/);
     const evidence: string[] = [];
 
     // Distancing: reduced first-person pronouns, increased passive voice
-    const firstPerson = this.countMarkers(words, ['i', 'me', 'my', 'mine']);
-    const thirdPerson = this.countMarkers(words, ['he', 'she', 'they', 'it']);
+    const firstPerson = this.countMarkers(words, ["i", "me", "my", "mine"]);
+    const thirdPerson = this.countMarkers(words, ["he", "she", "they", "it"]);
 
     const distancingRatio = thirdPerson / Math.max(firstPerson + thirdPerson, 1);
 
     if (distancingRatio > 0.7) {
-      evidence.push('High use of third-person pronouns');
+      evidence.push("High use of third-person pronouns");
     }
 
     // Check for passive voice indicators
-    const passiveIndicators = ['was', 'were', 'been', 'being'];
+    const passiveIndicators = ["was", "were", "been", "being"];
     const passiveCount = this.countMarkers(words, passiveIndicators);
 
     if (passiveCount / words.length > 0.05) {
-      evidence.push('High frequency of passive voice');
+      evidence.push("High frequency of passive voice");
     }
 
     return {
@@ -547,9 +595,13 @@ export class PsycholinguisticAnalyzer {
     };
   }
 
-  private detectExcessiveNegation(text: string): { detected: boolean; strength: number; evidence: string[] } {
+  private detectExcessiveNegation(text: string): {
+    detected: boolean;
+    strength: number;
+    evidence: string[];
+  } {
     const words = text.toLowerCase().split(/\s+/);
-    const negationWords = this.liwcDictionary.get('negation') || [];
+    const negationWords = this.liwcDictionary.get("negation") || [];
     const negationCount = this.countMarkers(words, negationWords);
     const negationRate = negationCount / words.length;
 
@@ -565,9 +617,21 @@ export class PsycholinguisticAnalyzer {
     };
   }
 
-  private detectVagueness(text: string): { detected: boolean; strength: number; evidence: string[] } {
+  private detectVagueness(text: string): {
+    detected: boolean;
+    strength: number;
+    evidence: string[];
+  } {
     const words = text.toLowerCase().split(/\s+/);
-    const vaguenessMarkers = ['something', 'somehow', 'somewhere', 'thing', 'stuff', 'kind of', 'sort of'];
+    const vaguenessMarkers = [
+      "something",
+      "somehow",
+      "somewhere",
+      "thing",
+      "stuff",
+      "kind of",
+      "sort of",
+    ];
     const vaguenessCount = this.countMarkers(words, vaguenessMarkers);
     const vaguenessRate = vaguenessCount / words.length;
 
@@ -583,14 +647,18 @@ export class PsycholinguisticAnalyzer {
     };
   }
 
-  private detectPronounShifting(texts: string[]): { detected: boolean; strength: number; evidence: string[] } {
+  private detectPronounShifting(texts: string[]): {
+    detected: boolean;
+    strength: number;
+    evidence: string[];
+  } {
     const evidence: string[] = [];
     const pronounRatios: number[] = [];
 
     for (const text of texts) {
       const words = text.toLowerCase().split(/\s+/);
-      const firstPerson = this.countMarkers(words, ['i', 'me', 'my']);
-      const thirdPerson = this.countMarkers(words, ['he', 'she', 'they']);
+      const firstPerson = this.countMarkers(words, ["i", "me", "my"]);
+      const thirdPerson = this.countMarkers(words, ["he", "she", "they"]);
       const total = firstPerson + thirdPerson;
       if (total > 0) {
         pronounRatios.push(firstPerson / total);
@@ -604,7 +672,7 @@ export class PsycholinguisticAnalyzer {
     // Check for significant shifts
     const volatility = this.calculateVolatility(pronounRatios);
     if (volatility > 0.3) {
-      evidence.push('Significant pronoun usage shifts between texts');
+      evidence.push("Significant pronoun usage shifts between texts");
     }
 
     return {
@@ -618,14 +686,14 @@ export class PsycholinguisticAnalyzer {
    * Extract linguistic fingerprint
    */
   private async extractLinguisticFingerprint(texts: string[]): Promise<LinguisticFingerprint> {
-    const combinedText = texts.join(' ');
+    const combinedText = texts.join(" ");
     const words = combinedText.toLowerCase().split(/\s+/);
 
     // Vocabulary metrics
     const uniqueWords = new Set(words);
     const typeTokenRatio = uniqueWords.size / words.length;
-    const hapaxLegomena = [...uniqueWords].filter((w) =>
-      words.filter((word) => word === w).length === 1,
+    const hapaxLegomena = [...uniqueWords].filter(
+      (w) => words.filter((word) => word === w).length === 1
     ).length;
     const averageWordLength = words.reduce((sum, w) => sum + w.length, 0) / words.length;
 
@@ -656,11 +724,11 @@ export class PsycholinguisticAnalyzer {
   }
 
   private analyzePronounProfile(words: string[]): PronounProfile {
-    const firstSingular = this.countMarkers(words, ['i', 'me', 'my', 'mine', 'myself']);
-    const firstPlural = this.countMarkers(words, ['we', 'us', 'our', 'ours', 'ourselves']);
-    const secondPerson = this.countMarkers(words, ['you', 'your', 'yours', 'yourself']);
-    const thirdSingular = this.countMarkers(words, ['he', 'she', 'him', 'her', 'his', 'hers']);
-    const thirdPlural = this.countMarkers(words, ['they', 'them', 'their', 'theirs']);
+    const firstSingular = this.countMarkers(words, ["i", "me", "my", "mine", "myself"]);
+    const firstPlural = this.countMarkers(words, ["we", "us", "our", "ours", "ourselves"]);
+    const secondPerson = this.countMarkers(words, ["you", "your", "yours", "yourself"]);
+    const thirdSingular = this.countMarkers(words, ["he", "she", "him", "her", "his", "hers"]);
+    const thirdPlural = this.countMarkers(words, ["they", "them", "their", "theirs"]);
 
     return {
       firstPersonSingular: firstSingular / words.length,
@@ -698,14 +766,17 @@ export class PsycholinguisticAnalyzer {
       const characteristics = await this.extractCharacteristics(texts[i]);
 
       if (prevCharacteristics) {
-        const similarity = this.calculateCharacteristicSimilarity(prevCharacteristics, characteristics);
+        const similarity = this.calculateCharacteristicSimilarity(
+          prevCharacteristics,
+          characteristics
+        );
 
         if (similarity < 0.5) {
           suddenChanges.push({
             timestamp: new Date(),
             affectedMetrics: Object.keys(characteristics),
             magnitude: 1 - similarity,
-            possibleCauses: ['Style change', 'Different author', 'Topic shift'],
+            possibleCauses: ["Style change", "Different author", "Topic shift"],
           });
         }
       }
@@ -714,7 +785,9 @@ export class PsycholinguisticAnalyzer {
         start: new Date(),
         end: new Date(),
         characteristics,
-        similarity: prevCharacteristics ? this.calculateCharacteristicSimilarity(prevCharacteristics, characteristics) : 1,
+        similarity: prevCharacteristics
+          ? this.calculateCharacteristicSimilarity(prevCharacteristics, characteristics)
+          : 1,
       });
 
       prevCharacteristics = characteristics;
@@ -746,7 +819,10 @@ export class PsycholinguisticAnalyzer {
     };
   }
 
-  private calculateCharacteristicSimilarity(a: Record<string, number>, b: Record<string, number>): number {
+  private calculateCharacteristicSimilarity(
+    a: Record<string, number>,
+    b: Record<string, number>
+  ): number {
     const keys = Object.keys(a);
     let totalSimilarity = 0;
 
@@ -767,29 +843,37 @@ export class PsycholinguisticAnalyzer {
     personality: BigFivePersonality,
     emotional: EmotionalProfile,
     fingerprint: LinguisticFingerprint,
-    evolution: TemporalEvolution,
+    evolution: TemporalEvolution
   ): Promise<PsycholinguisticAnomaly[]> {
     const anomalies: PsycholinguisticAnomaly[] = [];
 
     // Check for inconsistent personality
     if (personality.confidence < 0.3) {
       anomalies.push({
-        type: 'low_personality_confidence',
-        description: 'Personality traits unclear from available text',
+        type: "low_personality_confidence",
+        description: "Personality traits unclear from available text",
         severity: 0.5,
         evidence: [],
-        possibleExplanations: ['Insufficient text', 'Deliberately obscured personality', 'Multiple authors'],
+        possibleExplanations: [
+          "Insufficient text",
+          "Deliberately obscured personality",
+          "Multiple authors",
+        ],
       });
     }
 
     // Check for emotional inconsistency
     if (emotional.affectiveConsistency < 0.3) {
       anomalies.push({
-        type: 'emotional_inconsistency',
-        description: 'High emotional volatility across texts',
+        type: "emotional_inconsistency",
+        description: "High emotional volatility across texts",
         severity: 0.7,
         evidence: [`Volatility: ${emotional.emotionalVolatility.toFixed(2)}`],
-        possibleExplanations: ['Emotional instability', 'Different authors', 'Manipulative content'],
+        possibleExplanations: [
+          "Emotional instability",
+          "Different authors",
+          "Manipulative content",
+        ],
       });
     }
 
@@ -797,10 +881,10 @@ export class PsycholinguisticAnalyzer {
     if (evolution.suddenChanges.length > 0) {
       for (const change of evolution.suddenChanges) {
         anomalies.push({
-          type: 'sudden_style_change',
-          description: 'Abrupt change in writing style detected',
+          type: "sudden_style_change",
+          description: "Abrupt change in writing style detected",
           severity: change.magnitude,
-          evidence: [`Affected metrics: ${change.affectedMetrics.join(', ')}`],
+          evidence: [`Affected metrics: ${change.affectedMetrics.join(", ")}`],
           possibleExplanations: change.possibleCauses,
         });
       }
@@ -815,7 +899,7 @@ export class PsycholinguisticAnalyzer {
   private calculateAuthenticityScore(
     deception: DeceptionIndicators,
     anomalies: PsycholinguisticAnomaly[],
-    evolution: TemporalEvolution,
+    evolution: TemporalEvolution
   ): number {
     let score = 1.0;
 
@@ -823,9 +907,10 @@ export class PsycholinguisticAnalyzer {
     score -= deception.overallDeceptionScore * 0.3;
 
     // Deduct for anomalies
-    const avgAnomalySeverity = anomalies.length > 0
-      ? anomalies.reduce((sum, a) => sum + a.severity, 0) / anomalies.length
-      : 0;
+    const avgAnomalySeverity =
+      anomalies.length > 0
+        ? anomalies.reduce((sum, a) => sum + a.severity, 0) / anomalies.length
+        : 0;
     score -= avgAnomalySeverity * 0.3;
 
     // Deduct for low consistency

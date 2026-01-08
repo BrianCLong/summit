@@ -110,11 +110,7 @@ add_header X-Frame-Options "SAMEORIGIN";
 
 ```javascript
 // Example iframe validation
-const allowedDomains = [
-  'grafana.company.com',
-  'tempo.company.com',
-  'prometheus.company.com',
-];
+const allowedDomains = ["grafana.company.com", "tempo.company.com", "prometheus.company.com"];
 
 const isValidUrl = (url) => {
   try {
@@ -131,11 +127,7 @@ const isValidUrl = (url) => {
 The ObservabilityPanel uses secure sandbox attributes:
 
 ```jsx
-<iframe
-  sandbox="allow-same-origin allow-scripts"
-  src={validatedUrl}
-  title="observability-tool"
-/>
+<iframe sandbox="allow-same-origin allow-scripts" src={validatedUrl} title="observability-tool" />
 ```
 
 ### 4. Content Validation

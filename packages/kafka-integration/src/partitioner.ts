@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment, @typescript-eslint/no-unused-vars, @typescript-eslint/no-non-null-assertion, no-fallthrough */
 // @ts-nocheck
-import { Partitioner, PartitionerArgs } from 'kafkajs';
-import * as crypto from 'crypto';
+import { Partitioner, PartitionerArgs } from "kafkajs";
+import * as crypto from "crypto";
 
 /**
  * Murmur2 hash function (Java compatible)
  */
 function murmur2(key: string): number {
-  const data = Buffer.from(key, 'utf-8');
+  const data = Buffer.from(key, "utf-8");
   const length = data.length;
   const seed = 0x9747b28c;
 
@@ -137,7 +137,7 @@ export const CustomFieldPartitioner = (fieldPath: string): Partitioner => {
     const numPartitions = partitionMetadata.length;
 
     try {
-      const value = JSON.parse(message.value?.toString() || '{}');
+      const value = JSON.parse(message.value?.toString() || "{}");
       const fieldValue = getNestedField(value, fieldPath);
 
       if (fieldValue) {
@@ -161,7 +161,7 @@ export const CustomFieldPartitioner = (fieldPath: string): Partitioner => {
  * Get nested field from object
  */
 function getNestedField(obj: any, path: string): any {
-  const parts = path.split('.');
+  const parts = path.split(".");
   let current = obj;
 
   for (const part of parts) {

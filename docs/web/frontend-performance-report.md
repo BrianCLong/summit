@@ -67,16 +67,16 @@ manualChunks: {
 **Before**: Full D3 import
 
 ```javascript
-import * as d3 from 'd3';
+import * as d3 from "d3";
 ```
 
 **After**: Tree-shaken modular imports
 
 ```javascript
-import { select } from 'd3-selection';
-import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force';
-import { zoom } from 'd3-zoom';
-import { drag } from 'd3-drag';
+import { select } from "d3-selection";
+import { forceSimulation, forceLink, forceManyBody, forceCenter } from "d3-force";
+import { zoom } from "d3-zoom";
+import { drag } from "d3-drag";
 ```
 
 **Impact**: Reduces D3 bundle from ~500KB to ~80KB (only imports used modules)
@@ -90,11 +90,11 @@ import { drag } from 'd3-drag';
 The app correctly uses `React.lazy()` for all page-level components:
 
 ```javascript
-const HomePage = React.lazy(() => import('@/pages/HomePage'));
-const ExplorePage = React.lazy(() => import('@/pages/ExplorePage'));
-const AlertsPage = React.lazy(() => import('@/pages/AlertsPage'));
-const CasesPage = React.lazy(() => import('@/pages/CasesPage'));
-const AdminPage = React.lazy(() => import('@/pages/AdminPage'));
+const HomePage = React.lazy(() => import("@/pages/HomePage"));
+const ExplorePage = React.lazy(() => import("@/pages/ExplorePage"));
+const AlertsPage = React.lazy(() => import("@/pages/AlertsPage"));
+const CasesPage = React.lazy(() => import("@/pages/CasesPage"));
+const AdminPage = React.lazy(() => import("@/pages/AdminPage"));
 // ... and more
 ```
 
@@ -150,7 +150,7 @@ exceeds this size.
 2. **Lazy load heavy visualization components**
 
    ```javascript
-   const GraphCanvas = React.lazy(() => import('@/graphs/GraphCanvas'));
+   const GraphCanvas = React.lazy(() => import("@/graphs/GraphCanvas"));
    ```
 
 3. **Dynamic imports for admin features**

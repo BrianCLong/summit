@@ -1,22 +1,22 @@
-import { StreamMessage } from '@intelgraph/kafka-integration';
+import { StreamMessage } from "@intelgraph/kafka-integration";
 
 /**
  * Window types
  */
 export enum WindowType {
-  TUMBLING = 'tumbling',
-  SLIDING = 'sliding',
-  SESSION = 'session',
-  GLOBAL = 'global',
+  TUMBLING = "tumbling",
+  SLIDING = "sliding",
+  SESSION = "session",
+  GLOBAL = "global",
 }
 
 /**
  * Time semantics
  */
 export enum TimeSemantics {
-  EVENT_TIME = 'event_time',
-  PROCESSING_TIME = 'processing_time',
-  INGESTION_TIME = 'ingestion_time',
+  EVENT_TIME = "event_time",
+  PROCESSING_TIME = "processing_time",
+  INGESTION_TIME = "ingestion_time",
 }
 
 /**
@@ -63,9 +63,9 @@ export interface Watermark {
  * State backend types
  */
 export enum StateBackend {
-  MEMORY = 'memory',
-  REDIS = 'redis',
-  ROCKSDB = 'rocksdb',
+  MEMORY = "memory",
+  REDIS = "redis",
+  ROCKSDB = "rocksdb",
 }
 
 /**
@@ -91,10 +91,10 @@ export type AggregateFunction<T, A, R> = {
  * Join types
  */
 export enum JoinType {
-  INNER = 'inner',
-  LEFT = 'left',
-  RIGHT = 'right',
-  FULL_OUTER = 'full_outer',
+  INNER = "inner",
+  LEFT = "left",
+  RIGHT = "right",
+  FULL_OUTER = "full_outer",
 }
 
 /**
@@ -140,9 +140,9 @@ export interface ProcessingContext {
  * Late data handling strategy
  */
 export enum LateDataStrategy {
-  DROP = 'drop',
-  SIDE_OUTPUT = 'side_output',
-  UPDATE_WINDOW = 'update_window',
+  DROP = "drop",
+  SIDE_OUTPUT = "side_output",
+  UPDATE_WINDOW = "update_window",
 }
 
 /**
@@ -160,17 +160,17 @@ export interface Pattern {
   name: string;
   conditions: PatternCondition[];
   window: WindowSpec;
-  skip?: 'skip_past_last_event' | 'skip_to_first' | 'skip_to_last';
+  skip?: "skip_past_last_event" | "skip_to_first" | "skip_to_last";
 }
 
 /**
  * Pattern condition
  */
 export interface PatternCondition {
-  type: 'simple' | 'iterative' | 'looping';
+  type: "simple" | "iterative" | "looping";
   predicate: (event: any) => boolean;
   quantifier?: {
-    type: 'one_or_more' | 'zero_or_more' | 'times';
+    type: "one_or_more" | "zero_or_more" | "times";
     times?: number;
   };
 }
@@ -189,8 +189,8 @@ export interface PatternMatch<T = unknown> {
  * Backpressure strategy
  */
 export enum BackpressureStrategy {
-  DROP_OLDEST = 'drop_oldest',
-  DROP_NEWEST = 'drop_newest',
-  BLOCK = 'block',
-  SAMPLE = 'sample',
+  DROP_OLDEST = "drop_oldest",
+  DROP_NEWEST = "drop_newest",
+  BLOCK = "block",
+  SAMPLE = "sample",
 }

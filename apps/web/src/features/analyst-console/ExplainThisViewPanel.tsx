@@ -33,7 +33,7 @@ import type {
   AnalystLink,
   ViewExplanation,
   ViewExplanationMetrics,
-  TimeWindow
+  TimeWindow,
 } from './types'
 
 /**
@@ -251,7 +251,8 @@ export function ExplainThisViewPanel({
     const visibleEntityIds = new Set(visibleEntities.map(e => e.id))
     const visibleLinks = links.filter(
       link =>
-        visibleEntityIds.has(link.sourceId) && visibleEntityIds.has(link.targetId)
+        visibleEntityIds.has(link.sourceId) &&
+        visibleEntityIds.has(link.targetId)
     )
 
     // Filter locations by time window
@@ -457,31 +458,33 @@ export function ExplainThisViewPanel({
                   No entities in current view
                 </p>
               ) : (
-                explanation.metrics.topEntities.map(({ entity, connectionCount }) => (
-                  <div
-                    key={entity.id}
-                    className="flex items-center justify-between p-2 rounded-lg bg-slate-900/50 hover:bg-slate-900/70 transition-colors"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-slate-200 truncate">
-                        {entity.label}
+                explanation.metrics.topEntities.map(
+                  ({ entity, connectionCount }) => (
+                    <div
+                      key={entity.id}
+                      className="flex items-center justify-between p-2 rounded-lg bg-slate-900/50 hover:bg-slate-900/70 transition-colors"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-slate-200 truncate">
+                          {entity.label}
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="outline" className="text-xs">
+                            {entity.type}
+                          </Badge>
+                          <span className="text-xs text-slate-500">
+                            {connectionCount} connections
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="outline" className="text-xs">
-                          {entity.type}
-                        </Badge>
-                        <span className="text-xs text-slate-500">
-                          {connectionCount} connections
-                        </span>
-                      </div>
+                      {entity.importanceScore && (
+                        <div className="text-xs text-slate-400">
+                          Score: {Math.round(entity.importanceScore * 100)}
+                        </div>
+                      )}
                     </div>
-                    {entity.importanceScore && (
-                      <div className="text-xs text-slate-400">
-                        Score: {Math.round(entity.importanceScore * 100)}
-                      </div>
-                    )}
-                  </div>
-                ))
+                  )
+                )
               )}
             </CardContent>
           )}
@@ -547,7 +550,9 @@ export function ExplainThisViewPanel({
             <CardContent className="pt-0 space-y-2">
               {state.filters.entityTypes?.length ? (
                 <div>
-                  <div className="text-xs text-slate-500 mb-1">Entity Types</div>
+                  <div className="text-xs text-slate-500 mb-1">
+                    Entity Types
+                  </div>
                   <div className="flex flex-wrap gap-1">
                     {state.filters.entityTypes.map(type => (
                       <Badge key={type} variant="secondary" className="text-xs">
@@ -605,7 +610,8 @@ export function ExplainThisViewPanel({
               )}
               {state.selection.selectedLocationIds.length > 0 && (
                 <div className="text-xs text-slate-300">
-                  {state.selection.selectedLocationIds.length} locations selected
+                  {state.selection.selectedLocationIds.length} locations
+                  selected
                 </div>
               )}
               <Button
@@ -625,9 +631,9 @@ export function ExplainThisViewPanel({
           <div className="flex items-start gap-2">
             <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
             <p>
-              This panel summarizes what you're currently seeing. Select entities
-              in the graph, adjust the time brush in the timeline, or click
-              locations on the map to update this summary.
+              This panel summarizes what you're currently seeing. Select
+              entities in the graph, adjust the time brush in the timeline, or
+              click locations on the map to update this summary.
             </p>
           </div>
         </div>

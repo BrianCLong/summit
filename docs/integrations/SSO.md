@@ -26,22 +26,25 @@ env:
 ## Provider Setup
 
 ### Okta
+
 1.  Create a new **Web App** integration.
 2.  Set **Sign-in redirect URIs** to `https://<your-summit-domain>/auth/callback`.
 3.  Grant the `openid`, `profile`, and `email` scopes.
 4.  Copy the Client ID and Client Secret.
 
 ### Azure Active Directory (Entra ID)
+
 1.  Register a new application.
 2.  Add a **Web** platform with the Redirect URI `https://<your-summit-domain>/auth/callback`.
 3.  Create a Client Secret in **Certificates & secrets**.
 4.  Use the `Application (client) ID` and `Directory (tenant) ID` to form your issuer URL: `https://login.microsoftonline.com/<tenant-id>/v2.0`.
 
 ## Role Mapping
+
 Summit maps OIDC claims to internal roles. By default, it looks for a `groups` or `roles` claim.
 
-*   `summit-admin` -> Admin Access
-*   `summit-analyst` -> Analyst Access
-*   `summit-viewer` -> Read-only Access
+- `summit-admin` -> Admin Access
+- `summit-analyst` -> Analyst Access
+- `summit-viewer` -> Read-only Access
 
 Custom mapping can be configured via the `OIDC_ROLE_CLAIM` and `OIDC_ROLE_MAP` variables.

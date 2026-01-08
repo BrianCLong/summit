@@ -9,14 +9,14 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'contracts/**'
-      - 'packages/sdk-**/**'
-      - 'prov_ledger/**'
-      - 'server/src/conductor/api/**'
+      - "contracts/**"
+      - "packages/sdk-**/**"
+      - "prov_ledger/**"
+      - "server/src/conductor/api/**"
 
 env:
-  NODE_VERSION: '18'
-  PYTHON_VERSION: '3.11'
+  NODE_VERSION: "18"
+  PYTHON_VERSION: "3.11"
 
 jobs:
   contract-validation:
@@ -37,8 +37,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
-          cache-dependency-path: 'contracts/pnpm-lock.yaml'
+          cache: "pnpm"
+          cache-dependency-path: "contracts/pnpm-lock.yaml"
 
       - name: Install contract dependencies
         working-directory: contracts
@@ -67,7 +67,7 @@ jobs:
 
     strategy:
       matrix:
-        api-version: ['v1.0.0', 'v0.9.0', 'v0.8.0'] # Current and N-2 versions
+        api-version: ["v1.0.0", "v0.9.0", "v0.8.0"] # Current and N-2 versions
 
     services:
       test-api:
@@ -88,7 +88,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install test dependencies
         working-directory: contracts
@@ -126,7 +126,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Setup Python
         uses: actions/setup-python@v4

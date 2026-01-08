@@ -127,5 +127,5 @@ properties:
     type: object
     description: Environment-specific overrides keyed by environment name.
     additionalProperties:
-      $ref: '#'
+      $ref: "#"
 additionalProperties: false

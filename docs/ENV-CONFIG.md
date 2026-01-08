@@ -9,22 +9,23 @@ Create a `.env` file in the root directory based on `.env.example`.
 
 **Core Variables:**
 
-| Variable | Description | Default (Dev) |
-| :--- | :--- | :--- |
-| `NODE_ENV` | Environment mode | `development` |
-| `PORT` | API Server Port | `4000` |
+| Variable       | Description               | Default (Dev)                                               |
+| :------------- | :------------------------ | :---------------------------------------------------------- |
+| `NODE_ENV`     | Environment mode          | `development`                                               |
+| `PORT`         | API Server Port           | `4000`                                                      |
 | `DATABASE_URL` | PostgreSQL Connection URL | `postgresql://summit:devpassword@localhost:5432/summit_dev` |
-| `NEO4J_URI` | Neo4j Bolt URI | `bolt://localhost:7687` |
-| `REDIS_HOST` | Redis Hostname | `localhost` |
-| `JWT_SECRET` | Secret for signing JWTs | *Change in Prod* |
+| `NEO4J_URI`    | Neo4j Bolt URI            | `bolt://localhost:7687`                                     |
+| `REDIS_HOST`   | Redis Hostname            | `localhost`                                                 |
+| `JWT_SECRET`   | Secret for signing JWTs   | _Change in Prod_                                            |
 
-*See `.env.example` for the complete list.*
+_See `.env.example` for the complete list._
 
 ## 2. Docker Compose Configuration
 
 The local development environment is managed via `docker-compose.yml` and `docker-compose.dev.yml`.
 
 **Key Services:**
+
 - **postgres**: Main relational database (Port 5432).
 - **neo4j**: Graph database (Ports 7474, 7687).
 - **redis**: Cache and queue backing (Port 6379).
@@ -70,12 +71,12 @@ The following secrets must be configured in the GitHub Repository settings for C
 
 ## 5. Environment Differences
 
-| Feature | Local (Dev) | Staging | Production |
-| :--- | :--- | :--- | :--- |
-| **DB** | Docker Container | Cloud SQL / RDS (Sandbox) | Cloud SQL / RDS (High Avail) |
-| **Logs** | Console | Cloud Logging | Cloud Logging + Aggregator |
-| **Replicas** | 1 | 2 | Auto-scaling (min 3) |
-| **Ingress** | N/A (Localhost) | `staging.summit.run` | `app.summit.run` |
+| Feature      | Local (Dev)      | Staging                   | Production                   |
+| :----------- | :--------------- | :------------------------ | :--------------------------- |
+| **DB**       | Docker Container | Cloud SQL / RDS (Sandbox) | Cloud SQL / RDS (High Avail) |
+| **Logs**     | Console          | Cloud Logging             | Cloud Logging + Aggregator   |
+| **Replicas** | 1                | 2                         | Auto-scaling (min 3)         |
+| **Ingress**  | N/A (Localhost)  | `staging.summit.run`      | `app.summit.run`             |
 
 ## 6. Health Check Endpoints
 

@@ -1,11 +1,11 @@
 // @ts-nocheck
-import { Complex, polyFromRoots, evaluatePoly } from './complex.js';
-import { FilterDesign, NumericArray } from './types.js';
+import { Complex, polyFromRoots, evaluatePoly } from "./complex.js";
+import { FilterDesign, NumericArray } from "./types.js";
 
 function butterworthPoles(order: number): Complex[] {
   const poles: Complex[] = [];
   for (let k = 0; k < order; k += 1) {
-    const theta = Math.PI * (2 * k + 1) / (2 * order);
+    const theta = (Math.PI * (2 * k + 1)) / (2 * order);
     poles.push(new Complex(-Math.sin(theta), Math.cos(theta)));
   }
   return poles;
@@ -16,7 +16,7 @@ function chebyshevPoles(order: number, rippleDb: number): Complex[] {
   const mu = (1 / order) * Math.asinh(1 / epsilon);
   const poles: Complex[] = [];
   for (let k = 0; k < order; k += 1) {
-    const theta = Math.PI * (2 * k + 1) / (2 * order);
+    const theta = (Math.PI * (2 * k + 1)) / (2 * order);
     const sigma = -Math.sin(theta) * Math.sinh(mu);
     const omega = Math.cos(theta) * Math.cosh(mu);
     poles.push(new Complex(sigma, omega));
@@ -26,7 +26,7 @@ function chebyshevPoles(order: number, rippleDb: number): Complex[] {
 
 function bilinearTransform(poles: Complex[], sampleRate: number, cutoffHz: number): Complex[] {
   const fs2 = 2 * sampleRate;
-  const warped = Math.tan(Math.PI * cutoffHz / sampleRate);
+  const warped = Math.tan((Math.PI * cutoffHz) / sampleRate);
   return poles.map((pole) => {
     const scaled = pole.mul(warped);
     const numerator = new Complex(fs2 + scaled.re, scaled.im);
@@ -49,18 +49,27 @@ function buildDigitalFilter(poles: Complex[], order: number): FilterDesign {
   };
 }
 
-export function designButterworthLowpass(order: number, cutoffHz: number, sampleRate: number): FilterDesign {
+export function designButterworthLowpass(
+  order: number,
+  cutoffHz: number,
+  sampleRate: number
+): FilterDesign {
   if (order < 1) {
-    throw new Error('Order must be at least 1');
+    throw new Error("Order must be at least 1");
   }
   const poles = butterworthPoles(order);
   const digitalPoles = bilinearTransform(poles, sampleRate, cutoffHz);
   return buildDigitalFilter(digitalPoles, order);
 }
 
-export function designChebyshevLowpass(order: number, cutoffHz: number, sampleRate: number, rippleDb = 0.5): FilterDesign {
+export function designChebyshevLowpass(
+  order: number,
+  cutoffHz: number,
+  sampleRate: number,
+  rippleDb = 0.5
+): FilterDesign {
   if (order < 1) {
-    throw new Error('Order must be at least 1');
+    throw new Error("Order must be at least 1");
   }
   const poles = chebyshevPoles(order, rippleDb);
   const digitalPoles = bilinearTransform(poles, sampleRate, cutoffHz);
@@ -78,7 +87,7 @@ export class IIRFilter {
 
   constructor(design: FilterDesign) {
     if (design.denominator[0] === 0) {
-      throw new Error('Invalid denominator: a0 must be non-zero');
+      throw new Error("Invalid denominator: a0 must be non-zero");
     }
     this.b = design.numerator;
     this.a = design.denominator;

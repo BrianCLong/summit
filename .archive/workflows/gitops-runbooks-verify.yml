@@ -5,7 +5,7 @@ permissions:
 on:
   pull_request:
     paths:
-      - 'runbooks/**'
+      - "runbooks/**"
 
 jobs:
   verify-signed-runbooks:

@@ -1,20 +1,20 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================================================
 // Core Supply Chain Entity Types
 // ============================================================================
 
 export const SupplyChainNodeTypeSchema = z.enum([
-  'supplier',
-  'manufacturer',
-  'distributor',
-  'logistics-provider',
-  'retailer',
-  'raw-material-provider',
-  'component-manufacturer',
-  'warehouse',
-  'port',
-  'customs',
+  "supplier",
+  "manufacturer",
+  "distributor",
+  "logistics-provider",
+  "retailer",
+  "raw-material-provider",
+  "component-manufacturer",
+  "warehouse",
+  "port",
+  "customs",
 ]);
 
 export type SupplyChainNodeType = z.infer<typeof SupplyChainNodeTypeSchema>;
@@ -38,8 +38,8 @@ export const SupplyChainNodeSchema = z.object({
   description: z.string().optional(),
   location: GeographicLocationSchema.optional(),
   tier: z.number().int().min(1), // Tier 1 = direct suppliers, Tier 2+= sub-suppliers
-  status: z.enum(['active', 'inactive', 'under-review', 'suspended']),
-  criticality: z.enum(['low', 'medium', 'high', 'critical']),
+  status: z.enum(["active", "inactive", "under-review", "suspended"]),
+  criticality: z.enum(["low", "medium", "high", "critical"]),
   metadata: z.record(z.any()).optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
@@ -52,12 +52,12 @@ export const SupplyChainRelationshipSchema = z.object({
   sourceNodeId: z.string().uuid(),
   targetNodeId: z.string().uuid(),
   relationshipType: z.enum([
-    'supplies',
-    'manufactures',
-    'distributes',
-    'transports',
-    'warehouses',
-    'processes',
+    "supplies",
+    "manufactures",
+    "distributes",
+    "transports",
+    "warehouses",
+    "processes",
   ]),
   materialFlow: z.array(z.string()).optional(), // Materials/components flowing
   strength: z.number().min(0).max(1), // Relationship strength score
@@ -78,21 +78,21 @@ export type SupplyChainRelationship = z.infer<typeof SupplyChainRelationshipSche
 // ============================================================================
 
 export const RiskCategorySchema = z.enum([
-  'financial',
-  'cybersecurity',
-  'geopolitical',
-  'regulatory',
-  'esg',
-  'operational',
-  'quality',
-  'delivery',
-  'capacity',
-  'concentration',
+  "financial",
+  "cybersecurity",
+  "geopolitical",
+  "regulatory",
+  "esg",
+  "operational",
+  "quality",
+  "delivery",
+  "capacity",
+  "concentration",
 ]);
 
 export type RiskCategory = z.infer<typeof RiskCategorySchema>;
 
-export const RiskLevelSchema = z.enum(['low', 'medium', 'high', 'critical']);
+export const RiskLevelSchema = z.enum(["low", "medium", "high", "critical"]);
 
 export type RiskLevel = z.infer<typeof RiskLevelSchema>;
 
@@ -102,11 +102,13 @@ export const RiskAssessmentSchema = z.object({
   category: RiskCategorySchema,
   level: RiskLevelSchema,
   score: z.number().min(0).max(100),
-  indicators: z.array(z.object({
-    name: z.string(),
-    value: z.any(),
-    impact: z.enum(['positive', 'negative', 'neutral']),
-  })),
+  indicators: z.array(
+    z.object({
+      name: z.string(),
+      value: z.any(),
+      impact: z.enum(["positive", "negative", "neutral"]),
+    })
+  ),
   mitigations: z.array(z.string()).optional(),
   assessedAt: z.date(),
   assessedBy: z.string().optional(),
@@ -140,12 +142,14 @@ export const CybersecurityPostureSchema = z.object({
     medium: z.number(),
     low: z.number(),
   }),
-  incidentHistory: z.array(z.object({
-    date: z.date(),
-    type: z.string(),
-    severity: RiskLevelSchema,
-    resolved: z.boolean(),
-  })),
+  incidentHistory: z.array(
+    z.object({
+      date: z.date(),
+      type: z.string(),
+      severity: RiskLevelSchema,
+      resolved: z.boolean(),
+    })
+  ),
   lastAssessed: z.date(),
 });
 
@@ -158,12 +162,14 @@ export const ESGScoreSchema = z.object({
   socialScore: z.number().min(0).max(100),
   governanceScore: z.number().min(0).max(100),
   certifications: z.array(z.string()),
-  violations: z.array(z.object({
-    category: z.string(),
-    description: z.string(),
-    date: z.date(),
-    severity: RiskLevelSchema,
-  })),
+  violations: z.array(
+    z.object({
+      category: z.string(),
+      description: z.string(),
+      date: z.date(),
+      severity: RiskLevelSchema,
+    })
+  ),
   lastAssessed: z.date(),
 });
 
@@ -190,7 +196,7 @@ export const ComponentSchema = z.object({
   unitCost: z.number().optional(),
   currency: z.string().optional(),
   alternativeComponents: z.array(z.string().uuid()).optional(),
-  obsolescenceRisk: z.enum(['low', 'medium', 'high']),
+  obsolescenceRisk: z.enum(["low", "medium", "high"]),
   certifications: z.array(z.string()).optional(),
   serialized: z.boolean(),
   metadata: z.record(z.any()).optional(),
@@ -205,13 +211,15 @@ export const BillOfMaterialsSchema = z.object({
   productId: z.string(),
   productName: z.string(),
   version: z.string(),
-  items: z.array(z.object({
-    componentId: z.string().uuid(),
-    quantity: z.number(),
-    unit: z.string(),
-    isOptional: z.boolean(),
-    alternatives: z.array(z.string().uuid()).optional(),
-  })),
+  items: z.array(
+    z.object({
+      componentId: z.string().uuid(),
+      quantity: z.number(),
+      unit: z.string(),
+      isOptional: z.boolean(),
+      alternatives: z.array(z.string().uuid()).optional(),
+    })
+  ),
   totalCost: z.number().optional(),
   currency: z.string().optional(),
   validFrom: z.date(),
@@ -233,7 +241,7 @@ export const ComponentInventorySchema = z.object({
   expirationDate: z.date().optional(),
   batchNumber: z.string().optional(),
   serialNumbers: z.array(z.string()).optional(),
-  status: z.enum(['available', 'reserved', 'in-transit', 'quarantined', 'expired']),
+  status: z.enum(["available", "reserved", "in-transit", "quarantined", "expired"]),
   metadata: z.record(z.any()).optional(),
   updatedAt: z.date(),
 });
@@ -245,17 +253,17 @@ export type ComponentInventory = z.infer<typeof ComponentInventorySchema>;
 // ============================================================================
 
 export const ShipmentStatusSchema = z.enum([
-  'pending',
-  'picked-up',
-  'in-transit',
-  'at-port',
-  'customs-clearance',
-  'out-for-delivery',
-  'delivered',
-  'delayed',
-  'lost',
-  'damaged',
-  'returned',
+  "pending",
+  "picked-up",
+  "in-transit",
+  "at-port",
+  "customs-clearance",
+  "out-for-delivery",
+  "delivered",
+  "delayed",
+  "lost",
+  "damaged",
+  "returned",
 ]);
 
 export type ShipmentStatus = z.infer<typeof ShipmentStatusSchema>;
@@ -267,42 +275,54 @@ export const ShipmentSchema = z.object({
   origin: GeographicLocationSchema,
   destination: GeographicLocationSchema,
   carrier: z.string(),
-  transportMode: z.enum(['air', 'sea', 'rail', 'road', 'multimodal']),
+  transportMode: z.enum(["air", "sea", "rail", "road", "multimodal"]),
   status: ShipmentStatusSchema,
   currentLocation: GeographicLocationSchema.optional(),
-  contents: z.array(z.object({
-    componentId: z.string().uuid().optional(),
-    description: z.string(),
-    quantity: z.number(),
-    value: z.number().optional(),
-  })),
+  contents: z.array(
+    z.object({
+      componentId: z.string().uuid().optional(),
+      description: z.string(),
+      quantity: z.number(),
+      value: z.number().optional(),
+    })
+  ),
   estimatedDeparture: z.date().optional(),
   actualDeparture: z.date().optional(),
   estimatedArrival: z.date(),
   actualArrival: z.date().optional(),
-  milestones: z.array(z.object({
-    timestamp: z.date(),
-    location: GeographicLocationSchema,
-    event: z.string(),
-    status: ShipmentStatusSchema,
-  })),
-  temperature: z.object({
-    min: z.number(),
-    max: z.number(),
-    current: z.number().optional(),
-    unit: z.string(),
-  }).optional(),
-  alerts: z.array(z.object({
-    timestamp: z.date(),
-    type: z.string(),
-    severity: RiskLevelSchema,
-    message: z.string(),
-  })).optional(),
-  insurance: z.object({
-    provider: z.string(),
-    policyNumber: z.string(),
-    coverage: z.number(),
-  }).optional(),
+  milestones: z.array(
+    z.object({
+      timestamp: z.date(),
+      location: GeographicLocationSchema,
+      event: z.string(),
+      status: ShipmentStatusSchema,
+    })
+  ),
+  temperature: z
+    .object({
+      min: z.number(),
+      max: z.number(),
+      current: z.number().optional(),
+      unit: z.string(),
+    })
+    .optional(),
+  alerts: z
+    .array(
+      z.object({
+        timestamp: z.date(),
+        type: z.string(),
+        severity: RiskLevelSchema,
+        message: z.string(),
+      })
+    )
+    .optional(),
+  insurance: z
+    .object({
+      provider: z.string(),
+      policyNumber: z.string(),
+      coverage: z.number(),
+    })
+    .optional(),
   metadata: z.record(z.any()).optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
@@ -339,14 +359,14 @@ export const ComplianceRequirementSchema = z.object({
   id: z.string().uuid(),
   title: z.string(),
   category: z.enum([
-    'export-control',
-    'sanctions',
-    'conflict-minerals',
-    'environmental',
-    'labor',
-    'product-safety',
-    'trade',
-    'industry-specific',
+    "export-control",
+    "sanctions",
+    "conflict-minerals",
+    "environmental",
+    "labor",
+    "product-safety",
+    "trade",
+    "industry-specific",
   ]),
   jurisdiction: z.string(),
   description: z.string(),
@@ -367,20 +387,28 @@ export const ComplianceStatusSchema = z.object({
   id: z.string().uuid(),
   nodeId: z.string().uuid(),
   requirementId: z.string().uuid(),
-  status: z.enum(['compliant', 'non-compliant', 'under-review', 'exempted', 'not-applicable']),
+  status: z.enum(["compliant", "non-compliant", "under-review", "exempted", "not-applicable"]),
   lastAssessedAt: z.date(),
   assessedBy: z.string().optional(),
-  evidence: z.array(z.object({
-    type: z.string(),
-    description: z.string(),
-    documentUrl: z.string().optional(),
-    uploadedAt: z.date(),
-  })).optional(),
-  findings: z.array(z.object({
-    severity: RiskLevelSchema,
-    description: z.string(),
-    remediation: z.string().optional(),
-  })).optional(),
+  evidence: z
+    .array(
+      z.object({
+        type: z.string(),
+        description: z.string(),
+        documentUrl: z.string().optional(),
+        uploadedAt: z.date(),
+      })
+    )
+    .optional(),
+  findings: z
+    .array(
+      z.object({
+        severity: RiskLevelSchema,
+        description: z.string(),
+        remediation: z.string().optional(),
+      })
+    )
+    .optional(),
   nextAssessmentDue: z.date().optional(),
   metadata: z.record(z.any()).optional(),
 });
@@ -398,7 +426,7 @@ export const CertificationSchema = z.object({
   expirationDate: z.date().optional(),
   scope: z.string().optional(),
   documentUrl: z.string().optional(),
-  status: z.enum(['valid', 'expired', 'suspended', 'revoked']),
+  status: z.enum(["valid", "expired", "suspended", "revoked"]),
   metadata: z.record(z.any()).optional(),
 });
 
@@ -409,19 +437,19 @@ export type Certification = z.infer<typeof CertificationSchema>;
 // ============================================================================
 
 export const IncidentTypeSchema = z.enum([
-  'disruption',
-  'quality-issue',
-  'delivery-delay',
-  'security-breach',
-  'natural-disaster',
-  'geopolitical-event',
-  'regulatory-violation',
-  'financial-distress',
-  'labor-dispute',
-  'contamination',
-  'recall',
-  'fraud',
-  'other',
+  "disruption",
+  "quality-issue",
+  "delivery-delay",
+  "security-breach",
+  "natural-disaster",
+  "geopolitical-event",
+  "regulatory-violation",
+  "financial-distress",
+  "labor-dispute",
+  "contamination",
+  "recall",
+  "fraud",
+  "other",
 ]);
 
 export type IncidentType = z.infer<typeof IncidentTypeSchema>;
@@ -432,7 +460,7 @@ export const IncidentSchema = z.object({
   title: z.string(),
   description: z.string(),
   severity: RiskLevelSchema,
-  status: z.enum(['open', 'investigating', 'mitigating', 'resolved', 'closed']),
+  status: z.enum(["open", "investigating", "mitigating", "resolved", "closed"]),
   affectedNodes: z.array(z.string().uuid()),
   affectedComponents: z.array(z.string().uuid()).optional(),
   affectedShipments: z.array(z.string().uuid()).optional(),
@@ -447,12 +475,14 @@ export const IncidentSchema = z.object({
   reportedBy: z.string().optional(),
   resolvedAt: z.date().optional(),
   rootCause: z.string().optional(),
-  mitigationActions: z.array(z.object({
-    action: z.string(),
-    assignedTo: z.string().optional(),
-    status: z.enum(['pending', 'in-progress', 'completed']),
-    completedAt: z.date().optional(),
-  })),
+  mitigationActions: z.array(
+    z.object({
+      action: z.string(),
+      assignedTo: z.string().optional(),
+      status: z.enum(["pending", "in-progress", "completed"]),
+      completedAt: z.date().optional(),
+    })
+  ),
   lessonsLearned: z.string().optional(),
   preventiveMeasures: z.string().optional(),
   metadata: z.record(z.any()).optional(),
@@ -489,7 +519,13 @@ export const DisruptionPredictionSchema = z.object({
   id: z.string().uuid(),
   nodeId: z.string().uuid().optional(),
   componentId: z.string().uuid().optional(),
-  predictionType: z.enum(['supply-shortage', 'quality-issue', 'delay', 'price-spike', 'capacity-constraint']),
+  predictionType: z.enum([
+    "supply-shortage",
+    "quality-issue",
+    "delay",
+    "price-spike",
+    "capacity-constraint",
+  ]),
   probability: z.number().min(0).max(1),
   confidence: z.number().min(0).max(1),
   expectedImpact: RiskLevelSchema,
@@ -497,10 +533,12 @@ export const DisruptionPredictionSchema = z.object({
     start: z.date(),
     end: z.date(),
   }),
-  factors: z.array(z.object({
-    factor: z.string(),
-    contribution: z.number(),
-  })),
+  factors: z.array(
+    z.object({
+      factor: z.string(),
+      contribution: z.number(),
+    })
+  ),
   recommendations: z.array(z.string()),
   generatedAt: z.date(),
   modelVersion: z.string().optional(),
@@ -530,11 +568,13 @@ export const SupplyChainMetricsSchema = z.object({
     totalIncidents: z.number(),
     resolvedIncidents: z.number(),
   }),
-  trends: z.object({
-    riskTrend: z.enum(['improving', 'stable', 'deteriorating']),
-    costTrend: z.enum(['increasing', 'stable', 'decreasing']),
-    performanceTrend: z.enum(['improving', 'stable', 'deteriorating']),
-  }).optional(),
+  trends: z
+    .object({
+      riskTrend: z.enum(["improving", "stable", "deteriorating"]),
+      costTrend: z.enum(["increasing", "stable", "decreasing"]),
+      performanceTrend: z.enum(["improving", "stable", "deteriorating"]),
+    })
+    .optional(),
   generatedAt: z.date(),
 });
 
@@ -547,7 +587,12 @@ export type SupplyChainMetrics = z.infer<typeof SupplyChainMetricsSchema>;
 export const VendorAssessmentSchema = z.object({
   id: z.string().uuid(),
   vendorId: z.string().uuid(),
-  assessmentType: z.enum(['initial-onboarding', 'periodic-review', 'incident-triggered', 'contract-renewal']),
+  assessmentType: z.enum([
+    "initial-onboarding",
+    "periodic-review",
+    "incident-triggered",
+    "contract-renewal",
+  ]),
   overallScore: z.number().min(0).max(100),
   categories: z.object({
     financial: z.number().min(0).max(100),
@@ -556,17 +601,19 @@ export const VendorAssessmentSchema = z.object({
     compliance: z.number().min(0).max(100),
     esg: z.number().min(0).max(100),
   }),
-  recommendation: z.enum(['approve', 'approve-with-conditions', 'reject', 'monitor', 'terminate']),
+  recommendation: z.enum(["approve", "approve-with-conditions", "reject", "monitor", "terminate"]),
   conditions: z.array(z.string()).optional(),
   assessor: z.string().optional(),
   assessmentDate: z.date(),
   nextAssessmentDue: z.date().optional(),
-  findings: z.array(z.object({
-    category: z.string(),
-    finding: z.string(),
-    severity: RiskLevelSchema,
-    recommendation: z.string().optional(),
-  })),
+  findings: z.array(
+    z.object({
+      category: z.string(),
+      finding: z.string(),
+      severity: RiskLevelSchema,
+      recommendation: z.string().optional(),
+    })
+  ),
   metadata: z.record(z.any()).optional(),
 });
 
@@ -576,22 +623,28 @@ export const ContractSchema = z.object({
   id: z.string().uuid(),
   vendorId: z.string().uuid(),
   contractNumber: z.string(),
-  type: z.enum(['supply', 'service', 'logistics', 'manufacturing']),
-  status: z.enum(['draft', 'active', 'expired', 'terminated', 'renewed']),
+  type: z.enum(["supply", "service", "logistics", "manufacturing"]),
+  status: z.enum(["draft", "active", "expired", "terminated", "renewed"]),
   effectiveDate: z.date(),
   expirationDate: z.date().optional(),
   autoRenewal: z.boolean(),
   value: z.number().optional(),
   currency: z.string().optional(),
-  sla: z.object({
-    deliveryTimeDays: z.number().optional(),
-    qualityTargets: z.record(z.number()).optional(),
-    performanceMetrics: z.record(z.number()).optional(),
-    penalties: z.array(z.object({
-      breach: z.string(),
-      penalty: z.string(),
-    })).optional(),
-  }).optional(),
+  sla: z
+    .object({
+      deliveryTimeDays: z.number().optional(),
+      qualityTargets: z.record(z.number()).optional(),
+      performanceMetrics: z.record(z.number()).optional(),
+      penalties: z
+        .array(
+          z.object({
+            breach: z.string(),
+            penalty: z.string(),
+          })
+        )
+        .optional(),
+    })
+    .optional(),
   terminationClauses: z.array(z.string()).optional(),
   complianceRequirements: z.array(z.string().uuid()).optional(),
   metadata: z.record(z.any()).optional(),

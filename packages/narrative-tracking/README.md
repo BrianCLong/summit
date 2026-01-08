@@ -20,7 +20,7 @@ pnpm add @intelgraph/narrative-tracking
 ## Quick Start
 
 ```typescript
-import { NarrativeExtractor, FramingAnalyzer } from '@intelgraph/narrative-tracking';
+import { NarrativeExtractor, FramingAnalyzer } from "@intelgraph/narrative-tracking";
 
 const extractor = new NarrativeExtractor();
 const narrative = await extractor.extractNarrative("Your text...", "source-id");

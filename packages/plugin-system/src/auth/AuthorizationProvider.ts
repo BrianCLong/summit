@@ -1,4 +1,4 @@
-import { PluginManifest, PluginPermission } from '../types/plugin.js';
+import { PluginManifest, PluginPermission } from "../types/plugin.js";
 
 /**
  * Authorization provider interface for plugin permission checking
@@ -18,7 +18,10 @@ export interface AuthorizationProvider {
   /**
    * Check if manifest permissions are approved
    */
-  checkManifestPermissions(manifest: PluginManifest, context: AuthorizationContext): Promise<boolean>;
+  checkManifestPermissions(
+    manifest: PluginManifest,
+    context: AuthorizationContext
+  ): Promise<boolean>;
 }
 
 export interface AuthorizationRequest {
@@ -33,7 +36,7 @@ export interface AuthorizationContext {
   userId?: string;
   tenantId?: string;
   sessionId?: string;
-  environment: 'development' | 'staging' | 'production';
+  environment: "development" | "staging" | "production";
   metadata?: Record<string, any>;
 }
 
@@ -44,7 +47,7 @@ export interface AuthorizationResult {
 }
 
 export interface Obligation {
-  type: 'audit' | 'notify' | 'rate-limit' | 'quota';
+  type: "audit" | "notify" | "rate-limit" | "quota";
   config: Record<string, any>;
 }
 
@@ -55,7 +58,10 @@ export class OPAAuthorizationProvider implements AuthorizationProvider {
   private opaEndpoint: string;
   private policyPath: string;
 
-  constructor(opaEndpoint: string = 'http://localhost:8181', policyPath: string = '/v1/data/plugins/allow') {
+  constructor(
+    opaEndpoint: string = "http://localhost:8181",
+    policyPath: string = "/v1/data/plugins/allow"
+  ) {
     this.opaEndpoint = opaEndpoint;
     this.policyPath = policyPath;
   }
@@ -63,8 +69,8 @@ export class OPAAuthorizationProvider implements AuthorizationProvider {
   async authorize(request: AuthorizationRequest): Promise<AuthorizationResult> {
     try {
       const response = await fetch(`${this.opaEndpoint}${this.policyPath}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           input: {
             plugin: request.pluginId,
@@ -83,7 +89,7 @@ export class OPAAuthorizationProvider implements AuthorizationProvider {
         throw new Error(`OPA request failed: ${response.statusText}`);
       }
 
-      const data = await response.json() as any;
+      const data = (await response.json()) as any;
 
       return {
         allowed: data.result?.allow === true,
@@ -94,26 +100,29 @@ export class OPAAuthorizationProvider implements AuthorizationProvider {
       // Fail closed - deny if OPA is unavailable
       return {
         allowed: false,
-        reason: `Authorization check failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        reason: `Authorization check failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       };
     }
   }
 
   async authorizeMany(requests: AuthorizationRequest[]): Promise<AuthorizationResult[]> {
     // Execute in parallel for performance
-    return Promise.all(requests.map(req => this.authorize(req)));
+    return Promise.all(requests.map((req) => this.authorize(req)));
   }
 
-  async checkManifestPermissions(manifest: PluginManifest, context: AuthorizationContext): Promise<boolean> {
-    const requests: AuthorizationRequest[] = manifest.permissions.map(permission => ({
+  async checkManifestPermissions(
+    manifest: PluginManifest,
+    context: AuthorizationContext
+  ): Promise<boolean> {
+    const requests: AuthorizationRequest[] = manifest.permissions.map((permission) => ({
       pluginId: manifest.id,
       permission,
-      action: 'request',
+      action: "request",
       context,
     }));
 
     const results = await this.authorizeMany(requests);
-    return results.every(r => r.allowed);
+    return results.every((r) => r.allowed);
   }
 }
 
@@ -122,14 +131,17 @@ export class OPAAuthorizationProvider implements AuthorizationProvider {
  */
 export class DevelopmentAuthorizationProvider implements AuthorizationProvider {
   async authorize(_request: AuthorizationRequest): Promise<AuthorizationResult> {
-    return { allowed: true, reason: 'Development mode - all permissions allowed' };
+    return { allowed: true, reason: "Development mode - all permissions allowed" };
   }
 
   async authorizeMany(requests: AuthorizationRequest[]): Promise<AuthorizationResult[]> {
     return requests.map(() => ({ allowed: true }));
   }
 
-  async checkManifestPermissions(_manifest: PluginManifest, _context: AuthorizationContext): Promise<boolean> {
+  async checkManifestPermissions(
+    _manifest: PluginManifest,
+    _context: AuthorizationContext
+  ): Promise<boolean> {
     return true;
   }
 }
@@ -150,23 +162,26 @@ export class InMemoryAuthorizationProvider implements AuthorizationProvider {
 
     return {
       allowed,
-      reason: allowed ? undefined : 'Permission denied by policy',
+      reason: allowed ? undefined : "Permission denied by policy",
     };
   }
 
   async authorizeMany(requests: AuthorizationRequest[]): Promise<AuthorizationResult[]> {
-    return Promise.all(requests.map(req => this.authorize(req)));
+    return Promise.all(requests.map((req) => this.authorize(req)));
   }
 
-  async checkManifestPermissions(manifest: PluginManifest, context: AuthorizationContext): Promise<boolean> {
-    const requests: AuthorizationRequest[] = manifest.permissions.map(permission => ({
+  async checkManifestPermissions(
+    manifest: PluginManifest,
+    context: AuthorizationContext
+  ): Promise<boolean> {
+    const requests: AuthorizationRequest[] = manifest.permissions.map((permission) => ({
       pluginId: manifest.id,
       permission,
-      action: 'request',
+      action: "request",
       context,
     }));
 
     const results = await this.authorizeMany(requests);
-    return results.every(r => r.allowed);
+    return results.every((r) => r.allowed);
   }
 }

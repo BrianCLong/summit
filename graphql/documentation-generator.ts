@@ -21,13 +21,13 @@ import {
   isNonNullType,
   GraphQLNamedType,
   printSchema,
-} from 'graphql';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+} from "graphql";
+import * as fs from "fs/promises";
+import * as path from "path";
 
 export interface DocumentationOptions {
   outputPath: string;
-  format: 'markdown' | 'html' | 'json';
+  format: "markdown" | "html" | "json";
   includeDeprecated?: boolean;
   includeExamples?: boolean;
   groupByType?: boolean;
@@ -84,13 +84,13 @@ export class DocumentationGenerator {
     const documentation = this.extractDocumentation(options);
 
     switch (options.format) {
-      case 'markdown':
+      case "markdown":
         await this.generateMarkdown(documentation, options);
         break;
-      case 'html':
+      case "html":
         await this.generateHTML(documentation, options);
         break;
-      case 'json':
+      case "json":
         await this.generateJSON(documentation, options);
         break;
     }
@@ -99,15 +99,13 @@ export class DocumentationGenerator {
   /**
    * Extract documentation from schema
    */
-  private extractDocumentation(
-    options: DocumentationOptions
-  ): TypeDocumentation[] {
+  private extractDocumentation(options: DocumentationOptions): TypeDocumentation[] {
     const typeMap = this.schema.getTypeMap();
     const documentation: TypeDocumentation[] = [];
 
     for (const [typeName, type] of Object.entries(typeMap)) {
       // Skip built-in types
-      if (typeName.startsWith('__')) continue;
+      if (typeName.startsWith("__")) continue;
 
       // Skip deprecated types if not including them
       if (!options.includeDeprecated && this.isDeprecatedType(type)) {
@@ -160,7 +158,7 @@ export class DocumentationGenerator {
 
     return {
       name: type.name,
-      kind: 'Object',
+      kind: "Object",
       description: type.description || undefined,
       fields: fieldDocs,
     };
@@ -187,7 +185,7 @@ export class DocumentationGenerator {
 
     return {
       name: type.name,
-      kind: 'Interface',
+      kind: "Interface",
       description: type.description || undefined,
       fields: fieldDocs,
     };
@@ -213,7 +211,7 @@ export class DocumentationGenerator {
 
     return {
       name: type.name,
-      kind: 'Input',
+      kind: "Input",
       description: type.description || undefined,
       fields: fieldDocs,
     };
@@ -244,7 +242,7 @@ export class DocumentationGenerator {
 
     return {
       name: type.name,
-      kind: 'Enum',
+      kind: "Enum",
       description: type.description || undefined,
       values: valueDocs,
     };
@@ -256,7 +254,7 @@ export class DocumentationGenerator {
   private documentScalarType(type: GraphQLNamedType): TypeDocumentation {
     return {
       name: type.name,
-      kind: 'Scalar',
+      kind: "Scalar",
       description: type.description || undefined,
     };
   }
@@ -281,9 +279,9 @@ export class DocumentationGenerator {
     documentation: TypeDocumentation[],
     options: DocumentationOptions
   ): Promise<void> {
-    let markdown = '# GraphQL API Documentation\n\n';
+    let markdown = "# GraphQL API Documentation\n\n";
     markdown += `Generated: ${new Date().toISOString()}\n\n`;
-    markdown += '## Table of Contents\n\n';
+    markdown += "## Table of Contents\n\n";
 
     // Group by kind
     const grouped = this.groupByKind(documentation);
@@ -295,7 +293,7 @@ export class DocumentationGenerator {
         markdown += `  - [${type.name}](#${type.name.toLowerCase()})\n`;
       }
     }
-    markdown += '\n';
+    markdown += "\n";
 
     // Generate sections
     for (const [kind, types] of Object.entries(grouped)) {
@@ -326,16 +324,16 @@ export class DocumentationGenerator {
 
     // Fields
     if (type.fields && type.fields.length > 0) {
-      md += '#### Fields\n\n';
-      md += '| Field | Type | Description |\n';
-      md += '|-------|------|-------------|\n';
+      md += "#### Fields\n\n";
+      md += "| Field | Type | Description |\n";
+      md += "|-------|------|-------------|\n";
 
       for (const field of type.fields) {
-        const deprecated = field.deprecated ? ' ⚠️' : '';
-        const desc = field.description || '';
+        const deprecated = field.deprecated ? " ⚠️" : "";
+        const desc = field.description || "";
         md += `| ${field.name}${deprecated} | \`${field.type}\` | ${desc} |\n`;
       }
-      md += '\n';
+      md += "\n";
 
       // Field details with arguments and examples
       for (const field of type.fields) {
@@ -346,27 +344,26 @@ export class DocumentationGenerator {
             md += `${field.description}\n\n`;
           }
 
-          md += '**Arguments:**\n\n';
-          md += '| Name | Type | Required | Default | Description |\n';
-          md += '|------|------|----------|---------|-------------|\n';
+          md += "**Arguments:**\n\n";
+          md += "| Name | Type | Required | Default | Description |\n";
+          md += "|------|------|----------|---------|-------------|\n";
 
           for (const arg of field.arguments) {
-            const required = arg.required ? 'Yes' : 'No';
-            const defaultVal =
-              arg.defaultValue !== undefined ? `\`${arg.defaultValue}\`` : '-';
-            const desc = arg.description || '';
+            const required = arg.required ? "Yes" : "No";
+            const defaultVal = arg.defaultValue !== undefined ? `\`${arg.defaultValue}\`` : "-";
+            const desc = arg.description || "";
             md += `| ${arg.name} | \`${arg.type}\` | ${required} | ${defaultVal} | ${desc} |\n`;
           }
-          md += '\n';
+          md += "\n";
         }
 
         // Examples
         if (field.examples && field.examples.length > 0) {
           md += `**Examples:**\n\n`;
           for (const example of field.examples) {
-            md += '```graphql\n';
+            md += "```graphql\n";
             md += example;
-            md += '\n```\n\n';
+            md += "\n```\n\n";
           }
         }
       }
@@ -374,16 +371,16 @@ export class DocumentationGenerator {
 
     // Enum values
     if (type.values && type.values.length > 0) {
-      md += '#### Values\n\n';
-      md += '| Value | Description |\n';
-      md += '|-------|-------------|\n';
+      md += "#### Values\n\n";
+      md += "| Value | Description |\n";
+      md += "|-------|-------------|\n";
 
       for (const value of type.values) {
-        const deprecated = value.deprecated ? ' ⚠️' : '';
-        const desc = value.description || '';
+        const deprecated = value.deprecated ? " ⚠️" : "";
+        const desc = value.description || "";
         md += `| ${value.name}${deprecated} | ${desc} |\n`;
       }
-      md += '\n';
+      md += "\n";
     }
 
     return md;
@@ -428,7 +425,7 @@ export class DocumentationGenerator {
       }
     }
 
-    html += '</body></html>';
+    html += "</body></html>";
 
     await fs.mkdir(path.dirname(options.outputPath), { recursive: true });
     await fs.writeFile(options.outputPath, html);
@@ -453,7 +450,7 @@ export class DocumentationGenerator {
       html += `<h4>Fields</h4>`;
       html += `<table><thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead><tbody>`;
       for (const field of type.fields) {
-        html += `<tr><td><code>${field.name}</code></td><td><code>${field.type}</code></td><td>${field.description || ''}</td></tr>`;
+        html += `<tr><td><code>${field.name}</code></td><td><code>${field.type}</code></td><td>${field.description || ""}</td></tr>`;
       }
       html += `</tbody></table>`;
     }
@@ -462,7 +459,7 @@ export class DocumentationGenerator {
       html += `<h4>Values</h4>`;
       html += `<table><thead><tr><th>Value</th><th>Description</th></tr></thead><tbody>`;
       for (const value of type.values) {
-        html += `<tr><td><code>${value.name}</code></td><td>${value.description || ''}</td></tr>`;
+        html += `<tr><td><code>${value.name}</code></td><td>${value.description || ""}</td></tr>`;
       }
       html += `</tbody></table>`;
     }
@@ -499,9 +496,7 @@ export class DocumentationGenerator {
     return type.toString();
   }
 
-  private groupByKind(
-    documentation: TypeDocumentation[]
-  ): Record<string, TypeDocumentation[]> {
+  private groupByKind(documentation: TypeDocumentation[]): Record<string, TypeDocumentation[]> {
     const grouped: Record<string, TypeDocumentation[]> = {};
     for (const type of documentation) {
       if (!grouped[type.kind]) {
@@ -518,7 +513,7 @@ export class DocumentationGenerator {
   }
 
   private isBuiltInScalar(name: string): boolean {
-    return ['String', 'Int', 'Float', 'Boolean', 'ID'].includes(name);
+    return ["String", "Int", "Float", "Boolean", "ID"].includes(name);
   }
 }
 

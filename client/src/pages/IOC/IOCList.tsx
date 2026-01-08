@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -25,8 +25,8 @@ import {
   Badge,
   Paper,
   ChipProps,
-} from '@mui/material';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+} from "@mui/material";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import {
   Add,
   Upload,
@@ -41,96 +41,88 @@ import {
   Search,
   Share,
   Timeline,
-} from '@mui/icons-material';
-import { useSafeQuery } from '../../hooks/useSafeQuery';
+} from "@mui/icons-material";
+import { useSafeQuery } from "../../hooks/useSafeQuery";
 
 interface IOC {
   id: string;
-  type:
-    | 'IP'
-    | 'DOMAIN'
-    | 'URL'
-    | 'FILE_HASH'
-    | 'EMAIL'
-    | 'PHONE'
-    | 'REGISTRY'
-    | 'CERTIFICATE';
+  type: "IP" | "DOMAIN" | "URL" | "FILE_HASH" | "EMAIL" | "PHONE" | "REGISTRY" | "CERTIFICATE";
   value: string;
   risk: number;
-  status: 'ACTIVE' | 'INACTIVE' | 'INVESTIGATING' | 'FALSE_POSITIVE';
+  status: "ACTIVE" | "INACTIVE" | "INVESTIGATING" | "FALSE_POSITIVE";
   source: string;
   firstSeen: string;
   lastSeen: string;
   hits: number;
   tags: string[];
   description?: string;
-  tlp: 'WHITE' | 'GREEN' | 'AMBER' | 'RED';
+  tlp: "WHITE" | "GREEN" | "AMBER" | "RED";
 }
 
-const getIOCIcon = (type: IOC['type']) => {
+const getIOCIcon = (type: IOC["type"]) => {
   switch (type) {
-    case 'IP':
+    case "IP":
       return <Language />;
-    case 'DOMAIN':
+    case "DOMAIN":
       return <Language />;
-    case 'URL':
+    case "URL":
       return <Language />;
-    case 'FILE_HASH':
+    case "FILE_HASH":
       return <Fingerprint />;
-    case 'EMAIL':
+    case "EMAIL":
       return <Email />;
-    case 'PHONE':
+    case "PHONE":
       return <Phone />;
-    case 'REGISTRY':
+    case "REGISTRY":
       return <Computer />;
-    case 'CERTIFICATE':
+    case "CERTIFICATE":
       return <Security />;
     default:
       return <Security />;
   }
 };
 
-const getRiskColor = (risk: number): ChipProps['color'] => {
-  if (risk >= 80) return 'error';
-  if (risk >= 60) return 'warning';
-  if (risk >= 40) return 'info';
-  return 'success';
+const getRiskColor = (risk: number): ChipProps["color"] => {
+  if (risk >= 80) return "error";
+  if (risk >= 60) return "warning";
+  if (risk >= 40) return "info";
+  return "success";
 };
 
-const getStatusColor = (status: IOC['status']): ChipProps['color'] => {
+const getStatusColor = (status: IOC["status"]): ChipProps["color"] => {
   switch (status) {
-    case 'ACTIVE':
-      return 'error';
-    case 'INACTIVE':
-      return 'default';
-    case 'INVESTIGATING':
-      return 'warning';
-    case 'FALSE_POSITIVE':
-      return 'success';
+    case "ACTIVE":
+      return "error";
+    case "INACTIVE":
+      return "default";
+    case "INVESTIGATING":
+      return "warning";
+    case "FALSE_POSITIVE":
+      return "success";
     default:
-      return 'default';
+      return "default";
   }
 };
 
-const getTLPColor = (tlp: IOC['tlp']) => {
+const getTLPColor = (tlp: IOC["tlp"]) => {
   switch (tlp) {
-    case 'RED':
-      return '#FF0000';
-    case 'AMBER':
-      return '#FFC000';
-    case 'GREEN':
-      return '#33FF00';
-    case 'WHITE':
-      return '#FFFFFF';
+    case "RED":
+      return "#FF0000";
+    case "AMBER":
+      return "#FFC000";
+    case "GREEN":
+      return "#33FF00";
+    case "WHITE":
+      return "#FFFFFF";
     default:
-      return '#FFFFFF';
+      return "#FFFFFF";
   }
 };
 
 export default function IOCList() {
   const [selectedTab, setSelectedTab] = useState(0);
-  const [filterType, setFilterType] = useState('ALL');
-  const [filterStatus, setFilterStatus] = useState('ALL');
+  const [filterType, setFilterType] = useState("ALL");
+  const [filterStatus, setFilterStatus] = useState("ALL");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
 
@@ -138,90 +130,89 @@ export default function IOCList() {
     queryKey: `ioc_list_${filterType}_${filterStatus}`,
     mock: [
       {
-        id: 'ioc1',
-        type: 'IP',
-        value: '185.220.100.240',
+        id: "ioc1",
+        type: "IP",
+        value: "185.220.100.240",
         risk: 95,
-        status: 'ACTIVE',
-        source: 'ThreatConnect',
-        firstSeen: '2025-08-25T10:30:00Z',
-        lastSeen: '2025-08-27T02:15:00Z',
+        status: "ACTIVE",
+        source: "ThreatConnect",
+        firstSeen: "2025-08-25T10:30:00Z",
+        lastSeen: "2025-08-27T02:15:00Z",
         hits: 47,
-        tags: ['APT29', 'Cozy Bear', 'C2'],
-        description: 'Known C2 infrastructure for APT29 operations',
-        tlp: 'RED',
+        tags: ["APT29", "Cozy Bear", "C2"],
+        description: "Known C2 infrastructure for APT29 operations",
+        tlp: "RED",
       },
       {
-        id: 'ioc2',
-        type: 'DOMAIN',
-        value: 'secure-update-microsoft.com',
+        id: "ioc2",
+        type: "DOMAIN",
+        value: "secure-update-microsoft.com",
         risk: 88,
-        status: 'ACTIVE',
-        source: 'VirusTotal',
-        firstSeen: '2025-08-24T14:20:00Z',
-        lastSeen: '2025-08-27T01:45:00Z',
+        status: "ACTIVE",
+        source: "VirusTotal",
+        firstSeen: "2025-08-24T14:20:00Z",
+        lastSeen: "2025-08-27T01:45:00Z",
         hits: 23,
-        tags: ['Phishing', 'Microsoft Impersonation'],
-        description: 'Phishing domain impersonating Microsoft update service',
-        tlp: 'AMBER',
+        tags: ["Phishing", "Microsoft Impersonation"],
+        description: "Phishing domain impersonating Microsoft update service",
+        tlp: "AMBER",
       },
       {
-        id: 'ioc3',
-        type: 'FILE_HASH',
-        value: 'a4b35de71ca20fe776dc72d12fb2886edc3a0050',
+        id: "ioc3",
+        type: "FILE_HASH",
+        value: "a4b35de71ca20fe776dc72d12fb2886edc3a0050",
         risk: 72,
-        status: 'INVESTIGATING',
-        source: 'Internal Analysis',
-        firstSeen: '2025-08-26T09:10:00Z',
-        lastSeen: '2025-08-26T09:10:00Z',
+        status: "INVESTIGATING",
+        source: "Internal Analysis",
+        firstSeen: "2025-08-26T09:10:00Z",
+        lastSeen: "2025-08-26T09:10:00Z",
         hits: 1,
-        tags: ['Malware', 'Trojan'],
-        description: 'Suspicious executable detected in endpoint',
-        tlp: 'GREEN',
+        tags: ["Malware", "Trojan"],
+        description: "Suspicious executable detected in endpoint",
+        tlp: "GREEN",
       },
       {
-        id: 'ioc4',
-        type: 'EMAIL',
-        value: 'admin@secure-banking-alert.com',
+        id: "ioc4",
+        type: "EMAIL",
+        value: "admin@secure-banking-alert.com",
         risk: 65,
-        status: 'ACTIVE',
-        source: 'PhishTank',
-        firstSeen: '2025-08-25T16:00:00Z',
-        lastSeen: '2025-08-27T00:30:00Z',
+        status: "ACTIVE",
+        source: "PhishTank",
+        firstSeen: "2025-08-25T16:00:00Z",
+        lastSeen: "2025-08-27T00:30:00Z",
         hits: 12,
-        tags: ['Banking', 'Phishing', 'Social Engineering'],
-        description: 'Email address used in banking phishing campaigns',
-        tlp: 'AMBER',
+        tags: ["Banking", "Phishing", "Social Engineering"],
+        description: "Email address used in banking phishing campaigns",
+        tlp: "AMBER",
       },
       {
-        id: 'ioc5',
-        type: 'URL',
-        value: 'https://drive-google-docs.tk/download?id=malicious',
+        id: "ioc5",
+        type: "URL",
+        value: "https://drive-google-docs.tk/download?id=malicious",
         risk: 43,
-        status: 'FALSE_POSITIVE',
-        source: 'URLVoid',
-        firstSeen: '2025-08-20T11:25:00Z',
-        lastSeen: '2025-08-22T14:15:00Z',
+        status: "FALSE_POSITIVE",
+        source: "URLVoid",
+        firstSeen: "2025-08-20T11:25:00Z",
+        lastSeen: "2025-08-22T14:15:00Z",
         hits: 3,
-        tags: ['URL', 'False Positive'],
-        description: 'Initially flagged URL determined to be benign',
-        tlp: 'WHITE',
+        tags: ["URL", "False Positive"],
+        description: "Initially flagged URL determined to be benign",
+        tlp: "WHITE",
       },
       {
-        id: 'ioc6',
-        type: 'REGISTRY',
-         
-        value:
-          'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\SystemUpdater',
+        id: "ioc6",
+        type: "REGISTRY",
+
+        value: "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\SystemUpdater",
         risk: 80,
-        status: 'ACTIVE',
-        source: 'YARA Rule',
-        firstSeen: '2025-08-26T20:45:00Z',
-        lastSeen: '2025-08-27T03:20:00Z',
+        status: "ACTIVE",
+        source: "YARA Rule",
+        firstSeen: "2025-08-26T20:45:00Z",
+        lastSeen: "2025-08-27T03:20:00Z",
         hits: 8,
-        tags: ['Persistence', 'Registry', 'AutoRun'],
-        description: 'Suspicious registry key for persistence mechanism',
-        tlp: 'RED',
+        tags: ["Persistence", "Registry", "AutoRun"],
+        description: "Suspicious registry key for persistence mechanism",
+        tlp: "RED",
       },
     ],
     deps: [filterType, filterStatus],
@@ -229,8 +220,8 @@ export default function IOCList() {
 
   const columns: GridColDef<IOC>[] = [
     {
-      field: 'type',
-      headerName: 'Type',
+      field: "type",
+      headerName: "Type",
       width: 120,
       renderCell: (params) => (
         <Stack direction="row" alignItems="center" spacing={1}>
@@ -240,17 +231,17 @@ export default function IOCList() {
       ),
     },
     {
-      field: 'value',
-      headerName: 'Indicator Value',
+      field: "value",
+      headerName: "Indicator Value",
       flex: 1,
       renderCell: (params) => (
         <Box>
           <Typography
             variant="body2"
             sx={{
-              fontFamily: 'monospace',
-              wordBreak: 'break-all',
-              fontSize: '0.85rem',
+              fontFamily: "monospace",
+              wordBreak: "break-all",
+              fontSize: "0.85rem",
             }}
           >
             {params.value}
@@ -264,26 +255,26 @@ export default function IOCList() {
       ),
     },
     {
-      field: 'risk',
-      headerName: 'Risk Score',
+      field: "risk",
+      headerName: "Risk Score",
       width: 120,
       renderCell: (params) => (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <LinearProgress
             variant="determinate"
             value={params.value}
-            color={(getRiskColor(params.value) as any) ?? 'primary'}
+            color={(getRiskColor(params.value) as any) ?? "primary"}
             sx={{ width: 60, height: 8, borderRadius: 4 }}
           />
-          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+          <Typography variant="body2" sx={{ fontWeight: "bold" }}>
             {params.value}%
           </Typography>
         </Box>
       ),
     },
     {
-      field: 'status',
-      headerName: 'Status',
+      field: "status",
+      headerName: "Status",
       width: 130,
       renderCell: (params) => (
         <Chip
@@ -295,20 +286,14 @@ export default function IOCList() {
       ),
     },
     {
-      field: 'hits',
-      headerName: 'Hits',
+      field: "hits",
+      headerName: "Hits",
       width: 80,
-      type: 'number',
+      type: "number",
       renderCell: (params) => (
         <Badge
           badgeContent={params.value}
-          color={
-            params.value > 10
-              ? 'error'
-              : params.value > 0
-                ? 'warning'
-                : 'default'
-          }
+          color={params.value > 10 ? "error" : params.value > 0 ? "warning" : "default"}
           showZero
         >
           <Timeline />
@@ -316,13 +301,13 @@ export default function IOCList() {
       ),
     },
     {
-      field: 'source',
-      headerName: 'Source',
+      field: "source",
+      headerName: "Source",
       width: 140,
     },
     {
-      field: 'tlp',
-      headerName: 'TLP',
+      field: "tlp",
+      headerName: "TLP",
       width: 80,
       renderCell: (params) => (
         <Chip
@@ -330,25 +315,25 @@ export default function IOCList() {
           size="small"
           sx={{
             backgroundColor: getTLPColor(params.value),
-            color: params.value === 'WHITE' ? '#000' : '#fff',
-            fontWeight: 'bold',
+            color: params.value === "WHITE" ? "#000" : "#fff",
+            fontWeight: "bold",
           }}
         />
       ),
     },
     {
-      field: 'tags',
-      headerName: 'Tags',
+      field: "tags",
+      headerName: "Tags",
       width: 200,
       renderCell: (params) => (
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
           {params.value.slice(0, 2).map((tag: string) => (
             <Chip
               key={tag}
               label={tag}
               size="small"
               variant="outlined"
-              sx={{ fontSize: '0.7rem', height: 20 }}
+              sx={{ fontSize: "0.7rem", height: 20 }}
             />
           ))}
           {params.value.length > 2 && (
@@ -356,15 +341,15 @@ export default function IOCList() {
               label={`+${params.value.length - 2}`}
               size="small"
               variant="outlined"
-              sx={{ fontSize: '0.7rem', height: 20 }}
+              sx={{ fontSize: "0.7rem", height: 20 }}
             />
           )}
         </Box>
       ),
     },
     {
-      field: 'actions',
-      headerName: 'Actions',
+      field: "actions",
+      headerName: "Actions",
       width: 120,
       sortable: false,
       renderCell: () => (
@@ -386,17 +371,16 @@ export default function IOCList() {
 
   const filteredIOCs =
     iocs?.filter((ioc) => {
-      if (selectedTab === 1 && ioc.status !== 'ACTIVE') return false;
+      if (selectedTab === 1 && ioc.status !== "ACTIVE") return false;
       if (selectedTab === 2 && ioc.risk < 70) return false;
-      if (selectedTab === 3 && ioc.status !== 'INVESTIGATING') return false;
+      if (selectedTab === 3 && ioc.status !== "INVESTIGATING") return false;
       return true;
     }) || [];
 
-  const activeIOCs = iocs?.filter((i) => i.status === 'ACTIVE').length || 0;
+  const activeIOCs = iocs?.filter((i) => i.status === "ACTIVE").length || 0;
   const highRiskIOCs = iocs?.filter((i) => i.risk >= 70).length || 0;
   const totalHits = iocs?.reduce((sum, ioc) => sum + ioc.hits, 0) || 0;
-  const investigatingIOCs =
-    iocs?.filter((i) => i.status === 'INVESTIGATING').length || 0;
+  const investigatingIOCs = iocs?.filter((i) => i.status === "INVESTIGATING").length || 0;
 
   return (
     <Box sx={{ m: 2 }}>
@@ -467,15 +451,8 @@ export default function IOCList() {
       {/* Main IOC List */}
       <Card sx={{ borderRadius: 3 }}>
         <CardContent>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-            sx={{ mb: 2 }}
-          >
-            <Typography variant="h6">
-              Indicators of Compromise (IOCs)
-            </Typography>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+            <Typography variant="h6">Indicators of Compromise (IOCs)</Typography>
             <Stack direction="row" spacing={2}>
               <FormControl size="small" sx={{ minWidth: 120 }}>
                 <InputLabel>IOC Type</InputLabel>
@@ -523,7 +500,7 @@ export default function IOCList() {
             </Stack>
           </Stack>
 
-          <Box sx={{ width: '100%' }}>
+          <Box sx={{ width: "100%" }}>
             <Tabs value={selectedTab} onChange={(_, v) => setSelectedTab(v)}>
               <Tab label={`All IOCs (${iocs?.length || 0})`} />
               <Tab label={`Active (${activeIOCs})`} />
@@ -543,8 +520,8 @@ export default function IOCList() {
                 // TODO: Navigate to IOC detail page
               }}
               sx={{
-                '& .MuiDataGrid-row:hover': {
-                  backgroundColor: 'action.hover',
+                "& .MuiDataGrid-row:hover": {
+                  backgroundColor: "action.hover",
                 },
               }}
             />
@@ -553,12 +530,7 @@ export default function IOCList() {
       </Card>
 
       {/* Add IOC Dialog */}
-      <Dialog
-        open={addDialogOpen}
-        onClose={() => setAddDialogOpen(false)}
-        maxWidth="md"
-        fullWidth
-      >
+      <Dialog open={addDialogOpen} onClose={() => setAddDialogOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle>Add New IOC</DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>
@@ -568,20 +540,14 @@ export default function IOCList() {
                 <MenuItem value="IP">IP Address</MenuItem>
                 <MenuItem value="DOMAIN">Domain Name</MenuItem>
                 <MenuItem value="URL">URL</MenuItem>
-                <MenuItem value="FILE_HASH">
-                  File Hash (MD5/SHA1/SHA256)
-                </MenuItem>
+                <MenuItem value="FILE_HASH">File Hash (MD5/SHA1/SHA256)</MenuItem>
                 <MenuItem value="EMAIL">Email Address</MenuItem>
                 <MenuItem value="PHONE">Phone Number</MenuItem>
                 <MenuItem value="REGISTRY">Registry Key</MenuItem>
                 <MenuItem value="CERTIFICATE">Certificate</MenuItem>
               </Select>
             </FormControl>
-            <TextField
-              fullWidth
-              label="IOC Value"
-              placeholder="Enter the indicator value..."
-            />
+            <TextField fullWidth label="IOC Value" placeholder="Enter the indicator value..." />
             <FormControl fullWidth>
               <InputLabel>TLP Classification</InputLabel>
               <Select label="TLP Classification">
@@ -635,33 +601,25 @@ export default function IOCList() {
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>
             <Alert severity="info">
-              Upload a CSV file with columns: type, value, source, tlp, tags,
-              description
+              Upload a CSV file with columns: type, value, source, tlp, tags, description
             </Alert>
             <Paper
               variant="outlined"
               sx={{
                 p: 4,
-                textAlign: 'center',
-                border: '2px dashed',
-                borderColor: 'primary.main',
-                cursor: 'pointer',
+                textAlign: "center",
+                border: "2px dashed",
+                borderColor: "primary.main",
+                cursor: "pointer",
               }}
             >
-              <Upload sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-              <Typography variant="h6">
-                Drop files here or click to browse
-              </Typography>
+              <Upload sx={{ fontSize: 48, color: "primary.main", mb: 1 }} />
+              <Typography variant="h6">Drop files here or click to browse</Typography>
               <Typography variant="body2" color="text.secondary">
                 Supported formats: CSV, JSON, STIX
               </Typography>
             </Paper>
-            <TextField
-              fullWidth
-              select
-              label="Default TLP Classification"
-              defaultValue="GREEN"
-            >
+            <TextField fullWidth select label="Default TLP Classification" defaultValue="GREEN">
               <MenuItem value="WHITE">TLP:WHITE</MenuItem>
               <MenuItem value="GREEN">TLP:GREEN</MenuItem>
               <MenuItem value="AMBER">TLP:AMBER</MenuItem>

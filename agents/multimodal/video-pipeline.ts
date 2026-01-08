@@ -4,11 +4,11 @@
  * for OSINT video analysis and cross-modal fusion.
  */
 
-import { createHash } from 'crypto';
-import { promises as fs } from 'fs';
-import path from 'path';
-import { spawn } from 'child_process';
-import pino from 'pino';
+import { createHash } from "crypto";
+import { promises as fs } from "fs";
+import path from "path";
+import { spawn } from "child_process";
+import pino from "pino";
 
 import type {
   VideoEmbedding,
@@ -18,16 +18,16 @@ import type {
   DetectedFace,
   ProvenanceInfo,
   EmbeddingModel,
-} from './types.js';
-import { CLIPPipeline } from './clip-pipeline.js';
+} from "./types.js";
+import { CLIPPipeline } from "./clip-pipeline.js";
 
-const logger = pino({ name: 'video-pipeline' });
+const logger = pino({ name: "video-pipeline" });
 
 export interface VideoPipelineConfig {
   clipModel: EmbeddingModel;
   visionApiUrl: string;
   ffmpegPath: string;
-  frameExtractionMode: 'uniform' | 'scene_change' | 'keyframe';
+  frameExtractionMode: "uniform" | "scene_change" | "keyframe";
   framesPerSecond: number;
   maxFrames: number;
   minSceneChangeThreshold: number;
@@ -73,17 +73,17 @@ export class VideoPipeline {
 
   constructor(config: Partial<VideoPipelineConfig> = {}) {
     this.config = {
-      clipModel: 'clip-vit-large-patch14',
-      visionApiUrl: process.env.VISION_API_URL || 'http://localhost:8080',
-      ffmpegPath: process.env.FFMPEG_PATH || 'ffmpeg',
-      frameExtractionMode: 'scene_change',
+      clipModel: "clip-vit-large-patch14",
+      visionApiUrl: process.env.VISION_API_URL || "http://localhost:8080",
+      ffmpegPath: process.env.FFMPEG_PATH || "ffmpeg",
+      frameExtractionMode: "scene_change",
       framesPerSecond: 1,
       maxFrames: 100,
       minSceneChangeThreshold: 0.3,
       enableObjectTracking: true,
       enableFaceTracking: true,
       enableActivityRecognition: false,
-      tempDir: process.env.VIDEO_TEMP_DIR || '/tmp/video-frames',
+      tempDir: process.env.VIDEO_TEMP_DIR || "/tmp/video-frames",
       batchSize: 8,
       timeoutMs: 120000,
       cacheEnabled: true,
@@ -97,7 +97,7 @@ export class VideoPipeline {
       enableFaceDetection: this.config.enableFaceTracking,
     });
 
-    logger.info('Video Pipeline initialized', {
+    logger.info("Video Pipeline initialized", {
       frameExtractionMode: this.config.frameExtractionMode,
       maxFrames: this.config.maxFrames,
       tempDir: this.config.tempDir,
@@ -110,7 +110,7 @@ export class VideoPipeline {
   async embedVideo(
     videoPath: string,
     investigationId: string,
-    sourceId?: string,
+    sourceId?: string
   ): Promise<VideoEmbedding> {
     const startTime = Date.now();
     const videoId = sourceId || this.generateVideoId(videoPath);
@@ -119,7 +119,7 @@ export class VideoPipeline {
     if (this.config.cacheEnabled) {
       const cached = this.cache.get(videoId);
       if (cached) {
-        logger.debug('Cache hit for video embedding', { videoId });
+        logger.debug("Cache hit for video embedding", { videoId });
         return cached;
       }
     }
@@ -140,7 +140,7 @@ export class VideoPipeline {
       // Extract frames
       const frames = await this.extractFrames(videoPath, frameDir, metadata);
 
-      logger.info('Frames extracted', {
+      logger.info("Frames extracted", {
         videoId,
         frameCount: frames.length,
         duration: metadata.duration,
@@ -160,7 +160,7 @@ export class VideoPipeline {
         vector: aggregateVector,
         dimension: aggregateVector.length,
         model: this.config.clipModel,
-        modality: 'video',
+        modality: "video",
         timestamp: new Date(),
         metadata: {
           sourceId: videoId,
@@ -185,7 +185,7 @@ export class VideoPipeline {
         this.cache.set(videoId, embedding);
       }
 
-      logger.info('Video embedding generated', {
+      logger.info("Video embedding generated", {
         videoId,
         duration: metadata.duration,
         keyFrameCount: keyFrames.length,
@@ -195,9 +195,9 @@ export class VideoPipeline {
 
       return embedding;
     } catch (error) {
-      logger.error('Failed to generate video embedding', {
+      logger.error("Failed to generate video embedding", {
         videoPath,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
       });
       throw error;
     } finally {
@@ -214,7 +214,7 @@ export class VideoPipeline {
   private async extractFrames(
     videoPath: string,
     outputDir: string,
-    metadata: VideoMetadata,
+    metadata: VideoMetadata
   ): Promise<ExtractedFrame[]> {
     const frames: ExtractedFrame[] = [];
 
@@ -223,10 +223,10 @@ export class VideoPipeline {
     let frameCount: number;
     let interval: number;
 
-    if (this.config.frameExtractionMode === 'uniform') {
+    if (this.config.frameExtractionMode === "uniform") {
       frameCount = Math.min(
         this.config.maxFrames,
-        Math.ceil(totalDuration * this.config.framesPerSecond),
+        Math.ceil(totalDuration * this.config.framesPerSecond)
       );
       interval = totalDuration / frameCount;
     } else {
@@ -240,7 +240,7 @@ export class VideoPipeline {
       outputDir,
       this.config.frameExtractionMode,
       interval,
-      frameCount,
+      frameCount
     );
 
     // Execute FFmpeg
@@ -249,10 +249,10 @@ export class VideoPipeline {
     // Read extracted frames
     const files = await fs.readdir(outputDir);
     const frameFiles = files
-      .filter((f) => f.endsWith('.jpg') || f.endsWith('.png'))
+      .filter((f) => f.endsWith(".jpg") || f.endsWith(".png"))
       .sort((a, b) => {
-        const numA = parseInt(a.match(/\d+/)?.[0] || '0');
-        const numB = parseInt(b.match(/\d+/)?.[0] || '0');
+        const numA = parseInt(a.match(/\d+/)?.[0] || "0");
+        const numB = parseInt(b.match(/\d+/)?.[0] || "0");
         return numA - numB;
       });
 
@@ -280,38 +280,52 @@ export class VideoPipeline {
     outputDir: string,
     mode: string,
     interval: number,
-    maxFrames: number,
+    maxFrames: number
   ): string[] {
-    const outputPattern = path.join(outputDir, 'frame_%04d.jpg');
+    const outputPattern = path.join(outputDir, "frame_%04d.jpg");
 
     switch (mode) {
-      case 'scene_change':
+      case "scene_change":
         return [
-          '-i', inputPath,
-          '-vf', `select='gt(scene,${this.config.minSceneChangeThreshold})',showinfo`,
-          '-vsync', 'vfr',
-          '-frames:v', String(maxFrames),
-          '-q:v', '2',
+          "-i",
+          inputPath,
+          "-vf",
+          `select='gt(scene,${this.config.minSceneChangeThreshold})',showinfo`,
+          "-vsync",
+          "vfr",
+          "-frames:v",
+          String(maxFrames),
+          "-q:v",
+          "2",
           outputPattern,
         ];
 
-      case 'keyframe':
+      case "keyframe":
         return [
-          '-i', inputPath,
-          '-vf', "select='eq(pict_type,I)'",
-          '-vsync', 'vfr',
-          '-frames:v', String(maxFrames),
-          '-q:v', '2',
+          "-i",
+          inputPath,
+          "-vf",
+          "select='eq(pict_type,I)'",
+          "-vsync",
+          "vfr",
+          "-frames:v",
+          String(maxFrames),
+          "-q:v",
+          "2",
           outputPattern,
         ];
 
-      case 'uniform':
+      case "uniform":
       default:
         return [
-          '-i', inputPath,
-          '-vf', `fps=1/${interval}`,
-          '-frames:v', String(maxFrames),
-          '-q:v', '2',
+          "-i",
+          inputPath,
+          "-vf",
+          `fps=1/${interval}`,
+          "-frames:v",
+          String(maxFrames),
+          "-q:v",
+          "2",
           outputPattern,
         ];
     }
@@ -323,21 +337,21 @@ export class VideoPipeline {
   private executeFFmpeg(args: string[]): Promise<void> {
     return new Promise((resolve, reject) => {
       const process = spawn(this.config.ffmpegPath, args, {
-        stdio: ['ignore', 'pipe', 'pipe'],
+        stdio: ["ignore", "pipe", "pipe"],
       });
 
-      let stderr = '';
+      let stderr = "";
 
-      process.stderr?.on('data', (data) => {
+      process.stderr?.on("data", (data) => {
         stderr += data.toString();
       });
 
       const timeout = setTimeout(() => {
         process.kill();
-        reject(new Error('FFmpeg timeout'));
+        reject(new Error("FFmpeg timeout"));
       }, this.config.timeoutMs);
 
-      process.on('close', (code) => {
+      process.on("close", (code) => {
         clearTimeout(timeout);
         if (code === 0) {
           resolve();
@@ -346,7 +360,7 @@ export class VideoPipeline {
         }
       });
 
-      process.on('error', (err) => {
+      process.on("error", (err) => {
         clearTimeout(timeout);
         reject(err);
       });
@@ -358,7 +372,7 @@ export class VideoPipeline {
    */
   private async analyzeFrames(
     frames: ExtractedFrame[],
-    investigationId: string,
+    investigationId: string
   ): Promise<KeyFrame[]> {
     const keyFrames: KeyFrame[] = [];
 
@@ -371,7 +385,7 @@ export class VideoPipeline {
           const imageEmbedding = await this.clipPipeline.embedImage(
             frame.framePath,
             investigationId,
-            `frame-${frame.frameNumber}`,
+            `frame-${frame.frameNumber}`
           );
 
           return {
@@ -383,18 +397,16 @@ export class VideoPipeline {
             sceneType: this.classifyScene(imageEmbedding.objects),
           };
         } catch (error) {
-          logger.warn('Failed to analyze frame', {
+          logger.warn("Failed to analyze frame", {
             frameNumber: frame.frameNumber,
-            error: error instanceof Error ? error.message : 'Unknown',
+            error: error instanceof Error ? error.message : "Unknown",
           });
           return null;
         }
       });
 
       const batchResults = await Promise.all(batchPromises);
-      keyFrames.push(
-        ...batchResults.filter((r): r is KeyFrame => r !== null),
-      );
+      keyFrames.push(...batchResults.filter((r): r is KeyFrame => r !== null));
     }
 
     return keyFrames;
@@ -405,7 +417,7 @@ export class VideoPipeline {
    */
   private generateTemporalSegments(
     keyFrames: KeyFrame[],
-    metadata: VideoMetadata,
+    metadata: VideoMetadata
   ): TemporalSegment[] {
     if (keyFrames.length === 0) return [];
 
@@ -420,7 +432,7 @@ export class VideoPipeline {
       const segmentEmbedding = this.interpolateEmbeddings(
         startFrame.embedding,
         endFrame.embedding,
-        0.5,
+        0.5
       );
 
       // Determine activity based on detected objects
@@ -485,11 +497,7 @@ export class VideoPipeline {
   /**
    * Interpolate between two embeddings
    */
-  private interpolateEmbeddings(
-    a: number[],
-    b: number[],
-    t: number,
-  ): number[] {
+  private interpolateEmbeddings(a: number[], b: number[], t: number): number[] {
     const result = new Array(a.length);
     for (let i = 0; i < a.length; i++) {
       result[i] = a[i] * (1 - t) + b[i] * t;
@@ -511,29 +519,29 @@ export class VideoPipeline {
    */
   private classifyScene(objects?: DetectedObject[]): string {
     if (!objects || objects.length === 0) {
-      return 'unknown';
+      return "unknown";
     }
 
     const labels = objects.map((o) => o.label.toLowerCase());
 
     // Simple scene classification based on detected objects
-    if (labels.some((l) => ['car', 'truck', 'bus', 'traffic light', 'road'].includes(l))) {
-      return 'street';
+    if (labels.some((l) => ["car", "truck", "bus", "traffic light", "road"].includes(l))) {
+      return "street";
     }
-    if (labels.some((l) => ['person', 'crowd'].includes(l))) {
-      return 'people';
+    if (labels.some((l) => ["person", "crowd"].includes(l))) {
+      return "people";
     }
-    if (labels.some((l) => ['building', 'house', 'skyscraper'].includes(l))) {
-      return 'urban';
+    if (labels.some((l) => ["building", "house", "skyscraper"].includes(l))) {
+      return "urban";
     }
-    if (labels.some((l) => ['tree', 'grass', 'mountain', 'sky'].includes(l))) {
-      return 'outdoor';
+    if (labels.some((l) => ["tree", "grass", "mountain", "sky"].includes(l))) {
+      return "outdoor";
     }
-    if (labels.some((l) => ['chair', 'table', 'couch', 'bed'].includes(l))) {
-      return 'indoor';
+    if (labels.some((l) => ["chair", "table", "couch", "bed"].includes(l))) {
+      return "indoor";
     }
 
-    return 'general';
+    return "general";
   }
 
   /**
@@ -545,29 +553,23 @@ export class VideoPipeline {
     const endObjects = new Set(endFrame.objects?.map((o) => o.label) || []);
 
     // Check for motion indicators
-    const hasVehicles = ['car', 'truck', 'bus', 'motorcycle'].some(
-      (v) => startObjects.has(v) || endObjects.has(v),
+    const hasVehicles = ["car", "truck", "bus", "motorcycle"].some(
+      (v) => startObjects.has(v) || endObjects.has(v)
     );
     const hasPeople = startFrame.faces?.length || endFrame.faces?.length;
 
-    if (hasVehicles) return 'vehicle_activity';
-    if (hasPeople) return 'human_activity';
+    if (hasVehicles) return "vehicle_activity";
+    if (hasPeople) return "human_activity";
 
-    return 'static';
+    return "static";
   }
 
   /**
    * Calculate segment confidence
    */
-  private calculateSegmentConfidence(
-    startFrame: KeyFrame,
-    endFrame: KeyFrame,
-  ): number {
+  private calculateSegmentConfidence(startFrame: KeyFrame, endFrame: KeyFrame): number {
     // Calculate embedding similarity
-    const similarity = this.cosineSimilarity(
-      startFrame.embedding,
-      endFrame.embedding,
-    );
+    const similarity = this.cosineSimilarity(startFrame.embedding, endFrame.embedding);
 
     // Higher similarity = more coherent segment = higher confidence
     return 0.5 + similarity * 0.5;
@@ -579,24 +581,26 @@ export class VideoPipeline {
   private async getVideoMetadata(videoPath: string): Promise<VideoMetadata> {
     return new Promise((resolve, reject) => {
       const args = [
-        '-v', 'quiet',
-        '-print_format', 'json',
-        '-show_format',
-        '-show_streams',
+        "-v",
+        "quiet",
+        "-print_format",
+        "json",
+        "-show_format",
+        "-show_streams",
         videoPath,
       ];
 
-      const process = spawn('ffprobe', args, {
-        stdio: ['ignore', 'pipe', 'pipe'],
+      const process = spawn("ffprobe", args, {
+        stdio: ["ignore", "pipe", "pipe"],
       });
 
-      let stdout = '';
+      let stdout = "";
 
-      process.stdout?.on('data', (data) => {
+      process.stdout?.on("data", (data) => {
         stdout += data.toString();
       });
 
-      process.on('close', (code) => {
+      process.on("close", (code) => {
         if (code !== 0) {
           reject(new Error(`FFprobe exited with code ${code}`));
           return;
@@ -604,17 +608,15 @@ export class VideoPipeline {
 
         try {
           const data = JSON.parse(stdout);
-          const videoStream = data.streams?.find(
-            (s: any) => s.codec_type === 'video',
-          );
+          const videoStream = data.streams?.find((s: any) => s.codec_type === "video");
 
           if (!videoStream) {
-            reject(new Error('No video stream found'));
+            reject(new Error("No video stream found"));
             return;
           }
 
           const fps = this.parseFps(videoStream.r_frame_rate);
-          const duration = parseFloat(data.format?.duration || videoStream.duration || '0');
+          const duration = parseFloat(data.format?.duration || videoStream.duration || "0");
 
           resolve({
             duration,
@@ -622,7 +624,7 @@ export class VideoPipeline {
             width: videoStream.width,
             height: videoStream.height,
             codec: videoStream.codec_name,
-            bitrate: parseInt(data.format?.bit_rate || '0'),
+            bitrate: parseInt(data.format?.bit_rate || "0"),
             totalFrames: Math.ceil(duration * fps),
           });
         } catch (error) {
@@ -630,7 +632,7 @@ export class VideoPipeline {
         }
       });
 
-      process.on('error', (err) => {
+      process.on("error", (err) => {
         reject(err);
       });
     });
@@ -640,8 +642,8 @@ export class VideoPipeline {
    * Parse FPS string (e.g., "30000/1001" -> 29.97)
    */
   private parseFps(fpsString: string): number {
-    if (fpsString.includes('/')) {
-      const [num, den] = fpsString.split('/').map(Number);
+    if (fpsString.includes("/")) {
+      const [num, den] = fpsString.split("/").map(Number);
       return num / den;
     }
     return parseFloat(fpsString) || 30;
@@ -656,7 +658,7 @@ export class VideoPipeline {
       const stats = await fs.stat(videoPath);
 
       if (!stats.isFile()) {
-        throw new Error('Path is not a file');
+        throw new Error("Path is not a file");
       }
 
       // Check file size (max 5GB)
@@ -667,12 +669,12 @@ export class VideoPipeline {
 
       // Validate extension
       const ext = path.extname(videoPath).toLowerCase();
-      const validExtensions = ['.mp4', '.avi', '.mov', '.mkv', '.webm', '.m4v', '.wmv', '.flv'];
+      const validExtensions = [".mp4", ".avi", ".mov", ".mkv", ".webm", ".m4v", ".wmv", ".flv"];
       if (!validExtensions.includes(ext)) {
         throw new Error(`Invalid video extension: ${ext}`);
       }
     } catch (error) {
-      if (error instanceof Error && error.message.includes('ENOENT')) {
+      if (error instanceof Error && error.message.includes("ENOENT")) {
         throw new Error(`Video not found: ${videoPath}`);
       }
       throw error;
@@ -685,14 +687,12 @@ export class VideoPipeline {
   private async cleanupFrames(frameDir: string): Promise<void> {
     try {
       const files = await fs.readdir(frameDir);
-      await Promise.all(
-        files.map((f) => fs.unlink(path.join(frameDir, f))),
-      );
+      await Promise.all(files.map((f) => fs.unlink(path.join(frameDir, f))));
       await fs.rmdir(frameDir);
     } catch (error) {
-      logger.warn('Failed to cleanup frames', {
+      logger.warn("Failed to cleanup frames", {
         frameDir,
-        error: error instanceof Error ? error.message : 'Unknown',
+        error: error instanceof Error ? error.message : "Unknown",
       });
     }
   }
@@ -701,9 +701,9 @@ export class VideoPipeline {
    * Generate unique video ID
    */
   private generateVideoId(videoPath: string): string {
-    return createHash('sha256')
+    return createHash("sha256")
       .update(videoPath + Date.now())
-      .digest('hex')
+      .digest("hex")
       .slice(0, 16);
   }
 
@@ -718,7 +718,7 @@ export class VideoPipeline {
 
     // Boost if objects/faces detected
     const framesWithDetections = keyFrames.filter(
-      (f) => (f.objects?.length || 0) > 0 || (f.faces?.length || 0) > 0,
+      (f) => (f.objects?.length || 0) > 0 || (f.faces?.length || 0) > 0
     ).length;
     confidence += (framesWithDetections / keyFrames.length) * 0.1;
 
@@ -728,15 +728,12 @@ export class VideoPipeline {
   /**
    * Build provenance information
    */
-  private buildProvenance(
-    startTime: number,
-    metadata: VideoMetadata,
-  ): ProvenanceInfo {
+  private buildProvenance(startTime: number, metadata: VideoMetadata): ProvenanceInfo {
     return {
-      extractorName: 'VideoPipeline',
-      extractorVersion: '1.0.0',
+      extractorName: "VideoPipeline",
+      extractorVersion: "1.0.0",
       modelName: this.config.clipModel,
-      modelVersion: '1.0',
+      modelVersion: "1.0",
       processingParams: {
         frameExtractionMode: this.config.frameExtractionMode,
         maxFrames: this.config.maxFrames,
@@ -775,7 +772,7 @@ export class VideoPipeline {
     queryEmbedding: number[],
     candidateEmbeddings: VideoEmbedding[],
     topK: number = 10,
-    threshold: number = 0.7,
+    threshold: number = 0.7
   ): Promise<Array<{ embedding: VideoEmbedding; similarity: number }>> {
     const similarities = candidateEmbeddings.map((candidate) => ({
       embedding: candidate,
@@ -793,7 +790,7 @@ export class VideoPipeline {
    */
   clearCache(): void {
     this.cache.clear();
-    logger.info('Video cache cleared');
+    logger.info("Video cache cleared");
   }
 
   /**

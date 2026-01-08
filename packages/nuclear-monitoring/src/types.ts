@@ -24,53 +24,53 @@ export interface NuclearFacility {
 
 export enum FacilityType {
   // Enrichment Facilities
-  ENRICHMENT_PLANT = 'enrichment_plant',
-  CENTRIFUGE_FACILITY = 'centrifuge_facility',
-  GASEOUS_DIFFUSION = 'gaseous_diffusion',
+  ENRICHMENT_PLANT = "enrichment_plant",
+  CENTRIFUGE_FACILITY = "centrifuge_facility",
+  GASEOUS_DIFFUSION = "gaseous_diffusion",
 
   // Reprocessing
-  REPROCESSING_PLANT = 'reprocessing_plant',
-  SPENT_FUEL_FACILITY = 'spent_fuel_facility',
+  REPROCESSING_PLANT = "reprocessing_plant",
+  SPENT_FUEL_FACILITY = "spent_fuel_facility",
 
   // Reactors
-  POWER_REACTOR = 'power_reactor',
-  RESEARCH_REACTOR = 'research_reactor',
-  BREEDER_REACTOR = 'breeder_reactor',
-  PRODUCTION_REACTOR = 'production_reactor',
+  POWER_REACTOR = "power_reactor",
+  RESEARCH_REACTOR = "research_reactor",
+  BREEDER_REACTOR = "breeder_reactor",
+  PRODUCTION_REACTOR = "production_reactor",
 
   // Fuel Cycle
-  URANIUM_MINE = 'uranium_mine',
-  URANIUM_MILL = 'uranium_mill',
-  CONVERSION_FACILITY = 'conversion_facility',
-  FUEL_FABRICATION = 'fuel_fabrication',
+  URANIUM_MINE = "uranium_mine",
+  URANIUM_MILL = "uranium_mill",
+  CONVERSION_FACILITY = "conversion_facility",
+  FUEL_FABRICATION = "fuel_fabrication",
 
   // Testing and Storage
-  TEST_SITE = 'test_site',
-  WASTE_STORAGE = 'waste_storage',
-  DISPOSAL_SITE = 'disposal_site',
+  TEST_SITE = "test_site",
+  WASTE_STORAGE = "waste_storage",
+  DISPOSAL_SITE = "disposal_site",
 
   // Other
-  RESEARCH_LAB = 'research_lab',
-  HEAVY_WATER_PLANT = 'heavy_water_plant',
-  UNKNOWN = 'unknown'
+  RESEARCH_LAB = "research_lab",
+  HEAVY_WATER_PLANT = "heavy_water_plant",
+  UNKNOWN = "unknown",
 }
 
 export enum FacilityStatus {
-  OPERATIONAL = 'operational',
-  UNDER_CONSTRUCTION = 'under_construction',
-  PLANNED = 'planned',
-  SUSPENDED = 'suspended',
-  SHUTDOWN = 'shutdown',
-  DECOMMISSIONED = 'decommissioned',
-  UNKNOWN = 'unknown'
+  OPERATIONAL = "operational",
+  UNDER_CONSTRUCTION = "under_construction",
+  PLANNED = "planned",
+  SUSPENDED = "suspended",
+  SHUTDOWN = "shutdown",
+  DECOMMISSIONED = "decommissioned",
+  UNKNOWN = "unknown",
 }
 
 export enum ConfidenceLevel {
-  CONFIRMED = 'confirmed',
-  HIGH = 'high',
-  MODERATE = 'moderate',
-  LOW = 'low',
-  SUSPECTED = 'suspected'
+  CONFIRMED = "confirmed",
+  HIGH = "high",
+  MODERATE = "moderate",
+  LOW = "low",
+  SUSPECTED = "suspected",
 }
 
 export interface GeoLocation {
@@ -98,7 +98,7 @@ export interface EnrichmentIndicator {
   type: string;
   value: number | string;
   unit?: string;
-  significance: 'high' | 'medium' | 'low';
+  significance: "high" | "medium" | "low";
   description: string;
 }
 
@@ -147,15 +147,15 @@ export interface NuclearTest {
 }
 
 export enum TestType {
-  ATMOSPHERIC = 'atmospheric',
-  UNDERGROUND = 'underground',
-  UNDERWATER = 'underwater',
-  SUBCRITICAL = 'subcritical',
-  SUSPECTED = 'suspected'
+  ATMOSPHERIC = "atmospheric",
+  UNDERGROUND = "underground",
+  UNDERWATER = "underwater",
+  SUBCRITICAL = "subcritical",
+  SUSPECTED = "suspected",
 }
 
 export interface FuelCycleActivity {
-  activity_type: 'mining' | 'milling' | 'conversion' | 'fabrication';
+  activity_type: "mining" | "milling" | "conversion" | "fabrication";
   facility_id: string;
   timestamp: string;
   capacity?: number;
@@ -177,7 +177,7 @@ export interface TransportActivity {
 
 export interface WasteManagement {
   facility_id: string;
-  waste_type: 'low_level' | 'intermediate' | 'high_level' | 'spent_fuel';
+  waste_type: "low_level" | "intermediate" | "high_level" | "spent_fuel";
   storage_capacity: number;
   current_inventory: number;
   containment_type: string;
@@ -198,26 +198,26 @@ export interface NuclearInfrastructure {
 }
 
 export enum FuelCycleStage {
-  MINING = 'mining',
-  MILLING = 'milling',
-  CONVERSION = 'conversion',
-  ENRICHMENT = 'enrichment',
-  FUEL_FABRICATION = 'fuel_fabrication',
-  REACTOR_OPERATION = 'reactor_operation',
-  REPROCESSING = 'reprocessing',
-  WASTE_MANAGEMENT = 'waste_management'
+  MINING = "mining",
+  MILLING = "milling",
+  CONVERSION = "conversion",
+  ENRICHMENT = "enrichment",
+  FUEL_FABRICATION = "fuel_fabrication",
+  REACTOR_OPERATION = "reactor_operation",
+  REPROCESSING = "reprocessing",
+  WASTE_MANAGEMENT = "waste_management",
 }
 
 export enum TechnologyLevel {
-  ADVANCED = 'advanced',
-  INTERMEDIATE = 'intermediate',
-  DEVELOPING = 'developing',
-  NASCENT = 'nascent'
+  ADVANCED = "advanced",
+  INTERMEDIATE = "intermediate",
+  DEVELOPING = "developing",
+  NASCENT = "nascent",
 }
 
 export interface MonitoringAlert {
   id: string;
-  severity: 'critical' | 'high' | 'medium' | 'low';
+  severity: "critical" | "high" | "medium" | "low";
   alert_type: string;
   facility_id?: string;
   country: string;

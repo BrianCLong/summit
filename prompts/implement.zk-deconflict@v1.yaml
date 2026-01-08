@@ -1,17 +1,17 @@
 meta:
   id: implement.zk-deconflict@v1
-  owner: 'intelgraph-advisory-committee'
-  purpose: 'Build zero-knowledge overlap detection for multi-tenant deconfliction without revealing selector values'
-  tags: ['zero-knowledge', 'privacy', 'deconfliction', 'multi-tenant', 'cryptography']
+  owner: "intelgraph-advisory-committee"
+  purpose: "Build zero-knowledge overlap detection for multi-tenant deconfliction without revealing selector values"
+  tags: ["zero-knowledge", "privacy", "deconfliction", "multi-tenant", "cryptography"]
   guardrails:
-    - 'Never reveal selector values across tenant boundaries'
-    - 'Only return True/False overlap result + signed attestation'
-    - 'Salted hashes must use tenant-specific salts'
-    - 'Include leakage analysis in documentation'
-    - 'Transcripts must be cryptographically verifiable'
+    - "Never reveal selector values across tenant boundaries"
+    - "Only return True/False overlap result + signed attestation"
+    - "Salted hashes must use tenant-specific salts"
+    - "Include leakage analysis in documentation"
+    - "Transcripts must be cryptographically verifiable"
 
 modelConfig:
-  model: 'claude-sonnet-4-5'
+  model: "claude-sonnet-4-5"
   temperature: 0.1
   maxTokens: 6000
 
@@ -499,25 +499,25 @@ template: |
   Remember: **Privacy is paramount.** Any selector value leak is a critical vulnerability.
 
 examples:
-  - name: 'zksnark-sha256-1000'
+  - name: "zksnark-sha256-1000"
     inputs:
-      zk_protocol: 'zk-SNARK'
-      hash_function: 'SHA-256'
-      set_cardinality_limit: '1000'
+      zk_protocol: "zk-SNARK"
+      hash_function: "SHA-256"
+      set_cardinality_limit: "1000"
     expected_contains:
-      - 'zk-SNARK'
-      - 'SHA-256'
-      - 'salted hash'
-      - 'leakage analysis'
-      - 'True/False'
+      - "zk-SNARK"
+      - "SHA-256"
+      - "salted hash"
+      - "leakage analysis"
+      - "True/False"
 
-  - name: 'bulletproofs-blake3-10000'
+  - name: "bulletproofs-blake3-10000"
     inputs:
-      zk_protocol: 'Bulletproofs'
-      hash_function: 'BLAKE3'
-      set_cardinality_limit: '10000'
+      zk_protocol: "Bulletproofs"
+      hash_function: "BLAKE3"
+      set_cardinality_limit: "10000"
     expected_contains:
-      - 'Bulletproofs'
-      - 'BLAKE3'
-      - 'set intersection'
-      - 'transcript'
+      - "Bulletproofs"
+      - "BLAKE3"
+      - "set intersection"
+      - "transcript"

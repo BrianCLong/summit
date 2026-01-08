@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
   Paper,
@@ -27,7 +27,7 @@ import {
   Slide,
   Card,
   CardContent,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Send,
   Chat,
@@ -53,9 +53,9 @@ import {
   Settings,
   NotificationsOff,
   Notifications,
-} from '@mui/icons-material';
-import { formatDistanceToNow } from 'date-fns';
-import { gql, useLazyQuery } from '@apollo/client';
+} from "@mui/icons-material";
+import { formatDistanceToNow } from "date-fns";
+import { gql, useLazyQuery } from "@apollo/client";
 
 const CHAT_MESSAGES_QUERY = gql`
   query ChatMessages($investigationId: ID!, $limit: Int) {
@@ -76,10 +76,10 @@ function LiveChat({
   investigationId,
   isMinimized = true,
   onToggleMinimize,
-  position = 'bottom-right',
+  position = "bottom-right",
 }) {
   const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState('');
+  const [newMessage, setNewMessage] = useState("");
   const [isExpanded, setIsExpanded] = useState(!isMinimized);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isTyping, setIsTyping] = useState(new Set());
@@ -102,10 +102,10 @@ function LiveChat({
     if (!websocketService) return;
 
     // Join investigation chat room
-    websocketService.emit('join_investigation_chat', {
+    websocketService.emit("join_investigation_chat", {
       investigationId,
       userId: currentUser?.id,
-      userName: currentUser?.firstName || currentUser?.name || 'User',
+      userName: currentUser?.firstName || currentUser?.name || "User",
     });
 
     // Message event handlers
@@ -123,21 +123,17 @@ function LiveChat({
         setUnreadCount((prev) => prev + 1);
 
         // Show notification if enabled
-        if (
-          notifications &&
-          'Notification' in window &&
-          Notification.permission === 'granted'
-        ) {
+        if (notifications && "Notification" in window && Notification.permission === "granted") {
           new Notification(`New message from ${message.userName}`, {
             body: message.content.substring(0, 100),
-            icon: '/favicon.ico',
+            icon: "/favicon.ico",
           });
         }
       }
 
       // Auto-scroll to bottom
       setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100);
     };
 
@@ -167,7 +163,7 @@ function LiveChat({
     const handleUserPresence = (data) => {
       setOnlineUsers((prev) => {
         const newUsers = new Map(prev);
-        if (data.status === 'online') {
+        if (data.status === "online") {
           newUsers.set(data.userId, {
             id: data.userId,
             name: data.userName,
@@ -188,34 +184,26 @@ function LiveChat({
     const handleMessageEdited = (data) => {
       setMessages((prev) =>
         prev.map((msg) =>
-          msg.id === data.messageId
-            ? { ...msg, content: data.newContent, edited: true }
-            : msg,
-        ),
+          msg.id === data.messageId ? { ...msg, content: data.newContent, edited: true } : msg
+        )
       );
     };
 
     // Register event listeners
-    websocketService.on('chat_message', handleNewMessage);
-    websocketService.on('user_typing', handleTypingUpdate);
-    websocketService.on('user_presence', handleUserPresence);
-    websocketService.on('message_deleted', handleMessageDeleted);
-    websocketService.on('message_edited', handleMessageEdited);
+    websocketService.on("chat_message", handleNewMessage);
+    websocketService.on("user_typing", handleTypingUpdate);
+    websocketService.on("user_presence", handleUserPresence);
+    websocketService.on("message_deleted", handleMessageDeleted);
+    websocketService.on("message_edited", handleMessageEdited);
 
     return () => {
-      websocketService.off('chat_message', handleNewMessage);
-      websocketService.off('user_typing', handleTypingUpdate);
-      websocketService.off('user_presence', handleUserPresence);
-      websocketService.off('message_deleted', handleMessageDeleted);
-      websocketService.off('message_edited', handleMessageEdited);
+      websocketService.off("chat_message", handleNewMessage);
+      websocketService.off("user_typing", handleTypingUpdate);
+      websocketService.off("user_presence", handleUserPresence);
+      websocketService.off("message_deleted", handleMessageDeleted);
+      websocketService.off("message_edited", handleMessageEdited);
     };
-  }, [
-    websocketService,
-    currentUser,
-    investigationId,
-    isMinimized,
-    notifications,
-  ]);
+  }, [websocketService, currentUser, investigationId, isMinimized, notifications]);
 
   // Load chat history on open
   useEffect(() => {
@@ -232,14 +220,14 @@ function LiveChat({
         .map((m) => ({
           id: m.id,
           userId: m.userId,
-          userName: 'User',
+          userName: "User",
           investigationId: m.investigationId,
           content: m.content,
           timestamp: m.createdAt,
         }));
       setMessages(historical);
       setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 50);
     }
   }, [historyData]);
@@ -258,19 +246,19 @@ function LiveChat({
       id: Date.now().toString(),
       investigationId,
       userId: currentUser?.id,
-      userName: currentUser?.firstName || currentUser?.name || 'User',
+      userName: currentUser?.firstName || currentUser?.name || "User",
       content: newMessage.trim(),
       timestamp: new Date().toISOString(),
-      type: 'text',
+      type: "text",
       replyTo: replyToMessage?.id || null,
     };
 
-    websocketService.emit('send_chat_message', message);
-    setNewMessage('');
+    websocketService.emit("send_chat_message", message);
+    setNewMessage("");
     setReplyToMessage(null);
 
     // Stop typing indicator
-    websocketService.emit('user_typing', {
+    websocketService.emit("user_typing", {
       investigationId,
       userId: currentUser?.id,
       isTyping: false,
@@ -282,10 +270,10 @@ function LiveChat({
 
     // Send typing indicator
     if (websocketService) {
-      websocketService.emit('user_typing', {
+      websocketService.emit("user_typing", {
         investigationId,
         userId: currentUser?.id,
-        userName: currentUser?.firstName || currentUser?.name || 'User',
+        userName: currentUser?.firstName || currentUser?.name || "User",
         isTyping: value.length > 0,
       });
 
@@ -296,7 +284,7 @@ function LiveChat({
 
       // Stop typing after 2 seconds of inactivity
       typingTimeoutRef.current = setTimeout(() => {
-        websocketService.emit('user_typing', {
+        websocketService.emit("user_typing", {
           investigationId,
           userId: currentUser?.id,
           isTyping: false,
@@ -321,7 +309,7 @@ function LiveChat({
 
   const deleteMessage = () => {
     if (selectedMessage && websocketService) {
-      websocketService.emit('delete_chat_message', {
+      websocketService.emit("delete_chat_message", {
         investigationId,
         messageId: selectedMessage.id,
       });
@@ -340,43 +328,41 @@ function LiveChat({
   };
 
   const requestNotificationPermission = () => {
-    if ('Notification' in window && Notification.permission === 'default') {
+    if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission().then((permission) => {
-        setNotifications(permission === 'granted');
+        setNotifications(permission === "granted");
       });
     }
   };
 
   const MessageItem = ({ message }) => {
     const isOwnMessage = message.userId === currentUser?.id;
-    const replyMessage =
-      replyToMessage && messages.find((m) => m.id === message.replyTo);
+    const replyMessage = replyToMessage && messages.find((m) => m.id === message.replyTo);
 
     return (
       <ListItem
         sx={{
-          flexDirection: 'column',
-          alignItems: isOwnMessage ? 'flex-end' : 'flex-start',
+          flexDirection: "column",
+          alignItems: isOwnMessage ? "flex-end" : "flex-start",
           py: 1,
         }}
         onContextMenu={(e) => handleContextMenu(e, message)}
       >
         {replyMessage && (
-          <Box sx={{ mb: 1, opacity: 0.7, fontSize: '0.75rem' }}>
+          <Box sx={{ mb: 1, opacity: 0.7, fontSize: "0.75rem" }}>
             <Typography variant="caption">
-              Replying to {replyMessage.userName}:{' '}
-              {replyMessage.content.substring(0, 50)}...
+              Replying to {replyMessage.userName}: {replyMessage.content.substring(0, 50)}...
             </Typography>
           </Box>
         )}
 
         <Box
           sx={{
-            display: 'flex',
-            alignItems: 'flex-end',
+            display: "flex",
+            alignItems: "flex-end",
             gap: 1,
-            maxWidth: '80%',
-            flexDirection: isOwnMessage ? 'row-reverse' : 'row',
+            maxWidth: "80%",
+            flexDirection: isOwnMessage ? "row-reverse" : "row",
           }}
         >
           <Avatar sx={{ width: 32, height: 32 }} src={message.avatar}>
@@ -387,18 +373,13 @@ function LiveChat({
             sx={{
               px: 2,
               py: 1,
-              bgcolor: isOwnMessage ? 'primary.main' : 'background.paper',
-              color: isOwnMessage ? 'primary.contrastText' : 'text.primary',
-              borderRadius: isOwnMessage
-                ? '16px 4px 16px 16px'
-                : '4px 16px 16px 16px',
+              bgcolor: isOwnMessage ? "primary.main" : "background.paper",
+              color: isOwnMessage ? "primary.contrastText" : "text.primary",
+              borderRadius: isOwnMessage ? "16px 4px 16px 16px" : "4px 16px 16px 16px",
             }}
           >
             {!isOwnMessage && (
-              <Typography
-                variant="caption"
-                sx={{ fontWeight: 'bold', display: 'block' }}
-              >
+              <Typography variant="caption" sx={{ fontWeight: "bold", display: "block" }}>
                 {message.userName}
               </Typography>
             )}
@@ -406,14 +387,14 @@ function LiveChat({
             <Typography
               variant="caption"
               sx={{
-                display: 'block',
+                display: "block",
                 mt: 0.5,
                 opacity: 0.7,
-                fontSize: '0.6rem',
+                fontSize: "0.6rem",
               }}
             >
               {formatDistanceToNow(message.timestamp, { addSuffix: true })}
-              {message.edited && ' (edited)'}
+              {message.edited && " (edited)"}
             </Typography>
           </Paper>
         </Box>
@@ -422,15 +403,15 @@ function LiveChat({
   };
 
   const ChatHeader = () => (
-    <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+    <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider" }}>
       <Box
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Chat />
           <Typography variant="h6">Investigation Chat</Typography>
           <Badge badgeContent={onlineUsers.size} color="success">
@@ -438,12 +419,12 @@ function LiveChat({
           </Badge>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: "flex", gap: 1 }}>
           <Tooltip title="Toggle notifications">
             <IconButton
               size="small"
               onClick={() => {
-                if (!notifications && 'Notification' in window) {
+                if (!notifications && "Notification" in window) {
                   requestNotificationPermission();
                 } else {
                   setNotifications(!notifications);
@@ -454,13 +435,13 @@ function LiveChat({
             </IconButton>
           </Tooltip>
 
-          <Tooltip title={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}>
+          <Tooltip title={fullscreen ? "Exit fullscreen" : "Fullscreen"}>
             <IconButton size="small" onClick={toggleFullscreen}>
               {fullscreen ? <FullscreenExit /> : <Fullscreen />}
             </IconButton>
           </Tooltip>
 
-          <Tooltip title={isExpanded ? 'Minimize' : 'Expand'}>
+          <Tooltip title={isExpanded ? "Minimize" : "Expand"}>
             <IconButton
               size="small"
               onClick={() => {
@@ -475,13 +456,9 @@ function LiveChat({
       </Box>
 
       {isTyping.size > 0 && (
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ mt: 1, display: 'block' }}
-        >
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
           {Array.from(isTyping).length === 1
-            ? 'Someone is typing...'
+            ? "Someone is typing..."
             : `${isTyping.size} people are typing...`}
         </Typography>
       )}
@@ -495,12 +472,12 @@ function LiveChat({
         onClose={() => setFullscreen(false)}
         maxWidth="md"
         fullWidth
-        PaperProps={{ sx: { height: '80vh' } }}
+        PaperProps={{ sx: { height: "80vh" } }}
       >
         <DialogTitle>
           <ChatHeader />
         </DialogTitle>
-        <DialogContent sx={{ p: 0, display: 'flex', flexDirection: 'column' }}>
+        <DialogContent sx={{ p: 0, display: "flex", flexDirection: "column" }}>
           {/* Same content as main chat */}
         </DialogContent>
       </Dialog>
@@ -514,11 +491,11 @@ function LiveChat({
         <Fab
           color="primary"
           sx={{
-            position: 'fixed',
-            bottom: position.includes('bottom') ? 16 : 'auto',
-            top: position.includes('top') ? 16 : 'auto',
-            right: position.includes('right') ? 16 : 'auto',
-            left: position.includes('left') ? 16 : 'auto',
+            position: "fixed",
+            bottom: position.includes("bottom") ? 16 : "auto",
+            top: position.includes("top") ? 16 : "auto",
+            right: position.includes("right") ? 16 : "auto",
+            left: position.includes("left") ? 16 : "auto",
             zIndex: 1000,
           }}
           onClick={() => {
@@ -536,15 +513,15 @@ function LiveChat({
       <Slide direction="up" in={isExpanded} mountOnEnter unmountOnExit>
         <Paper
           sx={{
-            position: 'fixed',
-            bottom: position.includes('bottom') ? 16 : 'auto',
-            top: position.includes('top') ? 16 : 'auto',
-            right: position.includes('right') ? 16 : 'auto',
-            left: position.includes('left') ? 16 : 'auto',
+            position: "fixed",
+            bottom: position.includes("bottom") ? 16 : "auto",
+            top: position.includes("top") ? 16 : "auto",
+            right: position.includes("right") ? 16 : "auto",
+            left: position.includes("left") ? 16 : "auto",
             width: 400,
             height: 600,
-            display: 'flex',
-            flexDirection: 'column',
+            display: "flex",
+            flexDirection: "column",
             zIndex: 1000,
             boxShadow: 3,
           }}
@@ -552,7 +529,7 @@ function LiveChat({
           <ChatHeader />
 
           {/* Messages List */}
-          <Box sx={{ flex: 1, overflow: 'auto', px: 1 }}>
+          <Box sx={{ flex: 1, overflow: "auto", px: 1 }}>
             <List>
               {messages.map((message) => (
                 <MessageItem key={message.id} message={message} />
@@ -566,21 +543,18 @@ function LiveChat({
             <Box
               sx={{
                 p: 1,
-                bgcolor: 'action.hover',
+                bgcolor: "action.hover",
                 borderTop: 1,
-                borderColor: 'divider',
+                borderColor: "divider",
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Reply fontSize="small" />
                 <Typography variant="caption">
-                  Replying to {replyToMessage.userName}:{' '}
-                  {replyToMessage.content.substring(0, 50)}...
+                  Replying to {replyToMessage.userName}: {replyToMessage.content.substring(0, 50)}
+                  ...
                 </Typography>
-                <IconButton
-                  size="small"
-                  onClick={() => setReplyToMessage(null)}
-                >
+                <IconButton size="small" onClick={() => setReplyToMessage(null)}>
                   <Close fontSize="small" />
                 </IconButton>
               </Box>
@@ -588,8 +562,8 @@ function LiveChat({
           )}
 
           {/* Message Input */}
-          <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
+          <Box sx={{ p: 2, borderTop: 1, borderColor: "divider" }}>
+            <Box sx={{ display: "flex", gap: 1, alignItems: "flex-end" }}>
               <TextField
                 ref={chatInputRef}
                 fullWidth
@@ -600,7 +574,7 @@ function LiveChat({
                 value={newMessage}
                 onChange={(e) => handleTyping(e.target.value)}
                 onKeyPress={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
+                  if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
                     sendMessage();
                   }
@@ -608,11 +582,7 @@ function LiveChat({
                 size="small"
               />
 
-              <IconButton
-                color="primary"
-                onClick={sendMessage}
-                disabled={!newMessage.trim()}
-              >
+              <IconButton color="primary" onClick={sendMessage} disabled={!newMessage.trim()}>
                 <Send />
               </IconButton>
             </Box>
@@ -626,9 +596,7 @@ function LiveChat({
         onClose={handleCloseContextMenu}
         anchorReference="anchorPosition"
         anchorPosition={
-          contextMenu !== null
-            ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
-            : undefined
+          contextMenu !== null ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined
         }
       >
         <MenuItem onClick={replyToMessageAction}>

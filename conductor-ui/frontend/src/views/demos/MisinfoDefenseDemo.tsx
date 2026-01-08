@@ -4,7 +4,7 @@
  * Displays demo results with interactive exploration of detection evidence.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Card,
@@ -23,13 +23,13 @@ import {
   TableRow,
   Badge,
   Tooltip,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Warning as WarningIcon,
   CheckCircle as CheckCircleIcon,
   Info as InfoIcon,
   Policy as PolicyIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 interface DetectionResult {
   post: {
@@ -79,26 +79,26 @@ export const MisinfoDefenseDemo: React.FC = () => {
     try {
       // In production, this would fetch from API
       // For demo, we'll simulate loading from the generated JSON
-      const response = await fetch('/demos/misinfo-defense/output/analysis_results.json');
+      const response = await fetch("/demos/misinfo-defense/output/analysis_results.json");
       const data = await response.json();
       setResults(data);
       setLoading(false);
     } catch (err) {
-      setError('Failed to load demo results. Run: npm run demo:misinfo');
+      setError("Failed to load demo results. Run: npm run demo:misinfo");
       setLoading(false);
     }
   };
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'critical':
-        return 'error';
-      case 'high':
-        return 'warning';
-      case 'medium':
-        return 'info';
+      case "critical":
+        return "error";
+      case "high":
+        return "warning";
+      case "medium":
+        return "info";
       default:
-        return 'default';
+        return "default";
     }
   };
 
@@ -111,11 +111,7 @@ export const MisinfoDefenseDemo: React.FC = () => {
   }
 
   if (error || !results) {
-    return (
-      <Alert severity="error">
-        {error || 'No results available'}
-      </Alert>
-    );
+    return <Alert severity="error">{error || "No results available"}</Alert>;
   }
 
   return (
@@ -169,9 +165,7 @@ export const MisinfoDefenseDemo: React.FC = () => {
         <Grid item xs={12} md={3}>
           <Card>
             <CardContent>
-              <Typography variant="h6">
-                {(results.detection_rate * 100).toFixed(1)}%
-              </Typography>
+              <Typography variant="h6">{(results.detection_rate * 100).toFixed(1)}%</Typography>
               <Typography variant="body2" color="textSecondary">
                 Detection Rate
               </Typography>
@@ -208,7 +202,7 @@ export const MisinfoDefenseDemo: React.FC = () => {
                     key={result.post.id}
                     hover
                     onClick={() => setSelectedPost(result)}
-                    style={{ cursor: 'pointer' }}
+                    style={{ cursor: "pointer" }}
                   >
                     <TableCell>{result.post.id}</TableCell>
                     <TableCell>
@@ -221,12 +215,7 @@ export const MisinfoDefenseDemo: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       {result.analysis.is_misinfo ? (
-                        <Chip
-                          icon={<WarningIcon />}
-                          label="Misinfo"
-                          color="error"
-                          size="small"
-                        />
+                        <Chip icon={<WarningIcon />} label="Misinfo" color="error" size="small" />
                       ) : (
                         <Chip
                           icon={<CheckCircleIcon />}
@@ -237,7 +226,9 @@ export const MisinfoDefenseDemo: React.FC = () => {
                       )}
                     </TableCell>
                     <TableCell>
-                      <Tooltip title={`${(result.analysis.confidence * 100).toFixed(1)}% confidence`}>
+                      <Tooltip
+                        title={`${(result.analysis.confidence * 100).toFixed(1)}% confidence`}
+                      >
                         <Box display="flex" alignItems="center">
                           <CircularProgress
                             variant="determinate"
@@ -296,11 +287,13 @@ export const MisinfoDefenseDemo: React.FC = () => {
         {selectedTab === 1 && (
           <CardContent>
             <Alert severity="info" icon={<PolicyIcon />} sx={{ mb: 2 }}>
-              All detection decisions are backed by explicit evidence. Click any post to see details.
+              All detection decisions are backed by explicit evidence. Click any post to see
+              details.
             </Alert>
             {/* Additional evidence visualizations could go here */}
             <Typography variant="body2" color="textSecondary">
-              Evidence types: text_analysis, deepfake_detection, image_manipulation, narrative_context
+              Evidence types: text_analysis, deepfake_detection, image_manipulation,
+              narrative_context
             </Typography>
           </CardContent>
         )}
@@ -309,7 +302,8 @@ export const MisinfoDefenseDemo: React.FC = () => {
         {selectedTab === 2 && (
           <CardContent>
             <Alert severity="info" sx={{ mb: 2 }}>
-              Copilot can explain detection reasoning. All responses are evidence-grounded and policy-safe.
+              Copilot can explain detection reasoning. All responses are evidence-grounded and
+              policy-safe.
             </Alert>
             <Typography variant="body1" gutterBottom>
               Available Copilot Prompts:

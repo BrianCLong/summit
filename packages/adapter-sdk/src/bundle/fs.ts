@@ -1,10 +1,10 @@
-import { createHash } from 'node:crypto';
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
-import { BundleValidationError } from './types.js';
+import { createHash } from "node:crypto";
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import { BundleValidationError } from "./types.js";
 
 export async function readJsonFile<T>(filePath: string): Promise<T> {
-  const raw = await fs.readFile(filePath, 'utf-8');
+  const raw = await fs.readFile(filePath, "utf-8");
   try {
     return JSON.parse(raw) as T;
   } catch (error) {
@@ -19,14 +19,14 @@ export async function writeJson(filePath: string, value: unknown): Promise<void>
 }
 
 export async function hashFile(filePath: string): Promise<string> {
-  const hash = createHash('sha256');
+  const hash = createHash("sha256");
   const file = await fs.readFile(filePath);
   hash.update(file);
-  return hash.digest('hex');
+  return hash.digest("hex");
 }
 
 export async function hashDirectory(root: string): Promise<string> {
-  const hash = createHash('sha256');
+  const hash = createHash("sha256");
 
   async function walk(current: string): Promise<void> {
     const entries = await fs.readdir(current, { withFileTypes: true });
@@ -46,5 +46,5 @@ export async function hashDirectory(root: string): Promise<string> {
   }
 
   await walk(root);
-  return hash.digest('hex');
+  return hash.digest("hex");
 }

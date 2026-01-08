@@ -30,23 +30,23 @@ evidence/
 
 ## 2. Required Artifacts
 
-| Artifact | Format | Purpose | Mandatory? |
-|----------|--------|---------|------------|
-| **Manifest** | JSON | Machine-readable bundle metadata. | Yes |
-| **SBOM** | SPDX-JSON | Complete dependency tree for vulnerability scanning. | Yes |
-| **Provenance** | In-Toto | Cryptographic proof of build server identity & inputs. | Yes |
-| **Git State** | Text | Traceability to source control. | Yes |
-| **Test Results** | JUnit/JSON | Proof that quality gates passed. | Yes |
-| **Policy Check** | JSON | Proof that governance policies (OPA) passed. | Yes |
-| **Signatures** | Cosign | Cryptographic signatures of the artifacts. | Yes |
+| Artifact         | Format     | Purpose                                                | Mandatory? |
+| ---------------- | ---------- | ------------------------------------------------------ | ---------- |
+| **Manifest**     | JSON       | Machine-readable bundle metadata.                      | Yes        |
+| **SBOM**         | SPDX-JSON  | Complete dependency tree for vulnerability scanning.   | Yes        |
+| **Provenance**   | In-Toto    | Cryptographic proof of build server identity & inputs. | Yes        |
+| **Git State**    | Text       | Traceability to source control.                        | Yes        |
+| **Test Results** | JUnit/JSON | Proof that quality gates passed.                       | Yes        |
+| **Policy Check** | JSON       | Proof that governance policies (OPA) passed.           | Yes        |
+| **Signatures**   | Cosign     | Cryptographic signatures of the artifacts.             | Yes        |
 
 ## 3. Integrity & Verification
 
-*   **Hashing**: The `checksums.sha256` file must contain hashes for every other file in the bundle.
-*   **Signing**: The `evidence-bundle.tar.gz` itself must be signed. The signature is stored as a separate asset (`evidence-bundle.tar.gz.sig`) or attached via OCI registry metadata.
-*   **Storage**: Bundles are uploaded to:
-    1.  GitHub Release Assets (Immutable history).
-    2.  Internal Artifact Store (Long-term retention).
+- **Hashing**: The `checksums.sha256` file must contain hashes for every other file in the bundle.
+- **Signing**: The `evidence-bundle.tar.gz` itself must be signed. The signature is stored as a separate asset (`evidence-bundle.tar.gz.sig`) or attached via OCI registry metadata.
+- **Storage**: Bundles are uploaded to:
+  1.  GitHub Release Assets (Immutable history).
+  2.  Internal Artifact Store (Long-term retention).
 
 ## 4. Generation Process
 

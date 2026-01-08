@@ -1,8 +1,8 @@
-import { EventEmitter } from 'events';
-import { WorkspaceManager, WorkspaceStore } from '@intelgraph/workspace';
-import { SyncEngine, SyncStore } from '@intelgraph/real-time-sync';
-import { CommentManager, CommentStore } from '@intelgraph/commenting';
-import { VersionControl, VersionControlStore } from '@intelgraph/version-control';
+import { EventEmitter } from "events";
+import { WorkspaceManager, WorkspaceStore } from "@intelgraph/workspace";
+import { SyncEngine, SyncStore } from "@intelgraph/real-time-sync";
+import { CommentManager, CommentStore } from "@intelgraph/commenting";
+import { VersionControl, VersionControlStore } from "@intelgraph/version-control";
 import {
   Document,
   Task,
@@ -15,9 +15,9 @@ import {
   DocumentType,
   TaskStatus,
   NotificationType,
-  ShareLinkType
-} from './types';
-import { nanoid } from 'nanoid';
+  ShareLinkType,
+} from "./types";
+import { nanoid } from "nanoid";
 
 export interface CollaborationStores {
   workspace: WorkspaceStore;
@@ -34,7 +34,7 @@ export interface CollaborationStores {
 }
 
 export interface DocumentStore {
-  createDocument(doc: Omit<Document, 'id' | 'createdAt' | 'updatedAt'>): Promise<Document>;
+  createDocument(doc: Omit<Document, "id" | "createdAt" | "updatedAt">): Promise<Document>;
   getDocument(id: string): Promise<Document | null>;
   updateDocument(id: string, updates: Partial<Document>): Promise<Document>;
   deleteDocument(id: string): Promise<void>;
@@ -43,45 +43,47 @@ export interface DocumentStore {
 }
 
 export interface TaskStore {
-  createTask(task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>): Promise<Task>;
+  createTask(task: Omit<Task, "id" | "createdAt" | "updatedAt">): Promise<Task>;
   getTask(id: string): Promise<Task | null>;
   updateTask(id: string, updates: Partial<Task>): Promise<Task>;
   deleteTask(id: string): Promise<void>;
   listTasks(boardId: string): Promise<Task[]>;
-  createBoard(board: Omit<Board, 'id' | 'createdAt'>): Promise<Board>;
+  createBoard(board: Omit<Board, "id" | "createdAt">): Promise<Board>;
   getBoard(id: string): Promise<Board | null>;
   listBoards(workspaceId: string): Promise<Board[]>;
 }
 
 export interface NotificationStore {
-  createNotification(notif: Omit<Notification, 'id' | 'createdAt'>): Promise<Notification>;
+  createNotification(notif: Omit<Notification, "id" | "createdAt">): Promise<Notification>;
   getNotifications(userId: string, unreadOnly?: boolean): Promise<Notification[]>;
   markAsRead(notificationId: string): Promise<void>;
   markAllAsRead(userId: string): Promise<void>;
 }
 
 export interface ActivityStore {
-  logActivity(activity: Omit<ActivityFeedItem, 'id' | 'timestamp'>): Promise<ActivityFeedItem>;
+  logActivity(activity: Omit<ActivityFeedItem, "id" | "timestamp">): Promise<ActivityFeedItem>;
   getActivities(workspaceId: string, options?: any): Promise<ActivityFeedItem[]>;
   getUserActivities(userId: string, options?: any): Promise<ActivityFeedItem[]>;
 }
 
 export interface SharingStore {
-  createShareLink(link: Omit<ShareLink, 'id' | 'createdAt' | 'token'>): Promise<ShareLink>;
+  createShareLink(link: Omit<ShareLink, "id" | "createdAt" | "token">): Promise<ShareLink>;
   getShareLink(token: string): Promise<ShareLink | null>;
   revokeShareLink(linkId: string): Promise<void>;
   listShareLinks(resourceId: string): Promise<ShareLink[]>;
 }
 
 export interface MarketplaceStore {
-  publishAsset(asset: Omit<MarketplaceAsset, 'id' | 'createdAt' | 'updatedAt'>): Promise<MarketplaceAsset>;
+  publishAsset(
+    asset: Omit<MarketplaceAsset, "id" | "createdAt" | "updatedAt">
+  ): Promise<MarketplaceAsset>;
   getAsset(id: string): Promise<MarketplaceAsset | null>;
   searchAssets(query: string, filters?: any): Promise<MarketplaceAsset[]>;
   downloadAsset(assetId: string, userId: string): Promise<string>;
 }
 
 export interface MeetingStore {
-  createMeeting(meeting: Omit<Meeting, 'id' | 'createdAt'>): Promise<Meeting>;
+  createMeeting(meeting: Omit<Meeting, "id" | "createdAt">): Promise<Meeting>;
   getMeeting(id: string): Promise<Meeting | null>;
   updateMeeting(id: string, updates: Partial<Meeting>): Promise<Meeting>;
   listMeetings(workspaceId: string): Promise<Meeting[]>;
@@ -136,19 +138,14 @@ export class CollaborationHub extends EventEmitter {
       tags: options?.tags || [],
       isPublished: false,
       parentDocumentId: options?.parentDocumentId,
-      order: 0
+      order: 0,
     });
 
     // Initialize version control for document
-    await this.versionControl.initRepository(
-      workspaceId,
-      'document',
-      document.id,
-      authorId
-    );
+    await this.versionControl.initRepository(workspaceId, "document", document.id, authorId);
 
-    await this.logActivity(workspaceId, authorId, 'created', 'document', document.id, title);
-    this.emit('document:created', { document });
+    await this.logActivity(workspaceId, authorId, "created", "document", document.id, title);
+    this.emit("document:created", { document });
 
     return document;
   }
@@ -163,29 +160,38 @@ export class CollaborationHub extends EventEmitter {
     // Create version control commit if content changed
     if (updates.content) {
       const repo = await this.stores.versionControl.getRepositoryForResource(
-        'document',
+        "document",
         documentId
       );
 
       if (repo) {
         await this.versionControl.commit(
           repo.id,
-          'main',
+          "main",
           userId,
-          'User',
-          'Update document content',
-          [{
-            path: 'content',
-            type: 'modify' as any,
-            contentHash: this.hashContent(updates.content),
-            previousHash: ''
-          }]
+          "User",
+          "Update document content",
+          [
+            {
+              path: "content",
+              type: "modify" as any,
+              contentHash: this.hashContent(updates.content),
+              previousHash: "",
+            },
+          ]
         );
       }
     }
 
-    await this.logActivity(document.workspaceId, userId, 'updated', 'document', documentId, document.title);
-    this.emit('document:updated', { document });
+    await this.logActivity(
+      document.workspaceId,
+      userId,
+      "updated",
+      "document",
+      documentId,
+      document.title
+    );
+    this.emit("document:updated", { document });
 
     return document;
   }
@@ -203,7 +209,7 @@ export class CollaborationHub extends EventEmitter {
     options?: {
       description?: string;
       assigneeId?: string;
-      priority?: Task['priority'];
+      priority?: Task["priority"];
       dueDate?: Date;
       labels?: string[];
       projectId?: string;
@@ -216,14 +222,14 @@ export class CollaborationHub extends EventEmitter {
       title,
       description: options?.description,
       status: TaskStatus.TODO,
-      priority: options?.priority || 'medium' as any,
+      priority: options?.priority || ("medium" as any),
       assigneeId: options?.assigneeId,
       reporterId,
       dueDate: options?.dueDate,
       labels: options?.labels || [],
       dependencies: [],
       blockedBy: [],
-      subtasks: []
+      subtasks: [],
     });
 
     // Send notification to assignee
@@ -238,30 +244,26 @@ export class CollaborationHub extends EventEmitter {
       );
     }
 
-    await this.logActivity(workspaceId, reporterId, 'created', 'task', task.id, title);
-    this.emit('task:created', { task });
+    await this.logActivity(workspaceId, reporterId, "created", "task", task.id, title);
+    this.emit("task:created", { task });
 
     return task;
   }
 
-  async updateTaskStatus(
-    taskId: string,
-    status: TaskStatus,
-    userId: string
-  ): Promise<Task> {
+  async updateTaskStatus(taskId: string, status: TaskStatus, userId: string): Promise<Task> {
     const task = await this.stores.task.getTask(taskId);
     if (!task) {
-      throw new Error('Task not found');
+      throw new Error("Task not found");
     }
 
     const updated = await this.stores.task.updateTask(taskId, {
       status,
-      completedAt: status === TaskStatus.DONE ? new Date() : undefined
+      completedAt: status === TaskStatus.DONE ? new Date() : undefined,
     });
 
     // Notify assignee and reporter
     const recipients = [task.assigneeId, task.reporterId].filter(
-      id => id && id !== userId
+      (id) => id && id !== userId
     ) as string[];
 
     for (const recipientId of recipients) {
@@ -275,8 +277,8 @@ export class CollaborationHub extends EventEmitter {
       );
     }
 
-    await this.logActivity(task.workspaceId, userId, 'updated', 'task', taskId, task.title);
-    this.emit('task:updated', { task: updated, oldStatus: task.status, newStatus: status });
+    await this.logActivity(task.workspaceId, userId, "updated", "task", taskId, task.title);
+    this.emit("task:updated", { task: updated, oldStatus: task.status, newStatus: status });
 
     return updated;
   }
@@ -286,27 +288,27 @@ export class CollaborationHub extends EventEmitter {
     name: string,
     createdBy: string,
     options?: {
-      type?: Board['type'];
+      type?: Board["type"];
       projectId?: string;
-      columns?: Board['columns'];
+      columns?: Board["columns"];
     }
   ): Promise<Board> {
-    const defaultColumns: Board['columns'] = options?.columns || [
-      { id: nanoid(), name: 'To Do', status: TaskStatus.TODO, order: 0 },
-      { id: nanoid(), name: 'In Progress', status: TaskStatus.IN_PROGRESS, order: 1 },
-      { id: nanoid(), name: 'Done', status: TaskStatus.DONE, order: 2 }
+    const defaultColumns: Board["columns"] = options?.columns || [
+      { id: nanoid(), name: "To Do", status: TaskStatus.TODO, order: 0 },
+      { id: nanoid(), name: "In Progress", status: TaskStatus.IN_PROGRESS, order: 1 },
+      { id: nanoid(), name: "Done", status: TaskStatus.DONE, order: 2 },
     ];
 
     const board = await this.stores.task.createBoard({
       workspaceId,
       projectId: options?.projectId,
       name,
-      type: options?.type || 'kanban',
+      type: options?.type || "kanban",
       columns: defaultColumns,
-      createdBy
+      createdBy,
     });
 
-    this.emit('board:created', { board });
+    this.emit("board:created", { board });
 
     return board;
   }
@@ -329,10 +331,10 @@ export class CollaborationHub extends EventEmitter {
       message,
       actionUrl,
       metadata,
-      read: false
+      read: false,
     });
 
-    this.emit('notification:created', { notification });
+    this.emit("notification:created", { notification });
 
     return notification;
   }
@@ -343,7 +345,7 @@ export class CollaborationHub extends EventEmitter {
 
   async markAllNotificationsAsRead(userId: string): Promise<void> {
     await this.stores.notification.markAllAsRead(userId);
-    this.emit('notifications:read', { userId });
+    this.emit("notifications:read", { userId });
   }
 
   // Activity Feed
@@ -359,15 +361,15 @@ export class CollaborationHub extends EventEmitter {
     const activity = await this.stores.activity.logActivity({
       workspaceId,
       actorId,
-      actorName: 'User', // Would fetch from user service
+      actorName: "User", // Would fetch from user service
       action,
       resourceType,
       resourceId,
       resourceName,
-      metadata
+      metadata,
     });
 
-    this.emit('activity:logged', { activity });
+    this.emit("activity:logged", { activity });
 
     return activity;
   }
@@ -408,18 +410,18 @@ export class CollaborationHub extends EventEmitter {
       maxUses: options?.maxUses,
       uses: 0,
       allowAnonymous: options?.allowAnonymous || false,
-      createdBy
+      createdBy,
     });
 
-    await this.logActivity(workspaceId, createdBy, 'shared', resourceType, resourceId);
-    this.emit('share:created', { link });
+    await this.logActivity(workspaceId, createdBy, "shared", resourceType, resourceId);
+    this.emit("share:created", { link });
 
     return link;
   }
 
   async revokeShareLink(linkId: string): Promise<void> {
     await this.stores.sharing.revokeShareLink(linkId);
-    this.emit('share:revoked', { linkId });
+    this.emit("share:revoked", { linkId });
   }
 
   // Marketplace
@@ -427,7 +429,7 @@ export class CollaborationHub extends EventEmitter {
     authorId: string,
     name: string,
     description: string,
-    type: MarketplaceAsset['type'],
+    type: MarketplaceAsset["type"],
     contentUrl: string,
     options?: {
       category?: string;
@@ -440,10 +442,10 @@ export class CollaborationHub extends EventEmitter {
       type,
       name,
       description,
-      version: '1.0.0',
+      version: "1.0.0",
       authorId,
-      authorName: 'User',
-      category: options?.category || 'general',
+      authorName: "User",
+      category: options?.category || "general",
       tags: options?.tags || [],
       contentUrl,
       isPublic: options?.isPublic ?? true,
@@ -451,10 +453,10 @@ export class CollaborationHub extends EventEmitter {
       rating: 0,
       ratingCount: 0,
       downloadCount: 0,
-      changelog: []
+      changelog: [],
     });
 
-    this.emit('marketplace:published', { asset });
+    this.emit("marketplace:published", { asset });
 
     return asset;
   }
@@ -462,7 +464,7 @@ export class CollaborationHub extends EventEmitter {
   async downloadFromMarketplace(assetId: string, userId: string): Promise<string> {
     const contentUrl = await this.stores.marketplace.downloadAsset(assetId, userId);
 
-    this.emit('marketplace:downloaded', { assetId, userId });
+    this.emit("marketplace:downloaded", { assetId, userId });
 
     return contentUrl;
   }
@@ -485,18 +487,18 @@ export class CollaborationHub extends EventEmitter {
       title,
       description: options?.description,
       hostId,
-      participants: (options?.participants || []).map(userId => ({
+      participants: (options?.participants || []).map((userId) => ({
         userId,
-        role: 'participant' as const
+        role: "participant" as const,
       })),
       scheduledAt: options?.scheduledAt,
-      status: 'scheduled',
+      status: "scheduled",
       settings: {
         enableRecording: false,
         enableTranscription: false,
         allowScreenShare: true,
-        enableChat: true
-      }
+        enableChat: true,
+      },
     });
 
     // Notify participants
@@ -511,18 +513,18 @@ export class CollaborationHub extends EventEmitter {
       );
     }
 
-    this.emit('meeting:scheduled', { meeting });
+    this.emit("meeting:scheduled", { meeting });
 
     return meeting;
   }
 
   async startMeeting(meetingId: string): Promise<Meeting> {
     const meeting = await this.stores.meeting.updateMeeting(meetingId, {
-      status: 'active',
-      startedAt: new Date()
+      status: "active",
+      startedAt: new Date(),
     });
 
-    this.emit('meeting:started', { meeting });
+    this.emit("meeting:started", { meeting });
 
     return meeting;
   }
@@ -530,35 +532,38 @@ export class CollaborationHub extends EventEmitter {
   // Helper methods
   private setupEventHandlers(): void {
     // Cross-system event wiring
-    this.workspace.on('member.added', async ({ workspaceId, userId }) => {
+    this.workspace.on("member.added", async ({ workspaceId, userId }) => {
       await this.notify(
         userId,
         workspaceId,
         NotificationType.WORKSPACE_INVITE,
-        'Welcome to the workspace',
-        'You have been added to a new workspace'
+        "Welcome to the workspace",
+        "You have been added to a new workspace"
       );
     });
 
-    this.comments.on('comment:created', async ({ comment }) => {
+    this.comments.on("comment:created", async ({ comment }) => {
       // Notifications are handled in CommentManager
     });
 
-    this.sync.on('operation:applied', ({ documentId, operation }) => {
-      this.emit('realtime:update', { documentId, operation });
+    this.sync.on("operation:applied", ({ documentId, operation }) => {
+      this.emit("realtime:update", { documentId, operation });
     });
   }
 
   private generateSlug(text: string): string {
-    return text
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '')
-      + '-' + nanoid(8);
+    return (
+      text
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "") +
+      "-" +
+      nanoid(8)
+    );
   }
 
   private hashContent(content: string): string {
     // Simple hash for demo - use proper crypto in production
-    return Buffer.from(content).toString('base64').slice(0, 32);
+    return Buffer.from(content).toString("base64").slice(0, 32);
   }
 }

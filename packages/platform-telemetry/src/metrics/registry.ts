@@ -10,9 +10,9 @@ import {
   Registry,
   collectDefaultMetrics,
   register as defaultRegister,
-} from 'prom-client';
-import type { MetricDefinition } from './taxonomy.js';
-import { MetricsTaxonomy } from './taxonomy.js';
+} from "prom-client";
+import type { MetricDefinition } from "./taxonomy.js";
+import { MetricsTaxonomy } from "./taxonomy.js";
 
 export interface MetricsConfig {
   prefix: string;
@@ -22,7 +22,7 @@ export interface MetricsConfig {
 }
 
 const DEFAULT_CONFIG: MetricsConfig = {
-  prefix: 'summit_',
+  prefix: "summit_",
   defaultLabels: {},
   collectDefaultMetrics: true,
   defaultMetricsInterval: 10000,
@@ -95,7 +95,7 @@ export class MetricsRegistry {
     let metric: MetricInstance;
 
     switch (definition.type) {
-      case 'counter':
+      case "counter":
         metric = new Counter({
           name: fullName,
           help: definition.description,
@@ -104,7 +104,7 @@ export class MetricsRegistry {
         });
         break;
 
-      case 'gauge':
+      case "gauge":
         metric = new Gauge({
           name: fullName,
           help: definition.description,
@@ -113,7 +113,7 @@ export class MetricsRegistry {
         });
         break;
 
-      case 'histogram':
+      case "histogram":
         metric = new Histogram({
           name: fullName,
           help: definition.description,
@@ -123,7 +123,7 @@ export class MetricsRegistry {
         });
         break;
 
-      case 'summary':
+      case "summary":
         // Use histogram as summary alternative
         metric = new Histogram({
           name: fullName,
@@ -276,16 +276,16 @@ export const httpMetrics = {
     durationMs: number
   ): void {
     const labels = { method, path, status_code: String(statusCode) };
-    registry.inc('http_requests_total', labels);
-    registry.observe('http_request_duration_seconds', labels, durationMs / 1000);
+    registry.inc("http_requests_total", labels);
+    registry.observe("http_request_duration_seconds", labels, durationMs / 1000);
   },
 
   incrementActiveRequests(registry: MetricsRegistry, method: string): void {
-    registry.set('http_requests_active', { method }, 1);
+    registry.set("http_requests_active", { method }, 1);
   },
 
   decrementActiveRequests(registry: MetricsRegistry, method: string): void {
-    registry.set('http_requests_active', { method }, -1);
+    registry.set("http_requests_active", { method }, -1);
   },
 };
 
@@ -301,11 +301,11 @@ export const dbMetrics = {
     error?: string
   ): void {
     const labels = { database, operation };
-    registry.inc('db_queries_total', labels);
-    registry.observe('db_query_duration_seconds', labels, durationMs / 1000);
+    registry.inc("db_queries_total", labels);
+    registry.observe("db_query_duration_seconds", labels, durationMs / 1000);
 
     if (error) {
-      registry.inc('db_query_errors_total', { ...labels, error_type: error });
+      registry.inc("db_query_errors_total", { ...labels, error_type: error });
     }
   },
 
@@ -316,9 +316,9 @@ export const dbMetrics = {
     active: number,
     waiting: number
   ): void {
-    registry.set('db_connection_pool_size', { database }, size);
-    registry.set('db_connection_pool_active', { database }, active);
-    registry.set('db_connection_pool_waiting', { database }, waiting);
+    registry.set("db_connection_pool_size", { database }, size);
+    registry.set("db_connection_pool_active", { database }, active);
+    registry.set("db_connection_pool_waiting", { database }, waiting);
   },
 };
 
@@ -327,18 +327,18 @@ export const dbMetrics = {
  */
 export const cacheMetrics = {
   recordHit(registry: MetricsRegistry, layer: string): void {
-    registry.inc('cache_hits_total', { cache_layer: layer });
+    registry.inc("cache_hits_total", { cache_layer: layer });
   },
 
   recordMiss(registry: MetricsRegistry, layer: string): void {
-    registry.inc('cache_misses_total', { cache_layer: layer });
+    registry.inc("cache_misses_total", { cache_layer: layer });
   },
 
   setHitRate(registry: MetricsRegistry, layer: string, rate: number): void {
-    registry.set('cache_hit_rate', { cache_layer: layer }, rate);
+    registry.set("cache_hit_rate", { cache_layer: layer }, rate);
   },
 
   setSize(registry: MetricsRegistry, layer: string, size: number): void {
-    registry.set('cache_size', { cache_layer: layer }, size);
+    registry.set("cache_size", { cache_layer: layer }, size);
   },
 };

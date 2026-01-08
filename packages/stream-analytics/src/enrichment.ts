@@ -1,8 +1,8 @@
-import Redis from 'ioredis';
-import axios from 'axios';
-import pino from 'pino';
+import Redis from "ioredis";
+import axios from "axios";
+import pino from "pino";
 
-const logger = pino({ name: 'stream-enrichment' });
+const logger = pino({ name: "stream-enrichment" });
 
 /**
  * Data enrichment engine for real-time streams
@@ -43,7 +43,7 @@ export class EnrichmentEngine {
           this.cache.set(key, { value: parsed, timestamp: Date.now() });
           return parsed as T;
         } catch (error) {
-          logger.warn({ error, key }, 'Failed to parse Redis value');
+          logger.warn({ error, key }, "Failed to parse Redis value");
         }
       }
     }
@@ -55,11 +55,7 @@ export class EnrichmentEngine {
     this.cache.set(key, { value, timestamp: Date.now() });
 
     if (this.redis) {
-      await this.redis.setex(
-        `enrichment:${key}`,
-        Math.floor(ttl / 1000),
-        JSON.stringify(value)
-      );
+      await this.redis.setex(`enrichment:${key}`, Math.floor(ttl / 1000), JSON.stringify(value));
     }
 
     return value;
@@ -84,7 +80,7 @@ export class EnrichmentEngine {
 
       return response.data as R;
     } catch (error) {
-      logger.error({ error, endpoint }, 'API enrichment failed');
+      logger.error({ error, endpoint }, "API enrichment failed");
       throw error;
     }
   }
@@ -100,12 +96,12 @@ export class EnrichmentEngine {
       // For now, return mock data
       return {
         ip,
-        country: 'US',
-        region: 'California',
-        city: 'San Francisco',
+        country: "US",
+        region: "California",
+        city: "San Francisco",
         latitude: 37.7749,
         longitude: -122.4194,
-        timezone: 'America/Los_Angeles',
+        timezone: "America/Los_Angeles",
       };
     });
   }
@@ -120,7 +116,7 @@ export class EnrichmentEngine {
       // Fetch entity data from database or API
       return {
         id: entityId,
-        type: 'person',
+        type: "person",
         attributes: {},
       };
     });
@@ -138,8 +134,8 @@ export class EnrichmentEngine {
         // Query threat intelligence feeds
         return {
           indicator,
-          severity: 'medium',
-          categories: ['malware'],
+          severity: "medium",
+          categories: ["malware"],
           firstSeen: new Date(),
           lastSeen: new Date(),
         };
@@ -185,20 +181,15 @@ export class EnrichmentEngine {
     data: T,
     enrichers: Array<(data: T) => Promise<any>>
   ): Promise<T & Record<string, any>> {
-    const enrichments = await Promise.allSettled(
-      enrichers.map((enricher) => enricher(data))
-    );
+    const enrichments = await Promise.allSettled(enrichers.map((enricher) => enricher(data)));
 
     const result: any = { ...data };
 
     enrichments.forEach((enrichment, index) => {
-      if (enrichment.status === 'fulfilled') {
+      if (enrichment.status === "fulfilled") {
         Object.assign(result, enrichment.value);
       } else {
-        logger.warn(
-          { error: enrichment.reason, index },
-          'Enrichment failed'
-        );
+        logger.warn({ error: enrichment.reason, index }, "Enrichment failed");
       }
     });
 

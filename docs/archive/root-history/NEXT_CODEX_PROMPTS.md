@@ -1,6 +1,7 @@
 # Next Codex Prompts
 
 ## Binary Search Tree Implementation (JavaScript)
+
 - **Role**: Expert software engineer.
 - **Task**: Implement a binary search tree (BST) in JavaScript with methods to insert a node, search for a value, and traverse the tree in-order.
 - **Language**: JavaScript.
@@ -11,6 +12,7 @@
 - **Output**: Provide only the code, no explanations.
 
 ## Concurrency with Async/Await (JavaScript)
+
 - **Role**: Expert software engineer.
 - **Goal**: Demonstrate advanced concurrency patterns using `async`/`await` with practical examples (parallel execution, throttling, error handling, cancellation semantics where supported).
 - **Expectations**:
@@ -19,6 +21,7 @@
   - Include notes on testing strategies for concurrent workflows.
 
 ## Real-World Utility: CSV Parsing (JavaScript)
+
 - **Role**: Expert software engineer.
 - **Goal**: Provide a production-ready CSV parsing utility with streaming support.
 - **Expectations**:

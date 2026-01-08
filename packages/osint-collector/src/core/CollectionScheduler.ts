@@ -2,9 +2,9 @@
  * Collection Scheduler - Manages automated collection scheduling
  */
 
-import { EventEmitter } from 'events';
-import { CronJob } from 'cron';
-import type { CollectionTask, CollectionType } from '../types/index.js';
+import { EventEmitter } from "events";
+import { CronJob } from "cron";
+import type { CollectionTask, CollectionType } from "../types/index.js";
 
 export interface ScheduleConfig {
   id: string;
@@ -101,11 +101,11 @@ export class CollectionScheduler extends EventEmitter {
       () => this.executeScheduledTask(config),
       null,
       true,
-      'UTC'
+      "UTC"
     );
 
     this.schedules.set(config.id, job);
-    this.emit('schedule:started', { scheduleId: config.id, name: config.name });
+    this.emit("schedule:started", { scheduleId: config.id, name: config.name });
   }
 
   private executeScheduledTask(config: ScheduleConfig): void {
@@ -116,10 +116,10 @@ export class CollectionScheduler extends EventEmitter {
       target: config.target,
       priority: config.priority,
       scheduledAt: new Date(),
-      status: 'pending' as any,
-      config: config.config
+      status: "pending" as any,
+      config: config.config,
     };
 
-    this.emit('task:scheduled', task);
+    this.emit("task:scheduled", task);
   }
 }

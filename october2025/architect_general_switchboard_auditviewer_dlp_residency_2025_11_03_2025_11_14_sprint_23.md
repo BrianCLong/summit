@@ -77,21 +77,21 @@
 
 ```tsx
 // apps/web/src/app/audit/page.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 export default function AuditPage() {
   const [q, setQ] = useState({
     page: 1,
     pageSize: 50,
-    action: '',
-    decision: '',
-    traceId: '',
-    from: '',
-    to: '',
+    action: "",
+    decision: "",
+    traceId: "",
+    from: "",
+    to: "",
   });
   const [rows, setRows] = useState([]);
   const [total, setTotal] = useState(0);
   async function load() {
-    const url = '/api/audit/query?' + new URLSearchParams(q as any);
+    const url = "/api/audit/query?" + new URLSearchParams(q as any);
     const r = await fetch(url).then((r) => r.json());
     setRows(r.rows);
     setTotal(r.total);
@@ -116,18 +116,11 @@ export default function AuditPage() {
           placeholder="traceId"
           onChange={(e) => setQ({ ...q, traceId: e.target.value, page: 1 })}
         />
-        <input
-          type="datetime-local"
-          onChange={(e) => setQ({ ...q, from: e.target.value })}
-        />
-        <input
-          type="datetime-local"
-          onChange={(e) => setQ({ ...q, to: e.target.value })}
-        />
+        <input type="datetime-local" onChange={(e) => setQ({ ...q, from: e.target.value })} />
+        <input type="datetime-local" onChange={(e) => setQ({ ...q, to: e.target.value })} />
         <button
           onClick={() =>
-            (window.location.href =
-              '/api/audit/export?' + new URLSearchParams(q as any))
+            (window.location.href = "/api/audit/export?" + new URLSearchParams(q as any))
           }
           className="rounded-2xl px-3 py-2 shadow"
         >
@@ -157,9 +150,7 @@ export default function AuditPage() {
         </tbody>
       </table>
       <div className="flex gap-2">
-        <button onClick={() => setQ({ ...q, page: Math.max(1, q.page - 1) })}>
-          Prev
-        </button>
+        <button onClick={() => setQ({ ...q, page: Math.max(1, q.page - 1) })}>Prev</button>
         <span>Page {q.page}</span>
         <button onClick={() => setQ({ ...q, page: q.page + 1 })}>Next</button>
       </div>
@@ -172,41 +163,34 @@ export default function AuditPage() {
 
 ```ts
 // apps/web/src/app/api/audit/query/route.ts
-import { db } from '@/lib/db';
+import { db } from "@/lib/db";
 export async function GET(req: Request) {
   const u = new URL(req.url);
-  const page = Number(u.searchParams.get('page') || '1');
-  const pageSize = Math.min(
-    Number(u.searchParams.get('pageSize') || '50'),
-    200,
-  );
+  const page = Number(u.searchParams.get("page") || "1");
+  const pageSize = Math.min(Number(u.searchParams.get("pageSize") || "50"), 200);
   const where = [] as string[];
   const args: any[] = [];
-  for (const k of ['action', 'decision', 'traceId']) {
+  for (const k of ["action", "decision", "traceId"]) {
     const v = u.searchParams.get(k);
     if (v) {
-      where.push(
-        `${k === 'traceId' ? 'trace_id' : k} ilike $${where.length + 1}`,
-      );
-      args.push('%' + v + '%');
+      where.push(`${k === "traceId" ? "trace_id" : k} ilike $${where.length + 1}`);
+      args.push("%" + v + "%");
     }
   }
-  if (u.searchParams.get('from')) {
-    where.push('ts >= $' + (args.length + 1));
-    args.push(u.searchParams.get('from'));
+  if (u.searchParams.get("from")) {
+    where.push("ts >= $" + (args.length + 1));
+    args.push(u.searchParams.get("from"));
   }
-  if (u.searchParams.get('to')) {
-    where.push('ts <= $' + (args.length + 1));
-    args.push(u.searchParams.get('to'));
+  if (u.searchParams.get("to")) {
+    where.push("ts <= $" + (args.length + 1));
+    args.push(u.searchParams.get("to"));
   }
-  const w = where.length ? 'where ' + where.join(' and ') : '';
+  const w = where.length ? "where " + where.join(" and ") : "";
   const rows = await db.query(
     `select * from audit_events ${w} order by ts desc limit ${pageSize} offset ${(page - 1) * pageSize}`,
-    args,
+    args
   );
-  const total = (
-    await db.query(`select count(*) from audit_events ${w}`, args)
-  )[0].count;
+  const total = (await db.query(`select count(*) from audit_events ${w}`, args))[0].count;
   return Response.json({ rows, total });
 }
 ```
@@ -262,8 +246,8 @@ export function looksLikeSecret(s: string) {
 **Runtime Redactor v2**
 
 ```ts
-import dict from 'security/dlp/dictionary.yaml';
-import { looksLikeSecret } from '@/apps/shared/entropy';
+import dict from "security/dlp/dictionary.yaml";
+import { looksLikeSecret } from "@/apps/shared/entropy";
 export function redactDeep(obj: any) {
   /* walk object; apply dict + entropy; replace with [REDACTED:<rule>] */
 }
@@ -293,16 +277,13 @@ jobs:
 
 ```ts
 // apps/web/src/middleware.ts
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 export function middleware(req: any) {
-  const region =
-    req.geo?.country === 'DE' || req.geo?.continent === 'EU' ? 'EU' : 'US';
+  const region = req.geo?.country === "DE" || req.geo?.continent === "EU" ? "EU" : "US";
   const url = new URL(req.url);
   url.hostname =
-    region === 'EU'
-      ? 'eu.api.switchboard.example.com'
-      : 'us.api.switchboard.example.com';
-  req.headers.set('x-region', region);
+    region === "EU" ? "eu.api.switchboard.example.com" : "us.api.switchboard.example.com";
+  req.headers.set("x-region", region);
   return NextResponse.rewrite(url);
 }
 ```
@@ -310,10 +291,8 @@ export function middleware(req: any) {
 **UX Badge**
 
 ```tsx
-export function RegionBadge({ region }: { region: 'US' | 'EU' }) {
-  return (
-    <span className="px-2 py-1 rounded-2xl bg-slate-100">Region: {region}</span>
-  );
+export function RegionBadge({ region }: { region: "US" | "EU" }) {
+  return <span className="px-2 py-1 rounded-2xl bg-slate-100">Region: {region}</span>;
 }
 ```
 
@@ -353,8 +332,8 @@ initContainers:
     image: ghcr.io/org/verify-tool:latest
     env:
       - name: COSIGN_EXPERIMENTAL
-        value: '1'
-    command: ['/bin/sh', '-c']
+        value: "1"
+    command: ["/bin/sh", "-c"]
     args:
       - >-
         cosign verify-blob --yes --signature /policy/switchboard.bundle.sig /policy/switchboard.bundle.tar.gz
@@ -368,7 +347,7 @@ initContainers:
 ```yaml
 - name: opa
   image: openpolicyagent/opa:0.65.0-rootless
-  args: ['run', '--server', '--bundle', '/policy/switchboard.bundle.tar.gz']
+  args: ["run", "--server", "--bundle", "/policy/switchboard.bundle.tar.gz"]
 ```
 
 **CI Step**
@@ -423,7 +402,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata: { name: audit-pg-backup }
 spec:
-  schedule: '*/15 * * * *'
+  schedule: "*/15 * * * *"
   jobTemplate:
     spec:
       template:
@@ -431,28 +410,11 @@ spec:
           containers:
             - name: pgdump
               image: postgres:16
-              args:
-                [
-                  '/bin/sh',
-                  '-c',
-                  'pg_dump $PGURL | gzip > /backup/audit-$(date +%s).sql.gz',
-                ]
-              env:
-                [
-                  {
-                    name: PGURL,
-                    valueFrom: { secretKeyRef: { name: audit-db, key: url } },
-                  },
-                ]
+              args: ["/bin/sh", "-c", "pg_dump $PGURL | gzip > /backup/audit-$(date +%s).sql.gz"]
+              env: [{ name: PGURL, valueFrom: { secretKeyRef: { name: audit-db, key: url } } }]
               volumeMounts: [{ name: backup, mountPath: /backup }]
           restartPolicy: OnFailure
-          volumes:
-            [
-              {
-                name: backup,
-                persistentVolumeClaim: { claimName: audit-backups },
-              },
-            ]
+          volumes: [{ name: backup, persistentVolumeClaim: { claimName: audit-backups } }]
 ```
 
 **Restore Runbook (`ops/runbooks/dr-restore.md`)**

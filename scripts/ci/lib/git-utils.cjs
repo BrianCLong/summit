@@ -1,10 +1,10 @@
-const { execSync } = require('node:child_process');
-const path = require('node:path');
+const { execSync } = require("node:child_process");
+const path = require("node:path");
 
 function runGitCommand(args) {
   try {
     const output = execSync(`git ${args}`, {
-      stdio: ['ignore', 'pipe', 'pipe'],
+      stdio: ["ignore", "pipe", "pipe"],
     });
     return output.toString().trim();
   } catch (error) {
@@ -20,7 +20,7 @@ function getChangedFiles(baseRef) {
     return [];
   }
   return result
-    .split('\n')
+    .split("\n")
     .map((filePath) => filePath.trim())
     .filter(Boolean);
 }
@@ -28,7 +28,7 @@ function getChangedFiles(baseRef) {
 function getAddedLineNumbers(baseRef, filePath) {
   const diffRange = `${baseRef}...HEAD`;
   const diffOutput = runGitCommand(
-    `diff --unified=0 --no-color ${diffRange} -- ${escapePath(filePath)}`,
+    `diff --unified=0 --no-color ${diffRange} -- ${escapePath(filePath)}`
   );
   if (!diffOutput) {
     return new Set();
@@ -50,8 +50,8 @@ function getAddedLineNumbers(baseRef, filePath) {
 function escapePath(filePath) {
   return path
     .normalize(filePath)
-    .replace(/\\\\/g, '/')
-    .replace(/([ #$&'()*;?\[\]`{}~])/g, '\\$1');
+    .replace(/\\\\/g, "/")
+    .replace(/([ #$&'()*;?\[\]`{}~])/g, "\\$1");
 }
 
 function resolveWorkspacePath(relativePath) {

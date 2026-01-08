@@ -2,25 +2,25 @@
  * Alert and response types
  */
 
-import { ThreatSeverity, ThreatCategory } from './events';
+import { ThreatSeverity, ThreatCategory } from "./events";
 
 export enum AlertStatus {
-  NEW = 'NEW',
-  ACKNOWLEDGED = 'ACKNOWLEDGED',
-  IN_PROGRESS = 'IN_PROGRESS',
-  RESOLVED = 'RESOLVED',
-  FALSE_POSITIVE = 'FALSE_POSITIVE',
-  ESCALATED = 'ESCALATED'
+  NEW = "NEW",
+  ACKNOWLEDGED = "ACKNOWLEDGED",
+  IN_PROGRESS = "IN_PROGRESS",
+  RESOLVED = "RESOLVED",
+  FALSE_POSITIVE = "FALSE_POSITIVE",
+  ESCALATED = "ESCALATED",
 }
 
 export enum AlertChannel {
-  EMAIL = 'EMAIL',
-  SMS = 'SMS',
-  SLACK = 'SLACK',
-  PAGERDUTY = 'PAGERDUTY',
-  WEBHOOK = 'WEBHOOK',
-  SIEM = 'SIEM',
-  SOAR = 'SOAR'
+  EMAIL = "EMAIL",
+  SMS = "SMS",
+  SLACK = "SLACK",
+  PAGERDUTY = "PAGERDUTY",
+  WEBHOOK = "WEBHOOK",
+  SIEM = "SIEM",
+  SOAR = "SOAR",
 }
 
 export interface Alert {
@@ -94,13 +94,13 @@ export interface AlertRule {
   // Trigger conditions
   conditions: {
     field: string;
-    operator: 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'contains' | 'matches';
+    operator: "eq" | "ne" | "gt" | "gte" | "lt" | "lte" | "contains" | "matches";
     value: any;
   }[];
 
   // Time windows
   timeWindow?: number; // milliseconds
-  aggregation?: 'count' | 'sum' | 'avg' | 'max' | 'min';
+  aggregation?: "count" | "sum" | "avg" | "max" | "min";
   threshold?: number;
 
   // Alert configuration
@@ -151,7 +151,15 @@ export interface ResponseStep {
   order: number;
   name: string;
   description: string;
-  type: 'isolate' | 'block' | 'terminate' | 'quarantine' | 'notify' | 'investigate' | 'remediate' | 'custom';
+  type:
+    | "isolate"
+    | "block"
+    | "terminate"
+    | "quarantine"
+    | "notify"
+    | "investigate"
+    | "remediate"
+    | "custom";
 
   // Execution
   action: string; // Action identifier or script
@@ -172,7 +180,7 @@ export interface ResponseStep {
 
 export interface SOARIntegration {
   id: string;
-  platform: 'splunk_phantom' | 'palo_alto_cortex' | 'ibm_resilient' | 'demisto' | 'custom';
+  platform: "splunk_phantom" | "palo_alto_cortex" | "ibm_resilient" | "demisto" | "custom";
   endpoint: string;
   apiKey?: string;
   enabled: boolean;
@@ -183,7 +191,7 @@ export interface SOARIntegration {
 
   // Status
   lastSync?: Date;
-  healthStatus: 'healthy' | 'degraded' | 'down';
+  healthStatus: "healthy" | "degraded" | "down";
 }
 
 export interface IncidentResponse {
@@ -191,7 +199,7 @@ export interface IncidentResponse {
   alertIds: string[];
 
   // Status
-  status: 'new' | 'investigating' | 'contained' | 'eradicating' | 'recovering' | 'closed';
+  status: "new" | "investigating" | "contained" | "eradicating" | "recovering" | "closed";
   severity: ThreatSeverity;
 
   // Team
@@ -215,7 +223,7 @@ export interface IncidentResponse {
 
   // Evidence
   evidence: {
-    type: 'log' | 'screenshot' | 'file' | 'network_capture' | 'memory_dump' | 'other';
+    type: "log" | "screenshot" | "file" | "network_capture" | "memory_dump" | "other";
     description: string;
     location: string;
     collectedAt: Date;

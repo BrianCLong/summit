@@ -21,7 +21,11 @@ export function attachFlagContext(req: RequestWithFlags, _res: Response, next: N
   next();
 }
 
-export async function attachFlagHeaders(req: RequestWithFlags, res: Response, next: NextFunction): Promise<void> {
+export async function attachFlagHeaders(
+  req: RequestWithFlags,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
   const ctx = req.flagContext ?? { env: process.env.NODE_ENV ?? "dev" };
   const enabled = await client.get<boolean>(policyFlag, false, ctx);
   req.flags = { [policyFlag]: enabled };

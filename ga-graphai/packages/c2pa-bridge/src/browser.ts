@@ -1,19 +1,18 @@
-import { manifestCanonicalString, claimCanonicalString } from './common/manifest';
-import {
-  BrowserVerificationOptions,
-  BrowserVerificationResult,
-  VerificationIssue,
-} from './types';
+import { manifestCanonicalString, claimCanonicalString } from "./common/manifest";
+import { BrowserVerificationOptions, BrowserVerificationResult, VerificationIssue } from "./types";
 
-function collectIssue(message: string, level: VerificationIssue['level'] = 'error'): VerificationIssue {
+function collectIssue(
+  message: string,
+  level: VerificationIssue["level"] = "error"
+): VerificationIssue {
   return { message, level };
 }
 
 function pemToArrayBuffer(pem: string): ArrayBuffer {
   const base64 = pem
-    .replace('-----BEGIN PUBLIC KEY-----', '')
-    .replace('-----END PUBLIC KEY-----', '')
-    .replace(/\s+/g, '');
+    .replace("-----BEGIN PUBLIC KEY-----", "")
+    .replace("-----END PUBLIC KEY-----", "")
+    .replace(/\s+/g, "");
   const binary = atob(base64);
   const buffer = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i += 1) {
@@ -24,39 +23,41 @@ function pemToArrayBuffer(pem: string): ArrayBuffer {
 
 async function fingerprintPublicKey(publicKey: string): Promise<string> {
   const data = new TextEncoder().encode(publicKey.trim());
-  const digest = await crypto.subtle.digest('SHA-256', data);
+  const digest = await crypto.subtle.digest("SHA-256", data);
   return Array.from(new Uint8Array(digest))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 async function verifySignature(
   manifestCanonical: string,
   signature: string,
   publicKey: string,
-  algorithm: string,
+  algorithm: string
 ): Promise<boolean> {
-  if (algorithm !== 'rsa-sha256') {
-    throw new Error(`Browser verification currently supports rsa-sha256 only. Requested: ${algorithm}`);
+  if (algorithm !== "rsa-sha256") {
+    throw new Error(
+      `Browser verification currently supports rsa-sha256 only. Requested: ${algorithm}`
+    );
   }
   const keyData = pemToArrayBuffer(publicKey);
   const cryptoKey = await crypto.subtle.importKey(
-    'spki',
+    "spki",
     keyData,
     {
-      name: 'RSASSA-PKCS1-v1_5',
-      hash: 'SHA-256',
+      name: "RSASSA-PKCS1-v1_5",
+      hash: "SHA-256",
     },
     false,
-    ['verify'],
+    ["verify"]
   );
   const signatureBuffer = Uint8Array.from(atob(signature), (c) => c.charCodeAt(0));
   const data = new TextEncoder().encode(manifestCanonical);
-  return crypto.subtle.verify('RSASSA-PKCS1-v1_5', cryptoKey, signatureBuffer, data);
+  return crypto.subtle.verify("RSASSA-PKCS1-v1_5", cryptoKey, signatureBuffer, data);
 }
 
 export async function verifyManifestInBrowser(
-  options: BrowserVerificationOptions,
+  options: BrowserVerificationOptions
 ): Promise<BrowserVerificationResult> {
   const manifest = options.manifest;
   const manifestCanonical = manifestCanonicalString(manifest);
@@ -65,25 +66,25 @@ export async function verifyManifestInBrowser(
     manifestCanonical,
     manifest.signature,
     options.publicKey,
-    manifest.claim.signer.algorithm,
+    manifest.claim.signer.algorithm
   );
   if (!signatureValid) {
-    issues.push(collectIssue('Signature verification failed'));
+    issues.push(collectIssue("Signature verification failed"));
   }
 
   const providedFingerprint = await fingerprintPublicKey(options.publicKey);
   if (providedFingerprint !== manifest.claim.signer.publicKeyFingerprint) {
-    issues.push(collectIssue('Signer fingerprint mismatch with provided public key', 'warning'));
+    issues.push(collectIssue("Signer fingerprint mismatch with provided public key", "warning"));
   }
 
-  const digest = await crypto.subtle.digest('SHA-256', options.asset);
+  const digest = await crypto.subtle.digest("SHA-256", options.asset);
   const assetHash = Array.from(new Uint8Array(digest))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 
   const validAssetHash = assetHash === manifest.asset.hash;
   if (!validAssetHash) {
-    issues.push(collectIssue('Asset hash does not match manifest'));
+    issues.push(collectIssue("Asset hash does not match manifest"));
   }
 
   const manifestHash = await sha256(manifestCanonical);
@@ -100,8 +101,8 @@ export async function verifyManifestInBrowser(
 
 async function sha256(value: string): Promise<string> {
   const data = new TextEncoder().encode(value);
-  const digest = await crypto.subtle.digest('SHA-256', data);
+  const digest = await crypto.subtle.digest("SHA-256", data);
   return Array.from(new Uint8Array(digest))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }

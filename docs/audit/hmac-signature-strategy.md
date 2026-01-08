@@ -38,6 +38,7 @@ Event 1          Event 2          Event 3
 ### Primary Algorithm: HMAC-SHA256
 
 **Why HMAC-SHA256?**
+
 - **Security**: SHA-256 is cryptographically secure and FIPS 140-2 approved
 - **Performance**: Fast computation suitable for high-volume audit logging
 - **Compatibility**: Widely supported across platforms
@@ -55,10 +56,11 @@ Event 1          Event 2          Event 3
 
 ```typescript
 // Environment variable
-process.env.LEDGER_SIGNING_KEY
+process.env.LEDGER_SIGNING_KEY;
 ```
 
 **Key Properties:**
+
 - **Length**: Minimum 32 bytes (256 bits), recommended 64 bytes (512 bits)
 - **Entropy**: Cryptographically random (use crypto.randomBytes())
 - **Encoding**: Base64 or hex
@@ -72,6 +74,7 @@ node -e "console.log(require('crypto').randomBytes(64).toString('base64'))"
 ```
 
 **Example:**
+
 ```bash
 LEDGER_SIGNING_KEY=Xp3K9mN2vB8qR5tY7wZ4jA6dF1gH8kL0oP2sU5xC7eI9nM1vN3bQ8rT5yW7zA4d
 ```
@@ -79,22 +82,25 @@ LEDGER_SIGNING_KEY=Xp3K9mN2vB8qR5tY7wZ4jA6dF1gH8kL0oP2sU5xC7eI9nM1vN3bQ8rT5yW7zA
 ### Key Storage
 
 **Development:**
+
 - Store in `.env` file (gitignored)
 
 **Staging/Production:**
+
 - **AWS Secrets Manager**: Rotate automatically every 90 days
 - **HashiCorp Vault**: Transit secret engine for signing operations
 - **Azure Key Vault**: Managed HSM for FIPS 140-2 Level 3 compliance
 
 **Key Rotation Strategy:**
+
 ```typescript
 interface SigningKeyConfig {
-  keyId: string;          // Key version identifier
-  key: string;            // Actual signing key
-  algorithm: string;      // HMAC-SHA256, HMAC-SHA512, RSA-SHA256
-  validFrom: Date;        // Key activation date
-  validUntil?: Date;      // Key expiration (null = active)
-  rotatedBy?: string;     // Admin who rotated
+  keyId: string; // Key version identifier
+  key: string; // Actual signing key
+  algorithm: string; // HMAC-SHA256, HMAC-SHA512, RSA-SHA256
+  validFrom: Date; // Key activation date
+  validUntil?: Date; // Key expiration (null = active)
+  rotatedBy?: string; // Admin who rotated
 }
 
 // Store multiple keys for verification during rotation
@@ -115,6 +121,7 @@ const signingKeys: Map<string, SigningKeyConfig> = new Map();
 Each audit event is hashed using **SHA-256** to create a unique fingerprint.
 
 **Hashable Fields** (order matters):
+
 ```typescript
 const hashableData = {
   id: event.id,
@@ -135,17 +142,13 @@ const hashableData = {
 };
 
 // Canonical JSON (sorted keys)
-const canonical = JSON.stringify(
-  hashableData,
-  Object.keys(hashableData).sort()
-);
+const canonical = JSON.stringify(hashableData, Object.keys(hashableData).sort());
 
-const hash = crypto.createHash('sha256')
-  .update(canonical)
-  .digest('hex');
+const hash = crypto.createHash("sha256").update(canonical).digest("hex");
 ```
 
 **Why Canonical JSON?**
+
 - **Deterministic**: Same data always produces same hash
 - **Sorted Keys**: Prevents key order variations
 - **Reproducible**: Can recalculate hash for verification
@@ -155,62 +158,55 @@ const hash = crypto.createHash('sha256')
 ### Signature Payload
 
 The HMAC signature covers:
+
 ```typescript
 const signaturePayload = {
   id: event.id,
-  hash: event.hash,                    // Content hash
+  hash: event.hash, // Content hash
   timestamp: event.timestamp.toISOString(),
-  tenantId: event.tenantId,            // Prevent cross-tenant replay
-  previousEventHash: event.previousEventHash,  // Chain linkage
-  keyId: currentKeyId,                 // Key version
+  tenantId: event.tenantId, // Prevent cross-tenant replay
+  previousEventHash: event.previousEventHash, // Chain linkage
+  keyId: currentKeyId, // Key version
 };
 ```
 
 ### Signature Calculation
 
 ```typescript
-import { createHmac } from 'crypto';
+import { createHmac } from "crypto";
 
 function signEvent(
   event: AuditEvent,
   signingKey: string,
-  algorithm: 'sha256' | 'sha512' = 'sha256'
+  algorithm: "sha256" | "sha512" = "sha256"
 ): string {
   const payload = {
     id: event.id,
     hash: event.hash,
     timestamp: event.timestamp.toISOString(),
     tenantId: event.tenantId,
-    previousEventHash: event.previousEventHash || '',
+    previousEventHash: event.previousEventHash || "",
   };
 
-  const canonical = JSON.stringify(
-    payload,
-    Object.keys(payload).sort()
-  );
+  const canonical = JSON.stringify(payload, Object.keys(payload).sort());
 
-  return createHmac(algorithm, signingKey)
-    .update(canonical)
-    .digest('hex');
+  return createHmac(algorithm, signingKey).update(canonical).digest("hex");
 }
 ```
 
 ### Signature Verification
 
 ```typescript
-import { timingSafeEqual } from 'crypto';
+import { timingSafeEqual } from "crypto";
 
-function verifyEventSignature(
-  event: AuditEvent,
-  signingKey: string
-): boolean {
+function verifyEventSignature(event: AuditEvent, signingKey: string): boolean {
   try {
     // Recalculate signature
     const expectedSignature = signEvent(event, signingKey);
 
     // Timing-safe comparison (prevents timing attacks)
-    const eventSigBuffer = Buffer.from(event.signature || '', 'hex');
-    const expectedSigBuffer = Buffer.from(expectedSignature, 'hex');
+    const eventSigBuffer = Buffer.from(event.signature || "", "hex");
+    const expectedSigBuffer = Buffer.from(expectedSignature, "hex");
 
     if (eventSigBuffer.length !== expectedSigBuffer.length) {
       return false;
@@ -224,6 +220,7 @@ function verifyEventSignature(
 ```
 
 **Why Timing-Safe Comparison?**
+
 - Prevents timing side-channel attacks
 - Standard comparison leaks information via execution time
 - `timingSafeEqual()` always takes constant time
@@ -235,7 +232,7 @@ function verifyEventSignature(
 Each event links to the previous event via `previousEventHash`:
 
 ```typescript
-let lastEventHash = '';  // In-memory state
+let lastEventHash = ""; // In-memory state
 
 async function recordEvent(eventData: Partial<AuditEvent>) {
   // 1. Calculate event hash
@@ -274,7 +271,7 @@ async function verifyHashChain(
     tenantIds: tenantId ? [tenantId] : undefined,
   });
 
-  let expectedPreviousHash = '';
+  let expectedPreviousHash = "";
   let chainBreaks = 0;
   let firstBreakEventId: string | undefined;
 
@@ -339,17 +336,20 @@ async function verifyHashChain(
 In addition to database storage, audit events are appended to a **write-once file** for additional tamper protection.
 
 **File Location:**
+
 ```bash
 /var/log/audit/audit-trail-{TENANT_ID}-{YYYY-MM-DD}.log
 ```
 
 **File Format** (JSONL - JSON Lines):
+
 ```json
 {"seq":1,"ts":"2025-01-15T10:30:00.000Z","id":"123e4567-e89b-12d3-a456-426614174000","type":"user_login","hash":"abc123...","sig":"def456...","prevHash":"","data":"eyJpZCI6...","crc":"789abc"}
 {"seq":2,"ts":"2025-01-15T10:30:05.000Z","id":"223e4567-e89b-12d3-a456-426614174001","type":"entity_create","hash":"ghi789...","sig":"jkl012...","prevHash":"abc123...","data":"eyJpZCI6...","crc":"345def"}
 ```
 
 **Entry Fields:**
+
 - `seq`: Sequence number (monotonically increasing)
 - `ts`: Timestamp (ISO 8601)
 - `id`: Event UUID
@@ -373,6 +373,7 @@ sudo chattr +a /var/log/audit/audit-trail-*.log  # Append-only
 ```
 
 **immutable flag (+a):**
+
 - Files can only be appended to (no modifications or deletions)
 - Requires root to remove flag
 - Provides OS-level tamper protection
@@ -387,6 +388,7 @@ sudo chattr +a /var/log/audit/audit-trail-*.log  # Append-only
 ```
 
 **Rotation Process:**
+
 1. New file created at midnight UTC
 2. Old file is sealed (made read-only)
 3. Old file is checksummed and signed
@@ -397,19 +399,20 @@ sudo chattr +a /var/log/audit/audit-trail-*.log  # Append-only
 
 ### Trust Services Criteria Mapping
 
-| SOC 2 Control | Implementation |
-|---------------|----------------|
+| SOC 2 Control                                  | Implementation                                     |
+| ---------------------------------------------- | -------------------------------------------------- |
 | **CC6.1** - Implements logical access controls | HMAC signatures prevent unauthorized modifications |
-| **CC7.2** - System monitoring | Hash chain verification detects tampering |
-| **CC8.1** - Change management | Before/after states track all changes |
-| **A1.2** - Audit trail protection | Append-only logs + immutable flags |
-| **A1.3** - Integrity verification | Automated daily integrity checks |
+| **CC7.2** - System monitoring                  | Hash chain verification detects tampering          |
+| **CC8.1** - Change management                  | Before/after states track all changes              |
+| **A1.2** - Audit trail protection              | Append-only logs + immutable flags                 |
+| **A1.3** - Integrity verification              | Automated daily integrity checks                   |
 
 ### Audit Evidence
 
 **For SOC 2 auditors:**
 
 1. **Integrity Verification Reports**
+
    ```sql
    SELECT * FROM integrity_verifications
    WHERE verified_at >= NOW() - INTERVAL '90 days'
@@ -417,6 +420,7 @@ sudo chattr +a /var/log/audit/audit-trail-*.log  # Append-only
    ```
 
 2. **Hash Chain Verification**
+
    ```sql
    SELECT * FROM verify_hash_chain(
      NOW() - INTERVAL '1 month',
@@ -459,7 +463,7 @@ sudo chattr +a /var/log/audit/audit-trail-*.log  # Append-only
 ```typescript
 class AuditService {
   private eventBuffer: AuditEvent[] = [];
-  private lastEventHash: string = '';
+  private lastEventHash: string = "";
   private flushInterval: NodeJS.Timeout;
 
   constructor() {
@@ -475,7 +479,7 @@ class AuditService {
     const eventsToFlush = this.eventBuffer.splice(0, 100);
 
     // Batch insert to database
-    await this.db.batchInsert('audit_events', eventsToFlush);
+    await this.db.batchInsert("audit_events", eventsToFlush);
 
     // Batch append to write-once file
     await this.appendToAuditFile(eventsToFlush);

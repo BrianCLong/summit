@@ -1,12 +1,17 @@
-import type { GraphQLResolveInfo } from 'graphql';
+import type { GraphQLResolveInfo } from "graphql";
 
 type MaybePromise<T> = Promise<T> | T;
 
-export type ResolverFn<TResult = unknown, TParent = unknown, TArgs = Record<string, unknown>, TContext = unknown> = (
+export type ResolverFn<
+  TResult = unknown,
+  TParent = unknown,
+  TArgs = Record<string, unknown>,
+  TContext = unknown,
+> = (
   parent: TParent,
   args: TArgs,
   context: TContext,
-  info: GraphQLResolveInfo,
+  info: GraphQLResolveInfo
 ) => MaybePromise<TResult>;
 
 export type ResolverEntry = ResolverFn | ResolverFn[];
@@ -16,7 +21,7 @@ export type ResolverMap = Record<string, Record<string, ResolverEntry>>;
 export type EntityResolver<TContext = unknown> = (
   reference: { __typename: string; [key: string]: unknown },
   context: TContext,
-  info: GraphQLResolveInfo,
+  info: GraphQLResolveInfo
 ) => MaybePromise<unknown>;
 
 export interface FederationServiceDefinition<TContext = unknown> {

@@ -6,7 +6,7 @@
  * and convoy detection.
  */
 
-import { IGeoGraphRepository } from '../repository/GeoGraphRepository.js';
+import { IGeoGraphRepository } from "../repository/GeoGraphRepository.js";
 import {
   TrajectoryPoint,
   StayPoint,
@@ -17,7 +17,7 @@ import {
   ConvoyParams,
   TimeRange,
   TrajectoryAnalysis,
-} from '../types/geotemporal.js';
+} from "../types/geotemporal.js";
 import {
   buildTrajectory,
   detectStayPoints,
@@ -25,7 +25,7 @@ import {
   detectConvoys,
   calculateTrajectoryDistance,
   calculateAverageSpeed,
-} from '../analytics/geotemporal-algorithms.js';
+} from "../analytics/geotemporal-algorithms.js";
 
 /**
  * Geo-temporal analytics service
@@ -54,7 +54,7 @@ export class GeoTemporalService {
    */
   async getTrajectoryAnalysis(
     entityId: string,
-    timeRange?: TimeRange,
+    timeRange?: TimeRange
   ): Promise<TrajectoryAnalysis> {
     const trajectory = await this.getTrajectory(entityId, timeRange);
 
@@ -92,7 +92,7 @@ export class GeoTemporalService {
   async getStayPoints(
     entityId: string,
     timeRange: TimeRange,
-    params: StayPointParams,
+    params: StayPointParams
   ): Promise<StayPoint[]> {
     const trajectory = await this.getTrajectory(entityId, timeRange);
     return detectStayPoints(trajectory, params);
@@ -109,7 +109,7 @@ export class GeoTemporalService {
   async getCoPresence(
     entityIds: string[],
     timeRange: TimeRange,
-    params: CoPresenceParams,
+    params: CoPresenceParams
   ): Promise<CoPresenceInterval[]> {
     this.validateTimeRange(timeRange);
     this.validateEntityLimit(entityIds, 100);
@@ -129,7 +129,7 @@ export class GeoTemporalService {
   async getConvoys(
     entityIds: string[],
     timeRange: TimeRange,
-    params: ConvoyParams,
+    params: ConvoyParams
   ): Promise<Convoy[]> {
     this.validateTimeRange(timeRange);
 
@@ -155,20 +155,20 @@ export class GeoTemporalService {
    */
   private validateTimeRange(timeRange: TimeRange): void {
     if (!timeRange.from || !timeRange.to) {
-      throw new Error('Both from and to times are required for time range');
+      throw new Error("Both from and to times are required for time range");
     }
 
     const fromTime = new Date(timeRange.from).getTime();
     const toTime = new Date(timeRange.to).getTime();
 
     if (fromTime >= toTime) {
-      throw new Error('Invalid time range: from must be before to');
+      throw new Error("Invalid time range: from must be before to");
     }
 
     // Max 1 year window (configurable)
     const maxWindowMs = 365 * 24 * 60 * 60 * 1000; // 1 year
     if (toTime - fromTime > maxWindowMs) {
-      throw new Error('Time range exceeds maximum allowed window of 1 year');
+      throw new Error("Time range exceeds maximum allowed window of 1 year");
     }
   }
 

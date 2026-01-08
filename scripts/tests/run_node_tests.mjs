@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 
-const environment = process.env.TEST_ENVIRONMENT ?? 'dev';
+const environment = process.env.TEST_ENVIRONMENT ?? "dev";
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const defaultDataPath = join(__dirname, 'data', 'synthetic-test-data.json');
+const defaultDataPath = join(__dirname, "data", "synthetic-test-data.json");
 const dataPath = process.env.SYNTHETIC_DATA_PATH ?? defaultDataPath;
 
 function fail(message) {
@@ -15,7 +15,7 @@ function fail(message) {
 
 function loadData(path) {
   try {
-    const raw = readFileSync(path, 'utf-8');
+    const raw = readFileSync(path, "utf-8");
     return JSON.parse(raw);
   } catch (error) {
     fail(`Unable to load synthetic data from ${path}: ${error.message}`);
@@ -41,7 +41,7 @@ const latencyBudgetByEnv = {
 };
 
 const latencyBudget = latencyBudgetByEnv[environment];
-if (typeof latencyBudget !== 'number') {
+if (typeof latencyBudget !== "number") {
   fail(`No latency budget defined for environment '${environment}'.`);
 }
 
@@ -51,17 +51,17 @@ if (envSample.requestLatencyMs > latencyBudget) {
   );
 }
 
-if (environment === 'prod' && envSample.featureFlags.length !== 0) {
-  fail('Production synthetic sample should not contain experimental feature flags.');
+if (environment === "prod" && envSample.featureFlags.length !== 0) {
+  fail("Production synthetic sample should not contain experimental feature flags.");
 }
 
-if (['dev', 'staging'].includes(environment)) {
-  const requiredFlag = 'synthetic-metrics';
+if (["dev", "staging"].includes(environment)) {
+  const requiredFlag = "synthetic-metrics";
   if (!envSample.featureFlags.includes(requiredFlag)) {
     fail(`Expected feature flag '${requiredFlag}' for environment '${environment}'.`);
   }
 }
 
 console.log(
-  `Node service synthetic validation succeeded for ${environment}. Latency=${envSample.requestLatencyMs}ms, flags=${envSample.featureFlags.join(',') || 'none'}.`
+  `Node service synthetic validation succeeded for ${environment}. Latency=${envSample.requestLatencyMs}ms, flags=${envSample.featureFlags.join(",") || "none"}.`
 );

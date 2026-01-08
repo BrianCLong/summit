@@ -1,9 +1,9 @@
-import React from 'react';
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
-import Toolbar from './Toolbar';
-import GraphCanvas from './GraphCanvas';
-import SidePanel from './SidePanel';
+import React from "react";
+import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
+import Toolbar from "./Toolbar";
+import GraphCanvas from "./GraphCanvas";
+import SidePanel from "./SidePanel";
 
 export default function GraphWorkbench() {
   return (

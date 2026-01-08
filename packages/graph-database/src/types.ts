@@ -60,8 +60,8 @@ export interface AdjacencyList {
 }
 
 // Graph Schema
-export type PropertyType = 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object';
-export type IndexType = 'btree' | 'hash' | 'fulltext' | 'spatial' | 'vector';
+export type PropertyType = "string" | "number" | "boolean" | "date" | "array" | "object";
+export type IndexType = "btree" | "hash" | "fulltext" | "spatial" | "vector";
 
 export interface GraphSchemaConstraint {
   nodeLabel?: string;
@@ -88,9 +88,19 @@ export interface GraphSchema {
 }
 
 // Transaction Types
-export type TransactionStatus = 'active' | 'committed' | 'aborted';
-export type IsolationLevel = 'read_uncommitted' | 'read_committed' | 'repeatable_read' | 'serializable';
-export type OperationType = 'create_node' | 'update_node' | 'delete_node' | 'create_edge' | 'update_edge' | 'delete_edge';
+export type TransactionStatus = "active" | "committed" | "aborted";
+export type IsolationLevel =
+  | "read_uncommitted"
+  | "read_committed"
+  | "repeatable_read"
+  | "serializable";
+export type OperationType =
+  | "create_node"
+  | "update_node"
+  | "delete_node"
+  | "create_edge"
+  | "update_edge"
+  | "delete_edge";
 
 export interface TransactionOperation {
   type: OperationType;
@@ -109,7 +119,7 @@ export interface Transaction {
 }
 
 // Partition Types
-export type PartitionStrategy = 'hash' | 'range' | 'list' | 'composite' | 'edge_cut' | 'vertex_cut';
+export type PartitionStrategy = "hash" | "range" | "list" | "composite" | "edge_cut" | "vertex_cut";
 
 export interface Partition {
   id: string;
@@ -148,7 +158,7 @@ export interface MatchPattern {
   };
   edge?: {
     type?: string;
-    direction?: 'out' | 'in' | 'both';
+    direction?: "out" | "in" | "both";
     properties?: Record<string, unknown>;
     minHops?: number;
     maxHops?: number;
@@ -160,10 +170,21 @@ export interface MatchPattern {
   };
 }
 
-export type ComparisonOperator = '=' | '!=' | '>' | '<' | '>=' | '<=' | 'IN' | 'CONTAINS' | 'STARTS_WITH' | 'ENDS_WITH' | 'REGEX';
-export type LogicalOperator = 'AND' | 'OR' | 'NOT';
-export type AggregationType = 'COUNT' | 'SUM' | 'AVG' | 'MIN' | 'MAX' | 'COLLECT';
-export type SortDirection = 'ASC' | 'DESC';
+export type ComparisonOperator =
+  | "="
+  | "!="
+  | ">"
+  | "<"
+  | ">="
+  | "<="
+  | "IN"
+  | "CONTAINS"
+  | "STARTS_WITH"
+  | "ENDS_WITH"
+  | "REGEX";
+export type LogicalOperator = "AND" | "OR" | "NOT";
+export type AggregationType = "COUNT" | "SUM" | "AVG" | "MIN" | "MAX" | "COLLECT";
+export type SortDirection = "ASC" | "DESC";
 
 export interface WhereClause {
   field: string;
@@ -211,7 +232,7 @@ export class GraphDatabaseError extends Error {
 
   constructor(message: string, code: string, details?: unknown) {
     super(message);
-    this.name = 'GraphDatabaseError';
+    this.name = "GraphDatabaseError";
     this.code = code;
     this.details = details;
   }
@@ -219,15 +240,15 @@ export class GraphDatabaseError extends Error {
 
 export class TransactionError extends GraphDatabaseError {
   constructor(message: string, details?: unknown) {
-    super(message, 'TRANSACTION_ERROR', details);
-    this.name = 'TransactionError';
+    super(message, "TRANSACTION_ERROR", details);
+    this.name = "TransactionError";
   }
 }
 
 export class ConstraintViolationError extends GraphDatabaseError {
   constructor(message: string, details?: unknown) {
-    super(message, 'CONSTRAINT_VIOLATION', details);
-    this.name = 'ConstraintViolationError';
+    super(message, "CONSTRAINT_VIOLATION", details);
+    this.name = "ConstraintViolationError";
   }
 }
 

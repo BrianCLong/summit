@@ -14,19 +14,19 @@ The export workflow is a manual process that can be triggered from the GitHub Ac
 2.  Select the "Export Ops Evidence" workflow from the list of workflows.
 3.  Click the "Run workflow" dropdown.
 4.  Fill in the required inputs:
-    *   `run_id`: The ID of the workflow run that generated the evidence artifact.
-    *   `artifact_name`: The name of the artifact to export (defaults to `evidence-bundle`).
-    *   `destination_uri`: The S3 URI where the artifact should be exported (e.g., `s3://my-bucket/evidence/`). **Note:** This is a prefix; the artifact's filename will be appended to it.
-    *   `overwrite`: (Optional, default: `false`) If set to `true`, the workflow will overwrite an existing artifact at the destination. If `false`, the workflow will fail if the artifact already exists.
-    *   `checksum_verify`: (Optional, default: `true`) If set to `true`, the workflow will calculate and verify the artifact's SHA256 checksum before exporting. The checksum will be included in the export receipt.
+    - `run_id`: The ID of the workflow run that generated the evidence artifact.
+    - `artifact_name`: The name of the artifact to export (defaults to `evidence-bundle`).
+    - `destination_uri`: The S3 URI where the artifact should be exported (e.g., `s3://my-bucket/evidence/`). **Note:** This is a prefix; the artifact's filename will be appended to it.
+    - `overwrite`: (Optional, default: `false`) If set to `true`, the workflow will overwrite an existing artifact at the destination. If `false`, the workflow will fail if the artifact already exists.
+    - `checksum_verify`: (Optional, default: `true`) If set to `true`, the workflow will calculate and verify the artifact's SHA256 checksum before exporting. The checksum will be included in the export receipt.
 5.  Click "Run workflow".
 
 ## Required Environment Protections
 
 To ensure the security of the export process, the following protections are in place:
 
-*   **Protected Environment:** The workflow uses a protected environment named `ops-evidence-export`, which is configured with the necessary AWS credentials as secrets.
-*   **Access Control:** Only authorized users and teams can trigger the workflow and approve deployments to the protected environment.
+- **Protected Environment:** The workflow uses a protected environment named `ops-evidence-export`, which is configured with the necessary AWS credentials as secrets.
+- **Access Control:** Only authorized users and teams can trigger the workflow and approve deployments to the protected environment.
 
 ## How to Verify the Export
 

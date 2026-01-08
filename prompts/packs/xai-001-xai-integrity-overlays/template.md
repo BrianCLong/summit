@@ -85,53 +85,53 @@ Explain graph traversals and reasoning paths:
 
 ```typescript
 interface PathRationale {
-  query: string;  // Original Cypher query
+  query: string; // Original Cypher query
   resultEntity: Entity;
   reasoningPath: ReasoningStep[];
-  confidence: number;  // 0-1
+  confidence: number; // 0-1
   evidenceQuality: EvidenceQuality;
 }
 
 interface ReasoningStep {
   stepNumber: number;
   description: string;
-  cypher: string;  // Cypher fragment
+  cypher: string; // Cypher fragment
   intermediateResult: any;
   confidence: number;
 }
 
 interface EvidenceQuality {
-  completeness: number;  // % of expected evidence present
-  corroboration: number;  // % corroborated by independent sources
-  recency: number;  // Average age of evidence (days)
+  completeness: number; // % of expected evidence present
+  corroboration: number; // % corroborated by independent sources
+  recency: number; // Average age of evidence (days)
 }
 
 // Example: "Who is connected to Entity X?"
 const rationale: PathRationale = {
   query: "MATCH (x:Entity {id: 'e-123'})-[r]-(connected) RETURN connected",
-  resultEntity: { id: 'e-456', name: 'Connected Entity' },
+  resultEntity: { id: "e-456", name: "Connected Entity" },
   reasoningPath: [
     {
       stepNumber: 1,
       description: "Found direct relationship ASSOCIATED_WITH",
       cypher: "MATCH (x:Entity {id: 'e-123'})-[r:ASSOCIATED_WITH]-(connected)",
-      intermediateResult: { relationshipId: 'r-789' },
-      confidence: 0.85
+      intermediateResult: { relationshipId: "r-789" },
+      confidence: 0.85,
     },
     {
       stepNumber: 2,
       description: "Verified relationship via 2 independent sources",
       cypher: "MATCH (r:Relationship {id: 'r-789'})-[:DERIVED_FROM]-(source)",
-      intermediateResult: { sources: ['source-1', 'source-2'] },
-      confidence: 0.92
-    }
+      intermediateResult: { sources: ["source-1", "source-2"] },
+      confidence: 0.92,
+    },
   ],
-  confidence: 0.85 * 0.92,  // Combined confidence
+  confidence: 0.85 * 0.92, // Combined confidence
   evidenceQuality: {
-    completeness: 0.80,  // 80% of expected evidence present
-    corroboration: 1.0,  // Fully corroborated
-    recency: 15  // Average 15 days old
-  }
+    completeness: 0.8, // 80% of expected evidence present
+    corroboration: 1.0, // Fully corroborated
+    recency: 15, // Average 15 days old
+  },
 };
 ```
 
@@ -145,7 +145,7 @@ interface Counterfactual {
   originalConclusion: Conclusion;
   alteredAssumption: Assumption;
   alternativeConclusion: Conclusion;
-  likelihood: number;  // Probability this alternative is correct
+  likelihood: number; // Probability this alternative is correct
 }
 
 interface Assumption {
@@ -161,52 +161,50 @@ interface Conclusion {
 }
 
 // Example
-async function generateCounterfactuals(
-  analysis: Analysis
-): Promise<Counterfactual[]> {
+async function generateCounterfactuals(analysis: Analysis): Promise<Counterfactual[]> {
   const counterfactuals: Counterfactual[] = [];
 
   // Original: "Entity X is located in Country A"
   const original: Conclusion = {
     statement: "Entity X is located in Country A",
     confidence: 0.75,
-    supportingEvidence: ['source-1', 'source-2']
+    supportingEvidence: ["source-1", "source-2"],
   };
 
   // Counterfactual 1: What if source-1 is unreliable?
-  const cf1 = await recomputeWithout(analysis, 'source-1');
+  const cf1 = await recomputeWithout(analysis, "source-1");
   counterfactuals.push({
-    id: 'cf-001',
+    id: "cf-001",
     originalConclusion: original,
     alteredAssumption: {
-      type: 'source_reliability',
+      type: "source_reliability",
       description: "If source-1 is discarded due to credibility issues",
-      value: { excludedSources: ['source-1'] }
+      value: { excludedSources: ["source-1"] },
     },
     alternativeConclusion: {
       statement: "Entity X location uncertain",
-      confidence: 0.40,  // Lower confidence without source-1
-      supportingEvidence: ['source-2']
+      confidence: 0.4, // Lower confidence without source-1
+      supportingEvidence: ["source-2"],
     },
-    likelihood: 0.20  // 20% chance source-1 is unreliable
+    likelihood: 0.2, // 20% chance source-1 is unreliable
   });
 
   // Counterfactual 2: What if relationship is misclassified?
   const cf2 = await recomputeWithDifferentRelType(analysis);
   counterfactuals.push({
-    id: 'cf-002',
+    id: "cf-002",
     originalConclusion: original,
     alteredAssumption: {
-      type: 'relationship_type',
+      type: "relationship_type",
       description: "If relationship is 'PREVIOUSLY_LOCATED_IN' not 'LOCATED_IN'",
-      value: { relationshipType: 'PREVIOUSLY_LOCATED_IN' }
+      value: { relationshipType: "PREVIOUSLY_LOCATED_IN" },
     },
     alternativeConclusion: {
       statement: "Entity X was previously in Country A, current location unknown",
-      confidence: 0.60,
-      supportingEvidence: ['source-1', 'source-2']
+      confidence: 0.6,
+      supportingEvidence: ["source-1", "source-2"],
     },
-    likelihood: 0.15
+    likelihood: 0.15,
   });
 
   return counterfactuals;
@@ -220,52 +218,49 @@ Rank factors contributing to conclusion:
 ```typescript
 interface FeatureImportance {
   feature: string;
-  importance: number;  // 0-1, sum to 1.0
-  direction: 'positive' | 'negative';
+  importance: number; // 0-1, sum to 1.0
+  direction: "positive" | "negative";
   description: string;
 }
 
 // Example: "Why is Entity X classified as high-risk?"
 const featureImportances: FeatureImportance[] = [
   {
-    feature: 'connection_to_known_threats',
+    feature: "connection_to_known_threats",
     importance: 0.45,
-    direction: 'positive',
-    description: 'Entity X has direct relationships to 3 known threat actors'
+    direction: "positive",
+    description: "Entity X has direct relationships to 3 known threat actors",
   },
   {
-    feature: 'financial_transactions',
-    importance: 0.30,
-    direction: 'positive',
-    description: 'Suspicious transaction patterns flagged by ML model'
+    feature: "financial_transactions",
+    importance: 0.3,
+    direction: "positive",
+    description: "Suspicious transaction patterns flagged by ML model",
   },
   {
-    feature: 'geolocation_history',
+    feature: "geolocation_history",
     importance: 0.15,
-    direction: 'positive',
-    description: 'Recent travel to high-risk regions'
+    direction: "positive",
+    description: "Recent travel to high-risk regions",
   },
   {
-    feature: 'source_credibility',
-    importance: 0.10,
-    direction: 'negative',
-    description: 'Primary source has moderate credibility (70/100)'
-  }
+    feature: "source_credibility",
+    importance: 0.1,
+    direction: "negative",
+    description: "Primary source has moderate credibility (70/100)",
+  },
 ];
 
 // Use SHAP or LIME for ML models
-async function explainMLPrediction(
-  model: MLModel,
-  input: any
-): Promise<FeatureImportance[]> {
+async function explainMLPrediction(model: MLModel, input: any): Promise<FeatureImportance[]> {
   const explainer = new SHAPExplainer(model);
   const shapValues = await explainer.explain(input);
 
   return Object.entries(shapValues).map(([feature, value]) => ({
     feature,
     importance: Math.abs(value),
-    direction: value > 0 ? 'positive' : 'negative',
-    description: `Contribution: ${value > 0 ? '+' : ''}${value.toFixed(3)}`
+    direction: value > 0 ? "positive" : "negative",
+    description: `Contribution: ${value > 0 ? "+" : ""}${value.toFixed(3)}`,
   }));
 }
 ```
@@ -276,27 +271,25 @@ Warn analysts of limitations:
 
 ```typescript
 enum IntegrityFlag {
-  MISSING_EVIDENCE = 'missing_evidence',
-  CONTRADICTORY_EVIDENCE = 'contradictory_evidence',
-  LOW_CONFIDENCE = 'low_confidence',
-  SINGLE_SOURCE = 'single_source',
-  STALE_DATA = 'stale_data',
-  INCOMPLETE_PROVENANCE = 'incomplete_provenance',
-  UNVERIFIED_SOURCE = 'unverified_source'
+  MISSING_EVIDENCE = "missing_evidence",
+  CONTRADICTORY_EVIDENCE = "contradictory_evidence",
+  LOW_CONFIDENCE = "low_confidence",
+  SINGLE_SOURCE = "single_source",
+  STALE_DATA = "stale_data",
+  INCOMPLETE_PROVENANCE = "incomplete_provenance",
+  UNVERIFIED_SOURCE = "unverified_source",
 }
 
 interface IntegrityWarning {
   flag: IntegrityFlag;
-  severity: 'low' | 'medium' | 'high';
+  severity: "low" | "medium" | "high";
   message: string;
   affectedEntities: string[];
   recommendation: string;
 }
 
 // Detect integrity issues
-async function detectIntegrityIssues(
-  result: AnalyticalResult
-): Promise<IntegrityWarning[]> {
+async function detectIntegrityIssues(result: AnalyticalResult): Promise<IntegrityWarning[]> {
   const warnings: IntegrityWarning[] = [];
 
   // Check for missing evidence
@@ -305,10 +298,10 @@ async function detectIntegrityIssues(
   if (actualEvidence.length < expectedEvidence.length * 0.5) {
     warnings.push({
       flag: IntegrityFlag.MISSING_EVIDENCE,
-      severity: 'high',
+      severity: "high",
       message: `Only ${actualEvidence.length}/${expectedEvidence.length} expected evidence present`,
-      affectedEntities: result.entities.map(e => e.id),
-      recommendation: 'Seek additional sources before finalizing conclusion'
+      affectedEntities: result.entities.map((e) => e.id),
+      recommendation: "Seek additional sources before finalizing conclusion",
     });
   }
 
@@ -317,10 +310,10 @@ async function detectIntegrityIssues(
   if (contradictions.length > 0) {
     warnings.push({
       flag: IntegrityFlag.CONTRADICTORY_EVIDENCE,
-      severity: 'high',
+      severity: "high",
       message: `Found ${contradictions.length} contradictory statements`,
-      affectedEntities: contradictions.map(c => c.entityId),
-      recommendation: 'Reconcile contradictions or note in caveats'
+      affectedEntities: contradictions.map((c) => c.entityId),
+      recommendation: "Reconcile contradictions or note in caveats",
     });
   }
 
@@ -328,22 +321,22 @@ async function detectIntegrityIssues(
   if (result.confidence < 0.5) {
     warnings.push({
       flag: IntegrityFlag.LOW_CONFIDENCE,
-      severity: 'medium',
+      severity: "medium",
       message: `Conclusion has low confidence (${result.confidence.toFixed(2)})`,
-      affectedEntities: result.entities.map(e => e.id),
-      recommendation: 'Consider hedging language or gathering more evidence'
+      affectedEntities: result.entities.map((e) => e.id),
+      recommendation: "Consider hedging language or gathering more evidence",
     });
   }
 
   // Check for single-source reliance
-  const sources = new Set(result.supportingEvidence.map(e => e.sourceId));
+  const sources = new Set(result.supportingEvidence.map((e) => e.sourceId));
   if (sources.size === 1) {
     warnings.push({
       flag: IntegrityFlag.SINGLE_SOURCE,
-      severity: 'high',
-      message: 'Conclusion relies on single source (no corroboration)',
-      affectedEntities: result.entities.map(e => e.id),
-      recommendation: 'Seek corroborating sources'
+      severity: "high",
+      message: "Conclusion relies on single source (no corroboration)",
+      affectedEntities: result.entities.map((e) => e.id),
+      recommendation: "Seek corroborating sources",
     });
   }
 
@@ -536,6 +529,7 @@ FOR EACH ROW EXECUTE FUNCTION prevent_dissent_modification();
 ### SHAP Integration
 
 For ML model explanations:
+
 ```bash
 pip install shap
 ```

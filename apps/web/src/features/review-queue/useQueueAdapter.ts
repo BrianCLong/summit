@@ -66,7 +66,8 @@ const baseMockItems: QueueItem[] = [
     createdAt: new Date(Date.now() - 1000 * 60 * 140).toISOString(),
     tags: ['policy', 'export'],
     preview: {
-      policyWarning: 'Rule EU-482 triggered: cross-border movement of controlled intel.',
+      policyWarning:
+        'Rule EU-482 triggered: cross-border movement of controlled intel.',
     },
   },
   {
@@ -81,7 +82,8 @@ const baseMockItems: QueueItem[] = [
     createdAt: new Date(Date.now() - 1000 * 60 * 160).toISOString(),
     lastDecisionAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
     preview: {
-      snippet: 'Fingerprint fpr-9921 confirmed benign after 24h cooling period.',
+      snippet:
+        'Fingerprint fpr-9921 confirmed benign after 24h cooling period.',
     },
   },
 ]
@@ -128,7 +130,9 @@ export function useQueueAdapter(): QueueAdapter {
     }
   })
 
-  const [decisions, setDecisions] = useState<QueueDecision[]>(() => hydrateDecisions())
+  const [decisions, setDecisions] = useState<QueueDecision[]>(() =>
+    hydrateDecisions()
+  )
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -137,7 +141,10 @@ export function useQueueAdapter(): QueueAdapter {
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-    window.localStorage.setItem(STORAGE_KEYS.decisions, JSON.stringify(decisions))
+    window.localStorage.setItem(
+      STORAGE_KEYS.decisions,
+      JSON.stringify(decisions)
+    )
   }, [decisions])
 
   const list = useCallback(

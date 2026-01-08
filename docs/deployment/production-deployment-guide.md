@@ -109,12 +109,12 @@ kind: ClusterRole
 metadata:
   name: intelgraph-core-role
 rules:
-  - apiGroups: ['']
-    resources: ['configmaps', 'secrets', 'services']
-    verbs: ['get', 'list', 'watch']
-  - apiGroups: ['apps']
-    resources: ['deployments', 'replicasets']
-    verbs: ['get', 'list', 'watch', 'patch']
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets", "services"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets"]
+    verbs: ["get", "list", "watch", "patch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -162,15 +162,15 @@ spec:
                   name: neo4j-auth
                   key: auth
             - name: NEO4J_ACCEPT_LICENSE_AGREEMENT
-              value: 'yes'
+              value: "yes"
             - name: NEO4J_dbms_mode
-              value: 'CORE'
+              value: "CORE"
             - name: NEO4J_causal__clustering_initial__discovery__members
-              value: 'neo4j-0.neo4j.intelgraph-core.svc.cluster.local:5000,neo4j-1.neo4j.intelgraph-core.svc.cluster.local:5000,neo4j-2.neo4j.intelgraph-core.svc.cluster.local:5000'
+              value: "neo4j-0.neo4j.intelgraph-core.svc.cluster.local:5000,neo4j-1.neo4j.intelgraph-core.svc.cluster.local:5000,neo4j-2.neo4j.intelgraph-core.svc.cluster.local:5000"
             - name: NEO4J_dbms_connector_bolt_advertised__address
-              value: '$(hostname -f):7687'
+              value: "$(hostname -f):7687"
             - name: NEO4J_dbms_connector_http_advertised__address
-              value: '$(hostname -f):7474'
+              value: "$(hostname -f):7474"
           ports:
             - containerPort: 7474
               name: http
@@ -185,16 +185,16 @@ spec:
               mountPath: /logs
           resources:
             requests:
-              memory: '8Gi'
-              cpu: '2000m'
+              memory: "8Gi"
+              cpu: "2000m"
             limits:
-              memory: '16Gi'
-              cpu: '4000m'
+              memory: "16Gi"
+              cpu: "4000m"
   volumeClaimTemplates:
     - metadata:
         name: neo4j-data
       spec:
-        accessModes: ['ReadWriteOnce']
+        accessModes: ["ReadWriteOnce"]
         resources:
           requests:
             storage: 100Gi
@@ -202,7 +202,7 @@ spec:
     - metadata:
         name: neo4j-logs
       spec:
-        accessModes: ['ReadWriteOnce']
+        accessModes: ["ReadWriteOnce"]
         resources:
           requests:
             storage: 10Gi
@@ -224,38 +224,38 @@ spec:
 
   postgresql:
     parameters:
-      max_connections: '400'
-      shared_buffers: '4GB'
-      effective_cache_size: '12GB'
-      maintenance_work_mem: '1GB'
-      checkpoint_completion_target: '0.7'
-      wal_buffers: '16MB'
-      default_statistics_target: '100'
-      random_page_cost: '1.1'
-      effective_io_concurrency: '200'
-      work_mem: '10MB'
-      min_wal_size: '2GB'
-      max_wal_size: '8GB'
+      max_connections: "400"
+      shared_buffers: "4GB"
+      effective_cache_size: "12GB"
+      maintenance_work_mem: "1GB"
+      checkpoint_completion_target: "0.7"
+      wal_buffers: "16MB"
+      default_statistics_target: "100"
+      random_page_cost: "1.1"
+      effective_io_concurrency: "200"
+      work_mem: "10MB"
+      min_wal_size: "2GB"
+      max_wal_size: "8GB"
 
   monitoring:
     enabled: true
 
   resources:
     requests:
-      memory: '8Gi'
-      cpu: '2000m'
+      memory: "8Gi"
+      cpu: "2000m"
     limits:
-      memory: '16Gi'
-      cpu: '4000m'
+      memory: "16Gi"
+      cpu: "4000m"
 
   storage:
-    size: '200Gi'
-    storageClass: 'fast-ssd'
+    size: "200Gi"
+    storageClass: "fast-ssd"
 
   backup:
-    retentionPolicy: '30d'
+    retentionPolicy: "30d"
     barmanObjectStore:
-      destinationPath: 's3://intelgraph-backups/postgres'
+      destinationPath: "s3://intelgraph-backups/postgres"
       s3Credentials:
         accessKeyId:
           name: backup-credentials
@@ -264,9 +264,9 @@ spec:
           name: backup-credentials
           key: SECRET_ACCESS_KEY
       wal:
-        retention: '5d'
+        retention: "5d"
       data:
-        retention: '30d'
+        retention: "30d"
 ```
 
 ### Redis Deployment
@@ -307,11 +307,11 @@ spec:
               mountPath: /data
           resources:
             requests:
-              memory: '4Gi'
-              cpu: '1000m'
+              memory: "4Gi"
+              cpu: "1000m"
             limits:
-              memory: '8Gi'
-              cpu: '2000m'
+              memory: "8Gi"
+              cpu: "2000m"
           livenessProbe:
             tcpSocket:
               port: 6379
@@ -332,7 +332,7 @@ spec:
     - metadata:
         name: redis-data
       spec:
-        accessModes: ['ReadWriteOnce']
+        accessModes: ["ReadWriteOnce"]
         resources:
           requests:
             storage: 50Gi
@@ -365,9 +365,9 @@ spec:
       labels:
         app: intelgraph-core
       annotations:
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: '4000'
-        prometheus.io/path: '/metrics'
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4000"
+        prometheus.io/path: "/metrics"
     spec:
       serviceAccountName: intelgraph-core
       containers:
@@ -380,9 +380,9 @@ spec:
               name: graphql
           env:
             - name: NODE_ENV
-              value: 'production'
+              value: "production"
             - name: NEO4J_URI
-              value: 'neo4j://neo4j:7687'
+              value: "neo4j://neo4j:7687"
             - name: NEO4J_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -399,7 +399,7 @@ spec:
                   name: postgres-credentials
                   key: uri
             - name: REDIS_URL
-              value: 'redis://redis:6379'
+              value: "redis://redis:6379"
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
@@ -407,11 +407,11 @@ spec:
                   key: secret
           resources:
             requests:
-              memory: '2Gi'
-              cpu: '500m'
+              memory: "2Gi"
+              cpu: "500m"
             limits:
-              memory: '4Gi'
-              cpu: '1000m'
+              memory: "4Gi"
+              cpu: "1000m"
           livenessProbe:
             httpGet:
               path: /health
@@ -475,8 +475,8 @@ spec:
       labels:
         app: maestro-orchestrator
       annotations:
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: '4001'
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4001"
     spec:
       containers:
         - name: maestro-orchestrator
@@ -486,9 +486,9 @@ spec:
               name: http
           env:
             - name: NODE_ENV
-              value: 'production'
+              value: "production"
             - name: REDIS_URL
-              value: 'redis://redis.intelgraph-core:6379'
+              value: "redis://redis.intelgraph-core:6379"
             - name: POSTGRESQL_URL
               valueFrom:
                 secretKeyRef:
@@ -511,11 +511,11 @@ spec:
                   key: google
           resources:
             requests:
-              memory: '1Gi'
-              cpu: '500m'
+              memory: "1Gi"
+              cpu: "500m"
             limits:
-              memory: '2Gi'
-              cpu: '1000m'
+              memory: "2Gi"
+              cpu: "1000m"
           livenessProbe:
             httpGet:
               path: /v1/health
@@ -663,15 +663,15 @@ metadata:
   name: intelgraph-ingress
   namespace: intelgraph-core
   annotations:
-    kubernetes.io/ingress.class: 'nginx'
-    cert-manager.io/cluster-issuer: 'letsencrypt-prod'
-    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
-    nginx.ingress.kubernetes.io/use-regex: 'true'
-    nginx.ingress.kubernetes.io/cors-allow-origin: '*'
-    nginx.ingress.kubernetes.io/cors-allow-methods: 'GET, PUT, POST, DELETE, OPTIONS'
-    nginx.ingress.kubernetes.io/cors-allow-headers: 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization'
-    nginx.ingress.kubernetes.io/rate-limit: '1000'
-    nginx.ingress.kubernetes.io/rate-limit-window: '1m'
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, PUT, POST, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
+    nginx.ingress.kubernetes.io/rate-limit: "1000"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
 spec:
   tls:
     - hosts:
@@ -865,9 +865,9 @@ spec:
           image: intelgraph/dr-tools:latest
           env:
             - name: BACKUP_DATE
-              value: '20240115_120000'
+              value: "20240115_120000"
             - name: S3_BUCKET
-              value: 's3://intelgraph-production-backups'
+              value: "s3://intelgraph-production-backups"
           command:
             - /bin/bash
             - -c
@@ -966,29 +966,29 @@ metadata:
   namespace: intelgraph-core
 data:
   # Node.js optimization
-  NODE_OPTIONS: '--max-old-space-size=4096 --max-semi-space-size=256'
-  UV_THREADPOOL_SIZE: '16'
+  NODE_OPTIONS: "--max-old-space-size=4096 --max-semi-space-size=256"
+  UV_THREADPOOL_SIZE: "16"
 
   # Database connection pooling
-  DB_POOL_MIN: '10'
-  DB_POOL_MAX: '50'
-  DB_POOL_IDLE_TIMEOUT: '30000'
+  DB_POOL_MIN: "10"
+  DB_POOL_MAX: "50"
+  DB_POOL_IDLE_TIMEOUT: "30000"
 
   # Redis configuration
-  REDIS_POOL_SIZE: '20'
-  REDIS_RETRY_DELAY_ON_FAILURE: '100'
-  REDIS_MAX_RETRY_DELAY_ON_FAILURE: '1000'
+  REDIS_POOL_SIZE: "20"
+  REDIS_RETRY_DELAY_ON_FAILURE: "100"
+  REDIS_MAX_RETRY_DELAY_ON_FAILURE: "1000"
 
   # HTTP/GraphQL optimization
-  HTTP_KEEP_ALIVE_TIMEOUT: '65000'
-  HTTP_HEADERS_TIMEOUT: '66000'
-  GRAPHQL_INTROSPECTION: 'false'
-  GRAPHQL_PLAYGROUND: 'false'
+  HTTP_KEEP_ALIVE_TIMEOUT: "65000"
+  HTTP_HEADERS_TIMEOUT: "66000"
+  GRAPHQL_INTROSPECTION: "false"
+  GRAPHQL_PLAYGROUND: "false"
 
   # Caching configuration
-  CACHE_TTL_SHORT: '300' # 5 minutes
-  CACHE_TTL_MEDIUM: '1800' # 30 minutes
-  CACHE_TTL_LONG: '3600' # 1 hour
+  CACHE_TTL_SHORT: "300" # 5 minutes
+  CACHE_TTL_MEDIUM: "1800" # 30 minutes
+  CACHE_TTL_LONG: "3600" # 1 hour
 ```
 
 ## Scaling Configuration
@@ -1028,7 +1028,7 @@ spec:
           name: http_requests_per_second
         target:
           type: AverageValue
-          averageValue: '1000'
+          averageValue: "1000"
   behavior:
     scaleUp:
       stabilizationWindowSeconds: 60
@@ -1085,7 +1085,7 @@ spec:
     kind: Deployment
     name: intelgraph-core
   updatePolicy:
-    updateMode: 'Auto'
+    updateMode: "Auto"
   resourcePolicy:
     containerPolicies:
       - containerName: intelgraph-core
@@ -1095,7 +1095,7 @@ spec:
         maxAllowed:
           cpu: 2000m
           memory: 8Gi
-        controlledResources: ['cpu', 'memory']
+        controlledResources: ["cpu", "memory"]
 ```
 
 ## Health Checks and Validation

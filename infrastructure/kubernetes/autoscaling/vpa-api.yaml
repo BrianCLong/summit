@@ -12,15 +12,15 @@ spec:
     updateMode: "Auto" # Can be "Off", "Initial", "Recreate", or "Auto"
   resourcePolicy:
     containerPolicies:
-    - containerName: api
-      minAllowed:
-        cpu: 100m
-        memory: 256Mi
-      maxAllowed:
-        cpu: 8
-        memory: 16Gi
-      controlledResources: ["cpu", "memory"]
-      mode: Auto
+      - containerName: api
+        minAllowed:
+          cpu: 100m
+          memory: 256Mi
+        maxAllowed:
+          cpu: 8
+          memory: 16Gi
+        controlledResources: ["cpu", "memory"]
+        mode: Auto
 ---
 apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
@@ -36,15 +36,15 @@ spec:
     updateMode: "Auto"
   resourcePolicy:
     containerPolicies:
-    - containerName: worker
-      minAllowed:
-        cpu: 500m
-        memory: 512Mi
-      maxAllowed:
-        cpu: 16
-        memory: 32Gi
-      controlledResources: ["cpu", "memory"]
-      mode: Auto
+      - containerName: worker
+        minAllowed:
+          cpu: 500m
+          memory: 512Mi
+        maxAllowed:
+          cpu: 16
+          memory: 32Gi
+        controlledResources: ["cpu", "memory"]
+        mode: Auto
 ---
 apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
@@ -60,11 +60,11 @@ spec:
     updateMode: "Initial" # Only set on creation, not update
   resourcePolicy:
     containerPolicies:
-    - containerName: postgres
-      minAllowed:
-        cpu: 2
-        memory: 4Gi
-      maxAllowed:
-        cpu: 32
-        memory: 128Gi
-      controlledResources: ["cpu", "memory"]
+      - containerName: postgres
+        minAllowed:
+          cpu: 2
+          memory: 4Gi
+        maxAllowed:
+          cpu: 32
+          memory: 128Gi
+        controlledResources: ["cpu", "memory"]

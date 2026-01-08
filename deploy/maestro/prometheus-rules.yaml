@@ -18,7 +18,7 @@ spec:
             severity: critical
             service: maestro
           annotations:
-            summary: 'Maestro API 5xx error rate above 1%'
+            summary: "Maestro API 5xx error rate above 1%"
             description: |
               5xx rate exceeded 1% over the last 5 minutes.
               value={{ $value }}
@@ -34,7 +34,7 @@ spec:
             severity: warning
             service: maestro
           annotations:
-            summary: 'Maestro API p95 latency above 1.5s'
+            summary: "Maestro API p95 latency above 1.5s"
             description: |
               p95 latency over the last 10 minutes is above SLO (1.5s).
               value={{ $value }}

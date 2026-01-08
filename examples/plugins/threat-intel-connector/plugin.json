@@ -12,11 +12,7 @@
   "category": "integration",
   "main": "./dist/index.js",
   "engineVersion": "^1.0.0",
-  "permissions": [
-    "network:access",
-    "write:data",
-    "read:data"
-  ],
+  "permissions": ["network:access", "write:data", "read:data"],
   "resources": {
     "maxMemoryMB": 384,
     "maxCpuPercent": 40,

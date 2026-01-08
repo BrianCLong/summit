@@ -4,9 +4,9 @@
  * Fuses satellite imagery with vector features for enriched geospatial intelligence
  */
 
-import { EventEmitter } from 'events';
-import * as turf from '@turf/turf';
-import { Feature, FeatureCollection, Geometry, Polygon, MultiPolygon, Point } from 'geojson';
+import { EventEmitter } from "events";
+import * as turf from "@turf/turf";
+import { Feature, FeatureCollection, Geometry, Polygon, MultiPolygon, Point } from "geojson";
 import {
   SatelliteScene,
   RasterTile,
@@ -18,8 +18,8 @@ import {
   TileStatistics,
   BoundingBox,
   GeoPoint,
-} from '../types/satellite.js';
-import { IntelFeature, IntelFeatureCollection } from '../types/geospatial.js';
+} from "../types/satellite.js";
+import { IntelFeature, IntelFeatureCollection } from "../types/geospatial.js";
 
 export interface FusionEvents {
   progress: [number, string];
@@ -77,32 +77,36 @@ export class RasterVectorFusion extends EventEmitter {
     const startTime = Date.now();
     const fusionId = `fusion_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    this.emit('progress', 0, 'Starting fusion operation');
+    this.emit("progress", 0, "Starting fusion operation");
 
     let outputFeatures: ExtractedFeature[] = [];
     const zonalStats: Record<string, TileStatistics> = {};
 
     try {
       switch (this.config.fusionMethod) {
-        case 'overlay':
+        case "overlay":
           outputFeatures = await this.overlayFusion(scene, vectorFeatures, rasterData);
           break;
-        case 'zonal_stats':
-          const { features, stats } = await this.zonalStatsFusion(scene, vectorFeatures, rasterData);
+        case "zonal_stats":
+          const { features, stats } = await this.zonalStatsFusion(
+            scene,
+            vectorFeatures,
+            rasterData
+          );
           outputFeatures = features;
           Object.assign(zonalStats, stats);
           break;
-        case 'sample_extraction':
+        case "sample_extraction":
           outputFeatures = await this.sampleExtractionFusion(scene, vectorFeatures, rasterData);
           break;
-        case 'segmentation':
+        case "segmentation":
           outputFeatures = await this.segmentationFusion(scene, vectorFeatures, rasterData);
           break;
         default:
           throw new Error(`Unknown fusion method: ${this.config.fusionMethod}`);
       }
 
-      this.emit('progress', 90, 'Computing statistics');
+      this.emit("progress", 90, "Computing statistics");
 
       const statistics: FusionStatistics = {
         inputFeatureCount: vectorFeatures.features.length,
@@ -113,7 +117,7 @@ export class RasterVectorFusion extends EventEmitter {
         zonalStats,
       };
 
-      this.emit('progress', 100, 'Fusion complete');
+      this.emit("progress", 100, "Fusion complete");
 
       const result: FusionResult = {
         id: fusionId,
@@ -125,10 +129,10 @@ export class RasterVectorFusion extends EventEmitter {
         timestamp: new Date(),
       };
 
-      this.emit('complete', result);
+      this.emit("complete", result);
       return result;
     } catch (error) {
-      this.emit('error', error as Error);
+      this.emit("error", error as Error);
       throw error;
     }
   }
@@ -146,7 +150,11 @@ export class RasterVectorFusion extends EventEmitter {
 
     for (let i = 0; i < vectorFeatures.features.length; i++) {
       const feature = vectorFeatures.features[i];
-      this.emit('progress', Math.floor((i / totalFeatures) * 80), `Processing feature ${i + 1}/${totalFeatures}`);
+      this.emit(
+        "progress",
+        Math.floor((i / totalFeatures) * 80),
+        `Processing feature ${i + 1}/${totalFeatures}`
+      );
 
       const spectralSignature: number[] = [];
       const bandValues: Record<string, number> = {};
@@ -168,7 +176,7 @@ export class RasterVectorFusion extends EventEmitter {
         properties: {
           ...feature.properties,
           sceneId: scene.id,
-          extractionMethod: 'overlay',
+          extractionMethod: "overlay",
           detectionConfidence: 1.0,
           spectralSignature,
           ...bandValues,
@@ -176,7 +184,7 @@ export class RasterVectorFusion extends EventEmitter {
       };
 
       outputFeatures.push(extractedFeature);
-      this.emit('feature', extractedFeature);
+      this.emit("feature", extractedFeature);
     }
 
     return outputFeatures;
@@ -196,10 +204,14 @@ export class RasterVectorFusion extends EventEmitter {
 
     for (let i = 0; i < vectorFeatures.features.length; i++) {
       const feature = vectorFeatures.features[i];
-      this.emit('progress', Math.floor((i / totalFeatures) * 80), `Computing zonal stats ${i + 1}/${totalFeatures}`);
+      this.emit(
+        "progress",
+        Math.floor((i / totalFeatures) * 80),
+        `Computing zonal stats ${i + 1}/${totalFeatures}`
+      );
 
       // Only process polygon features
-      if (feature.geometry.type !== 'Polygon' && feature.geometry.type !== 'MultiPolygon') {
+      if (feature.geometry.type !== "Polygon" && feature.geometry.type !== "MultiPolygon") {
         continue;
       }
 
@@ -210,7 +222,11 @@ export class RasterVectorFusion extends EventEmitter {
         const tile = rasterData.get(band);
         if (!tile) continue;
 
-        const stats = this.computeZonalStats(tile, feature.geometry as Polygon | MultiPolygon, band);
+        const stats = this.computeZonalStats(
+          tile,
+          feature.geometry as Polygon | MultiPolygon,
+          band
+        );
         featureStats[band] = stats;
         spectralSignature.push(stats.mean);
 
@@ -230,7 +246,7 @@ export class RasterVectorFusion extends EventEmitter {
         properties: {
           ...feature.properties,
           sceneId: scene.id,
-          extractionMethod: 'zonal_stats',
+          extractionMethod: "zonal_stats",
           detectionConfidence: 1.0,
           spectralSignature,
           zonalStats: featureStats,
@@ -238,7 +254,7 @@ export class RasterVectorFusion extends EventEmitter {
       };
 
       outputFeatures.push(extractedFeature);
-      this.emit('feature', extractedFeature);
+      this.emit("feature", extractedFeature);
     }
 
     return { features: outputFeatures, stats: allStats };
@@ -257,7 +273,11 @@ export class RasterVectorFusion extends EventEmitter {
 
     for (let i = 0; i < vectorFeatures.features.length; i++) {
       const feature = vectorFeatures.features[i];
-      this.emit('progress', Math.floor((i / totalFeatures) * 80), `Extracting samples ${i + 1}/${totalFeatures}`);
+      this.emit(
+        "progress",
+        Math.floor((i / totalFeatures) * 80),
+        `Extracting samples ${i + 1}/${totalFeatures}`
+      );
 
       // Get sample points based on geometry type
       const samplePoints = this.getSamplePoints(feature);
@@ -287,14 +307,17 @@ export class RasterVectorFusion extends EventEmitter {
       }
 
       // Aggregate samples for feature
-      const spectralSignature = this.aggregateSamples(samples, this.config.aggregationMethod || 'mean');
+      const spectralSignature = this.aggregateSamples(
+        samples,
+        this.config.aggregationMethod || "mean"
+      );
 
       const extractedFeature: ExtractedFeature = {
         ...feature,
         properties: {
           ...feature.properties,
           sceneId: scene.id,
-          extractionMethod: 'sample_extraction',
+          extractionMethod: "sample_extraction",
           detectionConfidence: samples.length > 0 ? 1.0 : 0.0,
           spectralSignature,
           sampleCount: samples.length,
@@ -302,7 +325,7 @@ export class RasterVectorFusion extends EventEmitter {
       };
 
       outputFeatures.push(extractedFeature);
-      this.emit('feature', extractedFeature);
+      this.emit("feature", extractedFeature);
     }
 
     return outputFeatures;
@@ -321,12 +344,18 @@ export class RasterVectorFusion extends EventEmitter {
 
     for (let i = 0; i < vectorFeatures.features.length; i++) {
       const feature = vectorFeatures.features[i];
-      this.emit('progress', Math.floor((i / totalFeatures) * 80), `Segmenting ${i + 1}/${totalFeatures}`);
+      this.emit(
+        "progress",
+        Math.floor((i / totalFeatures) * 80),
+        `Segmenting ${i + 1}/${totalFeatures}`
+      );
 
       // Buffer feature if configured
       let processingGeometry = feature.geometry;
       if (this.config.bufferMeters && this.config.bufferMeters > 0) {
-        const buffered = turf.buffer(feature as Feature, this.config.bufferMeters, { units: 'meters' });
+        const buffered = turf.buffer(feature as Feature, this.config.bufferMeters, {
+          units: "meters",
+        });
         if (buffered) {
           processingGeometry = buffered.geometry;
         }
@@ -340,8 +369,12 @@ export class RasterVectorFusion extends EventEmitter {
         const tile = rasterData.get(band);
         if (!tile) continue;
 
-        if (processingGeometry.type === 'Polygon' || processingGeometry.type === 'MultiPolygon') {
-          const stats = this.computeZonalStats(tile, processingGeometry as Polygon | MultiPolygon, band);
+        if (processingGeometry.type === "Polygon" || processingGeometry.type === "MultiPolygon") {
+          const stats = this.computeZonalStats(
+            tile,
+            processingGeometry as Polygon | MultiPolygon,
+            band
+          );
           segmentStats[`${band}_mean`] = stats.mean;
           segmentStats[`${band}_stddev`] = stats.stdDev;
           segmentStats[`${band}_min`] = stats.min;
@@ -358,7 +391,7 @@ export class RasterVectorFusion extends EventEmitter {
         properties: {
           ...feature.properties,
           sceneId: scene.id,
-          extractionMethod: 'segmentation',
+          extractionMethod: "segmentation",
           detectionConfidence: homogeneity,
           spectralSignature,
           segmentStats,
@@ -367,7 +400,7 @@ export class RasterVectorFusion extends EventEmitter {
       };
 
       outputFeatures.push(extractedFeature);
-      this.emit('feature', extractedFeature);
+      this.emit("feature", extractedFeature);
     }
 
     return outputFeatures;
@@ -435,10 +468,30 @@ export class RasterVectorFusion extends EventEmitter {
     const geomBbox = turf.bbox(geometry);
 
     // Iterate over pixels within geometry bounds
-    const xMin = Math.max(0, Math.floor(((geomBbox[0] - tile.bbox.minLon) / (tile.bbox.maxLon - tile.bbox.minLon)) * tile.width));
-    const xMax = Math.min(tile.width - 1, Math.ceil(((geomBbox[2] - tile.bbox.minLon) / (tile.bbox.maxLon - tile.bbox.minLon)) * tile.width));
-    const yMin = Math.max(0, Math.floor((1 - (geomBbox[3] - tile.bbox.minLat) / (tile.bbox.maxLat - tile.bbox.minLat)) * tile.height));
-    const yMax = Math.min(tile.height - 1, Math.ceil((1 - (geomBbox[1] - tile.bbox.minLat) / (tile.bbox.maxLat - tile.bbox.minLat)) * tile.height));
+    const xMin = Math.max(
+      0,
+      Math.floor(
+        ((geomBbox[0] - tile.bbox.minLon) / (tile.bbox.maxLon - tile.bbox.minLon)) * tile.width
+      )
+    );
+    const xMax = Math.min(
+      tile.width - 1,
+      Math.ceil(
+        ((geomBbox[2] - tile.bbox.minLon) / (tile.bbox.maxLon - tile.bbox.minLon)) * tile.width
+      )
+    );
+    const yMin = Math.max(
+      0,
+      Math.floor(
+        (1 - (geomBbox[3] - tile.bbox.minLat) / (tile.bbox.maxLat - tile.bbox.minLat)) * tile.height
+      )
+    );
+    const yMax = Math.min(
+      tile.height - 1,
+      Math.ceil(
+        (1 - (geomBbox[1] - tile.bbox.minLat) / (tile.bbox.maxLat - tile.bbox.minLat)) * tile.height
+      )
+    );
 
     for (let y = yMin; y <= yMax; y++) {
       for (let x = xMin; x <= xMax; x++) {
@@ -461,7 +514,7 @@ export class RasterVectorFusion extends EventEmitter {
 
     if (values.length === 0) {
       return {
-        featureId: '',
+        featureId: "",
         band,
         count: 0,
         min: 0,
@@ -484,12 +537,13 @@ export class RasterVectorFusion extends EventEmitter {
 
     // Compute median
     const sorted = [...values].sort((a, b) => a - b);
-    const median = sorted.length % 2 === 0
-      ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
-      : sorted[Math.floor(sorted.length / 2)];
+    const median =
+      sorted.length % 2 === 0
+        ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
+        : sorted[Math.floor(sorted.length / 2)];
 
     return {
-      featureId: '',
+      featureId: "",
       band,
       count: values.length,
       min,
@@ -508,32 +562,32 @@ export class RasterVectorFusion extends EventEmitter {
     const points: GeoPoint[] = [];
 
     switch (feature.geometry.type) {
-      case 'Point':
+      case "Point":
         points.push({
           longitude: feature.geometry.coordinates[0],
           latitude: feature.geometry.coordinates[1],
         });
         break;
-      case 'MultiPoint':
+      case "MultiPoint":
         for (const coord of feature.geometry.coordinates) {
           points.push({ longitude: coord[0], latitude: coord[1] });
         }
         break;
-      case 'LineString':
+      case "LineString":
         // Sample along line
         const line = turf.lineString(feature.geometry.coordinates);
-        const length = turf.length(line, { units: 'meters' });
+        const length = turf.length(line, { units: "meters" });
         const sampleInterval = Math.max(10, length / 100); // At least 10m or 100 samples
         for (let d = 0; d <= length; d += sampleInterval) {
-          const point = turf.along(line, d, { units: 'meters' });
+          const point = turf.along(line, d, { units: "meters" });
           points.push({
             longitude: point.geometry.coordinates[0],
             latitude: point.geometry.coordinates[1],
           });
         }
         break;
-      case 'Polygon':
-      case 'MultiPolygon':
+      case "Polygon":
+      case "MultiPolygon":
         // Use centroid and grid sampling
         const centroid = turf.centroid(feature as Feature);
         points.push({
@@ -543,12 +597,9 @@ export class RasterVectorFusion extends EventEmitter {
 
         // Add points on regular grid within polygon
         const bbox = turf.bbox(feature as Feature);
-        const cellSize = Math.max(
-          (bbox[2] - bbox[0]) / 10,
-          (bbox[3] - bbox[1]) / 10
-        );
+        const cellSize = Math.max((bbox[2] - bbox[0]) / 10, (bbox[3] - bbox[1]) / 10);
 
-        const grid = turf.pointGrid(bbox, cellSize, { units: 'degrees' });
+        const grid = turf.pointGrid(bbox, cellSize, { units: "degrees" });
         for (const gridPoint of grid.features) {
           if (turf.booleanPointInPolygon(gridPoint, feature as Feature)) {
             points.push({
@@ -566,19 +617,14 @@ export class RasterVectorFusion extends EventEmitter {
   /**
    * Aggregate multiple samples using specified method
    */
-  private aggregateSamples(
-    samples: RasterSample[],
-    method: string
-  ): number[] {
+  private aggregateSamples(samples: RasterSample[], method: string): number[] {
     if (samples.length === 0) return [];
 
     const bands = Object.keys(samples[0].values) as SpectralBand[];
     const result: number[] = [];
 
     for (const band of bands) {
-      const values = samples
-        .map((s) => s.values[band])
-        .filter((v) => v !== undefined);
+      const values = samples.map((s) => s.values[band]).filter((v) => v !== undefined);
 
       if (values.length === 0) {
         result.push(0);
@@ -587,22 +633,23 @@ export class RasterVectorFusion extends EventEmitter {
 
       let aggregated: number;
       switch (method) {
-        case 'mean':
+        case "mean":
           aggregated = values.reduce((a, b) => a + b, 0) / values.length;
           break;
-        case 'median':
+        case "median":
           const sorted = [...values].sort((a, b) => a - b);
-          aggregated = sorted.length % 2 === 0
-            ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
-            : sorted[Math.floor(sorted.length / 2)];
+          aggregated =
+            sorted.length % 2 === 0
+              ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
+              : sorted[Math.floor(sorted.length / 2)];
           break;
-        case 'max':
+        case "max":
           aggregated = Math.max(...values);
           break;
-        case 'min':
+        case "min":
           aggregated = Math.min(...values);
           break;
-        case 'sum':
+        case "sum":
           aggregated = values.reduce((a, b) => a + b, 0);
           break;
         default:
@@ -618,7 +665,7 @@ export class RasterVectorFusion extends EventEmitter {
    * Compute segment homogeneity from statistics
    */
   private computeSegmentHomogeneity(stats: Record<string, number>): number {
-    const stddevKeys = Object.keys(stats).filter((k) => k.endsWith('_stddev'));
+    const stddevKeys = Object.keys(stats).filter((k) => k.endsWith("_stddev"));
     if (stddevKeys.length === 0) return 1.0;
 
     // Lower stddev = higher homogeneity
@@ -638,13 +685,14 @@ export class RasterVectorFusion extends EventEmitter {
     let totalArea = 0;
 
     for (const feature of features) {
-      if (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon') {
+      if (feature.geometry.type === "Polygon" || feature.geometry.type === "MultiPolygon") {
         totalArea += turf.area(feature as Feature);
       }
     }
 
     // Convert bbox to approximate m²
-    const bboxAreaM2 = bboxArea * 111000 * 111000 * Math.cos((bbox.minLat + bbox.maxLat) / 2 * Math.PI / 180);
+    const bboxAreaM2 =
+      bboxArea * 111000 * 111000 * Math.cos((((bbox.minLat + bbox.maxLat) / 2) * Math.PI) / 180);
 
     return Math.min(100, (totalArea / bboxAreaM2) * 100);
   }

@@ -1,7 +1,7 @@
 meta:
   id: plan.data-lineage@v1
-  owner: 'data-engineering'
-  purpose: 'Trace data flows across subsystems with lineage graphs and contracts'
+  owner: "data-engineering"
+  purpose: "Trace data flows across subsystems with lineage graphs and contracts"
   tags:
     - data
     - lineage
@@ -9,13 +9,13 @@ meta:
     - provenance
     - contracts
   guardrails:
-    - 'Lineage must be complete and accurate'
-    - 'Sensitive data flows must be highlighted'
-    - 'Breaking changes must trigger alerts'
-    - 'Documentation must be auto-generated where possible'
+    - "Lineage must be complete and accurate"
+    - "Sensitive data flows must be highlighted"
+    - "Breaking changes must trigger alerts"
+    - "Documentation must be auto-generated where possible"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -238,15 +238,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'entity-lineage'
+  - name: "entity-lineage"
     inputs:
-      data_sources: 'User API, External APIs, Batch imports, Copilot'
-      data_sinks: 'Neo4j, Elasticsearch, BigQuery, API responses'
-      transformation_stages: 'Normalization, Validation, Enrichment, Indexing'
-      sensitive_data_types: 'PII (names, emails), Investigation data'
-      compliance_requirements: 'GDPR right to erasure, audit trail'
+      data_sources: "User API, External APIs, Batch imports, Copilot"
+      data_sinks: "Neo4j, Elasticsearch, BigQuery, API responses"
+      transformation_stages: "Normalization, Validation, Enrichment, Indexing"
+      sensitive_data_types: "PII (names, emails), Investigation data"
+      compliance_requirements: "GDPR right to erasure, audit trail"
     expected_contains:
-      - 'Lineage Graph'
-      - 'Data Contracts'
-      - 'Source-to-Consumer'
-      - 'Visualization'
+      - "Lineage Graph"
+      - "Data Contracts"
+      - "Source-to-Consumer"
+      - "Visualization"

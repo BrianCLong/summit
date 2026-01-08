@@ -6,73 +6,72 @@
 
 ## Sprint Backlog (stories, AC, estimate)
 
-1. **Tenant Bootstrap Wizard (MVP)** — *8 pts*
+1. **Tenant Bootstrap Wizard (MVP)** — _8 pts_
    As an admin, I can create a tenant in <10 min with defaults for RBAC, data retention, and redaction presets.
    **AC:** Guided steps, validation, idempotent; emits an audit event trail; rollback deletes all artifacts cleanly.
 
-2. **Self-Serve Ingest Samples & Fixtures** — *5 pts*
+2. **Self-Serve Ingest Samples & Fixtures** — _5 pts_
    As a new analyst, I can load sample datasets (CSV/JSON) + a prebuilt graph fixture to complete the golden path in <20 min.
    **AC:** One-click load, clear docs, teardown script; works in fresh tenants.
 
-3. **Getting Started Tour (Product Tours)** — *5 pts*
+3. **Getting Started Tour (Product Tours)** — _5 pts_
    As a first-time user, I get inline tips across ingest → NL→Cypher → Authority Compiler → export.
    **AC:** Dismissible, persisted; re-openable from Help; no impact on keyboard nav.
 
-4. **Audit Log v1 (Search + Export)** — *8 pts*
+4. **Audit Log v1 (Search + Export)** — _8 pts_
    As compliance, I can query audit events by actor, object, and time, and export a signed log bundle.
    **AC:** 10 event families logged (auth, ingest, query, compile, export, overrides); export includes hash and manifest.
 
-5. **Sandboxed Tenancy Guardrails** — *5 pts*
+5. **Sandboxed Tenancy Guardrails** — _5 pts_
    As an operator, each partner runs in an isolated namespace with quotas and safe defaults (no external egress by default).
    **AC:** Quotas enforced; cross-tenant tests = 0 leakage; egress allowlist.
 
-6. **Authority Compiler: Templates Pack + Share Link** — *5 pts*
+6. **Authority Compiler: Templates Pack + Share Link** — _5 pts_
    As an author, I can start from 5 curated templates and share a read-only link inside the tenant.
    **AC:** Template gallery; share link respects RBAC; link revocation works.
 
-7. **Export UX Polish + Failure Explainability** — *3 pts*
+7. **Export UX Polish + Failure Explainability** — _3 pts_
    As a user, if export fails (license/provenance), I see a human-readable reason and “fix-it” link.
    **AC:** Reasons mapped to policy, owner, and next action; copy reviewed.
 
-**Stretch (time-boxed):**
-8. **Billing/Metering (Shadow Mode)** — *3 pts*
-   Track usage by tenant (queries, tokens/rows, exports) without enforcement.
-   **AC:** Daily rollups; basic dashboard.
+**Stretch (time-boxed):** 8. **Billing/Metering (Shadow Mode)** — _3 pts_
+Track usage by tenant (queries, tokens/rows, exports) without enforcement.
+**AC:** Daily rollups; basic dashboard.
 
-*Total forecast: 39 pts (stretch optional).* 
+_Total forecast: 39 pts (stretch optional)._
 
 ---
 
 ## Definition of Done (DoD)
 
-* All AC met; behind flags where applicable; stage demo updated; user and ops docs merged.
-* Unit + contract tests; one recorded E2E from *fresh tenant* through export.
-* Security: tenancy isolation tests, audit log coverage documented; no critical findings.
-* Observability: dashboards include audit-log ingest rate, bootstrap success, and export failure reasons.
+- All AC met; behind flags where applicable; stage demo updated; user and ops docs merged.
+- Unit + contract tests; one recorded E2E from _fresh tenant_ through export.
+- Security: tenancy isolation tests, audit log coverage documented; no critical findings.
+- Observability: dashboards include audit-log ingest rate, bootstrap success, and export failure reasons.
 
 ## Definition of Ready (DoR)
 
-* Each story has AC, dependencies, flags, sample data, and rollback notes; UI stories include wire or copy doc.
+- Each story has AC, dependencies, flags, sample data, and rollback notes; UI stories include wire or copy doc.
 
 ---
 
 ## Capacity & Calendar
 
-* **Capacity:** ~40 pts.
-* **Ceremonies:**
-  * Sprint Planning: Mon Jan 19, 09:30–11:00
-  * Daily Stand-up: 09:15–09:30
-  * Mid-sprint Refinement: Thu Jan 22, 14:00–14:45
-  * Sprint Review (live partner demo): Fri Jan 30, 10:00–11:00
-  * Retro: Fri Jan 30, 11:15–12:00
+- **Capacity:** ~40 pts.
+- **Ceremonies:**
+  - Sprint Planning: Mon Jan 19, 09:30–11:00
+  - Daily Stand-up: 09:15–09:30
+  - Mid-sprint Refinement: Thu Jan 22, 14:00–14:45
+  - Sprint Review (live partner demo): Fri Jan 30, 10:00–11:00
+  - Retro: Fri Jan 30, 11:15–12:00
 
 ---
 
 ## Environments, Flags, Data
 
-* **Envs:** dev → stage (partner sandboxes).
-* **Flags:** `tenantBootstrapWizard`, `sampleDataPacks`, `productToursV1`, `auditLogV1`, `tenantGuardrails`, `authorityTemplatesPack`, `exportExplainV1`, (`billingShadowV0` stretch).
-* **Test Data:** Sample CSV/JSON bundles, prebuilt graph fixture, canned evidence sets, two license models for negative tests.
+- **Envs:** dev → stage (partner sandboxes).
+- **Flags:** `tenantBootstrapWizard`, `sampleDataPacks`, `productToursV1`, `auditLogV1`, `tenantGuardrails`, `authorityTemplatesPack`, `exportExplainV1`, (`billingShadowV0` stretch).
+- **Test Data:** Sample CSV/JSON bundles, prebuilt graph fixture, canned evidence sets, two license models for negative tests.
 
 ---
 
@@ -80,35 +79,35 @@
 
 **Functional:**
 
-* Bootstrap wizard happy/rollback paths; default RBAC & retention applied.
-* Sample data one-click load; teardown leaves no residue.
-* Tours appear only for first-time users; accessibility pass (keyboard/screen reader).
-* Audit search by actor/object/time; export signed and verifiable.
-* Tenant quotas & egress allowlist enforced; cross-tenant leakage tests.
-* Authority templates pack; read-only share link honors RBAC.
-* Export failures show reason + fix path.
+- Bootstrap wizard happy/rollback paths; default RBAC & retention applied.
+- Sample data one-click load; teardown leaves no residue.
+- Tours appear only for first-time users; accessibility pass (keyboard/screen reader).
+- Audit search by actor/object/time; export signed and verifiable.
+- Tenant quotas & egress allowlist enforced; cross-tenant leakage tests.
+- Authority templates pack; read-only share link honors RBAC.
+- Export failures show reason + fix path.
 
 **E2E:** Fresh tenant → sample load → ask NL question (see Cypher preview) → compile brief (template) → export (PASS) and audit export.
 
 **Non-functional:**
 
-* p95 onboarding flow (<10 min bootstrap, <20 min golden path).
-* Audit log write/read SLO and index size checks.
+- p95 onboarding flow (<10 min bootstrap, <20 min golden path).
+- Audit log write/read SLO and index size checks.
 
 ---
 
 ## Risks & Mitigations
 
-* **Bootstrap complexity across envs** → idempotent scripts + teardown verified in CI.
-* **Tour fatigue** → dismiss persistence + Help relaunch; limit to 5 concise steps.
-* **Audit log cost/volume** → partitioned storage + retention policy defaults.
-* **Isolation edge cases** → add fuzz tests for headers/claims; egress allowlist by default.
+- **Bootstrap complexity across envs** → idempotent scripts + teardown verified in CI.
+- **Tour fatigue** → dismiss persistence + Help relaunch; limit to 5 concise steps.
+- **Audit log cost/volume** → partitioned storage + retention policy defaults.
+- **Isolation edge cases** → add fuzz tests for headers/claims; egress allowlist by default.
 
 ---
 
 ## Reporting Artifacts (to produce this sprint)
 
-* Partner onboarding runbook, 10-minute quickstart, demo script, risk register, burndown & throughput, SLO snapshots (start/end).
+- Partner onboarding runbook, 10-minute quickstart, demo script, risk register, burndown & throughput, SLO snapshots (start/end).
 
 ---
 

@@ -1,6 +1,6 @@
-import type { AdapterReceiptEmitter } from './receipts';
-import { AdapterLifecycleStage } from './lifecycle';
-import type { PolicyDecision, PolicyEvaluator } from './policy';
+import type { AdapterReceiptEmitter } from "./receipts";
+import { AdapterLifecycleStage } from "./lifecycle";
+import type { PolicyDecision, PolicyEvaluator } from "./policy";
 
 export interface AdapterDescriptor {
   name: string;
@@ -19,9 +19,9 @@ export interface AdapterRequest<TPayload = unknown> {
 }
 
 export enum AdapterOutcome {
-  Success = 'success',
-  Rejected = 'rejected',
-  Failed = 'failed',
+  Success = "success",
+  Rejected = "rejected",
+  Failed = "failed",
 }
 
 export interface AdapterError {
@@ -60,6 +60,6 @@ export interface Adapter<TPayload = unknown, TResult = unknown> {
   descriptor: AdapterDescriptor;
   execute(
     request: AdapterRequest<TPayload>,
-    context: AdapterContext,
+    context: AdapterContext
   ): Promise<AdapterResponse<TResult>>;
 }

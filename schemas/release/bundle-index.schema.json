@@ -3,10 +3,7 @@
   "$id": "https://intelgraph.com/schemas/release/bundle-index.schema.json",
   "title": "Release Bundle Index",
   "type": "object",
-  "required": [
-    "schemaVersion",
-    "files"
-  ],
+  "required": ["schemaVersion", "files"],
   "additionalProperties": true,
   "properties": {
     "schemaVersion": {
@@ -20,11 +17,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": [
-          "path",
-          "sha256",
-          "bytes"
-        ],
+        "required": ["path", "sha256", "bytes"],
         "additionalProperties": true,
         "properties": {
           "path": {

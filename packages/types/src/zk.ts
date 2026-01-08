@@ -1,6 +1,6 @@
-export type ZkRiskTier = 'tier-1' | 'tier-2' | 'tier-3' | 'tier-4';
+export type ZkRiskTier = "tier-1" | "tier-2" | "tier-3" | "tier-4";
 
-export type ZkResponseStatus = 'accepted' | 'rejected' | 'needs-review' | 'blocked';
+export type ZkResponseStatus = "accepted" | "rejected" | "needs-review" | "blocked";
 
 export interface ZkRequestEnvelope {
   requestId: string;
@@ -30,13 +30,13 @@ export interface ZkResponseEnvelope {
 }
 
 export type AuditEvidenceClassifier =
-  | 'request-metadata'
-  | 'witness-fingerprint'
-  | 'proof-metadata'
-  | 'review-log'
-  | 'policy-decision';
+  | "request-metadata"
+  | "witness-fingerprint"
+  | "proof-metadata"
+  | "review-log"
+  | "policy-decision";
 
-export type RedactionLevel = 'none' | 'partial' | 'full';
+export type RedactionLevel = "none" | "partial" | "full";
 
 export interface AuditEvidencePointer {
   id: string;
@@ -53,7 +53,7 @@ export interface RetentionPolicy {
   legalHold?: boolean;
 }
 
-export type AuditManifestStatus = 'draft' | 'finalized' | 'superseded';
+export type AuditManifestStatus = "draft" | "finalized" | "superseded";
 
 export interface AuditManifest {
   manifestId: string;

@@ -2,17 +2,17 @@ receivers:
   otlp:
     protocols:
       http:
-        endpoint: '0.0.0.0:4318' # OTLP/HTTP endpoint
+        endpoint: "0.0.0.0:4318" # OTLP/HTTP endpoint
 
 exporters:
   logging:
     verbosity: detailed # For debugging
   otlp:
-    endpoint: 'tempo:4317' # Example Tempo endpoint for traces
+    endpoint: "tempo:4317" # Example Tempo endpoint for traces
   otlp/metrics:
-    endpoint: 'prometheus:4317' # Example Prometheus endpoint for metrics
+    endpoint: "prometheus:4317" # Example Prometheus endpoint for metrics
   otlp/logs:
-    endpoint: 'loki:4317' # Example Loki endpoint for logs
+    endpoint: "loki:4317" # Example Loki endpoint for logs
 
 service:
   pipelines:

@@ -3,7 +3,15 @@
  * Simulates quantum circuits using statevector representation
  */
 
-import { Complex, QuantumState, QuantumCircuit, QuantumGate, QuantumSimulator, SimulationResult, GateType } from '../types';
+import {
+  Complex,
+  QuantumState,
+  QuantumCircuit,
+  QuantumGate,
+  QuantumSimulator,
+  SimulationResult,
+  GateType,
+} from "../types";
 
 export class StatevectorSimulator implements QuantumSimulator {
   async simulate(circuit: QuantumCircuit, shots: number = 1024): Promise<SimulationResult> {
@@ -297,11 +305,15 @@ export class StatevectorSimulator implements QuantumSimulator {
     return newState;
   }
 
-  private measureStatevector(state: QuantumState, numQubits: number, shots: number): Record<string, number> {
+  private measureStatevector(
+    state: QuantumState,
+    numQubits: number,
+    shots: number
+  ): Record<string, number> {
     const counts: Record<string, number> = {};
 
     // Calculate probabilities
-    const probabilities = state.map(amplitude => amplitude.real ** 2 + amplitude.imag ** 2);
+    const probabilities = state.map((amplitude) => amplitude.real ** 2 + amplitude.imag ** 2);
 
     // Sample measurements
     for (let shot = 0; shot < shots; shot++) {
@@ -317,7 +329,7 @@ export class StatevectorSimulator implements QuantumSimulator {
         }
       }
 
-      const bitstring = outcome.toString(2).padStart(numQubits, '0');
+      const bitstring = outcome.toString(2).padStart(numQubits, "0");
       counts[bitstring] = (counts[bitstring] || 0) + 1;
     }
 

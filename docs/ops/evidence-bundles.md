@@ -52,14 +52,17 @@ Each bundle captures what ran in CI and what artifacts were produced. Mandatory 
 ## CI Integration
 
 ### Continuous Integration (main + PRs)
+
 - Workflow: `.github/workflows/ci-cd.yml` (build-and-test job).
 - After tests, the job invokes the generator to capture commit + workflow metadata, and uploads `evidence-bundles/evidence-<sha>.json` as a workflow artifact named `evidence-bundle-<sha>`.
 
 ### Release Pipeline (main branch)
+
 - Workflow: `.github/workflows/release.yml`.
 - After packaging the release tarball, the workflow runs the generator with `ARTIFACT_PATHS` pointing at the bundle and uploads the resulting evidence JSON as an artifact named `release-evidence-<sha>`.
 
 ### Additional Notes
+
 - The generator is fast and non-blocking; missing files are recorded but do not fail the job.
 - Cosign/SLSA hooks only run if the tooling is already available in the environment.
 

@@ -1,13 +1,13 @@
 meta:
   id: jules.meta-architect@v1
   owner: jules
-  purpose: 'Refine and improve prompts using the unified architecture'
+  purpose: "Refine and improve prompts using the unified architecture"
   guardrails:
-    - 'Ensure modularity.'
-    - 'Maintain backward compatibility.'
+    - "Ensure modularity."
+    - "Maintain backward compatibility."
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
 
 inputs:

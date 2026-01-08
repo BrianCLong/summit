@@ -5,17 +5,17 @@
  * Copyright (c) 2025 IntelGraph
  */
 
-import { Router, Request, Response } from 'express';
-import type { RateLimiter } from '../rate-limiter.js';
-import type { RateLimitMetricsCollector } from '../monitoring/metrics.js';
-import type { UserTier } from '../types.js';
-import pino from 'pino';
+import { Router, Request, Response } from "express";
+import type { RateLimiter } from "../rate-limiter.js";
+import type { RateLimitMetricsCollector } from "../monitoring/metrics.js";
+import type { UserTier } from "../types.js";
+import pino from "pino";
 
 const logger = pino();
 
 export function createAdminRateLimitRouter(
   rateLimiter: RateLimiter,
-  metricsCollector: RateLimitMetricsCollector,
+  metricsCollector: RateLimitMetricsCollector
 ): Router {
   const router = Router();
 
@@ -23,7 +23,7 @@ export function createAdminRateLimitRouter(
    * GET /admin/rate-limits/metrics
    * Get current rate limit metrics
    */
-  router.get('/metrics', async (req: Request, res: Response) => {
+  router.get("/metrics", async (req: Request, res: Response) => {
     try {
       const metrics = metricsCollector.getMetrics();
       res.json({
@@ -32,12 +32,12 @@ export function createAdminRateLimitRouter(
       });
     } catch (error) {
       logger.error({
-        message: 'Failed to get rate limit metrics',
+        message: "Failed to get rate limit metrics",
         error: error instanceof Error ? error.message : String(error),
       });
       res.status(500).json({
         success: false,
-        error: 'Failed to retrieve metrics',
+        error: "Failed to retrieve metrics",
       });
     }
   });
@@ -46,19 +46,19 @@ export function createAdminRateLimitRouter(
    * GET /admin/rate-limits/prometheus
    * Get Prometheus-formatted metrics
    */
-  router.get('/prometheus', async (req: Request, res: Response) => {
+  router.get("/prometheus", async (req: Request, res: Response) => {
     try {
       const metrics = metricsCollector.getPrometheusMetrics();
-      res.setHeader('Content-Type', 'text/plain');
+      res.setHeader("Content-Type", "text/plain");
       res.send(metrics);
     } catch (error) {
       logger.error({
-        message: 'Failed to get Prometheus metrics',
+        message: "Failed to get Prometheus metrics",
         error: error instanceof Error ? error.message : String(error),
       });
       res.status(500).json({
         success: false,
-        error: 'Failed to retrieve Prometheus metrics',
+        error: "Failed to retrieve Prometheus metrics",
       });
     }
   });
@@ -67,7 +67,7 @@ export function createAdminRateLimitRouter(
    * GET /admin/rate-limits/violations
    * Get recent rate limit violations
    */
-  router.get('/violations', async (req: Request, res: Response) => {
+  router.get("/violations", async (req: Request, res: Response) => {
     try {
       const limit = parseInt(req.query.limit as string) || 100;
       const violations = metricsCollector.getRecentViolations(limit);
@@ -81,12 +81,12 @@ export function createAdminRateLimitRouter(
       });
     } catch (error) {
       logger.error({
-        message: 'Failed to get rate limit violations',
+        message: "Failed to get rate limit violations",
         error: error instanceof Error ? error.message : String(error),
       });
       res.status(500).json({
         success: false,
-        error: 'Failed to retrieve violations',
+        error: "Failed to retrieve violations",
       });
     }
   });
@@ -95,10 +95,10 @@ export function createAdminRateLimitRouter(
    * GET /admin/rate-limits/status/:identifier
    * Get rate limit status for specific identifier
    */
-  router.get('/status/:identifier', async (req: Request, res: Response) => {
+  router.get("/status/:identifier", async (req: Request, res: Response) => {
     try {
       const { identifier } = req.params;
-      const endpoint = (req.query.endpoint as string) || '/api';
+      const endpoint = (req.query.endpoint as string) || "/api";
       const tier = req.query.tier as UserTier | undefined;
 
       const state = await rateLimiter.peek(identifier, endpoint, tier);
@@ -110,8 +110,8 @@ export function createAdminRateLimitRouter(
             identifier,
             endpoint,
             tier,
-            status: 'no_limits',
-            message: 'No active rate limits',
+            status: "no_limits",
+            message: "No active rate limits",
           },
         });
       }
@@ -128,12 +128,12 @@ export function createAdminRateLimitRouter(
       });
     } catch (error) {
       logger.error({
-        message: 'Failed to get rate limit status',
+        message: "Failed to get rate limit status",
         error: error instanceof Error ? error.message : String(error),
       });
       res.status(500).json({
         success: false,
-        error: 'Failed to retrieve rate limit status',
+        error: "Failed to retrieve rate limit status",
       });
     }
   });
@@ -142,43 +142,39 @@ export function createAdminRateLimitRouter(
    * POST /admin/rate-limits/reset
    * Reset rate limit for identifier
    */
-  router.post('/reset', async (req: Request, res: Response) => {
+  router.post("/reset", async (req: Request, res: Response) => {
     try {
       const { identifier, endpoint, tier } = req.body;
 
       if (!identifier) {
         return res.status(400).json({
           success: false,
-          error: 'identifier is required',
+          error: "identifier is required",
         });
       }
 
-      await rateLimiter.reset(
-        identifier,
-        endpoint || '/api',
-        tier as UserTier | undefined,
-      );
+      await rateLimiter.reset(identifier, endpoint || "/api", tier as UserTier | undefined);
 
       logger.info({
-        message: 'Rate limit reset',
+        message: "Rate limit reset",
         identifier,
         endpoint,
         tier,
-        adminUser: (req as any).user?.id || 'unknown',
+        adminUser: (req as any).user?.id || "unknown",
       });
 
       res.json({
         success: true,
-        message: 'Rate limit reset successfully',
+        message: "Rate limit reset successfully",
       });
     } catch (error) {
       logger.error({
-        message: 'Failed to reset rate limit',
+        message: "Failed to reset rate limit",
         error: error instanceof Error ? error.message : String(error),
       });
       res.status(500).json({
         success: false,
-        error: 'Failed to reset rate limit',
+        error: "Failed to reset rate limit",
       });
     }
   });
@@ -187,9 +183,9 @@ export function createAdminRateLimitRouter(
    * GET /admin/rate-limits/policies
    * Get all rate limit policies
    */
-  router.get('/policies', async (req: Request, res: Response) => {
+  router.get("/policies", async (req: Request, res: Response) => {
     try {
-      const endpoint = (req.query.endpoint as string) || '/api';
+      const endpoint = (req.query.endpoint as string) || "/api";
       const tier = req.query.tier as UserTier | undefined;
 
       const policy = rateLimiter.getPolicy(endpoint, tier);
@@ -204,12 +200,12 @@ export function createAdminRateLimitRouter(
       });
     } catch (error) {
       logger.error({
-        message: 'Failed to get rate limit policies',
+        message: "Failed to get rate limit policies",
         error: error instanceof Error ? error.message : String(error),
       });
       res.status(500).json({
         success: false,
-        error: 'Failed to retrieve policies',
+        error: "Failed to retrieve policies",
       });
     }
   });
@@ -218,26 +214,26 @@ export function createAdminRateLimitRouter(
    * GET /admin/rate-limits/health
    * Health check for rate limiter
    */
-  router.get('/health', async (req: Request, res: Response) => {
+  router.get("/health", async (req: Request, res: Response) => {
     try {
       const healthy = await rateLimiter.healthCheck();
 
       res.json({
         success: true,
         data: {
-          status: healthy ? 'healthy' : 'unhealthy',
+          status: healthy ? "healthy" : "unhealthy",
           redis: healthy,
           timestamp: new Date().toISOString(),
         },
       });
     } catch (error) {
       logger.error({
-        message: 'Rate limiter health check failed',
+        message: "Rate limiter health check failed",
         error: error instanceof Error ? error.message : String(error),
       });
       res.status(500).json({
         success: false,
-        error: 'Health check failed',
+        error: "Health check failed",
       });
     }
   });
@@ -246,24 +242,20 @@ export function createAdminRateLimitRouter(
    * POST /admin/rate-limits/test
    * Test rate limiting for debugging
    */
-  router.post('/test', async (req: Request, res: Response) => {
+  router.post("/test", async (req: Request, res: Response) => {
     try {
       const { identifier, endpoint, tier, requests = 1 } = req.body;
 
       if (!identifier || !endpoint) {
         return res.status(400).json({
           success: false,
-          error: 'identifier and endpoint are required',
+          error: "identifier and endpoint are required",
         });
       }
 
       const results = [];
       for (let i = 0; i < requests; i++) {
-        const state = await rateLimiter.check(
-          identifier,
-          endpoint,
-          tier as UserTier | undefined,
-        );
+        const state = await rateLimiter.check(identifier, endpoint, tier as UserTier | undefined);
         results.push(state);
       }
 
@@ -279,12 +271,12 @@ export function createAdminRateLimitRouter(
       });
     } catch (error) {
       logger.error({
-        message: 'Rate limit test failed',
+        message: "Rate limit test failed",
         error: error instanceof Error ? error.message : String(error),
       });
       res.status(500).json({
         success: false,
-        error: 'Test failed',
+        error: "Test failed",
       });
     }
   });

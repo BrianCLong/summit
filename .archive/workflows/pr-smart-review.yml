@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with: { node-version: '18' }
+        with: { node-version: "18" }
       - run: pnpm i --frozen-lockfile
       - run: echo "$(git diff --name-only origin/${{ github.base_ref }}...HEAD)" > changed.txt
       - run: CHANGED_FILES="$(cat changed.txt)" node tools/ci/smart_review.ts

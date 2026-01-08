@@ -5,6 +5,7 @@ Strategic foresight analysis with comprehensive scenario planning, horizon scann
 ## Features
 
 ### Scenario Planning
+
 - Multiple scenario development
 - Alternative futures modeling
 - Driving forces identification
@@ -13,6 +14,7 @@ Strategic foresight analysis with comprehensive scenario planning, horizon scann
 - Signpost monitoring
 
 ### Horizon Scanning
+
 - Multi-domain scanning
 - Emerging issue identification
 - Weak signal detection
@@ -21,6 +23,7 @@ Strategic foresight analysis with comprehensive scenario planning, horizon scann
 - Issue momentum tracking
 
 ### Delphi Method
+
 - Expert forecasting
 - Multi-round consensus building
 - Convergence analysis
@@ -28,6 +31,7 @@ Strategic foresight analysis with comprehensive scenario planning, horizon scann
 - Structured expert elicitation
 
 ### Trend Analysis
+
 - Trend strength assessment
 - Direction determination
 - Velocity calculation
@@ -35,6 +39,7 @@ Strategic foresight analysis with comprehensive scenario planning, horizon scann
 - Inflection point identification
 
 ### Backcasting
+
 - Desired future definition
 - Pathway identification
 - Milestone definition
@@ -44,36 +49,32 @@ Strategic foresight analysis with comprehensive scenario planning, horizon scann
 ## Usage
 
 ```typescript
-import { ScenarioPlanner, HorizonScanner, DelphiAnalyzer } from '@intelgraph/futures-analysis';
+import { ScenarioPlanner, HorizonScanner, DelphiAnalyzer } from "@intelgraph/futures-analysis";
 
 // Scenario planning
 const planner = new ScenarioPlanner({
-  timeHorizons: ['mid-term', 'long-term'],
+  timeHorizons: ["mid-term", "long-term"],
   scenarioCount: 4,
   includeTransformative: true,
   uncertaintyThreshold: 0.6,
 });
 
-const scenarios = await planner.developScenarios(
-  'AI Governance',
-  'long-term',
-  2040
-);
+const scenarios = await planner.developScenarios("AI Governance", "long-term", 2040);
 
 // Horizon scanning
 const scanner = new HorizonScanner({
   scanFrequency: 30,
-  domains: ['technology', 'geopolitics', 'environment'],
-  sources: ['academic', 'industry', 'government'],
+  domains: ["technology", "geopolitics", "environment"],
+  sources: ["academic", "industry", "government"],
   noveltyThreshold: 2,
 });
 
-const scan = await scanner.conductScan('mid-term');
-const emergingIssues = scanner.getEmergingIssues({ momentum: 'accelerating' });
+const scan = await scanner.conductScan("mid-term");
+const emergingIssues = scanner.getEmergingIssues({ momentum: "accelerating" });
 
 // Delphi analysis
 const delphi = new DelphiAnalyzer();
-const study = delphi.createStudy('Quantum Computing Timeline', 20);
+const study = delphi.createStudy("Quantum Computing Timeline", 20);
 const consensus = delphi.analyzeConsensus(study.id);
 ```
 

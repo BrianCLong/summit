@@ -3,19 +3,19 @@
  * Analyzes the impact level of an issue (blocker/high/medium/low)
  */
 
-import { TriageItem } from '../types.js';
-import { ImpactRule } from '../config.js';
+import { TriageItem } from "../types.js";
+import { ImpactRule } from "../config.js";
 
 export function analyzeImpact(
   item: TriageItem,
-  impactRules: ImpactRule[],
-): { impact: 'blocker' | 'high' | 'medium' | 'low'; score: number } {
+  impactRules: ImpactRule[]
+): { impact: "blocker" | "high" | "medium" | "low"; score: number } {
   // If already has impact from source, use it as baseline
   const baselineImpact = item.impact;
   const text = `${item.title} ${item.description}`.toLowerCase();
 
   let maxScore = 0;
-  let detectedImpact: 'blocker' | 'high' | 'medium' | 'low' = baselineImpact;
+  let detectedImpact: "blocker" | "high" | "medium" | "low" = baselineImpact;
 
   // Check each impact rule
   for (const rule of impactRules) {
@@ -59,15 +59,15 @@ export function analyzeImpact(
   return { impact: detectedImpact, score: maxScore };
 }
 
-function getBaselineScore(impact: 'blocker' | 'high' | 'medium' | 'low'): number {
+function getBaselineScore(impact: "blocker" | "high" | "medium" | "low"): number {
   switch (impact) {
-    case 'blocker':
+    case "blocker":
       return 100;
-    case 'high':
+    case "high":
       return 75;
-    case 'medium':
+    case "medium":
       return 50;
-    case 'low':
+    case "low":
       return 25;
   }
 }

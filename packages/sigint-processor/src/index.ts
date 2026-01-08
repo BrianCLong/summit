@@ -5,41 +5,56 @@
  * for electromagnetic spectrum monitoring and communications intelligence
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 export const SignalSourceSchema = z.object({
   id: z.string().uuid(),
   type: z.enum([
-    'COMINT', 'ELINT', 'FISINT', 'MASINT', 'TECHINT',
-    'RF_EMISSION', 'SATELLITE', 'CELLULAR', 'WIFI', 'BLUETOOTH',
-    'RADAR', 'TELEMETRY', 'BEACON', 'JAMMER'
+    "COMINT",
+    "ELINT",
+    "FISINT",
+    "MASINT",
+    "TECHINT",
+    "RF_EMISSION",
+    "SATELLITE",
+    "CELLULAR",
+    "WIFI",
+    "BLUETOOTH",
+    "RADAR",
+    "TELEMETRY",
+    "BEACON",
+    "JAMMER",
   ]),
   frequency: z.object({
     center: z.number(),
     bandwidth: z.number(),
-    unit: z.enum(['Hz', 'kHz', 'MHz', 'GHz'])
+    unit: z.enum(["Hz", "kHz", "MHz", "GHz"]),
   }),
   modulation: z.string().optional(),
   protocol: z.string().optional(),
-  geolocation: z.object({
-    latitude: z.number(),
-    longitude: z.number(),
-    altitude: z.number().optional(),
-    accuracy: z.number(),
-    method: z.enum(['TDOA', 'AOA', 'POA', 'FDOA', 'HYBRID', 'GPS'])
-  }).optional(),
+  geolocation: z
+    .object({
+      latitude: z.number(),
+      longitude: z.number(),
+      altitude: z.number().optional(),
+      accuracy: z.number(),
+      method: z.enum(["TDOA", "AOA", "POA", "FDOA", "HYBRID", "GPS"]),
+    })
+    .optional(),
   temporalPattern: z.object({
     firstSeen: z.date(),
     lastSeen: z.date(),
     activeHours: z.array(z.number()),
-    burstPattern: z.string().optional()
+    burstPattern: z.string().optional(),
   }),
-  classification: z.enum(['UNCLASSIFIED', 'CONFIDENTIAL', 'SECRET', 'TOP_SECRET', 'SCI']),
-  attribution: z.object({
-    entity: z.string().optional(),
-    confidence: z.number(),
-    nationState: z.string().optional()
-  }).optional()
+  classification: z.enum(["UNCLASSIFIED", "CONFIDENTIAL", "SECRET", "TOP_SECRET", "SCI"]),
+  attribution: z
+    .object({
+      entity: z.string().optional(),
+      confidence: z.number(),
+      nationState: z.string().optional(),
+    })
+    .optional(),
 });
 
 export type SignalSource = z.infer<typeof SignalSourceSchema>;
@@ -56,47 +71,56 @@ export const InterceptSchema = z.object({
     snr: z.number(),
     errorRate: z.number().optional(),
     encryptionDetected: z.boolean(),
-    encryptionType: z.string().optional()
+    encryptionType: z.string().optional(),
   }),
   analysis: z.object({
     languageDetected: z.string().optional(),
     speakerCount: z.number().optional(),
     keywords: z.array(z.string()),
     entities: z.array(z.object({ type: z.string(), value: z.string(), confidence: z.number() })),
-    sentiment: z.enum(['HOSTILE', 'NEUTRAL', 'COOPERATIVE']).optional(),
-    urgency: z.enum(['ROUTINE', 'PRIORITY', 'IMMEDIATE', 'FLASH']).optional()
+    sentiment: z.enum(["HOSTILE", "NEUTRAL", "COOPERATIVE"]).optional(),
+    urgency: z.enum(["ROUTINE", "PRIORITY", "IMMEDIATE", "FLASH"]).optional(),
   }),
-  tasking: z.string().optional()
+  tasking: z.string().optional(),
 });
 
 export type Intercept = z.infer<typeof InterceptSchema>;
 
 export const EmitterSchema = z.object({
   id: z.string().uuid(),
-  type: z.enum(['RADAR', 'COMMUNICATION', 'NAVIGATION', 'IDENTIFICATION', 'WEAPON_SYSTEM', 'EW_SYSTEM']),
+  type: z.enum([
+    "RADAR",
+    "COMMUNICATION",
+    "NAVIGATION",
+    "IDENTIFICATION",
+    "WEAPON_SYSTEM",
+    "EW_SYSTEM",
+  ]),
   platform: z.object({
-    type: z.enum(['AIRCRAFT', 'SHIP', 'GROUND', 'SATELLITE', 'MISSILE', 'SUBMARINE', 'UNKNOWN']),
+    type: z.enum(["AIRCRAFT", "SHIP", "GROUND", "SATELLITE", "MISSILE", "SUBMARINE", "UNKNOWN"]),
     identifier: z.string().optional(),
-    nationality: z.string().optional()
+    nationality: z.string().optional(),
   }),
   characteristics: z.object({
     frequency: z.object({ min: z.number(), max: z.number(), agility: z.boolean() }),
     pulseWidth: z.number().optional(),
     pri: z.number().optional(),
     scanType: z.string().optional(),
-    power: z.number().optional()
+    power: z.number().optional(),
   }),
   threatAssessment: z.object({
-    category: z.enum(['FRIENDLY', 'HOSTILE', 'NEUTRAL', 'UNKNOWN']),
-    lethality: z.enum(['NONE', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
+    category: z.enum(["FRIENDLY", "HOSTILE", "NEUTRAL", "UNKNOWN"]),
+    lethality: z.enum(["NONE", "LOW", "MEDIUM", "HIGH", "CRITICAL"]),
     trackingCapability: z.boolean(),
-    guidanceCapability: z.boolean()
+    guidanceCapability: z.boolean(),
   }),
-  libraryMatch: z.object({
-    systemName: z.string(),
-    confidence: z.number(),
-    variants: z.array(z.string())
-  }).optional()
+  libraryMatch: z
+    .object({
+      systemName: z.string(),
+      confidence: z.number(),
+      variants: z.array(z.string()),
+    })
+    .optional(),
 });
 
 export type Emitter = z.infer<typeof EmitterSchema>;
@@ -113,20 +137,20 @@ export const NetworkTrafficSchema = z.object({
     size: z.number(),
     encrypted: z.boolean(),
     compressionDetected: z.boolean(),
-    fingerprint: z.string().optional()
+    fingerprint: z.string().optional(),
   }),
   analysis: z.object({
     applicationLayer: z.string().optional(),
     malwareIndicators: z.array(z.string()),
     exfiltrationScore: z.number(),
     c2Probability: z.number(),
-    beaconPattern: z.boolean()
+    beaconPattern: z.boolean(),
   }),
   geolocation: z.object({
     sourceCountry: z.string().optional(),
     destCountry: z.string().optional(),
-    hopCountries: z.array(z.string())
-  })
+    hopCountries: z.array(z.string()),
+  }),
 });
 
 export type NetworkTraffic = z.infer<typeof NetworkTrafficSchema>;
@@ -162,15 +186,15 @@ export class SIGINTProcessor {
         signalStrength: raw.metadata.signalStrength || -80,
         snr: raw.metadata.snr || 10,
         encryptionDetected: analysis.encrypted,
-        encryptionType: analysis.encryptionType
+        encryptionType: analysis.encryptionType,
       },
       analysis: {
         keywords: analysis.keywords,
         entities: analysis.entities,
         languageDetected: analysis.language,
         sentiment: analysis.sentiment,
-        urgency: analysis.urgency
-      }
+        urgency: analysis.urgency,
+      },
     };
 
     this.intercepts.set(intercept.id, intercept);
@@ -180,42 +204,44 @@ export class SIGINTProcessor {
   /**
    * Geolocate signal source using multiple techniques
    */
-  geolocateSource(measurements: Array<{
-    sensorId: string;
-    sensorLocation: { lat: number; lon: number; alt: number };
-    timestamp: Date;
-    measurement: { type: 'TDOA' | 'AOA' | 'RSSI'; value: number; error: number };
-  }>): {
+  geolocateSource(
+    measurements: Array<{
+      sensorId: string;
+      sensorLocation: { lat: number; lon: number; alt: number };
+      timestamp: Date;
+      measurement: { type: "TDOA" | "AOA" | "RSSI"; value: number; error: number };
+    }>
+  ): {
     location: { latitude: number; longitude: number; altitude?: number };
     accuracy: number;
     confidence: number;
     method: string;
   } {
     // Multi-sensor geolocation fusion
-    const tdoaMeasurements = measurements.filter(m => m.measurement.type === 'TDOA');
-    const aoaMeasurements = measurements.filter(m => m.measurement.type === 'AOA');
+    const tdoaMeasurements = measurements.filter((m) => m.measurement.type === "TDOA");
+    const aoaMeasurements = measurements.filter((m) => m.measurement.type === "AOA");
 
     let result = { latitude: 0, longitude: 0, altitude: undefined as number | undefined };
     let accuracy = 1000;
-    let method = 'HYBRID';
+    let method = "HYBRID";
 
     if (tdoaMeasurements.length >= 3) {
       // TDOA multilateration
       result = this.tdoaMultilateration(tdoaMeasurements);
       accuracy = 50;
-      method = 'TDOA';
+      method = "TDOA";
     } else if (aoaMeasurements.length >= 2) {
       // AOA triangulation
       result = this.aoaTriangulation(aoaMeasurements);
       accuracy = 200;
-      method = 'AOA';
+      method = "AOA";
     }
 
     return {
       location: result,
       accuracy,
       confidence: Math.max(0, 100 - accuracy / 10),
-      method
+      method,
     };
   }
 
@@ -249,7 +275,7 @@ export class SIGINTProcessor {
           platform: entry.platform,
           nationality: entry.nationality,
           confidence: score * 100,
-          threatLevel: entry.threatLevel
+          threatLevel: entry.threatLevel,
         });
       }
     }
@@ -258,7 +284,7 @@ export class SIGINTProcessor {
 
     return {
       matches: matches.slice(0, 5),
-      bestMatch: matches[0]?.systemName || null
+      bestMatch: matches[0]?.systemName || null,
     };
   }
 
@@ -267,7 +293,12 @@ export class SIGINTProcessor {
    */
   analyzeNetworkTraffic(traffic: NetworkTraffic[]): {
     c2Candidates: Array<{ address: string; score: number; indicators: string[] }>;
-    exfiltrationEvents: Array<{ sourceIp: string; destIp: string; dataVolume: number; timestamp: Date }>;
+    exfiltrationEvents: Array<{
+      sourceIp: string;
+      destIp: string;
+      dataVolume: number;
+      timestamp: Date;
+    }>;
     beacons: Array<{ address: string; interval: number; jitter: number }>;
     encryptedChannels: Array<{ endpoints: string[]; protocol: string; volume: number }>;
   } {
@@ -275,7 +306,7 @@ export class SIGINTProcessor {
       c2Candidates: [] as any[],
       exfiltrationEvents: [] as any[],
       beacons: [] as any[],
-      encryptedChannels: [] as any[]
+      encryptedChannels: [] as any[],
     };
 
     // Group by destination
@@ -289,18 +320,18 @@ export class SIGINTProcessor {
     // Detect beaconing
     for (const [dest, flows] of byDest) {
       if (flows.length >= 10) {
-        const intervals = this.calculateIntervals(flows.map(f => f.timestamp));
+        const intervals = this.calculateIntervals(flows.map((f) => f.timestamp));
         const beacon = this.detectBeaconPattern(intervals);
         if (beacon.isBeacon) {
           results.beacons.push({
             address: dest,
             interval: beacon.interval,
-            jitter: beacon.jitter
+            jitter: beacon.jitter,
           });
           results.c2Candidates.push({
             address: dest,
             score: beacon.confidence,
-            indicators: ['BEACON_PATTERN', `INTERVAL_${beacon.interval}ms`]
+            indicators: ["BEACON_PATTERN", `INTERVAL_${beacon.interval}ms`],
           });
         }
       }
@@ -313,7 +344,7 @@ export class SIGINTProcessor {
           sourceIp: t.sourceAddress,
           destIp: t.destinationAddress,
           dataVolume: t.payload.size,
-          timestamp: t.timestamp
+          timestamp: t.timestamp,
         });
       }
     }
@@ -325,7 +356,7 @@ export class SIGINTProcessor {
    * Decrypt and decode communications
    */
   processCommsIntercept(intercept: {
-    type: 'VOICE' | 'DATA' | 'VIDEO' | 'TEXT';
+    type: "VOICE" | "DATA" | "VIDEO" | "TEXT";
     encrypted: boolean;
     protocol: string;
     data: Uint8Array;
@@ -341,12 +372,12 @@ export class SIGINTProcessor {
     // Simulated processing
     return {
       decoded: !intercept.encrypted,
-      content: intercept.encrypted ? null : 'Decoded content placeholder',
-      language: 'en',
-      speakers: intercept.type === 'VOICE' ? 2 : 0,
+      content: intercept.encrypted ? null : "Decoded content placeholder",
+      language: "en",
+      speakers: intercept.type === "VOICE" ? 2 : 0,
       translation: null,
       keywords: [],
-      entities: []
+      entities: [],
     };
   }
 
@@ -364,7 +395,7 @@ export class SIGINTProcessor {
     recommendations: string[];
   } {
     const filteredIntercepts = Array.from(this.intercepts.values()).filter(
-      i => i.timestamp >= timeframe.start && i.timestamp <= timeframe.end
+      (i) => i.timestamp >= timeframe.start && i.timestamp <= timeframe.end
     );
 
     return {
@@ -375,29 +406,29 @@ export class SIGINTProcessor {
       keyFindings: [
         `${filteredIntercepts.length} intercepts processed`,
         `${this.sources.size} active signal sources`,
-        `${this.emitters.size} emitters identified`
+        `${this.emitters.size} emitters identified`,
       ],
       geolocations: [],
       threatIndicators: [],
       recommendations: [
-        'Continue monitoring identified frequencies',
-        'Cross-reference with HUMINT sources',
-        'Update emitter library with new signatures'
-      ]
+        "Continue monitoring identified frequencies",
+        "Cross-reference with HUMINT sources",
+        "Update emitter library with new signatures",
+      ],
     };
   }
 
   // Private helper methods
   private analyzeSignal(_data: Uint8Array, _metadata: any): any {
     return {
-      decoded: 'Decoded signal content',
+      decoded: "Decoded signal content",
       encrypted: false,
       encryptionType: undefined,
       keywords: [],
       entities: [],
-      language: 'en',
-      sentiment: 'NEUTRAL' as const,
-      urgency: 'ROUTINE' as const
+      language: "en",
+      sentiment: "NEUTRAL" as const,
+      urgency: "ROUTINE" as const,
     };
   }
 
@@ -422,8 +453,15 @@ export class SIGINTProcessor {
     return intervals;
   }
 
-  private detectBeaconPattern(intervals: number[]): { isBeacon: boolean; interval: number; jitter: number; confidence: number } {
-    if (intervals.length < 5) {return { isBeacon: false, interval: 0, jitter: 0, confidence: 0 };}
+  private detectBeaconPattern(intervals: number[]): {
+    isBeacon: boolean;
+    interval: number;
+    jitter: number;
+    confidence: number;
+  } {
+    if (intervals.length < 5) {
+      return { isBeacon: false, interval: 0, jitter: 0, confidence: 0 };
+    }
 
     const avg = intervals.reduce((a, b) => a + b, 0) / intervals.length;
     const variance = intervals.reduce((sum, i) => sum + Math.pow(i - avg, 2), 0) / intervals.length;
@@ -434,19 +472,25 @@ export class SIGINTProcessor {
       isBeacon: jitter < 0.2,
       interval: avg,
       jitter,
-      confidence: Math.max(0, 100 - jitter * 100)
+      confidence: Math.max(0, 100 - jitter * 100),
     };
   }
 
   // Public API
-  addSource(source: SignalSource): void { this.sources.set(source.id, source); }
-  getSource(id: string): SignalSource | undefined { return this.sources.get(id); }
-  getAllSources(): SignalSource[] { return Array.from(this.sources.values()); }
+  addSource(source: SignalSource): void {
+    this.sources.set(source.id, source);
+  }
+  getSource(id: string): SignalSource | undefined {
+    return this.sources.get(id);
+  }
+  getAllSources(): SignalSource[] {
+    return Array.from(this.sources.values());
+  }
   getIntercepts(sourceId?: string): Intercept[] {
     const all = Array.from(this.intercepts.values());
-    return sourceId ? all.filter(i => i.sourceId === sourceId) : all;
+    return sourceId ? all.filter((i) => i.sourceId === sourceId) : all;
   }
-  loadEmitterLibrary(library: Map<string, any>): void { this.emitterLibrary = library; }
+  loadEmitterLibrary(library: Map<string, any>): void {
+    this.emitterLibrary = library;
+  }
 }
-
-

@@ -2,32 +2,24 @@
  * Config Commands
  */
 
-import { Command } from 'commander';
-import fs from 'node:fs';
-import path from 'node:path';
-import os from 'node:os';
-import yaml from 'yaml';
-import type { CLIConfig } from '../lib/config.js';
-import {
-  getProfile,
-  saveConfig,
-  setProfileValue,
-  getConfigPath,
-} from '../lib/config.js';
-import { formatOutput, success, error, info } from '../utils/output.js';
-import { handleError, ValidationError } from '../utils/errors.js';
-import { CONFIG_DIR, CONFIG_FILE_NAME } from '../lib/constants.js';
+import { Command } from "commander";
+import fs from "node:fs";
+import path from "node:path";
+import os from "node:os";
+import yaml from "yaml";
+import type { CLIConfig } from "../lib/config.js";
+import { getProfile, saveConfig, setProfileValue, getConfigPath } from "../lib/config.js";
+import { formatOutput, success, error, info } from "../utils/output.js";
+import { handleError, ValidationError } from "../utils/errors.js";
+import { CONFIG_DIR, CONFIG_FILE_NAME } from "../lib/constants.js";
 
 export function registerConfigCommands(program: Command, config: CLIConfig): void {
-  const configCmd = program
-    .command('config')
-    .alias('c')
-    .description('Configuration management');
+  const configCmd = program.command("config").alias("c").description("Configuration management");
 
   configCmd
-    .command('show')
-    .description('Show current configuration')
-    .option('--profile <name>', 'Show specific profile')
+    .command("show")
+    .description("Show current configuration")
+    .option("--profile <name>", "Show specific profile")
     .action((options) => {
       try {
         if (options.profile) {
@@ -36,14 +28,14 @@ export function registerConfigCommands(program: Command, config: CLIConfig): voi
             console.log(JSON.stringify(profile, null, 2));
           } else {
             console.log(`\nProfile: ${options.profile}`);
-            console.log(formatOutput(profile, { format: 'plain' }));
+            console.log(formatOutput(profile, { format: "plain" }));
           }
         } else {
           if (program.opts().json) {
             console.log(JSON.stringify(config, null, 2));
           } else {
-            console.log('\nConfiguration:');
-            console.log(formatOutput(config, { format: 'plain' }));
+            console.log("\nConfiguration:");
+            console.log(formatOutput(config, { format: "plain" }));
           }
         }
       } catch (err) {
@@ -52,15 +44,15 @@ export function registerConfigCommands(program: Command, config: CLIConfig): voi
     });
 
   configCmd
-    .command('set <key> <value>')
-    .description('Set a configuration value')
-    .option('--profile <name>', 'Target profile', 'default')
+    .command("set <key> <value>")
+    .description("Set a configuration value")
+    .option("--profile <name>", "Target profile", "default")
     .action((key: string, value: string, options) => {
       try {
         // Parse value
         let parsedValue: unknown = value;
-        if (value === 'true') parsedValue = true;
-        else if (value === 'false') parsedValue = false;
+        if (value === "true") parsedValue = true;
+        else if (value === "false") parsedValue = false;
         else if (!isNaN(Number(value))) parsedValue = Number(value);
 
         setProfileValue(options.profile, key, parsedValue);
@@ -72,20 +64,20 @@ export function registerConfigCommands(program: Command, config: CLIConfig): voi
     });
 
   configCmd
-    .command('get <key>')
-    .description('Get a configuration value')
-    .option('--profile <name>', 'Target profile', 'default')
+    .command("get <key>")
+    .description("Get a configuration value")
+    .option("--profile <name>", "Target profile", "default")
     .action((key: string, options) => {
       try {
         const profile = getProfile(config, options.profile);
-        const keys = key.split('.');
+        const keys = key.split(".");
 
         let value: unknown = profile;
         for (const k of keys) {
-          if (value && typeof value === 'object' && k in value) {
+          if (value && typeof value === "object" && k in value) {
             value = (value as Record<string, unknown>)[k];
           } else {
-            console.log('undefined');
+            console.log("undefined");
             return;
           }
         }
@@ -101,39 +93,39 @@ export function registerConfigCommands(program: Command, config: CLIConfig): voi
     });
 
   configCmd
-    .command('init')
-    .description('Initialize configuration file')
-    .option('--global', 'Create in home directory')
-    .option('--force', 'Overwrite existing config')
+    .command("init")
+    .description("Initialize configuration file")
+    .option("--global", "Create in home directory")
+    .option("--force", "Overwrite existing config")
     .action(async (options) => {
       try {
         const configPath = options.global
-          ? path.join(os.homedir(), CONFIG_DIR, 'config.yaml')
+          ? path.join(os.homedir(), CONFIG_DIR, "config.yaml")
           : path.join(process.cwd(), `${CONFIG_FILE_NAME}.yaml`);
 
         if (fs.existsSync(configPath) && !options.force) {
           error(`Configuration file already exists: ${configPath}`);
-          info('Use --force to overwrite');
+          info("Use --force to overwrite");
           return;
         }
 
         const defaultConfig: CLIConfig = {
-          defaultProfile: 'default',
+          defaultProfile: "default",
           profiles: {
             default: {
               neo4j: {
-                uri: 'bolt://localhost:7687',
-                user: 'neo4j',
-                password: '',
-                database: 'neo4j',
+                uri: "bolt://localhost:7687",
+                user: "neo4j",
+                password: "",
+                database: "neo4j",
                 encrypted: false,
               },
               postgres: {
-                host: 'localhost',
+                host: "localhost",
                 port: 5432,
-                database: 'intelgraph',
-                user: 'postgres',
-                password: '',
+                database: "intelgraph",
+                user: "postgres",
+                password: "",
                 ssl: false,
               },
               agent: {
@@ -143,7 +135,7 @@ export function registerConfigCommands(program: Command, config: CLIConfig): voi
                 maxConcurrent: 5,
               },
               export: {
-                outputDir: './exports',
+                outputDir: "./exports",
                 compression: true,
                 signExports: false,
               },
@@ -161,22 +153,22 @@ export function registerConfigCommands(program: Command, config: CLIConfig): voi
         fs.writeFileSync(configPath, yaml.stringify(defaultConfig));
 
         success(`Configuration file created: ${configPath}`);
-        info('Edit this file to configure your connections');
+        info("Edit this file to configure your connections");
       } catch (err) {
         handleError(err);
       }
     });
 
   configCmd
-    .command('path')
-    .description('Show configuration file path')
+    .command("path")
+    .description("Show configuration file path")
     .action(() => {
       console.log(getConfigPath());
     });
 
   configCmd
-    .command('profiles')
-    .description('List available profiles')
+    .command("profiles")
+    .description("List available profiles")
     .action(() => {
       try {
         const profiles = Object.keys(config.profiles);
@@ -184,10 +176,10 @@ export function registerConfigCommands(program: Command, config: CLIConfig): voi
         if (program.opts().json) {
           console.log(JSON.stringify(profiles, null, 2));
         } else {
-          console.log('\nAvailable Profiles:');
+          console.log("\nAvailable Profiles:");
           for (const name of profiles) {
             const isDefault = name === config.defaultProfile;
-            console.log(`  ${isDefault ? '* ' : '  '}${name}`);
+            console.log(`  ${isDefault ? "* " : "  "}${name}`);
           }
         }
       } catch (err) {
@@ -196,9 +188,9 @@ export function registerConfigCommands(program: Command, config: CLIConfig): voi
     });
 
   configCmd
-    .command('add-profile <name>')
-    .description('Add a new profile')
-    .option('--copy-from <profile>', 'Copy settings from existing profile')
+    .command("add-profile <name>")
+    .description("Add a new profile")
+    .option("--copy-from <profile>", "Copy settings from existing profile")
     .action((name: string, options) => {
       try {
         if (config.profiles[name]) {
@@ -224,8 +216,8 @@ export function registerConfigCommands(program: Command, config: CLIConfig): voi
     });
 
   configCmd
-    .command('remove-profile <name>')
-    .description('Remove a profile')
+    .command("remove-profile <name>")
+    .description("Remove a profile")
     .action((name: string) => {
       try {
         if (!config.profiles[name]) {
@@ -233,7 +225,7 @@ export function registerConfigCommands(program: Command, config: CLIConfig): voi
         }
 
         if (name === config.defaultProfile) {
-          throw new ValidationError('Cannot remove default profile');
+          throw new ValidationError("Cannot remove default profile");
         }
 
         delete config.profiles[name];
@@ -246,8 +238,8 @@ export function registerConfigCommands(program: Command, config: CLIConfig): voi
     });
 
   configCmd
-    .command('set-default <name>')
-    .description('Set default profile')
+    .command("set-default <name>")
+    .description("Set default profile")
     .action((name: string) => {
       try {
         if (!config.profiles[name]) {
@@ -264,14 +256,12 @@ export function registerConfigCommands(program: Command, config: CLIConfig): voi
     });
 
   configCmd
-    .command('validate')
-    .description('Validate configuration')
-    .option('--profile <name>', 'Validate specific profile')
+    .command("validate")
+    .description("Validate configuration")
+    .option("--profile <name>", "Validate specific profile")
     .action(async (options) => {
       try {
-        const profiles = options.profile
-          ? [options.profile]
-          : Object.keys(config.profiles);
+        const profiles = options.profile ? [options.profile] : Object.keys(config.profiles);
 
         let hasErrors = false;
 
@@ -289,46 +279,46 @@ export function registerConfigCommands(program: Command, config: CLIConfig): voi
           // Validate Neo4j config
           if (profile.neo4j) {
             if (!profile.neo4j.uri) {
-              error('  neo4j.uri is required');
+              error("  neo4j.uri is required");
               hasErrors = true;
             } else {
-              success('  neo4j.uri: valid');
+              success("  neo4j.uri: valid");
             }
           } else {
-            info('  neo4j: not configured');
+            info("  neo4j: not configured");
           }
 
           // Validate PostgreSQL config
           if (profile.postgres) {
             if (!profile.postgres.host) {
-              error('  postgres.host is required');
+              error("  postgres.host is required");
               hasErrors = true;
             } else {
-              success('  postgres.host: valid');
+              success("  postgres.host: valid");
             }
           } else {
-            info('  postgres: not configured');
+            info("  postgres: not configured");
           }
 
           // Validate export config
           if (profile.export) {
             if (!profile.export.outputDir) {
-              error('  export.outputDir is required');
+              error("  export.outputDir is required");
               hasErrors = true;
             } else {
-              success('  export.outputDir: valid');
+              success("  export.outputDir: valid");
             }
           } else {
-            info('  export: not configured');
+            info("  export: not configured");
           }
         }
 
         if (!hasErrors) {
-          console.log('\n');
-          success('Configuration is valid');
+          console.log("\n");
+          success("Configuration is valid");
         } else {
-          console.log('\n');
-          error('Configuration has errors');
+          console.log("\n");
+          error("Configuration has errors");
           process.exit(1);
         }
       } catch (err) {

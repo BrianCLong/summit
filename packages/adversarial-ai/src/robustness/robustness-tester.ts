@@ -4,12 +4,12 @@ import {
   BackdoorDetectionResult,
   PoisoningDetectionResult,
   AdversarialAttackType,
-  DefenseMechanism
-} from '../types';
-import { FGSMAttack } from '../attacks/fgsm';
-import { PGDAttack } from '../attacks/pgd';
-import { CarliniWagnerAttack } from '../attacks/cw';
-import { DeepFoolAttack } from '../attacks/deepfool';
+  DefenseMechanism,
+} from "../types";
+import { FGSMAttack } from "../attacks/fgsm";
+import { PGDAttack } from "../attacks/pgd";
+import { CarliniWagnerAttack } from "../attacks/cw";
+import { DeepFoolAttack } from "../attacks/deepfool";
 
 /**
  * Comprehensive robustness testing framework
@@ -46,7 +46,9 @@ export class RobustnessTester {
       const originalConfidence = Math.max(...originalLogits);
 
       // Skip if already misclassified
-      if (originalClass !== trueLabel) {continue;}
+      if (originalClass !== trueLabel) {
+        continue;
+      }
 
       // Generate adversarial example
       let adversarialExample;
@@ -119,7 +121,7 @@ export class RobustnessTester {
 
     return {
       testId: this.generateId(),
-      modelId: 'unknown',
+      modelId: "unknown",
       attackType,
       totalSamples: numSamples,
       successfulAttacks,
@@ -130,9 +132,9 @@ export class RobustnessTester {
       results,
       metadata: {
         config,
-        testDate: new Date().toISOString()
+        testDate: new Date().toISOString(),
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -157,7 +159,7 @@ export class RobustnessTester {
       // Sample noisy predictions
       const numSamples = 100;
       for (let i = 0; i < numSamples; i++) {
-        const noisyInput = input.map(val => {
+        const noisyInput = input.map((val) => {
           const noise = (Math.random() - 0.5) * 2 * epsilon;
           return Math.max(0, Math.min(1, val + noise));
         });
@@ -168,7 +170,7 @@ export class RobustnessTester {
 
       // Check if majority vote is stable
       const counts = new Map<number, number>();
-      predictions.forEach(p => {
+      predictions.forEach((p) => {
         counts.set(p, (counts.get(p) || 0) + 1);
       });
 
@@ -183,7 +185,7 @@ export class RobustnessTester {
     return {
       certifiedAccuracy: certifiedSamples / testData.length,
       certifiedSamples,
-      totalSamples: testData.length
+      totalSamples: testData.length,
     };
   }
 
@@ -218,15 +220,23 @@ export class RobustnessTester {
     }
 
     // Compute metrics
-    let tp = 0, fp = 0, tn = 0, fn = 0;
+    let tp = 0,
+      fp = 0,
+      tn = 0,
+      fn = 0;
 
     for (const { score, isOOD } of scores) {
       const predictedOOD = score < threshold;
 
-      if (predictedOOD && isOOD) {tp++;}
-      else if (predictedOOD && !isOOD) {fp++;}
-      else if (!predictedOOD && !isOOD) {tn++;}
-      else {fn++;}
+      if (predictedOOD && isOOD) {
+        tp++;
+      } else if (predictedOOD && !isOOD) {
+        fp++;
+      } else if (!predictedOOD && !isOOD) {
+        tn++;
+      } else {
+        fn++;
+      }
     }
 
     const detectionAccuracy = (tp + tn) / scores.length;
@@ -240,7 +250,7 @@ export class RobustnessTester {
       auroc,
       detectionAccuracy,
       falsePositiveRate: fpr,
-      falseNegativeRate: fnr
+      falseNegativeRate: fnr,
     };
   }
 
@@ -259,7 +269,9 @@ export class RobustnessTester {
     for (let i = 0; i < cleanData.length; i++) {
       const logits = await predict(cleanData[i]);
       const predicted = this.argmax(logits);
-      if (predicted === trueLabels[i]) {cleanCorrect++;}
+      if (predicted === trueLabels[i]) {
+        cleanCorrect++;
+      }
     }
     const cleanAccuracy = cleanCorrect / cleanData.length;
 
@@ -291,7 +303,9 @@ export class RobustnessTester {
     for (const input of cleanData) {
       const logits = await predict(input);
       const maxProb = Math.max(...this.softmax(logits));
-      if (maxProb < 0.5) {falsePositives++;}
+      if (maxProb < 0.5) {
+        falsePositives++;
+      }
     }
     const falsePositiveRate = falsePositives / cleanData.length;
 
@@ -306,8 +320,8 @@ export class RobustnessTester {
       metadata: {
         cleanSamples: cleanData.length,
         adversarialSamples: adversarialData.length,
-        testDate: new Date().toISOString()
-      }
+        testDate: new Date().toISOString(),
+      },
     };
   }
 
@@ -324,7 +338,7 @@ export class RobustnessTester {
     const activations: number[][] = [];
 
     for (const input of validationData) {
-      const acts = await getActivations(input, 'final');
+      const acts = await getActivations(input, "final");
       activations.push(acts);
     }
 
@@ -332,8 +346,8 @@ export class RobustnessTester {
     const neuronStats = this.analyzeNeuronActivations(activations);
     const suspiciousNeurons = neuronStats
       .map((stat, idx) => ({ idx, ...stat }))
-      .filter(n => n.anomalyScore > 2.5)
-      .map(n => n.idx);
+      .filter((n) => n.anomalyScore > 2.5)
+      .map((n) => n.idx);
 
     // Check if backdoor is present
     const isBackdoored = suspiciousNeurons.length > 0;
@@ -346,10 +360,10 @@ export class RobustnessTester {
       confidence,
       suspiciousNeurons,
       metadata: {
-        method: 'Activation-Clustering',
+        method: "Activation-Clustering",
         validationSamples: validationData.length,
-        detectionThreshold: 2.5
-      }
+        detectionThreshold: 2.5,
+      },
     };
   }
 
@@ -395,26 +409,29 @@ export class RobustnessTester {
       poisonedSamples: uniquePoisoned,
       poisonRate,
       detectionConfidence: poisonRate > 0.01 ? 0.8 : 0.5,
-      poisonType: 'label-flip-or-backdoor',
+      poisonType: "label-flip-or-backdoor",
       metadata: {
         totalSamples: trainingData.length,
-        method: 'Outlier-Detection'
-      }
+        method: "Outlier-Detection",
+      },
     };
   }
 
   private analyzeNeuronActivations(
     activations: number[][]
   ): Array<{ mean: number; std: number; anomalyScore: number }> {
-    if (activations.length === 0) {return [];}
+    if (activations.length === 0) {
+      return [];
+    }
 
     const numNeurons = activations[0].length;
     const stats: Array<{ mean: number; std: number; anomalyScore: number }> = [];
 
     for (let i = 0; i < numNeurons; i++) {
-      const values = activations.map(a => a[i]);
+      const values = activations.map((a) => a[i]);
       const mean = values.reduce((a, b) => a + b, 0) / values.length;
-      const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+      const variance =
+        values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
       const std = Math.sqrt(variance);
 
       // Anomaly score based on activation distribution
@@ -429,7 +446,7 @@ export class RobustnessTester {
 
   private checkOutlier(sample: number[], dataset: number[][]): boolean {
     // Simple distance-based outlier detection
-    const distances = dataset.map(s => this.l2Distance(sample, s));
+    const distances = dataset.map((s) => this.l2Distance(sample, s));
     distances.sort((a, b) => a - b);
 
     const medianDistance = distances[Math.floor(distances.length / 2)];
@@ -443,31 +460,27 @@ export class RobustnessTester {
   }
 
   private l2Distance(a: number[], b: number[]): number {
-    return Math.sqrt(
-      a.reduce((sum, val, idx) => sum + Math.pow(val - b[idx], 2), 0)
-    );
+    return Math.sqrt(a.reduce((sum, val, idx) => sum + Math.pow(val - b[idx], 2), 0));
   }
 
   private softmax(logits: number[]): number[] {
     const maxLogit = Math.max(...logits);
-    const exps = logits.map(l => Math.exp(l - maxLogit));
+    const exps = logits.map((l) => Math.exp(l - maxLogit));
     const sum = exps.reduce((a, b) => a + b, 0);
-    return exps.map(e => e / sum);
+    return exps.map((e) => e / sum);
   }
 
   private argmax(array: number[]): number {
     return array.indexOf(Math.max(...array));
   }
 
-  private computeAUROC(
-    scores: Array<{ score: number; isOOD: boolean }>
-  ): number {
+  private computeAUROC(scores: Array<{ score: number; isOOD: boolean }>): number {
     // Sort by score
     const sorted = [...scores].sort((a, b) => b.score - a.score);
 
     let tp = 0;
     let fp = 0;
-    const totalPositive = scores.filter(s => s.isOOD).length;
+    const totalPositive = scores.filter((s) => s.isOOD).length;
     const totalNegative = scores.length - totalPositive;
 
     let auc = 0;

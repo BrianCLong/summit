@@ -3,13 +3,13 @@ name: Evidence Bundle Generation and Release
 on:
   push:
     tags:
-      - 'v*.*.*-GA'
+      - "v*.*.*-GA"
   workflow_dispatch:
     inputs:
       release_tag:
-        description: 'Release tag (e.g., v1.0.0-GA)'
+        description: "Release tag (e.g., v1.0.0-GA)"
         required: true
-        default: 'v1.0.0-GA'
+        default: "v1.0.0-GA"
 
 env:
   REGISTRY: ghcr.io

@@ -12,29 +12,29 @@ Error Boundaries are critical for isolating failures and preventing full-app cra
 
 The fallback UI must be consistent, actionable, and user-friendly.
 
-*   **Structure**:
-    *   **Icon**: Visual indicator of error (e.g., alert triangle).
-    *   **Title**: Clear, non-technical header (e.g., "Something went wrong").
-    *   **Message**: User-safe explanation (e.g., "We couldn't load this section.").
-    *   **Action**: Primary "Try Again" button (resets state/boundary). Secondary "Go Home" or navigation button.
-*   **Developer/Operator Details**:
-    *   **Production**: Do *not* show stack traces or raw error messages to end-users. Show a correlation ID if available.
-    *   **Development**: Show full stack trace and error message in a collapsible or distinct section.
+- **Structure**:
+  - **Icon**: Visual indicator of error (e.g., alert triangle).
+  - **Title**: Clear, non-technical header (e.g., "Something went wrong").
+  - **Message**: User-safe explanation (e.g., "We couldn't load this section.").
+  - **Action**: Primary "Try Again" button (resets state/boundary). Secondary "Go Home" or navigation button.
+- **Developer/Operator Details**:
+  - **Production**: Do _not_ show stack traces or raw error messages to end-users. Show a correlation ID if available.
+  - **Development**: Show full stack trace and error message in a collapsible or distinct section.
 
 ## Logging Policy
 
-*   **What to Log**:
-    *   Error name and message.
-    *   Component stack (React `errorInfo`).
-    *   Route context (where did it happen?).
-    *   User context (tenant ID, user ID) - *without PII if possible*.
-    *   Correlation ID (trace ID) to link to backend logs.
-*   **What NOT to Log**:
-    *   Sensitive payloads (passwords, tokens, PII).
-    *   Large state objects that might contain sensitive data.
+- **What to Log**:
+  - Error name and message.
+  - Component stack (React `errorInfo`).
+  - Route context (where did it happen?).
+  - User context (tenant ID, user ID) - _without PII if possible_.
+  - Correlation ID (trace ID) to link to backend logs.
+- **What NOT to Log**:
+  - Sensitive payloads (passwords, tokens, PII).
+  - Large state objects that might contain sensitive data.
 
 ## Accessibility (A11y) Requirements
 
-*   **Focus Management**: When the fallback renders, focus should be moved to the error heading or the primary action button so screen reader users know context has changed.
-*   **Keyboard Navigation**: All actions (Retry, Go Home) must be keyboard accessible.
-*   **ARIA Attributes**: Use `role="alert"` for the container or critical message to announce the error immediately.
+- **Focus Management**: When the fallback renders, focus should be moved to the error heading or the primary action button so screen reader users know context has changed.
+- **Keyboard Navigation**: All actions (Retry, Go Home) must be keyboard accessible.
+- **ARIA Attributes**: Use `role="alert"` for the container or critical message to announce the error immediately.

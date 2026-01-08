@@ -171,15 +171,15 @@ Operate **governed analytics at partner scale** with sealed execution, verifiabl
 ### 1) Attested JWT (Partner API)
 
 ```ts
-import * as jose from 'jose';
+import * as jose from "jose";
 export async function signAttestedJwt(attestation: object, sub: string) {
-  const key = await jose.importPKCS8(process.env.JWS_PRIVATE!, 'RS256');
+  const key = await jose.importPKCS8(process.env.JWS_PRIVATE!, "RS256");
   return await new jose.SignJWT({ attestation })
-    .setProtectedHeader({ alg: 'RS256', typ: 'JWT' })
-    .setIssuer('igac.partner')
+    .setProtectedHeader({ alg: "RS256", typ: "JWT" })
+    .setIssuer("igac.partner")
     .setSubject(sub)
-    .setAudience('intelgraph.partner')
-    .setExpirationTime('5m')
+    .setAudience("intelgraph.partner")
+    .setExpirationTime("5m")
     .sign(key);
 }
 ```
@@ -204,10 +204,10 @@ caps:
 
 ```ts
 if (estimate > cap.soft_warn && estimate <= cap.hard_cap) {
-  logger.warn({ selector, estimate }, 'CostSoftWarn');
+  logger.warn({ selector, estimate }, "CostSoftWarn");
 }
 if (estimate > cap.hard_cap) {
-  throw new Error('CostHardCapExceeded');
+  throw new Error("CostHardCapExceeded");
 }
 ```
 
@@ -242,7 +242,7 @@ if (estimate > cap.hard_cap) {
 
 ```ts
 function enforceEgress(token: PolicyToken, request: EgressRequest) {
-  if (!token.allows(request)) throw new Error('EgressDenied');
+  if (!token.allows(request)) throw new Error("EgressDenied");
 }
 ```
 

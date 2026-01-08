@@ -1,7 +1,7 @@
 name: Review SLA
 on:
   schedule:
-    - cron: '0 * * * *' # Runs every hour
+    - cron: "0 * * * *" # Runs every hour
 
 jobs:
   check-sla:

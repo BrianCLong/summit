@@ -2,27 +2,28 @@
  * Missile Capability Assessment
  */
 
-import { type MissileCapability, type MissileSystem, MissileType } from './types.js';
+import { type MissileCapability, type MissileSystem, MissileType } from "./types.js";
 
 export class MissileCapabilityAssessor {
-  assessCountryCapability(
-    country: string,
-    missiles: MissileSystem[]
-  ): MissileCapability {
-    const icbms = missiles.filter(m => m.missile_type === MissileType.BALLISTIC_ICBM);
-    const slbms = missiles.filter(m => m.submarine_launched);
-    const cruise = missiles.filter(m =>
-      m.missile_type === MissileType.CRUISE_GROUND ||
-      m.missile_type === MissileType.CRUISE_AIR ||
-      m.missile_type === MissileType.CRUISE_SEA
+  assessCountryCapability(country: string, missiles: MissileSystem[]): MissileCapability {
+    const icbms = missiles.filter((m) => m.missile_type === MissileType.BALLISTIC_ICBM);
+    const slbms = missiles.filter((m) => m.submarine_launched);
+    const cruise = missiles.filter(
+      (m) =>
+        m.missile_type === MissileType.CRUISE_GROUND ||
+        m.missile_type === MissileType.CRUISE_AIR ||
+        m.missile_type === MissileType.CRUISE_SEA
     );
-    const hypersonic = missiles.filter(m =>
-      m.missile_type === MissileType.HYPERSONIC_GLIDE ||
-      m.missile_type === MissileType.HYPERSONIC_CRUISE
+    const hypersonic = missiles.filter(
+      (m) =>
+        m.missile_type === MissileType.HYPERSONIC_GLIDE ||
+        m.missile_type === MissileType.HYPERSONIC_CRUISE
     );
 
-    const mobile = missiles.filter(m => m.mobile).reduce((sum, m) => sum + m.estimated_inventory, 0);
-    const mirv = missiles.some(m => m.mirv_capable);
+    const mobile = missiles
+      .filter((m) => m.mobile)
+      .reduce((sum, m) => sum + m.estimated_inventory, 0);
+    const mirv = missiles.some((m) => m.mirv_capable);
     const strategic = icbms.length > 0 || slbms.length > 0;
 
     // Second strike: survivable forces (mobile, submarine)
@@ -31,15 +32,15 @@ export class MissileCapabilityAssessor {
     // First strike: accurate, large arsenal
     const first_strike = icbms.reduce((sum, m) => sum + m.estimated_inventory, 0) > 100;
 
-    let overall_assessment: 'advanced' | 'intermediate' | 'developing' | 'nascent';
+    let overall_assessment: "advanced" | "intermediate" | "developing" | "nascent";
     if (strategic && mirv && hypersonic.length > 0) {
-      overall_assessment = 'advanced';
+      overall_assessment = "advanced";
     } else if (strategic || hypersonic.length > 0) {
-      overall_assessment = 'intermediate';
+      overall_assessment = "intermediate";
     } else if (missiles.length > 10) {
-      overall_assessment = 'developing';
+      overall_assessment = "developing";
     } else {
-      overall_assessment = 'nascent';
+      overall_assessment = "nascent";
     }
 
     return {
@@ -54,11 +55,14 @@ export class MissileCapabilityAssessor {
       submarine_platforms: slbms.length,
       second_strike_capability: second_strike,
       first_strike_capability: first_strike,
-      overall_assessment
+      overall_assessment,
     };
   }
 
-  compareCapabilities(cap1: MissileCapability, cap2: MissileCapability): {
+  compareCapabilities(
+    cap1: MissileCapability,
+    cap2: MissileCapability
+  ): {
     more_advanced: string;
     advantages: Record<string, string>;
   } {
@@ -81,7 +85,7 @@ export class MissileCapabilityAssessor {
 
     return {
       more_advanced: score1 > score2 ? cap1.country : cap2.country,
-      advantages
+      advantages,
     };
   }
 

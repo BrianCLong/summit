@@ -4,14 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Dry run (true/false)'
+        description: "Dry run (true/false)"
         required: false
-        default: 'false'
+        default: "false"
       maestro_digest:
-        description: 'Optional maestro-control-plane digest (sha256:...) to set placeholders'
+        description: "Optional maestro-control-plane digest (sha256:...) to set placeholders"
         required: false
   schedule:
-    - cron: '0 7 * * 1' # weekly Monday 07:00 UTC
+    - cron: "0 7 * * 1" # weekly Monday 07:00 UTC
 
 permissions:
   contents: write
@@ -50,8 +50,8 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          commit-message: 'chore(ci): auto-pin images to immutable digests'
-          title: 'chore(ci): auto-pin images to immutable digests'
+          commit-message: "chore(ci): auto-pin images to immutable digests"
+          title: "chore(ci): auto-pin images to immutable digests"
           body: |
             - Auto-pinned unpinned or :latest image references to @sha256 digests
             - Updated Maestro Rollout placeholders if digest provided

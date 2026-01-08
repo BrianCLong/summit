@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Avatar,
@@ -25,7 +25,7 @@ import {
   Switch,
   FormControlLabel,
   ListItemButton,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Group,
   Circle,
@@ -40,15 +40,15 @@ import {
   Share,
   LocationOn,
   Schedule,
-} from '@mui/icons-material';
-import { formatDistanceToNow } from 'date-fns';
+} from "@mui/icons-material";
+import { formatDistanceToNow } from "date-fns";
 
 function UserPresence({
   websocketService,
   currentUser,
   investigationId,
   showDetailed = false,
-  position = 'top-right',
+  position = "top-right",
   onUserClick,
   onInviteUser,
   maxVisible = 5,
@@ -62,22 +62,22 @@ function UserPresence({
 
   // Status colors
   const statusColors = {
-    online: '#4caf50',
-    away: '#ff9800',
-    busy: '#f44336',
-    offline: '#9e9e9e',
+    online: "#4caf50",
+    away: "#ff9800",
+    busy: "#f44336",
+    offline: "#9e9e9e",
   };
 
   useEffect(() => {
     if (!websocketService || !currentUser) return;
 
     // Join investigation presence room
-    websocketService.emit('join_presence', {
+    websocketService.emit("join_presence", {
       investigationId,
       userId: currentUser.id,
-      userName: currentUser.firstName || currentUser.name || 'User',
+      userName: currentUser.firstName || currentUser.name || "User",
       avatar: currentUser.avatar,
-      status: 'online',
+      status: "online",
     });
 
     // Handle user presence updates
@@ -88,7 +88,7 @@ function UserPresence({
           id: data.userId,
           name: data.userName,
           avatar: data.avatar,
-          status: data.status || 'online',
+          status: data.status || "online",
           joinedAt: new Date(),
           lastActivity: new Date(),
           location: data.location,
@@ -105,7 +105,7 @@ function UserPresence({
         if (user) {
           newUsers.set(data.userId, {
             ...user,
-            status: 'offline',
+            status: "offline",
             leftAt: new Date(),
           });
         }
@@ -164,42 +164,42 @@ function UserPresence({
     };
 
     // Register event listeners
-    websocketService.on('user_joined', handleUserJoined);
-    websocketService.on('user_left', handleUserLeft);
-    websocketService.on('user_status_updated', handleStatusUpdate);
-    websocketService.on('user_activity', handleUserActivity);
+    websocketService.on("user_joined", handleUserJoined);
+    websocketService.on("user_left", handleUserLeft);
+    websocketService.on("user_status_updated", handleStatusUpdate);
+    websocketService.on("user_activity", handleUserActivity);
 
     // Send periodic heartbeat
     const heartbeatInterval = setInterval(() => {
-      websocketService.emit('user_heartbeat', {
+      websocketService.emit("user_heartbeat", {
         investigationId,
         userId: currentUser.id,
-        status: document.hidden ? 'away' : 'online',
+        status: document.hidden ? "away" : "online",
       });
     }, 30000); // Every 30 seconds
 
     // Handle visibility change
     const handleVisibilityChange = () => {
-      const status = document.hidden ? 'away' : 'online';
-      websocketService.emit('user_status_update', {
+      const status = document.hidden ? "away" : "online";
+      websocketService.emit("user_status_update", {
         investigationId,
         userId: currentUser.id,
         status,
       });
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      websocketService.off('user_joined', handleUserJoined);
-      websocketService.off('user_left', handleUserLeft);
-      websocketService.off('user_status_updated', handleStatusUpdate);
-      websocketService.off('user_activity', handleUserActivity);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      websocketService.off("user_joined", handleUserJoined);
+      websocketService.off("user_left", handleUserLeft);
+      websocketService.off("user_status_updated", handleStatusUpdate);
+      websocketService.off("user_activity", handleUserActivity);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       clearInterval(heartbeatInterval);
 
       // Send leave event
-      websocketService.emit('leave_presence', {
+      websocketService.emit("leave_presence", {
         investigationId,
         userId: currentUser.id,
       });
@@ -208,16 +208,12 @@ function UserPresence({
 
   const activeUsers = Array.from(users.values()).filter(
     (user) =>
-      user.status !== 'offline' ||
-      (showInactive &&
-        user.leftAt &&
-        Date.now() - user.leftAt.getTime() < 300000), // Show for 5 minutes after leaving
+      user.status !== "offline" ||
+      (showInactive && user.leftAt && Date.now() - user.leftAt.getTime() < 300000) // Show for 5 minutes after leaving
   );
 
-  const onlineCount = activeUsers.filter(
-    (user) => user.status === 'online',
-  ).length;
-  const awayCount = activeUsers.filter((user) => user.status === 'away').length;
+  const onlineCount = activeUsers.filter((user) => user.status === "online").length;
+  const awayCount = activeUsers.filter((user) => user.status === "away").length;
 
   const getActivityDescription = (userId) => {
     const activity = userActivities.get(userId);
@@ -228,13 +224,13 @@ function UserPresence({
     });
 
     switch (activity.action) {
-      case 'viewing_graph':
+      case "viewing_graph":
         return `Viewing graph ${timeAgo}`;
-      case 'editing_node':
-        return `Editing ${activity.details?.nodeLabel || 'node'} ${timeAgo}`;
-      case 'running_analysis':
-        return `Running ${activity.details?.analysisType || 'analysis'} ${timeAgo}`;
-      case 'searching':
+      case "editing_node":
+        return `Editing ${activity.details?.nodeLabel || "node"} ${timeAgo}`;
+      case "running_analysis":
+        return `Running ${activity.details?.analysisType || "analysis"} ${timeAgo}`;
+      case "searching":
         return `Searching for "${activity.details?.query}" ${timeAgo}`;
       default:
         return `Active ${timeAgo}`;
@@ -245,13 +241,10 @@ function UserPresence({
     <Tooltip
       title={
         <Box>
-          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+          <Typography variant="body2" sx={{ fontWeight: "bold" }}>
             {user.name}
           </Typography>
-          <Typography
-            variant="caption"
-            sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-          >
+          <Typography variant="caption" sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
             <Circle sx={{ fontSize: 8, color: statusColors[user.status] }} />
             {user.status}
           </Typography>
@@ -261,10 +254,7 @@ function UserPresence({
             </Typography>
           )}
           {user.location && (
-            <Typography
-              variant="caption"
-              sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-            >
+            <Typography variant="caption" sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
               <LocationOn sx={{ fontSize: 12 }} />
               {user.location}
             </Typography>
@@ -275,14 +265,14 @@ function UserPresence({
     >
       <Badge
         overlap="circular"
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         badgeContent={
           <Circle
             sx={{
               fontSize: 12,
               color: statusColors[user.status],
-              bgcolor: 'background.paper',
-              borderRadius: '50%',
+              bgcolor: "background.paper",
+              borderRadius: "50%",
               p: 0.25,
             }}
           />
@@ -293,9 +283,9 @@ function UserPresence({
           sx={{
             width: size,
             height: size,
-            cursor: 'pointer',
-            border: user.isCurrentUser ? '2px solid' : 'none',
-            borderColor: 'primary.main',
+            cursor: "pointer",
+            border: user.isCurrentUser ? "2px solid" : "none",
+            borderColor: "primary.main",
           }}
           onClick={() => onUserClick?.(user)}
         >
@@ -313,14 +303,14 @@ function UserPresence({
       {!showDetailed && (
         <Paper
           sx={{
-            position: 'fixed',
-            top: position.includes('top') ? 16 : 'auto',
-            bottom: position.includes('bottom') ? 16 : 'auto',
-            right: position.includes('right') ? 16 : 'auto',
-            left: position.includes('left') ? 16 : 'auto',
+            position: "fixed",
+            top: position.includes("top") ? 16 : "auto",
+            bottom: position.includes("bottom") ? 16 : "auto",
+            right: position.includes("right") ? 16 : "auto",
+            left: position.includes("left") ? 16 : "auto",
             p: 2,
-            display: 'flex',
-            alignItems: 'center',
+            display: "flex",
+            alignItems: "center",
             gap: 2,
             zIndex: 1000,
             minWidth: 200,
@@ -334,27 +324,14 @@ function UserPresence({
             ))}
           </AvatarGroup>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Chip
-              size="small"
-              label={`${onlineCount} online`}
-              color="success"
-              variant="outlined"
-            />
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Chip size="small" label={`${onlineCount} online`} color="success" variant="outlined" />
             {awayCount > 0 && (
-              <Chip
-                size="small"
-                label={`${awayCount} away`}
-                color="warning"
-                variant="outlined"
-              />
+              <Chip size="small" label={`${awayCount} away`} color="warning" variant="outlined" />
             )}
           </Box>
 
-          <IconButton
-            size="small"
-            onClick={(e) => setAnchorEl(e.currentTarget)}
-          >
+          <IconButton size="small" onClick={(e) => setAnchorEl(e.currentTarget)}>
             <MoreVert />
           </IconButton>
         </Paper>
@@ -366,16 +343,13 @@ function UserPresence({
           <CardContent>
             <Box
               sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
                 mb: 2,
               }}
             >
-              <Typography
-                variant="h6"
-                sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-              >
+              <Typography variant="h6" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Group />
                 Team ({activeUsers.length})
               </Typography>
@@ -396,13 +370,9 @@ function UserPresence({
                   </ListItemAvatar>
                   <ListItemText
                     primary={
-                      <Box
-                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                      >
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                         {user.name}
-                        {user.isCurrentUser && (
-                          <Chip label="You" size="small" variant="outlined" />
-                        )}
+                        {user.isCurrentUser && <Chip label="You" size="small" variant="outlined" />}
                       </Box>
                     }
                     secondary={
@@ -410,7 +380,7 @@ function UserPresence({
                       `${user.status} since ${formatDistanceToNow(user.joinedAt, { addSuffix: true })}`
                     }
                   />
-                  <Box sx={{ display: 'flex', gap: 0.5 }}>
+                  <Box sx={{ display: "flex", gap: 0.5 }}>
                     <IconButton size="small">
                       <Message />
                     </IconButton>
@@ -444,8 +414,8 @@ function UserPresence({
         open={Boolean(anchorEl)}
         anchorEl={anchorEl}
         onClose={() => setAnchorEl(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
       >
         <List sx={{ width: 200 }}>
           <ListItemButton onClick={() => setSettingsOpen(true)}>
@@ -460,9 +430,7 @@ function UserPresence({
             <PersonAdd sx={{ mr: 1 }} />
             Invite User
           </ListItemButton>
-          <ListItemButton
-            onClick={() => navigator.share?.({ url: window.location.href })}
-          >
+          <ListItemButton onClick={() => navigator.share?.({ url: window.location.href })}>
             <Share sx={{ mr: 1 }} />
             Share Investigation
           </ListItemButton>
@@ -473,13 +441,10 @@ function UserPresence({
       <Dialog open={settingsOpen} onClose={() => setSettingsOpen(false)}>
         <DialogTitle>Presence Settings</DialogTitle>
         <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
             <FormControlLabel
               control={
-                <Switch
-                  checked={isVisible}
-                  onChange={(e) => setIsVisible(e.target.checked)}
-                />
+                <Switch checked={isVisible} onChange={(e) => setIsVisible(e.target.checked)} />
               }
               label="Show my presence to others"
             />
@@ -493,8 +458,8 @@ function UserPresence({
               label="Show recently offline users"
             />
             <Typography variant="body2" color="text.secondary">
-              Your presence information helps team members know when you're
-              actively working on the investigation.
+              Your presence information helps team members know when you're actively working on the
+              investigation.
             </Typography>
           </Box>
         </DialogContent>
@@ -507,13 +472,13 @@ function UserPresence({
       {!isVisible && (
         <IconButton
           sx={{
-            position: 'fixed',
-            top: position.includes('top') ? 16 : 'auto',
-            bottom: position.includes('bottom') ? 16 : 'auto',
-            right: position.includes('right') ? 16 : 'auto',
-            left: position.includes('left') ? 16 : 'auto',
+            position: "fixed",
+            top: position.includes("top") ? 16 : "auto",
+            bottom: position.includes("bottom") ? 16 : "auto",
+            right: position.includes("right") ? 16 : "auto",
+            left: position.includes("left") ? 16 : "auto",
             zIndex: 1000,
-            bgcolor: 'background.paper',
+            bgcolor: "background.paper",
             boxShadow: 1,
           }}
           onClick={() => setIsVisible(true)}

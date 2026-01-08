@@ -33,35 +33,41 @@
         <h3>Maestro APIs</h3>
         <a
           href="#"
-          onclick="load('/contracts/maestro/mcp.openapi.yaml'); return false;"
+          onclick="
+            load('/contracts/maestro/mcp.openapi.yaml');
+            return false;
+          "
           >MCP API</a
         >
         <a
           href="#"
-          onclick="load('/contracts/pipelines.openapi.yaml'); return false;"
+          onclick="
+            load('/contracts/pipelines.openapi.yaml');
+            return false;
+          "
           >Pipelines API</a
         >
         <a
           href="#"
-          onclick="load('/contracts/executors.openapi.yaml'); return false;"
+          onclick="
+            load('/contracts/executors.openapi.yaml');
+            return false;
+          "
           >Executors API</a
         >
       </div>
       <div id="main">
-        <redoc
-          id="redoc"
-          spec-url="/contracts/maestro/mcp.openapi.yaml"
-        ></redoc>
+        <redoc id="redoc" spec-url="/contracts/maestro/mcp.openapi.yaml"></redoc>
       </div>
     </div>
     <script>
       function load(url) {
-        const mount = document.getElementById('redoc');
-        mount.setAttribute('spec-url', url);
+        const mount = document.getElementById("redoc");
+        mount.setAttribute("spec-url", url);
         Redoc.init(url, {}, mount);
       }
-      document.addEventListener('DOMContentLoaded', () =>
-        load('/contracts/maestro/mcp.openapi.yaml'),
+      document.addEventListener("DOMContentLoaded", () =>
+        load("/contracts/maestro/mcp.openapi.yaml")
       );
     </script>
   </body>

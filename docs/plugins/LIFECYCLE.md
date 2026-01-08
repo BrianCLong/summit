@@ -28,23 +28,23 @@ graph TD
 
 ### `initialize(context)`
 
-*   **When**: Called when the plugin instance is created/loaded into memory.
-*   **Purpose**: Setup internal state, validate configuration, pre-compute values.
-*   **Constraints**: Must complete within 5 seconds. No side effects (network/db) allowed.
+- **When**: Called when the plugin instance is created/loaded into memory.
+- **Purpose**: Setup internal state, validate configuration, pre-compute values.
+- **Constraints**: Must complete within 5 seconds. No side effects (network/db) allowed.
 
 ### `execute(action, params, context)`
 
-*   **When**: Explicitly invoked by a user or workflow.
-*   **Purpose**: Perform a task and return a result.
-*   **Constraints**: Subject to `timeout` and memory limits.
+- **When**: Explicitly invoked by a user or workflow.
+- **Purpose**: Perform a task and return a result.
+- **Constraints**: Subject to `timeout` and memory limits.
 
 ### `onEvent(event, payload, context)`
 
-*   **When**: A subscribed platform event occurs (e.g., `entity:created`).
-*   **Purpose**: React to system changes.
-*   **Constraints**: Must return quickly; use background jobs for heavy lifting.
+- **When**: A subscribed platform event occurs (e.g., `entity:created`).
+- **Purpose**: React to system changes.
+- **Constraints**: Must return quickly; use background jobs for heavy lifting.
 
 ### `cleanup(context)`
 
-*   **When**: Plugin is disabled or unloaded.
-*   **Purpose**: Release resources, close connections.
+- **When**: Plugin is disabled or unloaded.
+- **Purpose**: Release resources, close connections.

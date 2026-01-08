@@ -2,7 +2,7 @@
  * DisruptiveThreatAnalyzer - Unconventional Threat Identification
  */
 
-import { DisruptiveThreat, ThreatScenario, WildCard } from './types.js';
+import { DisruptiveThreat, ThreatScenario, WildCard } from "./types.js";
 
 export interface ThreatAnalysisConfig {
   includeGrayZone: boolean;
@@ -44,7 +44,7 @@ export class DisruptiveThreatAnalyzer {
     const quantumThreats = await this.identifyQuantumThreats();
     threats.push(...quantumThreats);
 
-    threats.forEach(threat => this.threats.set(threat.id, threat));
+    threats.forEach((threat) => this.threats.set(threat.id, threat));
     return threats;
   }
 
@@ -72,7 +72,7 @@ export class DisruptiveThreatAnalyzer {
     const proxyOps = await this.identifyProxyOperations();
     threats.push(...proxyOps);
 
-    threats.forEach(threat => this.threats.set(threat.id, threat));
+    threats.forEach((threat) => this.threats.set(threat.id, threat));
     return threats;
   }
 
@@ -96,7 +96,7 @@ export class DisruptiveThreatAnalyzer {
     const nonState = await this.monitorNonStateActors();
     threats.push(...nonState);
 
-    threats.forEach(threat => this.threats.set(threat.id, threat));
+    threats.forEach((threat) => this.threats.set(threat.id, threat));
     return threats;
   }
 
@@ -124,7 +124,7 @@ export class DisruptiveThreatAnalyzer {
     const neurocognitive = await this.trackNeurocognitiveThreats();
     threats.push(...neurocognitive);
 
-    threats.forEach(threat => this.threats.set(threat.id, threat));
+    threats.forEach((threat) => this.threats.set(threat.id, threat));
     return threats;
   }
 
@@ -152,7 +152,7 @@ export class DisruptiveThreatAnalyzer {
     const cib = await this.monitorCoordinatedBehavior();
     threats.push(...cib);
 
-    threats.forEach(threat => this.threats.set(threat.id, threat));
+    threats.forEach((threat) => this.threats.set(threat.id, threat));
     return threats;
   }
 
@@ -178,7 +178,7 @@ export class DisruptiveThreatAnalyzer {
     const societalWildCards = await this.identifySocietalWildCards();
     wildCards.push(...societalWildCards);
 
-    wildCards.forEach(wc => this.wildCards.set(wc.id, wc));
+    wildCards.forEach((wc) => this.wildCards.set(wc.id, wc));
     return wildCards;
   }
 
@@ -209,7 +209,7 @@ export class DisruptiveThreatAnalyzer {
       scenarios.push(...wildCardScenarios);
     }
 
-    scenarios.forEach(scenario => this.scenarios.set(scenario.id, scenario));
+    scenarios.forEach((scenario) => this.scenarios.set(scenario.id, scenario));
     return scenarios;
   }
 
@@ -220,7 +220,7 @@ export class DisruptiveThreatAnalyzer {
     let threats = Array.from(this.threats.values());
 
     if (filter) {
-      threats = threats.filter(threat => {
+      threats = threats.filter((threat) => {
         return Object.entries(filter).every(([key, value]) => {
           return threat[key as keyof DisruptiveThreat] === value;
         });
@@ -234,11 +234,10 @@ export class DisruptiveThreatAnalyzer {
    * Get wild cards
    */
   getWildCards(): WildCard[] {
-    return Array.from(this.wildCards.values())
-      .sort((a, b) => {
-        const impactOrder = { 'catastrophic': 3, 'very-high': 2, 'high': 1 };
-        return impactOrder[b.impact] - impactOrder[a.impact];
-      });
+    return Array.from(this.wildCards.values()).sort((a, b) => {
+      const impactOrder = { catastrophic: 3, "very-high": 2, high: 1 };
+      return impactOrder[b.impact] - impactOrder[a.impact];
+    });
   }
 
   // Private analysis methods (stubs)
@@ -363,7 +362,7 @@ export class DisruptiveThreatAnalyzer {
         nearTerm: true,
         midTerm: false,
         longTerm: false,
-        uncertaintyLevel: 'medium',
+        uncertaintyLevel: "medium",
       },
       probability,
     };

@@ -1,6 +1,6 @@
 // @ts-nocheck
-import fs from 'node:fs';
-import path from 'node:path';
+import fs from "node:fs";
+import path from "node:path";
 
 export type SloMetrics = {
   availability?: string;
@@ -17,7 +17,7 @@ export type SloObjectives = {
 
 export type SloService = {
   name: string;
-  tier: 'critical' | 'standard';
+  tier: "critical" | "standard";
   owner?: string;
   metrics: SloMetrics;
   objectives: SloObjectives;
@@ -38,10 +38,10 @@ export type SloConfig = {
 };
 
 export const REQUIRED_SERVICES = [
-  'api-gateway',
-  'intelgraph-api',
-  'llm-orchestrator',
-  'ingestion-pipeline',
+  "api-gateway",
+  "intelgraph-api",
+  "llm-orchestrator",
+  "ingestion-pipeline",
 ] as const;
 
 export type ObservabilityValidationResult = {
@@ -51,33 +51,32 @@ export type ObservabilityValidationResult = {
   missingServices: string[];
 };
 
-const REQUIRED_METRIC_KEYS: (keyof SloMetrics)[] = ['availability', 'latency', 'errors'];
+const REQUIRED_METRIC_KEYS: (keyof SloMetrics)[] = ["availability", "latency", "errors"];
 
 export function loadSloConfig(configPath?: string): SloConfig {
-  const resolvedPath =
-    configPath || path.resolve(process.cwd(), 'config', 'slo.yaml');
+  const resolvedPath = configPath || path.resolve(process.cwd(), "config", "slo.yaml");
 
   if (!fs.existsSync(resolvedPath)) {
     throw new Error(`Missing SLO config at ${resolvedPath}`);
   }
 
-  const raw = fs.readFileSync(resolvedPath, 'utf8');
+  const raw = fs.readFileSync(resolvedPath, "utf8");
   let parsed: SloConfig;
 
   try {
     parsed = JSON.parse(raw);
   } catch (error) {
     throw new Error(
-      `Unable to parse SLO config as JSON/YAML-safe content: ${(error as Error).message}`,
+      `Unable to parse SLO config as JSON/YAML-safe content: ${(error as Error).message}`
     );
   }
 
   if (!parsed.services?.length) {
-    throw new Error('SLO config must include at least one service entry');
+    throw new Error("SLO config must include at least one service entry");
   }
 
   if (!parsed.error_budget_policy) {
-    throw new Error('SLO config missing error_budget_policy definition');
+    throw new Error("SLO config missing error_budget_policy definition");
   }
 
   return parsed;
@@ -85,33 +84,25 @@ export function loadSloConfig(configPath?: string): SloConfig {
 
 export function validateSloCoverage(
   config: SloConfig,
-  observedServices: string[] = [...REQUIRED_SERVICES],
+  observedServices: string[] = [...REQUIRED_SERVICES]
 ): ObservabilityValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
 
   const serviceMap = new Map(config.services.map((svc) => [svc.name, svc]));
 
-  const missingServices = observedServices.filter(
-    (svc) => !serviceMap.has(svc),
-  );
+  const missingServices = observedServices.filter((svc) => !serviceMap.has(svc));
   if (missingServices.length) {
-    errors.push(
-      `Missing SLO definitions for services: ${missingServices.join(', ')}`,
-    );
+    errors.push(`Missing SLO definitions for services: ${missingServices.join(", ")}`);
   }
 
   for (const service of config.services) {
-    const missingMetrics = REQUIRED_METRIC_KEYS.filter(
-      (key) => !service.metrics?.[key],
-    );
+    const missingMetrics = REQUIRED_METRIC_KEYS.filter((key) => !service.metrics?.[key]);
     if (missingMetrics.length) {
-      errors.push(
-        `${service.name}: missing required metrics (${missingMetrics.join(', ')})`,
-      );
+      errors.push(`${service.name}: missing required metrics (${missingMetrics.join(", ")})`);
     }
 
-    if (service.tier === 'critical' && !service.objectives?.availability) {
+    if (service.tier === "critical" && !service.objectives?.availability) {
       errors.push(`${service.name}: critical service missing availability SLO`);
     }
 
@@ -125,7 +116,7 @@ export function validateSloCoverage(
   }
 
   if (!config.error_budget_policy?.actions?.length) {
-    warnings.push('error_budget_policy.actions is empty');
+    warnings.push("error_budget_policy.actions is empty");
   }
 
   return {
@@ -138,7 +129,7 @@ export function validateSloCoverage(
 
 export function evaluateObservabilityGate(
   configPath?: string,
-  observedServices: string[] = [...REQUIRED_SERVICES],
+  observedServices: string[] = [...REQUIRED_SERVICES]
 ): ObservabilityValidationResult {
   const config = loadSloConfig(configPath);
   return validateSloCoverage(config, observedServices);

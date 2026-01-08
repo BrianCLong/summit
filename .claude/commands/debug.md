@@ -14,6 +14,7 @@ When the user says `/debug <issue description>`, follow this systematic approach
    - Is it reproducible?
 
 2. **Check service health:**
+
    ```bash
    curl -s http://localhost:4000/health/detailed | head -50
    ```
@@ -27,18 +28,19 @@ When the user says `/debug <issue description>`, follow this systematic approach
 
 Based on the error, determine which component is affected:
 
-| Error Pattern | Component | Investigation |
-|---------------|-----------|---------------|
-| `GraphQL` | API Service | Check resolvers, schema |
-| `Neo4j` | Graph DB | Check cypher queries, connection |
-| `PostgreSQL` | Relational DB | Check migrations, connection |
-| `Redis` | Cache | Check connection, memory |
-| `React` | Client | Check components, state |
-| `TypeScript` | Build | Check types, imports |
+| Error Pattern | Component     | Investigation                    |
+| ------------- | ------------- | -------------------------------- |
+| `GraphQL`     | API Service   | Check resolvers, schema          |
+| `Neo4j`       | Graph DB      | Check cypher queries, connection |
+| `PostgreSQL`  | Relational DB | Check migrations, connection     |
+| `Redis`       | Cache         | Check connection, memory         |
+| `React`       | Client        | Check components, state          |
+| `TypeScript`  | Build         | Check types, imports             |
 
 ## Step 3: Common Debug Commands
 
 **API Issues:**
+
 ```bash
 # Check API logs
 docker-compose logs api | grep -i error
@@ -50,6 +52,7 @@ curl -X POST http://localhost:4000/graphql \
 ```
 
 **Database Issues:**
+
 ```bash
 # Check PostgreSQL
 docker-compose exec postgres psql -U postgres -c "SELECT 1"
@@ -59,6 +62,7 @@ curl http://localhost:7474/db/neo4j/tx -u neo4j:devpassword
 ```
 
 **Build Issues:**
+
 ```bash
 # Clear caches
 rm -rf node_modules/.cache .turbo
@@ -90,6 +94,7 @@ pnpm test:jest -- --testPathPattern="<related-test>"
 ## Provide Clear Summary
 
 After debugging, provide:
+
 1. **Root Cause**: What caused the issue
 2. **Fix Applied**: What was changed
 3. **Prevention**: How to avoid in future

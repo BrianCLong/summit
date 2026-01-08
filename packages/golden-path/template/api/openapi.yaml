@@ -11,13 +11,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/IngestRequest'
+              $ref: "#/components/schemas/IngestRequest"
       responses:
-        '201':
+        "201":
           description: Accepted
-        '400':
+        "400":
           description: Validation or residency failure
-        '403':
+        "403":
           description: Authorization failure
   /api/timeline:
     get:
@@ -46,14 +46,14 @@ paths:
             type: string
             format: date-time
       responses:
-        '200':
+        "200":
           description: Timeline items
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/TimelineItem'
+                  $ref: "#/components/schemas/TimelineItem"
 components:
   schemas:
     Provenance:
@@ -87,15 +87,15 @@ components:
       type: object
       properties:
         entity:
-          $ref: '#/components/schemas/Entity'
+          $ref: "#/components/schemas/Entity"
         relationships:
           type: array
           items:
-            $ref: '#/components/schemas/Relationship'
+            $ref: "#/components/schemas/Relationship"
         events:
           type: array
           items:
-            $ref: '#/components/schemas/EventRecord'
+            $ref: "#/components/schemas/EventRecord"
         idempotencyKey:
           type: string
     Entity:
@@ -109,9 +109,9 @@ components:
         attributes:
           type: object
         tags:
-          $ref: '#/components/schemas/ClassificationTag'
+          $ref: "#/components/schemas/ClassificationTag"
         provenance:
-          $ref: '#/components/schemas/Provenance'
+          $ref: "#/components/schemas/Provenance"
     Relationship:
       type: object
       properties:
@@ -126,9 +126,9 @@ components:
         attributes:
           type: object
         tags:
-          $ref: '#/components/schemas/ClassificationTag'
+          $ref: "#/components/schemas/ClassificationTag"
         provenance:
-          $ref: '#/components/schemas/Provenance'
+          $ref: "#/components/schemas/Provenance"
     EventRecord:
       type: object
       properties:
@@ -148,7 +148,7 @@ components:
         payload:
           type: object
         provenance:
-          $ref: '#/components/schemas/Provenance'
+          $ref: "#/components/schemas/Provenance"
     TimelineItem:
       type: object
       properties:
@@ -165,4 +165,4 @@ components:
         payload:
           type: object
         provenance:
-          $ref: '#/components/schemas/Provenance'
+          $ref: "#/components/schemas/Provenance"

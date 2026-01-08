@@ -12,11 +12,11 @@ export interface MatchingConfig {
 }
 
 export type MatchingAlgorithm =
-  | 'deterministic'
-  | 'probabilistic'
-  | 'ml_based'
-  | 'hybrid'
-  | 'custom';
+  | "deterministic"
+  | "probabilistic"
+  | "ml_based"
+  | "hybrid"
+  | "custom";
 
 export interface MatchingRule {
   id: string;
@@ -38,26 +38,26 @@ export interface MatchingFieldConfig {
 }
 
 export type Comparator =
-  | 'exact'
-  | 'levenshtein'
-  | 'jaro_winkler'
-  | 'soundex'
-  | 'metaphone'
-  | 'token_sort'
-  | 'token_set'
-  | 'cosine_similarity'
-  | 'jaccard'
-  | 'custom';
+  | "exact"
+  | "levenshtein"
+  | "jaro_winkler"
+  | "soundex"
+  | "metaphone"
+  | "token_sort"
+  | "token_set"
+  | "cosine_similarity"
+  | "jaccard"
+  | "custom";
 
 export type MatchingTransformation =
-  | 'lowercase'
-  | 'uppercase'
-  | 'trim'
-  | 'remove_whitespace'
-  | 'remove_punctuation'
-  | 'phonetic'
-  | 'normalize'
-  | 'tokenize';
+  | "lowercase"
+  | "uppercase"
+  | "trim"
+  | "remove_whitespace"
+  | "remove_punctuation"
+  | "phonetic"
+  | "normalize"
+  | "tokenize";
 
 export interface MatchBlockingStrategy {
   blockingKeys: MatchBlockingKey[];
@@ -85,12 +85,7 @@ export interface MatchResult {
   reviewRequired: boolean;
 }
 
-export type MatchLevel =
-  | 'exact'
-  | 'high'
-  | 'medium'
-  | 'low'
-  | 'no_match';
+export type MatchLevel = "exact" | "high" | "medium" | "low" | "no_match";
 
 export interface MatchingJob {
   id: string;
@@ -105,12 +100,7 @@ export interface MatchingJob {
   errors: JobError[];
 }
 
-export type JobStatus =
-  | 'queued'
-  | 'running'
-  | 'completed'
-  | 'failed'
-  | 'cancelled';
+export type JobStatus = "queued" | "running" | "completed" | "failed" | "cancelled";
 
 export interface JobError {
   recordId: string;
@@ -130,8 +120,8 @@ export interface MatchPair {
 }
 
 export type MatchPairStatus =
-  | 'pending_review'
-  | 'approved'
-  | 'rejected'
-  | 'auto_approved'
-  | 'merged';
+  | "pending_review"
+  | "approved"
+  | "rejected"
+  | "auto_approved"
+  | "merged";

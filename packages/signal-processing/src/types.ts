@@ -1,6 +1,6 @@
 export type NumericArray = Float32Array | Float64Array | number[];
 
-export type WindowKind = 'rectangular' | 'hann' | 'hamming';
+export type WindowKind = "rectangular" | "hann" | "hamming";
 
 export interface WindowFunction {
   kind: WindowKind;
@@ -59,14 +59,14 @@ export interface WebSocketLike {
 }
 
 export interface DataChannelLike {
-  readyState: 'connecting' | 'open' | 'closing' | 'closed';
+  readyState: "connecting" | "open" | "closing" | "closed";
   send(data: string | ArrayBuffer | ArrayBufferView | Blob): void;
   onmessage: ((ev: { data: any }) => void) | null;
   close(): void;
 }
 
 export interface PipelineEvent<T> {
-  type: 'raw' | 'processed';
+  type: "raw" | "processed";
   payload: T;
   timestamp: number;
 }

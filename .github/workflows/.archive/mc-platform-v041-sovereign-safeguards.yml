@@ -6,40 +6,40 @@ on:
       - main
       - release/v0.4.1
     paths:
-      - 'graphql/v041/**'
-      - 'policy/v041/**'
-      - 'server/src/graphql/resolvers/v041/**'
-      - 'server/src/services/SovereignSafeguardsService.ts'
-      - 'helm/overlays/v041/**'
-      - 'observability/grafana/dashboards/sovereign-safeguards-v041.json'
-      - 'monitoring/prometheus/rules/mc-platform-v041.yml'
-      - '.github/workflows/mc-platform-v041-sovereign-safeguards.yml'
+      - "graphql/v041/**"
+      - "policy/v041/**"
+      - "server/src/graphql/resolvers/v041/**"
+      - "server/src/services/SovereignSafeguardsService.ts"
+      - "helm/overlays/v041/**"
+      - "observability/grafana/dashboards/sovereign-safeguards-v041.json"
+      - "monitoring/prometheus/rules/mc-platform-v041.yml"
+      - ".github/workflows/mc-platform-v041-sovereign-safeguards.yml"
 
   pull_request:
     branches:
       - main
       - release/v0.4.1
     paths:
-      - 'graphql/v041/**'
-      - 'policy/v041/**'
-      - 'server/src/graphql/resolvers/v041/**'
-      - 'server/src/services/SovereignSafeguardsService.ts'
-      - 'helm/overlays/v041/**'
-      - 'observability/grafana/dashboards/sovereign-safeguards-v041.json'
-      - 'monitoring/prometheus/rules/mc-platform-v041.yml'
+      - "graphql/v041/**"
+      - "policy/v041/**"
+      - "server/src/graphql/resolvers/v041/**"
+      - "server/src/services/SovereignSafeguardsService.ts"
+      - "helm/overlays/v041/**"
+      - "observability/grafana/dashboards/sovereign-safeguards-v041.json"
+      - "monitoring/prometheus/rules/mc-platform-v041.yml"
 
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Deployment environment'
+        description: "Deployment environment"
         required: true
-        default: 'staging'
+        default: "staging"
         type: choice
         options:
           - staging
           - production
       sovereign_compliance_check:
-        description: 'Force sovereign compliance validation'
+        description: "Force sovereign compliance validation"
         required: false
         default: true
         type: boolean
@@ -47,8 +47,8 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: mc-platform
-  NODE_VERSION: '20.11.x'
-  PNPM_VERSION: '8.x'
+  NODE_VERSION: "20.11.x"
+  PNPM_VERSION: "8.x"
 
 jobs:
   # === VALIDATION PHASE ===
@@ -68,7 +68,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
@@ -294,12 +294,12 @@ jobs:
       - name: Setup Kubernetes CLI
         uses: azure/setup-kubectl@v3
         with:
-          version: 'v1.28.0'
+          version: "v1.28.0"
 
       - name: Setup Helm
         uses: azure/setup-helm@v3
         with:
-          version: 'v3.12.0'
+          version: "v3.12.0"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -393,7 +393,7 @@ jobs:
       - name: Setup Kubernetes CLI
         uses: azure/setup-kubectl@v3
         with:
-          version: 'v1.28.0'
+          version: "v1.28.0"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4

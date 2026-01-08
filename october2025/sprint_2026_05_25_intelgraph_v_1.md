@@ -122,22 +122,20 @@ CREATE INDEX IF NOT EXISTS idx_chunk_case ON chunk_index (case_id);
 
 ```ts
 // workers/chunker/pdf.ts
-import pdfjs from 'pdfjs-dist';
-import crypto from 'crypto';
+import pdfjs from "pdfjs-dist";
+import crypto from "crypto";
 export async function chunkPdf(
   buf: Buffer,
   caseId: string,
   sourceId: string,
   size = 1200,
-  overlap = 200,
+  overlap = 200
 ) {
   const doc = await pdfjs.getDocument({ data: buf }).promise;
   const out: any[] = [];
   for (let p = 1; p <= doc.numPages; p++) {
     const page = await doc.getPage(p);
-    const text = (await page.getTextContent()).items
-      .map((i: any) => i.str)
-      .join(' ');
+    const text = (await page.getTextContent()).items.map((i: any) => i.str).join(" ");
     for (let i = 0; i < text.length; i += size - overlap) {
       const chunk = text.slice(i, i + size);
       out.push({
@@ -147,9 +145,9 @@ export async function chunkPdf(
         offsets: `[${i},${i + chunk.length})`,
         text: chunk,
         id: crypto
-          .createHash('sha1')
+          .createHash("sha1")
           .update(sourceId + p + i + chunk)
-          .digest('hex'),
+          .digest("hex"),
       });
     }
   }
@@ -180,8 +178,8 @@ async def embed(inp: In):
 
 ```ts
 // server/src/rag/retrieve.ts
-import { sql } from '../pg';
-import { cosineSim } from './sim';
+import { sql } from "../pg";
+import { cosineSim } from "./sim";
 export async function retrieve(qVec: number[], filters: any, k = 10) {
   const rows =
     await sql`SELECT id, case_id, source_id, page, offsets, license, kind, embedding FROM chunk_index WHERE case_id=${filters.caseId}`;
@@ -255,12 +253,12 @@ extend type Mutation {
 
 ```ts
 // server/src/report/api.ts
-import express from 'express';
+import express from "express";
 export const reportApi = express.Router();
-reportApi.post('/export', async (req, res) => {
+reportApi.post("/export", async (req, res) => {
   /* validate, compose, sign, enqueue render */ res.json({
-    id: 'exp_' + Date.now(),
-    status: 'queued',
+    id: "exp_" + Date.now(),
+    status: "queued",
   });
 });
 ```
@@ -270,20 +268,20 @@ reportApi.post('/export', async (req, res) => {
 ```js
 // apps/web/src/features/rag/jquery-console.js
 $(function () {
-  $('#rag-test').on('click', function () {
-    const q = $('#q').val(),
-      caseId = $('#case').val();
+  $("#rag-test").on("click", function () {
+    const q = $("#q").val(),
+      caseId = $("#case").val();
     $.ajax({
-      url: '/graphql',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/graphql",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({
         query: `{ ragSearch(q:"${q}", caseId:"${caseId}"){ text score citation{ sourceId page } } }`,
       }),
     });
   });
-  $('#hybrid-toggle').on('change', function () {
-    localStorage.setItem('hybrid', this.checked);
+  $("#hybrid-toggle").on("change", function () {
+    localStorage.setItem("hybrid", this.checked);
   });
 });
 ```
@@ -305,23 +303,22 @@ panels:
 ### 4.10 k6 — Embed + Retrieve Mix
 
 ```js
-import http from 'k6/http';
-export const options = { vus: 60, duration: '4m' };
+import http from "k6/http";
+export const options = { vus: 60, duration: "4m" };
 export default function () {
   http.post(
-    'http://localhost:4000/graphql',
+    "http://localhost:4000/graphql",
     JSON.stringify({
       query: 'mutation{ embedChunks(caseId:"c1", sourceId:"s1") }',
     }),
-    { headers: { 'Content-Type': 'application/json' } },
+    { headers: { "Content-Type": "application/json" } }
   );
   http.post(
-    'http://localhost:4000/graphql',
+    "http://localhost:4000/graphql",
     JSON.stringify({
-      query:
-        '{ ragSearch(q:"payments to acme last year", caseId:"c1"){ score } }',
+      query: '{ ragSearch(q:"payments to acme last year", caseId:"c1"){ score } }',
     }),
-    { headers: { 'Content-Type': 'application/json' } },
+    { headers: { "Content-Type": "application/json" } }
   );
 }
 ```

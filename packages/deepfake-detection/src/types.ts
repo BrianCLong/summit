@@ -14,16 +14,16 @@ export interface DeepfakeDetectionResult {
 }
 
 export enum DetectionMethod {
-  FACIAL_MANIPULATION = 'facial_manipulation',
-  VOICE_SYNTHESIS = 'voice_synthesis',
-  VIDEO_MANIPULATION = 'video_manipulation',
-  AUDIO_DEEPFAKE = 'audio_deepfake',
-  GAN_DETECTION = 'gan_detection',
-  TEMPORAL_ANALYSIS = 'temporal_analysis',
-  LIGHTING_PHYSICS = 'lighting_physics',
-  BIOMETRIC_ANOMALY = 'biometric_anomaly',
-  COMPRESSION_ARTIFACT = 'compression_artifact',
-  MULTI_MODAL = 'multi_modal',
+  FACIAL_MANIPULATION = "facial_manipulation",
+  VOICE_SYNTHESIS = "voice_synthesis",
+  VIDEO_MANIPULATION = "video_manipulation",
+  AUDIO_DEEPFAKE = "audio_deepfake",
+  GAN_DETECTION = "gan_detection",
+  TEMPORAL_ANALYSIS = "temporal_analysis",
+  LIGHTING_PHYSICS = "lighting_physics",
+  BIOMETRIC_ANOMALY = "biometric_anomaly",
+  COMPRESSION_ARTIFACT = "compression_artifact",
+  MULTI_MODAL = "multi_modal",
 }
 
 export interface DetectedArtifact {
@@ -35,18 +35,18 @@ export interface DetectedArtifact {
 }
 
 export enum ArtifactType {
-  FACIAL_BOUNDARY = 'facial_boundary',
-  EYE_BLINK_ANOMALY = 'eye_blink_anomaly',
-  LIP_SYNC_MISMATCH = 'lip_sync_mismatch',
-  SKIN_TEXTURE_INCONSISTENCY = 'skin_texture_inconsistency',
-  LIGHTING_INCONSISTENCY = 'lighting_inconsistency',
-  SHADOW_MISMATCH = 'shadow_mismatch',
-  TEMPORAL_DISCONTINUITY = 'temporal_discontinuity',
-  FREQUENCY_ARTIFACT = 'frequency_artifact',
-  SPECTRAL_ANOMALY = 'spectral_anomaly',
-  COMPRESSION_PATTERN = 'compression_pattern',
-  GAN_FINGERPRINT = 'gan_fingerprint',
-  BIOMETRIC_MISMATCH = 'biometric_mismatch',
+  FACIAL_BOUNDARY = "facial_boundary",
+  EYE_BLINK_ANOMALY = "eye_blink_anomaly",
+  LIP_SYNC_MISMATCH = "lip_sync_mismatch",
+  SKIN_TEXTURE_INCONSISTENCY = "skin_texture_inconsistency",
+  LIGHTING_INCONSISTENCY = "lighting_inconsistency",
+  SHADOW_MISMATCH = "shadow_mismatch",
+  TEMPORAL_DISCONTINUITY = "temporal_discontinuity",
+  FREQUENCY_ARTIFACT = "frequency_artifact",
+  SPECTRAL_ANOMALY = "spectral_anomaly",
+  COMPRESSION_PATTERN = "compression_pattern",
+  GAN_FINGERPRINT = "gan_fingerprint",
+  BIOMETRIC_MISMATCH = "biometric_mismatch",
 }
 
 export interface ArtifactLocation {
@@ -66,7 +66,7 @@ export interface BoundingBox {
 export interface FrequencyRange {
   min: number;
   max: number;
-  unit: 'Hz' | 'kHz';
+  unit: "Hz" | "kHz";
 }
 
 export interface DetectionMetadata {
@@ -298,10 +298,10 @@ export interface BiometricAnalysis {
 }
 
 export enum BiometricType {
-  FACIAL = 'facial',
-  VOICE = 'voice',
-  GAIT = 'gait',
-  BEHAVIORAL = 'behavioral',
+  FACIAL = "facial",
+  VOICE = "voice",
+  GAIT = "gait",
+  BEHAVIORAL = "behavioral",
 }
 
 export interface BiometricAnomaly {

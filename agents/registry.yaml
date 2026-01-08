@@ -62,7 +62,7 @@ agents:
 
     limits:
       execution:
-        max_wall_clock_ms: 300000  # 5 minutes
+        max_wall_clock_ms: 300000 # 5 minutes
         max_steps: 50
         max_tool_calls: 100
         max_tokens_total: 100000
@@ -159,7 +159,7 @@ agents:
 
     limits:
       execution:
-        max_wall_clock_ms: 600000  # 10 minutes for incident response
+        max_wall_clock_ms: 600000 # 10 minutes for incident response
         max_steps: 100
         max_tool_calls: 200
         max_tokens_total: 500000
@@ -244,7 +244,7 @@ agents:
 
     limits:
       execution:
-        max_wall_clock_ms: 1800000  # 30 minutes for migrations
+        max_wall_clock_ms: 1800000 # 30 minutes for migrations
         max_steps: 200
         max_tool_calls: 500
         max_tokens_total: 200000
@@ -291,8 +291,8 @@ agents:
             - "snyk:test"
           allowed_tools: ["trivy", "semgrep", "gitleaks"]
           read_only: true
-          secrets_access: true  # Can read secret metadata, not values
-          cross_tenant: true    # Security team can audit all tenants
+          secrets_access: true # Can read secret metadata, not values
+          cross_tenant: true # Security team can audit all tenants
         risk_level: "medium"
         requires_approval: false
         approval_class: "auto"
@@ -327,7 +327,7 @@ agents:
 
     limits:
       execution:
-        max_wall_clock_ms: 1800000  # 30 minutes for comprehensive scans
+        max_wall_clock_ms: 1800000 # 30 minutes for comprehensive scans
         max_steps: 500
         max_tool_calls: 1000
         max_tokens_total: 1000000
@@ -357,7 +357,7 @@ agents:
       name: "data-export-agent"
       version: "1.0.0"
       agent_type: "internal"
-      status: "suspended"  # Currently suspended
+      status: "suspended" # Currently suspended
       is_certified: false
       owner_id: "data-team"
       organization_id: "analytics"

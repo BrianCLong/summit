@@ -2,7 +2,7 @@
  * JSON Reporter - Generates structured JSON reports
  */
 
-import type { EvaluationReport } from '../../types/index.js';
+import type { EvaluationReport } from "../../types/index.js";
 
 export class JsonReporter {
   /**

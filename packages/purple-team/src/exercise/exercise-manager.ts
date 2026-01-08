@@ -11,8 +11,8 @@ import {
   AfterActionReport,
   TimelineEvent,
   LessonLearned,
-  Recommendation
-} from '../types';
+  Recommendation,
+} from "../types";
 
 /**
  * Purple Team Exercise Manager
@@ -39,46 +39,46 @@ export class ExerciseManager {
       objectives: objectives.map((desc, idx) => ({
         id: `obj_${idx + 1}`,
         description: desc,
-        type: 'collaboration' as const,
-        success: false
+        type: "collaboration" as const,
+        success: false,
       })),
       scenario,
       redTeam: {
-        lead: '',
+        lead: "",
         members: [],
         tools: [],
-        communications: ''
+        communications: "",
       },
       blueTeam: {
-        lead: '',
+        lead: "",
         members: [],
         tools: [],
-        communications: ''
+        communications: "",
       },
       schedule: {
         plannedStart: new Date(),
         plannedEnd: new Date(),
-        phases: []
+        phases: [],
       },
       scope: {
         inScope: [],
         outOfScope: [],
-        restrictions: []
+        restrictions: [],
       },
       rules: {
         authorizedActions: [],
         prohibitedActions: [],
         escalationProcedures: [],
         communicationProtocols: [],
-        emergencyContacts: []
+        emergencyContacts: [],
       },
       playbook: {
         id: this.generateId(),
         name: `${name} Playbook`,
-        description: '',
+        description: "",
         techniques: [],
         sequence: [],
-        variants: []
+        variants: [],
       },
       detections: [],
       findings: [],
@@ -86,7 +86,7 @@ export class ExerciseManager {
       afterAction: null,
       metadata: {},
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.exercises.set(exercise.id, exercise);
@@ -98,7 +98,9 @@ export class ExerciseManager {
    */
   startExercise(exerciseId: string): PurpleTeamExercise {
     const exercise = this.exercises.get(exerciseId);
-    if (!exercise) {throw new Error('Exercise not found');}
+    if (!exercise) {
+      throw new Error("Exercise not found");
+    }
 
     exercise.status = ExerciseStatus.IN_PROGRESS;
     exercise.schedule.actualStart = new Date();
@@ -111,17 +113,16 @@ export class ExerciseManager {
   /**
    * Record detection
    */
-  recordDetection(
-    exerciseId: string,
-    detection: Omit<Detection, 'id' | 'timestamp'>
-  ): Detection {
+  recordDetection(exerciseId: string, detection: Omit<Detection, "id" | "timestamp">): Detection {
     const exercise = this.exercises.get(exerciseId);
-    if (!exercise) {throw new Error('Exercise not found');}
+    if (!exercise) {
+      throw new Error("Exercise not found");
+    }
 
     const newDetection: Detection = {
       id: this.generateId(),
       timestamp: new Date(),
-      ...detection
+      ...detection,
     };
 
     exercise.detections.push(newDetection);
@@ -136,16 +137,15 @@ export class ExerciseManager {
   /**
    * Record finding
    */
-  recordFinding(
-    exerciseId: string,
-    finding: Omit<ExerciseFinding, 'id'>
-  ): ExerciseFinding {
+  recordFinding(exerciseId: string, finding: Omit<ExerciseFinding, "id">): ExerciseFinding {
     const exercise = this.exercises.get(exerciseId);
-    if (!exercise) {throw new Error('Exercise not found');}
+    if (!exercise) {
+      throw new Error("Exercise not found");
+    }
 
     const newFinding: ExerciseFinding = {
       id: this.generateId(),
-      ...finding
+      ...finding,
     };
 
     exercise.findings.push(newFinding);
@@ -159,7 +159,9 @@ export class ExerciseManager {
    */
   completeExercise(exerciseId: string): PurpleTeamExercise {
     const exercise = this.exercises.get(exerciseId);
-    if (!exercise) {throw new Error('Exercise not found');}
+    if (!exercise) {
+      throw new Error("Exercise not found");
+    }
 
     exercise.status = ExerciseStatus.COMPLETED;
     exercise.schedule.actualEnd = new Date();
@@ -180,7 +182,9 @@ export class ExerciseManager {
    */
   generateAfterActionReport(exerciseId: string): AfterActionReport {
     const exercise = this.exercises.get(exerciseId);
-    if (!exercise) {throw new Error('Exercise not found');}
+    if (!exercise) {
+      throw new Error("Exercise not found");
+    }
 
     // Generate timeline from detections and actions
     const timeline = this.generateTimeline(exercise);
@@ -199,18 +203,18 @@ export class ExerciseManager {
       exerciseId,
       generatedAt: new Date(),
       executiveSummary,
-      objectives: exercise.objectives.map(obj => ({
+      objectives: exercise.objectives.map((obj) => ({
         objectiveId: obj.id,
         description: obj.description,
         achieved: obj.success,
-        notes: obj.notes || ''
+        notes: obj.notes || "",
       })),
       timeline,
       findings: exercise.findings,
       metrics: exercise.metrics,
       lessonsLearned,
       recommendations,
-      attachments: []
+      attachments: [],
     };
 
     exercise.afterAction = report;
@@ -233,7 +237,7 @@ export class ExerciseManager {
     let exercises = Array.from(this.exercises.values());
 
     if (status) {
-      exercises = exercises.filter(e => e.status === status);
+      exercises = exercises.filter((e) => e.status === status);
     }
 
     return exercises.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
@@ -252,17 +256,17 @@ export class ExerciseManager {
       controlsCovered: 0,
       controlsEffective: 0,
       coverageScore: 0,
-      effectivenessScore: 0
+      effectivenessScore: 0,
     };
   }
 
   private updateMetrics(exercise: PurpleTeamExercise): void {
     const detections = exercise.detections;
-    const truePositives = detections.filter(d => d.truePositive);
-    const falsePositives = detections.filter(d => !d.truePositive);
+    const truePositives = detections.filter((d) => d.truePositive);
+    const falsePositives = detections.filter((d) => !d.truePositive);
 
     exercise.metrics.techniquesDetected = new Set(
-      truePositives.map(d => d.techniqueId).filter(Boolean)
+      truePositives.map((d) => d.techniqueId).filter(Boolean)
     ).size;
 
     exercise.metrics.falsePositives = falsePositives.length;
@@ -274,8 +278,8 @@ export class ExerciseManager {
 
     // Calculate mean time to detect
     const detectTimes = truePositives
-      .filter(d => d.timeToDetect !== undefined)
-      .map(d => d.timeToDetect!);
+      .filter((d) => d.timeToDetect !== undefined)
+      .map((d) => d.timeToDetect!);
 
     if (detectTimes.length > 0) {
       exercise.metrics.meanTimeToDetect =
@@ -284,8 +288,7 @@ export class ExerciseManager {
 
     // Calculate effectiveness score
     exercise.metrics.effectivenessScore =
-      exercise.metrics.detectionRate * 100 -
-      (exercise.metrics.falsePositives * 5);
+      exercise.metrics.detectionRate * 100 - exercise.metrics.falsePositives * 5;
   }
 
   private generateTimeline(exercise: PurpleTeamExercise): TimelineEvent[] {
@@ -294,10 +297,10 @@ export class ExerciseManager {
     for (const detection of exercise.detections) {
       events.push({
         timestamp: detection.timestamp,
-        team: 'blue',
+        team: "blue",
         action: `Detection: ${detection.description}`,
-        result: detection.truePositive ? 'True Positive' : 'False Positive',
-        techniqueId: detection.techniqueId
+        result: detection.truePositive ? "True Positive" : "False Positive",
+        techniqueId: detection.techniqueId,
       });
     }
 
@@ -311,14 +314,14 @@ export class ExerciseManager {
     if (exercise.metrics.detectionRate < 0.5) {
       lessons.push({
         id: this.generateId(),
-        category: 'Detection',
-        description: 'Low detection rate indicates significant visibility gaps',
-        impact: 'high',
+        category: "Detection",
+        description: "Low detection rate indicates significant visibility gaps",
+        impact: "high",
         actionItems: [
-          'Review and enhance detection rules',
-          'Increase log collection coverage',
-          'Implement additional monitoring tools'
-        ]
+          "Review and enhance detection rules",
+          "Increase log collection coverage",
+          "Implement additional monitoring tools",
+        ],
       });
     }
 
@@ -326,14 +329,14 @@ export class ExerciseManager {
     if (exercise.metrics.falsePositives > 5) {
       lessons.push({
         id: this.generateId(),
-        category: 'Alert Quality',
-        description: 'High false positive rate may cause alert fatigue',
-        impact: 'medium',
+        category: "Alert Quality",
+        description: "High false positive rate may cause alert fatigue",
+        impact: "medium",
         actionItems: [
-          'Tune detection rules to reduce false positives',
-          'Implement alert correlation',
-          'Review alert thresholds'
-        ]
+          "Tune detection rules to reduce false positives",
+          "Implement alert correlation",
+          "Review alert thresholds",
+        ],
       });
     }
 
@@ -341,14 +344,14 @@ export class ExerciseManager {
     if (exercise.metrics.meanTimeToDetect > 60) {
       lessons.push({
         id: this.generateId(),
-        category: 'Response Time',
-        description: 'Mean time to detect exceeds acceptable threshold',
-        impact: 'high',
+        category: "Response Time",
+        description: "Mean time to detect exceeds acceptable threshold",
+        impact: "high",
         actionItems: [
-          'Implement real-time alerting',
-          'Enhance automation in detection pipeline',
-          'Review analyst workflows'
-        ]
+          "Implement real-time alerting",
+          "Enhance automation in detection pipeline",
+          "Review analyst workflows",
+        ],
       });
     }
 
@@ -359,32 +362,32 @@ export class ExerciseManager {
     const recommendations: Recommendation[] = [];
 
     // Generate recommendations from findings
-    const criticalFindings = exercise.findings.filter(f => f.severity === 'critical');
-    const highFindings = exercise.findings.filter(f => f.severity === 'high');
+    const criticalFindings = exercise.findings.filter((f) => f.severity === "critical");
+    const highFindings = exercise.findings.filter((f) => f.severity === "high");
 
     for (const finding of criticalFindings) {
       recommendations.push({
         id: this.generateId(),
-        priority: 'critical',
+        priority: "critical",
         category: finding.category,
         title: `Address: ${finding.title}`,
-        description: finding.remediation || 'Immediate remediation required',
-        effort: 'high',
-        expectedOutcome: 'Eliminate critical security gap',
-        relatedFindings: [finding.id]
+        description: finding.remediation || "Immediate remediation required",
+        effort: "high",
+        expectedOutcome: "Eliminate critical security gap",
+        relatedFindings: [finding.id],
       });
     }
 
     for (const finding of highFindings) {
       recommendations.push({
         id: this.generateId(),
-        priority: 'high',
+        priority: "high",
         category: finding.category,
         title: `Address: ${finding.title}`,
-        description: finding.remediation || 'Remediation recommended',
-        effort: 'medium',
-        expectedOutcome: 'Improve security posture',
-        relatedFindings: [finding.id]
+        description: finding.remediation || "Remediation recommended",
+        effort: "medium",
+        expectedOutcome: "Improve security posture",
+        relatedFindings: [finding.id],
       });
     }
 
@@ -392,13 +395,13 @@ export class ExerciseManager {
     if (exercise.metrics.coverageScore < 50) {
       recommendations.push({
         id: this.generateId(),
-        priority: 'high',
-        category: 'Coverage',
-        title: 'Improve Control Coverage',
-        description: 'Expand security control coverage across critical assets',
-        effort: 'high',
-        expectedOutcome: 'Increased visibility and protection',
-        relatedFindings: []
+        priority: "high",
+        category: "Coverage",
+        title: "Improve Control Coverage",
+        description: "Expand security control coverage across critical assets",
+        effort: "high",
+        expectedOutcome: "Increased visibility and protection",
+        relatedFindings: [],
       });
     }
 
@@ -410,7 +413,7 @@ export class ExerciseManager {
 
   private generateExecutiveSummary(exercise: PurpleTeamExercise): string {
     const objectives = exercise.objectives;
-    const achieved = objectives.filter(o => o.success).length;
+    const achieved = objectives.filter((o) => o.success).length;
     const metrics = exercise.metrics;
 
     return `
@@ -420,8 +423,8 @@ Key Results:
 - ${achieved} of ${objectives.length} objectives achieved (${Math.round((achieved / objectives.length) * 100)}%)
 - Detection rate: ${Math.round(metrics.detectionRate * 100)}%
 - Mean time to detect: ${Math.round(metrics.meanTimeToDetect)} minutes
-- ${exercise.findings.filter(f => f.severity === 'critical').length} critical findings identified
-- ${exercise.findings.filter(f => f.severity === 'high').length} high severity findings identified
+- ${exercise.findings.filter((f) => f.severity === "critical").length} critical findings identified
+- ${exercise.findings.filter((f) => f.severity === "high").length} high severity findings identified
 
 Overall effectiveness score: ${Math.round(metrics.effectivenessScore)}%
     `.trim();

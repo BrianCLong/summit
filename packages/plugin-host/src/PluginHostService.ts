@@ -1,4 +1,4 @@
-import EventEmitter from 'eventemitter3';
+import EventEmitter from "eventemitter3";
 import {
   PluginManager,
   DefaultPluginLoader,
@@ -14,8 +14,8 @@ import {
   PluginManifest,
   PluginMetadata,
   PluginState,
-} from '@intelgraph/plugin-system';
-import type { Logger } from './types.js';
+} from "@intelgraph/plugin-system";
+import type { Logger } from "./types.js";
 
 /**
  * Plugin Host Service - Manages plugin lifecycle at the platform level
@@ -66,7 +66,7 @@ export class PluginHostService extends EventEmitter {
    * Start the plugin host service
    */
   async start(): Promise<void> {
-    this.logger.info('Starting Plugin Host Service...');
+    this.logger.info("Starting Plugin Host Service...");
 
     try {
       // Start health check monitoring
@@ -75,10 +75,10 @@ export class PluginHostService extends EventEmitter {
       // Load auto-start plugins
       await this.loadAutoStartPlugins();
 
-      this.logger.info('Plugin Host Service started successfully');
-      this.emit('started');
+      this.logger.info("Plugin Host Service started successfully");
+      this.emit("started");
     } catch (error) {
-      this.logger.error('Failed to start Plugin Host Service', { error });
+      this.logger.error("Failed to start Plugin Host Service", { error });
       throw error;
     }
   }
@@ -87,7 +87,7 @@ export class PluginHostService extends EventEmitter {
    * Stop the plugin host service
    */
   async stop(): Promise<void> {
-    this.logger.info('Stopping Plugin Host Service...');
+    this.logger.info("Stopping Plugin Host Service...");
 
     try {
       // Stop health check monitoring
@@ -101,10 +101,10 @@ export class PluginHostService extends EventEmitter {
         await this.manager.disable(instance.metadata.manifest.id);
       }
 
-      this.logger.info('Plugin Host Service stopped successfully');
-      this.emit('stopped');
+      this.logger.info("Plugin Host Service stopped successfully");
+      this.emit("stopped");
     } catch (error) {
-      this.logger.error('Failed to stop Plugin Host Service', { error });
+      this.logger.error("Failed to stop Plugin Host Service", { error });
       throw error;
     }
   }
@@ -124,11 +124,9 @@ export class PluginHostService extends EventEmitter {
       if (this.config.security.scanOnInstall && source.path) {
         const scanResult = await this.security.scanPlugin(source.path, manifest);
         if (!scanResult.safe) {
-          const criticalVulns = scanResult.vulnerabilities.filter(
-            v => v.severity === 'critical'
-          );
+          const criticalVulns = scanResult.vulnerabilities.filter((v) => v.severity === "critical");
           throw new Error(
-            `Plugin ${manifest.id} failed security scan: ${criticalVulns.map(v => v.message).join(', ')}`
+            `Plugin ${manifest.id} failed security scan: ${criticalVulns.map((v) => v.message).join(", ")}`
           );
         }
       }
@@ -157,14 +155,14 @@ export class PluginHostService extends EventEmitter {
       }
 
       // Install via manager
-      await this.manager.install(manifest, { type: source.type, location: source.path || '' });
+      await this.manager.install(manifest, { type: source.type, location: source.path || "" });
 
       // Set resource quota
       const quota = this.security.enforceResourceQuota(manifest);
       this.quotaEnforcer.setQuota(manifest.id, quota);
 
       this.logger.info(`Plugin ${manifest.id} installed successfully`);
-      this.emit('plugin:installed', { pluginId: manifest.id, version: manifest.version });
+      this.emit("plugin:installed", { pluginId: manifest.id, version: manifest.version });
     } catch (error) {
       this.logger.error(`Failed to install plugin ${manifest.id}`, { error });
       throw error;
@@ -183,7 +181,7 @@ export class PluginHostService extends EventEmitter {
       this.cpuTracker.reset(pluginId);
 
       this.logger.info(`Plugin ${pluginId} uninstalled successfully`);
-      this.emit('plugin:uninstalled', { pluginId });
+      this.emit("plugin:uninstalled", { pluginId });
     } catch (error) {
       this.logger.error(`Failed to uninstall plugin ${pluginId}`, { error });
       throw error;
@@ -221,7 +219,7 @@ export class PluginHostService extends EventEmitter {
       await this.manager.enable(pluginId);
 
       this.logger.info(`Plugin ${pluginId} enabled successfully`);
-      this.emit('plugin:enabled', { pluginId });
+      this.emit("plugin:enabled", { pluginId });
     } catch (error) {
       this.logger.error(`Failed to enable plugin ${pluginId}`, { error });
       throw error;
@@ -238,7 +236,7 @@ export class PluginHostService extends EventEmitter {
       await this.manager.disable(pluginId);
 
       this.logger.info(`Plugin ${pluginId} disabled successfully`);
-      this.emit('plugin:disabled', { pluginId });
+      this.emit("plugin:disabled", { pluginId });
     } catch (error) {
       this.logger.error(`Failed to disable plugin ${pluginId}`, { error });
       throw error;
@@ -255,7 +253,7 @@ export class PluginHostService extends EventEmitter {
       await this.manager.update(pluginId, newVersion);
 
       this.logger.info(`Plugin ${pluginId} updated to ${newVersion}`);
-      this.emit('plugin:updated', { pluginId, version: newVersion });
+      this.emit("plugin:updated", { pluginId, version: newVersion });
     } catch (error) {
       this.logger.error(`Failed to update plugin ${pluginId}`, { error });
       throw error;
@@ -272,7 +270,7 @@ export class PluginHostService extends EventEmitter {
       await this.manager.reload(pluginId);
 
       this.logger.info(`Plugin ${pluginId} reloaded successfully`);
-      this.emit('plugin:reloaded', { pluginId });
+      this.emit("plugin:reloaded", { pluginId });
     } catch (error) {
       this.logger.error(`Failed to reload plugin ${pluginId}`, { error });
       throw error;
@@ -318,7 +316,7 @@ export class PluginHostService extends EventEmitter {
       return {
         pluginId,
         healthy: false,
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: error instanceof Error ? error.message : "Unknown error",
       };
     }
   }
@@ -344,12 +342,12 @@ export class PluginHostService extends EventEmitter {
    * Create authorization provider based on config
    */
   private createAuthProvider(config: PluginHostConfig): AuthorizationProvider {
-    if (config.environment === 'development') {
-      this.logger.warn('Using development authorization provider - all permissions allowed');
+    if (config.environment === "development") {
+      this.logger.warn("Using development authorization provider - all permissions allowed");
       return new DevelopmentAuthorizationProvider();
     }
 
-    if (config.authorization.provider === 'opa') {
+    if (config.authorization.provider === "opa") {
       return new OPAAuthorizationProvider(
         config.authorization.opaEndpoint,
         config.authorization.policyPath
@@ -364,29 +362,29 @@ export class PluginHostService extends EventEmitter {
    * Setup event handlers
    */
   private setupEventHandlers(): void {
-    this.manager.on('plugin:installed', (event: any) => {
-      this.logger.info('Plugin installed event', event);
-      this.emit('plugin:installed', event);
+    this.manager.on("plugin:installed", (event: any) => {
+      this.logger.info("Plugin installed event", event);
+      this.emit("plugin:installed", event);
     });
 
-    this.manager.on('plugin:enabled', (event: any) => {
-      this.logger.info('Plugin enabled event', event);
-      this.emit('plugin:enabled', event);
+    this.manager.on("plugin:enabled", (event: any) => {
+      this.logger.info("Plugin enabled event", event);
+      this.emit("plugin:enabled", event);
     });
 
-    this.manager.on('plugin:disabled', (event: any) => {
-      this.logger.info('Plugin disabled event', event);
-      this.emit('plugin:disabled', event);
+    this.manager.on("plugin:disabled", (event: any) => {
+      this.logger.info("Plugin disabled event", event);
+      this.emit("plugin:disabled", event);
     });
 
-    this.manager.on('plugin:updated', (event: any) => {
-      this.logger.info('Plugin updated event', event);
-      this.emit('plugin:updated', event);
+    this.manager.on("plugin:updated", (event: any) => {
+      this.logger.info("Plugin updated event", event);
+      this.emit("plugin:updated", event);
     });
 
-    this.manager.on('plugin:reloaded', (event: any) => {
-      this.logger.info('Plugin reloaded event', event);
-      this.emit('plugin:reloaded', event);
+    this.manager.on("plugin:reloaded", (event: any) => {
+      this.logger.info("Plugin reloaded event", event);
+      this.emit("plugin:reloaded", event);
     });
   }
 
@@ -406,7 +404,7 @@ export class PluginHostService extends EventEmitter {
           const health = await this.manager.checkHealth(pluginId);
           if (!health.healthy) {
             this.logger.warn(`Plugin ${pluginId} health check failed`, health);
-            this.emit('plugin:unhealthy', { pluginId, health });
+            this.emit("plugin:unhealthy", { pluginId, health });
           }
 
           // Update resource usage
@@ -424,10 +422,10 @@ export class PluginHostService extends EventEmitter {
           const violations = this.quotaEnforcer.getViolations(pluginId);
           if (violations.length > 0) {
             this.logger.warn(`Plugin ${pluginId} quota violations`, { violations });
-            this.emit('plugin:quota-violation', { pluginId, violations });
+            this.emit("plugin:quota-violation", { pluginId, violations });
 
             // Auto-disable on critical violations if configured
-            const critical = violations.some(v => v.severity === 'critical');
+            const critical = violations.some((v) => v.severity === "critical");
             if (critical && this.config.monitoring.autoDisableOnViolation) {
               this.logger.error(`Auto-disabling plugin ${pluginId} due to critical violations`);
               await this.manager.disable(pluginId);
@@ -467,13 +465,13 @@ export class PluginHostService extends EventEmitter {
 
 export interface PluginHostConfig {
   platformVersion: string;
-  environment: 'development' | 'staging' | 'production';
+  environment: "development" | "staging" | "production";
   security: {
     scanOnInstall: boolean;
     requireSignature: boolean;
   };
   authorization: {
-    provider: 'opa' | 'development';
+    provider: "opa" | "development";
     opaEndpoint?: string;
     policyPath?: string;
   };
@@ -488,7 +486,7 @@ export interface PluginHostConfig {
 }
 
 export interface PluginSource {
-  type: 'npm' | 'git' | 'local' | 'marketplace';
+  type: "npm" | "git" | "local" | "marketplace";
   path?: string;
   url?: string;
 }

@@ -21,7 +21,7 @@ export class StandardScaler {
         this.mean[j] += sample[j];
       }
     }
-    this.mean = this.mean.map(m => m / data.length);
+    this.mean = this.mean.map((m) => m / data.length);
 
     // Calculate standard deviations
     for (const sample of data) {
@@ -29,7 +29,7 @@ export class StandardScaler {
         this.std[j] += Math.pow(sample[j] - this.mean[j], 2);
       }
     }
-    this.std = this.std.map(s => Math.sqrt(s / data.length));
+    this.std = this.std.map((s) => Math.sqrt(s / data.length));
 
     this.fitted = true;
   }
@@ -39,13 +39,11 @@ export class StandardScaler {
    */
   transform(data: number[][]): number[][] {
     if (!this.fitted) {
-      throw new Error('Scaler must be fitted before transformation');
+      throw new Error("Scaler must be fitted before transformation");
     }
 
-    return data.map(sample =>
-      sample.map((x, j) =>
-        this.std[j] > 0 ? (x - this.mean[j]) / this.std[j] : 0
-      )
+    return data.map((sample) =>
+      sample.map((x, j) => (this.std[j] > 0 ? (x - this.mean[j]) / this.std[j] : 0))
     );
   }
 
@@ -80,10 +78,10 @@ export class MinMaxScaler {
 
   transform(data: number[][]): number[][] {
     if (!this.fitted) {
-      throw new Error('Scaler must be fitted before transformation');
+      throw new Error("Scaler must be fitted before transformation");
     }
 
-    return data.map(sample =>
+    return data.map((sample) =>
       sample.map((x, j) => {
         const range = this.max[j] - this.min[j];
         return range > 0 ? (x - this.min[j]) / range : 0;

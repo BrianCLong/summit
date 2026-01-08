@@ -1,23 +1,23 @@
-import express from 'express';
-import { createServer } from 'http';
-import { ApolloServer } from '@apollo/server';
-import { expressMiddleware } from '@apollo/server/express4';
-import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
-import { makeExecutableSchema } from '@graphql-tools/schema';
-import { WebSocketServer } from 'ws';
-import { useServer } from 'graphql-ws/lib/use/ws';
-import cors from 'cors';
-import bodyParser from 'body-parser';
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import express from "express";
+import { createServer } from "http";
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@apollo/server/express4";
+import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
+import { makeExecutableSchema } from "@graphql-tools/schema";
+import { WebSocketServer } from "ws";
+import { useServer } from "graphql-ws/lib/use/ws";
+import cors from "cors";
+import bodyParser from "body-parser";
+import { readFileSync } from "fs";
+import { join } from "path";
 
-import { resolvers } from './graphql/resolvers';
-import { config } from '../config';
-import { logger } from '../observability/logging';
-import { initSocket } from './realtime/socket';
-import { getContext } from './auth';
+import { resolvers } from "./graphql/resolvers";
+import { config } from "../config";
+import { logger } from "../observability/logging";
+import { initSocket } from "./realtime/socket";
+import { getContext } from "./auth";
 
-const typeDefs = readFileSync(join(__dirname, 'graphql/schema.graphql'), 'utf8');
+const typeDefs = readFileSync(join(__dirname, "graphql/schema.graphql"), "utf8");
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 
 export const startServer = async () => {
@@ -26,7 +26,7 @@ export const startServer = async () => {
 
   const wsServer = new WebSocketServer({
     server: httpServer,
-    path: '/graphql',
+    path: "/graphql",
   });
 
   const serverCleanup = useServer({ schema }, wsServer);
@@ -49,9 +49,14 @@ export const startServer = async () => {
 
   await server.start();
 
-  app.use('/graphql', cors<cors.CorsRequest>(), bodyParser.json(), expressMiddleware(server, {
-    context: getContext,
-  }));
+  app.use(
+    "/graphql",
+    cors<cors.CorsRequest>(),
+    bodyParser.json(),
+    expressMiddleware(server, {
+      context: getContext,
+    })
+  );
 
   initSocket(httpServer);
 

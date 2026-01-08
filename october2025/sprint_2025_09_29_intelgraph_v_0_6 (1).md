@@ -169,21 +169,21 @@ type Mutation {
 
 ```ts
 // server/src/index.ts
-import 'dotenv/config';
-import { ApolloServer } from '@apollo/server';
-import { expressMiddleware } from '@apollo/server/express4';
-import express from 'express';
-import neo4j, { Driver } from 'neo4j-driver';
-import { readFileSync } from 'fs';
-import resolvers from './graphql/resolvers';
-import { authzPlugin } from './graphql/resolvers/authz';
+import "dotenv/config";
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@apollo/server/express4";
+import express from "express";
+import neo4j, { Driver } from "neo4j-driver";
+import { readFileSync } from "fs";
+import resolvers from "./graphql/resolvers";
+import { authzPlugin } from "./graphql/resolvers/authz";
 
-const typeDefs = readFileSync('server/src/graphql/schema.graphql', 'utf8');
+const typeDefs = readFileSync("server/src/graphql/schema.graphql", "utf8");
 const app = express();
 
 const driver: Driver = neo4j.driver(
   process.env.NEO4J_URI!,
-  neo4j.auth.basic(process.env.NEO4J_USER!, process.env.NEO4J_PASSWORD!),
+  neo4j.auth.basic(process.env.NEO4J_USER!, process.env.NEO4J_PASSWORD!)
 );
 
 const server = new ApolloServer({
@@ -193,7 +193,7 @@ const server = new ApolloServer({
 });
 await server.start();
 app.use(
-  '/graphql',
+  "/graphql",
   express.json(),
   expressMiddleware(server, {
     context: async ({ req }) => ({
@@ -201,18 +201,18 @@ app.use(
       abac: req.abac, // attributes for OPA
       driver,
     }),
-  }),
+  })
 );
 
-app.listen(4000, () => console.log('GraphQL on :4000'));
+app.listen(4000, () => console.log("GraphQL on :4000"));
 ```
 
 ### 4.4 NL → Cypher Engine (sketch)
 
 ```ts
 // server/src/nl2cypher/engine.ts
-import { estimateCost } from './cost';
-import { runSandbox } from './sandbox';
+import { estimateCost } from "./cost";
+import { runSandbox } from "./sandbox";
 
 export async function nlToCypher(prompt: string, schemaHint: string) {
   // Call LLM with schema/system prompts kept server‑side; strip PII via regex/allowlist
@@ -223,9 +223,9 @@ export async function nlToCypher(prompt: string, schemaHint: string) {
 
 export async function executeSandbox(
   cypher: string,
-  budget: { rows: number; ms: number; memoryMB: number },
+  budget: { rows: number; ms: number; memoryMB: number }
 ) {
-  if (!withinBudget(budget)) throw new Error('BudgetExceeded');
+  if (!withinBudget(budget)) throw new Error("BudgetExceeded");
   return await runSandbox(cypher, budget);
 }
 ```
@@ -253,14 +253,14 @@ export function scoreCandidate(a: any, b: any) {
 
 ```ts
 // server/src/provenance/manifest.ts
-import { createHash } from 'crypto';
+import { createHash } from "crypto";
 
 export interface ManifestItem {
   path: string;
   hash: string;
 }
 export interface Manifest {
-  algo: 'sha256';
+  algo: "sha256";
   items: ManifestItem[];
   merkleRoot: string;
 }
@@ -268,21 +268,21 @@ export interface Manifest {
 export function buildManifest(files: Buffer[], paths: string[]): Manifest {
   const items = files.map((buf, i) => ({ path: paths[i], hash: sha256(buf) }));
   const merkleRoot = merkle(items.map((i) => i.hash));
-  return { algo: 'sha256', items, merkleRoot };
+  return { algo: "sha256", items, merkleRoot };
 }
 
 function sha256(b: Buffer) {
-  return createHash('sha256').update(b).digest('hex');
+  return createHash("sha256").update(b).digest("hex");
 }
 function merkle(leaves: string[]) {
   let layer = leaves;
   while (layer.length > 1) {
     const next: string[] = [];
     for (let i = 0; i < layer.length; i += 2)
-      next.push(sha256(Buffer.from((layer[i] || '') + (layer[i + 1] || ''))));
+      next.push(sha256(Buffer.from((layer[i] || "") + (layer[i + 1] || ""))));
     layer = next;
   }
-  return layer[0] || '';
+  return layer[0] || "";
 }
 ```
 
@@ -291,18 +291,16 @@ function merkle(leaves: string[]) {
 ```js
 // apps/web/src/components/GraphCanvas/jquery-hooks.js
 $(function () {
-  $('#graph').on('contextmenu', '.node', function (e) {
+  $("#graph").on("contextmenu", ".node", function (e) {
     e.preventDefault();
-    const id = $(this).data('id');
-    $('#ctx').css({ top: e.pageY, left: e.pageX }).show().data('id', id);
+    const id = $(this).data("id");
+    $("#ctx").css({ top: e.pageY, left: e.pageX }).show().data("id", id);
   });
-  $('#ctx .action').on('click', function () {
-    const action = $(this).data('action');
-    const id = $('#ctx').data('id');
-    window.dispatchEvent(
-      new CustomEvent('graph:action', { detail: { action, id } }),
-    );
-    $('#ctx').hide();
+  $("#ctx .action").on("click", function () {
+    const action = $(this).data("action");
+    const id = $("#ctx").data("id");
+    window.dispatchEvent(new CustomEvent("graph:action", { detail: { action, id } }));
+    $("#ctx").hide();
   });
 });
 ```
@@ -333,8 +331,8 @@ blocked_selector[input] {
 server:
   resources:
     limits:
-      cpu: '2'
-      memory: '4Gi'
+      cpu: "2"
+      memory: "4Gi"
   queryBudget:
     rows: 200000
     ms: 2000
@@ -347,18 +345,18 @@ server:
 ### 4.10 k6 Perf Smoke
 
 ```js
-import http from 'k6/http';
-import { sleep, check } from 'k6';
-export const options = { vus: 10, duration: '2m' };
+import http from "k6/http";
+import { sleep, check } from "k6";
+export const options = { vus: 10, duration: "2m" };
 export default function () {
   const res = http.post(
-    'http://localhost:4000/graphql',
+    "http://localhost:4000/graphql",
     JSON.stringify({
       query: '{ searchEntities(q:"acme", limit:20){ type } }',
     }),
-    { headers: { 'Content-Type': 'application/json' } },
+    { headers: { "Content-Type": "application/json" } }
   );
-  check(res, { 'status 200': (r) => r.status === 200 });
+  check(res, { "status 200": (r) => r.status === 200 });
   sleep(1);
 }
 ```

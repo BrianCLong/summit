@@ -45,11 +45,11 @@
         "recordCount": 500
       },
       "expected": {
-        "completeness": 0.60,
+        "completeness": 0.6,
         "consistency": 0.85,
         "timeliness": 0.75,
         "duplication": 0.05,
-        "provenanceCoverage": 0.50
+        "provenanceCoverage": 0.5
       },
       "records": [
         {
@@ -77,7 +77,7 @@
         "recordCount": 300
       },
       "expected": {
-        "completeness": 0.90,
+        "completeness": 0.9,
         "consistency": 0.88,
         "timeliness": 0.92,
         "duplication": 0.25,
@@ -118,10 +118,10 @@
       },
       "expected": {
         "completeness": 0.85,
-        "consistency": 0.40,
-        "timeliness": 0.80,
-        "duplication": 0.10,
-        "provenanceCoverage": 0.90
+        "consistency": 0.4,
+        "timeliness": 0.8,
+        "duplication": 0.1,
+        "provenanceCoverage": 0.9
       },
       "records": [
         {

@@ -24,15 +24,15 @@ export function validateDataEnvelope<T>(
 
   // Required field validation
   if (!envelope.provenance) {
-    errors.push('Missing provenance metadata - unlabeled data rejected');
+    errors.push("Missing provenance metadata - unlabeled data rejected");
   }
 
   if (envelope.isSimulated === undefined) {
-    errors.push('Missing isSimulated flag - data integrity cannot be verified');
+    errors.push("Missing isSimulated flag - data integrity cannot be verified");
   }
 
   if (!envelope.dataHash) {
-    errors.push('Missing data hash - integrity cannot be verified');
+    errors.push("Missing data hash - integrity cannot be verified");
   }
 
   // ... additional validation
@@ -47,22 +47,22 @@ export function validateDataEnvelope<T>(
 
 ### Validation Rules
 
-| Rule | Severity | Action |
-|------|----------|--------|
-| Missing provenance | ERROR | Reject data |
-| Missing isSimulated flag | ERROR | Reject data |
-| Missing dataHash | ERROR | Reject data |
-| Missing classification | ERROR | Reject data |
-| Low confidence (<0.7) | WARNING | Log warning, allow with notice |
-| Simulated data in production | ERROR | Reject data |
-| Hash mismatch | ERROR | Reject data (tampering detected) |
+| Rule                         | Severity | Action                           |
+| ---------------------------- | -------- | -------------------------------- |
+| Missing provenance           | ERROR    | Reject data                      |
+| Missing isSimulated flag     | ERROR    | Reject data                      |
+| Missing dataHash             | ERROR    | Reject data                      |
+| Missing classification       | ERROR    | Reject data                      |
+| Low confidence (<0.7)        | WARNING  | Log warning, allow with notice   |
+| Simulated data in production | ERROR    | Reject data                      |
+| Hash mismatch                | ERROR    | Reject data (tampering detected) |
 
 ### Default Configuration
 
 ```typescript
 const DEFAULT_CONFIG: ValidationConfig = {
   minConfidence: 0.7,
-  rejectSimulated: process.env.NODE_ENV === 'production',
+  rejectSimulated: process.env.NODE_ENV === "production",
   verifyHash: true,
   strictMode: false,
 };
@@ -81,6 +81,7 @@ Visual progress bar showing AI confidence level:
 ```
 
 **Features:**
+
 - Color-coded by confidence level
   - Green (≥0.8): High confidence
   - Amber (0.5-0.8): Medium confidence
@@ -97,6 +98,7 @@ Warning badge for simulated data:
 ```
 
 **Features:**
+
 - Yellow warning color
 - Warning icon
 - "SIMULATED DATA" label
@@ -111,6 +113,7 @@ Security classification indicator:
 ```
 
 **Features:**
+
 - Color-coded by classification level
   - Green: PUBLIC
   - Blue: INTERNAL
@@ -128,6 +131,7 @@ Expandable provenance metadata display:
 ```
 
 **Features:**
+
 - Formatted provenance summary
 - Expandable lineage chain
 - Provenance ID display
@@ -145,6 +149,7 @@ Full card with all integrity indicators:
 ```
 
 **Features:**
+
 - Header with classification and simulation badges
 - Confidence indicator for AI content
 - Warning banner if warnings present
@@ -157,7 +162,7 @@ Full card with all integrity indicators:
 **Integration with axios/fetch:**
 
 ```typescript
-import { createEnvelopeInterceptor } from './data-envelope-validator';
+import { createEnvelopeInterceptor } from "./data-envelope-validator";
 
 const interceptor = createEnvelopeInterceptor({
   minConfidence: 0.7,
@@ -166,17 +171,17 @@ const interceptor = createEnvelopeInterceptor({
 });
 
 // Axios integration
-axios.interceptors.response.use(
-  interceptor.axiosResponseInterceptor,
-  (error) => Promise.reject(error)
+axios.interceptors.response.use(interceptor.axiosResponseInterceptor, (error) =>
+  Promise.reject(error)
 );
 
 // Fetch integration
-const response = await fetch('/api/endpoint');
+const response = await fetch("/api/endpoint");
 const data = await interceptor.fetchResponseInterceptor(response);
 ```
 
 **Behavior:**
+
 - Validates every API response
 - Throws `DataEnvelopeValidationError` on failure
 - Logs warnings to console
@@ -195,7 +200,7 @@ class DataEnvelopeValidationError extends Error {
   public warnings: string[];
 
   constructor(validation: ValidationResult) {
-    super(`Data envelope validation failed: ${validation.errors.join(', ')}`);
+    super(`Data envelope validation failed: ${validation.errors.join(", ")}`);
     this.errors = validation.errors;
     this.warnings = validation.warnings;
   }
@@ -213,6 +218,7 @@ React error boundary for graceful failure:
 ```
 
 **Features:**
+
 - Catches validation errors
 - Displays user-friendly error message
 - Shows error details in development
@@ -317,7 +323,7 @@ React error boundary for graceful failure:
 ### 1. API Request
 
 ```typescript
-const response = await fetch('/api/ai/hypothesis');
+const response = await fetch("/api/ai/hypothesis");
 const data = await response.json();
 ```
 
@@ -361,25 +367,25 @@ if (!validation.valid) {
 **Test File:** `__tests__/data-envelope-validator.test.ts`
 
 ```typescript
-describe('validateDataEnvelope', () => {
-  it('rejects data without provenance', () => {
-    const result = validateDataEnvelope({ data: 'test' });
+describe("validateDataEnvelope", () => {
+  it("rejects data without provenance", () => {
+    const result = validateDataEnvelope({ data: "test" });
     expect(result.valid).toBe(false);
-    expect(result.errors).toContain('Missing provenance metadata - unlabeled data rejected');
+    expect(result.errors).toContain("Missing provenance metadata - unlabeled data rejected");
   });
 
-  it('accepts valid envelope', () => {
+  it("accepts valid envelope", () => {
     const envelope = createValidEnvelope();
     const result = validateDataEnvelope(envelope);
     expect(result.valid).toBe(true);
     expect(result.errors).toHaveLength(0);
   });
 
-  it('warns on low confidence', () => {
+  it("warns on low confidence", () => {
     const envelope = createEnvelopeWithConfidence(0.62);
     const result = validateDataEnvelope(envelope);
     expect(result.valid).toBe(true);
-    expect(result.warnings).toContain('Low AI confidence score: 0.62');
+    expect(result.warnings).toContain("Low AI confidence score: 0.62");
   });
 });
 ```
@@ -436,12 +442,12 @@ describe('DataEnvelopeCard', () => {
 
 ## Compliance Mapping
 
-| Control | Evidence |
-|---------|----------|
-| **PI1.1** | Provenance validation rejects unlabeled data |
-| **PI1.2** | Timestamp validation ensures timeliness |
-| **PI1.4** | Hash verification ensures validity |
-| **C1.2** | Classification badges enforce confidentiality controls |
+| Control   | Evidence                                               |
+| --------- | ------------------------------------------------------ |
+| **PI1.1** | Provenance validation rejects unlabeled data           |
+| **PI1.2** | Timestamp validation ensures timeliness                |
+| **PI1.4** | Hash verification ensures validity                     |
+| **C1.2**  | Classification badges enforce confidentiality controls |
 
 ## Monitoring & Alerting
 
@@ -455,6 +461,7 @@ describe('DataEnvelopeCard', () => {
 ### Logging
 
 All validation failures logged to console with:
+
 - Validation errors
 - Validation warnings
 - Envelope metadata (provenance ID, source)
@@ -463,6 +470,7 @@ All validation failures logged to console with:
 ### Security Alerts
 
 Hash mismatch triggers:
+
 - Client-side error log
 - Server-side security alert
 - Potential incident investigation
@@ -470,6 +478,7 @@ Hash mismatch triggers:
 ## Accessibility
 
 All UI components include:
+
 - ARIA labels for screen readers
 - Semantic HTML
 - Keyboard navigation support

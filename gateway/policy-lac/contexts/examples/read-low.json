@@ -1,1 +1,5 @@
-{ "action": "graph:read", "resource": "node:42", "attributes": { "labels": ["public"], "sensitivity": "S1" } }
+{
+  "action": "graph:read",
+  "resource": "node:42",
+  "attributes": { "labels": ["public"], "sensitivity": "S1" }
+}

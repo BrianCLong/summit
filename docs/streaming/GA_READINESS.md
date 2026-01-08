@@ -1,7 +1,9 @@
 # Streaming Platform GA Readiness
 
 ## Explicit Non-Goals
+
 To ensure system stability and predictability, the following are explicitly **out of scope** or **prohibited**:
+
 1.  **Silent Retries:** All retries must be observable (metrics) and eventually bounded (DLQ).
 2.  **Auto Schema Coercion:** We strictly enforce schema compatibility. No "best effort" parsing of incompatible data.
 3.  **Unbounded Buffering:** Consumers must pause or backpressure if downstream is slow; they must not buffer indefinitely in memory.
@@ -26,5 +28,6 @@ To ensure system stability and predictability, the following are explicitly **ou
 - [ ] **Runbooks:** Runbooks verified in Game Day exercise.
 
 ## Status
+
 **Current State:** READY FOR LOAD TESTING
 **Next Step:** Execute `server/scripts/streaming-load-test.ts` in Staging.

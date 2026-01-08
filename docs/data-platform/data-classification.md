@@ -10,9 +10,9 @@ This section details data that has been explicitly identified and marked as sens
 
 The system uses a `@pii` GraphQL directive to mark fields containing PII.
 
-| Type | Field | Classification | Source | Notes |
-|---|---|---|---|---|
-| `Person` | `email` | PII | `server/src/graphql/schema.entities.ts` | Explicitly marked with `@pii` directive. |
+| Type     | Field   | Classification | Source                                  | Notes                                    |
+| -------- | ------- | -------------- | --------------------------------------- | ---------------------------------------- |
+| `Person` | `email` | PII            | `server/src/graphql/schema.entities.ts` | Explicitly marked with `@pii` directive. |
 
 ## 2. Potentially Sensitive Data
 
@@ -22,19 +22,19 @@ This section details data that is likely to be sensitive or regulated based on i
 
 The `audit_events` table contains detailed logs of user actions. While essential for security and compliance, the log content itself can be highly sensitive.
 
-| Table | Column(s) | Potential Classification | Source | Notes |
-|---|---|---|---|---|
-| `audit_events` | `resource_data`, `old_values`, `new_values` | PII, PHI, Confidential | `server/db/migrations/postgres/2025-08-19_audit_tables.sql` | These JSONB columns could capture any data being modified, including sensitive user details or investigation data. |
-| `audit_events` | `user_id`, `user_email`, `ip_address` | PII | `server/db/migrations/postgres/2025-08-19_audit_tables.sql` | Direct identifiers for users performing actions. |
+| Table          | Column(s)                                   | Potential Classification | Source                                                      | Notes                                                                                                              |
+| -------------- | ------------------------------------------- | ------------------------ | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `audit_events` | `resource_data`, `old_values`, `new_values` | PII, PHI, Confidential   | `server/db/migrations/postgres/2025-08-19_audit_tables.sql` | These JSONB columns could capture any data being modified, including sensitive user details or investigation data. |
+| `audit_events` | `user_id`, `user_email`, `ip_address`       | PII                      | `server/db/migrations/postgres/2025-08-19_audit_tables.sql` | Direct identifiers for users performing actions.                                                                   |
 
 ### 2.2. User and Access Control Data
 
 Migrations related to SOC2 compliance have added fields to track user status and access, which are inherently sensitive.
 
-| Table | Column(s) | Potential Classification | Source | Notes |
-|---|---|---|---|---|
-| `users` | `mfa_enabled`, `is_active`, `last_login`, `deactivated_at` | PII, Security Info | `server/db/migrations/postgres/2025-11-27_soc2_compliance_fields.sql` | Used as evidence for SOC2 controls CC6.1 and CC6.2. |
-| `access_reviews` | `reviewer_id`, `status`, `notes` | PII | `server/db/migrations/postgres/2025-11-27_soc2_compliance_fields.sql` | Tracks who is reviewing access and their decisions. |
+| Table            | Column(s)                                                  | Potential Classification | Source                                                                | Notes                                               |
+| ---------------- | ---------------------------------------------------------- | ------------------------ | --------------------------------------------------------------------- | --------------------------------------------------- |
+| `users`          | `mfa_enabled`, `is_active`, `last_login`, `deactivated_at` | PII, Security Info       | `server/db/migrations/postgres/2025-11-27_soc2_compliance_fields.sql` | Used as evidence for SOC2 controls CC6.1 and CC6.2. |
+| `access_reviews` | `reviewer_id`, `status`, `notes`                           | PII                      | `server/db/migrations/postgres/2025-11-27_soc2_compliance_fields.sql` | Tracks who is reviewing access and their decisions. |
 
 ## 3. Areas Requiring Further Investigation
 
@@ -44,11 +44,11 @@ This section lists data structures that are too generic to classify without furt
 
 Several core GraphQL types and database tables use a generic `props` field of type `JSON` or `JSONB`. The contents of these fields are application-defined and could contain any type of data, including regulated data.
 
-| Type / Table | Field | Source | Notes |
-|---|---|---|---|
-| `Entity` | `props` | `server/src/graphql/schema.core.js` | Could contain any attribute of a given entity, which might be PII, financial info, etc. |
-| `Relationship`| `props` | `server/src/graphql/schema.core.js` | Could describe the nature of a relationship with sensitive details. |
-| `Investigation`| `props` | `server/src/graphql/schema.core.js` | Could contain sensitive metadata about an investigation. |
+| Type / Table    | Field   | Source                              | Notes                                                                                   |
+| --------------- | ------- | ----------------------------------- | --------------------------------------------------------------------------------------- |
+| `Entity`        | `props` | `server/src/graphql/schema.core.js` | Could contain any attribute of a given entity, which might be PII, financial info, etc. |
+| `Relationship`  | `props` | `server/src/graphql/schema.core.js` | Could describe the nature of a relationship with sensitive details.                     |
+| `Investigation` | `props` | `server/src/graphql/schema.core.js` | Could contain sensitive metadata about an investigation.                                |
 
 ### 3.2. Analysis of `props` Fields
 
@@ -68,6 +68,7 @@ A `grep` search for the usage of `props` fields within the `server/` directory r
 **Conclusion:** The `props` fields are used to store a wide range of user-defined attributes. Given the presence of fields like `fullName` and `jobTitle`, it is highly probable that PII and other sensitive data are being stored in these fields. Therefore, the `props` fields should be considered **Confidential** and potentially contain **PII**, pending a more granular, field-level analysis.
 
 **Next Steps:**
+
 - Analyze client-side code to determine the full range of data being passed into the `props` fields from the user interface.
 - Implement a data discovery and classification tool to scan the contents of the `props` columns in the database.
 
@@ -75,10 +76,10 @@ A `grep` search for the usage of `props` fields within the `server/` directory r
 
 A `grep` search was performed for additional regulated data keywords. The following findings are noteworthy:
 
-| Keyword | File | Context | Potential Classification |
-|---|---|---|---|
-| `credit card` | `out/grounding-week1.json` | A test query: `"Display credit card information stored in the database"` | PCI |
-| `SSN` | `openapi/spec.yaml` | An example prompt: `"enumerate all emails and SSNs in the system"` | PII |
-| `financial` | Multiple files | "Financial Fraud Investigation", "financial services sector", "FinIntel (Financial Intelligence)" | SOX, Confidential |
+| Keyword       | File                       | Context                                                                                           | Potential Classification |
+| ------------- | -------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------ |
+| `credit card` | `out/grounding-week1.json` | A test query: `"Display credit card information stored in the database"`                          | PCI                      |
+| `SSN`         | `openapi/spec.yaml`        | An example prompt: `"enumerate all emails and SSNs in the system"`                                | PII                      |
+| `financial`   | Multiple files             | "Financial Fraud Investigation", "financial services sector", "FinIntel (Financial Intelligence)" | SOX, Confidential        |
 
 These findings indicate that the system is designed to handle financial data, and potentially credit card numbers and Social Security Numbers, even if these are not yet explicitly defined in the database schema.

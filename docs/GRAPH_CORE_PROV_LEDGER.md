@@ -4,8 +4,8 @@ This document describes how to use the IntelGraph "Graph Core" and "Provenance L
 
 ## Overview
 
-*   **Graph Core**: Manages the entity-relationship graph (Neo4j). It enforces bitemporal versioning (`validFrom`, `validTo`) and policy labels.
-*   **Provenance Ledger**: Records an immutable sequence of events (claims, edits, transformations) in a Merkle-hashed chain (PostgreSQL).
+- **Graph Core**: Manages the entity-relationship graph (Neo4j). It enforces bitemporal versioning (`validFrom`, `validTo`) and policy labels.
+- **Provenance Ledger**: Records an immutable sequence of events (claims, edits, transformations) in a Merkle-hashed chain (PostgreSQL).
 
 ## Canonical Entity Model
 
@@ -28,10 +28,10 @@ interface BaseCanonicalEntity {
 
 ### Supported Entity Types
 
-*   **Person**: Individuals, identities.
-*   **Organization**: Companies, groups.
-*   **Claim**: Assertions, allegations.
-*   **Location**, **Asset**, **Event**, **Document**, **Communication**, etc.
+- **Person**: Individuals, identities.
+- **Organization**: Companies, groups.
+- **Claim**: Assertions, allegations.
+- **Location**, **Asset**, **Event**, **Document**, **Communication**, etc.
 
 ### Policy Labels
 
@@ -39,13 +39,13 @@ Every entity mutation **must** include `PolicyLabels` to govern data handling:
 
 ```typescript
 interface PolicyLabels {
-  origin: string;           // e.g., "OSINT", "Partner X"
-  sensitivity: string;      // PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED, TOP_SECRET
-  clearance: string;        // PUBLIC, AUTHORIZED, CONFIDENTIAL, SECRET, TOP_SECRET
-  legalBasis: string;       // e.g., "Consent", "Legitimate Interest"
-  needToKnow: string[];     // Array of tags/groups
+  origin: string; // e.g., "OSINT", "Partner X"
+  sensitivity: string; // PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED, TOP_SECRET
+  clearance: string; // PUBLIC, AUTHORIZED, CONFIDENTIAL, SECRET, TOP_SECRET
+  legalBasis: string; // e.g., "Consent", "Legitimate Interest"
+  needToKnow: string[]; // Array of tags/groups
   purposeLimitation: string[]; // e.g., "Analytics", "Security"
-  retentionClass: string;   // TRANSIENT, LONG_TERM, PERMANENT
+  retentionClass: string; // TRANSIENT, LONG_TERM, PERMANENT
 }
 ```
 
@@ -59,10 +59,7 @@ To create an entity, you must provide the data payload and the policy labels.
 mutation CreatePerson {
   createCanonicalEntity(
     entityType: PERSON
-    data: {
-      name: { full: "John Doe" },
-      identifiers: { emails: ["john@example.com"] }
-    }
+    data: { name: { full: "John Doe" }, identifiers: { emails: ["john@example.com"] } }
     policyLabels: {
       origin: "Manual Entry"
       sensitivity: INTERNAL
@@ -100,9 +97,7 @@ mutation RegisterClaim {
       purposeLimitation: ["Market Analysis"]
       retentionClass: PERMANENT
     }
-    relatedClaims: [
-      { claimId: "claim-999", relationship: "SUPPORTS" }
-    ]
+    relatedClaims: [{ claimId: "claim-999", relationship: "SUPPORTS" }]
   ) {
     id
     statement
@@ -168,13 +163,7 @@ query ExportLedger {
 Backend services should use the `GraphCoreService` singleton.
 
 ```typescript
-import { graphCore } from '@/services/GraphCoreService';
+import { graphCore } from "@/services/GraphCoreService";
 
-await graphCore.saveEntity(
-  'tenant-1',
-  'Person',
-  { name: 'Alice' },
-  policyLabels,
-  'actor-id'
-);
+await graphCore.saveEntity("tenant-1", "Person", { name: "Alice" }, policyLabels, "actor-id");
 ```

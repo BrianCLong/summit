@@ -1,6 +1,7 @@
 # IntelGraph GA Core Blueprint
 
 ## Section 1: GA Core Overview
+
 - **What GA includes**
   - Data intake for CSV/TSV upload plus 3 connectors (S3-compatible object store, PostgreSQL, REST pull) with schema mapping, validation, and deduplication.
   - Canonical graph model (entities, relationships, temporal, geospatial, provenance) with versioned schema registry and policy tags.
@@ -16,6 +17,7 @@
   - Offensive automation/weaponized disinfo tooling, covert surveillance modules, biometric mass-tracking, auto-deepfake generation, autonomous lethal targeting, and non-consensual data exfiltration.
 
 ## Section 2: Architecture & Services
+
 - **Service map**
   - Ingestion Service (Node): connector runners, schema mapping, validation/dedupe, writes to landing bucket + Kafka topics.
   - Graph API Service (Node/GraphQL+REST): CRUD, query translation, policy enforcement, temporal/geo query hooks, caches.
@@ -29,18 +31,20 @@
   - Object Storage: S3-compatible landing + processed zones; used for uploads and bulk exports.
 - **Text diagram (bounds)**
   - [UI] ─BFF/API Gateway─> [Graph API] ─┬─> [Graph DB]
-                                   │        └─> [Analytics Service]
-                                   │
-                                   ├─> [Ingestion Service] ─Kafka─> [Graph API] / [Provenance]
-                                   │
-                                   ├─> [AI Copilot Service] ──> [Graph API] / [RAG Store]
-                                   │
-                                   └─> [Auth/Policy Service] ──> all PEPs
+    │ └─> [Analytics Service]
+    │
+    ├─> [Ingestion Service] ─Kafka─> [Graph API] / [Provenance]
+    │
+    ├─> [AI Copilot Service] ──> [Graph API] / [RAG Store]
+    │
+    └─> [Auth/Policy Service] ──> all PEPs
   - [Provenance/Audit Ledger] <─Kafka─ [All services emit events]
   - [Object Storage] <─Ingestion uploads; >─Bulk export
 
 ## Section 3: GA Backlog (Epics → stories)
+
 ### Epic A: Ingestion & Prep
+
 1. CSV/TSV upload with size limits, checksum, and resumable UI flow.
 2. S3-compatible connector (pull by path/prefix) with schema mapping wizard.
 3. PostgreSQL connector (table/query import) with incremental watermarking.
@@ -53,6 +57,7 @@
 10. Ingest monitoring dashboard (rates, failures, DLQ depth).
 
 ### Epic B: Canonical Model & Graph Core
+
 11. Define canonical entity/relationship schemas with versioning and policy tags.
 12. Graph CRUD APIs with RBAC/ABAC enforcement and audit hooks.
 13. Temporal slices: effective_from/through filters in queries.
@@ -63,6 +68,7 @@
 18. Edge directionality + weight support with validation.
 
 ### Epic C: Analytics & Tradecraft
+
 19. Ego network and neighborhood expansion endpoints with depth/filters.
 20. Shortest/weighted path API with policy-aware traversal limits.
 21. Degree/betweenness centrality batch job with result materialization.
@@ -71,6 +77,7 @@
 24. UI analytics console to run/save jobs and visualize outputs on graph/timeline/map.
 
 ### Epic D: AI Copilot
+
 25. NL → graph query translation with guardrails and dry-run preview.
 26. RAG index over schema docs, playbooks, and graph summaries; return citations.
 27. Safety filters: PII boundary checks, prompt/response audit log, policy-tag awareness.
@@ -78,6 +85,7 @@
 29. Feedback loop: user rating stored in provenance for tuning.
 
 ### Epic E: Security & Governance
+
 30. OIDC integration with session management and refresh tokens.
 31. RBAC roles + ABAC attributes (policy tags) enforced in PEP middleware.
 32. Immutable audit log for API, ingest, analytics, copilot actions.
@@ -86,6 +94,7 @@
 35. Tenant/project isolation configuration for services and storage.
 
 ### Epic F: UI Tri-Pane Experience
+
 36. Graph canvas with selection, filter, expand, and edge highlighting.
 37. Timeline view synced to selected entities/paths.
 38. Map view with geo-filtering and clustering for dense nodes.
@@ -95,6 +104,7 @@
 42. Accessibility: keyboard nav, color contrast, basic i18n scaffold.
 
 ### Epic G: Platform Operations
+
 43. CI/CD pipeline (lint, test, build, image, deploy to k8s sandbox).
 44. Observability: structured logs, metrics (ingest rate, query latency), traces via OpenTelemetry.
 45. Backup/restore scripts for graph DB and provenance ledger.
@@ -102,6 +112,7 @@
 47. Security hardening: TLS termination, CORS/helmet defaults, secrets via vault/K8s secrets.
 
 ## Section 4: 90-Day Plan (6×2-week sprints)
+
 - **Sprint 1: Foundations & Auth**
   - Themes: repo setup, CI/CD skeleton, OIDC authN, RBAC/ABAC middleware, policy tag registry baseline.
   - Deliverables: working login, JWT propagation, PEP middleware on sample endpoints, initial schema registry, CI lint/test pipeline.
@@ -139,10 +150,12 @@
   - Dependencies: prior functionality complete.
 
 ## Section 5: Tradeoffs
+
 - **Deferred (10+ items from wishbooks)**: Salesforce/Snowflake connectors; Kafka live streaming ingest; STIX/TAXII threat feeds; advanced entity resolution ML; automated playbooks/orchestration; multilingual NLQ; geospatial routing/heatmaps; temporal forecasting; collaborative multi-user sessions; offline/air-gapped bundle; chaos/HA gameday automation; mobile client; fine-tuned tenant LLMs.
 - **Non-negotiable for GA (differentiators)**: End-to-end provenance with auditability; policy-tag aware authZ (explainable governance); graph-native analytics (pathfinding + centrality with overlays); AI copilot with citations and guardrails; tri-pane (graph/timeline/map) synchronized exploration.
 
 ## Section 6: Forward-Leaning Enhancements (post-GA candidates)
+
 - Adaptive entity resolution using graph embeddings for dedupe/merge suggestions.
 - Continuous graph changefeed to feature store for online ML risk scoring.
 - Declarative policy-as-code (OPA/Rego) with simulation mode for connectors and analytics jobs.

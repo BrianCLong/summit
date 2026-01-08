@@ -5,67 +5,73 @@
  * behavioral analytics, and kill chain mapping
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // Hunt Types
 export const HuntMissionSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
-  classification: z.enum(['UNCLASSIFIED', 'CONFIDENTIAL', 'SECRET', 'TOP_SECRET']),
-  status: z.enum(['DRAFT', 'APPROVED', 'ACTIVE', 'PAUSED', 'COMPLETED', 'ARCHIVED']),
+  classification: z.enum(["UNCLASSIFIED", "CONFIDENTIAL", "SECRET", "TOP_SECRET"]),
+  status: z.enum(["DRAFT", "APPROVED", "ACTIVE", "PAUSED", "COMPLETED", "ARCHIVED"]),
   type: z.enum([
-    'HYPOTHESIS_DRIVEN',
-    'INTELLIGENCE_DRIVEN',
-    'ANOMALY_DRIVEN',
-    'TTP_DRIVEN',
-    'IOC_DRIVEN',
-    'BASELINE_DEVIATION'
+    "HYPOTHESIS_DRIVEN",
+    "INTELLIGENCE_DRIVEN",
+    "ANOMALY_DRIVEN",
+    "TTP_DRIVEN",
+    "IOC_DRIVEN",
+    "BASELINE_DEVIATION",
   ]),
-  priority: z.enum(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']),
+  priority: z.enum(["CRITICAL", "HIGH", "MEDIUM", "LOW"]),
   hypothesis: z.object({
     statement: z.string(),
     attackerProfile: z.string().optional(),
     expectedTTPs: z.array(z.string()),
     targetAssets: z.array(z.string()),
     indicators: z.array(z.string()),
-    dataSourcesRequired: z.array(z.string())
+    dataSourcesRequired: z.array(z.string()),
   }),
   scope: z.object({
     timeRange: z.object({ start: z.date(), end: z.date() }),
     systems: z.array(z.string()),
     networks: z.array(z.string()),
-    users: z.array(z.string()).optional()
+    users: z.array(z.string()).optional(),
   }),
-  queries: z.array(z.object({
-    id: z.string(),
-    name: z.string(),
-    dataSource: z.string(),
-    query: z.string(),
-    language: z.enum(['KQL', 'SPL', 'SQL', 'YARA', 'SIGMA', 'LUCENE', 'CYPHER']),
-    expectedResults: z.string(),
-    actualResults: z.number().optional()
-  })),
-  findings: z.array(z.object({
-    id: z.string(),
-    timestamp: z.date(),
-    type: z.enum(['CONFIRMED_THREAT', 'SUSPICIOUS', 'ANOMALY', 'FALSE_POSITIVE', 'IMPROVEMENT']),
-    description: z.string(),
-    evidence: z.array(z.string()),
-    severity: z.enum(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO']),
-    relatedEntities: z.array(z.string()),
-    mitreMapping: z.array(z.string()),
-    actionTaken: z.string().optional()
-  })),
-  metrics: z.object({
-    hoursInvested: z.number(),
-    systemsAnalyzed: z.number(),
-    eventsProcessed: z.number(),
-    findingsCount: z.number(),
-    truePositiveRate: z.number()
-  }).optional(),
+  queries: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      dataSource: z.string(),
+      query: z.string(),
+      language: z.enum(["KQL", "SPL", "SQL", "YARA", "SIGMA", "LUCENE", "CYPHER"]),
+      expectedResults: z.string(),
+      actualResults: z.number().optional(),
+    })
+  ),
+  findings: z.array(
+    z.object({
+      id: z.string(),
+      timestamp: z.date(),
+      type: z.enum(["CONFIRMED_THREAT", "SUSPICIOUS", "ANOMALY", "FALSE_POSITIVE", "IMPROVEMENT"]),
+      description: z.string(),
+      evidence: z.array(z.string()),
+      severity: z.enum(["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO"]),
+      relatedEntities: z.array(z.string()),
+      mitreMapping: z.array(z.string()),
+      actionTaken: z.string().optional(),
+    })
+  ),
+  metrics: z
+    .object({
+      hoursInvested: z.number(),
+      systemsAnalyzed: z.number(),
+      eventsProcessed: z.number(),
+      findingsCount: z.number(),
+      truePositiveRate: z.number(),
+    })
+    .optional(),
   team: z.array(z.object({ id: z.string(), role: z.string() })),
   createdAt: z.date(),
-  updatedAt: z.date()
+  updatedAt: z.date(),
 });
 
 export type HuntMission = z.infer<typeof HuntMissionSchema>;
@@ -80,7 +86,7 @@ export interface HuntAnalytics {
 
 export interface BehaviorProfile {
   entityId: string;
-  entityType: 'USER' | 'HOST' | 'SERVICE' | 'APPLICATION';
+  entityType: "USER" | "HOST" | "SERVICE" | "APPLICATION";
   normalBehavior: {
     accessPatterns: number[];
     networkActivity: number[];
@@ -145,7 +151,7 @@ export class ThreatHuntingEngine {
       statisticalBaseline: new Map(),
       anomalyThresholds: new Map(),
       behaviorProfiles: new Map(),
-      killChainCoverage: new Map()
+      killChainCoverage: new Map(),
     };
     this.initializeDefaultPlaybooks();
   }
@@ -155,8 +161,8 @@ export class ThreatHuntingEngine {
    */
   async createHuntMission(
     hypothesis: ThreatHypothesis,
-    scope: HuntMission['scope'],
-    team: HuntMission['team']
+    scope: HuntMission["scope"],
+    team: HuntMission["team"]
   ): Promise<HuntMission> {
     // Generate hunting queries based on hypothesis
     const queries = await this.generateHuntingQueries(hypothesis);
@@ -164,9 +170,9 @@ export class ThreatHuntingEngine {
     const mission: HuntMission = {
       id: crypto.randomUUID(),
       name: `Hunt: ${hypothesis.statement.substring(0, 50)}...`,
-      classification: 'SECRET',
-      status: 'DRAFT',
-      type: 'HYPOTHESIS_DRIVEN',
+      classification: "SECRET",
+      status: "DRAFT",
+      type: "HYPOTHESIS_DRIVEN",
       priority: this.assessHypothesisPriority(hypothesis),
       hypothesis: {
         statement: hypothesis.statement,
@@ -174,14 +180,14 @@ export class ThreatHuntingEngine {
         expectedTTPs: hypothesis.requiredData,
         targetAssets: [],
         indicators: [],
-        dataSourcesRequired: hypothesis.requiredData
+        dataSourcesRequired: hypothesis.requiredData,
       },
       scope,
       queries,
       findings: [],
       team,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.missions.set(mission.id, mission);
@@ -196,7 +202,7 @@ export class ThreatHuntingEngine {
     dataConnector: DataConnector
   ): Promise<{
     missionId: string;
-    findings: HuntMission['findings'];
+    findings: HuntMission["findings"];
     coverage: Map<string, boolean>;
     recommendations: string[];
   }> {
@@ -205,7 +211,7 @@ export class ThreatHuntingEngine {
       throw new Error(`Playbook ${playbookId} not found`);
     }
 
-    const findings: HuntMission['findings'] = [];
+    const findings: HuntMission["findings"] = [];
     const coverage = new Map<string, boolean>();
 
     // Execute each query step
@@ -231,7 +237,7 @@ export class ThreatHuntingEngine {
       missionId: mission.id,
       findings,
       coverage,
-      recommendations: this.generateHuntRecommendations(findings, coverage, playbook)
+      recommendations: this.generateHuntRecommendations(findings, coverage, playbook),
     };
   }
 
@@ -240,24 +246,24 @@ export class ThreatHuntingEngine {
    */
   async analyzeBaseline(
     entityId: string,
-    entityType: BehaviorProfile['entityType'],
+    entityType: BehaviorProfile["entityType"],
     historicalData: any[],
     windowDays: number = 30
   ): Promise<BehaviorProfile> {
     // Calculate statistical baselines
     const accessPatterns = this.calculateTimeSeriesBaseline(
-      historicalData.map(d => d.accessCount || 0)
+      historicalData.map((d) => d.accessCount || 0)
     );
     const networkActivity = this.calculateTimeSeriesBaseline(
-      historicalData.map(d => d.networkBytes || 0)
+      historicalData.map((d) => d.networkBytes || 0)
     );
 
     // Extract process and file patterns
     const processExecution = this.extractFrequentPatterns(
-      historicalData.flatMap(d => d.processes || [])
+      historicalData.flatMap((d) => d.processes || [])
     );
     const fileOperations = this.extractFrequentPatterns(
-      historicalData.flatMap(d => d.fileOps || [])
+      historicalData.flatMap((d) => d.fileOps || [])
     );
 
     // Calculate authentication patterns
@@ -271,11 +277,11 @@ export class ThreatHuntingEngine {
         networkActivity: networkActivity.values,
         processExecution,
         fileOperations,
-        authenticationPatterns: authPatterns
+        authenticationPatterns: authPatterns,
       },
       deviations: [],
       riskScore: 0,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
 
     this.behaviorProfiles.set(entityId, profile);
@@ -291,7 +297,7 @@ export class ThreatHuntingEngine {
     entityId: string,
     currentData: any
   ): Promise<{
-    deviations: BehaviorProfile['deviations'];
+    deviations: BehaviorProfile["deviations"];
     riskScore: number;
     alerts: Array<{ type: string; severity: string; description: string }>;
   }> {
@@ -300,7 +306,7 @@ export class ThreatHuntingEngine {
       return { deviations: [], riskScore: 0, alerts: [] };
     }
 
-    const deviations: BehaviorProfile['deviations'] = [];
+    const deviations: BehaviorProfile["deviations"] = [];
     const alerts: Array<{ type: string; severity: string; description: string }> = [];
 
     // Check access pattern deviation
@@ -311,15 +317,15 @@ export class ThreatHuntingEngine {
     if (accessDeviation.severity > 2) {
       deviations.push({
         timestamp: new Date(),
-        metric: 'access_count',
+        metric: "access_count",
         expected: accessDeviation.expected,
         actual: currentData.accessCount,
-        severity: accessDeviation.severity
+        severity: accessDeviation.severity,
       });
       alerts.push({
-        type: 'ACCESS_ANOMALY',
-        severity: accessDeviation.severity > 3 ? 'HIGH' : 'MEDIUM',
-        description: `Unusual access pattern: ${accessDeviation.severity.toFixed(1)} sigma deviation`
+        type: "ACCESS_ANOMALY",
+        severity: accessDeviation.severity > 3 ? "HIGH" : "MEDIUM",
+        description: `Unusual access pattern: ${accessDeviation.severity.toFixed(1)} sigma deviation`,
       });
     }
 
@@ -331,15 +337,15 @@ export class ThreatHuntingEngine {
     if (networkDeviation.severity > 2) {
       deviations.push({
         timestamp: new Date(),
-        metric: 'network_bytes',
+        metric: "network_bytes",
         expected: networkDeviation.expected,
         actual: currentData.networkBytes,
-        severity: networkDeviation.severity
+        severity: networkDeviation.severity,
       });
       alerts.push({
-        type: 'NETWORK_ANOMALY',
-        severity: networkDeviation.severity > 3 ? 'HIGH' : 'MEDIUM',
-        description: `Unusual network activity: ${networkDeviation.severity.toFixed(1)} sigma deviation`
+        type: "NETWORK_ANOMALY",
+        severity: networkDeviation.severity > 3 ? "HIGH" : "MEDIUM",
+        description: `Unusual network activity: ${networkDeviation.severity.toFixed(1)} sigma deviation`,
       });
     }
 
@@ -349,9 +355,9 @@ export class ThreatHuntingEngine {
     );
     if (unusualProcesses.length > 0) {
       alerts.push({
-        type: 'PROCESS_ANOMALY',
-        severity: 'MEDIUM',
-        description: `Unusual processes detected: ${unusualProcesses.join(', ')}`
+        type: "PROCESS_ANOMALY",
+        severity: "MEDIUM",
+        description: `Unusual processes detected: ${unusualProcesses.join(", ")}`,
       });
     }
 
@@ -377,32 +383,32 @@ export class ThreatHuntingEngine {
 
     for (const intel of threatIntelligence) {
       // Generate hypothesis based on threat actor TTPs
-      if (intel.type === 'APT_PROFILE') {
+      if (intel.type === "APT_PROFILE") {
         hypotheses.push({
           id: crypto.randomUUID(),
           statement: `${intel.name} may be targeting our ${environmentContext.criticalAssets[0]} using ${intel.preferredTTPs[0]}`,
           rationale: `Based on recent ${intel.name} activity targeting similar organizations`,
           confidence: 0.7,
           supportingIntelligence: [intel.id],
-          requiredData: ['EDR logs', 'Network flows', 'Authentication logs'],
+          requiredData: ["EDR logs", "Network flows", "Authentication logs"],
           testingApproach: intel.preferredTTPs.map((ttp: string) => `Hunt for ${ttp} indicators`),
-          expectedFindings: ['Suspicious process execution', 'Unusual network connections'],
-          falsePositiveIndicators: ['Legitimate admin activity', 'Scheduled tasks']
+          expectedFindings: ["Suspicious process execution", "Unusual network connections"],
+          falsePositiveIndicators: ["Legitimate admin activity", "Scheduled tasks"],
         });
       }
 
       // Generate hypothesis based on vulnerabilities
-      if (intel.type === 'VULNERABILITY') {
+      if (intel.type === "VULNERABILITY") {
         hypotheses.push({
           id: crypto.randomUUID(),
           statement: `Attackers may be exploiting ${intel.cve} in our environment`,
           rationale: `${intel.cve} is actively exploited and affects our ${intel.affectedProduct}`,
           confidence: 0.8,
           supportingIntelligence: [intel.id],
-          requiredData: ['Vulnerability scan results', 'Web logs', 'Application logs'],
-          testingApproach: ['Scan for vulnerable systems', 'Analyze exploitation attempts'],
-          expectedFindings: ['Exploitation attempts', 'Successful compromises'],
-          falsePositiveIndicators: ['Security scanner activity', 'Penetration testing']
+          requiredData: ["Vulnerability scan results", "Web logs", "Application logs"],
+          testingApproach: ["Scan for vulnerable systems", "Analyze exploitation attempts"],
+          expectedFindings: ["Exploitation attempts", "Successful compromises"],
+          falsePositiveIndicators: ["Security scanner activity", "Penetration testing"],
         });
       }
     }
@@ -416,21 +422,30 @@ export class ThreatHuntingEngine {
   /**
    * Map findings to MITRE ATT&CK kill chain
    */
-  mapToKillChain(findings: HuntMission['findings']): {
+  mapToKillChain(findings: HuntMission["findings"]): {
     coverage: Map<string, number>;
     gaps: string[];
     attackPath: string[];
   } {
     const killChainPhases = [
-      'reconnaissance', 'resource-development', 'initial-access',
-      'execution', 'persistence', 'privilege-escalation',
-      'defense-evasion', 'credential-access', 'discovery',
-      'lateral-movement', 'collection', 'command-and-control',
-      'exfiltration', 'impact'
+      "reconnaissance",
+      "resource-development",
+      "initial-access",
+      "execution",
+      "persistence",
+      "privilege-escalation",
+      "defense-evasion",
+      "credential-access",
+      "discovery",
+      "lateral-movement",
+      "collection",
+      "command-and-control",
+      "exfiltration",
+      "impact",
     ];
 
     const coverage = new Map<string, number>();
-    killChainPhases.forEach(phase => coverage.set(phase, 0));
+    killChainPhases.forEach((phase) => coverage.set(phase, 0));
 
     // Map findings to phases
     for (const finding of findings) {
@@ -443,10 +458,10 @@ export class ThreatHuntingEngine {
     }
 
     // Identify gaps
-    const gaps = killChainPhases.filter(phase => (coverage.get(phase) || 0) === 0);
+    const gaps = killChainPhases.filter((phase) => (coverage.get(phase) || 0) === 0);
 
     // Build attack path
-    const attackPath = killChainPhases.filter(phase => (coverage.get(phase) || 0) > 0);
+    const attackPath = killChainPhases.filter((phase) => (coverage.get(phase) || 0) > 0);
 
     return { coverage, gaps, attackPath };
   }
@@ -468,7 +483,7 @@ export class ThreatHuntingEngine {
     }>;
     recommendations: string[];
   }> {
-    const allFindings: Array<{ missionId: string; finding: HuntMission['findings'][0] }> = [];
+    const allFindings: Array<{ missionId: string; finding: HuntMission["findings"][0] }> = [];
 
     for (const [missionId, mission] of this.missions) {
       for (const finding of mission.findings) {
@@ -490,8 +505,10 @@ export class ThreatHuntingEngine {
 
   // Private methods
 
-  private async generateHuntingQueries(hypothesis: ThreatHypothesis): Promise<HuntMission['queries']> {
-    const queries: HuntMission['queries'] = [];
+  private async generateHuntingQueries(
+    hypothesis: ThreatHypothesis
+  ): Promise<HuntMission["queries"]> {
+    const queries: HuntMission["queries"] = [];
     let queryId = 1;
 
     // Generate queries for each required data source
@@ -502,7 +519,7 @@ export class ThreatHuntingEngine {
         dataSource,
         query: this.generateQueryForDataSource(dataSource, hypothesis),
         language: this.getQueryLanguage(dataSource),
-        expectedResults: hypothesis.expectedFindings[0] || 'Suspicious activity'
+        expectedResults: hypothesis.expectedFindings[0] || "Suspicious activity",
       });
     }
 
@@ -512,53 +529,53 @@ export class ThreatHuntingEngine {
   private generateQueryForDataSource(dataSource: string, hypothesis: ThreatHypothesis): string {
     // Generate appropriate query based on data source
     const templates: Record<string, string> = {
-      'EDR logs': `process where process.name in ("powershell.exe", "cmd.exe") and process.command_line matches ".*encoded.*"`,
-      'Network flows': `netflow where bytes_out > 10000000 and dst_port not in (80, 443)`,
-      'Authentication logs': `auth where result = "failure" | stats count by user | where count > 10`
+      "EDR logs": `process where process.name in ("powershell.exe", "cmd.exe") and process.command_line matches ".*encoded.*"`,
+      "Network flows": `netflow where bytes_out > 10000000 and dst_port not in (80, 443)`,
+      "Authentication logs": `auth where result = "failure" | stats count by user | where count > 10`,
     };
     return templates[dataSource] || `search ${dataSource}`;
   }
 
-  private getQueryLanguage(dataSource: string): HuntMission['queries'][0]['language'] {
-    const languages: Record<string, HuntMission['queries'][0]['language']> = {
-      'EDR logs': 'KQL',
-      'Network flows': 'SPL',
-      'Authentication logs': 'SQL'
+  private getQueryLanguage(dataSource: string): HuntMission["queries"][0]["language"] {
+    const languages: Record<string, HuntMission["queries"][0]["language"]> = {
+      "EDR logs": "KQL",
+      "Network flows": "SPL",
+      "Authentication logs": "SQL",
     };
-    return languages[dataSource] || 'LUCENE';
+    return languages[dataSource] || "LUCENE";
   }
 
-  private assessHypothesisPriority(hypothesis: ThreatHypothesis): HuntMission['priority'] {
+  private assessHypothesisPriority(hypothesis: ThreatHypothesis): HuntMission["priority"] {
     if (hypothesis.confidence > 0.8) {
-      return 'CRITICAL';
+      return "CRITICAL";
     }
     if (hypothesis.confidence > 0.6) {
-      return 'HIGH';
+      return "HIGH";
     }
     if (hypothesis.confidence > 0.4) {
-      return 'MEDIUM';
+      return "MEDIUM";
     }
-    return 'LOW';
+    return "LOW";
   }
 
   private async analyzeQueryResults(
     results: any[],
     playbook: HuntPlaybook,
     step: any
-  ): Promise<HuntMission['findings']> {
-    const findings: HuntMission['findings'] = [];
+  ): Promise<HuntMission["findings"]> {
+    const findings: HuntMission["findings"] = [];
 
     for (const result of results) {
       findings.push({
         id: crypto.randomUUID(),
         timestamp: new Date(),
-        type: 'SUSPICIOUS',
+        type: "SUSPICIOUS",
         description: `Found match in ${playbook.name}: ${JSON.stringify(result).substring(0, 200)}`,
         evidence: [JSON.stringify(result)],
-        severity: 'MEDIUM',
+        severity: "MEDIUM",
         relatedEntities: [],
         mitreMapping: playbook.mitreMapping,
-        actionTaken: undefined
+        actionTaken: undefined,
       });
     }
 
@@ -567,55 +584,60 @@ export class ThreatHuntingEngine {
 
   private async createMissionFromPlaybook(
     playbook: HuntPlaybook,
-    findings: HuntMission['findings']
+    findings: HuntMission["findings"]
   ): Promise<HuntMission> {
     const mission: HuntMission = {
       id: crypto.randomUUID(),
       name: `Playbook Hunt: ${playbook.name}`,
-      classification: 'SECRET',
-      status: 'COMPLETED',
-      type: 'TTP_DRIVEN',
-      priority: 'MEDIUM',
+      classification: "SECRET",
+      status: "COMPLETED",
+      type: "TTP_DRIVEN",
+      priority: "MEDIUM",
       hypothesis: {
         statement: playbook.description,
         expectedTTPs: playbook.mitreMapping,
         targetAssets: [],
         indicators: [],
-        dataSourcesRequired: playbook.dataSources
+        dataSourcesRequired: playbook.dataSources,
       },
       scope: {
         timeRange: { start: new Date(Date.now() - 24 * 60 * 60 * 1000), end: new Date() },
         systems: [],
-        networks: []
+        networks: [],
       },
       queries: playbook.queries.map((q, i) => ({
         id: `q_${i}`,
         name: q.description,
         dataSource: playbook.dataSources[0],
         query: q.query,
-        language: 'KQL' as const,
-        expectedResults: q.expectedOutput
+        language: "KQL" as const,
+        expectedResults: q.expectedOutput,
       })),
       findings,
       team: [],
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.missions.set(mission.id, mission);
     return mission;
   }
 
-  private calculateTimeSeriesBaseline(values: number[]): { values: number[]; mean: number; stdDev: number } {
+  private calculateTimeSeriesBaseline(values: number[]): {
+    values: number[];
+    mean: number;
+    stdDev: number;
+  } {
     const mean = values.reduce((a, b) => a + b, 0) / (values.length || 1);
-    const variance = values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / (values.length || 1);
+    const variance =
+      values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / (values.length || 1);
     const stdDev = Math.sqrt(variance);
     return { values, mean, stdDev };
   }
 
   private extractFrequentPatterns(items: string[]): string[] {
     const counts = new Map<string, number>();
-    items.forEach(item => counts.set(item, (counts.get(item) || 0) + 1));
+    items.forEach((item) => counts.set(item, (counts.get(item) || 0) + 1));
     return Array.from(counts.entries())
       .filter(([_, count]) => count > 1)
       .sort((a, b) => b[1] - a[1])
@@ -627,11 +649,14 @@ export class ThreatHuntingEngine {
     return {
       typicalHours: [9, 10, 11, 14, 15, 16],
       typicalDays: [1, 2, 3, 4, 5],
-      typicalLocations: ['office', 'vpn']
+      typicalLocations: ["office", "vpn"],
     };
   }
 
-  private calculateDeviation(value: number, baseline: number[]): { expected: number; severity: number } {
+  private calculateDeviation(
+    value: number,
+    baseline: number[]
+  ): { expected: number; severity: number } {
     const mean = baseline.reduce((a, b) => a + b, 0) / (baseline.length || 1);
     const stdDev = Math.sqrt(
       baseline.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / (baseline.length || 1)
@@ -652,17 +677,17 @@ export class ThreatHuntingEngine {
   private getKillChainPhase(mitreId: string): string | null {
     // Simplified mapping
     const phaseMap: Record<string, string> = {
-      'T1595': 'reconnaissance',
-      'T1566': 'initial-access',
-      'T1059': 'execution',
-      'T1547': 'persistence',
-      'T1548': 'privilege-escalation',
-      'T1070': 'defense-evasion',
-      'T1003': 'credential-access',
-      'T1021': 'lateral-movement',
-      'T1041': 'exfiltration'
+      T1595: "reconnaissance",
+      T1566: "initial-access",
+      T1059: "execution",
+      T1547: "persistence",
+      T1548: "privilege-escalation",
+      T1070: "defense-evasion",
+      T1003: "credential-access",
+      T1021: "lateral-movement",
+      T1041: "exfiltration",
     };
-    return phaseMap[mitreId.split('.')[0]] || null;
+    return phaseMap[mitreId.split(".")[0]] || null;
   }
 
   private clusterFindings(findings: any[]): any[] {
@@ -674,52 +699,66 @@ export class ThreatHuntingEngine {
   }
 
   private generateCorrelationRecommendations(clusters: any[], patterns: any[]): string[] {
-    return ['Review correlated findings for campaign indicators'];
+    return ["Review correlated findings for campaign indicators"];
   }
 
-  private generateHuntRecommendations(findings: any[], coverage: Map<string, boolean>, playbook: HuntPlaybook): string[] {
+  private generateHuntRecommendations(
+    findings: any[],
+    coverage: Map<string, boolean>,
+    playbook: HuntPlaybook
+  ): string[] {
     const recommendations: string[] = [];
 
     if (findings.length > 0) {
-      recommendations.push('Escalate findings to incident response team');
+      recommendations.push("Escalate findings to incident response team");
     }
 
     const failedSteps = Array.from(coverage.entries()).filter(([_, success]) => !success);
     if (failedSteps.length > 0) {
-      recommendations.push(`Review failed query steps: ${failedSteps.map(([step]) => step).join(', ')}`);
+      recommendations.push(
+        `Review failed query steps: ${failedSteps.map(([step]) => step).join(", ")}`
+      );
     }
 
     return recommendations;
   }
 
   private initializeDefaultPlaybooks(): void {
-    this.playbooks.set('pb_credential_dumping', {
-      id: 'pb_credential_dumping',
-      name: 'Credential Dumping Detection',
-      description: 'Hunt for credential dumping techniques',
-      targetThreat: 'Credential Access',
-      mitreMapping: ['T1003', 'T1003.001', 'T1003.002'],
-      prerequisites: ['EDR telemetry', 'Windows event logs'],
-      dataSources: ['EDR logs', 'Windows Security'],
+    this.playbooks.set("pb_credential_dumping", {
+      id: "pb_credential_dumping",
+      name: "Credential Dumping Detection",
+      description: "Hunt for credential dumping techniques",
+      targetThreat: "Credential Access",
+      mitreMapping: ["T1003", "T1003.001", "T1003.002"],
+      prerequisites: ["EDR telemetry", "Windows event logs"],
+      dataSources: ["EDR logs", "Windows Security"],
       queries: [
         {
           step: 1,
-          description: 'Detect LSASS access',
+          description: "Detect LSASS access",
           query: 'process where process.name == "lsass.exe" and event.type == "access"',
-          expectedOutput: 'LSASS memory access events',
-          nextSteps: { onMatch: 'Investigate process', onNoMatch: 'Continue' }
-        }
+          expectedOutput: "LSASS memory access events",
+          nextSteps: { onMatch: "Investigate process", onNoMatch: "Continue" },
+        },
       ],
-      analysisGuidance: ['Check for mimikatz signatures', 'Verify parent process'],
-      escalationCriteria: ['Confirmed credential dump', 'Multiple affected hosts']
+      analysisGuidance: ["Check for mimikatz signatures", "Verify parent process"],
+      escalationCriteria: ["Confirmed credential dump", "Multiple affected hosts"],
     });
   }
 
   // Public API
-  getMission(id: string): HuntMission | undefined { return this.missions.get(id); }
-  getAllMissions(): HuntMission[] { return Array.from(this.missions.values()); }
-  getPlaybook(id: string): HuntPlaybook | undefined { return this.playbooks.get(id); }
-  getAllPlaybooks(): HuntPlaybook[] { return Array.from(this.playbooks.values()); }
+  getMission(id: string): HuntMission | undefined {
+    return this.missions.get(id);
+  }
+  getAllMissions(): HuntMission[] {
+    return Array.from(this.missions.values());
+  }
+  getPlaybook(id: string): HuntPlaybook | undefined {
+    return this.playbooks.get(id);
+  }
+  getAllPlaybooks(): HuntPlaybook[] {
+    return Array.from(this.playbooks.values());
+  }
 }
 
 // Data connector interface

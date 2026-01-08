@@ -68,10 +68,7 @@ intelgraph/
       "clientId": "intelgraph-web",
       "protocol": "openid-connect",
       "publicClient": true,
-      "redirectUris": [
-        "https://*.intelgraph.local/*",
-        "http://localhost:5173/*"
-      ],
+      "redirectUris": ["https://*.intelgraph.local/*", "http://localhost:5173/*"],
       "webOrigins": ["+"]
     },
     {
@@ -130,9 +127,7 @@ intelgraph/
       "firstName": "Lead",
       "lastName": "Analyst",
       "attributes": { "tenant": ["pilot"] },
-      "credentials": [
-        { "type": "password", "value": "ChangeMe!123", "temporary": true }
-      ],
+      "credentials": [{ "type": "password", "value": "ChangeMe!123", "temporary": true }],
       "realmRoles": ["analyst"]
     }
   ],
@@ -195,7 +190,7 @@ OPA_URL=http://opa:8181
 
 ```ts
 // gateway usage reminder
-import { getContext } from './auth';
+import { getContext } from "./auth";
 startStandaloneServer(server, { context: getContext });
 ```
 
@@ -216,7 +211,7 @@ spec:
   provider: vault
   parameters:
     roleName: intelgraph-app
-    vaultAddress: 'https://vault.vault.svc:8200'
+    vaultAddress: "https://vault.vault.svc:8200"
     objects: |
       - objectName: neo4j-pass
         secretPath: secret/data/intelgraph/neo4j
@@ -263,9 +258,9 @@ metadata:
   name: intelgraph-secrets-reader
   namespace: intelgraph
 rules:
-  - apiGroups: ['']
-    resources: ['secrets']
-    verbs: ['get']
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

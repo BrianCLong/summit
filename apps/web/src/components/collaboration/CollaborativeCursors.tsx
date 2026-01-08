@@ -1,11 +1,11 @@
-import React from 'react';
-import { getStringColor } from '../../lib/utils/colors';
+import React from 'react'
+import { getStringColor } from '../../lib/utils/colors'
 
 interface CursorProps {
-  x: number;
-  y: number;
-  color?: string;
-  label?: string;
+  x: number
+  y: number
+  color?: string
+  label?: string
 }
 
 const Cursor: React.FC<CursorProps> = ({ x, y, color = '#f00', label }) => {
@@ -40,36 +40,39 @@ const Cursor: React.FC<CursorProps> = ({ x, y, color = '#f00', label }) => {
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
 interface CollaborativeCursorsProps {
   cursors: Array<{
-    userId: string;
-    x: number;
-    y: number;
-    username?: string;
-  }>;
-  containerRef?: React.RefObject<HTMLElement | null>;
+    userId: string
+    x: number
+    y: number
+    username?: string
+  }>
+  containerRef?: React.RefObject<HTMLElement | null>
 }
 
-export const CollaborativeCursors: React.FC<CollaborativeCursorsProps> = ({ cursors, containerRef }) => {
+export const CollaborativeCursors: React.FC<CollaborativeCursorsProps> = ({
+  cursors,
+  containerRef,
+}) => {
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      {cursors.map((cursor) => {
-          // If containerRef is provided, we might need to adjust coordinates if they are relative to page
-          // But usually we expect x/y to be relative to the container if emitted that way.
-          // For now assuming x/y are relative to the container's top-left.
-          return (
-            <Cursor
-                key={cursor.userId}
-                x={cursor.x}
-                y={cursor.y}
-                color={getStringColor(cursor.userId)}
-                label={cursor.username || cursor.userId.slice(0, 4)}
-            />
-          );
+      {cursors.map(cursor => {
+        // If containerRef is provided, we might need to adjust coordinates if they are relative to page
+        // But usually we expect x/y to be relative to the container if emitted that way.
+        // For now assuming x/y are relative to the container's top-left.
+        return (
+          <Cursor
+            key={cursor.userId}
+            x={cursor.x}
+            y={cursor.y}
+            color={getStringColor(cursor.userId)}
+            label={cursor.username || cursor.userId.slice(0, 4)}
+          />
+        )
       })}
     </div>
-  );
-};
+  )
+}

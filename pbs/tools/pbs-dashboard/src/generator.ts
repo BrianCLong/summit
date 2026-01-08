@@ -93,7 +93,7 @@ function renderSignatures(report: Report): string {
           <td><code>${signature.digest}</code></td>
           <td><code>${signature.signature}</code></td>
         </tr>
-      `,
+      `
     )
     .join("\n");
   return `
@@ -117,10 +117,7 @@ function renderSignatures(report: Report): string {
 }
 
 function escapeHTML(input: string): string {
-  return input
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  return input.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 export function renderDashboard(report: Report, recommendation?: string): string {
@@ -129,7 +126,7 @@ export function renderDashboard(report: Report, recommendation?: string): string
   const signatures = renderSignatures(report);
   const recommendationBlock = recommendation
     ? `<section class="recommendation"><h2>Rollout Recommendation</h2><pre>${escapeHTML(
-        recommendation,
+        recommendation
       )}</pre></section>`
     : "";
 

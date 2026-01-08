@@ -26,7 +26,7 @@
 
 > "Today I'm going to show you how IntelGraph helps you make better decisions with full provenance.
 >
-> The core problem we're solving: When you make a critical business decision—like selecting a vendor, approving a model, or allocating resources—you need to know *why* that decision was made, *what evidence* supported it, and *who* approved it.
+> The core problem we're solving: When you make a critical business decision—like selecting a vendor, approving a model, or allocating resources—you need to know _why_ that decision was made, _what evidence_ supported it, and _who_ approved it.
 >
 > Most organizations either have no audit trail, or have a mess of emails and documents that can't be reconstructed later.
 >
@@ -41,6 +41,7 @@
 > "Let's say you're evaluating a new AI vendor for your fraud detection system. You need to decide: Do we go with Vendor A or Vendor B?
 >
 > Today, this process probably looks like:
+>
 > 1. Someone gathers some documents
 > 2. A few people have email discussions
 > 3. Eventually someone makes a call in a meeting
@@ -131,6 +132,7 @@ curl -X POST http://localhost:4020/api/v1/evidence \
 **Talking Points:**
 
 > "Every claim should be backed by evidence. We track:
+>
 > - Where the evidence came from
 > - A hash of the content (so we know if it changes)
 > - How reliable we think the source is
@@ -202,6 +204,7 @@ curl -X POST http://localhost:4020/api/v1/disclosure/generate \
 > "This is your disclosure pack. When an auditor, regulator, or your future self asks 'why did we make this decision?'—you hand them this.
 >
 > It includes:
+>
 > - The question and answer
 > - All options considered
 > - The evidence and claims that supported it
@@ -227,6 +230,7 @@ curl http://localhost:4020/api/v1/decisions/<DECISION_ID>/graph \
 **Talking Points:**
 
 > "Everything is connected in a graph. From any decision, you can trace back to:
+>
 > - Which claims supported it
 > - What evidence backs those claims
 > - Which entities were involved
@@ -259,18 +263,23 @@ curl http://localhost:4020/api/v1/decisions/<DECISION_ID>/graph \
 ### Anticipated Questions
 
 **Q: How does this integrate with our existing systems?**
+
 > "We have a REST API and GraphQL interface. We can also sync with your document management system, pull from your GRC tools, or integrate with your approval workflows."
 
 **Q: What about AI-generated recommendations?**
+
 > "We support Maestro orchestration that can run AI analysis. The AI recommendation is just another claim with a confidence score—humans still approve. And the AI's reasoning is fully captured in the disclosure pack."
 
 **Q: How do you handle sensitive data?**
+
 > "Policy labels and clearance levels. Sensitive evidence can be automatically redacted in exports. Only users with the right clearance see the full data."
 
 **Q: What's the pricing model?**
+
 > "We're still finalizing pricing with design partners. It will likely be based on decision volume and storage."
 
 **Q: SOC2? GDPR?**
+
 > "We're on the path to SOC2 Type II. The system is designed with GDPR in mind—data locality, right to deletion where applicable, full audit trails."
 
 ---

@@ -1,14 +1,14 @@
 /** @type {import('jest').Config} */
 module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  roots: ['<rootDir>/src'],
+  preset: "ts-jest",
+  testEnvironment: "node",
+  roots: ["<rootDir>/src"],
   moduleNameMapper: {
-    '^(\\.\\.?/.*)\\.js$': '$1',
+    "^(\\.\\.?/.*)\\.js$": "$1",
   },
   globals: {
-    'ts-jest': {
-      tsconfig: './tsconfig.json',
+    "ts-jest": {
+      tsconfig: "./tsconfig.json",
       isolatedModules: false,
     },
   },

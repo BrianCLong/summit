@@ -1,9 +1,4 @@
-export type IntegrationKind =
-  | 'pull'
-  | 'push'
-  | 'event-driven'
-  | 'file-based'
-  | 'human-in-the-loop';
+export type IntegrationKind = "pull" | "push" | "event-driven" | "file-based" | "human-in-the-loop";
 
 export type ContractVersioning = {
   current: string;
@@ -11,9 +6,9 @@ export type ContractVersioning = {
 };
 
 export type PaginationContract =
-  | { type: 'cursor'; param: string }
-  | { type: 'offset'; param: string; limitParam?: string }
-  | { type: 'none' };
+  | { type: "cursor"; param: string }
+  | { type: "offset"; param: string; limitParam?: string }
+  | { type: "none" };
 
 export type ErrorContract = {
   retryableErrors: string[];
@@ -32,7 +27,7 @@ export type ConnectorContract = {
   idempotency: IdempotencyContract;
 };
 
-export type HealthStatus = 'connected' | 'degraded' | 'failing' | 'paused';
+export type HealthStatus = "connected" | "degraded" | "failing" | "paused";
 
 export type ConnectorOwner = {
   team: string;
@@ -56,14 +51,14 @@ export type ConnectorResult = {
   error?: Error;
 };
 
-export type SandboxMode = 'live' | 'sandbox';
+export type SandboxMode = "live" | "sandbox";
 
 export type RetryPolicy = {
   attempts: number;
   backoffMs: number;
 };
 
-export type DeliveryStatus = 'pending' | 'delivered' | 'failed' | 'dead-lettered';
+export type DeliveryStatus = "pending" | "delivered" | "failed" | "dead-lettered";
 
 export type EventRecord = {
   tenantId: string;
@@ -108,7 +103,7 @@ export type WorkflowInstance = {
   tenantId: string;
   steps: WorkflowStep[];
   cursor: number;
-  state: 'pending' | 'running' | 'failed' | 'completed' | 'paused';
+  state: "pending" | "running" | "failed" | "completed" | "paused";
   history: AuditEntry[];
   payload: Record<string, unknown>;
 };

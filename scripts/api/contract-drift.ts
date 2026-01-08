@@ -1,7 +1,7 @@
-import fs from 'fs';
-import path from 'path';
-import yaml from 'js-yaml';
-import * as ts from 'typescript';
+import fs from "fs";
+import path from "path";
+import yaml from "js-yaml";
+import * as ts from "typescript";
 
 interface DriftRoute {
   method: string;
@@ -54,19 +54,19 @@ function serviceHasDrift(service: ServiceReport): boolean {
   );
 }
 
-const HTTP_METHODS = new Set([
-  'get',
-  'post',
-  'put',
-  'patch',
-  'delete',
-  'options',
-  'head',
+const HTTP_METHODS = new Set(["get", "post", "put", "patch", "delete", "options", "head"]);
+
+const SKIP_DIRECTORIES = new Set([
+  "node_modules",
+  ".git",
+  ".turbo",
+  "dist",
+  "build",
+  "venv",
+  ".venv",
 ]);
 
-const SKIP_DIRECTORIES = new Set(['node_modules', '.git', '.turbo', 'dist', 'build', 'venv', '.venv']);
-
-const DEFAULT_REPORT_DIR = path.join('reports', 'contract-drift');
+const DEFAULT_REPORT_DIR = path.join("reports", "contract-drift");
 
 function gatherCodeFiles(dir: string): string[] {
   const results: string[] = [];
@@ -88,10 +88,10 @@ function parseArgs(argv: string[]): Record<string, string | boolean> {
   const args: Record<string, string | boolean> = {};
   for (let i = 0; i < argv.length; i += 1) {
     const raw = argv[i];
-    if (!raw.startsWith('--')) continue;
-    const key = raw.replace(/^--/, '');
+    if (!raw.startsWith("--")) continue;
+    const key = raw.replace(/^--/, "");
     const next = argv[i + 1];
-    if (next && !next.startsWith('--')) {
+    if (next && !next.startsWith("--")) {
       args[key] = next;
       i += 1;
     } else {
@@ -108,15 +108,15 @@ function ensureDir(dir: string): void {
 }
 
 function loadSpec(specPath: string): any {
-  const raw = fs.readFileSync(specPath, 'utf8');
-  if (specPath.endsWith('.json')) {
+  const raw = fs.readFileSync(specPath, "utf8");
+  if (specPath.endsWith(".json")) {
     return JSON.parse(raw);
   }
   return yaml.load(raw);
 }
 
 function saveSpec(specPath: string, spec: any): void {
-  const content = specPath.endsWith('.json')
+  const content = specPath.endsWith(".json")
     ? JSON.stringify(spec, null, 2)
     : yaml.dump(spec, { noRefs: true, lineWidth: 120 });
   fs.writeFileSync(specPath, content);
@@ -145,13 +145,13 @@ function walkForOpenApi(startDir: string, limitDepth = 6): string[] {
 }
 
 function normalisePath(prefix: string, child: string): string {
-  const base = prefix.endsWith('/') ? prefix.slice(0, -1) : prefix;
-  const tail = child.startsWith('/') ? child : `/${child}`;
-  return `${base}${tail}`.replace(/\/+/g, '/');
+  const base = prefix.endsWith("/") ? prefix.slice(0, -1) : prefix;
+  const tail = child.startsWith("/") ? child : `/${child}`;
+  return `${base}${tail}`.replace(/\/+/g, "/");
 }
 
 function resolveImport(currentFile: string, importPath: string): string | null {
-  const base = importPath.startsWith('.')
+  const base = importPath.startsWith(".")
     ? path.resolve(path.dirname(currentFile), importPath)
     : null;
   if (!base) return null;
@@ -161,8 +161,8 @@ function resolveImport(currentFile: string, importPath: string): string | null {
     `${base}.js`,
     `${base}.mjs`,
     `${base}.cjs`,
-    path.join(base, 'index.ts'),
-    path.join(base, 'index.js'),
+    path.join(base, "index.ts"),
+    path.join(base, "index.js"),
   ];
   for (const candidate of candidates) {
     if (fs.existsSync(candidate)) return candidate;
@@ -175,12 +175,17 @@ function collectExports(filePath: string, source: string): Set<string> {
   const sf = ts.createSourceFile(filePath, source, ts.ScriptTarget.ESNext, true);
   const visit = (node: ts.Node): void => {
     if (
-      (ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node) || ts.isEnumDeclaration(node)) &&
+      (ts.isInterfaceDeclaration(node) ||
+        ts.isTypeAliasDeclaration(node) ||
+        ts.isEnumDeclaration(node)) &&
       node.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword)
     ) {
       names.add(node.name.text);
     }
-    if (ts.isVariableStatement(node) && node.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword)) {
+    if (
+      ts.isVariableStatement(node) &&
+      node.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword)
+    ) {
       node.declarationList.declarations.forEach((decl) => {
         if (ts.isIdentifier(decl.name)) {
           names.add(decl.name.text);
@@ -196,18 +201,23 @@ function collectExports(filePath: string, source: string): Set<string> {
 function collectRoutes(
   filePath: string,
   routerPrefixes: Map<string, Set<string>>,
-  validatorHints: Set<string>,
+  validatorHints: Set<string>
 ): DriftRoute[] {
-  const source = fs.readFileSync(filePath, 'utf8');
+  const source = fs.readFileSync(filePath, "utf8");
   const sf = ts.createSourceFile(filePath, source, ts.ScriptTarget.ESNext, true);
   const imports = new Map<string, string>();
 
   sf.forEachChild((node) => {
-    if (!ts.isImportDeclaration(node) || !node.importClause?.name || !ts.isStringLiteral(node.moduleSpecifier)) return;
+    if (
+      !ts.isImportDeclaration(node) ||
+      !node.importClause?.name ||
+      !ts.isStringLiteral(node.moduleSpecifier)
+    )
+      return;
     imports.set(node.importClause.name.text, node.moduleSpecifier.text);
   });
 
-  const filePrefixes = routerPrefixes.get(filePath) ?? new Set<string>(['']);
+  const filePrefixes = routerPrefixes.get(filePath) ?? new Set<string>([""]);
   const routes: DriftRoute[] = [];
 
   const visit = (node: ts.Node): void => {
@@ -223,7 +233,7 @@ function collectRoutes(
     const method = node.expression.name.text.toLowerCase();
     const callee = node.expression.expression;
 
-    if (method === 'use') {
+    if (method === "use") {
       const [pathArg, routerArg] = node.arguments;
       if (pathArg && ts.isStringLiteralLike(pathArg) && routerArg && ts.isIdentifier(routerArg)) {
         const specifier = imports.get(routerArg.text);
@@ -249,7 +259,11 @@ function collectRoutes(
           });
         }
       }
-      if (source.includes('safeParse') || source.includes('validate') || source.includes('parse(')) {
+      if (
+        source.includes("safeParse") ||
+        source.includes("validate") ||
+        source.includes("parse(")
+      ) {
         validatorHints.add(filePath);
       }
     }
@@ -264,7 +278,7 @@ function collectRoutes(
 function collectCodeSchemas(files: string[]): Set<string> {
   const results = new Set<string>();
   for (const file of files) {
-    const source = fs.readFileSync(file, 'utf8');
+    const source = fs.readFileSync(file, "utf8");
     collectExports(file, source).forEach((name) => results.add(name));
   }
   return results;
@@ -274,7 +288,7 @@ function collectOpenApiRoutes(spec: any, specPath: string): DriftRoute[] {
   if (!spec.paths) return [];
   const routes: DriftRoute[] = [];
   for (const [routePath, methods] of Object.entries<any>(spec.paths)) {
-    if (typeof methods !== 'object' || Array.isArray(methods)) continue;
+    if (typeof methods !== "object" || Array.isArray(methods)) continue;
     for (const [method, operation] of Object.entries<any>(methods)) {
       if (!HTTP_METHODS.has(method.toLowerCase())) continue;
       routes.push({
@@ -290,7 +304,7 @@ function collectOpenApiRoutes(spec: any, specPath: string): DriftRoute[] {
 function collectOpenApiSchemas(spec: any): Set<string> {
   const names = new Set<string>();
   const schemaObj = spec.components?.schemas;
-  if (!schemaObj || typeof schemaObj !== 'object') return names;
+  if (!schemaObj || typeof schemaObj !== "object") return names;
   Object.keys(schemaObj).forEach((name) => names.add(name));
   return names;
 }
@@ -320,53 +334,57 @@ function computeDiff<T>(codeItems: T[], specItems: T[], hash: (item: T) => strin
 }
 
 function writeMarkdown(report: DriftReport, outputPath: string): void {
-  const lines: string[] = ['# API Contract Drift Report', ''];
+  const lines: string[] = ["# API Contract Drift Report", ""];
   report.services.forEach((service) => {
     lines.push(`## ${service.name}`);
-    lines.push('');
+    lines.push("");
     lines.push(`Spec: ${service.specPath}`);
-    lines.push('');
-    lines.push('### Route Drift');
+    lines.push("");
+    lines.push("### Route Drift");
     if (service.routes.missingInSpec.length === 0 && service.routes.missingInCode.length === 0) {
-      lines.push('- Routes are in sync.');
+      lines.push("- Routes are in sync.");
     } else {
       if (service.routes.missingInSpec.length > 0) {
-        lines.push('- Missing in spec:');
-        service.routes.missingInSpec.forEach((r) => lines.push(`  - ${r.method.toUpperCase()} ${r.path} (${r.sourceFile})`));
+        lines.push("- Missing in spec:");
+        service.routes.missingInSpec.forEach((r) =>
+          lines.push(`  - ${r.method.toUpperCase()} ${r.path} (${r.sourceFile})`)
+        );
       }
       if (service.routes.missingInCode.length > 0) {
-        lines.push('- Missing in code:');
-        service.routes.missingInCode.forEach((r) => lines.push(`  - ${r.method.toUpperCase()} ${r.path} (${r.sourceFile})`));
+        lines.push("- Missing in code:");
+        service.routes.missingInCode.forEach((r) =>
+          lines.push(`  - ${r.method.toUpperCase()} ${r.path} (${r.sourceFile})`)
+        );
       }
     }
-    lines.push('');
-    lines.push('### Schema Drift');
+    lines.push("");
+    lines.push("### Schema Drift");
     if (service.schemas.missingInSpec.length === 0 && service.schemas.missingInCode.length === 0) {
-      lines.push('- Schemas are in sync.');
+      lines.push("- Schemas are in sync.");
     } else {
       if (service.schemas.missingInSpec.length > 0) {
-        lines.push('- Missing in spec schemas:');
+        lines.push("- Missing in spec schemas:");
         service.schemas.missingInSpec.forEach((s) => lines.push(`  - ${s}`));
       }
       if (service.schemas.missingInCode.length > 0) {
-        lines.push('- Missing in code schemas:');
+        lines.push("- Missing in code schemas:");
         service.schemas.missingInCode.forEach((s) => lines.push(`  - ${s}`));
       }
     }
-    lines.push('');
-    lines.push('### Validation coverage');
+    lines.push("");
+    lines.push("### Validation coverage");
     if (service.validators.missingValidators.length === 0) {
-      lines.push('- Validators detected for all routes.');
+      lines.push("- Validators detected for all routes.");
     } else {
-      lines.push('- Routes without validator hints:');
+      lines.push("- Routes without validator hints:");
       service.validators.missingValidators.forEach((r) =>
-        lines.push(`  - ${r.method.toUpperCase()} ${r.path} (${r.sourceFile})`),
+        lines.push(`  - ${r.method.toUpperCase()} ${r.path} (${r.sourceFile})`)
       );
     }
-    lines.push('');
+    lines.push("");
   });
   ensureDir(path.dirname(outputPath));
-  fs.writeFileSync(outputPath, `${lines.join('\n')}\n`);
+  fs.writeFileSync(outputPath, `${lines.join("\n")}\n`);
 }
 
 function writeJson(report: DriftReport, outputPath: string): void {
@@ -377,7 +395,7 @@ function writeJson(report: DriftReport, outputPath: string): void {
 function buildServiceReport(specPath: string, rootDir: string, autofix: boolean): ServiceReport {
   const spec = loadSpec(specPath);
   const serviceName = path.basename(path.dirname(specPath));
-  const srcDir = path.join(path.dirname(specPath), 'src');
+  const srcDir = path.join(path.dirname(specPath), "src");
   if (!fs.existsSync(srcDir)) {
     throw new Error(`Source directory not found for ${serviceName}: ${srcDir}`);
   }
@@ -404,7 +422,9 @@ function buildServiceReport(specPath: string, rootDir: string, autofix: boolean)
   const specSchemas = collectOpenApiSchemas(spec);
   const schemaDiff = computeDiff(Array.from(codeSchemas), Array.from(specSchemas), (s) => s);
 
-  const missingValidators = routeDiff.inCode.filter((route) => !validatorHints.has(route.sourceFile));
+  const missingValidators = routeDiff.inCode.filter(
+    (route) => !validatorHints.has(route.sourceFile)
+  );
 
   if (autofix) {
     applyAutofix(spec, specPath, routeDiff, schemaDiff, srcDir);
@@ -430,7 +450,7 @@ function applyAutofix(
   specPath: string,
   routeDiff: DiffResult<DriftRoute>,
   schemaDiff: DiffResult<string>,
-  srcDir: string,
+  srcDir: string
 ): void {
   let updated = false;
   if (!spec.components) spec.components = {};
@@ -438,7 +458,7 @@ function applyAutofix(
   if (!spec.paths) spec.paths = {};
 
   if (!spec.components.schemas.AnyValue) {
-    spec.components.schemas.AnyValue = { type: 'object', additionalProperties: true };
+    spec.components.schemas.AnyValue = { type: "object", additionalProperties: true };
     updated = true;
   }
 
@@ -449,10 +469,10 @@ function applyAutofix(
         summary: `Autogenerated for ${missing.method.toUpperCase()} ${missing.path}`,
         responses: {
           200: {
-            description: 'Auto-added placeholder response',
+            description: "Auto-added placeholder response",
             content: {
-              'application/json': {
-                schema: { $ref: '#/components/schemas/AnyValue' },
+              "application/json": {
+                schema: { $ref: "#/components/schemas/AnyValue" },
               },
             },
           },
@@ -463,14 +483,18 @@ function applyAutofix(
   }
 
   if (schemaDiff.missingInCode.length > 0) {
-    const stubPath = path.join(srcDir, 'openapi-schemas.generated.ts');
-    const lines = ["import { z } from 'zod';", '', '/* Auto-generated to mirror OpenAPI schemas */'];
+    const stubPath = path.join(srcDir, "openapi-schemas.generated.ts");
+    const lines = [
+      "import { z } from 'zod';",
+      "",
+      "/* Auto-generated to mirror OpenAPI schemas */",
+    ];
     schemaDiff.missingInCode.forEach((schemaName) => {
       lines.push(`export const ${schemaName}Schema = z.any();`);
       lines.push(`export type ${schemaName} = z.infer<typeof ${schemaName}Schema>;`);
-      lines.push('');
+      lines.push("");
     });
-    fs.writeFileSync(stubPath, `${lines.join('\n')}\n`);
+    fs.writeFileSync(stubPath, `${lines.join("\n")}\n`);
     updated = true;
   }
 
@@ -485,15 +509,15 @@ function buildDriftReport(options: {
   markdown?: string;
   autofix: boolean;
 }): DriftReport {
-  const searchRoot = options.service ? path.resolve(options.service) : path.resolve('.');
+  const searchRoot = options.service ? path.resolve(options.service) : path.resolve(".");
   const openapiFiles = walkForOpenApi(searchRoot);
   if (openapiFiles.length === 0) {
-    throw new Error('No OpenAPI specs found');
+    throw new Error("No OpenAPI specs found");
   }
 
   const services: ServiceReport[] = [];
   openapiFiles.forEach((specPath) => {
-    const srcDir = path.join(path.dirname(specPath), 'src');
+    const srcDir = path.join(path.dirname(specPath), "src");
     if (!fs.existsSync(srcDir)) {
       console.warn(`Skipping ${specPath} because ${srcDir} is missing.`);
       return;
@@ -506,12 +530,13 @@ function buildDriftReport(options: {
   });
 
   if (services.length === 0) {
-    throw new Error('No OpenAPI specs with matching source directories were found.');
+    throw new Error("No OpenAPI specs with matching source directories were found.");
   }
 
   const hasDrift = services.some((svc) => serviceHasDrift(svc));
-  const reportPath = options.report ?? path.join(DEFAULT_REPORT_DIR, 'contract-drift-report.json');
-  const markdownPath = options.markdown ?? path.join(DEFAULT_REPORT_DIR, 'contract-drift-report.md');
+  const reportPath = options.report ?? path.join(DEFAULT_REPORT_DIR, "contract-drift-report.json");
+  const markdownPath =
+    options.markdown ?? path.join(DEFAULT_REPORT_DIR, "contract-drift-report.md");
   const aggregate: DriftReport = { services, hasDrift };
   writeJson(aggregate, reportPath);
   writeMarkdown(aggregate, markdownPath);
@@ -519,14 +544,16 @@ function buildDriftReport(options: {
 }
 
 function printHelp(): void {
-  console.log(`Usage: node --loader ts-node/esm scripts/api/contract-drift.ts [options]\n\n` +
-    `Options:\n` +
-    `  --service <path>   Limit scan to a specific service directory\n` +
-    `  --report <path>    Write aggregate JSON report to path (default: ${DEFAULT_REPORT_DIR}/contract-drift-report.json)\n` +
-    `  --markdown <path>  Write aggregate Markdown report (default: ${DEFAULT_REPORT_DIR}/contract-drift-report.md)\n` +
-    `  --autofix          Apply autofix to specs/types (adds missing routes, generates stubs)\n` +
-    `  --no-fail          Do not exit with non-zero status when drift is detected\n` +
-    `  --help             Show this help\n`);
+  console.log(
+    `Usage: node --loader ts-node/esm scripts/api/contract-drift.ts [options]\n\n` +
+      `Options:\n` +
+      `  --service <path>   Limit scan to a specific service directory\n` +
+      `  --report <path>    Write aggregate JSON report to path (default: ${DEFAULT_REPORT_DIR}/contract-drift-report.json)\n` +
+      `  --markdown <path>  Write aggregate Markdown report (default: ${DEFAULT_REPORT_DIR}/contract-drift-report.md)\n` +
+      `  --autofix          Apply autofix to specs/types (adds missing routes, generates stubs)\n` +
+      `  --no-fail          Do not exit with non-zero status when drift is detected\n` +
+      `  --help             Show this help\n`
+  );
 }
 
 function main(): void {
@@ -536,16 +563,16 @@ function main(): void {
     process.exit(0);
   }
   const autofix = Boolean(args.autofix);
-  const failOnDrift = args['no-fail'] ? false : true;
+  const failOnDrift = args["no-fail"] ? false : true;
   const report = buildDriftReport({
-    service: typeof args.service === 'string' ? args.service : undefined,
-    report: typeof args.report === 'string' ? args.report : undefined,
-    markdown: typeof args.markdown === 'string' ? args.markdown : undefined,
+    service: typeof args.service === "string" ? args.service : undefined,
+    report: typeof args.report === "string" ? args.report : undefined,
+    markdown: typeof args.markdown === "string" ? args.markdown : undefined,
     autofix,
   });
 
   if (report.hasDrift && failOnDrift) {
-    console.error('API contract drift detected. See reports for details.');
+    console.error("API contract drift detected. See reports for details.");
     process.exit(1);
   }
 }

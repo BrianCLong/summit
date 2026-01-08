@@ -9,9 +9,9 @@
  * - Review.md artifact generation
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import { spawn } from 'child_process';
+import * as fs from "fs";
+import * as path from "path";
+import { spawn } from "child_process";
 
 // Exit code for git workflow errors
 export const GIT_WORKFLOW_EXIT_CODE = 2;
@@ -72,7 +72,7 @@ export interface CommitInfo {
  */
 export interface FileChange {
   path: string;
-  status: 'added' | 'modified' | 'deleted' | 'renamed';
+  status: "added" | "modified" | "deleted" | "renamed";
   additions: number;
   deletions: number;
 }
@@ -88,7 +88,7 @@ export class GitWorkflowError extends Error {
     public exitCode: number = GIT_WORKFLOW_EXIT_CODE
   ) {
     super(message);
-    this.name = 'GitWorkflowError';
+    this.name = "GitWorkflowError";
   }
 
   format(): string {
@@ -96,7 +96,7 @@ export class GitWorkflowError extends Error {
     let output = `Git Workflow Error: ${this.message}`;
     output += `\nReason: ${this.reason}`;
     if (sortedDetails.length > 0) {
-      output += '\nDetails:';
+      output += "\nDetails:";
       for (const detail of sortedDetails) {
         output += `\n  - ${detail}`;
       }
@@ -114,27 +114,27 @@ async function execGit(
   _options: { ignoreErrors?: boolean } = {}
 ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
   return new Promise((resolve) => {
-    let stdout = '';
-    let stderr = '';
+    let stdout = "";
+    let stderr = "";
 
-    const proc = spawn('git', args, {
+    const proc = spawn("git", args, {
       cwd,
-      stdio: ['pipe', 'pipe', 'pipe'],
+      stdio: ["pipe", "pipe", "pipe"],
     });
 
     if (proc.stdout) {
-      proc.stdout.on('data', (data) => {
+      proc.stdout.on("data", (data) => {
         stdout += data.toString();
       });
     }
 
     if (proc.stderr) {
-      proc.stderr.on('data', (data) => {
+      proc.stderr.on("data", (data) => {
         stderr += data.toString();
       });
     }
 
-    proc.on('close', (code) => {
+    proc.on("close", (code) => {
       resolve({
         stdout: stdout.trim(),
         stderr: stderr.trim(),
@@ -142,9 +142,9 @@ async function execGit(
       });
     });
 
-    proc.on('error', (err) => {
+    proc.on("error", (err) => {
       resolve({
-        stdout: '',
+        stdout: "",
         stderr: err.message,
         exitCode: 1,
       });
@@ -156,15 +156,15 @@ async function execGit(
  * Detect if a directory is a git repository
  */
 export async function isGitRepo(dir: string): Promise<boolean> {
-  const result = await execGit(['rev-parse', '--is-inside-work-tree'], dir);
-  return result.exitCode === 0 && result.stdout === 'true';
+  const result = await execGit(["rev-parse", "--is-inside-work-tree"], dir);
+  return result.exitCode === 0 && result.stdout === "true";
 }
 
 /**
  * Find the git repository root from a directory
  */
 export async function findRepoRoot(startDir: string): Promise<string | null> {
-  const result = await execGit(['rev-parse', '--show-toplevel'], startDir);
+  const result = await execGit(["rev-parse", "--show-toplevel"], startDir);
   if (result.exitCode === 0) {
     return result.stdout;
   }
@@ -191,14 +191,11 @@ export async function getGitStatus(repoRoot: string): Promise<GitStatus> {
   }
 
   // Get current branch
-  const branchResult = await execGit(['rev-parse', '--abbrev-ref', 'HEAD'], repoRoot);
+  const branchResult = await execGit(["rev-parse", "--abbrev-ref", "HEAD"], repoRoot);
   const branch = branchResult.exitCode === 0 ? branchResult.stdout : null;
 
   // Get status with porcelain v2 for machine parsing
-  const statusResult = await execGit(
-    ['status', '--porcelain=v2', '--branch'],
-    repoRoot
-  );
+  const statusResult = await execGit(["status", "--porcelain=v2", "--branch"], repoRoot);
 
   const staged: string[] = [];
   const unstaged: string[] = [];
@@ -207,29 +204,29 @@ export async function getGitStatus(repoRoot: string): Promise<GitStatus> {
   let behind = 0;
   let remoteRef: string | null = null;
 
-  for (const line of statusResult.stdout.split('\n')) {
-    if (line.startsWith('# branch.ab')) {
+  for (const line of statusResult.stdout.split("\n")) {
+    if (line.startsWith("# branch.ab")) {
       // Parse ahead/behind: # branch.ab +1 -2
       const match = line.match(/\+(\d+) -(\d+)/);
       if (match) {
         ahead = parseInt(match[1], 10);
         behind = parseInt(match[2], 10);
       }
-    } else if (line.startsWith('# branch.upstream')) {
-      remoteRef = line.split(' ')[2] || null;
-    } else if (line.startsWith('1 ') || line.startsWith('2 ')) {
+    } else if (line.startsWith("# branch.upstream")) {
+      remoteRef = line.split(" ")[2] || null;
+    } else if (line.startsWith("1 ") || line.startsWith("2 ")) {
       // Changed entry
-      const parts = line.split(' ');
+      const parts = line.split(" ");
       const xy = parts[1];
-      const filePath = parts.slice(8).join(' ');
+      const filePath = parts.slice(8).join(" ");
 
-      if (xy[0] !== '.') {
+      if (xy[0] !== ".") {
         staged.push(filePath);
       }
-      if (xy[1] !== '.') {
+      if (xy[1] !== ".") {
         unstaged.push(filePath);
       }
-    } else if (line.startsWith('? ')) {
+    } else if (line.startsWith("? ")) {
       // Untracked file
       untracked.push(line.slice(2));
     }
@@ -269,25 +266,19 @@ export class GitWorkflow {
 
     // Must be a git repo
     if (!this.status.isRepo) {
-      throw new GitWorkflowError(
-        'Not a git repository',
-        'not_git_repo',
-        [`path: ${this.options.repoRoot}`]
-      );
+      throw new GitWorkflowError("Not a git repository", "not_git_repo", [
+        `path: ${this.options.repoRoot}`,
+      ]);
     }
 
     // Check dirty state unless allowed
     if (this.status.isDirty && !this.options.allowDirty) {
-      throw new GitWorkflowError(
-        'Repository has uncommitted changes',
-        'dirty_repo',
-        [
-          `staged: ${this.status.staged.length}`,
-          `unstaged: ${this.status.unstaged.length}`,
-          `untracked: ${this.status.untracked.length}`,
-          'use_--allow-dirty_to_continue',
-        ]
-      );
+      throw new GitWorkflowError("Repository has uncommitted changes", "dirty_repo", [
+        `staged: ${this.status.staged.length}`,
+        `unstaged: ${this.status.unstaged.length}`,
+        `untracked: ${this.status.untracked.length}`,
+        "use_--allow-dirty_to_continue",
+      ]);
     }
   }
 
@@ -296,11 +287,9 @@ export class GitWorkflow {
    */
   getStatus(): GitStatus {
     if (!this.status) {
-      throw new GitWorkflowError(
-        'Workflow not initialized',
-        'not_initialized',
-        ['call_initialize_first']
-      );
+      throw new GitWorkflowError("Workflow not initialized", "not_initialized", [
+        "call_initialize_first",
+      ]);
     }
     return this.status;
   }
@@ -311,34 +300,28 @@ export class GitWorkflow {
   async createBranch(branchName: string): Promise<void> {
     // Check if branch exists
     const checkResult = await execGit(
-      ['rev-parse', '--verify', branchName],
+      ["rev-parse", "--verify", branchName],
       this.options.repoRoot,
       { ignoreErrors: true }
     );
 
     if (checkResult.exitCode === 0) {
       // Branch exists, switch to it
-      const switchResult = await execGit(
-        ['checkout', branchName],
-        this.options.repoRoot
-      );
+      const switchResult = await execGit(["checkout", branchName], this.options.repoRoot);
       if (switchResult.exitCode !== 0) {
         throw new GitWorkflowError(
           `Failed to switch to branch: ${branchName}`,
-          'branch_switch_failed',
+          "branch_switch_failed",
           [`error: ${switchResult.stderr}`]
         );
       }
     } else {
       // Create new branch
-      const createResult = await execGit(
-        ['checkout', '-b', branchName],
-        this.options.repoRoot
-      );
+      const createResult = await execGit(["checkout", "-b", branchName], this.options.repoRoot);
       if (createResult.exitCode !== 0) {
         throw new GitWorkflowError(
           `Failed to create branch: ${branchName}`,
-          'branch_create_failed',
+          "branch_create_failed",
           [`error: ${createResult.stderr}`]
         );
       }
@@ -356,13 +339,11 @@ export class GitWorkflow {
       return;
     }
 
-    const result = await execGit(['add', '--', ...files], this.options.repoRoot);
+    const result = await execGit(["add", "--", ...files], this.options.repoRoot);
     if (result.exitCode !== 0) {
-      throw new GitWorkflowError(
-        'Failed to stage files',
-        'stage_failed',
-        [`error: ${result.stderr}`]
-      );
+      throw new GitWorkflowError("Failed to stage files", "stage_failed", [
+        `error: ${result.stderr}`,
+      ]);
     }
 
     // Update status
@@ -373,13 +354,11 @@ export class GitWorkflow {
    * Stage all changes
    */
   async stageAll(): Promise<void> {
-    const result = await execGit(['add', '-A'], this.options.repoRoot);
+    const result = await execGit(["add", "-A"], this.options.repoRoot);
     if (result.exitCode !== 0) {
-      throw new GitWorkflowError(
-        'Failed to stage all files',
-        'stage_all_failed',
-        [`error: ${result.stderr}`]
-      );
+      throw new GitWorkflowError("Failed to stage all files", "stage_all_failed", [
+        `error: ${result.stderr}`,
+      ]);
     }
 
     // Update status
@@ -393,24 +372,18 @@ export class GitWorkflow {
     // Check if there are staged changes
     const status = await getGitStatus(this.options.repoRoot);
     if (status.staged.length === 0) {
-      throw new GitWorkflowError(
-        'No staged changes to commit',
-        'nothing_staged',
-        ['stage_files_before_commit']
-      );
+      throw new GitWorkflowError("No staged changes to commit", "nothing_staged", [
+        "stage_files_before_commit",
+      ]);
     }
 
-    const result = await execGit(['commit', '-m', message], this.options.repoRoot);
+    const result = await execGit(["commit", "-m", message], this.options.repoRoot);
     if (result.exitCode !== 0) {
-      throw new GitWorkflowError(
-        'Commit failed',
-        'commit_failed',
-        [`error: ${result.stderr}`]
-      );
+      throw new GitWorkflowError("Commit failed", "commit_failed", [`error: ${result.stderr}`]);
     }
 
     // Get the commit hash
-    const hashResult = await execGit(['rev-parse', 'HEAD'], this.options.repoRoot);
+    const hashResult = await execGit(["rev-parse", "HEAD"], this.options.repoRoot);
     const commitHash = hashResult.stdout;
 
     // Update status
@@ -424,11 +397,7 @@ export class GitWorkflow {
    */
   async getCommitsSince(baseBranch: string): Promise<CommitInfo[]> {
     const result = await execGit(
-      [
-        'log',
-        `${baseBranch}..HEAD`,
-        '--format=%H|%h|%s|%an|%ai',
-      ],
+      ["log", `${baseBranch}..HEAD`, "--format=%H|%h|%s|%an|%ai"],
       this.options.repoRoot
     );
 
@@ -436,10 +405,13 @@ export class GitWorkflow {
       return [];
     }
 
-    return result.stdout.split('\n').filter(Boolean).map((line) => {
-      const [hash, shortHash, subject, author, date] = line.split('|');
-      return { hash, shortHash, subject, author, date };
-    });
+    return result.stdout
+      .split("\n")
+      .filter(Boolean)
+      .map((line) => {
+        const [hash, shortHash, subject, author, date] = line.split("|");
+        return { hash, shortHash, subject, author, date };
+      });
   }
 
   /**
@@ -447,7 +419,7 @@ export class GitWorkflow {
    */
   async getFileChangesSince(baseBranch: string): Promise<FileChange[]> {
     const result = await execGit(
-      ['diff', '--numstat', `${baseBranch}...HEAD`],
+      ["diff", "--numstat", `${baseBranch}...HEAD`],
       this.options.repoRoot
     );
 
@@ -456,40 +428,43 @@ export class GitWorkflow {
     }
 
     const statusResult = await execGit(
-      ['diff', '--name-status', `${baseBranch}...HEAD`],
+      ["diff", "--name-status", `${baseBranch}...HEAD`],
       this.options.repoRoot
     );
 
     const statusMap = new Map<string, string>();
-    for (const line of statusResult.stdout.split('\n').filter(Boolean)) {
-      const [status, ...pathParts] = line.split('\t');
-      const filePath = pathParts.join('\t');
+    for (const line of statusResult.stdout.split("\n").filter(Boolean)) {
+      const [status, ...pathParts] = line.split("\t");
+      const filePath = pathParts.join("\t");
       statusMap.set(filePath, status);
     }
 
-    return result.stdout.split('\n').filter(Boolean).map((line) => {
-      const [add, del, ...pathParts] = line.split('\t');
-      const filePath = pathParts.join('\t');
-      const statusCode = statusMap.get(filePath) || 'M';
+    return result.stdout
+      .split("\n")
+      .filter(Boolean)
+      .map((line) => {
+        const [add, del, ...pathParts] = line.split("\t");
+        const filePath = pathParts.join("\t");
+        const statusCode = statusMap.get(filePath) || "M";
 
-      let status: FileChange['status'] = 'modified';
-      if (statusCode.startsWith('A')) status = 'added';
-      else if (statusCode.startsWith('D')) status = 'deleted';
-      else if (statusCode.startsWith('R')) status = 'renamed';
+        let status: FileChange["status"] = "modified";
+        if (statusCode.startsWith("A")) status = "added";
+        else if (statusCode.startsWith("D")) status = "deleted";
+        else if (statusCode.startsWith("R")) status = "renamed";
 
-      return {
-        path: filePath,
-        status,
-        additions: add === '-' ? 0 : parseInt(add, 10),
-        deletions: del === '-' ? 0 : parseInt(del, 10),
-      };
-    });
+        return {
+          path: filePath,
+          status,
+          additions: add === "-" ? 0 : parseInt(add, 10),
+          deletions: del === "-" ? 0 : parseInt(del, 10),
+        };
+      });
   }
 
   /**
    * Generate review.md artifact
    */
-  async generateReview(baseBranch: string = 'main'): Promise<ReviewArtifact> {
+  async generateReview(baseBranch: string = "main"): Promise<ReviewArtifact> {
     const status = this.getStatus();
     const commits = await this.getCommitsSince(baseBranch);
     const filesChanged = await this.getFileChangesSince(baseBranch);
@@ -502,11 +477,11 @@ export class GitWorkflow {
       `${commits.length} commit(s)`,
       `${filesChanged.length} file(s) changed`,
       `+${totalAdditions} -${totalDeletions}`,
-    ].join(', ');
+    ].join(", ");
 
     return {
       timestamp: new Date().toISOString(),
-      branch: status.branch || 'unknown',
+      branch: status.branch || "unknown",
       baseBranch,
       commits,
       filesChanged,
@@ -517,10 +492,7 @@ export class GitWorkflow {
   /**
    * Write review.md file
    */
-  async writeReviewFile(
-    review: ReviewArtifact,
-    outputPath: string = 'review.md'
-  ): Promise<string> {
+  async writeReviewFile(review: ReviewArtifact, outputPath: string = "review.md"): Promise<string> {
     const absolutePath = path.isAbsolute(outputPath)
       ? outputPath
       : path.join(this.options.repoRoot, outputPath);
@@ -541,71 +513,65 @@ export class GitWorkflow {
    */
   private formatReviewMarkdown(review: ReviewArtifact): string {
     const lines: string[] = [
-      '# Review Summary',
-      '',
+      "# Review Summary",
+      "",
       `**Generated:** ${review.timestamp}`,
       `**Branch:** ${review.branch}`,
       `**Base:** ${review.baseBranch}`,
       `**Summary:** ${review.summary}`,
-      '',
-      '## Commits',
-      '',
+      "",
+      "## Commits",
+      "",
     ];
 
     if (review.commits.length === 0) {
-      lines.push('_No commits_');
+      lines.push("_No commits_");
     } else {
       for (const commit of review.commits) {
         lines.push(`- \`${commit.shortHash}\` ${commit.subject} (${commit.author})`);
       }
     }
 
-    lines.push('', '## Files Changed', '');
+    lines.push("", "## Files Changed", "");
 
     if (review.filesChanged.length === 0) {
-      lines.push('_No files changed_');
+      lines.push("_No files changed_");
     } else {
-      lines.push('| Status | File | Changes |');
-      lines.push('|--------|------|---------|');
+      lines.push("| Status | File | Changes |");
+      lines.push("|--------|------|---------|");
       for (const file of review.filesChanged) {
         const statusIcon =
-          file.status === 'added'
-            ? '+'
-            : file.status === 'deleted'
-            ? '-'
-            : file.status === 'renamed'
-            ? 'R'
-            : 'M';
-        lines.push(
-          `| ${statusIcon} | ${file.path} | +${file.additions} -${file.deletions} |`
-        );
+          file.status === "added"
+            ? "+"
+            : file.status === "deleted"
+              ? "-"
+              : file.status === "renamed"
+                ? "R"
+                : "M";
+        lines.push(`| ${statusIcon} | ${file.path} | +${file.additions} -${file.deletions} |`);
       }
     }
 
-    lines.push('');
-    return lines.join('\n');
+    lines.push("");
+    return lines.join("\n");
   }
 
   /**
    * Push to remote
    */
-  async push(remote: string = 'origin', setUpstream: boolean = true): Promise<void> {
+  async push(remote: string = "origin", setUpstream: boolean = true): Promise<void> {
     const status = this.getStatus();
-    const args = ['push'];
+    const args = ["push"];
 
     if (setUpstream && !status.remoteRef) {
-      args.push('-u', remote, status.branch || 'HEAD');
+      args.push("-u", remote, status.branch || "HEAD");
     } else {
       args.push(remote);
     }
 
     const result = await execGit(args, this.options.repoRoot);
     if (result.exitCode !== 0) {
-      throw new GitWorkflowError(
-        'Push failed',
-        'push_failed',
-        [`error: ${result.stderr}`]
-      );
+      throw new GitWorkflowError("Push failed", "push_failed", [`error: ${result.stderr}`]);
     }
 
     // Update status

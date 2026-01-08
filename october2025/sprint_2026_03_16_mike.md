@@ -17,12 +17,12 @@ roles:
   - FinOps Lead
   - Repo Maintainer / Arborist
 objectives:
-  - 'Runtime policy maturity: fine-grained ABAC with service/tenant attributes and break-glass with immutable audit.'
-  - 'Release train automation: cut, notes, provenance links, and rollback rehearsal as part of the pipeline.'
-  - 'Data contracts & schema registry: producer/consumer contracts with backward/forward compatibility gates.'
-  - 'Performance posture v4: coordinated cache layers (edge/app/db), negative cache & TTL hygiene; p99.9 protections.'
-  - 'Network resilience: fault injection (latency/packet loss) game days and adaptive timeouts at client libraries.'
-  - 'FinOps guardrail v4: workload efficiency scorecards, weekly budget deltas, and waste hunters (orphaned volumes/IPs).'
+  - "Runtime policy maturity: fine-grained ABAC with service/tenant attributes and break-glass with immutable audit."
+  - "Release train automation: cut, notes, provenance links, and rollback rehearsal as part of the pipeline."
+  - "Data contracts & schema registry: producer/consumer contracts with backward/forward compatibility gates."
+  - "Performance posture v4: coordinated cache layers (edge/app/db), negative cache & TTL hygiene; p99.9 protections."
+  - "Network resilience: fault injection (latency/packet loss) game days and adaptive timeouts at client libraries."
+  - "FinOps guardrail v4: workload efficiency scorecards, weekly budget deltas, and waste hunters (orphaned volumes/IPs)."
 ---
 
 # Sprint 35 Plan — Policy Precision, Release Automation, and p99.9 Resilience
@@ -169,13 +169,9 @@ allow {
 **Path:** `services/access/breakglass.ts`
 
 ```ts
-export async function grantTemporary(
-  role: string,
-  subject: string,
-  minutes = 30,
-) {
+export async function grantTemporary(role: string, subject: string, minutes = 30) {
   const until = new Date(Date.now() + minutes * 60000).toISOString();
-  await audit.write({ type: 'breakglass', subject, role, until });
+  await audit.write({ type: "breakglass", subject, role, until });
   await policy.addTempRole(subject, role, until);
 }
 ```
@@ -188,7 +184,7 @@ export async function grantTemporary(
 name: release-train
 on:
   workflow_dispatch:
-  schedule: [{ cron: '0 18 * * 4' }]
+  schedule: [{ cron: "0 18 * * 4" }]
 jobs:
   cut:
     runs-on: ubuntu-latest
@@ -232,7 +228,7 @@ jobs:
 **Path:** `services/gateway/src/adaptive.ts`
 
 ```ts
-let max = Number(process.env.MAX_INFLIGHT || '200');
+let max = Number(process.env.MAX_INFLIGHT || "200");
 export function adapt(samples: number[]) {
   const p99 = samples[Math.floor(samples.length * 0.99)];
   if (p99 > 1500 && max > 50) max -= 10;
@@ -250,7 +246,7 @@ apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata: { name: docs-api-fault }
 spec:
-  hosts: ['docs-api']
+  hosts: ["docs-api"]
   http:
     - fault:
         {
@@ -284,7 +280,7 @@ spec:
 ```yaml
 name: budget-delta
 on:
-  schedule: [{ cron: '0 12 * * 1' }]
+  schedule: [{ cron: "0 12 * * 1" }]
 jobs:
   comment:
     runs-on: ubuntu-latest

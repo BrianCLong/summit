@@ -127,21 +127,13 @@ create table if not exists budget_requests (
 **Banner Component**
 
 ```tsx
-export function FailoverBanner({
-  state,
-}: {
-  state: 'degraded' | 'failing_over' | 'recovered';
-}) {
+export function FailoverBanner({ state }: { state: "degraded" | "failing_over" | "recovered" }) {
   const copy = {
-    degraded: 'Performance degraded — preparing safe failover…',
-    failing_over: 'Failing over now — your work is safe.',
-    recovered: 'Recovered — resuming real‑time updates.',
+    degraded: "Performance degraded — preparing safe failover…",
+    failing_over: "Failing over now — your work is safe.",
+    recovered: "Recovered — resuming real‑time updates.",
   }[state];
-  return (
-    <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200">
-      {copy}
-    </div>
-  );
+  return <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200">{copy}</div>;
 }
 ```
 

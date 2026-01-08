@@ -1,27 +1,29 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import GraphPane from '../components/GraphPane';
-import MapPane from '../components/MapPane';
-import TimelinePane from '../components/TimelinePane';
-import SearchBar from '../components/SearchBar';
-import { getAuthToken, searchEntities, getNeighbors, Entity } from '../lib/api';
+import { useState, useEffect } from "react";
+import GraphPane from "../components/GraphPane";
+import MapPane from "../components/MapPane";
+import TimelinePane from "../components/TimelinePane";
+import SearchBar from "../components/SearchBar";
+import { getAuthToken, searchEntities, getNeighbors, Entity } from "../lib/api";
 
 export default function Home() {
-  const [token, setToken] = useState('');
+  const [token, setToken] = useState("");
   const [graphData, setGraphData] = useState<any>({ nodes: [], edges: [] });
   const [searchResults, setSearchResults] = useState<Entity[]>([]);
 
   // Config
-  const tenant = 't1';
-  const caseId = 'c1';
+  const tenant = "t1";
+  const caseId = "c1";
 
   useEffect(() => {
     getAuthToken().then(setToken);
   }, []);
 
   const handleSearch = async (q: string) => {
-    if (!token) {return;}
+    if (!token) {
+      return;
+    }
     const results = await searchEntities(q, token, tenant, caseId);
     setSearchResults(results);
 
@@ -39,9 +41,9 @@ export default function Home() {
       </div>
 
       {searchResults.length > 0 && (
-         <div className="text-sm text-gray-500 px-2">
-            Found: {searchResults.map(r => r.name).join(', ')}
-         </div>
+        <div className="text-sm text-gray-500 px-2">
+          Found: {searchResults.map((r) => r.name).join(", ")}
+        </div>
       )}
 
       <div className="grid grid-cols-3 gap-2 flex-grow">

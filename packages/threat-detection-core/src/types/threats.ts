@@ -2,10 +2,10 @@
  * Threat model types
  */
 
-import { ThreatCategory, ThreatSeverity } from './events';
+import { ThreatCategory, ThreatSeverity } from "./events";
 
 export interface ThreatIndicator {
-  type: 'ip' | 'domain' | 'url' | 'hash' | 'email' | 'file' | 'cve' | 'signature';
+  type: "ip" | "domain" | "url" | "hash" | "email" | "file" | "cve" | "signature";
   value: string;
   confidence: number;
   source: string;
@@ -19,7 +19,7 @@ export interface ThreatActor {
   name: string;
   aliases: string[];
   description: string;
-  sophistication: 'novice' | 'intermediate' | 'advanced' | 'expert' | 'nation_state';
+  sophistication: "novice" | "intermediate" | "advanced" | "expert" | "nation_state";
   motivation: string[];
   targetedSectors: string[];
   targetedCountries: string[];
@@ -45,7 +45,14 @@ export interface Campaign {
 }
 
 export interface KillChainStage {
-  stage: 'reconnaissance' | 'weaponization' | 'delivery' | 'exploitation' | 'installation' | 'command_control' | 'actions_on_objectives';
+  stage:
+    | "reconnaissance"
+    | "weaponization"
+    | "delivery"
+    | "exploitation"
+    | "installation"
+    | "command_control"
+    | "actions_on_objectives";
   detected: boolean;
   timestamp?: Date;
   indicators: string[];
@@ -69,7 +76,7 @@ export interface AttackTimeline {
   }[];
   events: string[]; // Event IDs
   severity: ThreatSeverity;
-  status: 'ongoing' | 'mitigated' | 'contained' | 'resolved';
+  status: "ongoing" | "mitigated" | "contained" | "resolved";
 }
 
 export interface APTIndicators {
@@ -122,13 +129,13 @@ export interface TTPPattern {
 
   // Detection logic
   detectionRule: {
-    type: 'signature' | 'behavioral' | 'statistical' | 'ml';
+    type: "signature" | "behavioral" | "statistical" | "ml";
     conditions: any; // Detection-specific conditions
     threshold?: number;
   };
 
   // Context
-  prevalence: 'rare' | 'uncommon' | 'common' | 'very_common';
+  prevalence: "rare" | "uncommon" | "common" | "very_common";
   falsePositiveRate: number;
   severity: ThreatSeverity;
 
@@ -141,11 +148,11 @@ export interface DataIntegrityThreat {
   id: string;
   timestamp: Date;
   dataSourceId: string;
-  threatType: 'poisoning' | 'manipulation' | 'corruption' | 'tampering';
+  threatType: "poisoning" | "manipulation" | "corruption" | "tampering";
 
   // Detection details
   anomalyScore: number;
-  detectionMethod: 'statistical' | 'checksumMismatch' | 'schemaViolation' | 'outlierDetection';
+  detectionMethod: "statistical" | "checksumMismatch" | "schemaViolation" | "outlierDetection";
 
   // Affected data
   affectedRecords: number;

@@ -2,7 +2,7 @@
  * Profile Analyzer - Enriches and analyzes social media profiles
  */
 
-import type { SocialProfile } from '../types/index.js';
+import type { SocialProfile } from "../types/index.js";
 
 export class ProfileAnalyzer {
   /**
@@ -13,7 +13,7 @@ export class ProfileAnalyzer {
     analysis: {
       completeness: number;
       credibility: number;
-      activityLevel: 'low' | 'medium' | 'high';
+      activityLevel: "low" | "medium" | "high";
       audienceQuality: number;
       riskFactors: string[];
     };
@@ -31,8 +31,8 @@ export class ProfileAnalyzer {
         credibility,
         activityLevel,
         audienceQuality,
-        riskFactors
-      }
+        riskFactors,
+      },
     };
   }
 
@@ -46,10 +46,10 @@ export class ProfileAnalyzer {
       profile.location,
       profile.website,
       profile.profileImage,
-      profile.verified
+      profile.verified,
     ];
 
-    const filledFields = fields.filter(f => f !== undefined && f !== null && f !== '');
+    const filledFields = fields.filter((f) => f !== undefined && f !== null && f !== "");
     return filledFields.length / fields.length;
   }
 
@@ -87,12 +87,12 @@ export class ProfileAnalyzer {
   /**
    * Assess activity level
    */
-  private assessActivityLevel(profile: SocialProfile): 'low' | 'medium' | 'high' {
-    if (!profile.posts) return 'low';
+  private assessActivityLevel(profile: SocialProfile): "low" | "medium" | "high" {
+    if (!profile.posts) return "low";
 
-    if (profile.posts > 1000) return 'high';
-    if (profile.posts > 100) return 'medium';
-    return 'low';
+    if (profile.posts > 1000) return "high";
+    if (profile.posts > 100) return "medium";
+    return "low";
   }
 
   /**
@@ -105,7 +105,7 @@ export class ProfileAnalyzer {
     const ratio = profile.followers / Math.max(1, profile.following);
 
     // Good ratio: more followers than following
-    if (ratio > 1) return Math.min(1, 0.5 + (ratio / 10));
+    if (ratio > 1) return Math.min(1, 0.5 + ratio / 10);
 
     // Poor ratio: following many more than followers
     return Math.max(0, 0.5 - (1 / ratio) * 0.2);
@@ -121,31 +121,31 @@ export class ProfileAnalyzer {
     if (profile.createdAt) {
       const ageInDays = (Date.now() - profile.createdAt.getTime()) / (1000 * 60 * 60 * 24);
       if (ageInDays < 30) {
-        risks.push('Very new account');
+        risks.push("Very new account");
       }
     }
 
     // Incomplete profile
     if (this.calculateCompleteness(profile) < 0.3) {
-      risks.push('Incomplete profile');
+      risks.push("Incomplete profile");
     }
 
     // Suspicious follow ratio
     if (profile.followers && profile.following) {
       const ratio = profile.following / Math.max(1, profile.followers);
       if (ratio > 10) {
-        risks.push('Suspicious follow ratio');
+        risks.push("Suspicious follow ratio");
       }
     }
 
     // Low engagement
     if (profile.engagement && profile.engagement.engagementRate < 0.001) {
-      risks.push('Low engagement rate');
+      risks.push("Low engagement rate");
     }
 
     // No profile image
     if (!profile.profileImage) {
-      risks.push('No profile image');
+      risks.push("No profile image");
     }
 
     return risks;
@@ -166,41 +166,41 @@ export class ProfileAnalyzer {
 
     // Same display name
     if (profile1.displayName === profile2.displayName) {
-      matches.push('display_name');
+      matches.push("display_name");
       score += 0.3;
     }
 
     // Similar username
     if (profile1.username.toLowerCase() === profile2.username.toLowerCase()) {
-      matches.push('username');
+      matches.push("username");
       score += 0.4;
     }
 
     // Same location
     if (profile1.location && profile2.location && profile1.location === profile2.location) {
-      matches.push('location');
+      matches.push("location");
       score += 0.1;
     }
 
     // Same website
     if (profile1.website && profile2.website && profile1.website === profile2.website) {
-      matches.push('website');
+      matches.push("website");
       score += 0.2;
     }
 
     // Same email domain
     if (profile1.email && profile2.email) {
-      const domain1 = profile1.email.split('@')[1];
-      const domain2 = profile2.email.split('@')[1];
+      const domain1 = profile1.email.split("@")[1];
+      const domain2 = profile2.email.split("@")[1];
       if (domain1 === domain2) {
-        matches.push('email_domain');
+        matches.push("email_domain");
         score += 0.15;
       }
     }
 
     return {
       similarity: Math.min(1, score),
-      matches
+      matches,
     };
   }
 }

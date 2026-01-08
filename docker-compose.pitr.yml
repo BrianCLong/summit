@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 # PostgreSQL Point-in-Time Recovery Stack
 # Adds PITR capabilities to existing PostgreSQL setup
@@ -26,23 +26,23 @@ services:
       -c config_file=/etc/postgresql/postgresql-pitr.conf
       -c hba_file=/var/lib/postgresql/data/pg_hba.conf
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
       - postgres_pitr_data:/var/lib/postgresql/data
       - postgres_pitr_wal:/var/lib/postgresql/wal
       - postgres_pitr_logs:/var/log/postgresql
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-summit} -d ${POSTGRES_DB:-summit_dev}']
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-summit} -d ${POSTGRES_DB:-summit_dev}"]
       interval: 10s
       timeout: 5s
       retries: 10
     networks:
       - summit
     labels:
-      - 'prometheus.scrape=true'
-      - 'prometheus.port=9187'
-      - 'backup.enabled=true'
-      - 'backup.schedule=daily'
+      - "prometheus.scrape=true"
+      - "prometheus.port=9187"
+      - "backup.enabled=true"
+      - "backup.schedule=daily"
 
   # PostgreSQL Exporter for monitoring
   postgres-exporter:
@@ -52,7 +52,7 @@ services:
     environment:
       DATA_SOURCE_NAME: postgresql://${POSTGRES_USER:-summit}:${POSTGRES_PASSWORD}@postgres-pitr:5432/${POSTGRES_DB:-summit_dev}?sslmode=disable
     ports:
-      - '9187:9187'
+      - "9187:9187"
     depends_on:
       postgres-pitr:
         condition: service_healthy
@@ -65,12 +65,12 @@ services:
     container_name: summit-pushgateway
     restart: unless-stopped
     ports:
-      - '9091:9091'
+      - "9091:9091"
     networks:
       - summit
     command:
-      - '--persistence.file=/data/pushgateway.data'
-      - '--persistence.interval=5m'
+      - "--persistence.file=/data/pushgateway.data"
+      - "--persistence.interval=5m"
     volumes:
       - pushgateway_data:/data
 
@@ -89,7 +89,7 @@ services:
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_REGION: ${AWS_REGION:-us-west-2}
       WALG_S3_PREFIX: ${WALG_S3_PREFIX:-s3://summit-wal-archives/postgres}
-      BACKUP_SCHEDULE: ${BACKUP_SCHEDULE:-0 2 * * *}  # Daily at 2 AM
+      BACKUP_SCHEDULE: ${BACKUP_SCHEDULE:-0 2 * * *} # Daily at 2 AM
     command: >
       sh -c '
       echo "Installing supercronic for cron scheduling..."

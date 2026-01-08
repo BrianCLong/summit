@@ -13,30 +13,30 @@ pnpm add @intelgraph/authentication
 ### JWT Authentication
 
 ```typescript
-import { JWTManager } from '@intelgraph/authentication';
+import { JWTManager } from "@intelgraph/authentication";
 
 const jwtManager = new JWTManager({
   secret: process.env.JWT_SECRET,
-  issuer: 'my-api',
-  expiresIn: '15m',
+  issuer: "my-api",
+  expiresIn: "15m",
 });
 
 const { accessToken, refreshToken } = jwtManager.generateTokenPair({
-  sub: 'user123',
-  roles: ['admin'],
-  scopes: ['read', 'write'],
+  sub: "user123",
+  roles: ["admin"],
+  scopes: ["read", "write"],
 });
 ```
 
 ### OAuth 2.0
 
 ```typescript
-import { OAuthProvider } from '@intelgraph/authentication';
+import { OAuthProvider } from "@intelgraph/authentication";
 
 const oauth = new OAuthProvider({
-  clientId: 'your-client-id',
-  clientSecret: 'your-client-secret',
-  redirectUri: 'https://yourapp.com/callback',
+  clientId: "your-client-id",
+  clientSecret: "your-client-secret",
+  redirectUri: "https://yourapp.com/callback",
   // ...
 });
 ```
@@ -44,14 +44,14 @@ const oauth = new OAuthProvider({
 ### API Keys
 
 ```typescript
-import { APIKeyManager } from '@intelgraph/authentication';
+import { APIKeyManager } from "@intelgraph/authentication";
 
 const apiKeyManager = new APIKeyManager();
 
 const { apiKey, key } = apiKeyManager.createAPIKey({
-  name: 'Production Key',
-  userId: 'user123',
-  scopes: ['read'],
+  name: "Production Key",
+  userId: "user123",
+  scopes: ["read"],
 });
 ```
 

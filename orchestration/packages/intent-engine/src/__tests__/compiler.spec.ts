@@ -1,6 +1,6 @@
 /// <reference types="vitest" />
-import { describe, expect, it } from 'vitest';
-import { compileToIR, yamlToIR } from '../index';
+import { describe, expect, it } from "vitest";
+import { compileToIR, yamlToIR } from "../index";
 
 const sampleYaml = `
 apiVersion: chronos.v1
@@ -18,46 +18,44 @@ spec:
         - a
 `;
 
-describe('intent engine compiler', () => {
-  it('creates deterministic hashes and ordering', () => {
+describe("intent engine compiler", () => {
+  it("creates deterministic hashes and ordering", () => {
     const ir = yamlToIR(sampleYaml);
-    expect(ir.name).toBe('example');
-    expect(ir.nodes.map((n) => n.id)).toEqual(['a', 'b']);
-    expect(ir.edges).toEqual([{ from: 'a', to: 'b' }]);
+    expect(ir.name).toBe("example");
+    expect(ir.nodes.map((n) => n.id)).toEqual(["a", "b"]);
+    expect(ir.edges).toEqual([{ from: "a", to: "b" }]);
     expect(ir.specHash).toHaveLength(64);
   });
 
-  it('respects explicit retry configuration', () => {
+  it("respects explicit retry configuration", () => {
     const ir = compileToIR({
-      apiVersion: 'chronos.v1',
-      kind: 'Workflow',
-      metadata: { name: 'retry-demo', namespace: 'demo' },
+      apiVersion: "chronos.v1",
+      kind: "Workflow",
+      metadata: { name: "retry-demo", namespace: "demo" },
       spec: {
-        tasks: [
-          { id: 'single', uses: 'noop' },
-        ],
+        tasks: [{ id: "single", uses: "noop" }],
         retries: {
-          default: { strategy: 'fixed', maxAttempts: 7, baseMs: 1000 },
+          default: { strategy: "fixed", maxAttempts: 7, baseMs: 1000 },
         },
       },
     });
 
-    expect(ir.retry.strategy).toBe('fixed');
+    expect(ir.retry.strategy).toBe("fixed");
     expect(ir.retry.maxAttempts).toBe(7);
     expect(ir.retry.baseMs).toBe(1000);
   });
 
-  it('propagates top-level inputs into the IR', () => {
+  it("propagates top-level inputs into the IR", () => {
     const ir = compileToIR({
-      apiVersion: 'chronos.v1',
-      kind: 'Workflow',
-      metadata: { name: 'inputs-demo', namespace: 'demo' },
+      apiVersion: "chronos.v1",
+      kind: "Workflow",
+      metadata: { name: "inputs-demo", namespace: "demo" },
       spec: {
-        inputs: { foo: 'bar', tenants: ['t1', 't2'] },
-        tasks: [{ id: 'single', uses: 'noop' }],
+        inputs: { foo: "bar", tenants: ["t1", "t2"] },
+        tasks: [{ id: "single", uses: "noop" }],
       },
     });
 
-    expect(ir.inputs).toEqual({ foo: 'bar', tenants: ['t1', 't2'] });
+    expect(ir.inputs).toEqual({ foo: "bar", tenants: ["t1", "t2"] });
   });
 });

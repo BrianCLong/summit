@@ -1,5 +1,5 @@
-import React from 'react';
-import { Skeleton, Stack, Typography } from '@mui/material';
+import React from "react";
+import { Skeleton, Stack, Typography } from "@mui/material";
 
 export default function StatsOverview() {
   // TODO: Re-enable GraphQL query when schema is available
@@ -22,17 +22,13 @@ export default function StatsOverview() {
         <Typography variant="subtitle2" color="text.secondary">
           Total Entities
         </Typography>
-        <Typography variant="h5">
-          {mockStats.entities.total.toLocaleString()}
-        </Typography>
+        <Typography variant="h5">{mockStats.entities.total.toLocaleString()}</Typography>
       </div>
       <div>
         <Typography variant="subtitle2" color="text.secondary">
           Total Relationships
         </Typography>
-        <Typography variant="h5">
-          {mockStats.relationships.total.toLocaleString()}
-        </Typography>
+        <Typography variant="h5">{mockStats.relationships.total.toLocaleString()}</Typography>
       </div>
       <div>
         <Typography variant="subtitle2" color="text.secondary">

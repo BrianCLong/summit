@@ -20,9 +20,11 @@ A comprehensive multi-tenant authorization system has been implemented for the I
 ### 1. Database Schema (3 Migrations)
 
 #### ✅ Warrant Lifecycle Management
+
 **File**: `server/db/migrations/postgres/2025-11-24_warrant_lifecycle_management.sql`
 
 **Tables Created:**
+
 - `warrants` - Core warrant registry with full lifecycle tracking
 - `warrant_bindings` - Resource authorization mappings
 - `warrant_usage_log` - Immutable usage audit trail
@@ -32,6 +34,7 @@ A comprehensive multi-tenant authorization system has been implemented for the I
 - `mv_warrant_compliance_summary` - Materialized view for compliance reporting
 
 **Features:**
+
 - 9 warrant types (WARRANT, SUBPOENA, COURT_ORDER, ADMIN_AUTH, etc.)
 - Temporal validity with expiration monitoring
 - Geographic scope enforcement
@@ -40,9 +43,11 @@ A comprehensive multi-tenant authorization system has been implemented for the I
 - Row-level security policies
 
 #### ✅ License Registry
+
 **File**: `server/db/migrations/postgres/2025-11-24_license_registry.sql`
 
 **Tables Created:**
+
 - `licenses` - License registry with permissions/restrictions
 - `data_license_assignments` - Resource license mappings
 - `license_lineage` - Inheritance tracking for derived data
@@ -51,6 +56,7 @@ A comprehensive multi-tenant authorization system has been implemented for the I
 - `license_compatibility_matrix` - Compatibility rules
 
 **Features:**
+
 - 7 license types (INTERNAL_ONLY, RELEASABLE, ORCON, NOFORN, etc.)
 - Granular permissions (read, copy, modify, distribute, etc.)
 - Export control enforcement
@@ -59,13 +65,16 @@ A comprehensive multi-tenant authorization system has been implemented for the I
 - TOS acceptance tracking
 
 #### ✅ Authorization Audit Log
+
 **File**: `server/db/migrations/postgres/2025-11-24_authorization_audit_log.sql`
 
 **Tables Created:**
+
 - `authorization_audit_log` - Immutable authorization decisions
 - `mv_authz_denials_summary` - Denial analytics (materialized view)
 
 **Features:**
+
 - Comprehensive decision logging
 - Policy evaluation traces
 - Warrant/license references
@@ -75,16 +84,19 @@ A comprehensive multi-tenant authorization system has been implemented for the I
 ### 2. Authorization Services (TypeScript Package)
 
 #### ✅ @intelgraph/authz-core Package
+
 **Location**: `packages/authz-core/`
 
 **Core Services:**
 
 ##### AuthorizationService
+
 **File**: `packages/authz-core/src/AuthorizationService.ts` (800+ lines)
 
 **Key Method**: `isAllowed(input: AuthorizationInput): Promise<AuthorizationDecision>`
 
 **Features:**
+
 - Multi-layered authorization checks (RBAC → ABAC → Warrant → License)
 - Side-effect free (only reads state, writes audit)
 - Decision caching (configurable TTL)
@@ -94,9 +106,11 @@ A comprehensive multi-tenant authorization system has been implemented for the I
 - Obligation and condition tracking
 
 ##### WarrantService
+
 **File**: `packages/authz-core/src/WarrantService.ts` (700+ lines)
 
 **Key Methods:**
+
 - `createWarrant()` - Register new warrant
 - `bindWarrant()` - Bind to resource
 - `validateWarrant()` - Validate for action
@@ -105,6 +119,7 @@ A comprehensive multi-tenant authorization system has been implemented for the I
 - `logWarrantUsage()` - Usage audit
 
 **Features:**
+
 - Complete lifecycle management
 - Approval workflows with SLA tracking
 - Automatic expiration alerts
@@ -113,9 +128,11 @@ A comprehensive multi-tenant authorization system has been implemented for the I
 - Usage tracking
 
 ##### LicenseService
+
 **File**: `packages/authz-core/src/LicenseService.ts` (700+ lines)
 
 **Key Methods:**
+
 - `createLicense()` - Register license
 - `assignLicense()` - Assign to resource
 - `validateLicense()` - Validate for action
@@ -123,6 +140,7 @@ A comprehensive multi-tenant authorization system has been implemented for the I
 - `recordLicenseLineage()` - Track inheritance
 
 **Features:**
+
 - License registry management
 - Assignment and revocation
 - Permission/restriction enforcement
@@ -132,9 +150,11 @@ A comprehensive multi-tenant authorization system has been implemented for the I
 - Compatibility checking
 
 ##### Type Definitions
+
 **File**: `packages/authz-core/src/types.ts` (600+ lines)
 
 **Key Types:**
+
 - `AuthorizationInput` / `AuthorizationDecision`
 - `Subject`, `Resource`, `Action`, `AuthorizationContext`
 - `Warrant`, `WarrantType`, `WarrantStatus`, `WarrantValidationResult`
@@ -145,9 +165,11 @@ A comprehensive multi-tenant authorization system has been implemented for the I
 ### 3. OPA Policies (Rego)
 
 #### ✅ Warrant Authorization Policy
+
 **File**: `policies/opa/warrant_authorization.rego` (500+ lines)
 
 **Rules:**
+
 - Default deny with explicit authorization
 - Warrant requirement detection (based on action/classification)
 - Warrant validation (status, expiry, scope)
@@ -157,6 +179,7 @@ A comprehensive multi-tenant authorization system has been implemented for the I
 - Appeal process information
 
 **Key Features:**
+
 - Temporal validation (effective/expiry dates)
 - Action-scope matching
 - Subject-scope matching
@@ -165,9 +188,11 @@ A comprehensive multi-tenant authorization system has been implemented for the I
 - Comprehensive denial reasons
 
 #### ✅ License Enforcement Policy
+
 **File**: `policies/opa/license_enforcement.rego` (600+ lines)
 
 **Rules:**
+
 - License requirement detection
 - Permission validation (read, copy, modify, distribute, etc.)
 - Restriction enforcement (attribution, share-alike, non-commercial, etc.)
@@ -177,6 +202,7 @@ A comprehensive multi-tenant authorization system has been implemented for the I
 - Obligation generation (attribution, notices, etc.)
 
 **Key Features:**
+
 - Action-to-permission mapping
 - License type-specific rules (INTERNAL_ONLY, ORCON, NOFORN)
 - Export control by country
@@ -187,9 +213,11 @@ A comprehensive multi-tenant authorization system has been implemented for the I
 ### 4. Documentation
 
 #### ✅ Comprehensive README
+
 **File**: `packages/authz-core/README.md` (1000+ lines)
 
 **Contents:**
+
 - Overview and architecture
 - Installation and quick start
 - Authorization decision flow diagram
@@ -205,6 +233,7 @@ A comprehensive multi-tenant authorization system has been implemented for the I
 - Best practices
 
 #### ✅ Implementation Summary
+
 **File**: `docs/AUTHZ_IMPLEMENTATION_SUMMARY.md` (this document)
 
 ## Integration Points
@@ -254,16 +283,16 @@ async resolveEntityQuery(parent, args, context) {
 #### 2. REST API Integration
 
 ```typescript
-import { AuthorizationService } from '@intelgraph/authz-core';
+import { AuthorizationService } from "@intelgraph/authz-core";
 
 const authz = new AuthorizationService();
 
-app.get('/api/entities/:id/export', async (req, res) => {
+app.get("/api/entities/:id/export", async (req, res) => {
   const decision = await authz.isAllowed({
     subject: req.user,
-    action: 'EXPORT',
+    action: "EXPORT",
     resource: {
-      type: 'entity',
+      type: "entity",
       id: req.params.id,
       tenantId: req.user.tenantId,
     },
@@ -271,7 +300,7 @@ app.get('/api/entities/:id/export', async (req, res) => {
       requestTime: new Date(),
       environment: process.env.NODE_ENV,
       purpose: req.body.purpose,
-      warrantId: req.body.warrantId,  // Required for exports
+      warrantId: req.body.warrantId, // Required for exports
       ip: req.ip,
       requestId: req.id,
     },
@@ -298,22 +327,22 @@ app.get('/api/entities/:id/export', async (req, res) => {
 // In copilot service
 const decision = await authz.isAllowed({
   subject: {
-    id: 'copilot-service',
-    type: 'service',
+    id: "copilot-service",
+    type: "service",
     tenantId: request.tenantId,
-    roles: ['COPILOT_SERVICE'],
-    permissions: ['entity:read', 'entity:query'],
+    roles: ["COPILOT_SERVICE"],
+    permissions: ["entity:read", "entity:query"],
   },
-  action: 'QUERY',
+  action: "QUERY",
   resource: {
-    type: 'entity',
+    type: "entity",
     id: entityId,
     tenantId: request.tenantId,
   },
   context: {
     requestTime: new Date(),
-    environment: 'production',
-    purpose: 'AI-assisted analysis for investigation',
+    environment: "production",
+    purpose: "AI-assisted analysis for investigation",
     investigationId: request.investigationId,
   },
 });
@@ -326,6 +355,7 @@ const decision = await authz.isAllowed({
 **Decision**: The `isAllowed()` API only reads state and logs to audit. It does NOT modify warrants, licenses, or permissions.
 
 **Rationale**:
+
 - Separation of concerns: authorization check vs. resource management
 - Idempotent: can be called multiple times without side effects
 - Composable: easy to integrate into any service
@@ -336,6 +366,7 @@ const decision = await authz.isAllowed({
 **Decision**: In production, errors during authorization result in DENY.
 
 **Rationale**:
+
 - Security first: prevent unauthorized access on failures
 - Observable: failures are logged and monitored
 - Configurable: can disable for development/testing
@@ -345,6 +376,7 @@ const decision = await authz.isAllowed({
 **Decision**: All authorization requests must include a purpose.
 
 **Rationale**:
+
 - Compliance: GDPR, HIPAA require purpose tracking
 - Audit trail: clear record of why access was requested
 - Abuse detection: unusual purposes flag for review
@@ -354,6 +386,7 @@ const decision = await authz.isAllowed({
 **Decision**: Authorization checks multiple layers: RBAC → ABAC → Warrant → License
 
 **Rationale**:
+
 - Defense in depth: multiple controls must pass
 - Flexibility: can enforce different policies at each layer
 - Compliance: different requirements (legal, license, policy) enforced
@@ -363,6 +396,7 @@ const decision = await authz.isAllowed({
 **Decision**: All audit tables have triggers preventing updates.
 
 **Rationale**:
+
 - Compliance: audit trails must be tamper-proof
 - Forensics: maintain chain of custody
 - Trust: demonstrate integrity of audit data
@@ -538,32 +572,32 @@ pnpm test:authz:smoke
 
 ### GDPR Compliance
 
-| Requirement | Implementation |
-|-------------|----------------|
-| Right to Access | Complete audit trail in `authorization_audit_log` |
+| Requirement        | Implementation                                         |
+| ------------------ | ------------------------------------------------------ |
+| Right to Access    | Complete audit trail in `authorization_audit_log`      |
 | Purpose Limitation | Required `purpose` field in all authorization requests |
-| Data Minimization | Warrant scope enforcement limits data access |
-| Retention Policies | `retention_policies` table + automatic cleanup |
-| Right to Erasure | `data_subject_requests` table + `data_deletion_log` |
+| Data Minimization  | Warrant scope enforcement limits data access           |
+| Retention Policies | `retention_policies` table + automatic cleanup         |
+| Right to Erasure   | `data_subject_requests` table + `data_deletion_log`    |
 
 ### HIPAA Compliance
 
-| Requirement | Implementation |
-|-------------|----------------|
-| Access Controls | Multi-layered authorization (RBAC + ABAC + warrants) |
-| Audit Controls | Immutable `authorization_audit_log` + `warrant_usage_log` |
-| Minimum Necessary | `minimumNecessary` justification field |
-| PHI Access Logging | Purpose tracking + detailed audit trail |
-| Integrity Controls | Immutability triggers + cryptographic hashes |
+| Requirement        | Implementation                                            |
+| ------------------ | --------------------------------------------------------- |
+| Access Controls    | Multi-layered authorization (RBAC + ABAC + warrants)      |
+| Audit Controls     | Immutable `authorization_audit_log` + `warrant_usage_log` |
+| Minimum Necessary  | `minimumNecessary` justification field                    |
+| PHI Access Logging | Purpose tracking + detailed audit trail                   |
+| Integrity Controls | Immutability triggers + cryptographic hashes              |
 
 ### SOC 2 Compliance
 
-| Requirement | Implementation |
-|-------------|----------------|
-| Access Control | Role-based + attribute-based policies |
-| Logical Access | Tenant isolation + warrant enforcement |
-| Authorization | Central `isAllowed()` API + audit logging |
-| Monitoring | Comprehensive metrics + denial alerts |
+| Requirement       | Implementation                                 |
+| ----------------- | ---------------------------------------------- |
+| Access Control    | Role-based + attribute-based policies          |
+| Logical Access    | Tenant isolation + warrant enforcement         |
+| Authorization     | Central `isAllowed()` API + audit logging      |
+| Monitoring        | Comprehensive metrics + denial alerts          |
 | Change Management | Approval workflows for warrant/license changes |
 
 ## Future Enhancements
@@ -644,6 +678,7 @@ pnpm test:authz:smoke
 ## Support and Maintenance
 
 ### Runbook Location
+
 `RUNBOOKS/authz-service-runbook.md` (to be created)
 
 ### On-Call Procedures
@@ -681,6 +716,7 @@ The multi-tenant authorization system provides a comprehensive, production-ready
 ✅ **Compliance** with GDPR, HIPAA, and SOC 2 requirements
 
 The system is designed to be:
+
 - **Secure by default** (fail-secure, purpose-required, multi-layered)
 - **Observable** (comprehensive metrics and audit)
 - **Maintainable** (clear separation of concerns, documented APIs)
@@ -691,6 +727,7 @@ All code, migrations, policies, and documentation are ready for review and deplo
 ---
 
 **Next Steps**:
+
 1. Review implementation with security team
 2. Deploy to staging environment
 3. Run comprehensive test suite

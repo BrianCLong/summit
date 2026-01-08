@@ -1,8 +1,4 @@
-import {
-  AttackSurface,
-  SurfaceAsset,
-  Exposure
-} from '../types';
+import { AttackSurface, SurfaceAsset, Exposure } from "../types";
 
 /**
  * Attack Surface Mapper
@@ -24,7 +20,7 @@ export class AttackSurfaceMapper {
       includeSubdomains = true,
       includePorts = true,
       includeServices = true,
-      includeCertificates = true
+      includeCertificates = true,
     } = options;
 
     const assets: SurfaceAsset[] = [];
@@ -49,7 +45,7 @@ export class AttackSurfaceMapper {
     }
 
     // Identify exposures
-    exposures.push(...await this.identifyExposures(assets));
+    exposures.push(...(await this.identifyExposures(assets)));
 
     // Calculate risk score
     const riskScore = this.calculateRiskScore(exposures);
@@ -60,7 +56,7 @@ export class AttackSurfaceMapper {
       lastScan: new Date(),
       assets,
       exposures,
-      riskScore
+      riskScore,
     };
   }
 
@@ -70,8 +66,20 @@ export class AttackSurfaceMapper {
   private async enumerateSubdomains(domain: string): Promise<SurfaceAsset[]> {
     // Simulated subdomain enumeration
     const commonSubdomains = [
-      'www', 'mail', 'ftp', 'admin', 'api', 'dev', 'staging',
-      'test', 'blog', 'shop', 'portal', 'vpn', 'remote', 'app'
+      "www",
+      "mail",
+      "ftp",
+      "admin",
+      "api",
+      "dev",
+      "staging",
+      "test",
+      "blog",
+      "shop",
+      "portal",
+      "vpn",
+      "remote",
+      "app",
     ];
 
     const assets: SurfaceAsset[] = [];
@@ -80,15 +88,15 @@ export class AttackSurfaceMapper {
     for (const sub of commonSubdomains) {
       assets.push({
         id: this.generateId(),
-        type: 'domain',
+        type: "domain",
         identifier: `${sub}.${domain}`,
         firstSeen: now,
         lastSeen: now,
         attributes: {
-          recordType: 'A',
-          dnssec: false
+          recordType: "A",
+          dnssec: false,
         },
-        risks: []
+        risks: [],
       });
     }
 
@@ -101,13 +109,13 @@ export class AttackSurfaceMapper {
   private async scanServices(target: string): Promise<SurfaceAsset[]> {
     // Simulated service scan results
     const commonServices = [
-      { port: 22, service: 'SSH', risk: 'medium' },
-      { port: 80, service: 'HTTP', risk: 'low' },
-      { port: 443, service: 'HTTPS', risk: 'low' },
-      { port: 3306, service: 'MySQL', risk: 'high' },
-      { port: 5432, service: 'PostgreSQL', risk: 'high' },
-      { port: 6379, service: 'Redis', risk: 'critical' },
-      { port: 27017, service: 'MongoDB', risk: 'critical' }
+      { port: 22, service: "SSH", risk: "medium" },
+      { port: 80, service: "HTTP", risk: "low" },
+      { port: 443, service: "HTTPS", risk: "low" },
+      { port: 3306, service: "MySQL", risk: "high" },
+      { port: 5432, service: "PostgreSQL", risk: "high" },
+      { port: 6379, service: "Redis", risk: "critical" },
+      { port: 27017, service: "MongoDB", risk: "critical" },
     ];
 
     const assets: SurfaceAsset[] = [];
@@ -116,21 +124,24 @@ export class AttackSurfaceMapper {
     for (const svc of commonServices) {
       assets.push({
         id: this.generateId(),
-        type: 'service',
+        type: "service",
         identifier: `${target}:${svc.port}`,
         firstSeen: now,
         lastSeen: now,
         attributes: {
           port: svc.port,
           service: svc.service,
-          protocol: 'TCP'
+          protocol: "TCP",
         },
-        risks: [{
-          id: this.generateId(),
-          category: 'exposure',
-          score: svc.risk === 'critical' ? 9 : svc.risk === 'high' ? 7 : svc.risk === 'medium' ? 5 : 3,
-          factors: [`${svc.service} exposed on port ${svc.port}`]
-        }]
+        risks: [
+          {
+            id: this.generateId(),
+            category: "exposure",
+            score:
+              svc.risk === "critical" ? 9 : svc.risk === "high" ? 7 : svc.risk === "medium" ? 5 : 3,
+            factors: [`${svc.service} exposed on port ${svc.port}`],
+          },
+        ],
       });
     }
 
@@ -144,29 +155,34 @@ export class AttackSurfaceMapper {
     const now = new Date();
     const expiryDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
 
-    return [{
-      id: this.generateId(),
-      type: 'certificate',
-      identifier: `*.${target}`,
-      firstSeen: now,
-      lastSeen: now,
-      attributes: {
-        issuer: 'Let\'s Encrypt',
-        validFrom: new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000),
-        validTo: expiryDate,
-        keySize: 2048,
-        signatureAlgorithm: 'SHA256withRSA',
-        subjectAlternativeNames: [target, `*.${target}`]
+    return [
+      {
+        id: this.generateId(),
+        type: "certificate",
+        identifier: `*.${target}`,
+        firstSeen: now,
+        lastSeen: now,
+        attributes: {
+          issuer: "Let's Encrypt",
+          validFrom: new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000),
+          validTo: expiryDate,
+          keySize: 2048,
+          signatureAlgorithm: "SHA256withRSA",
+          subjectAlternativeNames: [target, `*.${target}`],
+        },
+        risks:
+          expiryDate.getTime() - now.getTime() < 30 * 24 * 60 * 60 * 1000
+            ? [
+                {
+                  id: this.generateId(),
+                  category: "certificate",
+                  score: 6,
+                  factors: ["Certificate expiring soon"],
+                },
+              ]
+            : [],
       },
-      risks: expiryDate.getTime() - now.getTime() < 30 * 24 * 60 * 60 * 1000
-        ? [{
-            id: this.generateId(),
-            category: 'certificate',
-            score: 6,
-            factors: ['Certificate expiring soon']
-          }]
-        : []
-    }];
+    ];
   }
 
   /**
@@ -176,19 +192,19 @@ export class AttackSurfaceMapper {
     const exposures: Exposure[] = [];
 
     for (const asset of assets) {
-      if (asset.type === 'service') {
-        const port = asset.attributes['port'] as number;
-        const service = asset.attributes['service'] as string;
+      if (asset.type === "service") {
+        const port = asset.attributes["port"] as number;
+        const service = asset.attributes["service"] as string;
 
         // Check for dangerous exposed services
         if ([3306, 5432, 6379, 27017].includes(port)) {
           exposures.push({
             id: this.generateId(),
             assetId: asset.id,
-            type: 'open-port',
-            severity: 'critical',
+            type: "open-port",
+            severity: "critical",
             description: `Database service ${service} exposed to internet on port ${port}`,
-            remediation: `Restrict access to ${service} using firewall rules and VPN`
+            remediation: `Restrict access to ${service} using firewall rules and VPN`,
           });
         }
 
@@ -197,22 +213,22 @@ export class AttackSurfaceMapper {
           exposures.push({
             id: this.generateId(),
             assetId: asset.id,
-            type: 'misconfiguration',
-            severity: 'medium',
-            description: 'HTTP service without HTTPS redirect',
-            remediation: 'Configure automatic HTTPS redirect'
+            type: "misconfiguration",
+            severity: "medium",
+            description: "HTTP service without HTTPS redirect",
+            remediation: "Configure automatic HTTPS redirect",
           });
         }
       }
 
-      if (asset.type === 'certificate' && asset.risks.length > 0) {
+      if (asset.type === "certificate" && asset.risks.length > 0) {
         exposures.push({
           id: this.generateId(),
           assetId: asset.id,
-          type: 'misconfiguration',
-          severity: 'medium',
-          description: 'SSL/TLS certificate expiring soon',
-          remediation: 'Renew SSL/TLS certificate before expiry'
+          type: "misconfiguration",
+          severity: "medium",
+          description: "SSL/TLS certificate expiring soon",
+          remediation: "Renew SSL/TLS certificate before expiry",
         });
       }
     }
@@ -225,13 +241,15 @@ export class AttackSurfaceMapper {
    */
   private calculateRiskScore(exposures: Exposure[]): number {
     const severityScores: Record<string, number> = {
-      'critical': 10,
-      'high': 7,
-      'medium': 4,
-      'low': 1
+      critical: 10,
+      high: 7,
+      medium: 4,
+      low: 1,
     };
 
-    if (exposures.length === 0) {return 0;}
+    if (exposures.length === 0) {
+      return 0;
+    }
 
     const totalScore = exposures.reduce((sum, exp) => {
       return sum + (severityScores[exp.severity] || 0);
@@ -244,7 +262,7 @@ export class AttackSurfaceMapper {
    * Discover cloud assets
    */
   async discoverCloudAssets(
-    cloudProvider: 'aws' | 'azure' | 'gcp',
+    cloudProvider: "aws" | "azure" | "gcp",
     config: Record<string, string>
   ): Promise<SurfaceAsset[]> {
     // Simulated cloud asset discovery
@@ -253,54 +271,54 @@ export class AttackSurfaceMapper {
     return [
       {
         id: this.generateId(),
-        type: 'cloud-resource',
+        type: "cloud-resource",
         identifier: `${cloudProvider}://storage-bucket-001`,
         firstSeen: now,
         lastSeen: now,
         attributes: {
           provider: cloudProvider,
-          resourceType: 'storage',
-          region: 'us-east-1',
-          publicAccess: true
+          resourceType: "storage",
+          region: "us-east-1",
+          publicAccess: true,
         },
-        risks: [{
-          id: this.generateId(),
-          category: 'cloud',
-          score: 8,
-          factors: ['Public storage bucket detected']
-        }]
+        risks: [
+          {
+            id: this.generateId(),
+            category: "cloud",
+            score: 8,
+            factors: ["Public storage bucket detected"],
+          },
+        ],
       },
       {
         id: this.generateId(),
-        type: 'cloud-resource',
+        type: "cloud-resource",
         identifier: `${cloudProvider}://compute-instance-001`,
         firstSeen: now,
         lastSeen: now,
         attributes: {
           provider: cloudProvider,
-          resourceType: 'compute',
-          region: 'us-east-1',
-          publicIP: '203.0.113.1'
+          resourceType: "compute",
+          region: "us-east-1",
+          publicIP: "203.0.113.1",
         },
-        risks: []
-      }
+        risks: [],
+      },
     ];
   }
 
   /**
    * Discover API endpoints
    */
-  async discoverAPIEndpoints(
-    baseUrl: string
-  ): Promise<SurfaceAsset[]> {
+  async discoverAPIEndpoints(baseUrl: string): Promise<SurfaceAsset[]> {
     const commonEndpoints = [
-      '/api/v1/users',
-      '/api/v1/auth',
-      '/api/v1/admin',
-      '/api/health',
-      '/graphql',
-      '/swagger.json',
-      '/openapi.json'
+      "/api/v1/users",
+      "/api/v1/auth",
+      "/api/v1/admin",
+      "/api/health",
+      "/graphql",
+      "/swagger.json",
+      "/openapi.json",
     ];
 
     const now = new Date();
@@ -309,23 +327,26 @@ export class AttackSurfaceMapper {
     for (const endpoint of commonEndpoints) {
       assets.push({
         id: this.generateId(),
-        type: 'application',
+        type: "application",
         identifier: `${baseUrl}${endpoint}`,
         firstSeen: now,
         lastSeen: now,
         attributes: {
           endpoint,
-          method: 'GET',
-          authenticated: endpoint.includes('admin')
+          method: "GET",
+          authenticated: endpoint.includes("admin"),
         },
-        risks: endpoint.includes('swagger') || endpoint.includes('openapi')
-          ? [{
-              id: this.generateId(),
-              category: 'information-disclosure',
-              score: 5,
-              factors: ['API documentation publicly accessible']
-            }]
-          : []
+        risks:
+          endpoint.includes("swagger") || endpoint.includes("openapi")
+            ? [
+                {
+                  id: this.generateId(),
+                  category: "information-disclosure",
+                  score: 5,
+                  factors: ["API documentation publicly accessible"],
+                },
+              ]
+            : [],
       });
     }
 

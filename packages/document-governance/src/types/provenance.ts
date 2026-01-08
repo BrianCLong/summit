@@ -2,29 +2,29 @@
  * AI Provenance and Metadata Type Definitions
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // Creation Source Schema
-export const CreationSourceSchema = z.enum(['human', 'ai', 'hybrid', 'automated', 'imported']);
+export const CreationSourceSchema = z.enum(["human", "ai", "hybrid", "automated", "imported"]);
 
 export type CreationSource = z.infer<typeof CreationSourceSchema>;
 
 // AI Model Schema
 export const AIModelSchema = z.enum([
-  'gpt-4',
-  'gpt-4-turbo',
-  'gpt-4o',
-  'gpt-3.5-turbo',
-  'claude-3-opus',
-  'claude-3-sonnet',
-  'claude-3-haiku',
-  'claude-3.5-sonnet',
-  'claude-code',
-  'gemini-pro',
-  'gemini-ultra',
-  'llama-3',
-  'mistral-large',
-  'other',
+  "gpt-4",
+  "gpt-4-turbo",
+  "gpt-4o",
+  "gpt-3.5-turbo",
+  "claude-3-opus",
+  "claude-3-sonnet",
+  "claude-3-haiku",
+  "claude-3.5-sonnet",
+  "claude-code",
+  "gemini-pro",
+  "gemini-ultra",
+  "llama-3",
+  "mistral-large",
+  "other",
 ]);
 
 export type AIModel = z.infer<typeof AIModelSchema>;
@@ -54,12 +54,16 @@ export const AIProvenanceMetadataSchema = z.object({
   source_documents: z.array(z.string()).default([]),
   source_urls: z.array(z.string().url()).default([]),
   retrieval_augmented: z.boolean().default(false),
-  rag_sources: z.array(z.object({
-    source_type: z.enum(['document', 'database', 'api', 'web', 'knowledge_base']),
-    source_id: z.string(),
-    source_name: z.string(),
-    relevance_score: z.number().optional(),
-  })).default([]),
+  rag_sources: z
+    .array(
+      z.object({
+        source_type: z.enum(["document", "database", "api", "web", "knowledge_base"]),
+        source_id: z.string(),
+        source_name: z.string(),
+        relevance_score: z.number().optional(),
+      })
+    )
+    .default([]),
   reviewed_by_human: z.boolean().default(false),
   human_reviewer_id: z.string().optional(),
   human_reviewer_role: z.string().optional(),
@@ -81,21 +85,27 @@ export type AIProvenanceMetadata = z.infer<typeof AIProvenanceMetadataSchema>;
 
 // Content Extraction Metadata Schema
 export const ContentExtractionMetadataSchema = z.object({
-  extraction_method: z.enum(['manual', 'ocr', 'nlp', 'structured_extraction', 'api']),
+  extraction_method: z.enum(["manual", "ocr", "nlp", "structured_extraction", "api"]),
   source_format: z.string(),
   extraction_timestamp: z.string().datetime(),
   extraction_confidence: z.number().min(0).max(1).optional(),
-  extracted_fields: z.array(z.object({
-    field_name: z.string(),
-    field_value: z.any(),
-    confidence: z.number().min(0).max(1).optional(),
-    source_location: z.string().optional(),
-  })),
-  extraction_errors: z.array(z.object({
-    field_name: z.string().optional(),
-    error_type: z.string(),
-    error_message: z.string(),
-  })).default([]),
+  extracted_fields: z.array(
+    z.object({
+      field_name: z.string(),
+      field_value: z.any(),
+      confidence: z.number().min(0).max(1).optional(),
+      source_location: z.string().optional(),
+    })
+  ),
+  extraction_errors: z
+    .array(
+      z.object({
+        field_name: z.string().optional(),
+        error_type: z.string(),
+        error_message: z.string(),
+      })
+    )
+    .default([]),
 });
 
 export type ContentExtractionMetadata = z.infer<typeof ContentExtractionMetadataSchema>;
@@ -105,14 +115,14 @@ export const DocumentTransformationSchema = z.object({
   id: z.string().uuid(),
   document_id: z.string().uuid(),
   transformation_type: z.enum([
-    'format_conversion',
-    'content_extraction',
-    'summarization',
-    'translation',
-    'anonymization',
-    'redaction',
-    'enrichment',
-    'classification',
+    "format_conversion",
+    "content_extraction",
+    "summarization",
+    "translation",
+    "anonymization",
+    "redaction",
+    "enrichment",
+    "classification",
   ]),
   input_format: z.string().optional(),
   output_format: z.string().optional(),
@@ -132,7 +142,15 @@ export type DocumentTransformation = z.infer<typeof DocumentTransformationSchema
 export const DataLineageEntrySchema = z.object({
   id: z.string().uuid(),
   document_id: z.string().uuid(),
-  lineage_type: z.enum(['source', 'derived', 'merged', 'split', 'transformed', 'imported', 'exported']),
+  lineage_type: z.enum([
+    "source",
+    "derived",
+    "merged",
+    "split",
+    "transformed",
+    "imported",
+    "exported",
+  ]),
   related_document_id: z.string().uuid().optional(),
   external_source: z.string().optional(),
   external_destination: z.string().optional(),
@@ -168,12 +186,14 @@ export const ProvenanceReportSchema = z.object({
   provenance: AIProvenanceMetadataSchema,
   lineage: z.array(DataLineageEntrySchema),
   transformations: z.array(DocumentTransformationSchema),
-  chain_of_custody: z.array(z.object({
-    action: z.string(),
-    actor: z.string(),
-    timestamp: z.string().datetime(),
-    details: z.string().optional(),
-  })),
+  chain_of_custody: z.array(
+    z.object({
+      action: z.string(),
+      actor: z.string(),
+      timestamp: z.string().datetime(),
+      details: z.string().optional(),
+    })
+  ),
 });
 
 export type ProvenanceReport = z.infer<typeof ProvenanceReportSchema>;

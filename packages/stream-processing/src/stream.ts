@@ -1,19 +1,19 @@
-import { EventEmitter } from 'eventemitter3';
-import { Observable, Subject } from 'rxjs';
-import { StreamMessage } from '@intelgraph/kafka-integration';
-import pino from 'pino';
+import { EventEmitter } from "eventemitter3";
+import { Observable, Subject } from "rxjs";
+import { StreamMessage } from "@intelgraph/kafka-integration";
+import pino from "pino";
 import {
   WindowSpec,
   StreamOperator,
   SideOutputTag,
   BackpressureStrategy,
   ProcessingContext,
-} from './types';
-import { WindowManager } from './window';
-import { WatermarkGenerator } from './watermark';
-import { StateManager } from './state';
+} from "./types";
+import { WindowManager } from "./window";
+import { WatermarkGenerator } from "./watermark";
+import { StateManager } from "./state";
 
-const logger = pino({ name: 'data-stream' });
+const logger = pino({ name: "data-stream" });
 
 /**
  * Core data stream abstraction for stream processing
@@ -57,7 +57,7 @@ export class DataStream<T = unknown> extends EventEmitter {
 
     // Update watermark
     const watermark = this.watermarkGenerator.generate(message.metadata.timestamp);
-    this.emit('watermark', watermark);
+    this.emit("watermark", watermark);
 
     this.currentQueueSize--;
   }
@@ -83,8 +83,8 @@ export class DataStream<T = unknown> extends EventEmitter {
             payload: result,
           });
         } catch (error) {
-          logger.error({ error }, 'Map operation failed');
-          this.emit('error', error);
+          logger.error({ error }, "Map operation failed");
+          this.emit("error", error);
         }
       },
       error: (error) => outputStream.subject.error(error),
@@ -116,8 +116,8 @@ export class DataStream<T = unknown> extends EventEmitter {
             await outputStream.emit(message);
           }
         } catch (error) {
-          logger.error({ error }, 'Filter operation failed');
-          this.emit('error', error);
+          logger.error({ error }, "Filter operation failed");
+          this.emit("error", error);
         }
       },
       error: (error) => outputStream.subject.error(error),
@@ -130,9 +130,7 @@ export class DataStream<T = unknown> extends EventEmitter {
   /**
    * FlatMap transformation
    */
-  flatMap<R>(
-    fn: (value: T, context: ProcessingContext) => R[] | Promise<R[]>
-  ): DataStream<R> {
+  flatMap<R>(fn: (value: T, context: ProcessingContext) => R[] | Promise<R[]>): DataStream<R> {
     const outputStream = new DataStream<R>(`${this.name}-flatMap`);
 
     this.subject.subscribe({
@@ -152,8 +150,8 @@ export class DataStream<T = unknown> extends EventEmitter {
             });
           }
         } catch (error) {
-          logger.error({ error }, 'FlatMap operation failed');
-          this.emit('error', error);
+          logger.error({ error }, "FlatMap operation failed");
+          this.emit("error", error);
         }
       },
       error: (error) => outputStream.subject.error(error),
@@ -202,8 +200,8 @@ export class DataStream<T = unknown> extends EventEmitter {
             });
           }
         } catch (error) {
-          logger.error({ error, operator: operator.name }, 'Operator failed');
-          this.emit('error', error);
+          logger.error({ error, operator: operator.name }, "Operator failed");
+          this.emit("error", error);
         }
       },
       error: (error) => outputStream.subject.error(error),
@@ -266,17 +264,17 @@ export class DataStream<T = unknown> extends EventEmitter {
 
       case BackpressureStrategy.DROP_OLDEST:
         // Drop is handled by the Subject buffer
-        logger.warn('Backpressure: dropping oldest message');
+        logger.warn("Backpressure: dropping oldest message");
         break;
 
       case BackpressureStrategy.DROP_NEWEST:
-        logger.warn('Backpressure: dropping new message');
-        throw new Error('Backpressure: message dropped');
+        logger.warn("Backpressure: dropping new message");
+        throw new Error("Backpressure: message dropped");
 
       case BackpressureStrategy.SAMPLE:
         // Sample every Nth message
         if (Math.random() > 0.1) {
-          throw new Error('Backpressure: message sampled out');
+          throw new Error("Backpressure: message sampled out");
         }
         break;
     }

@@ -4,8 +4,8 @@ import type {
   CandidateScore,
   EntityRecord,
   FeatureContribution,
-} from '../types.js';
-import { extractFeatures } from '../core/features.js';
+} from "../types.js";
+import { extractFeatures } from "../core/features.js";
 
 /**
  * Base scorer interface
@@ -17,16 +17,16 @@ export interface Scorer {
 
 export function buildFeatureContributions(
   features: ERFeatures,
-  weights: ScoringConfig['weights'],
+  weights: ScoringConfig["weights"]
 ): FeatureContribution[] {
   const entries = Object.entries(weights).map(([feature, weight]) => {
     const rawValue = features[feature as keyof ERFeatures];
     const numericValue =
-      typeof rawValue === 'boolean'
+      typeof rawValue === "boolean"
         ? rawValue
           ? 1
           : 0
-        : typeof rawValue === 'number'
+        : typeof rawValue === "number"
           ? rawValue
           : 0;
     return {
@@ -40,7 +40,7 @@ export function buildFeatureContributions(
 
   const total = entries.reduce((sum, entry) => sum + entry.contribution, 0);
   return entries
-    .map(entry => ({
+    .map((entry) => ({
       ...entry,
       normalizedContribution: total > 0 ? entry.contribution / total : 0,
     }))
@@ -88,12 +88,12 @@ export class DeterministicScorer implements Scorer {
       confidence: Number(confidence.toFixed(3)),
       features,
       rationale,
-      method: 'deterministic',
+      method: "deterministic",
     };
   }
 
   getMethod(): string {
-    return 'deterministic';
+    return "deterministic";
   }
 
   private buildRationale(features: ERFeatures): string[] {
@@ -132,7 +132,7 @@ export class DeterministicScorer implements Scorer {
     }
 
     if (features.phoneticSimilarity === 1) {
-      rationale.push('Phonetic signature aligned');
+      rationale.push("Phonetic signature aligned");
     }
 
     return rationale;
@@ -169,12 +169,12 @@ export class ProbabilisticScorer implements Scorer {
       confidence: Number(confidence.toFixed(3)),
       features,
       rationale,
-      method: 'probabilistic',
+      method: "probabilistic",
     };
   }
 
   getMethod(): string {
-    return 'probabilistic';
+    return "probabilistic";
   }
 
   private calculateBaseScore(features: ERFeatures): number {
@@ -199,22 +199,42 @@ export class ProbabilisticScorer implements Scorer {
     const signals: number[] = [];
 
     // Strong signals (high weight)
-    if (features.nameSimilarity > 0.8) {signals.push(1.0);}
-    else if (features.nameSimilarity > 0.6) {signals.push(0.7);}
-    else if (features.nameSimilarity > 0.4) {signals.push(0.4);}
+    if (features.nameSimilarity > 0.8) {
+      signals.push(1.0);
+    } else if (features.nameSimilarity > 0.6) {
+      signals.push(0.7);
+    } else if (features.nameSimilarity > 0.4) {
+      signals.push(0.4);
+    }
 
-    if (features.typeMatch) {signals.push(0.8);}
+    if (features.typeMatch) {
+      signals.push(0.8);
+    }
 
     // Medium signals
-    if (features.deviceIdMatch > 0.5) {signals.push(0.9);}
-    if (features.accountIdMatch > 0.5) {signals.push(0.7);}
-    if (features.geographicProximity > 0.8) {signals.push(0.7);}
-    if (features.semanticSimilarity > 0.5) {signals.push(0.6);}
+    if (features.deviceIdMatch > 0.5) {
+      signals.push(0.9);
+    }
+    if (features.accountIdMatch > 0.5) {
+      signals.push(0.7);
+    }
+    if (features.geographicProximity > 0.8) {
+      signals.push(0.7);
+    }
+    if (features.semanticSimilarity > 0.5) {
+      signals.push(0.6);
+    }
 
     // Weak signals
-    if (features.propertyOverlap > 0.5) {signals.push(0.5);}
-    if (features.temporalCoOccurrence > 0.5) {signals.push(0.5);}
-    if (features.phoneticSimilarity === 1) {signals.push(0.4);}
+    if (features.propertyOverlap > 0.5) {
+      signals.push(0.5);
+    }
+    if (features.temporalCoOccurrence > 0.5) {
+      signals.push(0.5);
+    }
+    if (features.phoneticSimilarity === 1) {
+      signals.push(0.4);
+    }
 
     // Combine signals using noisy-OR model
     let confidence = 0;
@@ -273,7 +293,7 @@ export class HybridScorer implements Scorer {
     // Combine scores: weighted average
     // Use probabilistic confidence to weight the combination
     const weight = probScore.confidence;
-    const combinedScore = (probScore.score * weight) + (detScore.score * (1 - weight));
+    const combinedScore = probScore.score * weight + detScore.score * (1 - weight);
     const combinedConfidence = (probScore.confidence + detScore.score) / 2;
 
     // Merge rationale from both methods
@@ -288,12 +308,12 @@ export class HybridScorer implements Scorer {
       confidence: Number(combinedConfidence.toFixed(3)),
       features: detScore.features,
       rationale,
-      method: 'hybrid',
+      method: "hybrid",
     };
   }
 
   getMethod(): string {
-    return 'hybrid';
+    return "hybrid";
   }
 }
 
@@ -302,11 +322,11 @@ export class HybridScorer implements Scorer {
  */
 export function createScorer(config: ScoringConfig): Scorer {
   switch (config.method) {
-    case 'deterministic':
+    case "deterministic":
       return new DeterministicScorer(config);
-    case 'probabilistic':
+    case "probabilistic":
       return new ProbabilisticScorer(config);
-    case 'hybrid':
+    case "hybrid":
       return new HybridScorer(config);
     default:
       return new HybridScorer(config);

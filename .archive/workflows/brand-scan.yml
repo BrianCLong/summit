@@ -12,7 +12,7 @@ on:
         description: Optional custom allowlist file path
         required: false
         type: string
-        default: ''
+        default: ""
 jobs:
   scan:
     runs-on: ubuntu-latest

@@ -35,22 +35,13 @@ extend type Query {
   ): CognitiveSynthesisResult!
 
   # Memory recall
-  recallCognitiveMemory(
-    tenant: Tenant!
-    memoryQuery: CognitiveMemoryQuery!
-  ): CognitiveMemoryResult!
+  recallCognitiveMemory(tenant: Tenant!, memoryQuery: CognitiveMemoryQuery!): CognitiveMemoryResult!
 
   # Federated learning insights
-  getFederatedLearningInsights(
-    tenant: Tenant!
-    sessionId: String!
-  ): FederatedLearningInsights!
+  getFederatedLearningInsights(tenant: Tenant!, sessionId: String!): FederatedLearningInsights!
 
   # Cognitive performance metrics
-  getCognitivePerformanceMetrics(
-    tenant: Tenant!
-    timeRange: Duration
-  ): CognitivePerformanceMetrics!
+  getCognitivePerformanceMetrics(tenant: Tenant!, timeRange: Duration): CognitivePerformanceMetrics!
 
   # === COGNITIVE MONITORING ===
 
@@ -68,28 +59,16 @@ extend type Mutation {
   # === COGNITIVE CONFIGURATION ===
 
   # Configure cognitive synthesis engine
-  configureCognitiveSynthesis(
-    tenant: Tenant!
-    config: CognitiveSynthesisConfig!
-  ): MutationResult!
+  configureCognitiveSynthesis(tenant: Tenant!, config: CognitiveSynthesisConfig!): MutationResult!
 
   # Configure multi-modal processing
-  configureMultiModalProcessing(
-    tenant: Tenant!
-    config: MultiModalConfig!
-  ): MutationResult!
+  configureMultiModalProcessing(tenant: Tenant!, config: MultiModalConfig!): MutationResult!
 
   # Configure federated learning
-  configureFederatedLearning(
-    tenant: Tenant!
-    config: FederatedLearningConfig!
-  ): MutationResult!
+  configureFederatedLearning(tenant: Tenant!, config: FederatedLearningConfig!): MutationResult!
 
   # Configure cognitive memory
-  configureCognitiveMemory(
-    tenant: Tenant!
-    config: CognitiveMemoryConfig!
-  ): MutationResult!
+  configureCognitiveMemory(tenant: Tenant!, config: CognitiveMemoryConfig!): MutationResult!
 
   # Configure adaptive architecture
   configureAdaptiveArchitecture(
@@ -150,10 +129,7 @@ extend type Mutation {
   # === COGNITIVE CONTROL ===
 
   # Adjust cognitive load
-  adjustCognitiveLoad(
-    tenant: Tenant!
-    loadAdjustment: CognitiveLoadAdjustment!
-  ): MutationResult!
+  adjustCognitiveLoad(tenant: Tenant!, loadAdjustment: CognitiveLoadAdjustment!): MutationResult!
 
   # Redirect cognitive attention
   redirectCognitiveAttention(
@@ -174,16 +150,10 @@ extend type Subscription {
   cognitiveProcessingUpdates(tenant: Tenant!): CognitiveProcessingUpdate!
 
   # Multi-modal session updates
-  multiModalSessionUpdates(
-    tenant: Tenant!
-    sessionId: String!
-  ): MultiModalSessionUpdate!
+  multiModalSessionUpdates(tenant: Tenant!, sessionId: String!): MultiModalSessionUpdate!
 
   # Federated learning progress
-  federatedLearningProgress(
-    tenant: Tenant!
-    sessionId: String!
-  ): FederatedLearningProgress!
+  federatedLearningProgress(tenant: Tenant!, sessionId: String!): FederatedLearningProgress!
 
   # Cognitive load changes
   cognitiveLoadChanges(tenant: Tenant!): CognitiveLoadChange!

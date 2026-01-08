@@ -160,7 +160,7 @@ extend type Mutation {
 // server/src/narrative/track.ts
 export type Change = {
   id: string;
-  kind: 'ins' | 'del' | 'edit';
+  kind: "ins" | "del" | "edit";
   author: string;
   ts: number;
   range: [number, number];
@@ -170,11 +170,9 @@ export function applyChanges(text: string, changes: Change[]) {
   // naive apply; real impl stores ranges anchored by block version
   let t = text;
   for (const c of changes) {
-    if (c.kind === 'ins')
-      t = t.slice(0, c.range[0]) + c.payload.text + t.slice(c.range[0]);
-    if (c.kind === 'del') t = t.slice(0, c.range[0]) + t.slice(c.range[1]);
-    if (c.kind === 'edit')
-      t = t.slice(0, c.range[0]) + c.payload.text + t.slice(c.range[1]);
+    if (c.kind === "ins") t = t.slice(0, c.range[0]) + c.payload.text + t.slice(c.range[0]);
+    if (c.kind === "del") t = t.slice(0, c.range[0]) + t.slice(c.range[1]);
+    if (c.kind === "edit") t = t.slice(0, c.range[0]) + c.payload.text + t.slice(c.range[1]);
   }
   return t;
 }
@@ -185,14 +183,13 @@ export function applyChanges(text: string, changes: Change[]) {
 ```ts
 // server/src/narrative/facts.ts
 export async function bindFacts(blockId: string, claimIds: string[], ctx: any) {
-  const claims = await ctx.driver.executeQuery(
-    'MATCH (c:Claim) WHERE c.id IN $ids RETURN c',
-    { ids: claimIds },
-  );
+  const claims = await ctx.driver.executeQuery("MATCH (c:Claim) WHERE c.id IN $ids RETURN c", {
+    ids: claimIds,
+  });
   const chips = claims.records.map((r: any) => ({
-    claimId: r.get('c').properties.id,
-    confidence: r.get('c').properties.confidence || 0.9,
-    citation: makeCitation(r.get('c').properties),
+    claimId: r.get("c").properties.id,
+    confidence: r.get("c").properties.confidence || 0.9,
+    citation: makeCitation(r.get("c").properties),
   }));
   await ctx.db.insertBindings(blockId, chips);
   await propagateRedactions(blockId, ctx);
@@ -204,7 +201,7 @@ async function propagateRedactions(blockId: string, ctx: any) {
   if (redacted) await ctx.db.markParagraphRedacted(blockId);
 }
 function makeCitation(c: any) {
-  return `${c.source || 'source'}:${c.id}`;
+  return `${c.source || "source"}:${c.id}`;
 }
 ```
 
@@ -217,10 +214,10 @@ export async function buildTimeline(caseId: string, ctx: any) {
              RETURN c.id AS id, c.observedAt AS t, c.predicate AS k, c.object AS o ORDER BY t ASC LIMIT 50000`;
   const res = await ctx.driver.executeQuery(cy, { caseId });
   const events = res.records.map((r: any) => ({
-    id: r.get('id'),
-    t: r.get('t'),
-    kind: r.get('k'),
-    obj: r.get('o'),
+    id: r.get("id"),
+    t: r.get("t"),
+    kind: r.get("k"),
+    obj: r.get("o"),
   }));
   return mergeNear(events, 5 * 60); // 5 min window
 }
@@ -229,8 +226,7 @@ function mergeNear(evts: any[], windowSec: number) {
   let cur: any = null;
   for (const e of evts) {
     if (!cur) cur = e;
-    else if (Math.abs(e.t - cur.t) <= windowSec)
-      cur = { ...e, id: cur.id + ',' + e.id };
+    else if (Math.abs(e.t - cur.t) <= windowSec) cur = { ...e, id: cur.id + "," + e.id };
     else {
       out.push(cur);
       cur = e;
@@ -245,20 +241,16 @@ function mergeNear(evts: any[], windowSec: number) {
 
 ```ts
 // server/src/export/render.ts
-import { createWriteStream } from 'fs';
-import { JSDOM } from 'jsdom';
-export async function renderExport(
-  narrative: any,
-  exhibits: any[],
-  fmt: 'pdf' | 'docx',
-) {
+import { createWriteStream } from "fs";
+import { JSDOM } from "jsdom";
+export async function renderExport(narrative: any, exhibits: any[], fmt: "pdf" | "docx") {
   const html = renderHtml(narrative, exhibits);
-  if (fmt === 'pdf') return htmlToPdf(html);
+  if (fmt === "pdf") return htmlToPdf(html);
   return htmlToDocx(html);
 }
 function renderHtml(n: any, ex: any[]) {
   // compose sections, figure numbers, citation anchors, custody appendix
-  return `<html><body><h1>${n.title}</h1>${n.sections.map((s) => `<h2>${s.heading}</h2>${s.blocks.map((b) => `<p>${escape(b.text)} ${b.redacted ? '[REDACTED]' : ''} ${b.facts.map((f: any) => `<sup>[${f.citation}]</sup>`).join('')}</p>`).join('')}`).join('')}</body></html>`;
+  return `<html><body><h1>${n.title}</h1>${n.sections.map((s) => `<h2>${s.heading}</h2>${s.blocks.map((b) => `<p>${escape(b.text)} ${b.redacted ? "[REDACTED]" : ""} ${b.facts.map((f: any) => `<sup>[${f.citation}]</sup>`).join("")}</p>`).join("")}`).join("")}</body></html>`;
 }
 ```
 
@@ -266,7 +258,7 @@ function renderHtml(n: any, ex: any[]) {
 
 ```ts
 // server/src/export/verify.ts
-import crypto from 'crypto';
+import crypto from "crypto";
 export function verifyBundle(bundle: any) {
   // verify each exhibit hash and manifest chain
   return (
@@ -275,7 +267,7 @@ export function verifyBundle(bundle: any) {
   );
 }
 function sha256(b: Buffer) {
-  return crypto.createHash('sha256').update(b).digest('hex');
+  return crypto.createHash("sha256").update(b).digest("hex");
 }
 ```
 
@@ -303,30 +295,30 @@ violation[msg] {
 ```js
 // apps/web/src/features/narrative/jquery-editor.js
 $(function () {
-  $(document).on('mouseup', '.paragraph', function () {
+  $(document).on("mouseup", ".paragraph", function () {
     const sel = window.getSelection().toString();
     if (sel.length > 0) {
-      $('#fact-bind').data('range', sel).show();
+      $("#fact-bind").data("range", sel).show();
     }
   });
-  $('#fact-bind').on('click', function () {
+  $("#fact-bind").on("click", function () {
     const ids = getSelectedClaimIds();
     $.ajax({
-      url: '/graphql',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/graphql",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({
         query: `mutation{ bindFacts(blockId:"${currentBlockId()}", claims:${JSON.stringify(ids)}){ facts{ claimId } } }`,
       }),
     });
   });
-  $(document).on('click', '.approve-doc', function () {
+  $(document).on("click", ".approve-doc", function () {
     $.ajax({
-      url: '/graphql',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/graphql",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({
-        query: `mutation{ narrativeApprove(id:"${$('#nid').val()}") }`,
+        query: `mutation{ narrativeApprove(id:"${$("#nid").val()}") }`,
       }),
     });
   });
@@ -338,14 +330,14 @@ $(function () {
 ```js
 // apps/web/src/features/timeline/jquery-timeline.js
 $(function () {
-  $('#timeline-zoom').on('input', function () {
-    $('#timeline').attr('data-zoom', this.value);
+  $("#timeline-zoom").on("input", function () {
+    $("#timeline").attr("data-zoom", this.value);
   });
-  $('#rebuild-timeline').on('click', function () {
+  $("#rebuild-timeline").on("click", function () {
     $.ajax({
-      url: '/graphql',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/graphql",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({
         query: `{ timeline(caseId:"${window.caseId}"){ id t kind } }`,
       }),
@@ -357,19 +349,19 @@ $(function () {
 ### 4.10 k6 — Export Load & Narrative Latency
 
 ```js
-import http from 'k6/http';
+import http from "k6/http";
 export const options = {
   vus: 40,
-  duration: '3m',
-  thresholds: { http_req_duration: ['p(95)<5000'] },
+  duration: "3m",
+  thresholds: { http_req_duration: ["p(95)<5000"] },
 };
 export default function () {
   http.post(
-    'http://localhost:4000/graphql',
+    "http://localhost:4000/graphql",
     JSON.stringify({
       query: 'mutation{ exportNarrative(caseId:"c1", fmt:PDF){ id } }',
     }),
-    { headers: { 'Content-Type': 'application/json' } },
+    { headers: { "Content-Type": "application/json" } }
   );
 }
 ```

@@ -10,7 +10,7 @@ jobs:
   test-mock:
     runs-on: ubuntu-latest
     env:
-      FC_MOCK: '1'
+      FC_MOCK: "1"
       REPLAY_ENGINE_URL: http://localhost:8081
     steps:
       - uses: actions/checkout@v4
@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install k6
         run: sudo apt-get update && sudo apt-get install -y k6

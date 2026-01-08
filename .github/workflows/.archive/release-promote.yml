@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release candidate version to promote (e.g., 1.2.3-rc.1)'
+        description: "Release candidate version to promote (e.g., 1.2.3-rc.1)"
         required: true
         type: string
       action:
-        description: 'Action to perform'
+        description: "Action to perform"
         required: true
         type: choice
         options:
@@ -17,13 +17,13 @@ on:
           - promote-100
           - rollback
       rollback_to:
-        description: 'Version to rollback to (only for rollback action)'
+        description: "Version to rollback to (only for rollback action)"
         required: false
         type: string
       skip_evidence:
-        description: 'Skip evidence bundle generation (emergency only)'
+        description: "Skip evidence bundle generation (emergency only)"
         required: false
-        default: 'false'
+        default: "false"
         type: boolean
 
 concurrency:
@@ -194,7 +194,7 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@v4
         with:
-          version: 'v3.11.1'
+          version: "v3.11.1"
 
       - name: Create Kubeconfig
         run: |
@@ -389,7 +389,7 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@v4
         with:
-          version: 'v3.11.1'
+          version: "v3.11.1"
 
       - name: Create Kubeconfig
         run: |
@@ -488,7 +488,7 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@v4
         with:
-          version: 'v3.11.1'
+          version: "v3.11.1"
 
       - name: Create Kubeconfig
         run: |
@@ -576,7 +576,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

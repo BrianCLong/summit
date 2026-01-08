@@ -4,27 +4,18 @@
  * Extracts queries from client code and generates production allowlist
  */
 
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
-const glob = require('glob');
+const fs = require("fs");
+const path = require("path");
+const crypto = require("crypto");
+const glob = require("glob");
 
 // Configuration
-const CLIENT_DIR = process.env.CLIENT_DIR || './client';
-const OUTPUT_FILE =
-  process.env.ALLOWLIST_OUTPUT || './server/config/query-allowlist.json';
-const QUERY_PATTERNS = [
-  '**/*.ts',
-  '**/*.tsx',
-  '**/*.js',
-  '**/*.jsx',
-  '**/*.graphql',
-  '**/*.gql',
-];
+const CLIENT_DIR = process.env.CLIENT_DIR || "./client";
+const OUTPUT_FILE = process.env.ALLOWLIST_OUTPUT || "./server/config/query-allowlist.json";
+const QUERY_PATTERNS = ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "**/*.graphql", "**/*.gql"];
 
 // GraphQL query extraction patterns
-const QUERY_REGEX =
-  /(?:gql`|query\s*=\s*`|mutation\s*=\s*`|graphql\s*`)([\s\S]*?)(?:`)/g;
+const QUERY_REGEX = /(?:gql`|query\s*=\s*`|mutation\s*=\s*`|graphql\s*`)([\s\S]*?)(?:`)/g;
 const TEMPLATE_LITERAL_REGEX = /`((?:[^`\\]|\\.)*)(`)/g;
 
 class QueryAllowlistBuilder {
@@ -37,16 +28,11 @@ class QueryAllowlistBuilder {
    * Extract GraphQL queries from client source files
    */
   extractQueries() {
-    console.log('🔍 Extracting GraphQL queries from client code...');
+    console.log("🔍 Extracting GraphQL queries from client code...");
 
     for (const pattern of QUERY_PATTERNS) {
       const files = glob.sync(path.join(CLIENT_DIR, pattern), {
-        ignore: [
-          '**/node_modules/**',
-          '**/dist/**',
-          '**/*.test.*',
-          '**/*.spec.*',
-        ],
+        ignore: ["**/node_modules/**", "**/dist/**", "**/*.test.*", "**/*.spec.*"],
       });
 
       for (const file of files) {
@@ -62,13 +48,13 @@ class QueryAllowlistBuilder {
    */
   processFile(filePath) {
     try {
-      const content = fs.readFileSync(filePath, 'utf-8');
+      const content = fs.readFileSync(filePath, "utf-8");
       const extension = path.extname(filePath);
 
       // Different extraction strategies based on file type
       switch (extension) {
-        case '.graphql':
-        case '.gql':
+        case ".graphql":
+        case ".gql":
           this.extractFromGraphQLFile(content, filePath);
           break;
         default:
@@ -91,7 +77,7 @@ class QueryAllowlistBuilder {
       if (normalized && this.isValidQuery(normalized)) {
         this.queries.add(normalized);
         console.log(
-          `📝 Found query in ${path.basename(filePath)}: ${this.getQueryName(normalized) || 'Anonymous'}`,
+          `📝 Found query in ${path.basename(filePath)}: ${this.getQueryName(normalized) || "Anonymous"}`
         );
       }
     }
@@ -112,7 +98,7 @@ class QueryAllowlistBuilder {
       if (normalized && this.isValidQuery(normalized)) {
         this.queries.add(normalized);
         console.log(
-          `📝 Found query in ${path.basename(filePath)}: ${this.getQueryName(normalized) || 'Anonymous'}`,
+          `📝 Found query in ${path.basename(filePath)}: ${this.getQueryName(normalized) || "Anonymous"}`
         );
       }
     }
@@ -123,8 +109,8 @@ class QueryAllowlistBuilder {
    */
   splitGraphQLDocument(content) {
     const queries = [];
-    const lines = content.split('\n');
-    let currentQuery = '';
+    const lines = content.split("\n");
+    let currentQuery = "";
     let inOperation = false;
     let braceCount = 0;
 
@@ -132,7 +118,7 @@ class QueryAllowlistBuilder {
       const trimmed = line.trim();
 
       // Skip comments and empty lines
-      if (trimmed.startsWith('#') || !trimmed) {
+      if (trimmed.startsWith("#") || !trimmed) {
         continue;
       }
 
@@ -141,18 +127,16 @@ class QueryAllowlistBuilder {
         if (currentQuery && inOperation) {
           queries.push(currentQuery.trim());
         }
-        currentQuery = line + '\n';
+        currentQuery = line + "\n";
         inOperation = true;
-        braceCount =
-          (line.match(/\{/g) || []).length - (line.match(/\}/g) || []).length;
+        braceCount = (line.match(/\{/g) || []).length - (line.match(/\}/g) || []).length;
       } else if (inOperation) {
-        currentQuery += line + '\n';
-        braceCount +=
-          (line.match(/\{/g) || []).length - (line.match(/\}/g) || []).length;
+        currentQuery += line + "\n";
+        braceCount += (line.match(/\{/g) || []).length - (line.match(/\}/g) || []).length;
 
         if (braceCount === 0) {
           queries.push(currentQuery.trim());
-          currentQuery = '';
+          currentQuery = "";
           inOperation = false;
         }
       }
@@ -169,14 +153,14 @@ class QueryAllowlistBuilder {
    * Normalize GraphQL query for consistent hashing
    */
   normalizeQuery(query) {
-    if (!query || typeof query !== 'string') {
+    if (!query || typeof query !== "string") {
       return null;
     }
 
     return query
-      .replace(/\s+/g, ' ') // Normalize whitespace
-      .replace(/#[^\n\r]*/g, '') // Remove comments
-      .replace(/,(\s*[}\]])/g, '$1') // Remove trailing commas
+      .replace(/\s+/g, " ") // Normalize whitespace
+      .replace(/#[^\n\r]*/g, "") // Remove comments
+      .replace(/,(\s*[}\]])/g, "$1") // Remove trailing commas
       .trim();
   }
 
@@ -185,7 +169,7 @@ class QueryAllowlistBuilder {
    */
   isValidQuery(query) {
     const hasOperation = /^\s*(query|mutation|subscription)/i.test(query);
-    const hasBasicStructure = query.includes('{') && query.includes('}');
+    const hasBasicStructure = query.includes("{") && query.includes("}");
     const minLength = query.length > 10;
 
     return hasOperation && hasBasicStructure && minLength;
@@ -203,10 +187,10 @@ class QueryAllowlistBuilder {
    * Generate SHA-256 hashes for all queries
    */
   generateHashes() {
-    console.log('🔐 Generating SHA-256 hashes...');
+    console.log("🔐 Generating SHA-256 hashes...");
 
     for (const query of this.queries) {
-      const hash = crypto.createHash('sha256').update(query).digest('hex');
+      const hash = crypto.createHash("sha256").update(query).digest("hex");
       this.hashes.add(hash);
     }
 
@@ -219,7 +203,7 @@ class QueryAllowlistBuilder {
   writeAllowlist() {
     const allowlist = {
       generated: new Date().toISOString(),
-      buildSha: process.env.BUILD_SHA || 'unknown',
+      buildSha: process.env.BUILD_SHA || "unknown",
       totalQueries: this.queries.size,
       queries: Array.from(this.queries).sort(),
       hashes: Array.from(this.hashes).sort(),
@@ -236,7 +220,7 @@ class QueryAllowlistBuilder {
     console.log(`✅ Allowlist written to ${OUTPUT_FILE}`);
 
     // Write environment variable file
-    const envFile = OUTPUT_FILE.replace('.json', '.env');
+    const envFile = OUTPUT_FILE.replace(".json", ".env");
     const envContent = `GQL_SHA256_ALLOWLIST=${JSON.stringify(Array.from(this.hashes))}\n`;
     fs.writeFileSync(envFile, envContent);
     console.log(`📄 Environment file written to ${envFile}`);
@@ -253,25 +237,23 @@ class QueryAllowlistBuilder {
       const depth = this.calculateDepth(query);
       if (depth > 10) {
         issues.push(
-          `Query exceeds recommended depth (${depth}): ${this.getQueryName(query) || 'Anonymous'}`,
+          `Query exceeds recommended depth (${depth}): ${this.getQueryName(query) || "Anonymous"}`
         );
       }
     }
 
     // Check for suspicious patterns
-    const suspiciousPatterns = ['__schema', '__type', 'IntrospectionQuery'];
+    const suspiciousPatterns = ["__schema", "__type", "IntrospectionQuery"];
     for (const query of this.queries) {
       for (const pattern of suspiciousPatterns) {
         if (query.includes(pattern)) {
-          issues.push(
-            `Query contains introspection: ${this.getQueryName(query) || 'Anonymous'}`,
-          );
+          issues.push(`Query contains introspection: ${this.getQueryName(query) || "Anonymous"}`);
         }
       }
     }
 
     if (issues.length > 0) {
-      console.warn('⚠️  Validation issues found:');
+      console.warn("⚠️  Validation issues found:");
       for (const issue of issues) {
         console.warn(`   ${issue}`);
       }
@@ -288,10 +270,10 @@ class QueryAllowlistBuilder {
     let maxDepth = 0;
 
     for (const char of query) {
-      if (char === '{') {
+      if (char === "{") {
         depth++;
         maxDepth = Math.max(maxDepth, depth);
-      } else if (char === '}') {
+      } else if (char === "}") {
         depth--;
       }
     }
@@ -303,7 +285,7 @@ class QueryAllowlistBuilder {
    * Main build process
    */
   build() {
-    console.log('🚀 Building GraphQL query allowlist...');
+    console.log("🚀 Building GraphQL query allowlist...");
     console.log(`📂 Client directory: ${CLIENT_DIR}`);
     console.log(`📝 Output file: ${OUTPUT_FILE}`);
 
@@ -312,19 +294,17 @@ class QueryAllowlistBuilder {
     const issues = this.validate();
     this.writeAllowlist();
 
-    console.log('\n📊 Summary:');
+    console.log("\n📊 Summary:");
     console.log(`   Queries found: ${this.queries.size}`);
     console.log(`   Hashes generated: ${this.hashes.size}`);
     console.log(`   Validation issues: ${issues.length}`);
 
     if (issues.length > 0) {
-      console.log(
-        '\n⚠️  Please review validation issues before deploying to production',
-      );
+      console.log("\n⚠️  Please review validation issues before deploying to production");
       process.exit(1);
     }
 
-    console.log('\n✅ Allowlist build complete!');
+    console.log("\n✅ Allowlist build complete!");
   }
 }
 

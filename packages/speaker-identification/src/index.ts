@@ -12,10 +12,10 @@
  */
 
 // Export types
-export * from './types.js';
+export * from "./types.js";
 
 // Export interfaces
-export * from './interfaces.js';
+export * from "./interfaces.js";
 
 // Re-export commonly used items
 export type {
@@ -27,8 +27,8 @@ export type {
   DeepfakeDetectionResult,
   VoiceCloningDetection,
   SpeakerCluster,
-  SpeakerSeparationResult
-} from './types.js';
+  SpeakerSeparationResult,
+} from "./types.js";
 
 export type {
   IVoiceBiometricEnroller,
@@ -41,5 +41,5 @@ export type {
   ISpeakerClusterer,
   ISpeakerSeparator,
   IVoiceEmbeddingExtractor,
-  IVoiceDatabase
-} from './interfaces.js';
+  IVoiceDatabase,
+} from "./interfaces.js";

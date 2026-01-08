@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: 'pnpm' }
+        with: { node-version: 20, cache: "pnpm" }
       - uses: pnpm/action-setup@v4
       - run: pnpm -v && node -v
 
@@ -29,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: 'pnpm' }
+        with: { node-version: 20, cache: "pnpm" }
       - uses: pnpm/action-setup@v4
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint
@@ -40,7 +40,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: 'pnpm' }
+        with: { node-version: 20, cache: "pnpm" }
       - uses: pnpm/action-setup@v4
       - run: pnpm install --frozen-lockfile
       - run: pnpm run typecheck
@@ -51,13 +51,13 @@ jobs:
     services:
       neo4j:
         image: neo4j:5.23-community
-        ports: ['7687:7687', '7474:7474']
+        ports: ["7687:7687", "7474:7474"]
         env:
           NEO4J_AUTH: neo4j/testtest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: 'pnpm' }
+        with: { node-version: 20, cache: "pnpm" }
       - uses: pnpm/action-setup@v4
       - run: pnpm install --frozen-lockfile
       - run: pnpm run test -- --ci --reporters=default --reporters=jest-junit || pnpm run test:ci || true

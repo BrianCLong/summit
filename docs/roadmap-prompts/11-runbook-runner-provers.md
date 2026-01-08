@@ -24,7 +24,7 @@ grep -r "attestation\|proof\|prover" services/*/src/
 
 ## Claude Prompt
 
-```
+````
 You are implementing the Runbook Runner with Proof-Carrying Analytics for IntelGraph Core GA.
 
 CONTEXT:
@@ -246,9 +246,10 @@ SAMPLE RUNBOOK DEFINITION (R1-entity-enrichment.json):
     }
   }
 }
-```
+````
 
-SAMPLE *.PCQ MANIFEST:
+SAMPLE \*.PCQ MANIFEST:
+
 ```json
 {
   "manifestId": "pcq-123",
@@ -261,44 +262,65 @@ SAMPLE *.PCQ MANIFEST:
       "stepId": "query-entities",
       "attestation": {
         "inputs": {},
-        "outputs": [{"id": "e1", "name": "Alice"}, {"id": "e2", "name": "Bob"}],
+        "outputs": [
+          { "id": "e1", "name": "Alice" },
+          { "id": "e2", "name": "Bob" }
+        ],
         "timestamp": "2025-11-29T10:00:05Z",
         "signature": "base64:...",
         "previousAttestationHash": null
       },
       "proofs": {
         "preconditions": [
-          {"prover": "authority:read_entities", "result": "pass", "evidence": "OPA policy allowed"}
+          {
+            "prover": "authority:read_entities",
+            "result": "pass",
+            "evidence": "OPA policy allowed"
+          }
         ]
       }
     },
     {
       "stepId": "fetch-external-data",
       "attestation": {
-        "inputs": [{"id": "e1"}, {"id": "e2"}],
-        "outputs": [{"id": "e1", "email": "alice@example.com"}, {"id": "e2", "email": "bob@example.com"}],
+        "inputs": [{ "id": "e1" }, { "id": "e2" }],
+        "outputs": [
+          { "id": "e1", "email": "alice@example.com" },
+          { "id": "e2", "email": "bob@example.com" }
+        ],
         "timestamp": "2025-11-29T10:00:10Z",
         "signature": "base64:...",
         "previousAttestationHash": "sha256:abc123..."
       },
       "proofs": {
         "preconditions": [
-          {"prover": "license:api_access", "result": "pass", "evidence": "License allows API calls"}
+          {
+            "prover": "license:api_access",
+            "result": "pass",
+            "evidence": "License allows API calls"
+          }
         ]
       }
     },
     {
       "stepId": "update-entities",
       "attestation": {
-        "inputs": [{"id": "e1", "email": "alice@example.com"}, {"id": "e2", "email": "bob@example.com"}],
-        "outputs": {"updated": 2},
+        "inputs": [
+          { "id": "e1", "email": "alice@example.com" },
+          { "id": "e2", "email": "bob@example.com" }
+        ],
+        "outputs": { "updated": 2 },
         "timestamp": "2025-11-29T10:00:15Z",
         "signature": "base64:...",
         "previousAttestationHash": "sha256:def456..."
       },
       "proofs": {
         "preconditions": [
-          {"prover": "authority:write_entities", "result": "pass", "evidence": "OPA policy allowed"}
+          {
+            "prover": "authority:write_entities",
+            "result": "pass",
+            "evidence": "OPA policy allowed"
+          }
         ]
       }
     },
@@ -306,14 +328,14 @@ SAMPLE *.PCQ MANIFEST:
       "stepId": "assert-completeness",
       "attestation": {
         "inputs": {},
-        "outputs": {"completeness": 0.97},
+        "outputs": { "completeness": 0.97 },
         "timestamp": "2025-11-29T10:00:20Z",
         "signature": "base64:...",
         "previousAttestationHash": "sha256:ghi789..."
       },
       "proofs": {
         "postconditions": [
-          {"prover": "kpi:completeness>=0.95", "result": "pass", "evidence": "97% complete"}
+          { "prover": "kpi:completeness>=0.95", "result": "pass", "evidence": "97% complete" }
         ]
       }
     }
@@ -324,18 +346,19 @@ SAMPLE *.PCQ MANIFEST:
 ```
 
 SAMPLE RUNBOOK CONSOLE UI (RunbookConsole.tsx):
+
 ```tsx
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 export function RunbookConsole() {
   const [selectedRunbook, setSelectedRunbook] = useState<string | null>(null);
   const [execution, setExecution] = useState<any>(null);
 
-  const runbooks = ['R1-entity-enrichment', 'R2-relationship-inference', 'R3-weekly-report'];
+  const runbooks = ["R1-entity-enrichment", "R2-relationship-inference", "R3-weekly-report"];
 
   const executeRunbook = async (runbookId: string) => {
-    const res = await fetch('/api/runbooks/execute', {
-      method: 'POST',
+    const res = await fetch("/api/runbooks/execute", {
+      method: "POST",
       body: JSON.stringify({ runbookId, inputs: {} }),
     });
     const data = await res.json();
@@ -347,7 +370,11 @@ export function RunbookConsole() {
       <h2>Runbook Console</h2>
       <select onChange={(e) => setSelectedRunbook(e.target.value)}>
         <option>Select runbook</option>
-        {runbooks.map((r) => <option key={r} value={r}>{r}</option>)}
+        {runbooks.map((r) => (
+          <option key={r} value={r}>
+            {r}
+          </option>
+        ))}
       </select>
       <button onClick={() => executeRunbook(selectedRunbook!)}>Execute</button>
 
@@ -355,13 +382,22 @@ export function RunbookConsole() {
         <div>
           <h3>Execution: {execution.executionId}</h3>
           {execution.steps.map((step: any) => (
-            <div key={step.stepId} style={{ border: '1px solid gray', margin: '5px', padding: '10px' }}>
-              <p><strong>{step.stepId}</strong>: {step.status}</p>
-              {step.status === 'done' && <p>✅ Attestation signed</p>}
-              {step.status === 'failed' && <p>❌ Prover failed: {step.error}</p>}
+            <div
+              key={step.stepId}
+              style={{ border: "1px solid gray", margin: "5px", padding: "10px" }}
+            >
+              <p>
+                <strong>{step.stepId}</strong>: {step.status}
+              </p>
+              {step.status === "done" && <p>✅ Attestation signed</p>}
+              {step.status === "failed" && <p>❌ Prover failed: {step.error}</p>}
             </div>
           ))}
-          <button onClick={() => window.location.href = `/api/runbooks/${execution.executionId}/manifest.pcq`}>
+          <button
+            onClick={() =>
+              (window.location.href = `/api/runbooks/${execution.executionId}/manifest.pcq`)
+            }
+          >
             Download *.pcq Manifest
           </button>
         </div>
@@ -377,11 +413,12 @@ Provide:
 (b) DAG runner with topological sort
 (c) Attestation manager (sign & chain)
 (d) Precondition & postcondition provers
-(e) *.pcq manifest builder
+(e) \*.pcq manifest builder
 (f) React components (RunbookConsole, OmbudsReviewQueue)
 (g) CLI verifier tool (pcq-verify)
 (h) Sample runbooks (R1, R2, R3)
 (i) Tests (determinism, prover failures)
+
 ```
 
 ---
@@ -409,3 +446,4 @@ Provide:
 - Proof-carrying code: https://en.wikipedia.org/wiki/Proof-carrying_code
 - DAG execution: https://en.wikipedia.org/wiki/Topological_sorting
 - Ed25519: https://github.com/paulmillr/noble-ed25519
+```

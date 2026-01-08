@@ -7,8 +7,8 @@
  * Based on NIST Post-Quantum Cryptography standards and recommendations.
  */
 
-import * as crypto from 'crypto';
-import * as forge from 'node-forge';
+import * as crypto from "crypto";
+import * as forge from "node-forge";
 
 export interface PQCConfig {
   algorithm: PQCAlgorithm;
@@ -64,14 +64,14 @@ export interface PQCEncryptedData {
 }
 
 export enum PQCAlgorithm {
-  CRYSTALS_KYBER = 'crystals-kyber',
-  CRYSTALS_DILITHIUM = 'crystals-dilithium',
-  FALCON = 'falcon',
-  SPHINCS_PLUS = 'sphincs-plus',
-  NTRU = 'ntru',
-  SABER = 'saber',
-  FRODO_KEM = 'frodo-kem',
-  BIKE = 'bike',
+  CRYSTALS_KYBER = "crystals-kyber",
+  CRYSTALS_DILITHIUM = "crystals-dilithium",
+  FALCON = "falcon",
+  SPHINCS_PLUS = "sphincs-plus",
+  NTRU = "ntru",
+  SABER = "saber",
+  FRODO_KEM = "frodo-kem",
+  BIKE = "bike",
 }
 
 export enum PQCSecurityLevel {
@@ -125,18 +125,10 @@ export class PostQuantumCryptoEngine {
     const matrixA = this.generateRandomMatrix(parameters.n, parameters.q);
 
     // Generate error vector
-    const errorVector = this.generateErrorVector(
-      parameters.n,
-      parameters.sigma,
-    );
+    const errorVector = this.generateErrorVector(parameters.n, parameters.sigma);
 
     // Public key = A * secret + error (mod q)
-    const publicKeyData = this.matrixVectorMultiply(
-      matrixA,
-      secretKey,
-      errorVector,
-      parameters.q,
-    );
+    const publicKeyData = this.matrixVectorMultiply(matrixA, secretKey, errorVector, parameters.q);
 
     const keyPair: PQCKeyPair = {
       publicKey: {
@@ -243,11 +235,7 @@ export class PostQuantumCryptoEngine {
     const publicSeed = crypto.randomBytes(32);
 
     // Compute public key root
-    const publicRoot = this.computeSphincsRoot(
-      secretSeed,
-      publicSeed,
-      parameters,
-    );
+    const publicRoot = this.computeSphincsRoot(secretSeed, publicSeed, parameters);
 
     const keyPair: PQCKeyPair = {
       publicKey: {
@@ -276,7 +264,7 @@ export class PostQuantumCryptoEngine {
   async encrypt(
     data: Buffer,
     publicKey: PQCPublicKey,
-    hybrid: boolean = false,
+    hybrid: boolean = false
   ): Promise<PQCEncryptedData> {
     if (hybrid) {
       return this.hybridEncrypt(data, publicKey);
@@ -295,19 +283,14 @@ export class PostQuantumCryptoEngine {
   /**
    * Decrypt data using post-quantum algorithms
    */
-  async decrypt(
-    encryptedData: PQCEncryptedData,
-    privateKey: PQCPrivateKey,
-  ): Promise<Buffer> {
+  async decrypt(encryptedData: PQCEncryptedData, privateKey: PQCPrivateKey): Promise<Buffer> {
     switch (encryptedData.algorithm) {
       case PQCAlgorithm.CRYSTALS_KYBER:
         return this.kyberDecrypt(encryptedData, privateKey);
       case PQCAlgorithm.NTRU:
         return this.ntruDecrypt(encryptedData, privateKey);
       default:
-        throw new Error(
-          `Decryption not supported for ${encryptedData.algorithm}`,
-        );
+        throw new Error(`Decryption not supported for ${encryptedData.algorithm}`);
     }
   }
 
@@ -333,11 +316,7 @@ export class PostQuantumCryptoEngine {
   /**
    * Verify post-quantum digital signature
    */
-  async verify(
-    data: Buffer,
-    signature: PQCSignature,
-    publicKey: PQCPublicKey,
-  ): Promise<boolean> {
+  async verify(data: Buffer, signature: PQCSignature, publicKey: PQCPublicKey): Promise<boolean> {
     const message = Buffer.concat([data, signature.nonce]);
 
     switch (signature.algorithm) {
@@ -355,47 +334,30 @@ export class PostQuantumCryptoEngine {
   /**
    * Hybrid encryption combining classical and post-quantum
    */
-  private async hybridEncrypt(
-    data: Buffer,
-    publicKey: PQCPublicKey,
-  ): Promise<PQCEncryptedData> {
+  private async hybridEncrypt(data: Buffer, publicKey: PQCPublicKey): Promise<PQCEncryptedData> {
     // Generate symmetric key
     const symmetricKey = crypto.randomBytes(32);
 
     // Encrypt data with AES
-    const cipher = crypto.createCipher('aes-256-gcm', symmetricKey);
+    const cipher = crypto.createCipher("aes-256-gcm", symmetricKey);
     const encryptedData = Buffer.concat([cipher.update(data), cipher.final()]);
     const authTag = cipher.getAuthTag();
 
     // Encrypt symmetric key with PQC
-    const encryptedSymmetricKey = await this.encrypt(
-      symmetricKey,
-      publicKey,
-      false,
-    );
+    const encryptedSymmetricKey = await this.encrypt(symmetricKey, publicKey, false);
 
     return {
       algorithm: publicKey.algorithm,
-      ciphertext: Buffer.concat([
-        encryptedData,
-        authTag,
-        encryptedSymmetricKey.ciphertext,
-      ]),
+      ciphertext: Buffer.concat([encryptedData, authTag, encryptedSymmetricKey.ciphertext]),
       publicKeyFingerprint: publicKey.fingerprint,
-      mac: crypto
-        .createHmac('sha256', symmetricKey)
-        .update(encryptedData)
-        .digest(),
+      mac: crypto.createHmac("sha256", symmetricKey).update(encryptedData).digest(),
     };
   }
 
   /**
    * Kyber encryption implementation
    */
-  private async kyberEncrypt(
-    data: Buffer,
-    publicKey: PQCPublicKey,
-  ): Promise<PQCEncryptedData> {
+  private async kyberEncrypt(data: Buffer, publicKey: PQCPublicKey): Promise<PQCEncryptedData> {
     // Simplified Kyber encryption
     const sharedSecret = crypto.randomBytes(32);
 
@@ -403,7 +365,7 @@ export class PostQuantumCryptoEngine {
     const ciphertext = this.kyberEncapsulate(sharedSecret, publicKey);
 
     // Symmetric encryption of data
-    const cipher = crypto.createCipher('aes-256-gcm', sharedSecret);
+    const cipher = crypto.createCipher("aes-256-gcm", sharedSecret);
     const encryptedData = Buffer.concat([cipher.update(data), cipher.final()]);
     const authTag = cipher.getAuthTag();
 
@@ -411,10 +373,7 @@ export class PostQuantumCryptoEngine {
       algorithm: PQCAlgorithm.CRYSTALS_KYBER,
       ciphertext: Buffer.concat([ciphertext, encryptedData, authTag]),
       publicKeyFingerprint: publicKey.fingerprint,
-      mac: crypto
-        .createHmac('sha256', sharedSecret)
-        .update(encryptedData)
-        .digest(),
+      mac: crypto.createHmac("sha256", sharedSecret).update(encryptedData).digest(),
     };
   }
 
@@ -423,7 +382,7 @@ export class PostQuantumCryptoEngine {
    */
   private async kyberDecrypt(
     encryptedData: PQCEncryptedData,
-    privateKey: PQCPrivateKey,
+    privateKey: PQCPrivateKey
   ): Promise<Buffer> {
     // Extract components
     const kemCiphertext = encryptedData.ciphertext.slice(0, 1088); // Kyber-768 ciphertext size
@@ -434,13 +393,10 @@ export class PostQuantumCryptoEngine {
     const sharedSecret = this.kyberDecapsulate(kemCiphertext, privateKey);
 
     // Symmetric decryption
-    const decipher = crypto.createDecipher('aes-256-gcm', sharedSecret);
+    const decipher = crypto.createDecipher("aes-256-gcm", sharedSecret);
     decipher.setAuthTag(authTag);
 
-    return Buffer.concat([
-      decipher.update(symmetricCiphertext),
-      decipher.final(),
-    ]);
+    return Buffer.concat([decipher.update(symmetricCiphertext), decipher.final()]);
   }
 
   // Helper methods for cryptographic operations
@@ -493,7 +449,7 @@ export class PostQuantumCryptoEngine {
       .map(() =>
         Array(n)
           .fill(0)
-          .map(() => Math.floor(Math.random() * q)),
+          .map(() => Math.floor(Math.random() * q))
       );
   }
 
@@ -515,21 +471,16 @@ export class PostQuantumCryptoEngine {
     matrix: number[][],
     vector: number[],
     error: number[],
-    q: number,
+    q: number
   ): number[] {
     return matrix.map(
-      (row, i) =>
-        (row.reduce((sum, val, j) => sum + val * vector[j], 0) + error[i]) % q,
+      (row, i) => (row.reduce((sum, val, j) => sum + val * vector[j], 0) + error[i]) % q
     );
   }
 
   private calculateFingerprint(data: number[] | Buffer): string {
     const buffer = Buffer.isBuffer(data) ? data : Buffer.from(data);
-    return crypto
-      .createHash('sha256')
-      .update(buffer)
-      .digest('hex')
-      .substring(0, 16);
+    return crypto.createHash("sha256").update(buffer).digest("hex").substring(0, 16);
   }
 
   private generateNTRUBasis(n: number): {
@@ -552,62 +503,43 @@ export class PostQuantumCryptoEngine {
   private computeSphincsRoot(
     secretSeed: Buffer,
     publicSeed: Buffer,
-    parameters: PQCParameters,
+    parameters: PQCParameters
   ): Buffer {
     // Simplified SPHINCS+ root computation
     const combined = Buffer.concat([secretSeed, publicSeed]);
-    return crypto.createHash('sha256').update(combined).digest();
+    return crypto.createHash("sha256").update(combined).digest();
   }
 
-  private kyberEncapsulate(
-    sharedSecret: Buffer,
-    publicKey: PQCPublicKey,
-  ): Buffer {
+  private kyberEncapsulate(sharedSecret: Buffer, publicKey: PQCPublicKey): Buffer {
     // Simplified key encapsulation
     const combined = Buffer.concat([sharedSecret, publicKey.keyData]);
-    return crypto.createHash('sha512').update(combined).digest();
+    return crypto.createHash("sha512").update(combined).digest();
   }
 
-  private kyberDecapsulate(
-    ciphertext: Buffer,
-    privateKey: PQCPrivateKey,
-  ): Buffer {
+  private kyberDecapsulate(ciphertext: Buffer, privateKey: PQCPrivateKey): Buffer {
     // Simplified key decapsulation
     const combined = Buffer.concat([ciphertext, privateKey.keyData]);
-    return crypto.createHash('sha256').update(combined).digest();
+    return crypto.createHash("sha256").update(combined).digest();
   }
 
-  private ntruEncrypt(
-    data: Buffer,
-    publicKey: PQCPublicKey,
-  ): Promise<PQCEncryptedData> {
+  private ntruEncrypt(data: Buffer, publicKey: PQCPublicKey): Promise<PQCEncryptedData> {
     // Placeholder NTRU encryption
     return Promise.resolve({
       algorithm: PQCAlgorithm.NTRU,
       ciphertext: data, // Simplified
       publicKeyFingerprint: publicKey.fingerprint,
-      mac: crypto.createHash('sha256').update(data).digest(),
+      mac: crypto.createHash("sha256").update(data).digest(),
     });
   }
 
-  private ntruDecrypt(
-    encryptedData: PQCEncryptedData,
-    privateKey: PQCPrivateKey,
-  ): Promise<Buffer> {
+  private ntruDecrypt(encryptedData: PQCEncryptedData, privateKey: PQCPrivateKey): Promise<Buffer> {
     // Placeholder NTRU decryption
     return Promise.resolve(encryptedData.ciphertext);
   }
 
-  private dilithiumSign(
-    message: Buffer,
-    privateKey: PQCPrivateKey,
-    nonce: Buffer,
-  ): PQCSignature {
+  private dilithiumSign(message: Buffer, privateKey: PQCPrivateKey, nonce: Buffer): PQCSignature {
     // Simplified Dilithium signing
-    const signature = crypto
-      .createHmac('sha256', privateKey.keyData)
-      .update(message)
-      .digest();
+    const signature = crypto.createHmac("sha256", privateKey.keyData).update(message).digest();
 
     return {
       algorithm: PQCAlgorithm.CRYSTALS_DILITHIUM,
@@ -621,33 +553,23 @@ export class PostQuantumCryptoEngine {
   private dilithiumVerify(
     message: Buffer,
     signature: PQCSignature,
-    publicKey: PQCPublicKey,
+    publicKey: PQCPublicKey
   ): boolean {
     // Simplified Dilithium verification
     try {
       const privateKey = this.keyStore.get(publicKey.fingerprint)?.privateKey;
       if (!privateKey) return false;
 
-      const expectedSig = crypto
-        .createHmac('sha256', privateKey.keyData)
-        .update(message)
-        .digest();
+      const expectedSig = crypto.createHmac("sha256", privateKey.keyData).update(message).digest();
       return signature.signature.equals(expectedSig);
     } catch {
       return false;
     }
   }
 
-  private falconSign(
-    message: Buffer,
-    privateKey: PQCPrivateKey,
-    nonce: Buffer,
-  ): PQCSignature {
+  private falconSign(message: Buffer, privateKey: PQCPrivateKey, nonce: Buffer): PQCSignature {
     // Simplified Falcon signing
-    const signature = crypto
-      .createHmac('sha512', privateKey.keyData)
-      .update(message)
-      .digest();
+    const signature = crypto.createHmac("sha512", privateKey.keyData).update(message).digest();
 
     return {
       algorithm: PQCAlgorithm.FALCON,
@@ -658,34 +580,23 @@ export class PostQuantumCryptoEngine {
     };
   }
 
-  private falconVerify(
-    message: Buffer,
-    signature: PQCSignature,
-    publicKey: PQCPublicKey,
-  ): boolean {
+  private falconVerify(message: Buffer, signature: PQCSignature, publicKey: PQCPublicKey): boolean {
     // Simplified Falcon verification
     try {
       const privateKey = this.keyStore.get(publicKey.fingerprint)?.privateKey;
       if (!privateKey) return false;
 
-      const expectedSig = crypto
-        .createHmac('sha512', privateKey.keyData)
-        .update(message)
-        .digest();
+      const expectedSig = crypto.createHmac("sha512", privateKey.keyData).update(message).digest();
       return signature.signature.equals(expectedSig);
     } catch {
       return false;
     }
   }
 
-  private sphincsPlusSign(
-    message: Buffer,
-    privateKey: PQCPrivateKey,
-    nonce: Buffer,
-  ): PQCSignature {
+  private sphincsPlusSign(message: Buffer, privateKey: PQCPrivateKey, nonce: Buffer): PQCSignature {
     // Simplified SPHINCS+ signing
     const signature = crypto
-      .createHash('sha256')
+      .createHash("sha256")
       .update(Buffer.concat([privateKey.keyData, message, nonce]))
       .digest();
 
@@ -701,7 +612,7 @@ export class PostQuantumCryptoEngine {
   private sphincsPlusVerify(
     message: Buffer,
     signature: PQCSignature,
-    publicKey: PQCPublicKey,
+    publicKey: PQCPublicKey
   ): boolean {
     // Simplified SPHINCS+ verification
     try {
@@ -709,7 +620,7 @@ export class PostQuantumCryptoEngine {
       if (!privateKey) return false;
 
       const expectedSig = crypto
-        .createHash('sha256')
+        .createHash("sha256")
         .update(Buffer.concat([privateKey.keyData, message, signature.nonce]))
         .digest();
       return signature.signature.equals(expectedSig);
@@ -725,7 +636,7 @@ export class PostQuantumCryptoEngine {
         return fingerprint;
       }
     }
-    throw new Error('Public key not found for private key');
+    throw new Error("Public key not found for private key");
   }
 
   /**
@@ -761,27 +672,27 @@ export class PostQuantumCryptoEngine {
       [PQCAlgorithm.CRYSTALS_KYBER]: {
         resistant: true,
         securityLevel: 3,
-        notes: ['NIST standard', 'Lattice-based', 'Key encapsulation'],
+        notes: ["NIST standard", "Lattice-based", "Key encapsulation"],
       },
       [PQCAlgorithm.CRYSTALS_DILITHIUM]: {
         resistant: true,
         securityLevel: 3,
-        notes: ['NIST standard', 'Lattice-based', 'Digital signature'],
+        notes: ["NIST standard", "Lattice-based", "Digital signature"],
       },
       [PQCAlgorithm.FALCON]: {
         resistant: true,
         securityLevel: 5,
-        notes: ['NIST standard', 'Compact signatures', 'NTRU-based'],
+        notes: ["NIST standard", "Compact signatures", "NTRU-based"],
       },
       [PQCAlgorithm.SPHINCS_PLUS]: {
         resistant: true,
         securityLevel: 5,
-        notes: ['NIST standard', 'Hash-based', 'Stateless signatures'],
+        notes: ["NIST standard", "Hash-based", "Stateless signatures"],
       },
       [PQCAlgorithm.NTRU]: {
         resistant: true,
         securityLevel: 3,
-        notes: ['Lattice-based', 'Fast operations', 'Under evaluation'],
+        notes: ["Lattice-based", "Fast operations", "Under evaluation"],
       },
     };
 
@@ -789,7 +700,7 @@ export class PostQuantumCryptoEngine {
       assessments[algorithm] || {
         resistant: false,
         securityLevel: 0,
-        notes: ['Unknown algorithm'],
+        notes: ["Unknown algorithm"],
       }
     );
   }

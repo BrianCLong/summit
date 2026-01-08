@@ -1,9 +1,9 @@
-import { config } from 'dotenv';
-import { Pool, PoolClient } from 'pg';
+import { config } from "dotenv";
+import { Pool, PoolClient } from "pg";
 
 config();
 
-type Mode = 'anonymize' | 'delete';
+type Mode = "anonymize" | "delete";
 
 interface SubjectIdentifier {
   userId?: string;
@@ -25,31 +25,31 @@ function parseArgs(): SubjectIdentifier {
   const args = process.argv.slice(2);
   let userId: string | undefined;
   let email: string | undefined;
-  let mode: Mode = 'anonymize';
+  let mode: Mode = "anonymize";
   let dryRun = false;
 
   for (let i = 0; i < args.length; i += 1) {
     const arg = args[i];
     const next = args[i + 1];
-    if (arg === '--user-id' && next) {
+    if (arg === "--user-id" && next) {
       userId = next;
       i += 1;
-    } else if (arg === '--email' && next) {
+    } else if (arg === "--email" && next) {
       email = next;
       i += 1;
-    } else if (arg === '--mode' && next) {
-      if (next !== 'anonymize' && next !== 'delete') {
-        throw new Error('Mode must be anonymize or delete');
+    } else if (arg === "--mode" && next) {
+      if (next !== "anonymize" && next !== "delete") {
+        throw new Error("Mode must be anonymize or delete");
       }
       mode = next;
       i += 1;
-    } else if (arg === '--dry-run') {
+    } else if (arg === "--dry-run") {
       dryRun = true;
     }
   }
 
   if (!userId && !email) {
-    throw new Error('Provide --user-id or --email');
+    throw new Error("Provide --user-id or --email");
   }
 
   return { userId, email, mode, dryRun };
@@ -61,13 +61,13 @@ function buildPool(): Pool {
   if (connectionString) {
     return new Pool({
       connectionString,
-      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
+      ssl: process.env.DB_SSL === "true" ? { rejectUnauthorized: false } : undefined,
     });
   }
 
   const { DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME } = process.env;
   if (!DB_HOST || !DB_USER || !DB_NAME) {
-    throw new Error('Set DATABASE_URL or DB_HOST/DB_USER/DB_NAME for PostgreSQL access');
+    throw new Error("Set DATABASE_URL or DB_HOST/DB_USER/DB_NAME for PostgreSQL access");
   }
 
   return new Pool({
@@ -76,7 +76,7 @@ function buildPool(): Pool {
     user: DB_USER,
     password: DB_PASSWORD,
     database: DB_NAME,
-    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
+    ssl: process.env.DB_SSL === "true" ? { rejectUnauthorized: false } : undefined,
   });
 }
 
@@ -87,7 +87,7 @@ async function resolveUserId(pool: Pool, identifier: SubjectIdentifier): Promise
       `SELECT id FROM users WHERE ($1::uuid IS NOT NULL AND id = $1::uuid)
         OR ($2::text IS NOT NULL AND lower(email) = lower($2::text))
         LIMIT 1`,
-      [identifier.userId ?? null, identifier.email ?? null],
+      [identifier.userId ?? null, identifier.email ?? null]
     );
     return (result.rows[0]?.id as string | undefined) ?? null;
   } finally {
@@ -100,16 +100,28 @@ async function countRows(client: PoolClient, query: string, params: unknown[]): 
   return Number(rows[0]?.count ?? 0);
 }
 
-async function anonymizeUser(client: PoolClient, userId: string, dryRun: boolean): Promise<OperationResult> {
+async function anonymizeUser(
+  client: PoolClient,
+  userId: string,
+  dryRun: boolean
+): Promise<OperationResult> {
   const placeholderEmail = `deleted+${userId}@example.com`;
 
-  const roleCount = await countRows(client, 'SELECT COUNT(*) AS count FROM user_roles WHERE user_id = $1', [userId]);
+  const roleCount = await countRows(
+    client,
+    "SELECT COUNT(*) AS count FROM user_roles WHERE user_id = $1",
+    [userId]
+  );
   const impersonationCount = await countRows(
     client,
-    'SELECT COUNT(*) AS count FROM user_impersonations WHERE admin_user_id = $1 OR target_user_id = $1',
-    [userId],
+    "SELECT COUNT(*) AS count FROM user_impersonations WHERE admin_user_id = $1 OR target_user_id = $1",
+    [userId]
   );
-  const auditCount = await countRows(client, 'SELECT COUNT(*) AS count FROM audit_logs WHERE user_id = $1', [userId]);
+  const auditCount = await countRows(
+    client,
+    "SELECT COUNT(*) AS count FROM audit_logs WHERE user_id = $1",
+    [userId]
+  );
 
   if (dryRun) {
     return {
@@ -121,10 +133,13 @@ async function anonymizeUser(client: PoolClient, userId: string, dryRun: boolean
     };
   }
 
-  await client.query('BEGIN');
+  await client.query("BEGIN");
   try {
-    await client.query('DELETE FROM user_roles WHERE user_id = $1', [userId]);
-    await client.query('DELETE FROM user_impersonations WHERE admin_user_id = $1 OR target_user_id = $1', [userId]);
+    await client.query("DELETE FROM user_roles WHERE user_id = $1", [userId]);
+    await client.query(
+      "DELETE FROM user_impersonations WHERE admin_user_id = $1 OR target_user_id = $1",
+      [userId]
+    );
     await client.query(
       `UPDATE audit_logs
          SET user_id = $1,
@@ -132,7 +147,7 @@ async function anonymizeUser(client: PoolClient, userId: string, dryRun: boolean
              user_agent = NULL,
              metadata = coalesce(metadata, '{}'::jsonb) || jsonb_build_object('subject_redacted', true)
        WHERE user_id = $2`,
-      [userId, userId],
+      [userId, userId]
     );
 
     const userUpdate = await client.query(
@@ -151,10 +166,10 @@ async function anonymizeUser(client: PoolClient, userId: string, dryRun: boolean
              metadata = coalesce(metadata, '{}'::jsonb) || jsonb_build_object('subject_redacted', true),
              updated_at = now()
        WHERE id = $2`,
-      [placeholderEmail, userId],
+      [placeholderEmail, userId]
     );
 
-    await client.query('COMMIT');
+    await client.query("COMMIT");
 
     return {
       userFound: true,
@@ -164,19 +179,31 @@ async function anonymizeUser(client: PoolClient, userId: string, dryRun: boolean
       redactedAuditLogs: auditCount,
     };
   } catch (error) {
-    await client.query('ROLLBACK');
+    await client.query("ROLLBACK");
     throw error;
   }
 }
 
-async function deleteUser(client: PoolClient, userId: string, dryRun: boolean): Promise<OperationResult> {
-  const roleCount = await countRows(client, 'SELECT COUNT(*) AS count FROM user_roles WHERE user_id = $1', [userId]);
+async function deleteUser(
+  client: PoolClient,
+  userId: string,
+  dryRun: boolean
+): Promise<OperationResult> {
+  const roleCount = await countRows(
+    client,
+    "SELECT COUNT(*) AS count FROM user_roles WHERE user_id = $1",
+    [userId]
+  );
   const impersonationCount = await countRows(
     client,
-    'SELECT COUNT(*) AS count FROM user_impersonations WHERE admin_user_id = $1 OR target_user_id = $1',
-    [userId],
+    "SELECT COUNT(*) AS count FROM user_impersonations WHERE admin_user_id = $1 OR target_user_id = $1",
+    [userId]
   );
-  const auditCount = await countRows(client, 'SELECT COUNT(*) AS count FROM audit_logs WHERE user_id = $1', [userId]);
+  const auditCount = await countRows(
+    client,
+    "SELECT COUNT(*) AS count FROM audit_logs WHERE user_id = $1",
+    [userId]
+  );
 
   if (dryRun) {
     return {
@@ -188,10 +215,13 @@ async function deleteUser(client: PoolClient, userId: string, dryRun: boolean): 
     };
   }
 
-  await client.query('BEGIN');
+  await client.query("BEGIN");
   try {
-    await client.query('DELETE FROM user_roles WHERE user_id = $1', [userId]);
-    await client.query('DELETE FROM user_impersonations WHERE admin_user_id = $1 OR target_user_id = $1', [userId]);
+    await client.query("DELETE FROM user_roles WHERE user_id = $1", [userId]);
+    await client.query(
+      "DELETE FROM user_impersonations WHERE admin_user_id = $1 OR target_user_id = $1",
+      [userId]
+    );
     await client.query(
       `UPDATE audit_logs
          SET user_id = NULL,
@@ -199,11 +229,11 @@ async function deleteUser(client: PoolClient, userId: string, dryRun: boolean): 
              user_agent = NULL,
              metadata = coalesce(metadata, '{}'::jsonb) || jsonb_build_object('subject_deleted', true)
        WHERE user_id = $1`,
-      [userId],
+      [userId]
     );
 
-    const deleteResult = await client.query('DELETE FROM users WHERE id = $1', [userId]);
-    await client.query('COMMIT');
+    const deleteResult = await client.query("DELETE FROM users WHERE id = $1", [userId]);
+    await client.query("COMMIT");
 
     return {
       userFound: true,
@@ -213,7 +243,7 @@ async function deleteUser(client: PoolClient, userId: string, dryRun: boolean): 
       redactedAuditLogs: auditCount,
     };
   } catch (error) {
-    await client.query('ROLLBACK');
+    await client.query("ROLLBACK");
     throw error;
   }
 }
@@ -224,7 +254,7 @@ async function main() {
   const userId = await resolveUserId(pool, identifier);
 
   if (!userId) {
-    console.error('No matching user found for identifier');
+    console.error("No matching user found for identifier");
     process.exitCode = 1;
     await pool.end();
     return;
@@ -233,14 +263,14 @@ async function main() {
   const client = await pool.connect();
   try {
     const result =
-      identifier.mode === 'delete'
+      identifier.mode === "delete"
         ? await deleteUser(client, userId, identifier.dryRun)
         : await anonymizeUser(client, userId, identifier.dryRun);
 
     if (identifier.dryRun) {
-      console.log('[DRY RUN] Planned operations:', JSON.stringify(result, null, 2));
+      console.log("[DRY RUN] Planned operations:", JSON.stringify(result, null, 2));
     } else {
-      console.log('Completed operations:', JSON.stringify(result, null, 2));
+      console.log("Completed operations:", JSON.stringify(result, null, 2));
     }
   } finally {
     client.release();
@@ -249,6 +279,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error('Failed to delete/anonymize subject:', error);
+  console.error("Failed to delete/anonymize subject:", error);
   process.exitCode = 1;
 });

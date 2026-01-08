@@ -1,19 +1,16 @@
-import express from 'express';
-import { ragStaleness } from '../metrics';
-import { emit } from '../events';
+import express from "express";
+import { ragStaleness } from "../metrics";
+import { emit } from "../events";
 
 export const ragRouter = express.Router();
 
 let lastIndexedAt = Date.now() - 1000 * 60 * 60 * 25; // pretend stale by 25h
-const corpus = process.env.RAG_CORPUS || 'docs';
+const corpus = process.env.RAG_CORPUS || "docs";
 
-ragRouter.get('/status', (_req, res) => {
-  const staleness = Math.max(
-    0,
-    Math.floor((Date.now() - lastIndexedAt) / 1000),
-  );
+ragRouter.get("/status", (_req, res) => {
+  const staleness = Math.max(0, Math.floor((Date.now() - lastIndexedAt) / 1000));
   ragStaleness.labels(corpus).set(staleness);
-  emit({ type: 'rag.index.freshness', corpus, staleness_s: staleness });
+  emit({ type: "rag.index.freshness", corpus, staleness_s: staleness });
   res.json({
     corpus,
     last_indexed_at: new Date(lastIndexedAt).toISOString(),
@@ -22,8 +19,8 @@ ragRouter.get('/status', (_req, res) => {
   });
 });
 
-ragRouter.post('/reindex', (req, res) => {
-  const dry = String(req.query.dry_run || '0') === '1';
+ragRouter.post("/reindex", (req, res) => {
+  const dry = String(req.query.dry_run || "0") === "1";
   if (dry)
     return res.json({
       estimate_docs: 1200,

@@ -14,16 +14,17 @@ The seed data for these checks lives in `reliability/plan-regression/seed.sql` u
 
 ## Running the regression suite
 
-- Unit-level shape tests (no database needed):  
+- Unit-level shape tests (no database needed):
   ```bash
   pnpm test -- plan-regression
   ```
-- Full plan comparison (requires a seeded Postgres database):  
+- Full plan comparison (requires a seeded Postgres database):
   ```bash
   PLAN_REGRESSION_ENFORCE=true \
   PLAN_REGRESSION_DATABASE_URL=postgres://... \
   pnpm test -- plan-regression
   ```
+
   - Set `PLAN_REGRESSION_ANALYZE=true` in staging/perf to include `ANALYZE`/`BUFFERS` (omit in CI to avoid flakiness).
 
 ## Updating baselines (approval required)
@@ -31,10 +32,11 @@ The seed data for these checks lives in `reliability/plan-regression/seed.sql` u
 Only update baselines when a planner change is intended and reviewed.
 
 1. Point to a non-production database: `PLAN_REGRESSION_DATABASE_URL=postgres://...`.
-2. Seed the deterministic dataset and regenerate baselines:  
+2. Seed the deterministic dataset and regenerate baselines:
    ```bash
    pnpm dlx ts-node --esm reliability/plan-regression/update-baseline.ts
    ```
+
    - Set `PLAN_REGRESSION_SKIP_SEED=true` if your DB is already seeded.
 3. Commit the updated `reliability/plan-regression/fixtures/postgres-plan-baseline.json`.
 4. Add the PR label **plan-baseline-change** (or equivalent approval flag) so reviewers explicitly acknowledge the plan drift.
@@ -42,10 +44,11 @@ Only update baselines when a planner change is intended and reviewed.
 
 ## Automatic statistics refresh (staging/test)
 
-- Refresh planner stats on a safe cadence (staging/test only):  
+- Refresh planner stats on a safe cadence (staging/test only):
   ```bash
   PLAN_REGRESSION_ENV=staging pnpm run db:analyze:plan-regression
   ```
+
   - Override tables with `PLAN_REGRESSION_ANALYZE_TABLES=plan_regression.investigations,plan_regression.activity_log`.
   - Set `PLAN_REGRESSION_ANALYZE_VERBOSE=true` to emit `ANALYZE VERBOSE`.
 - Do **not** run this script in production; it refuses to execute unless `PLAN_REGRESSION_ENV` is set to `staging`/`test`.

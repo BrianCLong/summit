@@ -3,6 +3,7 @@
 **Type**: Cost Optimization ML Model
 
 ## Manifest
+
 ```json
 {
   "partnerId": "optim-ai",
@@ -15,6 +16,7 @@
 ```
 
 ## Recommendation Format
+
 ```json
 {
   "target": "cluster-1",
@@ -23,8 +25,6 @@
   "confidence": 0.92,
   "assumptions": ["cpu_load < 50%"],
   "counterfactual": "cost increases by 10% next month",
-  "alternatives": [
-    { "action": "shutdown", "confidence": 0.4 }
-  ]
+  "alternatives": [{ "action": "shutdown", "confidence": 0.4 }]
 }
 ```

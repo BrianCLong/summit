@@ -3,26 +3,26 @@
  * Run with: pnpm test:integration
  */
 
-import { ScenarioGenerator } from '../generator/ScenarioGenerator';
-import { GhostAnalyst } from '../analyst/GhostAnalyst';
-import { MetricsCollector } from '../metrics/MetricsCollector';
-import type { WorkflowScript } from '../types/index';
+import { ScenarioGenerator } from "../generator/ScenarioGenerator";
+import { GhostAnalyst } from "../analyst/GhostAnalyst";
+import { MetricsCollector } from "../metrics/MetricsCollector";
+import type { WorkflowScript } from "../types/index";
 
-const API_URL = process.env.API_URL || 'http://localhost:4000/graphql';
-const TENANT_ID = process.env.TENANT_ID || 'test-sim-harness';
+const API_URL = process.env.API_URL || "http://localhost:4000/graphql";
+const TENANT_ID = process.env.TENANT_ID || "test-sim-harness";
 
 // Skip if API not available
 const describeIntegration = process.env.SKIP_INTEGRATION ? describe.skip : describe;
 
-describeIntegration('Integration Tests', () => {
+describeIntegration("Integration Tests", () => {
   beforeAll(() => {
-    console.log('Running integration tests against:', API_URL);
+    console.log("Running integration tests against:", API_URL);
   });
 
-  it('should generate scenario and run basic workflow', async () => {
+  it("should generate scenario and run basic workflow", async () => {
     // Generate scenario
     const generator = new ScenarioGenerator({
-      template: 'fraud-ring',
+      template: "fraud-ring",
       params: { seed: 42, nodeCount: 10 },
     });
 
@@ -31,12 +31,12 @@ describeIntegration('Integration Tests', () => {
 
     // Define minimal workflow
     const workflow: WorkflowScript = {
-      name: 'integration-test-workflow',
+      name: "integration-test-workflow",
       steps: [
         {
-          name: 'health-check',
-          action: 'graphql-query',
-          query: 'query { __typename }',
+          name: "health-check",
+          action: "graphql-query",
+          query: "query { __typename }",
         },
       ],
     };
@@ -54,26 +54,26 @@ describeIntegration('Integration Tests', () => {
       scenario,
     });
 
-    expect(session.status).toBe('completed');
+    expect(session.status).toBe("completed");
     expect(session.steps.length).toBe(1);
-    expect(session.steps[0].status).toBe('success');
+    expect(session.steps[0].status).toBe("success");
   }, 30000); // 30 second timeout
 
-  it('should collect metrics from multiple sessions', async () => {
+  it("should collect metrics from multiple sessions", async () => {
     const generator = new ScenarioGenerator({
-      template: 'fraud-ring',
+      template: "fraud-ring",
       params: { seed: 123, nodeCount: 5 },
     });
 
     const scenario = await generator.generate();
 
     const workflow: WorkflowScript = {
-      name: 'multi-session-test',
+      name: "multi-session-test",
       steps: [
         {
-          name: 'health-check',
-          action: 'graphql-query',
-          query: 'query { __typename }',
+          name: "health-check",
+          action: "graphql-query",
+          query: "query { __typename }",
         },
       ],
     };

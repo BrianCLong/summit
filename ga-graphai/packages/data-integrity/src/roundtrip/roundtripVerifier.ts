@@ -1,4 +1,4 @@
-import { stableHash } from '../canonical/canonicalizer.js';
+import { stableHash } from "../canonical/canonicalizer.js";
 
 export interface BundleObject {
   id: string;
@@ -16,7 +16,10 @@ export interface RoundtripOptions {
   expectedCount?: number;
 }
 
-export function verifyRoundtrip(bundle: BundleObject[], options: RoundtripOptions = {}): RoundtripReport {
+export function verifyRoundtrip(
+  bundle: BundleObject[],
+  options: RoundtripOptions = {}
+): RoundtripReport {
   const mismatches: string[] = [];
   const ids = new Set(bundle.map((item) => item.id));
   if (options.expectedCount !== undefined && bundle.length !== options.expectedCount) {
@@ -33,7 +36,7 @@ export function verifyRoundtrip(bundle: BundleObject[], options: RoundtripOption
     if (item.references) {
       const missingRefs = item.references.filter((ref) => !ids.has(ref));
       if (missingRefs.length > 0) {
-        mismatches.push(`Missing references for ${item.id}: ${missingRefs.join(', ')}`);
+        mismatches.push(`Missing references for ${item.id}: ${missingRefs.join(", ")}`);
       }
     }
   });

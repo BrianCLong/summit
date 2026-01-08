@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { defineTask } from '@intelgraph/maestro-sdk';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { defineTask } from "@intelgraph/maestro-sdk";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
 interface In {
   bucket: string;
@@ -20,8 +20,8 @@ export default defineTask<In, { etag: string }>({
         Key: payload.key,
         Body: payload.body,
         ContentType: payload.contentType,
-      }),
+      })
     );
-    return { payload: { etag: res.ETag || '' } };
+    return { payload: { etag: res.ETag || "" } };
   },
 });

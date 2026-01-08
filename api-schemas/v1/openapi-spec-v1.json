@@ -350,10 +350,7 @@
           "path": {
             "type": "array",
             "items": {
-              "oneOf": [
-                { "type": "string" },
-                { "type": "integer" }
-              ]
+              "oneOf": [{ "type": "string" }, { "type": "integer" }]
             }
           }
         }

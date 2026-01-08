@@ -1,10 +1,7 @@
 import type { GraphData } from '../../src/data/mockGraph';
 import type { MapboxStubState } from './mapboxStub';
 
-export function applyTestHarness(
-  graph: GraphData,
-  mapState: MapboxStubState,
-) {
+export function applyTestHarness(graph: GraphData, mapState: MapboxStubState) {
   (window as any).__E2E_GRAPH__ = graph;
   (window as any).__MAPBOX_STATE__ = mapState;
   (window as any).__MAPBOX_STUB__ = {

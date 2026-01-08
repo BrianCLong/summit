@@ -1,49 +1,55 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
-import App from './App';
-import { CommandConsoleSnapshot } from './types';
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
+import App from "./App";
+import { CommandConsoleSnapshot } from "./types";
 
 const mockSnapshot: CommandConsoleSnapshot = {
-  generatedAt: '2024-01-01T00:00:00.000Z',
+  generatedAt: "2024-01-01T00:00:00.000Z",
   gaGate: {
-    overall: 'pass',
-    lastRun: '2024-01-01T00:00:00.000Z',
-    details: [{ component: 'package-json', status: 'pass', message: 'ok' }],
+    overall: "pass",
+    lastRun: "2024-01-01T00:00:00.000Z",
+    details: [{ component: "package-json", status: "pass", message: "ok" }],
   },
   ci: {
-    branch: 'main',
-    status: 'pass',
-    commit: 'abc123',
-    updatedAt: '2024-01-01T00:00:00.000Z',
+    branch: "main",
+    status: "pass",
+    commit: "abc123",
+    updatedAt: "2024-01-01T00:00:00.000Z",
   },
   slo: {
     compliance: 0.99,
-    window: '30d',
+    window: "30d",
     errorBudgetRemaining: 0.92,
     burnRate: 0.45,
   },
   llm: {
-    aggregate: { tokens: 200000, cost: 50, window: '7d' },
+    aggregate: { tokens: 200000, cost: 50, window: "7d" },
     tenants: [
-      { tenantId: 'acme', tokens: 100000, cost: 25, rateLimitStatus: 'pass' },
-      { tenantId: 'globex', tokens: 100000, cost: 25, rateLimitStatus: 'warning' },
+      { tenantId: "acme", tokens: 100000, cost: 25, rateLimitStatus: "pass" },
+      { tenantId: "globex", tokens: 100000, cost: 25, rateLimitStatus: "warning" },
     ],
   },
   dependencyRisk: {
-    level: 'warning',
+    level: "warning",
     issues: 2,
-    lastScan: '2024-01-01T00:00:00.000Z',
-    topRisks: ['outdated-core'],
+    lastScan: "2024-01-01T00:00:00.000Z",
+    topRisks: ["outdated-core"],
   },
   evidence: {
-    latestBundle: 'bundle-1',
-    status: 'pass',
+    latestBundle: "bundle-1",
+    status: "pass",
     artifacts: 3,
-    lastGeneratedAt: '2024-01-01T00:00:00.000Z',
+    lastGeneratedAt: "2024-01-01T00:00:00.000Z",
   },
   tenants: [
-    { tenantId: 'acme', active: true, rateLimit: '5r/s', ingestionCap: '5k/hr', killSwitch: false },
-    { tenantId: 'globex', active: true, rateLimit: '3r/s', ingestionCap: '2k/hr', killSwitch: true },
+    { tenantId: "acme", active: true, rateLimit: "5r/s", ingestionCap: "5k/hr", killSwitch: false },
+    {
+      tenantId: "globex",
+      active: true,
+      rateLimit: "3r/s",
+      ingestionCap: "2k/hr",
+      killSwitch: true,
+    },
   ],
   incidents: {
     gaGateFailures: [],
@@ -52,13 +58,13 @@ const mockSnapshot: CommandConsoleSnapshot = {
   },
 };
 
-describe('Command Console dashboard', () => {
+describe("Command Console dashboard", () => {
   const originalFetch = global.fetch;
   const originalEnv = { ...(import.meta as any).env };
 
   beforeEach(() => {
     vi.useFakeTimers();
-    (import.meta as any).env = { ...originalEnv, VITE_COMMAND_CONSOLE_ENABLED: 'true' };
+    (import.meta as any).env = { ...originalEnv, VITE_COMMAND_CONSOLE_ENABLED: "true" };
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => mockSnapshot,
@@ -71,7 +77,7 @@ describe('Command Console dashboard', () => {
     (import.meta as any).env = originalEnv;
   });
 
-  it('renders health and tenant panels', async () => {
+  it("renders health and tenant panels", async () => {
     render(<App />);
 
     await waitFor(() => {
@@ -84,8 +90,8 @@ describe('Command Console dashboard', () => {
     expect(screen.getByText(/LLM Tokens/)).toBeInTheDocument();
   });
 
-  it('shows a helpful message when disabled', async () => {
-    (import.meta as any).env = { VITE_COMMAND_CONSOLE_ENABLED: 'false' };
+  it("shows a helpful message when disabled", async () => {
+    (import.meta as any).env = { VITE_COMMAND_CONSOLE_ENABLED: "false" };
     render(<App />);
     await waitFor(() => {
       expect(screen.getByText(/Access blocked/)).toBeInTheDocument();

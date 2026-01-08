@@ -4,8 +4,8 @@ model_list:
   - model_name: local/llama
     litellm_params:
       custom_llm_provider: ollama
-      api_base: 'http://127.0.0.1:11434'
-      model: 'qwen2.5-coder:7b'
+      api_base: "http://127.0.0.1:11434"
+      model: "qwen2.5-coder:7b"
       num_ctx: 2048
       temperature: 0.2
 
@@ -13,8 +13,8 @@ model_list:
   - model_name: local/llama-cpu
     litellm_params:
       custom_llm_provider: ollama
-      api_base: 'http://127.0.0.1:11434'
-      model: 'llama3.1-8b-cpu'
+      api_base: "http://127.0.0.1:11434"
+      model: "llama3.1-8b-cpu"
       num_ctx: 1024
       temperature: 0.2
 
@@ -22,8 +22,8 @@ model_list:
   - model_name: local/llama-small
     litellm_params:
       custom_llm_provider: ollama
-      api_base: 'http://127.0.0.1:11434'
-      model: 'llama3.2:3b'
+      api_base: "http://127.0.0.1:11434"
+      model: "llama3.2:3b"
       num_ctx: 1024
       temperature: 0.2
 
@@ -31,9 +31,9 @@ model_list:
   - model_name: local/lmstudio
     litellm_params:
       custom_llm_provider: openai
-      api_base: 'http://127.0.0.1:1234/v1'
-      api_key: 'sk-local-lms'
-      model: 'llama-3.1-8b-instruct'
+      api_base: "http://127.0.0.1:1234/v1"
+      api_key: "sk-local-lms"
+      model: "llama-3.1-8b-instruct"
 
   # ===== OPTIONAL HOSTED (POWER BURSTS: DISABLED BY DEFAULT) =====
   # Uncomment and set env vars to enable hosted API bursts
@@ -52,32 +52,32 @@ model_list:
 
   - model_name: cloud/deepseek-v3
     litellm_params:
-      model: 'openrouter/deepseek/deepseek-chat'
-      api_base: 'https://openrouter.ai/api/v1'
-      api_key: '${OPENROUTER_API_KEY}'
-      custom_llm_provider: 'openrouter'
+      model: "openrouter/deepseek/deepseek-chat"
+      api_base: "https://openrouter.ai/api/v1"
+      api_key: "${OPENROUTER_API_KEY}"
+      custom_llm_provider: "openrouter"
 
   - model_name: cloud/deepseek-coder-v2
     litellm_params:
-      model: 'openrouter/deepseek/deepseek-coder'
-      api_base: 'https://openrouter.ai/api/v1'
-      api_key: '${OPENROUTER_API_KEY}'
-      custom_llm_provider: 'openrouter'
+      model: "openrouter/deepseek/deepseek-coder"
+      api_base: "https://openrouter.ai/api/v1"
+      api_key: "${OPENROUTER_API_KEY}"
+      custom_llm_provider: "openrouter"
 
   - model_name: cloud/qwen2.5-72b
     litellm_params:
-      model: 'openrouter/qwen/qwen-2.5-72b-instruct'
-      api_base: 'https://openrouter.ai/api/v1'
-      api_key: '${OPENROUTER_API_KEY}'
-      custom_llm_provider: 'openrouter'
+      model: "openrouter/qwen/qwen-2.5-72b-instruct"
+      api_base: "https://openrouter.ai/api/v1"
+      api_key: "${OPENROUTER_API_KEY}"
+      custom_llm_provider: "openrouter"
 
 router_settings:
   timeout: 60
   num_retries: 2
   fallback_models:
-    - 'local/llama-small'
-    - 'local/llama-cpu'
-  routing_strategy: 'simple-shuffle'
+    - "local/llama-small"
+    - "local/llama-cpu"
+  routing_strategy: "simple-shuffle"
 
 # ===== BUDGETS: POWER BURSTS (DISABLED BY DEFAULT) =====
 # Uncomment to enable hosted API usage with strict limits

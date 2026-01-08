@@ -2,14 +2,14 @@
  * Stationarity Tests (Augmented Dickey-Fuller)
  */
 
-import type { TimeSeriesPoint, StationarityTest } from '../types/index.js';
+import type { TimeSeriesPoint, StationarityTest } from "../types/index.js";
 
 export class StationarityTester {
   /**
    * Augmented Dickey-Fuller test
    */
   adfTest(data: TimeSeriesPoint[], lags: number = 1): StationarityTest {
-    const values = data.map(d => d.value);
+    const values = data.map((d) => d.value);
     const n = values.length;
 
     // Calculate first differences
@@ -24,12 +24,12 @@ export class StationarityTester {
 
     // Critical values (approximate)
     const criticalValues = {
-      '1%': -3.43,
-      '5%': -2.86,
-      '10%': -2.57,
+      "1%": -3.43,
+      "5%": -2.86,
+      "10%": -2.57,
     };
 
-    const isStationary = tStatistic < criticalValues['5%'];
+    const isStationary = tStatistic < criticalValues["5%"];
     const pValue = this.calculatePValue(tStatistic);
 
     return {
@@ -44,7 +44,7 @@ export class StationarityTester {
    * KPSS test for stationarity
    */
   kpssTest(data: TimeSeriesPoint[]): StationarityTest {
-    const values = data.map(d => d.value);
+    const values = data.map((d) => d.value);
     const n = values.length;
 
     // Detrend the series
@@ -65,16 +65,16 @@ export class StationarityTester {
 
     // Critical values
     const criticalValues = {
-      '1%': 0.739,
-      '5%': 0.463,
-      '10%': 0.347,
+      "1%": 0.739,
+      "5%": 0.463,
+      "10%": 0.347,
     };
 
-    const isStationary = testStatistic < criticalValues['5%'];
+    const isStationary = testStatistic < criticalValues["5%"];
 
     return {
       isStationary,
-      pValue: testStatistic < criticalValues['5%'] ? 0.05 : 0.1,
+      pValue: testStatistic < criticalValues["5%"] ? 0.05 : 0.1,
       testStatistic,
       criticalValues,
     };
@@ -116,8 +116,8 @@ export class StationarityTester {
   private calculatePValue(tStat: number): number {
     if (tStat < -3.43) return 0.01;
     if (tStat < -2.86) return 0.05;
-    if (tStat < -2.57) return 0.10;
-    return 0.20;
+    if (tStat < -2.57) return 0.1;
+    return 0.2;
   }
 
   /**
@@ -135,6 +135,6 @@ export class StationarityTester {
     const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
     const intercept = (sumY - slope * sumX) / n;
 
-    return x.map(xi => intercept + slope * xi);
+    return x.map((xi) => intercept + slope * xi);
   }
 }

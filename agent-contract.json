@@ -72,11 +72,7 @@
       "description": "Credit Card Number"
     }
   ],
-  "requiredChecks": [
-    "restricted-path-check",
-    "pr-metadata-check",
-    "pii-scan"
-  ],
+  "requiredChecks": ["restricted-path-check", "pr-metadata-check", "pii-scan"],
   "activityTracking": {
     "ledger": "AGENT_ACTIVITY.md",
     "backlog": "TASK_BACKLOG.md",

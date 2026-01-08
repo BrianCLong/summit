@@ -23,14 +23,14 @@ Comprehensive monitoring and analysis of international treaties, agreements, com
 ## Usage
 
 ```typescript
-import { TreatyMonitor, TreatyStatus, TreatyCategory } from '@intelgraph/treaty-monitor';
+import { TreatyMonitor, TreatyStatus, TreatyCategory } from "@intelgraph/treaty-monitor";
 
 const monitor = new TreatyMonitor();
 
 // Register a treaty
 monitor.registerTreaty({
-  id: 'treaty-001',
-  title: 'Paris Agreement',
+  id: "treaty-001",
+  title: "Paris Agreement",
   type: TreatyType.MULTILATERAL_TREATY,
   category: [TreatyCategory.CLIMATE, TreatyCategory.ENVIRONMENTAL],
   status: TreatyStatus.IN_FORCE,
@@ -39,14 +39,14 @@ monitor.registerTreaty({
 
 // Track negotiation progress
 monitor.trackNegotiationProgress({
-  treatyId: 'treaty-002',
+  treatyId: "treaty-002",
   round: 5,
   overallProgress: 75,
   // ... other details
 });
 
 // Analyze compliance
-const compliance = monitor.assessCompliance('treaty-001', 'USA');
+const compliance = monitor.assessCompliance("treaty-001", "USA");
 
 // Get treaties expiring soon
 const expiring = monitor.getExpiringSoon(365);
@@ -55,7 +55,7 @@ const expiring = monitor.getExpiringSoon(365);
 const risks = monitor.detectTerminationRisks();
 
 // Analyze treaty network
-const network = monitor.analyzeTreatyNetwork('USA');
+const network = monitor.analyzeTreatyNetwork("USA");
 ```
 
 ## API

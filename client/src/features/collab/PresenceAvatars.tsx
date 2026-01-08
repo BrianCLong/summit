@@ -1,6 +1,6 @@
-import React from 'react';
-import Avatar from '@mui/material/Avatar';
-import Stack from '@mui/material/Stack';
+import React from "react";
+import Avatar from "@mui/material/Avatar";
+import Stack from "@mui/material/Stack";
 
 export interface PresenceUser {
   id: string;
@@ -20,7 +20,7 @@ const PresenceAvatars: React.FC<Props> = ({ users }) => (
     {users.map((u) => (
       <Avatar
         key={u.id}
-        sx={{ bgcolor: u.color || 'primary.main', width: 24, height: 24 }}
+        sx={{ bgcolor: u.color || "primary.main", width: 24, height: 24 }}
         title={u.name}
       >
         {u.name.charAt(0).toUpperCase()}

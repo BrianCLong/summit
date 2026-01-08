@@ -2,9 +2,9 @@
  * MongoDB database connector
  */
 
-import { BaseConnector } from '../core/BaseConnector';
-import { ConnectorCapabilities, DataSourceConfig } from '../types';
-import { Logger } from 'winston';
+import { BaseConnector } from "../core/BaseConnector";
+import { ConnectorCapabilities, DataSourceConfig } from "../types";
+import { Logger } from "winston";
 
 export class MongoDBConnector extends BaseConnector {
   private client: any = null;
@@ -20,7 +20,7 @@ export class MongoDBConnector extends BaseConnector {
       // Using mongodb package (would need to be installed)
       // const { MongoClient } = require('mongodb');
 
-      this.logger.info('MongoDB connector ready for implementation');
+      this.logger.info("MongoDB connector ready for implementation");
       this.isConnected = true;
 
       // Placeholder for actual implementation
@@ -33,7 +33,7 @@ export class MongoDBConnector extends BaseConnector {
       // await this.client.connect();
       // this.db = this.client.db(this.config.connectionConfig.database);
     } catch (error) {
-      this.logger.error('Failed to connect to MongoDB', { error });
+      this.logger.error("Failed to connect to MongoDB", { error });
       throw error;
     }
   }
@@ -45,7 +45,7 @@ export class MongoDBConnector extends BaseConnector {
       this.db = null;
     }
     this.isConnected = false;
-    this.logger.info('Disconnected from MongoDB');
+    this.logger.info("Disconnected from MongoDB");
   }
 
   async testConnection(): Promise<boolean> {
@@ -53,7 +53,7 @@ export class MongoDBConnector extends BaseConnector {
       // await this.client.db().admin().ping();
       return true;
     } catch (error) {
-      this.logger.error('Connection test failed', { error });
+      this.logger.error("Connection test failed", { error });
       return false;
     }
   }
@@ -65,7 +65,7 @@ export class MongoDBConnector extends BaseConnector {
       supportsCDC: true, // With change streams
       supportsSchema: false, // MongoDB is schema-less
       supportsPartitioning: true,
-      maxConcurrentConnections: 100
+      maxConcurrentConnections: 100,
     };
   }
 
@@ -104,8 +104,8 @@ export class MongoDBConnector extends BaseConnector {
 
     return {
       collectionName,
-      schemaType: 'inferred',
-      fields: []
+      schemaType: "inferred",
+      fields: [],
     };
   }
 

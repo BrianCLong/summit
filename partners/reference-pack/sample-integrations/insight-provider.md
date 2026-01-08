@@ -3,6 +3,7 @@
 **Type**: Threat Intelligence Feed
 
 ## Manifest
+
 ```json
 {
   "partnerId": "intel-co",
@@ -15,6 +16,7 @@
 ```
 
 ## Signal Format
+
 ```json
 {
   "entity": "1.2.3.4",

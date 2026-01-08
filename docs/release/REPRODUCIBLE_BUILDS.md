@@ -9,6 +9,7 @@ The goal of this check is to ensure that our build process is deterministic. If 
 ## How it works
 
 The `scripts/repro-check.sh` script performs the following steps:
+
 1.  Creates two temporary directories.
 2.  Runs the client build (`pnpm run build` inside `client/`) targeting the first temporary directory.
 3.  Runs the client build again targeting the second temporary directory.
@@ -36,6 +37,7 @@ Note: The CI job currently uses `pnpm install --no-frozen-lockfile` temporarily 
 ## Troubleshooting
 
 If the check fails:
+
 1.  Check the diff output to see which files differ.
 2.  Look for timestamps, random seeds, or absolute paths embedded in the build artifacts.
 3.  Ensure that tools like `vite` are configured to produce deterministic output (e.g., consistent file hashing).

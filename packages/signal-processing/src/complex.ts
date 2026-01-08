@@ -1,6 +1,9 @@
 // @ts-nocheck
 export class Complex {
-  constructor(public readonly re: number, public readonly im: number = 0) {}
+  constructor(
+    public readonly re: number,
+    public readonly im: number = 0
+  ) {}
 
   add(other: Complex): Complex {
     return new Complex(this.re + other.re, this.im + other.im);
@@ -11,18 +14,24 @@ export class Complex {
   }
 
   mul(other: Complex | number): Complex {
-    if (typeof other === 'number') {
+    if (typeof other === "number") {
       return new Complex(this.re * other, this.im * other);
     }
-    return new Complex(this.re * other.re - this.im * other.im, this.re * other.im + this.im * other.re);
+    return new Complex(
+      this.re * other.re - this.im * other.im,
+      this.re * other.im + this.im * other.re
+    );
   }
 
   div(other: Complex | number): Complex {
-    if (typeof other === 'number') {
+    if (typeof other === "number") {
       return new Complex(this.re / other, this.im / other);
     }
     const denom = other.re * other.re + other.im * other.im;
-    return new Complex((this.re * other.re + this.im * other.im) / denom, (this.im * other.re - this.re * other.im) / denom);
+    return new Complex(
+      (this.re * other.re + this.im * other.im) / denom,
+      (this.im * other.re - this.re * other.im) / denom
+    );
   }
 
   conj(): Complex {

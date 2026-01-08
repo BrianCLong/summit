@@ -31,17 +31,17 @@
         },
         "owners": {
           "type": "array",
-          "items": {"type": "string"},
+          "items": { "type": "string" },
           "description": "Team or individual owners (email, team slug)"
         },
         "tags": {
           "type": "object",
-          "additionalProperties": {"type": "string"},
+          "additionalProperties": { "type": "string" },
           "description": "Key-value tags for categorization"
         },
         "annotations": {
           "type": "object",
-          "additionalProperties": {"type": "string"},
+          "additionalProperties": { "type": "string" },
           "description": "Non-identifying metadata (docs URLs, runbook links)"
         }
       }
@@ -114,9 +114,9 @@
             "type": "object",
             "required": ["name", "namespace"],
             "properties": {
-              "name": {"type": "string"},
-              "namespace": {"type": "string"},
-              "facets": {"type": "object"}
+              "name": { "type": "string" },
+              "namespace": { "type": "string" },
+              "facets": { "type": "object" }
             }
           },
           "description": "Output datasets for lineage tracking"
@@ -143,7 +143,7 @@
               },
               "depends_on": {
                 "type": "array",
-                "items": {"type": "string"},
+                "items": { "type": "string" },
                 "description": "Task IDs this task depends on"
               },
               "code": {
@@ -178,7 +178,7 @@
               },
               "env": {
                 "type": "object",
-                "additionalProperties": {"type": "string"},
+                "additionalProperties": { "type": "string" },
                 "description": "Environment variables"
               },
               "retry": {
@@ -210,9 +210,9 @@
               "resources": {
                 "type": "object",
                 "properties": {
-                  "cpu": {"type": "string"},
-                  "memory": {"type": "string"},
-                  "gpu": {"type": "integer"}
+                  "cpu": { "type": "string" },
+                  "memory": { "type": "string" },
+                  "gpu": { "type": "integer" }
                 }
               }
             }
@@ -224,20 +224,20 @@
             "budget": {
               "type": "object",
               "properties": {
-                "hard_cap_usd": {"type": "number"},
-                "per_run_usd": {"type": "number"}
+                "hard_cap_usd": { "type": "number" },
+                "per_run_usd": { "type": "number" }
               }
             },
             "slo": {
               "type": "object",
               "properties": {
-                "latency_p95_ms": {"type": "number"},
-                "success_rate_percent": {"type": "number"}
+                "latency_p95_ms": { "type": "number" },
+                "success_rate_percent": { "type": "number" }
               }
             },
             "policies": {
               "type": "array",
-              "items": {"type": "string"},
+              "items": { "type": "string" },
               "description": "OPA policy references"
             }
           }
@@ -263,10 +263,10 @@
               "items": {
                 "type": "object",
                 "properties": {
-                  "condition": {"type": "string"},
+                  "condition": { "type": "string" },
                   "channels": {
                     "type": "array",
-                    "items": {"type": "string"}
+                    "items": { "type": "string" }
                   }
                 }
               }

@@ -2,17 +2,17 @@
  * PKI (Public Key Infrastructure) Manager
  */
 
-import { ec as EC } from 'elliptic';
-import * as forge from 'node-forge';
-import { Logger } from 'pino';
-import { v4 as uuidv4 } from 'uuid';
+import { ec as EC } from "elliptic";
+import * as forge from "node-forge";
+import { Logger } from "pino";
+import { v4 as uuidv4 } from "uuid";
 
-const ec = new EC('secp256k1');
+const ec = new EC("secp256k1");
 
 export interface KeyPair {
   publicKey: string;
   privateKey: string;
-  algorithm: 'ECDSA' | 'RSA' | 'EdDSA';
+  algorithm: "ECDSA" | "RSA" | "EdDSA";
 }
 
 export interface Certificate {
@@ -50,9 +50,9 @@ export class PKIManager {
     const keyPair = ec.genKeyPair();
 
     return {
-      publicKey: keyPair.getPublic('hex'),
-      privateKey: keyPair.getPrivate('hex'),
-      algorithm: 'ECDSA',
+      publicKey: keyPair.getPublic("hex"),
+      privateKey: keyPair.getPrivate("hex"),
+      algorithm: "ECDSA",
     };
   }
 
@@ -65,7 +65,7 @@ export class PKIManager {
     return {
       publicKey: forge.pki.publicKeyToPem(keypair.publicKey),
       privateKey: forge.pki.privateKeyToPem(keypair.privateKey),
-      algorithm: 'RSA',
+      algorithm: "RSA",
     };
   }
 
@@ -73,11 +73,11 @@ export class PKIManager {
    * Sign data with ECDSA
    */
   signECDSA(data: string, privateKeyHex: string): string {
-    const key = ec.keyFromPrivate(privateKeyHex, 'hex');
+    const key = ec.keyFromPrivate(privateKeyHex, "hex");
     const hash = forge.md.sha256.create().update(data).digest().toHex();
     const signature = key.sign(hash);
 
-    return signature.toDER('hex');
+    return signature.toDER("hex");
   }
 
   /**
@@ -85,7 +85,7 @@ export class PKIManager {
    */
   verifyECDSA(data: string, signature: string, publicKeyHex: string): boolean {
     try {
-      const key = ec.keyFromPublic(publicKeyHex, 'hex');
+      const key = ec.keyFromPublic(publicKeyHex, "hex");
       const hash = forge.md.sha256.create().update(data).digest().toHex();
 
       return key.verify(hash, signature);
@@ -100,7 +100,7 @@ export class PKIManager {
   signRSA(data: string, privateKeyPem: string): string {
     const privateKey = forge.pki.privateKeyFromPem(privateKeyPem);
     const md = forge.md.sha256.create();
-    md.update(data, 'utf8');
+    md.update(data, "utf8");
 
     const signature = privateKey.sign(md);
     return forge.util.encode64(signature);
@@ -113,7 +113,7 @@ export class PKIManager {
     try {
       const publicKey = forge.pki.publicKeyFromPem(publicKeyPem);
       const md = forge.md.sha256.create();
-      md.update(data, 'utf8');
+      md.update(data, "utf8");
 
       const decodedSignature = forge.util.decode64(signature);
       return publicKey.verify(md.digest().bytes(), decodedSignature);
@@ -140,7 +140,7 @@ export class PKIManager {
       serialNumber: Date.now().toString(),
       validFrom: Date.now(),
       validTo: Date.now() + validityDays * 24 * 60 * 60 * 1000,
-      signature: '',
+      signature: "",
       revoked: false,
     };
 
@@ -160,10 +160,7 @@ export class PKIManager {
 
     this.certificates.set(cert.id, cert);
 
-    this.logger.info(
-      { certId: cert.id, subject, issuer },
-      'Certificate issued'
-    );
+    this.logger.info({ certId: cert.id, subject, issuer }, "Certificate issued");
 
     return cert;
   }
@@ -174,16 +171,13 @@ export class PKIManager {
   revokeCertificate(certId: string, reason: string): void {
     const cert = this.certificates.get(certId);
     if (!cert) {
-      throw new Error('Certificate not found');
+      throw new Error("Certificate not found");
     }
 
     cert.revoked = true;
     this.revokedCerts.add(certId);
 
-    this.logger.info(
-      { certId, reason },
-      'Certificate revoked'
-    );
+    this.logger.info({ certId, reason }, "Certificate revoked");
   }
 
   /**
@@ -197,21 +191,21 @@ export class PKIManager {
     const cert = this.certificates.get(certId);
 
     if (!cert) {
-      return { valid: false, errors: ['Certificate not found'] };
+      return { valid: false, errors: ["Certificate not found"] };
     }
 
     // Check revocation
     if (cert.revoked) {
-      errors.push('Certificate has been revoked');
+      errors.push("Certificate has been revoked");
     }
 
     // Check expiration
     const now = Date.now();
     if (now < cert.validFrom) {
-      errors.push('Certificate not yet valid');
+      errors.push("Certificate not yet valid");
     }
     if (now > cert.validTo) {
-      errors.push('Certificate has expired');
+      errors.push("Certificate has expired");
     }
 
     return {
@@ -247,7 +241,7 @@ export class PKIManager {
     publicKeys: string[];
   } {
     if (privateKeys.length < threshold) {
-      throw new Error('Insufficient private keys for threshold');
+      throw new Error("Insufficient private keys for threshold");
     }
 
     const signatures: string[] = [];
@@ -257,8 +251,8 @@ export class PKIManager {
       const signature = this.signECDSA(data, privateKey);
       signatures.push(signature);
 
-      const key = ec.keyFromPrivate(privateKey, 'hex');
-      publicKeys.push(key.getPublic('hex'));
+      const key = ec.keyFromPrivate(privateKey, "hex");
+      publicKeys.push(key.getPublic("hex"));
     }
 
     return {

@@ -24,20 +24,20 @@ npm install @intelgraph/streaming-api
 ### WebSocket
 
 ```typescript
-import { StreamingWebSocketServer } from '@intelgraph/streaming-api';
+import { StreamingWebSocketServer } from "@intelgraph/streaming-api";
 
 const server = new StreamingWebSocketServer({ port: 8080 });
 
-server.on('subscribe', ({ connectionId, topic }) => {
+server.on("subscribe", ({ connectionId, topic }) => {
   console.log(`${connectionId} subscribed to ${topic}`);
 });
 
 // Broadcast events
-server.broadcast('entities', {
-  id: '123',
-  topic: 'entities',
-  type: 'created',
-  data: { id: '1', name: 'New Entity' },
+server.broadcast("entities", {
+  id: "123",
+  topic: "entities",
+  type: "created",
+  data: { id: "1", name: "New Entity" },
   timestamp: new Date(),
 });
 ```
@@ -45,24 +45,24 @@ server.broadcast('entities', {
 ### Server-Sent Events
 
 ```typescript
-import { SSEServer } from '@intelgraph/streaming-api';
-import express from 'express';
+import { SSEServer } from "@intelgraph/streaming-api";
+import express from "express";
 
 const app = express();
 const sse = new SSEServer();
 
-app.get('/stream', (req, res) => {
+app.get("/stream", (req, res) => {
   sse.handleConnection(req, res, {
-    topics: ['entities', 'relationships'],
+    topics: ["entities", "relationships"],
   });
 });
 
 // Broadcast events
-sse.broadcast('entities', {
-  id: '123',
-  topic: 'entities',
-  type: 'updated',
-  data: { id: '1', name: 'Updated Entity' },
+sse.broadcast("entities", {
+  id: "123",
+  topic: "entities",
+  type: "updated",
+  data: { id: "1", name: "Updated Entity" },
   timestamp: new Date(),
 });
 ```

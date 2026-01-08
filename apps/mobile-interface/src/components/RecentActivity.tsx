@@ -1,11 +1,11 @@
 // @ts-nocheck
-import React from 'react';
+import React from "react";
 
 interface RecentActivityProps {
   className?: string;
 }
 
-export function RecentActivity({ className = '' }: RecentActivityProps) {
+export function RecentActivity({ className = "" }: RecentActivityProps) {
   return (
     <div className={`p-4 ${className}`}>
       <h3 className="font-semibold mb-3 dark:text-white">Recent Activity</h3>

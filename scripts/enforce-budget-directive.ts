@@ -5,16 +5,10 @@
  * Exit code 1 if violations found
  */
 
-import {
-  buildSchema,
-  GraphQLSchema,
-  isObjectType,
-  GraphQLField,
-  GraphQLObjectType,
-} from 'graphql';
-import { readFileSync, existsSync } from 'fs';
-import path from 'path';
-import { glob } from 'glob';
+import { buildSchema, GraphQLSchema, isObjectType, GraphQLField, GraphQLObjectType } from "graphql";
+import { readFileSync, existsSync } from "fs";
+import path from "path";
+import { glob } from "glob";
 
 interface BudgetViolation {
   fieldName: string;
@@ -49,16 +43,16 @@ function loadSchema(schemaPath: string): GraphQLSchema {
   const extension = path.extname(schemaPath);
   let sdlContent: string;
 
-  if (extension === '.graphql' || extension === '.gql') {
-    sdlContent = readFileSync(schemaPath, 'utf8');
+  if (extension === ".graphql" || extension === ".gql") {
+    sdlContent = readFileSync(schemaPath, "utf8");
   } else {
     // For .ts files, we need to extract the SDL string
-    const content = readFileSync(schemaPath, 'utf8');
+    const content = readFileSync(schemaPath, "utf8");
     const gqlMatch = content.match(/gql`([\s\S]*?)`/g);
     if (!gqlMatch) {
       throw new Error(`No GraphQL schema found in ${schemaPath}`);
     }
-    sdlContent = gqlMatch.map((match) => match.slice(4, -1)).join('\n');
+    sdlContent = gqlMatch.map((match) => match.slice(4, -1)).join("\n");
   }
 
   try {
@@ -70,15 +64,10 @@ function loadSchema(schemaPath: string): GraphQLSchema {
 }
 
 function hasBudgetDirective(field: GraphQLField<any, any>): boolean {
-  return !!field.astNode?.directives?.some(
-    (directive) => directive.name.value === 'budget',
-  );
+  return !!field.astNode?.directives?.some((directive) => directive.name.value === "budget");
 }
 
-function checkMutationFields(
-  schema: GraphQLSchema,
-  filePath: string,
-): BudgetViolation[] {
+function checkMutationFields(schema: GraphQLSchema, filePath: string): BudgetViolation[] {
   const violations: BudgetViolation[] = [];
   const mutationType = schema.getMutationType();
 
@@ -109,10 +98,10 @@ function formatViolations(violations: BudgetViolation[]): string {
       acc[key].push(violation.fieldName);
       return acc;
     },
-    {} as Record<string, string[]>,
+    {} as Record<string, string[]>
   );
 
-  let output = '';
+  let output = "";
   for (const [filePath, fieldNames] of Object.entries(grouped)) {
     output += `\n📁 ${path.relative(process.cwd(), filePath)}\n`;
     fieldNames.forEach((fieldName) => {
@@ -124,15 +113,14 @@ function formatViolations(violations: BudgetViolation[]): string {
 }
 
 async function main(): Promise<void> {
-  console.log('🔍 Checking for @budget directive compliance...\n');
+  console.log("🔍 Checking for @budget directive compliance...\n");
 
-  const schemaPath =
-    process.argv[2] || path.join(process.cwd(), 'server/src/graphql');
+  const schemaPath = process.argv[2] || path.join(process.cwd(), "server/src/graphql");
   let violations: BudgetViolation[] = [];
 
   try {
     // Handle single file or directory
-    if (existsSync(schemaPath) && schemaPath.endsWith('.graphql')) {
+    if (existsSync(schemaPath) && schemaPath.endsWith(".graphql")) {
       const schema = loadSchema(schemaPath);
       violations = checkMutationFields(schema, schemaPath);
     } else {
@@ -145,9 +133,7 @@ async function main(): Promise<void> {
       }
 
       console.log(`Found ${schemaFiles.length} schema files:`);
-      schemaFiles.forEach((file) =>
-        console.log(`  - ${path.relative(process.cwd(), file)}`),
-      );
+      schemaFiles.forEach((file) => console.log(`  - ${path.relative(process.cwd(), file)}`));
       console.log();
 
       for (const file of schemaFiles) {
@@ -157,7 +143,7 @@ async function main(): Promise<void> {
           violations.push(...fileViolations);
         } catch (error) {
           console.warn(
-            `⚠️  Skipping ${file}: ${error instanceof Error ? error.message : String(error)}`,
+            `⚠️  Skipping ${file}: ${error instanceof Error ? error.message : String(error)}`
           );
         }
       }
@@ -165,25 +151,21 @@ async function main(): Promise<void> {
 
     // Report results
     if (violations.length === 0) {
-      console.log('✅ All mutation fields have @budget directive');
-      console.log('🚀 Ready for production deployment\n');
+      console.log("✅ All mutation fields have @budget directive");
+      console.log("🚀 Ready for production deployment\n");
       process.exit(0);
     } else {
-      console.error(
-        `❌ Found ${violations.length} mutation field(s) missing @budget directive:`,
-      );
+      console.error(`❌ Found ${violations.length} mutation field(s) missing @budget directive:`);
       console.error(formatViolations(violations));
       console.error(
-        '\n💡 Fix by adding @budget(capUSD: X.XX, tokenCeiling: YYYY) to each mutation field',
+        "\n💡 Fix by adding @budget(capUSD: X.XX, tokenCeiling: YYYY) to each mutation field"
       );
-      console.error(
-        '📖 See: https://docs.intelgraph.com/safe-mutations#budget-directive\n',
-      );
+      console.error("📖 See: https://docs.intelgraph.com/safe-mutations#budget-directive\n");
       process.exit(1);
     }
   } catch (error) {
     console.error(
-      `💥 Failed to check budget directives: ${error instanceof Error ? error.message : String(error)}`,
+      `💥 Failed to check budget directives: ${error instanceof Error ? error.message : String(error)}`
     );
     process.exit(1);
   }
@@ -192,7 +174,7 @@ async function main(): Promise<void> {
 // Handle CLI execution
 if (require.main === module) {
   main().catch((error) => {
-    console.error('💥 Unexpected error:', error);
+    console.error("💥 Unexpected error:", error);
     process.exit(1);
   });
 }

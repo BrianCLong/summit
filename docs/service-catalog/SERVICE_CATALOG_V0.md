@@ -28,13 +28,13 @@ The living map of all services, capabilities, and owners in CompanyOS. Nobody ev
 
 ### Goals
 
-| Goal | Success Metric | Target |
-|------|---------------|--------|
-| **Discoverability** | Time to find service owner | < 30 seconds |
-| **Completeness** | Services in catalog | 100% of production services |
-| **Accuracy** | Stale entries | < 5% |
-| **Usability** | User satisfaction | > 4.5/5 rating |
-| **Automation** | Auto-populated fields | > 70% |
+| Goal                | Success Metric             | Target                      |
+| ------------------- | -------------------------- | --------------------------- |
+| **Discoverability** | Time to find service owner | < 30 seconds                |
+| **Completeness**    | Services in catalog        | 100% of production services |
+| **Accuracy**        | Stale entries              | < 5%                        |
+| **Usability**       | User satisfaction          | > 4.5/5 rating              |
+| **Automation**      | Auto-populated fields      | > 70%                       |
 
 ### Key Questions This Solves
 
@@ -87,10 +87,10 @@ The living map of all services, capabilities, and owners in CompanyOS. Nobody ev
 ```yaml
 catalog_navigation:
   primary_views:
-    - capabilities_map    # Business-oriented capability view
-    - service_list        # Alphabetical service directory
-    - dependency_graph    # Visual dependency explorer
-    - owner_directory     # Team/owner lookup
+    - capabilities_map # Business-oriented capability view
+    - service_list # Alphabetical service directory
+    - dependency_graph # Visual dependency explorer
+    - owner_directory # Team/owner lookup
 
   filters:
     - tier: [critical, high, medium, low]
@@ -113,7 +113,6 @@ catalog_navigation:
 
 ```yaml
 capability_domains:
-
   security:
     name: Security & Compliance
     description: Authentication, authorization, audit, and compliance capabilities
@@ -262,18 +261,18 @@ capability_domains:
 
 ### Capability-Service Matrix
 
-| Capability | Primary Service | Supporting Services |
-|------------|----------------|---------------------|
-| Authentication | authz-gateway | identity-service |
-| Authorization | authz-gateway | policy-service, opa |
-| Audit & Compliance | prov-ledger | audit-log, auditlake |
-| Graph Storage | graph-core | neo4j |
-| Entity Management | graph-core | er-service |
-| Search | search-api | elasticsearch |
-| AI Copilot | copilot-service | ml-service, rag-service |
-| API Gateway | api-gateway | rate-limiter |
-| Orchestration | conductor | maestro-core |
-| Observability | otel-collector | prometheus, jaeger |
+| Capability         | Primary Service | Supporting Services     |
+| ------------------ | --------------- | ----------------------- |
+| Authentication     | authz-gateway   | identity-service        |
+| Authorization      | authz-gateway   | policy-service, opa     |
+| Audit & Compliance | prov-ledger     | audit-log, auditlake    |
+| Graph Storage      | graph-core      | neo4j                   |
+| Entity Management  | graph-core      | er-service              |
+| Search             | search-api      | elasticsearch           |
+| AI Copilot         | copilot-service | ml-service, rag-service |
+| API Gateway        | api-gateway     | rate-limiter            |
+| Orchestration      | conductor       | maestro-core            |
+| Observability      | otel-collector  | prometheus, jaeger      |
 
 ---
 
@@ -283,45 +282,45 @@ capability_domains:
 
 Services essential to platform operation. Require 99.9%+ availability.
 
-| Service | Capability | Owner | Status |
-|---------|-----------|-------|--------|
-| authz-gateway | Authorization | security-engineering | GA |
-| graph-core | Graph Storage | platform-engineering | GA |
-| api-gateway | API Gateway | platform-engineering | GA |
-| prov-ledger | Audit | data-engineering | GA |
-| conductor | Orchestration | orchestration-team | GA |
-| neo4j | Data Store | data-engineering | GA |
-| redis | Caching | platform-engineering | GA |
-| postgres | Data Store | data-engineering | GA |
-| kafka | Streaming | data-engineering | GA |
-| otel-collector | Observability | sre-team | GA |
-| prometheus | Metrics | sre-team | GA |
-| identity-service | Authentication | security-engineering | GA |
-| config-service | Configuration | platform-engineering | GA |
-| secrets-service | Secrets | security-engineering | GA |
+| Service          | Capability     | Owner                | Status |
+| ---------------- | -------------- | -------------------- | ------ |
+| authz-gateway    | Authorization  | security-engineering | GA     |
+| graph-core       | Graph Storage  | platform-engineering | GA     |
+| api-gateway      | API Gateway    | platform-engineering | GA     |
+| prov-ledger      | Audit          | data-engineering     | GA     |
+| conductor        | Orchestration  | orchestration-team   | GA     |
+| neo4j            | Data Store     | data-engineering     | GA     |
+| redis            | Caching        | platform-engineering | GA     |
+| postgres         | Data Store     | data-engineering     | GA     |
+| kafka            | Streaming      | data-engineering     | GA     |
+| otel-collector   | Observability  | sre-team             | GA     |
+| prometheus       | Metrics        | sre-team             | GA     |
+| identity-service | Authentication | security-engineering | GA     |
+| config-service   | Configuration  | platform-engineering | GA     |
+| secrets-service  | Secrets        | security-engineering | GA     |
 
 ### Tier 2: High Services (32 services)
 
 Important services with strict SLOs. Require 99.5%+ availability.
 
-| Service | Capability | Owner | Status |
-|---------|-----------|-------|--------|
-| copilot-service | AI Copilot | ai-team | GA |
-| search-api | Search | search-team | GA |
-| analytics-engine | Analytics | analytics-team | GA |
-| er-service | Entity Resolution | data-engineering | GA |
-| ml-service | ML Inference | ai-team | GA |
-| feed-processor | Ingestion | data-engineering | GA |
-| ingest-service | Ingestion | data-engineering | GA |
-| graph-api | Graph Analytics | platform-engineering | GA |
-| data-quality | Data Quality | data-engineering | GA |
-| compliance-service | Compliance | security-engineering | GA |
-| privacy-service | Data Protection | security-engineering | GA |
-| export-service | Export | data-engineering | GA |
-| notification-service | Notifications | platform-engineering | GA |
-| scheduler | Scheduling | platform-engineering | GA |
-| workflow-service | Workflows | orchestration-team | GA |
-| ... | ... | ... | ... |
+| Service              | Capability        | Owner                | Status |
+| -------------------- | ----------------- | -------------------- | ------ |
+| copilot-service      | AI Copilot        | ai-team              | GA     |
+| search-api           | Search            | search-team          | GA     |
+| analytics-engine     | Analytics         | analytics-team       | GA     |
+| er-service           | Entity Resolution | data-engineering     | GA     |
+| ml-service           | ML Inference      | ai-team              | GA     |
+| feed-processor       | Ingestion         | data-engineering     | GA     |
+| ingest-service       | Ingestion         | data-engineering     | GA     |
+| graph-api            | Graph Analytics   | platform-engineering | GA     |
+| data-quality         | Data Quality      | data-engineering     | GA     |
+| compliance-service   | Compliance        | security-engineering | GA     |
+| privacy-service      | Data Protection   | security-engineering | GA     |
+| export-service       | Export            | data-engineering     | GA     |
+| notification-service | Notifications     | platform-engineering | GA     |
+| scheduler            | Scheduling        | platform-engineering | GA     |
+| workflow-service     | Workflows         | orchestration-team   | GA     |
+| ...                  | ...               | ...                  | ...    |
 
 ### Tier 3: Medium Services (108 services)
 
@@ -502,7 +501,6 @@ type Subscription {
 
 ```yaml
 integrations:
-
   github:
     purpose: CODEOWNERS sync, PR ownership validation
     sync: bidirectional

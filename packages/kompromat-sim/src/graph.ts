@@ -1,4 +1,4 @@
-import { Graph } from './types';
+import { Graph } from "./types";
 
 export function buildStar(n: number): Graph {
   const nodes = Array.from({ length: n }, (_, i) => ({
@@ -8,7 +8,7 @@ export function buildStar(n: number): Graph {
     deg: i === 0 ? n - 1 : 1,
   }));
   const edges = Array.from({ length: n - 1 }, (_, i) => ({
-    u: '0',
+    u: "0",
     v: String(i + 1),
   }));
   return { nodes, edges };

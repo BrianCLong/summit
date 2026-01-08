@@ -307,10 +307,7 @@ type Query {
 
   # New v0.4.0 transcendent queries
   transcendentStatus(tenant: Tenant!): TranscendentStatus!
-  evolutionProposals(
-    tenant: Tenant!
-    status: ApprovalStatus
-  ): [EvolutionProposal!]!
+  evolutionProposals(tenant: Tenant!, status: ApprovalStatus): [EvolutionProposal!]!
   evolutionHistory(tenant: Tenant!, limit: Int = 50): [EvolutionEvent!]!
   controllerV3Config(tenant: Tenant!): ControllerV3Config!
   transcendentCapabilities(tenant: Tenant!): [TranscendentCapability!]!
@@ -355,11 +352,7 @@ type Mutation {
   setFeatureFlags(tenant: Tenant!, flags: JSON!): MutationResult!
   setCanaryWeights(tenant: Tenant!, weights: JSON!): MutationResult!
   setSloThresholds(tenant: Tenant!, thresholds: JSON!): MutationResult!
-  proposeRemediation(
-    tenant: Tenant!
-    type: String!
-    hitl: Boolean!
-  ): MutationResult!
+  proposeRemediation(tenant: Tenant!, type: String!, hitl: Boolean!): MutationResult!
   canaryPromote(tenant: Tenant!): MutationResult!
   canaryHold(tenant: Tenant!): MutationResult!
   evidencePack(version: String!): EvidenceResult!
@@ -375,30 +368,16 @@ type Mutation {
     config: TranscendentIntelligenceConfig!
   ): MutationResult!
 
-  configureControllerV3(
-    tenant: Tenant!
-    config: ControllerV3ConfigInput!
-  ): MutationResult!
+  configureControllerV3(tenant: Tenant!, config: ControllerV3ConfigInput!): MutationResult!
 
   # Evolution Proposal System (Policy-Sandboxed)
-  proposeEvolution(
-    tenant: Tenant!
-    proposal: EvolutionProposalInput!
-  ): EvolutionProposal!
+  proposeEvolution(tenant: Tenant!, proposal: EvolutionProposalInput!): EvolutionProposal!
 
-  approveEvolution(
-    tenant: Tenant!
-    proposalId: String!
-    approverNotes: String
-  ): MutationResult!
+  approveEvolution(tenant: Tenant!, proposalId: String!, approverNotes: String): MutationResult!
 
   applyEvolution(tenant: Tenant!, proposalId: String!): MutationResult!
 
-  rollbackEvolution(
-    tenant: Tenant!
-    proposalId: String!
-    reason: String!
-  ): MutationResult!
+  rollbackEvolution(tenant: Tenant!, proposalId: String!, reason: String!): MutationResult!
 
   # Quantum Operations
   createQuantumKnowledgeNetwork(
@@ -406,16 +385,9 @@ type Mutation {
     config: QuantumKnowledgeNetworkInput!
   ): QuantumKnowledgeNetwork!
 
-  executeQuantumReasoning(
-    tenant: Tenant!
-    problem: JSON!
-  ): QuantumOperationResult!
+  executeQuantumReasoning(tenant: Tenant!, problem: JSON!): QuantumOperationResult!
 
-  synthesizeQuantumInsights(
-    tenant: Tenant!
-    networkId: String!
-    query: JSON!
-  ): MutationResult!
+  synthesizeQuantumInsights(tenant: Tenant!, networkId: String!, query: JSON!): MutationResult!
 
   # Autonomous Evolution Control
   pauseAutonomousEvolution(tenant: Tenant!, reason: String!): MutationResult!
@@ -423,18 +395,12 @@ type Mutation {
   resumeAutonomousEvolution(tenant: Tenant!): MutationResult!
 
   # Safety and Containment
-  emergencyContainment(
-    tenant: Tenant!
-    containmentType: ContainmentType!
-  ): MutationResult!
+  emergencyContainment(tenant: Tenant!, containmentType: ContainmentType!): MutationResult!
 
   validateTranscendentSafety(tenant: Tenant!): SafetyValidationResult!
 
   # Performance Optimization
-  optimizeTranscendentPerformance(
-    tenant: Tenant!
-    optimizationTargets: [String!]!
-  ): MutationResult!
+  optimizeTranscendentPerformance(tenant: Tenant!, optimizationTargets: [String!]!): MutationResult!
 }
 
 enum ContainmentType {

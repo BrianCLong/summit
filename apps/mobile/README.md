@@ -136,7 +136,7 @@ import { GEOINTMap } from '@/components/geoint';
   onFeaturePress={(feature) => console.log(feature)}
   showControls={true}
   showLayers={true}
-/>
+/>;
 ```
 
 ### Push Notifications

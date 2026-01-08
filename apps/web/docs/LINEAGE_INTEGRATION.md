@@ -11,8 +11,22 @@ A minimal API surface is exposed at `GET /api/lineage/:id` which returns a linea
   "targetId": "evidence-123",
   "targetType": "evidence",
   "policyTags": ["PII", "LICENSED"],
-  "upstream": [{ "id": "ingest-1", "label": "S3 Intake", "type": "source", "tags": ["checksum:verified"] }],
-  "downstream": [{ "id": "case-2", "label": "ACME Procurement Review", "type": "case", "tags": ["warrant:required"] }],
+  "upstream": [
+    {
+      "id": "ingest-1",
+      "label": "S3 Intake",
+      "type": "source",
+      "tags": ["checksum:verified"]
+    }
+  ],
+  "downstream": [
+    {
+      "id": "case-2",
+      "label": "ACME Procurement Review",
+      "type": "case",
+      "tags": ["warrant:required"]
+    }
+  ],
   "restricted": false,
   "mode": "read-only"
 }

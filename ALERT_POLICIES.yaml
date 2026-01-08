@@ -35,13 +35,13 @@ spec:
             team: platform
             pager: immediate
           annotations:
-            summary: '🚨 IntelGraph API burning error budget too fast'
+            summary: "🚨 IntelGraph API burning error budget too fast"
             description: |
               API error rate {{ $value | humanizePercentage }} is burning 2x error budget over 30 minutes.
               Current burn rate will exhaust monthly budget in {{ div 2160 (div $value 0.001) | humanizeDuration }}.
               IMMEDIATE ACTION REQUIRED - Consider emergency rollback.
-            runbook_url: 'https://runbooks.intelgraph.ai/slo-burn-rate'
-            dashboard_url: 'https://grafana.intelgraph.ai/d/api-overview'
+            runbook_url: "https://runbooks.intelgraph.ai/slo-burn-rate"
+            dashboard_url: "https://grafana.intelgraph.ai/d/api-overview"
 
         # Slow burn rate (14x budget in 6 hours) - WARNING
         - alert: IntelGraphAPISlowBurn
@@ -58,11 +58,11 @@ spec:
             team: platform
             pager: business_hours
           annotations:
-            summary: '⚠️ IntelGraph API burning error budget consistently'
+            summary: "⚠️ IntelGraph API burning error budget consistently"
             description: |
               API error rate {{ $value | humanizePercentage }} is burning 14x error budget over 6 hours.
               At this rate, monthly budget will be exhausted in {{ div 2160 (div $value 0.001) | humanizeDuration }}.
-            runbook_url: 'https://runbooks.intelgraph.ai/slo-burn-rate'
+            runbook_url: "https://runbooks.intelgraph.ai/slo-burn-rate"
 
     # ====================================================================
     # API PERFORMANCE ALERTS
@@ -83,12 +83,12 @@ spec:
             team: platform
             pager: immediate
           annotations:
-            summary: '🐌 IntelGraph API P95 latency exceeds SLO'
+            summary: "🐌 IntelGraph API P95 latency exceeds SLO"
             description: |
               API P95 latency {{ $value | humanizeDuration }} exceeds 350ms SLO for 15 minutes.
               This impacts user experience and may indicate resource constraints or performance regressions.
-            runbook_url: 'https://runbooks.intelgraph.ai/api-latency'
-            dashboard_url: 'https://grafana.intelgraph.ai/d/api-performance'
+            runbook_url: "https://runbooks.intelgraph.ai/api-latency"
+            dashboard_url: "https://grafana.intelgraph.ai/d/api-performance"
 
         # API P99 latency warning
         - alert: IntelGraphAPILatencyP99High
@@ -101,8 +101,8 @@ spec:
             slo: latency
             team: platform
           annotations:
-            summary: '🐌 IntelGraph API P99 latency high'
-            description: 'API P99 latency {{ $value | humanizeDuration }} exceeds 700ms threshold'
+            summary: "🐌 IntelGraph API P99 latency high"
+            description: "API P99 latency {{ $value | humanizeDuration }} exceeds 700ms threshold"
 
         # GraphQL query complexity alerts
         - alert: IntelGraphGraphQuerySlow
@@ -115,9 +115,9 @@ spec:
             slo: graph_latency
             team: platform
           annotations:
-            summary: '🕸️ Graph 3-hop queries exceeding SLO'
-            description: '3-hop graph queries P95 {{ $value | humanizeDuration }} exceeds 1.2s SLO'
-            runbook_url: 'https://runbooks.intelgraph.ai/graph-performance'
+            summary: "🕸️ Graph 3-hop queries exceeding SLO"
+            description: "3-hop graph queries P95 {{ $value | humanizeDuration }} exceeds 1.2s SLO"
+            runbook_url: "https://runbooks.intelgraph.ai/graph-performance"
 
     # ====================================================================
     # AUTHENTICATION & AUTHORIZATION ALERTS
@@ -138,11 +138,11 @@ spec:
             team: security
             pager: immediate
           annotations:
-            summary: '🔐 High authentication failure rate detected'
+            summary: "🔐 High authentication failure rate detected"
             description: |
               Authentication error rate {{ $value | humanizePercentage }} exceeds 0.5% threshold.
               This may indicate a credential attack or OIDC configuration issue.
-            runbook_url: 'https://runbooks.intelgraph.ai/auth-failures'
+            runbook_url: "https://runbooks.intelgraph.ai/auth-failures"
 
         # OIDC JWKS rotation failure
         - alert: IntelGraphJWKSRotationFailed
@@ -155,8 +155,8 @@ spec:
             category: security
             team: security
           annotations:
-            summary: '🔑 OIDC JWKS rotation failing'
-            description: 'JWKS fetch errors detected, authentication may fail for new tokens'
+            summary: "🔑 OIDC JWKS rotation failing"
+            description: "JWKS fetch errors detected, authentication may fail for new tokens"
 
         # OPA policy decision latency
         - alert: IntelGraphOPADecisionSlow
@@ -169,8 +169,8 @@ spec:
             category: security
             team: security
           annotations:
-            summary: '🛡️ OPA policy decisions slow'
-            description: 'OPA decision P95 latency {{ $value | humanizeDuration }} exceeds 10ms threshold'
+            summary: "🛡️ OPA policy decisions slow"
+            description: "OPA decision P95 latency {{ $value | humanizeDuration }} exceeds 10ms threshold"
 
     # ====================================================================
     # DATA PLATFORM ALERTS
@@ -189,8 +189,8 @@ spec:
             service: postgresql
             team: dba
           annotations:
-            summary: '🗄️ PostgreSQL connection pool near capacity'
-            description: 'Connection pool {{ $value | humanizePercentage }} full, may impact performance'
+            summary: "🗄️ PostgreSQL connection pool near capacity"
+            description: "Connection pool {{ $value | humanizePercentage }} full, may impact performance"
 
         # PostgreSQL replication lag
         - alert: IntelGraphPostgreSQLReplicationLag
@@ -203,8 +203,8 @@ spec:
             team: dba
             pager: immediate
           annotations:
-            summary: '🗄️ PostgreSQL replication lag high'
-            description: 'Replication lag {{ $value | humanizeDuration }} exceeds 5 minutes'
+            summary: "🗄️ PostgreSQL replication lag high"
+            description: "Replication lag {{ $value | humanizeDuration }} exceeds 5 minutes"
 
     - name: intelgraph.data.neo4j
       interval: 60s
@@ -219,7 +219,7 @@ spec:
             service: neo4j
             team: dba
           annotations:
-            summary: '🕸️ Neo4j page cache hit rate low'
+            summary: "🕸️ Neo4j page cache hit rate low"
             description: |
               Page cache hit rate {{ $value | humanizePercentage }} below 85% threshold.
               Consider increasing cache size or investigating query patterns.
@@ -235,8 +235,8 @@ spec:
             team: dba
             pager: immediate
           annotations:
-            summary: '🕸️ Neo4j cluster member down'
-            description: 'Neo4j cluster member {{ $labels.instance }} is unreachable'
+            summary: "🕸️ Neo4j cluster member down"
+            description: "Neo4j cluster member {{ $labels.instance }} is unreachable"
 
     - name: intelgraph.data.kafka
       interval: 30s
@@ -251,8 +251,8 @@ spec:
             service: kafka
             team: platform
           annotations:
-            summary: '📊 Kafka consumer lag high'
-            description: 'Consumer lag {{ $value }} messages exceeds 1000 threshold'
+            summary: "📊 Kafka consumer lag high"
+            description: "Consumer lag {{ $value }} messages exceeds 1000 threshold"
 
         # Dead Letter Queue growth
         - alert: IntelGraphDLQGrowthHigh
@@ -265,8 +265,8 @@ spec:
             category: data_quality
             team: platform
           annotations:
-            summary: '⚠️ Dead Letter Queue growing rapidly'
-            description: 'DLQ growth rate {{ $value }} messages/sec indicates processing issues'
+            summary: "⚠️ Dead Letter Queue growing rapidly"
+            description: "DLQ growth rate {{ $value }} messages/sec indicates processing issues"
 
     # ====================================================================
     # INFRASTRUCTURE ALERTS
@@ -285,8 +285,8 @@ spec:
             service: infrastructure
             team: sre
           annotations:
-            summary: '🔥 High CPU usage detected'
-            description: 'CPU usage {{ $value }}% on {{ $labels.instance }} exceeds 85%'
+            summary: "🔥 High CPU usage detected"
+            description: "CPU usage {{ $value }}% on {{ $labels.instance }} exceeds 85%"
 
         # High memory usage
         - alert: IntelGraphHighMemoryUsage
@@ -298,8 +298,8 @@ spec:
             service: infrastructure
             team: sre
           annotations:
-            summary: '🧠 High memory usage detected'
-            description: 'Memory usage {{ $value }}% on {{ $labels.instance }} exceeds 85%'
+            summary: "🧠 High memory usage detected"
+            description: "Memory usage {{ $value }}% on {{ $labels.instance }} exceeds 85%"
 
         # Pod restart rate high
         - alert: IntelGraphPodRestartRateHigh
@@ -311,8 +311,8 @@ spec:
             service: kubernetes
             team: sre
           annotations:
-            summary: '🔄 High pod restart rate'
-            description: 'Pod {{ $labels.pod }} restarting frequently'
+            summary: "🔄 High pod restart rate"
+            description: "Pod {{ $labels.pod }} restarting frequently"
 
     # ====================================================================
     # COST & CAPACITY ALERTS
@@ -331,8 +331,8 @@ spec:
             service: cost-management
             team: finops
           annotations:
-            summary: '💰 Daily cost exceeds budget'
-            description: 'Daily cost ${{ $value }} exceeds $600 budget (monthly projection: ${{ mul $value 30 }})'
+            summary: "💰 Daily cost exceeds budget"
+            description: "Daily cost ${{ $value }} exceeds $600 budget (monthly projection: ${{ mul $value 30 }})"
 
         # Resource quota near limit
         - alert: IntelGraphResourceQuotaNearLimit
@@ -344,8 +344,8 @@ spec:
             service: kubernetes
             team: sre
           annotations:
-            summary: '📊 Resource quota near limit'
-            description: '{{ $labels.resource }} quota {{ $value | humanizePercentage }} full in {{ $labels.namespace }}'
+            summary: "📊 Resource quota near limit"
+            description: "{{ $labels.resource }} quota {{ $value | humanizePercentage }} full in {{ $labels.namespace }}"
 
     # ====================================================================
     # SECURITY ALERTS
@@ -365,8 +365,8 @@ spec:
             category: security
             team: security
           annotations:
-            summary: '🚦 High rate limit enforcement'
-            description: 'Rate limit hits {{ $value }}/sec may indicate abuse or traffic spike'
+            summary: "🚦 High rate limit enforcement"
+            description: "Rate limit hits {{ $value }}/sec may indicate abuse or traffic spike"
 
         # Non-persisted GraphQL queries (security bypass attempt)
         - alert: IntelGraphNonPersistedQueryAttempt
@@ -379,8 +379,8 @@ spec:
             category: security
             team: security
           annotations:
-            summary: '🔒 Non-persisted GraphQL query attempts'
-            description: '{{ $value }}/sec attempts to use non-persisted queries (potential bypass attempt)'
+            summary: "🔒 Non-persisted GraphQL query attempts"
+            description: "{{ $value }}/sec attempts to use non-persisted queries (potential bypass attempt)"
 
         # Certificate expiry warning
         - alert: IntelGraphCertificateExpiringSoon
@@ -393,8 +393,8 @@ spec:
             category: security
             team: sre
           annotations:
-            summary: '📜 TLS certificate expiring soon'
-            description: 'Certificate {{ $labels.name }} expires in {{ div (sub $value (time())) 86400 | humanizeDuration }}'
+            summary: "📜 TLS certificate expiring soon"
+            description: "Certificate {{ $labels.name }} expires in {{ div (sub $value (time())) 86400 | humanizeDuration }}"
 
     # ====================================================================
     # AI COPILOT SERVICE ALERTS
@@ -418,12 +418,12 @@ spec:
             team: platform
             pager: immediate
           annotations:
-            summary: '🤖 AI Copilot availability burn rate high'
+            summary: "🤖 AI Copilot availability burn rate high"
             description: |
               AI Copilot error rate {{ $value | humanizePercentage }} is burning error budget too fast.
               IMMEDIATE ACTION REQUIRED.
-            runbook_url: 'https://runbooks.intelgraph.ai/ai-copilot'
-            dashboard_url: 'https://grafana.intelgraph.ai/d/ai-copilot'
+            runbook_url: "https://runbooks.intelgraph.ai/ai-copilot"
+            dashboard_url: "https://grafana.intelgraph.ai/d/ai-copilot"
 
         # AI Copilot latency SLO breach - WARNING
         - alert: AiCopilotLatencyBurnRate
@@ -436,10 +436,10 @@ spec:
             slo: latency
             team: platform
           annotations:
-            summary: '🤖 AI Copilot P95 latency exceeds SLO'
+            summary: "🤖 AI Copilot P95 latency exceeds SLO"
             description: |
               AI Copilot P95 latency {{ $value | humanizeDuration }} exceeds 1s SLO.
-            runbook_url: 'https://runbooks.intelgraph.ai/ai-copilot'
+            runbook_url: "https://runbooks.intelgraph.ai/ai-copilot"
 
         # AI Copilot high error rate - CRITICAL
         - alert: AiCopilotHighErrorRate
@@ -452,9 +452,9 @@ spec:
             team: platform
             pager: immediate
           annotations:
-            summary: '🤖 AI Copilot error rate high'
-            description: 'AI Copilot error rate {{ $value | humanizePercentage }} exceeds 1% threshold'
-            runbook_url: 'https://runbooks.intelgraph.ai/ai-copilot'
+            summary: "🤖 AI Copilot error rate high"
+            description: "AI Copilot error rate {{ $value | humanizePercentage }} exceeds 1% threshold"
+            runbook_url: "https://runbooks.intelgraph.ai/ai-copilot"
 
     # ====================================================================
     # BUSINESS METRICS ALERTS
@@ -473,8 +473,8 @@ spec:
             service: intelgraph-ingest
             team: product
           annotations:
-            summary: '📥 Entity ingestion rate low'
-            description: 'Entity ingestion rate {{ $value }}/hour below expected baseline'
+            summary: "📥 Entity ingestion rate low"
+            description: "Entity ingestion rate {{ $value }}/hour below expected baseline"
 
         # GraphQL operation success rate low
         - alert: IntelGraphGraphQLSuccessRateLow
@@ -486,8 +486,8 @@ spec:
             service: intelgraph-api
             team: product
           annotations:
-            summary: '📊 GraphQL success rate low'
-            description: 'GraphQL success rate {{ $value | humanizePercentage }} below 95% threshold'
+            summary: "📊 GraphQL success rate low"
+            description: "GraphQL success rate {{ $value | humanizePercentage }} below 95% threshold"
 
 ---
 # Alert Manager Configuration for routing and escalation

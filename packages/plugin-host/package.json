@@ -13,7 +13,12 @@
     "lint": "eslint src/**/*.ts",
     "typecheck": "tsc --noEmit"
   },
-  "keywords": ["plugin", "host", "runtime", "microservices"],
+  "keywords": [
+    "plugin",
+    "host",
+    "runtime",
+    "microservices"
+  ],
   "author": "IntelGraph Team",
   "license": "MIT",
   "dependencies": {

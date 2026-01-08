@@ -321,7 +321,7 @@ After validation, update:
 
 ### Weekly Data Collection Form
 
-**Week of**: ****\_****
+**Week of**: \***\*\_\*\***
 
 **Workflow Runs**:
 

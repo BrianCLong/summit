@@ -56,8 +56,8 @@
 
 ## Sign-off
 
-| Role | Name | Date | Signature |
-|------|------|------|-----------|
-| Data Engineering Lead | | | |
-| ML Engineering Lead | | | |
-| Privacy Officer | | | |
+| Role                  | Name | Date | Signature |
+| --------------------- | ---- | ---- | --------- |
+| Data Engineering Lead |      |      |           |
+| ML Engineering Lead   |      |      |           |
+| Privacy Officer       |      |      |           |

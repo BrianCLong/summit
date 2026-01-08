@@ -31,9 +31,9 @@ export class CriticalMassAnalyzer {
   estimateCriticalThreshold(
     averageDegree: number,
     adoptionThreshold: number,
-    contagionType: 'SIMPLE' | 'COMPLEX'
+    contagionType: "SIMPLE" | "COMPLEX"
   ): number {
-    if (contagionType === 'SIMPLE') {
+    if (contagionType === "SIMPLE") {
       // Simple contagion (like disease)
       return 1 / averageDegree;
     } else {
@@ -102,11 +102,13 @@ export class CriticalMassAnalyzer {
 
     while (this.calculateCoverage(activated, network) < targetCoverage) {
       // Find node that would activate the most additional nodes
-      let bestNode = '';
+      let bestNode = "";
       let bestGain = 0;
 
       for (const node of network.keys()) {
-        if (activated.has(node)) {continue;}
+        if (activated.has(node)) {
+          continue;
+        }
 
         // Simulate adding this node
         const gain = this.simulateActivation(node, activated, network, thresholds);
@@ -116,7 +118,9 @@ export class CriticalMassAnalyzer {
         }
       }
 
-      if (bestNode === '') {break;}
+      if (bestNode === "") {
+        break;
+      }
 
       seeds.push(bestNode);
       this.propagateActivation(bestNode, activated, network, thresholds);
@@ -134,7 +138,9 @@ export class CriticalMassAnalyzer {
     threshold: number,
     clustering: number
   ): number {
-    if (adoption >= threshold) {return 0.95;}
+    if (adoption >= threshold) {
+      return 0.95;
+    }
 
     // Probability increases as we approach threshold
     // Clustering helps local cascades
@@ -158,10 +164,14 @@ export class CriticalMassAnalyzer {
     threshold: number,
     metrics: NetworkMetrics
   ): number | undefined {
-    if (current >= threshold) {return 0;}
+    if (current >= threshold) {
+      return 0;
+    }
 
     const growthRate = metrics.adoptionVelocity || 0.01;
-    if (growthRate <= 0) {return undefined;}
+    if (growthRate <= 0) {
+      return undefined;
+    }
 
     return (threshold - current) / growthRate;
   }
@@ -185,7 +195,9 @@ export class CriticalMassAnalyzer {
     while (changed) {
       changed = false;
       for (const [n, neighbors] of network.entries()) {
-        if (testActive.has(n)) {continue;}
+        if (testActive.has(n)) {
+          continue;
+        }
 
         const activeNeighbors = neighbors.filter((nb) => testActive.has(nb)).length;
         const threshold = thresholds.get(n) || 0.5;
@@ -213,7 +225,9 @@ export class CriticalMassAnalyzer {
     while (changed) {
       changed = false;
       for (const [n, neighbors] of network.entries()) {
-        if (activated.has(n)) {continue;}
+        if (activated.has(n)) {
+          continue;
+        }
 
         const activeNeighbors = neighbors.filter((nb) => activated.has(nb)).length;
         const threshold = thresholds.get(n) || 0.5;
@@ -235,7 +249,7 @@ export interface NetworkMetrics {
 }
 
 export interface CriticalMassThresholdConfig {
-  type: 'SIMPLE' | 'COMPLEX';
+  type: "SIMPLE" | "COMPLEX";
   mean?: number;
   variance?: number;
   lowThresholdSegments?: string[];

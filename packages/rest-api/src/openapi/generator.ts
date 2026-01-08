@@ -4,8 +4,8 @@
  * Generates OpenAPI 3.0 specification from route definitions
  */
 
-import type { OpenAPIObject, PathItemObject, OperationObject } from 'openapi3-ts/oas31';
-import type { APIConfig, RouteDefinition, HTTPMethod } from '../types';
+import type { OpenAPIObject, PathItemObject, OperationObject } from "openapi3-ts/oas31";
+import type { APIConfig, RouteDefinition, HTTPMethod } from "../types";
 
 export class OpenAPIGenerator {
   private config: APIConfig;
@@ -15,7 +15,7 @@ export class OpenAPIGenerator {
     this.config = config;
 
     this.spec = {
-      openapi: '3.0.3',
+      openapi: "3.0.3",
       info: {
         title: config.title,
         version: config.version,
@@ -23,8 +23,8 @@ export class OpenAPIGenerator {
       },
       servers: config.openapi?.servers || [
         {
-          url: `${config.basePath || ''}`,
-          description: 'API Server',
+          url: `${config.basePath || ""}`,
+          description: "API Server",
         },
       ],
       paths: {},
@@ -68,7 +68,8 @@ export class OpenAPIGenerator {
     const operation: OperationObject = {
       summary: openapi.summary,
       description: openapi.description,
-      operationId: openapi.operationId || `${method.toLowerCase()}_${path.replace(/[^a-zA-Z0-9]/g, '_')}`,
+      operationId:
+        openapi.operationId || `${method.toLowerCase()}_${path.replace(/[^a-zA-Z0-9]/g, "_")}`,
       tags: openapi.tags,
       parameters: openapi.parameters?.map((param) => ({
         name: param.name,
@@ -80,10 +81,10 @@ export class OpenAPIGenerator {
       })),
       requestBody: openapi.requestBody
         ? {
-          description: openapi.requestBody.description,
-          required: openapi.requestBody.required,
-          content: openapi.requestBody.content as any,
-        }
+            description: openapi.requestBody.description,
+            required: openapi.requestBody.required,
+            content: openapi.requestBody.content as any,
+          }
         : undefined,
       responses: openapi.responses,
       security: openapi.security,
@@ -155,23 +156,23 @@ export class OpenAPIGenerator {
 
     if (config.security?.apiKeys?.enabled) {
       schemes.apiKey = {
-        type: 'apiKey',
-        in: config.security.apiKeys.header ? 'header' : 'query',
-        name: config.security.apiKeys.header || config.security.apiKeys.query || 'api-key',
+        type: "apiKey",
+        in: config.security.apiKeys.header ? "header" : "query",
+        name: config.security.apiKeys.header || config.security.apiKeys.query || "api-key",
       };
     }
 
     if (config.security?.jwt?.enabled) {
       schemes.bearerAuth = {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT",
       };
     }
 
     if (config.security?.oauth?.enabled) {
       schemes.oauth2 = {
-        type: 'oauth2',
+        type: "oauth2",
         flows: {
           authorizationCode: {
             authorizationUrl: config.security.oauth.authorizationURL,
@@ -191,162 +192,162 @@ export class OpenAPIGenerator {
   static generateCommonSchemas() {
     return {
       APIResponse: {
-        type: 'object',
+        type: "object",
         properties: {
           success: {
-            type: 'boolean',
-            description: 'Indicates if the request was successful',
+            type: "boolean",
+            description: "Indicates if the request was successful",
           },
           data: {
-            description: 'Response data',
+            description: "Response data",
           },
           error: {
-            $ref: '#/components/schemas/APIError',
+            $ref: "#/components/schemas/APIError",
           },
           metadata: {
-            $ref: '#/components/schemas/ResponseMetadata',
+            $ref: "#/components/schemas/ResponseMetadata",
           },
           links: {
-            $ref: '#/components/schemas/HATEOASLinks',
+            $ref: "#/components/schemas/HATEOASLinks",
           },
         },
-        required: ['success'],
+        required: ["success"],
       },
       APIError: {
-        type: 'object',
+        type: "object",
         properties: {
           error_code: {
-            type: 'string',
-            description: 'Stable machine-readable identifier for the error',
+            type: "string",
+            description: "Stable machine-readable identifier for the error",
           },
           human_message: {
-            type: 'string',
-            description: 'User-friendly explanation of the error',
+            type: "string",
+            description: "User-friendly explanation of the error",
           },
           developer_message: {
-            type: 'string',
-            description: 'Technical context intended for engineers/logs',
+            type: "string",
+            description: "Technical context intended for engineers/logs",
           },
           category: {
-            type: 'string',
-            enum: ['auth', 'validation', 'rate-limit', 'internal', 'LLM', 'upstream'],
-            description: 'Error taxonomy bucket',
+            type: "string",
+            enum: ["auth", "validation", "rate-limit", "internal", "LLM", "upstream"],
+            description: "Error taxonomy bucket",
           },
           trace_id: {
-            type: 'string',
-            description: 'Trace identifier for correlation',
+            type: "string",
+            description: "Trace identifier for correlation",
           },
           suggested_action: {
-            type: 'string',
-            description: 'Remediation guidance for the caller',
+            type: "string",
+            description: "Remediation guidance for the caller",
           },
           timestamp: {
-            type: 'string',
-            format: 'date-time',
-            description: 'When the error envelope was generated',
+            type: "string",
+            format: "date-time",
+            description: "When the error envelope was generated",
           },
           context: {
-            type: 'object',
-            description: 'Non-PII debugging breadcrumbs (path, method, provider)',
+            type: "object",
+            description: "Non-PII debugging breadcrumbs (path, method, provider)",
             additionalProperties: true,
           },
         },
-        required: ['error_code', 'human_message', 'category', 'trace_id', 'timestamp'],
+        required: ["error_code", "human_message", "category", "trace_id", "timestamp"],
       },
       ResponseMetadata: {
-        type: 'object',
+        type: "object",
         properties: {
           timestamp: {
-            type: 'string',
-            format: 'date-time',
+            type: "string",
+            format: "date-time",
           },
           version: {
-            type: 'string',
+            type: "string",
           },
           requestId: {
-            type: 'string',
+            type: "string",
           },
           traceId: {
-            type: 'string',
-            description: 'Trace identifier propagated across services',
+            type: "string",
+            description: "Trace identifier propagated across services",
           },
           duration: {
-            type: 'number',
-            description: 'Request duration in milliseconds',
+            type: "number",
+            description: "Request duration in milliseconds",
           },
           pagination: {
-            $ref: '#/components/schemas/PaginationMetadata',
+            $ref: "#/components/schemas/PaginationMetadata",
           },
         },
-        required: ['timestamp', 'version', 'requestId'],
+        required: ["timestamp", "version", "requestId"],
       },
       PaginationMetadata: {
-        type: 'object',
+        type: "object",
         properties: {
           total: {
-            type: 'integer',
-            description: 'Total number of items',
+            type: "integer",
+            description: "Total number of items",
           },
           count: {
-            type: 'integer',
-            description: 'Number of items in this response',
+            type: "integer",
+            description: "Number of items in this response",
           },
           limit: {
-            type: 'integer',
-            description: 'Maximum number of items per page',
+            type: "integer",
+            description: "Maximum number of items per page",
           },
           offset: {
-            type: 'integer',
-            description: 'Offset for pagination',
+            type: "integer",
+            description: "Offset for pagination",
           },
           cursor: {
-            type: 'string',
-            description: 'Cursor for cursor-based pagination',
+            type: "string",
+            description: "Cursor for cursor-based pagination",
           },
           hasMore: {
-            type: 'boolean',
-            description: 'Indicates if more items are available',
+            type: "boolean",
+            description: "Indicates if more items are available",
           },
         },
-        required: ['count', 'limit', 'hasMore'],
+        required: ["count", "limit", "hasMore"],
       },
       HATEOASLinks: {
-        type: 'object',
+        type: "object",
         properties: {
           self: {
-            $ref: '#/components/schemas/Link',
+            $ref: "#/components/schemas/Link",
           },
           next: {
-            $ref: '#/components/schemas/Link',
+            $ref: "#/components/schemas/Link",
           },
           prev: {
-            $ref: '#/components/schemas/Link',
+            $ref: "#/components/schemas/Link",
           },
           first: {
-            $ref: '#/components/schemas/Link',
+            $ref: "#/components/schemas/Link",
           },
           last: {
-            $ref: '#/components/schemas/Link',
+            $ref: "#/components/schemas/Link",
           },
         },
-        required: ['self'],
+        required: ["self"],
       },
       Link: {
-        type: 'object',
+        type: "object",
         properties: {
           href: {
-            type: 'string',
-            format: 'uri',
+            type: "string",
+            format: "uri",
           },
           method: {
-            type: 'string',
-            enum: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+            type: "string",
+            enum: ["GET", "POST", "PUT", "PATCH", "DELETE"],
           },
           type: {
-            type: 'string',
+            type: "string",
           },
         },
-        required: ['href'],
+        required: ["href"],
       },
     };
   }

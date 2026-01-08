@@ -1,9 +1,9 @@
-import { Worker } from 'worker_threads';
-import * as fs from 'fs';
-import { fileURLToPath, pathToFileURL } from 'url';
-import * as path from 'path';
-import { ExtensionManifest, ExtensionActivation, ExtensionContext } from '../types.js';
-import { ExtensionObservability } from '../observability.js';
+import { Worker } from "worker_threads";
+import * as fs from "fs";
+import { fileURLToPath, pathToFileURL } from "url";
+import * as path from "path";
+import { ExtensionManifest, ExtensionActivation, ExtensionContext } from "../types.js";
+import { ExtensionObservability } from "../observability.js";
 
 export interface SandboxOptions {
   timeoutMs?: number;
@@ -52,8 +52,8 @@ export class SandboxRunner {
       },
     };
 
-    if (workerFile.endsWith('.ts')) {
-      workerOptions.execArgv = ['--loader', 'ts-node/esm'];
+    if (workerFile.endsWith(".ts")) {
+      workerOptions.execArgv = ["--loader", "ts-node/esm"];
     }
 
     const worker = new Worker(workerFile, workerOptions);
@@ -64,12 +64,12 @@ export class SandboxRunner {
         reject(new Error(`Extension ${manifest.name} exceeded sandbox timeout`));
       }, this.timeoutMs + 100);
 
-      worker.once('message', (message: WorkerResult) => {
+      worker.once("message", (message: WorkerResult) => {
         clearTimeout(timer);
         resolve(message);
       });
 
-      worker.once('error', (err) => {
+      worker.once("error", (err) => {
         clearTimeout(timer);
         reject(err);
       });
@@ -91,9 +91,9 @@ export class SandboxRunner {
           worker.terminate();
           return;
         }
-        worker.postMessage({ type: 'dispose' });
+        worker.postMessage({ type: "dispose" });
         await new Promise<void>((resolve) => {
-          worker.once('message', () => resolve());
+          worker.once("message", () => resolve());
           setTimeout(() => resolve(), 250);
         });
         worker.terminate();
@@ -103,11 +103,11 @@ export class SandboxRunner {
 
   private resolveWorkerFile(): string {
     const dir = path.dirname(fileURLToPath(import.meta.url));
-    const jsPath = path.resolve(dir, 'sandbox-worker.js');
+    const jsPath = path.resolve(dir, "sandbox-worker.js");
     if (fs.existsSync(jsPath)) {
       return jsPath;
     }
-    const tsPath = path.resolve(dir, 'sandbox-worker.ts');
+    const tsPath = path.resolve(dir, "sandbox-worker.ts");
     return tsPath;
   }
 }

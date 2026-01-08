@@ -3,7 +3,7 @@ name: ga-gates
 permissions:
   contents: read
 on:
-  push: { branches: ['release/ga-2025-08'] }
+  push: { branches: ["release/ga-2025-08"] }
   workflow_dispatch: {}
 jobs:
   slo-k6:
@@ -21,16 +21,16 @@ jobs:
       - uses: actions/checkout@v4
       - uses: open-policy-agent/opa-gh-action@v2
         with:
-          query: 'data.intelgraph.policy.export.allow'
-          policy-path: 'policy/opa'
+          query: "data.intelgraph.policy.export.allow"
+          policy-path: "policy/opa"
           input: '{"action":"export","dataset":{"sources":[{"license":"DISALLOW_EXPORT","owner":"Acme"}]}}'
-          expect: 'false'
+          expect: "false"
   cypher-acceptance:
     runs-on: ubuntu-latest
     services:
       neo4j:
         image: neo4j:5
-        ports: ['7474:7474', '7687:7687']
+        ports: ["7474:7474", "7687:7687"]
         env: { NEO4J_AUTH: neo4j/test }
         options: >-
           --health-cmd "cypher-shell -u neo4j -p test 'RETURN 1'"
@@ -46,7 +46,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: '3.12' }
+        with: { python-version: "3.12" }
       - name: Run verifier against sample bundle
         run: |
           python -m tools.prov-verifier.igprov ./samples/disclosure-bundle || exit 1
@@ -55,7 +55,7 @@ jobs:
     services:
       neo4j:
         image: neo4j:5
-        ports: ['7474:7474', '7687:7687']
+        ports: ["7474:7474", "7687:7687"]
         env: { NEO4J_AUTH: neo4j/test }
         options: >-
           --health-cmd "cypher-shell -u neo4j -p test 'RETURN 1'"
@@ -63,12 +63,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '18' }
+        with: { node-version: "18" }
       - name: Validate golden prompts (≥95% valid of 50)
         env:
           PROMPTS_DIR: samples/golden-prompts/cypher
-          THRESHOLD: '0.95'
-          MIN_COUNT: '50'
+          THRESHOLD: "0.95"
+          MIN_COUNT: "50"
           NEO4J_HOST: localhost
           NEO4J_USER: neo4j
           NEO4J_PASS: test

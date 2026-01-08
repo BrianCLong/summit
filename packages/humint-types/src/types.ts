@@ -14,7 +14,7 @@ import type {
   ClassificationLevel,
   HandlingCaveat,
   HumintRelationshipType,
-} from './constants.js';
+} from "./constants.js";
 
 /**
  * Base entity interface with common fields
@@ -61,7 +61,7 @@ export interface ProvenanceInfo {
  */
 export interface ContactMethod {
   id: string;
-  type: 'SECURE_PHONE' | 'DEAD_DROP' | 'BRUSH_PASS' | 'SIGNAL' | 'EMAIL' | 'IN_PERSON' | 'VIRTUAL';
+  type: "SECURE_PHONE" | "DEAD_DROP" | "BRUSH_PASS" | "SIGNAL" | "EMAIL" | "IN_PERSON" | "VIRTUAL";
   identifier: string;
   protocol: string;
   scheduleWindow?: {
@@ -93,8 +93,8 @@ export interface CoverIdentity {
 export interface AccessCapability {
   type: AccessType;
   target: string;
-  targetType: 'PERSON' | 'ORGANIZATION' | 'LOCATION' | 'SYSTEM' | 'DOCUMENT';
-  level: 'FULL' | 'PARTIAL' | 'LIMITED' | 'HISTORICAL';
+  targetType: "PERSON" | "ORGANIZATION" | "LOCATION" | "SYSTEM" | "DOCUMENT";
+  level: "FULL" | "PARTIAL" | "LIMITED" | "HISTORICAL";
   validFrom: Date;
   validTo?: Date;
   reliability: number; // 0-100
@@ -127,7 +127,7 @@ export interface HumintSource extends BaseEntity {
   credibilityScore: number;
 
   /** Historical credibility trend */
-  credibilityTrend: 'IMPROVING' | 'STABLE' | 'DECLINING';
+  credibilityTrend: "IMPROVING" | "STABLE" | "DECLINING";
 
   /** Operational risk level */
   riskLevel: RiskLevel;
@@ -173,10 +173,10 @@ export interface HumintSource extends BaseEntity {
 
   /** Compensation arrangement */
   compensation: {
-    type: 'SALARY' | 'STIPEND' | 'PER_REPORT' | 'EXPENSES_ONLY' | 'NONE';
+    type: "SALARY" | "STIPEND" | "PER_REPORT" | "EXPENSES_ONLY" | "NONE";
     amount?: number;
     currency?: string;
-    frequency?: 'MONTHLY' | 'QUARTERLY' | 'PER_MEETING' | 'AD_HOC';
+    frequency?: "MONTHLY" | "QUARTERLY" | "PER_MEETING" | "AD_HOC";
   };
 
   /** Motivation factors */
@@ -223,13 +223,13 @@ export interface Handler extends BaseEntity {
  */
 export interface IntelligenceRequirement {
   id: string;
-  priority: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  priority: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
   topic: string;
   description: string;
   targetEntities: string[];
   deadline?: Date;
   requestorId: string;
-  status: 'OPEN' | 'IN_PROGRESS' | 'SATISFIED' | 'EXPIRED' | 'CANCELLED';
+  status: "OPEN" | "IN_PROGRESS" | "SATISFIED" | "EXPIRED" | "CANCELLED";
   createdAt: Date;
 }
 
@@ -241,9 +241,9 @@ export interface SourceTasking extends BaseEntity {
   requirementId: string;
   handlerId: string;
   taskDescription: string;
-  priority: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  priority: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
   deadline?: Date;
-  status: 'ASSIGNED' | 'ACKNOWLEDGED' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED' | 'CANCELLED';
+  status: "ASSIGNED" | "ACKNOWLEDGED" | "IN_PROGRESS" | "COMPLETED" | "FAILED" | "CANCELLED";
   completedAt?: Date;
   result?: string;
   policyLabels: PolicyLabels;
@@ -257,7 +257,7 @@ export interface CorroborationRecord {
   primarySourceId: string;
   corroboratingSourceId: string;
   intelligenceId: string;
-  corroborationType: 'CONFIRMS' | 'PARTIALLY_CONFIRMS' | 'CONTRADICTS' | 'UNRELATED';
+  corroborationType: "CONFIRMS" | "PARTIALLY_CONFIRMS" | "CONTRADICTS" | "UNRELATED";
   confidence: number;
   notes: string;
   evaluatedBy: string;
@@ -271,9 +271,9 @@ export interface SourceRelationship {
   id: string;
   type: HumintRelationshipType;
   fromId: string;
-  fromType: 'SOURCE' | 'PERSON' | 'ORGANIZATION' | 'LOCATION' | 'INTEL';
+  fromType: "SOURCE" | "PERSON" | "ORGANIZATION" | "LOCATION" | "INTEL";
   toId: string;
-  toType: 'SOURCE' | 'PERSON' | 'ORGANIZATION' | 'LOCATION' | 'INTEL';
+  toType: "SOURCE" | "PERSON" | "ORGANIZATION" | "LOCATION" | "INTEL";
   properties: Record<string, unknown>;
   confidence: number;
   validFrom: Date;
@@ -316,8 +316,8 @@ export interface SourceSearchCriteria {
   classification?: ClassificationLevel;
   limit?: number;
   offset?: number;
-  sortBy?: 'cryptonym' | 'credibilityScore' | 'lastContactDate' | 'createdAt';
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: "cryptonym" | "credibilityScore" | "lastContactDate" | "createdAt";
+  sortOrder?: "asc" | "desc";
 }
 
 /**

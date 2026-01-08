@@ -11,24 +11,21 @@ export interface Invariant {
 }
 
 export const SecurityInvariant: Invariant = {
-  id: 'SEC-001',
-  description: 'All API routes must have authentication middleware',
+  id: "SEC-001",
+  description: "All API routes must have authentication middleware",
   check: async () => {
     // Logic to scan routes for auth middleware
     return true;
-  }
+  },
 };
 
 export const DataIntegrityInvariant: Invariant = {
-  id: 'DAT-001',
-  description: 'Database schema must match migration history',
+  id: "DAT-001",
+  description: "Database schema must match migration history",
   check: async () => {
     // Logic to verify migrations
     return true;
-  }
+  },
 };
 
-export const InvariantsRegistry = [
-  SecurityInvariant,
-  DataIntegrityInvariant
-];
+export const InvariantsRegistry = [SecurityInvariant, DataIntegrityInvariant];

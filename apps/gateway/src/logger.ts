@@ -3,10 +3,10 @@
  * Provides JSON logging with trace/span context for Loki ingestion
  */
 
-import { trace, context as otelContext, Span } from '@opentelemetry/api';
-import { createHash } from 'crypto';
+import { trace, context as otelContext, Span } from "@opentelemetry/api";
+import { createHash } from "crypto";
 
-type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+type LogLevel = "debug" | "info" | "warn" | "error";
 
 interface LogData {
   userId?: string;
@@ -24,11 +24,7 @@ class StructuredLogger {
     this.serviceName = serviceName;
   }
 
-  private log(
-    level: LogLevel,
-    message: string,
-    context: LogData = {}
-  ): void {
+  private log(level: LogLevel, message: string, context: LogData = {}): void {
     const span = trace.getActiveSpan();
     const spanContext = span?.spanContext();
 
@@ -39,8 +35,8 @@ class StructuredLogger {
       timestamp: new Date().toISOString(),
       level,
       service: this.serviceName,
-      traceId: spanContext?.traceId || 'no-trace',
-      spanId: spanContext?.spanId || 'no-span',
+      traceId: spanContext?.traceId || "no-trace",
+      spanId: spanContext?.spanId || "no-span",
       ...sanitizedContext,
       message,
     };
@@ -50,16 +46,16 @@ class StructuredLogger {
 
     // Route to appropriate console method
     switch (level) {
-      case 'debug':
+      case "debug":
         console.debug(jsonLog);
         break;
-      case 'info':
+      case "info":
         console.info(jsonLog);
         break;
-      case 'warn':
+      case "warn":
         console.warn(jsonLog);
         break;
-      case 'error':
+      case "error":
         console.error(jsonLog);
         break;
     }
@@ -67,8 +63,8 @@ class StructuredLogger {
     // Add log event to active span
     if (span) {
       span.addEvent(`log.${level}`, {
-        'log.message': message,
-        'log.level': level,
+        "log.message": message,
+        "log.level": level,
       });
     }
   }
@@ -94,34 +90,34 @@ class StructuredLogger {
   }
 
   private hashId(id: string): string {
-    return 'hash_' + createHash('sha256').update(id).digest('hex').slice(0, 8);
+    return "hash_" + createHash("sha256").update(id).digest("hex").slice(0, 8);
   }
 
   debug(message: string, context?: LogData): void {
-    this.log('debug', message, context);
+    this.log("debug", message, context);
   }
 
   info(message: string, context?: LogData): void {
-    this.log('info', message, context);
+    this.log("info", message, context);
   }
 
   warn(message: string, context?: LogData): void {
-    this.log('warn', message, context);
+    this.log("warn", message, context);
   }
 
   error(message: string, error?: Error, context?: LogData): void {
     const errorContext = error
       ? {
-        error: {
-          name: error.name,
-          message: error.message,
-          stack: error.stack,
-        },
-        ...context,
-      }
+          error: {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+          },
+          ...context,
+        }
       : context;
 
-    this.log('error', message, errorContext);
+    this.log("error", message, errorContext);
 
     // Record exception on active span
     const span = trace.getActiveSpan();
@@ -131,11 +127,7 @@ class StructuredLogger {
   }
 
   // Measure and log operation duration
-  async measure<T>(
-    operationName: string,
-    fn: () => Promise<T>,
-    context?: LogData
-  ): Promise<T> {
+  async measure<T>(operationName: string, fn: () => Promise<T>, context?: LogData): Promise<T> {
     const start = Date.now();
     this.info(`${operationName} started`, context);
 
@@ -146,22 +138,18 @@ class StructuredLogger {
       this.info(`${operationName} succeeded`, {
         ...context,
         duration_ms: durationMs,
-        status: 'success',
+        status: "success",
       });
 
       return result;
     } catch (error) {
       const durationMs = Date.now() - start;
 
-      this.error(
-        `${operationName} failed`,
-        error as Error,
-        {
-          ...context,
-          duration_ms: durationMs,
-          status: 'error',
-        }
-      );
+      this.error(`${operationName} failed`, error as Error, {
+        ...context,
+        duration_ms: durationMs,
+        status: "error",
+      });
 
       throw error;
     }
@@ -169,7 +157,7 @@ class StructuredLogger {
 }
 
 // Export singleton logger
-export const logger = new StructuredLogger('graphql-gateway');
+export const logger = new StructuredLogger("graphql-gateway");
 
 // Context manager for request-scoped logging
 export class LogContext {

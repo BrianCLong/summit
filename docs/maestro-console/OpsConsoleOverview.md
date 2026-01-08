@@ -21,11 +21,13 @@ Access is controlled via Role-Based Access Control (RBAC). See [RBAC & Access](.
 The console is built with React, TypeScript, and Material UI, communicating with the Maestro Backend via REST APIs.
 
 ### Backend Services
+
 - `MaestroService`: Aggregates health, stats, and control loop logic.
 - `RunsRepo`: Manages persistence of execution traces in PostgreSQL.
 - `AuditLogger`: Records all mutations for governance.
 
 ### Frontend
+
 - Located in `conductor-ui/frontend`.
 - Entry point: `/maestro`.
 - Uses `Recharts` for visualization and `Material UI` for components.

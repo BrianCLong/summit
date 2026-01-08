@@ -3,10 +3,10 @@
  * Synchronization between Neo4j graph and PostgreSQL pgvector for embeddings
  */
 
-import pg from 'pg';
-import { z } from 'zod';
-import type { PostgresConfig } from './config.js';
-import type { GraphClient, NodeResult } from './graph-client.js';
+import pg from "pg";
+import { z } from "zod";
+import type { PostgresConfig } from "./config.js";
+import type { GraphClient, NodeResult } from "./graph-client.js";
 
 const { Pool } = pg;
 
@@ -24,7 +24,7 @@ export interface SyncOptions {
 
 export interface SyncStatus {
   syncId: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
+  status: "pending" | "running" | "completed" | "failed";
   progress: number;
   startedAt?: Date;
   completedAt?: Date;
@@ -52,9 +52,9 @@ export interface EmbeddingResult {
 const SyncOptionsSchema = z.object({
   batchSize: z.number().min(1).max(10000).default(1000),
   embeddingDimension: z.number().min(1).max(4096).default(1536),
-  tableName: z.string().default('node_embeddings'),
-  idColumn: z.string().default('node_id'),
-  embeddingColumn: z.string().default('embedding'),
+  tableName: z.string().default("node_embeddings"),
+  idColumn: z.string().default("node_id"),
+  embeddingColumn: z.string().default("embedding"),
   metadataColumns: z.array(z.string()).default([]),
   upsert: z.boolean().default(true),
   truncate: z.boolean().default(false),
@@ -92,21 +92,17 @@ export class PgVectorSync {
     // Verify connection and pgvector extension
     const client = await this.pool.connect();
     try {
-      await client.query('SELECT 1');
+      await client.query("SELECT 1");
 
       // Check if pgvector extension exists
-      const extResult = await client.query(
-        "SELECT 1 FROM pg_extension WHERE extname = 'vector'"
-      );
+      const extResult = await client.query("SELECT 1 FROM pg_extension WHERE extname = 'vector'");
 
       if (extResult.rows.length === 0) {
         // Try to create extension
         try {
-          await client.query('CREATE EXTENSION IF NOT EXISTS vector');
+          await client.query("CREATE EXTENSION IF NOT EXISTS vector");
         } catch {
-          throw new Error(
-            'pgvector extension not available. Please install pgvector.'
-          );
+          throw new Error("pgvector extension not available. Please install pgvector.");
         }
       }
     } finally {
@@ -128,9 +124,7 @@ export class PgVectorSync {
       await this.connect();
     }
 
-    const metadataColumnsDef = opts.metadataColumns
-      .map((col) => `${col} TEXT`)
-      .join(', ');
+    const metadataColumnsDef = opts.metadataColumns.map((col) => `${col} TEXT`).join(", ");
 
     const createTableSQL = `
       CREATE TABLE IF NOT EXISTS ${opts.tableName} (
@@ -138,7 +132,7 @@ export class PgVectorSync {
         ${opts.embeddingColumn} vector(${opts.embeddingDimension}),
         labels TEXT[],
         properties JSONB,
-        ${metadataColumnsDef ? metadataColumnsDef + ',' : ''}
+        ${metadataColumnsDef ? metadataColumnsDef + "," : ""}
         created_at TIMESTAMPTZ DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW()
       )
@@ -176,7 +170,7 @@ export class PgVectorSync {
 
     const status: SyncStatus = {
       syncId: crypto.randomUUID(),
-      status: 'pending',
+      status: "pending",
       progress: 0,
       stats: {
         totalNodes: 0,
@@ -191,14 +185,14 @@ export class PgVectorSync {
 
     try {
       if (!this.graphClient) {
-        throw new Error('Graph client not set. Call setGraphClient() first.');
+        throw new Error("Graph client not set. Call setGraphClient() first.");
       }
 
       if (!this.pool) {
         await this.connect();
       }
 
-      status.status = 'running';
+      status.status = "running";
       status.startedAt = new Date();
       onProgress?.(status);
 
@@ -248,11 +242,11 @@ export class PgVectorSync {
         if (nodes.length < batchSize) break;
       }
 
-      status.status = 'completed';
+      status.status = "completed";
       status.completedAt = new Date();
       status.progress = 100;
     } catch (error) {
-      status.status = 'failed';
+      status.status = "failed";
       status.completedAt = new Date();
       status.error = error instanceof Error ? error.message : String(error);
     }
@@ -297,7 +291,7 @@ export class PgVectorSync {
     try {
       await this.pool!.query(sql, [
         node.id,
-        `[${embedding.join(',')}]`,
+        `[${embedding.join(",")}]`,
         node.labels,
         JSON.stringify(node.properties),
       ]);
@@ -316,12 +310,7 @@ export class PgVectorSync {
       tableName?: string;
     } = {}
   ): Promise<EmbeddingResult[]> {
-    const {
-      limit = 10,
-      labels,
-      threshold,
-      tableName = 'node_embeddings',
-    } = options;
+    const { limit = 10, labels, threshold, tableName = "node_embeddings" } = options;
 
     if (!this.pool) {
       await this.connect();
@@ -337,7 +326,7 @@ export class PgVectorSync {
       FROM ${tableName}
     `;
 
-    const params: unknown[] = [`[${queryEmbedding.join(',')}]`];
+    const params: unknown[] = [`[${queryEmbedding.join(",")}]`];
     const conditions: string[] = [];
 
     if (labels?.length) {
@@ -351,7 +340,7 @@ export class PgVectorSync {
     }
 
     if (conditions.length > 0) {
-      sql += ` WHERE ${conditions.join(' AND ')}`;
+      sql += ` WHERE ${conditions.join(" AND ")}`;
     }
 
     sql += ` ORDER BY embedding <=> $1 LIMIT $${params.length + 1}`;
@@ -372,7 +361,7 @@ export class PgVectorSync {
 
   async getEmbedding(
     nodeId: string,
-    tableName = 'node_embeddings'
+    tableName = "node_embeddings"
   ): Promise<EmbeddingResult | null> {
     if (!this.pool) {
       await this.connect();
@@ -402,25 +391,17 @@ export class PgVectorSync {
     };
   }
 
-  async deleteEmbedding(
-    nodeId: string,
-    tableName = 'node_embeddings'
-  ): Promise<boolean> {
+  async deleteEmbedding(nodeId: string, tableName = "node_embeddings"): Promise<boolean> {
     if (!this.pool) {
       await this.connect();
     }
 
-    const result = await this.pool!.query(
-      `DELETE FROM ${tableName} WHERE node_id = $1`,
-      [nodeId]
-    );
+    const result = await this.pool!.query(`DELETE FROM ${tableName} WHERE node_id = $1`, [nodeId]);
 
     return (result.rowCount ?? 0) > 0;
   }
 
-  async getStats(
-    tableName = 'node_embeddings'
-  ): Promise<{
+  async getStats(tableName = "node_embeddings"): Promise<{
     totalEmbeddings: number;
     dimension: number;
     labels: string[];
@@ -430,9 +411,7 @@ export class PgVectorSync {
       await this.connect();
     }
 
-    const countResult = await this.pool!.query(
-      `SELECT COUNT(*) as count FROM ${tableName}`
-    );
+    const countResult = await this.pool!.query(`SELECT COUNT(*) as count FROM ${tableName}`);
 
     const labelsResult = await this.pool!.query(
       `SELECT DISTINCT UNNEST(labels) as label FROM ${tableName} LIMIT 100`
@@ -467,7 +446,7 @@ export class PgVectorSync {
         await this.connect();
       }
 
-      await this.pool!.query('SELECT 1');
+      await this.pool!.query("SELECT 1");
 
       const versionResult = await this.pool!.query(
         "SELECT extversion FROM pg_extension WHERE extname = 'vector'"
@@ -510,10 +489,7 @@ export class PgVectorSync {
     for (const node of nodes) {
       try {
         // Generate placeholder embedding (in real implementation, call embedding service)
-        const embedding = this.generatePlaceholderEmbedding(
-          node,
-          opts.embeddingDimension
-        );
+        const embedding = this.generatePlaceholderEmbedding(node, opts.embeddingDimension);
 
         // Check if exists
         const existing = await this.getEmbedding(node.id, opts.tableName);
@@ -537,10 +513,7 @@ export class PgVectorSync {
     return result;
   }
 
-  private generatePlaceholderEmbedding(
-    node: NodeResult,
-    dimension: number
-  ): number[] {
+  private generatePlaceholderEmbedding(node: NodeResult, dimension: number): number[] {
     // Generate deterministic placeholder embedding based on node properties
     // In production, this would call an embedding service
     const seed = this.hashString(JSON.stringify(node));
@@ -552,9 +525,7 @@ export class PgVectorSync {
     }
 
     // Normalize to unit vector
-    const magnitude = Math.sqrt(
-      embedding.reduce((sum, val) => sum + val * val, 0)
-    );
+    const magnitude = Math.sqrt(embedding.reduce((sum, val) => sum + val * val, 0));
     return embedding.map((val) => val / magnitude);
   }
 
@@ -570,8 +541,8 @@ export class PgVectorSync {
 
   private parseVector(vectorStr: string): number[] {
     // Parse pgvector format: [0.1,0.2,0.3,...]
-    const cleaned = vectorStr.replace(/[\[\]]/g, '');
-    return cleaned.split(',').map(Number);
+    const cleaned = vectorStr.replace(/[\[\]]/g, "");
+    return cleaned.split(",").map(Number);
   }
 }
 

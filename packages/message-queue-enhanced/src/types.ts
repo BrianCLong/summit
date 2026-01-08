@@ -4,7 +4,7 @@ export interface Message<T = any> {
   payload: T;
   headers?: Record<string, string>;
   timestamp: number;
-  priority?: 'high' | 'normal' | 'low';
+  priority?: "high" | "normal" | "low";
   retryCount?: number;
   maxRetries?: number;
   deadLetterAfter?: number;

@@ -1,5 +1,5 @@
 export function normalizeWhitespace(value: string): string {
-  return value.replace(/\s+/g, ' ').trim();
+  return value.replace(/\s+/g, " ").trim();
 }
 
 export function splitParagraphs(text: string): string[] {
@@ -20,26 +20,24 @@ export function dedupeParagraphs(text: string): string {
     seen.add(normalized);
     return true;
   });
-  return deduped.join('\n\n');
+  return deduped.join("\n\n");
 }
 
-export function detectLanguage(
-  text: string,
-): 'en' | 'es' | 'fr' | 'de' | 'unknown' {
+export function detectLanguage(text: string): "en" | "es" | "fr" | "de" | "unknown" {
   const lower = text.toLowerCase();
   if (/¿|¡|ñ/.test(lower)) {
-    return 'es';
+    return "es";
   }
   if (/[éèàçîôû]/.test(lower)) {
-    return 'fr';
+    return "fr";
   }
   if (/[äöüß]/.test(lower)) {
-    return 'de';
+    return "de";
   }
   if (/^[\x00-\x7F]*$/.test(text)) {
-    return 'en';
+    return "en";
   }
-  return 'unknown';
+  return "unknown";
 }
 
 export function extractKeyValues(text: string): Record<string, string> {
@@ -81,20 +79,18 @@ export function extractContextLimit(text: string): number | undefined {
 }
 
 export function extractEntities(text: string): string[] {
-  const matches = text.match(
-    /(?:repo|service|component|dataset)[:=]\s*([A-Za-z0-9._\/-]+)/gi,
-  );
+  const matches = text.match(/(?:repo|service|component|dataset)[:=]\s*([A-Za-z0-9._\/-]+)/gi);
   if (!matches) {
     return [];
   }
   return matches
     .map((entry) => entry.split(/[:=]/)[1]?.trim())
     .filter((entity): entity is string => Boolean(entity))
-    .map((entity) => entity.replace(/,$/, ''));
+    .map((entity) => entity.replace(/,$/, ""));
 }
 
 export function findAmbiguousPhrases(text: string): string[] {
-  const phrases = ['tbd', 'maybe', 'approximately', 'roughly', 'asap', 'later'];
+  const phrases = ["tbd", "maybe", "approximately", "roughly", "asap", "later"];
   const lower = text.toLowerCase();
   return phrases.filter((phrase) => lower.includes(phrase));
 }

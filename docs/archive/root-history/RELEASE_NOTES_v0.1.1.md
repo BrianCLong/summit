@@ -3,6 +3,7 @@
 **Date:** 2025-11-22
 
 ## Summary
+
 Observability foundation with typed logging, Prometheus metrics, health tests, and fixes.
 
 ## Changes

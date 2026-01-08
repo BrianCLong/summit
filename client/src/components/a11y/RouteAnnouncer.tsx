@@ -1,15 +1,15 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import React, { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { useFeatureFlag } from "../../hooks/useFeatureFlag";
 
 const visuallyHidden: React.CSSProperties = {
-  position: 'absolute',
-  width: '1px',
-  height: '1px',
+  position: "absolute",
+  width: "1px",
+  height: "1px",
   padding: 0,
-  margin: '-1px',
-  overflow: 'hidden',
-  clip: 'rect(0, 0, 0, 0)',
+  margin: "-1px",
+  overflow: "hidden",
+  clip: "rect(0, 0, 0, 0)",
   border: 0,
 };
 
@@ -20,15 +20,13 @@ type RouteAnnouncerProps = {
 
 export function RouteAnnouncer({ mainRef, routeLabels }: RouteAnnouncerProps) {
   const location = useLocation();
-  const guardrailsEnabled = useFeatureFlag('ui.a11yGuardrails');
-  const [message, setMessage] = useState('Navigation ready');
+  const guardrailsEnabled = useFeatureFlag("ui.a11yGuardrails");
+  const [message, setMessage] = useState("Navigation ready");
 
   const currentLabel = useMemo(() => {
     const rawLabel =
-      routeLabels[location.pathname] ||
-      location.pathname.replace('/', '') ||
-      'current page';
-    return rawLabel.trim() || 'current page';
+      routeLabels[location.pathname] || location.pathname.replace("/", "") || "current page";
+    return rawLabel.trim() || "current page";
   }, [location.pathname, routeLabels]);
 
   useEffect(() => {

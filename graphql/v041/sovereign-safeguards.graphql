@@ -18,19 +18,13 @@ extend type Query {
   reversibleAutonomyStatus(tenant: Tenant!): ReversibleAutonomyStatus!
 
   # Compliance monitoring dashboard
-  complianceMonitoring(
-    tenant: Tenant!
-    timeRange: Duration
-  ): ComplianceMonitoringData!
+  complianceMonitoring(tenant: Tenant!, timeRange: Duration): ComplianceMonitoringData!
 
   # Cross-border operation approvals
   crossBorderApprovals(tenant: Tenant!): [CrossBorderApproval!]!
 
   # Sovereign operation audit trail
-  sovereignAuditTrail(
-    tenant: Tenant!
-    limit: Int = 100
-  ): [SovereignAuditEntry!]!
+  sovereignAuditTrail(tenant: Tenant!, limit: Int = 100): [SovereignAuditEntry!]!
 }
 
 extend type Mutation {
@@ -44,16 +38,10 @@ extend type Mutation {
   ): IndependentVerificationRequest!
 
   # Configure sovereign safeguards
-  configureSovereignSafeguards(
-    tenant: Tenant!
-    config: SovereignSafeguardsConfig!
-  ): MutationResult!
+  configureSovereignSafeguards(tenant: Tenant!, config: SovereignSafeguardsConfig!): MutationResult!
 
   # Test containment readiness
-  testContainmentReadiness(
-    tenant: Tenant!
-    testType: ContainmentTestType!
-  ): ContainmentTestResult!
+  testContainmentReadiness(tenant: Tenant!, testType: ContainmentTestType!): ContainmentTestResult!
 
   # Verify lawful interoperability
   verifyLawfulInteroperability(
@@ -63,10 +51,7 @@ extend type Mutation {
   ): LawfulInteroperabilityResult!
 
   # Configure reversible autonomy
-  configureReversibleAutonomy(
-    tenant: Tenant!
-    config: ReversibleAutonomyConfig!
-  ): MutationResult!
+  configureReversibleAutonomy(tenant: Tenant!, config: ReversibleAutonomyConfig!): MutationResult!
 
   # === EMERGENCY SOVEREIGN CONTROLS ===
 
@@ -127,9 +112,7 @@ extend type Subscription {
   sovereignSafeguardsUpdates(tenant: Tenant!): SovereignSafeguardsUpdate!
 
   # Independent verification status changes
-  independentVerificationUpdates(
-    tenant: Tenant!
-  ): IndependentVerificationUpdate!
+  independentVerificationUpdates(tenant: Tenant!): IndependentVerificationUpdate!
 
   # Containment readiness alerts
   containmentReadinessAlerts(tenant: Tenant!): ContainmentAlert!

@@ -2,26 +2,26 @@
  * Threat Actor Categories
  */
 export enum ThreatActorCategory {
-  APT = 'apt',
-  NATION_STATE = 'nation-state',
-  CYBERCRIME = 'cybercrime',
-  HACKTIVIST = 'hacktivist',
-  INSIDER = 'insider',
-  SCRIPT_KIDDIE = 'script-kiddie'
+  APT = "apt",
+  NATION_STATE = "nation-state",
+  CYBERCRIME = "cybercrime",
+  HACKTIVIST = "hacktivist",
+  INSIDER = "insider",
+  SCRIPT_KIDDIE = "script-kiddie",
 }
 
 /**
  * Threat Actor Motivation
  */
 export enum ThreatActorMotivation {
-  ESPIONAGE = 'espionage',
-  FINANCIAL = 'financial',
-  DISRUPTION = 'disruption',
-  DESTRUCTION = 'destruction',
-  IDEOLOGY = 'ideology',
-  COERCION = 'coercion',
-  REVENGE = 'revenge',
-  UNKNOWN = 'unknown'
+  ESPIONAGE = "espionage",
+  FINANCIAL = "financial",
+  DISRUPTION = "disruption",
+  DESTRUCTION = "destruction",
+  IDEOLOGY = "ideology",
+  COERCION = "coercion",
+  REVENGE = "revenge",
+  UNKNOWN = "unknown",
 }
 
 /**
@@ -50,16 +50,16 @@ export interface ThreatActorProfile {
 
 export interface Attribution {
   country?: string;
-  confidence: 'high' | 'medium' | 'low';
-  sponsorship?: 'state-sponsored' | 'state-affiliated' | 'independent';
+  confidence: "high" | "medium" | "low";
+  sponsorship?: "state-sponsored" | "state-affiliated" | "independent";
   evidence: string[];
 }
 
 export interface ActorCapabilities {
-  sophistication: 'low' | 'medium' | 'high' | 'advanced';
-  resources: 'limited' | 'moderate' | 'extensive';
-  persistence: 'opportunistic' | 'targeted' | 'persistent';
-  stealthLevel: 'low' | 'medium' | 'high';
+  sophistication: "low" | "medium" | "high" | "advanced";
+  resources: "limited" | "moderate" | "extensive";
+  persistence: "opportunistic" | "targeted" | "persistent";
+  stealthLevel: "low" | "medium" | "high";
   zeroDayUsage: boolean;
   customTooling: boolean;
 }
@@ -77,13 +77,13 @@ export interface TTPProfile {
 export interface TacticUsage {
   tacticId: string;
   name: string;
-  frequency: 'always' | 'often' | 'sometimes' | 'rarely';
+  frequency: "always" | "often" | "sometimes" | "rarely";
 }
 
 export interface TechniqueUsage {
   techniqueId: string;
   name: string;
-  frequency: 'always' | 'often' | 'sometimes' | 'rarely';
+  frequency: "always" | "often" | "sometimes" | "rarely";
   variants: string[];
   tools: string[];
 }
@@ -99,10 +99,10 @@ export interface Procedure {
 
 export interface Signature {
   id: string;
-  type: 'network' | 'host' | 'file' | 'behavior';
+  type: "network" | "host" | "file" | "behavior";
   description: string;
   pattern: string;
-  confidence: 'high' | 'medium' | 'low';
+  confidence: "high" | "medium" | "low";
 }
 
 /**
@@ -123,7 +123,7 @@ export interface Campaign {
 }
 
 export interface CampaignIOC {
-  type: 'ip' | 'domain' | 'hash' | 'url' | 'email';
+  type: "ip" | "domain" | "hash" | "url" | "email";
   value: string;
   context: string;
 }
@@ -161,8 +161,8 @@ export interface DomainPattern {
  */
 export interface ActorTool {
   name: string;
-  type: 'commercial' | 'opensource' | 'custom';
-  category: 'rat' | 'backdoor' | 'loader' | 'exploit' | 'utility' | 'framework';
+  type: "commercial" | "opensource" | "custom";
+  category: "rat" | "backdoor" | "loader" | "exploit" | "utility" | "framework";
   description: string;
   techniques: string[];
 }
@@ -172,7 +172,7 @@ export interface ActorTool {
  */
 export interface ActorMalware {
   name: string;
-  type: 'trojan' | 'backdoor' | 'ransomware' | 'wiper' | 'worm' | 'dropper' | 'loader';
+  type: "trojan" | "backdoor" | "ransomware" | "wiper" | "worm" | "dropper" | "loader";
   variants: string[];
   capabilities: string[];
   techniques: string[];
@@ -246,7 +246,7 @@ export interface SafetyCheck {
   id: string;
   description: string;
   condition: string;
-  action: 'pause' | 'abort' | 'notify';
+  action: "pause" | "abort" | "notify";
 }
 
 export interface RollbackPlan {

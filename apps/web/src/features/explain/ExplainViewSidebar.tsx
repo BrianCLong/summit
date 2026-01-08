@@ -57,9 +57,9 @@ export function ExplainViewSidebar({
 }: ExplainViewSidebarProps) {
   const explainState = useAppSelector(selectExplain)
   const dispatch = useAppDispatch()
-  const [expandedSections, setExpandedSections] = React.useState<
-    Set<string>
-  >(new Set(['filters', 'contributors', 'provenance', 'confidence']))
+  const [expandedSections, setExpandedSections] = React.useState<Set<string>>(
+    new Set(['filters', 'contributors', 'provenance', 'confidence'])
+  )
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => {
@@ -144,9 +144,13 @@ export function ExplainViewSidebar({
   const confidenceStats = useMemo(() => {
     const buckets = { high: 0, medium: 0, low: 0 }
     entities.forEach(entity => {
-      if (entity.confidence >= 0.8) {buckets.high++}
-      else if (entity.confidence >= 0.5) {buckets.medium++}
-      else {buckets.low++}
+      if (entity.confidence >= 0.8) {
+        buckets.high++
+      } else if (entity.confidence >= 0.5) {
+        buckets.medium++
+      } else {
+        buckets.low++
+      }
     })
 
     const total = entities.length
@@ -168,8 +172,12 @@ export function ExplainViewSidebar({
 
     entities.forEach(entity => {
       // Mock source extraction from entity metadata
-      if (entity.properties?.source) {sources.add(entity.properties.source)}
-      if (entity.properties?.license) {licenses.add(entity.properties.license)}
+      if (entity.properties?.source) {
+        sources.add(entity.properties.source)
+      }
+      if (entity.properties?.license) {
+        licenses.add(entity.properties.license)
+      }
       avgConfidence += entity.confidence
     })
 
@@ -254,7 +262,11 @@ export function ExplainViewSidebar({
                     </div>
                     <div className="flex flex-wrap gap-1">
                       {activeFilters.entityTypes.map(type => (
-                        <Badge key={type} variant="secondary" className="text-xs">
+                        <Badge
+                          key={type}
+                          variant="secondary"
+                          className="text-xs"
+                        >
                           {type}
                         </Badge>
                       ))}
@@ -487,7 +499,11 @@ export function ExplainViewSidebar({
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {provenanceSummary.licenseTypes.map(license => (
-                      <Badge key={license} variant="secondary" className="text-xs">
+                      <Badge
+                        key={license}
+                        variant="secondary"
+                        className="text-xs"
+                      >
                         {license}
                       </Badge>
                     ))}
@@ -630,8 +646,8 @@ export function ExplainViewSidebar({
             <HelpCircle className="h-4 w-4 mt-0.5" />
             <div>
               This panel explains the current view by showing active filters,
-              most influential entities, data provenance, and confidence metrics.
-              Use this to understand what's driving the analysis.
+              most influential entities, data provenance, and confidence
+              metrics. Use this to understand what's driving the analysis.
             </div>
           </div>
         </div>

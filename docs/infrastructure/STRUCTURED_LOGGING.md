@@ -5,6 +5,7 @@
 ## Overview
 
 The IntelGraph Platform implements enterprise-grade structured logging with:
+
 - **Winston** - Structured logging library with flexible transports
 - **Pino** - High-performance HTTP request logging
 - **OpenTelemetry** - Distributed tracing integration
@@ -53,18 +54,18 @@ The IntelGraph Platform implements enterprise-grade structured logging with:
 ### Basic Logging
 
 ```typescript
-import logger from './utils/logger';
+import logger from "./utils/logger";
 
 // Simple logging
-logger.info('User logged in');
-logger.error('Failed to connect to database');
-logger.warn('API rate limit approaching');
-logger.debug('Processing request data');
+logger.info("User logged in");
+logger.error("Failed to connect to database");
+logger.warn("API rate limit approaching");
+logger.debug("Processing request data");
 
 // Structured logging with metadata
-logger.info('User authenticated', {
-  userId: 'user123',
-  email: 'user@example.com',
+logger.info("User authenticated", {
+  userId: "user123",
+  email: "user@example.com",
   ipAddress: req.ip,
 });
 ```
@@ -72,45 +73,50 @@ logger.info('User authenticated', {
 ### Logging with Correlation Context
 
 ```typescript
-import { logWithContext } from './utils/logger';
+import { logWithContext } from "./utils/logger";
 
 // Include correlation IDs for request tracking
-logWithContext('info', 'Processing payment', {
-  correlationId: req.correlationId,
-  traceId: req.traceId,
-  userId: req.user.id,
-}, {
-  amount: 100.00,
-  currency: 'USD',
-});
+logWithContext(
+  "info",
+  "Processing payment",
+  {
+    correlationId: req.correlationId,
+    traceId: req.traceId,
+    userId: req.user.id,
+  },
+  {
+    amount: 100.0,
+    currency: "USD",
+  }
+);
 ```
 
 ### Performance Logging
 
 ```typescript
-import { perfLog } from './utils/logger';
+import { perfLog } from "./utils/logger";
 
-const endLog = perfLog('database-query');
+const endLog = perfLog("database-query");
 
 // Perform operation
-await db.query('SELECT * FROM users');
+await db.query("SELECT * FROM users");
 
 // Log completion with duration
-endLog({ query: 'users', rowCount: 150 });
+endLog({ query: "users", rowCount: 150 });
 // Output: "database-query completed in 45ms"
 ```
 
 ### Error Logging
 
 ```typescript
-import { logError } from './utils/logger';
+import { logError } from "./utils/logger";
 
 try {
   await riskyOperation();
 } catch (error) {
-  logError('Operation failed', error, {
-    userId: 'user123',
-    operation: 'data-import',
+  logError("Operation failed", error, {
+    userId: "user123",
+    operation: "data-import",
   });
 }
 ```
@@ -118,11 +124,11 @@ try {
 ### Audit Logging
 
 ```typescript
-import { auditLog } from './utils/logger';
+import { auditLog } from "./utils/logger";
 
-auditLog('USER_LOGIN', {
-  userId: 'user123',
-  email: 'user@example.com',
+auditLog("USER_LOGIN", {
+  userId: "user123",
+  email: "user@example.com",
   ipAddress: req.ip,
   success: true,
   timestamp: new Date().toISOString(),
@@ -132,15 +138,15 @@ auditLog('USER_LOGIN', {
 ### Child Loggers
 
 ```typescript
-import { createChildLogger } from './utils/logger';
+import { createChildLogger } from "./utils/logger";
 
 // Create logger with fixed context
 const routerLogger = createChildLogger({
-  module: 'auth-router',
-  service: 'authentication',
+  module: "auth-router",
+  service: "authentication",
 });
 
-routerLogger.info('User logged in', { userId: 'user123' });
+routerLogger.info("User logged in", { userId: "user123" });
 // Includes module and service in all logs
 ```
 
@@ -148,11 +154,11 @@ routerLogger.info('User logged in', { userId: 'user123' });
 
 Environment-based log levels:
 
-| Environment | Default Level | Override |
-|-------------|--------------|----------|
-| Production  | `info`       | `LOG_LEVEL=warn` |
-| Development | `debug`      | `LOG_LEVEL=debug` |
-| Test        | `warn`       | `LOG_LEVEL=error` |
+| Environment | Default Level | Override          |
+| ----------- | ------------- | ----------------- |
+| Production  | `info`        | `LOG_LEVEL=warn`  |
+| Development | `debug`       | `LOG_LEVEL=debug` |
+| Test        | `warn`        | `LOG_LEVEL=error` |
 
 ### Setting Log Level
 
@@ -167,11 +173,13 @@ export LOG_LEVEL=info
 ## Correlation IDs
 
 Every request automatically receives:
+
 - **Correlation ID** - Unique identifier for the request
 - **Trace ID** - OpenTelemetry trace identifier
 - **Span ID** - OpenTelemetry span identifier
 
 These are automatically included in:
+
 - Log messages
 - HTTP response headers (`x-correlation-id`, `x-trace-id`)
 - Error reports
@@ -179,7 +187,7 @@ These are automatically included in:
 ### Accessing Correlation Context
 
 ```typescript
-import { getCorrelationContext } from './middleware/correlation-id';
+import { getCorrelationContext } from "./middleware/correlation-id";
 
 const context = getCorrelationContext(req);
 // {
@@ -213,6 +221,7 @@ docker-compose -f docker-compose.logging.yml up
 ### Kibana Dashboards
 
 Create dashboards for:
+
 - Error rates over time
 - Request latency (performance logs)
 - User activity (audit logs)
@@ -252,6 +261,7 @@ correlationId:"abc123-def456"
 ### Elasticsearch Retention
 
 Configure in Elasticsearch:
+
 ```bash
 # Delete indices older than 30 days
 DELETE /intelgraph-logs-*
@@ -285,6 +295,7 @@ Logs automatically include OpenTelemetry trace context:
 ### Jaeger Integration
 
 View traces in Jaeger:
+
 - URL: http://localhost:16686
 - Search by trace ID or operation
 
@@ -293,6 +304,7 @@ View traces in Jaeger:
 ### Redacted Fields
 
 Sensitive fields are automatically redacted from logs:
+
 - `password`
 - `authorization` headers
 - `cookie` headers
@@ -300,10 +312,11 @@ Sensitive fields are automatically redacted from logs:
 - `jwt`, `bearer`
 
 Example:
+
 ```javascript
-logger.info('User login attempt', {
-  email: 'user@example.com',
-  password: 'secret123',  // Will be redacted
+logger.info("User login attempt", {
+  email: "user@example.com",
+  password: "secret123", // Will be redacted
 });
 
 // Output:
@@ -315,26 +328,30 @@ logger.info('User login attempt', {
 ### DO
 
 ✅ Use structured logging with metadata:
+
 ```typescript
-logger.info('User action', { userId: 'user123', action: 'login' });
+logger.info("User action", { userId: "user123", action: "login" });
 ```
 
 ✅ Include correlation IDs for request tracking:
+
 ```typescript
-logger.info('Request processed', { correlationId: req.correlationId });
+logger.info("Request processed", { correlationId: req.correlationId });
 ```
 
 ✅ Use appropriate log levels:
+
 ```typescript
-logger.error('Critical error');  // Errors that need attention
-logger.warn('Approaching limit'); // Warnings
-logger.info('User logged in');    // Important events
-logger.debug('Request data: ...'); // Debugging info
+logger.error("Critical error"); // Errors that need attention
+logger.warn("Approaching limit"); // Warnings
+logger.info("User logged in"); // Important events
+logger.debug("Request data: ..."); // Debugging info
 ```
 
 ✅ Log performance metrics:
+
 ```typescript
-const end = perfLog('operation');
+const end = perfLog("operation");
 await operation();
 end({ resultCount: 100 });
 ```
@@ -342,18 +359,21 @@ end({ resultCount: 100 });
 ### DON'T
 
 ❌ Log sensitive data without redaction:
+
 ```typescript
-logger.info('Password:', password); // NEVER!
+logger.info("Password:", password); // NEVER!
 ```
 
 ❌ Use string concatenation:
+
 ```typescript
-logger.info('User ' + userId + ' logged in'); // BAD
+logger.info("User " + userId + " logged in"); // BAD
 ```
 
 ❌ Log at incorrect levels:
+
 ```typescript
-logger.error('User logged in'); // Wrong level
+logger.error("User logged in"); // Wrong level
 ```
 
 ## Configuration
@@ -368,11 +388,11 @@ const logger = winston.createLogger({
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.errors({ stack: true }),
-    winston.format.json(),
+    winston.format.json()
   ),
   transports: [
-    new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'logs/combined.log' }),
+    new winston.transports.File({ filename: "logs/error.log", level: "error" }),
+    new winston.transports.File({ filename: "logs/combined.log" }),
   ],
 });
 ```
@@ -382,14 +402,16 @@ const logger = winston.createLogger({
 In `/server/src/app.ts`:
 
 ```typescript
-app.use(pinoHttp({
-  logger: pino(),
-  redact: ['req.headers.authorization', 'req.headers.cookie'],
-  customProps: (req) => ({
-    correlationId: req.correlationId,
-    traceId: req.traceId,
-  }),
-}));
+app.use(
+  pinoHttp({
+    logger: pino(),
+    redact: ["req.headers.authorization", "req.headers.cookie"],
+    customProps: (req) => ({
+      correlationId: req.correlationId,
+      traceId: req.traceId,
+    }),
+  })
+);
 ```
 
 ## Troubleshooting
@@ -397,11 +419,13 @@ app.use(pinoHttp({
 ### Logs not appearing in Kibana
 
 1. Check Elasticsearch is running:
+
    ```bash
    curl http://localhost:9200/_cluster/health
    ```
 
 2. Verify Logstash is processing logs:
+
    ```bash
    curl http://localhost:9600/_node/stats/pipelines
    ```
@@ -414,11 +438,13 @@ app.use(pinoHttp({
 ### High log volume
 
 Adjust log level in production:
+
 ```bash
 LOG_LEVEL=warn
 ```
 
 Reduce file retention:
+
 ```typescript
 maxsize: 5242880,  // 5MB
 maxFiles: 3,

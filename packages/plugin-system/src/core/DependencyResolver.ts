@@ -1,11 +1,11 @@
-import semver from 'semver';
+import semver from "semver";
 import {
   DependencyResolver,
   DependencyTree,
   CompatibilityResult,
   CompatibilityIssue,
   PluginManifest,
-} from '../types/plugin.js';
+} from "../types/plugin.js";
 
 /**
  * Resolves plugin dependencies and checks compatibility
@@ -43,10 +43,7 @@ export class DefaultDependencyResolver implements DependencyResolver {
   /**
    * Check if plugin is compatible with current platform and environment
    */
-  async checkCompatibility(
-    pluginId: string,
-    version: string
-  ): Promise<CompatibilityResult> {
+  async checkCompatibility(pluginId: string, version: string): Promise<CompatibilityResult> {
     const issues: CompatibilityIssue[] = [];
 
     try {
@@ -55,9 +52,9 @@ export class DefaultDependencyResolver implements DependencyResolver {
       // Check platform version compatibility
       if (!semver.satisfies(this.platformVersion, manifest.engineVersion)) {
         issues.push({
-          type: 'version-mismatch',
+          type: "version-mismatch",
           message: `Plugin requires platform version ${manifest.engineVersion}, but current version is ${this.platformVersion}`,
-          severity: 'error',
+          severity: "error",
         });
       }
 
@@ -82,14 +79,14 @@ export class DefaultDependencyResolver implements DependencyResolver {
       issues.push(...conflicts);
     } catch (error) {
       issues.push({
-        type: 'missing-dependency',
+        type: "missing-dependency",
         message: `Failed to check compatibility: ${error}`,
-        severity: 'error',
+        severity: "error",
       });
     }
 
     return {
-      compatible: !issues.some(issue => issue.severity === 'error'),
+      compatible: !issues.some((issue) => issue.severity === "error"),
       issues,
     };
   }
@@ -97,10 +94,7 @@ export class DefaultDependencyResolver implements DependencyResolver {
   /**
    * Check a single dependency
    */
-  private async checkDependency(
-    depId: string,
-    depVersion: string
-  ): Promise<CompatibilityIssue[]> {
+  private async checkDependency(depId: string, depVersion: string): Promise<CompatibilityIssue[]> {
     const issues: CompatibilityIssue[] = [];
 
     try {
@@ -109,9 +103,9 @@ export class DefaultDependencyResolver implements DependencyResolver {
       // Check if dependency version exists and satisfies requirements
       if (!semver.satisfies(depManifest.version, depVersion)) {
         issues.push({
-          type: 'version-mismatch',
+          type: "version-mismatch",
           message: `Dependency ${depId} version ${depVersion} not satisfied, found ${depManifest.version}`,
-          severity: 'error',
+          severity: "error",
         });
       }
 
@@ -120,9 +114,9 @@ export class DefaultDependencyResolver implements DependencyResolver {
       issues.push(...depCompatibility.issues);
     } catch (error) {
       issues.push({
-        type: 'missing-dependency',
+        type: "missing-dependency",
         message: `Dependency ${depId}@${depVersion} not found`,
-        severity: 'error',
+        severity: "error",
       });
     }
 
@@ -142,9 +136,9 @@ export class DefaultDependencyResolver implements DependencyResolver {
     // For now, just warn about peer dependency requirements
 
     issues.push({
-      type: 'missing-dependency',
+      type: "missing-dependency",
       message: `Peer dependency ${peerId}@${peerVersion} should be installed`,
-      severity: 'warning',
+      severity: "warning",
     });
 
     return issues;

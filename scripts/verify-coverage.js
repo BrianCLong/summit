@@ -8,19 +8,19 @@
  * Usage: node scripts/verify-coverage.js [threshold] [--format=format]
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
 const DEFAULT_THRESHOLD = 80;
-const COVERAGE_FORMATS = ['json-summary', 'lcov', 'clover'];
+const COVERAGE_FORMATS = ["json-summary", "lcov", "clover"];
 
 function findCoverageFiles() {
   const possiblePaths = [
-    'coverage/coverage-summary.json',
-    'coverage/lcov-report/coverage-summary.json',
-    'server/coverage/coverage-summary.json',
-    'client/coverage/coverage-summary.json',
-    'coverage.json',
+    "coverage/coverage-summary.json",
+    "coverage/lcov-report/coverage-summary.json",
+    "server/coverage/coverage-summary.json",
+    "client/coverage/coverage-summary.json",
+    "coverage.json",
   ];
 
   const foundFiles = [];
@@ -35,7 +35,7 @@ function findCoverageFiles() {
 
 function parseCoverageSummary(filePath) {
   try {
-    const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
 
     // Handle different coverage summary formats
     if (data.total) {
@@ -71,7 +71,7 @@ function calculateOverallCoverage(coverageFiles) {
     const coverage = parseCoverageSummary(file);
     if (!coverage) continue;
 
-    const component = path.dirname(file).split('/')[0] || 'root';
+    const component = path.dirname(file).split("/")[0] || "root";
 
     if (coverage.lines) {
       totalLines += coverage.lines.total || 0;
@@ -106,14 +106,9 @@ function calculateOverallCoverage(coverageFiles) {
   return {
     overall: {
       lines: totalLines > 0 ? (totalCoveredLines / totalLines) * 100 : 0,
-      statements:
-        totalStatements > 0
-          ? (totalCoveredStatements / totalStatements) * 100
-          : 0,
-      functions:
-        totalFunctions > 0 ? (totalCoveredFunctions / totalFunctions) * 100 : 0,
-      branches:
-        totalBranches > 0 ? (totalCoveredBranches / totalBranches) * 100 : 0,
+      statements: totalStatements > 0 ? (totalCoveredStatements / totalStatements) * 100 : 0,
+      functions: totalFunctions > 0 ? (totalCoveredFunctions / totalFunctions) * 100 : 0,
+      branches: totalBranches > 0 ? (totalCoveredBranches / totalBranches) * 100 : 0,
     },
     components: componentCoverage,
   };
@@ -122,11 +117,11 @@ function calculateOverallCoverage(coverageFiles) {
 function generateCoverageReport(coverageData, threshold) {
   const { overall, components } = coverageData;
 
-  console.log('\n📊 Test Coverage Report');
-  console.log('========================');
+  console.log("\n📊 Test Coverage Report");
+  console.log("========================");
 
   // Overall coverage
-  console.log('\n🎯 Overall Coverage:');
+  console.log("\n🎯 Overall Coverage:");
   console.log(`   Lines:      ${overall.lines.toFixed(2)}%`);
   console.log(`   Statements: ${overall.statements.toFixed(2)}%`);
   console.log(`   Functions:  ${overall.functions.toFixed(2)}%`);
@@ -134,12 +129,10 @@ function generateCoverageReport(coverageData, threshold) {
 
   // Component breakdown
   if (components.length > 1) {
-    console.log('\n📦 Component Coverage:');
+    console.log("\n📦 Component Coverage:");
     components.forEach((comp) => {
-      const status = comp.lines >= threshold ? '✅' : '❌';
-      console.log(
-        `   ${status} ${comp.component}: ${comp.lines.toFixed(1)}% lines`,
-      );
+      const status = comp.lines >= threshold ? "✅" : "❌";
+      console.log(`   ${status} ${comp.component}: ${comp.lines.toFixed(1)}% lines`);
     });
   }
 
@@ -148,21 +141,15 @@ function generateCoverageReport(coverageData, threshold) {
   const primaryMetric = overall.lines;
 
   if (primaryMetric >= threshold) {
-    console.log(
-      `✅ Coverage PASSED: ${primaryMetric.toFixed(2)}% >= ${threshold}%`,
-    );
+    console.log(`✅ Coverage PASSED: ${primaryMetric.toFixed(2)}% >= ${threshold}%`);
     return true;
   } else {
-    console.log(
-      `❌ Coverage FAILED: ${primaryMetric.toFixed(2)}% < ${threshold}%`,
-    );
+    console.log(`❌ Coverage FAILED: ${primaryMetric.toFixed(2)}% < ${threshold}%`);
 
     // Provide actionable feedback
     const deficit = threshold - primaryMetric;
     console.log(`\n💡 To reach ${threshold}% coverage:`);
-    console.log(
-      `   - Need to improve coverage by ${deficit.toFixed(2)} percentage points`,
-    );
+    console.log(`   - Need to improve coverage by ${deficit.toFixed(2)} percentage points`);
     console.log(`   - Focus on untested areas with high impact`);
     console.log(`   - Add tests for critical business logic first`);
 
@@ -181,14 +168,14 @@ function generateGitHubSummary(coverageData, threshold, passed) {
 ## Overall Coverage
 | Metric | Percentage | Status |
 |--------|------------|--------|
-| Lines | ${overall.lines.toFixed(1)}% | ${overall.lines >= threshold ? '✅' : '❌'} |
-| Statements | ${overall.statements.toFixed(1)}% | ${overall.statements >= threshold ? '✅' : '❌'} |
-| Functions | ${overall.functions.toFixed(1)}% | ${overall.functions >= threshold ? '✅' : '❌'} |
-| Branches | ${overall.branches.toFixed(1)}% | ${overall.branches >= threshold ? '✅' : '❌'} |
+| Lines | ${overall.lines.toFixed(1)}% | ${overall.lines >= threshold ? "✅" : "❌"} |
+| Statements | ${overall.statements.toFixed(1)}% | ${overall.statements >= threshold ? "✅" : "❌"} |
+| Functions | ${overall.functions.toFixed(1)}% | ${overall.functions >= threshold ? "✅" : "❌"} |
+| Branches | ${overall.branches.toFixed(1)}% | ${overall.branches >= threshold ? "✅" : "❌"} |
 
 ## Threshold Check
 **Target**: ${threshold}%
-**Result**: ${passed ? '✅ PASSED' : '❌ FAILED'}
+**Result**: ${passed ? "✅ PASSED" : "❌ FAILED"}
 **Primary Metric**: ${overall.lines.toFixed(2)}% lines
 
 ${
@@ -197,9 +184,9 @@ ${
 ## Component Breakdown
 | Component | Lines | Status |
 |-----------|-------|--------|
-${components.map((c) => `| ${c.component} | ${c.lines.toFixed(1)}% | ${c.lines >= threshold ? '✅' : '❌'} |`).join('\n')}
+${components.map((c) => `| ${c.component} | ${c.lines.toFixed(1)}% | ${c.lines >= threshold ? "✅" : "❌"} |`).join("\n")}
 `
-    : ''
+    : ""
 }
 
 ${
@@ -211,14 +198,14 @@ ${
 - Add integration tests for API endpoints
 - Consider property-based testing for complex algorithms
 `
-    : ''
+    : ""
 }
 `;
 
   try {
     fs.appendFileSync(summaryFile, summary);
   } catch (error) {
-    console.error('Could not write to GitHub summary:', error.message);
+    console.error("Could not write to GitHub summary:", error.message);
   }
 }
 
@@ -231,16 +218,16 @@ function main() {
   const coverageFiles = findCoverageFiles();
 
   if (coverageFiles.length === 0) {
-    console.error('❌ No coverage files found');
-    console.error('Expected locations:');
-    console.error('  - coverage/coverage-summary.json');
-    console.error('  - server/coverage/coverage-summary.json');
-    console.error('  - client/coverage/coverage-summary.json');
-    console.error('\nRun tests with coverage first: npm test -- --coverage');
+    console.error("❌ No coverage files found");
+    console.error("Expected locations:");
+    console.error("  - coverage/coverage-summary.json");
+    console.error("  - server/coverage/coverage-summary.json");
+    console.error("  - client/coverage/coverage-summary.json");
+    console.error("\nRun tests with coverage first: npm test -- --coverage");
     process.exit(1);
   }
 
-  console.log(`📁 Found coverage files: ${coverageFiles.join(', ')}`);
+  console.log(`📁 Found coverage files: ${coverageFiles.join(", ")}`);
 
   const coverageData = calculateOverallCoverage(coverageFiles);
   const passed = generateCoverageReport(coverageData, threshold);
@@ -249,54 +236,54 @@ function main() {
   generateGitHubSummary(coverageData, threshold, passed);
 
   if (passed) {
-    console.log('\n🎉 Coverage verification passed!');
+    console.log("\n🎉 Coverage verification passed!");
     process.exit(0);
   } else {
-    console.log('\n💥 Coverage verification failed!');
-    console.log('\nTo improve coverage:');
-    console.log('1. Run: npm test -- --coverage');
-    console.log('2. Open: coverage/lcov-report/index.html');
-    console.log('3. Focus on red/yellow highlighted code');
-    console.log('4. Add tests for uncovered critical paths');
+    console.log("\n💥 Coverage verification failed!");
+    console.log("\nTo improve coverage:");
+    console.log("1. Run: npm test -- --coverage");
+    console.log("2. Open: coverage/lcov-report/index.html");
+    console.log("3. Focus on red/yellow highlighted code");
+    console.log("4. Add tests for uncovered critical paths");
     process.exit(1);
   }
 }
 
 // Handle various coverage formats
 function detectCoverageFormat() {
-  if (fs.existsSync('coverage/coverage-summary.json')) {
-    return 'jest';
+  if (fs.existsSync("coverage/coverage-summary.json")) {
+    return "jest";
   }
-  if (fs.existsSync('coverage/lcov.info')) {
-    return 'lcov';
+  if (fs.existsSync("coverage/lcov.info")) {
+    return "lcov";
   }
-  if (fs.existsSync('coverage.xml')) {
-    return 'cobertura';
+  if (fs.existsSync("coverage.xml")) {
+    return "cobertura";
   }
-  return 'unknown';
+  return "unknown";
 }
 
 // Allow for different test runners
 function getTestCommand() {
-  const packageJson = path.join(process.cwd(), 'package.json');
+  const packageJson = path.join(process.cwd(), "package.json");
 
   try {
-    const pkg = JSON.parse(fs.readFileSync(packageJson, 'utf8'));
+    const pkg = JSON.parse(fs.readFileSync(packageJson, "utf8"));
 
-    if (pkg.scripts && pkg.scripts['test:coverage']) {
-      return 'npm run test:coverage';
+    if (pkg.scripts && pkg.scripts["test:coverage"]) {
+      return "npm run test:coverage";
     }
     if (pkg.scripts && pkg.scripts.test) {
-      return 'npm test -- --coverage';
+      return "npm test -- --coverage";
     }
     if (pkg.devDependencies && pkg.devDependencies.jest) {
-      return 'npx jest --coverage';
+      return "npx jest --coverage";
     }
   } catch (error) {
     // Ignore errors, fall back to default
   }
 
-  return 'npm test -- --coverage';
+  return "npm test -- --coverage";
 }
 
 if (require.main === module) {

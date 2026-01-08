@@ -1,5 +1,5 @@
-import { Graph, CentralityScores, CentralityResult } from '../types/analytics';
-import { logger } from '../utils/logger';
+import { Graph, CentralityScores, CentralityResult } from "../types/analytics";
+import { logger } from "../utils/logger";
 
 /**
  * Centrality Algorithms
@@ -60,9 +60,7 @@ export function calculateDegreeCentrality(graph: Graph): Record<string, number> 
 /**
  * Calculate betweenness centrality using Brandes' algorithm
  */
-export function calculateBetweennessCentrality(
-  graph: Graph,
-): Record<string, number> {
+export function calculateBetweennessCentrality(graph: Graph): Record<string, number> {
   const adj = buildAdjacencyMap(graph);
   const nodeIds = graph.nodes.map((n) => n.id);
   const betweenness: Record<string, number> = {};
@@ -140,9 +138,7 @@ export function calculateBetweennessCentrality(
 /**
  * Calculate closeness centrality
  */
-export function calculateClosenessCentrality(
-  graph: Graph,
-): Record<string, number> {
+export function calculateClosenessCentrality(graph: Graph): Record<string, number> {
   const adj = buildAdjacencyMap(graph);
   const nodeIds = graph.nodes.map((n) => n.id);
   const closeness: Record<string, number> = {};
@@ -196,7 +192,7 @@ export function calculateClosenessCentrality(
 export function calculateEigenvectorCentrality(
   graph: Graph,
   maxIterations: number = 100,
-  tolerance: number = 1e-6,
+  tolerance: number = 1e-6
 ): Record<string, number> {
   const adj = buildAdjacencyMap(graph);
   const nodeIds = graph.nodes.map((n) => n.id);
@@ -227,17 +223,12 @@ export function calculateEigenvectorCentrality(
     }
 
     // Normalize
-    const norm = Math.sqrt(
-      Object.values(newScores).reduce((sum, val) => sum + val * val, 0),
-    );
+    const norm = Math.sqrt(Object.values(newScores).reduce((sum, val) => sum + val * val, 0));
 
     if (norm > 0) {
       for (const nodeId of nodeIds) {
         newScores[nodeId] /= norm;
-        maxChange = Math.max(
-          maxChange,
-          Math.abs(newScores[nodeId] - scores[nodeId]),
-        );
+        maxChange = Math.max(maxChange, Math.abs(newScores[nodeId] - scores[nodeId]));
       }
     }
 
@@ -261,12 +252,12 @@ export function computeCentrality(
     includeEigenvector?: boolean;
     includeCloseness?: boolean;
     topN?: number;
-  },
+  }
 ): CentralityResult {
   const startTime = Date.now();
   const topN = options?.topN || 10;
 
-  logger.info('Computing centrality metrics', {
+  logger.info("Computing centrality metrics", {
     nodes: graph.nodes.length,
     edges: graph.edges.length,
   });
@@ -290,10 +281,7 @@ export function computeCentrality(
   }
 
   // Get top N nodes for each metric
-  const sortByValue = (
-    scores: Record<string, number>,
-    n: number,
-  ): string[] => {
+  const sortByValue = (scores: Record<string, number>, n: number): string[] => {
     return Object.entries(scores)
       .sort(([, a], [, b]) => b - a)
       .slice(0, n)
@@ -302,21 +290,17 @@ export function computeCentrality(
 
   const topByDegree = sortByValue(degree, topN);
   const topByBetweenness = sortByValue(betweenness, topN);
-  const topByEigenvector = eigenvector
-    ? sortByValue(eigenvector, topN)
-    : undefined;
+  const topByEigenvector = eigenvector ? sortByValue(eigenvector, topN) : undefined;
   const topByCloseness = closeness ? sortByValue(closeness, topN) : undefined;
 
   // Calculate stats
   const degreeValues = Object.values(degree);
   const betweennessValues = Object.values(betweenness);
 
-  const avgDegree =
-    degreeValues.reduce((sum, val) => sum + val, 0) / degreeValues.length;
+  const avgDegree = degreeValues.reduce((sum, val) => sum + val, 0) / degreeValues.length;
   const maxDegree = Math.max(...degreeValues);
   const avgBetweenness =
-    betweennessValues.reduce((sum, val) => sum + val, 0) /
-    betweennessValues.length;
+    betweennessValues.reduce((sum, val) => sum + val, 0) / betweennessValues.length;
   const maxBetweenness = Math.max(...betweennessValues);
 
   const result: CentralityResult = {
@@ -341,7 +325,7 @@ export function computeCentrality(
   };
 
   const elapsed = Date.now() - startTime;
-  logger.info('Centrality metrics computed', {
+  logger.info("Centrality metrics computed", {
     elapsed: `${elapsed}ms`,
     topByDegree: topByDegree.slice(0, 3),
   });

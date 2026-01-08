@@ -102,19 +102,23 @@ Return:
 ## Agent Selected: CLAUDE CODE
 
 ### Reasoning
+
 This task involves architectural decisions about the graph schema
 and requires understanding of third-order implications across
 multiple services.
 
 ### Transformed Task
+
 [Original task rewritten with agent-specific instructions]
 
 ### Context
+
 - Relevant files: services/graph-api/src/schema.ts
 - Dependencies: @intelgraph/types, @intelgraph/neo4j
 - Constraints: Must maintain backward compatibility
 
 ### Governance
+
 - Policies: Bias mitigation + transparency log + session archival
 - Archival bucket: session://meta-router/${task-id}
 - Fallback: Summit Superprompt

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   GenerativeActionTranslator,
   MetaOrchestrator,
@@ -9,8 +9,8 @@ import {
   type PricingFeed,
   type StageExecutionRequest,
   type StageExecutionResult,
-} from '../src/index.js';
-import { OrchestrationKnowledgeGraph } from '@ga-graphai/knowledge-graph';
+} from "../src/index.js";
+import { OrchestrationKnowledgeGraph } from "@ga-graphai/knowledge-graph";
 import type {
   CloudProviderDescriptor,
   PipelineStageDefinition,
@@ -18,7 +18,7 @@ import type {
   PolicyEvaluationResult,
   PricingSignal,
   StageFallbackStrategy,
-} from '@ga-graphai/common-types';
+} from "@ga-graphai/common-types";
 
 class StaticPricingFeed implements PricingFeed {
   constructor(private readonly signals: PricingSignal[]) {}
@@ -29,9 +29,7 @@ class StaticPricingFeed implements PricingFeed {
 }
 
 class DeterministicExecutionAdapter implements ExecutionAdapter {
-  constructor(
-    private readonly responders: Record<string, () => StageExecutionResult>,
-  ) {}
+  constructor(private readonly responders: Record<string, () => StageExecutionResult>) {}
 
   async execute(request: StageExecutionRequest): Promise<StageExecutionResult> {
     const responder = this.responders[request.decision.provider];
@@ -39,11 +37,11 @@ class DeterministicExecutionAdapter implements ExecutionAdapter {
       return responder();
     }
     return {
-      status: 'success',
+      status: "success",
       throughputPerMinute: request.stage.minThroughputPerMinute,
       cost: request.decision.expectedCost,
       errorRate: 0.01,
-      logs: ['default-success'],
+      logs: ["default-success"],
     };
   }
 }
@@ -51,15 +49,15 @@ class DeterministicExecutionAdapter implements ExecutionAdapter {
 function allowAllPolicy(): PolicyEvaluationResult {
   return {
     allowed: true,
-    effect: 'allow',
-    matchedRules: ['allow-all'],
-    reasons: ['policy:allow-all'],
+    effect: "allow",
+    matchedRules: ["allow-all"],
+    reasons: ["policy:allow-all"],
     obligations: [],
     trace: [
       {
-        ruleId: 'allow-all',
+        ruleId: "allow-all",
         matched: true,
-        reasons: ['policy:allow-all'],
+        reasons: ["policy:allow-all"],
       },
     ],
   };
@@ -68,26 +66,26 @@ function allowAllPolicy(): PolicyEvaluationResult {
 function buildProviders(): CloudProviderDescriptor[] {
   return [
     {
-      name: 'aws',
-      regions: ['us-east-1'],
-      services: ['compute', 'ml'],
+      name: "aws",
+      regions: ["us-east-1"],
+      services: ["compute", "ml"],
       reliabilityScore: 0.92,
       sustainabilityScore: 0.55,
-      securityCertifications: ['fedramp', 'hipaa'],
+      securityCertifications: ["fedramp", "hipaa"],
       maxThroughputPerMinute: 180,
       baseLatencyMs: 60,
-      policyTags: ['fedramp', 'hipaa'],
+      policyTags: ["fedramp", "hipaa"],
     },
     {
-      name: 'azure',
-      regions: ['eastus'],
-      services: ['compute', 'ml'],
+      name: "azure",
+      regions: ["eastus"],
+      services: ["compute", "ml"],
       reliabilityScore: 0.95,
       sustainabilityScore: 0.62,
-      securityCertifications: ['fedramp', 'hipaa'],
+      securityCertifications: ["fedramp", "hipaa"],
       maxThroughputPerMinute: 170,
       baseLatencyMs: 70,
-      policyTags: ['fedramp', 'hipaa'],
+      policyTags: ["fedramp", "hipaa"],
     },
   ];
 }
@@ -95,39 +93,39 @@ function buildProviders(): CloudProviderDescriptor[] {
 function buildPricing(): PricingSignal[] {
   return [
     {
-      provider: 'aws',
-      region: 'us-east-1',
-      service: 'compute',
+      provider: "aws",
+      region: "us-east-1",
+      service: "compute",
       pricePerUnit: 0.8,
-      currency: 'USD',
-      unit: 'per-minute',
+      currency: "USD",
+      unit: "per-minute",
       effectiveAt: new Date().toISOString(),
     },
     {
-      provider: 'azure',
-      region: 'eastus',
-      service: 'compute',
+      provider: "azure",
+      region: "eastus",
+      service: "compute",
       pricePerUnit: 0.6,
-      currency: 'USD',
-      unit: 'per-minute',
+      currency: "USD",
+      unit: "per-minute",
       effectiveAt: new Date().toISOString(),
     },
     {
-      provider: 'aws',
-      region: 'us-east-1',
-      service: 'ml',
+      provider: "aws",
+      region: "us-east-1",
+      service: "ml",
       pricePerUnit: 1.2,
-      currency: 'USD',
-      unit: 'per-minute',
+      currency: "USD",
+      unit: "per-minute",
       effectiveAt: new Date().toISOString(),
     },
     {
-      provider: 'azure',
-      region: 'eastus',
-      service: 'ml',
+      provider: "azure",
+      region: "eastus",
+      service: "ml",
       pricePerUnit: 0.95,
-      currency: 'USD',
-      unit: 'per-minute',
+      currency: "USD",
+      unit: "per-minute",
       effectiveAt: new Date().toISOString(),
     },
   ];
@@ -135,10 +133,10 @@ function buildPricing(): PricingSignal[] {
 
 function buildActor(): PolicyActorContext {
   return {
-    tenantId: 'intelgraph',
-    userId: 'hello-bot',
-    roles: ['orchestrator'],
-    region: 'us',
+    tenantId: "intelgraph",
+    userId: "hello-bot",
+    roles: ["orchestrator"],
+    region: "us",
   };
 }
 
@@ -149,20 +147,20 @@ function buildKnowledgeGraph(withCriticalIncident = false): OrchestrationKnowled
     async loadServices() {
       return [
         {
-          id: 'svc-hello',
-          name: 'Hello Service',
-          tier: 'tier-1',
-          dependencies: ['svc-shared'],
+          id: "svc-hello",
+          name: "Hello Service",
+          tier: "tier-1",
+          dependencies: ["svc-shared"],
         },
         {
-          id: 'svc-case',
-          name: 'Hello Case Engine',
-          tier: 'tier-0',
-          dependencies: ['svc-hello'],
-          piiClassification: 'restricted',
+          id: "svc-case",
+          name: "Hello Case Engine",
+          tier: "tier-0",
+          dependencies: ["svc-hello"],
+          piiClassification: "restricted",
           soxCritical: true,
         },
-        { id: 'svc-shared', name: 'Shared Utility', tier: 'tier-2' },
+        { id: "svc-shared", name: "Shared Utility", tier: "tier-2" },
       ];
     },
   });
@@ -170,8 +168,8 @@ function buildKnowledgeGraph(withCriticalIncident = false): OrchestrationKnowled
   graph.registerEnvironmentConnector({
     async loadEnvironments() {
       return [
-        { id: 'env-staging', name: 'Staging', stage: 'staging', region: 'us-east-1' },
-        { id: 'env-prod', name: 'Production', stage: 'prod', region: 'eastus' },
+        { id: "env-staging", name: "Staging", stage: "staging", region: "us-east-1" },
+        { id: "env-prod", name: "Production", stage: "prod", region: "eastus" },
       ];
     },
   });
@@ -180,44 +178,44 @@ function buildKnowledgeGraph(withCriticalIncident = false): OrchestrationKnowled
     async loadPipelines() {
       return [
         {
-          id: 'pipeline-hello',
-          name: 'Hello World',
+          id: "pipeline-hello",
+          name: "Hello World",
           stages: [
             {
-              id: 'hello-build',
-              name: 'Build Artifact',
-              pipelineId: 'pipeline-hello',
-              serviceId: 'svc-hello',
-              environmentId: 'env-staging',
-              capability: 'compute',
+              id: "hello-build",
+              name: "Build Artifact",
+              pipelineId: "pipeline-hello",
+              serviceId: "svc-hello",
+              environmentId: "env-staging",
+              capability: "compute",
               guardrails: {
                 maxErrorRate: 0.05,
                 recoveryTimeoutSeconds: 120,
                 minThroughputPerMinute: 100,
                 slaSeconds: 300,
                 fallbackStrategies: [
-                  { provider: 'aws', region: 'us-east-1', trigger: 'execution-failure' },
+                  { provider: "aws", region: "us-east-1", trigger: "execution-failure" },
                 ],
               },
-              complianceTags: ['fedramp'],
+              complianceTags: ["fedramp"],
             },
             {
-              id: 'hello-case',
-              name: 'Case Planner',
-              pipelineId: 'pipeline-hello',
-              serviceId: 'svc-case',
-              environmentId: 'env-prod',
-              capability: 'ml',
+              id: "hello-case",
+              name: "Case Planner",
+              pipelineId: "pipeline-hello",
+              serviceId: "svc-case",
+              environmentId: "env-prod",
+              capability: "ml",
               guardrails: {
                 maxErrorRate: 0.08,
                 recoveryTimeoutSeconds: 180,
                 minThroughputPerMinute: 80,
                 slaSeconds: 450,
                 fallbackStrategies: [
-                  { provider: 'aws', region: 'us-east-1', trigger: 'execution-failure' },
+                  { provider: "aws", region: "us-east-1", trigger: "execution-failure" },
                 ],
               },
-              complianceTags: ['hipaa'],
+              complianceTags: ["hipaa"],
             },
           ],
         },
@@ -229,23 +227,23 @@ function buildKnowledgeGraph(withCriticalIncident = false): OrchestrationKnowled
     async loadPolicies() {
       return [
         {
-          id: 'policy-default',
-          description: 'Allow orchestrator automation',
-          effect: 'allow',
-          actions: ['orchestration.deploy'],
-          resources: ['service:svc-hello', 'service:svc-case'],
+          id: "policy-default",
+          description: "Allow orchestrator automation",
+          effect: "allow",
+          actions: ["orchestration.deploy"],
+          resources: ["service:svc-hello", "service:svc-case"],
           conditions: [],
           obligations: [],
         },
         {
-          id: 'policy-high-risk',
-          description: 'Gate risky case pushes',
-          effect: 'allow',
-          actions: ['orchestration.deploy'],
-          resources: ['service:svc-case'],
+          id: "policy-high-risk",
+          description: "Gate risky case pushes",
+          effect: "allow",
+          actions: ["orchestration.deploy"],
+          resources: ["service:svc-case"],
           conditions: [],
           obligations: [],
-          tags: ['high-risk'],
+          tags: ["high-risk"],
         },
       ];
     },
@@ -256,12 +254,12 @@ function buildKnowledgeGraph(withCriticalIncident = false): OrchestrationKnowled
       return withCriticalIncident
         ? [
             {
-              id: 'incident-critical',
-              serviceId: 'svc-case',
-              environmentId: 'env-prod',
-              severity: 'critical',
+              id: "incident-critical",
+              serviceId: "svc-case",
+              environmentId: "env-prod",
+              severity: "critical",
               occurredAt: new Date().toISOString(),
-              status: 'open',
+              status: "open",
             },
           ]
         : [];
@@ -272,7 +270,7 @@ function buildKnowledgeGraph(withCriticalIncident = false): OrchestrationKnowled
     async loadCostSignals() {
       return [
         {
-          serviceId: 'svc-case',
+          serviceId: "svc-case",
           timeBucket: new Date().toISOString(),
           saturation: withCriticalIncident ? 0.85 : 0.35,
           budgetBreaches: withCriticalIncident ? 2 : 0,
@@ -289,7 +287,7 @@ function buildKnowledgeGraph(withCriticalIncident = false): OrchestrationKnowled
 function deriveStagesFromGraph(
   graph: OrchestrationKnowledgeGraph,
   serviceId: string,
-  pipelineId: string,
+  pipelineId: string
 ): PipelineStageDefinition[] {
   const pipelines = graph.queryService(serviceId)?.pipelines ?? [];
   const pipeline = pipelines.find((entry) => entry.id === pipelineId);
@@ -308,31 +306,29 @@ function deriveStagesFromGraph(
       name: stage.name,
       requiredCapabilities: [stage.capability],
       complianceTags: stage.complianceTags ?? [],
-      minThroughputPerMinute:
-        (guardrails.minThroughputPerMinute as number | undefined) ?? 60,
+      minThroughputPerMinute: (guardrails.minThroughputPerMinute as number | undefined) ?? 60,
       slaSeconds: (guardrails.slaSeconds as number | undefined) ?? 300,
       guardrail: {
         maxErrorRate: (guardrails.maxErrorRate as number | undefined) ?? 0.05,
-        recoveryTimeoutSeconds:
-          (guardrails.recoveryTimeoutSeconds as number | undefined) ?? 120,
+        recoveryTimeoutSeconds: (guardrails.recoveryTimeoutSeconds as number | undefined) ?? 120,
       },
       fallbackStrategies,
     } satisfies PipelineStageDefinition;
   });
 }
 
-describe('Hello-World and Hello-Case orchestrations', () => {
+describe("Hello-World and Hello-Case orchestrations", () => {
   let auditTrail: AuditEntry[];
 
   beforeEach(() => {
     auditTrail = [];
   });
 
-  it('runs the Hello-World path end-to-end through IntelGraph context', async () => {
+  it("runs the Hello-World path end-to-end through IntelGraph context", async () => {
     const graph = buildKnowledgeGraph();
     await graph.refresh();
 
-    const helloContext = graph.queryService('svc-hello');
+    const helloContext = graph.queryService("svc-hello");
     expect(helloContext?.pipelines?.[0]?.stages).toHaveLength(2);
 
     const translator = new GenerativeActionTranslator({
@@ -343,32 +339,32 @@ describe('Hello-World and Hello-Case orchestrations', () => {
     });
 
     const intentPlan = translator.translate({
-      type: 'deploy',
-      targetServiceId: 'svc-hello',
-      environmentId: 'env-staging',
+      type: "deploy",
+      targetServiceId: "svc-hello",
+      environmentId: "env-staging",
       requestedBy: buildActor(),
-      metadata: { release: 'hello-world' },
+      metadata: { release: "hello-world" },
     });
 
     expect(intentPlan.guardrail.requiresApproval).toBe(false);
-    expect(intentPlan.steps[1]?.command).toContain('run-stage --stage hello-build');
+    expect(intentPlan.steps[1]?.command).toContain("run-stage --stage hello-build");
     expect(intentPlan.risk?.factors.incidentLoad).toBeDefined();
     expect(intentPlan.risk?.score).toBeGreaterThan(0);
 
-    const stages = deriveStagesFromGraph(graph, 'svc-hello', 'pipeline-hello');
-    expect(stages[0]?.fallbackStrategies?.[0]?.provider).toBe('aws');
+    const stages = deriveStagesFromGraph(graph, "svc-hello", "pipeline-hello");
+    expect(stages[0]?.fallbackStrategies?.[0]?.provider).toBe("aws");
 
     const orchestrator = new MetaOrchestrator({
-      pipelineId: 'pipeline-hello',
+      pipelineId: "pipeline-hello",
       providers: buildProviders(),
       pricingFeed: new StaticPricingFeed(buildPricing()),
       execution: new DeterministicExecutionAdapter({
         azure: () => ({
-          status: 'success',
+          status: "success",
           throughputPerMinute: 140,
           cost: 90,
           errorRate: 0.01,
-          logs: ['azure-primary'],
+          logs: ["azure-primary"],
         }),
       }),
       auditSink: { record: (entry) => auditTrail.push(entry) },
@@ -376,22 +372,22 @@ describe('Hello-World and Hello-Case orchestrations', () => {
     });
 
     const outcome = await orchestrator.executePlan(stages, {
-      rollout: 'hello-world',
+      rollout: "hello-world",
     });
     const telemetry = orchestrator.deriveTelemetry(outcome);
 
     expect(outcome.plan.steps).toHaveLength(2);
-    expect(outcome.trace.every((entry) => entry.status === 'success')).toBe(true);
+    expect(outcome.trace.every((entry) => entry.status === "success")).toBe(true);
     expect(telemetry.auditCompleteness).toBeCloseTo(1, 1);
-    expect(auditTrail.some((entry) => entry.category === 'plan')).toBe(true);
+    expect(auditTrail.some((entry) => entry.category === "plan")).toBe(true);
   });
 
-  it('runs the Hello-Case path with fallback, approvals, and load reshaping', async () => {
+  it("runs the Hello-Case path with fallback, approvals, and load reshaping", async () => {
     const graph = buildKnowledgeGraph(true);
     await graph.refresh();
 
-    const caseContext = graph.queryService('svc-case');
-    expect(caseContext?.incidents?.some((incident) => incident.status === 'open')).toBe(true);
+    const caseContext = graph.queryService("svc-case");
+    expect(caseContext?.incidents?.some((incident) => incident.status === "open")).toBe(true);
 
     const approvalQueue = { enqueue: vi.fn() };
     const translator = new GenerativeActionTranslator({
@@ -403,72 +399,75 @@ describe('Hello-World and Hello-Case orchestrations', () => {
     });
 
     const intentPlan = translator.translate({
-      type: 'deploy',
-      targetServiceId: 'svc-case',
-      environmentId: 'env-prod',
+      type: "deploy",
+      targetServiceId: "svc-case",
+      environmentId: "env-prod",
       requestedBy: buildActor(),
-      riskTolerance: 'low',
-      metadata: { caseId: 'CASE-123' },
+      riskTolerance: "low",
+      metadata: { caseId: "CASE-123" },
     });
 
     expect(intentPlan.guardrail.requiresApproval).toBe(true);
     expect(approvalQueue.enqueue).toHaveBeenCalled();
 
     const orchestrator = new MetaOrchestrator({
-      pipelineId: 'pipeline-hello',
+      pipelineId: "pipeline-hello",
       providers: buildProviders(),
       pricingFeed: new StaticPricingFeed(buildPricing()),
       execution: new DeterministicExecutionAdapter({
         azure: () => ({
-          status: 'failure',
+          status: "failure",
           throughputPerMinute: 50,
           cost: 120,
           errorRate: 0.2,
-          logs: ['azure-degraded'],
+          logs: ["azure-degraded"],
         }),
         aws: () => ({
-          status: 'success',
+          status: "success",
           throughputPerMinute: 150,
           cost: 85,
           errorRate: 0.02,
-          logs: ['aws-recovery'],
+          logs: ["aws-recovery"],
         }),
       }),
       auditSink: { record: (entry) => auditTrail.push(entry) },
       reasoningModel: new TemplateReasoningModel(),
-      selfHealing: { maxRetries: 1, backoffSeconds: 1, triggers: ['execution-failure'] },
+      selfHealing: { maxRetries: 1, backoffSeconds: 1, triggers: ["execution-failure"] },
     });
 
-    const stages = deriveStagesFromGraph(graph, 'svc-case', 'pipeline-hello');
+    const stages = deriveStagesFromGraph(graph, "svc-case", "pipeline-hello");
     const outcomes = await Promise.all(
       Array.from({ length: 3 }).map((_, index) =>
-        orchestrator.executePlan(stages, { rollout: `hello-case-${index}` }),
-      ),
+        orchestrator.executePlan(stages, { rollout: `hello-case-${index}` })
+      )
     );
 
-    const basePlan: ExecutionOutcome['plan'] = outcomes[0]?.plan ?? {
-      pipelineId: 'pipeline-hello',
+    const basePlan: ExecutionOutcome["plan"] = outcomes[0]?.plan ?? {
+      pipelineId: "pipeline-hello",
       generatedAt: new Date().toISOString(),
       steps: [],
       aggregateScore: 0,
       metadata: {},
     };
 
-    const mergedOutcome = outcomes.reduce<ExecutionOutcome>((acc, current, index) => {
-      if (index === 0) {
-        acc.plan = current.plan;
-      }
-      acc.trace.push(...current.trace);
-      acc.rewards.push(...current.rewards);
-      return acc;
-    }, { plan: basePlan, trace: [], rewards: [] });
+    const mergedOutcome = outcomes.reduce<ExecutionOutcome>(
+      (acc, current, index) => {
+        if (index === 0) {
+          acc.plan = current.plan;
+        }
+        acc.trace.push(...current.trace);
+        acc.rewards.push(...current.rewards);
+        return acc;
+      },
+      { plan: basePlan, trace: [], rewards: [] }
+    );
 
     const traces = mergedOutcome.trace;
     const telemetry = orchestrator.deriveTelemetry(mergedOutcome);
 
-    expect(traces.some((entry) => entry.status === 'recovered')).toBe(true);
+    expect(traces.some((entry) => entry.status === "recovered")).toBe(true);
     expect(telemetry.selfHealingRate).toBeGreaterThan(0);
-    expect(auditTrail.some((entry) => entry.category === 'fallback')).toBe(true);
-    expect(auditTrail.some((entry) => entry.category === 'reward-update')).toBe(true);
+    expect(auditTrail.some((entry) => entry.category === "fallback")).toBe(true);
+    expect(auditTrail.some((entry) => entry.category === "reward-update")).toBe(true);
   });
 });

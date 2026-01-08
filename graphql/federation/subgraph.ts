@@ -3,18 +3,15 @@
  * Helpers for creating federated subgraphs
  */
 
-import { buildSubgraphSchema } from '@apollo/subgraph';
-import { parse, DocumentNode } from 'graphql';
-import { IResolvers } from '@graphql-tools/utils';
+import { buildSubgraphSchema } from "@apollo/subgraph";
+import { parse, DocumentNode } from "graphql";
+import { IResolvers } from "@graphql-tools/utils";
 
 /**
  * Create a federated subgraph schema
  */
-export function createSubgraphSchema(
-  typeDefs: string | DocumentNode,
-  resolvers: IResolvers
-) {
-  const typeDefsDoc = typeof typeDefs === 'string' ? parse(typeDefs) : typeDefs;
+export function createSubgraphSchema(typeDefs: string | DocumentNode, resolvers: IResolvers) {
+  const typeDefsDoc = typeof typeDefs === "string" ? parse(typeDefs) : typeDefs;
 
   return buildSubgraphSchema({
     typeDefs: typeDefsDoc,
@@ -255,7 +252,7 @@ export const entityReferenceResolver = {
  */
 export function addFederationDirectives(typeDefs: string): string {
   // Check if schema already has federation directives
-  if (typeDefs.includes('@link') || typeDefs.includes('extend schema')) {
+  if (typeDefs.includes("@link") || typeDefs.includes("extend schema")) {
     return typeDefs;
   }
 
@@ -265,7 +262,7 @@ export function addFederationDirectives(typeDefs: string): string {
       @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key", "@shareable", "@external", "@requires", "@provides"])
   `;
 
-  return federationLink + '\n' + typeDefs;
+  return federationLink + "\n" + typeDefs;
 }
 
 /**

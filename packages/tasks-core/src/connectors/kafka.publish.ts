@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { defineTask } from '@intelgraph/maestro-sdk';
-import { Kafka } from 'kafkajs';
+import { defineTask } from "@intelgraph/maestro-sdk";
+import { Kafka } from "kafkajs";
 
 interface In {
   brokers: string[];
@@ -9,7 +9,7 @@ interface In {
 }
 export default defineTask<In, { count: number }>({
   async execute(_ctx, { payload }) {
-    const kafka = new Kafka({ clientId: 'maestro', brokers: payload.brokers });
+    const kafka = new Kafka({ clientId: "maestro", brokers: payload.brokers });
     const producer = kafka.producer();
     await producer.connect();
     await producer.send({ topic: payload.topic, messages: payload.messages });

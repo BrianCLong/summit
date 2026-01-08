@@ -4,9 +4,9 @@ grafana:
     dashboardproviders.yaml:
       apiVersion: 1
       providers:
-        - name: 'intelgraph'
+        - name: "intelgraph"
           orgId: 1
-          folder: ''
+          folder: ""
           type: file
           disableDeletion: false
           options:
@@ -78,13 +78,13 @@ grafana:
 alertmanager:
   config:
     route:
-      receiver: 'default'
-      group_by: ['alertname', 'service']
+      receiver: "default"
+      group_by: ["alertname", "service"]
     receivers:
-      - name: 'default'
+      - name: "default"
         slack_configs:
           - api_url: ${SLACK_WEBHOOK_URL}
-            channel: '#intelgraph-alerts'
+            channel: "#intelgraph-alerts"
 prometheus:
   prometheusSpec:
     serviceMonitorSelectorNilUsesHelmValues: false

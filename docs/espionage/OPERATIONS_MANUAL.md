@@ -66,6 +66,7 @@ curl https://api.example.com:4101/health
 ```
 
 Expected response:
+
 ```json
 {
   "status": "healthy",
@@ -215,6 +216,7 @@ curl https://api.example.com:4101/api/agencies/{agency-id}/assessment \
 ```
 
 Response:
+
 ```json
 {
   "threatLevel": "HIGH",
@@ -286,6 +288,7 @@ curl -X POST https://api.example.com/api/agents/officers/{officer-id}/analyze-co
 ```
 
 Response:
+
 ```json
 {
   "id": "cover-analysis-uuid",
@@ -313,6 +316,7 @@ curl -X POST https://api.example.com/api/agents/officers/{officer-id}/analyze-tr
 ```
 
 Response shows:
+
 - Frequent destinations
 - Travel clusters
 - Unusual trips
@@ -327,15 +331,18 @@ curl https://api.example.com/api/agents/officers/{officer-id}/risk-profile \
 ```
 
 Response:
+
 ```json
 {
   "officerId": "officer-uuid",
   "overallRisk": "MEDIUM",
-  "factors": [{
-    "factor": "Increased surveillance",
-    "severity": "MEDIUM",
-    "description": "Officer under surveillance 3 times in past month"
-  }],
+  "factors": [
+    {
+      "factor": "Increased surveillance",
+      "severity": "MEDIUM",
+      "description": "Officer under surveillance 3 times in past month"
+    }
+  ],
   "recommendations": [
     "Increase surveillance detection activities",
     "Review and update cover identities",
@@ -703,6 +710,7 @@ curl https://api.example.com/api/counterintel/posture \
 ```
 
 Response:
+
 ```json
 {
   "posture": "FAIR",
@@ -835,6 +843,7 @@ curl -X POST https://api.example.com/api/analytics/predictive \
 **Problem**: 401 Unauthorized responses
 
 **Solutions**:
+
 ```bash
 # Verify token is valid
 echo $AUTH_TOKEN
@@ -852,6 +861,7 @@ curl -X POST https://auth.example.com/token \
 **Problem**: 400 Bad Request with validation details
 
 **Solution**: Check the error details
+
 ```json
 {
   "error": "Validation failed",
@@ -873,6 +883,7 @@ Fix the data type and retry.
 **Problem**: 403 Forbidden for classified data
 
 **Solution**: Verify your clearance level
+
 ```bash
 # Check your user profile
 curl https://api.example.com/api/user/profile \
@@ -886,6 +897,7 @@ Request higher clearance if needed.
 **Problem**: No data returned or wrong data
 
 **Solution**: Verify tenantId
+
 ```bash
 # Always include tenantId in requests
 {
@@ -954,14 +966,14 @@ Request higher clearance if needed.
 
 ### A. Classification Markings
 
-| Level | Marking | Description |
-|-------|---------|-------------|
-| UNCLASSIFIED | U | Public information |
-| CONFIDENTIAL | C | Could damage national security |
-| SECRET | S | Serious damage to national security |
-| TOP SECRET | TS | Exceptionally grave damage |
-| TOP SECRET/SCI | TS/SCI | Special compartmented information |
-| SAP | SAP | Special Access Program |
+| Level          | Marking | Description                         |
+| -------------- | ------- | ----------------------------------- |
+| UNCLASSIFIED   | U       | Public information                  |
+| CONFIDENTIAL   | C       | Could damage national security      |
+| SECRET         | S       | Serious damage to national security |
+| TOP SECRET     | TS      | Exceptionally grave damage          |
+| TOP SECRET/SCI | TS/SCI  | Special compartmented information   |
+| SAP            | SAP     | Special Access Program              |
 
 ### B. Common Compartments
 
@@ -972,16 +984,16 @@ Request higher clearance if needed.
 
 ### C. API Status Codes
 
-| Code | Meaning | Action |
-|------|---------|--------|
-| 200 | Success | Continue |
-| 201 | Created | Resource created successfully |
-| 400 | Bad Request | Check request format |
-| 401 | Unauthorized | Check authentication |
-| 403 | Forbidden | Check permissions |
-| 404 | Not Found | Check resource ID |
-| 500 | Server Error | Contact support |
+| Code | Meaning      | Action                        |
+| ---- | ------------ | ----------------------------- |
+| 200  | Success      | Continue                      |
+| 201  | Created      | Resource created successfully |
+| 400  | Bad Request  | Check request format          |
+| 401  | Unauthorized | Check authentication          |
+| 403  | Forbidden    | Check permissions             |
+| 404  | Not Found    | Check resource ID             |
+| 500  | Server Error | Contact support               |
 
 ---
 
-*This operations manual is classified SECRET. Handle accordingly.*
+_This operations manual is classified SECRET. Handle accordingly._

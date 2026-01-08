@@ -109,7 +109,7 @@ on:
   workflow_dispatch: {}
   push:
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
 
 jobs:
   gate:
@@ -184,7 +184,7 @@ spec:
 name: connector-cert
 on:
   push:
-    paths: ['connectors/**']
+    paths: ["connectors/**"]
   workflow_dispatch: {}
 
 jobs:
@@ -194,10 +194,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Set up Node
         uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: "20" }
       - name: Set up Python
         uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
+        with: { python-version: "3.11" }
       - name: Install deps
         run: |
           npm ci || true
@@ -364,15 +364,15 @@ done
 
 ```javascript
 #!/usr/bin/env node
-const fs = require('fs');
+const fs = require("fs");
 const path = process.argv[2];
 if (!path) {
-  console.error('Usage: assert.js <golden.json>');
+  console.error("Usage: assert.js <golden.json>");
   process.exit(2);
 }
-const spec = JSON.parse(fs.readFileSync(path, 'utf8'));
+const spec = JSON.parse(fs.readFileSync(path, "utf8"));
 // Minimal placeholder: ensure required fields exist
-['name', 'input', 'expected'].forEach((k) => {
+["name", "input", "expected"].forEach((k) => {
   if (!(k in spec)) {
     console.error(`Missing ${k}`);
     process.exit(2);
@@ -388,13 +388,13 @@ process.exit(0);
 **Path:** `apps/web/components/ExportBadge.tsx`
 
 ```tsx
-import React from 'react';
+import React from "react";
 export default function ExportBadge({ verified }: { verified: boolean }) {
   return (
     <span
-      className={`inline-flex items-center rounded-2xl px-2 py-1 text-xs ${verified ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}
+      className={`inline-flex items-center rounded-2xl px-2 py-1 text-xs ${verified ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
     >
-      {verified ? 'Verified Manifest' : 'Unverified'}
+      {verified ? "Verified Manifest" : "Unverified"}
     </span>
   );
 }
@@ -480,7 +480,7 @@ scopes:
   - channels:history
   - users:read
 error_budget:
-  availability: '>=99.0%'
+  availability: ">=99.0%"
 ```
 
 **Example content:** `connectors/slack/mapping.yaml`
@@ -521,11 +521,11 @@ fields:
 **Path:** `apps/copilot/test/validity.spec.ts`
 
 ```ts
-import { generateCypher, validateCypher } from '../../src';
-import cases from './cases.json';
+import { generateCypher, validateCypher } from "../../src";
+import cases from "./cases.json";
 
-describe('NL→Cypher validity', () => {
-  it('≥95% syntactic validity', () => {
+describe("NL→Cypher validity", () => {
+  it("≥95% syntactic validity", () => {
     let valid = 0;
     for (const c of cases) {
       const q = generateCypher(c.prompt);

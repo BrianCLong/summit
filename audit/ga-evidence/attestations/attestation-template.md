@@ -65,11 +65,11 @@ I, [Release Captain Name], attest that:
 
 ## Signature
 
-**Release Captain**: ************\_************
+**Release Captain**: ****\*\*\*\*****\_****\*\*\*\*****
 
-**Date**: ************\_************
+**Date**: ****\*\*\*\*****\_****\*\*\*\*****
 
-**Digital Signature/GPG Key ID**: ************\_************
+**Digital Signature/GPG Key ID**: ****\*\*\*\*****\_****\*\*\*\*****
 
 ---
 

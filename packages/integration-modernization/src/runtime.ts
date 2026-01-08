@@ -1,13 +1,13 @@
-import { ConnectorObservability } from './observability';
-import { SecretVault } from './secretVault';
+import { ConnectorObservability } from "./observability";
+import { SecretVault } from "./secretVault";
 import {
   ConnectorMetadata,
   ConnectorResult,
   HealthStatus,
   RetryPolicy,
   SandboxMode,
-  IntegrationKind
-} from './types';
+  IntegrationKind,
+} from "./types";
 
 export interface IntegrationAdapter {
   testConnection(): Promise<ConnectorResult>;
@@ -42,13 +42,17 @@ export class ConnectorRuntime {
     this.secretVault = vault;
   }
 
-  registerConnector(metadata: ConnectorMetadata, adapter: IntegrationAdapter, options: ConnectorRuntimeOptions) {
+  registerConnector(
+    metadata: ConnectorMetadata,
+    adapter: IntegrationAdapter,
+    options: ConnectorRuntimeOptions
+  ) {
     this.connectors.set(metadata.id, {
       metadata,
       adapter,
-      health: 'degraded',
-      sandboxMode: options.sandboxMode ?? 'live',
-      retries: options.retryPolicy.attempts
+      health: "degraded",
+      sandboxMode: options.sandboxMode ?? "live",
+      retries: options.retryPolicy.attempts,
     });
   }
 
@@ -74,36 +78,42 @@ export class ConnectorRuntime {
         const result = await this.runAdapter(state, payload);
         if (result.success) {
           this.observability.recordSuccess(connectorId, Date.now() - start);
-          state.health = 'connected';
+          state.health = "connected";
           state.lastRun = Date.now();
           return result;
         }
-        throw result.error ?? new Error('Unknown connector failure');
+        throw result.error ?? new Error("Unknown connector failure");
       } catch (error) {
         this.observability.recordFailure(connectorId);
         if (attempt >= policy.attempts) {
-          state.health = 'failing';
+          state.health = "failing";
           return { success: false, error: error as Error };
         }
         await new Promise((resolve) => setTimeout(resolve, policy.backoffMs * attempt));
       }
     }
-    state.health = 'failing';
-    return { success: false, error: new Error('Exhausted attempts') };
+    state.health = "failing";
+    return { success: false, error: new Error("Exhausted attempts") };
   }
 
-  private async runAdapter(state: ConnectorState, payload?: Record<string, unknown>): Promise<ConnectorResult> {
+  private async runAdapter(
+    state: ConnectorState,
+    payload?: Record<string, unknown>
+  ): Promise<ConnectorResult> {
     const adapter = state.adapter;
-    if (state.sandboxMode === 'sandbox' && state.metadata.sandboxFixtures) {
+    if (state.sandboxMode === "sandbox" && state.metadata.sandboxFixtures) {
       return { success: true, data: state.metadata.sandboxFixtures };
     }
-    if (adapter.pull && (state.metadata.kind === 'pull' || state.metadata.kind === 'file-based')) {
+    if (adapter.pull && (state.metadata.kind === "pull" || state.metadata.kind === "file-based")) {
       return adapter.pull(payload);
     }
-    if (adapter.push && (state.metadata.kind === 'push' || state.metadata.kind === 'event-driven')) {
+    if (
+      adapter.push &&
+      (state.metadata.kind === "push" || state.metadata.kind === "event-driven")
+    ) {
       return adapter.push(payload ?? {});
     }
-    if (adapter.onEvent && state.metadata.kind === 'event-driven') {
+    if (adapter.onEvent && state.metadata.kind === "event-driven") {
       return adapter.onEvent(payload ?? {});
     }
     throw new Error(`No adapter method available for kind ${state.metadata.kind}`);
@@ -112,12 +122,12 @@ export class ConnectorRuntime {
   pause(connectorId: string) {
     const state = this.connectors.get(connectorId);
     if (!state) throw new Error(`Connector ${connectorId} not found`);
-    state.health = 'paused';
+    state.health = "paused";
     this.observability.pause(connectorId);
   }
 
   health(connectorId: string) {
-    return this.connectors.get(connectorId)?.health ?? 'failing';
+    return this.connectors.get(connectorId)?.health ?? "failing";
   }
 
   listInventory() {
@@ -142,12 +152,18 @@ export class ConnectorRuntime {
   }
 
   ensureFrameworkCompliance(metadata: ConnectorMetadata) {
-    const supportedKinds: IntegrationKind[] = ['pull', 'push', 'event-driven', 'file-based', 'human-in-the-loop'];
+    const supportedKinds: IntegrationKind[] = [
+      "pull",
+      "push",
+      "event-driven",
+      "file-based",
+      "human-in-the-loop",
+    ];
     if (!supportedKinds.includes(metadata.kind)) {
       throw new Error(`Unsupported integration kind ${metadata.kind}`);
     }
     if (!metadata.contract.idempotency.idempotencyKeyHeader) {
-      throw new Error('Missing idempotency contract');
+      throw new Error("Missing idempotency contract");
     }
   }
 
@@ -163,7 +179,7 @@ export class ConnectorRuntime {
       health,
       owner: metadata.owner,
       contractVersion: metadata.contract.versioning.current,
-      lastRun: this.connectors.get(metadata.id)?.lastRun
+      lastRun: this.connectors.get(metadata.id)?.lastRun,
     }));
   }
 }

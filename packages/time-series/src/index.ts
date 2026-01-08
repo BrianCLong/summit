@@ -4,10 +4,10 @@
  */
 
 // Types
-export * from './types/index.js';
+export * from "./types/index.js";
 
 // Decomposition
-export { STLDecomposer } from './decomposition/stl.js';
+export { STLDecomposer } from "./decomposition/stl.js";
 
 // Validators
-export { StationarityTester } from './validators/stationarity.js';
+export { StationarityTester } from "./validators/stationarity.js";

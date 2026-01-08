@@ -4,9 +4,9 @@
  * Extends OAuth 2.0 with identity layer
  */
 
-import { createLogger } from '../utils/logger.js';
+import { createLogger } from "../utils/logger.js";
 
-const logger = createLogger('oidc');
+const logger = createLogger("oidc");
 
 export interface OIDCConfig {
   issuer: string;
@@ -55,7 +55,7 @@ export class OIDCProvider {
     const userInfo = this.userInfoStore.get(accessToken);
 
     if (!userInfo) {
-      logger.warn('User info not found for token');
+      logger.warn("User info not found for token");
       return null;
     }
 
@@ -64,7 +64,7 @@ export class OIDCProvider {
 
   storeUserInfo(userId: string, userInfo: UserInfo): void {
     this.userInfoStore.set(userId, userInfo);
-    logger.info('User info stored', { sub: userInfo.sub });
+    logger.info("User info stored", { sub: userInfo.sub });
   }
 
   getDiscoveryDocument() {
@@ -76,10 +76,18 @@ export class OIDCProvider {
       jwks_uri: this.config.jwksUri,
       scopes_supported: this.config.supportedScopes,
       claims_supported: this.config.supportedClaims,
-      response_types_supported: ['code', 'token', 'id_token', 'code token', 'code id_token', 'token id_token', 'code token id_token'],
-      subject_types_supported: ['public'],
-      id_token_signing_alg_values_supported: ['RS256', 'HS256'],
-      token_endpoint_auth_methods_supported: ['client_secret_basic', 'client_secret_post'],
+      response_types_supported: [
+        "code",
+        "token",
+        "id_token",
+        "code token",
+        "code id_token",
+        "token id_token",
+        "code token id_token",
+      ],
+      subject_types_supported: ["public"],
+      id_token_signing_alg_values_supported: ["RS256", "HS256"],
+      token_endpoint_auth_methods_supported: ["client_secret_basic", "client_secret_post"],
     };
   }
 }

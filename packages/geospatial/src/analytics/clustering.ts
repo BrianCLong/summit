@@ -1,5 +1,5 @@
-import { haversineDistance } from '../utils/distance.js';
-import type { GeoPoint, SpatialCluster } from '../types/geospatial.js';
+import { haversineDistance } from "../utils/distance.js";
+import type { GeoPoint, SpatialCluster } from "../types/geospatial.js";
 
 export interface ClusteringOptions {
   epsilonMeters?: number;
@@ -50,10 +50,7 @@ export const clusterPoints = (
     expandCluster(idx, clusters.length, clusterIndices);
     const clusterPointsList = clusterIndices.map((i) => points[i]);
     const centroid = calculateCentroid(clusterPointsList);
-    const radius = Math.max(
-      ...clusterPointsList.map((p) => haversineDistance(p, centroid)),
-      0
-    );
+    const radius = Math.max(...clusterPointsList.map((p) => haversineDistance(p, centroid)), 0);
     clusters.push({
       id: clusters.length,
       points: clusterPointsList,

@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import $ from 'jquery';
+import { useEffect } from "react";
+import $ from "jquery";
 
 interface AlertRow {
   id: string;
@@ -11,18 +11,18 @@ interface AlertRow {
 
 const sample: AlertRow[] = [
   {
-    id: '1',
-    entity: 'Entity 1',
-    reason: 'matched name',
+    id: "1",
+    entity: "Entity 1",
+    reason: "matched name",
     severity: 5,
-    status: 'OPEN',
+    status: "OPEN",
   },
 ];
 
 export default function AlertsPage() {
   useEffect(() => {
-    const table = $('#alerts-table');
-    table.find('th').css({ position: 'sticky', top: 0 });
+    const table = $("#alerts-table");
+    table.find("th").css({ position: "sticky", top: 0 });
   }, []);
 
   return (

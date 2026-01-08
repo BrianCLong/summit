@@ -4,11 +4,11 @@
  * Enterprise-grade event bus with pub-sub, queuing, and message routing
  */
 
-import { EventEmitter } from 'events';
-import { v4 as uuidv4 } from 'uuid';
-import Redis from 'ioredis';
-import { Kafka, Producer, Consumer, EachMessagePayload } from 'kafkajs';
-import pino from 'pino';
+import { EventEmitter } from "events";
+import { v4 as uuidv4 } from "uuid";
+import Redis from "ioredis";
+import { Kafka, Producer, Consumer, EachMessagePayload } from "kafkajs";
+import pino from "pino";
 import type {
   EventBusConfig,
   Message,
@@ -19,8 +19,8 @@ import type {
   SubscriptionOptions,
   EventBusMetrics,
   DeliveryGuarantee,
-  MessageStatus
-} from './types.js';
+  MessageStatus,
+} from "./types.js";
 
 export class EventBus extends EventEmitter {
   private config: EventBusConfig;
@@ -44,7 +44,7 @@ export class EventBus extends EventEmitter {
       messagesDeadLettered: 0,
       averageLatency: 0,
       activeSubscriptions: 0,
-      queueDepth: 0
+      queueDepth: 0,
     };
   }
 
@@ -52,7 +52,7 @@ export class EventBus extends EventEmitter {
    * Initialize the event bus and connect to backends
    */
   async initialize(): Promise<void> {
-    this.logger.info('Initializing EventBus...');
+    this.logger.info("Initializing EventBus...");
 
     // Initialize Redis for local pub-sub and caching
     if (this.config.redis) {
@@ -61,11 +61,11 @@ export class EventBus extends EventEmitter {
         port: this.config.redis.port,
         password: this.config.redis.password,
         db: this.config.redis.db || 0,
-        keyPrefix: this.config.redis.keyPrefix || 'eventbus:'
+        keyPrefix: this.config.redis.keyPrefix || "eventbus:",
       });
 
-      this.redis.on('error', (err) => {
-        this.logger.error({ err }, 'Redis connection error');
+      this.redis.on("error", (err) => {
+        this.logger.error({ err }, "Redis connection error");
       });
     }
 
@@ -75,41 +75,37 @@ export class EventBus extends EventEmitter {
         clientId: this.config.kafka.clientId || this.config.name,
         brokers: this.config.kafka.brokers,
         ssl: this.config.kafka.ssl,
-        sasl: this.config.kafka.sasl as any
+        sasl: this.config.kafka.sasl as any,
       });
 
       this.kafkaProducer = this.kafka.producer();
       await this.kafkaProducer.connect();
     }
 
-    this.logger.info('EventBus initialized successfully');
+    this.logger.info("EventBus initialized successfully");
   }
 
   /**
    * Publish a message to a topic
    */
-  async publish<T = any>(
-    topic: string,
-    payload: T,
-    options: PublishOptions = {}
-  ): Promise<string> {
+  async publish<T = any>(topic: string, payload: T, options: PublishOptions = {}): Promise<string> {
     const messageId = uuidv4();
     const message: Message<T> = {
       metadata: {
         messageId,
         timestamp: new Date(),
         source: this.config.name,
-        version: '1.0',
-        traceId: options.persistent ? uuidv4() : undefined
+        version: "1.0",
+        traceId: options.persistent ? uuidv4() : undefined,
       },
       payload,
       topic,
       priority: options.priority,
       ttl: options.ttl,
-      delayed: options.delayed
+      delayed: options.delayed,
     };
 
-    this.logger.debug({ messageId, topic }, 'Publishing message');
+    this.logger.debug({ messageId, topic }, "Publishing message");
 
     // Publish to Redis for fast local delivery
     if (this.redis) {
@@ -120,16 +116,18 @@ export class EventBus extends EventEmitter {
     if (this.kafkaProducer && options.persistent) {
       await this.kafkaProducer.send({
         topic,
-        messages: [{
-          key: message.metadata.messageId,
-          value: JSON.stringify(message),
-          headers: message.metadata.headers as any
-        }]
+        messages: [
+          {
+            key: message.metadata.messageId,
+            value: JSON.stringify(message),
+            headers: message.metadata.headers as any,
+          },
+        ],
       });
     }
 
     this.metrics.messagesPublished++;
-    this.emit('message:published', { messageId, topic });
+    this.emit("message:published", { messageId, topic });
 
     return messageId;
   }
@@ -144,14 +142,14 @@ export class EventBus extends EventEmitter {
   ): Promise<Subscription> {
     const subscriptionId = uuidv4();
 
-    this.logger.info({ subscriptionId, topic }, 'Creating subscription');
+    this.logger.info({ subscriptionId, topic }, "Creating subscription");
 
     // Subscribe to Redis
     if (this.redis) {
       const subscriber = this.redis.duplicate();
       await subscriber.subscribe(topic);
 
-      subscriber.on('message', async (channel, messageStr) => {
+      subscriber.on("message", async (channel, messageStr) => {
         if (channel === topic) {
           const message = JSON.parse(messageStr) as Message<T>;
           await this.handleMessage(message, handler, options);
@@ -162,7 +160,7 @@ export class EventBus extends EventEmitter {
     // Subscribe to Kafka
     if (this.kafka) {
       const consumer = this.kafka.consumer({
-        groupId: `${this.config.name}-${topic}`
+        groupId: `${this.config.name}-${topic}`,
       });
 
       await consumer.connect();
@@ -170,11 +168,9 @@ export class EventBus extends EventEmitter {
 
       await consumer.run({
         eachMessage: async (payload: EachMessagePayload) => {
-          const message = JSON.parse(
-            payload.message.value?.toString() || '{}'
-          ) as Message<T>;
+          const message = JSON.parse(payload.message.value?.toString() || "{}") as Message<T>;
           await this.handleMessage(message, handler, options);
-        }
+        },
       });
 
       this.kafkaConsumers.set(subscriptionId, consumer);
@@ -187,7 +183,7 @@ export class EventBus extends EventEmitter {
       options,
       unsubscribe: async () => {
         await this.unsubscribe(subscriptionId);
-      }
+      },
     };
 
     this.subscriptions.set(subscriptionId, subscription);
@@ -199,36 +195,28 @@ export class EventBus extends EventEmitter {
   /**
    * Publish to a queue (point-to-point)
    */
-  async enqueue<T = any>(
-    queue: string,
-    payload: T,
-    options: PublishOptions = {}
-  ): Promise<string> {
+  async enqueue<T = any>(queue: string, payload: T, options: PublishOptions = {}): Promise<string> {
     const messageId = uuidv4();
     const message: Message<T> = {
       metadata: {
         messageId,
         timestamp: new Date(),
         source: this.config.name,
-        version: '1.0'
+        version: "1.0",
       },
       payload,
       queue,
-      priority: options.priority || 0
+      priority: options.priority || 0,
     };
 
-    this.logger.debug({ messageId, queue }, 'Enqueueing message');
+    this.logger.debug({ messageId, queue }, "Enqueueing message");
 
     if (this.redis) {
       const queueKey = `queue:${queue}`;
       const priority = options.priority || 0;
 
       // Use sorted set for priority queue
-      await this.redis.zadd(
-        queueKey,
-        priority,
-        JSON.stringify(message)
-      );
+      await this.redis.zadd(queueKey, priority, JSON.stringify(message));
     }
 
     this.metrics.messagesPublished++;
@@ -245,12 +233,14 @@ export class EventBus extends EventEmitter {
   ): Promise<Subscription> {
     const subscriptionId = uuidv4();
 
-    this.logger.info({ subscriptionId, queue }, 'Creating queue subscription');
+    this.logger.info({ subscriptionId, queue }, "Creating queue subscription");
 
     // Poll queue for messages
     const pollQueue = async () => {
       if (!this.redis) return;
-      if (!this.redis) { return; }
+      if (!this.redis) {
+        return;
+      }
 
       const queueKey = `queue:${queue}`;
       const prefetch = options.prefetchCount || 1;
@@ -268,18 +258,18 @@ export class EventBus extends EventEmitter {
             }
           } else {
             // No messages, wait before polling again
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise((resolve) => setTimeout(resolve, 100));
           }
         } catch (err) {
-          this.logger.error({ err, queue }, 'Queue polling error');
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          this.logger.error({ err, queue }, "Queue polling error");
+          await new Promise((resolve) => setTimeout(resolve, 1000));
         }
       }
     };
 
     // Start polling
-    pollQueue().catch(err => {
-      this.logger.error({ err, queue }, 'Queue subscription error');
+    pollQueue().catch((err) => {
+      this.logger.error({ err, queue }, "Queue subscription error");
     });
 
     const subscription: Subscription = {
@@ -289,7 +279,7 @@ export class EventBus extends EventEmitter {
       options,
       unsubscribe: async () => {
         await this.unsubscribe(subscriptionId);
-      }
+      },
     };
 
     this.subscriptions.set(subscriptionId, subscription);
@@ -310,8 +300,8 @@ export class EventBus extends EventEmitter {
       ...message,
       deliveryInfo: {
         attempt: 1,
-        firstAttemptedAt: new Date()
-      }
+        firstAttemptedAt: new Date(),
+      },
     };
 
     const maxRetries = options.maxRetries || this.config.maxRetries || 3;
@@ -327,24 +317,25 @@ export class EventBus extends EventEmitter {
 
         this.processing.delete(message.metadata.messageId);
         this.metrics.messagesConsumed++;
-        this.emit('message:consumed', {
-          messageId: message.metadata.messageId
+        this.emit("message:consumed", {
+          messageId: message.metadata.messageId,
         });
 
         return; // Success
       } catch (err) {
         this.logger.error(
           { err, messageId: message.metadata.messageId, attempt },
-          'Message handling failed'
+          "Message handling failed"
         );
 
         if (attempt < maxRetries) {
           // Calculate backoff
-          const delay = options.retryBackoff === 'exponential'
-            ? retryDelay * Math.pow(2, attempt - 1)
-            : retryDelay;
+          const delay =
+            options.retryBackoff === "exponential"
+              ? retryDelay * Math.pow(2, attempt - 1)
+              : retryDelay;
 
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
         } else {
           // Max retries exceeded
           this.processing.delete(message.metadata.messageId);
@@ -355,9 +346,9 @@ export class EventBus extends EventEmitter {
             await this.sendToDeadLetter(envelope, options.deadLetterQueue);
           }
 
-          this.emit('message:failed', {
+          this.emit("message:failed", {
             messageId: message.metadata.messageId,
-            error: err
+            error: err,
           });
         }
       }
@@ -372,7 +363,9 @@ export class EventBus extends EventEmitter {
     dlqName: string
   ): Promise<void> {
     if (!this.redis) return;
-    if (!this.redis) { return; }
+    if (!this.redis) {
+      return;
+    }
 
     const dlqKey = `dlq:${dlqName}`;
     await this.redis.lpush(dlqKey, JSON.stringify(envelope));
@@ -380,7 +373,7 @@ export class EventBus extends EventEmitter {
     this.metrics.messagesDeadLettered++;
     this.logger.warn(
       { messageId: envelope.metadata.messageId, dlq: dlqName },
-      'Message sent to dead letter queue'
+      "Message sent to dead letter queue"
     );
   }
 
@@ -390,7 +383,9 @@ export class EventBus extends EventEmitter {
   private async unsubscribe(subscriptionId: string): Promise<void> {
     const subscription = this.subscriptions.get(subscriptionId);
     if (!subscription) return;
-    if (!subscription) { return; }
+    if (!subscription) {
+      return;
+    }
 
     // Disconnect Kafka consumer
     const consumer = this.kafkaConsumers.get(subscriptionId);
@@ -402,7 +397,7 @@ export class EventBus extends EventEmitter {
     this.subscriptions.delete(subscriptionId);
     this.metrics.activeSubscriptions = this.subscriptions.size;
 
-    this.logger.info({ subscriptionId }, 'Unsubscribed');
+    this.logger.info({ subscriptionId }, "Unsubscribed");
   }
 
   /**
@@ -416,7 +411,7 @@ export class EventBus extends EventEmitter {
    * Shutdown the event bus
    */
   async shutdown(): Promise<void> {
-    this.logger.info('Shutting down EventBus...');
+    this.logger.info("Shutting down EventBus...");
 
     // Close all subscriptions
     for (const subscription of this.subscriptions.values()) {
@@ -433,6 +428,6 @@ export class EventBus extends EventEmitter {
       await this.redis.quit();
     }
 
-    this.logger.info('EventBus shut down successfully');
+    this.logger.info("EventBus shut down successfully");
   }
 }

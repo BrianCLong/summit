@@ -16,8 +16,8 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     env:
-      CI: 'true'
-      NODE_OPTIONS: '--max-old-space-size=4096'
+      CI: "true"
+      NODE_OPTIONS: "--max-old-space-size=4096"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -32,8 +32,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.11.x'
-          cache: 'pnpm'
+          node-version: "20.11.x"
+          cache: "pnpm"
 
       - name: Bootstrap (install dependencies)
         run: make bootstrap
@@ -42,7 +42,7 @@ jobs:
       - name: Run linter
         run: pnpm run lint
         timeout-minutes: 5
-        continue-on-error: true  # TODO: Remove once lint warnings are fixed across codebase
+        continue-on-error: true # TODO: Remove once lint warnings are fixed across codebase
 
       - name: Run typecheck
         run: pnpm run typecheck

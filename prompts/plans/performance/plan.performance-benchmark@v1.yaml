@@ -1,7 +1,7 @@
 meta:
   id: plan.performance-benchmark@v1
-  owner: 'platform-engineering'
-  purpose: 'Establish canonical cross-language benchmark suite with representative workloads'
+  owner: "platform-engineering"
+  purpose: "Establish canonical cross-language benchmark suite with representative workloads"
   tags:
     - performance
     - benchmark
@@ -9,13 +9,13 @@ meta:
     - python
     - go
   guardrails:
-    - 'Benchmarks must be reproducible in CI environment'
-    - 'Results must include statistical significance measures'
-    - 'Workloads must represent real production patterns'
-    - 'Avoid microbenchmarks that do not reflect actual usage'
+    - "Benchmarks must be reproducible in CI environment"
+    - "Results must include statistical significance measures"
+    - "Workloads must represent real production patterns"
+    - "Avoid microbenchmarks that do not reflect actual usage"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -97,27 +97,27 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'graphql-api-benchmarks'
+  - name: "graphql-api-benchmarks"
     inputs:
-      subsystems: 'GraphQL API (TS), Graph Query Engine (Go), ML Pipeline (Python)'
-      current_metrics: 'p50: 45ms, p99: 250ms, throughput: 500 req/s'
-      target_slis: 'p99 < 200ms, throughput > 1000 req/s'
-      runtime_versions: 'Node 20, Go 1.22, Python 3.11'
-      infrastructure_context: 'Kubernetes, 4 CPU / 8GB per pod'
+      subsystems: "GraphQL API (TS), Graph Query Engine (Go), ML Pipeline (Python)"
+      current_metrics: "p50: 45ms, p99: 250ms, throughput: 500 req/s"
+      target_slis: "p99 < 200ms, throughput > 1000 req/s"
+      runtime_versions: "Node 20, Go 1.22, Python 3.11"
+      infrastructure_context: "Kubernetes, 4 CPU / 8GB per pod"
     expected_contains:
-      - 'Benchmark Harness'
-      - 'Microbenchmarks'
-      - 'Statistical analysis'
-      - 'Acceptance Criteria'
+      - "Benchmark Harness"
+      - "Microbenchmarks"
+      - "Statistical analysis"
+      - "Acceptance Criteria"
 
-  - name: 'neo4j-query-benchmarks'
+  - name: "neo4j-query-benchmarks"
     inputs:
-      subsystems: 'Neo4j Cypher queries, Entity resolution, Relationship traversal'
-      current_metrics: 'Simple query: 5ms, Complex traversal: 500ms'
-      target_slis: 'Complex traversal < 300ms'
-      runtime_versions: 'Neo4j 5.x, Node 20'
-      infrastructure_context: 'Docker Compose dev, K8s production'
+      subsystems: "Neo4j Cypher queries, Entity resolution, Relationship traversal"
+      current_metrics: "Simple query: 5ms, Complex traversal: 500ms"
+      target_slis: "Complex traversal < 300ms"
+      runtime_versions: "Neo4j 5.x, Node 20"
+      infrastructure_context: "Docker Compose dev, K8s production"
     expected_contains:
-      - 'benchmarks'
-      - 'Baseline'
-      - 'CI integration'
+      - "benchmarks"
+      - "Baseline"
+      - "CI integration"

@@ -3,7 +3,11 @@ export class KalmanFilter1D {
 
   private stateEstimate: number;
 
-  constructor(initialEstimate: number, private readonly processVariance: number, private readonly measurementVariance: number) {
+  constructor(
+    initialEstimate: number,
+    private readonly processVariance: number,
+    private readonly measurementVariance: number
+  ) {
     this.stateEstimate = initialEstimate;
     this.estimationError = 1;
   }

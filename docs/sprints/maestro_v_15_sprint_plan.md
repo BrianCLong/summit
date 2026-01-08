@@ -94,17 +94,16 @@ export function sprt(
   p0 = 0.99,
   p1 = 0.995,
   alpha = 0.05,
-  beta = 0.1,
+  beta = 0.1
 ) {
   const A = Math.log((1 - beta) / alpha),
     B = Math.log(beta / (1 - alpha));
-  const ll = (s: number, t: number, p: number) =>
-    s * Math.log(p) + (t - s) * Math.log(1 - p);
+  const ll = (s: number, t: number, p: number) => s * Math.log(p) + (t - s) * Math.log(1 - p);
   const L =
     ll(successA, totalA, p1) -
     ll(successA, totalA, p0) +
     (ll(successB, totalB, 1 - p1) - ll(successB, totalB, 1 - p0));
-  return L > A ? 'accept' : L < B ? 'reject' : 'continue';
+  return L > A ? "accept" : L < B ? "reject" : "continue";
 }
 ```
 
@@ -126,17 +125,13 @@ export function sprt(
 
 ```ts
 // server/speclive/guard.ts
-export function whenThen(
-  when: (ctx: any) => boolean,
-  then: (ctx: any) => boolean,
-) {
+export function whenThen(when: (ctx: any) => boolean, then: (ctx: any) => boolean) {
   return (_: any, __: string, desc: PropertyDescriptor) => {
     const f = desc.value;
     desc.value = async function (ctx: any, ...rest: any[]) {
       if (when(ctx)) {
         const res = await f.apply(this, [ctx, ...rest]);
-        if (!then({ ctx, res }))
-          throw new Error('SpecLiveViolation: THEN failed');
+        if (!then({ ctx, res })) throw new Error("SpecLiveViolation: THEN failed");
         return res;
       } else {
         return f.apply(this, [ctx, ...rest]);
@@ -194,12 +189,9 @@ export function whenThen(
 // tools/supply/drift.ts
 export function riskyDelta(prev: any, next: any) {
   const added = next.packages.filter(
-    (p: any) => !prev.packages.some((q: any) => q.purl === p.purl),
+    (p: any) => !prev.packages.some((q: any) => q.purl === p.purl)
   );
-  return added.filter(
-    (p: any) =>
-      p.license?.match(/GPL|AGPL/i) || p.vuln?.severity === 'critical',
-  );
+  return added.filter((p: any) => p.license?.match(/GPL|AGPL/i) || p.vuln?.severity === "critical");
 }
 ```
 
@@ -283,40 +275,34 @@ export function psi(p: number[], q: number[]) {
     <script>
       $(function () {
         function render(c) {
-          $('#body').html(
-            '<div><span class=k>arm</span> ' +
+          $("#body").html(
+            "<div><span class=k>arm</span> " +
               c.arm +
-              ' · <span class=k>eval</span> ' +
+              " · <span class=k>eval</span> " +
               c.eval.toFixed(2) +
-              ' · <span class=k>$</span>' +
+              " · <span class=k>$</span>" +
               c.cost.toFixed(2) +
-              '</div><div class=k>speclive: ' +
-              (c.speclive ? 'ok' : 'violations') +
-              ' · exp: ' +
+              "</div><div class=k>speclive: " +
+              (c.speclive ? "ok" : "violations") +
+              " · exp: " +
               c.exp +
-              '</div><pre>' +
+              "</div><pre>" +
               c.rationale +
-              '</pre>',
+              "</pre>"
           );
         }
         var card = {
-          arm: 'impl@small',
+          arm: "impl@small",
           eval: 0.95,
           cost: 0.17,
           speclive: true,
-          exp: 'continue',
-          rationale: 'Cheapest capable; SPRT not conclusive yet',
+          exp: "continue",
+          rationale: "Cheapest capable; SPRT not conclusive yet",
         };
         render(card);
-        $('#b1').on('click', () =>
-          $.post('/api/decision/alt', { arm: 'impl@medium' }),
-        );
-        $('#b2').on('click', () =>
-          $.post('/api/decision/tests', { mode: 'high' }),
-        );
-        $('#b3').on('click', () =>
-          $.post('/api/release/rollback', { rc: 'current' }),
-        );
+        $("#b1").on("click", () => $.post("/api/decision/alt", { arm: "impl@medium" }));
+        $("#b2").on("click", () => $.post("/api/decision/tests", { mode: "high" }));
+        $("#b3").on("click", () => $.post("/api/release/rollback", { rc: "current" }));
       });
     </script>
   </body>

@@ -178,7 +178,7 @@ spec:
             privileged: false
             capabilities:
               add:
-                - SYS_ADMIN  # Required for mount operations
+                - SYS_ADMIN # Required for mount operations
               drop:
                 - ALL
           env:

@@ -29,7 +29,7 @@ export function calculateMetrics(cm: ConfusionMatrix): ClassificationMetrics {
   const total = tp + tn + fp + fn;
 
   if (total === 0) {
-    throw new Error('Confusion matrix is empty');
+    throw new Error("Confusion matrix is empty");
   }
 
   const accuracy = (tp + tn) / total;
@@ -37,9 +37,7 @@ export function calculateMetrics(cm: ConfusionMatrix): ClassificationMetrics {
   const recall = tp + fn === 0 ? 0 : tp / (tp + fn);
   const specificity = tn + fp === 0 ? 0 : tn / (tn + fp);
 
-  const f1Score = precision + recall === 0
-    ? 0
-    : 2 * (precision * recall) / (precision + recall);
+  const f1Score = precision + recall === 0 ? 0 : (2 * (precision * recall)) / (precision + recall);
 
   const falsePositiveRate = 1 - specificity;
   const falseNegativeRate = 1 - recall;
@@ -66,10 +64,10 @@ export function calculateMetrics(cm: ConfusionMatrix): ClassificationMetrics {
  */
 export function calculateEER(
   scores: number[],
-  labels: boolean[],
+  labels: boolean[]
 ): { eer: number; threshold: number } {
   if (scores.length !== labels.length) {
-    throw new Error('Scores and labels must have same length');
+    throw new Error("Scores and labels must have same length");
   }
 
   // Sort by score
@@ -116,7 +114,7 @@ export function calculateEER(
  */
 export function calculateAUC(scores: number[], labels: boolean[]): number {
   if (scores.length !== labels.length) {
-    throw new Error('Scores and labels must have same length');
+    throw new Error("Scores and labels must have same length");
   }
 
   // Sort by score
@@ -128,7 +126,7 @@ export function calculateAUC(scores: number[], labels: boolean[]): number {
   const negativeCount = labels.length - positiveCount;
 
   if (positiveCount === 0 || negativeCount === 0) {
-    throw new Error('Need both positive and negative samples');
+    throw new Error("Need both positive and negative samples");
   }
 
   let tpr = 0;
@@ -152,7 +150,7 @@ export function calculateAUC(scores: number[], labels: boolean[]): number {
     fpr = falsePositives / negativeCount;
 
     // Trapezoidal integration
-    auc += (fpr - prevFPR) * (tpr + prevTPR) / 2;
+    auc += ((fpr - prevFPR) * (tpr + prevTPR)) / 2;
 
     prevTPR = tpr;
     prevFPR = fpr;
@@ -164,13 +162,9 @@ export function calculateAUC(scores: number[], labels: boolean[]): number {
 /**
  * Calculate Population Stability Index (PSI) for drift detection
  */
-export function calculatePSI(
-  baseline: number[],
-  current: number[],
-  numBins: number = 10,
-): number {
+export function calculatePSI(baseline: number[], current: number[], numBins: number = 10): number {
   if (baseline.length === 0 || current.length === 0) {
-    throw new Error('Baseline and current distributions cannot be empty');
+    throw new Error("Baseline and current distributions cannot be empty");
   }
 
   // Determine bin edges from baseline distribution
@@ -230,12 +224,9 @@ function countInBins(data: number[], binEdges: number[]): number[] {
 /**
  * Calculate KL divergence for drift detection
  */
-export function calculateKLDivergence(
-  p: number[],
-  q: number[],
-): number {
+export function calculateKLDivergence(p: number[], q: number[]): number {
   if (p.length !== q.length) {
-    throw new Error('Distributions must have same length');
+    throw new Error("Distributions must have same length");
   }
 
   let kl = 0;
@@ -256,10 +247,10 @@ export function calculateKLDivergence(
 export function calculateCalibrationError(
   scores: number[],
   labels: boolean[],
-  numBins: number = 10,
+  numBins: number = 10
 ): number {
   if (scores.length !== labels.length) {
-    throw new Error('Scores and labels must have same length');
+    throw new Error("Scores and labels must have same length");
   }
 
   const binEdges = Array.from({ length: numBins + 1 }, (_, i) => i / numBins);
@@ -287,10 +278,10 @@ export function calculateCalibrationError(
  */
 export function calculatePercentiles(
   values: number[],
-  percentiles: number[] = [50, 95, 99],
+  percentiles: number[] = [50, 95, 99]
 ): Record<string, number> {
   if (values.length === 0) {
-    throw new Error('Cannot calculate percentiles of empty array');
+    throw new Error("Cannot calculate percentiles of empty array");
   }
 
   const sorted = [...values].sort((a, b) => a - b);
@@ -316,7 +307,7 @@ export function calculateSummaryStats(values: number[]): {
   count: number;
 } {
   if (values.length === 0) {
-    throw new Error('Cannot calculate statistics of empty array');
+    throw new Error("Cannot calculate statistics of empty array");
   }
 
   const sorted = [...values].sort((a, b) => a - b);

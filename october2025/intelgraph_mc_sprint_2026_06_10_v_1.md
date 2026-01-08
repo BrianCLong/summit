@@ -233,8 +233,7 @@ type OpBudget {
 type Mutation {
   setOpBudget(opId: String!, dailyCapUSD: Float!, action: String!): Boolean
     @auth(abac: "admin.write")
-  relocateDataset(datasetId: ID!, targetRegion: String!): Boolean
-    @auth(abac: "admin.write")
+  relocateDataset(datasetId: ID!, targetRegion: String!): Boolean @auth(abac: "admin.write")
   setReranker(enabled: Boolean!): Boolean @auth(abac: "admin.write")
 }
 ```
@@ -354,7 +353,7 @@ repo/
 export function chooseTTL(
   opId: string,
   tenant: string,
-  context: { writeRate: number; sloBurn: number },
+  context: { writeRate: number; sloBurn: number }
 ) {
   /* bounded adjust */
 }

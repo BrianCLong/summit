@@ -1,4 +1,4 @@
-export type Effect = 'allow' | 'deny';
+export type Effect = "allow" | "deny";
 
 export interface Decision {
   allowed: boolean;
@@ -60,4 +60,3 @@ export interface EvaluationInput {
   facts?: Record<string, string>;
   traits?: Record<string, string>;
 }
-

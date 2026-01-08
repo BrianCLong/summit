@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Timeline,
   TimelineItem,
@@ -7,7 +7,7 @@ import {
   TimelineContent,
   TimelineDot,
   TimelineOppositeContent,
-} from '@mui/lab';
+} from "@mui/lab";
 import {
   Box,
   Typography,
@@ -29,7 +29,7 @@ import {
   ListItem,
   ListItemText,
   LinearProgress,
-} from '@mui/material';
+} from "@mui/material";
 import {
   PersonOutlined as PlannerIcon,
   PsychologyOutlined as CriticIcon,
@@ -43,20 +43,13 @@ import {
   PersonOutlined as UserIcon,
   SmartToyOutlined as AgentIcon,
   PlayArrowOutlined as ExecuteIcon,
-} from '@mui/icons-material';
-import { api } from '../api';
+} from "@mui/icons-material";
+import { api } from "../api";
 
 interface AgentStep {
   id: string;
-  role: 'planner' | 'critic' | 'executor' | 'human';
-  state:
-    | 'pending'
-    | 'running'
-    | 'need_approval'
-    | 'approved'
-    | 'blocked'
-    | 'completed'
-    | 'error';
+  role: "planner" | "critic" | "executor" | "human";
+  state: "pending" | "running" | "need_approval" | "approved" | "blocked" | "completed" | "error";
   text: string;
   ts: number;
   metadata?: {
@@ -85,19 +78,14 @@ interface EditDialogProps {
   onSave: (stepId: string, editedText: string, reason?: string) => void;
 }
 
-const EditDialog: React.FC<EditDialogProps> = ({
-  open,
-  step,
-  onClose,
-  onSave,
-}) => {
-  const [editedText, setEditedText] = useState('');
-  const [reason, setReason] = useState('');
+const EditDialog: React.FC<EditDialogProps> = ({ open, step, onClose, onSave }) => {
+  const [editedText, setEditedText] = useState("");
+  const [reason, setReason] = useState("");
 
   useEffect(() => {
     if (step) {
       setEditedText(step.text);
-      setReason('');
+      setReason("");
     }
   }, [step]);
 
@@ -116,12 +104,8 @@ const EditDialog: React.FC<EditDialogProps> = ({
           <Typography variant="subtitle2" gutterBottom>
             Original Text:
           </Typography>
-          <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 1, mb: 2 }}>
-            <Typography
-              variant="body2"
-              component="pre"
-              sx={{ whiteSpace: 'pre-wrap' }}
-            >
+          <Box sx={{ p: 2, bgcolor: "grey.50", borderRadius: 1, mb: 2 }}>
+            <Typography variant="body2" component="pre" sx={{ whiteSpace: "pre-wrap" }}>
               {step?.text}
             </Typography>
           </Box>
@@ -147,11 +131,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button
-          variant="contained"
-          onClick={handleSave}
-          disabled={!editedText.trim()}
-        >
+        <Button variant="contained" onClick={handleSave} disabled={!editedText.trim()}>
           Save & Approve
         </Button>
       </DialogActions>
@@ -175,9 +155,7 @@ export default function AgentTimeline({ runId }: { runId: string }) {
         setSteps(r.steps || []);
         setError(null);
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : 'Failed to load agent steps',
-        );
+        setError(err instanceof Error ? err.message : "Failed to load agent steps");
       } finally {
         setLoading(false);
       }
@@ -186,7 +164,7 @@ export default function AgentTimeline({ runId }: { runId: string }) {
         setSteps((x) => {
           const nx = x.filter((y) => y.id !== s.id);
           return [...nx, s].sort((a, b) => a.ts - b.ts);
-        }),
+        })
       );
       return () => off();
     })();
@@ -194,9 +172,9 @@ export default function AgentTimeline({ runId }: { runId: string }) {
 
   const handleAction = async (
     stepId: string,
-    action: 'approve' | 'block',
+    action: "approve" | "block",
     editedText?: string,
-    reason?: string,
+    reason?: string
   ) => {
     try {
       await actOnAgent(runId, {
@@ -212,7 +190,7 @@ export default function AgentTimeline({ runId }: { runId: string }) {
           step.id === stepId
             ? {
                 ...step,
-                state: action === 'approve' ? 'approved' : 'blocked',
+                state: action === "approve" ? "approved" : "blocked",
                 text: editedText || step.text,
                 metadata: {
                   ...step.metadata,
@@ -231,11 +209,11 @@ export default function AgentTimeline({ runId }: { runId: string }) {
                       : step.metadata?.edit_history,
                 },
               }
-            : step,
-        ),
+            : step
+        )
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Action failed');
+      setError(err instanceof Error ? err.message : "Action failed");
     }
   };
 
@@ -244,23 +222,19 @@ export default function AgentTimeline({ runId }: { runId: string }) {
     setEditDialogOpen(true);
   };
 
-  const handleSaveEdit = (
-    stepId: string,
-    editedText: string,
-    reason?: string,
-  ) => {
-    handleAction(stepId, 'approve', editedText, reason);
+  const handleSaveEdit = (stepId: string, editedText: string, reason?: string) => {
+    handleAction(stepId, "approve", editedText, reason);
   };
 
   const getRoleIcon = (role: string) => {
     switch (role) {
-      case 'planner':
+      case "planner":
         return <PlannerIcon />;
-      case 'critic':
+      case "critic":
         return <CriticIcon />;
-      case 'executor':
+      case "executor":
         return <ExecutorIcon />;
-      case 'human':
+      case "human":
         return <UserIcon />;
       default:
         return <AgentIcon />;
@@ -269,32 +243,32 @@ export default function AgentTimeline({ runId }: { runId: string }) {
 
   const getStateColor = (state: string) => {
     switch (state) {
-      case 'approved':
-        return 'success';
-      case 'blocked':
-        return 'error';
-      case 'need_approval':
-        return 'warning';
-      case 'completed':
-        return 'success';
-      case 'error':
-        return 'error';
-      case 'running':
-        return 'primary';
+      case "approved":
+        return "success";
+      case "blocked":
+        return "error";
+      case "need_approval":
+        return "warning";
+      case "completed":
+        return "success";
+      case "error":
+        return "error";
+      case "running":
+        return "primary";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   const getStateIcon = (state: string) => {
     switch (state) {
-      case 'approved':
+      case "approved":
         return <ApprovedIcon color="success" />;
-      case 'blocked':
+      case "blocked":
         return <BlockedIcon color="error" />;
-      case 'need_approval':
+      case "need_approval":
         return <PendingIcon color="warning" />;
-      case 'running':
+      case "running":
         return <ExecuteIcon color="primary" />;
       default:
         return <PendingIcon />;
@@ -302,23 +276,23 @@ export default function AgentTimeline({ runId }: { runId: string }) {
   };
 
   const formatDuration = (ms?: number) => {
-    if (!ms) return '';
+    if (!ms) return "";
     if (ms < 1000) return `${ms}ms`;
     if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`;
     return `${(ms / 60000).toFixed(1)}m`;
   };
 
   const renderStepActions = (step: AgentStep) => {
-    if (step.state !== 'need_approval') return null;
+    if (step.state !== "need_approval") return null;
 
     return (
-      <Box sx={{ mt: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+      <Box sx={{ mt: 2, display: "flex", gap: 1, flexWrap: "wrap" }}>
         <Button
           variant="contained"
           color="success"
           size="small"
           startIcon={<ApprovedIcon />}
-          onClick={() => handleAction(step.id, 'approve')}
+          onClick={() => handleAction(step.id, "approve")}
         >
           Approve
         </Button>
@@ -328,7 +302,7 @@ export default function AgentTimeline({ runId }: { runId: string }) {
           color="error"
           size="small"
           startIcon={<BlockedIcon />}
-          onClick={() => handleAction(step.id, 'block')}
+          onClick={() => handleAction(step.id, "block")}
         >
           Block
         </Button>
@@ -348,8 +322,7 @@ export default function AgentTimeline({ runId }: { runId: string }) {
   const renderStepMetadata = (step: AgentStep) => {
     if (!step.metadata) return null;
 
-    const { duration, cost, confidence, tools_used, edit_history } =
-      step.metadata;
+    const { duration, cost, confidence, tools_used, edit_history } = step.metadata;
 
     return (
       <Accordion sx={{ mt: 1 }}>
@@ -361,8 +334,8 @@ export default function AgentTimeline({ runId }: { runId: string }) {
         <AccordionDetails>
           <Box
             sx={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
               gap: 2,
               mb: 2,
             }}
@@ -372,9 +345,7 @@ export default function AgentTimeline({ runId }: { runId: string }) {
                 <Typography variant="caption" color="textSecondary">
                   Duration
                 </Typography>
-                <Typography variant="body2">
-                  {formatDuration(duration)}
-                </Typography>
+                <Typography variant="body2">{formatDuration(duration)}</Typography>
               </Box>
             )}
 
@@ -392,31 +363,19 @@ export default function AgentTimeline({ runId }: { runId: string }) {
                 <Typography variant="caption" color="textSecondary">
                   Confidence
                 </Typography>
-                <Typography variant="body2">
-                  {(confidence * 100).toFixed(1)}%
-                </Typography>
+                <Typography variant="body2">{(confidence * 100).toFixed(1)}%</Typography>
               </Box>
             )}
           </Box>
 
           {tools_used && tools_used.length > 0 && (
             <Box sx={{ mb: 2 }}>
-              <Typography
-                variant="caption"
-                color="textSecondary"
-                display="block"
-                gutterBottom
-              >
+              <Typography variant="caption" color="textSecondary" display="block" gutterBottom>
                 Tools Used
               </Typography>
-              <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+              <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
                 {tools_used.map((tool, index) => (
-                  <Chip
-                    key={index}
-                    label={tool}
-                    size="small"
-                    variant="outlined"
-                  />
+                  <Chip key={index} label={tool} size="small" variant="outlined" />
                 ))}
               </Box>
             </Box>
@@ -424,12 +383,7 @@ export default function AgentTimeline({ runId }: { runId: string }) {
 
           {edit_history && edit_history.length > 0 && (
             <Box>
-              <Typography
-                variant="caption"
-                color="textSecondary"
-                display="block"
-                gutterBottom
-              >
+              <Typography variant="caption" color="textSecondary" display="block" gutterBottom>
                 Edit History
               </Typography>
               <List dense>
@@ -437,7 +391,7 @@ export default function AgentTimeline({ runId }: { runId: string }) {
                   <ListItem key={index}>
                     <ListItemText
                       primary={`Edit ${index + 1}`}
-                      secondary={`${new Date(edit.timestamp).toLocaleString()}${edit.reason ? ` - ${edit.reason}` : ''}`}
+                      secondary={`${new Date(edit.timestamp).toLocaleString()}${edit.reason ? ` - ${edit.reason}` : ""}`}
                     />
                   </ListItem>
                 ))}
@@ -451,10 +405,7 @@ export default function AgentTimeline({ runId }: { runId: string }) {
                 <Typography variant="body2">Inputs</Typography>
               </AccordionSummary>
               <AccordionDetails>
-                <Box
-                  component="pre"
-                  sx={{ fontSize: '0.75rem', overflow: 'auto' }}
-                >
+                <Box component="pre" sx={{ fontSize: "0.75rem", overflow: "auto" }}>
                   {JSON.stringify(step.inputs, null, 2)}
                 </Box>
               </AccordionDetails>
@@ -467,10 +418,7 @@ export default function AgentTimeline({ runId }: { runId: string }) {
                 <Typography variant="body2">Outputs</Typography>
               </AccordionSummary>
               <AccordionDetails>
-                <Box
-                  component="pre"
-                  sx={{ fontSize: '0.75rem', overflow: 'auto' }}
-                >
+                <Box component="pre" sx={{ fontSize: "0.75rem", overflow: "auto" }}>
                   {JSON.stringify(step.outputs, null, 2)}
                 </Box>
               </AccordionDetails>
@@ -504,7 +452,7 @@ export default function AgentTimeline({ runId }: { runId: string }) {
 
   return (
     <Box sx={{ p: 2 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
         <AgentIcon />
         <Typography variant="h6">Agent Timeline</Typography>
         <Chip label={`${steps.length} steps`} size="small" color="primary" />
@@ -512,23 +460,17 @@ export default function AgentTimeline({ runId }: { runId: string }) {
 
       {sortedSteps.length === 0 && (
         <Alert severity="info">
-          No agent steps yet. The agent timeline will populate as the run
-          progresses.
+          No agent steps yet. The agent timeline will populate as the run progresses.
         </Alert>
       )}
 
       <Timeline>
         {sortedSteps.map((step, index) => (
           <TimelineItem key={step.id}>
-            <TimelineOppositeContent
-              color="textSecondary"
-              sx={{ flex: '0 1 auto' }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <TimelineOppositeContent color="textSecondary" sx={{ flex: "0 1 auto" }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <TimeIcon fontSize="small" />
-                <Typography variant="caption">
-                  {new Date(step.ts).toLocaleTimeString()}
-                </Typography>
+                <Typography variant="caption">{new Date(step.ts).toLocaleTimeString()}</Typography>
               </Box>
               {step.metadata?.duration && (
                 <Typography variant="caption" color="textSecondary">
@@ -538,9 +480,7 @@ export default function AgentTimeline({ runId }: { runId: string }) {
             </TimelineOppositeContent>
 
             <TimelineSeparator>
-              <TimelineDot color={getStateColor(step.state)}>
-                {getRoleIcon(step.role)}
-              </TimelineDot>
+              <TimelineDot color={getStateColor(step.state)}>{getRoleIcon(step.role)}</TimelineDot>
               {index < sortedSteps.length - 1 && <TimelineConnector />}
             </TimelineSeparator>
 
@@ -549,32 +489,25 @@ export default function AgentTimeline({ runId }: { runId: string }) {
                 <CardContent>
                   <Box
                     sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
                       mb: 1,
                     }}
                   >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography
-                        variant="subtitle1"
-                        sx={{ textTransform: 'capitalize' }}
-                      >
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Typography variant="subtitle1" sx={{ textTransform: "capitalize" }}>
                         {step.role}
                       </Typography>
                       {step.metadata?.checkpoint_type && (
-                        <Chip
-                          label={step.metadata.checkpoint_type}
-                          size="small"
-                          color="info"
-                        />
+                        <Chip label={step.metadata.checkpoint_type} size="small" color="info" />
                       )}
                     </Box>
 
                     <Tooltip title={step.state}>
                       <Chip
                         icon={getStateIcon(step.state)}
-                        label={step.state.replace('_', ' ')}
+                        label={step.state.replace("_", " ")}
                         color={getStateColor(step.state)}
                         size="small"
                       />
@@ -585,8 +518,8 @@ export default function AgentTimeline({ runId }: { runId: string }) {
                     variant="body2"
                     component="pre"
                     sx={{
-                      whiteSpace: 'pre-wrap',
-                      fontFamily: 'inherit',
+                      whiteSpace: "pre-wrap",
+                      fontFamily: "inherit",
                       mb: 1,
                     }}
                   >

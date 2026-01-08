@@ -10,14 +10,15 @@ _Version: 2025-11-27_
 
 Each sequence follows a 3-touch + 1 breakup pattern over ~3 weeks:
 
-| Touch | Timing | Purpose |
-|-------|--------|---------|
-| Email 1 | Day 0 | Problem + mission hook |
-| Email 2 | Day 3-5 | Use case + social proof |
-| Email 3 | Day 10-12 | Direct ask + low-friction next step |
-| Email 4 (Breakup) | Day 18-21 | Permission to close loop |
+| Touch             | Timing    | Purpose                             |
+| ----------------- | --------- | ----------------------------------- |
+| Email 1           | Day 0     | Problem + mission hook              |
+| Email 2           | Day 3-5   | Use case + social proof             |
+| Email 3           | Day 10-12 | Direct ask + low-friction next step |
+| Email 4 (Breakup) | Day 18-21 | Permission to close loop            |
 
 **Variables to personalize:**
+
 - `{{First}}` — Contact first name
 - `{{Org}}` — Organization name
 - `{{Unit}}` — Specific unit/division
@@ -112,6 +113,7 @@ Hi {{First}},
 Haven't heard back, so I'll assume the timing isn't right for {{Org}} to look at analyst workbench options.
 
 If that changes—especially if you're facing:
+
 - A modernization deadline
 - An audit or compliance push
 - A new mission thread that needs OSINT fusion
@@ -408,19 +410,14 @@ Best,
 ### Discovery Questions
 
 **Current State:**
+
 1. "Walk me through how your analysts handle a typical [case / investigation / alert] today."
 2. "What tools are they using? Where do they spend the most time?"
 3. "When something needs to go to [leadership / legal / oversight], what does that process look like?"
 
-**Pain Points:**
-4. "Where do things break down or slow down?"
-5. "What happens when you can't trace how a conclusion was reached?"
-6. "Have you had any audit findings or compliance gaps in the last 12 months?"
+**Pain Points:** 4. "Where do things break down or slow down?" 5. "What happens when you can't trace how a conclusion was reached?" 6. "Have you had any audit findings or compliance gaps in the last 12 months?"
 
-**Decision Process:**
-7. "If you wanted to pilot something like this, what would that process look like?"
-8. "Who else would need to be involved?"
-9. "What budget/timeline constraints should I know about?"
+**Decision Process:** 7. "If you wanted to pilot something like this, what would that process look like?" 8. "Who else would need to be involved?" 9. "What budget/timeline constraints should I know about?"
 
 ### Closing
 
@@ -430,13 +427,13 @@ Best,
 
 ## Objection Handling
 
-| Objection | Response |
-|-----------|----------|
-| "We already have tools for this" | "Makes sense. What we usually hear is that existing tools handle search well but struggle with provenance and policy enforcement. Is that a gap, or do you have that covered?" |
-| "We're building internally" | "Got it. How far along is that? We've seen some teams use Summit as the substrate to accelerate their build—keeping the custom parts custom and not reinventing graph/provenance." |
-| "Budget is tight" | "Understood. Our pilots are scoped to prove value in 8-12 weeks. If we can show [specific metric], would that change the budget conversation?" |
-| "We need FedRAMP" | "We're on a FedRAMP High path. In the meantime, we've supported ATOs in [deployment pattern]. Happy to walk through our compliance posture with your security team." |
-| "Not the right time" | "When would be a better time to revisit? Any specific triggers—budget cycle, audit, new mission—that would make this more urgent?" |
+| Objection                        | Response                                                                                                                                                                           |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| "We already have tools for this" | "Makes sense. What we usually hear is that existing tools handle search well but struggle with provenance and policy enforcement. Is that a gap, or do you have that covered?"     |
+| "We're building internally"      | "Got it. How far along is that? We've seen some teams use Summit as the substrate to accelerate their build—keeping the custom parts custom and not reinventing graph/provenance." |
+| "Budget is tight"                | "Understood. Our pilots are scoped to prove value in 8-12 weeks. If we can show [specific metric], would that change the budget conversation?"                                     |
+| "We need FedRAMP"                | "We're on a FedRAMP High path. In the meantime, we've supported ATOs in [deployment pattern]. Happy to walk through our compliance posture with your security team."               |
+| "Not the right time"             | "When would be a better time to revisit? Any specific triggers—budget cycle, audit, new mission—that would make this more urgent?"                                                 |
 
 ---
 
@@ -444,15 +441,16 @@ Best,
 
 Track in CRM:
 
-| Metric | Target |
-|--------|--------|
-| Email open rate | > 40% |
-| Reply rate | > 8% |
-| Meeting book rate | > 3% of outreach |
+| Metric              | Target                      |
+| ------------------- | --------------------------- |
+| Email open rate     | > 40%                       |
+| Reply rate          | > 8%                        |
+| Meeting book rate   | > 3% of outreach            |
 | Sequence completion | > 90% (don't abandon early) |
-| Time to first reply | < 5 days |
+| Time to first reply | < 5 days                    |
 
 **A/B Test Candidates:**
+
 - Subject lines (problem vs. outcome)
 - Email length (short vs. detailed)
 - CTA (specific time vs. "let me know")

@@ -88,6 +88,7 @@ just pipelines-info cisa-kev-ingest
 ### Schema
 
 Pipelines are defined using YAML manifests conforming to the schema in:
+
 ```
 pipelines/schema/pipeline-manifest.schema.json
 ```
@@ -233,10 +234,10 @@ spec:
 
 ```yaml
 retry:
-  attempts: 3          # Number of retries
-  delay: 5m           # Delay between retries (s/m/h)
+  attempts: 3 # Number of retries
+  delay: 5m # Delay between retries (s/m/h)
   backoff: exponential # fixed | exponential
-timeout: 30m          # Task timeout (s/m/h)
+timeout: 30m # Task timeout (s/m/h)
 ```
 
 ### Dependencies
@@ -247,20 +248,20 @@ Tasks can depend on one or more other tasks:
 tasks:
   - id: task_a
     type: python
-    code: {...}
+    code: { ... }
 
   - id: task_b
     type: python
     depends_on:
       - task_a
-    code: {...}
+    code: { ... }
 
   - id: task_c
     type: python
     depends_on:
       - task_a
       - task_b
-    code: {...}
+    code: { ... }
 ```
 
 ---
@@ -392,6 +393,7 @@ python3 pipelines/cli.py run my-pipeline
 ```
 
 Features:
+
 - Topological task ordering
 - Retry logic with exponential backoff
 - Timeout enforcement
@@ -401,11 +403,13 @@ Features:
 ### Airflow Execution
 
 1. Generate Airflow DAG:
+
    ```bash
    just pipelines-generate-airflow
    ```
 
 2. Deploy to Airflow:
+
    ```bash
    cp airflow/dags/*.py /path/to/airflow/dags/
    ```
@@ -508,6 +512,7 @@ Convert operational runbooks into executable pipelines.
 ### Example Conversion
 
 **Before (RUNBOOK):**
+
 ```yaml
 # RUNBOOKS/ransomware-triage.yaml
 - Step 1: Gather incident context
@@ -517,6 +522,7 @@ Convert operational runbooks into executable pipelines.
 ```
 
 **After (Pipeline):**
+
 ```yaml
 # pipelines/manifests/runbook-ransomware-triage.yaml
 apiVersion: summit.io/v1
@@ -616,6 +622,7 @@ See `pipelines/manifests/intelligence-coordination-batch.yaml`
 - Coordination scoring and case triggering
 
 Run:
+
 ```bash
 just pipelines-info intelligence-coordination-batch
 just pipelines-graph intelligence-coordination-batch mermaid
@@ -631,6 +638,7 @@ See `pipelines/manifests/cisa-kev-ingest.yaml`
 - Validates data quality
 
 Run:
+
 ```bash
 just pipelines-run cisa-kev-ingest
 ```
@@ -640,12 +648,14 @@ just pipelines-run cisa-kev-ingest
 See `pipelines/manifests/demo-hello-world.yaml`
 
 Simple end-to-end pipeline demonstrating:
+
 - Multi-task dependencies
 - Context propagation
 - OpenLineage tracking
 - Summary generation
 
 Run:
+
 ```bash
 just pipelines-run demo-hello-world
 cat pipelines/demo/summary.txt
@@ -656,6 +666,7 @@ cat pipelines/demo/summary.txt
 See `pipelines/manifests/runbook-ransomware-triage.yaml`
 
 Automated incident response workflow:
+
 - Gather incident context
 - Identify patient zero
 - Map lateral movement
@@ -663,6 +674,7 @@ Automated incident response workflow:
 - Execute containment actions
 
 Run:
+
 ```bash
 just pipelines-info ransomware-triage
 ```
@@ -704,6 +716,7 @@ python3 pipelines/cli.py run demo-hello-world --context '{"test": true}'
 ### 1. Manifest Naming
 
 Use kebab-case for pipeline names:
+
 ```yaml
 metadata:
   name: my-pipeline-name  # ✅ Good
@@ -713,17 +726,19 @@ metadata:
 ### 2. Task Naming
 
 Use descriptive task IDs and names:
+
 ```yaml
 tasks:
-  - id: fetch_data         # ✅ Good
+  - id: fetch_data # ✅ Good
     name: Fetch User Data
-  - id: t1                 # ❌ Bad
+  - id: t1 # ❌ Bad
     name: Task 1
 ```
 
 ### 3. Ownership
 
 Always specify owners:
+
 ```yaml
 metadata:
   owners:
@@ -733,6 +748,7 @@ metadata:
 ### 4. Tags
 
 Use consistent taxonomy:
+
 ```yaml
 tags:
   domain: security | intelligence | data-engineering
@@ -743,6 +759,7 @@ tags:
 ### 5. Inputs/Outputs
 
 Document all data dependencies:
+
 ```yaml
 spec:
   inputs:
@@ -756,6 +773,7 @@ spec:
 ### 6. Governance
 
 Set budgets and SLOs:
+
 ```yaml
 governance:
   budget:
@@ -829,6 +847,7 @@ curl $OPENLINEAGE_URL/health
 ### From Maestro Workflows
 
 Maestro workflows are largely compatible! Just add:
+
 - `apiVersion: summit.io/v1`
 - `kind: Pipeline`
 - Ensure tasks follow new schema

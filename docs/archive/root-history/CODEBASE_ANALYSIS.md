@@ -9,6 +9,7 @@
 ## 1. Project Structure Overview
 
 ### Core Architecture Type
+
 - **Monorepo** using `pnpm` workspaces with Turbo for build caching
 - **Deployable-First Philosophy**: Every merge must maintain working `make up && make smoke` pipeline
 - **Package Manager**: pnpm 9.12.0 (enforced via `corepack enable`)
@@ -80,7 +81,9 @@ summit/
 ## 2. Application Type
 
 ### Primary Classification
+
 **Full-Stack Web Application** with:
+
 - **Backend**: GraphQL API (Apollo Server) + REST endpoints (Express)
 - **Frontend**: React SPA with Redux state management
 - **Real-time**: WebSocket subscriptions (Socket.io, GraphQL-WS)
@@ -88,6 +91,7 @@ summit/
 - **AI/ML**: Integrated extraction engines, NLP services, agent runtimes
 
 ### Key Use Cases
+
 1. **Investigation & Analysis**: Create investigations, extract entities, discover relationships
 2. **Intelligence Collaboration**: Real-time multi-user collaboration on investigations
 3. **AI-Powered Insights**: Entity linking, sentiment analysis, link prediction
@@ -103,30 +107,31 @@ summit/
 **Endpoint**: `http://localhost:4000/graphql` (dev)
 
 **Key Schema Modules**:
+
 ```typescript
 // Core entities
-- Entity (id, type, props, canonicalId)
-- Relationship (id, from, to, type, props)
-- Investigation (id, name, description)
-- User (id, email, username)
-- AuditLog (id, userId, action, details)
-
-// AI & Analysis
-- ExtractedEntity (text, type, confidence, linkedEntity)
-- ExtractedRelationship (sourceId, targetId, type, confidence)
-- AIRecommendation (from, to, score, explanation)
-- AISuggestionExplanation (score, factors, featureImportances)
-
-// Evidence & Trust
-- Evidence (id, content, source, relatedEntities)
-- TrustScore (entityId, score, factors)
-- ProvenanceRecord (action, actor, timestamp, changes)
-
-// Workflow
-- CrisisScenario, NarrativeHeatmap, StrategicResponsePlaybook
+(-Entity(id, type, props, canonicalId) -
+  Relationship(id, from, to, type, props) -
+  Investigation(id, name, description) -
+  User(id, email, username) -
+  AuditLog(id, userId, action, details) -
+  // AI & Analysis
+  ExtractedEntity(text, type, confidence, linkedEntity) -
+  ExtractedRelationship(sourceId, targetId, type, confidence) -
+  AIRecommendation(from, to, score, explanation) -
+  AISuggestionExplanation(score, factors, featureImportances) -
+  // Evidence & Trust
+  Evidence(id, content, source, relatedEntities) -
+  TrustScore(entityId, score, factors) -
+  ProvenanceRecord(action, actor, timestamp, changes) -
+  // Workflow
+  CrisisScenario,
+  NarrativeHeatmap,
+  StrategicResponsePlaybook);
 ```
 
 **Key GraphQL Operations**:
+
 - `Query.entity(id), entities(filter)` - Entity retrieval
 - `Query.relationships(filter)` - Relationship discovery
 - `Query.investigations(filter)` - Investigation queries
@@ -135,6 +140,7 @@ summit/
 - `Subscription.entityUpdated, relationshipAdded` - Real-time subscriptions
 
 **Persisted Queries** (security):
+
 - Located in `/persisted/queries/` and `/graphql/persisted/`
 - Used for production to prevent arbitrary query execution
 - Examples: `GetUserDashboard.graphql`, `CreateNote.graphql`, `evidenceVerify.graphql`
@@ -142,6 +148,7 @@ summit/
 ### 3B. REST API Endpoints (40+ routes)
 
 **Health & Monitoring**:
+
 ```
 GET  /health                    # Basic health check
 GET  /health/detailed           # Detailed service status
@@ -151,6 +158,7 @@ GET  /metrics                   # Prometheus metrics
 ```
 
 **Core Features**:
+
 ```
 POST /api/ai/extract           # Entity/relationship extraction
 POST /api/ai/sentiment         # Sentiment analysis
@@ -166,6 +174,7 @@ POST /rbac/...                 # Role-based access control
 ```
 
 **Integrations**:
+
 ```
 POST /webhooks/github          # GitHub webhook handler
 POST /webhooks/shopify         # Shopify integration
@@ -175,6 +184,7 @@ POST /api/marketplace          # Marketplace integration
 ```
 
 **Data Operations**:
+
 ```
 POST /api/disclosures          # Disclosure management
 POST /api/export-api           # Data export
@@ -187,12 +197,14 @@ POST /api/compliance           # Compliance checks
 ### 3C. WebSocket Protocols
 
 **Socket.io** (real-time collaboration):
+
 - Presence updates (who's viewing what)
 - Live investigation updates
 - Collaborative graph editing
 - Event streaming
 
 **GraphQL-WS** (GraphQL subscriptions):
+
 - Real-time entity/relationship changes
 - Investigation activity streams
 - Investigation status updates
@@ -202,49 +214,53 @@ POST /api/compliance           # Compliance checks
 ## 4. Technology Stack
 
 ### Backend
-| Component | Technology | Version |
-|-----------|-----------|---------|
-| Runtime | Node.js | 18.18+ |
-| API Framework | Express.js | 5.1.0 |
-| GraphQL Server | Apollo Server | 5.1.0 |
-| Graph Database | Neo4j | 5.24.0 |
-| Relational DB | PostgreSQL | 16-alpine |
-| Cache Layer | Redis | 7-alpine |
-| ORM/Query | Prisma, Knex.js | Latest |
-| Job Queue | BullMQ | 5.63.2 |
-| Auth/JWT | jsonwebtoken | 9.0.2 |
-| Logging | Pino | 10.1.0 |
-| Monitoring | OpenTelemetry, Prometheus | Latest |
-| Validation | Joi, Zod, express-validator | Latest |
+
+| Component      | Technology                  | Version   |
+| -------------- | --------------------------- | --------- |
+| Runtime        | Node.js                     | 18.18+    |
+| API Framework  | Express.js                  | 5.1.0     |
+| GraphQL Server | Apollo Server               | 5.1.0     |
+| Graph Database | Neo4j                       | 5.24.0    |
+| Relational DB  | PostgreSQL                  | 16-alpine |
+| Cache Layer    | Redis                       | 7-alpine  |
+| ORM/Query      | Prisma, Knex.js             | Latest    |
+| Job Queue      | BullMQ                      | 5.63.2    |
+| Auth/JWT       | jsonwebtoken                | 9.0.2     |
+| Logging        | Pino                        | 10.1.0    |
+| Monitoring     | OpenTelemetry, Prometheus   | Latest    |
+| Validation     | Joi, Zod, express-validator | Latest    |
 
 ### Frontend
-| Component | Technology | Version |
-|-----------|-----------|---------|
-| Framework | React | 18.3.1+ |
-| Build Tool | Vite | 7.x |
-| Styling | TailwindCSS, Emotion | Latest |
-| UI Components | Radix UI, Material-UI | Latest |
-| State Management | Redux Toolkit, Zustand | Latest |
-| API Client | Apollo Client | 4.x |
-| Router | React Router | 7.x |
-| Forms | React Hook Form | 7.x |
-| Data Grid | MUI X Data Grid | 8.x |
-| Visualization | D3.js, Cytoscape, Recharts, Leaflet | Latest |
-| Testing | Jest, Vitest, Playwright | Latest |
+
+| Component        | Technology                          | Version |
+| ---------------- | ----------------------------------- | ------- |
+| Framework        | React                               | 18.3.1+ |
+| Build Tool       | Vite                                | 7.x     |
+| Styling          | TailwindCSS, Emotion                | Latest  |
+| UI Components    | Radix UI, Material-UI               | Latest  |
+| State Management | Redux Toolkit, Zustand              | Latest  |
+| API Client       | Apollo Client                       | 4.x     |
+| Router           | React Router                        | 7.x     |
+| Forms            | React Hook Form                     | 7.x     |
+| Data Grid        | MUI X Data Grid                     | 8.x     |
+| Visualization    | D3.js, Cytoscape, Recharts, Leaflet | Latest  |
+| Testing          | Jest, Vitest, Playwright            | Latest  |
 
 ### DevOps & Infrastructure
-| Component | Technology |
-|-----------|-----------|
-| Container | Docker, Docker Compose |
-| Orchestration | Kubernetes (optional) |
-| Observability | OpenTelemetry, Prometheus, Grafana, Jaeger |
-| Scanning | Trivy, CodeQL, Semgrep, Gitleaks |
-| CI/CD | GitHub Actions |
-| Package Manager | pnpm 9.12.0 (enforced) |
-| Build System | Turbo (monorepo caching) |
-| Secrets | SOPS, GitHub Secrets |
+
+| Component       | Technology                                 |
+| --------------- | ------------------------------------------ |
+| Container       | Docker, Docker Compose                     |
+| Orchestration   | Kubernetes (optional)                      |
+| Observability   | OpenTelemetry, Prometheus, Grafana, Jaeger |
+| Scanning        | Trivy, CodeQL, Semgrep, Gitleaks           |
+| CI/CD           | GitHub Actions                             |
+| Package Manager | pnpm 9.12.0 (enforced)                     |
+| Build System    | Turbo (monorepo caching)                   |
+| Secrets         | SOPS, GitHub Secrets                       |
 
 ### Key Libraries & Tools
+
 ```
 - graphql-tools, graphql-scalars (GraphQL utilities)
 - neo4j-driver (Neo4j connectivity)
@@ -266,15 +282,17 @@ POST /api/compliance           # Compliance checks
 ## 5. Documentation & README Files
 
 ### Main Documentation
-| File | Purpose |
-|------|---------|
-| `/README.md` (1030 lines) | **Primary**: Quickstart, architecture, golden path, dev setup |
-| `/docs/ONBOARDING.md` | **Critical**: Developer onboarding, deployable-first philosophy, testing |
-| `/docs/ARCHITECTURE.md` | System architecture, C4 diagrams, trust boundaries |
-| `/REPOSITORY-STRUCTURE.md` | Detailed directory layout and module descriptions |
-| `/docs/API_GRAPHQL_SCHEMA.graphql` | GraphQL schema reference |
+
+| File                               | Purpose                                                                  |
+| ---------------------------------- | ------------------------------------------------------------------------ |
+| `/README.md` (1030 lines)          | **Primary**: Quickstart, architecture, golden path, dev setup            |
+| `/docs/ONBOARDING.md`              | **Critical**: Developer onboarding, deployable-first philosophy, testing |
+| `/docs/ARCHITECTURE.md`            | System architecture, C4 diagrams, trust boundaries                       |
+| `/REPOSITORY-STRUCTURE.md`         | Detailed directory layout and module descriptions                        |
+| `/docs/API_GRAPHQL_SCHEMA.graphql` | GraphQL schema reference                                                 |
 
 ### Additional Documentation
+
 - `/docs/api-reference/` - API endpoint documentation
 - `/docs/coding_standards/` - Coding patterns and style guides
 - `/docs/runbooks/` - Operational runbooks
@@ -283,6 +301,7 @@ POST /api/compliance           # Compliance checks
 - `/CHANGELOG.md` - Version history and release notes
 
 ### Configuration Documentation
+
 - `.env.example` - Development environment variables
 - `.env.production.sample` - Production template (with guards)
 - `tsconfig.build.json`, `tsconfig.paths.json` - TypeScript configuration
@@ -294,6 +313,7 @@ POST /api/compliance           # Compliance checks
 ## 6. Package.json & Dependencies
 
 ### Root `package.json` Highlights
+
 ```json
 {
   "name": "intelgraph-platform",
@@ -309,20 +329,20 @@ POST /api/compliance           # Compliance checks
     "typecheck": "tsc -b tsconfig.build.json",
     "smoke": "node scripts/smoke-test.js",
     "bootstrap": "make bootstrap",
-    
+
     // Database commands
     "db:migrate": "prisma migrate deploy",
     "db:seed": "ts-node scripts/seed-data.ts",
     "db:reset": "npm run db:migrate && npm run db:seed",
-    
+
     // Deployment
     "deploy:dev": "scripts/deploy.sh dev",
     "deploy:prod": "scripts/deploy.sh prod",
-    
+
     // GraphQL
     "graphql:codegen": "graphql-codegen",
     "persisted:build": "node scripts/graphql/build_persisted_map.js",
-    
+
     // CI/CD
     "ci": "pnpm run lint && pnpm run typecheck && pnpm run test",
     "smoke:ci": "NODE_ENV=test node scripts/smoke-test.js"
@@ -338,6 +358,7 @@ POST /api/compliance           # Compliance checks
 ```
 
 ### Key Workspace Packages
+
 ```
 /server          - GraphQL backend (Express + Apollo)
 /client          - React frontend (Vite)
@@ -355,28 +376,31 @@ POST /api/compliance           # Compliance checks
 ### Route Organization (`/server/src/routes/`)
 
 **Core Routes** (40+ files):
+
 ```typescript
-health.ts              // Health probes
-ai.ts                  // AI operations (extraction, analysis)
-copilot.ts            // AI copilot interactions
-admin.ts              // Administrative operations
-auth.ts               // Authentication
-rbacRoutes.ts         // Role-based access control
-monitoring.ts         // System monitoring
+health.ts; // Health probes
+ai.ts; // AI operations (extraction, analysis)
+copilot.ts; // AI copilot interactions
+admin.ts; // Administrative operations
+auth.ts; // Authentication
+rbacRoutes.ts; // Role-based access control
+monitoring.ts; // System monitoring
 ```
 
 **Integration Routes**:
+
 ```typescript
-github.ts             // GitHub integration & webhooks
-github-app.ts         // GitHub App handlers
-gitops.ts             // GitOps operations
-n8n.ts                // n8n workflow integration
-shopify.ts            // Shopify integration
-coinbase.ts           // Coinbase payment integration
-paypal.ts             // PayPal integration
+github.ts; // GitHub integration & webhooks
+github - app.ts; // GitHub App handlers
+gitops.ts; // GitOps operations
+n8n.ts; // n8n workflow integration
+shopify.ts; // Shopify integration
+coinbase.ts; // Coinbase payment integration
+paypal.ts; // PayPal integration
 ```
 
 **Feature Routes**:
+
 ```typescript
 copilot.ts            // AI copilot
 narrative-sim.ts      // Narrative simulation
@@ -391,26 +415,28 @@ cost-preview.ts       // Cost estimation
 ### GraphQL Resolvers (`/server/src/graphql/resolvers/`)
 
 **Resolver Modules**:
+
 ```typescript
-entity.ts             // Entity CRUD operations
-relationship.ts       // Relationship operations
-user.ts               // User management
-investigation.ts      // Investigation operations
-evidence.ts           // Evidence handling
-trustRisk.ts          // Trust & risk scoring
-provenance.ts         // Provenance tracking
-WargameResolver.ts    // Crisis simulation
+entity.ts; // Entity CRUD operations
+relationship.ts; // Relationship operations
+user.ts; // User management
+investigation.ts; // Investigation operations
+evidence.ts; // Evidence handling
+trustRisk.ts; // Trust & risk scoring
+provenance.ts; // Provenance tracking
+WargameResolver.ts; // Crisis simulation
 ```
 
 ### Middleware Stack
+
 ```typescript
-auth.ts               // JWT validation
-audit-logger.ts       // Request/response logging
-rbac.ts               // Role-based authorization
-cors.ts               // Cross-origin handling
-helmet.ts             // Security headers
-rate-limit.ts         // Rate limiting
-validation.ts         // Input validation
+auth.ts; // JWT validation
+audit - logger.ts; // Request/response logging
+rbac.ts; // Role-based authorization
+cors.ts; // Cross-origin handling
+helmet.ts; // Security headers
+rate - limit.ts; // Rate limiting
+validation.ts; // Input validation
 ```
 
 ---
@@ -418,28 +444,34 @@ validation.ts         // Input validation
 ## 8. Database Schemas
 
 ### Neo4j Graph Database
+
 **Purpose**: Relationship discovery, graph analytics
 
 **Key Node Types**:
+
 - `Entity` (person, organization, location, asset)
 - `Evidence` (document, communication, signal)
 - `Investigation` (case container)
 - `User` (investigators)
 
 **Relationships**:
+
 - `RELATED_TO` (generic entity relationship)
 - `PART_OF` (hierarchical)
 - `MENTIONS` (evidence → entity)
 - `LINKED_BY` (evidence reference)
 
 **Indexes**:
+
 - Full-text: `evidenceContentSearch`
 - Properties: Entity type, timestamp
 
 ### PostgreSQL Relational Database
+
 **Purpose**: ACID transactions, structured data
 
 **Core Tables**:
+
 - `users` - User accounts
 - `investigations` - Case metadata
 - `entities` - Entity records
@@ -451,9 +483,11 @@ validation.ts         // Input validation
 **Prisma Migrations**: Managed via `db:migrate` commands
 
 ### Redis Cache
+
 **Purpose**: Session storage, real-time data, job queue
 
 **Usage**:
+
 - User sessions (JWT blacklist)
 - Real-time collaboration state
 - BullMQ job queue
@@ -465,29 +499,35 @@ validation.ts         // Input validation
 ## 9. Key Architectural Patterns
 
 ### 1. **Golden Path Workflow** (Core User Journey)
+
 ```
 Investigation → Entities → Relationships → Copilot → Results
 ```
+
 Every PR/deployment must maintain this working end-to-end.
 
 ### 2. **Deployable-First Philosophy**
+
 - `make bootstrap` installs all dependencies
 - `make up` starts full environment
 - `make smoke` validates golden path
 - **Zero tolerance**: Broken builds block merges
 
 ### 3. **Multi-Database Strategy**
+
 - **Neo4j**: Graph analytics, relationship discovery
 - **PostgreSQL**: Transactional data, audit logs
 - **Redis**: Caching, real-time state, job queue
 
 ### 4. **AI/ML Integration**
+
 - **ExtractionEngine**: Entity/relationship extraction from text & media
 - **NLP Services**: Sentiment analysis, entity linking
 - **Adversary Agents**: Threat modeling & simulation
 - **BullMQ Workers**: Background job processing
 
 ### 5. **Security Layers**
+
 - JWT authentication (access + refresh tokens)
 - RBAC middleware (role-based access control)
 - Audit logging (all mutations)
@@ -496,11 +536,13 @@ Every PR/deployment must maintain this working end-to-end.
 - Rate limiting (600 req/min default)
 
 ### 6. **Real-Time Collaboration**
+
 - Socket.io presence tracking
 - GraphQL subscriptions for entity updates
 - Event-driven architecture (investigation changes)
 
 ### 7. **Observability**
+
 - OpenTelemetry instrumentation
 - Prometheus metrics (system, business)
 - Grafana dashboards (pre-provisioned)
@@ -512,17 +554,20 @@ Every PR/deployment must maintain this working end-to-end.
 ## 10. Important Files for Documentation Development
 
 ### Critical for Understanding API Design
+
 1. **`/server/src/app.ts`** - Express/Apollo setup, middleware order
 2. **`/server/src/graphql/schema.ts`** - Complete GraphQL type definitions
 3. **`/server/src/graphql/resolvers/index.ts`** - Resolver composition
 4. **`/server/src/routes/*.ts`** - REST endpoint implementations
 
 ### For API Documentation
+
 - All GraphQL resolvers in `/server/src/graphql/resolvers/`
 - REST routes in `/server/src/routes/` (look for router setup & endpoint definitions)
 - Type definitions in `/server/src/graphql/types/` and resolver imports
 
 ### For Understanding Workflows
+
 - `/docs/ONBOARDING.md` - Core philosophy
 - `/scripts/smoke-test.js` - Golden path validation
 - `/docker-compose.dev.yml` - Service orchestration
@@ -534,6 +579,7 @@ Every PR/deployment must maintain this working end-to-end.
 Based on the codebase analysis, here's what documentation would be most valuable:
 
 ### Priority 1 (Highest Value)
+
 ```
 Documentation Hub/
 ├── API Reference
@@ -565,6 +611,7 @@ Documentation Hub/
 ```
 
 ### Priority 2 (Supporting)
+
 - Golden Path Walkthrough (investigation creation → results)
 - Service Integration Guide (GitHub, n8n, Shopify, etc.)
 - AI/ML Capabilities Overview
@@ -618,10 +665,10 @@ Summit is a **production-ready, AI-powered intelligence analysis platform** with
 ✅ **AI/ML integrated** (extraction, NLP, adversary agents)  
 ✅ **Deployable-first** (make bootstrap && make up && make smoke)  
 ✅ **Comprehensive observability** (OpenTelemetry, Prometheus, Grafana)  
-✅ **Well-documented** (README, ONBOARDING, architectural docs)  
+✅ **Well-documented** (README, ONBOARDING, architectural docs)
 
 **For documentation work, focus on**:
+
 1. **API Reference** - Complete GraphQL & REST endpoint mapping
 2. **Architecture Guides** - Data flow, security, deployment
 3. **Developer Onboarding** - Local setup, testing, contribution workflow
-

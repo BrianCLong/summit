@@ -106,7 +106,9 @@ export const ApprovalDetailDrawer: React.FC<Props> = ({ approvalId, onClose, onD
                     <>
                       <div>Status: {approval.status}</div>
                       {approval.approverId && <div>Approver: {approval.approverId}</div>}
-                      {approval.decidedAt && <div>Decided: {new Date(approval.decidedAt).toLocaleString()}</div>}
+                      {approval.decidedAt && (
+                        <div>Decided: {new Date(approval.decidedAt).toLocaleString()}</div>
+                      )}
                     </>
                   )}
                 </div>
@@ -128,7 +130,10 @@ export const ApprovalDetailDrawer: React.FC<Props> = ({ approvalId, onClose, onD
                       Allow: <span className="font-mono">{simResult.allow ? "true" : "false"}</span>
                     </div>
                     <div>
-                      Requires approval: <span className="font-mono">{simResult.requiresApproval ? "true" : "false"}</span>
+                      Requires approval:{" "}
+                      <span className="font-mono">
+                        {simResult.requiresApproval ? "true" : "false"}
+                      </span>
                     </div>
                     {simResult.reasons?.length > 0 && (
                       <ul className="list-disc list-inside">
@@ -139,7 +144,9 @@ export const ApprovalDetailDrawer: React.FC<Props> = ({ approvalId, onClose, onD
                     )}
                   </div>
                 )}
-                {!simLoading && !simResult && <div className="text-xs text-gray-500">Simulation unavailable.</div>}
+                {!simLoading && !simResult && (
+                  <div className="text-xs text-gray-500">Simulation unavailable.</div>
+                )}
               </section>
 
               <section>
@@ -190,7 +197,9 @@ export const ApprovalDetailDrawer: React.FC<Props> = ({ approvalId, onClose, onD
 
         {approval && approval.status === "PENDING" && (
           <div className="border-t px-4 py-3 flex items-center justify-between">
-            <div className="text-[11px] text-gray-500">You must provide rationale for elevated access.</div>
+            <div className="text-[11px] text-gray-500">
+              You must provide rationale for elevated access.
+            </div>
             <button
               disabled={disabled}
               onClick={handleSubmit}

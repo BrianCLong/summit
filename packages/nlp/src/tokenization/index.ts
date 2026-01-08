@@ -2,7 +2,7 @@
  * Tokenization and sentence segmentation
  */
 
-import type { Token, Sentence, TokenizationOptions } from '../types';
+import type { Token, Sentence, TokenizationOptions } from "../types";
 
 export class Tokenizer {
   private options: TokenizationOptions;
@@ -76,31 +76,31 @@ export class Tokenizer {
    * Build tokenization pattern based on options
    */
   private buildTokenPattern(): RegExp {
-    let pattern = '';
+    let pattern = "";
 
     if (this.options.preserveUrls) {
-      pattern += '|https?://\\S+';
+      pattern += "|https?://\\S+";
     }
 
     if (this.options.preserveEmails) {
-      pattern += '|[\\w.-]+@[\\w.-]+\\.\\w+';
+      pattern += "|[\\w.-]+@[\\w.-]+\\.\\w+";
     }
 
     if (this.options.preserveMentions) {
-      pattern += '|@\\w+';
+      pattern += "|@\\w+";
     }
 
     if (this.options.preserveHashtags) {
-      pattern += '|#\\w+';
+      pattern += "|#\\w+";
     }
 
     // Default word tokenization
-    pattern += '|\\w+';
+    pattern += "|\\w+";
 
     // Remove leading pipe
     pattern = pattern.substring(1);
 
-    return new RegExp(pattern, 'gi');
+    return new RegExp(pattern, "gi");
   }
 
   /**
@@ -156,4 +156,4 @@ export const tokenization = {
   },
 };
 
-export * from './advanced';
+export * from "./advanced";

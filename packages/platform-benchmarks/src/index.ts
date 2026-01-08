@@ -11,12 +11,12 @@
  * - Baseline comparison and regression detection
  */
 
-export * from './types.js';
-export * from './harness.js';
-export * from './runners/index.js';
-export * from './reporters/index.js';
-export * from './comparators/index.js';
+export * from "./types.js";
+export * from "./harness.js";
+export * from "./runners/index.js";
+export * from "./reporters/index.js";
+export * from "./comparators/index.js";
 
 // Re-export for convenience
-export { BenchmarkHarness } from './harness.js';
-export { createBenchmarkSuite } from './suite.js';
+export { BenchmarkHarness } from "./harness.js";
+export { createBenchmarkSuite } from "./suite.js";

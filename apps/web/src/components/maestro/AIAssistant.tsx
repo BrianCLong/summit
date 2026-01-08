@@ -79,7 +79,9 @@ export function AIAssistant({ context }: AIAssistantProps) {
   }
 
   const sendMessage = async () => {
-    if (!inputValue.trim() || isLoading) {return}
+    if (!inputValue.trim() || isLoading) {
+      return
+    }
 
     const userMessage: AIMessage = {
       id: crypto.randomUUID(),

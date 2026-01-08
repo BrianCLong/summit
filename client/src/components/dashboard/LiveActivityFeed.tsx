@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Paper,
@@ -11,7 +11,7 @@ import {
   Badge,
   IconButton,
   Collapse,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Timeline as TimelineIcon,
   ExpandMore as ExpandMoreIcon,
@@ -20,7 +20,7 @@ import {
   Person as PersonIcon,
   Search as SearchIcon,
   Security as SecurityIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 // TODO: Re-enable GraphQL subscription when schema is available
 // import { useActivityFeedSubscription } from '../../generated/graphql';
 
@@ -38,15 +38,15 @@ interface ActivityEvent {
 
 const getActivityIcon = (type: string) => {
   switch (type) {
-    case 'INVESTIGATION_CREATED':
-    case 'INVESTIGATION_UPDATED':
+    case "INVESTIGATION_CREATED":
+    case "INVESTIGATION_UPDATED":
       return <SearchIcon fontSize="small" />;
-    case 'ENTITY_ADDED':
-    case 'RELATIONSHIP_ADDED':
+    case "ENTITY_ADDED":
+    case "RELATIONSHIP_ADDED":
       return <TimelineIcon fontSize="small" />;
-    case 'THREAT_DETECTED':
+    case "THREAT_DETECTED":
       return <SecurityIcon fontSize="small" />;
-    case 'USER_LOGIN':
+    case "USER_LOGIN":
       return <PersonIcon fontSize="small" />;
     default:
       return <NotificationsIcon fontSize="small" />;
@@ -55,15 +55,15 @@ const getActivityIcon = (type: string) => {
 
 const getActivityColor = (type: string) => {
   switch (type) {
-    case 'THREAT_DETECTED':
-      return 'error';
-    case 'INVESTIGATION_CREATED':
-      return 'primary';
-    case 'ENTITY_ADDED':
-    case 'RELATIONSHIP_ADDED':
-      return 'success';
+    case "THREAT_DETECTED":
+      return "error";
+    case "INVESTIGATION_CREATED":
+      return "primary";
+    case "ENTITY_ADDED":
+    case "RELATIONSHIP_ADDED":
+      return "success";
     default:
-      return 'default';
+      return "default";
   }
 };
 
@@ -73,32 +73,32 @@ export default function LiveActivityFeed() {
   // Mock activities for development
   const mockActivities: ActivityEvent[] = [
     {
-      id: '1',
-      type: 'INVESTIGATION_CREATED',
-      message: 'New investigation started: Financial Network Analysis',
+      id: "1",
+      type: "INVESTIGATION_CREATED",
+      message: "New investigation started: Financial Network Analysis",
       timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(), // 5 mins ago
-      actor: { id: '1', name: 'John Smith' },
+      actor: { id: "1", name: "John Smith" },
     },
     {
-      id: '2',
-      type: 'ENTITY_ADDED',
-      message: 'Entity added to investigation: ABC Corporation',
+      id: "2",
+      type: "ENTITY_ADDED",
+      message: "Entity added to investigation: ABC Corporation",
       timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(), // 15 mins ago
-      actor: { id: '2', name: 'Sarah Johnson' },
+      actor: { id: "2", name: "Sarah Johnson" },
     },
     {
-      id: '3',
-      type: 'THREAT_DETECTED',
-      message: 'Potential threat identified in communication patterns',
+      id: "3",
+      type: "THREAT_DETECTED",
+      message: "Potential threat identified in communication patterns",
       timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 mins ago
-      actor: { id: '3', name: 'AI System' },
+      actor: { id: "3", name: "AI System" },
     },
     {
-      id: '4',
-      type: 'USER_LOGIN',
-      message: 'User logged in from new location',
+      id: "4",
+      type: "USER_LOGIN",
+      message: "User logged in from new location",
       timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString(), // 1 hour ago
-      actor: { id: '4', name: 'Mike Davis' },
+      actor: { id: "4", name: "Mike Davis" },
     },
   ];
 
@@ -142,7 +142,7 @@ export default function LiveActivityFeed() {
     const diffMs = now.getTime() - eventTime.getTime();
     const diffMins = Math.floor(diffMs / 60000);
 
-    if (diffMins < 1) return 'Just now';
+    if (diffMins < 1) return "Just now";
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
     return eventTime.toLocaleDateString();
@@ -153,52 +153,30 @@ export default function LiveActivityFeed() {
       <Box
         sx={{
           p: 2,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          cursor: 'pointer',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          cursor: "pointer",
         }}
         onClick={handleToggleExpand}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Badge
-            badgeContent={newActivityCount}
-            color="error"
-            invisible={newActivityCount === 0}
-          >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Badge badgeContent={newActivityCount} color="error" invisible={newActivityCount === 0}>
             <TimelineIcon />
           </Badge>
           <Typography variant="h6">Live Activity</Typography>
           {loading && (
-            <Chip
-              label="Connecting..."
-              size="small"
-              color="warning"
-              variant="outlined"
-            />
+            <Chip label="Connecting..." size="small" color="warning" variant="outlined" />
           )}
-          {error && (
-            <Chip
-              label="Offline"
-              size="small"
-              color="error"
-              variant="outlined"
-            />
-          )}
+          {error && <Chip label="Offline" size="small" color="error" variant="outlined" />}
         </Box>
-        <IconButton size="small">
-          {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-        </IconButton>
+        <IconButton size="small">{isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}</IconButton>
       </Box>
 
       <Collapse in={isExpanded}>
         <Box sx={{ pb: 2 }}>
           {activities.length === 0 ? (
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ p: 2, textAlign: 'center' }}
-            >
+            <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: "center" }}>
               No recent activity
             </Typography>
           ) : (
@@ -212,17 +190,15 @@ export default function LiveActivityFeed() {
                     primary={
                       <Box
                         sx={{
-                          display: 'flex',
-                          alignItems: 'center',
+                          display: "flex",
+                          alignItems: "center",
                           gap: 1,
-                          flexWrap: 'wrap',
+                          flexWrap: "wrap",
                         }}
                       >
-                        <Typography variant="body2">
-                          {activity.message}
-                        </Typography>
+                        <Typography variant="body2">{activity.message}</Typography>
                         <Chip
-                          label={activity.type.toLowerCase().replace('_', ' ')}
+                          label={activity.type.toLowerCase().replace("_", " ")}
                           size="small"
                           color={getActivityColor(activity.type)}
                           variant="outlined"
@@ -232,8 +208,8 @@ export default function LiveActivityFeed() {
                     secondary={
                       <Box
                         sx={{
-                          display: 'flex',
-                          alignItems: 'center',
+                          display: "flex",
+                          alignItems: "center",
                           gap: 1,
                           mt: 0.5,
                         }}

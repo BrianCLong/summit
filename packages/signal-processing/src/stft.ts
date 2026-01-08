@@ -1,7 +1,7 @@
 // @ts-nocheck
-import { FftAnalyzer } from './fft.js';
-import { Spectrogram, SpectrogramSlice, WindowFunction, NumericArray } from './types.js';
-import { createWindow, normalizeFrame } from './window.js';
+import { FftAnalyzer } from "./fft.js";
+import { Spectrogram, SpectrogramSlice, WindowFunction, NumericArray } from "./types.js";
+import { createWindow, normalizeFrame } from "./window.js";
 
 export interface SpectrogramOptions {
   hopSize: number;
@@ -12,18 +12,18 @@ export function computeSpectrogram(
   samples: NumericArray,
   sampleRate: number,
   fftSize: number,
-  { hopSize, window }: SpectrogramOptions,
+  { hopSize, window }: SpectrogramOptions
 ): Spectrogram {
   if (hopSize <= 0) {
-    throw new Error('hopSize must be positive');
+    throw new Error("hopSize must be positive");
   }
   if (sampleRate <= 0) {
-    throw new Error('sampleRate must be positive');
+    throw new Error("sampleRate must be positive");
   }
   if (fftSize <= 0 || (fftSize & (fftSize - 1)) !== 0) {
-    throw new Error('fftSize must be a power of two');
+    throw new Error("fftSize must be a power of two");
   }
-  const windowFn = window ?? createWindow('hann', fftSize);
+  const windowFn = window ?? createWindow("hann", fftSize);
   const analyzer = new FftAnalyzer(fftSize, { window: windowFn });
   const slices: SpectrogramSlice[] = [];
   let frequencyBins: Float64Array | null = null;

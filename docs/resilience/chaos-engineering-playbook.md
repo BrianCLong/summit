@@ -3,16 +3,19 @@
 ## Failure Scenarios Catalog
 
 ### Infrastructure failures
+
 - **Single node loss:** Random termination or cordon/drain of one worker node to validate pod rescheduling, workload anti-affinity, and autoscaling thresholds.
 - **Zone/availability domain loss:** Disable a failure domain (taint/block scheduling, shut down nodes, or simulate AZ network isolation) to confirm multi-AZ placement, quorum durability, and degraded capacity handling.
 - **Dependency outage:** Blackhole or throttle outbound calls to core dependencies (databases, object storage, message bus, identity provider) to verify retry/backoff, circuit breaking, and fallback behavior.
 
 ### Application-level failures
+
 - **Latency spikes:** Inject p95/p99 latency into selected services or endpoints to validate SLO alerts, timeouts, and client-side degradation patterns (e.g., graceful feature disablement).
 - **Error storms:** Force elevated HTTP 5xx / gRPC error rates or throw exceptions in key code paths to exercise circuit breakers, bulkheads, and load shedding.
 - **Partial data unavailability:** Make specific tables/collections/feature flags unavailable (e.g., read-only mode, row-range denial) to confirm stale-cache fallbacks, degraded UX, and reconciliation once restored.
 
 ### Control-plane failures
+
 - **Orchestration issues:** Pause or slow Kubernetes controllers/schedulers, or block writes to etcd, to ensure workloads continue serving from existing pods and that drift is detected by watchdogs.
 - **Identity & policy engines:** Disable token issuance/refresh, revoke OPA sidecar connectivity, or serve deny-all policies to confirm cached credentials behavior and emergency break-glass access.
 - **Config/feature flag delivery:** Delay or corrupt config rollouts to validate rollback safety, default-safe values, and monitoring for config-induced outages.
@@ -20,6 +23,7 @@
 ## Experiment Mechanics
 
 ### Definition, schedule, and scope
+
 - **Templates:** Standardize experiments as YAML ("Resilience Experiment Library") with target service(s), failure mode, blast radius, guardrails, and expected outcomes.
 - **Scheduling:**
   - **Pipelines:** Run lightweight experiments on every main-branch canary deploy and nightly in non-prod (e.g., chaos namespace).
@@ -27,11 +31,13 @@
 - **Scoping:** Tag experiments by environment (dev/stage/canary/prod), tenant (shared vs. dedicated), and dependency class (data plane vs. control plane).
 
 ### Safety controls
+
 - **Blast-radius limits:** Time-bound experiments; limit to a subset of nodes/pods/requests (traffic sampling or namespace-scoped fault injection).
 - **Auto-stop conditions:** Abort on SLO burn-rate > 2x baseline, error budgets exhausted, pager alerts firing, or manual red-button invocation (Slack command).
 - **Change windows:** Only run in approved windows with on-call + service owner acknowledgment; use feature-flagged toggles to disengage faults instantly.
 
 ### Data collection and success criteria
+
 - **Observability:** Capture distributed traces, request/error rates, saturation, queue depths, and leader elections. Persist experiment metadata (start/end, scope, blast radius, toggles) to a ledger for auditability.
 - **User impact:** Monitor synthetic checks and real-user telemetry segmented by tenant; require no Sev1/Sev2 impact in non-prod and zero customer impact in prod experiments.
 - **Success vs. regression:**

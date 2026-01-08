@@ -1,6 +1,12 @@
-import { EventEmitter } from 'events';
-import { normalizeFrame } from './window.js';
-import { DataChannelLike, NumericArray, PipelineEvent, SignalProcessor, WebSocketLike } from './types.js';
+import { EventEmitter } from "events";
+import { normalizeFrame } from "./window.js";
+import {
+  DataChannelLike,
+  NumericArray,
+  PipelineEvent,
+  SignalProcessor,
+  WebSocketLike,
+} from "./types.js";
 
 export interface PipelineOptions {
   sampleRate: number;
@@ -34,13 +40,21 @@ export class SignalStreamingPipeline extends EventEmitter {
 
   ingestFrame(data: NumericArray): ProcessedFrame {
     const frame = normalizeFrame(data, this.options.frameSize);
-    const rawEvent: PipelineEvent<Float64Array> = { type: 'raw', payload: frame, timestamp: Date.now() };
-    this.emit('event', rawEvent);
+    const rawEvent: PipelineEvent<Float64Array> = {
+      type: "raw",
+      payload: frame,
+      timestamp: Date.now(),
+    };
+    this.emit("event", rawEvent);
 
     const results = this.options.processors.map((processor) => processor(frame));
     const processed: ProcessedFrame = { frame, results };
-    const processedEvent: PipelineEvent<ProcessedFrame> = { type: 'processed', payload: processed, timestamp: Date.now() };
-    this.emit('event', processedEvent);
+    const processedEvent: PipelineEvent<ProcessedFrame> = {
+      type: "processed",
+      payload: processed,
+      timestamp: Date.now(),
+    };
+    this.emit("event", processedEvent);
     this.broadcast(processed);
     return processed;
   }
@@ -65,7 +79,7 @@ export class SignalStreamingPipeline extends EventEmitter {
 
   private decodePayload(data: any): Float64Array | null {
     try {
-      if (typeof data === 'string') {
+      if (typeof data === "string") {
         const parsed = JSON.parse(data);
         if (Array.isArray(parsed)) {
           return this.normalizeFrame(Float64Array.from(parsed));
@@ -93,7 +107,7 @@ export class SignalStreamingPipeline extends EventEmitter {
       }
     });
     this.channels.forEach((channel) => {
-      if (channel.readyState === 'open') {
+      if (channel.readyState === "open") {
         channel.send(payload);
       }
     });

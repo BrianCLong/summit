@@ -38,14 +38,14 @@ pnpm install @intelgraph/data-augmentation
 ### Quick Start
 
 ```typescript
-import { TabularSynthesizer } from '@intelgraph/synthetic-data';
+import { TabularSynthesizer } from "@intelgraph/synthetic-data";
 
 // Configure synthesizer
 const synthesizer = new TabularSynthesizer({
-  method: 'statistical',
+  method: "statistical",
   numSamples: 1000,
   preserveCorrelations: true,
-  preserveDistributions: true
+  preserveDistributions: true,
 });
 
 // Fit on original data
@@ -54,8 +54,8 @@ await synthesizer.fit(originalData);
 // Generate synthetic data
 const result = await synthesizer.generate();
 
-console.log('Quality Metrics:', result.quality);
-console.log('Synthetic Data:', result.syntheticData);
+console.log("Quality Metrics:", result.quality);
+console.log("Synthetic Data:", result.syntheticData);
 ```
 
 ## Tabular Data Synthesis
@@ -71,14 +71,14 @@ console.log('Synthetic Data:', result.syntheticData);
 ### Example: CTGAN Synthesis
 
 ```typescript
-import { TabularSynthesizer } from '@intelgraph/synthetic-data';
+import { TabularSynthesizer } from "@intelgraph/synthetic-data";
 
 const synthesizer = new TabularSynthesizer({
-  method: 'ctgan',
+  method: "ctgan",
   numSamples: 5000,
   preserveCorrelations: true,
-  categoricalColumns: ['category', 'status'],
-  numericalColumns: ['age', 'income', 'score']
+  categoricalColumns: ["category", "status"],
+  numericalColumns: ["age", "income", "score"],
 });
 
 await synthesizer.fit(trainingData);
@@ -88,14 +88,14 @@ const result = await synthesizer.generate();
 ### Data Profiling
 
 ```typescript
-import { DataProfiler } from '@intelgraph/synthetic-data';
+import { DataProfiler } from "@intelgraph/synthetic-data";
 
 const profile = DataProfiler.profile(data);
 
-console.log('Rows:', profile.numRows);
-console.log('Columns:', profile.numColumns);
-console.log('Quality Score:', profile.quality.overallScore);
-console.log('Column Profiles:', profile.columns);
+console.log("Rows:", profile.numRows);
+console.log("Columns:", profile.numColumns);
+console.log("Quality Score:", profile.quality.overallScore);
+console.log("Column Profiles:", profile.columns);
 ```
 
 ## Privacy-Preserving Synthesis
@@ -103,12 +103,12 @@ console.log('Column Profiles:', profile.columns);
 ### Differential Privacy
 
 ```typescript
-import { DifferentialPrivacy } from '@intelgraph/privacy-preserving';
+import { DifferentialPrivacy } from "@intelgraph/privacy-preserving";
 
 const dp = new DifferentialPrivacy({
   epsilon: 1.0,
   delta: 1e-5,
-  mechanism: 'laplace'
+  mechanism: "laplace",
 });
 
 // Privatize a query result
@@ -116,44 +116,44 @@ const privatized = dp.privatizeQuery(originalValue, sensitivity);
 
 // Check privacy budget
 const budget = dp.getBudgetStatus();
-console.log('Remaining budget:', budget.remaining);
+console.log("Remaining budget:", budget.remaining);
 ```
 
 ### K-Anonymity
 
 ```typescript
-import { KAnonymity } from '@intelgraph/privacy-preserving';
+import { KAnonymity } from "@intelgraph/privacy-preserving";
 
 const kAnon = new KAnonymity({
   k: 5,
   l: 3, // l-diversity
   t: 0.2, // t-closeness
-  quasiIdentifiers: ['age', 'zipcode', 'gender'],
-  sensitiveAttributes: ['diagnosis', 'salary']
+  quasiIdentifiers: ["age", "zipcode", "gender"],
+  sensitiveAttributes: ["diagnosis", "salary"],
 });
 
 const result = kAnon.anonymize(data);
 
-console.log('Achieved k-anonymity:', result.metrics.kAnonymity);
-console.log('L-diversity:', result.metrics.lDiversity);
-console.log('Warnings:', result.warnings);
+console.log("Achieved k-anonymity:", result.metrics.kAnonymity);
+console.log("L-diversity:", result.metrics.lDiversity);
+console.log("Warnings:", result.warnings);
 ```
 
 ### Privacy Assessment
 
 ```typescript
-import { PrivacyValidator } from '@intelgraph/privacy-preserving';
+import { PrivacyValidator } from "@intelgraph/privacy-preserving";
 
 const assessment = PrivacyValidator.assessPrivacy(originalData, syntheticData, {
-  quasiIdentifiers: ['age', 'location'],
-  sensitiveAttributes: ['medical_condition'],
-  privacyBudget: 1.0
+  quasiIdentifiers: ["age", "location"],
+  sensitiveAttributes: ["medical_condition"],
+  privacyBudget: 1.0,
 });
 
-console.log('Overall Risk:', assessment.overallRisk);
-console.log('GDPR Compliant:', assessment.compliance.gdpr);
-console.log('HIPAA Compliant:', assessment.compliance.hipaa);
-console.log('Recommendations:', assessment.recommendations);
+console.log("Overall Risk:", assessment.overallRisk);
+console.log("GDPR Compliant:", assessment.compliance.gdpr);
+console.log("HIPAA Compliant:", assessment.compliance.hipaa);
+console.log("Recommendations:", assessment.recommendations);
 ```
 
 ## Text Generation
@@ -161,28 +161,28 @@ console.log('Recommendations:', assessment.recommendations);
 ### GPT-based Text Synthesis
 
 ```typescript
-import { TextSynthesizer } from '@intelgraph/text-generation';
+import { TextSynthesizer } from "@intelgraph/text-generation";
 
 const synthesizer = new TextSynthesizer({
-  model: 'gpt',
-  domain: 'medical',
+  model: "gpt",
+  domain: "medical",
   temperature: 0.8,
   maxLength: 200,
   preserveStyle: true,
-  language: 'en'
+  language: "en",
 });
 
 // Fit on training texts
 await synthesizer.fit(trainingTexts);
 
 // Generate synthetic text
-const samples = await synthesizer.generate(100, 'Medical report:');
+const samples = await synthesizer.generate(100, "Medical report:");
 ```
 
 ### Named Entity Generation
 
 ```typescript
-import { NamedEntityGenerator } from '@intelgraph/text-generation';
+import { NamedEntityGenerator } from "@intelgraph/text-generation";
 
 const generator = new NamedEntityGenerator();
 
@@ -196,10 +196,7 @@ const money = generator.generateMoney(1000, 50000); // "$25,000"
 ### Paraphrasing
 
 ```typescript
-const paraphrases = await synthesizer.paraphrase(
-  'The patient shows signs of improvement.',
-  3
-);
+const paraphrases = await synthesizer.paraphrase("The patient shows signs of improvement.", 3);
 
 console.log(paraphrases);
 // [
@@ -214,7 +211,7 @@ console.log(paraphrases);
 ```typescript
 const conversation = await synthesizer.generateConversation(
   10, // number of turns
-  ['User', 'Assistant']
+  ["User", "Assistant"]
 );
 
 console.log(conversation.turns);
@@ -225,13 +222,13 @@ console.log(conversation.turns);
 ### Image Generation
 
 ```typescript
-import { ImageSynthesizer } from '@intelgraph/image-synthesis';
+import { ImageSynthesizer } from "@intelgraph/image-synthesis";
 
 const synthesizer = new ImageSynthesizer({
-  model: 'diffusion',
+  model: "diffusion",
   resolution: [512, 512],
-  style: 'photorealistic',
-  seed: 42
+  style: "photorealistic",
+  seed: 42,
 });
 
 const images = await synthesizer.generate(10);
@@ -240,19 +237,19 @@ const images = await synthesizer.generate(10);
 ### Video Synthesis
 
 ```typescript
-import { VideoSynthesizer } from '@intelgraph/image-synthesis';
+import { VideoSynthesizer } from "@intelgraph/image-synthesis";
 
 const videoSyn = new VideoSynthesizer();
 const frames = await videoSyn.generateVideo(
   300, // frames
-  30   // fps
+  30 // fps
 );
 ```
 
 ### Image Augmentation
 
 ```typescript
-const transforms = ['rotate', 'flip', 'crop', 'brightness'];
+const transforms = ["rotate", "flip", "crop", "brightness"];
 const augmented = await synthesizer.augment(image, transforms);
 ```
 
@@ -261,28 +258,28 @@ const augmented = await synthesizer.augment(image, transforms);
 ### Text-to-Speech
 
 ```typescript
-import { TTSSynthesizer } from '@intelgraph/audio-synthesis';
+import { TTSSynthesizer } from "@intelgraph/audio-synthesis";
 
 const tts = new TTSSynthesizer();
-const audio = await tts.synthesize('Hello, world!', 'default');
+const audio = await tts.synthesize("Hello, world!", "default");
 
-console.log('Duration:', audio.duration);
-console.log('Sample Rate:', audio.sampleRate);
+console.log("Duration:", audio.duration);
+console.log("Sample Rate:", audio.sampleRate);
 ```
 
 ### Voice Cloning
 
 ```typescript
-import { VoiceCloner } from '@intelgraph/audio-synthesis';
+import { VoiceCloner } from "@intelgraph/audio-synthesis";
 
 const cloner = new VoiceCloner();
-const clonedAudio = await cloner.cloneVoice(referenceAudio, 'New text to synthesize');
+const clonedAudio = await cloner.cloneVoice(referenceAudio, "New text to synthesize");
 ```
 
 ### Audio Augmentation
 
 ```typescript
-import { AudioAugmentor } from '@intelgraph/audio-synthesis';
+import { AudioAugmentor } from "@intelgraph/audio-synthesis";
 
 const augmentor = new AudioAugmentor();
 
@@ -296,48 +293,48 @@ const noisy = augmentor.addNoise(audio, 0.05); // Add 5% noise
 ### Graph Generation Models
 
 ```typescript
-import { GraphSynthesizer } from '@intelgraph/graph-synthesis';
+import { GraphSynthesizer } from "@intelgraph/graph-synthesis";
 
 // Erdős-Rényi random graph
 const erSyn = new GraphSynthesizer({
-  model: 'erdos-renyi',
+  model: "erdos-renyi",
   numNodes: 1000,
-  avgDegree: 6
+  avgDegree: 6,
 });
 
 const graph = await erSyn.generate();
 
 // Barabási-Albert (scale-free)
 const baSyn = new GraphSynthesizer({
-  model: 'barabasi-albert',
+  model: "barabasi-albert",
   numNodes: 1000,
-  avgDegree: 4
+  avgDegree: 4,
 });
 
 // Watts-Strogatz (small-world)
 const wsSyn = new GraphSynthesizer({
-  model: 'watts-strogatz',
+  model: "watts-strogatz",
   numNodes: 1000,
-  avgDegree: 6
+  avgDegree: 6,
 });
 
 // Community structure
 const commSyn = new GraphSynthesizer({
-  model: 'community',
-  numNodes: 1000
+  model: "community",
+  numNodes: 1000,
 });
 ```
 
 ### Temporal Graphs
 
 ```typescript
-import { TemporalGraphSynthesizer } from '@intelgraph/graph-synthesis';
+import { TemporalGraphSynthesizer } from "@intelgraph/graph-synthesis";
 
 const tempSyn = new TemporalGraphSynthesizer();
 const graphs = await tempSyn.generateTemporalGraph(10, {
-  model: 'barabasi-albert',
+  model: "barabasi-albert",
   numNodes: 100,
-  avgDegree: 4
+  avgDegree: 4,
 });
 ```
 
@@ -346,16 +343,16 @@ const graphs = await tempSyn.generateTemporalGraph(10, {
 ### Location Traces
 
 ```typescript
-import { GeospatialSynthesizer } from '@intelgraph/geospatial-synthesis';
+import { GeospatialSynthesizer } from "@intelgraph/geospatial-synthesis";
 
 const geoSyn = new GeospatialSynthesizer({
   bounds: {
     minLat: 37.7,
     maxLat: 37.8,
     minLon: -122.5,
-    maxLon: -122.4
+    maxLon: -122.4,
   },
-  privacyRadius: 100 // meters
+  privacyRadius: 100, // meters
 });
 
 const traces = geoSyn.generateTraces(50, 100); // 50 traces, 100 points each
@@ -396,25 +393,25 @@ const pattern = geoSyn.generateMobilityPattern(
 ## Time-Series Synthesis
 
 ```typescript
-import { TimeSeriesSynthesizer } from '@intelgraph/synthetic-data';
+import { TimeSeriesSynthesizer } from "@intelgraph/synthetic-data";
 
 const tsSyn = new TimeSeriesSynthesizer({
-  method: 'arima',
+  method: "arima",
   length: 1000,
-  frequency: 'hourly',
+  frequency: "hourly",
   seasonality: {
     enabled: true,
-    period: 24
+    period: 24,
   },
   trend: {
     enabled: true,
-    type: 'linear'
+    type: "linear",
   },
   anomalies: {
     enabled: true,
     frequency: 0.01,
-    magnitude: 3.0
-  }
+    magnitude: 3.0,
+  },
 });
 
 const timeSeries = await tsSyn.generate();
@@ -425,7 +422,7 @@ const timeSeries = await tsSyn.generate();
 ### Tabular Augmentation
 
 ```typescript
-import { DataAugmentor } from '@intelgraph/data-augmentation';
+import { DataAugmentor } from "@intelgraph/data-augmentation";
 
 const augmentor = new DataAugmentor();
 
@@ -433,10 +430,10 @@ const augmentor = new DataAugmentor();
 const augmented = augmentor.augmentTabular(data, 3); // 3x increase
 
 // Class balancing
-const balanced = augmentor.balanceClasses(data, 'label');
+const balanced = augmentor.balanceClasses(data, "label");
 
 // SMOTE
-const smoted = augmentor.smote(data, 'label', 5);
+const smoted = augmentor.smote(data, "label", 5);
 
 // Mixup
 const mixed = augmentor.mixup(data, 0.2);
@@ -445,7 +442,7 @@ const mixed = augmentor.mixup(data, 0.2);
 ### Image Augmentation
 
 ```typescript
-import { ImageAugmentor, AugmentationStrategy } from '@intelgraph/data-augmentation';
+import { ImageAugmentor, AugmentationStrategy } from "@intelgraph/data-augmentation";
 
 const imgAug = new ImageAugmentor();
 
@@ -453,16 +450,16 @@ const imgAug = new ImageAugmentor();
 const pipeline = {
   transforms: [
     imgAug.rotate(15),
-    imgAug.flip('horizontal'),
+    imgAug.flip("horizontal"),
     imgAug.brightness(1.2),
     imgAug.contrast(1.1),
     imgAug.gaussianBlur(1.0),
-    imgAug.colorJitter(0.2, 0.2, 0.2)
-  ]
+    imgAug.colorJitter(0.2, 0.2, 0.2),
+  ],
 };
 
 // AutoAugment
-const autoPolicy = AugmentationStrategy.autoAugment('image');
+const autoPolicy = AugmentationStrategy.autoAugment("image");
 
 // RandAugment
 const randPolicy = AugmentationStrategy.randAugment(3, 5);
@@ -471,7 +468,7 @@ const randPolicy = AugmentationStrategy.randAugment(3, 5);
 ### Text Augmentation
 
 ```typescript
-import { TextAugmentor } from '@intelgraph/data-augmentation';
+import { TextAugmentor } from "@intelgraph/data-augmentation";
 
 const textAug = new TextAugmentor();
 
@@ -480,9 +477,9 @@ const pipeline = {
     textAug.synonymReplacement(2),
     textAug.randomInsertion(1),
     textAug.randomSwap(1),
-    textAug.backTranslation('es'),
-    textAug.paraphrasing()
-  ]
+    textAug.backTranslation("es"),
+    textAug.paraphrasing(),
+  ],
 };
 ```
 
@@ -491,15 +488,15 @@ const pipeline = {
 ### Quality Assessment
 
 ```typescript
-import { QualityAssessor } from '@intelgraph/synthetic-data';
+import { QualityAssessor } from "@intelgraph/synthetic-data";
 
 const report = QualityAssessor.assess(originalData, syntheticData);
 
-console.log('Overall Score:', report.overallScore);
-console.log('Distribution Similarity:', report.metrics.distributionSimilarity);
-console.log('Correlation Preservation:', report.metrics.correlationPreservation);
-console.log('Statistical Tests:', report.tests);
-console.log('Recommendations:', report.recommendations);
+console.log("Overall Score:", report.overallScore);
+console.log("Distribution Similarity:", report.metrics.distributionSimilarity);
+console.log("Correlation Preservation:", report.metrics.correlationPreservation);
+console.log("Statistical Tests:", report.tests);
+console.log("Recommendations:", report.recommendations);
 ```
 
 ### Quality Metrics
@@ -528,11 +525,13 @@ pnpm start
 #### API Endpoints
 
 **Health Check**
+
 ```
 GET /health
 ```
 
 **Tabular Synthesis**
+
 ```
 POST /api/synthesize/tabular
 Body: {
@@ -542,6 +541,7 @@ Body: {
 ```
 
 **Text Generation**
+
 ```
 POST /api/synthesize/text
 Body: {
@@ -552,6 +552,7 @@ Body: {
 ```
 
 **Image Synthesis**
+
 ```
 POST /api/synthesize/image
 Body: {
@@ -561,6 +562,7 @@ Body: {
 ```
 
 **Graph Synthesis**
+
 ```
 POST /api/synthesize/graph
 Body: {
@@ -569,6 +571,7 @@ Body: {
 ```
 
 **Privacy - Differential Privacy**
+
 ```
 POST /api/privacy/differential
 Body: {
@@ -579,6 +582,7 @@ Body: {
 ```
 
 **Privacy - K-Anonymity**
+
 ```
 POST /api/privacy/k-anonymity
 Body: {
@@ -588,6 +592,7 @@ Body: {
 ```
 
 **Privacy Assessment**
+
 ```
 POST /api/privacy/assess
 Body: {
@@ -601,6 +606,7 @@ Body: {
 ```
 
 **Data Augmentation**
+
 ```
 POST /api/augment/tabular
 Body: {
@@ -616,6 +622,7 @@ Body: {
 ```
 
 **Batch Synthesis**
+
 ```
 POST /api/batch/synthesize
 Body: {
@@ -696,6 +703,7 @@ See the `/examples` directory for complete working examples:
 ## Support
 
 For issues, questions, or contributions:
+
 - GitHub Issues: https://github.com/intelgraph/synthetic-data
 - Documentation: https://docs.intelgraph.com/synthetic-data
 - Email: support@intelgraph.com

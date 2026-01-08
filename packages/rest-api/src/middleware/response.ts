@@ -4,8 +4,8 @@
  * Standardizes API responses
  */
 
-import type { Request, Response, APIResponse, HATEOASLinks, Link } from '../types';
-import { NextFunction } from 'express';
+import type { Request, Response, APIResponse, HATEOASLinks, Link } from "../types";
+import { NextFunction } from "express";
 
 /**
  * Helper to send a standardized success response
@@ -26,7 +26,7 @@ export function sendSuccess<T>(
     data,
     metadata: {
       timestamp: new Date().toISOString(),
-      version: req.context?.apiVersion || '1.0',
+      version: req.context?.apiVersion || "1.0",
       requestId: req.context!.requestId,
       duration: Date.now() - req.context!.startTime,
       pagination: req.pagination,
@@ -48,18 +48,18 @@ export function generateHATEOASLinks(
     resourceId?: string;
   }
 ): HATEOASLinks {
-  const baseUrl = `${req.protocol}://${req.get('host')}${req.baseUrl}${req.path}`;
+  const baseUrl = `${req.protocol}://${req.get("host")}${req.baseUrl}${req.path}`;
 
   const links: HATEOASLinks = {
     self: {
-      href: baseUrl + (req.originalUrl.includes('?') ? req.originalUrl.split('?')[1] : ''),
+      href: baseUrl + (req.originalUrl.includes("?") ? req.originalUrl.split("?")[1] : ""),
       method: req.method,
     },
   };
 
   // Add pagination links
   if (req.pagination) {
-    if ('offset' in req.pagination && typeof req.pagination.offset === 'number') {
+    if ("offset" in req.pagination && typeof req.pagination.offset === "number") {
       // Offset-based pagination
       const limit = req.pagination.limit;
       const offset = req.pagination.offset;
@@ -68,7 +68,7 @@ export function generateHATEOASLinks(
         const prevOffset = Math.max(0, offset - limit);
         links.prev = {
           href: `${baseUrl}?limit=${limit}&offset=${prevOffset}`,
-          method: 'GET',
+          method: "GET",
         };
       }
 
@@ -76,19 +76,19 @@ export function generateHATEOASLinks(
         const nextOffset = offset + limit;
         links.next = {
           href: `${baseUrl}?limit=${limit}&offset=${nextOffset}`,
-          method: 'GET',
+          method: "GET",
         };
       }
 
       links.first = {
         href: `${baseUrl}?limit=${limit}&offset=0`,
-        method: 'GET',
+        method: "GET",
       };
     } else if (options?.nextCursor) {
       // Cursor-based pagination
       links.next = {
         href: `${baseUrl}?limit=${req.pagination.limit}&cursor=${options.nextCursor}`,
-        method: 'GET',
+        method: "GET",
       };
     }
   }
@@ -97,7 +97,7 @@ export function generateHATEOASLinks(
   if (options?.resourceId) {
     links.item = {
       href: `${baseUrl}/${options.resourceId}`,
-      method: 'GET',
+      method: "GET",
     };
   }
 

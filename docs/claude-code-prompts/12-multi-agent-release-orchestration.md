@@ -8,41 +8,42 @@ Deliver MVP-3 as **General Availability** with **progressive delivery**, **hard 
 
 ## Global constraints (apply to every agent)
 
-* Golden path SLOs enforced; canary auto-rollback on breach.
-* IaC only (Helm + Terraform). No plaintext secrets; SOPS + Sealed-Secrets.
-* Images **signed**, **attested** (SLSA), SBOMs required; diff budgets enforced.
-* AuthZ via OPA (RBAC+ABAC), step-up auth + Reason-for-Access on elevated actions.
-* Immutable audit trail; artifacts retained ≥ 1 year.
-* Every change has **rollback steps** and **owner**; follow CODEOWNERS.
+- Golden path SLOs enforced; canary auto-rollback on breach.
+- IaC only (Helm + Terraform). No plaintext secrets; SOPS + Sealed-Secrets.
+- Images **signed**, **attested** (SLSA), SBOMs required; diff budgets enforced.
+- AuthZ via OPA (RBAC+ABAC), step-up auth + Reason-for-Access on elevated actions.
+- Immutable audit trail; artifacts retained ≥ 1 year.
+- Every change has **rollback steps** and **owner**; follow CODEOWNERS.
 
 ## Inputs (required)
 
-* Repo: `{{REPO_NAME}}` (default: `summit-2025.09.23.1710`)
-* Target release: `{{TARGET_VERSION}}` (e.g., `v3.0.0`)
-* Change window & contacts: `{{WINDOW}}`, `{{ONCALL_HANDLES}}`
-* Tenants for probes/tests: `{{TEST_TENANTS}}`
-* Budget guardrails: `{{DAILY_PREVIEW_BUDGET_USD}}`, `{{MAX_IMAGE_MB}}`
-* IdP & SCIM endpoints (if enabled): `{{OIDC_ISSUER}}`, `{{SCIM_BASEURL}}`
+- Repo: `{{REPO_NAME}}` (default: `summit-2025.09.23.1710`)
+- Target release: `{{TARGET_VERSION}}` (e.g., `v3.0.0`)
+- Change window & contacts: `{{WINDOW}}`, `{{ONCALL_HANDLES}}`
+- Tenants for probes/tests: `{{TEST_TENANTS}}`
+- Budget guardrails: `{{DAILY_PREVIEW_BUDGET_USD}}`, `{{MAX_IMAGE_MB}}`
+- IdP & SCIM endpoints (if enabled): `{{OIDC_ISSUER}}`, `{{SCIM_BASEURL}}`
 
 ## Required outputs (succinct & machine-parsable)
 
-* `artifacts/release/{{TARGET_VERSION}}/evidence.zip` (signed)
-* `release_notes/{{TARGET_VERSION}}.md`
-* Green dashboards: SLOs, perf, security, DR freshness
-* GA toggle: `featureFlags.search.ga.enabled=true` (and other GA flags) set with audit trail
-* Post-release KPI report + regression issues (if any)
+- `artifacts/release/{{TARGET_VERSION}}/evidence.zip` (signed)
+- `release_notes/{{TARGET_VERSION}}.md`
+- Green dashboards: SLOs, perf, security, DR freshness
+- GA toggle: `featureFlags.search.ga.enabled=true` (and other GA flags) set with audit trail
+- Post-release KPI report + regression issues (if any)
 
 ---
 
 ## Orchestration protocol
 
-* **Conductor** coordinates phases and verifies gates. Subagents work in parallel where safe.
-* Every agent replies with:
+- **Conductor** coordinates phases and verifies gates. Subagents work in parallel where safe.
+- Every agent replies with:
 
   ```
   { "phase":"<P#>", "agent":"<name>", "action":"<what>", "result":"ok|fail", "evidence":[...], "trace_id":"..." }
   ```
-* On **fail**, Conductor triggers the relevant **rollback playbook**, posts evidence, and re-queues after fix or halts with incident.
+
+- On **fail**, Conductor triggers the relevant **rollback playbook**, posts evidence, and re-queues after fix or halts with incident.
 
 ---
 
@@ -67,8 +68,8 @@ Deliver MVP-3 as **General Availability** with **progressive delivery**, **hard 
 **Goal:** Drive phases, verify gates, compile evidence, own promote/rollback.
 **Core tasks:**
 
-* Enforce required checks: `slo-gates`, `migration-gate`, `supply-chain`, `performance-gate`, `policy-ci`.
-* Run release workflows; attach signed evidence; post notes & comms.
+- Enforce required checks: `slo-gates`, `migration-gate`, `supply-chain`, `performance-gate`, `policy-ci`.
+- Run release workflows; attach signed evidence; post notes & comms.
   **Success:** GA tag pushed, evidence verified, rollback drill demonstrated.
 
 ### 2) **CI/CD Engineer**
@@ -162,93 +163,93 @@ Deliver MVP-3 as **General Availability** with **progressive delivery**, **hard 
 
 ### P0 — Readiness
 
-* CI/CD Engineer: enable required checks; labeler + conventional commits; CODEOWNERS enforced.
-* Supply Chain: turn on supply-chain-gates workflow; cosign keyless or managed key.
-* DevOps: apply container hardening; Helm `_security.tpl` included; size budget script active.
+- CI/CD Engineer: enable required checks; labeler + conventional commits; CODEOWNERS enforced.
+- Supply Chain: turn on supply-chain-gates workflow; cosign keyless or managed key.
+- DevOps: apply container hardening; Helm `_security.tpl` included; size budget script active.
 
 **Gate:** `container-hardening`, `supply-chain`, `policy-ci` all green.
 
 ### P1 — Gates & Baselines
 
-* Observability: commit `golden_paths.yaml`; deploy synth-probe in previews/stage.
-* CI/CD: wire `verify_goldens.sh` & PromQL checks; PR previews cost/TTL + budget guard.
-* Perf: run baseline k6, record headroom; set HPA behaviors.
+- Observability: commit `golden_paths.yaml`; deploy synth-probe in previews/stage.
+- CI/CD: wire `verify_goldens.sh` & PromQL checks; PR previews cost/TTL + budget guard.
+- Perf: run baseline k6, record headroom; set HPA behaviors.
 
 **Gate:** `slo-gates`, `performance-gate`, preview budgets passing.
 
 ### P2 — Data Safety
 
-* Migrations: implement migration-gate; dry-run + shadow parity in preview; dual-write flags.
-* Data Plane: enable pgBouncer; index catalog; slow-query lint; RLS.
+- Migrations: implement migration-gate; dry-run + shadow parity in preview; dual-write flags.
+- Data Plane: enable pgBouncer; index catalog; slow-query lint; RLS.
 
 **Gate:** migration-gate passes with artifacts; data budgets met 48h in stage.
 
 ### P3 — Security/Compliance
 
-* AuthZ: OPA policies (RBAC/ABAC/obligations) compiled to Wasm; step-up + RFA enforced.
-* Audit/RFA: hash-chained events; evidence export tool.
-* Identity: OIDC + WebAuthn; SCIM dry-run; deprovision revokes sessions <60s.
+- AuthZ: OPA policies (RBAC/ABAC/obligations) compiled to Wasm; step-up + RFA enforced.
+- Audit/RFA: hash-chained events; evidence export tool.
+- Identity: OIDC + WebAuthn; SCIM dry-run; deprovision revokes sessions <60s.
 
 **Gate:** audits present; decision logs & identity dashboards green.
 
 ### P4 — Product GA
 
-* Realtime: WS+SSE fanout; resume; dashboards; soak test.
-* Reporting: renderer service; redaction tests; signing & provenance.
-* Search: schemas + indexer; alias reindex parity; tenant filters enforced.
-* Ingest: backpressure + DLQ + replayctl; chaos on ingest slowness.
+- Realtime: WS+SSE fanout; resume; dashboards; soak test.
+- Reporting: renderer service; redaction tests; signing & provenance.
+- Search: schemas + indexer; alias reindex parity; tenant filters enforced.
+- Ingest: backpressure + DLQ + replayctl; chaos on ingest slowness.
 
 **Gate:** product SLOs green 48h; parity/reindex success; ingest lag <60s.
 
 ### P5 — DR/Chaos
 
-* DR: backups verified; failover→cutback drill; flags for freeze/writemode.
-* Chaos: two stage scenarios + one canary rollback drill; evidence signed.
+- DR: backups verified; failover→cutback drill; flags for freeze/writemode.
+- Chaos: two stage scenarios + one canary rollback drill; evidence signed.
 
 **Gate:** DR drill within targets; chaos evidence uploaded; gaps addressed.
 
 ### P6 — Release Train
 
-* Conductor: cut `release/v{{X.Y.Z}}-rc.1`; stage canary; generate notes; prepare evidence.
-* Promote: prod canary 10→50→100 with SLO/Perf/Supply-Chain gates; flip GA flags per plan.
-* On breach: auto-rollback to prior digests; kill high-risk flags; open incident.
+- Conductor: cut `release/v{{X.Y.Z}}-rc.1`; stage canary; generate notes; prepare evidence.
+- Promote: prod canary 10→50→100 with SLO/Perf/Supply-Chain gates; flip GA flags per plan.
+- On breach: auto-rollback to prior digests; kill high-risk flags; open incident.
 
 **Gate:** final tag signed; evidence bundle attached.
 
 ### P7 — Alert Hygiene
 
-* Arborist: catalog→PrometheusRule; runbook template; noisy-alert issues created.
+- Arborist: catalog→PrometheusRule; runbook template; noisy-alert issues created.
 
 ### P8 — GA Flip & +24h KPI
 
-* Conductor: run KPI compare; open regression issues with owners; close release.
+- Conductor: run KPI compare; open regression issues with owners; close release.
 
 ---
 
 ## Promotion & rollback criteria (must implement)
 
-* **Promote:** all required checks green; no SLO burn; perf headroom ≥20%; migration cutover criteria met; SBOM diffs within budget; DR freshness OK.
-* **Rollback:** any guard breach or golden-path failure persists >N minutes; previous digests redeployed; golden paths re-green; audit event recorded.
+- **Promote:** all required checks green; no SLO burn; perf headroom ≥20%; migration cutover criteria met; SBOM diffs within budget; DR freshness OK.
+- **Rollback:** any guard breach or golden-path failure persists >N minutes; previous digests redeployed; golden paths re-green; audit event recorded.
 
 ---
 
 ## Evidence pack (minimum contents)
 
-* SBOMs + attestation + signatures (per image)
-* SLO/probe graphs; perf headroom; chaos/DR drill outputs
-* Migration plans + shadow parity + backfill status
-* Release notes; commit range; approvals matrix
-* Audit/RFA excerpts; identity & AuthZ decision stats
-* Alert hygiene snapshot; top issues created
+- SBOMs + attestation + signatures (per image)
+- SLO/probe graphs; perf headroom; chaos/DR drill outputs
+- Migration plans + shadow parity + backfill status
+- Release notes; commit range; approvals matrix
+- Audit/RFA excerpts; identity & AuthZ decision stats
+- Alert hygiene snapshot; top issues created
 
 ---
 
 ## GA switch list (flip only after promote)
 
-* `search.ga.enabled=true`
-* `realtime.enabled=true` (per pilot tenants → all)
-* `reports.renderer.v2.enabled=true`
-* Any per-feature flags required for MVP-3 scope
+- `search.ga.enabled=true`
+- `realtime.enabled=true` (per pilot tenants → all)
+- `reports.renderer.v2.enabled=true`
+- Any per-feature flags required for MVP-3 scope
 
 ---
 
@@ -282,38 +283,37 @@ Return JSON with fields: phase, action, result, links (PRs, dashboards), artifac
 ## Kickoff commands (Conductor issues these in order)
 
 1. **Bootstrap checks**
+   - Ask CI/CD Engineer: "Confirm required checks present & enforced; attach branch-protection export."
 
-   * Ask CI/CD Engineer: "Confirm required checks present & enforced; attach branch-protection export."
 2. **Golden paths + SLO gates**
+   - Ask Observability Lead: "Publish `golden_paths.yaml`, run probes in preview/stage, wire `verify_goldens.sh`."
 
-   * Ask Observability Lead: "Publish `golden_paths.yaml`, run probes in preview/stage, wire `verify_goldens.sh`."
 3. **Supply chain**
+   - Ask Security: "Enable `supply-chain-gates`; show cosign verify at deploy time."
 
-   * Ask Security: "Enable `supply-chain-gates`; show cosign verify at deploy time."
 4. **Migrations**
+   - Ask Schema Captain: "Create `migration-gate.yml`, run demo Postgres+Neo4j dry-runs, show shadow parity."
 
-   * Ask Schema Captain: "Create `migration-gate.yml`, run demo Postgres+Neo4j dry-runs, show shadow parity."
 5. **Perf**
+   - Ask Perf: "Run baseline k6; report headroom; tune HPA; enforce `performance-gate`."
 
-   * Ask Perf: "Run baseline k6; report headroom; tune HPA; enforce `performance-gate`."
 6. **Product**
+   - Ask Realtime/Search/Reporting/Ingest owners to land GA-ready features with SLO dashboards.
 
-   * Ask Realtime/Search/Reporting/Ingest owners to land GA-ready features with SLO dashboards.
 7. **DR/Chaos**
+   - Ask DR & Chaos captains to run drills and upload evidence.
 
-   * Ask DR & Chaos captains to run drills and upload evidence.
 8. **Release**
+   - Trigger `release-train.yml` → `release-promote.yml`; attach signed evidence and notes; flip GA flags.
 
-   * Trigger `release-train.yml` → `release-promote.yml`; attach signed evidence and notes; flip GA flags.
 9. **Post-release**
-
-   * Run +24h KPI compare; open regressions; confirm all alerts mapped to runbooks.
+   - Run +24h KPI compare; open regressions; confirm all alerts mapped to runbooks.
 
 ---
 
 ## Stop conditions / escalation
 
-* Any **critical** finding (security, SLO burn, data integrity) → **halt**, open incident, execute rollback runbook, escalate to `{{ONCALL_HANDLES}}`.
+- Any **critical** finding (security, SLO burn, data integrity) → **halt**, open incident, execute rollback runbook, escalate to `{{ONCALL_HANDLES}}`.
 
 ---
 

@@ -5,6 +5,7 @@
 ## Overview
 
 Summit uses Docker Compose profiles to manage different development scenarios. This guide covers:
+
 - Profile selection and customization
 - Service dependencies and mocking
 - Secrets management
@@ -27,6 +28,7 @@ minimal
 ### Available Profiles
 
 #### `minimal` - Databases Only
+
 For frontend-only work or when running API locally (outside Docker).
 
 ```bash
@@ -35,6 +37,7 @@ summit up --profile minimal
 ```
 
 **Services:**
+
 - `postgres` (5432) - Primary relational database
 - `redis` (6379) - Cache and pub/sub
 - `neo4j` (7474, 7687) - Graph database
@@ -44,6 +47,7 @@ summit up --profile minimal
 ---
 
 #### `core` - Standard Development (Default)
+
 Full application stack for typical development.
 
 ```bash
@@ -52,6 +56,7 @@ summit up
 ```
 
 **Services (adds to minimal):**
+
 - `api` (4000) - GraphQL API server
 - `web` (3000) - React frontend
 - `gateway` (4100) - API gateway
@@ -63,6 +68,7 @@ summit up
 ---
 
 #### `observability` - With Monitoring
+
 For debugging performance issues or developing observability features.
 
 ```bash
@@ -70,6 +76,7 @@ summit up --profile observability
 ```
 
 **Services (adds to core):**
+
 - `prometheus` (9090) - Metrics collection
 - `grafana` (3001) - Dashboards
 - `jaeger` (16686) - Distributed tracing
@@ -82,6 +89,7 @@ summit up --profile observability
 ---
 
 #### `ai` - With AI/ML Services
+
 For Copilot development or AI feature work.
 
 ```bash
@@ -89,6 +97,7 @@ summit up --profile ai
 ```
 
 **Services (adds to observability):**
+
 - `ai-sandbox` (4020) - AI task runner
 - `kafka` / `redpanda` - Event streaming
 - GPU support (if available)
@@ -98,6 +107,7 @@ summit up --profile ai
 ---
 
 #### `full` - Everything
+
 Complete stack for integration testing or production simulation.
 
 ```bash
@@ -112,19 +122,19 @@ summit up --profile full
 
 ### Port Mappings
 
-| Service | Default Port | Container Port | Override Env Var |
-|---------|--------------|----------------|------------------|
-| web | 3000 | 3000 | `WEB_PORT` |
-| api | 4000 | 4000 | `API_PORT` |
-| gateway | 4100 | 4100 | `GATEWAY_PORT` |
-| postgres | 5432 | 5432 | `POSTGRES_PORT` |
-| redis | 6379 | 6379 | `REDIS_PORT` |
-| neo4j-http | 7474 | 7474 | `NEO4J_HTTP_PORT` |
-| neo4j-bolt | 7687 | 7687 | `NEO4J_BOLT_PORT` |
-| elasticsearch | 9200 | 9200 | `ES_PORT` |
-| prometheus | 9090 | 9090 | - |
-| grafana | 3001 | 3000 | `GRAFANA_PORT` |
-| jaeger | 16686 | 16686 | - |
+| Service       | Default Port | Container Port | Override Env Var  |
+| ------------- | ------------ | -------------- | ----------------- |
+| web           | 3000         | 3000           | `WEB_PORT`        |
+| api           | 4000         | 4000           | `API_PORT`        |
+| gateway       | 4100         | 4100           | `GATEWAY_PORT`    |
+| postgres      | 5432         | 5432           | `POSTGRES_PORT`   |
+| redis         | 6379         | 6379           | `REDIS_PORT`      |
+| neo4j-http    | 7474         | 7474           | `NEO4J_HTTP_PORT` |
+| neo4j-bolt    | 7687         | 7687           | `NEO4J_BOLT_PORT` |
+| elasticsearch | 9200         | 9200           | `ES_PORT`         |
+| prometheus    | 9090         | 9090           | -                 |
+| grafana       | 3001         | 3000           | `GRAFANA_PORT`    |
+| jaeger        | 16686        | 16686          | -                 |
 
 ### Port Conflict Resolution
 
@@ -157,6 +167,7 @@ MOCK_EXTERNAL=true docker-compose up -d
 ```
 
 This starts `mock-services` container providing:
+
 - Mock OAuth provider (port 8088)
 - Mock S3 (MinIO, port 9000)
 - Mock Vault (port 8200)
@@ -178,10 +189,10 @@ Located in `scripts/devkit/mock-services.js`:
 ```javascript
 // Add custom mocks
 module.exports = {
-  '/api/external-service': {
-    response: { data: 'mocked' },
-    delay: 100  // Simulate latency
-  }
+  "/api/external-service": {
+    response: { data: "mocked" },
+    delay: 100, // Simulate latency
+  },
 };
 ```
 
@@ -194,6 +205,7 @@ module.exports = {
 For local development, secrets are stored in `.env` (gitignored).
 
 **Initial Setup:**
+
 ```bash
 summit bootstrap
 # Creates .env from .env.example with dev-safe defaults
@@ -231,13 +243,13 @@ summit secrets export --ci > secrets.enc
 
 ### Secret Reference
 
-| Secret | Required For | Dev Default | How to Get Real Value |
-|--------|--------------|-------------|----------------------|
-| `JWT_SECRET` | Auth | `dev-jwt-secret-xxx` | Auto-generated OK |
-| `NEO4J_PASSWORD` | Graph DB | `devpassword` | Auto-generated OK |
-| `POSTGRES_PASSWORD` | SQL DB | `devpassword` | Auto-generated OK |
-| `GITHUB_TOKEN` | GitHub API | None | Personal access token |
-| `OPENAI_API_KEY` | AI features | None | OpenAI dashboard |
+| Secret              | Required For | Dev Default          | How to Get Real Value |
+| ------------------- | ------------ | -------------------- | --------------------- |
+| `JWT_SECRET`        | Auth         | `dev-jwt-secret-xxx` | Auto-generated OK     |
+| `NEO4J_PASSWORD`    | Graph DB     | `devpassword`        | Auto-generated OK     |
+| `POSTGRES_PASSWORD` | SQL DB       | `devpassword`        | Auto-generated OK     |
+| `GITHUB_TOKEN`      | GitHub API   | None                 | Personal access token |
+| `OPENAI_API_KEY`    | AI features  | None                 | OpenAI dashboard      |
 
 ---
 
@@ -267,7 +279,7 @@ Create `.summitrc.json` in project root:
 Create `docker-compose.override.yml` (gitignored):
 
 ```yaml
-version: '3.9'
+version: "3.9"
 
 services:
   api:
@@ -275,7 +287,7 @@ services:
       - DEBUG=summit:*
       - LOG_LEVEL=debug
     volumes:
-      - ./server/src:/app/src:delegated  # Hot reload
+      - ./server/src:/app/src:delegated # Hot reload
 
   web:
     environment:
@@ -285,6 +297,7 @@ services:
 ### Hot Reload Configuration
 
 **API (Node.js):**
+
 ```yaml
 # docker-compose.override.yml
 services:
@@ -299,6 +312,7 @@ services:
 
 **Web (Vite):**
 Hot reload works by default. For debugging:
+
 ```yaml
 services:
   web:
@@ -314,10 +328,12 @@ services:
 ### Memory Allocation
 
 **Docker Desktop Settings:**
+
 - Development: 8GB minimum, 12GB recommended
 - AI Profile: 12GB minimum, 16GB recommended
 
 **Per-Service Limits:**
+
 ```yaml
 # docker-compose.override.yml
 services:
@@ -336,17 +352,19 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2.0'
+          cpus: "2.0"
 ```
 
 ### Disk Space
 
 Check available space:
+
 ```bash
 summit doctor --resources
 ```
 
 Clean up:
+
 ```bash
 summit clean --docker  # Remove unused images, containers, volumes
 ```
@@ -409,6 +427,7 @@ summit clean --deep
 #### Slow Performance on macOS
 
 Use `:cached` or `:delegated` volume mounts:
+
 ```yaml
 volumes:
   - ./src:/app/src:delegated
@@ -433,12 +452,15 @@ networks:
 ### Accessing Services
 
 **From Host:**
+
 - Use `localhost:<port>`
 
 **Between Containers:**
+
 - Use service name: `http://api:4000`
 
 **From Container to Host:**
+
 - Use `host.docker.internal`
 
 ### Custom Networks
@@ -459,27 +481,27 @@ networks:
 
 ### Core Application
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `NODE_ENV` | `development` | Environment mode |
-| `PORT` | `4000` | API server port |
-| `LOG_LEVEL` | `info` | Logging verbosity |
-| `DEBUG` | - | Debug namespaces |
+| Variable    | Default       | Description       |
+| ----------- | ------------- | ----------------- |
+| `NODE_ENV`  | `development` | Environment mode  |
+| `PORT`      | `4000`        | API server port   |
+| `LOG_LEVEL` | `info`        | Logging verbosity |
+| `DEBUG`     | -             | Debug namespaces  |
 
 ### Database Connections
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `DATABASE_URL` | (generated) | PostgreSQL connection |
-| `NEO4J_URI` | `bolt://localhost:7687` | Neo4j connection |
-| `REDIS_URL` | `redis://localhost:6379` | Redis connection |
+| Variable       | Default                  | Description           |
+| -------------- | ------------------------ | --------------------- |
+| `DATABASE_URL` | (generated)              | PostgreSQL connection |
+| `NEO4J_URI`    | `bolt://localhost:7687`  | Neo4j connection      |
+| `REDIS_URL`    | `redis://localhost:6379` | Redis connection      |
 
 ### Feature Flags
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `ENABLE_AI_FEATURES` | `true` | AI/Copilot features |
-| `ENABLE_REAL_TIME` | `true` | WebSocket features |
-| `ENABLE_METRICS` | `true` | Prometheus metrics |
+| Variable             | Default | Description         |
+| -------------------- | ------- | ------------------- |
+| `ENABLE_AI_FEATURES` | `true`  | AI/Copilot features |
+| `ENABLE_REAL_TIME`   | `true`  | WebSocket features  |
+| `ENABLE_METRICS`     | `true`  | Prometheus metrics  |
 
 See `.env.example` for complete reference.

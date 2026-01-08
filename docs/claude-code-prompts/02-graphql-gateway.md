@@ -1,10 +1,13 @@
 # Prompt 2: GraphQL Gateway (Apollo) + Contracts
 
 ## Role
+
 Graph/API Engineer
 
 ## Context
+
 The API gateway fronts multiple data sources:
+
 - **Neo4j**: Graph operations (entities, relationships)
 - **PostgreSQL**: Metadata and relational data
 - **Redis**: Caching layer
@@ -12,6 +15,7 @@ The API gateway fronts multiple data sources:
 The gateway must support high-performance reads and writes while maintaining strict SLOs.
 
 ## Task
+
 Implement an Apollo Server (TypeScript) with:
 
 1. **GraphQL SDL** for canonical entities:
@@ -32,6 +36,7 @@ Implement an Apollo Server (TypeScript) with:
 ## Guardrails (SLOs)
 
 ### Performance Targets
+
 - **Reads**:
   - p95 ≤ 350 ms
   - p99 ≤ 900 ms
@@ -40,6 +45,7 @@ Implement an Apollo Server (TypeScript) with:
   - p99 ≤ 1.5 s
 
 ### Security
+
 - All mutations require authentication
 - ABAC policy enforcement via OPA integration
 - Input validation on all mutations
@@ -47,6 +53,7 @@ Implement an Apollo Server (TypeScript) with:
 ## Deliverables
 
 ### 1. API Gateway Implementation
+
 - [ ] `api-gateway/` service with Apollo Server setup
 - [ ] GraphQL SDL schema files defining all types
 - [ ] Resolver skeleton for all queries and mutations
@@ -60,18 +67,21 @@ Implement an Apollo Server (TypeScript) with:
 - [ ] Backpressure middleware
 
 ### 2. Testing
+
 - [ ] Jest unit tests for resolvers
 - [ ] Contract tests for GraphQL schema
 - [ ] Example queries and mutations with expected responses
 - [ ] Load testing script (k6) to validate SLOs
 
 ### 3. Documentation
+
 - [ ] API documentation (SDL + examples)
 - [ ] Data source integration guide
 - [ ] Caching strategy documentation
 - [ ] Performance tuning notes
 
 ## Acceptance Criteria
+
 - ✅ `pnpm test` runs all tests successfully
 - ✅ k6 smoke test shows p95 read latency < 350 ms
 - ✅ k6 smoke test shows p95 write latency < 700 ms
@@ -128,6 +138,7 @@ type Mutation {
 ```
 
 ## Related Files
+
 - `/home/user/summit/packages/graphql/` - Existing GraphQL schemas
 - `/home/user/summit/services/api/` - API service implementations
 - `/home/user/summit/docs/api.graphql.md` - GraphQL API documentation
@@ -143,6 +154,7 @@ claude "Execute prompt 2: GraphQL Gateway implementation"
 ```
 
 ## Notes
+
 - Align with existing GraphQL patterns in the codebase
 - Use Apollo Server 4+ features (standalone server)
 - Implement OpenTelemetry instrumentation for SLO tracking

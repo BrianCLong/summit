@@ -157,10 +157,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Workflow'
+              $ref: "#/components/schemas/Workflow"
       responses:
-        '201': { description: Created }
-        '400': { description: Validation error }
+        "201": { description: Created }
+        "400": { description: Validation error }
   /api/workflows/{id}/publish:
     post:
       summary: Publish an immutable snapshot
@@ -171,8 +171,8 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200': { description: Published }
-        '409': { description: Version conflict }
+        "200": { description: Published }
+        "409": { description: Version conflict }
   /api/workflows/{id}/dry-run:
     post:
       summary: Evaluate policy and plan without side effects
@@ -183,12 +183,12 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200':
+        "200":
           description: Plan & policy decisions
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PlanResult'
+                $ref: "#/components/schemas/PlanResult"
   /api/executions:
     post:
       summary: Start an execution
@@ -198,9 +198,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StartRequest'
+              $ref: "#/components/schemas/StartRequest"
       responses:
-        '202': { description: Accepted }
+        "202": { description: Accepted }
   /api/executions/{id}/receipt:
     get:
       summary: Fetch the signed receipt
@@ -211,12 +211,12 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200':
+        "200":
           description: Receipt JSON
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Receipt'
+                $ref: "#/components/schemas/Receipt"
 components:
   schemas:
     Workflow:
@@ -233,7 +233,7 @@ components:
       properties:
         workflowId: { type: string }
         inputs: { type: object }
-        rollout: { type: string, enum: ['canary', 'all'] }
+        rollout: { type: string, enum: ["canary", "all"] }
       required: [workflowId]
     Receipt:
       type: object
@@ -359,9 +359,9 @@ name: mc-ci
 on:
   pull_request:
     paths:
-      - 'apps/**'
-      - 'policy/**'
-      - 'infra/**'
+      - "apps/**"
+      - "policy/**"
+      - "infra/**"
   push:
     branches: [main]
 
@@ -371,7 +371,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: "20" }
       - run: npm ci
       - run: npm test --workspaces
       - name: Lint rego
@@ -395,7 +395,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Semver version'
+        description: "Semver version"
         required: true
 
 jobs:
@@ -407,7 +407,7 @@ jobs:
       - name: Package artifacts
         run: tar -czf dist/mc-api.tgz apps/mc-api
       - name: Cosign attest SBOM
-        env: { COSIGN_EXPERIMENTAL: '1' }
+        env: { COSIGN_EXPERIMENTAL: "1" }
         run: |
           curl -sSfL https://raw.githubusercontent.com/sigstore/cosign/main/install.sh | sh -s -- -b ./bin
           ./bin/cosign attest --predicate sbom.json --type cyclonedx dist/mc-api.tgz || true
@@ -471,12 +471,12 @@ spec:
     spec:
       containers:
         - name: api
-          image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           ports:
             - containerPort: 8080
           env:
             - name: ERROR_BUDGET_MINUTES
-              value: '{{ .Values.budgets.errorBudgetMinutes }}'
+              value: "{{ .Values.budgets.errorBudgetMinutes }}"
 ```
 
 ---

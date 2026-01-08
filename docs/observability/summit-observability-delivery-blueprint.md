@@ -8,14 +8,14 @@ Summit provides "from code to customer" observability that fuses build intellige
 
 ### 2.1 Logical Layers
 
-| Layer | Responsibilities | Key Components |
-| --- | --- | --- |
-| **Instrumentation & SDKs** | Capture runtime, build, and infrastructure telemetry; enforce context propagation and PI/PII controls. | Language SDKs, CI runners plugins, CLI agents, OpenTelemetry exporters |
-| **Ingestion & Edge Processing** | Accept billions of events with low latency, enforce schemas, apply first-pass enrichment, sampling, and privacy scrubbing. | Global API gateways, Kafka front door clusters, edge processors (Rust), schema registry |
-| **Streaming & Processing** | Normalize, enrich, correlate, and score telemetry; power ML pipelines. | Apache Flink jobs, Kafka streams, ML feature pipelines, rule engine |
-| **Storage** | Persist optimized copies per access pattern (hot, warm, cold) with governance. | ClickHouse (events), OpenSearch (logs), Prometheus/Thanos (metrics), Neo4j (lineage), S3 data lake |
-| **Query & Insights** | Provide APIs, dashboards, analytics, alerting, and automated insights. | GraphQL/REST API, query federation, dashboard service, alerting engine, AI insight service |
-| **Experience & Integrations** | Serve developers, SREs, data science, and leadership audiences. | React web app, CLI, IDE extensions, Slack/PagerDuty integrations |
+| Layer                           | Responsibilities                                                                                                           | Key Components                                                                                     |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| **Instrumentation & SDKs**      | Capture runtime, build, and infrastructure telemetry; enforce context propagation and PI/PII controls.                     | Language SDKs, CI runners plugins, CLI agents, OpenTelemetry exporters                             |
+| **Ingestion & Edge Processing** | Accept billions of events with low latency, enforce schemas, apply first-pass enrichment, sampling, and privacy scrubbing. | Global API gateways, Kafka front door clusters, edge processors (Rust), schema registry            |
+| **Streaming & Processing**      | Normalize, enrich, correlate, and score telemetry; power ML pipelines.                                                     | Apache Flink jobs, Kafka streams, ML feature pipelines, rule engine                                |
+| **Storage**                     | Persist optimized copies per access pattern (hot, warm, cold) with governance.                                             | ClickHouse (events), OpenSearch (logs), Prometheus/Thanos (metrics), Neo4j (lineage), S3 data lake |
+| **Query & Insights**            | Provide APIs, dashboards, analytics, alerting, and automated insights.                                                     | GraphQL/REST API, query federation, dashboard service, alerting engine, AI insight service         |
+| **Experience & Integrations**   | Serve developers, SREs, data science, and leadership audiences.                                                            | React web app, CLI, IDE extensions, Slack/PagerDuty integrations                                   |
 
 ### 2.2 Deployment Topology
 
@@ -26,20 +26,20 @@ Summit provides "from code to customer" observability that fuses build intellige
 
 ## 3. Core Services & Responsibilities
 
-| Service | Description | Tech | Deployment |
-| --- | --- | --- | --- |
-| **ingest-gateway** | Multi-protocol (HTTP/gRPC) gateway performing schema validation, auth, rate limiting, and routing to Kafka topics. | Go + Envoy | EKS + HPA |
-| **edge-processor** | Rust service running WASM-based processors for sampling, PII redaction, and fingerprinting before Kafka. | Rust + Wasmtime | Edge nodes |
-| **event-normalizer** | Flink job converting raw events to canonical envelopes and deriving cross-link IDs. | Flink | Streaming plane |
-| **trace-correlator** | Flink job merging build spans, runtime traces, and infrastructure events via W3C trace context + Summit correlation IDs. | Flink | Streaming plane |
-| **build-graph-service** | Builds DAG of CI/CD runs, tasks, artifacts, and dependencies for cross-stage insights. | Kotlin + Neo4j | Control plane |
-| **metrics-ingestor** | Scrapes Prometheus remote-write, transforms to Thanos compactors with retention policies. | Go | Data plane |
-| **log-indexer** | Kafka Connect/OpenSearch pipeline ingesting structured & unstructured logs with dynamic mappings. | Kafka Connect | Data plane |
-| **ai-insight-engine** | Hosts ML models for anomaly detection, predictive alerts, and recommendations. | Python (FastAPI) + SageMaker endpoints | Control plane |
-| **alert-orchestrator** | Determines alert dedupe, routing, automations, and triggers runbooks. | Node.js (NestJS) | Control plane |
-| **experience-api** | GraphQL + REST gateway aggregating data from ClickHouse, OpenSearch, Prometheus, Neo4j. | TypeScript (Apollo Federation) | Control plane |
-| **summit-web** | React web app delivering dashboards, analytics studio, session replay, and pipeline explorer. | React + Vite + Tailwind | CDN + CloudFront |
-| **summit-cli** | Developer CLI for querying telemetry, running diagnostics, and controlling rollouts. | Node.js + oclif | npm distribution |
+| Service                 | Description                                                                                                              | Tech                                   | Deployment       |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------ | -------------------------------------- | ---------------- |
+| **ingest-gateway**      | Multi-protocol (HTTP/gRPC) gateway performing schema validation, auth, rate limiting, and routing to Kafka topics.       | Go + Envoy                             | EKS + HPA        |
+| **edge-processor**      | Rust service running WASM-based processors for sampling, PII redaction, and fingerprinting before Kafka.                 | Rust + Wasmtime                        | Edge nodes       |
+| **event-normalizer**    | Flink job converting raw events to canonical envelopes and deriving cross-link IDs.                                      | Flink                                  | Streaming plane  |
+| **trace-correlator**    | Flink job merging build spans, runtime traces, and infrastructure events via W3C trace context + Summit correlation IDs. | Flink                                  | Streaming plane  |
+| **build-graph-service** | Builds DAG of CI/CD runs, tasks, artifacts, and dependencies for cross-stage insights.                                   | Kotlin + Neo4j                         | Control plane    |
+| **metrics-ingestor**    | Scrapes Prometheus remote-write, transforms to Thanos compactors with retention policies.                                | Go                                     | Data plane       |
+| **log-indexer**         | Kafka Connect/OpenSearch pipeline ingesting structured & unstructured logs with dynamic mappings.                        | Kafka Connect                          | Data plane       |
+| **ai-insight-engine**   | Hosts ML models for anomaly detection, predictive alerts, and recommendations.                                           | Python (FastAPI) + SageMaker endpoints | Control plane    |
+| **alert-orchestrator**  | Determines alert dedupe, routing, automations, and triggers runbooks.                                                    | Node.js (NestJS)                       | Control plane    |
+| **experience-api**      | GraphQL + REST gateway aggregating data from ClickHouse, OpenSearch, Prometheus, Neo4j.                                  | TypeScript (Apollo Federation)         | Control plane    |
+| **summit-web**          | React web app delivering dashboards, analytics studio, session replay, and pipeline explorer.                            | React + Vite + Tailwind                | CDN + CloudFront |
+| **summit-cli**          | Developer CLI for querying telemetry, running diagnostics, and controlling rollouts.                                     | Node.js + oclif                        | npm distribution |
 
 ## 4. Data Models & Schemas
 
@@ -95,24 +95,24 @@ Relationships:
 
 ### 4.4 Kafka Topics
 
-| Topic | Description | Retention |
-| --- | --- | --- |
-| `raw-telemetry` | All inbound events before normalization. | 12h |
-| `normalized-events` | Canonical envelopes for storage sinks. | 7d |
-| `build-events` | Build & CI/CD-specific telemetry. | 30d |
-| `alert-signals` | Signals for alert orchestrator. | 3d |
-| `ai-feature-stream` | Feature vectors for ML training/inference. | 7d |
+| Topic               | Description                                | Retention |
+| ------------------- | ------------------------------------------ | --------- |
+| `raw-telemetry`     | All inbound events before normalization.   | 12h       |
+| `normalized-events` | Canonical envelopes for storage sinks.     | 7d        |
+| `build-events`      | Build & CI/CD-specific telemetry.          | 30d       |
+| `alert-signals`     | Signals for alert orchestrator.            | 3d        |
+| `ai-feature-stream` | Feature vectors for ML training/inference. | 7d        |
 
 ## 5. AI & Analytics Implementation
 
 ### 5.1 Models
 
-| Capability | Model | Features |
-| --- | --- | --- |
+| Capability                | Model                                                                                                             | Features |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------- | -------- |
 | Predictive build failures | Gradient boosted trees (XGBoost) trained on build metadata, code churn, author history, dependency graph metrics. |
-| Error similarity | Sentence-transformer embeddings on stack traces + code snippets + tags. |
-| Alert fatigue reduction | Reinforcement learning ranking model using historical acknowledgement/resolution outcomes. |
-| Root cause hints | Graph neural network operating on build graph + runtime anomalies to surface correlated nodes. |
+| Error similarity          | Sentence-transformer embeddings on stack traces + code snippets + tags.                                           |
+| Alert fatigue reduction   | Reinforcement learning ranking model using historical acknowledgement/resolution outcomes.                        |
+| Root cause hints          | Graph neural network operating on build graph + runtime anomalies to surface correlated nodes.                    |
 
 ### 5.2 Feature Store
 
@@ -146,25 +146,25 @@ Relationships:
 
 ### 7.2 Workstreams & Epics
 
-| Workstream | Epics | Core Outcomes |
-| --- | --- | --- |
-| **Ingestion & Data Plane** | Telemetry Gateway, Schema Registry, Edge Sampling, Global Routing | 500k events/sec sustained with <500ms P99 ingest latency. |
-| **Build Intelligence** | Build Graph Service, Pipeline Explorer UI, Flaky Test Radar, Predictive Failures | 30% reduction in build duration, 50% fewer failed builds. |
-| **Runtime Observability** | Error Tracking, Distributed Tracing, Metrics Federation, Session Replay | Runtime MTTR reduced by 50%. |
-| **AI & Insights** | Feature Store, Model Platform, Alert Advisor, Optimization Coach | Predictive alerts with 85% precision/recall. |
-| **Experience & Integrations** | Dashboard Studio, CLI/IDE, Integrations Hub, API/SDKs | 80% developer adoption within 3 months. |
-| **Security & Compliance** | RBAC, Data Residency, Audit Ledger, Supply Chain Security | Achieve SOC 2 readiness by Month 6. |
+| Workstream                    | Epics                                                                            | Core Outcomes                                             |
+| ----------------------------- | -------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| **Ingestion & Data Plane**    | Telemetry Gateway, Schema Registry, Edge Sampling, Global Routing                | 500k events/sec sustained with <500ms P99 ingest latency. |
+| **Build Intelligence**        | Build Graph Service, Pipeline Explorer UI, Flaky Test Radar, Predictive Failures | 30% reduction in build duration, 50% fewer failed builds. |
+| **Runtime Observability**     | Error Tracking, Distributed Tracing, Metrics Federation, Session Replay          | Runtime MTTR reduced by 50%.                              |
+| **AI & Insights**             | Feature Store, Model Platform, Alert Advisor, Optimization Coach                 | Predictive alerts with 85% precision/recall.              |
+| **Experience & Integrations** | Dashboard Studio, CLI/IDE, Integrations Hub, API/SDKs                            | 80% developer adoption within 3 months.                   |
+| **Security & Compliance**     | RBAC, Data Residency, Audit Ledger, Supply Chain Security                        | Achieve SOC 2 readiness by Month 6.                       |
 
 ### 7.3 Milestone Plan (Phase 1 Detailed)
 
-| Sprint | Deliverables | Owners |
-| --- | --- | --- |
-| Sprint 1 | Ingest gateway skeleton, schema definitions, CI runner plugin (GitHub Actions). | Ingestion Team |
-| Sprint 2 | Kafka clusters provisioned, normalization pipelines, build event schema, ClickHouse base tables. | Data Platform |
-| Sprint 3 | Build graph service MVP, basic dashboard (build durations), error ingestion w/ grouping. | Build Intelligence |
-| Sprint 4 | Distributed tracing ingestion, runtime metrics remote write, unified event explorer UI. | Runtime Obs |
-| Sprint 5 | Alert orchestrator MVP, Slack/PagerDuty integration, DORA metrics board. | Insights |
-| Sprint 6 | Hardened multi-tenant RBAC, compliance logging, SLO-based alert templates. | Security |
+| Sprint   | Deliverables                                                                                     | Owners             |
+| -------- | ------------------------------------------------------------------------------------------------ | ------------------ |
+| Sprint 1 | Ingest gateway skeleton, schema definitions, CI runner plugin (GitHub Actions).                  | Ingestion Team     |
+| Sprint 2 | Kafka clusters provisioned, normalization pipelines, build event schema, ClickHouse base tables. | Data Platform      |
+| Sprint 3 | Build graph service MVP, basic dashboard (build durations), error ingestion w/ grouping.         | Build Intelligence |
+| Sprint 4 | Distributed tracing ingestion, runtime metrics remote write, unified event explorer UI.          | Runtime Obs        |
+| Sprint 5 | Alert orchestrator MVP, Slack/PagerDuty integration, DORA metrics board.                         | Insights           |
+| Sprint 6 | Hardened multi-tenant RBAC, compliance logging, SLO-based alert templates.                       | Security           |
 
 ## 8. Engineering Enablement & Tooling
 
@@ -177,13 +177,13 @@ Relationships:
 
 ## 9. Success Metrics & KPIs
 
-| Metric | Target | Measurement |
-| --- | --- | --- |
-| Build telemetry coverage | ≥90% of pipelines emitting Summit events | Build graph coverage dashboard |
-| Error MTTR | 50% reduction vs baseline | Incident tracker integration |
-| Alert fatigue | 25% reduction in ack-to-close time | Alert analytics service |
-| Cost per event | ≤$0.0002/event | FinOps reports from cost-guard service |
-| Customer adoption | 80% DAU/WAU ratio for Summit web | Product analytics |
+| Metric                   | Target                                   | Measurement                            |
+| ------------------------ | ---------------------------------------- | -------------------------------------- |
+| Build telemetry coverage | ≥90% of pipelines emitting Summit events | Build graph coverage dashboard         |
+| Error MTTR               | 50% reduction vs baseline                | Incident tracker integration           |
+| Alert fatigue            | 25% reduction in ack-to-close time       | Alert analytics service                |
+| Cost per event           | ≤$0.0002/event                           | FinOps reports from cost-guard service |
+| Customer adoption        | 80% DAU/WAU ratio for Summit web         | Product analytics                      |
 
 ## 10. Launch Readiness Checklist
 
@@ -196,6 +196,7 @@ Relationships:
 ---
 
 **Document Control**
+
 - Version: 1.0
 - Owners: Platform Architecture, Build Intelligence, Data Platform leads
 - Last Updated: 2025-10-18

@@ -6,7 +6,7 @@ export interface ChurnFeatures {
   tenure: number;
   monthlyCharges: number;
   totalCharges: number;
-  contractType: 'month-to-month' | 'one-year' | 'two-year';
+  contractType: "month-to-month" | "one-year" | "two-year";
   paymentMethod: string;
   numServices: number;
   supportTickets: number;
@@ -16,7 +16,7 @@ export interface ChurnFeatures {
 export interface ChurnPrediction {
   customerId: string;
   churnProbability: number;
-  riskLevel: 'low' | 'medium' | 'high';
+  riskLevel: "low" | "medium" | "high";
   retentionActions: string[];
   clvImpact: number;
 }
@@ -31,8 +31,8 @@ export class ChurnPredictor {
    */
   fit(features: ChurnFeatures[], labels: boolean[]): void {
     // Simple logistic regression with feature engineering
-    const X = features.map(f => this.featureEngineering(f));
-    const y = labels.map(l => l ? 1 : 0);
+    const X = features.map((f) => this.featureEngineering(f));
+    const y = labels.map((l) => (l ? 1 : 0));
 
     // Gradient descent
     const learningRate = 0.01;
@@ -43,7 +43,7 @@ export class ChurnPredictor {
     this.intercept = 0;
 
     for (let iter = 0; iter < iterations; iter++) {
-      const predictions = X.map(x =>
+      const predictions = X.map((x) =>
         this.sigmoid(this.intercept + x.reduce((sum, xi, i) => sum + xi * weights[i], 0))
       );
 
@@ -53,7 +53,7 @@ export class ChurnPredictor {
         for (let i = 0; i < y.length; i++) {
           grad += (predictions[i] - y[i]) * X[i][j];
         }
-        weights[j] -= learningRate * grad / y.length;
+        weights[j] -= (learningRate * grad) / y.length;
       }
 
       // Update intercept
@@ -61,16 +61,16 @@ export class ChurnPredictor {
       for (let i = 0; i < y.length; i++) {
         interceptGrad += predictions[i] - y[i];
       }
-      this.intercept -= learningRate * interceptGrad / y.length;
+      this.intercept -= (learningRate * interceptGrad) / y.length;
     }
 
     // Store coefficients
-    this.coefficients.set('tenure', weights[0]);
-    this.coefficients.set('monthlyCharges', weights[1]);
-    this.coefficients.set('totalCharges', weights[2]);
-    this.coefficients.set('contractRisk', weights[3]);
-    this.coefficients.set('activityRisk', weights[4]);
-    this.coefficients.set('supportRisk', weights[5]);
+    this.coefficients.set("tenure", weights[0]);
+    this.coefficients.set("monthlyCharges", weights[1]);
+    this.coefficients.set("totalCharges", weights[2]);
+    this.coefficients.set("contractRisk", weights[3]);
+    this.coefficients.set("activityRisk", weights[4]);
+    this.coefficients.set("supportRisk", weights[5]);
 
     this.fitted = true;
   }
@@ -80,14 +80,16 @@ export class ChurnPredictor {
    */
   predict(customerId: string, features: ChurnFeatures): ChurnPrediction {
     if (!this.fitted) {
-      throw new Error('Model must be fitted first');
+      throw new Error("Model must be fitted first");
     }
 
     const x = this.featureEngineering(features);
-    const score = this.intercept + x.reduce((sum, xi, i) => {
-      const coef = Array.from(this.coefficients.values())[i];
-      return sum + xi * coef;
-    }, 0);
+    const score =
+      this.intercept +
+      x.reduce((sum, xi, i) => {
+        const coef = Array.from(this.coefficients.values())[i];
+        return sum + xi * coef;
+      }, 0);
 
     const churnProbability = this.sigmoid(score);
     const riskLevel = this.getRiskLevel(churnProbability);
@@ -111,7 +113,7 @@ export class ChurnPredictor {
       features.tenure / 100, // Normalize
       features.monthlyCharges / 100,
       features.totalCharges / 1000,
-      features.contractType === 'month-to-month' ? 1 : 0, // Contract risk
+      features.contractType === "month-to-month" ? 1 : 0, // Contract risk
       features.lastActivity / 30, // Activity risk
       features.supportTickets / 10, // Support risk
     ];
@@ -120,10 +122,14 @@ export class ChurnPredictor {
   /**
    * Get risk level
    */
-  private getRiskLevel(probability: number): 'low' | 'medium' | 'high' {
-    if (probability >= 0.7) {return 'high';}
-    if (probability >= 0.4) {return 'medium';}
-    return 'low';
+  private getRiskLevel(probability: number): "low" | "medium" | "high" {
+    if (probability >= 0.7) {
+      return "high";
+    }
+    if (probability >= 0.4) {
+      return "medium";
+    }
+    return "low";
   }
 
   /**
@@ -133,20 +139,20 @@ export class ChurnPredictor {
     const actions: string[] = [];
 
     if (probability >= 0.7) {
-      actions.push('Immediate outreach by retention specialist');
-      actions.push('Offer premium support package');
+      actions.push("Immediate outreach by retention specialist");
+      actions.push("Offer premium support package");
     }
 
-    if (features.contractType === 'month-to-month' && probability >= 0.5) {
-      actions.push('Offer incentive for annual contract');
+    if (features.contractType === "month-to-month" && probability >= 0.5) {
+      actions.push("Offer incentive for annual contract");
     }
 
     if (features.supportTickets > 5) {
-      actions.push('Schedule account review call');
+      actions.push("Schedule account review call");
     }
 
     if (features.lastActivity > 30) {
-      actions.push('Send re-engagement campaign');
+      actions.push("Send re-engagement campaign");
     }
 
     return actions;

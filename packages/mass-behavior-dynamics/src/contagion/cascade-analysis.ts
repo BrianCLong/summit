@@ -8,14 +8,14 @@ export interface CascadeState {
   history: Decision[];
   currentProbability: number;
   cascadeFormed: boolean;
-  cascadeDirection?: 'ADOPT' | 'REJECT';
+  cascadeDirection?: "ADOPT" | "REJECT";
 }
 
 export interface Decision {
   agent: number;
-  action: 'ADOPT' | 'REJECT';
+  action: "ADOPT" | "REJECT";
   privateSignal: boolean;
-  basedOn: 'SIGNAL' | 'CASCADE';
+  basedOn: "SIGNAL" | "CASCADE";
 }
 
 /**
@@ -52,7 +52,7 @@ export class InformationCascadeSimulator {
     let logOdds = Math.log(this.priorProbability / (1 - this.priorProbability));
 
     for (const decision of history) {
-      if (decision.action === 'ADOPT') {
+      if (decision.action === "ADOPT") {
         logOdds += Math.log(this.signalAccuracy / (1 - this.signalAccuracy));
       } else {
         logOdds -= Math.log(this.signalAccuracy / (1 - this.signalAccuracy));
@@ -65,14 +65,14 @@ export class InformationCascadeSimulator {
   /**
    * Determine if cascade has formed
    */
-  private checkCascade(posterior: number): { formed: boolean; direction?: 'ADOPT' | 'REJECT' } {
+  private checkCascade(posterior: number): { formed: boolean; direction?: "ADOPT" | "REJECT" } {
     const cascadeThreshold = this.signalAccuracy;
 
     if (posterior > cascadeThreshold) {
-      return { formed: true, direction: 'ADOPT' };
+      return { formed: true, direction: "ADOPT" };
     }
     if (posterior < 1 - cascadeThreshold) {
-      return { formed: true, direction: 'REJECT' };
+      return { formed: true, direction: "REJECT" };
     }
     return { formed: false };
   }
@@ -85,17 +85,17 @@ export class InformationCascadeSimulator {
     const posterior = this.calculatePosterior(state.history);
     const { formed, direction } = this.checkCascade(posterior);
 
-    let action: 'ADOPT' | 'REJECT';
-    let basedOn: 'SIGNAL' | 'CASCADE';
+    let action: "ADOPT" | "REJECT";
+    let basedOn: "SIGNAL" | "CASCADE";
 
     if (formed && direction) {
       // Follow cascade, ignore private signal
       action = direction;
-      basedOn = 'CASCADE';
+      basedOn = "CASCADE";
     } else {
       // Follow private signal
-      action = signal ? 'ADOPT' : 'REJECT';
-      basedOn = 'SIGNAL';
+      action = signal ? "ADOPT" : "REJECT";
+      basedOn = "SIGNAL";
     }
 
     return {
@@ -133,7 +133,7 @@ export class InformationCascadeSimulator {
 
     // Calculate accuracy
     const correctDecisions = state.history.filter(
-      (d) => (d.action === 'ADOPT') === this.trueState
+      (d) => (d.action === "ADOPT") === this.trueState
     ).length;
 
     return {
@@ -141,7 +141,7 @@ export class InformationCascadeSimulator {
       cascadeFormed: state.cascadeFormed,
       cascadeDirection: state.cascadeDirection,
       cascadeStartAgent,
-      cascadeCorrect: state.cascadeDirection === 'ADOPT' ? this.trueState : !this.trueState,
+      cascadeCorrect: state.cascadeDirection === "ADOPT" ? this.trueState : !this.trueState,
       decisionAccuracy: correctDecisions / numAgents,
       history: state.history,
     };
@@ -154,14 +154,15 @@ export class InformationCascadeSimulator {
    */
   analyzeCascadeFragility(state: CascadeState): FragilityAnalysis {
     if (!state.cascadeFormed) {
-      return { fragile: false, reason: 'NO_CASCADE' };
+      return { fragile: false, reason: "NO_CASCADE" };
     }
 
     const posterior = state.currentProbability;
     const cascadeThreshold = this.signalAccuracy;
-    const margin = state.cascadeDirection === 'ADOPT'
-      ? posterior - cascadeThreshold
-      : (1 - cascadeThreshold) - posterior;
+    const margin =
+      state.cascadeDirection === "ADOPT"
+        ? posterior - cascadeThreshold
+        : 1 - cascadeThreshold - posterior;
 
     // Number of contrary signals needed to break cascade
     const signalStrength = Math.log(this.signalAccuracy / (1 - this.signalAccuracy));
@@ -171,7 +172,7 @@ export class InformationCascadeSimulator {
       fragile: contrariansNeeded <= 2,
       contrariansNeeded,
       margin,
-      reason: contrariansNeeded <= 2 ? 'NEAR_THRESHOLD' : 'STABLE_CASCADE',
+      reason: contrariansNeeded <= 2 ? "NEAR_THRESHOLD" : "STABLE_CASCADE",
     };
   }
 }
@@ -185,7 +186,7 @@ interface CascadeConfig {
 interface CascadeSimulationResult {
   finalState: CascadeState;
   cascadeFormed: boolean;
-  cascadeDirection?: 'ADOPT' | 'REJECT';
+  cascadeDirection?: "ADOPT" | "REJECT";
   cascadeStartAgent: number | null;
   cascadeCorrect: boolean;
   decisionAccuracy: number;

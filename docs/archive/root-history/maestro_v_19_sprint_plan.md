@@ -44,9 +44,9 @@ Level Maestro up to **no‑regret autonomy**. We (1) attach **cryptographic proo
 
 ```ts
 // services/evidence/ce.ts
-import crypto from 'crypto';
+import crypto from "crypto";
 export function sha(s: Buffer | string) {
-  return crypto.createHash('sha256').update(s).digest('hex');
+  return crypto.createHash("sha256").update(s).digest("hex");
 }
 export function merkleLeaves(obligations: any) {
   return Object.keys(obligations)
@@ -75,7 +75,7 @@ export function proof(idx: number, leaves: string[]) {
     path.push(layer[sib] || layer[i]);
     const next: string[] = [];
     for (let j = 0; j < layer.length; j += 2) {
-      next.push(sha((layer[j] || '') + (layer[j + 1] || layer[j] || '')));
+      next.push(sha((layer[j] || "") + (layer[j + 1] || layer[j] || "")));
     }
     layer = next;
     i = Math.floor(i / 2);
@@ -115,13 +115,7 @@ export interface ZkVerifier {
 
 ```ts
 // services/market/oco.ts
-export function ocoStep(
-  price: number,
-  grad: number,
-  eta = 0.05,
-  pmin = 0,
-  pmax = 5,
-) {
+export function ocoStep(price: number, grad: number, eta = 0.05, pmin = 0, pmax = 5) {
   // grad>0 → raise price (demand>capacity); grad<0 → lower price
   let p = price - eta * grad;
   return Math.max(pmin, Math.min(pmax, p));
@@ -135,7 +129,7 @@ export function ocoStep(
 export function effectiveCost(
   baseUSD: number,
   usage: { gpuMin: number; tokens: number },
-  price: { gpu: number; tok: number },
+  price: { gpu: number; tok: number }
 ) {
   return baseUSD + usage.gpuMin * price.gpu + (usage.tokens / 1000) * price.tok;
 }
@@ -160,7 +154,7 @@ export function effectiveCost(
 ```ts
 // tools/verify/sym.ts
 export type Expr = {
-  kind: 'var' | 'const' | 'op';
+  kind: "var" | "const" | "op";
   op?: string;
   a?: Expr;
   b?: Expr;
@@ -168,16 +162,16 @@ export type Expr = {
   val?: number;
 };
 export function evalSym(e: Expr, env: Record<string, number>) {
-  if (e.kind === 'const') return { val: e.val! };
-  if (e.kind === 'var') return { val: env[e.name!] };
+  if (e.kind === "const") return { val: e.val! };
+  if (e.kind === "var") return { val: env[e.name!] };
   const A = evalSym(e.a!, env).val,
     B = evalSym(e.b!, env).val;
   switch (e.op) {
-    case '+':
+    case "+":
       return { val: A + B };
-    case '-':
+    case "-":
       return { val: A - B };
-    case '<=':
+    case "<=":
       return { val: A <= B ? 1 : 0 };
     default:
       throw e.op;
@@ -188,9 +182,9 @@ export function evalSym(e: Expr, env: Record<string, number>) {
 **Taint rule example (YAML)**
 
 ```yaml
-sources: ['req.headers', 'req.body', 'env:SECRET']
-sinks: ['fs.write', 'net.post', 'log.debug']
-sanitizers: ['redactPII', 'hash', 'encrypt']
+sources: ["req.headers", "req.body", "env:SECRET"]
+sinks: ["fs.write", "net.post", "log.debug"]
+sanitizers: ["redactPII", "hash", "encrypt"]
 ```
 
 ---
@@ -211,13 +205,9 @@ sanitizers: ['redactPII', 'hash', 'encrypt']
 
 ```ts
 // services/release/noRegret.ts
-export function step(
-  split: number,
-  sprt: 'accept' | 'reject' | 'continue',
-  utilDelta: number,
-) {
-  if (sprt === 'reject') return Math.max(0, split - 0.5);
-  if (sprt === 'accept') return Math.min(1, split + 0.5);
+export function step(split: number, sprt: "accept" | "reject" | "continue", utilDelta: number) {
+  if (sprt === "reject") return Math.max(0, split - 0.5);
+  if (sprt === "accept") return Math.min(1, split + 0.5);
   return Math.max(0, Math.min(1, split + 0.1 * Math.sign(utilDelta)));
 }
 ```
@@ -245,7 +235,7 @@ export function step(
 ```ts
 // tools/test/bloom.ts
 export function setBit(buf: Uint8Array, h: number) {
-  buf[h % (buf.length * 8) >> 3] |= 1 << h % 8;
+  buf[(h % (buf.length * 8)) >> 3] |= 1 << (h % 8);
 }
 ```
 
@@ -334,13 +324,11 @@ np.save('artifacts/hazard_coef.npy', m.coef_)
     </div>
     <script>
       function sha256(s) {
-        return crypto.subtle
-          .digest('SHA-256', new TextEncoder().encode(s))
-          .then((b) =>
-            Array.from(new Uint8Array(b))
-              .map((x) => x.toString(16).padStart(2, '0'))
-              .join(''),
-          );
+        return crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)).then((b) =>
+          Array.from(new Uint8Array(b))
+            .map((x) => x.toString(16).padStart(2, "0"))
+            .join("")
+        );
       }
       async function fold(h, sibs) {
         let cur = h;
@@ -349,12 +337,12 @@ np.save('artifacts/hazard_coef.npy', m.coef_)
         }
         return cur;
       }
-      $('#verify').on('click', async function () {
-        const leaf = $('#leaf').val();
-        const sibs = $('#path').val().split(',');
-        const root = $('#root').val();
+      $("#verify").on("click", async function () {
+        const leaf = $("#leaf").val();
+        const sibs = $("#path").val().split(",");
+        const root = $("#root").val();
         const got = await fold(leaf, sibs);
-        $('#out').text(got === root ? 'OK' : 'FAIL');
+        $("#out").text(got === root ? "OK" : "FAIL");
       });
     </script>
   </body>

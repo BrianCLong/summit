@@ -125,7 +125,7 @@ metadata:
     backup-type: full
     schedule: daily
 spec:
-  schedule: "0 2 * * *"  # Daily at 02:00 UTC
+  schedule: "0 2 * * *" # Daily at 02:00 UTC
   timeZone: "UTC"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 7
@@ -133,7 +133,7 @@ spec:
   startingDeadlineSeconds: 3600
   jobTemplate:
     spec:
-      activeDeadlineSeconds: 7200  # 2 hour timeout
+      activeDeadlineSeconds: 7200 # 2 hour timeout
       backoffLimit: 2
       template:
         metadata:
@@ -212,14 +212,14 @@ metadata:
     schedule: hourly
     component: postgresql
 spec:
-  schedule: "0 */4 * * *"  # Every 4 hours
+  schedule: "0 */4 * * *" # Every 4 hours
   timeZone: "UTC"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 6
   failedJobsHistoryLimit: 2
   jobTemplate:
     spec:
-      activeDeadlineSeconds: 1800  # 30 minute timeout
+      activeDeadlineSeconds: 1800 # 30 minute timeout
       backoffLimit: 1
       template:
         spec:
@@ -281,7 +281,7 @@ metadata:
     app: backup-verify
     schedule: daily
 spec:
-  schedule: "0 6 * * *"  # Daily at 06:00 UTC (after backups complete)
+  schedule: "0 6 * * *" # Daily at 06:00 UTC (after backups complete)
   timeZone: "UTC"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 7
@@ -331,7 +331,7 @@ metadata:
     app: restore-test
     schedule: weekly
 spec:
-  schedule: "0 8 * * 0"  # Sunday at 08:00 UTC
+  schedule: "0 8 * * 0" # Sunday at 08:00 UTC
   timeZone: "UTC"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 4
@@ -394,7 +394,7 @@ metadata:
     schedule: hourly
     component: redis
 spec:
-  schedule: "30 * * * *"  # Every hour at :30
+  schedule: "30 * * * *" # Every hour at :30
   timeZone: "UTC"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 24

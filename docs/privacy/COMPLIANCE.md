@@ -52,12 +52,12 @@ For California residents, the system ensures:
 ```typescript
 // Every biometric operation requires a legal basis
 const legalBases = {
-  CONSENT: 'Explicit consent from data subject',
-  CONTRACT: 'Processing necessary for contract',
-  LEGAL_OBLIGATION: 'Compliance with legal obligation',
-  VITAL_INTEREST: 'Protection of vital interests',
-  PUBLIC_INTEREST: 'Task carried out in public interest',
-  LEGITIMATE_INTEREST: 'Legitimate interests (with balancing test)'
+  CONSENT: "Explicit consent from data subject",
+  CONTRACT: "Processing necessary for contract",
+  LEGAL_OBLIGATION: "Compliance with legal obligation",
+  VITAL_INTEREST: "Protection of vital interests",
+  PUBLIC_INTEREST: "Task carried out in public interest",
+  LEGITIMATE_INTEREST: "Legitimate interests (with balancing test)",
 };
 ```
 
@@ -66,6 +66,7 @@ const legalBases = {
 Biometric data collected for one purpose cannot be used for another incompatible purpose without additional consent.
 
 **Allowed Purposes:**
+
 - Border security and immigration control
 - Law enforcement investigations
 - Identity verification for access control
@@ -79,9 +80,9 @@ Only collect biometric modalities necessary for the specific purpose:
 ```typescript
 // Example: For border crossing, only face + fingerprint
 const minimalCollection = {
-  purpose: 'BORDER_CROSSING',
-  modalities: ['FACE', 'FINGERPRINT'], // Not full biometric suite
-  retention: '90_DAYS'
+  purpose: "BORDER_CROSSING",
+  modalities: ["FACE", "FINGERPRINT"], // Not full biometric suite
+  retention: "90_DAYS",
 };
 ```
 
@@ -95,11 +96,11 @@ const minimalCollection = {
 
 ```typescript
 const retentionPolicies = {
-  ACTIVE_INVESTIGATION: '5_YEARS',
-  BORDER_CROSSING: '90_DAYS',
-  WATCHLIST_HIT: '10_YEARS',
-  NO_MATCH_CLEARED: '7_DAYS', // Delete quickly if cleared
-  CONSENT_BASED: 'UNTIL_REVOKED'
+  ACTIVE_INVESTIGATION: "5_YEARS",
+  BORDER_CROSSING: "90_DAYS",
+  WATCHLIST_HIT: "10_YEARS",
+  NO_MATCH_CLEARED: "7_DAYS", // Delete quickly if cleared
+  CONSENT_BASED: "UNTIL_REVOKED",
 };
 ```
 
@@ -209,6 +210,7 @@ async function obtainConsent(personId: string, purpose: string): Promise<Consent
 ### Right of Access
 
 Data subjects can request:
+
 - Copy of their biometric data
 - Information about processing
 - Recipients of their data
@@ -221,7 +223,7 @@ async function handleAccessRequest(personId: string): Promise<DataSubjectReport>
     biometricData: await getBiometricSummary(personId), // Summary, not raw templates
     processingActivities: await getProcessingHistory(personId),
     recipients: await getDataRecipients(personId),
-    retentionPeriod: await getRetentionInfo(personId)
+    retentionPeriod: await getRetentionInfo(personId),
   };
 }
 ```
@@ -229,6 +231,7 @@ async function handleAccessRequest(personId: string): Promise<DataSubjectReport>
 ### Right to Erasure (Right to be Forgotten)
 
 Data subjects can request deletion when:
+
 - No longer necessary for original purpose
 - Consent is withdrawn
 - Object to processing and no overriding grounds
@@ -239,7 +242,7 @@ async function handleErasureRequest(personId: string): Promise<void> {
   // Check if legal grounds for retention exist
   const legalHold = await checkLegalHold(personId);
   if (legalHold) {
-    throw new Error('Cannot delete: legal hold in place');
+    throw new Error("Cannot delete: legal hold in place");
   }
 
   // Delete all biometric data
@@ -269,7 +272,7 @@ Temporarily restrict processing while verifying accuracy or legality:
 
 ```typescript
 async function restrictProcessing(personId: string, reason: string): Promise<void> {
-  await updatePersonStatus(personId, 'RESTRICTED');
+  await updatePersonStatus(personId, "RESTRICTED");
   await logRestrictionEvent(personId, reason);
 }
 ```
@@ -288,6 +291,7 @@ async function exportPersonalData(personId: string): Promise<string> {
 ### Right to Object
 
 Data subjects can object to:
+
 - Processing based on legitimate interests
 - Direct marketing
 - Scientific/historical research
@@ -306,22 +310,27 @@ async function handleObjection(personId: string, objectionType: string): Promise
 ### Encryption
 
 #### At Rest
+
 ```typescript
 // AES-256 encryption for biometric templates
 const encryptedTemplate = await encrypt(template, {
-  algorithm: 'AES-256-GCM',
-  key: await getEncryptionKey()
+  algorithm: "AES-256-GCM",
+  key: await getEncryptionKey(),
 });
 ```
 
 #### In Transit
+
 ```typescript
 // TLS 1.3 for all API communications
-const server = https.createServer({
-  cert: fs.readFileSync('cert.pem'),
-  key: fs.readFileSync('key.pem'),
-  minVersion: 'TLSv1.3'
-}, app);
+const server = https.createServer(
+  {
+    cert: fs.readFileSync("cert.pem"),
+    key: fs.readFileSync("key.pem"),
+    minVersion: "TLSv1.3",
+  },
+  app
+);
 ```
 
 ### Access Control
@@ -330,12 +339,12 @@ const server = https.createServer({
 
 ```typescript
 const roles = {
-  ENROLLMENT_OFFICER: ['enroll', 'update'],
-  VERIFICATION_OFFICER: ['verify', 'screen'],
-  INVESTIGATOR: ['search', 'identify', 'view_history'],
-  ADMINISTRATOR: ['manage_users', 'configure_system'],
-  AUDITOR: ['view_audit_logs', 'export_reports'],
-  DPO: ['access_all', 'handle_subject_requests'] // Data Protection Officer
+  ENROLLMENT_OFFICER: ["enroll", "update"],
+  VERIFICATION_OFFICER: ["verify", "screen"],
+  INVESTIGATOR: ["search", "identify", "view_history"],
+  ADMINISTRATOR: ["manage_users", "configure_system"],
+  AUDITOR: ["view_audit_logs", "export_reports"],
+  DPO: ["access_all", "handle_subject_requests"], // Data Protection Officer
 };
 ```
 
@@ -368,6 +377,7 @@ INSERT INTO biometric_audit_events (
 ### Multi-Factor Authentication (MFA)
 
 Require MFA for:
+
 - System access
 - High-risk operations
 - Administrative functions
@@ -389,7 +399,7 @@ async function checkCompliance(): Promise<ComplianceReport> {
     consentValidity: await checkConsentValidity(),
     accessControlCompliance: await checkAccessControls(),
     encryptionCompliance: await checkEncryption(),
-    auditLogCompleteness: await checkAuditLogs()
+    auditLogCompleteness: await checkAuditLogs(),
   };
 }
 ```
@@ -397,6 +407,7 @@ async function checkCompliance(): Promise<ComplianceReport> {
 ### Privacy Impact Reviews
 
 Before any significant system change:
+
 1. Conduct privacy impact review
 2. Assess new risks
 3. Update DPIA if necessary
@@ -423,7 +434,7 @@ async function transferData(
 ): Promise<void> {
   // Verify transfer is allowed
   if (!isAdequateCountry(destination) && !hasValidMechanism(mechanism)) {
-    throw new Error('Transfer not permitted');
+    throw new Error("Transfer not permitted");
   }
 
   // Log transfer
@@ -461,21 +472,25 @@ All biometric processing vendors must:
 ### Data Breach Response Plan
 
 #### Detection (0-1 hour)
+
 - Automated alerting for unauthorized access
 - Monitoring for data exfiltration
 - User reports of suspicious activity
 
 #### Assessment (1-6 hours)
+
 - Determine scope of breach
 - Identify affected individuals
 - Assess sensitivity of data
 
 #### Containment (6-24 hours)
+
 - Stop ongoing breach
 - Revoke compromised credentials
 - Isolate affected systems
 
 #### Notification (72 hours)
+
 - **Supervisory Authority**: Within 72 hours if high risk
 - **Data Subjects**: Without undue delay if high risk to rights
 - **Documentation**: Record all actions taken
@@ -532,18 +547,20 @@ Contact: [DPO contact information]
 ### 1. Privacy by Default
 
 Default settings should be privacy-protective:
+
 ```typescript
 const defaultSettings = {
   dataSharing: false,
   analyticsParticipation: false,
-  retentionPeriod: 'MINIMUM',
-  qualityLogging: 'ANONYMIZED'
+  retentionPeriod: "MINIMUM",
+  qualityLogging: "ANONYMIZED",
 };
 ```
 
 ### 2. Clear Communication
 
 Use plain language in privacy notices:
+
 ```
 ✅ "We will keep your face photo for 90 days to verify your identity at border crossings."
 
@@ -553,6 +570,7 @@ Use plain language in privacy notices:
 ### 3. Regular Training
 
 All personnel handling biometric data must complete:
+
 - Annual privacy training
 - GDPR/CCPA compliance training
 - Security awareness training
@@ -561,6 +579,7 @@ All personnel handling biometric data must complete:
 ### 4. Documentation
 
 Maintain comprehensive records:
+
 - Data Processing Activities (Article 30 GDPR)
 - DPIAs for high-risk processing
 - Consent records
@@ -587,11 +606,13 @@ Maintain comprehensive records:
 ## Contact Information
 
 **Data Protection Officer (DPO)**
+
 - Email: dpo@intelgraph.com
 - Phone: [Contact number]
 - Address: [Physical address]
 
 **Supervisory Authority**
+
 - [Relevant data protection authority contact information]
 
 ## References

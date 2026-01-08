@@ -5,6 +5,6 @@ export class BasePage {
   }
 
   waitForUrl(urlPattern: string) {
-    cy.url().should('include', urlPattern);
+    cy.url().should("include", urlPattern);
   }
 }

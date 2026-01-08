@@ -1,12 +1,12 @@
-import Fastify from 'fastify';
-import underPressure from '@fastify/under-pressure';
-import { registerApi } from './api';
-import { initTelemetry } from './telemetry';
-import { registerSse } from './transport/httpSse';
+import Fastify from "fastify";
+import underPressure from "@fastify/under-pressure";
+import { registerApi } from "./api";
+import { initTelemetry } from "./telemetry";
+import { registerSse } from "./transport/httpSse";
 
 async function main() {
   const app = Fastify({ logger: true });
-  await initTelemetry('runtime-pooler');
+  await initTelemetry("runtime-pooler");
 
   app.register(underPressure, {
     maxEventLoopDelay: 100,
@@ -18,7 +18,7 @@ async function main() {
   registerSse(app);
 
   const port = Number(process.env.PORT || 8080);
-  await app.listen({ port, host: '0.0.0.0' });
+  await app.listen({ port, host: "0.0.0.0" });
 }
 
 main().catch((e) => {

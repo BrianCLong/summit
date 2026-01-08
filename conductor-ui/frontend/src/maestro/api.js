@@ -1,14 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { getMaestroConfig, authHeaders } from './config';
-import { maestroApi } from './api/client';
+import { useEffect, useMemo, useRef, useState } from "react";
+import { getMaestroConfig, authHeaders } from "./config";
+import { maestroApi } from "./api/client";
 export function api() {
   const cfg = getMaestroConfig();
-  const base = cfg.gatewayBase?.replace(/\/$/, '') || '';
+  const base = cfg.gatewayBase?.replace(/\/$/, "") || "";
   async function j(url, init) {
     const res = await fetch(url, {
       ...init,
       headers: {
-        'content-type': 'application/json',
+        "content-type": "application/json",
         ...(init?.headers || {}),
         ...authHeaders(cfg),
       },
@@ -32,8 +32,8 @@ export function api() {
           }
           setData(response.data);
         } catch (e) {
-          console.warn('Failed to fetch summary from API, using mock data', e);
-          setError(e instanceof Error ? e.message : 'Unknown error');
+          console.warn("Failed to fetch summary from API, using mock data", e);
+          setError(e instanceof Error ? e.message : "Unknown error");
           // Fallback to mock data
           setData({
             autonomy: { level: 3, canary: 0.1 },
@@ -41,20 +41,20 @@ export function api() {
             budgets: { remaining: 1240, cap: 5000 },
             runs: Array.from({ length: 8 }).map((_, i) => ({
               id: `run_${1000 + i}`,
-              status: i % 3 ? 'Running' : 'Succeeded',
-              pipeline: ['build', 'test', 'deploy'][i % 3],
+              status: i % 3 ? "Running" : "Succeeded",
+              pipeline: ["build", "test", "deploy"][i % 3],
             })),
-            approvals: [{ id: 'appr_1' }],
+            approvals: [{ id: "appr_1" }],
             changes: [
               {
                 at: new Date().toLocaleString(),
-                title: 'Policy updated: Cost ceiling $200/run',
-                by: 'alice',
+                title: "Policy updated: Cost ceiling $200/run",
+                by: "alice",
               },
               {
                 at: new Date().toLocaleString(),
-                title: 'Recipe v1.2 published: SLO Guard',
-                by: 'bob',
+                title: "Recipe v1.2 published: SLO Guard",
+                by: "bob",
               },
             ],
           });
@@ -75,27 +75,27 @@ export function api() {
         return setData(
           Array.from({ length: 12 }).map((_, i) => ({
             id: `run_${now}_${i}`,
-            pipeline: ['build', 'test', 'deploy'][i % 3],
-            status: ['Queued', 'Running', 'Succeeded', 'Failed'][i % 4],
+            pipeline: ["build", "test", "deploy"][i % 3],
+            status: ["Queued", "Running", "Succeeded", "Failed"][i % 4],
             durationMs: 200 + Math.round(Math.random() * 3000),
             cost: Number((Math.random() * 2).toFixed(2)),
-          })),
+          }))
         );
       }
       try {
         const resp = await j(`${base}/runs`);
         setData(resp.items || []);
       } catch (e) {
-        console.warn('GET /runs failed, fallback to mock', e);
+        console.warn("GET /runs failed, fallback to mock", e);
         const now = Date.now();
         setData(
           Array.from({ length: 8 }).map((_, i) => ({
             id: `run_${now}_${i}`,
-            pipeline: 'build',
-            status: i % 2 ? 'Running' : 'Succeeded',
+            pipeline: "build",
+            status: i % 2 ? "Running" : "Succeeded",
             durationMs: 500,
             cost: 0.1,
-          })),
+          }))
         );
       }
     };
@@ -111,14 +111,12 @@ export function api() {
         if (!base) {
           // fallback mock
           setData(
-            ['Build IntelGraph', 'Run Tests', 'Publish Release'].map(
-              (name, i) => ({
-                id: `pl_${i + 1}`,
-                name,
-                version: `1.${i}.0`,
-                owner: ['alice', 'bob', 'carol'][i % 3],
-              }),
-            ),
+            ["Build IntelGraph", "Run Tests", "Publish Release"].map((name, i) => ({
+              id: `pl_${i + 1}`,
+              name,
+              version: `1.${i}.0`,
+              owner: ["alice", "bob", "carol"][i % 3],
+            }))
           );
           return;
         }
@@ -126,25 +124,25 @@ export function api() {
           const resp = await j(`${base}/pipelines`);
           setData(resp || []);
         } catch (e) {
-          console.warn('GET /pipelines failed, fallback to mock', e);
+          console.warn("GET /pipelines failed, fallback to mock", e);
           setData([
             {
-              id: 'pl_1',
-              name: 'Build IntelGraph',
-              version: '1.0.0',
-              owner: 'system',
+              id: "pl_1",
+              name: "Build IntelGraph",
+              version: "1.0.0",
+              owner: "system",
             },
             {
-              id: 'pl_2',
-              name: 'Run Tests',
-              version: '1.0.0',
-              owner: 'system',
+              id: "pl_2",
+              name: "Run Tests",
+              version: "1.0.0",
+              owner: "system",
             },
             {
-              id: 'pl_3',
-              name: 'Deploy Production',
-              version: '1.0.0',
-              owner: 'system',
+              id: "pl_3",
+              name: "Deploy Production",
+              version: "1.0.0",
+              owner: "system",
             },
           ]);
         }
@@ -161,13 +159,13 @@ export function api() {
           setData({
             level: 3,
             policies: [
-              { title: 'Change freeze on Fridays after 12:00', state: 'ON' },
+              { title: "Change freeze on Fridays after 12:00", state: "ON" },
               {
-                title: 'Auto-rollback if error budget burn > 2%/h',
-                state: 'ON',
+                title: "Auto-rollback if error budget burn > 2%/h",
+                state: "ON",
               },
-              { title: 'Dual-approval for risk score >= 7/10', state: 'ON' },
-              { title: 'Cost ceiling $200/run', state: 'ON' },
+              { title: "Dual-approval for risk score >= 7/10", state: "ON" },
+              { title: "Cost ceiling $200/run", state: "ON" },
             ],
           });
           return;
@@ -176,17 +174,17 @@ export function api() {
           const resp = await j(`${base}/autonomy`);
           setData(resp);
         } catch (e) {
-          console.warn('GET /autonomy failed, fallback to mock', e);
+          console.warn("GET /autonomy failed, fallback to mock", e);
           setData({
             level: 3,
             policies: [
-              { title: 'Change freeze on Fridays after 12:00', state: 'ON' },
+              { title: "Change freeze on Fridays after 12:00", state: "ON" },
               {
-                title: 'Auto-rollback if error budget burn > 2%/h',
-                state: 'ON',
+                title: "Auto-rollback if error budget burn > 2%/h",
+                state: "ON",
               },
-              { title: 'Dual-approval for risk score >= 7/10', state: 'ON' },
-              { title: 'Cost ceiling $200/run', state: 'ON' },
+              { title: "Dual-approval for risk score >= 7/10", state: "ON" },
+              { title: "Cost ceiling $200/run", state: "ON" },
             ],
           });
         }
@@ -200,12 +198,12 @@ export function api() {
       }
       try {
         const resp = await j(`${base}/autonomy`, {
-          method: 'PUT',
+          method: "PUT",
           body: JSON.stringify({ level }),
         });
         setData(resp);
       } catch (e) {
-        console.warn('PUT /autonomy failed', e);
+        console.warn("PUT /autonomy failed", e);
         setData((d) => ({ ...d, level }));
       }
     };
@@ -218,18 +216,18 @@ export function api() {
         if (!base) {
           setData([
             {
-              id: 'r1',
-              name: 'Rapid Attribution',
-              version: '1.0.0',
+              id: "r1",
+              name: "Rapid Attribution",
+              version: "1.0.0",
               verified: true,
             },
             {
-              id: 'r2',
-              name: 'SLO Guard Enforcement',
-              version: '1.2.0',
+              id: "r2",
+              name: "SLO Guard Enforcement",
+              version: "1.2.0",
               verified: true,
             },
-            { id: 'r3', name: 'Cost Clamp', version: '0.9.1', verified: false },
+            { id: "r3", name: "Cost Clamp", version: "0.9.1", verified: false },
           ]);
           return;
         }
@@ -237,21 +235,21 @@ export function api() {
           const resp = await j(`${base}/recipes`);
           setData(resp || []);
         } catch (e) {
-          console.warn('GET /recipes failed, fallback to mock', e);
+          console.warn("GET /recipes failed, fallback to mock", e);
           setData([
             {
-              id: 'r1',
-              name: 'Rapid Attribution',
-              version: '1.0.0',
+              id: "r1",
+              name: "Rapid Attribution",
+              version: "1.0.0",
               verified: true,
             },
             {
-              id: 'r2',
-              name: 'SLO Guard Enforcement',
-              version: '1.2.0',
+              id: "r2",
+              name: "SLO Guard Enforcement",
+              version: "1.2.0",
               verified: true,
             },
-            { id: 'r3', name: 'Cost Clamp', version: '0.9.1', verified: false },
+            { id: "r3", name: "Cost Clamp", version: "0.9.1", verified: false },
           ]);
         }
       };
@@ -282,8 +280,8 @@ export function api() {
     const [data, setData] = useState([]);
     useEffect(() => {
       setData([
-        { id: '#1234', status: 'open', owner: 'alice', runId: 'run_001' },
-        { id: '#1235', status: 'triage', owner: 'oncall', runId: 'run_002' },
+        { id: "#1234", status: "open", owner: "alice", runId: "run_001" },
+        { id: "#1235", status: "triage", owner: "oncall", runId: "run_002" },
       ]);
     }, []);
     return { data };
@@ -296,8 +294,8 @@ export function api() {
         if (!base)
           return setData({
             id,
-            pipeline: 'build',
-            status: 'Running',
+            pipeline: "build",
+            status: "Running",
             autonomyLevel: 3,
             canary: 0.1,
             budgetCap: 200,
@@ -309,11 +307,11 @@ export function api() {
           const resp = await j(`${base}/runs/${encodeURIComponent(id)}`);
           setData(resp);
         } catch (e) {
-          console.warn('GET /runs/:id failed, fallback', e);
+          console.warn("GET /runs/:id failed, fallback", e);
           setData({
             id,
-            pipeline: 'build',
-            status: 'Running',
+            pipeline: "build",
+            status: "Running",
             autonomyLevel: 3,
             canary: 0.1,
             budgetCap: 200,
@@ -333,21 +331,21 @@ export function api() {
       (async () => {
         if (!base) {
           const ns = [
-            { id: 'source', label: 'source', state: 'succeeded' },
-            { id: 'validate', label: 'validate', state: 'succeeded' },
-            { id: 'enrich', label: 'enrich', state: 'running' },
-            { id: 'plan', label: 'plan', state: 'queued' },
-            { id: 'execute', label: 'execute', state: 'queued' },
-            { id: 'report', label: 'report', state: 'queued' },
-            { id: 'fallback', label: 'fallback', state: 'queued' },
+            { id: "source", label: "source", state: "succeeded" },
+            { id: "validate", label: "validate", state: "succeeded" },
+            { id: "enrich", label: "enrich", state: "running" },
+            { id: "plan", label: "plan", state: "queued" },
+            { id: "execute", label: "execute", state: "queued" },
+            { id: "report", label: "report", state: "queued" },
+            { id: "fallback", label: "fallback", state: "queued" },
           ];
           const es = [
-            { from: 'source', to: 'validate' },
-            { from: 'validate', to: 'enrich' },
-            { from: 'enrich', to: 'plan' },
-            { from: 'plan', to: 'execute' },
-            { from: 'execute', to: 'report' },
-            { from: 'source', to: 'fallback' },
+            { from: "source", to: "validate" },
+            { from: "validate", to: "enrich" },
+            { from: "enrich", to: "plan" },
+            { from: "plan", to: "execute" },
+            { from: "execute", to: "report" },
+            { from: "source", to: "fallback" },
           ];
           return (setNodes(ns), setEdges(es));
         }
@@ -356,12 +354,12 @@ export function api() {
           setNodes(resp.nodes || []);
           setEdges(resp.edges || []);
         } catch (e) {
-          console.warn('GET /runs/:id/graph failed, fallback', e);
+          console.warn("GET /runs/:id/graph failed, fallback", e);
           setNodes([
-            { id: 'source', label: 'source', state: 'succeeded' },
-            { id: 'execute', label: 'execute', state: 'running' },
+            { id: "source", label: "source", state: "succeeded" },
+            { id: "execute", label: "execute", state: "running" },
           ]);
-          setEdges([{ from: 'source', to: 'execute' }]);
+          setEdges([{ from: "source", to: "execute" }]);
         }
       })();
     }, [id]);
@@ -375,13 +373,13 @@ export function api() {
       if (base) {
         try {
           const q = new URLSearchParams({
-            stream: 'true',
+            stream: "true",
             ...(nodeId ? { nodeId: String(nodeId) } : {}),
           });
           const url = `${base}/runs/${encodeURIComponent(id)}/logs?${q}`;
           const es = new EventSource(url, { withCredentials: false });
           esRef.current = es;
-          es.addEventListener('message', (ev) => {
+          es.addEventListener("message", (ev) => {
             try {
               const m = JSON.parse(ev.data);
               setLines((l) => [
@@ -398,7 +396,7 @@ export function api() {
               ]);
             }
           });
-          es.addEventListener('error', () => {
+          es.addEventListener("error", () => {
             // fall back to timer
             es.close();
             if (!alive) return;
@@ -412,7 +410,7 @@ export function api() {
                     text: `run ${id}: log line ${++c}`,
                   },
                 ]),
-              500,
+              500
             );
             return () => clearInterval(t);
           });
@@ -431,7 +429,7 @@ export function api() {
                 text: `run ${id}: log line ${++c}`,
               },
             ]),
-          500,
+          500
         );
         return () => {
           alive = false;
@@ -451,25 +449,25 @@ export function api() {
     useEffect(() => {
       setDecisions([
         {
-          id: 'pol1',
-          action: 'promote',
+          id: "pol1",
+          action: "promote",
           allowed: true,
           reasons: [],
-          appealPath: '',
+          appealPath: "",
         },
         {
-          id: 'pol2',
-          action: 'cost_check',
+          id: "pol2",
+          action: "cost_check",
           allowed: true,
           reasons: [],
-          appealPath: '',
+          appealPath: "",
         },
         {
-          id: 'pol3',
-          action: 'change_freeze',
+          id: "pol3",
+          action: "change_freeze",
           allowed: false,
-          reasons: ['Change Freeze Friday (12:00–23:59)'],
-          appealPath: 'Request exception',
+          reasons: ["Change Freeze Friday (12:00–23:59)"],
+          appealPath: "Request exception",
         },
       ]);
     }, [id]);
@@ -479,42 +477,42 @@ export function api() {
     const [artifacts, setArtifacts] = useState([]);
     useEffect(() => {
       setArtifacts([
-        { name: 'image:app:sha256', digest: 'sha256:abc123', size: '64MB' },
-        { name: 'sbom.spdx.json', digest: 'sha256:def456', size: '1.2MB' },
+        { name: "image:app:sha256", digest: "sha256:abc123", size: "64MB" },
+        { name: "sbom.spdx.json", digest: "sha256:def456", size: "1.2MB" },
       ]);
     }, [id]);
     return { artifacts };
   }
   // Additional API helpers
   async function patchAutonomy(payload) {
-    if (!base) throw new Error('gatewayBase not configured');
+    if (!base) throw new Error("gatewayBase not configured");
     return j(`${base}/autonomy`, {
-      method: 'PATCH',
+      method: "PATCH",
       body: JSON.stringify(payload),
     });
   }
   async function getBudgets() {
-    if (!base) throw new Error('gatewayBase not configured');
+    if (!base) throw new Error("gatewayBase not configured");
     return j(`${base}/budgets`);
   }
   async function putBudgets(payload) {
-    if (!base) throw new Error('gatewayBase not configured');
+    if (!base) throw new Error("gatewayBase not configured");
     return j(`${base}/budgets`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(payload),
     });
   }
   async function postTickets(payload) {
-    if (!base) throw new Error('gatewayBase not configured');
+    if (!base) throw new Error("gatewayBase not configured");
     return j(`${base}/tickets`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(payload),
     });
   }
   async function postPolicyExplain(payload) {
-    if (!base) throw new Error('gatewayBase not configured');
+    if (!base) throw new Error("gatewayBase not configured");
     return j(`${base}/policies/explain`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(payload),
     });
   }
@@ -526,11 +524,11 @@ export function api() {
   async function getCIAnnotationsGlobal(params = {}) {
     if (!base) return { annotations: [] };
     const q = new URLSearchParams();
-    if (params.sinceMs) q.set('sinceMs', String(params.sinceMs));
-    if (params.level) q.set('level', params.level);
-    if (params.repo) q.set('repo', params.repo);
+    if (params.sinceMs) q.set("sinceMs", String(params.sinceMs));
+    if (params.level) q.set("level", params.level);
+    if (params.repo) q.set("repo", params.repo);
     const qs = q.toString();
-    return j(`${base}/ci/annotations${qs ? `?${qs}` : ''}`);
+    return j(`${base}/ci/annotations${qs ? `?${qs}` : ""}`);
   }
   // SLO by tenant
   async function getSLOSummaryByTenant(tenant) {
@@ -538,8 +536,8 @@ export function api() {
       return {
         tenant,
         slo: 0.995,
-        windowFast: '1h',
-        windowSlow: '6h',
+        windowFast: "1h",
+        windowSlow: "6h",
         fastBurn: 0.9,
         slowBurn: 0.8,
         errorRate: { fast: 0.005, slow: 0.004 },
@@ -550,7 +548,7 @@ export function api() {
   async function getSLOTimeSeriesByTenant(
     tenant,
     windowMs = 24 * 3600 * 1000,
-    stepMs = 10 * 60 * 1000,
+    stepMs = 10 * 60 * 1000
   ) {
     if (!base) return { tenant, points: [] };
     const q = new URLSearchParams({
@@ -574,11 +572,7 @@ export function api() {
     const q = new URLSearchParams({ tenant, windowMs: String(windowMs) });
     return j(`${base}/metrics/cost/tenant?${q.toString()}`);
   }
-  async function getTenantCostSeries(
-    tenant,
-    windowMs = 24 * 3600 * 1000,
-    stepMs = 10 * 60 * 1000,
-  ) {
+  async function getTenantCostSeries(tenant, windowMs = 24 * 3600 * 1000, stepMs = 10 * 60 * 1000) {
     if (!base) return { tenant, points: [] };
     const q = new URLSearchParams({
       tenant,
@@ -592,25 +586,18 @@ export function api() {
     return j(`${base}/budgets/tenant?tenant=${encodeURIComponent(tenant)}`);
   }
   async function getTenantBudgetPolicy(tenant) {
-    if (!base) return { tenant, type: 'hard', limit: 1000, grace: 0.1 }; // Mock policy
+    if (!base) return { tenant, type: "hard", limit: 1000, grace: 0.1 }; // Mock policy
     // In a real scenario, this would fetch the actual policy from the backend
-    return j(
-      `${base}/budgets/tenant/policy?tenant=${encodeURIComponent(tenant)}`,
-    );
+    return j(`${base}/budgets/tenant/policy?tenant=${encodeURIComponent(tenant)}`);
   }
   async function putTenantBudget(tenant, monthlyUsd) {
     if (!base) return { ok: true, tenant, monthlyUsd };
     return j(`${base}/budgets/tenant`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify({ tenant, monthlyUsd }),
     });
   }
-  async function getTenantCostForecast(
-    tenant,
-    hours = 48,
-    alpha = 0.5,
-    budgetUsd,
-  ) {
+  async function getTenantCostForecast(tenant, hours = 48, alpha = 0.5, budgetUsd) {
     if (!base)
       return {
         tenant,
@@ -620,7 +607,7 @@ export function api() {
         hist: [],
         smooth: [],
         forecast: [],
-        risk: 'WARN',
+        risk: "WARN",
       };
     const q = new URLSearchParams({
       tenant,
@@ -634,7 +621,7 @@ export function api() {
     tenant,
     windowMs = 24 * 3600 * 1000,
     stepMs = 60 * 60 * 1000,
-    z = 3.0,
+    z = 3.0
   ) {
     if (!base)
       return {
@@ -655,12 +642,10 @@ export function api() {
   }
   async function getModelCostAnomalies(tenant) {
     if (!base) return { items: [] };
-    return j(
-      `${base}/metrics/cost/models/anomalies?tenant=${encodeURIComponent(tenant)}`,
-    );
+    return j(`${base}/metrics/cost/models/anomalies?tenant=${encodeURIComponent(tenant)}`);
   }
   async function billingExport(tenant, month, format) {
-    if (!base) return { csvUrl: 'mock-csv-url', jsonUrl: 'mock-json-url' };
+    if (!base) return { csvUrl: "mock-csv-url", jsonUrl: "mock-json-url" };
     const q = new URLSearchParams({ tenant, month, format });
     return j(`${base}/billing/export?${q.toString()}`);
   }
@@ -686,9 +671,9 @@ export function api() {
     return j(`${base}/ops/dlq/policy`);
   }
   async function putDLQPolicy(p) {
-    if (!base) throw new Error('gatewayBase not configured');
+    if (!base) throw new Error("gatewayBase not configured");
     return j(`${base}/ops/dlq/policy`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(p),
     });
   }
@@ -699,16 +684,14 @@ export function api() {
   async function getDLQ(params = {}) {
     if (!base) return { items: [] };
     const q = new URLSearchParams();
-    if (params.sinceMs) q.set('sinceMs', String(params.sinceMs));
-    return j(`${base}/ops/dlq${q.toString() ? `?${q.toString()}` : ''}`);
+    if (params.sinceMs) q.set("sinceMs", String(params.sinceMs));
+    return j(`${base}/ops/dlq${q.toString() ? `?${q.toString()}` : ""}`);
   }
   async function getDLQRootCauses(params = {}) {
     if (!base) return { groups: [] };
     const q = new URLSearchParams();
-    if (params.sinceMs) q.set('sinceMs', String(params.sinceMs));
-    return j(
-      `${base}/ops/dlq/rootcauses${q.toString() ? `?${q.toString()}` : ''}`,
-    );
+    if (params.sinceMs) q.set("sinceMs", String(params.sinceMs));
+    return j(`${base}/ops/dlq/rootcauses${q.toString() ? `?${q.toString()}` : ""}`);
   }
   async function simulateDLQPolicy(item) {
     if (!base)
@@ -718,12 +701,12 @@ export function api() {
         passKind: true,
         passSig: true,
         rateLimited: false,
-        decision: 'DRY_RUN',
+        decision: "DRY_RUN",
         reasons: [],
-        normalizedSignature: 'sig',
+        normalizedSignature: "sig",
       };
     return j(`${base}/ops/dlq/policy/simulate`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify({ item }),
     });
   }
@@ -733,13 +716,13 @@ export function api() {
   }
   async function createAlertRoute(payload) {
     return j(`${base}/alerts/routes`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(payload),
     });
   }
   async function deleteAlertRoute(id) {
     return j(`${base}/alerts/routes/${encodeURIComponent(id)}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   }
   async function listAlertEvents() {
@@ -747,34 +730,30 @@ export function api() {
   }
   async function testAlertEvent(payload) {
     return j(`${base}/alerts/events/test`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(payload),
     });
   }
   async function getAlertCenterEvents(params = {}) {
     const q = new URLSearchParams();
-    if (params.sinceMs) q.set('sinceMs', String(params.sinceMs));
-    return j(
-      `${base}/alertcenter/events${q.toString() ? `?${q.toString()}` : ''}`,
-    );
+    if (params.sinceMs) q.set("sinceMs", String(params.sinceMs));
+    return j(`${base}/alertcenter/events${q.toString() ? `?${q.toString()}` : ""}`);
   }
   async function getProviderUsage(windowMs = 60 * 60 * 1000) {
     return j(`${base}/providers/usage?windowMs=${windowMs}`);
   }
   async function setProviderLimit(provider, rpm) {
     return j(`${base}/providers/${encodeURIComponent(provider)}/limits`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify({ rpm }),
     });
   }
   async function getPinHistory(route) {
-    return j(
-      `${base}/routing/pins/history${route ? `?route=${encodeURIComponent(route)}` : ''}`,
-    );
+    return j(`${base}/routing/pins/history${route ? `?route=${encodeURIComponent(route)}` : ""}`);
   }
   async function postRollback(route, reason) {
     return j(`${base}/routing/rollback`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify({ route, reason }),
     });
   }
@@ -783,7 +762,7 @@ export function api() {
   }
   async function putWatchdogConfigs(body) {
     return j(`${base}/routing/watchdog/configs`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(body),
     });
   }
@@ -795,25 +774,20 @@ export function api() {
     return j(`${base}/eval/scorecards/run/${encodeURIComponent(runId)}`);
   }
   async function getPipelineBaseline(pipeline) {
-    return j(
-      `${base}/eval/scorecards/pipeline/${encodeURIComponent(pipeline)}/baseline`,
-    );
+    return j(`${base}/eval/scorecards/pipeline/${encodeURIComponent(pipeline)}/baseline`);
   }
   async function putPipelineBaseline(pipeline, body) {
-    return j(
-      `${base}/eval/scorecards/pipeline/${encodeURIComponent(pipeline)}/baseline`,
-      {
-        method: 'PUT',
-        body: JSON.stringify(body),
-      },
-    );
+    return j(`${base}/eval/scorecards/pipeline/${encodeURIComponent(pipeline)}/baseline`, {
+      method: "PUT",
+      body: JSON.stringify(body),
+    });
   }
   async function getPipelineGate(pipeline) {
     return j(`${base}/eval/gates/pipeline/${encodeURIComponent(pipeline)}`);
   }
   async function checkGate(payload) {
     return j(`${base}/eval/gates/check`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(payload),
     });
   }
@@ -829,29 +803,27 @@ export function api() {
         onStep(JSON.parse(e.data));
       } catch {}
     };
-    es.addEventListener('step', handler);
+    es.addEventListener("step", handler);
     es.onerror = () => es.close();
     return () => {
       try {
-        es.removeEventListener('step', handler);
+        es.removeEventListener("step", handler);
         es.close();
       } catch {}
     };
   }
   async function actOnAgent(runId, payload) {
     return j(`${base}/runs/${encodeURIComponent(runId)}/agent/actions`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(payload),
     });
   }
   // Incidents
   async function getIncidents(params = {}) {
     const q = new URLSearchParams();
-    if (params.sinceMs) q.set('sinceMs', String(params.sinceMs));
-    if (params.windowMs) q.set('windowMs', String(params.windowMs));
-    return j(
-      `${base}/alertcenter/incidents${q.toString() ? `?${q.toString()}` : ''}`,
-    );
+    if (params.sinceMs) q.set("sinceMs", String(params.sinceMs));
+    if (params.windowMs) q.set("windowMs", String(params.windowMs));
+    return j(`${base}/alertcenter/incidents${q.toString() ? `?${q.toString()}` : ""}`);
   }
   // Graph compare
   async function getRunGraphCompare(runId, baselineRunId) {
@@ -862,21 +834,19 @@ export function api() {
         current: { nodes: [], edges: [] },
         baseline: { nodes: [], edges: [] },
       };
-    const q = baselineRunId
-      ? `?baseline=${encodeURIComponent(baselineRunId)}`
-      : '';
+    const q = baselineRunId ? `?baseline=${encodeURIComponent(baselineRunId)}` : "";
     return j(`${base}/runs/${encodeURIComponent(runId)}/graph-compare${q}`);
   }
   async function getRunNodeRouting(runId, nodeId) {
     if (!base)
       return {
         nodeId,
-        decision: { model: 'gpt-4o-mini', score: 0.72 },
+        decision: { model: "gpt-4o-mini", score: 0.72 },
         candidates: [],
-        policy: { allow: true, rulePath: 'policy.default.allow', reasons: [] },
+        policy: { allow: true, rulePath: "policy.default.allow", reasons: [] },
       };
     return j(
-      `${base}/runs/${encodeURIComponent(runId)}/nodes/${encodeURIComponent(nodeId)}/routing`,
+      `${base}/runs/${encodeURIComponent(runId)}/nodes/${encodeURIComponent(nodeId)}/routing`
     );
   }
   async function getRunComparePrevious(runId) {
@@ -886,7 +856,7 @@ export function api() {
   async function validatePipeline(id, body) {
     if (!base) return { valid: true, errors: [] };
     return j(`${base}/pipelines/${encodeURIComponent(id)}/validate`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(body),
     });
   }
@@ -895,9 +865,9 @@ export function api() {
     return j(`${base}/providers`);
   }
   async function testProvider(id) {
-    if (!base) throw new Error('gatewayBase not configured');
+    if (!base) throw new Error("gatewayBase not configured");
     return j(`${base}/providers/${encodeURIComponent(id)}/test`, {
-      method: 'POST',
+      method: "POST",
     });
   }
   // Routing pin management
@@ -906,16 +876,16 @@ export function api() {
     return j(`${base}/routing/pins`);
   }
   async function putRoutingPin(payload) {
-    if (!base) throw new Error('gatewayBase not configured');
+    if (!base) throw new Error("gatewayBase not configured");
     return j(`${base}/routing/pin`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(payload),
     });
   }
   async function deleteRoutingPin(route) {
-    if (!base) throw new Error('gatewayBase not configured');
+    if (!base) throw new Error("gatewayBase not configured");
     const q = new URLSearchParams({ route });
-    return j(`${base}/routing/pin?${q.toString()}`, { method: 'DELETE' });
+    return j(`${base}/routing/pin?${q.toString()}`, { method: "DELETE" });
   }
   // Node-level details
   function useRunNodeMetrics(runId, nodeId) {
@@ -937,7 +907,7 @@ export function api() {
           });
         try {
           const resp = await j(
-            `${base}/runs/${encodeURIComponent(runId)}/nodes/${encodeURIComponent(nodeId)}/metrics`,
+            `${base}/runs/${encodeURIComponent(runId)}/nodes/${encodeURIComponent(nodeId)}/metrics`
           );
           setMetrics(resp);
         } catch {
@@ -967,20 +937,20 @@ export function api() {
             artifacts: [
               {
                 name: `${nodeId}-output.json`,
-                digest: 'sha256:deadbeef',
-                size: '12KB',
+                digest: "sha256:deadbeef",
+                size: "12KB",
               },
             ],
-            traceId: 'trace-123-abc',
+            traceId: "trace-123-abc",
             provenance: {
-              sbom: 'present',
-              cosign: 'verified',
-              slsa: 'attested',
+              sbom: "present",
+              cosign: "verified",
+              slsa: "attested",
             },
           });
         try {
           const resp = await j(
-            `${base}/runs/${encodeURIComponent(runId)}/nodes/${encodeURIComponent(nodeId)}/evidence`,
+            `${base}/runs/${encodeURIComponent(runId)}/nodes/${encodeURIComponent(nodeId)}/evidence`
           );
           setEvidence(resp);
         } catch {
@@ -995,19 +965,19 @@ export function api() {
     return j(`${base}/secrets`);
   }
   async function rotateSecret(id) {
-    if (!base) throw new Error('gatewayBase not configured');
+    if (!base) throw new Error("gatewayBase not configured");
     return j(`${base}/secrets/${encodeURIComponent(id)}/rotate`, {
-      method: 'POST',
+      method: "POST",
     });
   }
   async function routingPreview(payload) {
     if (!base)
       return {
-        decision: { model: 'gpt-4o-mini', confidence: 0.7, reason: 'dev stub' },
+        decision: { model: "gpt-4o-mini", confidence: 0.7, reason: "dev stub" },
         candidates: [],
       };
     return j(`${base}/routing/preview`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(payload),
     });
   }
@@ -1019,26 +989,26 @@ export function api() {
     if (!base)
       return {
         id,
-        name: 'Mock',
-        version: '0.0.0',
-        owner: 'n/a',
-        yaml: 'steps: []',
+        name: "Mock",
+        version: "0.0.0",
+        owner: "n/a",
+        yaml: "steps: []",
       };
     return j(`${base}/pipelines/${encodeURIComponent(id)}`);
   }
   async function planPipeline(id, body) {
     if (!base) return { changes: [], costEstimate: { delta: 0 } };
     return j(`${base}/pipelines/${encodeURIComponent(id)}/plan`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(body),
     });
   }
   async function getRunEvidence(runId) {
     if (!base)
       return {
-        sbom: 'present',
-        cosign: 'verified',
-        slsa: 'attested',
+        sbom: "present",
+        cosign: "verified",
+        slsa: "attested",
         attestations: [],
       };
     return j(`${base}/runs/${encodeURIComponent(runId)}/evidence`);
@@ -1052,7 +1022,7 @@ export function api() {
         sbom: { present: true },
       };
     return j(`${base}/supplychain/verify`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(payload),
     });
   }
@@ -1074,23 +1044,20 @@ export function api() {
         policyBreach: false,
       };
     return j(`${base}/supplychain/sbom-diff`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(payload),
     });
   }
   async function getServingMetrics() {
-    if (!base)
-      return { summary: { qDepth: 2, batch: 4, kvHit: 0.8 }, series: [] };
+    if (!base) return { summary: { qDepth: 2, batch: 4, kvHit: 0.8 }, series: [] };
     return j(`${base}/serving/metrics`);
   }
   async function getCITrends(params = {}) {
     if (!base) return { buckets: [] };
     const q = new URLSearchParams();
-    if (params.sinceMs) q.set('sinceMs', String(params.sinceMs));
-    if (params.stepMs) q.set('stepMs', String(params.stepMs));
-    return j(
-      `${base}/ci/annotations/trends${q.toString() ? `?${q.toString()}` : ''}`,
-    );
+    if (params.sinceMs) q.set("sinceMs", String(params.sinceMs));
+    if (params.stepMs) q.set("stepMs", String(params.stepMs));
+    return j(`${base}/ci/annotations/trends${q.toString() ? `?${q.toString()}` : ""}`);
   }
   return useMemo(
     () => ({
@@ -1173,6 +1140,6 @@ export function api() {
       actOnAgent,
       getIncidents,
     }),
-    [],
+    []
   );
 }

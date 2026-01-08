@@ -1,11 +1,13 @@
 # Water Security Assessment
 
 ## Objective
+
 Analyze water security risks, transboundary water dependencies, and potential for water-related conflicts or cooperation.
 
 ## Analysis Framework
 
 ### Water Security Dimensions
+
 1. **Water Availability**: Per capita renewable water resources
 2. **Water Stress**: Demand vs. available supply ratio
 3. **Transboundary Dependence**: Percentage of water from external sources
@@ -13,7 +15,9 @@ Analyze water security risks, transboundary water dependencies, and potential fo
 5. **Governance**: Water management institutions, agreements
 
 ### Transboundary River Basin Analysis
+
 For shared water resources:
+
 - **Upstream Countries**: Control of water sources and infrastructure
 - **Downstream Countries**: Dependency levels, vulnerability
 - **Existing Agreements**: Treaties, cooperation mechanisms
@@ -21,6 +25,7 @@ For shared water resources:
 - **Climate Impacts**: Changing precipitation, glacier melt, droughts
 
 ### Conflict Risk Indicators
+
 - Lack of water-sharing agreements
 - Unilateral infrastructure development
 - Severe water stress (>40% of renewable water used)
@@ -29,6 +34,7 @@ For shared water resources:
 - Climate-driven scarcity trends
 
 ### Cooperation Opportunities
+
 - Joint water management institutions
 - Benefit-sharing mechanisms
 - Data and information exchange
@@ -36,18 +42,21 @@ For shared water resources:
 - Regional development projects
 
 ### Risk Assessment Levels
+
 - **LOW**: Adequate water, strong agreements, stable climate
 - **MODERATE**: Some stress, functioning cooperation mechanisms
 - **HIGH**: Significant stress, weak agreements, unilateral actions
 - **CRITICAL**: Acute scarcity, no cooperation, high conflict risk
 
 ### Scenario Planning
+
 - **Best Case**: Enhanced cooperation, adaptive management, tech solutions
 - **Status Quo**: Current trajectory, gradual stress increase
 - **Conflict Scenario**: Breakdown of cooperation, escalation risk
 - **Climate Shock**: Extreme drought, rapid destabilization
 
 ### Mitigation and Response
+
 - Diplomatic engagement and mediation
 - Technical cooperation (monitoring, efficiency)
 - Development assistance (infrastructure, institutions)
@@ -55,6 +64,7 @@ For shared water resources:
 - Regional security frameworks
 
 ### Ethical Framework
+
 - Support equitable water sharing
 - Promote peaceful conflict resolution
 - Protect vulnerable populations
@@ -62,6 +72,7 @@ For shared water resources:
 - Transparent data and analysis
 
 ### Applications
+
 - Diplomatic strategy and mediation
 - Development program design
 - Climate adaptation planning

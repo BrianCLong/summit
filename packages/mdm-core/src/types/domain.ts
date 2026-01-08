@@ -18,16 +18,16 @@ export interface Domain {
 }
 
 export type DomainType =
-  | 'customer'
-  | 'product'
-  | 'location'
-  | 'organization'
-  | 'employee'
-  | 'asset'
-  | 'financial_instrument'
-  | 'supplier'
-  | 'partner'
-  | 'custom';
+  | "customer"
+  | "product"
+  | "location"
+  | "organization"
+  | "employee"
+  | "asset"
+  | "financial_instrument"
+  | "supplier"
+  | "partner"
+  | "custom";
 
 export interface DomainSchema {
   attributes: DomainAttribute[];
@@ -51,21 +51,21 @@ export interface DomainAttribute {
 }
 
 export type AttributeType =
-  | 'string'
-  | 'number'
-  | 'boolean'
-  | 'date'
-  | 'datetime'
-  | 'email'
-  | 'phone'
-  | 'url'
-  | 'json'
-  | 'reference'
-  | 'array'
-  | 'enum';
+  | "string"
+  | "number"
+  | "boolean"
+  | "date"
+  | "datetime"
+  | "email"
+  | "phone"
+  | "url"
+  | "json"
+  | "reference"
+  | "array"
+  | "enum";
 
 export interface AttributeConstraint {
-  type: 'minLength' | 'maxLength' | 'pattern' | 'min' | 'max' | 'enum' | 'custom';
+  type: "minLength" | "maxLength" | "pattern" | "min" | "max" | "enum" | "custom";
   value: unknown;
   errorMessage?: string;
 }
@@ -81,8 +81,8 @@ export interface ValidationRule {
   id: string;
   name: string;
   description: string;
-  ruleType: 'field' | 'record' | 'cross_field' | 'business';
-  severity: 'error' | 'warning' | 'info';
+  ruleType: "field" | "record" | "cross_field" | "business";
+  severity: "error" | "warning" | "info";
   expression: string;
   errorMessage: string;
   active: boolean;
@@ -92,18 +92,18 @@ export interface DomainRelationship {
   id: string;
   targetDomain: string;
   relationshipType: DomainRelationshipType;
-  cardinality: '1:1' | '1:N' | 'N:1' | 'N:N';
+  cardinality: "1:1" | "1:N" | "N:1" | "N:N";
   attributes: string[];
   cascadeDelete: boolean;
   cascadeUpdate: boolean;
 }
 
 export type DomainRelationshipType =
-  | 'parent_child'
-  | 'reference'
-  | 'association'
-  | 'composition'
-  | 'aggregation';
+  | "parent_child"
+  | "reference"
+  | "association"
+  | "composition"
+  | "aggregation";
 
 export interface GovernancePolicy {
   dataOwner: string;
@@ -119,7 +119,7 @@ export interface GovernancePolicy {
 export interface AccessControlPolicy {
   roles: AccessRole[];
   permissions: Permission[];
-  defaultAccess: 'deny' | 'read' | 'write' | 'admin';
+  defaultAccess: "deny" | "read" | "write" | "admin";
 }
 
 export interface AccessRole {
@@ -131,7 +131,7 @@ export interface AccessRole {
 
 export interface Permission {
   resource: string;
-  action: 'create' | 'read' | 'update' | 'delete' | 'certify' | 'approve';
+  action: "create" | "read" | "update" | "delete" | "certify" | "approve";
   conditions?: Record<string, unknown>;
 }
 
@@ -145,8 +145,8 @@ export interface ChangeManagementPolicy {
 
 export interface RetentionPolicy {
   retentionPeriod: number;
-  retentionUnit: 'days' | 'months' | 'years';
-  archiveStrategy: 'delete' | 'archive' | 'anonymize';
+  retentionUnit: "days" | "months" | "years";
+  archiveStrategy: "delete" | "archive" | "anonymize";
   legalHoldEnabled: boolean;
 }
 
@@ -160,7 +160,7 @@ export interface PrivacyPolicy {
 
 export interface MaskingRule {
   field: string;
-  maskingType: 'full' | 'partial' | 'hash' | 'tokenize' | 'custom';
+  maskingType: "full" | "partial" | "hash" | "tokenize" | "custom";
   pattern?: string;
   customFunction?: (value: string) => string;
 }
@@ -175,7 +175,7 @@ export interface Steward {
   delegateUserId?: string;
 }
 
-export type StewardRole = 'data_steward' | 'domain_steward' | 'quality_steward' | 'chief_steward';
+export type StewardRole = "data_steward" | "domain_steward" | "quality_steward" | "chief_steward";
 
 export interface QualityRule {
   id: string;
@@ -183,28 +183,28 @@ export interface QualityRule {
   description: string;
   ruleType: QualityRuleType;
   dimension: QualityDimension;
-  severity: 'critical' | 'high' | 'medium' | 'low';
+  severity: "critical" | "high" | "medium" | "low";
   threshold: number;
   expression: string;
   active: boolean;
 }
 
 export type QualityRuleType =
-  | 'completeness'
-  | 'accuracy'
-  | 'consistency'
-  | 'validity'
-  | 'uniqueness'
-  | 'timeliness'
-  | 'conformity';
+  | "completeness"
+  | "accuracy"
+  | "consistency"
+  | "validity"
+  | "uniqueness"
+  | "timeliness"
+  | "conformity";
 
 export type QualityDimension =
-  | 'completeness'
-  | 'accuracy'
-  | 'consistency'
-  | 'validity'
-  | 'uniqueness'
-  | 'timeliness';
+  | "completeness"
+  | "accuracy"
+  | "consistency"
+  | "validity"
+  | "uniqueness"
+  | "timeliness";
 
 export interface MatchingRule {
   id: string;
@@ -219,14 +219,14 @@ export interface MatchingRule {
 }
 
 export type MatchingAlgorithm =
-  | 'exact'
-  | 'levenshtein'
-  | 'jaro_winkler'
-  | 'soundex'
-  | 'metaphone'
-  | 'token_based'
-  | 'ml_model'
-  | 'custom';
+  | "exact"
+  | "levenshtein"
+  | "jaro_winkler"
+  | "soundex"
+  | "metaphone"
+  | "token_based"
+  | "ml_model"
+  | "custom";
 
 export interface MatchingField {
   fieldName: string;
@@ -250,13 +250,13 @@ export interface SurvivorshipRule {
 }
 
 export type SurvivorshipStrategy =
-  | 'most_recent'
-  | 'most_complete'
-  | 'most_trusted_source'
-  | 'most_frequent'
-  | 'highest_quality'
-  | 'longest'
-  | 'custom';
+  | "most_recent"
+  | "most_complete"
+  | "most_trusted_source"
+  | "most_frequent"
+  | "highest_quality"
+  | "longest"
+  | "custom";
 
 export interface DomainMetadata {
   createdAt: Date;

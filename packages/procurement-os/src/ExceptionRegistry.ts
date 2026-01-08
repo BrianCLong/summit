@@ -1,5 +1,5 @@
-import { isAfter } from 'date-fns';
-import { ExceptionEntry } from './types';
+import { isAfter } from "date-fns";
+import { ExceptionEntry } from "./types";
 
 export class ExceptionRegistry {
   private exceptions: Map<string, ExceptionEntry> = new Map();

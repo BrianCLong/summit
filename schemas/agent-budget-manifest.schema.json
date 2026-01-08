@@ -75,13 +75,7 @@
     },
     "risk": {
       "type": "object",
-      "required": [
-        "inherent",
-        "controlBaseline",
-        "residual",
-        "riskTier",
-        "riskCeiling"
-      ],
+      "required": ["inherent", "controlBaseline", "residual", "riskTier", "riskCeiling"],
       "properties": {
         "inherent": {
           "type": "integer",

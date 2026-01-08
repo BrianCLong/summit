@@ -7,19 +7,19 @@
  * @module alert
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
-import type { SignalEnvelope } from './signal-envelope.js';
+import type { SignalEnvelope } from "./signal-envelope.js";
 
 /**
  * Alert severity levels
  */
 export const AlertSeverity = {
-  INFO: 'info',
-  LOW: 'low',
-  MEDIUM: 'medium',
-  HIGH: 'high',
-  CRITICAL: 'critical',
+  INFO: "info",
+  LOW: "low",
+  MEDIUM: "medium",
+  HIGH: "high",
+  CRITICAL: "critical",
 } as const;
 
 export type AlertSeverityType = (typeof AlertSeverity)[keyof typeof AlertSeverity];
@@ -28,13 +28,13 @@ export type AlertSeverityType = (typeof AlertSeverity)[keyof typeof AlertSeverit
  * Alert status lifecycle
  */
 export const AlertStatus = {
-  NEW: 'new',
-  ACKNOWLEDGED: 'acknowledged',
-  IN_PROGRESS: 'in_progress',
-  RESOLVED: 'resolved',
-  SUPPRESSED: 'suppressed',
-  FALSE_POSITIVE: 'false_positive',
-  ESCALATED: 'escalated',
+  NEW: "new",
+  ACKNOWLEDGED: "acknowledged",
+  IN_PROGRESS: "in_progress",
+  RESOLVED: "resolved",
+  SUPPRESSED: "suppressed",
+  FALSE_POSITIVE: "false_positive",
+  ESCALATED: "escalated",
 } as const;
 
 export type AlertStatusType = (typeof AlertStatus)[keyof typeof AlertStatus];
@@ -43,13 +43,13 @@ export type AlertStatusType = (typeof AlertStatus)[keyof typeof AlertStatus];
  * Alert type categories
  */
 export const AlertType = {
-  THRESHOLD: 'threshold',
-  PATTERN: 'pattern',
-  ANOMALY: 'anomaly',
-  CORRELATION: 'correlation',
-  TEMPORAL: 'temporal',
-  ABSENCE: 'absence',
-  RATE: 'rate',
+  THRESHOLD: "threshold",
+  PATTERN: "pattern",
+  ANOMALY: "anomaly",
+  CORRELATION: "correlation",
+  TEMPORAL: "temporal",
+  ABSENCE: "absence",
+  RATE: "rate",
 } as const;
 
 export type AlertTypeType = (typeof AlertType)[keyof typeof AlertType];
@@ -135,7 +135,7 @@ export const AlertContextSchema = z.object({
     .object({
       start: z.number(),
       end: z.number(),
-      windowType: z.enum(['tumbling', 'sliding', 'session']),
+      windowType: z.enum(["tumbling", "sliding", "session"]),
       windowSize: z.number(),
     })
     .optional(),
@@ -151,14 +151,7 @@ export type AlertContext = z.infer<typeof AlertContextSchema>;
  */
 export const AlertActionSchema = z.object({
   /** Action type */
-  actionType: z.enum([
-    'investigate',
-    'acknowledge',
-    'escalate',
-    'notify',
-    'automate',
-    'suppress',
-  ]),
+  actionType: z.enum(["investigate", "acknowledge", "escalate", "notify", "automate", "suppress"]),
 
   /** Action description */
   description: z.string(),
@@ -281,18 +274,13 @@ export const AlertSchema = z.object({
     .object({
       resolvedAt: z.number(),
       resolvedBy: z.string(),
-      resolutionType: z.enum([
-        'fixed',
-        'false_positive',
-        'no_action_needed',
-        'other',
-      ]),
+      resolutionType: z.enum(["fixed", "false_positive", "no_action_needed", "other"]),
       notes: z.string().optional(),
     })
     .optional(),
 
   /** Schema version */
-  schemaVersion: z.string().default('1.0.0'),
+  schemaVersion: z.string().default("1.0.0"),
 });
 
 export type Alert = z.infer<typeof AlertSchema>;
@@ -355,7 +343,7 @@ export function createAlert(input: CreateAlertInput): Alert {
     policyLabels: input.policyLabels ?? [],
     classification: input.classification,
     tags: input.tags ?? [],
-    schemaVersion: '1.0.0',
+    schemaVersion: "1.0.0",
   };
 }
 
@@ -376,7 +364,7 @@ export function createAlertFromSignal(
     triggerValue?: unknown;
     actualValue?: unknown;
     confidence?: number;
-  },
+  }
 ): Alert {
   const now = Date.now();
 
@@ -421,7 +409,7 @@ export function createAlertFromSignal(
     policyLabels: envelope.metadata.policyLabels,
     classification: envelope.metadata.classification,
     tags: envelope.metadata.tags,
-    schemaVersion: '1.0.0',
+    schemaVersion: "1.0.0",
   };
 }
 
@@ -438,7 +426,7 @@ export function validateAlert(input: unknown): z.SafeParseReturnType<unknown, Al
 export function shouldSuppressAlert(
   newAlert: Alert,
   existingAlerts: Alert[],
-  deduplicationWindowMs: number = 300000, // 5 minutes default
+  deduplicationWindowMs: number = 300000 // 5 minutes default
 ): boolean {
   const cutoff = newAlert.createdAt - deduplicationWindowMs;
 
@@ -448,7 +436,7 @@ export function shouldSuppressAlert(
       existing.tenantId === newAlert.tenantId &&
       existing.createdAt > cutoff &&
       existing.status !== AlertStatus.RESOLVED &&
-      existing.status !== AlertStatus.FALSE_POSITIVE,
+      existing.status !== AlertStatus.FALSE_POSITIVE
   );
 }
 

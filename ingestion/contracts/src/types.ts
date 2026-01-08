@@ -1,8 +1,8 @@
-export type DataClassification = 'public' | 'dp' | 'pii';
+export type DataClassification = "public" | "dp" | "pii";
 
 export interface ContractField {
   name: string;
-  type: 'string' | 'number' | 'boolean' | 'date' | 'object' | 'array';
+  type: "string" | "number" | "boolean" | "date" | "object" | "array";
   nullable: boolean;
   unit?: string;
   description?: string;
@@ -32,12 +32,12 @@ export interface ContractSpec {
 export interface ValidationFinding {
   field: string;
   issue: string;
-  severity: 'info' | 'warning' | 'error';
+  severity: "info" | "warning" | "error";
 }
 
 export interface DriftDiffEntry {
   field: string;
-  change: 'added' | 'removed' | 'changed';
+  change: "added" | "removed" | "changed";
   details: string;
 }
 

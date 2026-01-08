@@ -1,5 +1,5 @@
-'use client';
-import Switchboard from '@/components/Switchboard';
+"use client";
+import Switchboard from "@/components/Switchboard";
 
 export default function Home() {
   return (

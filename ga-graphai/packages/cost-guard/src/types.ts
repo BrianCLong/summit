@@ -13,7 +13,7 @@ export interface WorkloadQueueSignal {
   saturationRatio?: number;
 }
 
-export type QueueScalingAction = 'scale_up' | 'scale_down' | 'hold';
+export type QueueScalingAction = "scale_up" | "scale_down" | "hold";
 
 export interface QueueScalingDecision {
   action: QueueScalingAction;
@@ -39,7 +39,7 @@ export interface PlanBudgetInput {
   recentLatencyP95: number;
 }
 
-export type CostGuardAction = 'allow' | 'throttle' | 'kill';
+export type CostGuardAction = "allow" | "throttle" | "kill";
 
 export interface CostGuardDecision {
   action: CostGuardAction;
@@ -62,11 +62,11 @@ export interface SlowQueryRecord {
   reasonCode?: string;
 }
 
-export type PolicyGateAction = 'allow' | 'deny' | 'warn';
+export type PolicyGateAction = "allow" | "deny" | "warn";
 
 export interface PolicyGateInput {
   tenantId: string;
-  action: 'read' | 'write' | 'export';
+  action: "read" | "write" | "export";
   budgetTags?: string[];
   abacTags?: string[];
   estimatedCostUsd?: number;
@@ -128,7 +128,7 @@ export interface ScalingForecast {
   throughputPerNode: number;
 }
 
-export type ScalingAction = 'scale_up' | 'scale_down' | 'hold';
+export type ScalingAction = "scale_up" | "scale_down" | "hold";
 
 export interface ScalingDecision {
   action: ScalingAction;
@@ -172,7 +172,7 @@ export interface KedaTrigger {
 
 export interface KedaScaledObjectSpec {
   apiVersion: string;
-  kind: 'ScaledObject';
+  kind: "ScaledObject";
   metadata: { name: string; namespace: string; labels?: Record<string, string> };
   spec: {
     scaleTargetRef: { name: string };
@@ -200,7 +200,7 @@ export interface WorkloadAllocation {
 }
 
 export interface WorkloadBalancingPlan {
-  strategy: 'rebalance' | 'maintain';
+  strategy: "rebalance" | "maintain";
   reason: string;
   confidence: number;
   allocations: WorkloadAllocation[];
@@ -236,14 +236,14 @@ export interface JourneyTelemetrySample {
 }
 
 export interface PerformanceBudgetResult {
-  status: 'pass' | 'breach' | 'warn';
+  status: "pass" | "breach" | "warn";
   reason: string;
   targetMs: number;
   observedMs: number;
   annotations: Record<string, string | number | boolean>;
 }
 
-export type OffenderKind = 'endpoint' | 'query' | 'page';
+export type OffenderKind = "endpoint" | "query" | "page";
 
 export interface OffenderRecord {
   id: string;
@@ -285,7 +285,7 @@ export interface CacheRetrieval<TValue> {
 export interface ResponseShapeOptions {
   allowedFields: string[];
   pageSizeLimit: number;
-  tenantTier: 'standard' | 'premium' | 'strategic';
+  tenantTier: "standard" | "premium" | "strategic";
   compressionThresholdBytes: number;
   version: string;
   partial?: boolean;
@@ -300,22 +300,22 @@ export interface ShapedResponse {
   data: Record<string, unknown> | null;
   pagination: { offset: number; limit: number; total?: number };
   compressed?: Buffer;
-  encoding?: 'gzip' | 'brotli';
+  encoding?: "gzip" | "brotli";
 }
 
 export interface JobDefinition<TResult = unknown> {
   idempotencyKey: string;
   tenantId: string;
-  classification: 'cpu' | 'io';
+  classification: "cpu" | "io";
   handler: () => Promise<TResult>;
 }
 
 export interface JobExecutionResult<TResult = unknown> {
   id: string;
   tenantId: string;
-  status: 'success';
+  status: "success";
   durationMs: number;
-  classification: JobDefinition['classification'];
+  classification: JobDefinition["classification"];
   result: TResult;
 }
 
@@ -333,13 +333,13 @@ export interface TelemetryBudgetConfig {
 }
 
 export interface TelemetrySignal {
-  kind: 'logs' | 'metrics' | 'traces';
+  kind: "logs" | "metrics" | "traces";
   labels?: Record<string, string>;
 }
 
 export interface TelemetryIngestResult {
   accepted: boolean;
-  action: 'allow' | 'throttle' | 'reject';
+  action: "allow" | "throttle" | "reject";
   reason: string;
 }
 

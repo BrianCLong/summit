@@ -23,13 +23,13 @@ export interface ExternalReference {
 export interface ThreatIntelFeed {
   id: string;
   name: string;
-  type: 'stix' | 'taxii' | 'misp' | 'custom' | 'commercial';
+  type: "stix" | "taxii" | "misp" | "custom" | "commercial";
   provider: string;
 
   // Connection
   endpoint: string;
   authentication?: {
-    type: 'apikey' | 'oauth' | 'basic' | 'certificate';
+    type: "apikey" | "oauth" | "basic" | "certificate";
     credentials: Record<string, string>;
   };
 
@@ -51,7 +51,7 @@ export interface ThreatIntelFeed {
   // Status
   lastSync?: Date;
   lastSuccessfulSync?: Date;
-  syncStatus: 'active' | 'failed' | 'disabled';
+  syncStatus: "active" | "failed" | "disabled";
   errorMessage?: string;
 
   // Statistics
@@ -69,13 +69,13 @@ export interface ThreatIntelFeed {
 
 export interface ThreatIntelIndicator {
   id: string;
-  type: 'ip' | 'domain' | 'url' | 'hash' | 'email' | 'file' | 'cve' | 'yara';
+  type: "ip" | "domain" | "url" | "hash" | "email" | "file" | "cve" | "yara";
   value: string;
 
   // Context
   description?: string;
   tags: string[];
-  tlp: 'white' | 'green' | 'amber' | 'red'; // Traffic Light Protocol
+  tlp: "white" | "green" | "amber" | "red"; // Traffic Light Protocol
 
   // Threat classification
   threatType: string[];
@@ -85,7 +85,7 @@ export interface ThreatIntelIndicator {
   // Scoring
   confidence: number; // 0-100
   severity: number; // 0-10
-  risk: 'low' | 'medium' | 'high' | 'critical';
+  risk: "low" | "medium" | "high" | "critical";
 
   // Temporal
   firstSeen: Date;
@@ -124,7 +124,7 @@ export interface ThreatIntelIndicator {
   };
 
   // Action
-  recommendedAction?: 'block' | 'alert' | 'monitor' | 'investigate';
+  recommendedAction?: "block" | "alert" | "monitor" | "investigate";
 
   // Metadata
   createdAt: Date;
@@ -174,13 +174,13 @@ export interface ThreatIntelQuery {
   offset?: number;
 
   // Sorting
-  sortBy?: 'confidence' | 'severity' | 'firstSeen' | 'lastSeen';
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: "confidence" | "severity" | "firstSeen" | "lastSeen";
+  sortOrder?: "asc" | "desc";
 }
 
 export interface ThreatIntelEnrichment {
   indicatorId: string;
-  enrichmentType: 'geolocation' | 'reputation' | 'whois' | 'dns' | 'ssl' | 'passive_dns';
+  enrichmentType: "geolocation" | "reputation" | "whois" | "dns" | "ssl" | "passive_dns";
 
   data: Record<string, any>;
 
@@ -196,7 +196,7 @@ export interface ThreatIntelMatch {
 
   // Match details
   matchedValue: string;
-  matchType: 'exact' | 'partial' | 'fuzzy' | 'regex';
+  matchType: "exact" | "partial" | "fuzzy" | "regex";
   matchConfidence: number;
 
   // Context
@@ -212,7 +212,7 @@ export interface ThreatIntelMatch {
 export interface OsintSource {
   id: string;
   name: string;
-  type: 'twitter' | 'reddit' | 'github' | 'pastebin' | 'dark_web' | 'news' | 'blog' | 'forum';
+  type: "twitter" | "reddit" | "github" | "pastebin" | "dark_web" | "news" | "blog" | "forum";
   url: string;
 
   // Collection

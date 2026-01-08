@@ -5,59 +5,59 @@
  * multi-source data fusion, live situational awareness, and crisis response.
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================================================
 // Common Operating Picture (COP)
 // ============================================================================
 
 export const COPLayerTypeSchema = z.enum([
-  'BASE_MAP',
-  'FRIENDLY_FORCES',
-  'ENEMY_FORCES',
-  'NEUTRAL_FORCES',
-  'INFRASTRUCTURE',
-  'WEATHER',
-  'INTELLIGENCE',
-  'SENSOR_COVERAGE',
-  'COLLECTION_ASSETS',
-  'TARGET_OVERLAY',
-  'ROUTE_OVERLAY',
-  'AREA_OF_INTEREST',
-  'NO_FLY_ZONE',
-  'CONTROLLED_AIRSPACE'
+  "BASE_MAP",
+  "FRIENDLY_FORCES",
+  "ENEMY_FORCES",
+  "NEUTRAL_FORCES",
+  "INFRASTRUCTURE",
+  "WEATHER",
+  "INTELLIGENCE",
+  "SENSOR_COVERAGE",
+  "COLLECTION_ASSETS",
+  "TARGET_OVERLAY",
+  "ROUTE_OVERLAY",
+  "AREA_OF_INTEREST",
+  "NO_FLY_ZONE",
+  "CONTROLLED_AIRSPACE",
 ]);
 
 export const COPEntitySchema = z.object({
   id: z.string(),
   type: z.enum([
-    'UNIT',
-    'FACILITY',
-    'VEHICLE',
-    'AIRCRAFT',
-    'VESSEL',
-    'PERSON',
-    'SENSOR',
-    'TARGET',
-    'EVENT',
-    'BOUNDARY'
+    "UNIT",
+    "FACILITY",
+    "VEHICLE",
+    "AIRCRAFT",
+    "VESSEL",
+    "PERSON",
+    "SENSOR",
+    "TARGET",
+    "EVENT",
+    "BOUNDARY",
   ]),
-  category: z.enum(['FRIENDLY', 'HOSTILE', 'NEUTRAL', 'UNKNOWN']),
+  category: z.enum(["FRIENDLY", "HOSTILE", "NEUTRAL", "UNKNOWN"]),
 
   // Position and geometry
   geometry: z.union([
     z.object({
-      type: z.literal('Point'),
-      coordinates: z.tuple([z.number(), z.number()]) // [lon, lat]
+      type: z.literal("Point"),
+      coordinates: z.tuple([z.number(), z.number()]), // [lon, lat]
     }),
     z.object({
-      type: z.literal('LineString'),
-      coordinates: z.array(z.tuple([z.number(), z.number()]))
+      type: z.literal("LineString"),
+      coordinates: z.array(z.tuple([z.number(), z.number()])),
     }),
     z.object({
-      type: z.literal('Polygon'),
-      coordinates: z.array(z.array(z.tuple([z.number(), z.number()])))
-    })
+      type: z.literal("Polygon"),
+      coordinates: z.array(z.array(z.tuple([z.number(), z.number()]))),
+    }),
   ]),
 
   // Properties
@@ -77,7 +77,7 @@ export const COPEntitySchema = z.object({
     altitude: z.number().optional(), // meters
 
     // Additional attributes
-    metadata: z.record(z.string(), z.unknown())
+    metadata: z.record(z.string(), z.unknown()),
   }),
 
   // Display properties
@@ -87,8 +87,8 @@ export const COPEntitySchema = z.object({
     color: z.string(),
     size: z.number(),
     visible: z.boolean(),
-    zIndex: z.number()
-  })
+    zIndex: z.number(),
+  }),
 });
 
 export const COPLayerSchema = z.object({
@@ -98,7 +98,7 @@ export const COPLayerSchema = z.object({
   visible: z.boolean(),
   opacity: z.number(), // 0-1
   entities: z.array(COPEntitySchema),
-  metadata: z.record(z.string(), z.unknown())
+  metadata: z.record(z.string(), z.unknown()),
 });
 
 export const CommonOperatingPictureSchema = z.object({
@@ -113,24 +113,24 @@ export const CommonOperatingPictureSchema = z.object({
     center: z.tuple([z.number(), z.number()]), // [lon, lat]
     zoom: z.number(),
     bearing: z.number(), // degrees
-    pitch: z.number() // degrees
+    pitch: z.number(), // degrees
   }),
 
   timeWindow: z.object({
     start: z.string(),
     end: z.string(),
-    current: z.string()
+    current: z.string(),
   }),
 
   filters: z.object({
     categories: z.array(z.string()),
     classifications: z.array(z.string()),
     sources: z.array(z.string()),
-    minConfidence: z.number()
+    minConfidence: z.number(),
   }),
 
   updatedAt: z.string(),
-  metadata: z.record(z.string(), z.unknown())
+  metadata: z.record(z.string(), z.unknown()),
 });
 
 // ============================================================================
@@ -140,27 +140,29 @@ export const CommonOperatingPictureSchema = z.object({
 export const OperationalEventSchema = z.object({
   id: z.string(),
   type: z.enum([
-    'CONTACT',
-    'DETECTION',
-    'ENGAGEMENT',
-    'MOVEMENT',
-    'COMMUNICATION',
-    'ALERT',
-    'STATUS_CHANGE',
-    'INTELLIGENCE_REPORT',
-    'SENSOR_ACTIVATION',
-    'MISSION_UPDATE'
+    "CONTACT",
+    "DETECTION",
+    "ENGAGEMENT",
+    "MOVEMENT",
+    "COMMUNICATION",
+    "ALERT",
+    "STATUS_CHANGE",
+    "INTELLIGENCE_REPORT",
+    "SENSOR_ACTIVATION",
+    "MISSION_UPDATE",
   ]),
 
-  severity: z.enum(['INFO', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
-  priority: z.enum(['ROUTINE', 'PRIORITY', 'IMMEDIATE', 'FLASH']),
+  severity: z.enum(["INFO", "LOW", "MEDIUM", "HIGH", "CRITICAL"]),
+  priority: z.enum(["ROUTINE", "PRIORITY", "IMMEDIATE", "FLASH"]),
 
   timestamp: z.string(),
-  location: z.object({
-    lat: z.number(),
-    lon: z.number(),
-    accuracy: z.number().optional()
-  }).optional(),
+  location: z
+    .object({
+      lat: z.number(),
+      lon: z.number(),
+      accuracy: z.number().optional(),
+    })
+    .optional(),
 
   // Event details
   title: z.string(),
@@ -177,7 +179,7 @@ export const OperationalEventSchema = z.object({
   caveats: z.array(z.string()),
 
   // Workflow
-  status: z.enum(['NEW', 'ACKNOWLEDGED', 'IN_PROGRESS', 'RESOLVED', 'ARCHIVED']),
+  status: z.enum(["NEW", "ACKNOWLEDGED", "IN_PROGRESS", "RESOLVED", "ARCHIVED"]),
   assignedTo: z.string().optional(),
 
   // Correlation
@@ -186,7 +188,7 @@ export const OperationalEventSchema = z.object({
 
   metadata: z.record(z.string(), z.unknown()),
   createdAt: z.string(),
-  updatedAt: z.string()
+  updatedAt: z.string(),
 });
 
 // ============================================================================
@@ -204,41 +206,45 @@ export const AlertRuleSchema = z.object({
     eventType: z.array(z.string()).optional(),
     severity: z.array(z.string()).optional(),
     entityType: z.array(z.string()).optional(),
-    location: z.object({
-      lat: z.number(),
-      lon: z.number(),
-      radius: z.number() // km
-    }).optional(),
+    location: z
+      .object({
+        lat: z.number(),
+        lon: z.number(),
+        radius: z.number(), // km
+      })
+      .optional(),
     keyword: z.array(z.string()).optional(),
-    customLogic: z.string().optional()
+    customLogic: z.string().optional(),
   }),
 
   // Actions
-  actions: z.array(z.object({
-    type: z.enum([
-      'NOTIFY_USER',
-      'SEND_EMAIL',
-      'CREATE_TICKET',
-      'ESCALATE',
-      'UPDATE_COP',
-      'TRIGGER_WORKFLOW',
-      'EXECUTE_SCRIPT'
-    ]),
-    parameters: z.record(z.string(), z.unknown())
-  })),
+  actions: z.array(
+    z.object({
+      type: z.enum([
+        "NOTIFY_USER",
+        "SEND_EMAIL",
+        "CREATE_TICKET",
+        "ESCALATE",
+        "UPDATE_COP",
+        "TRIGGER_WORKFLOW",
+        "EXECUTE_SCRIPT",
+      ]),
+      parameters: z.record(z.string(), z.unknown()),
+    })
+  ),
 
   // Configuration
   throttle: z.object({
     enabled: z.boolean(),
     windowMinutes: z.number(),
-    maxAlerts: z.number()
+    maxAlerts: z.number(),
   }),
 
-  priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
+  priority: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
 
   createdBy: z.string(),
   createdAt: z.string(),
-  metadata: z.record(z.string(), z.unknown())
+  metadata: z.record(z.string(), z.unknown()),
 });
 
 export const AlertSchema = z.object({
@@ -246,8 +252,8 @@ export const AlertSchema = z.object({
   ruleId: z.string(),
   eventId: z.string(),
 
-  severity: z.enum(['INFO', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
-  priority: z.enum(['ROUTINE', 'PRIORITY', 'IMMEDIATE', 'FLASH']),
+  severity: z.enum(["INFO", "LOW", "MEDIUM", "HIGH", "CRITICAL"]),
+  priority: z.enum(["ROUTINE", "PRIORITY", "IMMEDIATE", "FLASH"]),
 
   title: z.string(),
   message: z.string(),
@@ -256,11 +262,11 @@ export const AlertSchema = z.object({
   acknowledgedAt: z.string().optional(),
   acknowledgedBy: z.string().optional(),
 
-  status: z.enum(['ACTIVE', 'ACKNOWLEDGED', 'RESOLVED', 'DISMISSED']),
+  status: z.enum(["ACTIVE", "ACKNOWLEDGED", "RESOLVED", "DISMISSED"]),
 
   notifiedUsers: z.array(z.string()),
 
-  metadata: z.record(z.string(), z.unknown())
+  metadata: z.record(z.string(), z.unknown()),
 });
 
 // ============================================================================
@@ -270,39 +276,43 @@ export const AlertSchema = z.object({
 export const WatchShiftSchema = z.object({
   id: z.string(),
   name: z.string(),
-  type: z.enum(['DAY', 'SWING', 'NIGHT', 'ROTATING']),
+  type: z.enum(["DAY", "SWING", "NIGHT", "ROTATING"]),
 
   startTime: z.string(),
   endTime: z.string(),
 
-  personnel: z.array(z.object({
-    userId: z.string(),
-    role: z.enum([
-      'WATCH_OFFICER',
-      'WATCH_SUPERVISOR',
-      'ANALYST',
-      'OPERATOR',
-      'COORDINATOR',
-      'SPECIALIST'
-    ]),
-    position: z.string(),
-    clearanceLevel: z.string()
-  })),
+  personnel: z.array(
+    z.object({
+      userId: z.string(),
+      role: z.enum([
+        "WATCH_OFFICER",
+        "WATCH_SUPERVISOR",
+        "ANALYST",
+        "OPERATOR",
+        "COORDINATOR",
+        "SPECIALIST",
+      ]),
+      position: z.string(),
+      clearanceLevel: z.string(),
+    })
+  ),
 
   responsibilities: z.array(z.string()),
 
-  status: z.enum(['SCHEDULED', 'ACTIVE', 'COMPLETED', 'CANCELLED']),
+  status: z.enum(["SCHEDULED", "ACTIVE", "COMPLETED", "CANCELLED"]),
 
-  handover: z.object({
-    fromShiftId: z.string().optional(),
-    toShiftId: z.string().optional(),
-    briefing: z.string(),
-    keyIssues: z.array(z.string()),
-    pendingActions: z.array(z.string()),
-    completedAt: z.string().optional()
-  }).optional(),
+  handover: z
+    .object({
+      fromShiftId: z.string().optional(),
+      toShiftId: z.string().optional(),
+      briefing: z.string(),
+      keyIssues: z.array(z.string()),
+      pendingActions: z.array(z.string()),
+      completedAt: z.string().optional(),
+    })
+    .optional(),
 
-  metadata: z.record(z.string(), z.unknown())
+  metadata: z.record(z.string(), z.unknown()),
 });
 
 export const WatchLogEntrySchema = z.object({
@@ -311,13 +321,13 @@ export const WatchLogEntrySchema = z.object({
   timestamp: z.string(),
 
   type: z.enum([
-    'OBSERVATION',
-    'ACTION_TAKEN',
-    'COMMUNICATION',
-    'STATUS_UPDATE',
-    'INCIDENT',
-    'DECISION',
-    'COORDINATION'
+    "OBSERVATION",
+    "ACTION_TAKEN",
+    "COMMUNICATION",
+    "STATUS_UPDATE",
+    "INCIDENT",
+    "DECISION",
+    "COORDINATION",
   ]),
 
   entry: z.string(),
@@ -326,7 +336,7 @@ export const WatchLogEntrySchema = z.object({
   author: z.string(),
   relatedEvents: z.array(z.string()),
 
-  metadata: z.record(z.string(), z.unknown())
+  metadata: z.record(z.string(), z.unknown()),
 });
 
 // ============================================================================
@@ -334,10 +344,10 @@ export const WatchLogEntrySchema = z.object({
 // ============================================================================
 
 export const CrisisLevelSchema = z.enum([
-  'STEADY_STATE',
-  'HEIGHTENED_ALERT',
-  'CRISIS',
-  'EMERGENCY'
+  "STEADY_STATE",
+  "HEIGHTENED_ALERT",
+  "CRISIS",
+  "EMERGENCY",
 ]);
 
 export const CrisisResponseSchema = z.object({
@@ -348,68 +358,78 @@ export const CrisisResponseSchema = z.object({
   trigger: z.object({
     eventId: z.string(),
     timestamp: z.string(),
-    description: z.string()
+    description: z.string(),
   }),
 
   // Response team
   team: z.object({
     commander: z.string(),
     deputy: z.string(),
-    members: z.array(z.object({
-      userId: z.string(),
-      role: z.string(),
-      contactInfo: z.string()
-    }))
+    members: z.array(
+      z.object({
+        userId: z.string(),
+        role: z.string(),
+        contactInfo: z.string(),
+      })
+    ),
   }),
 
   // Situation
   situation: z.object({
     summary: z.string(),
-    timeline: z.array(z.object({
-      timestamp: z.string(),
-      event: z.string()
-    })),
+    timeline: z.array(
+      z.object({
+        timestamp: z.string(),
+        event: z.string(),
+      })
+    ),
     affectedAssets: z.array(z.string()),
-    impactAssessment: z.string()
+    impactAssessment: z.string(),
   }),
 
   // Response actions
-  actions: z.array(z.object({
-    id: z.string(),
-    description: z.string(),
-    priority: z.enum(['IMMEDIATE', 'HIGH', 'MEDIUM', 'LOW']),
-    assignedTo: z.string(),
-    status: z.enum(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']),
-    deadline: z.string().optional(),
-    completedAt: z.string().optional()
-  })),
+  actions: z.array(
+    z.object({
+      id: z.string(),
+      description: z.string(),
+      priority: z.enum(["IMMEDIATE", "HIGH", "MEDIUM", "LOW"]),
+      assignedTo: z.string(),
+      status: z.enum(["PENDING", "IN_PROGRESS", "COMPLETED", "CANCELLED"]),
+      deadline: z.string().optional(),
+      completedAt: z.string().optional(),
+    })
+  ),
 
   // Communications
-  communications: z.array(z.object({
-    timestamp: z.string(),
-    from: z.string(),
-    to: z.array(z.string()),
-    channel: z.string(),
-    message: z.string()
-  })),
+  communications: z.array(
+    z.object({
+      timestamp: z.string(),
+      from: z.string(),
+      to: z.array(z.string()),
+      channel: z.string(),
+      message: z.string(),
+    })
+  ),
 
   // Decision log
-  decisions: z.array(z.object({
-    timestamp: z.string(),
-    decisionMaker: z.string(),
-    decision: z.string(),
-    rationale: z.string(),
-    approvals: z.array(z.string())
-  })),
+  decisions: z.array(
+    z.object({
+      timestamp: z.string(),
+      decisionMaker: z.string(),
+      decision: z.string(),
+      rationale: z.string(),
+      approvals: z.array(z.string()),
+    })
+  ),
 
-  status: z.enum(['ACTIVE', 'RESOLVED', 'ESCALATED', 'CANCELLED']),
+  status: z.enum(["ACTIVE", "RESOLVED", "ESCALATED", "CANCELLED"]),
 
   resolvedAt: z.string().optional(),
   resolution: z.string().optional(),
 
   metadata: z.record(z.string(), z.unknown()),
   createdAt: z.string(),
-  updatedAt: z.string()
+  updatedAt: z.string(),
 });
 
 // ============================================================================
@@ -465,7 +485,7 @@ export class OperationsCenter {
       throw new Error(`COP ${copId} not found`);
     }
 
-    const layer = cop.layers.find(l => l.id === layerId);
+    const layer = cop.layers.find((l) => l.id === layerId);
     if (!layer) {
       throw new Error(`Layer ${layerId} not found`);
     }
@@ -501,24 +521,22 @@ export class OperationsCenter {
     let events = Array.from(this.events.values());
 
     if (filter?.type) {
-      events = events.filter(e => filter.type!.includes(e.type));
+      events = events.filter((e) => filter.type!.includes(e.type));
     }
     if (filter?.severity) {
-      events = events.filter(e => filter.severity!.includes(e.severity));
+      events = events.filter((e) => filter.severity!.includes(e.severity));
     }
     if (filter?.startTime) {
-      events = events.filter(e => new Date(e.timestamp) >= new Date(filter.startTime!));
+      events = events.filter((e) => new Date(e.timestamp) >= new Date(filter.startTime!));
     }
     if (filter?.endTime) {
-      events = events.filter(e => new Date(e.timestamp) <= new Date(filter.endTime!));
+      events = events.filter((e) => new Date(e.timestamp) <= new Date(filter.endTime!));
     }
     if (filter?.status) {
-      events = events.filter(e => filter.status!.includes(e.status));
+      events = events.filter((e) => filter.status!.includes(e.status));
     }
 
-    return events.sort((a, b) =>
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    );
+    return events.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }
 
   /**
@@ -535,7 +553,9 @@ export class OperationsCenter {
    */
   private evaluateAlertRules(event: OperationalEvent): void {
     for (const rule of this.alertRules.values()) {
-      if (!rule.enabled) {continue;}
+      if (!rule.enabled) {
+        continue;
+      }
 
       let matches = true;
 
@@ -579,9 +599,9 @@ export class OperationsCenter {
       title: `Alert: ${event.title}`,
       message: event.description,
       timestamp: new Date().toISOString(),
-      status: 'ACTIVE',
+      status: "ACTIVE",
       notifiedUsers: [],
-      metadata: {} as Record<string, unknown>
+      metadata: {} as Record<string, unknown>,
     };
 
     this.alerts.set(alert.id, AlertSchema.parse(alert));
@@ -592,7 +612,7 @@ export class OperationsCenter {
    */
   getActiveAlerts(): Alert[] {
     return Array.from(this.alerts.values())
-      .filter(a => a.status === 'ACTIVE')
+      .filter((a) => a.status === "ACTIVE")
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }
 
@@ -605,7 +625,7 @@ export class OperationsCenter {
       throw new Error(`Alert ${alertId} not found`);
     }
 
-    alert.status = 'ACKNOWLEDGED';
+    alert.status = "ACKNOWLEDGED";
     alert.acknowledgedAt = new Date().toISOString();
     alert.acknowledgedBy = userId;
 
@@ -646,9 +666,9 @@ export class OperationsCenter {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(this.toRad(lat1)) *
-      Math.cos(this.toRad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+        Math.cos(this.toRad(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }

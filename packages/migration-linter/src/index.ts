@@ -1,2 +1,2 @@
-export * from './linter.js';
-export * from './types.js';
+export * from "./linter.js";
+export * from "./types.js";

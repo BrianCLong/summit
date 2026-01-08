@@ -2,17 +2,22 @@ module.exports = {
   root: true,
   env: {
     es2022: true,
-    node: true
+    node: true,
   },
-  extends: ["eslint:recommended", "plugin:import/recommended", "plugin:import/typescript", "prettier"],
+  extends: [
+    "eslint:recommended",
+    "plugin:import/recommended",
+    "plugin:import/typescript",
+    "prettier",
+  ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
     ecmaVersion: "latest",
-    sourceType: "module"
+    sourceType: "module",
   },
   plugins: ["@typescript-eslint"],
   rules: {
-    "import/no-unresolved": "off"
+    "import/no-unresolved": "off",
   },
-  ignorePatterns: ["dist"]
+  ignorePatterns: ["dist"],
 };

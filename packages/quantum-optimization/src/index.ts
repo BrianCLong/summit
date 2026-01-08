@@ -4,10 +4,10 @@
  */
 
 // QAOA
-export * from './qaoa/qaoa-optimizer';
+export * from "./qaoa/qaoa-optimizer";
 
 // Quantum Annealing
-export * from './annealing/quantum-annealer';
+export * from "./annealing/quantum-annealer";
 
 // VQE (Variational Quantum Eigensolver)
-export * from './vqe/vqe-solver';
+export * from "./vqe/vqe-solver";

@@ -1,5 +1,5 @@
 ---
-name: 'Release Checklist (S25)'
+name: "Release Checklist (S25)"
 about: Gate for consolidated merge
 labels: release
 ---

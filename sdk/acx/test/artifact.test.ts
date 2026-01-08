@@ -1,9 +1,9 @@
-import { createRequire } from 'node:module';
-import { AdaptiveConsentSDK } from '../src/sdk.js';
-import { ConsentArtifact, ConsentDecision, PolicyTemplatePack } from '../src/types.js';
+import { createRequire } from "node:module";
+import { AdaptiveConsentSDK } from "../src/sdk.js";
+import { ConsentArtifact, ConsentDecision, PolicyTemplatePack } from "../src/types.js";
 
 const require = createRequire(import.meta.url);
-const pack = require('../templates/policyPack.json') as PolicyTemplatePack;
+const pack = require("../templates/policyPack.json") as PolicyTemplatePack;
 
 const PRIVATE_KEY = `-----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC4ZMiSBOZ92zaa
@@ -44,22 +44,22 @@ W0AGhD9c+ODJico4nICI0rgwUKUdLPG9tPVRSQcjsEa7oymtx0LV73jgpdUAonxS
 HQIDAQAB
 -----END PUBLIC KEY-----`;
 
-describe('Consent artifacts', () => {
+describe("Consent artifacts", () => {
   const sdk = new AdaptiveConsentSDK(pack);
 
-  it('signs and verifies artifacts offline', () => {
-    const artifact = sdk.emitSignedArtifact('user-123', 'accept', { locale: 'en-US' }, PRIVATE_KEY);
+  it("signs and verifies artifacts offline", () => {
+    const artifact = sdk.emitSignedArtifact("user-123", "accept", { locale: "en-US" }, PRIVATE_KEY);
     expect(AdaptiveConsentSDK.verifyArtifact(artifact, PUBLIC_KEY)).toBe(true);
   });
 
-  it('fails verification when payload is altered', () => {
-    const artifact = sdk.emitSignedArtifact('user-123', 'accept', { locale: 'en-US' }, PRIVATE_KEY);
+  it("fails verification when payload is altered", () => {
+    const artifact = sdk.emitSignedArtifact("user-123", "accept", { locale: "en-US" }, PRIVATE_KEY);
     const tampered: ConsentArtifact = {
       ...artifact,
       payload: {
         ...artifact.payload,
-        decision: 'reject' as ConsentDecision
-      }
+        decision: "reject" as ConsentDecision,
+      },
     };
     expect(AdaptiveConsentSDK.verifyArtifact(tampered, PUBLIC_KEY)).toBe(false);
   });

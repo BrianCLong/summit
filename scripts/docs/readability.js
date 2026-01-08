@@ -1,10 +1,10 @@
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
-const TextStatistics = require('text-statistics');
+const fs = require("fs");
+const path = require("path");
+const matter = require("gray-matter");
+const TextStatistics = require("text-statistics");
 let fail = false;
 function body(md) {
-  return md.replace(/```[\s\S]*?```/g, '').replace(/<[^>]+>/g, '');
+  return md.replace(/```[\s\S]*?```/g, "").replace(/<[^>]+>/g, "");
 }
 (function walk(d) {
   for (const f of fs.readdirSync(d)) {
@@ -16,10 +16,10 @@ function body(md) {
       const txt = body(g.content);
       const ts = new TextStatistics(txt);
       const grade = ts.fleschKincaidGradeLevel();
-      if (grade > 10 && (g.data.type || '') !== 'reference') {
+      if (grade > 10 && (g.data.type || "") !== "reference") {
         console.warn(`High grade level (${grade.toFixed(1)}): ${p}`);
       }
     }
   }
-})('docs');
+})("docs");
 process.exit(fail ? 1 : 0);

@@ -1,9 +1,4 @@
-import {
-  Plugin,
-  PluginManifest,
-  PluginContext,
-  PluginPermission,
-} from '@intelgraph/plugin-system';
+import { Plugin, PluginManifest, PluginContext, PluginPermission } from "@intelgraph/plugin-system";
 
 /**
  * Builder class for creating plugins with fluent API
@@ -35,7 +30,7 @@ export class PluginBuilder {
       url?: string;
     };
     license: string;
-    category: PluginManifest['category'];
+    category: PluginManifest["category"];
   }): this {
     Object.assign(this.manifest, metadata);
     return this;
@@ -74,7 +69,7 @@ export class PluginBuilder {
    * Add multiple permissions
    */
   requestPermissions(...permissions: PluginPermission[]): this {
-    permissions.forEach(p => this.requestPermission(p));
+    permissions.forEach((p) => this.requestPermission(p));
     return this;
   }
 
@@ -126,7 +121,7 @@ export class PluginBuilder {
    * Add API endpoint
    */
   addEndpoint(endpoint: {
-    method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+    method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
     path: string;
     handler: string;
   }): this {
@@ -182,15 +177,15 @@ export class PluginBuilder {
    */
   build(): Plugin {
     // Validate required fields
-    if (!this.manifest.id) throw new Error('Plugin ID is required');
-    if (!this.manifest.name) throw new Error('Plugin name is required');
-    if (!this.manifest.version) throw new Error('Plugin version is required');
-    if (!this.manifest.description) throw new Error('Plugin description is required');
-    if (!this.manifest.author) throw new Error('Plugin author is required');
-    if (!this.manifest.license) throw new Error('Plugin license is required');
-    if (!this.manifest.category) throw new Error('Plugin category is required');
-    if (!this.manifest.main) throw new Error('Plugin main entry point is required');
-    if (!this.manifest.engineVersion) throw new Error('Engine version is required');
+    if (!this.manifest.id) throw new Error("Plugin ID is required");
+    if (!this.manifest.name) throw new Error("Plugin name is required");
+    if (!this.manifest.version) throw new Error("Plugin version is required");
+    if (!this.manifest.description) throw new Error("Plugin description is required");
+    if (!this.manifest.author) throw new Error("Plugin author is required");
+    if (!this.manifest.license) throw new Error("Plugin license is required");
+    if (!this.manifest.category) throw new Error("Plugin category is required");
+    if (!this.manifest.main) throw new Error("Plugin main entry point is required");
+    if (!this.manifest.engineVersion) throw new Error("Engine version is required");
 
     const manifest = this.manifest as PluginManifest;
 

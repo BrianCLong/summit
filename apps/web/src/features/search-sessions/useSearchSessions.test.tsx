@@ -1,6 +1,9 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { describe, expect, it, beforeEach } from 'vitest'
-import { useSearchSessions, SEARCH_SESSION_STORAGE_KEY } from './useSearchSessions'
+import {
+  useSearchSessions,
+  SEARCH_SESSION_STORAGE_KEY,
+} from './useSearchSessions'
 import type { FilterState } from '@/types'
 
 const createFilters = (): FilterState => ({
@@ -67,7 +70,9 @@ describe('useSearchSessions', () => {
     const savedActiveId = firstRender.result.current.activeSessionId
     firstRender.unmount()
 
-    const secondRender = renderHook(() => useSearchSessions(true, createFilters))
+    const secondRender = renderHook(() =>
+      useSearchSessions(true, createFilters)
+    )
 
     expect(secondRender.result.current.restoredFromStorage).toBe(true)
     expect(secondRender.result.current.activeSessionId).toBe(savedActiveId)

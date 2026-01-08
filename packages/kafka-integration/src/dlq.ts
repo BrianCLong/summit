@@ -1,7 +1,7 @@
-import { Kafka, Producer, KafkaMessage } from 'kafkajs';
-import pino from 'pino';
+import { Kafka, Producer, KafkaMessage } from "kafkajs";
+import pino from "pino";
 
-const logger = pino({ name: 'dlq' });
+const logger = pino({ name: "dlq" });
 
 /**
  * Dead Letter Queue for failed message handling
@@ -25,19 +25,15 @@ export class DeadLetterQueue {
     });
 
     await this.producer.connect();
-    logger.info({ dlqTopic: this.dlqTopic }, 'DLQ producer connected');
+    logger.info({ dlqTopic: this.dlqTopic }, "DLQ producer connected");
   }
 
   /**
    * Send failed message to DLQ
    */
-  async send(
-    originalTopic: string,
-    message: KafkaMessage,
-    error: Error
-  ): Promise<void> {
+  async send(originalTopic: string, message: KafkaMessage, error: Error): Promise<void> {
     if (!this.producer) {
-      throw new Error('DLQ producer not connected');
+      throw new Error("DLQ producer not connected");
     }
 
     const messageKey = `${originalTopic}-${message.offset}`;
@@ -50,7 +46,7 @@ export class DeadLetterQueue {
           offset: message.offset,
           retries: currentRetries,
         },
-        'Message exceeded max retries, sending to DLQ'
+        "Message exceeded max retries, sending to DLQ"
       );
 
       await this.producer.send({
@@ -61,11 +57,11 @@ export class DeadLetterQueue {
             value: message.value,
             headers: {
               ...message.headers,
-              'dlq.original-topic': originalTopic,
-              'dlq.original-offset': message.offset,
-              'dlq.error': error.message,
-              'dlq.retry-count': String(currentRetries),
-              'dlq.timestamp': Date.now().toString(),
+              "dlq.original-topic": originalTopic,
+              "dlq.original-offset": message.offset,
+              "dlq.error": error.message,
+              "dlq.retry-count": String(currentRetries),
+              "dlq.timestamp": Date.now().toString(),
             },
           },
         ],
@@ -80,7 +76,7 @@ export class DeadLetterQueue {
           offset: message.offset,
           retries: currentRetries + 1,
         },
-        'Message will be retried'
+        "Message will be retried"
       );
     }
   }
@@ -92,7 +88,7 @@ export class DeadLetterQueue {
     if (this.producer) {
       await this.producer.disconnect();
       this.producer = null;
-      logger.info('DLQ producer disconnected');
+      logger.info("DLQ producer disconnected");
     }
   }
 

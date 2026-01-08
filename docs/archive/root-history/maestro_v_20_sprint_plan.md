@@ -66,10 +66,10 @@ Turn Maestro into a **self‑certifying, price‑aware, globally resilient Engin
 
 ```ts
 // services/lsc/sign.ts
-import crypto from 'crypto';
+import crypto from "crypto";
 export function signLSC(doc: any, privPem: string) {
   const data = Buffer.from(JSON.stringify(doc));
-  const sig = crypto.sign('sha256', data, privPem).toString('base64');
+  const sig = crypto.sign("sha256", data, privPem).toString("base64");
   return { doc, sig };
 }
 ```
@@ -92,7 +92,7 @@ export function signLSC(doc: any, privPem: string) {
 
 ```ts
 // tools/ast/apply.ts
-import { Project, SyntaxKind } from 'ts-morph';
+import { Project, SyntaxKind } from "ts-morph";
 export function addGuard(file: string, fn: string, guard: string) {
   const p = new Project();
   p.addSourceFileAtPath(file);
@@ -100,7 +100,7 @@ export function addGuard(file: string, fn: string, guard: string) {
     .getSourceFile(file)!
     .getFunctions()
     .find((x) => x.getName() === fn);
-  if (!f) throw new Error('fn missing');
+  if (!f) throw new Error("fn missing");
   f.addStatements(0, guard);
   p.saveSync();
 }
@@ -129,7 +129,7 @@ export function effectiveUSD(
   tokK: number,
   gpuMin: number,
   ptok: number,
-  pgpu: number,
+  pgpu: number
 ) {
   return base + tokK * ptok + gpuMin * pgpu;
 }
@@ -153,10 +153,10 @@ export function effectiveUSD(
 
 ```yaml
 id: build-api
-needs: ['lint', 'deps']
-run: 'nix build .#api'
-cache_key: 'sha256(src/**, lock)'
-outputs: ['result/api.tar']
+needs: ["lint", "deps"]
+run: "nix build .#api"
+cache_key: "sha256(src/**, lock)"
+outputs: ["result/api.tar"]
 ```
 
 ---
@@ -272,22 +272,16 @@ export function pickOwner(scores: { user: string; p: number }[]) {
       $(function () {
         var lsc = {
           claims: [
-            { id: 'CL1', text: 'Spec≥0.95 ✔' },
-            { id: 'CL2', text: 'Policy denies==0 ✔' },
-            { id: 'CL3', text: 'Mutation≥0.75 ✔' },
+            { id: "CL1", text: "Spec≥0.95 ✔" },
+            { id: "CL2", text: "Policy denies==0 ✔" },
+            { id: "CL3", text: "Mutation≥0.75 ✔" },
           ],
         };
-        $('#claims').html(
-          lsc.claims.map((c) => '<div>' + c.text + '</div>').join(''),
-        );
-        $('#sim').on('click', () =>
-          $.post('/api/twin/run', { pr: location.search.slice(1) }),
-        );
-        $('#alt').on('click', () =>
-          $.post('/api/decision/alt', { arm: 'impl@medium' }),
-        );
-        $('#merge').on('click', () =>
-          $.post('/api/merge/request', { pr: location.search.slice(1) }),
+        $("#claims").html(lsc.claims.map((c) => "<div>" + c.text + "</div>").join(""));
+        $("#sim").on("click", () => $.post("/api/twin/run", { pr: location.search.slice(1) }));
+        $("#alt").on("click", () => $.post("/api/decision/alt", { arm: "impl@medium" }));
+        $("#merge").on("click", () =>
+          $.post("/api/merge/request", { pr: location.search.slice(1) })
         );
       });
     </script>

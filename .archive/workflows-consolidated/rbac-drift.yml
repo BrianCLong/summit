@@ -2,10 +2,10 @@ name: RBAC Drift Monitor
 
 on:
   schedule:
-    - cron: '0 1 * * *'
+    - cron: "0 1 * * *"
   push:
     paths:
-      - 'rbac/**'
+      - "rbac/**"
 
 jobs:
   drift:
@@ -15,7 +15,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@824a6237875d7a63864050674956c050c8c0868 # v4
         with:
-          python-version: '3.x'
+          python-version: "3.x"
       # - name: Install dependencies
       #   run: |
       #     pip install numpy scikit-learn xgboost cryptography

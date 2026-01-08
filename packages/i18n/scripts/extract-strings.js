@@ -16,9 +16,9 @@
  *   --dry-run          Preview extraction without writing files
  */
 
-import fs from 'fs';
-import path from 'path';
-import { glob } from 'glob';
+import fs from "fs";
+import path from "path";
+import { glob } from "glob";
 
 // Patterns to match translatable strings
 const STRING_PATTERNS = [
@@ -36,19 +36,19 @@ const STRING_PATTERNS = [
 
 // Strings to exclude from extraction
 const EXCLUDE_PATTERNS = [
-  /^$/,                          // Empty strings
-  /^\s+$/,                       // Whitespace only
-  /^[0-9]+$/,                    // Numbers only
-  /^[!@#$%^&*(),.?":{}|<>]+$/,   // Symbols only
+  /^$/, // Empty strings
+  /^\s+$/, // Whitespace only
+  /^[0-9]+$/, // Numbers only
+  /^[!@#$%^&*(),.?":{}|<>]+$/, // Symbols only
   /^(true|false|null|undefined)$/i, // Literals
   /^(const|let|var|function|class|import|export|from|return)$/i, // Keywords
-  /^[a-z][a-zA-Z0-9]*$/,         // camelCase identifiers
-  /^[A-Z][A-Z_0-9]*$/,           // CONSTANT_CASE
+  /^[a-z][a-zA-Z0-9]*$/, // camelCase identifiers
+  /^[A-Z][A-Z_0-9]*$/, // CONSTANT_CASE
   /^[A-Z][a-z]+([A-Z][a-z]+)*$/, // PascalCase
-  /^https?:\/\//,                // URLs
-  /^\/[^\s]*$/,                  // Paths
-  /^\./,                         // Relative paths
-  /^@/,                          // Package names
+  /^https?:\/\//, // URLs
+  /^\/[^\s]*$/, // Paths
+  /^\./, // Relative paths
+  /^@/, // Package names
 ];
 
 function shouldExtractString(str) {
@@ -65,7 +65,7 @@ function shouldExtractString(str) {
 }
 
 function extractStringsFromFile(filePath) {
-  const content = fs.readFileSync(filePath, 'utf-8');
+  const content = fs.readFileSync(filePath, "utf-8");
   const strings = new Set();
 
   for (const pattern of STRING_PATTERNS) {
@@ -85,20 +85,20 @@ function generateKey(str) {
   // Generate a translation key from string
   const cleaned = str
     .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/[^a-z0-9\s]/g, "")
     .trim()
     .split(/\s+/)
     .slice(0, 5) // Max 5 words
-    .join('_');
+    .join("_");
 
   return cleaned || `string_${Math.random().toString(36).slice(2, 9)}`;
 }
 
 async function extractStrings(sourceDir, options = {}) {
   const {
-    output = './extracted',
-    pattern = '**/*.{js,jsx,ts,tsx}',
-    namespace = 'extracted',
+    output = "./extracted",
+    pattern = "**/*.{js,jsx,ts,tsx}",
+    namespace = "extracted",
     dryRun = false,
   } = options;
 
@@ -108,7 +108,7 @@ async function extractStrings(sourceDir, options = {}) {
   const files = await glob(pattern, {
     cwd: sourceDir,
     absolute: true,
-    ignore: ['**/node_modules/**', '**/dist/**', '**/build/**', '**/*.test.*', '**/*.spec.*'],
+    ignore: ["**/node_modules/**", "**/dist/**", "**/build/**", "**/*.test.*", "**/*.spec.*"],
   });
 
   console.log(`📂 Found ${files.length} files to scan\n`);
@@ -137,10 +137,12 @@ async function extractStrings(sourceDir, options = {}) {
   console.log(`\n✨ Extracted ${totalStrings} total strings (${allExtracted.size} unique)\n`);
 
   if (dryRun) {
-    console.log('🔍 DRY RUN - Preview of extracted strings:\n');
+    console.log("🔍 DRY RUN - Preview of extracted strings:\n");
     for (const [key, { value, files }] of Array.from(allExtracted.entries()).slice(0, 20)) {
       console.log(`   ${key}: "${value}"`);
-      console.log(`      Found in: ${files.slice(0, 3).join(', ')}${files.length > 3 ? ` (+${files.length - 3} more)` : ''}\n`);
+      console.log(
+        `      Found in: ${files.slice(0, 3).join(", ")}${files.length > 3 ? ` (+${files.length - 3} more)` : ""}\n`
+      );
     }
     if (allExtracted.size > 20) {
       console.log(`   ... and ${allExtracted.size - 20} more\n`);
@@ -157,11 +159,7 @@ async function extractStrings(sourceDir, options = {}) {
     translations[key] = value;
   }
 
-  fs.writeFileSync(
-    outputPath,
-    JSON.stringify(translations, null, 2),
-    'utf-8'
-  );
+  fs.writeFileSync(outputPath, JSON.stringify(translations, null, 2), "utf-8");
 
   console.log(`💾 Saved extracted strings to: ${outputPath}`);
   console.log(`\n✅ Extraction complete!`);
@@ -174,16 +172,16 @@ async function extractStrings(sourceDir, options = {}) {
 // CLI entry point
 if (import.meta.url === `file://${process.argv[1]}`) {
   const args = process.argv.slice(2);
-  const sourceDir = args[0] || '.';
+  const sourceDir = args[0] || ".";
 
   const options = {
-    output: args.find((arg, i) => args[i - 1] === '--output'),
-    pattern: args.find((arg, i) => args[i - 1] === '--pattern'),
-    namespace: args.find((arg, i) => args[i - 1] === '--namespace'),
-    dryRun: args.includes('--dry-run'),
+    output: args.find((arg, i) => args[i - 1] === "--output"),
+    pattern: args.find((arg, i) => args[i - 1] === "--pattern"),
+    namespace: args.find((arg, i) => args[i - 1] === "--namespace"),
+    dryRun: args.includes("--dry-run"),
   };
 
-  if (args.includes('--help') || args.includes('-h')) {
+  if (args.includes("--help") || args.includes("-h")) {
     console.log(`
 String Extraction Tool
 

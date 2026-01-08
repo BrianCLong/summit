@@ -5,45 +5,39 @@
  * Validates documentation follows required structure and conventions
  */
 
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
+const fs = require("fs");
+const path = require("path");
+const matter = require("gray-matter");
 
 class DocumentationStructureValidator {
-  constructor(docsPath = 'docs') {
+  constructor(docsPath = "docs") {
     this.docsPath = docsPath;
     this.errors = [];
     this.warnings = [];
 
     // Required frontmatter fields
-    this.requiredFields = [
-      'title',
-      'summary',
-      'version',
-      'lastUpdated',
-      'owner',
-    ];
+    this.requiredFields = ["title", "summary", "version", "lastUpdated", "owner"];
 
     // Valid owner teams
     this.validOwners = [
-      'docs',
-      'api',
-      'platform',
-      'ml',
-      'infra',
-      'security',
-      'ops',
-      'product',
-      'engineering',
-      'support',
+      "docs",
+      "api",
+      "platform",
+      "ml",
+      "infra",
+      "security",
+      "ops",
+      "product",
+      "engineering",
+      "support",
     ];
 
     // Required sections for different content types
     this.requiredSections = {
-      'how-to': ['Prerequisites', 'Steps', 'Validation', 'Troubleshooting'],
-      tutorial: ['Overview', 'Prerequisites', 'Next steps'],
-      concept: ['Overview', 'Why it matters', 'How it works'],
-      reference: ['Overview', 'Syntax', 'Examples'],
+      "how-to": ["Prerequisites", "Steps", "Validation", "Troubleshooting"],
+      tutorial: ["Overview", "Prerequisites", "Next steps"],
+      concept: ["Overview", "Why it matters", "How it works"],
+      reference: ["Overview", "Syntax", "Examples"],
     };
   }
 
@@ -51,7 +45,7 @@ class DocumentationStructureValidator {
    * Validate overall documentation structure
    */
   async validate() {
-    console.log('🔍 Validating documentation structure...');
+    console.log("🔍 Validating documentation structure...");
 
     // Check directory structure
     this.validateDirectoryStructure();
@@ -79,17 +73,17 @@ class DocumentationStructureValidator {
    * Validate directory structure follows conventions
    */
   validateDirectoryStructure() {
-    console.log('  📁 Checking directory structure...');
+    console.log("  📁 Checking directory structure...");
 
     const requiredDirs = [
-      'docs/getting-started',
-      'docs/how-to',
-      'docs/tutorials',
-      'docs/concepts',
-      'docs/reference',
-      'docs/api',
-      'docs/releases',
-      'docs/governance',
+      "docs/getting-started",
+      "docs/how-to",
+      "docs/tutorials",
+      "docs/concepts",
+      "docs/reference",
+      "docs/api",
+      "docs/releases",
+      "docs/governance",
     ];
 
     requiredDirs.forEach((dir) => {
@@ -99,7 +93,7 @@ class DocumentationStructureValidator {
     });
 
     // Check for deprecated directories
-    const deprecatedDirs = ['docs/legacy', 'docs/old', 'docs/archived'];
+    const deprecatedDirs = ["docs/legacy", "docs/old", "docs/archived"];
 
     deprecatedDirs.forEach((dir) => {
       if (fs.existsSync(dir)) {
@@ -112,7 +106,7 @@ class DocumentationStructureValidator {
    * Validate individual documentation files
    */
   async validateFiles() {
-    console.log('  📄 Validating individual files...');
+    console.log("  📄 Validating individual files...");
 
     const files = this.getAllMarkdownFiles();
 
@@ -126,7 +120,7 @@ class DocumentationStructureValidator {
    */
   async validateFile(filePath) {
     try {
-      const content = fs.readFileSync(filePath, 'utf8');
+      const content = fs.readFileSync(filePath, "utf8");
       const parsed = matter(content);
 
       // Validate frontmatter
@@ -149,16 +143,14 @@ class DocumentationStructureValidator {
     // Check required fields
     this.requiredFields.forEach((field) => {
       if (!frontmatter[field]) {
-        this.errors.push(
-          `${filePath}: Missing required frontmatter field: ${field}`,
-        );
+        this.errors.push(`${filePath}: Missing required frontmatter field: ${field}`);
       }
     });
 
     // Validate owner
     if (frontmatter.owner && !this.validOwners.includes(frontmatter.owner)) {
       this.errors.push(
-        `${filePath}: Invalid owner '${frontmatter.owner}'. Must be one of: ${this.validOwners.join(', ')}`,
+        `${filePath}: Invalid owner '${frontmatter.owner}'. Must be one of: ${this.validOwners.join(", ")}`
       );
     }
 
@@ -166,9 +158,7 @@ class DocumentationStructureValidator {
     if (frontmatter.lastUpdated) {
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
       if (!dateRegex.test(frontmatter.lastUpdated)) {
-        this.errors.push(
-          `${filePath}: Invalid lastUpdated format. Use YYYY-MM-DD`,
-        );
+        this.errors.push(`${filePath}: Invalid lastUpdated format. Use YYYY-MM-DD`);
       } else {
         // Check if date is not too old (warn if > 6 months)
         const lastUpdated = new Date(frontmatter.lastUpdated);
@@ -177,7 +167,7 @@ class DocumentationStructureValidator {
 
         if (lastUpdated < sixMonthsAgo) {
           this.warnings.push(
-            `${filePath}: Content is more than 6 months old (${frontmatter.lastUpdated})`,
+            `${filePath}: Content is more than 6 months old (${frontmatter.lastUpdated})`
           );
         }
       }
@@ -185,15 +175,12 @@ class DocumentationStructureValidator {
 
     // Validate version format
     if (frontmatter.version) {
-      const validVersions = ['latest', 'deprecated', 'draft'];
+      const validVersions = ["latest", "deprecated", "draft"];
       const semverRegex = /^\d+\.\d+\.\d+$/;
 
-      if (
-        !validVersions.includes(frontmatter.version) &&
-        !semverRegex.test(frontmatter.version)
-      ) {
+      if (!validVersions.includes(frontmatter.version) && !semverRegex.test(frontmatter.version)) {
         this.warnings.push(
-          `${filePath}: Version should be 'latest', 'deprecated', 'draft', or semantic version (x.y.z)`,
+          `${filePath}: Version should be 'latest', 'deprecated', 'draft', or semantic version (x.y.z)`
         );
       }
     }
@@ -208,29 +195,22 @@ class DocumentationStructureValidator {
     // Check for required sections based on content type
     if (this.requiredSections[contentType]) {
       this.requiredSections[contentType].forEach((section) => {
-        const sectionRegex = new RegExp(`^##\\s+${section}`, 'm');
+        const sectionRegex = new RegExp(`^##\\s+${section}`, "m");
         if (!sectionRegex.test(content)) {
           this.errors.push(
-            `${filePath}: Missing required section '${section}' for ${contentType} content`,
+            `${filePath}: Missing required section '${section}' for ${contentType} content`
           );
         }
       });
     }
 
     // Check for "See also" and "Next steps" sections (best practice)
-    if (!content.includes('## See also') && !content.includes('##See also')) {
-      this.warnings.push(
-        `${filePath}: Consider adding a 'See also' section for better navigation`,
-      );
+    if (!content.includes("## See also") && !content.includes("##See also")) {
+      this.warnings.push(`${filePath}: Consider adding a 'See also' section for better navigation`);
     }
 
-    if (
-      !content.includes('## Next steps') &&
-      !content.includes('##Next steps')
-    ) {
-      this.warnings.push(
-        `${filePath}: Consider adding a 'Next steps' section to guide users`,
-      );
+    if (!content.includes("## Next steps") && !content.includes("##Next steps")) {
+      this.warnings.push(`${filePath}: Consider adding a 'Next steps' section to guide users`);
     }
 
     // Validate heading hierarchy
@@ -248,12 +228,12 @@ class DocumentationStructureValidator {
       return frontmatter.type;
     }
 
-    if (filePath.includes('/how-to/')) return 'how-to';
-    if (filePath.includes('/tutorials/')) return 'tutorial';
-    if (filePath.includes('/concepts/')) return 'concept';
-    if (filePath.includes('/reference/')) return 'reference';
+    if (filePath.includes("/how-to/")) return "how-to";
+    if (filePath.includes("/tutorials/")) return "tutorial";
+    if (filePath.includes("/concepts/")) return "concept";
+    if (filePath.includes("/reference/")) return "reference";
 
-    return 'general';
+    return "general";
   }
 
   /**
@@ -268,7 +248,7 @@ class DocumentationStructureValidator {
 
       if (level > lastLevel + 1) {
         this.warnings.push(
-          `${filePath}: Heading hierarchy skip detected at line with '${heading.trim()}'. Consider using h${lastLevel + 1} instead of h${level}`,
+          `${filePath}: Heading hierarchy skip detected at line with '${heading.trim()}'. Consider using h${lastLevel + 1} instead of h${level}`
         );
       }
 
@@ -290,7 +270,7 @@ class DocumentationStructureValidator {
       lineNumber = (beforeMatch.match(/\n/g) || []).length + 1;
 
       this.warnings.push(
-        `${filePath}:${lineNumber}: Code block without language specification. Consider adding language for syntax highlighting`,
+        `${filePath}:${lineNumber}: Code block without language specification. Consider adding language for syntax highlighting`
       );
     }
   }
@@ -311,25 +291,20 @@ class DocumentationStructureValidator {
     // Unmatched parentheses in links
     const openParens = (content.match(/\]\(/g) || []).length;
     const closeParens =
-      (content.match(/\)\s/g) || []).length +
-      (content.match(/\)$/gm) || []).length;
+      (content.match(/\)\s/g) || []).length + (content.match(/\)$/gm) || []).length;
     if (openParens > closeParens) {
-      this.warnings.push(
-        `${filePath}: Possible unmatched parentheses in links`,
-      );
+      this.warnings.push(`${filePath}: Possible unmatched parentheses in links`);
     }
 
     // Check for empty links
-    if (content.includes('[]()') || content.includes('[](')) {
+    if (content.includes("[]()") || content.includes("[](")) {
       this.errors.push(`${filePath}: Empty links detected`);
     }
 
     // Check for missing alt text in images
     const imageRegex = /!\[\]\(/g;
     if (imageRegex.test(content)) {
-      this.errors.push(
-        `${filePath}: Images missing alt text for accessibility`,
-      );
+      this.errors.push(`${filePath}: Images missing alt text for accessibility`);
     }
   }
 
@@ -337,13 +312,13 @@ class DocumentationStructureValidator {
    * Check for required top-level files
    */
   validateRequiredFiles() {
-    console.log('  📋 Checking required files...');
+    console.log("  📋 Checking required files...");
 
     const requiredFiles = [
-      'docs/README.md',
-      'docs/getting-started/index.md',
-      'docs/governance/documentation-charter.md',
-      'docs/_meta/features.yml',
+      "docs/README.md",
+      "docs/getting-started/index.md",
+      "docs/governance/documentation-charter.md",
+      "docs/_meta/features.yml",
     ];
 
     requiredFiles.forEach((file) => {
@@ -357,25 +332,25 @@ class DocumentationStructureValidator {
    * Validate navigation structure
    */
   validateNavigation() {
-    console.log('  🧭 Validating navigation structure...');
+    console.log("  🧭 Validating navigation structure...");
 
-    const sidebarPath = 'docs-site/sidebars.js';
+    const sidebarPath = "docs-site/sidebars.js";
     if (!fs.existsSync(sidebarPath)) {
-      this.errors.push('Missing sidebars.js configuration');
+      this.errors.push("Missing sidebars.js configuration");
       return;
     }
 
     try {
-      const sidebarContent = fs.readFileSync(sidebarPath, 'utf8');
+      const sidebarContent = fs.readFileSync(sidebarPath, "utf8");
 
       // Basic validation - check for required sections
       const requiredSections = [
-        'getting-started',
-        'tutorials',
-        'how-to',
-        'concepts',
-        'reference',
-        'api',
+        "getting-started",
+        "tutorials",
+        "how-to",
+        "concepts",
+        "reference",
+        "api",
       ];
 
       requiredSections.forEach((section) => {
@@ -403,7 +378,7 @@ class DocumentationStructureValidator {
 
         if (stat.isDirectory()) {
           walkDir(itemPath);
-        } else if (item.endsWith('.md') || item.endsWith('.mdx')) {
+        } else if (item.endsWith(".md") || item.endsWith(".mdx")) {
           files.push(itemPath);
         }
       });
@@ -420,11 +395,11 @@ class DocumentationStructureValidator {
    * Generate validation report
    */
   generateReport() {
-    console.log('\n📊 Structure Validation Report');
-    console.log('================================');
+    console.log("\n📊 Structure Validation Report");
+    console.log("================================");
 
     if (this.errors.length === 0 && this.warnings.length === 0) {
-      console.log('✅ All validation checks passed!');
+      console.log("✅ All validation checks passed!");
       return;
     }
 
@@ -454,24 +429,21 @@ class DocumentationStructureValidator {
       },
     };
 
-    fs.writeFileSync(
-      'docs-structure-report.json',
-      JSON.stringify(report, null, 2),
-    );
-    console.log('\n📄 Detailed report saved to docs-structure-report.json');
+    fs.writeFileSync("docs-structure-report.json", JSON.stringify(report, null, 2));
+    console.log("\n📄 Detailed report saved to docs-structure-report.json");
   }
 }
 
 // CLI execution
 if (require.main === module) {
-  const docsPath = process.argv[2] || 'docs';
+  const docsPath = process.argv[2] || "docs";
 
   // Ensure required dependencies are available
   try {
-    require('gray-matter');
+    require("gray-matter");
   } catch (error) {
-    console.error('❌ Missing dependency: gray-matter');
-    console.error('Install with: npm install gray-matter');
+    console.error("❌ Missing dependency: gray-matter");
+    console.error("Install with: npm install gray-matter");
     process.exit(1);
   }
 
@@ -481,17 +453,15 @@ if (require.main === module) {
     .validate()
     .then((result) => {
       if (!result.success) {
-        console.error(
-          `\n❌ Validation failed with ${result.errors.length} errors`,
-        );
+        console.error(`\n❌ Validation failed with ${result.errors.length} errors`);
         process.exit(1);
       } else {
-        console.log('\n✅ Documentation structure validation passed!');
+        console.log("\n✅ Documentation structure validation passed!");
         process.exit(0);
       }
     })
     .catch((error) => {
-      console.error('❌ Validation failed:', error.message);
+      console.error("❌ Validation failed:", error.message);
       process.exit(1);
     });
 }

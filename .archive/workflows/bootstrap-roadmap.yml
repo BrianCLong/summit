@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       project_title:
-        description: 'GitHub Project title'
+        description: "GitHub Project title"
         required: false
-        default: 'Assistant v1.1'
+        default: "Assistant v1.1"
 
 jobs:
   bootstrap:

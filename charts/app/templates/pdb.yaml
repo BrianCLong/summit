@@ -1,9 +1,9 @@
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: {{ include "app.fullname" . }}
+  name: { { include "app.fullname" . } }
 spec:
-  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  minAvailable: { { .Values.podDisruptionBudget.minAvailable } }
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "app.fullname" . }}
+      app.kubernetes.io/name: { { include "app.fullname" . } }

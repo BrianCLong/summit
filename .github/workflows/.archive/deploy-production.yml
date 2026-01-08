@@ -4,19 +4,19 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to deploy (required)'
+        description: "Version to deploy (required)"
         required: true
         type: string
       skip-tests:
-        description: 'Skip smoke tests (NOT RECOMMENDED)'
+        description: "Skip smoke tests (NOT RECOMMENDED)"
         required: false
         type: boolean
         default: false
       deployment-strategy:
-        description: 'Deployment strategy'
+        description: "Deployment strategy"
         required: true
         type: choice
-        default: 'blue-green'
+        default: "blue-green"
         options:
           - blue-green
           - canary
@@ -316,7 +316,7 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@v4
         with:
-          version: 'v3.13.0'
+          version: "v3.13.0"
 
       - name: Ensure namespace exists
         run: |

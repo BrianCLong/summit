@@ -70,7 +70,7 @@
 // Types
 // ============================================================================
 
-export * from './types.js';
+export * from "./types.js";
 
 // ============================================================================
 // Tools
@@ -85,7 +85,7 @@ export {
   GetNeighborsInputSchema,
   SubgraphQueryInputSchema,
   GraphStatsInputSchema,
-} from './tools/graph-tools.js';
+} from "./tools/graph-tools.js";
 
 export {
   createEntityTools,
@@ -96,7 +96,7 @@ export {
   CreateEntityInputSchema,
   FindSimilarEntitiesInputSchema,
   ResolveEntityInputSchema,
-} from './tools/entity-tools.js';
+} from "./tools/entity-tools.js";
 
 export {
   createInvestigationTools,
@@ -108,7 +108,7 @@ export {
   AddFindingInputSchema,
   LinkEntitiesToInvestigationInputSchema,
   GetTimelineInputSchema,
-} from './tools/investigation-tools.js';
+} from "./tools/investigation-tools.js";
 
 export {
   createAnalysisTools,
@@ -118,7 +118,7 @@ export {
   CentralityAnalysisInputSchema,
   AnomalyDetectionInputSchema,
   CompareEntitiesInputSchema,
-} from './tools/analysis-tools.js';
+} from "./tools/analysis-tools.js";
 
 // ============================================================================
 // Agents
@@ -130,7 +130,7 @@ export {
   type InvestigationAgentConfig,
   type InvestigationTask,
   type InvestigationResult,
-} from './agents/investigation-agent.js';
+} from "./agents/investigation-agent.js";
 
 export {
   createEntityResolutionAgent,
@@ -139,7 +139,7 @@ export {
   type ResolutionCandidate,
   type ResolutionTask,
   type ResolutionResult,
-} from './agents/entity-resolution-agent.js';
+} from "./agents/entity-resolution-agent.js";
 
 export {
   createAnalystAgent,
@@ -147,7 +147,7 @@ export {
   type AnalystAgentConfig,
   type AnalysisTask,
   type AnalysisResult,
-} from './agents/analyst-agent.js';
+} from "./agents/analyst-agent.js";
 
 export {
   INVESTIGATION_AGENT_PROMPT,
@@ -155,7 +155,7 @@ export {
   ANALYST_AGENT_PROMPT,
   NARRATIVE_AGENT_PROMPT,
   getSystemPrompt,
-} from './agents/prompts.js';
+} from "./agents/prompts.js";
 
 // ============================================================================
 // Memory
@@ -167,7 +167,7 @@ export {
   type GraphMemoryConfig,
   type MemorySearchOptions,
   type ConversationContext,
-} from './memory/graph-memory.js';
+} from "./memory/graph-memory.js";
 
 // ============================================================================
 // Governance
@@ -180,17 +180,17 @@ export {
   type ToolRiskProfile,
   type PolicyCheck,
   DEFAULT_TOOL_RISKS,
-} from './governance/index.js';
+} from "./governance/index.js";
 
 // ============================================================================
 // Convenience Factories
 // ============================================================================
 
-import type { Driver } from 'neo4j-driver';
-import { createGraphTools } from './tools/graph-tools.js';
-import { createEntityTools } from './tools/entity-tools.js';
-import { createInvestigationTools } from './tools/investigation-tools.js';
-import { createAnalysisTools } from './tools/analysis-tools.js';
+import type { Driver } from "neo4j-driver";
+import { createGraphTools } from "./tools/graph-tools.js";
+import { createEntityTools } from "./tools/entity-tools.js";
+import { createInvestigationTools } from "./tools/investigation-tools.js";
+import { createAnalysisTools } from "./tools/analysis-tools.js";
 
 /**
  * Configuration for creating all IntelGraph tools
@@ -242,15 +242,50 @@ export function createAllTools(config: IntelGraphToolsConfig) {
  */
 export const ToolCategories = {
   /** Graph traversal and query tools */
-  GRAPH: ['execute_cypher', 'find_path', 'get_neighbors', 'get_subgraph', 'get_graph_stats'],
+  GRAPH: ["execute_cypher", "find_path", "get_neighbors", "get_subgraph", "get_graph_stats"],
   /** Entity management tools */
-  ENTITY: ['search_entities', 'get_entity', 'create_entity', 'find_similar_entities', 'resolve_entity'],
+  ENTITY: [
+    "search_entities",
+    "get_entity",
+    "create_entity",
+    "find_similar_entities",
+    "resolve_entity",
+  ],
   /** Investigation workflow tools */
-  INVESTIGATION: ['get_investigation', 'create_hypothesis', 'update_hypothesis', 'add_finding', 'link_entities_to_investigation', 'get_timeline'],
+  INVESTIGATION: [
+    "get_investigation",
+    "create_hypothesis",
+    "update_hypothesis",
+    "add_finding",
+    "link_entities_to_investigation",
+    "get_timeline",
+  ],
   /** Analysis and pattern detection tools */
-  ANALYSIS: ['detect_patterns', 'analyze_centrality', 'detect_anomalies', 'compare_entities'],
+  ANALYSIS: ["detect_patterns", "analyze_centrality", "detect_anomalies", "compare_entities"],
   /** Read-only tools (safe for autonomous execution) */
-  READ_ONLY: ['execute_cypher', 'find_path', 'get_neighbors', 'get_subgraph', 'get_graph_stats', 'search_entities', 'get_entity', 'find_similar_entities', 'get_investigation', 'get_timeline', 'detect_patterns', 'analyze_centrality', 'detect_anomalies', 'compare_entities'],
+  READ_ONLY: [
+    "execute_cypher",
+    "find_path",
+    "get_neighbors",
+    "get_subgraph",
+    "get_graph_stats",
+    "search_entities",
+    "get_entity",
+    "find_similar_entities",
+    "get_investigation",
+    "get_timeline",
+    "detect_patterns",
+    "analyze_centrality",
+    "detect_anomalies",
+    "compare_entities",
+  ],
   /** Write tools (require approval in most configurations) */
-  WRITE: ['create_entity', 'resolve_entity', 'create_hypothesis', 'update_hypothesis', 'add_finding', 'link_entities_to_investigation'],
+  WRITE: [
+    "create_entity",
+    "resolve_entity",
+    "create_hypothesis",
+    "update_hypothesis",
+    "add_finding",
+    "link_entities_to_investigation",
+  ],
 } as const;

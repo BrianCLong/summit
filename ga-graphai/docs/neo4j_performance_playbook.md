@@ -1,6 +1,7 @@
 # Neo4j Performance Playbook
 
 ## Profile top user journeys
+
 - Run `PROFILE` and `EXPLAIN` for the three hottest user journeys to capture plan stability and execution costs:
   - **Entity expansion**: `PROFILE MATCH (seed:Entity {id: $seedId, tenantId: $tenantId})-[:RELATIONSHIP*1..3]->(neighbor) RETURN DISTINCT neighbor LIMIT 200`.
   - **Shortest path**: `PROFILE MATCH (a:Entity {id: $fromId, tenantId: $tenantId}), (b:Entity {id: $toId, tenantId: $tenantId}) CALL apoc.algo.dijkstra(a, b, 'RELATIONSHIP>', 'cost') YIELD path RETURN path LIMIT 1`.
@@ -10,6 +11,7 @@
 - Keep `EXPLAIN` plans for pull requests to validate that planner heuristics (index usage, join ordering) remain stable when new labels or properties are introduced.
 
 ## Indexing strategy
+
 - Create composite indexes for high-cardinality filters to constrain cardinality early in the plan:
   - `CREATE INDEX entity_tenant_type_status_idx IF NOT EXISTS FOR (e:Entity) ON (e.tenantId, e.type, e.status);`
   - `CREATE INDEX rel_tenant_type_since_idx IF NOT EXISTS FOR ()-[r:RELATIONSHIP]->() ON (r.tenantId, r.type, r.since);`
@@ -21,6 +23,7 @@
 - Validate index usage by running the profiled user journeys and confirming `Using Index` steps appear at the leaf operators; add to the regression harness.
 
 ## Traversal refactors and depth caps
+
 - Replace ad-hoc variable-length traversals with APOC path procedures when they provide better pruning:
   - Prefer `apoc.path.expandConfig` with `terminatorNodes`, `whitelist`/`blacklist` relationship filters, and `bfs:true` to bound search space.
   - Use `apoc.neighbor.tohop` for bounded 1..N hops on entity expansion pages where pagination is required.
@@ -30,6 +33,7 @@
   - Add a circuit-breaker flag `cypher.runtimeTimeoutMs` per session (e.g., 1_500 ms) for UI-sourced queries.
 
 ## Cache warmers for dashboards
+
 - Pre-warm the query cache for top dashboards every deployment:
   - Entity expansion widgets: warm `seedId` by the top 20 recently active entities per tenant.
   - Influence/shortest-path panel: warm `fromId`/`toId` pairs using last 24h investigation pairs.
@@ -38,6 +42,7 @@
 - Record warmer latency and hit/miss ratios; alerts fire if cache hit rate falls below 85% or p95 latency exceeds thresholds below.
 
 ## Observability and SLOs
+
 - Track per-query p95/p99 latency and cardinality using dashboards tagged by user journey (`entity-expansion`, `shortest-path`, `community-search`).
 - Graphika targets (dashboards): p95 ≤ 400 ms, p99 ≤ 750 ms for interactive reads; background analytics can tolerate up to p95 1.5 s.
 - Emit counters for `dbHits`, `rows`, and timeout aborts; attach trace attributes for `indexUsed` and `apocProcedure` name.

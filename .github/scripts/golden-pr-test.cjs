@@ -7,9 +7,9 @@
  * Used for both CI validation and manual verification of the system.
  */
 
-const fs = require('fs');
-const { execSync } = require('child_process');
-const path = require('path');
+const fs = require("fs");
+const { execSync } = require("child_process");
+const path = require("path");
 
 class GoldenPRTester {
   constructor(options = {}) {
@@ -20,14 +20,14 @@ class GoldenPRTester {
     this.results = [];
   }
 
-  log(message, level = 'info') {
+  log(message, level = "info") {
     const timestamp = new Date().toISOString();
-    const prefix = level === 'error' ? '❌' : level === 'success' ? '✅' : '📝';
+    const prefix = level === "error" ? "❌" : level === "success" ? "✅" : "📝";
     console.log(`${prefix} [${timestamp}] ${message}`);
   }
 
   async runTest(testName, testFn) {
-    this.log(`Starting test: ${testName}`, 'info');
+    this.log(`Starting test: ${testName}`, "info");
 
     try {
       const startTime = Date.now();
@@ -36,21 +36,21 @@ class GoldenPRTester {
 
       this.results.push({
         name: testName,
-        status: 'PASS',
+        status: "PASS",
         duration,
         result,
       });
 
-      this.log(`Test passed: ${testName} (${duration}ms)`, 'success');
+      this.log(`Test passed: ${testName} (${duration}ms)`, "success");
       return result;
     } catch (error) {
       this.results.push({
         name: testName,
-        status: 'FAIL',
+        status: "FAIL",
         error: error.message,
       });
 
-      this.log(`Test failed: ${testName} - ${error.message}`, 'error');
+      this.log(`Test failed: ${testName} - ${error.message}`, "error");
       throw error;
     }
   }
@@ -62,7 +62,7 @@ class GoldenPRTester {
     const branchName = `golden-test-${scenario.name}-${Date.now()}`;
 
     if (!this.dryRun) {
-      execSync(`git checkout -b ${branchName}`, { stdio: 'pipe' });
+      execSync(`git checkout -b ${branchName}`, { stdio: "pipe" });
 
       // Apply test changes
       for (const change of scenario.changes) {
@@ -70,19 +70,19 @@ class GoldenPRTester {
       }
 
       // Commit changes
-      execSync('git add .', { stdio: 'pipe' });
-      execSync(`git commit -m "${scenario.commitMessage}"`, { stdio: 'pipe' });
-      execSync(`git push origin ${branchName}`, { stdio: 'pipe' });
+      execSync("git add .", { stdio: "pipe" });
+      execSync(`git commit -m "${scenario.commitMessage}"`, { stdio: "pipe" });
+      execSync(`git push origin ${branchName}`, { stdio: "pipe" });
 
       // Create PR
       const prData = execSync(
         `gh pr create \
         --title "${scenario.title}" \
         --body "${scenario.body}" \
-        --label "${scenario.labels.join(',')}" \
-        ${scenario.draft ? '--draft' : ''} \
+        --label "${scenario.labels.join(",")}" \
+        ${scenario.draft ? "--draft" : ""} \
         --json number,url`,
-        { encoding: 'utf8' },
+        { encoding: "utf8" }
       );
 
       const pr = JSON.parse(prData);
@@ -94,10 +94,10 @@ class GoldenPRTester {
         branch: branchName,
       };
     } else {
-      this.log('Dry run: Would create PR with changes');
+      this.log("Dry run: Would create PR with changes");
       return {
         number: 999,
-        url: 'https://github.com/example/repo/pull/999',
+        url: "https://github.com/example/repo/pull/999",
         branch: branchName,
       };
     }
@@ -105,17 +105,17 @@ class GoldenPRTester {
 
   async applyChange(change) {
     switch (change.type) {
-      case 'create_file':
+      case "create_file":
         fs.writeFileSync(change.path, change.content);
         break;
-      case 'modify_file':
+      case "modify_file":
         if (fs.existsSync(change.path)) {
-          const content = fs.readFileSync(change.path, 'utf8');
+          const content = fs.readFileSync(change.path, "utf8");
           const modified = content.replace(change.find, change.replace);
           fs.writeFileSync(change.path, modified);
         }
         break;
-      case 'delete_file':
+      case "delete_file":
         if (fs.existsSync(change.path)) {
           fs.unlinkSync(change.path);
         }
@@ -123,7 +123,7 @@ class GoldenPRTester {
     }
   }
 
-  async triggerReleaseCapt(prNumber, command = '/merge-pr') {
+  async triggerReleaseCapt(prNumber, command = "/merge-pr") {
     this.log(`Triggering Release Captain: ${command} ${prNumber}`);
 
     if (!this.dryRun) {
@@ -135,7 +135,7 @@ class GoldenPRTester {
       // Wait for workflow to complete
       await this.waitForWorkflow(prNumber);
     } else {
-      this.log('Dry run: Would trigger Release Captain');
+      this.log("Dry run: Would trigger Release Captain");
     }
   }
 
@@ -148,18 +148,16 @@ class GoldenPRTester {
         const runs = execSync(
           `gh run list --workflow=release-captain.yml --limit=5 --json status,conclusion,databaseId`,
           {
-            encoding: 'utf8',
+            encoding: "utf8",
             env: { ...process.env, GH_TOKEN: this.githubToken },
-          },
+          }
         );
 
         const runList = JSON.parse(runs);
         const latestRun = runList[0];
 
-        if (latestRun.status === 'completed') {
-          this.log(
-            `Workflow completed with conclusion: ${latestRun.conclusion}`,
-          );
+        if (latestRun.status === "completed") {
+          this.log(`Workflow completed with conclusion: ${latestRun.conclusion}`);
           return latestRun;
         }
 
@@ -169,7 +167,7 @@ class GoldenPRTester {
       }
     }
 
-    throw new Error('Workflow timeout');
+    throw new Error("Workflow timeout");
   }
 
   async cleanupTestPR(pr) {
@@ -184,7 +182,7 @@ class GoldenPRTester {
 
         this.log(`Cleaned up PR #${pr.number} and branch ${pr.branch}`);
       } catch (error) {
-        this.log(`Cleanup failed: ${error.message}`, 'error');
+        this.log(`Cleanup failed: ${error.message}`, "error");
       }
     }
   }
@@ -192,16 +190,16 @@ class GoldenPRTester {
   getTestScenarios() {
     return [
       {
-        name: 'low-risk-frontend',
-        title: 'feat(web): add user profile avatar component',
-        body: 'Simple frontend component with tests and documentation.',
-        commitMessage: 'Add avatar component with tests',
-        labels: ['frontend', 'low-risk'],
+        name: "low-risk-frontend",
+        title: "feat(web): add user profile avatar component",
+        body: "Simple frontend component with tests and documentation.",
+        commitMessage: "Add avatar component with tests",
+        labels: ["frontend", "low-risk"],
         draft: false,
         changes: [
           {
-            type: 'create_file',
-            path: 'apps/web/src/components/Avatar.tsx',
+            type: "create_file",
+            path: "apps/web/src/components/Avatar.tsx",
             content: `import React from 'react';
 
 interface AvatarProps {
@@ -227,8 +225,8 @@ export const Avatar: React.FC<AvatarProps> = ({ src, alt, size = 'md' }) => {
 };`,
           },
           {
-            type: 'create_file',
-            path: 'apps/web/src/components/__tests__/Avatar.test.tsx',
+            type: "create_file",
+            path: "apps/web/src/components/__tests__/Avatar.test.tsx",
             content: `import { render, screen } from '@testing-library/react';
 import { Avatar } from '../Avatar';
 
@@ -248,19 +246,19 @@ describe('Avatar', () => {
 });`,
           },
         ],
-        expectedOutcome: 'approved',
+        expectedOutcome: "approved",
       },
       {
-        name: 'medium-risk-backend',
-        title: 'feat(api): add user preferences endpoint',
-        body: 'New API endpoint with validation and tests.',
-        commitMessage: 'Add user preferences API endpoint',
-        labels: ['backend', 'api', 'medium-risk'],
+        name: "medium-risk-backend",
+        title: "feat(api): add user preferences endpoint",
+        body: "New API endpoint with validation and tests.",
+        commitMessage: "Add user preferences API endpoint",
+        labels: ["backend", "api", "medium-risk"],
         draft: false,
         changes: [
           {
-            type: 'create_file',
-            path: 'services/api/src/routes/preferences.ts',
+            type: "create_file",
+            path: "services/api/src/routes/preferences.ts",
             content: `import { Router } from 'express';
 import { z } from 'zod';
 import { validateRequest } from '../middleware/validation';
@@ -286,8 +284,8 @@ router.put('/preferences', validateRequest(preferencesSchema), async (req, res) 
 export default router;`,
           },
           {
-            type: 'create_file',
-            path: 'services/api/src/routes/__tests__/preferences.test.ts',
+            type: "create_file",
+            path: "services/api/src/routes/__tests__/preferences.test.ts",
             content: `import request from 'supertest';
 import app from '../../app';
 
@@ -311,19 +309,19 @@ describe('Preferences API', () => {
 });`,
           },
         ],
-        expectedOutcome: 'approved',
+        expectedOutcome: "approved",
       },
       {
-        name: 'high-risk-migration',
-        title: 'feat(db): add user_settings table migration',
-        body: 'Database migration to add user settings table with proper constraints.',
-        commitMessage: 'Add user_settings table migration',
-        labels: ['database', 'migration', 'high-risk'],
+        name: "high-risk-migration",
+        title: "feat(db): add user_settings table migration",
+        body: "Database migration to add user settings table with proper constraints.",
+        commitMessage: "Add user_settings table migration",
+        labels: ["database", "migration", "high-risk"],
         draft: false,
         changes: [
           {
-            type: 'create_file',
-            path: 'services/api/migrations/20241201_add_user_settings.sql',
+            type: "create_file",
+            path: "services/api/migrations/20241201_add_user_settings.sql",
             content: `-- Add user_settings table
 -- Migration: 20241201_add_user_settings
 -- Author: Release Captain Test
@@ -346,8 +344,8 @@ CREATE INDEX idx_user_settings_key ON user_settings(setting_key);
 COMMIT;`,
           },
           {
-            type: 'create_file',
-            path: 'services/api/migrations/rollback/20241201_add_user_settings.sql',
+            type: "create_file",
+            path: "services/api/migrations/rollback/20241201_add_user_settings.sql",
             content: `-- Rollback user_settings table
 -- Migration: 20241201_add_user_settings (rollback)
 
@@ -358,19 +356,19 @@ DROP TABLE IF EXISTS user_settings;
 COMMIT;`,
           },
         ],
-        expectedOutcome: 'requires_migration_review',
+        expectedOutcome: "requires_migration_review",
       },
       {
-        name: 'blocking-security-issue',
-        title: 'fix: remove hardcoded API key',
-        body: 'Removes accidentally committed API key.',
-        commitMessage: 'Remove hardcoded API key',
-        labels: ['security', 'hotfix'],
+        name: "blocking-security-issue",
+        title: "fix: remove hardcoded API key",
+        body: "Removes accidentally committed API key.",
+        commitMessage: "Remove hardcoded API key",
+        labels: ["security", "hotfix"],
         draft: false,
         changes: [
           {
-            type: 'create_file',
-            path: 'services/api/src/config/secrets.ts',
+            type: "create_file",
+            path: "services/api/src/config/secrets.ts",
             content: `// Configuration with hardcoded secret (should be blocked)
 export const config = {
   apiKey: 'sk-1234567890abcdef',  // This should trigger security scan
@@ -381,26 +379,26 @@ export const config = {
 };`,
           },
         ],
-        expectedOutcome: 'blocked_security',
+        expectedOutcome: "blocked_security",
       },
       {
-        name: 'failing-tests',
-        title: 'feat: add broken feature',
-        body: 'Feature that should fail tests.',
-        commitMessage: 'Add feature with failing tests',
-        labels: ['feature'],
+        name: "failing-tests",
+        title: "feat: add broken feature",
+        body: "Feature that should fail tests.",
+        commitMessage: "Add feature with failing tests",
+        labels: ["feature"],
         draft: false,
         changes: [
           {
-            type: 'create_file',
-            path: 'services/api/src/broken-feature.ts',
+            type: "create_file",
+            path: "services/api/src/broken-feature.ts",
             content: `export function brokenFunction() {
   throw new Error('This function is intentionally broken');
 }`,
           },
           {
-            type: 'create_file',
-            path: 'services/api/src/__tests__/broken-feature.test.ts',
+            type: "create_file",
+            path: "services/api/src/__tests__/broken-feature.test.ts",
             content: `import { brokenFunction } from '../broken-feature';
 
 describe('Broken Feature', () => {
@@ -411,13 +409,13 @@ describe('Broken Feature', () => {
 });`,
           },
         ],
-        expectedOutcome: 'blocked_tests',
+        expectedOutcome: "blocked_tests",
       },
     ];
   }
 
   async runAllTests() {
-    this.log('🚀 Starting Golden PR Test Suite');
+    this.log("🚀 Starting Golden PR Test Suite");
 
     const scenarios = this.getTestScenarios();
     let passedTests = 0;
@@ -444,17 +442,14 @@ describe('Broken Feature', () => {
       } catch (error) {
         failedTests++;
         if (!this.dryRun) {
-          this.log(
-            `Test scenario ${scenario.name} failed: ${error.message}`,
-            'error',
-          );
+          this.log(`Test scenario ${scenario.name} failed: ${error.message}`, "error");
         }
       }
     }
 
     // Generate test report
     const report = this.generateReport(passedTests, failedTests);
-    this.log('📊 Test suite completed');
+    this.log("📊 Test suite completed");
 
     return {
       passedTests,
@@ -466,43 +461,38 @@ describe('Broken Feature', () => {
   }
 
   async verifyOutcome(prNumber, expectedOutcome) {
-    this.log(
-      `Verifying outcome for PR #${prNumber}: expected ${expectedOutcome}`,
-    );
+    this.log(`Verifying outcome for PR #${prNumber}: expected ${expectedOutcome}`);
 
     if (this.dryRun) {
-      this.log('Dry run: Skipping outcome verification');
+      this.log("Dry run: Skipping outcome verification");
       return;
     }
 
     // Get PR comments to check Release Captain's response
-    const comments = execSync(
-      `gh pr view ${prNumber} --json comments --jq '.comments[].body'`,
-      {
-        encoding: 'utf8',
-        env: { ...process.env, GH_TOKEN: this.githubToken },
-      },
-    );
+    const comments = execSync(`gh pr view ${prNumber} --json comments --jq '.comments[].body'`, {
+      encoding: "utf8",
+      env: { ...process.env, GH_TOKEN: this.githubToken },
+    });
 
     switch (expectedOutcome) {
-      case 'approved':
-        if (!comments.includes('READY TO MERGE')) {
-          throw new Error('Expected PR to be approved for merge');
+      case "approved":
+        if (!comments.includes("READY TO MERGE")) {
+          throw new Error("Expected PR to be approved for merge");
         }
         break;
-      case 'blocked_security':
-        if (!comments.includes('security') && !comments.includes('violation')) {
-          throw new Error('Expected security blocking');
+      case "blocked_security":
+        if (!comments.includes("security") && !comments.includes("violation")) {
+          throw new Error("Expected security blocking");
         }
         break;
-      case 'blocked_tests':
-        if (!comments.includes('test') && !comments.includes('fail')) {
-          throw new Error('Expected test failure blocking');
+      case "blocked_tests":
+        if (!comments.includes("test") && !comments.includes("fail")) {
+          throw new Error("Expected test failure blocking");
         }
         break;
-      case 'requires_migration_review':
-        if (!comments.includes('migration') && !comments.includes('review')) {
-          throw new Error('Expected migration review requirement');
+      case "requires_migration_review":
+        if (!comments.includes("migration") && !comments.includes("review")) {
+          throw new Error("Expected migration review requirement");
         }
         break;
     }
@@ -523,12 +513,12 @@ describe('Broken Feature', () => {
 ${this.results
   .map(
     (result) =>
-      `- **${result.name}**: ${result.status}${result.duration ? ` (${result.duration}ms)` : ''}${result.error ? ` - ${result.error}` : ''}`,
+      `- **${result.name}**: ${result.status}${result.duration ? ` (${result.duration}ms)` : ""}${result.error ? ` - ${result.error}` : ""}`
   )
-  .join('\n')}
+  .join("\n")}
 
 ## Release Captain Validation
-${passed === total ? '✅ Release Captain is functioning correctly' : '❌ Release Captain has issues that need attention'}
+${passed === total ? "✅ Release Captain is functioning correctly" : "❌ Release Captain has issues that need attention"}
 
 ---
 *Generated at ${new Date().toISOString()}*
@@ -540,19 +530,19 @@ ${passed === total ? '✅ Release Captain is functioning correctly' : '❌ Relea
 async function main() {
   const args = process.argv.slice(2);
   const options = {
-    dryRun: args.includes('--dry-run'),
-    verbose: args.includes('--verbose'),
+    dryRun: args.includes("--dry-run"),
+    verbose: args.includes("--verbose"),
     testRepo: process.env.GITHUB_REPOSITORY,
     githubToken: process.env.GITHUB_TOKEN,
   };
 
   if (!options.testRepo) {
-    console.error('GITHUB_REPOSITORY environment variable required');
+    console.error("GITHUB_REPOSITORY environment variable required");
     process.exit(1);
   }
 
   if (!options.githubToken) {
-    console.error('GITHUB_TOKEN environment variable required');
+    console.error("GITHUB_TOKEN environment variable required");
     process.exit(1);
   }
 
@@ -570,7 +560,7 @@ async function main() {
       process.exit(0);
     }
   } catch (error) {
-    console.error('Golden PR test suite failed:', error.message);
+    console.error("Golden PR test suite failed:", error.message);
     process.exit(1);
   }
 }

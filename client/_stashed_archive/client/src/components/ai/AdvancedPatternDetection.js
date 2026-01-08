@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -20,7 +20,7 @@ import {
   AccordionDetails,
   Button,
   Divider,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Psychology as PsychologyIcon,
   TrendingUp as TrendingUpIcon,
@@ -35,7 +35,7 @@ import {
   Pause as PauseIcon,
   Refresh as RefreshIcon,
   AutoAwesome as AutoAwesomeIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 // Advanced pattern detection algorithms
 const PatternDetectionEngine = {
@@ -51,16 +51,16 @@ const PatternDetectionEngine = {
     });
 
     const maxDay = Object.keys(weeklyActivity).reduce((a, b) =>
-      weeklyActivity[a] > weeklyActivity[b] ? a : b,
+      weeklyActivity[a] > weeklyActivity[b] ? a : b
     );
 
     if (weeklyActivity[maxDay] > events.length * 0.3) {
       patterns.push({
-        type: 'TEMPORAL_CYCLE',
+        type: "TEMPORAL_CYCLE",
         confidence: 0.85,
-        description: `Strong weekly pattern detected - ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][maxDay]} activity spike`,
-        impact: 'high',
-        recommendation: 'Monitor enhanced surveillance on identified peak days',
+        description: `Strong weekly pattern detected - ${["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][maxDay]} activity spike`,
+        impact: "high",
+        recommendation: "Monitor enhanced surveillance on identified peak days",
       });
     }
 
@@ -72,16 +72,16 @@ const PatternDetectionEngine = {
     });
 
     const maxHour = Object.keys(hourlyActivity).reduce((a, b) =>
-      hourlyActivity[a] > hourlyActivity[b] ? a : b,
+      hourlyActivity[a] > hourlyActivity[b] ? a : b
     );
 
     if (hourlyActivity[maxHour] > events.length * 0.4) {
       patterns.push({
-        type: 'ACTIVITY_BURST',
+        type: "ACTIVITY_BURST",
         confidence: 0.78,
         description: `Concentrated activity detected at ${maxHour}:00 - ${hourlyActivity[maxHour]} events`,
-        impact: 'medium',
-        recommendation: 'Investigate coordinated behavior during peak hours',
+        impact: "medium",
+        recommendation: "Investigate coordinated behavior during peak hours",
       });
     }
 
@@ -100,21 +100,17 @@ const PatternDetectionEngine = {
     });
 
     const avgDegree =
-      Object.values(nodeDegrees).reduce((a, b) => a + b, 0) /
-      Object.keys(nodeDegrees).length;
-    const hubs = Object.entries(nodeDegrees).filter(
-      ([id, degree]) => degree > avgDegree * 2,
-    );
+      Object.values(nodeDegrees).reduce((a, b) => a + b, 0) / Object.keys(nodeDegrees).length;
+    const hubs = Object.entries(nodeDegrees).filter(([id, degree]) => degree > avgDegree * 2);
 
     if (hubs.length > 0) {
       patterns.push({
-        type: 'NETWORK_HUB',
+        type: "NETWORK_HUB",
         confidence: 0.92,
         description: `${hubs.length} central hub(s) detected with high connectivity`,
-        impact: 'high',
+        impact: "high",
         entities: hubs.map(([id]) => id),
-        recommendation:
-          'Focus investigation on hub entities for maximum intelligence value',
+        recommendation: "Focus investigation on hub entities for maximum intelligence value",
       });
     }
 
@@ -122,12 +118,11 @@ const PatternDetectionEngine = {
     const clusters = detectCommunities(nodes, edges);
     if (clusters.length > 1) {
       patterns.push({
-        type: 'NETWORK_CLUSTERS',
+        type: "NETWORK_CLUSTERS",
         confidence: 0.81,
         description: `${clusters.length} distinct network communities identified`,
-        impact: 'medium',
-        recommendation:
-          'Analyze inter-cluster communications for operational insights',
+        impact: "medium",
+        recommendation: "Analyze inter-cluster communications for operational insights",
       });
     }
 
@@ -135,13 +130,12 @@ const PatternDetectionEngine = {
     const bridges = detectBridgeNodes(nodes, edges);
     if (bridges.length > 0) {
       patterns.push({
-        type: 'BRIDGE_NODES',
+        type: "BRIDGE_NODES",
         confidence: 0.89,
         description: `${bridges.length} critical bridge node(s) connecting network segments`,
-        impact: 'high',
+        impact: "high",
         entities: bridges,
-        recommendation:
-          'Monitor bridge nodes for communication interception opportunities',
+        recommendation: "Monitor bridge nodes for communication interception opportunities",
       });
     }
 
@@ -153,27 +147,21 @@ const PatternDetectionEngine = {
     const patterns = [];
 
     // Frequency anomalies
-    const frequencies = activities.map(
-      (a) => a.frequency || Math.random() * 10,
-    );
+    const frequencies = activities.map((a) => a.frequency || Math.random() * 10);
     const avgFreq = frequencies.reduce((a, b) => a + b, 0) / frequencies.length;
     const stdDev = Math.sqrt(
-      frequencies.reduce((a, b) => a + Math.pow(b - avgFreq, 2), 0) /
-        frequencies.length,
+      frequencies.reduce((a, b) => a + Math.pow(b - avgFreq, 2), 0) / frequencies.length
     );
 
-    const anomalies = activities.filter(
-      (a, i) => Math.abs(frequencies[i] - avgFreq) > stdDev * 2,
-    );
+    const anomalies = activities.filter((a, i) => Math.abs(frequencies[i] - avgFreq) > stdDev * 2);
 
     if (anomalies.length > 0) {
       patterns.push({
-        type: 'FREQUENCY_ANOMALY',
+        type: "FREQUENCY_ANOMALY",
         confidence: 0.76,
         description: `${anomalies.length} entities showing unusual activity frequency`,
-        impact: 'medium',
-        recommendation:
-          'Investigate entities with abnormal communication patterns',
+        impact: "medium",
+        recommendation: "Investigate entities with abnormal communication patterns",
       });
     }
 
@@ -183,11 +171,11 @@ const PatternDetectionEngine = {
       const clusters = detectGeographicClusters(locations);
       if (clusters.length > 0) {
         patterns.push({
-          type: 'GEOGRAPHIC_CLUSTERING',
+          type: "GEOGRAPHIC_CLUSTERING",
           confidence: 0.83,
           description: `Geographic clustering detected in ${clusters.length} region(s)`,
-          impact: 'high',
-          recommendation: 'Deploy area surveillance for clustered locations',
+          impact: "high",
+          recommendation: "Deploy area surveillance for clustered locations",
         });
       }
     }
@@ -212,9 +200,7 @@ function detectBridgeNodes(nodes, edges) {
 
 function detectGeographicClusters(locations) {
   // Simplified geographic clustering
-  return locations.length > 10
-    ? [{ center: 'SF Bay Area', radius: 50, count: 8 }]
-    : [];
+  return locations.length > 10 ? [{ center: "SF Bay Area", radius: 50, count: 8 }] : [];
 }
 
 // Pattern detection component
@@ -231,11 +217,11 @@ export default function AdvancedPatternDetection() {
 
     // Simulate analysis phases
     const phases = [
-      'Collecting temporal data...',
-      'Analyzing network topology...',
-      'Detecting behavioral anomalies...',
-      'Computing pattern correlations...',
-      'Generating insights...',
+      "Collecting temporal data...",
+      "Analyzing network topology...",
+      "Detecting behavioral anomalies...",
+      "Computing pattern correlations...",
+      "Generating insights...",
     ];
 
     for (let i = 0; i < phases.length; i++) {
@@ -246,9 +232,7 @@ export default function AdvancedPatternDetection() {
     // Generate synthetic patterns
     const mockEvents = Array.from({ length: 50 }, (_, i) => ({
       id: i,
-      timestamp: new Date(
-        Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000,
-      ),
+      timestamp: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
       frequency: Math.random() * 10,
     }));
 
@@ -282,16 +266,16 @@ export default function AdvancedPatternDetection() {
 
   const getPatternIcon = (type) => {
     switch (type) {
-      case 'TEMPORAL_CYCLE':
-      case 'ACTIVITY_BURST':
+      case "TEMPORAL_CYCLE":
+      case "ACTIVITY_BURST":
         return <ScheduleIcon />;
-      case 'NETWORK_HUB':
-      case 'NETWORK_CLUSTERS':
-      case 'BRIDGE_NODES':
+      case "NETWORK_HUB":
+      case "NETWORK_CLUSTERS":
+      case "BRIDGE_NODES":
         return <NetworkIcon />;
-      case 'FREQUENCY_ANOMALY':
+      case "FREQUENCY_ANOMALY":
         return <TrendingUpIcon />;
-      case 'GEOGRAPHIC_CLUSTERING':
+      case "GEOGRAPHIC_CLUSTERING":
         return <LocationIcon />;
       default:
         return <AutoAwesomeIcon />;
@@ -300,36 +284,32 @@ export default function AdvancedPatternDetection() {
 
   const getImpactColor = (impact) => {
     switch (impact) {
-      case 'high':
-        return 'error';
-      case 'medium':
-        return 'warning';
-      case 'low':
-        return 'info';
+      case "high":
+        return "error";
+      case "medium":
+        return "warning";
+      case "low":
+        return "info";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   return (
-    <Card sx={{ height: '100%' }}>
+    <Card sx={{ height: "100%" }}>
       <CardContent>
         <Box
           sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
             mb: 2,
           }}
         >
           <Typography variant="h6">🧠 Advanced Pattern Detection</Typography>
-          <Box sx={{ display: 'flex', gap: 1 }}>
+          <Box sx={{ display: "flex", gap: 1 }}>
             <Tooltip title="Run Analysis">
-              <IconButton
-                onClick={runPatternAnalysis}
-                disabled={isAnalyzing}
-                color="primary"
-              >
+              <IconButton onClick={runPatternAnalysis} disabled={isAnalyzing} color="primary">
                 {isAnalyzing ? <PauseIcon /> : <PlayIcon />}
               </IconButton>
             </Tooltip>
@@ -357,8 +337,8 @@ export default function AdvancedPatternDetection() {
         {lastAnalysis && (
           <Alert severity="info" sx={{ mb: 2 }}>
             <Typography variant="body2">
-              <strong>Analysis Complete:</strong> {patterns.length} patterns
-              detected | Last run: {lastAnalysis.toLocaleTimeString()}
+              <strong>Analysis Complete:</strong> {patterns.length} patterns detected | Last run:{" "}
+              {lastAnalysis.toLocaleTimeString()}
             </Typography>
           </Alert>
         )}
@@ -366,22 +346,19 @@ export default function AdvancedPatternDetection() {
         <Accordion defaultExpanded>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography variant="subtitle1">
-              🎯 Critical Patterns (
-              {patterns.filter((p) => p.impact === 'high').length})
+              🎯 Critical Patterns ({patterns.filter((p) => p.impact === "high").length})
             </Typography>
           </AccordionSummary>
           <AccordionDetails>
             <List dense>
               {patterns
-                .filter((p) => p.impact === 'high')
+                .filter((p) => p.impact === "high")
                 .map((pattern, index) => (
                   <ListItem key={index} sx={{ px: 0 }}>
                     <ListItemIcon>{getPatternIcon(pattern.type)}</ListItemIcon>
                     <ListItemText
                       primary={
-                        <Box
-                          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                        >
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                           <Typography variant="body2" sx={{ flexGrow: 1 }}>
                             {pattern.description}
                           </Typography>
@@ -406,9 +383,7 @@ export default function AdvancedPatternDetection() {
 
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography variant="subtitle1">
-              📊 All Patterns ({patterns.length})
-            </Typography>
+            <Typography variant="subtitle1">📊 All Patterns ({patterns.length})</Typography>
           </AccordionSummary>
           <AccordionDetails>
             <Grid container spacing={1}>
@@ -423,8 +398,8 @@ export default function AdvancedPatternDetection() {
                       {pattern.description}
                     </Typography>
                     <Typography variant="caption" display="block">
-                      Confidence: {(pattern.confidence * 100).toFixed(0)}% |
-                      Impact: {pattern.impact}
+                      Confidence: {(pattern.confidence * 100).toFixed(0)}% | Impact:{" "}
+                      {pattern.impact}
                     </Typography>
                   </Alert>
                 </Grid>
@@ -433,10 +408,10 @@ export default function AdvancedPatternDetection() {
           </AccordionDetails>
         </Accordion>
 
-        <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+        <Box sx={{ mt: 2, p: 2, bgcolor: "grey.50", borderRadius: 1 }}>
           <Typography variant="caption" color="text.secondary">
-            🔬 <strong>AI Engine Status:</strong> Machine learning models active
-            | Deep pattern recognition enabled | Real-time analysis running
+            🔬 <strong>AI Engine Status:</strong> Machine learning models active | Deep pattern
+            recognition enabled | Real-time analysis running
           </Typography>
         </Box>
       </CardContent>

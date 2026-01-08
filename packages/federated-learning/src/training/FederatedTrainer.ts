@@ -1,5 +1,5 @@
-import EventEmitter from 'eventemitter3';
-import { pino, type Logger } from 'pino';
+import EventEmitter from "eventemitter3";
+import { pino, type Logger } from "pino";
 
 export interface TrainingRound {
   roundNumber: number;
@@ -31,8 +31,8 @@ export interface FederatedConfig {
   minParticipants: number;
   maxRounds: number;
   targetAccuracy?: number;
-  aggregationStrategy: 'fedavg' | 'fedprox' | 'fedadam' | 'weighted-average';
-  clientSelection: 'random' | 'resource-aware' | 'performance-based';
+  aggregationStrategy: "fedavg" | "fedprox" | "fedadam" | "weighted-average";
+  clientSelection: "random" | "resource-aware" | "performance-based";
   roundTimeout: number; // seconds
   differentialPrivacy?: {
     enabled: boolean;
@@ -57,7 +57,7 @@ export class FederatedTrainer extends EventEmitter {
   constructor(config: FederatedConfig, logger?: Logger) {
     super();
     this.config = config;
-    this.logger = logger || pino({ name: 'FederatedTrainer' });
+    this.logger = logger || pino({ name: "FederatedTrainer" });
   }
 
   /**
@@ -65,8 +65,8 @@ export class FederatedTrainer extends EventEmitter {
    */
   async initialize(initialModel: unknown): Promise<void> {
     this.globalModel = initialModel;
-    this.logger.info('Federated trainer initialized');
-    this.emit('initialized', { model: initialModel });
+    this.logger.info("Federated trainer initialized");
+    this.emit("initialized", { model: initialModel });
   }
 
   /**
@@ -74,7 +74,7 @@ export class FederatedTrainer extends EventEmitter {
    */
   async startRound(availableNodes: string[]): Promise<TrainingRound> {
     if (this.currentRound && !this.currentRound.endTime) {
-      throw new Error('Previous round still in progress');
+      throw new Error("Previous round still in progress");
     }
 
     // Select participants based on strategy
@@ -93,17 +93,17 @@ export class FederatedTrainer extends EventEmitter {
       participatingNodes: participants,
       globalModel: this.globalModel,
       startTime: new Date(),
-      metrics: {}
+      metrics: {},
     };
 
     this.pendingUpdates.set(roundNumber, []);
 
     this.logger.info(
       { roundNumber, participants: participants.length },
-      'Started federated training round'
+      "Started federated training round"
     );
 
-    this.emit('round-started', this.currentRound);
+    this.emit("round-started", this.currentRound);
 
     // Set timeout for round
     setTimeout(() => {
@@ -120,11 +120,11 @@ export class FederatedTrainer extends EventEmitter {
    */
   async submitUpdate(update: LocalUpdate): Promise<void> {
     if (!this.currentRound || this.currentRound.roundNumber !== update.roundNumber) {
-      throw new Error('No active round or round number mismatch');
+      throw new Error("No active round or round number mismatch");
     }
 
     if (!this.currentRound.participatingNodes.includes(update.nodeId)) {
-      throw new Error('Node not participating in this round');
+      throw new Error("Node not participating in this round");
     }
 
     const updates = this.pendingUpdates.get(update.roundNumber) || [];
@@ -136,12 +136,15 @@ export class FederatedTrainer extends EventEmitter {
         roundNumber: update.roundNumber,
         nodeId: update.nodeId,
         received: updates.length,
-        total: this.currentRound.participatingNodes.length
+        total: this.currentRound.participatingNodes.length,
       },
-      'Received local update'
+      "Received local update"
     );
 
-    this.emit('update-received', { update, progress: updates.length / this.currentRound.participatingNodes.length });
+    this.emit("update-received", {
+      update,
+      progress: updates.length / this.currentRound.participatingNodes.length,
+    });
 
     // Check if all updates received
     if (updates.length === this.currentRound.participatingNodes.length) {
@@ -160,18 +163,15 @@ export class FederatedTrainer extends EventEmitter {
     const updates = this.pendingUpdates.get(roundNumber) || [];
 
     if (updates.length === 0) {
-      this.logger.warn({ roundNumber }, 'No updates received for round');
+      this.logger.warn({ roundNumber }, "No updates received for round");
       this.currentRound.endTime = new Date();
       this.rounds.push(this.currentRound);
-      this.emit('round-failed', { roundNumber, reason: 'no-updates' });
+      this.emit("round-failed", { roundNumber, reason: "no-updates" });
       this.currentRound = null;
       return;
     }
 
-    this.logger.info(
-      { roundNumber, updates: updates.length },
-      'Aggregating model updates'
-    );
+    this.logger.info({ roundNumber, updates: updates.length }, "Aggregating model updates");
 
     try {
       // Aggregate updates
@@ -184,7 +184,7 @@ export class FederatedTrainer extends EventEmitter {
       this.currentRound.metrics = {
         avgLoss,
         avgAccuracy,
-        convergence: this.calculateConvergence(avgLoss)
+        convergence: this.calculateConvergence(avgLoss),
       };
 
       this.currentRound.endTime = new Date();
@@ -196,31 +196,31 @@ export class FederatedTrainer extends EventEmitter {
         {
           roundNumber,
           avgLoss: avgLoss.toFixed(4),
-          avgAccuracy: avgAccuracy.toFixed(4)
+          avgAccuracy: avgAccuracy.toFixed(4),
         },
-        'Round completed'
+        "Round completed"
       );
 
-      this.emit('round-completed', {
+      this.emit("round-completed", {
         round: this.currentRound,
-        globalModel: aggregatedModel
+        globalModel: aggregatedModel,
       });
 
       this.currentRound = null;
 
       // Check if training should continue
       if (this.shouldContinueTraining()) {
-        this.emit('continue-training');
+        this.emit("continue-training");
       } else {
-        this.emit('training-completed', {
+        this.emit("training-completed", {
           totalRounds: this.rounds.length,
           finalModel: this.globalModel,
-          finalMetrics: this.rounds[this.rounds.length - 1].metrics
+          finalMetrics: this.rounds[this.rounds.length - 1].metrics,
         });
       }
     } catch (error) {
-      this.logger.error({ error, roundNumber }, 'Failed to complete round');
-      this.emit('round-failed', { roundNumber, error });
+      this.logger.error({ error, roundNumber }, "Failed to complete round");
+      this.emit("round-failed", { roundNumber, error });
     }
   }
 
@@ -229,13 +229,13 @@ export class FederatedTrainer extends EventEmitter {
    */
   private async aggregateUpdates(updates: LocalUpdate[]): Promise<unknown> {
     switch (this.config.aggregationStrategy) {
-      case 'fedavg':
+      case "fedavg":
         return this.federatedAveraging(updates);
-      case 'weighted-average':
+      case "weighted-average":
         return this.weightedAveraging(updates);
-      case 'fedprox':
+      case "fedprox":
         return this.federatedProx(updates);
-      case 'fedadam':
+      case "fedadam":
         return this.federatedAdam(updates);
       default:
         return this.federatedAveraging(updates);
@@ -246,17 +246,17 @@ export class FederatedTrainer extends EventEmitter {
    * Federated Averaging (FedAvg)
    */
   private async federatedAveraging(updates: LocalUpdate[]): Promise<unknown> {
-    this.logger.debug('Applying FedAvg aggregation');
+    this.logger.debug("Applying FedAvg aggregation");
 
     const totalSamples = updates.reduce((sum, u) => sum + u.numSamples, 0);
 
     // Weighted average based on number of samples
     // In real implementation, this would average the actual model weights
     return {
-      type: 'fedavg',
-      weights: 'aggregated_weights_placeholder',
+      type: "fedavg",
+      weights: "aggregated_weights_placeholder",
       totalSamples,
-      numClients: updates.length
+      numClients: updates.length,
     };
   }
 
@@ -264,14 +264,14 @@ export class FederatedTrainer extends EventEmitter {
    * Weighted Averaging
    */
   private async weightedAveraging(updates: LocalUpdate[]): Promise<unknown> {
-    this.logger.debug('Applying weighted averaging');
+    this.logger.debug("Applying weighted averaging");
 
     const totalSamples = updates.reduce((sum, u) => sum + u.numSamples, 0);
 
     return {
-      type: 'weighted-average',
-      weights: 'aggregated_weights_placeholder',
-      totalSamples
+      type: "weighted-average",
+      weights: "aggregated_weights_placeholder",
+      totalSamples,
     };
   }
 
@@ -279,12 +279,12 @@ export class FederatedTrainer extends EventEmitter {
    * FedProx - handles heterogeneous data/devices
    */
   private async federatedProx(updates: LocalUpdate[]): Promise<unknown> {
-    this.logger.debug('Applying FedProx aggregation');
+    this.logger.debug("Applying FedProx aggregation");
 
     return {
-      type: 'fedprox',
-      weights: 'aggregated_weights_placeholder',
-      proximalTerm: 0.01
+      type: "fedprox",
+      weights: "aggregated_weights_placeholder",
+      proximalTerm: 0.01,
     };
   }
 
@@ -292,13 +292,13 @@ export class FederatedTrainer extends EventEmitter {
    * FedAdam - adaptive optimization for federated learning
    */
   private async federatedAdam(updates: LocalUpdate[]): Promise<unknown> {
-    this.logger.debug('Applying FedAdam aggregation');
+    this.logger.debug("Applying FedAdam aggregation");
 
     return {
-      type: 'fedadam',
-      weights: 'aggregated_weights_placeholder',
+      type: "fedadam",
+      weights: "aggregated_weights_placeholder",
       momentum: 0.9,
-      beta: 0.999
+      beta: 0.999,
     };
   }
 
@@ -312,11 +312,11 @@ export class FederatedTrainer extends EventEmitter {
     );
 
     switch (this.config.clientSelection) {
-      case 'random':
+      case "random":
         return this.randomSelection(availableNodes, numParticipants);
-      case 'resource-aware':
+      case "resource-aware":
         return this.resourceAwareSelection(availableNodes, numParticipants);
-      case 'performance-based':
+      case "performance-based":
         return this.performanceBasedSelection(availableNodes, numParticipants);
       default:
         return this.randomSelection(availableNodes, numParticipants);
@@ -351,7 +351,9 @@ export class FederatedTrainer extends EventEmitter {
    * Calculate convergence metric
    */
   private calculateConvergence(currentLoss: number): number {
-    if (this.rounds.length === 0) {return 0;}
+    if (this.rounds.length === 0) {
+      return 0;
+    }
 
     const previousLoss = this.rounds[this.rounds.length - 1].metrics.avgLoss || currentLoss;
     const improvement = (previousLoss - currentLoss) / previousLoss;
@@ -412,13 +414,14 @@ export class FederatedTrainer extends EventEmitter {
     bestAccuracy: number;
     currentAccuracy: number;
   } {
-    const completedRounds = this.rounds.filter(r => r.endTime).length;
-    const avgParticipants = this.rounds.length > 0
-      ? this.rounds.reduce((sum, r) => sum + r.participatingNodes.length, 0) / this.rounds.length
-      : 0;
+    const completedRounds = this.rounds.filter((r) => r.endTime).length;
+    const avgParticipants =
+      this.rounds.length > 0
+        ? this.rounds.reduce((sum, r) => sum + r.participatingNodes.length, 0) / this.rounds.length
+        : 0;
 
     const accuracies = this.rounds
-      .map(r => r.metrics.avgAccuracy)
+      .map((r) => r.metrics.avgAccuracy)
       .filter((a): a is number => a !== undefined);
 
     const bestAccuracy = accuracies.length > 0 ? Math.max(...accuracies) : 0;
@@ -429,7 +432,7 @@ export class FederatedTrainer extends EventEmitter {
       completedRounds,
       avgParticipants,
       bestAccuracy,
-      currentAccuracy
+      currentAccuracy,
     };
   }
 
@@ -442,7 +445,7 @@ export class FederatedTrainer extends EventEmitter {
     this.pendingUpdates.clear();
     this.globalModel = null;
 
-    this.logger.info('Federated trainer reset');
-    this.emit('reset');
+    this.logger.info("Federated trainer reset");
+    this.emit("reset");
   }
 }

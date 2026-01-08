@@ -15,8 +15,8 @@ We have implemented a heuristic-based detection system for suspicious payloads d
 
 The feature is controlled by the `SUSPICIOUS_DETECT_ENABLED` feature flag.
 
--   **Flag**: `SUSPICIOUS_DETECT_ENABLED`
--   **Default**: `false`
+- **Flag**: `SUSPICIOUS_DETECT_ENABLED`
+- **Default**: `false`
 
 ## Audit Events
 

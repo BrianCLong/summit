@@ -1,17 +1,17 @@
 meta:
   id: financial.the-doom-trade@v1
   owner: financial-ops
-  purpose: 'Execute 2008-style collapse playbook'
+  purpose: "Execute 2008-style collapse playbook"
   tags:
     - financial-warfare
     - high-frequency
     - dark-pool
   guardrails:
-    - 'Ensure full legal compliance in jurisdiction of operation.'
-    - 'Do not trigger market instability without authorization.'
+    - "Ensure full legal compliance in jurisdiction of operation."
+    - "Do not trigger market instability without authorization."
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4096
 

@@ -2,31 +2,28 @@
  * Agent Commands
  */
 
-import { Command } from 'commander';
-import ora from 'ora';
-import type { CLIConfig } from '../lib/config.js';
-import { getProfile } from '../lib/config.js';
-import { AgentClient, type AgentStatus } from '../lib/agent-client.js';
-import { formatOutput, success, error, formatTable } from '../utils/output.js';
-import { handleError, ValidationError } from '../utils/errors.js';
-import { AGENT_TYPES, type AgentType } from '../lib/constants.js';
+import { Command } from "commander";
+import ora from "ora";
+import type { CLIConfig } from "../lib/config.js";
+import { getProfile } from "../lib/config.js";
+import { AgentClient, type AgentStatus } from "../lib/agent-client.js";
+import { formatOutput, success, error, formatTable } from "../utils/output.js";
+import { handleError, ValidationError } from "../utils/errors.js";
+import { AGENT_TYPES, type AgentType } from "../lib/constants.js";
 
 export function registerAgentCommands(program: Command, config: CLIConfig): void {
-  const agent = program
-    .command('agent')
-    .alias('a')
-    .description('Agent management operations');
+  const agent = program.command("agent").alias("a").description("Agent management operations");
 
   agent
-    .command('spin <type> <name>')
-    .description('Spin up a new agent')
-    .option('-p, --params <json>', 'Agent parameters as JSON', '{}')
-    .option('--async', 'Run agent asynchronously')
-    .option('--timeout <ms>', 'Execution timeout in milliseconds', '30000')
-    .option('--profile <name>', 'Use named profile')
+    .command("spin <type> <name>")
+    .description("Spin up a new agent")
+    .option("-p, --params <json>", "Agent parameters as JSON", "{}")
+    .option("--async", "Run agent asynchronously")
+    .option("--timeout <ms>", "Execution timeout in milliseconds", "30000")
+    .option("--profile <name>", "Use named profile")
     .action(async (type: string, name: string, options) => {
       if (!AGENT_TYPES.includes(type as AgentType)) {
-        error(`Invalid agent type. Must be one of: ${AGENT_TYPES.join(', ')}`);
+        error(`Invalid agent type. Must be one of: ${AGENT_TYPES.join(", ")}`);
         process.exit(1);
       }
 
@@ -59,17 +56,21 @@ export function registerAgentCommands(program: Command, config: CLIConfig): void
         if (program.opts().json) {
           console.log(JSON.stringify(status, null, 2));
         } else {
-          if (status.status === 'completed') {
+          if (status.status === "completed") {
             success(`Agent ${name} completed successfully`);
             console.log(`  ID: ${status.id}`);
-            console.log(`  Duration: ${status.completedAt && status.startedAt
-              ? (status.completedAt.getTime() - status.startedAt.getTime()) / 1000
-              : 'N/A'}s`);
+            console.log(
+              `  Duration: ${
+                status.completedAt && status.startedAt
+                  ? (status.completedAt.getTime() - status.startedAt.getTime()) / 1000
+                  : "N/A"
+              }s`
+            );
             if (status.result) {
-              console.log('\nResult:');
-              console.log(formatOutput(status.result, { format: 'plain' }));
+              console.log("\nResult:");
+              console.log(formatOutput(status.result, { format: "plain" }));
             }
-          } else if (status.status === 'failed') {
+          } else if (status.status === "failed") {
             error(`Agent ${name} failed: ${status.error}`);
           } else if (options.async) {
             success(`Agent ${name} started asynchronously`);
@@ -84,26 +85,27 @@ export function registerAgentCommands(program: Command, config: CLIConfig): void
     });
 
   agent
-    .command('spin-batch')
-    .description('Spin up multiple agents from a config file')
-    .requiredOption('-f, --file <path>', 'Path to agents config file (JSON/YAML)')
-    .option('--parallel', 'Run agents in parallel')
-    .option('--max-concurrent <number>', 'Maximum concurrent agents', '5')
-    .option('--profile <name>', 'Use named profile')
+    .command("spin-batch")
+    .description("Spin up multiple agents from a config file")
+    .requiredOption("-f, --file <path>", "Path to agents config file (JSON/YAML)")
+    .option("--parallel", "Run agents in parallel")
+    .option("--max-concurrent <number>", "Maximum concurrent agents", "5")
+    .option("--profile <name>", "Use named profile")
     .action(async (options) => {
-      const spinner = ora('Loading agent configurations...').start();
+      const spinner = ora("Loading agent configurations...").start();
 
       try {
-        const fs = await import('node:fs');
-        const yaml = await import('yaml');
+        const fs = await import("node:fs");
+        const yaml = await import("yaml");
 
-        const content = fs.readFileSync(options.file, 'utf-8');
-        const configs = options.file.endsWith('.yaml') || options.file.endsWith('.yml')
-          ? yaml.parse(content)
-          : JSON.parse(content);
+        const content = fs.readFileSync(options.file, "utf-8");
+        const configs =
+          options.file.endsWith(".yaml") || options.file.endsWith(".yml")
+            ? yaml.parse(content)
+            : JSON.parse(content);
 
         if (!Array.isArray(configs)) {
-          throw new ValidationError('Config file must contain an array of agent configurations');
+          throw new ValidationError("Config file must contain an array of agent configurations");
         }
 
         spinner.text = `Spinning up ${configs.length} agents...`;
@@ -122,8 +124,8 @@ export function registerAgentCommands(program: Command, config: CLIConfig): void
 
         spinner.stop();
 
-        const completed = results.filter((r) => r.status === 'completed').length;
-        const failed = results.filter((r) => r.status === 'failed').length;
+        const completed = results.filter((r) => r.status === "completed").length;
+        const failed = results.filter((r) => r.status === "failed").length;
 
         if (program.opts().json) {
           console.log(JSON.stringify(results, null, 2));
@@ -134,8 +136,8 @@ export function registerAgentCommands(program: Command, config: CLIConfig): void
           console.log(`  Total: ${results.length}`);
 
           if (failed > 0) {
-            console.log('\nFailed agents:');
-            for (const r of results.filter((r) => r.status === 'failed')) {
+            console.log("\nFailed agents:");
+            for (const r of results.filter((r) => r.status === "failed")) {
               console.log(`  - ${r.name}: ${r.error}`);
             }
           }
@@ -147,9 +149,9 @@ export function registerAgentCommands(program: Command, config: CLIConfig): void
     });
 
   agent
-    .command('status <agentId>')
-    .description('Get status of an agent')
-    .option('--profile <name>', 'Use named profile')
+    .command("status <agentId>")
+    .description("Get status of an agent")
+    .option("--profile <name>", "Use named profile")
     .action(async (agentId: string, options) => {
       try {
         const profile = getProfile(config, options.profile);
@@ -187,9 +189,9 @@ export function registerAgentCommands(program: Command, config: CLIConfig): void
     });
 
   agent
-    .command('cancel <agentId>')
-    .description('Cancel a running agent')
-    .option('--profile <name>', 'Use named profile')
+    .command("cancel <agentId>")
+    .description("Cancel a running agent")
+    .option("--profile <name>", "Use named profile")
     .action(async (agentId: string, options) => {
       try {
         const profile = getProfile(config, options.profile);
@@ -209,12 +211,12 @@ export function registerAgentCommands(program: Command, config: CLIConfig): void
     });
 
   agent
-    .command('list')
-    .alias('ls')
-    .description('List agents')
-    .option('-t, --type <type>', 'Filter by agent type')
-    .option('-s, --status <status>', 'Filter by status')
-    .option('--profile <name>', 'Use named profile')
+    .command("list")
+    .alias("ls")
+    .description("List agents")
+    .option("-t, --type <type>", "Filter by agent type")
+    .option("-s, --status <status>", "Filter by status")
+    .option("--profile <name>", "Use named profile")
     .action(async (options) => {
       try {
         const profile = getProfile(config, options.profile);
@@ -230,10 +232,10 @@ export function registerAgentCommands(program: Command, config: CLIConfig): void
           console.log(JSON.stringify(agents, null, 2));
         } else {
           if (agents.length === 0) {
-            console.log('No agents found');
+            console.log("No agents found");
           } else {
             const tableData = agents.map((a) => ({
-              id: a.id.substring(0, 8) + '...',
+              id: a.id.substring(0, 8) + "...",
               name: a.name,
               type: a.type,
               status: a.status,
@@ -248,12 +250,12 @@ export function registerAgentCommands(program: Command, config: CLIConfig): void
     });
 
   agent
-    .command('logs <agentId>')
-    .description('Get logs for an agent')
-    .option('-n, --lines <number>', 'Number of log lines', '50')
-    .option('-f, --follow', 'Follow log output')
-    .option('--level <level>', 'Filter by log level')
-    .option('--profile <name>', 'Use named profile')
+    .command("logs <agentId>")
+    .description("Get logs for an agent")
+    .option("-n, --lines <number>", "Number of log lines", "50")
+    .option("-f, --follow", "Follow log output")
+    .option("--level <level>", "Filter by log level")
+    .option("--profile <name>", "Use named profile")
     .action(async (agentId: string, options) => {
       try {
         const profile = getProfile(config, options.profile);
@@ -285,8 +287,8 @@ export function registerAgentCommands(program: Command, config: CLIConfig): void
           }
         }
 
-        if (options.follow && status.status === 'running') {
-          console.log('\n--- Following logs (Ctrl+C to stop) ---\n');
+        if (options.follow && status.status === "running") {
+          console.log("\n--- Following logs (Ctrl+C to stop) ---\n");
 
           const unsubscribe = client.onStatusChange(agentId, (s) => {
             const newLogs = s.logs.slice(logs.length);
@@ -298,7 +300,7 @@ export function registerAgentCommands(program: Command, config: CLIConfig): void
             logs = s.logs;
           });
 
-          process.on('SIGINT', () => {
+          process.on("SIGINT", () => {
             unsubscribe();
             process.exit(0);
           });
@@ -312,13 +314,13 @@ export function registerAgentCommands(program: Command, config: CLIConfig): void
     });
 
   agent
-    .command('types')
-    .description('List available agent types')
+    .command("types")
+    .description("List available agent types")
     .action(() => {
       if (program.opts().json) {
         console.log(JSON.stringify(AGENT_TYPES, null, 2));
       } else {
-        console.log('\nAvailable Agent Types:');
+        console.log("\nAvailable Agent Types:");
         for (const type of AGENT_TYPES) {
           console.log(`  - ${type}`);
         }

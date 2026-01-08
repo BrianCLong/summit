@@ -1,21 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { api } from '../api';
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from 'recharts';
+import React, { useEffect, useState } from "react";
+import { api } from "../api";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from "recharts";
 
 export default function DLQSignatures() {
-  const {
-    getDLQSignatures,
-    getDLQSignatureTimeSeries,
-    getDLQPolicy,
-    putDLQPolicy,
-  } = api();
+  const { getDLQSignatures, getDLQSignatureTimeSeries, getDLQPolicy, putDLQPolicy } = api();
   const [rows, setRows] = useState<any[]>([]);
   const [sel, setSel] = useState<string | null>(null);
   const [series, setSeries] = useState<any[]>([]);
@@ -24,26 +12,25 @@ export default function DLQSignatures() {
     getDLQSignatures().then((r) => setRows(r.signatures || []));
   }, []);
   useEffect(() => {
-    if (sel)
-      getDLQSignatureTimeSeries(sel).then((r) => setSeries(r.points || []));
+    if (sel) getDLQSignatureTimeSeries(sel).then((r) => setSeries(r.points || []));
   }, [sel]);
 
   async function allowSignature(sig: string) {
     const pol = await getDLQPolicy();
     const list = new Set(pol.allowSignatures || []);
-    if (list.has(sig)) return alert('Already allowed');
+    if (list.has(sig)) return alert("Already allowed");
     list.add(sig);
     await putDLQPolicy({ allowSignatures: Array.from(list) });
-    alert('Signature added to allowlist');
+    alert("Signature added to allowlist");
   }
 
   async function removeSignature(sig: string) {
     const pol = await getDLQPolicy();
     const list = new Set(pol.allowSignatures || []);
-    if (!list.has(sig)) return alert('Not in allowlist');
+    if (!list.has(sig)) return alert("Not in allowlist");
     list.delete(sig);
     await putDLQPolicy({ allowSignatures: Array.from(list) });
-    alert('Signature removed from allowlist');
+    alert("Signature removed from allowlist");
   }
 
   return (
@@ -63,16 +50,13 @@ export default function DLQSignatures() {
           {rows.map((r: any) => (
             <tr key={r.sig}>
               <td>{r.count}</td>
-              <td>{r.trend === 1 ? '↑' : r.trend === -1 ? '↓' : '→'}</td>
+              <td>{r.trend === 1 ? "↑" : r.trend === -1 ? "↓" : "→"}</td>
               <td>{new Date(r.lastTs).toLocaleString()}</td>
               <td className="max-w-[560px] truncate" title={r.sig}>
                 {r.sig}
               </td>
               <td>
-                <button
-                  className="mr-2 text-blue-600 underline"
-                  onClick={() => setSel(r.sig)}
-                >
+                <button className="mr-2 text-blue-600 underline" onClick={() => setSel(r.sig)}>
                   Trend
                 </button>
                 <button
@@ -81,10 +65,7 @@ export default function DLQSignatures() {
                 >
                   Allow auto-replay
                 </button>
-                <button
-                  className="text-red-600 underline"
-                  onClick={() => removeSignature(r.sig)}
-                >
+                <button className="text-red-600 underline" onClick={() => removeSignature(r.sig)}>
                   Remove
                 </button>
               </td>

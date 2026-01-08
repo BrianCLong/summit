@@ -1,13 +1,13 @@
 export type VerificationIssueCode =
-  | 'MISSING_MANIFEST'
-  | 'SCHEMA_INVALID'
-  | 'MISSING_FILE'
-  | 'HASH_MISMATCH'
-  | 'PATH_TRAVERSAL'
-  | 'TRANSFORM_BROKEN'
-  | 'EVIDENCE_MISSING'
-  | 'SIGNATURE_MISSING'
-  | 'SIGNATURE_INVALID';
+  | "MISSING_MANIFEST"
+  | "SCHEMA_INVALID"
+  | "MISSING_FILE"
+  | "HASH_MISMATCH"
+  | "PATH_TRAVERSAL"
+  | "TRANSFORM_BROKEN"
+  | "EVIDENCE_MISSING"
+  | "SIGNATURE_MISSING"
+  | "SIGNATURE_INVALID";
 
 export interface VerificationIssue {
   code: VerificationIssueCode;
@@ -71,7 +71,7 @@ export interface DisclosureRedaction {
 export interface DisclosureAudiencePolicy {
   policyId: string;
   label: string;
-  decision?: 'allow' | 'deny' | 'conditional';
+  decision?: "allow" | "deny" | "conditional";
 }
 
 export interface DisclosureLicense {
@@ -92,7 +92,7 @@ export interface DisclosureMetadata {
 }
 
 export interface ManifestSignature {
-  algorithm: 'ed25519';
+  algorithm: "ed25519";
   keyId: string;
   publicKey: string;
   signature: string;

@@ -9,7 +9,11 @@
     "lint": "echo 'lint not configured'",
     "test": "echo 'no tests'"
   },
-  "keywords": ["dlc", "data-lease", "client"],
+  "keywords": [
+    "dlc",
+    "data-lease",
+    "client"
+  ],
   "author": "Summit Engineering",
   "license": "Apache-2.0",
   "devDependencies": {

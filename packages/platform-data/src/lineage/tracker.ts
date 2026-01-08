@@ -3,34 +3,34 @@
  * Tracks data flow and transformations across the platform
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import { z } from 'zod';
+import { v4 as uuidv4 } from "uuid";
+import { z } from "zod";
 
 /**
  * Data source types
  */
 export type DataSourceType =
-  | 'database'
-  | 'api'
-  | 'file'
-  | 'stream'
-  | 'cache'
-  | 'external'
-  | 'user_input';
+  | "database"
+  | "api"
+  | "file"
+  | "stream"
+  | "cache"
+  | "external"
+  | "user_input";
 
 /**
  * Transformation types
  */
 export type TransformationType =
-  | 'extract'
-  | 'transform'
-  | 'load'
-  | 'aggregate'
-  | 'filter'
-  | 'join'
-  | 'enrich'
-  | 'anonymize'
-  | 'validate';
+  | "extract"
+  | "transform"
+  | "load"
+  | "aggregate"
+  | "filter"
+  | "join"
+  | "enrich"
+  | "anonymize"
+  | "validate";
 
 /**
  * Data node schema
@@ -38,8 +38,10 @@ export type TransformationType =
 export const DataNodeSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
-  type: z.enum(['source', 'transformation', 'sink']),
-  sourceType: z.enum(['database', 'api', 'file', 'stream', 'cache', 'external', 'user_input']).optional(),
+  type: z.enum(["source", "transformation", "sink"]),
+  sourceType: z
+    .enum(["database", "api", "file", "stream", "cache", "external", "user_input"])
+    .optional(),
   metadata: z.record(z.unknown()).optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
@@ -54,10 +56,19 @@ export const DataEdgeSchema = z.object({
   id: z.string().uuid(),
   sourceId: z.string().uuid(),
   targetId: z.string().uuid(),
-  transformationType: z.enum([
-    'extract', 'transform', 'load', 'aggregate',
-    'filter', 'join', 'enrich', 'anonymize', 'validate'
-  ]).optional(),
+  transformationType: z
+    .enum([
+      "extract",
+      "transform",
+      "load",
+      "aggregate",
+      "filter",
+      "join",
+      "enrich",
+      "anonymize",
+      "validate",
+    ])
+    .optional(),
   metadata: z.record(z.unknown()).optional(),
   createdAt: z.date(),
 });
@@ -74,12 +85,16 @@ export const LineageRecordSchema = z.object({
   operation: z.string(),
   timestamp: z.date(),
   source: DataNodeSchema.optional(),
-  transformations: z.array(z.object({
-    type: z.string(),
-    description: z.string().optional(),
-    inputFields: z.array(z.string()).optional(),
-    outputFields: z.array(z.string()).optional(),
-  })).optional(),
+  transformations: z
+    .array(
+      z.object({
+        type: z.string(),
+        description: z.string().optional(),
+        inputFields: z.array(z.string()).optional(),
+        outputFields: z.array(z.string()).optional(),
+      })
+    )
+    .optional(),
   upstream: z.array(z.string()).optional(),
   downstream: z.array(z.string()).optional(),
   metadata: z.record(z.unknown()).optional(),
@@ -100,7 +115,7 @@ export class LineageGraph {
    */
   addNode(
     name: string,
-    type: 'source' | 'transformation' | 'sink',
+    type: "source" | "transformation" | "sink",
     options: {
       sourceType?: DataSourceType;
       metadata?: Record<string, unknown>;
@@ -181,7 +196,7 @@ export class LineageGraph {
       }
     }
 
-    return Array.from(upstreamIds).map(id => this.nodes.get(id)!);
+    return Array.from(upstreamIds).map((id) => this.nodes.get(id)!);
   }
 
   /**
@@ -208,7 +223,7 @@ export class LineageGraph {
       }
     }
 
-    return Array.from(downstreamIds).map(id => this.nodes.get(id)!);
+    return Array.from(downstreamIds).map((id) => this.nodes.get(id)!);
   }
 
   /**
@@ -227,7 +242,7 @@ export class LineageGraph {
       const { id: currentId, path: currentPath } = queue.shift()!;
 
       if (currentId === toId) {
-        return currentPath.map(id => this.nodes.get(id)!);
+        return currentPath.map((id) => this.nodes.get(id)!);
       }
 
       if (visited.has(currentId)) continue;
@@ -309,14 +324,16 @@ export class LineageTracker {
       entityType: params.entityType,
       operation: params.operation,
       timestamp: new Date(),
-      source: params.source ? {
-        id: uuidv4(),
-        name: params.source.name,
-        type: 'source',
-        sourceType: params.source.type,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } : undefined,
+      source: params.source
+        ? {
+            id: uuidv4(),
+            name: params.source.name,
+            type: "source",
+            sourceType: params.source.type,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          }
+        : undefined,
       transformations: params.transformations,
       upstream: params.upstream,
       downstream: params.downstream,
@@ -327,7 +344,7 @@ export class LineageTracker {
 
     // Update graph
     if (params.source) {
-      this.graph.addNode(params.source.name, 'source', {
+      this.graph.addNode(params.source.name, "source", {
         sourceType: params.source.type,
       });
     }
@@ -339,7 +356,7 @@ export class LineageTracker {
    * Get lineage for an entity
    */
   getEntityLineage(entityId: string): LineageRecord[] {
-    return this.records.filter(r => r.entityId === entityId);
+    return this.records.filter((r) => r.entityId === entityId);
   }
 
   /**

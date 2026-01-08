@@ -19,14 +19,14 @@ This plan provides a **phased, dependency-aware remediation roadmap** for all 18
 
 ### Resource Requirements
 
-| Phase | Duration | Engineers | Parallel Tracks |
-|-------|----------|-----------|-----------------|
-| **Phase 1: Immediate** | 1 week | 4 engineers | 4 |
-| **Phase 2: Security** | 2 weeks | 5 engineers | 3 |
-| **Phase 3: Observability** | 2 weeks | 3 engineers | 2 |
-| **Phase 4: Features** | 1 week | 2 engineers | 1 |
-| **Phase 5: High Priority** | 3 weeks | 4 engineers | 2 |
-| **Total** | **9 weeks** | **Peak: 5 concurrent** | **Parallelizable** |
+| Phase                      | Duration    | Engineers              | Parallel Tracks    |
+| -------------------------- | ----------- | ---------------------- | ------------------ |
+| **Phase 1: Immediate**     | 1 week      | 4 engineers            | 4                  |
+| **Phase 2: Security**      | 2 weeks     | 5 engineers            | 3                  |
+| **Phase 3: Observability** | 2 weeks     | 3 engineers            | 2                  |
+| **Phase 4: Features**      | 1 week      | 2 engineers            | 1                  |
+| **Phase 5: High Priority** | 3 weeks     | 4 engineers            | 2                  |
+| **Total**                  | **9 weeks** | **Peak: 5 concurrent** | **Parallelizable** |
 
 ---
 
@@ -42,6 +42,7 @@ This plan provides a **phased, dependency-aware remediation roadmap** for all 18
 #### Track 1: Access Control Hardening (Backend Lead — 20 hours)
 
 **C-001: Missing RBAC on Admin Reindex Endpoint**
+
 - Effort: 8 hours
 - Steps:
   1. Define admin role requirements (1h)
@@ -52,6 +53,7 @@ This plan provides a **phased, dependency-aware remediation roadmap** for all 18
 - Deliverable: Admin endpoints require `admin` or `reindex_operator` role
 
 **C-006: Dangerous Clear Endpoint**
+
 - Effort: 2 hours
 - Steps:
   1. Identify clear/delete endpoints in Graph DB (0.5h)
@@ -61,6 +63,7 @@ This plan provides a **phased, dependency-aware remediation roadmap** for all 18
 - Deliverable: Clear endpoint disabled in production OR requires MFA + audit log
 
 **C-010: Missing Security Headers (Helmet)**
+
 - Effort: 4 hours
 - Steps:
   1. Install Helmet middleware in all services (1h)
@@ -70,6 +73,7 @@ This plan provides a **phased, dependency-aware remediation roadmap** for all 18
 - Deliverable: All services return security headers
 
 **C-011: CORS Misconfiguration**
+
 - Effort: 8 hours
 - Steps:
   1. Audit current CORS configuration (2h)
@@ -84,6 +88,7 @@ This plan provides a **phased, dependency-aware remediation roadmap** for all 18
 #### Track 2: Authentication (Security Eng — 20 hours)
 
 **C-003: Missing JWT Authentication on Services**
+
 - Effort: 16 hours
 - Steps:
   1. Implement JWT verification middleware (4h)
@@ -95,6 +100,7 @@ This plan provides a **phased, dependency-aware remediation roadmap** for all 18
 - Deliverable: Graph DB and Agent Executor require valid JWT
 
 **C-004: Policy Engine Dry-Run Mode**
+
 - Effort: 4 hours
 - Steps:
   1. Audit all deployment configurations (2h)
@@ -108,6 +114,7 @@ This plan provides a **phased, dependency-aware remediation roadmap** for all 18
 #### Track 3: Mobile Security (Mobile Eng — 8 hours)
 
 **C-015: Hardcoded Encryption Key**
+
 - Effort: 8 hours
 - Steps:
   1. Implement platform keychain integration (iOS Keychain, Android Keystore) (4h)
@@ -122,6 +129,7 @@ This plan provides a **phased, dependency-aware remediation roadmap** for all 18
 #### Track 4: Identity Management (Backend Lead — 24 hours)
 
 **C-002: SCIM Synchronization**
+
 - Effort: 24 hours
 - Steps:
   1. Review IdP SCIM API documentation (2h)
@@ -148,11 +156,11 @@ This plan provides a **phased, dependency-aware remediation roadmap** for all 18
 
 ### Phase 1 Risks
 
-| Risk | Likelihood | Mitigation |
-|------|-----------|------------|
-| IdP API access delayed | Medium | Start SCIM work immediately, escalate for credentials |
-| Breaking existing integrations | High | Thorough testing in staging before production |
-| JWT rollout breaks internal services | Medium | Phased rollout, feature flag |
+| Risk                                 | Likelihood | Mitigation                                            |
+| ------------------------------------ | ---------- | ----------------------------------------------------- |
+| IdP API access delayed               | Medium     | Start SCIM work immediately, escalate for credentials |
+| Breaking existing integrations       | High       | Thorough testing in staging before production         |
+| JWT rollout breaks internal services | Medium     | Phased rollout, feature flag                          |
 
 ---
 
@@ -168,6 +176,7 @@ This plan provides a **phased, dependency-aware remediation roadmap** for all 18
 #### Track 1: Cypher Injection Remediation (Graph DB Team — 40 hours)
 
 **C-005: Cypher Injection Vulnerability**
+
 - Effort: 40 hours (critical, complex)
 - Steps:
   1. **Audit Phase (16h — 2 engineers, 1 day):**
@@ -194,6 +203,7 @@ This plan provides a **phased, dependency-aware remediation roadmap** for all 18
 #### Track 2: Input Validation Framework (Backend Leads — 32 hours)
 
 **C-008: Missing Input Validation**
+
 - Effort: 32 hours
 - Steps:
   1. **Framework Selection (4h):**
@@ -221,6 +231,7 @@ This plan provides a **phased, dependency-aware remediation roadmap** for all 18
 #### Track 3: Rate Limiting (Backend Lead + DevOps — 16 hours)
 
 **C-009: Zero Rate Limiting**
+
 - Effort: 16 hours
 - Steps:
   1. **Infrastructure (8h — DevOps):**
@@ -232,13 +243,14 @@ This plan provides a **phased, dependency-aware remediation roadmap** for all 18
   2. **Implementation (8h — Backend Lead):**
      - Implement rate limiting middleware (4h)
      - Configure limits per endpoint tier (2h)
-     - Add rate limit headers (X-RateLimit-*) (1h)
+     - Add rate limit headers (X-RateLimit-\*) (1h)
      - Test rate limiting (1h)
 
 - Dependencies: Redis deployment
 - Deliverable: All API endpoints have rate limiting, Redis deployed
 
 **Rate Limit Thresholds:**
+
 ```yaml
 tiers:
   authentication:
@@ -259,6 +271,7 @@ tiers:
 #### Track 4: Audit Logging (Security Eng + Backend Lead — 24 hours)
 
 **C-012: No Audit Logging**
+
 - Effort: 24 hours
 - Steps:
   1. **Design (4h):**
@@ -282,6 +295,7 @@ tiers:
 - Deliverable: All sensitive operations logged, audit logs ingested
 
 **Audit Events Required:**
+
 - AuthN: login success/failure, logout, token refresh, MFA events
 - AuthZ: policy decisions (allow/deny), role assignments
 - Data: create/read/update/delete operations (with tenant context)
@@ -300,12 +314,12 @@ tiers:
 
 ### Phase 2 Risks
 
-| Risk | Likelihood | Mitigation |
-|------|-----------|------------|
-| Cypher refactor breaks queries | High | Comprehensive test suite, staging verification |
-| Rate limiting breaks legitimate users | Medium | Generous initial limits, monitoring, quick rollback |
-| Audit logging performance impact | Low | Async logging, buffering, performance testing |
-| Redis deployment delay | Low | Start infrastructure work in Phase 1 |
+| Risk                                  | Likelihood | Mitigation                                          |
+| ------------------------------------- | ---------- | --------------------------------------------------- |
+| Cypher refactor breaks queries        | High       | Comprehensive test suite, staging verification      |
+| Rate limiting breaks legitimate users | Medium     | Generous initial limits, monitoring, quick rollback |
+| Audit logging performance impact      | Low        | Async logging, buffering, performance testing       |
+| Redis deployment delay                | Low        | Start infrastructure work in Phase 1                |
 
 ---
 
@@ -321,6 +335,7 @@ tiers:
 #### Track 1: Ingest Metrics (Backend Eng — 20 hours)
 
 **C-017: Ingest Pipeline Failure Tracking**
+
 - Effort: 12 hours
 - Steps:
   1. Add failure counter to ingest metrics (2h)
@@ -332,6 +347,7 @@ tiers:
 - Deliverable: Failed records tracked, categorized, and recoverable
 
 **C-018: Ingest Pipeline Throughput Tracking**
+
 - Effort: 8 hours
 - Steps:
   1. Add byte counter to ingest metrics (2h)
@@ -346,6 +362,7 @@ tiers:
 #### Track 2: CI/CD Verification (SRE Lead — 16 hours)
 
 **C-013: Provenance Verification**
+
 - Effort: 16 hours
 - Steps:
   1. Design provenance checks (SLSA requirements) (2h)
@@ -358,6 +375,7 @@ tiers:
 - Deliverable: Provenance verification functional, enforced in CI
 
 **C-014: Golden Path SLO Verification**
+
 - Effort: 16 hours
 - Steps:
   1. Define SLO thresholds in `.ci/config/slo.yml` (2h)
@@ -374,6 +392,7 @@ tiers:
 #### Track 3: Query Timeout (Backend Eng — 8 hours)
 
 **C-007: Missing Query Timeouts**
+
 - Effort: 8 hours
 - Steps:
   1. Configure Neo4j query timeout (1h)
@@ -398,11 +417,11 @@ tiers:
 
 ### Phase 3 Risks
 
-| Risk | Likelihood | Mitigation |
-|------|-----------|------------|
-| DLQ replay mechanism complexity | Medium | Start with manual replay, automate later |
-| SLO verification too strict (false failures) | High | Conservative initial thresholds, tuning period |
-| Query timeouts break long-running operations | Medium | Identify legitimate long queries, increase timeout for specific operations |
+| Risk                                         | Likelihood | Mitigation                                                                 |
+| -------------------------------------------- | ---------- | -------------------------------------------------------------------------- |
+| DLQ replay mechanism complexity              | Medium     | Start with manual replay, automate later                                   |
+| SLO verification too strict (false failures) | High       | Conservative initial thresholds, tuning period                             |
+| Query timeouts break long-running operations | Medium     | Identify legitimate long queries, increase timeout for specific operations |
 
 ---
 
@@ -418,6 +437,7 @@ tiers:
 #### Track 1: Search Integration (Backend + Frontend — 16 hours)
 
 **C-016: Search API Non-Functional**
+
 - Effort: 16 hours
 - Steps:
   1. **Backend Integration (10h — Backend Eng):**
@@ -451,11 +471,11 @@ tiers:
 
 ### Phase 4 Risks
 
-| Risk | Likelihood | Mitigation |
-|------|-----------|------------|
-| Typesense not deployed | High | Verify deployment in Phase 1, escalate |
-| Search index missing or stale | Medium | Document indexing process, automate |
-| Performance issues with large indexes | Low | Performance testing, pagination |
+| Risk                                  | Likelihood | Mitigation                             |
+| ------------------------------------- | ---------- | -------------------------------------- |
+| Typesense not deployed                | High       | Verify deployment in Phase 1, escalate |
+| Search index missing or stale         | Medium     | Document indexing process, automate    |
+| Performance issues with large indexes | Low        | Performance testing, pagination        |
 
 ---
 
@@ -471,6 +491,7 @@ tiers:
 #### Track 1: Tenant Isolation Testing (QA Lead + Backend — 24 hours)
 
 **H-001: Tenant Isolation Tests**
+
 - Effort: 24 hours
 - Steps:
   1. **Test Design (8h):**
@@ -496,6 +517,7 @@ tiers:
 #### Track 2: Deduplication UX (Backend + Frontend — 40 hours)
 
 **H-002: Deduplication UX Features**
+
 - Effort: 40 hours
 - Steps:
   1. **WebAuthn Step-Up (8h — Backend):**
@@ -522,6 +544,7 @@ tiers:
 #### Track 3: GraphQL Stabilization (Backend — 32 hours)
 
 **H-004: GraphQL Schema Stability**
+
 - Effort: 32 hours
 - Steps:
   1. **Schema Audit (8h):**
@@ -549,6 +572,7 @@ tiers:
 #### Track 4: Dependency Cleanup (Frontend — 16 hours)
 
 **H-003: jQuery Removal**
+
 - Effort: 16 hours
 - Steps:
   1. Audit jQuery usage (2h)
@@ -563,6 +587,7 @@ tiers:
 #### Track 5: Planning Completion (PM — 8 hours)
 
 **H-005: Planning TODOs**
+
 - Effort: 8 hours
 - Steps:
   1. Review all planning documents (2h)
@@ -583,11 +608,11 @@ tiers:
 
 ### Phase 5 Risks
 
-| Risk | Likelihood | Mitigation |
-|------|-----------|------------|
-| Tenant isolation violations found late | Medium | Start testing in Phase 1, continuous testing |
-| GraphQL schema changes break clients | High | Phased rollout, versioning, deprecation warnings |
-| jQuery removal breaks functionality | Medium | Comprehensive testing, feature flags |
+| Risk                                   | Likelihood | Mitigation                                       |
+| -------------------------------------- | ---------- | ------------------------------------------------ |
+| Tenant isolation violations found late | Medium     | Start testing in Phase 1, continuous testing     |
+| GraphQL schema changes break clients   | High       | Phased rollout, versioning, deprecation warnings |
+| jQuery removal breaks functionality    | Medium     | Comprehensive testing, feature flags             |
 
 ---
 
@@ -637,17 +662,17 @@ graph TD
 
 ### Week-by-Week Breakdown
 
-| Week | Phase | Engineers | Focus |
-|------|-------|-----------|-------|
-| **1** | Phase 1 | 4 | Access control, auth, mobile security, SCIM |
-| **2** | Phase 2 (Part 1) | 5 | Cypher injection audit, input validation framework |
-| **3** | Phase 2 (Part 2) | 5 | Cypher remediation, rate limiting, audit logging |
-| **4** | Phase 3 (Part 1) | 3 | Ingest metrics, query timeouts |
-| **5** | Phase 3 (Part 2) | 3 | CI/CD verification (provenance, SLO) |
-| **6** | Phase 4 | 2 | Search integration |
-| **7** | Phase 5 (Part 1) | 4 | Tenant tests, dedup UX (WebAuthn, perf) |
-| **8** | Phase 5 (Part 2) | 4 | Dedup UX (frontend), GraphQL |
-| **9** | Phase 5 (Part 3) | 4 | jQuery removal, planning cleanup, final testing |
+| Week  | Phase            | Engineers | Focus                                              |
+| ----- | ---------------- | --------- | -------------------------------------------------- |
+| **1** | Phase 1          | 4         | Access control, auth, mobile security, SCIM        |
+| **2** | Phase 2 (Part 1) | 5         | Cypher injection audit, input validation framework |
+| **3** | Phase 2 (Part 2) | 5         | Cypher remediation, rate limiting, audit logging   |
+| **4** | Phase 3 (Part 1) | 3         | Ingest metrics, query timeouts                     |
+| **5** | Phase 3 (Part 2) | 3         | CI/CD verification (provenance, SLO)               |
+| **6** | Phase 4          | 2         | Search integration                                 |
+| **7** | Phase 5 (Part 1) | 4         | Tenant tests, dedup UX (WebAuthn, perf)            |
+| **8** | Phase 5 (Part 2) | 4         | Dedup UX (frontend), GraphQL                       |
+| **9** | Phase 5 (Part 3) | 4         | jQuery removal, planning cleanup, final testing    |
 
 ---
 
@@ -655,13 +680,13 @@ graph TD
 
 ### Testing Requirements Per Phase
 
-| Phase | Testing Type | Coverage | Duration |
-|-------|--------------|----------|----------|
-| Phase 1 | Integration tests, security review | All changes | 2 days |
-| Phase 2 | Security testing, injection tests, pentesting | All changes | 3 days |
-| Phase 3 | E2E tests, SLO verification, chaos testing | All changes | 2 days |
-| Phase 4 | Feature tests, tenant isolation | Search feature | 1 day |
-| Phase 5 | Regression tests, full system test | All features | 3 days |
+| Phase   | Testing Type                                  | Coverage       | Duration |
+| ------- | --------------------------------------------- | -------------- | -------- |
+| Phase 1 | Integration tests, security review            | All changes    | 2 days   |
+| Phase 2 | Security testing, injection tests, pentesting | All changes    | 3 days   |
+| Phase 3 | E2E tests, SLO verification, chaos testing    | All changes    | 2 days   |
+| Phase 4 | Feature tests, tenant isolation               | Search feature | 1 day    |
+| Phase 5 | Regression tests, full system test            | All features   | 3 days   |
 
 ### Security Testing Checklist
 
@@ -681,16 +706,19 @@ graph TD
 ### Phased Production Rollout
 
 **Week 10: Canary Deployment**
+
 - Deploy to 5% of traffic
 - Monitor for 48 hours
 - Key metrics: error rate, latency, auth failures, policy denials
 
 **Week 11: Gradual Rollout**
+
 - 20% traffic (day 1-2)
 - 50% traffic (day 3-4)
 - 100% traffic (day 5)
 
 **Week 12: GA Launch**
+
 - Full production deployment
 - SOC 2 audit readiness
 - Customer communications
@@ -701,13 +729,13 @@ graph TD
 
 ### Top Risks & Mitigations
 
-| Risk | Impact | Probability | Mitigation | Owner |
-|------|--------|-------------|------------|-------|
-| Cypher refactor breaks queries | Critical | High | Comprehensive test suite, phased rollout | Graph DB Team |
-| SCIM integration delayed (IdP access) | High | Medium | Start immediately, escalate for credentials | Security Eng |
-| Rate limiting breaks legitimate users | High | Medium | Conservative limits, monitoring, quick rollback | Backend Lead |
-| Testing finds new tenant isolation bugs | Critical | Medium | Start tenant tests early, continuous testing | QA Lead |
-| Resource constraints (engineers unavailable) | High | Medium | Cross-train, prioritize critical path | Engineering Manager |
+| Risk                                         | Impact   | Probability | Mitigation                                      | Owner               |
+| -------------------------------------------- | -------- | ----------- | ----------------------------------------------- | ------------------- |
+| Cypher refactor breaks queries               | Critical | High        | Comprehensive test suite, phased rollout        | Graph DB Team       |
+| SCIM integration delayed (IdP access)        | High     | Medium      | Start immediately, escalate for credentials     | Security Eng        |
+| Rate limiting breaks legitimate users        | High     | Medium      | Conservative limits, monitoring, quick rollback | Backend Lead        |
+| Testing finds new tenant isolation bugs      | Critical | Medium      | Start tenant tests early, continuous testing    | QA Lead             |
+| Resource constraints (engineers unavailable) | High     | Medium      | Cross-train, prioritize critical path           | Engineering Manager |
 
 ---
 
@@ -716,29 +744,34 @@ graph TD
 ### Phase Completion Gates
 
 **Phase 1 Complete When:**
+
 - All 8 Phase 1 TODOs resolved
 - Security review passed
 - Integration tests pass
 - Staging deployment successful
 
 **Phase 2 Complete When:**
+
 - All 4 Phase 2 TODOs resolved
 - Penetration testing shows no injection vulnerabilities
 - OWASP Top 10 compliance verified
 - Audit logging functional
 
 **Phase 3 Complete When:**
+
 - All 5 Phase 3 TODOs resolved
 - Metrics dashboards operational
 - CI/CD verification enforced
 - SLO gates functional
 
 **Phase 4 Complete When:**
+
 - Search feature functional
 - Tenant isolation verified
 - Performance acceptable
 
 **Phase 5 Complete When:**
+
 - All 5 High Priority TODOs resolved
 - Regression tests pass
 - Full system test passed
@@ -761,32 +794,32 @@ graph TD
 
 ### Engineering Costs
 
-| Role | Rate | Hours | Cost |
-|------|------|-------|------|
-| Backend Lead | $150/hr | 120h | $18,000 |
-| Security Engineer | $180/hr | 80h | $14,400 |
-| Graph DB Engineer (x2) | $140/hr | 80h | $11,200 |
-| SRE Lead | $160/hr | 40h | $6,400 |
-| Frontend Engineer | $130/hr | 60h | $7,800 |
-| QA Lead | $120/hr | 24h | $2,880 |
-| **Total Engineering** | | **396h** | **$60,680** |
+| Role                   | Rate    | Hours    | Cost        |
+| ---------------------- | ------- | -------- | ----------- |
+| Backend Lead           | $150/hr | 120h     | $18,000     |
+| Security Engineer      | $180/hr | 80h      | $14,400     |
+| Graph DB Engineer (x2) | $140/hr | 80h      | $11,200     |
+| SRE Lead               | $160/hr | 40h      | $6,400      |
+| Frontend Engineer      | $130/hr | 60h      | $7,800      |
+| QA Lead                | $120/hr | 24h      | $2,880      |
+| **Total Engineering**  |         | **396h** | **$60,680** |
 
 ### Infrastructure Costs (Estimated)
 
-| Item | Monthly Cost | Notes |
-|------|-------------|-------|
-| Redis (rate limiting) | $200 | Managed Redis (AWS ElastiCache) |
-| Audit log storage | $300 | CloudWatch Logs or equivalent |
-| Monitoring (Grafana Cloud) | $150 | Metrics + dashboards |
-| **Total Infrastructure** | **$650/month** | **Ongoing** |
+| Item                       | Monthly Cost   | Notes                           |
+| -------------------------- | -------------- | ------------------------------- |
+| Redis (rate limiting)      | $200           | Managed Redis (AWS ElastiCache) |
+| Audit log storage          | $300           | CloudWatch Logs or equivalent   |
+| Monitoring (Grafana Cloud) | $150           | Metrics + dashboards            |
+| **Total Infrastructure**   | **$650/month** | **Ongoing**                     |
 
 ### One-Time Costs
 
-| Item | Cost | Notes |
-|------|------|-------|
-| Security pentesting | $15,000 | External firm, 1 week engagement |
-| SCIM integration consulting | $5,000 | IdP-specific expertise (if needed) |
-| **Total One-Time** | **$20,000** | **Optional** |
+| Item                        | Cost        | Notes                              |
+| --------------------------- | ----------- | ---------------------------------- |
+| Security pentesting         | $15,000     | External firm, 1 week engagement   |
+| SCIM integration consulting | $5,000      | IdP-specific expertise (if needed) |
+| **Total One-Time**          | **$20,000** | **Optional**                       |
 
 ### Grand Total
 
@@ -802,25 +835,29 @@ graph TD
 ### If Behind Schedule
 
 **Priority 1 (Cannot Ship Without):**
+
 - C-001, C-002, C-003, C-005, C-006, C-012, C-015
 
 **Priority 2 (High Risk to Ship Without):**
+
 - C-004, C-007, C-008, C-009, C-010, C-011
 
 **Priority 3 (Can Ship with Compensating Controls):**
+
 - C-013, C-014, C-016, C-017, C-018
 
 **Priority 4 (Post-GA Acceptable):**
+
 - All High Priority TODOs
 
 ### Compensating Controls for Delayed Items
 
-| TODO | Compensating Control |
-|------|---------------------|
-| C-013 (Provenance) | Manual verification, increased audit |
-| C-014 (SLO Verification) | Manual SLO checks before release |
-| C-016 (Search) | Disable search feature, communicate to users |
-| C-017, C-018 (Metrics) | Manual monitoring, increased alerting |
+| TODO                     | Compensating Control                         |
+| ------------------------ | -------------------------------------------- |
+| C-013 (Provenance)       | Manual verification, increased audit         |
+| C-014 (SLO Verification) | Manual SLO checks before release             |
+| C-016 (Search)           | Disable search feature, communicate to users |
+| C-017, C-018 (Metrics)   | Manual monitoring, increased alerting        |
 
 ---
 
@@ -828,17 +865,18 @@ graph TD
 
 ### Stakeholder Updates
 
-| Stakeholder | Frequency | Content |
-|-------------|-----------|---------|
-| Engineering Leadership | Weekly | Progress, blockers, risks |
-| Security Team | Weekly | Security findings, remediation status |
-| Compliance Team | Bi-weekly | SOC 2 readiness, audit preparation |
-| Product Team | Weekly | Feature status, GA timeline impact |
-| Customers (GA pilot) | Bi-weekly | Upcoming changes, expected improvements |
+| Stakeholder            | Frequency | Content                                 |
+| ---------------------- | --------- | --------------------------------------- |
+| Engineering Leadership | Weekly    | Progress, blockers, risks               |
+| Security Team          | Weekly    | Security findings, remediation status   |
+| Compliance Team        | Bi-weekly | SOC 2 readiness, audit preparation      |
+| Product Team           | Weekly    | Feature status, GA timeline impact      |
+| Customers (GA pilot)   | Bi-weekly | Upcoming changes, expected improvements |
 
 ### Status Dashboard
 
 Create live dashboard tracking:
+
 - TODOs resolved vs. remaining
 - Phase completion %
 - Days to GA (estimated)
@@ -862,17 +900,17 @@ Week 10-12: Rollout → GA Launch
 
 ### Total Effort by Category
 
-| Category | Effort (hours) | % of Total |
-|----------|----------------|------------|
-| Security (AuthN/AuthZ) | 72h | 18% |
-| Security (Injection/Validation) | 104h | 26% |
-| Security (Rate Limiting/Headers) | 28h | 7% |
-| Compliance (Audit/Logging) | 24h | 6% |
-| Encryption/Secrets | 8h | 2% |
-| Observability | 60h | 15% |
-| Features | 16h | 4% |
-| Testing | 84h | 21% |
-| **Total** | **396h** | **100%** |
+| Category                         | Effort (hours) | % of Total |
+| -------------------------------- | -------------- | ---------- |
+| Security (AuthN/AuthZ)           | 72h            | 18%        |
+| Security (Injection/Validation)  | 104h           | 26%        |
+| Security (Rate Limiting/Headers) | 28h            | 7%         |
+| Compliance (Audit/Logging)       | 24h            | 6%         |
+| Encryption/Secrets               | 8h             | 2%         |
+| Observability                    | 60h            | 15%        |
+| Features                         | 16h            | 4%         |
+| Testing                          | 84h            | 21%        |
+| **Total**                        | **396h**       | **100%**   |
 
 ---
 

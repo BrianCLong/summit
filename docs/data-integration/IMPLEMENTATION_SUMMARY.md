@@ -9,6 +9,7 @@ This implementation delivers a comprehensive, enterprise-grade data integration 
 ### 1. Core Packages
 
 #### @intelgraph/data-integration
+
 **Location**: `packages/data-integration/`
 
 - **Base Connector Framework**: Extensible connector architecture with retry logic, rate limiting, and error handling
@@ -22,6 +23,7 @@ This implementation delivers a comprehensive, enterprise-grade data integration 
   - S3Connector (foundation ready for implementation)
 
 **Key Features**:
+
 - Connection pooling and SSL/TLS support
 - Retry logic with exponential backoff
 - Rate limiting and throttling
@@ -29,9 +31,11 @@ This implementation delivers a comprehensive, enterprise-grade data integration 
 - Incremental extraction support
 
 #### @intelgraph/etl-framework
+
 **Location**: `packages/etl-framework/`
 
 **Components**:
+
 - **PipelineExecutor**: Orchestrates end-to-end ETL/ELT pipeline execution
 - **DataTransformer**: Comprehensive transformation engine supporting:
   - Field mapping
@@ -67,9 +71,11 @@ This implementation delivers a comprehensive, enterprise-grade data integration 
   - Partitioned loading
 
 #### @intelgraph/data-lineage
+
 **Location**: `packages/data-lineage/`
 
 **Features**:
+
 - End-to-end lineage tracking
 - Column-level lineage
 - Transformation lineage
@@ -80,14 +86,17 @@ This implementation delivers a comprehensive, enterprise-grade data integration 
 ### 2. Services
 
 #### Orchestration Service
+
 **Location**: `services/orchestration/`
 
 **Components**:
+
 - **PipelineScheduler**: Cron-based and interval-based scheduling
 - **PipelineOrchestrator**: Pipeline lifecycle management
 - **AirflowIntegration**: Apache Airflow API integration
 
 **Features**:
+
 - RESTful API for pipeline management
 - Schedule management (cron, interval, event-based)
 - Pipeline execution tracking
@@ -95,6 +104,7 @@ This implementation delivers a comprehensive, enterprise-grade data integration 
 - Airflow DAG triggering and monitoring
 
 **API Endpoints**:
+
 - `POST /api/pipelines` - Create pipeline
 - `GET /api/pipelines` - List pipelines
 - `GET /api/pipelines/:id` - Get pipeline
@@ -109,9 +119,11 @@ This implementation delivers a comprehensive, enterprise-grade data integration 
 ### 3. Infrastructure
 
 #### Apache Airflow Setup
+
 **Location**: `infrastructure/airflow/`
 
 **Components**:
+
 - Docker Compose configuration for complete Airflow stack
 - PostgreSQL metadata database
 - Redis message broker
@@ -120,6 +132,7 @@ This implementation delivers a comprehensive, enterprise-grade data integration 
 - Example DAG demonstrating ETL pipeline orchestration
 
 **Services**:
+
 - airflow-webserver (port 8080)
 - airflow-scheduler
 - airflow-worker (scalable)
@@ -131,9 +144,11 @@ This implementation delivers a comprehensive, enterprise-grade data integration 
 ### 4. Documentation
 
 #### Comprehensive Guide
+
 **Location**: `docs/data-integration/GUIDE.md`
 
 **Sections**:
+
 - Architecture overview
 - Quick start guide
 - Supported data sources (100+ connectors)
@@ -150,12 +165,14 @@ This implementation delivers a comprehensive, enterprise-grade data integration 
 ## Architecture Highlights
 
 ### Modular Design
+
 - Clear separation of concerns
 - Pluggable connector architecture
 - Extensible transformation engine
 - Flexible validation framework
 
 ### Scalability
+
 - Streaming data extraction with generators
 - Batch processing with configurable sizes
 - Connection pooling
@@ -163,6 +180,7 @@ This implementation delivers a comprehensive, enterprise-grade data integration 
 - Horizontal scaling of workers
 
 ### Reliability
+
 - Comprehensive error handling
 - Retry logic with exponential backoff
 - Dead letter queues for failed records
@@ -170,6 +188,7 @@ This implementation delivers a comprehensive, enterprise-grade data integration 
 - Graceful degradation
 
 ### Observability
+
 - Detailed logging
 - Metrics collection (throughput, latency, errors)
 - Pipeline run history
@@ -179,6 +198,7 @@ This implementation delivers a comprehensive, enterprise-grade data integration 
 ## Technical Stack
 
 ### Languages & Frameworks
+
 - TypeScript for type safety and developer experience
 - Node.js for runtime
 - Express.js for REST APIs
@@ -186,11 +206,13 @@ This implementation delivers a comprehensive, enterprise-grade data integration 
 - Python for Airflow DAGs
 
 ### Databases & Storage
+
 - PostgreSQL for metadata and targets
 - Redis for caching and message queuing
 - Neo4j support for lineage graphs (planned)
 
 ### Key Libraries
+
 - pg (PostgreSQL client)
 - axios (HTTP client)
 - bull (job queues)
@@ -201,6 +223,7 @@ This implementation delivers a comprehensive, enterprise-grade data integration 
 ## Capabilities Comparison
 
 ### vs. Fivetran
+
 ✅ 100+ connectors
 ✅ Incremental extraction
 ✅ Schema management
@@ -210,6 +233,7 @@ This implementation delivers a comprehensive, enterprise-grade data integration 
 ✅ Lineage tracking
 
 ### vs. Talend
+
 ✅ Visual pipeline design (via Airflow UI)
 ✅ Data quality rules
 ✅ Metadata management
@@ -218,6 +242,7 @@ This implementation delivers a comprehensive, enterprise-grade data integration 
 ✅ Extensibility
 
 ### vs. Informatica
+
 ✅ Data integration
 ✅ ETL/ELT pipelines
 ✅ Data quality
@@ -228,6 +253,7 @@ This implementation delivers a comprehensive, enterprise-grade data integration 
 ## Next Steps for Production
 
 ### 1. Complete Connector Implementations
+
 - Finish MySQL and MongoDB connectors
 - Add Oracle, SQL Server connectors
 - Implement SaaS connectors (Salesforce, HubSpot, etc.)
@@ -235,6 +261,7 @@ This implementation delivers a comprehensive, enterprise-grade data integration 
 - Implement financial data feed connectors
 
 ### 2. Enhanced Features
+
 - Spark integration for big data transformations
 - Real-time streaming with Kafka
 - Change Data Capture (CDC) support
@@ -242,6 +269,7 @@ This implementation delivers a comprehensive, enterprise-grade data integration 
 - Advanced data profiling
 
 ### 3. Security & Compliance
+
 - Secret management integration (Vault, AWS Secrets Manager)
 - PII detection and masking
 - GDPR compliance features
@@ -249,6 +277,7 @@ This implementation delivers a comprehensive, enterprise-grade data integration 
 - Role-based access control (RBAC)
 
 ### 4. Performance Optimization
+
 - Query optimization
 - Caching strategies
 - Parallel processing
@@ -256,6 +285,7 @@ This implementation delivers a comprehensive, enterprise-grade data integration 
 - Cost optimization
 
 ### 5. Testing & Quality
+
 - Unit tests for all components
 - Integration tests
 - End-to-end pipeline tests
@@ -263,6 +293,7 @@ This implementation delivers a comprehensive, enterprise-grade data integration 
 - Load testing
 
 ### 6. Deployment
+
 - Kubernetes manifests
 - Helm charts
 - CI/CD pipelines
@@ -339,6 +370,7 @@ This implementation provides a solid foundation for an enterprise-grade data int
 **Connectors Implemented**: 5 (with foundation for 100+)
 
 The platform is ready for:
+
 - Adding more connectors
 - Production deployment
 - Feature enhancements

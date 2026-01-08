@@ -3,6 +3,7 @@
 Eight self-contained service blueprints that can be owned by separate Codex teams and merged independently. Each section states the charter, scope, API/data contracts, testing expectations, and rollout notes.
 
 ## 65. Ontology & Taxonomy Engine (`ontology/`)
+
 - **Purpose:** Shared semantic backbone for concepts, hierarchies, and controlled vocabularies used by ingest, search, XAI, compliance, and reporting.
 - **Core models:**
   - `Concept` (id, name, description, synonyms, parents, deprecated, aliases, lineage version).
@@ -22,6 +23,7 @@ Eight self-contained service blueprints that can be owned by separate Codex team
 - **Rollout:** Additive schemas only; other services reference IDs/tags, never hard-code enums.
 
 ## 66. Report Template Library & Narrative Blocks (`report-templates/`)
+
 - **Purpose:** Library of reusable report/brief templates and parameterized narrative blocks consumed by Case/Report Studio.
 - **Core models:**
   - `Template` (id, version, title, sections/subsections, required/optional fields, exhibit types, allowed narrative blocks).
@@ -41,6 +43,7 @@ Eight self-contained service blueprints that can be owned by separate Codex team
 - **Rollout:** Treat case/report service as a client; only add optional template IDs on their records.
 
 ## 67. Alert & Case Triage Prioritization Engine (`triage/`)
+
 - **Purpose:** Produce ranked, routed worklists from alert/case feeds using configurable rules and model scores without mutating source records.
 - **Core models:**
   - `TriageInput` (severity, entity types, pattern hits, tenant risk, SLA tier, timestamps).
@@ -59,6 +62,7 @@ Eight self-contained service blueprints that can be owned by separate Codex team
 - **Rollout:** Outputs emitted as overlays/worklists; no mutation of source alert/case records.
 
 ## 68. Multimodal Ingest Alignment (`multimodal-ingest/`)
+
 - **Purpose:** Align speech/audio, video, image, and text-derived outputs into synchronized, searchable timelines/entities.
 - **Core models:**
   - `AssetTrack` references (audio/video/image/PDF IDs) and derived tracks (transcripts, OCR blocks, detections).
@@ -78,6 +82,7 @@ Eight self-contained service blueprints that can be owned by separate Codex team
 - **Rollout:** Outputs attachable to cases and searchable timelines; no mutation of base evidence.
 
 ## 69. Policy Scenario Simulator (`policy-sim/`)
+
 - **Purpose:** Governance "what-if" engine to replay historical activity against proposed policy bundles and report behavioral deltas.
 - **Core models:**
   - `PolicyBundle` snapshot (authz/privacy/lifecycle/legal-hold inputs, immutable version + provenance).
@@ -95,6 +100,7 @@ Eight self-contained service blueprints that can be owned by separate Codex team
 - **Rollout:** Inputs are immutable snapshots; integration limited to simulation endpoints.
 
 ## 70. Tokenization & Pseudonymization Service (`tokenization/`)
+
 - **Purpose:** Controlled replacement of sensitive identifiers with reversible tokens under governed scopes.
 - **Core models:**
   - `Token` (deterministic per scope, type, and key version), `Scope` (tenant/region/policy), and `Mapping` (token ↔ original with audit).
@@ -112,6 +118,7 @@ Eight self-contained service blueprints that can be owned by separate Codex team
 - **Rollout:** Token formats are versioned and stable; other services call APIs without schema changes.
 
 ## 71. Training Academy Backend & Scenario Scoring (`academy/`)
+
 - **Purpose:** Manage synthetic training scenarios, trainee sessions, and scoring/feedback for analysts and governance staff.
 - **Core models:**
   - `Scenario` registry (title, objectives, required datasets/sim runs, scoring rubric).
@@ -130,6 +137,7 @@ Eight self-contained service blueprints that can be owned by separate Codex team
 - **Rollout:** Consumes demo-data/sim-engine as-is; no upstream schema changes required.
 
 ## 72. Customer Rules Engine (`tenant-rules/`)
+
 - **Purpose:** Sandboxed, tenant-specific rule packs in a constrained DSL/config to apply custom business logic without forking the platform.
 - **Core models:**
   - `RulePack` (tenant-scoped, versioned, validated DSL/config) and `RuleEvaluation` (inputs, actions emitted, audit).

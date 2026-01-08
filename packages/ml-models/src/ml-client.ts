@@ -2,8 +2,8 @@
  * Client for ML threat detection service
  */
 
-import axios, { AxiosInstance } from 'axios';
-import { PredictionRequest, PredictionResult } from '@intelgraph/threat-detection-core';
+import axios, { AxiosInstance } from "axios";
+import { PredictionRequest, PredictionResult } from "@intelgraph/threat-detection-core";
 
 export interface MLClientConfig {
   endpoint: string;
@@ -18,19 +18,21 @@ export class MLThreatClient {
     this.client = axios.create({
       baseURL: config.endpoint,
       timeout: config.timeout || 30000,
-      headers: config.apiKey ? {
-        'Authorization': `Bearer ${config.apiKey}`
-      } : {}
+      headers: config.apiKey
+        ? {
+            Authorization: `Bearer ${config.apiKey}`,
+          }
+        : {},
     });
   }
 
   async predictThreat(request: PredictionRequest): Promise<PredictionResult> {
-    const response = await this.client.post('/predict', request);
+    const response = await this.client.post("/predict", request);
     return response.data;
   }
 
   async predictBatch(requests: PredictionRequest[]): Promise<PredictionResult[]> {
-    const response = await this.client.post('/predict/batch', { requests });
+    const response = await this.client.post("/predict/batch", { requests });
     return response.data;
   }
 
@@ -39,11 +41,14 @@ export class MLThreatClient {
     isAnomaly: boolean;
     explanation?: string;
   }> {
-    const response = await this.client.post('/anomaly/detect', { features });
+    const response = await this.client.post("/anomaly/detect", { features });
     return response.data;
   }
 
-  async trainModel(modelId: string, trainingData: any): Promise<{
+  async trainModel(
+    modelId: string,
+    trainingData: any
+  ): Promise<{
     success: boolean;
     modelVersion: string;
     metrics: any;

@@ -7,6 +7,7 @@
 **Subject**: [SEV#] Incident: [Brief Description]
 
 **Body**:
+
 ```
 INCIDENT ALERT
 
@@ -41,6 +42,7 @@ This is an automated notification from the Summit/IntelGraph incident response s
 **Subject**: [SEV#] Update: [Brief Description]
 
 **Body**:
+
 ```
 INCIDENT UPDATE
 
@@ -79,6 +81,7 @@ This is an update from the Summit/IntelGraph incident response system.
 **Subject**: [SEV#] Mitigation Applied: [Brief Description]
 
 **Body**:
+
 ```
 INCIDENT MITIGATION
 
@@ -122,6 +125,7 @@ This is an update from the Summit/IntelGraph incident response system.
 **Subject**: [SEV#] Resolved: [Brief Description]
 
 **Body**:
+
 ```
 INCIDENT RESOLVED
 
@@ -174,6 +178,7 @@ This is the final notification for this incident.
 **Subject**: [SEV#] Incident Summary: [Brief Description]
 
 **Body**:
+
 ```
 INCIDENT SUMMARY
 
@@ -241,18 +246,21 @@ Last updated: [HH:MM UTC]
 ## Distribution Guidelines
 
 ### SEV1
+
 - **Immediate**: #incident-channel, #engineering, on-call via PagerDuty
 - **5 min**: Leadership (#leadership), stakeholders (#stakeholders)
 - **10 min**: Status page (if customer-facing), customer notifications
 - **Updates**: Every 15 minutes until resolved
 
 ### SEV2
+
 - **15 min**: #incident-channel, #engineering
 - **30 min**: Leadership, stakeholders
 - **1 hour**: Status page (if customer-facing and not resolved)
 - **Updates**: Every 30 minutes until resolved
 
 ### SEV3/SEV4
+
 - **1 hour**: #engineering, #incident-log
 - **Post-resolution**: Summary email to stakeholders
 - **Status page**: Not required unless specifically customer-facing
@@ -261,13 +269,13 @@ Last updated: [HH:MM UTC]
 
 ## Communication Channels
 
-| Audience | Primary Channel | Backup Channel |
-|----------|----------------|----------------|
-| Engineering Team | #incident-YYYYMMDD | #engineering |
-| SRE/Ops | #sre-oncall | PagerDuty |
-| Leadership | #leadership | Direct message |
-| Customers | Status page | Email notification |
-| All Employees | #general | Email |
+| Audience         | Primary Channel    | Backup Channel     |
+| ---------------- | ------------------ | ------------------ |
+| Engineering Team | #incident-YYYYMMDD | #engineering       |
+| SRE/Ops          | #sre-oncall        | PagerDuty          |
+| Leadership       | #leadership        | Direct message     |
+| Customers        | Status page        | Email notification |
+| All Employees    | #general           | Email              |
 
 ---
 

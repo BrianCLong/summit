@@ -1,4 +1,4 @@
-export type SiloId = 'Eu' | 'Us' | 'Apac';
+export type SiloId = "Eu" | "Us" | "Apac";
 
 export interface TraceEvent {
   policyId: string;

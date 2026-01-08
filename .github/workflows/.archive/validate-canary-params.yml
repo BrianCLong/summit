@@ -3,10 +3,10 @@ name: validate-canary-params
 on:
   pull_request:
     paths:
-      - 'config/canary-params-*.json'
-      - '.github/workflows/canary-*.yml'
-      - '.github/workflows/deployment-*.yml'
-      - 'scripts/validate-canary-gates.sh'
+      - "config/canary-params-*.json"
+      - ".github/workflows/canary-*.yml"
+      - ".github/workflows/deployment-*.yml"
+      - "scripts/validate-canary-gates.sh"
   workflow_dispatch:
 
 jobs:

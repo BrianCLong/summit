@@ -1,5 +1,5 @@
-import { EventEmitter } from 'node:events';
-import { randomUUID } from 'node:crypto';
+import { EventEmitter } from "node:events";
+import { randomUUID } from "node:crypto";
 import type {
   ConsentAuditRecord,
   ConsentConflict,
@@ -15,13 +15,13 @@ import type {
   ConsentValidationReport,
   ConsentValidationReportEntry,
   ConsentValidationScenario,
-} from 'common-types';
+} from "common-types";
 
 const DEFAULT_STATUS_ORDER: readonly ConsentStateStatus[] = [
-  'denied',
-  'revoked',
-  'expired',
-  'granted',
+  "denied",
+  "revoked",
+  "expired",
+  "granted",
 ];
 
 type MutableStatusTally = Record<ConsentStateStatus, number>;
@@ -33,9 +33,9 @@ function composeSubjectKey(subjectId: string, policyId: string): string {
 }
 
 function composeSourceKey(source: ConsentSourceRef): string {
-  const endpoint = source.endpoint ?? '*';
-  const environment = source.environment ?? '*';
-  const topology = source.topologyPath?.join('/') ?? '*';
+  const endpoint = source.endpoint ?? "*";
+  const environment = source.environment ?? "*";
+  const topology = source.topologyPath?.join("/") ?? "*";
   return `${source.domain}::${source.service}::${endpoint}::${environment}::${topology}`;
 }
 
@@ -67,34 +67,28 @@ function cloneEnvelope(envelope: ConsentStateEnvelope): ConsentStateEnvelope {
 function cloneConflict(conflict: ConsentConflict): ConsentConflict {
   return {
     ...conflict,
-    candidates: conflict.candidates.map((candidate) =>
-      cloneEnvelope(candidate),
-    ),
-    resolvedState: conflict.resolvedState
-      ? cloneState(conflict.resolvedState)
-      : undefined,
+    candidates: conflict.candidates.map((candidate) => cloneEnvelope(candidate)),
+    resolvedState: conflict.resolvedState ? cloneState(conflict.resolvedState) : undefined,
   };
 }
 
 function cloneResolution(resolution: ConsentResolution): ConsentResolution {
   return {
     finalState: cloneState(resolution.finalState),
-    conflict: resolution.conflict
-      ? cloneConflict(resolution.conflict)
-      : undefined,
+    conflict: resolution.conflict ? cloneConflict(resolution.conflict) : undefined,
     adoptedFrom: cloneSource(resolution.adoptedFrom),
     appliedOverrides: [...resolution.appliedOverrides],
   };
 }
 
 function canonicalizeScopes(scopes: readonly string[]): string {
-  return [...scopes].sort().join('|');
+  return [...scopes].sort().join("|");
 }
 
 function calculateStatusPriority(
   status: ConsentStateStatus,
   priority: Map<ConsentStateStatus, number>,
-  fallback: number,
+  fallback: number
 ): number {
   return priority.get(status) ?? fallback;
 }
@@ -126,11 +120,10 @@ export class ConsentStateReconciler {
     this.statusOrder = config.strictStatusOrder ?? DEFAULT_STATUS_ORDER;
     this.statusPriority = new Map(
       this.statusOrder.map(
-        (status, index) =>
-          [status, index] satisfies [ConsentStateStatus, number],
-      ),
+        (status, index) => [status, index] satisfies [ConsentStateStatus, number]
+      )
     );
-    this.conflictStrategy = config.conflictStrategy ?? 'prefer-strictest';
+    this.conflictStrategy = config.conflictStrategy ?? "prefer-strictest";
     this.sourceWeights = config.sourceWeights ?? {};
     this.clock = config.clock ?? (() => new Date());
   }
@@ -143,40 +136,27 @@ export class ConsentStateReconciler {
   }
 
   async ingest(envelope: ConsentStateEnvelope): Promise<ConsentResolution> {
-    const key = composeSubjectKey(
-      envelope.state.subjectId,
-      envelope.state.policyId,
-    );
+    const key = composeSubjectKey(envelope.state.subjectId, envelope.state.policyId);
     const pool = this.pools.get(key) ?? new Map<string, ConsentStateEnvelope>();
     pool.set(composeSourceKey(envelope.source), cloneEnvelope(envelope));
     this.pools.set(key, pool);
 
-    this.recordAudit(
-      'ingest',
-      envelope.state.subjectId,
-      envelope.state.policyId,
-      {
-        source: envelope.source,
-        status: envelope.state.status,
-        version: envelope.state.version,
-      },
-    );
+    this.recordAudit("ingest", envelope.state.subjectId, envelope.state.policyId, {
+      source: envelope.source,
+      status: envelope.state.status,
+      version: envelope.state.version,
+    });
 
     const candidates = [...pool.values()];
     const conflict = this.createConflict(candidates);
 
     if (conflict) {
       this.conflicts.set(key, conflict);
-      this.recordAudit(
-        'conflict-generated',
-        conflict.subjectId,
-        conflict.policyId,
-        {
-          severity: conflict.severity,
-          reason: conflict.reason,
-          candidateCount: conflict.candidates.length,
-        },
-      );
+      this.recordAudit("conflict-generated", conflict.subjectId, conflict.policyId, {
+        severity: conflict.severity,
+        reason: conflict.reason,
+        candidateCount: conflict.candidates.length,
+      });
     } else {
       this.conflicts.delete(key);
     }
@@ -185,45 +165,35 @@ export class ConsentStateReconciler {
     this.resolutions.set(key, resolution);
 
     this.recordAudit(
-      'auto-resolution',
+      "auto-resolution",
       resolution.finalState.subjectId,
       resolution.finalState.policyId,
       {
         adoptedFrom: resolution.adoptedFrom,
         status: resolution.finalState.status,
         appliedOverrides: resolution.appliedOverrides,
-      },
+      }
     );
 
     await this.syncModules(resolution);
 
     const broadcast = cloneResolution(resolution);
-    this.events.emit('resolution', broadcast);
+    this.events.emit("resolution", broadcast);
     return broadcast;
   }
 
-  getResolution(
-    subjectId: string,
-    policyId: string,
-  ): ConsentResolution | undefined {
-    const resolution = this.resolutions.get(
-      composeSubjectKey(subjectId, policyId),
-    );
+  getResolution(subjectId: string, policyId: string): ConsentResolution | undefined {
+    const resolution = this.resolutions.get(composeSubjectKey(subjectId, policyId));
     return resolution ? cloneResolution(resolution) : undefined;
   }
 
-  getConflict(
-    subjectId: string,
-    policyId: string,
-  ): ConsentConflict | undefined {
+  getConflict(subjectId: string, policyId: string): ConsentConflict | undefined {
     const conflict = this.conflicts.get(composeSubjectKey(subjectId, policyId));
     return conflict ? cloneConflict(conflict) : undefined;
   }
 
   listConflicts(): ConsentConflict[] {
-    return Array.from(this.conflicts.values()).map((current) =>
-      cloneConflict(current),
-    );
+    return Array.from(this.conflicts.values()).map((current) => cloneConflict(current));
   }
 
   getAuditLog(): ConsentAuditRecord[] {
@@ -256,9 +226,7 @@ export class ConsentStateReconciler {
           service: adoptedFrom.service,
           endpoint: adoptedFrom.endpoint,
           environment: adoptedFrom.environment,
-          topologyPath: adoptedFrom.topologyPath
-            ? [...adoptedFrom.topologyPath]
-            : undefined,
+          topologyPath: adoptedFrom.topologyPath ? [...adoptedFrom.topologyPath] : undefined,
           totalSubjects: 0,
           statuses: { granted: 0, denied: 0, revoked: 0, expired: 0 },
         };
@@ -275,9 +243,7 @@ export class ConsentStateReconciler {
       environment: node.environment,
       topologyPath: node.topologyPath ? [...node.topologyPath] : undefined,
       totalSubjects: node.totalSubjects,
-      statuses: { ...node.statuses } as Readonly<
-        Record<ConsentStateStatus, number>
-      >,
+      statuses: { ...node.statuses } as Readonly<Record<ConsentStateStatus, number>>,
     }));
 
     return {
@@ -287,16 +253,15 @@ export class ConsentStateReconciler {
   }
 
   subscribe(listener: (resolution: ConsentResolution) => void): () => void {
-    const handler = (resolution: ConsentResolution) =>
-      listener(cloneResolution(resolution));
-    this.events.on('resolution', handler);
+    const handler = (resolution: ConsentResolution) => listener(cloneResolution(resolution));
+    this.events.on("resolution", handler);
     return () => {
-      this.events.off('resolution', handler);
+      this.events.off("resolution", handler);
     };
   }
 
   async runValidation(
-    scenarios: readonly ConsentValidationScenario[],
+    scenarios: readonly ConsentValidationScenario[]
   ): Promise<ConsentValidationReport> {
     const entries: ConsentValidationReportEntry[] = [];
     for (const scenario of scenarios) {
@@ -308,21 +273,13 @@ export class ConsentStateReconciler {
         await harness.ingest(setup);
       }
       const expectation = scenario.expectation;
-      const resolution = harness.getResolution(
-        expectation.subjectId,
-        expectation.policyId,
-      );
-      const conflict = harness.getConflict(
-        expectation.subjectId,
-        expectation.policyId,
-      );
+      const resolution = harness.getResolution(expectation.subjectId, expectation.policyId);
+      const conflict = harness.getConflict(expectation.subjectId, expectation.policyId);
       const actualStatus = resolution?.finalState.status;
       const actualConflicts = conflict ? 1 : 0;
-      const expectedConflicts =
-        expectation.expectedConflicts ?? actualConflicts;
+      const expectedConflicts = expectation.expectedConflicts ?? actualConflicts;
       const passed =
-        actualStatus === expectation.expectedStatus &&
-        actualConflicts === expectedConflicts;
+        actualStatus === expectation.expectedStatus && actualConflicts === expectedConflicts;
 
       entries.push({
         scenarioId: scenario.id,
@@ -337,17 +294,12 @@ export class ConsentStateReconciler {
         },
       });
 
-      this.recordAudit(
-        'validation',
-        expectation.subjectId,
-        expectation.policyId,
-        {
-          scenarioId: scenario.id,
-          passed,
-          actualStatus,
-          actualConflicts,
-        },
-      );
+      this.recordAudit("validation", expectation.subjectId, expectation.policyId, {
+        scenarioId: scenario.id,
+        passed,
+        actualStatus,
+        actualConflicts,
+      });
     }
 
     return {
@@ -356,9 +308,7 @@ export class ConsentStateReconciler {
     };
   }
 
-  private createConflict(
-    candidates: ConsentStateEnvelope[],
-  ): ConsentConflict | undefined {
+  private createConflict(candidates: ConsentStateEnvelope[]): ConsentConflict | undefined {
     if (candidates.length <= 1) {
       return undefined;
     }
@@ -380,89 +330,75 @@ export class ConsentStateReconciler {
     const jurisdictionMismatch = jurisdictionSet.size > 1;
     const versionMismatch = versionSet.size > 1;
 
-    if (
-      !statusMismatch &&
-      !scopeMismatch &&
-      !jurisdictionMismatch &&
-      !versionMismatch
-    ) {
+    if (!statusMismatch && !scopeMismatch && !jurisdictionMismatch && !versionMismatch) {
       return undefined;
     }
 
     const reasonParts: string[] = [];
     if (statusMismatch) {
-      reasonParts.push(
-        `status mismatch: ${Array.from(statusSet).join(' vs ')}`,
-      );
+      reasonParts.push(`status mismatch: ${Array.from(statusSet).join(" vs ")}`);
     }
     if (scopeMismatch) {
-      reasonParts.push('scope divergence across sources');
+      reasonParts.push("scope divergence across sources");
     }
     if (jurisdictionMismatch) {
-      reasonParts.push('jurisdiction mismatch');
+      reasonParts.push("jurisdiction mismatch");
     }
     if (versionMismatch) {
-      reasonParts.push('policy version skew');
+      reasonParts.push("policy version skew");
     }
 
-    const severity: ConsentConflict['severity'] = statusMismatch
-      ? 'error'
+    const severity: ConsentConflict["severity"] = statusMismatch
+      ? "error"
       : scopeMismatch
-        ? 'warning'
-        : 'info';
+        ? "warning"
+        : "info";
 
     return {
       subjectId: candidates[0].state.subjectId,
       policyId: candidates[0].state.policyId,
       severity,
-      reason: reasonParts.join('; '),
+      reason: reasonParts.join("; "),
       candidates: candidates.map((candidate) => cloneEnvelope(candidate)),
     };
   }
 
   private createResolution(
     candidates: ConsentStateEnvelope[],
-    conflict: ConsentConflict | undefined,
+    conflict: ConsentConflict | undefined
   ): ConsentResolution {
     const selected = this.selectCandidate(candidates);
     const finalState = cloneState(selected.state);
     const adoptedFrom = cloneSource(selected.source);
     const resolution: ConsentResolution = {
       finalState,
-      conflict: conflict
-        ? { ...conflict, resolvedState: finalState }
-        : undefined,
+      conflict: conflict ? { ...conflict, resolvedState: finalState } : undefined,
       adoptedFrom,
-      appliedOverrides: selected.state.overrides
-        ? [...selected.state.overrides]
-        : [],
+      appliedOverrides: selected.state.overrides ? [...selected.state.overrides] : [],
     };
     return resolution;
   }
 
-  private selectCandidate(
-    candidates: ConsentStateEnvelope[],
-  ): ConsentStateEnvelope {
+  private selectCandidate(candidates: ConsentStateEnvelope[]): ConsentStateEnvelope {
     if (candidates.length === 1) {
       return candidates[0];
     }
 
     const ranked = candidates.slice();
     switch (this.conflictStrategy) {
-      case 'prefer-latest':
+      case "prefer-latest":
         ranked.sort((a, b) => this.compareLatest(a, b));
         break;
-      case 'prefer-source-weight':
+      case "prefer-source-weight":
         ranked.sort((a, b) => {
-          const weightDiff =
-            this.getSourceWeight(b.source) - this.getSourceWeight(a.source);
+          const weightDiff = this.getSourceWeight(b.source) - this.getSourceWeight(a.source);
           if (weightDiff !== 0) {
             return weightDiff;
           }
           return this.compareStrictest(a, b);
         });
         break;
-      case 'prefer-strictest':
+      case "prefer-strictest":
       default:
         ranked.sort((a, b) => this.compareStrictest(a, b));
         break;
@@ -470,10 +406,7 @@ export class ConsentStateReconciler {
     return ranked[0];
   }
 
-  private compareStrictest(
-    a: ConsentStateEnvelope,
-    b: ConsentStateEnvelope,
-  ): number {
+  private compareStrictest(a: ConsentStateEnvelope, b: ConsentStateEnvelope): number {
     const fallback = this.statusOrder.length;
     const priorityDiff =
       calculateStatusPriority(a.state.status, this.statusPriority, fallback) -
@@ -484,19 +417,12 @@ export class ConsentStateReconciler {
     if (b.state.version !== a.state.version) {
       return b.state.version - a.state.version;
     }
-    return (
-      new Date(b.state.updatedAt).getTime() -
-      new Date(a.state.updatedAt).getTime()
-    );
+    return new Date(b.state.updatedAt).getTime() - new Date(a.state.updatedAt).getTime();
   }
 
-  private compareLatest(
-    a: ConsentStateEnvelope,
-    b: ConsentStateEnvelope,
-  ): number {
+  private compareLatest(a: ConsentStateEnvelope, b: ConsentStateEnvelope): number {
     const updatedDiff =
-      new Date(b.state.updatedAt).getTime() -
-      new Date(a.state.updatedAt).getTime();
+      new Date(b.state.updatedAt).getTime() - new Date(a.state.updatedAt).getTime();
     if (updatedDiff !== 0) {
       return updatedDiff;
     }
@@ -512,10 +438,10 @@ export class ConsentStateReconciler {
   }
 
   private recordAudit(
-    action: ConsentAuditRecord['action'],
+    action: ConsentAuditRecord["action"],
     subjectId: string,
     policyId: string,
-    details: Record<string, unknown>,
+    details: Record<string, unknown>
   ): void {
     this.auditLog.push({
       eventId: randomUUID(),
@@ -541,10 +467,7 @@ export class ConsentStateReconciler {
         continue;
       }
       invoked.push(module.name);
-      const result = module.sync(
-        cloneResolution(resolution),
-        this.getAuditLog(),
-      );
+      const result = module.sync(cloneResolution(resolution), this.getAuditLog());
       if (result instanceof Promise) {
         tasks.push(result);
       }
@@ -554,12 +477,12 @@ export class ConsentStateReconciler {
     }
     if (invoked.length > 0) {
       this.recordAudit(
-        'module-sync',
+        "module-sync",
         resolution.finalState.subjectId,
         resolution.finalState.policyId,
         {
           modules: invoked,
-        },
+        }
       );
     }
   }

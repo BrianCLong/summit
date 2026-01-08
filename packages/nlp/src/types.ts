@@ -61,7 +61,7 @@ export interface TokenizationOptions {
 }
 
 export interface NormalizationOptions {
-  unicodeNormalization?: 'NFC' | 'NFD' | 'NFKC' | 'NFKD';
+  unicodeNormalization?: "NFC" | "NFD" | "NFKC" | "NFKD";
   caseFolding?: boolean;
   accentRemoval?: boolean;
   numberNormalization?: boolean;

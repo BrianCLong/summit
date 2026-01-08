@@ -4,9 +4,9 @@
  * Express middleware for feature flag integration
  */
 
-import { Request, Response, NextFunction } from 'express';
-import type { FeatureFlagService } from '../FeatureFlagService.js';
-import type { FlagContext, FlagVariation } from '../types.js';
+import { Request, Response, NextFunction } from "express";
+import type { FeatureFlagService } from "../FeatureFlagService.js";
+import type { FlagContext, FlagVariation } from "../types.js";
 
 /**
  * Extend Express Request to include feature flags
@@ -66,7 +66,7 @@ export interface FeatureFlagMiddlewareOptions {
  * Create feature flag middleware
  */
 export function createFeatureFlagMiddleware(
-  options: FeatureFlagMiddlewareOptions,
+  options: FeatureFlagMiddlewareOptions
 ): (req: Request, res: Response, next: NextFunction) => void {
   const { service, contextBuilder, skipRoutes = [], skipMethods = [] } = options;
 
@@ -116,7 +116,7 @@ export function createFeatureFlagMiddleware(
       next();
     } catch (error) {
       // Feature flags should not break request handling
-      console.error('Feature flag middleware error:', error);
+      console.error("Feature flag middleware error:", error);
       next();
     }
   };
@@ -127,7 +127,7 @@ export function createFeatureFlagMiddleware(
  */
 function buildContext(
   req: Request,
-  contextBuilder?: (req: Request) => Partial<FlagContext>,
+  contextBuilder?: (req: Request) => Partial<FlagContext>
 ): FlagContext {
   // Start with default context from request
   const defaultContext: Partial<FlagContext> = {
@@ -137,7 +137,7 @@ function buildContext(
     tenantId: (req as any).user?.tenantId || (req as any).tenant?.id,
     sessionId: (req as any).sessionId || (req as any).sessionID,
     ipAddress: req.ip || req.socket.remoteAddress,
-    userAgent: req.get('User-Agent'),
+    userAgent: req.get("User-Agent"),
   };
 
   // Merge with custom context if provided
@@ -165,21 +165,17 @@ export function createFlagGuard(
     statusCode?: number;
     /** Context builder */
     contextBuilder?: (req: Request) => Partial<FlagContext>;
-  },
+  }
 ): (req: Request, res: Response, next: NextFunction) => Promise<void> {
   const {
     service,
     redirectUrl,
-    errorMessage = 'Feature not available',
+    errorMessage = "Feature not available",
     statusCode = 403,
     contextBuilder,
   } = options;
 
-  return async (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const context = buildContext(req, contextBuilder);
       const isEnabled = await service.getBooleanFlag(flagKey, false, context);
@@ -200,7 +196,7 @@ export function createFlagGuard(
       console.error(`Flag guard error for ${flagKey}:`, error);
       // On error, deny access by default
       res.status(500).json({
-        error: 'Internal server error',
+        error: "Internal server error",
       });
     }
   };
@@ -211,20 +207,14 @@ export function createFlagGuard(
  */
 export function createFlagDirective(service: FeatureFlagService) {
   return {
-    name: 'featureFlag',
-    description: 'Protects a field or type with a feature flag',
-    locations: ['FIELD_DEFINITION', 'OBJECT'],
+    name: "featureFlag",
+    description: "Protects a field or type with a feature flag",
+    locations: ["FIELD_DEFINITION", "OBJECT"],
     args: {
-      key: 'String!',
-      defaultValue: 'Boolean',
+      key: "String!",
+      defaultValue: "Boolean",
     },
-    resolve: async (
-      next: any,
-      source: any,
-      args: any,
-      context: any,
-      info: any,
-    ) => {
+    resolve: async (next: any, source: any, args: any, context: any, info: any) => {
       const flagKey = args.key;
       const defaultValue = args.defaultValue ?? false;
 
@@ -236,11 +226,7 @@ export function createFlagDirective(service: FeatureFlagService) {
         tenantId: context.tenantId,
       };
 
-      const isEnabled = await service.getBooleanFlag(
-        flagKey,
-        defaultValue,
-        flagContext,
-      );
+      const isEnabled = await service.getBooleanFlag(flagKey, defaultValue, flagContext);
 
       if (!isEnabled) {
         throw new Error(`Feature '${flagKey}' is not available`);
@@ -261,14 +247,14 @@ export function exposeFeatureFlagsMiddleware(
     path?: string;
     /** Context builder */
     contextBuilder?: (req: Request) => Partial<FlagContext>;
-  } = {},
+  } = {}
 ): (req: Request, res: Response) => Promise<void> {
-  const { path = '/api/feature-flags', contextBuilder } = options;
+  const { path = "/api/feature-flags", contextBuilder } = options;
 
   return async (req: Request, res: Response): Promise<void> => {
     try {
       if (req.path !== path) {
-        res.status(404).json({ error: 'Not found' });
+        res.status(404).json({ error: "Not found" });
         return;
       }
 
@@ -284,8 +270,8 @@ export function exposeFeatureFlagsMiddleware(
         },
       });
     } catch (error) {
-      console.error('Error exposing feature flags:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      console.error("Error exposing feature flags:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   };
 }

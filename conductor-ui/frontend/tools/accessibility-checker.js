@@ -5,59 +5,59 @@
  * Performs WCAG compliance checks, keyboard navigation testing, and accessibility audits
  */
 
-import { chromium } from 'playwright';
-import { writeFileSync, existsSync, mkdirSync } from 'fs';
-import { join, resolve } from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { chromium } from "playwright";
+import { writeFileSync, existsSync, mkdirSync } from "fs";
+import { join, resolve } from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const root = resolve(__dirname, '..');
+const root = resolve(__dirname, "..");
 
 class AccessibilityChecker {
-  constructor(baseUrl = 'http://localhost:5173') {
+  constructor(baseUrl = "http://localhost:5173") {
     this.baseUrl = baseUrl;
     this.browser = null;
-    this.reportDir = join(root, 'test-results', 'accessibility');
+    this.reportDir = join(root, "test-results", "accessibility");
     this.results = [];
     this.startTime = Date.now();
 
     this.testPages = [
       {
-        name: 'login-page',
-        url: '/maestro/login',
-        description: 'Login page accessibility',
+        name: "login-page",
+        url: "/maestro/login",
+        description: "Login page accessibility",
       },
       {
-        name: 'dashboard',
-        url: '/maestro',
-        description: 'Main dashboard accessibility',
+        name: "dashboard",
+        url: "/maestro",
+        description: "Main dashboard accessibility",
         requireAuth: true,
       },
       {
-        name: 'runs-list',
-        url: '/maestro/runs',
-        description: 'Runs list page accessibility',
+        name: "runs-list",
+        url: "/maestro/runs",
+        description: "Runs list page accessibility",
         requireAuth: true,
       },
       {
-        name: 'observability',
-        url: '/maestro/observability',
-        description: 'Observability page accessibility',
+        name: "observability",
+        url: "/maestro/observability",
+        description: "Observability page accessibility",
         requireAuth: true,
       },
       {
-        name: 'routing-studio',
-        url: '/maestro/routing',
-        description: 'Routing Studio accessibility',
+        name: "routing-studio",
+        url: "/maestro/routing",
+        description: "Routing Studio accessibility",
         requireAuth: true,
       },
     ];
   }
 
   async setup() {
-    console.log('♿ Setting up accessibility checker...');
+    console.log("♿ Setting up accessibility checker...");
 
     // Create report directory
     if (!existsSync(this.reportDir)) {
@@ -67,60 +67,57 @@ class AccessibilityChecker {
     // Launch browser
     this.browser = await chromium.launch({
       headless: true,
-      args: [
-        '--disable-web-security',
-        '--disable-features=VizDisplayCompositor',
-      ],
+      args: ["--disable-web-security", "--disable-features=VizDisplayCompositor"],
     });
   }
 
   async mockAuthentication(page) {
     // Mock authentication for testing
     await page.addInitScript(() => {
-      localStorage.setItem('maestro_auth_access_token', 'mock-jwt-token');
-      localStorage.setItem('maestro_auth_id_token', 'mock-id-token');
+      localStorage.setItem("maestro_auth_access_token", "mock-jwt-token");
+      localStorage.setItem("maestro_auth_id_token", "mock-id-token");
 
       // Mock user data
       window.__USER_MOCK__ = {
-        id: 'user-123',
-        email: 'test@example.com',
-        name: 'Test User',
-        roles: ['user', 'operator'],
-        permissions: ['runs:read', 'pipelines:read'],
-        tenant: 'test-corp',
+        id: "user-123",
+        email: "test@example.com",
+        name: "Test User",
+        roles: ["user", "operator"],
+        permissions: ["runs:read", "pipelines:read"],
+        tenant: "test-corp",
       };
     });
 
     // Mock API responses
-    await page.route('**/api/**', async (route) => {
+    await page.route("**/api/**", async (route) => {
       const url = route.request().url();
 
-      if (url.includes('/summary')) {
+      if (url.includes("/summary")) {
         await route.fulfill({
-          contentType: 'application/json',
+          contentType: "application/json",
           body: JSON.stringify({
             data: {
               autonomy: { level: 3, canary: 0.15 },
               health: { success: 0.997, p95: 150, burn: 1.2 },
               budgets: { remaining: 15000, cap: 50000 },
               runs: [
-                { id: 'run-123', status: 'running' },
-                { id: 'run-124', status: 'completed' },
+                { id: "run-123", status: "running" },
+                { id: "run-124", status: "completed" },
               ],
             },
           }),
         });
-      } else if (url.includes('/runs')) {
+      } else if (url.includes("/runs")) {
         await route.fulfill({
-          contentType: 'application/json',
+          contentType: "application/json",
           body: JSON.stringify({
             data: {
               runs: [
                 {
-                  id: 'run-123',
-                  pipeline: 'main-build',
-                  status: 'running',
-                  createdAt: '2025-01-15T10:00:00Z',
+                  id: "run-123",
+                  pipeline: "main-build",
+                  status: "running",
+                  createdAt: "2025-01-15T10:00:00Z",
                   duration: 120,
                 },
               ],
@@ -129,7 +126,7 @@ class AccessibilityChecker {
         });
       } else {
         await route.fulfill({
-          contentType: 'application/json',
+          contentType: "application/json",
           body: JSON.stringify({ data: {} }),
         });
       }
@@ -141,7 +138,7 @@ class AccessibilityChecker {
 
     // Inject axe-core
     await page.addScriptTag({
-      url: 'https://unpkg.com/axe-core@4.7.2/axe.min.js',
+      url: "https://unpkg.com/axe-core@4.7.2/axe.min.js",
     });
 
     // Wait for page to be fully loaded
@@ -155,11 +152,11 @@ class AccessibilityChecker {
           {
             rules: {
               // Enable all WCAG 2.1 AA rules
-              'color-contrast': { enabled: true },
-              'keyboard-navigation': { enabled: true },
-              'focus-management': { enabled: true },
-              'aria-labels': { enabled: true },
-              'semantic-markup': { enabled: true },
+              "color-contrast": { enabled: true },
+              "keyboard-navigation": { enabled: true },
+              "focus-management": { enabled: true },
+              "aria-labels": { enabled: true },
+              "semantic-markup": { enabled: true },
             },
           },
           (err, results) => {
@@ -168,7 +165,7 @@ class AccessibilityChecker {
             } else {
               resolve(results);
             }
-          },
+          }
         );
       });
     });
@@ -185,11 +182,11 @@ class AccessibilityChecker {
       // Test Tab navigation
       const focusableElements = await page.evaluate(() => {
         const selectors = [
-          'button',
-          'input',
-          'select',
-          'textarea',
-          'a[href]',
+          "button",
+          "input",
+          "select",
+          "textarea",
+          "a[href]",
           '[tabindex]:not([tabindex="-1"])',
           '[contenteditable="true"]',
         ];
@@ -201,9 +198,9 @@ class AccessibilityChecker {
             if (el.offsetParent !== null && !el.disabled) {
               elements.push({
                 tag: el.tagName.toLowerCase(),
-                id: el.id || '',
-                class: el.className || '',
-                text: el.textContent?.substring(0, 50) || '',
+                id: el.id || "",
+                class: el.className || "",
+                text: el.textContent?.substring(0, 50) || "",
                 tabIndex: el.tabIndex,
               });
             }
@@ -218,7 +215,7 @@ class AccessibilityChecker {
       let previousElement = null;
 
       for (let i = 0; i < Math.min(focusableElements.length, 20); i++) {
-        await page.keyboard.press('Tab');
+        await page.keyboard.press("Tab");
         tabIndex++;
 
         const currentFocus = await page.evaluate(() => {
@@ -227,19 +224,19 @@ class AccessibilityChecker {
 
           return {
             tag: focused.tagName.toLowerCase(),
-            id: focused.id || '',
-            class: focused.className || '',
-            text: focused.textContent?.substring(0, 50) || '',
+            id: focused.id || "",
+            class: focused.className || "",
+            text: focused.textContent?.substring(0, 50) || "",
             visible: focused.offsetParent !== null,
             outline: window.getComputedStyle(focused).outline,
-            focusVisible: focused.matches(':focus-visible'),
+            focusVisible: focused.matches(":focus-visible"),
           };
         });
 
         if (!currentFocus) {
           keyboardIssues.push({
-            type: 'focus-loss',
-            severity: 'moderate',
+            type: "focus-loss",
+            severity: "moderate",
             message: `Lost focus after ${tabIndex} tab presses`,
             element: previousElement,
           });
@@ -249,12 +246,12 @@ class AccessibilityChecker {
         // Check for visible focus indicator
         if (
           !currentFocus.focusVisible &&
-          (!currentFocus.outline || currentFocus.outline === 'none')
+          (!currentFocus.outline || currentFocus.outline === "none")
         ) {
           keyboardIssues.push({
-            type: 'missing-focus-indicator',
-            severity: 'high',
-            message: 'Element lacks visible focus indicator',
+            type: "missing-focus-indicator",
+            severity: "high",
+            message: "Element lacks visible focus indicator",
             element: currentFocus,
           });
         }
@@ -263,13 +260,13 @@ class AccessibilityChecker {
       }
 
       // Test Escape key handling for modals/dropdowns
-      await page.keyboard.press('Escape');
+      await page.keyboard.press("Escape");
 
       // Test Enter/Space on buttons
-      const buttons = await page.locator('button:visible').count();
+      const buttons = await page.locator("button:visible").count();
       if (buttons > 0) {
-        await page.locator('button:visible').first().focus();
-        await page.keyboard.press('Enter');
+        await page.locator("button:visible").first().focus();
+        await page.keyboard.press("Enter");
 
         // Check if action was triggered (basic check)
         await page.waitForTimeout(1000);
@@ -278,16 +275,15 @@ class AccessibilityChecker {
       return {
         focusableElementsFound: focusableElements.length,
         keyboardIssues,
-        passed:
-          keyboardIssues.filter((i) => i.severity === 'high').length === 0,
+        passed: keyboardIssues.filter((i) => i.severity === "high").length === 0,
       };
     } catch (error) {
       return {
         focusableElementsFound: 0,
         keyboardIssues: [
           {
-            type: 'navigation-error',
-            severity: 'high',
+            type: "navigation-error",
+            severity: "high",
             message: `Keyboard navigation test failed: ${error.message}`,
           },
         ],
@@ -303,17 +299,15 @@ class AccessibilityChecker {
       const issues = [];
 
       // Get all text elements
-      const textElements = Array.from(document.querySelectorAll('*')).filter(
-        (el) => {
-          const style = window.getComputedStyle(el);
-          return (
-            el.textContent &&
-            el.textContent.trim().length > 0 &&
-            style.fontSize &&
-            parseFloat(style.fontSize) > 0
-          );
-        },
-      );
+      const textElements = Array.from(document.querySelectorAll("*")).filter((el) => {
+        const style = window.getComputedStyle(el);
+        return (
+          el.textContent &&
+          el.textContent.trim().length > 0 &&
+          style.fontSize &&
+          parseFloat(style.fontSize) > 0
+        );
+      });
 
       textElements.forEach((el, index) => {
         if (index > 50) return; // Limit to first 50 elements for performance
@@ -325,50 +319,45 @@ class AccessibilityChecker {
         const fontWeight = style.fontWeight;
 
         // Skip if no background color is set
-        if (!backgroundColor || backgroundColor === 'rgba(0, 0, 0, 0)') return;
+        if (!backgroundColor || backgroundColor === "rgba(0, 0, 0, 0)") return;
 
         // Simple contrast ratio calculation (approximation)
         const colorRgb = color.match(/rgb\\((\\d+),\\s*(\\d+),\\s*(\\d+)\\)/);
-        const bgRgb = backgroundColor.match(
-          /rgb\\((\\d+),\\s*(\\d+),\\s*(\\d+)\\)/,
-        );
+        const bgRgb = backgroundColor.match(/rgb\\((\\d+),\\s*(\\d+),\\s*(\\d+)\\)/);
 
         if (colorRgb && bgRgb) {
           const textLum = this.getLuminance(
             parseInt(colorRgb[1]),
             parseInt(colorRgb[2]),
-            parseInt(colorRgb[3]),
+            parseInt(colorRgb[3])
           );
           const bgLum = this.getLuminance(
             parseInt(bgRgb[1]),
             parseInt(bgRgb[2]),
-            parseInt(bgRgb[3]),
+            parseInt(bgRgb[3])
           );
 
           const contrastRatio =
-            (Math.max(textLum, bgLum) + 0.05) /
-            (Math.min(textLum, bgLum) + 0.05);
+            (Math.max(textLum, bgLum) + 0.05) / (Math.min(textLum, bgLum) + 0.05);
 
           // WCAG AA standards
-          const isLargeText =
-            fontSize >= 18 || (fontSize >= 14 && fontWeight >= 700);
+          const isLargeText = fontSize >= 18 || (fontSize >= 14 && fontWeight >= 700);
           const requiredRatio = isLargeText ? 3.0 : 4.5;
 
           if (contrastRatio < requiredRatio) {
             issues.push({
               element: {
                 tag: el.tagName.toLowerCase(),
-                class: el.className || '',
+                class: el.className || "",
                 text: el.textContent.substring(0, 100),
               },
               contrastRatio: contrastRatio.toFixed(2),
               requiredRatio,
               color,
               backgroundColor,
-              fontSize: fontSize + 'px',
+              fontSize: fontSize + "px",
               isLargeText,
-              severity:
-                contrastRatio < requiredRatio * 0.8 ? 'high' : 'moderate',
+              severity: contrastRatio < requiredRatio * 0.8 ? "high" : "moderate",
             });
           }
         }
@@ -378,24 +367,21 @@ class AccessibilityChecker {
     });
 
     // Add luminance calculation function to page context
-    await page.addFunction('getLuminance', (r, g, b) => {
+    await page.addFunction("getLuminance", (r, g, b) => {
       const rs = r / 255;
       const gs = g / 255;
       const bs = b / 255;
 
-      const rLum =
-        rs <= 0.03928 ? rs / 12.92 : Math.pow((rs + 0.055) / 1.055, 2.4);
-      const gLum =
-        gs <= 0.03928 ? gs / 12.92 : Math.pow((gs + 0.055) / 1.055, 2.4);
-      const bLum =
-        bs <= 0.03928 ? bs / 12.92 : Math.pow((bs + 0.055) / 1.055, 2.4);
+      const rLum = rs <= 0.03928 ? rs / 12.92 : Math.pow((rs + 0.055) / 1.055, 2.4);
+      const gLum = gs <= 0.03928 ? gs / 12.92 : Math.pow((gs + 0.055) / 1.055, 2.4);
+      const bLum = bs <= 0.03928 ? bs / 12.92 : Math.pow((bs + 0.055) / 1.055, 2.4);
 
       return 0.2126 * rLum + 0.7152 * gLum + 0.0722 * bLum;
     });
 
     return {
       contrastIssues,
-      passed: contrastIssues.filter((i) => i.severity === 'high').length === 0,
+      passed: contrastIssues.filter((i) => i.severity === "high").length === 0,
     };
   }
 
@@ -406,97 +392,91 @@ class AccessibilityChecker {
       const issues = [];
 
       // Check for missing alt text on images
-      const images = Array.from(document.querySelectorAll('img'));
+      const images = Array.from(document.querySelectorAll("img"));
       images.forEach((img) => {
-        if (!img.alt && img.src && !img.getAttribute('aria-hidden')) {
+        if (!img.alt && img.src && !img.getAttribute("aria-hidden")) {
           issues.push({
-            type: 'missing-alt-text',
-            severity: 'high',
-            element: { tag: 'img', src: img.src.substring(0, 100) },
-            message: 'Image missing alt text',
+            type: "missing-alt-text",
+            severity: "high",
+            element: { tag: "img", src: img.src.substring(0, 100) },
+            message: "Image missing alt text",
           });
         }
       });
 
       // Check for buttons without accessible names
       const buttons = Array.from(
-        document.querySelectorAll(
-          'button, input[type="button"], input[type="submit"]',
-        ),
+        document.querySelectorAll('button, input[type="button"], input[type="submit"]')
       );
       buttons.forEach((btn) => {
         const hasLabel =
           btn.textContent?.trim() ||
-          btn.getAttribute('aria-label') ||
-          btn.getAttribute('aria-labelledby') ||
-          btn.getAttribute('title');
+          btn.getAttribute("aria-label") ||
+          btn.getAttribute("aria-labelledby") ||
+          btn.getAttribute("title");
 
         if (!hasLabel) {
           issues.push({
-            type: 'missing-button-label',
-            severity: 'high',
+            type: "missing-button-label",
+            severity: "high",
             element: {
               tag: btn.tagName.toLowerCase(),
               class: btn.className,
-              type: btn.type || '',
+              type: btn.type || "",
             },
-            message: 'Button missing accessible name',
+            message: "Button missing accessible name",
           });
         }
       });
 
       // Check for form inputs without labels
       const inputs = Array.from(
-        document.querySelectorAll(
-          'input:not([type="hidden"]), textarea, select',
-        ),
+        document.querySelectorAll('input:not([type="hidden"]), textarea, select')
       );
       inputs.forEach((input) => {
         const hasLabel =
-          input.getAttribute('aria-label') ||
-          input.getAttribute('aria-labelledby') ||
+          input.getAttribute("aria-label") ||
+          input.getAttribute("aria-labelledby") ||
           document.querySelector(`label[for="${input.id}"]`) ||
-          input.closest('label');
+          input.closest("label");
 
         if (!hasLabel) {
           issues.push({
-            type: 'missing-form-label',
-            severity: 'high',
+            type: "missing-form-label",
+            severity: "high",
             element: {
               tag: input.tagName.toLowerCase(),
-              type: input.type || '',
-              name: input.name || '',
-              id: input.id || '',
+              type: input.type || "",
+              name: input.name || "",
+              id: input.id || "",
             },
-            message: 'Form input missing label',
+            message: "Form input missing label",
           });
         }
       });
 
       // Check for proper heading hierarchy
-      const headings = Array.from(
-        document.querySelectorAll('h1, h2, h3, h4, h5, h6'),
-      );
+      const headings = Array.from(document.querySelectorAll("h1, h2, h3, h4, h5, h6"));
       let previousLevel = 0;
       headings.forEach((heading, index) => {
         const currentLevel = parseInt(heading.tagName.charAt(1));
 
         if (index === 0 && currentLevel !== 1) {
           issues.push({
-            type: 'heading-hierarchy',
-            severity: 'moderate',
+            type: "heading-hierarchy",
+            severity: "moderate",
             element: {
               tag: heading.tagName.toLowerCase(),
               text: heading.textContent?.substring(0, 50),
             },
-            message: 'Page should start with h1',
+            message: "Page should start with h1",
           });
         }
 
         if (currentLevel > previousLevel + 1) {
           issues.push({
-            type: 'heading-hierarchy',
-            severity: 'moderate',
+            type: "heading-hierarchy",
+            severity: "moderate",
             element: {
               tag: heading.tagName.toLowerCase(),
               text: heading.textContent?.substring(0, 50),
@@ -510,30 +490,28 @@ class AccessibilityChecker {
 
       // Check for ARIA roles and properties
       const ariaElements = Array.from(
-        document.querySelectorAll(
-          '[role], [aria-expanded], [aria-selected], [aria-checked]',
-        ),
+        document.querySelectorAll("[role], [aria-expanded], [aria-selected], [aria-checked]")
       );
       ariaElements.forEach((el) => {
-        const role = el.getAttribute('role');
+        const role = el.getAttribute("role");
 
         // Check for required ARIA properties based on role
         if (
-          role === 'button' &&
-          !el.hasAttribute('aria-pressed') &&
-          el.getAttribute('aria-pressed') !== 'false'
+          role === "button" &&
+          !el.hasAttribute("aria-pressed") &&
+          el.getAttribute("aria-pressed") !== "false"
         ) {
           // This is okay, not all buttons need aria-pressed
         }
 
-        if (role === 'tablist') {
+        if (role === "tablist") {
           const tabs = el.querySelectorAll('[role="tab"]');
           if (tabs.length === 0) {
             issues.push({
-              type: 'aria-structure',
-              severity: 'moderate',
+              type: "aria-structure",
+              severity: "moderate",
               element: { role, class: el.className },
-              message: 'Tablist missing tab elements',
+              message: "Tablist missing tab elements",
             });
           }
         }
@@ -544,7 +522,7 @@ class AccessibilityChecker {
 
     return {
       ariaIssues,
-      passed: ariaIssues.filter((i) => i.severity === 'high').length === 0,
+      passed: ariaIssues.filter((i) => i.severity === "high").length === 0,
     };
   }
 
@@ -556,29 +534,20 @@ class AccessibilityChecker {
     try {
       // Check for proper landmark regions
       const landmarks = await page.evaluate(() => {
-        const roles = [
-          'main',
-          'navigation',
-          'banner',
-          'contentinfo',
-          'complementary',
-          'search',
-        ];
+        const roles = ["main", "navigation", "banner", "contentinfo", "complementary", "search"];
         const found = {};
 
         roles.forEach((role) => {
-          found[role] = document.querySelectorAll(
-            `[role="${role}"], ${role}`,
-          ).length;
+          found[role] = document.querySelectorAll(`[role="${role}"], ${role}`).length;
         });
 
         // Check for semantic HTML elements
-        found.nav = document.querySelectorAll('nav').length;
-        found.main = document.querySelectorAll('main').length;
-        found.header = document.querySelectorAll('header').length;
-        found.footer = document.querySelectorAll('footer').length;
-        found.section = document.querySelectorAll('section').length;
-        found.article = document.querySelectorAll('article').length;
+        found.nav = document.querySelectorAll("nav").length;
+        found.main = document.querySelectorAll("main").length;
+        found.header = document.querySelectorAll("header").length;
+        found.footer = document.querySelectorAll("footer").length;
+        found.section = document.querySelectorAll("section").length;
+        found.article = document.querySelectorAll("article").length;
 
         return found;
       });
@@ -586,47 +555,45 @@ class AccessibilityChecker {
       // Check for required landmarks
       if (landmarks.main === 0) {
         srIssues.push({
-          type: 'missing-landmark',
-          severity: 'moderate',
-          message: 'Page missing main landmark',
+          type: "missing-landmark",
+          severity: "moderate",
+          message: "Page missing main landmark",
           recommendation: 'Add <main> element or role="main"',
         });
       }
 
       if (landmarks.navigation === 0 && landmarks.nav === 0) {
         srIssues.push({
-          type: 'missing-landmark',
-          severity: 'low',
-          message: 'Page missing navigation landmark',
+          type: "missing-landmark",
+          severity: "low",
+          message: "Page missing navigation landmark",
           recommendation: 'Add <nav> element or role="navigation"',
         });
       }
 
       // Check for skip links
       const skipLink = await page.evaluate(() => {
-        const firstFocusable = document.querySelector(
-          'a, button, input, select, textarea',
-        );
+        const firstFocusable = document.querySelector("a, button, input, select, textarea");
         return (
-          firstFocusable?.textContent?.toLowerCase().includes('skip') ||
-          firstFocusable?.getAttribute('href') === '#main' ||
+          firstFocusable?.textContent?.toLowerCase().includes("skip") ||
+          firstFocusable?.getAttribute("href") === "#main" ||
           document.querySelector('a[href="#main"], a[href="#content"]')
         );
       });
 
       if (!skipLink) {
         srIssues.push({
-          type: 'missing-skip-link',
-          severity: 'moderate',
-          message: 'Page missing skip navigation link',
-          recommendation: 'Add skip link as first focusable element',
+          type: "missing-skip-link",
+          severity: "moderate",
+          message: "Page missing skip navigation link",
+          recommendation: "Add skip link as first focusable element",
         });
       }
 
       // Check for live regions
       const liveRegions = await page.evaluate(() => {
         return document.querySelectorAll(
-          '[aria-live], [aria-atomic], [role="status"], [role="alert"]',
+          '[aria-live], [aria-atomic], [role="status"], [role="alert"]'
         ).length;
       });
 
@@ -634,7 +601,7 @@ class AccessibilityChecker {
         landmarks,
         liveRegions,
         srIssues,
-        passed: srIssues.filter((i) => i.severity === 'high').length === 0,
+        passed: srIssues.filter((i) => i.severity === "high").length === 0,
       };
     } catch (error) {
       return {
@@ -642,8 +609,8 @@ class AccessibilityChecker {
         liveRegions: 0,
         srIssues: [
           {
-            type: 'screen-reader-test-error',
-            severity: 'moderate',
+            type: "screen-reader-test-error",
+            severity: "moderate",
             message: `Screen reader compatibility test failed: ${error.message}`,
           },
         ],
@@ -669,21 +636,20 @@ class AccessibilityChecker {
 
       // Navigate to page
       await page.goto(`${this.baseUrl}${testPage.url}`, {
-        waitUntil: 'networkidle',
+        waitUntil: "networkidle",
       });
 
       // Wait for page to stabilize
       await page.waitForTimeout(3000);
 
       // Run all accessibility tests
-      const [axeResults, keyboardTest, contrastTest, ariaTest, srTest] =
-        await Promise.all([
-          this.runAccessibilityAudit(page, testPage.name),
-          this.testKeyboardNavigation(page, testPage.name),
-          this.testColorContrast(page, testPage.name),
-          this.testAriaLabels(page, testPage.name),
-          this.testScreenReaderCompatibility(page, testPage.name),
-        ]);
+      const [axeResults, keyboardTest, contrastTest, ariaTest, srTest] = await Promise.all([
+        this.runAccessibilityAudit(page, testPage.name),
+        this.testKeyboardNavigation(page, testPage.name),
+        this.testColorContrast(page, testPage.name),
+        this.testAriaLabels(page, testPage.name),
+        this.testScreenReaderCompatibility(page, testPage.name),
+      ]);
 
       const result = {
         name: testPage.name,
@@ -726,24 +692,19 @@ class AccessibilityChecker {
         ...srTest.srIssues,
       ];
 
-      result.summary.critical = allIssues.filter(
-        (i) => i.severity === 'critical',
-      ).length;
+      result.summary.critical = allIssues.filter((i) => i.severity === "critical").length;
       result.summary.major = allIssues.filter(
-        (i) => i.severity === 'high' || i.severity === 'serious',
+        (i) => i.severity === "high" || i.severity === "serious"
       ).length;
       result.summary.minor = allIssues.filter(
-        (i) => i.severity === 'moderate' || i.severity === 'minor',
+        (i) => i.severity === "moderate" || i.severity === "minor"
       ).length;
 
-      result.overallPassed =
-        result.summary.critical === 0 && result.summary.major === 0;
+      result.overallPassed = result.summary.critical === 0 && result.summary.major === 0;
 
       await context.close();
 
-      console.log(
-        `  ✅ ${testPage.name}: ${result.summary.passed}/5 tests passed`,
-      );
+      console.log(`  ✅ ${testPage.name}: ${result.summary.passed}/5 tests passed`);
 
       return result;
     } catch (error) {
@@ -761,7 +722,7 @@ class AccessibilityChecker {
   }
 
   async generateReport() {
-    console.log('📄 Generating accessibility report...');
+    console.log("📄 Generating accessibility report...");
 
     const totalDuration = Date.now() - this.startTime;
     const overallSummary = this.results.reduce(
@@ -773,39 +734,35 @@ class AccessibilityChecker {
         acc.minor += result.summary?.minor || 0;
         return acc;
       },
-      { totalTests: 0, passed: 0, critical: 0, major: 0, minor: 0 },
+      { totalTests: 0, passed: 0, critical: 0, major: 0, minor: 0 }
     );
 
     const report = {
       timestamp: new Date().toISOString(),
       duration: totalDuration,
       baseUrl: this.baseUrl,
-      overallPassed:
-        overallSummary.critical === 0 && overallSummary.major === 0,
+      overallPassed: overallSummary.critical === 0 && overallSummary.major === 0,
       summary: overallSummary,
       results: this.results,
-      wcagLevel: 'AA',
+      wcagLevel: "AA",
       guidelines: [
-        'WCAG 2.1 AA Compliance',
-        'Keyboard Navigation Support',
-        'Screen Reader Compatibility',
-        'Color Contrast Standards',
-        'ARIA Best Practices',
+        "WCAG 2.1 AA Compliance",
+        "Keyboard Navigation Support",
+        "Screen Reader Compatibility",
+        "Color Contrast Standards",
+        "ARIA Best Practices",
       ],
     };
 
     // Write JSON report
     writeFileSync(
-      join(this.reportDir, 'accessibility-report.json'),
-      JSON.stringify(report, null, 2),
+      join(this.reportDir, "accessibility-report.json"),
+      JSON.stringify(report, null, 2)
     );
 
     // Write HTML report
     const htmlReport = this.generateHTMLReport(report);
-    writeFileSync(
-      join(this.reportDir, 'accessibility-report.html'),
-      htmlReport,
-    );
+    writeFileSync(join(this.reportDir, "accessibility-report.html"), htmlReport);
 
     return report;
   }
@@ -860,8 +817,8 @@ class AccessibilityChecker {
             <p><strong>WCAG Level:</strong> ${report.wcagLevel}</p>
         </div>
         
-        <div class="status ${report.overallPassed ? 'passed' : 'failed'}">
-            ${report.overallPassed ? '✅ ACCESSIBILITY TESTS PASSED' : '❌ ACCESSIBILITY ISSUES FOUND'}
+        <div class="status ${report.overallPassed ? "passed" : "failed"}">
+            ${report.overallPassed ? "✅ ACCESSIBILITY TESTS PASSED" : "❌ ACCESSIBILITY ISSUES FOUND"}
         </div>
         
         <div class="summary">
@@ -886,7 +843,7 @@ class AccessibilityChecker {
         <div class="guidelines">
             <h3>📋 Compliance Guidelines</h3>
             <ul>
-                ${report.guidelines.map((guideline) => `<li>${guideline}</li>`).join('')}
+                ${report.guidelines.map((guideline) => `<li>${guideline}</li>`).join("")}
             </ul>
         </div>
         
@@ -895,7 +852,7 @@ class AccessibilityChecker {
             ${report.results
               .map(
                 (result) => `
-                <div class="page-result ${result.overallPassed ? 'passed' : 'failed'}">
+                <div class="page-result ${result.overallPassed ? "passed" : "failed"}">
                     <div class="page-header">
                         <div>
                             <h3>${result.name}</h3>
@@ -903,8 +860,8 @@ class AccessibilityChecker {
                             <p><strong>URL:</strong> ${result.url}</p>
                         </div>
                         <div style="text-align: right;">
-                            <div style="font-size: 1.5em; color: ${result.overallPassed ? '#28a745' : '#dc3545'}">
-                                ${result.overallPassed ? '✅' : '❌'}
+                            <div style="font-size: 1.5em; color: ${result.overallPassed ? "#28a745" : "#dc3545"}">
+                                ${result.overallPassed ? "✅" : "❌"}
                             </div>
                             <div style="font-size: 0.9em; color: #666;">
                                 ${result.summary?.passed || 0}/${result.summary?.totalTests || 0} passed
@@ -926,9 +883,9 @@ class AccessibilityChecker {
                                 ? Object.entries(result.tests)
                                     .map(
                                       ([testName, testResult]) => `
-                                <div class="test-item ${testResult.passed ? 'passed' : 'failed'}">
-                                    <h4>${testName.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}</h4>
-                                    <p><strong>Status:</strong> ${testResult.passed ? '✅ Passed' : '❌ Failed'}</p>
+                                <div class="test-item ${testResult.passed ? "passed" : "failed"}">
+                                    <h4>${testName.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}</h4>
+                                    <p><strong>Status:</strong> ${testResult.passed ? "✅ Passed" : "❌ Failed"}</p>
                                     
                                     ${
                                       testResult.violations?.length > 0
@@ -939,15 +896,15 @@ class AccessibilityChecker {
                                               .slice(0, 3)
                                               .map(
                                                 (violation) => `
-                                                <div class="issue ${violation.impact || 'minor'}">
+                                                <div class="issue ${violation.impact || "minor"}">
                                                     <strong>${violation.id || violation.type}:</strong> ${violation.description || violation.message}
                                                 </div>
-                                            `,
+                                            `
                                               )
-                                              .join('')}
+                                              .join("")}
                                         </div>
                                     `
-                                        : ''
+                                        : ""
                                     }
                                     
                                     ${
@@ -962,12 +919,12 @@ class AccessibilityChecker {
                                                 <div class="issue ${issue.severity}">
                                                     <strong>${issue.type}:</strong> ${issue.message}
                                                 </div>
-                                            `,
+                                            `
                                               )
-                                              .join('')}
+                                              .join("")}
                                         </div>
                                     `
-                                        : ''
+                                        : ""
                                     }
                                     
                                     ${
@@ -982,12 +939,12 @@ class AccessibilityChecker {
                                                 <div class="issue ${issue.severity}">
                                                     Ratio: ${issue.contrastRatio} (required: ${issue.requiredRatio})
                                                 </div>
-                                            `,
+                                            `
                                               )
-                                              .join('')}
+                                              .join("")}
                                         </div>
                                     `
-                                        : ''
+                                        : ""
                                     }
                                     
                                     ${
@@ -1002,26 +959,26 @@ class AccessibilityChecker {
                                                 <div class="issue ${issue.severity}">
                                                     <strong>${issue.type}:</strong> ${issue.message}
                                                 </div>
-                                            `,
+                                            `
                                               )
-                                              .join('')}
+                                              .join("")}
                                         </div>
                                     `
-                                        : ''
+                                        : ""
                                     }
                                 </div>
-                            `,
+                            `
                                     )
-                                    .join('')
-                                : ''
+                                    .join("")
+                                : ""
                             }
                         </div>
                     `
                     }
                 </div>
-            `,
+            `
               )
-              .join('')}
+              .join("")}
         </div>
     </div>
 </body>
@@ -1045,9 +1002,7 @@ class AccessibilityChecker {
         ? this.testPages.filter((p) => pages.includes(p.name))
         : this.testPages;
 
-      console.log(
-        `♿ Running accessibility tests on ${pagesToTest.length} pages...\n`,
-      );
+      console.log(`♿ Running accessibility tests on ${pagesToTest.length} pages...\n`);
 
       for (const testPage of pagesToTest) {
         const result = await this.testPage(testPage);
@@ -1057,33 +1012,27 @@ class AccessibilityChecker {
       if (generateReport) {
         const report = await this.generateReport();
 
-        console.log('\n🎯 Accessibility Test Summary:');
+        console.log("\n🎯 Accessibility Test Summary:");
+        console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
         console.log(
-          '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
-        );
-        console.log(
-          `  Overall Status:       ${report.overallPassed ? '✅ PASSED' : '❌ ISSUES FOUND'}`,
+          `  Overall Status:       ${report.overallPassed ? "✅ PASSED" : "❌ ISSUES FOUND"}`
         );
         console.log(`  Pages Tested:         ${this.results.length}`);
         console.log(
-          `  Tests Passed:         ${report.summary.passed}/${report.summary.totalTests}`,
+          `  Tests Passed:         ${report.summary.passed}/${report.summary.totalTests}`
         );
         console.log(`  Critical Issues:      ${report.summary.critical}`);
         console.log(`  Major Issues:         ${report.summary.major}`);
         console.log(`  Minor Issues:         ${report.summary.minor}`);
-        console.log(
-          `  Test Duration:        ${(report.duration / 1000).toFixed(2)} seconds`,
-        );
+        console.log(`  Test Duration:        ${(report.duration / 1000).toFixed(2)} seconds`);
 
         if (report.summary.critical > 0 || report.summary.major > 0) {
-          console.log('\n⚠️ Critical or major accessibility issues found!');
-          console.log(
-            '💡 Review the detailed report for specific fixes needed.',
-          );
+          console.log("\n⚠️ Critical or major accessibility issues found!");
+          console.log("💡 Review the detailed report for specific fixes needed.");
         }
 
         console.log(
-          `\n📄 Detailed report: ${join('test-results', 'accessibility', 'accessibility-report.html')}`,
+          `\n📄 Detailed report: ${join("test-results", "accessibility", "accessibility-report.html")}`
         );
 
         return report.overallPassed;
@@ -1099,14 +1048,13 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const args = process.argv.slice(2);
   const options = {
     baseUrl:
-      args.find((arg) => arg.startsWith('--base-url='))?.split('=')[1] ||
-      'http://localhost:5173',
+      args.find((arg) => arg.startsWith("--base-url="))?.split("=")[1] || "http://localhost:5173",
     pages:
       args
-        .find((arg) => arg.startsWith('--pages='))
-        ?.split('=')[1]
-        ?.split(',') || null,
-    generateReport: !args.includes('--no-report'),
+        .find((arg) => arg.startsWith("--pages="))
+        ?.split("=")[1]
+        ?.split(",") || null,
+    generateReport: !args.includes("--no-report"),
   };
 
   const checker = new AccessibilityChecker(options.baseUrl);

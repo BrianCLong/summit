@@ -7,8 +7,8 @@ export interface DPConfig {
   epsilon: number; // Privacy budget
   delta?: number; // For (ε,δ)-DP
   sensitivity?: number; // Global sensitivity of the query
-  mechanism: 'laplace' | 'gaussian' | 'exponential';
-  accountingMethod?: 'basic' | 'advanced' | 'renyi';
+  mechanism: "laplace" | "gaussian" | "exponential";
+  accountingMethod?: "basic" | "advanced" | "renyi";
 }
 
 export interface PrivacyBudget {
@@ -40,7 +40,7 @@ export class DifferentialPrivacy {
       delta: config.delta || 0,
       spent: 0,
       remaining: config.epsilon,
-      allocations: []
+      allocations: [],
     };
   }
 
@@ -58,7 +58,7 @@ export class DifferentialPrivacy {
    */
   addGaussianNoise(value: number, sensitivity: number): number {
     if (!this.config.delta) {
-      throw new Error('Delta must be specified for Gaussian mechanism');
+      throw new Error("Delta must be specified for Gaussian mechanism");
     }
 
     const sigma = this.computeGaussianSigma(sensitivity, this.config.epsilon, this.config.delta);
@@ -77,16 +77,14 @@ export class DifferentialPrivacy {
     const epsilon = this.config.epsilon;
 
     // Compute scores
-    const scores = options.map(opt => scoringFunction(opt));
+    const scores = options.map((opt) => scoringFunction(opt));
 
     // Compute probabilities using exponential mechanism
-    const probabilities = scores.map(score =>
-      Math.exp((epsilon * score) / (2 * sensitivity))
-    );
+    const probabilities = scores.map((score) => Math.exp((epsilon * score) / (2 * sensitivity)));
 
     // Normalize probabilities
     const sum = probabilities.reduce((a, b) => a + b, 0);
-    const normalizedProbs = probabilities.map(p => p / sum);
+    const normalizedProbs = probabilities.map((p) => p / sum);
 
     // Sample from distribution
     const rand = Math.random();
@@ -108,16 +106,16 @@ export class DifferentialPrivacy {
   privatizeQuery(result: number, sensitivity: number): number {
     // Check budget
     if (this.budget.remaining < this.config.epsilon) {
-      throw new Error('Privacy budget exhausted');
+      throw new Error("Privacy budget exhausted");
     }
 
     let privatized: number;
 
     switch (this.config.mechanism) {
-      case 'laplace':
+      case "laplace":
         privatized = this.addLaplaceNoise(result, sensitivity);
         break;
-      case 'gaussian':
+      case "gaussian":
         privatized = this.addGaussianNoise(result, sensitivity);
         break;
       default:
@@ -125,7 +123,7 @@ export class DifferentialPrivacy {
     }
 
     // Update budget
-    this.updateBudget('query', this.config.epsilon, this.config.delta || 0);
+    this.updateBudget("query", this.config.epsilon, this.config.delta || 0);
 
     return privatized;
   }
@@ -149,11 +147,14 @@ export class DifferentialPrivacy {
   /**
    * Privatize summary statistics
    */
-  privatizeStatistics(stats: {
-    mean: number;
-    variance: number;
-    count: number;
-  }, dataRange: [number, number]): any {
+  privatizeStatistics(
+    stats: {
+      mean: number;
+      variance: number;
+      count: number;
+    },
+    dataRange: [number, number]
+  ): any {
     const [min, max] = dataRange;
     const range = max - min;
 
@@ -167,26 +168,30 @@ export class DifferentialPrivacy {
       mean: this.privatizeQuery(stats.mean, meanSensitivity),
       count: Math.round(this.privatizeQuery(stats.count, countSensitivity)),
       // Variance requires more careful handling
-      variance: stats.variance * (1 + this.sampleGaussian(0, 0.1))
+      variance: stats.variance * (1 + this.sampleGaussian(0, 0.1)),
     };
   }
 
   /**
    * Compose privacy guarantees using advanced composition
    */
-  composePrivacy(operations: Array<{ epsilon: number; delta: number }>): { epsilon: number; delta: number } {
-    if (this.config.accountingMethod === 'basic') {
+  composePrivacy(operations: Array<{ epsilon: number; delta: number }>): {
+    epsilon: number;
+    delta: number;
+  } {
+    if (this.config.accountingMethod === "basic") {
       // Basic composition: sum of epsilons
       const totalEpsilon = operations.reduce((sum, op) => sum + op.epsilon, 0);
       const totalDelta = operations.reduce((sum, op) => sum + op.delta, 0);
       return { epsilon: totalEpsilon, delta: totalDelta };
-    } else if (this.config.accountingMethod === 'advanced') {
+    } else if (this.config.accountingMethod === "advanced") {
       // Advanced composition theorem
       const k = operations.length;
       const epsilon = operations[0].epsilon;
       const delta = operations[0].delta;
 
-      const composedEpsilon = Math.sqrt(2 * k * Math.log(1 / delta)) * epsilon + k * epsilon * (Math.exp(epsilon) - 1);
+      const composedEpsilon =
+        Math.sqrt(2 * k * Math.log(1 / delta)) * epsilon + k * epsilon * (Math.exp(epsilon) - 1);
       const composedDelta = k * delta;
 
       return { epsilon: composedEpsilon, delta: composedDelta };
@@ -230,7 +235,7 @@ export class DifferentialPrivacy {
 
   private computeGaussianSigma(sensitivity: number, epsilon: number, delta: number): number {
     // Compute sigma for Gaussian mechanism
-    return sensitivity * Math.sqrt(2 * Math.log(1.25 / delta)) / epsilon;
+    return (sensitivity * Math.sqrt(2 * Math.log(1.25 / delta))) / epsilon;
   }
 
   private updateBudget(operation: string, epsilonUsed: number, deltaUsed: number): void {
@@ -241,11 +246,14 @@ export class DifferentialPrivacy {
       operation,
       epsilonUsed,
       deltaUsed,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
-  private renyiComposition(operations: Array<{ epsilon: number; delta: number }>): { epsilon: number; delta: number } {
+  private renyiComposition(operations: Array<{ epsilon: number; delta: number }>): {
+    epsilon: number;
+    delta: number;
+  } {
     // Simplified Renyi DP composition
     const k = operations.length;
     const epsilon = operations[0].epsilon;
@@ -276,7 +284,7 @@ export class PrivacyBudgetManager {
     const dp = new DifferentialPrivacy({
       epsilon,
       delta,
-      mechanism: 'laplace'
+      mechanism: "laplace",
     });
 
     this.allocations.set(operationId, dp);
@@ -288,7 +296,7 @@ export class PrivacyBudgetManager {
    */
   getTotalSpent(): number {
     let total = 0;
-    this.allocations.forEach(dp => {
+    this.allocations.forEach((dp) => {
       const budget = dp.getBudgetStatus();
       total += budget.spent;
     });

@@ -2,8 +2,8 @@
  * Contract Deployer - Deploy and manage smart contract instances
  */
 
-import { randomBytes } from 'crypto';
-import type { ContractConfig, TransactionReceipt } from './types.js';
+import { randomBytes } from "crypto";
+import type { ContractConfig, TransactionReceipt } from "./types.js";
 
 interface DeploymentResult {
   address: string;
@@ -22,32 +22,26 @@ export class ContractDeployer {
   }
 
   async deployDataPoolContract(initialOwner: string): Promise<DeploymentResult> {
-    return this.deploy('DataPool', [initialOwner]);
+    return this.deploy("DataPool", [initialOwner]);
   }
 
-  async deployAccessControlContract(
-    dataPoolAddress: string,
-  ): Promise<DeploymentResult> {
-    return this.deploy('AccessControl', [dataPoolAddress]);
+  async deployAccessControlContract(dataPoolAddress: string): Promise<DeploymentResult> {
+    return this.deploy("AccessControl", [dataPoolAddress]);
   }
 
   async deployMarketplaceContract(
     dataPoolAddress: string,
     accessControlAddress: string,
-    feePercent: number,
+    feePercent: number
   ): Promise<DeploymentResult> {
-    return this.deploy('Marketplace', [
-      dataPoolAddress,
-      accessControlAddress,
-      feePercent,
-    ]);
+    return this.deploy("Marketplace", [dataPoolAddress, accessControlAddress, feePercent]);
   }
 
   async deployRewardDistributionContract(
     dataPoolAddress: string,
-    tokenAddress: string,
+    tokenAddress: string
   ): Promise<DeploymentResult> {
-    return this.deploy('RewardDistribution', [dataPoolAddress, tokenAddress]);
+    return this.deploy("RewardDistribution", [dataPoolAddress, tokenAddress]);
   }
 
   async deployFullEcosystem(config: {
@@ -65,11 +59,11 @@ export class ContractDeployer {
     const marketplace = await this.deployMarketplaceContract(
       dataPool.address,
       accessControl.address,
-      config.feePercent,
+      config.feePercent
     );
     const rewardDistribution = await this.deployRewardDistributionContract(
       dataPool.address,
-      config.tokenAddress,
+      config.tokenAddress
     );
 
     return {
@@ -90,23 +84,23 @@ export class ContractDeployer {
 
   private async deploy(
     contractName: string,
-    constructorArgs: unknown[],
+    constructorArgs: unknown[]
   ): Promise<DeploymentResult> {
     // Simulate deployment
-    const address = `0x${  randomBytes(20).toString('hex')}`;
-    const txHash = `0x${  randomBytes(32).toString('hex')}`;
+    const address = `0x${randomBytes(20).toString("hex")}`;
+    const txHash = `0x${randomBytes(32).toString("hex")}`;
 
     const result: DeploymentResult = {
       address,
       txReceipt: {
         txHash,
         blockNumber: Math.floor(Date.now() / 1000),
-        blockHash: `0x${  randomBytes(32).toString('hex')}`,
+        blockHash: `0x${randomBytes(32).toString("hex")}`,
         gasUsed: 500000 + Math.floor(Math.random() * 500000),
-        status: 'success',
+        status: "success",
         logs: [
           {
-            name: 'ContractDeployed',
+            name: "ContractDeployed",
             args: { contractName, address, constructorArgs },
             address,
             blockNumber: Math.floor(Date.now() / 1000),

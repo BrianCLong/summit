@@ -5,6 +5,7 @@ A synchronized three-pane interface for comprehensive data analysis, combining g
 ## Overview
 
 The Tri-Pane Analysis Shell provides an integrated view of:
+
 - **Graph Pane**: Entity relationship visualization with force-directed, radial, or hierarchical layouts
 - **Timeline Pane**: Temporal event tracking with time-based filtering
 - **Map Pane**: Geographic event visualization with location-based insights
@@ -40,7 +41,7 @@ function MyAnalysisPage() {
       relationships={relationships}
       timelineEvents={timelineEvents}
       geospatialEvents={geospatialEvents}
-      onEntitySelect={(entity) => console.log('Selected:', entity)}
+      onEntitySelect={entity => console.log('Selected:', entity)}
       onExport={() => console.log('Exporting...')}
     />
   )
@@ -190,7 +191,7 @@ import { MockTriPaneDataProvider } from '@/features/triPane'
 const provider = new MockTriPaneDataProvider()
 
 // Subscribe to updates
-const unsubscribe = provider.subscribeToUpdates((update) => {
+const unsubscribe = provider.subscribeToUpdates(update => {
   console.log('New data:', update)
   // Update your component state
 })
@@ -203,13 +204,13 @@ useEffect(() => {
 
 ## Keyboard Shortcuts
 
-| Key | Action |
-|-----|--------|
-| `G` | Focus graph pane |
-| `T` | Focus timeline pane |
-| `M` | Focus map pane |
-| `R` | Reset all filters |
-| `E` | Export data |
+| Key | Action                    |
+| --- | ------------------------- |
+| `G` | Focus graph pane          |
+| `T` | Focus timeline pane       |
+| `M` | Focus map pane            |
+| `R` | Reset all filters         |
+| `E` | Export data               |
 | `P` | Toggle provenance overlay |
 
 ## Accessibility
@@ -272,6 +273,7 @@ npm run storybook
 ```
 
 Navigate to **Features → TriPaneShell** to see:
+
 - Default configuration
 - With provenance overlay
 - With time filters
@@ -283,21 +285,21 @@ Navigate to **Features → TriPaneShell** to see:
 
 ### TriPaneShell Props
 
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `entities` | `Entity[]` | Yes | Array of entities to display |
-| `relationships` | `Relationship[]` | Yes | Relationships between entities |
-| `timelineEvents` | `TimelineEvent[]` | Yes | Timeline events |
-| `geospatialEvents` | `GeospatialEvent[]` | Yes | Geographic events |
-| `initialSyncState` | `Partial<TriPaneSyncState>` | No | Initial pane state |
-| `onEntitySelect` | `(entity: Entity) => void` | No | Entity selection callback |
-| `onEventSelect` | `(event: TimelineEvent) => void` | No | Event selection callback |
-| `onLocationSelect` | `(id: string) => void` | No | Location selection callback |
-| `onTimeWindowChange` | `(window: TimeWindow) => void` | No | Time filter callback |
-| `onSyncStateChange` | `(state: TriPaneSyncState) => void` | No | State change callback |
-| `showProvenanceOverlay` | `boolean` | No | Show data lineage |
-| `onExport` | `() => void` | No | Export button callback |
-| `className` | `string` | No | Additional CSS classes |
+| Prop                    | Type                                | Required | Description                    |
+| ----------------------- | ----------------------------------- | -------- | ------------------------------ |
+| `entities`              | `Entity[]`                          | Yes      | Array of entities to display   |
+| `relationships`         | `Relationship[]`                    | Yes      | Relationships between entities |
+| `timelineEvents`        | `TimelineEvent[]`                   | Yes      | Timeline events                |
+| `geospatialEvents`      | `GeospatialEvent[]`                 | Yes      | Geographic events              |
+| `initialSyncState`      | `Partial<TriPaneSyncState>`         | No       | Initial pane state             |
+| `onEntitySelect`        | `(entity: Entity) => void`          | No       | Entity selection callback      |
+| `onEventSelect`         | `(event: TimelineEvent) => void`    | No       | Event selection callback       |
+| `onLocationSelect`      | `(id: string) => void`              | No       | Location selection callback    |
+| `onTimeWindowChange`    | `(window: TimeWindow) => void`      | No       | Time filter callback           |
+| `onSyncStateChange`     | `(state: TriPaneSyncState) => void` | No       | State change callback          |
+| `showProvenanceOverlay` | `boolean`                           | No       | Show data lineage              |
+| `onExport`              | `() => void`                        | No       | Export button callback         |
+| `className`             | `string`                            | No       | Additional CSS classes         |
 
 ### Type Exports
 
@@ -318,12 +320,14 @@ import type {
 ### Large Datasets
 
 The shell is optimized for datasets up to:
+
 - 100 entities
 - 200 relationships
 - 500 timeline events
 - 100 geographic events
 
 For larger datasets, consider:
+
 1. Server-side filtering
 2. Pagination
 3. Virtual scrolling for timeline

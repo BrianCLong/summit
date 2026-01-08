@@ -20,7 +20,7 @@ import type {
   UUID,
   Timestamp,
   SubtaskResult,
-} from './types.js';
+} from "./types.js";
 
 // ============================================================================
 // AGENT CONTEXT & DEPENDENCIES
@@ -45,7 +45,7 @@ export interface AgentServices {
 }
 
 export interface ProvenanceClient {
-  record(event: Omit<ProvenanceRecord, 'id' | 'timestamp' | 'payloadHash'>): Promise<UUID>;
+  record(event: Omit<ProvenanceRecord, "id" | "timestamp" | "payloadHash">): Promise<UUID>;
   query(taskId: UUID): Promise<ProvenanceRecord[]>;
 }
 
@@ -78,7 +78,7 @@ export interface ModelResponse {
 }
 
 export interface ChatMessage {
-  role: 'system' | 'user' | 'assistant';
+  role: "system" | "user" | "assistant";
   content: string;
 }
 
@@ -146,7 +146,7 @@ export interface Logger {
  */
 export abstract class BaseAgent {
   protected id: UUID;
-  protected status: AgentStatus = 'active';
+  protected status: AgentStatus = "active";
   protected registeredAt?: Timestamp;
 
   constructor(id?: UUID) {
@@ -161,7 +161,10 @@ export abstract class BaseAgent {
    * Returns the static descriptor for this agent.
    * Called during registration and for capability discovery.
    */
-  abstract getDescriptor(): Omit<AgentDescriptor, 'id' | 'status' | 'registeredAt' | 'lastHeartbeat'>;
+  abstract getDescriptor(): Omit<
+    AgentDescriptor,
+    "id" | "status" | "registeredAt" | "lastHeartbeat"
+  >;
 
   /**
    * Main entry point for task execution.
@@ -206,11 +209,7 @@ export abstract class BaseAgent {
    *
    * @returns true if error was handled and execution should continue
    */
-  async onError(
-    error: TaskError,
-    input: TaskInput,
-    services: AgentServices
-  ): Promise<boolean> {
+  async onError(error: TaskError, input: TaskInput, services: AgentServices): Promise<boolean> {
     services.logger.error(`Agent error: ${error.message}`, {
       agentId: this.id,
       taskId: input.task.id,
@@ -226,7 +225,7 @@ export abstract class BaseAgent {
    */
   async onRetire(services: AgentServices): Promise<void> {
     services.logger.info(`Agent retiring: ${this.getDescriptor().name}`, { agentId: this.id });
-    this.status = 'retired';
+    this.status = "retired";
   }
 
   // ---------------------------------------------------------------------------
@@ -272,7 +271,7 @@ export abstract class BaseAgent {
    * Health check - override for custom health logic.
    */
   async healthCheck(): Promise<{ healthy: boolean; details?: Record<string, unknown> }> {
-    return { healthy: this.status === 'active' || this.status === 'busy' };
+    return { healthy: this.status === "active" || this.status === "busy" };
   }
 
   // ---------------------------------------------------------------------------
@@ -282,10 +281,14 @@ export abstract class BaseAgent {
   /**
    * Helper to create a successful task output.
    */
-  protected success<T>(taskId: UUID, result: T, metadata?: Partial<TaskOutput['metadata']>): TaskOutput<T> {
+  protected success<T>(
+    taskId: UUID,
+    result: T,
+    metadata?: Partial<TaskOutput["metadata"]>
+  ): TaskOutput<T> {
     return {
       taskId,
-      status: 'completed',
+      status: "completed",
       result,
       metadata: {
         tokensUsed: 0,
@@ -302,10 +305,14 @@ export abstract class BaseAgent {
   /**
    * Helper to create a failed task output.
    */
-  protected failure(taskId: UUID, error: TaskError, metadata?: Partial<TaskOutput['metadata']>): TaskOutput {
+  protected failure(
+    taskId: UUID,
+    error: TaskError,
+    metadata?: Partial<TaskOutput["metadata"]>
+  ): TaskOutput {
     return {
       taskId,
-      status: 'failed',
+      status: "failed",
       error,
       metadata: {
         tokensUsed: 0,
@@ -325,7 +332,7 @@ export abstract class BaseAgent {
   protected needsReview<T>(taskId: UUID, result: T, reason: string): TaskOutput<T> {
     return {
       taskId,
-      status: 'needs_review',
+      status: "needs_review",
       result,
       metadata: {
         tokensUsed: 0,
@@ -344,9 +351,9 @@ export abstract class BaseAgent {
   protected async recordProvenance(
     services: AgentServices,
     taskId: UUID,
-    type: ProvenanceRecord['type'],
-    payload: ProvenanceRecord['payload'],
-    traceContext: ProvenanceRecord['traceContext']
+    type: ProvenanceRecord["type"],
+    payload: ProvenanceRecord["payload"],
+    traceContext: ProvenanceRecord["traceContext"]
   ): Promise<UUID> {
     return services.provenance.record({
       type,

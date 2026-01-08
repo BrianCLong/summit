@@ -1,7 +1,7 @@
 meta:
   id: plan.model-reproducibility@v1
-  owner: 'ml-engineering'
-  purpose: 'Ensure ML experiments and model training are reproducible'
+  owner: "ml-engineering"
+  purpose: "Ensure ML experiments and model training are reproducible"
   tags:
     - ml
     - reproducibility
@@ -9,13 +9,13 @@ meta:
     - experiments
     - registry
   guardrails:
-    - 'All experiments must be reproducible'
-    - 'Model versions must be traceable to code'
-    - 'Training data must be versioned'
-    - 'Environment must be captured'
+    - "All experiments must be reproducible"
+    - "Model versions must be traceable to code"
+    - "Training data must be versioned"
+    - "Environment must be captured"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -267,15 +267,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'ml-reproducibility'
+  - name: "ml-reproducibility"
     inputs:
-      ml_frameworks: 'PyTorch, scikit-learn, transformers'
-      current_workflow: 'Ad-hoc notebooks, manual tracking'
-      reproducibility_gaps: 'No versioned data, inconsistent environments'
-      storage_constraints: '100GB for models, 1TB for data'
-      team_size: '3 ML engineers'
+      ml_frameworks: "PyTorch, scikit-learn, transformers"
+      current_workflow: "Ad-hoc notebooks, manual tracking"
+      reproducibility_gaps: "No versioned data, inconsistent environments"
+      storage_constraints: "100GB for models, 1TB for data"
+      team_size: "3 ML engineers"
     expected_contains:
-      - 'Environment Capture'
-      - 'Versioned Artifacts'
-      - 'Model Registry'
-      - 'Reproducibility Guide'
+      - "Environment Capture"
+      - "Versioned Artifacts"
+      - "Model Registry"
+      - "Reproducibility Guide"

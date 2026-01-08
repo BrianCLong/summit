@@ -4,19 +4,19 @@
  * Creates comprehensive evidence bundle for GREEN TRAIN Week-4 release
  */
 
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
+const fs = require("fs");
+const path = require("path");
+const crypto = require("crypto");
 
 class ProvenanceBundleGenerator {
   constructor() {
     this.bundle = {
       metadata: {
         timestamp: new Date().toISOString(),
-        version: '1.0.0',
-        release_tag: 'v0.4.0-week4-observability-action',
-        environment: 'GREEN-TRAIN-Week4',
-        generator: 'provenance-bundle-generator',
+        version: "1.0.0",
+        release_tag: "v0.4.0-week4-observability-action",
+        environment: "GREEN-TRAIN-Week4",
+        generator: "provenance-bundle-generator",
       },
       build: {},
       tests: {},
@@ -34,7 +34,7 @@ class ProvenanceBundleGenerator {
    * Main bundle generation execution
    */
   async generate() {
-    console.log('📦 Generating Provenance Bundle...');
+    console.log("📦 Generating Provenance Bundle...");
 
     try {
       await this.collectBuildArtifacts();
@@ -46,10 +46,10 @@ class ProvenanceBundleGenerator {
       await this.signBundle();
       await this.exportBundle();
 
-      console.log('✅ Provenance bundle generated successfully');
+      console.log("✅ Provenance bundle generated successfully");
       return true;
     } catch (error) {
-      console.error('❌ Bundle generation failed:', error.message);
+      console.error("❌ Bundle generation failed:", error.message);
       return false;
     }
   }
@@ -58,12 +58,12 @@ class ProvenanceBundleGenerator {
    * Collect build artifacts and metadata
    */
   async collectBuildArtifacts() {
-    console.log('🔨 Collecting build artifacts...');
+    console.log("🔨 Collecting build artifacts...");
 
     // Simulate build metadata collection
     this.bundle.build = {
       commit_sha: this.generateCommitSHA(),
-      branch: 'main',
+      branch: "main",
       build_timestamp: new Date().toISOString(),
       sbom: await this.generateSBOM(),
       container_digests: await this.generateContainerDigests(),
@@ -76,40 +76,37 @@ class ProvenanceBundleGenerator {
    * Generate SBOM (Software Bill of Materials)
    */
   async generateSBOM() {
-    const packageJsonPath = path.join(process.cwd(), 'package.json');
+    const packageJsonPath = path.join(process.cwd(), "package.json");
 
     if (!fs.existsSync(packageJsonPath)) {
-      return { format: 'CycloneDX', components: [] };
+      return { format: "CycloneDX", components: [] };
     }
 
-    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
 
     return {
-      format: 'CycloneDX',
-      spec_version: '1.4',
+      format: "CycloneDX",
+      spec_version: "1.4",
       version: 1,
       metadata: {
         timestamp: new Date().toISOString(),
-        tools: ['npm', 'pnpm'],
+        tools: ["npm", "pnpm"],
       },
       components: [
         {
-          type: 'application',
-          name: packageJson.name || 'intelgraph-platform',
-          version: packageJson.version || '0.4.0',
+          type: "application",
+          name: packageJson.name || "intelgraph-platform",
+          version: packageJson.version || "0.4.0",
           purl: `pkg:npm/${packageJson.name}@${packageJson.version}`,
           hashes: [
             {
-              alg: 'SHA-256',
+              alg: "SHA-256",
               content: this.generateHash(JSON.stringify(packageJson)),
             },
           ],
         },
         ...this.generateDependencyComponents(packageJson.dependencies || {}),
-        ...this.generateDependencyComponents(
-          packageJson.devDependencies || {},
-          'dev',
-        ),
+        ...this.generateDependencyComponents(packageJson.devDependencies || {}, "dev"),
       ],
     };
   }
@@ -117,18 +114,18 @@ class ProvenanceBundleGenerator {
   /**
    * Generate dependency components for SBOM
    */
-  generateDependencyComponents(dependencies, scope = 'required') {
+  generateDependencyComponents(dependencies, scope = "required") {
     return Object.entries(dependencies)
       .slice(0, 10)
       .map(([name, version]) => ({
-        type: 'library',
+        type: "library",
         name: name,
-        version: version.replace(/[\^~]/, ''),
+        version: version.replace(/[\^~]/, ""),
         scope: scope,
-        purl: `pkg:npm/${name}@${version.replace(/[\^~]/, '')}`,
+        purl: `pkg:npm/${name}@${version.replace(/[\^~]/, "")}`,
         hashes: [
           {
-            alg: 'SHA-256',
+            alg: "SHA-256",
             content: this.generateHash(`${name}@${version}`),
           },
         ],
@@ -140,18 +137,18 @@ class ProvenanceBundleGenerator {
    */
   async generateContainerDigests() {
     return {
-      'intelgraph-server': {
-        registry: 'ghcr.io/intelgraph/server',
-        tag: 'v0.4.0-week4',
-        digest: 'sha256:' + this.generateHash('intelgraph-server:v0.4.0-week4'),
-        size: '245MB',
+      "intelgraph-server": {
+        registry: "ghcr.io/intelgraph/server",
+        tag: "v0.4.0-week4",
+        digest: "sha256:" + this.generateHash("intelgraph-server:v0.4.0-week4"),
+        size: "245MB",
         created: new Date().toISOString(),
       },
-      'insight-ai': {
-        registry: 'ghcr.io/intelgraph/insight-ai',
-        tag: 'v0.1.0-mvp0',
-        digest: 'sha256:' + this.generateHash('insight-ai:v0.1.0-mvp0'),
-        size: '1.2GB',
+      "insight-ai": {
+        registry: "ghcr.io/intelgraph/insight-ai",
+        tag: "v0.1.0-mvp0",
+        digest: "sha256:" + this.generateHash("insight-ai:v0.1.0-mvp0"),
+        size: "1.2GB",
         created: new Date().toISOString(),
       },
     };
@@ -161,28 +158,25 @@ class ProvenanceBundleGenerator {
    * Collect Helm values (redacted)
    */
   async collectHelmValues() {
-    const helmPath = path.join(
-      process.cwd(),
-      'deploy/helm/intelgraph/values.yaml',
-    );
+    const helmPath = path.join(process.cwd(), "deploy/helm/intelgraph/values.yaml");
 
     if (!fs.existsSync(helmPath)) {
-      return { redacted: true, reason: 'values.yaml not found' };
+      return { redacted: true, reason: "values.yaml not found" };
     }
 
     // Simulate redacted Helm values
     return {
       redacted: true,
-      hash: this.generateHash('helm-values'),
+      hash: this.generateHash("helm-values"),
       structure: {
-        image: { tag: 'REDACTED' },
+        image: { tag: "REDACTED" },
         replicas: 3,
         resources: {
-          requests: { cpu: 'REDACTED', memory: 'REDACTED' },
-          limits: { cpu: 'REDACTED', memory: 'REDACTED' },
+          requests: { cpu: "REDACTED", memory: "REDACTED" },
+          limits: { cpu: "REDACTED", memory: "REDACTED" },
         },
-        secrets: 'REDACTED',
-        config: 'REDACTED',
+        secrets: "REDACTED",
+        config: "REDACTED",
       },
     };
   }
@@ -193,19 +187,19 @@ class ProvenanceBundleGenerator {
   async collectSourceFiles() {
     const sourceFiles = [];
     const importantFiles = [
-      'package.json',
-      'monitoring/prometheus/error-budget-rules.yml',
-      'scripts/auto-rollback.sh',
-      'services/insight-ai/app.py',
-      'performance-budgets.json',
-      'chaos/experiments/pod-killer.yaml',
-      'scripts/finops-guardrails.cjs',
+      "package.json",
+      "monitoring/prometheus/error-budget-rules.yml",
+      "scripts/auto-rollback.sh",
+      "services/insight-ai/app.py",
+      "performance-budgets.json",
+      "chaos/experiments/pod-killer.yaml",
+      "scripts/finops-guardrails.cjs",
     ];
 
     for (const file of importantFiles) {
       const filePath = path.join(process.cwd(), file);
       if (fs.existsSync(filePath)) {
-        const content = fs.readFileSync(filePath, 'utf8');
+        const content = fs.readFileSync(filePath, "utf8");
         sourceFiles.push({
           path: file,
           hash: this.generateHash(content),
@@ -222,26 +216,26 @@ class ProvenanceBundleGenerator {
    * Collect test reports and coverage
    */
   async collectTestReports() {
-    console.log('🧪 Collecting test reports...');
+    console.log("🧪 Collecting test reports...");
 
-    const evidenceDir = path.join(process.cwd(), 'evidence');
+    const evidenceDir = path.join(process.cwd(), "evidence");
     const testReports = {};
 
     // Collect validation reports
     const validationFiles = [
-      'error-budget-validation.json',
-      'auto-rollback-validation.json',
-      'ai-insights-validation.json',
-      'performance-budgets-validation.json',
-      'chaos-experiments-validation.json',
+      "error-budget-validation.json",
+      "auto-rollback-validation.json",
+      "ai-insights-validation.json",
+      "performance-budgets-validation.json",
+      "chaos-experiments-validation.json",
     ];
 
     for (const reportFile of validationFiles) {
       const reportPath = path.join(evidenceDir, reportFile);
       if (fs.existsSync(reportPath)) {
-        const reportContent = fs.readFileSync(reportPath, 'utf8');
+        const reportContent = fs.readFileSync(reportPath, "utf8");
         const report = JSON.parse(reportContent);
-        testReports[reportFile.replace('-validation.json', '')] = {
+        testReports[reportFile.replace("-validation.json", "")] = {
           passed: report.passed,
           failed: report.failed,
           total: report.passed + report.failed,
@@ -278,12 +272,7 @@ class ProvenanceBundleGenerator {
       passed: 17,
       failed: 1,
       success_rate: 94.4,
-      scenarios: [
-        'user_login',
-        'entity_creation',
-        'graph_traversal',
-        'analytics_dashboard',
-      ],
+      scenarios: ["user_login", "entity_creation", "graph_traversal", "analytics_dashboard"],
     };
 
     this.bundle.tests = testReports;
@@ -293,7 +282,7 @@ class ProvenanceBundleGenerator {
    * Collect observability artifacts
    */
   async collectObservabilityArtifacts() {
-    console.log('📊 Collecting observability artifacts...');
+    console.log("📊 Collecting observability artifacts...");
 
     this.bundle.observability = {
       dashboards: await this.collectDashboards(),
@@ -307,20 +296,18 @@ class ProvenanceBundleGenerator {
    * Collect Grafana dashboards
    */
   async collectDashboards() {
-    const dashboardDir = path.join(process.cwd(), 'monitoring/grafana');
+    const dashboardDir = path.join(process.cwd(), "monitoring/grafana");
     const dashboards = {};
 
     if (fs.existsSync(dashboardDir)) {
-      const dashboardFiles = fs
-        .readdirSync(dashboardDir)
-        .filter((f) => f.endsWith('.json'));
+      const dashboardFiles = fs.readdirSync(dashboardDir).filter((f) => f.endsWith(".json"));
 
       for (const dashFile of dashboardFiles) {
         const dashPath = path.join(dashboardDir, dashFile);
-        const dashContent = fs.readFileSync(dashPath, 'utf8');
+        const dashContent = fs.readFileSync(dashPath, "utf8");
         const dashboard = JSON.parse(dashContent);
 
-        dashboards[dashFile.replace('.json', '')] = {
+        dashboards[dashFile.replace(".json", "")] = {
           title: dashboard.dashboard?.title || dashFile,
           panels: dashboard.dashboard?.panels?.length || 0,
           hash: this.generateHash(dashContent),
@@ -336,17 +323,17 @@ class ProvenanceBundleGenerator {
    * Collect Prometheus alert rules
    */
   async collectAlertRules() {
-    const rulesDir = path.join(process.cwd(), 'monitoring/prometheus');
+    const rulesDir = path.join(process.cwd(), "monitoring/prometheus");
     const alertRules = {};
 
     if (fs.existsSync(rulesDir)) {
       const ruleFiles = fs
         .readdirSync(rulesDir)
-        .filter((f) => f.endsWith('.yml') || f.endsWith('.yaml'));
+        .filter((f) => f.endsWith(".yml") || f.endsWith(".yaml"));
 
       for (const ruleFile of ruleFiles) {
         const rulePath = path.join(rulesDir, ruleFile);
-        const ruleContent = fs.readFileSync(rulePath, 'utf8');
+        const ruleContent = fs.readFileSync(rulePath, "utf8");
 
         // Count alert rules (simplified)
         const alertCount = (ruleContent.match(/- alert:/g) || []).length;
@@ -370,22 +357,22 @@ class ProvenanceBundleGenerator {
   async generateTraceExemplars() {
     return {
       service_to_graphql: {
-        trace_id: '1a2b3c4d5e6f7890',
-        span_id: 'abcd1234',
+        trace_id: "1a2b3c4d5e6f7890",
+        span_id: "abcd1234",
         duration_ms: 125,
-        status: 'success',
+        status: "success",
       },
       graphql_to_database: {
-        trace_id: '2b3c4d5e6f7890ab',
-        span_id: 'bcde2345',
+        trace_id: "2b3c4d5e6f7890ab",
+        span_id: "bcde2345",
         duration_ms: 45,
-        status: 'success',
+        status: "success",
       },
       ai_insights_request: {
-        trace_id: '3c4d5e6f7890abcd',
-        span_id: 'cdef3456',
+        trace_id: "3c4d5e6f7890abcd",
+        span_id: "cdef3456",
         duration_ms: 89,
-        status: 'success',
+        status: "success",
       },
     };
   }
@@ -418,7 +405,7 @@ class ProvenanceBundleGenerator {
    * Collect policy evaluations
    */
   async collectPolicyEvaluations() {
-    console.log('🛡️ Collecting policy evaluations...');
+    console.log("🛡️ Collecting policy evaluations...");
 
     this.bundle.policy = {
       opa_evaluations: await this.generateOPAEvaluations(),
@@ -436,26 +423,26 @@ class ProvenanceBundleGenerator {
       timestamp: new Date().toISOString(),
       policies_evaluated: [
         {
-          name: 'container-security-policy',
-          result: 'allow',
+          name: "container-security-policy",
+          result: "allow",
           violations: 0,
           warnings: 2,
         },
         {
-          name: 'resource-limits-policy',
-          result: 'allow',
+          name: "resource-limits-policy",
+          result: "allow",
           violations: 0,
           warnings: 0,
         },
         {
-          name: 'network-policy',
-          result: 'allow',
+          name: "network-policy",
+          result: "allow",
           violations: 0,
           warnings: 1,
         },
         {
-          name: 'data-retention-policy',
-          result: 'allow',
+          name: "data-retention-policy",
+          result: "allow",
           violations: 0,
           warnings: 0,
         },
@@ -476,28 +463,28 @@ class ProvenanceBundleGenerator {
   async generateRetentionMapping() {
     return {
       pii_data: {
-        retention_period: '30d',
-        classification: 'sensitive',
-        encryption: 'field-level',
-        purpose_tags: ['analytics', 'user-experience'],
+        retention_period: "30d",
+        classification: "sensitive",
+        encryption: "field-level",
+        purpose_tags: ["analytics", "user-experience"],
       },
       system_logs: {
-        retention_period: '90d',
-        classification: 'operational',
-        encryption: 'at-rest',
-        purpose_tags: ['debugging', 'audit'],
+        retention_period: "90d",
+        classification: "operational",
+        encryption: "at-rest",
+        purpose_tags: ["debugging", "audit"],
       },
       metrics_data: {
-        retention_period: '1y',
-        classification: 'operational',
-        encryption: 'at-rest',
-        purpose_tags: ['monitoring', 'analytics'],
+        retention_period: "1y",
+        classification: "operational",
+        encryption: "at-rest",
+        purpose_tags: ["monitoring", "analytics"],
       },
       audit_logs: {
-        retention_period: '7y',
-        classification: 'compliance',
-        encryption: 'at-rest',
-        purpose_tags: ['audit', 'legal'],
+        retention_period: "7y",
+        classification: "compliance",
+        encryption: "at-rest",
+        purpose_tags: ["audit", "legal"],
       },
     };
   }
@@ -508,7 +495,7 @@ class ProvenanceBundleGenerator {
   async generateSecurityScan() {
     return {
       timestamp: new Date().toISOString(),
-      scanners: ['trivy', 'snyk', 'semgrep'],
+      scanners: ["trivy", "snyk", "semgrep"],
       vulnerabilities: {
         critical: 0,
         high: 2,
@@ -519,12 +506,12 @@ class ProvenanceBundleGenerator {
       secrets_scan: {
         secrets_found: 0,
         false_positives: 3,
-        status: 'clean',
+        status: "clean",
       },
       license_compliance: {
         non_compliant_licenses: 0,
         flagged_licenses: 1,
-        status: 'compliant',
+        status: "compliant",
       },
     };
   }
@@ -534,21 +521,21 @@ class ProvenanceBundleGenerator {
    */
   async generateComplianceReport() {
     return {
-      framework: 'SOC2-Type2',
+      framework: "SOC2-Type2",
       controls_evaluated: 45,
       controls_passed: 43,
       controls_failed: 2,
       compliance_score: 95.6,
       findings: [
         {
-          control: 'CC6.1',
-          severity: 'medium',
-          description: 'Enhanced logging required for admin actions',
+          control: "CC6.1",
+          severity: "medium",
+          description: "Enhanced logging required for admin actions",
         },
         {
-          control: 'CC7.2',
-          severity: 'low',
-          description: 'Documentation update needed for incident response',
+          control: "CC7.2",
+          severity: "low",
+          description: "Documentation update needed for incident response",
         },
       ],
     };
@@ -558,23 +545,21 @@ class ProvenanceBundleGenerator {
    * Collect FinOps artifacts
    */
   async collectFinOpsArtifacts() {
-    console.log('💰 Collecting FinOps artifacts...');
+    console.log("💰 Collecting FinOps artifacts...");
 
     // Check if FinOps report exists
-    const finopsReportPath = path.join(process.cwd(), 'finops-report.json');
+    const finopsReportPath = path.join(process.cwd(), "finops-report.json");
 
     if (fs.existsSync(finopsReportPath)) {
-      const finopsReport = JSON.parse(
-        fs.readFileSync(finopsReportPath, 'utf8'),
-      );
+      const finopsReport = JSON.parse(fs.readFileSync(finopsReportPath, "utf8"));
       this.bundle.finops = finopsReport;
     } else {
       // Generate simulated FinOps data
       this.bundle.finops = {
         budget_analysis: {
-          development: { utilization_percent: 64.0, status: 'healthy' },
-          staging: { utilization_percent: 68.0, status: 'healthy' },
-          production: { utilization_percent: 64.0, status: 'healthy' },
+          development: { utilization_percent: 64.0, status: "healthy" },
+          staging: { utilization_percent: 68.0, status: "healthy" },
+          production: { utilization_percent: 64.0, status: "healthy" },
         },
         cost_optimization: {
           potential_savings: 4250,
@@ -594,10 +579,10 @@ class ProvenanceBundleGenerator {
    * Generate file manifest with hashes
    */
   async generateManifest() {
-    console.log('📋 Generating file manifest...');
+    console.log("📋 Generating file manifest...");
 
     const files = [];
-    const evidenceDir = path.join(process.cwd(), 'evidence');
+    const evidenceDir = path.join(process.cwd(), "evidence");
 
     if (fs.existsSync(evidenceDir)) {
       const evidenceFiles = fs.readdirSync(evidenceDir);
@@ -607,7 +592,7 @@ class ProvenanceBundleGenerator {
         const stat = fs.statSync(filePath);
 
         if (stat.isFile()) {
-          const content = fs.readFileSync(filePath, 'utf8');
+          const content = fs.readFileSync(filePath, "utf8");
 
           files.push({
             path: `evidence/${file}`,
@@ -621,16 +606,16 @@ class ProvenanceBundleGenerator {
 
     // Add key configuration files
     const configFiles = [
-      'performance-budgets.json',
-      'monitoring/prometheus/error-budget-rules.yml',
-      'scripts/auto-rollback.sh',
-      'scripts/finops-guardrails.cjs',
+      "performance-budgets.json",
+      "monitoring/prometheus/error-budget-rules.yml",
+      "scripts/auto-rollback.sh",
+      "scripts/finops-guardrails.cjs",
     ];
 
     for (const configFile of configFiles) {
       const configPath = path.join(process.cwd(), configFile);
       if (fs.existsSync(configPath)) {
-        const content = fs.readFileSync(configPath, 'utf8');
+        const content = fs.readFileSync(configPath, "utf8");
 
         files.push({
           path: configFile,
@@ -648,18 +633,18 @@ class ProvenanceBundleGenerator {
    * Sign the bundle (simulated)
    */
   async signBundle() {
-    console.log('✍️ Signing bundle...');
+    console.log("✍️ Signing bundle...");
 
     const bundleContent = JSON.stringify(this.bundle, null, 2);
     const bundleHash = this.generateHash(bundleContent);
 
     // Simulate digital signature
     const signature = {
-      algorithm: 'RSA-SHA256',
-      keyid: 'green-train-release-key',
+      algorithm: "RSA-SHA256",
+      keyid: "green-train-release-key",
       signature: this.generateHash(`${bundleHash}-signature`),
       timestamp: new Date().toISOString(),
-      signer: 'GREEN-TRAIN-Week4-Release',
+      signer: "GREEN-TRAIN-Week4-Release",
     };
 
     this.bundle.manifest.signatures.push(signature);
@@ -669,24 +654,24 @@ class ProvenanceBundleGenerator {
    * Export bundle to files
    */
   async exportBundle() {
-    console.log('📤 Exporting provenance bundle...');
+    console.log("📤 Exporting provenance bundle...");
 
-    const provenanceDir = path.join(process.cwd(), 'provenance');
+    const provenanceDir = path.join(process.cwd(), "provenance");
     if (!fs.existsSync(provenanceDir)) {
       fs.mkdirSync(provenanceDir, { recursive: true });
     }
 
     // Export main bundle
-    const bundlePath = path.join(provenanceDir, 'export-manifest.json');
+    const bundlePath = path.join(provenanceDir, "export-manifest.json");
     fs.writeFileSync(bundlePath, JSON.stringify(this.bundle, null, 2));
 
     // Export signature file
-    const sigPath = path.join(provenanceDir, 'export-manifest.json.sig');
+    const sigPath = path.join(provenanceDir, "export-manifest.json.sig");
     const signature = this.bundle.manifest.signatures[0];
     fs.writeFileSync(sigPath, JSON.stringify(signature, null, 2));
 
     // Export summary
-    const summaryPath = path.join(provenanceDir, 'bundle-summary.md');
+    const summaryPath = path.join(provenanceDir, "bundle-summary.md");
     const summary = this.generateBundleSummary();
     fs.writeFileSync(summaryPath, summary);
 
@@ -701,13 +686,10 @@ class ProvenanceBundleGenerator {
    */
   generateBundleSummary() {
     const testSummary = this.bundle.tests;
-    const totalTests = Object.values(testSummary).reduce(
-      (sum, test) => sum + (test.total || 0),
-      0,
-    );
+    const totalTests = Object.values(testSummary).reduce((sum, test) => sum + (test.total || 0), 0);
     const totalPassed = Object.values(testSummary).reduce(
       (sum, test) => sum + (test.passed || 0),
-      0,
+      0
     );
 
     return `# GREEN TRAIN Week-4 Provenance Bundle
@@ -745,7 +727,7 @@ class ProvenanceBundleGenerator {
 ### FinOps
 - **Potential Savings**: $${this.bundle.finops?.cost_optimization?.potential_savings || 0}/month
 - **Budget Utilization**: Production ${this.bundle.finops?.budget_analysis?.production?.utilization_percent || 0}%
-- **Unit Cost Compliance**: ${this.bundle.finops?.unit_costs?.within_targets ? 'Yes' : 'No'}
+- **Unit Cost Compliance**: ${this.bundle.finops?.unit_costs?.within_targets ? "Yes" : "No"}
 
 ### Manifest
 - **Files Tracked**: ${this.bundle.manifest.files?.length || 0}
@@ -788,26 +770,26 @@ jq '.build.sbom' provenance/export-manifest.json
    * Helper methods
    */
   generateHash(content) {
-    return crypto.createHash('sha256').update(content).digest('hex');
+    return crypto.createHash("sha256").update(content).digest("hex");
   }
 
   generateCommitSHA() {
-    return crypto.randomBytes(20).toString('hex');
+    return crypto.randomBytes(20).toString("hex");
   }
 
   getFileType(filename) {
     const ext = path.extname(filename).toLowerCase();
     const typeMap = {
-      '.json': 'configuration',
-      '.yaml': 'configuration',
-      '.yml': 'configuration',
-      '.sh': 'script',
-      '.js': 'script',
-      '.cjs': 'script',
-      '.py': 'script',
-      '.md': 'documentation',
+      ".json": "configuration",
+      ".yaml": "configuration",
+      ".yml": "configuration",
+      ".sh": "script",
+      ".js": "script",
+      ".cjs": "script",
+      ".py": "script",
+      ".md": "documentation",
     };
-    return typeMap[ext] || 'unknown';
+    return typeMap[ext] || "unknown";
   }
 }
 
@@ -820,7 +802,7 @@ if (require.main === module) {
       process.exit(success ? 0 : 1);
     })
     .catch((error) => {
-      console.error('Fatal error:', error);
+      console.error("Fatal error:", error);
       process.exit(1);
     });
 }

@@ -1,5 +1,5 @@
-import { GraphPersistenceAdapter } from './interface.js';
-import { GraphNode, GraphEdge } from '../types.js';
+import { GraphPersistenceAdapter } from "./interface.js";
+import { GraphNode, GraphEdge } from "../types.js";
 
 export class InMemoryGraphAdapter implements GraphPersistenceAdapter {
   private nodes: Map<string, GraphNode> = new Map();

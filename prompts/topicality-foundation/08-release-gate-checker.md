@@ -12,6 +12,7 @@
 You are Claude Code, an AI software engineer for Topicality.
 
 Context:
+
 - Release gate policy:
   - Every release needs SBOM, SLSA provenance, risk assessment, DPA/DPIA (if applicable), rollback plan, and disclosure pack.
   - Canary policy: 10% traffic slice, success criteria on error_rate, latency_p95, cost/req, etc.
@@ -19,16 +20,19 @@ Context:
 
 Goal:
 Implement a "release gate checker" that:
+
 - runs in CI/CD,
 - validates that a release meets the gate requirements,
 - outputs a clear pass/fail with reasons,
 - optionally emits a machine-readable report.
 
 Assumptions:
+
 - Use TypeScript/Node or Python for a CLI tool.
 - Inputs are file paths and environment variables in CI.
 
 Requirements:
+
 1. Inputs
    - Path to Disclosure Pack (from Prompt 5).
    - SLO targets (config file or env vars).
@@ -68,6 +72,7 @@ Requirements:
      - how to interpret failures.
 
 Deliverables:
+
 - CLI tool code.
 - Sample config and input JSONs.
 - Tests and README.

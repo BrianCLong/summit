@@ -210,10 +210,8 @@ type Entity {
   type: String!
   labels: [String!]!
   createdAt: DateTime!
-  attributes(filter: AttributeFilter): [Attribute!]!
-    @auth(abac: "attribute.read")
-  related(kind: String, maxHops: Int = 2): [Entity!]!
-    @auth(abac: "entity.relate.read")
+  attributes(filter: AttributeFilter): [Attribute!]! @auth(abac: "attribute.read")
+  related(kind: String, maxHops: Int = 2): [Entity!]! @auth(abac: "entity.relate.read")
 }
 
 type Attribute {
@@ -227,8 +225,7 @@ type Attribute {
 
 type Query {
   entity(id: ID!): Entity @auth(abac: "entity.read")
-  searchEntities(q: String!, limit: Int = 25): [Entity!]!
-    @auth(abac: "entity.search")
+  searchEntities(q: String!, limit: Int = 25): [Entity!]! @auth(abac: "entity.search")
 }
 
 type Mutation {
@@ -375,11 +372,11 @@ repo/
 **Gateway bootstrap (TypeScript, snippet)**
 
 ```ts
-import { ApolloServer } from '@apollo/server';
-import { startStandaloneServer } from '@apollo/server/standalone';
-import typeDefs from './schema';
-import resolvers from './resolvers';
-import { opaAuth } from './auth/opa';
+import { ApolloServer } from "@apollo/server";
+import { startStandaloneServer } from "@apollo/server/standalone";
+import typeDefs from "./schema";
+import resolvers from "./resolvers";
+import { opaAuth } from "./auth/opa";
 
 const server = new ApolloServer({ typeDefs, resolvers });
 startStandaloneServer(server, {

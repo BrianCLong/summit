@@ -1,11 +1,11 @@
-import type { Redis } from 'ioredis';
+import type { Redis } from "ioredis";
 
 /**
  * Cache tier enumeration
  */
 export enum CacheTier {
-  L1 = 'l1',
-  L2 = 'l2',
+  L1 = "l1",
+  L2 = "l2",
 }
 
 /**
@@ -166,11 +166,7 @@ export interface ICache {
   deleteByPattern(pattern: string): Promise<number>;
 
   /** Get or set with loader function (cache-aside pattern) */
-  getOrSet<T>(
-    key: string,
-    loader: () => Promise<T>,
-    options?: CacheSetOptions
-  ): Promise<T>;
+  getOrSet<T>(key: string, loader: () => Promise<T>, options?: CacheSetOptions): Promise<T>;
 
   /** Invalidate all entries with a specific tag */
   invalidateByTag(tag: string): Promise<void>;
@@ -192,6 +188,6 @@ export interface ICache {
  * Invalidation message for pub/sub
  */
 export type InvalidationMessage =
-  | { type: 'key'; keys: string[] }
-  | { type: 'tag'; tag: string }
-  | { type: 'pattern'; pattern: string };
+  | { type: "key"; keys: string[] }
+  | { type: "tag"; tag: string }
+  | { type: "pattern"; pattern: string };

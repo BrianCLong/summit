@@ -1,19 +1,17 @@
 // @ts-nocheck
-import fs from 'fs-extra';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { InitOptions } from './types.js';
+import fs from "fs-extra";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { InitOptions } from "./types.js";
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
-const templatesRoot = path.resolve(currentDir, '../templates');
+const templatesRoot = path.resolve(currentDir, "../templates");
 
 export async function initAdapterProject(options: InitOptions): Promise<string> {
   const source = path.join(templatesRoot, options.template);
 
   if (!(await fs.pathExists(source))) {
-    throw new Error(
-      `Template "${options.template}" was not found in ${templatesRoot}.`
-    );
+    throw new Error(`Template "${options.template}" was not found in ${templatesRoot}.`);
   }
 
   const target = path.isAbsolute(options.directory)

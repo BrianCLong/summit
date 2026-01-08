@@ -4,23 +4,23 @@
  * NIST PQC standardized algorithm
  */
 
-import { sha512 } from '@noble/hashes/sha512';
-import { DigitalSignatureScheme, KeyPair, Signature, PQCAlgorithm, SecurityLevel } from '../types';
+import { sha512 } from "@noble/hashes/sha512";
+import { DigitalSignatureScheme, KeyPair, Signature, PQCAlgorithm, SecurityLevel } from "../types";
 
 export class FalconSignature implements DigitalSignatureScheme {
-  private variant: 'falcon512' | 'falcon1024';
+  private variant: "falcon512" | "falcon1024";
   private algorithm: PQCAlgorithm;
   private securityLevel: SecurityLevel;
 
-  constructor(variant: 'falcon512' | 'falcon1024' = 'falcon512') {
+  constructor(variant: "falcon512" | "falcon1024" = "falcon512") {
     this.variant = variant;
 
     switch (variant) {
-      case 'falcon512':
+      case "falcon512":
         this.algorithm = PQCAlgorithm.FALCON_512;
         this.securityLevel = SecurityLevel.LEVEL_1;
         break;
-      case 'falcon1024':
+      case "falcon1024":
         this.algorithm = PQCAlgorithm.FALCON_1024;
         this.securityLevel = SecurityLevel.LEVEL_5;
         break;
@@ -57,12 +57,16 @@ export class FalconSignature implements DigitalSignatureScheme {
       metadata: {
         messageLength: message.length,
         signatureLength: signature.length,
-        compression: 'compact',
+        compression: "compact",
       },
     };
   }
 
-  async verify(message: Uint8Array, signature: Uint8Array, publicKey: Uint8Array): Promise<boolean> {
+  async verify(
+    message: Uint8Array,
+    signature: Uint8Array,
+    publicKey: Uint8Array
+  ): Promise<boolean> {
     this.validatePublicKey(publicKey);
 
     return await this.performVerification(message, signature, publicKey);
@@ -110,7 +114,11 @@ export class FalconSignature implements DigitalSignatureScheme {
     return signature;
   }
 
-  private async performVerification(message: Uint8Array, signature: Uint8Array, publicKey: Uint8Array): Promise<boolean> {
+  private async performVerification(
+    message: Uint8Array,
+    signature: Uint8Array,
+    publicKey: Uint8Array
+  ): Promise<boolean> {
     try {
       // Hash message
       const messageHash = sha512(message);
@@ -124,11 +132,15 @@ export class FalconSignature implements DigitalSignatureScheme {
     }
   }
 
-  private getFalconParameters(): { publicKeyBytes: number; privateKeyBytes: number; signatureBytes: number } {
+  private getFalconParameters(): {
+    publicKeyBytes: number;
+    privateKeyBytes: number;
+    signatureBytes: number;
+  } {
     switch (this.variant) {
-      case 'falcon512':
+      case "falcon512":
         return { publicKeyBytes: 897, privateKeyBytes: 1281, signatureBytes: 666 };
-      case 'falcon1024':
+      case "falcon1024":
         return { publicKeyBytes: 1793, privateKeyBytes: 2305, signatureBytes: 1280 };
     }
   }
@@ -136,27 +148,33 @@ export class FalconSignature implements DigitalSignatureScheme {
   private validatePublicKey(publicKey: Uint8Array): void {
     const params = this.getFalconParameters();
     if (publicKey.length !== params.publicKeyBytes) {
-      throw new Error(`Invalid public key length: expected ${params.publicKeyBytes}, got ${publicKey.length}`);
+      throw new Error(
+        `Invalid public key length: expected ${params.publicKeyBytes}, got ${publicKey.length}`
+      );
     }
   }
 
   private validatePrivateKey(privateKey: Uint8Array): void {
     const params = this.getFalconParameters();
     if (privateKey.length !== params.privateKeyBytes) {
-      throw new Error(`Invalid private key length: expected ${params.privateKeyBytes}, got ${privateKey.length}`);
+      throw new Error(
+        `Invalid private key length: expected ${params.privateKeyBytes}, got ${privateKey.length}`
+      );
     }
   }
 }
 
-export function createFalconSignature(securityLevel: SecurityLevel = SecurityLevel.LEVEL_1): FalconSignature {
+export function createFalconSignature(
+  securityLevel: SecurityLevel = SecurityLevel.LEVEL_1
+): FalconSignature {
   switch (securityLevel) {
     case SecurityLevel.LEVEL_1:
     case SecurityLevel.LEVEL_2:
     case SecurityLevel.LEVEL_3:
-      return new FalconSignature('falcon512');
+      return new FalconSignature("falcon512");
     case SecurityLevel.LEVEL_5:
-      return new FalconSignature('falcon1024');
+      return new FalconSignature("falcon1024");
     default:
-      return new FalconSignature('falcon512');
+      return new FalconSignature("falcon512");
   }
 }

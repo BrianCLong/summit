@@ -30,7 +30,7 @@ export function extractDomain(url: string): string {
  * Sleep for specified milliseconds
  */
 export function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -62,8 +62,8 @@ export async function retryWithBackoff<T>(
  * Hash string using SHA-256
  */
 export async function hashString(input: string): Promise<string> {
-  const crypto = await import('crypto');
-  return crypto.createHash('sha256').update(input).digest('hex');
+  const crypto = await import("crypto");
+  return crypto.createHash("sha256").update(input).digest("hex");
 }
 
 /**
@@ -117,8 +117,8 @@ export function parseUserAgent(ua: string): {
 } {
   // Basic parsing - would use a library like ua-parser-js in production
   return {
-    browser: ua.includes('Chrome') ? 'Chrome' : undefined,
-    os: ua.includes('Windows') ? 'Windows' : undefined,
-    device: ua.includes('Mobile') ? 'Mobile' : 'Desktop'
+    browser: ua.includes("Chrome") ? "Chrome" : undefined,
+    os: ua.includes("Windows") ? "Windows" : undefined,
+    device: ua.includes("Mobile") ? "Mobile" : "Desktop",
   };
 }

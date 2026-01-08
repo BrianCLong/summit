@@ -1,6 +1,6 @@
-import axios, { AxiosInstance } from 'axios';
-import nacl from 'tweetnacl';
-import { createHash, createHmac, randomInt } from 'crypto';
+import axios, { AxiosInstance } from "axios";
+import nacl from "tweetnacl";
+import { createHash, createHmac, randomInt } from "crypto";
 
 const DEFAULT_BLOOM_M = 2048;
 const DEFAULT_BLOOM_K = 3;
@@ -18,13 +18,16 @@ export interface NoisyAggregate {
 }
 
 export interface SessionResult {
-  mode: 'intersection' | 'aggregate';
+  mode: "intersection" | "aggregate";
   [key: string]: unknown;
 }
 
 export class SimpleBloom {
   private bits: Uint8Array;
-  constructor(public readonly m = DEFAULT_BLOOM_M, public readonly k = DEFAULT_BLOOM_K) {
+  constructor(
+    public readonly m = DEFAULT_BLOOM_M,
+    public readonly k = DEFAULT_BLOOM_K
+  ) {
     this.bits = new Uint8Array(Math.ceil(m / 8));
   }
 
@@ -42,16 +45,16 @@ export class SimpleBloom {
     return {
       m: this.m,
       k: this.k,
-      bits: Buffer.from(this.bits).toString('base64'),
+      bits: Buffer.from(this.bits).toString("base64"),
     };
   }
 }
 
 function computeHash(value: Uint8Array, salt: number): bigint {
-  const h = createHash('sha256');
+  const h = createHash("sha256");
   h.update(value);
   h.update(Buffer.from([salt]));
-  return BigInt('0x' + h.digest('hex'));
+  return BigInt("0x" + h.digest("hex"));
 }
 
 export class SafeJoinParticipant {
@@ -62,23 +65,27 @@ export class SafeJoinParticipant {
     const secret = nacl.randomBytes(32);
     this.secretKey = secret;
     const publicKey = nacl.scalarMult.base(secret);
-    this.publicKeyB64 = Buffer.from(publicKey).toString('base64');
+    this.publicKeyB64 = Buffer.from(publicKey).toString("base64");
   }
 
   deriveSharedSecret(peerPublicKey: string): Uint8Array {
-    const peer = Buffer.from(peerPublicKey, 'base64');
+    const peer = Buffer.from(peerPublicKey, "base64");
     return nacl.scalarMult(this.secretKey, peer);
   }
 
   hashTokens(sharedSecret: Uint8Array, keys: string[]): string[] {
     return keys.map((key) => {
-      const mac = createHmac('sha256', Buffer.from(sharedSecret));
-      mac.update(Buffer.from(key, 'utf8'));
-      return mac.digest('base64');
+      const mac = createHmac("sha256", Buffer.from(sharedSecret));
+      mac.update(Buffer.from(key, "utf8"));
+      return mac.digest("base64");
     });
   }
 
-  aggregatesWithNoise(tokens: string[], values: number[], epsilon: number): Record<string, NoisyAggregate> {
+  aggregatesWithNoise(
+    tokens: string[],
+    values: number[],
+    epsilon: number
+  ): Record<string, NoisyAggregate> {
     const scale = 1 / Math.max(epsilon, 1e-6);
     const aggregates: Record<string, NoisyAggregate> = {};
     tokens.forEach((token, idx) => {
@@ -94,23 +101,34 @@ export class SafeJoinParticipant {
 export class SafeJoinClient {
   private readonly http: AxiosInstance;
 
-  constructor(private readonly baseUrl: string, instance?: AxiosInstance) {
+  constructor(
+    private readonly baseUrl: string,
+    instance?: AxiosInstance
+  ) {
     this.http = instance ?? axios.create({ baseURL: baseUrl });
   }
 
-  async createSession(mode: 'intersection_only' | 'aggregate', opts: { expectedParticipants?: number; epsilon?: number; faultProbability?: number } = {}): Promise<string> {
+  async createSession(
+    mode: "intersection_only" | "aggregate",
+    opts: { expectedParticipants?: number; epsilon?: number; faultProbability?: number } = {}
+  ): Promise<string> {
     const payload: Record<string, unknown> = {
       expected_participants: opts.expectedParticipants ?? 2,
       fault_probability: opts.faultProbability,
-      mode: mode === 'aggregate'
-        ? { mode: 'aggregate', epsilon: opts.epsilon ?? 1.0 }
-        : { mode: 'intersection_only' },
+      mode:
+        mode === "aggregate"
+          ? { mode: "aggregate", epsilon: opts.epsilon ?? 1.0 }
+          : { mode: "intersection_only" },
     };
-    const { data } = await this.http.post('/sessions', payload);
+    const { data } = await this.http.post("/sessions", payload);
     return data.session_id as string;
   }
 
-  async register(sessionId: string, participantId: string, publicKey: string): Promise<string | undefined> {
+  async register(
+    sessionId: string,
+    participantId: string,
+    publicKey: string
+  ): Promise<string | undefined> {
     const { data } = await this.http.post(`/sessions/${sessionId}/register`, {
       participant_id: participantId,
       public_key: publicKey,
@@ -134,10 +152,18 @@ export class SafeJoinClient {
       }
       throw new Error(`peer lookup failed: ${response.status}`);
     }
-    throw new Error('peer not available before timeout');
+    throw new Error("peer not available before timeout");
   }
 
-  async upload(sessionId: string, payload: { participant_id: string; hashed_tokens: string[]; bloom_filter: ReturnType<SimpleBloom['encode']>; aggregates?: Record<string, NoisyAggregate> }): Promise<void> {
+  async upload(
+    sessionId: string,
+    payload: {
+      participant_id: string;
+      hashed_tokens: string[];
+      bloom_filter: ReturnType<SimpleBloom["encode"]>;
+      aggregates?: Record<string, NoisyAggregate>;
+    }
+  ): Promise<void> {
     await this.http.post(`/sessions/${sessionId}/upload`, payload);
   }
 
@@ -147,18 +173,30 @@ export class SafeJoinClient {
   }
 }
 
-export function preparePayload(participant: SafeJoinParticipant, peerPublicKey: string, records: Array<{ key: string; value: number }>, epsilon?: number): {
+export function preparePayload(
+  participant: SafeJoinParticipant,
+  peerPublicKey: string,
+  records: Array<{ key: string; value: number }>,
+  epsilon?: number
+): {
   tokens: string[];
   bloom: SimpleBloom;
   aggregates?: Record<string, NoisyAggregate>;
 } {
   const secret = participant.deriveSharedSecret(peerPublicKey);
-  const tokens = participant.hashTokens(secret, records.map((r) => r.key));
+  const tokens = participant.hashTokens(
+    secret,
+    records.map((r) => r.key)
+  );
   const bloom = new SimpleBloom();
-  tokens.forEach((token) => bloom.insert(Buffer.from(token, 'base64')));
+  tokens.forEach((token) => bloom.insert(Buffer.from(token, "base64")));
   let aggregates: Record<string, NoisyAggregate> | undefined;
   if (epsilon !== undefined) {
-    aggregates = participant.aggregatesWithNoise(tokens, records.map((r) => r.value), epsilon);
+    aggregates = participant.aggregatesWithNoise(
+      tokens,
+      records.map((r) => r.value),
+      epsilon
+    );
   }
   return { tokens, bloom, aggregates };
 }

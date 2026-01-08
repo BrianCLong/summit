@@ -4,10 +4,10 @@
  */
 
 // Quantum kernels
-export * from './kernels/quantum-kernel';
+export * from "./kernels/quantum-kernel";
 
 // Quantum neural networks
-export * from './circuits/quantum-neural-network';
+export * from "./circuits/quantum-neural-network";
 
 // Hybrid models
-export * from './hybrid/quantum-classical-model';
+export * from "./hybrid/quantum-classical-model";

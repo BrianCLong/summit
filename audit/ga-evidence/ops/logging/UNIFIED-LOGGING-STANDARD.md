@@ -18,32 +18,32 @@ All logs MUST be emitted in **JSON structured format** using the Pino logger fra
 
 Every log entry MUST include the following fields:
 
-| Field | Type | Description | Example |
-|-------|------|-------------|---------|
-| `time` | ISO 8601 timestamp | UTC timestamp of log event | `2025-12-27T14:23:45.123Z` |
-| `level` | number/string | Log level (10=trace, 20=debug, 30=info, 40=warn, 50=error, 60=fatal) | `30` or `info` |
-| `service` | string | Service name emitting the log | `summit-api` |
-| `correlationId` | UUID v4 | Request correlation ID for tracing | `a1b2c3d4-e5f6-7890-abcd-ef1234567890` |
-| `message` | string | Human-readable log message | `Request processed successfully` |
-| `context` | object | Additional contextual data | `{"userId": "u123", "tenantId": "t456"}` |
+| Field           | Type               | Description                                                          | Example                                  |
+| --------------- | ------------------ | -------------------------------------------------------------------- | ---------------------------------------- |
+| `time`          | ISO 8601 timestamp | UTC timestamp of log event                                           | `2025-12-27T14:23:45.123Z`               |
+| `level`         | number/string      | Log level (10=trace, 20=debug, 30=info, 40=warn, 50=error, 60=fatal) | `30` or `info`                           |
+| `service`       | string             | Service name emitting the log                                        | `summit-api`                             |
+| `correlationId` | UUID v4            | Request correlation ID for tracing                                   | `a1b2c3d4-e5f6-7890-abcd-ef1234567890`   |
+| `message`       | string             | Human-readable log message                                           | `Request processed successfully`         |
+| `context`       | object             | Additional contextual data                                           | `{"userId": "u123", "tenantId": "t456"}` |
 
 ### Optional Recommended Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `traceId` | string | OpenTelemetry trace ID |
-| `spanId` | string | OpenTelemetry span ID |
-| `tenantId` | string | Tenant identifier for multi-tenant context |
-| `userId` | string | User identifier when available |
-| `requestId` | UUID v4 | Alternative name for correlationId (aliased) |
-| `hostname` | string | Host/pod name emitting the log |
-| `environment` | string | Deployment environment (production, staging, etc.) |
-| `version` | string | Application version |
-| `duration` | number | Operation duration in milliseconds |
-| `statusCode` | number | HTTP status code for request logs |
-| `method` | string | HTTP method for request logs |
-| `path` | string | Request path |
-| `error` | object | Error details including stack trace |
+| Field         | Type    | Description                                        |
+| ------------- | ------- | -------------------------------------------------- |
+| `traceId`     | string  | OpenTelemetry trace ID                             |
+| `spanId`      | string  | OpenTelemetry span ID                              |
+| `tenantId`    | string  | Tenant identifier for multi-tenant context         |
+| `userId`      | string  | User identifier when available                     |
+| `requestId`   | UUID v4 | Alternative name for correlationId (aliased)       |
+| `hostname`    | string  | Host/pod name emitting the log                     |
+| `environment` | string  | Deployment environment (production, staging, etc.) |
+| `version`     | string  | Application version                                |
+| `duration`    | number  | Operation duration in milliseconds                 |
+| `statusCode`  | number  | HTTP status code for request logs                  |
+| `method`      | string  | HTTP method for request logs                       |
+| `path`        | string  | Request path                                       |
+| `error`       | object  | Error details including stack trace                |
 
 ## Log Levels
 
@@ -63,9 +63,9 @@ Use appropriate log levels according to these guidelines:
 The platform provides a pre-configured Pino logger at `/server/src/config/logger.js`:
 
 ```javascript
-import { logger } from './config/logger.js';
+import { logger } from "./config/logger.js";
 
-logger.info({ correlationId: req.correlationId, userId: req.user.id }, 'User authenticated');
+logger.info({ correlationId: req.correlationId, userId: req.user.id }, "User authenticated");
 ```
 
 ### Context-Aware Logger
@@ -73,10 +73,10 @@ logger.info({ correlationId: req.correlationId, userId: req.user.id }, 'User aut
 For automatic correlation ID injection, use the context-aware logger:
 
 ```javascript
-import { logger } from './observability/logging/logger.js';
+import { logger } from "./observability/logging/logger.js";
 
 // Automatically includes correlationId and tenantId from AsyncLocalStorage
-logger.info('Processing request', { operation: 'getData' });
+logger.info("Processing request", { operation: "getData" });
 ```
 
 ### Structured Logger with Event Bus
@@ -84,14 +84,17 @@ logger.info('Processing request', { operation: 'getData' });
 For advanced use cases with log event bus and alerting:
 
 ```javascript
-import { appLogger } from './logging/structuredLogger.js';
+import { appLogger } from "./logging/structuredLogger.js";
 
-appLogger.info({
-  correlationId: req.correlationId,
-  tenantId: req.tenantId,
-  operation: 'payment.processed',
-  amount: 100.00
-}, 'Payment processed successfully');
+appLogger.info(
+  {
+    correlationId: req.correlationId,
+    tenantId: req.tenantId,
+    operation: "payment.processed",
+    amount: 100.0,
+  },
+  "Payment processed successfully"
+);
 ```
 
 ## PII and Sensitive Data Handling
@@ -111,10 +114,13 @@ The logger is configured to automatically redact sensitive fields:
 For additional sensitive data, use the PII guard middleware or manually redact:
 
 ```javascript
-logger.info({
-  email: redactEmail(user.email),
-  phone: redactPhone(user.phone)
-}, 'User contact updated');
+logger.info(
+  {
+    email: redactEmail(user.email),
+    phone: redactPhone(user.phone),
+  },
+  "User contact updated"
+);
 ```
 
 ## Log Storage and Retention
@@ -141,6 +147,7 @@ logger.info({
 ### Event Bus
 
 All logs are published to the internal log event bus for:
+
 - Real-time alerting via LogAlertEngine
 - Metric aggregation
 - Audit trail processing
@@ -149,6 +156,7 @@ All logs are published to the internal log event bus for:
 ### Alert Rules
 
 Critical log patterns trigger alerts:
+
 - High error rates (>5% error ratio over 5 minutes)
 - Repeated authentication failures
 - Authorization policy violations
@@ -193,41 +201,45 @@ This logging standard supports the following compliance requirements:
 
 ### Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `LOG_LEVEL` | `info` | Minimum log level to emit |
-| `LOG_DIR` | `./logs` | Base directory for log files |
-| `LOG_RETENTION_DAYS` | `30` | Application log retention period |
-| `AUDIT_LOG_RETENTION_DAYS` | `365` | Audit log retention period |
-| `LOG_COMPRESS_AFTER_DAYS` | `3` | Days before compression |
-| `LOG_TOTAL_SIZE_MB` | `2048` | Maximum total log size (MB) |
-| `SERVICE_NAME` | `summit-api` | Service identifier in logs |
-| `AUDIT_CHAIN` | `false` | Enable cryptographic audit ledger |
+| Variable                   | Default      | Description                       |
+| -------------------------- | ------------ | --------------------------------- |
+| `LOG_LEVEL`                | `info`       | Minimum log level to emit         |
+| `LOG_DIR`                  | `./logs`     | Base directory for log files      |
+| `LOG_RETENTION_DAYS`       | `30`         | Application log retention period  |
+| `AUDIT_LOG_RETENTION_DAYS` | `365`        | Audit log retention period        |
+| `LOG_COMPRESS_AFTER_DAYS`  | `3`          | Days before compression           |
+| `LOG_TOTAL_SIZE_MB`        | `2048`       | Maximum total log size (MB)       |
+| `SERVICE_NAME`             | `summit-api` | Service identifier in logs        |
+| `AUDIT_CHAIN`              | `false`      | Enable cryptographic audit ledger |
 
 ## Migration Guide
 
 ### From Console.log
 
 **Before:**
+
 ```javascript
-console.log('User logged in:', userId);
+console.log("User logged in:", userId);
 ```
 
 **After:**
+
 ```javascript
-logger.info({ userId, correlationId: req.correlationId }, 'User logged in');
+logger.info({ userId, correlationId: req.correlationId }, "User logged in");
 ```
 
 ### From Winston
 
 **Before:**
+
 ```javascript
-winston.log('info', 'Processing payment', { amount: 100 });
+winston.log("info", "Processing payment", { amount: 100 });
 ```
 
 **After:**
+
 ```javascript
-logger.info({ amount: 100, correlationId: req.correlationId }, 'Processing payment');
+logger.info({ amount: 100, correlationId: req.correlationId }, "Processing payment");
 ```
 
 ## Examples
@@ -236,12 +248,15 @@ logger.info({ amount: 100, correlationId: req.correlationId }, 'Processing payme
 
 ```javascript
 app.use((req, res, next) => {
-  logger.info({
-    correlationId: req.correlationId,
-    method: req.method,
-    path: req.path,
-    userAgent: req.headers['user-agent']
-  }, 'Incoming request');
+  logger.info(
+    {
+      correlationId: req.correlationId,
+      method: req.method,
+      path: req.path,
+      userAgent: req.headers["user-agent"],
+    },
+    "Incoming request"
+  );
   next();
 });
 ```
@@ -252,14 +267,17 @@ app.use((req, res, next) => {
 try {
   await processPayment(data);
 } catch (error) {
-  logger.error({
-    correlationId: req.correlationId,
-    error: {
-      message: error.message,
-      stack: error.stack,
-      code: error.code
-    }
-  }, 'Payment processing failed');
+  logger.error(
+    {
+      correlationId: req.correlationId,
+      error: {
+        message: error.message,
+        stack: error.stack,
+        code: error.code,
+      },
+    },
+    "Payment processing failed"
+  );
   throw error;
 }
 ```
@@ -267,15 +285,18 @@ try {
 ### Business Event Logging
 
 ```javascript
-logger.info({
-  correlationId: req.correlationId,
-  tenantId: req.user.tenantId,
-  userId: req.user.id,
-  eventType: 'governance.verdict',
-  verdict: 'approved',
-  policyId: 'pol_123',
-  resourceId: 'res_456'
-}, 'Governance verdict applied');
+logger.info(
+  {
+    correlationId: req.correlationId,
+    tenantId: req.user.tenantId,
+    userId: req.user.id,
+    eventType: "governance.verdict",
+    verdict: "approved",
+    policyId: "pol_123",
+    resourceId: "res_456",
+  },
+  "Governance verdict applied"
+);
 ```
 
 ## Support and Contact
@@ -288,4 +309,5 @@ logger.info({
 ---
 
 **Document History:**
+
 - 2025-12-27: Initial version (v1.0) - GA hardening initiative

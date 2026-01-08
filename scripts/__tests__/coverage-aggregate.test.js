@@ -1,32 +1,29 @@
-import assert from 'node:assert';
-import { test } from 'node:test';
+import assert from "node:assert";
+import { test } from "node:test";
 
 import {
   aggregateCoverage,
   checkThresholds,
   workspaceFromPath,
   normalizePath,
-} from '../coverage-aggregate.js';
+} from "../coverage-aggregate.js";
 
-test('workspaceFromPath derives stable workspace keys', () => {
+test("workspaceFromPath derives stable workspace keys", () => {
+  assert.strictEqual(workspaceFromPath("server/coverage/coverage-summary.json"), "server");
   assert.strictEqual(
-    workspaceFromPath('server/coverage/coverage-summary.json'),
-    'server',
+    workspaceFromPath("packages/graph/coverage/coverage-summary.json"),
+    "packages/graph"
   );
-  assert.strictEqual(
-    workspaceFromPath('packages/graph/coverage/coverage-summary.json'),
-    'packages/graph',
-  );
-  assert.strictEqual(workspaceFromPath('coverage/coverage-summary.json'), 'coverage');
-  assert.strictEqual(workspaceFromPath(''), 'root');
+  assert.strictEqual(workspaceFromPath("coverage/coverage-summary.json"), "coverage");
+  assert.strictEqual(workspaceFromPath(""), "root");
 });
 
-test('normalizePath always returns forward slashes', () => {
-  const normalized = normalizePath('server/coverage/coverage-summary.json');
-  assert.ok(!normalized.includes('\\'));
+test("normalizePath always returns forward slashes", () => {
+  const normalized = normalizePath("server/coverage/coverage-summary.json");
+  assert.ok(!normalized.includes("\\"));
 });
 
-test('aggregateCoverage combines multiple coverage summaries deterministically', () => {
+test("aggregateCoverage combines multiple coverage summaries deterministically", () => {
   const aggregated = aggregateCoverage([
     {
       total: {
@@ -47,11 +44,11 @@ test('aggregateCoverage combines multiple coverage summaries deterministically',
   ]);
 
   assert.deepStrictEqual(aggregated.totals.lines, { total: 15, covered: 13 });
-  assert.strictEqual(aggregated.percentages.lines.toFixed(2), '86.67');
-  assert.strictEqual(aggregated.percentages.branches.toFixed(2), '83.33');
+  assert.strictEqual(aggregated.percentages.lines.toFixed(2), "86.67");
+  assert.strictEqual(aggregated.percentages.branches.toFixed(2), "83.33");
 });
 
-test('checkThresholds reports pass/fail per metric', () => {
+test("checkThresholds reports pass/fail per metric", () => {
   const thresholds = checkThresholds({
     lines: 90,
     branches: 60,
@@ -59,8 +56,8 @@ test('checkThresholds reports pass/fail per metric', () => {
     statements: 82,
   });
 
-  const lines = thresholds.results.find((item) => item.metric === 'lines');
-  const branches = thresholds.results.find((item) => item.metric === 'branches');
+  const lines = thresholds.results.find((item) => item.metric === "lines");
+  const branches = thresholds.results.find((item) => item.metric === "branches");
 
   assert.strictEqual(lines.passed, true);
   assert.strictEqual(branches.passed, false);

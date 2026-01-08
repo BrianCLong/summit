@@ -185,18 +185,18 @@ platform_eng  | 15         | 2025-12-12       | APPROVED
 // Encryption configuration validation
 const encryptionConfig = {
   database: {
-    encryption: 'AES-256',
-    status: 'ENABLED',
+    encryption: "AES-256",
+    status: "ENABLED",
     keyRotationDays: 90,
   },
   storage: {
-    encryption: 'AES-256',
-    status: 'ENABLED',
-    kmsKeyId: 'arn:aws:kms:us-east-1:123456789:key/abc123',
+    encryption: "AES-256",
+    status: "ENABLED",
+    kmsKeyId: "arn:aws:kms:us-east-1:123456789:key/abc123",
   },
   transit: {
-    protocol: 'TLS 1.3',
-    status: 'ENFORCED',
+    protocol: "TLS 1.3",
+    status: "ENFORCED",
     weakCiphersDisabled: true,
   },
 };
@@ -228,17 +228,17 @@ const encryptionConfig = {
 # SLO Achievement Report
 slo_achievement:
   api_latency_p95:
-    target: '<300ms'
-    actual: '247ms'
-    status: 'MET'
+    target: "<300ms"
+    actual: "247ms"
+    status: "MET"
   system_availability:
-    target: '99.9%'
-    actual: '99.97%'
-    status: 'EXCEEDED'
+    target: "99.9%"
+    actual: "99.97%"
+    status: "EXCEEDED"
   error_rate:
-    target: '<0.5%'
-    actual: '0.12%'
-    status: 'MET'
+    target: "<0.5%"
+    actual: "0.12%"
+    status: "MET"
 ```
 
 #### CC7.2 - System Capacity

@@ -28,131 +28,131 @@ Comprehensive tracking and analysis of ambassadors, envoys, diplomatic personnel
 import {
   DiplomaticPersonnelTracker,
   DiplomaticRank,
-  SpecializationArea
-} from '@intelgraph/diplomatic-personnel';
+  SpecializationArea,
+} from "@intelgraph/diplomatic-personnel";
 
 const tracker = new DiplomaticPersonnelTracker();
 
 // Track a diplomat
 tracker.trackDiplomat({
-  id: 'dip-001',
-  name: 'Ambassador Jane Smith',
+  id: "dip-001",
+  name: "Ambassador Jane Smith",
   rank: DiplomaticRank.AMBASSADOR,
-  country: 'USA',
-  nationality: 'American',
+  country: "USA",
+  nationality: "American",
   languages: [
-    { language: 'English', proficiency: 'NATIVE' },
-    { language: 'French', proficiency: 'FLUENT' },
-    { language: 'Mandarin', proficiency: 'PROFESSIONAL' }
+    { language: "English", proficiency: "NATIVE" },
+    { language: "French", proficiency: "FLUENT" },
+    { language: "Mandarin", proficiency: "PROFESSIONAL" },
   ],
   education: [
     {
-      institution: 'Georgetown University',
-      degree: 'MA',
-      field: 'International Relations',
+      institution: "Georgetown University",
+      degree: "MA",
+      field: "International Relations",
       year: 2000,
-      country: 'USA'
-    }
+      country: "USA",
+    },
   ],
-  careerStart: new Date('2000-01-01'),
+  careerStart: new Date("2000-01-01"),
   currentPosting: {
-    id: 'post-001',
-    type: 'BILATERAL_EMBASSY',
-    title: 'Ambassador to France',
-    location: { city: 'Paris', country: 'France', region: 'Europe' },
-    startDate: new Date('2022-01-01'),
+    id: "post-001",
+    type: "BILATERAL_EMBASSY",
+    title: "Ambassador to France",
+    location: { city: "Paris", country: "France", region: "Europe" },
+    startDate: new Date("2022-01-01"),
     isCurrent: true,
-    responsibilities: ['Bilateral relations', 'Economic diplomacy'],
-    significantEvents: []
+    responsibilities: ["Bilateral relations", "Economic diplomacy"],
+    significantEvents: [],
   },
   previousPostings: [],
   specializations: [SpecializationArea.POLITICAL_AFFAIRS, SpecializationArea.ECONOMIC_AFFAIRS],
-  regionalExpertise: ['Europe', 'Asia'],
-  topicalExpertise: ['Trade policy', 'Climate diplomacy'],
+  regionalExpertise: ["Europe", "Asia"],
+  topicalExpertise: ["Trade policy", "Climate diplomacy"],
   relationships: [],
   effectiveness: 85,
   influence: 78,
   networkSize: 120,
-  profileLevel: 'HIGH',
+  profileLevel: "HIGH",
   // ... other fields
 });
 
 // Analyze diplomat effectiveness
-const analysis = tracker.analyzeDiplomatEffectiveness('dip-001');
+const analysis = tracker.analyzeDiplomatEffectiveness("dip-001");
 console.log(`Effectiveness: ${analysis.effectivenessScore}`);
 console.log(`Career trajectory: ${analysis.careerTrajectory}`);
-console.log('Strengths:', analysis.strengths.join(', '));
-console.log('Recommendations:', analysis.recommendations.join(', '));
+console.log("Strengths:", analysis.strengths.join(", "));
+console.log("Recommendations:", analysis.recommendations.join(", "));
 
 // Map diplomatic network
-const network = tracker.mapDiplomaticNetwork('dip-001', 2);
+const network = tracker.mapDiplomaticNetwork("dip-001", 2);
 console.log(`Direct connections: ${network.directConnections.length}`);
 console.log(`Network strength: ${network.networkStrength.toFixed(1)}`);
-console.log(`Geographic reach: ${network.geographicReach.join(', ')}`);
-console.log('Influential contacts:');
-network.influentialContacts.forEach(contact => {
+console.log(`Geographic reach: ${network.geographicReach.join(", ")}`);
+console.log("Influential contacts:");
+network.influentialContacts.forEach((contact) => {
   console.log(`  - ${contact.name} (${contact.country})`);
 });
 
 // Get ambassadors to a country
-const ambassadors = tracker.getAmbassadorsToCountry('France');
+const ambassadors = tracker.getAmbassadorsToCountry("France");
 console.log(`${ambassadors.length} ambassadors accredited to France`);
 
 // Track an embassy
 tracker.trackEmbassy({
-  id: 'emb-001',
-  country: 'USA',
-  hostCountry: 'France',
-  location: { city: 'Paris', country: 'France', region: 'Europe' },
-  established: new Date('1776-01-01'),
-  headOfMission: 'dip-001',
+  id: "emb-001",
+  country: "USA",
+  hostCountry: "France",
+  location: { city: "Paris", country: "France", region: "Europe" },
+  established: new Date("1776-01-01"),
+  headOfMission: "dip-001",
   staff: {
     totalStaff: 150,
     diplomaticStaff: 50,
     administrativeStaff: 40,
     localStaff: 60,
     byRank: [],
-    bySpecialization: []
+    bySpecialization: [],
   },
   departments: [
     {
-      name: 'Political Section',
-      head: 'dip-002',
+      name: "Political Section",
+      head: "dip-002",
       staff: 15,
-      focus: ['Bilateral relations', 'Political reporting']
-    }
+      focus: ["Bilateral relations", "Political reporting"],
+    },
   ],
-  size: 'LARGE',
-  functions: ['Diplomatic representation', 'Consular services'],
-  priorities: ['Trade promotion', 'Cultural exchange'],
+  size: "LARGE",
+  functions: ["Diplomatic representation", "Consular services"],
+  priorities: ["Trade promotion", "Cultural exchange"],
   activities: [],
   effectiveness: 82,
   bilateralRelationshipQuality: 85,
-  lastUpdated: new Date()
+  lastUpdated: new Date(),
 });
 
 // Analyze embassy effectiveness
-const embassyAnalysis = tracker.analyzeEmbassyEffectiveness('emb-001');
+const embassyAnalysis = tracker.analyzeEmbassyEffectiveness("emb-001");
 console.log(`Embassy effectiveness: ${embassyAnalysis.effectivenessScore}`);
 console.log(`Staffing level: ${embassyAnalysis.staffingLevel}`);
-console.log('Strength areas:', embassyAnalysis.strengthAreas.join(', '));
+console.log("Strength areas:", embassyAnalysis.strengthAreas.join(", "));
 
 // Identify influential diplomats
 const influential = tracker.identifyInfluentialDiplomats({
   minInfluence: 75,
-  specialization: SpecializationArea.ECONOMIC_AFFAIRS
+  specialization: SpecializationArea.ECONOMIC_AFFAIRS,
 });
 console.log(`${influential.length} influential economic diplomats`);
 
 // Analyze career progression
-const career = tracker.analyzeCareerProgression('dip-001');
+const career = tracker.analyzeCareerProgression("dip-001");
 console.log(`Progression rate: ${career.progressionRate} years/promotion`);
 console.log(`Future prospects: ${career.futureProspects}`);
 console.log(`Benchmark: ${career.benchmarkComparison}`);
 
 // Track diplomatic cadre
 tracker.trackCadre({
-  country: 'USA',
+  country: "USA",
   totalDiplomats: 8000,
   activeOverseas: 3500,
   activeAtHome: 4500,
@@ -164,36 +164,36 @@ tracker.trackCadre({
   genderDistribution: { male: 4500, female: 3500 },
   recruitmentRate: 300,
   attritionRate: 5,
-  trainingPrograms: ['FSI', 'Language training', 'Leadership development'],
+  trainingPrograms: ["FSI", "Language training", "Leadership development"],
   languageCapabilities: [
-    { language: 'French', speakers: 1200 },
-    { language: 'Spanish', speakers: 1500 },
-    { language: 'Arabic', speakers: 800 }
+    { language: "French", speakers: 1200 },
+    { language: "Spanish", speakers: 1500 },
+    { language: "Arabic", speakers: 800 },
   ],
   reputation: 85,
-  effectiveness: 82
+  effectiveness: 82,
 });
 
 // Compare diplomatic cadres
-const comparison = tracker.compareCadres(['USA', 'UK', 'France', 'China']);
+const comparison = tracker.compareCadres(["USA", "UK", "France", "China"]);
 console.log(`Largest cadre: ${comparison.largestCadre}`);
 console.log(`Most effective: ${comparison.mostEffective}`);
 console.log(`Best trained: ${comparison.bestTrained}`);
-console.log('Insights:', comparison.insights.join('\n  '));
+console.log("Insights:", comparison.insights.join("\n  "));
 
 // Calculate influence metrics
-const influence = tracker.calculateInfluenceMetrics('dip-001');
+const influence = tracker.calculateInfluenceMetrics("dip-001");
 console.log(`Overall influence: ${influence.overallInfluence.toFixed(1)}`);
 console.log(`Network influence: ${influence.networkInfluence.toFixed(1)}`);
 console.log(`Political influence: ${influence.politicalInfluence.toFixed(1)}`);
 console.log(`Trend: ${influence.trend}`);
-console.log('Influence factors:', influence.influenceFactors.join(', '));
+console.log("Influence factors:", influence.influenceFactors.join(", "));
 
 // Compare diplomats
-const diplomatComparison = tracker.compareDiplomats(['dip-001', 'dip-002', 'dip-003']);
-console.log('Common background:', diplomatComparison.commonBackground?.join(', '));
-console.log('Effectiveness ranking:');
-diplomatComparison.effectivenessRanking.forEach(r => {
+const diplomatComparison = tracker.compareDiplomats(["dip-001", "dip-002", "dip-003"]);
+console.log("Common background:", diplomatComparison.commonBackground?.join(", "));
+console.log("Effectiveness ranking:");
+diplomatComparison.effectivenessRanking.forEach((r) => {
   console.log(`  ${r.rank}. ${r.diplomat}: ${r.score}`);
 });
 ```
@@ -223,7 +223,9 @@ diplomatComparison.effectivenessRanking.forEach(r => {
 ## Data Models
 
 ### Diplomat
+
 Complete diplomat profile including:
+
 - Personal background and education
 - Current and previous postings
 - Specializations and expertise
@@ -234,7 +236,9 @@ Complete diplomat profile including:
 - Reputation assessment
 
 ### Embassy
+
 Embassy profile including:
+
 - Staffing and structure
 - Departments and functions
 - Budget and resources
@@ -242,20 +246,26 @@ Embassy profile including:
 - Bilateral relationship quality
 
 ### DiplomaticNetwork
+
 Network structure including:
+
 - Member profiles
 - Network type and purpose
 - Cohesion and influence metrics
 
 ### CareerPath
+
 Career progression tracking:
+
 - Career stages
 - Promotion velocity
 - Geographic/functional diversity
 - Future prospects
 
 ### InfluenceMetrics
+
 Multi-dimensional influence assessment:
+
 - Network influence
 - Media presence
 - Political access
@@ -266,24 +276,28 @@ Multi-dimensional influence assessment:
 ## Analysis Capabilities
 
 ### Effectiveness Assessment
+
 - Performance scoring
 - Strength/weakness identification
 - Career trajectory analysis
 - Peer benchmarking
 
 ### Network Analysis
+
 - Relationship mapping
 - Influence propagation
 - Geographic reach
 - Key contact identification
 
 ### Career Development
+
 - Progression tracking
 - Promotion forecasting
 - Skill gap analysis
 - Succession planning
 
 ### Comparative Analysis
+
 - Cadre comparison
 - Diplomat comparison
 - Best practice identification

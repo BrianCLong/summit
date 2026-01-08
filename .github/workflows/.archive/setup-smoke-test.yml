@@ -1,17 +1,17 @@
 # .github/workflows/setup-smoke-test.yml
 
-name: 'Setup Smoke Test'
+name: "Setup Smoke Test"
 
 on:
   pull_request:
     paths:
-      - 'docs/ONBOARDING.md'
-      - 'scripts/validate-env.sh'
-      - 'scripts/start.sh'
-      - 'data/quickstart/**'
-      - 'docker-compose.dev.yml'
-      - 'Makefile'
-      - '.github/workflows/setup-smoke-test.yml'
+      - "docs/ONBOARDING.md"
+      - "scripts/validate-env.sh"
+      - "scripts/start.sh"
+      - "data/quickstart/**"
+      - "docker-compose.dev.yml"
+      - "Makefile"
+      - ".github/workflows/setup-smoke-test.yml"
   push:
     branches:
       - main
@@ -22,37 +22,37 @@ concurrency:
 
 jobs:
   validate-setup-experience:
-    name: 'Validate Developer Setup'
+    name: "Validate Developer Setup"
     runs-on: ubuntu-latest
 
     steps:
-      - name: 'Checkout Repository'
+      - name: "Checkout Repository"
         uses: actions/checkout@v4
 
-      - name: 'Set up Node.js and pnpm'
+      - name: "Set up Node.js and pnpm"
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-      - name: 'Enable corepack'
+          node-version: "20.x"
+      - name: "Enable corepack"
         run: corepack enable
-      - name: 'Setup pnpm'
+      - name: "Setup pnpm"
         uses: pnpm/action-setup@v4
         with:
           version: 9
           run_install: false
 
-      - name: 'Run Environment Validator'
+      - name: "Run Environment Validator"
         run: |
           chmod +x scripts/validate-env.sh
           ./scripts/validate-env.sh
 
-      - name: 'Run Full Setup and Smoke Test'
+      - name: "Run Full Setup and Smoke Test"
         run: ./start.sh
         env:
           # Prevent interactive prompts in CI
-          CI: 'true'
+          CI: "true"
 
-      - name: 'Tear Down Environment on Failure'
+      - name: "Tear Down Environment on Failure"
         if: failure()
         run: |
           echo "Setup failed. Tearing down environment..."

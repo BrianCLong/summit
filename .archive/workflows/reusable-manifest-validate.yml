@@ -6,9 +6,9 @@ on:
   workflow_call:
     inputs:
       manifests_glob:
-        description: 'Glob of manifests in caller repo'
+        description: "Glob of manifests in caller repo"
         required: false
-        default: 'examples/**/*.{yaml,yml,json}'
+        default: "examples/**/*.{yaml,yml,json}"
         type: string
 jobs:
   validate:
@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: "pnpm"
       - run: pnpm i -D ajv ajv-formats yaml glob
       - name: Copy validation script
         run: |

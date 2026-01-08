@@ -5,13 +5,13 @@
  * UI for assessing claims with evidence.
  */
 
-import React from 'react';
-import { CheckCircle, XCircle, AlertTriangle, Clock, ExternalLink } from 'lucide-react';
-import { useLabelingStore } from '../../store/labelingStore';
-import { cn } from '../../utils/cn';
-import type { Sample, LabelingJob, Label } from '../../types';
+import React from "react";
+import { CheckCircle, XCircle, AlertTriangle, Clock, ExternalLink } from "lucide-react";
+import { useLabelingStore } from "../../store/labelingStore";
+import { cn } from "../../utils/cn";
+import type { Sample, LabelingJob, Label } from "../../types";
 
-type ClaimVerdict = 'supported' | 'refuted' | 'insufficient_evidence';
+type ClaimVerdict = "supported" | "refuted" | "insufficient_evidence";
 
 interface ClaimAssessmentTaskProps {
   sample: Sample;
@@ -20,11 +20,7 @@ interface ClaimAssessmentTaskProps {
   instructions: string;
 }
 
-export function ClaimAssessmentTask({
-  sample,
-  onSubmit,
-  instructions,
-}: ClaimAssessmentTaskProps) {
+export function ClaimAssessmentTask({ sample, onSubmit, instructions }: ClaimAssessmentTaskProps) {
   const [verdict, setVerdict] = React.useState<ClaimVerdict | null>(null);
   const [confidenceValue, setConfidenceValue] = React.useState(0.8);
   const { notes, setNotes, getTimeSpent, keyboardShortcutsEnabled } = useLabelingStore();
@@ -41,16 +37,16 @@ export function ClaimAssessmentTask({
       }
 
       switch (e.key.toLowerCase()) {
-        case 's':
-          setVerdict('supported');
+        case "s":
+          setVerdict("supported");
           break;
-        case 'r':
-          setVerdict('refuted');
+        case "r":
+          setVerdict("refuted");
           break;
-        case 'i':
-          setVerdict('insufficient_evidence');
+        case "i":
+          setVerdict("insufficient_evidence");
           break;
-        case 'enter':
+        case "enter":
           if (verdict) {
             handleSubmit();
           }
@@ -58,8 +54,8 @@ export function ClaimAssessmentTask({
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [keyboardShortcutsEnabled, verdict]);
 
   const handleSubmit = () => {
@@ -67,7 +63,7 @@ export function ClaimAssessmentTask({
 
     const labels: Label[] = [
       {
-        fieldName: 'verdict',
+        fieldName: "verdict",
         value: verdict,
         confidence: confidenceValue,
       },
@@ -75,27 +71,27 @@ export function ClaimAssessmentTask({
 
     onSubmit(labels);
     setVerdict(null);
-    setNotes('');
+    setNotes("");
   };
 
   const verdictConfig = {
     supported: {
       icon: CheckCircle,
-      color: 'green',
-      label: 'Supported',
-      description: 'The claim is supported by the available evidence.',
+      color: "green",
+      label: "Supported",
+      description: "The claim is supported by the available evidence.",
     },
     refuted: {
       icon: XCircle,
-      color: 'red',
-      label: 'Refuted',
-      description: 'The claim is contradicted by the available evidence.',
+      color: "red",
+      label: "Refuted",
+      description: "The claim is contradicted by the available evidence.",
     },
     insufficient_evidence: {
       icon: AlertTriangle,
-      color: 'yellow',
-      label: 'Insufficient Evidence',
-      description: 'There is not enough evidence to determine the claim\'s validity.',
+      color: "yellow",
+      label: "Insufficient Evidence",
+      description: "There is not enough evidence to determine the claim's validity.",
     },
   };
 
@@ -106,9 +102,9 @@ export function ClaimAssessmentTask({
         <h3 className="text-sm font-medium text-blue-800 mb-1">Instructions</h3>
         <p className="text-sm text-blue-700">{instructions}</p>
         <p className="text-xs text-blue-600 mt-2">
-          Keyboard shortcuts: <kbd className="px-1 bg-blue-100 rounded">S</kbd> Supported,{' '}
-          <kbd className="px-1 bg-blue-100 rounded">R</kbd> Refuted,{' '}
-          <kbd className="px-1 bg-blue-100 rounded">I</kbd> Insufficient,{' '}
+          Keyboard shortcuts: <kbd className="px-1 bg-blue-100 rounded">S</kbd> Supported,{" "}
+          <kbd className="px-1 bg-blue-100 rounded">R</kbd> Refuted,{" "}
+          <kbd className="px-1 bg-blue-100 rounded">I</kbd> Insufficient,{" "}
           <kbd className="px-1 bg-blue-100 rounded">Enter</kbd> Submit
         </p>
       </div>
@@ -139,10 +135,7 @@ export function ClaimAssessmentTask({
           <h3 className="text-lg font-semibold mb-4">Supporting Evidence</h3>
           <ul className="space-y-3">
             {claim.supportingEvidence.map((evidence, index) => (
-              <li
-                key={index}
-                className="flex items-start gap-2 p-3 rounded-lg bg-muted/50"
-              >
+              <li key={index} className="flex items-start gap-2 p-3 rounded-lg bg-muted/50">
                 <ExternalLink className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
                 <span className="text-sm">{evidence}</span>
               </li>
@@ -163,24 +156,24 @@ export function ClaimAssessmentTask({
                   key={key}
                   onClick={() => setVerdict(key)}
                   className={cn(
-                    'flex flex-col items-center gap-2 p-4 rounded-lg border transition-all text-left',
+                    "flex flex-col items-center gap-2 p-4 rounded-lg border transition-all text-left",
                     verdict === key
-                      ? config.color === 'green'
-                        ? 'bg-green-100 border-green-500 ring-2 ring-green-500'
-                        : config.color === 'red'
-                        ? 'bg-red-100 border-red-500 ring-2 ring-red-500'
-                        : 'bg-yellow-100 border-yellow-500 ring-2 ring-yellow-500'
-                      : 'bg-card hover:bg-muted'
+                      ? config.color === "green"
+                        ? "bg-green-100 border-green-500 ring-2 ring-green-500"
+                        : config.color === "red"
+                          ? "bg-red-100 border-red-500 ring-2 ring-red-500"
+                          : "bg-yellow-100 border-yellow-500 ring-2 ring-yellow-500"
+                      : "bg-card hover:bg-muted"
                   )}
                 >
                   <Icon
                     className={cn(
-                      'h-8 w-8',
-                      config.color === 'green'
-                        ? 'text-green-600'
-                        : config.color === 'red'
-                        ? 'text-red-600'
-                        : 'text-yellow-600'
+                      "h-8 w-8",
+                      config.color === "green"
+                        ? "text-green-600"
+                        : config.color === "red"
+                          ? "text-red-600"
+                          : "text-yellow-600"
                     )}
                   />
                   <span className="font-medium">{config.label}</span>
@@ -211,9 +204,7 @@ export function ClaimAssessmentTask({
 
       {/* Notes */}
       <div className="mb-6">
-        <label className="block text-sm font-medium mb-2">
-          Reasoning (recommended)
-        </label>
+        <label className="block text-sm font-medium mb-2">Reasoning (recommended)</label>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
@@ -243,5 +234,5 @@ export function ClaimAssessmentTask({
 function formatTime(seconds: number): string {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
 }

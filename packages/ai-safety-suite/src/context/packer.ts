@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from "crypto";
 
 export interface ContextInput {
   scope: string;
@@ -18,22 +18,22 @@ export interface ContextPack {
   warnings: string[];
 }
 
-const DEFAULT_ALLOWED_FIELDS = ['id', 'name', 'summary', 'type', 'createdAt'];
+const DEFAULT_ALLOWED_FIELDS = ["id", "name", "summary", "type", "createdAt"];
 
 function sanitizeValue(value: unknown, redactedFields: string[], canary?: string): unknown {
   if (value == null) return value;
-  if (typeof value === 'string') {
-    const sanitized = value.replace(/(password|secret|api key)/gi, '[REDACTED]');
+  if (typeof value === "string") {
+    const sanitized = value.replace(/(password|secret|api key)/gi, "[REDACTED]");
     if (canary && sanitized.includes(canary)) {
-      redactedFields.push('canary');
-      return sanitized.replace(new RegExp(canary, 'g'), '[REDACTED]');
+      redactedFields.push("canary");
+      return sanitized.replace(new RegExp(canary, "g"), "[REDACTED]");
     }
     return sanitized;
   }
   if (Array.isArray(value)) {
     return value.map((item) => sanitizeValue(item, redactedFields, canary));
   }
-  if (typeof value === 'object') {
+  if (typeof value === "object") {
     const result: Record<string, unknown> = {};
     for (const [key, val] of Object.entries(value)) {
       if (!DEFAULT_ALLOWED_FIELDS.includes(key)) {
@@ -52,34 +52,39 @@ function estimateTokens(text: string): number {
 }
 
 export class ContextPacker {
-  constructor(private maxBytes = 4096, private maxTokens = 800) {}
+  constructor(
+    private maxBytes = 4096,
+    private maxTokens = 800
+  ) {}
 
   build(input: ContextInput): ContextPack {
     const redactedFields: string[] = [];
     const provenance: string[] = [];
     const sections: Record<string, unknown> = {};
     const orderedSections: [string, unknown][] = [
-      ['entities', input.entities ?? []],
-      ['notes', input.notes ?? []],
-      ['docsMetadata', input.docsMetadata ?? []],
-      ['hypotheses', input.hypotheses ?? []],
+      ["entities", input.entities ?? []],
+      ["notes", input.notes ?? []],
+      ["docsMetadata", input.docsMetadata ?? []],
+      ["hypotheses", input.hypotheses ?? []],
     ];
 
     for (const [sectionName, data] of orderedSections) {
       const sanitized = sanitizeValue(data, redactedFields, input.canarySecret);
       sections[sectionName] = sanitized;
-      provenance.push(`${sectionName}:${crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex').slice(0, 8)}`);
+      provenance.push(
+        `${sectionName}:${crypto.createHash("sha256").update(JSON.stringify(data)).digest("hex").slice(0, 8)}`
+      );
     }
 
     const serialized = JSON.stringify(sections);
-    let bytes = Buffer.byteLength(serialized, 'utf8');
+    let bytes = Buffer.byteLength(serialized, "utf8");
     let tokens = estimateTokens(serialized);
     const warnings: string[] = [];
 
     if (bytes > this.maxBytes || tokens > this.maxTokens) {
-      warnings.push('Context truncated to respect size limits');
+      warnings.push("Context truncated to respect size limits");
       const trimmed = serialized.slice(0, this.maxBytes);
-      bytes = Buffer.byteLength(trimmed, 'utf8');
+      bytes = Buffer.byteLength(trimmed, "utf8");
       tokens = estimateTokens(trimmed);
       sections.__truncated = true;
     }

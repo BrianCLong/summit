@@ -4,8 +4,8 @@
  * Provides Express middleware for automatic observability instrumentation.
  */
 
-import type { Request, Response, NextFunction, RequestHandler } from 'express';
-import { trace, context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
+import type { Request, Response, NextFunction, RequestHandler } from "express";
+import { trace, context, SpanStatusCode, SpanKind } from "@opentelemetry/api";
 import {
   httpRequestsTotal,
   httpRequestDuration,
@@ -13,11 +13,11 @@ import {
   recordError,
   getMetrics,
   getMetricsContentType,
-} from '../metrics/index.js';
-import { createLogger, createRequestLogger, type LoggingConfig } from '../logging/index.js';
-import { extractContext, injectContext, getTracer } from '../tracing/index.js';
-import { createHealthRoutes, initializeHealth, type HealthRouteHandlers } from '../health/index.js';
-import type { ServiceConfig } from '../types/index.js';
+} from "../metrics/index.js";
+import { createLogger, createRequestLogger, type LoggingConfig } from "../logging/index.js";
+import { extractContext, injectContext, getTracer } from "../tracing/index.js";
+import { createHealthRoutes, initializeHealth, type HealthRouteHandlers } from "../health/index.js";
+import type { ServiceConfig } from "../types/index.js";
 
 // =============================================================================
 // CONFIGURATION
@@ -43,7 +43,11 @@ export interface ObservabilityMiddlewareConfig {
  * Express middleware for collecting HTTP metrics
  */
 export function metricsMiddleware(config: ObservabilityMiddlewareConfig): RequestHandler {
-  const { service, excludeRoutes = ['/health', '/metrics', '/ready', '/live'], routeNormalizer } = config;
+  const {
+    service,
+    excludeRoutes = ["/health", "/metrics", "/ready", "/live"],
+    routeNormalizer,
+  } = config;
 
   return (req: Request, res: Response, next: NextFunction): void => {
     // Skip excluded routes
@@ -58,7 +62,7 @@ export function metricsMiddleware(config: ObservabilityMiddlewareConfig): Reques
     httpRequestsInFlight.labels({ service: service.name, method: req.method }).inc();
 
     // Record metrics on response finish
-    res.on('finish', () => {
+    res.on("finish", () => {
       const duration = Number(process.hrtime.bigint() - startTime) / 1e9; // Convert to seconds
 
       httpRequestsTotal
@@ -83,9 +87,9 @@ export function metricsMiddleware(config: ObservabilityMiddlewareConfig): Reques
 
       // Record errors
       if (res.statusCode >= 500) {
-        recordError('http_5xx', 'high', service.name);
+        recordError("http_5xx", "high", service.name);
       } else if (res.statusCode >= 400) {
-        recordError('http_4xx', 'low', service.name);
+        recordError("http_4xx", "low", service.name);
       }
     });
 
@@ -101,7 +105,11 @@ export function metricsMiddleware(config: ObservabilityMiddlewareConfig): Reques
  * Express middleware for distributed tracing
  */
 export function tracingMiddleware(config: ObservabilityMiddlewareConfig): RequestHandler {
-  const { service, excludeRoutes = ['/health', '/metrics', '/ready', '/live'], routeNormalizer } = config;
+  const {
+    service,
+    excludeRoutes = ["/health", "/metrics", "/ready", "/live"],
+    routeNormalizer,
+  } = config;
   const tracer = getTracer(service.name, service.version);
 
   return (req: Request, res: Response, next: NextFunction): void => {
@@ -121,15 +129,15 @@ export function tracingMiddleware(config: ObservabilityMiddlewareConfig): Reques
       {
         kind: SpanKind.SERVER,
         attributes: {
-          'http.method': req.method,
-          'http.url': req.url,
-          'http.route': route,
-          'http.scheme': req.protocol,
-          'http.host': req.hostname,
-          'http.user_agent': req.get('user-agent') || '',
-          'http.request_content_length': req.get('content-length'),
-          'service.name': service.name,
-          'service.version': service.version,
+          "http.method": req.method,
+          "http.url": req.url,
+          "http.route": route,
+          "http.scheme": req.protocol,
+          "http.host": req.hostname,
+          "http.user_agent": req.get("user-agent") || "",
+          "http.request_content_length": req.get("content-length"),
+          "service.name": service.name,
+          "service.version": service.version,
         },
       },
       parentContext
@@ -148,10 +156,10 @@ export function tracingMiddleware(config: ObservabilityMiddlewareConfig): Reques
     });
 
     // Record response
-    res.on('finish', () => {
+    res.on("finish", () => {
       span.setAttributes({
-        'http.status_code': res.statusCode,
-        'http.response_content_length': res.get('content-length'),
+        "http.status_code": res.statusCode,
+        "http.response_content_length": res.get("content-length"),
       });
 
       if (res.statusCode >= 400) {
@@ -181,7 +189,7 @@ export function tracingMiddleware(config: ObservabilityMiddlewareConfig): Reques
  * Express middleware for request logging
  */
 export function requestLoggingMiddleware(config: ObservabilityMiddlewareConfig): RequestHandler {
-  const { service, excludeRoutes = ['/health', '/metrics', '/ready', '/live'] } = config;
+  const { service, excludeRoutes = ["/health", "/metrics", "/ready", "/live"] } = config;
   const logger = createLogger({ service });
 
   return (req: Request, res: Response, next: NextFunction): void => {
@@ -191,7 +199,7 @@ export function requestLoggingMiddleware(config: ObservabilityMiddlewareConfig):
     }
 
     const startTime = Date.now();
-    const requestId = (req.headers['x-request-id'] as string) || generateRequestId();
+    const requestId = (req.headers["x-request-id"] as string) || generateRequestId();
 
     // Create child logger with request context
     const reqLogger = createRequestLogger(logger, {
@@ -210,18 +218,18 @@ export function requestLoggingMiddleware(config: ObservabilityMiddlewareConfig):
           method: req.method,
           url: req.url,
           headers: {
-            'user-agent': req.get('user-agent'),
-            'content-type': req.get('content-type'),
+            "user-agent": req.get("user-agent"),
+            "content-type": req.get("content-type"),
           },
         },
       },
-      'Request started'
+      "Request started"
     );
 
     // Log request completion
-    res.on('finish', () => {
+    res.on("finish", () => {
       const duration = Date.now() - startTime;
-      const level = res.statusCode >= 500 ? 'error' : res.statusCode >= 400 ? 'warn' : 'info';
+      const level = res.statusCode >= 500 ? "error" : res.statusCode >= 400 ? "warn" : "info";
 
       reqLogger[level](
         {
@@ -230,7 +238,7 @@ export function requestLoggingMiddleware(config: ObservabilityMiddlewareConfig):
           },
           duration_ms: duration,
         },
-        'Request completed'
+        "Request completed"
       );
     });
 
@@ -252,10 +260,10 @@ function generateRequestId(): string {
 export function metricsHandler(): RequestHandler {
   return async (_req: Request, res: Response): Promise<void> => {
     try {
-      res.set('Content-Type', getMetricsContentType());
+      res.set("Content-Type", getMetricsContentType());
       res.send(await getMetrics());
     } catch (error) {
-      res.status(500).send('Error collecting metrics');
+      res.status(500).send("Error collecting metrics");
     }
   };
 }
@@ -267,18 +275,15 @@ export function metricsHandler(): RequestHandler {
 /**
  * Express error handling middleware with observability
  */
-export function errorMiddleware(config: ObservabilityMiddlewareConfig): (
-  err: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => void {
+export function errorMiddleware(
+  config: ObservabilityMiddlewareConfig
+): (err: Error, req: Request, res: Response, next: NextFunction) => void {
   const { service } = config;
   const logger = createLogger({ service });
 
   return (err: Error, req: Request, res: Response, _next: NextFunction): void => {
     // Record error metrics
-    recordError(err.name || 'UnknownError', 'high', service.name);
+    recordError(err.name || "UnknownError", "high", service.name);
 
     // Log error
     const reqLogger = (req as any).log || logger;
@@ -290,7 +295,7 @@ export function errorMiddleware(config: ObservabilityMiddlewareConfig): (
           url: req.url,
         },
       },
-      'Request error'
+      "Request error"
     );
 
     // Record exception in span
@@ -307,8 +312,8 @@ export function errorMiddleware(config: ObservabilityMiddlewareConfig): (
     const statusCode = (err as any).statusCode || (err as any).status || 500;
     res.status(statusCode).json({
       error: {
-        message: process.env.NODE_ENV === 'production' ? 'Internal Server Error' : err.message,
-        ...(process.env.NODE_ENV !== 'production' && { stack: err.stack }),
+        message: process.env.NODE_ENV === "production" ? "Internal Server Error" : err.message,
+        ...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
       },
     });
   };
@@ -368,11 +373,11 @@ export function setupObservability(
   app.use(middleware.metrics);
 
   // Setup routes
-  app.get('/metrics', middleware.metricsEndpoint);
-  app.get('/health', middleware.health.liveness as unknown as RequestHandler);
-  app.get('/health/live', middleware.health.liveness as unknown as RequestHandler);
-  app.get('/health/ready', middleware.health.readiness as unknown as RequestHandler);
-  app.get('/health/detailed', middleware.health.detailed as unknown as RequestHandler);
+  app.get("/metrics", middleware.metricsEndpoint);
+  app.get("/health", middleware.health.liveness as unknown as RequestHandler);
+  app.get("/health/live", middleware.health.liveness as unknown as RequestHandler);
+  app.get("/health/ready", middleware.health.readiness as unknown as RequestHandler);
+  app.get("/health/detailed", middleware.health.detailed as unknown as RequestHandler);
 
   return middleware;
 }

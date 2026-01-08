@@ -13,6 +13,6 @@ IntelGraph is the core graph intelligence engine for Summit / Maestro Conductor.
 
 ## Architecture
 
-*   **Store**: Abstraction over Neo4j.
-*   **Fusion**: Ingestion pipeline with adapters for various providers.
-*   **API**: Express routes serving REST endpoints and executing DSL/CKP.
+- **Store**: Abstraction over Neo4j.
+- **Fusion**: Ingestion pipeline with adapters for various providers.
+- **API**: Express routes serving REST endpoints and executing DSL/CKP.

@@ -1,7 +1,7 @@
 import type {
   AssistantEvent,
   AssistantTransport,
-} from '@/components/ai-enhanced/EnhancedAIAssistant';
+} from "@/components/ai-enhanced/EnhancedAIAssistant";
 
 // ---- Shared utils ----
 export type TransportOpts = {
@@ -17,7 +17,7 @@ export type TransportOpts = {
 
 function expBackoff(
   attempt: number,
-  { baseMs = 300, maxMs = 5000, factor = 2, jitter = true } = {},
+  { baseMs = 300, maxMs = 5000, factor = 2, jitter = true } = {}
 ) {
   const raw = Math.min(maxMs, baseMs * Math.pow(factor, attempt));
   return jitter ? Math.round(raw * (0.7 + Math.random() * 0.6)) : raw;
@@ -25,15 +25,13 @@ function expBackoff(
 
 function withAuthHeaders(getAuthToken: () => string | null) {
   const token = getAuthToken?.();
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (token) headers.Authorization = `Bearer ${token}`;
   return headers;
 }
 
 // ---- Fetch streaming (HTTP) ----
-export function createFetchStreamTransport(
-  opts: TransportOpts,
-): AssistantTransport {
+export function createFetchStreamTransport(opts: TransportOpts): AssistantTransport {
   let handler: ((e: AssistantEvent) => void) | null = null;
   return {
     on: (fn: any) => {
@@ -45,25 +43,25 @@ export function createFetchStreamTransport(
     send: async (input: any, signal: any) => {
       try {
         // Emit a local thinking status so UIs/tests get immediate feedback
-        handler?.({ type: 'status', value: 'thinking' });
+        handler?.({ type: "status", value: "thinking" });
         const res = await fetch(`${opts.baseUrl}/assistant/stream`, {
-          method: 'POST',
+          method: "POST",
           headers: withAuthHeaders(opts.getAuthToken),
           body: JSON.stringify({ input }),
           signal,
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         // Support both streaming body and text() fallback
-        if (res.body && 'getReader' in res.body) {
+        if (res.body && "getReader" in res.body) {
           const reader = res.body.getReader();
           const decoder = new TextDecoder();
-          let buffer = '';
+          let buffer = "";
           while (true) {
             const { value, done } = await reader.read();
             if (done) break;
             buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split('\n');
-            buffer = lines.pop() || ''; // Keep incomplete line in buffer
+            const lines = buffer.split("\n");
+            buffer = lines.pop() || ""; // Keep incomplete line in buffer
             lines.forEach((line) => {
               if (line) {
                 try {
@@ -71,7 +69,7 @@ export function createFetchStreamTransport(
                   handler?.(event);
                 } catch (e) {
                   // Fallback: treat line as a plain token
-                  handler?.({ type: 'token', value: line } as AssistantEvent);
+                  handler?.({ type: "token", value: line } as AssistantEvent);
                 }
               }
             });
@@ -82,11 +80,11 @@ export function createFetchStreamTransport(
               const event = JSON.parse(buffer);
               handler?.(event);
             } catch (e) {
-              handler?.({ type: 'token', value: buffer } as AssistantEvent);
+              handler?.({ type: "token", value: buffer } as AssistantEvent);
             }
           }
           // Signal completion for consumers that expect an explicit done
-          handler?.({ type: 'done' });
+          handler?.({ type: "done" });
         } else {
           const text = await res.text();
           // Assuming fallback text is a single token or error
@@ -94,14 +92,14 @@ export function createFetchStreamTransport(
             const event = JSON.parse(text); // Try to parse as NDJSON event
             handler?.(event);
           } catch (e) {
-            handler?.({ type: 'token', value: text }); // Fallback to plain text token
+            handler?.({ type: "token", value: text }); // Fallback to plain text token
           }
         }
         // Ensure done even for non-streaming paths
-        handler?.({ type: 'done' });
+        handler?.({ type: "done" });
       } catch (e: any) {
         if (signal?.aborted) return;
-        handler?.({ type: 'error', error: e });
+        handler?.({ type: "error", error: e });
       }
     },
   };
@@ -116,25 +114,22 @@ export function createSseTransport(opts: TransportOpts): AssistantTransport {
 
   const open = (input: string, signal: AbortSignal) => {
     const token = opts.getAuthToken?.();
-    const url = new URL(
-      `${opts.baseUrl}/assistant/sse`,
-      window.location.origin,
-    );
-    url.searchParams.set('q', input);
-    if (token) url.searchParams.set('token', token);
+    const url = new URL(`${opts.baseUrl}/assistant/sse`, window.location.origin);
+    url.searchParams.set("q", input);
+    if (token) url.searchParams.set("token", token);
 
     es = new EventSource(url.toString(), { withCredentials: !!token });
     // handler?.({ type: "status", value: "thinking" }); // Server will send this
 
     const onMessage = (ev: MessageEvent) => {
-      const data = (ev.data ?? '').toString();
+      const data = (ev.data ?? "").toString();
       if (data) {
         // Process only if data is not empty
         try {
           const event = JSON.parse(data);
           handler?.(event);
         } catch (e) {
-          console.error('Failed to parse SSE data:', data, e);
+          console.error("Failed to parse SSE data:", data, e);
         }
       }
     };
@@ -148,9 +143,9 @@ export function createSseTransport(opts: TransportOpts): AssistantTransport {
       setTimeout(() => open(input, signal), delay);
     };
 
-    es.addEventListener('message', onMessage);
-    es.addEventListener('error', onError);
-    signal.addEventListener('abort', () => {
+    es.addEventListener("message", onMessage);
+    es.addEventListener("error", onError);
+    signal.addEventListener("abort", () => {
       es?.close();
       es = null;
     });
@@ -168,13 +163,11 @@ export function createSseTransport(opts: TransportOpts): AssistantTransport {
 }
 
 // ---- Socket.IO ----
-export function createSocketIoTransport(
-  opts: TransportOpts,
-): AssistantTransport {
+export function createSocketIoTransport(opts: TransportOpts): AssistantTransport {
   // Lazy-import so tests can mock without bundling the client in non-RT paths
   let SocketIO: any;
   try {
-    SocketIO = require('socket.io-client');
+    SocketIO = require("socket.io-client");
   } catch (_) {}
 
   let handler: ((e: AssistantEvent) => void) | null = null;
@@ -182,11 +175,11 @@ export function createSocketIoTransport(
   let attempt = 0;
 
   const connect = () => {
-    if (!SocketIO) throw new Error('socket.io-client not available');
+    if (!SocketIO) throw new Error("socket.io-client not available");
     const token = opts.getAuthToken?.();
     socket = SocketIO.io(opts.baseUrl, {
       auth: token ? { token } : undefined,
-      transports: ['websocket'],
+      transports: ["websocket"],
       reconnectionAttempts: 0, // we handle backoff manually per request
     });
   };
@@ -201,20 +194,18 @@ export function createSocketIoTransport(
     send: (input: any, signal: any) => {
       const run = () => {
         // handler?.({ type: "status", value: "thinking" }); // Server will send this
-        socket.emit('assistant:ask', { input });
+        socket.emit("assistant:ask", { input });
       };
 
       if (!socket) {
         connect();
-        socket.on('connect', run);
-        socket.on('assistant:token', (event: AssistantEvent) =>
-          handler?.(event),
-        ); // Expecting structured event
-        socket.on('assistant:done', (event: AssistantEvent) => {
+        socket.on("connect", run);
+        socket.on("assistant:token", (event: AssistantEvent) => handler?.(event)); // Expecting structured event
+        socket.on("assistant:done", (event: AssistantEvent) => {
           handler?.(event);
           attempt = 0;
         }); // Expecting structured event
-        socket.on('connect_error', () => {
+        socket.on("connect_error", () => {
           if (signal.aborted) return;
           attempt += 1;
           const delay = expBackoff(attempt, opts.backoff);
@@ -228,7 +219,7 @@ export function createSocketIoTransport(
             if (!signal.aborted) run();
           }, delay);
         });
-        signal.addEventListener('abort', () => {
+        signal.addEventListener("abort", () => {
           try {
             socket?.disconnect();
           } catch {}

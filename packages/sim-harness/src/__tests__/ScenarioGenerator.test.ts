@@ -2,36 +2,36 @@
  * Tests for ScenarioGenerator
  */
 
-import { ScenarioGenerator, getBuiltInTemplates } from '../generator/ScenarioGenerator';
+import { ScenarioGenerator, getBuiltInTemplates } from "../generator/ScenarioGenerator";
 
-describe('ScenarioGenerator', () => {
-  describe('Built-in templates', () => {
-    it('should have fraud-ring template', () => {
+describe("ScenarioGenerator", () => {
+  describe("Built-in templates", () => {
+    it("should have fraud-ring template", () => {
       const templates = getBuiltInTemplates();
-      const fraudRing = templates.find((t) => t.name === 'fraud-ring');
+      const fraudRing = templates.find((t) => t.name === "fraud-ring");
 
       expect(fraudRing).toBeDefined();
-      expect(fraudRing?.type).toBe('financial-crime');
+      expect(fraudRing?.type).toBe("financial-crime");
     });
 
-    it('should have terror-cell template', () => {
+    it("should have terror-cell template", () => {
       const templates = getBuiltInTemplates();
-      const terrorCell = templates.find((t) => t.name === 'terror-cell');
+      const terrorCell = templates.find((t) => t.name === "terror-cell");
 
       expect(terrorCell).toBeDefined();
-      expect(terrorCell?.type).toBe('security-threat');
+      expect(terrorCell?.type).toBe("security-threat");
     });
   });
 
-  describe('Generation', () => {
-    it('should generate deterministic scenario with fixed seed', async () => {
+  describe("Generation", () => {
+    it("should generate deterministic scenario with fixed seed", async () => {
       const generator1 = new ScenarioGenerator({
-        template: 'fraud-ring',
+        template: "fraud-ring",
         params: { seed: 42 },
       });
 
       const generator2 = new ScenarioGenerator({
-        template: 'fraud-ring',
+        template: "fraud-ring",
         params: { seed: 42 },
       });
 
@@ -43,9 +43,9 @@ describe('ScenarioGenerator', () => {
       expect(scenario1.entities[0].name).toBe(scenario2.entities[0].name);
     });
 
-    it('should generate scenario with correct entity count', async () => {
+    it("should generate scenario with correct entity count", async () => {
       const generator = new ScenarioGenerator({
-        template: 'fraud-ring',
+        template: "fraud-ring",
         params: { seed: 42 },
       });
 
@@ -55,17 +55,17 @@ describe('ScenarioGenerator', () => {
       expect(scenario.entities.length).toBe(50);
     });
 
-    it('should generate relationships with valid indices', async () => {
+    it("should generate relationships with valid indices", async () => {
       const generator = new ScenarioGenerator({
-        template: 'fraud-ring',
+        template: "fraud-ring",
         params: { seed: 42 },
       });
 
       const scenario = await generator.generate();
 
       for (const rel of scenario.relationships) {
-        const fromIdx = typeof rel.from === 'number' ? rel.from : -1;
-        const toIdx = typeof rel.to === 'number' ? rel.to : -1;
+        const fromIdx = typeof rel.from === "number" ? rel.from : -1;
+        const toIdx = typeof rel.to === "number" ? rel.to : -1;
 
         expect(fromIdx).toBeGreaterThanOrEqual(0);
         expect(fromIdx).toBeLessThan(scenario.entities.length);
@@ -74,9 +74,9 @@ describe('ScenarioGenerator', () => {
       }
     });
 
-    it('should generate expected outcomes', async () => {
+    it("should generate expected outcomes", async () => {
       const generator = new ScenarioGenerator({
-        template: 'fraud-ring',
+        template: "fraud-ring",
         params: { seed: 42 },
       });
 
@@ -87,9 +87,9 @@ describe('ScenarioGenerator', () => {
       expect(scenario.expectedOutcomes.minRelationshipsFound).toBeGreaterThan(0);
     });
 
-    it('should respect custom params', async () => {
+    it("should respect custom params", async () => {
       const generator = new ScenarioGenerator({
-        template: 'fraud-ring',
+        template: "fraud-ring",
         params: {
           seed: 42,
           nodeCount: 20,
@@ -103,15 +103,15 @@ describe('ScenarioGenerator', () => {
     });
   });
 
-  describe('Safety', () => {
-    it('should reject oversized scenarios', async () => {
+  describe("Safety", () => {
+    it("should reject oversized scenarios", async () => {
       const largeTemplate = {
-        name: 'too-large',
-        type: 'test',
+        name: "too-large",
+        type: "test",
         params: { seed: 42 },
         entities: [
           {
-            type: 'PERSON',
+            type: "PERSON",
             distribution: { count: 20000 }, // Way too large
           },
         ],

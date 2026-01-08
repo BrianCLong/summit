@@ -16,14 +16,14 @@ Only Summit occupies the bottom layer.
 
 ## Tiers Overview
 
-| Tier | Name | Rights | Primary Value |
-|------|------|--------|---------------|
-| **1** | **Insight Providers** | Read-only / Annotate | Signals, Metadata, Risk Scores |
-| **2** | **Recommendation Engines** | Propose / Rank | Analysis, Simulation, Optimization |
-| **3** | **Tool Integrations** | Execute (Guided) | Automation, Ticket Management |
+| Tier  | Name                       | Rights               | Primary Value                      |
+| ----- | -------------------------- | -------------------- | ---------------------------------- |
+| **1** | **Insight Providers**      | Read-only / Annotate | Signals, Metadata, Risk Scores     |
+| **2** | **Recommendation Engines** | Propose / Rank       | Analysis, Simulation, Optimization |
+| **3** | **Tool Integrations**      | Execute (Guided)     | Automation, Ticket Management      |
 
 ## Key Rules
 
-* Data flows **up** (Evidence -> Insight -> Recommendation).
-* Authority flows **down** (Summit -> Decision -> Execution).
-* No layer may bypass the layer below it.
+- Data flows **up** (Evidence -> Insight -> Recommendation).
+- Authority flows **down** (Summit -> Decision -> Execution).
+- No layer may bypass the layer below it.

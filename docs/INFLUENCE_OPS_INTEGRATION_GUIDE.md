@@ -69,6 +69,7 @@ The Influence Operations Defense capabilities leverage Summit/IntelGraph's exist
 **Location**: `server/src/services/DefensivePsyOpsService.ts`
 
 **Current Capabilities**:
+
 - Psychological threat detection
 - Manipulation technique analysis
 - Cognitive manipulation protection
@@ -77,19 +78,20 @@ The Influence Operations Defense capabilities leverage Summit/IntelGraph's exist
 
 **Integration Points**:
 
-| Sprint | Capability | How DefensivePsyOpsService is Used |
-|--------|-----------|-----------------------------------|
-| 1 | Narrative Identification | Use `detectPsychologicalThreats()` for initial narrative flagging |
-| 6 | Manipulation Detection | Leverage `analyzeManipulationTechniques()` for technique identification |
-| 7 | Bias Exploitation | Extend `detectBiasExploitation()` with additional bias types |
-| 8 | Resilience Training | Use `protectAgainstCognitiveManipulation()` to trigger training |
-| 9 | Protective Interventions | Leverage `applyProtectiveMeasures()` for intervention deployment |
-| 18 | Counter-Narratives | Use `generateDefensiveCounterNarrative()` for response creation |
+| Sprint | Capability               | How DefensivePsyOpsService is Used                                      |
+| ------ | ------------------------ | ----------------------------------------------------------------------- |
+| 1      | Narrative Identification | Use `detectPsychologicalThreats()` for initial narrative flagging       |
+| 6      | Manipulation Detection   | Leverage `analyzeManipulationTechniques()` for technique identification |
+| 7      | Bias Exploitation        | Extend `detectBiasExploitation()` with additional bias types            |
+| 8      | Resilience Training      | Use `protectAgainstCognitiveManipulation()` to trigger training         |
+| 9      | Protective Interventions | Leverage `applyProtectiveMeasures()` for intervention deployment        |
+| 18     | Counter-Narratives       | Use `generateDefensiveCounterNarrative()` for response creation         |
 
 **Extension Pattern**:
+
 ```typescript
 // Extend DefensivePsyOpsService for narrative analysis
-import { DefensivePsyOpsService } from '../services/DefensivePsyOpsService';
+import { DefensivePsyOpsService } from "../services/DefensivePsyOpsService";
 
 export class NarrativeAnalysisService extends DefensivePsyOpsService {
   async analyzeNarrative(content: string, metadata: any) {
@@ -120,6 +122,7 @@ export class NarrativeAnalysisService extends DefensivePsyOpsService {
 **Location**: `active-measures-module/`
 
 **Current Capabilities**:
+
 - Red/blue simulation frameworks
 - PsyOps framework
 - Active measures engine
@@ -128,16 +131,17 @@ export class NarrativeAnalysisService extends DefensivePsyOpsService {
 
 **Integration Points**:
 
-| Sprint | Capability | How Active Measures Module is Used |
-|--------|-----------|-----------------------------------|
-| 2 | Propagation Tracking | Use simulation framework to model propagation |
-| 28 | Narrative Simulation | Leverage red-blue simulation for conflict modeling |
-| 29 | Strategic Resilience | Use simulation to test communication strategies |
+| Sprint | Capability           | How Active Measures Module is Used                 |
+| ------ | -------------------- | -------------------------------------------------- |
+| 2      | Propagation Tracking | Use simulation framework to model propagation      |
+| 28     | Narrative Simulation | Leverage red-blue simulation for conflict modeling |
+| 29     | Strategic Resilience | Use simulation to test communication strategies    |
 
 **Extension Pattern**:
+
 ```typescript
 // Use active measures simulation for narrative propagation
-import { SimulationFramework } from 'active-measures-module/src/ai/SimulationFramework';
+import { SimulationFramework } from "active-measures-module/src/ai/SimulationFramework";
 
 export class NarrativePropagationService {
   private simulator: SimulationFramework;
@@ -173,6 +177,7 @@ export class NarrativePropagationService {
 **Location**: `server/src/db/neo4j.ts`, `config/neo4j.ts`
 
 **Current Capabilities**:
+
 - Entity and relationship storage
 - Temporal queries
 - Graph analytics
@@ -181,18 +186,19 @@ export class NarrativePropagationService {
 
 **Integration Points**:
 
-| Sprint | Capability | How Neo4j is Used |
-|--------|-----------|-------------------|
-| 1 | Narrative Storage | Store narratives as nodes with relationships to sources |
-| 2 | Propagation Tracking | Use temporal queries to track narrative spread |
-| 5 | Attribution | Graph traversal to identify source actors |
-| 11 | Bot Detection | Network analysis to identify bot clusters |
-| 12 | CIB Detection | Community detection for coordinated behavior |
-| 14 | Amplification Networks | Centrality algorithms to find key amplifiers |
-| 21 | Ecosystem Mapping | Store media outlets and their connections |
-| 22 | Influence Networks | Model influence relationships in graph |
+| Sprint | Capability             | How Neo4j is Used                                       |
+| ------ | ---------------------- | ------------------------------------------------------- |
+| 1      | Narrative Storage      | Store narratives as nodes with relationships to sources |
+| 2      | Propagation Tracking   | Use temporal queries to track narrative spread          |
+| 5      | Attribution            | Graph traversal to identify source actors               |
+| 11     | Bot Detection          | Network analysis to identify bot clusters               |
+| 12     | CIB Detection          | Community detection for coordinated behavior            |
+| 14     | Amplification Networks | Centrality algorithms to find key amplifiers            |
+| 21     | Ecosystem Mapping      | Store media outlets and their connections               |
+| 22     | Influence Networks     | Model influence relationships in graph                  |
 
 **Data Model Pattern**:
+
 ```cypher
 // Narrative node with temporal properties
 CREATE (n:Narrative {
@@ -228,30 +234,34 @@ CREATE (n)-[:MUTATED_TO {
 ```
 
 **Query Pattern**:
+
 ```typescript
 // Service integration with Neo4j
-import { neo4jDriver } from '../db/neo4j';
+import { neo4jDriver } from "../db/neo4j";
 
 export class NarrativeGraphService {
   async trackPropagation(narrativeId: string, timeRange: [Date, Date]) {
     const session = neo4jDriver.session();
 
     try {
-      const result = await session.run(`
+      const result = await session.run(
+        `
         MATCH (n:Narrative {id: $narrativeId})
         MATCH (a:Actor)-[r:AMPLIFIED]->(n)
         WHERE r.at >= $startTime AND r.at <= $endTime
         RETURN a, r
         ORDER BY r.at ASC
-      `, {
-        narrativeId,
-        startTime: timeRange[0],
-        endTime: timeRange[1],
-      });
+      `,
+        {
+          narrativeId,
+          startTime: timeRange[0],
+          endTime: timeRange[1],
+        }
+      );
 
-      return result.records.map(record => ({
-        actor: record.get('a').properties,
-        amplification: record.get('r').properties,
+      return result.records.map((record) => ({
+        actor: record.get("a").properties,
+        amplification: record.get("r").properties,
       }));
     } finally {
       await session.close();
@@ -267,6 +277,7 @@ export class NarrativeGraphService {
 **Location**: `server/src/ai/`, `apps/ml-engine/`
 
 **Current Capabilities**:
+
 - Text analysis (spaCy NLP)
 - Sentiment analysis
 - Entity recognition
@@ -276,19 +287,20 @@ export class NarrativeGraphService {
 
 **Integration Points**:
 
-| Sprint | Capability | How AI/ML is Used |
-|--------|-----------|-------------------|
-| 1 | Narrative Extraction | Use NLP to extract narrative elements |
-| 3 | Mutation Analysis | Use embeddings to detect semantic similarity |
-| 4 | Sentiment Analysis | Leverage sentiment models for impact assessment |
-| 6 | Manipulation Detection | Use NLP to identify manipulation techniques |
-| 17 | Claim Extraction | Use entity recognition for fact-checking |
-| 27 | Campaign Detection | Use classification models for campaign identification |
+| Sprint | Capability             | How AI/ML is Used                                     |
+| ------ | ---------------------- | ----------------------------------------------------- |
+| 1      | Narrative Extraction   | Use NLP to extract narrative elements                 |
+| 3      | Mutation Analysis      | Use embeddings to detect semantic similarity          |
+| 4      | Sentiment Analysis     | Leverage sentiment models for impact assessment       |
+| 6      | Manipulation Detection | Use NLP to identify manipulation techniques           |
+| 17     | Claim Extraction       | Use entity recognition for fact-checking              |
+| 27     | Campaign Detection     | Use classification models for campaign identification |
 
 **Extension Pattern**:
+
 ```typescript
 // Leverage existing NLP pipeline
-import { EmbeddingService } from '../ai/services/EmbeddingService';
+import { EmbeddingService } from "../ai/services/EmbeddingService";
 
 export class NarrativeEmbeddingService {
   private embeddingService: EmbeddingService;
@@ -298,19 +310,19 @@ export class NarrativeEmbeddingService {
     return await this.embeddingService.embed(narrative);
   }
 
-  async findSimilarNarratives(
-    embedding: number[],
-    threshold: number = 0.8
-  ): Promise<Narrative[]> {
+  async findSimilarNarratives(embedding: number[], threshold: number = 0.8): Promise<Narrative[]> {
     // Use pgvector for similarity search
-    const result = await this.db.query(`
+    const result = await this.db.query(
+      `
       SELECT id, content,
              1 - (embedding <=> $1::vector) as similarity
       FROM narratives
       WHERE 1 - (embedding <=> $1::vector) > $2
       ORDER BY similarity DESC
       LIMIT 10
-    `, [embedding, threshold]);
+    `,
+      [embedding, threshold]
+    );
 
     return result.rows;
   }
@@ -324,6 +336,7 @@ export class NarrativeEmbeddingService {
 **Location**: `server/src/narrative/` (from README.md)
 
 **Current Capabilities**:
+
 - Tick-based narrative propagation
 - Rule-based + LLM generation
 - Event injection
@@ -332,24 +345,25 @@ export class NarrativeEmbeddingService {
 
 **Integration Points**:
 
-| Sprint | Capability | How Simulation Engine is Used |
-|--------|-----------|-------------------------------|
-| 2 | Propagation Modeling | Use tick-based simulation for propagation |
-| 3 | Mutation Prediction | Model narrative mutations over time |
-| 4 | Impact Assessment | Simulate impact on communities |
-| 28 | Narrative Conflict | Run competing narrative simulations |
-| 29 | Resilience Testing | Test communication strategies in simulation |
+| Sprint | Capability           | How Simulation Engine is Used               |
+| ------ | -------------------- | ------------------------------------------- |
+| 2      | Propagation Modeling | Use tick-based simulation for propagation   |
+| 3      | Mutation Prediction  | Model narrative mutations over time         |
+| 4      | Impact Assessment    | Simulate impact on communities              |
+| 28     | Narrative Conflict   | Run competing narrative simulations         |
+| 29     | Resilience Testing   | Test communication strategies in simulation |
 
 **API Integration Pattern**:
+
 ```typescript
 // Use existing simulation API
 export class NarrativeSimulationService {
-  private apiUrl = 'http://localhost:4000/api/narrative-sim';
+  private apiUrl = "http://localhost:4000/api/narrative-sim";
 
   async createSimulation(scenario: SimulationScenario) {
     const response = await fetch(`${this.apiUrl}/simulations`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(scenario),
     });
 
@@ -360,10 +374,10 @@ export class NarrativeSimulationService {
   async injectNarrative(simId: string, narrative: Narrative) {
     // Inject narrative as event
     await fetch(`${this.apiUrl}/simulations/${simId}/events`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        type: 'NARRATIVE_INJECTION',
+        type: "NARRATIVE_INJECTION",
         tick: 0,
         data: {
           narrative: narrative.content,
@@ -375,14 +389,11 @@ export class NarrativeSimulationService {
   }
 
   async runSimulation(simId: string, ticks: number) {
-    const response = await fetch(
-      `${this.apiUrl}/simulations/${simId}/tick`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ steps: ticks }),
-      }
-    );
+    const response = await fetch(`${this.apiUrl}/simulations/${simId}/tick`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ steps: ticks }),
+    });
 
     return await response.json();
   }
@@ -396,6 +407,7 @@ export class NarrativeSimulationService {
 **Location**: `services/api/`, `packages/graphql/`
 
 **Current Capabilities**:
+
 - Apollo Server federation
 - Schema stitching
 - Authentication & authorization
@@ -405,11 +417,13 @@ export class NarrativeSimulationService {
 **Integration Points**:
 
 All sprints will expose capabilities via GraphQL:
+
 - Queries for data retrieval
 - Mutations for operations
 - Subscriptions for real-time updates
 
 **Schema Extension Pattern**:
+
 ```graphql
 # Extend existing schema with narrative types
 extend type Query {
@@ -418,10 +432,7 @@ extend type Query {
   narratives(filter: NarrativeFilter, limit: Int = 25): [Narrative!]!
 
   # Sprint 2: Propagation tracking
-  narrativePropagation(
-    narrativeId: ID!,
-    timeRange: TimeRange
-  ): PropagationMetrics!
+  narrativePropagation(narrativeId: ID!, timeRange: TimeRange): PropagationMetrics!
 
   # Sprint 5: Attribution
   narrativeAttribution(narrativeId: ID!): Attribution!
@@ -432,10 +443,7 @@ extend type Mutation {
   detectNarrative(input: NarrativeInput!): Narrative!
 
   # Sprint 18: Counter-narrative
-  createCounterNarrative(
-    threatId: ID!,
-    input: CounterNarrativeInput!
-  ): CounterNarrative!
+  createCounterNarrative(threatId: ID!, input: CounterNarrativeInput!): CounterNarrative!
 }
 
 extend type Subscription {
@@ -497,17 +505,18 @@ input NarrativeFilter {
 **Location**: `server/src/services/threatHuntingService.ts`
 
 **Current Capabilities**:
+
 - Threat pattern detection
 - Hunting workflows
 - Investigation support
 
 **Integration Points**:
 
-| Sprint | Capability | How Threat Hunting is Used |
-|--------|-----------|---------------------------|
-| 5 | Attribution | Use hunting workflows for actor identification |
-| 27 | Campaign Detection | Leverage threat patterns for campaign identification |
-| 30 | Threat Intelligence | Integrate with hunting workflows |
+| Sprint | Capability          | How Threat Hunting is Used                           |
+| ------ | ------------------- | ---------------------------------------------------- |
+| 5      | Attribution         | Use hunting workflows for actor identification       |
+| 27     | Campaign Detection  | Leverage threat patterns for campaign identification |
+| 30     | Threat Intelligence | Integrate with hunting workflows                     |
 
 ---
 
@@ -516,6 +525,7 @@ input NarrativeFilter {
 **Location**: `server/src/services/provenance-ledger.ts`
 
 **Current Capabilities**:
+
 - Chain of custody tracking
 - Claim verification
 - Audit trail
@@ -523,17 +533,18 @@ input NarrativeFilter {
 
 **Integration Points**:
 
-| Sprint | Capability | How Provenance is Used |
-|--------|-----------|------------------------|
-| 5 | Attribution | Track source chain of custody |
-| 16 | Source Verification | Verify source claims |
-| 17 | Fact-checking | Track verification chain |
-| 30 | Intelligence Reporting | Audit trail for intelligence products |
+| Sprint | Capability             | How Provenance is Used                |
+| ------ | ---------------------- | ------------------------------------- |
+| 5      | Attribution            | Track source chain of custody         |
+| 16     | Source Verification    | Verify source claims                  |
+| 17     | Fact-checking          | Track verification chain              |
+| 30     | Intelligence Reporting | Audit trail for intelligence products |
 
 **Extension Pattern**:
+
 ```typescript
 // Use provenance ledger for narrative tracking
-import { ProvenanceLedger } from '../services/provenance-ledger';
+import { ProvenanceLedger } from "../services/provenance-ledger";
 
 export class NarrativeProvenanceService {
   private ledger: ProvenanceLedger;
@@ -541,14 +552,14 @@ export class NarrativeProvenanceService {
   async recordNarrativeDetection(narrative: Narrative, evidence: Evidence[]) {
     // Record in provenance ledger
     await this.ledger.recordClaim({
-      type: 'NARRATIVE_DETECTION',
+      type: "NARRATIVE_DETECTION",
       subject: narrative.id,
       claims: {
         content: narrative.content,
         detectedAt: narrative.detectedAt,
         threatLevel: narrative.threatLevel,
       },
-      evidence: evidence.map(e => ({
+      evidence: evidence.map((e) => ({
         type: e.type,
         source: e.source,
         hash: e.hash,
@@ -598,10 +609,10 @@ server/src/services/
  * DEFENSIVE ONLY: [Description of defensive purpose]
  */
 
-import { PrismaClient } from '@prisma/client';
-import { EventEmitter } from 'events';
-import logger from '../../utils/logger';
-import { neo4jDriver } from '../../db/neo4j';
+import { PrismaClient } from "@prisma/client";
+import { EventEmitter } from "events";
+import logger from "../../utils/logger";
+import { neo4jDriver } from "../../db/neo4j";
 
 export interface ServiceConfig {
   // Configuration options
@@ -628,10 +639,10 @@ export class ServiceNameService extends EventEmitter {
   async detectCapability(input: Input): Promise<Output> {
     try {
       // Implementation
-      this.emit('capabilityDetected', result);
+      this.emit("capabilityDetected", result);
       return result;
     } catch (error) {
-      this.logger.error('Error in capability:', error);
+      this.logger.error("Error in capability:", error);
       throw error;
     }
   }
@@ -836,50 +847,41 @@ Following Summit's pattern (`/api/*`), add endpoints for influence operations:
 ```typescript
 // server/src/routes/influence-ops.ts
 
-import { Router } from 'express';
-import { NarrativeAnalysisService } from '../services/influence-ops/NarrativeAnalysisService';
-import { authMiddleware } from '../middleware/auth';
-import { rateLimitMiddleware } from '../middleware/rateLimit';
+import { Router } from "express";
+import { NarrativeAnalysisService } from "../services/influence-ops/NarrativeAnalysisService";
+import { authMiddleware } from "../middleware/auth";
+import { rateLimitMiddleware } from "../middleware/rateLimit";
 
 const router = Router();
 const narrativeService = new NarrativeAnalysisService();
 
 // Sprint 1: Narrative detection
-router.post(
-  '/narratives/detect',
-  authMiddleware,
-  rateLimitMiddleware,
-  async (req, res) => {
-    try {
-      const { content, metadata } = req.body;
-      const narrative = await narrativeService.detectNarrative(content, metadata);
-      res.json(narrative);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
+router.post("/narratives/detect", authMiddleware, rateLimitMiddleware, async (req, res) => {
+  try {
+    const { content, metadata } = req.body;
+    const narrative = await narrativeService.detectNarrative(content, metadata);
+    res.json(narrative);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
-);
+});
 
 // Sprint 2: Propagation tracking
-router.get(
-  '/narratives/:id/propagation',
-  authMiddleware,
-  async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { startTime, endTime } = req.query;
+router.get("/narratives/:id/propagation", authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { startTime, endTime } = req.query;
 
-      const metrics = await narrativeService.trackPropagation(
-        id,
-        [new Date(startTime), new Date(endTime)]
-      );
+    const metrics = await narrativeService.trackPropagation(id, [
+      new Date(startTime),
+      new Date(endTime),
+    ]);
 
-      res.json(metrics);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
+    res.json(metrics);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
-);
+});
 
 export default router;
 ```
@@ -889,39 +891,36 @@ export default router;
 ```typescript
 // services/api/src/resolvers/narrative.ts
 
-import { NarrativeAnalysisService } from '../services/influence-ops/NarrativeAnalysisService';
+import { NarrativeAnalysisService } from "../services/influence-ops/NarrativeAnalysisService";
 
 const narrativeService = new NarrativeAnalysisService();
 
 export const narrativeResolvers = {
   Query: {
     narrative: async (_parent, { id }, context) => {
-      await context.authorize('narrative:read');
+      await context.authorize("narrative:read");
       return await narrativeService.getNarrative(id);
     },
 
     narratives: async (_parent, { filter, limit }, context) => {
-      await context.authorize('narrative:read');
+      await context.authorize("narrative:read");
       return await narrativeService.findNarratives(filter, limit);
     },
 
     narrativePropagation: async (_parent, { narrativeId, timeRange }, context) => {
-      await context.authorize('narrative:read');
+      await context.authorize("narrative:read");
       return await narrativeService.trackPropagation(narrativeId, timeRange);
     },
   },
 
   Mutation: {
     detectNarrative: async (_parent, { input }, context) => {
-      await context.authorize('narrative:create');
+      await context.authorize("narrative:create");
 
-      const narrative = await narrativeService.detectNarrative(
-        input.content,
-        input.metadata
-      );
+      const narrative = await narrativeService.detectNarrative(input.content, input.metadata);
 
       // Record in audit log
-      await context.audit('NARRATIVE_DETECTED', { narrativeId: narrative.id });
+      await context.audit("NARRATIVE_DETECTED", { narrativeId: narrative.id });
 
       return narrative;
     },
@@ -930,7 +929,7 @@ export const narrativeResolvers = {
   Subscription: {
     narrativePropagationUpdates: {
       subscribe: async (_parent, { narrativeId }, context) => {
-        await context.authorize('narrative:read');
+        await context.authorize("narrative:read");
 
         // Return async iterator for real-time updates
         return narrativeService.subscribeToPropagation(narrativeId);
@@ -949,7 +948,7 @@ export const narrativeResolvers = {
     },
 
     attributions: async (narrative, _args, context) => {
-      await context.authorize('attribution:read');
+      await context.authorize("attribution:read");
       return await narrativeService.getAttributions(narrative.id);
     },
   },
@@ -967,14 +966,17 @@ export const narrativeResolvers = {
 async function getPropagationChain(narrativeId: string) {
   const session = neo4jDriver.session();
 
-  const result = await session.run(`
+  const result = await session.run(
+    `
     MATCH path = (n:Narrative {id: $narrativeId})<-[r:AMPLIFIED*1..5]-(a:Actor)
     RETURN path,
            length(path) as depth,
            [rel in relationships(path) | rel.at] as timestamps,
            [node in nodes(path) | node.id] as nodeIds
     ORDER BY depth ASC
-  `, { narrativeId });
+  `,
+    { narrativeId }
+  );
 
   await session.close();
   return result.records;
@@ -984,7 +986,8 @@ async function getPropagationChain(narrativeId: string) {
 async function findCoordinatedBehavior(threshold: number = 0.8) {
   const session = neo4jDriver.session();
 
-  const result = await session.run(`
+  const result = await session.run(
+    `
     // Find actors who amplified the same narratives at similar times
     MATCH (a1:Actor)-[r1:AMPLIFIED]->(n:Narrative)<-[r2:AMPLIFIED]-(a2:Actor)
     WHERE a1.id < a2.id  // Avoid duplicates
@@ -1010,7 +1013,9 @@ async function findCoordinatedBehavior(threshold: number = 0.8) {
     RETURN a1.id as actor1, a2.id as actor2,
            sharedNarratives, jaccardSimilarity
     ORDER BY jaccardSimilarity DESC
-  `, { threshold });
+  `,
+    { threshold }
+  );
 
   await session.close();
   return result.records;
@@ -1058,8 +1063,8 @@ async function calculateInfluenceCentrality() {
 
 ```typescript
 // Use existing NLP services
-import { SemanticSearchService } from '../services/SemanticSearchService';
-import { EmbeddingService } from '../ai/services/EmbeddingService';
+import { SemanticSearchService } from "../services/SemanticSearchService";
+import { EmbeddingService } from "../ai/services/EmbeddingService";
 
 export class NarrativeMLService {
   private semanticSearch: SemanticSearchService;
@@ -1085,10 +1090,7 @@ export class NarrativeMLService {
     const originalEmbedding = await this.embeddings.embed(original);
     const variantEmbedding = await this.embeddings.embed(variant);
 
-    const similarity = this.cosineSimilarity(
-      originalEmbedding,
-      variantEmbedding
-    );
+    const similarity = this.cosineSimilarity(originalEmbedding, variantEmbedding);
 
     // If similar but not identical, it's likely a mutation
     if (similarity > 0.7 && similarity < 0.95) {
@@ -1108,10 +1110,10 @@ export class NarrativeMLService {
     const features = this.extractBotFeatures(actorFeatures);
 
     // Use existing ML inference
-    const prediction = await this.mlService.predict('bot-detector', features);
+    const prediction = await this.mlService.predict("bot-detector", features);
 
     return {
-      isBot: prediction.label === 'BOT',
+      isBot: prediction.label === "BOT",
       confidence: prediction.confidence,
       features: prediction.importantFeatures,
     };
@@ -1134,10 +1136,10 @@ export class NarrativeMLService {
 
 ```typescript
 // Use existing Kafka infrastructure
-import { kafka } from '../streaming/kafka';
+import { kafka } from "../streaming/kafka";
 
 export class NarrativeStreamProcessor {
-  private consumer = kafka.consumer({ groupId: 'narrative-processor' });
+  private consumer = kafka.consumer({ groupId: "narrative-processor" });
   private producer = kafka.producer();
 
   async start() {
@@ -1146,7 +1148,7 @@ export class NarrativeStreamProcessor {
 
     // Subscribe to relevant topics
     await this.consumer.subscribe({
-      topics: ['social-media-stream', 'news-feed', 'user-reports'],
+      topics: ["social-media-stream", "news-feed", "user-reports"],
       fromBeginning: false,
     });
 
@@ -1161,25 +1163,29 @@ export class NarrativeStreamProcessor {
         if (narrative) {
           // Publish to narrative topic
           await this.producer.send({
-            topic: 'narrative-detected',
-            messages: [{
-              key: narrative.id,
-              value: JSON.stringify(narrative),
-            }],
+            topic: "narrative-detected",
+            messages: [
+              {
+                key: narrative.id,
+                value: JSON.stringify(narrative),
+              },
+            ],
           });
 
           // Trigger alerts if high threat level
-          if (narrative.threatLevel === 'HIGH' || narrative.threatLevel === 'CRITICAL') {
+          if (narrative.threatLevel === "HIGH" || narrative.threatLevel === "CRITICAL") {
             await this.producer.send({
-              topic: 'high-threat-alerts',
-              messages: [{
-                key: narrative.id,
-                value: JSON.stringify({
-                  type: 'NARRATIVE_THREAT',
-                  severity: narrative.threatLevel,
-                  narrative,
-                }),
-              }],
+              topic: "high-threat-alerts",
+              messages: [
+                {
+                  key: narrative.id,
+                  value: JSON.stringify({
+                    type: "NARRATIVE_THREAT",
+                    severity: narrative.threatLevel,
+                    narrative,
+                  }),
+                },
+              ],
             });
           }
         }
@@ -1197,47 +1203,47 @@ export class NarrativeStreamProcessor {
 
 ```typescript
 // Use existing Prometheus integration
-import { Counter, Histogram, Gauge } from 'prom-client';
+import { Counter, Histogram, Gauge } from "prom-client";
 
 export class NarrativeMetrics {
   // Counters
   private narrativesDetected = new Counter({
-    name: 'narratives_detected_total',
-    help: 'Total number of narratives detected',
-    labelNames: ['threat_level', 'taxonomy'],
+    name: "narratives_detected_total",
+    help: "Total number of narratives detected",
+    labelNames: ["threat_level", "taxonomy"],
   });
 
   private botsDetected = new Counter({
-    name: 'bots_detected_total',
-    help: 'Total number of bots detected',
-    labelNames: ['confidence_level'],
+    name: "bots_detected_total",
+    help: "Total number of bots detected",
+    labelNames: ["confidence_level"],
   });
 
   // Histograms
   private propagationVelocity = new Histogram({
-    name: 'narrative_propagation_velocity',
-    help: 'Narrative propagation velocity distribution',
+    name: "narrative_propagation_velocity",
+    help: "Narrative propagation velocity distribution",
     buckets: [10, 50, 100, 500, 1000, 5000, 10000],
   });
 
   private detectionLatency = new Histogram({
-    name: 'narrative_detection_latency_seconds',
-    help: 'Time to detect narrative',
+    name: "narrative_detection_latency_seconds",
+    help: "Time to detect narrative",
     buckets: [0.1, 0.5, 1, 2, 5, 10],
   });
 
   // Gauges
   private activeThreats = new Gauge({
-    name: 'active_narrative_threats',
-    help: 'Current number of active narrative threats',
-    labelNames: ['threat_level'],
+    name: "active_narrative_threats",
+    help: "Current number of active narrative threats",
+    labelNames: ["threat_level"],
   });
 
   // Record metrics
   recordNarrativeDetection(narrative: Narrative) {
     this.narrativesDetected.inc({
       threat_level: narrative.threatLevel,
-      taxonomy: narrative.taxonomy.join(','),
+      taxonomy: narrative.taxonomy.join(","),
     });
 
     this.activeThreats.inc({ threat_level: narrative.threatLevel });
@@ -1260,30 +1266,38 @@ Add dashboards following Summit's pattern in `observability/grafana/provisioning
     "panels": [
       {
         "title": "Narratives Detected",
-        "targets": [{
-          "expr": "sum by(threat_level) (rate(narratives_detected_total[5m]))"
-        }],
+        "targets": [
+          {
+            "expr": "sum by(threat_level) (rate(narratives_detected_total[5m]))"
+          }
+        ],
         "type": "graph"
       },
       {
         "title": "Active Threats by Level",
-        "targets": [{
-          "expr": "active_narrative_threats"
-        }],
+        "targets": [
+          {
+            "expr": "active_narrative_threats"
+          }
+        ],
         "type": "stat"
       },
       {
         "title": "Propagation Velocity (p95)",
-        "targets": [{
-          "expr": "histogram_quantile(0.95, narrative_propagation_velocity)"
-        }],
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, narrative_propagation_velocity)"
+          }
+        ],
         "type": "gauge"
       },
       {
         "title": "Bot Detection Rate",
-        "targets": [{
-          "expr": "rate(bots_detected_total[5m])"
-        }],
+        "targets": [
+          {
+            "expr": "rate(bots_detected_total[5m])"
+          }
+        ],
         "type": "graph"
       }
     ]
@@ -1300,10 +1314,10 @@ Add dashboards following Summit's pattern in `observability/grafana/provisioning
 ```typescript
 // __tests__/NarrativeAnalysisService.test.ts
 
-import { NarrativeAnalysisService } from '../services/influence-ops/NarrativeAnalysisService';
-import { neo4jDriver } from '../db/neo4j';
+import { NarrativeAnalysisService } from "../services/influence-ops/NarrativeAnalysisService";
+import { neo4jDriver } from "../db/neo4j";
 
-describe('NarrativeAnalysisService', () => {
+describe("NarrativeAnalysisService", () => {
   let service: NarrativeAnalysisService;
   let session;
 
@@ -1314,33 +1328,32 @@ describe('NarrativeAnalysisService', () => {
 
   afterEach(async () => {
     // Cleanup test data
-    await session.run('MATCH (n:Narrative {test: true}) DETACH DELETE n');
+    await session.run("MATCH (n:Narrative {test: true}) DETACH DELETE n");
     await session.close();
   });
 
-  describe('detectNarrative', () => {
-    it('should detect high-threat narratives', async () => {
-      const content = 'Divisive narrative content for testing';
-      const metadata = { source: 'test', test: true };
+  describe("detectNarrative", () => {
+    it("should detect high-threat narratives", async () => {
+      const content = "Divisive narrative content for testing";
+      const metadata = { source: "test", test: true };
 
       const narrative = await service.detectNarrative(content, metadata);
 
-      expect(narrative).toHaveProperty('id');
-      expect(narrative.threatLevel).toBe('HIGH');
-      expect(narrative.taxonomy).toContain('divisive');
+      expect(narrative).toHaveProperty("id");
+      expect(narrative.threatLevel).toBe("HIGH");
+      expect(narrative.taxonomy).toContain("divisive");
     });
 
-    it('should store narrative in Neo4j', async () => {
-      const content = 'Test narrative';
-      const metadata = { source: 'test', test: true };
+    it("should store narrative in Neo4j", async () => {
+      const content = "Test narrative";
+      const metadata = { source: "test", test: true };
 
       const narrative = await service.detectNarrative(content, metadata);
 
       // Verify in Neo4j
-      const result = await session.run(
-        'MATCH (n:Narrative {id: $id}) RETURN n',
-        { id: narrative.id }
-      );
+      const result = await session.run("MATCH (n:Narrative {id: $id}) RETURN n", {
+        id: narrative.id,
+      });
 
       expect(result.records).toHaveLength(1);
     });
@@ -1437,7 +1450,7 @@ async function auditInfluenceOpsAction(
   action: string,
   userId: string,
   resource: any,
-  result: 'SUCCESS' | 'FAILURE'
+  result: "SUCCESS" | "FAILURE"
 ) {
   await prisma.auditLog.create({
     data: {
@@ -1463,7 +1476,7 @@ async function auditInfluenceOpsAction(
 
 ```typescript
 // Use Redis for hot data
-import { redis } from '../cache/redis';
+import { redis } from "../cache/redis";
 
 export class NarrativeCacheService {
   private ttl = 3600; // 1 hour
@@ -1474,11 +1487,7 @@ export class NarrativeCacheService {
   }
 
   async cacheNarrative(narrative: Narrative) {
-    await redis.setex(
-      `narrative:${narrative.id}`,
-      this.ttl,
-      JSON.stringify(narrative)
-    );
+    await redis.setex(`narrative:${narrative.id}`, this.ttl, JSON.stringify(narrative));
   }
 
   async invalidateNarrative(id: string) {

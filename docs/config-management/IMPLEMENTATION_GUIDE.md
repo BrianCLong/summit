@@ -30,12 +30,12 @@ curl http://localhost:8500/v1/status/leader
 ### 2. Initialize Database
 
 ```typescript
-import { Pool } from 'pg';
+import { Pool } from "pg";
 import {
   PostgresConfigRepository,
   SecretsManager,
   ApprovalWorkflowManager,
-} from './server/src/config/distributed';
+} from "./server/src/config/distributed";
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -64,11 +64,11 @@ import {
   InMemoryConfigRepository,
   MultiBackendRepository,
   DistributedConfigService,
-} from './server/src/config/distributed';
+} from "./server/src/config/distributed";
 
 // Create backends
 const consulRepo = new ConsulConfigRepository({
-  host: 'localhost',
+  host: "localhost",
   port: 8500,
 });
 
@@ -146,7 +146,7 @@ DEFAULT_GRACE_PERIOD_DAYS=7
 ### Register Configuration Schema
 
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 const databaseConfigSchema = z.object({
   host: z.string(),
@@ -166,42 +166,42 @@ const databaseConfigSchema = z.object({
   poolSize: z.number().min(1).max(100).default(10),
 });
 
-configService.registerSchema('database/postgres', databaseConfigSchema);
+configService.registerSchema("database/postgres", databaseConfigSchema);
 ```
 
 ### Create Configuration
 
 ```typescript
 const config = {
-  host: 'localhost',
+  host: "localhost",
   port: 5432,
-  database: 'summit_production',
-  username: 'summit',
+  database: "summit_production",
+  username: "summit",
   password: {
     __secretRef: {
-      provider: 'aws',
-      key: 'database/postgres/password',
+      provider: "aws",
+      key: "database/postgres/password",
     },
   },
   ssl: true,
   poolSize: 20,
 };
 
-const version = await configService.createOrUpdate('database/postgres', {
+const version = await configService.createOrUpdate("database/postgres", {
   config,
   overrides: {
     production: {
-      host: 'prod-db.summit.com',
+      host: "prod-db.summit.com",
       ssl: true,
     },
     staging: {
-      host: 'staging-db.summit.com',
+      host: "staging-db.summit.com",
     },
   },
   metadata: {
-    actor: 'admin@summit.com',
-    message: 'Update production database configuration',
-    source: 'manual',
+    actor: "admin@summit.com",
+    message: "Update production database configuration",
+    source: "manual",
   },
 });
 
@@ -212,12 +212,12 @@ console.log(`Created version ${version.metadata.version}`);
 
 ```typescript
 // Get latest version for production environment
-const { effectiveConfig } = await configService.getConfig('database/postgres', {
-  environment: 'production',
-  resolveSecrets: true,  // Resolve secret references
+const { effectiveConfig } = await configService.getConfig("database/postgres", {
+  environment: "production",
+  resolveSecrets: true, // Resolve secret references
 });
 
-console.log('Database config:', effectiveConfig);
+console.log("Database config:", effectiveConfig);
 ```
 
 ---
@@ -229,7 +229,7 @@ console.log('Database config:', effectiveConfig);
 ```typescript
 // Base configuration applies to all environments
 const baseConfig = {
-  apiUrl: 'https://api.summit.com',
+  apiUrl: "https://api.summit.com",
   timeout: 30000,
   retries: 3,
   features: {
@@ -238,28 +238,28 @@ const baseConfig = {
   },
 };
 
-await configService.createOrUpdate('api/config', {
+await configService.createOrUpdate("api/config", {
   config: baseConfig,
   overrides: {
     development: {
-      apiUrl: 'http://localhost:4000',
+      apiUrl: "http://localhost:4000",
       features: {
         enableAnalytics: false,
       },
     },
     staging: {
-      apiUrl: 'https://staging-api.summit.com',
+      apiUrl: "https://staging-api.summit.com",
     },
   },
   metadata: {
-    actor: 'devops@summit.com',
-    message: 'Initialize API configuration',
+    actor: "devops@summit.com",
+    message: "Initialize API configuration",
   },
 });
 
 // Get config for development
-const { effectiveConfig: devConfig } = await configService.getConfig('api/config', {
-  environment: 'development',
+const { effectiveConfig: devConfig } = await configService.getConfig("api/config", {
+  environment: "development",
 });
 // apiUrl will be 'http://localhost:4000'
 // enableAnalytics will be false
@@ -270,30 +270,30 @@ const { effectiveConfig: devConfig } = await configService.getConfig('api/config
 ```typescript
 // Create rotation policy
 await secretsManager.setRotationPolicy({
-  secretId: 'database/postgres/password',
-  rotationIntervalDays: 90,  // Rotate every 90 days
-  gracePeriodDays: 7,  // Keep old secret valid for 7 days
-  notifyOnRotation: ['security@summit.com', 'ops@summit.com'],
+  secretId: "database/postgres/password",
+  rotationIntervalDays: 90, // Rotate every 90 days
+  gracePeriodDays: 7, // Keep old secret valid for 7 days
+  notifyOnRotation: ["security@summit.com", "ops@summit.com"],
   enabled: true,
 });
 
 // Manually rotate a secret
 await secretsManager.rotateSecret(
-  'database/postgres/password',
-  'new-secure-password-12345',
-  'admin@summit.com',
+  "database/postgres/password",
+  "new-secure-password-12345",
+  "admin@summit.com"
 );
 
 // Listen for rotation events
-secretsManager.on('secret:rotated', ({ secretId, newVersion }) => {
+secretsManager.on("secret:rotated", ({ secretId, newVersion }) => {
   console.log(`Secret ${secretId} rotated to version ${newVersion}`);
 });
 
-secretsManager.on('notify:rotation', ({ secretId, recipients }) => {
+secretsManager.on("notify:rotation", ({ secretId, recipients }) => {
   // Send notification emails
   sendEmail(recipients, {
     subject: `Secret ${secretId} has been rotated`,
-    body: 'Please update your services to use the new secret version.',
+    body: "Please update your services to use the new secret version.",
   });
 });
 ```
@@ -302,45 +302,41 @@ secretsManager.on('notify:rotation', ({ secretId, recipients }) => {
 
 ```typescript
 // Set approval rules for production changes
-await approvalManager.setApprovalRules('database/postgres', {
-  approvers: ['lead@summit.com', 'cto@summit.com', 'security@summit.com'],
-  requiredApprovals: 2,  // Need 2 approvals
-  autoApproveFor: ['development'],  // Auto-approve for dev
+await approvalManager.setApprovalRules("database/postgres", {
+  approvers: ["lead@summit.com", "cto@summit.com", "security@summit.com"],
+  requiredApprovals: 2, // Need 2 approvals
+  autoApproveFor: ["development"], // Auto-approve for dev
   requireReason: true,
 });
 
 // Request approval for a change
-const proposedVersion = await configService.createOrUpdate('database/postgres', {
+const proposedVersion = await configService.createOrUpdate("database/postgres", {
   config: newConfig,
   metadata: {
-    actor: 'dev@summit.com',
-    message: 'Increase connection pool size',
+    actor: "dev@summit.com",
+    message: "Increase connection pool size",
   },
 });
 
 const workflow = await approvalManager.createWorkflow(
-  'database/postgres',
+  "database/postgres",
   proposedVersion,
-  'dev@summit.com',
+  "dev@summit.com",
   {
-    environment: 'production',
-    reason: 'Performance improvement - handling increased load',
-  },
+    environment: "production",
+    reason: "Performance improvement - handling increased load",
+  }
 );
 
 console.log(`Created workflow ${workflow.changeId} - Status: ${workflow.status}`);
 
 // Approve the change
-await approvalManager.approve(
-  workflow.changeId,
-  'lead@summit.com',
-  'Looks good, approved',
-);
+await approvalManager.approve(workflow.changeId, "lead@summit.com", "Looks good, approved");
 
 await approvalManager.approve(
   workflow.changeId,
-  'cto@summit.com',
-  'Performance improvement approved',
+  "cto@summit.com",
+  "Performance improvement approved"
 );
 
 // Apply the change
@@ -351,24 +347,23 @@ await approvalManager.markApplied(workflow.changeId);
 
 ```typescript
 // Get current applied configuration
-const { effectiveConfig: expectedConfig } = await configService.getConfig(
-  'database/postgres',
-  { environment: 'production' },
-);
+const { effectiveConfig: expectedConfig } = await configService.getConfig("database/postgres", {
+  environment: "production",
+});
 
 // Get actual running configuration (from your application)
 const actualConfig = await getCurrentDatabaseConfig();
 
 // Detect drift
 const driftReport = await configService.detectDrift(
-  'database/postgres',
-  'production',
-  actualConfig,
+  "database/postgres",
+  "production",
+  actualConfig
 );
 
 if (driftReport.driftDetected) {
-  console.warn('Configuration drift detected!');
-  console.log('Differences:');
+  console.warn("Configuration drift detected!");
+  console.log("Differences:");
   driftReport.deltas.forEach((delta) => {
     console.log(`  ${delta.path}:`);
     console.log(`    Expected: ${delta.expected}`);
@@ -381,15 +376,18 @@ if (driftReport.driftDetected) {
 
 ```typescript
 // List versions
-const versions = await postgresRepo.listVersions('database/postgres');
-console.log('Available versions:', versions.map((v) => v.metadata.version));
+const versions = await postgresRepo.listVersions("database/postgres");
+console.log(
+  "Available versions:",
+  versions.map((v) => v.metadata.version)
+);
 
 // Rollback to previous version
 const rollbackVersion = await configService.rollback(
-  'database/postgres',
-  5,  // version number
-  'admin@summit.com',
-  'Rollback due to performance issues',
+  "database/postgres",
+  5, // version number
+  "admin@summit.com",
+  "Rollback due to performance issues"
 );
 
 console.log(`Rolled back to version ${rollbackVersion.metadata.version}`);
@@ -399,28 +397,28 @@ console.log(`Rolled back to version ${rollbackVersion.metadata.version}`);
 
 ```typescript
 // Create configuration with canary rollout
-await configService.createOrUpdate('api/config', {
+await configService.createOrUpdate("api/config", {
   config: baseConfig,
   canary: {
-    environment: 'production',
-    trafficPercent: 10,  // Start with 10% traffic
+    environment: "production",
+    trafficPercent: 10, // Start with 10% traffic
     config: {
-      timeout: 60000,  // Test increased timeout
+      timeout: 60000, // Test increased timeout
     },
     startAt: new Date(),
-    endAt: new Date(Date.now() + 24 * 60 * 60 * 1000),  // 24 hours
-    guardRailMetrics: ['error_rate', 'latency_p99'],
+    endAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+    guardRailMetrics: ["error_rate", "latency_p99"],
   },
   metadata: {
-    actor: 'sre@summit.com',
-    message: 'Canary rollout for increased timeout',
+    actor: "sre@summit.com",
+    message: "Canary rollout for increased timeout",
   },
 });
 
 // 10% of requests will get the canary configuration
-const { effectiveConfig } = await configService.getConfig('api/config', {
-  environment: 'production',
-  requestId: 'user-123',  // Used for consistent canary assignment
+const { effectiveConfig } = await configService.getConfig("api/config", {
+  environment: "production",
+  requestId: "user-123", // Used for consistent canary assignment
 });
 ```
 
@@ -428,39 +426,39 @@ const { effectiveConfig } = await configService.getConfig('api/config', {
 
 ```typescript
 // Create configuration with A/B test
-await configService.createOrUpdate('ui/theme', {
-  config: { theme: 'light', accentColor: '#007bff' },
+await configService.createOrUpdate("ui/theme", {
+  config: { theme: "light", accentColor: "#007bff" },
   abTest: {
-    experimentId: 'theme-experiment-001',
+    experimentId: "theme-experiment-001",
     variants: [
       {
-        name: 'control',
+        name: "control",
         weight: 0.5,
-        config: { theme: 'light' },
+        config: { theme: "light" },
       },
       {
-        name: 'dark-theme',
+        name: "dark-theme",
         weight: 0.3,
-        config: { theme: 'dark', accentColor: '#00d4ff' },
+        config: { theme: "dark", accentColor: "#00d4ff" },
       },
       {
-        name: 'high-contrast',
+        name: "high-contrast",
         weight: 0.2,
-        config: { theme: 'light', accentColor: '#ff0000' },
+        config: { theme: "light", accentColor: "#ff0000" },
       },
     ],
     startAt: new Date(),
-    endAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),  // 14 days
+    endAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days
   },
   metadata: {
-    actor: 'product@summit.com',
-    message: 'A/B test for theme preferences',
+    actor: "product@summit.com",
+    message: "A/B test for theme preferences",
   },
 });
 
 // Get user-specific configuration
-const { effectiveConfig } = await configService.getConfig('ui/theme', {
-  actorId: 'user-456',  // Consistent assignment per user
+const { effectiveConfig } = await configService.getConfig("ui/theme", {
+  actorId: "user-456", // Consistent assignment per user
 });
 ```
 
@@ -471,6 +469,7 @@ const { effectiveConfig } = await configService.getConfig('ui/theme', {
 ### Migrating from .env Files
 
 **Before:**
+
 ```bash
 # .env
 DATABASE_HOST=localhost
@@ -481,26 +480,27 @@ DATABASE_PASSWORD=devpassword
 ```
 
 **After:**
+
 ```typescript
 // 1. Create configuration
 const dbConfig = {
   host: process.env.DATABASE_HOST,
-  port: parseInt(process.env.DATABASE_PORT || '5432'),
+  port: parseInt(process.env.DATABASE_PORT || "5432"),
   database: process.env.DATABASE_NAME,
   username: process.env.DATABASE_USER,
   password: {
     __secretRef: {
-      provider: 'aws',
-      key: 'database/password',
+      provider: "aws",
+      key: "database/password",
     },
   },
 };
 
-await configService.createOrUpdate('database/postgres', {
+await configService.createOrUpdate("database/postgres", {
   config: dbConfig,
   metadata: {
-    actor: 'migration-script',
-    message: 'Migrated from .env file',
+    actor: "migration-script",
+    message: "Migrated from .env file",
   },
 });
 
@@ -508,14 +508,14 @@ await configService.createOrUpdate('database/postgres', {
 // OLD:
 const client = new Pool({
   host: process.env.DATABASE_HOST,
-  port: parseInt(process.env.DATABASE_PORT || '5432'),
+  port: parseInt(process.env.DATABASE_PORT || "5432"),
   database: process.env.DATABASE_NAME,
   user: process.env.DATABASE_USER,
   password: process.env.DATABASE_PASSWORD,
 });
 
 // NEW:
-const { effectiveConfig } = await configService.getConfig('database/postgres', {
+const { effectiveConfig } = await configService.getConfig("database/postgres", {
   environment: process.env.NODE_ENV,
   resolveSecrets: true,
 });
@@ -533,20 +533,14 @@ const client = new Pool({
 
 ```typescript
 // migration-script.ts
-import fs from 'fs';
-import yaml from 'yaml';
+import fs from "fs";
+import yaml from "yaml";
 
 // Load existing configs
 const configs = {
-  'database/postgres': yaml.parse(
-    fs.readFileSync('config/database.yml', 'utf8')
-  ),
-  'cache/redis': yaml.parse(
-    fs.readFileSync('config/redis.yml', 'utf8')
-  ),
-  'api/settings': yaml.parse(
-    fs.readFileSync('config/api.yml', 'utf8')
-  ),
+  "database/postgres": yaml.parse(fs.readFileSync("config/database.yml", "utf8")),
+  "cache/redis": yaml.parse(fs.readFileSync("config/redis.yml", "utf8")),
+  "api/settings": yaml.parse(fs.readFileSync("config/api.yml", "utf8")),
 };
 
 // Migrate each config
@@ -559,9 +553,9 @@ for (const [configId, config] of Object.entries(configs)) {
       production: config.production,
     },
     metadata: {
-      actor: 'migration-script',
+      actor: "migration-script",
       message: `Migrated from config/${configId}.yml`,
-      source: 'migration',
+      source: "migration",
     },
   });
 
@@ -576,6 +570,7 @@ for (const [configId, config] of Object.entries(configs)) {
 ### 1. Configuration Organization
 
 **Good:**
+
 ```
 configs/
 ├── database/
@@ -594,6 +589,7 @@ configs/
 ```
 
 **Bad:**
+
 ```
 configs/
 ├── config1
@@ -615,14 +611,14 @@ const apiConfigSchema = z.object({
     z.string().min(32),
     z.object({
       __secretRef: z.object({
-        provider: z.enum(['aws', 'gcp', 'azure']),
+        provider: z.enum(["aws", "gcp", "azure"]),
         key: z.string(),
       }),
     }),
   ]),
 });
 
-configService.registerSchema('api/settings', apiConfigSchema);
+configService.registerSchema("api/settings", apiConfigSchema);
 ```
 
 ### 3. Secret References
@@ -630,21 +626,23 @@ configService.registerSchema('api/settings', apiConfigSchema);
 Never store secrets directly in configuration:
 
 **Bad:**
+
 ```typescript
 const config = {
-  apiKey: 'sk-1234567890abcdef',  // ❌ Hardcoded secret
+  apiKey: "sk-1234567890abcdef", // ❌ Hardcoded secret
 };
 ```
 
 **Good:**
+
 ```typescript
 const config = {
   apiKey: {
     __secretRef: {
-      provider: 'aws',
-      key: 'api/openai/key',
+      provider: "aws",
+      key: "api/openai/key",
     },
-  },  // ✅ Secret reference
+  }, // ✅ Secret reference
 };
 ```
 
@@ -655,7 +653,7 @@ Set appropriate rotation intervals based on sensitivity:
 ```typescript
 // High sensitivity - rotate frequently
 await secretsManager.setRotationPolicy({
-  secretId: 'database/admin/password',
+  secretId: "database/admin/password",
   rotationIntervalDays: 30,
   gracePeriodDays: 3,
   enabled: true,
@@ -663,7 +661,7 @@ await secretsManager.setRotationPolicy({
 
 // Medium sensitivity
 await secretsManager.setRotationPolicy({
-  secretId: 'api/integration/key',
+  secretId: "api/integration/key",
   rotationIntervalDays: 90,
   gracePeriodDays: 7,
   enabled: true,
@@ -671,7 +669,7 @@ await secretsManager.setRotationPolicy({
 
 // Low sensitivity
 await secretsManager.setRotationPolicy({
-  secretId: 'monitoring/api/token',
+  secretId: "monitoring/api/token",
   rotationIntervalDays: 180,
   gracePeriodDays: 14,
   enabled: true,
@@ -684,21 +682,21 @@ Always provide meaningful commit messages:
 
 ```typescript
 // Good
-await configService.createOrUpdate('api/settings', {
+await configService.createOrUpdate("api/settings", {
   config,
   metadata: {
-    actor: 'alice@summit.com',
-    message: 'Increase timeout from 30s to 60s to handle large file uploads',
-    source: 'jira-ticket-1234',
+    actor: "alice@summit.com",
+    message: "Increase timeout from 30s to 60s to handle large file uploads",
+    source: "jira-ticket-1234",
   },
 });
 
 // Bad
-await configService.createOrUpdate('api/settings', {
+await configService.createOrUpdate("api/settings", {
   config,
   metadata: {
-    actor: 'alice@summit.com',
-    message: 'update',  // ❌ Not descriptive
+    actor: "alice@summit.com",
+    message: "update", // ❌ Not descriptive
   },
 });
 ```
@@ -715,9 +713,9 @@ Auto-approve for development, require approvals for production:
 
 ```typescript
 await approvalManager.setApprovalRules(configId, {
-  approvers: ['lead@summit.com', 'cto@summit.com'],
+  approvers: ["lead@summit.com", "cto@summit.com"],
   requiredApprovals: 2,
-  autoApproveFor: ['development', 'staging'],
+  autoApproveFor: ["development", "staging"],
 });
 ```
 
@@ -728,11 +726,13 @@ await approvalManager.setApprovalRules(configId, {
 ### Issue: Consul Connection Failed
 
 **Symptoms:**
+
 ```
 Error: connect ECONNREFUSED 127.0.0.1:8500
 ```
 
 **Solution:**
+
 ```bash
 # Check if Consul is running
 curl http://localhost:8500/v1/status/leader
@@ -747,18 +747,20 @@ docker logs summit-consul
 ### Issue: Secret Resolution Failed
 
 **Symptoms:**
+
 ```
 Error: No resolver configured for provider: aws
 ```
 
 **Solution:**
+
 ```typescript
-import { SecretsManager } from './server/src/config/distributed';
+import { SecretsManager } from "./server/src/config/distributed";
 
 // Register AWS secret resolver
 const awsResolver = {
   async resolve(ref: SecretReference): Promise<string> {
-    const client = new AWS.SecretsManager({ region: 'us-east-1' });
+    const client = new AWS.SecretsManager({ region: "us-east-1" });
     const result = await client.getSecretValue({ SecretId: ref.key }).promise();
     return result.SecretString;
   },
@@ -766,28 +768,30 @@ const awsResolver = {
 
 const secretsManager = new SecretsManager({
   pool,
-  resolvers: new Map([['aws', awsResolver]]),
+  resolvers: new Map([["aws", awsResolver]]),
 });
 ```
 
 ### Issue: Approval Workflow Stuck
 
 **Symptoms:**
+
 ```
 Workflow is pending but no one can approve it
 ```
 
 **Solution:**
+
 ```typescript
 // Check workflow status
 const workflow = await approvalManager.getWorkflow(changeId);
-console.log('Approvers:', workflow.approvers);
-console.log('Approvals:', workflow.approvals);
-console.log('Required:', workflow.requiredApprovals);
+console.log("Approvers:", workflow.approvers);
+console.log("Approvals:", workflow.approvals);
+console.log("Required:", workflow.requiredApprovals);
 
 // If needed, update approval rules
 await approvalManager.setApprovalRules(configId, {
-  approvers: ['alice@summit.com', 'bob@summit.com'],
+  approvers: ["alice@summit.com", "bob@summit.com"],
   requiredApprovals: 1,
 });
 ```
@@ -795,26 +799,24 @@ await approvalManager.setApprovalRules(configId, {
 ### Issue: Configuration Drift
 
 **Symptoms:**
+
 ```
 Services are using different configuration than expected
 ```
 
 **Solution:**
+
 ```typescript
 // Run drift detection
-const report = await configService.detectDrift(
-  configId,
-  'production',
-  actualConfig,
-);
+const report = await configService.detectDrift(configId, "production", actualConfig);
 
 if (report.driftDetected) {
   // Option 1: Update configuration to match reality
   await configService.createOrUpdate(configId, {
     config: actualConfig,
     metadata: {
-      actor: 'ops@summit.com',
-      message: 'Sync configuration with running state',
+      actor: "ops@summit.com",
+      message: "Sync configuration with running state",
     },
   });
 

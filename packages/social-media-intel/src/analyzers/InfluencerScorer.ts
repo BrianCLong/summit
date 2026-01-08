@@ -2,7 +2,7 @@
  * Influencer Scorer - Scores and ranks influencers
  */
 
-import type { SocialProfile, SocialPost } from '../types/index.js';
+import type { SocialProfile, SocialPost } from "../types/index.js";
 
 export interface InfluencerScore {
   username: string;
@@ -16,7 +16,7 @@ export interface InfluencerScore {
     consistency: number;
     growth: number;
   };
-  category: 'nano' | 'micro' | 'macro' | 'mega';
+  category: "nano" | "micro" | "macro" | "mega";
 }
 
 export class InfluencerScorer {
@@ -29,16 +29,16 @@ export class InfluencerScorer {
       engagement: this.calculateEngagement(profile, posts),
       authority: this.calculateAuthority(profile),
       consistency: this.calculateConsistency(posts),
-      growth: this.calculateGrowth(profile)
+      growth: this.calculateGrowth(profile),
     };
 
     // Weighted overall score
     const weights = {
       reach: 0.25,
-      engagement: 0.30,
-      authority: 0.20,
+      engagement: 0.3,
+      authority: 0.2,
       consistency: 0.15,
-      growth: 0.10
+      growth: 0.1,
     };
 
     const overallScore =
@@ -53,7 +53,7 @@ export class InfluencerScorer {
       platform: profile.platform,
       overallScore,
       metrics,
-      category: this.categorizeInfluencer(profile)
+      category: this.categorizeInfluencer(profile),
     };
   }
 
@@ -76,8 +76,7 @@ export class InfluencerScorer {
     if (!profile.engagement || posts.length === 0) return 0;
 
     const avgEngagement =
-      posts.reduce((sum, p) => sum + p.likes + p.comments * 2 + p.shares * 3, 0) /
-      posts.length;
+      posts.reduce((sum, p) => sum + p.likes + p.comments * 2 + p.shares * 3, 0) / posts.length;
 
     const followers = profile.followers || 1;
     const engagementRate = avgEngagement / followers;
@@ -99,18 +98,14 @@ export class InfluencerScorer {
 
     // Account age
     if (profile.createdAt) {
-      const ageInYears =
-        (Date.now() - profile.createdAt.getTime()) / (1000 * 60 * 60 * 24 * 365);
+      const ageInYears = (Date.now() - profile.createdAt.getTime()) / (1000 * 60 * 60 * 24 * 365);
       score += Math.min(0.2, ageInYears * 0.05);
     }
 
     // Profile completeness
-    const completeness = [
-      profile.bio,
-      profile.location,
-      profile.website,
-      profile.profileImage
-    ].filter(Boolean).length / 4;
+    const completeness =
+      [profile.bio, profile.location, profile.website, profile.profileImage].filter(Boolean)
+        .length / 4;
     score += completeness * 0.1;
 
     return Math.min(1, score);
@@ -122,7 +117,7 @@ export class InfluencerScorer {
   private calculateConsistency(posts: SocialPost[]): number {
     if (posts.length < 5) return 0.5;
 
-    const timestamps = posts.map(p => p.timestamp.getTime()).sort((a, b) => a - b);
+    const timestamps = posts.map((p) => p.timestamp.getTime()).sort((a, b) => a - b);
     const intervals: number[] = [];
 
     for (let i = 1; i < timestamps.length; i++) {
@@ -162,15 +157,13 @@ export class InfluencerScorer {
   /**
    * Categorize influencer by follower count
    */
-  private categorizeInfluencer(
-    profile: SocialProfile
-  ): 'nano' | 'micro' | 'macro' | 'mega' {
+  private categorizeInfluencer(profile: SocialProfile): "nano" | "micro" | "macro" | "mega" {
     const followers = profile.followers || 0;
 
-    if (followers >= 1000000) return 'mega'; // 1M+
-    if (followers >= 100000) return 'macro'; // 100K+
-    if (followers >= 10000) return 'micro'; // 10K+
-    return 'nano'; // < 10K
+    if (followers >= 1000000) return "mega"; // 1M+
+    if (followers >= 100000) return "macro"; // 100K+
+    if (followers >= 10000) return "micro"; // 10K+
+    return "nano"; // < 10K
   }
 
   /**
@@ -181,7 +174,7 @@ export class InfluencerScorer {
       .sort((a, b) => b.overallScore - a.overallScore)
       .map((score, index) => ({
         ...score,
-        rank: index + 1
+        rank: index + 1,
       }));
   }
 }

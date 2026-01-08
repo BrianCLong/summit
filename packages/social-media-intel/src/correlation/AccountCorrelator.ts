@@ -2,7 +2,7 @@
  * Account Correlator - Links accounts across platforms
  */
 
-import type { SocialProfile } from '../types/index.js';
+import type { SocialProfile } from "../types/index.js";
 
 export interface CorrelationResult {
   profiles: SocialProfile[];
@@ -49,57 +49,49 @@ export class AccountCorrelator {
     let score = 0;
 
     // Check username similarity
-    const usernames = profiles.map(p => p.username.toLowerCase());
+    const usernames = profiles.map((p) => p.username.toLowerCase());
     const uniqueUsernames = new Set(usernames);
     if (uniqueUsernames.size === 1) {
-      evidence.push('Identical usernames');
+      evidence.push("Identical usernames");
       score += 0.4;
     } else {
-      evidence.push('Similar usernames');
+      evidence.push("Similar usernames");
       score += 0.2;
     }
 
     // Check display names
-    const displayNames = profiles
-      .map(p => p.displayName?.toLowerCase())
-      .filter(Boolean);
+    const displayNames = profiles.map((p) => p.displayName?.toLowerCase()).filter(Boolean);
     if (displayNames.length > 1 && new Set(displayNames).size === 1) {
-      evidence.push('Identical display names');
+      evidence.push("Identical display names");
       score += 0.3;
     }
 
     // Check locations
-    const locations = profiles
-      .map(p => p.location?.toLowerCase())
-      .filter(Boolean);
+    const locations = profiles.map((p) => p.location?.toLowerCase()).filter(Boolean);
     if (locations.length > 1 && new Set(locations).size === 1) {
-      evidence.push('Same location');
+      evidence.push("Same location");
       score += 0.15;
     }
 
     // Check websites
-    const websites = profiles
-      .map(p => p.website?.toLowerCase())
-      .filter(Boolean);
+    const websites = profiles.map((p) => p.website?.toLowerCase()).filter(Boolean);
     if (websites.length > 1 && new Set(websites).size === 1) {
-      evidence.push('Same website');
+      evidence.push("Same website");
       score += 0.2;
     }
 
     // Check bio similarity
-    const bios = profiles.map(p => p.bio || '');
+    const bios = profiles.map((p) => p.bio || "");
     const bioSimilarity = this.calculateTextSimilarity(bios);
     if (bioSimilarity > 0.7) {
-      evidence.push('Very similar bios');
+      evidence.push("Very similar bios");
       score += 0.15;
     }
 
     // Check profile images (would need image comparison in production)
-    const profileImages = profiles
-      .map(p => p.profileImage)
-      .filter(Boolean);
+    const profileImages = profiles.map((p) => p.profileImage).filter(Boolean);
     if (profileImages.length > 1) {
-      evidence.push('Multiple profile images (comparison needed)');
+      evidence.push("Multiple profile images (comparison needed)");
       // Would add score after actual image comparison
     }
 
@@ -109,7 +101,7 @@ export class AccountCorrelator {
       profiles,
       confidence,
       evidence,
-      score
+      score,
     };
   }
 
@@ -119,7 +111,7 @@ export class AccountCorrelator {
   private normalizeUsername(username: string): string {
     return username
       .toLowerCase()
-      .replace(/[^a-z0-9]/g, '')
+      .replace(/[^a-z0-9]/g, "")
       .substring(0, 10); // Compare first 10 chars
   }
 

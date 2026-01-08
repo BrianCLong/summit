@@ -98,13 +98,13 @@ Summit's data pipeline infrastructure provides a comprehensive ETL/ELT framework
 
 ### Component Overview
 
-| Component | Purpose | Location |
-|-----------|---------|----------|
-| **ETL Framework** | Core pipeline execution engine | `packages/etl-framework/` |
-| **Data Integration** | Connectors and data source abstractions | `packages/data-integration/` |
-| **ETL Service** | REST API for pipeline management | `services/etl-service/` |
-| **Pipeline Orchestrator** | Multi-pipeline coordination | `services/orchestration/` |
-| **Provenance Ledger** | Lineage and audit trail tracking | `services/prov-ledger/` |
+| Component                 | Purpose                                 | Location                     |
+| ------------------------- | --------------------------------------- | ---------------------------- |
+| **ETL Framework**         | Core pipeline execution engine          | `packages/etl-framework/`    |
+| **Data Integration**      | Connectors and data source abstractions | `packages/data-integration/` |
+| **ETL Service**           | REST API for pipeline management        | `services/etl-service/`      |
+| **Pipeline Orchestrator** | Multi-pipeline coordination             | `services/orchestration/`    |
+| **Provenance Ledger**     | Lineage and audit trail tracking        | `services/prov-ledger/`      |
 
 ---
 
@@ -115,10 +115,10 @@ Summit's data pipeline infrastructure provides a comprehensive ETL/ELT framework
 The `PipelineExecutor` orchestrates the complete ETL/ELT workflow.
 
 ```typescript
-import { PipelineExecutor } from '@intelgraph/etl-framework';
-import { createLogger } from 'winston';
+import { PipelineExecutor } from "@intelgraph/etl-framework";
+import { createLogger } from "winston";
 
-const logger = createLogger({ level: 'info' });
+const logger = createLogger({ level: "info" });
 const executor = new PipelineExecutor(logger);
 
 // Execute pipeline
@@ -128,6 +128,7 @@ console.log(`Loaded ${run.recordsLoaded} records in ${run.metrics.totalDurationM
 ```
 
 **Key Features**:
+
 - Event-driven execution (start, progress, completed, failed)
 - Automatic error handling and retry logic
 - Comprehensive metrics collection
@@ -138,16 +139,16 @@ console.log(`Loaded ${run.recordsLoaded} records in ${run.metrics.totalDurationM
 The `CDCEngine` captures data changes using multiple strategies.
 
 ```typescript
-import { CDCEngine, CDCStrategy } from '@intelgraph/etl-framework';
+import { CDCEngine, CDCStrategy } from "@intelgraph/etl-framework";
 
 const cdcEngine = new CDCEngine(
   {
     strategy: CDCStrategy.TIMESTAMP,
-    sourceTable: 'users',
-    primaryKeys: ['id'],
-    trackingColumn: 'updated_at',
+    sourceTable: "users",
+    primaryKeys: ["id"],
+    trackingColumn: "updated_at",
     pollIntervalSeconds: 60,
-    batchSize: 1000
+    batchSize: 1000,
   },
   logger
 );
@@ -156,7 +157,7 @@ await cdcEngine.connect(connectionString);
 await cdcEngine.start();
 
 // Listen for changes
-cdcEngine.on('changes', (cdcRecords) => {
+cdcEngine.on("changes", (cdcRecords) => {
   console.log(`Captured ${cdcRecords.length} changes`);
 });
 ```
@@ -166,22 +167,22 @@ cdcEngine.on('changes', (cdcRecords) => {
 The `DataQualityMonitor` assesses data quality across six dimensions.
 
 ```typescript
-import { DataQualityMonitor, QualityDimension } from '@intelgraph/etl-framework';
+import { DataQualityMonitor, QualityDimension } from "@intelgraph/etl-framework";
 
 const monitor = new DataQualityMonitor(logger);
 
 // Add custom quality rules
 monitor.addRule({
-  id: 'email-format',
-  name: 'Email Format Validation',
+  id: "email-format",
+  name: "Email Format Validation",
   dimension: QualityDimension.VALIDITY,
   rule: {
-    type: 'format',
-    config: { field: 'email', format: 'email' }
+    type: "format",
+    config: { field: "email", format: "email" },
   },
   threshold: 95.0,
-  severity: 'high',
-  enabled: true
+  severity: "high",
+  enabled: true,
 });
 
 // Generate quality report
@@ -196,20 +197,20 @@ console.log(`Issues Found: ${report.issues.length}`);
 The `IncrementalLoader` handles watermark-based incremental loading.
 
 ```typescript
-import { IncrementalLoader } from '@intelgraph/etl-framework';
+import { IncrementalLoader } from "@intelgraph/etl-framework";
 
 const loader = new IncrementalLoader(
   {
-    sourceTable: 'transactions',
-    targetTable: 'transactions_dwh',
-    incrementalColumn: 'created_at',
-    primaryKeys: ['transaction_id'],
+    sourceTable: "transactions",
+    targetTable: "transactions_dwh",
+    incrementalColumn: "created_at",
+    primaryKeys: ["transaction_id"],
     watermark: {
-      watermarkColumn: 'created_at',
-      watermarkType: 'timestamp',
-      lookbackWindow: 300 // 5 minutes lookback
+      watermarkColumn: "created_at",
+      watermarkType: "timestamp",
+      lookbackWindow: 300, // 5 minutes lookback
     },
-    batchSize: 5000
+    batchSize: 5000,
   },
   logger
 );
@@ -227,27 +228,23 @@ console.log(`Loaded ${loadState.recordsLoaded} new records`);
 The `ProvenanceIntegration` tracks complete lineage and audit trails.
 
 ```typescript
-import { ProvenanceIntegration } from '@intelgraph/etl-framework';
+import { ProvenanceIntegration } from "@intelgraph/etl-framework";
 
 const provenance = new ProvenanceIntegration(
   {
-    baseURL: 'http://localhost:4010',
-    authorityId: 'etl-service',
-    reasonForAccess: 'pipeline execution',
-    enabled: true
+    baseURL: "http://localhost:4010",
+    authorityId: "etl-service",
+    reasonForAccess: "pipeline execution",
+    enabled: true,
   },
   logger
 );
 
 // Register pipeline run as evidence
-const evidenceId = await provenance.registerPipelineRun(pipelineRun, 'case-001');
+const evidenceId = await provenance.registerPipelineRun(pipelineRun, "case-001");
 
 // Create provenance chain
-const chainId = await provenance.createProvenanceChain(
-  pipelineRun,
-  [evidenceId],
-  'claim-001'
-);
+const chainId = await provenance.createProvenanceChain(pipelineRun, [evidenceId], "claim-001");
 ```
 
 ---
@@ -280,6 +277,7 @@ pipeline:
 ```
 
 **Use Cases**:
+
 - Initial data migration
 - Small tables that change infrequently
 - Daily full refresh scenarios
@@ -309,6 +307,7 @@ pipeline:
 ```
 
 **Use Cases**:
+
 - Large, frequently updated tables
 - Real-time or near-real-time sync
 - Append-only logs or events
@@ -336,6 +335,7 @@ pipeline:
 ```
 
 **Use Cases**:
+
 - Audit requirements
 - Historical change tracking
 - Regulatory compliance
@@ -370,6 +370,7 @@ pipeline:
 ```
 
 **Use Cases**:
+
 - Event processing
 - Metrics aggregation
 - Real-time dashboards
@@ -395,6 +396,7 @@ pipeline:
 ```
 
 **Schema**:
+
 ```sql
 CREATE TABLE customers_dwh (
   surrogate_key SERIAL PRIMARY KEY,
@@ -408,6 +410,7 @@ CREATE TABLE customers_dwh (
 ```
 
 **Use Cases**:
+
 - Maintaining history for reporting
 - Point-in-time analysis
 - Regulatory compliance
@@ -425,10 +428,10 @@ Tracks changes using `updated_at` or similar timestamp column.
 ```typescript
 const cdcConfig = {
   strategy: CDCStrategy.TIMESTAMP,
-  sourceTable: 'orders',
-  trackingColumn: 'updated_at',
-  primaryKeys: ['order_id'],
-  pollIntervalSeconds: 60
+  sourceTable: "orders",
+  trackingColumn: "updated_at",
+  primaryKeys: ["order_id"],
+  pollIntervalSeconds: 60,
 };
 ```
 
@@ -442,10 +445,10 @@ Uses version/sequence number for tracking.
 ```typescript
 const cdcConfig = {
   strategy: CDCStrategy.VERSION,
-  sourceTable: 'inventory',
-  trackingColumn: 'version',
-  primaryKeys: ['sku'],
-  pollIntervalSeconds: 30
+  sourceTable: "inventory",
+  trackingColumn: "version",
+  primaryKeys: ["sku"],
+  pollIntervalSeconds: 30,
 };
 ```
 
@@ -459,11 +462,11 @@ Database triggers populate a change tracking table.
 ```typescript
 const cdcConfig = {
   strategy: CDCStrategy.TRIGGER,
-  sourceTable: 'accounts',
-  primaryKeys: ['account_id'],
+  sourceTable: "accounts",
+  primaryKeys: ["account_id"],
   captureDeletes: true,
   includeOldValues: true,
-  pollIntervalSeconds: 10
+  pollIntervalSeconds: 10,
 };
 ```
 
@@ -525,29 +528,29 @@ Define custom quality rules:
 
 ```typescript
 const completenessRule: QualityRuleConfig = {
-  id: 'email-completeness',
-  name: 'Email Completeness Check',
+  id: "email-completeness",
+  name: "Email Completeness Check",
   dimension: QualityDimension.COMPLETENESS,
   rule: {
-    type: 'null_check',
-    config: { field: 'email', allowNull: false }
+    type: "null_check",
+    config: { field: "email", allowNull: false },
   },
   threshold: 95.0,
-  severity: 'high',
-  enabled: true
+  severity: "high",
+  enabled: true,
 };
 
 const formatRule: QualityRuleConfig = {
-  id: 'phone-format',
-  name: 'Phone Format Validation',
+  id: "phone-format",
+  name: "Phone Format Validation",
   dimension: QualityDimension.VALIDITY,
   rule: {
-    type: 'format',
-    config: { field: 'phone', format: 'phone' }
+    type: "format",
+    config: { field: "phone", format: "phone" },
   },
   threshold: 90.0,
-  severity: 'medium',
-  enabled: true
+  severity: "medium",
+  enabled: true,
 };
 
 monitor.addRule(completenessRule);
@@ -591,13 +594,13 @@ monitor.addRule(formatRule);
 Set up alerts for quality issues:
 
 ```typescript
-monitor.on('quality:issue', (issue) => {
-  if (issue.severity === 'critical') {
+monitor.on("quality:issue", (issue) => {
+  if (issue.severity === "critical") {
     // Alert ops team
     alertService.send({
-      title: 'Critical Data Quality Issue',
+      title: "Critical Data Quality Issue",
       message: issue.message,
-      severity: 'critical'
+      severity: "critical",
     });
   }
 });
@@ -634,19 +637,20 @@ Use lookback windows to handle late-arriving data:
 
 ```typescript
 const config: IncrementalConfig = {
-  sourceTable: 'events',
-  targetTable: 'events_dwh',
-  incrementalColumn: 'event_time',
-  primaryKeys: ['event_id'],
+  sourceTable: "events",
+  targetTable: "events_dwh",
+  incrementalColumn: "event_time",
+  primaryKeys: ["event_id"],
   watermark: {
-    watermarkColumn: 'event_time',
-    watermarkType: 'timestamp',
-    lookbackWindow: 3600 // 1 hour lookback
-  }
+    watermarkColumn: "event_time",
+    watermarkType: "timestamp",
+    lookbackWindow: 3600, // 1 hour lookback
+  },
 };
 ```
 
 **Why lookback windows?**
+
 - Handles clock skew between systems
 - Captures updates to recently inserted records
 - Provides safety buffer for distributed systems
@@ -668,7 +672,7 @@ await loader.resetWatermark();
 Register pipeline runs as evidence:
 
 ```typescript
-const evidenceId = await provenance.registerPipelineRun(pipelineRun, 'case-001');
+const evidenceId = await provenance.registerPipelineRun(pipelineRun, "case-001");
 ```
 
 ### Provenance Chain
@@ -678,8 +682,8 @@ Create complete lineage chain:
 ```typescript
 const chainId = await provenance.createProvenanceChain(
   pipelineRun,
-  ['evidence-001', 'evidence-002'],
-  'claim-001'
+  ["evidence-001", "evidence-002"],
+  "claim-001"
 );
 ```
 
@@ -688,7 +692,7 @@ const chainId = await provenance.createProvenanceChain(
 Generate disclosure bundle with Merkle tree:
 
 ```typescript
-const bundle = await provenance.generateDisclosureBundle('case-001');
+const bundle = await provenance.generateDisclosureBundle("case-001");
 
 console.log(`Merkle Root: ${bundle.merkleRoot}`);
 console.log(`Evidence Count: ${bundle.evidence.length}`);
@@ -953,6 +957,7 @@ curl http://localhost:4020/quality/reports/:runId | jq '.issues[]'
 **Symptoms**: Incremental load repeatedly processes same records
 
 **Solution**:
+
 ```sql
 -- Check watermark table
 SELECT * FROM etl_watermarks WHERE source_table = 'your_table' ORDER BY last_load_time DESC;
@@ -969,6 +974,7 @@ DELETE FROM etl_watermarks WHERE source_table = 'your_table';
 **Symptoms**: Change capture lag increasing
 
 **Solution**:
+
 - Increase batch size: `batchSize: 5000`
 - Reduce poll interval: `pollIntervalSeconds: 30`
 - Add more CDC workers
@@ -979,6 +985,7 @@ DELETE FROM etl_watermarks WHERE source_table = 'your_table';
 **Symptoms**: Data quality reports show declining scores
 
 **Solution**:
+
 1. Review quality report issues
 2. Check source data quality
 3. Add validation rules upstream
@@ -989,6 +996,7 @@ DELETE FROM etl_watermarks WHERE source_table = 'your_table';
 **Symptoms**: OOM errors during execution
 
 **Solution**:
+
 - Reduce batch size
 - Enable streaming extraction
 - Increase Node.js heap: `--max-old-space-size=4096`
@@ -1008,6 +1016,7 @@ DELETE FROM etl_watermarks WHERE source_table = 'your_table';
 ## Support
 
 For issues, questions, or feature requests:
+
 - **GitHub Issues**: [summit/issues](https://github.com/BrianCLong/summit/issues)
 - **Internal Slack**: #summit-data-platform
 - **Email**: data-platform-team@summit.io

@@ -15,38 +15,38 @@ export interface NeuralFingerprint {
 }
 
 export enum ModelFamily {
-  STABLE_DIFFUSION = 'stable_diffusion',
-  MIDJOURNEY = 'midjourney',
-  DALL_E = 'dall_e',
-  IMAGEN = 'imagen',
-  GPT = 'gpt',
-  CLAUDE = 'claude',
-  LLAMA = 'llama',
-  PALM = 'palm',
-  GEMINI = 'gemini',
-  ELEVENLABS = 'elevenlabs',
-  RESEMBLE = 'resemble',
-  TORTOISE = 'tortoise',
-  BARK = 'bark',
-  SORA = 'sora',
-  RUNWAY = 'runway',
-  PIKA = 'pika',
-  UNKNOWN = 'unknown',
+  STABLE_DIFFUSION = "stable_diffusion",
+  MIDJOURNEY = "midjourney",
+  DALL_E = "dall_e",
+  IMAGEN = "imagen",
+  GPT = "gpt",
+  CLAUDE = "claude",
+  LLAMA = "llama",
+  PALM = "palm",
+  GEMINI = "gemini",
+  ELEVENLABS = "elevenlabs",
+  RESEMBLE = "resemble",
+  TORTOISE = "tortoise",
+  BARK = "bark",
+  SORA = "sora",
+  RUNWAY = "runway",
+  PIKA = "pika",
+  UNKNOWN = "unknown",
 }
 
 export enum ModelArchitecture {
-  TRANSFORMER = 'transformer',
-  DIFFUSION = 'diffusion',
-  GAN = 'gan',
-  VAE = 'vae',
-  FLOW = 'flow',
-  AUTOREGRESSIVE = 'autoregressive',
-  HYBRID = 'hybrid',
-  UNKNOWN = 'unknown',
+  TRANSFORMER = "transformer",
+  DIFFUSION = "diffusion",
+  GAN = "gan",
+  VAE = "vae",
+  FLOW = "flow",
+  AUTOREGRESSIVE = "autoregressive",
+  HYBRID = "hybrid",
+  UNKNOWN = "unknown",
 }
 
 export interface FingerprintVector {
-  domain: 'frequency' | 'spatial' | 'temporal' | 'semantic' | 'statistical';
+  domain: "frequency" | "spatial" | "temporal" | "semantic" | "statistical";
   vector: number[];
   confidence: number;
   matchedSignatures: string[];
@@ -79,7 +79,7 @@ export class NeuralFingerprintingEngine {
       frequencyPatterns: this.getSDFrequencyPatterns(),
       spatialArtifacts: this.getSDSpatialArtifacts(),
       latentSpaceCharacteristics: this.getSDLatentCharacteristics(),
-      versions: ['1.4', '1.5', '2.0', '2.1', 'XL', 'XL-Turbo', '3.0'],
+      versions: ["1.4", "1.5", "2.0", "2.1", "XL", "XL-Turbo", "3.0"],
     });
 
     this.modelSignatures.set(ModelFamily.MIDJOURNEY, {
@@ -87,7 +87,7 @@ export class NeuralFingerprintingEngine {
       frequencyPatterns: this.getMJFrequencyPatterns(),
       spatialArtifacts: this.getMJSpatialArtifacts(),
       latentSpaceCharacteristics: this.getMJLatentCharacteristics(),
-      versions: ['v4', 'v5', 'v5.1', 'v5.2', 'v6'],
+      versions: ["v4", "v5", "v5.1", "v5.2", "v6"],
     });
 
     this.modelSignatures.set(ModelFamily.DALL_E, {
@@ -95,7 +95,7 @@ export class NeuralFingerprintingEngine {
       frequencyPatterns: this.getDALLEFrequencyPatterns(),
       spatialArtifacts: this.getDALLESpatialArtifacts(),
       latentSpaceCharacteristics: this.getDALLELatentCharacteristics(),
-      versions: ['2', '3'],
+      versions: ["2", "3"],
     });
 
     // Add more model signatures...
@@ -105,27 +105,28 @@ export class NeuralFingerprintingEngine {
    * Extract comprehensive neural fingerprint from media
    */
   async extractFingerprint(media: {
-    type: 'image' | 'audio' | 'video' | 'text';
+    type: "image" | "audio" | "video" | "text";
     data: Buffer | string;
   }): Promise<NeuralFingerprint> {
     const fingerprints: FingerprintVector[] = [];
 
     switch (media.type) {
-      case 'image':
+      case "image":
         fingerprints.push(...(await this.extractImageFingerprints(media.data as Buffer)));
         break;
-      case 'audio':
+      case "audio":
         fingerprints.push(...(await this.extractAudioFingerprints(media.data as Buffer)));
         break;
-      case 'video':
+      case "video":
         fingerprints.push(...(await this.extractVideoFingerprints(media.data as Buffer)));
         break;
-      case 'text':
+      case "text":
         fingerprints.push(...(await this.extractTextFingerprints(media.data as string)));
         break;
     }
 
-    const { modelFamily, architecture, confidence, version } = await this.identifyModel(fingerprints);
+    const { modelFamily, architecture, confidence, version } =
+      await this.identifyModel(fingerprints);
     const temporalSignature = await this.extractTemporalSignature(media);
     const adversarialResistance = await this.assessAdversarialResistance(fingerprints);
 
@@ -199,7 +200,7 @@ export class NeuralFingerprintingEngine {
     const rolloffCharacteristic = this.analyzeFrequencyRolloff(fftVector);
 
     return {
-      domain: 'frequency',
+      domain: "frequency",
       vector: [...radialProfile, checkerboardScore, ...rolloffCharacteristic],
       confidence: 0.85,
       matchedSignatures: [],
@@ -213,7 +214,7 @@ export class NeuralFingerprintingEngine {
     const dctVector = new Array(64).fill(0).map(() => Math.random());
 
     return {
-      domain: 'frequency',
+      domain: "frequency",
       vector: dctVector,
       confidence: 0.8,
       matchedSignatures: [],
@@ -227,7 +228,7 @@ export class NeuralFingerprintingEngine {
     const waveletVector = new Array(128).fill(0).map(() => Math.random());
 
     return {
-      domain: 'spatial',
+      domain: "spatial",
       vector: waveletVector,
       confidence: 0.82,
       matchedSignatures: [],
@@ -241,7 +242,7 @@ export class NeuralFingerprintingEngine {
     const lbpVector = new Array(256).fill(0).map(() => Math.random());
 
     return {
-      domain: 'spatial',
+      domain: "spatial",
       vector: lbpVector,
       confidence: 0.78,
       matchedSignatures: [],
@@ -255,7 +256,7 @@ export class NeuralFingerprintingEngine {
     const glcmVector = new Array(32).fill(0).map(() => Math.random());
 
     return {
-      domain: 'statistical',
+      domain: "statistical",
       vector: glcmVector,
       confidence: 0.75,
       matchedSignatures: [],
@@ -270,7 +271,7 @@ export class NeuralFingerprintingEngine {
     const noiseVector = new Array(64).fill(0).map(() => Math.random());
 
     return {
-      domain: 'statistical',
+      domain: "statistical",
       vector: noiseVector,
       confidence: 0.88,
       matchedSignatures: [],
@@ -286,10 +287,10 @@ export class NeuralFingerprintingEngine {
     const ganVector = new Array(32).fill(0).map(() => Math.random());
 
     return {
-      domain: 'spatial',
+      domain: "spatial",
       vector: ganVector,
       confidence: 0.9,
-      matchedSignatures: ['StyleGAN', 'ProGAN'],
+      matchedSignatures: ["StyleGAN", "ProGAN"],
     };
   }
 
@@ -302,10 +303,10 @@ export class NeuralFingerprintingEngine {
     const diffusionVector = new Array(48).fill(0).map(() => Math.random());
 
     return {
-      domain: 'temporal',
+      domain: "temporal",
       vector: diffusionVector,
       confidence: 0.87,
-      matchedSignatures: ['DDPM', 'DDIM', 'Euler'],
+      matchedSignatures: ["DDPM", "DDIM", "Euler"],
     };
   }
 
@@ -318,7 +319,7 @@ export class NeuralFingerprintingEngine {
     const upsampleVector = new Array(24).fill(0).map(() => Math.random());
 
     return {
-      domain: 'spatial',
+      domain: "spatial",
       vector: upsampleVector,
       confidence: 0.83,
       matchedSignatures: [],
@@ -334,7 +335,7 @@ export class NeuralFingerprintingEngine {
     const semanticVector = new Array(512).fill(0).map(() => Math.random());
 
     return {
-      domain: 'semantic',
+      domain: "semantic",
       vector: semanticVector,
       confidence: 0.8,
       matchedSignatures: [],
@@ -368,7 +369,7 @@ export class NeuralFingerprintingEngine {
   private async extractMelSpectrogramFingerprint(audioBuffer: Buffer): Promise<FingerprintVector> {
     const melVector = new Array(128).fill(0).map(() => Math.random());
     return {
-      domain: 'frequency',
+      domain: "frequency",
       vector: melVector,
       confidence: 0.88,
       matchedSignatures: [],
@@ -378,7 +379,7 @@ export class NeuralFingerprintingEngine {
   private async extractMFCCFingerprint(audioBuffer: Buffer): Promise<FingerprintVector> {
     const mfccVector = new Array(40).fill(0).map(() => Math.random());
     return {
-      domain: 'frequency',
+      domain: "frequency",
       vector: mfccVector,
       confidence: 0.85,
       matchedSignatures: [],
@@ -388,7 +389,7 @@ export class NeuralFingerprintingEngine {
   private async extractProsodyFingerprint(audioBuffer: Buffer): Promise<FingerprintVector> {
     const prosodyVector = new Array(64).fill(0).map(() => Math.random());
     return {
-      domain: 'temporal',
+      domain: "temporal",
       vector: prosodyVector,
       confidence: 0.82,
       matchedSignatures: [],
@@ -404,17 +405,17 @@ export class NeuralFingerprintingEngine {
 
     const vocoderVector = new Array(32).fill(0).map(() => Math.random());
     return {
-      domain: 'frequency',
+      domain: "frequency",
       vector: vocoderVector,
       confidence: 0.9,
-      matchedSignatures: ['WaveNet', 'HiFi-GAN', 'VITS'],
+      matchedSignatures: ["WaveNet", "HiFi-GAN", "VITS"],
     };
   }
 
   private async extractPhaseFingerprint(audioBuffer: Buffer): Promise<FingerprintVector> {
     const phaseVector = new Array(48).fill(0).map(() => Math.random());
     return {
-      domain: 'frequency',
+      domain: "frequency",
       vector: phaseVector,
       confidence: 0.78,
       matchedSignatures: [],
@@ -442,10 +443,12 @@ export class NeuralFingerprintingEngine {
     return fingerprints;
   }
 
-  private async extractTemporalCoherenceFingerprint(videoBuffer: Buffer): Promise<FingerprintVector> {
+  private async extractTemporalCoherenceFingerprint(
+    videoBuffer: Buffer
+  ): Promise<FingerprintVector> {
     const temporalVector = new Array(64).fill(0).map(() => Math.random());
     return {
-      domain: 'temporal',
+      domain: "temporal",
       vector: temporalVector,
       confidence: 0.85,
       matchedSignatures: [],
@@ -455,7 +458,7 @@ export class NeuralFingerprintingEngine {
   private async extractMotionFingerprint(videoBuffer: Buffer): Promise<FingerprintVector> {
     const motionVector = new Array(96).fill(0).map(() => Math.random());
     return {
-      domain: 'temporal',
+      domain: "temporal",
       vector: motionVector,
       confidence: 0.87,
       matchedSignatures: [],
@@ -465,7 +468,7 @@ export class NeuralFingerprintingEngine {
   private async extractFrameArtifacts(videoBuffer: Buffer): Promise<FingerprintVector> {
     const frameVector = new Array(128).fill(0).map(() => Math.random());
     return {
-      domain: 'spatial',
+      domain: "spatial",
       vector: frameVector,
       confidence: 0.83,
       matchedSignatures: [],
@@ -480,10 +483,10 @@ export class NeuralFingerprintingEngine {
 
     const renderVector = new Array(48).fill(0).map(() => Math.random());
     return {
-      domain: 'spatial',
+      domain: "spatial",
       vector: renderVector,
       confidence: 0.88,
-      matchedSignatures: ['Sora', 'Runway', 'Pika'],
+      matchedSignatures: ["Sora", "Runway", "Pika"],
     };
   }
 
@@ -517,7 +520,7 @@ export class NeuralFingerprintingEngine {
 
     const tokenVector = new Array(256).fill(0).map(() => Math.random());
     return {
-      domain: 'statistical',
+      domain: "statistical",
       vector: tokenVector,
       confidence: 0.85,
       matchedSignatures: [],
@@ -530,7 +533,7 @@ export class NeuralFingerprintingEngine {
 
     const attentionVector = new Array(128).fill(0).map(() => Math.random());
     return {
-      domain: 'semantic',
+      domain: "semantic",
       vector: attentionVector,
       confidence: 0.78,
       matchedSignatures: [],
@@ -546,7 +549,7 @@ export class NeuralFingerprintingEngine {
     const localEntropy = this.calculateLocalEntropy(text);
 
     return {
-      domain: 'statistical',
+      domain: "statistical",
       vector: [entropy, ...localEntropy],
       confidence: 0.88,
       matchedSignatures: [],
@@ -562,7 +565,7 @@ export class NeuralFingerprintingEngine {
 
     const stylometricVector = new Array(64).fill(0).map(() => Math.random());
     return {
-      domain: 'statistical',
+      domain: "statistical",
       vector: stylometricVector,
       confidence: 0.82,
       matchedSignatures: [],
@@ -572,7 +575,7 @@ export class NeuralFingerprintingEngine {
   private async extractSemanticCoherence(text: string): Promise<FingerprintVector> {
     const coherenceVector = new Array(32).fill(0).map(() => Math.random());
     return {
-      domain: 'semantic',
+      domain: "semantic",
       vector: coherenceVector,
       confidence: 0.8,
       matchedSignatures: [],
@@ -628,13 +631,16 @@ export class NeuralFingerprintingEngine {
     };
   }
 
-  private compareFingerprints(fingerprints: FingerprintVector[], signature: ModelSignature): number {
+  private compareFingerprints(
+    fingerprints: FingerprintVector[],
+    signature: ModelSignature
+  ): number {
     // Cosine similarity between fingerprint vectors
     let totalSimilarity = 0;
     let count = 0;
 
     for (const fp of fingerprints) {
-      if (fp.domain === 'frequency' && signature.frequencyPatterns) {
+      if (fp.domain === "frequency" && signature.frequencyPatterns) {
         totalSimilarity += this.cosineSimilarity(fp.vector, signature.frequencyPatterns);
         count++;
       }
@@ -682,7 +688,10 @@ export class NeuralFingerprintingEngine {
     return architectureMap[family];
   }
 
-  private identifyVersion(fingerprints: FingerprintVector[], signature: ModelSignature): string | null {
+  private identifyVersion(
+    fingerprints: FingerprintVector[],
+    signature: ModelSignature
+  ): string | null {
     // Version identification based on fine-grained fingerprint differences
     return signature.versions?.[0] || null;
   }
@@ -718,25 +727,54 @@ export class NeuralFingerprintingEngine {
     // Check if fingerprints are robust to adversarial perturbations
     // Higher score = more resistant to evasion attempts
 
-    const avgConfidence = fingerprints.reduce((sum, fp) => sum + fp.confidence, 0) / fingerprints.length;
+    const avgConfidence =
+      fingerprints.reduce((sum, fp) => sum + fp.confidence, 0) / fingerprints.length;
     return avgConfidence * 0.9;
   }
 
   // Helper methods for signature database
-  private getSDFrequencyPatterns(): number[] { return new Array(256).fill(0); }
-  private getSDSpatialArtifacts(): number[] { return new Array(128).fill(0); }
-  private getSDLatentCharacteristics(): number[] { return new Array(64).fill(0); }
-  private getMJFrequencyPatterns(): number[] { return new Array(256).fill(0); }
-  private getMJSpatialArtifacts(): number[] { return new Array(128).fill(0); }
-  private getMJLatentCharacteristics(): number[] { return new Array(64).fill(0); }
-  private getDALLEFrequencyPatterns(): number[] { return new Array(256).fill(0); }
-  private getDALLESpatialArtifacts(): number[] { return new Array(128).fill(0); }
-  private getDALLELatentCharacteristics(): number[] { return new Array(64).fill(0); }
-  private computeRadialProfile(fft: number[]): number[] { return new Array(32).fill(0); }
-  private detectCheckerboardPattern(fft: number[]): number { return 0; }
-  private analyzeFrequencyRolloff(fft: number[]): number[] { return new Array(8).fill(0); }
-  private calculateEntropy(words: string[]): number { return 0; }
-  private calculateLocalEntropy(text: string): number[] { return new Array(16).fill(0); }
+  private getSDFrequencyPatterns(): number[] {
+    return new Array(256).fill(0);
+  }
+  private getSDSpatialArtifacts(): number[] {
+    return new Array(128).fill(0);
+  }
+  private getSDLatentCharacteristics(): number[] {
+    return new Array(64).fill(0);
+  }
+  private getMJFrequencyPatterns(): number[] {
+    return new Array(256).fill(0);
+  }
+  private getMJSpatialArtifacts(): number[] {
+    return new Array(128).fill(0);
+  }
+  private getMJLatentCharacteristics(): number[] {
+    return new Array(64).fill(0);
+  }
+  private getDALLEFrequencyPatterns(): number[] {
+    return new Array(256).fill(0);
+  }
+  private getDALLESpatialArtifacts(): number[] {
+    return new Array(128).fill(0);
+  }
+  private getDALLELatentCharacteristics(): number[] {
+    return new Array(64).fill(0);
+  }
+  private computeRadialProfile(fft: number[]): number[] {
+    return new Array(32).fill(0);
+  }
+  private detectCheckerboardPattern(fft: number[]): number {
+    return 0;
+  }
+  private analyzeFrequencyRolloff(fft: number[]): number[] {
+    return new Array(8).fill(0);
+  }
+  private calculateEntropy(words: string[]): number {
+    return 0;
+  }
+  private calculateLocalEntropy(text: string): number[] {
+    return new Array(16).fill(0);
+  }
 }
 
 interface ModelSignature {

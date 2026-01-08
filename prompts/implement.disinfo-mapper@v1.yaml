@@ -1,17 +1,17 @@
 meta:
   id: implement.disinfo-mapper@v1
-  owner: 'intelgraph-advisory-committee'
-  purpose: 'Build disinformation network mapper with narrative detection, influence tracing, and counter-messaging simulation'
-  tags: ['disinformation', 'narrative-analysis', 'influence-ops', 'cti', 'simulation']
+  owner: "intelgraph-advisory-committee"
+  purpose: "Build disinformation network mapper with narrative detection, influence tracing, and counter-messaging simulation"
+  tags: ["disinformation", "narrative-analysis", "influence-ops", "cti", "simulation"]
   guardrails:
-    - 'Counter-messaging must show risk-of-harm meters'
-    - 'COA selection requires uplift > risk threshold'
-    - 'All assumptions must be exportable and cited'
-    - 'Gradient/flow overlays required for influence visualization'
-    - 'Simulations must include confidence intervals'
+    - "Counter-messaging must show risk-of-harm meters"
+    - "COA selection requires uplift > risk threshold"
+    - "All assumptions must be exportable and cited"
+    - "Gradient/flow overlays required for influence visualization"
+    - "Simulations must include confidence intervals"
 
 modelConfig:
-  model: 'claude-sonnet-4-5'
+  model: "claude-sonnet-4-5"
   temperature: 0.3
   maxTokens: 8000
 
@@ -653,25 +653,25 @@ template: |
   Remember: **First, do no harm.** Counter-messaging must meet uplift > risk threshold.
 
 examples:
-  - name: 'dbscan-pagerank-030'
+  - name: "dbscan-pagerank-030"
     inputs:
-      narrative_detection_method: 'DBSCAN'
-      influence_model: 'PageRank'
-      harm_risk_threshold: '0.30'
+      narrative_detection_method: "DBSCAN"
+      influence_model: "PageRank"
+      harm_risk_threshold: "0.30"
     expected_contains:
-      - 'DBSCAN'
-      - 'PageRank'
-      - 'burst detection'
-      - 'harm risk'
-      - '0.30'
+      - "DBSCAN"
+      - "PageRank"
+      - "burst detection"
+      - "harm risk"
+      - "0.30"
 
-  - name: 'hdbscan-ic-050'
+  - name: "hdbscan-ic-050"
     inputs:
-      narrative_detection_method: 'HDBSCAN'
-      influence_model: 'Independent Cascade'
-      harm_risk_threshold: '0.50'
+      narrative_detection_method: "HDBSCAN"
+      influence_model: "Independent Cascade"
+      harm_risk_threshold: "0.50"
     expected_contains:
-      - 'HDBSCAN'
-      - 'Independent Cascade'
-      - 'uplift'
-      - 'COA'
+      - "HDBSCAN"
+      - "Independent Cascade"
+      - "uplift"
+      - "COA"

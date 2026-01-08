@@ -3,12 +3,12 @@
  * Finds ground state energy of quantum systems
  */
 
-import { QuantumCircuit, QuantumSimulator, CircuitBuilder } from '@intelgraph/quantum-simulation';
+import { QuantumCircuit, QuantumSimulator, CircuitBuilder } from "@intelgraph/quantum-simulation";
 
 export interface VQEParams {
   numQubits: number;
   hamiltonian: PauliHamiltonian;
-  ansatz: 'hardware-efficient' | 'uccsd';
+  ansatz: "hardware-efficient" | "uccsd";
   layers: number;
 }
 
@@ -39,7 +39,9 @@ export class VQESolver {
   async solve(maxIterations: number = 100): Promise<VQEResult> {
     // Initialize variational parameters
     const numParams = this.getNumParameters();
-    let parameters = Array(numParams).fill(0).map(() => Math.random() * 2 * Math.PI);
+    let parameters = Array(numParams)
+      .fill(0)
+      .map(() => Math.random() * 2 * Math.PI);
 
     const convergence: number[] = [];
     let bestEnergy = Infinity;
@@ -78,7 +80,7 @@ export class VQESolver {
   private buildAnsatz(parameters: number[]): QuantumCircuit {
     const builder = new CircuitBuilder(this.params.numQubits);
 
-    if (this.params.ansatz === 'hardware-efficient') {
+    if (this.params.ansatz === "hardware-efficient") {
       this.buildHardwareEfficientAnsatz(builder, parameters);
     } else {
       this.buildUCCSDAnsatz(builder, parameters);
@@ -147,9 +149,9 @@ export class VQESolver {
     // Rotate to measurement basis for each Pauli operator
     for (let i = 0; i < pauliString.length; i++) {
       const pauli = pauliString[i];
-      if (pauli === 'X') {
+      if (pauli === "X") {
         builder.h(i);
-      } else if (pauli === 'Y') {
+      } else if (pauli === "Y") {
         builder.rz(i, -Math.PI / 2);
         builder.h(i);
       }
@@ -172,7 +174,7 @@ export class VQESolver {
 
       // Compute parity of measured qubits
       for (let i = 0; i < bitstring.length; i++) {
-        if (pauliString[i] !== 'I' && bitstring[i] === '1') {
+        if (pauliString[i] !== "I" && bitstring[i] === "1") {
           parity ^= 1;
         }
       }
@@ -212,7 +214,7 @@ export class VQESolver {
   }
 
   private getNumParameters(): number {
-    if (this.params.ansatz === 'hardware-efficient') {
+    if (this.params.ansatz === "hardware-efficient") {
       return this.params.layers * this.params.numQubits * 2;
     } else {
       // Simplified UCCSD parameter count

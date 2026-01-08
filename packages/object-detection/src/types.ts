@@ -2,20 +2,20 @@
  * Object Detection Types
  */
 
-import { z } from 'zod';
-import { DetectionSchema, BoundingBoxSchema, ConfidenceSchema } from '@intelgraph/computer-vision';
+import { z } from "zod";
+import { DetectionSchema, BoundingBoxSchema, ConfidenceSchema } from "@intelgraph/computer-vision";
 
 /**
  * Object Detection Configuration
  */
 export const ObjectDetectionConfigSchema = z.object({
-  model_type: z.enum(['yolov8', 'yolov9', 'faster_rcnn', 'ssd', 'efficientdet']),
-  model_size: z.enum(['nano', 'small', 'medium', 'large', 'xlarge']).default('medium'),
+  model_type: z.enum(["yolov8", "yolov9", "faster_rcnn", "ssd", "efficientdet"]),
+  model_size: z.enum(["nano", "small", "medium", "large", "xlarge"]).default("medium"),
   confidence_threshold: ConfidenceSchema.default(0.5),
   nms_threshold: z.number().min(0).max(1).default(0.4),
   max_detections: z.number().int().positive().default(100),
   input_size: z.tuple([z.number(), z.number()]).optional(),
-  device: z.enum(['cpu', 'cuda', 'auto']).default('auto'),
+  device: z.enum(["cpu", "cuda", "auto"]).default("auto"),
   classes: z.array(z.string()).optional(),
   enable_tracking: z.boolean().default(false),
   batch_size: z.number().int().positive().default(1),
@@ -47,11 +47,13 @@ export type ObjectDetectionResult = z.infer<typeof ObjectDetectionResultSchema>;
  * 3D Object Detection
  */
 export const Detection3DSchema = DetectionSchema.extend({
-  bbox_3d: z.object({
-    center: z.tuple([z.number(), z.number(), z.number()]),
-    dimensions: z.tuple([z.number(), z.number(), z.number()]),
-    rotation: z.number(),
-  }).optional(),
+  bbox_3d: z
+    .object({
+      center: z.tuple([z.number(), z.number(), z.number()]),
+      dimensions: z.tuple([z.number(), z.number(), z.number()]),
+      rotation: z.number(),
+    })
+    .optional(),
   distance: z.number().optional(),
   depth: z.number().optional(),
 });
@@ -73,7 +75,7 @@ export type InstanceSegmentation = z.infer<typeof InstanceSegmentationSchema>;
  * Multi-Object Tracking (MOT) Configuration
  */
 export const MOTConfigSchema = z.object({
-  tracker_type: z.enum(['sort', 'deepsort', 'bytetrack', 'botsort']).default('bytetrack'),
+  tracker_type: z.enum(["sort", "deepsort", "bytetrack", "botsort"]).default("bytetrack"),
   max_age: z.number().int().positive().default(30),
   min_hits: z.number().int().positive().default(3),
   iou_threshold: z.number().min(0).max(1).default(0.3),
@@ -135,7 +137,7 @@ export type SmallObjectConfig = z.infer<typeof SmallObjectConfigSchema>;
  */
 export const CustomTrainingConfigSchema = z.object({
   dataset_path: z.string(),
-  annotation_format: z.enum(['coco', 'yolo', 'pascal_voc', 'darknet']),
+  annotation_format: z.enum(["coco", "yolo", "pascal_voc", "darknet"]),
   num_classes: z.number().int().positive(),
   class_names: z.array(z.string()),
   epochs: z.number().int().positive().default(100),

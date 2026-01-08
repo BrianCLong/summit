@@ -1,2 +1,2 @@
-export { buildApp } from './app';
-export type { ApiDependencies } from './app';
+export { buildApp } from "./app";
+export type { ApiDependencies } from "./app";

@@ -1,16 +1,16 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
+import fs from "node:fs/promises";
+import path from "node:path";
 
-import { FetchResult } from './types.js';
+import { FetchResult } from "./types.js";
 
-const WAYBACK_PREFIX = 'https://web.archive.org/web/0/';
+const WAYBACK_PREFIX = "https://web.archive.org/web/0/";
 
 function buildUserAgent(): string {
-  return 'govbrief/0.1 (+https://summit.example/internal)';
+  return "govbrief/0.1 (+https://summit.example/internal)";
 }
 
 export async function fetchWithWayback(url: string): Promise<FetchResult> {
-  const headers = { 'User-Agent': buildUserAgent() };
+  const headers = { "User-Agent": buildUserAgent() };
   const start = Date.now();
   try {
     const response = await fetch(url, { headers });
@@ -30,7 +30,7 @@ export async function fetchWithWayback(url: string): Promise<FetchResult> {
   const fallbackResponse = await fetch(fallbackUrl, { headers });
   if (!fallbackResponse.ok) {
     throw new Error(
-      `Failed to fetch article from live and Wayback sources: ${fallbackResponse.status}`,
+      `Failed to fetch article from live and Wayback sources: ${fallbackResponse.status}`
     );
   }
   const html = await fallbackResponse.text();
@@ -46,11 +46,7 @@ export async function ensureDirectory(dir: string): Promise<void> {
   await fs.mkdir(dir, { recursive: true });
 }
 
-export async function writeFile(
-  dir: string,
-  filename: string,
-  content: string,
-): Promise<void> {
+export async function writeFile(dir: string, filename: string, content: string): Promise<void> {
   await ensureDirectory(dir);
-  await fs.writeFile(path.join(dir, filename), content, 'utf8');
+  await fs.writeFile(path.join(dir, filename), content, "utf8");
 }

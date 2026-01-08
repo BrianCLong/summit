@@ -5,8 +5,8 @@ permissions:
 on:
   pull_request:
     paths:
-      - 'policy/**'
-      - 'policies/**'
+      - "policy/**"
+      - "policies/**"
 
 jobs:
   opa:

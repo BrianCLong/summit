@@ -23,26 +23,31 @@ Ship policy-guided “operators” that propose and execute routine operational 
 ## 3) Scope (What Ships)
 
 ### Epic A — Agent framework v1 (CompanyOS + Switchboard)
+
 - **A1. Operator identity + permissions:** Tenant, capability, and environment scopes; all invocations recorded and searchable.
 - **A2. Plan → preflight → approval → execute pipeline:** Structured plans with steps, dependencies, rollback, required permissions, policy obligations, blast radius; approvals and rationale captured; execution via `/actions/preflight` and `/actions/execute`.
 - **A3. Kill-switch + quotas:** Per-tenant enablement flag, max actions/hour, max concurrent runs, auto-disable on repeated failures or SLO breach.
 
 ### Epic B — Automated workflows (MVP)
+
 - **Workflow 1: Receipt pipeline recovery:** Detect lag/DLQ growth → propose replay → execute safely; receipts + “recovery evidence bundle.”
 - **Workflow 2: Tenant quota tuning:** Detect sustained pressure → propose new quotas + notification → apply with approval; receipts + before/after usage graphs.
 - **Workflow 3: Incident triage & mitigation:** On alert, gather context (deploys, denials, adapter failures) → propose rollback/pause ramp/isolate tenant/increase capacity (if allowed); receipts + incident timeline + mitigations + postmortem starter.
 
 ### Epic C — Switchboard UX: “Automation Center”
+
 - **C1. Automation runs dashboard:** List runs with status, actor, tenant, workflow type, approvals, receipts, duration.
 - **C2. Approval & rationale improvements:** Show why safe, what changes, rollback plan, and links to evidence bundles.
 - **C3. Audit + replay:** Re-run past automation with updated parameters (requires fresh approvals).
 
 ### Epic D — Observability + controls
+
 - **D1. Agent telemetry:** Success rate, time-saved estimate, failure modes, top workflows; alerts for runaway patterns.
 - **D2. Safety tests:** Regression suite ensuring no bypass paths, obligations enforced, kill-switch works, and denials are safe/user-friendly.
 - **D3. Runbooks:** “Agent misbehavior” response and “Automation disabled due to SLO breach” procedures.
 
 ### Explicit non-goals
+
 - Fully autonomous remediation without approvals.
 - Open-ended natural-language “do anything” agents.
 
@@ -60,19 +65,19 @@ Ship policy-guided “operators” that propose and execute routine operational 
 
 ## 5) Backlog (Ready for Sprint)
 
-| ID        | Title / Area                                   | Owner      | Est | Acceptance Highlights                                    |
-| --------- | ---------------------------------------------- | ---------- | --: | -------------------------------------------------------- |
-| OP-A1     | Operator identity + scoped permissions         | Platform   |  3  | Tenant/capability/env scopes; invocation searchability    |
-| OP-A2     | Plan → preflight → approval → execute pipeline | Platform   |  5  | Structured plan schema; approval capture; exec via APIs   |
-| OP-A3     | Kill-switch + quotas                           | Platform   |  3  | Per-tenant enable; actions/hour + concurrent caps; auto-disable |
-| WF-B1     | Receipt pipeline recovery workflow             | Reliability|  5  | Lag/DLQ detection; replay plan; receipts + evidence bundle|
-| WF-B2     | Tenant quota tuning workflow                   | Reliability|  4  | Pressure detection; proposal + notification; receipts + graphs |
-| WF-B3     | Incident triage & mitigation workflow          | SRE/OPS    |  5  | Context gather; mitigation proposals; timeline receipts   |
-| UX-C1/C2  | Automation Center dashboard + approvals UI     | Web        |  4  | Runs list; rationale display; evidence links; rollback info |
-| UX-C3     | Audit + replay                                 | Web        |  3  | Re-run past automation with fresh approvals               |
-| OBS-D1    | Agent telemetry + alerts                       | Observability | 3 | Success/time-saved/failure telemetry; runaway alerts      |
-| SAFE-D2   | Safety regression suite                        | QE         |  4  | Tests for obligations, kill-switch, denial handling       |
-| DOC-D3    | Misbehavior/SLO-breach runbooks                | Docs       |  2  | Two runbooks with procedures and triggers                 |
+| ID       | Title / Area                                   | Owner         | Est | Acceptance Highlights                                           |
+| -------- | ---------------------------------------------- | ------------- | --: | --------------------------------------------------------------- |
+| OP-A1    | Operator identity + scoped permissions         | Platform      |   3 | Tenant/capability/env scopes; invocation searchability          |
+| OP-A2    | Plan → preflight → approval → execute pipeline | Platform      |   5 | Structured plan schema; approval capture; exec via APIs         |
+| OP-A3    | Kill-switch + quotas                           | Platform      |   3 | Per-tenant enable; actions/hour + concurrent caps; auto-disable |
+| WF-B1    | Receipt pipeline recovery workflow             | Reliability   |   5 | Lag/DLQ detection; replay plan; receipts + evidence bundle      |
+| WF-B2    | Tenant quota tuning workflow                   | Reliability   |   4 | Pressure detection; proposal + notification; receipts + graphs  |
+| WF-B3    | Incident triage & mitigation workflow          | SRE/OPS       |   5 | Context gather; mitigation proposals; timeline receipts         |
+| UX-C1/C2 | Automation Center dashboard + approvals UI     | Web           |   4 | Runs list; rationale display; evidence links; rollback info     |
+| UX-C3    | Audit + replay                                 | Web           |   3 | Re-run past automation with fresh approvals                     |
+| OBS-D1   | Agent telemetry + alerts                       | Observability |   3 | Success/time-saved/failure telemetry; runaway alerts            |
+| SAFE-D2  | Safety regression suite                        | QE            |   4 | Tests for obligations, kill-switch, denial handling             |
+| DOC-D3   | Misbehavior/SLO-breach runbooks                | Docs          |   2 | Two runbooks with procedures and triggers                       |
 
 > **Planned capacity:** ~37–41 pts with emphasis on the three workflows and safety rails.
 

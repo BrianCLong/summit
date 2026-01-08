@@ -16,6 +16,13 @@ type Query {
   auditEventsByCase(caseId: ID!, after: String, limit: Int = 100): [AuditEvent!]!
 }
 
-input AuditRecordInput { action: String!, subject: String!, details: JSON, caseId: ID }
+input AuditRecordInput {
+  action: String!
+  subject: String!
+  details: JSON
+  caseId: ID
+}
 
-type Mutation { recordAudit(input: AuditRecordInput!): AuditEvent! }
+type Mutation {
+  recordAudit(input: AuditRecordInput!): AuditEvent!
+}

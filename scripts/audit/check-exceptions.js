@@ -1,24 +1,33 @@
-const fs = require('fs');
-const yaml = require('js-yaml');
-const path = require('path');
+const fs = require("fs");
+const yaml = require("js-yaml");
+const path = require("path");
 
-const ROOT = path.resolve(__dirname, '..', '..');
-const EXCEPTIONS = path.join(ROOT, 'audit', 'exceptions.yaml');
+const ROOT = path.resolve(__dirname, "..", "..");
+const EXCEPTIONS = path.join(ROOT, "audit", "exceptions.yaml");
 
 function loadExceptions() {
-  const raw = fs.readFileSync(EXCEPTIONS, 'utf-8');
+  const raw = fs.readFileSync(EXCEPTIONS, "utf-8");
   const parsed = yaml.load(raw);
   if (!parsed || !Array.isArray(parsed.exceptions)) {
-    throw new Error('exceptions.yaml is missing an `exceptions` array');
+    throw new Error("exceptions.yaml is missing an `exceptions` array");
   }
   return parsed.exceptions;
 }
 
 function validateRequiredFields(entry) {
-  const required = ['id', 'justification', 'approved_by', 'created_at', 'expires_at', 'scope', 'risk', 'mitigation'];
+  const required = [
+    "id",
+    "justification",
+    "approved_by",
+    "created_at",
+    "expires_at",
+    "scope",
+    "risk",
+    "mitigation",
+  ];
   const missing = required.filter((field) => entry[field] === undefined || entry[field] === null);
   if (missing.length) {
-    throw new Error(`Exception ${entry.id || '<unknown>'} missing fields: ${missing.join(', ')}`);
+    throw new Error(`Exception ${entry.id || "<unknown>"} missing fields: ${missing.join(", ")}`);
   }
 }
 

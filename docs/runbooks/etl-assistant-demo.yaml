@@ -2,22 +2,22 @@ apiVersion: maestro.intelgraph.ai/v1alpha1
 kind: Runbook
 metadata:
   name: etl-assistant-demo
-  description: 'Demonstrates ETL process for assistant data.'
+  description: "Demonstrates ETL process for assistant data."
 spec:
-  version: '1.0.0'
+  version: "1.0.0"
   dag:
-    - name: 'extract_data'
-      task: 'etl.extract'
+    - name: "extract_data"
+      task: "etl.extract"
       params:
-        source: 'assistant_logs'
-    - name: 'transform_data'
-      task: 'etl.transform'
-      dependsOn: ['extract_data']
+        source: "assistant_logs"
+    - name: "transform_data"
+      task: "etl.transform"
+      dependsOn: ["extract_data"]
       params:
-        schema: 'assistant_schema_v2'
-    - name: 'load_data'
-      task: 'etl.load'
-      dependsOn: ['transform_data']
+        schema: "assistant_schema_v2"
+    - name: "load_data"
+      task: "etl.load"
+      dependsOn: ["transform_data"]
       params:
-        destination: 'intelgraph_db'
-        table: 'assistant_insights'
+        destination: "intelgraph_db"
+        table: "assistant_insights"

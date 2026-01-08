@@ -118,13 +118,13 @@ Implement and integrate the planned panels & abstractions as IntelGraph componen
 
 If you want, I can also spit out a ready-to-run **Backlog & RACI** (epics → stories → tasks) and an **ADR set** for the adapter contract & worktree engine—but this prompt alone is enough to brief the team and start implementation.
 
-[1]: https://github.com/stravu/crystal/releases/tag/v0.3.0 'Release 0.3.0 · stravu/crystal · GitHub'
-[2]: https://github.com/stravu/crystal 'GitHub - stravu/crystal: Run multiple Claude Code AI sessions in parallel git worktrees. Test, compare approaches & manage AI-assisted development workflows in one desktop app.'
-[3]: https://github.com/stravu/crystal/blob/main/DIFF_PANEL_PLAN.md 'crystal/DIFF_PANEL_PLAN.md at main · stravu/crystal · GitHub'
-[4]: https://github.com/stravu/crystal/blob/main/EDITOR_PANEL_PLAN.md 'crystal/EDITOR_PANEL_PLAN.md at main · stravu/crystal · GitHub'
-[5]: https://github.com/stravu/crystal/blob/main/LOGS_PANEL_PLAN.md 'crystal/LOGS_PANEL_PLAN.md at main · stravu/crystal · GitHub'
-[6]: https://github.com/stravu/crystal/blob/main/TOOL_PANEL_DESIGN.md 'crystal/TOOL_PANEL_DESIGN.md at main · stravu/crystal · GitHub'
-[7]: https://github.com/stravu/crystal/blob/main/RICH_OUTPUT_ABSTRACTION_PLAN.md 'crystal/RICH_OUTPUT_ABSTRACTION_PLAN.md at main · stravu/crystal · GitHub'
-[8]: https://stravu.com/crystal?utm_source=chatgpt.com 'Crystal for Claude Code'
-[9]: https://formulae.brew.sh/cask/stravu-crystal?utm_source=chatgpt.com 'stravu-crystal'
-[10]: https://stackoverflow.com/questions/66635437/git-worktree-with-relative-path?utm_source=chatgpt.com 'git worktree with relative path?'
+[1]: https://github.com/stravu/crystal/releases/tag/v0.3.0 "Release 0.3.0 · stravu/crystal · GitHub"
+[2]: https://github.com/stravu/crystal "GitHub - stravu/crystal: Run multiple Claude Code AI sessions in parallel git worktrees. Test, compare approaches & manage AI-assisted development workflows in one desktop app."
+[3]: https://github.com/stravu/crystal/blob/main/DIFF_PANEL_PLAN.md "crystal/DIFF_PANEL_PLAN.md at main · stravu/crystal · GitHub"
+[4]: https://github.com/stravu/crystal/blob/main/EDITOR_PANEL_PLAN.md "crystal/EDITOR_PANEL_PLAN.md at main · stravu/crystal · GitHub"
+[5]: https://github.com/stravu/crystal/blob/main/LOGS_PANEL_PLAN.md "crystal/LOGS_PANEL_PLAN.md at main · stravu/crystal · GitHub"
+[6]: https://github.com/stravu/crystal/blob/main/TOOL_PANEL_DESIGN.md "crystal/TOOL_PANEL_DESIGN.md at main · stravu/crystal · GitHub"
+[7]: https://github.com/stravu/crystal/blob/main/RICH_OUTPUT_ABSTRACTION_PLAN.md "crystal/RICH_OUTPUT_ABSTRACTION_PLAN.md at main · stravu/crystal · GitHub"
+[8]: https://stravu.com/crystal?utm_source=chatgpt.com "Crystal for Claude Code"
+[9]: https://formulae.brew.sh/cask/stravu-crystal?utm_source=chatgpt.com "stravu-crystal"
+[10]: https://stackoverflow.com/questions/66635437/git-worktree-with-relative-path?utm_source=chatgpt.com "git worktree with relative path?"

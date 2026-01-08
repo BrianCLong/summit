@@ -4,28 +4,28 @@ on:
   push:
     branches: [main]
     paths:
-      - 'ingest/**'
-      - 'services/ingest-adapters/**'
-      - 'libs/ingest-worker/**'
-      - 'tools/replayctl/**'
-      - 'tools/dlqtriage/**'
-      - '.github/workflows/ingest-ci.yml'
+      - "ingest/**"
+      - "services/ingest-adapters/**"
+      - "libs/ingest-worker/**"
+      - "tools/replayctl/**"
+      - "tools/dlqtriage/**"
+      - ".github/workflows/ingest-ci.yml"
   pull_request:
     branches: [main]
     paths:
-      - 'ingest/**'
-      - 'services/ingest-adapters/**'
-      - 'libs/ingest-worker/**'
-      - 'tools/replayctl/**'
-      - 'tools/dlqtriage/**'
+      - "ingest/**"
+      - "services/ingest-adapters/**"
+      - "libs/ingest-worker/**"
+      - "tools/replayctl/**"
+      - "tools/dlqtriage/**"
 
 concurrency:
   group: ingest-ci-${{ github.head_ref || github.sha }}
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: '20.x'
-  PNPM_VERSION: '9'
+  NODE_VERSION: "20.x"
+  PNPM_VERSION: "9"
 
 permissions:
   contents: read
@@ -91,7 +91,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -134,7 +134,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -202,7 +202,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -264,13 +264,13 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: 'services/ingest-adapters'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
+          scan-type: "fs"
+          scan-ref: "services/ingest-adapters"
+          format: "sarif"
+          output: "trivy-results.sarif"
 
       - name: Upload Trivy scan results
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: "trivy-results.sarif"

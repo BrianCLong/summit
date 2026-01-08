@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Box,
   Typography,
@@ -10,21 +10,19 @@ import {
   List,
   ListItem,
   ListItemText,
-} from '@mui/material';
-import { apiFetch } from '../../services/api';
+} from "@mui/material";
+import { apiFetch } from "../../services/api";
 
 export default function SentimentPanel() {
-  const [inputs, setInputs] = useState(
-    '[{"id":"1","kind":"text","text":"This is great!"}]',
-  );
+  const [inputs, setInputs] = useState('[{"id":"1","kind":"text","text":"This is great!"}]');
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
 
   const run = async () => {
     setBusy(true);
     try {
-      const res = await apiFetch('/api/sentiment/analyze', {
-        method: 'POST',
+      const res = await apiFetch("/api/sentiment/analyze", {
+        method: "POST",
         body: JSON.stringify({ inputs: JSON.parse(inputs) }),
       });
       setResult(res);
@@ -54,7 +52,7 @@ export default function SentimentPanel() {
             </Grid>
             <Grid item xs={12}>
               <Button variant="contained" onClick={run} disabled={busy}>
-                {busy ? 'Analyzing…' : 'Analyze'}
+                {busy ? "Analyzing…" : "Analyze"}
               </Button>
             </Grid>
           </Grid>

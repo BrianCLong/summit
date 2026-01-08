@@ -4,15 +4,15 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'infra/helm/**'
-      - 'charts/**'
-      - 'helm/**'
+      - "infra/helm/**"
+      - "charts/**"
+      - "helm/**"
   push:
     branches: [main]
     paths:
-      - 'infra/helm/**'
-      - 'charts/**'
-      - 'helm/**'
+      - "infra/helm/**"
+      - "charts/**"
+      - "helm/**"
   workflow_dispatch:
 
 permissions:
@@ -65,7 +65,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install pnpm
         if: steps.chart-check.outputs.exists == 'true'
@@ -82,7 +82,7 @@ jobs:
         if: steps.chart-check.outputs.exists == 'true'
         uses: azure/setup-helm@v4
         with:
-          version: '3.13.2'
+          version: "3.13.2"
 
       - name: Install Helm plugins
         if: steps.chart-check.outputs.exists == 'true'
@@ -103,7 +103,7 @@ jobs:
         if: steps.chart-check.outputs.exists == 'true'
         uses: azure/setup-kubectl@v4
         with:
-          version: '1.28.4'
+          version: "1.28.4"
 
       - name: Install kind
         if: steps.chart-check.outputs.exists == 'true'

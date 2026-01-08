@@ -10,7 +10,11 @@
     {
       "title": "Parity Gap",
       "type": "stat",
-      "targets": [{ "expr": "abs(search_collection_docs_count{alias='current'} - search_collection_docs_count{alias='next'})" }]
+      "targets": [
+        {
+          "expr": "abs(search_collection_docs_count{alias='current'} - search_collection_docs_count{alias='next'})"
+        }
+      ]
     }
   ]
 }

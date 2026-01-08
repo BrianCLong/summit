@@ -5,13 +5,7 @@
  * Provides golden signals (latency, traffic, errors, saturation) and business metrics.
  */
 
-import {
-  Registry,
-  Counter,
-  Histogram,
-  Gauge,
-  collectDefaultMetrics,
-} from 'prom-client';
+import { Registry, Counter, Histogram, Gauge, collectDefaultMetrics } from "prom-client";
 
 export interface MetricsConfig {
   /** Service name for metric labels */
@@ -104,7 +98,7 @@ export class MetricsExporter {
 
   constructor(config: MetricsConfig) {
     this.config = {
-      environment: 'development',
+      environment: "development",
       enableDefaultMetrics: true,
       defaultMetricsInterval: 10000,
       labels: {},
@@ -136,7 +130,7 @@ export class MetricsExporter {
     if (this.config.enableDefaultMetrics) {
       collectDefaultMetrics({
         register: this.registry,
-        prefix: 'intelgraph_',
+        prefix: "intelgraph_",
         gcDurationBuckets: [0.001, 0.01, 0.1, 1, 2, 5],
         eventLoopMonitoringPrecision: 10,
       });
@@ -148,25 +142,25 @@ export class MetricsExporter {
    */
   private initializeLatencyMetrics(): void {
     this.httpRequestDuration = new Histogram({
-      name: 'intelgraph_http_request_duration_seconds',
-      help: 'HTTP request duration in seconds',
-      labelNames: ['method', 'route', 'status_code'],
+      name: "intelgraph_http_request_duration_seconds",
+      help: "HTTP request duration in seconds",
+      labelNames: ["method", "route", "status_code"],
       buckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10],
       registers: [this.registry],
     });
 
     this.graphqlRequestDuration = new Histogram({
-      name: 'intelgraph_graphql_request_duration_seconds',
-      help: 'GraphQL request duration in seconds',
-      labelNames: ['operation_name', 'operation_type', 'success'],
+      name: "intelgraph_graphql_request_duration_seconds",
+      help: "GraphQL request duration in seconds",
+      labelNames: ["operation_name", "operation_type", "success"],
       buckets: [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10],
       registers: [this.registry],
     });
 
     this.databaseQueryDuration = new Histogram({
-      name: 'intelgraph_database_query_duration_seconds',
-      help: 'Database query duration in seconds',
-      labelNames: ['database', 'operation', 'success'],
+      name: "intelgraph_database_query_duration_seconds",
+      help: "Database query duration in seconds",
+      labelNames: ["database", "operation", "success"],
       buckets: [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5],
       registers: [this.registry],
     });
@@ -177,23 +171,23 @@ export class MetricsExporter {
    */
   private initializeTrafficMetrics(): void {
     this.httpRequestsTotal = new Counter({
-      name: 'intelgraph_http_requests_total',
-      help: 'Total number of HTTP requests',
-      labelNames: ['method', 'route', 'status_code'],
+      name: "intelgraph_http_requests_total",
+      help: "Total number of HTTP requests",
+      labelNames: ["method", "route", "status_code"],
       registers: [this.registry],
     });
 
     this.graphqlRequestsTotal = new Counter({
-      name: 'intelgraph_graphql_requests_total',
-      help: 'Total number of GraphQL requests',
-      labelNames: ['operation_name', 'operation_type'],
+      name: "intelgraph_graphql_requests_total",
+      help: "Total number of GraphQL requests",
+      labelNames: ["operation_name", "operation_type"],
       registers: [this.registry],
     });
 
     this.activeConnections = new Gauge({
-      name: 'intelgraph_active_connections',
-      help: 'Number of active connections',
-      labelNames: ['type'],
+      name: "intelgraph_active_connections",
+      help: "Number of active connections",
+      labelNames: ["type"],
       registers: [this.registry],
     });
   }
@@ -203,23 +197,23 @@ export class MetricsExporter {
    */
   private initializeErrorMetrics(): void {
     this.httpErrorsTotal = new Counter({
-      name: 'intelgraph_http_errors_total',
-      help: 'Total number of HTTP errors',
-      labelNames: ['method', 'route', 'status_code', 'error_type'],
+      name: "intelgraph_http_errors_total",
+      help: "Total number of HTTP errors",
+      labelNames: ["method", "route", "status_code", "error_type"],
       registers: [this.registry],
     });
 
     this.graphqlErrorsTotal = new Counter({
-      name: 'intelgraph_graphql_errors_total',
-      help: 'Total number of GraphQL errors',
-      labelNames: ['operation_name', 'error_code'],
+      name: "intelgraph_graphql_errors_total",
+      help: "Total number of GraphQL errors",
+      labelNames: ["operation_name", "error_code"],
       registers: [this.registry],
     });
 
     this.databaseErrorsTotal = new Counter({
-      name: 'intelgraph_database_errors_total',
-      help: 'Total number of database errors',
-      labelNames: ['database', 'operation', 'error_type'],
+      name: "intelgraph_database_errors_total",
+      help: "Total number of database errors",
+      labelNames: ["database", "operation", "error_type"],
       registers: [this.registry],
     });
   }
@@ -229,22 +223,22 @@ export class MetricsExporter {
    */
   private initializeSaturationMetrics(): void {
     this.cpuUsage = new Gauge({
-      name: 'intelgraph_cpu_usage_percent',
-      help: 'CPU usage percentage',
+      name: "intelgraph_cpu_usage_percent",
+      help: "CPU usage percentage",
       registers: [this.registry],
     });
 
     this.memoryUsage = new Gauge({
-      name: 'intelgraph_memory_usage_bytes',
-      help: 'Memory usage in bytes',
-      labelNames: ['type'],
+      name: "intelgraph_memory_usage_bytes",
+      help: "Memory usage in bytes",
+      labelNames: ["type"],
       registers: [this.registry],
     });
 
     this.databaseConnectionPool = new Gauge({
-      name: 'intelgraph_database_connection_pool',
-      help: 'Database connection pool metrics',
-      labelNames: ['database', 'state'],
+      name: "intelgraph_database_connection_pool",
+      help: "Database connection pool metrics",
+      labelNames: ["database", "state"],
       registers: [this.registry],
     });
   }
@@ -254,30 +248,30 @@ export class MetricsExporter {
    */
   private initializeCostMetrics(): void {
     this.costTotal = new Counter({
-      name: 'intelgraph_cost_total_dollars',
-      help: 'Total cost in dollars',
-      labelNames: ['tenant_id', 'operation', 'resource_type'],
+      name: "intelgraph_cost_total_dollars",
+      help: "Total cost in dollars",
+      labelNames: ["tenant_id", "operation", "resource_type"],
       registers: [this.registry],
     });
 
     this.budgetUtilization = new Gauge({
-      name: 'intelgraph_budget_utilization_percent',
-      help: 'Budget utilization percentage',
-      labelNames: ['tenant_id', 'period'],
+      name: "intelgraph_budget_utilization_percent",
+      help: "Budget utilization percentage",
+      labelNames: ["tenant_id", "period"],
       registers: [this.registry],
     });
 
     this.budgetViolations = new Counter({
-      name: 'intelgraph_budget_violations_total',
-      help: 'Total number of budget violations',
-      labelNames: ['tenant_id', 'violation_type'],
+      name: "intelgraph_budget_violations_total",
+      help: "Total number of budget violations",
+      labelNames: ["tenant_id", "violation_type"],
       registers: [this.registry],
     });
 
     this.slowQueriesKilled = new Counter({
-      name: 'intelgraph_slow_queries_killed_total',
-      help: 'Total number of slow queries killed',
-      labelNames: ['database', 'tenant_id'],
+      name: "intelgraph_slow_queries_killed_total",
+      help: "Total number of slow queries killed",
+      labelNames: ["database", "tenant_id"],
       registers: [this.registry],
     });
   }
@@ -287,30 +281,30 @@ export class MetricsExporter {
    */
   private initializeBusinessMetrics(): void {
     this.entitiesCreated = new Counter({
-      name: 'intelgraph_entities_created_total',
-      help: 'Total number of entities created',
-      labelNames: ['tenant_id', 'entity_type'],
+      name: "intelgraph_entities_created_total",
+      help: "Total number of entities created",
+      labelNames: ["tenant_id", "entity_type"],
       registers: [this.registry],
     });
 
     this.relationshipsCreated = new Counter({
-      name: 'intelgraph_relationships_created_total',
-      help: 'Total number of relationships created',
-      labelNames: ['tenant_id', 'relationship_type'],
+      name: "intelgraph_relationships_created_total",
+      help: "Total number of relationships created",
+      labelNames: ["tenant_id", "relationship_type"],
       registers: [this.registry],
     });
 
     this.investigationsCreated = new Counter({
-      name: 'intelgraph_investigations_created_total',
-      help: 'Total number of investigations created',
-      labelNames: ['tenant_id'],
+      name: "intelgraph_investigations_created_total",
+      help: "Total number of investigations created",
+      labelNames: ["tenant_id"],
       registers: [this.registry],
     });
 
     this.copilotRequests = new Counter({
-      name: 'intelgraph_copilot_requests_total',
-      help: 'Total number of copilot requests',
-      labelNames: ['tenant_id', 'request_type'],
+      name: "intelgraph_copilot_requests_total",
+      help: "Total number of copilot requests",
+      labelNames: ["tenant_id", "request_type"],
       registers: [this.registry],
     });
   }
@@ -331,7 +325,7 @@ export class MetricsExporter {
     if (!metrics.success) {
       this.httpErrorsTotal.inc({
         ...labels,
-        error_type: metrics.statusCode >= 500 ? 'server_error' : 'client_error',
+        error_type: metrics.statusCode >= 500 ? "server_error" : "client_error",
       });
     }
   }
@@ -351,10 +345,7 @@ export class MetricsExporter {
       operation_type: operationType,
     };
 
-    this.graphqlRequestDuration.observe(
-      { ...labels, success: success.toString() },
-      duration
-    );
+    this.graphqlRequestDuration.observe({ ...labels, success: success.toString() }, duration);
     this.graphqlRequestsTotal.inc(labels);
 
     if (!success && errorCode) {
@@ -381,7 +372,7 @@ export class MetricsExporter {
       this.databaseErrorsTotal.inc({
         database: metrics.database,
         operation: metrics.operation,
-        error_type: 'query_error',
+        error_type: "query_error",
       });
     }
   }
@@ -403,11 +394,7 @@ export class MetricsExporter {
   /**
    * Update budget utilization
    */
-  updateBudgetUtilization(
-    tenantId: string,
-    period: string,
-    percentage: number
-  ): void {
+  updateBudgetUtilization(tenantId: string, period: string, percentage: number): void {
     this.budgetUtilization.set({ tenant_id: tenantId, period }, percentage);
   }
 
@@ -468,7 +455,7 @@ export class MetricsExporter {
    */
   updateDatabaseConnectionPool(
     database: string,
-    state: 'active' | 'idle' | 'total',
+    state: "active" | "idle" | "total",
     count: number
   ): void {
     this.databaseConnectionPool.set({ database, state }, count);
@@ -504,12 +491,12 @@ export function createMetricsMiddleware(exporter: MetricsExporter) {
     const start = process.hrtime.bigint();
 
     // Track response finish
-    res.on('finish', () => {
+    res.on("finish", () => {
       const duration = Number(process.hrtime.bigint() - start) / 1e9; // Convert to seconds
 
       exporter.recordHttpRequest({
         method: req.method,
-        route: req.route?.path || req.path || 'unknown',
+        route: req.route?.path || req.path || "unknown",
         statusCode: res.statusCode,
         duration,
         success: res.statusCode < 400,
@@ -527,10 +514,10 @@ export function createMetricsEndpoint(exporter: MetricsExporter) {
   return async (req: any, res: any) => {
     try {
       const metrics = await exporter.getMetrics();
-      res.setHeader('Content-Type', exporter.getRegistry().contentType);
+      res.setHeader("Content-Type", exporter.getRegistry().contentType);
       res.send(metrics);
     } catch (error) {
-      res.status(500).send('Error collecting metrics');
+      res.status(500).send("Error collecting metrics");
     }
   };
 }

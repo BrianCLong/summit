@@ -1,7 +1,7 @@
 meta:
   id: plan.caching-strategy@v1
-  owner: 'platform-engineering'
-  purpose: 'Design and implement caching and memoization strategy to reduce redundant computation'
+  owner: "platform-engineering"
+  purpose: "Design and implement caching and memoization strategy to reduce redundant computation"
   tags:
     - performance
     - caching
@@ -9,13 +9,13 @@ meta:
     - memoization
     - optimization
   guardrails:
-    - 'Cache invalidation strategy must be defined upfront'
-    - 'Cache keys must be deterministic and collision-free'
-    - 'Stale data risks must be documented and mitigated'
-    - 'Cache size limits must prevent memory exhaustion'
+    - "Cache invalidation strategy must be defined upfront"
+    - "Cache keys must be deterministic and collision-free"
+    - "Stale data risks must be documented and mitigated"
+    - "Cache size limits must prevent memory exhaustion"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -144,15 +144,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'entity-caching'
+  - name: "entity-caching"
     inputs:
-      cacheable_operations: 'Entity lookup, Entity search, Relationship queries'
-      current_latency: 'Lookup: 50ms, Search: 200ms, Relationships: 150ms'
-      cache_infrastructure: 'Redis 7.0, 2GB cluster'
-      data_freshness_requirements: 'Entities: 5min stale OK, Relationships: 1min'
-      memory_budget: '512MB local, 2GB Redis'
+      cacheable_operations: "Entity lookup, Entity search, Relationship queries"
+      current_latency: "Lookup: 50ms, Search: 200ms, Relationships: 150ms"
+      cache_infrastructure: "Redis 7.0, 2GB cluster"
+      data_freshness_requirements: "Entities: 5min stale OK, Relationships: 1min"
+      memory_budget: "512MB local, 2GB Redis"
     expected_contains:
-      - 'cache_layers'
-      - 'Invalidation Policy'
-      - 'hit rate'
-      - 'Rollback Plan'
+      - "cache_layers"
+      - "Invalidation Policy"
+      - "hit rate"
+      - "Rollback Plan"

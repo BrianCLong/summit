@@ -56,18 +56,18 @@ These prompts are designed to guide legitimate analytical work in:
 
 ```typescript
 // Example: Using a prompt with Summit's Copilot
-import { loadPrompt } from '@intelgraph/copilot';
+import { loadPrompt } from "@intelgraph/copilot";
 
-const prompt = await loadPrompt('prompts/geopolitical/03-food-security-risk.md');
+const prompt = await loadPrompt("prompts/geopolitical/03-food-security-risk.md");
 
 const analysis = await copilot.analyze({
   prompt,
   context: {
-    country: 'Ethiopia',
-    timeframe: '6-month-outlook',
-    indicators: ['grain_reserves', 'price_inflation', 'supply_chain'],
+    country: "Ethiopia",
+    timeframe: "6-month-outlook",
+    indicators: ["grain_reserves", "price_inflation", "supply_chain"],
   },
-  purpose: 'Humanitarian early warning for WFP planning',
+  purpose: "Humanitarian early warning for WFP planning",
 });
 ```
 
@@ -97,6 +97,7 @@ Each prompt follows a consistent structure:
 All prompts are designed with these ethical principles:
 
 ✅ **DO:**
+
 - Support humanitarian protection and prevention
 - Use publicly available data
 - Maintain analytical objectivity
@@ -105,6 +106,7 @@ All prompts are designed with these ethical principles:
 - Focus on preparation and response, not manipulation
 
 ❌ **DO NOT:**
+
 - Plan or support illegal activities
 - Target individuals or violate privacy
 - Manipulate or interfere with legitimate political processes
@@ -117,6 +119,7 @@ All prompts are designed with these ethical principles:
 Recommended legitimate data sources:
 
 ### International Organizations
+
 - United Nations (UN, UNHCR, WFP, etc.)
 - World Bank and IMF
 - International Energy Agency (IEA)
@@ -124,18 +127,21 @@ Recommended legitimate data sources:
 - ICRC (humanitarian)
 
 ### Government & Official
+
 - National statistics offices
 - Central banks
 - Official government reports
 - Public diplomatic statements
 
 ### Academic & Research
+
 - Universities and think tanks
 - Peer-reviewed journals
 - Policy research institutes
 - NGO reports (Amnesty, HRW, etc.)
 
 ### Open Source Intelligence (OSINT)
+
 - Reputable media sources
 - Satellite imagery (commercial)
 - Trade data
@@ -171,6 +177,7 @@ When updating prompts:
 ## Support
 
 Questions or issues:
+
 - Technical: team@summit.example.com
 - Ethical concerns: ethics@summit.example.com
 - Security: security@summit.example.com

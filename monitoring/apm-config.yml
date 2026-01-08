@@ -23,7 +23,7 @@ newrelic:
   # Transaction Tracing
   transaction_tracer:
     enabled: true
-    transaction_threshold: 0.5  # 500ms
+    transaction_threshold: 0.5 # 500ms
     record_sql: obfuscated
     explain_threshold: 500
     stack_trace_threshold: 500
@@ -78,7 +78,7 @@ datadog:
   enabled: true
   api_key: ${DATADOG_API_KEY}
   app_key: ${DATADOG_APP_KEY}
-  site: datadoghq.com  # or datadoghq.eu for EU
+  site: datadoghq.com # or datadoghq.eu for EU
 
   # Service Configuration
   service: intelgraph-api
@@ -301,11 +301,11 @@ instrumentation:
 
   # Performance Budgets
   performance_budgets:
-    api_response_time_p95: 500  # ms
-    api_response_time_p99: 1000  # ms
-    database_query_time_p95: 100  # ms
-    graph_query_time_p95: 200  # ms
-    ml_inference_time_p95: 1000  # ms
+    api_response_time_p95: 500 # ms
+    api_response_time_p99: 1000 # ms
+    database_query_time_p95: 100 # ms
+    graph_query_time_p95: 200 # ms
+    ml_inference_time_p95: 1000 # ms
 
 # ====================
 # Error Tracking Configuration
@@ -494,24 +494,24 @@ slo:
   availability:
     target: 99.9
     measurement_window: 30d
-    error_budget: 0.1  # 0.1%
+    error_budget: 0.1 # 0.1%
 
   # Latency SLO: 95% of requests < 500ms
   latency:
-    p95_target: 500  # ms
-    p99_target: 1000  # ms
+    p95_target: 500 # ms
+    p99_target: 1000 # ms
     measurement_window: 30d
 
   # Error Rate SLO: < 1% error rate
   error_rate:
-    target: 1.0  # 1%
+    target: 1.0 # 1%
     measurement_window: 30d
 
   # Custom SLOs
   custom:
     - name: graph_query_performance
       description: 95% of graph queries complete in < 200ms
-      target: 200  # ms
+      target: 200 # ms
       percentile: 95
       measurement_window: 7d
 
@@ -522,6 +522,6 @@ slo:
 
     - name: ml_inference_performance
       description: 95% of ML inferences complete in < 1s
-      target: 1000  # ms
+      target: 1000 # ms
       percentile: 95
       measurement_window: 7d

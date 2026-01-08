@@ -21,12 +21,12 @@ pnpm add @intelgraph/provenance-visualizer
 ### Provenance Chain Viewer
 
 ```tsx
-import { ProvenanceChainViewer, ProvenanceLedgerClient } from '@intelgraph/provenance-visualizer';
+import { ProvenanceChainViewer, ProvenanceLedgerClient } from "@intelgraph/provenance-visualizer";
 
 const client = new ProvenanceLedgerClient(
-  'http://localhost:4010',
-  'analyst-001',
-  'investigation review'
+  "http://localhost:4010",
+  "analyst-001",
+  "investigation review"
 );
 
 function App() {
@@ -34,7 +34,7 @@ function App() {
     <ProvenanceChainViewer
       claimId="claim_550e8400-e29b-41d4-a716-446655440000"
       client={client}
-      onVerify={(valid) => console.log('Verified:', valid)}
+      onVerify={(valid) => console.log("Verified:", valid)}
     />
   );
 }
@@ -43,9 +43,9 @@ function App() {
 ### Merkle Tree Viewer
 
 ```tsx
-import { MerkleTreeViewer, ProvenanceLedgerClient } from '@intelgraph/provenance-visualizer';
+import { MerkleTreeViewer, ProvenanceLedgerClient } from "@intelgraph/provenance-visualizer";
 
-const client = new ProvenanceLedgerClient('http://localhost:4010');
+const client = new ProvenanceLedgerClient("http://localhost:4010");
 
 function App() {
   return (
@@ -54,7 +54,7 @@ function App() {
       client={client}
       onVerify={(valid, tamperedNodes) => {
         if (!valid) {
-          console.log('Tampered nodes:', tamperedNodes);
+          console.log("Tampered nodes:", tamperedNodes);
         }
       }}
     />
@@ -65,9 +65,9 @@ function App() {
 ### Chain of Custody Viewer
 
 ```tsx
-import { ChainOfCustodyViewer, ProvenanceLedgerClient } from '@intelgraph/provenance-visualizer';
+import { ChainOfCustodyViewer, ProvenanceLedgerClient } from "@intelgraph/provenance-visualizer";
 
-const client = new ProvenanceLedgerClient('http://localhost:4010');
+const client = new ProvenanceLedgerClient("http://localhost:4010");
 
 function App() {
   return (
@@ -84,6 +84,7 @@ function App() {
 ### ProvenanceChainViewer
 
 Displays a claim's provenance chain with:
+
 - Claim metadata and hash verification
 - Step-by-step transformation history
 - Source attribution
@@ -91,6 +92,7 @@ Displays a claim's provenance chain with:
 - Lineage visualization
 
 **Props:**
+
 - `claimId: string` - Claim ID to visualize
 - `client: ProvenanceLedgerClient` - API client instance
 - `onVerify?: (valid: boolean) => void` - Callback when verification completes
@@ -98,6 +100,7 @@ Displays a claim's provenance chain with:
 ### MerkleTreeViewer
 
 Interactive Merkle tree visualization with:
+
 - Tree structure visualization
 - Node-level tamper detection
 - Evidence chain display
@@ -105,6 +108,7 @@ Interactive Merkle tree visualization with:
 - Hash tree integrity checks
 
 **Props:**
+
 - `caseId: string` - Case ID to visualize
 - `client: ProvenanceLedgerClient` - API client instance
 - `onVerify?: (valid: boolean, tamperedNodes?: string[]) => void` - Callback with verification results
@@ -112,6 +116,7 @@ Interactive Merkle tree visualization with:
 ### ChainOfCustodyViewer
 
 Timeline view of evidence handling:
+
 - Evidence metadata
 - Transformation history timeline
 - Actor attribution
@@ -119,6 +124,7 @@ Timeline view of evidence handling:
 - Configuration details
 
 **Props:**
+
 - `evidenceId: string` - Evidence ID to visualize
 - `client: ProvenanceLedgerClient` - API client instance
 
@@ -150,13 +156,13 @@ await client.healthCheck(): Promise<any>
 All components use Material-UI and can be customized with MUI theming:
 
 ```tsx
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { ProvenanceChainViewer } from '@intelgraph/provenance-visualizer';
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { ProvenanceChainViewer } from "@intelgraph/provenance-visualizer";
 
 const theme = createTheme({
   palette: {
-    primary: { main: '#1976d2' },
-    secondary: { main: '#dc004e' },
+    primary: { main: "#1976d2" },
+    secondary: { main: "#dc004e" },
   },
 });
 
@@ -255,19 +261,19 @@ pnpm lint
 Full example integrating all three viewers:
 
 ```tsx
-import React, { useState } from 'react';
-import { Container, Tabs, Tab, Box } from '@mui/material';
+import React, { useState } from "react";
+import { Container, Tabs, Tab, Box } from "@mui/material";
 import {
   ProvenanceChainViewer,
   MerkleTreeViewer,
   ChainOfCustodyViewer,
   ProvenanceLedgerClient,
-} from '@intelgraph/provenance-visualizer';
+} from "@intelgraph/provenance-visualizer";
 
 const client = new ProvenanceLedgerClient(
-  process.env.PROV_LEDGER_URL || 'http://localhost:4010',
-  'analyst-001',
-  'investigation analysis'
+  process.env.PROV_LEDGER_URL || "http://localhost:4010",
+  "analyst-001",
+  "investigation analysis"
 );
 
 function ProvenanceApp() {
@@ -287,7 +293,7 @@ function ProvenanceApp() {
             claimId="claim_example"
             client={client}
             onVerify={(valid) => {
-              if (!valid) alert('Integrity issue detected!');
+              if (!valid) alert("Integrity issue detected!");
             }}
           />
         )}
@@ -297,17 +303,12 @@ function ProvenanceApp() {
             client={client}
             onVerify={(valid, tamperedNodes) => {
               if (!valid) {
-                console.error('Tampered nodes:', tamperedNodes);
+                console.error("Tampered nodes:", tamperedNodes);
               }
             }}
           />
         )}
-        {tab === 2 && (
-          <ChainOfCustodyViewer
-            evidenceId="evidence_example"
-            client={client}
-          />
-        )}
+        {tab === 2 && <ChainOfCustodyViewer evidenceId="evidence_example" client={client} />}
       </Box>
     </Container>
   );

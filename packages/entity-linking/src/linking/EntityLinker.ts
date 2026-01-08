@@ -2,10 +2,15 @@
  * Entity Linking to External Knowledge Bases
  */
 
-import { Driver } from 'neo4j-driver';
-import { v4 as uuidv4 } from 'uuid';
-import axios from 'axios';
-import { EntityLink, EntityLinkSchema, CoreferenceCluster, CoreferenceClusterSchema } from '@intelgraph/knowledge-graph';
+import { Driver } from "neo4j-driver";
+import { v4 as uuidv4 } from "uuid";
+import axios from "axios";
+import {
+  EntityLink,
+  EntityLinkSchema,
+  CoreferenceCluster,
+  CoreferenceClusterSchema,
+} from "@intelgraph/knowledge-graph";
 
 export interface EntityCandidate {
   externalId: string;
@@ -25,11 +30,11 @@ export class EntityLinker {
   async linkToDBpedia(
     entityId: string,
     entityText: string,
-    context?: string,
+    context?: string
   ): Promise<EntityLink | null> {
     try {
       // DBpedia Spotlight API for entity linking
-      const response = await axios.get('https://api.dbpedia-spotlight.org/en/candidates', {
+      const response = await axios.get("https://api.dbpedia-spotlight.org/en/candidates", {
         params: {
           text: context || entityText,
           confidence: 0.3,
@@ -45,16 +50,19 @@ export class EntityLinker {
         // Find best matching candidate
         const bestCandidate = candidates
           .filter((c: any) => c.resource)
-          .sort((a: any, b: any) => (b.resource['@similarityScore'] || 0) - (a.resource['@similarityScore'] || 0))[0];
+          .sort(
+            (a: any, b: any) =>
+              (b.resource["@similarityScore"] || 0) - (a.resource["@similarityScore"] || 0)
+          )[0];
 
         if (bestCandidate) {
           const link: EntityLink = {
             entityId,
-            externalId: bestCandidate.resource['@uri'],
-            externalSource: 'dbpedia',
-            externalUri: bestCandidate.resource['@uri'],
-            linkType: 'same_as',
-            confidence: parseFloat(bestCandidate.resource['@similarityScore'] || '0.5'),
+            externalId: bestCandidate.resource["@uri"],
+            externalSource: "dbpedia",
+            externalUri: bestCandidate.resource["@uri"],
+            linkType: "same_as",
+            confidence: parseFloat(bestCandidate.resource["@similarityScore"] || "0.5"),
             createdAt: new Date().toISOString(),
           };
 
@@ -62,7 +70,7 @@ export class EntityLinker {
         }
       }
     } catch (error) {
-      console.error('DBpedia linking error:', error);
+      console.error("DBpedia linking error:", error);
     }
 
     return null;
@@ -74,16 +82,16 @@ export class EntityLinker {
   async linkToWikidata(
     entityId: string,
     entityText: string,
-    entityType?: string,
+    entityType?: string
   ): Promise<EntityLink | null> {
     try {
       // Wikidata API search
-      const response = await axios.get('https://www.wikidata.org/w/api.php', {
+      const response = await axios.get("https://www.wikidata.org/w/api.php", {
         params: {
-          action: 'wbsearchentities',
+          action: "wbsearchentities",
           search: entityText,
-          language: 'en',
-          format: 'json',
+          language: "en",
+          format: "json",
           limit: 1,
         },
         timeout: 5000,
@@ -94,9 +102,9 @@ export class EntityLinker {
         const link: EntityLink = {
           entityId,
           externalId: result.id,
-          externalSource: 'wikidata',
+          externalSource: "wikidata",
           externalUri: `https://www.wikidata.org/wiki/${result.id}`,
-          linkType: 'same_as',
+          linkType: "same_as",
           confidence: 0.7, // Wikidata doesn't provide confidence scores
           disambiguationContext: {
             label: result.label,
@@ -108,7 +116,7 @@ export class EntityLinker {
         return EntityLinkSchema.parse(link);
       }
     } catch (error) {
-      console.error('Wikidata linking error:', error);
+      console.error("Wikidata linking error:", error);
     }
 
     return null;
@@ -148,7 +156,7 @@ export class EntityLinker {
           confidence: validated.confidence,
           disambiguationContext: JSON.stringify(validated.disambiguationContext || {}),
           createdAt: validated.createdAt,
-        },
+        }
       );
     } finally {
       await session.close();
@@ -161,7 +169,7 @@ export class EntityLinker {
   async disambiguate(
     entityText: string,
     candidates: EntityCandidate[],
-    context: string,
+    context: string
   ): Promise<EntityCandidate> {
     // Simplified disambiguation using scoring
     // In production, use ML-based disambiguation models
@@ -191,7 +199,7 @@ export class EntityLinker {
    */
   async resolveCoreferences(
     entityIds: string[],
-    method: CoreferenceCluster['resolutionMethod'] = 'fuzzy_match',
+    method: CoreferenceCluster["resolutionMethod"] = "fuzzy_match"
   ): Promise<CoreferenceCluster> {
     const session = this.driver.session();
     try {
@@ -202,13 +210,13 @@ export class EntityLinker {
         WHERE e.id IN $entityIds
         RETURN e.id as id, e.properties as properties, e.type as type
         `,
-        { entityIds },
+        { entityIds }
       );
 
       const entities = result.records.map((r) => ({
-        id: r.get('id'),
-        properties: JSON.parse(r.get('properties') || '{}'),
-        type: r.get('type'),
+        id: r.get("id"),
+        properties: JSON.parse(r.get("properties") || "{}"),
+        type: r.get("type"),
       }));
 
       // Simple coreference resolution based on property similarity
@@ -261,7 +269,7 @@ export class EntityLinker {
           resolutionMethod: validated.resolutionMethod,
           metadata: JSON.stringify(validated.metadata || {}),
           createdAt: validated.createdAt,
-        },
+        }
       );
 
       // Link all entities to the cluster
@@ -275,7 +283,7 @@ export class EntityLinker {
           {
             clusterId: validated.id,
             entityId,
-          },
+          }
         );
       }
     } finally {
@@ -294,15 +302,15 @@ export class EntityLinker {
         MATCH (e {id: $entityId})-[l:LINKED_TO]->(ex:ExternalEntity)
         RETURN l
         `,
-        { entityId },
+        { entityId }
       );
 
       return result.records.map((record) => {
-        const props = record.get('l').properties;
+        const props = record.get("l").properties;
         return EntityLinkSchema.parse({
           entityId,
           ...props,
-          disambiguationContext: JSON.parse(props.disambiguationContext || '{}'),
+          disambiguationContext: JSON.parse(props.disambiguationContext || "{}"),
         });
       });
     } finally {

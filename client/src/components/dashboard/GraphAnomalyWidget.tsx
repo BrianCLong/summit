@@ -1,5 +1,5 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { gql, useQuery } from '@apollo/client';
+import React, { useMemo, useState, useEffect } from "react";
+import { gql, useQuery } from "@apollo/client";
 import {
   Alert,
   Box,
@@ -13,10 +13,10 @@ import {
   TextField,
   Tooltip,
   Typography,
-} from '@mui/material';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import RefreshIcon from '@mui/icons-material/Refresh';
+} from "@mui/material";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import RefreshIcon from "@mui/icons-material/Refresh";
 
 const GRAPH_TRAVERSAL_ANOMALIES = gql`
   query GraphTraversalAnomalies(
@@ -84,7 +84,7 @@ interface GraphAnomalyNode {
 
 export const GraphAnomalyWidget: React.FC<GraphAnomalyWidgetProps> = ({
   investigationId,
-  defaultEntityId = '',
+  defaultEntityId = "",
   radius = 1,
   threshold = 0.6,
   contamination = 0.15,
@@ -93,8 +93,8 @@ export const GraphAnomalyWidget: React.FC<GraphAnomalyWidgetProps> = ({
   const [activeEntityId, setActiveEntityId] = useState(defaultEntityId);
 
   useEffect(() => {
-    setEntityInput(defaultEntityId || '');
-    setActiveEntityId(defaultEntityId || '');
+    setEntityInput(defaultEntityId || "");
+    setActiveEntityId(defaultEntityId || "");
   }, [defaultEntityId]);
 
   const shouldSkip = !investigationId || !activeEntityId;
@@ -108,13 +108,13 @@ export const GraphAnomalyWidget: React.FC<GraphAnomalyWidgetProps> = ({
       contamination,
     },
     skip: shouldSkip,
-    fetchPolicy: 'network-only',
+    fetchPolicy: "network-only",
   });
 
   const summary: GraphAnomalySummary | undefined = data?.graphTraversalAnomalies?.summary;
   const anomalies: GraphAnomalyNode[] = useMemo(
     () => data?.graphTraversalAnomalies?.nodes ?? [],
-    [data],
+    [data]
   );
 
   const handleAnalyze = () => {
@@ -136,7 +136,13 @@ export const GraphAnomalyWidget: React.FC<GraphAnomalyWidgetProps> = ({
   return (
     <Card elevation={2} sx={{ borderRadius: 2 }}>
       <CardContent>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2} mb={2}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          spacing={2}
+          mb={2}
+        >
           <Box>
             <Typography variant="h6" component="h3">
               Graph Traversal Anomalies
@@ -171,7 +177,7 @@ export const GraphAnomalyWidget: React.FC<GraphAnomalyWidgetProps> = ({
         )}
 
         {loading && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
             <LinearProgress sx={{ flex: 1 }} />
             <Typography variant="body2" color="text.secondary">
               Scoring traversal...
@@ -186,14 +192,21 @@ export const GraphAnomalyWidget: React.FC<GraphAnomalyWidgetProps> = ({
         )}
 
         {summary && (
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} mb={2}>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} mb={2}>
             <Chip label={`Nodes: ${summary.totalNodes}`} color="primary" variant="outlined" />
             <Chip label={`Edges: ${summary.totalEdges}`} color="primary" variant="outlined" />
-            <Chip label={`Anomalies: ${summary.anomalyCount}`} color={summary.anomalyCount ? 'error' : 'success'} variant="filled" />
+            <Chip
+              label={`Anomalies: ${summary.anomalyCount}`}
+              color={summary.anomalyCount ? "error" : "success"}
+              variant="filled"
+            />
             <Tooltip title={`Isolation Forest (${summary.modelVersion})`}>
               <Chip label={`Threshold: ${summary.threshold.toFixed(2)}`} variant="outlined" />
             </Tooltip>
-            <Chip label={`Contamination: ${(summary.contamination * 100).toFixed(1)}%`} variant="outlined" />
+            <Chip
+              label={`Contamination: ${(summary.contamination * 100).toFixed(1)}%`}
+              variant="outlined"
+            />
           </Stack>
         )}
 
@@ -203,11 +216,11 @@ export const GraphAnomalyWidget: React.FC<GraphAnomalyWidgetProps> = ({
               <Box
                 key={node.id}
                 sx={{
-                  border: '1px solid',
-                  borderColor: node.isAnomaly ? 'error.light' : 'grey.200',
+                  border: "1px solid",
+                  borderColor: node.isAnomaly ? "error.light" : "grey.200",
                   borderRadius: 1.5,
                   p: 1.5,
-                  backgroundColor: node.isAnomaly ? 'error.50' : 'background.paper',
+                  backgroundColor: node.isAnomaly ? "error.50" : "background.paper",
                 }}
               >
                 <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -223,12 +236,12 @@ export const GraphAnomalyWidget: React.FC<GraphAnomalyWidgetProps> = ({
                       </Typography>
                     </Stack>
                     <Typography variant="body2" color="text.secondary">
-                      {node.type || 'Entity'} · Score {node.score.toFixed(3)}
+                      {node.type || "Entity"} · Score {node.score.toFixed(3)}
                     </Typography>
                   </Box>
                   <Chip
-                    label={node.isAnomaly ? 'Anomalous' : 'Baseline'}
-                    color={node.isAnomaly ? 'error' : 'default'}
+                    label={node.isAnomaly ? "Anomalous" : "Baseline"}
+                    color={node.isAnomaly ? "error" : "default"}
                     size="small"
                   />
                 </Stack>
@@ -248,8 +261,8 @@ export const GraphAnomalyWidget: React.FC<GraphAnomalyWidgetProps> = ({
           !loading && (
             <Typography variant="body2" color="text.secondary">
               {shouldSkip
-                ? 'Provide an entity ID to run anomaly detection.'
-                : 'No anomalies detected for this traversal.'}
+                ? "Provide an entity ID to run anomaly detection."
+                : "No anomalies detected for this traversal."}
             </Typography>
           )
         )}

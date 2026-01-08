@@ -4,16 +4,16 @@
  */
 
 // Types
-export * from './types';
+export * from "./types";
 
 // Utilities
-export * from './utils';
+export * from "./utils";
 
 // Configuration
-export * from './config';
+export * from "./config";
 
 // Node Manager
-export * from './node-manager/EdgeNodeManager';
+export * from "./node-manager/EdgeNodeManager";
 
 // Version
-export const VERSION = '1.0.0';
+export const VERSION = "1.0.0";

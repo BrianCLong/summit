@@ -6,22 +6,22 @@
  * Supports multiple output formats: markdown, JSON, HTML.
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import type { BenchmarkReport, EvalMetrics, ScenarioResult } from '../src/types.js';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { join, dirname } from "node:path";
+import type { BenchmarkReport, EvalMetrics, ScenarioResult } from "../src/types.js";
 
 interface ReportConfig {
   inputPath: string;
   outputPath: string;
-  format: 'markdown' | 'json' | 'html';
+  format: "markdown" | "json" | "html";
   includeTraces: boolean;
   compareBaseline?: string;
 }
 
 const DEFAULT_CONFIG: ReportConfig = {
-  inputPath: './experiments/traces.jsonl',
-  outputPath: './benchmark/report.md',
-  format: 'markdown',
+  inputPath: "./experiments/traces.jsonl",
+  outputPath: "./benchmark/report.md",
+  format: "markdown",
   includeTraces: false,
 };
 
@@ -34,8 +34,8 @@ function loadTraces(path: string): ScenarioResult[] {
     return [];
   }
 
-  const content = readFileSync(path, 'utf8');
-  const lines = content.trim().split('\n').filter(Boolean);
+  const content = readFileSync(path, "utf8");
+  const lines = content.trim().split("\n").filter(Boolean);
 
   return lines.map((line) => {
     const trace = JSON.parse(line);
@@ -63,7 +63,7 @@ function extractMetrics(trace: any): EvalMetrics {
     inputTokens: 0,
     outputTokens: 0,
     totalCostUsd: summary.totalCostUsd ?? 0,
-    costPerSuccessfulTask: summary.success ? summary.totalCostUsd ?? 0 : 0,
+    costPerSuccessfulTask: summary.success ? (summary.totalCostUsd ?? 0) : 0,
     p50LatencyMs: summary.totalDurationMs ?? 0,
     p95LatencyMs: summary.totalDurationMs ?? 0,
     p99LatencyMs: summary.totalDurationMs ?? 0,
@@ -92,38 +92,35 @@ function aggregateMetrics(results: ScenarioResult[]): EvalMetrics {
   const successCount = results.filter((r) => r.success).length;
   const metrics = results.map((r) => r.metrics);
 
-  const sum = (key: keyof EvalMetrics) =>
-    metrics.reduce((s, m) => s + (m[key] as number), 0);
+  const sum = (key: keyof EvalMetrics) => metrics.reduce((s, m) => s + (m[key] as number), 0);
   const avg = (key: keyof EvalMetrics) => sum(key) / metrics.length;
 
   // Calculate latency percentiles
   const latencies = metrics.map((m) => m.avgLatencyMs).sort((a, b) => a - b);
-  const percentile = (p: number) =>
-    latencies[Math.floor(latencies.length * p)] ?? 0;
+  const percentile = (p: number) => latencies[Math.floor(latencies.length * p)] ?? 0;
 
   return {
     taskSuccessRate: successCount / results.length,
-    taskCompletionTime: sum('taskCompletionTime'),
-    totalTokens: sum('totalTokens'),
-    inputTokens: sum('inputTokens'),
-    outputTokens: sum('outputTokens'),
-    totalCostUsd: sum('totalCostUsd'),
-    costPerSuccessfulTask:
-      successCount > 0 ? sum('totalCostUsd') / successCount : 0,
+    taskCompletionTime: sum("taskCompletionTime"),
+    totalTokens: sum("totalTokens"),
+    inputTokens: sum("inputTokens"),
+    outputTokens: sum("outputTokens"),
+    totalCostUsd: sum("totalCostUsd"),
+    costPerSuccessfulTask: successCount > 0 ? sum("totalCostUsd") / successCount : 0,
     p50LatencyMs: percentile(0.5),
     p95LatencyMs: percentile(0.95),
     p99LatencyMs: percentile(0.99),
-    avgLatencyMs: avg('avgLatencyMs'),
-    toolCallCount: sum('toolCallCount'),
-    toolSuccessRate: avg('toolSuccessRate'),
-    avgToolLatencyMs: avg('avgToolLatencyMs'),
-    safetyViolationCount: sum('safetyViolationCount'),
-    safetyViolationRate: sum('safetyViolationCount') / results.length,
-    jailbreakAttempts: sum('jailbreakAttempts'),
-    jailbreakSuccesses: sum('jailbreakSuccesses'),
-    routingDecisionCount: sum('routingDecisionCount'),
-    routingAccuracy: avg('routingAccuracy'),
-    costSavingsVsBaseline: avg('costSavingsVsBaseline'),
+    avgLatencyMs: avg("avgLatencyMs"),
+    toolCallCount: sum("toolCallCount"),
+    toolSuccessRate: avg("toolSuccessRate"),
+    avgToolLatencyMs: avg("avgToolLatencyMs"),
+    safetyViolationCount: sum("safetyViolationCount"),
+    safetyViolationRate: sum("safetyViolationCount") / results.length,
+    jailbreakAttempts: sum("jailbreakAttempts"),
+    jailbreakSuccesses: sum("jailbreakSuccesses"),
+    routingDecisionCount: sum("routingDecisionCount"),
+    routingAccuracy: avg("routingAccuracy"),
+    costSavingsVsBaseline: avg("costSavingsVsBaseline"),
   };
 }
 
@@ -133,96 +130,96 @@ function aggregateMetrics(results: ScenarioResult[]): EvalMetrics {
 function generateMarkdownReport(
   results: ScenarioResult[],
   metrics: EvalMetrics,
-  config: ReportConfig,
+  config: ReportConfig
 ): string {
   const lines: string[] = [
-    '# Benchmark Report',
-    '',
+    "# Benchmark Report",
+    "",
     `**Generated**: ${new Date().toISOString()}`,
     `**Scenarios**: ${results.length}`,
     `**Success Rate**: ${(metrics.taskSuccessRate * 100).toFixed(1)}%`,
-    '',
-    '---',
-    '',
-    '## Executive Summary',
-    '',
-    '| Metric | Value |',
-    '|--------|-------|',
+    "",
+    "---",
+    "",
+    "## Executive Summary",
+    "",
+    "| Metric | Value |",
+    "|--------|-------|",
     `| Total Scenarios | ${results.length} |`,
     `| Successful | ${results.filter((r) => r.success).length} |`,
     `| Failed | ${results.filter((r) => !r.success).length} |`,
     `| Success Rate | ${(metrics.taskSuccessRate * 100).toFixed(1)}% |`,
-    '',
-    '---',
-    '',
-    '## Cost Metrics',
-    '',
-    '| Metric | Value |',
-    '|--------|-------|',
+    "",
+    "---",
+    "",
+    "## Cost Metrics",
+    "",
+    "| Metric | Value |",
+    "|--------|-------|",
     `| Total Tokens | ${metrics.totalTokens.toLocaleString()} |`,
     `| Total Cost | $${metrics.totalCostUsd.toFixed(4)} |`,
     `| Cost per Success | $${metrics.costPerSuccessfulTask.toFixed(4)} |`,
-    '',
-    '---',
-    '',
-    '## Latency Metrics',
-    '',
-    '| Percentile | Latency (ms) |',
-    '|------------|--------------|',
+    "",
+    "---",
+    "",
+    "## Latency Metrics",
+    "",
+    "| Percentile | Latency (ms) |",
+    "|------------|--------------|",
     `| P50 | ${metrics.p50LatencyMs.toFixed(0)} |`,
     `| P95 | ${metrics.p95LatencyMs.toFixed(0)} |`,
     `| P99 | ${metrics.p99LatencyMs.toFixed(0)} |`,
     `| Average | ${metrics.avgLatencyMs.toFixed(0)} |`,
-    '',
-    '---',
-    '',
-    '## Tool Usage',
-    '',
-    '| Metric | Value |',
-    '|--------|-------|',
+    "",
+    "---",
+    "",
+    "## Tool Usage",
+    "",
+    "| Metric | Value |",
+    "|--------|-------|",
     `| Total Tool Calls | ${metrics.toolCallCount} |`,
     `| Tool Success Rate | ${(metrics.toolSuccessRate * 100).toFixed(1)}% |`,
     `| Avg Tool Latency | ${metrics.avgToolLatencyMs.toFixed(0)}ms |`,
-    '',
-    '---',
-    '',
-    '## Safety Metrics',
-    '',
-    '| Metric | Value |',
-    '|--------|-------|',
+    "",
+    "---",
+    "",
+    "## Safety Metrics",
+    "",
+    "| Metric | Value |",
+    "|--------|-------|",
     `| Safety Violations | ${metrics.safetyViolationCount} |`,
     `| Violation Rate | ${(metrics.safetyViolationRate * 100).toFixed(1)}% |`,
     `| Jailbreak Attempts | ${metrics.jailbreakAttempts} |`,
     `| Jailbreak Successes | ${metrics.jailbreakSuccesses} |`,
-    '',
-    '---',
-    '',
-    '## Scenario Results',
-    '',
-    '| Scenario ID | Success | Duration (ms) | Tokens | Cost |',
-    '|-------------|---------|---------------|--------|------|',
+    "",
+    "---",
+    "",
+    "## Scenario Results",
+    "",
+    "| Scenario ID | Success | Duration (ms) | Tokens | Cost |",
+    "|-------------|---------|---------------|--------|------|",
   ];
 
   for (const result of results) {
     const m = result.metrics;
     lines.push(
-      `| ${result.scenarioId} | ${result.success ? '✅' : '❌'} | ${m.taskCompletionTime.toFixed(0)} | ${m.totalTokens} | $${m.totalCostUsd.toFixed(4)} |`,
+      `| ${result.scenarioId} | ${result.success ? "✅" : "❌"} | ${m.taskCompletionTime.toFixed(0)} | ${m.totalTokens} | $${m.totalCostUsd.toFixed(4)} |`
     );
   }
 
-  lines.push('', '---', '', '## Recommendations', '');
+  lines.push("", "---", "", "## Recommendations", "");
 
   if (metrics.taskSuccessRate < 0.8) {
-    lines.push('- ⚠️ Success rate below 80% - investigate failing scenarios');
+    lines.push("- ⚠️ Success rate below 80% - investigate failing scenarios");
   }
   if (metrics.costPerSuccessfulTask > 0.05) {
-    lines.push('- ⚠️ Cost per success above $0.05 - consider cost optimization');
+    lines.push("- ⚠️ Cost per success above $0.05 - consider cost optimization");
   }
   if (metrics.p95LatencyMs > 10000) {
-    lines.push('- ⚠️ P95 latency above 10s - investigate slow scenarios');
+    lines.push("- ⚠️ P95 latency above 10s - investigate slow scenarios");
   }
   if (metrics.safetyViolationRate > 0) {
-    lines.push('- 🔴 Safety violations detected - review safety measures');
+    lines.push("- 🔴 Safety violations detected - review safety measures");
   }
 
   if (
@@ -230,25 +227,22 @@ function generateMarkdownReport(
     metrics.costPerSuccessfulTask <= 0.03 &&
     metrics.p95LatencyMs <= 5000
   ) {
-    lines.push('- ✅ All metrics within target ranges');
+    lines.push("- ✅ All metrics within target ranges");
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
  * Generate JSON report
  */
-function generateJsonReport(
-  results: ScenarioResult[],
-  metrics: EvalMetrics,
-): string {
+function generateJsonReport(results: ScenarioResult[], metrics: EvalMetrics): string {
   const report: BenchmarkReport = {
     id: `benchmark-${Date.now()}`,
-    name: 'Evaluation Benchmark',
+    name: "Evaluation Benchmark",
     timestamp: new Date().toISOString(),
     config: {
-      routerType: 'greedy_cost',
+      routerType: "greedy_cost",
       costWeight: 0.5,
       scenarioCount: results.length,
     },
@@ -262,12 +256,9 @@ function generateJsonReport(
 /**
  * Generate HTML report
  */
-function generateHtmlReport(
-  results: ScenarioResult[],
-  metrics: EvalMetrics,
-): string {
+function generateHtmlReport(results: ScenarioResult[], metrics: EvalMetrics): string {
   const successRate = (metrics.taskSuccessRate * 100).toFixed(1);
-  const statusColor = metrics.taskSuccessRate >= 0.8 ? '#4caf50' : '#f44336';
+  const statusColor = metrics.taskSuccessRate >= 0.8 ? "#4caf50" : "#f44336";
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -332,14 +323,14 @@ function generateHtmlReport(
             (r) => `
           <tr>
             <td>${r.scenarioId}</td>
-            <td class="${r.success ? 'success' : 'failure'}">${r.success ? '✅ Pass' : '❌ Fail'}</td>
+            <td class="${r.success ? "success" : "failure"}">${r.success ? "✅ Pass" : "❌ Fail"}</td>
             <td>${r.metrics.taskCompletionTime.toFixed(0)}ms</td>
             <td>${r.metrics.totalTokens}</td>
             <td>$${r.metrics.totalCostUsd.toFixed(4)}</td>
           </tr>
-        `,
+        `
           )
-          .join('')}
+          .join("")}
       </tbody>
     </table>
   </div>
@@ -357,26 +348,26 @@ async function main() {
   // Parse arguments
   for (let i = 0; i < args.length; i++) {
     switch (args[i]) {
-      case '--input':
-      case '-i':
+      case "--input":
+      case "-i":
         config.inputPath = args[++i];
         break;
-      case '--output':
-      case '-o':
+      case "--output":
+      case "-o":
         config.outputPath = args[++i];
         break;
-      case '--format':
-      case '-f':
-        config.format = args[++i] as ReportConfig['format'];
+      case "--format":
+      case "-f":
+        config.format = args[++i] as ReportConfig["format"];
         break;
-      case '--traces':
+      case "--traces":
         config.includeTraces = true;
         break;
-      case '--baseline':
+      case "--baseline":
         config.compareBaseline = args[++i];
         break;
-      case '--help':
-      case '-h':
+      case "--help":
+      case "-h":
         console.log(`
 Benchmark Report Generator
 
@@ -398,7 +389,7 @@ Options:
   const results = loadTraces(config.inputPath);
 
   if (results.length === 0) {
-    console.log('No traces found. Generating empty report.');
+    console.log("No traces found. Generating empty report.");
   }
 
   console.log(`Found ${results.length} scenario results`);
@@ -406,13 +397,13 @@ Options:
 
   let report: string;
   switch (config.format) {
-    case 'json':
+    case "json":
       report = generateJsonReport(results, metrics);
       break;
-    case 'html':
+    case "html":
       report = generateHtmlReport(results, metrics);
       break;
-    case 'markdown':
+    case "markdown":
     default:
       report = generateMarkdownReport(results, metrics, config);
   }

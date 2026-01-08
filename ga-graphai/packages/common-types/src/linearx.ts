@@ -62,17 +62,14 @@ export interface LinearXCommandPaletteManifest {
 export interface LinearXBoardEnhancement {
   feature: string;
   description: string;
-  defaultState: 'enabled' | 'disabled' | 'preview';
+  defaultState: "enabled" | "disabled" | "preview";
   telemetryKey: string;
 }
 
-export type LinearXKeyboardShortcutMap = Record<
-  string,
-  LinearXKeyboardShortcut[]
->;
+export type LinearXKeyboardShortcutMap = Record<string, LinearXKeyboardShortcut[]>;
 
 export interface LinearXGraphQLBinding {
-  operation: 'Query' | 'Mutation';
+  operation: "Query" | "Mutation";
   field: string;
   inputType: string;
   returnType: string;
@@ -367,155 +364,153 @@ END OF MASTER PROMPT`;
 
 export const LINEARX_PROVIDER_ROUTING: ProviderRoute[] = [
   {
-    tags: ['fast.code', 'fast.plan', 'fast.summarize', 'cheap.translate'],
-    primary: 'groq',
-    fallbacks: ['openrouter', 'openai', 'anthropic'],
+    tags: ["fast.code", "fast.plan", "fast.summarize", "cheap.translate"],
+    primary: "groq",
+    fallbacks: ["openrouter", "openai", "anthropic"],
     notes:
-      'Latency-sensitive and low-cost interactive tags stay on Groq whenever confidence >= 0.6 and context fits.',
+      "Latency-sensitive and low-cost interactive tags stay on Groq whenever confidence >= 0.6 and context fits.",
   },
   {
-    tags: ['reason.long', 'reason.safety', 'reason.dense'],
-    primary: 'openrouter',
-    fallbacks: ['openai', 'anthropic'],
-    notes:
-      'Use richer context providers when long-form or policy-sensitive reasoning is required.',
+    tags: ["reason.long", "reason.safety", "reason.dense"],
+    primary: "openrouter",
+    fallbacks: ["openai", "anthropic"],
+    notes: "Use richer context providers when long-form or policy-sensitive reasoning is required.",
   },
   {
-    tags: ['rag.graph', 'rag.docs', 'vision.ocr', 'audio.stt'],
-    primary: 'groq',
-    fallbacks: ['openrouter', 'openai', 'anthropic'],
+    tags: ["rag.graph", "rag.docs", "vision.ocr", "audio.stt"],
+    primary: "groq",
+    fallbacks: ["openrouter", "openai", "anthropic"],
     notes:
-      'Start on Groq but fall back to the cheapest competent provider if model coverage requires it.',
+      "Start on Groq but fall back to the cheapest competent provider if model coverage requires it.",
   },
 ];
 
 export const LINEARX_TOOL_CONTRACTS: ToolContract[] = [
   {
-    name: 'policy.check',
-    request: '{ action: string, context: object }',
-    response: '{ allow: boolean, reason: string }',
+    name: "policy.check",
+    request: "{ action: string, context: object }",
+    response: "{ allow: boolean, reason: string }",
     mutation: false,
   },
   {
-    name: 'prov.register',
-    request: '{ evidence: object }',
-    response: '{ evidenceId: string, hash: string }',
+    name: "prov.register",
+    request: "{ evidence: object }",
+    response: "{ evidenceId: string, hash: string }",
     mutation: true,
   },
   {
-    name: 'graph.query',
-    request: '{ cypher: string, params?: object }',
-    response: '{ rows, paths, stats, citations[] }',
+    name: "graph.query",
+    request: "{ cypher: string, params?: object }",
+    response: "{ rows, paths, stats, citations[] }",
     mutation: false,
   },
   {
-    name: 'graph.explain',
-    request: '{ paths: string[] }',
-    response: '{ rationales[], saliency[], counterfactuals[] }',
+    name: "graph.explain",
+    request: "{ paths: string[] }",
+    response: "{ rationales[], saliency[], counterfactuals[] }",
     mutation: false,
   },
   {
-    name: 'linearx.issue.create',
-    request: '{ input }',
-    response: '{ issueId: string, url: string }',
+    name: "linearx.issue.create",
+    request: "{ input }",
+    response: "{ issueId: string, url: string }",
     mutation: true,
   },
   {
-    name: 'linearx.issue.update',
-    request: '{ selector, patch }',
-    response: '{ issueId: string, changes: object }',
+    name: "linearx.issue.update",
+    request: "{ selector, patch }",
+    response: "{ issueId: string, changes: object }",
     mutation: true,
   },
   {
-    name: 'linearx.issue.search',
-    request: '{ query, opts }',
-    response: '{ items: unknown[], facets: unknown }',
+    name: "linearx.issue.search",
+    request: "{ query, opts }",
+    response: "{ items: unknown[], facets: unknown }",
     mutation: false,
   },
   {
-    name: 'linearx.issue.linkPR',
-    request: '{ issueId, { provider, repo, pr } }',
-    response: '{ ok: boolean }',
+    name: "linearx.issue.linkPR",
+    request: "{ issueId, { provider, repo, pr } }",
+    response: "{ ok: boolean }",
     mutation: true,
   },
   {
-    name: 'linearx.project.create',
-    request: '{ input }',
-    response: '{ projectId: string }',
+    name: "linearx.project.create",
+    request: "{ input }",
+    response: "{ projectId: string }",
     mutation: true,
   },
   {
-    name: 'linearx.project.update',
-    request: '{ selector, patch }',
-    response: '{ projectId: string, changes: object }',
+    name: "linearx.project.update",
+    request: "{ selector, patch }",
+    response: "{ projectId: string, changes: object }",
     mutation: true,
   },
   {
-    name: 'linearx.cycle.create',
-    request: '{ teamId, start, end, capacity }',
-    response: '{ cycleId: string }',
+    name: "linearx.cycle.create",
+    request: "{ teamId, start, end, capacity }",
+    response: "{ cycleId: string }",
     mutation: true,
   },
   {
-    name: 'linearx.view.save',
-    request: '{ name, filters, layout }',
-    response: '{ viewId: string }',
+    name: "linearx.view.save",
+    request: "{ name, filters, layout }",
+    response: "{ viewId: string }",
     mutation: true,
   },
   {
-    name: 'linearx.automation.upsert',
-    request: '{ rule }',
-    response: '{ ruleId: string }',
+    name: "linearx.automation.upsert",
+    request: "{ rule }",
+    response: "{ ruleId: string }",
     mutation: true,
   },
   {
-    name: 'linearx.portfolio.forecast',
-    request: '{ scope: PortfolioForecastInput }',
-    response: '{ forecast: unknown, scenarios: unknown[] }',
+    name: "linearx.portfolio.forecast",
+    request: "{ scope: PortfolioForecastInput }",
+    response: "{ forecast: unknown, scenarios: unknown[] }",
     mutation: false,
   },
   {
-    name: 'linearx.tests.generate',
-    request: '{ specId?: string, sourceRefs: string[], targets: string[] }',
-    response: '{ branch: string, files: string[], instructions: string[] }',
+    name: "linearx.tests.generate",
+    request: "{ specId?: string, sourceRefs: string[], targets: string[] }",
+    response: "{ branch: string, files: string[], instructions: string[] }",
     mutation: true,
   },
   {
-    name: 'linearx.releaseNotes.compose',
-    request: '{ window: { start: string, end: string }, filters?: object }',
-    response: '{ documentId: string, summary: string, sections: unknown[] }',
+    name: "linearx.releaseNotes.compose",
+    request: "{ window: { start: string, end: string }, filters?: object }",
+    response: "{ documentId: string, summary: string, sections: unknown[] }",
     mutation: true,
   },
   {
-    name: 'linearx.overlay.criticalPath',
-    request: '{ scope: object }',
+    name: "linearx.overlay.criticalPath",
+    request: "{ scope: object }",
+    response: "{ paths: unknown[], bottlenecks: unknown[], counterfactuals: unknown[] }",
+    mutation: false,
+  },
+  {
+    name: "scm.getPR",
+    request: "{ provider, repo, number }",
     response:
-      '{ paths: unknown[], bottlenecks: unknown[], counterfactuals: unknown[] }',
+      "{ title: string, body: string, commits: unknown[], files: unknown[], state: string }",
     mutation: false,
   },
   {
-    name: 'scm.getPR',
-    request: '{ provider, repo, number }',
-    response:
-      '{ title: string, body: string, commits: unknown[], files: unknown[], state: string }',
-    mutation: false,
-  },
-  {
-    name: 'chat.notify',
-    request: '{ channel, message, mentions[] }',
-    response: '{ ok: boolean }',
+    name: "chat.notify",
+    request: "{ channel, message, mentions[] }",
+    response: "{ ok: boolean }",
     mutation: true,
   },
   {
-    name: 'search.graphRAG',
-    request: '{ query, scope }',
-    response: '{ answers: unknown[], paths: unknown[], citations: unknown[] }',
+    name: "search.graphRAG",
+    request: "{ query, scope }",
+    response: "{ answers: unknown[], paths: unknown[], citations: unknown[] }",
     mutation: false,
   },
   {
-    name: 'cost.guard',
-    request: '{ plan }',
-    response: '{ ok: boolean, revisedPlan: unknown, hints: string[] }',
+    name: "cost.guard",
+    request: "{ plan }",
+    response: "{ ok: boolean, revisedPlan: unknown, hints: string[] }",
     mutation: false,
   },
 ];
@@ -523,498 +518,475 @@ export const LINEARX_TOOL_CONTRACTS: ToolContract[] = [
 export const LINEARX_QUICK_NEXT_STEPS: LinearXQuickNextStep[] = [
   {
     id: 1,
-    description:
-      'Paste this master prompt as the LinearX orchestration agent system prompt.',
+    description: "Paste this master prompt as the LinearX orchestration agent system prompt.",
   },
   {
     id: 2,
-    description:
-      'Wire Groq → OpenRouter → OpenAI → Anthropic routing with tag mapping.',
+    description: "Wire Groq → OpenRouter → OpenAI → Anthropic routing with tag mapping.",
   },
   {
     id: 3,
     description:
-      'Expose linearx.* tool endpoints in the GraphQL layer and log mutations via prov.register.',
+      "Expose linearx.* tool endpoints in the GraphQL layer and log mutations via prov.register.",
   },
   {
     id: 4,
     description:
-      'Add keyboard map and command palette intents so NL actions round-trip to the agent.',
+      "Add keyboard map and command palette intents so NL actions round-trip to the agent.",
   },
   {
     id: 5,
-    description:
-      'Enable dependency graph overlays and risk heatmaps on boards.',
+    description: "Enable dependency graph overlays and risk heatmaps on boards.",
   },
   {
     id: 6,
     description:
-      'Publish the GraphQL resolver manifest + SDL from the gateway for Build Platform scaffolding.',
+      "Publish the GraphQL resolver manifest + SDL from the gateway for Build Platform scaffolding.",
   },
   {
     id: 7,
     description:
-      'Launch the release-notes composer and spec-to-tests intents so command palette actions round-trip end to end.',
+      "Launch the release-notes composer and spec-to-tests intents so command palette actions round-trip end to end.",
   },
 ];
 
 export const LINEARX_SHORT_ANSWERS: LinearXShortQuestionAnswer[] = [
   {
     question:
-      'Which provider(s) should we allow to auto-escalate for long-context portfolio forecasts?',
+      "Which provider(s) should we allow to auto-escalate for long-context portfolio forecasts?",
     answer:
-      'Escalate from Groq to OpenRouter and then OpenAI when context or confidence requires it, reserving Anthropic for extreme length or safety reviews.',
+      "Escalate from Groq to OpenRouter and then OpenAI when context or confidence requires it, reserving Anthropic for extreme length or safety reviews.",
   },
   {
     question:
-      'Do you want strict Linear keyboard parity or can I introduce new shortcuts (e.g., G R for risk view)?',
+      "Do you want strict Linear keyboard parity or can I introduce new shortcuts (e.g., G R for risk view)?",
     answer:
-      'Maintain strict parity by default but surface optional, discoverable shortcuts like G R for risk view that can be toggled per tenant.',
+      "Maintain strict parity by default but surface optional, discoverable shortcuts like G R for risk view that can be toggled per tenant.",
+  },
+  {
+    question: "What’s our initial SLA policy (e.g., P1=24h, P2=72h) and escalation channels?",
+    answer:
+      "Adopt P0=4h, P1=24h, P2=72h, P3=120h with Slack/Teams notifications and PagerDuty escalations for P0/P1 incidents.",
   },
   {
     question:
-      'What’s our initial SLA policy (e.g., P1=24h, P2=72h) and escalation channels?',
+      "Which SCM/chat stacks are in scope Day-1 (GitHub/Slack only, or include GitLab/Teams)?",
     answer:
-      'Adopt P0=4h, P1=24h, P2=72h, P3=120h with Slack/Teams notifications and PagerDuty escalations for P0/P1 incidents.',
+      "Launch with GitHub and Slack first, adding GitLab and Teams once policy hooks and provenance capture are validated.",
   },
   {
     question:
-      'Which SCM/chat stacks are in scope Day-1 (GitHub/Slack only, or include GitLab/Teams)?',
+      "Should we enable auto-merge on green toggles from issues via policy-checked tool calls?",
     answer:
-      'Launch with GitHub and Slack first, adding GitLab and Teams once policy hooks and provenance capture are validated.',
-  },
-  {
-    question:
-      'Should we enable auto-merge on green toggles from issues via policy-checked tool calls?',
-    answer:
-      'Yes—behind a policy.check-gated toggle so only authorized users trigger auto-merge with full audit provenance.',
+      "Yes—behind a policy.check-gated toggle so only authorized users trigger auto-merge with full audit provenance.",
   },
 ];
 
 export const LINEARX_KEYBOARD_SHORTCUTS: LinearXKeyboardShortcut[] = [
   {
-    action: 'Open command palette',
-    defaultShortcut: '⌘K',
-    alternatives: ['Ctrl+K'],
+    action: "Open command palette",
+    defaultShortcut: "⌘K",
+    alternatives: ["Ctrl+K"],
     description:
-      'Focuses the AI command palette so natural-language intents route through the orchestrator.',
-    category: 'navigation',
-    commandPaletteIntentId: 'command_palette',
+      "Focuses the AI command palette so natural-language intents route through the orchestrator.",
+    category: "navigation",
+    commandPaletteIntentId: "command_palette",
   },
   {
-    action: 'Create issue',
-    defaultShortcut: 'C',
-    alternatives: ['I N'],
+    action: "Create issue",
+    defaultShortcut: "C",
+    alternatives: ["I N"],
     description:
-      'Drafts a new issue with GraphRAG context, duplicate detection, and SLA recommendations.',
-    category: 'workflows',
-    commandPaletteIntentId: 'create_issue',
+      "Drafts a new issue with GraphRAG context, duplicate detection, and SLA recommendations.",
+    category: "workflows",
+    commandPaletteIntentId: "create_issue",
   },
   {
-    action: 'Toggle dependency overlay',
-    defaultShortcut: 'G D',
-    alternatives: ['Shift+G Shift+D'],
+    action: "Toggle dependency overlay",
+    defaultShortcut: "G D",
+    alternatives: ["Shift+G Shift+D"],
     description:
-      'Activates dependency graph overlays on boards, highlighting BLOCKS/BLOCKED_BY edges and critical paths.',
-    category: 'insights',
-    commandPaletteIntentId: 'dependency_overlay',
+      "Activates dependency graph overlays on boards, highlighting BLOCKS/BLOCKED_BY edges and critical paths.",
+    category: "insights",
+    commandPaletteIntentId: "dependency_overlay",
   },
   {
-    action: 'Show risk heatmap',
-    defaultShortcut: 'G R',
-    alternatives: ['Shift+G Shift+R'],
+    action: "Show risk heatmap",
+    defaultShortcut: "G R",
+    alternatives: ["Shift+G Shift+R"],
     description:
-      'Opens the portfolio risk heatmap overlay combining code churn, ownership, and review latency telemetry.',
-    category: 'insights',
-    commandPaletteIntentId: 'risk_overlay',
+      "Opens the portfolio risk heatmap overlay combining code churn, ownership, and review latency telemetry.",
+    category: "insights",
+    commandPaletteIntentId: "risk_overlay",
   },
   {
-    action: 'Forecast cycle spillover',
-    defaultShortcut: 'F',
-    alternatives: ['Shift+F'],
+    action: "Forecast cycle spillover",
+    defaultShortcut: "F",
+    alternatives: ["Shift+F"],
     description:
-      'Displays ETA bands, capacity usage, and spillover risk projections for the active cycle.',
-    category: 'planning',
-    commandPaletteIntentId: 'forecast_cycle',
+      "Displays ETA bands, capacity usage, and spillover risk projections for the active cycle.",
+    category: "planning",
+    commandPaletteIntentId: "forecast_cycle",
   },
   {
-    action: 'Toggle critical path overlay',
-    defaultShortcut: 'G C',
-    alternatives: ['Shift+G Shift+C'],
+    action: "Toggle critical path overlay",
+    defaultShortcut: "G C",
+    alternatives: ["Shift+G Shift+C"],
     description:
-      'Highlights the predicted critical path with counterfactual guidance on how to shorten delivery.',
-    category: 'insights',
-    commandPaletteIntentId: 'critical_path',
+      "Highlights the predicted critical path with counterfactual guidance on how to shorten delivery.",
+    category: "insights",
+    commandPaletteIntentId: "critical_path",
   },
   {
-    action: 'Compose release notes',
-    defaultShortcut: 'R N',
-    alternatives: ['Shift+R Shift+N'],
+    action: "Compose release notes",
+    defaultShortcut: "R N",
+    alternatives: ["Shift+R Shift+N"],
     description:
-      'Launches the release notes composer to summarize merged issues and PRs with provenance.',
-    category: 'delivery',
-    commandPaletteIntentId: 'release_notes',
+      "Launches the release notes composer to summarize merged issues and PRs with provenance.",
+    category: "delivery",
+    commandPaletteIntentId: "release_notes",
   },
   {
-    action: 'Generate spec-to-tests scaffolds',
-    defaultShortcut: 'T T',
-    alternatives: ['Shift+T'],
+    action: "Generate spec-to-tests scaffolds",
+    defaultShortcut: "T T",
+    alternatives: ["Shift+T"],
     description:
-      'Creates Jest/Playwright scaffolds from specs or docs with suggested reviewers and branches.',
-    category: 'workflows',
-    commandPaletteIntentId: 'spec_to_tests',
+      "Creates Jest/Playwright scaffolds from specs or docs with suggested reviewers and branches.",
+    category: "workflows",
+    commandPaletteIntentId: "spec_to_tests",
   },
   {
-    action: 'Open portfolio what-if',
-    defaultShortcut: 'G P',
-    alternatives: ['Shift+G Shift+P'],
-    description:
-      'Explores what-if portfolio forecasts across teams, scope, and time scenarios.',
-    category: 'planning',
-    commandPaletteIntentId: 'portfolio_forecast',
+    action: "Open portfolio what-if",
+    defaultShortcut: "G P",
+    alternatives: ["Shift+G Shift+P"],
+    description: "Explores what-if portfolio forecasts across teams, scope, and time scenarios.",
+    category: "planning",
+    commandPaletteIntentId: "portfolio_forecast",
   },
 ];
 
 export const LINEARX_COMMAND_PALETTE_INTENTS: LinearXCommandPaletteIntent[] = [
   {
-    id: 'command_palette',
-    title: 'Show command palette',
-    utterances: ['open palette', 'show commands', 'help'],
-    preview:
-      'Opens the universal command palette with contextual AI suggestions.',
+    id: "command_palette",
+    title: "Show command palette",
+    utterances: ["open palette", "show commands", "help"],
+    preview: "Opens the universal command palette with contextual AI suggestions.",
     confirmationRequired: false,
-    relatedShortcuts: ['⌘K', 'Ctrl+K'],
+    relatedShortcuts: ["⌘K", "Ctrl+K"],
   },
   {
-    id: 'create_issue',
-    title: 'Draft an issue',
-    utterances: ['create issue', 'log bug', 'open ticket'],
+    id: "create_issue",
+    title: "Draft an issue",
+    utterances: ["create issue", "log bug", "open ticket"],
     preview:
-      'Drafts a Linear-class issue, fetching GraphRAG evidence and proposing assignees and SLAs.',
+      "Drafts a Linear-class issue, fetching GraphRAG evidence and proposing assignees and SLAs.",
     confirmationRequired: true,
-    relatedShortcuts: ['C', 'I N'],
+    relatedShortcuts: ["C", "I N"],
   },
   {
-    id: 'dependency_overlay',
-    title: 'Toggle dependency overlay',
-    utterances: [
-      'show dependencies',
-      'toggle dependency overlay',
-      'graph overlay',
-    ],
-    preview:
-      'Enables dependency graph overlays across boards with provenance-backed tooltips.',
+    id: "dependency_overlay",
+    title: "Toggle dependency overlay",
+    utterances: ["show dependencies", "toggle dependency overlay", "graph overlay"],
+    preview: "Enables dependency graph overlays across boards with provenance-backed tooltips.",
     confirmationRequired: false,
-    relatedShortcuts: ['G D'],
+    relatedShortcuts: ["G D"],
   },
   {
-    id: 'risk_overlay',
-    title: 'Show risk heatmap',
-    utterances: ['show risk heatmap', 'risk view', 'portfolio risk'],
-    preview:
-      'Overlays risk scores derived from ownership, churn, and incident impact analytics.',
+    id: "risk_overlay",
+    title: "Show risk heatmap",
+    utterances: ["show risk heatmap", "risk view", "portfolio risk"],
+    preview: "Overlays risk scores derived from ownership, churn, and incident impact analytics.",
     confirmationRequired: false,
-    relatedShortcuts: ['G R'],
+    relatedShortcuts: ["G R"],
   },
   {
-    id: 'forecast_cycle',
-    title: 'Forecast cycle spillover',
-    utterances: ['forecast cycle', 'predict spillover', 'cycle eta'],
+    id: "forecast_cycle",
+    title: "Forecast cycle spillover",
+    utterances: ["forecast cycle", "predict spillover", "cycle eta"],
     preview:
-      'Computes capacity usage, confidence bands, and spillover probabilities for the active sprint.',
+      "Computes capacity usage, confidence bands, and spillover probabilities for the active sprint.",
     confirmationRequired: true,
-    relatedShortcuts: ['F', 'Shift+F'],
+    relatedShortcuts: ["F", "Shift+F"],
   },
   {
-    id: 'critical_path',
-    title: 'Show critical path',
-    utterances: ['critical path', 'show blockers', 'how to ship faster'],
+    id: "critical_path",
+    title: "Show critical path",
+    utterances: ["critical path", "show blockers", "how to ship faster"],
     preview:
-      'Surfaces the predicted critical path with counterfactuals on how to recover lost days.',
+      "Surfaces the predicted critical path with counterfactuals on how to recover lost days.",
     confirmationRequired: false,
-    relatedShortcuts: ['G C'],
+    relatedShortcuts: ["G C"],
   },
   {
-    id: 'release_notes',
-    title: 'Compose release notes',
-    utterances: ['release notes', 'summarize ship', 'draft changelog'],
+    id: "release_notes",
+    title: "Compose release notes",
+    utterances: ["release notes", "summarize ship", "draft changelog"],
     preview:
-      'Drafts release notes with linked issues/PRs, ownership callouts, and provenance citations.',
+      "Drafts release notes with linked issues/PRs, ownership callouts, and provenance citations.",
     confirmationRequired: true,
-    relatedShortcuts: ['R N'],
+    relatedShortcuts: ["R N"],
   },
   {
-    id: 'spec_to_tests',
-    title: 'Generate spec-to-tests',
-    utterances: ['spec to tests', 'generate tests', 'test scaffolds'],
+    id: "spec_to_tests",
+    title: "Generate spec-to-tests",
+    utterances: ["spec to tests", "generate tests", "test scaffolds"],
     preview:
-      'Turns specs and docs into Jest/Playwright scaffolds with reviewer assignments and branches.',
+      "Turns specs and docs into Jest/Playwright scaffolds with reviewer assignments and branches.",
     confirmationRequired: true,
-    relatedShortcuts: ['T T', 'Shift+T'],
+    relatedShortcuts: ["T T", "Shift+T"],
   },
   {
-    id: 'portfolio_forecast',
-    title: 'Portfolio what-if forecast',
-    utterances: ['portfolio forecast', 'what if', 'scenario planning'],
-    preview:
-      'Runs multi-team what-if forecasts with scope/time/people toggles and ROI deltas.',
+    id: "portfolio_forecast",
+    title: "Portfolio what-if forecast",
+    utterances: ["portfolio forecast", "what if", "scenario planning"],
+    preview: "Runs multi-team what-if forecasts with scope/time/people toggles and ROI deltas.",
     confirmationRequired: false,
-    relatedShortcuts: ['G P'],
+    relatedShortcuts: ["G P"],
   },
 ];
 
-export const LINEARX_COMMAND_PALETTE_CATEGORIES: LinearXCommandPaletteCategory[] =
-  [
-    {
-      id: 'navigation',
-      title: 'Navigation & Awareness',
-      description:
-        'Quick jumps and overlays that improve situational awareness without leaving the current view.',
-      intentIds: [
-        'command_palette',
-        'dependency_overlay',
-        'risk_overlay',
-        'critical_path',
-      ],
-    },
-    {
-      id: 'workflows',
-      title: 'Workflow Acceleration',
-      description:
-        'Actions that draft or extend work items with provenance, reviewers, and automation hooks.',
-      intentIds: ['create_issue', 'spec_to_tests'],
-    },
-    {
-      id: 'planning',
-      title: 'Planning & Forecasting',
-      description:
-        'Cycle-level and portfolio scenarios with guardrail-aware forecasts and spillover insights.',
-      intentIds: ['forecast_cycle', 'portfolio_forecast'],
-    },
-    {
-      id: 'delivery',
-      title: 'Delivery Communications',
-      description:
-        'Narratives and updates that roll up work into exec-ready communications with citations.',
-      intentIds: ['release_notes'],
-    },
-  ];
+export const LINEARX_COMMAND_PALETTE_CATEGORIES: LinearXCommandPaletteCategory[] = [
+  {
+    id: "navigation",
+    title: "Navigation & Awareness",
+    description:
+      "Quick jumps and overlays that improve situational awareness without leaving the current view.",
+    intentIds: ["command_palette", "dependency_overlay", "risk_overlay", "critical_path"],
+  },
+  {
+    id: "workflows",
+    title: "Workflow Acceleration",
+    description:
+      "Actions that draft or extend work items with provenance, reviewers, and automation hooks.",
+    intentIds: ["create_issue", "spec_to_tests"],
+  },
+  {
+    id: "planning",
+    title: "Planning & Forecasting",
+    description:
+      "Cycle-level and portfolio scenarios with guardrail-aware forecasts and spillover insights.",
+    intentIds: ["forecast_cycle", "portfolio_forecast"],
+  },
+  {
+    id: "delivery",
+    title: "Delivery Communications",
+    description:
+      "Narratives and updates that roll up work into exec-ready communications with citations.",
+    intentIds: ["release_notes"],
+  },
+];
 
 export const LINEARX_BOARD_ENHANCEMENTS: LinearXBoardEnhancement[] = [
   {
-    feature: 'dependencyOverlay',
+    feature: "dependencyOverlay",
     description:
-      'Graph-powered dependency overlay that visualizes BLOCKS/BLOCKED_BY edges with provenance tooltips.',
-    defaultState: 'enabled',
-    telemetryKey: 'board.dependency_overlay.enabled',
+      "Graph-powered dependency overlay that visualizes BLOCKS/BLOCKED_BY edges with provenance tooltips.",
+    defaultState: "enabled",
+    telemetryKey: "board.dependency_overlay.enabled",
   },
   {
-    feature: 'riskHeatmap',
+    feature: "riskHeatmap",
     description:
-      'Risk heatmap combining churn, ownership gaps, incidents, and SLA drift per column and swimlane.',
-    defaultState: 'enabled',
-    telemetryKey: 'board.risk_heatmap.enabled',
+      "Risk heatmap combining churn, ownership gaps, incidents, and SLA drift per column and swimlane.",
+    defaultState: "enabled",
+    telemetryKey: "board.risk_heatmap.enabled",
   },
   {
-    feature: 'slaClocks',
-    description:
-      'Inline SLA countdown clocks and breach indicators synced with triage automation.',
-    defaultState: 'preview',
-    telemetryKey: 'board.sla_clocks.preview',
+    feature: "slaClocks",
+    description: "Inline SLA countdown clocks and breach indicators synced with triage automation.",
+    defaultState: "preview",
+    telemetryKey: "board.sla_clocks.preview",
   },
   {
-    feature: 'criticalPathOverlay',
+    feature: "criticalPathOverlay",
     description:
-      'Predictive critical path overlay with counterfactual guidance on which blockers unlock the most time.',
-    defaultState: 'enabled',
-    telemetryKey: 'board.critical_path.enabled',
+      "Predictive critical path overlay with counterfactual guidance on which blockers unlock the most time.",
+    defaultState: "enabled",
+    telemetryKey: "board.critical_path.enabled",
   },
   {
-    feature: 'portfolioScenarioPanel',
+    feature: "portfolioScenarioPanel",
     description:
-      'Scenario planning side panel that visualizes what-if staffing/scope changes directly from the board view.',
-    defaultState: 'preview',
-    telemetryKey: 'board.portfolio_scenario.preview',
+      "Scenario planning side panel that visualizes what-if staffing/scope changes directly from the board view.",
+    defaultState: "preview",
+    telemetryKey: "board.portfolio_scenario.preview",
   },
 ];
 
 export const LINEARX_GRAPHQL_BINDINGS: LinearXGraphQLBinding[] = [
   {
-    operation: 'Mutation',
-    field: 'linearxIssueCreate',
-    inputType: 'LinearXIssueCreateInput!',
-    returnType: 'LinearXIssuePayload!',
-    tool: 'linearx.issue.create',
+    operation: "Mutation",
+    field: "linearxIssueCreate",
+    inputType: "LinearXIssueCreateInput!",
+    returnType: "LinearXIssuePayload!",
+    tool: "linearx.issue.create",
     description:
-      'Creates a new issue via the orchestrator with provenance logging and duplicate detection.',
-    policyAction: 'linearx.issue.create',
+      "Creates a new issue via the orchestrator with provenance logging and duplicate detection.",
+    policyAction: "linearx.issue.create",
     registersEvidence: true,
     guardrails: [
-      'Call policy.check before invoking the tool',
-      'Record prov.register with the issued payload',
-      'Return citations and confidence metadata to the caller',
+      "Call policy.check before invoking the tool",
+      "Record prov.register with the issued payload",
+      "Return citations and confidence metadata to the caller",
     ],
-    commandPaletteIntentId: 'create_issue',
-    keyboardShortcutAction: 'Create issue',
-    evidenceShape: '{ input, toolResponse }',
+    commandPaletteIntentId: "create_issue",
+    keyboardShortcutAction: "Create issue",
+    evidenceShape: "{ input, toolResponse }",
   },
   {
-    operation: 'Mutation',
-    field: 'linearxIssueUpdate',
-    inputType: 'LinearXIssueUpdateInput!',
-    returnType: 'LinearXIssuePayload!',
-    tool: 'linearx.issue.update',
-    description:
-      'Patches issue fields while enforcing RBAC, SLA clocks, and provenance capture.',
-    policyAction: 'linearx.issue.update',
+    operation: "Mutation",
+    field: "linearxIssueUpdate",
+    inputType: "LinearXIssueUpdateInput!",
+    returnType: "LinearXIssuePayload!",
+    tool: "linearx.issue.update",
+    description: "Patches issue fields while enforcing RBAC, SLA clocks, and provenance capture.",
+    policyAction: "linearx.issue.update",
     registersEvidence: true,
     guardrails: [
-      'Ensure policy.check approves the mutation context',
-      'Merge partial updates deterministically',
-      'Capture prov.register with before/after diff',
+      "Ensure policy.check approves the mutation context",
+      "Merge partial updates deterministically",
+      "Capture prov.register with before/after diff",
     ],
-    commandPaletteIntentId: 'command_palette',
-    evidenceShape: '{ selector, patch, toolResponse }',
+    commandPaletteIntentId: "command_palette",
+    evidenceShape: "{ selector, patch, toolResponse }",
   },
   {
-    operation: 'Query',
-    field: 'linearxIssueSearch',
-    inputType: 'LinearXIssueSearchInput!',
-    returnType: 'LinearXIssueSearchResult!',
-    tool: 'linearx.issue.search',
-    description:
-      'Searches issues with GraphRAG augmentation and typed facets for the UI.',
-    policyAction: 'linearx.issue.search',
+    operation: "Query",
+    field: "linearxIssueSearch",
+    inputType: "LinearXIssueSearchInput!",
+    returnType: "LinearXIssueSearchResult!",
+    tool: "linearx.issue.search",
+    description: "Searches issues with GraphRAG augmentation and typed facets for the UI.",
+    policyAction: "linearx.issue.search",
     registersEvidence: false,
     guardrails: [
-      'Respect tenant isolation filters',
-      'Mask sensitive fields according to RBAC',
-      'Stream partial results when exceeding latency budgets',
+      "Respect tenant isolation filters",
+      "Mask sensitive fields according to RBAC",
+      "Stream partial results when exceeding latency budgets",
     ],
-    commandPaletteIntentId: 'command_palette',
+    commandPaletteIntentId: "command_palette",
   },
   {
-    operation: 'Mutation',
-    field: 'linearxCycleCreate',
-    inputType: 'LinearXCycleCreateInput!',
-    returnType: 'LinearXCyclePayload!',
-    tool: 'linearx.cycle.create',
+    operation: "Mutation",
+    field: "linearxCycleCreate",
+    inputType: "LinearXCycleCreateInput!",
+    returnType: "LinearXCyclePayload!",
+    tool: "linearx.cycle.create",
     description:
-      'Creates a planning cycle, distributes issues, and notifies owners with undo metadata.',
-    policyAction: 'linearx.cycle.create',
+      "Creates a planning cycle, distributes issues, and notifies owners with undo metadata.",
+    policyAction: "linearx.cycle.create",
     requiresCostGuard: true,
     registersEvidence: true,
     guardrails: [
-      'Validate capacity assumptions with cost.guard',
-      'Call policy.check before mutation',
-      'Log prov.register entries for cycle creation and issue moves',
+      "Validate capacity assumptions with cost.guard",
+      "Call policy.check before mutation",
+      "Log prov.register entries for cycle creation and issue moves",
     ],
-    commandPaletteIntentId: 'forecast_cycle',
-    keyboardShortcutAction: 'Forecast cycle spillover',
-    evidenceShape: '{ cycleInput, affectedIssues, notifications }',
+    commandPaletteIntentId: "forecast_cycle",
+    keyboardShortcutAction: "Forecast cycle spillover",
+    evidenceShape: "{ cycleInput, affectedIssues, notifications }",
   },
   {
-    operation: 'Mutation',
-    field: 'linearxAutomationUpsert',
-    inputType: 'LinearXAutomationRuleInput!',
-    returnType: 'LinearXAutomationPayload!',
-    tool: 'linearx.automation.upsert',
-    description:
-      'Creates or updates automation rules for triage, SLA escalations, and routing.',
-    policyAction: 'linearx.automation.upsert',
+    operation: "Mutation",
+    field: "linearxAutomationUpsert",
+    inputType: "LinearXAutomationRuleInput!",
+    returnType: "LinearXAutomationPayload!",
+    tool: "linearx.automation.upsert",
+    description: "Creates or updates automation rules for triage, SLA escalations, and routing.",
+    policyAction: "linearx.automation.upsert",
     requiresCostGuard: true,
     registersEvidence: true,
     guardrails: [
-      'Run policy.check for automation scope',
-      'Validate plan complexity with cost.guard',
-      'Register prov.register with the compiled rule',
+      "Run policy.check for automation scope",
+      "Validate plan complexity with cost.guard",
+      "Register prov.register with the compiled rule",
     ],
-    commandPaletteIntentId: 'command_palette',
-    evidenceShape: '{ rule, compiledPlan }',
+    commandPaletteIntentId: "command_palette",
+    evidenceShape: "{ rule, compiledPlan }",
   },
   {
-    operation: 'Query',
-    field: 'linearxPortfolioForecast',
-    inputType: 'LinearXPortfolioForecastInput!',
-    returnType: 'LinearXPortfolioForecastPayload!',
-    tool: 'linearx.portfolio.forecast',
+    operation: "Query",
+    field: "linearxPortfolioForecast",
+    inputType: "LinearXPortfolioForecastInput!",
+    returnType: "LinearXPortfolioForecastPayload!",
+    tool: "linearx.portfolio.forecast",
     description:
-      'Runs what-if portfolio forecasts with staffing, scope, and timing toggles plus ROI deltas.',
-    policyAction: 'linearx.portfolio.forecast',
+      "Runs what-if portfolio forecasts with staffing, scope, and timing toggles plus ROI deltas.",
+    policyAction: "linearx.portfolio.forecast",
     requiresCostGuard: true,
     registersEvidence: false,
     guardrails: [
-      'Invoke cost.guard when scenario breadth exceeds interactive limits',
-      'Surface assumptions and confidence bands in the response',
-      'Respect tenant- and team-level visibility constraints',
+      "Invoke cost.guard when scenario breadth exceeds interactive limits",
+      "Surface assumptions and confidence bands in the response",
+      "Respect tenant- and team-level visibility constraints",
     ],
-    commandPaletteIntentId: 'portfolio_forecast',
-    keyboardShortcutAction: 'Open portfolio what-if',
+    commandPaletteIntentId: "portfolio_forecast",
+    keyboardShortcutAction: "Open portfolio what-if",
   },
   {
-    operation: 'Mutation',
-    field: 'linearxReleaseNotesCompose',
-    inputType: 'LinearXReleaseNotesInput!',
-    returnType: 'LinearXReleaseNotesPayload!',
-    tool: 'linearx.releaseNotes.compose',
+    operation: "Mutation",
+    field: "linearxReleaseNotesCompose",
+    inputType: "LinearXReleaseNotesInput!",
+    returnType: "LinearXReleaseNotesPayload!",
+    tool: "linearx.releaseNotes.compose",
     description:
-      'Drafts release notes with linked PRs/issues, ownership callouts, and provenance citations.',
-    policyAction: 'linearx.releaseNotes.compose',
+      "Drafts release notes with linked PRs/issues, ownership callouts, and provenance citations.",
+    policyAction: "linearx.releaseNotes.compose",
     requiresCostGuard: true,
     registersEvidence: true,
     guardrails: [
-      'Call policy.check to confirm the requesting user can broadcast release communications',
-      'Use cost.guard when summarizing large release windows',
-      'Register prov.register with the drafted release note and source references',
+      "Call policy.check to confirm the requesting user can broadcast release communications",
+      "Use cost.guard when summarizing large release windows",
+      "Register prov.register with the drafted release note and source references",
     ],
-    commandPaletteIntentId: 'release_notes',
-    keyboardShortcutAction: 'Compose release notes',
-    evidenceShape: '{ window, filters, draft }',
+    commandPaletteIntentId: "release_notes",
+    keyboardShortcutAction: "Compose release notes",
+    evidenceShape: "{ window, filters, draft }",
   },
   {
-    operation: 'Mutation',
-    field: 'linearxSpecToTests',
-    inputType: 'LinearXSpecToTestsInput!',
-    returnType: 'LinearXSpecToTestsPayload!',
-    tool: 'linearx.tests.generate',
+    operation: "Mutation",
+    field: "linearxSpecToTests",
+    inputType: "LinearXSpecToTestsInput!",
+    returnType: "LinearXSpecToTestsPayload!",
+    tool: "linearx.tests.generate",
     description:
-      'Generates Jest/Playwright scaffolds from specs or docs and proposes reviewers and branches.',
-    policyAction: 'linearx.tests.generate',
+      "Generates Jest/Playwright scaffolds from specs or docs and proposes reviewers and branches.",
+    policyAction: "linearx.tests.generate",
     requiresCostGuard: true,
     registersEvidence: true,
     guardrails: [
-      'Validate repository permissions via policy.check before writing branches',
-      'Use cost.guard to budget codegen and diff planning',
-      'Register prov.register with generated files, reviewers, and instructions',
+      "Validate repository permissions via policy.check before writing branches",
+      "Use cost.guard to budget codegen and diff planning",
+      "Register prov.register with generated files, reviewers, and instructions",
     ],
-    commandPaletteIntentId: 'spec_to_tests',
-    keyboardShortcutAction: 'Generate spec-to-tests scaffolds',
-    evidenceShape: '{ specRefs, generatedFiles, reviewers }',
+    commandPaletteIntentId: "spec_to_tests",
+    keyboardShortcutAction: "Generate spec-to-tests scaffolds",
+    evidenceShape: "{ specRefs, generatedFiles, reviewers }",
   },
   {
-    operation: 'Query',
-    field: 'linearxCriticalPath',
-    inputType: 'LinearXCriticalPathInput!',
-    returnType: 'LinearXCriticalPathPayload!',
-    tool: 'linearx.overlay.criticalPath',
+    operation: "Query",
+    field: "linearxCriticalPath",
+    inputType: "LinearXCriticalPathInput!",
+    returnType: "LinearXCriticalPathPayload!",
+    tool: "linearx.overlay.criticalPath",
     description:
-      'Retrieves the predictive critical path with counterfactuals and recommended unblockers.',
-    policyAction: 'linearx.overlay.criticalPath',
+      "Retrieves the predictive critical path with counterfactuals and recommended unblockers.",
+    policyAction: "linearx.overlay.criticalPath",
     registersEvidence: false,
     guardrails: [
-      'Respect access controls for linked issues and dependencies',
-      'Include counterfactuals with explicit assumptions',
-      'Annotate each suggestion with provenance citations',
+      "Respect access controls for linked issues and dependencies",
+      "Include counterfactuals with explicit assumptions",
+      "Annotate each suggestion with provenance citations",
     ],
-    commandPaletteIntentId: 'critical_path',
-    keyboardShortcutAction: 'Toggle critical path overlay',
+    commandPaletteIntentId: "critical_path",
+    keyboardShortcutAction: "Toggle critical path overlay",
   },
 ];
 
 export const LINEARX_SPEC: LinearXOrchestratorSpec = {
   systemPrompt: LINEARX_SYSTEM_PROMPT,
   providerRouting: LINEARX_PROVIDER_ROUTING,
-  fallbackChain: ['groq', 'openrouter', 'openai', 'anthropic'],
+  fallbackChain: ["groq", "openrouter", "openai", "anthropic"],
   qualityGates: {
     latencyP95Ms: 1200,
     bootstrapCostCapUsd: 0,
@@ -1033,11 +1005,9 @@ export const LINEARX_SPEC: LinearXOrchestratorSpec = {
 export function resolveProviderForTag(
   tag: string,
   options: ProviderResolutionOptions = {},
-  spec: LinearXOrchestratorSpec = LINEARX_SPEC,
+  spec: LinearXOrchestratorSpec = LINEARX_SPEC
 ): string {
-  const route = spec.providerRouting.find((candidate) =>
-    candidate.tags.includes(tag),
-  );
+  const route = spec.providerRouting.find((candidate) => candidate.tags.includes(tag));
   const chain: string[] = [];
   if (route) {
     chain.push(route.primary, ...route.fallbacks);
@@ -1051,22 +1021,14 @@ export function resolveProviderForTag(
     return spec.fallbackChain[0];
   }
   const confidence = options.confidence ?? 1;
-  if (
-    !options.overContextLimit &&
-    confidence >= spec.qualityGates.escalateConfidenceThreshold
-  ) {
+  if (!options.overContextLimit && confidence >= spec.qualityGates.escalateConfidenceThreshold) {
     return chain[0];
   }
-  const fallbackDepth = Math.max(
-    1,
-    Math.min(options.fallbackDepth ?? 1, chain.length - 1),
-  );
+  const fallbackDepth = Math.max(1, Math.min(options.fallbackDepth ?? 1, chain.length - 1));
   return chain[fallbackDepth];
 }
 
-export function listToolContract(
-  name?: string,
-): ToolContract | ToolContract[] | undefined {
+export function listToolContract(name?: string): ToolContract | ToolContract[] | undefined {
   if (!name) {
     return LINEARX_TOOL_CONTRACTS;
   }
@@ -1074,31 +1036,25 @@ export function listToolContract(
 }
 
 export function summarizeQuickStart(): string[] {
-  return LINEARX_QUICK_NEXT_STEPS.map(
-    (step) => `${step.id}. ${step.description}`,
-  );
+  return LINEARX_QUICK_NEXT_STEPS.map((step) => `${step.id}. ${step.description}`);
 }
 
 export function answerShortQuestion(question: string): string | undefined {
-  const match = LINEARX_SHORT_ANSWERS.find(
-    (entry) => entry.question === question,
-  );
+  const match = LINEARX_SHORT_ANSWERS.find((entry) => entry.question === question);
   return match?.answer;
 }
 
 export function listKeyboardShortcuts(
-  action?: string,
+  action?: string
 ): LinearXKeyboardShortcut | LinearXKeyboardShortcut[] | undefined {
   if (!action) {
     return LINEARX_KEYBOARD_SHORTCUTS;
   }
-  return LINEARX_KEYBOARD_SHORTCUTS.find(
-    (shortcut) => shortcut.action === action,
-  );
+  return LINEARX_KEYBOARD_SHORTCUTS.find((shortcut) => shortcut.action === action);
 }
 
 export function listCommandPaletteIntents(
-  id?: string,
+  id?: string
 ): LinearXCommandPaletteIntent | LinearXCommandPaletteIntent[] | undefined {
   if (!id) {
     return LINEARX_COMMAND_PALETTE_INTENTS;
@@ -1107,29 +1063,25 @@ export function listCommandPaletteIntents(
 }
 
 export function listCommandPaletteCategories(
-  id?: string,
+  id?: string
 ): LinearXCommandPaletteCategory | LinearXCommandPaletteCategory[] | undefined {
   if (!id) {
     return LINEARX_COMMAND_PALETTE_CATEGORIES;
   }
-  return LINEARX_COMMAND_PALETTE_CATEGORIES.find(
-    (category) => category.id === id,
-  );
+  return LINEARX_COMMAND_PALETTE_CATEGORIES.find((category) => category.id === id);
 }
 
 export function listBoardEnhancements(
-  feature?: string,
+  feature?: string
 ): LinearXBoardEnhancement | LinearXBoardEnhancement[] | undefined {
   if (!feature) {
     return LINEARX_BOARD_ENHANCEMENTS;
   }
-  return LINEARX_BOARD_ENHANCEMENTS.find(
-    (enhancement) => enhancement.feature === feature,
-  );
+  return LINEARX_BOARD_ENHANCEMENTS.find((enhancement) => enhancement.feature === feature);
 }
 
 export function listGraphQLBindings(
-  field?: string,
+  field?: string
 ): LinearXGraphQLBinding | LinearXGraphQLBinding[] | undefined {
   if (!field) {
     return LINEARX_GRAPHQL_BINDINGS;
@@ -1138,10 +1090,10 @@ export function listGraphQLBindings(
 }
 
 export function buildKeyboardShortcutMap(
-  shortcuts: LinearXKeyboardShortcut[] = LINEARX_KEYBOARD_SHORTCUTS,
+  shortcuts: LinearXKeyboardShortcut[] = LINEARX_KEYBOARD_SHORTCUTS
 ): LinearXKeyboardShortcutMap {
   return shortcuts.reduce((acc, shortcut) => {
-    const category = shortcut.category ?? 'general';
+    const category = shortcut.category ?? "general";
     if (!acc[category]) {
       acc[category] = [];
     }
@@ -1153,7 +1105,7 @@ export function buildKeyboardShortcutMap(
 export function buildCommandPaletteManifest(
   intents: LinearXCommandPaletteIntent[] = LINEARX_COMMAND_PALETTE_INTENTS,
   shortcuts: LinearXKeyboardShortcut[] = LINEARX_KEYBOARD_SHORTCUTS,
-  categories: LinearXCommandPaletteCategory[] = LINEARX_COMMAND_PALETTE_CATEGORIES,
+  categories: LinearXCommandPaletteCategory[] = LINEARX_COMMAND_PALETTE_CATEGORIES
 ): LinearXCommandPaletteManifest {
   const shortcutSetByIntent = new Map<string, Set<string>>();
   for (const shortcut of shortcuts) {
@@ -1187,7 +1139,7 @@ export function buildCommandPaletteManifest(
     .map((category) => ({
       ...category,
       intentIds: category.intentIds.filter((intentId) =>
-        intents.some((intent) => intent.id === intentId),
+        intents.some((intent) => intent.id === intentId)
       ),
     }))
     .filter((category) => category.intentIds.length > 0);
@@ -1200,9 +1152,9 @@ export function buildCommandPaletteManifest(
 }
 
 export function generateGraphQLSchemaSDL(
-  bindings: LinearXGraphQLBinding[] = LINEARX_GRAPHQL_BINDINGS,
+  bindings: LinearXGraphQLBinding[] = LINEARX_GRAPHQL_BINDINGS
 ): string {
-  const grouped: Record<'Query' | 'Mutation', LinearXGraphQLBinding[]> = {
+  const grouped: Record<"Query" | "Mutation", LinearXGraphQLBinding[]> = {
     Query: [],
     Mutation: [],
   };
@@ -1210,40 +1162,37 @@ export function generateGraphQLSchemaSDL(
     grouped[binding.operation].push(binding);
   }
   const sections: string[] = [];
-  for (const operation of ['Query', 'Mutation'] as const) {
+  for (const operation of ["Query", "Mutation"] as const) {
     const entries = grouped[operation];
     if (!entries.length) {
       continue;
     }
     const body = entries
-      .map(
-        (entry) =>
-          `  ${entry.field}(input: ${entry.inputType}) : ${entry.returnType}`,
-      )
-      .join('\n');
+      .map((entry) => `  ${entry.field}(input: ${entry.inputType}) : ${entry.returnType}`)
+      .join("\n");
     sections.push(`extend type ${operation} {\n${body}\n}`);
   }
-  return sections.join('\n\n');
+  return sections.join("\n\n");
 }
 
 export function planGuardedInvocation(
   tool: string,
   policyAction: string,
-  options: LinearXGuardedInvocationOptions = {},
+  options: LinearXGuardedInvocationOptions = {}
 ): LinearXGuardedInvocationPlan {
   const steps: LinearXGuardedInvocationStep[] = [];
   let order = 1;
   steps.push({
     order: order++,
-    title: 'policy.check',
+    title: "policy.check",
     description: `Call policy.check with action "${policyAction}" and include tenant, actor, and scope context.`,
   });
   if (options.requiresCostGuard) {
     steps.push({
       order: order++,
-      title: 'cost.guard',
+      title: "cost.guard",
       description:
-        'Validate plan complexity, latency budgets, and budget caps before executing the tool.',
+        "Validate plan complexity, latency budgets, and budget caps before executing the tool.",
     });
   }
   steps.push({
@@ -1255,9 +1204,9 @@ export function planGuardedInvocation(
   if (registersEvidence) {
     steps.push({
       order: order++,
-      title: 'prov.register',
+      title: "prov.register",
       description:
-        'Persist evidence including inputs, tool outputs, actor, and hashes for auditability.',
+        "Persist evidence including inputs, tool outputs, actor, and hashes for auditability.",
     });
   }
   const notes = [...(options.notes ?? [])];
@@ -1273,13 +1222,11 @@ export function planGuardedInvocation(
 }
 
 export function planGuardedInvocationForBinding(
-  bindingOrField: string | LinearXGraphQLBinding,
+  bindingOrField: string | LinearXGraphQLBinding
 ): LinearXGuardedInvocationPlan | undefined {
   const binding =
-    typeof bindingOrField === 'string'
-      ? LINEARX_GRAPHQL_BINDINGS.find(
-          (candidate) => candidate.field === bindingOrField,
-        )
+    typeof bindingOrField === "string"
+      ? LINEARX_GRAPHQL_BINDINGS.find((candidate) => candidate.field === bindingOrField)
       : bindingOrField;
   if (!binding) {
     return undefined;

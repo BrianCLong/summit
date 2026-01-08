@@ -13,9 +13,9 @@ Defensive playbooks for managing incidents.
 
 ## Playbooks (Defensive Only)
 
-*   **Credential Compromise**: Force MFA, Rotate Keys, Lock Account.
-*   **Data Exfiltration**: Block IP, Revoke Access, Snapshot Evidence.
-*   **Insider Threat**: Increased Monitoring, HR/Legal Review (Human-in-the-loop).
+- **Credential Compromise**: Force MFA, Rotate Keys, Lock Account.
+- **Data Exfiltration**: Block IP, Revoke Access, Snapshot Evidence.
+- **Insider Threat**: Increased Monitoring, HR/Legal Review (Human-in-the-loop).
 
 ## Evidence Bundles
 

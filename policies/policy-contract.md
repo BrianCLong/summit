@@ -40,6 +40,7 @@ The policy engine receives a JSON object with the following structure:
 ```
 
 ### Required Fields
+
 - `subject.id`: Authenticated user or service ID.
 - `subject.roles`: List of assigned roles.
 - `subject.tenant_id`: Tenant context.
@@ -77,6 +78,7 @@ Policies must return a JSON object with the following structure:
 ```
 
 ### Fields
+
 - `allow` (boolean): Whether the action is permitted.
 - `deny_reasons` (array of strings): Human-readable reasons for denial.
 - `obligations` (array of objects): Side effects or requirements that must be satisfied.
@@ -88,6 +90,7 @@ Policies must return a JSON object with the following structure:
 Obligations instruct the enforcement point to take specific actions.
 
 ### 3.1. Require Approval
+
 ```json
 {
   "type": "require_approval",
@@ -97,6 +100,7 @@ Obligations instruct the enforcement point to take specific actions.
 ```
 
 ### 3.2. Redaction
+
 ```json
 {
   "type": "redact_fields",
@@ -105,6 +109,7 @@ Obligations instruct the enforcement point to take specific actions.
 ```
 
 ### 3.3. Notify
+
 ```json
 {
   "type": "notify",

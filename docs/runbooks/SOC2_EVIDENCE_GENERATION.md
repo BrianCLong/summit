@@ -9,6 +9,7 @@
 This document provides a comprehensive guide to the automated SOC2 evidence generation and management system for the IntelGraph platform. The system is designed to provide a high-assurance, auditable, and repeatable process for collecting and preserving compliance artifacts.
 
 Its primary functions are:
+
 - **Automated Monthly Generation:** A background job runs on the first of every month to generate, sign, and store the SOC2 evidence packet for the preceding month.
 - **On-Demand Manual Generation:** A secure API endpoint allows authorized personnel to generate evidence packets for custom time periods.
 - **Cryptographic Integrity:** All generated artifacts (both JSON and PDF) are digitally signed to ensure they are tamper-evident.
@@ -30,10 +31,10 @@ The system is composed of several key services that work in concert:
 - **Schedule:** Runs automatically on the first day of every month at 03:00 UTC.
 - **Cron Expression:** `0 3 1 * *`
 - **Action:**
-    1.  Calculates the date range for the *previous* calendar month.
-    2.  Generates the SOC2 evidence packet in both JSON and PDF formats.
-    3.  Digitally signs both the JSON and PDF files, creating detached `.sig` files.
-    4.  Stores all four artifacts (e.g., `SOC2_Evidence.json`, `SOC2_Evidence.json.sig`, `SOC2_Evidence.pdf`, `SOC2_Evidence.pdf.sig`) in the WORM storage.
+  1.  Calculates the date range for the _previous_ calendar month.
+  2.  Generates the SOC2 evidence packet in both JSON and PDF formats.
+  3.  Digitally signs both the JSON and PDF files, creating detached `.sig` files.
+  4.  Stores all four artifacts (e.g., `SOC2_Evidence.json`, `SOC2_Evidence.json.sig`, `SOC2_Evidence.pdf`, `SOC2_Evidence.pdf.sig`) in the WORM storage.
 
 ## 4. Manual Generation (API)
 
@@ -42,11 +43,12 @@ Authorized users can manually trigger evidence generation via a secure REST endp
 - **Endpoint:** `GET /api/compliance/soc2-packet`
 - **Authorization:** Requires an authenticated user with the `ADMIN` or `compliance-officer` role.
 - **Query Parameters:**
-    - `startDate` (required): The start date for the audit period in ISO 8601 format (e.g., `2025-01-01T00:00:00.000Z`).
-    - `endDate` (required): The end date for the audit period in ISO 8601 format (e.g., `2025-12-31T23:59:59.999Z`).
-    - `format` (optional): Set to `pdf` to receive the report as a PDF document. If omitted, defaults to JSON.
+  - `startDate` (required): The start date for the audit period in ISO 8601 format (e.g., `2025-01-01T00:00:00.000Z`).
+  - `endDate` (required): The end date for the audit period in ISO 8601 format (e.g., `2025-12-31T23:59:59.999Z`).
+  - `format` (optional): Set to `pdf` to receive the report as a PDF document. If omitted, defaults to JSON.
 
 - **Example (cURL):**
+
   ```bash
   # Request JSON packet
   curl -X GET "http://localhost:4000/api/compliance/soc2-packet?startDate=2025-01-01T00:00:00.000Z&endDate=2025-01-31T23:59:59.999Z" \
@@ -66,6 +68,7 @@ Every generated artifact is accompanied by a base64-encoded digital signature, p
 
 1.  **Retrieve the Public Key:**
     Fetch the PEM-formatted public key from the API.
+
     ```bash
     curl http://localhost:4000/api/compliance/public-key -o public_key.pem
     ```
@@ -75,6 +78,7 @@ Every generated artifact is accompanied by a base64-encoded digital signature, p
     - Save the signature from the `X-Evidence-Signature` header or the `.sig` file to another file (e.g., `evidence.sig`). **Note:** The signature is base64-encoded, so it must be decoded before verification.
 
 3.  **Verify using OpenSSL:**
+
     ```bash
     # For a JSON packet
     # First, decode the signature from base64

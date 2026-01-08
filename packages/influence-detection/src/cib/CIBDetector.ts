@@ -28,7 +28,7 @@ export interface AccountBehavior {
 
 export interface Activity {
   timestamp: Date;
-  type: 'post' | 'share' | 'like' | 'follow' | 'comment';
+  type: "post" | "share" | "like" | "follow" | "comment";
   targetId: string;
   content?: string;
 }
@@ -53,9 +53,7 @@ export class CIBDetector {
     return this.mergeCampaigns(campaigns);
   }
 
-  private detectTemporalCoordination(
-    behaviors: AccountBehavior[]
-  ): CIBDetectionResult[] {
+  private detectTemporalCoordination(behaviors: AccountBehavior[]): CIBDetectionResult[] {
     const campaigns: CIBDetectionResult[] = [];
     const timeWindows = this.createTimeWindows(behaviors);
 
@@ -69,7 +67,7 @@ export class CIBDetector {
       if (coordinatedAccounts.length >= 3) {
         const indicators: CIBIndicator[] = [
           {
-            type: 'temporal_coordination',
+            type: "temporal_coordination",
             description: `${coordinatedAccounts.length} accounts posting within narrow time window`,
             affectedAccounts: coordinatedAccounts,
             score: 0.4,
@@ -77,7 +75,7 @@ export class CIBDetector {
         ];
 
         campaigns.push({
-          campaignId: this.generateCampaignId('temporal', window.start),
+          campaignId: this.generateCampaignId("temporal", window.start),
           accounts: coordinatedAccounts,
           coordinationScore: this.calculateCoordinationScore(coordinatedAccounts.length),
           inauthenticityScore: 0.5,
@@ -91,9 +89,7 @@ export class CIBDetector {
     return campaigns;
   }
 
-  private detectContentCoordination(
-    behaviors: AccountBehavior[]
-  ): CIBDetectionResult[] {
+  private detectContentCoordination(behaviors: AccountBehavior[]): CIBDetectionResult[] {
     const campaigns: CIBDetectionResult[] = [];
     const contentGroups = this.groupBySimilarContent(behaviors);
 
@@ -101,7 +97,7 @@ export class CIBDetector {
       if (group.accounts.length >= 3) {
         const indicators: CIBIndicator[] = [
           {
-            type: 'content_coordination',
+            type: "content_coordination",
             description: `${group.accounts.length} accounts posting similar content`,
             affectedAccounts: group.accounts,
             score: 0.5,
@@ -109,7 +105,7 @@ export class CIBDetector {
         ];
 
         campaigns.push({
-          campaignId: this.generateCampaignId('content', new Date()),
+          campaignId: this.generateCampaignId("content", new Date()),
           accounts: group.accounts,
           coordinationScore: this.calculateCoordinationScore(group.accounts.length),
           inauthenticityScore: group.similarity,
@@ -123,9 +119,7 @@ export class CIBDetector {
     return campaigns;
   }
 
-  private detectNetworkCoordination(
-    behaviors: AccountBehavior[]
-  ): CIBDetectionResult[] {
+  private detectNetworkCoordination(behaviors: AccountBehavior[]): CIBDetectionResult[] {
     const campaigns: CIBDetectionResult[] = [];
 
     // Build connection graph
@@ -138,7 +132,7 @@ export class CIBDetector {
       if (cluster.length >= 3) {
         const indicators: CIBIndicator[] = [
           {
-            type: 'network_coordination',
+            type: "network_coordination",
             description: `Dense network of ${cluster.length} interconnected accounts`,
             affectedAccounts: cluster,
             score: 0.4,
@@ -146,7 +140,7 @@ export class CIBDetector {
         ];
 
         campaigns.push({
-          campaignId: this.generateCampaignId('network', new Date()),
+          campaignId: this.generateCampaignId("network", new Date()),
           accounts: cluster,
           coordinationScore: this.calculateNetworkCoordination(cluster, graph),
           inauthenticityScore: 0.6,
@@ -160,9 +154,7 @@ export class CIBDetector {
     return campaigns;
   }
 
-  private createTimeWindows(
-    behaviors: AccountBehavior[]
-  ): Array<{ start: Date; end: Date }> {
+  private createTimeWindows(behaviors: AccountBehavior[]): Array<{ start: Date; end: Date }> {
     const allTimestamps: Date[] = [];
 
     for (const behavior of behaviors) {
@@ -195,9 +187,7 @@ export class CIBDetector {
 
     for (const behavior of behaviors) {
       const activitiesInWindow = behavior.activities.filter(
-        activity =>
-          activity.timestamp >= start &&
-          activity.timestamp <= end
+        (activity) => activity.timestamp >= start && activity.timestamp <= end
       );
 
       if (activitiesInWindow.length > 0) {
@@ -244,9 +234,7 @@ export class CIBDetector {
     return groups;
   }
 
-  private buildConnectionGraph(
-    behaviors: AccountBehavior[]
-  ): Map<string, Set<string>> {
+  private buildConnectionGraph(behaviors: AccountBehavior[]): Map<string, Set<string>> {
     const graph = new Map<string, Set<string>>();
 
     for (const behavior of behaviors) {
@@ -338,7 +326,7 @@ export class CIBDetector {
   }
 
   private normalizeContent(content: string): string {
-    return content.toLowerCase().replace(/\s+/g, ' ').trim();
+    return content.toLowerCase().replace(/\s+/g, " ").trim();
   }
 
   private generateCampaignId(type: string, timestamp: Date): string {
@@ -350,7 +338,7 @@ export class CIBDetector {
     const merged = new Map<string, CIBDetectionResult>();
 
     for (const campaign of campaigns) {
-      const key = campaign.accounts.sort().join('_');
+      const key = campaign.accounts.sort().join("_");
 
       if (!merged.has(key)) {
         merged.set(key, campaign);

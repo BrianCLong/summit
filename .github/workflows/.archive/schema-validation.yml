@@ -3,23 +3,23 @@ name: Schema Validation & Drift Detection
 on:
   schedule:
     # Run every 6 hours
-    - cron: '0 */6 * * *'
+    - cron: "0 */6 * * *"
   pull_request:
     paths:
-      - '**/migrations/**'
-      - 'db/**'
-      - 'server/db/**'
-      - 'server/src/migrations/**'
+      - "**/migrations/**"
+      - "db/**"
+      - "server/db/**"
+      - "server/src/migrations/**"
   workflow_dispatch:
     inputs:
       full_validation:
-        description: 'Run full validation (including performance analysis)'
+        description: "Run full validation (including performance analysis)"
         required: false
-        default: 'false'
+        default: "false"
 
 env:
-  NODE_VERSION: '20.x'
-  PNPM_VERSION: '9'
+  NODE_VERSION: "20.x"
+  PNPM_VERSION: "9"
 
 jobs:
   detect-schema-drift:
@@ -58,13 +58,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Full history for comparison
+          fetch-depth: 0 # Full history for comparison
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3

@@ -73,7 +73,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: "20" }
       - name: Install
         run: npm ci --workspaces
       - name: Lint & Unit Tests
@@ -124,7 +124,7 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
   /search:
     get:
       summary: Search entities and relationships
@@ -133,12 +133,12 @@ paths:
           name: q
           schema: { type: string }
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
   /audit:
     get:
       summary: Query audit log
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
 components:
   securitySchemes:
     bearerAuth:
@@ -187,7 +187,7 @@ redactions := r {
 ## 6) Audit Log Hash Chain (server snippet `server/src/audit/hashchain.ts`)
 
 ```ts
-import crypto from 'crypto';
+import crypto from "crypto";
 
 export type AuditRecord = {
   ts: string;
@@ -198,9 +198,9 @@ export type AuditRecord = {
   prevHash: string;
 };
 
-export function seal(record: Omit<AuditRecord, 'prevHash'>, prevHash: string) {
+export function seal(record: Omit<AuditRecord, "prevHash">, prevHash: string) {
   const data = `${record.ts}|${record.actor}|${record.action}|${record.target}|${record.payloadHash}|${prevHash}`;
-  const hash = crypto.createHash('sha256').update(data).digest('hex');
+  const hash = crypto.createHash("sha256").update(data).digest("hex");
   return { ...record, prevHash: hash };
 }
 ```
@@ -220,8 +220,8 @@ export type CypherPlan = {
 export async function generatePlan(q: NLQuery): Promise<CypherPlan> {
   // placeholder: swap with orchestrator call
   return {
-    cypher: 'MATCH (e:Entity) WHERE e.name CONTAINS $q RETURN e LIMIT 25',
-    rationale: 'Keyword match over name (demo stub)',
+    cypher: "MATCH (e:Entity) WHERE e.name CONTAINS $q RETURN e LIMIT 25",
+    rationale: "Keyword match over name (demo stub)",
     parameters: { q: q.question },
   };
 }
@@ -232,7 +232,7 @@ export async function generatePlan(q: NLQuery): Promise<CypherPlan> {
 ## 8) Splunk Connector (skeleton `ingestion/connectors/splunk/index.ts`)
 
 ```ts
-import axios from 'axios';
+import axios from "axios";
 
 export async function splunkSearch({
   baseUrl,
@@ -249,9 +249,9 @@ export async function splunkSearch({
     {
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
+        "Content-Type": "application/x-www-form-urlencoded",
       },
-    },
+    }
   );
   // TODO: parse results to normalized event model
   return r.data;
@@ -263,26 +263,18 @@ export async function splunkSearch({
 ## 9) S3/CSV Loader (skeleton `ingestion/connectors/s3csv/loader.ts`)
 
 ```ts
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
-import csv from 'csv-parser';
+import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import csv from "csv-parser";
 
-export async function loadCsv({
-  bucket,
-  key,
-}: {
-  bucket: string;
-  key: string;
-}) {
+export async function loadCsv({ bucket, key }: { bucket: string; key: string }) {
   const s3 = new S3Client({});
-  const stream = await s3.send(
-    new GetObjectCommand({ Bucket: bucket, Key: key }),
-  );
+  const stream = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
   return new Promise<any[]>((resolve) => {
     const rows: any[] = [];
     // @ts-ignore
     stream.Body.pipe(csv())
-      .on('data', (d: any) => rows.push(d))
-      .on('end', () => resolve(rows));
+      .on("data", (d: any) => rows.push(d))
+      .on("end", () => resolve(rows));
   });
 }
 ```
@@ -313,12 +305,12 @@ echo "[6/6] Open UI at http://localhost:5173"
 ## 11) Cypress Golden Path (`client/cypress/e2e/golden_path.cy.ts`)
 
 ```ts
-describe('Golden Path', () => {
-  it('loads, searches, shows citations and policy banner', () => {
-    cy.visit('/');
-    cy.contains('Policy in Effect').should('exist');
-    cy.get('[data-testid="global-search"]').type('Vendor X{enter}');
-    cy.contains('Citations').should('exist');
+describe("Golden Path", () => {
+  it("loads, searches, shows citations and policy banner", () => {
+    cy.visit("/");
+    cy.contains("Policy in Effect").should("exist");
+    cy.get('[data-testid="global-search"]').type("Vendor X{enter}");
+    cy.contains("Citations").should("exist");
   });
 });
 ```

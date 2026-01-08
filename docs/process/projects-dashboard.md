@@ -1,10 +1,12 @@
 # Projects dashboard (GitHub Projects v2)
 
 ## Dashboard link
+
 - Primary board: https://github.com/orgs/summit/projects/1
 - If you operate a fork or alternate org, set `PROJECT_OWNER`/`PROJECT_NUMBER` repo variables to match your board URL (pattern: `https://github.com/orgs/<org>/projects/<number>`).
 
 ## Board shape
+
 - Views (backed by the `Status` single-select field):
   - **Intake**: new/untriaged (`Status` = "Todo" or empty), filter `sort:created-desc`.
   - **Triage**: `Status` = "Triage"; filter to SEV-1/2 or P1/2 for daily standups.
@@ -16,6 +18,7 @@
   - `is:open label:P1` and `is:open label:P2` (or use a `Priority` field if defined).
 
 ## Custom fields (Project v2)
+
 - **Severity** (single select): `SEV-1`, `SEV-2`, `SEV-3`, `SEV-4`.
 - **SLA** (date): customer/internal due date for response/resolution.
 - **Component** (text): owning subsystem or service.
@@ -24,6 +27,7 @@
 - **Status** (single select): `Todo`, `Triage`, `In Progress`, `Blocked`, `Done` (drives views above).
 
 ## Automations
+
 - **Auto-add new issues**: issues opened/reopened in the repo are added to the project via `.github/workflows/projects-sla.yml`.
 - **SLA breach highlighting** (daily 06:00 UTC and manual dispatch):
   - Items with `SLA` past today and `Status` not `Done` are moved to **Blocked**, labeled `SLA: Breached`, and receive an audit comment.
@@ -32,6 +36,7 @@
 - **Filters**: views above should pin the severity/priority filters so SEV-1/2 and P1/2 stay in focus during triage.
 
 ## Population with existing audit outputs
+
 1. Convert audit artifacts into issues, tagging Severity and SLA:
    - Bugs: `tmp-audit/audit-2025-12-02.log` and recent findings in `TEST_FAILURES_WEEK1.md`.
    - Tech debt: `TECH_DEBT.md`, `TECH_DEBT_TRACKER.md`, and `TEST_DEBT.md`.
@@ -45,6 +50,7 @@
 3. The workflow will ingest new issues automatically; for historical items, use **Add item** → **Repository issue** in the project UI, then bulk-set custom fields.
 
 ## Slack and Teams embedding
+
 - **Slack**:
   - Add the dashboard URL as a channel bookmark for `#project-intelgraph` (or your project channel).
   - Create a Workflow Builder shortcut that posts the project URL + `Intake`/`Triage` views each morning.
@@ -55,6 +61,7 @@
   - Enable notifications for mentions on `SLA: Breached` issues to keep DRIs aware.
 
 ## Operating model
+
 - Daily triage: open `Triage` view filtered to SEV-1/2 and P1/2, assign Owner and Target Sprint.
 - Weekly review: validate `Done` items before archival; ensure SLA labels cleared when work is completed.
 - Metrics: export board CSV weekly for trend analysis (SLA hit rate, time-in-status, backlog aging).

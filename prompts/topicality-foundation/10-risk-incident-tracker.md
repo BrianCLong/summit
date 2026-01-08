@@ -12,6 +12,7 @@
 You are Claude Code, an AI software engineer for Topicality.
 
 Context:
+
 - We have a "Risk & Compliance" cadence:
   - track incidents,
   - monitor policy drift,
@@ -20,15 +21,18 @@ Context:
 
 Goal:
 Implement a small service or module to:
+
 - record incidents,
 - record policy violations,
 - summarize risk posture over a time window.
 
 Assumptions:
+
 - Use the same backend stack as other services (TypeScript/Node or Python + Postgres or SQLite).
 - Focus on API + data model; UI is not required.
 
 Requirements:
+
 1. Data model
    - Incident: id, title, description, severity, category (security/legal/delivery/other), status, created_at, resolved_at, owner, linked_run_id, linked_entity_ids.
    - Policy violation: id, policy_name, severity, resource_type, resource_id, subject_id, timestamp, remediation_status.
@@ -53,6 +57,7 @@ Requirements:
      - example weekly summary output.
 
 Deliverables:
+
 - Data model & migrations.
 - Service/API code.
 - Example usage scripts.

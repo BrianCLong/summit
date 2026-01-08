@@ -4,7 +4,7 @@ permissions:
   contents: read
 
 on:
-  schedule: [{ cron: '0 6 * * *' }]
+  schedule: [{ cron: "0 6 * * *" }]
   pull_request: # New trigger for PRs
     types: [labeled]
     branches: [main]
@@ -33,6 +33,6 @@ jobs:
           ls -R reports/ # Show what would be uploaded
       - uses: peter-evans/create-pull-request@v6
         with:
-          title: 'Eval: router weights proposal'
-          branch: 'eval/weights-proposal'
+          title: "Eval: router weights proposal"
+          branch: "eval/weights-proposal"
           labels: eval, router

@@ -76,7 +76,7 @@ _All DoR items are satisfied and linked above to unblock sprint planning._
 | Interface                         | Direction         | Description                                                                                       | Status Signals                   |
 | --------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------- | -------------------------------- |
 | `POST /disclosures/export`        | Client → API      | Accepts `{ tenantId, dateRange, artifacts[] }`; enqueues async job and returns `202` with job ID. | Queue depth, validation failures |
-| `GET /jobs/{id}`                  | Client ↔ API     | Polls job status (`pending`, `running`, `completed`, `failed`, `partial`) with progress metadata. | Completion latency, retry count  |
+| `GET /jobs/{id}`                  | Client ↔ API      | Polls job status (`pending`, `running`, `completed`, `failed`, `partial`) with progress metadata. | Completion latency, retry count  |
 | Webhook `disclosure.export.ready` | Platform → Tenant | Posts manifest summary, checksum index, and download URL; retries with exponential backoff.       | Delivery latency, failure alerts |
 | Bundle manifest JSON              | Worker → Storage  | Captures artifact list, SHA-512 checksums, jurisdiction tags, and policy versions.                | Provenance graph updates         |
 

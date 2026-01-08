@@ -42,6 +42,7 @@
 ## 🎯 Quick Reference
 
 ### Current State
+
 - **428 open PRs**
 - **57-74% AI/bot-generated**
 - **~250 PRs >60 days old**
@@ -49,6 +50,7 @@
 - **~50-100 PRs blocked by CI/CD**
 
 ### Target State (5 weeks)
+
 - **<100 open PRs** (76% reduction)
 - **0 PRs >60 days**
 - **0 duplicates**
@@ -57,13 +59,13 @@
 
 ### Phase Timeline
 
-| Phase | Duration | Target | Focus |
-|-------|----------|--------|-------|
-| 1 | Week 1 | 378 PRs | Duplicates, quick wins |
-| 2 | Weeks 2-3 | 228 PRs | September batch review |
-| 3 | Week 4 | 148 PRs | Recent PRs, bot fixes |
-| 4 | Week 5 | <100 PRs | Policy, sustainable state |
-| 5 | Ongoing | <100 PRs | Maintenance mode |
+| Phase | Duration  | Target   | Focus                     |
+| ----- | --------- | -------- | ------------------------- |
+| 1     | Week 1    | 378 PRs  | Duplicates, quick wins    |
+| 2     | Weeks 2-3 | 228 PRs  | September batch review    |
+| 3     | Week 4    | 148 PRs  | Recent PRs, bot fixes     |
+| 4     | Week 5    | <100 PRs | Policy, sustainable state |
+| 5     | Ongoing   | <100 PRs | Maintenance mode          |
 
 ---
 
@@ -93,14 +95,14 @@ gh pr close 1418 --comment "..."  # Duplicate, keep #1432
 
 ### Duplicate PRs to Close Immediately
 
-| Close | Keep | Reason |
-|-------|------|--------|
-| #1419, #1435 | None | Broken pnpm-lock.yaml |
-| #1422, #1423 | None | Hardcoded credentials |
-| #1697 | #1698 | Key collision vs. rollback issue |
-| #1436 | #1425 | Style issue vs. overfitting bug |
-| #1434 | #1433 | #1433 is canonical version |
-| #1418 | #1432 | #1432 has autofix available |
+| Close        | Keep  | Reason                           |
+| ------------ | ----- | -------------------------------- |
+| #1419, #1435 | None  | Broken pnpm-lock.yaml            |
+| #1422, #1423 | None  | Hardcoded credentials            |
+| #1697        | #1698 | Key collision vs. rollback issue |
+| #1436        | #1425 | Style issue vs. overfitting bug  |
+| #1434        | #1433 | #1433 is canonical version       |
+| #1418        | #1432 | #1432 has autofix available      |
 
 ### Critical Security Issues
 
@@ -142,6 +144,7 @@ Total:  ██████████ 76% reduction
 ## 👥 Team Responsibilities
 
 ### Triage Lead (1 person, 50% time)
+
 - Coordinate 5-phase execution
 - Run categorization scripts
 - Assign PRs to reviewers
@@ -149,17 +152,20 @@ Total:  ██████████ 76% reduction
 - Remove blockers
 
 ### Code Reviewers (3-5 people, 5-10 hrs/week)
+
 - Review assigned PRs
 - Provide feedback within SLO
 - Approve and merge when ready
 - Flag issues to triage lead
 
 ### Security Reviewer (1 person, as-needed)
+
 - Review security-flagged PRs
 - Sign-off on auth/authorization changes
 - Track security issues
 
 ### Bot/AI Engineer (1 person, ~8 hours)
+
 - Fix technical issues in bot PRs
 - Implement bot PR improvements
 - Update bot PR checklist
@@ -196,17 +202,20 @@ chmod +x scripts/*.sh
 ## 📞 Communication
 
 ### Internal (Team)
+
 - **Slack:** #engineering-process
 - **Weekly Sync:** Fridays, 30 min
 - **Blockers:** Tag @BrianCLong immediately
 
 ### External (Contributors)
+
 - Always thank for contribution
 - Explain closure/delay clearly
 - Offer path forward when appropriate
 - Use templates (see PR_TRIAGE_PLAN.md Appendix B)
 
 ### Stakeholders
+
 - **Weekly:** PR count + highlights email
 - **Bi-weekly:** Full metrics dashboard
 - **End of Phase:** Retrospective report
@@ -216,6 +225,7 @@ chmod +x scripts/*.sh
 ## ✅ Success Criteria
 
 ### Quantitative
+
 - [ ] <100 open PRs by end of Week 5
 - [ ] 0 PRs >60 days old
 - [ ] 0 duplicate PRs
@@ -223,6 +233,7 @@ chmod +x scripts/*.sh
 - [ ] Average time-to-first-review <7 days
 
 ### Qualitative
+
 - [ ] PR aging policy documented and enforced
 - [ ] Bot PR process has human review gate
 - [ ] Weekly triage meetings running
@@ -234,16 +245,19 @@ chmod +x scripts/*.sh
 ## 🔄 Maintenance (Post-Triage)
 
 ### Weekly
+
 - [ ] 30-min triage meeting (Fridays)
 - [ ] Review PRs >14 days old
 - [ ] Assign reviewers for coming week
 
 ### Monthly
+
 - [ ] Review PR health metrics
 - [ ] Adjust policies if needed
 - [ ] Celebrate wins, learn from blockers
 
 ### Quarterly
+
 - [ ] Deep-dive on PR process
 - [ ] Review aging policy effectiveness
 - [ ] Update documentation
@@ -294,15 +308,19 @@ Key decisions made during triage analysis (2025-11-20):
 ## 🤝 Contributing to This Triage
 
 ### Found More Duplicates?
+
 Add them to `PR_ANALYSIS.md` Section 5 and update closure list
 
 ### Better Categorization?
+
 Update scripts in `PR_TRIAGE_PLAN.md` Appendix A
 
 ### Process Improvements?
+
 Document in `PR_TRIAGE_RETROSPECTIVE.md` (create if needed)
 
 ### Questions?
+
 - Comment on relevant PR
 - Post in #engineering-process
 - Tag @BrianCLong
@@ -319,6 +337,7 @@ echo "$(date +%Y-%m-%d): $(gh pr list --state open --json number | jq 'length') 
 ```
 
 **Target Milestones:**
+
 - 2025-11-27 (Day 7): ≤378 PRs ✅ Week 1 complete
 - 2025-12-11 (Day 21): ≤228 PRs ✅ Weeks 2-3 complete
 - 2025-12-18 (Day 28): ≤148 PRs ✅ Week 4 complete

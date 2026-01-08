@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Card,
@@ -25,7 +25,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-} from '@mui/material';
+} from "@mui/material";
 import {
   People,
   Edit,
@@ -43,9 +43,9 @@ import {
   Person,
   Group,
   Message,
-} from '@mui/icons-material';
-import { useQuery, useMutation, useSubscription } from '@apollo/client';
-import { gql } from '@apollo/client';
+} from "@mui/icons-material";
+import { useQuery, useMutation, useSubscription } from "@apollo/client";
+import { gql } from "@apollo/client";
 
 // GraphQL queries for collaboration
 const GET_ACTIVE_USERS = gql`
@@ -268,52 +268,40 @@ const LIVE_NOTIFICATION = gql`
   }
 `;
 
-const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
+const CollaborationPanel = ({ investigationId = "inv-001" }) => {
   const [currentTab, setCurrentTab] = useState(0);
-  const [newComment, setNewComment] = useState('');
+  const [newComment, setNewComment] = useState("");
   const [selectedEntityId, setSelectedEntityId] = useState(null);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
 
   // GraphQL queries
-  const { data: activeUsersData, loading: usersLoading } = useQuery(
-    GET_ACTIVE_USERS,
-    {
-      variables: { investigationId },
-      pollInterval: 5000,
-      errorPolicy: 'all',
-    },
-  );
+  const { data: activeUsersData, loading: usersLoading } = useQuery(GET_ACTIVE_USERS, {
+    variables: { investigationId },
+    pollInterval: 5000,
+    errorPolicy: "all",
+  });
 
-  const { data: pendingEditsData, loading: editsLoading } = useQuery(
-    GET_PENDING_EDITS,
-    {
-      variables: { investigationId },
-      pollInterval: 3000,
-      errorPolicy: 'all',
-    },
-  );
+  const { data: pendingEditsData, loading: editsLoading } = useQuery(GET_PENDING_EDITS, {
+    variables: { investigationId },
+    pollInterval: 3000,
+    errorPolicy: "all",
+  });
 
-  const { data: commentsData, loading: commentsLoading } = useQuery(
-    GET_COMMENTS,
-    {
-      variables: { investigationId, entityId: selectedEntityId },
-      pollInterval: 2000,
-      errorPolicy: 'all',
-    },
-  );
+  const { data: commentsData, loading: commentsLoading } = useQuery(GET_COMMENTS, {
+    variables: { investigationId, entityId: selectedEntityId },
+    pollInterval: 2000,
+    errorPolicy: "all",
+  });
 
-  const { data: notificationsData, loading: notificationsLoading } = useQuery(
-    GET_NOTIFICATIONS,
-    {
-      variables: { investigationId, limit: 10 },
-      pollInterval: 1000,
-      errorPolicy: 'all',
-    },
-  );
+  const { data: notificationsData, loading: notificationsLoading } = useQuery(GET_NOTIFICATIONS, {
+    variables: { investigationId, limit: 10 },
+    pollInterval: 1000,
+    errorPolicy: "all",
+  });
 
   const { data: statsData } = useQuery(GET_COLLABORATION_STATS, {
     pollInterval: 10000,
-    errorPolicy: 'all',
+    errorPolicy: "all",
   });
 
   // GraphQL mutations
@@ -340,13 +328,13 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
       variables: {
         investigationId,
         userInfo: {
-          name: 'Current User',
-          email: 'user@intelgraph.com',
-          avatar: 'https://avatar.com/current-user',
-          role: 'ANALYST',
+          name: "Current User",
+          email: "user@intelgraph.com",
+          avatar: "https://avatar.com/current-user",
+          role: "ANALYST",
         },
       },
-    }).catch((err) => console.log('Join investigation error:', err));
+    }).catch((err) => console.log("Join investigation error:", err));
   }, [investigationId, joinInvestigation]);
 
   const handleAddComment = async () => {
@@ -362,10 +350,10 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
             },
           },
         });
-        setNewComment('');
+        setNewComment("");
         setCommentDialogOpen(false);
       } catch (err) {
-        console.error('Add comment error:', err);
+        console.error("Add comment error:", err);
       }
     }
   };
@@ -376,7 +364,7 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
         variables: { editId, status },
       });
     } catch (err) {
-      console.error('Resolve edit error:', err);
+      console.error("Resolve edit error:", err);
     }
   };
 
@@ -386,30 +374,30 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
 
   const getEditTypeColor = (editType) => {
     switch (editType) {
-      case 'CREATE':
-        return 'success';
-      case 'UPDATE':
-        return 'info';
-      case 'DELETE':
-        return 'error';
-      case 'MOVE':
-        return 'warning';
+      case "CREATE":
+        return "success";
+      case "UPDATE":
+        return "info";
+      case "DELETE":
+        return "error";
+      case "MOVE":
+        return "warning";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   const getNotificationIcon = (type) => {
     switch (type) {
-      case 'USER_JOINED':
+      case "USER_JOINED":
         return <Person color="success" />;
-      case 'USER_LEFT':
+      case "USER_LEFT":
         return <Person color="action" />;
-      case 'ENTITY_UPDATED':
+      case "ENTITY_UPDATED":
         return <Edit color="info" />;
-      case 'COMMENT_ADDED':
+      case "COMMENT_ADDED":
         return <Message color="primary" />;
-      case 'EDIT_CONFLICT':
+      case "EDIT_CONFLICT":
         return <Cancel color="error" />;
       default:
         return <Notifications />;
@@ -434,7 +422,7 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
           <Typography
             variant="h5"
             gutterBottom
-            sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+            sx={{ display: "flex", alignItems: "center", gap: 1 }}
           >
             <Group color="primary" />
             🤝 Real-time Collaboration
@@ -446,7 +434,7 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
           {statsData?.getCollaborationStats && (
             <Grid container spacing={2} sx={{ mt: 1 }}>
               <Grid item xs={6} sm={3}>
-                <Paper sx={{ p: 1, textAlign: 'center' }}>
+                <Paper sx={{ p: 1, textAlign: "center" }}>
                   <Typography variant="caption">Active Users</Typography>
                   <Typography variant="h6" color="primary">
                     {statsData.getCollaborationStats.activeUsers}
@@ -454,7 +442,7 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
                 </Paper>
               </Grid>
               <Grid item xs={6} sm={3}>
-                <Paper sx={{ p: 1, textAlign: 'center' }}>
+                <Paper sx={{ p: 1, textAlign: "center" }}>
                   <Typography variant="caption">Pending Edits</Typography>
                   <Typography variant="h6" color="warning.main">
                     {statsData.getCollaborationStats.pendingEdits}
@@ -462,7 +450,7 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
                 </Paper>
               </Grid>
               <Grid item xs={6} sm={3}>
-                <Paper sx={{ p: 1, textAlign: 'center' }}>
+                <Paper sx={{ p: 1, textAlign: "center" }}>
                   <Typography variant="caption">Comments</Typography>
                   <Typography variant="h6" color="info.main">
                     {statsData.getCollaborationStats.totalComments}
@@ -470,7 +458,7 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
                 </Paper>
               </Grid>
               <Grid item xs={6} sm={3}>
-                <Paper sx={{ p: 1, textAlign: 'center' }}>
+                <Paper sx={{ p: 1, textAlign: "center" }}>
                   <Typography variant="caption">Notifications</Typography>
                   <Typography variant="h6" color="secondary.main">
                     {statsData.getCollaborationStats.recentNotifications}
@@ -483,15 +471,12 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
       </Card>
 
       <Card>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
           <Tabs value={currentTab} onChange={handleTabChange}>
             <Tab
               label="Active Users"
               icon={
-                <Badge
-                  badgeContent={activeUsersData?.getActiveUsers?.length || 0}
-                  color="primary"
-                >
+                <Badge badgeContent={activeUsersData?.getActiveUsers?.length || 0} color="primary">
                   <People />
                 </Badge>
               }
@@ -510,10 +495,7 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
             <Tab
               label="Comments"
               icon={
-                <Badge
-                  badgeContent={commentsData?.getComments?.length || 0}
-                  color="info"
-                >
+                <Badge badgeContent={commentsData?.getComments?.length || 0} color="info">
                   <Comment />
                 </Badge>
               }
@@ -522,9 +504,7 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
               label="Live Feed"
               icon={
                 <Badge
-                  badgeContent={
-                    notificationsData?.getNotifications?.length || 0
-                  }
+                  badgeContent={notificationsData?.getNotifications?.length || 0}
                   color="secondary"
                 >
                   <Timeline />
@@ -540,9 +520,9 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
             <Box>
               <Box
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'between',
-                  alignItems: 'center',
+                  display: "flex",
+                  justifyContent: "between",
+                  alignItems: "center",
                   mb: 2,
                 }}
               >
@@ -555,28 +535,16 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
               </Box>
 
               {activeUsersData?.getActiveUsers?.length === 0 ? (
-                <Alert severity="info">
-                  No active users in this investigation
-                </Alert>
+                <Alert severity="info">No active users in this investigation</Alert>
               ) : (
                 <List>
                   {activeUsersData?.getActiveUsers?.map((user, index) => (
                     <ListItem
                       key={index}
                       secondaryAction={
-                        <Tooltip
-                          title={
-                            user.selectedEntityId
-                              ? 'Viewing entity'
-                              : 'No selection'
-                          }
-                        >
+                        <Tooltip title={user.selectedEntityId ? "Viewing entity" : "No selection"}>
                           <IconButton size="small">
-                            {user.selectedEntityId ? (
-                              <Visibility />
-                            ) : (
-                              <VisibilityOff />
-                            )}
+                            {user.selectedEntityId ? <Visibility /> : <VisibilityOff />}
                           </IconButton>
                         </Tooltip>
                       }
@@ -585,18 +553,12 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
                         <Badge
                           overlap="circular"
                           anchorOrigin={{
-                            vertical: 'bottom',
-                            horizontal: 'right',
+                            vertical: "bottom",
+                            horizontal: "right",
                           }}
-                          badgeContent={
-                            <Circle
-                              sx={{ color: 'success.main', fontSize: 8 }}
-                            />
-                          }
+                          badgeContent={<Circle sx={{ color: "success.main", fontSize: 8 }} />}
                         >
-                          <Avatar src={user.userInfo.avatar}>
-                            {user.userInfo.name[0]}
-                          </Avatar>
+                          <Avatar src={user.userInfo.avatar}>{user.userInfo.name[0]}</Avatar>
                         </Badge>
                       </ListItemAvatar>
                       <ListItemText
@@ -606,10 +568,7 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
                             <Typography variant="caption" display="block">
                               {user.userInfo.role} • {user.currentPage} page
                             </Typography>
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                            >
+                            <Typography variant="caption" color="text.secondary">
                               Last seen: {formatTimeAgo(user.timestamp)}
                             </Typography>
                           </Box>
@@ -627,9 +586,9 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
             <Box>
               <Box
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'between',
-                  alignItems: 'center',
+                  display: "flex",
+                  justifyContent: "between",
+                  alignItems: "center",
                   mb: 2,
                 }}
               >
@@ -653,18 +612,14 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
                           <IconButton
                             color="success"
                             size="small"
-                            onClick={() =>
-                              handleResolveEdit(edit.id, 'APPLIED')
-                            }
+                            onClick={() => handleResolveEdit(edit.id, "APPLIED")}
                           >
                             <Check />
                           </IconButton>
                           <IconButton
                             color="error"
                             size="small"
-                            onClick={() =>
-                              handleResolveEdit(edit.id, 'REJECTED')
-                            }
+                            onClick={() => handleResolveEdit(edit.id, "REJECTED")}
                           >
                             <Close />
                           </IconButton>
@@ -672,16 +627,14 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
                       }
                     >
                       <ListItemAvatar>
-                        <Avatar src={edit.user.avatar}>
-                          {edit.user.name[0]}
-                        </Avatar>
+                        <Avatar src={edit.user.avatar}>{edit.user.name[0]}</Avatar>
                       </ListItemAvatar>
                       <ListItemText
                         primary={
                           <Box
                             sx={{
-                              display: 'flex',
-                              alignItems: 'center',
+                              display: "flex",
+                              alignItems: "center",
                               gap: 1,
                             }}
                           >
@@ -709,9 +662,9 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
             <Box>
               <Box
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'between',
-                  alignItems: 'center',
+                  display: "flex",
+                  justifyContent: "between",
+                  alignItems: "center",
                   mb: 2,
                 }}
               >
@@ -733,28 +686,20 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
                   {commentsData?.getComments?.map((comment) => (
                     <ListItem key={comment.id} alignItems="flex-start">
                       <ListItemAvatar>
-                        <Avatar src={comment.user.avatar}>
-                          {comment.user.name[0]}
-                        </Avatar>
+                        <Avatar src={comment.user.avatar}>{comment.user.name[0]}</Avatar>
                       </ListItemAvatar>
                       <ListItemText
                         primary={
                           <Box
                             sx={{
-                              display: 'flex',
-                              alignItems: 'center',
+                              display: "flex",
+                              alignItems: "center",
                               gap: 1,
                             }}
                           >
-                            <Typography variant="subtitle2">
-                              {comment.user.name}
-                            </Typography>
+                            <Typography variant="subtitle2">{comment.user.name}</Typography>
                             {comment.resolved && (
-                              <Chip
-                                label="Resolved"
-                                color="success"
-                                size="small"
-                              />
+                              <Chip label="Resolved" color="success" size="small" />
                             )}
                           </Box>
                         }
@@ -763,13 +708,9 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
                             <Typography variant="body2" sx={{ mt: 0.5 }}>
                               {comment.content}
                             </Typography>
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                            >
+                            <Typography variant="caption" color="text.secondary">
                               {formatTimeAgo(comment.timestamp)}
-                              {comment.entityId &&
-                                ` • Entity ${comment.entityId}`}
+                              {comment.entityId && ` • Entity ${comment.entityId}`}
                             </Typography>
                           </Box>
                         }
@@ -786,9 +727,9 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
             <Box>
               <Box
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'between',
-                  alignItems: 'center',
+                  display: "flex",
+                  justifyContent: "between",
+                  alignItems: "center",
                   mb: 2,
                 }}
               >
@@ -807,7 +748,7 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
                   {notificationsData?.getNotifications?.map((notification) => (
                     <ListItem key={notification.id}>
                       <ListItemAvatar>
-                        <Avatar sx={{ bgcolor: 'background.paper' }}>
+                        <Avatar sx={{ bgcolor: "background.paper" }}>
                           {getNotificationIcon(notification.type)}
                         </Avatar>
                       </ListItemAvatar>
@@ -816,13 +757,9 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
                         secondary={
                           <Box>
                             <Typography variant="caption" display="block">
-                              {notification.user.name} •{' '}
-                              {notification.type.replace(/_/g, ' ')}
+                              {notification.user.name} • {notification.type.replace(/_/g, " ")}
                             </Typography>
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                            >
+                            <Typography variant="caption" color="text.secondary">
                               {formatTimeAgo(notification.timestamp)}
                             </Typography>
                           </Box>
@@ -863,18 +800,14 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
             label="Entity ID (optional)"
             fullWidth
             variant="outlined"
-            value={selectedEntityId || ''}
+            value={selectedEntityId || ""}
             onChange={(e) => setSelectedEntityId(e.target.value || null)}
             placeholder="Leave blank for general comment"
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setCommentDialogOpen(false)}>Cancel</Button>
-          <Button
-            onClick={handleAddComment}
-            variant="contained"
-            startIcon={<Send />}
-          >
+          <Button onClick={handleAddComment} variant="contained" startIcon={<Send />}>
             Add Comment
           </Button>
         </DialogActions>

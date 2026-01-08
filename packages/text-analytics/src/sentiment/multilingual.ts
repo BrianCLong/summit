@@ -2,8 +2,8 @@
  * Multilingual sentiment analysis
  */
 
-import { SentimentAnalyzer } from './index';
-import type { SentimentResult } from '../types';
+import { SentimentAnalyzer } from "./index";
+import type { SentimentResult } from "../types";
 
 export class MultilingualSentimentAnalyzer {
   private analyzers: Map<string, SentimentAnalyzer> = new Map();

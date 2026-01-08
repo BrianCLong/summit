@@ -3,26 +3,26 @@ name: Schema Drift Governance
 on:
   pull_request:
     paths:
-      - 'migrations/**'
-      - 'scripts/schema-*.ts'
-      - 'scripts/create-migration.ts'
-      - '.github/workflows/schema-drift.yml'
-      - 'schema-fingerprints/**'
-      - 'server/src/db/**'
-      - 'server/db/**'
-      - 'packages/**'
-      - 'schemas/**'
-      - 'docs/ops/schema-evolution-governance.md'
-      - 'package.json'
+      - "migrations/**"
+      - "scripts/schema-*.ts"
+      - "scripts/create-migration.ts"
+      - ".github/workflows/schema-drift.yml"
+      - "schema-fingerprints/**"
+      - "server/src/db/**"
+      - "server/db/**"
+      - "packages/**"
+      - "schemas/**"
+      - "docs/ops/schema-evolution-governance.md"
+      - "package.json"
   push:
     branches:
       - main
     paths:
-      - 'migrations/**'
-      - 'scripts/schema-*.ts'
-      - 'scripts/create-migration.ts'
-      - '.github/workflows/schema-drift.yml'
-      - 'schema-fingerprints/**'
+      - "migrations/**"
+      - "scripts/schema-*.ts"
+      - "scripts/create-migration.ts"
+      - ".github/workflows/schema-drift.yml"
+      - "schema-fingerprints/**"
 
 jobs:
   verify:
@@ -37,7 +37,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: |

@@ -188,7 +188,7 @@ spec:
             category: latency
           annotations:
             summary: "API p99 latency exceeds 500ms"
-            description: "API p99 latency is {{ $value | printf \"%.3f\" }}s"
+            description: 'API p99 latency is {{ $value | printf "%.3f" }}s'
 
         # Database Alerts
         - alert: SummitDatabaseLatencyHigh
@@ -200,7 +200,7 @@ spec:
             category: latency
           annotations:
             summary: "Database p95 latency exceeds 100ms"
-            description: "Database {{ $labels.database }} p95 latency is {{ $value | printf \"%.3f\" }}s"
+            description: 'Database {{ $labels.database }} p95 latency is {{ $value | printf "%.3f" }}s'
 
         - alert: SummitDatabaseConnectionPoolExhausted
           expr: |
@@ -212,7 +212,7 @@ spec:
             category: capacity
           annotations:
             summary: "Database connection pool nearly exhausted"
-            description: "Database {{ $labels.database }} is using {{ $value | printf \"%.0f\" }}% of connections"
+            description: 'Database {{ $labels.database }} is using {{ $value | printf "%.0f" }}% of connections'
 
         # Error Budget Exhaustion Alerts
         - alert: SummitSLOErrorBudgetLow
@@ -223,7 +223,7 @@ spec:
             category: slo
           annotations:
             summary: "API availability error budget is low"
-            description: "Only {{ $value | printf \"%.1f\" }}% of error budget remaining"
+            description: 'Only {{ $value | printf "%.1f" }}% of error budget remaining'
 
         - alert: SummitSLOErrorBudgetExhausted
           expr: summit:slo:api_availability:error_budget_remaining < 0

@@ -11,7 +11,7 @@ The default entrypoint is browser-safe and does not include Node.js polyfills.
 ```typescript
 import { parseManifest, parseChecksums, ReleaseStatus } from "@summit/release-bundle";
 
-const manifestJson = await fetch('/release-manifest.json').then(r => r.text());
+const manifestJson = await fetch("/release-manifest.json").then((r) => r.text());
 const status: ReleaseStatus = parseManifest(manifestJson);
 ```
 
@@ -22,6 +22,6 @@ For server-side usage with filesystem access, import from the `/node` subpath.
 ```typescript
 import { loadBundleFromDir } from "@summit/release-bundle/node";
 
-const bundle = loadBundleFromDir('./dist/release');
+const bundle = loadBundleFromDir("./dist/release");
 console.log(bundle.manifest.tag);
 ```

@@ -1,9 +1,9 @@
 name: intelgraph-ci
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
   push:
-    branches: [ main ]
+    branches: [main]
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
       - run: npm ci
 
   lint:
@@ -26,7 +26,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
       - run: npm ci
       - run: npm run lint
 
@@ -38,7 +38,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
       - run: npm ci
       - run: npm run typecheck
 
@@ -50,7 +50,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
       - run: npm ci
       - run: npm test -- --ci --reporters=default --reporters=jest-junit
 
@@ -60,7 +60,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 18, cache: 'npm' }
+        with: { node-version: 18, cache: "npm" }
       - run: npm ci
       - run: npm run --workspace gateway/policy-lac policy:lint
       - run: npm run --workspace gateway/policy-lac policy:sim:read
@@ -74,7 +74,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
       - run: npm ci
       - run: npx playwright install --with-deps
       - run: npm run e2e

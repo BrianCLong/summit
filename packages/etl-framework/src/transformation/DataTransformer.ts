@@ -2,8 +2,8 @@
  * Data transformation engine
  */
 
-import { Logger } from 'winston';
-import { TransformationConfig, Transformation } from '@intelgraph/data-integration/src/types';
+import { Logger } from "winston";
+import { TransformationConfig, Transformation } from "@intelgraph/data-integration/src/types";
 
 export class DataTransformer {
   private config: TransformationConfig | undefined;
@@ -25,7 +25,9 @@ export class DataTransformer {
     let transformedData = [...data];
 
     // Apply transformations in order
-    const sortedTransformations = [...this.config.transformations].sort((a, b) => a.order - b.order);
+    const sortedTransformations = [...this.config.transformations].sort(
+      (a, b) => a.order - b.order
+    );
 
     for (const transformation of sortedTransformations) {
       this.logger.debug(`Applying transformation: ${transformation.name}`);
@@ -37,21 +39,21 @@ export class DataTransformer {
 
   private async applyTransformation(data: any[], transformation: Transformation): Promise<any[]> {
     switch (transformation.type) {
-      case 'map':
+      case "map":
         return this.applyMapping(data, transformation.config);
-      case 'filter':
+      case "filter":
         return this.applyFilter(data, transformation.config);
-      case 'aggregate':
+      case "aggregate":
         return this.applyAggregation(data, transformation.config);
-      case 'join':
+      case "join":
         return this.applyJoin(data, transformation.config);
-      case 'flatten':
+      case "flatten":
         return this.applyFlatten(data, transformation.config);
-      case 'normalize':
+      case "normalize":
         return this.applyNormalization(data, transformation.config);
-      case 'typecast':
+      case "typecast":
         return this.applyTypeCasting(data, transformation.config);
-      case 'custom':
+      case "custom":
         return this.applyCustom(data, transformation.config);
       default:
         this.logger.warn(`Unknown transformation type: ${transformation.type}`);
@@ -62,13 +64,13 @@ export class DataTransformer {
   private applyMapping(data: any[], config: any): any[] {
     const fieldMapping = config.fieldMapping || {};
 
-    return data.map(record => {
+    return data.map((record) => {
       const mapped: any = {};
 
       for (const [targetField, sourceField] of Object.entries(fieldMapping)) {
-        if (typeof sourceField === 'string') {
+        if (typeof sourceField === "string") {
           mapped[targetField] = this.getNestedValue(record, sourceField);
-        } else if (typeof sourceField === 'function') {
+        } else if (typeof sourceField === "function") {
           mapped[targetField] = sourceField(record);
         }
       }
@@ -103,7 +105,7 @@ export class DataTransformer {
 
     // Group records
     for (const record of data) {
-      const key = groupBy.map((field: string) => record[field]).join('|');
+      const key = groupBy.map((field: string) => record[field]).join("|");
       if (!groups.has(key)) {
         groups.set(key, []);
       }
@@ -122,22 +124,23 @@ export class DataTransformer {
 
       // Apply aggregation functions
       for (const [field, aggType] of Object.entries(aggregations)) {
-        const values = records.map(r => r[field]).filter(v => v != null);
+        const values = records.map((r) => r[field]).filter((v) => v != null);
 
         switch (aggType) {
-          case 'sum':
+          case "sum":
             result[`${field}_sum`] = values.reduce((sum, val) => sum + Number(val), 0);
             break;
-          case 'avg':
-            result[`${field}_avg`] = values.reduce((sum, val) => sum + Number(val), 0) / values.length;
+          case "avg":
+            result[`${field}_avg`] =
+              values.reduce((sum, val) => sum + Number(val), 0) / values.length;
             break;
-          case 'count':
+          case "count":
             result[`${field}_count`] = values.length;
             break;
-          case 'min':
+          case "min":
             result[`${field}_min`] = Math.min(...values.map(Number));
             break;
-          case 'max':
+          case "max":
             result[`${field}_max`] = Math.max(...values.map(Number));
             break;
         }
@@ -158,13 +161,13 @@ export class DataTransformer {
   private applyFlatten(data: any[], config: any): any[] {
     const nestedField = config.nestedField;
 
-    return data.flatMap(record => {
+    return data.flatMap((record) => {
       const nestedValue = this.getNestedValue(record, nestedField);
 
       if (Array.isArray(nestedValue)) {
-        return nestedValue.map(item => ({
+        return nestedValue.map((item) => ({
           ...record,
-          [nestedField]: item
+          [nestedField]: item,
         }));
       }
 
@@ -177,7 +180,7 @@ export class DataTransformer {
     const stringFields = config.stringFields || [];
     const numericFields = config.numericFields || [];
 
-    return data.map(record => {
+    return data.map((record) => {
       const normalized = { ...record };
 
       // Normalize date fields
@@ -189,7 +192,7 @@ export class DataTransformer {
 
       // Normalize string fields
       for (const field of stringFields) {
-        if (typeof normalized[field] === 'string') {
+        if (typeof normalized[field] === "string") {
           normalized[field] = normalized[field].trim().toLowerCase();
         }
       }
@@ -208,23 +211,25 @@ export class DataTransformer {
   private applyTypeCasting(data: any[], config: any): any[] {
     const typeMapping = config.typeMapping || {};
 
-    return data.map(record => {
+    return data.map((record) => {
       const casted = { ...record };
 
       for (const [field, targetType] of Object.entries(typeMapping)) {
-        if (casted[field] == null) {continue;}
+        if (casted[field] == null) {
+          continue;
+        }
 
         switch (targetType) {
-          case 'string':
+          case "string":
             casted[field] = String(casted[field]);
             break;
-          case 'number':
+          case "number":
             casted[field] = Number(casted[field]);
             break;
-          case 'boolean':
+          case "boolean":
             casted[field] = Boolean(casted[field]);
             break;
-          case 'date':
+          case "date":
             casted[field] = new Date(casted[field]);
             break;
         }
@@ -237,7 +242,7 @@ export class DataTransformer {
   private applyCustom(data: any[], config: any): any[] {
     const customFn = config.transformFunction;
 
-    if (typeof customFn === 'function') {
+    if (typeof customFn === "function") {
       return data.map(customFn);
     }
 
@@ -245,6 +250,6 @@ export class DataTransformer {
   }
 
   private getNestedValue(obj: any, path: string): any {
-    return path.split('.').reduce((current, prop) => current?.[prop], obj);
+    return path.split(".").reduce((current, prop) => current?.[prop], obj);
   }
 }

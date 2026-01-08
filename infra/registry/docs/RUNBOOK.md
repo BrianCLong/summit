@@ -18,21 +18,21 @@ This runbook covers operational procedures for the IntelGraph air-gapped contain
 
 ### Key Components
 
-| Component | Purpose | Health Check |
-|-----------|---------|--------------|
-| Harbor Core | API and business logic | `curl /api/v2.0/ping` |
-| Harbor Registry | Image storage | `curl :5000/` |
-| Trivy | Vulnerability scanning | `curl :8080/probe/healthy` |
-| PostgreSQL | Metadata storage | `pg_isready` |
-| Redis | Caching | `redis-cli ping` |
+| Component       | Purpose                | Health Check               |
+| --------------- | ---------------------- | -------------------------- |
+| Harbor Core     | API and business logic | `curl /api/v2.0/ping`      |
+| Harbor Registry | Image storage          | `curl :5000/`              |
+| Trivy           | Vulnerability scanning | `curl :8080/probe/healthy` |
+| PostgreSQL      | Metadata storage       | `pg_isready`               |
+| Redis           | Caching                | `redis-cli ping`           |
 
 ### Contact Information
 
-| Role | Contact | Escalation |
-|------|---------|------------|
-| On-Call Engineer | #platform-oncall | PagerDuty |
-| Security Team | security@intelgraph.local | Immediate |
-| Platform Lead | platform-lead@intelgraph.local | 30 min |
+| Role             | Contact                        | Escalation |
+| ---------------- | ------------------------------ | ---------- |
+| On-Call Engineer | #platform-oncall               | PagerDuty  |
+| Security Team    | security@intelgraph.local      | Immediate  |
+| Platform Lead    | platform-lead@intelgraph.local | 30 min     |
 
 ---
 
@@ -90,6 +90,7 @@ echo "=== Health Check Complete ==="
 ### Weekly Sync Procedure (Sunday 02:00)
 
 **Pre-requisites:**
+
 - Approved image list reviewed by security team
 - Transfer media prepared (encrypted USB)
 - Sync workstation available
@@ -97,6 +98,7 @@ echo "=== Health Check Complete ==="
 **Procedure:**
 
 1. **Prepare Image List**
+
    ```bash
    # Review and approve images
    cat /etc/harbor-sync/approved-images.json
@@ -106,6 +108,7 @@ echo "=== Health Check Complete ==="
    ```
 
 2. **Execute Export**
+
    ```bash
    # On online sync workstation
    cd /opt/harbor-sync
@@ -120,6 +123,7 @@ echo "=== Health Check Complete ==="
    ```
 
 3. **Transfer to Air-Gapped Environment**
+
    ```bash
    # Copy to encrypted transfer media
    cp -r /var/lib/harbor-sync/export/* /media/transfer/
@@ -132,6 +136,7 @@ echo "=== Health Check Complete ==="
    ```
 
 4. **Import in Air-Gapped Environment**
+
    ```bash
    # Mount transfer media
    mount /dev/sdb1 /media/transfer
@@ -148,6 +153,7 @@ echo "=== Health Check Complete ==="
    ```
 
 5. **Post-Import Verification**
+
    ```bash
    # Scan imported images
    for img in $(crane catalog registry.intelgraph.local); do
@@ -182,6 +188,7 @@ For urgent image requirements outside the weekly sync:
    - Await written approval
 
 2. **Expedited Sync**
+
    ```bash
    # Create emergency image list
    cat > /tmp/emergency-sync.json << EOF
@@ -206,6 +213,7 @@ For urgent image requirements outside the weekly sync:
 ### Adding New Upstream Registry
 
 1. **Security Review**
+
    ```bash
    # Document the registry
    cat >> /etc/harbor-sync/registries.yaml << EOF
@@ -218,6 +226,7 @@ For urgent image requirements outside the weekly sync:
    ```
 
 2. **Configure Proxy Cache**
+
    ```bash
    # Add to Harbor proxy configuration
    kubectl edit configmap harbor-proxy-cache-config -n harbor
@@ -243,6 +252,7 @@ For urgent image requirements outside the weekly sync:
 **Response:**
 
 1. **Identify Source**
+
    ```bash
    # Check audit logs
    grep "NO_VALID_SIGNATURES" /var/log/harbor/audit.log | tail -20
@@ -252,6 +262,7 @@ For urgent image requirements outside the weekly sync:
    ```
 
 2. **Investigate**
+
    ```bash
    # Check if image should be signed
    cosign tree <image-ref>
@@ -274,6 +285,7 @@ For urgent image requirements outside the weekly sync:
 **Response:**
 
 1. **Assess Impact**
+
    ```bash
    # Find all affected images
    curl -s "https://registry.intelgraph.local/api/v2.0/projects/*/repositories/*/artifacts?with_scan_overview=true" | \
@@ -285,6 +297,7 @@ For urgent image requirements outside the weekly sync:
    ```
 
 2. **Contain**
+
    ```bash
    # If actively exploited, isolate affected workloads
    kubectl label namespace <ns> pod-security.kubernetes.io/enforce=restricted
@@ -311,6 +324,7 @@ For urgent image requirements outside the weekly sync:
 **Response:**
 
 1. **Diagnose**
+
    ```bash
    # Check pod status
    kubectl get pods -n harbor
@@ -323,6 +337,7 @@ For urgent image requirements outside the weekly sync:
    ```
 
 2. **Common Fixes**
+
    ```bash
    # Restart unhealthy pods
    kubectl delete pod -n harbor <unhealthy-pod>
@@ -420,6 +435,7 @@ psql -U postgres -d harbor_test < /backup/harbor-$(date +%Y%m%d).sql
 **RPO**: 24 hours (last backup)
 
 1. **Deploy New Harbor Instance**
+
    ```bash
    helm install harbor harbor/harbor \
      -n harbor --create-namespace \
@@ -427,6 +443,7 @@ psql -U postgres -d harbor_test < /backup/harbor-$(date +%Y%m%d).sql
    ```
 
 2. **Restore Database**
+
    ```bash
    # Copy backup to new database pod
    kubectl cp /backup/harbor-latest.sql harbor/harbor-database-0:/tmp/
@@ -437,12 +454,14 @@ psql -U postgres -d harbor_test < /backup/harbor-$(date +%Y%m%d).sql
    ```
 
 3. **Re-sync Images**
+
    ```bash
    # Use most recent export manifest
    npx ts-node sync/offline-sync.ts import /backup/last-sync-manifest.json
    ```
 
 4. **Verify Recovery**
+
    ```bash
    # Run full health check
    ./scripts/daily-health-check.sh
@@ -454,6 +473,7 @@ psql -U postgres -d harbor_test < /backup/harbor-$(date +%Y%m%d).sql
 ### Scenario: Compromised Image Detected
 
 1. **Isolate**
+
    ```bash
    # Quarantine the image
    curl -X POST "https://registry.intelgraph.local/api/v2.0/projects/*/repositories/*/artifacts/*/labels" \
@@ -462,6 +482,7 @@ psql -U postgres -d harbor_test < /backup/harbor-$(date +%Y%m%d).sql
    ```
 
 2. **Identify Blast Radius**
+
    ```bash
    # Find all deployments using the image
    kubectl get pods -A -o json | jq -r \
@@ -508,15 +529,15 @@ curl -s "https://registry.intelgraph.local/api/v2.0/projects/library/repositorie
 
 ### Log Locations
 
-| Log | Location | Rotation |
-|-----|----------|----------|
-| Harbor Core | `/var/log/harbor/core.log` | Daily, 7 days |
-| Registry | `/var/log/harbor/registry.log` | Daily, 7 days |
-| Audit | `/var/log/harbor/audit.log` | Daily, 90 days |
-| Sync | `/var/log/harbor-sync/sync.log` | Weekly, 30 days |
+| Log         | Location                        | Rotation        |
+| ----------- | ------------------------------- | --------------- |
+| Harbor Core | `/var/log/harbor/core.log`      | Daily, 7 days   |
+| Registry    | `/var/log/harbor/registry.log`  | Daily, 7 days   |
+| Audit       | `/var/log/harbor/audit.log`     | Daily, 90 days  |
+| Sync        | `/var/log/harbor-sync/sync.log` | Weekly, 30 days |
 
 ### Change Log
 
-| Date | Change | Author |
-|------|--------|--------|
+| Date       | Change                   | Author        |
+| ---------- | ------------------------ | ------------- |
 | 2025-01-15 | Initial runbook creation | Platform Team |

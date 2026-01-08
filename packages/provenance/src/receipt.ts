@@ -1,21 +1,19 @@
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
 // Load schema from local package or fallback gracefully
 let schema: Record<string, unknown> = {};
 try {
-  const schemaPath = path.resolve(__dirname, '../schema/receipt.schema.json');
-  schema = JSON.parse(fs.readFileSync(schemaPath, 'utf-8'));
+  const schemaPath = path.resolve(__dirname, "../schema/receipt.schema.json");
+  schema = JSON.parse(fs.readFileSync(schemaPath, "utf-8"));
 } catch {
   // Schema loading is optional for runtime type definitions
-  schema = { type: 'object' };
+  schema = { type: "object" };
 }
 
-export const RECEIPT_SCHEMA_VERSION = '0.1';
+export const RECEIPT_SCHEMA_VERSION = "0.1";
 
-export type ReceiptSigningAlgorithm =
-  | 'RSASSA_PSS_SHA_256'
-  | 'ECDSA_SHA_256';
+export type ReceiptSigningAlgorithm = "RSASSA_PSS_SHA_256" | "ECDSA_SHA_256";
 
 export interface ReceiptChainStep {
   stepId: string;

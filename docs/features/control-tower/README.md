@@ -61,37 +61,44 @@ apps/web/src/
 ## Features
 
 ### 1. Operational Health Score
+
 - Aggregate score (0-100) with trend indicator
 - Component breakdown: Support, Revenue, Product, Team
 - Factor-level drill-down
 
 ### 2. Active Situations
+
 - Grouped related events
 - Priority-based ordering (P1-P4)
 - Quick actions: View, Escalate, Reassign
 
 ### 3. Event Timeline
+
 - Chronological event stream
 - Severity filtering
 - Source filtering
 - Time range selection
 
 ### 4. Key Metrics
+
 - Configurable KPI widgets
 - Sparkline trends
 - Status indicators
 
 ### 5. Team Pulse
+
 - Real-time team status
 - Current assignments
 - Availability tracking
 
 ### 6. Command Palette (⌘K)
+
 - Global search
 - Quick actions
 - Navigation shortcuts
 
 ### 7. Event Details
+
 - Full context graph
 - AI suggestions
 - Action history
@@ -165,7 +172,9 @@ query GetActiveSituations {
         title
         priority
         eventCount
-        owner { name }
+        owner {
+          name
+        }
       }
     }
   }
@@ -248,29 +257,32 @@ ENABLE_REAL_TIME_UPDATES=true
 
 ## Success Metrics
 
-| Metric | Target |
-|--------|--------|
-| Time to Value | < 2 minutes |
-| Daily Active Usage | > 80% of ops team |
-| Action Completion Rate | > 40% |
-| MTTA Reduction | -80% |
-| Event Latency | < 5 seconds |
+| Metric                 | Target            |
+| ---------------------- | ----------------- |
+| Time to Value          | < 2 minutes       |
+| Daily Active Usage     | > 80% of ops team |
+| Action Completion Rate | > 40%             |
+| MTTA Reduction         | -80%              |
+| Event Latency          | < 5 seconds       |
 
 ## Roadmap
 
 ### Phase 1 (Current)
+
 - [x] Core GraphQL schema
 - [x] Basic dashboard components
 - [x] Health score calculation
 - [x] Event timeline
 
 ### Phase 2 (Next)
+
 - [ ] Real data integrations (Stripe, Zendesk, etc.)
 - [ ] AI-powered suggestions
 - [ ] Playbook execution
 - [ ] Advanced alerting
 
 ### Phase 3 (Future)
+
 - [ ] Custom dashboard builder
 - [ ] ML-based anomaly detection
 - [ ] Mobile app

@@ -1,23 +1,19 @@
 // @ts-nocheck
-import { spawnSync } from 'node:child_process';
-import { promises as fs } from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
-import * as tar from 'tar';
-import semver from 'semver';
+import { spawnSync } from "node:child_process";
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import * as tar from "tar";
+import semver from "semver";
 import type {
   AdapterCompatibilityMatrix,
   AdapterManifest,
   BundleVerificationOptions,
   BundleVerificationResult,
-} from './types.js';
-import { BundleValidationError } from './types.js';
-import {
-  validateCompatibility,
-  validateConfigSchema,
-  validateManifest,
-} from './validation.js';
-import { hashDirectory, hashFile, readJsonFile } from './fs.js';
+} from "./types.js";
+import { BundleValidationError } from "./types.js";
+import { validateCompatibility, validateConfigSchema, validateManifest } from "./validation.js";
+import { hashDirectory, hashFile, readJsonFile } from "./fs.js";
 
 async function ensureFileExists(filePath: string, label: string): Promise<void> {
   try {
@@ -39,7 +35,9 @@ function assertCompatibleRuntime(
 
   const minVersion = semver.coerce(compatibility.sdk.min);
   if (!minVersion) {
-    throw new BundleValidationError(`Invalid compatibility sdk.min value: ${compatibility.sdk.min}`);
+    throw new BundleValidationError(
+      `Invalid compatibility sdk.min value: ${compatibility.sdk.min}`
+    );
   }
 
   const maxVersion = compatibility.sdk.max ? semver.coerce(compatibility.sdk.max) : undefined;
@@ -55,20 +53,21 @@ function assertCompatibleRuntime(
   const maxOk = !maxVersion
     ? true
     : semver.lte(sdkVersion, maxVersion, {
-      includePrerelease: allowPrerelease,
-    } as any);
+        includePrerelease: allowPrerelease,
+      } as any);
 
   if (!minOk || !maxOk) {
     throw new BundleValidationError(
-      `Adapter is incompatible with SDK ${sdkVersion.version} (required ${compatibility.sdk.min}${compatibility.sdk.max ? ` - ${compatibility.sdk.max}` : '+'
+      `Adapter is incompatible with SDK ${sdkVersion.version} (required ${compatibility.sdk.min}${
+        compatibility.sdk.max ? ` - ${compatibility.sdk.max}` : "+"
       })`
     );
   }
 
   const runtimeMatch = compatibility.runtimes.find(
     (runtime) =>
-      (runtime.os === 'any' || runtime.os === process.platform) &&
-      (runtime.arch === 'any' || runtime.arch === process.arch) &&
+      (runtime.os === "any" || runtime.os === process.platform) &&
+      (runtime.arch === "any" || runtime.arch === process.arch) &&
       semver.satisfies(process.versions.node, runtime.node, {
         includePrerelease: allowPrerelease,
       } as any)
@@ -93,17 +92,17 @@ async function verifyChecksums(manifest: AdapterManifest, root: string): Promise
 
   const sbomDigest = await hashFile(path.join(root, manifest.artifacts.sbom));
   if (sbomDigest !== manifest.checksums.sbom) {
-    throw new BundleValidationError('SBOM checksum mismatch');
+    throw new BundleValidationError("SBOM checksum mismatch");
   }
 
   const slsaDigest = await hashFile(path.join(root, manifest.artifacts.slsa));
   if (slsaDigest !== manifest.checksums.slsa) {
-    throw new BundleValidationError('SLSA attestation checksum mismatch');
+    throw new BundleValidationError("SLSA attestation checksum mismatch");
   }
 
   const configDigest = await hashFile(path.join(root, manifest.artifacts.configSchema));
   if (configDigest !== manifest.checksums.configSchema) {
-    throw new BundleValidationError('Config schema checksum mismatch');
+    throw new BundleValidationError("Config schema checksum mismatch");
   }
 }
 
@@ -115,31 +114,31 @@ export async function verifyAdapterBundle(
     signaturePath,
     publicKeyPath,
     expectedSdkVersion,
-    cosignBinary = 'cosign',
+    cosignBinary = "cosign",
     allowPrerelease = false,
   } = options;
 
-  await ensureFileExists(bundlePath, 'Bundle');
-  await ensureFileExists(signaturePath, 'Signature');
-  await ensureFileExists(publicKeyPath, 'Public key');
+  await ensureFileExists(bundlePath, "Bundle");
+  await ensureFileExists(signaturePath, "Signature");
+  await ensureFileExists(publicKeyPath, "Public key");
 
   const verifyResult = spawnSync(
     cosignBinary,
-    ['verify-blob', '--key', publicKeyPath, '--signature', signaturePath, bundlePath],
-    { encoding: 'utf8' }
+    ["verify-blob", "--key", publicKeyPath, "--signature", signaturePath, bundlePath],
+    { encoding: "utf8" }
   );
 
   if (verifyResult.status !== 0) {
     throw new BundleValidationError(
-      `Cosign verification failed: ${verifyResult.stderr || verifyResult.stdout || verifyResult.error?.message || 'unknown error'}`
+      `Cosign verification failed: ${verifyResult.stderr || verifyResult.stdout || verifyResult.error?.message || "unknown error"}`
     );
   }
 
-  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'adapter-verify-'));
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "adapter-verify-"));
   try {
     await tar.x({ file: bundlePath, cwd: tempDir });
 
-    const manifestPath = path.join(tempDir, 'manifest.json');
+    const manifestPath = path.join(tempDir, "manifest.json");
     const manifest = await readJsonFile<AdapterManifest>(manifestPath);
     validateManifest(manifest);
 
@@ -153,7 +152,7 @@ export async function verifyAdapterBundle(
     validateConfigSchema(configSchema);
 
     if (JSON.stringify(manifest.compatibility) !== JSON.stringify(compatibility)) {
-      throw new BundleValidationError('Manifest compatibility does not match compatibility.json');
+      throw new BundleValidationError("Manifest compatibility does not match compatibility.json");
     }
 
     await verifyChecksums(manifest, tempDir);

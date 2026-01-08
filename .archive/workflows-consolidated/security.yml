@@ -1,17 +1,17 @@
 name: Security Pipeline
 on:
   schedule:
-    - cron: '0 2 * * 1' # Weekly on Monday at 2 AM
+    - cron: "0 2 * * 1" # Weekly on Monday at 2 AM
   workflow_dispatch:
   push:
     branches: [main]
     paths:
-      - '**/*.ts'
-      - '**/*.js'
-      - '**/*.py'
-      - '**/Dockerfile'
-      - '**/package*.json'
-      - '**/requirements*.txt'
+      - "**/*.ts"
+      - "**/*.js"
+      - "**/*.py"
+      - "**/Dockerfile"
+      - "**/package*.json"
+      - "**/requirements*.txt"
 
 permissions:
   contents: read
@@ -26,7 +26,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: ['javascript', 'python']
+        language: ["javascript", "python"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000 # v4
@@ -43,7 +43,7 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@b6110717a335152231a71b8447af51af11020a8f # v3
         with:
-          category: '/language:${{matrix.language}}'
+          category: "/language:${{matrix.language}}"
 
   # Dependency scanning
   dependency-scan:
@@ -56,8 +56,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: "18"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci --workspaces
@@ -69,7 +69,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@824a62378795d7a63864050674956c050c8c0868 # v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install Python security tools
         run: |
@@ -131,16 +131,16 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@77137e9
         with:
-          image-ref: '${{ matrix.service }}:scan'
-          format: 'sarif'
-          output: 'trivy-${{ matrix.service }}.sarif'
+          image-ref: "${{ matrix.service }}:scan"
+          format: "sarif"
+          output: "trivy-${{ matrix.service }}.sarif"
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@b6110717a335152231a71b8447af51af11020a8f # v3
         if: always()
         with:
-          sarif_file: 'trivy-${{ matrix.service }}.sarif'
-          category: 'trivy-${{ matrix.service }}'
+          sarif_file: "trivy-${{ matrix.service }}.sarif"
+          category: "trivy-${{ matrix.service }}"
 
       - name: Run Grype vulnerability scanner
         run: |
@@ -165,7 +165,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@fea496d8026727ca4633b69d3d8d2d83198a7053 # v3
         with:
-          terraform_version: '1.6.0'
+          terraform_version: "1.6.0"
 
       - name: Terraform security scan with Checkov
         uses: bridgecrewio/checkov-action@b92aaaf90225837053f939c126e97339242dc08a # master
@@ -180,7 +180,7 @@ jobs:
         if: always()
         with:
           sarif_file: checkov.sarif
-          category: 'checkov-terraform'
+          category: "checkov-terraform"
 
       - name: Helm security scan with Kubesec
         run: |
@@ -211,9 +211,9 @@ jobs:
       - name: ZAP baseline scan
         uses: zaproxy/action-baseline@bf6310e89f3a7513423e01893a33c184df27b38d # v0.12.0
         with:
-          target: 'https://staging.intelgraph.example.com'
-          rules_file_name: './deploy/zap/baseline.conf'
-          cmd_options: '-a -j -T 60'
+          target: "https://staging.intelgraph.example.com"
+          rules_file_name: "./deploy/zap/baseline.conf"
+          cmd_options: "-a -j -T 60"
 
       - name: Upload ZAP results
         uses: actions/upload-artifact@0b7f8f6 # v4
@@ -280,8 +280,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: "18"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci --workspaces
@@ -297,7 +297,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@824a62378795d7a63864050674956c050c8c0868 # v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install pip-licenses
         run: pip install pip-licenses
@@ -321,14 +321,7 @@ jobs:
     name: Security Summary
     runs-on: ubuntu-latest
     needs:
-      [
-        codeql,
-        dependency-scan,
-        container-scan,
-        infrastructure-scan,
-        secrets-scan,
-        license-scan,
-      ]
+      [codeql, dependency-scan, container-scan, infrastructure-scan, secrets-scan, license-scan]
     if: always()
     steps:
       - name: Download all artifacts

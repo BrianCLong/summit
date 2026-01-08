@@ -13,10 +13,10 @@
  * - DR readiness snapshot
  */
 
-import { execSync } from 'child_process';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as https from 'https';
+import { execSync } from "child_process";
+import * as fs from "fs";
+import * as path from "path";
+import * as https from "https";
 
 interface Args {
   version: string;
@@ -80,17 +80,17 @@ interface EvidenceBundle {
     availability: {
       target: number;
       current: number;
-      status: 'pass' | 'warn' | 'fail';
+      status: "pass" | "warn" | "fail";
     };
     latencyP95: {
       target: number;
       current: number;
-      status: 'pass' | 'warn' | 'fail';
+      status: "pass" | "warn" | "fail";
     };
     errorRate: {
       target: number;
       current: number;
-      status: 'pass' | 'warn' | 'fail';
+      status: "pass" | "warn" | "fail";
     };
     grafanaSnapshotUrl?: string;
   };
@@ -133,39 +133,39 @@ function parseArgs(): Args {
   const argv = process.argv.slice(2);
 
   for (let i = 0; i < argv.length; i++) {
-    if (argv[i].startsWith('--')) {
-      const key = argv[i].replace('--', '');
-      args[key] = argv[i + 1] || '';
+    if (argv[i].startsWith("--")) {
+      const key = argv[i].replace("--", "");
+      args[key] = argv[i + 1] || "";
       i++;
     }
   }
 
   return {
-    version: args['version'] || '0.0.0',
-    rcVersion: args['rc-version'],
-    apiDigest: args['api-digest'] || '',
-    webDigest: args['web-digest'] || '',
-    metricsUrl: args['metrics-url'],
-    hotfix: args['hotfix'] === 'true',
-    output: args['output'] || 'release_evidence.zip',
+    version: args["version"] || "0.0.0",
+    rcVersion: args["rc-version"],
+    apiDigest: args["api-digest"] || "",
+    webDigest: args["web-digest"] || "",
+    metricsUrl: args["metrics-url"],
+    hotfix: args["hotfix"] === "true",
+    output: args["output"] || "release_evidence.zip",
   };
 }
 
 function execCommand(cmd: string): string {
   try {
-    return execSync(cmd, { encoding: 'utf-8' }).trim();
+    return execSync(cmd, { encoding: "utf-8" }).trim();
   } catch {
-    return '';
+    return "";
   }
 }
 
-function getCommitInfo(version: string): EvidenceBundle['commits'] {
+function getCommitInfo(version: string): EvidenceBundle["commits"] {
   // Find previous release tag
   const prevTag = execCommand(
     `git tag -l 'v*' --sort=-v:refname | grep -v 'rc\\.' | head -2 | tail -1`
   );
 
-  const range = prevTag ? `${prevTag}..HEAD` : 'HEAD~100..HEAD';
+  const range = prevTag ? `${prevTag}..HEAD` : "HEAD~100..HEAD";
 
   // Get commit count
   const count = parseInt(execCommand(`git rev-list --count ${range}`), 10) || 0;
@@ -184,7 +184,7 @@ function getCommitInfo(version: string): EvidenceBundle['commits'] {
 
   // Get unique authors
   const authorsRaw = execCommand(`git log ${range} --format='%an' | sort -u`);
-  const authors = authorsRaw.split('\n').filter(Boolean);
+  const authors = authorsRaw.split("\n").filter(Boolean);
 
   return {
     range,
@@ -194,25 +194,22 @@ function getCommitInfo(version: string): EvidenceBundle['commits'] {
   };
 }
 
-function getImageInfo(
-  digest: string,
-  imageName: string
-): EvidenceBundle['images']['api'] {
-  const registry = process.env.REGISTRY || 'ghcr.io';
-  const repo = process.env.IMAGE_NAME || 'brianclong/summit';
+function getImageInfo(digest: string, imageName: string): EvidenceBundle["images"]["api"] {
+  const registry = process.env.REGISTRY || "ghcr.io";
+  const repo = process.env.IMAGE_NAME || "brianclong/summit";
   const fullImage = `${registry}/${repo}/${imageName}`;
 
   // Get tags
   const tagsOutput = execCommand(
     `docker manifest inspect ${fullImage}@${digest} 2>/dev/null | jq -r '.manifests[].annotations["org.opencontainers.image.ref.name"] // empty' || echo ""`
   );
-  const tags = tagsOutput.split('\n').filter(Boolean);
+  const tags = tagsOutput.split("\n").filter(Boolean);
 
   // Check for cosign signature
   let signature: string | undefined;
   try {
     execCommand(`cosign verify ${fullImage}@${digest} 2>/dev/null`);
-    signature = 'verified';
+    signature = "verified";
   } catch {
     signature = undefined;
   }
@@ -224,7 +221,7 @@ function getImageInfo(
       `cosign verify-attestation --type spdx ${fullImage}@${digest} 2>/dev/null`
     );
     if (attestOutput) {
-      attestations.push('spdx');
+      attestations.push("spdx");
     }
   } catch {
     // No SBOM attestation
@@ -235,7 +232,7 @@ function getImageInfo(
       `cosign verify-attestation --type slsaprovenance ${fullImage}@${digest} 2>/dev/null`
     );
     if (provenanceOutput) {
-      attestations.push('slsaprovenance');
+      attestations.push("slsaprovenance");
     }
   } catch {
     // No provenance attestation
@@ -249,9 +246,9 @@ function getImageInfo(
   };
 }
 
-function getSBOMInfo(): EvidenceBundle['sbom'] {
+function getSBOMInfo(): EvidenceBundle["sbom"] {
   // Check for SBOM files
-  const sbomExists = fs.existsSync('sbom.json') || fs.existsSync('sbom.spdx.json');
+  const sbomExists = fs.existsSync("sbom.json") || fs.existsSync("sbom.spdx.json");
 
   let vulnerabilities = {
     critical: 0,
@@ -262,24 +259,22 @@ function getSBOMInfo(): EvidenceBundle['sbom'] {
 
   // Try to get vulnerability counts from trivy output
   try {
-    const trivyOutput = execCommand(
-      'trivy fs --format json --quiet . 2>/dev/null'
-    );
+    const trivyOutput = execCommand("trivy fs --format json --quiet . 2>/dev/null");
     if (trivyOutput) {
       const trivyResult = JSON.parse(trivyOutput);
       for (const result of trivyResult.Results || []) {
         for (const vuln of result.Vulnerabilities || []) {
           switch (vuln.Severity?.toLowerCase()) {
-            case 'critical':
+            case "critical":
               vulnerabilities.critical++;
               break;
-            case 'high':
+            case "high":
               vulnerabilities.high++;
               break;
-            case 'medium':
+            case "medium":
               vulnerabilities.medium++;
               break;
-            case 'low':
+            case "low":
               vulnerabilities.low++;
               break;
           }
@@ -292,34 +287,34 @@ function getSBOMInfo(): EvidenceBundle['sbom'] {
 
   return {
     generated: sbomExists,
-    format: 'spdx',
+    format: "spdx",
     vulnerabilities,
   };
 }
 
-function getSLOInfo(metricsUrl?: string): EvidenceBundle['slo'] {
+function getSLOInfo(metricsUrl?: string): EvidenceBundle["slo"] {
   // Default SLO values - in production, these would be queried from Prometheus
   return {
     availability: {
       target: 99.9,
       current: 99.95,
-      status: 'pass',
+      status: "pass",
     },
     latencyP95: {
       target: 500,
       current: 320,
-      status: 'pass',
+      status: "pass",
     },
     errorRate: {
       target: 1.0,
       current: 0.15,
-      status: 'pass',
+      status: "pass",
     },
     grafanaSnapshotUrl: metricsUrl,
   };
 }
 
-function getPerformanceInfo(): EvidenceBundle['performance'] {
+function getPerformanceInfo(): EvidenceBundle["performance"] {
   // Default performance values - in production, these would come from load tests
   return {
     headroom: 35,
@@ -332,15 +327,15 @@ function getPerformanceInfo(): EvidenceBundle['performance'] {
   };
 }
 
-function getMigrationInfo(): EvidenceBundle['migrations'] {
+function getMigrationInfo(): EvidenceBundle["migrations"] {
   // Check for migration files
-  const migrationDir = 'migrations';
+  const migrationDir = "migrations";
   let migrationFiles: string[] = [];
 
   if (fs.existsSync(migrationDir)) {
     migrationFiles = fs
       .readdirSync(migrationDir)
-      .filter((f) => f.endsWith('.sql') || f.endsWith('.js'));
+      .filter((f) => f.endsWith(".sql") || f.endsWith(".js"));
   }
 
   return {
@@ -351,23 +346,23 @@ function getMigrationInfo(): EvidenceBundle['migrations'] {
   };
 }
 
-function getApprovalInfo(): EvidenceBundle['approvals'] {
+function getApprovalInfo(): EvidenceBundle["approvals"] {
   return {
-    releaseCaption: process.env.GITHUB_ACTOR || 'release-train',
+    releaseCaption: process.env.GITHUB_ACTOR || "release-train",
     securityReview: true,
     approvedAt: new Date().toISOString(),
   };
 }
 
-function getDRReadiness(): EvidenceBundle['drReadiness'] {
+function getDRReadiness(): EvidenceBundle["drReadiness"] {
   return {
-    backupFreshness: 'within-sla',
+    backupFreshness: "within-sla",
     lastBackupAge: 4,
     recoveryTested: true,
   };
 }
 
-function getProbeResults(): EvidenceBundle['probes'] {
+function getProbeResults(): EvidenceBundle["probes"] {
   return {
     health: true,
     readiness: true,
@@ -376,26 +371,20 @@ function getProbeResults(): EvidenceBundle['probes'] {
   };
 }
 
-async function createZipBundle(
-  bundle: EvidenceBundle,
-  outputPath: string
-): Promise<void> {
-  const tempDir = fs.mkdtempSync('/tmp/evidence-');
+async function createZipBundle(bundle: EvidenceBundle, outputPath: string): Promise<void> {
+  const tempDir = fs.mkdtempSync("/tmp/evidence-");
 
   try {
     // Write main evidence JSON
-    fs.writeFileSync(
-      path.join(tempDir, 'evidence.json'),
-      JSON.stringify(bundle, null, 2)
-    );
+    fs.writeFileSync(path.join(tempDir, "evidence.json"), JSON.stringify(bundle, null, 2));
 
     // Write summary markdown
     const summary = generateSummaryMarkdown(bundle);
-    fs.writeFileSync(path.join(tempDir, 'SUMMARY.md'), summary);
+    fs.writeFileSync(path.join(tempDir, "SUMMARY.md"), summary);
 
     // Copy SBOM if exists
-    if (fs.existsSync('sbom.json')) {
-      fs.copyFileSync('sbom.json', path.join(tempDir, 'sbom.json'));
+    if (fs.existsSync("sbom.json")) {
+      fs.copyFileSync("sbom.json", path.join(tempDir, "sbom.json"));
     }
 
     // Create zip
@@ -412,37 +401,37 @@ function generateSummaryMarkdown(bundle: EvidenceBundle): string {
   const lines: string[] = [];
 
   lines.push(`# Release Evidence Summary`);
-  lines.push('');
+  lines.push("");
   lines.push(`**Version**: v${bundle.metadata.version}`);
   lines.push(`**Created**: ${bundle.metadata.createdAt}`);
-  lines.push(`**Type**: ${bundle.metadata.hotfix ? 'Hotfix' : 'Regular Release'}`);
-  lines.push('');
+  lines.push(`**Type**: ${bundle.metadata.hotfix ? "Hotfix" : "Regular Release"}`);
+  lines.push("");
 
-  lines.push('## Commits');
-  lines.push('');
+  lines.push("## Commits");
+  lines.push("");
   lines.push(`- **Range**: ${bundle.commits.range}`);
   lines.push(`- **Count**: ${bundle.commits.count}`);
   lines.push(
     `- **Changes**: ${bundle.commits.diffStats.filesChanged} files, +${bundle.commits.diffStats.insertions}/-${bundle.commits.diffStats.deletions}`
   );
-  lines.push(`- **Authors**: ${bundle.commits.authors.join(', ')}`);
-  lines.push('');
+  lines.push(`- **Authors**: ${bundle.commits.authors.join(", ")}`);
+  lines.push("");
 
-  lines.push('## Images');
-  lines.push('');
+  lines.push("## Images");
+  lines.push("");
   lines.push(`### API`);
   lines.push(`- **Digest**: \`${bundle.images.api.digest}\``);
-  lines.push(`- **Signature**: ${bundle.images.api.signature || 'Not verified'}`);
-  lines.push('');
+  lines.push(`- **Signature**: ${bundle.images.api.signature || "Not verified"}`);
+  lines.push("");
   lines.push(`### Web`);
   lines.push(`- **Digest**: \`${bundle.images.web.digest}\``);
-  lines.push(`- **Signature**: ${bundle.images.web.signature || 'Not verified'}`);
-  lines.push('');
+  lines.push(`- **Signature**: ${bundle.images.web.signature || "Not verified"}`);
+  lines.push("");
 
-  lines.push('## SLO Status');
-  lines.push('');
-  lines.push('| Metric | Target | Current | Status |');
-  lines.push('|--------|--------|---------|--------|');
+  lines.push("## SLO Status");
+  lines.push("");
+  lines.push("| Metric | Target | Current | Status |");
+  lines.push("|--------|--------|---------|--------|");
   lines.push(
     `| Availability | ${bundle.slo.availability.target}% | ${bundle.slo.availability.current}% | ${bundle.slo.availability.status} |`
   );
@@ -452,41 +441,39 @@ function generateSummaryMarkdown(bundle: EvidenceBundle): string {
   lines.push(
     `| Error Rate | ${bundle.slo.errorRate.target}% | ${bundle.slo.errorRate.current}% | ${bundle.slo.errorRate.status} |`
   );
-  lines.push('');
+  lines.push("");
 
-  lines.push('## Security');
-  lines.push('');
-  lines.push('### Vulnerabilities');
-  lines.push(
-    `- Critical: ${bundle.sbom.vulnerabilities.critical}`
-  );
+  lines.push("## Security");
+  lines.push("");
+  lines.push("### Vulnerabilities");
+  lines.push(`- Critical: ${bundle.sbom.vulnerabilities.critical}`);
   lines.push(`- High: ${bundle.sbom.vulnerabilities.high}`);
   lines.push(`- Medium: ${bundle.sbom.vulnerabilities.medium}`);
   lines.push(`- Low: ${bundle.sbom.vulnerabilities.low}`);
-  lines.push('');
+  lines.push("");
 
-  lines.push('## Performance');
-  lines.push('');
+  lines.push("## Performance");
+  lines.push("");
   lines.push(`- **Headroom**: ${bundle.performance.headroom}%`);
-  lines.push(`- **Load Test**: ${bundle.performance.loadTestPassed ? 'Passed' : 'Failed'}`);
-  lines.push('');
+  lines.push(`- **Load Test**: ${bundle.performance.loadTestPassed ? "Passed" : "Failed"}`);
+  lines.push("");
 
-  lines.push('## Approvals');
-  lines.push('');
+  lines.push("## Approvals");
+  lines.push("");
   lines.push(`- **Release Captain**: ${bundle.approvals.releaseCaption}`);
   lines.push(`- **Approved At**: ${bundle.approvals.approvedAt}`);
-  lines.push('');
+  lines.push("");
 
-  lines.push('## DR Readiness');
-  lines.push('');
+  lines.push("## DR Readiness");
+  lines.push("");
   lines.push(`- **Backup Status**: ${bundle.drReadiness.backupFreshness}`);
   lines.push(`- **Last Backup Age**: ${bundle.drReadiness.lastBackupAge} hours`);
-  lines.push('');
+  lines.push("");
 
-  lines.push('---');
-  lines.push('*This evidence bundle is signed and should be retained for at least 1 year.*');
+  lines.push("---");
+  lines.push("*This evidence bundle is signed and should be retained for at least 1 year.*");
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 async function main() {
@@ -499,14 +486,14 @@ async function main() {
       version: args.version,
       rcVersion: args.rcVersion,
       createdAt: new Date().toISOString(),
-      runId: process.env.GITHUB_RUN_ID || 'local',
-      repository: process.env.GITHUB_REPOSITORY || 'brianclong/summit',
+      runId: process.env.GITHUB_RUN_ID || "local",
+      repository: process.env.GITHUB_REPOSITORY || "brianclong/summit",
       hotfix: args.hotfix || false,
     },
     commits: getCommitInfo(args.version),
     images: {
-      api: getImageInfo(args.apiDigest, 'api'),
-      web: getImageInfo(args.webDigest, 'web'),
+      api: getImageInfo(args.apiDigest, "api"),
+      web: getImageInfo(args.webDigest, "web"),
     },
     sbom: getSBOMInfo(),
     slo: getSLOInfo(args.metricsUrl),
@@ -519,10 +506,10 @@ async function main() {
 
   await createZipBundle(bundle, args.output);
 
-  console.log('Evidence bundle packaged successfully');
+  console.log("Evidence bundle packaged successfully");
 }
 
 main().catch((error) => {
-  console.error('Error packaging evidence:', error);
+  console.error("Error packaging evidence:", error);
   process.exit(1);
 });

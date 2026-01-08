@@ -1,4 +1,4 @@
-import { URL } from 'url';
+import { URL } from "url";
 
 export interface PolicyDecision {
   allowed: boolean;
@@ -32,12 +32,12 @@ export interface PolicyEngine {
   evaluate(context: PolicyEvaluationContext): PolicyDecision;
 }
 
-const DEFAULT_POLICY_VERSION = '1.0.0';
+const DEFAULT_POLICY_VERSION = "1.0.0";
 
 const matchTarget = (target: string, allowlist: string[]) => {
   return allowlist.some((allowed) => {
     if (!allowed) return false;
-    if (allowed === '*') return true;
+    if (allowed === "*") return true;
     if (target === allowed) return true;
     if (target.endsWith(`.${allowed}`)) return true;
     return false;
@@ -68,7 +68,7 @@ export class BasicPolicyEngine implements PolicyEngine {
     if (!this.enforceRateLimit()) {
       return {
         allowed: false,
-        reason: 'Rate limit exceeded',
+        reason: "Rate limit exceeded",
         policyVersion: DEFAULT_POLICY_VERSION,
       };
     }
@@ -109,7 +109,8 @@ export class BasicPolicyEngine implements PolicyEngine {
       }
     }
 
-    const reason = context.labMode === true ? 'Allowed by policy' : 'Dry-run approval (lab mode disabled)';
+    const reason =
+      context.labMode === true ? "Allowed by policy" : "Dry-run approval (lab mode disabled)";
 
     return {
       allowed: true,

@@ -1,15 +1,15 @@
 meta:
   id: plan.feature-request@v1
-  owner: 'platform-ai'
-  purpose: 'Create implementation plan for new feature requests'
+  owner: "platform-ai"
+  purpose: "Create implementation plan for new feature requests"
   guardrails:
-    - 'Scope must be achievable within budget and time constraints'
-    - 'Consider existing architecture and technical debt'
-    - 'Include security and privacy considerations'
-    - 'Plan for testing and rollback strategies'
+    - "Scope must be achievable within budget and time constraints"
+    - "Consider existing architecture and technical debt"
+    - "Include security and privacy considerations"
+    - "Plan for testing and rollback strategies"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 3000
 
@@ -71,29 +71,29 @@ template: |
   **Recommended Agent Chain:** Planner → Scaffolder → Implementer → Tester → Reviewer → Docs
 
 examples:
-  - name: 'user-authentication-feature'
+  - name: "user-authentication-feature"
     inputs:
-      feature_description: 'Add OAuth2 authentication with JWT tokens'
-      existing_codebase: 'Express.js API with PostgreSQL, Redis cache'
+      feature_description: "Add OAuth2 authentication with JWT tokens"
+      existing_codebase: "Express.js API with PostgreSQL, Redis cache"
       budget_usd: 25.0
       timeline_days: 5
-      requirements: 'Support Google OAuth, secure token storage, 99.9% uptime'
+      requirements: "Support Google OAuth, secure token storage, 99.9% uptime"
     expected_contains:
-      - 'OAuth2'
-      - 'JWT'
-      - 'Task Breakdown'
-      - 'Success Criteria'
-      - 'Rollback Plan'
+      - "OAuth2"
+      - "JWT"
+      - "Task Breakdown"
+      - "Success Criteria"
+      - "Rollback Plan"
 
-  - name: 'api-rate-limiting'
+  - name: "api-rate-limiting"
     inputs:
-      feature_description: 'Implement rate limiting for API endpoints'
-      existing_codebase: 'Node.js API with Redis'
+      feature_description: "Implement rate limiting for API endpoints"
+      existing_codebase: "Node.js API with Redis"
       budget_usd: 15.0
       timeline_days: 3
-      requirements: '1000 req/min per user, configurable limits'
+      requirements: "1000 req/min per user, configurable limits"
     expected_contains:
-      - 'rate limiting'
-      - 'Redis'
-      - 'req/min'
-      - 'Confidence Level'
+      - "rate limiting"
+      - "Redis"
+      - "req/min"
+      - "Confidence Level"

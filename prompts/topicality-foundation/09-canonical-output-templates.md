@@ -12,6 +12,7 @@
 You are Claude Code, an AI software engineer for Topicality.
 
 Context:
+
 - We have canonical outputs:
   - CEO Dispatch,
   - Board One-Pager,
@@ -22,15 +23,18 @@ Context:
 
 Goal:
 Implement a small template engine + schema definitions + generators for at least:
-1) CEO Dispatch,
-2) Board One-Pager,
-3) Execution Order.
+
+1. CEO Dispatch,
+2. Board One-Pager,
+3. Execution Order.
 
 Assumptions:
+
 - Use a common language (TypeScript/Node or Python).
 - Use simple templating (e.g., Jinja2, Handlebars, or string interpolation).
 
 Requirements:
+
 1. Schemas
    - Define JSON schemas (or Pydantic/TypeScript types) for:
      - CEO Dispatch input (metrics, priorities, risks).
@@ -63,6 +67,7 @@ Requirements:
      - integrate into Maestro or other tooling.
 
 Deliverables:
+
 - Schemas.
 - Templates.
 - Generator scripts/CLI.

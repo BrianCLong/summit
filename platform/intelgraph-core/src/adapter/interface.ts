@@ -1,4 +1,4 @@
-import { GraphNode, GraphEdge } from '../types.js';
+import { GraphNode, GraphEdge } from "../types.js";
 
 export interface GraphPersistenceAdapter {
   addNode(node: GraphNode): Promise<void>;

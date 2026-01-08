@@ -18,7 +18,7 @@ export interface ProcessingResult {
 }
 
 export interface FilterConfig {
-  type: 'lowpass' | 'highpass' | 'bandpass' | 'bandstop';
+  type: "lowpass" | "highpass" | "bandpass" | "bandstop";
   cutoffLow?: number;
   cutoffHigh?: number;
   order: number;
@@ -34,10 +34,7 @@ export class SignalProcessor {
   /**
    * Apply FIR filter to signal
    */
-  applyFilter(
-    signal: Float32Array,
-    config: FilterConfig
-  ): Float32Array {
+  applyFilter(signal: Float32Array, config: FilterConfig): Float32Array {
     const coefficients = this.designFilter(config);
     return this.convolve(signal, coefficients);
   }
@@ -59,14 +56,14 @@ export class SignalProcessor {
         coeffs[i] = Math.sin(2 * Math.PI * fc * n) / (Math.PI * n);
       }
       // Apply Hamming window
-      coeffs[i] *= 0.54 - 0.46 * Math.cos(2 * Math.PI * i / (N - 1));
+      coeffs[i] *= 0.54 - 0.46 * Math.cos((2 * Math.PI * i) / (N - 1));
     }
 
     // Normalize
     const sum = coeffs.reduce((a, b) => a + b, 0);
     for (let i = 0; i < N; i++) coeffs[i] /= sum;
 
-    if (config.type === 'highpass') {
+    if (config.type === "highpass") {
       // Spectral inversion for highpass
       for (let i = 0; i < N; i++) coeffs[i] *= -1;
       coeffs[Math.floor(N / 2)] += 1;
@@ -105,9 +102,10 @@ export class SignalProcessor {
 
     // Simple DFT for training (real FFT would use fft.js)
     for (let k = 0; k < fftSize / 2; k++) {
-      let real = 0, imag = 0;
+      let real = 0,
+        imag = 0;
       for (let n = 0; n < Math.min(signal.length, fftSize); n++) {
-        const angle = -2 * Math.PI * k * n / fftSize;
+        const angle = (-2 * Math.PI * k * n) / fftSize;
         real += signal[n] * Math.cos(angle);
         imag += signal[n] * Math.sin(angle);
       }
@@ -123,9 +121,9 @@ export class SignalProcessor {
   decimate(signal: Float32Array, factor: number): Float32Array {
     // Apply anti-aliasing filter first
     const filtered = this.applyFilter(signal, {
-      type: 'lowpass',
+      type: "lowpass",
       cutoffLow: this.sampleRate / (2 * factor),
-      order: 64
+      order: 64,
     });
 
     const output = new Float32Array(Math.floor(filtered.length / factor));
@@ -149,9 +147,9 @@ export class SignalProcessor {
 
     // Apply interpolation filter
     return this.applyFilter(output, {
-      type: 'lowpass',
+      type: "lowpass",
       cutoffLow: this.sampleRate / 2,
-      order: 64
+      order: 64,
     });
   }
 
@@ -182,8 +180,10 @@ export class SignalProcessor {
   /**
    * Calculate signal metrics
    */
-  calculateMetrics(signal: Float32Array): ProcessingResult['metrics'] {
-    let sum = 0, sumSq = 0, peak = -Infinity;
+  calculateMetrics(signal: Float32Array): ProcessingResult["metrics"] {
+    let sum = 0,
+      sumSq = 0,
+      peak = -Infinity;
 
     for (let i = 0; i < signal.length; i++) {
       const val = signal[i];
@@ -198,14 +198,15 @@ export class SignalProcessor {
 
     // Estimate noise from quiet portions
     const sorted = Array.from(signal).sort((a, b) => Math.abs(a) - Math.abs(b));
-    const noiseEstimate = sorted.slice(0, Math.floor(sorted.length * 0.2))
-      .reduce((a, b) => a + b * b, 0) / Math.floor(sorted.length * 0.2);
+    const noiseEstimate =
+      sorted.slice(0, Math.floor(sorted.length * 0.2)).reduce((a, b) => a + b * b, 0) /
+      Math.floor(sorted.length * 0.2);
 
     return {
       peakPower: 10 * Math.log10(peak * peak + 1e-10),
       averagePower: 10 * Math.log10(rms * rms + 1e-10),
-      snr: 10 * Math.log10((sumSq / signal.length) / (noiseEstimate + 1e-10)),
-      bandwidth: this.estimateBandwidth(signal)
+      snr: 10 * Math.log10(sumSq / signal.length / (noiseEstimate + 1e-10)),
+      bandwidth: this.estimateBandwidth(signal),
     };
   }
 
@@ -214,7 +215,8 @@ export class SignalProcessor {
     const peak = Math.max(...psd);
     const threshold = peak - 3; // -3dB bandwidth
 
-    let lowBin = 0, highBin = psd.length - 1;
+    let lowBin = 0,
+      highBin = psd.length - 1;
     for (let i = 0; i < psd.length; i++) {
       if (psd[i] >= threshold) {
         lowBin = i;
@@ -228,7 +230,7 @@ export class SignalProcessor {
       }
     }
 
-    return (highBin - lowBin) * this.sampleRate / 1024;
+    return ((highBin - lowBin) * this.sampleRate) / 1024;
   }
 
   setSampleRate(rate: number): void {

@@ -3,10 +3,10 @@
  * TRAINING/SIMULATION ONLY
  */
 
-import { EventEmitter } from 'eventemitter3';
-import { v4 as uuid } from 'uuid';
-import { SignalType, ClassificationLevel, RawSignal, COMINTMessage, ELINTReport } from '../types';
-import { SignalGenerator } from '../simulation/SignalGenerator';
+import { EventEmitter } from "eventemitter3";
+import { v4 as uuid } from "uuid";
+import { SignalType, ClassificationLevel, RawSignal, COMINTMessage, ELINTReport } from "../types";
+import { SignalGenerator } from "../simulation/SignalGenerator";
 
 export interface Exercise {
   id: string;
@@ -25,19 +25,13 @@ export interface Exercise {
 }
 
 export type ExerciseType =
-  | 'COLLECTION'      // Signal collection exercise
-  | 'ANALYSIS'        // Analysis and exploitation
-  | 'GEOLOCATION'     // Location and tracking
-  | 'NETWORK'         // Network analysis
-  | 'FULL_SPECTRUM';  // Combined exercise
+  | "COLLECTION" // Signal collection exercise
+  | "ANALYSIS" // Analysis and exploitation
+  | "GEOLOCATION" // Location and tracking
+  | "NETWORK" // Network analysis
+  | "FULL_SPECTRUM"; // Combined exercise
 
-export type ExerciseStatus =
-  | 'PLANNED'
-  | 'READY'
-  | 'RUNNING'
-  | 'PAUSED'
-  | 'COMPLETED'
-  | 'CANCELLED';
+export type ExerciseStatus = "PLANNED" | "READY" | "RUNNING" | "PAUSED" | "COMPLETED" | "CANCELLED";
 
 export interface ExerciseScenario {
   id: string;
@@ -60,7 +54,7 @@ export interface ExerciseScenario {
 export interface ScenarioInject {
   id: string;
   triggerTime: number; // seconds from start
-  type: 'SIGNAL' | 'COMINT' | 'ELINT' | 'NETWORK' | 'EVENT';
+  type: "SIGNAL" | "COMINT" | "ELINT" | "NETWORK" | "EVENT";
   data: unknown;
   description: string;
 }
@@ -68,7 +62,7 @@ export interface ScenarioInject {
 export interface TargetProfile {
   id: string;
   name: string;
-  type: 'INDIVIDUAL' | 'ORGANIZATION' | 'PLATFORM' | 'NETWORK';
+  type: "INDIVIDUAL" | "ORGANIZATION" | "PLATFORM" | "NETWORK";
   identifiers: string[];
   expectedActivity: {
     signalTypes: SignalType[];
@@ -81,7 +75,7 @@ export interface TargetProfile {
 export interface ExerciseObjective {
   id: string;
   description: string;
-  type: 'COLLECTION' | 'ANALYSIS' | 'IDENTIFICATION' | 'GEOLOCATION' | 'REPORTING';
+  type: "COLLECTION" | "ANALYSIS" | "IDENTIFICATION" | "GEOLOCATION" | "REPORTING";
   criteria: string[];
   weight: number;
   completed: boolean;
@@ -90,14 +84,14 @@ export interface ExerciseObjective {
 
 export interface ExerciseParticipant {
   id: string;
-  role: 'COLLECTOR' | 'ANALYST' | 'SUPERVISOR' | 'EVALUATOR';
+  role: "COLLECTOR" | "ANALYST" | "SUPERVISOR" | "EVALUATOR";
   name: string;
   callsign?: string;
 }
 
 export interface ExerciseEvent {
   timestamp: Date;
-  type: 'START' | 'PAUSE' | 'RESUME' | 'INJECT' | 'OBJECTIVE' | 'END' | 'NOTE';
+  type: "START" | "PAUSE" | "RESUME" | "INJECT" | "OBJECTIVE" | "END" | "NOTE";
   description: string;
   data?: unknown;
 }
@@ -124,13 +118,13 @@ export interface ExerciseResults {
 }
 
 export interface ExerciseManagerEvents {
-  'exercise:created': (exercise: Exercise) => void;
-  'exercise:started': (exercise: Exercise) => void;
-  'exercise:paused': (exercise: Exercise) => void;
-  'exercise:completed': (exercise: Exercise) => void;
-  'inject:triggered': (inject: ScenarioInject) => void;
-  'objective:completed': (objective: ExerciseObjective) => void;
-  'signal:generated': (signal: RawSignal) => void;
+  "exercise:created": (exercise: Exercise) => void;
+  "exercise:started": (exercise: Exercise) => void;
+  "exercise:paused": (exercise: Exercise) => void;
+  "exercise:completed": (exercise: Exercise) => void;
+  "inject:triggered": (inject: ScenarioInject) => void;
+  "objective:completed": (objective: ExerciseObjective) => void;
+  "signal:generated": (signal: RawSignal) => void;
 }
 
 export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
@@ -142,7 +136,7 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
 
   constructor() {
     super();
-    this.signalGenerator = new SignalGenerator({ realism: 'HIGH', includeNoise: true });
+    this.signalGenerator = new SignalGenerator({ realism: "HIGH", includeNoise: true });
   }
 
   /**
@@ -153,28 +147,28 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
     description: string;
     type: ExerciseType;
     scenario: Partial<ExerciseScenario>;
-    objectives: Omit<ExerciseObjective, 'id' | 'completed' | 'score'>[];
-    participants?: Omit<ExerciseParticipant, 'id'>[];
+    objectives: Omit<ExerciseObjective, "id" | "completed" | "score">[];
+    participants?: Omit<ExerciseParticipant, "id">[];
   }): Exercise {
     const exercise: Exercise = {
       id: uuid(),
       name: params.name,
       description: params.description,
-      classification: 'UNCLASSIFIED',
+      classification: "UNCLASSIFIED",
       type: params.type,
       scenario: this.buildScenario(params.scenario),
-      objectives: params.objectives.map(o => ({
+      objectives: params.objectives.map((o) => ({
         ...o,
         id: uuid(),
-        completed: false
+        completed: false,
       })),
-      participants: (params.participants || []).map(p => ({ ...p, id: uuid() })),
+      participants: (params.participants || []).map((p) => ({ ...p, id: uuid() })),
       timeline: [],
-      status: 'PLANNED'
+      status: "PLANNED",
     };
 
     this.exercises.set(exercise.id, exercise);
-    this.emit('exercise:created', exercise);
+    this.emit("exercise:created", exercise);
 
     return exercise;
   }
@@ -185,8 +179,8 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
   private buildScenario(partial: Partial<ExerciseScenario>): ExerciseScenario {
     return {
       id: uuid(),
-      name: partial.name || 'Default Scenario',
-      background: partial.background || 'Training exercise scenario',
+      name: partial.name || "Default Scenario",
+      background: partial.background || "Training exercise scenario",
       injects: partial.injects || this.generateDefaultInjects(),
       targetProfiles: partial.targetProfiles || this.generateDefaultTargets(),
       environmentSettings: partial.environmentSettings || {
@@ -196,9 +190,9 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
         geographicArea: {
           centerLat: 38.9,
           centerLon: -77.0,
-          radiusKm: 50
-        }
-      }
+          radiusKm: 50,
+        },
+      },
     };
   }
 
@@ -210,31 +204,31 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
       {
         id: uuid(),
         triggerTime: 60,
-        type: 'SIGNAL',
-        data: { signalType: 'CELLULAR_4G', priority: 4 },
-        description: 'New cellular signal detected in target area'
+        type: "SIGNAL",
+        data: { signalType: "CELLULAR_4G", priority: 4 },
+        description: "New cellular signal detected in target area",
       },
       {
         id: uuid(),
         triggerTime: 180,
-        type: 'COMINT',
-        data: { communicationType: 'VOICE', language: 'en' },
-        description: 'Voice communication intercept'
+        type: "COMINT",
+        data: { communicationType: "VOICE", language: "en" },
+        description: "Voice communication intercept",
       },
       {
         id: uuid(),
         triggerTime: 300,
-        type: 'ELINT',
-        data: { emitterType: 'RADAR_SEARCH' },
-        description: 'New radar emitter detected'
+        type: "ELINT",
+        data: { emitterType: "RADAR_SEARCH" },
+        description: "New radar emitter detected",
       },
       {
         id: uuid(),
         triggerTime: 420,
-        type: 'EVENT',
-        data: { type: 'MOVEMENT' },
-        description: 'Target movement detected'
-      }
+        type: "EVENT",
+        data: { type: "MOVEMENT" },
+        description: "Target movement detected",
+      },
     ];
   }
 
@@ -245,34 +239,34 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
     return [
       {
         id: uuid(),
-        name: 'Target Alpha',
-        type: 'ORGANIZATION',
-        identifiers: ['ALPHA-NET', 'ALPHA-COMM'],
+        name: "Target Alpha",
+        type: "ORGANIZATION",
+        identifiers: ["ALPHA-NET", "ALPHA-COMM"],
         expectedActivity: {
-          signalTypes: ['CELLULAR_4G', 'WIFI', 'VHF'],
+          signalTypes: ["CELLULAR_4G", "WIFI", "VHF"],
           frequencyBands: [
             { min: 800e6, max: 900e6 },
-            { min: 2400e6, max: 2500e6 }
+            { min: 2400e6, max: 2500e6 },
           ],
-          communicationPatterns: ['VOICE', 'DATA']
+          communicationPatterns: ["VOICE", "DATA"],
         },
-        priority: 1
+        priority: 1,
       },
       {
         id: uuid(),
-        name: 'Platform Bravo',
-        type: 'PLATFORM',
-        identifiers: ['BRAVO-1', 'BRAVO-2'],
+        name: "Platform Bravo",
+        type: "PLATFORM",
+        identifiers: ["BRAVO-1", "BRAVO-2"],
         expectedActivity: {
-          signalTypes: ['RADAR', 'SATELLITE', 'UHF'],
+          signalTypes: ["RADAR", "SATELLITE", "UHF"],
           frequencyBands: [
             { min: 9e9, max: 10e9 },
-            { min: 12e9, max: 13e9 }
+            { min: 12e9, max: 13e9 },
           ],
-          communicationPatterns: ['TELEMETRY', 'COMMAND']
+          communicationPatterns: ["TELEMETRY", "COMMAND"],
         },
-        priority: 2
-      }
+        priority: 2,
+      },
     ];
   }
 
@@ -281,15 +275,19 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
    */
   async startExercise(exerciseId: string): Promise<void> {
     const exercise = this.exercises.get(exerciseId);
-    if (!exercise) {throw new Error(`Exercise ${exerciseId} not found`);}
-    if (this.activeExercise) {throw new Error('Another exercise is already running');}
+    if (!exercise) {
+      throw new Error(`Exercise ${exerciseId} not found`);
+    }
+    if (this.activeExercise) {
+      throw new Error("Another exercise is already running");
+    }
 
-    exercise.status = 'RUNNING';
+    exercise.status = "RUNNING";
     exercise.startTime = new Date();
     this.activeExercise = exercise;
 
     // Log start event
-    this.addEvent(exercise, 'START', 'Exercise started');
+    this.addEvent(exercise, "START", "Exercise started");
 
     // Schedule injects
     this.scheduleInjects(exercise);
@@ -297,7 +295,7 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
     // Start background signal generation
     this.startSignalGeneration(exercise);
 
-    this.emit('exercise:started', exercise);
+    this.emit("exercise:started", exercise);
   }
 
   /**
@@ -305,14 +303,16 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
    */
   pauseExercise(exerciseId: string): void {
     const exercise = this.exercises.get(exerciseId);
-    if (!exercise || exercise.status !== 'RUNNING') {return;}
+    if (!exercise || exercise.status !== "RUNNING") {
+      return;
+    }
 
-    exercise.status = 'PAUSED';
+    exercise.status = "PAUSED";
     this.clearInjectTimers();
     this.stopSignalGeneration();
 
-    this.addEvent(exercise, 'PAUSE', 'Exercise paused');
-    this.emit('exercise:paused', exercise);
+    this.addEvent(exercise, "PAUSE", "Exercise paused");
+    this.emit("exercise:paused", exercise);
   }
 
   /**
@@ -320,13 +320,15 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
    */
   resumeExercise(exerciseId: string): void {
     const exercise = this.exercises.get(exerciseId);
-    if (!exercise || exercise.status !== 'PAUSED') {return;}
+    if (!exercise || exercise.status !== "PAUSED") {
+      return;
+    }
 
-    exercise.status = 'RUNNING';
+    exercise.status = "RUNNING";
     this.scheduleInjects(exercise, true);
     this.startSignalGeneration(exercise);
 
-    this.addEvent(exercise, 'RESUME', 'Exercise resumed');
+    this.addEvent(exercise, "RESUME", "Exercise resumed");
   }
 
   /**
@@ -334,9 +336,11 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
    */
   endExercise(exerciseId: string): void {
     const exercise = this.exercises.get(exerciseId);
-    if (!exercise) {return;}
+    if (!exercise) {
+      return;
+    }
 
-    exercise.status = 'COMPLETED';
+    exercise.status = "COMPLETED";
     exercise.endTime = new Date();
     this.activeExercise = undefined;
 
@@ -346,8 +350,8 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
     // Calculate results
     exercise.results = this.calculateResults(exercise);
 
-    this.addEvent(exercise, 'END', 'Exercise completed');
-    this.emit('exercise:completed', exercise);
+    this.addEvent(exercise, "END", "Exercise completed");
+    this.emit("exercise:completed", exercise);
   }
 
   /**
@@ -355,16 +359,20 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
    */
   completeObjective(exerciseId: string, objectiveId: string, score: number): void {
     const exercise = this.exercises.get(exerciseId);
-    if (!exercise) {return;}
+    if (!exercise) {
+      return;
+    }
 
-    const objective = exercise.objectives.find(o => o.id === objectiveId);
-    if (!objective) {return;}
+    const objective = exercise.objectives.find((o) => o.id === objectiveId);
+    if (!objective) {
+      return;
+    }
 
     objective.completed = true;
     objective.score = score;
 
-    this.addEvent(exercise, 'OBJECTIVE', `Objective completed: ${objective.description}`);
-    this.emit('objective:completed', objective);
+    this.addEvent(exercise, "OBJECTIVE", `Objective completed: ${objective.description}`);
+    this.emit("objective:completed", objective);
   }
 
   /**
@@ -392,25 +400,25 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
    * Trigger a scenario inject
    */
   private triggerInject(exercise: Exercise, inject: ScenarioInject): void {
-    this.addEvent(exercise, 'INJECT', inject.description, inject.data);
+    this.addEvent(exercise, "INJECT", inject.description, inject.data);
 
     // Generate appropriate data based on inject type
     switch (inject.type) {
-      case 'SIGNAL':
+      case "SIGNAL":
         const signal = this.signalGenerator.generateRFSignal(inject.data as any);
-        this.emit('signal:generated', signal);
+        this.emit("signal:generated", signal);
         break;
-      case 'COMINT':
+      case "COMINT":
         const comint = this.signalGenerator.generateCOMINTMessage(inject.data as any);
         // Would emit COMINT event
         break;
-      case 'ELINT':
+      case "ELINT":
         const elint = this.signalGenerator.generateELINTReport(inject.data as any);
         // Would emit ELINT event
         break;
     }
 
-    this.emit('inject:triggered', inject);
+    this.emit("inject:triggered", inject);
   }
 
   /**
@@ -423,18 +431,22 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
       // Generate ambient signals based on environment
       if (Math.random() < env.signalDensity) {
         const signal = this.signalGenerator.generateRFSignal({
-          signalType: this.randomSignalType()
+          signalType: this.randomSignalType(),
         });
 
         // Add location within geographic area
         signal.metadata.location = {
-          latitude: env.geographicArea.centerLat + (Math.random() - 0.5) * (env.geographicArea.radiusKm / 111),
-          longitude: env.geographicArea.centerLon + (Math.random() - 0.5) * (env.geographicArea.radiusKm / 111),
+          latitude:
+            env.geographicArea.centerLat +
+            (Math.random() - 0.5) * (env.geographicArea.radiusKm / 111),
+          longitude:
+            env.geographicArea.centerLon +
+            (Math.random() - 0.5) * (env.geographicArea.radiusKm / 111),
           accuracy: 100 + Math.random() * 500,
-          method: 'SIMULATED'
+          method: "SIMULATED",
         };
 
-        this.emit('signal:generated', signal);
+        this.emit("signal:generated", signal);
       }
     }, 2000);
   }
@@ -464,7 +476,7 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
    */
   private addEvent(
     exercise: Exercise,
-    type: ExerciseEvent['type'],
+    type: ExerciseEvent["type"],
     description: string,
     data?: unknown
   ): void {
@@ -472,7 +484,7 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
       timestamp: new Date(),
       type,
       description,
-      data
+      data,
     });
   }
 
@@ -483,7 +495,7 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
     let totalScore = 0;
     let maxScore = 0;
 
-    const objectiveResults = exercise.objectives.map(obj => {
+    const objectiveResults = exercise.objectives.map((obj) => {
       const score = obj.score || 0;
       totalScore += score * obj.weight;
       maxScore += 100 * obj.weight;
@@ -492,7 +504,7 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
         objectiveId: obj.id,
         completed: obj.completed,
         score,
-        notes: obj.completed ? 'Objective met' : 'Objective not completed'
+        notes: obj.completed ? "Objective met" : "Objective not completed",
       };
     });
 
@@ -506,10 +518,10 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
         signalsAnalyzed: Math.floor(Math.random() * 80) + 30,
         targetsIdentified: exercise.scenario.targetProfiles.length,
         locationsGenerated: Math.floor(Math.random() * 20) + 5,
-        reportsProduced: Math.floor(Math.random() * 10) + 2
+        reportsProduced: Math.floor(Math.random() * 10) + 2,
       },
       timeline: exercise.timeline,
-      feedback: this.generateFeedback(totalScore / maxScore)
+      feedback: this.generateFeedback(totalScore / maxScore),
     };
   }
 
@@ -517,16 +529,20 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
    * Generate feedback based on score
    */
   private generateFeedback(scoreRatio: number): string {
-    if (scoreRatio >= 0.9) {return 'Excellent performance. All objectives met with high proficiency.';}
-    if (scoreRatio >= 0.7) {return 'Good performance. Most objectives completed successfully.';}
-    if (scoreRatio >= 0.5) {return 'Satisfactory performance. Key objectives met but room for improvement.';}
-    return 'Additional training recommended. Review procedures and try again.';
+    if (scoreRatio >= 0.9) {
+      return "Excellent performance. All objectives met with high proficiency.";
+    }
+    if (scoreRatio >= 0.7) {
+      return "Good performance. Most objectives completed successfully.";
+    }
+    if (scoreRatio >= 0.5) {
+      return "Satisfactory performance. Key objectives met but room for improvement.";
+    }
+    return "Additional training recommended. Review procedures and try again.";
   }
 
   private randomSignalType(): SignalType {
-    const types: SignalType[] = [
-      'RF_DIGITAL', 'CELLULAR_4G', 'WIFI', 'VHF', 'UHF', 'SATELLITE'
-    ];
+    const types: SignalType[] = ["RF_DIGITAL", "CELLULAR_4G", "WIFI", "VHF", "UHF", "SATELLITE"];
     return types[Math.floor(Math.random() * types.length)];
   }
 

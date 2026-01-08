@@ -15,11 +15,11 @@ on:
       private:
         description: Is the repo private? (uses GITHUB_TOKEN for HTTPS)
         required: false
-        default: 'false'
+        default: "false"
       do_ssh:
         description: Also test SSH (requires secrets.DEPLOY_KEY)
         required: false
-        default: 'false'
+        default: "false"
   workflow_call:
     inputs:
       old_repo:
@@ -31,11 +31,11 @@ on:
       private:
         required: false
         type: string
-        default: 'false'
+        default: "false"
       do_ssh:
         required: false
         type: string
-        default: 'false'
+        default: "false"
 
 jobs:
   api-redirect:

@@ -8,8 +8,8 @@ metadata:
   labels:
     name: conductor-system
     app.kubernetes.io/name: conductor-omniversal
-    app.kubernetes.io/version: '2.0.0-phase2a'
-    conductor.ai/phase: '2a'
+    app.kubernetes.io/version: "2.0.0-phase2a"
+    conductor.ai/phase: "2a"
 
 ---
 # ConfigMap for application configuration
@@ -19,18 +19,18 @@ metadata:
   name: conductor-config
   namespace: conductor-system
 data:
-  LOG_LEVEL: 'info'
-  PORT: '3000'
-  ORCHESTRATION_ENABLED: 'true'
-  PREMIUM_ROUTING_ENABLED: 'true'
-  WEB_SCRAPING_ENABLED: 'true'
-  COMPLIANCE_GATE_ENABLED: 'true'
-  THOMPSON_SAMPLING_ENABLED: 'true'
-  MAX_CONCURRENT_SOURCES: '10'
-  DEFAULT_SYNTHESIS_STRATEGY: 'consensus'
-  RATE_LIMIT_WINDOW_MS: '60000'
-  CITATION_REQUIRED: 'true'
-  PROVENANCE_TRACKING: 'true'
+  LOG_LEVEL: "info"
+  PORT: "3000"
+  ORCHESTRATION_ENABLED: "true"
+  PREMIUM_ROUTING_ENABLED: "true"
+  WEB_SCRAPING_ENABLED: "true"
+  COMPLIANCE_GATE_ENABLED: "true"
+  THOMPSON_SAMPLING_ENABLED: "true"
+  MAX_CONCURRENT_SOURCES: "10"
+  DEFAULT_SYNTHESIS_STRATEGY: "consensus"
+  RATE_LIMIT_WINDOW_MS: "60000"
+  CITATION_REQUIRED: "true"
+  PROVENANCE_TRACKING: "true"
 
 ---
 # Secret for sensitive configuration
@@ -41,14 +41,14 @@ metadata:
   namespace: conductor-system
 type: Opaque
 stringData:
-  DATABASE_URL: 'postgresql://conductor:${DB_PASSWORD}@postgres-conductor:5432/conductor'
-  REDIS_URL: 'redis://redis-conductor:6379'
-  OPA_URL: 'http://opa-service:8181'
-  OPENAI_API_KEY: '${OPENAI_API_KEY}'
-  ANTHROPIC_API_KEY: '${ANTHROPIC_API_KEY}'
-  GITHUB_TOKEN: '${GITHUB_TOKEN}'
-  JIRA_TOKEN: '${JIRA_TOKEN}'
-  KEY_ENCRYPTION_KEY: '${KEY_ENCRYPTION_KEY}'
+  DATABASE_URL: "postgresql://conductor:${DB_PASSWORD}@postgres-conductor:5432/conductor"
+  REDIS_URL: "redis://redis-conductor:6379"
+  OPA_URL: "http://opa-service:8181"
+  OPENAI_API_KEY: "${OPENAI_API_KEY}"
+  ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}"
+  GITHUB_TOKEN: "${GITHUB_TOKEN}"
+  JIRA_TOKEN: "${JIRA_TOKEN}"
+  KEY_ENCRYPTION_KEY: "${KEY_ENCRYPTION_KEY}"
 
 ---
 # Web Orchestrator Deployment
@@ -60,7 +60,7 @@ metadata:
   labels:
     app: conductor-web-orchestrator
     component: orchestration
-    version: '2.0.0-phase2a'
+    version: "2.0.0-phase2a"
 spec:
   replicas: 3
   strategy:
@@ -77,9 +77,9 @@ spec:
         app: conductor-web-orchestrator
         component: orchestration
       annotations:
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: '3000'
-        prometheus.io/path: '/metrics'
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/metrics"
     spec:
       serviceAccountName: conductor-web-orchestrator
       securityContext:
@@ -97,7 +97,7 @@ spec:
               protocol: TCP
           env:
             - name: NODE_ENV
-              value: 'production'
+              value: "production"
           envFrom:
             - configMapRef:
                 name: conductor-config
@@ -105,11 +105,11 @@ spec:
                 name: conductor-secrets
           resources:
             requests:
-              memory: '512Mi'
-              cpu: '250m'
+              memory: "512Mi"
+              cpu: "250m"
             limits:
-              memory: '2Gi'
-              cpu: '1000m'
+              memory: "2Gi"
+              cpu: "1000m"
           livenessProbe:
             httpGet:
               path: /health
@@ -141,10 +141,10 @@ spec:
       nodeSelector:
         kubernetes.io/arch: amd64
       tolerations:
-        - key: 'conductor-workload'
-          operator: 'Equal'
-          value: 'true'
-          effect: 'NoSchedule'
+        - key: "conductor-workload"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
 
 ---
 # Premium Model Router Deployment
@@ -156,7 +156,7 @@ metadata:
   labels:
     app: conductor-premium-router
     component: routing
-    version: '2.0.0-phase2a'
+    version: "2.0.0-phase2a"
 spec:
   replicas: 2
   selector:
@@ -168,8 +168,8 @@ spec:
         app: conductor-premium-router
         component: routing
       annotations:
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: '3001'
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3001"
     spec:
       serviceAccountName: conductor-premium-router
       securityContext:
@@ -188,11 +188,11 @@ spec:
                 name: conductor-secrets
           resources:
             requests:
-              memory: '256Mi'
-              cpu: '100m'
+              memory: "256Mi"
+              cpu: "100m"
             limits:
-              memory: '1Gi'
-              cpu: '500m'
+              memory: "1Gi"
+              cpu: "500m"
           livenessProbe:
             httpGet:
               path: /health
@@ -265,12 +265,12 @@ metadata:
   name: conductor-web-orchestrator
   namespace: conductor-system
 rules:
-  - apiGroups: ['']
-    resources: ['pods', 'services', 'configmaps']
-    verbs: ['get', 'list', 'watch']
-  - apiGroups: ['apps']
-    resources: ['deployments']
-    verbs: ['get', 'list', 'watch']
+  - apiGroups: [""]
+    resources: ["pods", "services", "configmaps"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -295,12 +295,12 @@ metadata:
   name: conductor-ingress
   namespace: conductor-system
   annotations:
-    kubernetes.io/ingress.class: 'nginx'
-    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
-    nginx.ingress.kubernetes.io/use-regex: 'true'
-    nginx.ingress.kubernetes.io/rate-limit: '100'
-    nginx.ingress.kubernetes.io/rate-limit-window: '1m'
-    cert-manager.io/cluster-issuer: 'letsencrypt-prod'
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   tls:
     - hosts:

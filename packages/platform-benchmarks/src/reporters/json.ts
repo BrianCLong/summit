@@ -1,11 +1,11 @@
-import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 import type {
   BenchmarkConfig,
   BenchmarkReporter,
   BenchmarkResult,
   BenchmarkSuiteConfig,
-} from '../types.js';
+} from "../types.js";
 
 /**
  * JSON reporter for CI output
@@ -48,16 +48,18 @@ export class JsonReporter implements BenchmarkReporter {
 
     if (this.outputPath) {
       await fs.mkdir(path.dirname(this.outputPath), { recursive: true });
-      await fs.writeFile(this.outputPath, json, 'utf8');
+      await fs.writeFile(this.outputPath, json, "utf8");
     } else {
       console.log(json);
     }
   }
 
   async onError(error: Error, config?: BenchmarkConfig): Promise<void> {
-    console.error(JSON.stringify({
-      error: error.message,
-      benchmark: config?.name,
-    }));
+    console.error(
+      JSON.stringify({
+        error: error.message,
+        benchmark: config?.name,
+      })
+    );
   }
 }

@@ -43,6 +43,7 @@ In the event of a critical incident where the gate is malfunctioning or blocking
 ## Verification
 
 To verify the gate locally:
+
 ```bash
 ./scripts/check-ga-policy.sh
 grype .

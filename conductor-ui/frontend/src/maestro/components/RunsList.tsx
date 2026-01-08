@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import { api } from '../api';
-import { Run, RunFilters, SSEEvent } from '../types/maestro-api';
-import { getMaestroConfig } from '../config';
+import React, { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
+import { api } from "../api";
+import { Run, RunFilters, SSEEvent } from "../types/maestro-api";
+import { getMaestroConfig } from "../config";
 
 interface RunsListProps {
   filters?: RunFilters;
@@ -11,19 +11,19 @@ interface RunsListProps {
 }
 
 const statusColors = {
-  queued: 'bg-slate-100 text-slate-800',
-  running: 'bg-blue-100 text-blue-800',
-  succeeded: 'bg-green-100 text-green-800',
-  failed: 'bg-red-100 text-red-800',
-  cancelled: 'bg-yellow-100 text-yellow-800',
+  queued: "bg-slate-100 text-slate-800",
+  running: "bg-blue-100 text-blue-800",
+  succeeded: "bg-green-100 text-green-800",
+  failed: "bg-red-100 text-red-800",
+  cancelled: "bg-yellow-100 text-yellow-800",
 };
 
 const statusIcons = {
-  queued: '⏳',
-  running: '▶️',
-  succeeded: '✅',
-  failed: '❌',
-  cancelled: '⏹️',
+  queued: "⏳",
+  running: "▶️",
+  succeeded: "✅",
+  failed: "❌",
+  cancelled: "⏹️",
 };
 
 function RunRow({ run, compact = false }: { run: Run; compact?: boolean }) {
@@ -38,13 +38,10 @@ function RunRow({ run, compact = false }: { run: Run; compact?: boolean }) {
             className="text-slate-400 hover:text-slate-600"
             aria-label="Expand run details"
           >
-            {isExpanded ? '▼' : '▶'}
+            {isExpanded ? "▼" : "▶"}
           </button>
           <div className="font-mono text-xs">
-            <Link
-              className="text-indigo-700 hover:underline"
-              to={`/maestro/runs/${run.id}`}
-            >
+            <Link className="text-indigo-700 hover:underline" to={`/maestro/runs/${run.id}`}>
               {run.id}
             </Link>
           </div>
@@ -52,9 +49,7 @@ function RunRow({ run, compact = false }: { run: Run; compact?: boolean }) {
         {isExpanded && !compact && (
           <div className="mt-2 ml-6 text-xs text-slate-600">
             <div>Started: {new Date(run.startedAt).toLocaleString()}</div>
-            {run.endedAt && (
-              <div>Ended: {new Date(run.endedAt).toLocaleString()}</div>
-            )}
+            {run.endedAt && <div>Ended: {new Date(run.endedAt).toLocaleString()}</div>}
             {run.traceId && <div>Trace: {run.traceId}</div>}
             <div>Artifacts: {run.artifacts?.length || 0}</div>
           </div>
@@ -70,9 +65,7 @@ function RunRow({ run, compact = false }: { run: Run; compact?: boolean }) {
       </td>
       <td className="px-3 py-2">
         <div className="flex items-center gap-2">
-          <span className="text-sm">
-            {statusIcons[run.status as keyof typeof statusIcons]}
-          </span>
+          <span className="text-sm">{statusIcons[run.status as keyof typeof statusIcons]}</span>
           <span
             className={`rounded px-2 py-0.5 text-xs font-medium ${
               statusColors[run.status as keyof typeof statusColors]
@@ -80,44 +73,35 @@ function RunRow({ run, compact = false }: { run: Run; compact?: boolean }) {
           >
             {run.status}
           </span>
-          {run.status === 'running' && (
+          {run.status === "running" && (
             <div className="h-1 w-1 rounded-full bg-blue-500 animate-pulse" />
           )}
         </div>
       </td>
       <td className="px-3 py-2">
         <div className="text-sm">
-          {run.durationMs ? `${Math.round(run.durationMs / 1000)}s` : '—'}
+          {run.durationMs ? `${Math.round(run.durationMs / 1000)}s` : "—"}
         </div>
-        {isExpanded && run.status === 'running' && (
+        {isExpanded && run.status === "running" && (
           <div className="text-xs text-slate-500">
-            Running for{' '}
-            {Math.round(
-              (Date.now() - new Date(run.startedAt).getTime()) / 1000,
-            )}
-            s
+            Running for {Math.round((Date.now() - new Date(run.startedAt).getTime()) / 1000)}s
           </div>
         )}
       </td>
       <td className="px-3 py-2">
         <div className="text-sm">
-          {typeof run.cost === 'object'
-            ? `$${run.cost.total || '0.00'}`
-            : `$${run.cost || '0.00'}`}
+          {typeof run.cost === "object" ? `$${run.cost.total || "0.00"}` : `$${run.cost || "0.00"}`}
         </div>
-        {isExpanded && typeof run.cost === 'object' && (
+        {isExpanded && typeof run.cost === "object" && (
           <div className="text-xs text-slate-500">
-            Compute: ${run.cost.compute || '0.00'} • Models: $
-            {run.cost.models || '0.00'}
+            Compute: ${run.cost.compute || "0.00"} • Models: ${run.cost.models || "0.00"}
           </div>
         )}
       </td>
       <td className="px-3 py-2">
         <div className="text-xs text-slate-600">{run.env}</div>
         {run.commit && (
-          <div className="text-xs font-mono text-slate-500">
-            {run.commit.slice(0, 7)}
-          </div>
+          <div className="text-xs font-mono text-slate-500">{run.commit.slice(0, 7)}</div>
         )}
       </td>
       {!compact && (
@@ -129,12 +113,12 @@ function RunRow({ run, compact = false }: { run: Run; compact?: boolean }) {
             >
               View
             </Link>
-            {run.status === 'running' && (
+            {run.status === "running" && (
               <button className="rounded px-2 py-1 text-xs text-slate-600 hover:bg-slate-100">
                 Pause
               </button>
             )}
-            {run.status === 'failed' && (
+            {run.status === "failed" && (
               <button className="rounded px-2 py-1 text-xs text-slate-600 hover:bg-slate-100">
                 Retry
               </button>
@@ -154,28 +138,24 @@ function RunsFilters({
   onChange: (filters: RunFilters) => void;
 }) {
   const [savedViews, setSavedViews] = useState([
-    { name: 'Recent Failures', filters: { status: 'failed', limit: 20 } },
-    { name: 'Long Running', filters: { status: 'running' } },
-    { name: 'High Cost', filters: { limit: 50 } },
+    { name: "Recent Failures", filters: { status: "failed", limit: 20 } },
+    { name: "Long Running", filters: { status: "running" } },
+    { name: "High Cost", filters: { limit: 50 } },
   ]);
 
   return (
     <div className="rounded-lg border bg-white p-4 shadow-sm">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-medium text-slate-700">Filters</h3>
-        <button className="text-xs text-indigo-600 hover:text-indigo-700">
-          Save View
-        </button>
+        <button className="text-xs text-indigo-600 hover:text-indigo-700">Save View</button>
       </div>
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
         <div>
           <label className="block text-xs text-slate-600 mb-1">Status</label>
           <select
-            value={filters.status || ''}
-            onChange={(e) =>
-              onChange({ ...filters, status: e.target.value || undefined })
-            }
+            value={filters.status || ""}
+            onChange={(e) => onChange({ ...filters, status: e.target.value || undefined })}
             className="w-full rounded border px-2 py-1 text-sm"
           >
             <option value="">All statuses</option>
@@ -191,24 +171,18 @@ function RunsFilters({
           <label className="block text-xs text-slate-600 mb-1">Pipeline</label>
           <input
             type="text"
-            value={filters.pipeline || ''}
-            onChange={(e) =>
-              onChange({ ...filters, pipeline: e.target.value || undefined })
-            }
+            value={filters.pipeline || ""}
+            onChange={(e) => onChange({ ...filters, pipeline: e.target.value || undefined })}
             placeholder="Filter by pipeline..."
             className="w-full rounded border px-2 py-1 text-sm"
           />
         </div>
 
         <div>
-          <label className="block text-xs text-slate-600 mb-1">
-            Environment
-          </label>
+          <label className="block text-xs text-slate-600 mb-1">Environment</label>
           <select
-            value={filters.env || ''}
-            onChange={(e) =>
-              onChange({ ...filters, env: e.target.value || undefined })
-            }
+            value={filters.env || ""}
+            onChange={(e) => onChange({ ...filters, env: e.target.value || undefined })}
             className="w-full rounded border px-2 py-1 text-sm"
           >
             <option value="">All environments</option>
@@ -222,10 +196,8 @@ function RunsFilters({
           <label className="block text-xs text-slate-600 mb-1">Search</label>
           <input
             type="text"
-            value={filters.q || ''}
-            onChange={(e) =>
-              onChange({ ...filters, q: e.target.value || undefined })
-            }
+            value={filters.q || ""}
+            onChange={(e) => onChange({ ...filters, q: e.target.value || undefined })}
             placeholder="Search runs..."
             className="w-full rounded border px-2 py-1 text-sm"
           />
@@ -293,37 +265,31 @@ export default function RunsList({
         if (eventSourceRef.current?.readyState === EventSource.CLOSED) {
           eventSourceRef.current = null;
           // Recursive call to re-establish connection
-          const retryEventSource = new EventSource(
-            `${cfg.gatewayBase}/streams/runs`,
-          );
+          const retryEventSource = new EventSource(`${cfg.gatewayBase}/streams/runs`);
           eventSourceRef.current = retryEventSource;
         }
       }, 5000);
     };
 
-    eventSource.addEventListener('run_started', (event) => {
+    eventSource.addEventListener("run_started", (event) => {
       const data: SSEEvent = JSON.parse(event.data);
       const newRun = data.payload as Run;
       setRuns((prev) => [newRun, ...prev.slice(0, 199)]); // Keep last 200 runs
     });
 
-    eventSource.addEventListener('run_progress', (event) => {
+    eventSource.addEventListener("run_progress", (event) => {
       const data: SSEEvent = JSON.parse(event.data);
       const updatedRun = data.payload as Run;
       setRuns((prev) =>
-        prev.map((run) =>
-          run.id === updatedRun.id ? { ...run, ...updatedRun } : run,
-        ),
+        prev.map((run) => (run.id === updatedRun.id ? { ...run, ...updatedRun } : run))
       );
     });
 
-    eventSource.addEventListener('run_completed', (event) => {
+    eventSource.addEventListener("run_completed", (event) => {
       const data: SSEEvent = JSON.parse(event.data);
       const completedRun = data.payload as Run;
       setRuns((prev) =>
-        prev.map((run) =>
-          run.id === completedRun.id ? { ...run, ...completedRun } : run,
-        ),
+        prev.map((run) => (run.id === completedRun.id ? { ...run, ...completedRun } : run))
       );
     });
 
@@ -339,8 +305,7 @@ export default function RunsList({
   const filteredRuns = runs
     .filter((run) => {
       if (filters.status && run.status !== filters.status) return false;
-      if (filters.pipeline && !run.pipelineId.includes(filters.pipeline))
-        return false;
+      if (filters.pipeline && !run.pipelineId.includes(filters.pipeline)) return false;
       if (filters.env && run.env !== filters.env) return false;
       if (filters.q) {
         const query = filters.q.toLowerCase();
@@ -368,14 +333,10 @@ export default function RunsList({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div
-            className={`h-2 w-2 rounded-full ${
-              streamConnected ? 'bg-green-500' : 'bg-red-500'
-            }`}
+            className={`h-2 w-2 rounded-full ${streamConnected ? "bg-green-500" : "bg-red-500"}`}
           />
           <span className="text-xs text-slate-500">
-            {streamConnected
-              ? 'Live updates connected'
-              : 'Connecting to live updates...'}
+            {streamConnected ? "Live updates connected" : "Connecting to live updates..."}
           </span>
         </div>
         <button
@@ -393,14 +354,14 @@ export default function RunsList({
       <div className="flex items-center justify-between text-sm">
         <div className="text-slate-600">
           Showing {filteredRuns.length} run
-          {filteredRuns.length !== 1 ? 's' : ''}
-          {Object.keys(filters).length > 0 && ' (filtered)'}
+          {filteredRuns.length !== 1 ? "s" : ""}
+          {Object.keys(filters).length > 0 && " (filtered)"}
         </div>
         <div className="flex items-center gap-2">
           <span className="text-slate-500">Auto-refresh:</span>
           <div
             className={`h-2 w-2 rounded-full ${
-              streamConnected ? 'bg-green-500 animate-pulse' : 'bg-slate-300'
+              streamConnected ? "bg-green-500 animate-pulse" : "bg-slate-300"
             }`}
           />
         </div>
@@ -426,10 +387,7 @@ export default function RunsList({
             ))}
             {filteredRuns.length === 0 && (
               <tr>
-                <td
-                  colSpan={compact ? 6 : 7}
-                  className="px-3 py-8 text-center text-slate-500"
-                >
+                <td colSpan={compact ? 6 : 7} className="px-3 py-8 text-center text-slate-500">
                   No runs found matching current filters.
                 </td>
               </tr>

@@ -27,11 +27,5 @@
       "type": "string"
     }
   },
-  "required": [
-    "evidenceId",
-    "timestamp",
-    "source",
-    "content",
-    "attributionHypothesis"
-  ]
+  "required": ["evidenceId", "timestamp", "source", "content", "attributionHypothesis"]
 }

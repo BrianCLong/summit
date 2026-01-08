@@ -7,23 +7,23 @@
 
 ```ts
 // server/src/ai/langchain/IntelGraphTool.ts
-import { Tool } from 'langchain/tools';
-import fetch from 'node-fetch';
+import { Tool } from "langchain/tools";
+import fetch from "node-fetch";
 export class IntelGraphTool extends Tool {
-  name = 'intelgraph-graphql';
-  description = 'Query IntelGraph GraphQL with persisted queries only.';
+  name = "intelgraph-graphql";
+  description = "Query IntelGraph GraphQL with persisted queries only.";
   constructor(private opts: { endpoint: string; token: string }) {
     super();
   }
   async _call(input: string) {
     const res = await fetch(this.opts.endpoint, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'content-type': 'application/json',
+        "content-type": "application/json",
         authorization: `Bearer ${this.opts.token}`,
       },
       body: JSON.stringify({
-        operationName: 'pathsPolicyAware',
+        operationName: "pathsPolicyAware",
         extensions: { persistedQuery: { version: 1, sha256Hash: input } },
       }),
     });

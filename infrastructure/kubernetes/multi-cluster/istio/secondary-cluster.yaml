@@ -56,57 +56,57 @@ spec:
           maxReplicas: 5
 
     ingressGateways:
-    - name: istio-ingressgateway
-      enabled: true
-      k8s:
-        service:
-          type: LoadBalancer
-        resources:
-          requests:
-            cpu: 100m
-            memory: 128Mi
-          limits:
-            cpu: 2000m
-            memory: 1024Mi
-        hpaSpec:
-          minReplicas: 2
-          maxReplicas: 5
+      - name: istio-ingressgateway
+        enabled: true
+        k8s:
+          service:
+            type: LoadBalancer
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 2000m
+              memory: 1024Mi
+          hpaSpec:
+            minReplicas: 2
+            maxReplicas: 5
 
-    - name: istio-eastwestgateway
-      enabled: true
-      label:
-        istio: eastwestgateway
-        app: istio-eastwestgateway
-        topology.istio.io/network: network2
-      k8s:
-        service:
-          type: LoadBalancer
-          ports:
-          - port: 15021
-            name: status-port
-          - port: 15443
-            name: tls
-          - port: 15012
-            name: tcp-istiod
-          - port: 15017
-            name: tcp-webhook
-        env:
-        - name: ISTIO_META_ROUTER_MODE
-          value: "sni-dnat"
-        - name: ISTIO_META_REQUESTED_NETWORK_VIEW
-          value: network2
+      - name: istio-eastwestgateway
+        enabled: true
+        label:
+          istio: eastwestgateway
+          app: istio-eastwestgateway
+          topology.istio.io/network: network2
+        k8s:
+          service:
+            type: LoadBalancer
+            ports:
+              - port: 15021
+                name: status-port
+              - port: 15443
+                name: tls
+              - port: 15012
+                name: tcp-istiod
+              - port: 15017
+                name: tcp-webhook
+          env:
+            - name: ISTIO_META_ROUTER_MODE
+              value: "sni-dnat"
+            - name: ISTIO_META_REQUESTED_NETWORK_VIEW
+              value: network2
 
     egressGateways:
-    - name: istio-egressgateway
-      enabled: true
-      k8s:
-        resources:
-          requests:
-            cpu: 100m
-            memory: 128Mi
-          limits:
-            cpu: 2000m
-            memory: 1024Mi
+      - name: istio-egressgateway
+        enabled: true
+        k8s:
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 2000m
+              memory: 1024Mi
 
     cni:
       enabled: false
@@ -125,7 +125,7 @@ spec:
     enableAutoMtls: true
 
     defaultServiceExportTo:
-    - "*"
+      - "*"
 
     outboundTrafficPolicy:
       mode: ALLOW_ANY

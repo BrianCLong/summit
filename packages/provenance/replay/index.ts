@@ -1,5 +1,5 @@
 // Placeholder for Replay capability
-import { AuditLogEntry } from '../audit-log';
+import { AuditLogEntry } from "../audit-log";
 
 export class ProvenanceReplay {
   async replay(traceId: string): Promise<AuditLogEntry | null> {

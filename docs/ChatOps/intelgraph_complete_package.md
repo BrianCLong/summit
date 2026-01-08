@@ -469,24 +469,22 @@ class OSINTEnrichment(TransformPlugin):
 ### Creating a Visualization Plugin (JavaScript)
 
 ```javascript
-import { VisualizationPlugin } from 'intelgraph-sdk';
+import { VisualizationPlugin } from "intelgraph-sdk";
 
 export class ThreatActorVisualization extends VisualizationPlugin {
-  name = 'threat-actor-viz';
+  name = "threat-actor-viz";
 
   shouldApply(node) {
-    return (
-      node.data.type === 'Person' && node.data.attributes.threat_actor === true
-    );
+    return node.data.type === "Person" && node.data.attributes.threat_actor === true;
   }
 
   apply(node, canvas) {
     canvas.setNodeStyle(node.id, {
-      'background-color': '#ff4444',
-      'border-color': '#cc0000',
-      'border-width': 3,
+      "background-color": "#ff4444",
+      "border-color": "#cc0000",
+      "border-width": 3,
     });
-    canvas.addBadge(node.id, '⚠️');
+    canvas.addBadge(node.id, "⚠️");
   }
 }
 ```

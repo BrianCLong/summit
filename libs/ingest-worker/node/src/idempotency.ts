@@ -5,7 +5,7 @@
  * with configurable storage backends (Redis, PostgreSQL).
  */
 
-import type { IdempotencyConfig } from './types.js';
+import type { IdempotencyConfig } from "./types.js";
 
 export interface IdempotencyStore {
   /**
@@ -44,7 +44,7 @@ export interface IdempotencyStore {
  */
 export class RedisIdempotencyStore implements IdempotencyStore {
   constructor(
-    private redis: import('ioredis').default,
+    private redis: import("ioredis").default,
     private config: IdempotencyConfig
   ) {}
 
@@ -64,14 +64,16 @@ export class RedisIdempotencyStore implements IdempotencyStore {
       metadata,
     });
 
-    await this.redis.set(redisKey, value, 'EX', this.config.ttlSeconds);
+    await this.redis.set(redisKey, value, "EX", this.config.ttlSeconds);
   }
 
   async delete(key: string): Promise<void> {
     await this.redis.del(this.getKey(key));
   }
 
-  async get(key: string): Promise<{ processedAt: string; metadata?: Record<string, unknown> } | null> {
+  async get(
+    key: string
+  ): Promise<{ processedAt: string; metadata?: Record<string, unknown> } | null> {
     const value = await this.redis.get(this.getKey(key));
     if (!value) return null;
 
@@ -90,8 +92,8 @@ export class RedisIdempotencyStore implements IdempotencyStore {
     });
 
     // Use SET NX EX for atomic check-and-set
-    const result = await this.redis.set(redisKey, value, 'EX', this.config.ttlSeconds, 'NX');
-    return result === 'OK';
+    const result = await this.redis.set(redisKey, value, "EX", this.config.ttlSeconds, "NX");
+    return result === "OK";
   }
 
   async close(): Promise<void> {
@@ -104,9 +106,9 @@ export class RedisIdempotencyStore implements IdempotencyStore {
  */
 export class PostgresIdempotencyStore implements IdempotencyStore {
   constructor(
-    private pool: import('pg').Pool,
+    private pool: import("pg").Pool,
     private config: IdempotencyConfig,
-    private tableName: string = 'ingest_idempotency'
+    private tableName: string = "ingest_idempotency"
   ) {}
 
   async initialize(): Promise<void> {
@@ -147,13 +149,12 @@ export class PostgresIdempotencyStore implements IdempotencyStore {
   }
 
   async delete(key: string): Promise<void> {
-    await this.pool.query(
-      `DELETE FROM ${this.tableName} WHERE dedupe_key = $1`,
-      [key]
-    );
+    await this.pool.query(`DELETE FROM ${this.tableName} WHERE dedupe_key = $1`, [key]);
   }
 
-  async get(key: string): Promise<{ processedAt: string; metadata?: Record<string, unknown> } | null> {
+  async get(
+    key: string
+  ): Promise<{ processedAt: string; metadata?: Record<string, unknown> } | null> {
     const result = await this.pool.query(
       `SELECT processed_at, metadata FROM ${this.tableName}
        WHERE dedupe_key = $1 AND expires_at > NOW()`,
@@ -184,7 +185,7 @@ export class PostgresIdempotencyStore implements IdempotencyStore {
       return (result.rowCount ?? 0) > 0;
     } catch (error) {
       // Check if it's a duplicate key error
-      if (error && typeof error === 'object' && 'code' in error && error.code === '23505') {
+      if (error && typeof error === "object" && "code" in error && error.code === "23505") {
         return false;
       }
       throw error;
@@ -199,9 +200,7 @@ export class PostgresIdempotencyStore implements IdempotencyStore {
    * Clean up expired keys.
    */
   async cleanup(): Promise<number> {
-    const result = await this.pool.query(
-      `DELETE FROM ${this.tableName} WHERE expires_at < NOW()`
-    );
+    const result = await this.pool.query(`DELETE FROM ${this.tableName} WHERE expires_at < NOW()`);
     return result.rowCount ?? 0;
   }
 }
@@ -210,7 +209,10 @@ export class PostgresIdempotencyStore implements IdempotencyStore {
  * In-memory idempotency store (for testing/development).
  */
 export class InMemoryIdempotencyStore implements IdempotencyStore {
-  private store: Map<string, { processedAt: string; metadata?: Record<string, unknown>; expiresAt: number }> = new Map();
+  private store: Map<
+    string,
+    { processedAt: string; metadata?: Record<string, unknown>; expiresAt: number }
+  > = new Map();
   private cleanupTimer: NodeJS.Timeout | null = null;
 
   constructor(private ttlSeconds: number = 3600) {
@@ -242,7 +244,9 @@ export class InMemoryIdempotencyStore implements IdempotencyStore {
     this.store.delete(key);
   }
 
-  async get(key: string): Promise<{ processedAt: string; metadata?: Record<string, unknown> } | null> {
+  async get(
+    key: string
+  ): Promise<{ processedAt: string; metadata?: Record<string, unknown> } | null> {
     const entry = this.store.get(key);
     if (!entry) return null;
 
@@ -293,19 +297,19 @@ export class InMemoryIdempotencyStore implements IdempotencyStore {
  */
 export function createIdempotencyStore(
   config: IdempotencyConfig,
-  redis?: import('ioredis').default,
-  pgPool?: import('pg').Pool
+  redis?: import("ioredis").default,
+  pgPool?: import("pg").Pool
 ): IdempotencyStore {
   switch (config.storeType) {
-    case 'redis':
+    case "redis":
       if (!redis) {
-        throw new Error('Redis client required for redis idempotency store');
+        throw new Error("Redis client required for redis idempotency store");
       }
       return new RedisIdempotencyStore(redis, config);
 
-    case 'postgres':
+    case "postgres":
       if (!pgPool) {
-        throw new Error('PostgreSQL pool required for postgres idempotency store');
+        throw new Error("PostgreSQL pool required for postgres idempotency store");
       }
       return new PostgresIdempotencyStore(pgPool, config);
 

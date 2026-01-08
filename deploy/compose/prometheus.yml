@@ -3,41 +3,41 @@ global:
   evaluation_interval: 15s
 
 rule_files:
-  - 'rules/*.yml'
+  - "rules/*.yml"
 
 scrape_configs:
-  - job_name: 'prometheus'
+  - job_name: "prometheus"
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: ["localhost:9090"]
 
-  - job_name: 'otel-collector'
+  - job_name: "otel-collector"
     static_configs:
-      - targets: ['otel-collector:8888']
+      - targets: ["otel-collector:8888"]
     scrape_interval: 5s
 
-  - job_name: 'intelgraph-api'
+  - job_name: "intelgraph-api"
     static_configs:
-      - targets: ['api-server:4000']
-    metrics_path: '/metrics'
+      - targets: ["api-server:4000"]
+    metrics_path: "/metrics"
     scrape_interval: 5s
 
-  - job_name: 'intelgraph-gateway'
+  - job_name: "intelgraph-gateway"
     static_configs:
-      - targets: ['apollo-gateway:4001']
-    metrics_path: '/metrics'
+      - targets: ["apollo-gateway:4001"]
+    metrics_path: "/metrics"
     scrape_interval: 5s
 
-  - job_name: 'neo4j'
+  - job_name: "neo4j"
     static_configs:
-      - targets: ['neo4j:2004']
+      - targets: ["neo4j:2004"]
     scrape_interval: 10s
 
-  - job_name: 'postgres-exporter'
+  - job_name: "postgres-exporter"
     static_configs:
-      - targets: ['postgres:5432']
+      - targets: ["postgres:5432"]
     scrape_interval: 10s
 
-  - job_name: 'redis'
+  - job_name: "redis"
     static_configs:
-      - targets: ['redis:6379']
+      - targets: ["redis:6379"]
     scrape_interval: 10s

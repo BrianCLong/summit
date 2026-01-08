@@ -65,10 +65,7 @@
   <body>
     <div class="header">
       <h1>🚀 IntelGraph GraphQL Playground</h1>
-      <p>
-        Interactive exploration of the IntelGraph intelligence analysis platform
-        API
-      </p>
+      <p>Interactive exploration of the IntelGraph intelligence analysis platform API</p>
     </div>
 
     <div class="sample-queries">
@@ -94,10 +91,7 @@
         <code>query FindRelationships</code>
       </div>
 
-      <div
-        class="sample-query"
-        onclick="loadQuery(createInvestigationMutation)"
-      >
+      <div class="sample-query" onclick="loadQuery(createInvestigationMutation)">
         <strong>Create Investigation</strong>
         <code>mutation CreateInvestigation</code>
       </div>
@@ -341,11 +335,11 @@ query EntityNetwork($center_entity: ID!, $depth: Int = 2) {
         }
       }
 
-      const graphiqlContainer = document.getElementById('graphiql');
+      const graphiqlContainer = document.getElementById("graphiql");
 
       // Create GraphiQL instance
       const fetcher = GraphiQL.createFetcher({
-        url: '/graphql', // Adjust this to your GraphQL endpoint
+        url: "/graphql", // Adjust this to your GraphQL endpoint
       });
 
       const root = ReactDOM.createRoot(graphiqlContainer);
@@ -353,7 +347,7 @@ query EntityNetwork($center_entity: ID!, $depth: Int = 2) {
       const graphiqlElement = React.createElement(GraphiQL, {
         fetcher,
         query: healthQuery,
-        variables: '{}',
+        variables: "{}",
         headers: '{"Authorization": "Bearer your-jwt-token"}',
         onEditQuery: (query) => {
           // Store reference to update query programmatically
@@ -366,7 +360,7 @@ query EntityNetwork($center_entity: ID!, $depth: Int = 2) {
       window.graphiqlInstance = {
         setState: (newState) => {
           // This would need to be properly implemented with React state management
-          console.log('Loading query:', newState.query);
+          console.log("Loading query:", newState.query);
         },
       };
 
@@ -395,13 +389,7 @@ Happy querying! 🎯
       }, 1000);
     </script>
 
-    <script
-      crossorigin
-      src="https://unpkg.com/react@18/umd/react.development.js"
-    ></script>
-    <script
-      crossorigin
-      src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"
-    ></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   </body>
 </html>

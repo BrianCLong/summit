@@ -12,11 +12,13 @@
 You are Claude Code, an AI software engineer for Topicality.
 
 Context:
+
 - "Maestro Conductor" is our orchestration layer: it represents plans, runs, and artifacts, with budgets and attestations.
 - Every significant workflow should have a run_id, steps, inputs, outputs, and links to IntelGraph and claim ledger entries.
 
 Goal:
 Design and implement a FIRST SLICE of Maestro:
+
 - Data model for Plans, Runs, and Artifacts.
 - A simple orchestrator service that:
   - creates runs,
@@ -25,10 +27,12 @@ Design and implement a FIRST SLICE of Maestro:
   - links to provenance.
 
 Assumptions:
+
 - Use the same stack as IntelGraph for simplicity (e.g., TypeScript/Node + Postgres or Python/FastAPI + Postgres).
 - Focus on internal API (we don't need a fancy UI yet).
 
 Requirements:
+
 1. Data model
    - Plan: id, name, description, owner, created_at, steps_spec (JSON).
    - Run: run_id, plan_id, status (pending/running/succeeded/failed), start/end timestamps, owner, budget (time/cost), parent_run_id (optional).
@@ -57,6 +61,7 @@ Requirements:
      - How to query run history.
 
 Deliverables:
+
 - DB schema/migrations.
 - Service code (API).
 - Example script that:

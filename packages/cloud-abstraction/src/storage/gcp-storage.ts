@@ -3,8 +3,8 @@
  * GCP Cloud Storage Provider
  */
 
-import { Storage, Bucket, File } from '@google-cloud/storage';
-import { IStorageProvider } from './index';
+import { Storage, Bucket, File } from "@google-cloud/storage";
+import { IStorageProvider } from "./index";
 import {
   CloudProvider,
   StorageObject,
@@ -12,8 +12,8 @@ import {
   StorageDownloadOptions,
   StorageListOptions,
   StorageListResult,
-  StorageError
-} from '../types';
+  StorageError,
+} from "../types";
 
 export class GCPStorageProvider implements IStorageProvider {
   readonly provider = CloudProvider.GCP;
@@ -22,7 +22,7 @@ export class GCPStorageProvider implements IStorageProvider {
   constructor(projectId?: string, keyFilename?: string) {
     this.client = new Storage({
       projectId: projectId || process.env.GCP_PROJECT_ID,
-      keyFilename: keyFilename || process.env.GCP_KEY_FILENAME
+      keyFilename: keyFilename || process.env.GCP_KEY_FILENAME,
     });
   }
 
@@ -36,14 +36,14 @@ export class GCPStorageProvider implements IStorageProvider {
       const bucketObj = this.client.bucket(bucket);
       const file = bucketObj.file(key);
 
-      const buffer = typeof data === 'string' ? Buffer.from(data) : data;
+      const buffer = typeof data === "string" ? Buffer.from(data) : data;
 
       await file.save(buffer, {
         contentType: options?.contentType,
         metadata: {
-          metadata: options?.metadata
+          metadata: options?.metadata,
         },
-        resumable: false
+        resumable: false,
       });
 
       if (options?.storageClass) {
@@ -58,11 +58,7 @@ export class GCPStorageProvider implements IStorageProvider {
     }
   }
 
-  async download(
-    bucket: string,
-    key: string,
-    options?: StorageDownloadOptions
-  ): Promise<Buffer> {
+  async download(bucket: string, key: string, options?: StorageDownloadOptions): Promise<Buffer> {
     try {
       const bucketObj = this.client.bucket(bucket);
       const file = bucketObj.file(key);
@@ -99,10 +95,7 @@ export class GCPStorageProvider implements IStorageProvider {
     }
   }
 
-  async list(
-    bucket: string,
-    options?: StorageListOptions
-  ): Promise<StorageListResult> {
+  async list(bucket: string, options?: StorageListOptions): Promise<StorageListResult> {
     try {
       const bucketObj = this.client.bucket(bucket);
 
@@ -110,7 +103,7 @@ export class GCPStorageProvider implements IStorageProvider {
         prefix: options?.prefix,
         maxResults: options?.maxResults,
         pageToken: options?.continuationToken,
-        autoPaginate: false
+        autoPaginate: false,
       });
 
       const objects: StorageObject[] = files.map((file) => ({
@@ -119,13 +112,13 @@ export class GCPStorageProvider implements IStorageProvider {
         lastModified: new Date(file.metadata.updated),
         etag: file.metadata.etag,
         contentType: file.metadata.contentType,
-        metadata: file.metadata.metadata
+        metadata: file.metadata.metadata,
       }));
 
       return {
         objects,
         continuationToken: response?.nextPageToken,
-        isTruncated: Boolean(response?.nextPageToken)
+        isTruncated: Boolean(response?.nextPageToken),
       };
     } catch (error) {
       throw new StorageError(
@@ -149,7 +142,7 @@ export class GCPStorageProvider implements IStorageProvider {
         lastModified: new Date(metadata.updated),
         etag: metadata.etag,
         contentType: metadata.contentType,
-        metadata: metadata.metadata
+        metadata: metadata.metadata,
       };
     } catch (error) {
       throw new StorageError(
@@ -199,16 +192,16 @@ export class GCPStorageProvider implements IStorageProvider {
     bucket: string,
     key: string,
     expiresIn: number,
-    operation: 'get' | 'put'
+    operation: "get" | "put"
   ): Promise<string> {
     try {
       const bucketObj = this.client.bucket(bucket);
       const file = bucketObj.file(key);
 
       const [url] = await file.getSignedUrl({
-        version: 'v4',
-        action: operation === 'get' ? 'read' : 'write',
-        expires: Date.now() + expiresIn * 1000
+        version: "v4",
+        action: operation === "get" ? "read" : "write",
+        expires: Date.now() + expiresIn * 1000,
       });
 
       return url;

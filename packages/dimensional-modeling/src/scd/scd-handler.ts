@@ -10,7 +10,7 @@
  * - Type 6: Hybrid (1+2+3)
  */
 
-import { Pool } from 'pg';
+import { Pool } from "pg";
 
 export enum SCDType {
   TYPE_1 = 1,
@@ -30,16 +30,16 @@ export class SCDHandler {
   async handleType1(
     tableName: string,
     naturalKey: string[],
-    newValues: Record<string, any>,
+    newValues: Record<string, any>
   ): Promise<void> {
     const whereClause = naturalKey
       .map((key) => `${key} = $${naturalKey.indexOf(key) + 1}`)
-      .join(' AND ');
+      .join(" AND ");
 
     const setClause = Object.keys(newValues)
       .filter((k) => !naturalKey.includes(k))
       .map((k, idx) => `${k} = $${naturalKey.length + idx + 1}`)
-      .join(', ');
+      .join(", ");
 
     const values = [
       ...naturalKey.map((k) => newValues[k]),
@@ -50,7 +50,7 @@ export class SCDHandler {
 
     await this.pool.query(
       `UPDATE ${tableName} SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE ${whereClause}`,
-      values,
+      values
     );
   }
 
@@ -60,12 +60,10 @@ export class SCDHandler {
   async handleType2(
     tableName: string,
     naturalKey: string[],
-    newValues: Record<string, any>,
+    newValues: Record<string, any>
   ): Promise<void> {
     // Expire current record
-    const whereClause = naturalKey
-      .map((key) => `${key} = '${newValues[key]}'`)
-      .join(' AND ');
+    const whereClause = naturalKey.map((key) => `${key} = '${newValues[key]}'`).join(" AND ");
 
     await this.pool.query(`
       UPDATE ${tableName}
@@ -75,15 +73,15 @@ export class SCDHandler {
     `);
 
     // Insert new record
-    const columns = Object.keys(newValues).join(', ');
+    const columns = Object.keys(newValues).join(", ");
     const placeholders = Object.keys(newValues)
       .map((_, idx) => `$${idx + 1}`)
-      .join(', ');
+      .join(", ");
 
     await this.pool.query(
       `INSERT INTO ${tableName} (${columns}, is_current, effective_date)
        VALUES (${placeholders}, TRUE, CURRENT_TIMESTAMP)`,
-      Object.values(newValues),
+      Object.values(newValues)
     );
   }
 
@@ -94,23 +92,19 @@ export class SCDHandler {
     tableName: string,
     naturalKey: string[],
     newValues: Record<string, any>,
-    trackedColumns: string[],
+    trackedColumns: string[]
   ): Promise<void> {
     // First, get current values
-    const whereClause = naturalKey
-      .map((key) => `${key} = '${newValues[key]}'`)
-      .join(' AND ');
+    const whereClause = naturalKey.map((key) => `${key} = '${newValues[key]}'`).join(" AND ");
 
-    const current = await this.pool.query(
-      `SELECT * FROM ${tableName} WHERE ${whereClause}`,
-    );
+    const current = await this.pool.query(`SELECT * FROM ${tableName} WHERE ${whereClause}`);
 
     if (current.rows.length === 0) return;
 
     // Update with previous values
     const updateSets = trackedColumns
       .map((col) => `${col}_previous = ${col}, ${col} = '${newValues[col]}'`)
-      .join(', ');
+      .join(", ");
 
     await this.pool.query(`
       UPDATE ${tableName}
@@ -126,24 +120,20 @@ export class SCDHandler {
     tableName: string,
     historyTableName: string,
     naturalKey: string[],
-    newValues: Record<string, any>,
+    newValues: Record<string, any>
   ): Promise<void> {
     // Get current record
-    const whereClause = naturalKey
-      .map((key) => `${key} = '${newValues[key]}'`)
-      .join(' AND ');
+    const whereClause = naturalKey.map((key) => `${key} = '${newValues[key]}'`).join(" AND ");
 
-    const current = await this.pool.query(
-      `SELECT * FROM ${tableName} WHERE ${whereClause}`,
-    );
+    const current = await this.pool.query(`SELECT * FROM ${tableName} WHERE ${whereClause}`);
 
     if (current.rows.length > 0) {
       // Copy to history
       const currentRow = current.rows[0];
-      const columns = Object.keys(currentRow).join(', ');
+      const columns = Object.keys(currentRow).join(", ");
       const values = Object.values(currentRow)
         .map((v) => `'${v}'`)
-        .join(', ');
+        .join(", ");
 
       await this.pool.query(`
         INSERT INTO ${historyTableName} (${columns}, history_date)
@@ -154,7 +144,7 @@ export class SCDHandler {
       const setClause = Object.entries(newValues)
         .filter(([k]) => !naturalKey.includes(k))
         .map(([k, v]) => `${k} = '${v}'`)
-        .join(', ');
+        .join(", ");
 
       await this.pool.query(`
         UPDATE ${tableName}
@@ -170,16 +160,14 @@ export class SCDHandler {
   async handleType6(
     tableName: string,
     naturalKey: string[],
-    newValues: Record<string, any>,
+    newValues: Record<string, any>
   ): Promise<void> {
     // Expire current record (Type 2)
-    const whereClause = naturalKey
-      .map((key) => `${key} = '${newValues[key]}'`)
-      .join(' AND ');
+    const whereClause = naturalKey.map((key) => `${key} = '${newValues[key]}'`).join(" AND ");
 
     // Get current values for Type 3
     const current = await this.pool.query(
-      `SELECT * FROM ${tableName} WHERE ${whereClause} AND is_current = TRUE`,
+      `SELECT * FROM ${tableName} WHERE ${whereClause} AND is_current = TRUE`
     );
 
     // Update all records with new current value (Type 1)
@@ -198,15 +186,15 @@ export class SCDHandler {
     `);
 
     // Insert new record with history (Type 2 + Type 3)
-    const columns = Object.keys(newValues).join(', ');
+    const columns = Object.keys(newValues).join(", ");
     const placeholders = Object.keys(newValues)
       .map((_, idx) => `$${idx + 1}`)
-      .join(', ');
+      .join(", ");
 
     await this.pool.query(
       `INSERT INTO ${tableName} (${columns}, is_current, effective_date, previous_value)
        VALUES (${placeholders}, TRUE, CURRENT_TIMESTAMP, $${Object.keys(newValues).length + 1})`,
-      [...Object.values(newValues), current.rows[0]?.value],
+      [...Object.values(newValues), current.rows[0]?.value]
     );
   }
 
@@ -216,21 +204,24 @@ export class SCDHandler {
   async queryAsOfDate(
     tableName: string,
     asOfDate: Date,
-    filters?: Record<string, any>,
+    filters?: Record<string, any>
   ): Promise<any[]> {
     const whereClause = filters
       ? `AND ${Object.entries(filters)
           .map(([k, v]) => `${k} = '${v}'`)
-          .join(' AND ')}`
-      : '';
+          .join(" AND ")}`
+      : "";
 
-    const result = await this.pool.query(`
+    const result = await this.pool.query(
+      `
       SELECT *
       FROM ${tableName}
       WHERE effective_date <= $1
         AND (expiry_date IS NULL OR expiry_date > $1)
         ${whereClause}
-    `, [asOfDate]);
+    `,
+      [asOfDate]
+    );
 
     return result.rows;
   }

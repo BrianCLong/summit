@@ -1,19 +1,17 @@
-import { createHash, generateKeyPairSync } from 'node:crypto';
-import { describe, expect, it } from 'vitest';
-import type { EvidenceBundle, LedgerEntry } from 'common-types';
-import { stableHash } from '@ga-graphai/data-integrity';
-import { createExportManifest } from '../src/manifest.js';
+import { createHash, generateKeyPairSync } from "node:crypto";
+import { describe, expect, it } from "vitest";
+import type { EvidenceBundle, LedgerEntry } from "common-types";
+import { stableHash } from "@ga-graphai/data-integrity";
+import { createExportManifest } from "../src/manifest.js";
 import {
   ProvenanceBundleValidator,
   hashBundle,
   type ExternalValidationPayload,
   type ThirdPartyValidator,
-} from '../src/externalValidator.js';
+} from "../src/externalValidator.js";
 
-function computeHash(
-  entry: Omit<LedgerEntry, 'hash'> & { previousHash?: string },
-): string {
-  const hash = createHash('sha256');
+function computeHash(entry: Omit<LedgerEntry, "hash"> & { previousHash?: string }): string {
+  const hash = createHash("sha256");
   hash.update(entry.id);
   hash.update(entry.category);
   hash.update(entry.actor);
@@ -24,46 +22,46 @@ function computeHash(
   if (entry.previousHash) {
     hash.update(entry.previousHash);
   }
-  return hash.digest('hex');
+  return hash.digest("hex");
 }
 
 function buildLedgerEntries(): LedgerEntry[] {
-  const timestamp = new Date('2024-06-01T00:00:00Z').toISOString();
+  const timestamp = new Date("2024-06-01T00:00:00Z").toISOString();
   const ingest: LedgerEntry = {
-    id: 'evt-1',
-    category: 'ingest',
-    actor: 'collector',
-    action: 'register',
-    resource: 'rss-feed',
-    payload: { url: 'https://example.com/feed', checksum: 'abc123' },
+    id: "evt-1",
+    category: "ingest",
+    actor: "collector",
+    action: "register",
+    resource: "rss-feed",
+    payload: { url: "https://example.com/feed", checksum: "abc123" },
     timestamp,
-    hash: '',
+    hash: "",
     previousHash: undefined,
   };
   ingest.hash = computeHash(ingest);
   const analysis: LedgerEntry = {
-    id: 'evt-2',
-    category: 'analysis',
-    actor: 'nlp-service',
-    action: 'extract',
-    resource: 'entity',
-    payload: { entityId: 'person-1', confidence: 0.92 },
+    id: "evt-2",
+    category: "analysis",
+    actor: "nlp-service",
+    action: "extract",
+    resource: "entity",
+    payload: { entityId: "person-1", confidence: 0.92 },
     timestamp,
-    hash: '',
+    hash: "",
     previousHash: ingest.hash,
   };
   analysis.hash = computeHash(analysis);
   return [ingest, analysis];
 }
 
-const fixedNow = () => new Date('2024-06-01T12:00:00Z');
+const fixedNow = () => new Date("2024-06-01T12:00:00Z");
 
-describe('ProvenanceBundleValidator', () => {
-  const { privateKey, publicKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
-  const issuerPrivateKey = privateKey.export({ format: 'pem', type: 'pkcs1' }).toString();
-  const issuerPublicKey = publicKey.export({ format: 'pem', type: 'pkcs1' }).toString();
+describe("ProvenanceBundleValidator", () => {
+  const { privateKey, publicKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
+  const issuerPrivateKey = privateKey.export({ format: "pem", type: "pkcs1" }).toString();
+  const issuerPublicKey = publicKey.export({ format: "pem", type: "pkcs1" }).toString();
 
-  it('submits provenance bundles for third-party verification with custody tracking', async () => {
+  it("submits provenance bundles for third-party verification with custody tracking", async () => {
     const entries = buildLedgerEntries();
     const bundle: EvidenceBundle = {
       generatedAt: fixedNow().toISOString(),
@@ -71,7 +69,7 @@ describe('ProvenanceBundleValidator', () => {
       entries,
     };
     const manifest = createExportManifest({
-      caseId: 'case-77',
+      caseId: "case-77",
       ledger: entries,
       privateKey: issuerPrivateKey,
       publicKey: issuerPublicKey,
@@ -80,47 +78,47 @@ describe('ProvenanceBundleValidator', () => {
 
     const captured: ExternalValidationPayload[] = [];
     const validator: ThirdPartyValidator = {
-      name: 'TrustCheck',
+      name: "TrustCheck",
       async verify(payload) {
         captured.push(payload);
         return {
-          validator: 'TrustCheck',
-          status: 'verified',
-          correlationId: 'ver-001',
+          validator: "TrustCheck",
+          status: "verified",
+          correlationId: "ver-001",
           checkedAt: fixedNow().toISOString(),
-          notes: 'signature matched',
+          notes: "signature matched",
         };
       },
     };
 
     const bundleValidator = new ProvenanceBundleValidator(validator, {
-      complianceFramework: 'NIST 800-53',
-      attestor: 'trust-office',
-      custodyLocation: 'us-east-1',
+      complianceFramework: "NIST 800-53",
+      attestor: "trust-office",
+      custodyLocation: "us-east-1",
       now: fixedNow,
     });
 
     const report = await bundleValidator.validate(bundle, manifest);
 
     expect(report.manifestVerification.valid).toBe(true);
-    expect(report.thirdParty.status).toBe('verified');
-    expect(report.thirdParty.validator).toBe('TrustCheck');
-    expect(report.compliance.status).toBe('compliant');
-    expect(report.compliance.framework).toBe('NIST 800-53');
-    expect(report.compliance.attestedBy).toBe('trust-office');
+    expect(report.thirdParty.status).toBe("verified");
+    expect(report.thirdParty.validator).toBe("TrustCheck");
+    expect(report.compliance.status).toBe("compliant");
+    expect(report.compliance.framework).toBe("NIST 800-53");
+    expect(report.compliance.attestedBy).toBe("trust-office");
     expect(report.compliance.evidenceRef).toBe(hashBundle(bundle));
     expect(report.custodyTrail.map((event) => event.stage)).toEqual([
-      'received',
-      'submitted',
-      'verified',
-      'attested',
+      "received",
+      "submitted",
+      "verified",
+      "attested",
     ]);
-    expect(report.custodyTrail[1].location).toBe('us-east-1');
+    expect(report.custodyTrail[1].location).toBe("us-east-1");
     expect(captured[0].bundleHash).toBe(hashBundle(bundle));
     expect(captured[0].manifest.merkleRoot).toBe(manifest.merkleRoot);
   });
 
-  it('flags compliance when manifest verification fails', async () => {
+  it("flags compliance when manifest verification fails", async () => {
     const entries = buildLedgerEntries();
     const bundle: EvidenceBundle = {
       generatedAt: fixedNow().toISOString(),
@@ -128,21 +126,21 @@ describe('ProvenanceBundleValidator', () => {
       entries,
     };
     const manifest = createExportManifest({
-      caseId: 'case-21',
+      caseId: "case-21",
       ledger: entries,
       privateKey: issuerPrivateKey,
       publicKey: issuerPublicKey,
       now: fixedNow,
     });
-    manifest.merkleRoot = 'tampered-root';
+    manifest.merkleRoot = "tampered-root";
 
     const validator: ThirdPartyValidator = {
-      name: 'AttestCorp',
+      name: "AttestCorp",
       async verify() {
         return {
-          validator: 'AttestCorp',
-          status: 'verified',
-          correlationId: 'ver-404',
+          validator: "AttestCorp",
+          status: "verified",
+          correlationId: "ver-404",
           checkedAt: fixedNow().toISOString(),
         };
       },
@@ -153,11 +151,11 @@ describe('ProvenanceBundleValidator', () => {
     const report = await bundleValidator.validate(bundle, manifest);
 
     expect(report.manifestVerification.valid).toBe(false);
-    expect(report.compliance.status).toBe('non-compliant');
-    expect(report.custodyTrail.at(-1)?.stage).toBe('attested');
+    expect(report.compliance.status).toBe("non-compliant");
+    expect(report.custodyTrail.at(-1)?.stage).toBe("attested");
   });
 
-  it('hashes bundles deterministically with canonical ordering and domain separation', () => {
+  it("hashes bundles deterministically with canonical ordering and domain separation", () => {
     const entries = buildLedgerEntries();
     const bundle: EvidenceBundle = {
       generatedAt: fixedNow().toISOString(),
@@ -186,7 +184,7 @@ describe('ProvenanceBundleValidator', () => {
     expect(hashBundle(bundle)).toBe(hashBundle(reorderedBundle));
   });
 
-  it('applies domain separation to avoid collisions with other hash domains', () => {
+  it("applies domain separation to avoid collisions with other hash domains", () => {
     const entries = buildLedgerEntries();
     const bundle: EvidenceBundle = {
       generatedAt: fixedNow().toISOString(),
@@ -200,7 +198,7 @@ describe('ProvenanceBundleValidator', () => {
     expect(bundleHash).not.toBe(rawHash);
   });
 
-  it('throws when headHash is missing', () => {
+  it("throws when headHash is missing", () => {
     const entries = buildLedgerEntries();
     const bundle: EvidenceBundle = {
       generatedAt: fixedNow().toISOString(),
@@ -211,7 +209,7 @@ describe('ProvenanceBundleValidator', () => {
     expect(() => hashBundle(bundle)).toThrow(/headHash/);
   });
 
-  it('rejects duplicate ledger entries', () => {
+  it("rejects duplicate ledger entries", () => {
     const entries = buildLedgerEntries();
     const duplicate = { ...entries[0] };
     const bundle: EvidenceBundle = {
@@ -223,7 +221,7 @@ describe('ProvenanceBundleValidator', () => {
     expect(() => hashBundle(bundle)).toThrow(/duplicate entry/);
   });
 
-  it('detects ordering changes in bundles', () => {
+  it("detects ordering changes in bundles", () => {
     const entries = buildLedgerEntries();
     const bundle: EvidenceBundle = {
       generatedAt: fixedNow().toISOString(),

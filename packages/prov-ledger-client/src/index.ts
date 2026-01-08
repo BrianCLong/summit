@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import axios, { AxiosInstance } from 'axios';
-import axiosRetry from 'axios-retry';
+import axios, { AxiosInstance } from "axios";
+import axiosRetry from "axios-retry";
 
 export interface Evidence {
   evidenceId?: string;
@@ -28,7 +28,7 @@ export class ProvLedgerClient {
   }
 
   async registerEvidence(evidence: Evidence): Promise<string> {
-    const res = await this.client.post('/evidence', evidence);
+    const res = await this.client.post("/evidence", evidence);
     return res.data.evidenceId;
   }
 

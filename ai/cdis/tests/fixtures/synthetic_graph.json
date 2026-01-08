@@ -1,9 +1,5 @@
 {
-  "nodes": [
-    "treatment",
-    "mediator",
-    "outcome"
-  ],
+  "nodes": ["treatment", "mediator", "outcome"],
   "edges": [
     {
       "source": "treatment",

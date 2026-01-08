@@ -30,11 +30,11 @@ The CPG will be a core component of the Model Context Protocol, responsible for 
 - **Context Ingestion Module:** Receives raw model context inputs and prepares them for processing.
 - **Context Segmentation Engine:** Divides the context into discrete, addressable segments (e.g., by token range, logical block, or data source).
 - **Provenance Graph Generator:**
-    - Assigns a unique, cryptographic identifier to each context segment.
-    - Constructs a directed acyclic graph (DAG) where nodes represent segments and edges represent their derivation relationships (e.g., transformation, aggregation, agent origin).
+  - Assigns a unique, cryptographic identifier to each context segment.
+  - Constructs a directed acyclic graph (DAG) where nodes represent segments and edges represent their derivation relationships (e.g., transformation, aggregation, agent origin).
 - **Policy Enforcement Engine:**
-    - Integrates with existing policy frameworks (e.g., OPA).
-    - Permits, denies, redacts, or revokes individual context segments based on defined policies *before* model execution.
+  - Integrates with existing policy frameworks (e.g., OPA).
+  - Permits, denies, redacts, or revokes individual context segments based on defined policies _before_ model execution.
 - **Context Replay Engine:** Reconstructs historical model contexts from the provenance graph for audit, verification, and debugging purposes.
 
 ### Implementation Details
@@ -86,46 +86,56 @@ The CPG will be implemented as a new set of modules within the `intelgraph/serve
 ## Code References
 
 ### Core Implementation
+
 - `intelgraph/server/src/modules/context/provenance/provenance.service.ts`
 - `intelgraph/server/src/modules/context/policy/policy.service.ts`
 - `intelgraph/server/src/modules/context/replay/replay.service.ts`
 
 ### Data Models
+
 - `intelgraph/server/src/modules/context/provenance/provenance.types.ts`
 - `intelgraph/server/src/modules/context/policy/policy.types.ts`
 - `intelgraph/server/src/modules/context/replay/replay.types.ts`
 
 ### APIs
+
 - The CPG will expose an internal service API for use by the MCP. A GraphQL API for querying provenance may be considered in the future.
 
 ## Tests & Validation
 
 ### Unit Tests
+
 - `intelgraph/server/src/modules/context/provenance/provenance.service.spec.ts`
 - `intelgraph/server/src/modules/context/policy/policy.service.spec.ts`
 - Expected coverage: 85%
 
 ### Integration Tests
+
 - Integration tests will be created to validate the end-to-end flow of context through the CPG and policy engine.
 
 ### Policy Tests
+
 - Policies will be tested using the OPA test framework.
 
 ### CI Enforcement
+
 - CI pipeline will run all unit, integration, and policy tests.
 
 ## Migration & Rollout
 
 ### Migration Steps
+
 1. **Phase 1 (Scaffolding):** Create the directory structure, placeholder files, and initial ADR. (This change)
 2. **Phase 2 (Core Implementation):** Implement the core CPG services (segmentation, graph generation).
 3. **Phase 3 (Policy Integration):** Integrate the policy enforcement engine.
 4. **Phase 4 (Rollout):** Enable the CPG in a development environment, followed by a staged rollout to production.
 
 ### Rollback Plan
+
 - The CPG can be disabled via a feature flag.
 
 ### Timeline
+
 - **Phase 1:** Q2 2024
 - **Phase 2:** Q3 2024
 - **Phase 3:** Q3 2024
@@ -134,6 +144,7 @@ The CPG will be implemented as a new set of modules within the `intelgraph/serve
 ## References
 
 ### Related ADRs
+
 - [ADR-0006](0006-neo4j-graph-store.md): Neo4j as Primary Graph Store
 - [ADR-0011](0011-provenance-ledger-schema.md): Provenance Ledger Schema Design
 
@@ -141,6 +152,6 @@ The CPG will be implemented as a new set of modules within the `intelgraph/serve
 
 ## Revision History
 
-| Date | Author | Change |
-|------|--------|--------|
-| 2024-05-21 | Jules | Initial version |
+| Date       | Author | Change          |
+| ---------- | ------ | --------------- |
+| 2024-05-21 | Jules  | Initial version |

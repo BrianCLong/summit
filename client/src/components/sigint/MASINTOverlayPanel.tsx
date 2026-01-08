@@ -2,8 +2,8 @@
  * MASINTOverlayPanel - MASINT sensor overlay display
  * Shows measurement and signature intelligence data with status indicators.
  */
-import React, { useMemo, useState } from 'react';
-import type { MASINTOverlay, MASINTDetection } from './types';
+import React, { useMemo, useState } from "react";
+import type { MASINTOverlay, MASINTDetection } from "./types";
 
 interface MASINTOverlayPanelProps {
   overlays: MASINTOverlay[];
@@ -13,26 +13,26 @@ interface MASINTOverlayPanelProps {
   className?: string;
 }
 
-const SENSOR_ICONS: Record<MASINTOverlay['sensorType'], string> = {
-  RADAR: 'R',
-  ACOUSTIC: 'A',
-  SEISMIC: 'S',
-  NUCLEAR: 'N',
-  ELECTRO_OPTICAL: 'E',
+const SENSOR_ICONS: Record<MASINTOverlay["sensorType"], string> = {
+  RADAR: "R",
+  ACOUSTIC: "A",
+  SEISMIC: "S",
+  NUCLEAR: "N",
+  ELECTRO_OPTICAL: "E",
 };
 
-const SENSOR_COLORS: Record<MASINTOverlay['sensorType'], string> = {
-  RADAR: 'bg-blue-500',
-  ACOUSTIC: 'bg-green-500',
-  SEISMIC: 'bg-amber-500',
-  NUCLEAR: 'bg-red-500',
-  ELECTRO_OPTICAL: 'bg-purple-500',
+const SENSOR_COLORS: Record<MASINTOverlay["sensorType"], string> = {
+  RADAR: "bg-blue-500",
+  ACOUSTIC: "bg-green-500",
+  SEISMIC: "bg-amber-500",
+  NUCLEAR: "bg-red-500",
+  ELECTRO_OPTICAL: "bg-purple-500",
 };
 
-const STATUS_COLORS: Record<MASINTOverlay['status'], string> = {
-  ACTIVE: 'bg-green-500',
-  DEGRADED: 'bg-yellow-500',
-  OFFLINE: 'bg-red-500',
+const STATUS_COLORS: Record<MASINTOverlay["status"], string> = {
+  ACTIVE: "bg-green-500",
+  DEGRADED: "bg-yellow-500",
+  OFFLINE: "bg-red-500",
 };
 
 export const MASINTOverlayPanel: React.FC<MASINTOverlayPanelProps> = ({
@@ -58,12 +58,10 @@ export const MASINTOverlayPanel: React.FC<MASINTOverlayPanelProps> = ({
 
   // Calculate stats
   const stats = useMemo(() => {
-    const active = overlays.filter((o) => o.status === 'ACTIVE').length;
+    const active = overlays.filter((o) => o.status === "ACTIVE").length;
     const totalDetections = overlays.reduce((sum, o) => sum + o.detections.length, 0);
     const recentDetections = overlays.reduce(
-      (sum, o) =>
-        sum +
-        o.detections.filter((d) => Date.now() - d.timestamp < 300000).length,
+      (sum, o) => sum + o.detections.filter((d) => Date.now() - d.timestamp < 300000).length,
       0
     );
     return { active, total: overlays.length, totalDetections, recentDetections };
@@ -82,7 +80,7 @@ export const MASINTOverlayPanel: React.FC<MASINTOverlayPanelProps> = ({
 
   return (
     <div
-      className={`flex flex-col h-full bg-slate-900 text-slate-100 rounded-lg overflow-hidden ${className || ''}`}
+      className={`flex flex-col h-full bg-slate-900 text-slate-100 rounded-lg overflow-hidden ${className || ""}`}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-slate-800 border-b border-slate-700">
@@ -109,11 +107,11 @@ export const MASINTOverlayPanel: React.FC<MASINTOverlayPanelProps> = ({
             {/* Sensor type header */}
             <div className="flex items-center gap-2 px-4 py-2 bg-slate-850 text-sm font-medium text-slate-400">
               <span
-                className={`w-5 h-5 flex items-center justify-center rounded text-xs font-bold text-white ${SENSOR_COLORS[sensorType as MASINTOverlay['sensorType']]}`}
+                className={`w-5 h-5 flex items-center justify-center rounded text-xs font-bold text-white ${SENSOR_COLORS[sensorType as MASINTOverlay["sensorType"]]}`}
               >
-                {SENSOR_ICONS[sensorType as MASINTOverlay['sensorType']]}
+                {SENSOR_ICONS[sensorType as MASINTOverlay["sensorType"]]}
               </span>
-              <span>{sensorType.replace('_', ' ')}</span>
+              <span>{sensorType.replace("_", " ")}</span>
               <span className="ml-auto text-xs">{sensorOverlays.length}</span>
             </div>
 
@@ -123,8 +121,8 @@ export const MASINTOverlayPanel: React.FC<MASINTOverlayPanelProps> = ({
                 key={overlay.id}
                 className={`border-l-2 transition-colors ${
                   selectedOverlayId === overlay.id
-                    ? 'border-l-cyan-400 bg-slate-800/50'
-                    : 'border-l-transparent hover:bg-slate-800/30'
+                    ? "border-l-cyan-400 bg-slate-800/50"
+                    : "border-l-transparent hover:bg-slate-800/30"
                 }`}
               >
                 {/* Overlay row */}
@@ -136,16 +134,15 @@ export const MASINTOverlayPanel: React.FC<MASINTOverlayPanelProps> = ({
                   className="w-full flex items-center gap-3 px-4 py-2 text-left"
                 >
                   {/* Status indicator */}
-                  <span
-                    className={`w-2 h-2 rounded-full ${STATUS_COLORS[overlay.status]}`}
-                  />
+                  <span className={`w-2 h-2 rounded-full ${STATUS_COLORS[overlay.status]}`} />
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium truncate">{overlay.id}</div>
                     <div className="text-xs text-slate-400 flex items-center gap-2">
                       <span>
-                        {overlay.coverage.center.lat.toFixed(2)}, {overlay.coverage.center.lng.toFixed(2)}
+                        {overlay.coverage.center.lat.toFixed(2)},{" "}
+                        {overlay.coverage.center.lng.toFixed(2)}
                       </span>
                       <span className="text-slate-600">|</span>
                       <span>{overlay.coverage.radiusKm}km radius</span>
@@ -162,7 +159,7 @@ export const MASINTOverlayPanel: React.FC<MASINTOverlayPanelProps> = ({
                   {/* Expand indicator */}
                   <svg
                     className={`w-4 h-4 transition-transform ${
-                      expandedId === overlay.id ? 'rotate-180' : ''
+                      expandedId === overlay.id ? "rotate-180" : ""
                     }`}
                     fill="none"
                     viewBox="0 0 24 24"

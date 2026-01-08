@@ -1,10 +1,10 @@
 name: roadmap-audit
 
 on:
-  schedule: [{ cron: '0 8 * * MON' }] # Mondays 08:00 UTC
+  schedule: [{ cron: "0 8 * * MON" }] # Mondays 08:00 UTC
   workflow_dispatch: {}
   workflow_run:
-    workflows: ['post-release-bootstrap']
+    workflows: ["post-release-bootstrap"]
     types: [completed]
 
 permissions:
@@ -14,8 +14,8 @@ permissions:
   projects: read
 
 env:
-  PROJECT_TITLE: 'Assistant v1.1'
-  REPORT_ISSUE_TITLE: 'Assistant v1.1 — Weekly Audit'
+  PROJECT_TITLE: "Assistant v1.1"
+  REPORT_ISSUE_TITLE: "Assistant v1.1 — Weekly Audit"
   DEFAULT_STATUS: Planned
 
 jobs:

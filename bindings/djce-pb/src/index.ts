@@ -9,17 +9,13 @@ import type {
   EstimateInterval,
   DatasetSummary,
   SketchConfig,
-  Thresholds
-} from './types';
+  Thresholds,
+} from "./types";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires -- native binding is compiled at build time
 const native: {
-  assessJoin: (
-    left: DatasetInput,
-    right: DatasetInput,
-    options?: JoinOptions
-  ) => JoinRiskReport;
-} = require('../native/index.node');
+  assessJoin: (left: DatasetInput, right: DatasetInput, options?: JoinOptions) => JoinRiskReport;
+} = require("../native/index.node");
 
 export type {
   DatasetInput,
@@ -29,7 +25,7 @@ export type {
   EstimateInterval,
   DatasetSummary,
   SketchConfig,
-  Thresholds
+  Thresholds,
 };
 
 export const assessJoin = (

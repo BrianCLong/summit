@@ -6,13 +6,13 @@ on:
       - main
       - develop
     paths:
-      - 'apps/web/**'
+      - "apps/web/**"
   pull_request:
     branches:
       - main
       - develop
     paths:
-      - 'apps/web/**'
+      - "apps/web/**"
 
 jobs:
   test:
@@ -24,7 +24,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps

@@ -1,1 +1,1 @@
-export { default as PresenceAvatars } from './PresenceAvatars';
+export { default as PresenceAvatars } from "./PresenceAvatars";

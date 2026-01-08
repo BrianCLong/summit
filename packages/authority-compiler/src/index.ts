@@ -7,10 +7,10 @@
  * @module authority-compiler
  */
 
-export * from './schema/policy.schema';
-export * from './compiler';
-export * from './evaluator';
-export * from './middleware';
-export * from './opa-client';
-export * from './service-connectors';
-export * from './provenance-integration';
+export * from "./schema/policy.schema";
+export * from "./compiler";
+export * from "./evaluator";
+export * from "./middleware";
+export * from "./opa-client";
+export * from "./service-connectors";
+export * from "./provenance-integration";

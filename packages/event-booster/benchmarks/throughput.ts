@@ -2,7 +2,7 @@ import {
   createDefaultEventBooster,
   generateBurstEvents,
   runPatternBenchmark,
-} from '../src/index.js';
+} from "../src/index.js";
 
 const booster = createDefaultEventBooster();
 const baseline = generateBurstEvents({
@@ -11,7 +11,7 @@ const baseline = generateBurstEvents({
   intervalMs: 250,
 });
 
-const metrics = runPatternBenchmark(booster, 'amplify-signal', baseline, {
+const metrics = runPatternBenchmark(booster, "amplify-signal", baseline, {
   iterations: 20,
   warmupIterations: 5,
 });

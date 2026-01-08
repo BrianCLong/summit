@@ -3,7 +3,7 @@
  * @module @intelgraph/web/pages/control-tower
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react'
 import {
   Box,
   Grid,
@@ -12,50 +12,50 @@ import {
   IconButton,
   Tooltip,
   useTheme,
-} from '@mui/material';
+} from '@mui/material'
 import {
   Refresh as RefreshIcon,
   FilterList as FilterIcon,
   Search as SearchIcon,
-} from '@mui/icons-material';
+} from '@mui/icons-material'
 
-import { HealthScoreCard } from '../../components/control-tower/HealthScoreCard';
-import { ActiveSituations } from '../../components/control-tower/ActiveSituations';
-import { KeyMetricsGrid } from '../../components/control-tower/KeyMetricsGrid';
-import { TeamPulse } from '../../components/control-tower/TeamPulse';
-import { EventTimeline } from '../../components/control-tower/EventTimeline';
-import { CommandPalette } from '../../components/control-tower/CommandPalette';
-import { EventDetailPanel } from '../../components/control-tower/EventDetailPanel';
-import { useControlTowerData } from '../../hooks/useControlTowerData';
-import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
-import { DataIntegrityNotice } from '../../components/common/DataIntegrityNotice';
-import { useDemoMode } from '../../components/common/DemoIndicator';
+import { HealthScoreCard } from '../../components/control-tower/HealthScoreCard'
+import { ActiveSituations } from '../../components/control-tower/ActiveSituations'
+import { KeyMetricsGrid } from '../../components/control-tower/KeyMetricsGrid'
+import { TeamPulse } from '../../components/control-tower/TeamPulse'
+import { EventTimeline } from '../../components/control-tower/EventTimeline'
+import { CommandPalette } from '../../components/control-tower/CommandPalette'
+import { EventDetailPanel } from '../../components/control-tower/EventDetailPanel'
+import { useControlTowerData } from '../../hooks/useControlTowerData'
+import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts'
+import { DataIntegrityNotice } from '../../components/common/DataIntegrityNotice'
+import { useDemoMode } from '../../components/common/DemoIndicator'
 
 export interface ControlTowerDashboardProps {
   /** Initial filter state */
-  initialFilters?: EventFilterState;
+  initialFilters?: EventFilterState
 }
 
 export interface EventFilterState {
-  severity?: string[];
-  status?: string[];
-  category?: string[];
-  source?: string[];
-  timeRange?: string;
-  searchQuery?: string;
+  severity?: string[]
+  status?: string[]
+  category?: string[]
+  source?: string[]
+  timeRange?: string
+  searchQuery?: string
 }
 
 export const ControlTowerDashboard: React.FC<ControlTowerDashboardProps> = ({
   initialFilters = {},
 }) => {
-  const theme = useTheme();
+  const theme = useTheme()
 
   // State
-  const [filters, setFilters] = useState<EventFilterState>(initialFilters);
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-  const [isCommandPaletteOpen, setCommandPaletteOpen] = useState(false);
-  const [isFilterPanelOpen, setFilterPanelOpen] = useState(false);
-  const isDemoMode = useDemoMode();
+  const [filters, setFilters] = useState<EventFilterState>(initialFilters)
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
+  const [isCommandPaletteOpen, setCommandPaletteOpen] = useState(false)
+  const [isFilterPanelOpen, setFilterPanelOpen] = useState(false)
+  const isDemoMode = useDemoMode()
 
   // Data fetching
   const {
@@ -67,54 +67,60 @@ export const ControlTowerDashboard: React.FC<ControlTowerDashboardProps> = ({
     isLoading,
     error,
     refetch,
-  } = useControlTowerData(filters);
-  const showPlaceholder = isLoading || !isDemoMode;
+  } = useControlTowerData(filters)
+  const showPlaceholder = isLoading || !isDemoMode
 
   // Keyboard shortcuts
   useKeyboardShortcuts({
     'mod+k': () => setCommandPaletteOpen(true),
     'mod+f': () => setFilterPanelOpen(true),
-    'escape': () => {
-      setSelectedEventId(null);
-      setCommandPaletteOpen(false);
-      setFilterPanelOpen(false);
+    escape: () => {
+      setSelectedEventId(null)
+      setCommandPaletteOpen(false)
+      setFilterPanelOpen(false)
     },
-  });
+  })
 
   // Handlers
   const handleEventSelect = useCallback((eventId: string) => {
-    setSelectedEventId(eventId);
-  }, []);
+    setSelectedEventId(eventId)
+  }, [])
 
   const handleEventClose = useCallback(() => {
-    setSelectedEventId(null);
-  }, []);
+    setSelectedEventId(null)
+  }, [])
 
-  const handleFilterChange = useCallback((newFilters: Partial<EventFilterState>) => {
-    setFilters((prev) => ({ ...prev, ...newFilters }));
-  }, []);
+  const handleFilterChange = useCallback(
+    (newFilters: Partial<EventFilterState>) => {
+      setFilters(prev => ({ ...prev, ...newFilters }))
+    },
+    []
+  )
 
   const handleRefresh = useCallback(() => {
-    refetch();
-  }, [refetch]);
+    refetch()
+  }, [refetch])
 
-  const handleCommandSelect = useCallback((command: string, args?: Record<string, unknown>) => {
-    setCommandPaletteOpen(false);
+  const handleCommandSelect = useCallback(
+    (command: string, args?: Record<string, unknown>) => {
+      setCommandPaletteOpen(false)
 
-    switch (command) {
-      case 'search':
-        handleFilterChange({ searchQuery: args?.query as string });
-        break;
-      case 'filter':
-        setFilterPanelOpen(true);
-        break;
-      case 'refresh':
-        handleRefresh();
-        break;
-      default:
-        console.log('Command:', command, args);
-    }
-  }, [handleFilterChange, handleRefresh]);
+      switch (command) {
+        case 'search':
+          handleFilterChange({ searchQuery: args?.query as string })
+          break
+        case 'filter':
+          setFilterPanelOpen(true)
+          break
+        case 'refresh':
+          handleRefresh()
+          break
+        default:
+          console.log('Command:', command, args)
+      }
+    },
+    [handleFilterChange, handleRefresh]
+  )
 
   if (error) {
     return (
@@ -124,7 +130,7 @@ export const ControlTowerDashboard: React.FC<ControlTowerDashboardProps> = ({
         </Typography>
         <Typography color="textSecondary">{error.message}</Typography>
       </Box>
-    );
+    )
   }
 
   return (
@@ -188,10 +194,7 @@ export const ControlTowerDashboard: React.FC<ControlTowerDashboardProps> = ({
       >
         {!isDemoMode && (
           <Box mb={3}>
-            <DataIntegrityNotice
-              mode="unavailable"
-              context="Control tower"
-            />
+            <DataIntegrityNotice mode="unavailable" context="Control tower" />
           </Box>
         )}
 
@@ -211,7 +214,7 @@ export const ControlTowerDashboard: React.FC<ControlTowerDashboardProps> = ({
           <Grid item xs={12} md={5}>
             <ActiveSituations
               situations={activeSituations}
-              onSituationClick={(id) => console.log('Situation clicked:', id)}
+              onSituationClick={id => console.log('Situation clicked:', id)}
               isLoading={showPlaceholder}
             />
           </Grid>
@@ -219,7 +222,10 @@ export const ControlTowerDashboard: React.FC<ControlTowerDashboardProps> = ({
           <Grid item xs={12} md={7}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
-                <KeyMetricsGrid metrics={keyMetrics} isLoading={showPlaceholder} />
+                <KeyMetricsGrid
+                  metrics={keyMetrics}
+                  isLoading={showPlaceholder}
+                />
               </Grid>
               <Grid item xs={12}>
                 <TeamPulse members={teamPulse} isLoading={showPlaceholder} />
@@ -253,7 +259,7 @@ export const ControlTowerDashboard: React.FC<ControlTowerDashboardProps> = ({
         onClose={handleEventClose}
       />
     </Box>
-  );
-};
+  )
+}
 
-export default ControlTowerDashboard;
+export default ControlTowerDashboard

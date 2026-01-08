@@ -140,7 +140,7 @@ Claude Code Session C
 gh pr list --label "ready-for-review" | while read pr; do
   # Quick review
   gh pr view $pr
-  
+
   # If approved
   gh pr review $pr --approve
   gh pr merge $pr --auto --squash
@@ -192,7 +192,7 @@ Code Quality:
   - No commented code: PASS
 
 Test Quality:
-  - Unit coverage: >90%
+  - Unit coverage: >90
   - Integration tests: PRESENT
   - Edge cases: COVERED
   - Error paths: COVERED
@@ -220,6 +220,7 @@ Integration Quality:
 ## Troubleshooting
 
 ### Issue: CI Fails
+
 ```bash
 # 1. Check CI logs
 gh run view --log-failed
@@ -237,6 +238,7 @@ gh run watch
 ```
 
 ### Issue: Quality Gate Not Met
+
 ```bash
 # 1. Identify failing gate
 pnpm check 2>&1 | grep "FAIL"
@@ -251,6 +253,7 @@ pnpm check
 ```
 
 ### Issue: Merge Conflicts
+
 ```bash
 # 1. Update from main
 git fetch origin main
@@ -273,23 +276,27 @@ git push --force-with-lease
 ## Best Practices
 
 ### Task Scoping
+
 - **Sweet spot**: 1-3 hour tasks
 - **Too large**: Break into sub-tasks
 - **Too small**: Batch with related work
 
 ### Prompt Engineering
+
 - Be specific about requirements
 - Provide clear success criteria
 - Identify edge cases upfront
 - Reference existing patterns
 
 ### PR Management
+
 - Create PRs when ready, not "almost ready"
 - Include comprehensive descriptions
 - Link to related issues
 - Provide testing evidence
 
 ### Session Management
+
 - Archive completed sessions promptly
 - Document learnings
 - Update metrics
@@ -301,7 +308,7 @@ git push --force-with-lease
 ✅ **Quality**: >95% CI pass rate  
 ✅ **Confidence**: Team trusts changes  
 ✅ **Impact**: Measurable business value  
-✅ **Sustainability**: Velocity increasing over time  
+✅ **Sustainability**: Velocity increasing over time
 
 ---
 

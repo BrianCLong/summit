@@ -1,7 +1,4 @@
-import {
-  SupplyChainNode,
-  SupplyChainRelationship,
-} from '@intelgraph/supply-chain-types';
+import { SupplyChainNode, SupplyChainRelationship } from "@intelgraph/supply-chain-types";
 
 /**
  * Graph visualization node
@@ -11,7 +8,7 @@ export interface VisNode {
   label: string;
   type: string;
   tier: number;
-  criticality: 'low' | 'medium' | 'high' | 'critical';
+  criticality: "low" | "medium" | "high" | "critical";
   status: string;
   location?: {
     country: string;
@@ -44,7 +41,7 @@ export interface VisEdge {
 export interface VisGraph {
   nodes: VisNode[];
   edges: VisEdge[];
-  layout: 'force' | 'hierarchical' | 'geographic' | 'circular';
+  layout: "force" | "hierarchical" | "geographic" | "circular";
   metadata: {
     totalNodes: number;
     totalEdges: number;
@@ -77,17 +74,17 @@ export interface GeographicDistribution {
  */
 export class VisualizationService {
   private readonly CRITICALITY_COLORS = {
-    low: '#4CAF50',
-    medium: '#FFC107',
-    high: '#FF9800',
-    critical: '#F44336',
+    low: "#4CAF50",
+    medium: "#FFC107",
+    high: "#FF9800",
+    critical: "#F44336",
   };
 
   private readonly STATUS_COLORS = {
-    active: '#4CAF50',
-    inactive: '#9E9E9E',
-    'under-review': '#FFC107',
-    suspended: '#F44336',
+    active: "#4CAF50",
+    inactive: "#9E9E9E",
+    "under-review": "#FFC107",
+    suspended: "#F44336",
   };
 
   private readonly TIER_SIZES = {
@@ -103,15 +100,13 @@ export class VisualizationService {
   toVisualizationGraph(
     nodes: SupplyChainNode[],
     relationships: SupplyChainRelationship[],
-    layout: 'force' | 'hierarchical' | 'geographic' | 'circular' = 'force'
+    layout: "force" | "hierarchical" | "geographic" | "circular" = "force"
   ): VisGraph {
-    const visNodes = nodes.map(node => this.toVisNode(node));
-    const visEdges = relationships
-      .filter(rel => rel.isActive)
-      .map(rel => this.toVisEdge(rel));
+    const visNodes = nodes.map((node) => this.toVisNode(node));
+    const visEdges = relationships.filter((rel) => rel.isActive).map((rel) => this.toVisEdge(rel));
 
-    const tiers = [...new Set(nodes.map(n => n.tier))].sort((a, b) => a - b);
-    const criticalNodes = nodes.filter(n => n.criticality === 'critical').length;
+    const tiers = [...new Set(nodes.map((n) => n.tier))].sort((a, b) => a - b);
+    const criticalNodes = nodes.filter((n) => n.criticality === "critical").length;
 
     return {
       nodes: visNodes,
@@ -130,15 +125,20 @@ export class VisualizationService {
    * Generate geographic distribution visualization data
    */
   getGeographicDistribution(nodes: SupplyChainNode[]): GeographicDistribution {
-    const countryMap = new Map<string, {
-      count: number;
-      critical: number;
-      lat: number;
-      lon: number;
-    }>();
+    const countryMap = new Map<
+      string,
+      {
+        count: number;
+        critical: number;
+        lat: number;
+        lon: number;
+      }
+    >();
 
     for (const node of nodes) {
-      if (!node.location?.country) {continue;}
+      if (!node.location?.country) {
+        continue;
+      }
 
       const country = node.location.country;
       if (!countryMap.has(country)) {
@@ -152,7 +152,7 @@ export class VisualizationService {
 
       const data = countryMap.get(country)!;
       data.count++;
-      if (node.criticality === 'critical') {
+      if (node.criticality === "critical") {
         data.critical++;
       }
     }
@@ -166,7 +166,7 @@ export class VisualizationService {
     }));
 
     // Calculate concentration risk (Herfindahl-Hirschman Index)
-    const totalNodes = nodes.filter(n => n.location?.country).length;
+    const totalNodes = nodes.filter((n) => n.location?.country).length;
     const hhi = countries.reduce((sum, c) => {
       const share = c.nodeCount / totalNodes;
       return sum + Math.pow(share, 2);
@@ -186,7 +186,7 @@ export class VisualizationService {
     const regions = Array.from(regionMap.entries()).map(([region, countriesSet]) => ({
       region,
       nodeCount: countries
-        .filter(c => countriesSet.has(c.country))
+        .filter((c) => countriesSet.has(c.country))
         .reduce((sum, c) => sum + c.nodeCount, 0),
       countries: Array.from(countriesSet),
     }));
@@ -225,10 +225,10 @@ export class VisualizationService {
     const tiers = Array.from(tierMap.entries())
       .sort(([a], [b]) => a - b)
       .map(([tier, tierNodes]) => {
-        const nodeIds = tierNodes.map(n => n.id);
-        const criticalCount = tierNodes.filter(n => n.criticality === 'critical').length;
+        const nodeIds = tierNodes.map((n) => n.id);
+        const criticalCount = tierNodes.filter((n) => n.criticality === "critical").length;
         const downstreamConnections = relationships.filter(
-          r => r.isActive && nodeIds.includes(r.sourceNodeId)
+          (r) => r.isActive && nodeIds.includes(r.sourceNodeId)
         ).length;
 
         return {
@@ -278,7 +278,7 @@ export class VisualizationService {
     const statusCounts = {
       active: 0,
       inactive: 0,
-      'under-review': 0,
+      "under-review": 0,
       suspended: 0,
     };
 
@@ -294,17 +294,17 @@ export class VisualizationService {
       criticalityCounts[node.criticality]++;
     }
 
-    const activeRels = relationships.filter(r => r.isActive);
+    const activeRels = relationships.filter((r) => r.isActive);
     const totalStrength = activeRels.reduce((sum, r) => sum + r.strength, 0);
     const avgStrength = activeRels.length > 0 ? totalStrength / activeRels.length : 0;
 
     const totalTier = nodes.reduce((sum, n) => sum + n.tier, 0);
     const avgTier = nodes.length > 0 ? totalTier / nodes.length : 0;
 
-    const countries = new Set(nodes.filter(n => n.location?.country).map(n => n.location!.country));
-    const regions = new Set(
-      Array.from(countries).map(c => this.getRegion(c))
+    const countries = new Set(
+      nodes.filter((n) => n.location?.country).map((n) => n.location!.country)
     );
+    const regions = new Set(Array.from(countries).map((c) => this.getRegion(c)));
 
     const geoDist = this.getGeographicDistribution(nodes);
 
@@ -313,7 +313,7 @@ export class VisualizationService {
         totalNodes: nodes.length,
         activeNodes: statusCounts.active,
         inactiveNodes: statusCounts.inactive,
-        underReview: statusCounts['under-review'],
+        underReview: statusCounts["under-review"],
         suspended: statusCounts.suspended,
       },
       criticality: criticalityCounts,
@@ -341,11 +341,13 @@ export class VisualizationService {
       tier: node.tier,
       criticality: node.criticality,
       status: node.status,
-      location: node.location ? {
-        country: node.location.country,
-        latitude: node.location.latitude,
-        longitude: node.location.longitude,
-      } : undefined,
+      location: node.location
+        ? {
+            country: node.location.country,
+            latitude: node.location.latitude,
+            longitude: node.location.longitude,
+          }
+        : undefined,
       size: this.TIER_SIZES[node.tier as keyof typeof this.TIER_SIZES] || this.TIER_SIZES.default,
       color: this.CRITICALITY_COLORS[node.criticality],
       metadata: node.metadata || {},
@@ -372,31 +374,37 @@ export class VisualizationService {
   }
 
   private getEdgeColor(strength: number): string {
-    if (strength >= 0.8) {return '#2196F3';}
-    if (strength >= 0.6) {return '#03A9F4';}
-    if (strength >= 0.4) {return '#81D4FA';}
-    return '#B3E5FC';
+    if (strength >= 0.8) {
+      return "#2196F3";
+    }
+    if (strength >= 0.6) {
+      return "#03A9F4";
+    }
+    if (strength >= 0.4) {
+      return "#81D4FA";
+    }
+    return "#B3E5FC";
   }
 
   private getRegion(country: string): string {
     // Simplified region mapping - in production use proper geographic data
     const regionMap: Record<string, string> = {
-      'United States': 'North America',
-      'Canada': 'North America',
-      'Mexico': 'North America',
-      'China': 'Asia Pacific',
-      'Japan': 'Asia Pacific',
-      'South Korea': 'Asia Pacific',
-      'India': 'Asia Pacific',
-      'Germany': 'Europe',
-      'France': 'Europe',
-      'United Kingdom': 'Europe',
-      'Italy': 'Europe',
-      'Spain': 'Europe',
-      'Brazil': 'South America',
-      'Argentina': 'South America',
+      "United States": "North America",
+      Canada: "North America",
+      Mexico: "North America",
+      China: "Asia Pacific",
+      Japan: "Asia Pacific",
+      "South Korea": "Asia Pacific",
+      India: "Asia Pacific",
+      Germany: "Europe",
+      France: "Europe",
+      "United Kingdom": "Europe",
+      Italy: "Europe",
+      Spain: "Europe",
+      Brazil: "South America",
+      Argentina: "South America",
     };
 
-    return regionMap[country] || 'Other';
+    return regionMap[country] || "Other";
   }
 }

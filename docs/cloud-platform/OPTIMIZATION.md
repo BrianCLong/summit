@@ -10,22 +10,22 @@ Move data through storage tiers based on access patterns:
 
 \`\`\`typescript
 const lifecycleRules = [
-  {
-    id: 'move-to-cool',
-    enabled: true,
-    prefix: 'data/',
-    transitions: [
-      { days: 30, storageClass: StorageTier.COOL },
-      { days: 90, storageClass: StorageTier.COLD },
-      { days: 365, storageClass: StorageTier.ARCHIVE }
-    ]
-  },
-  {
-    id: 'delete-temp',
-    enabled: true,
-    prefix: 'temp/',
-    expiration: { days: 7 }
-  }
+{
+id: 'move-to-cool',
+enabled: true,
+prefix: 'data/',
+transitions: [
+{ days: 30, storageClass: StorageTier.COOL },
+{ days: 90, storageClass: StorageTier.COLD },
+{ days: 365, storageClass: StorageTier.ARCHIVE }
+]
+},
+{
+id: 'delete-temp',
+enabled: true,
+prefix: 'temp/',
+expiration: { days: 7 }
+}
 ];
 
 await storage.setLifecyclePolicy(lifecycleRules);
@@ -37,12 +37,12 @@ await storage.setLifecyclePolicy(lifecycleRules);
 
 Choose the right compression codec:
 
-| Codec | Compression Ratio | Speed | Use Case |
-|-------|------------------|-------|----------|
-| Snappy | 2x | Very Fast | Hot data, frequent reads |
-| Gzip | 3x | Fast | Balanced workloads |
-| Zstd | 4x | Medium | Cold data, archival |
-| LZ4 | 2x | Fastest | Real-time streaming |
+| Codec  | Compression Ratio | Speed     | Use Case                 |
+| ------ | ----------------- | --------- | ------------------------ |
+| Snappy | 2x                | Very Fast | Hot data, frequent reads |
+| Gzip   | 3x                | Fast      | Balanced workloads       |
+| Zstd   | 4x                | Medium    | Cold data, archival      |
+| LZ4    | 2x                | Fastest   | Real-time streaming      |
 
 **Recommendation:** Start with Snappy, move to Zstd for cold data
 
@@ -54,11 +54,11 @@ Scale compute resources based on load:
 
 \`\`\`typescript
 const scalingConfig = {
-  minInstances: 2,
-  maxInstances: 20,
-  targetCPU: 70,
-  scaleUpCooldown: 300,    // 5 minutes
-  scaleDownCooldown: 600   // 10 minutes
+minInstances: 2,
+maxInstances: 20,
+targetCPU: 70,
+scaleUpCooldown: 300, // 5 minutes
+scaleDownCooldown: 600 // 10 minutes
 };
 \`\`\`
 
@@ -112,12 +112,12 @@ Always filter by partition keys:
 
 \`\`\`sql
 -- Bad: Full table scan
-SELECT * FROM events WHERE user_id = 'abc';
+SELECT \* FROM events WHERE user_id = 'abc';
 
 -- Good: Partition pruning
-SELECT * FROM events
-WHERE date = '2024-01-15'  -- Partition key
-  AND user_id = 'abc';
+SELECT \* FROM events
+WHERE date = '2024-01-15' -- Partition key
+AND user_id = 'abc';
 \`\`\`
 
 **Impact:** 100x faster, 100x cheaper
@@ -128,7 +128,7 @@ Only select needed columns:
 
 \`\`\`sql
 -- Bad: Read all columns
-SELECT * FROM large_table;
+SELECT \* FROM large_table;
 
 -- Good: Read only needed columns
 SELECT id, name FROM large_table;
@@ -142,9 +142,9 @@ Let the storage layer filter:
 
 \`\`\`sql
 -- Automatically pushed down
-SELECT * FROM events
+SELECT \* FROM events
 WHERE timestamp > '2024-01-01'
-  AND status = 'completed';
+AND status = 'completed';
 \`\`\`
 
 **Impact:** 5-10x faster
@@ -165,12 +165,13 @@ const analysis = await optimizer.analyzeTable(table);
 console.log(\`Average file size: \${analysis.avgFileSize / 1024 / 1024} MB\`);
 
 // Compact if needed
-if (analysis.avgFileSize < 64 * 1024 * 1024) {
-  await table.compact();
+if (analysis.avgFileSize < 64 _ 1024 _ 1024) {
+await table.compact();
 }
 \`\`\`
 
 **Impact:**
+
 - Too small: High metadata overhead
 - Too large: Reduced parallelism
 
@@ -181,8 +182,8 @@ Co-locate related data:
 \`\`\`typescript
 // Order by frequently filtered columns
 await optimizer.zOrder(table, {
-  columns: ['user_id', 'timestamp'],
-  maxFileSize: 1024 * 1024 * 1024  // 1 GB
+columns: ['user_id', 'timestamp'],
+maxFileSize: 1024 _ 1024 _ 1024 // 1 GB
 });
 \`\`\`
 
@@ -196,9 +197,9 @@ Cache frequent queries:
 
 \`\`\`typescript
 const analytics = new UnifiedAnalyticsEngine({
-  enableCaching: true,
-  cacheTTL: 3600,  // 1 hour
-  maxCacheSize: 10 * 1024 * 1024 * 1024  // 10 GB
+enableCaching: true,
+cacheTTL: 3600, // 1 hour
+maxCacheSize: 10 _ 1024 _ 1024 \* 1024 // 10 GB
 });
 \`\`\`
 
@@ -225,7 +226,7 @@ const partitions = await table.listPartitions();
 
 // Process 10 partitions concurrently
 const results = await Promise.all(
-  partitions.slice(0, 10).map(p => processPartition(p))
+partitions.slice(0, 10).map(p => processPartition(p))
 );
 \`\`\`
 
@@ -263,11 +264,11 @@ Low Priority Cluster
 
 Choose the best provider per workload:
 
-| Provider | Strength | Use Case |
-|----------|----------|----------|
-| AWS | Breadth of services | General purpose |
-| Azure | Enterprise integration | Microsoft ecosystem |
-| GCP | ML/AI | Data science workloads |
+| Provider | Strength               | Use Case               |
+| -------- | ---------------------- | ---------------------- |
+| AWS      | Breadth of services    | General purpose        |
+| Azure    | Enterprise integration | Microsoft ecosystem    |
+| GCP      | ML/AI                  | Data science workloads |
 
 ### 2. Data Placement
 
@@ -279,7 +280,7 @@ const patterns = await analyzeAccessPatterns();
 
 // Place data near compute
 if (patterns.primaryRegion === 'us-east-1') {
-  await replicateToRegion('us-east-1');
+await replicateToRegion('us-east-1');
 }
 \`\`\`
 
@@ -297,11 +298,11 @@ Replicate strategically:
 
 Balance RTO/RPO vs cost:
 
-| RTO | RPO | Cost | Use Case |
-|-----|-----|------|----------|
-| < 5 min | < 1 min | High | Critical systems |
-| < 1 hour | < 15 min | Medium | Production workloads |
-| < 4 hours | < 1 hour | Low | Non-critical data |
+| RTO       | RPO      | Cost   | Use Case             |
+| --------- | -------- | ------ | -------------------- |
+| < 5 min   | < 1 min  | High   | Critical systems     |
+| < 1 hour  | < 15 min | Medium | Production workloads |
+| < 4 hours | < 1 hour | Low    | Non-critical data    |
 
 ## Monitoring & Observability
 
@@ -312,11 +313,11 @@ Balance RTO/RPO vs cost:
 \`\`\`typescript
 // Track query performance
 const metrics = {
-  p50Latency: 1200,      // ms
-  p95Latency: 5000,      // ms
-  p99Latency: 15000,     // ms
-  throughput: 1000,      // queries/sec
-  errorRate: 0.01        // 1%
+p50Latency: 1200, // ms
+p95Latency: 5000, // ms
+p99Latency: 15000, // ms
+throughput: 1000, // queries/sec
+errorRate: 0.01 // 1%
 };
 \`\`\`
 
@@ -325,10 +326,10 @@ const metrics = {
 \`\`\`typescript
 // Monitor costs
 const costs = {
-  compute: 1000,         // USD/day
-  storage: 500,          // USD/day
-  network: 200,          // USD/day
-  total: 1700            // USD/day
+compute: 1000, // USD/day
+storage: 500, // USD/day
+network: 200, // USD/day
+total: 1700 // USD/day
 };
 \`\`\`
 
@@ -338,21 +339,21 @@ Set up proactive alerts:
 
 \`\`\`typescript
 const alerts = [
-  {
-    metric: 'cost',
-    threshold: 1000,      // USD/day
-    action: 'notify'
-  },
-  {
-    metric: 'p99Latency',
-    threshold: 10000,     // ms
-    action: 'page'
-  },
-  {
-    metric: 'errorRate',
-    threshold: 0.05,      // 5%
-    action: 'page'
-  }
+{
+metric: 'cost',
+threshold: 1000, // USD/day
+action: 'notify'
+},
+{
+metric: 'p99Latency',
+threshold: 10000, // ms
+action: 'page'
+},
+{
+metric: 'errorRate',
+threshold: 0.05, // 5%
+action: 'page'
+}
 ];
 \`\`\`
 
@@ -434,30 +435,30 @@ Track these KPIs:
 
 ### Query Performance
 
-| Query Type | Latency | Throughput | Data Scanned |
-|------------|---------|------------|--------------|
-| Point lookup | 50ms | - | 1 MB |
-| Partition scan | 500ms | 2 GB/s | 100 MB |
-| Full table scan | 5s | 1 GB/s | 5 GB |
-| Aggregation | 2s | 500 MB/s | 1 GB |
-| Join | 10s | 200 MB/s | 2 GB |
+| Query Type      | Latency | Throughput | Data Scanned |
+| --------------- | ------- | ---------- | ------------ |
+| Point lookup    | 50ms    | -          | 1 MB         |
+| Partition scan  | 500ms   | 2 GB/s     | 100 MB       |
+| Full table scan | 5s      | 1 GB/s     | 5 GB         |
+| Aggregation     | 2s      | 500 MB/s   | 1 GB         |
+| Join            | 10s     | 200 MB/s   | 2 GB         |
 
 ### Write Performance
 
-| Operation | Latency | Throughput |
-|-----------|---------|------------|
-| Append | 1s | 100 MB/s |
-| Upsert | 5s | 50 MB/s |
-| Delete | 3s | - |
-| Compaction | 30s | 200 MB/s |
+| Operation  | Latency | Throughput |
+| ---------- | ------- | ---------- |
+| Append     | 1s      | 100 MB/s   |
+| Upsert     | 5s      | 50 MB/s    |
+| Delete     | 3s      | -          |
+| Compaction | 30s     | 200 MB/s   |
 
 ### Cost Benchmarks
 
-| Workload | Monthly Cost | Data Size |
-|----------|--------------|-----------|
-| Small (10 TB) | $500 | 10 TB |
-| Medium (100 TB) | $3,000 | 100 TB |
-| Large (1 PB) | $20,000 | 1 PB |
-| Enterprise (10 PB) | $150,000 | 10 PB |
+| Workload           | Monthly Cost | Data Size |
+| ------------------ | ------------ | --------- |
+| Small (10 TB)      | $500         | 10 TB     |
+| Medium (100 TB)    | $3,000       | 100 TB    |
+| Large (1 PB)       | $20,000      | 1 PB      |
+| Enterprise (10 PB) | $150,000     | 10 PB     |
 
-*Costs include compute, storage, and network at AWS pricing
+\*Costs include compute, storage, and network at AWS pricing

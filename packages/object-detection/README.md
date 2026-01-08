@@ -23,18 +23,18 @@ pnpm install @intelgraph/object-detection
 ### Basic Object Detection
 
 ```typescript
-import { createYOLODetector } from '@intelgraph/object-detection';
+import { createYOLODetector } from "@intelgraph/object-detection";
 
 const detector = createYOLODetector({
-  model_type: 'yolov8',
-  model_size: 'medium',
+  model_type: "yolov8",
+  model_size: "medium",
   confidence_threshold: 0.5,
-  device: 'auto',
+  device: "auto",
 });
 
 await detector.initialize();
 
-const result = await detector.detect('/path/to/image.jpg');
+const result = await detector.detect("/path/to/image.jpg");
 console.log(`Found ${result.detections.length} objects`);
 
 for (const det of result.detections) {
@@ -45,9 +45,9 @@ for (const det of result.detections) {
 ### Multi-Object Tracking
 
 ```typescript
-import { createTracker } from '@intelgraph/object-detection';
+import { createTracker } from "@intelgraph/object-detection";
 
-const tracker = createTracker('bytetrack', {
+const tracker = createTracker("bytetrack", {
   iou_threshold: 0.3,
   max_age: 30,
 });
@@ -65,7 +65,7 @@ for (const frame of frames) {
 ### Batch Processing
 
 ```typescript
-const images = ['img1.jpg', 'img2.jpg', 'img3.jpg'];
+const images = ["img1.jpg", "img2.jpg", "img3.jpg"];
 const results = await detector.processBatch(images);
 
 for (const result of results) {
@@ -76,8 +76,8 @@ for (const result of results) {
 ### Custom Classes
 
 ```typescript
-const result = await detector.detect('/path/to/image.jpg', {
-  classes: ['person', 'car', 'truck'],
+const result = await detector.detect("/path/to/image.jpg", {
+  classes: ["person", "car", "truck"],
   confidenceThreshold: 0.7,
 });
 ```
@@ -91,12 +91,12 @@ const result = await detector.detect('/path/to/image.jpg', {
 
 ## Performance
 
-| Model | Size | Speed (ms) | mAP |
-|-------|------|-----------|-----|
-| YOLOv8n | 3.2MB | 2-5ms (GPU) | 37.3 |
-| YOLOv8s | 11.2MB | 3-8ms (GPU) | 44.9 |
-| YOLOv8m | 25.9MB | 5-15ms (GPU) | 50.2 |
-| YOLOv8l | 43.7MB | 8-25ms (GPU) | 52.9 |
+| Model   | Size   | Speed (ms)    | mAP  |
+| ------- | ------ | ------------- | ---- |
+| YOLOv8n | 3.2MB  | 2-5ms (GPU)   | 37.3 |
+| YOLOv8s | 11.2MB | 3-8ms (GPU)   | 44.9 |
+| YOLOv8m | 25.9MB | 5-15ms (GPU)  | 50.2 |
+| YOLOv8l | 43.7MB | 8-25ms (GPU)  | 52.9 |
 | YOLOv8x | 68.2MB | 12-40ms (GPU) | 53.9 |
 
 ## License

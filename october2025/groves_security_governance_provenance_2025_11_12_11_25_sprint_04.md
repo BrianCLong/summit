@@ -132,13 +132,7 @@
 {
   "$id": "https://example.org/dxf/0.9/schema",
   "type": "object",
-  "required": [
-    "caseId",
-    "manifestRoot",
-    "signatures",
-    "jurisdiction",
-    "artifacts"
-  ],
+  "required": ["caseId", "manifestRoot", "signatures", "jurisdiction", "artifacts"],
   "properties": {
     "caseId": { "type": "string" },
     "manifestRoot": { "type": "string" },

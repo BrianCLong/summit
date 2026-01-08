@@ -1,5 +1,5 @@
-import fs from 'node:fs';
-import path from 'node:path';
+import fs from "node:fs";
+import path from "node:path";
 
 function ensureDir(targetPath) {
   fs.mkdirSync(targetPath, { recursive: true });
@@ -18,9 +18,9 @@ function gatherMetrics() {
   };
 }
 
-const stateDir = path.join('.ci', 'state');
+const stateDir = path.join(".ci", "state");
 ensureDir(stateDir);
-const statePath = path.join(stateDir, 'stats.json');
+const statePath = path.join(stateDir, "stats.json");
 const data = gatherMetrics();
 fs.writeFileSync(statePath, `${JSON.stringify(data, null, 2)}\n`);
 console.log(`Wrote ${statePath}`);

@@ -1,6 +1,6 @@
 export interface ComplianceRiskEntry {
-  type: 'late_writes' | 'backfill';
-  status: 'ok' | 'breach';
+  type: "late_writes" | "backfill";
+  status: "ok" | "breach";
   allowed_days: number;
   projected_shift_days: number;
   delta_days: number;
@@ -18,7 +18,7 @@ export interface PurposeTimeline {
 
 export interface DependencyImpact {
   name: string;
-  type: 'index' | 'feature' | string;
+  type: "index" | "feature" | string;
   purpose: string;
   retention_days: number;
   latency_days: number;
@@ -49,7 +49,7 @@ export interface TimelineRow {
   baselineHorizon: string;
   lateWriteHorizon: string;
   backfillHorizon: string;
-  riskLevel: 'ok' | 'elevated' | 'breach';
+  riskLevel: "ok" | "elevated" | "breach";
   blockers: string[];
 }
 

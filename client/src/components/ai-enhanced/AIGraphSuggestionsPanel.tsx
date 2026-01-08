@@ -1,12 +1,12 @@
-import React from 'react';
-import { Button, Card, CardContent } from '@mui/material';
+import React from "react";
+import { Button, Card, CardContent } from "@mui/material";
 
 async function gql<T>(query: string, variables?: any) {
-  const res = await fetch('/graphql', {
-    method: 'POST',
+  const res = await fetch("/graphql", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${localStorage.getItem('ig_jwt')}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("ig_jwt")}`,
     },
     body: JSON.stringify({ query, variables }),
   });
@@ -22,7 +22,7 @@ export default function AIGraphSuggestionsPanel() {
   const load = React.useCallback(async () => {
     setLoading(true);
     const data = await gql<{ suggestions: any[] }>(
-      `query { suggestions { id type label confidence status createdAt } }`,
+      `query { suggestions { id type label confidence status createdAt } }`
     );
     setItems(data.suggestions);
     setLoading(false);
@@ -32,11 +32,8 @@ export default function AIGraphSuggestionsPanel() {
     load();
   }, [load]);
 
-  const act = async (id: string, kind: 'accept' | 'reject') => {
-    await gql<{ ok: boolean }>(
-      `mutation($id: ID!) { ${kind}Suggestion(id:$id) }`,
-      { id },
-    );
+  const act = async (id: string, kind: "accept" | "reject") => {
+    await gql<{ ok: boolean }>(`mutation($id: ID!) { ${kind}Suggestion(id:$id) }`, { id });
     await load();
   };
 
@@ -50,22 +47,12 @@ export default function AIGraphSuggestionsPanel() {
               {s.type} • {s.createdAt}
             </div>
             <div className="text-lg font-medium">{s.label}</div>
-            <div className="text-sm">
-              confidence: {Math.round(s.confidence * 100)}%
-            </div>
+            <div className="text-sm">confidence: {Math.round(s.confidence * 100)}%</div>
             <div className="mt-2 flex gap-2">
-              <Button
-                size="small"
-                variant="contained"
-                onClick={() => act(s.id, 'accept')}
-              >
+              <Button size="small" variant="contained" onClick={() => act(s.id, "accept")}>
                 Accept
               </Button>
-              <Button
-                size="small"
-                variant="outlined"
-                onClick={() => act(s.id, 'reject')}
-              >
+              <Button size="small" variant="outlined" onClick={() => act(s.id, "reject")}>
                 Reject
               </Button>
             </div>

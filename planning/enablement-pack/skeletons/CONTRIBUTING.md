@@ -1,6 +1,7 @@
 # Contributing to the Project
 
 ## Getting Started
+
 1. **Clone the repo**: `git clone <url>`
 2. **Setup Environment**:
    - Option A: Open in VS Code Dev Containers (Recommended).
@@ -8,6 +9,7 @@
 3. **Run Tests**: `npm test` | `pytest` | `go test ./...`
 
 ## Pull Request Process
+
 1. Create a branch `feature/my-feature`.
 2. Commit changes (ensure pre-commit hooks pass).
 3. Open PR using the template.
@@ -15,6 +17,7 @@
 5. Get approval from 1 code owner.
 
 ## Coding Standards
+
 - **TS**: ESLint + Prettier.
 - **Python**: Black + isort.
 - **Go**: golangci-lint.

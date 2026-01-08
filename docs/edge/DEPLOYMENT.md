@@ -5,6 +5,7 @@
 ### System Requirements
 
 **Edge Orchestrator:**
+
 - CPU: 2+ cores
 - RAM: 4GB minimum, 8GB recommended
 - Storage: 20GB+ for models and data
@@ -12,6 +13,7 @@
 - Docker 20.10+
 
 **Edge Node:**
+
 - CPU: 1+ cores
 - RAM: 2GB minimum
 - Storage: 10GB+
@@ -55,6 +57,7 @@ pnpm --filter @intelgraph/edge-gateway build
 Create environment files for each service:
 
 **services/edge-orchestrator/.env**
+
 ```env
 PORT=8080
 NODE_ENV=production
@@ -63,6 +66,7 @@ LOG_LEVEL=info
 ```
 
 **services/edge-gateway/.env**
+
 ```env
 PORT=3000
 NODE_ENV=production
@@ -93,6 +97,7 @@ docker-compose ps
 ```
 
 **Exposed Ports:**
+
 - 3000: Edge Gateway
 - 8080: Edge Orchestrator
 - 9090: Prometheus
@@ -289,6 +294,7 @@ curl -X POST http://localhost:3000/api/orchestrator/federated/rounds/start \
 Access Prometheus at http://localhost:9090
 
 **Key Metrics:**
+
 - `edge_nodes_total`: Total number of registered nodes
 - `edge_nodes_online`: Number of online nodes
 - `edge_inference_latency`: Inference latency histogram
@@ -300,6 +306,7 @@ Access Prometheus at http://localhost:9090
 Access Grafana at http://localhost:3001
 
 **Pre-configured Dashboards:**
+
 1. Edge Infrastructure Overview
 2. Node Health and Resources
 3. Inference Performance
@@ -309,11 +316,13 @@ Access Grafana at http://localhost:3001
 ### Log Aggregation
 
 Logs are collected from:
+
 - Edge Gateway: `/var/log/edge-gateway`
 - Edge Orchestrator: `/var/log/edge-orchestrator`
 - Edge Nodes: `/var/log/edge`
 
 View logs:
+
 ```bash
 # Docker Compose
 docker-compose logs -f edge-orchestrator
@@ -358,6 +367,7 @@ kubectl exec -n edge-computing deployment/edge-orchestrator -- \
 ### Horizontal Scaling
 
 **Add More Orchestrator Replicas:**
+
 ```bash
 # Kubernetes
 kubectl scale deployment edge-orchestrator --replicas=5 -n edge-computing
@@ -389,24 +399,28 @@ resources:
 ### Common Issues
 
 **1. Node Not Connecting**
+
 - Check network connectivity
 - Verify authentication credentials
 - Check firewall rules
 - Review node logs
 
 **2. High Inference Latency**
+
 - Check model size and optimization
 - Verify available resources
 - Monitor network latency
 - Consider model quantization
 
 **3. Sync Failures**
+
 - Check network connectivity to cloud
 - Verify bandwidth limits
 - Review retry configuration
 - Check disk space
 
 **4. Container Deployment Failures**
+
 - Verify Docker is running
 - Check image availability
 - Review resource limits
@@ -415,6 +429,7 @@ resources:
 ### Debug Mode
 
 Enable debug logging:
+
 ```bash
 # Environment variable
 export LOG_LEVEL=debug
@@ -443,6 +458,7 @@ LOG_LEVEL=debug
 ## Support
 
 For issues and questions:
+
 - GitHub Issues: https://github.com/yourusername/summit/issues
 - Documentation: https://docs.intelgraph.ai/edge
 - Email: support@intelgraph.ai

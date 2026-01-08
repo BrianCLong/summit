@@ -4,7 +4,7 @@
  * Provides API for federation operations, signal sharing, and alert management.
  */
 
-import { gql } from 'graphql-tag';
+import { gql } from "graphql-tag";
 
 export const typeDefs = gql`
   """
@@ -12,12 +12,11 @@ export const typeDefs = gql`
 
   Privacy-preserving cross-organization campaign signal sharing for information warfare defense.
   """
-
-  # ============================================================================
+  enum # ============================================================================
   # Enums
   # ============================================================================
 
-  enum SignalType {
+  SignalType {
     NARRATIVE
     CLAIM
     MEDIA_ARTIFACT

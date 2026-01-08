@@ -3,41 +3,35 @@
  * Rule-based policy evaluation for governance and compliance
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Policy rule types
  */
-export type RuleType =
-  | 'allow'
-  | 'deny'
-  | 'require'
-  | 'enforce'
-  | 'audit'
-  | 'notify';
+export type RuleType = "allow" | "deny" | "require" | "enforce" | "audit" | "notify";
 
 /**
  * Policy effect
  */
-export type PolicyEffect = 'allow' | 'deny' | 'warn';
+export type PolicyEffect = "allow" | "deny" | "warn";
 
 /**
  * Condition operator types
  */
 export type ConditionOperator =
-  | 'equals'
-  | 'not_equals'
-  | 'contains'
-  | 'not_contains'
-  | 'starts_with'
-  | 'ends_with'
-  | 'matches'
-  | 'greater_than'
-  | 'less_than'
-  | 'in'
-  | 'not_in'
-  | 'exists'
-  | 'not_exists';
+  | "equals"
+  | "not_equals"
+  | "contains"
+  | "not_contains"
+  | "starts_with"
+  | "ends_with"
+  | "matches"
+  | "greater_than"
+  | "less_than"
+  | "in"
+  | "not_in"
+  | "exists"
+  | "not_exists";
 
 /**
  * Condition schema
@@ -45,10 +39,19 @@ export type ConditionOperator =
 export const ConditionSchema = z.object({
   field: z.string(),
   operator: z.enum([
-    'equals', 'not_equals', 'contains', 'not_contains',
-    'starts_with', 'ends_with', 'matches',
-    'greater_than', 'less_than',
-    'in', 'not_in', 'exists', 'not_exists'
+    "equals",
+    "not_equals",
+    "contains",
+    "not_contains",
+    "starts_with",
+    "ends_with",
+    "matches",
+    "greater_than",
+    "less_than",
+    "in",
+    "not_in",
+    "exists",
+    "not_exists",
   ]),
   value: z.unknown().optional(),
 });
@@ -62,12 +65,12 @@ export const PolicyRuleSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string().optional(),
-  type: z.enum(['allow', 'deny', 'require', 'enforce', 'audit', 'notify']),
-  effect: z.enum(['allow', 'deny', 'warn']),
+  type: z.enum(["allow", "deny", "require", "enforce", "audit", "notify"]),
+  effect: z.enum(["allow", "deny", "warn"]),
   priority: z.number().default(0),
   enabled: z.boolean().default(true),
   conditions: z.array(ConditionSchema),
-  conditionLogic: z.enum(['and', 'or']).default('and'),
+  conditionLogic: z.enum(["and", "or"]).default("and"),
   actions: z.array(z.string()).optional(),
   metadata: z.record(z.unknown()).optional(),
 });
@@ -83,7 +86,7 @@ export const PolicySchema = z.object({
   version: z.string(),
   description: z.string().optional(),
   rules: z.array(PolicyRuleSchema),
-  defaultEffect: z.enum(['allow', 'deny']).default('deny'),
+  defaultEffect: z.enum(["allow", "deny"]).default("deny"),
   metadata: z.record(z.unknown()).optional(),
 });
 
@@ -130,14 +133,14 @@ function evaluateCondition(condition: Condition, context: EvaluationContext): bo
   const value = getFieldValue(condition.field, context);
 
   switch (condition.operator) {
-    case 'equals':
+    case "equals":
       return value === condition.value;
 
-    case 'not_equals':
+    case "not_equals":
       return value !== condition.value;
 
-    case 'contains':
-      if (typeof value === 'string' && typeof condition.value === 'string') {
+    case "contains":
+      if (typeof value === "string" && typeof condition.value === "string") {
         return value.includes(condition.value);
       }
       if (Array.isArray(value)) {
@@ -145,8 +148,8 @@ function evaluateCondition(condition: Condition, context: EvaluationContext): bo
       }
       return false;
 
-    case 'not_contains':
-      if (typeof value === 'string' && typeof condition.value === 'string') {
+    case "not_contains":
+      if (typeof value === "string" && typeof condition.value === "string") {
         return !value.includes(condition.value);
       }
       if (Array.isArray(value)) {
@@ -154,42 +157,46 @@ function evaluateCondition(condition: Condition, context: EvaluationContext): bo
       }
       return true;
 
-    case 'starts_with':
-      return typeof value === 'string' &&
-        typeof condition.value === 'string' &&
-        value.startsWith(condition.value);
+    case "starts_with":
+      return (
+        typeof value === "string" &&
+        typeof condition.value === "string" &&
+        value.startsWith(condition.value)
+      );
 
-    case 'ends_with':
-      return typeof value === 'string' &&
-        typeof condition.value === 'string' &&
-        value.endsWith(condition.value);
+    case "ends_with":
+      return (
+        typeof value === "string" &&
+        typeof condition.value === "string" &&
+        value.endsWith(condition.value)
+      );
 
-    case 'matches':
-      if (typeof value === 'string' && typeof condition.value === 'string') {
+    case "matches":
+      if (typeof value === "string" && typeof condition.value === "string") {
         return new RegExp(condition.value).test(value);
       }
       return false;
 
-    case 'greater_than':
-      return typeof value === 'number' &&
-        typeof condition.value === 'number' &&
-        value > condition.value;
+    case "greater_than":
+      return (
+        typeof value === "number" && typeof condition.value === "number" && value > condition.value
+      );
 
-    case 'less_than':
-      return typeof value === 'number' &&
-        typeof condition.value === 'number' &&
-        value < condition.value;
+    case "less_than":
+      return (
+        typeof value === "number" && typeof condition.value === "number" && value < condition.value
+      );
 
-    case 'in':
+    case "in":
       return Array.isArray(condition.value) && condition.value.includes(value);
 
-    case 'not_in':
+    case "not_in":
       return Array.isArray(condition.value) && !condition.value.includes(value);
 
-    case 'exists':
+    case "exists":
       return value !== undefined && value !== null;
 
-    case 'not_exists':
+    case "not_exists":
       return value === undefined || value === null;
 
     default:
@@ -201,7 +208,7 @@ function evaluateCondition(condition: Condition, context: EvaluationContext): bo
  * Get field value from context using dot notation
  */
 function getFieldValue(field: string, context: EvaluationContext): unknown {
-  const parts = field.split('.');
+  const parts = field.split(".");
   let value: unknown = context;
 
   for (const part of parts) {
@@ -248,7 +255,7 @@ export class PolicyEngine {
   evaluate(context: EvaluationContext): EvaluationResult {
     const result: EvaluationResult = {
       allowed: false,
-      effect: 'deny',
+      effect: "deny",
       matchedRules: [],
       warnings: [],
       auditLog: [],
@@ -271,11 +278,12 @@ export class PolicyEngine {
     let hasExplicitDeny = false;
 
     for (const { rule, policy } of allRules) {
-      const conditionResults = rule.conditions.map(c => evaluateCondition(c, context));
+      const conditionResults = rule.conditions.map((c) => evaluateCondition(c, context));
 
-      const matched = rule.conditionLogic === 'and'
-        ? conditionResults.every(r => r)
-        : conditionResults.some(r => r);
+      const matched =
+        rule.conditionLogic === "and"
+          ? conditionResults.every((r) => r)
+          : conditionResults.some((r) => r);
 
       result.auditLog.push({
         ruleId: rule.id,
@@ -289,17 +297,19 @@ export class PolicyEngine {
         result.matchedRules.push(rule);
 
         switch (rule.effect) {
-          case 'allow':
+          case "allow":
             hasExplicitAllow = true;
             break;
 
-          case 'deny':
+          case "deny":
             hasExplicitDeny = true;
             result.deniedBy = rule;
             break;
 
-          case 'warn':
-            result.warnings.push(`Warning from rule "${rule.name}": ${rule.description || 'No description'}`);
+          case "warn":
+            result.warnings.push(
+              `Warning from rule "${rule.name}": ${rule.description || "No description"}`
+            );
             break;
         }
       }
@@ -308,14 +318,14 @@ export class PolicyEngine {
     // Determine final effect (deny takes precedence)
     if (hasExplicitDeny) {
       result.allowed = false;
-      result.effect = 'deny';
+      result.effect = "deny";
     } else if (hasExplicitAllow) {
       result.allowed = true;
-      result.effect = 'allow';
+      result.effect = "allow";
     } else {
       // Use default effect from first policy (or deny)
-      const defaultEffect = this.policies.values().next().value?.defaultEffect || 'deny';
-      result.allowed = defaultEffect === 'allow';
+      const defaultEffect = this.policies.values().next().value?.defaultEffect || "deny";
+      result.allowed = defaultEffect === "allow";
       result.effect = defaultEffect;
     }
 
@@ -332,14 +342,14 @@ export class PolicyEngine {
     const result = this.evaluate(context);
 
     const explanationLines: string[] = [
-      `Decision: ${result.allowed ? 'ALLOWED' : 'DENIED'}`,
+      `Decision: ${result.allowed ? "ALLOWED" : "DENIED"}`,
       `Effect: ${result.effect}`,
-      '',
+      "",
       `Subject: ${context.subject.type}:${context.subject.id}`,
       `Resource: ${context.resource.type}:${context.resource.id}`,
       `Action: ${context.action}`,
-      '',
-      'Evaluation Log:',
+      "",
+      "Evaluation Log:",
     ];
 
     for (const log of result.auditLog) {
@@ -347,13 +357,13 @@ export class PolicyEngine {
     }
 
     if (result.deniedBy) {
-      explanationLines.push('');
+      explanationLines.push("");
       explanationLines.push(`Denied by rule: ${result.deniedBy.name}`);
     }
 
     if (result.warnings.length > 0) {
-      explanationLines.push('');
-      explanationLines.push('Warnings:');
+      explanationLines.push("");
+      explanationLines.push("Warnings:");
       for (const warning of result.warnings) {
         explanationLines.push(`  - ${warning}`);
       }
@@ -361,7 +371,7 @@ export class PolicyEngine {
 
     return {
       result,
-      explanation: explanationLines.join('\n'),
+      explanation: explanationLines.join("\n"),
     };
   }
 }

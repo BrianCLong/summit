@@ -1,4 +1,4 @@
-import Redis from 'ioredis';
+import Redis from "ioredis";
 import type {
   CacheConfig,
   CacheGetOptions,
@@ -6,14 +6,14 @@ import type {
   CacheStats,
   ICache,
   InvalidationMessage,
-} from './types.js';
-import { CacheTier } from './types.js';
-import { LRUCache } from './lru-cache.js';
-import { CacheMetrics, NoOpMetrics } from './metrics.js';
+} from "./types.js";
+import { CacheTier } from "./types.js";
+import { LRUCache } from "./lru-cache.js";
+import { CacheMetrics, NoOpMetrics } from "./metrics.js";
 
 const DEFAULT_L1_MAX_BYTES = 100 * 1024 * 1024; // 100MB
 const DEFAULT_TTL_SECONDS = 300; // 5 minutes
-const INVALIDATION_CHANNEL = 'cache:invalidation';
+const INVALIDATION_CHANNEL = "cache:invalidation";
 const CLEANUP_INTERVAL_MS = 60 * 1000; // 1 minute
 
 /**
@@ -53,7 +53,7 @@ export class Cache implements ICache {
         this.l2Client = config.l2.client;
       } else if (config.l2?.connection) {
         this.l2Client = new Redis({
-          host: config.l2.connection.host ?? 'localhost',
+          host: config.l2.connection.host ?? "localhost",
           port: config.l2.connection.port ?? 6379,
           password: config.l2.connection.password,
           db: config.l2.connection.db ?? 0,
@@ -78,9 +78,7 @@ export class Cache implements ICache {
     }
 
     // Initialize metrics
-    this.metrics = config.metrics !== false
-      ? new CacheMetrics(this.namespace)
-      : new NoOpMetrics();
+    this.metrics = config.metrics !== false ? new CacheMetrics(this.namespace) : new NoOpMetrics();
 
     // Start cleanup interval
     this.startCleanup();
@@ -96,21 +94,21 @@ export class Cache implements ICache {
 
     // Try L1 first
     if (!options?.skipL1 && this.l1Cache) {
-      const endTimer = this.metrics.timeOperation('l1', 'get');
+      const endTimer = this.metrics.timeOperation("l1", "get");
       const value = this.l1Cache.get(fullKey);
       endTimer();
 
       if (value !== undefined) {
-        this.metrics.recordHit('l1');
+        this.metrics.recordHit("l1");
         this.updateL1Metrics();
         return value as T;
       }
-      this.metrics.recordMiss('l1');
+      this.metrics.recordMiss("l1");
     }
 
     // Try L2
     if (!options?.skipL2 && this.l2Client) {
-      const endTimer = this.metrics.timeOperation('l2', 'get');
+      const endTimer = this.metrics.timeOperation("l2", "get");
       try {
         const raw = await this.l2Client.get(fullKey);
         endTimer();
@@ -130,10 +128,10 @@ export class Cache implements ICache {
             this.updateL1Metrics();
           }
 
-          this.metrics.recordHit('l2');
+          this.metrics.recordHit("l2");
           return value;
         }
-        this.metrics.recordMiss('l2');
+        this.metrics.recordMiss("l2");
       } catch (error) {
         endTimer();
         // Redis errors should not break the application
@@ -155,17 +153,17 @@ export class Cache implements ICache {
 
     // Set L1
     if (!options?.skipL1 && this.l1Cache) {
-      const endTimer = this.metrics.timeOperation('l1', 'set');
+      const endTimer = this.metrics.timeOperation("l1", "set");
       this.l1Cache.set(fullKey, value, { ttlSeconds, tags });
       endTimer();
-      this.metrics.recordSet('l1');
+      this.metrics.recordSet("l1");
       this.trackTags(fullKey, tags);
       this.updateL1Metrics();
     }
 
     // Set L2
     if (!options?.skipL2 && this.l2Client) {
-      const endTimer = this.metrics.timeOperation('l2', 'set');
+      const endTimer = this.metrics.timeOperation("l2", "set");
       try {
         const payload = JSON.stringify({
           value,
@@ -174,7 +172,7 @@ export class Cache implements ICache {
         });
         await this.l2Client.setex(fullKey, ttlSeconds, payload);
         endTimer();
-        this.metrics.recordSet('l2');
+        this.metrics.recordSet("l2");
 
         // Index tags in Redis
         if (tags && tags.length > 0) {
@@ -195,24 +193,24 @@ export class Cache implements ICache {
 
     // Delete from L1
     if (this.l1Cache) {
-      const endTimer = this.metrics.timeOperation('l1', 'delete');
+      const endTimer = this.metrics.timeOperation("l1", "delete");
       this.l1Cache.delete(fullKey);
       endTimer();
-      this.metrics.recordDelete('l1');
+      this.metrics.recordDelete("l1");
       this.dropTagTracking(fullKey);
       this.updateL1Metrics();
     }
 
     // Delete from L2
     if (this.l2Client) {
-      const endTimer = this.metrics.timeOperation('l2', 'delete');
+      const endTimer = this.metrics.timeOperation("l2", "delete");
       try {
         await this.l2Client.del(fullKey);
         endTimer();
-        this.metrics.recordDelete('l2');
+        this.metrics.recordDelete("l2");
 
         // Publish invalidation
-        await this.publishInvalidation({ type: 'key', keys: [fullKey] });
+        await this.publishInvalidation({ type: "key", keys: [fullKey] });
       } catch (error) {
         endTimer();
       }
@@ -241,24 +239,20 @@ export class Cache implements ICache {
         }
 
         // Publish invalidation
-        await this.publishInvalidation({ type: 'pattern', pattern: fullPattern });
+        await this.publishInvalidation({ type: "pattern", pattern: fullPattern });
       } catch (error) {
         // Redis errors should not break the application
       }
     }
 
-    this.metrics.recordInvalidation('pattern');
+    this.metrics.recordInvalidation("pattern");
     return deleted;
   }
 
   /**
    * Get or set with loader function (cache-aside pattern with stampede protection)
    */
-  async getOrSet<T>(
-    key: string,
-    loader: () => Promise<T>,
-    options?: CacheSetOptions
-  ): Promise<T> {
+  async getOrSet<T>(key: string, loader: () => Promise<T>, options?: CacheSetOptions): Promise<T> {
     // Try to get from cache
     const cached = await this.get<T>(key);
     if (cached !== null) {
@@ -311,13 +305,13 @@ export class Cache implements ICache {
         await this.l2Client.del(tagKey);
 
         // Publish invalidation
-        await this.publishInvalidation({ type: 'tag', tag });
+        await this.publishInvalidation({ type: "tag", tag });
       } catch (error) {
         // Redis errors should not break the application
       }
     }
 
-    this.metrics.recordInvalidation('tag');
+    this.metrics.recordInvalidation("tag");
   }
 
   /**
@@ -368,7 +362,7 @@ export class Cache implements ICache {
     // Clear L2 (only our namespace)
     if (this.l2Client) {
       try {
-        const pattern = this.getKey('*');
+        const pattern = this.getKey("*");
         const keys = await this.l2Client.keys(pattern);
         if (keys.length > 0) {
           await this.l2Client.del(...keys);
@@ -448,11 +442,7 @@ export class Cache implements ICache {
     }
   }
 
-  private async indexTagsInRedis(
-    key: string,
-    tags: string[],
-    ttlSeconds: number
-  ): Promise<void> {
+  private async indexTagsInRedis(key: string, tags: string[], ttlSeconds: number): Promise<void> {
     if (!this.l2Client) return;
 
     for (const tag of tags) {
@@ -466,10 +456,7 @@ export class Cache implements ICache {
     if (!this.l2Client) return;
 
     try {
-      await this.l2Client.publish(
-        INVALIDATION_CHANNEL,
-        JSON.stringify(message)
-      );
+      await this.l2Client.publish(INVALIDATION_CHANNEL, JSON.stringify(message));
     } catch (error) {
       // Publish errors should not break the application
     }
@@ -478,23 +465,23 @@ export class Cache implements ICache {
   private setupPubSub(channel: string): void {
     if (!this.subscriber) return;
 
-    this.subscriber.on('message', (ch, message) => {
+    this.subscriber.on("message", (ch, message) => {
       if (ch !== channel) return;
 
       try {
         const payload = JSON.parse(message) as InvalidationMessage;
 
-        if (payload.type === 'key' && this.l1Cache) {
+        if (payload.type === "key" && this.l1Cache) {
           for (const key of payload.keys) {
             this.l1Cache.delete(key);
             this.dropTagTracking(key);
           }
           this.updateL1Metrics();
-        } else if (payload.type === 'tag' && this.l1Cache) {
+        } else if (payload.type === "tag" && this.l1Cache) {
           this.l1Cache.deleteByTag(payload.tag);
           this.tagIndex.delete(payload.tag);
           this.updateL1Metrics();
-        } else if (payload.type === 'pattern' && this.l1Cache) {
+        } else if (payload.type === "pattern" && this.l1Cache) {
           this.l1Cache.deleteByPattern(payload.pattern);
           this.updateL1Metrics();
         }
@@ -522,8 +509,8 @@ export class Cache implements ICache {
 
   private updateL1Metrics(): void {
     if (this.l1Cache) {
-      this.metrics.setEntries('l1', this.l1Cache.size);
-      this.metrics.setBytes('l1', this.l1Cache.bytes);
+      this.metrics.setEntries("l1", this.l1Cache.size);
+      this.metrics.setBytes("l1", this.l1Cache.bytes);
     }
   }
 }

@@ -3,15 +3,15 @@
  * Labeling UI - Main Application
  */
 
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Layout } from './components/common/Layout';
-import { DashboardPage } from './pages/DashboardPage';
-import { LabelingPage } from './pages/LabelingPage';
-import { ReviewPage } from './pages/ReviewPage';
-import { DatasetsPage } from './pages/DatasetsPage';
-import { QualityPage } from './pages/QualityPage';
-import './index.css';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Layout } from "./components/common/Layout";
+import { DashboardPage } from "./pages/DashboardPage";
+import { LabelingPage } from "./pages/LabelingPage";
+import { ReviewPage } from "./pages/ReviewPage";
+import { DatasetsPage } from "./pages/DatasetsPage";
+import { QualityPage } from "./pages/QualityPage";
+import "./index.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {

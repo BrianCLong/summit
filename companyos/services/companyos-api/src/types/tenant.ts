@@ -9,42 +9,42 @@
 // ============================================================================
 
 export enum TenantStatus {
-  PENDING = 'PENDING',
-  ACTIVE = 'ACTIVE',
-  SUSPENDED = 'SUSPENDED',
-  DELETION_REQUESTED = 'DELETION_REQUESTED',
-  DELETED = 'DELETED',
+  PENDING = "PENDING",
+  ACTIVE = "ACTIVE",
+  SUSPENDED = "SUSPENDED",
+  DELETION_REQUESTED = "DELETION_REQUESTED",
+  DELETED = "DELETED",
 }
 
 export enum TenantTier {
-  STARTER = 'STARTER',
-  BRONZE = 'BRONZE',
-  SILVER = 'SILVER',
-  GOLD = 'GOLD',
-  ENTERPRISE = 'ENTERPRISE',
+  STARTER = "STARTER",
+  BRONZE = "BRONZE",
+  SILVER = "SILVER",
+  GOLD = "GOLD",
+  ENTERPRISE = "ENTERPRISE",
 }
 
 export enum TenantAdminRole {
-  ADMIN = 'ADMIN',
-  OWNER = 'OWNER',
-  BILLING_ADMIN = 'BILLING_ADMIN',
-  SECURITY_REVIEWER = 'SECURITY_REVIEWER',
+  ADMIN = "ADMIN",
+  OWNER = "OWNER",
+  BILLING_ADMIN = "BILLING_ADMIN",
+  SECURITY_REVIEWER = "SECURITY_REVIEWER",
 }
 
 export enum AuditEventCategory {
-  TENANT_LIFECYCLE = 'tenant_lifecycle',
-  USER_MANAGEMENT = 'user_management',
-  FEATURE_FLAGS = 'feature_flags',
-  SECURITY = 'security',
-  BILLING = 'billing',
-  DATA_ACCESS = 'data_access',
-  CONFIGURATION = 'configuration',
+  TENANT_LIFECYCLE = "tenant_lifecycle",
+  USER_MANAGEMENT = "user_management",
+  FEATURE_FLAGS = "feature_flags",
+  SECURITY = "security",
+  BILLING = "billing",
+  DATA_ACCESS = "data_access",
+  CONFIGURATION = "configuration",
 }
 
 export enum AuditEventOutcome {
-  SUCCESS = 'success',
-  FAILURE = 'failure',
-  DENIED = 'denied',
+  SUCCESS = "success",
+  FAILURE = "failure",
+  DENIED = "denied",
 }
 
 // ============================================================================

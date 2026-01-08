@@ -2,32 +2,32 @@
  * CompanyOS Tenant API - GraphQL Resolvers
  */
 
-import { tenantService, auditService } from '../services/index.js';
-import { healthCheck as dbHealthCheck } from '../db/postgres.js';
-import type { GraphQLContext } from './context.js';
+import { tenantService, auditService } from "../services/index.js";
+import { healthCheck as dbHealthCheck } from "../db/postgres.js";
+import type { GraphQLContext } from "./context.js";
 import type {
   CreateTenantInput,
   UpdateTenantInput,
   SetFeatureFlagInput,
   Tenant,
-} from '../types/index.js';
-import { GraphQLScalarType, Kind } from 'graphql';
+} from "../types/index.js";
+import { GraphQLScalarType, Kind } from "graphql";
 
 // Custom DateTime scalar
 const DateTimeScalar = new GraphQLScalarType({
-  name: 'DateTime',
-  description: 'DateTime custom scalar type',
+  name: "DateTime",
+  description: "DateTime custom scalar type",
   serialize(value: unknown): string {
     if (value instanceof Date) {
       return value.toISOString();
     }
-    throw new Error('DateTime cannot represent non-Date value');
+    throw new Error("DateTime cannot represent non-Date value");
   },
   parseValue(value: unknown): Date {
-    if (typeof value === 'string' || typeof value === 'number') {
+    if (typeof value === "string" || typeof value === "number") {
       return new Date(value);
     }
-    throw new Error('DateTime cannot parse non-string/number value');
+    throw new Error("DateTime cannot parse non-string/number value");
   },
   parseLiteral(ast): Date | null {
     if (ast.kind === Kind.STRING || ast.kind === Kind.INT) {
@@ -39,8 +39,8 @@ const DateTimeScalar = new GraphQLScalarType({
 
 // Custom JSON scalar
 const JSONScalar = new GraphQLScalarType({
-  name: 'JSON',
-  description: 'JSON custom scalar type',
+  name: "JSON",
+  description: "JSON custom scalar type",
   serialize(value: unknown): unknown {
     return value;
   },
@@ -96,34 +96,22 @@ export const resolvers = {
 
   Query: {
     // Tenant queries
-    tenant: async (
-      _parent: unknown,
-      { id }: { id: string },
-      context: GraphQLContext,
-    ) => {
-      context.logger.info({ tenantId: id }, 'Fetching tenant by ID');
+    tenant: async (_parent: unknown, { id }: { id: string }, context: GraphQLContext) => {
+      context.logger.info({ tenantId: id }, "Fetching tenant by ID");
       return tenantService.getTenantById(id);
     },
 
-    tenantBySlug: async (
-      _parent: unknown,
-      { slug }: { slug: string },
-      context: GraphQLContext,
-    ) => {
-      context.logger.info({ slug }, 'Fetching tenant by slug');
+    tenantBySlug: async (_parent: unknown, { slug }: { slug: string }, context: GraphQLContext) => {
+      context.logger.info({ slug }, "Fetching tenant by slug");
       return tenantService.getTenantBySlug(slug);
     },
 
     tenants: async (
       _parent: unknown,
-      {
-        status,
-        limit,
-        offset,
-      }: { status?: string; limit?: number; offset?: number },
-      context: GraphQLContext,
+      { status, limit, offset }: { status?: string; limit?: number; offset?: number },
+      context: GraphQLContext
     ) => {
-      context.logger.info({ status, limit, offset }, 'Listing tenants');
+      context.logger.info({ status, limit, offset }, "Listing tenants");
       const result = await tenantService.listTenants({ status, limit, offset });
 
       return {
@@ -140,18 +128,18 @@ export const resolvers = {
     tenantFeatures: async (
       _parent: unknown,
       { tenantId }: { tenantId: string },
-      context: GraphQLContext,
+      context: GraphQLContext
     ) => {
-      context.logger.info({ tenantId }, 'Fetching tenant features');
+      context.logger.info({ tenantId }, "Fetching tenant features");
       return tenantService.getTenantFeatures(tenantId);
     },
 
     effectiveFeatureFlags: async (
       _parent: unknown,
       { tenantId }: { tenantId: string },
-      context: GraphQLContext,
+      context: GraphQLContext
     ) => {
-      context.logger.info({ tenantId }, 'Getting effective feature flags');
+      context.logger.info({ tenantId }, "Getting effective feature flags");
       return tenantService.getEffectiveFeatureFlags(tenantId);
     },
 
@@ -174,9 +162,9 @@ export const resolvers = {
         limit?: number;
         offset?: number;
       },
-      context: GraphQLContext,
+      context: GraphQLContext
     ) => {
-      context.logger.info({ filter, limit, offset }, 'Querying audit events');
+      context.logger.info({ filter, limit, offset }, "Querying audit events");
       const result = await auditService.getAuditEvents({
         ...filter,
         limit,
@@ -198,11 +186,11 @@ export const resolvers = {
       const dbHealthy = await dbHealthCheck();
 
       return {
-        status: dbHealthy ? 'healthy' : 'unhealthy',
+        status: dbHealthy ? "healthy" : "unhealthy",
         timestamp: new Date(),
-        version: process.env.npm_package_version || '0.1.0',
+        version: process.env.npm_package_version || "0.1.0",
         services: {
-          postgres: dbHealthy ? 'healthy' : 'unhealthy',
+          postgres: dbHealthy ? "healthy" : "unhealthy",
         },
       };
     },
@@ -213,9 +201,9 @@ export const resolvers = {
     createTenant: async (
       _parent: unknown,
       { input }: { input: CreateTenantInput },
-      context: GraphQLContext,
+      context: GraphQLContext
     ) => {
-      context.logger.info({ input }, 'Creating tenant');
+      context.logger.info({ input }, "Creating tenant");
 
       const tenant = await tenantService.createTenant(input, context.user?.id);
 
@@ -223,12 +211,12 @@ export const resolvers = {
       await auditService.logTenantCreated(
         tenant.id,
         { name: tenant.name, slug: tenant.slug, dataRegion: tenant.dataRegion },
-        getActor(context),
+        getActor(context)
       );
 
       context.logger.info(
         { tenantId: tenant.id, slug: tenant.slug },
-        'Tenant created successfully',
+        "Tenant created successfully"
       );
 
       return tenant;
@@ -237,9 +225,9 @@ export const resolvers = {
     updateTenant: async (
       _parent: unknown,
       { id, input }: { id: string; input: UpdateTenantInput },
-      context: GraphQLContext,
+      context: GraphQLContext
     ) => {
-      context.logger.info({ tenantId: id, input }, 'Updating tenant');
+      context.logger.info({ tenantId: id, input }, "Updating tenant");
 
       const before = await tenantService.getTenantById(id);
       if (!before) {
@@ -256,26 +244,22 @@ export const resolvers = {
         id,
         { name: before.name, status: before.status },
         { name: tenant.name, status: tenant.status },
-        getActor(context),
+        getActor(context)
       );
 
-      context.logger.info({ tenantId: id }, 'Tenant updated successfully');
+      context.logger.info({ tenantId: id }, "Tenant updated successfully");
 
       return tenant;
     },
 
-    deleteTenant: async (
-      _parent: unknown,
-      { id }: { id: string },
-      context: GraphQLContext,
-    ) => {
-      context.logger.info({ tenantId: id }, 'Deleting tenant');
+    deleteTenant: async (_parent: unknown, { id }: { id: string }, context: GraphQLContext) => {
+      context.logger.info({ tenantId: id }, "Deleting tenant");
 
       const success = await tenantService.deleteTenant(id, context.user?.id);
 
       if (success) {
         await auditService.logTenantDeleted(id, getActor(context));
-        context.logger.info({ tenantId: id }, 'Tenant deleted successfully');
+        context.logger.info({ tenantId: id }, "Tenant deleted successfully");
       }
 
       return success;
@@ -285,9 +269,9 @@ export const resolvers = {
     setFeatureFlag: async (
       _parent: unknown,
       { input }: { input: SetFeatureFlagInput },
-      context: GraphQLContext,
+      context: GraphQLContext
     ) => {
-      context.logger.info({ input }, 'Setting feature flag');
+      context.logger.info({ input }, "Setting feature flag");
 
       const feature = await tenantService.setFeatureFlag(input, context.user?.id);
 
@@ -295,7 +279,7 @@ export const resolvers = {
         input.tenantId,
         input.flagName,
         input.enabled,
-        getActor(context),
+        getActor(context)
       );
 
       context.logger.info(
@@ -304,7 +288,7 @@ export const resolvers = {
           flagName: input.flagName,
           enabled: input.enabled,
         },
-        'Feature flag updated',
+        "Feature flag updated"
       );
 
       return feature;
@@ -313,24 +297,24 @@ export const resolvers = {
     enableFeatureFlag: async (
       _parent: unknown,
       { tenantId, flagName }: { tenantId: string; flagName: string },
-      context: GraphQLContext,
+      context: GraphQLContext
     ) => {
       return resolvers.Mutation.setFeatureFlag(
         _parent,
         { input: { tenantId, flagName, enabled: true } },
-        context,
+        context
       );
     },
 
     disableFeatureFlag: async (
       _parent: unknown,
       { tenantId, flagName }: { tenantId: string; flagName: string },
-      context: GraphQLContext,
+      context: GraphQLContext
     ) => {
       return resolvers.Mutation.setFeatureFlag(
         _parent,
         { input: { tenantId, flagName, enabled: false } },
-        context,
+        context
       );
     },
   },
@@ -341,11 +325,7 @@ export const resolvers = {
       return tenantService.getTenantFeatures(parent.id);
     },
 
-    effectiveFlags: async (
-      parent: Tenant,
-      _args: unknown,
-      context: GraphQLContext,
-    ) => {
+    effectiveFlags: async (parent: Tenant, _args: unknown, context: GraphQLContext) => {
       return tenantService.getEffectiveFeatureFlags(parent.id);
     },
   },

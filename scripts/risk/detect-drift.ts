@@ -1,7 +1,7 @@
-import fs from 'node:fs';
-import path from 'node:path';
+import fs from "node:fs";
+import path from "node:path";
 
-type Band = 'Low' | 'Medium' | 'High' | 'Critical';
+type Band = "Low" | "Medium" | "High" | "Critical";
 
 interface HistoryEntry {
   changeId: string;
@@ -28,8 +28,8 @@ function parseArgs() {
   const args = process.argv.slice(2);
   const options: Record<string, string> = {};
   for (let i = 0; i < args.length; i += 1) {
-    const [key, value] = args[i].split('=');
-    const normalizedKey = key.replace(/^--/, '');
+    const [key, value] = args[i].split("=");
+    const normalizedKey = key.replace(/^--/, "");
     if (value === undefined) {
       options[normalizedKey] = args[i + 1];
       i += 1;
@@ -39,15 +39,15 @@ function parseArgs() {
   }
 
   return {
-    history: options.history ?? 'risk-history.json',
+    history: options.history ?? "risk-history.json",
     output: options.output,
-    window: Number(options.window ?? '10'),
+    window: Number(options.window ?? "10"),
   };
 }
 
 function loadHistory(filePath: string): HistoryEntry[] {
   const absolute = path.resolve(process.cwd(), filePath);
-  const raw = fs.readFileSync(absolute, 'utf8');
+  const raw = fs.readFileSync(absolute, "utf8");
   return JSON.parse(raw) as HistoryEntry[];
 }
 
@@ -81,7 +81,9 @@ function computeDrift(entries: HistoryEntry[], window: number): DriftReport {
   if (baselineAverage > 0) {
     const increase = (recentAverage - baselineAverage) / baselineAverage;
     if (increase > 0.1) {
-      warnings.push(`Risk average increased by ${(increase * 100).toFixed(1)}% (baseline=${baselineAverage.toFixed(2)}, recent=${recentAverage.toFixed(2)}).`);
+      warnings.push(
+        `Risk average increased by ${(increase * 100).toFixed(1)}% (baseline=${baselineAverage.toFixed(2)}, recent=${recentAverage.toFixed(2)}).`
+      );
     }
   }
 
@@ -96,7 +98,7 @@ function computeDrift(entries: HistoryEntry[], window: number): DriftReport {
   }
 
   if (debtTrend >= 0) {
-    warnings.push('Debt burn-down stalled or reversed (non-negative delta).');
+    warnings.push("Debt burn-down stalled or reversed (non-negative delta).");
   }
 
   return {
@@ -112,7 +114,7 @@ function computeDrift(entries: HistoryEntry[], window: number): DriftReport {
 }
 
 function emitReport(report: DriftReport, output?: string) {
-  console.log('[RISK-DRIFT] Drift analysis summary');
+  console.log("[RISK-DRIFT] Drift analysis summary");
   console.log(`- baseline average score: ${report.baselineAverage.toFixed(2)}`);
   console.log(`- recent average score: ${report.recentAverage.toFixed(2)}`);
   console.log(`- exception delta: ${report.exceptionDelta.toFixed(2)}`);
@@ -120,10 +122,10 @@ function emitReport(report: DriftReport, output?: string) {
   console.log(`- debt trend: ${report.debtTrend.toFixed(2)}`);
 
   if (report.warnings.length > 0) {
-    console.warn('[RISK-DRIFT] Warnings detected:');
+    console.warn("[RISK-DRIFT] Warnings detected:");
     report.warnings.forEach((warning) => console.warn(`- ${warning}`));
   } else {
-    console.log('[RISK-DRIFT] No drift warnings detected.');
+    console.log("[RISK-DRIFT] No drift warnings detected.");
   }
 
   if (output) {

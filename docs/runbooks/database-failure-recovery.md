@@ -7,6 +7,7 @@ This runbook covers recovery procedures for PostgreSQL and Neo4j database failur
 ## PostgreSQL Failure Recovery
 
 ### Symptoms
+
 - API returning 500 errors
 - Health check showing "postgres: unhealthy"
 - Connection timeout errors
@@ -38,6 +39,7 @@ psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
 #### Scenario 1: Connection Pool Exhaustion
 
 **Immediate Mitigation:**
+
 ```bash
 # Kill idle connections
 psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
@@ -58,6 +60,7 @@ psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
 ```
 
 **Long-term Fix:**
+
 ```bash
 # Increase max_connections in postgres config
 kubectl edit configmap postgres-config -n intelgraph
@@ -75,6 +78,7 @@ kubectl set env deployment/intelgraph-api -n intelgraph \
 #### Scenario 2: Database Crash/Corruption
 
 **Check Status:**
+
 ```bash
 # Check PostgreSQL pod events
 kubectl describe pod -l app=postgres -n intelgraph
@@ -87,6 +91,7 @@ kubectl exec -it statefulset/postgres -n intelgraph -- df -h
 ```
 
 **Recovery Steps:**
+
 ```bash
 # 1. Stop writes to database (enable read-only mode)
 kubectl scale deployment intelgraph-api -n intelgraph --replicas=0
@@ -133,6 +138,7 @@ watch kubectl get pods -n intelgraph
 #### Scenario 3: Replication Lag
 
 **Check Replication Status:**
+
 ```bash
 # Check replication lag
 psql -h postgres-primary -U $POSTGRES_USER -d intelgraph -c "
@@ -154,6 +160,7 @@ kubectl exec -it statefulset/postgres-replica-0 -n intelgraph -- \
 ```
 
 **Mitigation:**
+
 ```bash
 # Temporary: Route all reads to primary
 kubectl patch service postgres-replica -n intelgraph -p '
@@ -174,6 +181,7 @@ kubectl delete pod postgres-replica-0 -n intelgraph
 ## Neo4j Failure Recovery
 
 ### Symptoms
+
 - Graph queries timing out
 - "Unable to connect to Neo4j" errors
 - Cypher query failures
@@ -202,6 +210,7 @@ cypher-shell -a bolt://neo4j:7687 -u neo4j -p $NEO4J_PASSWORD \
 #### Scenario 1: Neo4j Pod Crash
 
 **Immediate Recovery:**
+
 ```bash
 # Check crash reason
 kubectl describe pod -l app=neo4j -n intelgraph | grep -A 20 "Last State"
@@ -223,6 +232,7 @@ cypher-shell -a bolt://neo4j:7687 -u neo4j -p $NEO4J_PASSWORD \
 #### Scenario 2: Data Corruption
 
 **Check for Corruption:**
+
 ```bash
 # Check consistency
 kubectl exec -it statefulset/neo4j-0 -n intelgraph -- \
@@ -234,6 +244,7 @@ kubectl exec -it statefulset/neo4j-0 -n intelgraph -- \
 ```
 
 **Recovery from Backup:**
+
 ```bash
 # 1. Stop Neo4j
 kubectl scale statefulset neo4j -n intelgraph --replicas=0
@@ -260,6 +271,7 @@ cypher-shell -a bolt://neo4j:7687 -u neo4j -p $NEO4J_PASSWORD \
 #### Scenario 3: Performance Degradation
 
 **Identify Slow Queries:**
+
 ```cypher
 // List slow queries
 CALL dbms.listQueries()
@@ -274,6 +286,7 @@ CALL dbms.killQuery('<query-id>');
 ```
 
 **Check and Rebuild Indexes:**
+
 ```cypher
 // Check index status
 SHOW INDEXES
@@ -293,6 +306,7 @@ RETURN name, state, populationPercent;
 ```
 
 **Optimize Memory:**
+
 ```bash
 # Update Neo4j memory settings
 kubectl edit configmap neo4j-config -n intelgraph
@@ -357,6 +371,7 @@ neo4j-admin replay \
 After recovery, verify:
 
 ### PostgreSQL
+
 - [ ] Connection successful
 - [ ] Record counts match expectations
 - [ ] Recent data visible
@@ -365,6 +380,7 @@ After recovery, verify:
 - [ ] Performance normal
 
 ### Neo4j
+
 - [ ] Connection successful
 - [ ] Node/relationship counts correct
 - [ ] Indexes online

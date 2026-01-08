@@ -46,7 +46,7 @@ models:
   purpose: stable API docs, comparisons
   sources:
   - BigModel docs
-open_weights:
+    open_weights:
 - name: GLM-4.6 (HF)
   license: MIT (open weights)
   capability: 200k ctx MoE; improved coding/reasoning vs 4.5
@@ -61,30 +61,30 @@ open_weights:
   - HF 9B Chat
   - HF 9B Chat 1M
   - chatglm.cpp repo (GLM-4(V) support)
-access_and_pricing:
-  primary_portal: BigModel (official rates & quotas)
-  mirrors: CometAPI / OpenRouter / SiliconFlow (for VLM + alt pricing)
-  migration_note: Sept 2025 “Claude→GLM” switch offer (URL swap + bonus tokens)
-  sources:
+    access_and_pricing:
+    primary_portal: BigModel (official rates & quotas)
+    mirrors: CometAPI / OpenRouter / SiliconFlow (for VLM + alt pricing)
+    migration_note: Sept 2025 “Claude→GLM” switch offer (URL swap + bonus tokens)
+    sources:
   - BigModel pricing
   - CometAPI pricing explainer
   - Reuters migration story (+ AOL syndication)
-capability_highlights:
+    capability_highlights:
 - 200k context (GLM-4.6) with upgraded tool-use/thinking
 - dual-mode execution (deep-think vs fast)
 - long context + artifact-level code gen (HTML/SVG/Python)
 - VLM on 4.5V for image understanding grounded to 4.5 text stack
 - local/open path with 9B class + HF GLM-4.6 weights
-sources:
+  sources:
 - Z.ai blog
 - SiliconFlow blog
 - HF pages
-defaults:
+  defaults:
   choose:
   - Max-IQ: GLM-4.6 (fallback 4.5 or 4.5-Air for latency/cost)
   - Multimodal: GLM-4.5V
   - On-prem/local: GLM-4-9B-Chat via chatglm.cpp (or HF GLM-4.6 for research)
-risk_notes:
+    risk_notes:
 - Always verify official pricing on BigModel before quoting
 - Provider features (context, tool-use) vary; pin per-environment
 - China/US policy shifts can affect provider access; keep a fallback route

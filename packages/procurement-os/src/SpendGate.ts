@@ -1,4 +1,4 @@
-import { ApprovalRequirement, IntakeRequest, RiskTier } from './types';
+import { ApprovalRequirement, IntakeRequest, RiskTier } from "./types";
 
 interface SpendThresholds {
   manager: number;
@@ -18,16 +18,16 @@ export class SpendGate {
   constructor(private readonly thresholds: SpendThresholds = DEFAULT_THRESHOLDS) {}
 
   evaluate(intake: IntakeRequest, riskTier: RiskTier): ApprovalRequirement {
-    const approvers: string[] = ['manager'];
+    const approvers: string[] = ["manager"];
 
     if (intake.spendEstimate >= this.thresholds.manager) {
-      approvers.push('director');
+      approvers.push("director");
     }
     if (intake.spendEstimate >= this.thresholds.director) {
-      approvers.push('vp');
+      approvers.push("vp");
     }
     if (intake.spendEstimate >= this.thresholds.vp) {
-      approvers.push('cfo');
+      approvers.push("cfo");
     }
 
     const requiresExecutiveSignoff = riskTier === 0 || intake.spendEstimate >= this.thresholds.cfo;

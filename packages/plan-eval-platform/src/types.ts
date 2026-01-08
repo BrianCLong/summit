@@ -1,18 +1,18 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================================================
 // TRACE SCHEMA - Canonical format for eval traces
 // ============================================================================
 
 export const TraceEventTypeSchema = z.enum([
-  'request_start',
-  'request_end',
-  'tool_call_start',
-  'tool_call_end',
-  'routing_decision',
-  'safety_check',
-  'error',
-  'metric',
+  "request_start",
+  "request_end",
+  "tool_call_start",
+  "tool_call_end",
+  "routing_decision",
+  "safety_check",
+  "error",
+  "metric",
 ]);
 
 export type TraceEventType = z.infer<typeof TraceEventTypeSchema>;
@@ -35,7 +35,7 @@ export const TraceEventSchema = z.object({
       latencyMs: z.number().optional(),
     })
     .optional(),
-  status: z.enum(['success', 'failure', 'pending']).optional(),
+  status: z.enum(["success", "failure", "pending"]).optional(),
   error: z
     .object({
       code: z.string(),
@@ -86,7 +86,7 @@ export type ToolDefinition = z.infer<typeof ToolDefinitionSchema>;
 
 export const ScenarioStepSchema = z.object({
   id: z.string(),
-  type: z.enum(['prompt', 'tool_call', 'assertion', 'wait']),
+  type: z.enum(["prompt", "tool_call", "assertion", "wait"]),
   input: z.unknown().optional(),
   expectedOutput: z.unknown().optional(),
   timeout: z.number().optional(),
@@ -103,13 +103,7 @@ export const ScenarioStepSchema = z.object({
 export type ScenarioStep = z.infer<typeof ScenarioStepSchema>;
 
 export const SuccessCriteriaSchema = z.object({
-  type: z.enum([
-    'exact_match',
-    'contains',
-    'regex',
-    'semantic_similarity',
-    'custom',
-  ]),
+  type: z.enum(["exact_match", "contains", "regex", "semantic_similarity", "custom"]),
   value: z.unknown(),
   threshold: z.number().optional(),
 });
@@ -121,16 +115,16 @@ export const ScenarioSchema = z.object({
   name: z.string(),
   description: z.string().optional(),
   category: z.enum([
-    'code_correction',
-    'code_explanation',
-    'data_analysis',
-    'multi_tool_pipeline',
-    'agentic_flow',
-    'reasoning',
-    'safety',
-    'other',
+    "code_correction",
+    "code_explanation",
+    "data_analysis",
+    "multi_tool_pipeline",
+    "agentic_flow",
+    "reasoning",
+    "safety",
+    "other",
   ]),
-  difficulty: z.enum(['easy', 'medium', 'hard', 'expert']).optional(),
+  difficulty: z.enum(["easy", "medium", "hard", "expert"]).optional(),
   tags: z.array(z.string()).optional(),
   tools: z.array(ToolDefinitionSchema),
   steps: z.array(ScenarioStepSchema),
@@ -228,7 +222,7 @@ export interface BenchmarkReport {
 // ROUTING - Cost-aware router types
 // ============================================================================
 
-export type RouterType = 'random' | 'greedy_cost' | 'quality_first' | 'adaptive';
+export type RouterType = "random" | "greedy_cost" | "quality_first" | "adaptive";
 
 export interface RoutingConfig {
   type: RouterType;
@@ -267,16 +261,16 @@ export interface RoutingDecision {
 // ============================================================================
 
 export type SafetyCheckType =
-  | 'jailbreak_detection'
-  | 'pii_detection'
-  | 'harmful_content'
-  | 'injection_attack'
-  | 'data_exfiltration';
+  | "jailbreak_detection"
+  | "pii_detection"
+  | "harmful_content"
+  | "injection_attack"
+  | "data_exfiltration";
 
 export interface SafetyCheckResult {
   type: SafetyCheckType;
   passed: boolean;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   details: string;
   confidence: number;
   flaggedContent?: string;
@@ -289,7 +283,7 @@ export interface SafetyConfig {
   customPatterns?: Array<{
     name: string;
     pattern: string;
-    severity: SafetyCheckResult['severity'];
+    severity: SafetyCheckResult["severity"];
   }>;
 }
 
@@ -319,7 +313,7 @@ export interface CostEstimate {
 
 export interface TelemetryConfig {
   outputPath: string;
-  format: 'jsonl' | 'json' | 'parquet';
+  format: "jsonl" | "json" | "parquet";
   flushIntervalMs: number;
   enableMetrics: boolean;
   enableTracing: boolean;

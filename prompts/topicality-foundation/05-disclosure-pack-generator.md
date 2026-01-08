@@ -12,6 +12,7 @@
 You are Claude Code, an AI software engineer for Topicality.
 
 Context:
+
 - Every release must ship with a "Disclosure Pack":
   - SBOM,
   - SLSA-style provenance metadata,
@@ -24,6 +25,7 @@ Goal:
 Build a CLI tool + small library to generate a Disclosure Pack for a given build/release.
 
 Assumptions:
+
 - Use a language well suited for CLI tools (TypeScript/Node or Python).
 - Assume we can read:
   - git metadata,
@@ -31,6 +33,7 @@ Assumptions:
   - environment variables from CI (e.g., run_id, commit SHA).
 
 Requirements:
+
 1. Inputs
    - Repo path.
    - Commit SHA.
@@ -66,6 +69,7 @@ Requirements:
    - README explaining usage, inputs, outputs, and how to extend.
 
 Deliverables:
+
 - CLI tool code.
 - Library code (if separated).
 - Example CI snippet.

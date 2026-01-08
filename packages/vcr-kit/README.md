@@ -62,23 +62,23 @@ import {
   consentPresent,
   FileRevocationRegistry,
   verifyConsentReceipt,
-} from '@summitsec/vcr-kit';
+} from "@summitsec/vcr-kit";
 
 const resolver = new InMemoryDidResolver();
-const revocations = new FileRevocationRegistry('data/revocations.json');
+const revocations = new FileRevocationRegistry("data/revocations.json");
 
 const credential = await issueConsentReceipt({
-  issuerDid: 'did:key:zExampleIssuer',
+  issuerDid: "did:key:zExampleIssuer",
   issuerPrivateKey: issuerKeyBytes,
-  subject: { id: 'did:key:zExampleSubject' },
+  subject: { id: "did:key:zExampleSubject" },
   claims: {
-    purpose: [{ purposeId: 'marketing-updates' }],
-    scope: [{ resource: 'email', actions: ['send'] }],
+    purpose: [{ purposeId: "marketing-updates" }],
+    scope: [{ resource: "email", actions: ["send"] }],
     retention: {
-      policyUri: 'https://policies.summit.example/privacy#retention',
-      expiresAt: '2026-01-01T00:00:00Z',
+      policyUri: "https://policies.summit.example/privacy#retention",
+      expiresAt: "2026-01-01T00:00:00Z",
     },
-    tenant: 'summit-retail',
+    tenant: "summit-retail",
   },
 });
 
@@ -91,9 +91,9 @@ const result = await verifyConsentReceipt(credential, {
 Register the Express middleware to block missing or revoked receipts:
 
 ```ts
-import express from 'express';
-import bodyParser from 'body-parser';
-import { consentPresent, InMemoryDidResolver } from '@summitsec/vcr-kit';
+import express from "express";
+import bodyParser from "body-parser";
+import { consentPresent, InMemoryDidResolver } from "@summitsec/vcr-kit";
 
 const app = express();
 app.use(bodyParser.json());
@@ -104,7 +104,7 @@ app.use(
   consentPresent({
     resolver,
     revocationRegistry: revocations,
-  }),
+  })
 );
 ```
 

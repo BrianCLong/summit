@@ -9,7 +9,7 @@
  * @module pages/Admin/UserManagement/RoleAssignment
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Box,
@@ -34,14 +34,14 @@ import {
   TextField,
   Tooltip,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
   Schedule as ScheduleIcon,
-} from '@mui/icons-material';
-import { useAdminRoles } from '../../../hooks/useAdminRoles';
-import { ManagedUser, RoleAssignment as RoleAssignmentType } from '../../../services/admin-api';
+} from "@mui/icons-material";
+import { useAdminRoles } from "../../../hooks/useAdminRoles";
+import { ManagedUser, RoleAssignment as RoleAssignmentType } from "../../../services/admin-api";
 
 interface RoleAssignmentProps {
   open: boolean;
@@ -49,23 +49,12 @@ interface RoleAssignmentProps {
   onClose: () => void;
 }
 
-export default function RoleAssignment({
-  open,
-  user,
-  onClose,
-}: RoleAssignmentProps) {
-  const {
-    roles,
-    userRoles,
-    loading,
-    error,
-    loadUserRoles,
-    assignRoleToUser,
-    revokeRoleFromUser,
-  } = useAdminRoles();
+export default function RoleAssignment({ open, user, onClose }: RoleAssignmentProps) {
+  const { roles, userRoles, loading, error, loadUserRoles, assignRoleToUser, revokeRoleFromUser } =
+    useAdminRoles();
 
-  const [selectedRole, setSelectedRole] = useState('');
-  const [expiresAt, setExpiresAt] = useState('');
+  const [selectedRole, setSelectedRole] = useState("");
+  const [expiresAt, setExpiresAt] = useState("");
   const [showExpiry, setShowExpiry] = useState(false);
 
   useEffect(() => {
@@ -84,8 +73,8 @@ export default function RoleAssignment({
     );
 
     if (result) {
-      setSelectedRole('');
-      setExpiresAt('');
+      setSelectedRole("");
+      setExpiresAt("");
       setShowExpiry(false);
     }
   };
@@ -100,18 +89,16 @@ export default function RoleAssignment({
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return null;
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
-        Manage Roles for {user.fullName}
-      </DialogTitle>
+      <DialogTitle>Manage Roles for {user.fullName}</DialogTitle>
       <DialogContent>
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
@@ -142,7 +129,7 @@ export default function RoleAssignment({
                     <ListItem
                       key={assignment.id}
                       sx={{
-                        bgcolor: 'action.hover',
+                        bgcolor: "action.hover",
                         borderRadius: 1,
                         mb: 1,
                       }}
@@ -243,9 +230,9 @@ export default function RoleAssignment({
                     size="small"
                     startIcon={<ScheduleIcon />}
                     onClick={() => setShowExpiry(!showExpiry)}
-                    color={showExpiry ? 'primary' : 'inherit'}
+                    color={showExpiry ? "primary" : "inherit"}
                   >
-                    {showExpiry ? 'Remove Expiry' : 'Set Expiry'}
+                    {showExpiry ? "Remove Expiry" : "Set Expiry"}
                   </Button>
                 </Stack>
 
@@ -278,7 +265,7 @@ export default function RoleAssignment({
 
             {/* Role Info */}
             {selectedRole && (
-              <Box sx={{ bgcolor: 'action.hover', p: 2, borderRadius: 1 }}>
+              <Box sx={{ bgcolor: "action.hover", p: 2, borderRadius: 1 }}>
                 <Typography variant="subtitle2" gutterBottom>
                   Role Details
                 </Typography>

@@ -10,7 +10,7 @@
  * @module prov-ledger-extensions
  */
 
-export * from './evidence-chain';
-export * from './ai-attribution';
-export * from './export-manifest';
-export * from './citation-tracker';
+export * from "./evidence-chain";
+export * from "./ai-attribution";
+export * from "./export-manifest";
+export * from "./citation-tracker";

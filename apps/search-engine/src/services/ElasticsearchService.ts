@@ -1,7 +1,7 @@
-import { Client } from '@elastic/elasticsearch';
-import { createLogger, format, transports, Logger } from 'winston';
+import { Client } from "@elastic/elasticsearch";
+import { createLogger, format, transports, Logger } from "winston";
 
-import { SearchIndex, SearchQuery, SearchResponse, SearchResult } from '../types';
+import { SearchIndex, SearchQuery, SearchResponse, SearchResult } from "../types";
 
 export class ElasticsearchService {
   private client: Client;
@@ -12,28 +12,24 @@ export class ElasticsearchService {
 
   constructor() {
     this.client = new Client({
-      node: process.env.ELASTICSEARCH_URL || 'http://localhost:9200',
+      node: process.env.ELASTICSEARCH_URL || "http://localhost:9200",
       auth: process.env.ELASTICSEARCH_AUTH
         ? {
-            username: process.env.ELASTICSEARCH_USERNAME || 'elastic',
-            password: process.env.ELASTICSEARCH_PASSWORD || 'changeme',
+            username: process.env.ELASTICSEARCH_USERNAME || "elastic",
+            password: process.env.ELASTICSEARCH_PASSWORD || "changeme",
           }
         : undefined,
       requestTimeout: 30000,
       maxRetries: 3,
-      resurrectStrategy: 'ping',
+      resurrectStrategy: "ping",
     });
 
     this.logger = createLogger({
-      level: process.env.LOG_LEVEL || 'info',
-      format: format.combine(
-        format.timestamp(),
-        format.errors({ stack: true }),
-        format.json(),
-      ),
+      level: process.env.LOG_LEVEL || "info",
+      format: format.combine(format.timestamp(), format.errors({ stack: true }), format.json()),
       transports: [
         new transports.Console(),
-        new transports.File({ filename: 'logs/search-engine.log' }),
+        new transports.File({ filename: "logs/search-engine.log" }),
       ],
     });
   }
@@ -44,7 +40,7 @@ export class ElasticsearchService {
     try {
       const elasticQuery = this.buildElasticsearchQuery(query);
 
-      this.logger.info('Executing search query', {
+      this.logger.info("Executing search query", {
         query: query.query,
         searchType: query.searchType,
         filters: query.filters,
@@ -55,7 +51,7 @@ export class ElasticsearchService {
         body: elasticQuery,
         track_total_hits: true,
         request_cache: true,
-        timeout: '30s',
+        timeout: "30s",
       });
       const body = this.getBody<any>(response);
 
@@ -73,7 +69,7 @@ export class ElasticsearchService {
         scrollId: body._scroll_id,
       };
 
-      this.logger.info('Search completed', {
+      this.logger.info("Search completed", {
         query: query.query,
         resultCount: searchResponse.results.length,
         totalHits: searchResponse.total.value,
@@ -83,7 +79,7 @@ export class ElasticsearchService {
 
       return searchResponse;
     } catch (error) {
-      this.logger.error('Search failed', {
+      this.logger.error("Search failed", {
         query: query.query,
         error: error instanceof Error ? error.message : String(error),
         executionTime: Date.now() - startTime,
@@ -96,8 +92,7 @@ export class ElasticsearchService {
     const esQuery: any = {
       query: this.buildQueryClause(query),
       size: query.pagination?.size || 20,
-      from:
-        ((query.pagination?.page || 1) - 1) * (query.pagination?.size || 20),
+      from: ((query.pagination?.page || 1) - 1) * (query.pagination?.size || 20),
     };
 
     // Add sorting
@@ -111,7 +106,7 @@ export class ElasticsearchService {
         },
       ];
     } else {
-      esQuery.sort = [{ _score: { order: 'desc' } }];
+      esQuery.sort = [{ _score: { order: "desc" } }];
     }
 
     // Add highlighting
@@ -121,8 +116,8 @@ export class ElasticsearchService {
           acc[field] = {
             fragment_size: query.highlight!.fragmentSize || 150,
             number_of_fragments: query.highlight!.numberOfFragments || 3,
-            pre_tags: query.highlight!.preTags || ['<mark>'],
-            post_tags: query.highlight!.postTags || ['</mark>'],
+            pre_tags: query.highlight!.preTags || ["<mark>"],
+            post_tags: query.highlight!.postTags || ["</mark>"],
           };
           return acc;
         }, {} as any),
@@ -155,13 +150,13 @@ export class ElasticsearchService {
     // Main query
     if (query.query && query.query.trim()) {
       switch (query.searchType) {
-        case 'semantic':
+        case "semantic":
           boolQuery.bool.must.push(this.buildSemanticQuery(query.query));
           break;
-        case 'fuzzy':
+        case "fuzzy":
           boolQuery.bool.must.push(this.buildFuzzyQuery(query.query));
           break;
-        case 'hybrid':
+        case "hybrid":
           boolQuery.bool.should.push(this.buildFullTextQuery(query.query));
           boolQuery.bool.should.push(this.buildSemanticQuery(query.query));
           boolQuery.bool.minimum_should_match = 1;
@@ -192,19 +187,19 @@ export class ElasticsearchService {
 
       if (query.filters.entityTypes && query.filters.entityTypes.length > 0) {
         boolQuery.bool.filter.push({
-          terms: { 'entityType.keyword': query.filters.entityTypes },
+          terms: { "entityType.keyword": query.filters.entityTypes },
         });
       }
 
       if (query.filters.sources && query.filters.sources.length > 0) {
         boolQuery.bool.filter.push({
-          terms: { 'source.keyword': query.filters.sources },
+          terms: { "source.keyword": query.filters.sources },
         });
       }
 
       if (query.filters.tags && query.filters.tags.length > 0) {
         boolQuery.bool.filter.push({
-          terms: { 'tags.keyword': query.filters.tags },
+          terms: { "tags.keyword": query.filters.tags },
         });
       }
 
@@ -242,9 +237,7 @@ export class ElasticsearchService {
     if (query.boost) {
       if (query.boost.fields) {
         Object.entries(query.boost.fields).forEach(([field, boost]) => {
-          const fieldQuery = boolQuery.bool.must.find(
-            (q: any) => q.multi_match,
-          );
+          const fieldQuery = boolQuery.bool.must.find((q: any) => q.multi_match);
           if (fieldQuery && fieldQuery.multi_match) {
             fieldQuery.multi_match.fields = fieldQuery.multi_match.fields || [];
             fieldQuery.multi_match.fields.push(`${field}^${boost}`);
@@ -260,12 +253,12 @@ export class ElasticsearchService {
               field_value_factor: {
                 field: func.field,
                 factor: func.factor || 1.2,
-                modifier: func.modifier || 'log1p',
+                modifier: func.modifier || "log1p",
                 missing: func.missing || 1,
               },
             })),
-            score_mode: 'sum',
-            boost_mode: 'multiply',
+            score_mode: "sum",
+            boost_mode: "multiply",
           },
         };
       }
@@ -278,16 +271,10 @@ export class ElasticsearchService {
     return {
       multi_match: {
         query: queryText,
-        fields: [
-          'title^3',
-          'content^2',
-          'description^1.5',
-          'tags^2',
-          'metadata.*',
-        ],
-        type: 'best_fields',
-        operator: 'or',
-        fuzziness: 'AUTO',
+        fields: ["title^3", "content^2", "description^1.5", "tags^2", "metadata.*"],
+        type: "best_fields",
+        operator: "or",
+        fuzziness: "AUTO",
         prefix_length: 2,
         max_expansions: 50,
       },
@@ -321,7 +308,7 @@ export class ElasticsearchService {
           fuzzy: {
             content: {
               value: word,
-              fuzziness: 'AUTO',
+              fuzziness: "AUTO",
               max_expansions: 50,
               prefix_length: 2,
             },
@@ -337,43 +324,43 @@ export class ElasticsearchService {
 
     facets.forEach((facet) => {
       switch (facet) {
-        case 'entityTypes':
+        case "entityTypes":
           aggs.entityTypes = {
             terms: {
-              field: 'entityType.keyword',
+              field: "entityType.keyword",
               size: 20,
             },
           };
           break;
-        case 'sources':
+        case "sources":
           aggs.sources = {
             terms: {
-              field: 'source.keyword',
+              field: "source.keyword",
               size: 20,
             },
           };
           break;
-        case 'tags':
+        case "tags":
           aggs.tags = {
             terms: {
-              field: 'tags.keyword',
+              field: "tags.keyword",
               size: 20,
             },
           };
           break;
-        case 'dateHistogram':
+        case "dateHistogram":
           aggs.dateHistogram = {
             date_histogram: {
-              field: 'createdAt',
-              calendar_interval: 'day',
+              field: "createdAt",
+              calendar_interval: "day",
               min_doc_count: 1,
             },
           };
           break;
-        case 'confidence':
+        case "confidence":
           aggs.confidence = {
             histogram: {
-              field: 'confidence',
+              field: "confidence",
               interval: 0.1,
               min_doc_count: 1,
             },
@@ -386,7 +373,7 @@ export class ElasticsearchService {
   }
 
   private getSearchIndices(query: SearchQuery): string[] {
-    const indices = ['entities', 'cases', 'documents', 'comments', 'events'];
+    const indices = ["entities", "cases", "documents", "comments", "events"];
 
     if (query.filters?.entityTypes) {
       return query.filters.entityTypes.map((type) => `${type}s`);
@@ -444,7 +431,7 @@ export class ElasticsearchService {
                 text: option.text,
                 score: option.score,
                 freq: option.freq,
-              })),
+              }))
             );
           }
         });
@@ -456,9 +443,7 @@ export class ElasticsearchService {
 
   private getQueryEmbedding(queryText: string): number[] {
     const base = Math.max(queryText.length, 1);
-    return new Array(384)
-      .fill(0)
-      .map((_, idx) => ((idx + 1) * base) % 1);
+    return new Array(384).fill(0).map((_, idx) => ((idx + 1) * base) % 1);
   }
 
   async createIndex(index: SearchIndex): Promise<void> {
@@ -469,7 +454,7 @@ export class ElasticsearchService {
           mappings: index.mappings as Record<string, unknown>,
           settings: index.settings as Record<string, unknown>,
         },
-      } as Parameters<Client['indices']['create']>[0];
+      } as Parameters<Client["indices"]["create"]>[0];
 
       await this.client.indices.create(createRequest as any);
 
@@ -480,14 +465,14 @@ export class ElasticsearchService {
               add: { index: index.name, alias },
             })) as Array<{ add: { index: string; alias: string } }>,
           },
-        } as Parameters<Client['indices']['updateAliases']>[0];
+        } as Parameters<Client["indices"]["updateAliases"]>[0];
 
         await this.client.indices.updateAliases(aliasRequest as any);
       }
 
-      this.logger.info('Index created successfully', { indexName: index.name });
+      this.logger.info("Index created successfully", { indexName: index.name });
     } catch (error) {
-      this.logger.error('Failed to create index', {
+      this.logger.error("Failed to create index", {
         indexName: index.name,
         error: error instanceof Error ? error.message : String(error),
       });
@@ -499,9 +484,9 @@ export class ElasticsearchService {
     try {
       const response = await this.client.indices.delete({ index: indexName });
       this.getBody(response);
-      this.logger.info('Index deleted successfully', { indexName });
+      this.logger.info("Index deleted successfully", { indexName });
     } catch (error) {
-      this.logger.error('Failed to delete index', {
+      this.logger.error("Failed to delete index", {
         indexName,
         error: error instanceof Error ? error.message : String(error),
       });
@@ -509,23 +494,19 @@ export class ElasticsearchService {
     }
   }
 
-  async indexDocument(
-    indexName: string,
-    id: string,
-    document: any,
-  ): Promise<void> {
+  async indexDocument(indexName: string, id: string, document: any): Promise<void> {
     try {
       const response = await this.client.index({
         index: indexName,
         id,
         body: document,
-        refresh: 'wait_for',
+        refresh: "wait_for",
       });
       this.getBody(response);
 
-      this.logger.debug('Document indexed successfully', { indexName, id });
+      this.logger.debug("Document indexed successfully", { indexName, id });
     } catch (error) {
-      this.logger.error('Failed to index document', {
+      this.logger.error("Failed to index document", {
         indexName,
         id,
         error: error instanceof Error ? error.message : String(error),
@@ -538,7 +519,7 @@ export class ElasticsearchService {
     try {
       const response = await this.client.bulk({
         body: operations,
-        refresh: 'wait_for',
+        refresh: "wait_for",
       });
       const body = this.getBody<any>(response);
 
@@ -556,18 +537,18 @@ export class ElasticsearchService {
           }
         });
 
-        this.logger.error('Bulk indexing partially failed', {
+        this.logger.error("Bulk indexing partially failed", {
           errorCount: erroredDocuments.length,
           errors: erroredDocuments,
         });
       }
 
-      this.logger.info('Bulk indexing completed', {
+      this.logger.info("Bulk indexing completed", {
         took: body.took,
         errors: body.errors,
       });
     } catch (error) {
-      this.logger.error('Bulk indexing failed', {
+      this.logger.error("Bulk indexing failed", {
         error: error instanceof Error ? error.message : String(error),
       });
       throw error;
@@ -577,13 +558,13 @@ export class ElasticsearchService {
   async getIndexStats(): Promise<Record<string, any>> {
     try {
       const response = await this.client.indices.stats({
-        index: '_all',
-        metric: ['docs', 'store', 'indexing', 'search'],
+        index: "_all",
+        metric: ["docs", "store", "indexing", "search"],
       });
 
       return this.getBody<any>(response).indices;
     } catch (error) {
-      this.logger.error('Failed to get index stats', {
+      this.logger.error("Failed to get index stats", {
         error: error instanceof Error ? error.message : String(error),
       });
       throw error;
@@ -604,7 +585,7 @@ export class ElasticsearchService {
       };
     } catch (error) {
       return {
-        status: 'red',
+        status: "red",
         details: {
           error: error instanceof Error ? error.message : String(error),
         },

@@ -9,6 +9,7 @@ The Summit Cloud Data Platform provides a comprehensive, enterprise-grade multi-
 ### Multi-Cloud Support
 
 The platform supports AWS, Azure, and GCP with:
+
 - **Cloud-agnostic design patterns**
 - **Cross-cloud data replication**
 - **Unified API across providers**
@@ -51,27 +52,27 @@ The platform supports AWS, Azure, and GCP with:
 import { MultiCloudManager, CloudProvider } from '@intelgraph/cloud-platform';
 
 const deployment = {
-  primary: {
-    provider: CloudProvider.AWS,
-    region: 'us-east-1',
-    credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-    }
-  },
-  secondary: [
-    {
-      provider: CloudProvider.AZURE,
-      region: 'eastus',
-      credentials: {
-        clientId: process.env.AZURE_CLIENT_ID,
-        clientSecret: process.env.AZURE_CLIENT_SECRET,
-        tenantId: process.env.AZURE_TENANT_ID
-      }
-    }
-  ],
-  replicationStrategy: 'async',
-  failoverEnabled: true
+primary: {
+provider: CloudProvider.AWS,
+region: 'us-east-1',
+credentials: {
+accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+}
+},
+secondary: [
+{
+provider: CloudProvider.AZURE,
+region: 'eastus',
+credentials: {
+clientId: process.env.AZURE_CLIENT_ID,
+clientSecret: process.env.AZURE_CLIENT_SECRET,
+tenantId: process.env.AZURE_TENANT_ID
+}
+}
+],
+replicationStrategy: 'async',
+failoverEnabled: true
 };
 
 const manager = new MultiCloudManager(deployment);
@@ -86,19 +87,19 @@ import { LakehouseManager, TableFormat } from '@intelgraph/lakehouse';
 const lakehouse = new LakehouseManager();
 
 const table = await lakehouse.createTable({
-  name: 'intelligence_data',
-  format: TableFormat.DELTA_LAKE,
-  schema: {
-    columns: [
-      { name: 'id', type: 'string', nullable: false },
-      { name: 'timestamp', type: 'timestamp', nullable: false },
-      { name: 'entity', type: 'string', nullable: false },
-      { name: 'data', type: 'map', nullable: true }
-    ],
-    partitionKeys: ['timestamp']
-  },
-  location: 's3://my-lakehouse/intelligence_data',
-  compression: 'snappy'
+name: 'intelligence_data',
+format: TableFormat.DELTA_LAKE,
+schema: {
+columns: [
+{ name: 'id', type: 'string', nullable: false },
+{ name: 'timestamp', type: 'timestamp', nullable: false },
+{ name: 'entity', type: 'string', nullable: false },
+{ name: 'data', type: 'map', nullable: true }
+],
+partitionKeys: ['timestamp']
+},
+location: 's3://my-lakehouse/intelligence_data',
+compression: 'snappy'
 });
 \`\`\`
 
@@ -108,19 +109,19 @@ const table = await lakehouse.createTable({
 import { UnifiedAnalyticsEngine } from '@intelgraph/unified-analytics';
 
 const analytics = new UnifiedAnalyticsEngine({
-  enableAdaptiveExecution: true,
-  enableCaching: true,
-  maxConcurrency: 10,
-  queryTimeout: 300000
+enableAdaptiveExecution: true,
+enableCaching: true,
+maxConcurrency: 10,
+queryTimeout: 300000
 });
 
 const result = await analytics.executeSQL(\`
-  SELECT entity, COUNT(*) as count
-  FROM intelligence_data
-  WHERE timestamp >= '2024-01-01'
-  GROUP BY entity
-  ORDER BY count DESC
-  LIMIT 10
+SELECT entity, COUNT(\*) as count
+FROM intelligence_data
+WHERE timestamp >= '2024-01-01'
+GROUP BY entity
+ORDER BY count DESC
+LIMIT 10
 \`);
 \`\`\`
 
@@ -129,12 +130,12 @@ const result = await analytics.executeSQL(\`
 \`\`\`typescript
 // Query data as it existed 1 hour ago
 const historicalData = await table.readAtVersion({
-  timestamp: new Date(Date.now() - 60 * 60 * 1000)
+timestamp: new Date(Date.now() - 60 _ 60 _ 1000)
 });
 
 // Query specific version
 const versionData = await table.readAtVersion({
-  version: 5
+version: 5
 });
 \`\`\`
 
@@ -147,23 +148,23 @@ const governance = new GovernanceManager();
 
 // Create access policy
 await governance.createPolicy({
-  principal: 'analyst-team',
-  resource: 'intelligence_data',
-  access: AccessLevel.READ
+principal: 'analyst-team',
+resource: 'intelligence_data',
+access: AccessLevel.READ
 });
 
 // Check access
 const hasAccess = await governance.checkAccess(
-  'user@example.com',
-  'intelligence_data',
-  'read'
+'user@example.com',
+'intelligence_data',
+'read'
 );
 
 // Detect PII
 const piiResult = await governance.detectPII({
-  name: 'John Doe',
-  email: 'john@example.com',
-  ssn: '123-45-6789'
+name: 'John Doe',
+email: 'john@example.com',
+ssn: '123-45-6789'
 });
 \`\`\`
 
@@ -178,10 +179,10 @@ const costManager = new CloudCostManager();
 
 // Set budget
 costManager.setBudget({
-  provider: CloudProvider.AWS,
-  monthlyLimit: 10000,
-  alertThresholds: [0.7, 0.85, 0.95],
-  notificationEmails: ['admin@example.com']
+provider: CloudProvider.AWS,
+monthlyLimit: 10000,
+alertThresholds: [0.7, 0.85, 0.95],
+notificationEmails: ['admin@example.com']
 });
 
 // Get cost trends
@@ -200,12 +201,12 @@ const suggestions = costManager.getOptimizationSuggestions(CloudProvider.AWS);
 import { DisasterRecoveryManager } from '@intelgraph/cloud-platform';
 
 const drConfig = {
-  enabled: true,
-  rto: 60, // 1 hour recovery time objective
-  rpo: 15, // 15 minutes recovery point objective
-  backupRegions: ['us-west-2', 'eu-west-1'],
-  failoverPriority: [CloudProvider.AWS, CloudProvider.AZURE],
-  automatedFailover: true
+enabled: true,
+rto: 60, // 1 hour recovery time objective
+rpo: 15, // 15 minutes recovery point objective
+backupRegions: ['us-west-2', 'eu-west-1'],
+failoverPriority: [CloudProvider.AWS, CloudProvider.AZURE],
+automatedFailover: true
 };
 
 const drManager = new DisasterRecoveryManager(drConfig, multiCloudManager);
@@ -218,9 +219,9 @@ const canFailover = await drManager.testFailover(CloudProvider.AZURE);
 
 // Initiate failover
 await drManager.initiateFailover(
-  CloudProvider.AWS,
-  CloudProvider.AZURE,
-  'Primary region outage'
+CloudProvider.AWS,
+CloudProvider.AZURE,
+'Primary region outage'
 );
 \`\`\`
 
@@ -291,9 +292,9 @@ console.log(\`Optimization saved \${result.bytesRemoved / 1024 / 1024} MB\`);
 
 \`\`\`typescript
 const analytics = new UnifiedAnalyticsEngine({
-  enableCaching: true,
-  // Cache frequently accessed data
-  // Automatic cache invalidation on table updates
+enableCaching: true,
+// Cache frequently accessed data
+// Automatic cache invalidation on table updates
 });
 \`\`\`
 
@@ -326,16 +327,19 @@ const analytics = new UnifiedAnalyticsEngine({
 ### Common Issues
 
 **Slow Queries**
+
 - Check partition pruning effectiveness
 - Verify file sizes aren't too small
 - Consider Z-ordering frequently filtered columns
 
 **High Costs**
+
 - Review storage lifecycle policies
 - Check for unused resources
 - Optimize query patterns
 
 **Access Denied**
+
 - Verify access policies
 - Check audit logs
 - Ensure proper authentication
@@ -345,6 +349,7 @@ const analytics = new UnifiedAnalyticsEngine({
 ### REST APIs
 
 **Lakehouse Service** (Port 4200)
+
 - `POST /api/tables` - Create table
 - `GET /api/tables` - List tables
 - `POST /api/query` - Execute query
@@ -352,6 +357,7 @@ const analytics = new UnifiedAnalyticsEngine({
 - `POST /api/tables/:name/optimize` - Optimize table
 
 **Cloud Platform Service** (Port 4300)
+
 - `POST /api/cloud/init` - Initialize multi-cloud
 - `GET /api/cloud/resources` - List resources
 - `GET /api/cloud/recommendations` - Get optimization recommendations
@@ -361,6 +367,7 @@ const analytics = new UnifiedAnalyticsEngine({
 ## Support
 
 For issues and questions:
+
 - GitHub: https://github.com/summit/cloud-platform
 - Documentation: https://docs.summit.io/cloud-platform
 - Community: https://community.summit.io

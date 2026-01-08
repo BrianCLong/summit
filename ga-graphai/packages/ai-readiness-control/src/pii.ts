@@ -1,15 +1,15 @@
-import crypto from 'crypto';
-import { PiiRule } from './types.js';
+import crypto from "crypto";
+import { PiiRule } from "./types.js";
 
-function applyAction(value: unknown, action: PiiRule['action']): unknown {
-  if (action === 'drop') return undefined;
-  if (action === 'redact') return '[REDACTED]';
-  return crypto.createHash('sha256').update(String(value)).digest('hex');
+function applyAction(value: unknown, action: PiiRule["action"]): unknown {
+  if (action === "drop") return undefined;
+  if (action === "redact") return "[REDACTED]";
+  return crypto.createHash("sha256").update(String(value)).digest("hex");
 }
 
 function getNested(record: Record<string, unknown>, path: string): unknown {
-  return path.split('.').reduce<unknown>((acc, part) => {
-    if (acc && typeof acc === 'object' && part in (acc as Record<string, unknown>)) {
+  return path.split(".").reduce<unknown>((acc, part) => {
+    if (acc && typeof acc === "object" && part in (acc as Record<string, unknown>)) {
       return (acc as Record<string, unknown>)[part];
     }
     return undefined;
@@ -17,7 +17,7 @@ function getNested(record: Record<string, unknown>, path: string): unknown {
 }
 
 function setNested(record: Record<string, unknown>, path: string, value: unknown): void {
-  const parts = path.split('.');
+  const parts = path.split(".");
   let current: Record<string, unknown> = record;
   parts.forEach((part, idx) => {
     if (idx === parts.length - 1) {
@@ -27,7 +27,7 @@ function setNested(record: Record<string, unknown>, path: string, value: unknown
         current[part] = value;
       }
     } else {
-      if (!current[part] || typeof current[part] !== 'object') {
+      if (!current[part] || typeof current[part] !== "object") {
         current[part] = {};
       }
       current = current[part] as Record<string, unknown>;

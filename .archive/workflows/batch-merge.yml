@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       integration_branch:
-        description: 'The branch to merge PRs into'
+        description: "The branch to merge PRs into"
         required: true
-        default: 'integration/batch'
+        default: "integration/batch"
       name: batch-merge
 
 permissions:

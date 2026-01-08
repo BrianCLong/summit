@@ -4,20 +4,20 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'packages/sim-harness/**'
-      - 'server/**'
-      - 'graphql/**'
-      - '.github/workflows/scenario-evaluation.yml'
+      - "packages/sim-harness/**"
+      - "server/**"
+      - "graphql/**"
+      - ".github/workflows/scenario-evaluation.yml"
   workflow_dispatch:
     inputs:
       scenario:
-        description: 'Scenario to run'
+        description: "Scenario to run"
         required: false
-        default: 'fraud-ring'
+        default: "fraud-ring"
       sessions:
-        description: 'Number of sessions'
+        description: "Number of sessions"
         required: false
-        default: '3'
+        default: "3"
 
 jobs:
   scenario-tests:
@@ -32,7 +32,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Enable pnpm
         run: corepack enable
@@ -228,7 +228,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Enable pnpm
         run: corepack enable

@@ -32,7 +32,7 @@ describe('AuthService', () => {
       expect(Keychain.setGenericPassword).toHaveBeenCalledWith(
         'auth_tokens',
         JSON.stringify(tokens),
-        { service: 'intelgraph_auth' }
+        { service: 'intelgraph_auth' },
       );
     });
   });

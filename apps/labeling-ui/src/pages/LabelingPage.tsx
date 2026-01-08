@@ -5,23 +5,30 @@
  * Main labeling interface for annotators.
  */
 
-import React from 'react';
-import { useParams } from 'react-router-dom';
-import { useMyJobs, useJob, useSample, useAssignJobs, useStartJob, useSubmitLabel } from '../hooks/useApi';
-import { useLabelingStore } from '../store/labelingStore';
-import { EntityMatchTask } from '../components/labeling/EntityMatchTask';
-import { ClusterReviewTask } from '../components/labeling/ClusterReviewTask';
-import { ClaimAssessmentTask } from '../components/labeling/ClaimAssessmentTask';
-import { SafetyDecisionTask } from '../components/labeling/SafetyDecisionTask';
-import { TextClassificationTask } from '../components/labeling/TextClassificationTask';
-import { Play, CheckCircle, AlertCircle, Clock } from 'lucide-react';
-import { cn } from '../utils/cn';
-import type { Label } from '../types';
+import React from "react";
+import { useParams } from "react-router-dom";
+import {
+  useMyJobs,
+  useJob,
+  useSample,
+  useAssignJobs,
+  useStartJob,
+  useSubmitLabel,
+} from "../hooks/useApi";
+import { useLabelingStore } from "../store/labelingStore";
+import { EntityMatchTask } from "../components/labeling/EntityMatchTask";
+import { ClusterReviewTask } from "../components/labeling/ClusterReviewTask";
+import { ClaimAssessmentTask } from "../components/labeling/ClaimAssessmentTask";
+import { SafetyDecisionTask } from "../components/labeling/SafetyDecisionTask";
+import { TextClassificationTask } from "../components/labeling/TextClassificationTask";
+import { Play, CheckCircle, AlertCircle, Clock } from "lucide-react";
+import { cn } from "../utils/cn";
+import type { Label } from "../types";
 
 export function LabelingPage() {
   const { jobId } = useParams<{ jobId: string }>();
-  const { data: myJobs, isLoading: jobsLoading } = useMyJobs('assigned');
-  const { data: currentJobData } = useJob(jobId || '');
+  const { data: myJobs, isLoading: jobsLoading } = useMyJobs("assigned");
+  const { data: currentJobData } = useJob(jobId || "");
   const assignJobs = useAssignJobs();
   const startJob = useStartJob();
   const submitLabel = useSubmitLabel();
@@ -41,7 +48,7 @@ export function LabelingPage() {
   } = useLabelingStore();
 
   // Fetch sample when job is available
-  const { data: sampleData } = useSample(currentJob?.sampleId || '');
+  const { data: sampleData } = useSample(currentJob?.sampleId || "");
 
   React.useEffect(() => {
     if (currentJobData) {
@@ -62,7 +69,7 @@ export function LabelingPage() {
         setCurrentJob(jobs[0]);
       }
     } catch (error) {
-      console.error('Failed to assign jobs:', error);
+      console.error("Failed to assign jobs:", error);
     }
   };
 
@@ -72,7 +79,7 @@ export function LabelingPage() {
       setCurrentJob(job);
       startSession();
     } catch (error) {
-      console.error('Failed to start job:', error);
+      console.error("Failed to start job:", error);
     }
   };
 
@@ -97,7 +104,7 @@ export function LabelingPage() {
         }
       }
     } catch (error) {
-      console.error('Failed to submit label:', error);
+      console.error("Failed to submit label:", error);
     }
   };
 
@@ -112,16 +119,16 @@ export function LabelingPage() {
     };
 
     switch (currentJob.taskType) {
-      case 'entity_match':
-      case 'entity_no_match':
+      case "entity_match":
+      case "entity_no_match":
         return <EntityMatchTask {...props} />;
-      case 'cluster_review':
+      case "cluster_review":
         return <ClusterReviewTask {...props} />;
-      case 'claim_assessment':
+      case "claim_assessment":
         return <ClaimAssessmentTask {...props} />;
-      case 'safety_decision':
+      case "safety_decision":
         return <SafetyDecisionTask {...props} />;
-      case 'text_classification':
+      case "text_classification":
       default:
         return <TextClassificationTask {...props} />;
     }
@@ -146,7 +153,7 @@ export function LabelingPage() {
             disabled={assignJobs.isPending}
             className="text-sm text-primary hover:underline disabled:opacity-50"
           >
-            {assignJobs.isPending ? 'Loading...' : 'Get More'}
+            {assignJobs.isPending ? "Loading..." : "Get More"}
           </button>
         </div>
 
@@ -156,15 +163,13 @@ export function LabelingPage() {
               <div
                 key={job.id}
                 className={cn(
-                  'rounded-lg border p-3 cursor-pointer transition-colors',
-                  currentJob?.id === job.id
-                    ? 'border-primary bg-primary/5'
-                    : 'hover:bg-muted'
+                  "rounded-lg border p-3 cursor-pointer transition-colors",
+                  currentJob?.id === job.id ? "border-primary bg-primary/5" : "hover:bg-muted"
                 )}
                 onClick={() => {
-                  if (job.status === 'assigned') {
+                  if (job.status === "assigned") {
                     handleStartJob(job.id);
-                  } else if (job.status === 'in_progress') {
+                  } else if (job.status === "in_progress") {
                     setCurrentJob(job);
                     if (!sessionStartTime) {
                       startSession();
@@ -174,7 +179,7 @@ export function LabelingPage() {
               >
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm font-medium capitalize">
-                    {job.taskType.replace(/_/g, ' ')}
+                    {job.taskType.replace(/_/g, " ")}
                   </span>
                   <JobStatusBadge status={job.status} />
                 </div>
@@ -226,19 +231,15 @@ export function LabelingPage() {
 
 function JobStatusBadge({ status }: { status: string }) {
   const config: Record<string, { color: string; label: string }> = {
-    queued: { color: 'bg-gray-100 text-gray-800', label: 'Queued' },
-    assigned: { color: 'bg-blue-100 text-blue-800', label: 'Assigned' },
-    in_progress: { color: 'bg-yellow-100 text-yellow-800', label: 'In Progress' },
-    submitted: { color: 'bg-green-100 text-green-800', label: 'Submitted' },
-    approved: { color: 'bg-green-100 text-green-800', label: 'Approved' },
-    rejected: { color: 'bg-red-100 text-red-800', label: 'Rejected' },
+    queued: { color: "bg-gray-100 text-gray-800", label: "Queued" },
+    assigned: { color: "bg-blue-100 text-blue-800", label: "Assigned" },
+    in_progress: { color: "bg-yellow-100 text-yellow-800", label: "In Progress" },
+    submitted: { color: "bg-green-100 text-green-800", label: "Submitted" },
+    approved: { color: "bg-green-100 text-green-800", label: "Approved" },
+    rejected: { color: "bg-red-100 text-red-800", label: "Rejected" },
   };
 
   const { color, label } = config[status] || config.queued;
 
-  return (
-    <span className={cn('px-2 py-0.5 rounded-full text-xs font-medium', color)}>
-      {label}
-    </span>
-  );
+  return <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium", color)}>{label}</span>;
 }

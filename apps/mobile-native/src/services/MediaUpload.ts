@@ -89,7 +89,7 @@ export const uploadMedia = async (
         'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${token}`,
       },
-      onUploadProgress: (progressEvent) => {
+      onUploadProgress: progressEvent => {
         if (progressEvent.total) {
           const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
           options?.onProgress?.(progress);
@@ -154,10 +154,7 @@ export const uploadQueuedMedia = async (): Promise<void> => {
       // Prepare form data
       const formData = new FormData();
       formData.append('file', {
-        uri:
-          Platform.OS === 'android'
-            ? upload.filePath
-            : upload.filePath.replace('file://', ''),
+        uri: Platform.OS === 'android' ? upload.filePath : upload.filePath.replace('file://', ''),
         type: upload.fileType,
         name: upload.filePath.split('/').pop(),
       } as any);
@@ -180,7 +177,7 @@ export const uploadQueuedMedia = async (): Promise<void> => {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,
         },
-        onUploadProgress: (progressEvent) => {
+        onUploadProgress: progressEvent => {
           if (progressEvent.total) {
             const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
             updateMediaUploadStatus(upload.id, 'uploading', progress);
@@ -277,9 +274,9 @@ export const getUploadQueueStatus = async (): Promise<{
   const uploads = await getPendingMediaUploads();
 
   return {
-    pending: uploads.filter((u) => u.uploadStatus === 'pending').length,
-    uploading: uploads.filter((u) => u.uploadStatus === 'uploading').length,
-    failed: uploads.filter((u) => u.uploadStatus === 'failed').length,
+    pending: uploads.filter(u => u.uploadStatus === 'pending').length,
+    uploading: uploads.filter(u => u.uploadStatus === 'uploading').length,
+    failed: uploads.filter(u => u.uploadStatus === 'failed').length,
   };
 };
 

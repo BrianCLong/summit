@@ -1,9 +1,9 @@
 // @ts-nocheck
-import { NumericArray, WaveletLevel, WaveletResult } from './types.js';
+import { NumericArray, WaveletLevel, WaveletResult } from "./types.js";
 
 export function haarTransform(signal: NumericArray, levels: number): WaveletResult {
   if (levels < 1) {
-    throw new Error('Levels must be at least 1');
+    throw new Error("Levels must be at least 1");
   }
   let working = signal instanceof Float64Array ? signal : Float64Array.from(signal);
   const results: WaveletLevel[] = [];

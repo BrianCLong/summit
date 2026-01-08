@@ -62,9 +62,9 @@ spec:
         app.kubernetes.io/part-of: intelgraph
         worker-type: build
       annotations:
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: '9090'
-        prometheus.io/path: '/metrics'
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
     spec:
       serviceAccountName: maestro-conductor
       securityContext:
@@ -85,7 +85,7 @@ spec:
             - name: WORKER_DOMAIN
               value: dev
             - name: JAVA_OPTS
-              value: '-Xms512m -Xmx1024m -XX:+UseG1GC'
+              value: "-Xms512m -Xmx1024m -XX:+UseG1GC"
           livenessProbe:
             httpGet:
               path: /health
@@ -150,9 +150,9 @@ spec:
         app.kubernetes.io/part-of: intelgraph
         worker-type: test
       annotations:
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: '9090'
-        prometheus.io/path: '/metrics'
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
     spec:
       serviceAccountName: maestro-conductor
       containers:
@@ -212,9 +212,9 @@ spec:
         app.kubernetes.io/part-of: intelgraph
         worker-type: security
       annotations:
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: '9090'
-        prometheus.io/path: '/metrics'
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
     spec:
       serviceAccountName: maestro-conductor
       containers:
@@ -289,7 +289,7 @@ spec:
               queue_name: BUILD_TASK
         target:
           type: AverageValue
-          averageValue: '10'
+          averageValue: "10"
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 300
@@ -340,7 +340,7 @@ spec:
               queue_name: TEST_TASK
         target:
           type: AverageValue
-          averageValue: '5'
+          averageValue: "5"
 
 ---
 apiVersion: autoscaling/v2
@@ -375,7 +375,7 @@ spec:
               queue_name: SECURITY_SCAN_TASK
         target:
           type: AverageValue
-          averageValue: '3'
+          averageValue: "3"
 
 ---
 apiVersion: v1
@@ -388,9 +388,9 @@ metadata:
     app.kubernetes.io/component: worker
     app.kubernetes.io/part-of: intelgraph
   annotations:
-    prometheus.io/scrape: 'true'
-    prometheus.io/port: '9090'
-    prometheus.io/path: '/metrics'
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+    prometheus.io/path: "/metrics"
 spec:
   type: ClusterIP
   ports:
@@ -411,9 +411,9 @@ metadata:
     app.kubernetes.io/component: worker
     app.kubernetes.io/part-of: intelgraph
   annotations:
-    prometheus.io/scrape: 'true'
-    prometheus.io/port: '9090'
-    prometheus.io/path: '/metrics'
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+    prometheus.io/path: "/metrics"
 spec:
   type: ClusterIP
   ports:
@@ -434,9 +434,9 @@ metadata:
     app.kubernetes.io/component: worker
     app.kubernetes.io/part-of: intelgraph
   annotations:
-    prometheus.io/scrape: 'true'
-    prometheus.io/port: '9090'
-    prometheus.io/path: '/metrics'
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+    prometheus.io/path: "/metrics"
 spec:
   type: ClusterIP
   ports:

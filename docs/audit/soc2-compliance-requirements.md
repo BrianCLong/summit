@@ -25,37 +25,39 @@ The comprehensive audit system provides:
 **Implementation:**
 
 1. **Access Control Logging**
+
    ```typescript
    // All authentication events are logged
    await auditSystem.recordEvent({
-     eventType: 'user_login',
+     eventType: "user_login",
      userId: user.id,
-     action: 'LOGIN',
-     outcome: 'success',
+     action: "LOGIN",
+     outcome: "success",
      complianceRelevant: true,
-     complianceFrameworks: ['SOC2', 'ISO27001'],
+     complianceFrameworks: ["SOC2", "ISO27001"],
      ipAddress: req.ip,
-     userAgent: req.headers['user-agent']
+     userAgent: req.headers["user-agent"],
    });
    ```
 
 2. **Authorization Decision Logging**
+
    ```typescript
    // RBAC decisions are audited
    await auditSystem.recordEvent({
-     eventType: 'policy_decision',
+     eventType: "policy_decision",
      userId: user.id,
-     resourceType: 'investigation',
+     resourceType: "investigation",
      resourceId: investigationId,
-     action: 'ACCESS_CHECK',
-     outcome: permitted ? 'success' : 'failure',
+     action: "ACCESS_CHECK",
+     outcome: permitted ? "success" : "failure",
      details: {
-       requiredPermission: 'investigation:read',
+       requiredPermission: "investigation:read",
        userRole: user.role,
-       decision: permitted
+       decision: permitted,
      },
      complianceRelevant: true,
-     complianceFrameworks: ['SOC2']
+     complianceFrameworks: ["SOC2"],
    });
    ```
 
@@ -63,16 +65,16 @@ The comprehensive audit system provides:
    ```typescript
    // Failed access attempts are logged for security monitoring
    await auditSystem.recordEvent({
-     eventType: 'access_denied',
-     level: 'warn',
+     eventType: "access_denied",
+     level: "warn",
      userId: user.id,
-     resourceType: 'investigation',
+     resourceType: "investigation",
      resourceId: investigationId,
-     action: 'READ',
-     outcome: 'failure',
-     message: 'Insufficient permissions',
+     action: "READ",
+     outcome: "failure",
+     message: "Insufficient permissions",
      complianceRelevant: true,
-     complianceFrameworks: ['SOC2']
+     complianceFrameworks: ["SOC2"],
    });
    ```
 
@@ -99,37 +101,38 @@ ORDER BY day DESC;
 **Implementation:**
 
 1. **User Registration Logging**
+
    ```typescript
    await auditSystem.recordEvent({
-     eventType: 'user_register',
+     eventType: "user_register",
      userId: newUser.id,
-     action: 'USER_CREATED',
-     outcome: 'success',
+     action: "USER_CREATED",
+     outcome: "success",
      details: {
        email: newUser.email,
        role: newUser.role,
-       approvedBy: admin.id
+       approvedBy: admin.id,
      },
      complianceRelevant: true,
-     complianceFrameworks: ['SOC2']
+     complianceFrameworks: ["SOC2"],
    });
    ```
 
 2. **Role Assignment Logging**
    ```typescript
    await auditSystem.recordEvent({
-     eventType: 'role_assigned',
+     eventType: "role_assigned",
      userId: user.id,
-     action: 'ROLE_CHANGE',
-     outcome: 'success',
+     action: "ROLE_CHANGE",
+     outcome: "success",
      oldValues: { role: oldRole },
      newValues: { role: newRole },
      details: {
        assignedBy: admin.id,
-       reason: 'Promotion to analyst'
+       reason: "Promotion to analyst",
      },
      complianceRelevant: true,
-     complianceFrameworks: ['SOC2']
+     complianceFrameworks: ["SOC2"],
    });
    ```
 
@@ -151,19 +154,19 @@ LIMIT 100;
 1. **Permission Changes**
    ```typescript
    await auditSystem.recordEvent({
-     eventType: 'permission_granted',
+     eventType: "permission_granted",
      userId: user.id,
-     action: 'PERMISSION_CHANGE',
-     outcome: 'success',
+     action: "PERMISSION_CHANGE",
+     outcome: "success",
      oldValues: { permissions: oldPermissions },
      newValues: { permissions: newPermissions },
      details: {
        grantedBy: admin.id,
        addedPermissions: diff.added,
-       revokedPermissions: diff.removed
+       revokedPermissions: diff.removed,
      },
      complianceRelevant: true,
-     complianceFrameworks: ['SOC2']
+     complianceFrameworks: ["SOC2"],
    });
    ```
 
@@ -191,46 +194,47 @@ ORDER BY timestamp DESC;
 **Implementation:**
 
 1. **System Lifecycle Events**
+
    ```typescript
    // System startup
    await auditSystem.recordEvent({
-     eventType: 'system_start',
-     level: 'info',
-     serviceId: 'intelgraph-api',
-     serviceName: 'IntelGraph API',
+     eventType: "system_start",
+     level: "info",
+     serviceId: "intelgraph-api",
+     serviceName: "IntelGraph API",
      serviceVersion: packageJson.version,
-     action: 'SYSTEM_START',
-     outcome: 'success',
+     action: "SYSTEM_START",
+     outcome: "success",
      environment: process.env.NODE_ENV,
      complianceRelevant: true,
-     complianceFrameworks: ['SOC2']
+     complianceFrameworks: ["SOC2"],
    });
 
    // System shutdown
    await auditSystem.recordEvent({
-     eventType: 'system_stop',
-     level: 'warn',
-     action: 'SYSTEM_STOP',
-     outcome: 'success',
-     complianceRelevant: true
+     eventType: "system_stop",
+     level: "warn",
+     action: "SYSTEM_STOP",
+     outcome: "success",
+     complianceRelevant: true,
    });
    ```
 
 2. **Configuration Changes**
    ```typescript
    await auditSystem.recordEvent({
-     eventType: 'config_change',
-     level: 'warn',
-     action: 'CONFIG_UPDATE',
-     outcome: 'success',
+     eventType: "config_change",
+     level: "warn",
+     action: "CONFIG_UPDATE",
+     outcome: "success",
      oldValues: { maxConnections: 20 },
      newValues: { maxConnections: 50 },
      details: {
        changedBy: admin.id,
-       reason: 'Scale up for load test'
+       reason: "Scale up for load test",
      },
      complianceRelevant: true,
-     complianceFrameworks: ['SOC2']
+     complianceFrameworks: ["SOC2"],
    });
    ```
 
@@ -249,58 +253,61 @@ ORDER BY timestamp DESC;
 **Implementation:**
 
 1. **Automated Integrity Checks**
+
    ```typescript
    // Daily automated integrity verification
-   cron.schedule('0 2 * * *', async () => {  // 2 AM daily
+   cron.schedule("0 2 * * *", async () => {
+     // 2 AM daily
      const result = await auditSystem.verifyIntegrity(
-       new Date(Date.now() - 24 * 60 * 60 * 1000),  // Last 24h
+       new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24h
        new Date()
      );
 
      await auditSystem.recordEvent({
-       eventType: 'audit_integrity_check',
-       level: result.valid ? 'info' : 'critical',
-       action: 'INTEGRITY_CHECK',
-       outcome: result.valid ? 'success' : 'failure',
+       eventType: "audit_integrity_check",
+       level: result.valid ? "info" : "critical",
+       action: "INTEGRITY_CHECK",
+       outcome: result.valid ? "success" : "failure",
        details: {
          totalEvents: result.totalEvents,
          validEvents: result.validEvents,
          invalidEvents: result.invalidEvents.length,
-         issues: result.invalidEvents
+         issues: result.invalidEvents,
        },
        complianceRelevant: true,
-       complianceFrameworks: ['SOC2']
+       complianceFrameworks: ["SOC2"],
      });
 
      // Alert on integrity failures
      if (!result.valid) {
        await alertService.sendCritical({
-         title: 'Audit Trail Integrity Violation Detected',
+         title: "Audit Trail Integrity Violation Detected",
          description: `${result.invalidEvents.length} tampered events found`,
-         severity: 'critical'
+         severity: "critical",
        });
      }
    });
    ```
 
 2. **Anomaly Detection**
+
    ```typescript
    // Detect suspicious patterns
    const anomalies = await auditSystem.detectAnomalies(correlationId);
 
    if (anomalies.length > 0) {
      await auditSystem.recordEvent({
-       eventType: 'anomaly_detected',
-       level: 'warn',
-       action: 'ANOMALY_DETECTION',
-       outcome: 'success',
+       eventType: "anomaly_detected",
+       level: "warn",
+       action: "ANOMALY_DETECTION",
+       outcome: "success",
        details: {
          anomalyCount: anomalies.length,
-         types: anomalies.map(a => a.type),
-         maxSeverity: Math.max(...anomalies.map(a => a.severity))
+         types: anomalies.map((a) => a.type),
+         maxSeverity: Math.max(...anomalies.map((a) => a.severity)),
        },
        complianceRelevant: true,
-       complianceFrameworks: ['SOC2']
+       complianceFrameworks: ["SOC2"],
      });
    }
    ```
@@ -327,50 +334,51 @@ ORDER BY check_date DESC;
 **Implementation:**
 
 1. **Resource Mutation Tracking**
+
    ```typescript
    // Track before/after states for all mutations
    await auditSystem.recordEvent({
-     eventType: 'investigation_update',
+     eventType: "investigation_update",
      userId: user.id,
-     resourceType: 'investigation',
+     resourceType: "investigation",
      resourceId: investigation.id,
-     action: 'UPDATE',
-     outcome: 'success',
+     action: "UPDATE",
+     outcome: "success",
      oldValues: {
        title: investigation.title,
        status: investigation.status,
-       priority: investigation.priority
+       priority: investigation.priority,
      },
      newValues: {
        title: updates.title,
        status: updates.status,
-       priority: updates.priority
+       priority: updates.priority,
      },
      diffSummary: 'Changed title from "Old" to "New", status from ACTIVE to CLOSED',
      complianceRelevant: true,
-     complianceFrameworks: ['SOC2', 'SOX']
+     complianceFrameworks: ["SOC2", "SOX"],
    });
    ```
 
 2. **Data Export Tracking**
    ```typescript
    await auditSystem.recordEvent({
-     eventType: 'data_export',
-     level: 'warn',
+     eventType: "data_export",
+     level: "warn",
      userId: user.id,
-     action: 'EXPORT',
-     outcome: 'success',
-     resourceType: 'investigation',
+     action: "EXPORT",
+     outcome: "success",
+     resourceType: "investigation",
      resourceId: investigation.id,
      details: {
-       format: 'PDF',
+       format: "PDF",
        recordCount: 1500,
-       exportedFields: ['entities', 'relationships', 'notes'],
-       approvedBy: manager.id
+       exportedFields: ["entities", "relationships", "notes"],
+       approvedBy: manager.id,
      },
-     dataClassification: 'confidential',
+     dataClassification: "confidential",
      complianceRelevant: true,
-     complianceFrameworks: ['SOC2', 'GDPR']
+     complianceFrameworks: ["SOC2", "GDPR"],
    });
    ```
 
@@ -401,43 +409,44 @@ ORDER BY timestamp DESC;
 **Implementation:**
 
 1. **Backup Operations**
+
    ```typescript
    await auditSystem.recordEvent({
-     eventType: 'backup_complete',
-     level: 'info',
-     serviceId: 'backup-service',
-     action: 'BACKUP',
-     outcome: 'success',
+     eventType: "backup_complete",
+     level: "info",
+     serviceId: "backup-service",
+     action: "BACKUP",
+     outcome: "success",
      details: {
        backupId: backup.id,
-       backupType: 'full',
-       databases: ['postgres', 'neo4j', 'redis'],
+       backupType: "full",
+       databases: ["postgres", "neo4j", "redis"],
        sizeBytes: backup.sizeBytes,
        duration: backup.duration,
-       s3Location: backup.s3Key
+       s3Location: backup.s3Key,
      },
      complianceRelevant: true,
-     complianceFrameworks: ['SOC2']
+     complianceFrameworks: ["SOC2"],
    });
    ```
 
 2. **Restore Operations**
    ```typescript
    await auditSystem.recordEvent({
-     eventType: 'restore_complete',
-     level: 'warn',
-     serviceId: 'backup-service',
-     action: 'RESTORE',
-     outcome: 'success',
+     eventType: "restore_complete",
+     level: "warn",
+     serviceId: "backup-service",
+     action: "RESTORE",
+     outcome: "success",
      details: {
        backupId: backup.id,
        targetTimestamp: targetTime.toISOString(),
        initiatedBy: admin.id,
        approvedBy: manager.id,
-       verification: 'passed'
+       verification: "passed",
      },
      complianceRelevant: true,
-     complianceFrameworks: ['SOC2']
+     complianceFrameworks: ["SOC2"],
    });
    ```
 
@@ -466,11 +475,7 @@ The audit system generates automated SOC 2 compliance reports:
 
 ```typescript
 // Generate monthly SOC 2 compliance report
-const report = await auditSystem.generateComplianceReport(
-  'SOC2',
-  startOfMonth,
-  endOfMonth
-);
+const report = await auditSystem.generateComplianceReport("SOC2", startOfMonth, endOfMonth);
 
 // Report includes:
 // - Summary metrics (total events, violations, compliance score)
@@ -558,29 +563,33 @@ ORDER BY month DESC, resource_type;
 **Implementation:**
 
 1. **Default Retention**: 2555 days (7 years)
+
    ```sql
    ALTER TABLE audit_events
    ALTER COLUMN retention_period_days SET DEFAULT 2555;
    ```
 
 2. **Compliance-Relevant Events**: Extended retention
+
    ```typescript
    await auditSystem.recordEvent({
      ...eventData,
      complianceRelevant: true,
-     retentionPeriodDays: 3650,  // 10 years
+     retentionPeriodDays: 3650, // 10 years
    });
    ```
 
 3. **Legal Hold**: Indefinite retention
+
    ```typescript
    await auditSystem.recordEvent({
      ...eventData,
-     legalHold: true,  // Prevents deletion
+     legalHold: true, // Prevents deletion
    });
    ```
 
 4. **TimescaleDB Retention Policy**:
+
    ```sql
    -- Configured in migration
    SELECT add_retention_policy(
@@ -616,27 +625,27 @@ const integrityResult = await auditSystem.verifyIntegrity(yesterday, today);
 if (!integrityResult.valid) {
   // CRITICAL ALERT
   await pagerDuty.trigger({
-    severity: 'critical',
-    title: 'Audit Trail Tampering Detected',
+    severity: "critical",
+    title: "Audit Trail Tampering Detected",
     description: `${integrityResult.invalidEvents} events failed integrity check`,
     details: integrityResult.issues,
-    incidentKey: `audit-tamper-${Date.now()}`
+    incidentKey: `audit-tamper-${Date.now()}`,
   });
 
   // Log the tampering detection
   await auditSystem.recordEvent({
-    eventType: 'audit_tamper_detected',
-    level: 'critical',
-    action: 'TAMPER_DETECTION',
-    outcome: 'failure',
+    eventType: "audit_tamper_detected",
+    level: "critical",
+    action: "TAMPER_DETECTION",
+    outcome: "failure",
     details: {
       timeRange: { start: yesterday, end: today },
       totalEvents: integrityResult.totalEvents,
       invalidEvents: integrityResult.invalidEvents,
-      issues: integrityResult.issues
+      issues: integrityResult.issues,
     },
     complianceRelevant: true,
-    complianceFrameworks: ['SOC2']
+    complianceFrameworks: ["SOC2"],
   });
 }
 ```
@@ -648,20 +657,20 @@ if (!integrityResult.valid) {
 ```typescript
 // Log security incidents for SOC 2 compliance
 await auditSystem.recordEvent({
-  eventType: 'security_alert',
-  level: 'critical',
-  action: 'SECURITY_INCIDENT',
-  outcome: 'pending',
+  eventType: "security_alert",
+  level: "critical",
+  action: "SECURITY_INCIDENT",
+  outcome: "pending",
   details: {
-    incidentType: 'brute_force_attack',
-    affectedUsers: ['user1', 'user2'],
-    sourceIp: '192.168.1.100',
+    incidentType: "brute_force_attack",
+    affectedUsers: ["user1", "user2"],
+    sourceIp: "192.168.1.100",
     detectedAt: new Date(),
-    detectionMethod: 'anomaly_detection',
-    responseStatus: 'investigating'
+    detectionMethod: "anomaly_detection",
+    responseStatus: "investigating",
   },
   complianceRelevant: true,
-  complianceFrameworks: ['SOC2', 'ISO27001']
+  complianceFrameworks: ["SOC2", "ISO27001"],
 });
 ```
 
@@ -698,46 +707,46 @@ const analysis = await auditSystem.performForensicAnalysis(correlationId);
 
 ```typescript
 // Integration test: Verify audit event creation
-describe('SOC 2 Compliance - Audit Logging', () => {
-  it('should log user login events', async () => {
+describe("SOC 2 Compliance - Audit Logging", () => {
+  it("should log user login events", async () => {
     await userService.login(email, password);
 
     const events = await auditSystem.queryEvents({
-      eventTypes: ['user_login'],
+      eventTypes: ["user_login"],
       userIds: [user.id],
     });
 
     expect(events).toHaveLength(1);
     expect(events[0].complianceRelevant).toBe(true);
-    expect(events[0].complianceFrameworks).toContain('SOC2');
+    expect(events[0].complianceFrameworks).toContain("SOC2");
   });
 
-  it('should track resource mutations', async () => {
+  it("should track resource mutations", async () => {
     const oldInvestigation = await getInvestigation(id);
-    await updateInvestigation(id, { title: 'New Title' });
+    await updateInvestigation(id, { title: "New Title" });
 
     const events = await auditSystem.queryEvents({
-      eventTypes: ['investigation_update'],
+      eventTypes: ["investigation_update"],
       resourceIds: [id],
     });
 
     expect(events[0].oldValues).toEqual({ title: oldInvestigation.title });
-    expect(events[0].newValues).toEqual({ title: 'New Title' });
+    expect(events[0].newValues).toEqual({ title: "New Title" });
   });
 
-  it('should detect hash chain tampering', async () => {
+  it("should detect hash chain tampering", async () => {
     // Simulate tampering by modifying an event
-    await db.query(
-      'UPDATE audit_events SET message = $1 WHERE id = $2',
-      ['Tampered message', eventId]
-    );
+    await db.query("UPDATE audit_events SET message = $1 WHERE id = $2", [
+      "Tampered message",
+      eventId,
+    ]);
 
     const result = await auditSystem.verifyIntegrity(yesterday, today);
 
     expect(result.valid).toBe(false);
     expect(result.invalidEvents).toContainEqual({
       eventId,
-      issue: 'Hash mismatch - possible tampering'
+      issue: "Hash mismatch - possible tampering",
     });
   });
 });

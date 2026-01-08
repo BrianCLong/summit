@@ -1,3 +1,3 @@
-const { generateGraph } = require('./generator');
+const { generateGraph } = require("./generator");
 
 module.exports = { generateGraph };

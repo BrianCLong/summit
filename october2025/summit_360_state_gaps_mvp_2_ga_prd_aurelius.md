@@ -390,9 +390,7 @@ with summit.Client(api_key) as cli:
 {
   "Plan": {
     "inputs": { "type": "object" },
-    "steps": [
-      { "id": "str", "type": "str", "resources": { "model_id": "str" } }
-    ],
+    "steps": [{ "id": "str", "type": "str", "resources": { "model_id": "str" } }],
     "constraints": {
       "latency_ms": 120,
       "budget_tokens": 8000,

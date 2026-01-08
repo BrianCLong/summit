@@ -6,7 +6,7 @@ export interface RiskScore {
   entityId: string;
   score: number;
   probability: number;
-  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  riskLevel: "low" | "medium" | "high" | "critical";
   factors: RiskFactor[];
   timestamp: Date;
 }
@@ -41,5 +41,5 @@ export interface ScoreBin {
 export interface PSI {
   variable: string;
   psi: number;
-  status: 'stable' | 'warning' | 'unstable';
+  status: "stable" | "warning" | "unstable";
 }

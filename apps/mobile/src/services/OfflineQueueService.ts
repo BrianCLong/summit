@@ -33,10 +33,7 @@ export const getPendingMutations = (): OfflineMutation[] => {
 };
 
 // Queue a mutation for offline sync
-export const queueOfflineMutation = (
-  operation: Operation,
-  priority: number = 0,
-): string => {
+export const queueOfflineMutation = (operation: Operation, priority: number = 0): string => {
   const id = uuid();
   const mutation: OfflineMutation = {
     id,

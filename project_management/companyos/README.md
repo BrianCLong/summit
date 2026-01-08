@@ -4,16 +4,16 @@ This directory captures the full execution playbooks for the eight parallel Comp
 
 ## Files
 
-| Ticket | Title | Primary Owner | Story Points |
-| --- | --- | --- | --- |
-| COS-ID-SCIM-ABAC | OIDC/SCIM + ABAC Enforcement | App Engineering | 8 |
-| COS-POL-FETCH | Policy Pack Consumer + OPA Hot-Reload | App Engineering | 5 |
-| COS-EVIDENCE-PUB | Publish Evidence (SLO+Cost) to MC | Backend Engineering | 5 |
-| COS-OTEL-SLO | OTEL Telemetry + SLO Dashboards | Site Reliability Engineering | 8 |
-| COS-ROLLOUT-GATE | Argo Evidence-Gated Promotion | Site Reliability Engineering | 5 |
-| COS-RET-RTBF | Retention & Right-to-be-Forgotten | Data Engineering | 13 |
-| COS-HELM-HARDEN | Charts, Limits, Secrets | Platform Engineering | 8 |
-| COS-PACT-E2E | Pact-style Contract + E2E Cold-Start | QA & Engineering | 8 |
+| Ticket           | Title                                 | Primary Owner                | Story Points |
+| ---------------- | ------------------------------------- | ---------------------------- | ------------ |
+| COS-ID-SCIM-ABAC | OIDC/SCIM + ABAC Enforcement          | App Engineering              | 8            |
+| COS-POL-FETCH    | Policy Pack Consumer + OPA Hot-Reload | App Engineering              | 5            |
+| COS-EVIDENCE-PUB | Publish Evidence (SLO+Cost) to MC     | Backend Engineering          | 5            |
+| COS-OTEL-SLO     | OTEL Telemetry + SLO Dashboards       | Site Reliability Engineering | 8            |
+| COS-ROLLOUT-GATE | Argo Evidence-Gated Promotion         | Site Reliability Engineering | 5            |
+| COS-RET-RTBF     | Retention & Right-to-be-Forgotten     | Data Engineering             | 13           |
+| COS-HELM-HARDEN  | Charts, Limits, Secrets               | Platform Engineering         | 8            |
+| COS-PACT-E2E     | Pact-style Contract + E2E Cold-Start  | QA & Engineering             | 8            |
 
 Each individual markdown file documents:
 

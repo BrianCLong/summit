@@ -1,4 +1,4 @@
-import { QuarantineRecord } from './types.js';
+import { QuarantineRecord } from "./types.js";
 
 export class QuarantineRegistry {
   private readonly records: QuarantineRecord[] = [];
@@ -8,15 +8,20 @@ export class QuarantineRegistry {
       contractId,
       version,
       reason,
-      at: new Date().toISOString()
+      at: new Date().toISOString(),
     };
     this.records.push(record);
     return record;
   }
 
-  resolve(contractId: string, version: string, resolutionNote: string): QuarantineRecord | undefined {
+  resolve(
+    contractId: string,
+    version: string,
+    resolutionNote: string
+  ): QuarantineRecord | undefined {
     const entry = this.records.find(
-      (record) => record.contractId === contractId && record.version === version && !record.releasedAt
+      (record) =>
+        record.contractId === contractId && record.version === version && !record.releasedAt
     );
     if (entry) {
       entry.releasedAt = new Date().toISOString();

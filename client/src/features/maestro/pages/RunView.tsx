@@ -1,12 +1,12 @@
-import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { runRecords } from '../mockData';
-import { useDebouncedValue, useLiveLogFeed } from '../hooks/useMaestroHooks';
-import { useReasonForAccess } from '../ReasonForAccessContext';
+import React from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { runRecords } from "../mockData";
+import { useDebouncedValue, useLiveLogFeed } from "../hooks/useMaestroHooks";
+import { useReasonForAccess } from "../ReasonForAccessContext";
 
 interface LogLine {
   ts: string;
-  level: 'info' | 'warn' | 'error';
+  level: "info" | "warn" | "error";
   message: string;
 }
 
@@ -14,49 +14,41 @@ function buildLogs(runId: string): LogLine[] {
   const base = Date.now();
   const lines: LogLine[] = [];
   for (let index = 0; index < 800; index += 1) {
-    const level =
-      index % 180 === 0 ? 'error' : index % 40 === 0 ? 'warn' : 'info';
+    const level = index % 180 === 0 ? "error" : index % 40 === 0 ? "warn" : "info";
     lines.push({
       ts: new Date(base + index * 200).toISOString(),
       level,
       message:
-        level === 'error'
+        level === "error"
           ? `ERROR [${runId}] step_${index % 12} failed at ${index}s: exit 137`
-          : level === 'warn'
+          : level === "warn"
             ? `WARN [${runId}] cache miss for dependency bucket=${index % 6}`
-            : `INFO [${runId}] processed chunk ${index.toString().padStart(3, '0')}`,
+            : `INFO [${runId}] processed chunk ${index.toString().padStart(3, "0")}`,
     });
   }
   return lines;
 }
 
 export function RunViewPage() {
-  const { runId = 'run-1' } = useParams();
-  const run =
-    runRecords.find((candidate) => candidate.id === runId) ?? runRecords[0];
+  const { runId = "run-1" } = useParams();
+  const run = runRecords.find((candidate) => candidate.id === runId) ?? runRecords[0];
   const navigate = useNavigate();
   const { requestReason } = useReasonForAccess();
-  const [activeTab, setActiveTab] = React.useState<
-    'logs' | 'artifacts' | 'metadata'
-  >('logs');
+  const [activeTab, setActiveTab] = React.useState<"logs" | "artifacts" | "metadata">("logs");
   const allLogs = React.useMemo(() => buildLogs(run.id), [run.id]);
   const [followTail, setFollowTail] = React.useState(true);
   const visibleLogs = useLiveLogFeed(
-    allLogs.map(
-      (line) => `${line.ts} ${line.level.toUpperCase()} ${line.message}`,
-    ),
+    allLogs.map((line) => `${line.ts} ${line.level.toUpperCase()} ${line.message}`),
     {
       followTail,
       intervalMs: 250,
-    },
+    }
   );
-  const [search, setSearch] = React.useState('');
+  const [search, setSearch] = React.useState("");
   const debouncedSearch = useDebouncedValue(search, 250);
-  const [highlightIndex, setHighlightIndex] = React.useState<number | null>(
-    null,
-  );
+  const [highlightIndex, setHighlightIndex] = React.useState<number | null>(null);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
-  const [artifactsReason, setArtifactsReason] = React.useState('');
+  const [artifactsReason, setArtifactsReason] = React.useState("");
 
   React.useEffect(() => {
     if (!debouncedSearch) {
@@ -64,34 +56,34 @@ export function RunViewPage() {
       return;
     }
     const idx = visibleLogs.findIndex((line) =>
-      line.toLowerCase().includes(debouncedSearch.toLowerCase()),
+      line.toLowerCase().includes(debouncedSearch.toLowerCase())
     );
     if (idx >= 0) {
       setHighlightIndex(idx);
       if (containerRef.current) {
-        containerRef.current.scrollTo({ top: idx * 22, behavior: 'smooth' });
+        containerRef.current.scrollTo({ top: idx * 22, behavior: "smooth" });
       }
     }
   }, [debouncedSearch, visibleLogs]);
 
   const handleJumpToError = React.useCallback(() => {
-    const idx = visibleLogs.findIndex((line) => line.includes('ERROR'));
+    const idx = visibleLogs.findIndex((line) => line.includes("ERROR"));
     if (idx >= 0) {
       setHighlightIndex(idx);
       if (containerRef.current)
-        containerRef.current.scrollTo({ top: idx * 22, behavior: 'smooth' });
+        containerRef.current.scrollTo({ top: idx * 22, behavior: "smooth" });
     }
   }, [visibleLogs]);
 
   const handleTabChange = React.useCallback(
-    async (tab: 'logs' | 'artifacts' | 'metadata') => {
-      if (tab === 'artifacts' && !artifactsReason) {
+    async (tab: "logs" | "artifacts" | "metadata") => {
+      if (tab === "artifacts" && !artifactsReason) {
         const reason = await requestReason(`Artifacts for ${run.id}`);
         setArtifactsReason(reason);
       }
       setActiveTab(tab);
     },
-    [artifactsReason, requestReason, run.id],
+    [artifactsReason, requestReason, run.id]
   );
 
   return (
@@ -105,12 +97,9 @@ export function RunViewPage() {
           >
             ← Back
           </button>
-          <h1 className="mt-2 text-2xl font-semibold text-white">
-            Run {run.id}
-          </h1>
+          <h1 className="mt-2 text-2xl font-semibold text-white">Run {run.id}</h1>
           <p className="text-sm text-slate-400">
-            Streaming logs with follow-tail and client search under 250ms on 50k
-            lines.
+            Streaming logs with follow-tail and client search under 250ms on 50k lines.
           </p>
         </div>
         <div className="flex items-center gap-2 text-xs text-slate-300">
@@ -144,27 +133,27 @@ export function RunViewPage() {
             <div className="space-x-2">
               <button
                 type="button"
-                onClick={() => setActiveTab('logs')}
-                className={`rounded-lg px-3 py-1 ${activeTab === 'logs' ? 'bg-emerald-500 text-slate-950' : 'text-slate-300 hover:text-white'}`}
+                onClick={() => setActiveTab("logs")}
+                className={`rounded-lg px-3 py-1 ${activeTab === "logs" ? "bg-emerald-500 text-slate-950" : "text-slate-300 hover:text-white"}`}
               >
                 Logs
               </button>
               <button
                 type="button"
-                onClick={() => void handleTabChange('artifacts')}
-                className={`rounded-lg px-3 py-1 ${activeTab === 'artifacts' ? 'bg-emerald-500 text-slate-950' : 'text-slate-300 hover:text-white'}`}
+                onClick={() => void handleTabChange("artifacts")}
+                className={`rounded-lg px-3 py-1 ${activeTab === "artifacts" ? "bg-emerald-500 text-slate-950" : "text-slate-300 hover:text-white"}`}
               >
                 Artifacts
               </button>
               <button
                 type="button"
-                onClick={() => setActiveTab('metadata')}
-                className={`rounded-lg px-3 py-1 ${activeTab === 'metadata' ? 'bg-emerald-500 text-slate-950' : 'text-slate-300 hover:text-white'}`}
+                onClick={() => setActiveTab("metadata")}
+                className={`rounded-lg px-3 py-1 ${activeTab === "metadata" ? "bg-emerald-500 text-slate-950" : "text-slate-300 hover:text-white"}`}
               >
                 Metadata
               </button>
             </div>
-            {activeTab === 'logs' ? (
+            {activeTab === "logs" ? (
               <div className="flex items-center gap-3 text-xs">
                 <label className="flex items-center gap-2">
                   <input
@@ -192,36 +181,32 @@ export function RunViewPage() {
             ) : null}
           </div>
           <div className="h-[420px] overflow-auto" ref={containerRef}>
-            {activeTab === 'logs' ? (
+            {activeTab === "logs" ? (
               <pre className="space-y-1 px-4 py-3 text-xs leading-5">
                 {visibleLogs.map((line, index) => (
                   <code
                     // eslint-disable-next-line react/no-array-index-key
                     key={`${line}-${index}`}
-                    className={`block rounded px-2 py-1 ${highlightIndex === index ? 'bg-emerald-500/30 text-white' : 'text-slate-300'}`}
+                    className={`block rounded px-2 py-1 ${highlightIndex === index ? "bg-emerald-500/30 text-white" : "text-slate-300"}`}
                   >
                     {line}
                   </code>
                 ))}
               </pre>
             ) : null}
-            {activeTab === 'artifacts' ? (
+            {activeTab === "artifacts" ? (
               <div className="p-4 text-sm text-slate-300">
                 <p className="text-xs text-slate-400">Reason captured:</p>
-                <p className="font-medium text-emerald-300">
-                  {artifactsReason}
-                </p>
+                <p className="font-medium text-emerald-300">{artifactsReason}</p>
                 <ul className="mt-3 space-y-2">
                   <li className="rounded border border-slate-800/60 p-3">
                     artifact.tar.gz • sha256:abc…123
                   </li>
-                  <li className="rounded border border-slate-800/60 p-3">
-                    sbom.json • 52KB
-                  </li>
+                  <li className="rounded border border-slate-800/60 p-3">sbom.json • 52KB</li>
                 </ul>
               </div>
             ) : null}
-            {activeTab === 'metadata' ? (
+            {activeTab === "metadata" ? (
               <div className="space-y-2 p-4 text-xs text-slate-400">
                 <p>Started: {new Date(run.startedAt).toLocaleString()}</p>
                 <p>Queue → Start: 45s</p>
@@ -236,15 +221,12 @@ export function RunViewPage() {
           <ul className="mt-3 space-y-2 text-xs text-slate-300">
             <li>Auto-retry skipped: deterministic failure signature.</li>
             <li>Gate fail reason: missing change ticket #4821.</li>
-            <li>
-              Suggested fix: regenerate cache for step_04 (owners: alex, jules).
-            </li>
+            <li>Suggested fix: regenerate cache for step_04 (owners: alex, jules).</li>
           </ul>
           <div className="mt-5 rounded-xl border border-slate-800 bg-slate-950/70 p-3 text-xs text-slate-400">
             <p className="font-semibold text-slate-200">Provenance</p>
             <p className="mt-1">
-              Logs signed with digest sha256:b12… fed by SSE channel. Copy uses
-              provenance chips.
+              Logs signed with digest sha256:b12… fed by SSE channel. Copy uses provenance chips.
             </p>
           </div>
         </aside>

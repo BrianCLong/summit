@@ -28,7 +28,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR: ${{ github.event.pull_request.number }}
-          PROJECT_TITLE: 'Assistant v1.1'
+          PROJECT_TITLE: "Assistant v1.1"
         run: |
           set -euo pipefail
           BODY=$(gh pr view "$PR" --json body -q .body)

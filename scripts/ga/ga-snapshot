@@ -16,32 +16,32 @@
  *   --help              Show this help message
  */
 
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { execSync } from 'node:child_process';
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { execSync } from "node:child_process";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(__dirname, '..', '..');
+const repoRoot = path.resolve(__dirname, "..", "..");
 
 // Default input paths (relative to repo root)
 const DEFAULT_INPUTS = {
-  queue: 'docs/release/QUEUE.md',
-  blockers: 'docs/release/BLOCKERS.md',
-  evidence: 'docs/release/EVIDENCE.md',
-  notes: 'docs/release/NOTES.md',
-  state: 'docs/release/STATE.md',
+  queue: "docs/release/QUEUE.md",
+  blockers: "docs/release/BLOCKERS.md",
+  evidence: "docs/release/EVIDENCE.md",
+  notes: "docs/release/NOTES.md",
+  state: "docs/release/STATE.md",
 };
 
 // Valid phases for GA lifecycle
 const VALID_PHASES = [
-  'P0_DISCOVER',
-  'P1_QUEUE',
-  'P2_UNBLOCK',
-  'P3_MERGE',
-  'P4_VERIFY',
-  'P5_RELEASE',
-  'P6_DONE',
+  "P0_DISCOVER",
+  "P1_QUEUE",
+  "P2_UNBLOCK",
+  "P3_MERGE",
+  "P4_VERIFY",
+  "P5_RELEASE",
+  "P6_DONE",
 ];
 
 /**
@@ -49,7 +49,7 @@ const VALID_PHASES = [
  */
 function parseArgs(argv) {
   const args = {
-    out: 'ga_snapshot.json',
+    out: "ga_snapshot.json",
     includeCi: false,
     includeRelease: false,
     allowMissing: false,
@@ -59,20 +59,20 @@ function parseArgs(argv) {
   for (let i = 2; i < argv.length; i++) {
     const arg = argv[i];
     switch (arg) {
-      case '--out':
+      case "--out":
         args.out = argv[++i];
         break;
-      case '--include-ci':
+      case "--include-ci":
         args.includeCi = true;
         break;
-      case '--include-release':
+      case "--include-release":
         args.includeRelease = true;
         break;
-      case '--allow-missing':
+      case "--allow-missing":
         args.allowMissing = true;
         break;
-      case '--help':
-      case '-h':
+      case "--help":
+      case "-h":
         args.help = true;
         break;
     }
@@ -87,7 +87,7 @@ function parseArgs(argv) {
 async function readFileSafe(relativePath) {
   const absolute = path.join(repoRoot, relativePath);
   try {
-    return await fs.readFile(absolute, 'utf8');
+    return await fs.readFile(absolute, "utf8");
   } catch {
     return null;
   }
@@ -99,21 +99,21 @@ async function readFileSafe(relativePath) {
 function parseQueue(content) {
   if (!content) {
     return {
-      total: 'unknown',
-      remaining: 'unknown',
-      merged: 'unknown',
-      deferred: 'unknown',
+      total: "unknown",
+      remaining: "unknown",
+      merged: "unknown",
+      deferred: "unknown",
       buckets: {
-        A: { remaining: 'unknown', merged: 'unknown' },
-        B: { remaining: 'unknown', merged: 'unknown' },
-        C: { remaining: 'unknown', merged: 'unknown' },
-        D: { remaining: 'unknown', merged: 'unknown' },
+        A: { remaining: "unknown", merged: "unknown" },
+        B: { remaining: "unknown", merged: "unknown" },
+        C: { remaining: "unknown", merged: "unknown" },
+        D: { remaining: "unknown", merged: "unknown" },
       },
       top_failing_checks: [],
     };
   }
 
-  const lines = content.split('\n');
+  const lines = content.split("\n");
 
   // Count PR entries (lines with PR references like #1234 or PR-1234)
   const prPattern = /(?:#|PR[-\s]?)(\d{4,6})/gi;
@@ -180,15 +180,27 @@ function parseQueue(content) {
     .slice(0, 5);
 
   return {
-    total: total || 'unknown',
-    remaining: total > 0 ? total - merged - deferred : 'unknown',
-    merged: merged || 'unknown',
-    deferred: deferred || 'unknown',
+    total: total || "unknown",
+    remaining: total > 0 ? total - merged - deferred : "unknown",
+    merged: merged || "unknown",
+    deferred: deferred || "unknown",
     buckets: {
-      A: buckets.A.remaining || buckets.A.merged ? buckets.A : { remaining: 'unknown', merged: 'unknown' },
-      B: buckets.B.remaining || buckets.B.merged ? buckets.B : { remaining: 'unknown', merged: 'unknown' },
-      C: buckets.C.remaining || buckets.C.merged ? buckets.C : { remaining: 'unknown', merged: 'unknown' },
-      D: buckets.D.remaining || buckets.D.merged ? buckets.D : { remaining: 'unknown', merged: 'unknown' },
+      A:
+        buckets.A.remaining || buckets.A.merged
+          ? buckets.A
+          : { remaining: "unknown", merged: "unknown" },
+      B:
+        buckets.B.remaining || buckets.B.merged
+          ? buckets.B
+          : { remaining: "unknown", merged: "unknown" },
+      C:
+        buckets.C.remaining || buckets.C.merged
+          ? buckets.C
+          : { remaining: "unknown", merged: "unknown" },
+      D:
+        buckets.D.remaining || buckets.D.merged
+          ? buckets.D
+          : { remaining: "unknown", merged: "unknown" },
     },
     top_failing_checks: topFailingChecks,
   };
@@ -202,34 +214,34 @@ function parseBlockers(content) {
     return [];
   }
 
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   const blockers = [];
 
   // Pattern to detect blocker entries (flexible format)
   const blockerPatterns = [
-    /^[-*]\s*\[([xX\s])\]\s*(.+)$/,           // Checkbox format: - [x] Check name
-    /^[-*]\s*(\S+):\s*(.+)$/,                  // Label format: - CheckName: description
-    /^#+\s*(.+)$/,                              // Heading format
+    /^[-*]\s*\[([xX\s])\]\s*(.+)$/, // Checkbox format: - [x] Check name
+    /^[-*]\s*(\S+):\s*(.+)$/, // Label format: - CheckName: description
+    /^#+\s*(.+)$/, // Heading format
   ];
 
   for (const line of lines) {
     const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('<!--')) continue;
+    if (!trimmed || trimmed.startsWith("<!--")) continue;
 
     // Try checkbox format first
     const checkboxMatch = trimmed.match(/^[-*]\s*\[([xX\s])\]\s*(.+)$/);
     if (checkboxMatch) {
-      const isResolved = checkboxMatch[1].toLowerCase() === 'x';
+      const isResolved = checkboxMatch[1].toLowerCase() === "x";
       const text = checkboxMatch[2].trim();
 
       // Extract check name (first part before colon or dash)
       const parts = text.split(/[:\-–—]/);
       const checkName = parts[0].trim();
-      const summary = parts.slice(1).join(':').trim() || text;
+      const summary = parts.slice(1).join(":").trim() || text;
 
       blockers.push({
         check: checkName,
-        status: isResolved ? 'resolved' : 'open',
+        status: isResolved ? "resolved" : "open",
         summary: summary.slice(0, 100), // Limit to 100 chars
       });
       continue;
@@ -240,18 +252,18 @@ function parseBlockers(content) {
     const openPattern = /(?:open|pending|blocking|blocked|🔴|❌)/i;
 
     // Look for lines that seem like blocker entries
-    if (trimmed.startsWith('-') || trimmed.startsWith('*')) {
-      const text = trimmed.replace(/^[-*]\s*/, '');
+    if (trimmed.startsWith("-") || trimmed.startsWith("*")) {
+      const text = trimmed.replace(/^[-*]\s*/, "");
       const isResolved = resolvedPattern.test(text);
       const isOpen = openPattern.test(text);
 
       // Extract a reasonable check name
-      const words = text.split(/\s+/).slice(0, 3).join(' ');
+      const words = text.split(/\s+/).slice(0, 3).join(" ");
 
       if (isResolved || isOpen || text.length > 10) {
         blockers.push({
           check: words.slice(0, 50),
-          status: isResolved ? 'resolved' : isOpen ? 'open' : 'unknown',
+          status: isResolved ? "resolved" : isOpen ? "open" : "unknown",
           summary: text.slice(0, 100),
         });
       }
@@ -266,7 +278,7 @@ function parseBlockers(content) {
  */
 function parseState(content) {
   if (!content) {
-    return 'unknown';
+    return "unknown";
   }
 
   // First, look for explicit "Current Phase:" declaration with a phase
@@ -279,7 +291,9 @@ function parseState(content) {
   }
 
   // Try "Phase:" or "Status:" followed by phase name
-  const phaseMatch = content.match(/(?:current\s+)?(?:phase|status|stage)[:\s*]+\**\s*(P\d_\w+|\w+)/i);
+  const phaseMatch = content.match(
+    /(?:current\s+)?(?:phase|status|stage)[:\s*]+\**\s*(P\d_\w+|\w+)/i
+  );
   if (phaseMatch) {
     const found = phaseMatch[1].toUpperCase();
     if (VALID_PHASES.includes(found)) {
@@ -287,20 +301,20 @@ function parseState(content) {
     }
     // Map common names to phases
     const mapping = {
-      DISCOVER: 'P0_DISCOVER',
-      QUEUE: 'P1_QUEUE',
-      UNBLOCK: 'P2_UNBLOCK',
-      MERGE: 'P3_MERGE',
-      VERIFY: 'P4_VERIFY',
-      RELEASE: 'P5_RELEASE',
-      DONE: 'P6_DONE',
-      COMPLETE: 'P6_DONE',
+      DISCOVER: "P0_DISCOVER",
+      QUEUE: "P1_QUEUE",
+      UNBLOCK: "P2_UNBLOCK",
+      MERGE: "P3_MERGE",
+      VERIFY: "P4_VERIFY",
+      RELEASE: "P5_RELEASE",
+      DONE: "P6_DONE",
+      COMPLETE: "P6_DONE",
     };
     if (mapping[found]) return mapping[found];
   }
 
   // Fall back to looking for any phase in order (last one found is likely current)
-  let lastFound = 'unknown';
+  let lastFound = "unknown";
   for (const phase of VALID_PHASES) {
     if (content.includes(phase)) {
       lastFound = phase;
@@ -316,18 +330,18 @@ function parseState(content) {
 function parseEvidence(content) {
   if (!content) {
     return {
-      last_evidence_section: 'unknown',
-      status: 'unknown',
+      last_evidence_section: "unknown",
+      status: "unknown",
     };
   }
 
-  const requiredSections = ['install', 'build', 'tests', 'e2e', 'security', 'smoke'];
+  const requiredSections = ["install", "build", "tests", "e2e", "security", "smoke"];
   const foundSections = [];
-  let lastSection = 'unknown';
+  let lastSection = "unknown";
 
   for (const section of requiredSections) {
     // Look for section headings (flexible matching)
-    const pattern = new RegExp(`(?:^#+\\s*|\\*\\*|__)${section}`, 'im');
+    const pattern = new RegExp(`(?:^#+\\s*|\\*\\*|__)${section}`, "im");
     if (pattern.test(content)) {
       foundSections.push(section);
       lastSection = section;
@@ -338,14 +352,14 @@ function parseEvidence(content) {
   const passPattern = /(?:pass|passed|success|✅|✓|all green)/i;
   const failPattern = /(?:fail|failed|error|❌|🔴)/i;
 
-  let status = 'unknown';
+  let status = "unknown";
   if (passPattern.test(content) && !failPattern.test(content)) {
-    status = 'pass';
+    status = "pass";
   } else if (failPattern.test(content)) {
-    status = 'fail';
+    status = "fail";
   } else if (foundSections.length >= 4) {
     // If most sections present, assume pass
-    status = 'pass';
+    status = "pass";
   }
 
   return {
@@ -361,16 +375,16 @@ function getCiStatus() {
   try {
     const result = execSync('gh run list --limit 1 --json conclusion -q ".[0].conclusion"', {
       cwd: repoRoot,
-      encoding: 'utf8',
+      encoding: "utf8",
       timeout: 10000,
-      stdio: ['pipe', 'pipe', 'pipe'],
+      stdio: ["pipe", "pipe", "pipe"],
     }).trim();
 
-    if (result === 'success') return true;
-    if (result === 'failure') return false;
-    return 'unknown';
+    if (result === "success") return true;
+    if (result === "failure") return false;
+    return "unknown";
   } catch {
-    return 'unknown';
+    return "unknown";
   }
 }
 
@@ -379,32 +393,32 @@ function getCiStatus() {
  */
 function getReleaseInfo() {
   const result = {
-    version: 'unknown',
-    tag: 'unknown',
-    commit: 'unknown',
+    version: "unknown",
+    tag: "unknown",
+    commit: "unknown",
   };
 
   try {
     // Get latest tag
     const tag = execSync('git describe --tags --abbrev=0 2>/dev/null || echo ""', {
       cwd: repoRoot,
-      encoding: 'utf8',
+      encoding: "utf8",
       timeout: 5000,
-      stdio: ['pipe', 'pipe', 'pipe'],
+      stdio: ["pipe", "pipe", "pipe"],
     }).trim();
 
     if (tag) {
       result.tag = tag;
       // Extract version from tag (strip v prefix if present)
-      result.version = tag.replace(/^v/, '');
+      result.version = tag.replace(/^v/, "");
     }
 
     // Get current commit
     const commit = execSync('git rev-parse HEAD 2>/dev/null || echo ""', {
       cwd: repoRoot,
-      encoding: 'utf8',
+      encoding: "utf8",
       timeout: 5000,
-      stdio: ['pipe', 'pipe', 'pipe'],
+      stdio: ["pipe", "pipe", "pipe"],
     }).trim();
 
     if (commit) {
@@ -468,40 +482,42 @@ Output Schema:
   if (!stateContent) missingFiles.push(DEFAULT_INPUTS.state);
 
   if (missingFiles.length > 0 && !args.allowMissing) {
-    console.error('Missing required files:');
+    console.error("Missing required files:");
     missingFiles.forEach((f) => console.error(`  - ${f}`));
-    console.error('\nUse --allow-missing to proceed with partial data.');
+    console.error("\nUse --allow-missing to proceed with partial data.");
     process.exit(1);
   }
 
   // Build snapshot
   const snapshot = {
     phase: parseState(stateContent),
-    main_green: args.includeCi ? getCiStatus() : 'unknown',
+    main_green: args.includeCi ? getCiStatus() : "unknown",
     queue: parseQueue(queueContent),
     blockers: parseBlockers(blockersContent),
     verification: parseEvidence(evidenceContent),
-    release: args.includeRelease ? getReleaseInfo() : {
-      version: 'unknown',
-      tag: 'unknown',
-      commit: 'unknown',
-    },
-    generated_by: 'scripts/ga/ga-snapshot',
+    release: args.includeRelease
+      ? getReleaseInfo()
+      : {
+          version: "unknown",
+          tag: "unknown",
+          commit: "unknown",
+        },
+    generated_by: "scripts/ga/ga-snapshot",
   };
 
   // Write output with stable key ordering (keys are already in insertion order)
   const output = JSON.stringify(snapshot, null, 2);
 
-  if (args.out === '-') {
+  if (args.out === "-") {
     console.log(output);
   } else {
     const outPath = path.isAbsolute(args.out) ? args.out : path.join(process.cwd(), args.out);
-    await fs.writeFile(outPath, output + '\n', 'utf8');
+    await fs.writeFile(outPath, output + "\n", "utf8");
     console.log(`GA snapshot written to: ${outPath}`);
   }
 }
 
 main().catch((err) => {
-  console.error('GA snapshot generation failed:', err.message);
+  console.error("GA snapshot generation failed:", err.message);
   process.exit(1);
 });

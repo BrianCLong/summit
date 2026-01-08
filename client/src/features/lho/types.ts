@@ -9,7 +9,7 @@ export interface CustodyEvent {
   timestamp: string;
   holdId: string;
   system: string;
-  action: 'apply' | 'verify';
+  action: "apply" | "verify";
   scopeFingerprint: string;
   prevHash: string;
   hash: string;

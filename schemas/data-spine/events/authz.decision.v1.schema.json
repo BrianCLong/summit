@@ -69,13 +69,7 @@
               }
             }
           },
-          "required": [
-            "resource",
-            "action",
-            "decision",
-            "policy_id",
-            "policy_version"
-          ]
+          "required": ["resource", "action", "decision", "policy_id", "policy_version"]
         }
       }
     }

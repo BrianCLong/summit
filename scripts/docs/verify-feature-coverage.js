@@ -5,12 +5,12 @@
  * Validates that all features have required documentation artifacts
  */
 
-const fs = require('fs');
-const path = require('path');
-const yaml = require('js-yaml');
+const fs = require("fs");
+const path = require("path");
+const yaml = require("js-yaml");
 
 class FeatureCoverageValidator {
-  constructor(featuresPath = 'docs/_meta/features.yml', docsPath = 'docs') {
+  constructor(featuresPath = "docs/_meta/features.yml", docsPath = "docs") {
     this.featuresPath = featuresPath;
     this.docsPath = docsPath;
     this.errors = [];
@@ -27,7 +27,7 @@ class FeatureCoverageValidator {
    * Validate feature documentation coverage
    */
   async validate() {
-    console.log('🔍 Validating feature documentation coverage...');
+    console.log("🔍 Validating feature documentation coverage...");
 
     // Load and validate features configuration
     const featuresConfig = this.loadFeaturesConfig();
@@ -57,13 +57,11 @@ class FeatureCoverageValidator {
   loadFeaturesConfig() {
     try {
       if (!fs.existsSync(this.featuresPath)) {
-        this.errors.push(
-          `Features configuration not found: ${this.featuresPath}`,
-        );
+        this.errors.push(`Features configuration not found: ${this.featuresPath}`);
         return null;
       }
 
-      const content = fs.readFileSync(this.featuresPath, 'utf8');
+      const content = fs.readFileSync(this.featuresPath, "utf8");
       const config = yaml.load(content);
 
       // Validate configuration structure
@@ -80,7 +78,7 @@ class FeatureCoverageValidator {
    * Validate features configuration structure
    */
   validateConfigStructure(config) {
-    const requiredFields = ['features', 'validationRules', 'qualityThresholds'];
+    const requiredFields = ["features", "validationRules", "qualityThresholds"];
 
     requiredFields.forEach((field) => {
       if (!config[field]) {
@@ -89,7 +87,7 @@ class FeatureCoverageValidator {
     });
 
     if (!config.features || !Array.isArray(config.features)) {
-      this.errors.push('Features must be an array');
+      this.errors.push("Features must be an array");
       return;
     }
 
@@ -103,14 +101,7 @@ class FeatureCoverageValidator {
    * Validate individual feature structure
    */
   validateFeatureStructure(feature, index) {
-    const requiredFields = [
-      'id',
-      'name',
-      'category',
-      'status',
-      'owners',
-      'priority',
-    ];
+    const requiredFields = ["id", "name", "category", "status", "owners", "priority"];
 
     requiredFields.forEach((field) => {
       if (!feature[field]) {
@@ -118,10 +109,8 @@ class FeatureCoverageValidator {
       }
     });
 
-    if (!feature.docs || typeof feature.docs !== 'object') {
-      this.errors.push(
-        `Feature ${feature.id}: Missing or invalid docs configuration`,
-      );
+    if (!feature.docs || typeof feature.docs !== "object") {
+      this.errors.push(`Feature ${feature.id}: Missing or invalid docs configuration`);
     }
   }
 
@@ -132,10 +121,7 @@ class FeatureCoverageValidator {
     this.stats.totalFeatures = config.features.length;
 
     config.features.forEach((feature) => {
-      const coverage = this.validateFeatureCoverage(
-        feature,
-        config.validationRules,
-      );
+      const coverage = this.validateFeatureCoverage(feature, config.validationRules);
       if (coverage.hasRequiredDocs) {
         this.stats.coveredFeatures++;
       }
@@ -146,9 +132,7 @@ class FeatureCoverageValidator {
    * Validate documentation coverage for a single feature
    */
   validateFeatureCoverage(feature, validationRules) {
-    console.log(
-      `  📋 Validating ${feature.id} (${feature.status}, ${feature.priority})`,
-    );
+    console.log(`  📋 Validating ${feature.id} (${feature.status}, ${feature.priority})`);
 
     const coverage = {
       hasRequiredDocs: true,
@@ -169,18 +153,14 @@ class FeatureCoverageValidator {
       const docPath = feature.docs[docType];
 
       if (!docPath) {
-        this.errors.push(
-          `${feature.id}: Missing required ${docType} documentation`,
-        );
+        this.errors.push(`${feature.id}: Missing required ${docType} documentation`);
         coverage.missingRequired.push(docType);
         coverage.hasRequiredDocs = false;
         this.stats.missingArtifacts++;
       } else {
         const fullPath = path.join(this.docsPath, docPath);
         if (!fs.existsSync(fullPath)) {
-          this.errors.push(
-            `${feature.id}: ${docType} file not found: ${fullPath}`,
-          );
+          this.errors.push(`${feature.id}: ${docType} file not found: ${fullPath}`);
           coverage.missingRequired.push(docType);
           coverage.hasRequiredDocs = false;
           this.stats.missingArtifacts++;
@@ -196,17 +176,13 @@ class FeatureCoverageValidator {
       const docPath = feature.docs[docType];
 
       if (!docPath) {
-        this.warnings.push(
-          `${feature.id}: Missing recommended ${docType} documentation`,
-        );
+        this.warnings.push(`${feature.id}: Missing recommended ${docType} documentation`);
         coverage.missingOptional.push(docType);
         this.stats.optionalMissing++;
       } else {
         const fullPath = path.join(this.docsPath, docPath);
         if (!fs.existsSync(fullPath)) {
-          this.warnings.push(
-            `${feature.id}: ${docType} file not found: ${fullPath}`,
-          );
+          this.warnings.push(`${feature.id}: ${docType} file not found: ${fullPath}`);
           coverage.missingOptional.push(docType);
           this.stats.optionalMissing++;
         } else {
@@ -222,18 +198,15 @@ class FeatureCoverageValidator {
    * Get required documentation types for a feature
    */
   getRequiredDocs(feature, validationRules) {
-    const statusRequirements = validationRules.statusRequirements[
-      feature.status
-    ] || { required: [] };
-    const priorityRequirements = validationRules.priorityRequirements[
-      feature.priority
-    ] || { required: [] };
+    const statusRequirements = validationRules.statusRequirements[feature.status] || {
+      required: [],
+    };
+    const priorityRequirements = validationRules.priorityRequirements[feature.priority] || {
+      required: [],
+    };
 
     // Combine status and priority requirements
-    const required = new Set([
-      ...statusRequirements.required,
-      ...priorityRequirements.required,
-    ]);
+    const required = new Set([...statusRequirements.required, ...priorityRequirements.required]);
 
     return Array.from(required);
   }
@@ -242,12 +215,12 @@ class FeatureCoverageValidator {
    * Get recommended documentation types for a feature
    */
   getRecommendedDocs(feature, validationRules) {
-    const statusRequirements = validationRules.statusRequirements[
-      feature.status
-    ] || { recommended: [] };
-    const priorityRequirements = validationRules.priorityRequirements[
-      feature.priority
-    ] || { recommended: [] };
+    const statusRequirements = validationRules.statusRequirements[feature.status] || {
+      recommended: [],
+    };
+    const priorityRequirements = validationRules.priorityRequirements[feature.priority] || {
+      recommended: [],
+    };
 
     // Combine status and priority recommendations
     const recommended = new Set([
@@ -263,44 +236,33 @@ class FeatureCoverageValidator {
    */
   validateDocumentContent(filePath, feature, docType) {
     try {
-      const content = fs.readFileSync(filePath, 'utf8');
+      const content = fs.readFileSync(filePath, "utf8");
 
       // Check for frontmatter
-      if (!content.startsWith('---')) {
-        this.warnings.push(
-          `${feature.id}: ${docType} missing frontmatter: ${filePath}`,
-        );
+      if (!content.startsWith("---")) {
+        this.warnings.push(`${feature.id}: ${docType} missing frontmatter: ${filePath}`);
       }
 
       // Check for feature mentions
       if (!content.includes(feature.name) && !content.includes(feature.id)) {
         this.warnings.push(
-          `${feature.id}: ${docType} doesn't mention feature name or ID: ${filePath}`,
+          `${feature.id}: ${docType} doesn't mention feature name or ID: ${filePath}`
         );
       }
 
       // Validate code examples for features that require them
       if (feature.validation && feature.validation.codeExamples) {
-        if (!content.includes('```')) {
-          this.warnings.push(
-            `${feature.id}: ${docType} missing code examples: ${filePath}`,
-          );
+        if (!content.includes("```")) {
+          this.warnings.push(`${feature.id}: ${docType} missing code examples: ${filePath}`);
         }
       }
 
       // Check for validation requirements
       if (feature.validation) {
-        this.validateFeatureValidationRequirements(
-          feature,
-          docType,
-          content,
-          filePath,
-        );
+        this.validateFeatureValidationRequirements(feature, docType, content, filePath);
       }
     } catch (error) {
-      this.errors.push(
-        `${feature.id}: Failed to validate ${docType} content: ${error.message}`,
-      );
+      this.errors.push(`${feature.id}: Failed to validate ${docType} content: ${error.message}`);
     }
   }
 
@@ -311,48 +273,38 @@ class FeatureCoverageValidator {
     const validation = feature.validation;
 
     // API testing requirements
-    if (validation.apiTesting && docType === 'reference') {
-      if (!content.includes('API') && !content.includes('endpoint')) {
+    if (validation.apiTesting && docType === "reference") {
+      if (!content.includes("API") && !content.includes("endpoint")) {
         this.warnings.push(
-          `${feature.id}: API documentation missing API/endpoint references: ${filePath}`,
+          `${feature.id}: API documentation missing API/endpoint references: ${filePath}`
         );
       }
     }
 
     // Security testing requirements
-    if (validation.securityTesting && docType === 'howto') {
-      const securityTerms = [
-        'security',
-        'authentication',
-        'authorization',
-        'permissions',
-      ];
+    if (validation.securityTesting && docType === "howto") {
+      const securityTerms = ["security", "authentication", "authorization", "permissions"];
       const hasSecurityContent = securityTerms.some((term) =>
-        content.toLowerCase().includes(term.toLowerCase()),
+        content.toLowerCase().includes(term.toLowerCase())
       );
 
       if (!hasSecurityContent) {
         this.warnings.push(
-          `${feature.id}: Security-sensitive feature missing security guidance: ${filePath}`,
+          `${feature.id}: Security-sensitive feature missing security guidance: ${filePath}`
         );
       }
     }
 
     // Compliance testing requirements
-    if (validation.complianceTesting && docType === 'concept') {
-      const complianceTerms = [
-        'compliance',
-        'regulation',
-        'audit',
-        'governance',
-      ];
+    if (validation.complianceTesting && docType === "concept") {
+      const complianceTerms = ["compliance", "regulation", "audit", "governance"];
       const hasComplianceContent = complianceTerms.some((term) =>
-        content.toLowerCase().includes(term.toLowerCase()),
+        content.toLowerCase().includes(term.toLowerCase())
       );
 
       if (!hasComplianceContent) {
         this.warnings.push(
-          `${feature.id}: Compliance-related feature missing compliance guidance: ${filePath}`,
+          `${feature.id}: Compliance-related feature missing compliance guidance: ${filePath}`
         );
       }
     }
@@ -362,7 +314,7 @@ class FeatureCoverageValidator {
    * Find documentation not linked to any feature
    */
   findOrphanedDocs(config) {
-    console.log('  🔍 Checking for orphaned documentation...');
+    console.log("  🔍 Checking for orphaned documentation...");
 
     const linkedDocs = new Set();
 
@@ -385,9 +337,7 @@ class FeatureCoverageValidator {
     });
 
     if (orphanedDocs.length > 0) {
-      this.warnings.push(
-        `Found ${orphanedDocs.length} potentially orphaned documentation files`,
-      );
+      this.warnings.push(`Found ${orphanedDocs.length} potentially orphaned documentation files`);
       orphanedDocs.forEach((docPath) => {
         this.warnings.push(`Orphaned: ${docPath}`);
       });
@@ -428,7 +378,7 @@ class FeatureCoverageValidator {
 
         if (stat.isDirectory()) {
           walkDir(itemPath);
-        } else if (item.endsWith('.md') || item.endsWith('.mdx')) {
+        } else if (item.endsWith(".md") || item.endsWith(".mdx")) {
           files.push(itemPath);
         }
       });
@@ -443,9 +393,7 @@ class FeatureCoverageValidator {
    */
   calculateCoveragePercentage() {
     if (this.stats.totalFeatures === 0) return 0;
-    return Math.round(
-      (this.stats.coveredFeatures / this.stats.totalFeatures) * 100,
-    );
+    return Math.round((this.stats.coveredFeatures / this.stats.totalFeatures) * 100);
   }
 
   /**
@@ -454,8 +402,8 @@ class FeatureCoverageValidator {
   generateCoverageReport() {
     const coveragePercentage = this.calculateCoveragePercentage();
 
-    console.log('\n📊 Feature Documentation Coverage Report');
-    console.log('==========================================');
+    console.log("\n📊 Feature Documentation Coverage Report");
+    console.log("==========================================");
 
     console.log(`\n📈 Coverage Statistics:`);
     console.log(`  Total Features: ${this.stats.totalFeatures}`);
@@ -494,14 +442,11 @@ class FeatureCoverageValidator {
       },
       errors: this.errors,
       warnings: this.warnings,
-      status: this.errors.length === 0 ? 'PASS' : 'FAIL',
+      status: this.errors.length === 0 ? "PASS" : "FAIL",
     };
 
-    fs.writeFileSync(
-      'feature-coverage-report.json',
-      JSON.stringify(report, null, 2),
-    );
-    console.log('\n📄 Detailed report saved to feature-coverage-report.json');
+    fs.writeFileSync("feature-coverage-report.json", JSON.stringify(report, null, 2));
+    console.log("\n📄 Detailed report saved to feature-coverage-report.json");
 
     // Generate coverage badge data
     this.generateCoverageBadge(coveragePercentage);
@@ -513,37 +458,37 @@ class FeatureCoverageValidator {
   generateCoverageBadge(percentage) {
     const badgeColor =
       percentage >= 95
-        ? 'brightgreen'
+        ? "brightgreen"
         : percentage >= 85
-          ? 'green'
+          ? "green"
           : percentage >= 70
-            ? 'yellow'
+            ? "yellow"
             : percentage >= 50
-              ? 'orange'
-              : 'red';
+              ? "orange"
+              : "red";
 
     const badgeData = {
       schemaVersion: 1,
-      label: 'docs coverage',
+      label: "docs coverage",
       message: `${percentage}%`,
       color: badgeColor,
     };
 
-    fs.writeFileSync('coverage-badge.json', JSON.stringify(badgeData, null, 2));
+    fs.writeFileSync("coverage-badge.json", JSON.stringify(badgeData, null, 2));
   }
 }
 
 // CLI execution
 if (require.main === module) {
-  const featuresPath = process.argv[2] || 'docs/_meta/features.yml';
-  const docsPath = process.argv[3] || 'docs';
+  const featuresPath = process.argv[2] || "docs/_meta/features.yml";
+  const docsPath = process.argv[3] || "docs";
 
   // Ensure required dependencies are available
   try {
-    require('js-yaml');
+    require("js-yaml");
   } catch (error) {
-    console.error('❌ Missing dependency: js-yaml');
-    console.error('Install with: npm install js-yaml');
+    console.error("❌ Missing dependency: js-yaml");
+    console.error("Install with: npm install js-yaml");
     process.exit(1);
   }
 
@@ -556,9 +501,7 @@ if (require.main === module) {
 
       if (!result.success || result.coveragePercentage < threshold) {
         console.error(`\n❌ Feature coverage validation failed`);
-        console.error(
-          `Coverage: ${result.coveragePercentage}% (minimum: ${threshold}%)`,
-        );
+        console.error(`Coverage: ${result.coveragePercentage}% (minimum: ${threshold}%)`);
         process.exit(1);
       } else {
         console.log(`\n✅ Feature coverage validation passed!`);
@@ -567,7 +510,7 @@ if (require.main === module) {
       }
     })
     .catch((error) => {
-      console.error('❌ Validation failed:', error.message);
+      console.error("❌ Validation failed:", error.message);
       process.exit(1);
     });
 }

@@ -138,6 +138,7 @@ Predicts which patterns will dominate:
 ### Proto-Pattern Detection Algorithm
 
 #### Input
+
 - Graph snapshot: `G(t)` at time `t`
 - Historical pattern library: `P = {p₁, p₂, ..., pₙ}`
 - Sensitivity threshold: `θ`
@@ -145,6 +146,7 @@ Predicts which patterns will dominate:
 #### Process
 
 1. **Weak Signal Extraction**
+
    ```
    For each known pattern p ∈ P:
      Extract signature features F(p)
@@ -152,6 +154,7 @@ Predicts which patterns will dominate:
    ```
 
 2. **Graph Scanning**
+
    ```
    For each subgraph s ⊆ G(t):
      Compute feature vector f(s)
@@ -161,6 +164,7 @@ Predicts which patterns will dominate:
    ```
 
 3. **Temporal Coherence Check**
+
    ```
    For each candidate c:
      Examine temporal evolution: c(t-k), c(t-k+1), ..., c(t)
@@ -178,6 +182,7 @@ Predicts which patterns will dominate:
 ### Pattern Evolution Simulation
 
 #### Input
+
 - Proto-pattern: `proto`
 - Time horizon: `T`
 - Simulation runs: `N`
@@ -185,12 +190,14 @@ Predicts which patterns will dominate:
 #### Process
 
 1. **Initialize Trajectories**
+
    ```
    For i = 1 to N:
      trajectory[i] = {proto}
    ```
 
 2. **Simulate Forward**
+
    ```
    For each trajectory[i]:
      For t = 1 to T:
@@ -203,6 +210,7 @@ Predicts which patterns will dominate:
    ```
 
 3. **Convergence Analysis**
+
    ```
    Cluster all trajectory endpoints
    Identify dominant clusters (modes of distribution)
@@ -220,12 +228,14 @@ Predicts which patterns will dominate:
 ### Pattern Competition Modeling
 
 #### Input
+
 - Set of proto-patterns: `{proto₁, proto₂, ..., protoₘ}`
 - Resource constraints: `R`
 
 #### Process
 
 1. **Define Competition Space**
+
    ```
    For each pair (protoᵢ, protoⱼ):
      Compute overlap: overlap(i,j) = |nodes(i) ∩ nodes(j)| / |nodes(i) ∪ nodes(j)|
@@ -233,11 +243,13 @@ Predicts which patterns will dominate:
    ```
 
 2. **Fitness Functions**
+
    ```
    fitness(protoᵢ) = intrinsic_strength(i) - Σⱼ c(i,j) * strength(j)
    ```
 
 3. **Ecological Simulation**
+
    ```
    Use Lotka-Volterra competition equations:
 
@@ -260,11 +272,13 @@ Predicts which patterns will dominate:
 ### Dominance Prediction
 
 #### Input
+
 - Proto-patterns with competition results: `{(proto₁, fitness₁), ...}`
 
 #### Process
 
 1. **Growth Rate Estimation**
+
    ```
    For each protoᵢ:
      Measure historical growth: g(i) = Δstrength / Δtime
@@ -272,17 +286,20 @@ Predicts which patterns will dominate:
    ```
 
 2. **Network Effects**
+
    ```
    network_amplification(i) = 1 + β * log(connected_components(i))
    adjusted_growth(i) = g(i) * network_amplification(i)
    ```
 
 3. **Resilience Scoring**
+
    ```
    resilience(i) = structural_redundancy(i) * resource_diversity(i)
    ```
 
 4. **Dominance Score**
+
    ```
    dominance(i) = weighted_sum(
      growth_score(i),
@@ -361,29 +378,16 @@ type Query {
   ): [ProtoPattern!]!
 
   # Predict future motifs
-  predictMotifs(
-    timeHorizon: Int!
-    confidence: Float = 0.8
-    maxResults: Int = 10
-  ): [FutureMotif!]!
+  predictMotifs(timeHorizon: Int!, confidence: Float = 0.8, maxResults: Int = 10): [FutureMotif!]!
 
   # Get pattern competitions
-  getCompetitions(
-    protoPatternIds: [ID!]
-    includeAllActive: Boolean = true
-  ): [PatternCompetition!]!
+  getCompetitions(protoPatternIds: [ID!], includeAllActive: Boolean = true): [PatternCompetition!]!
 
   # Get dominant patterns
-  getDominantPatterns(
-    topK: Int = 5
-    timeHorizon: Int = 30
-  ): [DominanceScore!]!
+  getDominantPatterns(topK: Int = 5, timeHorizon: Int = 30): [DominanceScore!]!
 
   # Get pattern evolution
-  getEvolutionTrajectories(
-    protoPatternId: ID!
-    simulations: Int = 1000
-  ): [Trajectory!]!
+  getEvolutionTrajectories(protoPatternId: ID!, simulations: Int = 1000): [Trajectory!]!
 }
 ```
 
@@ -392,11 +396,7 @@ type Query {
 ```graphql
 type Mutation {
   # Seed a proto-pattern manually
-  seedPattern(
-    partialMotif: JSON!
-    confidence: Float!
-    metadata: JSON
-  ): ProtoPattern!
+  seedPattern(partialMotif: JSON!, confidence: Float!, metadata: JSON): ProtoPattern!
 
   # Run competition simulation
   runCompetition(
@@ -406,11 +406,7 @@ type Mutation {
   ): PatternCompetition!
 
   # Evolve a proto-pattern
-  evolvePattern(
-    protoPatternId: ID!
-    timeSteps: Int!
-    constraints: JSON
-  ): [PatternExpression!]!
+  evolvePattern(protoPatternId: ID!, timeSteps: Int!, constraints: JSON): [PatternExpression!]!
 }
 ```
 
@@ -591,7 +587,7 @@ interface PatternGenesisConfig {
   };
   competition: {
     enableCompetition: boolean;
-    resourceModel: 'limited' | 'unlimited';
+    resourceModel: "limited" | "unlimited";
     cooperationAllowed: boolean;
   };
   dominance: {
@@ -631,7 +627,7 @@ services:
 ### Scalability
 
 - **Detection**: O(n²) for n subgraphs, parallelizable
-- **Evolution**: O(N * T) for N simulations and T timesteps
+- **Evolution**: O(N \* T) for N simulations and T timesteps
 - **Competition**: O(m²) for m proto-patterns
 - **Dominance**: O(m log m) for ranking
 
@@ -658,6 +654,7 @@ services:
 **Scenario**: Detect emerging Advanced Persistent Threat tactics before they fully materialize.
 
 **Approach**:
+
 1. Detect proto-patterns in network traffic, authentication logs, and file access
 2. Compare to library of known APT patterns
 3. Evolve proto-patterns to predict attack progression
@@ -670,6 +667,7 @@ services:
 **Scenario**: Identify coordinated influence operations as they begin forming.
 
 **Approach**:
+
 1. Scan social graph for weak signals of coordination
 2. Detect proto-patterns of bot networks, amplification structures
 3. Simulate competition between influence campaigns
@@ -682,6 +680,7 @@ services:
 **Scenario**: Predict how malware variants will evolve.
 
 **Approach**:
+
 1. Identify proto-patterns in malware code signatures
 2. Model evolution trajectories based on historical mutations
 3. Predict dominant variants
@@ -694,6 +693,7 @@ services:
 **Scenario**: Detect emerging supply chain vulnerabilities.
 
 **Approach**:
+
 1. Scan supply chain graph for proto-patterns of risk
 2. Model competition between alternative suppliers
 3. Predict which risk patterns will dominate

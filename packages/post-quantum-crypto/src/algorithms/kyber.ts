@@ -4,26 +4,32 @@
  * NIST PQC standardized algorithm
  */
 
-import { KeyEncapsulationMechanism, KeyPair, EncapsulatedSecret, PQCAlgorithm, SecurityLevel } from '../types';
+import {
+  KeyEncapsulationMechanism,
+  KeyPair,
+  EncapsulatedSecret,
+  PQCAlgorithm,
+  SecurityLevel,
+} from "../types";
 
 export class KyberKEM implements KeyEncapsulationMechanism {
-  private variant: 'kyber512' | 'kyber768' | 'kyber1024';
+  private variant: "kyber512" | "kyber768" | "kyber1024";
   private algorithm: PQCAlgorithm;
   private securityLevel: SecurityLevel;
 
-  constructor(variant: 'kyber512' | 'kyber768' | 'kyber1024' = 'kyber768') {
+  constructor(variant: "kyber512" | "kyber768" | "kyber1024" = "kyber768") {
     this.variant = variant;
 
     switch (variant) {
-      case 'kyber512':
+      case "kyber512":
         this.algorithm = PQCAlgorithm.KYBER_512;
         this.securityLevel = SecurityLevel.LEVEL_1;
         break;
-      case 'kyber768':
+      case "kyber768":
         this.algorithm = PQCAlgorithm.KYBER_768;
         this.securityLevel = SecurityLevel.LEVEL_3;
         break;
-      case 'kyber1024':
+      case "kyber1024":
         this.algorithm = PQCAlgorithm.KYBER_1024;
         this.securityLevel = SecurityLevel.LEVEL_5;
         break;
@@ -102,7 +108,9 @@ export class KyberKEM implements KeyEncapsulationMechanism {
     return { publicKey, privateKey };
   }
 
-  private async performEncapsulation(publicKey: Uint8Array): Promise<{ ciphertext: Uint8Array; sharedSecret: Uint8Array }> {
+  private async performEncapsulation(
+    publicKey: Uint8Array
+  ): Promise<{ ciphertext: Uint8Array; sharedSecret: Uint8Array }> {
     const params = this.getKyberParameters();
 
     // Generate random coins
@@ -119,7 +127,10 @@ export class KyberKEM implements KeyEncapsulationMechanism {
     return { ciphertext, sharedSecret };
   }
 
-  private async performDecapsulation(ciphertext: Uint8Array, privateKey: Uint8Array): Promise<Uint8Array> {
+  private async performDecapsulation(
+    ciphertext: Uint8Array,
+    privateKey: Uint8Array
+  ): Promise<Uint8Array> {
     // Decapsulation algorithm
     const sharedSecret = new Uint8Array(32);
 
@@ -129,13 +140,17 @@ export class KyberKEM implements KeyEncapsulationMechanism {
     return sharedSecret;
   }
 
-  private getKyberParameters(): { publicKeyBytes: number; privateKeyBytes: number; ciphertextBytes: number } {
+  private getKyberParameters(): {
+    publicKeyBytes: number;
+    privateKeyBytes: number;
+    ciphertextBytes: number;
+  } {
     switch (this.variant) {
-      case 'kyber512':
+      case "kyber512":
         return { publicKeyBytes: 800, privateKeyBytes: 1632, ciphertextBytes: 768 };
-      case 'kyber768':
+      case "kyber768":
         return { publicKeyBytes: 1184, privateKeyBytes: 2400, ciphertextBytes: 1088 };
-      case 'kyber1024':
+      case "kyber1024":
         return { publicKeyBytes: 1568, privateKeyBytes: 3168, ciphertextBytes: 1568 };
     }
   }
@@ -143,21 +158,27 @@ export class KyberKEM implements KeyEncapsulationMechanism {
   private validatePublicKey(publicKey: Uint8Array): void {
     const params = this.getKyberParameters();
     if (publicKey.length !== params.publicKeyBytes) {
-      throw new Error(`Invalid public key length: expected ${params.publicKeyBytes}, got ${publicKey.length}`);
+      throw new Error(
+        `Invalid public key length: expected ${params.publicKeyBytes}, got ${publicKey.length}`
+      );
     }
   }
 
   private validatePrivateKey(privateKey: Uint8Array): void {
     const params = this.getKyberParameters();
     if (privateKey.length !== params.privateKeyBytes) {
-      throw new Error(`Invalid private key length: expected ${params.privateKeyBytes}, got ${privateKey.length}`);
+      throw new Error(
+        `Invalid private key length: expected ${params.privateKeyBytes}, got ${privateKey.length}`
+      );
     }
   }
 
   private validateCiphertext(ciphertext: Uint8Array): void {
     const params = this.getKyberParameters();
     if (ciphertext.length !== params.ciphertextBytes) {
-      throw new Error(`Invalid ciphertext length: expected ${params.ciphertextBytes}, got ${ciphertext.length}`);
+      throw new Error(
+        `Invalid ciphertext length: expected ${params.ciphertextBytes}, got ${ciphertext.length}`
+      );
     }
   }
 }
@@ -165,12 +186,12 @@ export class KyberKEM implements KeyEncapsulationMechanism {
 export function createKyberKEM(securityLevel: SecurityLevel = SecurityLevel.LEVEL_3): KyberKEM {
   switch (securityLevel) {
     case SecurityLevel.LEVEL_1:
-      return new KyberKEM('kyber512');
+      return new KyberKEM("kyber512");
     case SecurityLevel.LEVEL_3:
-      return new KyberKEM('kyber768');
+      return new KyberKEM("kyber768");
     case SecurityLevel.LEVEL_5:
-      return new KyberKEM('kyber1024');
+      return new KyberKEM("kyber1024");
     default:
-      return new KyberKEM('kyber768');
+      return new KyberKEM("kyber768");
   }
 }

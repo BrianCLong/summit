@@ -17,10 +17,5 @@ type EntityRef {
 scalar JSON
 
 type Subscription {
-  onGraphEvent(
-    tenant: ID!,
-    types: [String!],
-    entityIds: [ID!],
-    kinds: [String!]
-  ): GraphEvent!
+  onGraphEvent(tenant: ID!, types: [String!], entityIds: [ID!], kinds: [String!]): GraphEvent!
 }

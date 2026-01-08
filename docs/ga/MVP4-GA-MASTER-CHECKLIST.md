@@ -247,25 +247,25 @@ This checklist is the **single source of truth** for MVP-4-GA readiness. Every i
   - Readiness Score: 95.75%
   - Recommendation: GO FOR GA
 
-- [ ] **Security Lead**: ___________________ Date: _______
+- [ ] **Security Lead**: ********\_\_\_******** Date: **\_\_\_**
   - Review: Security controls, audit trail, secrets management
   - Approval: ☐ Approved ☐ Approved with conditions ☐ Rejected
 
-- [ ] **SRE Lead**: ___________________ Date: _______
+- [ ] **SRE Lead**: ********\_\_\_******** Date: **\_\_\_**
   - Review: Observability, runbooks, rollback procedures
   - Approval: ☐ Approved ☐ Approved with conditions ☐ Rejected
 
-- [ ] **Product Owner**: ___________________ Date: _______
+- [ ] **Product Owner**: ********\_\_\_******** Date: **\_\_\_**
   - Review: Features complete, business requirements met
   - Approval: ☐ Approved ☐ Approved with conditions ☐ Rejected
 
-- [ ] **Compliance Officer**: ___________________ Date: _______
+- [ ] **Compliance Officer**: ********\_\_\_******** Date: **\_\_\_**
   - Review: Audit trail, retention policy, governance
   - Approval: ☐ Approved ☐ Approved with conditions ☐ Rejected
 
 ### 9.2 Executive Sign-Off
 
-- [ ] **VP Engineering**: ___________________ Date: _______
+- [ ] **VP Engineering**: ********\_\_\_******** Date: **\_\_\_**
   - Final authority: ☐ AUTHORIZE GA ☐ DEFER
 
 ---
@@ -274,18 +274,18 @@ This checklist is the **single source of truth** for MVP-4-GA readiness. Every i
 
 ### 10.1 Accepted Gaps (Non-Blocking)
 
-| Gap | Rationale | Remediation |
-|-----|-----------|-------------|
-| **pnpm audit commented** | Baseline CVEs need triage | Enable Week 1 post-GA |
-| **Jest/ts-jest environment** | Legacy tooling issues | CI handles, local varies |
-| **Error budgets not in Terraform** | Requires Prometheus setup | Implement Week 1 post-GA |
-| **Some legacy lint warnings** | Pre-existing codebase | New code strict, legacy tolerated |
+| Gap                                | Rationale                 | Remediation                       |
+| ---------------------------------- | ------------------------- | --------------------------------- |
+| **pnpm audit commented**           | Baseline CVEs need triage | Enable Week 1 post-GA             |
+| **Jest/ts-jest environment**       | Legacy tooling issues     | CI handles, local varies          |
+| **Error budgets not in Terraform** | Requires Prometheus setup | Implement Week 1 post-GA          |
+| **Some legacy lint warnings**      | Pre-existing codebase     | New code strict, legacy tolerated |
 
 ### 10.2 Explicit Waivers
 
-| Item | Waiver Reason | Approved By | Date |
-|------|--------------|-------------|------|
-| _None required_ | - | - | - |
+| Item            | Waiver Reason | Approved By | Date |
+| --------------- | ------------- | ----------- | ---- |
+| _None required_ | -             | -           | -    |
 
 **Stance**: All gaps are **documented and acceptable** per "permissive but documented" guidance.
 
@@ -307,6 +307,7 @@ Pending (Post-GA):  5 (7.5%)
 **Score**: **95.75%** (from RELEASE-READINESS-REPORT.md)
 
 **Breakdown**:
+
 - Code & Architecture: 100%
 - Security: 95%
 - CI/CD: 95%
@@ -360,12 +361,12 @@ Pending (Post-GA):  5 (7.5%)
 
 ## 13. Emergency Contacts
 
-| Role | Name | Contact |
-|------|------|---------|
-| **Release Captain** | [TBD] | [TBD] |
-| **On-Call SRE** | [TBD] | [TBD] |
-| **Security Lead** | [TBD] | [TBD] |
-| **VP Engineering** | [TBD] | [TBD] |
+| Role                | Name  | Contact |
+| ------------------- | ----- | ------- |
+| **Release Captain** | [TBD] | [TBD]   |
+| **On-Call SRE**     | [TBD] | [TBD]   |
+| **Security Lead**   | [TBD] | [TBD]   |
+| **VP Engineering**  | [TBD] | [TBD]   |
 
 **War Room**: [Zoom Link TBD]
 **Status Page**: https://status.summit.internal

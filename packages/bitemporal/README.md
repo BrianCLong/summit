@@ -23,50 +23,53 @@ pnpm add @intelgraph/bitemporal
 ## Quick Start
 
 ```typescript
-import { BitemporalStore } from '@intelgraph/bitemporal';
-import pino from 'pino';
+import { BitemporalStore } from "@intelgraph/bitemporal";
+import pino from "pino";
 
 const logger = pino();
 const store = new BitemporalStore(
-  'postgresql://user:pass@localhost:5432/db',
-  'entities', // table name
+  "postgresql://user:pass@localhost:5432/db",
+  "entities", // table name
   logger
 );
 
 await store.initialize();
 
 // Upsert a record
-await store.upsert('person-001',
-  { name: 'John Doe', age: 30 },
+await store.upsert(
+  "person-001",
+  { name: "John Doe", age: 30 },
   {
-    validFrom: new Date('2024-01-01'),
-    validTo: new Date('2024-12-31'),
-    userId: 'analyst-001'
+    validFrom: new Date("2024-01-01"),
+    validTo: new Date("2024-12-31"),
+    userId: "analyst-001",
   }
 );
 
 // Get current state
-const current = await store.getCurrent('person-001');
+const current = await store.getCurrent("person-001");
 
 // Time-travel query
 const asOf = await store.getAsOf(
-  'person-001',
-  new Date('2024-06-01'), // valid time
-  new Date('2024-06-15')  // transaction time
+  "person-001",
+  new Date("2024-06-01"), // valid time
+  new Date("2024-06-15") // transaction time
 );
 
 // Get all versions
-const versions = await store.getAllVersions('person-001');
+const versions = await store.getAllVersions("person-001");
 
 // Temporal diff
 const diff = await store.diff(
-  new Date('2024-01-01'), new Date('2024-01-01'), // from
-  new Date('2024-06-01'), new Date('2024-06-01')  // to
+  new Date("2024-01-01"),
+  new Date("2024-01-01"), // from
+  new Date("2024-06-01"),
+  new Date("2024-06-01") // to
 );
 
-console.log('Added:', diff.added.length);
-console.log('Modified:', diff.modified.length);
-console.log('Removed:', diff.removed.length);
+console.log("Added:", diff.added.length);
+console.log("Modified:", diff.modified.length);
+console.log("Removed:", diff.removed.length);
 ```
 
 ## API Reference
@@ -86,32 +89,41 @@ new BitemporalStore<T>(
 #### Methods
 
 **`initialize(): Promise<void>`**
+
 - Initialize database schema and indexes
 
 **`upsert(entityKey: string, data: T, options: UpsertOptions): Promise<string>`**
+
 - Insert or update a record with temporal semantics
 - Automatically closes overlapping intervals
 - Returns the new record ID
 
 **`getCurrent(entityKey: string): Promise<BitemporalRecord<T> | null>`**
+
 - Get the current state of an entity (as of now)
 
 **`getAsOf(entityKey: string, validTime: Date, txTime: Date): Promise<BitemporalRecord<T> | null>`**
+
 - Query state at a specific point in both time dimensions
 
 **`query(options: TemporalQueryOptions): Promise<TemporalSnapshot<T>>`**
+
 - Advanced temporal queries with filtering
 
 **`diff(fromValidTime: Date, fromTxTime: Date, toValidTime: Date, toTxTime: Date): Promise<TemporalDiff<T>>`**
+
 - Compare two temporal snapshots
 
 **`exportAudit(entityKey: string, privateKey?: string): Promise<SignedAudit[]>`**
+
 - Export audit trail with optional cryptographic signatures
 
 **`getAllVersions(entityKey: string): Promise<BitemporalRecord<T>[]>`**
+
 - Get complete version history
 
 **`close(): Promise<void>`**
+
 - Close database connections
 
 ## Types
@@ -121,7 +133,7 @@ new BitemporalStore<T>(
 ```typescript
 interface UpsertOptions {
   validFrom: Date;
-  validTo?: Date;        // Defaults to '9999-12-31'
+  validTo?: Date; // Defaults to '9999-12-31'
   userId?: string;
   metadata?: Record<string, any>;
 }
@@ -165,28 +177,30 @@ Track changes in entity attributes over both real-world time and database time:
 
 ```typescript
 // Record when an entity was added to a watchlist
-await store.upsert('entity-123',
-  { watchlist: true, reason: 'travel pattern' },
+await store.upsert(
+  "entity-123",
+  { watchlist: true, reason: "travel pattern" },
   {
-    validFrom: new Date('2024-01-15'), // When travel occurred
-    userId: 'analyst-007'
+    validFrom: new Date("2024-01-15"), // When travel occurred
+    userId: "analyst-007",
   }
 );
 
 // Later, discover the travel date was wrong - correct it
-await store.upsert('entity-123',
-  { watchlist: true, reason: 'travel pattern' },
+await store.upsert(
+  "entity-123",
+  { watchlist: true, reason: "travel pattern" },
   {
-    validFrom: new Date('2024-01-10'), // Corrected date
-    userId: 'analyst-007'
+    validFrom: new Date("2024-01-10"), // Corrected date
+    userId: "analyst-007",
   }
 );
 
 // Query: "What did we believe on Feb 1st about Jan 20th?"
 const belief = await store.getAsOf(
-  'entity-123',
-  new Date('2024-01-20'), // valid time: what we're asking about
-  new Date('2024-02-01')  // tx time: what we knew then
+  "entity-123",
+  new Date("2024-01-20"), // valid time: what we're asking about
+  new Date("2024-02-01") // tx time: what we knew then
 );
 ```
 
@@ -195,7 +209,7 @@ const belief = await store.getAsOf(
 Maintain immutable audit trails:
 
 ```typescript
-const audit = await store.exportAudit('entity-123', privateKey);
+const audit = await store.exportAudit("entity-123", privateKey);
 
 for (const entry of audit) {
   console.log(`${entry.operation} at ${entry.txTime}`);
@@ -210,8 +224,10 @@ Compare current state with past beliefs:
 
 ```typescript
 const diff = await store.diff(
-  new Date('2024-01-01'), new Date('2024-01-01'),
-  new Date('2024-06-01'), new Date('2024-06-01')
+  new Date("2024-01-01"),
+  new Date("2024-01-01"),
+  new Date("2024-06-01"),
+  new Date("2024-06-01")
 );
 
 console.log(`Corrected ${diff.modified.length} records`);
@@ -271,6 +287,7 @@ pnpm test
 ```
 
 Key properties tested:
+
 - `valid_from < valid_to` always
 - `tx_from < tx_to` always
 - No overlapping intervals for same entity at same tx time
@@ -287,6 +304,7 @@ Indexes optimized for temporal queries:
 - **Combined index** on (entity_key, valid_from, valid_to, tx_from, tx_to)
 
 Typical query performance (100k records):
+
 - Current state: < 1ms
 - As-of query: < 5ms
 - Diff between snapshots: < 50ms

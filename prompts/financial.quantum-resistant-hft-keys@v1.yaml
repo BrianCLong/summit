@@ -1,17 +1,17 @@
 meta:
   id: financial.quantum-resistant-hft-keys@v1
   owner: financial-ops
-  purpose: 'Secure trading keys with post-quantum cryptography'
+  purpose: "Secure trading keys with post-quantum cryptography"
   tags:
     - financial-warfare
     - high-frequency
     - dark-pool
   guardrails:
-    - 'Ensure full legal compliance in jurisdiction of operation.'
-    - 'Do not trigger market instability without authorization.'
+    - "Ensure full legal compliance in jurisdiction of operation."
+    - "Do not trigger market instability without authorization."
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4096
 

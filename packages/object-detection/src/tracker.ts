@@ -3,17 +3,8 @@
  * Multi-Object Tracking (MOT) Implementation
  */
 
-import {
-  Detection,
-  BoundingBox,
-  calculateIoU,
-  getBboxCenter,
-} from '@intelgraph/computer-vision';
-import {
-  TrackedObject,
-  TrackingResult,
-  MOTConfig,
-} from './types.js';
+import { Detection, BoundingBox, calculateIoU, getBboxCenter } from "@intelgraph/computer-vision";
+import { TrackedObject, TrackingResult, MOTConfig } from "./types.js";
 
 /**
  * Simple Object Tracker using IoU matching
@@ -27,7 +18,7 @@ export class ObjectTracker {
 
   constructor(config: Partial<MOTConfig> = {}) {
     this.config = {
-      tracker_type: config.tracker_type || 'sort',
+      tracker_type: config.tracker_type || "sort",
       max_age: config.max_age || 30,
       min_hits: config.min_hits || 3,
       iou_threshold: config.iou_threshold || 0.3,
@@ -90,9 +81,7 @@ export class ObjectTracker {
   /**
    * Match detections to existing tracks using IoU
    */
-  private matchDetectionsToTracks(
-    detections: Detection[]
-  ): {
+  private matchDetectionsToTracks(detections: Detection[]): {
     matched: Map<number, Detection>;
     unmatched: Detection[];
   } {
@@ -134,10 +123,7 @@ export class ObjectTracker {
   /**
    * Greedy assignment algorithm
    */
-  private greedyAssignment(
-    costMatrix: number[][],
-    costThreshold: number
-  ): Map<number, number> {
+  private greedyAssignment(costMatrix: number[][], costThreshold: number): Map<number, number> {
     const assignments = new Map<number, number>();
     const usedDetections = new Set<number>();
 
@@ -189,7 +175,9 @@ export class ObjectTracker {
    */
   protected updateTrack(trackId: number, detection: Detection): void {
     const track = this.tracks.get(trackId);
-    if (!track) { return; }
+    if (!track) {
+      return;
+    }
 
     // Calculate velocity
     const oldCenter = getBboxCenter(track.detection.bbox);
@@ -261,7 +249,7 @@ export class ByteTracker extends ObjectTracker {
   constructor(config: Partial<MOTConfig> = {}) {
     super({
       ...config,
-      tracker_type: 'bytetrack',
+      tracker_type: "bytetrack",
     });
   }
 
@@ -306,10 +294,10 @@ export class ByteTracker extends ObjectTracker {
  * Create tracker instance
  */
 export function createTracker(
-  type: 'sort' | 'bytetrack' = 'sort',
+  type: "sort" | "bytetrack" = "sort",
   config?: Partial<MOTConfig>
 ): ObjectTracker {
-  if (type === 'bytetrack') {
+  if (type === "bytetrack") {
     return new ByteTracker(config);
   }
   return new ObjectTracker(config);

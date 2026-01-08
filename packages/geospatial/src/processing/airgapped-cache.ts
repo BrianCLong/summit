@@ -5,19 +5,19 @@
  * Supports encrypted storage, priority-based eviction, and offline operation
  */
 
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import * as crypto from 'crypto';
-import * as zlib from 'zlib';
-import { promisify } from 'util';
-import { EventEmitter } from 'events';
+import * as fs from "fs/promises";
+import * as path from "path";
+import * as crypto from "crypto";
+import * as zlib from "zlib";
+import { promisify } from "util";
+import { EventEmitter } from "events";
 import {
   CacheEntry,
   CacheStats,
   RasterTile,
   SatelliteScene,
   SpectralBand,
-} from '../types/satellite.js';
+} from "../types/satellite.js";
 
 const gzip = promisify(zlib.gzip);
 const gunzip = promisify(zlib.gunzip);
@@ -28,7 +28,7 @@ export interface AirgappedCacheConfig {
   encryptionKey?: string; // 32-byte key for AES-256
   compressionEnabled: boolean;
   defaultTtlMs?: number;
-  evictionPolicy: 'lru' | 'lfu' | 'priority' | 'fifo';
+  evictionPolicy: "lru" | "lfu" | "priority" | "fifo";
   persistIndex: boolean;
   checksumValidation: boolean;
 }
@@ -50,13 +50,13 @@ interface CacheIndex {
 
 interface CacheEntryMetadata {
   key: string;
-  dataType: CacheEntry['dataType'];
+  dataType: CacheEntry["dataType"];
   sizeBytes: number;
   createdAt: Date;
   expiresAt?: Date;
   accessCount: number;
   lastAccessedAt: Date;
-  priority: CacheEntry['priority'];
+  priority: CacheEntry["priority"];
   checksumMd5: string;
   compressed: boolean;
   encrypted: boolean;
@@ -84,14 +84,14 @@ export class AirgappedCache extends EventEmitter {
     this.config = {
       ...config,
       compressionEnabled: config.compressionEnabled ?? true,
-      evictionPolicy: config.evictionPolicy ?? 'lru',
+      evictionPolicy: config.evictionPolicy ?? "lru",
       persistIndex: config.persistIndex ?? true,
       checksumValidation: config.checksumValidation ?? true,
     };
 
-    this.indexPath = path.join(config.cacheDir, '.cache-index.json');
+    this.indexPath = path.join(config.cacheDir, ".cache-index.json");
     this.index = {
-      version: '1.0.0',
+      version: "1.0.0",
       entries: new Map(),
       totalSize: 0,
       lastCompaction: new Date(),
@@ -108,11 +108,9 @@ export class AirgappedCache extends EventEmitter {
     await fs.mkdir(this.config.cacheDir, { recursive: true });
 
     // Create subdirectories for different data types
-    const subdirs = ['raster', 'vector', 'metadata', 'model', 'tile'];
+    const subdirs = ["raster", "vector", "metadata", "model", "tile"];
     await Promise.all(
-      subdirs.map((dir) =>
-        fs.mkdir(path.join(this.config.cacheDir, dir), { recursive: true })
-      )
+      subdirs.map((dir) => fs.mkdir(path.join(this.config.cacheDir, dir), { recursive: true }))
     );
 
     // Load existing index
@@ -133,8 +131,8 @@ export class AirgappedCache extends EventEmitter {
     key: string,
     data: Buffer | string | object,
     options: {
-      dataType: CacheEntry['dataType'];
-      priority?: CacheEntry['priority'];
+      dataType: CacheEntry["dataType"];
+      priority?: CacheEntry["priority"];
       ttlMs?: number;
       tags?: string[];
     }
@@ -147,10 +145,10 @@ export class AirgappedCache extends EventEmitter {
       let serialized: Buffer;
       if (Buffer.isBuffer(data)) {
         serialized = data;
-      } else if (typeof data === 'string') {
-        serialized = Buffer.from(data, 'utf-8');
+      } else if (typeof data === "string") {
+        serialized = Buffer.from(data, "utf-8");
       } else {
-        serialized = Buffer.from(JSON.stringify(data), 'utf-8');
+        serialized = Buffer.from(JSON.stringify(data), "utf-8");
       }
 
       // Compress if enabled
@@ -169,10 +167,7 @@ export class AirgappedCache extends EventEmitter {
       }
 
       // Calculate checksum
-      const checksumMd5 = crypto
-        .createHash('md5')
-        .update(processedData)
-        .digest('hex');
+      const checksumMd5 = crypto.createHash("md5").update(processedData).digest("hex");
 
       // Ensure we have space
       const requiredSpace = processedData.length;
@@ -180,11 +175,7 @@ export class AirgappedCache extends EventEmitter {
 
       // Determine file path
       const fileName = this.keyToFileName(key);
-      const filePath = path.join(
-        this.config.cacheDir,
-        options.dataType,
-        fileName
-      );
+      const filePath = path.join(this.config.cacheDir, options.dataType, fileName);
 
       // Write to disk
       await fs.writeFile(filePath, processedData);
@@ -198,11 +189,11 @@ export class AirgappedCache extends EventEmitter {
         expiresAt: options.ttlMs
           ? new Date(Date.now() + options.ttlMs)
           : this.config.defaultTtlMs
-          ? new Date(Date.now() + this.config.defaultTtlMs)
-          : undefined,
+            ? new Date(Date.now() + this.config.defaultTtlMs)
+            : undefined,
         accessCount: 0,
         lastAccessedAt: new Date(),
-        priority: options.priority ?? 'normal',
+        priority: options.priority ?? "normal",
         checksumMd5,
         compressed,
         encrypted,
@@ -242,7 +233,7 @@ export class AirgappedCache extends EventEmitter {
 
     if (!metadata) {
       this.missCount++;
-      this.emit('miss', key);
+      this.emit("miss", key);
       return null;
     }
 
@@ -250,7 +241,7 @@ export class AirgappedCache extends EventEmitter {
     if (metadata.expiresAt && new Date() > metadata.expiresAt) {
       await this.delete(key);
       this.missCount++;
-      this.emit('miss', key);
+      this.emit("miss", key);
       return null;
     }
 
@@ -260,9 +251,9 @@ export class AirgappedCache extends EventEmitter {
 
       // Validate checksum
       if (this.config.checksumValidation) {
-        const checksum = crypto.createHash('md5').update(data).digest('hex');
+        const checksum = crypto.createHash("md5").update(data).digest("hex");
         if (checksum !== metadata.checksumMd5) {
-          throw new Error('Checksum validation failed');
+          throw new Error("Checksum validation failed");
         }
       }
 
@@ -281,23 +272,23 @@ export class AirgappedCache extends EventEmitter {
       metadata.lastAccessedAt = new Date();
 
       this.hitCount++;
-      this.emit('hit', key, this.metadataToEntry(metadata, data));
+      this.emit("hit", key, this.metadataToEntry(metadata, data));
 
       // Deserialize based on data type
-      if (metadata.dataType === 'raster') {
+      if (metadata.dataType === "raster") {
         return data as unknown as T;
-      } else if (metadata.dataType === 'metadata') {
-        return JSON.parse(data.toString('utf-8')) as T;
+      } else if (metadata.dataType === "metadata") {
+        return JSON.parse(data.toString("utf-8")) as T;
       } else {
         // Try JSON parse, fall back to string
         try {
-          return JSON.parse(data.toString('utf-8')) as T;
+          return JSON.parse(data.toString("utf-8")) as T;
         } catch {
-          return data.toString('utf-8') as unknown as T;
+          return data.toString("utf-8") as unknown as T;
         }
       }
     } catch (error) {
-      this.emit('error', error as Error);
+      this.emit("error", error as Error);
       // Remove corrupted entry
       await this.delete(key);
       return null;
@@ -353,8 +344,8 @@ export class AirgappedCache extends EventEmitter {
   async cacheScene(scene: SatelliteScene): Promise<void> {
     const key = `scene:${scene.id}`;
     await this.set(key, scene, {
-      dataType: 'metadata',
-      priority: 'high',
+      dataType: "metadata",
+      priority: "high",
     });
   }
 
@@ -369,11 +360,7 @@ export class AirgappedCache extends EventEmitter {
   /**
    * Store raster tile
    */
-  async cacheTile(
-    sceneId: string,
-    band: SpectralBand,
-    tile: RasterTile
-  ): Promise<void> {
+  async cacheTile(sceneId: string, band: SpectralBand, tile: RasterTile): Promise<void> {
     const key = `tile:${sceneId}:${band}:${tile.x}:${tile.y}:${tile.z}`;
 
     // Serialize tile data
@@ -383,8 +370,8 @@ export class AirgappedCache extends EventEmitter {
     };
 
     await this.set(key, tileData, {
-      dataType: 'tile',
-      priority: 'normal',
+      dataType: "tile",
+      priority: "normal",
     });
   }
 
@@ -413,25 +400,18 @@ export class AirgappedCache extends EventEmitter {
   /**
    * Store full raster band
    */
-  async cacheRasterBand(
-    sceneId: string,
-    band: SpectralBand,
-    data: Buffer
-  ): Promise<void> {
+  async cacheRasterBand(sceneId: string, band: SpectralBand, data: Buffer): Promise<void> {
     const key = `raster:${sceneId}:${band}`;
     await this.set(key, data, {
-      dataType: 'raster',
-      priority: 'high',
+      dataType: "raster",
+      priority: "high",
     });
   }
 
   /**
    * Get cached raster band
    */
-  async getRasterBand(
-    sceneId: string,
-    band: SpectralBand
-  ): Promise<Buffer | null> {
+  async getRasterBand(sceneId: string, band: SpectralBand): Promise<Buffer | null> {
     const key = `raster:${sceneId}:${band}`;
     return this.get<Buffer>(key);
   }
@@ -455,7 +435,7 @@ export class AirgappedCache extends EventEmitter {
         // This is a placeholder for the prefetch workflow
       } catch (error) {
         failed++;
-        this.emit('error', error as Error);
+        this.emit("error", error as Error);
       }
     }
 
@@ -477,8 +457,7 @@ export class AirgappedCache extends EventEmitter {
       entriesByType[entry.dataType] = (entriesByType[entry.dataType] ?? 0) + 1;
 
       // By priority
-      entriesByPriority[entry.priority] =
-        (entriesByPriority[entry.priority] ?? 0) + 1;
+      entriesByPriority[entry.priority] = (entriesByPriority[entry.priority] ?? 0) + 1;
 
       // Track oldest/newest
       if (!oldestEntry || entry.createdAt < oldestEntry) {
@@ -619,10 +598,10 @@ export class AirgappedCache extends EventEmitter {
         const data = await fs.readFile(sourceFile);
 
         // Detect type from key
-        let dataType: CacheEntry['dataType'] = 'metadata';
-        if (key.startsWith('raster:')) dataType = 'raster';
-        else if (key.startsWith('tile:')) dataType = 'tile';
-        else if (key.startsWith('vector:')) dataType = 'vector';
+        let dataType: CacheEntry["dataType"] = "metadata";
+        if (key.startsWith("raster:")) dataType = "raster";
+        else if (key.startsWith("tile:")) dataType = "tile";
+        else if (key.startsWith("vector:")) dataType = "vector";
 
         await this.set(key, data, { dataType });
         imported++;
@@ -631,7 +610,7 @@ export class AirgappedCache extends EventEmitter {
       }
     }
 
-    this.emit('sync', imported, failed);
+    this.emit("sync", imported, failed);
     return { imported, failed };
   }
 
@@ -656,7 +635,7 @@ export class AirgappedCache extends EventEmitter {
 
   private async loadIndex(): Promise<void> {
     try {
-      const data = await fs.readFile(this.indexPath, 'utf-8');
+      const data = await fs.readFile(this.indexPath, "utf-8");
       const parsed = JSON.parse(data);
 
       this.index = {
@@ -688,11 +667,7 @@ export class AirgappedCache extends EventEmitter {
       lastCompaction: this.index.lastCompaction.toISOString(),
     };
 
-    await fs.writeFile(
-      this.indexPath,
-      JSON.stringify(serializable, null, 2),
-      'utf-8'
-    );
+    await fs.writeFile(this.indexPath, JSON.stringify(serializable, null, 2), "utf-8");
   }
 
   private async validateEntries(): Promise<void> {
@@ -726,7 +701,7 @@ export class AirgappedCache extends EventEmitter {
 
       const victim = this.index.entries.get(victimKey);
       if (victim) {
-        this.emit('eviction', victimKey, this.metadataToEntry(victim));
+        this.emit("eviction", victimKey, this.metadataToEntry(victim));
         this.evictionCount++;
       }
 
@@ -740,39 +715,31 @@ export class AirgappedCache extends EventEmitter {
     const entries = Array.from(this.index.entries.entries());
 
     // Never evict critical priority
-    const evictable = entries.filter(([_, e]) => e.priority !== 'critical');
+    const evictable = entries.filter(([_, e]) => e.priority !== "critical");
     if (evictable.length === 0) return entries[0][0];
 
     switch (this.config.evictionPolicy) {
-      case 'lru':
+      case "lru":
         // Least recently used
-        evictable.sort(
-          (a, b) =>
-            a[1].lastAccessedAt.getTime() - b[1].lastAccessedAt.getTime()
-        );
+        evictable.sort((a, b) => a[1].lastAccessedAt.getTime() - b[1].lastAccessedAt.getTime());
         break;
-      case 'lfu':
+      case "lfu":
         // Least frequently used
         evictable.sort((a, b) => a[1].accessCount - b[1].accessCount);
         break;
-      case 'priority':
+      case "priority":
         // Lowest priority first, then LRU within priority
         evictable.sort((a, b) => {
           const priorityOrder = { low: 0, normal: 1, high: 2, critical: 3 };
-          const priorityDiff =
-            priorityOrder[a[1].priority] - priorityOrder[b[1].priority];
+          const priorityDiff = priorityOrder[a[1].priority] - priorityOrder[b[1].priority];
           if (priorityDiff !== 0) return priorityDiff;
-          return (
-            a[1].lastAccessedAt.getTime() - b[1].lastAccessedAt.getTime()
-          );
+          return a[1].lastAccessedAt.getTime() - b[1].lastAccessedAt.getTime();
         });
         break;
-      case 'fifo':
+      case "fifo":
       default:
         // First in, first out
-        evictable.sort(
-          (a, b) => a[1].createdAt.getTime() - b[1].createdAt.getTime()
-        );
+        evictable.sort((a, b) => a[1].createdAt.getTime() - b[1].createdAt.getTime());
         break;
     }
 
@@ -781,7 +748,7 @@ export class AirgappedCache extends EventEmitter {
 
   private keyToFileName(key: string): string {
     // Create safe filename from key
-    const hash = crypto.createHash('sha256').update(key).digest('hex');
+    const hash = crypto.createHash("sha256").update(key).digest("hex");
     return `${hash.substring(0, 16)}.cache`;
   }
 
@@ -789,8 +756,8 @@ export class AirgappedCache extends EventEmitter {
     if (!this.config.encryptionKey) return data;
 
     const iv = crypto.randomBytes(16);
-    const key = Buffer.from(this.config.encryptionKey, 'hex');
-    const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+    const key = Buffer.from(this.config.encryptionKey, "hex");
+    const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
 
     const encrypted = Buffer.concat([cipher.update(data), cipher.final()]);
     const authTag = cipher.getAuthTag();
@@ -806,17 +773,14 @@ export class AirgappedCache extends EventEmitter {
     const authTag = data.subarray(16, 32);
     const encrypted = data.subarray(32);
 
-    const key = Buffer.from(this.config.encryptionKey, 'hex');
-    const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
+    const key = Buffer.from(this.config.encryptionKey, "hex");
+    const decipher = crypto.createDecipheriv("aes-256-gcm", key, iv);
     decipher.setAuthTag(authTag);
 
     return Buffer.concat([decipher.update(encrypted), decipher.final()]);
   }
 
-  private metadataToEntry(
-    metadata: CacheEntryMetadata,
-    data?: Buffer
-  ): CacheEntry {
+  private metadataToEntry(metadata: CacheEntryMetadata, data?: Buffer): CacheEntry {
     return {
       key: metadata.key,
       data: data ?? Buffer.alloc(0),
@@ -829,9 +793,7 @@ export class AirgappedCache extends EventEmitter {
       priority: metadata.priority,
       checksumMd5: metadata.checksumMd5,
       compressed: metadata.compressed,
-      encryption: metadata.encrypted
-        ? { algorithm: 'aes-256-gcm', keyId: 'default' }
-        : undefined,
+      encryption: metadata.encrypted ? { algorithm: "aes-256-gcm", keyId: "default" } : undefined,
     };
   }
 }
@@ -839,8 +801,6 @@ export class AirgappedCache extends EventEmitter {
 /**
  * Factory for creating air-gapped cache instances
  */
-export function createAirgappedCache(
-  config: AirgappedCacheConfig
-): AirgappedCache {
+export function createAirgappedCache(config: AirgappedCacheConfig): AirgappedCache {
   return new AirgappedCache(config);
 }

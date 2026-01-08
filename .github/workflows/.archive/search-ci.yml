@@ -3,9 +3,9 @@ name: Search CI
 on:
   push:
     paths:
-      - 'search/**'
-      - 'services/search-indexer/**'
-      - 'apps/gateway/src/routes/search.ts'
+      - "search/**"
+      - "services/search-indexer/**"
+      - "apps/gateway/src/routes/search.ts"
 
 jobs:
   lint-schemas:

@@ -6,7 +6,7 @@ on:
       pr_numbers:
         description: 'Comma-separated PR numbers to revive (or "all" for batch)'
         required: true
-        default: 'all'
+        default: "all"
 
 permissions:
   contents: write

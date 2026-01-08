@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Card,
@@ -11,17 +11,17 @@ import {
   ListItemText,
   Tooltip,
   Typography,
-} from '@mui/material';
-import { SystemAPI } from '../../services/api';
+} from "@mui/material";
+import { SystemAPI } from "../../services/api";
 
 const Dot = ({ ok }) => (
   <span
     style={{
-      display: 'inline-block',
+      display: "inline-block",
       width: 10,
       height: 10,
       borderRadius: 5,
-      backgroundColor: ok ? '#2e7d32' : '#ed6c02',
+      backgroundColor: ok ? "#2e7d32" : "#ed6c02",
       marginRight: 6,
     }}
   />
@@ -44,8 +44,8 @@ export default function SystemPanel() {
       setVersion(null);
     }
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${SystemAPI.base || ''}/api/system/stats`, {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${SystemAPI.base || ""}/api/system/stats`, {
         headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       });
       if (res.ok) setStats(await res.json());
@@ -67,7 +67,7 @@ export default function SystemPanel() {
           <Card>
             <CardHeader
               title="Backend Readiness"
-              subheader={ready.ready ? 'All systems go' : 'Degraded'}
+              subheader={ready.ready ? "All systems go" : "Degraded"}
             />
             <CardContent>
               <List dense>
@@ -81,7 +81,7 @@ export default function SystemPanel() {
                     <ListItemText
                       primary={
                         <span>
-                          <Dot ok={status === 'ok'} />
+                          <Dot ok={status === "ok"} />
                           {name}
                         </span>
                       }
@@ -97,25 +97,22 @@ export default function SystemPanel() {
           <Card>
             <CardHeader
               title="Version & Process"
-              subheader={version ? `${version.name} v${version.version}` : ''}
+              subheader={version ? `${version.name} v${version.version}` : ""}
             />
             <CardContent>
               {stats ? (
                 <Box>
                   <Typography variant="body2">
-                    PID: {stats.process?.pid} • Uptime:{' '}
-                    {stats.process?.uptimeSec}s
+                    PID: {stats.process?.pid} • Uptime: {stats.process?.uptimeSec}s
                   </Typography>
                   <Typography variant="body2">
-                    Heap:{' '}
-                    {Math.round((stats.process?.memory?.heapUsed || 0) / 1e6)}MB
-                    /{' '}
+                    Heap: {Math.round((stats.process?.memory?.heapUsed || 0) / 1e6)}MB /{" "}
                     {Math.round((stats.process?.memory?.heapTotal || 0) / 1e6)}
                     MB
                   </Typography>
                   <Typography variant="body2">
-                    Connections: {stats.connections?.totalConnections || 0} •
-                    Users: {stats.connections?.uniqueUsers || 0} • Rooms:{' '}
+                    Connections: {stats.connections?.totalConnections || 0} • Users:{" "}
+                    {stats.connections?.uniqueUsers || 0} • Rooms:{" "}
                     {stats.connections?.activeInvestigations || 0}
                   </Typography>
                 </Box>

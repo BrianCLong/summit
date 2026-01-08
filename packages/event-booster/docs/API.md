@@ -18,12 +18,12 @@ class EventBooster {
   boost(
     events: readonly EventRecord[],
     patternName: string,
-    options?: Record<string, unknown>,
+    options?: Record<string, unknown>
   ): BoostRunResult;
   boostFromGenerator(
     factory: () => readonly EventRecord[],
     patternName: string,
-    options?: Record<string, unknown>,
+    options?: Record<string, unknown>
   ): BoostRunResult;
   getHistory(limit?: number): HistoryEntry[];
   clearHistory(): void;
@@ -86,14 +86,14 @@ import {
   createDefaultEventBooster,
   generateBurstEvents,
   runPatternBenchmark,
-} from '@intelgraph/event-booster';
+} from "@intelgraph/event-booster";
 
 const booster = createDefaultEventBooster();
 const baseline = generateBurstEvents({ bursts: 3, burstSize: 10 });
-const { events, outputCount } = booster.boost(baseline, 'amplify-signal');
+const { events, outputCount } = booster.boost(baseline, "amplify-signal");
 console.log(`Boosted ${outputCount} events`);
 
-const metrics = runPatternBenchmark(booster, 'amplify-signal', baseline, {
+const metrics = runPatternBenchmark(booster, "amplify-signal", baseline, {
   iterations: 15,
   warmupIterations: 3,
 });

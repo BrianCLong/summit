@@ -17,12 +17,12 @@ This runbook guides you through responding to error rate spikes. Error rate spik
 
 ## Severity Levels
 
-| Burn Rate | Time to Exhaustion | Severity | Response Time |
-|-----------|-------------------|----------|---------------|
-| 14.4x | 2 days | **Critical** | Immediate (page) |
-| 6x | 5 days | **High** | 15 minutes |
-| 3x | 10 days | **Medium** | 1 hour |
-| 1x | 30 days | **Low** | Next business day |
+| Burn Rate | Time to Exhaustion | Severity     | Response Time     |
+| --------- | ------------------ | ------------ | ----------------- |
+| 14.4x     | 2 days             | **Critical** | Immediate (page)  |
+| 6x        | 5 days             | **High**     | 15 minutes        |
+| 3x        | 10 days            | **Medium**   | 1 hour            |
+| 1x        | 30 days            | **Low**      | Next business day |
 
 ## Initial Response (5 minutes)
 
@@ -64,6 +64,7 @@ sum(rate(http_requests_total{service="api",code=~"5.."}[5m])) by (code)
 ```
 
 Check:
+
 - [ ] 500 (Internal Server Error) - code bugs
 - [ ] 502 (Bad Gateway) - upstream service down
 - [ ] 503 (Service Unavailable) - overload
@@ -76,6 +77,7 @@ Check:
 **Jaeger**: [http://localhost:16686](http://localhost:16686)
 
 Steps:
+
 1. Select service: `summit-api`
 2. Select operation with errors (if known)
 3. Set Tags: `error=true`
@@ -83,6 +85,7 @@ Steps:
 5. Click on a recent error trace
 
 **Look for**:
+
 - [ ] Error message in span tags
 - [ ] Stack trace in span logs
 - [ ] Which component failed (database, external API, etc.)
@@ -143,6 +146,7 @@ docker images summit-api --format "table {{.Tag}}\t{{.CreatedAt}}"
 ```
 
 **Correlate with deployment**:
+
 - Did errors start right after a deployment?
 - Was there a config change?
 - Was there a database migration?
@@ -152,10 +156,12 @@ docker images summit-api --format "table {{.Tag}}\t{{.CreatedAt}}"
 ### Cause 1: Database Connection Exhausted
 
 **Symptom**:
+
 - Errors: "Connection pool exhausted", "Unable to acquire connection"
 - Traces show long waits before database errors
 
 **Check**:
+
 ```bash
 # PostgreSQL connections
 docker exec summit-postgres psql -U summit -d summit_dev -c \
@@ -167,6 +173,7 @@ docker exec summit-postgres psql -U summit -d summit_dev -c \
 ```
 
 **Fix**:
+
 ```typescript
 // Increase pool size in code
 const pool = new Pool({
@@ -175,6 +182,7 @@ const pool = new Pool({
 ```
 
 Or restart with more connections:
+
 ```bash
 docker-compose restart postgres
 ```
@@ -182,11 +190,13 @@ docker-compose restart postgres
 ### Cause 2: Unhandled Exception in Code
 
 **Symptom**:
+
 - 500 errors with stack traces
 - Specific endpoint always failing
 - Error message points to code line
 
 **Fix**:
+
 ```bash
 # Quick rollback
 git revert <bad-commit-hash>
@@ -201,11 +211,13 @@ docker-compose up -d api
 ### Cause 3: Dependency Service Down
 
 **Symptom**:
+
 - 502/504 errors
 - Traces show timeout to downstream service
 - `up` metric = 0 for dependency
 
 **Fix**:
+
 ```bash
 # Restart dependency
 docker-compose restart neo4j
@@ -220,11 +232,13 @@ docker stats neo4j
 ### Cause 4: Rate Limiting / Overload
 
 **Symptom**:
+
 - 503 errors
 - CPU/memory maxed out
 - Request rate spike
 
 **Fix**:
+
 ```bash
 # Scale horizontally
 docker-compose up -d --scale api=3
@@ -237,35 +251,41 @@ RATE_LIMIT_MAX=100 docker-compose up -d api
 ### Cause 5: Bad Data / Malformed Input
 
 **Symptom**:
+
 - Validation errors
 - Parsing errors
 - Specific user triggering errors
 
 **Fix**:
+
 ```typescript
 // Add input validation
-app.use(express.json({
-  limit: '1mb',
-  strict: true,
-}));
+app.use(
+  express.json({
+    limit: "1mb",
+    strict: true,
+  })
+);
 
 // Add error handling
 app.use((err, req, res, next) => {
-  logger.error({ err, requestId: req.id }, 'Request failed');
-  res.status(500).json({ error: 'Internal server error' });
+  logger.error({ err, requestId: req.id }, "Request failed");
+  res.status(500).json({ error: "Internal server error" });
 });
 ```
 
 ### Cause 6: External API Failure
 
 **Symptom**:
+
 - Errors when calling external service
 - Timeouts to third-party APIs
 
 **Fix**:
+
 ```typescript
 // Add circuit breaker
-import CircuitBreaker from 'opossum';
+import CircuitBreaker from "opossum";
 
 const breaker = new CircuitBreaker(externalApiCall, {
   timeout: 5000,
@@ -315,6 +335,7 @@ kubectl scale deployment summit-api --replicas=10
 ### 4. Circuit Breaker / Graceful Degradation
 
 If a specific dependency is failing:
+
 - Enable circuit breaker to fail fast
 - Return cached data
 - Return degraded response (partial data)
@@ -324,6 +345,7 @@ If a specific dependency is failing:
 After implementing fixes:
 
 1. **Check error rate** (wait 5 minutes):
+
 ```promql
 sum(rate(http_requests_total{service="api",code=~"5.."}[5m]))
 /
@@ -343,6 +365,7 @@ Expected: < 0.1% (back below SLO)
 ## Escalation
 
 Escalate if:
+
 - [ ] Error rate remains > 10% after 15 minutes
 - [ ] Unable to identify root cause within 30 minutes
 - [ ] Rollback doesn't fix the issue

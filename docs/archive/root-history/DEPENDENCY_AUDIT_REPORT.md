@@ -33,23 +33,24 @@ This comprehensive dependency audit analyzed the Summit/IntelGraph monorepo cont
 
 #### CRITICAL Severity (1)
 
-| Package | Vulnerability | Affected Versions | Fixed In | Impact |
-|---------|--------------|-------------------|----------|---------|
-| **parse-url** | Server-Side Request Forgery (SSRF) | <8.1.0 | ≥8.1.0 | Allows attackers to make arbitrary requests from the server |
+| Package       | Vulnerability                      | Affected Versions | Fixed In | Impact                                                      |
+| ------------- | ---------------------------------- | ----------------- | -------- | ----------------------------------------------------------- |
+| **parse-url** | Server-Side Request Forgery (SSRF) | <8.1.0            | ≥8.1.0   | Allows attackers to make arbitrary requests from the server |
 
 **Advisory**: https://github.com/advisories/GHSA-j9fq-vwqv-2fm2
 
 #### HIGH Severity (5)
 
-| Package | Vulnerability | Affected Versions | Fixed In | Impact |
-|---------|--------------|-------------------|----------|---------|
-| **parse-path** | Authorization Bypass | <5.0.0 | ≥5.0.0 | Can bypass authorization checks |
-| **xlsx** | Prototype Pollution | <0.19.3 | No fix available | Allows prototype pollution attacks |
-| **xlsx** | Regular Expression DoS | <0.20.2 | No fix available | CPU exhaustion via crafted input |
-| **moment** | Inefficient RegEx Complexity | ≥2.18.0 <2.29.4 | ≥2.29.4 | ReDoS attack vector |
-| **glob** | Command Injection | ≥11.0.0 <11.1.0 | ≥11.1.0 | CLI command injection via -c flag |
+| Package        | Vulnerability                | Affected Versions | Fixed In         | Impact                             |
+| -------------- | ---------------------------- | ----------------- | ---------------- | ---------------------------------- |
+| **parse-path** | Authorization Bypass         | <5.0.0            | ≥5.0.0           | Can bypass authorization checks    |
+| **xlsx**       | Prototype Pollution          | <0.19.3           | No fix available | Allows prototype pollution attacks |
+| **xlsx**       | Regular Expression DoS       | <0.20.2           | No fix available | CPU exhaustion via crafted input   |
+| **moment**     | Inefficient RegEx Complexity | ≥2.18.0 <2.29.4   | ≥2.29.4          | ReDoS attack vector                |
+| **glob**       | Command Injection            | ≥11.0.0 <11.1.0   | ≥11.1.0          | CLI command injection via -c flag  |
 
 **Advisories**:
+
 - parse-path: https://github.com/advisories/GHSA-3j8f-xvm3-ffx4
 - xlsx (prototype): https://github.com/advisories/GHSA-4r6h-8v6p-xvw6
 - xlsx (ReDoS): https://github.com/advisories/GHSA-5pgg-2g8v-p4x9
@@ -58,12 +59,13 @@ This comprehensive dependency audit analyzed the Summit/IntelGraph monorepo cont
 
 #### MODERATE Severity (2)
 
-| Package | Vulnerability | Affected Versions | Fixed In | Impact |
-|---------|--------------|-------------------|----------|---------|
-| **parse-url** | Hostname Spoofing | <8.1.0 | ≥8.1.0 | Parses HTTP URLs incorrectly, vulnerable to hostname spoofing |
-| **esbuild** | Dev Server CORS Bypass | ≤0.24.2 | ≥0.25.0 | Development server allows unauthorized cross-origin requests |
+| Package       | Vulnerability          | Affected Versions | Fixed In | Impact                                                        |
+| ------------- | ---------------------- | ----------------- | -------- | ------------------------------------------------------------- |
+| **parse-url** | Hostname Spoofing      | <8.1.0            | ≥8.1.0   | Parses HTTP URLs incorrectly, vulnerable to hostname spoofing |
+| **esbuild**   | Dev Server CORS Bypass | ≤0.24.2           | ≥0.25.0  | Development server allows unauthorized cross-origin requests  |
 
 **Advisories**:
+
 - parse-url: https://github.com/advisories/GHSA-pqw5-jmp5-px4v
 - esbuild: https://github.com/advisories/GHSA-67mh-4wv8-2f99
 
@@ -71,16 +73,16 @@ This comprehensive dependency audit analyzed the Summit/IntelGraph monorepo cont
 
 **Location**: `copilot/requirements.txt` and related Python packages
 
-| Package | Version | Severity | CVE/ID | Fixed In | Impact |
-|---------|---------|----------|--------|----------|---------|
-| **fastapi** | 0.104.1 | HIGH | PYSEC-2024-38 | 0.109.1 | ReDoS in python-multipart form parsing |
-| **python-jose** | 3.3.0 | HIGH | PYSEC-2024-232 | 3.4.0 | Algorithm confusion with ECDSA keys (similar to CVE-2022-29217) |
-| **python-jose** | 3.3.0 | HIGH | PYSEC-2024-233 | 3.4.0 | JWT bomb DoS via high compression JWE tokens |
-| **python-multipart** | 0.0.6 | HIGH | GHSA-2jv5-9r88-3w3p | 0.0.7 | ReDoS in Content-Type header parsing |
-| **python-multipart** | 0.0.6 | MEDIUM | GHSA-59g5-xgcq-4qw3 | 0.0.18 | CPU exhaustion via excessive logging |
-| **starlette** | 0.27.0 | HIGH | GHSA-f96h-pmfr-66vw | 0.40.0 | Memory exhaustion via large form fields |
-| **starlette** | 0.27.0 | MEDIUM | GHSA-2c2j-9gv5-cj73 | 0.47.2 | Event loop blocking during file uploads |
-| **ecdsa** | 0.19.1 | MEDIUM | GHSA-wj6h-64fc-37mp | N/A | Minerva timing attack (out of scope for maintainer) |
+| Package              | Version | Severity | CVE/ID              | Fixed In | Impact                                                          |
+| -------------------- | ------- | -------- | ------------------- | -------- | --------------------------------------------------------------- |
+| **fastapi**          | 0.104.1 | HIGH     | PYSEC-2024-38       | 0.109.1  | ReDoS in python-multipart form parsing                          |
+| **python-jose**      | 3.3.0   | HIGH     | PYSEC-2024-232      | 3.4.0    | Algorithm confusion with ECDSA keys (similar to CVE-2022-29217) |
+| **python-jose**      | 3.3.0   | HIGH     | PYSEC-2024-233      | 3.4.0    | JWT bomb DoS via high compression JWE tokens                    |
+| **python-multipart** | 0.0.6   | HIGH     | GHSA-2jv5-9r88-3w3p | 0.0.7    | ReDoS in Content-Type header parsing                            |
+| **python-multipart** | 0.0.6   | MEDIUM   | GHSA-59g5-xgcq-4qw3 | 0.0.18   | CPU exhaustion via excessive logging                            |
+| **starlette**        | 0.27.0  | HIGH     | GHSA-f96h-pmfr-66vw | 0.40.0   | Memory exhaustion via large form fields                         |
+| **starlette**        | 0.27.0  | MEDIUM   | GHSA-2c2j-9gv5-cj73 | 0.47.2   | Event loop blocking during file uploads                         |
+| **ecdsa**            | 0.19.1  | MEDIUM   | GHSA-wj6h-64fc-37mp | N/A      | Minerva timing attack (out of scope for maintainer)             |
 
 **Note**: The `en-core-web-lg` package could not be audited as it's not on PyPI.
 
@@ -95,6 +97,7 @@ This comprehensive dependency audit analyzed the Summit/IntelGraph monorepo cont
 #### TypeScript (21 versions!)
 
 Most common versions:
+
 - `^5.9.3`: 184 packages ← **Target version**
 - `^5.3.3`: 26 packages
 - `^5.4.5`: 14 packages
@@ -106,6 +109,7 @@ Most common versions:
 #### @types/node (20 versions)
 
 Most common versions:
+
 - `^24.10.1`: 140 packages ← **Target version**
 - `^20.0.0`: 23 packages
 - `^20.10.0`: 23 packages
@@ -117,6 +121,7 @@ Most common versions:
 #### ESLint (15 versions)
 
 Most common versions:
+
 - `^9.39.1`: 56 packages ← **Target version**
 - `9.39.1`: 7 packages (remove caret)
 - `^9.11.1`: 4 packages
@@ -127,6 +132,7 @@ Most common versions:
 #### Jest (8 versions)
 
 Most common versions:
+
 - `^30.2.0`: 118 packages ← **Target version**
 - `^29.7.0`: 19 packages
 - `^29.5.0`: 3 packages
@@ -136,6 +142,7 @@ Most common versions:
 #### Zod (8 versions)
 
 Most common versions:
+
 - `^4.1.12`: 72 packages ← **Zod v4 (experimental)**
 - `^3.22.4`: 29 packages
 - `^3.22.0`: 10 packages
@@ -169,15 +176,16 @@ Most common versions:
 
 Most root-level dependencies show as "missing" because they're managed by workspaces. Key findings:
 
-| Package | Current (Wanted) | Latest | Notes |
-|---------|------------------|--------|-------|
-| @typescript-eslint/* | 8.46.4 | **8.47.0** | Minor update available |
-| eslint-plugin-jest | 29.1.0 | **29.2.0** | Minor update available |
-| markdownlint-cli | 0.45.0 | **0.46.0** | Minor update available |
+| Package               | Current (Wanted) | Latest     | Notes                  |
+| --------------------- | ---------------- | ---------- | ---------------------- |
+| @typescript-eslint/\* | 8.46.4           | **8.47.0** | Minor update available |
+| eslint-plugin-jest    | 29.1.0           | **29.2.0** | Minor update available |
+| markdownlint-cli      | 0.45.0           | **0.46.0** | Minor update available |
 
 ### 3.2 Workspace-Level Analysis
 
 Due to pnpm workspace complexity (355 packages), a recursive outdated check failed. Recommend:
+
 1. Per-workspace audits for critical packages
 2. Automated Dependabot/Renovate configuration
 3. Turbo-based update scripts
@@ -190,13 +198,13 @@ Due to pnpm workspace complexity (355 packages), a recursive outdated check fail
 
 ### 4.1 Top Candidates for Review
 
-| Workspace | Count | Examples |
-|-----------|-------|----------|
-| **@intelgraph/mobile-interface** | 39 | `react-dom`, `tailwindcss`, `@headlessui/react` |
-| **@intelgraph/mobile-native** | 31 | `react-native-screens`, `@react-native-firebase/app` |
-| **intelgraph-platform (root)** | 23 | `ajv`, `docx`, `dotenv`, `cross-env` |
-| **@intelgraph/web** | 23 | `@radix-ui/*`, `@hookform/resolvers` |
-| **intelgraph-client** | 19 | `@emotion/react`, `d3-selection`, `zod` |
+| Workspace                        | Count | Examples                                             |
+| -------------------------------- | ----- | ---------------------------------------------------- |
+| **@intelgraph/mobile-interface** | 39    | `react-dom`, `tailwindcss`, `@headlessui/react`      |
+| **@intelgraph/mobile-native**    | 31    | `react-native-screens`, `@react-native-firebase/app` |
+| **intelgraph-platform (root)**   | 23    | `ajv`, `docx`, `dotenv`, `cross-env`                 |
+| **@intelgraph/web**              | 23    | `@radix-ui/*`, `@hookform/resolvers`                 |
+| **intelgraph-client**            | 19    | `@emotion/react`, `d3-selection`, `zod`              |
 
 ### 4.2 Analysis Limitations
 
@@ -217,11 +225,13 @@ Due to pnpm workspace complexity (355 packages), a recursive outdated check fail
 ### 5.1 Immediate Actions (Priority: CRITICAL)
 
 1. **Fix parse-url SSRF vulnerability**
+
    ```bash
    pnpm update parse-url@latest -r
    ```
 
 2. **Update high-severity packages**
+
    ```bash
    pnpm update parse-path@latest moment@latest glob@latest -r
    ```
@@ -243,6 +253,7 @@ Due to pnpm workspace complexity (355 packages), a recursive outdated check fail
      - Accept risk if only used for trusted input
 
 5. **Consolidate TypeScript versions**
+
    ```bash
    # Create script to update all package.json files
    find . -name "package.json" -not -path "*/node_modules/*" \
@@ -251,6 +262,7 @@ Due to pnpm workspace complexity (355 packages), a recursive outdated check fail
    ```
 
 6. **Consolidate @types/node versions**
+
    ```bash
    # Similar approach, target ^24.10.1
    ```
@@ -370,6 +382,7 @@ Due to pnpm workspace complexity (355 packages), a recursive outdated check fail
 ### Pre-Update Testing
 
 Before any dependency updates:
+
 1. Ensure golden path is green: `make smoke`
 2. Run full test suite: `pnpm test`
 3. Run linters: `pnpm lint`
@@ -379,6 +392,7 @@ Before any dependency updates:
 ### Post-Update Testing
 
 After each phase:
+
 1. Re-run all pre-update checks
 2. Test critical user workflows (Investigation → Entities → Relationships → Copilot)
 3. Verify Docker compose stack: `make up && make smoke`
@@ -388,6 +402,7 @@ After each phase:
 ### Rollback Plan
 
 If issues arise:
+
 1. Use git to revert changes: `git revert <commit>`
 2. Restore lockfile: `git checkout HEAD~1 pnpm-lock.yaml`
 3. Re-install: `pnpm install`
@@ -401,12 +416,12 @@ If issues arise:
 
 The following updates carry higher risk of breaking changes:
 
-| Package | Current → Target | Risk Level | Mitigation |
-|---------|------------------|------------|------------|
-| React | 18.x → 19.x | HIGH | Extensive testing, gradual rollout |
-| Express | 4.x → 5.x | MEDIUM | Review breaking changes, update middleware |
-| Jest | 29.x → 30.x | MEDIUM | Review test configuration changes |
-| Zod | 3.x → 4.x | HIGH | DO NOT upgrade unless necessary (v4 is beta) |
+| Package | Current → Target | Risk Level | Mitigation                                   |
+| ------- | ---------------- | ---------- | -------------------------------------------- |
+| React   | 18.x → 19.x      | HIGH       | Extensive testing, gradual rollout           |
+| Express | 4.x → 5.x        | MEDIUM     | Review breaking changes, update middleware   |
+| Jest    | 29.x → 30.x      | MEDIUM     | Review test configuration changes            |
+| Zod     | 3.x → 4.x        | HIGH       | DO NOT upgrade unless necessary (v4 is beta) |
 
 ### Low-Risk Updates
 
@@ -499,6 +514,7 @@ pnpm typecheck                         # Type checking
 This audit provides a comprehensive analysis of the Summit platform's dependency health. Implementation of the recommended actions will significantly improve security posture, reduce maintenance burden, and establish sustainable dependency management practices.
 
 **Next Steps**:
+
 1. Review this report with the engineering team
 2. Prioritize action items based on business impact
 3. Create GitHub issues for each phase

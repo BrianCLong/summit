@@ -1,20 +1,22 @@
-import {
-  VendorAssessment,
-  Contract,
-  SupplyChainNode,
-} from '@intelgraph/supply-chain-types';
+import { VendorAssessment, Contract, SupplyChainNode } from "@intelgraph/supply-chain-types";
 
 /**
  * Vendor onboarding workflow
  */
 export interface VendorOnboarding {
   vendorId: string;
-  stage: 'initial-review' | 'due-diligence' | 'security-assessment' | 'legal-review' | 'approved' | 'rejected';
+  stage:
+    | "initial-review"
+    | "due-diligence"
+    | "security-assessment"
+    | "legal-review"
+    | "approved"
+    | "rejected";
   startedAt: Date;
   completedAt?: Date;
   checklist: Array<{
     item: string;
-    status: 'pending' | 'in-progress' | 'completed' | 'failed';
+    status: "pending" | "in-progress" | "completed" | "failed";
     completedAt?: Date;
     notes?: string;
   }>;
@@ -29,7 +31,7 @@ export interface VendorOnboarding {
     role: string;
     userId: string;
     approvedAt?: Date;
-    decision?: 'approve' | 'reject' | 'request-changes';
+    decision?: "approve" | "reject" | "request-changes";
     notes?: string;
   }>;
 }
@@ -39,7 +41,7 @@ export interface VendorOnboarding {
  */
 export interface VendorMonitoringConfig {
   vendorId: string;
-  assessmentFrequency: 'monthly' | 'quarterly' | 'semi-annual' | 'annual';
+  assessmentFrequency: "monthly" | "quarterly" | "semi-annual" | "annual";
   securityMonitoring: boolean;
   financialMonitoring: boolean;
   complianceMonitoring: boolean;
@@ -60,7 +62,7 @@ export interface FourthPartyRisk {
   subVendorId: string; // The fourth party
   subVendorName: string;
   relationship: string;
-  criticalityToVendor: 'low' | 'medium' | 'high' | 'critical';
+  criticalityToVendor: "low" | "medium" | "high" | "critical";
   hasAccess: boolean;
   dataShared: boolean;
   riskScore: number;
@@ -76,29 +78,29 @@ export class ThirdPartyRiskManager {
    */
   initiateOnboarding(vendorId: string, vendorName: string): VendorOnboarding {
     const checklist = [
-      { item: 'Business information collected', status: 'pending' as const },
-      { item: 'Financial statements reviewed', status: 'pending' as const },
-      { item: 'Security questionnaire completed', status: 'pending' as const },
-      { item: 'References checked', status: 'pending' as const },
-      { item: 'Compliance certifications verified', status: 'pending' as const },
-      { item: 'Insurance documentation reviewed', status: 'pending' as const },
-      { item: 'Contract terms negotiated', status: 'pending' as const },
-      { item: 'Legal review completed', status: 'pending' as const },
-      { item: 'Executive approval obtained', status: 'pending' as const },
+      { item: "Business information collected", status: "pending" as const },
+      { item: "Financial statements reviewed", status: "pending" as const },
+      { item: "Security questionnaire completed", status: "pending" as const },
+      { item: "References checked", status: "pending" as const },
+      { item: "Compliance certifications verified", status: "pending" as const },
+      { item: "Insurance documentation reviewed", status: "pending" as const },
+      { item: "Contract terms negotiated", status: "pending" as const },
+      { item: "Legal review completed", status: "pending" as const },
+      { item: "Executive approval obtained", status: "pending" as const },
     ];
 
     return {
       vendorId,
-      stage: 'initial-review',
+      stage: "initial-review",
       startedAt: new Date(),
       checklist,
       documents: [],
       approvers: [
-        { role: 'Procurement', userId: '' },
-        { role: 'Security', userId: '' },
-        { role: 'Legal', userId: '' },
-        { role: 'Finance', userId: '' },
-        { role: 'Executive', userId: '' },
+        { role: "Procurement", userId: "" },
+        { role: "Security", userId: "" },
+        { role: "Legal", userId: "" },
+        { role: "Finance", userId: "" },
+        { role: "Executive", userId: "" },
       ],
     };
   }
@@ -108,7 +110,11 @@ export class ThirdPartyRiskManager {
    */
   async conductAssessment(
     vendor: SupplyChainNode,
-    assessmentType: 'initial-onboarding' | 'periodic-review' | 'incident-triggered' | 'contract-renewal'
+    assessmentType:
+      | "initial-onboarding"
+      | "periodic-review"
+      | "incident-triggered"
+      | "contract-renewal"
   ): Promise<VendorAssessment> {
     // Assess different categories
     const categories = {
@@ -123,18 +129,18 @@ export class ThirdPartyRiskManager {
     const overallScore = Object.values(categories).reduce((sum, score) => sum + score, 0) / 5;
 
     // Determine recommendation
-    let recommendation: 'approve' | 'approve-with-conditions' | 'reject' | 'monitor' | 'terminate';
+    let recommendation: "approve" | "approve-with-conditions" | "reject" | "monitor" | "terminate";
     let conditions: string[] = [];
 
     if (overallScore >= 80) {
-      recommendation = 'approve';
+      recommendation = "approve";
     } else if (overallScore >= 60) {
-      recommendation = 'approve-with-conditions';
+      recommendation = "approve-with-conditions";
       conditions = this.generateConditions(categories);
     } else if (overallScore >= 40) {
-      recommendation = assessmentType === 'initial-onboarding' ? 'reject' : 'monitor';
+      recommendation = assessmentType === "initial-onboarding" ? "reject" : "monitor";
     } else {
-      recommendation = assessmentType === 'initial-onboarding' ? 'reject' : 'terminate';
+      recommendation = assessmentType === "initial-onboarding" ? "reject" : "terminate";
     }
 
     // Generate findings
@@ -161,22 +167,22 @@ export class ThirdPartyRiskManager {
     vendorId: string,
     config: VendorMonitoringConfig
   ): Promise<{
-    status: 'healthy' | 'warning' | 'critical';
+    status: "healthy" | "warning" | "critical";
     alerts: Array<{
       type: string;
-      severity: 'low' | 'medium' | 'high' | 'critical';
+      severity: "low" | "medium" | "high" | "critical";
       message: string;
       detectedAt: Date;
     }>;
     metrics: {
       currentRiskScore: number;
       previousRiskScore: number;
-      trend: 'improving' | 'stable' | 'deteriorating';
+      trend: "improving" | "stable" | "deteriorating";
     };
   }> {
     const alerts: Array<{
       type: string;
-      severity: 'low' | 'medium' | 'high' | 'critical';
+      severity: "low" | "medium" | "high" | "critical";
       message: string;
       detectedAt: Date;
     }> = [];
@@ -188,15 +194,16 @@ export class ThirdPartyRiskManager {
 
     if (Math.abs(scoreDelta) >= config.alertThresholds.riskScoreDecrease) {
       alerts.push({
-        type: 'risk-score-change',
-        severity: scoreDelta < 0 ? 'high' : 'low',
+        type: "risk-score-change",
+        severity: scoreDelta < 0 ? "high" : "low",
         message: `Risk score changed by ${scoreDelta} points`,
         detectedAt: new Date(),
       });
     }
 
-    const trend = scoreDelta > 2 ? 'improving' : scoreDelta < -2 ? 'deteriorating' : 'stable';
-    const status = currentRiskScore >= 70 ? 'healthy' : currentRiskScore >= 50 ? 'warning' : 'critical';
+    const trend = scoreDelta > 2 ? "improving" : scoreDelta < -2 ? "deteriorating" : "stable";
+    const status =
+      currentRiskScore >= 70 ? "healthy" : currentRiskScore >= 50 ? "warning" : "critical";
 
     return {
       status,
@@ -216,7 +223,7 @@ export class ThirdPartyRiskManager {
     vendorId: string,
     subVendors: Array<{ id: string; name: string; relationship: string }>
   ): Promise<FourthPartyRisk[]> {
-    return subVendors.map(sub => ({
+    return subVendors.map((sub) => ({
       vendorId,
       subVendorId: sub.id,
       subVendorName: sub.name,
@@ -242,7 +249,7 @@ export class ThirdPartyRiskManager {
     compliant: boolean;
     violations: Array<{
       clause: string;
-      severity: 'minor' | 'major' | 'critical';
+      severity: "minor" | "major" | "critical";
       description: string;
     }>;
     penalties: Array<{
@@ -253,7 +260,7 @@ export class ThirdPartyRiskManager {
   } {
     const violations: Array<{
       clause: string;
-      severity: 'minor' | 'major' | 'critical';
+      severity: "minor" | "major" | "critical";
       description: string;
     }> = [];
 
@@ -267,8 +274,8 @@ export class ThirdPartyRiskManager {
     if (contract.sla) {
       if (contract.sla.deliveryTimeDays && performance.onTimeDelivery < 0.9) {
         violations.push({
-          clause: 'SLA - Delivery Time',
-          severity: 'major',
+          clause: "SLA - Delivery Time",
+          severity: "major",
           description: `On-time delivery rate ${(performance.onTimeDelivery * 100).toFixed(1)}% below 90% target`,
         });
       }
@@ -279,7 +286,7 @@ export class ThirdPartyRiskManager {
           if (actual !== undefined && actual < target) {
             violations.push({
               clause: `SLA - Quality: ${metric}`,
-              severity: 'major',
+              severity: "major",
               description: `${metric} at ${actual} below target of ${target}`,
             });
           }
@@ -289,9 +296,9 @@ export class ThirdPartyRiskManager {
 
     // Calculate penalties based on violations
     for (const violation of violations) {
-      if (violation.severity === 'critical') {
+      if (violation.severity === "critical") {
         penalties.push({
-          type: 'financial',
+          type: "financial",
           amount: 10000,
           description: `Critical SLA violation: ${violation.description}`,
         });
@@ -318,7 +325,7 @@ export class ThirdPartyRiskManager {
   }
 
   private async assessOperational(vendor: SupplyChainNode): Promise<number> {
-    return vendor.status === 'active' ? 85 : 40;
+    return vendor.status === "active" ? 85 : 40;
   }
 
   private async assessCompliance(vendor: SupplyChainNode): Promise<number> {
@@ -346,13 +353,13 @@ export class ThirdPartyRiskManager {
   private generateFindings(categories: Record<string, number>): Array<{
     category: string;
     finding: string;
-    severity: 'low' | 'medium' | 'high' | 'critical';
+    severity: "low" | "medium" | "high" | "critical";
     recommendation?: string;
   }> {
     const findings: Array<{
       category: string;
       finding: string;
-      severity: 'low' | 'medium' | 'high' | 'critical';
+      severity: "low" | "medium" | "high" | "critical";
       recommendation?: string;
     }> = [];
 
@@ -361,14 +368,14 @@ export class ThirdPartyRiskManager {
         findings.push({
           category,
           finding: `${category} score critically low at ${score}`,
-          severity: 'critical',
+          severity: "critical",
           recommendation: `Immediate remediation required for ${category}`,
         });
       } else if (score < 60) {
         findings.push({
           category,
           finding: `${category} score below acceptable threshold at ${score}`,
-          severity: 'high',
+          severity: "high",
           recommendation: `Develop improvement plan for ${category}`,
         });
       }
@@ -395,22 +402,22 @@ export class ThirdPartyRiskManager {
     return now;
   }
 
-  private assessSubVendorCriticality(relationship: string): 'low' | 'medium' | 'high' | 'critical' {
-    const criticalRelationships = ['manufacturing', 'critical-component', 'data-processor'];
-    const highRelationships = ['logistics', 'quality-testing', 'assembly'];
+  private assessSubVendorCriticality(relationship: string): "low" | "medium" | "high" | "critical" {
+    const criticalRelationships = ["manufacturing", "critical-component", "data-processor"];
+    const highRelationships = ["logistics", "quality-testing", "assembly"];
 
-    if (criticalRelationships.some(r => relationship.toLowerCase().includes(r))) {
-      return 'critical';
+    if (criticalRelationships.some((r) => relationship.toLowerCase().includes(r))) {
+      return "critical";
     }
-    if (highRelationships.some(r => relationship.toLowerCase().includes(r))) {
-      return 'high';
+    if (highRelationships.some((r) => relationship.toLowerCase().includes(r))) {
+      return "high";
     }
-    return 'medium';
+    return "medium";
   }
 
   private checkDataAccess(relationship: string): boolean {
-    const dataAccessRelationships = ['data-processor', 'cloud-provider', 'it-services'];
-    return dataAccessRelationships.some(r => relationship.toLowerCase().includes(r));
+    const dataAccessRelationships = ["data-processor", "cloud-provider", "it-services"];
+    return dataAccessRelationships.some((r) => relationship.toLowerCase().includes(r));
   }
 
   private checkDataSharing(relationship: string): boolean {

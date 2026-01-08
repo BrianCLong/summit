@@ -3,19 +3,19 @@
  * Parameterized quantum circuit for machine learning
  */
 
-import { QuantumCircuit, QuantumSimulator, CircuitBuilder } from '@intelgraph/quantum-simulation';
+import { QuantumCircuit, QuantumSimulator, CircuitBuilder } from "@intelgraph/quantum-simulation";
 
 export interface QNNParams {
   numQubits: number;
   layers: number;
-  entangling: 'linear' | 'circular' | 'full';
+  entangling: "linear" | "circular" | "full";
 }
 
 export interface TrainingConfig {
   learningRate: number;
   epochs: number;
   batchSize: number;
-  optimizer: 'sgd' | 'adam';
+  optimizer: "sgd" | "adam";
 }
 
 export class QuantumNeuralNetwork {
@@ -90,15 +90,15 @@ export class QuantumNeuralNetwork {
   }
 
   private applyEntanglement(builder: CircuitBuilder): void {
-    if (this.params.entangling === 'linear') {
+    if (this.params.entangling === "linear") {
       for (let i = 0; i < this.params.numQubits - 1; i++) {
         builder.cnot(i, i + 1);
       }
-    } else if (this.params.entangling === 'circular') {
+    } else if (this.params.entangling === "circular") {
       for (let i = 0; i < this.params.numQubits; i++) {
         builder.cnot(i, (i + 1) % this.params.numQubits);
       }
-    } else if (this.params.entangling === 'full') {
+    } else if (this.params.entangling === "full") {
       for (let i = 0; i < this.params.numQubits; i++) {
         for (let j = i + 1; j < this.params.numQubits; j++) {
           builder.cnot(i, j);
@@ -113,14 +113,14 @@ export class QuantumNeuralNetwork {
 
     for (const [bitstring, count] of Object.entries(counts)) {
       for (let i = 0; i < bitstring.length; i++) {
-        if (bitstring[i] === '1') {
+        if (bitstring[i] === "1") {
           output[i] += count;
         }
       }
       totalCounts += count;
     }
 
-    return output.map(o => o / totalCounts);
+    return output.map((o) => o / totalCounts);
   }
 
   private computeLoss(predicted: number[], target: number): number {
@@ -167,7 +167,9 @@ export class QuantumNeuralNetwork {
 
   private initializeWeights(): number[] {
     const numWeights = this.params.layers * this.params.numQubits * 2;
-    return Array(numWeights).fill(0).map(() => Math.random() * 2 * Math.PI);
+    return Array(numWeights)
+      .fill(0)
+      .map(() => Math.random() * 2 * Math.PI);
   }
 
   getWeights(): number[] {

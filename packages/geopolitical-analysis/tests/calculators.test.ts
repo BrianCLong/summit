@@ -6,16 +6,16 @@ import {
   PoliticalStabilityCalculator,
   FoodSecurityCalculator,
   SupplyChainCalculator,
-} from '../src';
-import { RiskLevel } from '../src/types';
+} from "../src";
+import { RiskLevel } from "../src/types";
 
-describe('PoliticalStabilityCalculator', () => {
+describe("PoliticalStabilityCalculator", () => {
   const calculator = new PoliticalStabilityCalculator();
 
-  it('should calculate high stability for strong indicators', () => {
+  it("should calculate high stability for strong indicators", () => {
     const result = calculator.calculate({
-      countryCode: 'NO',
-      countryName: 'Norway',
+      countryCode: "NO",
+      countryName: "Norway",
       eliteCohesion: 90,
       governmentEffectiveness: 95,
       politicalViolenceRisk: 5,
@@ -24,16 +24,16 @@ describe('PoliticalStabilityCalculator', () => {
       electionRisk: 5,
     });
 
-    expect(result.type).toBe('POLITICAL_STABILITY');
+    expect(result.type).toBe("POLITICAL_STABILITY");
     expect(result.riskLevel).toBe(RiskLevel.LOW);
     expect(result.score).toBeGreaterThan(75);
-    expect(result.countryCode).toBe('NO');
+    expect(result.countryCode).toBe("NO");
   });
 
-  it('should calculate low stability for weak indicators', () => {
+  it("should calculate low stability for weak indicators", () => {
     const result = calculator.calculate({
-      countryCode: 'XX',
-      countryName: 'Test Country',
+      countryCode: "XX",
+      countryName: "Test Country",
       eliteCohesion: 20,
       governmentEffectiveness: 15,
       politicalViolenceRisk: 85,
@@ -46,11 +46,11 @@ describe('PoliticalStabilityCalculator', () => {
     expect(result.score).toBeLessThan(30);
   });
 
-  it('should throw error for invalid inputs', () => {
+  it("should throw error for invalid inputs", () => {
     expect(() =>
       calculator.calculate({
-        countryCode: 'XX',
-        countryName: 'Test',
+        countryCode: "XX",
+        countryName: "Test",
         eliteCohesion: 150, // Invalid
         governmentEffectiveness: 50,
         politicalViolenceRisk: 50,
@@ -61,11 +61,11 @@ describe('PoliticalStabilityCalculator', () => {
     ).toThrow();
   });
 
-  it('should throw error for missing country code', () => {
+  it("should throw error for missing country code", () => {
     expect(() =>
       calculator.calculate({
-        countryCode: '',
-        countryName: 'Test',
+        countryCode: "",
+        countryName: "Test",
         eliteCohesion: 50,
         governmentEffectiveness: 50,
         politicalViolenceRisk: 50,
@@ -77,13 +77,13 @@ describe('PoliticalStabilityCalculator', () => {
   });
 });
 
-describe('FoodSecurityCalculator', () => {
+describe("FoodSecurityCalculator", () => {
   const calculator = new FoodSecurityCalculator();
 
-  it('should calculate low risk for secure food situation', () => {
+  it("should calculate low risk for secure food situation", () => {
     const result = calculator.calculate({
-      countryCode: 'US',
-      countryName: 'United States',
+      countryCode: "US",
+      countryName: "United States",
       grainReservesDays: 180,
       foodPriceInflation: 2.5,
       importDependence: 10,
@@ -91,15 +91,15 @@ describe('FoodSecurityCalculator', () => {
       supplyChainDisruption: 5,
     });
 
-    expect(result.type).toBe('FOOD_SECURITY');
+    expect(result.type).toBe("FOOD_SECURITY");
     expect(result.riskLevel).toBe(RiskLevel.LOW);
     expect(result.socialUnrestRisk).toBeLessThan(30);
   });
 
-  it('should calculate high risk for insecure food situation', () => {
+  it("should calculate high risk for insecure food situation", () => {
     const result = calculator.calculate({
-      countryCode: 'XX',
-      countryName: 'Test Country',
+      countryCode: "XX",
+      countryName: "Test Country",
       grainReservesDays: 20,
       foodPriceInflation: 35,
       importDependence: 85,
@@ -111,11 +111,11 @@ describe('FoodSecurityCalculator', () => {
     expect(result.socialUnrestRisk).toBeGreaterThan(60);
   });
 
-  it('should throw error for negative grain reserves', () => {
+  it("should throw error for negative grain reserves", () => {
     expect(() =>
       calculator.calculate({
-        countryCode: 'XX',
-        countryName: 'Test',
+        countryCode: "XX",
+        countryName: "Test",
         grainReservesDays: -10,
         foodPriceInflation: 5,
         importDependence: 50,
@@ -126,14 +126,14 @@ describe('FoodSecurityCalculator', () => {
   });
 });
 
-describe('SupplyChainCalculator', () => {
+describe("SupplyChainCalculator", () => {
   const calculator = new SupplyChainCalculator();
 
-  it('should calculate low vulnerability for diversified supply', () => {
+  it("should calculate low vulnerability for diversified supply", () => {
     const result = calculator.calculate({
-      countryCode: 'US',
-      countryName: 'United States',
-      resourceType: 'copper',
+      countryCode: "US",
+      countryName: "United States",
+      resourceType: "copper",
       supplyConcentration: 30,
       alternativeSourcesAvailable: 80,
       transportationRisk: 20,
@@ -141,16 +141,16 @@ describe('SupplyChainCalculator', () => {
       stockpileDays: 200,
     });
 
-    expect(result.type).toBe('SUPPLY_CHAIN');
-    expect(result.resourceType).toBe('copper');
+    expect(result.type).toBe("SUPPLY_CHAIN");
+    expect(result.resourceType).toBe("copper");
     expect(result.riskLevel).toBeOneOf([RiskLevel.LOW, RiskLevel.MODERATE]);
   });
 
-  it('should calculate high vulnerability for concentrated supply', () => {
+  it("should calculate high vulnerability for concentrated supply", () => {
     const result = calculator.calculate({
-      countryCode: 'XX',
-      countryName: 'Test Country',
-      resourceType: 'rare-earths',
+      countryCode: "XX",
+      countryName: "Test Country",
+      resourceType: "rare-earths",
       supplyConcentration: 95,
       alternativeSourcesAvailable: 5,
       transportationRisk: 80,
@@ -161,12 +161,12 @@ describe('SupplyChainCalculator', () => {
     expect(result.riskLevel).toBeOneOf([RiskLevel.HIGH, RiskLevel.CRITICAL]);
   });
 
-  it('should throw error for missing resource type', () => {
+  it("should throw error for missing resource type", () => {
     expect(() =>
       calculator.calculate({
-        countryCode: 'XX',
-        countryName: 'Test',
-        resourceType: '',
+        countryCode: "XX",
+        countryName: "Test",
+        resourceType: "",
         supplyConcentration: 50,
         alternativeSourcesAvailable: 50,
         transportationRisk: 50,
@@ -185,8 +185,8 @@ expect.extend({
       pass,
       message: () =>
         pass
-          ? `expected ${received} not to be one of ${expected.join(', ')}`
-          : `expected ${received} to be one of ${expected.join(', ')}`,
+          ? `expected ${received} not to be one of ${expected.join(", ")}`
+          : `expected ${received} to be one of ${expected.join(", ")}`,
     };
   },
 });

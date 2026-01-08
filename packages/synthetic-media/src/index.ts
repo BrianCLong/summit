@@ -15,27 +15,27 @@ export interface SyntheticMediaAnalysis {
 }
 
 export enum MediaType {
-  TEXT = 'text',
-  IMAGE = 'image',
-  AUDIO = 'audio',
-  VIDEO = 'video',
-  MIXED = 'mixed',
+  TEXT = "text",
+  IMAGE = "image",
+  AUDIO = "audio",
+  VIDEO = "video",
+  MIXED = "mixed",
 }
 
 export enum GeneratorType {
-  GPT = 'gpt',
-  LLAMA = 'llama',
-  CLAUDE = 'claude',
-  STABLE_DIFFUSION = 'stable_diffusion',
-  MIDJOURNEY = 'midjourney',
-  DALL_E = 'dall_e',
-  WAVENET = 'wavenet',
-  TACOTRON = 'tacotron',
-  NEURAL_CODEC = 'neural_codec',
-  GAN = 'gan',
-  DIFFUSION = 'diffusion',
-  VAE = 'vae',
-  UNKNOWN = 'unknown',
+  GPT = "gpt",
+  LLAMA = "llama",
+  CLAUDE = "claude",
+  STABLE_DIFFUSION = "stable_diffusion",
+  MIDJOURNEY = "midjourney",
+  DALL_E = "dall_e",
+  WAVENET = "wavenet",
+  TACOTRON = "tacotron",
+  NEURAL_CODEC = "neural_codec",
+  GAN = "gan",
+  DIFFUSION = "diffusion",
+  VAE = "vae",
+  UNKNOWN = "unknown",
 }
 
 export interface DetectionMethod {
@@ -59,14 +59,14 @@ export interface SyntheticArtifact {
 }
 
 export enum ArtifactType {
-  UPSAMPLING_ARTIFACT = 'upsampling',
-  FREQUENCY_ANOMALY = 'frequency_anomaly',
-  STATISTICAL_OUTLIER = 'statistical_outlier',
-  PERPLEXITY_ANOMALY = 'perplexity_anomaly',
-  STYLISTIC_INCONSISTENCY = 'stylistic_inconsistency',
-  SEMANTIC_DRIFT = 'semantic_drift',
-  TRAINING_DATA_LEAKAGE = 'training_data_leakage',
-  MODEL_FINGERPRINT = 'model_fingerprint',
+  UPSAMPLING_ARTIFACT = "upsampling",
+  FREQUENCY_ANOMALY = "frequency_anomaly",
+  STATISTICAL_OUTLIER = "statistical_outlier",
+  PERPLEXITY_ANOMALY = "perplexity_anomaly",
+  STYLISTIC_INCONSISTENCY = "stylistic_inconsistency",
+  SEMANTIC_DRIFT = "semantic_drift",
+  TRAINING_DATA_LEAKAGE = "training_data_leakage",
+  MODEL_FINGERPRINT = "model_fingerprint",
 }
 
 export class SyntheticMediaDetector {
@@ -124,11 +124,11 @@ export class SyntheticMediaDetector {
     }
 
     if (isSynthetic) {
-      recommendations.push('Content appears to be AI-generated');
+      recommendations.push("Content appears to be AI-generated");
       if (generatorType) {
         recommendations.push(`Likely generator: ${generatorType}`);
       }
-      recommendations.push('Verify with original source if available');
+      recommendations.push("Verify with original source if available");
     }
 
     return {
@@ -159,7 +159,7 @@ export class SyntheticMediaDetector {
     // 1. Perplexity analysis
     const perplexityResult = this.analyzePerplexity(text);
     methods.push({
-      name: 'perplexity_analysis',
+      name: "perplexity_analysis",
       confidence: perplexityResult.confidence,
       evidence: perplexityResult,
     });
@@ -167,7 +167,7 @@ export class SyntheticMediaDetector {
     // 2. Burstiness analysis
     const burstinessResult = this.analyzeBurstiness(text);
     methods.push({
-      name: 'burstiness_analysis',
+      name: "burstiness_analysis",
       confidence: burstinessResult.confidence,
       evidence: burstinessResult,
     });
@@ -175,7 +175,7 @@ export class SyntheticMediaDetector {
     // 3. Stylistic analysis
     const styleResult = this.analyzeTextStyle(text);
     methods.push({
-      name: 'style_analysis',
+      name: "style_analysis",
       confidence: styleResult.confidence,
       evidence: styleResult,
     });
@@ -183,7 +183,7 @@ export class SyntheticMediaDetector {
     // 4. N-gram analysis
     const ngramResult = this.analyzeNGrams(text);
     methods.push({
-      name: 'ngram_analysis',
+      name: "ngram_analysis",
       confidence: ngramResult.confidence,
       evidence: ngramResult,
     });
@@ -191,7 +191,7 @@ export class SyntheticMediaDetector {
     // 5. Coherence analysis
     const coherenceResult = this.analyzeCoherence(text);
     methods.push({
-      name: 'coherence_analysis',
+      name: "coherence_analysis",
       confidence: coherenceResult.confidence,
       evidence: coherenceResult,
     });
@@ -242,7 +242,8 @@ export class SyntheticMediaDetector {
 
     const lengths = sentences.map((s) => s.trim().split(/\s+/).length);
     const mean = lengths.reduce((a, b) => a + b, 0) / lengths.length;
-    const variance = lengths.reduce((sum, len) => sum + Math.pow(len - mean, 2), 0) / lengths.length;
+    const variance =
+      lengths.reduce((sum, len) => sum + Math.pow(len - mean, 2), 0) / lengths.length;
     const stdDev = Math.sqrt(variance);
     const cv = stdDev / mean; // Coefficient of variation
 
@@ -300,19 +301,17 @@ export class SyntheticMediaDetector {
 
     // Check for common AI phrases
     const aiPhrases = [
-      'it is important to note',
-      'it should be noted',
-      'as an ai',
-      'i apologize',
-      'furthermore',
-      'however',
-      'in conclusion',
-      'to summarize',
+      "it is important to note",
+      "it should be noted",
+      "as an ai",
+      "i apologize",
+      "furthermore",
+      "however",
+      "in conclusion",
+      "to summarize",
     ];
 
-    const aiPhraseCount = aiPhrases.filter((phrase) =>
-      text.toLowerCase().includes(phrase),
-    ).length;
+    const aiPhraseCount = aiPhrases.filter((phrase) => text.toLowerCase().includes(phrase)).length;
 
     const confidence = aiPhraseCount > 2 ? 0.8 : aiPhraseCount > 0 ? 0.6 : 0.3;
 
@@ -328,7 +327,7 @@ export class SyntheticMediaDetector {
 
     // Simplified: check paragraph consistency
     const paragraphs = text.split(/\n\n+/);
-    const coherenceScore = paragraphs.length > 1 ? 0.85 : 0.90;
+    const coherenceScore = paragraphs.length > 1 ? 0.85 : 0.9;
 
     return {
       confidence: coherenceScore > 0.87 ? 0.6 : 0.4,
@@ -340,7 +339,7 @@ export class SyntheticMediaDetector {
     // Identify specific generator based on fingerprints
 
     // GPT-specific patterns
-    if (text.includes('As an AI') || text.includes('I apologize')) {
+    if (text.includes("As an AI") || text.includes("I apologize")) {
       return GeneratorType.GPT;
     }
 
@@ -366,7 +365,7 @@ export class SyntheticMediaDetector {
     // 1. GAN fingerprint detection
     const ganResult = await this.detectGANFingerprints(imageBuffer);
     methods.push({
-      name: 'gan_fingerprint',
+      name: "gan_fingerprint",
       confidence: ganResult.confidence,
       evidence: ganResult,
     });
@@ -375,7 +374,7 @@ export class SyntheticMediaDetector {
     // 2. Frequency domain analysis
     const freqResult = await this.analyzeFrequencyDomain(imageBuffer);
     methods.push({
-      name: 'frequency_analysis',
+      name: "frequency_analysis",
       confidence: freqResult.confidence,
       evidence: freqResult,
     });
@@ -383,7 +382,7 @@ export class SyntheticMediaDetector {
     // 3. Upsampling artifacts
     const upsampleResult = await this.detectUpsamplingArtifacts(imageBuffer);
     methods.push({
-      name: 'upsampling_detection',
+      name: "upsampling_detection",
       confidence: upsampleResult.confidence,
       evidence: upsampleResult,
     });
@@ -391,7 +390,7 @@ export class SyntheticMediaDetector {
     // 4. Style transfer detection
     const styleResult = await this.detectStyleTransfer(imageBuffer);
     methods.push({
-      name: 'style_transfer',
+      name: "style_transfer",
       confidence: styleResult.confidence,
       evidence: styleResult,
     });

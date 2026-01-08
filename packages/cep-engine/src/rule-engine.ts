@@ -1,8 +1,8 @@
-import { EventEmitter } from 'eventemitter3';
-import pino from 'pino';
-import { BusinessRule, RuleContext } from './types';
+import { EventEmitter } from "eventemitter3";
+import pino from "pino";
+import { BusinessRule, RuleContext } from "./types";
 
-const logger = pino({ name: 'rule-engine' });
+const logger = pino({ name: "rule-engine" });
 
 /**
  * Business rule engine for real-time rule evaluation
@@ -15,7 +15,7 @@ export class RuleEngine extends EventEmitter {
    */
   addRule(rule: BusinessRule): void {
     this.rules.set(rule.id, rule);
-    logger.info({ ruleId: rule.id, name: rule.name }, 'Rule added');
+    logger.info({ ruleId: rule.id, name: rule.name }, "Rule added");
   }
 
   /**
@@ -23,7 +23,7 @@ export class RuleEngine extends EventEmitter {
    */
   removeRule(ruleId: string): void {
     this.rules.delete(ruleId);
-    logger.info({ ruleId }, 'Rule removed');
+    logger.info({ ruleId }, "Rule removed");
   }
 
   /**
@@ -66,12 +66,12 @@ export class RuleEngine extends EventEmitter {
             executedAt: Date.now(),
           });
 
-          this.emit('rule-matched', { rule, event, context: ruleContext });
-          logger.info({ ruleId: rule.id, name: rule.name }, 'Rule matched');
+          this.emit("rule-matched", { rule, event, context: ruleContext });
+          logger.info({ ruleId: rule.id, name: rule.name }, "Rule matched");
         }
       } catch (error) {
-        logger.error({ error, ruleId: rule.id }, 'Rule evaluation failed');
-        this.emit('rule-error', { rule, event, error });
+        logger.error({ error, ruleId: rule.id }, "Rule evaluation failed");
+        this.emit("rule-error", { rule, event, error });
 
         results.push({
           ruleId: rule.id,

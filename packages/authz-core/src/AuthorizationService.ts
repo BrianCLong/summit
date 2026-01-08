@@ -6,9 +6,9 @@
  * Integrates RBAC, ABAC, warrant validation, and license enforcement
  */
 
-import { Pool } from 'pg';
-import axios from 'axios';
-import pino from 'pino';
+import { Pool } from "pg";
+import axios from "axios";
+import pino from "pino";
 import type {
   AuthorizationInput,
   AuthorizationDecision,
@@ -25,10 +25,10 @@ import type {
   AuthorizationContext,
   Warrant,
   License,
-} from './types';
-import { AuthorizationError } from './types';
+} from "./types";
+import { AuthorizationError } from "./types";
 
-const logger = pino({ name: 'authz-service' });
+const logger = pino({ name: "authz-service" });
 
 export class AuthorizationService {
   private db: Pool;
@@ -38,22 +38,22 @@ export class AuthorizationService {
   constructor(config: Partial<AuthorizationConfig> = {}) {
     // Default configuration
     this.config = {
-      opaUrl: process.env.OPA_URL || 'http://localhost:8181',
-      opaTimeout: parseInt(process.env.OPA_TIMEOUT || '5000', 10),
-      opaCacheEnabled: process.env.OPA_CACHE_ENABLED !== 'false',
-      opaCacheTtl: parseInt(process.env.OPA_CACHE_TTL || '300000', 10), // 5 minutes
-      databaseUrl: process.env.DATABASE_URL || 'postgresql://localhost:5432/intelgraph',
-      databasePoolSize: parseInt(process.env.DB_POOL_SIZE || '20', 10),
-      failSecure: process.env.NODE_ENV === 'production',
-      requirePurpose: process.env.REQUIRE_PURPOSE !== 'false',
-      requireWarrantFor: ['EXPORT', 'SHARE', 'DISTRIBUTE'] as Action[],
-      requireLicenseFor: ['EXPORT', 'SHARE', 'DISTRIBUTE', 'DOWNLOAD'] as Action[],
-      auditEnabled: process.env.AUDIT_ENABLED !== 'false',
+      opaUrl: process.env.OPA_URL || "http://localhost:8181",
+      opaTimeout: parseInt(process.env.OPA_TIMEOUT || "5000", 10),
+      opaCacheEnabled: process.env.OPA_CACHE_ENABLED !== "false",
+      opaCacheTtl: parseInt(process.env.OPA_CACHE_TTL || "300000", 10), // 5 minutes
+      databaseUrl: process.env.DATABASE_URL || "postgresql://localhost:5432/intelgraph",
+      databasePoolSize: parseInt(process.env.DB_POOL_SIZE || "20", 10),
+      failSecure: process.env.NODE_ENV === "production",
+      requirePurpose: process.env.REQUIRE_PURPOSE !== "false",
+      requireWarrantFor: ["EXPORT", "SHARE", "DISTRIBUTE"] as Action[],
+      requireLicenseFor: ["EXPORT", "SHARE", "DISTRIBUTE", "DOWNLOAD"] as Action[],
+      auditEnabled: process.env.AUDIT_ENABLED !== "false",
       auditStreamUrl: process.env.AUDIT_STREAM_URL,
-      cacheEnabled: process.env.CACHE_ENABLED !== 'false',
-      cacheTtl: parseInt(process.env.CACHE_TTL || '60000', 10), // 1 minute
-      metricsEnabled: process.env.METRICS_ENABLED !== 'false',
-      tracingEnabled: process.env.TRACING_ENABLED !== 'false',
+      cacheEnabled: process.env.CACHE_ENABLED !== "false",
+      cacheTtl: parseInt(process.env.CACHE_TTL || "60000", 10), // 1 minute
+      metricsEnabled: process.env.METRICS_ENABLED !== "false",
+      tracingEnabled: process.env.TRACING_ENABLED !== "false",
       ...config,
     };
 
@@ -108,35 +108,34 @@ export class AuthorizationService {
       const tenantCheck = this.checkTenantIsolation(subject, resource);
       conditions.push(tenantCheck);
       if (!tenantCheck.satisfied) {
-        return this.denyDecision(
-          'Cross-tenant access denied',
-          trace,
-          startTime,
-          { conditions, warrantResult: undefined, licenseResult: undefined }
-        );
+        return this.denyDecision("Cross-tenant access denied", trace, startTime, {
+          conditions,
+          warrantResult: undefined,
+          licenseResult: undefined,
+        });
       }
 
       // 2. RBAC check (role-based access control)
       const rbacResult = await this.evaluateRBAC(subject, action, resource);
-      trace.policiesEvaluated.push('RBAC');
+      trace.policiesEvaluated.push("RBAC");
       if (!rbacResult) {
-        trace.rulesFailed.push('RBAC');
+        trace.rulesFailed.push("RBAC");
         return this.denyDecision(
-          `Role '${subject.roles.join(',')}' does not permit '${action}' on '${resource.type}'`,
+          `Role '${subject.roles.join(",")}' does not permit '${action}' on '${resource.type}'`,
           trace,
           startTime,
           { rbacResult, conditions }
         );
       }
-      trace.rulesMatched.push('RBAC');
+      trace.rulesMatched.push("RBAC");
 
       // 3. ABAC check (attribute-based access control)
       const abacResult = await this.evaluateABAC(subject, action, resource, context);
-      trace.policiesEvaluated.push('ABAC');
+      trace.policiesEvaluated.push("ABAC");
       if (!abacResult.allowed) {
-        trace.rulesFailed.push('ABAC');
+        trace.rulesFailed.push("ABAC");
         return this.denyDecision(
-          abacResult.reason || 'ABAC policy denied access',
+          abacResult.reason || "ABAC policy denied access",
           trace,
           startTime,
           {
@@ -147,7 +146,7 @@ export class AuthorizationService {
           }
         );
       }
-      trace.rulesMatched.push('ABAC');
+      trace.rulesMatched.push("ABAC");
       if (abacResult.obligations) {
         obligations.push(...abacResult.obligations);
       }
@@ -156,12 +155,12 @@ export class AuthorizationService {
       let warrantResult: WarrantValidationResult | undefined;
       if (this.requiresWarrant(action, context)) {
         warrantResult = await this.validateWarrant(subject, action, resource, context);
-        trace.policiesEvaluated.push('WARRANT');
+        trace.policiesEvaluated.push("WARRANT");
 
         if (!warrantResult.valid) {
-          trace.rulesFailed.push('WARRANT');
+          trace.rulesFailed.push("WARRANT");
           return this.denyDecision(
-            warrantResult.reason || 'Valid warrant required',
+            warrantResult.reason || "Valid warrant required",
             trace,
             startTime,
             {
@@ -173,19 +172,19 @@ export class AuthorizationService {
             }
           );
         }
-        trace.rulesMatched.push('WARRANT');
+        trace.rulesMatched.push("WARRANT");
       }
 
       // 5. License enforcement (if required)
       let licenseResult: LicenseValidationResult | undefined;
       if (this.requiresLicense(action, context)) {
         licenseResult = await this.validateLicense(subject, action, resource, context);
-        trace.policiesEvaluated.push('LICENSE');
+        trace.policiesEvaluated.push("LICENSE");
 
         if (!licenseResult.valid) {
-          trace.rulesFailed.push('LICENSE');
+          trace.rulesFailed.push("LICENSE");
           return this.denyDecision(
-            licenseResult.reason || 'License restrictions prevent this action',
+            licenseResult.reason || "License restrictions prevent this action",
             trace,
             startTime,
             {
@@ -210,26 +209,21 @@ export class AuthorizationService {
             }))
           );
         }
-        trace.rulesMatched.push('LICENSE');
+        trace.rulesMatched.push("LICENSE");
       }
 
       // 6. TOS acceptance check (if required)
       const tosAccepted = await this.checkTOSAcceptance(subject, context);
       if (!tosAccepted && this.requiresTOS(action, context)) {
-        return this.denyDecision(
-          'Terms of Service acceptance required',
-          trace,
-          startTime,
-          {
-            rbacResult,
-            abacResult: true,
-            warrantResult,
-            licenseResult,
-            tosAccepted: false,
-            conditions,
-            obligations,
-          }
-        );
+        return this.denyDecision("Terms of Service acceptance required", trace, startTime, {
+          rbacResult,
+          abacResult: true,
+          warrantResult,
+          licenseResult,
+          tosAccepted: false,
+          conditions,
+          obligations,
+        });
       }
 
       // 7. Step-up authentication check
@@ -237,7 +231,7 @@ export class AuthorizationService {
       if (stepUpRequired && !this.hasStepUp(subject, context)) {
         return {
           allowed: false,
-          reason: 'Step-up authentication required for this action',
+          reason: "Step-up authentication required for this action",
           decidedAt: new Date(),
           rbacResult,
           abacResult: true,
@@ -248,7 +242,7 @@ export class AuthorizationService {
           conditions,
           requiresStepUp: true,
           stepUpReason: `Action '${action}' requires elevated authentication`,
-          minimumAcr: 'loa2',
+          minimumAcr: "loa2",
           decisionTrace: {
             ...trace,
             evaluationTimeMs: Date.now() - startTime,
@@ -260,9 +254,9 @@ export class AuthorizationService {
       trace.evaluationTimeMs = Date.now() - startTime;
       const decision: AuthorizationDecision = {
         allowed: true,
-        reason: 'Authorization granted',
+        reason: "Authorization granted",
         decidedAt: new Date(),
-        policyVersion: '1.0',
+        policyVersion: "1.0",
         rbacResult,
         abacResult: true,
         warrantResult,
@@ -285,30 +279,32 @@ export class AuthorizationService {
       }
 
       return decision;
-
     } catch (error) {
-      logger.error({ error, subject: subject.id, action, resource: resource.id }, 'Authorization error');
+      logger.error(
+        { error, subject: subject.id, action, resource: resource.id },
+        "Authorization error"
+      );
 
       // Fail-secure in production
       if (this.config.failSecure) {
         return {
           allowed: false,
-          reason: 'Authorization service error',
+          reason: "Authorization service error",
           decidedAt: new Date(),
           decisionTrace: {
             policiesEvaluated: [],
             rulesMatched: [],
-            rulesFailed: ['SYSTEM_ERROR'],
+            rulesFailed: ["SYSTEM_ERROR"],
             evaluationTimeMs: Date.now() - startTime,
           },
         };
       }
 
       throw new AuthorizationError(
-        'Authorization evaluation failed',
-        'AUTHZ_EVALUATION_ERROR',
+        "Authorization evaluation failed",
+        "AUTHZ_EVALUATION_ERROR",
         500,
-        { error: error instanceof Error ? error.message : 'Unknown error' }
+        { error: error instanceof Error ? error.message : "Unknown error" }
       );
     }
   }
@@ -320,22 +316,22 @@ export class AuthorizationService {
     const { subject, action, resource, context } = input;
 
     if (!subject?.id || !subject?.tenantId) {
-      throw new AuthorizationError('Invalid subject', 'INVALID_SUBJECT', 400);
+      throw new AuthorizationError("Invalid subject", "INVALID_SUBJECT", 400);
     }
 
     if (!action) {
-      throw new AuthorizationError('Invalid action', 'INVALID_ACTION', 400);
+      throw new AuthorizationError("Invalid action", "INVALID_ACTION", 400);
     }
 
     if (!resource?.id || !resource?.type || !resource?.tenantId) {
-      throw new AuthorizationError('Invalid resource', 'INVALID_RESOURCE', 400);
+      throw new AuthorizationError("Invalid resource", "INVALID_RESOURCE", 400);
     }
 
     // Require purpose if configured
     if (this.config.requirePurpose && !context?.purpose) {
       throw new AuthorizationError(
-        'Purpose is required for all authorization requests',
-        'PURPOSE_REQUIRED',
+        "Purpose is required for all authorization requests",
+        "PURPOSE_REQUIRED",
         400
       );
     }
@@ -347,10 +343,12 @@ export class AuthorizationService {
   private checkTenantIsolation(subject: Subject, resource: Resource): Condition {
     const sameTenant = subject.tenantId === resource.tenantId;
     return {
-      type: 'TENANT_ISOLATION',
-      description: 'Subject and resource must belong to same tenant',
+      type: "TENANT_ISOLATION",
+      description: "Subject and resource must belong to same tenant",
       satisfied: sameTenant,
-      reason: sameTenant ? undefined : `Tenant mismatch: ${subject.tenantId} != ${resource.tenantId}`,
+      reason: sameTenant
+        ? undefined
+        : `Tenant mismatch: ${subject.tenantId} != ${resource.tenantId}`,
     };
   }
 
@@ -369,20 +367,24 @@ export class AuthorizationService {
     }
 
     // Check role-based permissions (could be enhanced with database lookup)
-    if (subject.roles?.includes('PLATFORM_ADMIN')) {
+    if (subject.roles?.includes("PLATFORM_ADMIN")) {
       return true;
     }
 
-    if (subject.roles?.includes('ADMIN') && resource.tenantId === subject.tenantId) {
+    if (subject.roles?.includes("ADMIN") && resource.tenantId === subject.tenantId) {
       return true;
     }
 
     // Default: check if permission exists in permissions array
-    return subject.permissions?.some((p) => {
-      const [resType, resAction] = p.split(':');
-      return (resType === resource.type || resType === '*') &&
-             (resAction === action.toLowerCase() || resAction === '*');
-    }) || false;
+    return (
+      subject.permissions?.some((p) => {
+        const [resType, resAction] = p.split(":");
+        return (
+          (resType === resource.type || resType === "*") &&
+          (resAction === action.toLowerCase() || resAction === "*")
+        );
+      }) || false
+    );
   }
 
   /**
@@ -393,7 +395,12 @@ export class AuthorizationService {
     action: Action,
     resource: Resource,
     context: AuthorizationContext
-  ): Promise<{ allowed: boolean; reason?: string; obligations?: Obligation[]; opaResult?: unknown }> {
+  ): Promise<{
+    allowed: boolean;
+    reason?: string;
+    obligations?: Obligation[];
+    opaResult?: unknown;
+  }> {
     try {
       const opaInput = {
         subject: {
@@ -433,11 +440,11 @@ export class AuthorizationService {
 
       const result = response.data?.result;
 
-      if (typeof result === 'boolean') {
+      if (typeof result === "boolean") {
         return { allowed: result, opaResult: result };
       }
 
-      if (result && typeof result === 'object') {
+      if (result && typeof result === "object") {
         return {
           allowed: result.allow === true,
           reason: result.reason,
@@ -447,18 +454,17 @@ export class AuthorizationService {
       }
 
       // No result = deny
-      return { allowed: false, reason: 'OPA returned no result' };
-
+      return { allowed: false, reason: "OPA returned no result" };
     } catch (error) {
-      logger.error({ error }, 'OPA evaluation failed');
+      logger.error({ error }, "OPA evaluation failed");
 
       // Fail-secure: deny on OPA error in production
       if (this.config.failSecure) {
-        return { allowed: false, reason: 'Policy evaluation failed' };
+        return { allowed: false, reason: "Policy evaluation failed" };
       }
 
       // In non-production, allow RBAC to determine
-      return { allowed: true, reason: 'OPA unavailable, allowing based on RBAC' };
+      return { allowed: true, reason: "OPA unavailable, allowing based on RBAC" };
     }
   }
 
@@ -529,7 +535,7 @@ export class AuthorizationService {
 
       const warrant = warrantResult.rows[0];
       if (!warrant) {
-        return { valid: false, reason: 'Warrant not found' };
+        return { valid: false, reason: "Warrant not found" };
       }
 
       // Calculate time until expiry
@@ -544,12 +550,11 @@ export class AuthorizationService {
         warrant: warrant as Warrant,
         expiresIn,
       };
-
     } catch (error) {
-      logger.error({ error }, 'Warrant validation error');
+      logger.error({ error }, "Warrant validation error");
       return {
         valid: false,
-        reason: 'Warrant validation failed',
+        reason: "Warrant validation failed",
       };
     }
   }
@@ -576,11 +581,9 @@ export class AuthorizationService {
   ): Promise<LicenseValidationResult> {
     try {
       // Get active license for resource
-      const licenseId = context.licenseId || await this.getActiveLicenseForResource(
-        subject.tenantId,
-        resource.type,
-        resource.id
-      );
+      const licenseId =
+        context.licenseId ||
+        (await this.getActiveLicenseForResource(subject.tenantId, resource.type, resource.id));
 
       if (!licenseId) {
         // No license required (resource not licensed)
@@ -613,7 +616,7 @@ export class AuthorizationService {
 
       const license = licenseResult.rows[0];
       if (!license) {
-        return { valid: false, reason: 'License not active' };
+        return { valid: false, reason: "License not active" };
       }
 
       // Build conditions based on license restrictions
@@ -621,24 +624,24 @@ export class AuthorizationService {
 
       if (license.requires_attribution) {
         conditions.push({
-          type: 'ATTRIBUTION' as const,
-          requirement: license.attribution_text || 'Attribution required',
+          type: "ATTRIBUTION" as const,
+          requirement: license.attribution_text || "Attribution required",
           details: { text: license.attribution_text },
         });
       }
 
       if (license.requires_notice) {
         conditions.push({
-          type: 'NOTICE' as const,
-          requirement: license.notice_text || 'Notice required',
+          type: "NOTICE" as const,
+          requirement: license.notice_text || "Notice required",
           details: { text: license.notice_text },
         });
       }
 
       if (license.export_controlled) {
         conditions.push({
-          type: 'EXPORT_CONTROL' as const,
-          requirement: 'Subject to export control regulations',
+          type: "EXPORT_CONTROL" as const,
+          requirement: "Subject to export control regulations",
           details: { controlled: true },
         });
       }
@@ -648,12 +651,11 @@ export class AuthorizationService {
         license: license as License,
         conditions,
       };
-
     } catch (error) {
-      logger.error({ error }, 'License validation error');
+      logger.error({ error }, "License validation error");
       return {
         valid: false,
-        reason: 'License validation failed',
+        reason: "License validation failed",
       };
     }
   }
@@ -673,7 +675,7 @@ export class AuthorizationService {
       );
       return result.rows[0]?.license_id || null;
     } catch (error) {
-      logger.error({ error }, 'Failed to get active license');
+      logger.error({ error }, "Failed to get active license");
       return null;
     }
   }
@@ -692,11 +694,11 @@ export class AuthorizationService {
     try {
       const result = await this.db.query<{ has_accepted: boolean }>(
         `SELECT has_user_accepted_tos($1, $2, $3) as has_accepted`,
-        [subject.id, '1.0', 'PLATFORM_TOS'] // Version and type should be configurable
+        [subject.id, "1.0", "PLATFORM_TOS"] // Version and type should be configurable
       );
       return result.rows[0]?.has_accepted || false;
     } catch (error) {
-      logger.error({ error }, 'TOS acceptance check failed');
+      logger.error({ error }, "TOS acceptance check failed");
       return false;
     }
   }
@@ -706,7 +708,7 @@ export class AuthorizationService {
    */
   private requiresTOS(action: Action, context: AuthorizationContext): boolean {
     // Always require TOS for exports and distributions
-    return ['EXPORT', 'SHARE', 'DISTRIBUTE'].includes(action);
+    return ["EXPORT", "SHARE", "DISTRIBUTE"].includes(action);
   }
 
   /**
@@ -718,15 +720,15 @@ export class AuthorizationService {
     }
 
     // High-risk actions require step-up
-    return ['DELETE', 'EXPORT', 'SHARE'].includes(action);
+    return ["DELETE", "EXPORT", "SHARE"].includes(action);
   }
 
   /**
    * Check if subject has step-up authentication
    */
   private hasStepUp(subject: Subject, context: AuthorizationContext): boolean {
-    const currentAcr = context.currentAcr || subject.acr || 'loa1';
-    return currentAcr >= 'loa2' || subject.mfaVerified === true;
+    const currentAcr = context.currentAcr || subject.acr || "loa1";
+    return currentAcr >= "loa2" || subject.mfaVerified === true;
   }
 
   /**
@@ -745,7 +747,7 @@ export class AuthorizationService {
       decidedAt: new Date(),
       decisionTrace: trace,
       appealable: true,
-      appealProcess: 'Contact your system administrator to request access',
+      appealProcess: "Contact your system administrator to request access",
       ...details,
     };
   }
@@ -801,15 +803,15 @@ export class AuthorizationService {
     decision: AuthorizationDecision
   ): Promise<void> {
     try {
-      const event: Omit<AuthorizationAuditEvent, 'eventId'> = {
-        eventType: 'AUTHORIZATION_DECISION',
+      const event: Omit<AuthorizationAuditEvent, "eventId"> = {
+        eventType: "AUTHORIZATION_DECISION",
         tenantId: input.subject.tenantId,
         userId: input.subject.id,
         userEmail: input.subject.email,
         action: input.action,
         resourceType: input.resource.type,
         resourceId: input.resource.id,
-        decision: decision.allowed ? 'ALLOW' : 'DENY',
+        decision: decision.allowed ? "ALLOW" : "DENY",
         reason: decision.reason,
         warrantId: input.context.warrantId,
         licenseId: input.context.licenseId,
@@ -864,15 +866,16 @@ export class AuthorizationService {
 
       // Stream to audit service if configured
       if (this.config.auditStreamUrl) {
-        await axios.post(this.config.auditStreamUrl, event, {
-          timeout: 1000,
-        }).catch((error) => {
-          logger.warn({ error }, 'Failed to stream audit event');
-        });
+        await axios
+          .post(this.config.auditStreamUrl, event, {
+            timeout: 1000,
+          })
+          .catch((error) => {
+            logger.warn({ error }, "Failed to stream audit event");
+          });
       }
-
     } catch (error) {
-      logger.error({ error }, 'Failed to audit authorization decision');
+      logger.error({ error }, "Failed to audit authorization decision");
       // Don't throw - audit failure shouldn't block authorization
     }
   }

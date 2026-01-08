@@ -6,11 +6,11 @@
  * Integrates with git tools and can run tests.
  */
 
-import { BaseAgent, type AgentServices } from '../Agent.js';
-import type { AgentDescriptor, TaskInput, TaskOutput } from '../types.js';
+import { BaseAgent, type AgentServices } from "../Agent.js";
+import type { AgentDescriptor, TaskInput, TaskOutput } from "../types.js";
 
 interface CoderInput {
-  action: 'generate' | 'refactor' | 'review' | 'fix_bug';
+  action: "generate" | "refactor" | "review" | "fix_bug";
   specification: string;
   targetFiles?: string[];
   language?: string;
@@ -27,7 +27,7 @@ interface CoderOutput {
 
 interface FileChange {
   path: string;
-  action: 'create' | 'modify' | 'delete';
+  action: "create" | "modify" | "delete";
   content?: string;
   diff?: string;
 }
@@ -40,7 +40,7 @@ interface CodeReview {
 }
 
 interface ReviewIssue {
-  severity: 'error' | 'warning' | 'info';
+  severity: "error" | "warning" | "info";
   file: string;
   line?: number;
   message: string;
@@ -50,17 +50,24 @@ interface ReviewIssue {
  * CoderAgent handles code generation, refactoring, and review tasks.
  */
 export class CoderAgent extends BaseAgent {
-  getDescriptor(): Omit<AgentDescriptor, 'id' | 'status' | 'registeredAt' | 'lastHeartbeat'> {
+  getDescriptor(): Omit<AgentDescriptor, "id" | "status" | "registeredAt" | "lastHeartbeat"> {
     return {
-      name: 'coder-agent',
-      version: '1.0.0',
-      role: 'coder',
-      riskTier: 'medium',
-      capabilities: ['code_generation', 'refactoring', 'code_review', 'bug_fixing', 'typescript', 'python'],
-      requiredTools: ['git', 'file_read', 'file_write'],
+      name: "coder-agent",
+      version: "1.0.0",
+      role: "coder",
+      riskTier: "medium",
+      capabilities: [
+        "code_generation",
+        "refactoring",
+        "code_review",
+        "bug_fixing",
+        "typescript",
+        "python",
+      ],
+      requiredTools: ["git", "file_read", "file_write"],
       modelPreference: {
-        provider: 'anthropic',
-        model: 'claude-sonnet-4-5-20250929',
+        provider: "anthropic",
+        model: "claude-sonnet-4-5-20250929",
         temperature: 0.2,
         maxTokens: 8192,
       },
@@ -75,22 +82,22 @@ export class CoderAgent extends BaseAgent {
     const { task, payload } = input;
     const startTime = Date.now();
 
-    services.logger.info('Coder task received', { taskId: task.id, action: payload.action });
+    services.logger.info("Coder task received", { taskId: task.id, action: payload.action });
 
     try {
       let result: CoderOutput;
 
       switch (payload.action) {
-        case 'generate':
+        case "generate":
           result = await this.generateCode(payload, services);
           break;
-        case 'refactor':
+        case "refactor":
           result = await this.refactorCode(payload, services);
           break;
-        case 'review':
+        case "review":
           result = await this.reviewCode(payload, services);
           break;
-        case 'fix_bug':
+        case "fix_bug":
           result = await this.fixBug(payload, services);
           break;
         default:
@@ -103,8 +110,8 @@ export class CoderAgent extends BaseAgent {
       });
     } catch (error) {
       return this.failure(task.id, {
-        code: 'CODER_ERROR',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        code: "CODER_ERROR",
+        message: error instanceof Error ? error.message : "Unknown error",
         recoverable: true,
       });
     }
@@ -114,7 +121,7 @@ export class CoderAgent extends BaseAgent {
     const prompt = `You are an expert software engineer. Generate code based on this specification.
 
 Specification: ${payload.specification}
-Language: ${payload.language ?? 'TypeScript'}
+Language: ${payload.language ?? "TypeScript"}
 
 Provide production-quality code with:
 - Clear comments
@@ -133,11 +140,13 @@ Return the code in a markdown code block.`;
 
   private async refactorCode(payload: CoderInput, services: AgentServices): Promise<CoderOutput> {
     // Read existing files if specified
-    let existingCode = '';
+    let existingCode = "";
     if (payload.targetFiles?.length) {
       for (const file of payload.targetFiles) {
         try {
-          const content = await services.tools.invoke<{ path: string }, string>('file_read', { path: file });
+          const content = await services.tools.invoke<{ path: string }, string>("file_read", {
+            path: file,
+          });
           existingCode += `\n// File: ${file}\n${content}`;
         } catch {
           services.logger.warn(`Could not read file: ${file}`);
@@ -148,7 +157,7 @@ Return the code in a markdown code block.`;
     const prompt = `Refactor this code according to the specification.
 
 Specification: ${payload.specification}
-${existingCode ? `\nExisting code:\n${existingCode}` : ''}
+${existingCode ? `\nExisting code:\n${existingCode}` : ""}
 
 Provide the refactored code with explanations.`;
 
@@ -158,7 +167,7 @@ Provide the refactored code with explanations.`;
       code: response.content,
       files: payload.targetFiles?.map((path) => ({
         path,
-        action: 'modify' as const,
+        action: "modify" as const,
       })),
     };
   }
@@ -167,10 +176,12 @@ Provide the refactored code with explanations.`;
     let codeToReview = payload.specification;
 
     if (payload.targetFiles?.length) {
-      codeToReview = '';
+      codeToReview = "";
       for (const file of payload.targetFiles) {
         try {
-          const content = await services.tools.invoke<{ path: string }, string>('file_read', { path: file });
+          const content = await services.tools.invoke<{ path: string }, string>("file_read", {
+            path: file,
+          });
           codeToReview += `\n// File: ${file}\n${content}`;
         } catch {
           services.logger.warn(`Could not read file: ${file}`);

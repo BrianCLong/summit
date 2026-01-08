@@ -1,10 +1,10 @@
-import { promises as dns } from 'dns';
-import fs from 'fs';
-import path from 'path';
-import { setTimeout as wait } from 'timers/promises';
+import { promises as dns } from "dns";
+import fs from "fs";
+import path from "path";
+import { setTimeout as wait } from "timers/promises";
 
-import { ContentBoundary } from './contentBoundary';
-import { PolicyDecision } from './policy';
+import { ContentBoundary } from "./contentBoundary";
+import { PolicyDecision } from "./policy";
 
 export interface ToolContext {
   labMode: boolean;
@@ -39,19 +39,19 @@ const withTimeout = async <T>(promise: Promise<T>, timeoutMs: number): Promise<T
 };
 
 export const httpHeadTool: ToolDefinition = {
-  name: 'http_head',
-  version: '0.1.0',
-  description: 'Performs a HEAD request (or GET fallback) to retrieve metadata only.',
+  name: "http_head",
+  version: "0.1.0",
+  description: "Performs a HEAD request (or GET fallback) to retrieve metadata only.",
   async execute(inputs, context) {
-    const target = String(inputs.url || '');
+    const target = String(inputs.url || "");
     if (!target) {
-      throw new Error('url is required');
+      throw new Error("url is required");
     }
 
     if (context.dryRun || !context.labMode) {
       return {
-        output: { url: target, status: 'dry-run', headers: {}, mock: true },
-        notes: 'Dry-run mode; no network call performed.',
+        output: { url: target, status: "dry-run", headers: {}, mock: true },
+        notes: "Dry-run mode; no network call performed.",
       };
     }
 
@@ -59,8 +59,10 @@ export const httpHeadTool: ToolDefinition = {
     const timeout = setTimeout(() => controller.abort(), context.timeoutMs);
     try {
       const res = await withTimeout(
-        fetch(target, { method: 'HEAD', signal: controller.signal }).catch(() => fetch(target, { method: 'GET', signal: controller.signal })),
-        context.timeoutMs,
+        fetch(target, { method: "HEAD", signal: controller.signal }).catch(() =>
+          fetch(target, { method: "GET", signal: controller.signal })
+        ),
+        context.timeoutMs
       );
       const headers: Record<string, string> = {};
       res.headers.forEach((value, key) => {
@@ -77,19 +79,19 @@ export const httpHeadTool: ToolDefinition = {
 };
 
 export const dnsLookupTool: ToolDefinition = {
-  name: 'dns_lookup',
-  version: '0.1.0',
-  description: 'Resolves DNS records (A/AAAA/CNAME) for an allowlisted domain.',
+  name: "dns_lookup",
+  version: "0.1.0",
+  description: "Resolves DNS records (A/AAAA/CNAME) for an allowlisted domain.",
   async execute(inputs, context) {
-    const domain = String(inputs.domain || '');
+    const domain = String(inputs.domain || "");
     if (!domain) {
-      throw new Error('domain is required');
+      throw new Error("domain is required");
     }
 
     if (context.dryRun || !context.labMode) {
       return {
-        output: { domain, records: [], status: 'dry-run', mock: true },
-        notes: 'Dry-run mode; resolver not invoked.',
+        output: { domain, records: [], status: "dry-run", mock: true },
+        notes: "Dry-run mode; resolver not invoked.",
       };
     }
 
@@ -99,22 +101,22 @@ export const dnsLookupTool: ToolDefinition = {
 };
 
 export const localGrepTool = (root: string): ToolDefinition => ({
-  name: 'local_grep',
-  version: '0.1.0',
-  description: 'Searches for a safe string within the local artifacts folder only.',
+  name: "local_grep",
+  version: "0.1.0",
+  description: "Searches for a safe string within the local artifacts folder only.",
   async execute(inputs) {
-    const needle = String(inputs.pattern || '');
+    const needle = String(inputs.pattern || "");
     if (!needle) {
-      throw new Error('pattern is required');
+      throw new Error("pattern is required");
     }
 
     const targetDir = path.resolve(root);
-    if (!targetDir.includes(path.resolve('artifacts'))) {
-      throw new Error('local_grep restricted to artifacts folder');
+    if (!targetDir.includes(path.resolve("artifacts"))) {
+      throw new Error("local_grep restricted to artifacts folder");
     }
 
     if (!fs.existsSync(targetDir)) {
-      return { output: { matches: [], note: 'No artifacts directory present.' } };
+      return { output: { matches: [], note: "No artifacts directory present." } };
     }
 
     const files = fs.readdirSync(targetDir);
@@ -124,7 +126,7 @@ export const localGrepTool = (root: string): ToolDefinition => ({
       const fullPath = path.join(targetDir, file);
       const stat = fs.statSync(fullPath);
       if (stat.isDirectory()) continue;
-      const content = fs.readFileSync(fullPath, 'utf-8');
+      const content = fs.readFileSync(fullPath, "utf-8");
       const count = content.split(needle).length - 1;
       if (count > 0) {
         matches.push({ file, count });
@@ -138,5 +140,5 @@ export const localGrepTool = (root: string): ToolDefinition => ({
 export const builtInTools = (artifactRoot: string): ToolDefinition[] => [
   httpHeadTool,
   dnsLookupTool,
-  localGrepTool(path.join(artifactRoot, 'raw')),
+  localGrepTool(path.join(artifactRoot, "raw")),
 ];

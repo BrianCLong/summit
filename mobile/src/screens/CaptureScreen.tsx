@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Button, Image, Alert, ActivityIndicator } from 'react-native';
-import { Camera, CameraType } from 'expo-camera';
-import * as FileSystem from 'expo-file-system';
-import * as Location from 'expo-location';
-import { useSync } from '../services/SyncProvider';
+import React, { useEffect, useRef, useState } from "react";
+import { View, Text, StyleSheet, Button, Image, Alert, ActivityIndicator } from "react-native";
+import { Camera, CameraType } from "expo-camera";
+import * as FileSystem from "expo-file-system";
+import * as Location from "expo-location";
+import { useSync } from "../services/SyncProvider";
 
 export default function CaptureScreen(): JSX.Element {
   const cameraRef = useRef<Camera | null>(null);
@@ -22,7 +22,9 @@ export default function CaptureScreen(): JSX.Element {
     if (!cameraRef.current) return;
     setProcessing(true);
     try {
-      const location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
       const snapshot = await cameraRef.current.takePictureAsync({ quality: 0.6, base64: true });
 
       // Use GPS timestamp if available, fallback to Date.now() only if necessary
@@ -34,21 +36,24 @@ export default function CaptureScreen(): JSX.Element {
       setPhotoUri(filename);
 
       await enqueue({
-        type: 'image',
+        type: "image",
         payload: filename,
         capturedAt: timestamp,
         location: {
           lat: location.coords.latitude,
           lng: location.coords.longitude,
           accuracy: location.coords.accuracy,
-          altitude: location.coords.altitude
+          altitude: location.coords.altitude,
         },
-        deviceIntegrity: true // Placeholder for integrity check
+        deviceIntegrity: true, // Placeholder for integrity check
       });
 
-      Alert.alert('Secure Capture', 'Intelligence tagged with GPS timestamp, encrypted and queued.');
+      Alert.alert(
+        "Secure Capture",
+        "Intelligence tagged with GPS timestamp, encrypted and queued."
+      );
     } catch (e) {
-      Alert.alert('Error', (e as Error).message);
+      Alert.alert("Error", (e as Error).message);
     } finally {
       setProcessing(false);
     }
@@ -69,7 +74,7 @@ export default function CaptureScreen(): JSX.Element {
       </View>
       <View style={styles.controls}>
         <Button
-          title={permission?.granted ? 'Capture Evidence' : 'Request Permissions'}
+          title={permission?.granted ? "Capture Evidence" : "Request Permissions"}
           onPress={handleCapture}
           disabled={processing}
         />
@@ -81,14 +86,27 @@ export default function CaptureScreen(): JSX.Element {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#0B1221' },
-  title: { color: 'white', fontSize: 20, fontWeight: '700', marginBottom: 4 },
-  subtitle: { color: '#9FB3D1', marginBottom: 12 },
-  cameraFrame: { flex: 1, borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderColor: '#1F2A44', marginBottom: 12, position: 'relative' },
+  container: { flex: 1, padding: 16, backgroundColor: "#0B1221" },
+  title: { color: "white", fontSize: 20, fontWeight: "700", marginBottom: 4 },
+  subtitle: { color: "#9FB3D1", marginBottom: 12 },
+  cameraFrame: {
+    flex: 1,
+    borderRadius: 12,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#1F2A44",
+    marginBottom: 12,
+    position: "relative",
+  },
   camera: { flex: 1 },
-  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center' },
-  overlayText: { color: 'white', marginTop: 8 },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  overlayText: { color: "white", marginTop: 8 },
   controls: { marginBottom: 8 },
   preview: { marginTop: 12, height: 100, borderRadius: 8 },
-  queue: { marginTop: 8, color: '#9FB3D1', textAlign: 'center' }
+  queue: { marginTop: 8, color: "#9FB3D1", textAlign: "center" },
 });

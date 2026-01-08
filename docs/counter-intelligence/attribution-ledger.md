@@ -10,7 +10,7 @@ This principle is embodied in the Attribution Ledger, which separates the act of
 
 ## Narrative Framing
 
-> *Defense does not require certainty. Escalation does.*
+> _Defense does not require certainty. Escalation does._
 
 This framing underscores the purpose of the ledger: to enable a measured, risk-based approach to counter-intelligence, where the intensity of the response is proportional to the confidence in the attribution.
 

@@ -3,30 +3,30 @@ name: Helm lint and validate
 on:
   pull_request:
     paths:
-      - 'helm/**'
-      - 'charts/**'
-      - 'infra/helm/**'
-      - 'deploy/helm/**'
-      - 'k8s/**'
-      - 'ops/**'
-      - 'services/**/helm/**'
-      - 'deepagent-mvp/helm/**'
-      - 'graph-xai/infra/helm/**'
-      - 'graph_xai/infra/helm/**'
-      - 'ga-graphai/infra/helm/**'
-      - 'prov-ledger/infra/helm/**'
-      - 'prov_ledger/infra/helm/**'
-      - 'templates/golden-path-platform/helm/**'
-      - 'v24_modules/**'
-      - 'sprint-kits/**'
-      - 'summit-company_extended/infra/helm/**'
-      - '.github/workflows/helm-lint-validate.yml'
-      - 'helm/ci-values.yaml'
-      - 'docs/helm-ci.md'
+      - "helm/**"
+      - "charts/**"
+      - "infra/helm/**"
+      - "deploy/helm/**"
+      - "k8s/**"
+      - "ops/**"
+      - "services/**/helm/**"
+      - "deepagent-mvp/helm/**"
+      - "graph-xai/infra/helm/**"
+      - "graph_xai/infra/helm/**"
+      - "ga-graphai/infra/helm/**"
+      - "prov-ledger/infra/helm/**"
+      - "prov_ledger/infra/helm/**"
+      - "templates/golden-path-platform/helm/**"
+      - "v24_modules/**"
+      - "sprint-kits/**"
+      - "summit-company_extended/infra/helm/**"
+      - ".github/workflows/helm-lint-validate.yml"
+      - "helm/ci-values.yaml"
+      - "docs/helm-ci.md"
   workflow_dispatch:
     inputs:
       run_kind_smoke:
-        description: 'Create a Kind cluster and install the redis chart as a smoke test'
+        description: "Create a Kind cluster and install the redis chart as a smoke test"
         required: false
         type: boolean
         default: false
@@ -36,7 +36,7 @@ permissions:
 
 env:
   HELM_VERSION: v3.14.4
-  KUBECONFORM_VERSION: '0.6.7'
+  KUBECONFORM_VERSION: "0.6.7"
   SAMPLE_VALUES_FILE: helm/ci-values.yaml
 
 jobs:

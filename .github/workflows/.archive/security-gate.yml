@@ -25,19 +25,19 @@ jobs:
       - name: Run Trivy filesystem scan
         uses: aquasecurity/trivy-action@0.24.0
         with:
-          scan-type: 'fs'
+          scan-type: "fs"
           ignore-unfixed: true
-          format: 'table'
-          severity: 'HIGH,CRITICAL'
-          exit-code: '1'
+          format: "table"
+          severity: "HIGH,CRITICAL"
+          exit-code: "1"
           timeout: 10m
 
       - name: Generate CycloneDX SBOM
         uses: aquasecurity/trivy-action@0.24.0
         with:
-          scan-type: 'fs'
-          format: 'cyclonedx'
-          output: 'sbom.cdx.json'
+          scan-type: "fs"
+          format: "cyclonedx"
+          output: "sbom.cdx.json"
 
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4

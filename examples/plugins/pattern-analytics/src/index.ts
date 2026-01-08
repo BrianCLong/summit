@@ -8,7 +8,7 @@ import {
   Entity,
   Relationship,
   PluginContext,
-} from '@intelgraph/plugin-system';
+} from "@intelgraph/plugin-system";
 
 /**
  * Pattern Detection Analytics Plugin
@@ -24,18 +24,18 @@ export default class PatternAnalyticsPlugin extends AnalyticsExtension {
 
   protected async onInitialize(context: PluginContext): Promise<void> {
     await super.onInitialize(context);
-    this.log.info('Pattern Analytics Plugin initialized');
+    this.log.info("Pattern Analytics Plugin initialized");
 
     // Load any configuration
     const config = context.config;
     if (config.cacheEnabled) {
-      this.log.info('Caching enabled for analytics results');
+      this.log.info("Caching enabled for analytics results");
     }
   }
 
   protected async onStart(): Promise<void> {
     await super.onStart();
-    this.log.info('Pattern Analytics Plugin started - ready to analyze');
+    this.log.info("Pattern Analytics Plugin started - ready to analyze");
   }
 
   protected async onStop(): Promise<void> {
@@ -53,7 +53,7 @@ export default class PatternAnalyticsPlugin extends AnalyticsExtension {
   async analyze(input: AnalyticsInput): Promise<AnalyticsResult> {
     const startTime = Date.now();
 
-    this.log.info('Starting pattern analysis', {
+    this.log.info("Starting pattern analysis", {
       hasQuery: !!input.query,
       hasData: !!input.data,
     });
@@ -62,7 +62,7 @@ export default class PatternAnalyticsPlugin extends AnalyticsExtension {
       // Check cache
       const cacheKey = this.getCacheKey(input);
       if (this.analysisCache.has(cacheKey)) {
-        this.log.debug('Returning cached result');
+        this.log.debug("Returning cached result");
         return this.analysisCache.get(cacheKey)!;
       }
 
@@ -101,7 +101,7 @@ export default class PatternAnalyticsPlugin extends AnalyticsExtension {
         metadata: {
           executionTimeMs: Date.now() - startTime,
           dataPointsAnalyzed: data.entities.length + data.relationships.length,
-          algorithm: 'pattern-detection-v1',
+          algorithm: "pattern-detection-v1",
           version: this.manifest.version,
         },
       };
@@ -109,7 +109,7 @@ export default class PatternAnalyticsPlugin extends AnalyticsExtension {
       // Cache result
       this.analysisCache.set(cacheKey, result);
 
-      this.log.info('Pattern analysis completed', {
+      this.log.info("Pattern analysis completed", {
         insightsCount: insights.length,
         executionTimeMs: result.metadata.executionTimeMs,
         confidence,
@@ -117,7 +117,7 @@ export default class PatternAnalyticsPlugin extends AnalyticsExtension {
 
       return result;
     } catch (error) {
-      this.log.error('Pattern analysis failed', error as Error);
+      this.log.error("Pattern analysis failed", error as Error);
       throw error;
     }
   }
@@ -127,15 +127,15 @@ export default class PatternAnalyticsPlugin extends AnalyticsExtension {
    */
   getMetadata(): AnalyticsMetadata {
     return {
-      name: 'Pattern Detection Analytics',
-      description: 'Analyzes graph patterns to detect suspicious relationships and entity clusters',
-      version: '1.0.0',
-      author: 'IntelGraph Team',
-      category: 'threat-intelligence',
-      tags: ['pattern-detection', 'graph-analysis', 'anomaly-detection'],
+      name: "Pattern Detection Analytics",
+      description: "Analyzes graph patterns to detect suspicious relationships and entity clusters",
+      version: "1.0.0",
+      author: "IntelGraph Team",
+      category: "threat-intelligence",
+      tags: ["pattern-detection", "graph-analysis", "anomaly-detection"],
       parameters: this.getParameters(),
-      supportedDataTypes: ['graph', 'entities', 'relationships'],
-      outputTypes: ['insights', 'clusters', 'metrics'],
+      supportedDataTypes: ["graph", "entities", "relationships"],
+      outputTypes: ["insights", "clusters", "metrics"],
     };
   }
 
@@ -145,25 +145,25 @@ export default class PatternAnalyticsPlugin extends AnalyticsExtension {
   private getParameters(): AnalyticsParameter[] {
     return [
       {
-        name: 'minClusterSize',
-        type: 'number',
-        description: 'Minimum size for cluster detection',
+        name: "minClusterSize",
+        type: "number",
+        description: "Minimum size for cluster detection",
         required: false,
         default: 3,
         validation: { min: 2, max: 100 },
       },
       {
-        name: 'anomalyThreshold',
-        type: 'number',
-        description: 'Threshold for anomaly detection (0-1)',
+        name: "anomalyThreshold",
+        type: "number",
+        description: "Threshold for anomaly detection (0-1)",
         required: false,
         default: 0.7,
         validation: { min: 0, max: 1 },
       },
       {
-        name: 'includeHiddenConnections',
-        type: 'boolean',
-        description: 'Include analysis of hidden connections',
+        name: "includeHiddenConnections",
+        type: "boolean",
+        description: "Include analysis of hidden connections",
         required: false,
         default: true,
       },
@@ -173,7 +173,9 @@ export default class PatternAnalyticsPlugin extends AnalyticsExtension {
   /**
    * Extract data from input
    */
-  private async extractData(input: AnalyticsInput): Promise<{ entities: Entity[]; relationships: Relationship[] }> {
+  private async extractData(
+    input: AnalyticsInput
+  ): Promise<{ entities: Entity[]; relationships: Relationship[] }> {
     if (input.data) {
       return {
         entities: input.data.entities || [],
@@ -184,7 +186,7 @@ export default class PatternAnalyticsPlugin extends AnalyticsExtension {
     if (input.query?.cypher) {
       // In a real implementation, this would execute the Cypher query
       // For now, return empty data
-      this.log.warn('Cypher query execution not implemented in example');
+      this.log.warn("Cypher query execution not implemented in example");
       return { entities: [], relationships: [] };
     }
 
@@ -215,13 +217,13 @@ export default class PatternAnalyticsPlugin extends AnalyticsExtension {
         visited.add(currentId);
 
         const connectedRels = relationships.filter(
-          r => r.source === currentId || r.target === currentId
+          (r) => r.source === currentId || r.target === currentId
         );
 
         for (const rel of connectedRels) {
           const otherId = rel.source === currentId ? rel.target : rel.source;
           if (!visited.has(otherId)) {
-            const otherEntity = entities.find(e => e.id === otherId);
+            const otherEntity = entities.find((e) => e.id === otherId);
             if (otherEntity) {
               cluster.entities.push(otherEntity);
               queue.push(otherId);
@@ -245,9 +247,9 @@ export default class PatternAnalyticsPlugin extends AnalyticsExtension {
   private calculateClusterDensity(entities: Entity[], relationships: Relationship[]): number {
     if (entities.length < 2) return 0;
 
-    const entityIds = new Set(entities.map(e => e.id));
+    const entityIds = new Set(entities.map((e) => e.id));
     const internalEdges = relationships.filter(
-      r => entityIds.has(r.source) && entityIds.has(r.target)
+      (r) => entityIds.has(r.source) && entityIds.has(r.target)
     );
 
     const maxPossibleEdges = (entities.length * (entities.length - 1)) / 2;
@@ -259,21 +261,21 @@ export default class PatternAnalyticsPlugin extends AnalyticsExtension {
    */
   private generateClusterInsights(clusters: EntityCluster[]): Insight[] {
     return clusters
-      .filter(c => c.density > 0.6) // High-density clusters
-      .map(cluster => ({
-        type: 'cluster',
+      .filter((c) => c.density > 0.6) // High-density clusters
+      .map((cluster) => ({
+        type: "cluster",
         title: `High-Density Entity Cluster Detected`,
         description: `Found cluster of ${cluster.entities.length} entities with ${(cluster.density * 100).toFixed(1)}% density`,
         confidence: cluster.density,
-        severity: cluster.density > 0.8 ? 'high' : 'medium',
+        severity: cluster.density > 0.8 ? "high" : "medium",
         data: {
           clusterId: cluster.id,
           size: cluster.entities.length,
           density: cluster.density,
         },
         recommendations: [
-          'Review entities in cluster for suspicious activity',
-          'Check temporal patterns of relationship formation',
+          "Review entities in cluster for suspicious activity",
+          "Check temporal patterns of relationship formation",
         ],
       }));
   }
@@ -286,23 +288,24 @@ export default class PatternAnalyticsPlugin extends AnalyticsExtension {
 
     // Detect entities with unusually high connection count
     const connectionCounts = new Map<string, number>();
-    relationships.forEach(r => {
+    relationships.forEach((r) => {
       connectionCounts.set(r.source, (connectionCounts.get(r.source) || 0) + 1);
       connectionCounts.set(r.target, (connectionCounts.get(r.target) || 0) + 1);
     });
 
-    const avgConnections = Array.from(connectionCounts.values()).reduce((a, b) => a + b, 0) / connectionCounts.size;
+    const avgConnections =
+      Array.from(connectionCounts.values()).reduce((a, b) => a + b, 0) / connectionCounts.size;
     const threshold = avgConnections * 3; // 3x average
 
     for (const [entityId, count] of connectionCounts) {
       if (count > threshold) {
-        const entity = entities.find(e => e.id === entityId);
+        const entity = entities.find((e) => e.id === entityId);
         insights.push({
-          type: 'anomaly',
-          title: 'Highly Connected Entity Detected',
+          type: "anomaly",
+          title: "Highly Connected Entity Detected",
           description: `Entity has ${count} connections (${(count / avgConnections).toFixed(1)}x average)`,
           confidence: Math.min(count / threshold, 1),
-          severity: count > threshold * 2 ? 'high' : 'medium',
+          severity: count > threshold * 2 ? "high" : "medium",
           data: {
             entityId,
             entityType: entity?.type,
@@ -310,8 +313,8 @@ export default class PatternAnalyticsPlugin extends AnalyticsExtension {
             averageConnections: avgConnections,
           },
           recommendations: [
-            'Investigate purpose of high connectivity',
-            'Check if entity is a hub or broker',
+            "Investigate purpose of high connectivity",
+            "Check if entity is a hub or broker",
           ],
         });
       }
@@ -323,12 +326,15 @@ export default class PatternAnalyticsPlugin extends AnalyticsExtension {
   /**
    * Calculate centrality metrics
    */
-  private calculateCentrality(entities: Entity[], relationships: Relationship[]): Map<string, CentralityMetrics> {
+  private calculateCentrality(
+    entities: Entity[],
+    relationships: Relationship[]
+  ): Map<string, CentralityMetrics> {
     const metrics = new Map<string, CentralityMetrics>();
 
     for (const entity of entities) {
-      const inDegree = relationships.filter(r => r.target === entity.id).length;
-      const outDegree = relationships.filter(r => r.source === entity.id).length;
+      const inDegree = relationships.filter((r) => r.target === entity.id).length;
+      const outDegree = relationships.filter((r) => r.source === entity.id).length;
       const totalDegree = inDegree + outDegree;
 
       metrics.set(entity.id, {
@@ -353,17 +359,17 @@ export default class PatternAnalyticsPlugin extends AnalyticsExtension {
 
     if (sortedByDegree.length > 0) {
       insights.push({
-        type: 'centrality',
-        title: 'Key Network Nodes Identified',
+        type: "centrality",
+        title: "Key Network Nodes Identified",
         description: `Identified ${sortedByDegree.length} highly central entities in the network`,
         confidence: 0.9,
-        severity: 'medium',
+        severity: "medium",
         data: {
           topNodes: sortedByDegree.map(([id, m]) => ({ id, degree: m.totalDegree })),
         },
         recommendations: [
-          'Monitor these entities as they are central to the network',
-          'Investigate their role and importance',
+          "Monitor these entities as they are central to the network",
+          "Investigate their role and importance",
         ],
       });
     }
@@ -379,28 +385,28 @@ export default class PatternAnalyticsPlugin extends AnalyticsExtension {
 
     // Example: Detect star pattern (one central node with many connections)
     const connectionCounts = new Map<string, number>();
-    relationships.forEach(r => {
+    relationships.forEach((r) => {
       connectionCounts.set(r.source, (connectionCounts.get(r.source) || 0) + 1);
     });
 
     for (const [entityId, count] of connectionCounts) {
       if (count >= 5) {
-        const entity = entities.find(e => e.id === entityId);
+        const entity = entities.find((e) => e.id === entityId);
         insights.push({
-          type: 'pattern',
-          title: 'Star Pattern Detected',
+          type: "pattern",
+          title: "Star Pattern Detected",
           description: `Entity acts as a central hub with ${count} outbound connections`,
           confidence: 0.85,
-          severity: count > 10 ? 'high' : 'medium',
+          severity: count > 10 ? "high" : "medium",
           data: {
             entityId,
             entityType: entity?.type,
-            pattern: 'star',
+            pattern: "star",
             connectionCount: count,
           },
           recommendations: [
-            'Verify if this hub pattern is expected',
-            'Check for potential command-and-control behavior',
+            "Verify if this hub pattern is expected",
+            "Check for potential command-and-control behavior",
           ],
         });
       }

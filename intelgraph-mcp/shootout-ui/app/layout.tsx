@@ -1,10 +1,9 @@
-import './globals.css';
-import type { ReactNode } from 'react';
+import "./globals.css";
+import type { ReactNode } from "react";
 
 export const metadata = {
-  title: 'IntelGraph MCP Shootout',
-  description:
-    'Benchmark scoreboard for IntelGraph Maestro Conductor vs competitors.',
+  title: "IntelGraph MCP Shootout",
+  description: "Benchmark scoreboard for IntelGraph Maestro Conductor vs competitors.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

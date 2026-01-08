@@ -6,7 +6,7 @@
 #   or
 #   docker-compose -f docker-compose.dev.yml -f docker-compose.logging.yml up
 
-version: '3.9'
+version: "3.9"
 
 services:
   # Elasticsearch - Log storage and search
@@ -40,10 +40,10 @@ services:
       - ./infra/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
       - ./logs:/logs:ro
     ports:
-      - "5044:5044"  # Beats input
-      - "5000:5000/tcp"  # TCP input
-      - "5000:5000/udp"  # UDP input
-      - "9600:9600"  # Logstash monitoring API
+      - "5044:5044" # Beats input
+      - "5000:5000/tcp" # TCP input
+      - "5000:5000/udp" # UDP input
+      - "9600:9600" # Logstash monitoring API
     environment:
       - "LS_JAVA_OPTS=-Xmx256m -Xms256m"
     networks:

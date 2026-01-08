@@ -1,6 +1,11 @@
-import { Task } from './types.js';
+import { Task } from "./types.js";
 
-export type MaestroEventType = 'TASK_CREATED' | 'TASK_STARTED' | 'TASK_COMPLETED' | 'TASK_FAILED' | 'TASK_BLOCKED';
+export type MaestroEventType =
+  | "TASK_CREATED"
+  | "TASK_STARTED"
+  | "TASK_COMPLETED"
+  | "TASK_FAILED"
+  | "TASK_BLOCKED";
 
 export interface MaestroEvent {
   type: MaestroEventType;

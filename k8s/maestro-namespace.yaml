@@ -5,7 +5,7 @@ metadata:
   labels:
     name: maestro-system
     app.kubernetes.io/name: maestro
-    app.kubernetes.io/version: '2.0.0-prod'
+    app.kubernetes.io/version: "2.0.0-prod"
     pod-security.kubernetes.io/enforce: restricted
     pod-security.kubernetes.io/audit: restricted
     pod-security.kubernetes.io/warn: restricted

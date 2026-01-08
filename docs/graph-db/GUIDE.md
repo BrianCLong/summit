@@ -32,7 +32,7 @@ The Graph Database platform consists of several integrated components:
    - Query optimization and planning
 
 3. **Graph Algorithms** (`@intelgraph/graph-algorithms`)
-   - Pathfinding (Dijkstra, A*, Bellman-Ford)
+   - Pathfinding (Dijkstra, A\*, Bellman-Ford)
    - Centrality measures (PageRank, Betweenness, Closeness)
    - Community detection (Louvain, Label Propagation)
    - Clustering and clique detection
@@ -87,38 +87,26 @@ pnpm -F @intelgraph/graph-db-service run dev
 #### Creating Nodes and Edges
 
 ```typescript
-import { GraphStorage } from '@intelgraph/graph-database';
+import { GraphStorage } from "@intelgraph/graph-database";
 
 const storage = new GraphStorage({
-  dataDir: './data/graph',
-  cacheSize: 1024 * 1024 * 100 // 100MB
+  dataDir: "./data/graph",
+  cacheSize: 1024 * 1024 * 100, // 100MB
 });
 
 // Create nodes
-const person1 = storage.createNode(
-  ['Person', 'Agent'],
-  { name: 'John Doe', role: 'analyst' }
-);
+const person1 = storage.createNode(["Person", "Agent"], { name: "John Doe", role: "analyst" });
 
-const person2 = storage.createNode(
-  ['Person'],
-  { name: 'Jane Smith', role: 'director' }
-);
+const person2 = storage.createNode(["Person"], { name: "Jane Smith", role: "director" });
 
 // Create relationship
-const edge = storage.createEdge(
-  person1.id,
-  person2.id,
-  'REPORTS_TO',
-  { since: '2024-01-01' },
-  1.0
-);
+const edge = storage.createEdge(person1.id, person2.id, "REPORTS_TO", { since: "2024-01-01" }, 1.0);
 ```
 
 #### Querying with Cypher
 
 ```typescript
-import { QueryEngine } from '@intelgraph/graph-query';
+import { QueryEngine } from "@intelgraph/graph-query";
 
 const queryEngine = new QueryEngine(storage);
 
@@ -142,8 +130,8 @@ const reports = queryEngine.executeCypher(`
 import {
   ShortestPathAlgorithms,
   CentralityMeasures,
-  CommunityDetection
-} from '@intelgraph/graph-algorithms';
+  CommunityDetection,
+} from "@intelgraph/graph-algorithms";
 
 // Shortest path
 const pathfinding = new ShortestPathAlgorithms(storage);
@@ -198,14 +186,14 @@ Support for temporal analysis:
 const temporalEdge = storage.createEdge(
   source.id,
   target.id,
-  'COMMUNICATED_WITH',
-  { message: 'Meeting scheduled' },
+  "COMMUNICATED_WITH",
+  { message: "Meeting scheduled" },
   1.0
 );
 
 // Add temporal validity
-temporalEdge.validFrom = Date.parse('2024-01-01');
-temporalEdge.validTo = Date.parse('2024-12-31');
+temporalEdge.validFrom = Date.parse("2024-01-01");
+temporalEdge.validTo = Date.parse("2024-12-31");
 ```
 
 ### Hypergraphs
@@ -214,11 +202,9 @@ Support for complex multi-node relationships:
 
 ```typescript
 // Create hyperedge connecting multiple nodes
-const hyperedge = storage.createHyperedge(
-  [node1.id, node2.id, node3.id],
-  'PARTICIPATED_IN',
-  { event: 'summit-2024' }
-);
+const hyperedge = storage.createHyperedge([node1.id, node2.id, node3.id], "PARTICIPATED_IN", {
+  event: "summit-2024",
+});
 ```
 
 ## API Reference
@@ -271,10 +257,10 @@ const hyperedge = storage.createHyperedge(
 
 ```typescript
 // Good: Specific, hierarchical labels
-storage.createNode(['Person', 'Employee', 'Analyst'], properties);
+storage.createNode(["Person", "Employee", "Analyst"], properties);
 
 // Avoid: Too generic
-storage.createNode(['Entity'], properties);
+storage.createNode(["Entity"], properties);
 ```
 
 ### 2. Property Indexing
@@ -298,10 +284,10 @@ Use clear, descriptive edge types:
 
 ```typescript
 // Good
-'REPORTS_TO', 'COMMUNICATED_WITH', 'LOCATED_IN'
+("REPORTS_TO", "COMMUNICATED_WITH", "LOCATED_IN");
 
 // Avoid
-'RELATED', 'CONNECTED', 'LINKED'
+("RELATED", "CONNECTED", "LINKED");
 ```
 
 ### 4. Temporal Data
@@ -309,10 +295,10 @@ Use clear, descriptive edge types:
 Always include temporal information for intelligence:
 
 ```typescript
-const edge = storage.createEdge(source.id, target.id, 'MET_WITH', {
-  location: 'Prague',
+const edge = storage.createEdge(source.id, target.id, "MET_WITH", {
+  location: "Prague",
   timestamp: Date.now(),
-  duration: 3600000 // 1 hour
+  duration: 3600000, // 1 hour
 });
 ```
 
@@ -338,7 +324,7 @@ Configure appropriate cache size:
 ```typescript
 const storage = new GraphStorage({
   cacheSize: 1024 * 1024 * 500, // 500MB for large graphs
-  enableCompression: true
+  enableCompression: true,
 });
 ```
 
@@ -349,7 +335,7 @@ Use query planning to optimize:
 ```typescript
 // Check execution plan
 const plan = queryEngine.explain(query);
-console.log('Estimated cost:', plan.estimatedCost);
+console.log("Estimated cost:", plan.estimatedCost);
 
 // Optimize by adding indexes or restructuring query
 ```
@@ -360,8 +346,8 @@ For very large graphs, use partitioning:
 
 ```typescript
 const storage = new GraphStorage({
-  partitionStrategy: 'hash', // or 'range', 'edge_cut'
-  replicationFactor: 2
+  partitionStrategy: "hash", // or 'range', 'edge_cut'
+  replicationFactor: 2,
 });
 ```
 
@@ -372,9 +358,9 @@ Tune algorithm parameters:
 ```typescript
 // PageRank with custom parameters
 const pageRank = centrality.pageRank(
-  0.85,  // damping factor
-  100,   // max iterations
-  1e-6   // tolerance
+  0.85, // damping factor
+  100, // max iterations
+  1e-6 // tolerance
 );
 
 // Community detection with resolution parameter
@@ -387,10 +373,10 @@ Monitor graph statistics:
 
 ```typescript
 const stats = storage.getStats();
-console.log('Nodes:', stats.nodeCount);
-console.log('Edges:', stats.edgeCount);
-console.log('Density:', stats.density);
-console.log('Avg Degree:', stats.avgDegree);
+console.log("Nodes:", stats.nodeCount);
+console.log("Edges:", stats.edgeCount);
+console.log("Density:", stats.density);
+console.log("Avg Degree:", stats.avgDegree);
 ```
 
 ## Intelligence Use Cases
@@ -418,9 +404,9 @@ const mining = new PatternMining(storage);
 const anomalies = mining.detectAnomalousRelationships(0.8);
 
 for (const anomaly of anomalies) {
-  console.log('Anomalous edge:', anomaly.edge.id);
-  console.log('Score:', anomaly.anomalyScore);
-  console.log('Reasons:', anomaly.reasons);
+  console.log("Anomalous edge:", anomaly.edge.id);
+  console.log("Score:", anomaly.anomalyScore);
+  console.log("Reasons:", anomaly.reasons);
 }
 ```
 
@@ -447,25 +433,25 @@ Track relationship evolution:
 const patterns = mining.temporalPatterns(86400000); // 1 day windows
 
 for (const pattern of patterns) {
-  console.log('Pattern:', pattern.pattern.id);
-  console.log('Frequency over time:', pattern.frequency);
+  console.log("Pattern:", pattern.pattern.id);
+  console.log("Frequency over time:", pattern.frequency);
 }
 ```
 
 ## Comparison with Other Graph Databases
 
-| Feature | Summit | Neo4j | TigerGraph |
-|---------|--------|-------|------------|
-| Native Graph Storage | ✓ | ✓ | ✓ |
-| Index-Free Adjacency | ✓ | ✓ | ✓ |
-| Cypher Support | ✓ | ✓ | ✗ |
-| Gremlin Support | ✓ | Plugin | ✓ |
-| Built-in Algorithms | ✓ | Limited | ✓ |
-| Link Prediction | ✓ | ✗ | ✗ |
-| Pattern Mining | ✓ | Limited | Limited |
-| Temporal Graphs | ✓ | Plugin | Limited |
-| Intelligence Focus | ✓ | ✗ | ✗ |
-| Distributed | Planned | ✓ | ✓ |
+| Feature              | Summit  | Neo4j   | TigerGraph |
+| -------------------- | ------- | ------- | ---------- |
+| Native Graph Storage | ✓       | ✓       | ✓          |
+| Index-Free Adjacency | ✓       | ✓       | ✓          |
+| Cypher Support       | ✓       | ✓       | ✗          |
+| Gremlin Support      | ✓       | Plugin  | ✓          |
+| Built-in Algorithms  | ✓       | Limited | ✓          |
+| Link Prediction      | ✓       | ✗       | ✗          |
+| Pattern Mining       | ✓       | Limited | Limited    |
+| Temporal Graphs      | ✓       | Plugin  | Limited    |
+| Intelligence Focus   | ✓       | ✗       | ✗          |
+| Distributed          | Planned | ✓       | ✓          |
 
 ## Next Steps
 
@@ -477,6 +463,7 @@ for (const pattern of patterns) {
 ## Support
 
 For questions and support:
+
 - Documentation: `/docs/graph-db`
 - Issues: GitHub Issues
 - Community: Slack channel

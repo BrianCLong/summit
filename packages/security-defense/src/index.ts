@@ -1,22 +1,22 @@
 #!/usr/bin/env node
-import { runAllChecks, summarizeResults } from './runner.js';
-import { RunnerOptions } from './types.js';
+import { runAllChecks, summarizeResults } from "./runner.js";
+import { RunnerOptions } from "./types.js";
 
 const parseArgs = (): RunnerOptions => {
   const args = process.argv.slice(2);
   const options: RunnerOptions = {};
   for (let i = 0; i < args.length; i += 1) {
     const arg = args[i];
-    if (arg === '--root') {
+    if (arg === "--root") {
       options.rootDir = args[i + 1];
       i += 1;
-    } else if (arg === '--sbom-baseline') {
+    } else if (arg === "--sbom-baseline") {
       options.sbomBaselinePath = args[i + 1];
       i += 1;
-    } else if (arg === '--sbom-target') {
+    } else if (arg === "--sbom-target") {
       options.sbomTargetPath = args[i + 1];
       i += 1;
-    } else if (arg === '--rotation-days') {
+    } else if (arg === "--rotation-days") {
       options.rotationThresholdDays = Number.parseInt(args[i + 1], 10);
       i += 1;
     }

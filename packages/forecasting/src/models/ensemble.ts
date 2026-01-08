@@ -2,10 +2,10 @@
  * Ensemble Forecasting Methods
  */
 
-import type { TimeSeriesData, ForecastResult, EnsembleConfig } from '../types/index.js';
-import { ARIMAForecaster } from '../core/arima.js';
-import { ExponentialSmoothingForecaster } from '../core/exponential-smoothing.js';
-import { ProphetForecaster } from '../core/prophet.js';
+import type { TimeSeriesData, ForecastResult, EnsembleConfig } from "../types/index.js";
+import { ARIMAForecaster } from "../core/arima.js";
+import { ExponentialSmoothingForecaster } from "../core/exponential-smoothing.js";
+import { ProphetForecaster } from "../core/prophet.js";
 
 export class EnsembleForecaster {
   private config: EnsembleConfig;
@@ -24,22 +24,23 @@ export class EnsembleForecaster {
    * Initialize individual models
    */
   private initializeModels(): void {
-    const weights = this.config.weights ||
-                   new Array(this.config.models.length).fill(1 / this.config.models.length);
+    const weights =
+      this.config.weights ||
+      new Array(this.config.models.length).fill(1 / this.config.models.length);
 
     for (let i = 0; i < this.config.models.length; i++) {
       const modelSpec = this.config.models[i];
       let forecaster: ARIMAForecaster | ExponentialSmoothingForecaster | ProphetForecaster;
 
       switch (modelSpec.type) {
-        case 'arima':
-        case 'sarima':
+        case "arima":
+        case "sarima":
           forecaster = new ARIMAForecaster(modelSpec.params as any);
           break;
-        case 'exponential':
+        case "exponential":
           forecaster = new ExponentialSmoothingForecaster(modelSpec.params as any);
           break;
-        case 'prophet':
+        case "prophet":
           forecaster = new ProphetForecaster(modelSpec.params as any);
           break;
         default:
@@ -68,18 +69,18 @@ export class EnsembleForecaster {
    */
   forecast(horizon: number, confidenceLevel: number = 0.95): ForecastResult[] {
     if (!this.fitted) {
-      throw new Error('Ensemble must be fitted before forecasting');
+      throw new Error("Ensemble must be fitted before forecasting");
     }
 
     // Get forecasts from all models
-    const allForecasts = this.models.map(model =>
+    const allForecasts = this.models.map((model) =>
       model.forecaster.forecast(horizon, confidenceLevel)
     );
 
     // Combine forecasts based on method
-    if (this.config.method === 'average') {
+    if (this.config.method === "average") {
       return this.averageForecasts(allForecasts);
-    } else if (this.config.method === 'weighted') {
+    } else if (this.config.method === "weighted") {
       return this.weightedForecasts(allForecasts);
     } else {
       // Stacking would require a meta-model
@@ -95,9 +96,9 @@ export class EnsembleForecaster {
     const results: ForecastResult[] = [];
 
     for (let i = 0; i < n; i++) {
-      const forecasts = allForecasts.map(f => f[i].forecast);
-      const lowerBounds = allForecasts.map(f => f[i].lowerBound);
-      const upperBounds = allForecasts.map(f => f[i].upperBound);
+      const forecasts = allForecasts.map((f) => f[i].forecast);
+      const lowerBounds = allForecasts.map((f) => f[i].lowerBound);
+      const upperBounds = allForecasts.map((f) => f[i].upperBound);
 
       results.push({
         timestamp: allForecasts[0][i].timestamp,
@@ -153,10 +154,7 @@ export class OptimalEnsemble {
   /**
    * Calculate optimal weights using inverse variance weighting
    */
-  static calculateOptimalWeights(
-    forecasts: ForecastResult[][],
-    actualValues: number[]
-  ): number[] {
+  static calculateOptimalWeights(forecasts: ForecastResult[][], actualValues: number[]): number[] {
     const n = forecasts.length;
     const variances: number[] = [];
 
@@ -170,8 +168,8 @@ export class OptimalEnsemble {
     }
 
     // Inverse variance weights
-    const inverseVars = variances.map(v => 1 / (v + 1e-10));
+    const inverseVars = variances.map((v) => 1 / (v + 1e-10));
     const sum = inverseVars.reduce((a, b) => a + b, 0);
-    return inverseVars.map(iv => iv / sum);
+    return inverseVars.map((iv) => iv / sum);
   }
 }

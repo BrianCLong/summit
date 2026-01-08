@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { randomUUID } from "node:crypto";
 import type {
   CandidateRequest,
   CandidateResponse,
@@ -13,10 +13,10 @@ import type {
   EntityRecord,
   ScoringConfig,
   MergeExportBundle,
-} from '../types.js';
-import { DEFAULT_SCORING_CONFIG } from '../types.js';
-import { buildFeatureContributions, createScorer } from '../scoring/scorer.js';
-import { ERStorage } from '../storage/storage.js';
+} from "../types.js";
+import { DEFAULT_SCORING_CONFIG } from "../types.js";
+import { buildFeatureContributions, createScorer } from "../scoring/scorer.js";
+import { ERStorage } from "../storage/storage.js";
 
 /**
  * Main Entity Resolution Engine
@@ -26,10 +26,7 @@ export class EREngine {
   private storage: ERStorage;
   private config: ScoringConfig;
 
-  constructor(
-    config: Partial<ScoringConfig> = {},
-    storage?: ERStorage,
-  ) {
+  constructor(config: Partial<ScoringConfig> = {}, storage?: ERStorage) {
     this.config = { ...DEFAULT_SCORING_CONFIG, ...config } as ScoringConfig;
     this.storage = storage || new ERStorage();
   }
@@ -43,7 +40,7 @@ export class EREngine {
 
     // Filter population to same tenant
     const population = request.population.filter(
-      candidate => candidate.tenantId === request.tenantId,
+      (candidate) => candidate.tenantId === request.tenantId
     );
 
     // Create scorer based on method
@@ -57,9 +54,9 @@ export class EREngine {
 
     // Score all candidates
     const scored = population
-      .filter(candidate => candidate.id !== request.entity.id)
-      .map(candidate => scorer.score(request.entity, candidate))
-      .filter(result => result.score >= scoringConfig.threshold)
+      .filter((candidate) => candidate.id !== request.entity.id)
+      .map((candidate) => scorer.score(request.entity, candidate))
+      .filter((result) => result.score >= scoringConfig.threshold)
       .sort((a, b) => b.score - a.score)
       .slice(0, request.topK || 5);
 
@@ -79,11 +76,11 @@ export class EREngine {
   merge(request: MergeRequest): MergeRecord {
     // Validate request
     if (request.entityIds.length < 2) {
-      throw new Error('At least 2 entity IDs required for merge');
+      throw new Error("At least 2 entity IDs required for merge");
     }
 
     // Ensure all entities belong to the same tenant
-    const entities = request.entityIds.map(id => {
+    const entities = request.entityIds.map((id) => {
       const entity = this.storage.getEntity(id);
       if (!entity) {
         throw new Error(`Entity ${id} not found`);
@@ -96,21 +93,19 @@ export class EREngine {
 
     // If no primary specified, use first entity
     const primaryId = request.primaryId || request.entityIds[0];
-    const primary = entities.find(e => e.id === primaryId);
+    const primary = entities.find((e) => e.id === primaryId);
     if (!primary) {
       throw new Error(`Primary entity ${primaryId} not found`);
     }
 
     // Calculate features between primary and each merged entity
     const scorer = createScorer(this.config);
-    const scores = entities
-      .filter(e => e.id !== primaryId)
-      .map(e => scorer.score(primary, e));
+    const scores = entities.filter((e) => e.id !== primaryId).map((e) => scorer.score(primary, e));
 
     // Use features from first comparison
     const features = scores[0]?.features;
     if (!features) {
-      throw new Error('Could not extract features for merge');
+      throw new Error("Could not extract features for merge");
     }
 
     // Store merge
@@ -119,7 +114,7 @@ export class EREngine {
       features,
       this.config.weights,
       this.config.threshold,
-      this.config.method,
+      this.config.method
     );
 
     return record;
@@ -138,7 +133,7 @@ export class EREngine {
   split(request: SplitRequest): SplitRecord {
     // Validate request
     if (request.splitGroups.length < 2) {
-      throw new Error('At least 2 split groups required');
+      throw new Error("At least 2 split groups required");
     }
 
     // Verify entity exists
@@ -196,10 +191,7 @@ export class EREngine {
     };
     const scorer = createScorer(scoringConfig);
     const result = scorer.score(request.entityA, request.entityB);
-    const featureContributions = buildFeatureContributions(
-      result.features,
-      scoringConfig.weights,
-    );
+    const featureContributions = buildFeatureContributions(result.features, scoringConfig.weights);
 
     return {
       score: result.score,
@@ -246,7 +238,7 @@ export class EREngine {
   getAuditLog(options?: {
     tenantId?: string;
     actor?: string;
-    event?: 'merge' | 'revert' | 'split';
+    event?: "merge" | "revert" | "split";
     limit?: number;
   }): AuditEntry[] {
     return this.storage.getAuditLog(options);

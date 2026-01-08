@@ -18,7 +18,7 @@ spec:
     - metadata:
         name: model-artifacts
       spec:
-        accessModes: ['ReadWriteOnce']
+        accessModes: ["ReadWriteOnce"]
         resources:
           requests:
             storage: 20Gi
@@ -33,31 +33,31 @@ spec:
 
           - name: data-validation
             template: validate-training-data
-            depends: 'drift-detection.Succeeded'
+            depends: "drift-detection.Succeeded"
 
           - name: feature-engineering
             template: feature-engineering
-            depends: 'data-validation.Succeeded'
+            depends: "data-validation.Succeeded"
 
           - name: parallel-model-training
             template: parallel-model-training
-            depends: 'feature-engineering.Succeeded'
+            depends: "feature-engineering.Succeeded"
 
           - name: model-evaluation
             template: evaluate-models
-            depends: 'parallel-model-training.Succeeded'
+            depends: "parallel-model-training.Succeeded"
 
           - name: champion-challenger
             template: champion-challenger-test
-            depends: 'model-evaluation.Succeeded'
+            depends: "model-evaluation.Succeeded"
 
           - name: model-deployment
             template: deploy-best-model
-            depends: 'champion-challenger.Succeeded'
+            depends: "champion-challenger.Succeeded"
 
           - name: performance-monitoring
             template: setup-monitoring
-            depends: 'model-deployment.Succeeded'
+            depends: "model-deployment.Succeeded"
 
     # Concept drift detection
     - name: concept-drift-detection
@@ -71,16 +71,16 @@ spec:
           - --metrics-endpoint=prometheus:9090
         env:
           - name: MLFLOW_TRACKING_URI
-            value: 'http://mlflow-server:5000'
+            value: "http://mlflow-server:5000"
           - name: FEATURE_STORE_URI
-            value: 'redis://redis-cluster:6379'
+            value: "redis://redis-cluster:6379"
         resources:
           requests:
-            memory: '2Gi'
-            cpu: '1'
+            memory: "2Gi"
+            cpu: "1"
           limits:
-            memory: '4Gi'
-            cpu: '2'
+            memory: "4Gi"
+            cpu: "2"
       outputs:
         parameters:
           - name: drift-detected
@@ -107,7 +107,7 @@ spec:
                 name: database-secrets
                 key: timescaledb-url
           - name: GREAT_EXPECTATIONS_CONFIG
-            value: '/config/data_validation.yaml'
+            value: "/config/data_validation.yaml"
         volumeMounts:
           - name: model-artifacts
             mountPath: /artifacts
@@ -132,22 +132,22 @@ spec:
           - --feature-config=/config/features.yaml
         env:
           - name: FEAST_REPO_PATH
-            value: '/config/feast'
+            value: "/config/feast"
         volumeMounts:
           - name: model-artifacts
             mountPath: /artifacts
         resources:
           requests:
-            memory: '4Gi'
-            cpu: '2'
+            memory: "4Gi"
+            cpu: "2"
           limits:
-            memory: '8Gi'
-            cpu: '4'
+            memory: "8Gi"
+            cpu: "4"
       inputs:
         artifacts:
           - name: dataset
             path: /artifacts/validated_dataset.parquet
-            from: '{{tasks.data-validation.outputs.artifacts.validated-dataset}}'
+            from: "{{tasks.data-validation.outputs.artifacts.validated-dataset}}"
       outputs:
         artifacts:
           - name: feature-store
@@ -167,31 +167,31 @@ spec:
           - --config=/config/training_config.yaml
         env:
           - name: CUDA_VISIBLE_DEVICES
-            value: '{{workflow.parameters.gpu-id}}'
+            value: "{{workflow.parameters.gpu-id}}"
           - name: MLFLOW_EXPERIMENT_NAME
-            value: 'threat-detection-retraining-{{workflow.creationTimestamp}}'
+            value: "threat-detection-retraining-{{workflow.creationTimestamp}}"
         volumeMounts:
           - name: model-artifacts
             mountPath: /artifacts
         resources:
           requests:
-            memory: '8Gi'
-            cpu: '4'
+            memory: "8Gi"
+            cpu: "4"
             nvidia.com/gpu: 1
           limits:
-            memory: '16Gi'
-            cpu: '8'
+            memory: "16Gi"
+            cpu: "8"
             nvidia.com/gpu: 1
       withItems:
-        - 'network-behavior'
-        - 'process-behavior'
-        - 'temporal-anomaly'
-        - 'graph-anomaly'
+        - "network-behavior"
+        - "process-behavior"
+        - "temporal-anomaly"
+        - "graph-anomaly"
       inputs:
         artifacts:
           - name: features
             path: /artifacts/feature_store
-            from: '{{tasks.feature-engineering.outputs.artifacts.feature-store}}'
+            from: "{{tasks.feature-engineering.outputs.artifacts.feature-store}}"
       outputs:
         artifacts:
           - name: trained-model
@@ -209,17 +209,17 @@ spec:
           - --metrics-output=/artifacts/evaluation_results.json
         env:
           - name: MLFLOW_TRACKING_URI
-            value: 'http://mlflow-server:5000'
+            value: "http://mlflow-server:5000"
         volumeMounts:
           - name: model-artifacts
             mountPath: /artifacts
         resources:
           requests:
-            memory: '4Gi'
-            cpu: '2'
+            memory: "4Gi"
+            cpu: "2"
           limits:
-            memory: '8Gi'
-            cpu: '4'
+            memory: "8Gi"
+            cpu: "4"
       outputs:
         parameters:
           - name: best-model
@@ -246,16 +246,16 @@ spec:
           - --success-threshold=0.05
         env:
           - name: KUBERNETES_NAMESPACE
-            value: 'intelgraph-ml'
+            value: "intelgraph-ml"
           - name: ISTIO_GATEWAY
-            value: 'intelgraph-gateway'
+            value: "intelgraph-gateway"
         volumeMounts:
           - name: model-artifacts
             mountPath: /artifacts
         resources:
           requests:
-            memory: '2Gi'
-            cpu: '1'
+            memory: "2Gi"
+            cpu: "1"
       outputs:
         parameters:
           - name: challenger-wins
@@ -278,18 +278,18 @@ spec:
           - --traffic-split=5
         env:
           - name: KUBERNETES_NAMESPACE
-            value: 'intelgraph'
+            value: "intelgraph"
           - name: MODEL_REGISTRY_URL
-            value: 'http://mlflow-server:5000'
+            value: "http://mlflow-server:5000"
           - name: SELDON_CORE_ENABLED
-            value: 'true'
+            value: "true"
         volumeMounts:
           - name: model-artifacts
             mountPath: /artifacts
         resources:
           requests:
-            memory: '1Gi'
-            cpu: '0.5'
+            memory: "1Gi"
+            cpu: "0.5"
       outputs:
         parameters:
           - name: deployment-id
@@ -311,15 +311,15 @@ spec:
           - --monitoring-config=/config/monitoring.yaml
         env:
           - name: PROMETHEUS_URL
-            value: 'http://prometheus:9090'
+            value: "http://prometheus:9090"
           - name: GRAFANA_URL
-            value: 'http://grafana:3000'
+            value: "http://grafana:3000"
           - name: ALERT_MANAGER_URL
-            value: 'http://alertmanager:9093'
+            value: "http://alertmanager:9093"
         resources:
           requests:
-            memory: '512Mi'
-            cpu: '0.25'
+            memory: "512Mi"
+            cpu: "0.25"
 
 ---
 # Scheduled workflow for regular retraining
@@ -329,8 +329,8 @@ metadata:
   name: scheduled-threat-model-retraining
   namespace: intelgraph-ml
 spec:
-  schedule: '0 2 * * 0' # Weekly on Sunday at 2 AM
-  timezone: 'America/New_York'
+  schedule: "0 2 * * 0" # Weekly on Sunday at 2 AM
+  timezone: "America/New_York"
   workflowSpec:
     entrypoint: retraining-pipeline
     workflowTemplateRef:
@@ -338,9 +338,9 @@ spec:
     arguments:
       parameters:
         - name: current-model
-          value: 'threat-detection-v1.0.0'
+          value: "threat-detection-v1.0.0"
         - name: gpu-id
-          value: '0'
+          value: "0"
 
 ---
 # Feature store configuration

@@ -75,9 +75,9 @@ name: migration-gate
 on:
   pull_request:
     paths:
-      - 'db/migrations/**'
-      - 'docs/migrations/**'
-      - '.ci/policies/**'
+      - "db/migrations/**"
+      - "docs/migrations/**"
+      - ".ci/policies/**"
 permissions: { contents: read }
 jobs:
   verify:

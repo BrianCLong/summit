@@ -2,7 +2,7 @@
  * Exponential Smoothing Methods (Holt-Winters)
  */
 
-import type { TimeSeriesData, ForecastResult, ExponentialSmoothingParams } from '../types/index.js';
+import type { TimeSeriesData, ForecastResult, ExponentialSmoothingParams } from "../types/index.js";
 
 export class ExponentialSmoothingForecaster {
   private params: ExponentialSmoothingParams;
@@ -17,8 +17,8 @@ export class ExponentialSmoothingForecaster {
       beta: params.beta || 0.1,
       gamma: params.gamma || 0.1,
       seasonalPeriods: params.seasonalPeriods || 12,
-      trendType: params.trendType || 'additive',
-      seasonalType: params.seasonalType || 'additive',
+      trendType: params.trendType || "additive",
+      seasonalType: params.seasonalType || "additive",
       dampedTrend: params.dampedTrend || false,
     };
   }
@@ -27,7 +27,7 @@ export class ExponentialSmoothingForecaster {
    * Fit the exponential smoothing model
    */
   fit(data: TimeSeriesData[]): void {
-    const values = data.map(d => d.value);
+    const values = data.map((d) => d.value);
     const n = values.length;
 
     // Initialize components
@@ -46,7 +46,7 @@ export class ExponentialSmoothingForecaster {
    */
   forecast(horizon: number, confidenceLevel: number = 0.95): ForecastResult[] {
     if (!this.fitted) {
-      throw new Error('Model must be fitted before forecasting');
+      throw new Error("Model must be fitted before forecasting");
     }
 
     const results: ForecastResult[] = [];
@@ -79,7 +79,7 @@ export class ExponentialSmoothingForecaster {
     this.level = values.slice(0, s).reduce((a, b) => a + b, 0) / s;
 
     // Initialize trend
-    if (this.params.trendType !== 'none') {
+    if (this.params.trendType !== "none") {
       let trendSum = 0;
       for (let i = 0; i < s && i + s < values.length; i++) {
         trendSum += (values[i + s] - values[i]) / s;
@@ -88,13 +88,13 @@ export class ExponentialSmoothingForecaster {
     }
 
     // Initialize seasonal components
-    if (this.params.seasonalType !== 'none') {
+    if (this.params.seasonalType !== "none") {
       this.seasonal = new Array(s).fill(0);
       for (let i = 0; i < s; i++) {
         let seasonalSum = 0;
         let count = 0;
         for (let j = i; j < values.length; j += s) {
-          if (this.params.seasonalType === 'additive') {
+          if (this.params.seasonalType === "additive") {
             seasonalSum += values[j] - this.level;
           } else {
             seasonalSum += values[j] / this.level;
@@ -105,12 +105,12 @@ export class ExponentialSmoothingForecaster {
       }
 
       // Normalize seasonal components
-      if (this.params.seasonalType === 'additive') {
+      if (this.params.seasonalType === "additive") {
         const seasonalMean = this.seasonal.reduce((a, b) => a + b, 0) / s;
-        this.seasonal = this.seasonal.map(s => s - seasonalMean);
+        this.seasonal = this.seasonal.map((s) => s - seasonalMean);
       } else {
         const seasonalMean = this.seasonal.reduce((a, b) => a + b, 0) / s;
-        this.seasonal = this.seasonal.map(s => s / seasonalMean);
+        this.seasonal = this.seasonal.map((s) => s / seasonalMean);
       }
     }
   }
@@ -129,35 +129,35 @@ export class ExponentialSmoothingForecaster {
     const prevTrend = this.trend;
 
     // Update level
-    if (this.params.seasonalType === 'additive') {
-      this.level = alpha * (values[t] - this.seasonal[seasonalIdx]) +
-                   (1 - alpha) * (prevLevel + prevTrend);
-    } else if (this.params.seasonalType === 'multiplicative') {
-      this.level = alpha * (values[t] / this.seasonal[seasonalIdx]) +
-                   (1 - alpha) * (prevLevel + prevTrend);
+    if (this.params.seasonalType === "additive") {
+      this.level =
+        alpha * (values[t] - this.seasonal[seasonalIdx]) + (1 - alpha) * (prevLevel + prevTrend);
+    } else if (this.params.seasonalType === "multiplicative") {
+      this.level =
+        alpha * (values[t] / this.seasonal[seasonalIdx]) + (1 - alpha) * (prevLevel + prevTrend);
     } else {
       this.level = alpha * values[t] + (1 - alpha) * (prevLevel + prevTrend);
     }
 
     // Update trend
-    if (this.params.trendType === 'additive') {
+    if (this.params.trendType === "additive") {
       this.trend = beta * (this.level - prevLevel) + (1 - beta) * prevTrend;
-    } else if (this.params.trendType === 'multiplicative') {
+    } else if (this.params.trendType === "multiplicative") {
       this.trend = beta * (this.level / prevLevel) + (1 - beta) * prevTrend;
     }
 
     // Apply damping if enabled
-    if (this.params.dampedTrend && this.params.trendType !== 'none') {
+    if (this.params.dampedTrend && this.params.trendType !== "none") {
       this.trend *= 0.98; // Damping factor
     }
 
     // Update seasonal component
-    if (this.params.seasonalType === 'additive') {
-      this.seasonal[seasonalIdx] = gamma * (values[t] - this.level) +
-                                   (1 - gamma) * this.seasonal[seasonalIdx];
-    } else if (this.params.seasonalType === 'multiplicative') {
-      this.seasonal[seasonalIdx] = gamma * (values[t] / this.level) +
-                                   (1 - gamma) * this.seasonal[seasonalIdx];
+    if (this.params.seasonalType === "additive") {
+      this.seasonal[seasonalIdx] =
+        gamma * (values[t] - this.level) + (1 - gamma) * this.seasonal[seasonalIdx];
+    } else if (this.params.seasonalType === "multiplicative") {
+      this.seasonal[seasonalIdx] =
+        gamma * (values[t] / this.level) + (1 - gamma) * this.seasonal[seasonalIdx];
     }
   }
 
@@ -171,16 +171,16 @@ export class ExponentialSmoothingForecaster {
     let forecast = this.level;
 
     // Add trend component
-    if (this.params.trendType === 'additive') {
+    if (this.params.trendType === "additive") {
       forecast += h * this.trend;
-    } else if (this.params.trendType === 'multiplicative') {
+    } else if (this.params.trendType === "multiplicative") {
       forecast *= Math.pow(this.trend, h);
     }
 
     // Add seasonal component
-    if (this.params.seasonalType === 'additive') {
+    if (this.params.seasonalType === "additive") {
       forecast += this.seasonal[seasonalIdx];
-    } else if (this.params.seasonalType === 'multiplicative') {
+    } else if (this.params.seasonalType === "multiplicative") {
       forecast *= this.seasonal[seasonalIdx];
     }
 
@@ -200,7 +200,7 @@ export class ExponentialSmoothingForecaster {
    */
   private getZScore(confidenceLevel: number): number {
     const zScores: Record<number, number> = {
-      0.90: 1.645,
+      0.9: 1.645,
       0.95: 1.96,
       0.99: 2.576,
     };
@@ -220,7 +220,7 @@ export class SimpleExponentialSmoothing {
   }
 
   fit(data: TimeSeriesData[]): void {
-    const values = data.map(d => d.value);
+    const values = data.map((d) => d.value);
     this.level = values[0];
 
     for (let t = 1; t < values.length; t++) {

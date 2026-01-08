@@ -6,7 +6,7 @@
  * Reviews actions and outputs for compliance before execution.
  */
 
-import { BaseAgent, type AgentServices } from '../Agent.js';
+import { BaseAgent, type AgentServices } from "../Agent.js";
 import type {
   AgentDescriptor,
   TaskInput,
@@ -14,10 +14,10 @@ import type {
   PolicyAction,
   PolicyDecision,
   RedactionSpec,
-} from '../types.js';
+} from "../types.js";
 
 interface PolicyGuardianInput {
-  action: 'evaluate' | 'audit' | 'explain';
+  action: "evaluate" | "audit" | "explain";
   content: unknown;
   contentType: string;
   policies?: string[];
@@ -36,7 +36,7 @@ interface PolicyGuardianOutput {
 interface PolicyViolation {
   policyId: string;
   policyName: string;
-  severity: 'critical' | 'high' | 'medium' | 'low';
+  severity: "critical" | "high" | "medium" | "low";
   description: string;
   path?: string;
 }
@@ -48,10 +48,10 @@ export class PolicyGuardianAgent extends BaseAgent {
   // Built-in policy rules (would be loaded from config in production)
   private readonly policies: PolicyRule[] = [
     {
-      id: 'SEC-001',
-      name: 'No Secrets in Output',
-      description: 'Outputs must not contain secrets, API keys, or credentials',
-      severity: 'critical',
+      id: "SEC-001",
+      name: "No Secrets in Output",
+      description: "Outputs must not contain secrets, API keys, or credentials",
+      severity: "critical",
       check: (content: string) => {
         const patterns = [
           /api[_-]?key/i,
@@ -64,10 +64,10 @@ export class PolicyGuardianAgent extends BaseAgent {
       },
     },
     {
-      id: 'SEC-002',
-      name: 'No PII Exposure',
-      description: 'Outputs must not expose personally identifiable information',
-      severity: 'high',
+      id: "SEC-002",
+      name: "No PII Exposure",
+      description: "Outputs must not expose personally identifiable information",
+      severity: "high",
       check: (content: string) => {
         const patterns = [
           /\b\d{3}-\d{2}-\d{4}\b/, // SSN
@@ -78,17 +78,17 @@ export class PolicyGuardianAgent extends BaseAgent {
       },
     },
     {
-      id: 'SAFE-001',
-      name: 'No Harmful Instructions',
-      description: 'Outputs must not contain instructions for harmful activities',
-      severity: 'critical',
+      id: "SAFE-001",
+      name: "No Harmful Instructions",
+      description: "Outputs must not contain instructions for harmful activities",
+      severity: "critical",
       check: (_content: string) => true, // Would use content classifier
     },
     {
-      id: 'CODE-001',
-      name: 'No Unsafe Code Patterns',
-      description: 'Code outputs must not contain known vulnerable patterns',
-      severity: 'high',
+      id: "CODE-001",
+      name: "No Unsafe Code Patterns",
+      description: "Code outputs must not contain known vulnerable patterns",
+      severity: "high",
       check: (content: string) => {
         const patterns = [
           /eval\s*\(/,
@@ -102,17 +102,17 @@ export class PolicyGuardianAgent extends BaseAgent {
     },
   ];
 
-  getDescriptor(): Omit<AgentDescriptor, 'id' | 'status' | 'registeredAt' | 'lastHeartbeat'> {
+  getDescriptor(): Omit<AgentDescriptor, "id" | "status" | "registeredAt" | "lastHeartbeat"> {
     return {
-      name: 'policy-guardian-agent',
-      version: '1.0.0',
-      role: 'policy_guardian',
-      riskTier: 'low',
-      capabilities: ['policy_evaluation', 'compliance_audit', 'policy_explanation'],
+      name: "policy-guardian-agent",
+      version: "1.0.0",
+      role: "policy_guardian",
+      riskTier: "low",
+      capabilities: ["policy_evaluation", "compliance_audit", "policy_explanation"],
       requiredTools: [],
       modelPreference: {
-        provider: 'anthropic',
-        model: 'claude-sonnet-4-5-20250929',
+        provider: "anthropic",
+        model: "claude-sonnet-4-5-20250929",
         temperature: 0.0, // Deterministic for policy decisions
         maxTokens: 2048,
       },
@@ -127,23 +127,23 @@ export class PolicyGuardianAgent extends BaseAgent {
     const { task, payload } = input;
     const startTime = Date.now();
 
-    services.logger.info('Policy evaluation started', { taskId: task.id, action: payload.action });
+    services.logger.info("Policy evaluation started", { taskId: task.id, action: payload.action });
 
     try {
       switch (payload.action) {
-        case 'evaluate':
+        case "evaluate":
           return await this.evaluate(task.id, payload, services, startTime);
-        case 'audit':
+        case "audit":
           return await this.audit(task.id, payload, services, startTime);
-        case 'explain':
+        case "explain":
           return await this.explain(task.id, payload, services, startTime);
         default:
           throw new Error(`Unknown action: ${payload.action}`);
       }
     } catch (error) {
       return this.failure(task.id, {
-        code: 'POLICY_ERROR',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        code: "POLICY_ERROR",
+        message: error instanceof Error ? error.message : "Unknown error",
         recoverable: false, // Policy errors should not be retried
       });
     }
@@ -155,9 +155,8 @@ export class PolicyGuardianAgent extends BaseAgent {
     services: AgentServices,
     startTime: number
   ): Promise<TaskOutput<PolicyGuardianOutput>> {
-    const contentStr = typeof payload.content === 'string'
-      ? payload.content
-      : JSON.stringify(payload.content);
+    const contentStr =
+      typeof payload.content === "string" ? payload.content : JSON.stringify(payload.content);
 
     const violations: PolicyViolation[] = [];
     const applicablePolicies = payload.policies
@@ -181,43 +180,46 @@ export class PolicyGuardianAgent extends BaseAgent {
     violations.push(...modelViolations);
 
     // Determine decision
-    const criticalViolations = violations.filter((v) => v.severity === 'critical');
-    const highViolations = violations.filter((v) => v.severity === 'high');
+    const criticalViolations = violations.filter((v) => v.severity === "critical");
+    const highViolations = violations.filter((v) => v.severity === "high");
 
     let decision: PolicyAction;
     let reason: string;
     let redactions: RedactionSpec[] | undefined;
 
     if (criticalViolations.length > 0) {
-      decision = 'deny';
+      decision = "deny";
       reason = `Critical policy violation: ${criticalViolations[0].policyName}`;
     } else if (highViolations.length > 0) {
-      decision = 'allow_with_redactions';
+      decision = "allow_with_redactions";
       reason = `High severity violations require redaction`;
       redactions = this.generateRedactions(violations, contentStr);
     } else if (violations.length > 0) {
-      decision = 'allow';
+      decision = "allow";
       reason = `Minor violations noted but allowed`;
     } else {
-      decision = 'allow';
-      reason = 'No policy violations detected';
+      decision = "allow";
+      reason = "No policy violations detected";
     }
 
-    const suggestions = violations.length > 0
-      ? violations.map((v) => `Address ${v.policyId}: ${v.description}`)
-      : [];
+    const suggestions =
+      violations.length > 0 ? violations.map((v) => `Address ${v.policyId}: ${v.description}`) : [];
 
-    return this.success(taskId, {
-      decision,
-      reason,
-      violations,
-      redactions,
-      suggestions,
-      policyIds: applicablePolicies.map((p) => p.id),
-    }, {
-      latencyMs: Date.now() - startTime,
-      modelCallCount: 1,
-    });
+    return this.success(
+      taskId,
+      {
+        decision,
+        reason,
+        violations,
+        redactions,
+        suggestions,
+        policyIds: applicablePolicies.map((p) => p.id),
+      },
+      {
+        latencyMs: Date.now() - startTime,
+        modelCallCount: 1,
+      }
+    );
   }
 
   private async modelBasedEvaluation(
@@ -227,7 +229,7 @@ export class PolicyGuardianAgent extends BaseAgent {
     const prompt = `Evaluate this ${payload.contentType} for policy compliance.
 
 Content:
-${typeof payload.content === 'string' ? payload.content : JSON.stringify(payload.content, null, 2)}
+${typeof payload.content === "string" ? payload.content : JSON.stringify(payload.content, null, 2)}
 
 Check for:
 1. Security issues (secrets, credentials, injection vulnerabilities)
@@ -245,12 +247,14 @@ If no violations: { "violations": [] }`;
 
     if (jsonMatch) {
       const result = JSON.parse(jsonMatch[0]);
-      return (result.violations ?? []).map((v: { severity: string; description: string }, i: number) => ({
-        policyId: `MODEL-${i + 1}`,
-        policyName: 'Model-detected violation',
-        severity: v.severity as PolicyViolation['severity'],
-        description: v.description,
-      }));
+      return (result.violations ?? []).map(
+        (v: { severity: string; description: string }, i: number) => ({
+          policyId: `MODEL-${i + 1}`,
+          policyName: "Model-detected violation",
+          severity: v.severity as PolicyViolation["severity"],
+          description: v.description,
+        })
+      );
     }
 
     return [];
@@ -259,10 +263,10 @@ If no violations: { "violations": [] }`;
   private generateRedactions(violations: PolicyViolation[], _content: string): RedactionSpec[] {
     // Simplified - would do actual path detection in production
     return violations
-      .filter((v) => v.severity === 'high' || v.severity === 'critical')
+      .filter((v) => v.severity === "high" || v.severity === "critical")
       .map((v) => ({
-        path: v.path ?? '$',
-        strategy: 'mask' as const,
+        path: v.path ?? "$",
+        strategy: "mask" as const,
       }));
   }
 
@@ -275,7 +279,7 @@ If no violations: { "violations": [] }`;
     // Audit mode: comprehensive review without blocking
     const evalResult = await this.evaluate(taskId, payload, services, startTime);
     if (evalResult.result) {
-      evalResult.result.decision = 'allow'; // Audit doesn't block
+      evalResult.result.decision = "allow"; // Audit doesn't block
     }
     return evalResult;
   }
@@ -291,22 +295,26 @@ If no violations: { "violations": [] }`;
 
     const prompt = `Explain these policies in plain language:
 
-${policies.map((p) => `${p.id} - ${p.name}: ${p.description}`).join('\n')}
+${policies.map((p) => `${p.id} - ${p.name}: ${p.description}`).join("\n")}
 
 Provide a clear explanation suitable for developers.`;
 
     const response = await services.model.complete(prompt);
 
-    return this.success(taskId, {
-      decision: 'allow',
-      reason: response.content,
-      violations: [],
-      suggestions: [],
-      policyIds,
-    }, {
-      latencyMs: Date.now() - startTime,
-      modelCallCount: 1,
-    });
+    return this.success(
+      taskId,
+      {
+        decision: "allow",
+        reason: response.content,
+        violations: [],
+        suggestions: [],
+        policyIds,
+      },
+      {
+        latencyMs: Date.now() - startTime,
+        modelCallCount: 1,
+      }
+    );
   }
 }
 
@@ -314,6 +322,6 @@ interface PolicyRule {
   id: string;
   name: string;
   description: string;
-  severity: 'critical' | 'high' | 'medium' | 'low';
+  severity: "critical" | "high" | "medium" | "low";
   check: (content: string) => boolean;
 }

@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { DataPoint, DataFilter, Dimension } from './types';
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { DataPoint, DataFilter, Dimension } from "./types";
 
 // Hook for managing visualization dimensions with responsive resize
 export function useVisualizationDimensions(
@@ -10,7 +10,9 @@ export function useVisualizationDimensions(
   const [dimensions, setDimensions] = useState<Dimension>({ width: 0, height: 0 });
 
   useEffect(() => {
-    if (!containerRef.current) {return;}
+    if (!containerRef.current) {
+      return;
+    }
 
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
@@ -52,27 +54,27 @@ export function useDataFilter<T extends DataPoint>(
           const value = item[filter.field];
 
           switch (filter.operator) {
-            case 'eq':
+            case "eq":
               return value === filter.value;
-            case 'ne':
+            case "ne":
               return value !== filter.value;
-            case 'gt':
+            case "gt":
               return value > filter.value;
-            case 'gte':
+            case "gte":
               return value >= filter.value;
-            case 'lt':
+            case "lt":
               return value < filter.value;
-            case 'lte':
+            case "lte":
               return value <= filter.value;
-            case 'in':
+            case "in":
               return Array.isArray(filter.value) && filter.value.includes(value);
-            case 'nin':
+            case "nin":
               return Array.isArray(filter.value) && !filter.value.includes(value);
-            case 'contains':
+            case "contains":
               return String(value).includes(String(filter.value));
-            case 'startsWith':
+            case "startsWith":
               return String(value).startsWith(String(filter.value));
-            case 'endsWith':
+            case "endsWith":
               return String(value).endsWith(String(filter.value));
             default:
               return true;
@@ -121,9 +123,7 @@ export function useSelection<T extends DataPoint>(
 
   const deselect = useCallback((items: T | T[]) => {
     const itemsArray = Array.isArray(items) ? items : [items];
-    setSelection((prev) =>
-      prev.filter((item) => !itemsArray.find((i) => i.id === item.id))
-    );
+    setSelection((prev) => prev.filter((item) => !itemsArray.find((i) => i.id === item.id)));
   }, []);
 
   const toggle = useCallback((item: T) => {
@@ -205,7 +205,7 @@ export function useDataAggregation<T extends DataPoint>(
   data: T[],
   groupBy: keyof T,
   aggregateField: keyof T,
-  operation: 'count' | 'sum' | 'avg' | 'min' | 'max' = 'count'
+  operation: "count" | "sum" | "avg" | "min" | "max" = "count"
 ): Record<string, number> {
   return useMemo(() => {
     const groups: Record<string, T[]> = {};
@@ -223,20 +223,20 @@ export function useDataAggregation<T extends DataPoint>(
     const result: Record<string, number> = {};
     Object.entries(groups).forEach(([key, items]) => {
       switch (operation) {
-        case 'count':
+        case "count":
           result[key] = items.length;
           break;
-        case 'sum':
+        case "sum":
           result[key] = items.reduce((sum, item) => sum + Number(item[aggregateField]), 0);
           break;
-        case 'avg':
+        case "avg":
           result[key] =
             items.reduce((sum, item) => sum + Number(item[aggregateField]), 0) / items.length;
           break;
-        case 'min':
+        case "min":
           result[key] = Math.min(...items.map((item) => Number(item[aggregateField])));
           break;
-        case 'max':
+        case "max":
           result[key] = Math.max(...items.map((item) => Number(item[aggregateField])));
           break;
       }
@@ -296,7 +296,7 @@ export function useDataLoader<T>(
       setError(null);
 
       // Check cache if key provided
-      if (cacheKey && typeof window !== 'undefined') {
+      if (cacheKey && typeof window !== "undefined") {
         const cached = sessionStorage.getItem(cacheKey);
         if (cached) {
           setData(JSON.parse(cached));
@@ -309,7 +309,7 @@ export function useDataLoader<T>(
       setData(result);
 
       // Cache result if key provided
-      if (cacheKey && typeof window !== 'undefined') {
+      if (cacheKey && typeof window !== "undefined") {
         sessionStorage.setItem(cacheKey, JSON.stringify(result));
       }
     } catch (err) {

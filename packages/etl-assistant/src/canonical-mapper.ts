@@ -10,8 +10,8 @@ import type {
   CanonicalEntityType,
   FieldMapping,
   RedactionStrategy,
-} from './types';
-import { PIIDetection } from './pii-detection';
+} from "./types";
+import { PIIDetection } from "./pii-detection";
 
 export interface MappingConfig {
   entityType: CanonicalEntityType;
@@ -47,7 +47,7 @@ export class CanonicalMapper {
         // Apply redaction if configured
         if (config.redactionRules && config.redactionRules[mapping.sourceField]) {
           const strategy = config.redactionRules[mapping.sourceField];
-          if (typeof sourceValue === 'string') {
+          if (typeof sourceValue === "string") {
             mappedValue = PIIDetection.redact(sourceValue, strategy);
             piiRedacted = true;
           }
@@ -55,14 +55,11 @@ export class CanonicalMapper {
 
         // Apply transformation if specified
         if (mapping.transformation) {
-          mappedValue = this.applyTransformation(
-            mappedValue,
-            mapping.transformation
-          );
+          mappedValue = this.applyTransformation(mappedValue, mapping.transformation);
         }
 
         // Set property
-        if (mapping.targetField.startsWith('props.')) {
+        if (mapping.targetField.startsWith("props.")) {
           const propName = mapping.targetField.substring(6);
           props[propName] = mappedValue;
         } else {
@@ -105,13 +102,8 @@ export class CanonicalMapper {
   /**
    * Map multiple records to canonical format
    */
-  mapRecords(
-    records: SampleRecord[],
-    config: MappingConfig
-  ): CanonicalEntity[] {
-    return records.map((record, index) =>
-      this.mapToCanonical(record, config, index)
-    );
+  mapRecords(records: SampleRecord[], config: MappingConfig): CanonicalEntity[] {
+    return records.map((record, index) => this.mapToCanonical(record, config, index));
   }
 
   /**
@@ -120,23 +112,23 @@ export class CanonicalMapper {
   private applyTransformation(value: unknown, transformation: string): unknown {
     // Simple transformations (can be extended)
     switch (transformation) {
-      case 'uppercase':
-        return typeof value === 'string' ? value.toUpperCase() : value;
+      case "uppercase":
+        return typeof value === "string" ? value.toUpperCase() : value;
 
-      case 'lowercase':
-        return typeof value === 'string' ? value.toLowerCase() : value;
+      case "lowercase":
+        return typeof value === "string" ? value.toLowerCase() : value;
 
-      case 'trim':
-        return typeof value === 'string' ? value.trim() : value;
+      case "trim":
+        return typeof value === "string" ? value.trim() : value;
 
-      case 'number':
-        return typeof value === 'string' ? parseFloat(value) : value;
+      case "number":
+        return typeof value === "string" ? parseFloat(value) : value;
 
-      case 'string':
+      case "string":
         return String(value);
 
-      case 'date':
-        return typeof value === 'string' ? new Date(value).toISOString() : value;
+      case "date":
+        return typeof value === "string" ? new Date(value).toISOString() : value;
 
       default:
         return value;
@@ -153,7 +145,7 @@ export class CanonicalMapper {
     recordIndex: number
   ): string {
     // Try to use record's ID field if available
-    const idFields = ['id', '_id', 'uuid', 'key'];
+    const idFields = ["id", "_id", "uuid", "key"];
 
     for (const field of idFields) {
       if (record[field]) {
@@ -168,10 +160,7 @@ export class CanonicalMapper {
   /**
    * Calculate confidence score
    */
-  private calculateConfidence(
-    mappings: FieldMapping[],
-    record: SampleRecord
-  ): number {
+  private calculateConfidence(mappings: FieldMapping[], record: SampleRecord): number {
     const requiredMappings = mappings.filter((m) => m.required);
 
     if (requiredMappings.length === 0) {
@@ -180,7 +169,7 @@ export class CanonicalMapper {
 
     const satisfiedRequirements = requiredMappings.filter((m) => {
       const value = record[m.sourceField];
-      return value !== undefined && value !== null && value !== '';
+      return value !== undefined && value !== null && value !== "";
     });
 
     return satisfiedRequirements.length / requiredMappings.length;

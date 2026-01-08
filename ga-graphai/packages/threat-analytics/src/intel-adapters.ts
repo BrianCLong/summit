@@ -1,4 +1,4 @@
-import type { ThreatIntelClient, ThreatIntelIndicator } from './types';
+import type { ThreatIntelClient, ThreatIntelIndicator } from "./types";
 
 interface StixObject {
   id: string;
@@ -9,31 +9,33 @@ interface StixObject {
   labels?: string[];
 }
 
-function parsePattern(pattern: string): { type: ThreatIntelIndicator['type']; value: string } | undefined {
+function parsePattern(
+  pattern: string
+): { type: ThreatIntelIndicator["type"]; value: string } | undefined {
   const normalized = pattern.toLowerCase();
-  if (normalized.includes('ipv4-addr')) {
+  if (normalized.includes("ipv4-addr")) {
     const match = /\'([0-9.]+)\'/.exec(pattern);
     if (match) {
-      return { type: 'ip', value: match[1] };
+      return { type: "ip", value: match[1] };
     }
   }
-  if (normalized.includes('domain-name')) {
+  if (normalized.includes("domain-name")) {
     const match = /\'([^']+)\'/.exec(pattern);
     if (match) {
-      return { type: 'domain', value: match[1] };
+      return { type: "domain", value: match[1] };
     }
   }
-  if (normalized.includes('file:hashes')) {
+  if (normalized.includes("file:hashes")) {
     const match = /\'([0-9a-f]{16,})\'/.exec(pattern);
     if (match) {
-      return { type: 'hash', value: match[1] };
+      return { type: "hash", value: match[1] };
     }
   }
   return undefined;
 }
 
 export class StixBundleAdapter implements ThreatIntelClient {
-  readonly name = 'stix-adapter';
+  readonly name = "stix-adapter";
 
   constructor(private readonly fetchBundle: () => Promise<{ objects: StixObject[] }>) {}
 
@@ -41,7 +43,7 @@ export class StixBundleAdapter implements ThreatIntelClient {
     const bundle = await this.fetchBundle();
     const indicators: ThreatIntelIndicator[] = [];
     for (const object of bundle.objects ?? []) {
-      if (object.type !== 'indicator' || !object.pattern) {
+      if (object.type !== "indicator" || !object.pattern) {
         continue;
       }
       const parsed = parsePattern(object.pattern);
@@ -53,7 +55,7 @@ export class StixBundleAdapter implements ThreatIntelClient {
         value: parsed.value,
         type: parsed.type,
         confidence: object.confidence ?? 50,
-        source: 'STIX',
+        source: "STIX",
         validUntil: object.valid_until,
         tags: object.labels,
       });
@@ -67,24 +69,24 @@ export class TaxiiCollectionClient implements ThreatIntelClient {
 
   constructor(
     name: string,
-    private readonly fetchCollection: () => Promise<ThreatIntelIndicator[]>,
+    private readonly fetchCollection: () => Promise<ThreatIntelIndicator[]>
   ) {
     this.name = name;
   }
 
   async fetchIndicators(): Promise<ThreatIntelIndicator[]> {
     const indicators = await this.fetchCollection();
-    return indicators.map((indicator) => ({ ...indicator, source: 'TAXII' as const }));
+    return indicators.map((indicator) => ({ ...indicator, source: "TAXII" as const }));
   }
 }
 
 export class MispClient implements ThreatIntelClient {
-  readonly name = 'misp-client';
+  readonly name = "misp-client";
 
   constructor(private readonly fetchFeed: () => Promise<ThreatIntelIndicator[]>) {}
 
   async fetchIndicators(): Promise<ThreatIntelIndicator[]> {
     const indicators = await this.fetchFeed();
-    return indicators.map((indicator) => ({ ...indicator, source: 'MISP' as const }));
+    return indicators.map((indicator) => ({ ...indicator, source: "MISP" as const }));
   }
 }

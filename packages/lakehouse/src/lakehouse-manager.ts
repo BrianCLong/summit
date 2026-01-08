@@ -3,15 +3,15 @@
  * Central management for data lakehouse operations
  */
 
-import { TableFormat, TableConfig } from './types.js';
-import { BaseTable } from './table-formats/base-table.js';
-import { DeltaLakeTable } from './table-formats/delta-lake.js';
-import { IcebergTable } from './table-formats/iceberg.js';
-import { HudiTable, HudiTableType } from './table-formats/hudi.js';
-import { LakehouseCatalog } from './catalog.js';
-import pino from 'pino';
+import { TableFormat, TableConfig } from "./types.js";
+import { BaseTable } from "./table-formats/base-table.js";
+import { DeltaLakeTable } from "./table-formats/delta-lake.js";
+import { IcebergTable } from "./table-formats/iceberg.js";
+import { HudiTable, HudiTableType } from "./table-formats/hudi.js";
+import { LakehouseCatalog } from "./catalog.js";
+import pino from "pino";
 
-const logger = pino({ name: 'lakehouse-manager' });
+const logger = pino({ name: "lakehouse-manager" });
 
 export class LakehouseManager {
   private tables: Map<string, BaseTable>;
@@ -20,7 +20,7 @@ export class LakehouseManager {
   constructor() {
     this.tables = new Map();
     this.catalog = new LakehouseCatalog();
-    logger.info('Lakehouse manager initialized');
+    logger.info("Lakehouse manager initialized");
   }
 
   async createTable(config: TableConfig): Promise<BaseTable> {
@@ -47,7 +47,7 @@ export class LakehouseManager {
     this.tables.set(config.name, table);
     await this.catalog.registerTable(table.getMetadata());
 
-    logger.info({ table: config.name, format: config.format }, 'Table created');
+    logger.info({ table: config.name, format: config.format }, "Table created");
 
     return table;
   }
@@ -65,7 +65,7 @@ export class LakehouseManager {
     this.tables.delete(name);
     await this.catalog.unregisterTable(name);
 
-    logger.info({ table: name }, 'Table dropped');
+    logger.info({ table: name }, "Table dropped");
   }
 
   async listTables(): Promise<string[]> {
@@ -85,27 +85,27 @@ export class LakehouseManager {
   }
 
   async compactAllTables(): Promise<void> {
-    logger.info('Starting compaction for all tables');
+    logger.info("Starting compaction for all tables");
 
     for (const [name, table] of this.tables) {
       try {
         const result = await table.compact();
-        logger.info({ table: name, result }, 'Table compacted');
+        logger.info({ table: name, result }, "Table compacted");
       } catch (error) {
-        logger.error({ error, table: name }, 'Failed to compact table');
+        logger.error({ error, table: name }, "Failed to compact table");
       }
     }
   }
 
   async vacuumAllTables(olderThan: Date): Promise<void> {
-    logger.info({ olderThan }, 'Starting vacuum for all tables');
+    logger.info({ olderThan }, "Starting vacuum for all tables");
 
     for (const [name, table] of this.tables) {
       try {
         const removed = await table.vacuum(olderThan);
-        logger.info({ table: name, removed }, 'Table vacuumed');
+        logger.info({ table: name, removed }, "Table vacuumed");
       } catch (error) {
-        logger.error({ error, table: name }, 'Failed to vacuum table');
+        logger.error({ error, table: name }, "Failed to vacuum table");
       }
     }
   }

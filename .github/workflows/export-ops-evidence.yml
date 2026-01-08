@@ -4,25 +4,25 @@ on:
   workflow_dispatch:
     inputs:
       run_id:
-        description: 'The ID of the workflow run to get the artifact from'
+        description: "The ID of the workflow run to get the artifact from"
         required: true
         type: string
       artifact_name:
-        description: 'The name of the artifact to export'
+        description: "The name of the artifact to export"
         required: true
         type: string
-        default: 'evidence-bundle'
+        default: "evidence-bundle"
       destination_uri:
-        description: 'The S3 destination URI (e.g., s3://my-bucket/prefix/)'
+        description: "The S3 destination URI (e.g., s3://my-bucket/prefix/)"
         required: true
         type: string
       overwrite:
-        description: 'Overwrite the artifact if it already exists in the destination'
+        description: "Overwrite the artifact if it already exists in the destination"
         required: false
         type: boolean
         default: false
       checksum_verify:
-        description: 'Verify the checksum of the artifact before exporting'
+        description: "Verify the checksum of the artifact before exporting"
         required: false
         type: boolean
         default: true

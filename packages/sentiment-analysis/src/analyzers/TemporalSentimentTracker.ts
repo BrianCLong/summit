@@ -3,17 +3,13 @@
  * Tracks sentiment over time and detects significant shifts
  */
 
-import type { SentimentScore, SentimentTimeSeries, TimeSeriesEvent } from '../core/types.js';
+import type { SentimentScore, SentimentTimeSeries, TimeSeriesEvent } from "../core/types.js";
 
 export class TemporalSentimentTracker {
   private sentimentHistory: Map<string, SentimentTimeSeries> = new Map();
   private anomalyThreshold = 0.3; // Threshold for detecting significant shifts
 
-  trackSentiment(
-    entityId: string,
-    sentiment: SentimentScore,
-    timestamp: Date = new Date()
-  ): void {
+  trackSentiment(entityId: string, sentiment: SentimentScore, timestamp: Date = new Date()): void {
     let timeSeries = this.sentimentHistory.get(entityId);
 
     if (!timeSeries) {
@@ -21,7 +17,7 @@ export class TemporalSentimentTracker {
         timestamps: [],
         sentiments: [],
         events: [],
-        trend: 'neutral',
+        trend: "neutral",
         momentum: 0,
       };
       this.sentimentHistory.set(entityId, timeSeries);
@@ -46,10 +42,7 @@ export class TemporalSentimentTracker {
     return this.sentimentHistory.get(entityId);
   }
 
-  analyzeShifts(
-    entityId: string,
-    timeWindow?: { start: Date; end: Date }
-  ): TimeSeriesEvent[] {
+  analyzeShifts(entityId: string, timeWindow?: { start: Date; end: Date }): TimeSeriesEvent[] {
     const timeSeries = this.sentimentHistory.get(entityId);
     if (!timeSeries) {
       return [];
@@ -57,8 +50,7 @@ export class TemporalSentimentTracker {
 
     if (timeWindow) {
       return timeSeries.events.filter(
-        event =>
-          event.timestamp >= timeWindow.start && event.timestamp <= timeWindow.end
+        (event) => event.timestamp >= timeWindow.start && event.timestamp <= timeWindow.end
       );
     }
 
@@ -90,22 +82,22 @@ export class TemporalSentimentTracker {
     const momentum = this.calculateMomentum(recentSentiments);
 
     if (momentum > 0.1) {
-      indicators.push('Increasing positive sentiment momentum');
+      indicators.push("Increasing positive sentiment momentum");
     } else if (momentum < -0.1) {
-      indicators.push('Increasing negative sentiment momentum');
+      indicators.push("Increasing negative sentiment momentum");
     }
 
     // Check for volatility
     const volatility = this.calculateVolatility(recentSentiments);
     if (volatility > 0.2) {
-      indicators.push('High sentiment volatility detected');
+      indicators.push("High sentiment volatility detected");
     }
 
     // Check for sustained trends
-    if (this.hasSustainedTrend(recentSentiments, 'positive')) {
-      indicators.push('Sustained positive trend');
-    } else if (this.hasSustainedTrend(recentSentiments, 'negative')) {
-      indicators.push('Sustained negative trend');
+    if (this.hasSustainedTrend(recentSentiments, "positive")) {
+      indicators.push("Sustained positive trend");
+    } else if (this.hasSustainedTrend(recentSentiments, "negative")) {
+      indicators.push("Sustained negative trend");
     }
 
     return indicators;
@@ -122,7 +114,7 @@ export class TemporalSentimentTracker {
     if (compoundDiff > this.anomalyThreshold) {
       return {
         timestamp,
-        type: 'shift',
+        type: "shift",
         magnitude: compoundDiff,
         description: `Significant sentiment shift detected: ${previousSentiment.compound.toFixed(2)} → ${currentSentiment.compound.toFixed(2)}`,
       };
@@ -132,7 +124,7 @@ export class TemporalSentimentTracker {
     if (Math.abs(currentSentiment.compound) > 0.8) {
       return {
         timestamp,
-        type: 'spike',
+        type: "spike",
         magnitude: Math.abs(currentSentiment.compound),
         description: `Sentiment spike detected: ${currentSentiment.compound.toFixed(2)}`,
       };
@@ -153,13 +145,13 @@ export class TemporalSentimentTracker {
     // Determine trend
     const volatility = this.calculateVolatility(recentSentiments);
     if (volatility > 0.25) {
-      timeSeries.trend = 'volatile';
+      timeSeries.trend = "volatile";
     } else if (momentum > 0.05) {
-      timeSeries.trend = 'positive';
+      timeSeries.trend = "positive";
     } else if (momentum < -0.05) {
-      timeSeries.trend = 'negative';
+      timeSeries.trend = "negative";
     } else {
-      timeSeries.trend = 'neutral';
+      timeSeries.trend = "neutral";
     }
   }
 
@@ -179,21 +171,21 @@ export class TemporalSentimentTracker {
 
   private hasSustainedTrend(
     sentiments: SentimentScore[],
-    direction: 'positive' | 'negative'
+    direction: "positive" | "negative"
   ): boolean {
     if (sentiments.length < 3) {
       return false;
     }
 
     let consecutiveCount = 0;
-    const threshold = direction === 'positive' ? 0 : 0;
+    const threshold = direction === "positive" ? 0 : 0;
 
     for (let i = 1; i < sentiments.length; i++) {
       const diff = sentiments[i].compound - sentiments[i - 1].compound;
 
-      if (direction === 'positive' && diff > threshold) {
+      if (direction === "positive" && diff > threshold) {
         consecutiveCount++;
-      } else if (direction === 'negative' && diff < threshold) {
+      } else if (direction === "negative" && diff < threshold) {
         consecutiveCount++;
       } else {
         consecutiveCount = 0;

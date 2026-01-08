@@ -76,7 +76,7 @@ curl -X POST http://localhost:8091/api/forecast \
   ],
   "model_info": {
     "type": "arima",
-    "parameters": {"p": 2, "d": 1, "q": 2},
+    "parameters": { "p": 2, "d": 1, "q": 2 },
     "accuracy_metrics": {
       "mape": 8.7,
       "rmse": 45.2,
@@ -149,10 +149,10 @@ curl -X POST http://localhost:8091/api/simulate \
         "expected_error_rate": 0.01,
         "expected_latency_p95": 350,
         "expected_availability": 0.99,
-        "risk_reduction": 0.60
+        "risk_reduction": 0.6
       },
       "confidence": 0.92,
-      "cost_estimate": 0.50,
+      "cost_estimate": 0.5,
       "time_to_effect": 30
     }
   ],
@@ -279,17 +279,18 @@ Add to your `prometheus.yml`:
 
 ```yaml
 scrape_configs:
-  - job_name: 'predictive-forecasting'
+  - job_name: "predictive-forecasting"
     scrape_interval: 15s
     static_configs:
       - targets:
-          - 'localhost:8091'
-    metrics_path: '/metrics'
+          - "localhost:8091"
+    metrics_path: "/metrics"
 ```
 
 4. **Import Grafana dashboards:**
 
 Import the dashboard JSON files from:
+
 - `/observability/grafana/dashboards/predictive-suite-platform-health.json`
 - `/observability/grafana/dashboards/predictive-suite-forecasts.json`
 
@@ -374,31 +375,31 @@ PREDICTIVE_SUITE_CONFIG = {
 
 ### Forecast Metrics
 
-| Metric | Type | Labels | Description |
-|--------|------|--------|-------------|
-| `predictive_forecast_value` | Gauge | signal_type, entity_id, horizon, offset_hours | Latest predicted value |
-| `predictive_forecast_lower_bound` | Gauge | signal_type, entity_id, horizon, offset_hours | Lower confidence bound |
-| `predictive_forecast_upper_bound` | Gauge | signal_type, entity_id, horizon, offset_hours | Upper confidence bound |
-| `predictive_forecast_accuracy_mape` | Gauge | signal_type, entity_id, model_type | Mean Absolute Percentage Error |
-| `predictive_forecast_accuracy_rmse` | Gauge | signal_type, entity_id, model_type | Root Mean Square Error |
-| `predictive_forecast_generation_total` | Counter | signal_type, model_type, status | Total forecasts generated |
-| `predictive_forecast_generation_duration_seconds` | Histogram | signal_type, model_type | Forecast generation time |
+| Metric                                            | Type      | Labels                                        | Description                    |
+| ------------------------------------------------- | --------- | --------------------------------------------- | ------------------------------ |
+| `predictive_forecast_value`                       | Gauge     | signal_type, entity_id, horizon, offset_hours | Latest predicted value         |
+| `predictive_forecast_lower_bound`                 | Gauge     | signal_type, entity_id, horizon, offset_hours | Lower confidence bound         |
+| `predictive_forecast_upper_bound`                 | Gauge     | signal_type, entity_id, horizon, offset_hours | Upper confidence bound         |
+| `predictive_forecast_accuracy_mape`               | Gauge     | signal_type, entity_id, model_type            | Mean Absolute Percentage Error |
+| `predictive_forecast_accuracy_rmse`               | Gauge     | signal_type, entity_id, model_type            | Root Mean Square Error         |
+| `predictive_forecast_generation_total`            | Counter   | signal_type, model_type, status               | Total forecasts generated      |
+| `predictive_forecast_generation_duration_seconds` | Histogram | signal_type, model_type                       | Forecast generation time       |
 
 ### Simulation Metrics
 
-| Metric | Type | Labels | Description |
-|--------|------|--------|-------------|
-| `predictive_simulation_risk_score` | Gauge | entity_id, scenario_type | Risk score (0-1) |
-| `predictive_simulation_recommendation_priority` | Gauge | entity_id, recommended_action | Priority level (0-3) |
-| `predictive_simulation_total` | Counter | entity_id, status | Total simulations run |
-| `predictive_simulation_duration_seconds` | Histogram | entity_id | Simulation execution time |
+| Metric                                          | Type      | Labels                        | Description               |
+| ----------------------------------------------- | --------- | ----------------------------- | ------------------------- |
+| `predictive_simulation_risk_score`              | Gauge     | entity_id, scenario_type      | Risk score (0-1)          |
+| `predictive_simulation_recommendation_priority` | Gauge     | entity_id, recommended_action | Priority level (0-3)      |
+| `predictive_simulation_total`                   | Counter   | entity_id, status             | Total simulations run     |
+| `predictive_simulation_duration_seconds`        | Histogram | entity_id                     | Simulation execution time |
 
 ### HTTP Metrics
 
-| Metric | Type | Labels | Description |
-|--------|------|--------|-------------|
-| `predictive_http_requests_total` | Counter | method, endpoint, status | Total HTTP requests |
-| `predictive_http_request_duration_seconds` | Histogram | method, endpoint | Request duration |
+| Metric                                     | Type      | Labels                   | Description         |
+| ------------------------------------------ | --------- | ------------------------ | ------------------- |
+| `predictive_http_requests_total`           | Counter   | method, endpoint, status | Total HTTP requests |
+| `predictive_http_request_duration_seconds` | Histogram | method, endpoint         | Request duration    |
 
 ## Architecture Details
 
@@ -425,6 +426,7 @@ The counterfactual simulator uses a simplified causal model with:
 - **Risk reduction**: Calculated impact of interventions on baseline risk
 
 Weights:
+
 - Threat level: 40%
 - Error rate: 25%
 - Latency: 20%
@@ -435,6 +437,7 @@ Weights:
 ### Issue: Forecasts are inaccurate
 
 **Solution**:
+
 - Ensure sufficient historical data (minimum 30 points recommended)
 - Try different model types (`arima` vs `exponential_smoothing`)
 - Check for data quality issues (missing values, outliers)
@@ -442,6 +445,7 @@ Weights:
 ### Issue: API returns 500 errors
 
 **Solution**:
+
 - Check logs: `docker-compose logs predictive-forecasting`
 - Verify input data format and types
 - Ensure historical data is non-negative for event counts
@@ -449,6 +453,7 @@ Weights:
 ### Issue: Metrics not appearing in Prometheus
 
 **Solution**:
+
 - Verify Prometheus scrape config includes the service
 - Check service is accessible: `curl http://localhost:8091/metrics`
 - Review Prometheus targets: http://localhost:9090/targets
@@ -456,6 +461,7 @@ Weights:
 ### Issue: Dashboards show "No Data"
 
 **Solution**:
+
 - Ensure Prometheus datasource is configured in Grafana
 - Verify metrics are being scraped: Query in Prometheus UI
 - Check time range in Grafana dashboard

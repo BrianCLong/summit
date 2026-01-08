@@ -95,13 +95,13 @@ model.export(format='engine', device=0, int8=True)
 
 ## Performance Benchmarks
 
-| Model | Size | GPU (ms) | CPU (ms) | Accuracy |
-|-------|------|----------|----------|----------|
-| YOLOv8n | 3.2MB | 2-5 | 50-100 | 37.3 mAP |
-| YOLOv8s | 11.2MB | 3-8 | 100-200 | 44.9 mAP |
-| YOLOv8m | 25.9MB | 5-15 | 200-400 | 50.2 mAP |
-| YOLOv8l | 43.7MB | 8-25 | 400-800 | 52.9 mAP |
-| YOLOv8x | 68.2MB | 12-40 | 800-1600 | 53.9 mAP |
+| Model   | Size   | GPU (ms) | CPU (ms) | Accuracy |
+| ------- | ------ | -------- | -------- | -------- |
+| YOLOv8n | 3.2MB  | 2-5      | 50-100   | 37.3 mAP |
+| YOLOv8s | 11.2MB | 3-8      | 100-200  | 44.9 mAP |
+| YOLOv8m | 25.9MB | 5-15     | 200-400  | 50.2 mAP |
+| YOLOv8l | 43.7MB | 8-25     | 400-800  | 52.9 mAP |
+| YOLOv8x | 68.2MB | 12-40    | 800-1600 | 53.9 mAP |
 
 ## GPU Requirements
 
@@ -112,6 +112,7 @@ model.export(format='engine', device=0, int8=True)
 ## Model Versioning
 
 Models are versioned using semantic versioning:
+
 - `model-name-v1.0.0.pt`
 - `model-name-v1.1.0.pt`
 - `model-name-v2.0.0.pt`

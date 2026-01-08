@@ -6,32 +6,32 @@ global:
   scrape_timeout: 10s
   evaluation_interval: 15s
   external_labels:
-    cluster: 'intelgraph'
-    environment: '${ENV:-development}'
+    cluster: "intelgraph"
+    environment: "${ENV:-development}"
 
 # Load alerting rules
 rule_files:
-  - 'alerts.yml'
-  - 'alerting-rules.yml'
-  - 'alerting-governance.yml'
-  - 'rules/adapters.rules.yml'
+  - "alerts.yml"
+  - "alerting-rules.yml"
+  - "alerting-governance.yml"
+  - "rules/adapters.rules.yml"
 
 # Alertmanager configuration
 alerting:
   alertmanagers:
     - static_configs:
         - targets:
-            - 'alertmanager:9093'
+            - "alertmanager:9093"
       timeout: 10s
       api_version: v2
 
 # Scrape configurations
 scrape_configs:
   # IntelGraph Server - Main API and GraphQL endpoint
-  - job_name: 'intelgraph-server'
+  - job_name: "intelgraph-server"
     static_configs:
-      - targets: ['server:4000']
-    metrics_path: '/metrics'
+      - targets: ["server:4000"]
+    metrics_path: "/metrics"
     scrape_interval: 10s
     scrape_timeout: 5s
     honor_labels: true
@@ -40,54 +40,54 @@ scrape_configs:
   - job_name: symphony-proxy
     metrics_path: /metrics
     static_configs:
-      - targets: ['host.docker.internal:8787']
+      - targets: ["host.docker.internal:8787"]
 
   # IntelGraph ML Service
-  - job_name: 'intelgraph-ml'
+  - job_name: "intelgraph-ml"
     static_configs:
-      - targets: ['ml:8001']
-    metrics_path: '/metrics'
+      - targets: ["ml:8001"]
+    metrics_path: "/metrics"
     scrape_interval: 10s
     scrape_timeout: 5s
 
   # PostgreSQL Exporter - Database metrics
-  - job_name: 'postgres'
+  - job_name: "postgres"
     static_configs:
-      - targets: ['postgres-exporter:9187']
+      - targets: ["postgres-exporter:9187"]
     scrape_interval: 30s
 
   # Redis Exporter - Cache metrics
-  - job_name: 'redis'
+  - job_name: "redis"
     static_configs:
-      - targets: ['redis-exporter:9121']
+      - targets: ["redis-exporter:9121"]
     scrape_interval: 30s
 
   # Neo4j Exporter - Graph database metrics
-  - job_name: 'neo4j'
+  - job_name: "neo4j"
     static_configs:
-      - targets: ['neo4j-exporter:9308']
+      - targets: ["neo4j-exporter:9308"]
     scrape_interval: 30s
 
   # Node Exporter - System metrics
-  - job_name: 'node-exporter'
+  - job_name: "node-exporter"
     static_configs:
-      - targets: ['node-exporter:9100']
+      - targets: ["node-exporter:9100"]
     scrape_interval: 30s
 
   # cAdvisor - Container metrics
-  - job_name: 'cadvisor'
+  - job_name: "cadvisor"
     static_configs:
-      - targets: ['cadvisor:8080']
+      - targets: ["cadvisor:8080"]
     scrape_interval: 30s
 
   # Prometheus itself
-  - job_name: 'prometheus'
+  - job_name: "prometheus"
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: ["localhost:9090"]
     scrape_interval: 30s
 
   # OpenTelemetry Collector metrics
-  - job_name: 'otel-collector'
+  - job_name: "otel-collector"
     static_configs:
-      - targets: ['otel-collector:8888', 'otel-collector:8889']
+      - targets: ["otel-collector:8888", "otel-collector:8889"]
     scrape_interval: 15s

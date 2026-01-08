@@ -4,19 +4,19 @@
  */
 
 export enum IncidentSeverity {
-  SEV1 = 'sev1',
-  SEV2 = 'sev2',
-  SEV3 = 'sev3',
-  SEV4 = 'sev4',
+  SEV1 = "sev1",
+  SEV2 = "sev2",
+  SEV3 = "sev3",
+  SEV4 = "sev4",
 }
 
 export enum IncidentStatus {
-  OPEN = 'open',
-  INVESTIGATING = 'investigating',
-  IDENTIFIED = 'identified',
-  MONITORING = 'monitoring',
-  RESOLVED = 'resolved',
-  CLOSED = 'closed',
+  OPEN = "open",
+  INVESTIGATING = "investigating",
+  IDENTIFIED = "identified",
+  MONITORING = "monitoring",
+  RESOLVED = "resolved",
+  CLOSED = "closed",
 }
 
 export interface Incident {

@@ -88,9 +88,7 @@ describe('appStore', () => {
 
       useAppStore.getState().updatePreferences({ theme: 'light' });
 
-      expect(useAppStore.getState().preferences.notifications).toEqual(
-        originalNotifications
-      );
+      expect(useAppStore.getState().preferences.notifications).toEqual(originalNotifications);
     });
   });
 

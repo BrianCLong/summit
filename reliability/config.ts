@@ -13,5 +13,5 @@
  */
 export function isOpsGuardV1Enabled(): boolean {
   const flag = process.env.FEATURE_OPS_GUARD_V1?.toLowerCase();
-  return flag === 'true' || flag === '1';
+  return flag === "true" || flag === "1";
 }

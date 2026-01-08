@@ -8,28 +8,28 @@
 // =============================================================================
 
 export type DataClassification =
-  | 'PUBLIC'
-  | 'INTERNAL'
-  | 'CONFIDENTIAL'
-  | 'RESTRICTED'
-  | 'TOP_SECRET';
+  | "PUBLIC"
+  | "INTERNAL"
+  | "CONFIDENTIAL"
+  | "RESTRICTED"
+  | "TOP_SECRET";
 
 export type DataCategory =
-  | 'PII'
-  | 'PCI'
-  | 'PHI'
-  | 'TRADE_SECRET'
-  | 'FINANCIAL'
-  | 'REGULATED'
-  | 'INTERNAL';
+  | "PII"
+  | "PCI"
+  | "PHI"
+  | "TRADE_SECRET"
+  | "FINANCIAL"
+  | "REGULATED"
+  | "INTERNAL";
 
 export interface ClassificationLabel {
   level: DataClassification;
   categories: DataCategory[];
   handling: {
-    encryption: 'REQUIRED' | 'RECOMMENDED' | 'OPTIONAL';
+    encryption: "REQUIRED" | "RECOMMENDED" | "OPTIONAL";
     retentionDays: number;
-    deletionPolicy: 'SOFT' | 'HARD' | 'CRYPTO_SHRED';
+    deletionPolicy: "SOFT" | "HARD" | "CRYPTO_SHRED";
   };
   jurisdictions: string[];
   compliance: string[];
@@ -40,23 +40,23 @@ export interface ClassificationLabel {
 // =============================================================================
 
 export type DetectedDataType =
-  | 'SSN'
-  | 'CREDIT_CARD'
-  | 'BANK_ACCOUNT'
-  | 'EMAIL'
-  | 'PHONE'
-  | 'DATE_OF_BIRTH'
-  | 'ADDRESS'
-  | 'IP_ADDRESS'
-  | 'PASSPORT'
-  | 'DRIVER_LICENSE'
-  | 'API_KEY'
-  | 'PASSWORD'
-  | 'PHI'
-  | 'BIOMETRIC'
-  | 'FINANCIAL_DATA'
-  | 'TRADE_SECRET'
-  | 'CUSTOM';
+  | "SSN"
+  | "CREDIT_CARD"
+  | "BANK_ACCOUNT"
+  | "EMAIL"
+  | "PHONE"
+  | "DATE_OF_BIRTH"
+  | "ADDRESS"
+  | "IP_ADDRESS"
+  | "PASSPORT"
+  | "DRIVER_LICENSE"
+  | "API_KEY"
+  | "PASSWORD"
+  | "PHI"
+  | "BIOMETRIC"
+  | "FINANCIAL_DATA"
+  | "TRADE_SECRET"
+  | "CUSTOM";
 
 export interface PatternConfig {
   name: string;
@@ -120,13 +120,13 @@ export interface ScanOptions {
 }
 
 export type ScanAction =
-  | 'ALLOW'
-  | 'BLOCK'
-  | 'REDACT'
-  | 'WARN'
-  | 'REQUIRE_JUSTIFICATION'
-  | 'REQUIRE_APPROVAL'
-  | 'QUARANTINE';
+  | "ALLOW"
+  | "BLOCK"
+  | "REDACT"
+  | "WARN"
+  | "REQUIRE_JUSTIFICATION"
+  | "REQUIRE_APPROVAL"
+  | "QUARANTINE";
 
 export interface ContentScanResult {
   allowed: boolean;
@@ -141,7 +141,7 @@ export interface ContentScanResult {
 export interface PolicyViolation {
   type: string;
   message: string;
-  severity: 'INFO' | 'WARNING' | 'HIGH' | 'CRITICAL';
+  severity: "INFO" | "WARNING" | "HIGH" | "CRITICAL";
   policyId?: string;
   ruleId?: string;
   remediation?: string;
@@ -159,11 +159,11 @@ export interface Obligation {
 // =============================================================================
 
 export type BarrierType =
-  | 'TENANT_ISOLATION'
-  | 'BUSINESS_UNIT'
-  | 'ROLE_BASED'
-  | 'ENVIRONMENT'
-  | 'JURISDICTION';
+  | "TENANT_ISOLATION"
+  | "BUSINESS_UNIT"
+  | "ROLE_BASED"
+  | "ENVIRONMENT"
+  | "JURISDICTION";
 
 export interface BarrierContext {
   tenantId: string;
@@ -207,7 +207,7 @@ export interface BarrierCheckRequest {
 export interface BarrierViolation {
   type: BarrierType;
   message: string;
-  severity: 'HIGH' | 'CRITICAL';
+  severity: "HIGH" | "CRITICAL";
   sourceContext?: Record<string, string>;
   targetContext?: Record<string, string>;
   remediation?: string;
@@ -226,12 +226,12 @@ export interface BarrierCheckResult {
 // =============================================================================
 
 export type RedactionStrategy =
-  | 'FULL_MASK'
-  | 'PARTIAL_MASK'
-  | 'GENERALIZE'
-  | 'TOKENIZE'
-  | 'ENCRYPT'
-  | 'REMOVE';
+  | "FULL_MASK"
+  | "PARTIAL_MASK"
+  | "GENERALIZE"
+  | "TOKENIZE"
+  | "ENCRYPT"
+  | "REMOVE";
 
 export interface RedactionConfig {
   strategy: RedactionStrategy;
@@ -346,23 +346,23 @@ export interface DLPException {
     allowedDestinations?: string[];
     additionalControls?: string[];
   };
-  status: 'PENDING' | 'APPROVED' | 'DENIED' | 'EXPIRED' | 'REVOKED';
+  status: "PENDING" | "APPROVED" | "DENIED" | "EXPIRED" | "REVOKED";
   usageCount: number;
 }
 
 export interface ExceptionRequest {
-  scope: DLPException['scope'];
-  justification: DLPException['justification'];
+  scope: DLPException["scope"];
+  justification: DLPException["justification"];
   requestedBy: string;
   requestedDuration: {
     from: string;
     until: string;
   };
-  constraints?: Partial<DLPException['constraints']>;
+  constraints?: Partial<DLPException["constraints"]>;
 }
 
 export interface ExceptionApproval {
-  role: 'DATA_OWNER' | 'MANAGER' | 'COMPLIANCE' | 'SECURITY' | 'LEGAL';
+  role: "DATA_OWNER" | "MANAGER" | "COMPLIANCE" | "SECURITY" | "LEGAL";
   approver: string;
   approvedAt?: string;
   deniedAt?: string;
@@ -374,14 +374,14 @@ export interface ExceptionApproval {
 // =============================================================================
 
 export type DLPEventType =
-  | 'INGESTION_SCAN'
-  | 'EGRESS_SCAN'
-  | 'TRANSFER_SCAN'
-  | 'BARRIER_CHECK'
-  | 'EXCEPTION_USED'
-  | 'POLICY_VIOLATION'
-  | 'REDACTION_APPLIED'
-  | 'ADMIN_OVERRIDE';
+  | "INGESTION_SCAN"
+  | "EGRESS_SCAN"
+  | "TRANSFER_SCAN"
+  | "BARRIER_CHECK"
+  | "EXCEPTION_USED"
+  | "POLICY_VIOLATION"
+  | "REDACTION_APPLIED"
+  | "ADMIN_OVERRIDE";
 
 export interface DLPAuditEvent {
   eventId: string;
@@ -466,7 +466,7 @@ export interface DLPService {
   policies: {
     list(filter?: { tenantId?: string; enabled?: boolean }): Promise<DLPPolicy[]>;
     get(id: string): Promise<DLPPolicy | null>;
-    create(policy: Omit<DLPPolicy, 'id' | 'createdAt' | 'updatedAt'>): Promise<DLPPolicy>;
+    create(policy: Omit<DLPPolicy, "id" | "createdAt" | "updatedAt">): Promise<DLPPolicy>;
     update(id: string, policy: Partial<DLPPolicy>): Promise<DLPPolicy>;
     delete(id: string): Promise<void>;
     test(
@@ -496,8 +496,8 @@ export interface DLPService {
       offset?: number;
     }): Promise<DLPAuditEvent[]>;
     export(
-      filter: Parameters<DLPService['audit']['query']>[0],
-      format: 'JSON' | 'CSV' | 'PDF'
+      filter: Parameters<DLPService["audit"]["query"]>[0],
+      format: "JSON" | "CSV" | "PDF"
     ): Promise<Buffer>;
   };
 }

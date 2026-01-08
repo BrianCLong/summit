@@ -1,4 +1,4 @@
-import { CostEstimate, PlanNode } from '../types';
+import { CostEstimate, PlanNode } from "../types";
 
 export class GraphCostModel {
   private stats: Record<string, { count: number; avgDegree: number }> = {};
@@ -9,9 +9,9 @@ export class GraphCostModel {
     } else {
       // Default mock stats
       this.stats = {
-        'Person': { count: 100000, avgDegree: 50 },
-        'Company': { count: 5000, avgDegree: 20 },
-        'Transaction': { count: 1000000, avgDegree: 2 },
+        Person: { count: 100000, avgDegree: 50 },
+        Company: { count: 5000, avgDegree: 20 },
+        Transaction: { count: 1000000, avgDegree: 2 },
       };
     }
   }
@@ -29,7 +29,7 @@ export class GraphCostModel {
 
     // Detect patterns
     const hasCartesianProduct = query.match(/MATCH\s+\(.*\)\s*,\s*\(.*\)/i);
-    const hasCrossTenantRisk = !query.includes('tenantId') && policyContext?.tenantId;
+    const hasCrossTenantRisk = !query.includes("tenantId") && policyContext?.tenantId;
 
     // Base costs
     cpu += matchCount * 10;
@@ -62,7 +62,7 @@ export class GraphCostModel {
       networkCost: net,
       totalCost: cpu + io + net + penalty,
       confidence: 0.5, // Heuristic
-      policyPenalty: penalty
+      policyPenalty: penalty,
     };
   }
 

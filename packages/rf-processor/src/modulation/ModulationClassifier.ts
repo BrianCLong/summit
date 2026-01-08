@@ -3,7 +3,7 @@
  * TRAINING/SIMULATION ONLY
  */
 
-import { ModulationType } from '@intelgraph/sigint-collector';
+import { ModulationType } from "@intelgraph/sigint-collector";
 
 export interface ClassificationResult {
   modulation: ModulationType;
@@ -40,25 +40,25 @@ export class ModulationClassifier {
 
   private initializeThresholds(): void {
     // Simplified thresholds for training purposes
-    this.featureThresholds.set('AM', {
+    this.featureThresholds.set("AM", {
       kurtosis: 3.0,
-      spectralFlatness: 0.3
+      spectralFlatness: 0.3,
     });
-    this.featureThresholds.set('FM', {
+    this.featureThresholds.set("FM", {
       kurtosis: 1.5,
-      spectralBandwidth: 75000
+      spectralBandwidth: 75000,
     });
-    this.featureThresholds.set('BPSK', {
+    this.featureThresholds.set("BPSK", {
       phaseStd: 0.8,
-      kurtosis: 2.0
+      kurtosis: 2.0,
     });
-    this.featureThresholds.set('QPSK', {
+    this.featureThresholds.set("QPSK", {
       phaseStd: 0.5,
-      kurtosis: 1.8
+      kurtosis: 1.8,
     });
-    this.featureThresholds.set('OFDM', {
+    this.featureThresholds.set("OFDM", {
       spectralFlatness: 0.8,
-      peakToAverage: 10
+      peakToAverage: 10,
     });
   }
 
@@ -70,8 +70,7 @@ export class ModulationClassifier {
     const scores = this.computeScores(features);
 
     // Sort by score
-    const sorted = Array.from(scores.entries())
-      .sort((a, b) => b[1] - a[1]);
+    const sorted = Array.from(scores.entries()).sort((a, b) => b[1] - a[1]);
 
     const best = sorted[0];
     const total = sorted.reduce((sum, [_, score]) => sum + score, 0);
@@ -81,9 +80,9 @@ export class ModulationClassifier {
       confidence: best[1] / total,
       alternatives: sorted.slice(1, 4).map(([mod, score]) => ({
         modulation: mod,
-        confidence: score / total
+        confidence: score / total,
       })),
-      features
+      features,
     };
   }
 
@@ -113,7 +112,7 @@ export class ModulationClassifier {
       spectralBandwidth: spectralFeatures.bandwidth,
       peakToAverage: spectralFeatures.par,
       phaseStd: phaseStats.std,
-      symbolRate: this.estimateSymbolRate(amplitude)
+      symbolRate: this.estimateSymbolRate(amplitude),
     };
   }
 
@@ -124,7 +123,10 @@ export class ModulationClassifier {
     skewness: number;
   } {
     const n = data.length;
-    let sum = 0, sum2 = 0, sum3 = 0, sum4 = 0;
+    let sum = 0,
+      sum2 = 0,
+      sum3 = 0,
+      sum4 = 0;
 
     for (let i = 0; i < n; i++) sum += data[i];
     const mean = sum / n;
@@ -142,12 +144,15 @@ export class ModulationClassifier {
     return {
       mean,
       std,
-      kurtosis: variance > 0 ? (sum4 / n) / (variance * variance) : 0,
-      skewness: variance > 0 ? (sum3 / n) / (std * std * std) : 0
+      kurtosis: variance > 0 ? sum4 / n / (variance * variance) : 0,
+      skewness: variance > 0 ? sum3 / n / (std * std * std) : 0,
     };
   }
 
-  private computeSpectralFeatures(i: Float32Array, q: Float32Array): {
+  private computeSpectralFeatures(
+    i: Float32Array,
+    q: Float32Array
+  ): {
     flatness: number;
     centroid: number;
     bandwidth: number;
@@ -158,9 +163,10 @@ export class ModulationClassifier {
 
     // Compute magnitude spectrum
     for (let k = 0; k < fftSize; k++) {
-      let real = 0, imag = 0;
+      let real = 0,
+        imag = 0;
       for (let n = 0; n < fftSize; n++) {
-        const angle = -2 * Math.PI * k * n / fftSize;
+        const angle = (-2 * Math.PI * k * n) / fftSize;
         real += i[n] * Math.cos(angle) - q[n] * Math.sin(angle);
         imag += i[n] * Math.sin(angle) + q[n] * Math.cos(angle);
       }
@@ -168,7 +174,9 @@ export class ModulationClassifier {
     }
 
     // Spectral flatness (geometric mean / arithmetic mean)
-    let logSum = 0, sum = 0, peak = 0;
+    let logSum = 0,
+      sum = 0,
+      peak = 0;
     for (let k = 0; k < fftSize; k++) {
       const val = psd[k] + 1e-10;
       logSum += Math.log(val);
@@ -224,34 +232,32 @@ export class ModulationClassifier {
     const scores = new Map<ModulationType, number>();
 
     // Simple scoring based on feature matching
-    const modTypes: ModulationType[] = [
-      'AM', 'FM', 'BPSK', 'QPSK', 'QAM', 'OFDM', 'FSK', 'ASK'
-    ];
+    const modTypes: ModulationType[] = ["AM", "FM", "BPSK", "QPSK", "QAM", "OFDM", "FSK", "ASK"];
 
     for (const mod of modTypes) {
       let score = 1.0;
 
       // Heuristic scoring for training demonstration
       switch (mod) {
-        case 'AM':
+        case "AM":
           score *= features.kurtosis > 2.5 ? 2 : 0.5;
           score *= features.spectralFlatness < 0.5 ? 2 : 0.5;
           break;
-        case 'FM':
+        case "FM":
           score *= features.stdAmplitude < 0.1 ? 2 : 0.5;
           score *= features.spectralBandwidth > 50000 ? 2 : 0.5;
           break;
-        case 'BPSK':
+        case "BPSK":
           score *= Math.abs(features.phaseStd - 1.57) < 0.5 ? 2 : 0.5;
           break;
-        case 'QPSK':
+        case "QPSK":
           score *= Math.abs(features.phaseStd - 0.78) < 0.3 ? 2 : 0.5;
           break;
-        case 'OFDM':
+        case "OFDM":
           score *= features.spectralFlatness > 0.7 ? 2 : 0.5;
           score *= features.peakToAverage > 8 ? 2 : 0.5;
           break;
-        case 'FSK':
+        case "FSK":
           score *= features.spectralFlatness < 0.3 ? 1.5 : 0.5;
           break;
         default:

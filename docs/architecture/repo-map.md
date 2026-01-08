@@ -29,87 +29,94 @@ graph TD
 ## Production vs. Labs Boundaries
 
 ### Production Critical (Strict Gates)
-*Modifications here require Code Owner approval and full CI pass.*
 
-*   `server/src/` - Core API logic.
-*   `server/src/auth/` - Authentication & Authorization.
-*   `server/src/graphql/` - Public Schema & Resolvers.
-*   `apps/web/` - Customer-facing Frontend.
-*   `server/src/provenance/` - Ledger & Audit integrity.
-*   `.github/workflows/` - CI/CD Pipelines.
-*   `deploy/` - Infrastructure as Code.
+_Modifications here require Code Owner approval and full CI pass._
+
+- `server/src/` - Core API logic.
+- `server/src/auth/` - Authentication & Authorization.
+- `server/src/graphql/` - Public Schema & Resolvers.
+- `apps/web/` - Customer-facing Frontend.
+- `server/src/provenance/` - Ledger & Audit integrity.
+- `.github/workflows/` - CI/CD Pipelines.
+- `deploy/` - Infrastructure as Code.
 
 ### Shared Infrastructure (Library)
-*Modifications here affect multiple zones.*
 
-*   `server/src/lib/` - Shared utilities.
-*   `prompts/` - LLM Prompts (Production & Experimental mixed).
-*   `docs/` - Documentation.
+_Modifications here affect multiple zones._
+
+- `server/src/lib/` - Shared utilities.
+- `prompts/` - LLM Prompts (Production & Experimental mixed).
+- `docs/` - Documentation.
 
 ### Labs / Experimental (Quarantined)
-*Code here is not guaranteed to be stable or secure for production use.*
 
-*   `server/src/black-projects/` - Experimental modules (Aurora, Oracle).
-*   `tools/ultra-agent/` - Autonomous agent prototypes.
-*   `experiments/` - Data science scripts.
-*   `intelgraph-mvp/` - Legacy/MVP code (to be migrated).
-*   `policy-fuzzer/` - Testing tools.
+_Code here is not guaranteed to be stable or secure for production use._
+
+- `server/src/black-projects/` - Experimental modules (Aurora, Oracle).
+- `tools/ultra-agent/` - Autonomous agent prototypes.
+- `experiments/` - Data science scripts.
+- `intelgraph-mvp/` - Legacy/MVP code (to be migrated).
+- `policy-fuzzer/` - Testing tools.
 
 ## Key Directories
 
 ### 1. Core Applications
-*   **`server/`**: The primary **IntelGraph API** (Node.js/Express/Apollo).
-    *   `src/index.ts`: Entry point.
-    *   `src/graphql/`: Schema and Resolvers.
-    *   `src/services/`: Business logic (Singleton services).
-    *   `src/maestro/`: Orchestration engine.
-    *   `src/provenance/`: Ledger and Audit logic.
-*   **`apps/web/`**: The **Summit Analyst Interface** (React/Vite).
-    *   `src/`: Frontend source code.
-    *   `src/components/`: Reusable UI components.
-    *   `src/graphql/`: Apollo Client queries/mutations.
+
+- **`server/`**: The primary **IntelGraph API** (Node.js/Express/Apollo).
+  - `src/index.ts`: Entry point.
+  - `src/graphql/`: Schema and Resolvers.
+  - `src/services/`: Business logic (Singleton services).
+  - `src/maestro/`: Orchestration engine.
+  - `src/provenance/`: Ledger and Audit logic.
+- **`apps/web/`**: The **Summit Analyst Interface** (React/Vite).
+  - `src/`: Frontend source code.
+  - `src/components/`: Reusable UI components.
+  - `src/graphql/`: Apollo Client queries/mutations.
 
 ### 2. Services & Agents
-*   **`services/`**: Independent microservices (Node.js/Python).
-*   **`rust/psc-runner`**: High-performance sidecar/runner.
-*   **`tools/ultra-agent`**: Autonomous development agent framework.
+
+- **`services/`**: Independent microservices (Node.js/Python).
+- **`rust/psc-runner`**: High-performance sidecar/runner.
+- **`tools/ultra-agent`**: Autonomous development agent framework.
 
 ### 3. Shared Resources
-*   **`packages/`**: Shared libraries (contracts, utils) used by multiple apps.
-*   **`prompts/`**: Centralized LLM prompts (YAML) managed by `PromptRegistry`.
+
+- **`packages/`**: Shared libraries (contracts, utils) used by multiple apps.
+- **`prompts/`**: Centralized LLM prompts (YAML) managed by `PromptRegistry`.
 
 ### 4. Infrastructure & Config
-*   **`deploy/`**: Deployment configurations (Docker Compose profiles).
-*   **`k8s/`, `helm/`**: Kubernetes manifests for production.
-*   **`.github/workflows/`**: CI/CD pipelines (`pr-quality-gate.yml` is the source of truth).
-*   **`AGENTS.md`**: Master instruction file for AI agents.
+
+- **`deploy/`**: Deployment configurations (Docker Compose profiles).
+- **`k8s/`, `helm/`**: Kubernetes manifests for production.
+- **`.github/workflows/`**: CI/CD pipelines (`pr-quality-gate.yml` is the source of truth).
+- **`AGENTS.md`**: Master instruction file for AI agents.
 
 ## Critical Paths & Owners
 
-| Domain | Path | Key Files |
-| :--- | :--- | :--- |
-| **Auth** | `server/src/auth` | `AuthService.ts`, `middleware/auth.ts` |
-| **Graph DB** | `server/src/db` | `neo4j.ts`, `migrations/` |
-| **Orchestration** | `server/src/maestro` | `MaestroOrchestrator.ts`, `runs/` |
-| **Search** | `server/src/search` | `search.ts`, `search-engine/` |
-| **Audit** | `server/src/provenance` | `ledger.ts`, `audit/worm.ts` |
+| Domain            | Path                    | Key Files                              |
+| :---------------- | :---------------------- | :------------------------------------- |
+| **Auth**          | `server/src/auth`       | `AuthService.ts`, `middleware/auth.ts` |
+| **Graph DB**      | `server/src/db`         | `neo4j.ts`, `migrations/`              |
+| **Orchestration** | `server/src/maestro`    | `MaestroOrchestrator.ts`, `runs/`      |
+| **Search**        | `server/src/search`     | `search.ts`, `search-engine/`          |
+| **Audit**         | `server/src/provenance` | `ledger.ts`, `audit/worm.ts`           |
 
 ## Developer Workflow
 
-*   **Bootstrap:** `make bootstrap` (Installs deps, setups env)
-*   **Start:** `make up` (Runs full stack via Docker Compose)
-*   **Verify:** `make smoke` (Runs golden path tests)
+- **Bootstrap:** `make bootstrap` (Installs deps, setups env)
+- **Start:** `make up` (Runs full stack via Docker Compose)
+- **Verify:** `make smoke` (Runs golden path tests)
 
 ## Boundary Enforcement
 
-*   **CI**: Production paths enforce blocking SAST/SCA checks.
-*   **Runtime**: "Labs" features must be behind Feature Flags (`ENABLE_LABS_MODE`).
-*   **Dependencies**: Production code cannot import from `black-projects` or `experiments`.
+- **CI**: Production paths enforce blocking SAST/SCA checks.
+- **Runtime**: "Labs" features must be behind Feature Flags (`ENABLE_LABS_MODE`).
+- **Dependencies**: Production code cannot import from `black-projects` or `experiments`.
 
 ## "Ghost" & Legacy Zones
 
-*   `client/`: Legacy React client (prefer `apps/web`).
-*   `apps/server`: Experimental v2 Server (prefer root `server/`).
-*   `intelgraph-mvp/`: Initial MVP reference.
+- `client/`: Legacy React client (prefer `apps/web`).
+- `apps/server`: Experimental v2 Server (prefer root `server/`).
+- `intelgraph-mvp/`: Initial MVP reference.
 
 Use this map to navigate the repository safely. When in doubt, follow the **Critical Paths**.

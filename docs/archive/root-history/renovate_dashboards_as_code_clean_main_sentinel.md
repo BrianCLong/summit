@@ -64,9 +64,7 @@ docs/observability/README.md
     {
       "matchUpdateTypes": ["minor", "patch"],
       "automerge": false,
-      "prBodyNotes": [
-        "This PR will roll out via canary using the release train."
-      ]
+      "prBodyNotes": ["This PR will roll out via canary using the release train."]
     },
     {
       "matchUpdateTypes": ["major"],
@@ -99,7 +97,7 @@ docs/observability/README.md
 name: renovate
 on:
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: "*/30 * * * *"
   workflow_dispatch: {}
 jobs:
   renovate:

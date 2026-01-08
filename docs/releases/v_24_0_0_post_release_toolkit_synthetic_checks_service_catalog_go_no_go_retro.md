@@ -58,10 +58,10 @@ metadata:
   annotations:
     pagerduty.com/service-id: intelgraph-server
     grafana/dashboard-url: https://grafana.example.com/d/v24
-    slo/read-p95-ms: '350'
-    slo/write-p95-ms: '700'
-    slo/sub-fanout-p95-ms: '250'
-    slo/error-rate-pct: '0.1'
+    slo/read-p95-ms: "350"
+    slo/write-p95-ms: "700"
+    slo/sub-fanout-p95-ms: "250"
+    slo/error-rate-pct: "0.1"
 spec:
   type: service
   lifecycle: production

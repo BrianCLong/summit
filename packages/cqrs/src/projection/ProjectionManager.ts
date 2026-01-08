@@ -4,17 +4,17 @@
  * Build and maintain read models from event streams
  */
 
-import { EventEmitter } from 'events';
-import { EventStore, DomainEvent } from '@intelgraph/event-sourcing';
-import { Pool } from 'pg';
-import pino from 'pino';
+import { EventEmitter } from "events";
+import { EventStore, DomainEvent } from "@intelgraph/event-sourcing";
+import { Pool } from "pg";
+import pino from "pino";
 import type {
   Projection,
   ProjectionState,
   ProjectionStatus,
   ProjectionOptions,
-  ProjectionStats
-} from './types.js';
+  ProjectionStats,
+} from "./types.js";
 
 export class ProjectionManager extends EventEmitter {
   private projections: Map<string, Projection> = new Map();
@@ -25,23 +25,19 @@ export class ProjectionManager extends EventEmitter {
   private polling: Map<string, NodeJS.Timeout> = new Map();
   private schema: string;
 
-  constructor(
-    eventStore: EventStore,
-    pool: Pool,
-    schema: string = 'public'
-  ) {
+  constructor(eventStore: EventStore, pool: Pool, schema: string = "public") {
     super();
     this.eventStore = eventStore;
     this.pool = pool;
     this.schema = schema;
-    this.logger = pino({ name: 'ProjectionManager' });
+    this.logger = pino({ name: "ProjectionManager" });
   }
 
   /**
    * Initialize projection manager
    */
   async initialize(): Promise<void> {
-    this.logger.info('Initializing ProjectionManager...');
+    this.logger.info("Initializing ProjectionManager...");
 
     // Create projection state table
     await this.pool.query(`
@@ -57,7 +53,7 @@ export class ProjectionManager extends EventEmitter {
       )
     `);
 
-    this.logger.info('ProjectionManager initialized');
+    this.logger.info("ProjectionManager initialized");
   }
 
   /**
@@ -72,12 +68,12 @@ export class ProjectionManager extends EventEmitter {
 
     this.logger.info(
       { name: projection.name, version: projection.version },
-      'Projection registered'
+      "Projection registered"
     );
 
     if (options.autoStart !== false) {
-      this.start(projection.name, options).catch(err => {
-        this.logger.error({ err, name: projection.name }, 'Failed to start projection');
+      this.start(projection.name, options).catch((err) => {
+        this.logger.error({ err, name: projection.name }, "Failed to start projection");
       });
     }
   }
@@ -85,10 +81,7 @@ export class ProjectionManager extends EventEmitter {
   /**
    * Start projection processing
    */
-  async start(
-    projectionName: string,
-    options: ProjectionOptions = {}
-  ): Promise<void> {
+  async start(projectionName: string, options: ProjectionOptions = {}): Promise<void> {
     const projection = this.projections.get(projectionName);
     if (!projection) {
       throw new Error(`Projection not found: ${projectionName}`);
@@ -106,12 +99,12 @@ export class ProjectionManager extends EventEmitter {
       state = {
         projectionName,
         position: 0,
-        status: 'running' as ProjectionStatus
+        status: "running" as ProjectionStatus,
       };
 
       await this.saveState(state);
     } else {
-      state.status = 'running' as ProjectionStatus;
+      state.status = "running" as ProjectionStatus;
       await this.saveState(state);
     }
 
@@ -125,10 +118,7 @@ export class ProjectionManager extends EventEmitter {
       try {
         await this.processEvents(projection, batchSize);
       } catch (err) {
-        this.logger.error(
-          { err, projectionName },
-          'Projection processing error'
-        );
+        this.logger.error({ err, projectionName }, "Projection processing error");
       }
     };
 
@@ -136,12 +126,12 @@ export class ProjectionManager extends EventEmitter {
     this.polling.set(projectionName, interval);
 
     // Initial poll
-    poll().catch(err => {
-      this.logger.error({ err, projectionName }, 'Initial poll failed');
+    poll().catch((err) => {
+      this.logger.error({ err, projectionName }, "Initial poll failed");
     });
 
-    this.logger.info({ projectionName }, 'Projection started');
-    this.emit('projection:started', projectionName);
+    this.logger.info({ projectionName }, "Projection started");
+    this.emit("projection:started", projectionName);
   }
 
   /**
@@ -156,12 +146,12 @@ export class ProjectionManager extends EventEmitter {
 
     const state = this.states.get(projectionName);
     if (state) {
-      state.status = 'stopped' as ProjectionStatus;
+      state.status = "stopped" as ProjectionStatus;
       await this.saveState(state);
     }
 
-    this.logger.info({ projectionName }, 'Projection stopped');
-    this.emit('projection:stopped', projectionName);
+    this.logger.info({ projectionName }, "Projection stopped");
+    this.emit("projection:stopped", projectionName);
   }
 
   /**
@@ -173,7 +163,7 @@ export class ProjectionManager extends EventEmitter {
       throw new Error(`Projection not found: ${projectionName}`);
     }
 
-    this.logger.info({ projectionName }, 'Rebuilding projection');
+    this.logger.info({ projectionName }, "Rebuilding projection");
 
     // Stop if running
     await this.stop(projectionName);
@@ -182,7 +172,7 @@ export class ProjectionManager extends EventEmitter {
     const state: ProjectionState = {
       projectionName,
       position: 0,
-      status: 'rebuilding' as ProjectionStatus
+      status: "rebuilding" as ProjectionStatus,
     };
 
     await this.saveState(state);
@@ -195,31 +185,28 @@ export class ProjectionManager extends EventEmitter {
 
     // Reset position and restart
     state.position = 0;
-    state.status = 'running' as ProjectionStatus;
+    state.status = "running" as ProjectionStatus;
     await this.saveState(state);
 
     await this.start(projectionName);
 
-    this.logger.info({ projectionName }, 'Projection rebuilt');
-    this.emit('projection:rebuilt', projectionName);
+    this.logger.info({ projectionName }, "Projection rebuilt");
+    this.emit("projection:rebuilt", projectionName);
   }
 
   /**
    * Process events for projection
    */
-  private async processEvents(
-    projection: Projection,
-    batchSize: number
-  ): Promise<void> {
+  private async processEvents(projection: Projection, batchSize: number): Promise<void> {
     const state = this.states.get(projection.name);
-    if (!state || state.status !== 'running') {
+    if (!state || state.status !== "running") {
       return;
     }
 
     try {
       // Get events since last position
       const events = await this.eventStore.queryEvents({
-        fromTimestamp: state.lastEventTimestamp
+        fromTimestamp: state.lastEventTimestamp,
       });
 
       if (events.length === 0) {
@@ -244,23 +231,20 @@ export class ProjectionManager extends EventEmitter {
 
       await this.saveState(state);
 
-      this.emit('projection:events-processed', {
+      this.emit("projection:events-processed", {
         projectionName: projection.name,
-        count: batch.length
+        count: batch.length,
       });
     } catch (err: any) {
-      this.logger.error(
-        { err, projectionName: projection.name },
-        'Event processing failed'
-      );
+      this.logger.error({ err, projectionName: projection.name }, "Event processing failed");
 
-      state.status = 'error' as ProjectionStatus;
+      state.status = "error" as ProjectionStatus;
       state.error = err.message;
       await this.saveState(state);
 
-      this.emit('projection:error', {
+      this.emit("projection:error", {
         projectionName: projection.name,
-        error: err
+        error: err,
       });
     }
   }
@@ -268,9 +252,7 @@ export class ProjectionManager extends EventEmitter {
   /**
    * Load projection state
    */
-  private async loadState(
-    projectionName: string
-  ): Promise<ProjectionState | null> {
+  private async loadState(projectionName: string): Promise<ProjectionState | null> {
     const result = await this.pool.query(
       `SELECT * FROM ${this.schema}.projection_state WHERE projection_name = $1`,
       [projectionName]
@@ -288,7 +270,7 @@ export class ProjectionManager extends EventEmitter {
       lastProcessedVersion: row.last_processed_version,
       position: parseInt(row.position, 10),
       status: row.status,
-      error: row.error
+      error: row.error,
     };
   }
 
@@ -316,7 +298,7 @@ export class ProjectionManager extends EventEmitter {
         state.lastProcessedVersion,
         state.position,
         state.status,
-        state.error
+        state.error,
       ]
     );
   }
@@ -340,7 +322,7 @@ export class ProjectionManager extends EventEmitter {
       eventsProcessed: state.position,
       lastEventTimestamp: state.lastEventTimestamp,
       processingRate,
-      lag: undefined
+      lag: undefined,
     };
   }
 
@@ -348,12 +330,12 @@ export class ProjectionManager extends EventEmitter {
    * Shutdown projection manager
    */
   async shutdown(): Promise<void> {
-    this.logger.info('Shutting down ProjectionManager...');
+    this.logger.info("Shutting down ProjectionManager...");
 
     for (const projectionName of this.projections.keys()) {
       await this.stop(projectionName);
     }
 
-    this.logger.info('ProjectionManager shut down');
+    this.logger.info("ProjectionManager shut down");
   }
 }

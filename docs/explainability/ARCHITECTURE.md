@@ -7,12 +7,15 @@ EXPLAINABILITY instruments Summit's AI pipeline to capture complete reasoning ch
 ## Core Concepts
 
 ### Inference Chain
+
 An inference chain is a directed acyclic graph (DAG) of operations:
+
 - **Root**: User query or agent task
 - **Nodes**: Individual operations (RAG query, graph traversal, policy check, model invocation)
 - **Edges**: Parent/child relationships (operation X triggered operation Y)
 
 ### Instrumentation Points
+
 - **RAG Service**: Captures vector similarity queries, retrieved documents, scores
 - **Neo4j Driver**: Captures Cypher queries, execution plans, returned nodes/edges
 - **OPA Policy Fetcher**: Captures policy evaluations, matched rules, allow/deny decisions
@@ -22,19 +25,19 @@ An inference chain is a directed acyclic graph (DAG) of operations:
 
 \`\`\`
 User Query
-  ↓
+↓
 Apollo Resolver (creates inference context)
-  ↓
+↓
 RAG Service (wrapped) → Emits rag.query events
-  ↓
+↓
 Neo4j Driver (wrapped) → Emits graph.traversal events
-  ↓
+↓
 Policy Check (wrapped) → Emits policy.decision events
-  ↓
+↓
 Collector (Redis subscriber) → Assembles inference tree
-  ↓
+↓
 PostgreSQL (persists inference chains)
-  ↓
+↓
 Query API (retrieves for audit/review)
 \`\`\`
 
@@ -44,14 +47,14 @@ Query API (retrieves for audit/review)
 
 \`\`\`sql
 CREATE TABLE inference_chains (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  inference_id UUID NOT NULL UNIQUE,
-  parent_inference_id UUID,
-  user_id TEXT NOT NULL,
-  event_type TEXT NOT NULL,
-  timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  data JSONB NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+inference_id UUID NOT NULL UNIQUE,
+parent_inference_id UUID,
+user_id TEXT NOT NULL,
+event_type TEXT NOT NULL,
+timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+data JSONB NOT NULL,
+created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_inference_chains_inference_id ON inference_chains(inference_id);
@@ -76,18 +79,18 @@ CREATE INDEX idx_inference_chains_timestamp ON inference_chains(timestamp);
 
 \`\`\`graphql
 type InferenceChain {
-  id: ID!
-  inferenceId: ID!
-  parentInferenceId: ID
-  eventType: String!
-  timestamp: DateTime!
-  data: JSON!
-  children: [InferenceChain!]!
+id: ID!
+inferenceId: ID!
+parentInferenceId: ID
+eventType: String!
+timestamp: DateTime!
+data: JSON!
+children: [InferenceChain!]!
 }
 
 type Query {
-  inferenceChain(inferenceId: ID!): InferenceChain
-  inferenceChainsByUser(userId: ID!, limit: Int = 100): [InferenceChain!]!
+inferenceChain(inferenceId: ID!): InferenceChain
+inferenceChainsByUser(userId: ID!, limit: Int = 100): [InferenceChain!]!
 }
 \`\`\`
 

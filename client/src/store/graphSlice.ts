@@ -1,5 +1,5 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ElementDefinition } from 'cytoscape';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { ElementDefinition } from "cytoscape";
 
 export interface GraphDataState {
   nodes: ElementDefinition[];
@@ -12,7 +12,7 @@ const initialState: GraphDataState = {
 };
 
 const graphSlice = createSlice({
-  name: 'graphData',
+  name: "graphData",
   initialState,
   reducers: {
     addNode(state, action: PayloadAction<ElementDefinition>) {

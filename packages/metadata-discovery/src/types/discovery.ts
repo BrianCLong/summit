@@ -18,17 +18,17 @@ export interface DataSourceConfig {
  * Data Source Types
  */
 export enum DataSourceType {
-  POSTGRESQL = 'POSTGRESQL',
-  MYSQL = 'MYSQL',
-  MONGODB = 'MONGODB',
-  NEO4J = 'NEO4J',
-  S3 = 'S3',
-  HDFS = 'HDFS',
-  API = 'API',
-  FILE_SYSTEM = 'FILE_SYSTEM',
-  SNOWFLAKE = 'SNOWFLAKE',
-  BIGQUERY = 'BIGQUERY',
-  REDSHIFT = 'REDSHIFT',
+  POSTGRESQL = "POSTGRESQL",
+  MYSQL = "MYSQL",
+  MONGODB = "MONGODB",
+  NEO4J = "NEO4J",
+  S3 = "S3",
+  HDFS = "HDFS",
+  API = "API",
+  FILE_SYSTEM = "FILE_SYSTEM",
+  SNOWFLAKE = "SNOWFLAKE",
+  BIGQUERY = "BIGQUERY",
+  REDSHIFT = "REDSHIFT",
 }
 
 /**
@@ -89,11 +89,11 @@ export interface DiscoveryJobExecution {
  * Job Status
  */
 export enum JobStatus {
-  PENDING = 'PENDING',
-  RUNNING = 'RUNNING',
-  COMPLETED = 'COMPLETED',
-  FAILED = 'FAILED',
-  CANCELLED = 'CANCELLED',
+  PENDING = "PENDING",
+  RUNNING = "RUNNING",
+  COMPLETED = "COMPLETED",
+  FAILED = "FAILED",
+  CANCELLED = "CANCELLED",
 }
 
 /**
@@ -111,10 +111,10 @@ export interface DiscoveryError {
  * Error Severity
  */
 export enum ErrorSeverity {
-  INFO = 'INFO',
-  WARNING = 'WARNING',
-  ERROR = 'ERROR',
-  CRITICAL = 'CRITICAL',
+  INFO = "INFO",
+  WARNING = "WARNING",
+  ERROR = "ERROR",
+  CRITICAL = "CRITICAL",
 }
 
 /**
@@ -224,13 +224,13 @@ export interface DataPattern {
  * Pattern Types
  */
 export enum PatternType {
-  EMAIL = 'EMAIL',
-  PHONE = 'PHONE',
-  URL = 'URL',
-  IP_ADDRESS = 'IP_ADDRESS',
-  DATE = 'DATE',
-  CURRENCY = 'CURRENCY',
-  SSN = 'SSN',
-  CREDIT_CARD = 'CREDIT_CARD',
-  CUSTOM = 'CUSTOM',
+  EMAIL = "EMAIL",
+  PHONE = "PHONE",
+  URL = "URL",
+  IP_ADDRESS = "IP_ADDRESS",
+  DATE = "DATE",
+  CURRENCY = "CURRENCY",
+  SSN = "SSN",
+  CREDIT_CARD = "CREDIT_CARD",
+  CUSTOM = "CUSTOM",
 }

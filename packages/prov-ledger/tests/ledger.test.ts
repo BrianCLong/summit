@@ -1,10 +1,10 @@
-import { Ledger } from '../src/ledger';
-import { Verifier } from '../src/verifier';
-import fs from 'fs';
+import { Ledger } from "../src/ledger";
+import { Verifier } from "../src/verifier";
+import fs from "fs";
 
-const TEST_DIR = './tmp/test-ledger';
+const TEST_DIR = "./tmp/test-ledger";
 
-describe('Ledger', () => {
+describe("Ledger", () => {
   let ledger: Ledger;
 
   beforeEach(() => {
@@ -20,35 +20,35 @@ describe('Ledger', () => {
     }
   });
 
-  test('should register evidence and create claim', () => {
+  test("should register evidence and create claim", () => {
     const evidence = ledger.registerEvidence({
-      contentHash: 'abc',
-      licenseId: 'MIT',
-      source: 'user',
-      transforms: []
+      contentHash: "abc",
+      licenseId: "MIT",
+      source: "user",
+      transforms: [],
     });
     expect(evidence.id).toBeDefined();
 
     const claim = ledger.createClaim({
       evidenceIds: [evidence.id],
       transformChainIds: [],
-      text: 'test claim'
+      text: "test claim",
     });
     expect(claim.id).toBeDefined();
     expect(claim.hash).toBeDefined();
   });
 
-  test('should verify valid manifest', () => {
+  test("should verify valid manifest", () => {
     const evidence = ledger.registerEvidence({
-      contentHash: 'abc',
-      licenseId: 'MIT',
-      source: 'user',
-      transforms: []
+      contentHash: "abc",
+      licenseId: "MIT",
+      source: "user",
+      transforms: [],
     });
     const claim = ledger.createClaim({
       evidenceIds: [evidence.id],
       transformChainIds: [],
-      text: 'test claim'
+      text: "test claim",
     });
 
     const manifest = ledger.generateManifest([claim.id]);
@@ -56,24 +56,24 @@ describe('Ledger', () => {
     expect(verification.valid).toBe(true);
   });
 
-  test('should fail verification on tampered claim', () => {
+  test("should fail verification on tampered claim", () => {
     const evidence = ledger.registerEvidence({
-      contentHash: 'abc',
-      licenseId: 'MIT',
-      source: 'user',
-      transforms: []
+      contentHash: "abc",
+      licenseId: "MIT",
+      source: "user",
+      transforms: [],
     });
     const claim = ledger.createClaim({
       evidenceIds: [evidence.id],
       transformChainIds: [],
-      text: 'test claim'
+      text: "test claim",
     });
 
     const manifest = ledger.generateManifest([claim.id]);
 
     // Tamper
     if (manifest.claims.length > 0 && manifest.claims[0]) {
-        manifest.claims[0].text = 'tampered text';
+      manifest.claims[0].text = "tampered text";
     }
 
     const verification = Verifier.verifyManifest(manifest);
@@ -81,23 +81,23 @@ describe('Ledger', () => {
     expect(verification.errors.length).toBeGreaterThan(0);
   });
 
-  test('should fail verification on tampered merkle root', () => {
+  test("should fail verification on tampered merkle root", () => {
     const evidence = ledger.registerEvidence({
-      contentHash: 'abc',
-      licenseId: 'MIT',
-      source: 'user',
-      transforms: []
+      contentHash: "abc",
+      licenseId: "MIT",
+      source: "user",
+      transforms: [],
     });
     const claim = ledger.createClaim({
       evidenceIds: [evidence.id],
       transformChainIds: [],
-      text: 'test claim'
+      text: "test claim",
     });
 
     const manifest = ledger.generateManifest([claim.id]);
 
     // Tamper Root
-    manifest.merkleRoot = 'deadbeef';
+    manifest.merkleRoot = "deadbeef";
 
     const verification = Verifier.verifyManifest(manifest);
     expect(verification.valid).toBe(false);

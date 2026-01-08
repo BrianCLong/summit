@@ -1,19 +1,10 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Card,
-  CardContent,
-  Grid,
-  Chip,
-} from '@mui/material';
-import { apiFetch } from '../../services/api';
+import React, { useState } from "react";
+import { Box, Typography, TextField, Button, Card, CardContent, Grid, Chip } from "@mui/material";
+import { apiFetch } from "../../services/api";
 
 export default function SimulationPanel() {
-  const [investigationId, setInvestigationId] = useState('');
-  const [seeds, setSeeds] = useState('');
+  const [investigationId, setInvestigationId] = useState("");
+  const [seeds, setSeeds] = useState("");
   const [steps, setSteps] = useState(5);
   const [probability, setProbability] = useState(0.2);
   const [busy, setBusy] = useState(false);
@@ -25,14 +16,14 @@ export default function SimulationPanel() {
       const body = {
         investigationId,
         seeds: seeds
-          .split(',')
+          .split(",")
           .map((s) => s.trim())
           .filter(Boolean),
         steps: Number(steps),
         probability: Number(probability),
       };
-      const res = await apiFetch('/api/simulate/spread', {
-        method: 'POST',
+      const res = await apiFetch("/api/simulate/spread", {
+        method: "POST",
         body: JSON.stringify(body),
       });
       setTimeline(res.timeline || []);
@@ -85,12 +76,8 @@ export default function SimulationPanel() {
               />
             </Grid>
             <Grid item xs={12}>
-              <Button
-                variant="contained"
-                onClick={run}
-                disabled={busy || !investigationId}
-              >
-                {busy ? 'Running…' : 'Simulate'}
+              <Button variant="contained" onClick={run} disabled={busy || !investigationId}>
+                {busy ? "Running…" : "Simulate"}
               </Button>
             </Grid>
           </Grid>
@@ -105,10 +92,9 @@ export default function SimulationPanel() {
             {timeline.map((step) => (
               <Box key={step.step} sx={{ mb: 1 }}>
                 <Typography variant="subtitle2">
-                  Step {step.step} — newly infected ({step.newlyInfected.length}
-                  )
+                  Step {step.step} — newly infected ({step.newlyInfected.length})
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
                   {step.newlyInfected.map((id) => (
                     <Chip key={id} label={id} size="small" />
                   ))}

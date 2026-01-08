@@ -159,37 +159,17 @@ flowchart LR
 {
   "$id": "ig.contract.v1",
   "type": "object",
-  "required": [
-    "datasetId",
-    "version",
-    "tenantId",
-    "license",
-    "purpose",
-    "retention",
-    "sla"
-  ],
+  "required": ["datasetId", "version", "tenantId", "license", "purpose", "retention", "sla"],
   "properties": {
     "datasetId": { "type": "string" },
     "version": { "type": "string" },
     "tenantId": { "type": "string" },
     "license": {
-      "enum": [
-        "MIT-OK",
-        "Open-Data-OK",
-        "Restricted-TOS",
-        "Proprietary-Client",
-        "Embargoed"
-      ]
+      "enum": ["MIT-OK", "Open-Data-OK", "Restricted-TOS", "Proprietary-Client", "Embargoed"]
     },
     "purpose": { "type": "array", "items": { "type": "string" } },
     "retention": {
-      "enum": [
-        "ephemeral-7d",
-        "short-30d",
-        "standard-365d",
-        "long-1825d",
-        "legal-hold"
-      ]
+      "enum": ["ephemeral-7d", "short-30d", "standard-365d", "long-1825d", "legal-hold"]
     },
     "sla": {
       "type": "object",
@@ -265,19 +245,13 @@ type TemporalPath {
 }
 
 type Query {
-  contract(datasetId: ID!, version: String!): DataContract
-    @auth(abac: "contract.read")
-  temporalPath(
-    entityId: ID!
-    from: DateTime!
-    to: DateTime!
-    maxHops: Int = 2
-  ): TemporalPath @auth(abac: "analytics.read")
+  contract(datasetId: ID!, version: String!): DataContract @auth(abac: "contract.read")
+  temporalPath(entityId: ID!, from: DateTime!, to: DateTime!, maxHops: Int = 2): TemporalPath
+    @auth(abac: "analytics.read")
 }
 
 type Mutation {
-  upsertContract(input: DataContractInput!): Boolean
-    @auth(abac: "contract.write")
+  upsertContract(input: DataContractInput!): Boolean @auth(abac: "contract.write")
 }
 ```
 

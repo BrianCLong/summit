@@ -31,7 +31,7 @@ export interface PlanBaseline {
 
 export interface PlanDiff {
   path: string;
-  field: keyof PlanSignatureNode | 'children' | 'sqlHash' | 'baseline';
+  field: keyof PlanSignatureNode | "children" | "sqlHash" | "baseline";
   baseline?: string | number | undefined;
   current?: string | number | undefined;
   message: string;

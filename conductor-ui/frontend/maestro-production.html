@@ -19,8 +19,7 @@
       }
       body {
         font-family:
-          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-          'Helvetica Neue', Arial, sans-serif;
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: #1a202c;
         min-height: 100vh;
@@ -206,7 +205,7 @@
         overflow: hidden;
       }
       .card::before {
-        content: '';
+        content: "";
         position: absolute;
         top: 0;
         left: 0;
@@ -456,18 +455,13 @@
         position: relative;
       }
       .progress-fill::after {
-        content: '';
+        content: "";
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background: linear-gradient(
-          90deg,
-          transparent,
-          rgba(255, 255, 255, 0.3),
-          transparent
-        );
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
         animation: shimmer 2s infinite;
       }
       @keyframes shimmer {
@@ -712,66 +706,66 @@
             budgets: { remaining: 2450, cap: 5000, utilization: 51.0 },
             runs: [
               {
-                id: 'run-2849',
-                status: 'running',
-                pipeline: 'data-ingestion',
+                id: "run-2849",
+                status: "running",
+                pipeline: "data-ingestion",
                 progress: 75,
               },
               {
-                id: 'run-2848',
-                status: 'completed',
-                pipeline: 'ml-training',
+                id: "run-2848",
+                status: "completed",
+                pipeline: "ml-training",
                 progress: 100,
               },
               {
-                id: 'run-2847',
-                status: 'failed',
-                pipeline: 'model-serving',
+                id: "run-2847",
+                status: "failed",
+                pipeline: "model-serving",
                 progress: 45,
               },
               {
-                id: 'run-2846',
-                status: 'completed',
-                pipeline: 'analytics',
+                id: "run-2846",
+                status: "completed",
+                pipeline: "analytics",
                 progress: 100,
               },
               {
-                id: 'run-2845',
-                status: 'pending',
-                pipeline: 'data-ingestion',
+                id: "run-2845",
+                status: "pending",
+                pipeline: "data-ingestion",
                 progress: 0,
               },
             ],
             changes: [
               {
-                at: '17:45',
-                title: 'Auto-scaled workers from 3 to 5',
-                by: 'system',
-                type: 'automation',
+                at: "17:45",
+                title: "Auto-scaled workers from 3 to 5",
+                by: "system",
+                type: "automation",
               },
               {
-                at: '16:23',
-                title: 'Pipeline config updated',
-                by: 'jane.doe',
-                type: 'manual',
+                at: "16:23",
+                title: "Pipeline config updated",
+                by: "jane.doe",
+                type: "manual",
               },
               {
-                at: '15:18',
-                title: 'New user added',
-                by: 'admin',
-                type: 'access',
+                at: "15:18",
+                title: "New user added",
+                by: "admin",
+                type: "access",
               },
               {
-                at: '14:45',
-                title: 'SLO threshold adjusted',
-                by: 'john.smith',
-                type: 'config',
+                at: "14:45",
+                title: "SLO threshold adjusted",
+                by: "john.smith",
+                type: "config",
               },
               {
-                at: '13:12',
-                title: 'Security patch applied',
-                by: 'system',
-                type: 'maintenance',
+                at: "13:12",
+                title: "Security patch applied",
+                by: "system",
+                type: "maintenance",
               },
             ],
           };
@@ -781,18 +775,13 @@
           await new Promise((resolve) => setTimeout(resolve, 200));
           return Array.from({ length: 15 }, (_, i) => ({
             id: `run-${2849 + i}`,
-            pipeline: [
-              'data-ingestion',
-              'ml-training',
-              'model-serving',
-              'analytics',
-            ][Math.floor(Math.random() * 4)],
-            status: ['running', 'completed', 'failed', 'pending'][
+            pipeline: ["data-ingestion", "ml-training", "model-serving", "analytics"][
               Math.floor(Math.random() * 4)
             ],
+            status: ["running", "completed", "failed", "pending"][Math.floor(Math.random() * 4)],
             durationMs: 1000 + Math.floor(Math.random() * 120000),
             cost: (Math.random() * 25).toFixed(2),
-            user: ['john.doe', 'jane.smith', 'bob.wilson', 'alice.brown'][
+            user: ["john.doe", "jane.smith", "bob.wilson", "alice.brown"][
               Math.floor(Math.random() * 4)
             ],
             startTime: new Date(Date.now() - Math.random() * 86400000),
@@ -804,52 +793,52 @@
           await new Promise((resolve) => setTimeout(resolve, 250));
           return [
             {
-              id: 'pipeline-1',
-              name: 'Data Ingestion Pipeline',
-              version: 'v2.1',
-              owner: 'data-team',
-              status: 'active',
-              description: 'Processes raw data from multiple sources',
+              id: "pipeline-1",
+              name: "Data Ingestion Pipeline",
+              version: "v2.1",
+              owner: "data-team",
+              status: "active",
+              description: "Processes raw data from multiple sources",
             },
             {
-              id: 'pipeline-2',
-              name: 'ML Training Pipeline',
-              version: 'v1.8',
-              owner: 'ml-team',
-              status: 'active',
-              description: 'Trains machine learning models',
+              id: "pipeline-2",
+              name: "ML Training Pipeline",
+              version: "v1.8",
+              owner: "ml-team",
+              status: "active",
+              description: "Trains machine learning models",
             },
             {
-              id: 'pipeline-3',
-              name: 'Model Serving Pipeline',
-              version: 'v3.2',
-              owner: 'platform-team',
-              status: 'active',
-              description: 'Deploys models to production',
+              id: "pipeline-3",
+              name: "Model Serving Pipeline",
+              version: "v3.2",
+              owner: "platform-team",
+              status: "active",
+              description: "Deploys models to production",
             },
             {
-              id: 'pipeline-4',
-              name: 'Analytics Pipeline',
-              version: 'v1.5',
-              owner: 'analytics-team',
-              status: 'active',
-              description: 'Generates business intelligence reports',
+              id: "pipeline-4",
+              name: "Analytics Pipeline",
+              version: "v1.5",
+              owner: "analytics-team",
+              status: "active",
+              description: "Generates business intelligence reports",
             },
             {
-              id: 'pipeline-5',
-              name: 'Data Validation Pipeline',
-              version: 'v1.2',
-              owner: 'data-team',
-              status: 'inactive',
-              description: 'Validates data quality',
+              id: "pipeline-5",
+              name: "Data Validation Pipeline",
+              version: "v1.2",
+              owner: "data-team",
+              status: "inactive",
+              description: "Validates data quality",
             },
             {
-              id: 'pipeline-6',
-              name: 'Real-time Processing',
-              version: 'v2.3',
-              owner: 'streaming-team',
-              status: 'active',
-              description: 'Processes real-time streams',
+              id: "pipeline-6",
+              name: "Real-time Processing",
+              version: "v2.3",
+              owner: "streaming-team",
+              status: "active",
+              description: "Processes real-time streams",
             },
           ];
         },
@@ -885,55 +874,55 @@
             canary: 0.1,
             policies: [
               {
-                title: 'Resource Limits',
-                state: 'active',
-                description: 'Enforces CPU and memory constraints',
+                title: "Resource Limits",
+                state: "active",
+                description: "Enforces CPU and memory constraints",
               },
               {
-                title: 'Cost Controls',
-                state: 'active',
-                description: 'Prevents spending over budget',
+                title: "Cost Controls",
+                state: "active",
+                description: "Prevents spending over budget",
               },
               {
-                title: 'Security Gates',
-                state: 'active',
-                description: 'Validates security compliance',
+                title: "Security Gates",
+                state: "active",
+                description: "Validates security compliance",
               },
               {
-                title: 'Performance SLOs',
-                state: 'monitoring',
-                description: 'Monitors service levels',
+                title: "Performance SLOs",
+                state: "monitoring",
+                description: "Monitors service levels",
               },
               {
-                title: 'Data Quality Gates',
-                state: 'active',
-                description: 'Ensures data quality',
+                title: "Data Quality Gates",
+                state: "active",
+                description: "Ensures data quality",
               },
             ],
             recentDecisions: [
               {
-                timestamp: '17:45',
-                action: 'Auto-scaled workers from 3 to 5',
-                reason: 'High queue depth detected',
-                impact: 'Reduced latency by 40%',
+                timestamp: "17:45",
+                action: "Auto-scaled workers from 3 to 5",
+                reason: "High queue depth detected",
+                impact: "Reduced latency by 40%",
               },
               {
-                timestamp: '16:23',
-                action: 'Rolled back model deployment',
-                reason: 'Error rate exceeded threshold',
-                impact: 'Prevented service degradation',
+                timestamp: "16:23",
+                action: "Rolled back model deployment",
+                reason: "Error rate exceeded threshold",
+                impact: "Prevented service degradation",
               },
               {
-                timestamp: '15:18',
-                action: 'Applied resource limits',
-                reason: 'CPU usage exceeded 85%',
-                impact: 'Maintained stability',
+                timestamp: "15:18",
+                action: "Applied resource limits",
+                reason: "CPU usage exceeded 85%",
+                impact: "Maintained stability",
               },
               {
-                timestamp: '14:45',
-                action: 'Triggered quality alert',
-                reason: 'Data completeness dropped',
-                impact: 'Prevented downstream issues',
+                timestamp: "14:45",
+                action: "Triggered quality alert",
+                reason: "Data completeness dropped",
+                impact: "Prevented downstream issues",
               },
             ],
           };
@@ -941,12 +930,7 @@
       };
 
       // Simple SVG Chart Component
-      const SimpleChart = ({
-        data,
-        width = 400,
-        height = 200,
-        color = '#667eea',
-      }) => {
+      const SimpleChart = ({ data, width = 400, height = 200, color = "#667eea" }) => {
         const maxValue = Math.max(...data.map((d) => d.value));
         const points = data
           .map((d, i) => {
@@ -954,36 +938,24 @@
             const y = height - (d.value / maxValue) * height;
             return `${x},${y}`;
           })
-          .join(' ');
+          .join(" ");
 
         return (
-          <svg
-            width={width}
-            height={height}
-            style={{ width: '100%', height: '100%' }}
-          >
+          <svg width={width} height={height} style={{ width: "100%", height: "100%" }}>
             <defs>
               <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stopColor={color} stopOpacity="0.3" />
                 <stop offset="100%" stopColor={color} stopOpacity="0" />
               </linearGradient>
             </defs>
-            <polyline
-              fill="none"
-              stroke={color}
-              strokeWidth="3"
-              points={points}
-            />
-            <polygon
-              fill="url(#gradient)"
-              points={`0,${height} ${points} ${width},${height}`}
-            />
+            <polyline fill="none" stroke={color} strokeWidth="3" points={points} />
+            <polygon fill="url(#gradient)" points={`0,${height} ${points} ${width},${height}`} />
           </svg>
         );
       };
 
       function MaestroApp() {
-        const [currentPage, setCurrentPage] = useState('home');
+        const [currentPage, setCurrentPage] = useState("home");
         const [loading, setLoading] = useState({});
         const [data, setData] = useState({});
         const [showModal, setShowModal] = useState(null);
@@ -1003,17 +975,17 @@
         }, []);
 
         useEffect(() => {
-          if (currentPage === 'home') {
-            loadData('summary', mockApi.getSummary);
-            loadData('metrics', mockApi.getMetrics);
-          } else if (currentPage === 'runs') {
-            loadData('runs', mockApi.getRuns);
-          } else if (currentPage === 'pipelines') {
-            loadData('pipelines', mockApi.getPipelines);
-          } else if (currentPage === 'autonomy') {
-            loadData('autonomy', mockApi.getAutonomy);
-          } else if (currentPage === 'observability') {
-            loadData('metrics', mockApi.getMetrics);
+          if (currentPage === "home") {
+            loadData("summary", mockApi.getSummary);
+            loadData("metrics", mockApi.getMetrics);
+          } else if (currentPage === "runs") {
+            loadData("runs", mockApi.getRuns);
+          } else if (currentPage === "pipelines") {
+            loadData("pipelines", mockApi.getPipelines);
+          } else if (currentPage === "autonomy") {
+            loadData("autonomy", mockApi.getAutonomy);
+          } else if (currentPage === "observability") {
+            loadData("metrics", mockApi.getMetrics);
           }
         }, [currentPage, loadData]);
 
@@ -1029,16 +1001,10 @@
               </div>
             </div>
             <div className="header-right">
-              <div
-                className="cmd-palette"
-                onClick={() => setShowModal('commandPalette')}
-              >
+              <div className="cmd-palette" onClick={() => setShowModal("commandPalette")}>
                 <i className="fas fa-search"></i> ⌘K Command Palette
               </div>
-              <div
-                className="user-profile"
-                onClick={() => setShowModal('userProfile')}
-              >
+              <div className="user-profile" onClick={() => setShowModal("userProfile")}>
                 JD
               </div>
             </div>
@@ -1051,10 +1017,10 @@
               <div className="nav-title">Core Operations</div>
               <a
                 href="#"
-                className={`nav-item ${currentPage === 'home' ? 'active' : ''}`}
+                className={`nav-item ${currentPage === "home" ? "active" : ""}`}
                 onClick={(e) => {
                   e.preventDefault();
-                  setCurrentPage('home');
+                  setCurrentPage("home");
                 }}
               >
                 <i className="fas fa-home"></i>
@@ -1062,10 +1028,10 @@
               </a>
               <a
                 href="#"
-                className={`nav-item ${currentPage === 'runs' ? 'active' : ''}`}
+                className={`nav-item ${currentPage === "runs" ? "active" : ""}`}
                 onClick={(e) => {
                   e.preventDefault();
-                  setCurrentPage('runs');
+                  setCurrentPage("runs");
                 }}
               >
                 <i className="fas fa-play-circle"></i>
@@ -1073,10 +1039,10 @@
               </a>
               <a
                 href="#"
-                className={`nav-item ${currentPage === 'pipelines' ? 'active' : ''}`}
+                className={`nav-item ${currentPage === "pipelines" ? "active" : ""}`}
                 onClick={(e) => {
                   e.preventDefault();
-                  setCurrentPage('pipelines');
+                  setCurrentPage("pipelines");
                 }}
               >
                 <i className="fas fa-project-diagram"></i>
@@ -1084,10 +1050,10 @@
               </a>
               <a
                 href="#"
-                className={`nav-item ${currentPage === 'observability' ? 'active' : ''}`}
+                className={`nav-item ${currentPage === "observability" ? "active" : ""}`}
                 onClick={(e) => {
                   e.preventDefault();
-                  setCurrentPage('observability');
+                  setCurrentPage("observability");
                 }}
               >
                 <i className="fas fa-chart-line"></i>
@@ -1099,10 +1065,10 @@
               <div className="nav-title">Autonomous Systems</div>
               <a
                 href="#"
-                className={`nav-item ${currentPage === 'autonomy' ? 'active' : ''}`}
+                className={`nav-item ${currentPage === "autonomy" ? "active" : ""}`}
                 onClick={(e) => {
                   e.preventDefault();
-                  setCurrentPage('autonomy');
+                  setCurrentPage("autonomy");
                 }}
               >
                 <i className="fas fa-robot"></i>
@@ -1110,10 +1076,10 @@
               </a>
               <a
                 href="#"
-                className={`nav-item ${currentPage === 'policies' ? 'active' : ''}`}
+                className={`nav-item ${currentPage === "policies" ? "active" : ""}`}
                 onClick={(e) => {
                   e.preventDefault();
-                  setCurrentPage('policies');
+                  setCurrentPage("policies");
                 }}
               >
                 <i className="fas fa-shield-alt"></i>
@@ -1121,10 +1087,10 @@
               </a>
               <a
                 href="#"
-                className={`nav-item ${currentPage === 'cost' ? 'active' : ''}`}
+                className={`nav-item ${currentPage === "cost" ? "active" : ""}`}
                 onClick={(e) => {
                   e.preventDefault();
-                  setCurrentPage('cost');
+                  setCurrentPage("cost");
                 }}
               >
                 <i className="fas fa-dollar-sign"></i>
@@ -1136,10 +1102,10 @@
               <div className="nav-title">Platform Services</div>
               <a
                 href="#"
-                className={`nav-item ${currentPage === 'recipes' ? 'active' : ''}`}
+                className={`nav-item ${currentPage === "recipes" ? "active" : ""}`}
                 onClick={(e) => {
                   e.preventDefault();
-                  setCurrentPage('recipes');
+                  setCurrentPage("recipes");
                 }}
               >
                 <i className="fas fa-book"></i>
@@ -1147,10 +1113,10 @@
               </a>
               <a
                 href="#"
-                className={`nav-item ${currentPage === 'secrets' ? 'active' : ''}`}
+                className={`nav-item ${currentPage === "secrets" ? "active" : ""}`}
                 onClick={(e) => {
                   e.preventDefault();
-                  setCurrentPage('secrets');
+                  setCurrentPage("secrets");
                 }}
               >
                 <i className="fas fa-key"></i>
@@ -1158,10 +1124,10 @@
               </a>
               <a
                 href="#"
-                className={`nav-item ${currentPage === 'admin' ? 'active' : ''}`}
+                className={`nav-item ${currentPage === "admin" ? "active" : ""}`}
                 onClick={(e) => {
                   e.preventDefault();
-                  setCurrentPage('admin');
+                  setCurrentPage("admin");
                 }}
               >
                 <i className="fas fa-cogs"></i>
@@ -1190,18 +1156,14 @@
                 <div className="card-header">
                   <div>
                     <div className="card-title">System Health</div>
-                    <div className="card-subtitle">
-                      Real-time operational status
-                    </div>
+                    <div className="card-subtitle">Real-time operational status</div>
                   </div>
                 </div>
                 <div className="metrics-row">
                   <div className="metric">
                     <div className="metric-label">Success Rate</div>
                     <div className="metric-value">
-                      {summary
-                        ? (summary.health.success * 100).toFixed(1)
-                        : '99.2'}
+                      {summary ? (summary.health.success * 100).toFixed(1) : "99.2"}
                       <span className="metric-unit">%</span>
                     </div>
                     <div className="metric-change positive">
@@ -1213,7 +1175,7 @@
                   <div className="metric">
                     <div className="metric-label">P95 Latency</div>
                     <div className="metric-value">
-                      {summary?.health.p95 || '145'}
+                      {summary?.health.p95 || "145"}
                       <span className="metric-unit">ms</span>
                     </div>
                     <div className="metric-change positive">
@@ -1223,7 +1185,7 @@
                   <div className="metric">
                     <div className="metric-label">Uptime</div>
                     <div className="metric-value">
-                      {summary?.health.uptime || '99.8'}
+                      {summary?.health.uptime || "99.8"}
                       <span className="metric-unit">%</span>
                     </div>
                     <div className="metric-change positive">
@@ -1238,29 +1200,23 @@
                 <div className="card-header">
                   <div>
                     <div className="card-title">Autonomous Operations</div>
-                    <div className="card-subtitle">
-                      Current autonomy configuration
-                    </div>
+                    <div className="card-subtitle">Current autonomy configuration</div>
                   </div>
                 </div>
                 <div className="metrics-row">
                   <div className="metric">
                     <div className="metric-label">Autonomy Level</div>
-                    <div className="metric-value" style={{ color: '#667eea' }}>
-                      L{summary?.autonomy.level || '2'}
+                    <div className="metric-value" style={{ color: "#667eea" }}>
+                      L{summary?.autonomy.level || "2"}
                     </div>
-                    <div className="metric-change">
-                      Conditional autonomy active
-                    </div>
+                    <div className="metric-change">Conditional autonomy active</div>
                   </div>
                 </div>
                 <div className="metrics-row">
                   <div className="metric">
                     <div className="metric-label">Canary Deployment</div>
                     <div className="metric-value">
-                      {summary
-                        ? (summary.autonomy.canary * 100).toFixed(0)
-                        : '10'}
+                      {summary ? (summary.autonomy.canary * 100).toFixed(0) : "10"}
                       <span className="metric-unit">%</span>
                     </div>
                   </div>
@@ -1269,10 +1225,7 @@
                     <div className="metric-value">5</div>
                   </div>
                 </div>
-                <button
-                  className="button primary"
-                  onClick={() => setCurrentPage('autonomy')}
-                >
+                <button className="button primary" onClick={() => setCurrentPage("autonomy")}>
                   <i className="fas fa-robot"></i>
                   Configure Autonomy
                 </button>
@@ -1283,23 +1236,17 @@
                 <div className="card-header">
                   <div>
                     <div className="card-title">Budget & Costs</div>
-                    <div className="card-subtitle">
-                      Monthly spending overview
-                    </div>
+                    <div className="card-subtitle">Monthly spending overview</div>
                   </div>
                 </div>
                 <div className="metrics-row">
                   <div className="metric">
                     <div className="metric-label">Remaining Budget</div>
-                    <div className="metric-value">
-                      ${summary?.budgets.remaining || '2,450'}
-                    </div>
+                    <div className="metric-value">${summary?.budgets.remaining || "2,450"}</div>
                   </div>
                   <div className="metric">
                     <div className="metric-label">Monthly Cap</div>
-                    <div className="metric-value">
-                      ${summary?.budgets.cap || '5,000'}
-                    </div>
+                    <div className="metric-value">${summary?.budgets.cap || "5,000"}</div>
                   </div>
                 </div>
                 <div className="progress-bar">
@@ -1311,8 +1258,7 @@
                   ></div>
                 </div>
                 <div className="metric-change">
-                  {summary ? summary.budgets.utilization : '51.0'}% utilized
-                  this month
+                  {summary ? summary.budgets.utilization : "51.0"}% utilized this month
                 </div>
               </div>
 
@@ -1321,25 +1267,23 @@
                 <div className="card-header">
                   <div>
                     <div className="card-title">Active Pipeline Runs</div>
-                    <div className="card-subtitle">
-                      Current execution status
-                    </div>
+                    <div className="card-subtitle">Current execution status</div>
                   </div>
                 </div>
-                <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                <div style={{ maxHeight: "300px", overflowY: "auto" }}>
                   {(summary?.runs || []).map((run) => (
                     <div key={run.id} className="activity-item">
                       <div
                         className="activity-icon"
                         style={{
                           backgroundColor:
-                            run.status === 'completed'
-                              ? '#10b981'
-                              : run.status === 'running'
-                                ? '#3b82f6'
-                                : run.status === 'failed'
-                                  ? '#ef4444'
-                                  : '#6b7280',
+                            run.status === "completed"
+                              ? "#10b981"
+                              : run.status === "running"
+                                ? "#3b82f6"
+                                : run.status === "failed"
+                                  ? "#ef4444"
+                                  : "#6b7280",
                         }}
                       ></div>
                       <div className="activity-content">
@@ -1348,24 +1292,19 @@
                           {run.pipeline} •
                           <span
                             className={`status ${run.status}`}
-                            style={{ marginLeft: '8px', padding: '2px 8px' }}
+                            style={{ marginLeft: "8px", padding: "2px 8px" }}
                           >
                             {run.status}
                           </span>
                           {run.progress > 0 && (
-                            <span style={{ marginLeft: '8px' }}>
-                              • {run.progress}% complete
-                            </span>
+                            <span style={{ marginLeft: "8px" }}>• {run.progress}% complete</span>
                           )}
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
-                <button
-                  className="button secondary"
-                  onClick={() => setCurrentPage('runs')}
-                >
+                <button className="button secondary" onClick={() => setCurrentPage("runs")}>
                   <i className="fas fa-external-link-alt"></i>
                   View All Runs
                 </button>
@@ -1376,9 +1315,7 @@
                 <div className="card-header">
                   <div>
                     <div className="card-title">Performance Metrics</div>
-                    <div className="card-subtitle">
-                      System performance over the last 24 hours
-                    </div>
+                    <div className="card-subtitle">System performance over the last 24 hours</div>
                   </div>
                 </div>
                 <div className="chart-container">
@@ -1398,9 +1335,7 @@
                 <div className="card-header">
                   <div>
                     <div className="card-title">System Resources</div>
-                    <div className="card-subtitle">
-                      Current utilization levels
-                    </div>
+                    <div className="card-subtitle">Current utilization levels</div>
                   </div>
                 </div>
 
@@ -1413,14 +1348,14 @@
                         width: `${metrics?.currentMetrics.cpuUsage || 42}%`,
                         background:
                           (metrics?.currentMetrics.cpuUsage || 42) > 80
-                            ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
+                            ? "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"
                             : (metrics?.currentMetrics.cpuUsage || 42) > 60
-                              ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
-                              : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                              ? "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
+                              : "linear-gradient(135deg, #10b981 0%, #059669 100%)",
                       }}
                     ></div>
                   </div>
-                  <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                  <div style={{ fontSize: "14px", color: "#6b7280" }}>
                     {metrics?.currentMetrics.cpuUsage || 42.3}% utilized
                   </div>
                 </div>
@@ -1434,14 +1369,14 @@
                         width: `${metrics?.currentMetrics.memoryUsage || 68}%`,
                         background:
                           (metrics?.currentMetrics.memoryUsage || 68) > 80
-                            ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
+                            ? "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"
                             : (metrics?.currentMetrics.memoryUsage || 68) > 60
-                              ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
-                              : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                              ? "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
+                              : "linear-gradient(135deg, #10b981 0%, #059669 100%)",
                       }}
                     ></div>
                   </div>
-                  <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                  <div style={{ fontSize: "14px", color: "#6b7280" }}>
                     {metrics?.currentMetrics.memoryUsage || 67.8}% utilized
                   </div>
                 </div>
@@ -1453,12 +1388,11 @@
                       className="progress-fill"
                       style={{
                         width: `${metrics?.currentMetrics.diskUsage || 34}%`,
-                        background:
-                          'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
                       }}
                     ></div>
                   </div>
-                  <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                  <div style={{ fontSize: "14px", color: "#6b7280" }}>
                     {metrics?.currentMetrics.diskUsage || 34.2}% utilized
                   </div>
                 </div>
@@ -1469,25 +1403,23 @@
                 <div className="card-header">
                   <div>
                     <div className="card-title">Recent Activity</div>
-                    <div className="card-subtitle">
-                      System changes and updates
-                    </div>
+                    <div className="card-subtitle">System changes and updates</div>
                   </div>
                 </div>
-                <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                <div style={{ maxHeight: "300px", overflowY: "auto" }}>
                   {(summary?.changes || []).map((change, index) => (
                     <div key={index} className="activity-item">
                       <div
                         className="activity-icon"
                         style={{
                           backgroundColor:
-                            change.type === 'automation'
-                              ? '#3b82f6'
-                              : change.type === 'manual'
-                                ? '#10b981'
-                                : change.type === 'maintenance'
-                                  ? '#f59e0b'
-                                  : '#6b7280',
+                            change.type === "automation"
+                              ? "#3b82f6"
+                              : change.type === "manual"
+                                ? "#10b981"
+                                : change.type === "maintenance"
+                                  ? "#f59e0b"
+                                  : "#6b7280",
                         }}
                       ></div>
                       <div className="activity-content">
@@ -1521,19 +1453,14 @@
                 <div className="card-header">
                   <div>
                     <div className="card-title">Pipeline Runs Management</div>
-                    <div className="card-subtitle">
-                      Execution history and current status
-                    </div>
+                    <div className="card-subtitle">Execution history and current status</div>
                   </div>
-                  <button
-                    className="button primary"
-                    onClick={() => setShowModal('newRun')}
-                  >
+                  <button className="button primary" onClick={() => setShowModal("newRun")}>
                     <i className="fas fa-plus"></i> New Run
                   </button>
                 </div>
 
-                <div className="metrics-row" style={{ marginBottom: '32px' }}>
+                <div className="metrics-row" style={{ marginBottom: "32px" }}>
                   <div className="metric">
                     <div className="metric-label">Total Runs</div>
                     <div className="metric-value">{runs?.length || 0}</div>
@@ -1543,12 +1470,10 @@
                     <div className="metric-value">
                       {runs
                         ? (
-                            (runs.filter((r) => r.status === 'completed')
-                              .length /
-                              runs.length) *
+                            (runs.filter((r) => r.status === "completed").length / runs.length) *
                             100
                           ).toFixed(1)
-                        : '89.2'}
+                        : "89.2"}
                       <span className="metric-unit">%</span>
                     </div>
                   </div>
@@ -1557,9 +1482,7 @@
                     <div className="metric-value">
                       {runs
                         ? Math.round(
-                            runs.reduce((acc, r) => acc + r.durationMs, 0) /
-                              runs.length /
-                              1000,
+                            runs.reduce((acc, r) => acc + r.durationMs, 0) / runs.length / 1000
                           )
                         : 127}
                       <span className="metric-unit">s</span>
@@ -1570,10 +1493,8 @@
                     <div className="metric-value">
                       $
                       {runs
-                        ? runs
-                            .reduce((acc, r) => acc + parseFloat(r.cost), 0)
-                            .toFixed(2)
-                        : '156.78'}
+                        ? runs.reduce((acc, r) => acc + parseFloat(r.cost), 0).toFixed(2)
+                        : "156.78"}
                     </div>
                   </div>
                 </div>
@@ -1598,26 +1519,21 @@
                           <td>
                             <span
                               style={{
-                                fontFamily: 'monospace',
-                                fontSize: '13px',
-                                color: '#667eea',
-                                fontWeight: '600',
+                                fontFamily: "monospace",
+                                fontSize: "13px",
+                                color: "#667eea",
+                                fontWeight: "600",
                               }}
                             >
                               {run.id}
                             </span>
                           </td>
-                          <td style={{ fontWeight: '500' }}>{run.pipeline}</td>
+                          <td style={{ fontWeight: "500" }}>{run.pipeline}</td>
                           <td>
-                            <div className={`status ${run.status}`}>
-                              {run.status}
-                            </div>
+                            <div className={`status ${run.status}`}>{run.status}</div>
                           </td>
                           <td>
-                            <div
-                              className="progress-bar"
-                              style={{ height: '6px', margin: '0' }}
-                            >
+                            <div className="progress-bar" style={{ height: "6px", margin: "0" }}>
                               <div
                                 className="progress-fill"
                                 style={{ width: `${run.progress}%` }}
@@ -1625,9 +1541,9 @@
                             </div>
                             <div
                               style={{
-                                fontSize: '12px',
-                                color: '#6b7280',
-                                marginTop: '4px',
+                                fontSize: "12px",
+                                color: "#6b7280",
+                                marginTop: "4px",
                               }}
                             >
                               {run.progress}%
@@ -1635,11 +1551,11 @@
                           </td>
                           <td>{Math.round(run.durationMs / 1000)}s</td>
                           <td>${run.cost}</td>
-                          <td style={{ color: '#6b7280' }}>{run.user}</td>
+                          <td style={{ color: "#6b7280" }}>{run.user}</td>
                           <td>
                             <button
                               className="button secondary"
-                              style={{ fontSize: '12px', padding: '8px 16px' }}
+                              style={{ fontSize: "12px", padding: "8px 16px" }}
                             >
                               <i className="fas fa-eye"></i>
                             </button>
@@ -1667,7 +1583,7 @@
 
           return (
             <div className="fade-in">
-              <div className="card" style={{ marginBottom: '32px' }}>
+              <div className="card" style={{ marginBottom: "32px" }}>
                 <div className="card-header">
                   <div>
                     <div className="card-title">Pipeline Management</div>
@@ -1675,10 +1591,7 @@
                       Configure and deploy data processing pipelines
                     </div>
                   </div>
-                  <button
-                    className="button primary"
-                    onClick={() => setShowModal('newPipeline')}
-                  >
+                  <button className="button primary" onClick={() => setShowModal("newPipeline")}>
                     <i className="fas fa-plus"></i> New Pipeline
                   </button>
                 </div>
@@ -1689,37 +1602,24 @@
                   <div key={pipeline.id} className="card">
                     <div className="card-header">
                       <div>
-                        <div
-                          className="card-title"
-                          style={{ fontSize: '18px' }}
-                        >
+                        <div className="card-title" style={{ fontSize: "18px" }}>
                           {pipeline.name}
                         </div>
-                        <div className="card-subtitle">
-                          {pipeline.description}
-                        </div>
+                        <div className="card-subtitle">{pipeline.description}</div>
                       </div>
-                      <div className={`status ${pipeline.status}`}>
-                        {pipeline.status}
-                      </div>
+                      <div className={`status ${pipeline.status}`}>{pipeline.status}</div>
                     </div>
 
                     <div className="metrics-row">
                       <div className="metric">
                         <div className="metric-label">Version</div>
-                        <div
-                          className="metric-value"
-                          style={{ fontSize: '18px' }}
-                        >
+                        <div className="metric-value" style={{ fontSize: "18px" }}>
                           {pipeline.version}
                         </div>
                       </div>
                       <div className="metric">
                         <div className="metric-label">Owner Team</div>
-                        <div
-                          className="metric-value"
-                          style={{ fontSize: '18px' }}
-                        >
+                        <div className="metric-value" style={{ fontSize: "18px" }}>
                           {pipeline.owner}
                         </div>
                       </div>
@@ -1727,9 +1627,9 @@
 
                     <div
                       style={{
-                        display: 'flex',
-                        gap: '12px',
-                        marginTop: '24px',
+                        display: "flex",
+                        gap: "12px",
+                        marginTop: "24px",
                       }}
                     >
                       <button className="button secondary" style={{ flex: 1 }}>
@@ -1760,12 +1660,12 @@
           }
 
           const levelDescriptions = {
-            0: 'Manual operation - All decisions require human approval',
-            1: 'Assisted operation - System provides recommendations',
-            2: 'Conditional autonomy - Automatic actions within defined parameters',
-            3: 'High autonomy - Independent operation with human oversight',
-            4: 'Full autonomy - Complete operational independence',
-            5: 'Complete autonomy - Self-improving and self-governing',
+            0: "Manual operation - All decisions require human approval",
+            1: "Assisted operation - System provides recommendations",
+            2: "Conditional autonomy - Automatic actions within defined parameters",
+            3: "High autonomy - Independent operation with human oversight",
+            4: "Full autonomy - Complete operational independence",
+            5: "Complete autonomy - Self-improving and self-governing",
           };
 
           return (
@@ -1791,17 +1691,15 @@
                       max="5"
                       value={autonomyLevel}
                       className="slider"
-                      onChange={(e) =>
-                        setAutonomyLevel(parseInt(e.target.value))
-                      }
+                      onChange={(e) => setAutonomyLevel(parseInt(e.target.value))}
                     />
                     <div
                       style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        fontSize: '12px',
-                        color: '#6b7280',
-                        marginTop: '12px',
+                        display: "flex",
+                        justifyContent: "space-between",
+                        fontSize: "12px",
+                        color: "#6b7280",
+                        marginTop: "12px",
                       }}
                     >
                       <span>L0</span>
@@ -1813,7 +1711,7 @@
                     </div>
                   </div>
 
-                  <div className="alert info" style={{ margin: '20px 0' }}>
+                  <div className="alert info" style={{ margin: "20px 0" }}>
                     <strong>Level {autonomyLevel} Capabilities:</strong>
                     <br />
                     {levelDescriptions[autonomyLevel]}
@@ -1821,7 +1719,7 @@
 
                   <button
                     className="button primary"
-                    onClick={() => setShowModal('confirmAutonomy')}
+                    onClick={() => setShowModal("confirmAutonomy")}
                   >
                     <i className="fas fa-robot"></i>
                     Update Autonomy Level
@@ -1832,9 +1730,7 @@
                   <div className="card-header">
                     <div>
                       <div className="card-title">Active Policies</div>
-                      <div className="card-subtitle">
-                        Guardrails and safety constraints
-                      </div>
+                      <div className="card-subtitle">Guardrails and safety constraints</div>
                     </div>
                   </div>
 
@@ -1843,8 +1739,7 @@
                       <div
                         className="activity-icon"
                         style={{
-                          backgroundColor:
-                            policy.state === 'active' ? '#10b981' : '#f59e0b',
+                          backgroundColor: policy.state === "active" ? "#10b981" : "#f59e0b",
                         }}
                       ></div>
                       <div className="activity-content">
@@ -1852,8 +1747,8 @@
                         <div className="activity-meta">
                           {policy.description} •
                           <span
-                            className={`status ${policy.state === 'active' ? 'healthy' : 'warning'}`}
-                            style={{ marginLeft: '8px', padding: '2px 8px' }}
+                            className={`status ${policy.state === "active" ? "healthy" : "warning"}`}
+                            style={{ marginLeft: "8px", padding: "2px 8px" }}
                           >
                             {policy.state}
                           </span>
@@ -1862,10 +1757,7 @@
                     </div>
                   ))}
 
-                  <button
-                    className="button secondary"
-                    style={{ marginTop: '20px' }}
-                  >
+                  <button className="button secondary" style={{ marginTop: "20px" }}>
                     <i className="fas fa-plus"></i>
                     Add New Policy
                   </button>
@@ -1874,26 +1766,17 @@
                 <div className="card dashboard-grid-wide">
                   <div className="card-header">
                     <div>
-                      <div className="card-title">
-                        Recent Autonomous Decisions
-                      </div>
-                      <div className="card-subtitle">
-                        Actions taken automatically by the system
-                      </div>
+                      <div className="card-title">Recent Autonomous Decisions</div>
+                      <div className="card-subtitle">Actions taken automatically by the system</div>
                     </div>
                   </div>
 
-                  <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                  <div style={{ maxHeight: "400px", overflowY: "auto" }}>
                     {autonomy?.recentDecisions?.map((decision, index) => (
                       <div key={index} className="activity-item">
-                        <div
-                          className="activity-icon"
-                          style={{ backgroundColor: '#3b82f6' }}
-                        ></div>
+                        <div className="activity-icon" style={{ backgroundColor: "#3b82f6" }}></div>
                         <div className="activity-content">
-                          <div className="activity-title">
-                            {decision.action}
-                          </div>
+                          <div className="activity-title">{decision.action}</div>
                           <div className="activity-meta">
                             <strong>Reason:</strong> {decision.reason}
                             <br />
@@ -1928,21 +1811,16 @@
                 <div className="card dashboard-grid-wide">
                   <div className="card-header">
                     <div>
-                      <div className="card-title">
-                        System Performance Dashboard
-                      </div>
-                      <div className="card-subtitle">
-                        Real-time monitoring and analytics
-                      </div>
+                      <div className="card-title">System Performance Dashboard</div>
+                      <div className="card-subtitle">Real-time monitoring and analytics</div>
                     </div>
                   </div>
 
-                  <div className="metrics-row" style={{ marginBottom: '32px' }}>
+                  <div className="metrics-row" style={{ marginBottom: "32px" }}>
                     <div className="metric">
                       <div className="metric-label">Requests/min</div>
                       <div className="metric-value">
-                        {metrics?.currentMetrics.requestsPerMin?.toLocaleString() ||
-                          '1,247'}
+                        {metrics?.currentMetrics.requestsPerMin?.toLocaleString() || "1,247"}
                       </div>
                       <div className="metric-change positive">
                         <i className="fas fa-arrow-up"></i> +15% from last hour
@@ -1970,9 +1848,7 @@
                     </div>
                     <div className="metric">
                       <div className="metric-label">Queue Depth</div>
-                      <div className="metric-value">
-                        {metrics?.currentMetrics.queueDepth || 23}
-                      </div>
+                      <div className="metric-value">{metrics?.currentMetrics.queueDepth || 23}</div>
                       <div className="metric-change">Normal levels</div>
                     </div>
                   </div>
@@ -1993,34 +1869,24 @@
                   <div className="card-header">
                     <div>
                       <div className="card-title">SLO Status</div>
-                      <div className="card-subtitle">
-                        Service Level Objectives
-                      </div>
+                      <div className="card-subtitle">Service Level Objectives</div>
                     </div>
                   </div>
 
                   <div className="control-group">
                     <div className="metric-label">Availability SLO</div>
                     <div className="progress-bar">
-                      <div
-                        className="progress-fill"
-                        style={{ width: '99.9%' }}
-                      ></div>
+                      <div className="progress-fill" style={{ width: "99.9%" }}></div>
                     </div>
-                    <div style={{ fontSize: '14px', color: '#6b7280' }}>
-                      99.9% (Target: 99.5%)
-                    </div>
+                    <div style={{ fontSize: "14px", color: "#6b7280" }}>99.9% (Target: 99.5%)</div>
                   </div>
 
                   <div className="control-group">
                     <div className="metric-label">Latency SLO</div>
                     <div className="progress-bar">
-                      <div
-                        className="progress-fill"
-                        style={{ width: '87%' }}
-                      ></div>
+                      <div className="progress-fill" style={{ width: "87%" }}></div>
                     </div>
-                    <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                    <div style={{ fontSize: "14px", color: "#6b7280" }}>
                       145ms (Target: &lt; 200ms)
                     </div>
                   </div>
@@ -2030,17 +1896,14 @@
                     <div
                       className="progress-fill"
                       style={{
-                        width: '92%',
-                        background:
-                          'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        width: "92%",
+                        background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
                       }}
                     ></div>
-                    <div style={{ fontSize: '14px', color: '#6b7280' }}>
-                      0.8% (Target: &lt; 1%)
-                    </div>
+                    <div style={{ fontSize: "14px", color: "#6b7280" }}>0.8% (Target: &lt; 1%)</div>
                   </div>
 
-                  <div className="alert success" style={{ marginTop: '20px' }}>
+                  <div className="alert success" style={{ marginTop: "20px" }}>
                     <i className="fas fa-check-circle"></i>
                     All SLOs are meeting their targets
                   </div>
@@ -2050,34 +1913,26 @@
                   <div className="card-header">
                     <div>
                       <div className="card-title">Alert Center</div>
-                      <div className="card-subtitle">
-                        Active alerts and notifications
-                      </div>
+                      <div className="card-subtitle">Active alerts and notifications</div>
                     </div>
                   </div>
 
                   <div className="alert warning">
-                    <strong>Warning:</strong> Auth service response time
-                    elevated (350ms average)
-                    <div style={{ fontSize: '12px', marginTop: '4px' }}>
-                      Started: 2 hours ago
-                    </div>
+                    <strong>Warning:</strong> Auth service response time elevated (350ms average)
+                    <div style={{ fontSize: "12px", marginTop: "4px" }}>Started: 2 hours ago</div>
                   </div>
 
                   <div className="alert info">
-                    <strong>Info:</strong> Scheduled maintenance window in 2
-                    hours
-                    <div style={{ fontSize: '12px', marginTop: '4px' }}>
-                      Duration: 30 minutes
-                    </div>
+                    <strong>Info:</strong> Scheduled maintenance window in 2 hours
+                    <div style={{ fontSize: "12px", marginTop: "4px" }}>Duration: 30 minutes</div>
                   </div>
 
                   <div
                     style={{
-                      color: '#6b7280',
-                      fontSize: '14px',
-                      textAlign: 'center',
-                      marginTop: '20px',
+                      color: "#6b7280",
+                      fontSize: "14px",
+                      textAlign: "center",
+                      marginTop: "20px",
                     }}
                   >
                     <i className="fas fa-check-circle"></i> No critical alerts
@@ -2096,14 +1951,14 @@
                   <div className="card-title">
                     <i
                       className={`fas ${icon}`}
-                      style={{ marginRight: '12px', color: '#667eea' }}
+                      style={{ marginRight: "12px", color: "#667eea" }}
                     ></i>
                     {title}
                   </div>
                   <div className="card-subtitle">{subtitle}</div>
                 </div>
               </div>
-              <div className="alert info" style={{ margin: '20px 0' }}>
+              <div className="alert info" style={{ margin: "20px 0" }}>
                 {description}
               </div>
               <button className="button primary">
@@ -2130,17 +1985,17 @@
 
         const renderPage = () => {
           switch (currentPage) {
-            case 'home':
+            case "home":
               return <HomePage />;
-            case 'runs':
+            case "runs":
               return <RunsPage />;
-            case 'pipelines':
+            case "pipelines":
               return <PipelinesPage />;
-            case 'observability':
+            case "observability":
               return <ObservabilityPage />;
-            case 'autonomy':
+            case "autonomy":
               return <AutonomyPage />;
-            case 'cost':
+            case "cost":
               return (
                 <GenericPage
                   title="Cost Management"
@@ -2149,7 +2004,7 @@
                   icon="fa-dollar-sign"
                 />
               );
-            case 'recipes':
+            case "recipes":
               return (
                 <GenericPage
                   title="Recipe Library"
@@ -2158,7 +2013,7 @@
                   icon="fa-book"
                 />
               );
-            case 'secrets':
+            case "secrets":
               return (
                 <GenericPage
                   title="Secrets & Configuration"
@@ -2167,7 +2022,7 @@
                   icon="fa-key"
                 />
               );
-            case 'policies':
+            case "policies":
               return (
                 <GenericPage
                   title="Policies & Gates"
@@ -2176,7 +2031,7 @@
                   icon="fa-shield-alt"
                 />
               );
-            case 'admin':
+            case "admin":
               return (
                 <GenericPage
                   title="Administration"
@@ -2198,7 +2053,7 @@
               <div className="content">{renderPage()}</div>
             </div>
 
-            {showModal === 'commandPalette' && (
+            {showModal === "commandPalette" && (
               <Modal title="Command Palette" onClose={() => setShowModal(null)}>
                 <div className="form-group">
                   <input
@@ -2210,9 +2065,9 @@
                 </div>
                 <div
                   style={{
-                    fontSize: '12px',
-                    color: '#6b7280',
-                    lineHeight: '1.6',
+                    fontSize: "12px",
+                    color: "#6b7280",
+                    lineHeight: "1.6",
                   }}
                 >
                   <strong>Available Commands:</strong>
@@ -2231,45 +2086,25 @@
               </Modal>
             )}
 
-            {showModal === 'userProfile' && (
+            {showModal === "userProfile" && (
               <Modal title="User Profile" onClose={() => setShowModal(null)}>
                 <div className="form-group">
                   <label className="control-label">Full Name</label>
-                  <input
-                    type="text"
-                    className="input"
-                    value="John Doe"
-                    readOnly
-                  />
+                  <input type="text" className="input" value="John Doe" readOnly />
                 </div>
                 <div className="form-group">
                   <label className="control-label">Email Address</label>
-                  <input
-                    type="email"
-                    className="input"
-                    value="john.doe@company.com"
-                    readOnly
-                  />
+                  <input type="email" className="input" value="john.doe@company.com" readOnly />
                 </div>
                 <div className="form-group">
                   <label className="control-label">Role</label>
-                  <input
-                    type="text"
-                    className="input"
-                    value="Platform Engineer"
-                    readOnly
-                  />
+                  <input type="text" className="input" value="Platform Engineer" readOnly />
                 </div>
                 <div className="form-group">
                   <label className="control-label">Team</label>
-                  <input
-                    type="text"
-                    className="input"
-                    value="IntelGraph Platform Team"
-                    readOnly
-                  />
+                  <input type="text" className="input" value="IntelGraph Platform Team" readOnly />
                 </div>
-                <div style={{ display: 'flex', gap: '12px' }}>
+                <div style={{ display: "flex", gap: "12px" }}>
                   <button className="button secondary">
                     <i className="fas fa-edit"></i>
                     Edit Profile
@@ -2282,11 +2117,8 @@
               </Modal>
             )}
 
-            {showModal === 'newRun' && (
-              <Modal
-                title="Start New Pipeline Run"
-                onClose={() => setShowModal(null)}
-              >
+            {showModal === "newRun" && (
+              <Modal title="Start New Pipeline Run" onClose={() => setShowModal(null)}>
                 <div className="form-group">
                   <label className="control-label">Select Pipeline</label>
                   <select className="select">
@@ -2316,21 +2148,14 @@
                   </select>
                 </div>
                 <div className="form-group">
-                  <label className="control-label">
-                    Description (Optional)
-                  </label>
+                  <label className="control-label">Description (Optional)</label>
                   <textarea
                     className="textarea"
                     placeholder="Add a description for this run..."
                   ></textarea>
                 </div>
-                <div
-                  style={{ display: 'flex', gap: '12px', marginTop: '24px' }}
-                >
-                  <button
-                    className="button secondary"
-                    onClick={() => setShowModal(null)}
-                  >
+                <div style={{ display: "flex", gap: "12px", marginTop: "24px" }}>
+                  <button className="button secondary" onClick={() => setShowModal(null)}>
                     Cancel
                   </button>
                   <button className="button primary">
@@ -2341,11 +2166,8 @@
               </Modal>
             )}
 
-            {showModal === 'newPipeline' && (
-              <Modal
-                title="Create New Pipeline"
-                onClose={() => setShowModal(null)}
-              >
+            {showModal === "newPipeline" && (
+              <Modal title="Create New Pipeline" onClose={() => setShowModal(null)}>
                 <div className="form-group">
                   <label className="control-label">Pipeline Name</label>
                   <input
@@ -2383,13 +2205,8 @@
                     placeholder="Describe what this pipeline does and its intended use..."
                   ></textarea>
                 </div>
-                <div
-                  style={{ display: 'flex', gap: '12px', marginTop: '24px' }}
-                >
-                  <button
-                    className="button secondary"
-                    onClick={() => setShowModal(null)}
-                  >
+                <div style={{ display: "flex", gap: "12px", marginTop: "24px" }}>
+                  <button className="button secondary" onClick={() => setShowModal(null)}>
                     Cancel
                   </button>
                   <button className="button primary">
@@ -2400,31 +2217,23 @@
               </Modal>
             )}
 
-            {showModal === 'confirmAutonomy' && (
-              <Modal
-                title="Confirm Autonomy Level Change"
-                onClose={() => setShowModal(null)}
-              >
-                <div className="alert warning" style={{ margin: '0 0 20px 0' }}>
-                  <strong>Warning:</strong> Changing autonomy level to L
-                  {autonomyLevel} will modify how the system makes automated
-                  decisions and could affect operational behavior.
+            {showModal === "confirmAutonomy" && (
+              <Modal title="Confirm Autonomy Level Change" onClose={() => setShowModal(null)}>
+                <div className="alert warning" style={{ margin: "0 0 20px 0" }}>
+                  <strong>Warning:</strong> Changing autonomy level to L{autonomyLevel} will modify
+                  how the system makes automated decisions and could affect operational behavior.
                 </div>
-                <div style={{ marginBottom: '24px', lineHeight: '1.6' }}>
-                  <strong>Current Level:</strong> L{data.autonomy?.level || 2} -
-                  Conditional autonomy
+                <div style={{ marginBottom: "24px", lineHeight: "1.6" }}>
+                  <strong>Current Level:</strong> L{data.autonomy?.level || 2} - Conditional
+                  autonomy
                   <br />
-                  <strong>New Level:</strong> L{autonomyLevel} -{' '}
-                  {levelDescriptions[autonomyLevel]}
+                  <strong>New Level:</strong> L{autonomyLevel} - {levelDescriptions[autonomyLevel]}
                   <br />
                   <br />
                   Are you sure you want to proceed with this change?
                 </div>
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <button
-                    className="button secondary"
-                    onClick={() => setShowModal(null)}
-                  >
+                <div style={{ display: "flex", gap: "12px" }}>
+                  <button className="button secondary" onClick={() => setShowModal(null)}>
                     Cancel Change
                   </button>
                   <button
@@ -2451,7 +2260,7 @@
       }
 
       // Render the app
-      ReactDOM.render(<MaestroApp />, document.getElementById('root'));
+      ReactDOM.render(<MaestroApp />, document.getElementById("root"));
     </script>
   </body>
 </html>

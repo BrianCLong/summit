@@ -15,7 +15,8 @@ export function MaintenanceMode() {
             Maintenance Mode
           </h2>
           <p className="text-sm text-muted-foreground">
-            We are currently performing scheduled maintenance. Please check back later.
+            We are currently performing scheduled maintenance. Please check back
+            later.
           </p>
         </div>
       </Card>

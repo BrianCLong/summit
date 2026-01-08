@@ -1,12 +1,12 @@
-import { z } from 'zod';
-import { ChmEventBus } from './events.js';
+import { z } from "zod";
+import { ChmEventBus } from "./events.js";
 import {
   tagRuleSchema,
   type DocumentTag,
   type ExportContext,
   type ExportDecision,
-  type TagRule
-} from './config.js';
+  type TagRule,
+} from "./config.js";
 
 export interface RuleEngineOptions {
   rules: TagRule[];
@@ -29,7 +29,7 @@ export class RuleEngine {
     }
 
     const residencyOk = rule.residency === context.residency;
-    const licenseOk = rule.license === context.license || rule.license === 'exportable';
+    const licenseOk = rule.license === context.license || rule.license === "exportable";
     const allowed = rule.exportable && residencyOk && licenseOk;
 
     if (!allowed) {
@@ -40,7 +40,7 @@ export class RuleEngine {
             ? `Export blocked: policy ${rule.rationale}`
             : `Export blocked: license ${context.license} incompatible with ${rule.rationale}`
           : `Export blocked: residency ${context.residency} incompatible with ${rule.rationale}`,
-        violatedRule: rule
+        violatedRule: rule,
       };
       this.bus.emitViolation(tag, context, decision.reason);
       return decision;

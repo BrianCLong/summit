@@ -3,8 +3,8 @@
  * Action recognition, activity detection, crowd analysis, real-time streaming
  */
 
-import { BaseComputerVisionModel, ModelConfig, IVideoAnalyzer } from '@intelgraph/computer-vision';
-import { YOLODetector, TrackedObject, createTracker } from '@intelgraph/object-detection';
+import { BaseComputerVisionModel, ModelConfig, IVideoAnalyzer } from "@intelgraph/computer-vision";
+import { YOLODetector, TrackedObject, createTracker } from "@intelgraph/object-detection";
 
 export interface VideoAnalysisResult {
   frame_count: number;
@@ -34,7 +34,7 @@ export interface KeyFrame {
 
 export interface CrowdAnalysis {
   crowd_count: number;
-  crowd_density: 'low' | 'medium' | 'high' | 'very_high';
+  crowd_density: "low" | "medium" | "high" | "very_high";
   heatmap: number[][];
   flow_vectors: Array<{ x: number; y: number; magnitude: number }>;
 }
@@ -58,8 +58,8 @@ export class VideoAnalyzer extends BaseComputerVisionModel implements IVideoAnal
 
   constructor(config?: Partial<ModelConfig>) {
     super({
-      model_name: 'video_analyzer',
-      device: config?.device || 'cuda',
+      model_name: "video_analyzer",
+      device: config?.device || "cuda",
       ...config,
     });
   }
@@ -67,7 +67,7 @@ export class VideoAnalyzer extends BaseComputerVisionModel implements IVideoAnal
   async initialize(): Promise<void> {
     this.detector = new YOLODetector({ device: this.config.device });
     await this.detector.initialize();
-    this.tracker = createTracker('bytetrack');
+    this.tracker = createTracker("bytetrack");
     this.initialized = true;
   }
 
@@ -75,13 +75,16 @@ export class VideoAnalyzer extends BaseComputerVisionModel implements IVideoAnal
     return this.analyzeVideo(imagePath, options);
   }
 
-  async analyzeVideo(videoPath: string, options?: {
-    detectActions?: boolean;
-    extractKeyFrames?: boolean;
-    trackObjects?: boolean;
-    analyzeCrowd?: boolean;
-    detectAnomalies?: boolean;
-  }): Promise<VideoAnalysisResult> {
+  async analyzeVideo(
+    videoPath: string,
+    options?: {
+      detectActions?: boolean;
+      extractKeyFrames?: boolean;
+      trackObjects?: boolean;
+      analyzeCrowd?: boolean;
+      detectAnomalies?: boolean;
+    }
+  ): Promise<VideoAnalysisResult> {
     this.ensureInitialized();
     const startTime = Date.now();
 
@@ -104,10 +107,13 @@ export class VideoAnalyzer extends BaseComputerVisionModel implements IVideoAnal
     return result;
   }
 
-  async extractKeyFrames(videoPath: string, options?: {
-    numFrames?: number;
-    method?: 'uniform' | 'scene_change' | 'importance';
-  }): Promise<KeyFrame[]> {
+  async extractKeyFrames(
+    videoPath: string,
+    options?: {
+      numFrames?: number;
+      method?: "uniform" | "scene_change" | "importance";
+    }
+  ): Promise<KeyFrame[]> {
     // Extract representative key frames from video
     const numFrames = options?.numFrames || 10;
     const keyFrames: KeyFrame[] = [];
@@ -123,13 +129,16 @@ export class VideoAnalyzer extends BaseComputerVisionModel implements IVideoAnal
     return keyFrames;
   }
 
-  async detectActions(videoPath: string, options?: {
-    actionClasses?: string[];
-  }): Promise<Action[]> {
+  async detectActions(
+    videoPath: string,
+    options?: {
+      actionClasses?: string[];
+    }
+  ): Promise<Action[]> {
     // Detect actions/activities in video (running, jumping, fighting, etc.)
     return [
       {
-        action_type: 'walking',
+        action_type: "walking",
         confidence: 0.9,
         start_frame: 0,
         end_frame: 100,
@@ -146,15 +155,18 @@ export class VideoAnalyzer extends BaseComputerVisionModel implements IVideoAnal
     // Crowd counting and density analysis
     return {
       crowd_count: 0,
-      crowd_density: 'low',
+      crowd_density: "low",
       heatmap: [],
       flow_vectors: [],
     };
   }
 
-  async detectAnomalies(videoPath: string, options?: {
-    normalBehaviorModel?: string;
-  }): Promise<AnomalyDetection> {
+  async detectAnomalies(
+    videoPath: string,
+    options?: {
+      normalBehaviorModel?: string;
+    }
+  ): Promise<AnomalyDetection> {
     // Detect anomalous events in video
     return {
       anomalies: [],
@@ -162,21 +174,24 @@ export class VideoAnalyzer extends BaseComputerVisionModel implements IVideoAnal
     };
   }
 
-  async summarizeVideo(videoPath: string, options?: {
-    summaryLength?: number;
-  }): Promise<{ summary: string; key_frames: KeyFrame[] }> {
+  async summarizeVideo(
+    videoPath: string,
+    options?: {
+      summaryLength?: number;
+    }
+  ): Promise<{ summary: string; key_frames: KeyFrame[] }> {
     // Generate video summary
     const keyFrames = await this.extractKeyFrames(videoPath);
 
     return {
-      summary: 'Video contains multiple scenes with people and vehicles.',
+      summary: "Video contains multiple scenes with people and vehicles.",
       key_frames: keyFrames,
     };
   }
 
   async captionVideo(videoPath: string): Promise<string[]> {
     // Generate captions for video
-    return ['A person walking in a park', 'Cars driving on a road'];
+    return ["A person walking in a park", "Cars driving on a road"];
   }
 
   async detectMotion(videoPath: string): Promise<Array<{ frame: number; motion_score: number }>> {
@@ -194,7 +209,9 @@ export class VideoAnalyzer extends BaseComputerVisionModel implements IVideoAnal
     return [];
   }
 
-  async detectViolence(videoPath: string): Promise<{ violent_frames: number[]; confidence: number }> {
+  async detectViolence(
+    videoPath: string
+  ): Promise<{ violent_frames: number[]; confidence: number }> {
     // Detect violence in video
     return {
       violent_frames: [],
@@ -205,7 +222,7 @@ export class VideoAnalyzer extends BaseComputerVisionModel implements IVideoAnal
   async recognizeSpeech(videoPath: string): Promise<{ transcription: string; timestamps: any[] }> {
     // Extract and transcribe speech from video
     return {
-      transcription: '',
+      transcription: "",
       timestamps: [],
     };
   }

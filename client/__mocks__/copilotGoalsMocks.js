@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 export const GET_GOALS = gql`
   query CopilotGoals($investigationId: ID) {
@@ -37,8 +37,8 @@ export const mocks = [
     result: {
       data: {
         investigations: [
-          { id: '1', title: 'Investigation Alpha' },
-          { id: '2', title: 'Investigation Beta' },
+          { id: "1", title: "Investigation Alpha" },
+          { id: "2", title: "Investigation Beta" },
         ],
       },
     },
@@ -52,14 +52,14 @@ export const mocks = [
       data: {
         copilotGoals: [
           {
-            id: 'g1',
-            text: 'Existing Goal 1',
-            createdAt: '2023-01-01T10:00:00Z',
+            id: "g1",
+            text: "Existing Goal 1",
+            createdAt: "2023-01-01T10:00:00Z",
           },
           {
-            id: 'g2',
-            text: 'Existing Goal 2',
-            createdAt: '2023-01-02T11:00:00Z',
+            id: "g2",
+            text: "Existing Goal 2",
+            createdAt: "2023-01-02T11:00:00Z",
           },
         ],
       },
@@ -68,14 +68,14 @@ export const mocks = [
   {
     request: {
       query: CREATE_GOAL,
-      variables: { text: 'Test goal', investigationId: null },
+      variables: { text: "Test goal", investigationId: null },
     },
     result: {
       data: {
         createCopilotGoal: {
-          id: 'g3',
-          text: 'Test goal',
-          createdAt: '2023-01-03T12:00:00Z',
+          id: "g3",
+          text: "Test goal",
+          createdAt: "2023-01-03T12:00:00Z",
         },
       },
     },
@@ -88,16 +88,16 @@ export const mocks = [
     result: {
       data: {
         copilotGoals: [
-          { id: 'g3', text: 'Test goal', createdAt: '2023-01-03T12:00:00Z' },
+          { id: "g3", text: "Test goal", createdAt: "2023-01-03T12:00:00Z" },
           {
-            id: 'g1',
-            text: 'Existing Goal 1',
-            createdAt: '2023-01-01T10:00:00Z',
+            id: "g1",
+            text: "Existing Goal 1",
+            createdAt: "2023-01-01T10:00:00Z",
           },
           {
-            id: 'g2',
-            text: 'Existing Goal 2',
-            createdAt: '2023-01-02T11:00:00Z',
+            id: "g2",
+            text: "Existing Goal 2",
+            createdAt: "2023-01-02T11:00:00Z",
           },
         ],
       },

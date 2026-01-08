@@ -5,7 +5,7 @@
  * Provides filtering and quick access to run details.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Card,
@@ -23,14 +23,14 @@ import {
   Stack,
   IconButton,
   Tooltip,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Refresh as RefreshIcon,
   Visibility as VisibilityIcon,
   CheckCircle as CheckCircleIcon,
   Error as ErrorIcon,
   Warning as WarningIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 interface ExplainableRun {
   run_id: string;
@@ -73,9 +73,9 @@ const RunTimeline: React.FC<RunTimelineProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState({
-    run_type: '',
-    min_confidence: '',
-    capability: '',
+    run_type: "",
+    min_confidence: "",
+    capability: "",
   });
 
   const fetchRuns = async () => {
@@ -84,9 +84,9 @@ const RunTimeline: React.FC<RunTimelineProps> = ({
 
     try {
       const params = new URLSearchParams();
-      if (filter.run_type) params.append('run_type', filter.run_type);
-      if (filter.min_confidence) params.append('min_confidence', filter.min_confidence);
-      if (filter.capability) params.append('capability', filter.capability);
+      if (filter.run_type) params.append("run_type", filter.run_type);
+      if (filter.min_confidence) params.append("min_confidence", filter.min_confidence);
+      if (filter.capability) params.append("capability", filter.capability);
 
       const response = await fetch(`/api/explainability/runs?${params.toString()}`);
       const result = await response.json();
@@ -94,10 +94,10 @@ const RunTimeline: React.FC<RunTimelineProps> = ({
       if (result.success) {
         setRuns(result.data || []);
       } else {
-        setError(result.errors?.[0]?.message || 'Failed to fetch runs');
+        setError(result.errors?.[0]?.message || "Failed to fetch runs");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setLoading(false);
     }
@@ -114,10 +114,10 @@ const RunTimeline: React.FC<RunTimelineProps> = ({
     }
   }, [autoRefresh, refreshIntervalMs, filter]);
 
-  const getConfidenceColor = (confidence: number): 'success' | 'warning' | 'error' => {
-    if (confidence >= 0.8) return 'success';
-    if (confidence >= 0.5) return 'warning';
-    return 'error';
+  const getConfidenceColor = (confidence: number): "success" | "warning" | "error" => {
+    if (confidence >= 0.8) return "success";
+    if (confidence >= 0.5) return "warning";
+    return "error";
   };
 
   const getConfidenceIcon = (confidence: number) => {
@@ -127,7 +127,7 @@ const RunTimeline: React.FC<RunTimelineProps> = ({
   };
 
   const formatDuration = (ms: number | null): string => {
-    if (ms === null) return 'In progress...';
+    if (ms === null) return "In progress...";
     if (ms < 1000) return `${ms}ms`;
     return `${(ms / 1000).toFixed(2)}s`;
   };
@@ -138,7 +138,7 @@ const RunTimeline: React.FC<RunTimelineProps> = ({
   };
 
   return (
-    <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto', p: 2 }}>
+    <Box sx={{ width: "100%", maxWidth: 1200, mx: "auto", p: 2 }}>
       <Typography variant="h4" gutterBottom>
         Explainability Timeline
       </Typography>
@@ -211,7 +211,7 @@ const RunTimeline: React.FC<RunTimelineProps> = ({
                 <Box sx={{ flexGrow: 1 }}>
                   {/* Header */}
                   <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                    <Typography variant="h6">{run.run_type.replace('_', ' ')}</Typography>
+                    <Typography variant="h6">{run.run_type.replace("_", " ")}</Typography>
                     <Chip label={run.actor.actor_name} size="small" variant="outlined" />
                     <Chip
                       label={`${(run.confidence.overall_confidence * 100).toFixed(0)}%`}
@@ -254,7 +254,7 @@ const RunTimeline: React.FC<RunTimelineProps> = ({
                           key={idx}
                           label={`${pd.policy_name}: ${pd.decision}`}
                           size="small"
-                          color={pd.decision === 'allow' ? 'success' : 'error'}
+                          color={pd.decision === "allow" ? "success" : "error"}
                           variant="outlined"
                         />
                       ))}

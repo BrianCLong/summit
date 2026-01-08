@@ -13,6 +13,7 @@ This document describes the implementation of correlation IDs in the Summit plat
 ## Purpose
 
 Correlation IDs enable:
+
 - **End-to-end tracing** of requests through multiple services
 - **Incident diagnosis** by correlating all logs for a single request
 - **Performance analysis** across distributed systems
@@ -42,9 +43,11 @@ Client Request → Correlation ID Middleware → Services → Response
 ## Middleware Implementation
 
 ### Location
+
 `/server/src/middleware/correlation-id.ts`
 
 ### Execution Order
+
 The correlation ID middleware is the **FIRST** middleware in the Express chain (see `/server/src/app.ts` line 142):
 
 ```javascript
@@ -57,12 +60,13 @@ This ensures all subsequent middleware and route handlers have access to correla
 
 ```javascript
 const correlationId =
-  req.headers['x-correlation-id'] ||    // From upstream service
-  req.headers['x-request-id'] ||        // Alternative header
-  randomUUID();                          // Generate new UUID v4
+  req.headers["x-correlation-id"] || // From upstream service
+  req.headers["x-request-id"] || // Alternative header
+  randomUUID(); // Generate new UUID v4
 ```
 
 **Priority Order:**
+
 1. Use existing `X-Correlation-ID` header (from API gateway, upstream service)
 2. Use existing `X-Request-ID` header (compatibility)
 3. Generate new UUID v4 using Node.js `crypto.randomUUID()`
@@ -70,9 +74,9 @@ const correlationId =
 ### Request Attachment
 
 ```javascript
-req.correlationId = correlationId;  // Available in all handlers
-req.traceId = activeSpan?.spanContext().traceId || '';
-req.spanId = activeSpan?.spanContext().spanId || '';
+req.correlationId = correlationId; // Available in all handlers
+req.traceId = activeSpan?.spanContext().traceId || "";
+req.spanId = activeSpan?.spanContext().spanId || "";
 ```
 
 ### Response Headers
@@ -80,12 +84,13 @@ req.spanId = activeSpan?.spanContext().spanId || '';
 All responses include correlation headers for client-side tracing:
 
 ```javascript
-res.setHeader('X-Correlation-ID', correlationId);
-res.setHeader('X-Request-ID', correlationId);  // Alias for compatibility
-res.setHeader('X-Trace-ID', traceId);          // OpenTelemetry trace ID
+res.setHeader("X-Correlation-ID", correlationId);
+res.setHeader("X-Request-ID", correlationId); // Alias for compatibility
+res.setHeader("X-Trace-ID", traceId); // OpenTelemetry trace ID
 ```
 
 Clients can use these headers to:
+
 - Reference specific requests in support tickets
 - Track request flows through the system
 - Correlate client-side errors with server-side logs
@@ -96,11 +101,11 @@ The middleware uses Node.js AsyncLocalStorage to propagate context through the e
 
 ```javascript
 const store = new Map();
-store.set('correlationId', correlationId);
-store.set('requestId', correlationId);
-store.set('traceId', traceId);
-store.set('tenantId', tenantId);
-store.set('principalId', userId);
+store.set("correlationId", correlationId);
+store.set("requestId", correlationId);
+store.set("traceId", traceId);
+store.set("tenantId", tenantId);
+store.set("principalId", userId);
 
 correlationStorage.run(store, () => {
   next();
@@ -111,10 +116,10 @@ This enables **automatic context injection** without manual parameter passing:
 
 ```javascript
 // Anywhere in the request chain:
-import { logger } from './observability/logging/logger.js';
+import { logger } from "./observability/logging/logger.js";
 
 // Automatically includes correlationId from ALS context
-logger.info('Processing payment');
+logger.info("Processing payment");
 ```
 
 ## OpenTelemetry Integration
@@ -125,8 +130,8 @@ The middleware integrates with OpenTelemetry distributed tracing:
 
 ```javascript
 const activeSpan = trace.getActiveSpan();
-req.traceId = activeSpan?.spanContext().traceId || '';
-req.spanId = activeSpan?.spanContext().spanId || '';
+req.traceId = activeSpan?.spanContext().traceId || "";
+req.spanId = activeSpan?.spanContext().spanId || "";
 ```
 
 ### W3C Traceparent Support
@@ -140,8 +145,8 @@ traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
 ```
 
 ```javascript
-if (!req.traceId && req.headers['traceparent']) {
-  const [, inboundTraceId, inboundSpanId] = req.headers['traceparent'].split('-');
+if (!req.traceId && req.headers["traceparent"]) {
+  const [, inboundTraceId, inboundSpanId] = req.headers["traceparent"].split("-");
   req.traceId = inboundTraceId;
   req.spanId = inboundSpanId;
 }
@@ -152,9 +157,9 @@ if (!req.traceId && req.headers['traceparent']) {
 Correlation data is attached to OpenTelemetry spans:
 
 ```javascript
-tracer.setAttribute('correlation.id', correlationId);
-tracer.setAttribute('correlation.request_id', correlationId);
-tracer.setAttribute('tenant.id', tenantId);
+tracer.setAttribute("correlation.id", correlationId);
+tracer.setAttribute("correlation.request_id", correlationId);
+tracer.setAttribute("tenant.id", tenantId);
 ```
 
 ## Usage Patterns
@@ -162,9 +167,9 @@ tracer.setAttribute('tenant.id', tenantId);
 ### Express Route Handlers
 
 ```javascript
-app.get('/api/users/:id', async (req, res) => {
+app.get("/api/users/:id", async (req, res) => {
   // Correlation ID automatically available
-  logger.info({ correlationId: req.correlationId }, 'Fetching user');
+  logger.info({ correlationId: req.correlationId }, "Fetching user");
 
   const user = await getUserById(req.params.id);
   res.json(user);
@@ -177,14 +182,14 @@ When calling downstream services, propagate the correlation ID:
 
 ```javascript
 async function callDownstreamService(data, req) {
-  const response = await fetch('https://downstream-service/api/endpoint', {
-    method: 'POST',
+  const response = await fetch("https://downstream-service/api/endpoint", {
+    method: "POST",
     headers: {
-      'X-Correlation-ID': req.correlationId,
-      'X-Trace-ID': req.traceId,
-      'Content-Type': 'application/json'
+      "X-Correlation-ID": req.correlationId,
+      "X-Trace-ID": req.traceId,
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
   });
 
   return response.json();
@@ -201,7 +206,7 @@ async function queueJob(jobData, req) {
     ...jobData,
     correlationId: req.correlationId,
     tenantId: req.user?.tenant_id,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 }
 
@@ -209,11 +214,14 @@ async function queueJob(jobData, req) {
 async function processJob(job) {
   const { correlationId, tenantId } = job.data;
 
-  logger.info({
-    correlationId,
-    tenantId,
-    jobId: job.id
-  }, 'Processing queued job');
+  logger.info(
+    {
+      correlationId,
+      tenantId,
+      jobId: job.id,
+    },
+    "Processing queued job"
+  );
 
   // Process job...
 }
@@ -239,14 +247,17 @@ export async function getContext({ req }) {
 const resolvers = {
   Query: {
     user: async (parent, args, context) => {
-      logger.info({
-        correlationId: context.correlationId,
-        userId: args.id
-      }, 'GraphQL: Fetching user');
+      logger.info(
+        {
+          correlationId: context.correlationId,
+          userId: args.id,
+        },
+        "GraphQL: Fetching user"
+      );
 
       return getUserById(args.id);
-    }
-  }
+    },
+  },
 };
 ```
 
@@ -254,27 +265,27 @@ const resolvers = {
 
 ### Request Headers (Honored)
 
-| Header | Description | Example |
-|--------|-------------|---------|
-| `X-Correlation-ID` | Primary correlation ID header | `a1b2c3d4-e5f6-7890-abcd-ef1234567890` |
-| `X-Request-ID` | Alternative correlation ID | `a1b2c3d4-e5f6-7890-abcd-ef1234567890` |
-| `traceparent` | W3C trace context | `00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01` |
-| `X-Tenant-ID` | Tenant context (optional) | `tenant_abc123` |
+| Header             | Description                   | Example                                                   |
+| ------------------ | ----------------------------- | --------------------------------------------------------- |
+| `X-Correlation-ID` | Primary correlation ID header | `a1b2c3d4-e5f6-7890-abcd-ef1234567890`                    |
+| `X-Request-ID`     | Alternative correlation ID    | `a1b2c3d4-e5f6-7890-abcd-ef1234567890`                    |
+| `traceparent`      | W3C trace context             | `00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01` |
+| `X-Tenant-ID`      | Tenant context (optional)     | `tenant_abc123`                                           |
 
 ### Response Headers (Always Returned)
 
-| Header | Description | Example |
-|--------|-------------|---------|
-| `X-Correlation-ID` | Request correlation ID | `a1b2c3d4-e5f6-7890-abcd-ef1234567890` |
-| `X-Request-ID` | Alias for correlation ID | `a1b2c3d4-e5f6-7890-abcd-ef1234567890` |
-| `X-Trace-ID` | OpenTelemetry trace ID | `4bf92f3577b34da6a3ce929d0e0e4736` |
+| Header             | Description              | Example                                |
+| ------------------ | ------------------------ | -------------------------------------- |
+| `X-Correlation-ID` | Request correlation ID   | `a1b2c3d4-e5f6-7890-abcd-ef1234567890` |
+| `X-Request-ID`     | Alias for correlation ID | `a1b2c3d4-e5f6-7890-abcd-ef1234567890` |
+| `X-Trace-ID`       | OpenTelemetry trace ID   | `4bf92f3577b34da6a3ce929d0e0e4736`     |
 
 ## Correlation Context Helpers
 
 ### Get Correlation Context
 
 ```javascript
-import { getCorrelationContext } from './middleware/correlation-id.js';
+import { getCorrelationContext } from "./middleware/correlation-id.js";
 
 const context = getCorrelationContext(req);
 // {
@@ -289,7 +300,7 @@ const context = getCorrelationContext(req);
 ### Get User Context
 
 ```javascript
-import { getUserContext } from './middleware/correlation-id.js';
+import { getUserContext } from "./middleware/correlation-id.js";
 
 const userCtx = getUserContext(req);
 // {
@@ -307,10 +318,10 @@ const userCtx = getUserContext(req);
 The context-aware logger automatically includes correlation ID:
 
 ```javascript
-import { logger } from './observability/logging/logger.js';
+import { logger } from "./observability/logging/logger.js";
 
 // Inside request handler
-logger.info('User authenticated');
+logger.info("User authenticated");
 // Output: {"time":"...","level":30,"correlationId":"a1b2...","message":"User authenticated"}
 ```
 
@@ -319,12 +330,15 @@ logger.info('User authenticated');
 For the base Pino logger, include correlation ID explicitly:
 
 ```javascript
-import { appLogger } from './logging/structuredLogger.js';
+import { appLogger } from "./logging/structuredLogger.js";
 
-appLogger.info({
-  correlationId: req.correlationId,
-  userId: req.user.id
-}, 'Payment processed');
+appLogger.info(
+  {
+    correlationId: req.correlationId,
+    userId: req.user.id,
+  },
+  "Payment processed"
+);
 ```
 
 ### Pino HTTP Logger
@@ -332,16 +346,18 @@ appLogger.info({
 The `pino-http` middleware automatically includes correlation data:
 
 ```javascript
-app.use(pinoHttp({
-  logger: appLogger,
-  customProps: (req) => ({
-    correlationId: req.correlationId,
-    traceId: req.traceId,
-    spanId: req.spanId,
-    userId: req.user?.sub || req.user?.id,
-    tenantId: req.user?.tenant_id
+app.use(
+  pinoHttp({
+    logger: appLogger,
+    customProps: (req) => ({
+      correlationId: req.correlationId,
+      traceId: req.traceId,
+      spanId: req.spanId,
+      userId: req.user?.sub || req.user?.id,
+      tenantId: req.user?.tenant_id,
+    }),
   })
-}));
+);
 ```
 
 ## Querying by Correlation ID
@@ -375,9 +391,7 @@ cat /logs/app-structured.log | \
       "correlationId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
     }
   },
-  "sort": [
-    { "time": "asc" }
-  ]
+  "sort": [{ "time": "asc" }]
 }
 ```
 
@@ -386,6 +400,7 @@ cat /logs/app-structured.log | \
 ### Request Flow Visualization
 
 Correlation IDs enable Grafana dashboards to:
+
 - Trace request paths through services
 - Identify bottlenecks and latency contributors
 - Correlate errors across service boundaries
@@ -440,18 +455,16 @@ curl -v http://localhost:3000/api/health
 ### Integration Testing
 
 ```javascript
-it('should propagate correlation ID through request chain', async () => {
-  const correlationId = 'test-correlation-id';
+it("should propagate correlation ID through request chain", async () => {
+  const correlationId = "test-correlation-id";
 
-  const response = await request(app)
-    .get('/api/users/123')
-    .set('X-Correlation-ID', correlationId);
+  const response = await request(app).get("/api/users/123").set("X-Correlation-ID", correlationId);
 
-  expect(response.headers['x-correlation-id']).toBe(correlationId);
+  expect(response.headers["x-correlation-id"]).toBe(correlationId);
 
   // Verify in logs
   const logs = await readLogs();
-  const requestLogs = logs.filter(l => l.correlationId === correlationId);
+  const requestLogs = logs.filter((l) => l.correlationId === correlationId);
   expect(requestLogs.length).toBeGreaterThan(0);
 });
 ```
@@ -501,4 +514,5 @@ This implementation supports:
 ---
 
 **Document History:**
+
 - 2025-12-27: Initial version (v1.0) - GA hardening initiative

@@ -2,9 +2,9 @@
  * Missing Link Prediction
  */
 
-import { Driver } from 'neo4j-driver';
-import { v4 as uuidv4 } from 'uuid';
-import { PredictedLink, PredictedLinkSchema } from '../types/inference.js';
+import { Driver } from "neo4j-driver";
+import { v4 as uuidv4 } from "uuid";
+import { PredictedLink, PredictedLinkSchema } from "../types/inference.js";
 
 export class LinkPredictor {
   constructor(private driver: Driver) {}
@@ -16,13 +16,13 @@ export class LinkPredictor {
     entityId: string,
     relationshipType?: string,
     minConfidence = 0.5,
-    limit = 10,
+    limit = 10
   ): Promise<PredictedLink[]> {
     const session = this.driver.session();
     try {
       // Use path-based features for link prediction
       // Common neighbors, path length, etc.
-      const relTypeFilter = relationshipType ? `:${relationshipType}` : '';
+      const relTypeFilter = relationshipType ? `:${relationshipType}` : "";
 
       const result = await session.run(
         `
@@ -39,7 +39,7 @@ export class LinkPredictor {
         ORDER BY score DESC
         LIMIT $limit
         `,
-        { entityId, minConfidence, limit },
+        { entityId, minConfidence, limit }
       );
 
       const predictions: PredictedLink[] = [];
@@ -48,12 +48,12 @@ export class LinkPredictor {
         const prediction: PredictedLink = {
           id: uuidv4(),
           sourceEntityId: entityId,
-          targetEntityId: record.get('targetId'),
-          predictedRelationType: relationshipType || 'RELATED_TO',
-          confidence: record.get('score'),
-          predictionMethod: 'path_ranking',
+          targetEntityId: record.get("targetId"),
+          predictedRelationType: relationshipType || "RELATED_TO",
+          confidence: record.get("score"),
+          predictionMethod: "path_ranking",
           features: {
-            commonNeighbors: record.get('score'),
+            commonNeighbors: record.get("score"),
           },
           validated: false,
           createdAt: new Date().toISOString(),
@@ -71,10 +71,7 @@ export class LinkPredictor {
   /**
    * Predict links using Adamic-Adar scoring
    */
-  async predictLinksAdamicAdar(
-    entityId: string,
-    limit = 10,
-  ): Promise<PredictedLink[]> {
+  async predictLinksAdamicAdar(entityId: string, limit = 10): Promise<PredictedLink[]> {
     const session = this.driver.session();
     try {
       // Adamic-Adar: sum of 1/log(degree(common_neighbor))
@@ -93,7 +90,7 @@ export class LinkPredictor {
         ORDER BY score DESC
         LIMIT $limit
         `,
-        { entityId, limit },
+        { entityId, limit }
       );
 
       const predictions: PredictedLink[] = [];
@@ -102,12 +99,12 @@ export class LinkPredictor {
         const prediction: PredictedLink = {
           id: uuidv4(),
           sourceEntityId: entityId,
-          targetEntityId: record.get('targetId'),
-          predictedRelationType: 'RELATED_TO',
-          confidence: Math.min(record.get('score') / 10, 1.0), // Normalize
-          predictionMethod: 'path_ranking',
+          targetEntityId: record.get("targetId"),
+          predictedRelationType: "RELATED_TO",
+          confidence: Math.min(record.get("score") / 10, 1.0), // Normalize
+          predictionMethod: "path_ranking",
           features: {
-            adamicAdar: record.get('score'),
+            adamicAdar: record.get("score"),
           },
           validated: false,
           createdAt: new Date().toISOString(),
@@ -160,7 +157,7 @@ export class LinkPredictor {
           validatedBy: validated.validatedBy || null,
           validatedAt: validated.validatedAt || null,
           createdAt: validated.createdAt,
-        },
+        }
       );
     } finally {
       await session.close();
@@ -173,7 +170,7 @@ export class LinkPredictor {
   async validatePredictedLink(
     linkId: string,
     validatedBy: string,
-    isValid: boolean,
+    isValid: boolean
   ): Promise<void> {
     const session = this.driver.session();
     try {
@@ -184,7 +181,7 @@ export class LinkPredictor {
             p.validatedBy = $validatedBy,
             p.validatedAt = datetime()
         `,
-        { linkId, validatedBy, isValid },
+        { linkId, validatedBy, isValid }
       );
 
       // If valid, create actual relationship
@@ -200,7 +197,7 @@ export class LinkPredictor {
             createdAt: datetime()
           }]->(target)
           `,
-          { linkId },
+          { linkId }
         );
       }
     } finally {

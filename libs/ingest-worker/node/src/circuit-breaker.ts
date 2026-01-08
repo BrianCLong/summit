@@ -10,9 +10,9 @@
  * - HALF_OPEN: Testing if service recovered
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 
-export type CircuitState = 'closed' | 'open' | 'half-open';
+export type CircuitState = "closed" | "open" | "half-open";
 
 export interface CircuitBreakerConfig {
   /** Number of failures before opening circuit */
@@ -49,7 +49,7 @@ export interface CircuitBreakerStats {
 }
 
 export class CircuitBreaker extends EventEmitter {
-  private state: CircuitState = 'closed';
+  private state: CircuitState = "closed";
   private failures: number[] = [];
   private consecutiveSuccesses = 0;
   private lastFailureTime: number | null = null;
@@ -72,13 +72,13 @@ export class CircuitBreaker extends EventEmitter {
     // Check if circuit allows the call
     if (!this.canExecute()) {
       this.totalRejected++;
-      throw new CircuitBreakerError('Circuit breaker is open', this.state);
+      throw new CircuitBreakerError("Circuit breaker is open", this.state);
     }
 
     this.totalCalls++;
 
     // Track half-open calls
-    if (this.state === 'half-open') {
+    if (this.state === "half-open") {
       this.halfOpenCalls++;
     }
 
@@ -101,18 +101,21 @@ export class CircuitBreaker extends EventEmitter {
    */
   canExecute(): boolean {
     switch (this.state) {
-      case 'closed':
+      case "closed":
         return true;
 
-      case 'open':
+      case "open":
         // Check if recovery time has passed
-        if (this.lastFailureTime && Date.now() - this.lastFailureTime >= this.config.recoveryTimeMs) {
-          this.transitionTo('half-open');
+        if (
+          this.lastFailureTime &&
+          Date.now() - this.lastFailureTime >= this.config.recoveryTimeMs
+        ) {
+          this.transitionTo("half-open");
           return true;
         }
         return false;
 
-      case 'half-open':
+      case "half-open":
         // Allow limited calls in half-open state
         return this.halfOpenCalls < this.config.successThreshold;
 
@@ -125,7 +128,7 @@ export class CircuitBreaker extends EventEmitter {
    * Manually trip the circuit (force open).
    */
   trip(): void {
-    this.transitionTo('open');
+    this.transitionTo("open");
     this.lastFailureTime = Date.now();
   }
 
@@ -133,7 +136,7 @@ export class CircuitBreaker extends EventEmitter {
    * Manually reset the circuit (force closed).
    */
   reset(): void {
-    this.transitionTo('closed');
+    this.transitionTo("closed");
     this.failures = [];
     this.consecutiveSuccesses = 0;
     this.halfOpenCalls = 0;
@@ -144,9 +147,9 @@ export class CircuitBreaker extends EventEmitter {
    */
   getState(): CircuitState {
     // Check for automatic transition from open to half-open
-    if (this.state === 'open' && this.lastFailureTime) {
+    if (this.state === "open" && this.lastFailureTime) {
       if (Date.now() - this.lastFailureTime >= this.config.recoveryTimeMs) {
-        this.transitionTo('half-open');
+        this.transitionTo("half-open");
       }
     }
     return this.state;
@@ -190,15 +193,15 @@ export class CircuitBreaker extends EventEmitter {
     this.consecutiveSuccesses++;
 
     switch (this.state) {
-      case 'half-open':
+      case "half-open":
         // Check if we've had enough successes to close
         if (this.consecutiveSuccesses >= this.config.successThreshold) {
-          this.transitionTo('closed');
+          this.transitionTo("closed");
           this.halfOpenCalls = 0;
         }
         break;
 
-      case 'closed':
+      case "closed":
         // Success in closed state - nothing special
         break;
     }
@@ -218,19 +221,19 @@ export class CircuitBreaker extends EventEmitter {
     }
 
     switch (this.state) {
-      case 'half-open':
+      case "half-open":
         // Any failure in half-open immediately opens
-        this.transitionTo('open');
+        this.transitionTo("open");
         this.halfOpenCalls = 0;
         break;
 
-      case 'closed':
+      case "closed":
         // Record failure and check threshold
         this.failures.push(Date.now());
         this.cleanupFailures();
 
         if (this.failures.length >= this.config.failureThreshold) {
-          this.transitionTo('open');
+          this.transitionTo("open");
         }
         break;
     }
@@ -240,9 +243,9 @@ export class CircuitBreaker extends EventEmitter {
     if (this.state !== newState) {
       const oldState = this.state;
       this.state = newState;
-      this.emit('stateChange', newState, oldState);
+      this.emit("stateChange", newState, oldState);
 
-      if (newState === 'half-open') {
+      if (newState === "half-open") {
         this.halfOpenCalls = 0;
       }
     }
@@ -276,9 +279,12 @@ export class CircuitBreaker extends EventEmitter {
  * Error thrown when circuit breaker is open.
  */
 export class CircuitBreakerError extends Error {
-  constructor(message: string, public readonly state: CircuitState) {
+  constructor(
+    message: string,
+    public readonly state: CircuitState
+  ) {
     super(message);
-    this.name = 'CircuitBreakerError';
+    this.name = "CircuitBreakerError";
   }
 }
 
@@ -288,7 +294,7 @@ export class CircuitBreakerError extends Error {
 export class TimeoutError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'TimeoutError';
+    this.name = "TimeoutError";
   }
 }
 

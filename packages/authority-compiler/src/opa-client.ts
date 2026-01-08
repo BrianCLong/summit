@@ -5,8 +5,13 @@
  * Supports both embedded and remote OPA evaluation modes.
  */
 
-import { PolicyBundle, PolicyDecision, Operation, ClassificationLevel } from './schema/policy.schema';
-import type { EvaluationContext } from './evaluator';
+import {
+  PolicyBundle,
+  PolicyDecision,
+  Operation,
+  ClassificationLevel,
+} from "./schema/policy.schema";
+import type { EvaluationContext } from "./evaluator";
 
 // -----------------------------------------------------------------------------
 // OPA Client Configuration
@@ -18,7 +23,7 @@ export interface OPAClientConfig {
   /** Policy bundle path (for embedded mode) */
   bundlePath?: string;
   /** Evaluation mode */
-  mode: 'remote' | 'embedded';
+  mode: "remote" | "embedded";
   /** Timeout in milliseconds */
   timeoutMs?: number;
   /** Enable caching of policy decisions */
@@ -133,9 +138,10 @@ export class OPAClient {
     }
 
     // Evaluate policy
-    const result = this.config.mode === 'remote'
-      ? await this.evaluateRemote(input)
-      : await this.evaluateEmbedded(input);
+    const result =
+      this.config.mode === "remote"
+        ? await this.evaluateRemote(input)
+        : await this.evaluateEmbedded(input);
 
     // Cache result
     if (this.config.enableCache) {
@@ -150,7 +156,7 @@ export class OPAClient {
    */
   private async evaluateRemote(input: OPAInput): Promise<OPAOutput> {
     if (!this.config.endpoint) {
-      throw new Error('OPA endpoint not configured for remote mode');
+      throw new Error("OPA endpoint not configured for remote mode");
     }
 
     const controller = new AbortController();
@@ -160,8 +166,8 @@ export class OPAClient {
       const response = await this.fetchWithRetry(
         `${this.config.endpoint}/v1/data/summit/authz/allow`,
         {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ input }),
           signal: controller.signal,
         }
@@ -180,17 +186,13 @@ export class OPAClient {
   private async evaluateEmbedded(input: OPAInput): Promise<OPAOutput> {
     // In production, this would use @open-policy-agent/opa-wasm
     // For now, return a stub that delegates to the local evaluator
-    throw new Error('Embedded OPA not yet implemented - use remote mode');
+    throw new Error("Embedded OPA not yet implemented - use remote mode");
   }
 
   /**
    * Fetch with retry logic
    */
-  private async fetchWithRetry(
-    url: string,
-    options: RequestInit,
-    attempt = 0
-  ): Promise<Response> {
+  private async fetchWithRetry(url: string, options: RequestInit, attempt = 0): Promise<Response> {
     try {
       const response = await fetch(url, options);
       if (!response.ok && response.status >= 500 && attempt < this.config.retry!.maxRetries) {
@@ -213,7 +215,7 @@ export class OPAClient {
   private parseOPAResponse(data: any): OPAOutput {
     const result = data.result;
 
-    if (typeof result === 'boolean') {
+    if (typeof result === "boolean") {
       return { allow: result };
     }
 
@@ -255,7 +257,7 @@ export class OPAClient {
     const key = this.cacheKey(input);
     this.cache.set(key, {
       decision,
-      expiresAt: Date.now() + (this.config.cacheTTL! * 1000),
+      expiresAt: Date.now() + this.config.cacheTTL! * 1000,
     });
   }
 
@@ -342,7 +344,7 @@ export function opaOutputToDecision(output: OPAOutput, auditId: string): PolicyD
   return {
     allowed: output.allow,
     authorityId: output.authorityId,
-    reason: output.reason || (output.allow ? 'Access granted' : 'Access denied'),
+    reason: output.reason || (output.allow ? "Access granted" : "Access denied"),
     conditions: output.conditions,
     requiresTwoPersonControl: output.requiresTwoPersonControl || false,
     twoPersonControlId: output.twoPersonControlId,
@@ -361,28 +363,28 @@ export function opaOutputToDecision(output: OPAOutput, auditId: string): PolicyD
  */
 export function generateRegoPolicy(bundle: PolicyBundle): string {
   const lines: string[] = [
-    '# Auto-generated from Summit Policy Bundle',
+    "# Auto-generated from Summit Policy Bundle",
     `# Bundle: ${bundle.name} v${bundle.version}`,
     `# Generated: ${new Date().toISOString()}`,
-    '',
-    'package summit.authz',
-    '',
-    'import future.keywords.if',
-    'import future.keywords.in',
-    '',
-    'default allow := false',
-    '',
+    "",
+    "package summit.authz",
+    "",
+    "import future.keywords.if",
+    "import future.keywords.in",
+    "",
+    "default allow := false",
+    "",
   ];
 
   // Generate rules for each authority
   for (const authority of bundle.authorities) {
     lines.push(`# Authority: ${authority.name}`);
     lines.push(`allow if {`);
-    lines.push(`  authority_${authority.id.replace(/-/g, '_')}`);
+    lines.push(`  authority_${authority.id.replace(/-/g, "_")}`);
     lines.push(`}`);
-    lines.push('');
+    lines.push("");
 
-    lines.push(`authority_${authority.id.replace(/-/g, '_')} if {`);
+    lines.push(`authority_${authority.id.replace(/-/g, "_")} if {`);
 
     // Subject matching
     if (authority.subjects.roles?.length) {
@@ -403,30 +405,32 @@ export function generateRegoPolicy(bundle: PolicyBundle): string {
 
     if (authority.resources.classifications?.length) {
       lines.push(`  # Classification check`);
-      lines.push(`  input.resource.classification in ${JSON.stringify(authority.resources.classifications)}`);
+      lines.push(
+        `  input.resource.classification in ${JSON.stringify(authority.resources.classifications)}`
+      );
     }
 
     lines.push(`}`);
-    lines.push('');
+    lines.push("");
   }
 
   // Add helper rules
-  lines.push('# Helper: Get matched authority ID');
-  lines.push('authority_id := id if {');
-  lines.push('  some authority in data.authorities');
-  lines.push('  allow');
-  lines.push('  id := authority.id');
-  lines.push('}');
-  lines.push('');
+  lines.push("# Helper: Get matched authority ID");
+  lines.push("authority_id := id if {");
+  lines.push("  some authority in data.authorities");
+  lines.push("  allow");
+  lines.push("  id := authority.id");
+  lines.push("}");
+  lines.push("");
 
   // Add reason generation
-  lines.push('# Helper: Generate denial reason');
-  lines.push('reason := msg if {');
-  lines.push('  not allow');
+  lines.push("# Helper: Generate denial reason");
+  lines.push("reason := msg if {");
+  lines.push("  not allow");
   lines.push('  msg := "No matching authority found"');
-  lines.push('}');
+  lines.push("}");
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 export default OPAClient;

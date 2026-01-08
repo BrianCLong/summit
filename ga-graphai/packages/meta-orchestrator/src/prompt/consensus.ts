@@ -1,4 +1,4 @@
-import type { SimilarityFunction } from './types.js';
+import type { SimilarityFunction } from "./types.js";
 
 export interface CandidateGenerationOptions {
   prompt: string;
@@ -47,7 +47,11 @@ export class SelfConsensusEngine {
         const similarity = this.similarity(cluster.centroid, embedding);
         if (similarity >= this.similarityThreshold) {
           cluster.members.push(text);
-          cluster.centroid = this.recalculateCentroid(cluster.centroid, embedding, cluster.members.length);
+          cluster.centroid = this.recalculateCentroid(
+            cluster.centroid,
+            embedding,
+            cluster.members.length
+          );
           assigned = true;
           break;
         }
@@ -60,7 +64,7 @@ export class SelfConsensusEngine {
     const bestCluster = clusters.reduce((largest, cluster) =>
       cluster.members.length > largest.members.length ? cluster : largest
     );
-    const consensus = bestCluster.members[0] ?? '';
+    const consensus = bestCluster.members[0] ?? "";
 
     return { consensus, clusters };
   }

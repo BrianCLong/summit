@@ -5,6 +5,7 @@ Complete enterprise-grade AI agent prompt bundle for Summit, IntelGraph, Maestro
 ## Purpose
 
 Enables autonomous AI agents to deliver production-grade code with:
+
 - 100% requirement coverage (explicit, implicit, architectural)
 - Zero TODOs or incomplete work
 - Fully green CI on first submission
@@ -14,6 +15,7 @@ Enables autonomous AI agents to deliver production-grade code with:
 ## Agent Prompts
 
 ### Core Agents
+
 - **`claude-code.md`** - Deep architectural reasoning with third-order inference
 - **`codex.md`** - Deterministic zero-error build systems
 - **`jules-gemini.md`** - Cross-file schema harmonization
@@ -22,10 +24,12 @@ Enables autonomous AI agents to deliver production-grade code with:
 - **`cursor-warp.md`** - Live devloop integration
 
 ### Enterprise Agents
+
 - **`summit-intelgraph.md`** - Multi-service enterprise architecture
 - **`ci-cd.md`** - Pipeline enforcement and governance
 
 ### Orchestration
+
 - **`meta-router.md`** - Automatic agent selection
 - **`capability-matrix.md`** - Agent capability mapping
 - **`enterprise-4th-order.md`** - Governance layer
@@ -43,10 +47,11 @@ vim .agentic-prompts/task-123-feature.md
 ```
 
 ## Target Metrics
+
 - 3-5 complete tasks per day
 - <2 hours time to PR
-- >95% CI pass rate
-- >90% first-time merge rate
+- > 95% CI pass rate
+- > 90% first-time merge rate
 - Zero TODOs
 
 ## Testing

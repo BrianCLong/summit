@@ -1,11 +1,13 @@
 # Troubleshooting Guide Template
 
 ## Purpose
+
 This guide helps developers diagnose and resolve common issues when developing, deploying, or operating the Summit/IntelGraph platform.
 
 ---
 
 ## Table of Contents
+
 1. [Local Development Issues](#local-development-issues)
 2. [Build & Deployment Issues](#build--deployment-issues)
 3. [Database Issues](#database-issues)
@@ -22,11 +24,13 @@ This guide helps developers diagnose and resolve common issues when developing, 
 ### ❌ `pnpm install` Fails
 
 **Symptom:**
+
 ```
 ERR_PNPM_FETCH_404  GET https://registry.npmjs.org/[package]: Not Found
 ```
 
 **Common Causes:**
+
 1. Package name typo in `package.json`
 2. Private package without authentication
 3. Network/proxy issues
@@ -35,12 +39,14 @@ ERR_PNPM_FETCH_404  GET https://registry.npmjs.org/[package]: Not Found
 **Solutions:**
 
 1. **Verify Node.js version:**
+
    ```bash
    node --version  # Should be >= 20.x
    nvm use 20      # If using nvm
    ```
 
 2. **Clear pnpm cache:**
+
    ```bash
    pnpm store prune
    rm -rf node_modules pnpm-lock.yaml
@@ -48,6 +54,7 @@ ERR_PNPM_FETCH_404  GET https://registry.npmjs.org/[package]: Not Found
    ```
 
 3. **Check for private packages:**
+
    ```bash
    # Authenticate with GitHub Packages (if using @org/package)
    echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" > ~/.npmrc
@@ -65,11 +72,13 @@ ERR_PNPM_FETCH_404  GET https://registry.npmjs.org/[package]: Not Found
 ### ❌ Docker Compose Services Won't Start
 
 **Symptom:**
+
 ```
 ERROR: for neo4j  Cannot start service neo4j: Ports are not available
 ```
 
 **Common Causes:**
+
 1. Ports already in use
 2. Docker daemon not running
 3. Insufficient resources (memory/CPU)
@@ -78,6 +87,7 @@ ERROR: for neo4j  Cannot start service neo4j: Ports are not available
 **Solutions:**
 
 1. **Check if port is in use:**
+
    ```bash
    lsof -i :7687  # Neo4j port
    lsof -i :5432  # PostgreSQL port
@@ -85,15 +95,18 @@ ERROR: for neo4j  Cannot start service neo4j: Ports are not available
    ```
 
 2. **Kill conflicting process:**
+
    ```bash
    kill -9 $(lsof -t -i :7687)
    ```
 
 3. **Check Docker resources:**
+
    ```bash
    docker info | grep -i memory
    docker info | grep -i cpu
    ```
+
    - **Solution:** Increase Docker Desktop resources (Preferences → Resources)
 
 4. **Rebuild containers:**
@@ -107,10 +120,12 @@ ERROR: for neo4j  Cannot start service neo4j: Ports are not available
 ### ❌ Hot Module Replacement (HMR) Not Working
 
 **Symptom:**
+
 - Code changes don't reflect in browser
 - Need to manually refresh
 
 **Common Causes:**
+
 1. Vite/Webpack not watching files
 2. Too many files (inotify limit on Linux)
 3. File system issues (NFS, Docker volume)
@@ -118,21 +133,23 @@ ERROR: for neo4j  Cannot start service neo4j: Ports are not available
 **Solutions:**
 
 1. **Increase inotify watchers (Linux):**
+
    ```bash
    echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf
    sudo sysctl -p
    ```
 
 2. **Check Vite config:**
+
    ```javascript
    // vite.config.ts
    export default {
      server: {
        watch: {
-         usePolling: true,  // For Docker/NFS
-       }
-     }
-   }
+         usePolling: true, // For Docker/NFS
+       },
+     },
+   };
    ```
 
 3. **Restart dev server:**
@@ -145,11 +162,13 @@ ERROR: for neo4j  Cannot start service neo4j: Ports are not available
 ### ❌ TypeScript Errors After Pulling Latest Code
 
 **Symptom:**
+
 ```
 TS2307: Cannot find module '@intelgraph/types' or its corresponding type declarations.
 ```
 
 **Common Causes:**
+
 1. New dependencies not installed
 2. Generated types not built
 3. TypeScript cache corruption
@@ -157,11 +176,13 @@ TS2307: Cannot find module '@intelgraph/types' or its corresponding type declara
 **Solutions:**
 
 1. **Reinstall dependencies:**
+
    ```bash
    pnpm install
    ```
 
 2. **Build internal packages:**
+
    ```bash
    pnpm run build:packages  # Build @intelgraph/* packages
    ```
@@ -180,12 +201,14 @@ TS2307: Cannot find module '@intelgraph/types' or its corresponding type declara
 ### ❌ Docker Build Fails
 
 **Symptom:**
+
 ```
 ERROR [build 3/8] RUN pnpm install --frozen-lockfile
 executor failed running [/bin/sh -c pnpm install]: exit code 1
 ```
 
 **Common Causes:**
+
 1. Outdated `pnpm-lock.yaml`
 2. Platform-specific dependencies
 3. Build context issues
@@ -193,6 +216,7 @@ executor failed running [/bin/sh -c pnpm install]: exit code 1
 **Solutions:**
 
 1. **Update lockfile:**
+
    ```bash
    pnpm install
    git add pnpm-lock.yaml
@@ -200,11 +224,13 @@ executor failed running [/bin/sh -c pnpm install]: exit code 1
    ```
 
 2. **Use buildx for multi-platform:**
+
    ```bash
    docker buildx build --platform linux/amd64,linux/arm64 -t myimage:latest .
    ```
 
 3. **Clear Docker build cache:**
+
    ```bash
    docker builder prune -a
    ```
@@ -222,12 +248,14 @@ executor failed running [/bin/sh -c pnpm install]: exit code 1
 ### ❌ Kubernetes Pod in CrashLoopBackOff
 
 **Symptom:**
+
 ```bash
 NAME                    READY   STATUS             RESTARTS   AGE
 api-gateway-6d8f7b-xyz  0/1     CrashLoopBackOff   5          3m
 ```
 
 **Common Causes:**
+
 1. Application startup failure
 2. Missing environment variables
 3. Health check failures
@@ -236,28 +264,32 @@ api-gateway-6d8f7b-xyz  0/1     CrashLoopBackOff   5          3m
 **Solutions:**
 
 1. **Check logs:**
+
    ```bash
    kubectl logs api-gateway-6d8f7b-xyz
    kubectl logs api-gateway-6d8f7b-xyz --previous  # Previous crash
    ```
 
 2. **Check events:**
+
    ```bash
    kubectl describe pod api-gateway-6d8f7b-xyz
    ```
 
 3. **Check environment variables:**
+
    ```bash
    kubectl exec -it api-gateway-6d8f7b-xyz -- env | grep -i [VAR_NAME]
    ```
 
 4. **Increase resource limits:**
+
    ```yaml
    # deployment.yaml
    resources:
      limits:
-       memory: "2Gi"  # Increase from 512Mi
-       cpu: "1000m"   # Increase from 500m
+       memory: "2Gi" # Increase from 512Mi
+       cpu: "1000m" # Increase from 500m
    ```
 
 5. **Disable health checks temporarily:**
@@ -273,11 +305,13 @@ api-gateway-6d8f7b-xyz  0/1     CrashLoopBackOff   5          3m
 ### ❌ Cannot Connect to PostgreSQL
 
 **Symptom:**
+
 ```
 Error: connect ECONNREFUSED 127.0.0.1:5432
 ```
 
 **Common Causes:**
+
 1. PostgreSQL not running
 2. Wrong connection string
 3. Firewall/network issues
@@ -286,6 +320,7 @@ Error: connect ECONNREFUSED 127.0.0.1:5432
 **Solutions:**
 
 1. **Check if PostgreSQL is running:**
+
    ```bash
    # Docker Compose
    docker-compose ps postgres
@@ -295,6 +330,7 @@ Error: connect ECONNREFUSED 127.0.0.1:5432
    ```
 
 2. **Verify connection string:**
+
    ```bash
    # Should match this format:
    postgresql://user:password@host:5432/database
@@ -304,6 +340,7 @@ Error: connect ECONNREFUSED 127.0.0.1:5432
    ```
 
 3. **Check pg_hba.conf:**
+
    ```bash
    docker exec -it postgres cat /var/lib/postgresql/data/pg_hba.conf
    # Ensure: host all all 0.0.0.0/0 md5
@@ -319,11 +356,13 @@ Error: connect ECONNREFUSED 127.0.0.1:5432
 ### ❌ Neo4j Connection Timeout
 
 **Symptom:**
+
 ```
 ServiceUnavailable: WebSocket connection failure
 ```
 
 **Common Causes:**
+
 1. Neo4j not fully started
 2. Wrong URI (bolt:// vs neo4j://)
 3. Authentication failure
@@ -332,6 +371,7 @@ ServiceUnavailable: WebSocket connection failure
 **Solutions:**
 
 1. **Check Neo4j status:**
+
    ```bash
    # Docker
    docker logs neo4j
@@ -340,6 +380,7 @@ ServiceUnavailable: WebSocket connection failure
    ```
 
 2. **Verify URI format:**
+
    ```bash
    # Correct formats:
    NEO4J_URI=bolt://localhost:7687       # Single instance
@@ -348,6 +389,7 @@ ServiceUnavailable: WebSocket connection failure
    ```
 
 3. **Test connection:**
+
    ```bash
    docker exec -it neo4j cypher-shell -u neo4j -p password "RETURN 1;"
    ```
@@ -364,11 +406,13 @@ ServiceUnavailable: WebSocket connection failure
 ### ❌ Database Migration Fails
 
 **Symptom:**
+
 ```
 Error: Migration "20240101_add_users_table" failed
 ```
 
 **Common Causes:**
+
 1. Schema conflicts
 2. Missing permissions
 3. Previous migration not completed
@@ -377,17 +421,20 @@ Error: Migration "20240101_add_users_table" failed
 **Solutions:**
 
 1. **Check migration status:**
+
    ```bash
    pnpm run migrate:status
    ```
 
 2. **Rollback and retry:**
+
    ```bash
    pnpm run migrate:down  # Rollback last migration
    pnpm run migrate:up    # Re-run migrations
    ```
 
 3. **Check database permissions:**
+
    ```sql
    -- PostgreSQL
    SELECT grantee, privilege_type
@@ -408,11 +455,13 @@ Error: Migration "20240101_add_users_table" failed
 ### ❌ API Requests Timing Out
 
 **Symptom:**
+
 ```
 Error: timeout of 30000ms exceeded
 ```
 
 **Common Causes:**
+
 1. Service not running
 2. Network/firewall blocking
 3. Slow database query
@@ -421,19 +470,22 @@ Error: timeout of 30000ms exceeded
 **Solutions:**
 
 1. **Check service health:**
+
    ```bash
    curl http://localhost:3000/health
    ```
 
 2. **Check service logs:**
+
    ```bash
    docker logs api-gateway --tail=50
    ```
 
 3. **Increase timeout (temporarily):**
+
    ```javascript
    // In your API client
-   axios.get('/api/data', { timeout: 60000 })  // 60 seconds
+   axios.get("/api/data", { timeout: 60000 }); // 60 seconds
    ```
 
 4. **Check for slow queries:**
@@ -452,12 +504,14 @@ Error: timeout of 30000ms exceeded
 ### ❌ CORS Errors in Browser
 
 **Symptom:**
+
 ```
 Access to fetch at 'http://localhost:3000/api' from origin 'http://localhost:5173'
 has been blocked by CORS policy
 ```
 
 **Common Causes:**
+
 1. Backend not configured for CORS
 2. Wrong origin URL
 3. Credentials not allowed
@@ -465,25 +519,29 @@ has been blocked by CORS policy
 **Solutions:**
 
 1. **Enable CORS in backend:**
+
    ```javascript
    // Express.js
-   const cors = require('cors');
-   app.use(cors({
-     origin: 'http://localhost:5173',  // Vite dev server
-     credentials: true
-   }));
+   const cors = require("cors");
+   app.use(
+     cors({
+       origin: "http://localhost:5173", // Vite dev server
+       credentials: true,
+     })
+   );
    ```
 
 2. **Use proxy in development:**
+
    ```javascript
    // vite.config.ts
    export default {
      server: {
        proxy: {
-         '/api': 'http://localhost:3000'
-       }
-     }
-   }
+         "/api": "http://localhost:3000",
+       },
+     },
+   };
    ```
 
 3. **Check browser console:**
@@ -496,10 +554,12 @@ has been blocked by CORS policy
 ### ❌ GraphQL Query Very Slow
 
 **Symptom:**
+
 - Query takes > 5 seconds
 - Frontend times out
 
 **Common Causes:**
+
 1. Missing database indexes
 2. N+1 query problem
 3. Large result sets without pagination
@@ -508,6 +568,7 @@ has been blocked by CORS policy
 **Solutions:**
 
 1. **Enable GraphQL query logging:**
+
    ```javascript
    // In Apollo Server config
    plugins: [
@@ -517,14 +578,15 @@ has been blocked by CORS policy
          return {
            willSendResponse({ metrics }) {
              console.log(`Query took ${Date.now() - start}ms`);
-           }
-         }
-       }
-     }
-   ]
+           },
+         };
+       },
+     },
+   ];
    ```
 
 2. **Use DataLoader to batch queries:**
+
    ```javascript
    const userLoader = new DataLoader(async (ids) => {
      return await User.findByIds(ids);
@@ -532,13 +594,20 @@ has been blocked by CORS policy
    ```
 
 3. **Add pagination:**
+
    ```graphql
    query {
      entities(first: 20, after: "cursor") {
        edges {
-         node { id name }
+         node {
+           id
+           name
+         }
        }
-       pageInfo { hasNextPage endCursor }
+       pageInfo {
+         hasNextPage
+         endCursor
+       }
      }
    }
    ```
@@ -553,10 +622,12 @@ has been blocked by CORS policy
 ### ❌ Frontend Bundle Too Large
 
 **Symptom:**
+
 - Initial load > 5MB
 - Slow page load
 
 **Common Causes:**
+
 1. Not using code splitting
 2. Including entire libraries (e.g., lodash, moment)
 3. Large images not optimized
@@ -565,24 +636,27 @@ has been blocked by CORS policy
 **Solutions:**
 
 1. **Analyze bundle:**
+
    ```bash
    pnpm run build
    pnpm exec vite-bundle-visualizer
    ```
 
 2. **Enable code splitting:**
+
    ```javascript
    // Use dynamic imports
-   const HeavyComponent = lazy(() => import('./HeavyComponent'));
+   const HeavyComponent = lazy(() => import("./HeavyComponent"));
    ```
 
 3. **Use tree-shaking imports:**
+
    ```javascript
    // ❌ Bad
-   import _ from 'lodash';
+   import _ from "lodash";
 
    // ✅ Good
-   import debounce from 'lodash/debounce';
+   import debounce from "lodash/debounce";
    ```
 
 4. **Disable source maps in production:**
@@ -590,9 +664,9 @@ has been blocked by CORS policy
    // vite.config.ts
    export default {
      build: {
-       sourcemap: false
-     }
-   }
+       sourcemap: false,
+     },
+   };
    ```
 
 ---
@@ -602,11 +676,13 @@ has been blocked by CORS policy
 ### ❌ JWT Token Invalid
 
 **Symptom:**
+
 ```
 Error: JsonWebTokenError: invalid token
 ```
 
 **Common Causes:**
+
 1. Token expired
 2. Wrong secret key
 3. Token format invalid
@@ -615,19 +691,22 @@ Error: JsonWebTokenError: invalid token
 **Solutions:**
 
 1. **Verify token format:**
+
    ```bash
    # Should be: header.payload.signature
    echo "eyJhbGciOi..." | cut -d. -f1 | base64 -d
    ```
 
 2. **Check expiration:**
+
    ```javascript
-   const jwt = require('jsonwebtoken');
+   const jwt = require("jsonwebtoken");
    const decoded = jwt.decode(token);
-   console.log('Expires:', new Date(decoded.exp * 1000));
+   console.log("Expires:", new Date(decoded.exp * 1000));
    ```
 
 3. **Verify secret key:**
+
    ```bash
    # Ensure JWT_SECRET matches across services
    echo $JWT_SECRET
@@ -635,7 +714,7 @@ Error: JsonWebTokenError: invalid token
 
 4. **Allow clock skew:**
    ```javascript
-   jwt.verify(token, secret, { clockTolerance: 60 });  // 60 seconds
+   jwt.verify(token, secret, { clockTolerance: 60 }); // 60 seconds
    ```
 
 ---
@@ -643,11 +722,13 @@ Error: JsonWebTokenError: invalid token
 ### ❌ OPA Policy Denies Request
 
 **Symptom:**
+
 ```
 403 Forbidden: Policy evaluation failed
 ```
 
 **Common Causes:**
+
 1. User missing required role/permission
 2. Policy logic error
 3. OPA bundle not loaded
@@ -656,17 +737,20 @@ Error: JsonWebTokenError: invalid token
 **Solutions:**
 
 1. **Test policy locally:**
+
    ```bash
    # Test with sample input
    opa eval -d policies/ -i input.json "data.authz.allow"
    ```
 
 2. **Check OPA logs:**
+
    ```bash
    kubectl logs -l app=opa --tail=50
    ```
 
 3. **Verify policy bundle:**
+
    ```bash
    kubectl exec -it opa-0 -- wget -O- http://localhost:8181/v1/policies
    ```
@@ -685,12 +769,14 @@ Error: JsonWebTokenError: invalid token
 ### ❌ ImagePullBackOff
 
 **Symptom:**
+
 ```bash
 NAME                READY   STATUS             RESTARTS   AGE
 api-gateway-xyz     0/1     ImagePullBackOff   0          2m
 ```
 
 **Common Causes:**
+
 1. Image doesn't exist
 2. Registry authentication failure
 3. Image tag wrong
@@ -699,16 +785,19 @@ api-gateway-xyz     0/1     ImagePullBackOff   0          2m
 **Solutions:**
 
 1. **Check image exists:**
+
    ```bash
    docker pull [image-name]:[tag]
    ```
 
 2. **Verify image in deployment:**
+
    ```bash
    kubectl describe pod api-gateway-xyz | grep Image
    ```
 
 3. **Create image pull secret:**
+
    ```bash
    kubectl create secret docker-registry regcred \
      --docker-server=[registry] \
@@ -733,6 +822,7 @@ api-gateway-xyz     0/1     ImagePullBackOff   0          2m
 ### Essential Commands
 
 #### Docker
+
 ```bash
 # View logs
 docker logs [container] --tail=100 --follow
@@ -748,6 +838,7 @@ docker stats
 ```
 
 #### Kubernetes
+
 ```bash
 # View pod logs
 kubectl logs [pod] -f
@@ -767,6 +858,7 @@ kubectl top nodes
 ```
 
 #### Database
+
 ```bash
 # PostgreSQL
 docker exec -it postgres psql -U postgres -d intelgraph
@@ -779,6 +871,7 @@ docker exec -it redis redis-cli
 ```
 
 #### Network
+
 ```bash
 # Test connectivity
 curl -v http://localhost:3000/health
@@ -795,17 +888,20 @@ traceroute api-gateway.example.com
 ## Getting Help
 
 ### Before Asking for Help
+
 1. ✅ Check this troubleshooting guide
 2. ✅ Search existing issues/tickets
 3. ✅ Review logs for error messages
 4. ✅ Try restarting the service
 
 ### Where to Ask
+
 - **Slack:** `#engineering-help`
 - **GitHub Issues:** `[Repo URL]/issues`
 - **On-Call:** Page via PagerDuty for production issues
 
 ### What to Include
+
 - ❗ **Error message** (full stack trace)
 - ❗ **Steps to reproduce**
 - ❗ **Environment** (local/staging/production)

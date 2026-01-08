@@ -18,7 +18,7 @@ export class MetadataExtractor {
       emails: this.extractEmails(text),
       phones: this.extractPhones(text),
       addresses: this.extractAddresses(text),
-      socialMedia: this.extractSocialMediaHandles(text)
+      socialMedia: this.extractSocialMediaHandles(text),
     };
   }
 
@@ -45,7 +45,8 @@ export class MetadataExtractor {
    */
   private extractAddresses(text: string): string[] {
     // This is a simplified version - production would use NLP
-    const addressRegex = /\d+\s+[\w\s]+(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Lane|Ln|Drive|Dr|Court|Ct|Circle|Cir)[,.]?\s+[\w\s]+,\s+[A-Z]{2}\s+\d{5}/gi;
+    const addressRegex =
+      /\d+\s+[\w\s]+(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Lane|Ln|Drive|Dr|Court|Ct|Circle|Cir)[,.]?\s+[\w\s]+,\s+[A-Z]{2}\s+\d{5}/gi;
     const matches = text.match(addressRegex) || [];
     return Array.from(new Set(matches));
   }
@@ -57,7 +58,7 @@ export class MetadataExtractor {
     const handles: Record<string, string[]> = {
       twitter: [],
       instagram: [],
-      linkedin: []
+      linkedin: [],
     };
 
     // Twitter handles
@@ -104,7 +105,7 @@ export class MetadataExtractor {
 
     return {
       bitcoin: Array.from(new Set(bitcoin)),
-      ethereum: Array.from(new Set(ethereum))
+      ethereum: Array.from(new Set(ethereum)),
     };
   }
 
@@ -115,12 +116,13 @@ export class MetadataExtractor {
     ipv4: string[];
     ipv6: string[];
   } {
-    const ipv4Regex = /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/g;
+    const ipv4Regex =
+      /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/g;
     const ipv6Regex = /\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\b/g;
 
     return {
       ipv4: Array.from(new Set(text.match(ipv4Regex) || [])),
-      ipv6: Array.from(new Set(text.match(ipv6Regex) || []))
+      ipv6: Array.from(new Set(text.match(ipv6Regex) || [])),
     };
   }
 
@@ -135,7 +137,7 @@ export class MetadataExtractor {
     return {
       md5: Array.from(new Set(text.match(/\b[a-fA-F0-9]{32}\b/g) || [])),
       sha1: Array.from(new Set(text.match(/\b[a-fA-F0-9]{40}\b/g) || [])),
-      sha256: Array.from(new Set(text.match(/\b[a-fA-F0-9]{64}\b/g) || []))
+      sha256: Array.from(new Set(text.match(/\b[a-fA-F0-9]{64}\b/g) || [])),
     };
   }
 }

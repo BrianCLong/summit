@@ -11,13 +11,13 @@ import React, {
   useMemo,
   useEffect,
   ReactNode,
-} from 'react';
+} from "react";
 import type {
   HelpContextValue,
   HelpProviderConfig,
   HelpArticle,
   ContextualHelpResponse,
-} from './types.js';
+} from "./types.js";
 
 const HelpContext = createContext<HelpContextValue | null>(null);
 
@@ -32,20 +32,23 @@ const cache = new Map<string, { data: unknown; timestamp: number }>();
 export function HelpProvider({ children, config }: HelpProviderProps): JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
   const [currentArticle, setCurrentArticle] = useState<HelpArticle | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<HelpArticle[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
   const cacheTimeout = config.cacheTimeout || 5 * 60 * 1000; // 5 minutes default
 
-  const getCached = useCallback(<T,>(key: string): T | null => {
-    const cached = cache.get(key);
-    if (cached && Date.now() - cached.timestamp < cacheTimeout) {
-      return cached.data as T;
-    }
-    cache.delete(key);
-    return null;
-  }, [cacheTimeout]);
+  const getCached = useCallback(
+    <T,>(key: string): T | null => {
+      const cached = cache.get(key);
+      if (cached && Date.now() - cached.timestamp < cacheTimeout) {
+        return cached.data as T;
+      }
+      cache.delete(key);
+      return null;
+    },
+    [cacheTimeout]
+  );
 
   const setCache = useCallback((key: string, data: unknown): void => {
     cache.set(key, { data, timestamp: Date.now() });
@@ -58,54 +61,57 @@ export function HelpProvider({ children, config }: HelpProviderProps): JSX.Eleme
   }, []);
   const toggleHelp = useCallback(() => setIsOpen((prev) => !prev), []);
 
-  const search = useCallback(async (query: string): Promise<void> => {
-    if (!query.trim()) {
-      setSearchResults([]);
-      return;
-    }
-
-    const cacheKey = `search:${query}`;
-    const cached = getCached<HelpArticle[]>(cacheKey);
-    if (cached) {
-      setSearchResults(cached);
-      return;
-    }
-
-    setIsSearching(true);
-    try {
-      const params = new URLSearchParams({
-        q: query,
-        limit: '10',
-      });
-      if (config.defaultRole) {
-        params.set('role', config.defaultRole);
+  const search = useCallback(
+    async (query: string): Promise<void> => {
+      if (!query.trim()) {
+        setSearchResults([]);
+        return;
       }
 
-      const response = await fetch(`${config.baseUrl}/search?${params}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...(config.defaultRole && { 'x-user-role': config.defaultRole }),
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Search failed');
+      const cacheKey = `search:${query}`;
+      const cached = getCached<HelpArticle[]>(cacheKey);
+      if (cached) {
+        setSearchResults(cached);
+        return;
       }
 
-      const data = await response.json();
-      setSearchResults(data.articles || []);
-      setCache(cacheKey, data.articles || []);
-    } catch (error) {
-      console.error('Help search error:', error);
-      setSearchResults([]);
-    } finally {
-      setIsSearching(false);
-    }
-  }, [config.baseUrl, config.defaultRole, getCached, setCache]);
+      setIsSearching(true);
+      try {
+        const params = new URLSearchParams({
+          q: query,
+          limit: "10",
+        });
+        if (config.defaultRole) {
+          params.set("role", config.defaultRole);
+        }
+
+        const response = await fetch(`${config.baseUrl}/search?${params}`, {
+          headers: {
+            "Content-Type": "application/json",
+            ...(config.defaultRole && { "x-user-role": config.defaultRole }),
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Search failed");
+        }
+
+        const data = await response.json();
+        setSearchResults(data.articles || []);
+        setCache(cacheKey, data.articles || []);
+      } catch (error) {
+        console.error("Help search error:", error);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    },
+    [config.baseUrl, config.defaultRole, getCached, setCache]
+  );
 
   const fetchContextualHelp = useCallback(
     async (route: string, anchorKey?: string): Promise<ContextualHelpResponse | null> => {
-      const cacheKey = `context:${route}:${anchorKey || ''}`;
+      const cacheKey = `context:${route}:${anchorKey || ""}`;
       const cached = getCached<ContextualHelpResponse>(cacheKey);
       if (cached) {
         return cached;
@@ -113,10 +119,10 @@ export function HelpProvider({ children, config }: HelpProviderProps): JSX.Eleme
 
       try {
         const response = await fetch(`${config.baseUrl}/context`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            ...(config.defaultRole && { 'x-user-role': config.defaultRole }),
+            "Content-Type": "application/json",
+            ...(config.defaultRole && { "x-user-role": config.defaultRole }),
           },
           body: JSON.stringify({
             uiRoute: route,
@@ -127,14 +133,14 @@ export function HelpProvider({ children, config }: HelpProviderProps): JSX.Eleme
         });
 
         if (!response.ok) {
-          throw new Error('Failed to fetch contextual help');
+          throw new Error("Failed to fetch contextual help");
         }
 
         const data = await response.json();
         setCache(cacheKey, data);
         return data;
       } catch (error) {
-        console.error('Contextual help error:', error);
+        console.error("Contextual help error:", error);
         return null;
       }
     },
@@ -145,17 +151,12 @@ export function HelpProvider({ children, config }: HelpProviderProps): JSX.Eleme
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {
       // Check for ? key (Shift + /)
-      if (
-        event.key === '?' &&
-        !event.ctrlKey &&
-        !event.metaKey &&
-        !event.altKey
-      ) {
+      if (event.key === "?" && !event.ctrlKey && !event.metaKey && !event.altKey) {
         // Don't trigger if user is typing in an input
         const target = event.target as HTMLElement;
         if (
-          target.tagName === 'INPUT' ||
-          target.tagName === 'TEXTAREA' ||
+          target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
           target.isContentEditable
         ) {
           return;
@@ -165,13 +166,13 @@ export function HelpProvider({ children, config }: HelpProviderProps): JSX.Eleme
       }
 
       // Escape to close
-      if (event.key === 'Escape' && isOpen) {
+      if (event.key === "Escape" && isOpen) {
         closeHelp();
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, toggleHelp, closeHelp]);
 
   const value = useMemo<HelpContextValue>(
@@ -211,7 +212,7 @@ export function HelpProvider({ children, config }: HelpProviderProps): JSX.Eleme
 export function useHelp(): HelpContextValue {
   const context = useContext(HelpContext);
   if (!context) {
-    throw new Error('useHelp must be used within a HelpProvider');
+    throw new Error("useHelp must be used within a HelpProvider");
   }
   return context;
 }

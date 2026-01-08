@@ -9,17 +9,17 @@
  * - IP Hash
  */
 
-import { Backend } from './router.js';
-import { createLogger } from '../utils/logger.js';
+import { Backend } from "./router.js";
+import { createLogger } from "../utils/logger.js";
 
-const logger = createLogger('load-balancer');
+const logger = createLogger("load-balancer");
 
 export type LoadBalancingStrategy =
-  | 'round-robin'
-  | 'weighted-round-robin'
-  | 'least-connections'
-  | 'random'
-  | 'ip-hash';
+  | "round-robin"
+  | "weighted-round-robin"
+  | "least-connections"
+  | "random"
+  | "ip-hash";
 
 export class LoadBalancer {
   private strategy: LoadBalancingStrategy;
@@ -28,7 +28,7 @@ export class LoadBalancer {
   private healthCheckInterval?: number;
   private healthCheckTimer?: NodeJS.Timeout;
 
-  constructor(strategy: LoadBalancingStrategy = 'round-robin', healthCheckInterval?: number) {
+  constructor(strategy: LoadBalancingStrategy = "round-robin", healthCheckInterval?: number) {
     this.strategy = strategy;
     this.healthCheckInterval = healthCheckInterval;
 
@@ -38,30 +38,30 @@ export class LoadBalancer {
   }
 
   async selectBackend(backends: Backend[], clientIp?: string): Promise<Backend | null> {
-    const healthyBackends = backends.filter(b => b.healthy !== false);
+    const healthyBackends = backends.filter((b) => b.healthy !== false);
 
     if (healthyBackends.length === 0) {
-      logger.warn('No healthy backends available');
+      logger.warn("No healthy backends available");
       return null;
     }
 
     let selected: Backend | null = null;
 
     switch (this.strategy) {
-      case 'round-robin':
+      case "round-robin":
         selected = this.roundRobin(healthyBackends);
         break;
-      case 'weighted-round-robin':
+      case "weighted-round-robin":
         selected = this.weightedRoundRobin(healthyBackends);
         break;
-      case 'least-connections':
+      case "least-connections":
         selected = this.leastConnections(healthyBackends);
         break;
-      case 'random':
+      case "random":
         selected = this.random(healthyBackends);
         break;
-      case 'ip-hash':
-        selected = this.ipHash(healthyBackends, clientIp || '');
+      case "ip-hash":
+        selected = this.ipHash(healthyBackends, clientIp || "");
         break;
       default:
         selected = this.roundRobin(healthyBackends);
@@ -115,7 +115,7 @@ export class LoadBalancer {
     // Simple hash function
     let hash = 0;
     for (let i = 0; i < clientIp.length; i++) {
-      hash = ((hash << 5) - hash) + clientIp.charCodeAt(i);
+      hash = (hash << 5) - hash + clientIp.charCodeAt(i);
       hash = hash & hash; // Convert to 32-bit integer
     }
 
@@ -138,7 +138,7 @@ export class LoadBalancer {
   private startHealthChecks(): void {
     if (this.healthCheckInterval) {
       this.healthCheckTimer = setInterval(() => {
-        logger.debug('Running health checks');
+        logger.debug("Running health checks");
         // Health check logic would go here
       }, this.healthCheckInterval);
     }

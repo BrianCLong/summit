@@ -7,14 +7,14 @@ This lightweight client targets the Keyless KMS Proxy (KKP) service. It provides
 - Fetch-agnostic HTTP helpers so it runs in Node.js or modern browsers
 
 ```ts
-import { KkpClient, verifyToken } from '@intelgraph/kkp-client';
+import { KkpClient, verifyToken } from "@intelgraph/kkp-client";
 
-const client = new KkpClient({ baseUrl: 'https://kkp.internal' });
+const client = new KkpClient({ baseUrl: "https://kkp.internal" });
 const token = await client.issueToken({
-  subject: 'svc',
-  audience: 'app',
-  backend: 'aws',
-  key_id: 'alias/app',
+  subject: "svc",
+  audience: "app",
+  backend: "aws",
+  key_id: "alias/app",
 });
 
 const jwks = await client.fetchJwks();

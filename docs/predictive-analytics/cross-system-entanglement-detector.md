@@ -9,6 +9,7 @@
 The Cross-System Entanglement Detector discovers hidden relationships and shared failure modes across completely different domains in complex intelligence systems. It identifies latent couplings, synchronization patterns, and cascading risk propagation that traditional monitoring cannot detect.
 
 **Key Value Propositions**:
+
 - **Predict cascading failures** before they occur by mapping hidden system interdependencies
 - **Discover non-obvious correlations** between disparate domains (e.g., network latency → analysis quality)
 - **Quantify coupling strength** and synchronization depth across system boundaries
@@ -24,6 +25,7 @@ The Cross-System Entanglement Detector discovers hidden relationships and shared
 Modern intelligence platforms like Summit/IntelGraph consist of dozens of microservices, databases, ML pipelines, and external integrations. Traditional monitoring treats these as independent components, but reality is more complex:
 
 **Hidden Entanglements**:
+
 1. **Temporal Synchronization**: Systems that change state in lockstep despite no direct communication
 2. **Resource Contention**: Shared infrastructure creating invisible dependencies
 3. **Data Lineage**: Upstream quality issues propagating through transformation pipelines
@@ -31,6 +33,7 @@ Modern intelligence platforms like Summit/IntelGraph consist of dozens of micros
 5. **Emergent Behaviors**: System-of-systems patterns not visible from component metrics
 
 **Real-World Scenarios**:
+
 - Neo4j memory pressure → GraphQL query timeout → Frontend freeze (3-hop cascade)
 - Kafka partition lag → ML feature staleness → Copilot quality degradation
 - Auth service latency → Connection pool exhaustion → Multi-service failure
@@ -39,6 +42,7 @@ Modern intelligence platforms like Summit/IntelGraph consist of dozens of micros
 ### Current Gaps
 
 Existing monitoring tools are **component-centric**:
+
 - Prometheus alerts on individual service metrics
 - Distributed tracing shows request paths, not systemic correlations
 - Log aggregation lacks cross-domain pattern detection
@@ -59,17 +63,17 @@ An **Entanglement Signature** captures the behavioral correlation between two or
 ```typescript
 interface EntanglementSignature {
   id: string;
-  systems: string[];              // Entangled system identifiers
-  couplingStrength: number;       // 0.0 - 1.0 (Pearson correlation)
-  synchronizationDepth: number;   // Time-lagged correlation depth (ms)
+  systems: string[]; // Entangled system identifiers
+  couplingStrength: number; // 0.0 - 1.0 (Pearson correlation)
+  synchronizationDepth: number; // Time-lagged correlation depth (ms)
   detectedAt: Date;
   lastObserved: Date;
-  signatureType: 'TEMPORAL' | 'CAUSAL' | 'RESOURCE' | 'DATA_LINEAGE';
-  confidence: number;             // Statistical confidence (0.0 - 1.0)
+  signatureType: "TEMPORAL" | "CAUSAL" | "RESOURCE" | "DATA_LINEAGE";
+  confidence: number; // Statistical confidence (0.0 - 1.0)
   metadata: {
     correlationCoefficient: number;
-    lagTime: number;              // Milliseconds
-    observationWindow: number;    // Milliseconds
+    lagTime: number; // Milliseconds
+    observationWindow: number; // Milliseconds
     sampleCount: number;
   };
 }
@@ -84,15 +88,15 @@ interface SystemCoupling {
   id: string;
   sourceSystem: string;
   targetSystem: string;
-  couplingType: 'BIDIRECTIONAL' | 'UNIDIRECTIONAL' | 'CASCADE';
-  strength: number;               // 0.0 - 1.0
-  direction: 'FORWARD' | 'REVERSE' | 'MUTUAL';
+  couplingType: "BIDIRECTIONAL" | "UNIDIRECTIONAL" | "CASCADE";
+  strength: number; // 0.0 - 1.0
+  direction: "FORWARD" | "REVERSE" | "MUTUAL";
   detectionMethod: string;
   evidenceCount: number;
-  riskScore: number;              // 0.0 - 1.0
+  riskScore: number; // 0.0 - 1.0
   metadata: {
-    failureCorrelation: number;   // How often they fail together
-    latencyCorrelation: number;   // Performance coupling
+    failureCorrelation: number; // How often they fail together
+    latencyCorrelation: number; // Performance coupling
     throughputCorrelation: number;
   };
 }
@@ -107,9 +111,9 @@ interface SynchronizationEvent {
   id: string;
   systems: string[];
   timestamp: Date;
-  eventType: 'STATE_CHANGE' | 'PERFORMANCE_SHIFT' | 'FAILURE_CASCADE';
-  synchronizationScore: number;   // How tightly synchronized (0.0 - 1.0)
-  timeWindow: number;             // Detection window (ms)
+  eventType: "STATE_CHANGE" | "PERFORMANCE_SHIFT" | "FAILURE_CASCADE";
+  synchronizationScore: number; // How tightly synchronized (0.0 - 1.0)
+  timeWindow: number; // Detection window (ms)
   metrics: Record<string, number>;
 }
 ```
@@ -121,13 +125,13 @@ Predictive risk assessment for failure propagation:
 ```typescript
 interface RiskScore {
   systemId: string;
-  overallRisk: number;            // 0.0 - 1.0
-  cascadeRisk: number;            // Risk of causing cascading failures
-  impactRadius: number;           // Number of coupled systems
+  overallRisk: number; // 0.0 - 1.0
+  cascadeRisk: number; // Risk of causing cascading failures
+  impactRadius: number; // Number of coupled systems
   criticalPaths: Array<{
-    path: string[];               // Sequence of system IDs
+    path: string[]; // Sequence of system IDs
     propagationProbability: number;
-    estimatedLatency: number;     // Failure propagation time (ms)
+    estimatedLatency: number; // Failure propagation time (ms)
   }>;
   recommendations: string[];
 }
@@ -167,6 +171,7 @@ Output: Set of EntanglementSignatures
 ```
 
 **Key Metrics**:
+
 - **Pearson correlation coefficient**: Linear relationship strength
 - **Spearman rank correlation**: Monotonic relationship (non-linear)
 - **Granger causality**: Directional influence testing
@@ -204,6 +209,7 @@ Output: Set of SynchronizationEvents
 ```
 
 **Detection Techniques**:
+
 - **Sliding window analysis**: Continuous monitoring
 - **Change point detection**: Identify regime shifts
 - **Burst detection**: Find abnormal activity clusters
@@ -249,6 +255,7 @@ Output: Risk scores for all systems
 ```
 
 **Risk Factors**:
+
 - **Direct coupling count**: Number of entangled systems
 - **Indirect influence**: Transitive coupling reach
 - **Historical failure correlation**: Observed co-failure rate
@@ -296,6 +303,7 @@ Output: Cross-domain entanglement signatures
 ```
 
 **Domain Distance Metrics**:
+
 - **Architectural distance**: Hops in deployment diagram
 - **Semantic distance**: WordNet/embedding similarity of domain labels
 - **Operational distance**: Different on-call teams, SLO owners
@@ -375,6 +383,7 @@ GET /api/entanglement/critical-paths/:systemId
 ### Graph Schema
 
 **Node Types**:
+
 ```cypher
 (:System {
   id: string,
@@ -402,6 +411,7 @@ GET /api/entanglement/critical-paths/:systemId
 ```
 
 **Relationship Types**:
+
 ```cypher
 (:System)-[:COUPLED_TO {
   strength: float,
@@ -425,6 +435,7 @@ GET /api/entanglement/critical-paths/:systemId
 ### Key Graph Queries
 
 **Find cascade risk from system**:
+
 ```cypher
 MATCH path = (s:System {id: $systemId})-[:COUPLED_TO*1..3]->(target:System)
 WHERE ALL(r IN relationships(path) WHERE r.strength > 0.6)
@@ -437,6 +448,7 @@ LIMIT 10
 ```
 
 **Find cross-domain entanglements**:
+
 ```cypher
 MATCH (s1:System)-[c:COUPLED_TO]->(s2:System)
 WHERE s1.domain <> s2.domain
@@ -449,6 +461,7 @@ ORDER BY avgStrength DESC
 ```
 
 **Find synchronization clusters**:
+
 ```cypher
 MATCH (s:System)-[:SYNCHRONIZED_IN]->(e:SynchronizationEvent)
 WHERE e.timestamp > datetime() - duration({hours: 1})
@@ -501,11 +514,11 @@ services/predictive-analytics/cross-system-entanglement/
     "apollo-server": "^4.9.5",
     "graphql": "^16.8.1",
     "@apollo/server": "^4.9.5",
-    "mathjs": "^12.2.0",              // Statistical functions
-    "simple-statistics": "^7.8.3",    // Correlation, regression
-    "d3-array": "^3.2.4",             // Data manipulation
-    "pino": "^8.17.2",                 // Logging
-    "prom-client": "^15.1.0"           // Prometheus metrics
+    "mathjs": "^12.2.0", // Statistical functions
+    "simple-statistics": "^7.8.3", // Correlation, regression
+    "d3-array": "^3.2.4", // Data manipulation
+    "pino": "^8.17.2", // Logging
+    "prom-client": "^15.1.0" // Prometheus metrics
   }
 }
 ```
@@ -513,6 +526,7 @@ services/predictive-analytics/cross-system-entanglement/
 ### Configuration
 
 Environment variables (`.env`):
+
 ```bash
 # Neo4j connection
 NEO4J_URI=bolt://localhost:7687
@@ -577,10 +591,7 @@ query {
 
 ```graphql
 query {
-  getRiskScores(
-    systemIds: ["neo4j-primary"]
-    includePaths: true
-  ) {
+  getRiskScores(systemIds: ["neo4j-primary"], includePaths: true) {
     systemId
     overallRisk
     cascadeRisk
@@ -602,10 +613,7 @@ mutation {
   registerSystem(
     systemId: "ml-pipeline-v2"
     domain: "machine-learning"
-    metricEndpoints: [
-      "http://ml-pipeline:9090/metrics",
-      "http://ml-pipeline:9090/events"
-    ]
+    metricEndpoints: ["http://ml-pipeline:9090/metrics", "http://ml-pipeline:9090/events"]
   ) {
     id
     domain
@@ -640,6 +648,7 @@ entanglement_avg_coupling_strength
 ### Logging
 
 All significant events logged with structured context:
+
 - Entanglement signature creation/expiration
 - Synchronization event detection
 - High-risk system alerts
@@ -651,18 +660,21 @@ All significant events logged with structured context:
 ## Future Enhancements
 
 ### Phase 2: Advanced Analytics
+
 - **Machine learning**: Train models to predict coupling emergence
 - **Anomaly detection**: Identify unusual entanglement patterns
 - **What-if analysis**: Simulate failure scenarios
 - **Recommendation engine**: Suggest architectural decoupling
 
 ### Phase 3: Proactive Mitigation
+
 - **Auto-remediation**: Trigger circuit breakers when cascade risk exceeds threshold
 - **Load shedding**: Intelligently shed load across coupled systems
 - **Capacity planning**: Use entanglement map for resource allocation
 - **Chaos engineering**: Inject failures along critical paths to validate resilience
 
 ### Phase 4: Compliance & Audit
+
 - **Entanglement lineage**: Track how couplings evolved over time
 - **Compliance reporting**: "System X is entangled with Y" audit trail
 - **Change impact analysis**: "This deployment will affect 7 coupled systems"
@@ -672,11 +684,13 @@ All significant events logged with structured context:
 ## References
 
 ### Academic Foundations
+
 - Granger, C. W. J. (1969). "Investigating Causal Relations by Econometric Models and Cross-spectral Methods"
 - Schreiber, T. (2000). "Measuring Information Transfer"
 - Newman, M. E. J. (2010). "Networks: An Introduction"
 
 ### Industry Practices
+
 - Google SRE Book: Cascading Failures
 - AWS Well-Architected Framework: Reliability Pillar
 - Netflix: Chaos Engineering Principles

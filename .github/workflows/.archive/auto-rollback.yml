@@ -3,7 +3,7 @@ name: 🔄 Auto-Rollback Safety Net
 on:
   deployment_status:
   workflow_run:
-    workflows: ['🚢 Release Captain']
+    workflows: ["🚢 Release Captain"]
     types: [completed]
   repository_dispatch:
     types: [slo-breach, alert-webhook]
@@ -19,8 +19,8 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  NODE_VERSION: '20.11.1'
-  PNPM_VERSION: '9.6.0'
+  NODE_VERSION: "20.11.1"
+  PNPM_VERSION: "9.6.0"
   HEALTH_CHECK_TIMEOUT: 300
   MAX_ROLLBACK_ATTEMPTS: 3
 
@@ -248,7 +248,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2

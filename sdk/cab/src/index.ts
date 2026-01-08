@@ -1,5 +1,4 @@
-
-export type RiskLevel = 'low' | 'medium' | 'high';
+export type RiskLevel = "low" | "medium" | "high";
 
 export interface RiskResult {
   name: string;
@@ -29,7 +28,7 @@ export interface ChallengeInfo {
 }
 
 export interface DecisionResponse {
-  decision: 'allow' | 'deny' | 'step-up';
+  decision: "allow" | "deny" | "step-up";
   policyId?: string;
   evaluationId: string;
   riskLevel: RiskLevel;
@@ -74,25 +73,25 @@ export class CABClient {
   private readonly defaultHeaders: HeadersInit;
 
   constructor(options: CABClientOptions = {}) {
-    this.baseUrl = options.baseUrl ?? 'http://localhost:8085';
+    this.baseUrl = options.baseUrl ?? "http://localhost:8085";
     this.fetchImpl = options.fetchImpl ?? fetch;
-    this.defaultHeaders = options.defaultHeaders ?? { 'Content-Type': 'application/json' };
+    this.defaultHeaders = options.defaultHeaders ?? { "Content-Type": "application/json" };
   }
 
   async evaluate(request: DecisionRequest): Promise<DecisionResponse> {
-    return this.post<DecisionResponse>('/evaluate', request);
+    return this.post<DecisionResponse>("/evaluate", request);
   }
 
   async listPolicies(): Promise<PolicyDescription[]> {
-    return this.get<PolicyDescription[]>('/policies');
+    return this.get<PolicyDescription[]>("/policies");
   }
 
   async listScenarios(): Promise<ScenarioRecord[]> {
-    return this.get<ScenarioRecord[]>('/scenarios');
+    return this.get<ScenarioRecord[]>("/scenarios");
   }
 
   async saveScenario(name: string, request: DecisionRequest): Promise<ScenarioRecord> {
-    return this.post<ScenarioRecord>('/scenarios', { name, request });
+    return this.post<ScenarioRecord>("/scenarios", { name, request });
   }
 
   async replayScenario(id: string): Promise<ReplayResponse> {
@@ -107,12 +106,12 @@ export class CABClient {
   }
 
   private async get<T>(path: string): Promise<T> {
-    return this.request<T>(path, { method: 'GET' });
+    return this.request<T>(path, { method: "GET" });
   }
 
   private async post<T>(path: string, body?: unknown): Promise<T> {
     return this.request<T>(path, {
-      method: 'POST',
+      method: "POST",
       body: body ? JSON.stringify(body) : undefined,
     });
   }
@@ -131,10 +130,10 @@ export class CABClient {
   }
 
   private normalize(path: string): string {
-    if (path.startsWith('http://') || path.startsWith('https://')) {
+    if (path.startsWith("http://") || path.startsWith("https://")) {
       return path;
     }
-    if (!path.startsWith('/')) {
+    if (!path.startsWith("/")) {
       path = `/${path}`;
     }
     return `${this.baseUrl}${path}`;
@@ -144,11 +143,11 @@ export class CABClient {
 async function safeErrorMessage(response: Response): Promise<string> {
   try {
     const data = await response.json();
-    if (typeof data === 'object' && data && 'error' in data) {
+    if (typeof data === "object" && data && "error" in data) {
       return String((data as { error: unknown }).error);
     }
     return JSON.stringify(data);
   } catch (error) {
-    return response.statusText || 'unknown error';
+    return response.statusText || "unknown error";
   }
 }

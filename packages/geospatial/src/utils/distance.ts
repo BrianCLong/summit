@@ -2,7 +2,7 @@
  * Distance calculation utilities for geospatial analysis
  */
 
-import { GeoPoint } from '../types/geospatial.js';
+import { GeoPoint } from "../types/geospatial.js";
 
 const EARTH_RADIUS_METERS = 6371000; // Earth's radius in meters
 
@@ -78,7 +78,12 @@ export function vincentyDistance(point1: GeoPoint, point2: GeoPoint): number {
 
     const C = (f / 16) * cosSqAlpha * (4 + f * (4 - 3 * cosSqAlpha));
     lambdaP = lambda;
-    lambda = L + (1 - C) * f * sinAlpha * (sigma + C * sinSigma * (cos2SigmaM + C * cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM)));
+    lambda =
+      L +
+      (1 - C) *
+        f *
+        sinAlpha *
+        (sigma + C * sinSigma * (cos2SigmaM + C * cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM)));
   }
 
   if (iterLimit === 0) {
@@ -94,7 +99,10 @@ export function vincentyDistance(point1: GeoPoint, point2: GeoPoint): number {
     (cos2SigmaM +
       (B / 4) *
         (cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM) -
-          (B / 6) * cos2SigmaM * (-3 + 4 * sinSigma * sinSigma) * (-3 + 4 * cos2SigmaM * cos2SigmaM)));
+          (B / 6) *
+            cos2SigmaM *
+            (-3 + 4 * sinSigma * sinSigma) *
+            (-3 + 4 * cos2SigmaM * cos2SigmaM)));
 
   return b * A * (sigma - deltaSigma);
 }
@@ -164,7 +172,10 @@ export function midpoint(point1: GeoPoint, point2: GeoPoint): GeoPoint {
   const Bx = Math.cos(lat2) * Math.cos(deltaLon);
   const By = Math.cos(lat2) * Math.sin(deltaLon);
 
-  const lat3 = Math.atan2(Math.sin(lat1) + Math.sin(lat2), Math.sqrt((Math.cos(lat1) + Bx) * (Math.cos(lat1) + Bx) + By * By));
+  const lat3 = Math.atan2(
+    Math.sin(lat1) + Math.sin(lat2),
+    Math.sqrt((Math.cos(lat1) + Bx) * (Math.cos(lat1) + Bx) + By * By)
+  );
   const lon3 = lon1 + Math.atan2(By, Math.cos(lat1) + Bx);
 
   return {
@@ -178,7 +189,7 @@ export function midpoint(point1: GeoPoint, point2: GeoPoint): GeoPoint {
  */
 export function centroid(points: GeoPoint[]): GeoPoint {
   if (points.length === 0) {
-    throw new Error('Cannot calculate centroid of empty array');
+    throw new Error("Cannot calculate centroid of empty array");
   }
 
   if (points.length === 1) {

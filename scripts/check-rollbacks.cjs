@@ -8,16 +8,14 @@
  * Usage: node scripts/check-rollbacks.js <migrations-directory>
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
 function main() {
   const migrationsDir = process.argv[2];
 
   if (!migrationsDir) {
-    console.error(
-      'Usage: node scripts/check-rollbacks.js <migrations-directory>',
-    );
+    console.error("Usage: node scripts/check-rollbacks.js <migrations-directory>");
     process.exit(1);
   }
 
@@ -32,16 +30,18 @@ function main() {
   // Exclude existing rollback scripts (ending in .down.sql or similar)
   const allFiles = fs.readdirSync(migrationsDir);
 
-  const migrationFiles = allFiles.filter(
-    (file) =>
-      file.endsWith('.sql') &&
-      !file.endsWith('.down.sql') &&
-      !file.endsWith('.rollback.sql') &&
-      !file.includes('.rehydrated') // Skip rehydrated/backup files
-  ).sort();
+  const migrationFiles = allFiles
+    .filter(
+      (file) =>
+        file.endsWith(".sql") &&
+        !file.endsWith(".down.sql") &&
+        !file.endsWith(".rollback.sql") &&
+        !file.includes(".rehydrated") // Skip rehydrated/backup files
+    )
+    .sort();
 
   if (migrationFiles.length === 0) {
-    console.log('ℹ️  No migration files found to check.');
+    console.log("ℹ️  No migration files found to check.");
     process.exit(0);
   }
 
@@ -50,7 +50,7 @@ function main() {
   migrationFiles.forEach((file) => {
     // Determine expected rollback filename
     // Convention: X.sql -> X.down.sql
-    const baseName = file.replace(/\.sql$/, '');
+    const baseName = file.replace(/\.sql$/, "");
     const rollbackName = `${baseName}.down.sql`;
     const rollbackPath = path.join(migrationsDir, rollbackName);
 
@@ -67,7 +67,9 @@ function main() {
 
   if (missingRollbacks > 0) {
     console.log(`\n❌ Found ${missingRollbacks} migrations without rollback scripts.`);
-    console.log('Every migration must have a corresponding .down.sql script to ensure reversibility.');
+    console.log(
+      "Every migration must have a corresponding .down.sql script to ensure reversibility."
+    );
     process.exit(1);
   } else {
     console.log(`\n✅ All ${migrationFiles.length} migrations have rollback scripts.`);

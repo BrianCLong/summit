@@ -19,14 +19,14 @@ CompanyOS recognizes five canonical service archetypes. Each has specific charac
 
 **Purpose**: Synchronous request/response services exposing REST or GraphQL endpoints.
 
-| Attribute | Default |
-|-----------|---------|
-| Runtime | Node.js 20 LTS (Express/Fastify) or Go 1.22+ |
-| Protocol | HTTP/2, gRPC optional |
-| Scaling | HPA (CPU/Memory), KEDA (request rate) |
-| SLO Target | 99.9% availability, p99 < 500ms |
-| Health Endpoints | `/health`, `/health/ready`, `/health/live` |
-| Metrics | Prometheus `/metrics` (RED metrics) |
+| Attribute        | Default                                      |
+| ---------------- | -------------------------------------------- |
+| Runtime          | Node.js 20 LTS (Express/Fastify) or Go 1.22+ |
+| Protocol         | HTTP/2, gRPC optional                        |
+| Scaling          | HPA (CPU/Memory), KEDA (request rate)        |
+| SLO Target       | 99.9% availability, p99 < 500ms              |
+| Health Endpoints | `/health`, `/health/ready`, `/health/live`   |
+| Metrics          | Prometheus `/metrics` (RED metrics)          |
 
 **Example Use Cases**: GraphQL Gateway, REST API, BFF (Backend for Frontend)
 
@@ -34,13 +34,13 @@ CompanyOS recognizes five canonical service archetypes. Each has specific charac
 
 **Purpose**: Asynchronous message/event consumers processing background work.
 
-| Attribute | Default |
-|-----------|---------|
-| Runtime | Node.js 20 LTS or Python 3.11+ |
-| Protocol | Kafka, Redis Streams, SQS |
-| Scaling | KEDA (queue depth, lag) |
-| SLO Target | 99.9% processing success, p95 < 30s |
-| Metrics | Consumer lag, processing rate, DLQ size |
+| Attribute  | Default                                 |
+| ---------- | --------------------------------------- |
+| Runtime    | Node.js 20 LTS or Python 3.11+          |
+| Protocol   | Kafka, Redis Streams, SQS               |
+| Scaling    | KEDA (queue depth, lag)                 |
+| SLO Target | 99.9% processing success, p95 < 30s     |
+| Metrics    | Consumer lag, processing rate, DLQ size |
 
 **Example Use Cases**: Event processors, notification handlers, async pipelines
 
@@ -48,13 +48,13 @@ CompanyOS recognizes five canonical service archetypes. Each has specific charac
 
 **Purpose**: Scheduled or triggered data processing jobs.
 
-| Attribute | Default |
-|-----------|---------|
-| Runtime | Python 3.11+ (Pandas/Polars) or Node.js |
-| Scheduling | Kubernetes CronJob, Argo Workflows |
-| Scaling | Vertical (job-level resources) |
-| SLO Target | 99% completion rate within window |
-| Monitoring | Job duration, success/failure rate |
+| Attribute  | Default                                 |
+| ---------- | --------------------------------------- |
+| Runtime    | Python 3.11+ (Pandas/Polars) or Node.js |
+| Scheduling | Kubernetes CronJob, Argo Workflows      |
+| Scaling    | Vertical (job-level resources)          |
+| SLO Target | 99% completion rate within window       |
+| Monitoring | Job duration, success/failure rate      |
 
 **Example Use Cases**: ETL jobs, report generation, data sync, ML training
 
@@ -62,13 +62,13 @@ CompanyOS recognizes five canonical service archetypes. Each has specific charac
 
 **Purpose**: Stateful services managing database access and data transformation.
 
-| Attribute | Default |
-|-----------|---------|
-| Runtime | Node.js 20 (Prisma/Knex) or Python (SQLAlchemy) |
-| Databases | PostgreSQL 15+, Neo4j 5.x, Redis |
-| Scaling | Vertical primary, horizontal read replicas |
-| SLO Target | 99.95% availability, p99 < 100ms (reads) |
-| Features | Connection pooling, schema migrations, audit logging |
+| Attribute  | Default                                              |
+| ---------- | ---------------------------------------------------- |
+| Runtime    | Node.js 20 (Prisma/Knex) or Python (SQLAlchemy)      |
+| Databases  | PostgreSQL 15+, Neo4j 5.x, Redis                     |
+| Scaling    | Vertical primary, horizontal read replicas           |
+| SLO Target | 99.95% availability, p99 < 100ms (reads)             |
+| Features   | Connection pooling, schema migrations, audit logging |
 
 **Example Use Cases**: User data service, graph data service, audit ledger
 
@@ -76,13 +76,13 @@ CompanyOS recognizes five canonical service archetypes. Each has specific charac
 
 **Purpose**: Single-page applications (SPAs) and micro-frontends.
 
-| Attribute | Default |
-|-----------|---------|
-| Framework | React 18+ (Vite), Next.js 14+ |
-| CDN | CloudFront/Fastly with edge caching |
-| Scaling | Static assets, serverless functions |
+| Attribute  | Default                                              |
+| ---------- | ---------------------------------------------------- |
+| Framework  | React 18+ (Vite), Next.js 14+                        |
+| CDN        | CloudFront/Fastly with edge caching                  |
+| Scaling    | Static assets, serverless functions                  |
 | SLO Target | Core Web Vitals (LCP < 2.5s, FID < 100ms, CLS < 0.1) |
-| Features | Code splitting, service worker, A/B testing |
+| Features   | Code splitting, service worker, A/B testing          |
 
 **Example Use Cases**: Console UI, admin dashboard, customer portal
 
@@ -92,48 +92,48 @@ CompanyOS recognizes five canonical service archetypes. Each has specific charac
 
 ### 2.1 Infrastructure-as-Code
 
-| Layer | Technology | Purpose |
-|-------|------------|---------|
-| **Cluster IaC** | Terraform 1.5+ | Cloud infrastructure provisioning |
-| **Kubernetes** | EKS/GKE 1.28+ | Container orchestration |
-| **Helm** | v3.12+ | Kubernetes package management |
-| **Secrets** | External Secrets + Vault | Secret rotation and injection |
+| Layer           | Technology               | Purpose                           |
+| --------------- | ------------------------ | --------------------------------- |
+| **Cluster IaC** | Terraform 1.5+           | Cloud infrastructure provisioning |
+| **Kubernetes**  | EKS/GKE 1.28+            | Container orchestration           |
+| **Helm**        | v3.12+                   | Kubernetes package management     |
+| **Secrets**     | External Secrets + Vault | Secret rotation and injection     |
 
 ### 2.2 CI/CD
 
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| **Pipeline** | GitHub Actions | Build, test, deploy automation |
-| **Registry** | ECR/GAR | Container image storage |
-| **Signing** | Cosign + Sigstore | Image attestation and SBOM |
-| **GitOps** | ArgoCD | Kubernetes deployment sync |
-| **Rollouts** | Argo Rollouts | Canary/blue-green deployments |
+| Component    | Technology        | Purpose                        |
+| ------------ | ----------------- | ------------------------------ |
+| **Pipeline** | GitHub Actions    | Build, test, deploy automation |
+| **Registry** | ECR/GAR           | Container image storage        |
+| **Signing**  | Cosign + Sigstore | Image attestation and SBOM     |
+| **GitOps**   | ArgoCD            | Kubernetes deployment sync     |
+| **Rollouts** | Argo Rollouts     | Canary/blue-green deployments  |
 
 ### 2.3 Containerization
 
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| **Build** | Docker BuildKit | Multi-stage, cached builds |
-| **Base Images** | Distroless / Alpine | Minimal attack surface |
-| **Scanning** | Trivy + Grype | Vulnerability detection |
+| Component       | Technology          | Purpose                    |
+| --------------- | ------------------- | -------------------------- |
+| **Build**       | Docker BuildKit     | Multi-stage, cached builds |
+| **Base Images** | Distroless / Alpine | Minimal attack surface     |
+| **Scanning**    | Trivy + Grype       | Vulnerability detection    |
 
 ### 2.4 Observability
 
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| **Metrics** | Prometheus + Grafana | Time-series metrics and dashboards |
-| **Logging** | Loki + Promtail | Log aggregation and search |
-| **Tracing** | OpenTelemetry + Tempo | Distributed tracing |
-| **Alerting** | Alertmanager + PagerDuty | Incident notification |
+| Component    | Technology               | Purpose                            |
+| ------------ | ------------------------ | ---------------------------------- |
+| **Metrics**  | Prometheus + Grafana     | Time-series metrics and dashboards |
+| **Logging**  | Loki + Promtail          | Log aggregation and search         |
+| **Tracing**  | OpenTelemetry + Tempo    | Distributed tracing                |
+| **Alerting** | Alertmanager + PagerDuty | Incident notification              |
 
 ### 2.5 Governance
 
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| **Authorization** | OPA (Rego) | ABAC/RBAC policy enforcement |
-| **Admission** | Kyverno | Kubernetes policy gates |
-| **Compliance** | CycloneDX SBOM | Software bill of materials |
-| **Audit** | Audit Ledger Service | Immutable action logging |
+| Component         | Technology           | Purpose                      |
+| ----------------- | -------------------- | ---------------------------- |
+| **Authorization** | OPA (Rego)           | ABAC/RBAC policy enforcement |
+| **Admission**     | Kyverno              | Kubernetes policy gates      |
+| **Compliance**    | CycloneDX SBOM       | Software bill of materials   |
+| **Audit**         | Audit Ledger Service | Immutable action logging     |
 
 ---
 
@@ -226,12 +226,12 @@ All services live within the pnpm workspace:
 ```yaml
 # pnpm-workspace.yaml
 packages:
-  - 'apps/*'           # Frontend applications
-  - 'packages/*'       # Shared libraries
-  - 'services/*'       # Backend services
-  - 'pipelines/*'      # Data pipelines
-  - 'contracts/*'      # Data contracts
-  - 'tools/*'          # Development tools
+  - "apps/*" # Frontend applications
+  - "packages/*" # Shared libraries
+  - "services/*" # Backend services
+  - "pipelines/*" # Data pipelines
+  - "contracts/*" # Data contracts
+  - "tools/*" # Development tools
 ```
 
 ### 4.2 Turbo Pipeline Configuration
@@ -268,12 +268,12 @@ packages:
 
 ### 5.1 Package Naming Convention
 
-| Type | Pattern | Example |
-|------|---------|---------|
-| API Service | `@intelgraph/<domain>-api` | `@intelgraph/users-api` |
-| Worker | `@intelgraph/<domain>-worker` | `@intelgraph/notifications-worker` |
-| Library | `@intelgraph/<name>` | `@intelgraph/auth-utils` |
-| Frontend | `@intelgraph/<name>-ui` | `@intelgraph/console-ui` |
+| Type        | Pattern                       | Example                            |
+| ----------- | ----------------------------- | ---------------------------------- |
+| API Service | `@intelgraph/<domain>-api`    | `@intelgraph/users-api`            |
+| Worker      | `@intelgraph/<domain>-worker` | `@intelgraph/notifications-worker` |
+| Library     | `@intelgraph/<name>`          | `@intelgraph/auth-utils`           |
+| Frontend    | `@intelgraph/<name>-ui`       | `@intelgraph/console-ui`           |
 
 ### 5.2 Kubernetes Service Naming
 
@@ -290,12 +290,12 @@ packages:
 
 ### 6.1 Environment Tiers
 
-| Environment | Purpose | Infrastructure | Data |
-|-------------|---------|----------------|------|
-| **local** | Developer workstation | docker-compose | Seed fixtures |
-| **preview** | PR validation | Ephemeral K8s namespace | Anonymized subset |
-| **staging** | Pre-production testing | Dedicated cluster | Production mirror (redacted) |
-| **production** | Live traffic | Multi-AZ HA cluster | Real data |
+| Environment    | Purpose                | Infrastructure          | Data                         |
+| -------------- | ---------------------- | ----------------------- | ---------------------------- |
+| **local**      | Developer workstation  | docker-compose          | Seed fixtures                |
+| **preview**    | PR validation          | Ephemeral K8s namespace | Anonymized subset            |
+| **staging**    | Pre-production testing | Dedicated cluster       | Production mirror (redacted) |
+| **production** | Live traffic           | Multi-AZ HA cluster     | Real data                    |
 
 ### 6.2 Configuration Management
 
@@ -309,13 +309,13 @@ packages:
 
 ### 7.1 Zero-Trust Defaults
 
-| Control | Default |
-|---------|---------|
-| Network Policy | Default-deny ingress/egress |
-| mTLS | Required for all service-to-service |
-| RBAC | Minimal service accounts |
-| Pod Security | Restricted (no root, drop capabilities) |
-| Image Policy | Signed images only (Cosign verified) |
+| Control        | Default                                 |
+| -------------- | --------------------------------------- |
+| Network Policy | Default-deny ingress/egress             |
+| mTLS           | Required for all service-to-service     |
+| RBAC           | Minimal service accounts                |
+| Pod Security   | Restricted (no root, drop capabilities) |
+| Image Policy   | Signed images only (Cosign verified)    |
 
 ### 7.2 Supply Chain Security
 

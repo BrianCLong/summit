@@ -34,20 +34,20 @@ Use the header fields `x-user-id`, `x-user-role`, and `x-user-name` (injected au
 
 ## API Overview
 
-| Endpoint | Method | Roles | Description |
-| --- | --- | --- | --- |
-| `/appeals` | `POST` | admin, reviewer | Capture a new appeal. |
-| `/appeals` | `GET` | all | List appeals (filter by `?status=`). |
-| `/appeals/:id/queue` | `POST` | admin, reviewer | Move an appeal into the triage queue. |
-| `/appeals/:id/evidence` | `POST` | admin, reviewer | Attach evidence metadata. |
-| `/appeals/:id/decision` | `POST` | admin, reviewer | Record an approve/deny decision (dual-control). |
-| `/appeals/:id/policy-suggestions` | `POST` | admin, reviewer | Register a policy suggestion tied to an appeal. |
-| `/policy-proposals` | `POST` | admin, reviewer | Submit a cross-appeal policy change proposal. |
-| `/policy-proposals/:id/decision` | `POST` | admin, reviewer | Dual-control ratification of a proposal. |
-| `/policy-proposals` | `GET` | all | List proposals and their decisions. |
-| `/audit-log` | `GET` | admin, reviewer, auditor | Retrieve the complete audit trail. |
-| `/export` | `GET` | admin, reviewer | Download the round-trippable JSON bundle. |
-| `/import` | `POST` | admin | Replace the persisted state with an exported payload. |
+| Endpoint                          | Method | Roles                    | Description                                           |
+| --------------------------------- | ------ | ------------------------ | ----------------------------------------------------- |
+| `/appeals`                        | `POST` | admin, reviewer          | Capture a new appeal.                                 |
+| `/appeals`                        | `GET`  | all                      | List appeals (filter by `?status=`).                  |
+| `/appeals/:id/queue`              | `POST` | admin, reviewer          | Move an appeal into the triage queue.                 |
+| `/appeals/:id/evidence`           | `POST` | admin, reviewer          | Attach evidence metadata.                             |
+| `/appeals/:id/decision`           | `POST` | admin, reviewer          | Record an approve/deny decision (dual-control).       |
+| `/appeals/:id/policy-suggestions` | `POST` | admin, reviewer          | Register a policy suggestion tied to an appeal.       |
+| `/policy-proposals`               | `POST` | admin, reviewer          | Submit a cross-appeal policy change proposal.         |
+| `/policy-proposals/:id/decision`  | `POST` | admin, reviewer          | Dual-control ratification of a proposal.              |
+| `/policy-proposals`               | `GET`  | all                      | List proposals and their decisions.                   |
+| `/audit-log`                      | `GET`  | admin, reviewer, auditor | Retrieve the complete audit trail.                    |
+| `/export`                         | `GET`  | admin, reviewer          | Download the round-trippable JSON bundle.             |
+| `/import`                         | `POST` | admin                    | Replace the persisted state with an exported payload. |
 
 Audit entries include the action namespace (`appeal:*`, `policy:*`, `system:*`), the target object, and contextual details for traceability.
 

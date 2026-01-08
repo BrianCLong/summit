@@ -2,17 +2,17 @@
  * Common types and helpers shared across Maestro Conductor services.
  */
 
-export * from './events';
+export * from "./events";
 
 // ============================================================================
 // MERGE TRAIN: Preserving existing LinearX types + adding Cursor governance
 // ============================================================================
 
-export * from './linearx';
-export * from './replay';
+export * from "./linearx";
+export * from "./replay";
 
 // LinearX Automation Types
-export type AutomationMode = 'auto' | 'guided' | 'manual';
+export type AutomationMode = "auto" | "guided" | "manual";
 
 export interface PromptHardening {
   readonly toxicityFilter: boolean;
@@ -32,7 +32,7 @@ export interface PromptTuning {
 
 export interface NavigationDirective {
   readonly url: string;
-  readonly method?: 'GET' | 'POST';
+  readonly method?: "GET" | "POST";
   readonly payload?: Record<string, string | number>;
   readonly headers?: Record<string, string>;
 }
@@ -96,16 +96,9 @@ export interface AutomationCommand {
 }
 
 // Policy-Aware Workcell Types
-export type PolicyEffect = 'allow' | 'deny';
+export type PolicyEffect = "allow" | "deny";
 
-export type PolicyOperator =
-  | 'eq'
-  | 'neq'
-  | 'lt'
-  | 'lte'
-  | 'gt'
-  | 'gte'
-  | 'includes';
+export type PolicyOperator = "eq" | "neq" | "lt" | "lte" | "gt" | "gte" | "includes";
 
 export interface PolicyCondition {
   attribute: string;
@@ -158,7 +151,7 @@ export interface PolicyEvaluationResult {
   trace: PolicyEvaluationTrace[];
 }
 
-export type ConsentStateStatus = 'granted' | 'denied' | 'revoked' | 'expired';
+export type ConsentStateStatus = "granted" | "denied" | "revoked" | "expired";
 
 export interface ConsentSourceRef {
   domain: string;
@@ -196,7 +189,7 @@ export interface ConsentStateEnvelope {
   evidence?: readonly string[];
 }
 
-export type ConsentConflictSeverity = 'info' | 'warning' | 'error';
+export type ConsentConflictSeverity = "info" | "warning" | "error";
 
 export interface ConsentConflict {
   subjectId: string;
@@ -217,21 +210,16 @@ export interface ConsentResolution {
 export interface ConsentAuditRecord {
   eventId: string;
   timestamp: string;
-  action:
-    | 'ingest'
-    | 'conflict-generated'
-    | 'auto-resolution'
-    | 'module-sync'
-    | 'validation';
+  action: "ingest" | "conflict-generated" | "auto-resolution" | "module-sync" | "validation";
   subjectId: string;
   policyId: string;
   details: Readonly<Record<string, unknown>>;
 }
 
 export type ConsentResolutionStrategy =
-  | 'prefer-strictest'
-  | 'prefer-latest'
-  | 'prefer-source-weight';
+  | "prefer-strictest"
+  | "prefer-latest"
+  | "prefer-source-weight";
 
 export interface ConsentReconcilerConfig {
   strictStatusOrder?: readonly ConsentStateStatus[];
@@ -245,7 +233,7 @@ export interface ConsentIntegrationModule {
   supportedDomains: readonly string[];
   sync: (
     resolution: ConsentResolution,
-    auditTrail: readonly ConsentAuditRecord[],
+    auditTrail: readonly ConsentAuditRecord[]
   ) => Promise<void> | void;
 }
 
@@ -322,7 +310,7 @@ export interface EvidenceBundle {
 }
 
 export interface MerkleProofStep {
-  position: 'left' | 'right';
+  position: "left" | "right";
   hash: string;
 }
 
@@ -355,12 +343,12 @@ export interface ExecutionAttestation {
 }
 
 export type ComplianceFramework =
-  | 'soc2'
-  | 'iso27001'
-  | 'gdpr'
-  | 'hipaa'
-  | 'pci-dss'
-  | 'nist-800-53'
+  | "soc2"
+  | "iso27001"
+  | "gdpr"
+  | "hipaa"
+  | "pci-dss"
+  | "nist-800-53"
   | (string & {});
 
 export interface ControlRequirement {
@@ -374,13 +362,13 @@ export interface ControlRequirement {
 export interface EvidenceArtifact {
   id: string;
   type:
-    | 'policy'
-    | 'procedure'
-    | 'log'
-    | 'screenshot'
-    | 'attestation'
-    | 'dataset'
-    | 'configuration'
+    | "policy"
+    | "procedure"
+    | "log"
+    | "screenshot"
+    | "attestation"
+    | "dataset"
+    | "configuration"
     | (string & {});
   title: string;
   uri: string;
@@ -411,7 +399,7 @@ export interface ControlEvidenceBundle {
   readOnly: boolean;
 }
 
-export type WorkTaskStatus = 'success' | 'rejected' | 'failed';
+export type WorkTaskStatus = "success" | "rejected" | "failed";
 
 export interface WorkTaskInput {
   taskId: string;
@@ -443,12 +431,12 @@ export interface WorkOrderSubmission {
 }
 
 export type SelfEditStatus =
-  | 'proposed'
-  | 'queued'
-  | 'approved'
-  | 'rejected'
-  | 'applied'
-  | 'expired';
+  | "proposed"
+  | "queued"
+  | "approved"
+  | "rejected"
+  | "applied"
+  | "expired";
 
 export interface SelfEditVerifierScore {
   verifier: string;
@@ -460,7 +448,7 @@ export interface SelfEditVerifierScore {
 
 export interface SelfEditApproval {
   reviewer: string;
-  decision: 'approved' | 'rejected';
+  decision: "approved" | "rejected";
   decidedAt: string;
   notes?: string;
 }
@@ -499,7 +487,7 @@ export interface SelfEditScorecard {
   status: SelfEditStatus;
 }
 
-export type WorkOrderStatus = 'completed' | 'partial' | 'rejected';
+export type WorkOrderStatus = "completed" | "partial" | "rejected";
 
 export interface WorkOrderResult {
   orderId: string;
@@ -525,7 +513,7 @@ export interface WorkcellToolHandlerContext {
 
 export type WorkcellToolHandler = (
   task: WorkTaskInput,
-  context: WorkcellToolHandlerContext,
+  context: WorkcellToolHandlerContext
 ) => Promise<Record<string, unknown>> | Record<string, unknown>;
 
 export interface WorkcellToolDefinition {
@@ -554,13 +542,13 @@ export interface LatencyDistribution {
 
 export interface CandidateResource {
   id: string;
-  kind: 'model' | 'runtime' | 'hardware';
+  kind: "model" | "runtime" | "hardware";
   skills: string[];
   ckpt: string;
   contextTokens: number;
   cost: CostEstimate;
   latencyMs: LatencyDistribution;
-  safetyTier: 'A' | 'B' | 'C';
+  safetyTier: "A" | "B" | "C";
   licenseClass: string;
   residency: string;
   constraints?: { pii?: boolean };
@@ -577,27 +565,27 @@ export interface DecisionRecord {
 }
 
 export const RESOURCE_KINDS = {
-  MODEL: 'model',
-  RUNTIME: 'runtime',
-  HARDWARE: 'hardware',
+  MODEL: "model",
+  RUNTIME: "runtime",
+  HARDWARE: "hardware",
 } as const;
 
-export const SAFETY_TIERS = { A: 'A', B: 'B', C: 'C' } as const;
+export const SAFETY_TIERS = { A: "A", B: "B", C: "C" } as const;
 
 export const LICENSE_CLASSES = {
-  MIT_OK: 'MIT-OK',
-  OPEN_DATA_OK: 'Open-Data-OK',
-  RESTRICTED_TOS: 'Restricted-TOS',
+  MIT_OK: "MIT-OK",
+  OPEN_DATA_OK: "Open-Data-OK",
+  RESTRICTED_TOS: "Restricted-TOS",
 } as const;
 
 export const ZERO_SPEND_OPTIMIZATIONS = {
-  KV_CACHE: 'kvCache',
-  MEMOIZATION: 'memo',
-  QUANTIZATION: 'quant',
-  SPECULATIVE_DECODE: 'specDecode',
-  BATCHING: 'batching',
-  VLLM: 'vLLM',
-  LORA: 'LoRA',
+  KV_CACHE: "kvCache",
+  MEMOIZATION: "memo",
+  QUANTIZATION: "quant",
+  SPECULATIVE_DECODE: "specDecode",
+  BATCHING: "batching",
+  VLLM: "vLLM",
+  LORA: "LoRA",
 } as const;
 
 export interface BudgetSnapshot {
@@ -616,13 +604,13 @@ export interface ValueDensityMetrics {
 }
 
 export type FallbackTrigger =
-  | 'cost-spike'
-  | 'latency-breach'
-  | 'policy-violation'
-  | 'execution-failure'
-  | 'timeout'
-  | 'circuit-open'
-  | 'graceful-degradation';
+  | "cost-spike"
+  | "latency-breach"
+  | "policy-violation"
+  | "execution-failure"
+  | "timeout"
+  | "circuit-open"
+  | "graceful-degradation";
 
 export interface CloudProviderDescriptor {
   name: string;
@@ -646,9 +634,9 @@ export interface PricingSignal {
   effectiveAt: string;
 }
 
-export type UrgencyLevel = 'low' | 'medium' | 'high';
+export type UrgencyLevel = "low" | "medium" | "high";
 
-export type CostSensitivity = 'low' | 'medium' | 'high';
+export type CostSensitivity = "low" | "medium" | "high";
 
 export interface CapabilityMatrixEntry {
   provider: string;
@@ -671,9 +659,9 @@ export interface CapabilityMatrix {
 export interface BiasMitigationStrategy {
   id: string;
   description: string;
-  signal: 'cost' | 'latency' | 'reliability' | 'diversity';
+  signal: "cost" | "latency" | "reliability" | "diversity";
   threshold?: number;
-  correctiveAction: 'rebalance' | 'penalize' | 'route-to-human';
+  correctiveAction: "rebalance" | "penalize" | "route-to-human";
 }
 
 export interface FairnessPolicy {
@@ -764,7 +752,7 @@ export interface ExplainablePlan {
 
 export interface GovernanceEvent {
   id: string;
-  kind: 'selection' | 'fallback' | 'fairness' | 'archive' | 'explanation';
+  kind: "selection" | "fallback" | "fairness" | "archive" | "explanation";
   timestamp: string;
   summary: string;
   details: Record<string, unknown>;
@@ -809,7 +797,7 @@ export interface MetaOrchestratorPlugin {
 export interface ExecutionTraceEntry {
   stageId: string;
   provider: string;
-  status: 'success' | 'failed' | 'recovered';
+  status: "success" | "failed" | "recovered";
   startedAt: string;
   finishedAt: string;
   logs: string[];
@@ -842,29 +830,29 @@ export interface MetaOrchestratorTelemetry {
 // ============================================================================
 
 export type CursorEventName =
-  | 'cursor.session.start'
-  | 'cursor.session.stop'
-  | 'cursor.prompt'
-  | 'cursor.applyDiff'
-  | 'cursor.commit';
+  | "cursor.session.start"
+  | "cursor.session.stop"
+  | "cursor.prompt"
+  | "cursor.applyDiff"
+  | "cursor.commit";
 
 export type CursorPurpose =
-  | 'investigation'
-  | 'threat-intel'
-  | 'fraud-risk'
-  | 't&s'
-  | 'benchmarking'
-  | 'training'
-  | 'demo'
+  | "investigation"
+  | "threat-intel"
+  | "fraud-risk"
+  | "t&s"
+  | "benchmarking"
+  | "training"
+  | "demo"
   | (string & {});
 
 export type CursorDataClass =
-  | 'public-code'
-  | 'pseudo-data'
-  | 'production-PII'
-  | 'secrets'
-  | 'proprietary-client'
-  | 'legal-hold'
+  | "public-code"
+  | "pseudo-data"
+  | "production-PII"
+  | "secrets"
+  | "proprietary-client"
+  | "legal-hold"
   | (string & {});
 
 export interface CursorActor {
@@ -878,7 +866,7 @@ export interface CursorActor {
 export interface CursorModel {
   name: string;
   vendor: string;
-  routing?: 'proxy' | 'direct' | (string & {});
+  routing?: "proxy" | "direct" | (string & {});
   version?: string;
 }
 
@@ -904,7 +892,7 @@ export interface TokenUsage {
 }
 
 export interface PolicyDecision {
-  decision: 'allow' | 'deny';
+  decision: "allow" | "deny";
   explanations: string[];
   ruleIds?: string[];
   obligations?: string[];
@@ -915,7 +903,7 @@ export interface PolicyDecision {
 export interface PolicyEvaluationContext {
   repoMeta?: {
     license?: string;
-    visibility?: 'public' | 'private' | 'internal' | (string & {});
+    visibility?: "public" | "private" | "internal" | (string & {});
     tags?: string[];
   };
   scan?: {
@@ -1019,7 +1007,7 @@ export interface WorkspaceAnalyst {
   team?: string;
 }
 
-export type PresenceStatus = 'active' | 'idle' | 'offline';
+export type PresenceStatus = "active" | "idle" | "offline";
 
 export interface WorkspacePresence {
   analyst: WorkspaceAnalyst;
@@ -1039,7 +1027,7 @@ export interface WorkspaceEntry {
 
 export interface WorkspaceActivity {
   id: string;
-  type: 'update' | 'presence' | 'conflict' | 'sync';
+  type: "update" | "presence" | "conflict" | "sync";
   actor: WorkspaceAnalyst;
   timestamp: number;
   description: string;
@@ -1051,7 +1039,7 @@ export interface WorkspaceConflict {
   key: string;
   localVersion: number;
   incomingVersion: number;
-  resolvedWith: 'local' | 'incoming';
+  resolvedWith: "local" | "incoming";
   note?: string;
   lastKnownBy: WorkspaceAnalyst;
   incomingAuthor: WorkspaceAnalyst;
@@ -1090,8 +1078,8 @@ export interface GatewayAuthContext {
   };
   attributes?: Record<string, unknown>;
   dataClasses?: CursorDataClass[];
-  repoMeta?: PolicyEvaluationContext['repoMeta'];
-  scan?: PolicyEvaluationContext['scan'];
+  repoMeta?: PolicyEvaluationContext["repoMeta"];
+  scan?: PolicyEvaluationContext["scan"];
   model?: CursorModel;
   requestIp?: string;
   requestId?: string;
@@ -1172,7 +1160,7 @@ const EMPTY_USAGE: TokenUsage = {
   totalTokens: 0,
 };
 
-function normalizeUsage(usage?: CursorEventPayload['usage']): TokenUsage {
+function normalizeUsage(usage?: CursorEventPayload["usage"]): TokenUsage {
   if (!usage) {
     return EMPTY_USAGE;
   }
@@ -1242,7 +1230,7 @@ export function normalizeCursorEvent(payload: CursorEventPayload): CursorEvent {
 
 export function mergeDataClasses(
   event: CursorEvent,
-  context?: PolicyEvaluationContext,
+  context?: PolicyEvaluationContext
 ): CursorDataClass[] {
   const classes = new Set<CursorDataClass>();
 
@@ -1272,13 +1260,13 @@ export const TENANT_BUDGETS: Record<string, BudgetConfig> = {
     windowMs: DAY_MS,
     alertPercent: 0.8,
   },
-  'maestro-internal': {
+  "maestro-internal": {
     tokens: 3_000_000,
     currency: 25,
     windowMs: DAY_MS,
     alertPercent: 0.8,
   },
-  'production-sample': {
+  "production-sample": {
     tokens: 12_000_000,
     currency: 100,
     windowMs: DAY_MS,
@@ -1286,16 +1274,16 @@ export const TENANT_BUDGETS: Record<string, BudgetConfig> = {
   },
 };
 
-export const MODEL_ALLOWLIST = ['gpt-4.1-mini', 'claude-3.5-sonnet'] as const;
+export const MODEL_ALLOWLIST = ["gpt-4.1-mini", "claude-3.5-sonnet"] as const;
 
 export const PURPOSE_ALLOWLIST: CursorPurpose[] = [
-  'investigation',
-  'threat-intel',
-  'fraud-risk',
-  't&s',
-  'benchmarking',
-  'training',
-  'demo',
+  "investigation",
+  "threat-intel",
+  "fraud-risk",
+  "t&s",
+  "benchmarking",
+  "training",
+  "demo",
 ];
 
 // ============================================================================
@@ -1303,36 +1291,30 @@ export const PURPOSE_ALLOWLIST: CursorPurpose[] = [
 // ============================================================================
 
 export const NODE_CATEGORIES = {
-  source: ['git.clone', 's3.fetch', 'artifact.import'] as const,
-  build: ['build.compile', 'build.cache'] as const,
-  test: ['test.junit', 'test.pytest', 'test.map', 'test.reduce'] as const,
-  quality: ['quality.lint', 'quality.coverage'] as const,
-  security: ['security.sca', 'security.sast', 'security.dast'] as const,
-  package: ['package.docker', 'package.helm'] as const,
-  deploy: ['deploy.canary', 'deploy.rollback', 'deploy.promotion'] as const,
+  source: ["git.clone", "s3.fetch", "artifact.import"] as const,
+  build: ["build.compile", "build.cache"] as const,
+  test: ["test.junit", "test.pytest", "test.map", "test.reduce"] as const,
+  quality: ["quality.lint", "quality.coverage"] as const,
+  security: ["security.sca", "security.sast", "security.dast"] as const,
+  package: ["package.docker", "package.helm"] as const,
+  deploy: ["deploy.canary", "deploy.rollback", "deploy.promotion"] as const,
   utility: [
-    'util.fanout',
-    'util.fanin',
-    'util.gate',
-    'util.approval',
-    'util.map',
-    'util.reduce',
+    "util.fanout",
+    "util.fanin",
+    "util.gate",
+    "util.approval",
+    "util.map",
+    "util.reduce",
   ] as const,
-  ai: ['ai.summarize', 'ai.release-notes'] as const,
+  ai: ["ai.summarize", "ai.release-notes"] as const,
 } as const;
 
 export type NodeCategory = keyof typeof NODE_CATEGORIES;
 export type NodeType = (typeof NODE_CATEGORIES)[NodeCategory][number];
-export type EdgeCondition = 'success' | 'failure' | 'always' | 'manual';
-export type ArtifactType =
-  | 'sarif'
-  | 'spdx'
-  | 'junit'
-  | 'coverage'
-  | 'provenance'
-  | 'generic';
-export type EvidenceType = ArtifactType | 'trace' | 'log' | 'screenshot';
-export type RetentionTier = 'short-30d' | 'standard-365d' | 'extended-730d';
+export type EdgeCondition = "success" | "failure" | "always" | "manual";
+export type ArtifactType = "sarif" | "spdx" | "junit" | "coverage" | "provenance" | "generic";
+export type EvidenceType = ArtifactType | "trace" | "log" | "screenshot";
+export type RetentionTier = "short-30d" | "standard-365d" | "extended-730d";
 
 export interface ArtifactBinding {
   name: string;
@@ -1378,7 +1360,7 @@ export interface VaultSecretRef extends BaseSecretRef {
    * Vault reference (`vault://path/to/secret`). Literal secrets are forbidden.
    */
   vault: string;
-  provider?: 'vault';
+  provider?: "vault";
 }
 
 export interface KmsEnvelopeRef extends BaseSecretRef {
@@ -1386,7 +1368,7 @@ export interface KmsEnvelopeRef extends BaseSecretRef {
    * AWS KMS key identifier used for envelope encryption.
    */
   keyId: string;
-  provider: 'kms';
+  provider: "kms";
   /**
    * Base64 encoded envelope containing the encrypted secret payload.
    */
@@ -1435,7 +1417,7 @@ export interface WorkflowNode {
   evidenceOutputs?: EvidenceOutput[];
   aiAssist?: {
     enabled: boolean;
-    mode: 'suggest' | 'explain' | 'optimize';
+    mode: "suggest" | "explain" | "optimize";
   };
   workbook?: {
     uri: string;
@@ -1504,22 +1486,12 @@ export interface TemplateParameter {
   description?: string;
   required: boolean;
   defaultValue?: unknown;
-  type?: 'string' | 'number' | 'boolean' | 'object' | 'array';
+  type?: "string" | "number" | "boolean" | "object" | "array";
   secret?: boolean;
 }
 
-export type RunStatus =
-  | 'pending'
-  | 'running'
-  | 'succeeded'
-  | 'failed'
-  | 'aborted';
-export type NodeRunStatus =
-  | 'queued'
-  | 'running'
-  | 'succeeded'
-  | 'failed'
-  | 'skipped';
+export type RunStatus = "pending" | "running" | "succeeded" | "failed" | "aborted";
+export type NodeRunStatus = "queued" | "running" | "succeeded" | "failed" | "skipped";
 
 export interface RunNodeSnapshot {
   nodeId: string;
@@ -1588,29 +1560,25 @@ export interface LedgerRecord {
 }
 
 export type WorkflowDependencyType =
-  | 'service'
-  | 'database'
-  | 'package'
-  | 'dataset'
-  | 'queue'
-  | 'policy'
-  | 'infrastructure';
+  | "service"
+  | "database"
+  | "package"
+  | "dataset"
+  | "queue"
+  | "policy"
+  | "infrastructure";
 
-export type WorkflowDependencyCriticality =
-  | 'low'
-  | 'medium'
-  | 'high'
-  | 'mission-critical';
+export type WorkflowDependencyCriticality = "low" | "medium" | "high" | "mission-critical";
 
 export type ComplianceDomain =
-  | 'privacy'
-  | 'security'
-  | 'financial'
-  | 'regulatory'
-  | 'operational'
-  | 'data';
+  | "privacy"
+  | "security"
+  | "financial"
+  | "regulatory"
+  | "operational"
+  | "data";
 
-export type RiskSeverity = 'info' | 'low' | 'medium' | 'high' | 'critical';
+export type RiskSeverity = "info" | "low" | "medium" | "high" | "critical";
 
 export interface WorkflowDependencySnapshot {
   id: string;
@@ -1625,7 +1593,7 @@ export interface WorkflowDependencySnapshot {
   metadata?: Record<string, unknown>;
 }
 
-export type ControlCoverage = 'full' | 'partial' | 'none';
+export type ControlCoverage = "full" | "partial" | "none";
 
 export interface WorkflowPolicyBinding {
   controlId: string;
@@ -1672,7 +1640,7 @@ export interface WorkflowSnapshot {
   notes?: string;
 }
 
-export type DiffLayer = 'functional' | 'dependency' | 'policy' | 'runtime';
+export type DiffLayer = "functional" | "dependency" | "policy" | "runtime";
 
 export interface DiffGraphNode {
   id: string;
@@ -1761,7 +1729,7 @@ export interface WorkflowMigrationPlan {
   tests: WorkflowMigrationTestCase[];
 }
 
-export type ContinuousCheckTrigger = 'pre-merge' | 'post-merge' | 'scheduled';
+export type ContinuousCheckTrigger = "pre-merge" | "post-merge" | "scheduled";
 
 export interface WorkflowContinuousCheck {
   name: string;
@@ -1783,7 +1751,7 @@ export interface WorkflowDiffResult {
 }
 
 export interface WorkflowValidationIssue {
-  severity: 'error' | 'warning' | 'info';
+  severity: "error" | "warning" | "info";
   code: string;
   message: string;
   nodes?: string[];
@@ -1892,23 +1860,23 @@ export const DEFAULT_VALIDATION_DEFAULTS: ValidationDefaults = {
   evidenceRequired: true,
 };
 
-export const SHORT_RETENTION: RetentionTier = 'short-30d';
-export const DEFAULT_RETENTION: RetentionTier = 'standard-365d';
+export const SHORT_RETENTION: RetentionTier = "short-30d";
+export const DEFAULT_RETENTION: RetentionTier = "standard-365d";
 
 export function emptyWorkflow(
   tenantId: string,
   name: string,
-  createdBy?: string,
+  createdBy?: string
 ): WorkflowDefinition {
   return normalizeWorkflow({
-    workflowId: '',
+    workflowId: "",
     name,
     version: 1,
     tenantId,
     policy: {
-      purpose: 'engineering',
+      purpose: "engineering",
       retention: DEFAULT_RETENTION,
-      licenseClass: 'MIT-OK',
+      licenseClass: "MIT-OK",
       pii: false,
     },
     constraints: {
@@ -1926,7 +1894,7 @@ export function emptyWorkflow(
 
 export function normalizeWorkflow(
   workflow: WorkflowDefinition,
-  defaults: Partial<ValidationDefaults> = {},
+  defaults: Partial<ValidationDefaults> = {}
 ): WorkflowDefinition {
   const mergedDefaults: ValidationDefaults = {
     ...DEFAULT_VALIDATION_DEFAULTS,
@@ -1934,9 +1902,7 @@ export function normalizeWorkflow(
     ...defaults,
   };
 
-  const nodes = workflow.nodes.map((node) =>
-    applyNodeDefaults(node, mergedDefaults),
-  );
+  const nodes = workflow.nodes.map((node) => applyNodeDefaults(node, mergedDefaults));
   return {
     ...workflow,
     defaults: mergedDefaults,
@@ -1944,10 +1910,7 @@ export function normalizeWorkflow(
   };
 }
 
-function applyNodeDefaults(
-  node: WorkflowNode,
-  defaults: ValidationDefaults,
-): WorkflowNode {
+function applyNodeDefaults(node: WorkflowNode, defaults: ValidationDefaults): WorkflowNode {
   return {
     ...node,
     retries: node.retries ?? defaults.retries,
@@ -1959,7 +1922,7 @@ function applyNodeDefaults(
         : defaults.evidenceRequired
           ? [
               {
-                type: 'provenance',
+                type: "provenance",
                 path: `prov/${node.id}.json`,
                 required: true,
               },
@@ -2001,16 +1964,12 @@ export function analyzeEvidence(nodes: WorkflowNode[]): EvidenceAnalysis {
 
 export function listSourceNodes(workflow: WorkflowDefinition): string[] {
   const targets = new Set(workflow.edges.map((edge) => edge.to));
-  return workflow.nodes
-    .filter((node) => !targets.has(node.id))
-    .map((node) => node.id);
+  return workflow.nodes.filter((node) => !targets.has(node.id)).map((node) => node.id);
 }
 
 export function listSinkNodes(workflow: WorkflowDefinition): string[] {
   const outgoing = new Set(workflow.edges.map((edge) => edge.from));
-  return workflow.nodes
-    .filter((node) => !outgoing.has(node.id))
-    .map((node) => node.id);
+  return workflow.nodes.filter((node) => !outgoing.has(node.id)).map((node) => node.id);
 }
 
 export function listOrphanNodes(workflow: WorkflowDefinition): string[] {
@@ -2041,7 +2000,7 @@ export function summarizeWorkflow(workflow: WorkflowDefinition): {
 
 export function createWhatIfScenario(
   label: string,
-  overrides: WhatIfScenario['overrides'],
+  overrides: WhatIfScenario["overrides"]
 ): WhatIfScenario {
   return {
     label,
@@ -2060,13 +2019,11 @@ export function enumerateArtifacts(nodes: WorkflowNode[]): ArtifactBinding[] {
 }
 
 export function buildLedgerUri(context: LedgerContext, runId: string): string {
-  const base = context.ledgerBaseUri.replace(/\/$/, '');
+  const base = context.ledgerBaseUri.replace(/\/$/, "");
   return `${base}/${runId}`;
 }
 
-export function collectEvidencePointers(
-  nodes: WorkflowNode[],
-): LedgerEvidencePointer[] {
+export function collectEvidencePointers(nodes: WorkflowNode[]): LedgerEvidencePointer[] {
   const pointers: LedgerEvidencePointer[] = [];
   for (const node of nodes) {
     for (const evidence of node.evidenceOutputs ?? []) {
@@ -2081,26 +2038,23 @@ export function collectEvidencePointers(
 }
 
 export function ensureSecret(value: unknown): value is SecretRef {
-  if (!value || typeof value !== 'object') {
+  if (!value || typeof value !== "object") {
     return false;
   }
   const candidate = value as Partial<SecretRef> & { provider?: string };
-  const provider = candidate.provider ?? 'vault';
+  const provider = candidate.provider ?? "vault";
 
-  if (provider === 'vault') {
+  if (provider === "vault") {
     const vaultCandidate = candidate as VaultSecretRef;
-    return (
-      typeof vaultCandidate.vault === 'string' &&
-      typeof vaultCandidate.key === 'string'
-    );
+    return typeof vaultCandidate.vault === "string" && typeof vaultCandidate.key === "string";
   }
 
-  if (provider === 'kms') {
+  if (provider === "kms") {
     const kmsCandidate = candidate as KmsEnvelopeRef;
     return (
-      typeof kmsCandidate.keyId === 'string' &&
-      typeof kmsCandidate.ciphertext === 'string' &&
-      typeof kmsCandidate.key === 'string'
+      typeof kmsCandidate.keyId === "string" &&
+      typeof kmsCandidate.ciphertext === "string" &&
+      typeof kmsCandidate.key === "string"
     );
   }
 
@@ -2111,7 +2065,7 @@ export function ensureSecret(value: unknown): value is SecretRef {
 // MULTI-LLM COOPERATION TYPES - Added from codex/harden-and-extend-prompt-engine-and-cooperation-fabric
 // ============================================================================
 
-export type LanguageTag = 'en' | 'es' | 'fr' | 'de' | 'unknown';
+export type LanguageTag = "en" | "es" | "fr" | "de" | "unknown";
 
 export interface EvidenceLink {
   id: string;
@@ -2120,30 +2074,30 @@ export interface EvidenceLink {
 }
 
 export type PolicyTag =
-  | 'retention:short-30d'
-  | 'retention:standard-365d'
-  | 'retention:archive'
-  | 'purpose:engineering'
-  | 'purpose:compliance'
-  | 'purpose:security'
-  | 'license:mit-ok'
-  | 'license:restricted'
-  | 'pii:present'
-  | 'pii:absent';
+  | "retention:short-30d"
+  | "retention:standard-365d"
+  | "retention:archive"
+  | "purpose:engineering"
+  | "purpose:compliance"
+  | "purpose:security"
+  | "license:mit-ok"
+  | "license:restricted"
+  | "pii:present"
+  | "pii:absent";
 
 export interface PolicyMetadata {
-  purpose: 'engineering' | 'analytics' | 'support';
-  retention: 'short-30d' | 'standard-365d' | 'archive';
-  licenseClass: 'MIT-OK' | 'RESTRICTED' | 'CUSTOM';
+  purpose: "engineering" | "analytics" | "support";
+  retention: "short-30d" | "standard-365d" | "archive";
+  licenseClass: "MIT-OK" | "RESTRICTED" | "CUSTOM";
   pii: boolean;
-  safetyTier?: 'low' | 'medium' | 'high';
-  residency?: 'global' | 'us' | 'eu';
+  safetyTier?: "low" | "medium" | "high";
+  residency?: "global" | "us" | "eu";
 }
 
 export interface AcceptanceCriteria {
   id: string;
   statement: string;
-  verify: 'cmd' | 'test' | 'assert' | 'manual';
+  verify: "cmd" | "test" | "assert" | "manual";
   metric: string;
   threshold: string;
 }
@@ -2151,7 +2105,7 @@ export interface AcceptanceCriteria {
 export interface RiskItem {
   id: string;
   description: string;
-  severity: 'low' | 'medium' | 'high';
+  severity: "low" | "medium" | "high";
 }
 
 export interface RaciMatrix {
@@ -2164,7 +2118,7 @@ export interface SlaMetadata {
 }
 
 export interface TaskInputReference {
-  type: 'code' | 'log' | 'pdf' | 'url' | 'adr' | 'sbom';
+  type: "code" | "log" | "pdf" | "url" | "adr" | "sbom";
   uri: string;
   hash?: string;
   estimatedTokens?: number;
@@ -2219,7 +2173,7 @@ export interface Ticket {
 export interface ClarifyingQuestion {
   question: string;
   reason: string;
-  priority: 'low' | 'medium' | 'high';
+  priority: "low" | "medium" | "high";
 }
 
 export interface NormalizedTask {
@@ -2231,13 +2185,13 @@ export interface NormalizedTask {
 export interface CapabilityProfile {
   id: string;
   displayName: string;
-  type: 'foundation' | 'fine-tuned' | 'tool' | 'human';
+  type: "foundation" | "fine-tuned" | "tool" | "human";
   skills: string[];
   costUSDPer1kTokens: number;
   latencyMsP95: number;
   contextWindowTokens: number;
-  safety: 'low' | 'medium' | 'high';
-  residency: 'global' | 'us' | 'eu';
+  safety: "low" | "medium" | "high";
+  residency: "global" | "us" | "eu";
   maxConcurrency: number;
   reliabilityScore: number;
 }
@@ -2265,13 +2219,13 @@ export interface RoutingDecision {
 }
 
 export type CooperationMode =
-  | 'auction-of-experts'
-  | 'semantic-braid'
-  | 'counterfactual-shadowing'
-  | 'causal-challenge-games'
-  | 'cross-entropy-swaps'
-  | 'proof-of-useful-workbook'
-  | 'federated-deliberation';
+  | "auction-of-experts"
+  | "semantic-braid"
+  | "counterfactual-shadowing"
+  | "causal-challenge-games"
+  | "cross-entropy-swaps"
+  | "proof-of-useful-workbook"
+  | "federated-deliberation";
 
 export interface CooperationArtifact {
   mode: CooperationMode;
@@ -2282,14 +2236,14 @@ export interface CooperationArtifact {
 }
 
 export interface EvaluatorScore {
-  axis: 'accuracy' | 'safety' | 'compliance' | 'readability' | 'performance';
+  axis: "accuracy" | "safety" | "compliance" | "readability" | "performance";
   score: number;
   rationale?: string;
 }
 
 export interface ProvenanceRecord {
   reqId: string;
-  step: 'critic' | 'router' | 'generator' | 'evaluator' | 'planner';
+  step: "critic" | "router" | "generator" | "evaluator" | "planner";
   inputHash: string;
   outputHash: string;
   modelId: string;
@@ -2297,10 +2251,7 @@ export interface ProvenanceRecord {
   promptHash: string;
   params: Record<string, unknown>;
   scores: Partial<
-    Record<
-      'accuracy' | 'safety' | 'readability' | 'compliance' | 'performance',
-      number
-    >
+    Record<"accuracy" | "safety" | "readability" | "compliance" | "performance", number>
   >;
   policy: PolicyMetadata;
   time: {
@@ -2319,7 +2270,7 @@ export interface WorkbookCommand {
 export interface WorkbookReceipt {
   id: string;
   commands: WorkbookCommand[];
-  status: 'passed' | 'failed';
+  status: "passed" | "failed";
   artifacts: EvidenceLink[];
   startedAt: string;
   completedAt: string;
@@ -2329,13 +2280,9 @@ export interface WorkbookReceipt {
 // AUDIT INVESTIGATION PLATFORM TYPES
 // ============================================================================
 
-export type AuditSeverity = 'info' | 'low' | 'medium' | 'high' | 'critical';
+export type AuditSeverity = "info" | "low" | "medium" | "high" | "critical";
 
-export type AuditInvestigatorRole =
-  | 'viewer'
-  | 'analyst'
-  | 'admin'
-  | (string & {});
+export type AuditInvestigatorRole = "viewer" | "analyst" | "admin" | (string & {});
 
 export interface AuditInvestigationContext {
   tenantId: string;
@@ -2401,7 +2348,7 @@ export interface AuditQueryOptions {
   includeTimeline?: boolean;
   includeAnomalies?: boolean;
   includeCorrelations?: boolean;
-  exportFormat?: 'json' | 'csv';
+  exportFormat?: "json" | "csv";
   optimize?: boolean;
   naturalLanguage?: string;
   useCache?: boolean;
@@ -2419,7 +2366,7 @@ export interface AuditQueryResult {
   optimizedPlan?: string;
   cached: boolean;
   exportPayload?: string;
-  exportFormat?: 'json' | 'csv';
+  exportFormat?: "json" | "csv";
   naturalLanguage?: string;
 }
 
@@ -2456,9 +2403,7 @@ export interface AuditInvestigationTrailEntry {
 
 export interface AuditLogDataSource {
   system: string;
-  load: (
-    filter: AuditQueryFilter,
-  ) => Promise<AuditLogEvent[]> | AuditLogEvent[];
+  load: (filter: AuditQueryFilter) => Promise<AuditLogEvent[]> | AuditLogEvent[];
 }
 
 export interface ValidationResult {
@@ -2474,16 +2419,16 @@ export function validateTaskSpec(spec: TaskSpec): ValidationResult {
   const warnings: string[] = [];
 
   if (!spec.taskId.trim()) {
-    errors.push('taskId is required');
+    errors.push("taskId is required");
   }
   if (!spec.tenantId.trim()) {
-    errors.push('tenantId is required');
+    errors.push("tenantId is required");
   }
   if (!spec.goal.trim()) {
-    errors.push('goal is required');
+    errors.push("goal is required");
   }
   if (spec.acceptanceCriteria.length === 0) {
-    errors.push('at least one acceptance criteria is required');
+    errors.push("at least one acceptance criteria is required");
   }
   spec.acceptanceCriteria.forEach((ac) => {
     if (!ac.statement.trim()) {
@@ -2495,29 +2440,29 @@ export function validateTaskSpec(spec: TaskSpec): ValidationResult {
   });
 
   if (spec.constraints.budgetUSD <= 0) {
-    errors.push('budget must be positive');
+    errors.push("budget must be positive");
   }
   if (spec.constraints.latencyP95Ms <= 0) {
-    errors.push('latencyP95Ms must be positive');
+    errors.push("latencyP95Ms must be positive");
   }
   if (spec.constraints.contextTokensMax <= 0) {
-    errors.push('contextTokensMax must be positive');
+    errors.push("contextTokensMax must be positive");
   }
 
   if (!spec.policy.retention) {
-    errors.push('policy.retention missing');
+    errors.push("policy.retention missing");
   }
   if (spec.policy.pii) {
-    if (!spec.policyTags.includes('pii:present')) {
-      warnings.push('PII flagged but policy tag missing');
+    if (!spec.policyTags.includes("pii:present")) {
+      warnings.push("PII flagged but policy tag missing");
     }
-  } else if (!spec.policyTags.includes('pii:absent')) {
-    warnings.push('PII absent but missing explicit policy tag');
+  } else if (!spec.policyTags.includes("pii:absent")) {
+    warnings.push("PII absent but missing explicit policy tag");
   }
 
   const due = Date.parse(spec.sla.due);
   if (Number.isNaN(due)) {
-    errors.push('sla.due must be ISO date');
+    errors.push("sla.due must be ISO date");
   }
 
   const coverage = new Set<string>();
@@ -2525,17 +2470,12 @@ export function validateTaskSpec(spec: TaskSpec): ValidationResult {
     coverage.add(ac.id);
   }
   if (coverage.size !== spec.acceptanceCriteria.length) {
-    errors.push('acceptance criteria ids must be unique');
+    errors.push("acceptance criteria ids must be unique");
   }
 
   spec.policyTags.forEach((tag) => {
-    if (
-      tag.startsWith('license') &&
-      spec.policy.licenseClass === 'RESTRICTED'
-    ) {
-      warnings.push(
-        'license tag indicates restrictions; verify downstream routing',
-      );
+    if (tag.startsWith("license") && spec.policy.licenseClass === "RESTRICTED") {
+      warnings.push("license tag indicates restrictions; verify downstream routing");
     }
   });
 

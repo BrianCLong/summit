@@ -8,12 +8,12 @@
  * @see docs/adr/ADR-009_context_provenance_graph.md
  */
 
-export * from './types.js';
-export * from './ProvenanceGraph.js';
-export * from './PolicyEngine.js';
-export * from './ReplayEngine.js';
+export * from "./types.js";
+export * from "./ProvenanceGraph.js";
+export * from "./PolicyEngine.js";
+export * from "./ReplayEngine.js";
 
-export { createSegmentId } from './ProvenanceGraph.js';
+export { createSegmentId } from "./ProvenanceGraph.js";
 export {
   revokedAgentRule,
   externalTrustRedactionRule,
@@ -21,5 +21,5 @@ export {
   policyDomainMismatchRule,
   agentQuarantineRule,
   trustTierEscalationRule,
-  contextExpirationRule
-} from './PolicyEngine.js';
+  contextExpirationRule,
+} from "./PolicyEngine.js";

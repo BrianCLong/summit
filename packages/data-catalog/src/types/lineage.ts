@@ -7,18 +7,18 @@
  * Lineage Direction
  */
 export enum LineageDirection {
-  UPSTREAM = 'UPSTREAM',
-  DOWNSTREAM = 'DOWNSTREAM',
-  BOTH = 'BOTH',
+  UPSTREAM = "UPSTREAM",
+  DOWNSTREAM = "DOWNSTREAM",
+  BOTH = "BOTH",
 }
 
 /**
  * Lineage Level
  */
 export enum LineageLevel {
-  TABLE = 'TABLE',
-  COLUMN = 'COLUMN',
-  TRANSFORMATION = 'TRANSFORMATION',
+  TABLE = "TABLE",
+  COLUMN = "COLUMN",
+  TRANSFORMATION = "TRANSFORMATION",
 }
 
 /**
@@ -49,13 +49,13 @@ export interface LineageEdge {
  * Transformation Types
  */
 export enum TransformationType {
-  COPY = 'COPY',
-  FILTER = 'FILTER',
-  AGGREGATE = 'AGGREGATE',
-  JOIN = 'JOIN',
-  UNION = 'UNION',
-  TRANSFORM = 'TRANSFORM',
-  CUSTOM = 'CUSTOM',
+  COPY = "COPY",
+  FILTER = "FILTER",
+  AGGREGATE = "AGGREGATE",
+  JOIN = "JOIN",
+  UNION = "UNION",
+  TRANSFORM = "TRANSFORM",
+  CUSTOM = "CUSTOM",
 }
 
 /**
@@ -126,10 +126,10 @@ export interface ImpactedAsset {
  * Impact Level
  */
 export enum ImpactLevel {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL',
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+  CRITICAL = "CRITICAL",
 }
 
 /**

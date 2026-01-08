@@ -1,5 +1,5 @@
-import { scoreboardService } from '../../scoreboard/scoreboardService.js';
-import { DomainScoreboard } from '../../scoreboard/types.js';
+import { scoreboardService } from "../../scoreboard/scoreboardService.js";
+import { DomainScoreboard } from "../../scoreboard/types.js";
 
 export const scoreboardResolvers = {
   Query: {
@@ -13,19 +13,44 @@ export const scoreboardResolvers = {
     },
     logDecision: (
       _: unknown,
-      { input }: { input: { domainId: string; title: string; owner: string; rationale: string; revisitDate: string; decisionType: 'ONE_WAY_DOOR' | 'TWO_WAY_DOOR' } },
+      {
+        input,
+      }: {
+        input: {
+          domainId: string;
+          title: string;
+          owner: string;
+          rationale: string;
+          revisitDate: string;
+          decisionType: "ONE_WAY_DOOR" | "TWO_WAY_DOOR";
+        };
+      }
     ) => {
       return scoreboardService.logDecision(input);
     },
     registerException: (
       _: unknown,
-      { input }: { input: { domainId: string; gate: any; owner: string; reason: string; expiresAt: string } },
+      {
+        input,
+      }: {
+        input: { domainId: string; gate: any; owner: string; reason: string; expiresAt: string };
+      }
     ) => {
       return scoreboardService.registerException(input);
     },
     registerReleaseEnvelope: (
       _: unknown,
-      { input }: { input: { domainId: string; owner: string; metrics: string[]; rollbackPlan: string; expiresAt?: string } },
+      {
+        input,
+      }: {
+        input: {
+          domainId: string;
+          owner: string;
+          metrics: string[];
+          rollbackPlan: string;
+          expiresAt?: string;
+        };
+      }
     ) => {
       return scoreboardService.registerReleaseEnvelope(input);
     },
@@ -34,9 +59,10 @@ export const scoreboardResolvers = {
     health: (scoreboard: DomainScoreboard) => scoreboard.health,
   },
   DomainMetrics: {
-    onCall: (scoreboardMetrics: DomainScoreboard['metrics']) => ({
+    onCall: (scoreboardMetrics: DomainScoreboard["metrics"]) => ({
       ...scoreboardMetrics.onCall,
-      status: scoreboardService.getDomainScoreboard(scoreboardMetrics.domainId)?.health.onCall ?? 'GOOD',
+      status:
+        scoreboardService.getDomainScoreboard(scoreboardMetrics.domainId)?.health.onCall ?? "GOOD",
     }),
   },
 };

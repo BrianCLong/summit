@@ -38,9 +38,11 @@ er-service/
 ## API Endpoints
 
 ### POST /api/v1/candidates
+
 Find candidate matches for an entity.
 
 **Request:**
+
 ```json
 {
   "tenantId": "tenant-123",
@@ -60,6 +62,7 @@ Find candidate matches for an entity.
 ```
 
 **Response:**
+
 ```json
 {
   "requestId": "uuid",
@@ -78,9 +81,11 @@ Find candidate matches for an entity.
 ```
 
 ### POST /api/v1/merge
+
 Merge entities into a canonical record.
 
 **Request:**
+
 ```json
 {
   "tenantId": "tenant-123",
@@ -94,6 +99,7 @@ Merge entities into a canonical record.
 ```
 
 **Response:**
+
 ```json
 {
   "mergeId": "merge-uuid",
@@ -108,9 +114,11 @@ Merge entities into a canonical record.
 ```
 
 ### POST /api/v1/merge/:mergeId/revert
+
 Revert a merge operation.
 
 **Request:**
+
 ```json
 {
   "actor": "supervisor@example.com",
@@ -119,9 +127,11 @@ Revert a merge operation.
 ```
 
 ### POST /api/v1/split
+
 Split an entity into multiple entities.
 
 **Request:**
+
 ```json
 {
   "tenantId": "tenant-123",
@@ -142,9 +152,11 @@ Split an entity into multiple entities.
 ```
 
 ### GET /api/v1/explain/:mergeId
+
 Get explanation for a merge decision.
 
 **Response:**
+
 ```json
 {
   "mergeId": "merge-uuid",
@@ -166,18 +178,22 @@ Get explanation for a merge decision.
 ```
 
 ### GET /api/v1/audit
+
 Retrieve audit log.
 
 **Query Parameters:**
+
 - `tenantId`: Filter by tenant
 - `actor`: Filter by actor
 - `event`: Filter by event type (merge, revert, split)
 - `limit`: Limit number of results
 
 ### GET /api/v1/stats
+
 Get service statistics.
 
 ### GET /api/v1/health
+
 Health check endpoint.
 
 ## Installation
@@ -214,16 +230,16 @@ npm run lint
 ### Using the Client
 
 ```typescript
-import { createERClient } from '../server/src/er-client';
+import { createERClient } from "../server/src/er-client";
 
 const client = createERClient({
-  baseUrl: 'http://localhost:3001',
+  baseUrl: "http://localhost:3001",
   timeout: 30000,
 });
 
 // Find candidates
 const candidates = await client.candidates({
-  tenantId: 'tenant-123',
+  tenantId: "tenant-123",
   entity: myEntity,
   population: allEntities,
   topK: 5,
@@ -231,10 +247,10 @@ const candidates = await client.candidates({
 
 // Merge entities
 const merge = await client.merge({
-  tenantId: 'tenant-123',
-  entityIds: ['e1', 'e2'],
-  actor: 'analyst@example.com',
-  reason: 'Duplicate',
+  tenantId: "tenant-123",
+  entityIds: ["e1", "e2"],
+  actor: "analyst@example.com",
+  reason: "Duplicate",
 });
 
 // Get explanation
@@ -242,7 +258,7 @@ const explanation = await client.explain(merge.mergeId);
 console.log(explanation.rationale);
 
 // Revert if needed
-await client.revertMerge(merge.mergeId, 'supervisor@example.com', 'False positive');
+await client.revertMerge(merge.mergeId, "supervisor@example.com", "False positive");
 ```
 
 ## Configuration
@@ -256,6 +272,7 @@ PORT=3001  # Default: 3001
 ## Performance
 
 Target metrics:
+
 - **Merge operations**: ≥100 ops/sec
 - **Candidate search**: <100ms for 1000 entities
 - **Test coverage**: ≥90%

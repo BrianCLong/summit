@@ -100,10 +100,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2'
+          cpus: "2"
           memory: 1G
         reservations:
-          cpus: '0.5'
+          cpus: "0.5"
           memory: 512M
 ```
 
@@ -152,33 +152,33 @@ spec:
         app: predictive-forecasting
     spec:
       containers:
-      - name: forecasting
-        image: summit/predictive-suite:alpha
-        ports:
-        - containerPort: 8091
-          name: http
-        env:
-        - name: LOG_LEVEL
-          value: "INFO"
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "1Gi"
-            cpu: "1000m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8091
-          initialDelaySeconds: 10
-          periodSeconds: 30
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 8091
-          initialDelaySeconds: 5
-          periodSeconds: 10
+        - name: forecasting
+          image: summit/predictive-suite:alpha
+          ports:
+            - containerPort: 8091
+              name: http
+          env:
+            - name: LOG_LEVEL
+              value: "INFO"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8091
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8091
+            initialDelaySeconds: 5
+            periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
@@ -193,9 +193,9 @@ spec:
   selector:
     app: predictive-forecasting
   ports:
-  - name: http
-    port: 8091
-    targetPort: 8091
+    - name: http
+      port: 8091
+      targetPort: 8091
   type: ClusterIP
 ```
 
@@ -328,9 +328,9 @@ spec:
     matchLabels:
       app: predictive-forecasting
   endpoints:
-  - port: http
-    path: /metrics
-    interval: 15s
+    - port: http
+      path: /metrics
+      interval: 15s
 ```
 
 ---
@@ -369,12 +369,12 @@ Add to your existing `prometheus.yml`:
 
 ```yaml
 scrape_configs:
-  - job_name: 'predictive-forecasting'
+  - job_name: "predictive-forecasting"
     scrape_interval: 15s
     static_configs:
       - targets:
-          - 'localhost:8091'
-    metrics_path: '/metrics'
+          - "localhost:8091"
+    metrics_path: "/metrics"
 ```
 
 Reload Prometheus:
@@ -449,17 +449,17 @@ sudo systemctl status predictive-suite
 scrape_configs:
   # ... existing jobs
 
-  - job_name: 'predictive-suite'
+  - job_name: "predictive-suite"
     scrape_interval: 15s
     static_configs:
       - targets:
-          - 'predictive-forecasting:8091'  # If in same Docker network
+          - "predictive-forecasting:8091" # If in same Docker network
           # OR
-          - 'localhost:8091'  # If running on same host
+          - "localhost:8091" # If running on same host
     relabel_configs:
       - source_labels: [__address__]
         target_label: instance
-        replacement: 'predictive-suite'
+        replacement: "predictive-suite"
 ```
 
 2. **Reload Summit's Prometheus:**
@@ -493,8 +493,8 @@ Add to `/home/user/summit/observability/grafana/provisioning/dashboards/dashboar
 apiVersion: 1
 
 providers:
-  - name: 'Predictive Suite'
-    folder: 'Predictive Suite'
+  - name: "Predictive Suite"
+    folder: "Predictive Suite"
     type: file
     options:
       path: /etc/grafana/provisioning/dashboards/predictive-suite
@@ -646,6 +646,7 @@ journalctl -u predictive-suite -f
 ### Common Issues
 
 **Issue: Container won't start**
+
 ```bash
 # Check logs
 docker-compose logs predictive-forecasting
@@ -657,6 +658,7 @@ docker-compose logs predictive-forecasting
 ```
 
 **Issue: Prometheus not scraping**
+
 ```bash
 # Check Prometheus targets
 curl http://localhost:9090/api/v1/targets
@@ -669,6 +671,7 @@ docker-compose exec prometheus ping predictive-forecasting
 ```
 
 **Issue: High memory usage**
+
 ```bash
 # Monitor memory
 docker stats predictive-forecasting
@@ -763,6 +766,7 @@ kubectl delete -f k8s-deployment-blue.yml
 ## Support
 
 For deployment issues or questions, contact the observability team or refer to:
+
 - [README.md](./README.md)
 - [ARCHITECTURE.md](./ARCHITECTURE.md)
 - [Summit Observability Docs](../docs/observability/)

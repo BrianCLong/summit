@@ -1,5 +1,5 @@
-import { spawn } from 'node:child_process';
-import type { BenchmarkResult, BenchmarkConfig } from '../types.js';
+import { spawn } from "node:child_process";
+import type { BenchmarkResult, BenchmarkConfig } from "../types.js";
 
 /**
  * Options for subprocess runner
@@ -42,26 +42,26 @@ export class SubprocessRunner {
       const child = spawn(command, args, {
         cwd,
         env: { ...process.env, ...env },
-        stdio: ['pipe', 'pipe', 'pipe'],
+        stdio: ["pipe", "pipe", "pipe"],
       });
 
-      let stdout = '';
-      let stderr = '';
+      let stdout = "";
+      let stderr = "";
 
-      child.stdout.on('data', (data) => {
+      child.stdout.on("data", (data) => {
         stdout += data.toString();
       });
 
-      child.stderr.on('data', (data) => {
+      child.stderr.on("data", (data) => {
         stderr += data.toString();
       });
 
       const timer = setTimeout(() => {
-        child.kill('SIGTERM');
+        child.kill("SIGTERM");
         reject(new Error(`Subprocess timed out after ${timeout}ms`));
       }, timeout);
 
-      child.on('close', (code) => {
+      child.on("close", (code) => {
         clearTimeout(timer);
 
         if (code !== 0) {
@@ -78,7 +78,7 @@ export class SubprocessRunner {
         }
       });
 
-      child.on('error', (error) => {
+      child.on("error", (error) => {
         clearTimeout(timer);
         reject(error);
       });
@@ -90,8 +90,8 @@ export class SubprocessRunner {
    */
   static python(scriptPath: string, options?: Partial<SubprocessOptions>): SubprocessRunner {
     return new SubprocessRunner({
-      command: 'python',
-      args: [scriptPath, '--output', 'json'],
+      command: "python",
+      args: [scriptPath, "--output", "json"],
       ...options,
     });
   }
@@ -102,7 +102,7 @@ export class SubprocessRunner {
   static go(binaryPath: string, options?: Partial<SubprocessOptions>): SubprocessRunner {
     return new SubprocessRunner({
       command: binaryPath,
-      args: ['--output', 'json'],
+      args: ["--output", "json"],
       ...options,
     });
   }

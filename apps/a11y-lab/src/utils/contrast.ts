@@ -6,7 +6,10 @@ type PaletteColor = {
 
 type ContrastResult = PaletteColor & { ratio: number; pass: boolean };
 
-export function evaluateContrastBudget(palette: PaletteColor[], minimumRatio: number): ContrastResult[] {
+export function evaluateContrastBudget(
+  palette: PaletteColor[],
+  minimumRatio: number
+): ContrastResult[] {
   return palette.map((color) => {
     const ratio = contrastRatio(color.foreground, color.background);
     return { ...color, ratio, pass: ratio >= minimumRatio };
@@ -30,7 +33,7 @@ function luminance({ r, g, b }: { r: number; g: number; b: number }): number {
 }
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
-  const normalized = hex.replace('#', '');
+  const normalized = hex.replace("#", "");
   if (normalized.length !== 6) {
     throw new Error(`Expected 6 digit hex color, received ${hex}`);
   }

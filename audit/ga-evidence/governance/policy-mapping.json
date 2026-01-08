@@ -83,11 +83,7 @@
           "rationale": "Ensures refusal decisions are accurate and appropriate"
         }
       ],
-      "evaluationCriteria": [
-        "Refusal category",
-        "Risk level",
-        "Audit trail completeness"
-      ],
+      "evaluationCriteria": ["Refusal category", "Risk level", "Audit trail completeness"],
       "verdictLogic": {
         "APPROVED": "N/A - refusals are inherently restrictive",
         "REJECTED": "Policy violations, unsafe queries, authorization failures",
@@ -168,11 +164,7 @@
           "rationale": "Prevents processing when integrity cannot be assured"
         }
       ],
-      "evaluationCriteria": [
-        "Verdict generation failure",
-        "System errors",
-        "Timeout conditions"
-      ],
+      "evaluationCriteria": ["Verdict generation failure", "System errors", "Timeout conditions"],
       "verdictLogic": {
         "APPROVED": "N/A - emergency failsafe always rejects",
         "REJECTED": "Always - fail-safe default",

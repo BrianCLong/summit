@@ -1,11 +1,13 @@
 # Economic Stability Monitoring
 
 ## Objective
+
 Track economic stability indicators to identify risks of financial crisis, economic collapse, or severe recession that could lead to political instability.
 
 ## Analysis Framework
 
 ### Core Economic Indicators
+
 1. **Growth Metrics**
    - GDP growth rate and trends
    - Industrial production
@@ -31,6 +33,7 @@ Track economic stability indicators to identify risks of financial crisis, econo
    - External debt levels
 
 ### Crisis Risk Indicators
+
 - Rapid currency depreciation (>20% annually)
 - Hyperinflation (>50% monthly)
 - Foreign reserves below 3 months imports
@@ -39,6 +42,7 @@ Track economic stability indicators to identify risks of financial crisis, econo
 - Capital flight indicators
 
 ### Stability Scoring (0-100)
+
 - **80-100**: Robust growth, strong fundamentals, low crisis risk
 - **60-79**: Stable with manageable challenges
 - **40-59**: Significant vulnerabilities, elevated risk
@@ -46,7 +50,9 @@ Track economic stability indicators to identify risks of financial crisis, econo
 - **0-19**: Economic crisis underway or imminent
 
 ### Social Impact Assessment
+
 Economic instability consequences:
+
 - Unemployment and poverty increases
 - Social unrest probability
 - Migration pressures
@@ -54,11 +60,13 @@ Economic instability consequences:
 - Service delivery collapse
 
 ### Scenario Analysis
+
 - **Recovery**: Policy interventions, external support, stabilization
 - **Muddle Through**: Continued weakness, no resolution
 - **Crisis Escalation**: Sovereign default, currency collapse, political fallout
 
 ### Policy Recommendations
+
 - Fiscal consolidation needs
 - Monetary policy adjustments
 - Structural reforms required
@@ -66,6 +74,7 @@ Economic instability consequences:
 - Social safety net priorities
 
 ### Ethical Guidelines
+
 - Support economic stability and development
 - Protect vulnerable populations
 - Promote sustainable policies
@@ -73,6 +82,7 @@ Economic instability consequences:
 - Transparent analytical methods
 
 ### Applications
+
 - Development policy planning
 - Humanitarian preparedness
 - Business risk assessment

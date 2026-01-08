@@ -2,8 +2,8 @@
  * Public Records Collector - Aggregates data from public records sources
  */
 
-import { CollectorBase } from '../core/CollectorBase.js';
-import type { CollectionTask, PublicRecord } from '../types/index.js';
+import { CollectorBase } from "../core/CollectorBase.js";
+import type { CollectionTask, PublicRecord } from "../types/index.js";
 
 export class PublicRecordsCollector extends CollectorBase {
   protected async onInitialize(): Promise<void> {
@@ -15,11 +15,11 @@ export class PublicRecordsCollector extends CollectorBase {
     const query = task.target;
 
     switch (recordType) {
-      case 'court':
+      case "court":
         return await this.searchCourtRecords(query);
-      case 'business':
+      case "business":
         return await this.searchBusinessRegistries(query);
-      case 'property':
+      case "property":
         return await this.searchPropertyRecords(query);
       default:
         return await this.searchAllRecords(query);
@@ -68,7 +68,7 @@ export class PublicRecordsCollector extends CollectorBase {
     const results = await Promise.all([
       this.searchCourtRecords(query),
       this.searchBusinessRegistries(query),
-      this.searchPropertyRecords(query)
+      this.searchPropertyRecords(query),
     ]);
 
     return results.flat();

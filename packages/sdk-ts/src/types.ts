@@ -1,10 +1,4 @@
-export type Json =
-  | null
-  | boolean
-  | number
-  | string
-  | Json[]
-  | { [k: string]: Json };
+export type Json = null | boolean | number | string | Json[] | { [k: string]: Json };
 
 export interface PolicyContext {
   purpose: string;

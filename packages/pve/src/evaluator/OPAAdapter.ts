@@ -7,11 +7,11 @@
  * @module pve/evaluator/OPAAdapter
  */
 
-import { execFile, spawn } from 'node:child_process';
-import fs from 'node:fs';
-import path from 'node:path';
-import os from 'node:os';
-import { logger } from '../utils/logger.js';
+import { execFile, spawn } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import os from "node:os";
+import { logger } from "../utils/logger.js";
 
 export interface OPAConfig {
   /** Path to OPA binary (default: 'opa') */
@@ -19,7 +19,7 @@ export interface OPAConfig {
   /** OPA server URL for HTTP mode */
   serverUrl?: string;
   /** Evaluation mode */
-  mode?: 'binary' | 'http' | 'wasm';
+  mode?: "binary" | "http" | "wasm";
   /** Timeout in milliseconds */
   timeout?: number;
   /** Enable strict mode */
@@ -59,9 +59,9 @@ export class OPAAdapter {
 
   constructor(config: OPAConfig = {}) {
     this.config = {
-      binary: config.binary || 'opa',
-      serverUrl: config.serverUrl || '',
-      mode: config.mode || 'binary',
+      binary: config.binary || "opa",
+      serverUrl: config.serverUrl || "",
+      mode: config.mode || "binary",
       timeout: config.timeout || DEFAULT_TIMEOUT,
       strict: config.strict !== false,
       flags: config.flags || [],
@@ -71,17 +71,13 @@ export class OPAAdapter {
   /**
    * Evaluate a policy against input data
    */
-  async evaluate(
-    policyPath: string,
-    input: unknown,
-    query?: string,
-  ): Promise<OPAEvalResult> {
+  async evaluate(policyPath: string, input: unknown, query?: string): Promise<OPAEvalResult> {
     switch (this.config.mode) {
-      case 'http':
+      case "http":
         return this.evaluateHttp(policyPath, input, query);
-      case 'wasm':
+      case "wasm":
         return this.evaluateWasm(policyPath, input, query);
-      case 'binary':
+      case "binary":
       default:
         return this.evaluateBinary(policyPath, input, query);
     }
@@ -93,7 +89,7 @@ export class OPAAdapter {
   private async evaluateBinary(
     policyPath: string,
     input: unknown,
-    query?: string,
+    query?: string
   ): Promise<OPAEvalResult> {
     const namespace = this.getDataNamespace(policyPath);
     const queryStr = query || `data.${namespace}`;
@@ -104,18 +100,18 @@ export class OPAAdapter {
 
     try {
       const args = [
-        'eval',
-        '--format=json',
-        '--data',
+        "eval",
+        "--format=json",
+        "--data",
         policyPath,
-        '--input',
+        "--input",
         inputFile,
         queryStr,
         ...this.config.flags,
       ];
 
       if (this.config.strict) {
-        args.push('--strict');
+        args.push("--strict");
       }
 
       const result = await this.runOPA(args);
@@ -134,26 +130,23 @@ export class OPAAdapter {
   private async evaluateHttp(
     policyPath: string,
     input: unknown,
-    query?: string,
+    query?: string
   ): Promise<OPAEvalResult> {
     if (!this.config.serverUrl) {
-      throw new Error('OPA server URL not configured');
+      throw new Error("OPA server URL not configured");
     }
 
     const namespace = this.getDataNamespace(policyPath);
-    const url = `${this.config.serverUrl}/v1/data/${namespace.replace(/\./g, '/')}`;
+    const url = `${this.config.serverUrl}/v1/data/${namespace.replace(/\./g, "/")}`;
 
     const controller = new AbortController();
-    const timeout = setTimeout(
-      () => controller.abort(),
-      this.config.timeout,
-    );
+    const timeout = setTimeout(() => controller.abort(), this.config.timeout);
 
     try {
       const response = await fetch(url, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ input }),
         signal: controller.signal,
@@ -176,9 +169,9 @@ export class OPAAdapter {
   private async evaluateWasm(
     _policyPath: string,
     _input: unknown,
-    _query?: string,
+    _query?: string
   ): Promise<OPAEvalResult> {
-    throw new Error('WASM evaluation mode not yet implemented');
+    throw new Error("WASM evaluation mode not yet implemented");
   }
 
   /**
@@ -195,7 +188,7 @@ export class OPAAdapter {
         },
         (error, stdout, stderr) => {
           if (error) {
-            logger.error('OPA execution failed', {
+            logger.error("OPA execution failed", {
               error: error.message,
               stderr,
               args,
@@ -208,17 +201,17 @@ export class OPAAdapter {
             const parsed = JSON.parse(stdout);
             resolve(parsed);
           } catch (parseError) {
-            logger.error('Failed to parse OPA output', {
+            logger.error("Failed to parse OPA output", {
               stdout,
               error: parseError instanceof Error ? parseError.message : String(parseError),
             });
             reject(new Error(`Failed to parse OPA output: ${stdout}`));
           }
-        },
+        }
       );
 
-      proc.on('error', (err) => {
-        if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+      proc.on("error", (err) => {
+        if ((err as NodeJS.ErrnoException).code === "ENOENT") {
           reject(new Error(`OPA binary not found at: ${this.config.binary}`));
         } else {
           reject(err);
@@ -231,14 +224,14 @@ export class OPAAdapter {
    * Parse OPA result into standard format
    */
   private parseOPAResult(result: unknown): OPAEvalResult {
-    if (!result || typeof result !== 'object') {
+    if (!result || typeof result !== "object") {
       return { allow: false, raw: result };
     }
 
     const obj = result as Record<string, unknown>;
 
     // Handle standard OPA eval output format
-    if ('result' in obj && Array.isArray(obj.result)) {
+    if ("result" in obj && Array.isArray(obj.result)) {
       const expressions = obj.result;
       if (expressions.length === 0) {
         return { allow: false, raw: result };
@@ -251,7 +244,7 @@ export class OPAAdapter {
     }
 
     // Handle HTTP API response format
-    if ('result' in obj && typeof obj.result === 'object') {
+    if ("result" in obj && typeof obj.result === "object") {
       return this.parseEvalValue(obj.result, result);
     }
 
@@ -262,11 +255,11 @@ export class OPAAdapter {
    * Parse evaluation value from OPA response
    */
   private parseEvalValue(value: unknown, raw: unknown): OPAEvalResult {
-    if (typeof value === 'boolean') {
+    if (typeof value === "boolean") {
       return { allow: value, raw };
     }
 
-    if (typeof value === 'object' && value !== null) {
+    if (typeof value === "object" && value !== null) {
       const obj = value as Record<string, unknown>;
 
       // Standard policy result structure
@@ -298,21 +291,21 @@ export class OPAAdapter {
     }
 
     return data.map((item) => {
-      if (typeof item === 'string') {
-        return { rule: 'unknown', message: item };
+      if (typeof item === "string") {
+        return { rule: "unknown", message: item };
       }
 
-      if (typeof item === 'object' && item !== null) {
+      if (typeof item === "object" && item !== null) {
         const obj = item as Record<string, unknown>;
         return {
-          rule: String(obj.rule || obj.name || 'unknown'),
-          message: String(obj.message || obj.msg || obj.description || ''),
+          rule: String(obj.rule || obj.name || "unknown"),
+          message: String(obj.message || obj.msg || obj.description || ""),
           severity: obj.severity as string | undefined,
           metadata: obj.metadata as Record<string, unknown> | undefined,
         };
       }
 
-      return { rule: 'unknown', message: String(item) };
+      return { rule: "unknown", message: String(item) };
     });
   }
 
@@ -322,7 +315,7 @@ export class OPAAdapter {
   private getDataNamespace(policyPath: string): string {
     // Read the policy file to extract the package name
     if (fs.existsSync(policyPath)) {
-      const content = fs.readFileSync(policyPath, 'utf-8');
+      const content = fs.readFileSync(policyPath, "utf-8");
       const packageMatch = content.match(/^package\s+(\S+)/m);
       if (packageMatch) {
         return packageMatch[1];
@@ -331,9 +324,9 @@ export class OPAAdapter {
 
     // Fall back to path-based namespace
     return policyPath
-      .replace(/^.*policies[/\\]/, '')
-      .replace(/\.rego$/, '')
-      .replace(/[/\\]/g, '.');
+      .replace(/^.*policies[/\\]/, "")
+      .replace(/\.rego$/, "")
+      .replace(/[/\\]/g, ".");
   }
 
   /**
@@ -341,7 +334,7 @@ export class OPAAdapter {
    */
   async isAvailable(): Promise<boolean> {
     try {
-      await this.runOPA(['version']);
+      await this.runOPA(["version"]);
       return true;
     } catch {
       return false;
@@ -353,11 +346,8 @@ export class OPAAdapter {
    */
   async getVersion(): Promise<string | null> {
     try {
-      const result = (await this.runOPA(['version', '--format=json'])) as Record<
-        string,
-        unknown
-      >;
-      return String(result.version || 'unknown');
+      const result = (await this.runOPA(["version", "--format=json"])) as Record<string, unknown>;
+      return String(result.version || "unknown");
     } catch {
       return null;
     }
@@ -371,7 +361,7 @@ export class OPAAdapter {
     errors?: string[];
   }> {
     try {
-      await this.runOPA(['check', policyPath, '--strict']);
+      await this.runOPA(["check", policyPath, "--strict"]);
       return { valid: true };
     } catch (error) {
       return {
@@ -386,19 +376,19 @@ export class OPAAdapter {
    */
   async formatPolicy(policyPath: string): Promise<string> {
     const result = await new Promise<string>((resolve, reject) => {
-      const proc = spawn(this.config.binary, ['fmt', policyPath]);
-      let output = '';
-      let error = '';
+      const proc = spawn(this.config.binary, ["fmt", policyPath]);
+      let output = "";
+      let error = "";
 
-      proc.stdout.on('data', (data) => {
+      proc.stdout.on("data", (data) => {
         output += data.toString();
       });
 
-      proc.stderr.on('data', (data) => {
+      proc.stderr.on("data", (data) => {
         error += data.toString();
       });
 
-      proc.on('close', (code) => {
+      proc.on("close", (code) => {
         if (code !== 0) {
           reject(new Error(`OPA fmt failed: ${error}`));
         } else {

@@ -16,7 +16,7 @@ nodes:
     kind: local
     offload_when:
       battery: < 40%
-      load: '> 0.75'
+      load: "> 0.75"
     preferred_jobs:
       - interactive
       - graph

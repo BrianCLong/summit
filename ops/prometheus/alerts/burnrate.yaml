@@ -1,9 +1,9 @@
 # ops/prometheus/alerts/burnrate.yaml
 groups:
-- name: gateway.slo
-  rules:
-  - alert: GraphQLErrorBudgetBurn
-    expr: (rate(gateway_graphql_errors_total[5m]) / rate(gateway_graphql_requests_total[5m])) > 0.05
-    for: 10m
-    labels: { severity: page }
-    annotations: { summary: "High error budget burn", runbook: "ops/runbooks/slo.md" }
+  - name: gateway.slo
+    rules:
+      - alert: GraphQLErrorBudgetBurn
+        expr: (rate(gateway_graphql_errors_total[5m]) / rate(gateway_graphql_requests_total[5m])) > 0.05
+        for: 10m
+        labels: { severity: page }
+        annotations: { summary: "High error budget burn", runbook: "ops/runbooks/slo.md" }

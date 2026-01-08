@@ -6,9 +6,9 @@ The Curriculum Engine guides the LLM planner by providing a structured sequence 
 
 The curriculum is a list of stages. Each stage is an object with a `stage` name, a list of `goals`, and an object of `constraints`.
 
--   `stage` (string, required): A unique name for the stage (e.g., `baseline`, `ablation`, `generalization`).
--   `goals` (list of strings, required): A list of high-level objectives for the LLM planner to achieve during this stage. These are interpreted by the LLM.
--   `constraints` (object, optional): A set of hard rules that the planner must follow.
+- `stage` (string, required): A unique name for the stage (e.g., `baseline`, `ablation`, `generalization`).
+- `goals` (list of strings, required): A list of high-level objectives for the LLM planner to achieve during this stage. These are interpreted by the LLM.
+- `constraints` (object, optional): A set of hard rules that the planner must follow.
 
 ## Example Specification
 
@@ -49,4 +49,4 @@ The curriculum is a list of stages. Each stage is an object with a `stage` name,
 
 ## How it's used
 
-The **Planner (LLM)** receives the *current experiment graph* and the *current curriculum stage* as input. It then proposes new nodes and edges for the graph that are consistent with the stage's `goals` and `constraints`. The **Curriculum Engine** is responsible for advancing from one stage to the next once the goals of the current stage are met (as determined by analyzing the experiment graph).
+The **Planner (LLM)** receives the _current experiment graph_ and the _current curriculum stage_ as input. It then proposes new nodes and edges for the graph that are consistent with the stage's `goals` and `constraints`. The **Curriculum Engine** is responsible for advancing from one stage to the next once the goals of the current stage are met (as determined by analyzing the experiment graph).

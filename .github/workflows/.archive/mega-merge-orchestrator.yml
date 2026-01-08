@@ -2,23 +2,23 @@ name: 🏭 Mega Merge Orchestrator - Industrial Scale
 
 on:
   schedule:
-    - cron: '*/15 * * * *'  # Every 15 minutes (4x faster)
+    - cron: "*/15 * * * *" # Every 15 minutes (4x faster)
   push:
     branches: [main]
   workflow_dispatch:
     inputs:
       batch_size:
-        description: 'Number of PRs to process'
+        description: "Number of PRs to process"
         required: false
-        default: '50'
+        default: "50"
       parallel_workers:
-        description: 'Number of parallel workers'
+        description: "Number of parallel workers"
         required: false
-        default: '5'
+        default: "5"
       aggressive_mode:
-        description: 'Enable aggressive merge mode'
+        description: "Enable aggressive merge mode"
         required: false
-        default: 'true'
+        default: "true"
 
 permissions:
   contents: write

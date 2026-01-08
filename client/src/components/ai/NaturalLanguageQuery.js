@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from "react";
 import {
   Box,
   TextField,
@@ -29,7 +29,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Mic,
   MicOff,
@@ -53,13 +53,11 @@ import {
   AutoAwesome,
   Lightbulb,
   QuestionMark,
-} from '@mui/icons-material';
-import SpeechRecognition, {
-  useSpeechRecognition,
-} from 'react-speech-recognition';
+} from "@mui/icons-material";
+import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 
 function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [queryHistory, setQueryHistory] = useState([]);
@@ -70,12 +68,8 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
   const [showHelp, setShowHelp] = useState(false);
   const inputRef = useRef(null);
 
-  const {
-    transcript,
-    listening,
-    resetTranscript,
-    browserSupportsSpeechRecognition,
-  } = useSpeechRecognition();
+  const { transcript, listening, resetTranscript, browserSupportsSpeechRecognition } =
+    useSpeechRecognition();
 
   useEffect(() => {
     if (transcript && transcript !== query) {
@@ -86,12 +80,12 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
 
   useEffect(() => {
     // Load query history from localStorage
-    const saved = localStorage.getItem('nlq_history');
+    const saved = localStorage.getItem("nlq_history");
     if (saved) {
       try {
         setQueryHistory(JSON.parse(saved));
       } catch (error) {
-        console.error('Error loading query history:', error);
+        console.error("Error loading query history:", error);
       }
     }
   }, []);
@@ -107,7 +101,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
 
     const newHistory = [historyItem, ...queryHistory.slice(0, 19)]; // Keep only 20 items
     setQueryHistory(newHistory);
-    localStorage.setItem('nlq_history', JSON.stringify(newHistory));
+    localStorage.setItem("nlq_history", JSON.stringify(newHistory));
   };
 
   const generateSuggestions = (queryText) => {
@@ -120,17 +114,11 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
     const lowerQuery = queryText.toLowerCase();
 
     // Entity type suggestions
-    const entityTypes = [
-      'person',
-      'organization',
-      'location',
-      'document',
-      'event',
-    ];
+    const entityTypes = ["person", "organization", "location", "document", "event"];
     entityTypes.forEach((type) => {
       if (type.includes(lowerQuery)) {
         suggestions.push({
-          type: 'entity_type',
+          type: "entity_type",
           text: `Show all ${type}s`,
           icon: <Group />,
           confidence: 0.9,
@@ -139,17 +127,11 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
     });
 
     // Relationship suggestions
-    const relationships = [
-      'connected to',
-      'works for',
-      'located at',
-      'owns',
-      'related to',
-    ];
+    const relationships = ["connected to", "works for", "located at", "owns", "related to"];
     relationships.forEach((rel) => {
-      if (rel.includes(lowerQuery) || lowerQuery.includes(rel.split(' ')[0])) {
+      if (rel.includes(lowerQuery) || lowerQuery.includes(rel.split(" ")[0])) {
         suggestions.push({
-          type: 'relationship',
+          type: "relationship",
           text: `Find entities ${rel} something`,
           icon: <AccountTree />,
           confidence: 0.8,
@@ -160,33 +142,33 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
     // Analysis suggestions
     const analysisPatterns = [
       {
-        pattern: ['find', 'search', 'show'],
-        text: 'Find entities matching criteria',
+        pattern: ["find", "search", "show"],
+        text: "Find entities matching criteria",
         icon: <Search />,
       },
       {
-        pattern: ['analyze', 'analysis'],
-        text: 'Perform network analysis',
+        pattern: ["analyze", "analysis"],
+        text: "Perform network analysis",
         icon: <TrendingUp />,
       },
       {
-        pattern: ['central', 'important', 'key'],
-        text: 'Find central/important entities',
+        pattern: ["central", "important", "key"],
+        text: "Find central/important entities",
         icon: <Star />,
       },
       {
-        pattern: ['isolated', 'disconnected'],
-        text: 'Find isolated entities',
+        pattern: ["isolated", "disconnected"],
+        text: "Find isolated entities",
         icon: <Warning />,
       },
       {
-        pattern: ['cluster', 'group'],
-        text: 'Find clusters in the network',
+        pattern: ["cluster", "group"],
+        text: "Find clusters in the network",
         icon: <Group />,
       },
       {
-        pattern: ['path', 'route', 'connection'],
-        text: 'Find paths between entities',
+        pattern: ["path", "route", "connection"],
+        text: "Find paths between entities",
         icon: <AccountTree />,
       },
     ];
@@ -194,7 +176,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
     analysisPatterns.forEach(({ pattern, text, icon }) => {
       if (pattern.some((p) => lowerQuery.includes(p))) {
         suggestions.push({
-          type: 'analysis',
+          type: "analysis",
           text,
           icon,
           confidence: 0.7,
@@ -205,18 +187,18 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
     // Example queries
     if (suggestions.length === 0) {
       const examples = [
-        'Show all organizations in New York',
-        'Find people connected to Acme Corp',
-        'Analyze network centrality',
-        'Find isolated entities',
-        'Show recent events',
-        'Find suspicious relationships',
+        "Show all organizations in New York",
+        "Find people connected to Acme Corp",
+        "Analyze network centrality",
+        "Find isolated entities",
+        "Show recent events",
+        "Find suspicious relationships",
       ];
 
       examples.forEach((example) => {
         if (example.toLowerCase().includes(lowerQuery)) {
           suggestions.push({
-            type: 'example',
+            type: "example",
             text: example,
             icon: <Lightbulb />,
             confidence: 0.6,
@@ -235,10 +217,9 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
     const patterns = [
       // Show/Find entities
       {
-        regex:
-          /(?:show|find|get|list)\s+(?:all\s+)?(\w+)s?(?:\s+(?:in|at|from|near)\s+(.+))?/,
+        regex: /(?:show|find|get|list)\s+(?:all\s+)?(\w+)s?(?:\s+(?:in|at|from|near)\s+(.+))?/,
         handler: (matches) => ({
-          action: 'filter',
+          action: "filter",
           entityType: matches[1].toUpperCase(),
           location: matches[2]?.trim(),
           cypher: matches[2]
@@ -252,7 +233,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
         regex:
           /(?:find|show|get)\s+(?:entities|nodes|people|organizations)?\s*(?:connected|linked|related)\s+to\s+(.+)/,
         handler: (matches) => ({
-          action: 'connected',
+          action: "connected",
           target: matches[1].trim(),
           cypher: `MATCH (target)-[r]-(connected) WHERE target.label =~ '.*${matches[1]}.*' RETURN target, r, connected`,
         }),
@@ -263,7 +244,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
         regex:
           /(?:find|show|get)\s+(?:path|route|connection)s?\s+(?:between|from)\s+(.+?)\s+(?:to|and)\s+(.+)/,
         handler: (matches) => ({
-          action: 'path',
+          action: "path",
           source: matches[1].trim(),
           target: matches[2].trim(),
           cypher: `MATCH path = shortestPath((source)-[*]-(target)) WHERE source.label =~ '.*${matches[1]}.*' AND target.label =~ '.*${matches[2]}.*' RETURN path`,
@@ -272,22 +253,20 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
 
       // Centrality analysis
       {
-        regex:
-          /(?:analyze|find|show)\s+(?:central|important|key|hub)\s+(?:entities|nodes)/,
+        regex: /(?:analyze|find|show)\s+(?:central|important|key|hub)\s+(?:entities|nodes)/,
         handler: () => ({
-          action: 'centrality',
+          action: "centrality",
           cypher:
-            'MATCH (n)-[r]-() WITH n, count(r) as degree ORDER BY degree DESC LIMIT 10 RETURN n, degree',
+            "MATCH (n)-[r]-() WITH n, count(r) as degree ORDER BY degree DESC LIMIT 10 RETURN n, degree",
         }),
       },
 
       // Isolated entities
       {
-        regex:
-          /(?:find|show|get)\s+(?:isolated|disconnected|orphan)\s+(?:entities|nodes)/,
+        regex: /(?:find|show|get)\s+(?:isolated|disconnected|orphan)\s+(?:entities|nodes)/,
         handler: () => ({
-          action: 'isolated',
-          cypher: 'MATCH (n) WHERE NOT (n)-[]-() RETURN n',
+          action: "isolated",
+          cypher: "MATCH (n) WHERE NOT (n)-[]-() RETURN n",
         }),
       },
 
@@ -295,7 +274,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
       {
         regex: /(?:find|show|get)\s+(?:recent|new|latest)\s+(\w+)s?/,
         handler: (matches) => ({
-          action: 'recent',
+          action: "recent",
           entityType: matches[1].toUpperCase(),
           cypher: `MATCH (n:${matches[1].toUpperCase()}) WHERE n.created_at > datetime() - duration('P30D') RETURN n ORDER BY n.created_at DESC`,
         }),
@@ -306,9 +285,9 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
         regex:
           /(?:find|show|get)\s+(?:suspicious|anomalous|unusual|strange)\s+(?:entities|relationships|connections)/,
         handler: () => ({
-          action: 'anomalous',
+          action: "anomalous",
           cypher:
-            'MATCH (n)-[r]-() WITH n, count(r) as degree WHERE degree > 10 RETURN n, degree ORDER BY degree DESC',
+            "MATCH (n)-[r]-() WITH n, count(r) as degree WHERE degree > 10 RETURN n, degree ORDER BY degree DESC",
         }),
       },
 
@@ -316,7 +295,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
       {
         regex: /(?:find|show|analyze)\s+(?:clusters|groups|communities)/,
         handler: () => ({
-          action: 'clusters',
+          action: "clusters",
           cypher:
             'CALL gds.louvain.stream("myGraph") YIELD nodeId, communityId RETURN nodeId, communityId',
         }),
@@ -335,9 +314,9 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
     const keywords = query.split(/\s+/).filter((word) => word.length > 2);
     if (keywords.length > 0) {
       return {
-        action: 'search',
+        action: "search",
         keywords,
-        cypher: `MATCH (n) WHERE any(keyword IN [${keywords.map((k) => `'${k}'`).join(', ')}] WHERE n.label =~ ('.*' + keyword + '.*')) RETURN n`,
+        cypher: `MATCH (n) WHERE any(keyword IN [${keywords.map((k) => `'${k}'`).join(", ")}] WHERE n.label =~ ('.*' + keyword + '.*')) RETURN n`,
       };
     }
 
@@ -355,13 +334,12 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
 
       if (!parsedQuery) {
         setResults({
-          error:
-            'Could not understand the query. Please try rephrasing or use the help examples.',
+          error: "Could not understand the query. Please try rephrasing or use the help examples.",
           suggestions: [
-            'Show all organizations',
-            'Find people connected to John Doe',
-            'Analyze network centrality',
-            'Find isolated entities',
+            "Show all organizations",
+            "Find people connected to John Doe",
+            "Analyze network centrality",
+            "Find isolated entities",
           ],
         });
         setLoading(false);
@@ -382,10 +360,10 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
         onQueryExecuted(parsedQuery, results);
       }
     } catch (error) {
-      console.error('Error executing query:', error);
+      console.error("Error executing query:", error);
       setResults({
         error: error.message,
-        suggestion: 'Please try a different query or check the syntax.',
+        suggestion: "Please try a different query or check the syntax.",
       });
     } finally {
       setLoading(false);
@@ -393,7 +371,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
   };
 
   const executeGraphQuery = async (parsedQuery) => {
-    if (!cy) throw new Error('Graph not available');
+    if (!cy) throw new Error("Graph not available");
 
     const results = {
       action: parsedQuery.action,
@@ -403,12 +381,12 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
     };
 
     switch (parsedQuery.action) {
-      case 'filter':
+      case "filter":
         const filteredNodes = cy.nodes().filter((node) => {
           const nodeData = node.data();
           let matches = true;
 
-          if (parsedQuery.entityType && parsedQuery.entityType !== 'ENTITY') {
+          if (parsedQuery.entityType && parsedQuery.entityType !== "ENTITY") {
             matches = matches && nodeData.type === parsedQuery.entityType;
           }
 
@@ -416,11 +394,9 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
             const locationText = (
               nodeData.properties?.location ||
               nodeData.properties?.address ||
-              ''
+              ""
             ).toLowerCase();
-            matches =
-              matches &&
-              locationText.includes(parsedQuery.location.toLowerCase());
+            matches = matches && locationText.includes(parsedQuery.location.toLowerCase());
           }
 
           return matches;
@@ -430,18 +406,15 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
         results.metadata.count = filteredNodes.length;
 
         // Highlight in graph
-        cy.elements().removeClass('highlighted');
-        filteredNodes.addClass('highlighted');
+        cy.elements().removeClass("highlighted");
+        filteredNodes.addClass("highlighted");
         break;
 
-      case 'connected':
+      case "connected":
         const targetNodes = cy
           .nodes()
           .filter((node) =>
-            node
-              .data()
-              .label?.toLowerCase()
-              .includes(parsedQuery.target.toLowerCase()),
+            node.data().label?.toLowerCase().includes(parsedQuery.target.toLowerCase())
           );
 
         if (targetNodes.length > 0) {
@@ -454,27 +427,21 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
           results.metadata.count = connectedElements.nodes().length - 1; // Exclude target
 
           // Highlight in graph
-          cy.elements().removeClass('highlighted');
-          connectedElements.addClass('highlighted');
+          cy.elements().removeClass("highlighted");
+          connectedElements.addClass("highlighted");
         }
         break;
 
-      case 'path':
+      case "path":
         const sourceNodes = cy
           .nodes()
           .filter((node) =>
-            node
-              .data()
-              .label?.toLowerCase()
-              .includes(parsedQuery.source.toLowerCase()),
+            node.data().label?.toLowerCase().includes(parsedQuery.source.toLowerCase())
           );
         const targetNodesCandidates = cy
           .nodes()
           .filter((node) =>
-            node
-              .data()
-              .label?.toLowerCase()
-              .includes(parsedQuery.target.toLowerCase()),
+            node.data().label?.toLowerCase().includes(parsedQuery.target.toLowerCase())
           );
 
         if (sourceNodes.length > 0 && targetNodesCandidates.length > 0) {
@@ -492,18 +459,18 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
             results.metadata.target = target.data();
 
             // Highlight path in graph
-            cy.elements().removeClass('highlighted');
-            path.nodes.addClass('highlighted');
-            path.edges.addClass('highlighted');
+            cy.elements().removeClass("highlighted");
+            path.nodes.addClass("highlighted");
+            path.edges.addClass("highlighted");
           } else {
-            results.error = 'No path found between the specified entities';
+            results.error = "No path found between the specified entities";
           }
         } else {
-          results.error = 'Could not find the specified entities';
+          results.error = "Could not find the specified entities";
         }
         break;
 
-      case 'centrality':
+      case "centrality":
         const centralityData = cy
           .nodes()
           .map((node) => ({
@@ -520,37 +487,35 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
         results.metadata.count = centralityData.length;
 
         // Highlight top central nodes
-        cy.elements().removeClass('highlighted');
+        cy.elements().removeClass("highlighted");
         centralityData.slice(0, 5).forEach((d) => {
-          cy.getElementById(d.node.id).addClass('highlighted');
+          cy.getElementById(d.node.id).addClass("highlighted");
         });
         break;
 
-      case 'isolated':
+      case "isolated":
         const isolatedNodes = cy.nodes().filter((node) => node.degree() === 0);
 
         results.nodes = isolatedNodes.map((n) => n.data());
         results.metadata.count = isolatedNodes.length;
 
         // Highlight isolated nodes
-        cy.elements().removeClass('highlighted');
-        isolatedNodes.addClass('highlighted');
+        cy.elements().removeClass("highlighted");
+        isolatedNodes.addClass("highlighted");
         break;
 
-      case 'search':
+      case "search":
         const searchResults = cy.nodes().filter((node) => {
           const nodeData = node.data();
           const searchText = (
             nodeData.label +
-            ' ' +
-            (nodeData.type || '') +
-            ' ' +
+            " " +
+            (nodeData.type || "") +
+            " " +
             JSON.stringify(nodeData.properties || {})
           ).toLowerCase();
 
-          return parsedQuery.keywords.some((keyword) =>
-            searchText.includes(keyword.toLowerCase()),
-          );
+          return parsedQuery.keywords.some((keyword) => searchText.includes(keyword.toLowerCase()));
         });
 
         results.nodes = searchResults.map((n) => n.data());
@@ -558,8 +523,8 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
         results.metadata.count = searchResults.length;
 
         // Highlight search results
-        cy.elements().removeClass('highlighted');
-        searchResults.addClass('highlighted');
+        cy.elements().removeClass("highlighted");
+        searchResults.addClass("highlighted");
         break;
 
       default:
@@ -637,7 +602,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
 
   const startListening = () => {
     if (!browserSupportsSpeechRecognition) {
-      alert('Your browser does not support speech recognition');
+      alert("Your browser does not support speech recognition");
       return;
     }
 
@@ -664,20 +629,20 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
   };
 
   const exampleQueries = [
-    'Show all organizations in New York',
-    'Find people connected to John Doe',
-    'Analyze network centrality',
-    'Find isolated entities',
-    'Show paths between Acme Corp and Document A',
-    'Find suspicious relationships',
-    'Show recent events',
-    'Find clusters in the network',
+    "Show all organizations in New York",
+    "Find people connected to John Doe",
+    "Analyze network centrality",
+    "Find isolated entities",
+    "Show paths between Acme Corp and Document A",
+    "Find suspicious relationships",
+    "Show recent events",
+    "Find clusters in the network",
   ];
 
   return (
     <Box>
       {/* Main Query Input */}
-      <Box sx={{ position: 'relative', mb: 2 }}>
+      <Box sx={{ position: "relative", mb: 2 }}>
         <TextField
           ref={inputRef}
           fullWidth
@@ -689,7 +654,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
             generateSuggestions(e.target.value);
           }}
           onKeyPress={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
+            if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
               executeQuery();
             }
@@ -697,11 +662,11 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
           onFocus={(e) => setAnchorEl(e.currentTarget)}
           InputProps={{
             endAdornment: (
-              <Box sx={{ display: 'flex', gap: 1 }}>
+              <Box sx={{ display: "flex", gap: 1 }}>
                 {browserSupportsSpeechRecognition && (
                   <IconButton
                     onClick={isListening ? stopListening : startListening}
-                    color={isListening ? 'error' : 'default'}
+                    color={isListening ? "error" : "default"}
                   >
                     {isListening ? <MicOff /> : <Mic />}
                   </IconButton>
@@ -735,11 +700,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
             <Paper elevation={3} sx={{ mt: 1 }}>
               <List dense>
                 {suggestions.map((suggestion, index) => (
-                  <ListItem
-                    key={index}
-                    button
-                    onClick={() => handleSuggestionClick(suggestion)}
-                  >
+                  <ListItem key={index} button onClick={() => handleSuggestionClick(suggestion)}>
                     <ListItemIcon>{suggestion.icon}</ListItemIcon>
                     <ListItemText
                       primary={suggestion.text}
@@ -762,7 +723,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
       {/* Status Indicators */}
       {isListening && (
         <Alert severity="info" sx={{ mb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Mic />
             Listening... Speak your query
             <Button size="small" onClick={stopListening}>
@@ -781,17 +742,13 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
                 <Typography variant="body2">{results.error}</Typography>
                 {results.suggestions && (
                   <Box sx={{ mt: 1 }}>
-                    <Typography variant="caption">
-                      Try these instead:
-                    </Typography>
+                    <Typography variant="caption">Try these instead:</Typography>
                     {results.suggestions.map((suggestion, index) => (
                       <Chip
                         key={index}
                         label={suggestion}
                         size="small"
-                        onClick={() =>
-                          handleSuggestionClick({ text: suggestion })
-                        }
+                        onClick={() => handleSuggestionClick({ text: suggestion })}
                         sx={{ m: 0.5 }}
                       />
                     ))}
@@ -800,15 +757,11 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
               </Alert>
             ) : (
               <>
-                <Box
-                  sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
-                >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
                   <CheckCircle color="success" />
                   <Typography variant="h6">Query Results</Typography>
                   <Badge
-                    badgeContent={
-                      results.metadata?.count || results.nodes?.length || 0
-                    }
+                    badgeContent={results.metadata?.count || results.nodes?.length || 0}
                     color="primary"
                   >
                     <Chip label={results.action} variant="outlined" />
@@ -818,9 +771,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
                 {results.nodes && results.nodes.length > 0 && (
                   <Accordion>
                     <AccordionSummary expandIcon={<ExpandMore />}>
-                      <Typography>
-                        Found {results.nodes.length} entities
-                      </Typography>
+                      <Typography>Found {results.nodes.length} entities</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
                       <List dense>
@@ -834,10 +785,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
                                 variant="outlined"
                               />
                             </ListItemIcon>
-                            <ListItemText
-                              primary={node.label}
-                              secondary={`ID: ${node.id}`}
-                            />
+                            <ListItemText primary={node.label} secondary={`ID: ${node.id}`} />
                           </ListItem>
                         ))}
                         {results.nodes.length > 10 && (
@@ -850,17 +798,16 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
                   </Accordion>
                 )}
 
-                {results.metadata &&
-                  Object.keys(results.metadata).length > 0 && (
-                    <Box sx={{ mt: 2 }}>
-                      <Typography variant="subtitle2" gutterBottom>
-                        Analysis Details:
-                      </Typography>
-                      <pre style={{ fontSize: '0.75rem', color: '#666' }}>
-                        {JSON.stringify(results.metadata, null, 2)}
-                      </pre>
-                    </Box>
-                  )}
+                {results.metadata && Object.keys(results.metadata).length > 0 && (
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Analysis Details:
+                    </Typography>
+                    <pre style={{ fontSize: "0.75rem", color: "#666" }}>
+                      {JSON.stringify(results.metadata, null, 2)}
+                    </pre>
+                  </Box>
+                )}
               </>
             )}
           </CardContent>
@@ -876,11 +823,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
             </Typography>
             <List dense>
               {queryHistory.slice(0, 5).map((item) => (
-                <ListItem
-                  key={item.id}
-                  button
-                  onClick={() => handleHistoryClick(item)}
-                >
+                <ListItem key={item.id} button onClick={() => handleHistoryClick(item)}>
                   <ListItemIcon>
                     <History />
                   </ListItemIcon>
@@ -896,12 +839,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
       )}
 
       {/* Help Dialog */}
-      <Dialog
-        open={showHelp}
-        onClose={() => setShowHelp(false)}
-        maxWidth="md"
-        fullWidth
-      >
+      <Dialog open={showHelp} onClose={() => setShowHelp(false)} maxWidth="md" fullWidth>
         <DialogTitle>Natural Language Query Help</DialogTitle>
         <DialogContent>
           <Typography variant="h6" gutterBottom>

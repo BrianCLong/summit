@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { api } from '../api';
+import React, { useEffect, useState } from "react";
+import { api } from "../api";
 
 export default function DLQPolicy() {
   const { getDLQPolicy, putDLQPolicy, getDLQAudit } = api();
   const [p, setP] = useState<any>(null);
   const [audit, setAudit] = useState<any[]>([]);
-  const [allowKinds, setAllowKinds] = useState<string>('');
-  const [allowSigs, setAllowSigs] = useState<string>('');
+  const [allowKinds, setAllowKinds] = useState<string>("");
+  const [allowSigs, setAllowSigs] = useState<string>("");
 
   const refresh = () => {
     getDLQPolicy().then((policy) => {
       setP(policy);
-      setAllowKinds(policy.allowKinds?.join(',') || '');
-      setAllowSigs(policy.allowSignatures?.join(',') || '');
+      setAllowKinds(policy.allowKinds?.join(",") || "");
+      setAllowSigs(policy.allowSignatures?.join(",") || "");
     });
     getDLQAudit().then((a) => setAudit(a.items || []));
   };
@@ -31,7 +31,7 @@ export default function DLQPolicy() {
               type="checkbox"
               checked={p.enabled}
               onChange={(e) => setP({ ...p, enabled: e.target.checked })}
-            />{' '}
+            />{" "}
             <span>Enabled</span>
           </label>
           <label className="flex items-center gap-2">
@@ -39,7 +39,7 @@ export default function DLQPolicy() {
               type="checkbox"
               checked={p.dryRun}
               onChange={(e) => setP({ ...p, dryRun: e.target.checked })}
-            />{' '}
+            />{" "}
             <span>Dry-run</span>
           </label>
           <label className="flex items-center gap-2">
@@ -48,9 +48,7 @@ export default function DLQPolicy() {
               type="number"
               className="w-24 rounded border px-2 py-1"
               value={p.maxReplaysPerMinute}
-              onChange={(e) =>
-                setP({ ...p, maxReplaysPerMinute: Number(e.target.value) })
-              }
+              onChange={(e) => setP({ ...p, maxReplaysPerMinute: Number(e.target.value) })}
             />
           </label>
         </div>
@@ -75,11 +73,11 @@ export default function DLQPolicy() {
               const body = {
                 ...p,
                 allowKinds: allowKinds
-                  .split(',')
+                  .split(",")
                   .map((s) => s.trim())
                   .filter(Boolean),
                 allowSignatures: allowSigs
-                  .split(',')
+                  .split(",")
                   .map((s) => s.trim())
                   .filter(Boolean),
               };

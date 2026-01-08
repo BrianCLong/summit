@@ -3,11 +3,11 @@
  * Provides a unified GraphQL API from multiple subgraphs
  */
 
-import { ApolloGateway, IntrospectAndCompose, RemoteGraphQLDataSource } from '@apollo/gateway';
-import { ApolloServer } from '@apollo/server';
-import { expressMiddleware } from '@apollo/server/express4';
-import { readFileSync } from 'fs';
-import { AuthContext } from '../directives/auth';
+import { ApolloGateway, IntrospectAndCompose, RemoteGraphQLDataSource } from "@apollo/gateway";
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@apollo/server/express4";
+import { readFileSync } from "fs";
+import { AuthContext } from "../directives/auth";
 
 export interface SubgraphConfig {
   name: string;
@@ -29,17 +29,17 @@ class AuthenticatedDataSource extends RemoteGraphQLDataSource {
   willSendRequest({ request, context }: any) {
     // Forward authentication token to subgraphs
     if (context.token) {
-      request.http.headers.set('authorization', `Bearer ${context.token}`);
+      request.http.headers.set("authorization", `Bearer ${context.token}`);
     }
 
     // Forward tenant ID for multi-tenancy
     if (context.user?.tenantId) {
-      request.http.headers.set('x-tenant-id', context.user.tenantId);
+      request.http.headers.set("x-tenant-id", context.user.tenantId);
     }
 
     // Forward request ID for tracing
     if (context.requestId) {
-      request.http.headers.set('x-request-id', context.requestId);
+      request.http.headers.set("x-request-id", context.requestId);
     }
   }
 }
@@ -47,9 +47,7 @@ class AuthenticatedDataSource extends RemoteGraphQLDataSource {
 /**
  * Create and configure Apollo Gateway
  */
-export async function createFederatedGateway(
-  config: GatewayConfig
-): Promise<ApolloGateway> {
+export async function createFederatedGateway(config: GatewayConfig): Promise<ApolloGateway> {
   const gateway = new ApolloGateway({
     supergraphSdl: new IntrospectAndCompose({
       subgraphs: config.subgraphs.map((subgraph) => ({
@@ -91,39 +89,41 @@ export async function createFederatedServer(config: GatewayConfig) {
  */
 export const defaultSubgraphs: SubgraphConfig[] = [
   {
-    name: 'core',
-    url: process.env.CORE_SUBGRAPH_URL || 'http://localhost:4001/graphql',
+    name: "core",
+    url: process.env.CORE_SUBGRAPH_URL || "http://localhost:4001/graphql",
   },
   {
-    name: 'entities',
-    url: process.env.ENTITIES_SUBGRAPH_URL || 'http://localhost:4002/graphql',
+    name: "entities",
+    url: process.env.ENTITIES_SUBGRAPH_URL || "http://localhost:4002/graphql",
   },
   {
-    name: 'relationships',
-    url: process.env.RELATIONSHIPS_SUBGRAPH_URL || 'http://localhost:4003/graphql',
+    name: "relationships",
+    url: process.env.RELATIONSHIPS_SUBGRAPH_URL || "http://localhost:4003/graphql",
   },
   {
-    name: 'ai-analysis',
-    url: process.env.AI_SUBGRAPH_URL || 'http://localhost:4004/graphql',
+    name: "ai-analysis",
+    url: process.env.AI_SUBGRAPH_URL || "http://localhost:4004/graphql",
   },
   {
-    name: 'investigations',
-    url: process.env.INVESTIGATIONS_SUBGRAPH_URL || 'http://localhost:4005/graphql',
+    name: "investigations",
+    url: process.env.INVESTIGATIONS_SUBGRAPH_URL || "http://localhost:4005/graphql",
   },
 ];
 
 /**
  * Context builder for federated gateway
  */
-export function buildFederatedContext(req: any, res: any): AuthContext & { requestId: string; token?: string } {
+export function buildFederatedContext(
+  req: any,
+  res: any
+): AuthContext & { requestId: string; token?: string } {
   // Extract token from Authorization header
-  const authHeader = req.headers.authorization || '';
-  const token = authHeader.startsWith('Bearer ')
-    ? authHeader.substring(7)
-    : undefined;
+  const authHeader = req.headers.authorization || "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : undefined;
 
   // Generate request ID for tracing
-  const requestId = req.headers['x-request-id'] || `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const requestId =
+    req.headers["x-request-id"] || `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
   return {
     user: (req as any).user, // Populated by auth middleware
@@ -146,9 +146,9 @@ export async function gatewayHealthCheck(gateway: ApolloGateway): Promise<{
     try {
       // Attempt a simple introspection query
       const response = await fetch(service.url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: '{ __typename }' }),
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: "{ __typename }" }),
       });
 
       results.push({

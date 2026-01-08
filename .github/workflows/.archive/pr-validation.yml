@@ -11,8 +11,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: '20.11.1'
-  PNPM_VERSION: '9.6.0'
+  NODE_VERSION: "20.11.1"
+  PNPM_VERSION: "9.6.0"
 
 permissions:
   contents: read
@@ -166,7 +166,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -207,7 +207,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -266,7 +266,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -336,7 +336,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
         with:
-          args: '--redact --exit-code 1 --report-format sarif --report-path gitleaks.sarif'
+          args: "--redact --exit-code 1 --report-format sarif --report-path gitleaks.sarif"
 
       - name: Upload Gitleaks SARIF
         if: always()
@@ -468,7 +468,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2

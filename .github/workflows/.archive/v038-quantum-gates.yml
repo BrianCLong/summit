@@ -2,21 +2,21 @@ name: MC v0.3.8 - Quantum-Ready Equilibrium Gates
 
 on:
   push:
-    branches: [main, 'release/v0.3.8*']
+    branches: [main, "release/v0.3.8*"]
   pull_request:
     branches: [main]
   workflow_dispatch:
     inputs:
       force_deployment:
-        description: 'Force deployment even if gates fail'
+        description: "Force deployment even if gates fail"
         required: false
-        default: 'false'
+        default: "false"
         type: boolean
 
 env:
-  NODE_VERSION: '20.11.x'
-  PYTHON_VERSION: '3.11'
-  QUANTUM_READY_VERSION: 'v0.3.8'
+  NODE_VERSION: "20.11.x"
+  PYTHON_VERSION: "3.11"
+  QUANTUM_READY_VERSION: "v0.3.8"
 
 jobs:
   quantum-ready-validation:
@@ -41,13 +41,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
+          cache: "pip"
 
       - name: Install dependencies
         run: |

@@ -1,13 +1,13 @@
-import {defineConfig} from 'tsup';
+import { defineConfig } from "tsup";
 
 export default defineConfig({
   entry: {
-    index: 'src/index.ts',
-    'offline/index': 'src/offline/index.ts',
-    'auth/index': 'src/auth/index.ts',
-    'storage/index': 'src/storage/index.ts',
+    index: "src/index.ts",
+    "offline/index": "src/offline/index.ts",
+    "auth/index": "src/auth/index.ts",
+    "storage/index": "src/storage/index.ts",
   },
-  format: ['esm', 'cjs'],
+  format: ["esm", "cjs"],
   dts: false, // Disabled due to export conflicts between db/Entity and types/Entity
   splitting: false,
   sourcemap: true,

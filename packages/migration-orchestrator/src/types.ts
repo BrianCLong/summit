@@ -6,12 +6,12 @@
  */
 
 export const TENANT_PHASES = [
-  'inventory',
-  'mapping',
-  'dry-run',
-  'canary',
-  'ramp',
-  'full',
-  'stabilization',
-  'decommissioned',
+  "inventory",
+  "mapping",
+  "dry-run",
+  "canary",
+  "ramp",
+  "full",
+  "stabilization",
+  "decommissioned",
 ];

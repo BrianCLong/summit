@@ -1,4 +1,15 @@
-{ "title": "Scale Overview", "panels": [
-  { "type": "stat", "title": "Queue Depth", "targets": [{ "expr": "queue_depth" }] },
-  { "type": "graph", "title": "Cache Hit Rate", "targets": [{ "expr": "rate(cache_hits_total[5m]) / (rate(cache_hits_total[5m]) + rate(cache_misses_total[5m]))" }] }
-]}
+{
+  "title": "Scale Overview",
+  "panels": [
+    { "type": "stat", "title": "Queue Depth", "targets": [{ "expr": "queue_depth" }] },
+    {
+      "type": "graph",
+      "title": "Cache Hit Rate",
+      "targets": [
+        {
+          "expr": "rate(cache_hits_total[5m]) / (rate(cache_hits_total[5m]) + rate(cache_misses_total[5m]))"
+        }
+      ]
+    }
+  ]
+}

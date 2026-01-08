@@ -9,7 +9,7 @@
  * @module pages/Admin/UserManagement/UserList
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback } from "react";
 import {
   Alert,
   Box,
@@ -41,7 +41,7 @@ import {
   TextField,
   Tooltip,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
@@ -52,12 +52,12 @@ import {
   Refresh as RefreshIcon,
   Search as SearchIcon,
   Security as SecurityIcon,
-} from '@mui/icons-material';
-import { useAuth } from '../../../context/AuthContext.jsx';
-import { useAdminUsers } from '../../../hooks/useAdminUsers';
-import { ManagedUser } from '../../../services/admin-api';
-import UserForm from './UserForm';
-import RoleAssignment from './RoleAssignment';
+} from "@mui/icons-material";
+import { useAuth } from "../../../context/AuthContext.jsx";
+import { useAdminUsers } from "../../../hooks/useAdminUsers";
+import { ManagedUser } from "../../../services/admin-api";
+import UserForm from "./UserForm";
+import RoleAssignment from "./RoleAssignment";
 
 export default function UserList() {
   const { hasPermission, hasRole } = useAuth() as {
@@ -88,28 +88,28 @@ export default function UserList() {
   } = useAdminUsers();
 
   // UI State
-  const [searchQuery, setSearchQuery] = useState('');
-  const [roleFilter, setRoleFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("");
   const [showUserForm, setShowUserForm] = useState(false);
   const [showRoleAssignment, setShowRoleAssignment] = useState(false);
   const [editingUser, setEditingUser] = useState<ManagedUser | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<ManagedUser | null>(null);
   const [lockDialog, setLockDialog] = useState<ManagedUser | null>(null);
-  const [lockReason, setLockReason] = useState('');
+  const [lockReason, setLockReason] = useState("");
 
   // Check permissions
-  const canCreate = hasRole('admin') || hasPermission('user:create');
-  const canEdit = hasRole('admin') || hasPermission('user:update');
-  const canDelete = hasRole('admin') || hasPermission('user:delete');
-  const canLock = hasRole('admin') || hasPermission('user:lock');
-  const canAssignRoles = hasRole('admin') || hasPermission('role:assign');
+  const canCreate = hasRole("admin") || hasPermission("user:create");
+  const canEdit = hasRole("admin") || hasPermission("user:update");
+  const canDelete = hasRole("admin") || hasPermission("user:delete");
+  const canLock = hasRole("admin") || hasPermission("user:lock");
+  const canAssignRoles = hasRole("admin") || hasPermission("role:assign");
 
   const handleSearch = useCallback(() => {
     setFilters({
       search: searchQuery || undefined,
       role: roleFilter || undefined,
-      isActive: statusFilter === '' ? undefined : statusFilter === 'active',
+      isActive: statusFilter === "" ? undefined : statusFilter === "active",
     });
   }, [searchQuery, roleFilter, statusFilter, setFilters]);
 
@@ -149,7 +149,7 @@ export default function UserList() {
     } else {
       const result = await createUser({
         email: data.email,
-        password: data.password || '',
+        password: data.password || "",
         firstName: data.firstName,
         lastName: data.lastName,
         role: data.role,
@@ -171,7 +171,7 @@ export default function UserList() {
     if (lockDialog) {
       await lockUser(lockDialog.id, lockReason);
       setLockDialog(null);
-      setLockReason('');
+      setLockReason("");
     }
   };
 
@@ -190,17 +190,17 @@ export default function UserList() {
   };
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return 'Never';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    if (!dateString) return "Never";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
-  if (!hasRole('admin') && !hasPermission('user:read')) {
+  if (!hasRole("admin") && !hasPermission("user:read")) {
     return (
       <Box p={3}>
         <Alert severity="error">Access Denied: User management permission required.</Alert>
@@ -230,11 +230,7 @@ export default function UserList() {
             Refresh
           </Button>
           {canCreate && (
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleCreateUser}
-            >
+            <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateUser}>
               Add User
             </Button>
           )}
@@ -251,13 +247,13 @@ export default function UserList() {
       {/* Search and Filters */}
       <Card variant="outlined" sx={{ mb: 3 }}>
         <CardContent>
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems="center">
+          <Stack direction={{ xs: "column", md: "row" }} spacing={2} alignItems="center">
             <TextField
               placeholder="Search by name or email..."
               size="small"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              onKeyPress={(e) => e.key === "Enter" && handleSearch()}
               sx={{ minWidth: 300 }}
               InputProps={{
                 startAdornment: (
@@ -346,12 +342,12 @@ export default function UserList() {
                       <Chip
                         label={user.role}
                         size="small"
-                        color={user.role === 'admin' ? 'primary' : 'default'}
+                        color={user.role === "admin" ? "primary" : "default"}
                       />
                     </TableCell>
                     <TableCell>
                       {user.isLocked ? (
-                        <Tooltip title={user.lockReason || 'Account locked'}>
+                        <Tooltip title={user.lockReason || "Account locked"}>
                           <Chip label="Locked" size="small" color="error" />
                         </Tooltip>
                       ) : user.isActive ? (
@@ -368,58 +364,41 @@ export default function UserList() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2">
-                        {formatDate(user.lastLogin)}
-                      </Typography>
+                      <Typography variant="body2">{formatDate(user.lastLogin)}</Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2">
-                        {formatDate(user.createdAt)}
-                      </Typography>
+                      <Typography variant="body2">{formatDate(user.createdAt)}</Typography>
                     </TableCell>
                     <TableCell align="right">
                       <Stack direction="row" spacing={0.5} justifyContent="flex-end">
                         {canAssignRoles && (
                           <Tooltip title="Manage Roles">
-                            <IconButton
-                              size="small"
-                              onClick={() => handleOpenRoleAssignment(user)}
-                            >
+                            <IconButton size="small" onClick={() => handleOpenRoleAssignment(user)}>
                               <SecurityIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>
                         )}
                         {canEdit && (
                           <Tooltip title="Edit User">
-                            <IconButton
-                              size="small"
-                              onClick={() => handleEditUser(user)}
-                            >
+                            <IconButton size="small" onClick={() => handleEditUser(user)}>
                               <EditIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>
                         )}
-                        {canLock && (
-                          user.isLocked ? (
+                        {canLock &&
+                          (user.isLocked ? (
                             <Tooltip title="Unlock User">
-                              <IconButton
-                                size="small"
-                                onClick={() => handleUnlock(user)}
-                              >
+                              <IconButton size="small" onClick={() => handleUnlock(user)}>
                                 <UnlockIcon fontSize="small" />
                               </IconButton>
                             </Tooltip>
                           ) : (
                             <Tooltip title="Lock User">
-                              <IconButton
-                                size="small"
-                                onClick={() => setLockDialog(user)}
-                              >
+                              <IconButton size="small" onClick={() => setLockDialog(user)}>
                                 <LockIcon fontSize="small" />
                               </IconButton>
                             </Tooltip>
-                          )
-                        )}
+                          ))}
                         {canDelete && (
                           <Tooltip title="Delete User">
                             <IconButton
@@ -479,8 +458,8 @@ export default function UserList() {
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete user <strong>{deleteConfirm?.fullName}</strong>?
-            This will deactivate their account. Use hard delete for permanent removal.
+            Are you sure you want to delete user <strong>{deleteConfirm?.fullName}</strong>? This
+            will deactivate their account. Use hard delete for permanent removal.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -496,8 +475,8 @@ export default function UserList() {
         <DialogTitle>Lock User Account</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ mb: 2 }}>
-            Lock account for <strong>{lockDialog?.fullName}</strong>?
-            They will be unable to log in until unlocked.
+            Lock account for <strong>{lockDialog?.fullName}</strong>? They will be unable to log in
+            until unlocked.
           </DialogContentText>
           <TextField
             autoFocus
@@ -509,7 +488,12 @@ export default function UserList() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => { setLockDialog(null); setLockReason(''); }}>
+          <Button
+            onClick={() => {
+              setLockDialog(null);
+              setLockReason("");
+            }}
+          >
             Cancel
           </Button>
           <Button

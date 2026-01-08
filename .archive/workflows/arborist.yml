@@ -3,7 +3,7 @@ name: arborist
 permissions:
   contents: read
 on:
-  schedule: [{ cron: '0 5 * * 6' }]
+  schedule: [{ cron: "0 5 * * 6" }]
 jobs:
   prune:
     runs-on: ubuntu-latest

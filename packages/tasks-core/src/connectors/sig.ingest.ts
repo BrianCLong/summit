@@ -1,20 +1,17 @@
 // @ts-nocheck
-import { defineTask } from '@intelgraph/maestro-sdk';
+import { defineTask } from "@intelgraph/maestro-sdk";
 
 type Item = { id: string; payload: unknown };
 interface In {
   endpoint?: string;
   items: Item[];
 }
-export default defineTask<
-  In,
-  { jobId: string; receipts: Array<{ id: string; hash: string }> }
->({
+export default defineTask<In, { jobId: string; receipts: Array<{ id: string; hash: string }> }>({
   async execute(ctx, { payload }) {
-    const endpoint = payload.endpoint ?? (await ctx.secrets('SIG_INGEST_URL'));
+    const endpoint = payload.endpoint ?? (await ctx.secrets("SIG_INGEST_URL"));
     const res = await fetch(`${endpoint}/ingest/batch`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      method: "POST",
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({ items: payload.items }),
     });
     if (!res.ok) throw new Error(`SIG ingest failed ${res.status}`);

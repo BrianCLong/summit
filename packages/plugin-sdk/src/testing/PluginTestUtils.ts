@@ -5,20 +5,20 @@ import {
   PluginLogger,
   PluginStorage,
   PluginAPI,
-} from '@intelgraph/plugin-system';
+} from "@intelgraph/plugin-system";
 
 /**
  * Create a mock plugin context for testing
  */
 export function createMockContext(overrides?: Partial<PluginContext>): PluginContext {
   return {
-    pluginId: 'test-plugin',
-    version: '1.0.0',
+    pluginId: "test-plugin",
+    version: "1.0.0",
     config: {},
     logger: createMockLogger(),
     storage: createMockStorage(),
     api: createMockAPI(),
-    events: createMockEventBus() as PluginContext['events'],
+    events: createMockEventBus() as PluginContext["events"],
     ...overrides,
   };
 }
@@ -30,10 +30,11 @@ export function createMockLogger(): PluginLogger {
   const logs: Array<{ level: string; message: string; meta?: unknown; error?: unknown }> = [];
 
   return {
-    debug: (message: string, meta?: unknown) => logs.push({ level: 'debug', message, meta }),
-    info: (message: string, meta?: unknown) => logs.push({ level: 'info', message, meta }),
-    warn: (message: string, meta?: unknown) => logs.push({ level: 'warn', message, meta }),
-    error: (message: string, error?: unknown, meta?: unknown) => logs.push({ level: 'error', message, error, meta }),
+    debug: (message: string, meta?: unknown) => logs.push({ level: "debug", message, meta }),
+    info: (message: string, meta?: unknown) => logs.push({ level: "info", message, meta }),
+    warn: (message: string, meta?: unknown) => logs.push({ level: "warn", message, meta }),
+    error: (message: string, error?: unknown, meta?: unknown) =>
+      logs.push({ level: "error", message, error, meta }),
   };
 }
 
@@ -45,11 +46,17 @@ export function createMockStorage(): PluginStorage {
 
   return {
     get: async (key: string) => store.get(key) ?? null,
-    set: async (key: string, value: unknown) => { store.set(key, value); },
-    delete: async (key: string) => { store.delete(key); },
+    set: async (key: string, value: unknown) => {
+      store.set(key, value);
+    },
+    delete: async (key: string) => {
+      store.delete(key);
+    },
     has: async (key: string) => store.has(key),
     keys: async () => Array.from(store.keys()),
-    clear: async () => { store.clear(); },
+    clear: async () => {
+      store.clear();
+    },
   };
 }
 
@@ -127,7 +134,7 @@ export async function testPluginLifecycle(plugin: Plugin): Promise<void> {
   if (plugin.healthCheck) {
     const health = await plugin.healthCheck();
     if (!health.healthy) {
-      throw new Error('Plugin health check failed');
+      throw new Error("Plugin health check failed");
     }
   }
 

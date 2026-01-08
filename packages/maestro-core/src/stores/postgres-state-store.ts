@@ -3,8 +3,8 @@
  * Manages workflow run state and step execution tracking
  */
 
-import { Pool, PoolClient } from 'pg';
-import { StateStore, RunContext, StepExecution } from '../engine';
+import { Pool, PoolClient } from "pg";
+import { StateStore, RunContext, StepExecution } from "../engine";
 
 export class PostgresStateStore implements StateStore {
   constructor(private pool: Pool) {}
@@ -12,7 +12,7 @@ export class PostgresStateStore implements StateStore {
   async createRun(context: RunContext): Promise<void> {
     const client = await this.pool.connect();
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
 
       await client.query(
         `
@@ -31,39 +31,34 @@ export class PostgresStateStore implements StateStore {
           context.environment,
           JSON.stringify(context.parameters),
           JSON.stringify(context.budget),
-        ],
+        ]
       );
 
-      await client.query('COMMIT');
+      await client.query("COMMIT");
     } catch (error) {
-      await client.query('ROLLBACK');
+      await client.query("ROLLBACK");
       throw error;
     } finally {
       client.release();
     }
   }
 
-  async updateRunStatus(
-    runId: string,
-    status: string,
-    error?: string,
-  ): Promise<void> {
+  async updateRunStatus(runId: string, status: string, error?: string): Promise<void> {
     await this.pool.query(
       `
       UPDATE workflow_runs 
       SET status = $1, error = $2, completed_at = CASE WHEN $1 IN ('completed', 'failed', 'cancelled') THEN NOW() ELSE completed_at END
       WHERE run_id = $3
     `,
-      [status, error, runId],
+      [status, error, runId]
     );
   }
 
   async getRunStatus(runId: string): Promise<string> {
-    const result = await this.pool.query(
-      'SELECT status FROM workflow_runs WHERE run_id = $1',
-      [runId],
-    );
-    return result.rows[0]?.status || 'not_found';
+    const result = await this.pool.query("SELECT status FROM workflow_runs WHERE run_id = $1", [
+      runId,
+    ]);
+    return result.rows[0]?.status || "not_found";
   }
 
   async getRunDetails(runId: string): Promise<any> {
@@ -74,7 +69,7 @@ export class PostgresStateStore implements StateStore {
         `
         SELECT * FROM workflow_runs WHERE run_id = $1
       `,
-        [runId],
+        [runId]
       );
 
       if (runResult.rows.length === 0) {
@@ -88,16 +83,16 @@ export class PostgresStateStore implements StateStore {
         WHERE run_id = $1 
         ORDER BY created_at ASC
       `,
-        [runId],
+        [runId]
       );
 
       return {
         ...runResult.rows[0],
-        parameters: JSON.parse(runResult.rows[0].parameters || '{}'),
-        budget: JSON.parse(runResult.rows[0].budget || '{}'),
+        parameters: JSON.parse(runResult.rows[0].parameters || "{}"),
+        budget: JSON.parse(runResult.rows[0].budget || "{}"),
         steps: stepsResult.rows.map((row) => ({
           ...row,
-          metadata: JSON.parse(row.metadata || '{}'),
+          metadata: JSON.parse(row.metadata || "{}"),
         })),
       };
     } finally {
@@ -118,7 +113,7 @@ export class PostgresStateStore implements StateStore {
         execution.status,
         execution.attempt,
         JSON.stringify(execution.metadata),
-      ],
+      ]
     );
   }
 
@@ -142,14 +137,11 @@ export class PostgresStateStore implements StateStore {
         execution.step_id,
         execution.run_id,
         execution.attempt,
-      ],
+      ]
     );
   }
 
-  async getStepExecution(
-    runId: string,
-    stepId: string,
-  ): Promise<StepExecution | null> {
+  async getStepExecution(runId: string, stepId: string): Promise<StepExecution | null> {
     const result = await this.pool.query(
       `
       SELECT * FROM step_executions 
@@ -157,7 +149,7 @@ export class PostgresStateStore implements StateStore {
       ORDER BY attempt DESC 
       LIMIT 1
     `,
-      [runId, stepId],
+      [runId, stepId]
     );
 
     if (result.rows.length === 0) {
@@ -175,7 +167,7 @@ export class PostgresStateStore implements StateStore {
       output: row.output ? JSON.parse(row.output) : undefined,
       error: row.error,
       cost_usd: row.cost_usd,
-      metadata: JSON.parse(row.metadata || '{}'),
+      metadata: JSON.parse(row.metadata || "{}"),
     };
   }
 
@@ -197,7 +189,7 @@ export class PostgresStateStore implements StateStore {
       FROM step_executions 
       WHERE run_id = $1
     `,
-      [runId],
+      [runId]
     );
 
     const row = result.rows[0];
@@ -206,9 +198,7 @@ export class PostgresStateStore implements StateStore {
       completedSteps: parseInt(row.completed_steps),
       failedSteps: parseInt(row.failed_steps),
       totalCost: parseFloat(row.total_cost),
-      duration: row.duration_seconds
-        ? parseFloat(row.duration_seconds)
-        : undefined,
+      duration: row.duration_seconds ? parseFloat(row.duration_seconds) : undefined,
     };
   }
 }

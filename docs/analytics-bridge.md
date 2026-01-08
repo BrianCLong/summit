@@ -28,19 +28,19 @@ This component streams progressive analytics results from Redis Streams to the A
 
 ```js
 // connect to namespace and join a job room
-const socket = io('/graph-analytics', { auth: { token } });
-socket.emit('join_job', { jobId: job.id });
+const socket = io("/graph-analytics", { auth: { token } });
+socket.emit("join_job", { jobId: job.id });
 
-socket.on('progress', (e) => {
+socket.on("progress", (e) => {
   /* update UI */
 });
-socket.on('result', (e) => {
+socket.on("result", (e) => {
   /* append partial results */
 });
-socket.on('error', (e) => {
+socket.on("error", (e) => {
   /* show error */
 });
-socket.on('complete', (e) => {
+socket.on("complete", (e) => {
   /* finalize */
 });
 ```

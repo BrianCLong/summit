@@ -4,13 +4,13 @@
  * Central management interface for the data warehouse
  */
 
-import { Pool } from 'pg';
-import { ColumnarStorageEngine, TableSchema } from './storage/columnar-storage-engine';
-import { DistributedQueryExecutor } from './query/distributed-executor';
-import { QueryPlanner, QueryRequest } from './query/query-planner';
-import { ResultCache } from './query/result-cache';
-import { WorkloadManager, QueryPriority } from './workload/workload-manager';
-import { ComputeScaler } from './workload/compute-scaler';
+import { Pool } from "pg";
+import { ColumnarStorageEngine, TableSchema } from "./storage/columnar-storage-engine";
+import { DistributedQueryExecutor } from "./query/distributed-executor";
+import { QueryPlanner, QueryRequest } from "./query/query-planner";
+import { ResultCache } from "./query/result-cache";
+import { WorkloadManager, QueryPriority } from "./workload/workload-manager";
+import { ComputeScaler } from "./workload/compute-scaler";
 
 export interface WarehouseConfig {
   pools: Pool[];
@@ -31,10 +31,7 @@ export class WarehouseManager {
     const primaryPool = config.pools[0];
 
     this.storageEngine = new ColumnarStorageEngine(primaryPool);
-    this.queryExecutor = new DistributedQueryExecutor(
-      config.pools,
-      config.maxParallelism || 32,
-    );
+    this.queryExecutor = new DistributedQueryExecutor(config.pools, config.maxParallelism || 32);
     this.queryPlanner = new QueryPlanner(primaryPool);
     this.resultCache = new ResultCache(config.cacheSize);
     this.workloadManager = new WorkloadManager({
@@ -49,18 +46,11 @@ export class WarehouseManager {
     return this.storageEngine.createTable(schema);
   }
 
-  async insertData(
-    tableName: string,
-    columns: string[],
-    data: any[][],
-  ): Promise<void> {
+  async insertData(tableName: string, columns: string[], data: any[][]): Promise<void> {
     return this.storageEngine.insertData(tableName, columns, data);
   }
 
-  async query(
-    sql: string,
-    priority: QueryPriority = QueryPriority.MEDIUM,
-  ): Promise<any[]> {
+  async query(sql: string, priority: QueryPriority = QueryPriority.MEDIUM): Promise<any[]> {
     const request: QueryRequest = { sql };
 
     // Generate query plan
@@ -84,15 +74,10 @@ export class WarehouseManager {
       const result = await this.queryExecutor.execute(plan);
 
       // Cache result
-      await this.resultCache.set(
-        plan.queryId,
-        plan.queryId,
-        result.rows,
-        {
-          columns: [],
-          executionTimeMs: result.metrics.totalDurationMs,
-        },
-      );
+      await this.resultCache.set(plan.queryId, plan.queryId, result.rows, {
+        columns: [],
+        executionTimeMs: result.metrics.totalDurationMs,
+      });
 
       return result.rows;
     } finally {

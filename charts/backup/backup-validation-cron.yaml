@@ -8,8 +8,8 @@ metadata:
     app.kubernetes.io/component: backup
     app.kubernetes.io/part-of: intelgraph
 spec:
-  schedule: '0 4 * * 0' # Weekly on Sunday at 4 AM UTC
-  timeZone: 'UTC'
+  schedule: "0 4 * * 0" # Weekly on Sunday at 4 AM UTC
+  timeZone: "UTC"
   successfulJobsHistoryLimit: 4
   failedJobsHistoryLimit: 2
   concurrencyPolicy: Forbid
@@ -319,11 +319,11 @@ spec:
                       key: aws-secret-access-key
               resources:
                 requests:
-                  memory: '1Gi'
-                  cpu: '500m'
+                  memory: "1Gi"
+                  cpu: "500m"
                 limits:
-                  memory: '4Gi'
-                  cpu: '2000m'
+                  memory: "4Gi"
+                  cpu: "2000m"
               volumeMounts:
                 - name: validation-storage
                   mountPath: /validations
@@ -332,12 +332,12 @@ spec:
               emptyDir:
                 sizeLimit: 50Gi
           tolerations:
-            - key: 'backup-workload'
-              operator: 'Equal'
-              value: 'true'
-              effect: 'NoSchedule'
+            - key: "backup-workload"
+              operator: "Equal"
+              value: "true"
+              effect: "NoSchedule"
           nodeSelector:
-            node-type: 'backup-optimized'
+            node-type: "backup-optimized"
 ---
 # Restore testing job (manual trigger)
 apiVersion: batch/v1
@@ -385,11 +385,11 @@ spec:
 
           resources:
             requests:
-              memory: '2Gi'
-              cpu: '1000m'
+              memory: "2Gi"
+              cpu: "1000m"
             limits:
-              memory: '8Gi'
-              cpu: '4000m'
+              memory: "8Gi"
+              cpu: "4000m"
           volumeMounts:
             - name: restore-storage
               mountPath: /restore-tests

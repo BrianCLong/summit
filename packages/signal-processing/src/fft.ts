@@ -1,6 +1,6 @@
-import FFT from 'fft.js';
-import { applyWindow, createWindow, normalizeFrame } from './window.js';
-import { FrequencyDomainFrame, NumericArray, WindowFunction } from './types.js';
+import FFT from "fft.js";
+import { applyWindow, createWindow, normalizeFrame } from "./window.js";
+import { FrequencyDomainFrame, NumericArray, WindowFunction } from "./types.js";
 
 export interface FftOptions {
   window?: WindowFunction;
@@ -11,12 +11,15 @@ export class FftAnalyzer {
 
   private readonly window: WindowFunction;
 
-  constructor(private readonly size: number, options: FftOptions = {}) {
+  constructor(
+    private readonly size: number,
+    options: FftOptions = {}
+  ) {
     if (size <= 0 || (size & (size - 1)) !== 0) {
-      throw new Error('FFT size must be a power of two greater than zero.');
+      throw new Error("FFT size must be a power of two greater than zero.");
     }
     this.fft = new FFT(size);
-    this.window = options.window ?? createWindow('hann', size);
+    this.window = options.window ?? createWindow("hann", size);
   }
 
   analyze(samples: NumericArray, sampleRate: number): FrequencyDomainFrame {

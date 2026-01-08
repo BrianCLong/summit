@@ -3,57 +3,57 @@
  */
 
 export enum ThreatSeverity {
-  CRITICAL = 'CRITICAL',
-  HIGH = 'HIGH',
-  MEDIUM = 'MEDIUM',
-  LOW = 'LOW',
-  INFO = 'INFO'
+  CRITICAL = "CRITICAL",
+  HIGH = "HIGH",
+  MEDIUM = "MEDIUM",
+  LOW = "LOW",
+  INFO = "INFO",
 }
 
 export enum ThreatCategory {
   // Network threats
-  NETWORK_ATTACK = 'NETWORK_ATTACK',
-  DDOS = 'DDOS',
-  PORT_SCAN = 'PORT_SCAN',
-  C2_COMMUNICATION = 'C2_COMMUNICATION',
-  DATA_EXFILTRATION = 'DATA_EXFILTRATION',
-  DNS_TUNNELING = 'DNS_TUNNELING',
+  NETWORK_ATTACK = "NETWORK_ATTACK",
+  DDOS = "DDOS",
+  PORT_SCAN = "PORT_SCAN",
+  C2_COMMUNICATION = "C2_COMMUNICATION",
+  DATA_EXFILTRATION = "DATA_EXFILTRATION",
+  DNS_TUNNELING = "DNS_TUNNELING",
 
   // Behavioral threats
-  ANOMALOUS_BEHAVIOR = 'ANOMALOUS_BEHAVIOR',
-  INSIDER_THREAT = 'INSIDER_THREAT',
-  PRIVILEGE_ESCALATION = 'PRIVILEGE_ESCALATION',
-  CREDENTIAL_ABUSE = 'CREDENTIAL_ABUSE',
+  ANOMALOUS_BEHAVIOR = "ANOMALOUS_BEHAVIOR",
+  INSIDER_THREAT = "INSIDER_THREAT",
+  PRIVILEGE_ESCALATION = "PRIVILEGE_ESCALATION",
+  CREDENTIAL_ABUSE = "CREDENTIAL_ABUSE",
 
   // Advanced persistent threats
-  APT = 'APT',
-  LATERAL_MOVEMENT = 'LATERAL_MOVEMENT',
-  RECONNAISSANCE = 'RECONNAISSANCE',
+  APT = "APT",
+  LATERAL_MOVEMENT = "LATERAL_MOVEMENT",
+  RECONNAISSANCE = "RECONNAISSANCE",
 
   // Data threats
-  DATA_POISONING = 'DATA_POISONING',
-  DATA_MANIPULATION = 'DATA_MANIPULATION',
-  INJECTION_ATTACK = 'INJECTION_ATTACK',
+  DATA_POISONING = "DATA_POISONING",
+  DATA_MANIPULATION = "DATA_MANIPULATION",
+  INJECTION_ATTACK = "INJECTION_ATTACK",
 
   // Malware
-  MALWARE = 'MALWARE',
-  FILELESS_MALWARE = 'FILELESS_MALWARE',
-  PROCESS_INJECTION = 'PROCESS_INJECTION',
-  CREDENTIAL_DUMPING = 'CREDENTIAL_DUMPING',
+  MALWARE = "MALWARE",
+  FILELESS_MALWARE = "FILELESS_MALWARE",
+  PROCESS_INJECTION = "PROCESS_INJECTION",
+  CREDENTIAL_DUMPING = "CREDENTIAL_DUMPING",
 
   // Other
-  ZERO_DAY = 'ZERO_DAY',
-  UNKNOWN = 'UNKNOWN'
+  ZERO_DAY = "ZERO_DAY",
+  UNKNOWN = "UNKNOWN",
 }
 
 export enum EventSource {
-  NETWORK = 'NETWORK',
-  APPLICATION = 'APPLICATION',
-  SYSTEM = 'SYSTEM',
-  USER = 'USER',
-  API = 'API',
-  DATABASE = 'DATABASE',
-  EXTERNAL = 'EXTERNAL'
+  NETWORK = "NETWORK",
+  APPLICATION = "APPLICATION",
+  SYSTEM = "SYSTEM",
+  USER = "USER",
+  API = "API",
+  DATABASE = "DATABASE",
+  EXTERNAL = "EXTERNAL",
 }
 
 export interface ThreatEvent {
@@ -97,14 +97,24 @@ export interface AnomalyScore {
   zScore?: number;
   iqrScore?: number;
   isolationScore?: number;
-  method: 'zscore' | 'iqr' | 'isolation_forest' | 'autoencoder' | 'ensemble' | 'behavioral' | 'statistical' | 'time_series' | 'mad' | 'grubbs';
+  method:
+    | "zscore"
+    | "iqr"
+    | "isolation_forest"
+    | "autoencoder"
+    | "ensemble"
+    | "behavioral"
+    | "statistical"
+    | "time_series"
+    | "mad"
+    | "grubbs";
   features: Record<string, number>;
   explanation?: string;
 }
 
 export interface BehaviorProfile {
   entityId: string;
-  entityType: 'user' | 'system' | 'application';
+  entityType: "user" | "system" | "application";
 
   // Baseline statistics
   baselineMetrics: {

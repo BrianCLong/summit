@@ -141,11 +141,11 @@ mutation CreateInvestigation {
 ```javascript
 // Create Person entity
 const person = await createEntity({
-  type: 'Person',
+  type: "Person",
   attributes: {
-    name: 'John Doe',
-    email: 'john@example.com',
-    role: 'Software Engineer',
+    name: "John Doe",
+    email: "john@example.com",
+    role: "Software Engineer",
   },
   confidence: 0.95,
 });
@@ -154,7 +154,7 @@ const person = await createEntity({
 await createRelationship({
   from_entity_id: person.id,
   to_entity_id: organization.id,
-  type: 'WORKS_FOR',
+  type: "WORKS_FOR",
   confidence: 0.9,
 });
 ```
@@ -171,13 +171,13 @@ const predictions = await predictLinks({
 // Detect anomalies
 const anomalies = await detectAnomalies({
   entity_ids: allNodeIds,
-  algorithm: 'autoencoder',
+  algorithm: "autoencoder",
 });
 
 // Find communities
 const communities = await detectCommunities({
   entity_ids: allNodeIds,
-  algorithm: 'louvain',
+  algorithm: "louvain",
   resolution: 1.0,
 });
 ```

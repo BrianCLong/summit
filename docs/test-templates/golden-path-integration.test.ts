@@ -21,16 +21,16 @@
  * 4. Validate complete workflows
  */
 
-import { jest } from '@jest/globals';
-import axios from 'axios';
-import { WebSocket } from 'ws';
-import type { Pool } from 'pg';
-import type { Driver } from 'neo4j-driver';
+import { jest } from "@jest/globals";
+import axios from "axios";
+import { WebSocket } from "ws";
+import type { Pool } from "pg";
+import type { Driver } from "neo4j-driver";
 
-describe('Golden Path Integration Tests', () => {
+describe("Golden Path Integration Tests", () => {
   // Service endpoints
-  const API_URL = process.env.TEST_API_URL || 'http://localhost:4000/graphql';
-  const WS_URL = process.env.TEST_WS_URL || 'ws://localhost:4000/graphql';
+  const API_URL = process.env.TEST_API_URL || "http://localhost:4000/graphql";
+  const WS_URL = process.env.TEST_WS_URL || "ws://localhost:4000/graphql";
 
   // Database connections
   let pgPool: Pool;
@@ -40,33 +40,33 @@ describe('Golden Path Integration Tests', () => {
   let testInvestigationId: string;
   let testEntityIds: string[] = [];
   let testRelationshipIds: string[] = [];
-  let testUserId: string = 'test-user-123';
+  let testUserId: string = "test-user-123";
   let authToken: string;
 
   // Setup before all tests
   beforeAll(async () => {
     // Initialize database connections
-    const { Pool } = await import('pg');
-    const neo4j = await import('neo4j-driver');
+    const { Pool } = await import("pg");
+    const neo4j = await import("neo4j-driver");
 
     pgPool = new Pool({
-      host: process.env.TEST_PG_HOST || 'localhost',
-      port: parseInt(process.env.TEST_PG_PORT || '5432'),
-      database: process.env.TEST_PG_DATABASE || 'intelgraph_test',
-      user: process.env.TEST_PG_USER || 'postgres',
-      password: process.env.TEST_PG_PASSWORD || 'password',
+      host: process.env.TEST_PG_HOST || "localhost",
+      port: parseInt(process.env.TEST_PG_PORT || "5432"),
+      database: process.env.TEST_PG_DATABASE || "intelgraph_test",
+      user: process.env.TEST_PG_USER || "postgres",
+      password: process.env.TEST_PG_PASSWORD || "password",
     });
 
     neo4jDriver = neo4j.driver(
-      process.env.TEST_NEO4J_URL || 'bolt://localhost:7687',
+      process.env.TEST_NEO4J_URL || "bolt://localhost:7687",
       neo4j.auth.basic(
-        process.env.TEST_NEO4J_USER || 'neo4j',
-        process.env.TEST_NEO4J_PASSWORD || 'password',
-      ),
+        process.env.TEST_NEO4J_USER || "neo4j",
+        process.env.TEST_NEO4J_PASSWORD || "password"
+      )
     );
 
     // Verify connectivity
-    await pgPool.query('SELECT 1');
+    await pgPool.query("SELECT 1");
     await neo4jDriver.verifyConnectivity();
 
     // Get authentication token
@@ -89,8 +89,8 @@ describe('Golden Path Integration Tests', () => {
   // STEP 1: INVESTIGATION CREATION
   // ===========================================
 
-  describe('Step 1: Create Investigation', () => {
-    it('should create investigation via GraphQL API', async () => {
+  describe("Step 1: Create Investigation", () => {
+    it("should create investigation via GraphQL API", async () => {
       // Arrange
       const mutation = `
         mutation CreateInvestigation($input: CreateInvestigationInput!) {
@@ -107,10 +107,10 @@ describe('Golden Path Integration Tests', () => {
 
       const variables = {
         input: {
-          name: 'Test Investigation - Golden Path',
-          description: 'Integration test for golden path workflow',
-          priority: 'high',
-          status: 'active',
+          name: "Test Investigation - Golden Path",
+          description: "Integration test for golden path workflow",
+          priority: "high",
+          status: "active",
         },
       };
 
@@ -123,54 +123,52 @@ describe('Golden Path Integration Tests', () => {
         id: expect.any(String),
         name: variables.input.name,
         description: variables.input.description,
-        status: 'active',
+        status: "active",
         createdBy: expect.any(String),
       });
 
       testInvestigationId = response.data.createInvestigation.id;
     });
 
-    it('should persist investigation in PostgreSQL', async () => {
+    it("should persist investigation in PostgreSQL", async () => {
       // Arrange
       await createTestInvestigation();
 
       // Act
-      const result = await pgPool.query(
-        'SELECT * FROM investigations WHERE id = $1',
-        [testInvestigationId],
-      );
+      const result = await pgPool.query("SELECT * FROM investigations WHERE id = $1", [
+        testInvestigationId,
+      ]);
 
       // Assert
       expect(result.rows).toHaveLength(1);
       expect(result.rows[0]).toMatchObject({
         id: testInvestigationId,
         name: expect.any(String),
-        status: 'active',
+        status: "active",
       });
     });
 
-    it('should create investigation node in Neo4j', async () => {
+    it("should create investigation node in Neo4j", async () => {
       // Arrange
       await createTestInvestigation();
 
       // Act
       const session = neo4jDriver.session();
       try {
-        const result = await session.run(
-          'MATCH (i:Investigation {id: $id}) RETURN i',
-          { id: testInvestigationId },
-        );
+        const result = await session.run("MATCH (i:Investigation {id: $id}) RETURN i", {
+          id: testInvestigationId,
+        });
 
         // Assert
         expect(result.records).toHaveLength(1);
-        const investigation = result.records[0].get('i');
+        const investigation = result.records[0].get("i");
         expect(investigation.properties.id).toBe(testInvestigationId);
       } finally {
         await session.close();
       }
     });
 
-    it('should create audit log entry', async () => {
+    it("should create audit log entry", async () => {
       // Arrange
       await createTestInvestigation();
 
@@ -180,15 +178,15 @@ describe('Golden Path Integration Tests', () => {
          WHERE entity_type = 'investigation'
          AND entity_id = $1
          AND action = 'created'`,
-        [testInvestigationId],
+        [testInvestigationId]
       );
 
       // Assert
       expect(result.rows).toHaveLength(1);
       expect(result.rows[0]).toMatchObject({
-        entity_type: 'investigation',
+        entity_type: "investigation",
         entity_id: testInvestigationId,
-        action: 'created',
+        action: "created",
         user_id: expect.any(String),
       });
     });
@@ -198,36 +196,36 @@ describe('Golden Path Integration Tests', () => {
   // STEP 2: ENTITY MANAGEMENT
   // ===========================================
 
-  describe('Step 2: Add Entities', () => {
+  describe("Step 2: Add Entities", () => {
     beforeEach(async () => {
       await createTestInvestigation();
     });
 
-    it('should add multiple entities to investigation', async () => {
+    it("should add multiple entities to investigation", async () => {
       // Arrange
       const entities = [
         {
           investigationId: testInvestigationId,
-          type: 'Person',
-          name: 'John Doe',
+          type: "Person",
+          name: "John Doe",
           properties: {
-            email: 'john@example.com',
-            role: 'Suspect',
+            email: "john@example.com",
+            role: "Suspect",
           },
         },
         {
           investigationId: testInvestigationId,
-          type: 'Organization',
-          name: 'Acme Corp',
+          type: "Organization",
+          name: "Acme Corp",
           properties: {
-            industry: 'Technology',
-            location: 'San Francisco',
+            industry: "Technology",
+            location: "San Francisco",
           },
         },
         {
           investigationId: testInvestigationId,
-          type: 'Location',
-          name: 'San Francisco, CA',
+          type: "Location",
+          name: "San Francisco, CA",
           properties: {
             lat: 37.7749,
             lon: -122.4194,
@@ -248,11 +246,7 @@ describe('Golden Path Integration Tests', () => {
           }
         `;
 
-        const response = await graphqlRequest(
-          mutation,
-          { input: entity },
-          authToken,
-        );
+        const response = await graphqlRequest(mutation, { input: entity }, authToken);
 
         expect(response.errors).toBeUndefined();
         testEntityIds.push(response.data.createEntity.id);
@@ -262,31 +256,29 @@ describe('Golden Path Integration Tests', () => {
       expect(testEntityIds).toHaveLength(3);
     });
 
-    it('should sync entities to both PostgreSQL and Neo4j', async () => {
+    it("should sync entities to both PostgreSQL and Neo4j", async () => {
       // Arrange
       await addTestEntities();
 
       // Act & Assert - PostgreSQL
-      const pgResult = await pgPool.query(
-        'SELECT * FROM entities WHERE id = ANY($1)',
-        [testEntityIds],
-      );
+      const pgResult = await pgPool.query("SELECT * FROM entities WHERE id = ANY($1)", [
+        testEntityIds,
+      ]);
       expect(pgResult.rows).toHaveLength(testEntityIds.length);
 
       // Act & Assert - Neo4j
       const session = neo4jDriver.session();
       try {
-        const neo4jResult = await session.run(
-          'MATCH (e:Entity) WHERE e.id IN $ids RETURN e',
-          { ids: testEntityIds },
-        );
+        const neo4jResult = await session.run("MATCH (e:Entity) WHERE e.id IN $ids RETURN e", {
+          ids: testEntityIds,
+        });
         expect(neo4jResult.records).toHaveLength(testEntityIds.length);
       } finally {
         await session.close();
       }
     });
 
-    it('should validate entity data consistency', async () => {
+    it("should validate entity data consistency", async () => {
       // Arrange
       await addTestEntities();
 
@@ -294,20 +286,14 @@ describe('Golden Path Integration Tests', () => {
       const entityId = testEntityIds[0];
 
       // Get from PostgreSQL
-      const pgResult = await pgPool.query(
-        'SELECT * FROM entities WHERE id = $1',
-        [entityId],
-      );
+      const pgResult = await pgPool.query("SELECT * FROM entities WHERE id = $1", [entityId]);
 
       // Get from Neo4j
       const session = neo4jDriver.session();
       let neo4jEntity;
       try {
-        const result = await session.run(
-          'MATCH (e:Entity {id: $id}) RETURN e',
-          { id: entityId },
-        );
-        neo4jEntity = result.records[0].get('e').properties;
+        const result = await session.run("MATCH (e:Entity {id: $id}) RETURN e", { id: entityId });
+        neo4jEntity = result.records[0].get("e").properties;
       } finally {
         await session.close();
       }
@@ -319,12 +305,12 @@ describe('Golden Path Integration Tests', () => {
       expect(neo4jEntity.type).toBe(pgEntity.type);
     });
 
-    it('should handle entity validation errors', async () => {
+    it("should handle entity validation errors", async () => {
       // Arrange
       const invalidEntity = {
         investigationId: testInvestigationId,
-        type: '', // Invalid: empty type
-        name: 'Invalid Entity',
+        type: "", // Invalid: empty type
+        name: "Invalid Entity",
         properties: {},
       };
 
@@ -337,15 +323,11 @@ describe('Golden Path Integration Tests', () => {
       `;
 
       // Act
-      const response = await graphqlRequest(
-        mutation,
-        { input: invalidEntity },
-        authToken,
-      );
+      const response = await graphqlRequest(mutation, { input: invalidEntity }, authToken);
 
       // Assert
       expect(response.errors).toBeDefined();
-      expect(response.errors[0].message).toContain('type');
+      expect(response.errors[0].message).toContain("type");
     });
   });
 
@@ -353,32 +335,32 @@ describe('Golden Path Integration Tests', () => {
   // STEP 3: RELATIONSHIP CREATION
   // ===========================================
 
-  describe('Step 3: Create Relationships', () => {
+  describe("Step 3: Create Relationships", () => {
     beforeEach(async () => {
       await createTestInvestigation();
       await addTestEntities();
     });
 
-    it('should create relationships between entities', async () => {
+    it("should create relationships between entities", async () => {
       // Arrange
       const relationships = [
         {
           investigationId: testInvestigationId,
           fromEntityId: testEntityIds[0], // John Doe
           toEntityId: testEntityIds[1], // Acme Corp
-          type: 'WORKS_FOR',
+          type: "WORKS_FOR",
           properties: {
-            since: '2020-01-01',
-            role: 'Employee',
+            since: "2020-01-01",
+            role: "Employee",
           },
         },
         {
           investigationId: testInvestigationId,
           fromEntityId: testEntityIds[1], // Acme Corp
           toEntityId: testEntityIds[2], // San Francisco
-          type: 'LOCATED_IN',
+          type: "LOCATED_IN",
           properties: {
-            since: '2015-01-01',
+            since: "2015-01-01",
           },
         },
       ];
@@ -397,11 +379,7 @@ describe('Golden Path Integration Tests', () => {
           }
         `;
 
-        const response = await graphqlRequest(
-          mutation,
-          { input: relationship },
-          authToken,
-        );
+        const response = await graphqlRequest(mutation, { input: relationship }, authToken);
 
         expect(response.errors).toBeUndefined();
         testRelationshipIds.push(response.data.createRelationship.id);
@@ -411,7 +389,7 @@ describe('Golden Path Integration Tests', () => {
       expect(testRelationshipIds).toHaveLength(2);
     });
 
-    it('should create graph relationships in Neo4j', async () => {
+    it("should create graph relationships in Neo4j", async () => {
       // Arrange
       await createTestRelationships();
 
@@ -422,19 +400,17 @@ describe('Golden Path Integration Tests', () => {
           `MATCH (a)-[r]->(b)
            WHERE a.id IN $entityIds AND b.id IN $entityIds
            RETURN r`,
-          { entityIds: testEntityIds },
+          { entityIds: testEntityIds }
         );
 
         // Assert
-        expect(result.records.length).toBeGreaterThanOrEqual(
-          testRelationshipIds.length,
-        );
+        expect(result.records.length).toBeGreaterThanOrEqual(testRelationshipIds.length);
       } finally {
         await session.close();
       }
     });
 
-    it('should support graph traversal queries', async () => {
+    it("should support graph traversal queries", async () => {
       // Arrange
       await createTestRelationships();
 
@@ -448,7 +424,7 @@ describe('Golden Path Integration Tests', () => {
           {
             startId: testEntityIds[0],
             endId: testEntityIds[2],
-          },
+          }
         );
 
         // Assert
@@ -458,7 +434,7 @@ describe('Golden Path Integration Tests', () => {
       }
     });
 
-    it('should prevent duplicate relationships', async () => {
+    it("should prevent duplicate relationships", async () => {
       // Arrange
       await createTestRelationships();
 
@@ -466,7 +442,7 @@ describe('Golden Path Integration Tests', () => {
         investigationId: testInvestigationId,
         fromEntityId: testEntityIds[0],
         toEntityId: testEntityIds[1],
-        type: 'WORKS_FOR', // Same as existing
+        type: "WORKS_FOR", // Same as existing
         properties: {},
       };
 
@@ -479,15 +455,11 @@ describe('Golden Path Integration Tests', () => {
       `;
 
       // Act
-      const response = await graphqlRequest(
-        mutation,
-        { input: duplicateRelationship },
-        authToken,
-      );
+      const response = await graphqlRequest(mutation, { input: duplicateRelationship }, authToken);
 
       // Assert
       expect(response.errors).toBeDefined();
-      expect(response.errors[0].message).toContain('already exists');
+      expect(response.errors[0].message).toContain("already exists");
     });
   });
 
@@ -495,14 +467,14 @@ describe('Golden Path Integration Tests', () => {
   // STEP 4: COPILOT INTERACTION
   // ===========================================
 
-  describe('Step 4: Copilot Analysis', () => {
+  describe("Step 4: Copilot Analysis", () => {
     beforeEach(async () => {
       await createTestInvestigation();
       await addTestEntities();
       await createTestRelationships();
     });
 
-    it('should start copilot run with goal', async () => {
+    it("should start copilot run with goal", async () => {
       // Arrange
       const mutation = `
         mutation StartCopilotRun($input: StartCopilotRunInput!) {
@@ -519,7 +491,7 @@ describe('Golden Path Integration Tests', () => {
       const variables = {
         input: {
           investigationId: testInvestigationId,
-          goal: 'Analyze relationships and identify key actors',
+          goal: "Analyze relationships and identify key actors",
         },
       };
 
@@ -536,7 +508,7 @@ describe('Golden Path Integration Tests', () => {
       });
     });
 
-    it('should process copilot run and generate insights', async () => {
+    it("should process copilot run and generate insights", async () => {
       // Arrange
       const runId = await startCopilotRun();
 
@@ -561,15 +533,11 @@ describe('Golden Path Integration Tests', () => {
           }
         `;
 
-        const response = await graphqlRequest(
-          query,
-          { id: runId },
-          authToken,
-        );
+        const response = await graphqlRequest(query, { id: runId }, authToken);
 
         run = response.data.copilotRun;
 
-        if (run.status === 'completed') {
+        if (run.status === "completed") {
           break;
         }
 
@@ -578,12 +546,12 @@ describe('Golden Path Integration Tests', () => {
       }
 
       // Assert
-      expect(run.status).toBe('completed');
+      expect(run.status).toBe("completed");
       expect(run.insights).toBeDefined();
       expect(run.insights.length).toBeGreaterThan(0);
     });
 
-    it('should store copilot insights in database', async () => {
+    it("should store copilot insights in database", async () => {
       // Arrange
       const runId = await startCopilotRun();
       await waitForCopilotCompletion(runId);
@@ -592,7 +560,7 @@ describe('Golden Path Integration Tests', () => {
       const result = await pgPool.query(
         `SELECT * FROM copilot_insights
          WHERE run_id = $1`,
-        [runId],
+        [runId]
       );
 
       // Assert
@@ -610,14 +578,14 @@ describe('Golden Path Integration Tests', () => {
   // STEP 5: RESULTS VISUALIZATION
   // ===========================================
 
-  describe('Step 5: Query and Visualize Results', () => {
+  describe("Step 5: Query and Visualize Results", () => {
     beforeEach(async () => {
       await createTestInvestigation();
       await addTestEntities();
       await createTestRelationships();
     });
 
-    it('should query investigation graph data', async () => {
+    it("should query investigation graph data", async () => {
       // Arrange
       const query = `
         query GetInvestigation($id: ID!) {
@@ -642,11 +610,7 @@ describe('Golden Path Integration Tests', () => {
       `;
 
       // Act
-      const response = await graphqlRequest(
-        query,
-        { id: testInvestigationId },
-        authToken,
-      );
+      const response = await graphqlRequest(query, { id: testInvestigationId }, authToken);
 
       // Assert
       expect(response.errors).toBeUndefined();
@@ -670,7 +634,7 @@ describe('Golden Path Integration Tests', () => {
       });
     });
 
-    it('should run graph analytics queries', async () => {
+    it("should run graph analytics queries", async () => {
       // Arrange
       const mutation = `
         mutation RunGraphAnalytics($input: GraphAnalyticsInput!) {
@@ -685,7 +649,7 @@ describe('Golden Path Integration Tests', () => {
       const variables = {
         input: {
           investigationId: testInvestigationId,
-          algorithms: ['pagerank', 'centrality', 'community'],
+          algorithms: ["pagerank", "centrality", "community"],
         },
       };
 
@@ -698,7 +662,7 @@ describe('Golden Path Integration Tests', () => {
       expect(response.data.runGraphAnalytics.results).toBeDefined();
     });
 
-    it('should export investigation data', async () => {
+    it("should export investigation data", async () => {
       // Arrange
       const mutation = `
         mutation ExportInvestigation($input: ExportInvestigationInput!) {
@@ -714,7 +678,7 @@ describe('Golden Path Integration Tests', () => {
       const variables = {
         input: {
           investigationId: testInvestigationId,
-          format: 'json',
+          format: "json",
           includeMetadata: true,
         },
       };
@@ -726,7 +690,7 @@ describe('Golden Path Integration Tests', () => {
       expect(response.errors).toBeUndefined();
       expect(response.data.exportInvestigation).toMatchObject({
         id: expect.any(String),
-        format: 'json',
+        format: "json",
         status: expect.stringMatching(/pending|completed/),
       });
     });
@@ -736,8 +700,8 @@ describe('Golden Path Integration Tests', () => {
   // REAL-TIME UPDATES (WebSocket)
   // ===========================================
 
-  describe('Real-time Updates', () => {
-    it('should receive investigation updates via WebSocket', async (done) => {
+  describe("Real-time Updates", () => {
+    it("should receive investigation updates via WebSocket", async (done) => {
       // Arrange
       await createTestInvestigation();
 
@@ -748,10 +712,10 @@ describe('Golden Path Integration Tests', () => {
       });
 
       // Subscribe to investigation updates
-      ws.on('open', () => {
+      ws.on("open", () => {
         ws.send(
           JSON.stringify({
-            type: 'subscribe',
+            type: "subscribe",
             payload: {
               query: `
                 subscription OnInvestigationUpdate($id: ID!) {
@@ -766,20 +730,18 @@ describe('Golden Path Integration Tests', () => {
                 id: testInvestigationId,
               },
             },
-          }),
+          })
         );
       });
 
       // Listen for updates
-      ws.on('message', async (data) => {
+      ws.on("message", async (data) => {
         const message = JSON.parse(data.toString());
 
-        if (message.type === 'data') {
+        if (message.type === "data") {
           // Assert
           expect(message.payload.data.investigationUpdated).toBeDefined();
-          expect(message.payload.data.investigationUpdated.id).toBe(
-            testInvestigationId,
-          );
+          expect(message.payload.data.investigationUpdated.id).toBe(testInvestigationId);
 
           ws.close();
           done();
@@ -802,10 +764,10 @@ describe('Golden Path Integration Tests', () => {
           {
             input: {
               id: testInvestigationId,
-              status: 'in_progress',
+              status: "in_progress",
             },
           },
-          authToken,
+          authToken
         );
       }, 1000);
     }, 10000);
@@ -817,23 +779,19 @@ describe('Golden Path Integration Tests', () => {
 
   async function getAuthToken(): Promise<string> {
     // Mock authentication - replace with actual auth flow
-    return 'test-auth-token';
+    return "test-auth-token";
   }
 
-  async function graphqlRequest(
-    query: string,
-    variables: any,
-    token: string,
-  ): Promise<any> {
+  async function graphqlRequest(query: string, variables: any, token: string): Promise<any> {
     const response = await axios.post(
       API_URL,
       { query, variables },
       {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-      },
+      }
     );
 
     return response.data;
@@ -853,11 +811,11 @@ describe('Golden Path Integration Tests', () => {
       {
         input: {
           name: `Test Investigation ${Date.now()}`,
-          description: 'Integration test investigation',
-          status: 'active',
+          description: "Integration test investigation",
+          status: "active",
         },
       },
-      authToken,
+      authToken
     );
 
     testInvestigationId = response.data.createInvestigation.id;
@@ -865,9 +823,9 @@ describe('Golden Path Integration Tests', () => {
 
   async function addTestEntities(): Promise<void> {
     const entities = [
-      { type: 'Person', name: 'John Doe' },
-      { type: 'Organization', name: 'Acme Corp' },
-      { type: 'Location', name: 'San Francisco' },
+      { type: "Person", name: "John Doe" },
+      { type: "Organization", name: "Acme Corp" },
+      { type: "Location", name: "San Francisco" },
     ];
 
     for (const entity of entities) {
@@ -888,7 +846,7 @@ describe('Golden Path Integration Tests', () => {
             properties: {},
           },
         },
-        authToken,
+        authToken
       );
 
       testEntityIds.push(response.data.createEntity.id);
@@ -911,11 +869,11 @@ describe('Golden Path Integration Tests', () => {
           investigationId: testInvestigationId,
           fromEntityId: testEntityIds[0],
           toEntityId: testEntityIds[1],
-          type: 'WORKS_FOR',
+          type: "WORKS_FOR",
           properties: {},
         },
       },
-      authToken,
+      authToken
     );
 
     testRelationshipIds.push(response.data.createRelationship.id);
@@ -935,10 +893,10 @@ describe('Golden Path Integration Tests', () => {
       {
         input: {
           investigationId: testInvestigationId,
-          goal: 'Analyze test investigation',
+          goal: "Analyze test investigation",
         },
       },
-      authToken,
+      authToken
     );
 
     return response.data.startCopilotRun.id;
@@ -959,7 +917,7 @@ describe('Golden Path Integration Tests', () => {
 
       const response = await graphqlRequest(query, { id: runId }, authToken);
 
-      if (response.data.copilotRun.status === 'completed') {
+      if (response.data.copilotRun.status === "completed") {
         return;
       }
 
@@ -967,32 +925,29 @@ describe('Golden Path Integration Tests', () => {
       attempts++;
     }
 
-    throw new Error('Copilot run timeout');
+    throw new Error("Copilot run timeout");
   }
 
   async function cleanupTestData(): Promise<void> {
     // Clean up PostgreSQL
     if (testInvestigationId) {
-      await pgPool.query('DELETE FROM investigations WHERE id = $1', [
-        testInvestigationId,
-      ]);
+      await pgPool.query("DELETE FROM investigations WHERE id = $1", [testInvestigationId]);
     }
 
     // Clean up Neo4j
     if (testInvestigationId) {
       const session = neo4jDriver.session();
       try {
-        await session.run(
-          'MATCH (n) WHERE n.investigationId = $id DETACH DELETE n',
-          { id: testInvestigationId },
-        );
+        await session.run("MATCH (n) WHERE n.investigationId = $id DETACH DELETE n", {
+          id: testInvestigationId,
+        });
       } finally {
         await session.close();
       }
     }
 
     // Reset test data
-    testInvestigationId = '';
+    testInvestigationId = "";
     testEntityIds = [];
     testRelationshipIds = [];
   }

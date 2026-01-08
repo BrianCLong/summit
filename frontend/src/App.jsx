@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import Graph from './Graph';
-import TimelinePanel from './TimelinePanel';
-import './App.css';
+import { useState, useEffect } from "react";
+import Graph from "./Graph";
+import TimelinePanel from "./TimelinePanel";
+import "./App.css";
 
 function App() {
   const [graphData, setGraphData] = useState({ nodes: [], edges: [] });
@@ -12,7 +12,7 @@ function App() {
   const [forecastIndex, setForecastIndex] = useState(0);
 
   useEffect(() => {
-    fetch('/api/graph')
+    fetch("/api/graph")
       .then((res) => res.json())
       .then((data) => {
         const formattedNodes = data.nodes.map((n) => ({
@@ -28,14 +28,14 @@ function App() {
         }));
         setGraphData({ nodes: formattedNodes, edges: formattedEdges });
       })
-      .catch((err) => console.error('Failed to fetch graph data:', err));
+      .catch((err) => console.error("Failed to fetch graph data:", err));
   }, []);
 
   useEffect(() => {
-    fetch('/api/agent-actions')
+    fetch("/api/agent-actions")
       .then((res) => res.json())
       .then((data) => setEvents(data))
-      .catch((err) => console.error('Failed to fetch agent actions:', err));
+      .catch((err) => console.error("Failed to fetch agent actions:", err));
   }, []);
 
   const toggleForecast = () => {
@@ -44,9 +44,7 @@ function App() {
     if (next && forecastEdges.length === 0) {
       const entityId = graphData.nodes[0]?.data.id;
       if (!entityId) return;
-      fetch(
-        `/api/forecast/graph?entity_id=${entityId}&past_days=14&future_days=30`,
-      )
+      fetch(`/api/forecast/graph?entity_id=${entityId}&past_days=14&future_days=30`)
         .then((res) => res.json())
         .then((data) => {
           const formatted = data.edges.map((e, idx) => ({
@@ -55,19 +53,17 @@ function App() {
               target: e.target,
               label: `ETA: ${e.timestamp}`,
             },
-            classes: 'forecast',
+            classes: "forecast",
             id: `forecast-${idx}`,
           }));
           setForecastEdges(formatted);
           setForecastIndex(formatted.length - 1);
         })
-        .catch((err) => console.error('Failed to fetch forecast:', err));
+        .catch((err) => console.error("Failed to fetch forecast:", err));
     }
   };
 
-  const displayedForecastEdges = showForecast
-    ? forecastEdges.slice(0, forecastIndex + 1)
-    : [];
+  const displayedForecastEdges = showForecast ? forecastEdges.slice(0, forecastIndex + 1) : [];
   const combinedEdges = graphData.edges.concat(displayedForecastEdges);
 
   return (
@@ -75,11 +71,9 @@ function App() {
       <header className="App-header">
         <h1>IntelGraph</h1>
         <button onClick={() => setNeighborhoodMode((m) => !m)}>
-          {neighborhoodMode ? 'Show Full Graph' : 'Neighborhood Mode'}
+          {neighborhoodMode ? "Show Full Graph" : "Neighborhood Mode"}
         </button>
-        <button onClick={toggleForecast}>
-          {showForecast ? 'Hide Forecast' : 'Forecast View'}
-        </button>
+        <button onClick={toggleForecast}>{showForecast ? "Hide Forecast" : "Forecast View"}</button>
       </header>
       <main>
         <Graph

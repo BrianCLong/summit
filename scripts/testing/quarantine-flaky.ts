@@ -1,6 +1,6 @@
-import { existsSync } from 'fs';
-import { mkdir, readFile, writeFile } from 'fs/promises';
-import path from 'path';
+import { existsSync } from "fs";
+import { mkdir, readFile, writeFile } from "fs/promises";
+import path from "path";
 
 interface FlakyTestRecord {
   id: string;
@@ -8,7 +8,7 @@ interface FlakyTestRecord {
   name: string;
   symptoms?: string;
   owner?: string;
-  status: 'quarantined' | 'fixing' | 'resolved';
+  status: "quarantined" | "fixing" | "resolved";
   lastSeen: string;
   notes?: string;
 }
@@ -27,7 +27,7 @@ interface CliOptions {
   tests: string[];
   owner?: string;
   symptoms?: string;
-  status: FlakyTestRecord['status'];
+  status: FlakyTestRecord["status"];
   metadataPath: string;
   applyTags: boolean;
 }
@@ -37,12 +37,14 @@ const loadMetadata = async (metadataPath: string): Promise<FlakyTestRecord[]> =>
     return [];
   }
 
-  const content = await readFile(metadataPath, 'utf8');
+  const content = await readFile(metadataPath, "utf8");
   try {
     const parsed = JSON.parse(content) as { tests?: FlakyTestRecord[] };
     return parsed.tests || [];
   } catch (error) {
-    console.warn(`[quarantine] Unable to parse metadata at ${metadataPath}: ${(error as Error).message}`);
+    console.warn(
+      `[quarantine] Unable to parse metadata at ${metadataPath}: ${(error as Error).message}`
+    );
     return [];
   }
 };
@@ -63,63 +65,63 @@ const parseReport = async (reportPath?: string): Promise<FlakyTestRecord[]> => {
     return [];
   }
 
-  const content = await readFile(reportPath, 'utf8');
+  const content = await readFile(reportPath, "utf8");
   try {
     const parsed = JSON.parse(content) as FlakyReport;
     return (parsed.flakyTests || []).map((test) => ({
       id: test.id,
       file: test.file,
       name: test.name,
-      status: 'quarantined',
+      status: "quarantined",
       lastSeen: new Date().toISOString(),
     }));
   } catch (error) {
-    console.warn(`[quarantine] Unable to parse report at ${reportPath}: ${(error as Error).message}`);
+    console.warn(
+      `[quarantine] Unable to parse report at ${reportPath}: ${(error as Error).message}`
+    );
     return [];
   }
 };
 
 const extractTestsFromArgs = (tests: string[]): FlakyTestRecord[] =>
-  tests
-    .filter(Boolean)
-    .map((entry) => {
-      const [file, ...nameParts] = entry.split('::');
-      return {
-        id: entry,
-        file,
-        name: nameParts.join('::') || entry,
-        status: 'quarantined' as const,
-        lastSeen: new Date().toISOString(),
-      };
-    });
+  tests.filter(Boolean).map((entry) => {
+    const [file, ...nameParts] = entry.split("::");
+    return {
+      id: entry,
+      file,
+      name: nameParts.join("::") || entry,
+      status: "quarantined" as const,
+      lastSeen: new Date().toISOString(),
+    };
+  });
 
 const parseArgs = (): CliOptions => {
   const args = process.argv.slice(2);
   const tests: string[] = [];
-  const options: Partial<CliOptions> = { applyTags: false, status: 'quarantined' };
+  const options: Partial<CliOptions> = { applyTags: false, status: "quarantined" };
 
   for (let i = 0; i < args.length; i += 1) {
     const arg = args[i];
-    if (arg === '--input' && args[i + 1]) {
+    if (arg === "--input" && args[i + 1]) {
       options.input = args[i + 1];
       i += 1;
-    } else if (arg === '--test' && args[i + 1]) {
+    } else if (arg === "--test" && args[i + 1]) {
       tests.push(args[i + 1]);
       i += 1;
-    } else if (arg === '--owner' && args[i + 1]) {
+    } else if (arg === "--owner" && args[i + 1]) {
       options.owner = args[i + 1];
       i += 1;
-    } else if (arg === '--symptoms' && args[i + 1]) {
+    } else if (arg === "--symptoms" && args[i + 1]) {
       options.symptoms = args[i + 1];
       i += 1;
-    } else if (arg === '--status' && args[i + 1]) {
-      const status = args[i + 1] as FlakyTestRecord['status'];
+    } else if (arg === "--status" && args[i + 1]) {
+      const status = args[i + 1] as FlakyTestRecord["status"];
       options.status = status;
       i += 1;
-    } else if (arg === '--metadata' && args[i + 1]) {
+    } else if (arg === "--metadata" && args[i + 1]) {
       options.metadataPath = args[i + 1];
       i += 1;
-    } else if (arg === '--applyTags') {
+    } else if (arg === "--applyTags") {
       options.applyTags = true;
     }
   }
@@ -129,8 +131,8 @@ const parseArgs = (): CliOptions => {
     tests,
     owner: options.owner,
     symptoms: options.symptoms,
-    status: options.status || 'quarantined',
-    metadataPath: options.metadataPath || path.join('testing', 'flaky-metadata.json'),
+    status: options.status || "quarantined",
+    metadataPath: options.metadataPath || path.join("testing", "flaky-metadata.json"),
     applyTags: Boolean(options.applyTags),
   };
 };
@@ -141,7 +143,7 @@ const findTestInsertionPoint = (content: string, testName: string) => {
     return null;
   }
 
-  const startOfLine = content.lastIndexOf('\n', nameIndex) + 1;
+  const startOfLine = content.lastIndexOf("\n", nameIndex) + 1;
   return startOfLine;
 };
 
@@ -151,8 +153,8 @@ const tagTestInFile = async (filePath: string, testName: string) => {
     return;
   }
 
-  const content = await readFile(filePath, 'utf8');
-  if (content.includes('@flaky') && content.includes(testName)) {
+  const content = await readFile(filePath, "utf8");
+  if (content.includes("@flaky") && content.includes(testName)) {
     return;
   }
 
@@ -163,13 +165,17 @@ const tagTestInFile = async (filePath: string, testName: string) => {
   }
 
   const before = content.slice(0, insertionIndex);
-  const indentMatch = before.slice(before.lastIndexOf('\n') + 1).match(/^[ \t]*/);
-  const indent = indentMatch?.[0] || '';
+  const indentMatch = before.slice(before.lastIndexOf("\n") + 1).match(/^[ \t]*/);
+  const indent = indentMatch?.[0] || "";
   const taggedContent = `${before}// @flaky\n${indent}${content.slice(insertionIndex)}`;
   await writeFile(filePath, taggedContent);
 };
 
-const mergeRecords = (existing: FlakyTestRecord[], incoming: FlakyTestRecord[], defaults: Omit<FlakyTestRecord, 'id' | 'file' | 'name' | 'lastSeen'>) => {
+const mergeRecords = (
+  existing: FlakyTestRecord[],
+  incoming: FlakyTestRecord[],
+  defaults: Omit<FlakyTestRecord, "id" | "file" | "name" | "lastSeen">
+) => {
   const lookup = new Map<string, FlakyTestRecord>();
   existing.forEach((record) => lookup.set(record.id, record));
 
@@ -180,7 +186,7 @@ const mergeRecords = (existing: FlakyTestRecord[], incoming: FlakyTestRecord[], 
       ...record,
       symptoms: record.symptoms || prior?.symptoms || defaults.symptoms,
       owner: record.owner || prior?.owner || defaults.owner,
-      status: (record.status || prior?.status || defaults.status) as FlakyTestRecord['status'],
+      status: (record.status || prior?.status || defaults.status) as FlakyTestRecord["status"],
       lastSeen: record.lastSeen || prior?.lastSeen || new Date().toISOString(),
       notes: record.notes || prior?.notes,
     };
@@ -188,7 +194,9 @@ const mergeRecords = (existing: FlakyTestRecord[], incoming: FlakyTestRecord[], 
     lookup.set(record.id, next);
   });
 
-  return Array.from(lookup.values()).sort((a, b) => a.file.localeCompare(b.file) || a.name.localeCompare(b.name));
+  return Array.from(lookup.values()).sort(
+    (a, b) => a.file.localeCompare(b.file) || a.name.localeCompare(b.name)
+  );
 };
 
 const main = async () => {
@@ -205,7 +213,7 @@ const main = async () => {
   const candidates = [...reported, ...manual];
 
   if (candidates.length === 0) {
-    console.log('[quarantine] No tests provided to quarantine.');
+    console.log("[quarantine] No tests provided to quarantine.");
     return;
   }
 
@@ -218,10 +226,12 @@ const main = async () => {
     }
   }
 
-  console.log(`[quarantine] Updated metadata at ${options.metadataPath} with ${candidates.length} test(s).`);
+  console.log(
+    `[quarantine] Updated metadata at ${options.metadataPath} with ${candidates.length} test(s).`
+  );
 };
 
 main().catch((error) => {
-  console.error('[quarantine] Failed to update quarantine metadata', error);
+  console.error("[quarantine] Failed to update quarantine metadata", error);
   process.exit(1);
 });

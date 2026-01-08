@@ -122,8 +122,16 @@ const navItems: NavItem[] = [
 ]
 
 const supportItems: NavItem[] = [
-  { name: 'Help', href: '/help', icon: HelpCircle as React.ComponentType<{ className?: string }> },
-  { name: 'Changelog', href: '/changelog', icon: History as React.ComponentType<{ className?: string }> },
+  {
+    name: 'Help',
+    href: '/help',
+    icon: HelpCircle as React.ComponentType<{ className?: string }>,
+  },
+  {
+    name: 'Changelog',
+    href: '/changelog',
+    icon: History as React.ComponentType<{ className?: string }>,
+  },
 ]
 
 export function Navigation({ user }: NavigationProps) {

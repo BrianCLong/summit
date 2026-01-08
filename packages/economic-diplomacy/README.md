@@ -31,34 +31,34 @@ import {
   EconomicDiplomacyMonitor,
   NegotiationType,
   NegotiationPhase,
-  PartnershipType
-} from '@intelgraph/economic-diplomacy';
+  PartnershipType,
+} from "@intelgraph/economic-diplomacy";
 
 const monitor = new EconomicDiplomacyMonitor();
 
 // Track a trade negotiation
 monitor.trackNegotiation({
-  id: 'neg-001',
-  name: 'US-UK Free Trade Agreement',
+  id: "neg-001",
+  name: "US-UK Free Trade Agreement",
   type: NegotiationType.FREE_TRADE_AGREEMENT,
   phase: NegotiationPhase.FORMAL_NEGOTIATION,
   parties: [
     {
-      id: 'usa',
-      name: 'United States',
-      type: 'COUNTRY',
+      id: "usa",
+      name: "United States",
+      type: "COUNTRY",
       gdp: 25000000000000,
       tradeVolume: 5000000000000,
       population: 330000000,
-      objectives: ['Market access', 'Digital trade'],
-      redLines: ['Agricultural subsidies'],
+      objectives: ["Market access", "Digital trade"],
+      redLines: ["Agricultural subsidies"],
       priorities: [],
-      constraints: ['Congressional approval'],
-      leverage: 85
-    }
+      constraints: ["Congressional approval"],
+      leverage: 85,
+    },
   ],
   leadNegotiators: [],
-  launchDate: new Date('2023-01-01'),
+  launchDate: new Date("2023-01-01"),
   scope: {
     goodsTrade: true,
     servicesTrade: true,
@@ -72,7 +72,7 @@ monitor.trackNegotiation({
     stateOwnedEnterprises: false,
     regulatoryCooperation: true,
     disputeSettlement: true,
-    customAreas: []
+    customAreas: [],
   },
   sectors: [],
   rounds: [],
@@ -81,7 +81,7 @@ monitor.trackNegotiation({
   progress: 45,
   chaptersAgreed: 8,
   chaptersTotal: 20,
-  momentum: 'MODERATE',
+  momentum: "MODERATE",
   keyStickingPoints: [],
   resolvedIssues: [],
   criticalIssues: [],
@@ -90,35 +90,35 @@ monitor.trackNegotiation({
     gdpImpact: [],
     jobsCreated: 50000,
     jobsDisplaced: 10000,
-    sectorsGaining: ['Technology', 'Services'],
-    sectorsLosing: ['Agriculture'],
-    competitivenessImpact: 'Positive'
+    sectorsGaining: ["Technology", "Services"],
+    sectorsLosing: ["Agriculture"],
+    competitivenessImpact: "Positive",
   },
   stakes: {
     economicStakes: 500000000000,
-    strategicStakes: 'Strengthen transatlantic ties',
-    politicalStakes: 'Domestic political win',
-    geopoliticalStakes: 'Counter other trade blocs',
-    reputationalStakes: 'Demonstrate post-Brexit success'
+    strategicStakes: "Strengthen transatlantic ties",
+    politicalStakes: "Domestic political win",
+    geopoliticalStakes: "Counter other trade blocs",
+    reputationalStakes: "Demonstrate post-Brexit success",
   },
   politicalContext: {
-    domesticPoliticalCycle: 'Mid-term elections approaching',
+    domesticPoliticalCycle: "Mid-term elections approaching",
     governmentStability: 75,
-    publicSentiment: 'DIVIDED',
-    mediaAttention: 'MODERATE'
+    publicSentiment: "DIVIDED",
+    mediaAttention: "MODERATE",
   },
   domesticConstraints: [],
-  geopoliticalImplications: ['EU concerns', 'China reaction'],
+  geopoliticalImplications: ["EU concerns", "China reaction"],
   businessSupport: 70,
   publicSupport: 55,
-  civilSocietyPosition: 'Mixed support',
+  civilSocietyPosition: "Mixed support",
   lobbyingActivity: [],
   successLikelihood: 65,
   risks: [],
   opportunities: [],
   lastUpdated: new Date(),
   sources: [],
-  monitoring: true
+  monitoring: true,
 });
 
 // Get active negotiations
@@ -126,41 +126,41 @@ const active = monitor.getActiveNegotiations();
 console.log(`${active.length} active negotiations`);
 
 // Analyze negotiation progress
-const progress = monitor.analyzeNegotiationProgress('neg-001');
+const progress = monitor.analyzeNegotiationProgress("neg-001");
 console.log(`Overall progress: ${progress.overallProgress.toFixed(1)}%`);
 console.log(`Momentum: ${progress.momentum}`);
 console.log(`Success likelihood: ${progress.successLikelihood}%`);
-console.log('Critical path:', progress.criticalPath.join(', '));
-console.log('Bottlenecks:', progress.bottlenecks.join(', '));
-console.log('Recommendations:');
-progress.recommendations.forEach(rec => console.log(`  - ${rec}`));
+console.log("Critical path:", progress.criticalPath.join(", "));
+console.log("Bottlenecks:", progress.bottlenecks.join(", "));
+console.log("Recommendations:");
+progress.recommendations.forEach((rec) => console.log(`  - ${rec}`));
 
 // Identify deal breakers
-const dealBreakers = monitor.identifyDealBreakers('neg-001');
+const dealBreakers = monitor.identifyDealBreakers("neg-001");
 console.log(`${dealBreakers.dealBreakers.length} deal-breaking issues`);
-dealBreakers.resolutionStrategies.forEach(strategy => {
+dealBreakers.resolutionStrategies.forEach((strategy) => {
   console.log(`${strategy.issue}: ${strategy.feasibility}% feasibility`);
-  console.log('  Strategies:', strategy.strategies.join(', '));
+  console.log("  Strategies:", strategy.strategies.join(", "));
 });
 
 // Assess economic impact
-const impact = monitor.assessEconomicImpact('neg-001');
+const impact = monitor.assessEconomicImpact("neg-001");
 console.log(`Total impact: $${impact.totalImpact.toLocaleString()}`);
-console.log('Beneficiaries:', impact.beneficiaries.join(', '));
-console.log('Sectors at risk:', impact.losers.join(', '));
+console.log("Beneficiaries:", impact.beneficiaries.join(", "));
+console.log("Sectors at risk:", impact.losers.join(", "));
 console.log(`Net benefit: ${impact.netBenefit}`);
 
 // Track economic partnership
 monitor.trackPartnership({
-  id: 'part-001',
-  name: 'Belt and Road Initiative',
+  id: "part-001",
+  name: "Belt and Road Initiative",
   type: PartnershipType.INFRASTRUCTURE_PARTNERSHIP,
-  partners: ['China', 'Various'],
-  established: new Date('2013-01-01'),
-  framework: 'Bilateral agreements and MOUs',
+  partners: ["China", "Various"],
+  established: new Date("2013-01-01"),
+  framework: "Bilateral agreements and MOUs",
   institutions: [],
   mechanisms: [],
-  objectives: ['Infrastructure development', 'Trade facilitation'],
+  objectives: ["Infrastructure development", "Trade facilitation"],
   keyAreas: [],
   projects: [],
   programs: [],
@@ -176,50 +176,50 @@ monitor.trackPartnership({
   strategicValue: 90,
   politicalSignificance: 85,
   lastUpdated: new Date(),
-  sources: []
+  sources: [],
 });
 
 // Evaluate partnership
-const partnershipEval = monitor.evaluatePartnershipEffectiveness('part-001');
+const partnershipEval = monitor.evaluatePartnershipEffectiveness("part-001");
 console.log(`Partnership effectiveness: ${partnershipEval.effectivenessScore}`);
 console.log(`Achievement rate: ${partnershipEval.achievementRate.toFixed(1)}%`);
 console.log(`Economic value: $${partnershipEval.economicValue.toLocaleString()}`);
-console.log('Strengths:', partnershipEval.strengthAreas.join(', '));
+console.log("Strengths:", partnershipEval.strengthAreas.join(", "));
 
 // Track sanctions
 monitor.trackSanction({
-  id: 'sanc-001',
-  name: 'Comprehensive Sanctions',
-  imposedBy: ['USA', 'EU'],
-  targetCountry: 'Country X',
-  startDate: new Date('2020-01-01'),
-  type: 'COMPREHENSIVE',
+  id: "sanc-001",
+  name: "Comprehensive Sanctions",
+  imposedBy: ["USA", "EU"],
+  targetCountry: "Country X",
+  startDate: new Date("2020-01-01"),
+  type: "COMPREHENSIVE",
   scope: {
     trade: true,
     finance: true,
     technology: true,
     travel: true,
     assets: true,
-    sectors: ['Energy', 'Finance', 'Defense'],
-    exemptions: ['Humanitarian goods']
+    sectors: ["Energy", "Finance", "Defense"],
+    exemptions: ["Humanitarian goods"],
   },
   measures: [],
-  objectives: ['Policy change', 'Deterrence'],
-  triggeringEvents: ['Human rights violations'],
-  legalBasis: 'UN Resolution',
+  objectives: ["Policy change", "Deterrence"],
+  triggeringEvents: ["Human rights violations"],
+  legalBasis: "UN Resolution",
   economicImpact: {
     targetCountryGDPImpact: -15,
     tradeReduction: 60,
     investmentLoss: 50000000000,
-    sectorsAffected: ['Energy', 'Finance']
+    sectorsAffected: ["Energy", "Finance"],
   },
   effectiveness: 60,
   compliance: {
     complianceRate: 85,
-    majorCompliers: ['EU countries', 'US allies'],
+    majorCompliers: ["EU countries", "US allies"],
     significantViolators: [],
     enforcementActions: 150,
-    penalties: 500000000
+    penalties: 500000000,
   },
   violations: [],
   enforcement: [],
@@ -227,11 +227,11 @@ monitor.trackSanction({
   waivers: [],
   liftingProspects: 30,
   lastUpdated: new Date(),
-  sources: []
+  sources: [],
 });
 
 // Assess sanction effectiveness
-const sanctionEval = monitor.assessSanctionEffectiveness('sanc-001');
+const sanctionEval = monitor.assessSanctionEffectiveness("sanc-001");
 console.log(`Sanction effectiveness: ${sanctionEval.effectivenessScore}%`);
 console.log(`Economic impact: ${sanctionEval.economicImpact}% GDP reduction`);
 console.log(`Compliance rate: ${sanctionEval.complianceRate}%`);
@@ -239,50 +239,50 @@ console.log(`Relief prospects: ${sanctionEval.reliefProspects}%`);
 
 // Track trade relationship
 monitor.trackTradeRelationship({
-  country1: 'USA',
-  country2: 'China',
+  country1: "USA",
+  country2: "China",
   bilateralTradeVolume: 650000000000,
   year: 2023,
   country1Exports: 150000000000,
   country2Exports: 500000000000,
   tradeBalance: -350000000000,
   topExportsCountry1: [
-    { product: 'Aircraft', value: 20000000000, share: 13, growth: 5 },
-    { product: 'Soybeans', value: 15000000000, share: 10, growth: -2 }
+    { product: "Aircraft", value: 20000000000, share: 13, growth: 5 },
+    { product: "Soybeans", value: 15000000000, share: 10, growth: -2 },
   ],
   topExportsCountry2: [
-    { product: 'Electronics', value: 150000000000, share: 30, growth: 8 },
-    { product: 'Machinery', value: 100000000000, share: 20, growth: 6 }
+    { product: "Electronics", value: 150000000000, share: 30, growth: 8 },
+    { product: "Machinery", value: 100000000000, share: 20, growth: 6 },
   ],
   tradeGrowthRate: 3.5,
-  historicalTrend: 'GROWING',
+  historicalTrend: "GROWING",
   tradeAgreements: [],
   tariffLevel: {
     country1OnCountry2: 15,
-    country2OnCountry1: 8
+    country2OnCountry1: 8,
   },
   tradeFrictions: [],
   disputes: [],
   unrealizedPotential: 100000000000,
-  growthOpportunities: ['Services', 'Clean energy'],
-  barriers: ['Tariffs', 'Non-tariff barriers'],
-  lastUpdated: new Date()
+  growthOpportunities: ["Services", "Clean energy"],
+  barriers: ["Tariffs", "Non-tariff barriers"],
+  lastUpdated: new Date(),
 });
 
 // Analyze bilateral trade
-const tradeAnalysis = monitor.analyzeBilateralTrade('USA', 'China');
+const tradeAnalysis = monitor.analyzeBilateralTrade("USA", "China");
 console.log(`Trade intensity: $${tradeAnalysis.tradeIntensity?.toLocaleString()}`);
 console.log(`Balance: ${tradeAnalysis.balanceAssessment}`);
 console.log(`Growth: ${tradeAnalysis.growth}`);
-console.log('Opportunities:', tradeAnalysis.opportunities?.join(', '));
+console.log("Opportunities:", tradeAnalysis.opportunities?.join(", "));
 
 // Compare trade agreements
-const comparison = monitor.compareTradeAgreements(['neg-001', 'neg-002', 'neg-003']);
+const comparison = monitor.compareTradeAgreements(["neg-001", "neg-002", "neg-003"]);
 console.log(`Most advanced: ${comparison.mostAdvanced}`);
 console.log(`Most comprehensive: ${comparison.mostComprehensive}`);
 console.log(`Highest stakes: ${comparison.highestStakes}`);
-console.log('Insights:');
-comparison.insights.forEach(insight => console.log(`  - ${insight}`));
+console.log("Insights:");
+comparison.insights.forEach((insight) => console.log(`  - ${insight}`));
 ```
 
 ## API
@@ -313,6 +313,7 @@ comparison.insights.forEach(insight => console.log(`  - ${insight}`));
 ## Analysis Capabilities
 
 ### Negotiation Analysis
+
 - Progress tracking
 - Bottleneck identification
 - Deal breaker detection
@@ -321,6 +322,7 @@ comparison.insights.forEach(insight => console.log(`  - ${insight}`));
 - Strategic recommendations
 
 ### Economic Impact Assessment
+
 - Trade creation/diversion
 - GDP impact modeling
 - Employment effects
@@ -329,6 +331,7 @@ comparison.insights.forEach(insight => console.log(`  - ${insight}`));
 - Consumer welfare
 
 ### Partnership Evaluation
+
 - Project tracking
 - Achievement measurement
 - Sustainability assessment
@@ -336,6 +339,7 @@ comparison.insights.forEach(insight => console.log(`  - ${insight}`));
 - Effectiveness scoring
 
 ### Sanction Assessment
+
 - Effectiveness measurement
 - Compliance tracking
 - Impact quantification
@@ -343,6 +347,7 @@ comparison.insights.forEach(insight => console.log(`  - ${insight}`));
 - Relief prospects
 
 ### Trade Analysis
+
 - Bilateral flow analysis
 - Balance assessment
 - Growth trends

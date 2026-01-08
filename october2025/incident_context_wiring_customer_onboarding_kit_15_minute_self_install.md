@@ -24,13 +24,13 @@ groups:
           team: intelgraph
           tenant: pilot
         annotations:
-          summary: 'Gateway GraphQL unreachable'
-          description: 'Synthetic probe failed for 2m. Ingress, DNS, or pods may be unhealthy.'
-          runbook: 'https://internal.docs/runbooks/gateway-down'
+          summary: "Gateway GraphQL unreachable"
+          description: "Synthetic probe failed for 2m. Ingress, DNS, or pods may be unhealthy."
+          runbook: "https://internal.docs/runbooks/gateway-down"
           # Pass trace, links (if scrape emitted X-Trace-Id header metric; else leave blank)
-          trace_id: '{{ $labels.trace_id }}'
-          jaeger_link: 'https://jaeger.example.com/search?traceID={{ $labels.trace_id }}'
-          grafana_link: 'https://grafana.example.com/d/a1b2c3/intelgraph-ga?var-tenant={{ $labels.tenant }}'
+          trace_id: "{{ $labels.trace_id }}"
+          jaeger_link: "https://jaeger.example.com/search?traceID={{ $labels.trace_id }}"
+          grafana_link: "https://grafana.example.com/d/a1b2c3/intelgraph-ga?var-tenant={{ $labels.tenant }}"
       - alert: WalletVerifyDown
         expr: probe_success{job="blackbox-wallet"} == 0
         for: 5m
@@ -39,12 +39,12 @@ groups:
           team: intelgraph
           tenant: pilot
         annotations:
-          summary: 'Wallet verify endpoint unreachable'
-          description: 'Wallet health probe failing (5m).'
-          runbook: 'https://internal.docs/runbooks/wallet-down'
-          trace_id: '{{ $labels.trace_id }}'
-          jaeger_link: 'https://jaeger.example.com/search?traceID={{ $labels.trace_id }}'
-          grafana_link: 'https://grafana.example.com/d/a1b2c3/intelgraph-ga?var-tenant={{ $labels.tenant }}'
+          summary: "Wallet verify endpoint unreachable"
+          description: "Wallet health probe failing (5m)."
+          runbook: "https://internal.docs/runbooks/wallet-down"
+          trace_id: "{{ $labels.trace_id }}"
+          jaeger_link: "https://jaeger.example.com/search?traceID={{ $labels.trace_id }}"
+          grafana_link: "https://grafana.example.com/d/a1b2c3/intelgraph-ga?var-tenant={{ $labels.tenant }}"
 ```
 
 > If your blackbox exporter doesn’t emit `trace_id`, you can enrich metrics at the gateway: export a synthetic probe endpoint that returns `X-Trace-Id` header, scrape with `headers: [X-Trace-Id]` and map via recording rule into a label. Optional; links still work without it.
@@ -57,19 +57,19 @@ receivers:
   - name: pagerduty
     pagerduty_configs:
       - routing_key_file: /etc/alertmanager/secrets/routing_key
-        severity: '{{ .CommonLabels.severity }}'
-        class: 'synthetic'
-        component: '{{ .CommonLabels.job }}'
-        group: '{{ .CommonLabels.team }}'
-        dedup_key: '{{ .GroupLabels.alertname }}:{{ .CommonLabels.tenant }}'
+        severity: "{{ .CommonLabels.severity }}"
+        class: "synthetic"
+        component: "{{ .CommonLabels.job }}"
+        group: "{{ .CommonLabels.team }}"
+        dedup_key: "{{ .GroupLabels.alertname }}:{{ .CommonLabels.tenant }}"
         details:
-          tenant: '{{ .CommonLabels.tenant }}'
-          runbook: '{{ .CommonAnnotations.runbook }}'
-          grafana: '{{ .CommonAnnotations.grafana_link }}'
-          jaeger: '{{ .CommonAnnotations.jaeger_link }}'
-          trace_id: '{{ .CommonAnnotations.trace_id }}'
-          summary: '{{ .CommonAnnotations.summary }}'
-          description: '{{ .CommonAnnotations.description }}'
+          tenant: "{{ .CommonLabels.tenant }}"
+          runbook: "{{ .CommonAnnotations.runbook }}"
+          grafana: "{{ .CommonAnnotations.grafana_link }}"
+          jaeger: "{{ .CommonAnnotations.jaeger_link }}"
+          trace_id: "{{ .CommonAnnotations.trace_id }}"
+          summary: "{{ .CommonAnnotations.summary }}"
+          description: "{{ .CommonAnnotations.description }}"
         send_resolved: true
 ```
 
@@ -80,7 +80,7 @@ receivers:
 name: statuspage-bridge
 on:
   workflow_run:
-    workflows: ['synthetics-check']
+    workflows: ["synthetics-check"]
     types: [completed]
 jobs:
   incident:

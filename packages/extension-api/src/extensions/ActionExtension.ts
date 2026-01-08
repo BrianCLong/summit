@@ -1,4 +1,4 @@
-import { ExtensionPoint } from '../ExtensionPoint.js';
+import { ExtensionPoint } from "../ExtensionPoint.js";
 
 export interface ActionInput {
   actionId: string;
@@ -17,7 +17,7 @@ export interface ActionResult {
  * Action Extension - Defines an executable action that can be performed by the system.
  */
 export interface ActionExtension extends ExtensionPoint<ActionInput, ActionResult> {
-  type: 'action';
+  type: "action";
 
   /**
    * Unique identifier for the action definition
@@ -41,7 +41,7 @@ export interface ActionExtension extends ExtensionPoint<ActionInput, ActionResul
 }
 
 export abstract class BaseActionExtension implements ActionExtension {
-  readonly type = 'action' as const;
+  readonly type = "action" as const;
 
   constructor(
     public readonly id: string,

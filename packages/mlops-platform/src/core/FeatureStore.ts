@@ -3,8 +3,8 @@
  * Online and offline feature storage with versioning and lineage tracking
  */
 
-import { Feature, FeatureStoreConfig, FeatureType } from '../types/index.js';
-import { EventEmitter } from 'events';
+import { Feature, FeatureStoreConfig, FeatureType } from "../types/index.js";
+import { EventEmitter } from "events";
 
 export interface FeatureValue {
   featureId: string;
@@ -43,7 +43,9 @@ export class FeatureStore extends EventEmitter {
   /**
    * Register a feature
    */
-  async registerFeature(feature: Omit<Feature, 'id' | 'createdAt' | 'updatedAt'>): Promise<Feature> {
+  async registerFeature(
+    feature: Omit<Feature, "id" | "createdAt" | "updatedAt">
+  ): Promise<Feature> {
     const id = this.generateFeatureId();
     const now = new Date();
 
@@ -55,7 +57,7 @@ export class FeatureStore extends EventEmitter {
     };
 
     this.features.set(id, fullFeature);
-    this.emit('feature:registered', fullFeature);
+    this.emit("feature:registered", fullFeature);
 
     return fullFeature;
   }
@@ -83,9 +85,7 @@ export class FeatureStore extends EventEmitter {
    * List features in a feature group
    */
   async listFeatureGroup(groupName: string): Promise<Feature[]> {
-    return Array.from(this.features.values()).filter(
-      f => f.featureGroup === groupName
-    );
+    return Array.from(this.features.values()).filter((f) => f.featureGroup === groupName);
   }
 
   /**
@@ -117,14 +117,14 @@ export class FeatureStore extends EventEmitter {
     // Apply TTL if configured
     if (this.config.online.ttl) {
       const cutoff = new Date(Date.now() - this.config.online.ttl * 1000);
-      const filtered = existing.filter(v => v.timestamp > cutoff);
+      const filtered = existing.filter((v) => v.timestamp > cutoff);
       this.onlineStore.set(key, filtered);
     } else {
       // Keep only latest value
       this.onlineStore.set(key, [featureValue]);
     }
 
-    this.emit('feature:written', { entityId, featureId, value });
+    this.emit("feature:written", { entityId, featureId, value });
   }
 
   /**
@@ -154,7 +154,7 @@ export class FeatureStore extends EventEmitter {
     existing.push(featureValue);
     this.offlineStore.set(key, existing);
 
-    this.emit('feature:written-offline', { entityId, featureId, value, timestamp });
+    this.emit("feature:written-offline", { entityId, featureId, value, timestamp });
   }
 
   /**
@@ -175,10 +175,7 @@ export class FeatureStore extends EventEmitter {
   /**
    * Read feature vector (multiple features for an entity)
    */
-  async readFeatureVector(
-    entityId: string,
-    featureIds: string[]
-  ): Promise<FeatureVector> {
+  async readFeatureVector(entityId: string, featureIds: string[]): Promise<FeatureVector> {
     const features: Record<string, any> = {};
 
     for (const featureId of featureIds) {
@@ -207,14 +204,16 @@ export class FeatureStore extends EventEmitter {
 
       for (const featureName of query.featureNames) {
         const feature = await this.getFeatureByName(featureName);
-        if (!feature) {continue;}
+        if (!feature) {
+          continue;
+        }
 
         const key = this.getOfflineKey(entityId, feature.id);
         const values = this.offlineStore.get(key) || [];
 
         // Find value closest to but not after query timestamp
         const relevantValues = values
-          .filter(v => v.timestamp <= query.timestamp)
+          .filter((v) => v.timestamp <= query.timestamp)
           .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 
         if (relevantValues.length > 0) {
@@ -263,10 +262,7 @@ export class FeatureStore extends EventEmitter {
   /**
    * Batch read features
    */
-  async batchRead(
-    entityIds: string[],
-    featureIds: string[]
-  ): Promise<FeatureVector[]> {
+  async batchRead(entityIds: string[], featureIds: string[]): Promise<FeatureVector[]> {
     const results: FeatureVector[] = [];
 
     for (const entityId of entityIds) {
@@ -280,7 +276,7 @@ export class FeatureStore extends EventEmitter {
   /**
    * Compute feature statistics
    */
-  async computeStatistics(featureId: string): Promise<Feature['statistics']> {
+  async computeStatistics(featureId: string): Promise<Feature["statistics"]> {
     const feature = this.features.get(featureId);
     if (!feature) {
       throw new Error(`Feature ${featureId} not found`);
@@ -290,10 +286,8 @@ export class FeatureStore extends EventEmitter {
 
     // Collect all values from offline store
     for (const values of this.offlineStore.values()) {
-      const featureValues = values
-        .filter(v => v.featureId === featureId)
-        .map(v => v.value);
-      allValues.push(...featureValues.filter(v => typeof v === 'number'));
+      const featureValues = values.filter((v) => v.featureId === featureId).map((v) => v.value);
+      allValues.push(...featureValues.filter((v) => typeof v === "number"));
     }
 
     if (allValues.length === 0) {
@@ -305,8 +299,7 @@ export class FeatureStore extends EventEmitter {
     const mean = sum / allValues.length;
 
     const variance =
-      allValues.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
-      allValues.length;
+      allValues.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / allValues.length;
     const stddev = Math.sqrt(variance);
 
     const statistics = {
@@ -333,7 +326,7 @@ export class FeatureStore extends EventEmitter {
   ): Promise<void> {
     const features = await this.listFeatureGroup(featureGroupName);
 
-    this.emit('materialization:started', {
+    this.emit("materialization:started", {
       featureGroup: featureGroupName,
       featureCount: features.length,
     });
@@ -344,7 +337,7 @@ export class FeatureStore extends EventEmitter {
     // 3. Write to offline store
     // 4. Update online store if needed
 
-    this.emit('materialization:completed', {
+    this.emit("materialization:completed", {
       featureGroup: featureGroupName,
     });
   }
@@ -358,16 +351,16 @@ export class FeatureStore extends EventEmitter {
   ): Promise<{ valid: boolean; violations: string[] }> {
     const feature = this.features.get(featureId);
     if (!feature) {
-      return { valid: false, violations: ['Feature not found'] };
+      return { valid: false, violations: ["Feature not found"] };
     }
 
     const violations: string[] = [];
 
     for (const constraint of feature.constraints) {
       switch (constraint.type) {
-        case 'range':
+        case "range":
           if (
-            typeof value === 'number' &&
+            typeof value === "number" &&
             (value < constraint.config.min || value > constraint.config.max)
           ) {
             violations.push(
@@ -376,16 +369,16 @@ export class FeatureStore extends EventEmitter {
           }
           break;
 
-        case 'not-null':
+        case "not-null":
           if (value === null || value === undefined) {
-            violations.push('Value cannot be null');
+            violations.push("Value cannot be null");
           }
           break;
 
-        case 'enum':
+        case "enum":
           if (!constraint.config.values.includes(value)) {
             violations.push(
-              `Value ${value} not in allowed values: ${constraint.config.values.join(', ')}`
+              `Value ${value} not in allowed values: ${constraint.config.values.join(", ")}`
             );
           }
           break;
@@ -422,10 +415,7 @@ export class FeatureStore extends EventEmitter {
   /**
    * Update feature
    */
-  async updateFeature(
-    id: string,
-    updates: Partial<Feature>
-  ): Promise<Feature | null> {
+  async updateFeature(id: string, updates: Partial<Feature>): Promise<Feature | null> {
     const feature = this.features.get(id);
     if (!feature) {
       return null;
@@ -440,7 +430,7 @@ export class FeatureStore extends EventEmitter {
     };
 
     this.features.set(id, updated);
-    this.emit('feature:updated', updated);
+    this.emit("feature:updated", updated);
 
     return updated;
   }
@@ -463,9 +453,9 @@ export class FeatureStore extends EventEmitter {
         keysToDelete.push(key);
       }
     }
-    keysToDelete.forEach(key => this.onlineStore.delete(key));
+    keysToDelete.forEach((key) => this.onlineStore.delete(key));
 
-    this.emit('feature:deleted', feature);
+    this.emit("feature:deleted", feature);
 
     return true;
   }

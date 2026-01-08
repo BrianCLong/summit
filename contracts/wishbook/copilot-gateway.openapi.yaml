@@ -16,7 +16,7 @@ paths:
                 prompt: { type: string }
                 scope: { type: object }
       responses:
-        '200': { description: Preview with estimates }
+        "200": { description: Preview with estimates }
   /copilot/v1/rag/query:
     post:
       summary: GraphRAG with inline citations and redaction awareness
@@ -31,4 +31,4 @@ paths:
                 kbId: { type: string }
                 redaction: { type: boolean, default: true }
       responses:
-        '200': { description: Answer with citations }
+        "200": { description: Answer with citations }

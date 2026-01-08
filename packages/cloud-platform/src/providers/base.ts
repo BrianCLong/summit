@@ -3,7 +3,7 @@
  * Abstract base class for all cloud providers
  */
 
-import { CloudProvider, CloudConfig, CloudResource, CloudMetrics } from '../types.js';
+import { CloudProvider, CloudConfig, CloudResource, CloudMetrics } from "../types.js";
 
 export abstract class BaseCloudProvider {
   protected provider: CloudProvider;

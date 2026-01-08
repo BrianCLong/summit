@@ -51,14 +51,14 @@ BACKUP_ID=summit-backup-full-20250120T020000Z
 
 ## Backup Sets
 
-| Set | Description | Frequency | Use Case |
-|-----|-------------|-----------|----------|
-| `full` | Complete system backup | Daily | Disaster recovery, compliance |
-| `minimal` | Core databases only | Hourly | Quick testing, development |
-| `tenant` | Per-tenant data | Hourly | Tenant isolation, GDPR |
-| `project` | Per-project/investigation | On-demand | Archival, data portability |
-| `config_only` | Configuration & policies | Every 4h | Config management |
-| `disaster_recovery` | Multi-region DR snapshot | Every 6h | Production failover |
+| Set                 | Description               | Frequency | Use Case                      |
+| ------------------- | ------------------------- | --------- | ----------------------------- |
+| `full`              | Complete system backup    | Daily     | Disaster recovery, compliance |
+| `minimal`           | Core databases only       | Hourly    | Quick testing, development    |
+| `tenant`            | Per-tenant data           | Hourly    | Tenant isolation, GDPR        |
+| `project`           | Per-project/investigation | On-demand | Archival, data portability    |
+| `config_only`       | Configuration & policies  | Every 4h  | Config management             |
+| `disaster_recovery` | Multi-region DR snapshot  | Every 6h  | Production failover           |
 
 ## Key Features
 
@@ -172,6 +172,7 @@ Summit Backup & Restore Framework
 See the complete troubleshooting guide in [docs/BACKUP_RESTORE_DR_GUIDE.md](docs/BACKUP_RESTORE_DR_GUIDE.md#troubleshooting).
 
 Common issues:
+
 - Disk space errors → Clean up old backups
 - Permission denied → Check file permissions
 - S3 upload fails → Verify AWS credentials

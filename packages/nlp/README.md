@@ -20,11 +20,11 @@ pnpm add @intelgraph/nlp
 ## Quick Start
 
 ```typescript
-import { TextPreprocessor, Tokenizer, LanguageDetector } from '@intelgraph/nlp';
+import { TextPreprocessor, Tokenizer, LanguageDetector } from "@intelgraph/nlp";
 
 // Language detection
 const detector = new LanguageDetector();
-const language = detector.detect('Hello world');
+const language = detector.detect("Hello world");
 
 // Text preprocessing
 const preprocessor = new TextPreprocessor({
@@ -33,11 +33,11 @@ const preprocessor = new TextPreprocessor({
   lemmatize: true,
 });
 
-const cleaned = preprocessor.preprocess('Your text here');
+const cleaned = preprocessor.preprocess("Your text here");
 
 // Tokenization
 const tokenizer = new Tokenizer();
-const tokens = tokenizer.tokenize('Natural language processing');
+const tokens = tokenizer.tokenize("Natural language processing");
 ```
 
 ## Documentation

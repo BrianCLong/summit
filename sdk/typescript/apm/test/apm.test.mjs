@@ -50,7 +50,10 @@ test('planQuery reduces exposure and join breadth', () => {
 
   assert.equal(response.removed_joins.length, 1);
   assert.equal(response.removed_joins[0], 'r');
-  assert.equal(response.reduced_sql, 'SELECT o.order_id, o.total, c.name FROM orders AS o JOIN customers AS c ON o.customer_id = c.id');
+  assert.equal(
+    response.reduced_sql,
+    'SELECT o.order_id, o.total, c.name FROM orders AS o JOIN customers AS c ON o.customer_id = c.id',
+  );
   assert.ok(response.exposure_delta.reduced.columns < response.exposure_delta.baseline.columns);
   assert.ok(response.exposure_delta.reduced.rows < response.exposure_delta.baseline.rows);
   assert.ok(response.achieved_accuracy >= request.goal.accuracy_target);

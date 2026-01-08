@@ -2,24 +2,35 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "RevOps Governance Decision",
   "type": "object",
-  "required": ["allowed", "reason", "violations", "actions", "risk_score", "flags", "sla_breaches", "forecast_category", "policy_bundle_version", "naming"],
+  "required": [
+    "allowed",
+    "reason",
+    "violations",
+    "actions",
+    "risk_score",
+    "flags",
+    "sla_breaches",
+    "forecast_category",
+    "policy_bundle_version",
+    "naming"
+  ],
   "properties": {
-    "allowed": {"type": "boolean"},
-    "reason": {"type": "string"},
-    "violations": {"type": "array", "items": {"type": "string"}},
-    "actions": {"type": "array", "items": {"type": "string"}},
-    "risk_score": {"type": "number"},
-    "flags": {"type": "array", "items": {"type": "string"}},
-    "sla_breaches": {"type": "array", "items": {"type": "string"}},
-    "forecast_category": {"type": "string"},
-    "policy_bundle_version": {"type": "string"},
+    "allowed": { "type": "boolean" },
+    "reason": { "type": "string" },
+    "violations": { "type": "array", "items": { "type": "string" } },
+    "actions": { "type": "array", "items": { "type": "string" } },
+    "risk_score": { "type": "number" },
+    "flags": { "type": "array", "items": { "type": "string" } },
+    "sla_breaches": { "type": "array", "items": { "type": "string" } },
+    "forecast_category": { "type": "string" },
+    "policy_bundle_version": { "type": "string" },
     "naming": {
       "type": "object",
       "properties": {
-        "deal": {"type": "string"},
-        "campaign": {"type": "string"},
-        "territory": {"type": "string"},
-        "skus": {"type": "array", "items": {"type": "string"}}
+        "deal": { "type": "string" },
+        "campaign": { "type": "string" },
+        "territory": { "type": "string" },
+        "skus": { "type": "array", "items": { "type": "string" } }
       }
     }
   }

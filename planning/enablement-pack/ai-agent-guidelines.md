@@ -25,26 +25,26 @@ graph TD
 
 ### DO ✅
 
-*   **Always run golden path:** `pnpm run ci` (lint, typecheck, test) before claiming success.
-*   **Follow existing patterns:** Read `planning/enablement-pack/` docs for conventions.
-*   **Write tests:** Include unit and integration tests for new features.
-*   **Document changes:** Update relevant docs (README, ONBOARDING, API docs).
-*   **Use TypeScript types:** Avoid `any`, prefer interfaces and types.
-*   **Handle errors gracefully:** Use try/catch, return error objects.
-*   **Reference file paths:** Use `file_path:line_number` pattern in responses.
-*   **Verify incrementally:** Test each change before moving to the next.
-*   **Use conventional commits:** Follow commit message standards.
+- **Always run golden path:** `pnpm run ci` (lint, typecheck, test) before claiming success.
+- **Follow existing patterns:** Read `planning/enablement-pack/` docs for conventions.
+- **Write tests:** Include unit and integration tests for new features.
+- **Document changes:** Update relevant docs (README, ONBOARDING, API docs).
+- **Use TypeScript types:** Avoid `any`, prefer interfaces and types.
+- **Handle errors gracefully:** Use try/catch, return error objects.
+- **Reference file paths:** Use `file_path:line_number` pattern in responses.
+- **Verify incrementally:** Test each change before moving to the next.
+- **Use conventional commits:** Follow commit message standards.
 
 ### DON'T ❌
 
-*   **Skip verification:** Never claim completion without running `pnpm run ci` or `pnpm run test`.
-*   **Commit secrets:** Never commit credentials, API keys, or sensitive data.
-*   **Break golden path:** Ensure Investigation → Entities → Relationships → Copilot → Results workflow.
-*   **Use production defaults:** Never use default passwords or localhost in production config.
-*   **Bypass security:** Don't disable security checks or skip validation.
-*   **Ignore test failures:** Fix all failing tests before committing.
-*   **Batch too much:** Keep PRs focused and reviewable (< 500 lines preferred).
-*   **Commit debug code:** Remove console.log, debugger statements, and .only() tests.
+- **Skip verification:** Never claim completion without running `pnpm run ci` or `pnpm run test`.
+- **Commit secrets:** Never commit credentials, API keys, or sensitive data.
+- **Break golden path:** Ensure Investigation → Entities → Relationships → Copilot → Results workflow.
+- **Use production defaults:** Never use default passwords or localhost in production config.
+- **Bypass security:** Don't disable security checks or skip validation.
+- **Ignore test failures:** Fix all failing tests before committing.
+- **Batch too much:** Keep PRs focused and reviewable (< 500 lines preferred).
+- **Commit debug code:** Remove console.log, debugger statements, and .only() tests.
 
 ## Multi-Agent Coordination
 

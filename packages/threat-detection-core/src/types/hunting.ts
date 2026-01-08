@@ -2,22 +2,22 @@
  * Threat hunting types
  */
 
-import { ThreatCategory, ThreatSeverity } from './events';
+import { ThreatCategory, ThreatSeverity } from "./events";
 
 export enum HuntType {
-  HYPOTHESIS_DRIVEN = 'HYPOTHESIS_DRIVEN',
-  INDICATOR_BASED = 'INDICATOR_BASED',
-  TTP_BASED = 'TTP_BASED',
-  ANOMALY_BASED = 'ANOMALY_BASED',
-  INTELLIGENCE_DRIVEN = 'INTELLIGENCE_DRIVEN'
+  HYPOTHESIS_DRIVEN = "HYPOTHESIS_DRIVEN",
+  INDICATOR_BASED = "INDICATOR_BASED",
+  TTP_BASED = "TTP_BASED",
+  ANOMALY_BASED = "ANOMALY_BASED",
+  INTELLIGENCE_DRIVEN = "INTELLIGENCE_DRIVEN",
 }
 
 export enum HuntStatus {
-  PLANNING = 'PLANNING',
-  IN_PROGRESS = 'IN_PROGRESS',
-  PAUSED = 'PAUSED',
-  COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED'
+  PLANNING = "PLANNING",
+  IN_PROGRESS = "IN_PROGRESS",
+  PAUSED = "PAUSED",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
 }
 
 export interface ThreatHunt {
@@ -107,7 +107,7 @@ export interface HuntFinding {
 
   // Evidence
   evidence: {
-    type: 'event' | 'log' | 'file' | 'network_traffic' | 'screenshot' | 'other';
+    type: "event" | "log" | "file" | "network_traffic" | "screenshot" | "other";
     description: string;
     reference: string; // ID or path
     timestamp: Date;
@@ -153,7 +153,7 @@ export interface HuntQuery {
   // Query details
   name: string;
   description: string;
-  queryType: 'sql' | 'kql' | 'spl' | 'lucene' | 'regex' | 'graph' | 'custom';
+  queryType: "sql" | "kql" | "spl" | "lucene" | "regex" | "graph" | "custom";
   query: string;
 
   // Target
@@ -196,7 +196,7 @@ export interface HuntPlaybook {
     order: number;
     name: string;
     description: string;
-    type: 'query' | 'analysis' | 'correlation' | 'validation' | 'documentation';
+    type: "query" | "analysis" | "correlation" | "validation" | "documentation";
 
     // Query templates
     queryTemplates?: {
@@ -282,7 +282,7 @@ export interface HuntMetrics {
 export interface HuntingTool {
   id: string;
   name: string;
-  type: 'query_builder' | 'log_analyzer' | 'network_analyzer' | 'memory_analyzer' | 'file_analyzer';
+  type: "query_builder" | "log_analyzer" | "network_analyzer" | "memory_analyzer" | "file_analyzer";
 
   // Integration
   endpoint?: string;

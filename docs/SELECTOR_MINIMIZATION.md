@@ -59,6 +59,7 @@ This feature implements comprehensive data minimization controls, including:
 ### Database Schema
 
 **Core Tables:**
+
 - `query_scope_metrics` - Every query's selector expansion and scope
 - `selector_minimization_baselines` - Statistical baselines for anomaly detection
 - `tripwire_config` - Configurable thresholds per tenant/query type
@@ -66,10 +67,12 @@ This feature implements comprehensive data minimization controls, including:
 - `tripwire_trend_metrics` - Aggregated metrics over time
 
 **PNC Reporting:**
+
 - `proof_of_non_collection_reports` - Monthly PNC reports
 - `pnc_audit_samples` - Individual audit samples
 
 **Views:**
+
 - `recent_anomalies` - Last 7 days of anomalous queries
 - `tripwire_dashboard` - Summary of violations and trends
 
@@ -80,7 +83,10 @@ This feature implements comprehensive data minimization controls, including:
 Wrap resolvers with selector tracking:
 
 ```typescript
-import { withSelectorTracking, withReasonRequired } from '../graphql/middleware/selectorMinimizationMiddleware.js';
+import {
+  withSelectorTracking,
+  withReasonRequired,
+} from "../graphql/middleware/selectorMinimizationMiddleware.js";
 
 const resolvers = {
   Query: {
@@ -138,13 +144,14 @@ REQUIRE_REASON_FOR_EXPANSION_RATIO=5.0
 Jobs run automatically via cron:
 
 ```typescript
-import { initializeSelectorMinimizationJobs } from './jobs/selectorMinimizationJobs.js';
+import { initializeSelectorMinimizationJobs } from "./jobs/selectorMinimizationJobs.js";
 
 // In your server startup
 initializeSelectorMinimizationJobs();
 ```
 
 **Job Schedule:**
+
 - **Daily 2:00 AM** - Calculate tripwire metrics for all tenants
 - **Monday 3:00 AM** - Weekly metrics aggregation
 - **1st of month 4:00 AM** - Monthly metrics aggregation
@@ -156,10 +163,10 @@ initializeSelectorMinimizationJobs();
 ### 5. Query Metrics Dashboard
 
 ```typescript
-import { tripwireMetricsService } from './services/TripwireMetricsService.js';
+import { tripwireMetricsService } from "./services/TripwireMetricsService.js";
 
 // Get improvement dashboard
-const dashboard = await tripwireMetricsService.getImprovementDashboard('tenant-123');
+const dashboard = await tripwireMetricsService.getImprovementDashboard("tenant-123");
 
 console.log(dashboard);
 // {
@@ -181,17 +188,17 @@ console.log(dashboard);
 ### 6. Generate PNC Report
 
 ```typescript
-import { proofOfNonCollectionService } from './services/ProofOfNonCollectionService.js';
+import { proofOfNonCollectionService } from "./services/ProofOfNonCollectionService.js";
 
 // Generate report for last month
 const report = await proofOfNonCollectionService.generateMonthlyReport(
-  'tenant-123',
+  "tenant-123",
   2025,
   10, // October
   {
-    dataCategories: ['biometric_data', 'genetic_data', 'health_records'],
+    dataCategories: ["biometric_data", "genetic_data", "health_records"],
     sampleRate: 0.05, // 5% sample
-    samplingMethod: 'stratified'
+    samplingMethod: "stratified",
   }
 );
 
@@ -224,6 +231,7 @@ if (report.violationsDetected === 0) {
 ### Anomaly Detection
 
 Uses statistical methods:
+
 - **Z-score analysis** - Detects queries >4σ from baseline (default)
 - **P95/P99 thresholds** - Flags queries exceeding historical 95th/99th percentiles
 - **Pattern matching** - Identifies unusual query patterns
@@ -231,6 +239,7 @@ Uses statistical methods:
 ### Trend Analysis
 
 Linear regression over time shows:
+
 - **Improvement rate** - How fast violations are decreasing
 - **Projection** - Estimated time to reach <1% violation rate
 - **Consistency** - Consecutive periods below threshold
@@ -323,6 +332,7 @@ Alert Closed (status: resolved)
 > Personal data shall be adequate, relevant and limited to what is necessary
 
 **Implementation:**
+
 - Tracks whether queries access more data than needed
 - Requires justification for broad queries
 - Demonstrates reduction in over-broad queries over time
@@ -333,6 +343,7 @@ Alert Closed (status: resolved)
 > Businesses shall not collect personal information beyond what is reasonably necessary
 
 **Implementation:**
+
 - Monitors record access patterns
 - Alerts on excessive data collection
 - Provides audit trail of access justification
@@ -343,6 +354,7 @@ Alert Closed (status: resolved)
 > Restricts access to information assets to authorized users
 
 **Implementation:**
+
 - Reason-for-access requirement
 - Purpose-based access control (via PolicyEnforcer)
 - Audit logging of all access decisions
@@ -391,15 +403,15 @@ Alert Closed (status: resolved)
 ### Unit Tests
 
 ```typescript
-import { selectorMinimizationService } from './services/SelectorMinimizationService.js';
+import { selectorMinimizationService } from "./services/SelectorMinimizationService.js";
 
-describe('Selector Minimization', () => {
-  it('should detect tripwire violations', async () => {
+describe("Selector Minimization", () => {
+  it("should detect tripwire violations", async () => {
     const metrics = {
-      tenantId: 'test',
-      userId: 'user1',
-      queryId: 'q1',
-      queryType: 'graphql',
+      tenantId: "test",
+      userId: "user1",
+      queryId: "q1",
+      queryType: "graphql",
       initialSelectors: 1,
       expandedSelectors: 15,
       recordsAccessed: 1000,
@@ -412,9 +424,9 @@ describe('Selector Minimization', () => {
     await selectorMinimizationService.trackQueryScope(metrics);
 
     // Check that violation was detected
-    const alerts = await selectorMinimizationService.getOpenAlerts('test');
+    const alerts = await selectorMinimizationService.getOpenAlerts("test");
     expect(alerts.length).toBeGreaterThan(0);
-    expect(alerts[0].alertType).toBe('expansion_threshold');
+    expect(alerts[0].alertType).toBe("expansion_threshold");
   });
 });
 ```
@@ -459,6 +471,7 @@ All events are logged with structured data:
 ### High False Positive Rate
 
 Adjust anomaly detection threshold:
+
 ```bash
 SELECTOR_ANOMALY_Z_SCORE=5.0  # More lenient (default: 4.0)
 ```
@@ -497,6 +510,7 @@ SELECTOR_ANOMALY_Z_SCORE=5.0  # More lenient (default: 4.0)
 ## Support
 
 For questions or issues:
+
 - Check logs: `/var/log/summit/selector-minimization.log`
 - Review metrics: Prometheus dashboard
 - Consult configuration: `/server/src/config/selectorMinimization.ts`

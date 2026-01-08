@@ -1,4 +1,4 @@
-import { pino, type Logger } from 'pino';
+import { pino, type Logger } from "pino";
 
 export interface PrivacyBudget {
   epsilon: number; // Privacy loss parameter
@@ -8,7 +8,7 @@ export interface PrivacyBudget {
 }
 
 export interface NoiseParameters {
-  mechanism: 'gaussian' | 'laplace';
+  mechanism: "gaussian" | "laplace";
   sensitivity: number;
   epsilon: number;
   delta?: number;
@@ -23,12 +23,12 @@ export class DifferentialPrivacy {
   private privacyBudget: PrivacyBudget;
 
   constructor(epsilon: number, delta: number, logger?: Logger) {
-    this.logger = logger || pino({ name: 'DifferentialPrivacy' });
+    this.logger = logger || pino({ name: "DifferentialPrivacy" });
     this.privacyBudget = {
       epsilon,
       delta,
       spent: 0,
-      remaining: epsilon
+      remaining: epsilon,
     };
   }
 
@@ -38,14 +38,14 @@ export class DifferentialPrivacy {
   addGaussianNoise(data: number[], sensitivity: number, epsilon: number, delta: number): number[] {
     const sigma = this.calculateGaussianNoiseSigma(sensitivity, epsilon, delta);
 
-    const noisyData = data.map(value => {
+    const noisyData = data.map((value) => {
       const noise = this.sampleGaussian(0, sigma);
       return value + noise;
     });
 
     this.updatePrivacyBudget(epsilon);
 
-    this.logger.debug({ sigma, epsilon, delta }, 'Added Gaussian noise');
+    this.logger.debug({ sigma, epsilon, delta }, "Added Gaussian noise");
 
     return noisyData;
   }
@@ -56,14 +56,14 @@ export class DifferentialPrivacy {
   addLaplaceNoise(data: number[], sensitivity: number, epsilon: number): number[] {
     const scale = sensitivity / epsilon;
 
-    const noisyData = data.map(value => {
+    const noisyData = data.map((value) => {
       const noise = this.sampleLaplace(scale);
       return value + noise;
     });
 
     this.updatePrivacyBudget(epsilon);
 
-    this.logger.debug({ scale, epsilon }, 'Added Laplace noise');
+    this.logger.debug({ scale, epsilon }, "Added Laplace noise");
 
     return noisyData;
   }
@@ -76,7 +76,7 @@ export class DifferentialPrivacy {
 
     if (norm > clipNorm) {
       const scale = clipNorm / norm;
-      return gradients.map(g => g * scale);
+      return gradients.map((g) => g * scale);
     }
 
     return gradients;
@@ -96,9 +96,7 @@ export class DifferentialPrivacy {
     }
 
     // Sum all values
-    const sum = values[0].map((_, i) =>
-      values.reduce((acc, val) => acc + val[i], 0)
-    );
+    const sum = values[0].map((_, i) => values.reduce((acc, val) => acc + val[i], 0));
 
     // Add noise for privacy
     return this.addGaussianNoise(sum, sensitivity, epsilon, delta);
@@ -114,7 +112,7 @@ export class DifferentialPrivacy {
     delta: number
   ): number[] {
     const sum = this.privateSumAggregation(values, sensitivity, epsilon, delta);
-    return sum.map(v => v / values.length);
+    return sum.map((v) => v / values.length);
   }
 
   /**
@@ -125,12 +123,12 @@ export class DifferentialPrivacy {
     threshold: number
   ): Promise<number[]> {
     if (localUpdates.size < threshold) {
-      throw new Error('Insufficient participants for secure aggregation');
+      throw new Error("Insufficient participants for secure aggregation");
     }
 
     this.logger.info(
       { participants: localUpdates.size, threshold },
-      'Performing secure aggregation'
+      "Performing secure aggregation"
     );
 
     // In a real implementation, this would:
@@ -140,8 +138,8 @@ export class DifferentialPrivacy {
     // 4. Decrypt only the aggregate result
 
     const allValues = Array.from(localUpdates.values());
-    const aggregated = allValues[0].map((_, i) =>
-      allValues.reduce((sum, val) => sum + val[i], 0) / allValues.length
+    const aggregated = allValues[0].map(
+      (_, i) => allValues.reduce((sum, val) => sum + val[i], 0) / allValues.length
     );
 
     return aggregated;
@@ -150,11 +148,7 @@ export class DifferentialPrivacy {
   /**
    * Calculate Gaussian noise sigma
    */
-  private calculateGaussianNoiseSigma(
-    sensitivity: number,
-    epsilon: number,
-    delta: number
-  ): number {
+  private calculateGaussianNoiseSigma(sensitivity: number, epsilon: number, delta: number): number {
     // Gaussian mechanism: σ = (sensitivity * sqrt(2 * ln(1.25/δ))) / ε
     return (sensitivity * Math.sqrt(2 * Math.log(1.25 / delta))) / epsilon;
   }
@@ -186,7 +180,7 @@ export class DifferentialPrivacy {
     this.privacyBudget.remaining = this.privacyBudget.epsilon - this.privacyBudget.spent;
 
     if (this.privacyBudget.remaining < 0) {
-      this.logger.warn('Privacy budget exceeded!');
+      this.logger.warn("Privacy budget exceeded!");
     }
   }
 
@@ -210,7 +204,7 @@ export class DifferentialPrivacy {
   resetBudget(): void {
     this.privacyBudget.spent = 0;
     this.privacyBudget.remaining = this.privacyBudget.epsilon;
-    this.logger.info('Privacy budget reset');
+    this.logger.info("Privacy budget reset");
   }
 
   /**

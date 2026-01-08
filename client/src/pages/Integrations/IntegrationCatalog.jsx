@@ -8,7 +8,7 @@
  * @module pages/Integrations/IntegrationCatalog
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from "react";
 import {
   Box,
   Container,
@@ -45,7 +45,7 @@ import {
   Tabs,
   Tab,
   CircularProgress,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Search,
   Add,
@@ -60,43 +60,43 @@ import {
   Security,
   Approval,
   History,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 import {
   useIntegrationCatalog,
   useIntegrations,
   useIntegrationOperations,
   useIntegrationApprovals,
   useIntegrationAudit,
-} from '../../hooks/useIntegrations';
+} from "../../hooks/useIntegrations";
 
 // Category icons
 const categoryIcons = {
-  communication: '💬',
-  project_management: '📋',
-  source_control: '📦',
-  monitoring: '📊',
-  security: '🔒',
-  cloud: '☁️',
-  data: '🗄️',
-  custom: '⚙️',
+  communication: "💬",
+  project_management: "📋",
+  source_control: "📦",
+  monitoring: "📊",
+  security: "🔒",
+  cloud: "☁️",
+  data: "🗄️",
+  custom: "⚙️",
 };
 
 // Risk level colors
 const riskColors = {
-  low: 'success',
-  medium: 'warning',
-  high: 'error',
-  critical: 'error',
+  low: "success",
+  medium: "warning",
+  high: "error",
+  critical: "error",
 };
 
 // Status colors
 const statusColors = {
-  available: 'default',
-  configured: 'info',
-  connected: 'success',
-  disconnected: 'warning',
-  error: 'error',
-  pending_approval: 'secondary',
+  available: "default",
+  configured: "info",
+  connected: "success",
+  disconnected: "warning",
+  error: "error",
+  pending_approval: "secondary",
 };
 
 // Tab Panel Component
@@ -117,7 +117,7 @@ function TabPanel({ children, value, index, ...other }) {
 // Setup Dialog Component
 function SetupDialog({ open, manifest, onClose, onSetup }) {
   const { setup, loading, error } = useIntegrationOperations();
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
   const [config, setConfig] = useState({});
 
   React.useEffect(() => {
@@ -142,39 +142,33 @@ function SetupDialog({ open, manifest, onClose, onSetup }) {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Typography variant="h5">
             {categoryIcons[manifest.category]} Set Up {manifest.name}
           </Typography>
         </Box>
       </DialogTitle>
       <DialogContent dividers>
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
           <Box>
             <Typography variant="body2" color="text.secondary" gutterBottom>
               {manifest.description}
             </Typography>
-            <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-              <Chip
-                label={manifest.category}
-                size="small"
-                color="primary"
-                variant="outlined"
-              />
+            <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
+              <Chip label={manifest.category} size="small" color="primary" variant="outlined" />
               <Chip
                 label={`Risk: ${manifest.riskLevel}`}
                 size="small"
                 color={riskColors[manifest.riskLevel]}
               />
-              {manifest.riskLevel === 'high' || manifest.riskLevel === 'critical' ? (
-                <Chip
-                  icon={<Approval />}
-                  label="Requires Approval"
-                  size="small"
-                  color="warning"
-                />
+              {manifest.riskLevel === "high" || manifest.riskLevel === "critical" ? (
+                <Chip icon={<Approval />} label="Requires Approval" size="small" color="warning" />
               ) : null}
             </Box>
           </Box>
@@ -194,8 +188,10 @@ function SetupDialog({ open, manifest, onClose, onSetup }) {
           {manifest.configSchema?.properties ? (
             Object.entries(manifest.configSchema.properties).map(([key, schema]) => (
               <Box key={key}>
-                {schema.type === 'boolean' ? (
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                {schema.type === "boolean" ? (
+                  <Box
+                    sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                  >
                     <Box>
                       <Typography variant="body2">{key}</Typography>
                       <Typography variant="caption" color="text.secondary">
@@ -211,9 +207,9 @@ function SetupDialog({ open, manifest, onClose, onSetup }) {
                   <TextField
                     fullWidth
                     label={key}
-                    type={schema.secret ? 'password' : 'text'}
+                    type={schema.secret ? "password" : "text"}
                     helperText={schema.description}
-                    value={config[key] ?? ''}
+                    value={config[key] ?? ""}
                     onChange={(e) => setConfig({ ...config, [key]: e.target.value })}
                     required={manifest.configSchema.required?.includes(key)}
                   />
@@ -224,16 +220,16 @@ function SetupDialog({ open, manifest, onClose, onSetup }) {
             <Alert severity="info">No configuration required for this integration.</Alert>
           )}
 
-          <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+          <Box sx={{ p: 2, bgcolor: "grey.50", borderRadius: 1 }}>
             <Typography variant="subtitle2" gutterBottom>
               Capabilities
             </Typography>
             {manifest.capabilities?.map((cap) => (
-              <Box key={cap.id} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <Box key={cap.id} sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
                 <Chip
                   size="small"
                   label={cap.direction}
-                  color={cap.direction === 'inbound' ? 'info' : 'primary'}
+                  color={cap.direction === "inbound" ? "info" : "primary"}
                   variant="outlined"
                 />
                 <Typography variant="body2">{cap.name}</Typography>
@@ -253,7 +249,7 @@ function SetupDialog({ open, manifest, onClose, onSetup }) {
           disabled={loading || !name}
           startIcon={loading ? <CircularProgress size={16} /> : <Add />}
         >
-          {loading ? 'Setting Up...' : 'Set Up Integration'}
+          {loading ? "Setting Up..." : "Set Up Integration"}
         </Button>
       </DialogActions>
     </Dialog>
@@ -283,33 +279,27 @@ function IntegrationCard({ integration, manifest, onConnect, onDisconnect, onExe
   };
 
   return (
-    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <CardContent sx={{ flexGrow: 1 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+        <Box
+          sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}
+        >
           <Typography variant="h6">
-            {categoryIcons[manifest?.category] || '⚙️'} {integration.name}
+            {categoryIcons[manifest?.category] || "⚙️"} {integration.name}
           </Typography>
-          <Chip
-            label={integration.status}
-            size="small"
-            color={statusColors[integration.status]}
-          />
+          <Chip label={integration.status} size="small" color={statusColors[integration.status]} />
         </Box>
 
         <Typography variant="body2" color="text.secondary" gutterBottom>
           {manifest?.description}
         </Typography>
 
-        <Box sx={{ mt: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-          <Chip
-            label={manifest?.category}
-            size="small"
-            variant="outlined"
-          />
+        <Box sx={{ mt: 2, display: "flex", gap: 1, flexWrap: "wrap" }}>
+          <Chip label={manifest?.category} size="small" variant="outlined" />
           <Chip
             label={`Health: ${integration.connectionHealth}`}
             size="small"
-            color={integration.connectionHealth === 'healthy' ? 'success' : 'warning'}
+            color={integration.connectionHealth === "healthy" ? "success" : "warning"}
           />
         </Box>
 
@@ -319,14 +309,14 @@ function IntegrationCard({ integration, manifest, onConnect, onDisconnect, onExe
           </Alert>
         )}
 
-        {integration.status === 'pending_approval' && (
+        {integration.status === "pending_approval" && (
           <Alert severity="info" sx={{ mt: 2 }}>
             This integration requires approval before it can be connected.
           </Alert>
         )}
       </CardContent>
       <CardActions sx={{ p: 2, pt: 0 }}>
-        {integration.status === 'connected' ? (
+        {integration.status === "connected" ? (
           <>
             <Button
               size="small"
@@ -336,15 +326,11 @@ function IntegrationCard({ integration, manifest, onConnect, onDisconnect, onExe
             >
               Disconnect
             </Button>
-            <Button
-              size="small"
-              startIcon={<PlayArrow />}
-              onClick={() => onExecute(integration)}
-            >
+            <Button size="small" startIcon={<PlayArrow />} onClick={() => onExecute(integration)}>
               Execute
             </Button>
           </>
-        ) : integration.status === 'pending_approval' ? (
+        ) : integration.status === "pending_approval" ? (
           <Button size="small" disabled startIcon={<Approval />}>
             Awaiting Approval
           </Button>
@@ -356,7 +342,7 @@ function IntegrationCard({ integration, manifest, onConnect, onDisconnect, onExe
             onClick={handleConnect}
             disabled={connecting}
           >
-            {connecting ? 'Connecting...' : 'Connect'}
+            {connecting ? "Connecting..." : "Connect"}
           </Button>
         )}
       </CardActions>
@@ -366,17 +352,16 @@ function IntegrationCard({ integration, manifest, onConnect, onDisconnect, onExe
 
 // Approval Queue Component
 function ApprovalQueue() {
-  const { approvals, loading, error, processing, approve, reject, refresh } = useIntegrationApprovals();
-  const [comment, setComment] = useState('');
+  const { approvals, loading, error, processing, approve, reject, refresh } =
+    useIntegrationApprovals();
+  const [comment, setComment] = useState("");
 
   if (loading) return <LinearProgress />;
 
   if (error) return <Alert severity="error">{error}</Alert>;
 
   if (approvals.length === 0) {
-    return (
-      <Alert severity="info">No pending approvals.</Alert>
-    );
+    return <Alert severity="info">No pending approvals.</Alert>;
   }
 
   return (
@@ -397,7 +382,7 @@ function ApprovalQueue() {
             <TableRow key={approval.id}>
               <TableCell>
                 <Chip
-                  label={approval.type.replace('_', ' ')}
+                  label={approval.type.replace("_", " ")}
                   size="small"
                   color="primary"
                   variant="outlined"
@@ -412,9 +397,7 @@ function ApprovalQueue() {
                   color={riskColors[approval.riskAssessment.level]}
                 />
               </TableCell>
-              <TableCell>
-                {new Date(approval.requestedAt).toLocaleString()}
-              </TableCell>
+              <TableCell>{new Date(approval.requestedAt).toLocaleString()}</TableCell>
               <TableCell align="right">
                 <Button
                   size="small"
@@ -470,9 +453,7 @@ function AuditLog() {
         <TableBody>
           {auditLog.map((entry) => (
             <TableRow key={entry.id}>
-              <TableCell>
-                {new Date(entry.timestamp).toLocaleString()}
-              </TableCell>
+              <TableCell>{new Date(entry.timestamp).toLocaleString()}</TableCell>
               <TableCell>{entry.action}</TableCell>
               <TableCell>{entry.actorId}</TableCell>
               <TableCell>
@@ -487,7 +468,7 @@ function AuditLog() {
                 <Chip
                   label={entry.governanceVerdict}
                   size="small"
-                  color={entry.governanceVerdict === 'ALLOW' ? 'success' : 'warning'}
+                  color={entry.governanceVerdict === "ALLOW" ? "success" : "warning"}
                 />
               </TableCell>
             </TableRow>
@@ -510,8 +491,8 @@ export default function IntegrationCatalog() {
   const { connect, disconnect } = useIntegrationOperations();
 
   const [tabValue, setTabValue] = useState(0);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
   const [setupManifest, setSetupManifest] = useState(null);
   const [executeIntegration, setExecuteIntegration] = useState(null);
 
@@ -565,7 +546,7 @@ export default function IntegrationCatalog() {
       </Box>
 
       {/* Tabs */}
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+      <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}>
         <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)}>
           <Tab label="Catalog" />
           <Tab label={`Configured (${configuredIntegrations.length})`} />
@@ -585,14 +566,14 @@ export default function IntegrationCatalog() {
       {/* Catalog Tab */}
       <TabPanel value={tabValue} index={0}>
         {/* Filters */}
-        <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
+        <Box sx={{ mb: 3, display: "flex", gap: 2 }}>
           <TextField
             size="small"
             placeholder="Search integrations..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             InputProps={{
-              startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} />,
+              startAdornment: <Search sx={{ mr: 1, color: "text.secondary" }} />,
             }}
             sx={{ width: 300 }}
           />
@@ -619,12 +600,10 @@ export default function IntegrationCatalog() {
         <Grid container spacing={3}>
           {filteredAvailable.map((manifest) => (
             <Grid item xs={12} sm={6} md={4} key={manifest.id}>
-              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
                 <CardContent sx={{ flexGrow: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                    <Typography variant="h5">
-                      {categoryIcons[manifest.category]}
-                    </Typography>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+                    <Typography variant="h5">{categoryIcons[manifest.category]}</Typography>
                     <Box>
                       <Typography variant="h6">{manifest.name}</Typography>
                       <Typography variant="caption" color="text.secondary">
@@ -635,7 +614,7 @@ export default function IntegrationCatalog() {
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                     {manifest.description}
                   </Typography>
-                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                  <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
                     <Chip label={manifest.category} size="small" />
                     <Chip
                       label={`Risk: ${manifest.riskLevel}`}
@@ -669,7 +648,7 @@ export default function IntegrationCatalog() {
 
       {/* Configured Tab */}
       <TabPanel value={tabValue} index={1}>
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+        <Box sx={{ mb: 2, display: "flex", justifyContent: "flex-end" }}>
           <Button startIcon={<Refresh />} onClick={refreshIntegrations}>
             Refresh
           </Button>

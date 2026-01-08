@@ -1,11 +1,11 @@
 ---
-title: 'Docs Workstream — Sprint Plan & Artifacts (IntelGraph + Maestro)'
-summary: 'Deep repo + sprint review, gaps, risks, and aligned docs sprint plan with exportable templates, scaffolds, and CI gates.'
-owner: 'Documentation Expert (Doc IG)'
-version: 'v0.1'
-lastUpdated: '2025-09-30'
-sprintWindow: '2025-09-29 → 2025-10-10 (America/Denver)'
-status: 'Draft — ready to run'
+title: "Docs Workstream — Sprint Plan & Artifacts (IntelGraph + Maestro)"
+summary: "Deep repo + sprint review, gaps, risks, and aligned docs sprint plan with exportable templates, scaffolds, and CI gates."
+owner: "Documentation Expert (Doc IG)"
+version: "v0.1"
+lastUpdated: "2025-09-30"
+sprintWindow: "2025-09-29 → 2025-10-10 (America/Denver)"
+status: "Draft — ready to run"
 ---
 
 # Docs Workstream — Sprint Plan & Export Pack
@@ -122,12 +122,12 @@ status: 'Draft — ready to run'
 
 ```yaml
 ---
-title: '<Page title>'
-summary: '<1–2 sentences>'
-owner: '<team/role>'
-version: '<semver>'
-lastUpdated: 'YYYY-MM-DD'
-tags: ['intelgraph', 'maestro', '<topic>']
+title: "<Page title>"
+summary: "<1–2 sentences>"
+owner: "<team/role>"
+version: "<semver>"
+lastUpdated: "YYYY-MM-DD"
+tags: ["intelgraph", "maestro", "<topic>"]
 ---
 ```
 
@@ -182,8 +182,8 @@ links: ["PR #", "Commit"]
 
 ```markdown
 ---
-title: 'Release <YYYY-MM-DD>'
-version: '<semver>'
+title: "Release <YYYY-MM-DD>"
+version: "<semver>"
 ---
 
 ## Highlights
@@ -229,8 +229,8 @@ version: '<semver>'
 
 ```markdown
 ---
-title: 'Runbook — <Service>'
-severityMap: { P1: '<min SLO>', P2: '…' }
+title: "Runbook — <Service>"
+severityMap: { P1: "<min SLO>", P2: "…" }
 ---
 
 ## Purpose
@@ -296,8 +296,8 @@ name: docs-ci
 on:
   pull_request:
     paths:
-      - 'docs/**'
-      - '**/*.md'
+      - "docs/**"
+      - "**/*.md"
   push:
     branches: [main]
 
@@ -349,21 +349,19 @@ jobs:
 ### 7.3 `.ci/scripts/frontmatter-check.mjs`
 
 ```js
-import fs from 'node:fs';
-import matter from 'gray-matter';
-import globby from 'globby';
+import fs from "node:fs";
+import matter from "gray-matter";
+import globby from "globby";
 
-const files = (await globby(process.argv.slice(2))).filter((p) =>
-  p.endsWith('.md'),
-);
+const files = (await globby(process.argv.slice(2))).filter((p) => p.endsWith(".md"));
 let fail = false;
 for (const f of files) {
-  const s = fs.readFileSync(f, 'utf8');
+  const s = fs.readFileSync(f, "utf8");
   const fm = matter(s);
-  const req = ['title', 'summary', 'owner', 'version', 'lastUpdated'];
+  const req = ["title", "summary", "owner", "version", "lastUpdated"];
   const missing = req.filter((k) => !fm.data?.[k]);
   if (missing.length) {
-    console.log(`⚠️  ${f} missing: ${missing.join(', ')}`);
+    console.log(`⚠️  ${f} missing: ${missing.join(", ")}`);
     fail = true;
   }
 }
@@ -384,8 +382,8 @@ node scripts/gql-to-md.mjs graphql-schema.json > docs/latest/reference/graphql/s
 ### 8.2 `scripts/gql-to-md.mjs` (sketch)
 
 ```js
-import fs from 'node:fs';
-const s = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+import fs from "node:fs";
+const s = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
 // Walk types, queries, mutations → emit tables
 ```
 
@@ -414,11 +412,11 @@ const s = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
 
 ```markdown
 ---
-title: 'Runbook — API Gateway'
-summary: 'Triage and resolution for API failures.'
-owner: 'Platform Ops'
-version: '1.0'
-lastUpdated: '2025-09-30'
+title: "Runbook — API Gateway"
+summary: "Triage and resolution for API failures."
+owner: "Platform Ops"
+version: "1.0"
+lastUpdated: "2025-09-30"
 ---
 
 ## Symptoms
@@ -444,11 +442,11 @@ lastUpdated: '2025-09-30'
 
 ```markdown
 ---
-title: 'Error Catalog'
-summary: 'Canonical error codes and fixes.'
-owner: 'Platform'
-version: '1.0'
-lastUpdated: '2025-09-30'
+title: "Error Catalog"
+summary: "Canonical error codes and fixes."
+owner: "Platform"
+version: "1.0"
+lastUpdated: "2025-09-30"
 ---
 
 <include ./seed.md>

@@ -5,6 +5,7 @@
 **Complete automation suite for GitHub Enterprise + Groq AI + n8n**
 
 This collection contains 10 advanced workflows that multiply your development velocity by 23x through:
+
 - **AI-powered code generation**
 - **Automated code review**
 - **Self-healing CI/CD**
@@ -16,17 +17,20 @@ This collection contains 10 advanced workflows that multiply your development ve
 ## 📦 Workflow Collection
 
 ### 1️⃣ **Issue→AI→Deploy Pipeline** ✅
+
 **File**: `01-issue-to-deploy-pipeline.json`  
 **Impact**: 10x faster feature delivery  
-**Triggers**: GitHub issue labeled "auto-implement"  
+**Triggers**: GitHub issue labeled "auto-implement"
 
 **Flow**:
+
 ```
-Webhook → Filter → AI Plan → AI Code → AI Tests → 
+Webhook → Filter → AI Plan → AI Code → AI Tests →
 Create Branch → Commit → Create PR → Slack Notify
 ```
 
 **What it does**:
+
 - Reads GitHub issue description
 - Generates complete implementation plan
 - Writes production-ready TypeScript/Deno code
@@ -35,6 +39,7 @@ Create Branch → Commit → Create PR → Slack Notify
 - Notifies team on Slack
 
 **Setup**:
+
 1. Import workflow to n8n
 2. Add GitHub webhook: `https://your-n8n.cloud/webhook/github-issue-auto-implement`
 3. Configure webhook events: `issues` (opened, labeled)
@@ -43,11 +48,13 @@ Create Branch → Commit → Create PR → Slack Notify
 ---
 
 ### 2️⃣ **PR Review Swarm (5 AI Agents)**
+
 **Status**: Template ready (use JSON below)  
 **Impact**: 5x better code quality, instant reviews  
-**Triggers**: Pull request opened  
+**Triggers**: Pull request opened
 
 **Parallel AI Agents**:
+
 1. **Security Agent**: Scans for vulnerabilities (OWASP)
 2. **Performance Agent**: Identifies bottlenecks
 3. **Quality Agent**: Checks best practices
@@ -59,22 +66,26 @@ Create Branch → Commit → Create PR → Slack Notify
 ---
 
 ### 3️⃣ **Self-Healing CI/CD**
+
 **Impact**: 80% auto-fix rate for failures  
-**Triggers**: GitHub Actions failure  
+**Triggers**: GitHub Actions failure
 
 **Flow**:
+
 ```
-CI Failure → Get Logs → AI Analyze → 
+CI Failure → Get Logs → AI Analyze →
 Generate Fix → Create PR → Auto-merge if tests pass
 ```
 
 ---
 
 ### 4️⃣ **Cross-Repo Policy Enforcer**
+
 **Impact**: Manage 50+ repos as one  
-**Triggers**: Schedule (daily)  
+**Triggers**: Schedule (daily)
 
 **Actions**:
+
 - Syncs security policies
 - Updates dependencies org-wide
 - Applies coding standards
@@ -83,22 +94,26 @@ Generate Fix → Create PR → Auto-merge if tests pass
 ---
 
 ### 5️⃣ **Workflow Generation Factory** (Meta)
+
 **Impact**: Automation creates automation  
-**Triggers**: Schedule (every 12 hours)  
+**Triggers**: Schedule (every 12 hours)
 
 **Flow**:
+
 ```
-Analyze Dev Patterns → Identify Repetitive Tasks → 
+Analyze Dev Patterns → Identify Repetitive Tasks →
 AI Generates New Workflow → Test → Deploy
 ```
 
 ---
 
 ### 6️⃣ **Smart Event Router**
+
 **Impact**: Right tool for every job  
-**Triggers**: ANY GitHub event  
+**Triggers**: ANY GitHub event
 
 **Intelligence**:
+
 - AI classifies event type & urgency
 - Routes to specialized sub-workflow
 - Selects optimal AI model
@@ -107,10 +122,12 @@ AI Generates New Workflow → Test → Deploy
 ---
 
 ### 7️⃣ **Predictive Issue Creator**
+
 **Impact**: Fix problems before they happen  
-**Triggers**: Continuous (on every push)  
+**Triggers**: Continuous (on every push)
 
 **Analysis**:
+
 - Scans code changes
 - Predicts potential issues
 - Creates preventive PRs
@@ -119,10 +136,12 @@ AI Generates New Workflow → Test → Deploy
 ---
 
 ### 8️⃣ **Org Knowledge Graph Builder**
+
 **Impact**: Organization-wide intelligence  
-**Triggers**: Continuous learning  
+**Triggers**: Continuous learning
 
 **Builds**:
+
 - Code relationships map
 - Developer expertise profiles
 - Common patterns library
@@ -131,10 +150,12 @@ AI Generates New Workflow → Test → Deploy
 ---
 
 ### 9️⃣ **Auto-Documentation Generator**
+
 **Impact**: Always up-to-date docs  
-**Triggers**: PR merged to main  
+**Triggers**: PR merged to main
 
 **Generates**:
+
 - API documentation
 - Code comments
 - Architecture diagrams
@@ -143,10 +164,12 @@ AI Generates New Workflow → Test → Deploy
 ---
 
 ### 🔟 **Performance Monitor → Auto-Optimizer**
+
 **Impact**: Self-optimizing codebase  
-**Triggers**: Production metrics  
+**Triggers**: Production metrics
 
 **Actions**:
+
 - Monitors performance
 - Identifies bottlenecks
 - Generates optimization PRs
@@ -157,6 +180,7 @@ AI Generates New Workflow → Test → Deploy
 ## 🛠️ Quick Setup Guide
 
 ### Prerequisites
+
 1. **n8n instance** (cloud or self-hosted)
 2. **GitHub Personal Access Token** with:
    - `repo` (full)
@@ -169,6 +193,7 @@ AI Generates New Workflow → Test → Deploy
 ### Import Workflows
 
 **Option A: n8n UI**
+
 ```
 1. Open n8n
 2. Workflows → Import from File
@@ -178,6 +203,7 @@ AI Generates New Workflow → Test → Deploy
 ```
 
 **Option B: n8n API**
+
 ```bash
 curl -X POST https://your-n8n.cloud/api/v1/workflows \
   -H "X-N8N-API-KEY: your-api-key" \
@@ -188,6 +214,7 @@ curl -X POST https://your-n8n.cloud/api/v1/workflows \
 ### Configure GitHub Webhooks
 
 **Repository Settings**:
+
 ```
 1. Go to: github.com/TopicalityLLC/Summit/settings/hooks
 2. Add webhook
@@ -195,7 +222,7 @@ curl -X POST https://your-n8n.cloud/api/v1/workflows \
 4. Content type: application/json
 5. Select events:
    ☑️ Issues
-   ☑️ Pull requests  
+   ☑️ Pull requests
    ☑️ Pushes
    ☑️ Workflow runs
    ☑️ Security alerts
@@ -203,6 +230,7 @@ curl -X POST https://your-n8n.cloud/api/v1/workflows \
 ```
 
 **Webhook URLs by Workflow**:
+
 ```
 Workflow 1: /webhook/github-issue-auto-implement
 Workflow 2: /webhook/pr-review-swarm
@@ -220,21 +248,23 @@ Workflow 10: /webhook/performance-monitor
 
 ## 📊 Success Metrics
 
-| Metric | Before | After 23x | Improvement |
-|--------|--------|-----------|-------------|
-| Feature delivery | 3-5 days | 4-8 hours | **10x faster** |
-| Bug fix time | 2-24 hours | 5-30 min | **20x faster** |
-| Code review | 2-4 hours | 5-10 min | **15x faster** |
-| CI failures | Manual fix | 80% auto | **Autonomous** |
-| Productivity | Baseline | 300%+ | **3x output** |
-| Deployments | 2-3/week | 5-10/day | **15x more** |
+| Metric           | Before     | After 23x | Improvement    |
+| ---------------- | ---------- | --------- | -------------- |
+| Feature delivery | 3-5 days   | 4-8 hours | **10x faster** |
+| Bug fix time     | 2-24 hours | 5-30 min  | **20x faster** |
+| Code review      | 2-4 hours  | 5-10 min  | **15x faster** |
+| CI failures      | Manual fix | 80% auto  | **Autonomous** |
+| Productivity     | Baseline   | 300%+     | **3x output**  |
+| Deployments      | 2-3/week   | 5-10/day  | **15x more**   |
 
 ---
 
 ## 🔧 Customization Guide
 
 ### Adjust AI Models
+
 Change in workflow JSON:
+
 ```json
 "model": "llama-3.3-70b-versatile"  // Fast, high quality
 "model": "mixtral-8x7b-32768"      // Long context
@@ -242,7 +272,9 @@ Change in workflow JSON:
 ```
 
 ### Add Custom Filters
+
 Modify filter conditions:
+
 ```json
 "conditions": {
   "string": [
@@ -256,7 +288,9 @@ Modify filter conditions:
 ```
 
 ### Customize Notifications
+
 Edit Slack messages:
+
 ```json
 "text": "=Your custom message with {{$json.variables}}"
 ```
@@ -278,18 +312,21 @@ Edit Slack messages:
 ## 🐞 Troubleshooting
 
 ### Webhook not triggering
+
 - Check webhook URL is correct
 - Verify webhook is active in GitHub
 - Check n8n workflow is active
 - Review webhook delivery logs
 
 ### AI generating poor code
+
 - Improve issue descriptions
 - Add more context in prompts
 - Try different AI models
 - Adjust temperature settings
 
 ### GitHub API rate limits
+
 - Use authenticated requests
 - Implement exponential backoff
 - Cache responses when possible

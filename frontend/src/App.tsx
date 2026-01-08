@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import Graph from './Graph';
-import TimelinePanel from './TimelinePanel';
-import './App.css';
+import { useState, useEffect } from "react";
+import Graph from "./Graph";
+import TimelinePanel from "./TimelinePanel";
+import "./App.css";
 
 interface EventItem {
   id: string;
@@ -41,7 +41,7 @@ function App() {
   const [events, setEvents] = useState<EventItem[]>([]);
 
   useEffect(() => {
-    fetch('/api/graph')
+    fetch("/api/graph")
       .then((res) => res.json())
       .then((data) => {
         const formattedNodes = data.nodes.map((n: any) => ({
@@ -57,14 +57,14 @@ function App() {
         }));
         setGraphData({ nodes: formattedNodes, edges: formattedEdges });
       })
-      .catch((err) => console.error('Failed to fetch graph data:', err));
+      .catch((err) => console.error("Failed to fetch graph data:", err));
   }, []);
 
   useEffect(() => {
-    fetch('/api/agent-actions')
+    fetch("/api/agent-actions")
       .then((res) => res.json())
       .then((data) => setEvents(data))
-      .catch((err) => console.error('Failed to fetch agent actions:', err));
+      .catch((err) => console.error("Failed to fetch agent actions:", err));
   }, []);
 
   return (
@@ -72,7 +72,7 @@ function App() {
       <header className="App-header">
         <h1>IntelGraph</h1>
         <button onClick={() => setNeighborhoodMode((m) => !m)}>
-          {neighborhoodMode ? 'Show Full Graph' : 'Neighborhood Mode'}
+          {neighborhoodMode ? "Show Full Graph" : "Neighborhood Mode"}
         </button>
       </header>
       <main>

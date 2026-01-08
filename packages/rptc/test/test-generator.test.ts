@@ -9,50 +9,50 @@ import {
   stringSlot,
   type SlotValues,
   type TestHarness,
-} from '../src/index.js';
+} from "../src/index.js";
 
 function buildTemplate() {
   return createPromptTemplate({
-    name: 'policy-brief',
-    description: 'Generate policy briefs with strict slot validation.',
+    name: "policy-brief",
+    description: "Generate policy briefs with strict slot validation.",
     template:
-      'Policy for {{audience}} on {{topic}} with {{count}} actions. Mode={{mode}} Include summary={{includeSummary}}',
+      "Policy for {{audience}} on {{topic}} with {{count}} actions. Mode={{mode}} Include summary={{includeSummary}}",
     slots: {
       audience: stringSlot({
         constraints: { minLength: 4, maxLength: 32 },
-        example: 'mission planners',
+        example: "mission planners",
       }),
       topic: stringSlot({
         constraints: { minLength: 6, pattern: /^[A-Za-z\s]+$/ },
-        example: 'Resilience drills',
+        example: "Resilience drills",
       }),
       count: numberSlot({ constraints: { min: 2, max: 4 }, example: 2 }),
-      mode: enumSlot(['strategic', 'tactical'] as const, {
-        defaultValue: 'strategic',
+      mode: enumSlot(["strategic", "tactical"] as const, {
+        defaultValue: "strategic",
       }),
       includeSummary: booleanSlot({ defaultValue: true }),
     },
   });
 }
 
-describe('generated test suites', () => {
+describe("generated test suites", () => {
   const template = buildTemplate();
   const suite = generateTestSuite(template, {
     validExample: {
-      audience: 'intel chiefs',
-      topic: 'Resilience drills',
+      audience: "intel chiefs",
+      topic: "Resilience drills",
       count: 3,
-      mode: 'strategic',
+      mode: "strategic",
       includeSummary: true,
     },
   });
 
-  it('passes when template enforces constraints', () => {
+  it("passes when template enforces constraints", () => {
     const results = suite.run();
     expect(results.passed).toBe(true);
   });
 
-  it('catches seeded regressions', () => {
+  it("catches seeded regressions", () => {
     const broken: PromptTemplate<typeof template.slots> = {
       ...template,
       validate(values) {
@@ -60,8 +60,8 @@ describe('generated test suites', () => {
           Object.keys(template.slots).map((slot) => [
             slot,
             { valid: true, value: (values as Record<string, unknown>)[slot] },
-          ]),
-        ) as PromptValidationResult<typeof template.slots>['slots'];
+          ])
+        ) as PromptValidationResult<typeof template.slots>["slots"];
         return {
           valid: true,
           slots,
@@ -74,23 +74,17 @@ describe('generated test suites', () => {
           name: template.name,
           description: template.description,
           template: template.template,
-          rendered: template.template.replace(
-            /{{\s*([a-zA-Z0-9_]+)\s*}}/g,
-            (_, key: string) => {
-              const resolved = (values as Record<string, unknown>)[key];
-              return resolved === undefined || resolved === null
-                ? ''
-                : String(resolved);
-            },
-          ),
+          rendered: template.template.replace(/{{\s*([a-zA-Z0-9_]+)\s*}}/g, (_, key: string) => {
+            const resolved = (values as Record<string, unknown>)[key];
+            return resolved === undefined || resolved === null ? "" : String(resolved);
+          }),
           slots: template.slots,
           values: values as SlotValues<typeof template.slots>,
           metadata: template.metadata,
         };
       },
       render(values) {
-        return this.compile(values as SlotValues<typeof template.slots>)
-          .rendered;
+        return this.compile(values as SlotValues<typeof template.slots>).rendered;
       },
     };
 
@@ -99,7 +93,7 @@ describe('generated test suites', () => {
     expect(results.results.some((result) => !result.passed)).toBe(true);
   });
 
-  it('registers tests against a harness', () => {
+  it("registers tests against a harness", () => {
     const calls: string[] = [];
     const harness: TestHarness = {
       describe(name, fn) {
@@ -114,7 +108,7 @@ describe('generated test suites', () => {
     };
 
     suite.register(harness);
-    expect(calls.some((entry) => entry.startsWith('describe:'))).toBe(true);
-    expect(calls.some((entry) => entry.startsWith('it:'))).toBe(true);
+    expect(calls.some((entry) => entry.startsWith("describe:"))).toBe(true);
+    expect(calls.some((entry) => entry.startsWith("it:"))).toBe(true);
   });
 });

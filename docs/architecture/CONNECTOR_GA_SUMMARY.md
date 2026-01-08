@@ -26,6 +26,7 @@ This document summarizes the deliverables for advancing Data Intake & Preparatio
 **Location**: `/docs/architecture/data-intake-ga-spec.md`
 
 **Contents**:
+
 - Current state analysis (15 existing connectors evaluated)
 - Minimal connector specification v1.0
 - Manifest schema with JSON validation
@@ -149,7 +150,7 @@ name: Golden IO Tests
 on:
   pull_request:
     paths:
-      - 'connectors/**'
+      - "connectors/**"
 
 jobs:
   golden-tests:
@@ -195,32 +196,27 @@ All acceptance criteria from the Wishbook have been addressed:
 
 #### Current Status: 15 Existing Connectors
 
-| Connector | Manifest | Tests | Golden IO | PII | License | Status |
-|-----------|----------|-------|-----------|-----|---------|--------|
-| CSV | ✅ | ✅ | ❌ | ❌ | ❌ | Needs GA hardening |
-| JSON | ✅ | ✅ | ❌ | ❌ | ❌ | Needs GA hardening |
-| STIX/TAXII | ✅ | ✅ | ❌ | ❌ | ❌ | Needs GA hardening |
-| Splunk | ✅ | ✅ | ❌ | ❌ | ❌ | Needs GA hardening |
-| Sentinel | ✅ | ✅ | ❌ | ❌ | ❌ | Needs GA hardening |
-| OFAC SDN | ✅ | ✅ | ❌ | ❌ | ❌ | Needs GA hardening |
-| RSS News | ✅ | ✅ | ❌ | ❌ | ❌ | Needs GA hardening |
-| **CISA KEV** | ✅ | ✅ | ✅ | ✅ | ✅ | **✅ GA READY** |
+| Connector    | Manifest | Tests | Golden IO | PII | License | Status             |
+| ------------ | -------- | ----- | --------- | --- | ------- | ------------------ |
+| CSV          | ✅       | ✅    | ❌        | ❌  | ❌      | Needs GA hardening |
+| JSON         | ✅       | ✅    | ❌        | ❌  | ❌      | Needs GA hardening |
+| STIX/TAXII   | ✅       | ✅    | ❌        | ❌  | ❌      | Needs GA hardening |
+| Splunk       | ✅       | ✅    | ❌        | ❌  | ❌      | Needs GA hardening |
+| Sentinel     | ✅       | ✅    | ❌        | ❌  | ❌      | Needs GA hardening |
+| OFAC SDN     | ✅       | ✅    | ❌        | ❌  | ❌      | Needs GA hardening |
+| RSS News     | ✅       | ✅    | ❌        | ❌  | ❌      | Needs GA hardening |
+| **CISA KEV** | ✅       | ✅    | ✅        | ✅  | ✅      | **✅ GA READY**    |
 
 #### Missing from GA Target (10 connectors)
 
 **Implemented:**
+
 1. ✅ CSV/Parquet (CSV exists, add Parquet)
 2. ✅ STIX/TAXII (exists)
 3. ✅ Sanctions (OFAC SDN exists)
 4. ✅ **CISA KEV** (NEW - reference implementation)
 
-**Need Implementation:**
-5. ❌ MISP (Python version)
-6. ❌ GDELT
-7. ❌ DNS/WHOIS
-8. ❌ Slack/Jira (meta)
-9. 🟡 S3 (partial)
-10. 🟡 HTTP (exists in ingestion service)
+**Need Implementation:** 5. ❌ MISP (Python version) 6. ❌ GDELT 7. ❌ DNS/WHOIS 8. ❌ Slack/Jira (meta) 9. 🟡 S3 (partial) 10. 🟡 HTTP (exists in ingestion service)
 
 **Status**: 4/10 complete, 6 need implementation
 
@@ -231,6 +227,7 @@ All acceptance criteria from the Wishbook have been addressed:
 Retrofit 7 existing connectors with GA requirements:
 
 For each connector:
+
 - [ ] Add golden IO tests (3+ test cases)
 - [ ] Integrate PII detection
 - [ ] Add license registry checks
@@ -239,6 +236,7 @@ For each connector:
 - [ ] Add comprehensive README
 
 **Connectors to harden:**
+
 1. CSV (add Parquet support)
 2. JSON
 3. STIX/TAXII
@@ -250,6 +248,7 @@ For each connector:
 #### Phase 2: Implement Missing Connectors (4 weeks)
 
 **Priority 1: DNS/WHOIS** (Week 1-2)
+
 - Medium complexity
 - Infrastructure analysis value
 - Multiple entity types (Domain, Organization, Person)
@@ -257,6 +256,7 @@ For each connector:
 - PII detection required (email, phone)
 
 **Priority 2: MISP (Python)** (Week 2-3)
+
 - TypeScript version exists as reference
 - High threat intel value
 - Complex API integration
@@ -264,6 +264,7 @@ For each connector:
 - IOC enrichment
 
 **Priority 3: GDELT** (Week 3-4)
+
 - Events data source
 - Large-scale data processing
 - Deduplication patterns
@@ -272,12 +273,14 @@ For each connector:
 #### Phase 3: Build Ingest Wizard & ETL Assistant (2 weeks)
 
 **Ingest Wizard UI:**
+
 - Connector selection and configuration
 - Connection testing
 - Sample data preview
 - Schedule configuration
 
 **ETL Assistant:**
+
 - Guided schema mapping
 - Field matching suggestions
 - Data type validation
@@ -396,22 +399,22 @@ For each connector:
 
 #### Technical Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| API changes break connectors | Medium | High | Golden IO tests detect regressions |
-| Rate limiting issues | Medium | Medium | Retry logic, backoff strategies |
-| PII leakage | Low | Critical | Automated PII detection in pipeline |
-| License violations | Low | High | License registry enforcement |
-| Performance degradation | Medium | Medium | SLI/SLO monitoring, alerts |
+| Risk                         | Likelihood | Impact   | Mitigation                          |
+| ---------------------------- | ---------- | -------- | ----------------------------------- |
+| API changes break connectors | Medium     | High     | Golden IO tests detect regressions  |
+| Rate limiting issues         | Medium     | Medium   | Retry logic, backoff strategies     |
+| PII leakage                  | Low        | Critical | Automated PII detection in pipeline |
+| License violations           | Low        | High     | License registry enforcement        |
+| Performance degradation      | Medium     | Medium   | SLI/SLO monitoring, alerts          |
 
 #### Operational Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Connector maintenance burden | High | Medium | Good documentation, test coverage |
-| Schema drift | Medium | High | Golden IO tests, version control |
-| Data quality issues | Medium | High | DQ rules, validation checks |
-| Source unavailability | Medium | Medium | Caching, fallback sources |
+| Risk                         | Likelihood | Impact | Mitigation                        |
+| ---------------------------- | ---------- | ------ | --------------------------------- |
+| Connector maintenance burden | High       | Medium | Good documentation, test coverage |
+| Schema drift                 | Medium     | High   | Golden IO tests, version control  |
+| Data quality issues          | Medium     | High   | DQ rules, validation checks       |
+| Source unavailability        | Medium     | Medium | Caching, fallback sources         |
 
 ### 12. Resource Estimates
 
@@ -431,6 +434,7 @@ For each connector:
 #### Future Time Estimates
 
 **Per Connector (using templates)**:
+
 - Simple (CSV, JSON): 4-6 hours
 - Medium (DNS/WHOIS, GDELT): 8-12 hours
 - Complex (MISP): 16-20 hours
@@ -460,10 +464,12 @@ This delivery provides a **complete foundation** for advancing Data Intake & Pre
 ## Appendix: File Inventory
 
 ### Architecture Documentation
+
 - `/docs/architecture/data-intake-ga-spec.md` (comprehensive spec)
 - `/docs/architecture/CONNECTOR_GA_SUMMARY.md` (this summary)
 
 ### CISA KEV Connector
+
 - `/connectors/cisa-kev/manifest.yaml`
 - `/connectors/cisa-kev/.dpia.yaml`
 - `/connectors/cisa-kev/README.md`
@@ -473,6 +479,7 @@ This delivery provides a **complete foundation** for advancing Data Intake & Pre
 - `/connectors/cisa-kev/sample.json`
 
 ### Tests
+
 - `/connectors/cisa-kev/__tests__/test_mapping.py` (20+ unit tests)
 - `/connectors/cisa-kev/__tests__/test_e2e.py` (integration tests)
 - `/connectors/cisa-kev/__tests__/test_golden.py` (10+ golden tests)

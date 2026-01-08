@@ -4,23 +4,17 @@
     {
       "type": "stat",
       "title": "Backup Freshness",
-      "targets": [
-        {"expr": "time() - max(backup_last_success_timestamp)"}
-      ]
+      "targets": [{ "expr": "time() - max(backup_last_success_timestamp)" }]
     },
     {
       "type": "stat",
       "title": "Verify Success",
-      "targets": [
-        {"expr": "min(backup_verify_success)"}
-      ]
+      "targets": [{ "expr": "min(backup_verify_success)" }]
     },
     {
       "type": "graph",
       "title": "Backup Duration",
-      "targets": [
-        {"expr": "backup_duration_seconds"}
-      ]
+      "targets": [{ "expr": "backup_duration_seconds" }]
     },
     {
       "type": "table",
@@ -29,7 +23,9 @@
         "showHeader": true
       },
       "targets": [
-        {"expr": "label_replace(backup_last_success_timestamp, \"store\", \"$1\", \"store\", \"(.*)\")"}
+        {
+          "expr": "label_replace(backup_last_success_timestamp, \"store\", \"$1\", \"store\", \"(.*)\")"
+        }
       ]
     }
   ],

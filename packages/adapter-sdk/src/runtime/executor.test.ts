@@ -1,47 +1,59 @@
-import { describe, expect, it, vi } from 'vitest';
-import type { DlqEvent, DlqPublisher } from './types';
+import { describe, expect, it, vi } from "vitest";
+import type { DlqEvent, DlqPublisher } from "./types";
 
-vi.mock('@opentelemetry/api', () => ({
-  metrics: {
-    getMeter: () => ({
-      createHistogram: () => ({ record: () => {} }),
-      createCounter: () => ({ add: () => {} }),
-    }),
-  },
-  trace: {
-    getTracer: () => ({
-      startSpan: () => ({
-        setStatus: () => {},
-        recordException: () => {},
-        end: () => {},
+vi.mock(
+  "@opentelemetry/api",
+  () => ({
+    metrics: {
+      getMeter: () => ({
+        createHistogram: () => ({ record: () => {} }),
+        createCounter: () => ({ add: () => {} }),
       }),
-    }),
-  },
-  SpanStatusCode: { OK: 1, ERROR: 2 },
-}), { virtual: true });
-
-vi.mock('kafkajs', () => ({
-  Kafka: class {
-    producer() {
-      return {
-        connect: vi.fn().mockResolvedValue(undefined),
-        send: vi.fn().mockResolvedValue(undefined),
-        disconnect: vi.fn().mockResolvedValue(undefined),
-      };
-    }
-  },
-}), { virtual: true });
-
-vi.mock('pino', () => ({
-  default: () => ({
-    info: () => {},
-    warn: () => {},
-    error: () => {},
-    debug: () => {},
+    },
+    trace: {
+      getTracer: () => ({
+        startSpan: () => ({
+          setStatus: () => {},
+          recordException: () => {},
+          end: () => {},
+        }),
+      }),
+    },
+    SpanStatusCode: { OK: 1, ERROR: 2 },
   }),
-}), { virtual: true });
+  { virtual: true }
+);
 
-import { AdapterExecutor } from './executor';
+vi.mock(
+  "kafkajs",
+  () => ({
+    Kafka: class {
+      producer() {
+        return {
+          connect: vi.fn().mockResolvedValue(undefined),
+          send: vi.fn().mockResolvedValue(undefined),
+          disconnect: vi.fn().mockResolvedValue(undefined),
+        };
+      }
+    },
+  }),
+  { virtual: true }
+);
+
+vi.mock(
+  "pino",
+  () => ({
+    default: () => ({
+      info: () => {},
+      warn: () => {},
+      error: () => {},
+      debug: () => {},
+    }),
+  }),
+  { virtual: true }
+);
+
+import { AdapterExecutor } from "./executor";
 
 class StubDlqPublisher implements DlqPublisher {
   public events: DlqEvent[] = [];
@@ -51,8 +63,8 @@ class StubDlqPublisher implements DlqPublisher {
   }
 }
 
-describe('AdapterExecutor', () => {
-  it('retries retryable failures and succeeds', async () => {
+describe("AdapterExecutor", () => {
+  it("retries retryable failures and succeeds", async () => {
     const dlq = new StubDlqPublisher();
     const executor = new AdapterExecutor({
       retryPolicy: {
@@ -67,12 +79,12 @@ describe('AdapterExecutor', () => {
 
     const handler = vi
       .fn()
-      .mockRejectedValueOnce(Object.assign(new Error('transient'), { code: 'ECONNRESET' }))
-      .mockResolvedValueOnce('ok');
+      .mockRejectedValueOnce(Object.assign(new Error("transient"), { code: "ECONNRESET" }))
+      .mockResolvedValueOnce("ok");
 
     const result = await executor.execute({
-      adapterId: 'adapter-1',
-      operation: 'ping',
+      adapterId: "adapter-1",
+      operation: "ping",
       execute: handler,
     });
 
@@ -81,22 +93,22 @@ describe('AdapterExecutor', () => {
     expect(dlq.events).toHaveLength(0);
   });
 
-  it('uses idempotency cache for repeated keys', async () => {
+  it("uses idempotency cache for repeated keys", async () => {
     const executor = new AdapterExecutor({ idempotencyTtlMs: 10_000 });
-    const handler = vi.fn().mockResolvedValue('once');
+    const handler = vi.fn().mockResolvedValue("once");
 
     const first = await executor.execute({
-      adapterId: 'adapter-1',
-      operation: 'dedupe',
+      adapterId: "adapter-1",
+      operation: "dedupe",
       execute: handler,
-      idempotencyKey: 'key-1',
+      idempotencyKey: "key-1",
     });
 
     const second = await executor.execute({
-      adapterId: 'adapter-1',
-      operation: 'dedupe',
+      adapterId: "adapter-1",
+      operation: "dedupe",
       execute: handler,
-      idempotencyKey: 'key-1',
+      idempotencyKey: "key-1",
     });
 
     expect(first.success).toBe(true);
@@ -104,25 +116,25 @@ describe('AdapterExecutor', () => {
     expect(handler).toHaveBeenCalledTimes(1);
   });
 
-  it('opens the circuit after repeated failures', async () => {
+  it("opens the circuit after repeated failures", async () => {
     const dlq = new StubDlqPublisher();
     const executor = new AdapterExecutor({
       circuitBreaker: { failureThreshold: 1, resetTimeoutMs: 10_000, halfOpenMaxSuccesses: 1 },
       dlqPublisher: dlq,
     });
 
-    const failing = vi.fn().mockRejectedValue(new Error('hard-fail'));
+    const failing = vi.fn().mockRejectedValue(new Error("hard-fail"));
     const first = await executor.execute({
-      adapterId: 'adapter-1',
-      operation: 'fail',
+      adapterId: "adapter-1",
+      operation: "fail",
       execute: failing,
     });
 
     expect(first.success).toBe(false);
 
     const blocked = await executor.execute({
-      adapterId: 'adapter-1',
-      operation: 'fail',
+      adapterId: "adapter-1",
+      operation: "fail",
       execute: failing,
     });
 
@@ -131,19 +143,19 @@ describe('AdapterExecutor', () => {
     expect(dlq.events.length).toBeGreaterThan(0);
   });
 
-  it('denies egress when target host is not allowlisted', async () => {
+  it("denies egress when target host is not allowlisted", async () => {
     const executor = new AdapterExecutor();
-    const handler = vi.fn().mockResolvedValue('ok');
+    const handler = vi.fn().mockResolvedValue("ok");
 
     const result = await executor.execute({
-      adapterId: 'adapter-1',
-      operation: 'http-call',
+      adapterId: "adapter-1",
+      operation: "http-call",
       execute: handler,
-      target: 'https://example.com/resource',
+      target: "https://example.com/resource",
     });
 
     expect(result.success).toBe(false);
-    expect(result.error?.message).toContain('Network egress denied');
+    expect(result.error?.message).toContain("Network egress denied");
     expect(handler).not.toHaveBeenCalled();
   });
 });

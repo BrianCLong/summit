@@ -2,11 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import { evaluateCustomerRead } from "./opa-client";
 import type { Resource } from "./types";
 
-export async function customerReadGuard(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
+export async function customerReadGuard(req: Request, res: Response, next: NextFunction) {
   if (!req.subject) {
     return res.status(401).json({ error: "unauthenticated" });
   }
@@ -35,7 +31,7 @@ export async function customerReadGuard(
         decision: decision.allow,
         reason: decision.reason,
       },
-      "authz_decision",
+      "authz_decision"
     );
 
     if (!decision.allow) {

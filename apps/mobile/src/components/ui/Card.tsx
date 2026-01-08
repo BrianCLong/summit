@@ -56,11 +56,7 @@ CardContent.displayName = 'CardContent';
 export const CardFooter = React.forwardRef<View, ViewProps & { className?: string }>(
   ({ className, children, ...props }, ref) => {
     return (
-      <View
-        ref={ref}
-        className={cn('flex-row items-center p-4 pt-0', className)}
-        {...props}
-      >
+      <View ref={ref} className={cn('flex-row items-center p-4 pt-0', className)} {...props}>
         {children}
       </View>
     );

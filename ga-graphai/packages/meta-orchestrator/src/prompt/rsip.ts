@@ -1,4 +1,4 @@
-import { clampValue } from './utils.js';
+import { clampValue } from "./utils.js";
 
 export type QualityAspect = string & {};
 
@@ -13,7 +13,11 @@ export interface RSIPIterationLog {
 
 export interface RSIPOptions {
   aspects: QualityAspect[];
-  generator: (prompt: string, iteration: number, history: RSIPIterationLog[]) => Promise<string> | string;
+  generator: (
+    prompt: string,
+    iteration: number,
+    history: RSIPIterationLog[]
+  ) => Promise<string> | string;
   evaluator: (
     output: string,
     aspect: QualityAspect,
@@ -46,7 +50,7 @@ const DEFAULT_WEIGHTS: Record<QualityAspect, number> = {
   clarity: 0.2,
   completeness: 0.25,
   factuality: 0.2,
-  safety: 0.05
+  safety: 0.05,
 };
 
 const DEFAULT_MAX_ITERATIONS = 5;
@@ -73,18 +77,18 @@ function normalizeWeights(weights: Record<QualityAspect, number>): Record<Qualit
 
 export class RecursiveSelfImprovementEngine {
   private readonly aspects: QualityAspect[];
-  private readonly generator: RSIPOptions['generator'];
-  private readonly evaluator: RSIPOptions['evaluator'];
-  private readonly refinePrompt?: RSIPOptions['refinePrompt'];
+  private readonly generator: RSIPOptions["generator"];
+  private readonly evaluator: RSIPOptions["evaluator"];
+  private readonly refinePrompt?: RSIPOptions["refinePrompt"];
   private readonly maxIterations: number;
   private readonly qualityThreshold: number;
   private readonly focusWindow: number;
   private readonly weights: Record<QualityAspect, number>;
-  private readonly logger?: RSIPOptions['logger'];
+  private readonly logger?: RSIPOptions["logger"];
 
   constructor(options: RSIPOptions) {
     if (options.aspects.length === 0) {
-      throw new Error('RSIP requires at least one quality aspect.');
+      throw new Error("RSIP requires at least one quality aspect.");
     }
     this.aspects = [...options.aspects];
     this.generator = options.generator;
@@ -119,7 +123,7 @@ export class RecursiveSelfImprovementEngine {
         output,
         aspectScores,
         prioritizedAspects,
-        aggregateScore
+        aggregateScore,
       };
       logs.push(entry);
       if (this.logger) {
@@ -128,19 +132,32 @@ export class RecursiveSelfImprovementEngine {
       if (aggregateScore >= this.qualityThreshold) {
         return { success: true, finalOutput: output, iterations: iteration, logs };
       }
-      currentPrompt = this.buildRefinementPrompt(currentPrompt, output, prioritizedAspects, iteration, logs);
+      currentPrompt = this.buildRefinementPrompt(
+        currentPrompt,
+        output,
+        prioritizedAspects,
+        iteration,
+        logs
+      );
     }
     const last = logs.at(-1);
-    return { success: false, finalOutput: last?.output ?? '', iterations: logs.length, logs };
+    return { success: false, finalOutput: last?.output ?? "", iterations: logs.length, logs };
   }
 
-  private prioritizeAspects(history: RSIPIterationLog[], latest: Record<QualityAspect, number>): QualityAspect[] {
+  private prioritizeAspects(
+    history: RSIPIterationLog[],
+    latest: Record<QualityAspect, number>
+  ): QualityAspect[] {
     const window = history.slice(Math.max(0, history.length - (this.focusWindow - 1)));
     const blended = new Map<QualityAspect, number>();
     for (const aspect of this.aspects) {
-      const pastValues = window.map(entry => entry.aspectScores[aspect]).filter(value => typeof value === 'number');
+      const pastValues = window
+        .map((entry) => entry.aspectScores[aspect])
+        .filter((value) => typeof value === "number");
       const historicalAverage =
-        pastValues.length === 0 ? 1 : pastValues.reduce((acc, value) => acc + value, 0) / pastValues.length;
+        pastValues.length === 0
+          ? 1
+          : pastValues.reduce((acc, value) => acc + value, 0) / pastValues.length;
       blended.set(aspect, (historicalAverage + latest[aspect]) / 2);
     }
     return [...blended.entries()].sort(([, a], [, b]) => a - b).map(([aspect]) => aspect);
@@ -164,15 +181,15 @@ export class RecursiveSelfImprovementEngine {
     if (this.refinePrompt) {
       return this.refinePrompt(previousPrompt, output, prioritizedAspects, iteration, history);
     }
-    const focus = prioritizedAspects.slice(0, 2).join(' and ') || 'overall quality';
+    const focus = prioritizedAspects.slice(0, 2).join(" and ") || "overall quality";
     return [
-      'You are refining a draft response. Improve it with focus on the weakest aspects.',
+      "You are refining a draft response. Improve it with focus on the weakest aspects.",
       `Priority aspects: ${focus}.`,
-      'Original prompt:',
+      "Original prompt:",
       previousPrompt,
-      'Current draft:',
+      "Current draft:",
       output,
-      'Return an improved version that addresses the priority aspects while keeping strengths intact.'
-    ].join('\n\n');
+      "Return an improved version that addresses the priority aspects while keeping strengths intact.",
+    ].join("\n\n");
   }
 }

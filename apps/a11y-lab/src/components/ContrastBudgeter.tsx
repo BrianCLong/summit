@@ -1,5 +1,5 @@
-import React from 'react';
-import { evaluateContrastBudget } from '../utils/contrast';
+import React from "react";
+import { evaluateContrastBudget } from "../utils/contrast";
 
 type PaletteItem = {
   name: string;
@@ -29,8 +29,8 @@ export function ContrastBudgeter({ palette, minimumRatio }: Props) {
           <tr key={entry.name}>
             <td>{entry.name}</td>
             <td>{entry.ratio.toFixed(2)}:1</td>
-            <td aria-label={entry.pass ? 'passes contrast budget' : 'fails contrast budget'}>
-              {entry.pass ? 'Passes AA' : 'Needs adjustment'}
+            <td aria-label={entry.pass ? "passes contrast budget" : "fails contrast budget"}>
+              {entry.pass ? "Passes AA" : "Needs adjustment"}
             </td>
           </tr>
         ))}

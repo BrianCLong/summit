@@ -3,7 +3,7 @@
  * Governance and compliance framework
  */
 
-export * from './governance-engine.js';
+export * from "./governance-engine.js";
 
 // Re-export types
-export type { GovernancePolicy, Domain } from '@intelgraph/mdm-core';
+export type { GovernancePolicy, Domain } from "@intelgraph/mdm-core";

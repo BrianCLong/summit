@@ -13,16 +13,16 @@ This directory contains a modular implementation of the Summit ingest wizard. Th
 ## Usage
 
 ```tsx
-import { IngestWizard, ingestWizardReducer, initialWizardState } from './ingestWizard';
-import { configureStore } from '@reduxjs/toolkit';
+import { IngestWizard, ingestWizardReducer, initialWizardState } from "./ingestWizard";
+import { configureStore } from "@reduxjs/toolkit";
 
 const store = configureStore({
   reducer: {
-    ingestWizard: ingestWizardReducer
+    ingestWizard: ingestWizardReducer,
   },
   preloadedState: {
-    ingestWizard: initialWizardState
-  }
+    ingestWizard: initialWizardState,
+  },
 });
 
 <Provider store={store}>

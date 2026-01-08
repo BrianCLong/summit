@@ -197,7 +197,7 @@ spec:
       per_run_usd: 50.00
       hard_cap_usd: 200.00
     slo:
-      latency_p95_ms: 7200000  # 2 hours
+      latency_p95_ms: 7200000 # 2 hours
       success_rate_percent: 99.0
     policies:
       - data-retention-policy

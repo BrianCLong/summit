@@ -7,7 +7,7 @@
 // ===== Core Query Types =====
 
 export interface Query {
-  type: 'query';
+  type: "query";
   resource: string;
   fields?: FieldSelection[];
   filters?: FilterExpression[];
@@ -28,7 +28,7 @@ export interface QueryOptions {
   cacheTTL?: number;
   stream?: boolean;
   realtime?: boolean;
-  consistency?: 'eventual' | 'strong' | 'bounded';
+  consistency?: "eventual" | "strong" | "bounded";
   timeout?: number;
 }
 
@@ -53,24 +53,36 @@ export type FilterExpression =
   | ExistsFilter;
 
 export interface ComparisonFilter {
-  type: 'comparison';
+  type: "comparison";
   field: string;
-  operator: '=' | '!=' | '>' | '>=' | '<' | '<=' | 'LIKE' | 'IN' | 'NOT_IN' | 'CONTAINS' | 'STARTS_WITH' | 'ENDS_WITH';
+  operator:
+    | "="
+    | "!="
+    | ">"
+    | ">="
+    | "<"
+    | "<="
+    | "LIKE"
+    | "IN"
+    | "NOT_IN"
+    | "CONTAINS"
+    | "STARTS_WITH"
+    | "ENDS_WITH";
   value: any;
 }
 
 export interface LogicalFilter {
-  type: 'logical';
-  operator: 'AND' | 'OR' | 'NOT';
+  type: "logical";
+  operator: "AND" | "OR" | "NOT";
   expressions: FilterExpression[];
 }
 
 export interface FullTextFilter {
-  type: 'fulltext';
+  type: "fulltext";
   fields: string[];
   query: string;
   options?: {
-    mode?: 'natural' | 'boolean' | 'phrase';
+    mode?: "natural" | "boolean" | "phrase";
     minScore?: number;
     boost?: Record<string, number>;
     fuzzy?: boolean;
@@ -79,32 +91,32 @@ export interface FullTextFilter {
 }
 
 export interface GeoFilter {
-  type: 'geo';
+  type: "geo";
   field: string;
-  operator: 'within' | 'intersects' | 'near' | 'contains';
+  operator: "within" | "intersects" | "near" | "contains";
   geometry: GeoJSON.Geometry;
   options?: {
     maxDistance?: number;
-    unit?: 'meters' | 'kilometers' | 'miles';
+    unit?: "meters" | "kilometers" | "miles";
   };
 }
 
 export interface TemporalFilter {
-  type: 'temporal';
+  type: "temporal";
   field: string;
-  operator: 'before' | 'after' | 'between' | 'within_last' | 'within_next';
+  operator: "before" | "after" | "between" | "within_last" | "within_next";
   value: Date | [Date, Date] | string;
 }
 
 export interface ArrayFilter {
-  type: 'array';
+  type: "array";
   field: string;
-  operator: 'ANY' | 'ALL' | 'SIZE' | 'OVERLAP';
+  operator: "ANY" | "ALL" | "SIZE" | "OVERLAP";
   value: any;
 }
 
 export interface ExistsFilter {
-  type: 'exists';
+  type: "exists";
   field: string;
   exists: boolean;
 }
@@ -113,14 +125,14 @@ export interface ExistsFilter {
 
 export interface SortClause {
   field: string;
-  direction: 'ASC' | 'DESC';
-  nulls?: 'FIRST' | 'LAST';
+  direction: "ASC" | "DESC";
+  nulls?: "FIRST" | "LAST";
 }
 
 // ===== Temporal Queries =====
 
 export interface TemporalClause {
-  type: 'point_in_time' | 'time_range' | 'time_travel';
+  type: "point_in_time" | "time_range" | "time_travel";
   timestamp?: Date;
   start?: Date;
   end?: Date;
@@ -130,7 +142,7 @@ export interface TemporalClause {
 // ===== Geospatial Queries =====
 
 export interface GeospatialClause {
-  type: 'bbox' | 'radius' | 'polygon';
+  type: "bbox" | "radius" | "polygon";
   coordinates: number[] | number[][];
   options?: {
     crs?: string;
@@ -156,46 +168,46 @@ export interface BaseAggregation {
 }
 
 export interface CountAggregation extends BaseAggregation {
-  type: 'count';
+  type: "count";
   field?: string;
   distinct?: boolean;
 }
 
 export interface SumAggregation extends BaseAggregation {
-  type: 'sum';
+  type: "sum";
   field: string;
 }
 
 export interface AvgAggregation extends BaseAggregation {
-  type: 'avg';
+  type: "avg";
   field: string;
 }
 
 export interface MinAggregation extends BaseAggregation {
-  type: 'min';
+  type: "min";
   field: string;
 }
 
 export interface MaxAggregation extends BaseAggregation {
-  type: 'max';
+  type: "max";
   field: string;
 }
 
 export interface GroupByAggregation extends BaseAggregation {
-  type: 'group_by';
+  type: "group_by";
   fields: string[];
   aggregations: AggregationClause[];
 }
 
 export interface HistogramAggregation extends BaseAggregation {
-  type: 'histogram';
+  type: "histogram";
   field: string;
   interval: number | string;
   minDocCount?: number;
 }
 
 export interface PercentilesAggregation extends BaseAggregation {
-  type: 'percentiles';
+  type: "percentiles";
   field: string;
   percentiles: number[];
 }
@@ -203,7 +215,7 @@ export interface PercentilesAggregation extends BaseAggregation {
 // ===== Joins =====
 
 export interface JoinClause {
-  type: 'inner' | 'left' | 'right' | 'full';
+  type: "inner" | "left" | "right" | "full";
   resource: string;
   alias?: string;
   on: JoinCondition;
@@ -212,7 +224,7 @@ export interface JoinClause {
 
 export interface JoinCondition {
   left: string;
-  operator: '=' | '!=' | '>' | '>=' | '<' | '<=';
+  operator: "=" | "!=" | ">" | ">=" | "<" | "<=";
   right: string;
 }
 
@@ -246,47 +258,47 @@ export interface SourceLocation {
 }
 
 export interface QueryNode extends BaseASTNode {
-  type: 'Query';
+  type: "Query";
   resource: string;
   children: ASTNode[];
 }
 
 export interface FieldNode extends BaseASTNode {
-  type: 'Field';
+  type: "Field";
   name: string;
   alias?: string;
   children?: ASTNode[];
 }
 
 export interface FilterNode extends BaseASTNode {
-  type: 'Filter';
+  type: "Filter";
   expression: FilterExpression;
 }
 
 export interface SortNode extends BaseASTNode {
-  type: 'Sort';
+  type: "Sort";
   clauses: SortClause[];
 }
 
 export interface AggregationNode extends BaseASTNode {
-  type: 'Aggregation';
+  type: "Aggregation";
   aggregations: AggregationClause[];
 }
 
 export interface JoinNode extends BaseASTNode {
-  type: 'Join';
+  type: "Join";
   join: JoinClause;
 }
 
 export interface FragmentNode extends BaseASTNode {
-  type: 'Fragment';
+  type: "Fragment";
   fragment: FragmentDefinition;
 }
 
 // ===== Execution Plan =====
 
 export interface ExecutionPlan {
-  type: 'physical' | 'logical';
+  type: "physical" | "logical";
   steps: ExecutionStep[];
   estimatedCost: number;
   estimatedRows: number;
@@ -329,7 +341,7 @@ export interface QueryError {
 // ===== Streaming Results =====
 
 export interface StreamingQueryResult<T = any> {
-  type: 'data' | 'error' | 'complete';
+  type: "data" | "error" | "complete";
   data?: T;
   error?: QueryError;
   metadata?: Partial<QueryMetadata>;
@@ -347,21 +359,21 @@ export interface ValidationError {
   message: string;
   code: string;
   location?: SourceLocation;
-  severity: 'error';
+  severity: "error";
 }
 
 export interface ValidationWarning {
   message: string;
   code: string;
   location?: SourceLocation;
-  severity: 'warning';
+  severity: "warning";
 }
 
 // ===== Type System =====
 
 export interface TypeDefinition {
   name: string;
-  kind: 'scalar' | 'object' | 'enum' | 'interface' | 'union';
+  kind: "scalar" | "object" | "enum" | "interface" | "union";
   fields?: FieldDefinition[];
   values?: string[];
 }
@@ -391,17 +403,17 @@ declare namespace GeoJSON {
   }
 
   interface Point extends Geometry {
-    type: 'Point';
+    type: "Point";
     coordinates: number[];
   }
 
   interface Polygon extends Geometry {
-    type: 'Polygon';
+    type: "Polygon";
     coordinates: number[][][];
   }
 
   interface LineString extends Geometry {
-    type: 'LineString';
+    type: "LineString";
     coordinates: number[][];
   }
 }

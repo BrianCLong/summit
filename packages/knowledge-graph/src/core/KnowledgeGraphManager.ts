@@ -2,9 +2,9 @@
  * Core Knowledge Graph Management
  */
 
-import { Driver } from 'neo4j-driver';
-import { v4 as uuidv4 } from 'uuid';
-import { KGEntity, KGEntitySchema, KGRelationship, KGRelationshipSchema } from '../types/entity.js';
+import { Driver } from "neo4j-driver";
+import { v4 as uuidv4 } from "uuid";
+import { KGEntity, KGEntitySchema, KGRelationship, KGRelationshipSchema } from "../types/entity.js";
 
 export class KnowledgeGraphManager {
   constructor(private driver: Driver) {}
@@ -12,7 +12,7 @@ export class KnowledgeGraphManager {
   /**
    * Create a new entity in the knowledge graph
    */
-  async createEntity(entity: Omit<KGEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<KGEntity> {
+  async createEntity(entity: Omit<KGEntity, "id" | "createdAt" | "updatedAt">): Promise<KGEntity> {
     const now = new Date().toISOString();
     const fullEntity: KGEntity = {
       ...entity,
@@ -25,7 +25,7 @@ export class KnowledgeGraphManager {
 
     const session = this.driver.session();
     try {
-      const labels = validated.labels.map((l) => `:${l}`).join('');
+      const labels = validated.labels.map((l) => `:${l}`).join("");
       await session.run(
         `
         CREATE (e${labels} {
@@ -53,7 +53,7 @@ export class KnowledgeGraphManager {
           metadata: JSON.stringify(validated.metadata || {}),
           createdAt: validated.createdAt,
           updatedAt: validated.updatedAt,
-        },
+        }
       );
 
       return validated;
@@ -73,7 +73,7 @@ export class KnowledgeGraphManager {
         MATCH (e {id: $entityId})
         RETURN e, labels(e) as labels
         `,
-        { entityId },
+        { entityId }
       );
 
       if (result.records.length === 0) {
@@ -81,8 +81,8 @@ export class KnowledgeGraphManager {
       }
 
       const record = result.records[0];
-      const props = record.get('e').properties;
-      const labels = record.get('labels');
+      const props = record.get("e").properties;
+      const labels = record.get("labels");
 
       return KGEntitySchema.parse({
         ...props,
@@ -90,7 +90,7 @@ export class KnowledgeGraphManager {
         properties: JSON.parse(props.properties),
         provenance: JSON.parse(props.provenance),
         temporalInfo: props.temporalInfo ? JSON.parse(props.temporalInfo) : null,
-        metadata: JSON.parse(props.metadata || '{}'),
+        metadata: JSON.parse(props.metadata || "{}"),
       });
     } finally {
       await session.close();
@@ -108,27 +108,27 @@ export class KnowledgeGraphManager {
       const params: Record<string, any> = { entityId, updatedAt: now };
 
       if (updates.properties) {
-        setters.push('e.properties = $properties');
+        setters.push("e.properties = $properties");
         params.properties = JSON.stringify(updates.properties);
       }
       if (updates.confidence !== undefined) {
-        setters.push('e.confidence = $confidence');
+        setters.push("e.confidence = $confidence");
         params.confidence = updates.confidence;
       }
       if (updates.metadata) {
-        setters.push('e.metadata = $metadata');
+        setters.push("e.metadata = $metadata");
         params.metadata = JSON.stringify(updates.metadata);
       }
 
-      setters.push('e.updatedAt = datetime($updatedAt)');
+      setters.push("e.updatedAt = datetime($updatedAt)");
 
       const result = await session.run(
         `
         MATCH (e {id: $entityId})
-        SET ${setters.join(', ')}
+        SET ${setters.join(", ")}
         RETURN e, labels(e) as labels
         `,
-        params,
+        params
       );
 
       if (result.records.length === 0) {
@@ -136,8 +136,8 @@ export class KnowledgeGraphManager {
       }
 
       const record = result.records[0];
-      const props = record.get('e').properties;
-      const labels = record.get('labels');
+      const props = record.get("e").properties;
+      const labels = record.get("labels");
 
       return KGEntitySchema.parse({
         ...props,
@@ -145,7 +145,7 @@ export class KnowledgeGraphManager {
         properties: JSON.parse(props.properties),
         provenance: JSON.parse(props.provenance),
         temporalInfo: props.temporalInfo ? JSON.parse(props.temporalInfo) : null,
-        metadata: JSON.parse(props.metadata || '{}'),
+        metadata: JSON.parse(props.metadata || "{}"),
       });
     } finally {
       await session.close();
@@ -156,7 +156,7 @@ export class KnowledgeGraphManager {
    * Create a relationship between two entities
    */
   async createRelationship(
-    relationship: Omit<KGRelationship, 'id' | 'createdAt' | 'updatedAt'>,
+    relationship: Omit<KGRelationship, "id" | "createdAt" | "updatedAt">
   ): Promise<KGRelationship> {
     const now = new Date().toISOString();
     const fullRelationship: KGRelationship = {
@@ -174,7 +174,7 @@ export class KnowledgeGraphManager {
         `
         MATCH (source {id: $sourceId})
         MATCH (target {id: $targetId})
-        CREATE (source)-[r:${validated.type.toUpperCase().replace(/[^A-Z0-9_]/g, '_')} {
+        CREATE (source)-[r:${validated.type.toUpperCase().replace(/[^A-Z0-9_]/g, "_")} {
           id: $id,
           type: $type,
           namespace: $namespace,
@@ -203,7 +203,7 @@ export class KnowledgeGraphManager {
           metadata: JSON.stringify(validated.metadata || {}),
           createdAt: validated.createdAt,
           updatedAt: validated.updatedAt,
-        },
+        }
       );
 
       return validated;
@@ -215,11 +215,7 @@ export class KnowledgeGraphManager {
   /**
    * Find entities by type
    */
-  async findEntitiesByType(
-    type: string,
-    limit = 100,
-    offset = 0,
-  ): Promise<KGEntity[]> {
+  async findEntitiesByType(type: string, limit = 100, offset = 0): Promise<KGEntity[]> {
     const session = this.driver.session();
     try {
       const result = await session.run(
@@ -230,19 +226,19 @@ export class KnowledgeGraphManager {
         SKIP $offset
         LIMIT $limit
         `,
-        { type, offset, limit },
+        { type, offset, limit }
       );
 
       return result.records.map((record) => {
-        const props = record.get('e').properties;
-        const labels = record.get('labels');
+        const props = record.get("e").properties;
+        const labels = record.get("labels");
         return KGEntitySchema.parse({
           ...props,
           labels,
           properties: JSON.parse(props.properties),
           provenance: JSON.parse(props.provenance),
           temporalInfo: props.temporalInfo ? JSON.parse(props.temporalInfo) : null,
-          metadata: JSON.parse(props.metadata || '{}'),
+          metadata: JSON.parse(props.metadata || "{}"),
         });
       });
     } finally {
@@ -257,45 +253,45 @@ export class KnowledgeGraphManager {
     sourceId?: string,
     targetId?: string,
     type?: string,
-    limit = 100,
+    limit = 100
   ): Promise<KGRelationship[]> {
     const session = this.driver.session();
     try {
-      let cypher = 'MATCH (source)-[r]->(target)';
+      let cypher = "MATCH (source)-[r]->(target)";
       const params: Record<string, any> = { limit };
       const whereClauses: string[] = [];
 
       if (sourceId) {
-        whereClauses.push('source.id = $sourceId');
+        whereClauses.push("source.id = $sourceId");
         params.sourceId = sourceId;
       }
       if (targetId) {
-        whereClauses.push('target.id = $targetId');
+        whereClauses.push("target.id = $targetId");
         params.targetId = targetId;
       }
       if (type) {
-        whereClauses.push('r.type = $type');
+        whereClauses.push("r.type = $type");
         params.type = type;
       }
 
       if (whereClauses.length > 0) {
-        cypher += ` WHERE ${  whereClauses.join(' AND ')}`;
+        cypher += ` WHERE ${whereClauses.join(" AND ")}`;
       }
 
-      cypher += ' RETURN r, source.id as sourceId, target.id as targetId LIMIT $limit';
+      cypher += " RETURN r, source.id as sourceId, target.id as targetId LIMIT $limit";
 
       const result = await session.run(cypher, params);
 
       return result.records.map((record) => {
-        const props = record.get('r').properties;
+        const props = record.get("r").properties;
         return KGRelationshipSchema.parse({
           ...props,
-          sourceId: record.get('sourceId'),
-          targetId: record.get('targetId'),
+          sourceId: record.get("sourceId"),
+          targetId: record.get("targetId"),
           properties: JSON.parse(props.properties),
           provenance: JSON.parse(props.provenance),
           temporalInfo: props.temporalInfo ? JSON.parse(props.temporalInfo) : null,
-          metadata: JSON.parse(props.metadata || '{}'),
+          metadata: JSON.parse(props.metadata || "{}"),
         });
       });
     } finally {
@@ -315,10 +311,10 @@ export class KnowledgeGraphManager {
         DETACH DELETE e
         RETURN count(e) as deleted
         `,
-        { entityId },
+        { entityId }
       );
 
-      return result.records[0].get('deleted').toNumber() > 0;
+      return result.records[0].get("deleted").toNumber() > 0;
     } finally {
       await session.close();
     }
@@ -330,7 +326,7 @@ export class KnowledgeGraphManager {
   async getEntityNeighborhood(
     entityId: string,
     depth = 1,
-    relationshipTypes?: string[],
+    relationshipTypes?: string[]
   ): Promise<{
     entity: KGEntity;
     relationships: KGRelationship[];
@@ -338,9 +334,7 @@ export class KnowledgeGraphManager {
   }> {
     const session = this.driver.session();
     try {
-      const relTypeFilter = relationshipTypes
-        ? `:${relationshipTypes.join('|')}`
-        : '';
+      const relTypeFilter = relationshipTypes ? `:${relationshipTypes.join("|")}` : "";
 
       const result = await session.run(
         `
@@ -350,7 +344,7 @@ export class KnowledgeGraphManager {
                collect(DISTINCT r) as relationships,
                collect(DISTINCT {node: n, labels: labels(n)}) as neighbors
         `,
-        { entityId },
+        { entityId }
       );
 
       if (result.records.length === 0) {
@@ -358,18 +352,16 @@ export class KnowledgeGraphManager {
       }
 
       const record = result.records[0];
-      const entityProps = record.get('e').properties;
-      const entityLabels = record.get('eLabels');
+      const entityProps = record.get("e").properties;
+      const entityLabels = record.get("eLabels");
 
       const entity = KGEntitySchema.parse({
         ...entityProps,
         labels: entityLabels,
         properties: JSON.parse(entityProps.properties),
         provenance: JSON.parse(entityProps.provenance),
-        temporalInfo: entityProps.temporalInfo
-          ? JSON.parse(entityProps.temporalInfo)
-          : null,
-        metadata: JSON.parse(entityProps.metadata || '{}'),
+        temporalInfo: entityProps.temporalInfo ? JSON.parse(entityProps.temporalInfo) : null,
+        metadata: JSON.parse(entityProps.metadata || "{}"),
       });
 
       const relationships: KGRelationship[] = [];

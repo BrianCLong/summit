@@ -3,9 +3,9 @@
  * SQL, Spark, and federated query support
  */
 
-import pino from 'pino';
+import pino from "pino";
 
-const logger = pino({ name: 'unified-analytics' });
+const logger = pino({ name: "unified-analytics" });
 
 export interface QueryResult {
   columns: string[];
@@ -31,7 +31,7 @@ export class UnifiedAnalyticsEngine {
 
   async executeSQL(query: string): Promise<QueryResult> {
     const startTime = Date.now();
-    logger.info({ query }, 'Executing SQL query');
+    logger.info({ query }, "Executing SQL query");
 
     // SQL execution would go here
     const result: QueryResult = {
@@ -39,23 +39,23 @@ export class UnifiedAnalyticsEngine {
       rows: [],
       rowCount: 0,
       executionTime: Date.now() - startTime,
-      bytesScanned: 0
+      bytesScanned: 0,
     };
 
     return result;
   }
 
   async executeSpark(job: any): Promise<QueryResult> {
-    logger.info('Executing Spark job');
-    return this.executeSQL('');
+    logger.info("Executing Spark job");
+    return this.executeSQL("");
   }
 
   async federatedQuery(sources: string[], query: string): Promise<QueryResult> {
-    logger.info({ sources, query }, 'Executing federated query');
-    return this.executeSQL('');
+    logger.info({ sources, query }, "Executing federated query");
+    return this.executeSQL("");
   }
 }
 
-export * from './sql-parser.js';
-export * from './query-optimizer.js';
-export * from './execution-engine.js';
+export * from "./sql-parser.js";
+export * from "./query-optimizer.js";
+export * from "./execution-engine.js";

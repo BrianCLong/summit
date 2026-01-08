@@ -6,13 +6,13 @@ import {
   parse,
   visit,
   visitWithTypeInfo,
-} from 'graphql';
+} from "graphql";
 import type {
   CostGuardDecision,
   QueryPlanSummary,
   TenantBudgetProfile,
-} from '@ga-graphai/cost-guard';
-import { CostGuard, DEFAULT_PROFILE } from '@ga-graphai/cost-guard';
+} from "@ga-graphai/cost-guard";
+import { CostGuard, DEFAULT_PROFILE } from "@ga-graphai/cost-guard";
 
 interface CostWeights {
   fieldCost: number;
@@ -60,7 +60,10 @@ export interface GuardedExecution {
 export class GraphQLCostAnalyzer {
   private readonly weights: CostWeights;
 
-  constructor(private readonly schema: GraphQLSchema, weights?: Partial<CostWeights>) {
+  constructor(
+    private readonly schema: GraphQLSchema,
+    weights?: Partial<CostWeights>
+  ) {
     this.weights = { ...DEFAULT_COST_WEIGHTS, ...weights };
   }
 
@@ -99,7 +102,7 @@ export class GraphQLCostAnalyzer {
             listDepthStack.pop();
           },
         },
-      }),
+      })
     );
 
     const containsCartesianProduct = maxListDepth >= this.weights.cartesianListDepth;
@@ -115,7 +118,7 @@ export class GraphQLCostAnalyzer {
   private estimateRru(
     operations: number,
     depth: number,
-    containsCartesianProduct: boolean,
+    containsCartesianProduct: boolean
   ): number {
     const base = Math.max(operations, 1) * this.weights.fieldCost;
     const depthCost = depth * this.weights.depthCost;
@@ -124,11 +127,7 @@ export class GraphQLCostAnalyzer {
     return Math.round(base + depthCost + listCost + penalty);
   }
 
-  private estimateLatencyMs(
-    operations: number,
-    depth: number,
-    listDepth: number,
-  ): number {
+  private estimateLatencyMs(operations: number, depth: number, listDepth: number): number {
     const base = Math.max(operations, 1) * this.weights.latencyPerFieldMs;
     const depthFactor = 1 + Math.max(0, depth - 1) * this.weights.depthLatencyAmplifier;
     const listFactor = 1 + Math.max(0, listDepth - 1) * this.weights.listLatencyAmplifier;
@@ -146,7 +145,10 @@ export class GraphQLRateLimiter {
   private readonly windowMs: number;
   private readonly maxRequestsPerWindow: number;
 
-  constructor(private readonly schema: GraphQLSchema, options: GraphQLRateLimiterOptions = {}) {
+  constructor(
+    private readonly schema: GraphQLSchema,
+    options: GraphQLRateLimiterOptions = {}
+  ) {
     this.analyzer = new GraphQLCostAnalyzer(schema, options.costWeights);
     this.defaultProfile = options.defaultProfile ?? DEFAULT_PROFILE;
     this.tenantProfiles = new Map(Object.entries(options.tenantProfiles ?? {}));
@@ -170,7 +172,7 @@ export class GraphQLRateLimiter {
       recentLatencyP95: this.computeP95(stats.latencies),
     });
 
-    if (decision.action === 'allow') {
+    if (decision.action === "allow") {
       stats.active += 1;
       return {
         plan,
@@ -196,9 +198,7 @@ export class GraphQLRateLimiter {
   }
 
   private recordLatency(stats: TenantStats, latencyMs: number): void {
-    const normalizedLatency = Number.isFinite(latencyMs)
-      ? Math.max(0, Math.round(latencyMs))
-      : 0;
+    const normalizedLatency = Number.isFinite(latencyMs) ? Math.max(0, Math.round(latencyMs)) : 0;
     stats.latencies.push(normalizedLatency);
     if (stats.latencies.length > 50) {
       stats.latencies.shift();
@@ -228,9 +228,9 @@ export class GraphQLRateLimiter {
     if (recent.length > this.maxRequestsPerWindow) {
       const retryAfterMs = Math.max(0, recent[0] + this.windowMs - now);
       return {
-        action: 'kill',
-        reason: 'Rate limit exceeded for tenant window',
-        reasonCode: 'RATE_LIMIT_WINDOW',
+        action: "kill",
+        reason: "Rate limit exceeded for tenant window",
+        reasonCode: "RATE_LIMIT_WINDOW",
         nextCheckMs: retryAfterMs || 1000,
         metrics: {
           projectedRru: 0,

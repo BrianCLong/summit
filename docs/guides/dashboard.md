@@ -138,7 +138,7 @@ Add allowed commands in `tools/proxy.js`:
 
 ```javascript
 const ALLOWED_COMMANDS = [
-  'your-custom-command',
+  "your-custom-command",
   // ... existing commands
 ];
 ```

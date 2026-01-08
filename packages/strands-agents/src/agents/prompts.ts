@@ -215,17 +215,17 @@ Before finalizing any narrative:
  */
 export function getSystemPrompt(role: string): string {
   switch (role.toLowerCase()) {
-    case 'investigator':
-    case 'investigation':
+    case "investigator":
+    case "investigation":
       return INVESTIGATION_AGENT_PROMPT;
-    case 'entity_resolver':
-    case 'resolver':
+    case "entity_resolver":
+    case "resolver":
       return ENTITY_RESOLUTION_AGENT_PROMPT;
-    case 'analyst':
-    case 'analysis':
+    case "analyst":
+    case "analysis":
       return ANALYST_AGENT_PROMPT;
-    case 'narrator':
-    case 'narrative':
+    case "narrator":
+    case "narrative":
       return NARRATIVE_AGENT_PROMPT;
     default:
       return ANALYST_AGENT_PROMPT;

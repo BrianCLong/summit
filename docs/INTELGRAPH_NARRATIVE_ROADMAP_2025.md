@@ -3,6 +3,7 @@
 Summit context: Neo4j graph core with pgvector/Redis/TimescaleDB, GraphQL API + React + real-time collaboration, AI copilot, and a tick-based narrative simulation engine. Objective: deliver analyst-grade OSINT/CTI/narrative intelligence workflows that stay deployable under partial connectivity and governed for provenance, audit, and mission safety.
 
 ## Capability 1 — GNN-augmented Narrative Integrity Scoring
+
 - **Value**: Quantifies the reliability and manipulation risk of social narratives and sources before they are injected into simulations or briefings.
 - **Timeliness**: Aligns with 2024–2025 graph-based misinformation and bot detection research (graph neural diffusion, cascade modeling) and rising narrative warfare concerns in geopolitics.
 - **v0/v1 (4–8 weeks)**:
@@ -14,6 +15,7 @@ Summit context: Neo4j graph core with pgvector/Redis/TimescaleDB, GraphQL API + 
 - **Governance/controls**: Provenance-tracked features and model versions; audit log of score changes; uncertainty ribbons on UI; policy flags to block simulation of low-trust narratives without analyst override.
 
 ## Capability 2 — Agentic OSINT Triage Copilot → Graph Investigations + Narrative Seeds
+
 - **Value**: Converts raw OSINT/SOC alerts into structured graph investigations and seed scenarios that analysts can simulate or brief immediately.
 - **Timeliness**: Mirrors the 2025 push toward agentic SOC-style workflows and collaborative, open-weight model orchestration instead of single black-box LLMs.
 - **v0/v1 (4–8 weeks)**:
@@ -25,6 +27,7 @@ Summit context: Neo4j graph core with pgvector/Redis/TimescaleDB, GraphQL API + 
 - **Governance/controls**: All agent actions logged with data lineage; per-enrichment provenance and confidence; rate limits and content-safety filters on external fetches; manual approval gates before publishing narratives.
 
 ## Capability 3 — Open-weight Multi-Model Orchestrator for CTI Playbooks
+
 - **Value**: Reliable, cost-controllable playbook execution that chains specialized open models (NLP, OCR, translation, code) with deterministic tools for evidence gathering.
 - **Timeliness**: Tracks 2024–2025 emphasis on open, system-level AI ecosystems and collaborative tooling instead of closed monoliths.
 - **v0/v1 (4–8 weeks)**:
@@ -36,6 +39,7 @@ Summit context: Neo4j graph core with pgvector/Redis/TimescaleDB, GraphQL API + 
 - **Governance/controls**: Strict provenance (model hash, config, tool versions), reproducibility bundles, and attested outputs; policy guardrails to block disallowed models/regions; uncertainty + gap annotations in reports.
 
 ## Capability 4 — Narrative Propagation Early-Warning & Decision Board
+
 - **Value**: Detects fast-moving or coordinated narratives, estimates impact, and prescribes counter-actions linked to playbooks and simulations.
 - **Timeliness**: Leverages graph-based cascade detection and botnet coordination research alongside decision intelligence dashboards that connect alerts→intel→action.
 - **v0/v1 (4–8 weeks)**:
@@ -47,6 +51,7 @@ Summit context: Neo4j graph core with pgvector/Redis/TimescaleDB, GraphQL API + 
 - **Governance/controls**: Alert fatigue controls (cooldowns, deduplication), confidence intervals on reach/velocity, red-team prompts to stress-test suggested actions, and audit logs for intervention decisions.
 
 ## Phased Roadmap
+
 - **Phase 1 (fastest value, leverage existing graph/sim)**: Capability 2 (Triage Copilot) and Capability 1 (Integrity Scoring) — immediately improves alert→graph→sim flow and injects governance via provenance and integrity gating.
 - **Phase 2 (platform leverage + defensibility)**: Capability 4 (Propagation Early-Warning Board) — differentiates with graph + sim coupling and decision intelligence dashboards.
 - **Phase 3 (system resilience + cost control)**: Capability 3 (Open-weight Orchestrator) — hardens execution, lowers cost, and keeps deployments sovereign/offline-friendly while feeding playbook outputs back into graph and simulation loops.

@@ -22,20 +22,20 @@ pnpm add @intelgraph/plugin-host
 ## Quick Start
 
 ```typescript
-import { PluginHostService, PluginHostAPI, createLogger } from '@intelgraph/plugin-host';
+import { PluginHostService, PluginHostAPI, createLogger } from "@intelgraph/plugin-host";
 
 // Configuration
 const config = {
-  platformVersion: '1.0.0',
-  environment: 'production',
+  platformVersion: "1.0.0",
+  environment: "production",
   security: {
     scanOnInstall: true,
     requireSignature: true,
   },
   authorization: {
-    provider: 'opa',
-    opaEndpoint: 'http://localhost:8181',
-    policyPath: '/v1/data/plugins/allow',
+    provider: "opa",
+    opaEndpoint: "http://localhost:8181",
+    policyPath: "/v1/data/plugins/allow",
   },
   monitoring: {
     healthCheckIntervalMs: 30000,
@@ -43,12 +43,12 @@ const config = {
   },
   autoStart: {
     enabled: true,
-    plugins: ['analytics-core', 'visualization-graphs'],
+    plugins: ["analytics-core", "visualization-graphs"],
   },
 };
 
 // Create service
-const logger = createLogger('PluginHost');
+const logger = createLogger("PluginHost");
 const service = new PluginHostService(config, logger);
 const api = new PluginHostAPI(service, logger);
 
@@ -56,7 +56,7 @@ const api = new PluginHostAPI(service, logger);
 await service.start();
 await api.start(3001);
 
-console.log('Plugin Host Service running on http://localhost:3001');
+console.log("Plugin Host Service running on http://localhost:3001");
 ```
 
 ## API Endpoints
@@ -171,22 +171,22 @@ Get health status and resource usage for a plugin.
 await service.installPlugin(manifest, source, options);
 
 // Enable a plugin
-await service.enablePlugin('my-plugin-id');
+await service.enablePlugin("my-plugin-id");
 
 // Disable a plugin
-await service.disablePlugin('my-plugin-id');
+await service.disablePlugin("my-plugin-id");
 
 // Update a plugin
-await service.updatePlugin('my-plugin-id', '2.0.0');
+await service.updatePlugin("my-plugin-id", "2.0.0");
 
 // Hot reload
-await service.reloadPlugin('my-plugin-id');
+await service.reloadPlugin("my-plugin-id");
 
 // List plugins
-const plugins = await service.listPlugins({ category: 'analytics' });
+const plugins = await service.listPlugins({ category: "analytics" });
 
 // Get plugin health
-const health = await service.getPluginHealth('my-plugin-id');
+const health = await service.getPluginHealth("my-plugin-id");
 
 // Get service health
 const serviceHealth = await service.getServiceHealth();
@@ -197,23 +197,23 @@ const serviceHealth = await service.getServiceHealth();
 The Plugin Host Service emits events for monitoring:
 
 ```typescript
-service.on('plugin:installed', ({ pluginId, version }) => {
+service.on("plugin:installed", ({ pluginId, version }) => {
   console.log(`Plugin ${pluginId}@${version} installed`);
 });
 
-service.on('plugin:enabled', ({ pluginId }) => {
+service.on("plugin:enabled", ({ pluginId }) => {
   console.log(`Plugin ${pluginId} enabled`);
 });
 
-service.on('plugin:disabled', ({ pluginId }) => {
+service.on("plugin:disabled", ({ pluginId }) => {
   console.log(`Plugin ${pluginId} disabled`);
 });
 
-service.on('plugin:unhealthy', ({ pluginId, health }) => {
+service.on("plugin:unhealthy", ({ pluginId, health }) => {
   console.warn(`Plugin ${pluginId} unhealthy:`, health);
 });
 
-service.on('plugin:quota-violation', ({ pluginId, violations }) => {
+service.on("plugin:quota-violation", ({ pluginId, violations }) => {
   console.error(`Plugin ${pluginId} quota violations:`, violations);
 });
 ```
@@ -224,8 +224,8 @@ service.on('plugin:quota-violation', ({ pluginId, violations }) => {
 
 ```typescript
 security: {
-  scanOnInstall: boolean;      // Scan plugins during installation
-  requireSignature: boolean;   // Require code signing
+  scanOnInstall: boolean; // Scan plugins during installation
+  requireSignature: boolean; // Require code signing
 }
 ```
 
@@ -243,8 +243,8 @@ authorization: {
 
 ```typescript
 monitoring: {
-  healthCheckIntervalMs: number;     // Health check frequency
-  autoDisableOnViolation: boolean;   // Auto-disable on critical violations
+  healthCheckIntervalMs: number; // Health check frequency
+  autoDisableOnViolation: boolean; // Auto-disable on critical violations
 }
 ```
 
@@ -273,6 +273,7 @@ Violations are detected and can trigger automatic plugin disable.
 ### Sandboxing
 
 All plugins run in isolated-vm sandboxes with:
+
 - Memory limits
 - No direct file system access
 - Controlled network access
@@ -291,6 +292,7 @@ Plugins must declare required permissions:
 ### Code Scanning
 
 Automatic security scanning for:
+
 - Known vulnerabilities
 - Dangerous code patterns
 - Dependency vulnerabilities

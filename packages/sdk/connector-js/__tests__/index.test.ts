@@ -1,9 +1,9 @@
-import { createEmitter } from '../src/index';
-import { Writable } from 'stream';
+import { createEmitter } from "../src/index";
+import { Writable } from "stream";
 
-describe('createEmitter', () => {
-  it('writes newline delimited JSON', () => {
-    let data = '';
+describe("createEmitter", () => {
+  it("writes newline delimited JSON", () => {
+    let data = "";
     const stream = new Writable({
       write(chunk, _enc, cb) {
         data += chunk.toString();
@@ -11,7 +11,7 @@ describe('createEmitter', () => {
       },
     });
     const emit = createEmitter(stream);
-    emit({ foo: 'bar' });
+    emit({ foo: "bar" });
     expect(data).toBe('{"foo":"bar"}\n');
   });
 });

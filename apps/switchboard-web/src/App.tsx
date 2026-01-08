@@ -1,5 +1,5 @@
-import React from 'react';
-import { AdaptersPage } from './features/adapters/AdaptersPage';
+import React from "react";
+import { AdaptersPage } from "./features/adapters/AdaptersPage";
 
 function App() {
   return (

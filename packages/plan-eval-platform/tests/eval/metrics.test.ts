@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { MetricsCollector, calculateMetricsFromTraces } from '../../src/eval/metrics.js';
-import type { ScenarioResult, Trace } from '../../src/types.js';
+import { describe, it, expect, beforeEach } from "vitest";
+import { MetricsCollector, calculateMetricsFromTraces } from "../../src/eval/metrics.js";
+import type { ScenarioResult, Trace } from "../../src/types.js";
 
 const createMockResult = (success: boolean, tokens: number, costUsd: number): ScenarioResult => ({
   scenarioId: `scenario-${Math.random().toString(36).slice(2)}`,
@@ -30,9 +30,9 @@ const createMockResult = (success: boolean, tokens: number, costUsd: number): Sc
     costSavingsVsBaseline: 0.1,
   },
   trace: {
-    id: 'trace-1',
-    scenarioId: 'scenario',
-    runId: 'run',
+    id: "trace-1",
+    scenarioId: "scenario",
+    runId: "run",
     startTime: new Date().toISOString(),
     events: [],
   },
@@ -40,14 +40,14 @@ const createMockResult = (success: boolean, tokens: number, costUsd: number): Sc
   assertions: [],
 });
 
-describe('MetricsCollector', () => {
+describe("MetricsCollector", () => {
   let collector: MetricsCollector;
 
   beforeEach(() => {
     collector = new MetricsCollector();
   });
 
-  it('should compute metrics from empty results', () => {
+  it("should compute metrics from empty results", () => {
     const metrics = collector.computeMetrics();
 
     expect(metrics.taskSuccessRate).toBe(0);
@@ -55,7 +55,7 @@ describe('MetricsCollector', () => {
     expect(metrics.totalCostUsd).toBe(0);
   });
 
-  it('should add results and compute metrics', () => {
+  it("should add results and compute metrics", () => {
     collector.addResult(createMockResult(true, 1000, 0.01));
     collector.addResult(createMockResult(true, 800, 0.008));
     collector.addResult(createMockResult(false, 1200, 0.012));
@@ -67,7 +67,7 @@ describe('MetricsCollector', () => {
     expect(metrics.totalCostUsd).toBeCloseTo(0.03, 4);
   });
 
-  it('should calculate cost per successful task', () => {
+  it("should calculate cost per successful task", () => {
     collector.addResult(createMockResult(true, 1000, 0.01));
     collector.addResult(createMockResult(true, 1000, 0.02));
     collector.addResult(createMockResult(false, 1000, 0.015));
@@ -78,7 +78,7 @@ describe('MetricsCollector', () => {
     expect(metrics.costPerSuccessfulTask).toBeCloseTo(0.0225, 4);
   });
 
-  it('should calculate latency percentiles', () => {
+  it("should calculate latency percentiles", () => {
     // Add results with varying latencies
     for (let i = 0; i < 10; i++) {
       const result = createMockResult(true, 100, 0.001);
@@ -92,31 +92,31 @@ describe('MetricsCollector', () => {
     expect(metrics.p95LatencyMs).toBe(1000);
   });
 
-  it('should compute metrics by category', () => {
+  it("should compute metrics by category", () => {
     const result1 = createMockResult(true, 1000, 0.01);
-    result1.trace.metadata = { category: 'code_correction' };
+    result1.trace.metadata = { category: "code_correction" };
 
     const result2 = createMockResult(false, 800, 0.008);
-    result2.trace.metadata = { category: 'data_analysis' };
+    result2.trace.metadata = { category: "data_analysis" };
 
     const result3 = createMockResult(true, 1200, 0.012);
-    result3.trace.metadata = { category: 'code_correction' };
+    result3.trace.metadata = { category: "code_correction" };
 
     collector.addResults([result1, result2, result3]);
 
     const byCategory = collector.computeByCategory();
 
-    expect(byCategory.has('code_correction')).toBe(true);
-    expect(byCategory.has('data_analysis')).toBe(true);
+    expect(byCategory.has("code_correction")).toBe(true);
+    expect(byCategory.has("data_analysis")).toBe(true);
 
-    const codeMetrics = byCategory.get('code_correction')!;
+    const codeMetrics = byCategory.get("code_correction")!;
     expect(codeMetrics.taskSuccessRate).toBe(1);
 
-    const dataMetrics = byCategory.get('data_analysis')!;
+    const dataMetrics = byCategory.get("data_analysis")!;
     expect(dataMetrics.taskSuccessRate).toBe(0);
   });
 
-  it('should compare to baseline', () => {
+  it("should compare to baseline", () => {
     collector.addResult(createMockResult(true, 800, 0.008));
     collector.addResult(createMockResult(true, 900, 0.009));
 
@@ -135,19 +135,19 @@ describe('MetricsCollector', () => {
     expect(comparison.improvements.length + comparison.regressions.length).toBeGreaterThan(0);
   });
 
-  it('should generate summary report', () => {
+  it("should generate summary report", () => {
     collector.addResult(createMockResult(true, 1000, 0.01));
     collector.addResult(createMockResult(true, 800, 0.008));
 
     const summary = collector.generateSummary();
 
-    expect(summary).toContain('Evaluation Summary');
-    expect(summary).toContain('Success Rate');
-    expect(summary).toContain('Cost Metrics');
-    expect(summary).toContain('Latency Metrics');
+    expect(summary).toContain("Evaluation Summary");
+    expect(summary).toContain("Success Rate");
+    expect(summary).toContain("Cost Metrics");
+    expect(summary).toContain("Latency Metrics");
   });
 
-  it('should clear results', () => {
+  it("should clear results", () => {
     collector.addResult(createMockResult(true, 1000, 0.01));
     collector.clear();
 
@@ -156,15 +156,15 @@ describe('MetricsCollector', () => {
   });
 });
 
-describe('calculateMetricsFromTraces', () => {
-  it('should calculate metrics from trace array', () => {
+describe("calculateMetricsFromTraces", () => {
+  it("should calculate metrics from trace array", () => {
     const traces: Trace[] = [
       {
-        id: 'trace-1',
-        scenarioId: 'scenario-1',
-        runId: 'run-1',
-        startTime: '2024-01-01T00:00:00Z',
-        endTime: '2024-01-01T00:00:01Z',
+        id: "trace-1",
+        scenarioId: "scenario-1",
+        runId: "run-1",
+        startTime: "2024-01-01T00:00:00Z",
+        endTime: "2024-01-01T00:00:01Z",
         events: [],
         summary: {
           success: true,
@@ -177,11 +177,11 @@ describe('calculateMetricsFromTraces', () => {
         },
       },
       {
-        id: 'trace-2',
-        scenarioId: 'scenario-2',
-        runId: 'run-2',
-        startTime: '2024-01-01T00:00:00Z',
-        endTime: '2024-01-01T00:00:02Z',
+        id: "trace-2",
+        scenarioId: "scenario-2",
+        runId: "run-2",
+        startTime: "2024-01-01T00:00:00Z",
+        endTime: "2024-01-01T00:00:02Z",
         events: [],
         summary: {
           success: false,

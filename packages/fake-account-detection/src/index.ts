@@ -3,8 +3,8 @@
  * Bot detection, sockpuppet identification, and profile authenticity scoring
  */
 
-export * from './psycholinguistics';
-export * from './graph-neural/gnn-analyzer';
+export * from "./psycholinguistics";
+export * from "./graph-neural/gnn-analyzer";
 
 export interface FakeAccountAnalysis {
   isFake: boolean;
@@ -18,13 +18,13 @@ export interface FakeAccountAnalysis {
 }
 
 export enum AccountType {
-  GENUINE = 'genuine',
-  BOT = 'bot',
-  SOCKPUPPET = 'sockpuppet',
-  COMPROMISED = 'compromised',
-  SPAM = 'spam',
-  TROLL = 'troll',
-  CYBORG = 'cyborg',
+  GENUINE = "genuine",
+  BOT = "bot",
+  SOCKPUPPET = "sockpuppet",
+  COMPROMISED = "compromised",
+  SPAM = "spam",
+  TROLL = "troll",
+  CYBORG = "cyborg",
 }
 
 export interface FakeIndicator {
@@ -131,9 +131,9 @@ export class FakeAccountDetector {
     const behaviorAnalysis = await this.analyzeBehavior(account.activity);
     if (behaviorAnalysis.authenticity < 0.5) {
       indicators.push({
-        type: 'suspicious_behavior',
+        type: "suspicious_behavior",
         severity: 1 - behaviorAnalysis.authenticity,
-        description: 'Account exhibits bot-like behavior patterns',
+        description: "Account exhibits bot-like behavior patterns",
         evidence: behaviorAnalysis,
       });
     }
@@ -142,9 +142,9 @@ export class FakeAccountDetector {
     const profileAnalysis = await this.analyzeProfile(account.profile);
     if (profileAnalysis.authenticity < 0.6) {
       indicators.push({
-        type: 'suspicious_profile',
+        type: "suspicious_profile",
         severity: 1 - profileAnalysis.authenticity,
-        description: 'Profile shows signs of inauthenticity',
+        description: "Profile shows signs of inauthenticity",
         evidence: profileAnalysis,
       });
     }
@@ -153,9 +153,9 @@ export class FakeAccountDetector {
     const networkAnalysis = await this.analyzeNetwork(account.connections);
     if (networkAnalysis.isolation > 0.7) {
       indicators.push({
-        type: 'network_isolation',
+        type: "network_isolation",
         severity: networkAnalysis.isolation,
-        description: 'Account is isolated or part of suspicious cluster',
+        description: "Account is isolated or part of suspicious cluster",
         evidence: networkAnalysis,
       });
     }
@@ -164,16 +164,16 @@ export class FakeAccountDetector {
     const { accountType, confidence } = this.classifyAccount(
       behaviorAnalysis,
       profileAnalysis,
-      networkAnalysis,
+      networkAnalysis
     );
 
     const isFake = accountType !== AccountType.GENUINE;
 
     if (isFake) {
-      recommendations.push('Verify account through additional authentication methods');
-      recommendations.push('Monitor account activity for confirmation');
+      recommendations.push("Verify account through additional authentication methods");
+      recommendations.push("Monitor account activity for confirmation");
       if (confidence > 0.8) {
-        recommendations.push('Consider account suspension pending investigation');
+        recommendations.push("Consider account suspension pending investigation");
       }
     }
 
@@ -251,7 +251,8 @@ export class FakeAccountDetector {
     }
 
     const mean = intervals.reduce((a, b) => a + b, 0) / intervals.length;
-    const variance = intervals.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / intervals.length;
+    const variance =
+      intervals.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / intervals.length;
     const cv = Math.sqrt(variance) / mean;
 
     // Low CV = high regularity
@@ -356,11 +357,11 @@ export class FakeAccountDetector {
     let spamScore = 0;
 
     for (const post of posts) {
-      const text = post.text || '';
+      const text = post.text || "";
       // Check for spam indicators
-      if (text.includes('http') && text.split('http').length > 3) spamScore += 0.2;
+      if (text.includes("http") && text.split("http").length > 3) spamScore += 0.2;
       if (/[A-Z]{10,}/.test(text)) spamScore += 0.1; // Excessive caps
-      if (text.includes('🎁') || text.includes('💰')) spamScore += 0.1; // Spam emojis
+      if (text.includes("🎁") || text.includes("💰")) spamScore += 0.1; // Spam emojis
     }
 
     return Math.min(spamScore / posts.length, 1);
@@ -386,9 +387,9 @@ export class FakeAccountDetector {
     // Check for various anomalies
     if (activity?.posts?.length > 1000) {
       anomalies.push({
-        type: 'excessive_posting',
+        type: "excessive_posting",
         severity: 0.7,
-        description: 'Unusually high post count',
+        description: "Unusually high post count",
       });
     }
 
@@ -444,7 +445,7 @@ export class FakeAccountDetector {
         isGeneric: true,
         coherence: 0,
         depth: 0,
-        flags: ['missing_bio'],
+        flags: ["missing_bio"],
       };
     }
 
@@ -463,7 +464,7 @@ export class FakeAccountDetector {
       isGeneric,
       coherence: 0.7,
       depth: bio.length / 100,
-      flags: isGeneric ? ['generic_bio'] : [],
+      flags: isGeneric ? ["generic_bio"] : [],
     };
   }
 
@@ -475,9 +476,9 @@ export class FakeAccountDetector {
     const nameQuality = this.assessNameQuality(profile.name);
 
     const flags: string[] = [];
-    if (accountAge < 30) flags.push('new_account');
-    if (usernamePattern === 'random') flags.push('suspicious_username');
-    if (!profile.name) flags.push('missing_name');
+    if (accountAge < 30) flags.push("new_account");
+    if (usernamePattern === "random") flags.push("suspicious_username");
+    if (!profile.name) flags.push("missing_name");
 
     return {
       accountAge,
@@ -489,9 +490,9 @@ export class FakeAccountDetector {
   }
 
   private classifyUsernamePattern(username: string): string {
-    if (/^[a-z]+\d{8,}$/i.test(username)) return 'random';
-    if (/^\d+$/.test(username)) return 'numeric';
-    return 'normal';
+    if (/^[a-z]+\d{8,}$/i.test(username)) return "random";
+    if (/^\d+$/.test(username)) return "numeric";
+    return "normal";
   }
 
   private assessNameQuality(name: string): number {
@@ -502,7 +503,7 @@ export class FakeAccountDetector {
   }
 
   private calculateCompleteness(profile: any): number {
-    const fields = ['name', 'bio', 'image', 'location', 'website'];
+    const fields = ["name", "bio", "image", "location", "website"];
     const filled = fields.filter((f) => profile[f]).length;
     return filled / fields.length;
   }
@@ -551,9 +552,9 @@ export class FakeAccountDetector {
   }
 
   private determineNetworkRole(connections: any[]): string {
-    if (connections.length < 10) return 'peripheral';
-    if (connections.length > 1000) return 'hub';
-    return 'normal';
+    if (connections.length < 10) return "peripheral";
+    if (connections.length > 1000) return "hub";
+    return "normal";
   }
 
   /**
@@ -562,7 +563,7 @@ export class FakeAccountDetector {
   private classifyAccount(
     behavior: BehaviorAnalysis,
     profile: ProfileAnalysis,
-    network: NetworkAnalysis,
+    network: NetworkAnalysis
   ): { accountType: AccountType; confidence: number } {
     const overallAuthenticity =
       behavior.authenticity * 0.4 + profile.authenticity * 0.3 + (1 - network.isolation) * 0.3;
@@ -573,7 +574,10 @@ export class FakeAccountDetector {
 
     // Classify based on patterns
     if (behavior.activityPattern.humanLikelihood < 0.3) {
-      return { accountType: AccountType.BOT, confidence: 1 - behavior.activityPattern.humanLikelihood };
+      return {
+        accountType: AccountType.BOT,
+        confidence: 1 - behavior.activityPattern.humanLikelihood,
+      };
     }
 
     if (profile.authenticity < 0.3 && behavior.authenticity < 0.5) {

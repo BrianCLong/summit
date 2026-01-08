@@ -3,9 +3,7 @@ import { ReplayReport } from "./types.js";
 
 export function renderDashboard(report: ReplayReport): string {
   const ranked = rankOutcomes(report);
-  const rows = ranked
-    .map((outcome) => renderRow(outcome))
-    .join("\n");
+  const rows = ranked.map((outcome) => renderRow(outcome)).join("\n");
   return `<!DOCTYPE html>
 <html lang="en">
   <head>

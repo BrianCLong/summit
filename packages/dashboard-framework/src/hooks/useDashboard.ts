@@ -1,6 +1,6 @@
-import { useCallback, useEffect } from 'react';
-import { useDashboardStore } from '../store';
-import { Dashboard, DashboardPage, Widget } from '../types';
+import { useCallback, useEffect } from "react";
+import { useDashboardStore } from "../store";
+import { Dashboard, DashboardPage, Widget } from "../types";
 
 export function useDashboard(dashboardId?: string) {
   const store = useDashboardStore();

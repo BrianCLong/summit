@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 services:
   sfu:
     image: ghcr.io/companyos/media-sfu:latest
@@ -9,53 +9,44 @@ services:
     image: coturn/coturn:latest
     network_mode: host
     command:
-      [
-        '-n',
-        '--no-cli',
-        '--no-tls',
-        '--no-dtls',
-        '--min-port',
-        '49160',
-        '--max-port',
-        '49200',
-      ]
+      ["-n", "--no-cli", "--no-tls", "--no-dtls", "--min-port", "49160", "--max-port", "49200"]
   signaling:
     image: ghcr.io/companyos/signaling:latest
-    ports: ['8080:8080']
+    ports: ["8080:8080"]
     environment:
       - NATS_URL=nats://haproxy:4222
   nats1:
     image: nats:2
     command:
-      - '-p'
-      - '4222'
-      - '--cluster'
-      - 'nats://0.0.0.0:6222'
-      - '--routes'
-      - 'nats://rurl@nats2:6222,nats://rurl@nats3:6222'
-      - '-js'
+      - "-p"
+      - "4222"
+      - "--cluster"
+      - "nats://0.0.0.0:6222"
+      - "--routes"
+      - "nats://rurl@nats2:6222,nats://rurl@nats3:6222"
+      - "-js"
     ports:
       - "8222:8222"
   nats2:
     image: nats:2
     command:
-      - '-p'
-      - '4222'
-      - '--cluster'
-      - 'nats://0.0.0.0:6222'
-      - '--routes'
-      - 'nats://rurl@nats1:6222,nats://rurl@nats3:6222'
-      - '-js'
+      - "-p"
+      - "4222"
+      - "--cluster"
+      - "nats://0.0.0.0:6222"
+      - "--routes"
+      - "nats://rurl@nats1:6222,nats://rurl@nats3:6222"
+      - "-js"
   nats3:
     image: nats:2
     command:
-      - '-p'
-      - '4222'
-      - '--cluster'
-      - 'nats://0.0.0.0:6222'
-      - '--routes'
-      - 'nats://rurl@nats1:6222,nats://rurl@nats2:6222'
-      - '-js'
+      - "-p"
+      - "4222"
+      - "--cluster"
+      - "nats://0.0.0.0:6222"
+      - "--routes"
+      - "nats://rurl@nats1:6222,nats://rurl@nats2:6222"
+      - "-js"
   haproxy:
     image: haproxy:latest
     ports:
@@ -64,7 +55,7 @@ services:
       - ./haproxy:/usr/local/etc/haproxy:ro
   opa:
     image: openpolicyagent/opa:latest
-    command: ['run', '--server', '/policies']
+    command: ["run", "--server", "/policies"]
     volumes:
       - ../../policies:/policies:ro
   agent-gateway:
@@ -72,4 +63,4 @@ services:
     environment:
       - NATS_URL=nats://haproxy:4222
       - OPA_URL=http://opa:8181
-    ports: ['7070:7070']
+    ports: ["7070:7070"]

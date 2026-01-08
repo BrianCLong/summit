@@ -12,7 +12,11 @@
     "lint": "eslint src/**/*.ts",
     "typecheck": "tsc --noEmit"
   },
-  "keywords": ["extension", "api", "extensibility"],
+  "keywords": [
+    "extension",
+    "api",
+    "extensibility"
+  ],
   "author": "IntelGraph Team",
   "license": "MIT",
   "dependencies": {

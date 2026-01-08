@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Target environment'
+        description: "Target environment"
         required: true
-        default: 'staging'
+        default: "staging"
       ref:
-        description: 'Git ref to deploy'
+        description: "Git ref to deploy"
         required: false
-        default: 'main'
+        default: "main"
 
 jobs:
   deploy:
@@ -26,7 +26,7 @@ jobs:
 
       - name: Node build (client)
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4
-        with: { node-version: '20' }
+        with: { node-version: "20" }
       - run: |
           cd client
           npm ci
@@ -34,7 +34,7 @@ jobs:
 
       - name: Node build (server)
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4
-        with: { node-version: '20' }
+        with: { node-version: "20" }
       - run: |
           cd server
           npm ci

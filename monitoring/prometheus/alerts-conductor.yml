@@ -6,16 +6,16 @@ groups:
         for: 10m
         labels: { severity: page }
         annotations:
-          summary: 'Conductor error rate >2% (5m)'
+          summary: "Conductor error rate >2% (5m)"
       - alert: ConductorHighLatency
         expr: histogram_quantile(0.95, sum(rate(conductor_request_duration_seconds_bucket[5m])) by (le)) > 0.8
         for: 10m
         labels: { severity: page }
         annotations:
-          summary: 'Conductor p95 latency >800ms'
+          summary: "Conductor p95 latency >800ms"
       - alert: McpServerDown
         expr: probe_success{job="mcp_health"} == 0
         for: 2m
         labels: { severity: page }
         annotations:
-          summary: 'MCP health probe failing'
+          summary: "MCP health probe failing"

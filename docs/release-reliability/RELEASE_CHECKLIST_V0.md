@@ -49,7 +49,7 @@ This checklist ensures every release follows the safe path. Complete all applica
 
 ## Database Migration Checklist
 
-*Complete if release includes database changes*
+_Complete if release includes database changes_
 
 ### Schema Changes
 
@@ -71,7 +71,7 @@ This checklist ensures every release follows the safe path. Complete all applica
 
 ## Feature Flag Checklist
 
-*Complete if release uses feature flags*
+_Complete if release uses feature flags_
 
 - [ ] Feature flag configured in LaunchDarkly/config
 - [ ] Initial rollout percentage set (recommend: 1-5%)
@@ -104,13 +104,13 @@ This checklist ensures every release follows the safe path. Complete all applica
 
 For Tier 1 services (Progressive Canary):
 
-| Traffic % | Duration | Checks Required |
-|-----------|----------|-----------------|
-| 1% | 1 min | Smoke check |
-| 10% | 5 min | SLO burn, error budget |
-| 25% | 10 min | SLO burn, synthetic |
-| 50% | 15 min | SLO burn, anomaly detection |
-| 100% | - | Final validation |
+| Traffic % | Duration | Checks Required             |
+| --------- | -------- | --------------------------- |
+| 1%        | 1 min    | Smoke check                 |
+| 10%       | 5 min    | SLO burn, error budget      |
+| 25%       | 10 min   | SLO burn, synthetic         |
+| 50%       | 15 min   | SLO burn, anomaly detection |
+| 100%      | -        | Final validation            |
 
 - [ ] 1% traffic: smoke check passed
 - [ ] 10% traffic: SLO burn check passed
@@ -120,11 +120,11 @@ For Tier 1 services (Progressive Canary):
 
 For Tier 2 services (Standard Canary):
 
-| Traffic % | Duration | Checks Required |
-|-----------|----------|-----------------|
-| 10% | 2 min | Quick health |
-| 50% | 3 min | SLO burn |
-| 100% | - | Final validation |
+| Traffic % | Duration | Checks Required  |
+| --------- | -------- | ---------------- |
+| 10%       | 2 min    | Quick health     |
+| 50%       | 3 min    | SLO burn         |
+| 100%      | -        | Final validation |
 
 - [ ] 10% traffic: health check passed
 - [ ] 50% traffic: SLO burn check passed
@@ -161,14 +161,14 @@ For Tier 2 services (Standard Canary):
 
 Immediately rollback if any of these occur:
 
-| Trigger | Threshold | Auto/Manual |
-|---------|-----------|-------------|
-| Error rate spike | > 5% | Automatic |
-| Latency p95 | > 500ms sustained 2min | Automatic |
-| Health check failures | > 50% pods failing | Automatic |
-| Golden path broken | Test failing | Manual |
-| Customer reports | Multiple complaints | Manual |
-| SLO burn rate | > 5x for 5 minutes | Automatic |
+| Trigger               | Threshold              | Auto/Manual |
+| --------------------- | ---------------------- | ----------- |
+| Error rate spike      | > 5%                   | Automatic   |
+| Latency p95           | > 500ms sustained 2min | Automatic   |
+| Health check failures | > 50% pods failing     | Automatic   |
+| Golden path broken    | Test failing           | Manual      |
+| Customer reports      | Multiple complaints    | Manual      |
+| SLO burn rate         | > 5x for 5 minutes     | Automatic   |
 
 ### Rollback Procedure
 
@@ -214,14 +214,14 @@ curl -sf http://<service>:4000/health
 
 ## Emergency Release Checklist
 
-*Use only for P0/P1 hotfixes with explicit approval*
+_Use only for P0/P1 hotfixes with explicit approval_
 
 ### Emergency Prerequisites
 
 - [ ] P0/P1 incident ticket created
-- [ ] Emergency override approved by: ________________
-- [ ] Incident ID: ________________
-- [ ] Reason documented: ________________
+- [ ] Emergency override approved by: ******\_\_\_\_******
+- [ ] Incident ID: ******\_\_\_\_******
+- [ ] Reason documented: ******\_\_\_\_******
 
 ### Abbreviated Checks
 
@@ -250,11 +250,11 @@ curl -sf http://<service>:4000/health
 
 ## Sign-Off
 
-| Role | Name | Signature | Date |
-|------|------|-----------|------|
-| Release Captain | | | |
-| Developer | | | |
-| SRE (if Tier 1) | | | |
+| Role            | Name | Signature | Date |
+| --------------- | ---- | --------- | ---- |
+| Release Captain |      |           |      |
+| Developer       |      |           |      |
+| SRE (if Tier 1) |      |           |      |
 
 ---
 
@@ -284,21 +284,21 @@ kubectl argo rollouts undo <service> -n production
 
 ### Key URLs
 
-| Resource | URL |
-|----------|-----|
-| Grafana Dashboard | http://grafana:3001/d/slo-overview |
-| Prometheus | http://prometheus:9090 |
-| Argo Rollouts | http://argo-rollouts:3100 |
-| GitHub Actions | https://github.com/BrianCLong/summit/actions |
+| Resource          | URL                                          |
+| ----------------- | -------------------------------------------- |
+| Grafana Dashboard | http://grafana:3001/d/slo-overview           |
+| Prometheus        | http://prometheus:9090                       |
+| Argo Rollouts     | http://argo-rollouts:3100                    |
+| GitHub Actions    | https://github.com/BrianCLong/summit/actions |
 
 ### Contact
 
-| Role | Slack | PagerDuty |
-|------|-------|-----------|
-| Release Captain | #release-captain | @release-oncall |
-| SRE Team | #sre-team | @sre-oncall |
-| On-Call Engineer | #incidents | @oncall |
+| Role             | Slack            | PagerDuty       |
+| ---------------- | ---------------- | --------------- |
+| Release Captain  | #release-captain | @release-oncall |
+| SRE Team         | #sre-team        | @sre-oncall     |
+| On-Call Engineer | #incidents       | @oncall         |
 
 ---
 
-*Checklist version 0.1.0 - Review and update quarterly*
+_Checklist version 0.1.0 - Review and update quarterly_

@@ -1,7 +1,7 @@
-import fs from 'fs';
-import path from 'path';
-import yaml from 'js-yaml';
-import { z } from 'zod';
+import fs from "fs";
+import path from "path";
+import yaml from "js-yaml";
+import { z } from "zod";
 
 export const WorkflowStepSchema = z.object({
   name: z.string(),
@@ -11,7 +11,7 @@ export const WorkflowStepSchema = z.object({
 });
 
 export const WorkflowSpecSchema = z.object({
-  version: z.string().default('1.0.0'),
+  version: z.string().default("1.0.0"),
   name: z.string(),
   description: z.string().optional(),
   dryRun: z.boolean().optional(),
@@ -36,7 +36,7 @@ export const validateWorkflowSpec = (spec: unknown): WorkflowSpec => {
 
 export const loadWorkflowSpec = (filePath: string): WorkflowSpec => {
   const resolved = path.resolve(filePath);
-  const raw = fs.readFileSync(resolved, 'utf-8');
-  const data = resolved.endsWith('.json') ? JSON.parse(raw) : yaml.load(raw);
+  const raw = fs.readFileSync(resolved, "utf-8");
+  const data = resolved.endsWith(".json") ? JSON.parse(raw) : yaml.load(raw);
   return validateWorkflowSpec(data);
 };

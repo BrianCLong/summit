@@ -61,24 +61,24 @@
 **Path:** `apis/attestation/server.js` (delta)
 
 ```js
-import morgan from 'morgan';
-import helmet from 'helmet';
-import { rateLimit } from 'express-rate-limit';
+import morgan from "morgan";
+import helmet from "helmet";
+import { rateLimit } from "express-rate-limit";
 const perTenant = rateLimit({
   windowMs: 60_000,
   max: (req) => req.tenant?.quota || 60,
   standardHeaders: true,
 });
 app.use(helmet());
-app.use(morgan('combined'));
+app.use(morgan("combined"));
 app.use((req, res, next) => {
-  /* auth */ const key = req.get('X-API-Key');
+  /* auth */ const key = req.get("X-API-Key");
   /* look up tenant */ next();
 });
 app.use(perTenant);
-app.set('trust proxy', true);
+app.set("trust proxy", true);
 app.use((req, res, next) => {
-  res.set('Retry-After', '5');
+  res.set("Retry-After", "5");
   next();
 });
 ```
@@ -91,13 +91,12 @@ app.use((req, res, next) => {
 
 ```js
 #!/usr/bin/env node
-import { execSync as sh } from 'node:child_process';
-const name = process.argv[2] || 'tenant-portal';
-sh(
-  `git clone --depth=1 https://github.com/yourorg/trust-portal-template ${name}`,
-  { stdio: 'inherit' },
-);
-console.log('Next: edit tenant.config.json and run npm install && npm run dev');
+import { execSync as sh } from "node:child_process";
+const name = process.argv[2] || "tenant-portal";
+sh(`git clone --depth=1 https://github.com/yourorg/trust-portal-template ${name}`, {
+  stdio: "inherit",
+});
+console.log("Next: edit tenant.config.json and run npm install && npm run dev");
 ```
 
 ### 5.3 Vendor Attestation Ingestion
@@ -106,19 +105,19 @@ console.log('Next: edit tenant.config.json and run npm install && npm run dev');
 
 ```js
 #!/usr/bin/env node
-import fs from 'fs';
+import fs from "fs";
 const files = process.argv.slice(2);
 const out = { items: [] };
 for (const f of files) {
-  const raw = JSON.parse(fs.readFileSync(f, 'utf8'));
+  const raw = JSON.parse(fs.readFileSync(f, "utf8"));
   out.items.push({
     source: f,
-    type: raw?.predicateType || 'cyclonedx',
-    sha256: 'TODO',
+    type: raw?.predicateType || "cyclonedx",
+    sha256: "TODO",
     verified: true,
   });
 }
-fs.writeFileSync('vendor_attestations.json', JSON.stringify(out, null, 2));
+fs.writeFileSync("vendor_attestations.json", JSON.stringify(out, null, 2));
 ```
 
 **CI step:**
@@ -139,13 +138,10 @@ vendor_attestations:
 
 ```js
 #!/usr/bin/env node
-import fs from 'fs';
-const a = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
-const b = JSON.parse(fs.readFileSync(process.argv[3], 'utf8'));
-const set = (o) =>
-  new Map(
-    o.components.map((c) => [`${c.group || ''}:${c.name}:${c.version}`, c]),
-  );
+import fs from "fs";
+const a = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+const b = JSON.parse(fs.readFileSync(process.argv[3], "utf8"));
+const set = (o) => new Map(o.components.map((c) => [`${c.group || ""}:${c.name}:${c.version}`, c]));
 const A = set(a),
   B = set(b);
 const added = [],
@@ -154,14 +150,10 @@ const added = [],
 for (const k of B.keys()) if (!A.has(k)) added.push(k);
 for (const k of A.keys()) if (!B.has(k)) removed.push(k);
 for (const [k, c] of B.entries())
-  if (A.has(k) && JSON.stringify(A.get(k)) !== JSON.stringify(c))
-    changed.push(k);
-const risk = Math.min(
-  100,
-  added.length * 3 + removed.length + changed.length * 2,
-);
+  if (A.has(k) && JSON.stringify(A.get(k)) !== JSON.stringify(c)) changed.push(k);
+const risk = Math.min(100, added.length * 3 + removed.length + changed.length * 2);
 const out = { added, removed, changed, risk_score: risk };
-fs.writeFileSync('sbom.diff.json', JSON.stringify(out, null, 2));
+fs.writeFileSync("sbom.diff.json", JSON.stringify(out, null, 2));
 ```
 
 **CI gate:** fail if `risk_score>70` unless Decision override.
@@ -171,11 +163,11 @@ fs.writeFileSync('sbom.diff.json', JSON.stringify(out, null, 2));
 **Path:** `tools/reports/sla-report.mjs`
 
 ```js
-import fs from 'fs';
-const m = JSON.parse(fs.readFileSync('evidence/dr_metrics.json', 'utf8'));
-const pack = JSON.parse(fs.readFileSync('policy.json', 'utf8'));
+import fs from "fs";
+const m = JSON.parse(fs.readFileSync("evidence/dr_metrics.json", "utf8"));
+const pack = JSON.parse(fs.readFileSync("policy.json", "utf8"));
 const md = `# SLA Report — ${process.env.GITHUB_REF_NAME}\n\n- RPO: ${m.rpo}s\n- RTO: ${m.rto}s\n- Policy: ${pack.policy_version} (${pack.policy_sha256})\n`;
-fs.writeFileSync('sla-report.md', md);
+fs.writeFileSync("sla-report.md", md);
 ```
 
 **CI to PDF:**
@@ -213,7 +205,7 @@ export function EvidenceRow({
         {vendor.items.map((v) => (
           <span
             key={v.source}
-            className={`px-2 py-1 rounded ${v.verified ? 'bg-green-100' : 'bg-red-100'}`}
+            className={`px-2 py-1 rounded ${v.verified ? "bg-green-100" : "bg-red-100"}`}
           >
             {v.type}
           </span>

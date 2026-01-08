@@ -9,15 +9,15 @@ export function scrub(line: string): string {
   // Email masking: a***@domain.tld
   scrubbedLine = scrubbedLine.replace(EMAIL_REDACT, (match, p1, p2) => {
     const firstChar = p1.charAt(0);
-    const maskedPart = '*'.repeat(p1.length - 1);
+    const maskedPart = "*".repeat(p1.length - 1);
     return `${firstChar}${maskedPart}@${p2}`;
   });
 
   // Phone masking: [REDACTED] (using existing regex for simplicity)
-  scrubbedLine = scrubbedLine.replace(PHONE_REDACT, '[REDACTED]');
+  scrubbedLine = scrubbedLine.replace(PHONE_REDACT, "[REDACTED]");
 
   // IP masking: 203.0.113.x
-  scrubbedLine = scrubbedLine.replace(IP_REDACT, '$1.x');
+  scrubbedLine = scrubbedLine.replace(IP_REDACT, "$1.x");
 
   // Token/API key masking: last 4 only
   scrubbedLine = scrubbedLine.replace(TOKEN_API_KEY_REDACT, (match, p1, p2) => {

@@ -1,14 +1,14 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { MaestroLayout } from './layouts/MaestroLayout';
-import { DashboardPage } from './pages/DashboardPage';
-import { RunsPage } from './pages/RunsPage';
-import { RunDetailPage } from './pages/RunDetailPage';
-import { AgentsPage } from './pages/AgentsPage';
-import { AutonomicPage } from './pages/AutonomicPage';
-import { MergeTrainsPage } from './pages/MergeTrainsPage';
-import { ExperimentsPage } from './pages/ExperimentsPage';
-import { GovernancePage } from './pages/GovernancePage';
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { MaestroLayout } from "./layouts/MaestroLayout";
+import { DashboardPage } from "./pages/DashboardPage";
+import { RunsPage } from "./pages/RunsPage";
+import { RunDetailPage } from "./pages/RunDetailPage";
+import { AgentsPage } from "./pages/AgentsPage";
+import { AutonomicPage } from "./pages/AutonomicPage";
+import { MergeTrainsPage } from "./pages/MergeTrainsPage";
+import { ExperimentsPage } from "./pages/ExperimentsPage";
+import { GovernancePage } from "./pages/GovernancePage";
 
 const MaestroApp: React.FC = () => {
   return (

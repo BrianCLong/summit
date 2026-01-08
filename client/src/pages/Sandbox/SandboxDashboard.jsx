@@ -8,7 +8,7 @@
  * @module pages/Sandbox/SandboxDashboard
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Container,
@@ -44,7 +44,7 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Add,
   Delete,
@@ -58,24 +58,24 @@ import {
   Assignment,
   Timeline,
   BugReport,
-} from '@mui/icons-material';
-import { SandboxAPI } from '../../services/sandbox-api';
+} from "@mui/icons-material";
+import { SandboxAPI } from "../../services/sandbox-api";
 
 // Status colors
 const statusColors = {
-  created: 'info',
-  running: 'warning',
-  completed: 'success',
-  failed: 'error',
-  expired: 'default',
+  created: "info",
+  running: "warning",
+  completed: "success",
+  failed: "error",
+  expired: "default",
 };
 
 // Verdict colors
 const verdictColors = {
-  ALLOW: 'success',
-  DENY: 'error',
-  FLAG: 'warning',
-  REVIEW_REQUIRED: 'info',
+  ALLOW: "success",
+  DENY: "error",
+  FLAG: "warning",
+  REVIEW_REQUIRED: "info",
 };
 
 // Tab Panel
@@ -89,7 +89,7 @@ function TabPanel({ children, value, index, ...other }) {
 
 // Create Sandbox Dialog
 function CreateSandboxDialog({ open, onClose, onCreate }) {
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
   const [expiresIn, setExpiresIn] = useState(24);
   const [loading, setLoading] = useState(false);
 
@@ -98,7 +98,7 @@ function CreateSandboxDialog({ open, onClose, onCreate }) {
     setLoading(true);
     try {
       await onCreate({ name, expiresIn });
-      setName('');
+      setName("");
       onClose();
     } finally {
       setLoading(false);
@@ -134,7 +134,7 @@ function CreateSandboxDialog({ open, onClose, onCreate }) {
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
         <Button onClick={handleCreate} variant="contained" disabled={loading || !name.trim()}>
-          {loading ? <CircularProgress size={20} /> : 'Create'}
+          {loading ? <CircularProgress size={20} /> : "Create"}
         </Button>
       </DialogActions>
     </Dialog>
@@ -144,12 +144,12 @@ function CreateSandboxDialog({ open, onClose, onCreate }) {
 // Add Scenario Dialog
 function AddScenarioDialog({ open, onClose, onAdd }) {
   const [scenario, setScenario] = useState({
-    name: '',
-    description: '',
-    actor: { type: 'user', role: 'analyst' },
-    action: 'read',
-    resource: { type: 'document' },
-    expectedVerdict: 'ALLOW',
+    name: "",
+    description: "",
+    actor: { type: "user", role: "analyst" },
+    action: "read",
+    resource: { type: "document" },
+    expectedVerdict: "ALLOW",
   });
   const [loading, setLoading] = useState(false);
 
@@ -159,12 +159,12 @@ function AddScenarioDialog({ open, onClose, onAdd }) {
     try {
       await onAdd(scenario);
       setScenario({
-        name: '',
-        description: '',
-        actor: { type: 'user', role: 'analyst' },
-        action: 'read',
-        resource: { type: 'document' },
-        expectedVerdict: 'ALLOW',
+        name: "",
+        description: "",
+        actor: { type: "user", role: "analyst" },
+        action: "read",
+        resource: { type: "document" },
+        expectedVerdict: "ALLOW",
       });
       onClose();
     } finally {
@@ -235,9 +235,7 @@ function AddScenarioDialog({ open, onClose, onAdd }) {
               label="Expected Verdict"
               fullWidth
               value={scenario.expectedVerdict}
-              onChange={(e) =>
-                setScenario({ ...scenario, expectedVerdict: e.target.value })
-              }
+              onChange={(e) => setScenario({ ...scenario, expectedVerdict: e.target.value })}
               SelectProps={{ native: true }}
             >
               <option value="ALLOW">ALLOW</option>
@@ -251,7 +249,7 @@ function AddScenarioDialog({ open, onClose, onAdd }) {
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
         <Button onClick={handleAdd} variant="contained" disabled={loading || !scenario.name.trim()}>
-          {loading ? <CircularProgress size={20} /> : 'Add Scenario'}
+          {loading ? <CircularProgress size={20} /> : "Add Scenario"}
         </Button>
       </DialogActions>
     </Dialog>
@@ -261,11 +259,7 @@ function AddScenarioDialog({ open, onClose, onAdd }) {
 // Sandbox List Component
 function SandboxList({ sandboxes, onSelect, onDelete, selectedId }) {
   if (sandboxes.length === 0) {
-    return (
-      <Alert severity="info">
-        No sandboxes found. Create one to start testing policies.
-      </Alert>
-    );
+    return <Alert severity="info">No sandboxes found. Create one to start testing policies.</Alert>;
   }
 
   return (
@@ -286,7 +280,7 @@ function SandboxList({ sandboxes, onSelect, onDelete, selectedId }) {
             <TableRow
               key={sandbox.id}
               selected={sandbox.id === selectedId}
-              sx={{ cursor: 'pointer' }}
+              sx={{ cursor: "pointer" }}
               onClick={() => onSelect(sandbox)}
             >
               <TableCell>
@@ -298,11 +292,7 @@ function SandboxList({ sandboxes, onSelect, onDelete, selectedId }) {
                 </Typography>
               </TableCell>
               <TableCell>
-                <Chip
-                  label={sandbox.status}
-                  size="small"
-                  color={statusColors[sandbox.status]}
-                />
+                <Chip label={sandbox.status} size="small" color={statusColors[sandbox.status]} />
               </TableCell>
               <TableCell>{sandbox.testData?.scenarios?.length || 0}</TableCell>
               <TableCell>{sandbox.policies?.length || 0}</TableCell>
@@ -335,11 +325,7 @@ function SandboxList({ sandboxes, onSelect, onDelete, selectedId }) {
 // Execution Results Component
 function ExecutionResults({ result }) {
   if (!result) {
-    return (
-      <Alert severity="info">
-        No execution results yet. Run the sandbox to see results.
-      </Alert>
-    );
+    return <Alert severity="info">No execution results yet. Run the sandbox to see results.</Alert>;
   }
 
   return (
@@ -352,17 +338,13 @@ function ExecutionResults({ result }) {
               <Typography variant="h6" gutterBottom>
                 Execution Summary
               </Typography>
-              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+              <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
                 <Chip
                   icon={<CheckCircle />}
                   label={`${result.summary.passed} Passed`}
                   color="success"
                 />
-                <Chip
-                  icon={<Error />}
-                  label={`${result.summary.failed} Failed`}
-                  color="error"
-                />
+                <Chip icon={<Error />} label={`${result.summary.failed} Failed`} color="error" />
                 <Chip
                   icon={<Warning />}
                   label={`${result.summary.skipped} Skipped`}
@@ -377,7 +359,7 @@ function ExecutionResults({ result }) {
               <Typography variant="h6" gutterBottom>
                 Verdict Distribution
               </Typography>
-              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
                 <Chip
                   label={`ALLOW: ${result.summary.verdictDistribution.allow}`}
                   size="small"
@@ -414,12 +396,12 @@ function ExecutionResults({ result }) {
           <Typography variant="h6" gutterBottom>
             Policy Coverage
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
             <Box sx={{ flexGrow: 1 }}>
               <LinearProgress
                 variant="determinate"
                 value={result.coverage.coveragePercent}
-                color={result.coverage.coveragePercent >= 80 ? 'success' : 'warning'}
+                color={result.coverage.coveragePercent >= 80 ? "success" : "warning"}
                 sx={{ height: 10, borderRadius: 5 }}
               />
             </Box>
@@ -466,25 +448,22 @@ function ExecutionResults({ result }) {
               {result.issues.map((issue, i) => (
                 <ListItem key={i}>
                   <ListItemIcon>
-                    {issue.severity === 'critical' || issue.severity === 'high' ? (
+                    {issue.severity === "critical" || issue.severity === "high" ? (
                       <Error color="error" />
                     ) : (
                       <Warning color="warning" />
                     )}
                   </ListItemIcon>
-                  <ListItemText
-                    primary={issue.description}
-                    secondary={issue.recommendation}
-                  />
+                  <ListItemText primary={issue.description} secondary={issue.recommendation} />
                   <Chip
                     label={issue.severity}
                     size="small"
                     color={
-                      issue.severity === 'critical'
-                        ? 'error'
-                        : issue.severity === 'high'
-                        ? 'warning'
-                        : 'default'
+                      issue.severity === "critical"
+                        ? "error"
+                        : issue.severity === "high"
+                          ? "warning"
+                          : "default"
                     }
                   />
                 </ListItem>
@@ -523,7 +502,7 @@ function ExecutionResults({ result }) {
                       <Chip
                         label={sr.status}
                         size="small"
-                        color={sr.status === 'passed' ? 'success' : 'error'}
+                        color={sr.status === "passed" ? "success" : "error"}
                       />
                     </TableCell>
                     <TableCell>
@@ -536,11 +515,7 @@ function ExecutionResults({ result }) {
                     </TableCell>
                     <TableCell>
                       {sr.expectedVerdict && (
-                        <Chip
-                          label={sr.expectedVerdict}
-                          size="small"
-                          variant="outlined"
-                        />
+                        <Chip label={sr.expectedVerdict} size="small" variant="outlined" />
                       )}
                     </TableCell>
                     <TableCell>{sr.executionTime}ms</TableCell>
@@ -572,7 +547,7 @@ export default function SandboxDashboard() {
       const response = await SandboxAPI.list();
       setSandboxes(response.data || []);
     } catch (err) {
-      console.error('Failed to fetch sandboxes:', err);
+      console.error("Failed to fetch sandboxes:", err);
     } finally {
       setLoading(false);
     }
@@ -588,12 +563,12 @@ export default function SandboxDashboard() {
       setSandboxes([...sandboxes, response.data]);
       setSelectedSandbox(response.data);
     } catch (err) {
-      console.error('Failed to create sandbox:', err);
+      console.error("Failed to create sandbox:", err);
     }
   };
 
   const handleDelete = async (sandboxId) => {
-    if (!window.confirm('Are you sure you want to delete this sandbox?')) return;
+    if (!window.confirm("Are you sure you want to delete this sandbox?")) return;
     try {
       await SandboxAPI.delete(sandboxId);
       setSandboxes(sandboxes.filter((s) => s.id !== sandboxId));
@@ -602,7 +577,7 @@ export default function SandboxDashboard() {
         setExecutionResult(null);
       }
     } catch (err) {
-      console.error('Failed to delete sandbox:', err);
+      console.error("Failed to delete sandbox:", err);
     }
   };
 
@@ -614,7 +589,7 @@ export default function SandboxDashboard() {
       const response = await SandboxAPI.get(selectedSandbox.id);
       setSelectedSandbox(response.data);
     } catch (err) {
-      console.error('Failed to add scenario:', err);
+      console.error("Failed to add scenario:", err);
     }
   };
 
@@ -626,7 +601,7 @@ export default function SandboxDashboard() {
       setExecutionResult(response.data);
       setTabValue(1); // Switch to results tab
     } catch (err) {
-      console.error('Failed to execute sandbox:', err);
+      console.error("Failed to execute sandbox:", err);
     } finally {
       setExecuting(false);
     }
@@ -636,7 +611,7 @@ export default function SandboxDashboard() {
 
   return (
     <Container maxWidth="xl">
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box sx={{ mb: 3, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Box>
           <Typography variant="h4" gutterBottom>
             Policy Sandbox
@@ -645,15 +620,11 @@ export default function SandboxDashboard() {
             Test and validate governance policies in an isolated environment.
           </Typography>
         </Box>
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ display: "flex", gap: 2 }}>
           <Button startIcon={<Refresh />} onClick={fetchSandboxes}>
             Refresh
           </Button>
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={() => setCreateDialogOpen(true)}
-          >
+          <Button variant="contained" startIcon={<Add />} onClick={() => setCreateDialogOpen(true)}>
             Create Sandbox
           </Button>
         </Box>
@@ -682,7 +653,14 @@ export default function SandboxDashboard() {
           {selectedSandbox ? (
             <Card>
               <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    mb: 2,
+                  }}
+                >
                   <Box>
                     <Typography variant="h6">{selectedSandbox.name}</Typography>
                     <Chip
@@ -692,25 +670,22 @@ export default function SandboxDashboard() {
                       sx={{ mt: 1 }}
                     />
                   </Box>
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Button
-                      startIcon={<Assignment />}
-                      onClick={() => setScenarioDialogOpen(true)}
-                    >
+                  <Box sx={{ display: "flex", gap: 1 }}>
+                    <Button startIcon={<Assignment />} onClick={() => setScenarioDialogOpen(true)}>
                       Add Scenario
                     </Button>
                     <Button
                       variant="contained"
                       startIcon={executing ? <CircularProgress size={20} /> : <PlayArrow />}
                       onClick={handleExecute}
-                      disabled={executing || selectedSandbox.status === 'running'}
+                      disabled={executing || selectedSandbox.status === "running"}
                     >
-                      {executing ? 'Running...' : 'Execute'}
+                      {executing ? "Running..." : "Execute"}
                     </Button>
                   </Box>
                 </Box>
 
-                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
                   <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)}>
                     <Tab icon={<Science />} label="Scenarios" iconPosition="start" />
                     <Tab icon={<Timeline />} label="Results" iconPosition="start" />
@@ -774,7 +749,7 @@ export default function SandboxDashboard() {
                       {executionResult.issues.map((issue, i) => (
                         <ListItem key={i} divider>
                           <ListItemIcon>
-                            {issue.type === 'security' ? (
+                            {issue.type === "security" ? (
                               <Error color="error" />
                             ) : (
                               <Warning color="warning" />
@@ -782,16 +757,16 @@ export default function SandboxDashboard() {
                           </ListItemIcon>
                           <ListItemText
                             primary={
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                                 <Typography variant="body1">{issue.description}</Typography>
                                 <Chip label={issue.type} size="small" variant="outlined" />
                                 <Chip
                                   label={issue.severity}
                                   size="small"
                                   color={
-                                    issue.severity === 'critical' || issue.severity === 'high'
-                                      ? 'error'
-                                      : 'warning'
+                                    issue.severity === "critical" || issue.severity === "high"
+                                      ? "error"
+                                      : "warning"
                                   }
                                 />
                               </Box>
@@ -811,8 +786,8 @@ export default function SandboxDashboard() {
             </Card>
           ) : (
             <Card>
-              <CardContent sx={{ textAlign: 'center', py: 8 }}>
-                <Science sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
+              <CardContent sx={{ textAlign: "center", py: 8 }}>
+                <Science sx={{ fontSize: 64, color: "text.disabled", mb: 2 }} />
                 <Typography variant="h6" color="text.secondary">
                   Select a sandbox to view details
                 </Typography>

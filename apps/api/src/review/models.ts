@@ -1,12 +1,8 @@
-export type ReviewType = 'entity' | 'relationship' | 'event' | 'quarantine';
+export type ReviewType = "entity" | "relationship" | "event" | "quarantine";
 
-export type ReviewStatus = 'pending' | 'decided';
+export type ReviewStatus = "pending" | "decided";
 
-export type ReviewDecisionAction =
-  | 'approve'
-  | 'reject'
-  | 'needs-more-info'
-  | 'escalate';
+export type ReviewDecisionAction = "approve" | "reject" | "needs-more-info" | "escalate";
 
 export interface ReviewItem {
   id: string;

@@ -1,5 +1,5 @@
-import { v4 as uuidv4 } from 'uuid';
-import { APIRequestContext } from '@playwright/test';
+import { v4 as uuidv4 } from "uuid";
+import { APIRequestContext } from "@playwright/test";
 
 /**
  * A canary marker is a hidden piece of data that should only appear in search
@@ -49,29 +49,29 @@ export function generateSeedDocuments(tenant1Id: string, tenant2Id: string): Ten
     {
       id: `doc-1-${tenant1Id}`,
       tenantId: tenant1Id,
-      title: 'Graph security analytics pipeline',
-      text: 'Building resilient graph analytics for intelligence teams.',
+      title: "Graph security analytics pipeline",
+      text: "Building resilient graph analytics for intelligence teams.",
       canary: canary1.canary,
     },
     {
       id: `doc-1-${tenant2Id}`,
       tenantId: tenant2Id,
-      title: 'Graph security analytics pipeline',
-      text: 'Building resilient graph analytics for intelligence teams.',
+      title: "Graph security analytics pipeline",
+      text: "Building resilient graph analytics for intelligence teams.",
       canary: canary2.canary,
     },
     {
       id: `doc-2-${tenant1Id}`,
       tenantId: tenant1Id,
-      title: 'AI copilot suggestions for analysts',
-      text: 'Predictive query suggestions and behavioral analytics.',
+      title: "AI copilot suggestions for analysts",
+      text: "Predictive query suggestions and behavioral analytics.",
       canary: canary1.canary,
     },
     {
       id: `doc-2-${tenant2Id}`,
       tenantId: tenant2Id,
-      title: 'AI copilot suggestions for analysts',
-      text: 'Predictive query suggestions and behavioral analytics.',
+      title: "AI copilot suggestions for analysts",
+      text: "Predictive query suggestions and behavioral analytics.",
       canary: canary2.canary,
     },
   ];
@@ -82,14 +82,17 @@ export function generateSeedDocuments(tenant1Id: string, tenant2Id: string): Ten
  * @param request The Playwright request context.
  * @param documents The documents to seed.
  */
-export async function seedSearchData(request: APIRequestContext, documents: TenantDocument[]): Promise<void> {
+export async function seedSearchData(
+  request: APIRequestContext,
+  documents: TenantDocument[]
+): Promise<void> {
   const events = documents.map((doc, i) => ({
     sequence: i + 1,
-    action: 'upsert',
+    action: "upsert",
     document: doc,
   }));
 
-  const response = await request.post('http://localhost:8000/search/reindex/events', {
+  const response = await request.post("http://localhost:8000/search/reindex/events", {
     data: { events },
   });
 

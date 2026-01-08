@@ -378,10 +378,7 @@
   "refresh": "5s",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": [
-    "tripane",
-    "sync"
-  ],
+  "tags": ["tripane", "sync"],
   "templating": {
     "list": []
   },

@@ -3,14 +3,19 @@
  * Random Forest Classifier
  */
 
-import type { Dataset, PredictionResult, ModelPerformance, FeatureImportance } from '../types/index.js';
+import type {
+  Dataset,
+  PredictionResult,
+  ModelPerformance,
+  FeatureImportance,
+} from "../types/index.js";
 
 export interface RandomForestConfig {
   nEstimators: number;
   maxDepth?: number;
   minSamplesSplit: number;
   minSamplesLeaf: number;
-  maxFeatures?: number | 'sqrt' | 'log2';
+  maxFeatures?: number | "sqrt" | "log2";
   bootstrap: boolean;
   oobScore: boolean;
   randomState?: number;
@@ -29,7 +34,7 @@ export class RandomForestClassifier {
       maxDepth: config.maxDepth,
       minSamplesSplit: config.minSamplesSplit || 2,
       minSamplesLeaf: config.minSamplesLeaf || 1,
-      maxFeatures: config.maxFeatures || 'sqrt',
+      maxFeatures: config.maxFeatures || "sqrt",
       bootstrap: config.bootstrap !== false,
       oobScore: config.oobScore || false,
       randomState: config.randomState,
@@ -56,8 +61,8 @@ export class RandomForestClassifier {
         bootstrapIndices = Array.from({ length: features.length }, (_, i) => i);
       }
 
-      const bootstrapFeatures = bootstrapIndices.map(idx => features[idx]);
-      const bootstrapLabels = bootstrapIndices.map(idx => labels[idx]);
+      const bootstrapFeatures = bootstrapIndices.map((idx) => features[idx]);
+      const bootstrapLabels = bootstrapIndices.map((idx) => labels[idx]);
 
       const tree = new DecisionTree({
         maxDepth: this.config.maxDepth,
@@ -78,7 +83,7 @@ export class RandomForestClassifier {
 
     // Normalize feature importances
     const sum = this.featureImportances.reduce((a, b) => a + b, 0);
-    this.featureImportances = this.featureImportances.map(imp => imp / sum);
+    this.featureImportances = this.featureImportances.map((imp) => imp / sum);
 
     this.fitted = true;
   }
@@ -88,10 +93,10 @@ export class RandomForestClassifier {
    */
   predict(features: number[][]): PredictionResult[] {
     if (!this.fitted) {
-      throw new Error('Model must be fitted before prediction');
+      throw new Error("Model must be fitted before prediction");
     }
 
-    return features.map(sample => this.predictSample(sample));
+    return features.map((sample) => this.predictSample(sample));
   }
 
   /**
@@ -99,10 +104,10 @@ export class RandomForestClassifier {
    */
   predictProba(features: number[][]): number[][] {
     if (!this.fitted) {
-      throw new Error('Model must be fitted before prediction');
+      throw new Error("Model must be fitted before prediction");
     }
 
-    return features.map(sample => {
+    return features.map((sample) => {
       const votes = new Map<string | number, number>();
 
       for (const tree of this.trees) {
@@ -111,9 +116,7 @@ export class RandomForestClassifier {
       }
 
       // Convert votes to probabilities
-      const probs = this.classes.map(cls =>
-        (votes.get(cls) || 0) / this.trees.length
-      );
+      const probs = this.classes.map((cls) => (votes.get(cls) || 0) / this.trees.length);
 
       return probs;
     });
@@ -140,7 +143,7 @@ export class RandomForestClassifier {
    */
   evaluate(testDataset: Dataset): ModelPerformance {
     const predictions = this.predict(testDataset.features);
-    const predicted = predictions.map(p => p.prediction);
+    const predicted = predictions.map((p) => p.prediction);
     const actual = testDataset.labels;
 
     return this.calculateMetrics(actual, predicted);
@@ -190,11 +193,11 @@ export class RandomForestClassifier {
    * Get max features based on config
    */
   private getMaxFeatures(nFeatures: number): number {
-    if (typeof this.config.maxFeatures === 'number') {
+    if (typeof this.config.maxFeatures === "number") {
       return this.config.maxFeatures;
-    } else if (this.config.maxFeatures === 'sqrt') {
+    } else if (this.config.maxFeatures === "sqrt") {
       return Math.floor(Math.sqrt(nFeatures));
-    } else if (this.config.maxFeatures === 'log2') {
+    } else if (this.config.maxFeatures === "log2") {
       return Math.floor(Math.log2(nFeatures));
     }
     return nFeatures;
@@ -274,7 +277,7 @@ class DecisionTree {
   }
 
   predictSample(sample: number[]): string | number {
-    if (!this.root) throw new Error('Tree not fitted');
+    if (!this.root) throw new Error("Tree not fitted");
 
     let node = this.root;
     while (!node.isLeaf) {
@@ -292,11 +295,7 @@ class DecisionTree {
     return this.featureImportances;
   }
 
-  private buildTree(
-    features: number[][],
-    labels: (string | number)[],
-    depth: number
-  ): TreeNode {
+  private buildTree(features: number[][], labels: (string | number)[], depth: number): TreeNode {
     const n = features.length;
 
     // Check stopping criteria
@@ -322,10 +321,10 @@ class DecisionTree {
     const { leftIndices, rightIndices } = this.splitData(features, featureIndex, threshold);
 
     // Recursively build subtrees
-    const leftFeatures = leftIndices.map(i => features[i]);
-    const leftLabels = leftIndices.map(i => labels[i]);
-    const rightFeatures = rightIndices.map(i => features[i]);
-    const rightLabels = rightIndices.map(i => labels[i]);
+    const leftFeatures = leftIndices.map((i) => features[i]);
+    const leftLabels = leftIndices.map((i) => labels[i]);
+    const rightFeatures = rightIndices.map((i) => features[i]);
+    const rightLabels = rightIndices.map((i) => labels[i]);
 
     return {
       isLeaf: false,
@@ -371,7 +370,7 @@ class DecisionTree {
     const featureIndices = this.randomFeatureSubset(nFeatures);
 
     for (const featureIndex of featureIndices) {
-      const values = features.map(f => f[featureIndex]);
+      const values = features.map((f) => f[featureIndex]);
       const uniqueValues = [...new Set(values)].sort((a, b) => a - b);
 
       for (let i = 0; i < uniqueValues.length - 1; i++) {
@@ -402,16 +401,15 @@ class DecisionTree {
     }
 
     const parentEntropy = this.calculateEntropy(labels);
-    const leftLabels = leftIndices.map(i => labels[i]);
-    const rightLabels = rightIndices.map(i => labels[i]);
+    const leftLabels = leftIndices.map((i) => labels[i]);
+    const rightLabels = rightIndices.map((i) => labels[i]);
 
     const leftEntropy = this.calculateEntropy(leftLabels);
     const rightEntropy = this.calculateEntropy(rightLabels);
 
     const n = labels.length;
     const weightedEntropy =
-      (leftIndices.length / n) * leftEntropy +
-      (rightIndices.length / n) * rightEntropy;
+      (leftIndices.length / n) * leftEntropy + (rightIndices.length / n) * rightEntropy;
 
     return parentEntropy - weightedEntropy;
   }

@@ -1,17 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { api } from '../api';
+import React, { useEffect, useState } from "react";
+import { api } from "../api";
 
 export default function DLQSimulator() {
   const { getDLQ, simulateDLQPolicy } = api();
   const [items, setItems] = useState<any[]>([]);
-  const [json, setJson] = useState<string>('');
+  const [json, setJson] = useState<string>("");
   const [res, setRes] = useState<any>(null);
-  const [sel, setSel] = useState<string>('');
+  const [sel, setSel] = useState<string>("");
 
   useEffect(() => {
-    getDLQ({ sinceMs: 7 * 24 * 3600 * 1000 }).then((r) =>
-      setItems(r.items || []),
-    );
+    getDLQ({ sinceMs: 7 * 24 * 3600 * 1000 }).then((r) => setItems(r.items || []));
   }, []);
 
   const itemFromSel = items.find((i) => i.id === sel);
@@ -68,19 +66,15 @@ export default function DLQSimulator() {
       </div>
 
       {res && (
-        <div
-          className="space-y-2 rounded-2xl border p-4"
-          role="status"
-          aria-live="polite"
-        >
+        <div className="space-y-2 rounded-2xl border p-4" role="status" aria-live="polite">
           <div className="flex items-center gap-3">
             <span
               className={`rounded px-3 py-1 text-white ${
-                res.decision === 'ALLOW'
-                  ? 'bg-emerald-600'
-                  : res.decision === 'DRY_RUN'
-                    ? 'bg-amber-500'
-                    : 'bg-red-600'
+                res.decision === "ALLOW"
+                  ? "bg-emerald-600"
+                  : res.decision === "DRY_RUN"
+                    ? "bg-amber-500"
+                    : "bg-red-600"
               }`}
             >
               {res.decision}
@@ -91,8 +85,8 @@ export default function DLQSimulator() {
           </div>
           <ul className="ml-6 list-disc text-sm">
             <li>
-              policy: {res.enabled ? 'enabled' : 'disabled'}
-              {res.dryRun ? ' (dry-run)' : ''}
+              policy: {res.enabled ? "enabled" : "disabled"}
+              {res.dryRun ? " (dry-run)" : ""}
             </li>
             <li>kind allowed: {String(res.passKind)}</li>
             <li>signature allowed: {String(res.passSig)}</li>

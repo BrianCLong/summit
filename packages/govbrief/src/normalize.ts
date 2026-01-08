@@ -1,70 +1,62 @@
-import { parse, HTMLElement, Node } from 'node-html-parser';
+import { parse, HTMLElement, Node } from "node-html-parser";
 
-import { ArticleRecord, ArticleSection } from './types.js';
-import { createSlug, ensureIsoDate } from './utils.js';
+import { ArticleRecord, ArticleSection } from "./types.js";
+import { createSlug, ensureIsoDate } from "./utils.js";
 
 function findArticleRoot(documentRoot: HTMLElement): HTMLElement | null {
-  const main = documentRoot.querySelector('main');
+  const main = documentRoot.querySelector("main");
   if (!main) {
-    return documentRoot.querySelector('article');
+    return documentRoot.querySelector("article");
   }
-  const article = main.querySelector('article');
+  const article = main.querySelector("article");
   return article ?? main;
 }
 
 function extractTitle(articleRoot: HTMLElement): string {
-  const heading = articleRoot.querySelector('h1');
-  return heading?.text.trim() ?? '';
+  const heading = articleRoot.querySelector("h1");
+  return heading?.text.trim() ?? "";
 }
 
 function extractPublisher(documentRoot: HTMLElement): string {
   const siteName = documentRoot.querySelector('meta[property="og:site_name"]');
   if (siteName) {
-    const value = siteName.getAttribute('content');
+    const value = siteName.getAttribute("content");
     if (value) {
       return value.trim();
     }
   }
-  const publisherMeta = documentRoot.querySelector(
-    'meta[name="dcterms.publisher"]',
-  );
+  const publisherMeta = documentRoot.querySelector('meta[name="dcterms.publisher"]');
   if (publisherMeta) {
-    const value = publisherMeta.getAttribute('content');
+    const value = publisherMeta.getAttribute("content");
     if (value) {
       return value.trim();
     }
   }
-  return 'Unknown Publisher';
+  return "Unknown Publisher";
 }
 
 function extractDate(articleRoot: HTMLElement): string {
-  const dateField = articleRoot.querySelector(
-    '.field--name-field-date-published .field__item',
-  );
+  const dateField = articleRoot.querySelector(".field--name-field-date-published .field__item");
   if (dateField) {
     return dateField.text.trim();
   }
-  const timeElement = articleRoot.querySelector('time');
+  const timeElement = articleRoot.querySelector("time");
   if (timeElement) {
-    const dateTime = timeElement.getAttribute('datetime');
+    const dateTime = timeElement.getAttribute("datetime");
     if (dateTime) {
       return dateTime;
     }
     return timeElement.text.trim();
   }
-  return '';
+  return "";
 }
 
 function extractAuthors(articleRoot: HTMLElement): string[] {
-  const authorFields = articleRoot.querySelectorAll(
-    '.field--name-field-ref-authors .field__item',
-  );
+  const authorFields = articleRoot.querySelectorAll(".field--name-field-ref-authors .field__item");
   if (authorFields.length > 0) {
     return authorFields.map((node) => node.text.trim()).filter(Boolean);
   }
-  const fallback = articleRoot.querySelectorAll(
-    '[rel="author"], .author, .byline a',
-  );
+  const fallback = articleRoot.querySelectorAll('[rel="author"], .author, .byline a');
   if (fallback.length > 0) {
     return fallback.map((node) => node.text.trim()).filter(Boolean);
   }
@@ -77,7 +69,7 @@ function isContentNode(node: Node): boolean {
   }
   const element = node as HTMLElement;
   const tag = element.tagName;
-  return ['P', 'UL', 'OL', 'BLOCKQUOTE'].includes(tag);
+  return ["P", "UL", "OL", "BLOCKQUOTE"].includes(tag);
 }
 
 function gatherSectionText(nodes: Node[]): string {
@@ -85,18 +77,18 @@ function gatherSectionText(nodes: Node[]): string {
     .filter((node) => isContentNode(node))
     .map((node) => (node as HTMLElement).innerText.trim())
     .filter(Boolean)
-    .join('\n\n');
+    .join("\n\n");
 }
 
 export function extractArticleRecord(
   html: string,
   url: string,
-  archiveUrl?: string,
+  archiveUrl?: string
 ): ArticleRecord {
   const documentRoot = parse(html);
   const articleRoot = findArticleRoot(documentRoot);
   if (!articleRoot) {
-    throw new Error('Unable to locate article content in the HTML payload.');
+    throw new Error("Unable to locate article content in the HTML payload.");
   }
 
   const title = extractTitle(articleRoot);
@@ -106,7 +98,7 @@ export function extractArticleRecord(
   const authors = extractAuthors(articleRoot);
 
   const sections: ArticleSection[] = [];
-  let currentHeading = 'Overview';
+  let currentHeading = "Overview";
   let buffer: Node[] = [];
   let lineCounter = 1;
 
@@ -117,7 +109,7 @@ export function extractArticleRecord(
       if (/^H[2-4]$/.test(element.tagName)) {
         const sectionText = gatherSectionText(buffer);
         if (sectionText.length > 0) {
-          const id = createSlug(currentHeading || 'section');
+          const id = createSlug(currentHeading || "section");
           sections.push({
             id,
             title: currentHeading,
@@ -136,7 +128,7 @@ export function extractArticleRecord(
 
   const trailing = gatherSectionText(buffer);
   if (trailing.length > 0) {
-    const id = createSlug(currentHeading || 'section');
+    const id = createSlug(currentHeading || "section");
     sections.push({
       id,
       title: currentHeading,

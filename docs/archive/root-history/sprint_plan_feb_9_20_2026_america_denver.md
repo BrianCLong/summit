@@ -68,25 +68,30 @@
 ## 5) Backlog (Ready for Sprint)
 
 ### Epic A — Copilot 2.0 (Actions)
+
 - **A1 Playbook Engine:** server‑side DAG steps {cypher, filter, annotate, export, notify}; dry‑run + execute; audited.
 - **A2 NL → Planner:** ≥90% syntactic validity; review screen shows plan + risks; variables supported.
 - **A3 Guarded Execution:** budget caps (rows/time), kill switch, preview diffs for annotate; friendly remediation on cap breach.
 
 ### Epic B — Privacy & Redaction
+
 - **B1 Policy Model:** roles → field actions (`mask`, `hash`, `drop`, `pass`) + row predicates; eval <10 ms/row on test sets.
 - **B2 Export Integration:** CSV/PDF/JSON honor policy; manifest records redactions + reasons; manifest hash stored.
 - **B3 k‑Anon & DP Counts:** group‑by quasi‑identifiers with k≥5; optional Laplace noise for aggregates; epsilon selectable.
 
 ### Epic C — Data Quality Guardrails
+
 - **C1 Constraint DSL:** `unique`, `not_null`, `enum`, `pii(tag_conf>=T)`, `schema(version)`; violations logged + surfaced; coverage report.
 - **C2 Drift Monitor:** alerts on column add/remove/type shift in streaming + batch; synthetic drift triggers alert <2 min.
 - **C3 Fix‑It Wizard:** guided merges/splits/remap fields/re‑run PII tagger; undoable; audit snapshot stored.
 
 ### Epic D — Relevance Feedback
+
 - **D1 Telemetry:** capture query → openedTarget → dwell; opt‑in; PII‑free hashed IDs; CTR@5 dashboard.
 - **D2 Reranker Tuning:** nightly learned‑to‑rank refresh; Copilot prompt templates versioned; top‑5 recall +5% target.
 
 ### Epic E — Ops & Cost
+
 - **E1 Budgets & Rate Limits:** per‑user daily export cap; per‑playbook cost estimate + stop‑before‑run; budget breach soft fail + admin notify.
 - **E2 Full Audit Coverage:** who/what/why/when for playbooks, redactions, fixes, exports; immutable IDs; sample trace reconstructs end‑to‑end.
 
@@ -142,14 +147,14 @@
 
 ## 11) Risks & Mitigations (RAID)
 
-| Risk | Prob. | Impact | Mitigation |
-| --- | --- | ---: | --- |
-| Over‑automation in Copilot actions | Med | High | Enforce review‑before‑run; budget caps; annotate diffs; kill switch drills. |
-| Redaction bypass attempts | Low | High | Server‑side enforcement only; signed manifests; deny if policy not resolvable; audit required. |
-| Utility loss from DP noise | Low | Med | Default off; user warning; apply only to aggregates; epsilon visible. |
-| Constraint noise/false alarms | Med | Med | Start with high‑signal rules; classify low‑signal as warnings; tune thresholds. |
-| Drift alert fatigue | Med | Med | Suppress duplicates; batch notifications; curated drift fixtures. |
-| Cost overruns for playbooks | Low | High | Pre‑run cost estimate + stop; rate limits; admin notifications on breach. |
+| Risk                               | Prob. | Impact | Mitigation                                                                                     |
+| ---------------------------------- | ----- | -----: | ---------------------------------------------------------------------------------------------- |
+| Over‑automation in Copilot actions | Med   |   High | Enforce review‑before‑run; budget caps; annotate diffs; kill switch drills.                    |
+| Redaction bypass attempts          | Low   |   High | Server‑side enforcement only; signed manifests; deny if policy not resolvable; audit required. |
+| Utility loss from DP noise         | Low   |    Med | Default off; user warning; apply only to aggregates; epsilon visible.                          |
+| Constraint noise/false alarms      | Med   |    Med | Start with high‑signal rules; classify low‑signal as warnings; tune thresholds.                |
+| Drift alert fatigue                | Med   |    Med | Suppress duplicates; batch notifications; curated drift fixtures.                              |
+| Cost overruns for playbooks        | Low   |   High | Pre‑run cost estimate + stop; rate limits; admin notifications on breach.                      |
 
 ---
 

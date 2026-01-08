@@ -4,13 +4,13 @@ This document captures the shared permissions vocabulary and how it is enforced 
 
 ## Roles and capabilities
 
-| Role | Description | Key permissions |
-| --- | --- | --- |
-| `admin` | Full administrative control over IntelGraph and Maestro. | `*` (all), `manage_users`, `manage_settings`, `run_maestro`, `write_graph`, `view_dashboards` |
-| `analyst` | Day-to-day IntelGraph analyst with graph authoring rights. | `read_graph`, `write_graph`, `view_dashboards` |
-| `operator` | Operations staff running Maestro workflows and service toggles. | `run_maestro`, `read_graph`, `view_dashboards`, `manage_settings` |
-| `service_account` | Non-interactive automation account used by pipelines. | `read_graph`, `write_graph` (scoped) |
-| `viewer` | Read-only visibility into graph data and dashboards. | `read_graph`, `view_dashboards` |
+| Role              | Description                                                     | Key permissions                                                                               |
+| ----------------- | --------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `admin`           | Full administrative control over IntelGraph and Maestro.        | `*` (all), `manage_users`, `manage_settings`, `run_maestro`, `write_graph`, `view_dashboards` |
+| `analyst`         | Day-to-day IntelGraph analyst with graph authoring rights.      | `read_graph`, `write_graph`, `view_dashboards`                                                |
+| `operator`        | Operations staff running Maestro workflows and service toggles. | `run_maestro`, `read_graph`, `view_dashboards`, `manage_settings`                             |
+| `service_account` | Non-interactive automation account used by pipelines.           | `read_graph`, `write_graph` (scoped)                                                          |
+| `viewer`          | Read-only visibility into graph data and dashboards.            | `read_graph`, `view_dashboards`                                                               |
 
 ### Permission glossary
 
@@ -25,22 +25,22 @@ Legacy route-level permissions such as `entity:create`, `run:update`, or `admin:
 
 ## Enforcement map
 
-| Endpoint / Area | Required permission | Notes |
-| --- | --- | --- |
-| IntelGraph entity mutations (`POST/PATCH/DELETE /api/entities`) | `write_graph` | Enforced via `authorize('write_graph')` middleware. |
-| Maestro run lifecycle (`/api/maestro/runs` create/read/update/delete) | `run_maestro` | Applied uniformly to creation, updates, retries, and cancellations. |
-| Admin controls (`/api/admin/*`, `/api/admin/config`, overrides) | `manage_users` | Protects sensitive configuration and override administration. |
+| Endpoint / Area                                                       | Required permission | Notes                                                               |
+| --------------------------------------------------------------------- | ------------------- | ------------------------------------------------------------------- |
+| IntelGraph entity mutations (`POST/PATCH/DELETE /api/entities`)       | `write_graph`       | Enforced via `authorize('write_graph')` middleware.                 |
+| Maestro run lifecycle (`/api/maestro/runs` create/read/update/delete) | `run_maestro`       | Applied uniformly to creation, updates, retries, and cancellations. |
+| Admin controls (`/api/admin/*`, `/api/admin/config`, overrides)       | `manage_users`      | Protects sensitive configuration and override administration.       |
 
 ## Backend guard
 
 Use the shared Express middleware:
 
 ```ts
-import { authorize } from '../middleware/authorization';
+import { authorize } from "../middleware/authorization";
 
-router.post('/entities', authorize('write_graph'), handler);
-router.post('/maestro/runs', authorize('run_maestro'), handler);
-router.use('/admin', authorize('manage_users'));
+router.post("/entities", authorize("write_graph"), handler);
+router.post("/maestro/runs", authorize("run_maestro"), handler);
+router.use("/admin", authorize("manage_users"));
 ```
 
 ## Frontend capability checks

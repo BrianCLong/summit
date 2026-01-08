@@ -1,24 +1,24 @@
-import { createHash } from 'node:crypto';
-import { promises as fs, existsSync } from 'node:fs';
-import path from 'node:path';
-import { validateManifest } from './schema.js';
-import { verifyManifestSignature } from './signature.js';
+import { createHash } from "node:crypto";
+import { promises as fs, existsSync } from "node:fs";
+import path from "node:path";
+import { validateManifest } from "./schema.js";
+import { verifyManifestSignature } from "./signature.js";
 
 const normalizePath = (bundlePath, relativePath) => {
   const resolved = path.resolve(bundlePath, relativePath);
   const base = path.resolve(bundlePath);
   const safePrefix = `${base}${path.sep}`;
   if (resolved !== base && !resolved.startsWith(safePrefix)) {
-    throw new Error('path-traversal');
+    throw new Error("path-traversal");
   }
   return resolved;
 };
 
 const computeHash = async (filePath) => {
   const data = await fs.readFile(filePath);
-  const hash = createHash('sha256');
+  const hash = createHash("sha256");
   hash.update(data);
-  return hash.digest('hex');
+  return hash.digest("hex");
 };
 
 const checkFile = async (bundlePath, relativePath, expectedHash, issues) => {
@@ -26,7 +26,7 @@ const checkFile = async (bundlePath, relativePath, expectedHash, issues) => {
     const resolved = normalizePath(bundlePath, relativePath);
     if (!existsSync(resolved)) {
       issues.push({
-        code: 'missing-file',
+        code: "missing-file",
         target: relativePath,
         message: `Referenced file is missing: ${relativePath}`,
       });
@@ -35,7 +35,7 @@ const checkFile = async (bundlePath, relativePath, expectedHash, issues) => {
     const digest = await computeHash(resolved);
     if (digest !== expectedHash) {
       issues.push({
-        code: 'hash-mismatch',
+        code: "hash-mismatch",
         target: relativePath,
         message: `Hash mismatch for ${relativePath}. expected ${expectedHash} got ${digest}`,
       });
@@ -43,9 +43,9 @@ const checkFile = async (bundlePath, relativePath, expectedHash, issues) => {
     }
     return true;
   } catch (error) {
-    if (error.message === 'path-traversal') {
+    if (error.message === "path-traversal") {
       issues.push({
-        code: 'path-traversal',
+        code: "path-traversal",
         target: relativePath,
         message: `Illegal path detected: ${relativePath}`,
       });
@@ -66,7 +66,7 @@ const verifyTransforms = async (bundlePath, asset, issues) => {
   for (const transform of asset.transforms) {
     if (transform.input !== chainPointer) {
       issues.push({
-        code: 'transform-link-broken',
+        code: "transform-link-broken",
         target: transform.input,
         message: `Transform input ${transform.input} does not match previous output ${chainPointer}`,
       });
@@ -77,7 +77,7 @@ const verifyTransforms = async (bundlePath, asset, issues) => {
     const ok = await checkFile(bundlePath, transform.output, transform.sha256, issues);
     if (!ok) {
       issues.push({
-        code: 'transform-link-broken',
+        code: "transform-link-broken",
         target: transform.output,
         message: `Transform output ${transform.output} failed verification`,
       });
@@ -90,20 +90,20 @@ const verifyTransforms = async (bundlePath, asset, issues) => {
 };
 
 export const verifyManifest = async (bundlePath) => {
-  const manifestPath = path.join(bundlePath, 'manifest.json');
-  const signaturePath = path.join(bundlePath, 'signature.json');
+  const manifestPath = path.join(bundlePath, "manifest.json");
+  const signaturePath = path.join(bundlePath, "signature.json");
   const issues = [];
   let manifest;
 
   if (!existsSync(manifestPath)) {
     return {
-      manifestVersion: 'unknown',
+      manifestVersion: "unknown",
       valid: false,
       issues: [
         {
-          code: 'missing-file',
-          target: 'manifest.json',
-          message: 'manifest.json not found in bundle',
+          code: "missing-file",
+          target: "manifest.json",
+          message: "manifest.json not found in bundle",
         },
       ],
       checkedFiles: 0,
@@ -111,16 +111,16 @@ export const verifyManifest = async (bundlePath) => {
   }
 
   try {
-    const raw = await fs.readFile(manifestPath, 'utf8');
+    const raw = await fs.readFile(manifestPath, "utf8");
     manifest = JSON.parse(raw);
   } catch {
     issues.push({
-      code: 'schema-invalid',
-      target: 'manifest.json',
-      message: 'manifest.json is not valid JSON',
+      code: "schema-invalid",
+      target: "manifest.json",
+      message: "manifest.json is not valid JSON",
     });
     return {
-      manifestVersion: 'unknown',
+      manifestVersion: "unknown",
       valid: false,
       issues,
       checkedFiles: 0,
@@ -130,9 +130,9 @@ export const verifyManifest = async (bundlePath) => {
   const validationErrors = validateManifest(manifest);
   if (validationErrors.length > 0) {
     issues.push({
-      code: 'schema-invalid',
-      target: 'manifest.json',
-      message: validationErrors.join('; '),
+      code: "schema-invalid",
+      target: "manifest.json",
+      message: validationErrors.join("; "),
     });
   }
 
@@ -151,7 +151,7 @@ export const verifyManifest = async (bundlePath) => {
           const evidence = manifest.evidence.find((item) => item.id === evidenceId);
           if (!evidence) {
             issues.push({
-              code: 'evidence-missing',
+              code: "evidence-missing",
               target: evidenceId,
               message: `Evidence ${evidenceId} referenced by ${asset.id} not found`,
             });
@@ -169,14 +169,14 @@ export const verifyManifest = async (bundlePath) => {
   let signature;
   if (existsSync(signaturePath)) {
     try {
-      const rawSignature = await fs.readFile(signaturePath, 'utf8');
+      const rawSignature = await fs.readFile(signaturePath, "utf8");
       const signatureFile = JSON.parse(rawSignature);
       const { valid: signatureValid, reason } = verifyManifestSignature(manifest, signatureFile);
       if (!signatureValid) {
         issues.push({
-          code: 'signature-invalid',
-          target: 'signature.json',
-          message: reason ?? 'Signature invalid',
+          code: "signature-invalid",
+          target: "signature.json",
+          message: reason ?? "Signature invalid",
         });
       }
       signature = {
@@ -189,11 +189,11 @@ export const verifyManifest = async (bundlePath) => {
       };
     } catch (error) {
       issues.push({
-        code: 'signature-invalid',
-        target: 'signature.json',
+        code: "signature-invalid",
+        target: "signature.json",
         message: `Signature file invalid JSON: ${error.message}`,
       });
-      signature = { valid: false, reason: 'Signature file invalid JSON' };
+      signature = { valid: false, reason: "Signature file invalid JSON" };
     }
   }
 
@@ -208,11 +208,11 @@ export const verifyManifest = async (bundlePath) => {
 };
 
 export const readManifest = async (bundlePath) => {
-  const manifestPath = path.join(bundlePath, 'manifest.json');
+  const manifestPath = path.join(bundlePath, "manifest.json");
   if (!existsSync(manifestPath)) {
     return undefined;
   }
-  const raw = await fs.readFile(manifestPath, 'utf8');
+  const raw = await fs.readFile(manifestPath, "utf8");
   return JSON.parse(raw);
 };
 

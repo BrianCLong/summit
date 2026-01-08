@@ -4,7 +4,7 @@
  * Large-scale simulation of heterogeneous agent populations
  */
 
-import { PopulationState, Scenario, ExternalShock } from '../index.js';
+import { PopulationState, Scenario, ExternalShock } from "../index.js";
 
 export interface SimulationConfig {
   populationSize: number;
@@ -20,7 +20,7 @@ export interface Agent {
   threshold: number;
   susceptibility: number;
   neighbors: string[];
-  state: 'INACTIVE' | 'ACTIVE' | 'RECOVERED';
+  state: "INACTIVE" | "ACTIVE" | "RECOVERED";
 }
 
 export interface SimulationState {
@@ -59,7 +59,9 @@ export class AgentBasedSimulator {
   }
 
   private createRNG(seed?: number): () => number {
-    if (!seed) {return Math.random;}
+    if (!seed) {
+      return Math.random;
+    }
 
     // Simple seeded RNG (Mulberry32)
     let state = seed;
@@ -93,12 +95,12 @@ export class AgentBasedSimulator {
           threshold: this.sampleThreshold(segment.susceptibilityProfile),
           susceptibility: segment.susceptibilityProfile.disinformation,
           neighbors: [],
-          state: 'INACTIVE',
+          state: "INACTIVE",
         };
 
         // Initialize beliefs from segment psychographics
-        agent.beliefs.set('trust_government', segment.psychographics.institutionalTrust.government);
-        agent.beliefs.set('trust_media', segment.psychographics.institutionalTrust.media);
+        agent.beliefs.set("trust_government", segment.psychographics.institutionalTrust.government);
+        agent.beliefs.set("trust_media", segment.psychographics.institutionalTrust.media);
 
         this.agents.set(agent.id, agent);
       }
@@ -114,7 +116,7 @@ export class AgentBasedSimulator {
     return Math.max(0.05, Math.min(0.95, base + (this.rng() - 0.5) * 0.2));
   }
 
-  private buildNetwork(topology: PopulationState['networkTopology']): void {
+  private buildNetwork(topology: PopulationState["networkTopology"]): void {
     const agentList = Array.from(this.agents.values());
     const n = agentList.length;
     const targetDegree = topology.averageDegree;
@@ -164,9 +166,7 @@ export class AgentBasedSimulator {
 
     for (let t = 0; t < this.config.timeSteps; t++) {
       // Apply external shocks
-      const shocksAtT = scenario.events.filter(
-        (e) => Math.abs(e.timing.getTime() - t) < 1
-      );
+      const shocksAtT = scenario.events.filter((e) => Math.abs(e.timing.getTime() - t) < 1);
       for (const shock of shocksAtT) {
         this.applyShock(shock);
       }
@@ -178,7 +178,9 @@ export class AgentBasedSimulator {
       const state = this.getState(t);
       trajectory.push(state);
 
-      if (onStep) {onStep(state);}
+      if (onStep) {
+        onStep(state);
+      }
     }
 
     return {
@@ -196,7 +198,7 @@ export class AgentBasedSimulator {
 
     for (let i = 0; i < seedCount; i++) {
       const idx = Math.floor(this.rng() * agentList.length);
-      agentList[idx].state = 'ACTIVE';
+      agentList[idx].state = "ACTIVE";
     }
   }
 
@@ -215,20 +217,19 @@ export class AgentBasedSimulator {
     const recoveries: string[] = [];
 
     for (const agent of agentList) {
-      if (agent.state === 'INACTIVE') {
+      if (agent.state === "INACTIVE") {
         // Check for activation
         const activeNeighbors = agent.neighbors.filter(
-          (nid) => this.agents.get(nid)?.state === 'ACTIVE'
+          (nid) => this.agents.get(nid)?.state === "ACTIVE"
         ).length;
 
-        const activeFraction = agent.neighbors.length > 0
-          ? activeNeighbors / agent.neighbors.length
-          : 0;
+        const activeFraction =
+          agent.neighbors.length > 0 ? activeNeighbors / agent.neighbors.length : 0;
 
         if (activeFraction >= agent.threshold) {
           activations.push(agent.id);
         }
-      } else if (agent.state === 'ACTIVE') {
+      } else if (agent.state === "ACTIVE") {
         // Random recovery
         if (this.rng() < 0.05) {
           recoveries.push(agent.id);
@@ -238,16 +239,16 @@ export class AgentBasedSimulator {
 
     // Apply changes
     for (const id of activations) {
-      this.agents.get(id)!.state = 'ACTIVE';
+      this.agents.get(id)!.state = "ACTIVE";
     }
     for (const id of recoveries) {
-      this.agents.get(id)!.state = 'RECOVERED';
+      this.agents.get(id)!.state = "RECOVERED";
     }
   }
 
   private getState(t: number): SimulationState {
     const agents = Array.from(this.agents.values());
-    const activeCount = agents.filter((a) => a.state === 'ACTIVE').length;
+    const activeCount = agents.filter((a) => a.state === "ACTIVE").length;
 
     return {
       t,
@@ -292,9 +293,7 @@ export class AgentBasedSimulator {
     const peakActive = Math.max(...trajectory.map((s) => s.activeCount));
     const finalActive = trajectory[trajectory.length - 1].activeCount;
     const totalActivated = new Set(
-      trajectory.flatMap((s) =>
-        s.agents.filter((a) => a.state !== 'INACTIVE').map((a) => a.id)
-      )
+      trajectory.flatMap((s) => s.agents.filter((a) => a.state !== "INACTIVE").map((a) => a.id))
     ).size;
 
     return {

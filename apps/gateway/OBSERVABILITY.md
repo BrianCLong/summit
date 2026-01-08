@@ -22,24 +22,25 @@ GraphQL Request
 
 ### GraphQL Operation Metrics
 
-| Metric | Type | Labels | Description |
-|--------|------|--------|-------------|
-| `graphql_query_duration_ms` | Histogram | operation, operationType, status | Query execution duration |
-| `graphql_requests_total` | Counter | operation, operationType, status | Total requests |
-| `graphql_errors_total` | Counter | operation, errorType, errorCode | Total errors |
-| `graphql_query_complexity` | UpDownCounter | operation | Query complexity score |
-| `graphql_cache_hits_total` | Counter | operation | Cache hits |
-| `graphql_cache_misses_total` | Counter | operation | Cache misses |
+| Metric                       | Type          | Labels                           | Description              |
+| ---------------------------- | ------------- | -------------------------------- | ------------------------ |
+| `graphql_query_duration_ms`  | Histogram     | operation, operationType, status | Query execution duration |
+| `graphql_requests_total`     | Counter       | operation, operationType, status | Total requests           |
+| `graphql_errors_total`       | Counter       | operation, errorType, errorCode  | Total errors             |
+| `graphql_query_complexity`   | UpDownCounter | operation                        | Query complexity score   |
+| `graphql_cache_hits_total`   | Counter       | operation                        | Cache hits               |
+| `graphql_cache_misses_total` | Counter       | operation                        | Cache misses             |
 
 ### Golden Path SLO Metrics
 
-| Metric | Type | Labels | Description |
-|--------|------|--------|-------------|
-| `golden_path_success_total` | Counter | step | Successful golden path steps |
-| `golden_path_duration_ms` | Histogram | step | Step duration |
-| `golden_path_errors_total` | Counter | step, errorType | Step errors |
+| Metric                      | Type      | Labels          | Description                  |
+| --------------------------- | --------- | --------------- | ---------------------------- |
+| `golden_path_success_total` | Counter   | step            | Successful golden path steps |
+| `golden_path_duration_ms`   | Histogram | step            | Step duration                |
+| `golden_path_errors_total`  | Counter   | step, errorType | Step errors                  |
 
 **Golden Path Steps:**
+
 - `create_investigation`
 - `add_entity`
 - `add_relationship`
@@ -65,6 +66,7 @@ GraphQL Request
 ### Trace Context Propagation
 
 Trace context is propagated via W3C Trace Context headers:
+
 - `traceparent: 00-{trace-id}-{span-id}-01`
 - `tracestate: {vendor-specific-state}`
 
@@ -99,50 +101,56 @@ All outbound HTTP calls include these headers for distributed tracing.
 ### Usage Example
 
 ```typescript
-import { logger } from './logger';
+import { logger } from "./logger";
 
 // Simple logging
-logger.info('Processing GraphQL query', { operation: 'getEntities' });
+logger.info("Processing GraphQL query", { operation: "getEntities" });
 
 // Error logging with exception
 try {
   await processQuery();
 } catch (error) {
-  logger.error('Query processing failed', error, { operation: 'getEntities' });
+  logger.error("Query processing failed", error, { operation: "getEntities" });
 }
 
 // Measure operation duration
-const result = await logger.measure('fetchFromNeo4j', async () => {
-  return await neo4jClient.query(cypher);
-}, { queryType: 'entity_search' });
+const result = await logger.measure(
+  "fetchFromNeo4j",
+  async () => {
+    return await neo4jClient.query(cypher);
+  },
+  { queryType: "entity_search" }
+);
 ```
 
 ## Alerts
 
 ### Severe (Sev-1)
 
-| Alert | Condition | Duration | Runbook |
-|-------|-----------|----------|---------|
-| GraphQLHighLatency | p95 > 2s | 5m | [Link](../../RUNBOOKS/graphql-high-latency.md) |
-| GraphQLHighErrorRate | Error rate > 5% | 5m | [Link](../../RUNBOOKS/graphql-high-error-rate.md) |
-| GoldenPathBroken | Success < 95% | 10m | [Link](../../RUNBOOKS/golden-path-failure.md) |
-| GraphQLGatewayDown | Service down | 1m | [Link](../../RUNBOOKS/service-down.md) |
+| Alert                | Condition       | Duration | Runbook                                           |
+| -------------------- | --------------- | -------- | ------------------------------------------------- |
+| GraphQLHighLatency   | p95 > 2s        | 5m       | [Link](../../RUNBOOKS/graphql-high-latency.md)    |
+| GraphQLHighErrorRate | Error rate > 5% | 5m       | [Link](../../RUNBOOKS/graphql-high-error-rate.md) |
+| GoldenPathBroken     | Success < 95%   | 10m      | [Link](../../RUNBOOKS/golden-path-failure.md)     |
+| GraphQLGatewayDown   | Service down    | 1m       | [Link](../../RUNBOOKS/service-down.md)            |
 
 ### Warning (Sev-2)
 
-| Alert | Condition | Duration |
-|-------|-----------|----------|
-| GraphQLModerateLatency | p95 > 1s | 10m |
-| GraphQLModerateErrorRate | Error rate > 2% | 10m |
-| GoldenPathDegraded | Success < 98% | 15m |
-| Neo4jSlowQueries | p95 > 500ms | 10m |
+| Alert                    | Condition       | Duration |
+| ------------------------ | --------------- | -------- |
+| GraphQLModerateLatency   | p95 > 1s        | 10m      |
+| GraphQLModerateErrorRate | Error rate > 2% | 10m      |
+| GoldenPathDegraded       | Success < 98%   | 15m      |
+| Neo4jSlowQueries         | p95 > 500ms     | 10m      |
 
 ## Dashboards
 
 ### GraphQL API - Comprehensive Observability
+
 **File**: `observability/grafana/dashboards/graphql-comprehensive.json`
 
 **Panels:**
+
 1. Request Rate (QPS)
 2. Error Rate (%)
 3. Latency Percentiles (p50, p95, p99)
@@ -160,11 +168,11 @@ const result = await logger.measure('fetchFromNeo4j', async () => {
 
 ## Endpoints
 
-| Endpoint | Port | Purpose |
-|----------|------|---------|
-| `/metrics` | 9464 | Prometheus metrics scraping |
-| `/health` | 4000 | Health check (not traced) |
-| `graphql` | 4000 | GraphQL API (fully instrumented) |
+| Endpoint   | Port | Purpose                          |
+| ---------- | ---- | -------------------------------- |
+| `/metrics` | 9464 | Prometheus metrics scraping      |
+| `/health`  | 4000 | Health check (not traced)        |
+| `graphql`  | 4000 | GraphQL API (fully instrumented) |
 
 ## Setup & Configuration
 
@@ -212,9 +220,9 @@ Add to `observability/prometheus/prometheus.yml`:
 
 ```yaml
 scrape_configs:
-  - job_name: 'graphql-gateway'
+  - job_name: "graphql-gateway"
     static_configs:
-      - targets: ['graphql-gateway:9464']
+      - targets: ["graphql-gateway:9464"]
     scrape_interval: 15s
 ```
 
@@ -239,6 +247,7 @@ open http://localhost:16686
 **Error Budget**: 0.5% (216 minutes/month)
 
 **Calculation**:
+
 ```promql
 (
   sum(rate(golden_path_success_total[30d]))
@@ -252,6 +261,7 @@ open http://localhost:16686
 **Target**: p95 < 1s, p99 < 2s
 
 **Calculation**:
+
 ```promql
 histogram_quantile(0.95, sum(rate(graphql_query_duration_ms_bucket[5m])) by (le))
 histogram_quantile(0.99, sum(rate(graphql_query_duration_ms_bucket[5m])) by (le))
@@ -262,11 +272,13 @@ histogram_quantile(0.99, sum(rate(graphql_query_duration_ms_bucket[5m])) by (le)
 ### No Metrics Appearing
 
 1. Check OpenTelemetry SDK started:
+
    ```bash
    docker logs graphql-gateway | grep "OpenTelemetry initialized"
    ```
 
 2. Verify OTLP collector is reachable:
+
    ```bash
    curl http://otel-collector:4318/v1/traces
    ```
@@ -279,11 +291,13 @@ histogram_quantile(0.99, sum(rate(graphql_query_duration_ms_bucket[5m])) by (le)
 ### No Traces in Jaeger
 
 1. Verify OTLP exporter endpoint:
+
    ```bash
    echo $OTEL_EXPORTER_OTLP_ENDPOINT
    ```
 
 2. Check OTLP collector logs:
+
    ```bash
    docker logs otel-collector
    ```

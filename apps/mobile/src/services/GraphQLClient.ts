@@ -66,9 +66,7 @@ const authLink = setContext(async (_, { headers }) => {
 const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
   if (graphQLErrors) {
     for (const error of graphQLErrors) {
-      console.error(
-        `[GraphQL error]: Message: ${error.message}, Path: ${error.path}`,
-      );
+      console.error(`[GraphQL error]: Message: ${error.message}, Path: ${error.path}`);
 
       // Handle authentication errors
       if (
@@ -107,10 +105,7 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
     NetInfo.fetch().then((state) => {
       if (!state.isConnected) {
         const definition = getMainDefinition(operation.query);
-        if (
-          definition.kind === 'OperationDefinition' &&
-          definition.operation === 'mutation'
-        ) {
+        if (definition.kind === 'OperationDefinition' && definition.operation === 'mutation') {
           queueOfflineMutation(operation);
         }
       }
@@ -191,9 +186,7 @@ const createCache = () =>
   });
 
 // Initialize Apollo Client
-export const initializeApolloClient = async (): Promise<
-  ApolloClient<NormalizedCacheObject>
-> => {
+export const initializeApolloClient = async (): Promise<ApolloClient<NormalizedCacheObject>> => {
   if (apolloClient) {
     return apolloClient;
   }
@@ -214,10 +207,7 @@ export const initializeApolloClient = async (): Promise<
   const splitLink = split(
     ({ query }) => {
       const definition = getMainDefinition(query);
-      return (
-        definition.kind === 'OperationDefinition' &&
-        definition.operation === 'subscription'
-      );
+      return definition.kind === 'OperationDefinition' && definition.operation === 'subscription';
     },
     wsLink,
     from([retryLink, authLink, errorLink, httpLink]),

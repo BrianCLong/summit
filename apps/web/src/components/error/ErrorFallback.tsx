@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { Button } from '@/components/ui/Button';
+import React, { useEffect, useRef } from 'react'
+import { Button } from '@/components/ui/Button'
 import {
   Card,
   CardHeader,
@@ -7,16 +7,16 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
-} from '@/components/ui/Card';
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+} from '@/components/ui/Card'
+import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 interface ErrorFallbackProps {
-  error: Error | null;
-  resetErrorBoundary?: () => void;
-  title?: string;
-  description?: string;
-  showHomeButton?: boolean;
+  error: Error | null
+  resetErrorBoundary?: () => void
+  title?: string
+  description?: string
+  showHomeButton?: boolean
 }
 
 export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
@@ -26,23 +26,23 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
   description = 'An unexpected error occurred. Please try again.',
   showHomeButton = true,
 }) => {
-  const navigate = useNavigate();
-  const headingRef = useRef<HTMLHeadingElement>(null);
+  const navigate = useNavigate()
+  const headingRef = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
     // Focus the heading for accessibility when the error boundary mounts
     if (headingRef.current) {
-      headingRef.current.focus();
+      headingRef.current.focus()
     }
-  }, []);
+  }, [])
 
   const handleHome = () => {
-    navigate('/');
+    navigate('/')
     // Optional: reset boundary if provided, though navigating might be enough
     if (resetErrorBoundary) {
-      resetErrorBoundary();
+      resetErrorBoundary()
     }
-  };
+  }
 
   return (
     <div
@@ -70,9 +70,7 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
               <p className="font-semibold mb-1 text-destructive">
                 {error.name}: {error.message}
               </p>
-              {error.stack && (
-                <pre className="opacity-70">{error.stack}</pre>
-              )}
+              {error.stack && <pre className="opacity-70">{error.stack}</pre>}
             </div>
           )}
           {!import.meta.env.DEV && (
@@ -98,5 +96,5 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
         </CardFooter>
       </Card>
     </div>
-  );
-};
+  )
+}

@@ -4,20 +4,20 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'docs/**'
-      - 'docs-site/**'
-      - '*.md'
-      - 'README.md'
-      - 'CONTRIBUTING.md'
-      - 'CHANGELOG.md'
-      - '.vale.ini'
-      - '.vale/**'
+      - "docs/**"
+      - "docs-site/**"
+      - "*.md"
+      - "README.md"
+      - "CONTRIBUTING.md"
+      - "CHANGELOG.md"
+      - ".vale.ini"
+      - ".vale/**"
   push:
     branches: [main]
     paths:
-      - 'docs/**'
-      - 'docs-site/**'
-      - '*.md'
+      - "docs/**"
+      - "docs-site/**"
+      - "*.md"
   workflow_dispatch:
 
 permissions:
@@ -46,7 +46,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install pnpm
         if: ${{ vars.DOCS_DISABLE != '1' }}

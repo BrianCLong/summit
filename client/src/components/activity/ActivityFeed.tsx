@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Paper,
   List,
@@ -10,9 +10,9 @@ import {
   Chip,
   Box,
   Divider,
-} from '@mui/material';
-import { formatDistanceToNow } from 'date-fns';
-import { gql, useQuery } from '@apollo/client';
+} from "@mui/material";
+import { formatDistanceToNow } from "date-fns";
+import { gql, useQuery } from "@apollo/client";
 
 const ACTIVITY_FEED_QUERY = gql`
   query ActivityFeedData {
@@ -33,12 +33,12 @@ interface ActivityFeedProps {
 }
 
 const ACTION_COLORS = {
-  created: 'success',
-  updated: 'info',
-  deleted: 'error',
-  viewed: 'default',
-  shared: 'secondary',
-  exported: 'warning',
+  created: "success",
+  updated: "info",
+  deleted: "error",
+  viewed: "default",
+  shared: "secondary",
+  exported: "warning",
 } as const;
 
 export function ActivityFeed({ filters, maxItems = 50 }: ActivityFeedProps) {
@@ -54,20 +54,16 @@ export function ActivityFeed({ filters, maxItems = 50 }: ActivityFeedProps) {
         <Typography variant="h6" gutterBottom>
           Activity Feed
         </Typography>
-        <Typography color="text.secondary">
-          Loading recent activity...
-        </Typography>
+        <Typography color="text.secondary">Loading recent activity...</Typography>
       </Paper>
     );
   }
 
   return (
-    <Paper elevation={1} sx={{ p: 2, maxHeight: 400, overflow: 'auto' }}>
+    <Paper elevation={1} sx={{ p: 2, maxHeight: 400, overflow: "auto" }}>
       <Typography variant="h6" gutterBottom>
         Live Activity Feed
-        {activities.length > 0 && (
-          <Chip size="small" label={activities.length} sx={{ ml: 1 }} />
-        )}
+        {activities.length > 0 && <Chip size="small" label={activities.length} sx={{ ml: 1 }} />}
       </Typography>
 
       {activities.length === 0 ? (
@@ -81,32 +77,25 @@ export function ActivityFeed({ filters, maxItems = 50 }: ActivityFeedProps) {
               <ListItem alignItems="flex-start">
                 <ListItemAvatar>
                   <Avatar sx={{ width: 32, height: 32 }}>
-                    {activity.actor?.displayName?.charAt(0).toUpperCase() ||
-                      '?'}
+                    {activity.actor?.displayName?.charAt(0).toUpperCase() || "?"}
                   </Avatar>
                 </ListItemAvatar>
 
                 <ListItemText
                   primary={
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <Typography variant="subtitle2" component="span">
-                        {activity.actor?.displayName || 'Unknown User'}
+                        {activity.actor?.displayName || "Unknown User"}
                       </Typography>
                       <Chip
                         size="small"
                         label={activity.action}
                         color={
-                          ACTION_COLORS[
-                            activity.action as keyof typeof ACTION_COLORS
-                          ] || 'default'
+                          ACTION_COLORS[activity.action as keyof typeof ACTION_COLORS] || "default"
                         }
-                        sx={{ height: 20, fontSize: '0.7rem' }}
+                        sx={{ height: 20, fontSize: "0.7rem" }}
                       />
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        component="span"
-                      >
+                      <Typography variant="body2" color="text.secondary" component="span">
                         {activity.target?.name}
                       </Typography>
                     </Box>
@@ -121,7 +110,7 @@ export function ActivityFeed({ filters, maxItems = 50 }: ActivityFeedProps) {
                           size="small"
                           label={activity.target.type}
                           variant="outlined"
-                          sx={{ ml: 1, height: 16, fontSize: '0.6rem' }}
+                          sx={{ ml: 1, height: 16, fontSize: "0.6rem" }}
                         />
                       )}
                     </Typography>
@@ -129,9 +118,7 @@ export function ActivityFeed({ filters, maxItems = 50 }: ActivityFeedProps) {
                 />
               </ListItem>
 
-              {index < activities.length - 1 && (
-                <Divider variant="inset" component="li" />
-              )}
+              {index < activities.length - 1 && <Divider variant="inset" component="li" />}
             </React.Fragment>
           ))}
         </List>

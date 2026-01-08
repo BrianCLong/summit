@@ -8,17 +8,17 @@
  */
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { createHash } from 'crypto';
+import { createHash } from "crypto";
 
 /**
  * Data classification levels
  */
 export enum DataClassification {
-  PUBLIC = 'PUBLIC',
-  INTERNAL = 'INTERNAL',
-  CONFIDENTIAL = 'CONFIDENTIAL',
-  RESTRICTED = 'RESTRICTED',
-  HIGHLY_RESTRICTED = 'HIGHLY_RESTRICTED',
+  PUBLIC = "PUBLIC",
+  INTERNAL = "INTERNAL",
+  CONFIDENTIAL = "CONFIDENTIAL",
+  RESTRICTED = "RESTRICTED",
+  HIGHLY_RESTRICTED = "HIGHLY_RESTRICTED",
 }
 
 /**
@@ -97,7 +97,7 @@ export interface ValidationConfig {
  */
 const DEFAULT_CONFIG: ValidationConfig = {
   minConfidence: 0.7,
-  rejectSimulated: process.env.NODE_ENV === 'production',
+  rejectSimulated: process.env.NODE_ENV === "production",
   verifyHash: true,
   strictMode: false,
 };
@@ -116,57 +116,57 @@ export function validateDataEnvelope<T>(
   const warnings: string[] = [];
 
   // Check if response is an envelope
-  if (!envelope || typeof envelope !== 'object') {
-    errors.push('Response is not an object');
+  if (!envelope || typeof envelope !== "object") {
+    errors.push("Response is not an object");
     return { valid: false, errors, warnings };
   }
 
   // Check required fields
   if (!envelope.provenance) {
-    errors.push('Missing provenance metadata - unlabeled data rejected');
+    errors.push("Missing provenance metadata - unlabeled data rejected");
   }
 
   if (!envelope.data) {
-    errors.push('Missing data payload');
+    errors.push("Missing data payload");
   }
 
   if (envelope.isSimulated === undefined || envelope.isSimulated === null) {
-    errors.push('Missing isSimulated flag - data integrity cannot be verified');
+    errors.push("Missing isSimulated flag - data integrity cannot be verified");
   }
 
   if (!envelope.classification) {
-    errors.push('Missing data classification');
+    errors.push("Missing data classification");
   }
 
   if (!envelope.dataHash) {
-    errors.push('Missing data hash - integrity cannot be verified');
+    errors.push("Missing data hash - integrity cannot be verified");
   }
 
   // Validate provenance structure
   if (envelope.provenance) {
     if (!envelope.provenance.source) {
-      errors.push('Provenance missing source identifier');
+      errors.push("Provenance missing source identifier");
     }
 
     if (!envelope.provenance.generatedAt) {
-      errors.push('Provenance missing timestamp');
+      errors.push("Provenance missing timestamp");
     }
 
     if (!envelope.provenance.provenanceId) {
-      errors.push('Provenance missing unique identifier');
+      errors.push("Provenance missing unique identifier");
     }
 
     if (!Array.isArray(envelope.provenance.lineage)) {
-      errors.push('Provenance lineage is not an array');
+      errors.push("Provenance lineage is not an array");
     }
   }
 
   // Validate confidence score if present
   if (envelope.confidence !== undefined && envelope.confidence !== null) {
-    if (typeof envelope.confidence !== 'number') {
-      errors.push('Confidence score must be a number');
+    if (typeof envelope.confidence !== "number") {
+      errors.push("Confidence score must be a number");
     } else if (envelope.confidence < 0 || envelope.confidence > 1) {
-      errors.push('Confidence score must be between 0 and 1');
+      errors.push("Confidence score must be between 0 and 1");
     } else if (finalConfig.minConfidence && envelope.confidence < finalConfig.minConfidence) {
       errors.push(
         `AI confidence (${envelope.confidence}) below minimum threshold (${finalConfig.minConfidence})`
@@ -178,11 +178,11 @@ export function validateDataEnvelope<T>(
 
   // Check simulation flag
   if (envelope.isSimulated && finalConfig.rejectSimulated) {
-    errors.push('Simulated data not allowed in production environment');
+    errors.push("Simulated data not allowed in production environment");
   }
 
   if (envelope.isSimulated) {
-    warnings.push('This is simulated/synthetic data - use with caution');
+    warnings.push("This is simulated/synthetic data - use with caution");
   }
 
   // Check classification
@@ -192,12 +192,12 @@ export function validateDataEnvelope<T>(
     !finalConfig.allowedClassifications.includes(envelope.classification)
   ) {
     errors.push(
-      `Data classification ${envelope.classification} not allowed. Allowed: ${finalConfig.allowedClassifications.join(', ')}`
+      `Data classification ${envelope.classification} not allowed. Allowed: ${finalConfig.allowedClassifications.join(", ")}`
     );
   }
 
   // Verify data hash integrity
-  if (finalConfig.verifyHash && envelope.dataHash && typeof window !== 'undefined') {
+  if (finalConfig.verifyHash && envelope.dataHash && typeof window !== "undefined") {
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const dataString = JSON.stringify(envelope.data);
@@ -205,11 +205,11 @@ export function validateDataEnvelope<T>(
       // This is a simplified check - actual implementation should use proper crypto
       const isHashValid = envelope.dataHash && envelope.dataHash.length === 64;
       if (!isHashValid) {
-        errors.push('Data hash integrity check failed - possible tampering detected');
+        errors.push("Data hash integrity check failed - possible tampering detected");
       }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      warnings.push('Could not verify data hash integrity');
+      warnings.push("Could not verify data hash integrity");
     }
   }
 
@@ -238,12 +238,12 @@ export function unwrapEnvelope<T>(envelope: DataEnvelope<T>): T {
   const validation = validateDataEnvelope(envelope);
 
   if (!validation.valid) {
-    throw new Error(`Invalid data envelope: ${validation.errors.join(', ')}`);
+    throw new Error(`Invalid data envelope: ${validation.errors.join(", ")}`);
   }
 
   // Log warnings to console
   if (validation.warnings.length > 0) {
-    console.warn('[Data Envelope] Validation warnings:', validation.warnings);
+    console.warn("[Data Envelope] Validation warnings:", validation.warnings);
   }
 
   return envelope.data;
@@ -259,17 +259,17 @@ export function isAIGenerated(envelope: DataEnvelope): boolean {
 /**
  * Get confidence level category
  */
-export function getConfidenceLevel(confidence?: number): 'high' | 'medium' | 'low' | 'none' {
+export function getConfidenceLevel(confidence?: number): "high" | "medium" | "low" | "none" {
   if (confidence === undefined || confidence === null) {
-    return 'none';
+    return "none";
   }
 
   if (confidence >= 0.8) {
-    return 'high';
+    return "high";
   } else if (confidence >= 0.5) {
-    return 'medium';
+    return "medium";
   } else {
-    return 'low';
+    return "low";
   }
 }
 
@@ -279,17 +279,17 @@ export function getConfidenceLevel(confidence?: number): 'high' | 'medium' | 'lo
 export function getClassificationColor(classification: DataClassification): string {
   switch (classification) {
     case DataClassification.PUBLIC:
-      return '#10b981'; // green
+      return "#10b981"; // green
     case DataClassification.INTERNAL:
-      return '#3b82f6'; // blue
+      return "#3b82f6"; // blue
     case DataClassification.CONFIDENTIAL:
-      return '#f59e0b'; // amber
+      return "#f59e0b"; // amber
     case DataClassification.RESTRICTED:
-      return '#ef4444'; // red
+      return "#ef4444"; // red
     case DataClassification.HIGHLY_RESTRICTED:
-      return '#7c2d12'; // dark red
+      return "#7c2d12"; // dark red
     default:
-      return '#6b7280'; // gray
+      return "#6b7280"; // gray
   }
 }
 
@@ -298,7 +298,7 @@ export function getClassificationColor(classification: DataClassification): stri
  */
 export function formatProvenance(provenance: Provenance): string {
   const date = new Date(provenance.generatedAt).toLocaleString();
-  const actor = provenance.actor || 'system';
+  const actor = provenance.actor || "system";
   return `Generated by ${provenance.source} (${actor}) at ${date}`;
 }
 
@@ -310,8 +310,8 @@ export class DataEnvelopeValidationError extends Error {
   public warnings: string[];
 
   constructor(validation: ValidationResult) {
-    super(`Data envelope validation failed: ${validation.errors.join(', ')}`);
-    this.name = 'DataEnvelopeValidationError';
+    super(`Data envelope validation failed: ${validation.errors.join(", ")}`);
+    this.name = "DataEnvelopeValidationError";
     this.errors = validation.errors;
     this.warnings = validation.warnings;
   }
@@ -335,7 +335,7 @@ export function createEnvelopeInterceptor(config: ValidationConfig = {}) {
 
       // Log warnings
       if (validation.warnings.length > 0) {
-        console.warn('[Data Envelope] API Response warnings:', validation.warnings);
+        console.warn("[Data Envelope] API Response warnings:", validation.warnings);
       }
 
       // Store metadata in response
@@ -361,7 +361,7 @@ export function createEnvelopeInterceptor(config: ValidationConfig = {}) {
 
       // Log warnings
       if (validation.warnings.length > 0) {
-        console.warn('[Data Envelope] API Response warnings:', validation.warnings);
+        console.warn("[Data Envelope] API Response warnings:", validation.warnings);
       }
 
       return {

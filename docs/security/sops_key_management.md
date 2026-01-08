@@ -41,8 +41,8 @@ The `.sops.yaml` file defines the encryption rules for your repository. It speci
     # .sops.yaml
     creation_rules:
       - path_regex: k8s/secrets/.*\.enc\.yaml
-        encrypted_regex: '^(data|stringData)$'
-        age: ['age1...YOUR_PUBLIC_KEY_HERE...'] # Paste your public key here
+        encrypted_regex: "^(data|stringData)$"
+        age: ["age1...YOUR_PUBLIC_KEY_HERE..."] # Paste your public key here
       # Add rules for other secret files if needed
     ```
 

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { FederationAPI } from '../../services/api';
+import React, { useEffect, useState } from "react";
+import { FederationAPI } from "../../services/api";
 import {
   Box,
   Typography,
@@ -10,17 +10,17 @@ import {
   CardContent,
   Chip,
   Stack,
-} from '@mui/material';
+} from "@mui/material";
 
 export default function InstanceConnections() {
   const [instances, setInstances] = useState([]);
   const [summary, setSummary] = useState(null);
   const [form, setForm] = useState({
-    id: '',
-    name: '',
-    endpoint: '',
-    apiKey: '',
-    capabilities: '',
+    id: "",
+    name: "",
+    endpoint: "",
+    apiKey: "",
+    capabilities: "",
     maxConcurrentQueries: 5,
     timeout: 30000,
   });
@@ -50,7 +50,7 @@ export default function InstanceConnections() {
       apiKey: form.apiKey,
       capabilities: form.capabilities
         ? form.capabilities
-            .split(',')
+            .split(",")
             .map((s) => s.trim())
             .filter(Boolean)
         : [],
@@ -58,11 +58,11 @@ export default function InstanceConnections() {
       timeout: Number(form.timeout) || 30000,
     });
     setForm({
-      id: '',
-      name: '',
-      endpoint: '',
-      apiKey: '',
-      capabilities: '',
+      id: "",
+      name: "",
+      endpoint: "",
+      apiKey: "",
+      capabilities: "",
       maxConcurrentQueries: 5,
       timeout: 30000,
     });
@@ -89,31 +89,30 @@ export default function InstanceConnections() {
       </Typography>
       {summary && (
         <Typography variant="body2" sx={{ mb: 2 }}>
-          Total: {summary.total} · Healthy: {summary.healthy} · Visible:{' '}
-          {summary.visible}
+          Total: {summary.total} · Healthy: {summary.healthy} · Visible: {summary.visible}
         </Typography>
       )}
 
       <Grid container spacing={2} sx={{ mb: 3 }}>
         {[
-          'id',
-          'name',
-          'endpoint',
-          'apiKey',
-          'capabilities',
-          'maxConcurrentQueries',
-          'timeout',
+          "id",
+          "name",
+          "endpoint",
+          "apiKey",
+          "capabilities",
+          "maxConcurrentQueries",
+          "timeout",
         ].map((key) => (
-          <Grid item xs={12} md={key === 'capabilities' ? 12 : 6} key={key}>
+          <Grid item xs={12} md={key === "capabilities" ? 12 : 6} key={key}>
             <TextField
               label={key}
               fullWidth
               value={form[key]}
               onChange={(e) => setForm({ ...form, [key]: e.target.value })}
               helperText={
-                key === 'capabilities'
-                  ? 'Comma-separated (e.g., graph_analytics, nlp_processing)'
-                  : ' '
+                key === "capabilities"
+                  ? "Comma-separated (e.g., graph_analytics, nlp_processing)"
+                  : " "
               }
             />
           </Grid>
@@ -122,13 +121,7 @@ export default function InstanceConnections() {
           <Button
             variant="contained"
             onClick={register}
-            disabled={
-              loading ||
-              !form.id ||
-              !form.name ||
-              !form.endpoint ||
-              !form.apiKey
-            }
+            disabled={loading || !form.id || !form.name || !form.endpoint || !form.apiKey}
           >
             Register Instance
           </Button>
@@ -145,14 +138,9 @@ export default function InstanceConnections() {
                   {inst.endpoint}
                 </Typography>
                 <Typography variant="body2" sx={{ mt: 1 }}>
-                  Status:{' '}
-                  {statusMap[inst.id]?.connectionStatus?.status || 'Unknown'}
+                  Status: {statusMap[inst.id]?.connectionStatus?.status || "Unknown"}
                 </Typography>
-                <Stack
-                  direction="row"
-                  spacing={1}
-                  sx={{ mt: 1, flexWrap: 'wrap' }}
-                >
+                <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: "wrap" }}>
                   {(inst.capabilities || []).map((c) => (
                     <Chip size="small" key={c} label={c} />
                   ))}
@@ -165,10 +153,8 @@ export default function InstanceConnections() {
                         select
                         fullWidth
                         SelectProps={{ native: true }}
-                        defaultValue={inst.accessLevel || 'public'}
-                        onBlur={(e) =>
-                          update(inst, { accessLevel: e.target.value })
-                        }
+                        defaultValue={inst.accessLevel || "public"}
+                        onBlur={(e) => update(inst, { accessLevel: e.target.value })}
                       >
                         <option value="public">public</option>
                         <option value="restricted">restricted</option>
@@ -179,11 +165,11 @@ export default function InstanceConnections() {
                       <TextField
                         label="Capabilities (comma-separated)"
                         fullWidth
-                        defaultValue={(inst.capabilities || []).join(', ')}
+                        defaultValue={(inst.capabilities || []).join(", ")}
                         onBlur={(e) =>
                           update(inst, {
                             capabilities: e.target.value
-                              .split(',')
+                              .split(",")
                               .map((s) => s.trim())
                               .filter(Boolean),
                           })
@@ -239,11 +225,7 @@ export default function InstanceConnections() {
                         >
                           Test
                         </Button>
-                        <Button
-                          size="small"
-                          color="error"
-                          onClick={() => remove(inst.id)}
-                        >
+                        <Button size="small" color="error" onClick={() => remove(inst.id)}>
                           Remove
                         </Button>
                       </Stack>

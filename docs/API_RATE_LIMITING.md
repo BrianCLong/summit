@@ -28,13 +28,13 @@ We use two complementary rate limiting algorithms:
 
 Rate limits vary based on your subscription tier:
 
-| Tier | Requests/Min | Requests/Hour | Burst Capacity | GraphQL Complexity |
-|------|-------------|---------------|----------------|-------------------|
-| **Free** | 10 | 500 | 15 | 100 |
-| **Basic** | 30 | 1,500 | 50 | 300 |
-| **Premium** | 100 | 5,000 | 150 | 1,000 |
-| **Enterprise** | 500 | 25,000 | 1,000 | 5,000 |
-| **Internal** | 10,000 | 500,000 | 10,000 | 50,000 |
+| Tier           | Requests/Min | Requests/Hour | Burst Capacity | GraphQL Complexity |
+| -------------- | ------------ | ------------- | -------------- | ------------------ |
+| **Free**       | 10           | 500           | 15             | 100                |
+| **Basic**      | 30           | 1,500         | 50             | 300                |
+| **Premium**    | 100          | 5,000         | 150            | 1,000              |
+| **Enterprise** | 500          | 25,000        | 1,000          | 5,000              |
+| **Internal**   | 10,000       | 500,000       | 10,000         | 50,000             |
 
 ## Endpoint-Specific Limits
 
@@ -74,7 +74,7 @@ Token bucket for burst analysis workloads:
 
 Restricted to internal tier only:
 
-- **ALL /api/admin/***: Internal tier required
+- **ALL /api/admin/\***: Internal tier required
 - No rate limiting for internal service-to-service calls
 
 ## HTTP Response Headers
@@ -122,11 +122,11 @@ X-RateLimit-Reset: 1640995200
 Always check `X-RateLimit-Remaining` to avoid hitting limits:
 
 ```javascript
-const response = await fetch('/api/endpoint');
-const remaining = response.headers.get('X-RateLimit-Remaining');
+const response = await fetch("/api/endpoint");
+const remaining = response.headers.get("X-RateLimit-Remaining");
 
 if (remaining < 10) {
-  console.warn('Approaching rate limit');
+  console.warn("Approaching rate limit");
 }
 ```
 
@@ -140,17 +140,17 @@ async function fetchWithRetry(url, maxRetries = 3) {
     const response = await fetch(url);
 
     if (response.status === 429) {
-      const retryAfter = response.headers.get('Retry-After');
+      const retryAfter = response.headers.get("Retry-After");
       const delay = retryAfter ? parseInt(retryAfter) * 1000 : Math.pow(2, i) * 1000;
 
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
       continue;
     }
 
     return response;
   }
 
-  throw new Error('Max retries exceeded');
+  throw new Error("Max retries exceeded");
 }
 ```
 
@@ -222,11 +222,13 @@ query {
 ```
 
 **Complexity Calculation**:
+
 - Each field: +1 point
 - Each nesting level: +10 points
 - Each fragment: +5 points
 
 **Limits by Tier**:
+
 - Free: 100 points
 - Basic: 300 points
 - Premium: 1,000 points
@@ -274,12 +276,14 @@ Response:
 ### Issue: Hitting Limits Unexpectedly
 
 **Causes**:
+
 1. Polling too frequently
 2. Not caching responses
 3. Inefficient query patterns
 4. Shared IP address
 
 **Solutions**:
+
 1. Implement webhooks instead of polling
 2. Add response caching
 3. Optimize queries (use batch endpoints)
@@ -288,11 +292,13 @@ Response:
 ### Issue: GraphQL Complexity Errors
 
 **Causes**:
+
 1. Deeply nested queries
 2. Requesting too many fields
 3. Multiple fragments
 
 **Solutions**:
+
 1. Reduce query depth
 2. Request only needed fields
 3. Split into multiple simpler queries
@@ -301,11 +307,13 @@ Response:
 ### Issue: Different Limits Than Expected
 
 **Causes**:
+
 1. Wrong tier assumption
 2. Endpoint-specific limits
 3. Shared tenant quota
 
 **Solutions**:
+
 1. Verify your tier via `/api/user/profile`
 2. Check endpoint-specific limits in docs
 3. Consider per-user authentication
@@ -321,6 +329,7 @@ For rate limit increases or issues:
 ## Changelog
 
 ### 2025-01-15
+
 - Initial implementation with sliding window and token bucket algorithms
 - Per-tier and per-endpoint policies
 - Prometheus metrics integration

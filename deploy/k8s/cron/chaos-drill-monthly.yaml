@@ -8,23 +8,23 @@ data:
   chaos-drill.sh: |
     #!/bin/bash
     set -e
-    
+
     echo "Starting monthly chaos drill..."
-    
+
     # Run all chaos experiments
     kubectl apply -f /config/chaos-experiments.yaml
-    
+
     # Wait for completion
     sleep 300
-    
+
     # Collect results
     kubectl get chaos -n chaos-testing -o json > /reports/chaos-results.json
-    
+
     # Send notification
     curl -X POST "${SLACK_WEBHOOK_URL}" \
       -H 'Content-Type: application/json' \
       -d '{"text": "Monthly chaos drill completed. Check results at /reports/chaos-results.json"}'
-    
+
     echo "Chaos drill complete"
 
 ---

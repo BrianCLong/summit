@@ -1,5 +1,5 @@
-import React from 'react';
-import { useAnalysisStore } from './store';
+import React from "react";
+import { useAnalysisStore } from "./store";
 
 export const ExplainPanel: React.FC = () => {
   const { timeRange, activeQuery, pinned, clearPinned } = useAnalysisStore();
@@ -11,14 +11,11 @@ export const ExplainPanel: React.FC = () => {
       <div>
         Time: {timeRange.start} - {timeRange.end}
       </div>
-      <div>Query: {activeQuery ?? 'none'}</div>
+      <div>Query: {activeQuery ?? "none"}</div>
       <div>Pinned: {pinned.size}</div>
       {pinned.size > 0 && (
         <div>
-          <button
-            onClick={clearPinned}
-            className="mt-1 rounded bg-gray-700 px-2 py-1 text-xs"
-          >
+          <button onClick={clearPinned} className="mt-1 rounded bg-gray-700 px-2 py-1 text-xs">
             Clear pinned
           </button>
         </div>

@@ -24,20 +24,20 @@ pnpm install @intelgraph/social-media-intel
 ### Profile Analysis
 
 ```typescript
-import { ProfileAnalyzer } from '@intelgraph/social-media-intel';
+import { ProfileAnalyzer } from "@intelgraph/social-media-intel";
 
 const analyzer = new ProfileAnalyzer();
 const result = analyzer.analyzeProfile(profile);
 
 console.log(`Completeness: ${result.analysis.completeness}`);
 console.log(`Credibility: ${result.analysis.credibility}`);
-console.log(`Risk factors: ${result.analysis.riskFactors.join(', ')}`);
+console.log(`Risk factors: ${result.analysis.riskFactors.join(", ")}`);
 ```
 
 ### Sentiment Analysis
 
 ```typescript
-import { SentimentAnalyzer } from '@intelgraph/social-media-intel';
+import { SentimentAnalyzer } from "@intelgraph/social-media-intel";
 
 const analyzer = new SentimentAnalyzer();
 const sentiment = analyzer.analyze(post.content);
@@ -50,7 +50,7 @@ console.log(`Emotions:`, sentiment.emotion);
 ### Network Analysis
 
 ```typescript
-import { NetworkAnalyzer } from '@intelgraph/social-media-intel';
+import { NetworkAnalyzer } from "@intelgraph/social-media-intel";
 
 const analyzer = new NetworkAnalyzer();
 const network = analyzer.buildNetwork(profiles, relationships);
@@ -66,7 +66,7 @@ const withCommunities = analyzer.detectCommunities(network);
 ### Bot Detection
 
 ```typescript
-import { BotDetector } from '@intelgraph/social-media-intel';
+import { BotDetector } from "@intelgraph/social-media-intel";
 
 const detector = new BotDetector();
 const botScore = detector.analyze(profile, recentPosts);
@@ -79,7 +79,7 @@ console.log(`Indicators:`, botScore.indicators);
 ### Influencer Scoring
 
 ```typescript
-import { InfluencerScorer } from '@intelgraph/social-media-intel';
+import { InfluencerScorer } from "@intelgraph/social-media-intel";
 
 const scorer = new InfluencerScorer();
 const score = scorer.scoreInfluencer(profile, posts);
@@ -92,22 +92,22 @@ console.log(`Metrics:`, score.metrics);
 ### Account Correlation
 
 ```typescript
-import { AccountCorrelator } from '@intelgraph/social-media-intel';
+import { AccountCorrelator } from "@intelgraph/social-media-intel";
 
 const correlator = new AccountCorrelator();
 const results = correlator.correlateAccounts(profiles);
 
-results.forEach(result => {
+results.forEach((result) => {
   console.log(`Confidence: ${result.confidence}`);
-  console.log(`Evidence: ${result.evidence.join(', ')}`);
-  console.log(`Profiles: ${result.profiles.map(p => p.username).join(', ')}`);
+  console.log(`Evidence: ${result.evidence.join(", ")}`);
+  console.log(`Profiles: ${result.profiles.map((p) => p.username).join(", ")}`);
 });
 ```
 
 ### Timeline Reconstruction
 
 ```typescript
-import { TimelineReconstructor } from '@intelgraph/social-media-intel';
+import { TimelineReconstructor } from "@intelgraph/social-media-intel";
 
 const reconstructor = new TimelineReconstructor();
 const timeline = reconstructor.buildTimeline(posts);

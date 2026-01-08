@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { gql, useApolloClient, DocumentNode } from '@apollo/client';
+import React, { useState } from "react";
+import { gql, useApolloClient, DocumentNode } from "@apollo/client";
 import {
   Autocomplete,
   TextField,
@@ -8,7 +8,7 @@ import {
   List,
   ListItem,
   ListItemText,
-} from '@mui/material';
+} from "@mui/material";
 
 interface ParsedQuery {
   query: DocumentNode;
@@ -16,11 +16,11 @@ interface ParsedQuery {
   variables: Record<string, any>;
 }
 
-const ENTITY_SUGGESTIONS = ['APT actor', 'campaign', 'target', 'malware'];
+const ENTITY_SUGGESTIONS = ["APT actor", "campaign", "target", "malware"];
 
-const RELATION_SUGGESTIONS = ['linked to', 'associated with', 'targets'];
+const RELATION_SUGGESTIONS = ["linked to", "associated with", "targets"];
 
-const EXAMPLE = 'Show all APT actors linked to finance-themed targets';
+const EXAMPLE = "Show all APT actors linked to finance-themed targets";
 
 function parseNaturalQuery(text: string): ParsedQuery | null {
   const m = /show all (.+) linked to (.+)-themed targets/i.exec(text);
@@ -43,8 +43,8 @@ function parseNaturalQuery(text: string): ParsedQuery | null {
 
 export default function MagicSearch() {
   const client = useApolloClient();
-  const [input, setInput] = useState('');
-  const [graphql, setGraphql] = useState('');
+  const [input, setInput] = useState("");
+  const [graphql, setGraphql] = useState("");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [results, setResults] = useState<any[]>([]);
   const options = [...ENTITY_SUGGESTIONS, ...RELATION_SUGGESTIONS];
@@ -52,7 +52,7 @@ export default function MagicSearch() {
   const runSearch = async () => {
     const parsed = parseNaturalQuery(input);
     if (!parsed) return;
-    setGraphql(parsed.query.loc?.source.body || '');
+    setGraphql(parsed.query.loc?.source.body || "");
     try {
       const { data } = await client.query({
         query: parsed.query,
@@ -78,7 +78,7 @@ export default function MagicSearch() {
             placeholder="Ask in natural language"
             helperText={`Try: ${EXAMPLE}`}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') runSearch();
+              if (e.key === "Enter") runSearch();
             }}
             fullWidth
           />

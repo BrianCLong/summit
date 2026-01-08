@@ -3,7 +3,7 @@ import type {
   WorkspaceActivity,
   WorkspacePresence,
   WorkspaceSyncState,
-} from 'common-types';
+} from "common-types";
 
 export interface PresenceIndicator {
   analystId: string;
@@ -57,7 +57,7 @@ export class WorkspaceCollaborationClient {
   presenceIndicators(now = Date.now()): PresenceIndicator[] {
     return [...this.presences.values()].map((presence) => {
       const isStale = now - presence.lastSeen > this.stalenessMs;
-      const status: PresenceStatus = isStale ? 'offline' : presence.status;
+      const status: PresenceStatus = isStale ? "offline" : presence.status;
       return {
         analystId: presence.analyst.id,
         displayName: presence.analyst.displayName,
@@ -71,9 +71,7 @@ export class WorkspaceCollaborationClient {
   }
 
   activityStream(limit = 15): WorkspaceActivity[] {
-    return [...this.activities.values()]
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .slice(0, limit);
+    return [...this.activities.values()].sort((a, b) => b.timestamp - a.timestamp).slice(0, limit);
   }
 
   private trimActivities(): void {
@@ -81,9 +79,7 @@ export class WorkspaceCollaborationClient {
       return;
     }
 
-    const ordered = [...this.activities.values()].sort(
-      (a, b) => b.timestamp - a.timestamp,
-    );
+    const ordered = [...this.activities.values()].sort((a, b) => b.timestamp - a.timestamp);
     const trimmed = ordered.slice(0, this.activityLimit);
     this.activities.clear();
     for (const activity of trimmed) {

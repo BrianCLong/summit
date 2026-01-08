@@ -5,16 +5,16 @@ on:
     branches:
       - main
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
   release:
     types: [created, published]
   workflow_dispatch:
     inputs:
       from_tag:
-        description: 'Start tag (leave empty for last tag)'
+        description: "Start tag (leave empty for last tag)"
         required: false
       to_tag:
-        description: 'End tag (leave empty for HEAD)'
+        description: "End tag (leave empty for HEAD)"
         required: false
 
 permissions:
@@ -34,7 +34,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: "20.x"
 
       - name: Install release-notes tools
         run: |

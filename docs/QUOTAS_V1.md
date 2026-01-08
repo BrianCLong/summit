@@ -22,9 +22,13 @@
 1. Set the feature flag: `export QUOTAS_V1=1`.
 2. Optional tenant-specific overrides (runtime, in-memory):
    ```ts
-   quotaManager.setTenantOverrides('tenant-id', {
+   quotaManager.setTenantOverrides("tenant-id", {
      requestsPerMinute: { limit: 200, windowMs: 60_000, burstCredits: 25 },
-     ingestBytesPerDay: { limit: 10 * 1024 * 1024 * 1024, windowMs: 86_400_000, burstCredits: 512 * 1024 * 1024 },
+     ingestBytesPerDay: {
+       limit: 10 * 1024 * 1024 * 1024,
+       windowMs: 86_400_000,
+       burstCredits: 512 * 1024 * 1024,
+     },
      queryCostPerMinute: { limit: 20_000, windowMs: 60_000, burstCredits: 2_000 },
      exportConcurrency: { limit: 10, windowMs: 0, burstCredits: 2 },
    });
@@ -49,4 +53,4 @@ Use these to alert on sustained throttling per tenant/resource and to correlate 
 ## Testing guidance
 
 - **Unit**: window resets, burst credit consumption, saturation-driven throttling (see `server/src/lib/resources/__tests__/QuotaManager.v1.test.ts`).
-- **Integration**: middleware respects QUOTAS_V1 flag and returns deterministic 429s with retry hints (see `server/src/middleware/__tests__/rateLimit.test.ts`). 
+- **Integration**: middleware respects QUOTAS_V1 flag and returns deterministic 429s with retry hints (see `server/src/middleware/__tests__/rateLimit.test.ts`).

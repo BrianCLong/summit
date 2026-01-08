@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+import crypto from "node:crypto";
 
 export class BackfillFramework {
   constructor(maxRetries = 3, batchSize = 50) {
@@ -24,7 +24,7 @@ export class BackfillFramework {
               this.checkpoints.push(idx);
             }
           } catch (error) {
-            const key = crypto.createHash('sha1').update(JSON.stringify(payload)).digest('hex');
+            const key = crypto.createHash("sha1").update(JSON.stringify(payload)).digest("hex");
             this.retries[key] = (this.retries[key] ?? 0) + 1;
             const attemptsLeft = this.maxRetries - this.retries[key] + 1;
             if (attemptsLeft <= 0) {
@@ -45,7 +45,7 @@ export class BackfillFramework {
               }
             }
           }
-        }),
+        })
       );
     }
 

@@ -1,9 +1,9 @@
-import { trace } from '@opentelemetry/api';
-import pino from 'pino';
-import { L3CacheConfig } from './types';
+import { trace } from "@opentelemetry/api";
+import pino from "pino";
+import { L3CacheConfig } from "./types";
 
-const logger = pino({ name: 'CDNIntegration' });
-const tracer = trace.getTracer('advanced-caching');
+const logger = pino({ name: "CDNIntegration" });
+const tracer = trace.getTracer("advanced-caching");
 
 /**
  * CDN integration for edge caching
@@ -15,17 +15,17 @@ export class CDNIntegration {
    * Purge cache from CDN
    */
   async purge(paths: string[]): Promise<void> {
-    const span = tracer.startSpan('CDNIntegration.purge');
+    const span = tracer.startSpan("CDNIntegration.purge");
 
     try {
       switch (this.config.provider) {
-        case 'cloudfront':
+        case "cloudfront":
           await this.purgeCloudFront(paths);
           break;
-        case 'cloudflare':
+        case "cloudflare":
           await this.purgeCloudflare(paths);
           break;
-        case 'fastly':
+        case "fastly":
           await this.purgeFastly(paths);
           break;
         default:
@@ -37,7 +37,7 @@ export class CDNIntegration {
         paths: paths.length,
       });
 
-      logger.info({ provider: this.config.provider, paths }, 'CDN cache purged');
+      logger.info({ provider: this.config.provider, paths }, "CDN cache purged");
     } catch (error) {
       span.recordException(error as Error);
       throw error;
@@ -50,24 +50,24 @@ export class CDNIntegration {
    * Purge all CDN cache
    */
   async purgeAll(): Promise<void> {
-    const span = tracer.startSpan('CDNIntegration.purgeAll');
+    const span = tracer.startSpan("CDNIntegration.purgeAll");
 
     try {
       switch (this.config.provider) {
-        case 'cloudfront':
+        case "cloudfront":
           await this.purgeCloudFrontAll();
           break;
-        case 'cloudflare':
+        case "cloudflare":
           await this.purgeCloudflareAll();
           break;
-        case 'fastly':
+        case "fastly":
           await this.purgeFastlyAll();
           break;
         default:
           throw new Error(`Unsupported CDN provider: ${this.config.provider}`);
       }
 
-      logger.info({ provider: this.config.provider }, 'All CDN cache purged');
+      logger.info({ provider: this.config.provider }, "All CDN cache purged");
     } catch (error) {
       span.recordException(error as Error);
       throw error;
@@ -103,12 +103,12 @@ export class CDNIntegration {
 
   private async purgeCloudFront(paths: string[]): Promise<void> {
     if (!this.config.distributionId) {
-      throw new Error('CloudFront distribution ID not configured');
+      throw new Error("CloudFront distribution ID not configured");
     }
 
     // Implementation would use AWS SDK
     // Example: AWS.CloudFront.createInvalidation()
-    logger.debug({ paths }, 'CloudFront purge requested');
+    logger.debug({ paths }, "CloudFront purge requested");
 
     // Placeholder for actual AWS SDK call
     // const cloudfront = new AWS.CloudFront();
@@ -122,17 +122,17 @@ export class CDNIntegration {
   }
 
   private async purgeCloudFrontAll(): Promise<void> {
-    await this.purgeCloudFront(['/*']);
+    await this.purgeCloudFront(["/*"]);
   }
 
   private async purgeCloudflare(paths: string[]): Promise<void> {
     if (!this.config.apiKey || !this.config.zone) {
-      throw new Error('Cloudflare API key and zone not configured');
+      throw new Error("Cloudflare API key and zone not configured");
     }
 
     // Implementation would use Cloudflare API
     // Example: POST https://api.cloudflare.com/client/v4/zones/:zone/purge_cache
-    logger.debug({ paths }, 'Cloudflare purge requested');
+    logger.debug({ paths }, "Cloudflare purge requested");
 
     // Placeholder for actual API call
     // const response = await fetch(
@@ -150,10 +150,10 @@ export class CDNIntegration {
 
   private async purgeCloudflareAll(): Promise<void> {
     if (!this.config.apiKey || !this.config.zone) {
-      throw new Error('Cloudflare API key and zone not configured');
+      throw new Error("Cloudflare API key and zone not configured");
     }
 
-    logger.debug('Cloudflare purge all requested');
+    logger.debug("Cloudflare purge all requested");
 
     // Placeholder for actual API call
     // const response = await fetch(
@@ -171,10 +171,10 @@ export class CDNIntegration {
 
   private async purgeFastly(paths: string[]): Promise<void> {
     if (!this.config.apiKey) {
-      throw new Error('Fastly API key not configured');
+      throw new Error("Fastly API key not configured");
     }
 
-    logger.debug({ paths }, 'Fastly purge requested');
+    logger.debug({ paths }, "Fastly purge requested");
 
     // Placeholder for actual Fastly API call
     // for (const path of paths) {
@@ -187,10 +187,10 @@ export class CDNIntegration {
 
   private async purgeFastlyAll(): Promise<void> {
     if (!this.config.apiKey) {
-      throw new Error('Fastly API key not configured');
+      throw new Error("Fastly API key not configured");
     }
 
-    logger.debug('Fastly purge all requested');
+    logger.debug("Fastly purge all requested");
 
     // Placeholder for actual Fastly API call
     // await fetch(`https://api.fastly.com/service/${serviceId}/purge_all`, {

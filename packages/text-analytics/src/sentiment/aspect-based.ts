@@ -2,7 +2,7 @@
  * Aspect-based sentiment analysis
  */
 
-import type { AspectSentiment } from '../types';
+import type { AspectSentiment } from "../types";
 
 export class AspectBasedSentimentAnalyzer {
   /**

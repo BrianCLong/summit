@@ -1,10 +1,10 @@
-import { createHash } from 'crypto';
-import fs from 'fs/promises';
+import { createHash } from "crypto";
+import fs from "fs/promises";
 
 export function sha256(input: Buffer | string): string {
-  const hash = createHash('sha256');
+  const hash = createHash("sha256");
   hash.update(input);
-  return hash.digest('hex');
+  return hash.digest("hex");
 }
 
 export async function sha256File(path: string): Promise<string> {
@@ -18,7 +18,7 @@ export function hashLeaf(id: string, contentHash: string): string {
 
 export function buildMerkleRoot(leaves: string[]): { root: string; layers: string[][] } {
   if (leaves.length === 0) {
-    return { root: '', layers: [[]] };
+    return { root: "", layers: [[]] };
   }
 
   let layer = leaves.slice();
@@ -35,5 +35,5 @@ export function buildMerkleRoot(leaves: string[]): { root: string; layers: strin
     layers.push(layer);
   }
 
-  return { root: layer[0] ?? '', layers };
+  return { root: layer[0] ?? "", layers };
 }

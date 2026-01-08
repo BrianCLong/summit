@@ -1,4 +1,4 @@
-export type IsolationBoundary = 'tenant' | 'compartment';
+export type IsolationBoundary = "tenant" | "compartment";
 
 export interface TenantScope {
   tenantId: string;
@@ -18,7 +18,7 @@ export class IsolationViolationError extends Error {
 
   constructor(message: string, boundary: IsolationBoundary, details?: Record<string, unknown>) {
     super(message);
-    this.name = 'IsolationViolationError';
+    this.name = "IsolationViolationError";
     this.boundary = boundary;
     this.details = details;
   }
@@ -26,7 +26,7 @@ export class IsolationViolationError extends Error {
 
 export const requireTenantScope = (scope: Partial<TenantScope>): TenantScope => {
   if (!scope?.tenantId) {
-    throw new IsolationViolationError('Tenant scope is required for this operation.', 'tenant');
+    throw new IsolationViolationError("Tenant scope is required for this operation.", "tenant");
   }
 
   return {
@@ -39,15 +39,15 @@ export const requireTenantScope = (scope: Partial<TenantScope>): TenantScope => 
 export const assertTenantMatch = (
   targetTenantId: string | undefined,
   scope: TenantScope,
-  hint?: string,
+  hint?: string
 ): void => {
   const tenantScope = requireTenantScope(scope);
 
   if (!targetTenantId || targetTenantId !== tenantScope.tenantId) {
     throw new IsolationViolationError(
-      `Tenant boundary violation: expected ${tenantScope.tenantId} but received ${targetTenantId ?? 'unknown'}.`,
-      'tenant',
-      hint ? { hint } : undefined,
+      `Tenant boundary violation: expected ${tenantScope.tenantId} but received ${targetTenantId ?? "unknown"}.`,
+      "tenant",
+      hint ? { hint } : undefined
     );
   }
 };
@@ -56,14 +56,14 @@ export const scopeSqlToTenant = (
   query: string,
   params: unknown[],
   scope: TenantScope,
-  column = 'tenant_id',
+  column = "tenant_id"
 ): { text: string; values: unknown[] } => {
   const tenantScope = requireTenantScope(scope);
   const normalizedQuery = query.trim();
   const lower = normalizedQuery.toLowerCase();
   const lowerColumn = column.toLowerCase();
 
-  const whereIndex = lower.indexOf(' where ');
+  const whereIndex = lower.indexOf(" where ");
   const hasTenantGuard =
     (whereIndex !== -1 && lower.slice(whereIndex).includes(lowerColumn)) ||
     new RegExp(`\\b${lowerColumn}\\b`).test(lower);
@@ -72,7 +72,9 @@ export const scopeSqlToTenant = (
     return { text: normalizedQuery, values: params };
   }
 
-  const clauseMatch = lower.match(/\s(group by|order by|limit|offset|returning|having|for update|for share)\b/);
+  const clauseMatch = lower.match(
+    /\s(group by|order by|limit|offset|returning|having|for update|for share)\b/
+  );
   const insertionIndex = clauseMatch?.index ?? normalizedQuery.length;
   const before = normalizedQuery.slice(0, insertionIndex).trimEnd();
   const after = normalizedQuery.slice(insertionIndex);
@@ -91,20 +93,23 @@ export const scopeSqlToTenant = (
 export const enforceCompartments = (
   targetCompartments: string[] | readonly string[],
   scope: TenantScope,
-  options: { allowUnscoped?: boolean } = {},
+  options: { allowUnscoped?: boolean } = {}
 ): void => {
   const compartments = [...targetCompartments];
 
   if (compartments.length === 0) {
     if (options.allowUnscoped) return;
-    throw new IsolationViolationError('Compartment boundary requires explicit labels.', 'compartment');
+    throw new IsolationViolationError(
+      "Compartment boundary requires explicit labels.",
+      "compartment"
+    );
   }
 
   const allowed = new Set(scope.compartments ?? []);
   const missing = compartments.filter((compartment) => !allowed.has(compartment));
 
   if (missing.length > 0) {
-    throw new IsolationViolationError('Compartment boundary violation detected.', 'compartment', {
+    throw new IsolationViolationError("Compartment boundary violation detected.", "compartment", {
       missing,
       allowed: Array.from(allowed),
     });
@@ -114,7 +119,7 @@ export const enforceCompartments = (
 export const assertServiceIsolation = (
   context: IsolationContext,
   resource: { tenantId?: string; compartments?: string[] },
-  options: { requireCompartments?: boolean; tenantColumn?: string } = {},
+  options: { requireCompartments?: boolean; tenantColumn?: string } = {}
 ): void => {
   const tenantScope = requireTenantScope(context.tenant);
   assertTenantMatch(resource.tenantId, tenantScope, options.tenantColumn);
@@ -128,7 +133,7 @@ export const assertServiceIsolation = (
 
 export const createTenantScopedParams = (
   scope: TenantScope,
-  baseParams: Record<string, unknown> = {},
+  baseParams: Record<string, unknown> = {}
 ): Record<string, unknown> => {
   const tenantScope = requireTenantScope(scope);
   return {

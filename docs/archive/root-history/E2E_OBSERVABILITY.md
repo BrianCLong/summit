@@ -45,11 +45,13 @@ The E2E Test Observability System provides comprehensive monitoring, metrics col
 **File:** `.github/workflows/e2e-observability.yml`
 
 **Triggers:**
+
 - Scheduled: Every 6 hours
 - Pull requests affecting e2e tests
 - Manual dispatch
 
 **Stages:**
+
 1. **Setup Observability** - Initialize metrics infrastructure
 2. **E2E with Metrics** - Run tests with metrics collection (4 parallel suites)
 3. **Aggregate Metrics** - Combine results and calculate totals
@@ -58,31 +60,33 @@ The E2E Test Observability System provides comprehensive monitoring, metrics col
 
 ### 2. Test Suites Monitored
 
-| Suite | Description | SLO Target |
-|-------|-------------|------------|
-| `golden-path` | Critical user journey | 99.9% pass rate |
-| `analytics-bridge` | Analytics integration | 99.5% pass rate |
-| `graph-visualization` | Graph rendering | 99% pass rate |
-| `real-time-updates` | WebSocket functionality | 99% pass rate |
+| Suite                 | Description             | SLO Target      |
+| --------------------- | ----------------------- | --------------- |
+| `golden-path`         | Critical user journey   | 99.9% pass rate |
+| `analytics-bridge`    | Analytics integration   | 99.5% pass rate |
+| `graph-visualization` | Graph rendering         | 99% pass rate   |
+| `real-time-updates`   | WebSocket functionality | 99% pass rate   |
 
 ### 3. Metrics Collected
 
 #### Test Execution Metrics
-| Metric | Type | Description |
-|--------|------|-------------|
-| `e2e_test_duration_seconds` | Gauge | Duration per suite |
-| `e2e_tests_passed_total` | Gauge | Passed tests per suite |
-| `e2e_tests_failed_total` | Gauge | Failed tests per suite |
-| `e2e_tests_flaky_total` | Gauge | Flaky tests per suite |
-| `e2e_tests_skipped_total` | Gauge | Skipped tests per suite |
+
+| Metric                      | Type  | Description             |
+| --------------------------- | ----- | ----------------------- |
+| `e2e_test_duration_seconds` | Gauge | Duration per suite      |
+| `e2e_tests_passed_total`    | Gauge | Passed tests per suite  |
+| `e2e_tests_failed_total`    | Gauge | Failed tests per suite  |
+| `e2e_tests_flaky_total`     | Gauge | Flaky tests per suite   |
+| `e2e_tests_skipped_total`   | Gauge | Skipped tests per suite |
 
 #### Aggregate Metrics
-| Metric | Type | Description |
-|--------|------|-------------|
-| `e2e_total_duration_seconds` | Gauge | Total test run duration |
-| `e2e_total_tests_passed` | Gauge | Total passed tests |
-| `e2e_total_tests_failed` | Gauge | Total failed tests |
-| `e2e_test_success_rate` | Gauge | Overall success rate (0-1) |
+
+| Metric                       | Type  | Description                |
+| ---------------------------- | ----- | -------------------------- |
+| `e2e_total_duration_seconds` | Gauge | Total test run duration    |
+| `e2e_total_tests_passed`     | Gauge | Total passed tests         |
+| `e2e_total_tests_failed`     | Gauge | Total failed tests         |
+| `e2e_test_success_rate`      | Gauge | Overall success rate (0-1) |
 
 ### 4. Dashboard
 
@@ -91,6 +95,7 @@ The E2E Test Observability System provides comprehensive monitoring, metrics col
 **URL:** http://localhost:3001/d/e2e-test-performance
 
 **Panels:**
+
 - 🎯 Success Rate Gauge
 - ✅ Tests Passed Counter
 - ❌ Tests Failed Counter
@@ -111,20 +116,20 @@ The E2E Test Observability System provides comprehensive monitoring, metrics col
 
 #### Critical Alerts
 
-| Alert | Condition | Action |
-|-------|-----------|--------|
-| `E2ETestSuiteFailure` | Any test failures | Immediate investigation |
-| `E2ESuccessRateCritical` | Success rate < 90% | Stop deployments |
-| `E2ETestSuiteDown` | No metrics for 30min | Check pipeline health |
-| `E2EBudgetBurnRateHigh` | Error budget exhaustion risk | Review recent changes |
+| Alert                    | Condition                    | Action                  |
+| ------------------------ | ---------------------------- | ----------------------- |
+| `E2ETestSuiteFailure`    | Any test failures            | Immediate investigation |
+| `E2ESuccessRateCritical` | Success rate < 90%           | Stop deployments        |
+| `E2ETestSuiteDown`       | No metrics for 30min         | Check pipeline health   |
+| `E2EBudgetBurnRateHigh`  | Error budget exhaustion risk | Review recent changes   |
 
 #### Warning Alerts
 
-| Alert | Condition | Action |
-|-------|-----------|--------|
-| `E2ESuccessRateWarning` | Success rate < 98% | Monitor closely |
-| `E2ETestDurationHigh` | Duration > 10 minutes | Performance review |
-| `E2EFlakyTestsDetected` | > 3 flaky tests | Quarantine and fix |
+| Alert                   | Condition             | Action                    |
+| ----------------------- | --------------------- | ------------------------- |
+| `E2ESuccessRateWarning` | Success rate < 98%    | Monitor closely           |
+| `E2ETestDurationHigh`   | Duration > 10 minutes | Performance review        |
+| `E2EFlakyTestsDetected` | > 3 flaky tests       | Quarantine and fix        |
 | `E2EDurationRegression` | 50% duration increase | Performance investigation |
 
 ### SLO Configuration
@@ -132,6 +137,7 @@ The E2E Test Observability System provides comprehensive monitoring, metrics col
 **Target SLO:** 99.5% test success rate over 7 days
 
 **Error Budget:**
+
 - Monthly budget: 0.5% (approximately 3.6 hours)
 - Burn rate monitoring: 1h, 6h, 1d, 7d windows
 
@@ -206,11 +212,11 @@ cat observability/e2e-trends.json | jq '.'
 
 ### Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
+| Variable                      | Default                 | Description             |
+| ----------------------------- | ----------------------- | ----------------------- |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | `http://localhost:4317` | OTLP collector endpoint |
-| `OTEL_SERVICE_NAME` | `e2e-test-runner` | Service name for traces |
-| `METRICS_PUSH_GATEWAY` | `http://localhost:9091` | Prometheus pushgateway |
+| `OTEL_SERVICE_NAME`           | `e2e-test-runner`       | Service name for traces |
+| `METRICS_PUSH_GATEWAY`        | `http://localhost:9091` | Prometheus pushgateway  |
 
 ### Customizing Alert Thresholds
 
@@ -219,18 +225,19 @@ Edit `observability/alerts/e2e-alerts.yml`:
 ```yaml
 # Adjust success rate threshold
 - alert: E2ESuccessRateCritical
-  expr: e2e_test_success_rate < 0.9  # Change threshold here
+  expr: e2e_test_success_rate < 0.9 # Change threshold here
 ```
 
 ### Adding New Test Suites
 
 1. Add suite to workflow matrix in `e2e-observability.yml`:
+
 ```yaml
 matrix:
   test_suite:
     - golden-path
     - analytics-bridge
-    - your-new-suite  # Add here
+    - your-new-suite # Add here
 ```
 
 2. Create corresponding Playwright spec file
@@ -241,16 +248,19 @@ matrix:
 ## Maintenance
 
 ### Weekly Tasks
+
 - [ ] Review flaky test trends
 - [ ] Check error budget consumption
 - [ ] Archive old metrics (> 90 days)
 
 ### Monthly Tasks
+
 - [ ] Review and adjust SLO targets
 - [ ] Analyze duration trends
 - [ ] Update documentation
 
 ### Quarterly Tasks
+
 - [ ] Evaluate alert effectiveness
 - [ ] Review dashboard utility
 - [ ] Update test suite coverage
@@ -329,4 +339,4 @@ curl 'http://localhost:9090/api/v1/query?query=e2e:slo:burn_rate:7d' | jq '.data
 
 ---
 
-*Part of the Summit/IntelGraph E2E Observability Initiative*
+_Part of the Summit/IntelGraph E2E Observability Initiative_

@@ -5,12 +5,7 @@
  * alerting following Google SRE multi-window, multi-burn-rate methodology.
  */
 
-import type {
-  SloDefinition,
-  SloType,
-  ErrorBudget,
-  ServiceArchetype,
-} from '../types/index.js';
+import type { SloDefinition, SloType, ErrorBudget, ServiceArchetype } from "../types/index.js";
 
 // =============================================================================
 // SLO CONFIGURATION
@@ -23,32 +18,32 @@ export const DEFAULT_SLO_TARGETS: Record<
   ServiceArchetype,
   { availability: number; latency_p99_ms: number; latency_p95_ms: number }
 > = {
-  'api-service': {
+  "api-service": {
     availability: 99.9,
     latency_p99_ms: 500,
     latency_p95_ms: 200,
   },
-  'gateway-service': {
+  "gateway-service": {
     availability: 99.95,
     latency_p99_ms: 100,
     latency_p95_ms: 50,
   },
-  'worker-service': {
+  "worker-service": {
     availability: 99.5,
     latency_p99_ms: 300000, // 5 minutes
     latency_p95_ms: 60000, // 1 minute
   },
-  'data-pipeline': {
+  "data-pipeline": {
     availability: 99.0,
     latency_p99_ms: 600000, // 10 minutes
     latency_p95_ms: 300000, // 5 minutes
   },
-  'storage-service': {
+  "storage-service": {
     availability: 99.99,
     latency_p99_ms: 100,
     latency_p95_ms: 50,
   },
-  'ml-service': {
+  "ml-service": {
     availability: 99.5,
     latency_p99_ms: 5000,
     latency_p95_ms: 2000,
@@ -61,35 +56,35 @@ export const DEFAULT_SLO_TARGETS: Record<
 export const BURN_RATE_WINDOWS = {
   /** Page immediately: 5% of budget in 1 hour */
   critical: {
-    longWindow: '1h',
-    shortWindow: '5m',
+    longWindow: "1h",
+    shortWindow: "5m",
     burnRate: 14.4,
-    severity: 'critical' as const,
-    description: 'Exhausts 30-day budget in ~2 days',
+    severity: "critical" as const,
+    description: "Exhausts 30-day budget in ~2 days",
   },
   /** Page during business hours: 5% of budget in 6 hours */
   high: {
-    longWindow: '6h',
-    shortWindow: '30m',
+    longWindow: "6h",
+    shortWindow: "30m",
     burnRate: 6,
-    severity: 'warning' as const,
-    description: 'Exhausts 30-day budget in ~5 days',
+    severity: "warning" as const,
+    description: "Exhausts 30-day budget in ~5 days",
   },
   /** Create ticket: 10% of budget in 3 days */
   medium: {
-    longWindow: '3d',
-    shortWindow: '6h',
+    longWindow: "3d",
+    shortWindow: "6h",
     burnRate: 1,
-    severity: 'warning' as const,
-    description: 'Exhausts 30-day budget in ~30 days',
+    severity: "warning" as const,
+    description: "Exhausts 30-day budget in ~30 days",
   },
   /** Informational: slow burn */
   low: {
-    longWindow: '7d',
-    shortWindow: '1d',
+    longWindow: "7d",
+    shortWindow: "1d",
     burnRate: 0.5,
-    severity: 'info' as const,
-    description: 'Slow degradation, review weekly',
+    severity: "info" as const,
+    description: "Slow degradation, review weekly",
   },
 };
 
@@ -107,7 +102,7 @@ export function createAvailabilitySlo(
 ): SloDefinition {
   return {
     name: `${serviceName}_availability`,
-    type: 'availability',
+    type: "availability",
     target,
     window,
     description: `${target}% of requests should succeed (non-5xx) over ${window} days`,
@@ -116,9 +111,9 @@ export function createAvailabilitySlo(
       total: `sum(rate(http_requests_total{service="${serviceName}"}[5m]))`,
     },
     alerts: [
-      { burnRate: 14.4, severity: 'critical', window: '1h' },
-      { burnRate: 6, severity: 'warning', window: '6h' },
-      { burnRate: 1, severity: 'warning', window: '3d' },
+      { burnRate: 14.4, severity: "critical", window: "1h" },
+      { burnRate: 6, severity: "warning", window: "6h" },
+      { burnRate: 1, severity: "warning", window: "3d" },
     ],
   };
 }
@@ -136,7 +131,7 @@ export function createLatencySlo(
   const thresholdSeconds = thresholdMs / 1000;
   return {
     name: `${serviceName}_latency_p${percentile}`,
-    type: 'latency',
+    type: "latency",
     target,
     window,
     description: `${target}% of requests should complete within ${thresholdMs}ms (p${percentile}) over ${window} days`,
@@ -145,8 +140,8 @@ export function createLatencySlo(
       total: `sum(rate(http_request_duration_seconds_count{service="${serviceName}"}[5m]))`,
     },
     alerts: [
-      { burnRate: 14.4, severity: 'critical', window: '1h' },
-      { burnRate: 6, severity: 'warning', window: '6h' },
+      { burnRate: 14.4, severity: "critical", window: "1h" },
+      { burnRate: 6, severity: "warning", window: "6h" },
     ],
   };
 }
@@ -162,17 +157,15 @@ export function createThroughputSlo(
 ): SloDefinition {
   return {
     name: `${serviceName}_throughput`,
-    type: 'throughput',
+    type: "throughput",
     target,
     window,
     description: `${target}% of time should handle >= ${minRequestsPerSecond} req/s over ${window} days`,
     sli: {
       good: `sum(rate(http_requests_total{service="${serviceName}"}[5m])) >= ${minRequestsPerSecond}`,
-      total: '1', // Boolean SLI
+      total: "1", // Boolean SLI
     },
-    alerts: [
-      { burnRate: 6, severity: 'warning', window: '1h' },
-    ],
+    alerts: [{ burnRate: 6, severity: "warning", window: "1h" }],
   };
 }
 
@@ -190,7 +183,7 @@ export function createWorkerSlos(
   return [
     {
       name: `${serviceName}_job_success`,
-      type: 'availability',
+      type: "availability",
       target: targets.availability,
       window: 30,
       description: `${targets.availability}% of jobs should complete successfully`,
@@ -199,13 +192,13 @@ export function createWorkerSlos(
         total: `sum(rate(jobs_processed_total{service="${serviceName}",queue="${queueName}"}[5m]))`,
       },
       alerts: [
-        { burnRate: 14.4, severity: 'critical', window: '1h' },
-        { burnRate: 6, severity: 'warning', window: '6h' },
+        { burnRate: 14.4, severity: "critical", window: "1h" },
+        { burnRate: 6, severity: "warning", window: "6h" },
       ],
     },
     {
       name: `${serviceName}_job_duration`,
-      type: 'latency',
+      type: "latency",
       target: 99,
       window: 30,
       description: `99% of jobs should complete within ${targets.maxDurationMs}ms`,
@@ -213,9 +206,7 @@ export function createWorkerSlos(
         good: `sum(rate(job_duration_seconds_bucket{service="${serviceName}",queue="${queueName}",le="${targets.maxDurationMs / 1000}"}[5m]))`,
         total: `sum(rate(job_duration_seconds_count{service="${serviceName}",queue="${queueName}"}[5m]))`,
       },
-      alerts: [
-        { burnRate: 6, severity: 'warning', window: '6h' },
-      ],
+      alerts: [{ burnRate: 6, severity: "warning", window: "6h" }],
     },
   ];
 }
@@ -248,15 +239,15 @@ export function calculateErrorBudget(
   const consumed = totalBudget - remaining;
   const windowRemaining = (windowDays - elapsedDays) * 24 * 60 * 60;
 
-  let status: ErrorBudget['status'];
+  let status: ErrorBudget["status"];
   if (remaining <= 0) {
-    status = 'exhausted';
+    status = "exhausted";
   } else if (currentBurnRate >= 6) {
-    status = 'critical';
+    status = "critical";
   } else if (currentBurnRate >= 1) {
-    status = 'warning';
+    status = "warning";
   } else {
-    status = 'healthy';
+    status = "healthy";
   }
 
   return {
@@ -301,7 +292,7 @@ export function timeToExhaustion(
  */
 export function generateRecordingRules(slo: SloDefinition): string {
   const rules: string[] = [];
-  const safeName = slo.name.replace(/[^a-zA-Z0-9_]/g, '_');
+  const safeName = slo.name.replace(/[^a-zA-Z0-9_]/g, "_");
 
   // SLI recording rule
   rules.push(`
@@ -313,20 +304,20 @@ export function generateRecordingRules(slo: SloDefinition): string {
 `);
 
   // Error rate recording rules for different windows
-  const windows = ['5m', '30m', '1h', '6h', '1d', '3d'];
+  const windows = ["5m", "30m", "1h", "6h", "1d", "3d"];
   for (const window of windows) {
     rules.push(`
 - record: slo:${safeName}:error_rate:${window}
   expr: |
     1 - (
-      sum(increase(${slo.sli.good.replace('[5m]', `[${window}]`)}))
+      sum(increase(${slo.sli.good.replace("[5m]", `[${window}]`)}))
       /
-      sum(increase(${slo.sli.total.replace('[5m]', `[${window}]`)}))
+      sum(increase(${slo.sli.total.replace("[5m]", `[${window}]`)}))
     )
 `);
   }
 
-  return rules.join('\n');
+  return rules.join("\n");
 }
 
 /**
@@ -334,7 +325,7 @@ export function generateRecordingRules(slo: SloDefinition): string {
  */
 export function generateAlertRules(slo: SloDefinition): string {
   const rules: string[] = [];
-  const safeName = slo.name.replace(/[^a-zA-Z0-9_]/g, '_');
+  const safeName = slo.name.replace(/[^a-zA-Z0-9_]/g, "_");
   const errorBudget = (100 - slo.target) / 100;
 
   for (const alert of slo.alerts || []) {
@@ -356,7 +347,7 @@ export function generateAlertRules(slo: SloDefinition): string {
 `);
   }
 
-  return rules.join('\n');
+  return rules.join("\n");
 }
 
 // =============================================================================
@@ -377,22 +368,24 @@ export function generateSloConfig(
   slos.push(createAvailabilitySlo(serviceName, targets.availability));
 
   // Latency SLO (API and gateway services)
-  if (['api-service', 'gateway-service', 'storage-service', 'ml-service'].includes(archetype)) {
+  if (["api-service", "gateway-service", "storage-service", "ml-service"].includes(archetype)) {
     slos.push(createLatencySlo(serviceName, targets.latency_p99_ms, 99));
     slos.push(createLatencySlo(serviceName, targets.latency_p95_ms, 95));
   }
 
   // Worker-specific SLOs
-  if (archetype === 'worker-service' || archetype === 'data-pipeline') {
-    slos.push(...createWorkerSlos(serviceName, 'default', {
-      availability: targets.availability,
-      maxDurationMs: targets.latency_p99_ms,
-    }));
+  if (archetype === "worker-service" || archetype === "data-pipeline") {
+    slos.push(
+      ...createWorkerSlos(serviceName, "default", {
+        availability: targets.availability,
+        maxDurationMs: targets.latency_p99_ms,
+      })
+    );
   }
 
   // Generate Prometheus rules
-  const recordingRules = slos.map(generateRecordingRules).join('\n');
-  const alertRules = slos.map(generateAlertRules).join('\n');
+  const recordingRules = slos.map(generateRecordingRules).join("\n");
+  const alertRules = slos.map(generateAlertRules).join("\n");
 
   const prometheusRules = `
 groups:

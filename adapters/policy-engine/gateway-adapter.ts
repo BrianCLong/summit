@@ -4,9 +4,9 @@
  * Auto-loaded by gateway from adapters/policy-engine/
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
-const POLICY_ENGINE_URL = process.env.POLICY_ENGINE_URL || 'http://localhost:4040';
+const POLICY_ENGINE_URL = process.env.POLICY_ENGINE_URL || "http://localhost:4040";
 
 // ============================================================================
 // Types
@@ -23,7 +23,7 @@ interface PolicyGuardrailResult {
 
 interface QueryContext {
   queryId: string;
-  operation: 'READ' | 'EXPORT' | 'AGGREGATE' | 'JOIN' | 'DELETE';
+  operation: "READ" | "EXPORT" | "AGGREGATE" | "JOIN" | "DELETE";
   targetDatasets: string[];
   requestedFields?: string[];
   purpose: string;
@@ -52,9 +52,9 @@ export class PolicyEngineAdapter {
   async checkGuardrails(context: QueryContext): Promise<PolicyGuardrailResult> {
     try {
       const response = await fetch(`${this.baseUrl}/gateway/guardrail`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ queryPlan: context }),
       });
@@ -62,14 +62,14 @@ export class PolicyEngineAdapter {
       if (!response.ok) {
         console.error(`[PolicyEngineAdapter] Guardrail check failed: ${response.status}`);
         // Fail open in case of policy engine errors (configurable)
-        return { blocked: false, warnings: ['Policy check unavailable'] };
+        return { blocked: false, warnings: ["Policy check unavailable"] };
       }
 
       return await response.json();
     } catch (error) {
-      console.error('[PolicyEngineAdapter] Error checking guardrails:', error);
+      console.error("[PolicyEngineAdapter] Error checking guardrails:", error);
       // Fail open - don't block if policy engine is down
-      return { blocked: false, warnings: ['Policy engine unreachable'] };
+      return { blocked: false, warnings: ["Policy engine unreachable"] };
     }
   }
 
@@ -80,7 +80,7 @@ export class PolicyEngineAdapter {
     datasetId: string,
     purpose: string,
     requesterId: string,
-    operation: 'READ' | 'EXPORT' | 'AGGREGATE' | 'JOIN' | 'DELETE',
+    operation: "READ" | "EXPORT" | "AGGREGATE" | "JOIN" | "DELETE"
   ): Promise<{
     allowed: boolean;
     decision: string;
@@ -90,9 +90,9 @@ export class PolicyEngineAdapter {
   }> {
     try {
       const response = await fetch(`${this.baseUrl}/license/check`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           datasetId,
@@ -105,16 +105,16 @@ export class PolicyEngineAdapter {
       if (!response.ok) {
         return {
           allowed: false,
-          decision: 'License check service unavailable',
+          decision: "License check service unavailable",
         };
       }
 
       return await response.json();
     } catch (error) {
-      console.error('[PolicyEngineAdapter] Error checking license:', error);
+      console.error("[PolicyEngineAdapter] Error checking license:", error);
       return {
         allowed: false,
-        decision: 'License check failed due to service error',
+        decision: "License check failed due to service error",
       };
     }
   }
@@ -136,9 +136,9 @@ export class PolicyEngineAdapter {
     return {
       errors: [
         {
-          message: result.message || 'Operation blocked by policy',
+          message: result.message || "Operation blocked by policy",
           extensions: {
-            code: 'POLICY_VIOLATION',
+            code: "POLICY_VIOLATION",
             policyViolation: true,
             licenses: result.affectedLicenses,
             overrideWorkflow: result.overrideWorkflow,
@@ -151,10 +151,7 @@ export class PolicyEngineAdapter {
   /**
    * Add policy warnings to response extensions
    */
-  addWarningsToResponse(
-    response: any,
-    warnings: string[],
-  ): any {
+  addWarningsToResponse(response: any, warnings: string[]): any {
     return {
       ...response,
       extensions: {
@@ -174,8 +171,8 @@ export class PolicyEngineAdapter {
  * Auto-registered when gateway loads adapters
  */
 export const gatewayPlugin = {
-  name: 'policy-engine',
-  version: '1.0.0',
+  name: "policy-engine",
+  version: "1.0.0",
 
   /**
    * Called on every request before execution
@@ -192,9 +189,9 @@ export const gatewayPlugin = {
       queryId: `gql_${Date.now()}`,
       operation: mapOperationType(context.operation),
       targetDatasets: extractDatasets(context.operation, context.variables),
-      purpose: context.variables?.purpose || 'investigation',
+      purpose: context.variables?.purpose || "investigation",
       requester: {
-        userId: context.user?.id || 'anonymous',
+        userId: context.user?.id || "anonymous",
         roles: context.user?.roles || [],
         authorityBindingId: context.user?.authorityBindingId,
       },
@@ -229,23 +226,23 @@ export const gatewayPlugin = {
 // Helper Functions
 // ============================================================================
 
-function mapOperationType(operation: string): 'READ' | 'EXPORT' | 'AGGREGATE' | 'JOIN' | 'DELETE' {
+function mapOperationType(operation: string): "READ" | "EXPORT" | "AGGREGATE" | "JOIN" | "DELETE" {
   const lowerOp = operation.toLowerCase();
 
-  if (lowerOp.includes('export') || lowerOp.includes('download')) {
-    return 'EXPORT';
+  if (lowerOp.includes("export") || lowerOp.includes("download")) {
+    return "EXPORT";
   }
-  if (lowerOp.includes('delete') || lowerOp.includes('remove')) {
-    return 'DELETE';
+  if (lowerOp.includes("delete") || lowerOp.includes("remove")) {
+    return "DELETE";
   }
-  if (lowerOp.includes('aggregate') || lowerOp.includes('count') || lowerOp.includes('sum')) {
-    return 'AGGREGATE';
+  if (lowerOp.includes("aggregate") || lowerOp.includes("count") || lowerOp.includes("sum")) {
+    return "AGGREGATE";
   }
-  if (lowerOp.includes('join') || lowerOp.includes('merge')) {
-    return 'JOIN';
+  if (lowerOp.includes("join") || lowerOp.includes("merge")) {
+    return "JOIN";
   }
 
-  return 'READ';
+  return "READ";
 }
 
 function extractDatasets(operation: string, variables: any): string[] {
@@ -270,7 +267,7 @@ function extractDatasets(operation: string, variables: any): string[] {
     }
   }
 
-  return datasets.length > 0 ? datasets : ['default'];
+  return datasets.length > 0 ? datasets : ["default"];
 }
 
 export default PolicyEngineAdapter;

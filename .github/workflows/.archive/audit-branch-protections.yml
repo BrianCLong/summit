@@ -3,11 +3,11 @@ name: Audit Branch Protections
 on:
   pull_request:
     paths:
-      - '.github/CODEOWNERS'
-      - '.github/workflows/**'
-      - 'deploy/terraform/github/**'
-      - '.ci/scripts/export_github_rules.py'
-      - '.ci/policies/**'
+      - ".github/CODEOWNERS"
+      - ".github/workflows/**"
+      - "deploy/terraform/github/**"
+      - ".ci/scripts/export_github_rules.py"
+      - ".ci/policies/**"
 
 permissions:
   contents: read

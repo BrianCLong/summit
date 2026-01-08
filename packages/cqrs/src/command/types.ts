@@ -42,10 +42,7 @@ export type CommandValidator<T = any> = (
 ) => Promise<CommandValidationResult> | CommandValidationResult;
 
 export interface CommandMiddleware {
-  execute: (
-    command: Command,
-    next: () => Promise<CommandResult>
-  ) => Promise<CommandResult>;
+  execute: (command: Command, next: () => Promise<CommandResult>) => Promise<CommandResult>;
 }
 
 export interface CommandHandlerRegistration {

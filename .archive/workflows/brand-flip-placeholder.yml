@@ -13,7 +13,7 @@ on:
       confirm:
         description: Type 'ack' to acknowledge this workflow does NOT flip runtime brand
         required: false
-        default: ''
+        default: ""
   workflow_call:
     inputs:
       target_brand:
@@ -22,7 +22,7 @@ on:
       confirm:
         required: false
         type: string
-        default: ''
+        default: ""
 
 jobs:
   announce:

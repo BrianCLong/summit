@@ -4,14 +4,14 @@ permissions:
   contents: read
 on:
   push:
-    tags: ['v*.*.*']
+    tags: ["v*.*.*"]
 jobs:
   version:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: 'pnpm' }
+        with: { node-version: 20, cache: "pnpm" }
       - run: pnpm install --frozen-lockfile || true
       - name: Version docs from tag
         run: |

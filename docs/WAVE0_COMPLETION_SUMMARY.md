@@ -8,19 +8,21 @@ Wave 0 establishes the foundational governance infrastructure for Summit's strat
 
 ### 1. Strategic Documentation
 
-| Document | Purpose |
-|----------|---------|
+| Document                                   | Purpose                                              |
+| ------------------------------------------ | ---------------------------------------------------- |
 | `docs/STRATEGIC_IMPLEMENTATION_ROADMAP.md` | Master roadmap with all 8 themes and 70+ initiatives |
-| `docs/HUMAN_AI_COLLABORATION.md` | Ownership patterns and collaboration framework |
-| `docs/governance/INTEGRATION_POINTS.md` | Governance hook integration guide |
-| `docs/governance/SERVICE_INVENTORY.md` | Complete service catalog with governance status |
+| `docs/HUMAN_AI_COLLABORATION.md`           | Ownership patterns and collaboration framework       |
+| `docs/governance/INTEGRATION_POINTS.md`    | Governance hook integration guide                    |
+| `docs/governance/SERVICE_INVENTORY.md`     | Complete service catalog with governance status      |
 
 ### 2. New Packages
 
 #### @intelgraph/authority-compiler
+
 Policy compilation and evaluation engine supporting RBAC, ABAC, and license enforcement.
 
 **Key Components:**
+
 - `schema/policy.schema.ts` - Zod schemas for Authority, License, Operation
 - `compiler/policy-compiler.ts` - Compiles policies into evaluation bundles
 - `evaluator/policy-evaluator.ts` - Runtime policy evaluation
@@ -29,36 +31,44 @@ Policy compilation and evaluation engine supporting RBAC, ABAC, and license enfo
 - `service-connectors.ts` - Integration with GraphQL, REST, Copilot, RAG
 
 #### @intelgraph/canonical-entities
+
 Canonical entity type definitions with bitemporal support.
 
 **Key Components:**
+
 - `types.ts` - 8 entity types (Person, Organization, Asset, Location, Event, Document, Claim, Case)
 - `graphql-types.ts` - GraphQL schema definitions
 - Bitemporal fields: validFrom, validTo, observedAt, recordedAt
 - Classification levels: UNCLASSIFIED, CONFIDENTIAL, SECRET, TOP_SECRET
 
 #### @intelgraph/connector-sdk
+
 SDK for building external data source connectors.
 
 **Key Components:**
+
 - `types.ts` - Connector interfaces and result types
 - `base.ts` - BaseConnector abstract class
 - `testing.ts` - MockConnectorTestHarness for testing
 - Rate limiting, retry logic, health checks built-in
 
 #### @intelgraph/prov-ledger-extensions
+
 Extensions for provenance tracking and AI attribution.
 
 **Key Components:**
+
 - `evidence-chain.ts` - Build and verify evidence chains
 - `ai-attribution.ts` - Track AI model usage and costs
 - `citation-tracker.ts` - Manage copilot citations
 - `export-manifest.ts` - Create verifiable export manifests
 
 #### @intelgraph/governance-hooks
+
 Pre-built hooks for service integration.
 
 **Key Components:**
+
 - `graphql-hooks.ts` - Authority, PII, Provenance, Audit hooks
 - `copilot-hooks.ts` - Validation, Citation, Cost control hooks
 - `connector-hooks.ts` - Auth, Rate limit, Provenance hooks
@@ -71,6 +81,7 @@ Pre-built hooks for service integration.
 **Location:** `connectors/registry.json`
 
 13 connectors documented with:
+
 - Authentication methods (API Key, OAuth2, None)
 - Rate limits and quotas
 - Capabilities (search, fetch, batch, stream)
@@ -78,28 +89,29 @@ Pre-built hooks for service integration.
 
 ### 4. Architecture Decision Records
 
-| ADR | Title |
-|-----|-------|
-| ADR-0005 | Canonical Entity Types with Bitemporal Support |
+| ADR      | Title                                             |
+| -------- | ------------------------------------------------- |
+| ADR-0005 | Canonical Entity Types with Bitemporal Support    |
 | ADR-0006 | Authority/License Compiler for Policy Enforcement |
-| ADR-0007 | Evidence-First AI Copilot with Citations |
+| ADR-0007 | Evidence-First AI Copilot with Citations          |
 
 ### 5. Implementation Scripts
 
-| Script | Purpose |
-|--------|---------|
-| `01-validate-golden-path.sh` | Validates make bootstrap/up/smoke |
-| `02-install-packages.sh` | Installs new governance packages |
-| `03-run-health-checks.sh` | Comprehensive health validation |
-| `04-validate-schema.sh` | Validates entity and policy schemas |
-| `05-generate-reports.sh` | Generates completion reports |
-| `run-all.sh` | Executes all Wave 0 tasks |
+| Script                       | Purpose                             |
+| ---------------------------- | ----------------------------------- |
+| `01-validate-golden-path.sh` | Validates make bootstrap/up/smoke   |
+| `02-install-packages.sh`     | Installs new governance packages    |
+| `03-run-health-checks.sh`    | Comprehensive health validation     |
+| `04-validate-schema.sh`      | Validates entity and policy schemas |
+| `05-generate-reports.sh`     | Generates completion reports        |
+| `run-all.sh`                 | Executes all Wave 0 tasks           |
 
 ## Integration Points
 
 ### GraphQL API
+
 ```typescript
-import { createGraphQLGovernanceMiddleware } from '@intelgraph/governance-hooks';
+import { createGraphQLGovernanceMiddleware } from "@intelgraph/governance-hooks";
 
 const middleware = createGraphQLGovernanceMiddleware(config, {
   authorityEvaluator,
@@ -109,8 +121,9 @@ const middleware = createGraphQLGovernanceMiddleware(config, {
 ```
 
 ### Copilot Service
+
 ```typescript
-import { createCopilotGovernanceMiddleware } from '@intelgraph/governance-hooks';
+import { createCopilotGovernanceMiddleware } from "@intelgraph/governance-hooks";
 
 const middleware = createCopilotGovernanceMiddleware(config, {
   costTracker,
@@ -120,8 +133,9 @@ const middleware = createCopilotGovernanceMiddleware(config, {
 ```
 
 ### Connectors
+
 ```typescript
-import { createConnectorGovernanceMiddleware } from '@intelgraph/governance-hooks';
+import { createConnectorGovernanceMiddleware } from "@intelgraph/governance-hooks";
 
 const middleware = createConnectorGovernanceMiddleware(config, {
   authManager,
@@ -133,6 +147,7 @@ const middleware = createConnectorGovernanceMiddleware(config, {
 ## Metrics
 
 OTEL metrics exposed:
+
 - `governance_authority_evaluations_total`
 - `governance_authority_latency_ms`
 - `governance_pii_detections_total`
@@ -162,4 +177,4 @@ OTEL metrics exposed:
 
 ---
 
-*Wave 0 establishes the governance foundation. Wave 1 will activate these controls in production services.*
+_Wave 0 establishes the governance foundation. Wave 1 will activate these controls in production services._

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Box,
   Typography,
@@ -11,11 +11,11 @@ import {
   Card,
   CardContent,
   Grid,
-} from '@mui/material';
-import { MLAPI } from '../../services/api';
+} from "@mui/material";
+import { MLAPI } from "../../services/api";
 
 export default function AISuggestionsPanel() {
-  const [investigationId, setInvestigationId] = useState('');
+  const [investigationId, setInvestigationId] = useState("");
   const [topK, setTopK] = useState(20);
   const [busy, setBusy] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
@@ -38,7 +38,7 @@ export default function AISuggestionsPanel() {
   const runTrain = async () => {
     setTrainBusy(true);
     try {
-      const res = await MLAPI.train({ name: 'baseline-linkpred' });
+      const res = await MLAPI.train({ name: "baseline-linkpred" });
       setLastModel(res);
     } finally {
       setTrainBusy(false);
@@ -70,25 +70,12 @@ export default function AISuggestionsPanel() {
                 onChange={(e) => setTopK(e.target.value)}
               />
             </Grid>
-            <Grid
-              item
-              xs={12}
-              md={6}
-              sx={{ display: 'flex', gap: 1, alignItems: 'center' }}
-            >
-              <Button
-                variant="contained"
-                disabled={!investigationId || busy}
-                onClick={runSuggest}
-              >
-                {busy ? 'Running…' : 'Suggest Links'}
+            <Grid item xs={12} md={6} sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+              <Button variant="contained" disabled={!investigationId || busy} onClick={runSuggest}>
+                {busy ? "Running…" : "Suggest Links"}
               </Button>
-              <Button
-                variant="outlined"
-                onClick={runTrain}
-                disabled={trainBusy}
-              >
-                {trainBusy ? 'Training…' : 'Train Baseline'}
+              <Button variant="outlined" onClick={runTrain} disabled={trainBusy}>
+                {trainBusy ? "Training…" : "Train Baseline"}
               </Button>
               {lastModel && (
                 <Typography variant="body2">

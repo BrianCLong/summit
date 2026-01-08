@@ -1,26 +1,26 @@
 #!/usr/bin/env node
-import fs from 'fs';
-import tar from 'tar-stream';
-import { createGunzip } from 'zlib';
-import { merkleRoot, Manifest, verifyClaim } from './ledger';
+import fs from "fs";
+import tar from "tar-stream";
+import { createGunzip } from "zlib";
+import { merkleRoot, Manifest, verifyClaim } from "./ledger";
 
 async function readManifest(path: string): Promise<Manifest> {
   const extract = tar.extract();
   const gunzip = createGunzip();
   const stream = fs.createReadStream(path);
   return new Promise((resolve, reject) => {
-    let manifest = '';
-    extract.on('entry', (header, streamEntry, next) => {
-      if (header.name === 'manifest.json') {
-        streamEntry.on('data', (d) => (manifest += d.toString()));
-        streamEntry.on('end', () => next());
-        streamEntry.on('error', reject);
+    let manifest = "";
+    extract.on("entry", (header, streamEntry, next) => {
+      if (header.name === "manifest.json") {
+        streamEntry.on("data", (d) => (manifest += d.toString()));
+        streamEntry.on("end", () => next());
+        streamEntry.on("error", reject);
       } else {
         streamEntry.resume();
-        streamEntry.on('end', next);
+        streamEntry.on("end", next);
       }
     });
-    extract.on('finish', () => {
+    extract.on("finish", () => {
       try {
         resolve(JSON.parse(manifest));
       } catch (err) {
@@ -40,7 +40,7 @@ export async function verifyBundle(path: string): Promise<boolean> {
   }
   const computedRoot = merkleRoot(manifest.claims.map((c) => c.hash));
   if (computedRoot !== manifest.merkleRoot) {
-    throw new Error('Merkle root mismatch');
+    throw new Error("Merkle root mismatch");
   }
   return true;
 }
@@ -48,14 +48,14 @@ export async function verifyBundle(path: string): Promise<boolean> {
 async function main() {
   const file = process.argv[2];
   if (!file) {
-    console.error('usage: prov-verify <bundle.tgz>');
+    console.error("usage: prov-verify <bundle.tgz>");
     process.exit(1);
   }
   try {
     await verifyBundle(file);
-    console.log('OK');
+    console.log("OK");
   } catch (err) {
-    console.error('Verification failed:', err);
+    console.error("Verification failed:", err);
     process.exit(1);
   }
 }

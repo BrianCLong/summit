@@ -4,10 +4,10 @@
  * and ViT (Vision Transformer) models for cross-modal OSINT fusion.
  */
 
-import { createHash } from 'crypto';
-import { promises as fs } from 'fs';
-import path from 'path';
-import pino from 'pino';
+import { createHash } from "crypto";
+import { promises as fs } from "fs";
+import path from "path";
+import pino from "pino";
 
 import type {
   ImageEmbedding,
@@ -16,32 +16,32 @@ import type {
   BoundingBox,
   EmbeddingModel,
   ProvenanceInfo,
-} from './types.js';
+} from "./types.js";
 
-const logger = pino({ name: 'clip-pipeline' });
+const logger = pino({ name: "clip-pipeline" });
 
 // CLIP Model Configurations
 const CLIP_MODELS: Record<string, CLIPModelConfig> = {
-  'clip-vit-base-patch32': {
-    name: 'ViT-B/32',
+  "clip-vit-base-patch32": {
+    name: "ViT-B/32",
     dimension: 512,
     patchSize: 32,
     imageSize: 224,
-    endpoint: '/api/v1/clip/embed',
+    endpoint: "/api/v1/clip/embed",
   },
-  'clip-vit-large-patch14': {
-    name: 'ViT-L/14',
+  "clip-vit-large-patch14": {
+    name: "ViT-L/14",
     dimension: 768,
     patchSize: 14,
     imageSize: 224,
-    endpoint: '/api/v1/clip/embed',
+    endpoint: "/api/v1/clip/embed",
   },
-  'openai-clip': {
-    name: 'openai/clip-vit-large-patch14',
+  "openai-clip": {
+    name: "openai/clip-vit-large-patch14",
     dimension: 768,
     patchSize: 14,
     imageSize: 224,
-    endpoint: '/api/v1/clip/embed',
+    endpoint: "/api/v1/clip/embed",
   },
 };
 
@@ -82,8 +82,8 @@ export class CLIPPipeline {
 
   constructor(config: Partial<CLIPPipelineConfig> = {}) {
     this.config = {
-      model: 'clip-vit-large-patch14',
-      visionApiUrl: process.env.VISION_API_URL || 'http://localhost:8080',
+      model: "clip-vit-large-patch14",
+      visionApiUrl: process.env.VISION_API_URL || "http://localhost:8080",
       batchSize: 8,
       maxConcurrency: 4,
       enableObjectDetection: true,
@@ -96,9 +96,9 @@ export class CLIPPipeline {
     };
 
     const modelKey = this.config.model as string;
-    this.modelConfig = CLIP_MODELS[modelKey] || CLIP_MODELS['clip-vit-large-patch14'];
+    this.modelConfig = CLIP_MODELS[modelKey] || CLIP_MODELS["clip-vit-large-patch14"];
 
-    logger.info('CLIP Pipeline initialized', {
+    logger.info("CLIP Pipeline initialized", {
       model: this.config.model,
       dimension: this.modelConfig.dimension,
       visionApiUrl: this.config.visionApiUrl,
@@ -111,7 +111,7 @@ export class CLIPPipeline {
   async embedImage(
     imagePath: string,
     investigationId: string,
-    sourceId?: string,
+    sourceId?: string
   ): Promise<ImageEmbedding> {
     const startTime = Date.now();
     const imageId = sourceId || this.generateImageId(imagePath);
@@ -120,7 +120,7 @@ export class CLIPPipeline {
     if (this.config.cacheEnabled) {
       const cached = await this.getCachedEmbedding(imageId);
       if (cached) {
-        logger.debug('Cache hit for image embedding', { imageId });
+        logger.debug("Cache hit for image embedding", { imageId });
         return cached;
       }
     }
@@ -140,7 +140,7 @@ export class CLIPPipeline {
         vector: result.embedding,
         dimension: this.modelConfig.dimension,
         model: this.config.model,
-        modality: 'image',
+        modality: "image",
         timestamp: new Date(),
         metadata: {
           sourceId: imageId,
@@ -165,7 +165,7 @@ export class CLIPPipeline {
         await this.cacheEmbedding(imageId, embedding);
       }
 
-      logger.info('Image embedding generated', {
+      logger.info("Image embedding generated", {
         imageId,
         dimension: embedding.dimension,
         objectCount: result.objects?.length || 0,
@@ -175,9 +175,9 @@ export class CLIPPipeline {
 
       return embedding;
     } catch (error) {
-      logger.error('Failed to generate image embedding', {
+      logger.error("Failed to generate image embedding", {
         imagePath,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
       });
       throw error;
     }
@@ -186,13 +186,10 @@ export class CLIPPipeline {
   /**
    * Batch process multiple images
    */
-  async embedImageBatch(
-    imagePaths: string[],
-    investigationId: string,
-  ): Promise<ImageEmbedding[]> {
+  async embedImageBatch(imagePaths: string[], investigationId: string): Promise<ImageEmbedding[]> {
     const startTime = Date.now();
 
-    logger.info('Starting batch image embedding', {
+    logger.info("Starting batch image embedding", {
       imageCount: imagePaths.length,
       batchSize: this.config.batchSize,
     });
@@ -210,7 +207,7 @@ export class CLIPPipeline {
         } catch (error) {
           errors.push({
             path: imagePath,
-            error: error instanceof Error ? error.message : 'Unknown error',
+            error: error instanceof Error ? error.message : "Unknown error",
           });
           return null;
         }
@@ -220,7 +217,7 @@ export class CLIPPipeline {
       results.push(...batchResults.filter((r): r is ImageEmbedding => r !== null));
     }
 
-    logger.info('Batch image embedding completed', {
+    logger.info("Batch image embedding completed", {
       totalImages: imagePaths.length,
       successCount: results.length,
       errorCount: errors.length,
@@ -236,7 +233,7 @@ export class CLIPPipeline {
   async embedImageTextPair(
     imagePath: string,
     text: string,
-    investigationId: string,
+    investigationId: string
   ): Promise<{ imageEmbedding: number[]; textEmbedding: number[]; similarity: number }> {
     const startTime = Date.now();
 
@@ -250,7 +247,7 @@ export class CLIPPipeline {
       // Calculate cosine similarity
       const similarity = this.cosineSimilarity(imageEmbedding.embedding, textEmbedding);
 
-      logger.debug('Image-text pair embedded', {
+      logger.debug("Image-text pair embedded", {
         imagePath,
         textLength: text.length,
         similarity,
@@ -263,9 +260,9 @@ export class CLIPPipeline {
         similarity,
       };
     } catch (error) {
-      logger.error('Failed to embed image-text pair', {
+      logger.error("Failed to embed image-text pair", {
         imagePath,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
       });
       throw error;
     }
@@ -278,7 +275,7 @@ export class CLIPPipeline {
     queryEmbedding: number[],
     candidateEmbeddings: ImageEmbedding[],
     topK: number = 10,
-    threshold: number = 0.7,
+    threshold: number = 0.7
   ): Promise<Array<{ embedding: ImageEmbedding; similarity: number }>> {
     const similarities = candidateEmbeddings.map((candidate) => ({
       embedding: candidate,
@@ -299,39 +296,47 @@ export class CLIPPipeline {
 
     // Read image file
     const imageBuffer = await fs.readFile(imagePath);
-    const base64Image = imageBuffer.toString('base64');
+    const base64Image = imageBuffer.toString("base64");
     const mimeType = this.getMimeType(imagePath);
 
     // Prepare requests for parallel processing
     const requests: Promise<any>[] = [];
 
     // CLIP embedding request
-    requests.push(this.callVisionAPI('/api/v1/clip/embed', {
-      image: `data:${mimeType};base64,${base64Image}`,
-      model: this.modelConfig.name,
-    }));
+    requests.push(
+      this.callVisionAPI("/api/v1/clip/embed", {
+        image: `data:${mimeType};base64,${base64Image}`,
+        model: this.modelConfig.name,
+      })
+    );
 
     // Optional object detection
     if (this.config.enableObjectDetection) {
-      requests.push(this.callVisionAPI('/api/v1/detect/objects', {
-        image: `data:${mimeType};base64,${base64Image}`,
-        confidence_threshold: 0.5,
-      }).catch(() => ({ detections: [] })));
+      requests.push(
+        this.callVisionAPI("/api/v1/detect/objects", {
+          image: `data:${mimeType};base64,${base64Image}`,
+          confidence_threshold: 0.5,
+        }).catch(() => ({ detections: [] }))
+      );
     }
 
     // Optional face detection
     if (this.config.enableFaceDetection) {
-      requests.push(this.callVisionAPI('/api/v1/face/detect', {
-        image: `data:${mimeType};base64,${base64Image}`,
-        extract_embeddings: true,
-      }).catch(() => ({ faces: [] })));
+      requests.push(
+        this.callVisionAPI("/api/v1/face/detect", {
+          image: `data:${mimeType};base64,${base64Image}`,
+          extract_embeddings: true,
+        }).catch(() => ({ faces: [] }))
+      );
     }
 
     // Optional OCR
     if (this.config.enableOCR) {
-      requests.push(this.callVisionAPI('/api/v1/ocr/extract', {
-        image: `data:${mimeType};base64,${base64Image}`,
-      }).catch(() => ({ text: '' })));
+      requests.push(
+        this.callVisionAPI("/api/v1/ocr/extract", {
+          image: `data:${mimeType};base64,${base64Image}`,
+        }).catch(() => ({ text: "" }))
+      );
     }
 
     const [clipResult, objectResult, faceResult, ocrResult] = await Promise.all(requests);
@@ -359,7 +364,7 @@ export class CLIPPipeline {
    * Embed text using CLIP text encoder
    */
   private async embedTextWithCLIP(text: string): Promise<number[]> {
-    const response = await this.callVisionAPI('/api/v1/clip/embed-text', {
+    const response = await this.callVisionAPI("/api/v1/clip/embed-text", {
       text,
       model: this.modelConfig.name,
     });
@@ -378,9 +383,9 @@ export class CLIPPipeline {
 
     try {
       const response = await fetch(url, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
         signal: controller.signal,
@@ -406,7 +411,7 @@ export class CLIPPipeline {
     if (response?.data?.[0]?.embedding) {
       return response.data[0].embedding;
     }
-    throw new Error('Invalid CLIP embedding response');
+    throw new Error("Invalid CLIP embedding response");
   }
 
   /**
@@ -456,7 +461,7 @@ export class CLIPPipeline {
       const stats = await fs.stat(imagePath);
 
       if (!stats.isFile()) {
-        throw new Error('Path is not a file');
+        throw new Error("Path is not a file");
       }
 
       // Check file size (max 100MB)
@@ -467,12 +472,12 @@ export class CLIPPipeline {
 
       // Validate extension
       const ext = path.extname(imagePath).toLowerCase();
-      const validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.tiff'];
+      const validExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".tiff"];
       if (!validExtensions.includes(ext)) {
         throw new Error(`Invalid image extension: ${ext}`);
       }
     } catch (error) {
-      if (error instanceof Error && error.message.includes('ENOENT')) {
+      if (error instanceof Error && error.message.includes("ENOENT")) {
         throw new Error(`Image not found: ${imagePath}`);
       }
       throw error;
@@ -503,9 +508,9 @@ export class CLIPPipeline {
    * Generate unique image ID
    */
   private generateImageId(imagePath: string): string {
-    return createHash('sha256')
+    return createHash("sha256")
       .update(imagePath + Date.now())
-      .digest('hex')
+      .digest("hex")
       .slice(0, 16);
   }
 
@@ -517,15 +522,15 @@ export class CLIPPipeline {
 
     // Boost confidence if objects detected
     if (result.objects && result.objects.length > 0) {
-      const avgObjectConf = result.objects.reduce((sum, o) => sum + o.confidence, 0) /
-        result.objects.length;
+      const avgObjectConf =
+        result.objects.reduce((sum, o) => sum + o.confidence, 0) / result.objects.length;
       confidence = Math.max(confidence, avgObjectConf);
     }
 
     // Boost confidence if faces detected
     if (result.faces && result.faces.length > 0) {
-      const avgFaceConf = result.faces.reduce((sum, f) => sum + f.confidence, 0) /
-        result.faces.length;
+      const avgFaceConf =
+        result.faces.reduce((sum, f) => sum + f.confidence, 0) / result.faces.length;
       confidence = Math.max(confidence, avgFaceConf);
     }
 
@@ -537,10 +542,10 @@ export class CLIPPipeline {
    */
   private buildProvenance(startTime: number): ProvenanceInfo {
     return {
-      extractorName: 'CLIPPipeline',
-      extractorVersion: '1.0.0',
+      extractorName: "CLIPPipeline",
+      extractorVersion: "1.0.0",
       modelName: this.modelConfig.name,
-      modelVersion: '1.0',
+      modelVersion: "1.0",
       processingParams: {
         model: this.config.model,
         enableObjectDetection: this.config.enableObjectDetection,
@@ -557,7 +562,7 @@ export class CLIPPipeline {
    */
   private cosineSimilarity(a: number[], b: number[]): number {
     if (a.length !== b.length) {
-      throw new Error('Vectors must have same dimension');
+      throw new Error("Vectors must have same dimension");
     }
 
     let dotProduct = 0;
@@ -580,15 +585,15 @@ export class CLIPPipeline {
   private getMimeType(filePath: string): string {
     const ext = path.extname(filePath).toLowerCase();
     const mimeTypes: Record<string, string> = {
-      '.jpg': 'image/jpeg',
-      '.jpeg': 'image/jpeg',
-      '.png': 'image/png',
-      '.gif': 'image/gif',
-      '.webp': 'image/webp',
-      '.bmp': 'image/bmp',
-      '.tiff': 'image/tiff',
+      ".jpg": "image/jpeg",
+      ".jpeg": "image/jpeg",
+      ".png": "image/png",
+      ".gif": "image/gif",
+      ".webp": "image/webp",
+      ".bmp": "image/bmp",
+      ".tiff": "image/tiff",
     };
-    return mimeTypes[ext] || 'application/octet-stream';
+    return mimeTypes[ext] || "application/octet-stream";
   }
 
   /**
@@ -603,9 +608,9 @@ export class CLIPPipeline {
         await fs.mkdir(path.dirname(cachePath), { recursive: true });
         await fs.writeFile(cachePath, JSON.stringify(embedding));
       } catch (error) {
-        logger.warn('Failed to write cache file', {
+        logger.warn("Failed to write cache file", {
           imageId,
-          error: error instanceof Error ? error.message : 'Unknown',
+          error: error instanceof Error ? error.message : "Unknown",
         });
       }
     }
@@ -623,7 +628,7 @@ export class CLIPPipeline {
     if (this.config.cachePath) {
       try {
         const cachePath = path.join(this.config.cachePath, `${imageId}.json`);
-        const data = await fs.readFile(cachePath, 'utf-8');
+        const data = await fs.readFile(cachePath, "utf-8");
         const embedding = JSON.parse(data) as ImageEmbedding;
         this.cache.set(imageId, embedding);
         return embedding;
@@ -640,7 +645,7 @@ export class CLIPPipeline {
    */
   async clearCache(): Promise<void> {
     this.cache.clear();
-    logger.info('Cache cleared');
+    logger.info("Cache cleared");
   }
 
   /**

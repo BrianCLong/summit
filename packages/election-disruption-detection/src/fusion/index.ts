@@ -1,1 +1,1 @@
-export * from './multi-modal-fusion.js';
+export * from "./multi-modal-fusion.js";

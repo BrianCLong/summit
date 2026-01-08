@@ -12,8 +12,8 @@
 export function createClient(baseUrl) {
   const post = async (path, body) => {
     const res = await fetch(`${baseUrl}${path}`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      method: "POST",
+      headers: { "content-type": "application/json" },
       body: JSON.stringify(body),
     });
     if (!res.ok) throw new Error(`Request failed: ${res.status}`);
@@ -22,11 +22,11 @@ export function createClient(baseUrl) {
 
   return {
     /** @param {Record} data */
-    createClaim: (data) => post('/claims', data),
+    createClaim: (data) => post("/claims", data),
     /** @param {Record} data */
-    createEvidence: (data) => post('/evidence', data),
+    createEvidence: (data) => post("/evidence", data),
     /** @param {Record} data */
-    createTransform: (data) => post('/transform', data),
-    exportManifest: () => post('/export/manifests', {}),
+    createTransform: (data) => post("/transform", data),
+    exportManifest: () => post("/export/manifests", {}),
   };
 }

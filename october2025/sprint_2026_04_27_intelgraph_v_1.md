@@ -106,20 +106,20 @@
 
 ```ts
 // server/src/er/blocking.ts
-import natural from 'natural';
-import { transliterate as tr } from 'transliteration';
+import natural from "natural";
+import { transliterate as tr } from "transliteration";
 export type Keys = { script: string; norm: string; phonetic: string[] };
 export function keys(name: string) {
   const norm = tr(name)
     .toLowerCase()
-    .replace(/[^a-z0-9 ]/g, ' ')
-    .replace(/\s+/g, ' ')
+    .replace(/[^a-z0-9 ]/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
   const script = /[\u0400-\u04FF]/.test(name)
-    ? 'cyrillic'
+    ? "cyrillic"
     : /[\u0600-\u06FF]/.test(name)
-      ? 'arabic'
-      : 'latin';
+      ? "arabic"
+      : "latin";
   const dm = new natural.DoubleMetaphone();
   const codes: string[] = [];
   dm.process(norm, (p1: string, p2: string) => {
@@ -185,10 +185,7 @@ export class UF {
     this.w[pa] += this.w[pb];
   }
 }
-export function cluster(
-  pairs: { a: string; b: string; score: number }[],
-  theta: number,
-) {
+export function cluster(pairs: { a: string; b: string; score: number }[], theta: number) {
   const uf = new UF();
   for (const p of pairs) if (p.score >= theta) uf.u(p.a, p.b, p.score);
   return uf;
@@ -236,12 +233,7 @@ extend type Query {
   erQueue(caseId: ID!, limit: Int = 50): ReviewTask!
 }
 extend type Mutation {
-  erDecision(
-    taskId: ID!
-    pairId: ID!
-    decision: String!
-    reason: String
-  ): ReviewTask!
+  erDecision(taskId: ID!, pairId: ID!, decision: String!, reason: String): ReviewTask!
 }
 ```
 
@@ -250,24 +242,24 @@ extend type Mutation {
 ```js
 // apps/web/src/features/er/jquery-review.js
 $(function () {
-  $(document).on('click', '.approve', function () {
-    submit('approve');
+  $(document).on("click", ".approve", function () {
+    submit("approve");
   });
-  $(document).on('click', '.deny', function () {
-    submit('deny');
+  $(document).on("click", ".deny", function () {
+    submit("deny");
   });
-  $(document).on('keydown', function (e) {
-    if (e.key === 'a') submit('approve');
-    if (e.key === 'd') submit('deny');
+  $(document).on("keydown", function (e) {
+    if (e.key === "a") submit("approve");
+    if (e.key === "d") submit("deny");
   });
   function submit(dec) {
-    const pairId = $('.pair.active').data('id');
+    const pairId = $(".pair.active").data("id");
     $.ajax({
-      url: '/graphql',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/graphql",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({
-        query: `mutation{ erDecision(taskId:"${$('#task').val()}", pairId:"${pairId}", decision:"${dec}") { id } }`,
+        query: `mutation{ erDecision(taskId:"${$("#task").val()}", pairId:"${pairId}", decision:"${dec}") { id } }`,
       }),
     });
   }
@@ -280,17 +272,17 @@ $(function () {
 // server/src/integrity/audit.ts
 export type Violation = {
   entityId: string;
-  kind: 'conflicting_id' | 'license_conflict' | 'attr_inconsistent';
+  kind: "conflicting_id" | "license_conflict" | "attr_inconsistent";
   detail: string;
 };
 export async function audit(driver: any): Promise<Violation[]> {
   const res = await driver.executeQuery(
-    `MATCH (e:Entity) WITH e, size(apoc.coll.toSet(e.identifiers)) AS ids WHERE ids>1 RETURN e.id AS id`,
+    `MATCH (e:Entity) WITH e, size(apoc.coll.toSet(e.identifiers)) AS ids WHERE ids>1 RETURN e.id AS id`
   );
   return res.records.map((r: any) => ({
-    entityId: r.get('id'),
-    kind: 'conflicting_id',
-    detail: 'Multiple identifiers',
+    entityId: r.get("id"),
+    kind: "conflicting_id",
+    detail: "Multiple identifiers",
   }));
 }
 ```
@@ -299,7 +291,7 @@ export async function audit(driver: any): Promise<Violation[]> {
 
 ```ts
 // tools/er-eval/index.ts
-import fs from 'fs';
+import fs from "fs";
 export function evalPairs(pairs: any[]) {
   let tp = 0,
     fp = 0,
@@ -336,16 +328,15 @@ panels:
 ### 4.10 k6 — Blocking + Scoring Load
 
 ```js
-import http from 'k6/http';
-export const options = { vus: 50, duration: '3m' };
+import http from "k6/http";
+export const options = { vus: 50, duration: "3m" };
 export default function () {
   http.post(
-    'http://localhost:4000/graphql',
+    "http://localhost:4000/graphql",
     JSON.stringify({
-      query:
-        'mutation{ erBlockAndScore(caseId:"c1", limit:100){ pairs{ id score } } }',
+      query: 'mutation{ erBlockAndScore(caseId:"c1", limit:100){ pairs{ id score } } }',
     }),
-    { headers: { 'Content-Type': 'application/json' } },
+    { headers: { "Content-Type": "application/json" } }
   );
 }
 ```

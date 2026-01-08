@@ -3,12 +3,12 @@
  * Local simulator backend for development and testing
  */
 
-import { QuantumBackend, QuantumCircuit, SimulationResult, GateType } from '../types';
-import { StatevectorSimulator } from '../simulators/statevector-simulator';
+import { QuantumBackend, QuantumCircuit, SimulationResult, GateType } from "../types";
+import { StatevectorSimulator } from "../simulators/statevector-simulator";
 
 export class LocalBackend implements QuantumBackend {
-  name = 'local-simulator';
-  type: 'simulator' | 'hardware' = 'simulator';
+  name = "local-simulator";
+  type: "simulator" | "hardware" = "simulator";
   maxQubits = 25; // Practical limit for statevector simulation
   supportedGates: GateType[] = [
     GateType.IDENTITY,
@@ -27,7 +27,10 @@ export class LocalBackend implements QuantumBackend {
   ];
 
   private simulator: StatevectorSimulator;
-  private jobs: Map<string, { status: 'queued' | 'running' | 'completed' | 'failed'; result?: SimulationResult }>;
+  private jobs: Map<
+    string,
+    { status: "queued" | "running" | "completed" | "failed"; result?: SimulationResult }
+  >;
 
   constructor() {
     this.simulator = new StatevectorSimulator();
@@ -39,11 +42,13 @@ export class LocalBackend implements QuantumBackend {
 
     // Validate circuit
     if (circuit.numQubits > this.maxQubits) {
-      throw new Error(`Circuit requires ${circuit.numQubits} qubits, but backend supports max ${this.maxQubits}`);
+      throw new Error(
+        `Circuit requires ${circuit.numQubits} qubits, but backend supports max ${this.maxQubits}`
+      );
     }
 
     // Queue job
-    this.jobs.set(jobId, { status: 'queued' });
+    this.jobs.set(jobId, { status: "queued" });
 
     // Run simulation asynchronously
     this.runSimulation(jobId, circuit);
@@ -58,14 +63,14 @@ export class LocalBackend implements QuantumBackend {
       throw new Error(`Job ${jobId} not found`);
     }
 
-    if (job.status !== 'completed') {
+    if (job.status !== "completed") {
       throw new Error(`Job ${jobId} has not completed (status: ${job.status})`);
     }
 
     return job.result!;
   }
 
-  async getStatus(jobId: string): Promise<'queued' | 'running' | 'completed' | 'failed'> {
+  async getStatus(jobId: string): Promise<"queued" | "running" | "completed" | "failed"> {
     const job = this.jobs.get(jobId);
 
     if (!job) {
@@ -79,14 +84,14 @@ export class LocalBackend implements QuantumBackend {
     const job = this.jobs.get(jobId)!;
 
     try {
-      job.status = 'running';
+      job.status = "running";
 
       const result = await this.simulator.simulate(circuit, 1024);
 
-      job.status = 'completed';
+      job.status = "completed";
       job.result = result;
     } catch (error) {
-      job.status = 'failed';
+      job.status = "failed";
       console.error(`Job ${jobId} failed:`, error);
     }
   }

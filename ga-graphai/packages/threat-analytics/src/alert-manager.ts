@@ -1,4 +1,4 @@
-import type { ThreatAlert, ThreatIntelIndicator, ThreatSeverity } from './types';
+import type { ThreatAlert, ThreatIntelIndicator, ThreatSeverity } from "./types";
 
 interface AlertInput {
   entityId: string;
@@ -7,10 +7,10 @@ interface AlertInput {
   severity: ThreatSeverity;
   score: number;
   indicators: ThreatIntelIndicator[];
-  patternMatches: ThreatAlert['patternMatches'];
-  behavior?: ThreatAlert['behavior'];
-  temporal?: ThreatAlert['temporal'];
-  triage: ThreatAlert['triage'];
+  patternMatches: ThreatAlert["patternMatches"];
+  behavior?: ThreatAlert["behavior"];
+  temporal?: ThreatAlert["temporal"];
+  triage: ThreatAlert["triage"];
   ruleIds?: string[];
 }
 
@@ -48,19 +48,24 @@ export class AlertManager {
     return Array.from(this.activeAlerts.values());
   }
 
-  private escalateSeverity(current: ThreatSeverity | undefined, incoming: ThreatSeverity): ThreatSeverity {
-    const order: ThreatSeverity[] = ['info', 'low', 'medium', 'high', 'critical'];
+  private escalateSeverity(
+    current: ThreatSeverity | undefined,
+    incoming: ThreatSeverity
+  ): ThreatSeverity {
+    const order: ThreatSeverity[] = ["info", "low", "medium", "high", "critical"];
     if (!current) return incoming;
     return order[Math.max(order.indexOf(current), order.indexOf(incoming))];
   }
 
   private mergeIndicators(
     existing: ThreatIntelIndicator[],
-    incoming: ThreatIntelIndicator[],
+    incoming: ThreatIntelIndicator[]
   ): ThreatIntelIndicator[] {
     const combined = [...existing];
     for (const indicator of incoming) {
-      if (!combined.find((item) => item.value === indicator.value && item.type === indicator.type)) {
+      if (
+        !combined.find((item) => item.value === indicator.value && item.type === indicator.type)
+      ) {
         combined.push(indicator);
       }
     }

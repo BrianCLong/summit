@@ -7,22 +7,22 @@ API for pre-join risk evaluation and guardrail recommendations.
 ## Usage
 
 ```ts
-import { assessJoin } from '@intelgraph/djce-pb';
+import { assessJoin } from "@intelgraph/djce-pb";
 
 const left = {
-  name: 'marketing',
+  name: "marketing",
   records: [
-    ['alice', '1985', 'denver'],
-    ['bob', '1976', 'denver']
-  ]
+    ["alice", "1985", "denver"],
+    ["bob", "1976", "denver"],
+  ],
 };
 
 const right = {
-  name: 'crm',
+  name: "crm",
   records: [
-    ['alice', '1985', 'denver'],
-    ['dave', '1990', 'boston']
-  ]
+    ["alice", "1985", "denver"],
+    ["dave", "1990", "boston"],
+  ],
 };
 
 const report = assessJoin(left, right);

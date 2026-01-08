@@ -301,24 +301,24 @@ jobs:
 **Load (k6)**:
 
 ```js
-import http from 'k6/http';
-import { check } from 'k6';
-export const options = { vus: 50, duration: '3m' };
+import http from "k6/http";
+import { check } from "k6";
+export const options = { vus: 50, duration: "3m" };
 export default function () {
   const res = http.post(
     __ENV.GRAPHQL_URL,
     JSON.stringify({
-      query: 'query($t:ID!){ tenantCoherence(tenantId:$t){ score status }}',
-      variables: { t: 'tenant-123' },
+      query: "query($t:ID!){ tenantCoherence(tenantId:$t){ score status }}",
+      variables: { t: "tenant-123" },
     }),
     {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${__ENV.JWT}`,
       },
-    },
+    }
   );
-  check(res, { 'status 200': (r) => r.status === 200 });
+  check(res, { "status 200": (r) => r.status === 200 });
 }
 ```
 
@@ -428,22 +428,22 @@ export function computeScore(values: Array<{ v: number; w?: number }>): number {
 **`graphql/resolvers.ts` (excerpt)**
 
 ```ts
-import { neo } from '../db/neo4j';
-import { pg } from '../db/pg';
-import { getUser } from '../auth/context';
+import { neo } from "../db/neo4j";
+import { pg } from "../db/pg";
+import { getUser } from "../auth/context";
 export const resolvers = {
   Query: {
     async tenantCoherence(_: any, { tenantId }: any, ctx: any) {
       const user = getUser(ctx);
-      ctx.opa.enforce('coherence:read', { tenantId, user });
+      ctx.opa.enforce("coherence:read", { tenantId, user });
       const row = await pg.oneOrNone(
-        'SELECT score, status, updated_at FROM coherence_scores WHERE tenant_id=$1',
-        [tenantId],
+        "SELECT score, status, updated_at FROM coherence_scores WHERE tenant_id=$1",
+        [tenantId]
       );
       return {
         tenantId,
         score: row?.score ?? 0,
-        status: row?.status ?? 'UNKNOWN',
+        status: row?.status ?? "UNKNOWN",
         updatedAt: row?.updated_at ?? new Date().toISOString(),
       };
     },
@@ -461,7 +461,7 @@ export const resolvers = {
           weight,
           source,
           ts: ts || new Date().toISOString(),
-        },
+        }
       );
       return true;
     },
@@ -472,15 +472,13 @@ export const resolvers = {
 **k6 parser (`.maestro/scripts/parse-k6.js`)**
 
 ```js
-const fs = require('fs');
-const summary = JSON.parse(fs.readFileSync('summary.json', 'utf8'));
-const p95 = summary.metrics['http_req_duration'].percentiles['p(95)'];
+const fs = require("fs");
+const summary = JSON.parse(fs.readFileSync("summary.json", "utf8"));
+const p95 = summary.metrics["http_req_duration"].percentiles["p(95)"];
 const err =
-  ((summary.metrics.http_req_failed?.passes || 0) /
-    (summary.metrics.http_reqs.count || 1)) *
-  100;
-const p95Budget = Number(process.argv[process.argv.indexOf('--p95') + 1]);
-const errBudget = Number(process.argv[process.argv.indexOf('--errorRate') + 1]);
+  ((summary.metrics.http_req_failed?.passes || 0) / (summary.metrics.http_reqs.count || 1)) * 100;
+const p95Budget = Number(process.argv[process.argv.indexOf("--p95") + 1]);
+const errBudget = Number(process.argv[process.argv.indexOf("--errorRate") + 1]);
 if (p95 > p95Budget) {
   console.error(`FAIL p95 ${p95}ms > ${p95Budget}ms`);
   process.exit(1);
@@ -489,7 +487,7 @@ if (err > errBudget) {
   console.error(`FAIL error ${err}% > ${errBudget}%`);
   process.exit(1);
 }
-console.log('SLO OK');
+console.log("SLO OK");
 ```
 
 ---
@@ -536,9 +534,9 @@ npm i -D @types/ioredis
 **`server/src/subscriptions/pubsub.ts`**
 
 ```ts
-import { PubSub } from 'graphql-subscriptions';
-import { RedisPubSub } from 'graphql-redis-subscriptions';
-import Redis from 'ioredis';
+import { PubSub } from "graphql-subscriptions";
+import { RedisPubSub } from "graphql-redis-subscriptions";
+import Redis from "ioredis";
 
 export function makePubSub() {
   const url = process.env.REDIS_URL;
@@ -566,15 +564,14 @@ Wire it in your resolvers initialization and use a 100 ms coalescing window to
 **`server/src/middleware/persisted.ts`**
 
 ```ts
-import { createHash } from 'crypto';
-import allowlist from '../../.maestro/persisted-queries.json';
+import { createHash } from "crypto";
+import allowlist from "../../.maestro/persisted-queries.json";
 export function enforcePersisted(req: any, res: any, next: any) {
   const { query, extensions } = req.body || {};
   const hash =
     extensions?.persistedQuery?.sha256Hash ||
-    (query && createHash('sha256').update(query).digest('hex'));
-  if (!hash || !(allowlist as any)[hash])
-    return res.status(400).json({ error: 'Unknown query' });
+    (query && createHash("sha256").update(query).digest("hex"));
+  if (!hash || !(allowlist as any)[hash]) return res.status(400).json({ error: "Unknown query" });
   req.body.query = (allowlist as any)[hash];
   next();
 }
@@ -615,12 +612,12 @@ opa test policy -v
 **`server/src/metrics.ts`**
 
 ```ts
-import client from 'prom-client';
+import client from "prom-client";
 export const registry = new client.Registry();
 client.collectDefaultMetrics({ register: registry });
 export const gqlDuration = new client.Histogram({
-  name: 'graphql_request_duration_seconds',
-  help: 'GraphQL duration',
+  name: "graphql_request_duration_seconds",
+  help: "GraphQL duration",
   buckets: [0.05, 0.1, 0.2, 0.35, 0.7, 1, 1.5, 3],
 });
 registry.registerMetric(gqlDuration);
@@ -725,13 +722,13 @@ featureFlags:
     coherence: true
 replicaCount: 3
 resources:
-  requests: { cpu: '200m', memory: '256Mi' }
-  limits: { cpu: '1', memory: '1Gi' }
+  requests: { cpu: "200m", memory: "256Mi" }
+  limits: { cpu: "1", memory: "1Gi" }
 env:
-  REDIS_URL: 'redis://redis:6379'
-  CONDUCTOR_RPS_MAX: '1000'
-  NODE_ENV: 'production'
-  ENABLE_PLAYGROUND: 'false'
+  REDIS_URL: "redis://redis:6379"
+  CONDUCTOR_RPS_MAX: "1000"
+  NODE_ENV: "production"
+  ENABLE_PLAYGROUND: "false"
 service:
   port: 4000
 ```
@@ -748,8 +745,7 @@ spec:
   maxReplicas: 10
   metrics:
     - type: Resource
-      resource:
-        { name: cpu, target: { type: Utilization, averageUtilization: 70 } }
+      resource: { name: cpu, target: { type: Utilization, averageUtilization: 70 } }
 ---
 apiVersion: policy/v1
 kind: PodDisruptionBudget
@@ -773,19 +769,19 @@ spec:
           expr: histogram_quantile(0.95, sum(rate(graphql_request_duration_seconds_bucket{op="query"}[5m])) by (le)) > 0.35
           for: 10m
           labels: { severity: warning }
-          annotations: { summary: 'GraphQL read p95 > 350ms' }
+          annotations: { summary: "GraphQL read p95 > 350ms" }
         - alert: GraphQLErrorRateHigh
           expr: sum(rate(graphql_requests_total{status=~"5.."}[5m])) / sum(rate(graphql_requests_total[5m])) > 0.001
           for: 10m
           labels: { severity: critical }
-          annotations: { summary: 'GraphQL error rate > 0.1%' }
+          annotations: { summary: "GraphQL error rate > 0.1%" }
     - name: subscriptions
       rules:
         - alert: SubFanoutLatencyHigh
           expr: histogram_quantile(0.95, sum(rate(subscription_fanout_latency_ms_bucket[5m])) by (le)) > 250
           for: 10m
           labels: { severity: warning }
-          annotations: { summary: 'Subscription fan‑out p95 > 250ms' }
+          annotations: { summary: "Subscription fan‑out p95 > 250ms" }
 ```
 
 ## Grafana Dashboard (excerpt)
@@ -832,7 +828,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata: { name: prune-signals-365d }
 spec:
-  schedule: '37 3 * * *'
+  schedule: "37 3 * * *"
   jobTemplate:
     spec:
       template:
@@ -841,11 +837,8 @@ spec:
             - name: prune
               image: node:20-alpine
               env:
-                - {
-                    name: NEO4J_URI,
-                    valueFrom: { secretKeyRef: { name: neo4j, key: uri } },
-                  }
-              command: ['node', 'scripts/prune-signals.js']
+                - { name: NEO4J_URI, valueFrom: { secretKeyRef: { name: neo4j, key: uri } } }
+              command: ["node", "scripts/prune-signals.js"]
           restartPolicy: OnFailure
 ```
 

@@ -1,7 +1,7 @@
 meta:
   id: plan.dx-feedback@v1
-  owner: 'platform-engineering'
-  purpose: 'Capture developer feedback to continuously improve tooling and workflows'
+  owner: "platform-engineering"
+  purpose: "Capture developer feedback to continuously improve tooling and workflows"
   tags:
     - dx
     - feedback
@@ -9,13 +9,13 @@ meta:
     - tooling
     - surveys
   guardrails:
-    - 'Feedback must be actionable'
-    - 'Developer time must be respected'
-    - 'Responses must remain anonymous if desired'
-    - 'Insights must drive actual improvements'
+    - "Feedback must be actionable"
+    - "Developer time must be respected"
+    - "Responses must remain anonymous if desired"
+    - "Insights must drive actual improvements"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -279,15 +279,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'dx-feedback-system'
+  - name: "dx-feedback-system"
     inputs:
-      team_size: '25 developers across 5 teams'
-      current_pain_points: 'Slow CI, outdated docs, complex setup'
-      feedback_channels: 'Slack, ad-hoc conversations'
-      improvement_areas: 'Build times, onboarding, documentation'
-      existing_tooling: 'GitHub, Slack, internal wiki'
+      team_size: "25 developers across 5 teams"
+      current_pain_points: "Slow CI, outdated docs, complex setup"
+      feedback_channels: "Slack, ad-hoc conversations"
+      improvement_areas: "Build times, onboarding, documentation"
+      existing_tooling: "GitHub, Slack, internal wiki"
     expected_contains:
-      - 'Feedback Collector'
-      - 'Survey Templates'
-      - 'Insights Dashboard'
-      - 'Action Tracking'
+      - "Feedback Collector"
+      - "Survey Templates"
+      - "Insights Dashboard"
+      - "Action Tracking"

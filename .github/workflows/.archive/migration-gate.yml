@@ -3,24 +3,24 @@ name: migration-gate
 on:
   pull_request:
     paths:
-      - 'migrations/**'
-      - 'services/**/db/**'
-      - 'apps/**/db/**'
-      - 'packages/**/db/**'
-      - 'apps/**/models/**'
-      - 'services/**/models/**'
-      - '.ci/policies/**'
+      - "migrations/**"
+      - "services/**/db/**"
+      - "apps/**/db/**"
+      - "packages/**/db/**"
+      - "apps/**/models/**"
+      - "services/**/models/**"
+      - ".ci/policies/**"
   push:
     branches:
       - main
     paths:
-      - 'migrations/**'
-      - 'services/**/db/**'
-      - 'apps/**/db/**'
-      - 'packages/**/db/**'
-      - 'apps/**/models/**'
-      - 'services/**/models/**'
-      - '.ci/policies/**'
+      - "migrations/**"
+      - "services/**/db/**"
+      - "apps/**/db/**"
+      - "packages/**/db/**"
+      - "apps/**/models/**"
+      - "services/**/models/**"
+      - ".ci/policies/**"
 
 concurrency:
   group: migration-gate-${{ github.event.pull_request.number || github.sha }}
@@ -45,13 +45,13 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install toolchain
         run: |

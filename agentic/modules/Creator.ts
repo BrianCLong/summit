@@ -4,31 +4,31 @@
  * Manifests file structures and features from pure intent.
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from "fs";
+import * as path from "path";
 
 export class Creator {
   constructor() {
-    console.log('⚡ TIER-10: Creator Module Initialized');
+    console.log("⚡ TIER-10: Creator Module Initialized");
   }
 
   public manifest(intent: string, destination: string) {
     console.log(`⚡ Manifesting intent: "${intent}" into ${destination}`);
 
-    if (intent.includes('service')) {
+    if (intent.includes("service")) {
       this.createServiceScaffold(destination);
     } else {
-      console.log('⚡ Intent unclear. Manifesting generic structure.');
+      console.log("⚡ Intent unclear. Manifesting generic structure.");
       this.createGenericFile(destination);
     }
   }
 
   private createServiceScaffold(dest: string) {
     const files = {
-      'index.ts': 'export * from "./service";',
-      'service.ts': 'export class Service { /* Logic */ }',
-      'types.ts': 'export interface Config {}',
-      'test.ts': 'describe("Service", () => { /* Tests */ });'
+      "index.ts": 'export * from "./service";',
+      "service.ts": "export class Service { /* Logic */ }",
+      "types.ts": "export interface Config {}",
+      "test.ts": 'describe("Service", () => { /* Tests */ });',
     };
 
     // Simulation of file creation

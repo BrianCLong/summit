@@ -11,6 +11,7 @@ python connector.py
 ```
 
 Expected output:
+
 ```
 === CSV Connector Info ===
 {
@@ -38,6 +39,7 @@ Duration: 0.05s
 ```
 
 ✅ **Acceptance Met:**
+
 - CSV→entities in **< 10 minutes** (actually < 1 second!)
 - PII flags **visible** in output
 - Blocked fields would show license reason if present
@@ -51,6 +53,7 @@ python wizard.py
 ```
 
 The wizard will:
+
 1. Show available connectors (CSV, RSS, STIX/TAXII)
 2. Let you select one
 3. Validate the manifest
@@ -76,22 +79,26 @@ python -m pytest __tests__/test_stix_parsing.py -v
 ### CSV Connector Features
 
 ✅ **Rate Limiting**
+
 - 10,000 requests/hour
 - Burst limit: 100
 - Exponential backoff
 
 ✅ **PII Detection**
+
 - Names (severity: medium, policy: prompt)
 - Emails (severity: high, policy: redact)
 - Phones (severity: high, policy: redact)
 - SSN (severity: critical, policy: block)
 
 ✅ **License Enforcement**
+
 - Credit card fields blocked (PCI-DSS compliance)
 - Shows reason: "Payment card data prohibited"
 - Suggests alternative: "Use tokenized payment references"
 
 ✅ **Lineage Tracking**
+
 - Automatic provenance receipts
 - Immutable TX IDs
 - Full metadata trail
@@ -99,16 +106,19 @@ python -m pytest __tests__/test_stix_parsing.py -v
 ### RSS Connector Features
 
 ✅ **Feed Management**
+
 - 60 requests/hour rate limit
 - 24-hour deduplication window
 - Full-text extraction with NLP
 
 ✅ **PII Handling**
+
 - Author names flagged
 - Quoted individuals detected
 - Configurable policies
 
 ✅ **Preconfigured Feeds**
+
 - Krebs on Security
 - SANS ISC
 - Threatpost
@@ -118,16 +128,19 @@ python -m pytest __tests__/test_stix_parsing.py -v
 ### STIX/TAXII Connector Features
 
 ✅ **Threat Intelligence**
+
 - STIX 2.1 compliant
 - Conservative rate limiting (2 req/min)
 - TLP marking support
 
 ✅ **Security Controls**
+
 - Malware payloads blocked
 - Binary artifacts filtered
 - Hash-based alternatives suggested
 
 ✅ **Supported Objects**
+
 - Indicators
 - Malware
 - Threat Actors
@@ -287,22 +300,26 @@ Lineage: 3 records
 ## Validation Checklist
 
 ✅ Map CSV→entities in ≤10 min
+
 - Actual: < 1 second for sample data
 - Tested with 100+ records: < 10 seconds
 - Large files (1000+ records): < 1 minute
 
 ✅ PII flags visible
+
 - Console output shows all PII fields
 - Wizard displays with color coding
 - Severity levels indicated
 - User prompted for decisions
 
 ✅ Blocked fields show license reason
+
 - Credit card field shows: "Payment card data prohibited by PCI-DSS compliance"
 - Alternative suggested: "Use tokenized payment references instead"
 - License violations logged and reported
 
 ✅ Lineage recorded
+
 - Every record gets provenance receipt
 - Stored in immutable ledger
 - TX ID: `tx_abc123...`
@@ -311,6 +328,7 @@ Lineage: 3 records
 ## Next Steps
 
 1. **Add your own data source:**
+
    ```bash
    cd connectors/csv_connector
    python connector.py --file /path/to/your/data.csv

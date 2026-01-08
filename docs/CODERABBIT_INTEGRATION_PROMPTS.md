@@ -16,6 +16,7 @@ Use these templates as starting points and adjust scope, file paths, or telemetr
 ## Phase 1 — API & Webhook Integration
 
 ### Prompt: Build CodeRabbit Connector Service
+
 - **Purpose**: Scaffold a `coderabbit-connector` Nest.js service that exchanges PR metadata and review artifacts between Summit’s GitHub org and CodeRabbit’s API.
 - **Context payload**:
   - `docs/CONNECTORS.md`
@@ -32,6 +33,7 @@ Use these templates as starting points and adjust scope, file paths, or telemetr
   - “Draft Terraform secrets for CodeRabbit API tokens.”
 
 ### Prompt: Webhook Listener Lambda
+
 - **Purpose**: Provision AWS Lambda (Python) that ingests CodeRabbit webhook events and publishes them to Summit EventBridge bus.
 - **Context payload**:
   - `infrastructure/aws/lambda-template`
@@ -50,6 +52,7 @@ Use these templates as starting points and adjust scope, file paths, or telemetr
 ## Phase 2 — Workflow & Pipeline Automation
 
 ### Prompt: Maestro Conductor Gate Plugin
+
 - **Purpose**: Create a Maestro Conductor plugin that triggers CodeRabbit reviews as a pre-merge gate when PRs target protected branches.
 - **Context payload**:
   - `ga-graphai/packages/maestro-conductor`
@@ -64,6 +67,7 @@ Use these templates as starting points and adjust scope, file paths, or telemetr
   - “Wire plugin into `maestro.conductor.yaml` default pipeline.”
 
 ### Prompt: Risk Graph Enrichment Job
+
 - **Purpose**: Extend IntelGraph job that enriches risk scores with incoming CodeRabbit findings.
 - **Context payload**:
   - `server/src/jobs/risk`
@@ -82,6 +86,7 @@ Use these templates as starting points and adjust scope, file paths, or telemetr
 ## Phase 3 — UX & Developer Tools Integration
 
 ### Prompt: Code Review Command Center UI
+
 - **Purpose**: Design React dashboard module showing CodeRabbit summaries, inline threads, and Maestro pipeline state.
 - **Context payload**:
   - `client/src/features/reviews`
@@ -96,6 +101,7 @@ Use these templates as starting points and adjust scope, file paths, or telemetr
   - “Implement keyboard shortcuts for triaging review findings.”
 
 ### Prompt: IDE Extension Data Bridge
+
 - **Purpose**: Implement shared SDK that surfaces Summit context (risk score, ownership) inside VS Code, Cursor, and Windsurf plugins.
 - **Context payload**:
   - `tools/ide-extensions`
@@ -114,6 +120,7 @@ Use these templates as starting points and adjust scope, file paths, or telemetr
 ## Phase 4 — Autofix & Issue Management
 
 ### Prompt: Autofix PR Orchestrator
+
 - **Purpose**: Connect CodeRabbit autofix suggestions to Maestro Conductor’s branch automation for gated merges.
 - **Context payload**:
   - `ga-graphai/packages/maestro-conductor`
@@ -128,6 +135,7 @@ Use these templates as starting points and adjust scope, file paths, or telemetr
   - “Enable human approval checkpoint before merge.”
 
 ### Prompt: Issue Synchronization Ruleset
+
 - **Purpose**: Automate creation and linking of Jira/Linear tickets based on CodeRabbit review outcomes.
 - **Context payload**:
   - `server/src/modules/integrations/jira`
@@ -146,6 +154,7 @@ Use these templates as starting points and adjust scope, file paths, or telemetr
 ## Phase 5 — Quality Control & Reporting
 
 ### Prompt: Code Quality Gate Enforcement
+
 - **Purpose**: Enforce Summit CI to fail on CodeRabbit critical findings, surfacing actionable diagnostics.
 - **Context payload**:
   - `ci/pipelines`
@@ -160,6 +169,7 @@ Use these templates as starting points and adjust scope, file paths, or telemetr
   - “Add Slack alerting for blocked merges including owner mentions.”
 
 ### Prompt: Executive Analytics Dashboard
+
 - **Purpose**: Extend Grafana/Looker dashboards with CodeRabbit coverage, MTTR, and adoption KPIs.
 - **Context payload**:
   - `observability/grafana`
@@ -178,6 +188,7 @@ Use these templates as starting points and adjust scope, file paths, or telemetr
 ## Phase 6 — Security & Compliance Alignment
 
 ### Prompt: Joint Security Control Matrix
+
 - **Purpose**: Map CodeRabbit SOC2/GDPR controls into Summit GRC inventory for auditors.
 - **Context payload**:
   - `compliance/soc2`
@@ -192,6 +203,7 @@ Use these templates as starting points and adjust scope, file paths, or telemetr
   - “Schedule tabletop exercise around CodeRabbit data handling.”
 
 ### Prompt: Audit Logging Enhancements
+
 - **Purpose**: Ensure CodeRabbit interactions are captured in Summit’s unified audit trail.
 - **Context payload**:
   - `server/src/modules/audit`

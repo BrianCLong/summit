@@ -22,7 +22,7 @@ export class ResumeParser {
   }
 
   private extractName(text: string): string | undefined {
-    const lines = text.split('\n');
+    const lines = text.split("\n");
     return lines[0]?.trim();
   }
 

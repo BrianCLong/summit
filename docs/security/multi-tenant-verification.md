@@ -1,6 +1,7 @@
 # Multi-Tenant Isolation Verification Policy
 
 ## Overview
+
 This document outlines the policies and mechanisms for ensuring tenant isolation within the IntelGraph platform. All data access must be strictly scoped to the authenticated tenant.
 
 ## Policy Rules
@@ -28,7 +29,9 @@ This document outlines the policies and mechanisms for ensuring tenant isolation
     - Explicitly passing `tenantId` as a URL parameter or body field is forbidden unless validated against the authenticated user's token.
 
 ## Sensitive Domains
+
 The following domains are considered strictly tenant-scoped:
+
 - **Identity**: Users, Roles, Permissions
 - **Audit**: Audit Logs, Activity History
 - **Operations**: Runs, Pipelines, Executors, Jobs
@@ -36,6 +39,7 @@ The following domains are considered strictly tenant-scoped:
 - **Billing**: Subscriptions, Invoices, Usage Data
 
 ## Global Data (Exemptions)
+
 - `system_config`
 - `feature_flags` (global definitions)
 - `public_datasets`
@@ -43,16 +47,21 @@ The following domains are considered strictly tenant-scoped:
 ## Verification Tooling
 
 ### Static Analysis
+
 A static analysis tool (`scripts/security/scan-tenant-isolation.ts`) scans the codebase for:
+
 - SQL queries missing `tenant_id`.
 - Cypher queries missing `tenantId`.
 - GraphQL resolvers missing `withTenant`.
 
 ### Dynamic Verification
+
 A dynamic verifier (`scripts/security/verify-tenant-isolation.ts`) runs during CI to:
+
 - Seed multi-tenant data.
 - Attempt cross-tenant access.
 - Verify isolation enforcement.
 
 ## Compliance
+
 New features must include tenant isolation tests. Violations detected by the scanner must be resolved before merging.

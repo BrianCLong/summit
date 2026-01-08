@@ -10,22 +10,22 @@ Chaos Mesh experiments targeting the Node.js backend, Python analytics API, and 
 
 ## Service Level Objectives
 
-| SLO | Target | Threshold | Notes |
-| --- | --- | --- | --- |
-| Node.js backend recovery | 99% of experiments recover < 60s | 60 seconds | Derived from `chaos_recovery_time_node_seconds` histogram. |
-| Node.js backend error rate | Error rate ≤ 0.5% during chaos | 0.005 | Based on `rate(http_requests_total{service="intelgraph",status=~"5.."}[1m])`. |
-| Python API recovery | 95% recover < 90s | 90 seconds | Measured via `chaos_recovery_time_python_seconds`. |
-| Python API error rate | Error rate ≤ 1.5% during chaos | 0.015 | Uses `http_requests_total{service="analytics-api"}` ratios. |
-| PostgreSQL failover recovery | 99% recover < 120s | 120 seconds | Leveraging `chaos_recovery_time_postgres_seconds`. |
-| PostgreSQL error rate | Error rate ≤ 1% during failover | 0.01 | From `rate(sql_error_total{cluster="postgres"}[1m])`. |
+| SLO                          | Target                           | Threshold   | Notes                                                                         |
+| ---------------------------- | -------------------------------- | ----------- | ----------------------------------------------------------------------------- |
+| Node.js backend recovery     | 99% of experiments recover < 60s | 60 seconds  | Derived from `chaos_recovery_time_node_seconds` histogram.                    |
+| Node.js backend error rate   | Error rate ≤ 0.5% during chaos   | 0.005       | Based on `rate(http_requests_total{service="intelgraph",status=~"5.."}[1m])`. |
+| Python API recovery          | 95% recover < 90s                | 90 seconds  | Measured via `chaos_recovery_time_python_seconds`.                            |
+| Python API error rate        | Error rate ≤ 1.5% during chaos   | 0.015       | Uses `http_requests_total{service="analytics-api"}` ratios.                   |
+| PostgreSQL failover recovery | 99% recover < 120s               | 120 seconds | Leveraging `chaos_recovery_time_postgres_seconds`.                            |
+| PostgreSQL error rate        | Error rate ≤ 1% during failover  | 0.01        | From `rate(sql_error_total{cluster="postgres"}[1m])`.                         |
 
 ## Experiment Results
 
-| Experiment | Injected Fault | Peak Error Rate | Recovery Time | SLO Status |
-| --- | --- | --- | --- | --- |
-| Node.js pod kill | Terminated one backend pod for 5m | 0.32% | 44s | ✅ Met (error budget consumed 3.6%). |
-| Python latency | +200ms latency for 10m | 1.1% | 78s | ✅ Met (retry storm avoided). |
-| PostgreSQL primary failure | Marked primary as failed for 15m | 0.7% | 104s | ✅ Met (replica promoted in 62s; app stabilized by 104s). |
+| Experiment                 | Injected Fault                    | Peak Error Rate | Recovery Time | SLO Status                                                |
+| -------------------------- | --------------------------------- | --------------- | ------------- | --------------------------------------------------------- |
+| Node.js pod kill           | Terminated one backend pod for 5m | 0.32%           | 44s           | ✅ Met (error budget consumed 3.6%).                      |
+| Python latency             | +200ms latency for 10m            | 1.1%            | 78s           | ✅ Met (retry storm avoided).                             |
+| PostgreSQL primary failure | Marked primary as failed for 15m  | 0.7%            | 104s          | ✅ Met (replica promoted in 62s; app stabilized by 104s). |
 
 ### Observations
 

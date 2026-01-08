@@ -1,12 +1,12 @@
 // Parse JUnit to compute flake index (failures that pass on retry)
-const fs = require('fs');
-const glob = require('glob');
-const { XMLParser } = require('fast-xml-parser');
+const fs = require("fs");
+const glob = require("glob");
+const { XMLParser } = require("fast-xml-parser");
 const parser = new XMLParser();
 let total = 0,
   flaky = 0;
-for (const f of glob.sync('reports/junit/**/*.xml')) {
-  const xml = parser.parse(fs.readFileSync(f, 'utf8'));
+for (const f of glob.sync("reports/junit/**/*.xml")) {
+  const xml = parser.parse(fs.readFileSync(f, "utf8"));
   const suites = Array.isArray(xml.testsuites?.testsuite)
     ? xml.testsuites.testsuite
     : [xml.testsuites?.testsuite].filter(Boolean);

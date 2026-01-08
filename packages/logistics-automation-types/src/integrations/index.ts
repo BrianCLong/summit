@@ -8,8 +8,8 @@
  * - Military service-specific systems (GCSS-Army, NAVSUP, AFMC)
  */
 
-import { z } from 'zod';
-import { SupplySystemSchema } from '../index.js';
+import { z } from "zod";
+import { SupplySystemSchema } from "../index.js";
 
 // =============================================================================
 // DLA INTEGRATION TYPES
@@ -52,8 +52,8 @@ export type DlaStatusResponse = z.infer<typeof DlaStatusResponseSchema>;
 
 export const NspaContractNoticeSchema = z.object({
   noticeId: z.string(),
-  noticeType: z.enum(['invitation_to_bid', 'contract_award', 'amendment', 'cancellation']),
-  procurementMethod: z.enum(['open', 'restricted', 'negotiated', 'framework']),
+  noticeType: z.enum(["invitation_to_bid", "contract_award", "amendment", "cancellation"]),
+  procurementMethod: z.enum(["open", "restricted", "negotiated", "framework"]),
   title: z.string(),
   description: z.string(),
   natoStockNumbers: z.array(z.string()),
@@ -63,7 +63,7 @@ export const NspaContractNoticeSchema = z.object({
   submissionDeadline: z.string().datetime().optional(),
   contractDuration: z.string().optional(),
   deliveryLocations: z.array(z.string()),
-  securityClassification: z.enum(['NATO_UNCLASSIFIED', 'NATO_RESTRICTED', 'NATO_CONFIDENTIAL']),
+  securityClassification: z.enum(["NATO_UNCLASSIFIED", "NATO_RESTRICTED", "NATO_CONFIDENTIAL"]),
   publishedDate: z.string().datetime(),
 });
 export type NspaContractNotice = z.infer<typeof NspaContractNoticeSchema>;
@@ -78,12 +78,12 @@ export const NspaOrderSchema = z.object({
       description: z.string(),
       quantity: z.number().positive(),
       unitPrice: z.number().positive(),
-    }),
+    })
   ),
   totalValue: z.number().positive(),
   deliveryAddress: z.string(),
   requestedDeliveryDate: z.string().datetime(),
-  status: z.enum(['submitted', 'confirmed', 'in_production', 'shipped', 'delivered']),
+  status: z.enum(["submitted", "confirmed", "in_production", "shipped", "delivered"]),
 });
 export type NspaOrder = z.infer<typeof NspaOrderSchema>;
 
@@ -93,18 +93,18 @@ export type NspaOrder = z.infer<typeof NspaOrderSchema>;
 
 export const AlliedLogisticsRequestSchema = z.object({
   requestId: z.string().uuid(),
-  requestType: z.enum(['supply', 'transport', 'maintenance', 'medical', 'fuel']),
+  requestType: z.enum(["supply", "transport", "maintenance", "medical", "fuel"]),
   requestingNation: z.string().length(3),
   supportingNation: z.string().length(3).optional(),
   operationName: z.string().optional(),
-  urgency: z.enum(['routine', 'priority', 'immediate', 'flash']),
+  urgency: z.enum(["routine", "priority", "immediate", "flash"]),
   items: z.array(
     z.object({
       nsn: z.string().optional(),
       description: z.string(),
       quantity: z.number().positive(),
       unitOfMeasure: z.string(),
-    }),
+    })
   ),
   deliveryLocation: z.object({
     mgrs: z.string().optional(), // Military Grid Reference System
@@ -113,7 +113,7 @@ export const AlliedLogisticsRequestSchema = z.object({
     locationName: z.string(),
   }),
   requiredDeliveryDate: z.string().datetime(),
-  classification: z.enum(['UNCLASSIFIED', 'RESTRICTED', 'CONFIDENTIAL', 'SECRET']),
+  classification: z.enum(["UNCLASSIFIED", "RESTRICTED", "CONFIDENTIAL", "SECRET"]),
   createdAt: z.string().datetime(),
 });
 export type AlliedLogisticsRequest = z.infer<typeof AlliedLogisticsRequestSchema>;
@@ -153,8 +153,13 @@ export interface AlliedLogexAdapter extends IntegrationAdapter {
 
 export const Stanag4406MessageSchema = z.object({
   messageId: z.string(),
-  precedence: z.enum(['ROUTINE', 'PRIORITY', 'IMMEDIATE', 'FLASH']),
-  classification: z.enum(['NATO_UNCLASSIFIED', 'NATO_RESTRICTED', 'NATO_CONFIDENTIAL', 'NATO_SECRET']),
+  precedence: z.enum(["ROUTINE", "PRIORITY", "IMMEDIATE", "FLASH"]),
+  classification: z.enum([
+    "NATO_UNCLASSIFIED",
+    "NATO_RESTRICTED",
+    "NATO_CONFIDENTIAL",
+    "NATO_SECRET",
+  ]),
   originator: z.string(),
   recipients: z.array(z.string()),
   subject: z.string(),
@@ -167,7 +172,7 @@ export const Stanag4406MessageSchema = z.object({
         mimeType: z.string(),
         size: z.number(),
         checksum: z.string(),
-      }),
+      })
     )
     .optional(),
 });

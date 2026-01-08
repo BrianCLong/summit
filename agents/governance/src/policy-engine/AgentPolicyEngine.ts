@@ -5,7 +5,7 @@
  * caching, and integration with IC FY28 compliance requirements.
  */
 
-import crypto from 'node:crypto';
+import crypto from "node:crypto";
 import {
   AgentPolicyContext,
   PolicyDecision,
@@ -14,7 +14,7 @@ import {
   AgentTrustLevel,
   AgentClassification,
   GovernanceEvent,
-} from '../types';
+} from "../types";
 
 // ============================================================================
 // Configuration
@@ -28,22 +28,22 @@ export interface PolicyEngineConfig {
   timeoutMs: number;
   retryAttempts: number;
   retryBackoffMs: number;
-  failSafe: 'deny' | 'allow';
+  failSafe: "deny" | "allow";
   metricsEnabled: boolean;
   federalMode: boolean;
 }
 
 const DEFAULT_CONFIG: PolicyEngineConfig = {
-  opaBaseUrl: process.env.OPA_BASE_URL || 'http://localhost:8181',
+  opaBaseUrl: process.env.OPA_BASE_URL || "http://localhost:8181",
   cacheEnabled: true,
   cacheTtlMs: 60_000, // 1 minute for allow decisions
   denyTtlMs: 300_000, // 5 minutes for deny decisions
   timeoutMs: 5000,
   retryAttempts: 3,
   retryBackoffMs: 500,
-  failSafe: 'deny',
+  failSafe: "deny",
   metricsEnabled: true,
-  federalMode: process.env.FEDERAL_MODE === 'true',
+  federalMode: process.env.FEDERAL_MODE === "true",
 };
 
 // ============================================================================
@@ -51,14 +51,14 @@ const DEFAULT_CONFIG: PolicyEngineConfig = {
 // ============================================================================
 
 const POLICY_PATHS = {
-  agentAction: 'agents/governance/action',
-  agentMisuse: 'agents/governance/misuse',
-  agentChain: 'agents/governance/chain',
-  agentProvenance: 'agents/governance/provenance',
-  tenantIsolation: 'agents/governance/tenant_isolation',
-  dataClassification: 'agents/governance/data_classification',
-  rateLimit: 'agents/governance/rate_limit',
-  icfy28Compliance: 'agents/governance/icfy28',
+  agentAction: "agents/governance/action",
+  agentMisuse: "agents/governance/misuse",
+  agentChain: "agents/governance/chain",
+  agentProvenance: "agents/governance/provenance",
+  tenantIsolation: "agents/governance/tenant_isolation",
+  dataClassification: "agents/governance/data_classification",
+  rateLimit: "agents/governance/rate_limit",
+  icfy28Compliance: "agents/governance/icfy28",
 } as const;
 
 // ============================================================================
@@ -127,7 +127,7 @@ export class AgentPolicyEngine {
    */
   async evaluateChain(
     context: AgentPolicyContext,
-    chainMetadata: { chainId: string; stepCount: number; totalCost: number },
+    chainMetadata: { chainId: string; stepCount: number; totalCost: number }
   ): Promise<PolicyDecision> {
     const enrichedContext = {
       ...context,
@@ -146,7 +146,7 @@ export class AgentPolicyEngine {
    */
   async evaluateProvenance(
     context: AgentPolicyContext,
-    provenanceInfo: { slsaLevel: string; signed: boolean; trusted: boolean },
+    provenanceInfo: { slsaLevel: string; signed: boolean; trusted: boolean }
   ): Promise<PolicyDecision> {
     const enrichedContext = {
       ...context,
@@ -170,7 +170,7 @@ export class AgentPolicyEngine {
    */
   private async evaluatePolicy(
     policyPath: string,
-    context: AgentPolicyContext,
+    context: AgentPolicyContext
   ): Promise<PolicyDecision> {
     const startTime = Date.now();
     this.metrics.evaluationsTotal++;
@@ -204,15 +204,15 @@ export class AgentPolicyEngine {
       this.emitEvent({
         id: crypto.randomUUID(),
         timestamp: new Date(),
-        type: decision.allow ? 'policy_evaluation' : 'policy_violation',
-        source: 'AgentPolicyEngine',
+        type: decision.allow ? "policy_evaluation" : "policy_violation",
+        source: "AgentPolicyEngine",
         agentId: context.agentId,
         fleetId: context.fleetId,
         sessionId: context.sessionId,
         actor: context.userContext.userId,
         action: context.requestedAction,
         resource: context.targetResource,
-        outcome: decision.allow ? 'success' : 'failure',
+        outcome: decision.allow ? "success" : "failure",
         classification: context.classification,
         details: {
           policyPath,
@@ -264,7 +264,7 @@ export class AgentPolicyEngine {
           federalEnvironment: context.environmentContext.federalEnvironment,
           slsaLevel: context.environmentContext.slsaLevel,
         },
-        policyVersion: process.env.OPA_POLICY_VERSION || '2025.11',
+        policyVersion: process.env.OPA_POLICY_VERSION || "2025.11",
       },
     };
   }
@@ -274,7 +274,7 @@ export class AgentPolicyEngine {
    */
   private async callOpaWithRetry(
     policyPath: string,
-    input: Record<string, unknown>,
+    input: Record<string, unknown>
   ): Promise<PolicyDecision> {
     let lastError: Error | null = null;
 
@@ -291,7 +291,7 @@ export class AgentPolicyEngine {
       }
     }
 
-    throw lastError || new Error('Policy evaluation failed after retries');
+    throw lastError || new Error("Policy evaluation failed after retries");
   }
 
   /**
@@ -299,7 +299,7 @@ export class AgentPolicyEngine {
    */
   private async callOpa(
     policyPath: string,
-    input: Record<string, unknown>,
+    input: Record<string, unknown>
   ): Promise<PolicyDecision> {
     const url = `${this.config.opaBaseUrl}/v1/data/${policyPath}`;
 
@@ -308,10 +308,10 @@ export class AgentPolicyEngine {
 
     try {
       const response = await fetch(url, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-Request-ID': crypto.randomUUID(),
+          "Content-Type": "application/json",
+          "X-Request-ID": crypto.randomUUID(),
         },
         body: JSON.stringify(input),
         signal: controller.signal,
@@ -341,7 +341,7 @@ export class AgentPolicyEngine {
     if (Array.isArray(result.conditions)) {
       for (const cond of result.conditions) {
         conditions.push({
-          type: cond.type || 'capability_restricted',
+          type: cond.type || "capability_restricted",
           parameters: cond.parameters || {},
           enforced: cond.enforced ?? true,
         });
@@ -352,9 +352,9 @@ export class AgentPolicyEngine {
     if (Array.isArray(result.mitigations)) {
       for (const mit of result.mitigations) {
         mitigations.push({
-          action: mit.action || 'block',
-          severity: mit.severity || 'medium',
-          description: mit.description || 'Policy mitigation required',
+          action: mit.action || "block",
+          severity: mit.severity || "medium",
+          description: mit.description || "Policy mitigation required",
           automated: mit.automated ?? false,
         });
       }
@@ -362,8 +362,8 @@ export class AgentPolicyEngine {
 
     return {
       allow: Boolean(result.allow),
-      reason: String(result.reason || 'No reason provided'),
-      policyPath: String(result.policy_path || ''),
+      reason: String(result.reason || "No reason provided"),
+      policyPath: String(result.policy_path || ""),
       conditions: conditions.length > 0 ? conditions : undefined,
       requiredApprovals: Array.isArray(result.required_approvals)
         ? result.required_approvals
@@ -377,12 +377,12 @@ export class AgentPolicyEngine {
   /**
    * Parse audit level from OPA response
    */
-  private parseAuditLevel(level: unknown): 'info' | 'warn' | 'alert' | 'critical' {
-    const validLevels = ['info', 'warn', 'alert', 'critical'] as const;
-    if (typeof level === 'string' && validLevels.includes(level as typeof validLevels[number])) {
-      return level as typeof validLevels[number];
+  private parseAuditLevel(level: unknown): "info" | "warn" | "alert" | "critical" {
+    const validLevels = ["info", "warn", "alert", "critical"] as const;
+    if (typeof level === "string" && validLevels.includes(level as (typeof validLevels)[number])) {
+      return level as (typeof validLevels)[number];
     }
-    return 'info';
+    return "info";
   }
 
   /**
@@ -391,21 +391,21 @@ export class AgentPolicyEngine {
   private getFailSafeDecision(
     policyPath: string,
     context: AgentPolicyContext,
-    error: unknown,
+    error: unknown
   ): PolicyDecision {
     const errorMessage = error instanceof Error ? error.message : String(error);
 
-    if (this.config.failSafe === 'deny') {
+    if (this.config.failSafe === "deny") {
       return {
         allow: false,
         reason: `Policy evaluation failed (fail-safe deny): ${errorMessage}`,
         policyPath,
-        auditLevel: 'critical',
+        auditLevel: "critical",
         mitigations: [
           {
-            action: 'block',
-            severity: 'high',
-            description: 'Policy engine unavailable - blocking by default',
+            action: "block",
+            severity: "high",
+            description: "Policy engine unavailable - blocking by default",
             automated: true,
           },
         ],
@@ -413,21 +413,21 @@ export class AgentPolicyEngine {
     }
 
     // Fail-open only for read-only operations with basic trust
-    const isReadOnly = ['read', 'analyze', 'query', 'list', 'get'].some((op) =>
-      context.requestedAction.toLowerCase().includes(op),
+    const isReadOnly = ["read", "analyze", "query", "list", "get"].some((op) =>
+      context.requestedAction.toLowerCase().includes(op)
     );
-    const isBasicTrust = ['basic', 'untrusted'].includes(context.trustLevel);
+    const isBasicTrust = ["basic", "untrusted"].includes(context.trustLevel);
 
     if (isReadOnly && !isBasicTrust) {
       return {
         allow: true,
         reason: `Policy evaluation failed (fail-safe allow for read-only): ${errorMessage}`,
         policyPath,
-        auditLevel: 'alert',
+        auditLevel: "alert",
         conditions: [
           {
-            type: 'audit_enhanced',
-            parameters: { reason: 'fail-safe allow', error: errorMessage },
+            type: "audit_enhanced",
+            parameters: { reason: "fail-safe allow", error: errorMessage },
             enforced: true,
           },
         ],
@@ -438,7 +438,7 @@ export class AgentPolicyEngine {
       allow: false,
       reason: `Policy evaluation failed: ${errorMessage}`,
       policyPath,
-      auditLevel: 'critical',
+      auditLevel: "critical",
     };
   }
 
@@ -457,7 +457,7 @@ export class AgentPolicyEngine {
       user: context.userContext.userId,
     };
 
-    return crypto.createHash('sha256').update(JSON.stringify(keyData)).digest('hex');
+    return crypto.createHash("sha256").update(JSON.stringify(keyData)).digest("hex");
   }
 
   /**
@@ -484,7 +484,7 @@ export class AgentPolicyEngine {
   private cacheDecision(
     policyPath: string,
     context: AgentPolicyContext,
-    decision: PolicyDecision,
+    decision: PolicyDecision
   ): void {
     const cacheKey = this.generateCacheKey(policyPath, context);
     const ttl = decision.allow ? this.config.cacheTtlMs : this.config.denyTtlMs;
@@ -546,7 +546,7 @@ export class AgentPolicyEngine {
       try {
         listener(event);
       } catch (error) {
-        console.error('Event listener error:', error);
+        console.error("Event listener error:", error);
       }
     }
   }
@@ -569,25 +569,22 @@ export class AgentPolicyEngine {
    * Check if a trust level meets minimum requirement
    */
   static checkTrustLevel(actual: AgentTrustLevel, required: AgentTrustLevel): boolean {
-    const levels: AgentTrustLevel[] = ['untrusted', 'basic', 'elevated', 'privileged', 'sovereign'];
+    const levels: AgentTrustLevel[] = ["untrusted", "basic", "elevated", "privileged", "sovereign"];
     return levels.indexOf(actual) >= levels.indexOf(required);
   }
 
   /**
    * Check if a classification level meets minimum requirement
    */
-  static checkClassification(
-    actual: AgentClassification,
-    required: AgentClassification,
-  ): boolean {
+  static checkClassification(actual: AgentClassification, required: AgentClassification): boolean {
     const levels: AgentClassification[] = [
-      'UNCLASSIFIED',
-      'CUI',
-      'CONFIDENTIAL',
-      'SECRET',
-      'TOP_SECRET',
-      'SCI',
-      'SAP',
+      "UNCLASSIFIED",
+      "CUI",
+      "CONFIDENTIAL",
+      "SECRET",
+      "TOP_SECRET",
+      "SCI",
+      "SAP",
     ];
     return levels.indexOf(actual) >= levels.indexOf(required);
   }

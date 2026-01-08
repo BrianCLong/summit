@@ -70,10 +70,10 @@ export {
   // SDK factory
   type SummitSDK,
   createSummitSDK,
-} from './client/index.js';
+} from "./client/index.js";
 
 // Generated API client exports
-export * from './generated/index.js';
+export * from "./generated/index.js";
 
 // Governance helpers
 export {
@@ -81,10 +81,10 @@ export {
   type ProvenanceReceipt,
   type ReceiptStatus,
   type ReceiptSubmissionResponse,
-} from './receipts.js';
+} from "./receipts.js";
 
 export {
   PolicyDecisionsClient,
   type PolicyDecision,
   type PolicyDecisionRequest,
-} from './policyDecisions.js';
+} from "./policyDecisions.js";

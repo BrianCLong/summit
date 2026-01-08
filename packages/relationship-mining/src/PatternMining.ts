@@ -3,7 +3,7 @@
  * Frequent subgraph mining, pattern templates, anomaly detection
  */
 
-import type { GraphStorage, Node, Edge, Path } from '@intelgraph/graph-database';
+import type { GraphStorage, Node, Edge, Path } from "@intelgraph/graph-database";
 
 export interface Pattern {
   id: string;
@@ -77,7 +77,7 @@ export class PatternMining {
             nodes: [sourceNode, targetNode],
             edges: [sampleEdge],
             frequency: edges.length,
-            support: edges.length / totalEdges
+            support: edges.length / totalEdges,
           });
         }
       }
@@ -131,7 +131,7 @@ export class PatternMining {
     // Bipartite motif
     motifs.push(this.detectBipartiteMotif());
 
-    return motifs.filter(m => m.count > 0);
+    return motifs.filter((m) => m.count > 0);
   }
 
   /**
@@ -194,7 +194,7 @@ export class PatternMining {
     // Convert to temporal patterns
     for (const [patternId, frequency] of patternFrequency) {
       // Create a representative pattern
-      const timestamps = Array.from(frequency.keys()).map(k => new Date(k).getTime());
+      const timestamps = Array.from(frequency.keys()).map((k) => new Date(k).getTime());
 
       patterns.push({
         pattern: {
@@ -202,10 +202,10 @@ export class PatternMining {
           nodes: [],
           edges: [],
           frequency: Array.from(frequency.values()).reduce((a, b) => a + b, 0),
-          support: 0
+          support: 0,
         },
         timestamps,
-        frequency
+        frequency,
       });
     }
 
@@ -216,11 +216,7 @@ export class PatternMining {
    * Multi-hop relationship inference
    * Infer potential relationships through intermediate connections
    */
-  inferMultiHopRelationships(
-    sourceId: string,
-    targetId: string,
-    maxHops: number = 3
-  ): Path[] {
+  inferMultiHopRelationships(sourceId: string, targetId: string, maxHops: number = 3): Path[] {
     const paths: Path[] = [];
     const visited = new Set<string>();
 
@@ -235,7 +231,9 @@ export class PatternMining {
    */
   calculateRelationshipStrength(edgeId: string): number {
     const edge = this.storage.getEdge(edgeId);
-    if (!edge) {return 0;}
+    if (!edge) {
+      return 0;
+    }
 
     let strength = 0;
 
@@ -248,14 +246,14 @@ export class PatternMining {
 
     if (source && target) {
       const sourceNeighbors = new Set(
-        this.storage.getNeighbors(source.id, 'both').map(n => n.id)
+        this.storage.getNeighbors(source.id, "both").map((n) => n.id)
       );
       const targetNeighbors = new Set(
-        this.storage.getNeighbors(target.id, 'both').map(n => n.id)
+        this.storage.getNeighbors(target.id, "both").map((n) => n.id)
       );
 
       const intersection = new Set(
-        Array.from(sourceNeighbors).filter(n => targetNeighbors.has(n))
+        Array.from(sourceNeighbors).filter((n) => targetNeighbors.has(n))
       );
       const union = new Set([...sourceNeighbors, ...targetNeighbors]);
 
@@ -282,12 +280,14 @@ export class PatternMining {
    * Determine how significant a path is in the overall graph
    */
   analyzePathSignificance(path: Path): number {
-    if (path.length === 0) {return 0;}
+    if (path.length === 0) {
+      return 0;
+    }
 
     let significance = 0;
 
     // Factor 1: Path rarity (inverse of common paths)
-    const pathTypes = path.edges.map(e => e.type).join('->');
+    const pathTypes = path.edges.map((e) => e.type).join("->");
     const similarPaths = this.findSimilarPaths(pathTypes);
     const rarity = 1 / (1 + similarPaths.length);
     significance += rarity * 0.4;
@@ -312,19 +312,19 @@ export class PatternMining {
     const exported = this.storage.exportGraph();
 
     for (const node1 of exported.nodes) {
-      const neighbors1 = this.storage.getNeighbors(node1.id, 'out');
+      const neighbors1 = this.storage.getNeighbors(node1.id, "out");
 
       for (const node2 of neighbors1) {
-        const neighbors2 = this.storage.getNeighbors(node2.id, 'out');
+        const neighbors2 = this.storage.getNeighbors(node2.id, "out");
 
         for (const node3 of neighbors2) {
           // Check if node3 connects back to node1
-          const neighbors3 = this.storage.getNeighbors(node3.id, 'out');
+          const neighbors3 = this.storage.getNeighbors(node3.id, "out");
 
-          if (neighbors3.some(n => n.id === node1.id)) {
+          if (neighbors3.some((n) => n.id === node1.id)) {
             instances.push({
               nodeIds: [node1.id, node2.id, node3.id],
-              edgeIds: [] // Would need to collect edge IDs
+              edgeIds: [], // Would need to collect edge IDs
             });
           }
         }
@@ -332,10 +332,10 @@ export class PatternMining {
     }
 
     return {
-      type: 'triangle',
+      type: "triangle",
       instances: instances.slice(0, 100), // Limit for performance
       count: instances.length,
-      significance: this.calculateMotifSignificance('triangle', instances.length)
+      significance: this.calculateMotifSignificance("triangle", instances.length),
     };
   }
 
@@ -344,12 +344,12 @@ export class PatternMining {
     const exported = this.storage.exportGraph();
 
     for (const node of exported.nodes) {
-      const neighbors = this.storage.getNeighbors(node.id, 'out');
+      const neighbors = this.storage.getNeighbors(node.id, "out");
 
       if (neighbors.length >= k) {
         instances.push({
-          nodeIds: [node.id, ...neighbors.slice(0, k).map(n => n.id)],
-          edgeIds: []
+          nodeIds: [node.id, ...neighbors.slice(0, k).map((n) => n.id)],
+          edgeIds: [],
         });
       }
     }
@@ -358,7 +358,7 @@ export class PatternMining {
       type: `star_${k}`,
       instances,
       count: instances.length,
-      significance: this.calculateMotifSignificance(`star_${k}`, instances.length)
+      significance: this.calculateMotifSignificance(`star_${k}`, instances.length),
     };
   }
 
@@ -369,7 +369,7 @@ export class PatternMining {
       type: `chain_${length}`,
       instances,
       count: 0,
-      significance: 0
+      significance: 0,
     };
   }
 
@@ -377,10 +377,10 @@ export class PatternMining {
     const instances: MotifInstance[] = [];
     // Implementation would identify bipartite subgraphs
     return {
-      type: 'bipartite',
+      type: "bipartite",
       instances,
       count: 0,
-      significance: 0
+      significance: 0,
     };
   }
 
@@ -390,15 +390,17 @@ export class PatternMining {
     const totalNodes = stats.nodeCount;
     const totalEdges = stats.edgeCount;
 
-    if (totalNodes === 0) {return 0;}
+    if (totalNodes === 0) {
+      return 0;
+    }
 
     // Expected count in random graph (simplified)
     let expectedCount = 0;
     const edgeProbability = totalEdges / (totalNodes * (totalNodes - 1));
 
-    if (type === 'triangle') {
-      expectedCount = (totalNodes * (totalNodes - 1) * (totalNodes - 2) / 6) *
-        Math.pow(edgeProbability, 3);
+    if (type === "triangle") {
+      expectedCount =
+        ((totalNodes * (totalNodes - 1) * (totalNodes - 2)) / 6) * Math.pow(edgeProbability, 3);
     }
 
     const significance = expectedCount > 0 ? count / expectedCount : 0;
@@ -419,10 +421,10 @@ export class PatternMining {
     anomalyScore += Math.min(1, weightDeviation) * 0.3;
 
     // Factor 3: Temporal anomaly
-    const recentEdges = typeEdges.filter(e =>
-      e.createdAt > Date.now() - 30 * 24 * 60 * 60 * 1000
+    const recentEdges = typeEdges.filter(
+      (e) => e.createdAt > Date.now() - 30 * 24 * 60 * 60 * 1000
     );
-    const temporalRarity = 1 - (recentEdges.length / (typeEdges.length || 1));
+    const temporalRarity = 1 - recentEdges.length / (typeEdges.length || 1);
     anomalyScore += temporalRarity * 0.3;
 
     return anomalyScore;
@@ -432,24 +434,24 @@ export class PatternMining {
     const reasons: string[] = [];
 
     if (score > 0.7) {
-      reasons.push('Highly unusual relationship type');
+      reasons.push("Highly unusual relationship type");
     }
 
     const typeEdges = this.storage.getEdgesByType(edge.type);
     if (typeEdges.length < 5) {
-      reasons.push('Rare relationship type in graph');
+      reasons.push("Rare relationship type in graph");
     }
 
     const avgWeight = typeEdges.reduce((sum, e) => sum + e.weight, 0) / typeEdges.length;
     if (Math.abs(edge.weight - avgWeight) > avgWeight) {
-      reasons.push('Unusual weight for relationship type');
+      reasons.push("Unusual weight for relationship type");
     }
 
     return reasons;
   }
 
   private nodeMatchesTemplate(node: Node, template: NodeTemplate): boolean {
-    if (template.labels && !template.labels.every(l => node.labels.includes(l))) {
+    if (template.labels && !template.labels.every((l) => node.labels.includes(l))) {
       return false;
     }
 
@@ -482,8 +484,12 @@ export class PatternMining {
     paths: Path[],
     visited: Set<string>
   ): void {
-    if (currentPath.length >= maxHops) {return;}
-    if (visited.has(current)) {return;}
+    if (currentPath.length >= maxHops) {
+      return;
+    }
+    if (visited.has(current)) {
+      return;
+    }
 
     visited.add(current);
     currentPath.push(current);
@@ -495,12 +501,16 @@ export class PatternMining {
 
       for (let i = 0; i < currentPath.length; i++) {
         const node = this.storage.getNode(currentPath[i]);
-        if (node) {nodes.push(node);}
+        if (node) {
+          nodes.push(node);
+        }
 
         if (i < currentPath.length - 1) {
           const outgoing = this.storage.getOutgoingEdges(currentPath[i]);
-          const edge = outgoing.find(e => e.targetId === currentPath[i + 1]);
-          if (edge) {edges.push(edge);}
+          const edge = outgoing.find((e) => e.targetId === currentPath[i + 1]);
+          if (edge) {
+            edges.push(edge);
+          }
         }
       }
 
@@ -508,11 +518,11 @@ export class PatternMining {
         nodes,
         edges,
         length: edges.length,
-        weight: edges.reduce((sum, e) => sum + e.weight, 0)
+        weight: edges.reduce((sum, e) => sum + e.weight, 0),
       });
     }
 
-    const neighbors = this.storage.getNeighbors(current, 'out');
+    const neighbors = this.storage.getNeighbors(current, "out");
     for (const neighbor of neighbors) {
       this.findPathsDFS(neighbor.id, target, maxHops, [...currentPath], paths, new Set(visited));
     }

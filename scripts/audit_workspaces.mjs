@@ -5,26 +5,26 @@
  * - Builds a package graph from internal deps and detects cycles
  * - Validates "exports"/"main"/"types" existence when TS is present
  */
-import fs from 'fs/promises';
-import path from 'path';
+import fs from "fs/promises";
+import path from "path";
 
 // Strict mode: fail CI only on repo-breaking issues
 // Usage: node scripts/audit_workspaces.mjs --strict
-const STRICT = process.argv.includes('--strict');
+const STRICT = process.argv.includes("--strict");
 
 const ROOT = process.cwd();
-const ROOT_TSCONFIG = path.join(ROOT, 'tsconfig.json');
-const GROUPS = ['apps', 'packages', 'services', 'contracts'];
+const ROOT_TSCONFIG = path.join(ROOT, "tsconfig.json");
+const GROUPS = ["apps", "packages", "services", "contracts"];
 
 let fatalIssues = 0; // cycles + missing tsconfig for TS packages
 let softIssues = 0; // missing build script, exports cosmetics, etc.
-const ok = (m) => console.log('✓', m);
+const ok = (m) => console.log("✓", m);
 const warn = (m) => {
-  console.warn('⚠️', m);
+  console.warn("⚠️", m);
   softIssues++;
 };
 const err = (m) => {
-  console.error('❌', m);
+  console.error("❌", m);
   fatalIssues++;
 };
 
@@ -44,7 +44,7 @@ async function discover() {
     if (!(await exists(gdir))) continue;
     for (const name of await fs.readdir(gdir)) {
       const dir = path.join(gdir, name);
-      if (!(await exists(path.join(dir, 'package.json')))) continue;
+      if (!(await exists(path.join(dir, "package.json")))) continue;
       workspaces.push({ group: g, name, dir });
     }
   }
@@ -52,15 +52,14 @@ async function discover() {
 }
 
 async function hasTsSources(dir) {
-  const src = path.join(dir, 'src');
+  const src = path.join(dir, "src");
   if (!(await exists(src))) return false;
-  for (const f of await fs.readdir(src))
-    if (f.endsWith('.ts') || f.endsWith('.tsx')) return true;
+  for (const f of await fs.readdir(src)) if (f.endsWith(".ts") || f.endsWith(".tsx")) return true;
   return false;
 }
 
 async function readJSON(p) {
-  return JSON.parse(await fs.readFile(p, 'utf8'));
+  return JSON.parse(await fs.readFile(p, "utf8"));
 }
 
 function internalNameSet(ws) {
@@ -68,12 +67,7 @@ function internalNameSet(ws) {
 }
 
 function depKeys(pj) {
-  return Object.assign(
-    {},
-    pj.dependencies,
-    pj.devDependencies,
-    pj.peerDependencies,
-  );
+  return Object.assign({}, pj.dependencies, pj.devDependencies, pj.peerDependencies);
 }
 
 function cycleDetect(graph) {
@@ -97,24 +91,23 @@ function cycleDetect(graph) {
 
 (async () => {
   const hasRootTs = await exists(ROOT_TSCONFIG);
-  if (!hasRootTs)
-    warn('Root tsconfig.json missing (project references recommended).');
+  if (!hasRootTs) warn("Root tsconfig.json missing (project references recommended).");
 
   const ws = await discover();
   if (ws.length === 0) {
-    err('No workspaces discovered.');
+    err("No workspaces discovered.");
     process.exit(1);
   }
 
   // attach package.json + quick facts
   for (const w of ws) {
-    const pjPath = path.join(w.dir, 'package.json');
-    w.pkgJsonRaw = await fs.readFile(pjPath, 'utf8');
+    const pjPath = path.join(w.dir, "package.json");
+    w.pkgJsonRaw = await fs.readFile(pjPath, "utf8");
     w.pj = JSON.parse(w.pkgJsonRaw);
     w.name = w.pj.name || `${w.group}/${path.basename(w.dir)}`;
     w.hasBuild = !!(w.pj.scripts && w.pj.scripts.build);
     w.hasTs = await hasTsSources(w.dir);
-    w.tsconfig = path.join(w.dir, 'tsconfig.json');
+    w.tsconfig = path.join(w.dir, "tsconfig.json");
     w.hasTsconfig = await exists(w.tsconfig);
     w.main = w.pj.main;
     w.types = w.pj.types;
@@ -133,12 +126,7 @@ function cycleDetect(graph) {
     if (w.hasTs && (!w.main || !w.types)) {
       warn(`[${w.name}] TS package should set "main"/"types"`);
     }
-    if (
-      w.exports &&
-      typeof w.exports === 'object' &&
-      !w.exports['.'] &&
-      !w.exports.default
-    ) {
+    if (w.exports && typeof w.exports === "object" && !w.exports["."] && !w.exports.default) {
       warn(`[${w.name}] "exports" exists but missing "." or default entry`);
     }
   }
@@ -150,14 +138,14 @@ function cycleDetect(graph) {
     const deps = Object.keys(depKeys(w.pj) || {});
     graph.set(
       w.pj.name,
-      deps.filter((d) => internal.has(d)),
+      deps.filter((d) => internal.has(d))
     );
   }
   const cycles = cycleDetect(graph);
   if (cycles.length) {
-    for (const c of cycles) err(`Cycle detected: ${c.join(' -> ')}`);
+    for (const c of cycles) err(`Cycle detected: ${c.join(" -> ")}`);
   } else {
-    ok('No internal dependency cycles detected.');
+    ok("No internal dependency cycles detected.");
   }
 
   // tsconfig reference sanity (best-effort)
@@ -167,15 +155,15 @@ function cycleDetect(graph) {
       const refs = (rootTs.references || []).map((r) => r.path);
       for (const g of GROUPS) {
         const expected = `./${g}/*`;
-        if (!refs.some((r) => r.includes(expected.replace('./', ''))))
+        if (!refs.some((r) => r.includes(expected.replace("./", ""))))
           warn(`Root tsconfig.json missing reference: ${expected}`);
       }
     } catch {
-      warn('Could not parse root tsconfig.json for references.');
+      warn("Could not parse root tsconfig.json for references.");
     }
   }
 
   // exit code for CI
-  console.log(`\nAudit complete: ${issues ? 'issues found' : 'clean'}`);
+  console.log(`\nAudit complete: ${issues ? "issues found" : "clean"}`);
   process.exit(issues ? 2 : 0);
 })();

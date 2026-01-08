@@ -3,7 +3,7 @@
  * Identifies story arcs, themes, and key narrative elements
  */
 
-import type { Narrative, StoryArc, NarrativeActor } from './types.js';
+import type { Narrative, StoryArc, NarrativeActor } from "./types.js";
 
 export class NarrativeExtractor {
   private narrativeCache: Map<string, Narrative> = new Map();
@@ -28,11 +28,11 @@ export class NarrativeExtractor {
       description: this.generateDescription(text),
       storyArc,
       framing: {
-        mainFrame: themes[0] || 'unknown',
+        mainFrame: themes[0] || "unknown",
         subFrames: themes.slice(1, 4),
         framingDevices: [],
         perspective: this.detectPerspective(text),
-        tone: sentiment > 0.2 ? 'positive' : sentiment < -0.2 ? 'negative' : 'neutral',
+        tone: sentiment > 0.2 ? "positive" : sentiment < -0.2 ? "negative" : "neutral",
       },
       themes,
       actors,
@@ -53,26 +53,26 @@ export class NarrativeExtractor {
 
     // Common intelligence-related themes
     const themeKeywords = {
-      threat: ['threat', 'danger', 'risk', 'attack', 'hostile'],
-      security: ['security', 'protection', 'defense', 'safeguard'],
-      conspiracy: ['conspiracy', 'plot', 'scheme', 'collusion'],
-      corruption: ['corruption', 'bribe', 'fraud', 'illegal'],
-      conflict: ['conflict', 'war', 'battle', 'confrontation'],
-      cooperation: ['cooperation', 'alliance', 'partnership', 'collaboration'],
-      crisis: ['crisis', 'emergency', 'disaster', 'catastrophe'],
-      reform: ['reform', 'change', 'transformation', 'revolution'],
+      threat: ["threat", "danger", "risk", "attack", "hostile"],
+      security: ["security", "protection", "defense", "safeguard"],
+      conspiracy: ["conspiracy", "plot", "scheme", "collusion"],
+      corruption: ["corruption", "bribe", "fraud", "illegal"],
+      conflict: ["conflict", "war", "battle", "confrontation"],
+      cooperation: ["cooperation", "alliance", "partnership", "collaboration"],
+      crisis: ["crisis", "emergency", "disaster", "catastrophe"],
+      reform: ["reform", "change", "transformation", "revolution"],
     };
 
     const lowerText = text.toLowerCase();
 
     for (const [theme, keywords] of Object.entries(themeKeywords)) {
-      const matchCount = keywords.filter(keyword => lowerText.includes(keyword)).length;
+      const matchCount = keywords.filter((keyword) => lowerText.includes(keyword)).length;
       if (matchCount > 0) {
         themes.push(theme);
       }
     }
 
-    return themes.length > 0 ? themes : ['general'];
+    return themes.length > 0 ? themes : ["general"];
   }
 
   async extractActors(text: string): Promise<NarrativeActor[]> {
@@ -114,7 +114,7 @@ export class NarrativeExtractor {
   }
 
   async identifyStoryArc(text: string): Promise<StoryArc> {
-    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0);
 
     // Divide text into story arc sections
     const sections = Math.ceil(sentences.length / 5);
@@ -129,71 +129,67 @@ export class NarrativeExtractor {
     };
   }
 
-  private detectArcType(text: string): StoryArc['arcType'] {
+  private detectArcType(text: string): StoryArc["arcType"] {
     const lowerText = text.toLowerCase();
 
     if (
-      lowerText.includes('hero') ||
-      lowerText.includes('victory') ||
-      lowerText.includes('triumph')
+      lowerText.includes("hero") ||
+      lowerText.includes("victory") ||
+      lowerText.includes("triumph")
     ) {
-      return 'hero';
+      return "hero";
     }
-    if (lowerText.includes('tragedy') || lowerText.includes('disaster')) {
-      return 'tragedy';
+    if (lowerText.includes("tragedy") || lowerText.includes("disaster")) {
+      return "tragedy";
     }
-    if (lowerText.includes('quest') || lowerText.includes('search')) {
-      return 'quest';
+    if (lowerText.includes("quest") || lowerText.includes("search")) {
+      return "quest";
     }
-    if (lowerText.includes('journey') || lowerText.includes('voyage')) {
-      return 'voyage';
+    if (lowerText.includes("journey") || lowerText.includes("voyage")) {
+      return "voyage";
     }
 
-    return 'quest'; // Default
+    return "quest"; // Default
   }
 
-  private detectPerspective(text: string): 'first-person' | 'second-person' | 'third-person' {
+  private detectPerspective(text: string): "first-person" | "second-person" | "third-person" {
     const lowerText = text.toLowerCase();
 
     if (lowerText.match(/\b(i|we|our|us)\b/g)) {
-      return 'first-person';
+      return "first-person";
     }
     if (lowerText.match(/\b(you|your)\b/g)) {
-      return 'second-person';
+      return "second-person";
     }
-    return 'third-person';
+    return "third-person";
   }
 
   private inferRole(
     name: string,
     text: string
-  ): 'protagonist' | 'antagonist' | 'supporting' | 'victim' | 'hero' | 'villain' {
+  ): "protagonist" | "antagonist" | "supporting" | "victim" | "hero" | "villain" {
     const lowerText = text.toLowerCase();
     const lowerName = name.toLowerCase();
 
     // Simple sentiment-based role assignment
     const context = this.getActorContext(lowerName, lowerText);
 
-    if (context.includes('hero') || context.includes('defender')) {
-      return 'hero';
+    if (context.includes("hero") || context.includes("defender")) {
+      return "hero";
     }
-    if (
-      context.includes('villain') ||
-      context.includes('attacker') ||
-      context.includes('threat')
-    ) {
-      return 'villain';
+    if (context.includes("villain") || context.includes("attacker") || context.includes("threat")) {
+      return "villain";
     }
-    if (context.includes('victim') || context.includes('target')) {
-      return 'victim';
+    if (context.includes("victim") || context.includes("target")) {
+      return "victim";
     }
 
-    return 'supporting';
+    return "supporting";
   }
 
   private getActorContext(actor: string, text: string, windowSize = 100): string {
     const index = text.indexOf(actor);
-    if (index === -1) return '';
+    if (index === -1) return "";
 
     const start = Math.max(0, index - windowSize);
     const end = Math.min(text.length, index + actor.length + windowSize);
@@ -203,17 +199,17 @@ export class NarrativeExtractor {
 
   private async calculateNarrativeSentiment(text: string): Promise<number> {
     // Simple sentiment calculation (in production, use sentiment analyzer)
-    const positiveWords = ['good', 'great', 'excellent', 'success', 'victory', 'positive'];
-    const negativeWords = ['bad', 'terrible', 'failure', 'defeat', 'negative', 'threat'];
+    const positiveWords = ["good", "great", "excellent", "success", "victory", "positive"];
+    const negativeWords = ["bad", "terrible", "failure", "defeat", "negative", "threat"];
 
     const lowerText = text.toLowerCase();
     let score = 0;
 
     for (const word of positiveWords) {
-      score += (lowerText.match(new RegExp(word, 'g')) || []).length;
+      score += (lowerText.match(new RegExp(word, "g")) || []).length;
     }
     for (const word of negativeWords) {
-      score -= (lowerText.match(new RegExp(word, 'g')) || []).length;
+      score -= (lowerText.match(new RegExp(word, "g")) || []).length;
     }
 
     return Math.max(-1, Math.min(1, score / 10));
@@ -231,16 +227,16 @@ export class NarrativeExtractor {
   }
 
   private generateTitle(themes: string[]): string {
-    if (themes.length === 0) return 'Untitled Narrative';
+    if (themes.length === 0) return "Untitled Narrative";
     return themes
       .slice(0, 3)
-      .map(t => t.charAt(0).toUpperCase() + t.slice(1))
-      .join(' & ');
+      .map((t) => t.charAt(0).toUpperCase() + t.slice(1))
+      .join(" & ");
   }
 
   private generateDescription(text: string): string {
     // Return first 200 characters as description
-    return text.substring(0, 200) + (text.length > 200 ? '...' : '');
+    return text.substring(0, 200) + (text.length > 200 ? "..." : "");
   }
 
   clearCache(): void {

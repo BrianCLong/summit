@@ -3,4 +3,4 @@
  * This package is currently under reconstruction.
  */
 
-export const VERSION = '2.0.0';
+export const VERSION = "2.0.0";

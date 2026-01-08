@@ -1,6 +1,6 @@
-import { loadConfig } from '../config.js';
-import { createPool, initSchema } from '../db.js';
-import { defaultTaxonomy } from '../taxonomy.js';
+import { loadConfig } from "../config.js";
+import { createPool, initSchema } from "../db.js";
+import { defaultTaxonomy } from "../taxonomy.js";
 
 const run = async () => {
   const config = loadConfig();
@@ -21,6 +21,6 @@ const run = async () => {
 
 run().catch((err) => {
   // eslint-disable-next-line no-console
-  console.error('Migration failed', err);
+  console.error("Migration failed", err);
   process.exit(1);
 });

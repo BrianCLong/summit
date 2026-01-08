@@ -1,10 +1,4 @@
-import React, {
-  useRef,
-  useEffect,
-  useState,
-  useCallback,
-  useMemo,
-} from 'react';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import {
   Box,
   Paper,
@@ -32,7 +26,7 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-} from '@mui/material';
+} from "@mui/material";
 import {
   ZoomIn,
   ZoomOut,
@@ -50,31 +44,31 @@ import {
   PlayArrow,
   Stop,
   Download,
-} from '@mui/icons-material';
-import { useParams } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
+} from "@mui/icons-material";
+import { useParams } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import {
   setGraphData,
   addNode,
   addEdge,
   setSelectedNode,
   setSelectedEdge,
-} from '../../store/slices/graphSlice';
-import { setCommunityData } from '../../store/slices/aiInsightsSlice';
-import { useSocket } from '../../hooks/useSocket';
-import { useAIOperations } from '../../ai/insightsHooks';
-import { useFlag } from '../../hooks/useFlag';
-import AIInsightsPanel from '../ai/AIInsightsPanel';
-import { useApolloClient } from '@apollo/client';
-import cytoscape from 'cytoscape';
-import cola from 'cytoscape-cola';
-import dagre from 'cytoscape-dagre';
-import fcose from 'cytoscape-fcose';
-import coseBilkent from 'cytoscape-cose-bilkent';
-import popper from 'cytoscape-popper';
-import ReactDOM from 'react-dom/client';
-import GraphPopover from './GraphPopover';
-import InvestigationPresence from '../InvestigationPresence';
+} from "../../store/slices/graphSlice";
+import { setCommunityData } from "../../store/slices/aiInsightsSlice";
+import { useSocket } from "../../hooks/useSocket";
+import { useAIOperations } from "../../ai/insightsHooks";
+import { useFlag } from "../../hooks/useFlag";
+import AIInsightsPanel from "../ai/AIInsightsPanel";
+import { useApolloClient } from "@apollo/client";
+import cytoscape from "cytoscape";
+import cola from "cytoscape-cola";
+import dagre from "cytoscape-dagre";
+import fcose from "cytoscape-fcose";
+import coseBilkent from "cytoscape-cose-bilkent";
+import popper from "cytoscape-popper";
+import ReactDOM from "react-dom/client";
+import GraphPopover from "./GraphPopover";
+import InvestigationPresence from "../InvestigationPresence";
 
 // Register extensions
 cytoscape.use(cola);
@@ -100,18 +94,13 @@ function CytoscapeGraph() {
   const cyRef = useRef(null);
   const containerRef = useRef(null);
   const [cy, setCy] = useState(null);
-  const { nodes, edges, selectedNode, selectedEdge } = useSelector(
-    (state) => state.graph,
+  const { nodes, edges, selectedNode, selectedEdge } = useSelector((state) => state.graph);
+  const { highlightEnabled, selectedInsightType, communityData, communityIdFilter } = useSelector(
+    (state) => state.aiInsights
   );
-  const {
-    highlightEnabled,
-    selectedInsightType,
-    communityData,
-    communityIdFilter,
-  } = useSelector((state) => state.aiInsights);
   const [loading, setLoading] = useState(false);
   const [layoutMenuAnchor, setLayoutMenuAnchor] = useState(null);
-  const [currentLayout, setCurrentLayout] = useState('fcose');
+  const [currentLayout, setCurrentLayout] = useState("fcose");
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
@@ -119,7 +108,7 @@ function CytoscapeGraph() {
   const [notification, setNotification] = useState(null);
   const [aiJobDialog, setAiJobDialog] = useState({
     open: false,
-    type: '',
+    type: "",
     loading: false,
   });
   const [filterSettings, setFilterSettings] = useState({
@@ -129,10 +118,10 @@ function CytoscapeGraph() {
   });
   const [benchmarkResults, setBenchmarkResults] = useState(null);
   const [lastViewportZoom, setLastViewportZoom] = useState(null);
-  const lodFeatureEnabled = useFlag('graph-lod');
-  const aggregationFeatureEnabled = useFlag('graph-lod-aggregation');
-  const benchmarkFeatureEnabled = useFlag('graph-lod-benchmark');
-  const [lodMode, setLodMode] = useState('high'); // "high", "medium", "low"
+  const lodFeatureEnabled = useFlag("graph-lod");
+  const aggregationFeatureEnabled = useFlag("graph-lod-aggregation");
+  const benchmarkFeatureEnabled = useFlag("graph-lod-benchmark");
+  const [lodMode, setLodMode] = useState("high"); // "high", "medium", "low"
   const [lodModeChanges, setLodModeChanges] = useState(0);
   const [suggestedEdges, setSuggestedEdges] = useState([]);
 
@@ -141,7 +130,7 @@ function CytoscapeGraph() {
   }, [lodMode]);
 
   // WebSocket connection for real-time updates
-  const socket = useSocket('wss://localhost:4000');
+  const socket = useSocket("wss://localhost:4000");
 
   // AI operations hook
   const aiOps = useAIOperations();
@@ -149,147 +138,145 @@ function CytoscapeGraph() {
   // Advanced styling configuration
   const cytoscapeStyle = [
     {
-      selector: 'node',
+      selector: "node",
       style: {
-        'background-color': (ele) =>
-          getNodeColor(ele.data('type'), ele.data('id')),
-        label: 'data(label)',
-        color: '#333',
-        'font-size': '12px',
-        'font-weight': 'bold',
-        'text-halign': 'center',
-        'text-valign': 'center',
-        'border-width': 2,
-        'border-color': '#fff',
-        width: (ele) => Math.max(30, ele.data('importance') * 10 || 30),
-        height: (ele) => Math.max(30, ele.data('importance') * 10 || 30),
-        'overlay-opacity': 0,
-        'transition-property': 'background-color, border-color, width, height',
-        'transition-duration': '0.3s',
+        "background-color": (ele) => getNodeColor(ele.data("type"), ele.data("id")),
+        label: "data(label)",
+        color: "#333",
+        "font-size": "12px",
+        "font-weight": "bold",
+        "text-halign": "center",
+        "text-valign": "center",
+        "border-width": 2,
+        "border-color": "#fff",
+        width: (ele) => Math.max(30, ele.data("importance") * 10 || 30),
+        height: (ele) => Math.max(30, ele.data("importance") * 10 || 30),
+        "overlay-opacity": 0,
+        "transition-property": "background-color, border-color, width, height",
+        "transition-duration": "0.3s",
       },
     },
     {
-      selector: 'node:selected',
+      selector: "node:selected",
       style: {
-        'border-color': '#FF6B35',
-        'border-width': 4,
-        'background-color': '#FFE5DB',
+        "border-color": "#FF6B35",
+        "border-width": 4,
+        "background-color": "#FFE5DB",
       },
     },
     {
-      selector: 'node:hover',
+      selector: "node:hover",
       style: {
-        'border-color': '#4CAF50',
-        'border-width': 3,
+        "border-color": "#4CAF50",
+        "border-width": 3,
       },
     },
     {
-      selector: 'edge',
+      selector: "edge",
       style: {
-        width: (ele) => Math.max(2, ele.data('weight') * 5 || 2),
-        'line-color': (ele) => getEdgeColor(ele.data('type')),
-        'target-arrow-color': (ele) => getEdgeColor(ele.data('type')),
-        'target-arrow-shape': 'triangle',
-        'curve-style': 'bezier',
-        label: 'data(label)',
-        'font-size': '10px',
-        'text-rotation': 'autorotate',
-        'text-margin-y': -10,
-        'edge-text-rotation': 'autorotate',
-        'overlay-opacity': 0,
-        'transition-property': 'line-color, width',
-        'transition-duration': '0.3s',
+        width: (ele) => Math.max(2, ele.data("weight") * 5 || 2),
+        "line-color": (ele) => getEdgeColor(ele.data("type")),
+        "target-arrow-color": (ele) => getEdgeColor(ele.data("type")),
+        "target-arrow-shape": "triangle",
+        "curve-style": "bezier",
+        label: "data(label)",
+        "font-size": "10px",
+        "text-rotation": "autorotate",
+        "text-margin-y": -10,
+        "edge-text-rotation": "autorotate",
+        "overlay-opacity": 0,
+        "transition-property": "line-color, width",
+        "transition-duration": "0.3s",
       },
     },
     {
-      selector: 'edge:selected',
+      selector: "edge:selected",
       style: {
-        'line-color': '#FF6B35',
-        'target-arrow-color': '#FF6B35',
+        "line-color": "#FF6B35",
+        "target-arrow-color": "#FF6B35",
         width: 6,
       },
     },
     {
-      selector: 'edge:hover',
+      selector: "edge:hover",
       style: {
-        'line-color': '#4CAF50',
-        'target-arrow-color': '#4CAF50',
+        "line-color": "#4CAF50",
+        "target-arrow-color": "#4CAF50",
       },
     },
     {
-      selector: 'edge[suggested]',
+      selector: "edge[suggested]",
       style: {
-        'line-style': 'dashed',
-        'line-color': '#999',
-        'target-arrow-color': '#999',
-        label: 'data(scoreLabel)',
-        'font-size': '10px',
-        'text-rotation': 'autorotate',
-        'text-margin-y': -10,
+        "line-style": "dashed",
+        "line-color": "#999",
+        "target-arrow-color": "#999",
+        label: "data(scoreLabel)",
+        "font-size": "10px",
+        "text-rotation": "autorotate",
+        "text-margin-y": -10,
       },
     },
     {
-      selector: '.highlighted',
+      selector: ".highlighted",
       style: {
-        'background-color': '#FFD700',
-        'line-color': '#FFD700',
-        'target-arrow-color': '#FFD700',
-        'transition-property':
-          'background-color, line-color, target-arrow-color, opacity',
-        'transition-duration': '0.3s',
+        "background-color": "#FFD700",
+        "line-color": "#FFD700",
+        "target-arrow-color": "#FFD700",
+        "transition-property": "background-color, line-color, target-arrow-color, opacity",
+        "transition-duration": "0.3s",
         opacity: 1,
       },
     },
     {
-      selector: '.dimmed',
+      selector: ".dimmed",
       style: {
         opacity: 0.3,
       },
     },
     {
-      selector: '.low-detail',
+      selector: ".low-detail",
       style: {
         width: 10,
         height: 10,
-        'border-width': 0,
-        'background-color': '#ccc',
-        'line-color': '#eee',
-        'target-arrow-shape': 'none',
-        'curve-style': 'haystack',
+        "border-width": 0,
+        "background-color": "#ccc",
+        "line-color": "#eee",
+        "target-arrow-shape": "none",
+        "curve-style": "haystack",
         opacity: 0.7,
       },
     },
     {
-      selector: '.aggregation-node',
+      selector: ".aggregation-node",
       style: {
-        'background-color': '#607d8b',
-        'border-color': '#eceff1',
-        'border-width': 2,
+        "background-color": "#607d8b",
+        "border-color": "#eceff1",
+        "border-width": 2,
         width: 50,
         height: 50,
-        shape: 'round-rectangle',
-        'font-size': '11px',
-        'text-wrap': 'wrap',
-        'text-max-width': 80,
+        shape: "round-rectangle",
+        "font-size": "11px",
+        "text-wrap": "wrap",
+        "text-max-width": 80,
       },
     },
     {
-      selector: '.aggregation-edge',
+      selector: ".aggregation-edge",
       style: {
-        'line-color': '#90a4ae',
-        'target-arrow-color': '#90a4ae',
-        'target-arrow-shape': 'triangle',
-        'curve-style': 'straight',
+        "line-color": "#90a4ae",
+        "target-arrow-color": "#90a4ae",
+        "target-arrow-shape": "triangle",
+        "curve-style": "straight",
         width: 4,
-        label: 'data(weightLabel)',
-        'font-size': '9px',
-        'text-rotation': 'autorotate',
+        label: "data(weightLabel)",
+        "font-size": "9px",
+        "text-rotation": "autorotate",
       },
     },
     {
-      selector: '.hidden-original',
+      selector: ".hidden-original",
       style: {
-        display: 'none',
+        display: "none",
       },
     },
   ];
@@ -298,8 +285,8 @@ function CytoscapeGraph() {
   const layoutConfigs = useMemo(
     () => ({
       fcose: {
-        name: 'fcose',
-        quality: 'default',
+        name: "fcose",
+        quality: "default",
         randomize: false,
         animate: true,
         animationDuration: 1000,
@@ -314,7 +301,7 @@ function CytoscapeGraph() {
         nestingFactor: 0.1,
       },
       cola: {
-        name: 'cola',
+        name: "cola",
         animate: true,
         animationDuration: 1000,
         refresh: 1,
@@ -330,18 +317,18 @@ function CytoscapeGraph() {
         nodeSpacing: 10,
       },
       dagre: {
-        name: 'dagre',
-        rankDir: 'TB',
+        name: "dagre",
+        rankDir: "TB",
         animate: true,
         animationDuration: 1000,
         fit: true,
         padding: 30,
         spacingFactor: 1.25,
         nodeDimensionsIncludeLabels: true,
-        ranker: 'network-simplex',
+        ranker: "network-simplex",
       },
-      'cose-bilkent': {
-        name: 'cose-bilkent',
+      "cose-bilkent": {
+        name: "cose-bilkent",
         animate: true,
         animationDuration: 1000,
         refresh: 30,
@@ -360,7 +347,7 @@ function CytoscapeGraph() {
         tilingPaddingHorizontal: 10,
       },
       circle: {
-        name: 'circle',
+        name: "circle",
         animate: true,
         animationDuration: 1000,
         fit: true,
@@ -372,7 +359,7 @@ function CytoscapeGraph() {
         sort: undefined,
       },
       grid: {
-        name: 'grid',
+        name: "grid",
         animate: true,
         animationDuration: 1000,
         fit: true,
@@ -386,44 +373,44 @@ function CytoscapeGraph() {
         cols: undefined,
       },
     }),
-    [],
+    []
   );
 
   const sampleNodes = [
     {
       data: {
-        id: '1',
-        label: 'John Doe',
-        type: 'PERSON',
+        id: "1",
+        label: "John Doe",
+        type: "PERSON",
         importance: 3,
-        properties: { age: 35, occupation: 'Engineer' },
+        properties: { age: 35, occupation: "Engineer" },
       },
     },
     {
       data: {
-        id: '2',
-        label: 'Acme Corp',
-        type: 'ORGANIZATION',
+        id: "2",
+        label: "Acme Corp",
+        type: "ORGANIZATION",
         importance: 4,
-        properties: { industry: 'Technology', employees: 1000 },
+        properties: { industry: "Technology", employees: 1000 },
       },
     },
     {
       data: {
-        id: '3',
-        label: 'New York',
-        type: 'LOCATION',
+        id: "3",
+        label: "New York",
+        type: "LOCATION",
         importance: 2,
-        properties: { country: 'USA', population: 8000000 },
+        properties: { country: "USA", population: 8000000 },
       },
     },
     {
       data: {
-        id: '4',
-        label: 'Document A',
-        type: 'DOCUMENT',
+        id: "4",
+        label: "Document A",
+        type: "DOCUMENT",
         importance: 1,
-        properties: { classification: 'Confidential', pages: 50 },
+        properties: { classification: "Confidential", pages: 50 },
       },
     },
   ];
@@ -431,35 +418,35 @@ function CytoscapeGraph() {
   const sampleEdges = [
     {
       data: {
-        id: 'e1',
-        source: '1',
-        target: '2',
-        label: 'WORKS_FOR',
-        type: 'EMPLOYMENT',
+        id: "e1",
+        source: "1",
+        target: "2",
+        label: "WORKS_FOR",
+        type: "EMPLOYMENT",
         weight: 0.8,
-        properties: { since: '2020-01-01', role: 'Senior Engineer' },
+        properties: { since: "2020-01-01", role: "Senior Engineer" },
       },
     },
     {
       data: {
-        id: 'e2',
-        source: '1',
-        target: '3',
-        label: 'LOCATED_AT',
-        type: 'LOCATION',
+        id: "e2",
+        source: "1",
+        target: "3",
+        label: "LOCATED_AT",
+        type: "LOCATION",
         weight: 0.6,
-        properties: { address: '123 Main St' },
+        properties: { address: "123 Main St" },
       },
     },
     {
       data: {
-        id: 'e3',
-        source: '2',
-        target: '4',
-        label: 'OWNS',
-        type: 'OWNERSHIP',
+        id: "e3",
+        source: "2",
+        target: "4",
+        label: "OWNS",
+        type: "OWNERSHIP",
         weight: 0.9,
-        properties: { acquired: '2019-05-15' },
+        properties: { acquired: "2019-05-15" },
       },
     },
   ];
@@ -472,9 +459,9 @@ function CytoscapeGraph() {
     if (!selectedNode) return;
     const fetchSuggestions = async () => {
       try {
-        const res = await fetch('/ai/suggest-links', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        const res = await fetch("/ai/suggest-links", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             graph: { nodes, edges },
             node_id: selectedNode.id,
@@ -486,7 +473,7 @@ function CytoscapeGraph() {
           setSuggestedEdges(data.suggestions || []);
         }
       } catch (err) {
-        console.error('Error fetching suggestions', err);
+        console.error("Error fetching suggestions", err);
       }
     };
     fetchSuggestions();
@@ -494,7 +481,7 @@ function CytoscapeGraph() {
 
   useEffect(() => {
     if (!cy) return;
-    cy.edges('[suggested]').remove();
+    cy.edges("[suggested]").remove();
     suggestedEdges.forEach((e) => {
       cy.add({
         data: {
@@ -519,14 +506,14 @@ function CytoscapeGraph() {
         maxZoom: 10,
         wheelSensitivity: 0.1,
         boxSelectionEnabled: true,
-        selectionType: 'single',
+        selectionType: "single",
       });
 
       // Store popover instances
       const popovers = new Map();
 
       const showPopover = (ele) => {
-        const popperDiv = document.createElement('div');
+        const popperDiv = document.createElement("div");
         document.body.appendChild(popperDiv);
         const root = ReactDOM.createRoot(popperDiv);
         root.render(<GraphPopover data={ele.data()} />);
@@ -534,8 +521,8 @@ function CytoscapeGraph() {
         const popper = ele.popper({
           content: () => popperDiv,
           popper: {
-            placement: 'top',
-            strategy: 'fixed',
+            placement: "top",
+            strategy: "fixed",
           },
         });
 
@@ -553,19 +540,19 @@ function CytoscapeGraph() {
       };
 
       // Event handlers
-      cytoscapeInstance.on('tap', 'node', (evt) => {
+      cytoscapeInstance.on("tap", "node", (evt) => {
         const node = evt.target;
         dispatch(setSelectedNode(node.data()));
         highlightConnectedElements(node);
       });
 
-      cytoscapeInstance.on('tap', 'edge', (evt) => {
+      cytoscapeInstance.on("tap", "edge", (evt) => {
         const edge = evt.target;
         dispatch(setSelectedEdge(edge.data()));
         highlightEdge(edge);
       });
 
-      cytoscapeInstance.on('tap', (evt) => {
+      cytoscapeInstance.on("tap", (evt) => {
         if (evt.target === cytoscapeInstance) {
           dispatch(setSelectedNode(null));
           dispatch(setSelectedEdge(null));
@@ -574,16 +561,16 @@ function CytoscapeGraph() {
       });
 
       // Mouseover/mouseout for popovers
-      cytoscapeInstance.on('mouseover', 'node, edge', (evt) => {
+      cytoscapeInstance.on("mouseover", "node, edge", (evt) => {
         showPopover(evt.target);
       });
 
-      cytoscapeInstance.on('mouseout', 'node, edge', (evt) => {
+      cytoscapeInstance.on("mouseout", "node, edge", (evt) => {
         hidePopover(evt.target);
       });
 
       // Context menu setup
-      cytoscapeInstance.on('cxttap', 'node', (evt) => {
+      cytoscapeInstance.on("cxttap", "node", (evt) => {
         const node = evt.target;
         showContextMenu(evt, node);
       });
@@ -599,11 +586,11 @@ function CytoscapeGraph() {
 
         if (!lodFeatureEnabled) return;
 
-        let nextMode = 'high';
+        let nextMode = "high";
         if (zoom < LOD_THRESHOLDS.medium || numElements > 10000) {
-          nextMode = 'low';
+          nextMode = "low";
         } else if (zoom < LOD_THRESHOLDS.high || numElements > 5000) {
-          nextMode = 'medium';
+          nextMode = "medium";
         }
 
         setLodMode((prev) => (prev === nextMode ? prev : nextMode));
@@ -611,8 +598,8 @@ function CytoscapeGraph() {
 
       // Initial LOD update and event listeners
       updateLOD(); // Call once on initialization
-      cytoscapeInstance.on('zoom', updateLOD);
-      cytoscapeInstance.on('pan', updateLOD);
+      cytoscapeInstance.on("zoom", updateLOD);
+      cytoscapeInstance.on("pan", updateLOD);
 
       setCy(cytoscapeInstance);
       cyRef.current = cytoscapeInstance;
@@ -621,8 +608,8 @@ function CytoscapeGraph() {
     return () => {
       if (cyRef.current) {
         // Remove event listeners
-        cyRef.current.off('zoom', updateLOD);
-        cyRef.current.off('pan', updateLOD);
+        cyRef.current.off("zoom", updateLOD);
+        cyRef.current.off("pan", updateLOD);
 
         // Clean up all active popovers before destroying Cytoscape instance
         popovers.forEach(({ popper, root, popperDiv }) => {
@@ -673,15 +660,14 @@ function CytoscapeGraph() {
     try {
       const url = import.meta?.env?.VITE_WS_URL || undefined;
       const token =
-        (typeof localStorage !== 'undefined' &&
-          (localStorage.getItem('auth_token') ||
-            localStorage.getItem('token'))) ||
+        (typeof localStorage !== "undefined" &&
+          (localStorage.getItem("auth_token") || localStorage.getItem("token"))) ||
         undefined;
       // Connect to analytics namespace
-      const { io } = require('socket.io-client');
-      socket = io(url ? `${url}/graph-analytics` : '/graph-analytics', {
+      const { io } = require("socket.io-client");
+      socket = io(url ? `${url}/graph-analytics` : "/graph-analytics", {
         autoConnect: true,
-        transports: ['websocket'],
+        transports: ["websocket"],
         auth: token ? { token } : undefined,
       });
       const getHeat = (v) => {
@@ -690,17 +676,17 @@ function CytoscapeGraph() {
         const g = Math.floor(180 * (1 - x));
         return `rgb(${r},${g},80)`;
       };
-      socket.on('result', (ev) => {
+      socket.on("result", (ev) => {
         const updates = ev?.activity?.nodes || [];
         updates.forEach(({ id, activityScore }) => {
           const node = cy.getElementById(String(id));
           if (node && node.length) {
-            node.data('activityScore', activityScore);
-            node.style('background-color', getHeat(activityScore));
+            node.data("activityScore", activityScore);
+            node.style("background-color", getHeat(activityScore));
           }
         });
       });
-      socket.on('complete', () => {
+      socket.on("complete", () => {
         /* no-op */
       });
     } catch (_) {
@@ -715,24 +701,24 @@ function CytoscapeGraph() {
 
   const getCommunityColor = (communityId) => {
     const colors = [
-      '#FF6B35',
-      '#6BFF35',
-      '#356BFF',
-      '#FF356B',
-      '#35FF6B',
-      '#6B35FF',
-      '#FFD700',
-      '#ADFF2F',
-      '#8A2BE2',
-      '#00CED1',
-      '#FF4500',
-      '#7FFF00',
-      '#DC143C',
-      '#00BFFF',
-      '#FF1493',
-      '#20B2AA',
-      '#BA55D3',
-      '#7B68EE',
+      "#FF6B35",
+      "#6BFF35",
+      "#356BFF",
+      "#FF356B",
+      "#35FF6B",
+      "#6B35FF",
+      "#FFD700",
+      "#ADFF2F",
+      "#8A2BE2",
+      "#00CED1",
+      "#FF4500",
+      "#7FFF00",
+      "#DC143C",
+      "#00BFFF",
+      "#FF1493",
+      "#20B2AA",
+      "#BA55D3",
+      "#7B68EE",
     ];
     return colors[communityId % colors.length];
   };
@@ -761,14 +747,12 @@ function CytoscapeGraph() {
       const layout = cy.layout(config);
       const startTime = performance.now();
       layout.run();
-      if (typeof layout?.promiseOn === 'function') {
+      if (typeof layout?.promiseOn === "function") {
         layout
-          .promiseOn('layoutstop')
+          .promiseOn("layoutstop")
           .then(() => {
             const duration = performance.now() - startTime;
-            console.log(
-              `Layout '${layoutName}' took ${duration.toFixed(2)} ms`,
-            );
+            console.log(`Layout '${layoutName}' took ${duration.toFixed(2)} ms`);
           })
           .catch(() => {
             /* ignore timing errors */
@@ -782,43 +766,40 @@ function CytoscapeGraph() {
 
     cy.batch(() => {
       cy.nodes().forEach((node) => {
-        node.removeClass('low-detail');
-        if (lodMode === 'low') {
-          if (node.hasClass('aggregation-node')) {
-            node.style('label', node.data('label') ?? '');
+        node.removeClass("low-detail");
+        if (lodMode === "low") {
+          if (node.hasClass("aggregation-node")) {
+            node.style("label", node.data("label") ?? "");
           } else {
-            node.addClass('low-detail');
-            node.style('label', '');
+            node.addClass("low-detail");
+            node.style("label", "");
           }
-        } else if (lodMode === 'medium') {
-          node.style('label', node.data('label') ?? '');
-          node.style('font-size', '10px');
+        } else if (lodMode === "medium") {
+          node.style("label", node.data("label") ?? "");
+          node.style("font-size", "10px");
         } else {
-          node.style('label', node.data('label') ?? '');
-          node.style('font-size', '12px');
+          node.style("label", node.data("label") ?? "");
+          node.style("font-size", "12px");
         }
       });
 
       cy.edges().forEach((edge) => {
-        edge.removeClass('low-detail');
-        if (lodMode === 'low') {
-          if (edge.hasClass('aggregation-edge')) {
-            edge.style('label', edge.data('weightLabel') ?? '');
-            edge.style('curve-style', 'straight');
+        edge.removeClass("low-detail");
+        if (lodMode === "low") {
+          if (edge.hasClass("aggregation-edge")) {
+            edge.style("label", edge.data("weightLabel") ?? "");
+            edge.style("curve-style", "straight");
           } else {
-            edge.addClass('low-detail');
-            edge.style('label', '');
-            edge.style('curve-style', 'haystack');
+            edge.addClass("low-detail");
+            edge.style("label", "");
+            edge.style("curve-style", "haystack");
           }
-        } else if (lodMode === 'medium') {
-          edge.style('label', '');
-          edge.style('curve-style', 'straight');
+        } else if (lodMode === "medium") {
+          edge.style("label", "");
+          edge.style("curve-style", "straight");
         } else {
-          edge.style(
-            'label',
-            edge.data('label') ?? edge.data('weightLabel') ?? '',
-          );
-          edge.style('curve-style', 'bezier');
+          edge.style("label", edge.data("label") ?? edge.data("weightLabel") ?? "");
+          edge.style("curve-style", "bezier");
         }
       });
     });
@@ -832,105 +813,84 @@ function CytoscapeGraph() {
       return;
     }
 
-    if (lodMode === 'low') {
+    if (lodMode === "low") {
       buildAggregatedView();
     } else {
       restoreAggregatedView();
     }
-  }, [
-    cy,
-    lodMode,
-    aggregationFeatureEnabled,
-    buildAggregatedView,
-    restoreAggregatedView,
-  ]);
+  }, [cy, lodMode, aggregationFeatureEnabled, buildAggregatedView, restoreAggregatedView]);
   // Apply AI Insights highlighting
   useEffect(() => {
     if (!cy) return;
 
     if (
       highlightEnabled &&
-      selectedInsightType === 'community_detection' &&
+      selectedInsightType === "community_detection" &&
       Object.keys(communityData).length > 0
     ) {
       cy.nodes().forEach((node) => {
-        const nodeId = node.data('id');
+        const nodeId = node.data("id");
         const communityId = communityData[nodeId];
         const [min, max] = communityIdFilter;
 
         if (communityId !== undefined) {
           if (communityId >= min && communityId <= max) {
-            node.style('background-color', getCommunityColor(communityId));
-            node.removeClass('dimmed');
+            node.style("background-color", getCommunityColor(communityId));
+            node.removeClass("dimmed");
           } else {
-            node.style(
-              'background-color',
-              getNodeColor(node.data('type'), node.data('id')),
-            ); // Revert to default color
-            node.addClass('dimmed');
+            node.style("background-color", getNodeColor(node.data("type"), node.data("id"))); // Revert to default color
+            node.addClass("dimmed");
           }
         } else {
           // If node has no community data, revert to default and dim
-          node.style(
-            'background-color',
-            getNodeColor(node.data('type'), node.data('id')),
-          );
-          node.addClass('dimmed');
+          node.style("background-color", getNodeColor(node.data("type"), node.data("id")));
+          node.addClass("dimmed");
         }
       });
     } else {
       // Reset node colors to default based on type and remove dimming
       cy.nodes().forEach((node) => {
-        node.style(
-          'background-color',
-          getNodeColor(node.data('type'), node.data('id')),
-        );
-        node.removeClass('dimmed');
+        node.style("background-color", getNodeColor(node.data("type"), node.data("id")));
+        node.removeClass("dimmed");
       });
     }
-  }, [
-    cy,
-    highlightEnabled,
-    selectedInsightType,
-    communityData,
-    communityIdFilter,
-  ]);
+  }, [cy, highlightEnabled, selectedInsightType, communityData, communityIdFilter]);
 
   const getNodeColor = (type, nodeId) => {
     if (
       highlightEnabled &&
-      selectedInsightType === 'community_detection' &&
+      selectedInsightType === "community_detection" &&
       communityData[nodeId] !== undefined
     ) {
       return getCommunityColor(communityData[nodeId]);
     }
     const colors = {
-      PERSON: '#4caf50',
-      ORGANIZATION: '#2196f3',
-      LOCATION: '#ff9800',
-      DOCUMENT: '#9c27b0',
-      EVENT: '#f44336',
-      ASSET: '#795548',
-      COMMUNICATION: '#607d8b',
+      PERSON: "#4caf50",
+      ORGANIZATION: "#2196f3",
+      LOCATION: "#ff9800",
+      DOCUMENT: "#9c27b0",
+      EVENT: "#f44336",
+      ASSET: "#795548",
+      COMMUNICATION: "#607d8b",
     };
-    return colors[type] || '#9e9e9e';
+    return colors[type] || "#9e9e9e";
   };
 
   const getEdgeColor = (type) => {
     const colors = {
-      EMPLOYMENT: '#4caf50',
-      LOCATION: '#ff9800',
-      OWNERSHIP: '#2196f3',
-      COMMUNICATION: '#607d8b',
-      FINANCIAL: '#795548',
-      FAMILY: '#e91e63',
-      ASSOCIATION: '#9c27b0',
+      EMPLOYMENT: "#4caf50",
+      LOCATION: "#ff9800",
+      OWNERSHIP: "#2196f3",
+      COMMUNICATION: "#607d8b",
+      FINANCIAL: "#795548",
+      FAMILY: "#e91e63",
+      ASSOCIATION: "#9c27b0",
     };
-    return colors[type] || '#666';
+    return colors[type] || "#666";
   };
 
   const generateBenchmarkGraph = useCallback((nodeCount, edgeCount) => {
-    const nodeTypes = ['PERSON', 'ORGANIZATION', 'LOCATION', 'DOCUMENT'];
+    const nodeTypes = ["PERSON", "ORGANIZATION", "LOCATION", "DOCUMENT"];
 
     const benchmarkNodes = Array.from({ length: nodeCount }, (_, idx) => ({
       data: {
@@ -952,7 +912,7 @@ function CytoscapeGraph() {
           source,
           target,
           label: `REL_${(i % 7) + 1}`,
-          type: 'ASSOCIATION',
+          type: "ASSOCIATION",
           weight: (i % 5) / 2 + 0.5,
         },
       });
@@ -965,23 +925,23 @@ function CytoscapeGraph() {
     if (!cy) return;
 
     cy.batch(() => {
-      cy.nodes('.aggregation-node').remove();
-      cy.edges('.aggregation-edge').remove();
-      cy.nodes('.hidden-original').removeClass('hidden-original');
-      cy.edges('.hidden-original').removeClass('hidden-original');
+      cy.nodes(".aggregation-node").remove();
+      cy.edges(".aggregation-edge").remove();
+      cy.nodes(".hidden-original").removeClass("hidden-original");
+      cy.edges(".hidden-original").removeClass("hidden-original");
     });
   }, [cy]);
 
   const buildAggregatedView = useCallback(() => {
     if (!cy) return;
 
-    cy.nodes('.aggregation-node').remove();
-    cy.edges('.aggregation-edge').remove();
+    cy.nodes(".aggregation-node").remove();
+    cy.edges(".aggregation-edge").remove();
 
     const clusters = new Map();
 
     cy.nodes().forEach((node) => {
-      const clusterKey = node.data('community') ?? node.data('type') ?? 'Other';
+      const clusterKey = node.data("community") ?? node.data("type") ?? "Other";
       if (!clusters.has(clusterKey)) {
         clusters.set(clusterKey, []);
       }
@@ -995,43 +955,41 @@ function CytoscapeGraph() {
 
     cy.batch(() => {
       cy.nodes().forEach((node) => {
-        if (!node.hasClass('aggregation-node')) {
-          node.addClass('hidden-original');
+        if (!node.hasClass("aggregation-node")) {
+          node.addClass("hidden-original");
         }
       });
 
       cy.edges().forEach((edge) => {
-        if (!edge.hasClass('aggregation-edge')) {
-          edge.addClass('hidden-original');
+        if (!edge.hasClass("aggregation-edge")) {
+          edge.addClass("hidden-original");
         }
       });
     });
 
-    const aggregationNodes = Array.from(clusters.entries()).map(
-      ([clusterKey, members], idx) => {
-        const safeKey = `${clusterKey}`.replace(/[^a-zA-Z0-9_-]/g, '-');
-        return {
-          data: {
-            id: `agg-${safeKey || idx}`,
-            label: `${clusterKey} (${members.length})`,
-            memberIds: members.map((member) => member.id()),
-            type: 'AGGREGATION',
-          },
-          classes: 'aggregation-node',
-        };
-      },
-    );
+    const aggregationNodes = Array.from(clusters.entries()).map(([clusterKey, members], idx) => {
+      const safeKey = `${clusterKey}`.replace(/[^a-zA-Z0-9_-]/g, "-");
+      return {
+        data: {
+          id: `agg-${safeKey || idx}`,
+          label: `${clusterKey} (${members.length})`,
+          memberIds: members.map((member) => member.id()),
+          type: "AGGREGATION",
+        },
+        classes: "aggregation-node",
+      };
+    });
 
     const aggregationEdgesMap = new Map();
     cy.edges().forEach((edge) => {
-      if (edge.hasClass('aggregation-edge')) return;
+      if (edge.hasClass("aggregation-edge")) return;
 
       const sourceKey = nodeToCluster.get(edge.source().id());
       const targetKey = nodeToCluster.get(edge.target().id());
       if (!sourceKey || !targetKey) return;
 
-      const safeSource = `${sourceKey}`.replace(/[^a-zA-Z0-9_-]/g, '-');
-      const safeTarget = `${targetKey}`.replace(/[^a-zA-Z0-9_-]/g, '-');
+      const safeSource = `${sourceKey}`.replace(/[^a-zA-Z0-9_-]/g, "-");
+      const safeTarget = `${targetKey}`.replace(/[^a-zA-Z0-9_-]/g, "-");
       const mapKey = `${safeSource}->${safeTarget}`;
 
       const prev = aggregationEdgesMap.get(mapKey);
@@ -1051,8 +1009,8 @@ function CytoscapeGraph() {
           weightLabel: `${count} links`,
           weight: count,
         },
-        classes: 'aggregation-edge',
-      }),
+        classes: "aggregation-edge",
+      })
     );
 
     cy.add([...aggregationNodes, ...aggregationEdges]);
@@ -1064,18 +1022,18 @@ function CytoscapeGraph() {
     const benchmarkCy = cytoscape({ headless: true, elements: [] });
     const { nodes: benchNodes, edges: benchEdges } = generateBenchmarkGraph(
       BENCHMARK_GRAPH_SIZE.nodes,
-      BENCHMARK_GRAPH_SIZE.edges,
+      BENCHMARK_GRAPH_SIZE.edges
     );
 
     const start = performance.now();
     benchmarkCy.add([...benchNodes, ...benchEdges]);
     const afterAdd = performance.now();
 
-    const layout = benchmarkCy.layout({ name: 'cose', animate: false, randomize: true });
+    const layout = benchmarkCy.layout({ name: "cose", animate: false, randomize: true });
     layout.run();
 
-    if (typeof layout.promiseOn === 'function') {
-      await layout.promiseOn('layoutstop').catch(() => {});
+    if (typeof layout.promiseOn === "function") {
+      await layout.promiseOn("layoutstop").catch(() => {});
     }
 
     const end = performance.now();
@@ -1093,7 +1051,7 @@ function CytoscapeGraph() {
       message: `LOD benchmark: ${benchNodes.length} nodes/${benchEdges.length} edges processed in ${(
         end - start
       ).toFixed(1)} ms`,
-      severity: 'info',
+      severity: "info",
     });
   }, [benchmarkFeatureEnabled, generateBenchmarkGraph]);
 
@@ -1101,41 +1059,39 @@ function CytoscapeGraph() {
     (node) => {
       if (!cy) return;
 
-      cy.elements().removeClass('highlighted dimmed');
+      cy.elements().removeClass("highlighted dimmed");
 
       const connectedEdges = node.connectedEdges();
       const connectedNodes = connectedEdges.connectedNodes();
 
-      node.addClass('highlighted');
-      connectedEdges.addClass('highlighted');
-      connectedNodes.addClass('highlighted');
+      node.addClass("highlighted");
+      connectedEdges.addClass("highlighted");
+      connectedNodes.addClass("highlighted");
 
-      cy.elements()
-        .difference(node.union(connectedEdges).union(connectedNodes))
-        .addClass('dimmed');
+      cy.elements().difference(node.union(connectedEdges).union(connectedNodes)).addClass("dimmed");
     },
-    [cy],
+    [cy]
   );
 
   const highlightEdge = useCallback(
     (edge) => {
       if (!cy) return;
 
-      cy.elements().removeClass('highlighted dimmed');
+      cy.elements().removeClass("highlighted dimmed");
 
       const connectedNodes = edge.connectedNodes();
 
-      edge.addClass('highlighted');
-      connectedNodes.addClass('highlighted');
+      edge.addClass("highlighted");
+      connectedNodes.addClass("highlighted");
 
-      cy.elements().difference(edge.union(connectedNodes)).addClass('dimmed');
+      cy.elements().difference(edge.union(connectedNodes)).addClass("dimmed");
     },
-    [cy],
+    [cy]
   );
 
   const clearHighlights = useCallback(() => {
     if (!cy) return;
-    cy.elements().removeClass('highlighted dimmed');
+    cy.elements().removeClass("highlighted dimmed");
   }, [cy]);
 
   const applyLayout = (layoutName) => {
@@ -1163,7 +1119,7 @@ function CytoscapeGraph() {
       data: {
         id: `node_${Date.now()}`,
         label: `New Entity ${nodes.length + 1}`,
-        type: 'PERSON',
+        type: "PERSON",
         importance: Math.random() * 5,
         properties: {},
       },
@@ -1181,45 +1137,45 @@ function CytoscapeGraph() {
 
   const showContextMenu = (evt, element) => {
     // Placeholder for context menu functionality
-    console.log('Context menu for:', element.data());
+    console.log("Context menu for:", element.data());
   };
 
   // WebSocket event handlers
   useEffect(() => {
     if (socket && realTimeEnabled) {
-      socket.on('graph:node:added', (nodeData) => {
+      socket.on("graph:node:added", (nodeData) => {
         dispatch(addNode(nodeData));
         setNotification({
-          message: 'New node added to graph',
-          severity: 'info',
+          message: "New node added to graph",
+          severity: "info",
         });
       });
 
-      socket.on('graph:edge:added', (edgeData) => {
+      socket.on("graph:edge:added", (edgeData) => {
         dispatch(addEdge(edgeData));
         setNotification({
-          message: 'New relationship added',
-          severity: 'info',
+          message: "New relationship added",
+          severity: "info",
         });
       });
 
-      socket.on('graph:node:updated', (nodeData) => {
+      socket.on("graph:node:updated", (nodeData) => {
         // Update existing node
         if (cy) {
           const node = cy.getElementById(nodeData.id);
           if (node.length) {
             node.data(nodeData);
-            setNotification({ message: 'Node updated', severity: 'info' });
+            setNotification({ message: "Node updated", severity: "info" });
           }
         }
       });
 
-      socket.on('ai:insight:created', (insight) => {
+      socket.on("ai:insight:created", (insight) => {
         setNotification({
           message: `New AI insight: ${insight.kind}`,
-          severity: 'success',
+          severity: "success",
         });
-        if (insight.kind === 'community_detection' && insight.data) {
+        if (insight.kind === "community_detection" && insight.data) {
           const newCommunityData = {};
           insight.data.forEach((item) => {
             if (item.nodeId && item.communityId !== undefined) {
@@ -1231,68 +1187,68 @@ function CytoscapeGraph() {
       });
 
       return () => {
-        socket.off('graph:node:added');
-        socket.off('graph:edge:added');
-        socket.off('graph:node:updated');
-        socket.off('ai:insight:created');
+        socket.off("graph:node:added");
+        socket.off("graph:edge:added");
+        socket.off("graph:node:updated");
+        socket.off("ai:insight:created");
       };
     }
   }, [socket, realTimeEnabled, cy, dispatch]);
 
   // AI Operations
   const handleAILinkPrediction = async () => {
-    setAiJobDialog({ open: true, type: 'link_prediction', loading: true });
+    setAiJobDialog({ open: true, type: "link_prediction", loading: true });
     try {
-      const result = await aiOps.predictLinks(apollo, id || 'current', 50);
+      const result = await aiOps.predictLinks(apollo, id || "current", 50);
       setNotification({
         message: `Link prediction job queued: ${result.data.aiLinkPredict.id}`,
-        severity: 'success',
+        severity: "success",
       });
     } catch (error) {
       setNotification({
-        message: 'Failed to start link prediction',
-        severity: 'error',
+        message: "Failed to start link prediction",
+        severity: "error",
       });
     } finally {
-      setAiJobDialog({ open: false, type: '', loading: false });
+      setAiJobDialog({ open: false, type: "", loading: false });
     }
   };
 
   const handleAICommunityDetection = async () => {
-    setAiJobDialog({ open: true, type: 'community_detection', loading: true });
+    setAiJobDialog({ open: true, type: "community_detection", loading: true });
     try {
-      const result = await aiOps.detectCommunities(apollo, id || 'current');
+      const result = await aiOps.detectCommunities(apollo, id || "current");
       setNotification({
         message: `Community detection job queued: ${result.data.aiCommunityDetect.id}`,
-        severity: 'success',
+        severity: "success",
       });
     } catch (error) {
       setNotification({
-        message: 'Failed to start community detection',
-        severity: 'error',
+        message: "Failed to start community detection",
+        severity: "error",
       });
     } finally {
-      setAiJobDialog({ open: false, type: '', loading: false });
+      setAiJobDialog({ open: false, type: "", loading: false });
     }
   };
 
   const handleAIEntityExtraction = async () => {
     if (selectedNode && selectedNode.text) {
-      setAiJobDialog({ open: true, type: 'entity_extraction', loading: true });
+      setAiJobDialog({ open: true, type: "entity_extraction", loading: true });
       try {
         const docs = [{ id: selectedNode.id, text: selectedNode.text }];
         const result = await aiOps.extractEntities(apollo, docs);
         setNotification({
           message: `Entity extraction job queued: ${result.data.aiExtractEntities.id}`,
-          severity: 'success',
+          severity: "success",
         });
       } catch (error) {
         setNotification({
-          message: 'Failed to start entity extraction',
-          severity: 'error',
+          message: "Failed to start entity extraction",
+          severity: "error",
         });
       } finally {
-        setAiJobDialog({ open: false, type: '', loading: false });
+        setAiJobDialog({ open: false, type: "", loading: false });
       }
     }
   };
@@ -1300,7 +1256,7 @@ function CytoscapeGraph() {
   const handleExport = () => {
     if (cy) {
       const png = cy.png({ scale: 2, full: true });
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.download = `graph-${Date.now()}.png`;
       link.href = png;
       link.click();
@@ -1321,28 +1277,28 @@ function CytoscapeGraph() {
     let content, filename, type;
 
     switch (format) {
-      case 'json':
+      case "json":
         content = JSON.stringify(data, null, 2);
         filename = `graph-export-${Date.now()}.json`;
-        type = 'application/json';
+        type = "application/json";
         break;
-      case 'csv':
+      case "csv":
         // Convert to CSV format
         const csvNodes = nodes
           .map(
             (n) =>
-              `"${n.data?.id || n.id}","${n.data?.label || n.label}","${n.data?.type || n.type}"`,
+              `"${n.data?.id || n.id}","${n.data?.label || n.label}","${n.data?.type || n.type}"`
           )
-          .join('\n');
+          .join("\n");
         const csvEdges = edges
           .map(
             (e) =>
-              `"${e.data?.source || e.source}","${e.data?.target || e.target}","${e.data?.label || e.label}"`,
+              `"${e.data?.source || e.source}","${e.data?.target || e.target}","${e.data?.label || e.label}"`
           )
-          .join('\n');
+          .join("\n");
         content = `Nodes\nid,label,type\n${csvNodes}\n\nEdges\nsource,target,label\n${csvEdges}`;
         filename = `graph-export-${Date.now()}.csv`;
-        type = 'text/csv';
+        type = "text/csv";
         break;
       default:
         return;
@@ -1350,7 +1306,7 @@ function CytoscapeGraph() {
 
     const blob = new Blob([content], { type });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
     link.download = filename;
     link.click();
@@ -1358,19 +1314,19 @@ function CytoscapeGraph() {
   };
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
           mb: 2,
         }}
       >
         <Typography variant="h5" component="h1" fontWeight="bold">
           Advanced Graph Explorer {id && `- Investigation ${id}`}
         </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: "flex", gap: 1 }}>
           <Button
             variant="outlined"
             startIcon={<AccountTree />}
@@ -1386,11 +1342,7 @@ function CytoscapeGraph() {
             AI Tools
           </Button>
           {benchmarkFeatureEnabled && (
-            <Button
-              variant="outlined"
-              startIcon={<Timeline />}
-              onClick={runPerformanceBenchmark}
-            >
+            <Button variant="outlined" startIcon={<Timeline />} onClick={runPerformanceBenchmark}>
               LOD Benchmark
             </Button>
           )}
@@ -1399,21 +1351,21 @@ function CytoscapeGraph() {
             startIcon={<FilterList />} // Using FilterList icon for LOD for now
             onClick={() =>
               setLodMode((prev) => {
-                if (prev === 'high') return 'medium';
-                if (prev === 'medium') return 'low';
-                return 'high';
+                if (prev === "high") return "medium";
+                if (prev === "medium") return "low";
+                return "high";
               })
             }
           >
             LOD: {lodMode.toUpperCase()}
           </Button>
           <Button
-            variant={realTimeEnabled ? 'contained' : 'outlined'}
+            variant={realTimeEnabled ? "contained" : "outlined"}
             startIcon={realTimeEnabled ? <Stop /> : <PlayArrow />}
             onClick={() => setRealTimeEnabled(!realTimeEnabled)}
-            color={realTimeEnabled ? 'success' : 'primary'}
+            color={realTimeEnabled ? "success" : "primary"}
           >
-            Real-time: {realTimeEnabled ? 'ON' : 'OFF'}
+            Real-time: {realTimeEnabled ? "ON" : "OFF"}
           </Button>
           <Button
             variant="outlined"
@@ -1433,7 +1385,7 @@ function CytoscapeGraph() {
           <Button
             variant="contained"
             startIcon={<Download />}
-            onClick={() => handleExportData('json')}
+            onClick={() => handleExportData("json")}
           >
             Export
           </Button>
@@ -1442,49 +1394,33 @@ function CytoscapeGraph() {
 
       {id && <InvestigationPresence />}
 
-      <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-        <Chip
-          label={`Nodes: ${nodes.length}`}
-          color="primary"
-          variant="outlined"
-        />
-        <Chip
-          label={`Edges: ${edges.length}`}
-          color="secondary"
-          variant="outlined"
-        />
+      <Box sx={{ display: "flex", gap: 1, mb: 2, flexWrap: "wrap" }}>
+        <Chip label={`Nodes: ${nodes.length}`} color="primary" variant="outlined" />
+        <Chip label={`Edges: ${edges.length}`} color="secondary" variant="outlined" />
         <Chip
           label={`Layout: ${currentLayout}`}
-          color={loading ? 'default' : 'success'}
+          color={loading ? "default" : "success"}
           variant="outlined"
         />
         <Chip
-          label={`Status: ${loading ? 'Loading...' : 'Ready'}`}
-          color={loading ? 'warning' : 'success'}
+          label={`Status: ${loading ? "Loading..." : "Ready"}`}
+          color={loading ? "warning" : "success"}
           variant="outlined"
         />
         <Chip label={`LOD Mode: ${lodMode}`} color="info" variant="outlined" />
-        <Chip
-          label={`LOD Changes: ${lodModeChanges}`}
-          color="info"
-          variant="outlined"
-        />
+        <Chip label={`LOD Changes: ${lodModeChanges}`} color="info" variant="outlined" />
         <Chip
           label={`Viewport Zoom: ${
-            lastViewportZoom !== null ? lastViewportZoom.toFixed(2) : 'n/a'
+            lastViewportZoom !== null ? lastViewportZoom.toFixed(2) : "n/a"
           }`}
           color="default"
           variant="outlined"
         />
         <Chip
           label={`Aggregation: ${
-            aggregationFeatureEnabled && lodMode === 'low'
-              ? 'Supernodes active'
-              : 'Full detail'
+            aggregationFeatureEnabled && lodMode === "low" ? "Supernodes active" : "Full detail"
           }`}
-          color={
-            aggregationFeatureEnabled && lodMode === 'low' ? 'success' : 'default'
-          }
+          color={aggregationFeatureEnabled && lodMode === "low" ? "success" : "default"}
           variant="outlined"
         />
         {benchmarkResults && (
@@ -1497,27 +1433,25 @@ function CytoscapeGraph() {
       </Box>
 
       <Alert severity="info" sx={{ mb: 2 }}>
-        Advanced graph visualization with Cytoscape.js. Level of detail now
-        responds to zoom: labels and edge curves simplify as you zoom out, and
-        optional supernode aggregation collapses clusters at low zoom. Use the
-        LOD toggle to override and the benchmark control to validate
+        Advanced graph visualization with Cytoscape.js. Level of detail now responds to zoom: labels
+        and edge curves simplify as you zoom out, and optional supernode aggregation collapses
+        clusters at low zoom. Use the LOD toggle to override and the benchmark control to validate
         performance.
       </Alert>
 
       {benchmarkResults && (
         <Alert severity="success" sx={{ mb: 2 }}>
           LOD benchmark processed {benchmarkResults.nodes} nodes and
-          {` ${benchmarkResults.edges}`} edges in {benchmarkResults.totalMs} ms
-          ({benchmarkResults.ingestMs} ms ingest, {benchmarkResults.layoutMs} ms
-          layout).
+          {` ${benchmarkResults.edges}`} edges in {benchmarkResults.totalMs} ms (
+          {benchmarkResults.ingestMs} ms ingest, {benchmarkResults.layoutMs} ms layout).
         </Alert>
       )}
 
       <Paper
         sx={{
           flexGrow: 1,
-          position: 'relative',
-          overflow: 'hidden',
+          position: "relative",
+          overflow: "hidden",
           minHeight: 500,
         }}
         elevation={2}
@@ -1526,53 +1460,41 @@ function CytoscapeGraph() {
           ref={containerRef}
           data-testid="cytoscape-graph-container"
           style={{
-            width: '100%',
-            height: '100%',
-            background: '#fafafa',
+            width: "100%",
+            height: "100%",
+            background: "#fafafa",
           }}
         />
 
         <Box
           sx={{
-            position: 'absolute',
+            position: "absolute",
             top: 16,
             right: 16,
-            display: 'flex',
-            flexDirection: 'column',
+            display: "flex",
+            flexDirection: "column",
             gap: 1,
           }}
         >
           <Tooltip title="Zoom In">
-            <IconButton
-              size="small"
-              sx={{ bgcolor: 'white' }}
-              onClick={handleZoomIn}
-            >
+            <IconButton size="small" sx={{ bgcolor: "white" }} onClick={handleZoomIn}>
               <ZoomIn />
             </IconButton>
           </Tooltip>
           <Tooltip title="Zoom Out">
-            <IconButton
-              size="small"
-              sx={{ bgcolor: 'white' }}
-              onClick={handleZoomOut}
-            >
+            <IconButton size="small" sx={{ bgcolor: "white" }} onClick={handleZoomOut}>
               <ZoomOut />
             </IconButton>
           </Tooltip>
           <Tooltip title="Fit to View">
-            <IconButton
-              size="small"
-              sx={{ bgcolor: 'white' }}
-              onClick={handleCenter}
-            >
+            <IconButton size="small" sx={{ bgcolor: "white" }} onClick={handleCenter}>
               <CenterFocusStrong />
             </IconButton>
           </Tooltip>
           <Tooltip title="Settings">
             <IconButton
               size="small"
-              sx={{ bgcolor: 'white' }}
+              sx={{ bgcolor: "white" }}
               onClick={() => setSettingsOpen(true)}
             >
               <Settings />
@@ -1582,7 +1504,7 @@ function CytoscapeGraph() {
 
         <Fab
           color="primary"
-          sx={{ position: 'absolute', bottom: 16, right: 16 }}
+          sx={{ position: "absolute", bottom: 16, right: 16 }}
           onClick={handleAddNode}
         >
           <Add />
@@ -1611,7 +1533,7 @@ function CytoscapeGraph() {
         anchor="right"
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
-        sx={{ '& .MuiDrawer-paper': { width: 350, p: 2 } }}
+        sx={{ "& .MuiDrawer-paper": { width: 350, p: 2 } }}
       >
         <Typography variant="h6" sx={{ mb: 2 }}>
           Graph Settings
@@ -1640,9 +1562,7 @@ function CytoscapeGraph() {
         <Typography gutterBottom>Time Range</Typography>
         <Slider
           value={filterSettings.timeRange}
-          onChange={(e, value) =>
-            setFilterSettings((prev) => ({ ...prev, timeRange: value }))
-          }
+          onChange={(e, value) => setFilterSettings((prev) => ({ ...prev, timeRange: value }))}
           valueLabelDisplay="auto"
           sx={{ mb: 2 }}
         />
@@ -1656,9 +1576,9 @@ function CytoscapeGraph() {
       {(selectedNode || selectedEdge) && (
         <Paper sx={{ mt: 2, p: 2 }}>
           <Typography variant="h6" sx={{ mb: 1 }}>
-            {selectedNode ? 'Selected Node' : 'Selected Edge'}
+            {selectedNode ? "Selected Node" : "Selected Edge"}
           </Typography>
-          <pre style={{ fontSize: '12px', overflow: 'auto' }}>
+          <pre style={{ fontSize: "12px", overflow: "auto" }}>
             {JSON.stringify(selectedNode || selectedEdge, null, 2)}
           </pre>
         </Paper>
@@ -1668,18 +1588,13 @@ function CytoscapeGraph() {
       <Dialog
         open={aiJobDialog.open}
         onClose={() =>
-          !aiJobDialog.loading &&
-          setAiJobDialog({ open: false, type: '', loading: false })
+          !aiJobDialog.loading && setAiJobDialog({ open: false, type: "", loading: false })
         }
       >
         <DialogTitle>AI Analysis in Progress</DialogTitle>
-        <DialogContent
-          sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 300 }}
-        >
+        <DialogContent sx={{ display: "flex", alignItems: "center", gap: 2, minWidth: 300 }}>
           <CircularProgress size={24} />
-          <Typography>
-            Running {aiJobDialog.type.replace('_', ' ')} analysis...
-          </Typography>
+          <Typography>Running {aiJobDialog.type.replace("_", " ")} analysis...</Typography>
         </DialogContent>
       </Dialog>
 
@@ -1688,12 +1603,9 @@ function CytoscapeGraph() {
         open={!!notification}
         autoHideDuration={4000}
         onClose={() => setNotification(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
-        <Alert
-          onClose={() => setNotification(null)}
-          severity={notification?.severity || 'info'}
-        >
+        <Alert onClose={() => setNotification(null)} severity={notification?.severity || "info"}>
           {notification?.message}
         </Alert>
       </Snackbar>

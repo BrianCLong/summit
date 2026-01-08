@@ -6,10 +6,12 @@
 - **Requested image tag:** `<stable-image-tag>` (placeholder; choose last known good)
 
 ## Attempt
+
 - Intended command: `gh workflow run cd-rollback.yml --ref main -f environment=staging -f image_tag=<stable-image-tag>`
 - Result: Not executed in this workspace because GitHub CLI (`gh`) is not installed and no GitHub token/secrets are available in the environment to authorize the dispatch.
 
 ## Next steps to execute in real environment
+
 1. Install GitHub CLI and authenticate with a token that has `workflow` scope.
 2. Run the command above from a machine with network access.
 3. Monitor **Actions → CD Rollback** for job status; confirm compose pull/up completes.

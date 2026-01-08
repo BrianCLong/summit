@@ -8,7 +8,7 @@
  * which often leads to "merge hell" with lockfiles.
  */
 
-const { execSync } = require('child_process');
+const { execSync } = require("child_process");
 
 // Configuration
 const PACKAGE_JSON_PATTERN = /package\.json$/;
@@ -16,7 +16,7 @@ const LOCKFILE_PATTERN = /(package-lock\.json|pnpm-lock\.yaml|yarn\.lock)$/;
 
 function run(command) {
   try {
-    return execSync(command, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).trim();
+    return execSync(command, { encoding: "utf8", stdio: ["pipe", "pipe", "ignore"] }).trim();
   } catch (e) {
     return null;
   }
@@ -24,24 +24,24 @@ function run(command) {
 
 function getOpenPRs() {
   console.log("Fetching open PRs...");
-  const json = run('gh pr list --state open --limit 50 --json number,title,author,url,mergeable');
+  const json = run("gh pr list --state open --limit 50 --json number,title,author,url,mergeable");
   return json ? JSON.parse(json) : [];
 }
 
 function getChangedFiles(prNumber) {
   const output = run(`gh pr diff ${prNumber} --name-only`);
-  return output ? output.split('\n').filter(Boolean) : [];
+  return output ? output.split("\n").filter(Boolean) : [];
 }
 
 function analyze() {
   const prs = getOpenPRs();
   const packageJsonMap = new Map(); // filepath -> [prNumber]
-  const lockfileMap = new Map();    // filepath -> [prNumber]
+  const lockfileMap = new Map(); // filepath -> [prNumber]
 
   console.log(`Analyzing ${prs.length} open PRs...`);
 
   for (const pr of prs) {
-    if (pr.mergeable === 'CONFLICTING') {
+    if (pr.mergeable === "CONFLICTING") {
       console.log(`⚠️  PR #${pr.number} "${pr.title}" has git conflicts.`);
     }
 
@@ -67,7 +67,7 @@ function analyze() {
     if (prNumbers.length > 1) {
       conflictFound = true;
       console.log(`🔥 CONFLICT RISK: ${file}`);
-      console.log(`   Modified by PRs: ${prNumbers.map(n => '#' + n).join(', ')}`);
+      console.log(`   Modified by PRs: ${prNumbers.map((n) => "#" + n).join(", ")}`);
       // Future: Parse actual dependency lines to see if they conflict semantically
     }
   });
@@ -82,7 +82,9 @@ function analyze() {
   console.log("\n=== Lockfile Churn ===");
   lockfileMap.forEach((prNumbers, file) => {
     if (prNumbers.length > 1) {
-      console.log(`DATA RACE: ${file} is being modified by PRs ${prNumbers.map(n => '#' + n).join(', ')}`);
+      console.log(
+        `DATA RACE: ${file} is being modified by PRs ${prNumbers.map((n) => "#" + n).join(", ")}`
+      );
     }
   });
 }

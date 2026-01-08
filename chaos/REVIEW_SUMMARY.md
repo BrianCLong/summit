@@ -11,7 +11,9 @@ The Resilience Lab has been comprehensively reviewed, enhanced, and made product
 **File:** `chaos/runner.sh` (1900 lines → enhanced from 764 lines)
 
 #### Error Handling & Reliability
+
 ✅ **Specific Exit Codes**
+
 - 0: Success
 - 1: General error
 - 2: Missing dependencies
@@ -20,57 +22,69 @@ The Resilience Lab has been comprehensively reviewed, enhanced, and made product
 - 5: Recovery timeout
 
 ✅ **Lock File Mechanism**
+
 - Prevents concurrent chaos runner executions
 - Automatic stale lock detection and cleanup
 - PID-based lock validation
 - Location: `artifacts/chaos/temp/chaos-runner.lock`
 
 ✅ **Signal Handling**
+
 - Trap EXIT, INT, TERM signals
 - Automatic cleanup on script exit
 - Graceful shutdown on interrupts
 - Resource cleanup guaranteed
 
 ✅ **Input Validation**
+
 - All function parameters validated
 - Configuration file validation
 - Target environment validation
 - Scenarios file syntax checking
 
 #### Logging & Observability
+
 ✅ **Enhanced Logging System**
+
 - Timestamps on all log messages (YYYY-MM-DD HH:MM:SS)
 - 5 log levels: INFO, SUCCESS, WARN, ERROR, DEBUG
 - Logs to stderr, output to stdout (proper separation)
 - Color-coded for easy reading
 
 ✅ **Debug Mode**
+
 - Enable with `--verbose` or `VERBOSE=true`
 - Detailed operation logging
 - Function entry/exit tracking
 - Configuration value display
 
 ✅ **Progress Indicators**
+
 - 30-second update intervals during recovery
 - Scenario progress tracking
 - Suite execution progress
 - ETA calculations
 
 #### Recovery Measurement
+
 ✅ **Reliable Recovery Detection**
+
 - Requires 3 consecutive successful health checks
 - Eliminates false positives from flaky services
 - Configurable recovery timeout (`MAX_RECOVERY_TIME`)
 - Detailed recovery status tracking
 
 ✅ **Recovery Metrics**
+
 - Time to first success
 - Time to stable recovery (3x success)
 - Health check attempt counts
 - Failure reason tracking
 
 #### Enhanced Reporting
+
 ✅ **Comprehensive Metadata**
+
 - Runner version (v2.0)
 - Hostname tracking
 - Dry-run status
@@ -79,6 +93,7 @@ The Resilience Lab has been comprehensively reviewed, enhanced, and made product
 - Recovery status enum
 
 ✅ **Detailed Tracking**
+
 - Health check history (pre-chaos, during, post-chaos)
 - Chaos action history with timestamps
 - Error array for debugging
@@ -86,6 +101,7 @@ The Resilience Lab has been comprehensively reviewed, enhanced, and made product
 - Prometheus metrics integration
 
 ✅ **HTML Reports**
+
 - Modern, responsive design
 - Gradient backgrounds
 - Interactive elements
@@ -94,19 +110,23 @@ The Resilience Lab has been comprehensively reviewed, enhanced, and made product
 - Print-friendly CSS
 
 #### New Features
+
 ✅ **Dry-Run Mode**
+
 - Test scenarios without executing chaos
 - Validate configuration
 - Check target accessibility
 - Preview actions
 
 ✅ **Verbose Mode**
+
 - Detailed debug logging
 - Configuration display
 - Step-by-step execution tracking
 - Useful for troubleshooting
 
 ✅ **Prometheus Integration**
+
 - Automatic metrics collection
 - Error rate tracking
 - Latency percentiles (P95, P99)
@@ -118,6 +138,7 @@ The Resilience Lab has been comprehensively reviewed, enhanced, and made product
 **File:** `chaos/test-runner.sh` (650 lines, 20+ tests)
 
 ✅ **Unit Tests**
+
 - Dependency checking validation
 - YAML parsing tests
 - Health check functionality
@@ -127,6 +148,7 @@ The Resilience Lab has been comprehensively reviewed, enhanced, and made product
 - Configuration validation
 
 ✅ **Test Framework**
+
 - Custom test framework (no external dependencies)
 - Assert functions (equals, contains, file_exists, exit_code)
 - Test lifecycle (setup, teardown)
@@ -135,6 +157,7 @@ The Resilience Lab has been comprehensively reviewed, enhanced, and made product
 - Bail-on-failure option
 
 ✅ **Integration Tests**
+
 - Dry-run mode validation
 - HTTP health check tests
 - Docker Compose integration
@@ -142,12 +165,14 @@ The Resilience Lab has been comprehensively reviewed, enhanced, and made product
 - Report format validation
 
 ✅ **Coverage**
+
 - Core functions: 100%
 - Edge cases: 95%
 - Error paths: 90%
 - Integration: 80%
 
 **Run Tests:**
+
 ```bash
 ./chaos/test-runner.sh
 ./chaos/test-runner.sh --verbose
@@ -159,6 +184,7 @@ The Resilience Lab has been comprehensively reviewed, enhanced, and made product
 **File:** `chaos/MIGRATION.md` (500 lines)
 
 ✅ **Breaking Changes**
+
 - Exit code changes (detailed examples)
 - Lock file behavior
 - Health check logic (3x requirement)
@@ -166,6 +192,7 @@ The Resilience Lab has been comprehensively reviewed, enhanced, and made product
 - Environment variable changes
 
 ✅ **Migration Steps**
+
 - Step-by-step instructions
 - Code examples (before/after)
 - CI/CD pipeline updates
@@ -173,12 +200,14 @@ The Resilience Lab has been comprehensively reviewed, enhanced, and made product
 - Testing procedures
 
 ✅ **Compatibility Matrix**
+
 - Feature-by-feature comparison
 - v1.0 vs v2.0 differences
 - Compatibility indicators
 - Migration complexity ratings
 
 ✅ **Support**
+
 - FAQ section (10+ common questions)
 - Rollback procedures
 - Testing migration guide
@@ -190,6 +219,7 @@ The Resilience Lab has been comprehensively reviewed, enhanced, and made product
 **File:** `PRODUCTION_READINESS.md` (700 lines)
 
 ✅ **Pre-Deployment Checklist** (40+ items)
+
 - Environment validation
 - Configuration verification
 - Security review
@@ -198,6 +228,7 @@ The Resilience Lab has been comprehensively reviewed, enhanced, and made product
 - Documentation review
 
 ✅ **Deployment Checklist** (20+ items)
+
 - CI/CD integration
 - Notification setup
 - Documentation updates
@@ -205,12 +236,14 @@ The Resilience Lab has been comprehensively reviewed, enhanced, and made product
 - Runbook creation
 
 ✅ **Post-Deployment Checklist** (15+ items)
+
 - Daily monitoring (first week)
 - SLO compliance tracking
 - Error rate trending
 - Fine-tuning guidance
 
 ✅ **Environment-Specific**
+
 - Docker Compose configurations
 - Kubernetes configurations
 - Network policies
@@ -218,12 +251,14 @@ The Resilience Lab has been comprehensively reviewed, enhanced, and made product
 - Security policies
 
 ✅ **Compliance & Audit**
+
 - Audit log requirements
 - Change management
 - Data privacy
 - Regulatory compliance
 
 ✅ **Sign-Off Template**
+
 - Development team approval
 - Operations team approval
 - Security team approval
@@ -234,47 +269,56 @@ The Resilience Lab has been comprehensively reviewed, enhanced, and made product
 **File:** `EXAMPLES.md` (800 lines, 30 examples)
 
 ✅ **Basic Usage** (3 examples)
+
 - First chaos test walkthrough
 - Single scenario execution
 - Different test suites
 
 ✅ **Advanced Scenarios** (7 examples)
+
 - Custom recovery times
 - Custom health check endpoints
 - Multiple targets
 - Kubernetes namespace testing
 
 ✅ **CI/CD Integration** (3 examples)
+
 - GitHub Actions workflow
 - GitLab CI configuration
 - Jenkins pipeline
 
 ✅ **Custom Scenarios** (3 examples)
+
 - Add custom scenarios
 - Cascading failures
 - Network partitions
 
 ✅ **Monitoring Integration** (3 examples)
+
 - Prometheus metrics
 - Grafana dashboards
 - Alert configurations
 
 ✅ **Multi-Environment** (2 examples)
+
 - Test all environments script
 - Canary chaos testing
 
 ✅ **Troubleshooting** (4 examples)
+
 - Debug failed scenarios
 - Handle concurrent runs
 - Recovery timeout diagnosis
 - Service health investigation
 
 ✅ **Report Analysis** (3 examples)
+
 - Extract key metrics
 - Compare recovery times
 - SLO compliance reporting
 
 ✅ **Automation Scripts** (2 examples)
+
 - Weekly chaos reports
 - Pre-deployment gates
 - Best practices examples
@@ -284,6 +328,7 @@ The Resilience Lab has been comprehensively reviewed, enhanced, and made product
 **File:** `production-check.sh` (400 lines)
 
 ✅ **Automated Validation**
+
 - 7 categories of checks
 - 50+ individual checks
 - Auto-fix mode (`--fix`)
@@ -291,6 +336,7 @@ The Resilience Lab has been comprehensively reviewed, enhanced, and made product
 - Summary reporting
 
 ✅ **Check Categories**
+
 1. **Dependencies** (5 checks)
    - Docker, Docker Compose
    - jq, curl, bc
@@ -326,6 +372,7 @@ The Resilience Lab has been comprehensively reviewed, enhanced, and made product
    - Completeness validation
 
 ✅ **Output Examples**
+
 ```bash
 # Standard run
 ./chaos/production-check.sh
@@ -342,39 +389,39 @@ All checks passed!
 
 ### Code Quality
 
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| Lines of Code | 764 | 1,900 | +149% |
-| Functions | 15 | 45 | +200% |
-| Error Handling | Basic | Comprehensive | 10x |
-| Test Coverage | 0% | 90%+ | ∞ |
-| Documentation | 600 lines | 2,400 lines | +300% |
-| Examples | 0 | 30 | ∞ |
+| Metric         | Before    | After         | Improvement |
+| -------------- | --------- | ------------- | ----------- |
+| Lines of Code  | 764       | 1,900         | +149%       |
+| Functions      | 15        | 45            | +200%       |
+| Error Handling | Basic     | Comprehensive | 10x         |
+| Test Coverage  | 0%        | 90%+          | ∞           |
+| Documentation  | 600 lines | 2,400 lines   | +300%       |
+| Examples       | 0         | 30            | ∞           |
 
 ### Features
 
-| Feature | Before | After |
-|---------|--------|-------|
-| Exit Codes | 2 (0, 1) | 6 (0-5) |
-| Logging Levels | 1 | 5 |
-| Health Check Logic | Single | 3x consecutive |
-| Lock Mechanism | No | Yes |
-| Signal Handling | No | Yes |
-| Input Validation | Partial | Complete |
-| Progress Indicators | No | Yes |
-| Debug Mode | No | Yes |
-| Dry-Run Mode | No | Yes |
+| Feature             | Before   | After          |
+| ------------------- | -------- | -------------- |
+| Exit Codes          | 2 (0, 1) | 6 (0-5)        |
+| Logging Levels      | 1        | 5              |
+| Health Check Logic  | Single   | 3x consecutive |
+| Lock Mechanism      | No       | Yes            |
+| Signal Handling     | No       | Yes            |
+| Input Validation    | Partial  | Complete       |
+| Progress Indicators | No       | Yes            |
+| Debug Mode          | No       | Yes            |
+| Dry-Run Mode        | No       | Yes            |
 
 ### Documentation
 
-| Document | Lines | Content |
-|----------|-------|---------|
-| MIGRATION.md | 500 | Breaking changes, migration steps, FAQ |
-| PRODUCTION_READINESS.md | 700 | 70+ checklist items, sign-off template |
-| EXAMPLES.md | 800 | 30 real-world examples |
-| Test Suite | 650 | 20+ unit tests |
-| Production Check | 400 | 50+ automated checks |
-| **Total New Docs** | **3,050** | **Comprehensive coverage** |
+| Document                | Lines     | Content                                |
+| ----------------------- | --------- | -------------------------------------- |
+| MIGRATION.md            | 500       | Breaking changes, migration steps, FAQ |
+| PRODUCTION_READINESS.md | 700       | 70+ checklist items, sign-off template |
+| EXAMPLES.md             | 800       | 30 real-world examples                 |
+| Test Suite              | 650       | 20+ unit tests                         |
+| Production Check        | 400       | 50+ automated checks                   |
+| **Total New Docs**      | **3,050** | **Comprehensive coverage**             |
 
 ## 🎯 Production Readiness Criteria
 
@@ -475,6 +522,7 @@ cleanup() {
 ## 📝 Testing Performed
 
 ### Unit Tests
+
 ```bash
 $ ./chaos/test-runner.sh
 =========================================
@@ -505,6 +553,7 @@ Skipped: 0
 ```
 
 ### Integration Tests
+
 ```bash
 $ DRY_RUN=true ./chaos/runner.sh --suite smoke_suite
 ✓ Step 1/7: Checking dependencies...
@@ -518,6 +567,7 @@ $ DRY_RUN=true ./chaos/runner.sh --suite smoke_suite
 ```
 
 ### Production Validation
+
 ```bash
 $ ./chaos/production-check.sh
 ╔═══════════════════════════════════════╗
@@ -554,6 +604,7 @@ Summary
 ### What's Complete
 
 ✅ **Code Quality**
+
 - Production-grade error handling
 - Comprehensive input validation
 - Proper signal handling
@@ -561,12 +612,14 @@ Summary
 - Extensive inline comments (200+ comment blocks)
 
 ✅ **Testing**
+
 - 20+ unit tests (90%+ coverage)
 - Integration tests
 - Dry-run validation
 - Test framework infrastructure
 
 ✅ **Documentation**
+
 - 5 major documents (3,050+ lines)
 - Migration guide with examples
 - Production readiness checklist
@@ -574,6 +627,7 @@ Summary
 - Inline code documentation
 
 ✅ **Production Features**
+
 - Automated validation script
 - Monitoring integration
 - Multi-environment support
@@ -581,6 +635,7 @@ Summary
 - Security validation
 
 ✅ **Best Practices**
+
 - Bash best practices followed
 - Security considerations addressed
 - Performance optimized
@@ -597,6 +652,7 @@ Summary
 ### Backward Compatibility
 
 ✅ **Preserved**
+
 - scenarios.yaml format unchanged
 - Core metrics accessible
 - Makefile targets unchanged
@@ -626,11 +682,14 @@ Summary
 **Title:** `feat: Comprehensive Enhancement of Resilience Lab for Production Readiness (v2.0)`
 
 **Description Template:**
+
 ```markdown
 ## Summary
+
 Comprehensive enhancement of the Resilience Lab with production-grade error handling, extensive testing, and operational excellence.
 
 ## Key Features
+
 - Enhanced runner v2.0 with comprehensive error handling
 - 20+ unit tests with 90%+ coverage
 - 3,050+ lines of new documentation
@@ -638,42 +697,49 @@ Comprehensive enhancement of the Resilience Lab with production-grade error hand
 - 30 comprehensive examples
 
 ## Breaking Changes
+
 - Exit codes: Now returns 0-5 (was 0-1)
 - Lock file: Prevents concurrent execution
 - Health checks: Requires 3 consecutive successes
 - See MIGRATION.md for full details
 
 ## Testing
+
 - [x] Unit tests passing (22/22)
 - [x] Integration tests validated
 - [x] Dry-run successful
 - [x] Production check passing
 
 ## Documentation
+
 - [x] Migration guide
 - [x] Production readiness checklist
 - [x] 30 comprehensive examples
 - [x] Inline code comments
 
 ## Reviewers
+
 @team-sre @team-platform
 ```
 
 ### 2. Deployment Strategy
 
 **Phase 1: Development (Week 1)**
+
 - Deploy to dev environment
 - Run full test suite
 - Validate monitoring integration
 - Team familiarization
 
 **Phase 2: Staging (Week 2)**
+
 - Deploy to staging
 - Run nightly chaos tests
 - Monitor SLO compliance
 - Collect feedback
 
 **Phase 3: Production (Week 3-4)**
+
 - Gradual rollout
 - Monitor closely
 - Adjust SLO thresholds if needed
@@ -682,12 +748,14 @@ Comprehensive enhancement of the Resilience Lab with production-grade error hand
 ### 3. Training & Documentation
 
 **Team Training**
+
 - Overview presentation (30 mins)
 - Hands-on workshop (1 hour)
 - Q&A session
 - Reference documentation sharing
 
 **Documentation Sharing**
+
 - README.md - Main entry point
 - QUICK_START.md - 5-minute start
 - EXAMPLES.md - Real-world usage
@@ -696,12 +764,14 @@ Comprehensive enhancement of the Resilience Lab with production-grade error hand
 ### 4. Monitoring Setup
 
 **Metrics to Track**
+
 - Chaos test success rate
 - Recovery time trends
 - SLO compliance percentage
 - System availability during chaos
 
 **Alerts to Configure**
+
 - ChaosExperimentFailed
 - SystemNotRecoveringFromChaos
 - ChaosImpactTooHigh
@@ -712,6 +782,7 @@ Comprehensive enhancement of the Resilience Lab with production-grade error hand
 ### Files Created/Modified
 
 **New Files** (5):
+
 1. `chaos/test-runner.sh` - Unit test suite (650 lines)
 2. `chaos/MIGRATION.md` - Migration guide (500 lines)
 3. `chaos/PRODUCTION_READINESS.md` - Production checklist (700 lines)
@@ -719,6 +790,7 @@ Comprehensive enhancement of the Resilience Lab with production-grade error hand
 5. `chaos/production-check.sh` - Validation script (400 lines)
 
 **Modified Files** (1):
+
 1. `chaos/runner.sh` - Enhanced v2.0 (764 → 1,900 lines)
 
 **Total Addition**: 4,279 lines of production-ready code and documentation
@@ -726,11 +798,13 @@ Comprehensive enhancement of the Resilience Lab with production-grade error hand
 ### Git Commits
 
 **Commit 1:** Initial Resilience Lab implementation
+
 ```
 feat: implement Resilience Lab with automated chaos drills
 ```
 
 **Commit 2:** Comprehensive enhancements
+
 ```
 feat: comprehensive enhancement of Resilience Lab for production readiness
 - Enhanced runner v2.0 with error handling
@@ -765,6 +839,7 @@ The Resilience Lab is now **production-ready** with:
 ---
 
 **Questions or concerns?** Review the comprehensive documentation:
+
 - [Migration Guide](MIGRATION.md)
 - [Production Readiness](PRODUCTION_READINESS.md)
 - [Examples](EXAMPLES.md)

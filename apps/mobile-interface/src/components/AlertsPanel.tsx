@@ -1,11 +1,11 @@
 // @ts-nocheck
-import React from 'react';
+import React from "react";
 
 interface AlertsPanelProps {
   className?: string;
 }
 
-export function AlertsPanel({ className = '' }: AlertsPanelProps) {
+export function AlertsPanel({ className = "" }: AlertsPanelProps) {
   return (
     <div className={`p-4 ${className}`}>
       <h3 className="font-semibold mb-3 dark:text-white">Alerts</h3>

@@ -1,7 +1,7 @@
 meta:
   id: plan.log-management@v1
-  owner: 'platform-engineering'
-  purpose: 'Manage log volume, retention, and archival cost-effectively'
+  owner: "platform-engineering"
+  purpose: "Manage log volume, retention, and archival cost-effectively"
   tags:
     - observability
     - logging
@@ -9,13 +9,13 @@ meta:
     - cost
     - compliance
   guardrails:
-    - 'PII must never appear in logs'
-    - 'Log volume must be cost-conscious'
-    - 'Retention must meet compliance requirements'
-    - 'Logs must remain queryable for investigations'
+    - "PII must never appear in logs"
+    - "Log volume must be cost-conscious"
+    - "Retention must meet compliance requirements"
+    - "Logs must remain queryable for investigations"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -273,15 +273,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'log-cost-reduction'
+  - name: "log-cost-reduction"
     inputs:
-      current_volume: '500 GB/day, $5000/month storage'
-      log_sources: 'API servers, workers, databases, load balancers'
-      retention_requirements: 'Audit: 7 years, App: 1 year, Debug: 7 days'
-      cost_constraints: 'Reduce to $3000/month'
-      query_patterns: 'Error investigation, audit queries, metric debugging'
+      current_volume: "500 GB/day, $5000/month storage"
+      log_sources: "API servers, workers, databases, load balancers"
+      retention_requirements: "Audit: 7 years, App: 1 year, Debug: 7 days"
+      cost_constraints: "Reduce to $3000/month"
+      query_patterns: "Error investigation, audit queries, metric debugging"
     expected_contains:
-      - 'Sampling Strategy'
-      - 'Retention Windows'
-      - 'Cost Optimization'
-      - 'Pipeline Changes'
+      - "Sampling Strategy"
+      - "Retention Windows"
+      - "Cost Optimization"
+      - "Pipeline Changes"

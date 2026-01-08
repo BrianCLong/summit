@@ -5,15 +5,15 @@
  * Supports AWS S3, MinIO, and other S3-compatible services.
  */
 
-import { Readable } from 'stream';
-import { PullConnector } from '../base-connector';
+import { Readable } from "stream";
+import { PullConnector } from "../base-connector";
 import type {
   ConnectorManifest,
   ConnectorConfig,
   ConnectorContext,
   ConnectorResult,
   ConnectorEntity,
-} from '../types';
+} from "../types";
 
 /**
  * Minimal S3 Client interface for dependency injection
@@ -31,10 +31,7 @@ export interface S3Client {
     NextContinuationToken?: string;
   }>;
 
-  getObject(params: {
-    Bucket: string;
-    Key: string;
-  }): Promise<{
+  getObject(params: { Bucket: string; Key: string }): Promise<{
     Body?: Readable | ReadableStream<any> | Blob;
     ContentType?: string;
     ContentLength?: number;
@@ -58,35 +55,35 @@ export interface S3BucketConnectorConfig {
  */
 export class S3BucketConnector extends PullConnector {
   readonly manifest: ConnectorManifest = {
-    id: 's3-bucket-connector',
-    name: 'S3 Bucket Connector',
-    version: '1.0.0',
-    description: 'Ingests files from S3-compatible object storage',
-    status: 'stable',
-    category: 'storage',
-    capabilities: ['pull', 'batch', 'incremental'],
-    entityTypes: ['GenericRecord', 'Document'],
+    id: "s3-bucket-connector",
+    name: "S3 Bucket Connector",
+    version: "1.0.0",
+    description: "Ingests files from S3-compatible object storage",
+    status: "stable",
+    category: "storage",
+    capabilities: ["pull", "batch", "incremental"],
+    entityTypes: ["GenericRecord", "Document"],
     relationshipTypes: [],
-    authentication: ['aws-credentials', 'iam-role'],
+    authentication: ["aws-credentials", "iam-role"],
     requiredSecrets: [], // Optional: accessKeyId, secretAccessKey
-    license: 'MIT',
-    maintainer: 'IntelGraph Team',
-    documentationUrl: 'https://docs.intelgraph.io/connectors/s3-bucket',
-    tags: ['s3', 'aws', 'object-storage', 'files'],
+    license: "MIT",
+    maintainer: "IntelGraph Team",
+    documentationUrl: "https://docs.intelgraph.io/connectors/s3-bucket",
+    tags: ["s3", "aws", "object-storage", "files"],
     configSchema: {
-      type: 'object',
+      type: "object",
       properties: {
-        bucket: { type: 'string' },
-        prefix: { type: 'string' },
-        filePattern: { type: 'string' },
-        maxFiles: { type: 'number' },
-        region: { type: 'string', default: 'us-east-1' },
-        endpoint: { type: 'string' },
-        entityType: { type: 'string', default: 'Document' },
-        parseJson: { type: 'boolean', default: false },
-        parseNdjson: { type: 'boolean', default: false },
+        bucket: { type: "string" },
+        prefix: { type: "string" },
+        filePattern: { type: "string" },
+        maxFiles: { type: "number" },
+        region: { type: "string", default: "us-east-1" },
+        endpoint: { type: "string" },
+        entityType: { type: "string", default: "Document" },
+        parseJson: { type: "boolean", default: false },
+        parseNdjson: { type: "boolean", default: false },
       },
-      required: ['bucket'],
+      required: ["bucket"],
     },
   };
 
@@ -104,8 +101,8 @@ export class S3BucketConnector extends PullConnector {
   protected async onInitialize(config: ConnectorConfig): Promise<void> {
     // Validate and cast config
     const cfg = config.config as Record<string, unknown>;
-    if (!cfg.bucket || typeof cfg.bucket !== 'string') {
-      throw new Error('bucket is required and must be a string');
+    if (!cfg.bucket || typeof cfg.bucket !== "string") {
+      throw new Error("bucket is required and must be a string");
     }
 
     this.s3Config = cfg as unknown as S3BucketConnectorConfig;
@@ -123,11 +120,11 @@ export class S3BucketConnector extends PullConnector {
   private async createS3Client(config: ConnectorConfig): Promise<S3Client> {
     try {
       // Dynamic import of AWS SDK v3
-      const { S3Client: AWSS3Client } = await import('@aws-sdk/client-s3');
-      const { ListObjectsV2Command, GetObjectCommand } = await import('@aws-sdk/client-s3');
+      const { S3Client: AWSS3Client } = await import("@aws-sdk/client-s3");
+      const { ListObjectsV2Command, GetObjectCommand } = await import("@aws-sdk/client-s3");
 
       const clientConfig: any = {
-        region: this.s3Config.region || 'us-east-1',
+        region: this.s3Config.region || "us-east-1",
       };
 
       // Add credentials if provided
@@ -202,12 +199,12 @@ export class S3BucketConnector extends PullConnector {
         prefix,
         filePattern,
         maxFiles,
-        entityType = 'Document',
+        entityType = "Document",
         parseJson = false,
         parseNdjson = false,
       } = this.s3Config;
 
-      context.logger.info('Starting S3 bucket ingestion', {
+      context.logger.info("Starting S3 bucket ingestion", {
         bucket,
         prefix,
         filePattern,
@@ -235,7 +232,7 @@ export class S3BucketConnector extends PullConnector {
 
         const objects = listResult.Contents || [];
 
-        context.logger.debug('Listed S3 objects', {
+        context.logger.debug("Listed S3 objects", {
           count: objects.length,
           hasMore: listResult.IsTruncated,
         });
@@ -245,7 +242,7 @@ export class S3BucketConnector extends PullConnector {
 
           // Check file pattern
           if (filePatternRegex && !filePatternRegex.test(object.Key)) {
-            context.logger.debug('Skipping file (pattern mismatch)', {
+            context.logger.debug("Skipping file (pattern mismatch)", {
               key: object.Key,
             });
             continue;
@@ -253,7 +250,7 @@ export class S3BucketConnector extends PullConnector {
 
           // Check max files limit
           if (maxFiles && filesProcessed >= maxFiles) {
-            context.logger.info('Reached max files limit', { maxFiles });
+            context.logger.info("Reached max files limit", { maxFiles });
             hasMore = false;
             break;
           }
@@ -272,17 +269,17 @@ export class S3BucketConnector extends PullConnector {
             );
 
             filesProcessed++;
-            context.metrics.increment('s3.files.processed', 1, {
+            context.metrics.increment("s3.files.processed", 1, {
               connector: this.manifest.id,
             });
           } catch (error) {
-            context.logger.error('Error processing S3 object', error as Error, {
+            context.logger.error("Error processing S3 object", error as Error, {
               bucket,
               key: object.Key,
             });
 
             errors.push({
-              code: 'S3_OBJECT_PROCESSING_ERROR',
+              code: "S3_OBJECT_PROCESSING_ERROR",
               message: (error as Error).message,
               recordId: object.Key,
               retryable: true,
@@ -302,14 +299,14 @@ export class S3BucketConnector extends PullConnector {
       await context.emitter.flush();
 
       const durationMs = Date.now() - startTime;
-      context.logger.info('S3 bucket ingestion completed', {
+      context.logger.info("S3 bucket ingestion completed", {
         filesProcessed,
         entitiesProcessed,
         errorCount: errors.length,
         durationMs,
       });
 
-      context.metrics.timing('s3.ingestion.duration', durationMs, {
+      context.metrics.timing("s3.ingestion.duration", durationMs, {
         connector: this.manifest.id,
       });
 
@@ -329,7 +326,7 @@ export class S3BucketConnector extends PullConnector {
       };
     } catch (error) {
       const durationMs = Date.now() - startTime;
-      context.logger.error('S3 bucket ingestion failed', error as Error);
+      context.logger.error("S3 bucket ingestion failed", error as Error);
 
       return this.failureResult(error as Error, entitiesProcessed, 0, durationMs);
     }
@@ -401,7 +398,7 @@ export class S3BucketConnector extends PullConnector {
       }
     } else if (parseNdjson) {
       // Newline-delimited JSON
-      const lines = body.split('\n').filter((line) => line.trim());
+      const lines = body.split("\n").filter((line) => line.trim());
 
       for (let i = 0; i < lines.length; i++) {
         const data = JSON.parse(lines[i]);
@@ -431,7 +428,7 @@ export class S3BucketConnector extends PullConnector {
           content: body,
           contentType: getResult.ContentType,
           contentLength: getResult.ContentLength,
-          fileName: key.split('/').pop(),
+          fileName: key.split("/").pop(),
         },
         confidence: 1.0,
         observedAt: new Date(),
@@ -457,7 +454,7 @@ export class S3BucketConnector extends PullConnector {
     if (stream instanceof ReadableStream) {
       const reader = stream.getReader();
       const decoder = new TextDecoder();
-      let result = '';
+      let result = "";
 
       while (true) {
         const { done, value } = await reader.read();
@@ -471,9 +468,9 @@ export class S3BucketConnector extends PullConnector {
     // Node.js Readable stream
     const chunks: Buffer[] = [];
     return new Promise((resolve, reject) => {
-      (stream as Readable).on('data', (chunk) => chunks.push(Buffer.from(chunk)));
-      (stream as Readable).on('error', reject);
-      (stream as Readable).on('end', () => resolve(Buffer.concat(chunks).toString('utf-8')));
+      (stream as Readable).on("data", (chunk) => chunks.push(Buffer.from(chunk)));
+      (stream as Readable).on("error", reject);
+      (stream as Readable).on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
     });
   }
 }

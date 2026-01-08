@@ -201,9 +201,7 @@ quotas:
   "query_p95_ms": 320,
   "write_p95_ms": 640,
   "subs_p95_ms": 210,
-  "incidents": [
-    { "id": "INC-123", "downtime_min": 12, "summary": "Ingress flaps" }
-  ]
+  "incidents": [{ "id": "INC-123", "downtime_min": 12, "summary": "Ingress flaps" }]
 }
 ```
 
@@ -221,14 +219,14 @@ quotas:
 **Quota Middleware (Express)**
 
 ```ts
-import Limiter from 'rate-limiter-flexible';
+import Limiter from "rate-limiter-flexible";
 const perTenant = new Limiter.RateLimiterMemory({ points: 50, duration: 1 });
 export async function quota(req, res, next) {
   try {
     await perTenant.consume(req.tenant.id);
     next();
   } catch {
-    res.status(429).json({ error: 'quota_exceeded', retryAfter: 1 });
+    res.status(429).json({ error: "quota_exceeded", retryAfter: 1 });
   }
 }
 ```

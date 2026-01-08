@@ -22,6 +22,7 @@ We are proud to announce the General Availability (GA) release of the Summit Int
 Unlike traditional AI systems that operate as opaque black boxes, **every AI output in Summit carries a governance verdict**. Our integrated policy engine evaluates all AI-generated insights against your organization's compliance requirements, classification policies, and regulatory frameworks—before results reach analysts.
 
 **Key Governance Features:**
+
 - **Universal Policy Enforcement**: Open Policy Agent (OPA) integration ensures every query, export, and AI interaction is evaluated against your governance rules
 - **RBAC + ABAC Access Control**: Role-Based and Attribute-Based Access Control with multi-tenant isolation and compartment boundaries
 - **Reason-for-Access Logging**: All access decisions are logged with justification, creating an immutable audit trail
@@ -36,6 +37,7 @@ Unlike traditional AI systems that operate as opaque black boxes, **every AI out
 Summit GA introduces a **provenance-first architecture** where every fact, relationship, and inference includes complete chain-of-custody metadata. The system tracks not just what information exists, but where it came from, how it was transformed, and how confident we are in its accuracy.
 
 **Provenance Features:**
+
 - **Claims Ledger**: Immutable append-only record of every data ingestion, linking entities and edges to their original sources
 - **Source Attribution**: Every graph node and edge traces back to pipeline, timestamp, source system, and confidence score
 - **Confidence Tracking**: Probabilistic data includes explicit confidence intervals; deterministic data is clearly marked
@@ -51,6 +53,7 @@ Summit GA introduces a **provenance-first architecture** where every fact, relat
 Enterprise integrations require stability. Summit GA implements **strict API versioning** using semantic versioning (SemVer) with comprehensive deprecation policies that protect your investments.
 
 **API Stability Guarantees:**
+
 - **Semantic Versioning**: MAJOR.MINOR.PATCH versioning for all REST and GraphQL APIs
 - **6-Month Deprecation Notice**: Minimum six-month advance warning before any breaking changes
 - **Parallel Version Support**: Run old and new API versions side-by-side during migrations
@@ -67,6 +70,7 @@ Enterprise integrations require stability. Summit GA implements **strict API ver
 Summit GA enforces quality through **strict, automated CI/CD gates** that prevent defects, vulnerabilities, and policy violations from reaching production.
 
 **CI/CD Hard Gates:**
+
 - **Static Analysis**: Mandatory linting, type checking, and security scanning on every pull request
 - **Comprehensive Testing**: Unit tests, integration tests, and end-to-end smoke tests must pass
 - **Security Audits**: Automated dependency vulnerability scanning with blocking severity thresholds
@@ -84,6 +88,7 @@ Summit GA enforces quality through **strict, automated CI/CD gates** that preven
 Summit GA implements **defense-in-depth security** informed by formal STRIDE threat modeling and aligned with SOC 2 Type II requirements.
 
 **Security Highlights:**
+
 - **STRIDE Threat Model**: Comprehensive analysis of Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, and Elevation of Privilege threats
 - **Trust Boundaries**: Clearly defined boundaries between external/edge, edge/app, app/data, and app/agents layers
 - **OIDC/JWT Authentication**: Industry-standard authentication with short-lived tokens (1-hour expiry)
@@ -107,6 +112,7 @@ Summit GA has been rigorously tested across all **Tier-0 user journeys**—the c
 5. **Administrative & Compliance**: User management, audit log review, data export
 
 **Service Level Objectives (SLOs):**
+
 - **Availability**: 99.9% uptime for Tier-0 APIs
 - **Latency**: p95 ≤ 1500ms for complex queries, p95 ≤ 350ms for simple queries
 - **Throughput**: 10,000 records/second ingestion capacity
@@ -182,6 +188,7 @@ Summit GA is available immediately for:
 Summit is an enterprise intelligence platform that combines knowledge graphs, AI-assisted analysis, and governance-first architecture to help organizations make better decisions with trustworthy data. Built for security-conscious enterprises, government agencies, and regulated industries, Summit provides the accountability and auditability required for high-stakes intelligence work.
 
 For more information:
+
 - **Documentation**: [docs/README.md]
 - **API Reference**: [docs/API_DOCUMENTATION.md]
 - **Security**: [docs/SECURITY.md]
@@ -204,4 +211,4 @@ For more information:
 
 ---
 
-*This announcement supersedes all previous MVP-3 communications. All claims are documented and verifiable through our public documentation repository.*
+_This announcement supersedes all previous MVP-3 communications. All claims are documented and verifiable through our public documentation repository._

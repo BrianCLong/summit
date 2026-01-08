@@ -4,9 +4,9 @@
  * Domain events with flexible subscription and filtering
  */
 
-import { EventEmitter } from 'events';
-import { EventBus } from '@intelgraph/event-bus';
-import pino from 'pino';
+import { EventEmitter } from "events";
+import { EventBus } from "@intelgraph/event-bus";
+import pino from "pino";
 
 export interface DomainEventNotification<T = any> {
   eventId: string;
@@ -20,9 +20,7 @@ export interface DomainEventNotification<T = any> {
   metadata?: Record<string, any>;
 }
 
-export type EventSubscriber<T = any> = (
-  event: DomainEventNotification<T>
-) => Promise<void> | void;
+export type EventSubscriber<T = any> = (event: DomainEventNotification<T>) => Promise<void> | void;
 
 export interface SubscriptionFilter {
   eventTypes?: string[];
@@ -33,41 +31,39 @@ export interface SubscriptionFilter {
 export class EventNotificationService extends EventEmitter {
   private eventBus: EventBus;
   private logger: pino.Logger;
-  private subscriptions: Map<string, {
-    filter?: SubscriptionFilter;
-    subscriber: EventSubscriber;
-  }> = new Map();
+  private subscriptions: Map<
+    string,
+    {
+      filter?: SubscriptionFilter;
+      subscriber: EventSubscriber;
+    }
+  > = new Map();
 
   constructor(eventBus: EventBus) {
     super();
     this.eventBus = eventBus;
-    this.logger = pino({ name: 'EventNotificationService' });
+    this.logger = pino({ name: "EventNotificationService" });
   }
 
   /**
    * Publish domain event notification
    */
-  async publish<T = any>(
-    event: DomainEventNotification<T>
-  ): Promise<void> {
+  async publish<T = any>(event: DomainEventNotification<T>): Promise<void> {
     this.logger.debug(
       { eventId: event.eventId, eventType: event.eventType },
-      'Publishing event notification'
+      "Publishing event notification"
     );
 
     // Publish to general events topic
-    await this.eventBus.publish('domain.events', event);
+    await this.eventBus.publish("domain.events", event);
 
     // Publish to event-type specific topic
     await this.eventBus.publish(`domain.events.${event.eventType}`, event);
 
     // Publish to aggregate-type specific topic
-    await this.eventBus.publish(
-      `domain.events.${event.aggregateType}`,
-      event
-    );
+    await this.eventBus.publish(`domain.events.${event.aggregateType}`, event);
 
-    this.emit('event:published', event);
+    this.emit("event:published", event);
   }
 
   /**
@@ -81,27 +77,24 @@ export class EventNotificationService extends EventEmitter {
 
     this.subscriptions.set(subscriptionId, {
       filter,
-      subscriber: subscriber as EventSubscriber
+      subscriber: subscriber as EventSubscriber,
     });
 
     // Subscribe to general events topic
-    await this.eventBus.subscribe('domain.events', async (message) => {
+    await this.eventBus.subscribe("domain.events", async (message) => {
       const event = message.payload as DomainEventNotification;
 
       if (this.matchesFilter(event, filter)) {
         try {
           await subscriber(event as any);
         } catch (err) {
-          this.logger.error(
-            { err, eventId: event.eventId },
-            'Subscriber error'
-          );
-          this.emit('subscriber:error', { event, error: err });
+          this.logger.error({ err, eventId: event.eventId }, "Subscriber error");
+          this.emit("subscriber:error", { event, error: err });
         }
       }
     });
 
-    this.logger.info({ subscriptionId, filter }, 'Subscription created');
+    this.logger.info({ subscriptionId, filter }, "Subscription created");
 
     return subscriptionId;
   }
@@ -139,31 +132,21 @@ export class EventNotificationService extends EventEmitter {
   /**
    * Check if event matches filter
    */
-  private matchesFilter(
-    event: DomainEventNotification,
-    filter?: SubscriptionFilter
-  ): boolean {
+  private matchesFilter(event: DomainEventNotification, filter?: SubscriptionFilter): boolean {
     if (!filter) return true;
-    if (!filter) {return true;}
+    if (!filter) {
+      return true;
+    }
 
-    if (
-      filter.eventTypes &&
-      !filter.eventTypes.includes(event.eventType)
-    ) {
+    if (filter.eventTypes && !filter.eventTypes.includes(event.eventType)) {
       return false;
     }
 
-    if (
-      filter.aggregateTypes &&
-      !filter.aggregateTypes.includes(event.aggregateType)
-    ) {
+    if (filter.aggregateTypes && !filter.aggregateTypes.includes(event.aggregateType)) {
       return false;
     }
 
-    if (
-      filter.aggregateIds &&
-      !filter.aggregateIds.includes(event.aggregateId)
-    ) {
+    if (filter.aggregateIds && !filter.aggregateIds.includes(event.aggregateId)) {
       return false;
     }
 
@@ -175,7 +158,7 @@ export class EventNotificationService extends EventEmitter {
    */
   async unsubscribe(subscriptionId: string): Promise<void> {
     this.subscriptions.delete(subscriptionId);
-    this.logger.info({ subscriptionId }, 'Unsubscribed');
+    this.logger.info({ subscriptionId }, "Unsubscribed");
   }
 
   /**

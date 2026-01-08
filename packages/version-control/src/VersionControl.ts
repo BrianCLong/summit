@@ -1,7 +1,7 @@
 // @ts-nocheck
-import { nanoid } from 'nanoid';
-import { EventEmitter } from 'events';
-import * as fastDiff from 'fast-diff';
+import { nanoid } from "nanoid";
+import { EventEmitter } from "events";
+import * as fastDiff from "fast-diff";
 import {
   Repository,
   Branch,
@@ -13,30 +13,30 @@ import {
   ChangeType,
   MergeStrategy,
   CommitTree,
-  CompareResult
-} from './types';
+  CompareResult,
+} from "./types";
 
 export interface VersionControlStore {
   // Repository operations
-  createRepository(repo: Omit<Repository, 'id' | 'createdAt'>): Promise<Repository>;
+  createRepository(repo: Omit<Repository, "id" | "createdAt">): Promise<Repository>;
   getRepository(id: string): Promise<Repository | null>;
   getRepositoryForResource(resourceType: string, resourceId: string): Promise<Repository | null>;
 
   // Branch operations
-  createBranch(branch: Omit<Branch, 'id' | 'createdAt'>): Promise<Branch>;
+  createBranch(branch: Omit<Branch, "id" | "createdAt">): Promise<Branch>;
   getBranch(repositoryId: string, name: string): Promise<Branch | null>;
   listBranches(repositoryId: string): Promise<Branch[]>;
   updateBranch(branchId: string, updates: Partial<Branch>): Promise<Branch>;
   deleteBranch(branchId: string): Promise<void>;
 
   // Commit operations
-  createCommit(commit: Omit<Commit, 'id' | 'timestamp'>): Promise<Commit>;
+  createCommit(commit: Omit<Commit, "id" | "timestamp">): Promise<Commit>;
   getCommit(commitId: string): Promise<Commit | null>;
   listCommits(branchId: string, limit?: number): Promise<Commit[]>;
   getCommitHistory(commitId: string): Promise<Commit[]>;
 
   // Tag operations
-  createTag(tag: Omit<Tag, 'id' | 'createdAt'>): Promise<Tag>;
+  createTag(tag: Omit<Tag, "id" | "createdAt">): Promise<Tag>;
   getTag(repositoryId: string, name: string): Promise<Tag | null>;
   listTags(repositoryId: string): Promise<Tag[]>;
   deleteTag(tagId: string): Promise<void>;
@@ -62,8 +62,8 @@ export class VersionControl extends EventEmitter {
       workspaceId,
       resourceType,
       resourceId,
-      defaultBranch: 'main',
-      createdBy
+      defaultBranch: "main",
+      createdBy,
     });
 
     // Create default branch
@@ -71,21 +71,21 @@ export class VersionControl extends EventEmitter {
       repositoryId: repository.id,
       parentCommits: [],
       authorId: createdBy,
-      authorName: 'System',
-      message: 'Initial commit',
-      changes: []
+      authorName: "System",
+      message: "Initial commit",
+      changes: [],
     });
 
     await this.store.createBranch({
       repositoryId: repository.id,
-      name: 'main',
+      name: "main",
       headCommitId: initialCommit.id,
       createdBy,
       isProtected: false,
-      isDefault: true
+      isDefault: true,
     });
 
-    this.emit('repository:created', { repository });
+    this.emit("repository:created", { repository });
 
     return repository;
   }
@@ -108,10 +108,10 @@ export class VersionControl extends EventEmitter {
       createdBy,
       isProtected: options?.isProtected || false,
       isDefault: false,
-      metadata: options?.metadata
+      metadata: options?.metadata,
     });
 
-    this.emit('branch:created', { branch });
+    this.emit("branch:created", { branch });
 
     return branch;
   }
@@ -119,20 +119,20 @@ export class VersionControl extends EventEmitter {
   async deleteBranch(repositoryId: string, branchName: string): Promise<void> {
     const branch = await this.store.getBranch(repositoryId, branchName);
     if (!branch) {
-      throw new Error('Branch not found');
+      throw new Error("Branch not found");
     }
 
     if (branch.isProtected) {
-      throw new Error('Cannot delete protected branch');
+      throw new Error("Cannot delete protected branch");
     }
 
     if (branch.isDefault) {
-      throw new Error('Cannot delete default branch');
+      throw new Error("Cannot delete default branch");
     }
 
     await this.store.deleteBranch(branch.id);
 
-    this.emit('branch:deleted', { branchId: branch.id, branchName });
+    this.emit("branch:deleted", { branchId: branch.id, branchName });
   }
 
   // Commit management
@@ -142,7 +142,7 @@ export class VersionControl extends EventEmitter {
     authorId: string,
     authorName: string,
     message: string,
-    changes: Commit['changes'],
+    changes: Commit["changes"],
     options?: {
       description?: string;
       metadata?: Record<string, any>;
@@ -150,7 +150,7 @@ export class VersionControl extends EventEmitter {
   ): Promise<Commit> {
     const branch = await this.store.getBranch(repositoryId, branchName);
     if (!branch) {
-      throw new Error('Branch not found');
+      throw new Error("Branch not found");
     }
 
     // Create commit
@@ -163,15 +163,15 @@ export class VersionControl extends EventEmitter {
       description: options?.description,
       changes,
       tags: [],
-      metadata: options?.metadata
+      metadata: options?.metadata,
     });
 
     // Update branch head
     await this.store.updateBranch(branch.id, {
-      headCommitId: commit.id
+      headCommitId: commit.id,
     });
 
-    this.emit('commit:created', { commit, branch: branchName });
+    this.emit("commit:created", { commit, branch: branchName });
 
     return commit;
   }
@@ -189,22 +189,22 @@ export class VersionControl extends EventEmitter {
   ): Promise<Commit[]> {
     const branch = await this.store.getBranch(repositoryId, branchName);
     if (!branch) {
-      throw new Error('Branch not found');
+      throw new Error("Branch not found");
     }
 
     let commits = await this.store.getCommitHistory(branch.headCommitId);
 
     // Apply filters
     if (options?.author) {
-      commits = commits.filter(c => c.authorId === options.author);
+      commits = commits.filter((c) => c.authorId === options.author);
     }
 
     if (options?.since) {
-      commits = commits.filter(c => c.timestamp >= options.since!);
+      commits = commits.filter((c) => c.timestamp >= options.since!);
     }
 
     if (options?.until) {
-      commits = commits.filter(c => c.timestamp <= options.until!);
+      commits = commits.filter((c) => c.timestamp <= options.until!);
     }
 
     // Apply pagination
@@ -220,24 +220,20 @@ export class VersionControl extends EventEmitter {
   }
 
   // Diff and compare
-  async diff(
-    repositoryId: string,
-    fromCommitId: string,
-    toCommitId: string
-  ): Promise<Diff[]> {
+  async diff(repositoryId: string, fromCommitId: string, toCommitId: string): Promise<Diff[]> {
     const fromCommit = await this.store.getCommit(fromCommitId);
     const toCommit = await this.store.getCommit(toCommitId);
 
     if (!fromCommit || !toCommit) {
-      throw new Error('Commit not found');
+      throw new Error("Commit not found");
     }
 
     const diffs: Diff[] = [];
 
     // Get all changed paths
     const changedPaths = new Set([
-      ...fromCommit.changes.map(c => c.path),
-      ...toCommit.changes.map(c => c.path)
+      ...fromCommit.changes.map((c) => c.path),
+      ...toCommit.changes.map((c) => c.path),
     ]);
 
     for (const path of changedPaths) {
@@ -260,15 +256,15 @@ export class VersionControl extends EventEmitter {
     const compare = await this.store.getBranch(repositoryId, compareBranch);
 
     if (!base || !compare) {
-      throw new Error('Branch not found');
+      throw new Error("Branch not found");
     }
 
     // Get commits in compare branch not in base
     const compareCommits = await this.store.getCommitHistory(compare.headCommitId);
     const baseCommits = await this.store.getCommitHistory(base.headCommitId);
-    const baseCommitIds = new Set(baseCommits.map(c => c.id));
+    const baseCommitIds = new Set(baseCommits.map((c) => c.id));
 
-    const commits = compareCommits.filter(c => !baseCommitIds.has(c.id));
+    const commits = compareCommits.filter((c) => !baseCommitIds.has(c.id));
 
     // Get diffs
     const diffs = await this.diff(repositoryId, base.headCommitId, compare.headCommitId);
@@ -282,7 +278,7 @@ export class VersionControl extends EventEmitter {
       commits,
       filesChanged: diffs.length,
       additions,
-      deletions
+      deletions,
     };
   }
 
@@ -298,24 +294,24 @@ export class VersionControl extends EventEmitter {
     const source = await this.store.getBranch(repositoryId, sourceBranch);
 
     if (!target || !source) {
-      throw new Error('Branch not found');
+      throw new Error("Branch not found");
     }
 
     if (target.isProtected) {
-      throw new Error('Cannot merge into protected branch without approval');
+      throw new Error("Cannot merge into protected branch without approval");
     }
 
     // Check if fast-forward is possible
     const targetCommits = await this.store.getCommitHistory(target.headCommitId);
     const sourceCommits = await this.store.getCommitHistory(source.headCommitId);
-    const targetCommitIds = new Set(targetCommits.map(c => c.id));
+    const targetCommitIds = new Set(targetCommits.map((c) => c.id));
 
     const canFastForward = targetCommitIds.has(source.headCommitId);
 
     if (canFastForward && strategy === MergeStrategy.FAST_FORWARD) {
       // Fast-forward merge
       await this.store.updateBranch(target.id, {
-        headCommitId: source.headCommitId
+        headCommitId: source.headCommitId,
       });
 
       const result: MergeResult = {
@@ -325,10 +321,10 @@ export class VersionControl extends EventEmitter {
         mergeCommitId: source.headCommitId,
         conflicts: [],
         strategy: MergeStrategy.FAST_FORWARD,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
-      this.emit('merge:completed', { result });
+      this.emit("merge:completed", { result });
 
       return result;
     }
@@ -337,7 +333,7 @@ export class VersionControl extends EventEmitter {
     const mergeBase = await this.findMergeBase(target.headCommitId, source.headCommitId);
 
     if (!mergeBase) {
-      throw new Error('No common ancestor found');
+      throw new Error("No common ancestor found");
     }
 
     // Detect conflicts
@@ -355,7 +351,7 @@ export class VersionControl extends EventEmitter {
         sourceBranch,
         conflicts,
         strategy,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
 
@@ -364,13 +360,13 @@ export class VersionControl extends EventEmitter {
       repositoryId,
       parentCommits: [target.headCommitId, source.headCommitId],
       authorId: mergedBy,
-      authorName: 'System',
+      authorName: "System",
       message: `Merge ${sourceBranch} into ${targetBranch}`,
-      changes: []
+      changes: [],
     });
 
     await this.store.updateBranch(target.id, {
-      headCommitId: mergeCommit.id
+      headCommitId: mergeCommit.id,
     });
 
     const result: MergeResult = {
@@ -380,10 +376,10 @@ export class VersionControl extends EventEmitter {
       mergeCommitId: mergeCommit.id,
       conflicts: [],
       strategy,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    this.emit('merge:completed', { result });
+    this.emit("merge:completed", { result });
 
     return result;
   }
@@ -397,15 +393,15 @@ export class VersionControl extends EventEmitter {
   ): Promise<Commit> {
     const commit = await this.store.getCommit(commitId);
     if (!commit) {
-      throw new Error('Commit not found');
+      throw new Error("Commit not found");
     }
 
     // Create reverse changes
-    const reverseChanges = commit.changes.map(change => ({
+    const reverseChanges = commit.changes.map((change) => ({
       ...change,
       type: this.getReverseChangeType(change.type),
-      contentHash: change.previousHash || '',
-      previousHash: change.contentHash
+      contentHash: change.previousHash || "",
+      previousHash: change.contentHash,
     }));
 
     // Create revert commit
@@ -413,39 +409,35 @@ export class VersionControl extends EventEmitter {
       repositoryId,
       branchName,
       revertedBy,
-      'System',
+      "System",
       `Revert "${commit.message}"`,
       reverseChanges,
       {
         description: `This reverts commit ${commitId}`,
-        metadata: { revertedCommitId: commitId }
+        metadata: { revertedCommitId: commitId },
       }
     );
 
-    this.emit('commit:reverted', { originalCommit: commit, revertCommit });
+    this.emit("commit:reverted", { originalCommit: commit, revertCommit });
 
     return revertCommit;
   }
 
   // Blame
-  async blame(
-    repositoryId: string,
-    branchName: string,
-    path: string
-  ): Promise<Blame> {
+  async blame(repositoryId: string, branchName: string, path: string): Promise<Blame> {
     const branch = await this.store.getBranch(repositoryId, branchName);
     if (!branch) {
-      throw new Error('Branch not found');
+      throw new Error("Branch not found");
     }
 
     const commits = await this.store.getCommitHistory(branch.headCommitId);
     const content = await this.store.getContent(branch.headCommitId, path);
 
-    if (typeof content !== 'string') {
-      throw new Error('Blame only supported for text content');
+    if (typeof content !== "string") {
+      throw new Error("Blame only supported for text content");
     }
 
-    const lines = content.split('\n');
+    const lines = content.split("\n");
     const blameLines = [];
 
     // Simple blame implementation - find which commit last modified each line
@@ -454,8 +446,8 @@ export class VersionControl extends EventEmitter {
 
       for (const commit of commits) {
         const commitContent = await this.store.getContent(commit.id, path);
-        if (typeof commitContent === 'string') {
-          const commitLines = commitContent.split('\n');
+        if (typeof commitContent === "string") {
+          const commitLines = commitContent.split("\n");
           if (commitLines[i] === lines[i]) {
             foundCommit = commit;
             break;
@@ -469,13 +461,13 @@ export class VersionControl extends EventEmitter {
         commitId: foundCommit.id,
         authorId: foundCommit.authorId,
         authorName: foundCommit.authorName,
-        timestamp: foundCommit.timestamp
+        timestamp: foundCommit.timestamp,
       });
     }
 
     return {
       path,
-      lines: blameLines
+      lines: blameLines,
     };
   }
 
@@ -492,10 +484,10 @@ export class VersionControl extends EventEmitter {
       name,
       commitId,
       message,
-      createdBy
+      createdBy,
     });
 
-    this.emit('tag:created', { tag });
+    this.emit("tag:created", { tag });
 
     return tag;
   }
@@ -509,9 +501,7 @@ export class VersionControl extends EventEmitter {
     }
   ): Promise<CommitTree> {
     const branches = options?.branches
-      ? await Promise.all(
-          options.branches.map(name => this.store.getBranch(repositoryId, name))
-        )
+      ? await Promise.all(options.branches.map((name) => this.store.getBranch(repositoryId, name)))
       : await this.store.listBranches(repositoryId);
 
     const allCommits = new Map<string, Commit>();
@@ -532,12 +522,10 @@ export class VersionControl extends EventEmitter {
     }
 
     // Find root commit(s)
-    const roots = Array.from(allCommits.values()).filter(
-      c => c.parentCommits.length === 0
-    );
+    const roots = Array.from(allCommits.values()).filter((c) => c.parentCommits.length === 0);
 
     if (roots.length === 0) {
-      throw new Error('No root commit found');
+      throw new Error("No root commit found");
     }
 
     const buildTree = (commitId: string): CommitTree => {
@@ -548,7 +536,7 @@ export class VersionControl extends EventEmitter {
         commit,
         children: childIds.map(buildTree),
         branches: [],
-        tags: []
+        tags: [],
       };
     };
 
@@ -557,14 +545,18 @@ export class VersionControl extends EventEmitter {
 
   // Helper methods
   private computeDiff(path: string, fromContent: any, toContent: any): Diff {
-    if (typeof fromContent !== 'string' || typeof toContent !== 'string') {
+    if (typeof fromContent !== "string" || typeof toContent !== "string") {
       // For non-text content, just indicate the change
       return {
         path,
-        changeType: !fromContent ? ChangeType.ADD : !toContent ? ChangeType.DELETE : ChangeType.MODIFY,
+        changeType: !fromContent
+          ? ChangeType.ADD
+          : !toContent
+            ? ChangeType.DELETE
+            : ChangeType.MODIFY,
         additions: 1,
         deletions: 1,
-        hunks: []
+        hunks: [],
       };
     }
 
@@ -574,9 +566,9 @@ export class VersionControl extends EventEmitter {
 
     for (const [type, text] of diffs) {
       if (type === fastDiff.INSERT) {
-        additions += text.split('\n').length - 1;
+        additions += text.split("\n").length - 1;
       } else if (type === fastDiff.DELETE) {
-        deletions += text.split('\n').length - 1;
+        deletions += text.split("\n").length - 1;
       }
     }
 
@@ -585,7 +577,7 @@ export class VersionControl extends EventEmitter {
       changeType: ChangeType.MODIFY,
       additions,
       deletions,
-      hunks: [] // Would compute actual hunks for detailed diff view
+      hunks: [], // Would compute actual hunks for detailed diff view
     };
   }
 
@@ -593,7 +585,7 @@ export class VersionControl extends EventEmitter {
     const commits1 = await this.store.getCommitHistory(commitId1);
     const commits2 = await this.store.getCommitHistory(commitId2);
 
-    const commitIds2 = new Set(commits2.map(c => c.id));
+    const commitIds2 = new Set(commits2.map((c) => c.id));
 
     for (const commit of commits1) {
       if (commitIds2.has(commit.id)) {
@@ -609,7 +601,7 @@ export class VersionControl extends EventEmitter {
     baseCommitId: string,
     targetCommitId: string,
     sourceCommitId: string
-  ): Promise<MergeResult['conflicts']> {
+  ): Promise<MergeResult["conflicts"]> {
     const baseCommit = await this.store.getCommit(baseCommitId);
     const targetCommit = await this.store.getCommit(targetCommitId);
     const sourceCommit = await this.store.getCommit(sourceCommitId);
@@ -618,11 +610,11 @@ export class VersionControl extends EventEmitter {
       return [];
     }
 
-    const conflicts: MergeResult['conflicts'] = [];
+    const conflicts: MergeResult["conflicts"] = [];
 
     // Find files modified in both branches
-    const targetPaths = new Set(targetCommit.changes.map(c => c.path));
-    const sourcePaths = new Set(sourceCommit.changes.map(c => c.path));
+    const targetPaths = new Set(targetCommit.changes.map((c) => c.path));
+    const sourcePaths = new Set(sourceCommit.changes.map((c) => c.path));
 
     for (const path of targetPaths) {
       if (sourcePaths.has(path)) {
@@ -633,11 +625,11 @@ export class VersionControl extends EventEmitter {
         if (JSON.stringify(targetContent) !== JSON.stringify(sourceContent)) {
           conflicts.push({
             path,
-            type: 'content',
+            type: "content",
             currentContent: targetContent,
             incomingContent: sourceContent,
             baseContent,
-            resolved: false
+            resolved: false,
           });
         }
       }

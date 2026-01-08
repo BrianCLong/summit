@@ -4,7 +4,7 @@
 
 export class ToxicityDetector {
   detect(text: string): { isToxic: boolean; severity: number; categories: string[] } {
-    const toxicWords = ['hate', 'kill', 'stupid', 'idiot'];
+    const toxicWords = ["hate", "kill", "stupid", "idiot"];
     const lower = text.toLowerCase();
 
     let toxicityScore = 0;
@@ -13,7 +13,7 @@ export class ToxicityDetector {
     for (const word of toxicWords) {
       if (lower.includes(word)) {
         toxicityScore += 0.25;
-        categories.push('offensive');
+        categories.push("offensive");
       }
     }
 

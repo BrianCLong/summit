@@ -5,33 +5,36 @@
 ### 1. Event Naming
 
 **Use past tense for event names:**
+
 ```typescript
 // Good
-'InvestigationCreated'
-'EntityEnriched'
-'ThreatDetected'
+"InvestigationCreated";
+"EntityEnriched";
+"ThreatDetected";
 
 // Bad
-'CreateInvestigation'
-'EnrichEntity'
-'DetectThreat'
+"CreateInvestigation";
+"EnrichEntity";
+"DetectThreat";
 ```
 
 **Be specific and descriptive:**
+
 ```typescript
 // Good
-'HighPriorityThreatDetected'
-'InvestigationAssignedToAnalyst'
+"HighPriorityThreatDetected";
+"InvestigationAssignedToAnalyst";
 
 // Bad
-'Event'
-'Update'
-'Changed'
+"Event";
+"Update";
+"Changed";
 ```
 
 ### 2. Event Structure
 
 **Include complete context:**
+
 ```typescript
 interface WellDesignedEvent {
   // Identity
@@ -65,6 +68,7 @@ interface WellDesignedEvent {
 ```
 
 **Don't store sensitive data in events:**
+
 ```typescript
 // Bad
 {
@@ -90,6 +94,7 @@ interface WellDesignedEvent {
 ### 3. Event Versioning
 
 **Version events from day one:**
+
 ```typescript
 {
   eventType: 'InvestigationCreated',
@@ -99,19 +104,20 @@ interface WellDesignedEvent {
 ```
 
 **Use upcasters for evolution:**
+
 ```typescript
 // V1 -> V2: Added priority field
-upcasterChain.register('InvestigationCreated', {
+upcasterChain.register("InvestigationCreated", {
   fromVersion: 1,
   toVersion: 2,
-  upcast: UpcastHelpers.addField('priority', 3)
+  upcast: UpcastHelpers.addField("priority", 3),
 });
 
 // V2 -> V3: Renamed assignee to assignedTo
-upcasterChain.register('InvestigationCreated', {
+upcasterChain.register("InvestigationCreated", {
   fromVersion: 2,
   toVersion: 3,
-  upcast: UpcastHelpers.renameField('assignee', 'assignedTo')
+  upcast: UpcastHelpers.renameField("assignee", "assignedTo"),
 });
 ```
 
@@ -120,14 +126,15 @@ upcasterChain.register('InvestigationCreated', {
 ### 1. Idempotency
 
 **Always design idempotent handlers:**
+
 ```typescript
-await eventBus.subscribe('entity.updated', async (message) => {
+await eventBus.subscribe("entity.updated", async (message) => {
   const { entityId, version, timestamp } = message.payload;
 
   // Use message ID for deduplication
   const processed = await redis.get(`processed:${message.metadata.messageId}`);
   if (processed) {
-    logger.debug('Already processed, skipping');
+    logger.debug("Already processed, skipping");
     return;
   }
 
@@ -137,22 +144,23 @@ await eventBus.subscribe('entity.updated', async (message) => {
   // Mark as processed (with TTL to prevent unbounded growth)
   await redis.setex(
     `processed:${message.metadata.messageId}`,
-    86400,  // 24 hours
-    '1'
+    86400, // 24 hours
+    "1"
   );
 });
 ```
 
 **Alternative: Use version numbers:**
+
 ```typescript
-await eventBus.subscribe('entity.updated', async (message) => {
+await eventBus.subscribe("entity.updated", async (message) => {
   const { entityId, version } = message.payload;
 
   const currentVersion = await getEntityVersion(entityId);
 
   // Only process if version is newer
   if (version <= currentVersion) {
-    logger.debug('Stale event, skipping');
+    logger.debug("Stale event, skipping");
     return;
   }
 
@@ -163,30 +171,32 @@ await eventBus.subscribe('entity.updated', async (message) => {
 ### 2. Error Handling
 
 **Use retries with exponential backoff:**
+
 ```typescript
-await eventBus.subscribe('critical.task', handler, {
+await eventBus.subscribe("critical.task", handler, {
   maxRetries: 5,
-  retryBackoff: 'exponential',
-  retryDelay: 1000,  // Start with 1 second
-  deadLetterQueue: 'dlq-critical'
+  retryBackoff: "exponential",
+  retryDelay: 1000, // Start with 1 second
+  deadLetterQueue: "dlq-critical",
 });
 ```
 
 **Implement circuit breakers:**
+
 ```typescript
 const breaker = new CircuitBreaker(externalService.call, {
   timeout: 5000,
   errorThresholdPercentage: 50,
-  resetTimeout: 30000
+  resetTimeout: 30000,
 });
 
-await eventBus.subscribe('external.call', async (message) => {
+await eventBus.subscribe("external.call", async (message) => {
   try {
     const result = await breaker.fire(message.payload);
     await processResult(result);
   } catch (err) {
     if (breaker.opened) {
-      logger.warn('Circuit breaker open, queueing for retry');
+      logger.warn("Circuit breaker open, queueing for retry");
       await retryQueue.enqueue(message);
     } else {
       throw err;
@@ -198,20 +208,22 @@ await eventBus.subscribe('external.call', async (message) => {
 ### 3. Dead Letter Queue Management
 
 **Monitor and alert:**
+
 ```typescript
 setInterval(async () => {
   const stats = await dlq.getStats();
 
   if (stats.totalMessages > 100) {
     await alertService.send({
-      severity: 'high',
-      message: `DLQ has ${stats.totalMessages} messages`
+      severity: "high",
+      message: `DLQ has ${stats.totalMessages} messages`,
     });
   }
-}, 60000);  // Check every minute
+}, 60000); // Check every minute
 ```
 
 **Implement DLQ processors:**
+
 ```typescript
 class DLQProcessor {
   async processFailedMessages(): Promise<void> {
@@ -238,6 +250,7 @@ class DLQProcessor {
 ### 1. Batching
 
 **Batch event processing:**
+
 ```typescript
 class BatchedEventProcessor {
   private batch: Event[] = [];
@@ -274,14 +287,13 @@ class BatchedEventProcessor {
 
   private async processBatch(events: Event[]): Promise<void> {
     // Bulk insert to database
-    await db.query(`
+    await db.query(
+      `
       INSERT INTO events (id, type, payload)
       SELECT * FROM UNNEST($1::uuid[], $2::text[], $3::jsonb[])
-    `, [
-      events.map(e => e.id),
-      events.map(e => e.type),
-      events.map(e => e.payload)
-    ]);
+    `,
+      [events.map((e) => e.id), events.map((e) => e.type), events.map((e) => e.payload)]
+    );
   }
 }
 ```
@@ -289,48 +301,50 @@ class BatchedEventProcessor {
 ### 2. Caching
 
 **Cache query results:**
+
 ```typescript
 queryBus.register({
-  queryType: 'GetInvestigation',
+  queryType: "GetInvestigation",
   handler: async (query) => {
     const investigation = await db.findInvestigation(query.parameters.id);
     return { success: true, data: investigation };
   },
   cacheable: true,
-  cacheTTL: 300  // 5 minutes
+  cacheTTL: 300, // 5 minutes
 });
 
 // Invalidate on changes
 commandBus.register({
-  commandType: 'UpdateInvestigation',
+  commandType: "UpdateInvestigation",
   handler: async (command) => {
     await db.updateInvestigation(command.payload);
 
     // Invalidate cache
-    await queryBus.invalidateCache('GetInvestigation', {
-      id: command.payload.id
+    await queryBus.invalidateCache("GetInvestigation", {
+      id: command.payload.id,
     });
 
     return { success: true };
-  }
+  },
 });
 ```
 
 ### 3. Backpressure
 
 **Handle backpressure:**
+
 ```typescript
-await eventBus.subscribeQueue('slow-tasks', handler, {
-  prefetchCount: 1,  // Process one at a time
+await eventBus.subscribeQueue("slow-tasks", handler, {
+  prefetchCount: 1, // Process one at a time
 });
 
 // Or use rate limiting
 const rateLimiter = new RateLimiter({
   tokensPerInterval: 100,
-  interval: 'second'
+  interval: "second",
 });
 
-await eventBus.subscribe('high-volume', async (message) => {
+await eventBus.subscribe("high-volume", async (message) => {
   await rateLimiter.removeTokens(1);
   await handler(message);
 });
@@ -341,14 +355,15 @@ await eventBus.subscribe('high-volume', async (message) => {
 ### 1. Metrics
 
 **Track key metrics:**
+
 ```typescript
 class MetricsCollector {
   private metrics = {
-    messagesPublished: new Counter('messages_published'),
-    messagesConsumed: new Counter('messages_consumed'),
-    messagesFailed: new Counter('messages_failed'),
-    processingTime: new Histogram('message_processing_seconds'),
-    queueDepth: new Gauge('queue_depth')
+    messagesPublished: new Counter("messages_published"),
+    messagesConsumed: new Counter("messages_consumed"),
+    messagesFailed: new Counter("messages_failed"),
+    processingTime: new Histogram("message_processing_seconds"),
+    queueDepth: new Gauge("queue_depth"),
   };
 
   recordPublish(topic: string): void {
@@ -373,17 +388,22 @@ class MetricsCollector {
 ### 2. Logging
 
 **Structured logging:**
+
 ```typescript
-logger.info({
-  eventType: 'InvestigationCreated',
-  aggregateId: 'inv-123',
-  userId: 'analyst-1',
-  correlationId: 'corr-456',
-  duration: 234
-}, 'Investigation created');
+logger.info(
+  {
+    eventType: "InvestigationCreated",
+    aggregateId: "inv-123",
+    userId: "analyst-1",
+    correlationId: "corr-456",
+    duration: 234,
+  },
+  "Investigation created"
+);
 ```
 
 **Log levels:**
+
 - ERROR: Failures requiring immediate attention
 - WARN: Degraded performance, retries
 - INFO: Business events, state changes
@@ -392,17 +412,18 @@ logger.info({
 ### 3. Distributed Tracing
 
 **Implement tracing:**
+
 ```typescript
-import { trace, context, SpanStatusCode } from '@opentelemetry/api';
+import { trace, context, SpanStatusCode } from "@opentelemetry/api";
 
-const tracer = trace.getTracer('event-bus');
+const tracer = trace.getTracer("event-bus");
 
-await eventBus.subscribe('task', async (message) => {
-  const span = tracer.startSpan('process-task', {
+await eventBus.subscribe("task", async (message) => {
+  const span = tracer.startSpan("process-task", {
     attributes: {
-      'message.id': message.metadata.messageId,
-      'message.type': message.topic
-    }
+      "message.id": message.metadata.messageId,
+      "message.type": message.topic,
+    },
   });
 
   try {
@@ -411,7 +432,7 @@ await eventBus.subscribe('task', async (message) => {
   } catch (err) {
     span.setStatus({
       code: SpanStatusCode.ERROR,
-      message: err.message
+      message: err.message,
     });
     throw err;
   } finally {
@@ -425,21 +446,19 @@ await eventBus.subscribe('task', async (message) => {
 ### 1. Authentication & Authorization
 
 **Validate permissions:**
+
 ```typescript
 commandBus.addValidator(async (command) => {
   const { userId } = command.metadata;
 
   if (!userId) {
-    return { valid: false, errors: ['Authentication required'] };
+    return { valid: false, errors: ["Authentication required"] };
   }
 
-  const hasPermission = await authService.checkPermission(
-    userId,
-    command.commandType
-  );
+  const hasPermission = await authService.checkPermission(userId, command.commandType);
 
   if (!hasPermission) {
-    return { valid: false, errors: ['Insufficient permissions'] };
+    return { valid: false, errors: ["Insufficient permissions"] };
   }
 
   return { valid: true };
@@ -449,12 +468,11 @@ commandBus.addValidator(async (command) => {
 ### 2. Encryption
 
 **Encrypt sensitive payloads:**
+
 ```typescript
 class EncryptedEventBus {
   async publish(topic: string, payload: any, options?: PublishOptions): Promise<string> {
-    const encrypted = options?.encrypted
-      ? await this.encrypt(payload)
-      : payload;
+    const encrypted = options?.encrypted ? await this.encrypt(payload) : payload;
 
     return this.eventBus.publish(topic, encrypted, options);
   }
@@ -483,28 +501,29 @@ class EncryptedEventBus {
 ### 1. Unit Tests
 
 **Test event handlers:**
+
 ```typescript
-describe('InvestigationEventHandler', () => {
-  it('should create investigation on InvestigationCreated event', async () => {
+describe("InvestigationEventHandler", () => {
+  it("should create investigation on InvestigationCreated event", async () => {
     const handler = new InvestigationEventHandler(mockDb);
 
     const event: DomainEvent = {
-      eventType: 'InvestigationCreated',
-      aggregateId: 'inv-123',
+      eventType: "InvestigationCreated",
+      aggregateId: "inv-123",
       payload: {
-        title: 'Test Investigation',
-        analyst: 'analyst-1'
+        title: "Test Investigation",
+        analyst: "analyst-1",
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     await handler.handle(event);
 
     expect(mockDb.insert).toHaveBeenCalledWith(
-      'investigations',
+      "investigations",
       expect.objectContaining({
-        id: 'inv-123',
-        title: 'Test Investigation'
+        id: "inv-123",
+        title: "Test Investigation",
       })
     );
   });
@@ -514,20 +533,21 @@ describe('InvestigationEventHandler', () => {
 ### 2. Integration Tests
 
 **Test event flow:**
+
 ```typescript
-describe('Investigation Workflow', () => {
-  it('should complete full investigation workflow', async () => {
+describe("Investigation Workflow", () => {
+  it("should complete full investigation workflow", async () => {
     const events: DomainEvent[] = [];
 
     // Subscribe to collect events
-    await eventBus.subscribe('investigation.*', async (msg) => {
+    await eventBus.subscribe("investigation.*", async (msg) => {
       events.push(msg.payload);
     });
 
     // Create investigation
-    await commandBus.execute('CreateInvestigation', {
-      title: 'Test',
-      analyst: 'analyst-1'
+    await commandBus.execute("CreateInvestigation", {
+      title: "Test",
+      analyst: "analyst-1",
     });
 
     // Wait for events
@@ -535,13 +555,13 @@ describe('Investigation Workflow', () => {
 
     expect(events).toContainEqual(
       expect.objectContaining({
-        eventType: 'InvestigationCreated'
+        eventType: "InvestigationCreated",
       })
     );
 
     expect(events).toContainEqual(
       expect.objectContaining({
-        eventType: 'AnalystAssigned'
+        eventType: "AnalystAssigned",
       })
     );
   });
@@ -551,20 +571,21 @@ describe('Investigation Workflow', () => {
 ### 3. Contract Testing
 
 **Verify event schemas:**
+
 ```typescript
-describe('Event Contracts', () => {
-  it('should match InvestigationCreated schema', () => {
+describe("Event Contracts", () => {
+  it("should match InvestigationCreated schema", () => {
     const event = {
-      eventType: 'InvestigationCreated',
-      aggregateId: 'inv-123',
+      eventType: "InvestigationCreated",
+      aggregateId: "inv-123",
       payload: {
-        title: 'Test',
-        analyst: 'analyst-1',
-        priority: 3
-      }
+        title: "Test",
+        analyst: "analyst-1",
+        priority: 3,
+      },
     };
 
-    const result = validateEventSchema('InvestigationCreated', 1, event);
+    const result = validateEventSchema("InvestigationCreated", 1, event);
 
     expect(result.valid).toBe(true);
   });
@@ -576,15 +597,16 @@ describe('Event Contracts', () => {
 ### 1. Blue-Green Deployment
 
 Support multiple versions:
+
 ```typescript
 // Version 1 handler
-eventBus.subscribe('v1.events', handlerV1);
+eventBus.subscribe("v1.events", handlerV1);
 
 // Version 2 handler
-eventBus.subscribe('v2.events', handlerV2);
+eventBus.subscribe("v2.events", handlerV2);
 
 // Router
-eventBus.subscribe('events', async (msg) => {
+eventBus.subscribe("events", async (msg) => {
   const version = getDeploymentVersion();
   await eventBus.publish(`${version}.events`, msg.payload);
 });
@@ -593,19 +615,14 @@ eventBus.subscribe('events', async (msg) => {
 ### 2. Health Checks
 
 ```typescript
-app.get('/health', async (req, res) => {
-  const checks = await Promise.all([
-    checkEventBus(),
-    checkDatabase(),
-    checkRedis(),
-    checkKafka()
-  ]);
+app.get("/health", async (req, res) => {
+  const checks = await Promise.all([checkEventBus(), checkDatabase(), checkRedis(), checkKafka()]);
 
-  const healthy = checks.every(c => c.healthy);
+  const healthy = checks.every((c) => c.healthy);
 
   res.status(healthy ? 200 : 503).json({
-    status: healthy ? 'healthy' : 'unhealthy',
-    checks
+    status: healthy ? "healthy" : "unhealthy",
+    checks,
   });
 });
 ```
@@ -613,8 +630,8 @@ app.get('/health', async (req, res) => {
 ### 3. Graceful Shutdown
 
 ```typescript
-process.on('SIGTERM', async () => {
-  logger.info('SIGTERM received, shutting down...');
+process.on("SIGTERM", async () => {
+  logger.info("SIGTERM received, shutting down...");
 
   // Stop accepting new messages
   server.close();
@@ -626,7 +643,7 @@ process.on('SIGTERM', async () => {
   await eventStore.close();
   await redis.quit();
 
-  logger.info('Shutdown complete');
+  logger.info("Shutdown complete");
   process.exit(0);
 });
 ```

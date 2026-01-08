@@ -5,22 +5,22 @@
  * Copyright (c) 2025 IntelGraph
  */
 
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from "express";
 
 /**
  * Rate limiting algorithms
  */
-export type RateLimitAlgorithm = 'sliding-window' | 'token-bucket' | 'fixed-window';
+export type RateLimitAlgorithm = "sliding-window" | "token-bucket" | "fixed-window";
 
 /**
  * User tier levels
  */
-export type UserTier = 'free' | 'basic' | 'premium' | 'enterprise' | 'internal';
+export type UserTier = "free" | "basic" | "premium" | "enterprise" | "internal";
 
 /**
  * Rate limit result status
  */
-export type RateLimitResult = 'allowed' | 'denied' | 'error';
+export type RateLimitResult = "allowed" | "denied" | "error";
 
 /**
  * Rate limit policy configuration
@@ -203,7 +203,12 @@ export interface IRateLimitStore {
   /** Get token bucket state */
   getTokenBucket(key: string): Promise<TokenBucketState | null>;
   /** Consume tokens from bucket */
-  consumeTokens(key: string, tokens: number, capacity: number, refillRate: number): Promise<TokenBucketState>;
+  consumeTokens(
+    key: string,
+    tokens: number,
+    capacity: number,
+    refillRate: number
+  ): Promise<TokenBucketState>;
   /** Health check */
   healthCheck(): Promise<boolean>;
 }

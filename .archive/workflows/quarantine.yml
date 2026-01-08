@@ -14,6 +14,6 @@ jobs:
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           {
-            commit_message: 'ci: quarantine flaky tests [skip ci]',
-            file_pattern: 'tests/.quarantine.json',
+            commit_message: "ci: quarantine flaky tests [skip ci]",
+            file_pattern: "tests/.quarantine.json",
           }

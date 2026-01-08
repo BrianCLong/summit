@@ -11,7 +11,7 @@
 **Bad Response (Lobbyist):** "Regulation stifles innovation. Let the market decide. Trust us."
 
 **Clean-Hands Response:**
-"We agree that safety is paramount. In fact, we believe the current standards are *too low*.
+"We agree that safety is paramount. In fact, we believe the current standards are _too low_.
 Here is our internal Safety Model. We have open-sourced the testing harness.
 If you are drafting rules, we recommend focusing on **measurable outcomes** (like X and Y) rather than prescribing specific technologies, which will date quickly."
 
@@ -50,5 +50,6 @@ We will bring our engineers, not our lawyers.
 We will walk you through the system architecture on a whiteboard. No policy requests, just education."
 
 ---
+
 **Golden Rule:**
 **Always be the most useful person in the room, never the most demanding.**

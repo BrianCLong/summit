@@ -1,17 +1,17 @@
 meta:
   id: implement.cost-guard-budgeter@v1
-  owner: 'intelgraph-advisory-committee'
-  purpose: 'Build budget-aware query planner with cost estimation, slow-query killer, and alternative plan suggestions'
-  tags: ['cost-control', 'query-optimization', 'budget', 'performance', 'observability']
+  owner: "intelgraph-advisory-committee"
+  purpose: "Build budget-aware query planner with cost estimation, slow-query killer, and alternative plan suggestions"
+  tags: ["cost-control", "query-optimization", "budget", "performance", "observability"]
   guardrails:
-    - 'All queries must show cost estimates before execution'
-    - 'Budget limits enforced at tenant level'
-    - 'Slow queries automatically killed at timeout threshold'
-    - 'Alternative cheaper plans must be suggested when available'
-    - 'Cost savings tracked and reported'
+    - "All queries must show cost estimates before execution"
+    - "Budget limits enforced at tenant level"
+    - "Slow queries automatically killed at timeout threshold"
+    - "Alternative cheaper plans must be suggested when available"
+    - "Cost savings tracked and reported"
 
 modelConfig:
-  model: 'claude-sonnet-4-5'
+  model: "claude-sonnet-4-5"
   temperature: 0.2
   maxTokens: 7000
 
@@ -535,25 +535,25 @@ template: |
   Remember: **Cost control = margin protection.** Every dollar saved is a dollar earned.
 
 examples:
-  - name: 'dbhits-cost-50usd'
+  - name: "dbhits-cost-50usd"
     inputs:
-      cost_model: 'dbHits + rows'
-      optimization_target: 'cost'
-      default_budget_usd: '50'
+      cost_model: "dbHits + rows"
+      optimization_target: "cost"
+      default_budget_usd: "50"
     expected_contains:
-      - 'dbHits'
-      - 'cost estimate'
-      - '20-40% savings'
-      - 'slow query killer'
-      - '$50'
+      - "dbHits"
+      - "cost estimate"
+      - "20-40% savings"
+      - "slow query killer"
+      - "$50"
 
-  - name: 'cpu-latency-100usd'
+  - name: "cpu-latency-100usd"
     inputs:
-      cost_model: 'CPU + memory'
-      optimization_target: 'latency'
-      default_budget_usd: '100'
+      cost_model: "CPU + memory"
+      optimization_target: "latency"
+      default_budget_usd: "100"
     expected_contains:
-      - 'CPU'
-      - 'latency'
-      - 'budget'
-      - 'optimizer'
+      - "CPU"
+      - "latency"
+      - "budget"
+      - "optimizer"

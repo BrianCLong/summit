@@ -116,7 +116,7 @@ export function mapPost(p: any) {
       ts: new Date(p.created_at).toISOString(),
       text: p.text,
       lang: p.lang,
-      license: p.license || 'Unknown',
+      license: p.license || "Unknown",
     },
     edges: edgesFrom(p),
   };
@@ -125,14 +125,14 @@ function edgesFrom(p: any) {
   const out: any[] = [];
   if (p.in_reply_to)
     out.push({
-      type: 'REPLIED_TO',
+      type: "REPLIED_TO",
       src: `post:${p.id}`,
       dst: `post:${p.in_reply_to}`,
     });
   for (const m of p.mentions || [])
-    out.push({ type: 'MENTIONED', src: `post:${p.id}`, dst: `user:${m}` });
+    out.push({ type: "MENTIONED", src: `post:${p.id}`, dst: `user:${m}` });
   for (const q of p.quotes || [])
-    out.push({ type: 'QUOTED', src: `post:${p.id}`, dst: `post:${q}` });
+    out.push({ type: "QUOTED", src: `post:${p.id}`, dst: `post:${q}` });
   return out;
 }
 ```
@@ -182,7 +182,7 @@ async def score(posts: List[Post]):
 
 ```ts
 // server/src/coord/minhash.ts
-import crypto from 'crypto';
+import crypto from "crypto";
 export function shingle(s: string, k = 5) {
   const out: string[] = [];
   for (let i = 0; i <= s.length - k; i++) out.push(s.slice(i, i + k));
@@ -193,11 +193,11 @@ export function minhash(sig: string[], h = 64) {
   return salts.map((salt) =>
     sig.reduce((m, sh) => {
       const h = crypto
-        .createHash('sha1')
+        .createHash("sha1")
         .update(salt + sh)
-        .digest('hex');
+        .digest("hex");
       return m < h ? m : h;
-    }, 'f'.repeat(40)),
+    }, "f".repeat(40))
   );
 }
 export function lsh(bands: number, rows: number, mh: string[]) {
@@ -242,12 +242,7 @@ type Citation {
   license: String
 }
 extend type Query {
-  narratives(
-    caseId: ID!
-    from: DateTime
-    to: DateTime
-    k: Int = 6
-  ): [NarrativeCard!]!
+  narratives(caseId: ID!, from: DateTime, to: DateTime, k: Int = 6): [NarrativeCard!]!
 }
 ```
 
@@ -273,24 +268,24 @@ contains_restricted_terms {
 ```js
 // apps/web/src/features/comms/jquery-ui.js
 $(function () {
-  $('#time-slider').on('input', function () {
+  $("#time-slider").on("input", function () {
     const w = $(this).val();
     $.ajax({
-      url: '/graphql',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/graphql",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({
         query: `{ threadView(caseId:"${caseId}", window:${w}){ nodes{ id } edges{ s t } } }`,
       }),
     });
   });
-  $(document).on('click', '.coord-suppress', function () {
+  $(document).on("click", ".coord-suppress", function () {
     $.ajax({
-      url: '/graphql',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/graphql",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({
-        query: `mutation{ coordSuppress(cluster:"${$(this).data('id')}"){ ok } }`,
+        query: `mutation{ coordSuppress(cluster:"${$(this).data("id")}"){ ok } }`,
       }),
     });
   });
@@ -314,20 +309,20 @@ panels:
 ### 4.10 k6 — Ingest + Query Mix
 
 ```js
-import http from 'k6/http';
-export const options = { vus: 50, duration: '3m' };
+import http from "k6/http";
+export const options = { vus: 50, duration: "3m" };
 export default function () {
   http.post(
-    'http://localhost:4000/graphql',
+    "http://localhost:4000/graphql",
     JSON.stringify({
       query: 'mutation{ commsIngest(source:"dump.json"){ ok } }',
     }),
-    { headers: { 'Content-Type': 'application/json' } },
+    { headers: { "Content-Type": "application/json" } }
   );
   http.post(
-    'http://localhost:4000/graphql',
+    "http://localhost:4000/graphql",
     JSON.stringify({ query: '{ narratives(caseId:"c1", k:6){ id count } }' }),
-    { headers: { 'Content-Type': 'application/json' } },
+    { headers: { "Content-Type": "application/json" } }
   );
 }
 ```

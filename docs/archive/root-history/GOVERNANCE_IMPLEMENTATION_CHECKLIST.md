@@ -5,6 +5,7 @@ This checklist guides you through deploying the complete governance, ABAC, and a
 ## Pre-Deployment Checklist
 
 ### Environment Preparation
+
 - [ ] Ensure PostgreSQL 12+ is running
 - [ ] Ensure Neo4j 4.4+ is running
 - [ ] Ensure Redis is running (for audit buffering)
@@ -51,6 +52,7 @@ GOVERNANCE_MIN_REASON_LENGTH=10
 ### Database Migrations
 
 #### PostgreSQL
+
 - [ ] Review migration file: `server/src/migrations/001_governance_schema.sql`
 - [ ] Run migration:
   ```bash
@@ -70,6 +72,7 @@ GOVERNANCE_MIN_REASON_LENGTH=10
   ```
 
 #### Neo4j
+
 - [ ] Review migration file: `server/src/migrations/002_neo4j_policy_tags.ts`
 - [ ] Run migration:
   ```bash
@@ -86,7 +89,9 @@ GOVERNANCE_MIN_REASON_LENGTH=10
   ```
 
 ### OPA Deployment
+
 - [ ] Install OPA:
+
   ```bash
   # macOS
   brew install opa
@@ -95,6 +100,7 @@ GOVERNANCE_MIN_REASON_LENGTH=10
   curl -L -o /usr/local/bin/opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
   chmod +x /usr/local/bin/opa
   ```
+
 - [ ] Copy policies to OPA directory:
   ```bash
   mkdir -p /etc/opa/policies
@@ -122,6 +128,7 @@ GOVERNANCE_MIN_REASON_LENGTH=10
   ```
 
 ### Application Integration
+
 - [ ] Install dependencies:
   ```bash
   npm install
@@ -154,6 +161,7 @@ GOVERNANCE_MIN_REASON_LENGTH=10
   - `X-Reason-For-Access`
 
 ### Create Test Warrants
+
 - [ ] Create test warrant for pilot tenant:
   ```bash
   curl -X POST http://localhost:3000/api/warrants \
@@ -178,6 +186,7 @@ GOVERNANCE_MIN_REASON_LENGTH=10
   ```
 
 ### Test Case Graph Access
+
 - [ ] Test with all governance headers:
   ```bash
   curl -X POST http://localhost:3000/graphql \
@@ -209,6 +218,7 @@ GOVERNANCE_MIN_REASON_LENGTH=10
   ```
 
 ### Monitor Performance
+
 - [ ] Check OPA response times:
   ```bash
   curl http://localhost:8181/metrics
@@ -225,6 +235,7 @@ GOVERNANCE_MIN_REASON_LENGTH=10
 - [ ] Check audit log flush performance
 
 ### Gather Feedback
+
 - [ ] Survey pilot users on:
   - Ease of use
   - Performance impact
@@ -238,6 +249,7 @@ GOVERNANCE_MIN_REASON_LENGTH=10
 ## Phase 3: Gradual Rollout (Week 5-8)
 
 ### Enable for All New Investigations
+
 - [ ] Set feature flag:
   ```bash
   FEATURE_GOVERNANCE_HEADERS=true
@@ -247,6 +259,7 @@ GOVERNANCE_MIN_REASON_LENGTH=10
 - [ ] Provide training materials
 
 ### Backfill Policy Tags for Existing Data
+
 - [ ] Run backfill script:
   ```bash
   npm run backfill:policy-tags
@@ -268,6 +281,7 @@ GOVERNANCE_MIN_REASON_LENGTH=10
   ```
 
 ### Make Governance Headers Required for Sensitive Operations
+
 - [ ] Update middleware configuration:
   ```typescript
   const governanceMiddleware = createGovernanceMiddleware(db, warrantService, logger, {
@@ -280,6 +294,7 @@ GOVERNANCE_MIN_REASON_LENGTH=10
 - [ ] Provide clear error messages
 
 ### Train Users on Access Request Process
+
 - [ ] Create access request form
 - [ ] Document approval workflow
 - [ ] Train compliance officers
@@ -290,6 +305,7 @@ GOVERNANCE_MIN_REASON_LENGTH=10
 ## Phase 4: Full Enforcement (Week 9-12)
 
 ### Enforce Warrant Requirements for Restricted Data
+
 - [ ] Enable feature flag:
   ```bash
   FEATURE_WARRANT_ENFORCEMENT=true
@@ -299,6 +315,7 @@ GOVERNANCE_MIN_REASON_LENGTH=10
 - [ ] Monitor warrant usage rates
 
 ### Make Reason-for-Access Mandatory
+
 - [ ] Enable strict mode:
   ```typescript
   const governanceMiddleware = createGovernanceMiddleware(db, warrantService, logger, {
@@ -312,6 +329,7 @@ GOVERNANCE_MIN_REASON_LENGTH=10
 - [ ] Monitor for issues
 
 ### Enable Immutable Audit Log
+
 - [ ] Verify triggers are in place:
   ```sql
   SELECT * FROM pg_trigger
@@ -325,12 +343,14 @@ GOVERNANCE_MIN_REASON_LENGTH=10
 - [ ] Set up audit log archival (if needed)
 
 ### Complete OIDC Integration
+
 - [ ] Implement OIDC issuer verification (opa-abac.ts:161)
 - [ ] Test with real OIDC provider
 - [ ] Update token validation
 - [ ] Remove development mode bypass
 
 ### Continuous Monitoring and Optimization
+
 - [ ] Set up dashboards for:
   - Policy evaluation times
   - Warrant usage rates
@@ -350,6 +370,7 @@ GOVERNANCE_MIN_REASON_LENGTH=10
 ## Post-Deployment Tasks
 
 ### Documentation
+
 - [ ] Update API documentation with governance headers
 - [ ] Create user guide for warrant requests
 - [ ] Document appeal process
@@ -357,6 +378,7 @@ GOVERNANCE_MIN_REASON_LENGTH=10
 - [ ] Update developer onboarding docs
 
 ### Security Hardening
+
 - [ ] Enable HSM/KMS for key management
 - [ ] Enable database encryption at rest
 - [ ] Set up append-only audit storage (e.g., AWS S3 with object lock)
@@ -364,6 +386,7 @@ GOVERNANCE_MIN_REASON_LENGTH=10
 - [ ] Enable MFA for admin accounts
 
 ### Compliance Validation
+
 - [ ] Run full compliance report:
   ```bash
   npm run compliance:report -- --framework SOX --start-date 2025-01-01 --end-date 2025-12-31
@@ -376,6 +399,7 @@ GOVERNANCE_MIN_REASON_LENGTH=10
 - [ ] Schedule regular compliance reviews
 
 ### Performance Optimization
+
 - [ ] Review slow queries:
   ```sql
   SELECT query, mean_exec_time, calls
@@ -395,6 +419,7 @@ GOVERNANCE_MIN_REASON_LENGTH=10
 If issues arise, follow this rollback procedure:
 
 ### Emergency Rollback (< 1 hour)
+
 1. [ ] Disable feature flags:
    ```bash
    FEATURE_GOVERNANCE_HEADERS=false
@@ -405,6 +430,7 @@ If issues arise, follow this rollback procedure:
 4. [ ] Monitor for stability
 
 ### Full Rollback (if needed)
+
 1. [ ] Stop OPA server
 2. [ ] Rollback Neo4j migration:
    ```bash
@@ -427,6 +453,7 @@ If issues arise, follow this rollback procedure:
 ## Success Criteria
 
 ### Technical Metrics
+
 - [ ] Policy evaluation time < 50ms (p95)
 - [ ] Audit log write latency < 10ms (p95)
 - [ ] 100% of resource access logged
@@ -434,6 +461,7 @@ If issues arise, follow this rollback procedure:
 - [ ] Zero unauthorized access incidents
 
 ### Business Metrics
+
 - [ ] Policy denial rate < 5%
 - [ ] Average access request response time < 24 hours
 - [ ] Compliance score > 95% for all frameworks
@@ -441,6 +469,7 @@ If issues arise, follow this rollback procedure:
 - [ ] Zero data breach incidents
 
 ### Compliance Metrics
+
 - [ ] 100% of warrant usage tracked
 - [ ] 100% of restricted data access has legal basis
 - [ ] All access has reason-for-access recorded
@@ -452,14 +481,17 @@ If issues arise, follow this rollback procedure:
 ## Support Contacts
 
 ### Technical Issues
+
 - Development Team: dev-team@example.com
 - DevOps: devops@example.com
 
 ### Compliance Issues
+
 - Compliance Officer: compliance@example.com
 - Legal Team: legal@example.com
 
 ### Access Requests
+
 - Submit via: /api/access-requests
 - Email: access-requests@example.com
 - SLA: 24 hours for review
@@ -469,23 +501,27 @@ If issues arise, follow this rollback procedure:
 ## Maintenance Schedule
 
 ### Daily
+
 - [ ] Check OPA server health
 - [ ] Monitor audit log sizes
 - [ ] Review high-severity audit events
 
 ### Weekly
+
 - [ ] Review access denial reports
 - [ ] Process pending access requests
 - [ ] Review warrant expiry dates
 - [ ] Generate weekly compliance summary
 
 ### Monthly
+
 - [ ] Run full compliance reports
 - [ ] Audit trail integrity verification
 - [ ] Performance optimization review
 - [ ] Policy update review
 
 ### Quarterly
+
 - [ ] Comprehensive security audit
 - [ ] User training refresh
 - [ ] Policy effectiveness review

@@ -56,10 +56,7 @@ export const ConductorDashboard: React.FC = () => {
   >('24h')
   const [refreshInterval] = useState(30000) // 30 seconds
 
-  const {
-    data: metrics,
-    error: metricsError,
-  } = useConductorMetrics({
+  const { data: metrics, error: metricsError } = useConductorMetrics({
     timeRange: selectedTimeRange,
     refreshInterval,
   })
@@ -111,20 +108,23 @@ export const ConductorDashboard: React.FC = () => {
 
   // Determine system status
   const systemStatus = useMemo(() => {
-    if (systemHealthScore >= 90)
-      {return {
+    if (systemHealthScore >= 90) {
+      return {
         status: 'excellent',
         color: 'text-green-600',
         bg: 'bg-green-100',
-      }}
-    if (systemHealthScore >= 80)
-      {return { status: 'good', color: 'text-blue-600', bg: 'bg-blue-100' }}
-    if (systemHealthScore >= 70)
-      {return {
+      }
+    }
+    if (systemHealthScore >= 80) {
+      return { status: 'good', color: 'text-blue-600', bg: 'bg-blue-100' }
+    }
+    if (systemHealthScore >= 70) {
+      return {
         status: 'warning',
         color: 'text-yellow-600',
         bg: 'bg-yellow-100',
-      }}
+      }
+    }
     return { status: 'critical', color: 'text-red-600', bg: 'bg-red-100' }
   }, [systemHealthScore])
 
@@ -661,7 +661,9 @@ export const ConductorDashboard: React.FC = () => {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant="secondary">{issue.status.name}</Badge>
+                            <Badge variant="secondary">
+                              {issue.status.name}
+                            </Badge>
                           </TableCell>
                           <TableCell>
                             <Badge
@@ -676,7 +678,9 @@ export const ConductorDashboard: React.FC = () => {
                               {issue.priority.name}
                             </Badge>
                           </TableCell>
-                          <TableCell>{issue.assignee?.displayName || 'Unassigned'}</TableCell>
+                          <TableCell>
+                            {issue.assignee?.displayName || 'Unassigned'}
+                          </TableCell>
                           <TableCell>{issue.created}</TableCell>
                         </TableRow>
                       ))}

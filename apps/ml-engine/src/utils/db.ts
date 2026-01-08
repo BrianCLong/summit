@@ -1,5 +1,5 @@
-import { Pool } from 'pg';
-import { config } from '../config.js';
+import { Pool } from "pg";
+import { config } from "../config.js";
 
 let pool: Pool | undefined;
 

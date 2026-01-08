@@ -14,7 +14,11 @@
     "entity_id": "company-44",
     "change_type": "update",
     "previous_state": { "name": "Acme Inc", "tier": "standard", "contact_email_hash": "77aa1c" },
-    "new_state": { "name": "Acme Incorporated", "tier": "enterprise", "contact_email_hash": "77aa1c" },
+    "new_state": {
+      "name": "Acme Incorporated",
+      "tier": "enterprise",
+      "contact_email_hash": "77aa1c"
+    },
     "changed_by": "system-cdc",
     "cdc_lsn": "1122334455",
     "source_table": "public.company_profiles",

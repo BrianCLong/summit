@@ -1,18 +1,12 @@
-import pLimit from 'p-limit';
-import { randomUUID } from 'crypto';
-import {
-  ensurePrewarmedSnapshot,
-  checkoutVm,
-  releaseVm,
-  invokeSandbox,
-  VmHandle,
-} from './vm-pool';
-import { createRecording } from './replay-client';
+import pLimit from "p-limit";
+import { randomUUID } from "crypto";
+import { ensurePrewarmedSnapshot, checkoutVm, releaseVm, invokeSandbox, VmHandle } from "./vm-pool";
+import { createRecording } from "./replay-client";
 
 export type Session = {
   id: string;
   vm: VmHandle;
-  transport: 'http+sse' | 'stdio';
+  transport: "http+sse" | "stdio";
   createdAt: string;
   recordingId?: string;
 };
@@ -29,7 +23,7 @@ export class Scheduler {
     const session: Session = {
       id,
       vm,
-      transport: 'http+sse',
+      transport: "http+sse",
       createdAt: new Date().toISOString(),
       recordingId,
     };

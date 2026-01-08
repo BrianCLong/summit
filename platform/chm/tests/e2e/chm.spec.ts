@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from "@playwright/test";
 
 const pageTemplate = `
 <!doctype html>
@@ -73,23 +73,23 @@ const pageTemplate = `
   </body>
 </html>`;
 
-test('apply tag → blocked export → approved downgrade → export', async ({ page }) => {
+test("apply tag → blocked export → approved downgrade → export", async ({ page }) => {
   await page.setContent(pageTemplate);
 
-  await page.getByText('Apply CHM-TS Tag').click();
-  await expect(page.locator('#doc-stamp')).toHaveText('CHM-TS applied');
+  await page.getByText("Apply CHM-TS Tag").click();
+  await expect(page.locator("#doc-stamp")).toHaveText("CHM-TS applied");
 
-  await page.getByText('Attempt Export').click();
-  await expect(page.locator('#status')).toHaveText('Status: export blocked (residency/license)');
+  await page.getByText("Attempt Export").click();
+  await expect(page.locator("#status")).toHaveText("Status: export blocked (residency/license)");
 
-  await page.getByText('Approve A').click();
-  await page.getByText('Approve B').click();
-  await expect(page.locator('#doc-stamp')).toHaveText('CHM-S downgraded');
-  await expect(page.locator('#status')).toHaveText('Status: downgrade approved');
+  await page.getByText("Approve A").click();
+  await page.getByText("Approve B").click();
+  await expect(page.locator("#doc-stamp")).toHaveText("CHM-S downgraded");
+  await expect(page.locator("#status")).toHaveText("Status: downgrade approved");
 
-  await page.getByText('Attempt Export').click();
-  await expect(page.locator('#status')).toHaveText('Status: export allowed after downgrade');
+  await page.getByText("Attempt Export").click();
+  await expect(page.locator("#status")).toHaveText("Status: export allowed after downgrade");
 
-  await page.getByLabel('Derived-from marking').check();
-  await expect(page.locator('#derived-label')).toBeVisible();
+  await page.getByLabel("Derived-from marking").check();
+  await expect(page.locator("#derived-label")).toBeVisible();
 });

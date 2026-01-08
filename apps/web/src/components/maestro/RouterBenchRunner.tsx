@@ -148,7 +148,8 @@ export default function RouterBenchRunner() {
     } catch (error) {
       alert(
         `Benchmark failed: ${
-          error instanceof Error ? error.message : 'Unknown error'}`
+          error instanceof Error ? error.message : 'Unknown error'
+        }`
       )
     } finally {
       setLoading(false)

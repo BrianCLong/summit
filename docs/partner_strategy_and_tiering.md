@@ -1,9 +1,11 @@
 # Partner Strategy, Tiering, and Execution Blueprint
 
 ## Purpose
+
 This blueprint operationalizes partner selection, tiering, enablement, and governance so channel motions are predictable, defensible, and profitable. It converts the epics into repeatable mechanisms with clear ownership, metrics, and controls.
 
 ## Operating Principles
+
 - **Tiered by value and risk**: Investment follows measurable impact (pipeline, delivery quality, security posture).
 - **Contracts mirror controls**: What we promise in agreements must be enforceable in systems and processes.
 - **Factory over bespoke**: All partners flow through standardized intake, onboarding, certification, and periodic reviews.
@@ -11,6 +13,7 @@ This blueprint operationalizes partner selection, tiering, enablement, and gover
 - **No dead motions**: Activities that do not produce pipeline, retention, or margin are cut quickly.
 
 ## Epic 1 — Partner Strategy & Tiering (pick who matters, codify it)
+
 - **Partner archetypes**: Platform, SI/agency, reseller, OEM/embedded, data/provider. For each, map value drivers (pipeline, ARR influence, product coverage), risk (data scope, blast radius), and enablement needs.
 - **Tier criteria**: Revenue influence, delivery quality, security posture, support maturity. Score on a 0–5 rubric per criterion with weights tuned quarterly.
 - **Scorecard**: Track pipeline sourced/influenced, installs/activations, retention by cohort, incident rate, and NPS. Require dashboards refreshed weekly.
@@ -24,6 +27,7 @@ This blueprint operationalizes partner selection, tiering, enablement, and gover
 - **No ad-hoc partnerships**: If no tier or terms, pause engagement until they enter the factory.
 
 ## Epic 2 — Partner Contracts that Don’t Create Debt (templates + enforcement)
+
 - Standardize agreements (reseller, referral, publisher, OEM) with fallback clauses.
 - Maintain clause library: IP, confidentiality, data use, support, termination, audit.
 - Define data processing roles (controller/processor) per partner type.
@@ -37,6 +41,7 @@ This blueprint operationalizes partner selection, tiering, enablement, and gover
 - Run quarterly contract drift audits to reduce one-offs.
 
 ## Epic 3 — Partner Onboarding Factory (ship partners fast, safely)
+
 - Intake: identity, ownership, tax/payout, contacts, escalation chain.
 - Security questionnaire lite by tier; fail → remediation before access.
 - Technical checklist: sandbox, keys, scopes, rate limits, webhooks.
@@ -50,6 +55,7 @@ This blueprint operationalizes partner selection, tiering, enablement, and gover
 - Remove bespoke onboarding; force the factory path.
 
 ## Epic 4 — Integration Standards & Certification (partners can’t break you)
+
 - Integration contract standards: versioning, pagination, errors, idempotency.
 - Signed webhooks + replay protection for inbound/outbound events.
 - Scoped permissions (least privilege per tenant) for integrations.
@@ -63,6 +69,7 @@ This blueprint operationalizes partner selection, tiering, enablement, and gover
 - Deprecate uncertified integrations and migrate them to standard path.
 
 ## Epic 5 — Co-Selling & Channel Motion (pipeline that compounds)
+
 - Joint ICP and deal criteria per strategic partner.
 - Co-sell playbooks: qualification, MAP template, demo flow, handoffs.
 - Lead sharing and routing rules with attribution in CRM.
@@ -76,6 +83,7 @@ This blueprint operationalizes partner selection, tiering, enablement, and gover
 - Kill motions that fail to produce pipeline or retention.
 
 ## Epic 6 — Delivery Quality & Implementation (SIs without customer pain)
+
 - Implementation standards: onboarding steps, milestones, acceptance criteria.
 - SI delivery certification (training, exams, observed projects).
 - Implementation templates: project plan, migration, validation report.
@@ -89,6 +97,7 @@ This blueprint operationalizes partner selection, tiering, enablement, and gover
 - Convert recurring custom work into product primitives.
 
 ## Epic 7 — Partner Risk, Compliance, and Incident Coordination (shared blast radius)
+
 - Partner risk register: data access, criticality, geography, dependencies.
 - Contracted incident notification terms and quarterly comms tests.
 - Audit logging for partner actions and integration calls (tenant-scoped).
@@ -102,6 +111,7 @@ This blueprint operationalizes partner selection, tiering, enablement, and gover
 - Quarterly compliance checks with evidence packs and expiring exceptions.
 
 ## Epic 8 — Partner Monetization & Billing (make revenue clean)
+
 - Monetization models: rev share, referral fee, usage-based, OEM licensing.
 - Partner metering: installs, usage, revenue attribution, refunds/chargebacks.
 - Payout system with audit trails and dispute workflows.
@@ -115,6 +125,7 @@ This blueprint operationalizes partner selection, tiering, enablement, and gover
 - Kill unprofitable motions unless explicitly subsidized as strategic.
 
 ## Epic 9 — Ecosystem Governance & Narrative (credibility at scale)
+
 - Partner policy handbook: acceptable use, security requirements, brand rules.
 - Claims approval process for joint marketing (proof required).
 - Public docs: API changelog, deprecation policy, uptime/perf targets.
@@ -128,18 +139,21 @@ This blueprint operationalizes partner selection, tiering, enablement, and gover
 - Ecosystem health as an exec KPI: installs, retention, incidents, revenue.
 
 ## Execution Rhythm and Governance
+
 - **Quarterly**: Tier recalibration, contract drift audit, ecosystem review, roadmap alignment publish.
 - **Monthly**: Partner pipeline review, revenue review, compliance check exceptions, deletion quota execution.
 - **Weekly**: Scorecard refresh, deal registration validation, health signal monitoring.
 - **Event-driven**: Incident response, enforcement ladder actions, kill switch triggers, offboarding decisions.
 
 ## KPIs and Dashboards
+
 - **Growth**: Partner-sourced/influenced ARR, pipeline coverage, activation rate, time-to-first-success.
 - **Reliability**: Incident rate per integration, SLA adherence, kill-switch activations, rework rate.
 - **Quality**: NPS/CSAT, SI quality score, certification pass rate, audit log completeness.
 - **Efficiency**: CAC impact, support cost per partner, MDF ROI, onboarding cycle time.
 
 ## Roles and Ownership
+
 - **Head of Partnerships**: Tiering authority, roadmap alignment chair, QBR owner.
 - **Partner Ops**: Scorecards, deal registration, portal, routing rules, contract metadata.
 - **Security & Compliance**: Security questionnaires, incident playbooks, access reviews, evidence packs.
@@ -148,6 +162,6 @@ This blueprint operationalizes partner selection, tiering, enablement, and gover
 - **Sales & CS**: Co-sell execution, delivery standards, escalation adherence.
 
 ## Innovation Frontier
+
 - **Adaptive risk-based throttling**: Use anomaly detection on partner traffic to auto-adjust quotas and trigger pre-incident throttles while notifying partners via the portal.
 - **Certification-as-code**: Partners run an open-source CLI that executes the certification suite locally, signs results, and uploads attestations for automated approval.
-

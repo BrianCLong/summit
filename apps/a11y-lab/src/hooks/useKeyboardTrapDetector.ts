@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 export type TrapSnapshot = {
   nodeLabel: string;
@@ -44,15 +44,15 @@ export function useKeyboardTrapDetector(options: Options = defaultOptions): Trap
     };
 
     const listener = (event: KeyboardEvent) => {
-      if (event.key === 'Tab') {
+      if (event.key === "Tab") {
         window.setTimeout(handler, 25);
       }
     };
 
-    document.addEventListener('keydown', listener);
+    document.addEventListener("keydown", listener);
 
     return () => {
-      document.removeEventListener('keydown', listener);
+      document.removeEventListener("keydown", listener);
     };
   }, [threshold, onTrap]);
 
@@ -61,9 +61,9 @@ export function useKeyboardTrapDetector(options: Options = defaultOptions): Trap
 
 function deriveLabel(node: HTMLElement): string {
   return (
-    node.getAttribute('aria-label') ||
+    node.getAttribute("aria-label") ||
     node.textContent?.trim() ||
-    node.getAttribute('name') ||
+    node.getAttribute("name") ||
     node.id ||
     node.tagName.toLowerCase()
   );

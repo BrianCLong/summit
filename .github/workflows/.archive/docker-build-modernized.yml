@@ -5,27 +5,27 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - '**/Dockerfile*'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'src/**'
-      - 'server/**'
-      - 'client/**'
-      - 'apps/**'
-      - 'services/**'
+      - "**/Dockerfile*"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "src/**"
+      - "server/**"
+      - "client/**"
+      - "apps/**"
+      - "services/**"
   pull_request:
     branches: [main]
     paths:
-      - '**/Dockerfile*'
+      - "**/Dockerfile*"
   workflow_dispatch:
     inputs:
       platforms:
-        description: 'Build platforms (comma-separated)'
+        description: "Build platforms (comma-separated)"
         required: false
         type: string
-        default: 'linux/amd64,linux/arm64'
+        default: "linux/amd64,linux/arm64"
       push-images:
-        description: 'Push images to registry'
+        description: "Push images to registry"
         required: false
         type: boolean
         default: false
@@ -207,7 +207,7 @@ jobs:
           format: sarif
           output: trivy-${{ matrix.name }}.sarif
           severity: CRITICAL,HIGH,MEDIUM
-          exit-code: '0'
+          exit-code: "0"
           vuln-type: os,library
 
       - name: Upload Trivy results to Security tab

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { api } from '../api';
-import { useFocusTrap } from '../utils/useFocusTrap';
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { api } from "../api";
+import { useFocusTrap } from "../utils/useFocusTrap";
 
 interface SLOPoint {
   timestamp: string;
@@ -17,7 +17,7 @@ interface AlertRule {
   threshold: number;
   enabled: boolean;
   channels: string[];
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
 }
 
 interface SLODetails {
@@ -28,7 +28,7 @@ interface SLODetails {
   objective: number;
   window: string;
   sli: {
-    type: 'availability' | 'latency' | 'throughput' | 'error_rate';
+    type: "availability" | "latency" | "throughput" | "error_rate";
     query: string;
   };
   status: {
@@ -59,7 +59,7 @@ export default function SLODetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingAlert, setEditingAlert] = useState<AlertRule | null>(null);
-  const [timeRange, setTimeRange] = useState('7d');
+  const [timeRange, setTimeRange] = useState("7d");
   const [hasEditPermission, setHasEditPermission] = useState(false);
 
   const { getSLO, getSLOHistory, updateAlertRule, checkPermission } = api();
@@ -88,9 +88,7 @@ export default function SLODetail() {
         history: historyData,
       });
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Failed to load SLO details',
-      );
+      setError(err instanceof Error ? err.message : "Failed to load SLO details");
     } finally {
       setLoading(false);
     }
@@ -98,7 +96,7 @@ export default function SLODetail() {
 
   const checkEditPermission = async () => {
     try {
-      const allowed = await checkPermission('update_slo_alerts');
+      const allowed = await checkPermission("update_slo_alerts");
       setHasEditPermission(allowed);
     } catch {
       setHasEditPermission(false);
@@ -113,24 +111,24 @@ export default function SLODetail() {
       await loadSLODetails(); // Refresh data
       setEditingAlert(null);
     } catch (err) {
-      console.error('Failed to update alert rule:', err);
+      console.error("Failed to update alert rule:", err);
     }
   };
 
   const formatPercentage = (value: number) => `${(value * 100).toFixed(2)}%`;
 
   const getBurnRateColor = (burnRate: number) => {
-    if (burnRate > 10) return 'text-red-600';
-    if (burnRate > 5) return 'text-orange-600';
-    if (burnRate > 2) return 'text-yellow-600';
-    return 'text-green-600';
+    if (burnRate > 10) return "text-red-600";
+    if (burnRate > 5) return "text-orange-600";
+    if (burnRate > 2) return "text-yellow-600";
+    return "text-green-600";
   };
 
   const getErrorBudgetColor = (consumedPercentage: number) => {
-    if (consumedPercentage > 90) return 'bg-red-500';
-    if (consumedPercentage > 70) return 'bg-orange-500';
-    if (consumedPercentage > 50) return 'bg-yellow-500';
-    return 'bg-green-500';
+    if (consumedPercentage > 90) return "bg-red-500";
+    if (consumedPercentage > 70) return "bg-orange-500";
+    if (consumedPercentage > 50) return "bg-yellow-500";
+    return "bg-green-500";
   };
 
   if (loading) {
@@ -145,10 +143,8 @@ export default function SLODetail() {
     return (
       <div className="p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <h2 className="text-lg font-semibold text-red-800">
-            Error Loading SLO
-          </h2>
-          <p className="text-red-600">{error || 'SLO not found'}</p>
+          <h2 className="text-lg font-semibold text-red-800">Error Loading SLO</h2>
+          <p className="text-red-600">{error || "SLO not found"}</p>
         </div>
       </div>
     );
@@ -165,7 +161,7 @@ export default function SLODetail() {
             <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
               <span>Service: {slo.service}</span>
               <span>Window: {slo.window}</span>
-              <span>Type: {slo.sli.type.replace('_', ' ').toUpperCase()}</span>
+              <span>Type: {slo.sli.type.replace("_", " ").toUpperCase()}</span>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -190,9 +186,7 @@ export default function SLODetail() {
           {/* SLO Status Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-sm font-medium text-gray-500">
-                Current SLI
-              </div>
+              <div className="text-sm font-medium text-gray-500">Current SLI</div>
               <div className="text-3xl font-bold text-gray-900 mt-2">
                 {formatPercentage(slo.status.currentSLI)}
               </div>
@@ -201,31 +195,22 @@ export default function SLODetail() {
               </div>
               <div
                 className={`text-sm mt-1 ${
-                  slo.status.currentSLI >= slo.objective
-                    ? 'text-green-600'
-                    : 'text-red-600'
+                  slo.status.currentSLI >= slo.objective ? "text-green-600" : "text-red-600"
                 }`}
               >
-                {slo.status.currentSLI >= slo.objective
-                  ? 'Meeting SLO'
-                  : 'Below Target'}
+                {slo.status.currentSLI >= slo.objective ? "Meeting SLO" : "Below Target"}
               </div>
             </div>
 
             <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-sm font-medium text-gray-500">
-                Error Budget
-              </div>
+              <div className="text-sm font-medium text-gray-500">Error Budget</div>
               <div className="text-3xl font-bold text-gray-900 mt-2">
-                {formatPercentage(
-                  slo.status.errorBudget.remaining /
-                    slo.status.errorBudget.total,
-                )}
+                {formatPercentage(slo.status.errorBudget.remaining / slo.status.errorBudget.total)}
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
                 <div
                   className={`h-2 rounded-full transition-all duration-300 ${getErrorBudgetColor(
-                    slo.status.errorBudget.consumedPercentage,
+                    slo.status.errorBudget.consumedPercentage
                   )}`}
                   style={{
                     width: `${slo.status.errorBudget.consumedPercentage}%`,
@@ -233,8 +218,7 @@ export default function SLODetail() {
                 />
               </div>
               <div className="text-sm text-gray-600 mt-1">
-                {formatPercentage(slo.status.errorBudget.consumedPercentage)}{' '}
-                consumed
+                {formatPercentage(slo.status.errorBudget.consumedPercentage)} consumed
               </div>
             </div>
 
@@ -247,10 +231,7 @@ export default function SLODetail() {
               </div>
               {slo.status.errorBudget.exhaustionDate && (
                 <div className="text-sm text-red-600 mt-1">
-                  Exhaustion:{' '}
-                  {new Date(
-                    slo.status.errorBudget.exhaustionDate,
-                  ).toLocaleDateString()}
+                  Exhaustion: {new Date(slo.status.errorBudget.exhaustionDate).toLocaleDateString()}
                 </div>
               )}
             </div>
@@ -259,9 +240,7 @@ export default function SLODetail() {
           {/* Burn History Chart */}
           <div className="bg-white rounded-lg shadow">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-lg font-semibold">
-                SLI & Error Budget History
-              </h2>
+              <h2 className="text-lg font-semibold">SLI & Error Budget History</h2>
             </div>
             <div className="p-6">
               {/* Simple chart representation - in a real app, you'd use a charting library */}
@@ -277,13 +256,7 @@ export default function SLODetail() {
                     <div className="text-gray-600">
                       {new Date(point.timestamp).toLocaleTimeString()}
                     </div>
-                    <div
-                      className={
-                        point.sli >= slo.objective
-                          ? 'text-green-600'
-                          : 'text-red-600'
-                      }
-                    >
+                    <div className={point.sli >= slo.objective ? "text-green-600" : "text-red-600"}>
                       {formatPercentage(point.sli)}
                     </div>
                     <div>{formatPercentage(point.errorBudgetConsumed)}</div>
@@ -310,12 +283,9 @@ export default function SLODetail() {
                       className="flex items-center justify-between p-3 bg-gray-50 rounded"
                     >
                       <div>
-                        <h3 className="font-medium text-gray-900">
-                          {incident.title}
-                        </h3>
+                        <h3 className="font-medium text-gray-900">{incident.title}</h3>
                         <div className="text-sm text-gray-500">
-                          Started:{' '}
-                          {new Date(incident.startedAt).toLocaleString()}
+                          Started: {new Date(incident.startedAt).toLocaleString()}
                         </div>
                       </div>
                       <div className="text-right">
@@ -338,9 +308,7 @@ export default function SLODetail() {
             <div className="px-4 py-3 border-b flex items-center justify-between">
               <h3 className="font-semibold">Alert Rules</h3>
               {hasEditPermission && (
-                <button className="text-sm text-blue-600 hover:text-blue-800">
-                  + Add Rule
-                </button>
+                <button className="text-sm text-blue-600 hover:text-blue-800">+ Add Rule</button>
               )}
             </div>
             <div className="p-4 space-y-3">
@@ -353,21 +321,21 @@ export default function SLODetail() {
                         <span
                           className={`text-xs px-2 py-1 rounded ${
                             rule.enabled
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-gray-100 text-gray-800'
+                              ? "bg-green-100 text-green-800"
+                              : "bg-gray-100 text-gray-800"
                           }`}
                         >
-                          {rule.enabled ? 'Active' : 'Disabled'}
+                          {rule.enabled ? "Active" : "Disabled"}
                         </span>
                         <span
                           className={`text-xs px-2 py-1 rounded ${
-                            rule.severity === 'critical'
-                              ? 'bg-red-100 text-red-800'
-                              : rule.severity === 'high'
-                                ? 'bg-orange-100 text-orange-800'
-                                : rule.severity === 'medium'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : 'bg-blue-100 text-blue-800'
+                            rule.severity === "critical"
+                              ? "bg-red-100 text-red-800"
+                              : rule.severity === "high"
+                                ? "bg-orange-100 text-orange-800"
+                                : rule.severity === "medium"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-blue-100 text-blue-800"
                           }`}
                         >
                           {rule.severity}
@@ -378,7 +346,7 @@ export default function SLODetail() {
                       </div>
                       {rule.channels.length > 0 && (
                         <div className="text-xs text-gray-500 mt-1">
-                          Channels: {rule.channels.join(', ')}
+                          Channels: {rule.channels.join(", ")}
                         </div>
                       )}
                     </div>
@@ -403,25 +371,15 @@ export default function SLODetail() {
             </div>
             <div className="p-4 space-y-3">
               <div>
-                <div className="text-sm font-medium text-gray-700">
-                  SLI Query
-                </div>
-                <div className="mt-1 p-2 bg-gray-50 rounded text-xs font-mono">
-                  {slo.sli.query}
-                </div>
+                <div className="text-sm font-medium text-gray-700">SLI Query</div>
+                <div className="mt-1 p-2 bg-gray-50 rounded text-xs font-mono">{slo.sli.query}</div>
               </div>
               <div>
-                <div className="text-sm font-medium text-gray-700">
-                  Objective
-                </div>
-                <div className="text-sm text-gray-600">
-                  {formatPercentage(slo.objective)}
-                </div>
+                <div className="text-sm font-medium text-gray-700">Objective</div>
+                <div className="text-sm text-gray-600">{formatPercentage(slo.objective)}</div>
               </div>
               <div>
-                <div className="text-sm font-medium text-gray-700">
-                  Time Window
-                </div>
+                <div className="text-sm font-medium text-gray-700">Time Window</div>
                 <div className="text-sm text-gray-600">{slo.window}</div>
               </div>
             </div>
@@ -446,23 +404,17 @@ export default function SLODetail() {
             >
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Name
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700">Name</label>
                   <input
                     type="text"
                     className="mt-1 block w-full rounded border border-gray-300 px-3 py-2"
                     value={editingAlert.name}
-                    onChange={(e) =>
-                      setEditingAlert({ ...editingAlert, name: e.target.value })
-                    }
+                    onChange={(e) => setEditingAlert({ ...editingAlert, name: e.target.value })}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Condition
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700">Condition</label>
                   <select
                     className="mt-1 block w-full rounded border border-gray-300 px-3 py-2"
                     value={editingAlert.condition}
@@ -474,17 +426,13 @@ export default function SLODetail() {
                     }
                   >
                     <option value="burn_rate_gt">Burn rate greater than</option>
-                    <option value="error_budget_lt">
-                      Error budget less than
-                    </option>
+                    <option value="error_budget_lt">Error budget less than</option>
                     <option value="sli_lt">SLI less than</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Threshold
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700">Threshold</label>
                   <input
                     type="number"
                     step="0.01"
@@ -500,9 +448,7 @@ export default function SLODetail() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Severity
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700">Severity</label>
                   <select
                     className="mt-1 block w-full rounded border border-gray-300 px-3 py-2"
                     value={editingAlert.severity}
@@ -533,10 +479,7 @@ export default function SLODetail() {
                       })
                     }
                   />
-                  <label
-                    htmlFor="enabled"
-                    className="ml-2 text-sm text-gray-700"
-                  >
+                  <label htmlFor="enabled" className="ml-2 text-sm text-gray-700">
                     Enable this alert rule
                   </label>
                 </div>

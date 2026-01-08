@@ -2,7 +2,7 @@
  * Relationship extraction from text
  */
 
-import type { Relationship, TemporalRelation } from '../types';
+import type { Relationship, TemporalRelation } from "../types";
 
 export class RelationshipExtractor {
   /**
@@ -71,7 +71,8 @@ export class RelationshipExtractor {
     const relations: Array<{ cause: string; effect: string; confidence: number }> = [];
 
     // Look for causal markers
-    const causalPattern = /(.+?)\s+(?:because|due to|caused by|leads to|results in)\s+(.+?)(?:\.|$)/gi;
+    const causalPattern =
+      /(.+?)\s+(?:because|due to|caused by|leads to|results in)\s+(.+?)(?:\.|$)/gi;
     let match;
 
     while ((match = causalPattern.exec(text)) !== null) {
@@ -88,10 +89,12 @@ export class RelationshipExtractor {
   /**
    * Parse SVO triple from sentence
    */
-  private parseSVO(sentence: string): Omit<Relationship, 'start' | 'end' | 'sentenceIndex'> | null {
+  private parseSVO(sentence: string): Omit<Relationship, "start" | "end" | "sentenceIndex"> | null {
     // Very simplified SVO parsing
     const words = sentence.match(/\b\w+\b/g) || [];
-    if (words.length < 3) {return null;}
+    if (words.length < 3) {
+      return null;
+    }
 
     return {
       subject: words[0],
@@ -102,5 +105,5 @@ export class RelationshipExtractor {
   }
 }
 
-export * from './event-extraction';
-export * from './cooccurrence';
+export * from "./event-extraction";
+export * from "./cooccurrence";

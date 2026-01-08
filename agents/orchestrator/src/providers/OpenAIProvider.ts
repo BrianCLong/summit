@@ -5,7 +5,7 @@
  * o1-preview, and o1-mini with full tool calling support.
  */
 
-import { BaseLLMProvider } from './BaseLLMProvider.js';
+import { BaseLLMProvider } from "./BaseLLMProvider.js";
 import {
   LLMProvider,
   LLMModel,
@@ -14,20 +14,20 @@ import {
   LLMProviderConfig,
   TokenUsage,
   LLMMessage,
-} from '../types/index.js';
+} from "../types/index.js";
 
 // Pricing per 1K tokens (as of 2024)
 const OPENAI_PRICING: Record<string, { input: number; output: number }> = {
-  'gpt-4-turbo': { input: 0.01, output: 0.03 },
-  'gpt-4o': { input: 0.005, output: 0.015 },
-  'gpt-4o-mini': { input: 0.00015, output: 0.0006 },
-  'o1-preview': { input: 0.015, output: 0.06 },
-  'o1-mini': { input: 0.003, output: 0.012 },
+  "gpt-4-turbo": { input: 0.01, output: 0.03 },
+  "gpt-4o": { input: 0.005, output: 0.015 },
+  "gpt-4o-mini": { input: 0.00015, output: 0.0006 },
+  "o1-preview": { input: 0.015, output: 0.06 },
+  "o1-mini": { input: 0.003, output: 0.012 },
 };
 
 export interface OpenAIProviderConfig extends LLMProviderConfig {
-  provider: 'gpt' | 'o1';
-  model: 'gpt-4-turbo' | 'gpt-4o' | 'gpt-4o-mini' | 'o1-preview' | 'o1-mini';
+  provider: "gpt" | "o1";
+  model: "gpt-4-turbo" | "gpt-4o" | "gpt-4o-mini" | "o1-preview" | "o1-mini";
   organization?: string;
 }
 
@@ -40,17 +40,17 @@ export class OpenAIProvider extends BaseLLMProvider {
   }
 
   get provider(): LLMProvider {
-    return this.config.model.startsWith('o1') ? 'o1' : 'gpt';
+    return this.config.model.startsWith("o1") ? "o1" : "gpt";
   }
 
   get supportedModels(): LLMModel[] {
-    return ['gpt-4-turbo', 'gpt-4o', 'gpt-4o-mini', 'o1-preview', 'o1-mini'];
+    return ["gpt-4-turbo", "gpt-4o", "gpt-4o-mini", "o1-preview", "o1-mini"];
   }
 
   async complete(request: LLMRequest): Promise<LLMResponse> {
     const startTime = Date.now();
     const model = request.model || this.config.model;
-    const isO1Model = model.startsWith('o1');
+    const isO1Model = model.startsWith("o1");
 
     try {
       // Transform messages for OpenAI format
@@ -70,7 +70,7 @@ export class OpenAIProvider extends BaseLLMProvider {
         // Add tools if provided
         if (request.tools && request.tools.length > 0) {
           requestBody.tools = request.tools;
-          requestBody.tool_choice = 'auto';
+          requestBody.tool_choice = "auto";
         }
       }
 
@@ -90,7 +90,7 @@ export class OpenAIProvider extends BaseLLMProvider {
         id: response.id || this.generateResponseId(),
         model: model as LLMModel,
         provider: this.provider,
-        content: choice.message?.content || '',
+        content: choice.message?.content || "",
         toolCalls: choice.message?.tool_calls,
         usage,
         latencyMs,
@@ -99,7 +99,12 @@ export class OpenAIProvider extends BaseLLMProvider {
       };
     } catch (error) {
       const latencyMs = Date.now() - startTime;
-      this.updateMetrics(false, latencyMs, { promptTokens: 0, completionTokens: 0, totalTokens: 0, estimatedCostUSD: 0 });
+      this.updateMetrics(false, latencyMs, {
+        promptTokens: 0,
+        completionTokens: 0,
+        totalTokens: 0,
+        estimatedCostUSD: 0,
+      });
       throw error;
     }
   }
@@ -107,7 +112,7 @@ export class OpenAIProvider extends BaseLLMProvider {
   async healthCheck(): Promise<boolean> {
     try {
       await this.complete({
-        messages: [{ role: 'user', content: 'Hello' }],
+        messages: [{ role: "user", content: "Hello" }],
         maxTokens: 5,
       });
       return true;
@@ -117,7 +122,7 @@ export class OpenAIProvider extends BaseLLMProvider {
   }
 
   estimateCost(promptTokens: number, completionTokens: number): number {
-    const pricing = OPENAI_PRICING[this.config.model] || OPENAI_PRICING['gpt-4o'];
+    const pricing = OPENAI_PRICING[this.config.model] || OPENAI_PRICING["gpt-4o"];
     return (promptTokens / 1000) * pricing.input + (completionTokens / 1000) * pricing.output;
   }
 
@@ -126,9 +131,9 @@ export class OpenAIProvider extends BaseLLMProvider {
 
     for (const msg of messages) {
       // o1 models don't support system messages - convert to user message
-      if (msg.role === 'system' && isO1Model) {
+      if (msg.role === "system" && isO1Model) {
         transformed.push({
-          role: 'user',
+          role: "user",
           content: `[System Instructions]\n${msg.content}`,
         });
         continue;
@@ -159,23 +164,23 @@ export class OpenAIProvider extends BaseLLMProvider {
 
   private async callOpenAIAPI(requestBody: any): Promise<any> {
     const apiKey = this.config.apiKey || process.env.OPENAI_API_KEY;
-    const baseUrl = this.config.baseUrl || 'https://api.openai.com';
+    const baseUrl = this.config.baseUrl || "https://api.openai.com";
 
     if (!apiKey) {
-      throw new Error('OpenAI API key not configured');
+      throw new Error("OpenAI API key not configured");
     }
 
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
     };
 
     if (this.organization) {
-      headers['OpenAI-Organization'] = this.organization;
+      headers["OpenAI-Organization"] = this.organization;
     }
 
     const response = await fetch(`${baseUrl}/v1/chat/completions`, {
-      method: 'POST',
+      method: "POST",
       headers,
       body: JSON.stringify(requestBody),
     });

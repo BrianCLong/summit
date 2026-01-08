@@ -38,9 +38,9 @@
       "thresholds": {
         "mode": "absolute",
         "steps": [
-          {"color": "red", "value": 0},
-          {"color": "orange", "value": 0.995},
-          {"color": "green", "value": 0.999}
+          { "color": "red", "value": 0 },
+          { "color": "orange", "value": 0.995 },
+          { "color": "green", "value": 0.999 }
         ]
       }
     },
@@ -77,9 +77,9 @@
       "thresholds": {
         "mode": "absolute",
         "steps": [
-          {"color": "green", "value": 0},
-          {"color": "orange", "value": 0.01},
-          {"color": "red", "value": 0.02}
+          { "color": "green", "value": 0 },
+          { "color": "orange", "value": 0.01 },
+          { "color": "red", "value": 0.02 }
         ]
       }
     },
@@ -97,7 +97,7 @@
       },
       "fieldConfig": {
         "defaults": {
-          "color": {"mode": "palette-classic"},
+          "color": { "mode": "palette-classic" },
           "custom": {
             "lineWidth": 2,
             "drawStyle": "line",
@@ -108,8 +108,8 @@
         "overrides": []
       },
       "options": {
-        "legend": {"displayMode": "list", "placement": "bottom"},
-        "tooltip": {"mode": "single"}
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "single" }
       },
       "targets": [
         {
@@ -132,13 +132,13 @@
       },
       "fieldConfig": {
         "defaults": {
-          "color": {"mode": "palette-classic"}
+          "color": { "mode": "palette-classic" }
         },
         "overrides": []
       },
       "options": {
-        "legend": {"displayMode": "list", "placement": "bottom"},
-        "tooltip": {"mode": "single"}
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "single" }
       },
       "targets": [
         {
@@ -211,9 +211,9 @@
       "thresholds": {
         "mode": "absolute",
         "steps": [
-          {"color": "green", "value": 0},
-          {"color": "orange", "value": 1},
-          {"color": "red", "value": 2}
+          { "color": "green", "value": 0 },
+          { "color": "orange", "value": 1 },
+          { "color": "red", "value": 2 }
         ]
       }
     }
@@ -222,7 +222,7 @@
   "schemaVersion": 36,
   "style": "dark",
   "tags": ["sla", "reliability", "otel"],
-  "templating": {"list": []},
+  "templating": { "list": [] },
   "time": {
     "from": "now-1h",
     "to": "now"

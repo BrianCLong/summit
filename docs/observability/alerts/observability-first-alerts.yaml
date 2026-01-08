@@ -2,7 +2,7 @@ global:
   resolve_timeout: 5m
 route:
   receiver: summit-observability
-  group_by: ['service']
+  group_by: ["service"]
   routes:
     - matchers:
         - service = observability-first
@@ -21,11 +21,11 @@ receivers:
         sendResolved: true
         details:
           playbook: https://confluence.summit/playbooks/observability-first
-          slack_channel: '#observability-alarms'
+          slack_channel: "#observability-alarms"
   - name: summit-slack
     slackConfigs:
       - api_url: ${SLACK_WEBHOOK_URL}
-        channel: '#observability-alarms'
+        channel: "#observability-alarms"
         title: '{{ template "slack.title" . }}'
         text: '{{ template "slack.text" . }}'
         send_resolved: true

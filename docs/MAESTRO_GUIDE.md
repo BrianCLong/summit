@@ -1,4 +1,3 @@
-
 # Maestro & Conductor Developer Guide
 
 ## Local Pipeline Execution
@@ -38,13 +37,14 @@ To run pipelines locally and verify evidence linkage:
 
 ## Run Types & Metadata
 
-*   **P0 Runs (Critical)**: Use `idempotency_key` to ensure exactly-once processing logic (at least for initiation).
-*   **Standard Runs**: Regular pipeline executions.
+- **P0 Runs (Critical)**: Use `idempotency_key` to ensure exactly-once processing logic (at least for initiation).
+- **Standard Runs**: Regular pipeline executions.
 
 **Metadata Guarantees:**
-*   All runs are persisted in PostgreSQL (`runs` table).
-*   Provenance evidence is stored in `evidence_ledger` and hashed into a Merkle Tree.
-*   Graph nodes (`Run`, `Evidence`, `Claim`) are synced to IntelGraph (Neo4j) for traversal and analysis.
+
+- All runs are persisted in PostgreSQL (`runs` table).
+- Provenance evidence is stored in `evidence_ledger` and hashed into a Merkle Tree.
+- Graph nodes (`Run`, `Evidence`, `Claim`) are synced to IntelGraph (Neo4j) for traversal and analysis.
 
 ## Verification Steps
 

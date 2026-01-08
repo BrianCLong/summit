@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       image:
-        description: 'Image tag (sha) to deploy'
+        description: "Image tag (sha) to deploy"
         required: true
 
 concurrency: prod-deploy
@@ -35,11 +35,11 @@ jobs:
       - name: Install cosign
         uses: sigstore/cosign-installer@v3
         with:
-          cosign-release: 'v2.2.4'
+          cosign-release: "v2.2.4"
 
       - name: Sign and attest release image
         env:
-          COSIGN_EXPERIMENTAL: '1'
+          COSIGN_EXPERIMENTAL: "1"
           IMAGE: ${{ env.IMAGE_REPOSITORY }}:${{ inputs.image }}
         run: |
           set -euo pipefail

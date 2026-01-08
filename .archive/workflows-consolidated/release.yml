@@ -48,7 +48,7 @@ jobs:
         if: steps.changesets.outputs.published == 'true'
         uses: CycloneDX/gh-node-module-generatebom@b266740b26029650ad7e1b18555b2451325c9853 # v3.0.0
         with:
-          output: 'bom.xml'
+          output: "bom.xml"
 
       - name: Package Helm Charts
         if: steps.changesets.outputs.published == 'true'

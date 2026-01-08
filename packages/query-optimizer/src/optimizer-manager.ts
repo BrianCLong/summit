@@ -2,9 +2,9 @@
  * Query Optimizer Manager
  */
 
-import { Pool } from 'pg';
-import { MaterializedViewManager } from './materialized/mv-manager';
-import { IncrementalSubgraphManager } from './materialized/ims-manager';
+import { Pool } from "pg";
+import { MaterializedViewManager } from "./materialized/mv-manager";
+import { IncrementalSubgraphManager } from "./materialized/ims-manager";
 
 export class OptimizerManager {
   public mvManager: MaterializedViewManager;
@@ -18,7 +18,7 @@ export class OptimizerManager {
   }
 
   async initialize(): Promise<void> {
-      await this.imsManager.initialize();
+    await this.imsManager.initialize();
   }
 
   async analyzeQuery(sql: string): Promise<{
@@ -27,7 +27,7 @@ export class OptimizerManager {
     recommendations: string[];
   }> {
     const explainResult = await this.pool.query(`EXPLAIN (FORMAT JSON) ${sql}`);
-    
+
     return {
       estimatedCost: 0,
       estimatedRows: 0,

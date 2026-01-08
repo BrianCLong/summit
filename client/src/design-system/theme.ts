@@ -1,12 +1,12 @@
-import { createTheme, ThemeOptions } from '@mui/material/styles';
-import { darkTokens, DesignTokens, lightTokens } from './tokens';
+import { createTheme, ThemeOptions } from "@mui/material/styles";
+import { darkTokens, DesignTokens, lightTokens } from "./tokens";
 
 export type BuildThemeOptions = {
-  mode?: 'light' | 'dark';
+  mode?: "light" | "dark";
   tokens?: DesignTokens;
 };
 
-const buildPalette = (tokens: DesignTokens): ThemeOptions['palette'] => ({
+const buildPalette = (tokens: DesignTokens): ThemeOptions["palette"] => ({
   mode: tokens.palette.mode,
   primary: {
     main: tokens.palette.primary.main,
@@ -39,7 +39,7 @@ const buildPalette = (tokens: DesignTokens): ThemeOptions['palette'] => ({
   },
 });
 
-const buildTypography = (tokens: DesignTokens): ThemeOptions['typography'] => ({
+const buildTypography = (tokens: DesignTokens): ThemeOptions["typography"] => ({
   fontFamily: tokens.typography.fontFamily,
   h1: tokens.typography.headings.h1,
   h2: tokens.typography.headings.h2,
@@ -52,12 +52,12 @@ const buildTypography = (tokens: DesignTokens): ThemeOptions['typography'] => ({
   caption: tokens.typography.body.caption,
 });
 
-const buildShape = (tokens: DesignTokens): ThemeOptions['shape'] => ({
+const buildShape = (tokens: DesignTokens): ThemeOptions["shape"] => ({
   borderRadius: tokens.radius.md,
 });
 
-const buildShadows = (tokens: DesignTokens): ThemeOptions['shadows'] => [
-  'none',
+const buildShadows = (tokens: DesignTokens): ThemeOptions["shadows"] => [
+  "none",
   tokens.shadows.sm,
   tokens.shadows.md,
   tokens.shadows.lg,
@@ -84,8 +84,8 @@ const buildShadows = (tokens: DesignTokens): ThemeOptions['shadows'] => [
   tokens.shadows.lg,
 ];
 
-export const buildDesignSystemTheme = ({ mode = 'light', tokens }: BuildThemeOptions = {}) => {
-  const resolvedTokens = tokens ?? (mode === 'dark' ? darkTokens : lightTokens);
+export const buildDesignSystemTheme = ({ mode = "light", tokens }: BuildThemeOptions = {}) => {
+  const resolvedTokens = tokens ?? (mode === "dark" ? darkTokens : lightTokens);
 
   return createTheme({
     palette: buildPalette(resolvedTokens),
@@ -98,10 +98,10 @@ export const buildDesignSystemTheme = ({ mode = 'light', tokens }: BuildThemeOpt
         styleOverrides: {
           root: {
             borderRadius: resolvedTokens.radius.md,
-            textTransform: 'none',
+            textTransform: "none",
             fontWeight: 600,
             transition: `all ${resolvedTokens.motion.fast}`,
-            '&:focus-visible': {
+            "&:focus-visible": {
               outline: `2px solid ${resolvedTokens.palette.states.outline}`,
               outlineOffset: 2,
             },
@@ -120,10 +120,10 @@ export const buildDesignSystemTheme = ({ mode = 'light', tokens }: BuildThemeOpt
       MuiTableRow: {
         styleOverrides: {
           root: {
-            '&:hover': {
+            "&:hover": {
               backgroundColor: resolvedTokens.palette.states.hover,
             },
-            '&:focus-within': {
+            "&:focus-within": {
               outline: `2px solid ${resolvedTokens.palette.states.outline}`,
               outlineOffset: 2,
             },

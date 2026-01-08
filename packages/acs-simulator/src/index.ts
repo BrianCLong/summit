@@ -1,9 +1,14 @@
-import { ATLModel, inferTariff as _inferTariff } from '@intelgraph/atl/src/index';
-import { ADC } from '@intelgraph/adc/src/index';
-import { ReplayResult, replayWithSanctions, StressProfile, RunTrace } from '@intelgraph/crsp/src/index';
+import { ATLModel, inferTariff as _inferTariff } from "@intelgraph/atl/src/index";
+import { ADC } from "@intelgraph/adc/src/index";
+import {
+  ReplayResult,
+  replayWithSanctions,
+  StressProfile,
+  RunTrace,
+} from "@intelgraph/crsp/src/index";
 
 export interface AdversaryAction {
-  type: 'attack' | 'evade';
+  type: "attack" | "evade";
   params: unknown; // Action-specific parameters
 }
 
@@ -22,7 +27,10 @@ export class ACSSimulator {
     this.adcModule = adcModule;
   }
 
-  async runSimulation(initialState: SimulationState, adversaryStrategy: AdversaryAction[]): Promise<ReplayResult[]> {
+  async runSimulation(
+    initialState: SimulationState,
+    adversaryStrategy: AdversaryAction[]
+  ): Promise<ReplayResult[]> {
     const results: ReplayResult[] = [];
     const _currentState = { ...initialState };
 
@@ -30,7 +38,11 @@ export class ACSSimulator {
       // Simulate adversary action and its impact
       // For MVP, we'll just generate a mock replay result
       const mockRunTrace: RunTrace = { runId: `sim-${Date.now()}`, steps: [], plan: {} };
-      const mockStressProfile: StressProfile = { apiFailureRate: 0.1, tokenCap: 10000, policyStrict: false };
+      const mockStressProfile: StressProfile = {
+        apiFailureRate: 0.1,
+        tokenCap: 10000,
+        policyStrict: false,
+      };
       const replayResult = replayWithSanctions(mockRunTrace, mockStressProfile);
       results.push(replayResult);
 
@@ -40,7 +52,11 @@ export class ACSSimulator {
     return results;
   }
 
-  private updateState(_state: SimulationState, _action: AdversaryAction, _result: ReplayResult): SimulationState {
+  private updateState(
+    _state: SimulationState,
+    _action: AdversaryAction,
+    _result: ReplayResult
+  ): SimulationState {
     // Placeholder for state update logic
     return _state;
   }

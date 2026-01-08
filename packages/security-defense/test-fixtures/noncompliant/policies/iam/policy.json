@@ -1,5 +1,3 @@
 {
-  "Statement": [
-    { "Effect": "Allow", "Action": "*", "Resource": "*" }
-  ]
+  "Statement": [{ "Effect": "Allow", "Action": "*", "Resource": "*" }]
 }

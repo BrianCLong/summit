@@ -2,33 +2,33 @@
  * Document Relationship Type Definitions
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // Relationship types
 export const RelationshipTypeIdSchema = z.enum([
-  'rel.GOVERNS',
-  'rel.GOVERNED_BY',
-  'rel.DERIVES_FROM',
-  'rel.DERIVED_INTO',
-  'rel.REQUIRES',
-  'rel.REQUIRED_BY',
-  'rel.SUPERSEDES',
-  'rel.SUPERSEDED_BY',
-  'rel.INFORMS',
-  'rel.INFORMED_BY',
-  'rel.EVIDENCES',
-  'rel.EVIDENCED_BY',
-  'rel.OWNED_BY',
-  'rel.OWNS',
-  'rel.AMENDS',
-  'rel.AMENDED_BY',
-  'rel.REFERENCES',
-  'rel.REFERENCED_BY',
-  'rel.CONFLICTS_WITH',
-  'rel.ATTACHES_TO',
-  'rel.HAS_ATTACHMENT',
-  'rel.IMPLEMENTS',
-  'rel.IMPLEMENTED_BY',
+  "rel.GOVERNS",
+  "rel.GOVERNED_BY",
+  "rel.DERIVES_FROM",
+  "rel.DERIVED_INTO",
+  "rel.REQUIRES",
+  "rel.REQUIRED_BY",
+  "rel.SUPERSEDES",
+  "rel.SUPERSEDED_BY",
+  "rel.INFORMS",
+  "rel.INFORMED_BY",
+  "rel.EVIDENCES",
+  "rel.EVIDENCED_BY",
+  "rel.OWNED_BY",
+  "rel.OWNS",
+  "rel.AMENDS",
+  "rel.AMENDED_BY",
+  "rel.REFERENCES",
+  "rel.REFERENCED_BY",
+  "rel.CONFLICTS_WITH",
+  "rel.ATTACHES_TO",
+  "rel.HAS_ATTACHMENT",
+  "rel.IMPLEMENTS",
+  "rel.IMPLEMENTED_BY",
 ]);
 
 export type RelationshipTypeId = z.infer<typeof RelationshipTypeIdSchema>;
@@ -41,11 +41,15 @@ export const RelationshipTypeDefinitionSchema = z.object({
   symmetric: z.boolean().default(false),
   transitive: z.boolean().default(false),
   inverse: RelationshipTypeIdSchema.optional(),
-  valid_pairs: z.array(z.object({
-    from: z.string(),
-    to: z.string(),
-    description: z.string().optional(),
-  })).optional(),
+  valid_pairs: z
+    .array(
+      z.object({
+        from: z.string(),
+        to: z.string(),
+        description: z.string().optional(),
+      })
+    )
+    .optional(),
   notes: z.string().optional(),
 });
 
@@ -72,7 +76,7 @@ export type DocumentRelationship = z.infer<typeof DocumentRelationshipSchema>;
 export const RelationshipQuerySchema = z.object({
   document_id: z.string().uuid().optional(),
   relationship_types: z.array(RelationshipTypeIdSchema).optional(),
-  direction: z.enum(['outgoing', 'incoming', 'both']).default('both'),
+  direction: z.enum(["outgoing", "incoming", "both"]).default("both"),
   depth: z.number().min(1).max(10).default(1),
   include_inactive: z.boolean().default(false),
   limit: z.number().min(1).max(100).default(50),

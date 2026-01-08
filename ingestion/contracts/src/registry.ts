@@ -1,18 +1,18 @@
-import { CertificationWorkflow } from './certification.js';
-import { AppendOnlyAuditLog } from './audit.js';
-import { QuarantineService } from './quarantine.js';
-import { ScorecardEngine } from './scorecard.js';
-import { validateConformance, diffSpecs } from './spec-utils.js';
+import { CertificationWorkflow } from "./certification.js";
+import { AppendOnlyAuditLog } from "./audit.js";
+import { QuarantineService } from "./quarantine.js";
+import { ScorecardEngine } from "./scorecard.js";
+import { validateConformance, diffSpecs } from "./spec-utils.js";
 import {
   Certification,
   ConformanceResult,
   ContractSpec,
   QuarantineRecord,
   Scorecard,
-} from './types.js';
+} from "./types.js";
 
 export interface IngestionOutcome {
-  status: 'accepted' | 'rejected' | 'quarantined';
+  status: "accepted" | "rejected" | "quarantined";
   reason?: string;
   conformance: ConformanceResult;
   certificateVerified: boolean;
@@ -28,26 +28,36 @@ export class ContractRegistry {
     private readonly workflow: CertificationWorkflow,
     private readonly audit: AppendOnlyAuditLog,
     private readonly quarantine: QuarantineService,
-    private readonly scorecardsEngine: ScorecardEngine,
+    private readonly scorecardsEngine: ScorecardEngine
   ) {}
 
   register(spec: ContractSpec): void {
     const record: ContractSpec = {
       ...spec,
       createdAt: spec.createdAt ?? new Date().toISOString(),
-      status: spec.status ?? 'draft',
+      status: spec.status ?? "draft",
     };
     this.specs.set(spec.id, record);
-    this.audit.record({ actor: 'registry', action: 'registered', details: { id: spec.id, version: spec.version } });
+    this.audit.record({
+      actor: "registry",
+      action: "registered",
+      details: { id: spec.id, version: spec.version },
+    });
   }
 
   update(spec: ContractSpec): string[] {
     const previous = this.specs.get(spec.id);
     this.register(spec);
-    if (!previous) {return ['new spec registered'];}
+    if (!previous) {
+      return ["new spec registered"];
+    }
     const drift = diffSpecs(previous, spec);
     if (drift.length > 0) {
-      this.audit.record({ actor: 'registry', action: 'drift-detected', details: { id: spec.id, drift } });
+      this.audit.record({
+        actor: "registry",
+        action: "drift-detected",
+        details: { id: spec.id, drift },
+      });
     }
     return drift;
   }
@@ -56,13 +66,23 @@ export class ContractRegistry {
     return this.specs.get(contractId);
   }
 
-  async certify(contractId: string, secret: string, validUntil?: string): Promise<Certification | undefined> {
+  async certify(
+    contractId: string,
+    secret: string,
+    validUntil?: string
+  ): Promise<Certification | undefined> {
     const spec = this.get(contractId);
-    if (!spec) {return undefined;}
+    if (!spec) {
+      return undefined;
+    }
     const certificate = await this.workflow.issueCertificate(spec, secret, validUntil);
     this.certificates.set(contractId, certificate);
-    spec.status = 'certified';
-    this.audit.record({ actor: 'registry', action: 'certified', details: { id: contractId, certificateId: certificate.id } });
+    spec.status = "certified";
+    this.audit.record({
+      actor: "registry",
+      action: "certified",
+      details: { id: contractId, certificateId: certificate.id },
+    });
     return certificate;
   }
 
@@ -73,14 +93,14 @@ export class ContractRegistry {
   async validateIngestion(
     contractId: string,
     payload: Record<string, unknown>,
-    environment: 'dev' | 'staging' | 'production',
+    environment: "dev" | "staging" | "production",
     secret: string,
-    providedCertificate?: Certification,
+    providedCertificate?: Certification
   ): Promise<IngestionOutcome> {
     const spec = this.get(contractId);
     if (!spec) {
       return {
-        status: 'rejected',
+        status: "rejected",
         reason: `Unknown contract ${contractId}`,
         conformance: {
           conforms: false,
@@ -101,29 +121,41 @@ export class ContractRegistry {
       ? await this.workflow.verifyCertificate(spec, certificate, secret)
       : { certificate: undefined, verified: false };
 
-    if (environment === 'production' && !verification.verified) {
-      this.audit.record({ actor: 'ingestion', action: 'blocked-no-cert', details: { contractId } });
+    if (environment === "production" && !verification.verified) {
+      this.audit.record({ actor: "ingestion", action: "blocked-no-cert", details: { contractId } });
       return {
-        status: 'rejected',
-        reason: 'Production ingestion requires a verified certificate',
+        status: "rejected",
+        reason: "Production ingestion requires a verified certificate",
         conformance,
         certificateVerified: false,
       };
     }
 
     if (!conformance.conforms) {
-      const quarantineRecord = this.quarantine.place(contractId, 'contract-nonconformance', payload);
-      this.audit.record({ actor: 'ingestion', action: 'quarantined', details: { contractId, issues: conformance } });
+      const quarantineRecord = this.quarantine.place(
+        contractId,
+        "contract-nonconformance",
+        payload
+      );
+      this.audit.record({
+        actor: "ingestion",
+        action: "quarantined",
+        details: { contractId, issues: conformance },
+      });
       return {
-        status: 'quarantined',
-        reason: 'Payload did not conform to contract',
+        status: "quarantined",
+        reason: "Payload did not conform to contract",
         conformance,
         certificateVerified: verification.verified,
         quarantineRecord,
       };
     }
 
-    this.audit.record({ actor: 'ingestion', action: 'accepted', details: { contractId, environment } });
+    this.audit.record({
+      actor: "ingestion",
+      action: "accepted",
+      details: { contractId, environment },
+    });
     this.scorecards.set(
       contractId,
       this.scorecardsEngine.build({
@@ -131,11 +163,11 @@ export class ContractRegistry {
         version: spec.version,
         conformanceScores: [conformance.score],
         quarantinedEvents: 0,
-      }),
+      })
     );
 
     return {
-      status: 'accepted',
+      status: "accepted",
       conformance,
       certificateVerified: verification.verified,
     };
@@ -143,8 +175,10 @@ export class ContractRegistry {
 
   recertifyAfterResolution(contractId: string, secret: string): Promise<Certification | undefined> {
     const spec = this.get(contractId);
-    if (!spec) {return Promise.resolve(undefined);}
-    spec.status = 'certified';
+    if (!spec) {
+      return Promise.resolve(undefined);
+    }
+    spec.status = "certified";
     return this.certify(contractId, secret);
   }
 

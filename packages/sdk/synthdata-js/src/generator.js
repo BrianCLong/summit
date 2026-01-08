@@ -1,4 +1,4 @@
-const seedrandom = require('seedrandom');
+const seedrandom = require("seedrandom");
 
 function generateGraph(spec) {
   const rng = seedrandom(spec.seed || 1);
@@ -11,16 +11,16 @@ function generateGraph(spec) {
   const numComms = counts.comms || 0;
 
   for (let i = 0; i < numPersons; i++) {
-    nodes.push({ id: `person-${i}`, type: 'person' });
+    nodes.push({ id: `person-${i}`, type: "person" });
   }
   for (let i = 0; i < numOrgs; i++) {
-    nodes.push({ id: `org-${i}`, type: 'org' });
+    nodes.push({ id: `org-${i}`, type: "org" });
   }
   for (let i = 0; i < numAssets; i++) {
-    nodes.push({ id: `asset-${i}`, type: 'asset' });
+    nodes.push({ id: `asset-${i}`, type: "asset" });
   }
   for (let i = 0; i < numComms; i++) {
-    nodes.push({ id: `comm-${i}`, type: 'comm' });
+    nodes.push({ id: `comm-${i}`, type: "comm" });
   }
 
   for (let i = 0; i < numPersons; i++) {
@@ -29,14 +29,14 @@ function generateGraph(spec) {
       edges.push({
         from: `person-${i}`,
         to: `org-${target}`,
-        type: 'member_of',
+        type: "member_of",
       });
     }
   }
   for (let i = 0; i < numPersons; i++) {
     if (numAssets > 0) {
       const target = Math.floor(rng() * numAssets);
-      edges.push({ from: `person-${i}`, to: `asset-${target}`, type: 'uses' });
+      edges.push({ from: `person-${i}`, to: `asset-${target}`, type: "uses" });
     }
   }
   for (let i = 0; i < numComms; i++) {
@@ -49,7 +49,7 @@ function generateGraph(spec) {
       edges.push({
         from: `person-${from}`,
         to: `person-${to}`,
-        type: 'communicates_with',
+        type: "communicates_with",
       });
     }
   }

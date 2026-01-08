@@ -99,7 +99,7 @@ IntelGraph already ships a strong foundation: React + MUI + Cytoscape, GraphQL A
 | A1  | Implement `GraphRAGService.ts` + resolver + tests              | `feature/graphrag-v1`        | Query returns `answer`, `why_paths` (edge ids), `citations` (entity ids), <800ms on 10k‑edge dataset for 1‑hop motifs; unit+integration tests pass |
 | A2  | Add `withAuthAndPolicy` wrapper and apply to mutations/queries | `chore/policy-guard`         | Unauthorized access blocked by Rego; 100% coverage on policy paths; audit logs written                                                             |
 | A3  | Enforce persisted queries in prod                              | `security/persisted-queries` | Non‑allowlisted operations 403 in prod; CI generates manifest; client uses ids                                                                     |
-| A4  | Apollo metrics plugin + OTel traces                            | `obs/apollo-instrumentation` | Grafana shows resolver histograms; traces link API ↔ worker jobs                                                                                  |
+| A4  | Apollo metrics plugin + OTel traces                            | `obs/apollo-instrumentation` | Grafana shows resolver histograms; traces link API ↔ worker jobs                                                                                   |
 | B1  | BullMQ embedding upserter                                      | `ai/embeddings-upsert`       | On entity change, pgvector row exists; ANN search returns neighbors                                                                                |
 | C1  | Copilot UI                                                     | `ui/copilot-panel`           | NL question → response + overlay; clicking path focuses Cytoscape edges                                                                            |
 | E2  | Golden Path E2E gate                                           | `ci/golden-path-gate`        | Playwright test marks PR required status; rollback workflow proven                                                                                 |
@@ -112,12 +112,12 @@ IntelGraph already ships a strong foundation: React + MUI + Cytoscape, GraphQL A
 
 ```ts
 // server/src/services/GraphRAGService.ts
-import neo4j from 'neo4j-driver';
-import { getNeo4jDriver, getPostgresPool } from '../config/database.js';
-import pino from 'pino';
-import { z } from 'zod';
+import neo4j from "neo4j-driver";
+import { getNeo4jDriver, getPostgresPool } from "../config/database.js";
+import pino from "pino";
+import { z } from "zod";
 
-const log = pino({ name: 'GraphRAGService' });
+const log = pino({ name: "GraphRAGService" });
 
 export type GraphRAGRequest = {
   investigationId: string;
@@ -142,11 +142,7 @@ const Input = z.object({
 
 export class GraphRAGService {
   async retrieveSubgraph(req: GraphRAGRequest) {
-    const {
-      investigationId,
-      focusEntityIds = [],
-      maxHops = 2,
-    } = Input.parse(req);
+    const { investigationId, focusEntityIds = [], maxHops = 2 } = Input.parse(req);
     const driver = getNeo4jDriver();
     const session = driver.session();
 
@@ -174,8 +170,8 @@ export class GraphRAGService {
     await session.close();
     if (!res.records.length) return { nodes: [], rels: [] };
     const rec = res.records[0];
-    const nodes = rec.get('nodes').map((n: any) => n.properties);
-    const rels = rec.get('relationships').map((r: any) => r.properties);
+    const nodes = rec.get("nodes").map((n: any) => n.properties);
+    const rels = rec.get("relationships").map((r: any) => r.properties);
     return { nodes, rels };
   }
 
@@ -222,7 +218,7 @@ export class GraphRAGService {
     const out = await this.askLLM(question, facts);
     log.info(
       { inv: req.investigationId, nodes: nodes.length, rels: rels.length },
-      'GraphRAG answered',
+      "GraphRAG answered"
     );
     return out;
   }
@@ -233,15 +229,15 @@ export class GraphRAGService {
 
 ```ts
 // server/src/graphql/resolvers/aiAnalysis.ts
-import { GraphRAGService } from '../../services/GraphRAGService.js';
-import { withAuthAndPolicy } from '../../middleware/withAuthAndPolicy.js';
+import { GraphRAGService } from "../../services/GraphRAGService.js";
+import { withAuthAndPolicy } from "../../middleware/withAuthAndPolicy.js";
 
 const rag = new GraphRAGService();
 
 export const aiAnalysisResolvers = {
   Query: {
-    graphRagAnswer: withAuthAndPolicy('read:analysis', (args, ctx) => ({
-      type: 'investigation',
+    graphRagAnswer: withAuthAndPolicy("read:analysis", (args, ctx) => ({
+      type: "investigation",
       id: args.investigationId,
     }))(async (_: any, args: any, ctx: any) => {
       return rag.answer({
@@ -257,20 +253,20 @@ export const aiAnalysisResolvers = {
 
 ```ts
 // server/src/middleware/withAuthAndPolicy.ts
-import { evaluate } from '../services/PolicyService.js'; // wraps OPA http or wasm
-import pino from 'pino';
-const log = pino({ name: 'policy' });
+import { evaluate } from "../services/PolicyService.js"; // wraps OPA http or wasm
+import pino from "pino";
+const log = pino({ name: "policy" });
 
 export const withAuthAndPolicy =
   (action: string, resourceFactory: (args: any, ctx: any) => any) =>
   (resolver: Function) =>
   async (parent: any, args: any, ctx: any, info: any) => {
-    if (!ctx.user) throw new Error('Not authenticated');
+    if (!ctx.user) throw new Error("Not authenticated");
     const resource = resourceFactory(args, ctx);
     const allow = await evaluate({ action, user: ctx.user, resource });
     if (!allow) {
-      log.warn({ user: ctx.user.id, action, resource }, 'policy deny');
-      throw new Error('Not authorized');
+      log.warn({ user: ctx.user.id, action, resource }, "policy deny");
+      throw new Error("Not authorized");
     }
     return resolver(parent, args, ctx, info);
   };
@@ -280,25 +276,20 @@ export const withAuthAndPolicy =
 
 ```ts
 // server/src/middleware/persistedQueries.ts
-import type { Request, Response, NextFunction } from 'express';
-import crypto from 'crypto';
-import fs from 'fs';
+import type { Request, Response, NextFunction } from "express";
+import crypto from "crypto";
+import fs from "fs";
 
 const manifest = JSON.parse(
-  fs.readFileSync(process.env.PQ_MANIFEST || 'persisted-queries.json', 'utf8'),
+  fs.readFileSync(process.env.PQ_MANIFEST || "persisted-queries.json", "utf8")
 );
 
-export function requirePersistedQueries(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  if (process.env.NODE_ENV === 'production') {
+export function requirePersistedQueries(req: Request, res: Response, next: NextFunction) {
+  if (process.env.NODE_ENV === "production") {
     const body = req.body || {};
     // Accept APQ protocol: body may include queryId or hashed query
     const id = body.extensions?.persistedQuery?.sha256Hash || body.id;
-    if (!id || !manifest[id])
-      return res.status(403).json({ error: 'Persisted query required' });
+    if (!id || !manifest[id]) return res.status(403).json({ error: "Persisted query required" });
     req.body.query = manifest[id]; // inject server‑side
   }
   next();
@@ -309,19 +300,19 @@ export function requirePersistedQueries(
 
 ```ts
 // server/src/workers/embeddingUpsert.ts
-import { Worker, Job } from 'bullmq';
-import { getPostgresPool } from '../config/database.js';
+import { Worker, Job } from "bullmq";
+import { getPostgresPool } from "../config/database.js";
 
 export const startEmbeddingUpserter = (connection: any) =>
-  new Worker('entity-events', async (job: Job) => {
+  new Worker("entity-events", async (job: Job) => {
     const { entity } = job.data;
     // TODO: call embedding model provider
     const embedding = await computeEmbedding(`${entity.type} ${entity.label}`); // float[]
     const pool = getPostgresPool();
     await pool.query(
-      'INSERT INTO entity_embeddings (entity_id, embedding, model) VALUES ($1, $2::vector, $3)\n' +
-        'ON CONFLICT (entity_id) DO UPDATE SET embedding=$2::vector, model=$3, updated_at=NOW()',
-      [entity.id, `[${embedding.join(',')}]`, 'text-embedding-3-small'],
+      "INSERT INTO entity_embeddings (entity_id, embedding, model) VALUES ($1, $2::vector, $3)\n" +
+        "ON CONFLICT (entity_id) DO UPDATE SET embedding=$2::vector, model=$3, updated_at=NOW()",
+      [entity.id, `[${embedding.join(",")}]`, "text-embedding-3-small"]
     );
   });
 ```
@@ -330,13 +321,13 @@ export const startEmbeddingUpserter = (connection: any) =>
 
 ```ts
 // server/src/monitoring/apolloPlugin.ts
-import { PluginDefinition } from '@apollo/server';
-import client from 'prom-client';
+import { PluginDefinition } from "@apollo/server";
+import client from "prom-client";
 
 const hist = new client.Histogram({
-  name: 'graphql_resolver_ms',
-  help: 'Resolver latency',
-  labelNames: ['type', 'field'],
+  name: "graphql_resolver_ms",
+  help: "Resolver latency",
+  labelNames: ["type", "field"],
 });
 
 export const apolloMetricsPlugin = (): PluginDefinition => ({
@@ -362,10 +353,10 @@ export const apolloMetricsPlugin = (): PluginDefinition => ({
 
 ```jsx
 // client/src/components/graph/AIInsightsPanel.jsx
-import React from 'react';
-import { useQuery, gql } from '@apollo/client';
-import { Box, Paper, Typography, Button } from '@mui/material';
-import $ from 'jquery';
+import React from "react";
+import { useQuery, gql } from "@apollo/client";
+import { Box, Paper, Typography, Button } from "@mui/material";
+import $ from "jquery";
 
 const Q = gql`
   query ($investigationId: ID!, $q: String!) {
@@ -386,7 +377,7 @@ const Q = gql`
 `;
 
 export default function AIInsightsPanel({ cy, investigationId }) {
-  const [q, setQ] = React.useState('What connects A to B?');
+  const [q, setQ] = React.useState("What connects A to B?");
   const [run, { data, loading }] = useQuery(Q, {
     variables: { investigationId, q },
     skip: true,
@@ -397,10 +388,10 @@ export default function AIInsightsPanel({ cy, investigationId }) {
     // jQuery‑assisted hit‑target styling for highlighted edges
     const ids = data.graphRagAnswer.why_paths.map((w) => w.relId);
     cy.batch(() => {
-      cy.elements('edge').removeClass('why');
-      ids.forEach((id) => cy.$(`edge[id = "${id}"]`).addClass('why'));
+      cy.elements("edge").removeClass("why");
+      ids.forEach((id) => cy.$(`edge[id = "${id}"]`).addClass("why"));
     });
-    $(cy.container()).trigger('intelgraph:why_paths_applied', [ids]);
+    $(cy.container()).trigger("intelgraph:why_paths_applied", [ids]);
   }, [cy, data]);
 
   return (
@@ -466,23 +457,23 @@ export default function AIInsightsPanel({ cy, investigationId }) {
 ## Appendix A — Golden Path Playwright outline
 
 ```ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test('golden path', async ({ page }) => {
-  await page.goto('http://localhost:3000');
-  await page.getByRole('button', { name: 'New Investigation' }).click();
-  await page.getByLabel('Title').fill('Demo Inv');
-  await page.getByRole('button', { name: 'Create' }).click();
+test("golden path", async ({ page }) => {
+  await page.goto("http://localhost:3000");
+  await page.getByRole("button", { name: "New Investigation" }).click();
+  await page.getByLabel("Title").fill("Demo Inv");
+  await page.getByRole("button", { name: "Create" }).click();
   // Add two entities and a relationship
-  await page.getByRole('button', { name: 'Add Entity' }).click();
-  await page.getByLabel('Label').fill('Alice');
-  await page.getByRole('button', { name: 'Save' }).click();
+  await page.getByRole("button", { name: "Add Entity" }).click();
+  await page.getByLabel("Label").fill("Alice");
+  await page.getByRole("button", { name: "Save" }).click();
   // ... repeat for Bob ...
   // Connect Alice → Bob
-  await page.getByRole('button', { name: 'Add Relationship' }).click();
+  await page.getByRole("button", { name: "Add Relationship" }).click();
   // Run Copilot
-  await page.getByRole('button', { name: 'Ask' }).click();
-  await expect(page.getByText('Hypothesis')).toBeVisible();
+  await page.getByRole("button", { name: "Ask" }).click();
+  await expect(page.getByText("Hypothesis")).toBeVisible();
 });
 ```
 

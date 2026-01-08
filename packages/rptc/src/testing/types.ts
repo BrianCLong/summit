@@ -1,13 +1,9 @@
-import type { PromptTemplate, PromptValidationResult } from '../compiler.js';
-import type {
-  SlotSchemaMap,
-  SlotValues,
-  PartialSlotValues,
-} from '../schema.js';
+import type { PromptTemplate, PromptValidationResult } from "../compiler.js";
+import type { SlotSchemaMap, SlotValues, PartialSlotValues } from "../schema.js";
 
 export interface GeneratedTestCase<TSlots extends SlotSchemaMap> {
   readonly description: string;
-  readonly slot: keyof TSlots | 'template';
+  readonly slot: keyof TSlots | "template";
   readonly values: PartialSlotValues<TSlots>;
   readonly expectValid: boolean;
 }

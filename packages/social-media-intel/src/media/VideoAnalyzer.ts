@@ -2,7 +2,7 @@
  * Video Analyzer - Analyzes video content
  */
 
-import type { VideoMetadata } from '../types/index.js';
+import type { VideoMetadata } from "../types/index.js";
 
 export class VideoAnalyzer {
   /**
@@ -18,9 +18,9 @@ export class VideoAnalyzer {
       duration: 0,
       width: 0,
       height: 0,
-      format: 'unknown',
-      thumbnail: '',
-      transcript: ''
+      format: "unknown",
+      thumbnail: "",
+      transcript: "",
     };
   }
 
@@ -33,7 +33,7 @@ export class VideoAnalyzer {
     // - AWS Transcribe
     // - Azure Speech Services
 
-    return '';
+    return "";
   }
 
   /**

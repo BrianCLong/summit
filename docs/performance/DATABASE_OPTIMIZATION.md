@@ -48,6 +48,7 @@ Optimized connection pool configuration (see `config/postgresql.ts`):
 ```
 
 **Best Practices:**
+
 - Use read replicas for read-heavy workloads
 - Monitor pool utilization via Prometheus metrics
 - Adjust pool size based on concurrent request volume
@@ -70,6 +71,7 @@ WHERE confidence > 0.5;
 ```
 
 **Index Strategy:**
+
 - Always index tenant_id for multi-tenant isolation
 - Create composite indexes for common WHERE combinations
 - Use partial indexes for frequently filtered subsets
@@ -79,12 +81,14 @@ WHERE confidence > 0.5;
 ### Query Optimization
 
 **Slow Query Detection:**
+
 ```typescript
 // Queries >100ms are logged automatically
 const slowQueryThreshold = 100; // milliseconds
 ```
 
 **Query Monitoring:**
+
 ```sql
 -- Enable pg_stat_statements for query analysis
 CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
@@ -98,6 +102,7 @@ LIMIT 10;
 ```
 
 **Optimization Techniques:**
+
 1. Use `EXPLAIN ANALYZE` to understand query plans
 2. Prefer `EXISTS` over `COUNT(*)` for existence checks
 3. Use pagination for large result sets
@@ -110,18 +115,16 @@ LIMIT 10;
 ```typescript
 // Bad: N+1 queries
 for (const entity of entities) {
-  const relationships = await db.query(
-    'SELECT * FROM relationships WHERE source_id = $1',
-    [entity.id]
-  );
+  const relationships = await db.query("SELECT * FROM relationships WHERE source_id = $1", [
+    entity.id,
+  ]);
 }
 
 // Good: Single batch query
-const entityIds = entities.map(e => e.id);
-const relationships = await db.query(
-  'SELECT * FROM relationships WHERE source_id = ANY($1)',
-  [entityIds]
-);
+const entityIds = entities.map((e) => e.id);
+const relationships = await db.query("SELECT * FROM relationships WHERE source_id = ANY($1)", [
+  entityIds,
+]);
 ```
 
 ## Neo4j Optimization
@@ -144,6 +147,7 @@ Neo4j driver configuration (see `config/neo4j.ts`):
 See `migrations/add-neo4j-indexes.cypher` for complete index definitions.
 
 **Key Indexes:**
+
 ```cypher
 // Composite indexes for common patterns
 CREATE INDEX idx_entity_tenant_type FOR (e:Entity) ON (e.tenantId, e.type);
@@ -156,6 +160,7 @@ CREATE RANGE INDEX idx_entity_confidence_range FOR (e:Entity) ON (e.confidence);
 ```
 
 **Constraints:**
+
 ```cypher
 // Uniqueness
 CREATE CONSTRAINT constraint_entity_id FOR (e:Entity) REQUIRE e.id IS UNIQUE;
@@ -172,6 +177,7 @@ REQUIRE e.tenantId IS NOT NULL;
 ### Query Optimization
 
 **Always filter by tenant first:**
+
 ```cypher
 // Good: Uses idx_entity_tenant_type
 MATCH (e:Entity {tenantId: $tenantId, type: $type})
@@ -184,6 +190,7 @@ RETURN e
 ```
 
 **Use PROFILE/EXPLAIN:**
+
 ```cypher
 // Analyze query performance
 PROFILE MATCH (e:Entity {tenantId: $tenantId})
@@ -194,6 +201,7 @@ LIMIT 100
 ```
 
 **Optimization Tips:**
+
 1. Use parameters ($param) instead of string concatenation
 2. Limit traversal depth with relationship hop limits
 3. Use `WITH` to pipeline complex queries
@@ -204,7 +212,7 @@ LIMIT 100
 ### Query Result Caching
 
 ```typescript
-import { Neo4jQueryCache } from '../config/neo4j';
+import { Neo4jQueryCache } from "../config/neo4j";
 
 const cache = new Neo4jQueryCache(1000, 300000); // 1000 items, 5min TTL
 
@@ -227,10 +235,10 @@ See `config/redis.ts` for complete implementation.
 
 ```typescript
 export const CACHE_TTL = {
-  GRAPHQL_QUERY: 300,      // 5 minutes
-  USER_SESSION: 86400,     // 24 hours
-  GRAPH_METRICS: 3600,     // 1 hour
-  ENTITY_DATA: 1800,       // 30 minutes
+  GRAPHQL_QUERY: 300, // 5 minutes
+  USER_SESSION: 86400, // 24 hours
+  GRAPH_METRICS: 3600, // 1 hour
+  ENTITY_DATA: 1800, // 30 minutes
   RELATIONSHIP_DATA: 1800, // 30 minutes
   INVESTIGATION_DATA: 600, // 10 minutes
 };
@@ -240,20 +248,21 @@ export const CACHE_TTL = {
 
 ```typescript
 export const CACHE_PREFIX = {
-  GRAPHQL: 'gql',
-  SESSION: 'session',
-  METRICS: 'metrics',
-  ENTITY: 'entity',
-  RELATIONSHIP: 'rel',
-  INVESTIGATION: 'inv',
+  GRAPHQL: "gql",
+  SESSION: "session",
+  METRICS: "metrics",
+  ENTITY: "entity",
+  RELATIONSHIP: "rel",
+  INVESTIGATION: "inv",
 };
 ```
 
 ### Caching Patterns
 
 **1. GraphQL Query Caching:**
+
 ```typescript
-import { RedisCacheManager, hashGraphQLQuery } from '../config/redis';
+import { RedisCacheManager, hashGraphQLQuery } from "../config/redis";
 
 const queryHash = hashGraphQLQuery(query, variables);
 const cached = await cacheManager.getGraphQLQuery(queryHash, tenantId);
@@ -267,6 +276,7 @@ return cached;
 ```
 
 **2. User Session Caching:**
+
 ```typescript
 // Store session
 await cacheManager.cacheUserSession(sessionId, sessionData);
@@ -279,24 +289,27 @@ await cacheManager.deleteUserSession(sessionId);
 ```
 
 **3. Graph Metrics Caching:**
+
 ```typescript
 // Cache computed metrics
-await cacheManager.cacheGraphMetrics('degree_centrality', metrics, tenantId);
+await cacheManager.cacheGraphMetrics("degree_centrality", metrics, tenantId);
 
 // Retrieve cached metrics
-const metrics = await cacheManager.getGraphMetrics('degree_centrality', tenantId);
+const metrics = await cacheManager.getGraphMetrics("degree_centrality", tenantId);
 ```
 
 ### Cache Invalidation
 
 **Automatic invalidation on mutations:**
+
 ```typescript
 // In mutation resolvers
-await cacheManager.invalidateOnMutation('entity', entityId, tenantId);
-await cacheManager.invalidateOnMutation('relationship', relId, tenantId);
+await cacheManager.invalidateOnMutation("entity", entityId, tenantId);
+await cacheManager.invalidateOnMutation("relationship", relId, tenantId);
 ```
 
 **Pattern-based invalidation:**
+
 ```typescript
 // Invalidate all GraphQL queries for a tenant
 await cacheManager.invalidateGraphQLQueries(tenantId);
@@ -305,7 +318,7 @@ await cacheManager.invalidateGraphQLQueries(tenantId);
 await cacheManager.invalidateGraphMetrics(tenantId);
 
 // Invalidate by pattern
-await cacheManager.deleteByPattern('gql:tenant123:*');
+await cacheManager.deleteByPattern("gql:tenant123:*");
 ```
 
 ### Cache Monitoring
@@ -334,6 +347,7 @@ const summary = cacheManager.getCacheHitRateSummary();
 See `middleware/pagination.ts` for complete implementation.
 
 **Default Limits:**
+
 ```typescript
 {
   DEFAULT_PAGE_SIZE: 100,
@@ -343,8 +357,9 @@ See `middleware/pagination.ts` for complete implementation.
 ```
 
 **Usage in GraphQL:**
+
 ```typescript
-import { createConnection, validatePaginationInput } from '../middleware/pagination';
+import { createConnection, validatePaginationInput } from "../middleware/pagination";
 
 const resolver = {
   entities: async (parent, args, context) => {
@@ -356,11 +371,12 @@ const resolver = {
 
     // Create connection response
     return createConnection(entities, args, totalCount);
-  }
+  },
 };
 ```
 
 **GraphQL Schema:**
+
 ```graphql
 type EntityConnection {
   edges: [EntityEdge!]!
@@ -387,8 +403,9 @@ type Query {
 ```
 
 **PostgreSQL Pagination:**
+
 ```typescript
-import { PostgresCursorPagination } from '../middleware/pagination';
+import { PostgresCursorPagination } from "../middleware/pagination";
 
 const { where, params } = PostgresCursorPagination.buildWhereClause(cursor, isForward);
 const orderBy = PostgresCursorPagination.buildOrderClause(isForward);
@@ -403,8 +420,9 @@ const query = `
 ```
 
 **Neo4j Pagination:**
+
 ```typescript
-import { Neo4jCursorPagination } from '../middleware/pagination';
+import { Neo4jCursorPagination } from "../middleware/pagination";
 
 const { where, params } = Neo4jCursorPagination.buildWhereClause(cursor, isForward);
 const orderBy = Neo4jCursorPagination.buildOrderClause(isForward);
@@ -436,7 +454,7 @@ for (const entity of entities) {
 // GOOD: With DataLoader
 const entities = await getEntities(); // 1 query
 const relationships = await Promise.all(
-  entities.map(e => loaders.entityRelationshipsLoader.load(e.id))
+  entities.map((e) => loaders.entityRelationshipsLoader.load(e.id))
 ); // 1 batched query
 // Total: 2 queries
 ```
@@ -444,8 +462,9 @@ const relationships = await Promise.all(
 ### Setting Up DataLoaders
 
 **In GraphQL context:**
+
 ```typescript
-import { createDataLoaders } from '../middleware/dataloader';
+import { createDataLoaders } from "../middleware/dataloader";
 
 const context = ({ req }) => ({
   loaders: createDataLoaders(postgresPool, neo4jDriver, req.user?.tenantId),
@@ -454,6 +473,7 @@ const context = ({ req }) => ({
 ```
 
 **In Resolvers:**
+
 ```typescript
 const resolvers = {
   Entity: {
@@ -466,9 +486,7 @@ const resolvers = {
   Query: {
     entities: async (parent, args, context) => {
       // Batch load multiple entities
-      return Promise.all(
-        args.ids.map(id => context.loaders.entityLoader.load(id))
-      );
+      return Promise.all(args.ids.map((id) => context.loaders.entityLoader.load(id)));
     },
   },
 };
@@ -491,8 +509,8 @@ interface DataLoaderContext {
 
 ```typescript
 export const DEFAULT_DATALOADER_OPTIONS = {
-  cache: true,              // Enable per-request caching
-  maxBatchSize: 100,        // Maximum items per batch
+  cache: true, // Enable per-request caching
+  maxBatchSize: 100, // Maximum items per batch
   batchScheduleFn: (cb) => setTimeout(cb, 10), // 10ms batching window
 };
 ```
@@ -504,6 +522,7 @@ See `middleware/database-monitoring.ts` for complete implementation.
 ### Prometheus Metrics
 
 **PostgreSQL Metrics:**
+
 - `postgres_query_duration_seconds` - Query latency histogram
 - `postgres_query_total` - Total queries counter
 - `postgres_slow_query_total` - Slow queries (>100ms)
@@ -512,27 +531,30 @@ See `middleware/database-monitoring.ts` for complete implementation.
 - `postgres_pool_waiting` - Waiting clients
 
 **Neo4j Metrics:**
+
 - `neo4j_query_duration_seconds` - Query latency histogram
 - `neo4j_query_total` - Total queries counter
 - `neo4j_slow_query_total` - Slow queries (>100ms)
 
 **Redis Cache Metrics:**
+
 - `redis_cache_hits_total` - Cache hits counter
 - `redis_cache_misses_total` - Cache misses counter
 - `redis_cache_hit_rate` - Hit rate gauge (0-1)
 - `redis_cache_size_bytes` - Cache size estimate
 
 **DataLoader Metrics:**
+
 - `dataloader_batch_size` - Batch size histogram
 - `dataloader_cache_hit_rate` - Cache hit rate
 
 ### Setting Up Monitoring
 
 ```typescript
-import { databaseHealthMonitor } from '../middleware/database-monitoring';
+import { databaseHealthMonitor } from "../middleware/database-monitoring";
 
 // Monitor PostgreSQL pool
-databaseHealthMonitor.monitorPostgresPool(postgresPool, 'write');
+databaseHealthMonitor.monitorPostgresPool(postgresPool, "write");
 
 // Get health report
 const report = databaseHealthMonitor.getHealthReport();
@@ -553,9 +575,9 @@ const report = databaseHealthMonitor.getHealthReport();
 ### Health Check Endpoint
 
 ```typescript
-import { handleHealthCheck } from '../middleware/database-monitoring';
+import { handleHealthCheck } from "../middleware/database-monitoring";
 
-app.get('/health/database', handleHealthCheck);
+app.get("/health/database", handleHealthCheck);
 ```
 
 ### Query Performance Tracking
@@ -568,11 +590,11 @@ const start = Date.now();
 const result = await pool.query(sql, params);
 const duration = Date.now() - start;
 
-tracker.trackQuery('postgres', sql, duration, {
-  queryType: 'SELECT',
-  table: 'entities',
-  operation: 'read',
-  status: 'success',
+tracker.trackQuery("postgres", sql, duration, {
+  queryType: "SELECT",
+  table: "entities",
+  operation: "read",
+  status: "success",
 });
 
 // Get slow query report
@@ -583,14 +605,14 @@ const slowQueries = tracker.getSlowQueryReport(10);
 
 ### Target Metrics
 
-| Metric | Target | Current Baseline |
-|--------|--------|-----------------|
-| Query Response Time (p90) | <100ms | TBD |
-| Query Response Time (p99) | <500ms | TBD |
-| Cache Hit Rate | >90% | TBD |
-| Database Pool Utilization | <80% | TBD |
-| N+1 Queries | 0 | TBD |
-| Slow Query Rate | <1% | TBD |
+| Metric                    | Target | Current Baseline |
+| ------------------------- | ------ | ---------------- |
+| Query Response Time (p90) | <100ms | TBD              |
+| Query Response Time (p99) | <500ms | TBD              |
+| Cache Hit Rate            | >90%   | TBD              |
+| Database Pool Utilization | <80%   | TBD              |
+| N+1 Queries               | 0      | TBD              |
+| Slow Query Rate           | <1%    | TBD              |
 
 ### Load Testing
 
@@ -610,6 +632,7 @@ redis-benchmark -h localhost -p 6379 -c 50 -n 100000
 ### Performance Monitoring Dashboard
 
 Create Grafana dashboards with:
+
 1. Query latency percentiles (p50, p90, p99)
 2. Database pool utilization over time
 3. Cache hit rate by type
@@ -629,7 +652,7 @@ Create Grafana dashboards with:
 - [ ] Cache frequently accessed data
 - [ ] Use prepared statements for security and performance
 - [ ] Profile slow queries with EXPLAIN/PROFILE
-- [ ] Avoid SELECT *, specify needed columns
+- [ ] Avoid SELECT \*, specify needed columns
 - [ ] Use composite indexes for common query patterns
 
 ### Caching Guidelines
@@ -645,11 +668,13 @@ Create Grafana dashboards with:
 **Formula:** `pool_size = ((core_count * 2) + effective_spindle_count)`
 
 For typical workload:
+
 - **Write Pool**: 5-20 connections
 - **Read Pool**: 20-60 connections
 - **Neo4j Pool**: 30-50 connections
 
 Adjust based on:
+
 - Concurrent user count
 - Average request duration
 - Database server resources
@@ -677,6 +702,7 @@ ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
 **Symptoms:** Queries taking >100ms
 
 **Diagnosis:**
+
 ```sql
 -- Find slow queries
 SELECT query, mean_exec_time, calls
@@ -691,6 +717,7 @@ WHERE seq_scan > idx_scan;
 ```
 
 **Solutions:**
+
 1. Add appropriate indexes
 2. Optimize query with EXPLAIN ANALYZE
 3. Use pagination for large result sets
@@ -702,12 +729,14 @@ WHERE seq_scan > idx_scan;
 **Symptoms:** Cache hit rate <80%
 
 **Diagnosis:**
+
 ```typescript
 const summary = cacheManager.getCacheHitRateSummary();
 console.log(summary);
 ```
 
 **Solutions:**
+
 1. Increase cache TTL for stable data
 2. Pre-warm cache for common queries
 3. Review cache invalidation logic
@@ -719,12 +748,14 @@ console.log(summary);
 **Symptoms:** Clients waiting for connections
 
 **Diagnosis:**
+
 ```typescript
 const stats = databaseHealthMonitor.getHealthReport();
 console.log(stats.postgres.pool);
 ```
 
 **Solutions:**
+
 1. Increase pool size (max: 20-50)
 2. Reduce query duration (optimize queries)
 3. Implement connection timeout
@@ -736,6 +767,7 @@ console.log(stats.postgres.pool);
 **Symptoms:** Excessive database queries per request
 
 **Diagnosis:**
+
 ```bash
 # Enable query logging
 export POSTGRES_LOG_STATEMENT=all
@@ -745,6 +777,7 @@ grep "SELECT" postgres.log | wc -l
 ```
 
 **Solutions:**
+
 1. Use DataLoader for batch loading
 2. Use JOIN queries instead of multiple SELECTs
 3. Implement eager loading for relationships
@@ -756,12 +789,14 @@ grep "SELECT" postgres.log | wc -l
 **Symptoms:** Redis running out of memory
 
 **Diagnosis:**
+
 ```bash
 redis-cli INFO memory
 redis-cli --bigkeys
 ```
 
 **Solutions:**
+
 1. Implement LRU eviction policy
 2. Reduce cache TTLs
 3. Use cache size limits
@@ -773,34 +808,39 @@ redis-cli --bigkeys
 ### Applying Optimizations
 
 1. **Apply PostgreSQL indexes:**
+
 ```bash
 psql -U intelgraph -d intelgraph_dev -f migrations/add-performance-indexes.sql
 ```
 
 2. **Apply Neo4j indexes:**
+
 ```bash
 cypher-shell -u neo4j -p password < migrations/add-neo4j-indexes.cypher
 ```
 
 3. **Configure connection pools:**
+
 ```typescript
-import { createOptimizedPool } from './config/postgresql';
-import { createOptimizedNeo4jDriver } from './config/neo4j';
+import { createOptimizedPool } from "./config/postgresql";
+import { createOptimizedNeo4jDriver } from "./config/neo4j";
 
 const postgresPool = createOptimizedPool(config);
 const neo4jDriver = createOptimizedNeo4jDriver(config);
 ```
 
 4. **Enable caching:**
+
 ```typescript
-import { createRedisCacheManager } from './config/redis';
+import { createRedisCacheManager } from "./config/redis";
 
 const cacheManager = createRedisCacheManager(config);
 ```
 
 5. **Add DataLoaders to GraphQL context:**
+
 ```typescript
-import { createDataLoaders } from './middleware/dataloader';
+import { createDataLoaders } from "./middleware/dataloader";
 
 const context = ({ req }) => ({
   loaders: createDataLoaders(postgresPool, neo4jDriver, req.user?.tenantId),
@@ -808,11 +848,12 @@ const context = ({ req }) => ({
 ```
 
 6. **Enable monitoring:**
+
 ```typescript
-import { databaseHealthMonitor } from './middleware/database-monitoring';
+import { databaseHealthMonitor } from "./middleware/database-monitoring";
 
 databaseHealthMonitor.monitorPostgresPool(postgresPool);
-app.get('/health/database', handleHealthCheck);
+app.get("/health/database", handleHealthCheck);
 ```
 
 ## Summary
@@ -829,6 +870,7 @@ This optimization guide implements:
 ✅ **Documentation**: Comprehensive performance guidelines
 
 **Expected Outcomes:**
+
 - Query times <100ms for 90th percentile
 - Cache hit rate >90%
 - Zero N+1 queries via DataLoader

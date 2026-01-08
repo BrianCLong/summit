@@ -1,6 +1,7 @@
 # Energy Security Analysis
 
 ## Objective
+
 Assess energy security risks, dependencies, and transition dynamics to understand vulnerabilities and opportunities in national energy systems.
 
 ## Analysis Framework
@@ -36,7 +37,9 @@ Assess energy security risks, dependencies, and transition dynamics to understan
    - Environmental impacts
 
 ### Energy Mix Analysis
+
 Current and projected shares:
+
 - Oil and natural gas
 - Coal
 - Nuclear
@@ -46,6 +49,7 @@ Current and projected shares:
 - Emerging technologies (hydrogen, fusion, etc.)
 
 ### Import Dependency Assessment
+
 - **Critical Dependencies**: Energy types >50% imported
 - **Source Concentration**: Top 3 suppliers percentage
 - **Transit Risks**: Pipeline, shipping route vulnerabilities
@@ -53,6 +57,7 @@ Current and projected shares:
 - **Price Exposure**: Market power of suppliers
 
 ### Strategic Reserve Evaluation
+
 - Oil reserve days of consumption
 - Natural gas storage capacity
 - Coal stockpiles
@@ -60,6 +65,7 @@ Current and projected shares:
 - Release mechanisms and effectiveness
 
 ### Infrastructure Resilience
+
 - **Physical Security**: Protection against attacks/sabotage
 - **Cyber Security**: SCADA and control system protection
 - **Climate Resilience**: Adaptation to extreme weather
@@ -69,6 +75,7 @@ Current and projected shares:
 ### Energy Transition Dynamics
 
 **Drivers:**
+
 - Climate policy and commitments
 - Technology cost declines
 - Energy security imperatives
@@ -76,6 +83,7 @@ Current and projected shares:
 - Economic opportunities
 
 **Challenges:**
+
 - Transition costs and financing
 - Infrastructure requirements
 - Intermittency management
@@ -83,6 +91,7 @@ Current and projected shares:
 - Social and employment impacts
 
 **Timeline Assessment:**
+
 - Near-term (2025-2030): Transition pace and milestones
 - Medium-term (2030-2040): Major system changes
 - Long-term (2040-2050): Carbon neutrality progress
@@ -90,18 +99,21 @@ Current and projected shares:
 ### Risk Scenarios
 
 **Supply Disruption:**
+
 - Sudden cut-off of major import source
 - Infrastructure attack or failure
 - Extreme weather impacts
 - Geopolitical crisis effects
 
 **Price Shock:**
+
 - Oil/gas price spikes
 - Economic impacts and responses
 - Social unrest risks
 - Policy intervention options
 
 **Transition Disruption:**
+
 - Too-rapid fossil fuel phase-out
 - Renewable integration challenges
 - Grid stability issues
@@ -110,29 +122,34 @@ Current and projected shares:
 ### Mitigation Strategies
 
 **Short-term:**
+
 - Increase strategic reserves
 - Diversify import sources
 - Improve infrastructure security
 - Demand management
 
 **Medium-term:**
+
 - Accelerate renewable deployment
 - Enhance grid flexibility
 - Develop domestic resources sustainably
 - Regional integration
 
 **Long-term:**
+
 - Achieve energy independence or resilient interdependence
 - Full energy system transformation
 - Technology leadership
 - Climate resilience
 
 ### Monitoring Indicators
+
 - Monthly: Prices, import volumes, reserve levels
 - Quarterly: Infrastructure incidents, policy changes, investment flows
 - Annually: Energy mix evolution, emissions, security metrics
 
 ### Ethical Framework
+
 - Ensure universal energy access
 - Minimize environmental harm
 - Support just transition (employment, communities)
@@ -140,6 +157,7 @@ Current and projected shares:
 - Respect indigenous rights in energy development
 
 ### Applications
+
 - National energy strategy
 - Climate policy integration
 - Security and defense planning

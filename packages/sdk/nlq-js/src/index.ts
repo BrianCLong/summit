@@ -1,4 +1,4 @@
-import neo4j, { Driver } from 'neo4j-driver';
+import neo4j, { Driver } from "neo4j-driver";
 
 export interface CostEstimate {
   nodes: number;
@@ -21,20 +21,20 @@ export interface CompileResult {
 export function compile(nl: string): CompileResult {
   const normalized = nl.toLowerCase();
   if (/\b(create|merge|delete|set|drop)\b/.test(normalized)) {
-    throw new Error('write operations are not allowed');
+    throw new Error("write operations are not allowed");
   }
 
   // rudimentary mapping for demo purposes
-  if (normalized.includes('people')) {
+  if (normalized.includes("people")) {
     return {
-      cypher: 'MATCH (p:Person) RETURN p LIMIT $limit',
+      cypher: "MATCH (p:Person) RETURN p LIMIT $limit",
       params: { limit: 25 },
       costEstimate: { nodes: 25, edges: 0, rows: 25, safe: true },
     };
   }
 
   return {
-    cypher: 'MATCH (n) RETURN n LIMIT $limit',
+    cypher: "MATCH (n) RETURN n LIMIT $limit",
     params: { limit: 25 },
     costEstimate: { nodes: 25, edges: 0, rows: 25, safe: true },
   };
@@ -53,7 +53,7 @@ export interface ExecuteResult {
 export async function executeSandbox(
   driver: Driver,
   cypher: string,
-  params: Record<string, unknown>,
+  params: Record<string, unknown>
 ): Promise<ExecuteResult> {
   const session = driver.session({ defaultAccessMode: neo4j.session.READ });
   try {

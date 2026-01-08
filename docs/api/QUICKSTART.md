@@ -13,6 +13,7 @@ http://localhost:4000/api/docs
 ```
 
 Available documentation formats:
+
 - **Swagger UI**: [/api/docs](http://localhost:4000/api/docs) - Interactive REST API docs
 - **ReDoc**: [/api/docs/redoc](http://localhost:4000/api/docs/redoc) - Clean, searchable REST API docs
 - **GraphQL Playground**: [/api/docs/graphql-playground](http://localhost:4000/api/docs/graphql-playground) - Interactive GraphQL explorer
@@ -164,23 +165,23 @@ node scripts/generate-api-changelog.js --dry-run
 
 ### REST API (`/api/*`)
 
-| Category | Endpoints | Authentication |
-|----------|-----------|----------------|
-| **Cases** | 4 endpoints | Required |
-| **Evidence** | 3 endpoints | Required |
-| **Ingest** | 6 endpoints | Partial |
-| **Triage** | 4 endpoints | Required |
-| **Analytics** | 1 endpoint | Required |
-| **Copilot** | 3 endpoints | Required |
-| **Admin** | 8 endpoints | Required (admin) |
-| **Health** | 2 endpoints | None |
+| Category      | Endpoints   | Authentication   |
+| ------------- | ----------- | ---------------- |
+| **Cases**     | 4 endpoints | Required         |
+| **Evidence**  | 3 endpoints | Required         |
+| **Ingest**    | 6 endpoints | Partial          |
+| **Triage**    | 4 endpoints | Required         |
+| **Analytics** | 1 endpoint  | Required         |
+| **Copilot**   | 3 endpoints | Required         |
+| **Admin**     | 8 endpoints | Required (admin) |
+| **Health**    | 2 endpoints | None             |
 
 ### GraphQL API (`/graphql`)
 
-| Category | Operations |
-|----------|------------|
-| **Queries** | 15+ root queries |
-| **Mutations** | 20+ mutations |
+| Category          | Operations                |
+| ----------------- | ------------------------- |
+| **Queries**       | 15+ root queries          |
+| **Mutations**     | 20+ mutations             |
 | **Subscriptions** | 4 real-time subscriptions |
 
 ## 🔒 Security Notes
@@ -196,19 +197,23 @@ node scripts/generate-api-changelog.js --dry-run
 ### Common Issues
 
 **401 Unauthorized**
+
 - Check that your JWT token is valid and not expired
 - Verify the `Authorization: Bearer <token>` header is set correctly
 
 **403 Forbidden**
+
 - Ensure your user has the required permissions for the endpoint
 - Check your role assignments in the admin console
 
 **429 Too Many Requests**
+
 - You've hit the rate limit
 - Wait for the time specified in `X-RateLimit-Reset` header
 - Implement exponential backoff in your client
 
 **500 Internal Server Error**
+
 - Check server logs for details
 - Verify all required environment variables are set
 - Ensure database connections are working

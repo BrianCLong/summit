@@ -1,7 +1,7 @@
 meta:
   id: plan.hot-path-profiling@v1
-  owner: 'platform-engineering'
-  purpose: 'Shadow-run profiling in staging to locate hot paths and optimization targets'
+  owner: "platform-engineering"
+  purpose: "Shadow-run profiling in staging to locate hot paths and optimization targets"
   tags:
     - performance
     - profiling
@@ -9,13 +9,13 @@ meta:
     - cpu
     - memory
   guardrails:
-    - 'Profiling must not impact production traffic'
-    - 'PII and sensitive data must be redacted from profiles'
-    - 'Profiling overhead must be < 5% in staging'
-    - 'Results must map to actionable code regions'
+    - "Profiling must not impact production traffic"
+    - "PII and sensitive data must be redacted from profiles"
+    - "Profiling overhead must be < 5% in staging"
+    - "Results must map to actionable code regions"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -109,15 +109,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'api-endpoint-profiling'
+  - name: "api-endpoint-profiling"
     inputs:
-      target_services: 'GraphQL API, Entity Service, Relationship Service'
-      traffic_patterns: 'Peak: 1000 req/min, Avg: 200 req/min, Complex queries: 10%'
-      profiling_tools: 'Node.js --inspect, pprof (Go), py-spy (Python)'
-      staging_environment: 'Kubernetes staging cluster, 2 replicas per service'
-      known_bottlenecks: 'Entity resolution slow for large graphs, N+1 query issues'
+      target_services: "GraphQL API, Entity Service, Relationship Service"
+      traffic_patterns: "Peak: 1000 req/min, Avg: 200 req/min, Complex queries: 10%"
+      profiling_tools: "Node.js --inspect, pprof (Go), py-spy (Python)"
+      staging_environment: "Kubernetes staging cluster, 2 replicas per service"
+      known_bottlenecks: "Entity resolution slow for large graphs, N+1 query issues"
     expected_contains:
-      - 'Hotspot Map'
-      - 'flamegraphs'
-      - 'Recommended Refactors'
-      - 'Acceptance Criteria'
+      - "Hotspot Map"
+      - "flamegraphs"
+      - "Recommended Refactors"
+      - "Acceptance Criteria"

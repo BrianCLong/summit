@@ -2,7 +2,7 @@ name: E2E Full Suite
 
 on:
   schedule:
-    - cron: '0 2 * * *' # Nightly at 2 AM UTC
+    - cron: "0 2 * * *" # Nightly at 2 AM UTC
   workflow_dispatch:
   push:
     branches: [main]
@@ -22,8 +22,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'pnpm'
+          node-version: "18"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install

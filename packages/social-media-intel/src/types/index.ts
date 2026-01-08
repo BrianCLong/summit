@@ -47,7 +47,7 @@ export interface SocialPost {
 }
 
 export interface MediaItem {
-  type: 'image' | 'video' | 'audio';
+  type: "image" | "video" | "audio";
   url: string;
   thumbnail?: string;
   metadata?: ImageMetadata | VideoMetadata;
@@ -105,11 +105,11 @@ export interface SentimentScore {
     sadness?: number;
     surprise?: number;
   };
-  label: 'positive' | 'negative' | 'neutral';
+  label: "positive" | "negative" | "neutral";
 }
 
 export interface Entity {
-  type: 'person' | 'organization' | 'location' | 'product' | 'event';
+  type: "person" | "organization" | "location" | "product" | "event";
   text: string;
   confidence: number;
 }
@@ -125,14 +125,14 @@ export interface NetworkNode {
   id: string;
   username: string;
   platform: string;
-  type: 'user' | 'post' | 'hashtag' | 'topic';
+  type: "user" | "post" | "hashtag" | "topic";
   properties?: Record<string, any>;
 }
 
 export interface NetworkEdge {
   source: string;
   target: string;
-  type: 'follows' | 'mentions' | 'replies' | 'shares' | 'tags';
+  type: "follows" | "mentions" | "replies" | "shares" | "tags";
   weight?: number;
 }
 
@@ -170,5 +170,5 @@ export interface BotScore {
     timingPatterns?: number;
     engagement?: number;
   };
-  classification: 'human' | 'bot' | 'cyborg' | 'unknown';
+  classification: "human" | "bot" | "cyborg" | "unknown";
 }

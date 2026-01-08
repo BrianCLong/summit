@@ -11,9 +11,9 @@ import type {
   WorkcellAgentDefinition,
   WorkcellToolDefinition,
   WorkcellToolHandlerContext,
-} from 'common-types';
-import { PolicyEngine } from 'policy';
-import { ProvenanceLedger } from 'prov-ledger';
+} from "common-types";
+import { PolicyEngine } from "policy";
+import { ProvenanceLedger } from "prov-ledger";
 
 export interface WorkcellRuntimeOptions {
   policy: PolicyEngine;
@@ -22,10 +22,8 @@ export interface WorkcellRuntimeOptions {
   agents?: WorkcellAgentDefinition[];
 }
 
-function normaliseOutput(
-  output: Record<string, unknown> | undefined,
-): Record<string, unknown> {
-  if (output && typeof output === 'object') {
+function normaliseOutput(output: Record<string, unknown> | undefined): Record<string, unknown> {
+  if (output && typeof output === "object") {
     return output;
   }
   return {};
@@ -33,17 +31,17 @@ function normaliseOutput(
 
 function deriveOrderStatus(results: WorkTaskResult[]): WorkOrderStatus {
   if (results.length === 0) {
-    return 'completed';
+    return "completed";
   }
 
   const statuses = results.map((result) => result.status);
-  if (statuses.every((status) => status === 'success')) {
-    return 'completed';
+  if (statuses.every((status) => status === "success")) {
+    return "completed";
   }
-  if (statuses.every((status) => status === 'rejected')) {
-    return 'rejected';
+  if (statuses.every((status) => status === "rejected")) {
+    return "rejected";
   }
-  return 'partial';
+  return "partial";
 }
 
 export class WorkcellRuntime {
@@ -135,7 +133,7 @@ export class WorkcellRuntime {
 
     this.appendLedger({
       id: `${order.orderId}:summary:${finishedAt.getTime()}`,
-      category: 'workcell-order',
+      category: "workcell-order",
       actor: order.submittedBy,
       action: `order.${status}`,
       resource: order.agentName,
@@ -160,39 +158,36 @@ export class WorkcellRuntime {
     order: WorkOrderSubmission,
     agent: WorkcellAgentDefinition,
     task: WorkTaskInput,
-    evaluation: PolicyEvaluationResult,
+    evaluation: PolicyEvaluationResult
   ): Promise<WorkTaskResult> {
     const logs: string[] = [];
-    let status: WorkTaskStatus = 'rejected';
+    let status: WorkTaskStatus = "rejected";
     let output: Record<string, unknown> = {};
 
     if (!evaluation.allowed) {
-      logs.push(
-        `policy denied task ${task.taskId}: ${evaluation.reasons.join('; ')}`,
-      );
-      this.appendTaskLedger(order, task, 'rejected', logs, evaluation, output);
-      return { taskId: task.taskId, status: 'rejected', logs, output };
+      logs.push(`policy denied task ${task.taskId}: ${evaluation.reasons.join("; ")}`);
+      this.appendTaskLedger(order, task, "rejected", logs, evaluation, output);
+      return { taskId: task.taskId, status: "rejected", logs, output };
     }
 
     const tool = this.tools.get(task.tool);
     if (!tool) {
       logs.push(`tool ${task.tool} is not registered`);
-      this.appendTaskLedger(order, task, 'rejected', logs, evaluation, output);
-      return { taskId: task.taskId, status: 'rejected', logs, output };
+      this.appendTaskLedger(order, task, "rejected", logs, evaluation, output);
+      return { taskId: task.taskId, status: "rejected", logs, output };
     }
 
     if (!agent.allowedTools.includes(task.tool)) {
       logs.push(`agent ${agent.name} is not permitted to use ${task.tool}`);
-      this.appendTaskLedger(order, task, 'rejected', logs, evaluation, output);
-      return { taskId: task.taskId, status: 'rejected', logs, output };
+      this.appendTaskLedger(order, task, "rejected", logs, evaluation, output);
+      return { taskId: task.taskId, status: "rejected", logs, output };
     }
 
-    const requiredAuthority =
-      task.requiredAuthority ?? tool.minimumAuthority ?? 0;
+    const requiredAuthority = task.requiredAuthority ?? tool.minimumAuthority ?? 0;
     if (agent.authority < requiredAuthority) {
       logs.push(`agent ${agent.name} lacks authority for ${task.tool}`);
-      this.appendTaskLedger(order, task, 'rejected', logs, evaluation, output);
-      return { taskId: task.taskId, status: 'rejected', logs, output };
+      this.appendTaskLedger(order, task, "rejected", logs, evaluation, output);
+      return { taskId: task.taskId, status: "rejected", logs, output };
     }
 
     try {
@@ -205,14 +200,12 @@ export class WorkcellRuntime {
         metadata: order.metadata,
       };
       const handlerOutput = await Promise.resolve(tool.handler(task, context));
-      output = normaliseOutput(
-        handlerOutput as Record<string, unknown> | undefined,
-      );
-      status = 'success';
+      output = normaliseOutput(handlerOutput as Record<string, unknown> | undefined);
+      status = "success";
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       logs.push(`execution failure: ${message}`);
-      status = 'failed';
+      status = "failed";
       output = {};
     }
 
@@ -226,11 +219,11 @@ export class WorkcellRuntime {
     status: WorkTaskStatus,
     logs: string[],
     evaluation: PolicyEvaluationResult,
-    output: Record<string, unknown>,
+    output: Record<string, unknown>
   ) {
     const entry: LedgerFactInput = {
       id: `${order.orderId}:${task.taskId}:${Date.now()}`,
-      category: 'workcell-task',
+      category: "workcell-task",
       actor: order.submittedBy,
       action: `task.${status}`,
       resource: task.tool,
@@ -262,4 +255,4 @@ export type {
   WorkTaskResult,
   WorkcellAgentDefinition,
   WorkcellToolDefinition,
-} from 'common-types';
+} from "common-types";

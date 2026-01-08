@@ -4,8 +4,8 @@
  * UI for classifying text into predefined categories.
  */
 
-import { useState } from 'react';
-import type { Sample, LabelingJob, Label } from '../../types';
+import { useState } from "react";
+import type { Sample, LabelingJob, Label } from "../../types";
 
 interface TextClassificationTaskProps {
   sample: Sample;
@@ -14,27 +14,21 @@ interface TextClassificationTaskProps {
   instructions: string;
 }
 
-const CLASSIFICATION_CATEGORIES = [
-  'News',
-  'Opinion',
-  'Analysis',
-  'Report',
-  'Other',
-];
+const CLASSIFICATION_CATEGORIES = ["News", "Opinion", "Analysis", "Report", "Other"];
 
 export function TextClassificationTask({
   sample,
   instructions,
   onSubmit,
 }: TextClassificationTaskProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
 
   const handleSubmit = () => {
     if (!selectedCategory) return;
 
     onSubmit([
       {
-        fieldName: 'category',
+        fieldName: "category",
         value: selectedCategory,
       },
     ]);
@@ -50,7 +44,7 @@ export function TextClassificationTask({
       <div className="rounded-lg border bg-card p-6 mb-6">
         <h3 className="font-medium mb-4">Text Content</h3>
         <div className="text-sm bg-muted p-4 rounded">
-          {sample.content.text || 'No text content available'}
+          {sample.content.text || "No text content available"}
         </div>
       </div>
 

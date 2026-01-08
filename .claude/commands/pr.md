@@ -7,16 +7,19 @@ Create a well-formatted pull request for the current changes following Summit co
 Before creating the PR, verify:
 
 1. **Run all quality checks:**
+
    ```bash
    pnpm lint && pnpm typecheck && pnpm test:jest
    ```
 
 2. **Run smoke tests:**
+
    ```bash
    pnpm smoke
    ```
 
 3. **Check for uncommitted changes:**
+
    ```bash
    git status
    ```
@@ -29,6 +32,7 @@ Before creating the PR, verify:
 ## Creating the PR
 
 1. **Push the branch:**
+
    ```bash
    git push -u origin $(git branch --show-current)
    ```
@@ -39,24 +43,30 @@ Use this PR template:
 
 ```markdown
 ## Summary
+
 [1-3 bullet points describing what this PR does]
 
 ## Changes
+
 - [List of specific changes made]
 
 ## Testing
+
 - [ ] Unit tests added/updated
 - [ ] Integration tests pass
 - [ ] Smoke tests pass
 - [ ] Manual testing completed
 
 ## Screenshots (if applicable)
+
 [Add any relevant screenshots]
 
 ## Related Issues
+
 Closes #[issue number]
 
 ## Checklist
+
 - [ ] Code follows project conventions
 - [ ] Self-review completed
 - [ ] Documentation updated (if needed)
@@ -67,6 +77,7 @@ Closes #[issue number]
 ## Commit Message Format
 
 Follow Conventional Commits:
+
 ```
 <type>(<scope>): <description>
 

@@ -5,4 +5,4 @@
  * double agent management, deception operations, and insider threat hunting.
  */
 
-export * from './ci-manager.js';
+export * from "./ci-manager.js";

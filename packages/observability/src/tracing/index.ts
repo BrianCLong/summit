@@ -16,18 +16,18 @@ import {
   Context,
   TextMapGetter,
   TextMapSetter,
-} from '@opentelemetry/api';
-import { NodeSDK } from '@opentelemetry/sdk-node';
-import { Resource } from '@opentelemetry/resources';
+} from "@opentelemetry/api";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { Resource } from "@opentelemetry/resources";
 import {
   ATTR_SERVICE_NAME,
   ATTR_SERVICE_VERSION,
   SEMRESATTRS_DEPLOYMENT_ENVIRONMENT,
-} from '@opentelemetry/semantic-conventions';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { BatchSpanProcessor, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import type { ServiceConfig, TracingConfig, SpanAttributes, SpanKind } from '../types/index.js';
+} from "@opentelemetry/semantic-conventions";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
+import { BatchSpanProcessor, SimpleSpanProcessor } from "@opentelemetry/sdk-trace-base";
+import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
+import type { ServiceConfig, TracingConfig, SpanAttributes, SpanKind } from "../types/index.js";
 
 // =============================================================================
 // CONFIGURATION
@@ -59,16 +59,16 @@ let isInitialized = false;
  */
 export async function initializeTracing(config: TracingInitConfig): Promise<void> {
   if (isInitialized) {
-    console.warn('Tracing already initialized, skipping re-initialization');
+    console.warn("Tracing already initialized, skipping re-initialization");
     return;
   }
 
   const {
     service,
-    otlpEndpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318',
-    sampleRate = parseFloat(process.env.OTEL_SAMPLE_RATE || '1.0'),
+    otlpEndpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT || "http://localhost:4318",
+    sampleRate = parseFloat(process.env.OTEL_SAMPLE_RATE || "1.0"),
     autoInstrumentation = true,
-    batchProcessing = process.env.NODE_ENV === 'production',
+    batchProcessing = process.env.NODE_ENV === "production",
     resourceAttributes = {},
   } = config;
 
@@ -77,9 +77,9 @@ export async function initializeTracing(config: TracingInitConfig): Promise<void
     [ATTR_SERVICE_NAME]: service.name,
     [ATTR_SERVICE_VERSION]: service.version,
     [SEMRESATTRS_DEPLOYMENT_ENVIRONMENT]: service.environment,
-    'service.team': service.team,
-    'service.tier': service.tier,
-    'service.namespace': service.namespace,
+    "service.team": service.team,
+    "service.tier": service.tier,
+    "service.namespace": service.namespace,
     ...resourceAttributes,
   });
 
@@ -103,17 +103,21 @@ export async function initializeTracing(config: TracingInitConfig): Promise<void
   sdk = new NodeSDK({
     resource,
     spanProcessors: [spanProcessor as any],
-    instrumentations: autoInstrumentation ? [getNodeAutoInstrumentations({
-      '@opentelemetry/instrumentation-fs': { enabled: false },
-      '@opentelemetry/instrumentation-dns': { enabled: false },
-    })] : [],
+    instrumentations: autoInstrumentation
+      ? [
+          getNodeAutoInstrumentations({
+            "@opentelemetry/instrumentation-fs": { enabled: false },
+            "@opentelemetry/instrumentation-dns": { enabled: false },
+          }),
+        ]
+      : [],
   });
 
   await sdk.start();
   isInitialized = true;
 
   // Graceful shutdown
-  process.on('SIGTERM', async () => {
+  process.on("SIGTERM", async () => {
     await shutdownTracing();
   });
 }
@@ -136,7 +140,7 @@ export async function shutdownTracing(): Promise<void> {
  * Get a tracer for manual span creation
  */
 export function getTracer(name?: string, version?: string): Tracer {
-  return trace.getTracer(name || 'companyos-observability', version || '1.0.0');
+  return trace.getTracer(name || "companyos-observability", version || "1.0.0");
 }
 
 /**
@@ -181,12 +185,9 @@ export interface SpanOptions {
 /**
  * Create and start a new span
  */
-export function startSpan(
-  name: string,
-  options: SpanOptions = {}
-): Span {
+export function startSpan(name: string, options: SpanOptions = {}): Span {
   const tracer = getTracer();
-  const { kind = 'internal', attributes = {}, parent } = options;
+  const { kind = "internal", attributes = {}, parent } = options;
 
   const ctx = parent || context.active();
 
@@ -231,11 +232,7 @@ export async function withSpan<T>(
 /**
  * Execute a synchronous function within a span context
  */
-export function withSpanSync<T>(
-  name: string,
-  fn: (span: Span) => T,
-  options: SpanOptions = {}
-): T {
+export function withSpanSync<T>(name: string, fn: (span: Span) => T, options: SpanOptions = {}): T {
   const span = startSpan(name, options);
 
   try {
@@ -269,10 +266,10 @@ export function createHttpClientSpan(
   attributes?: SpanAttributes
 ): Span {
   return startSpan(`HTTP ${method}`, {
-    kind: 'client',
+    kind: "client",
     attributes: {
-      'http.method': method,
-      'http.url': url,
+      "http.method": method,
+      "http.url": url,
       ...attributes,
     },
   });
@@ -288,11 +285,11 @@ export function createDbSpan(
   attributes?: SpanAttributes
 ): Span {
   return startSpan(`${dbSystem} ${operation}`, {
-    kind: 'client',
+    kind: "client",
     attributes: {
-      'db.system': dbSystem,
-      'db.operation': operation,
-      ...(statement && { 'db.statement': statement }),
+      "db.system": dbSystem,
+      "db.operation": operation,
+      ...(statement && { "db.statement": statement }),
       ...attributes,
     },
   });
@@ -308,11 +305,11 @@ export function createCacheSpan(
   attributes?: SpanAttributes
 ): Span {
   return startSpan(`cache.${operation}`, {
-    kind: 'client',
+    kind: "client",
     attributes: {
-      'cache.name': cacheName,
-      'cache.operation': operation,
-      ...(key && { 'cache.key': key }),
+      "cache.name": cacheName,
+      "cache.operation": operation,
+      ...(key && { "cache.key": key }),
       ...attributes,
     },
   });
@@ -327,10 +324,10 @@ export function createExternalCallSpan(
   attributes?: SpanAttributes
 ): Span {
   return startSpan(`${serviceName}.${operation}`, {
-    kind: 'client',
+    kind: "client",
     attributes: {
-      'peer.service': serviceName,
-      'rpc.method': operation,
+      "peer.service": serviceName,
+      "rpc.method": operation,
       ...attributes,
     },
   });
@@ -341,15 +338,15 @@ export function createExternalCallSpan(
  */
 export function createQueueSpan(
   queueName: string,
-  operation: 'publish' | 'consume',
+  operation: "publish" | "consume",
   attributes?: SpanAttributes
 ): Span {
   return startSpan(`${queueName} ${operation}`, {
-    kind: operation === 'publish' ? 'producer' : 'consumer',
+    kind: operation === "publish" ? "producer" : "consumer",
     attributes: {
-      'messaging.system': 'queue',
-      'messaging.destination': queueName,
-      'messaging.operation': operation,
+      "messaging.system": "queue",
+      "messaging.destination": queueName,
+      "messaging.operation": operation,
       ...attributes,
     },
   });
@@ -359,15 +356,15 @@ export function createQueueSpan(
  * Create a span for GraphQL operations
  */
 export function createGraphQLSpan(
-  operationType: 'query' | 'mutation' | 'subscription',
+  operationType: "query" | "mutation" | "subscription",
   operationName: string,
   attributes?: SpanAttributes
 ): Span {
   return startSpan(`graphql.${operationType}`, {
-    kind: 'server',
+    kind: "server",
     attributes: {
-      'graphql.operation.type': operationType,
-      'graphql.operation.name': operationName,
+      "graphql.operation.type": operationType,
+      "graphql.operation.name": operationName,
       ...attributes,
     },
   });
@@ -441,11 +438,7 @@ export function recordException(error: Error, attributes?: SpanAttributes): void
 /**
  * Add an event to the active span
  */
-export function addSpanEvent(
-  name: string,
-  attributes?: SpanAttributes,
-  timestamp?: number
-): void {
+export function addSpanEvent(name: string, attributes?: SpanAttributes, timestamp?: number): void {
   const span = getActiveSpan();
   if (span) {
     span.addEvent(name, attributes, timestamp);

@@ -3,12 +3,12 @@
  * @module @intelgraph/strands-agents/agents/investigation-agent
  */
 
-import type { Driver } from 'neo4j-driver';
-import { createGraphTools } from '../tools/graph-tools.js';
-import { createEntityTools } from '../tools/entity-tools.js';
-import { createInvestigationTools } from '../tools/investigation-tools.js';
-import { createAnalysisTools } from '../tools/analysis-tools.js';
-import { INVESTIGATION_AGENT_PROMPT } from './prompts.js';
+import type { Driver } from "neo4j-driver";
+import { createGraphTools } from "../tools/graph-tools.js";
+import { createEntityTools } from "../tools/entity-tools.js";
+import { createInvestigationTools } from "../tools/investigation-tools.js";
+import { createAnalysisTools } from "../tools/analysis-tools.js";
+import { INVESTIGATION_AGENT_PROMPT } from "./prompts.js";
 
 // ============================================================================
 // Types
@@ -20,7 +20,7 @@ export interface InvestigationAgentConfig {
   /** Database name */
   database?: string;
   /** Model provider to use */
-  modelProvider?: 'bedrock' | 'anthropic' | 'openai';
+  modelProvider?: "bedrock" | "anthropic" | "openai";
   /** Model ID override */
   modelId?: string;
   /** Maximum iterations for agent loop */
@@ -113,13 +113,13 @@ export interface InvestigationResult {
 export function createInvestigationAgent(config: InvestigationAgentConfig) {
   const {
     driver,
-    database = 'neo4j',
-    modelProvider = 'bedrock',
+    database = "neo4j",
+    modelProvider = "bedrock",
     modelId,
     maxIterations = 15,
     temperature = 0.7,
     auditLog,
-    userId = 'investigation-agent',
+    userId = "investigation-agent",
     additionalInstructions,
   } = config;
 
@@ -165,9 +165,9 @@ export function createInvestigationAgent(config: InvestigationAgentConfig) {
     let iterations = 0;
     let toolCalls = 0;
 
-    const findings: InvestigationResult['findings'] = [];
-    const hypotheses: InvestigationResult['hypotheses'] = [];
-    const entities: InvestigationResult['entities'] = [];
+    const findings: InvestigationResult["findings"] = [];
+    const hypotheses: InvestigationResult["hypotheses"] = [];
+    const entities: InvestigationResult["entities"] = [];
 
     try {
       // Build the task prompt
@@ -175,7 +175,7 @@ export function createInvestigationAgent(config: InvestigationAgentConfig) {
 
       // Log task start
       if (auditLog) {
-        auditLog('investigation_started', {
+        auditLog("investigation_started", {
           investigationId: task.investigationId,
           task: task.task,
         });
@@ -205,10 +205,10 @@ export function createInvestigationAgent(config: InvestigationAgentConfig) {
         },
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
 
       if (auditLog) {
-        auditLog('investigation_error', {
+        auditLog("investigation_error", {
           investigationId: task.investigationId,
           error: errorMessage,
         });
@@ -244,8 +244,8 @@ export function createInvestigationAgent(config: InvestigationAgentConfig) {
     // }
 
     yield {
-      type: 'status',
-      data: 'Investigation agent ready for Strands SDK streaming integration',
+      type: "status",
+      data: "Investigation agent ready for Strands SDK streaming integration",
     };
   }
 
@@ -274,7 +274,7 @@ function buildTaskPrompt(task: InvestigationTask): string {
   }
 
   if (task.focusEntityIds?.length) {
-    prompt += `\n\n**Focus Entities**: ${task.focusEntityIds.join(', ')}`;
+    prompt += `\n\n**Focus Entities**: ${task.focusEntityIds.join(", ")}`;
   }
 
   prompt += `
@@ -291,14 +291,14 @@ function buildTaskPrompt(task: InvestigationTask): string {
 
 function getDefaultModelId(provider: string): string {
   switch (provider) {
-    case 'bedrock':
-      return 'anthropic.claude-3-5-sonnet-20241022-v2:0';
-    case 'anthropic':
-      return 'claude-sonnet-4-5-20250929';
-    case 'openai':
-      return 'gpt-4o';
+    case "bedrock":
+      return "anthropic.claude-3-5-sonnet-20241022-v2:0";
+    case "anthropic":
+      return "claude-sonnet-4-5-20250929";
+    case "openai":
+      return "gpt-4o";
     default:
-      return 'anthropic.claude-3-5-sonnet-20241022-v2:0';
+      return "anthropic.claude-3-5-sonnet-20241022-v2:0";
   }
 }
 

@@ -2,12 +2,8 @@
  * Reward Distribution Contract - Manages contributor rewards
  */
 
-import type {
-  ContractConfig,
-  TransactionReceipt,
-  ContributorReward,
-} from '../types.js';
-import { BaseContract } from './base-contract.js';
+import type { ContractConfig, TransactionReceipt, ContributorReward } from "../types.js";
+import { BaseContract } from "./base-contract.js";
 
 export class RewardDistributionContract extends BaseContract {
   constructor(config: ContractConfig) {
@@ -17,24 +13,21 @@ export class RewardDistributionContract extends BaseContract {
   async distributeRewards(
     poolId: string,
     epoch: number,
-    rewards: Array<{ contributor: string; amount: bigint }>,
+    rewards: Array<{ contributor: string; amount: bigint }>
   ): Promise<TransactionReceipt> {
-    return this.sendTransaction('distributeRewards', [poolId, epoch, rewards]);
+    return this.sendTransaction("distributeRewards", [poolId, epoch, rewards]);
   }
 
   async claimReward(poolId: string, epoch: number): Promise<TransactionReceipt> {
-    return this.sendTransaction('claimReward', [poolId, epoch]);
+    return this.sendTransaction("claimReward", [poolId, epoch]);
   }
 
   async getPendingRewards(contributor: string, poolId: string): Promise<bigint> {
-    return this.call('getPendingRewards', [contributor, poolId]);
+    return this.call("getPendingRewards", [contributor, poolId]);
   }
 
-  async getRewardHistory(
-    contributor: string,
-    poolId: string,
-  ): Promise<ContributorReward[]> {
-    const rewards = await this.call('getRewardHistory', [contributor, poolId]);
+  async getRewardHistory(contributor: string, poolId: string): Promise<ContributorReward[]> {
+    const rewards = await this.call("getRewardHistory", [contributor, poolId]);
     return rewards.map((r: any) => ({
       contributorId: r.contributorId,
       poolId: r.poolId,
@@ -45,7 +38,7 @@ export class RewardDistributionContract extends BaseContract {
   }
 
   async setRewardRate(poolId: string, ratePerContribution: bigint): Promise<TransactionReceipt> {
-    return this.sendTransaction('setRewardRate', [poolId, ratePerContribution]);
+    return this.sendTransaction("setRewardRate", [poolId, ratePerContribution]);
   }
 
   async getPoolRewardStats(poolId: string): Promise<{
@@ -53,7 +46,7 @@ export class RewardDistributionContract extends BaseContract {
     totalClaimed: bigint;
     currentEpoch: number;
   }> {
-    const stats = await this.call('getPoolRewardStats', [poolId]);
+    const stats = await this.call("getPoolRewardStats", [poolId]);
     return {
       totalDistributed: BigInt(stats.totalDistributed),
       totalClaimed: BigInt(stats.totalClaimed),
@@ -61,7 +54,9 @@ export class RewardDistributionContract extends BaseContract {
     };
   }
 
-  async batchClaimRewards(claims: Array<{ poolId: string; epoch: number }>): Promise<TransactionReceipt> {
-    return this.sendTransaction('batchClaimRewards', [claims]);
+  async batchClaimRewards(
+    claims: Array<{ poolId: string; epoch: number }>
+  ): Promise<TransactionReceipt> {
+    return this.sendTransaction("batchClaimRewards", [claims]);
   }
 }

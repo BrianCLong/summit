@@ -53,23 +53,20 @@ when:
   - event: model_call
 assert:
   - expr: total_spend_usd <= budget_usd
-    message: 'Budget exceeded: spent {{total_spend_usd}} > {{budget_usd}}'
+    message: "Budget exceeded: spent {{total_spend_usd}} > {{budget_usd}}"
 ```
 
 **Runtime guard (TypeScript decorator)**
 
 ```ts
 // server/safety/guard.ts
-export function requireInvariant(
-  check: (ctx: any) => { ok: boolean; msg?: string },
-) {
+export function requireInvariant(check: (ctx: any) => { ok: boolean; msg?: string }) {
   return (_: any, __: string, desc: PropertyDescriptor) => {
     const f = desc.value;
     desc.value = async function (...args: any[]) {
       const ctx = args[0] || {};
       const r = check(ctx);
-      if (!r.ok)
-        throw new Error(`InvariantViolation: ${r.msg || 'unspecified'}`);
+      if (!r.ok) throw new Error(`InvariantViolation: ${r.msg || "unspecified"}`);
       return f.apply(this, args);
     };
     return desc;
@@ -107,9 +104,7 @@ java -jar tools/tla2tools.jar -tool -deadlock -config specs/queue.cfg specs/queu
 
 ```ts
 // services/policy/ope.ts
-export function ips(
-  samples: { p_beh: number; p_new: number; reward: number }[],
-) {
+export function ips(samples: { p_beh: number; p_new: number; reward: number }[]) {
   const w = samples.map((s) => (s.p_new / (s.p_beh + 1e-9)) * s.reward);
   return w.reduce((a, b) => a + b, 0) / samples.length;
 }
@@ -176,13 +171,13 @@ model.wv.save_word2vec_format('artifacts/embeddings/code.vec')
 
 ```ts
 // server/ai/localModel.ts
-import { spawn } from 'child_process';
+import { spawn } from "child_process";
 export async function runLocal(prompt: string) {
   return new Promise<string>((res, rej) => {
-    const p = spawn('./llama', ['-p', prompt, '-n', '512']);
-    let out = '';
-    p.stdout.on('data', (d) => (out += d));
-    p.on('close', (c) => (c ? rej(new Error('local model failed')) : res(out)));
+    const p = spawn("./llama", ["-p", prompt, "-n", "512"]);
+    let out = "";
+    p.stdout.on("data", (d) => (out += d));
+    p.on("close", (c) => (c ? rej(new Error("local model failed")) : res(out)));
   });
 }
 ```
@@ -259,43 +254,43 @@ export function shouldRun(paths: string[], bloom: Uint8Array) {
       $(function () {
         var cards = []; // fetch or inject
         function render() {
-          $('#list').empty();
-          var q = $('#q').val().toLowerCase();
+          $("#list").empty();
+          var q = $("#q").val().toLowerCase();
           $.each(cards, function (_, c) {
             if (q && !JSON.stringify(c).toLowerCase().includes(q)) return;
-            $('#list').append(
+            $("#list").append(
               '<div class="card"><div><b>' +
                 c.taskId +
-                '</b> → ' +
+                "</b> → " +
                 c.chosenArm +
-                '</div><div class=meta>eval ' +
+                "</div><div class=meta>eval " +
                 c.predictedEval.toFixed(2) +
-                ' · $' +
+                " · $" +
                 c.predictedCostUSD.toFixed(2) +
-                ' · ±' +
+                " · ±" +
                 c.uncertainty.toFixed(2) +
-                '</div><pre>' +
+                "</div><pre>" +
                 c.rationale +
-                '</pre></div>',
+                "</pre></div>"
             );
           });
         }
-        $('#sortCost').on('click', function () {
+        $("#sortCost").on("click", function () {
           cards.sort(function (a, b) {
             return a.predictedCostUSD - b.predictedCostUSD;
           });
           render();
         });
-        $('#q').on('input', render);
+        $("#q").on("input", render);
         // demo
         cards = [
           {
-            taskId: 't1',
-            chosenArm: 'impl@small',
+            taskId: "t1",
+            chosenArm: "impl@small",
             predictedEval: 0.93,
             predictedCostUSD: 0.21,
             uncertainty: 0.04,
-            rationale: 'Cheapest capable based on low risk & small diff.',
+            rationale: "Cheapest capable based on low risk & small diff.",
           },
         ];
         render();

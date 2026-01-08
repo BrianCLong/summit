@@ -3,15 +3,15 @@
  * Multi-source data synchronization with conflict detection and resolution
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 import type {
   SyncConfiguration,
   SyncJob,
   SyncJobStatus,
   SyncConflict,
   SyncError,
-  DeltaChange
-} from '@intelgraph/mdm-core';
+  DeltaChange,
+} from "@intelgraph/mdm-core";
 
 export class SyncEngine {
   private configurations: Map<string, SyncConfiguration>;
@@ -47,7 +47,7 @@ export class SyncEngine {
     const job: SyncJob = {
       id: uuidv4(),
       syncConfigId: configId,
-      status: 'running',
+      status: "running",
       startTime: new Date(),
       recordsProcessed: 0,
       recordsSuccessful: 0,
@@ -61,29 +61,31 @@ export class SyncEngine {
         conflictRate: 0,
         averageLatency: 0,
         peakThroughput: 0,
-        dataVolumeBytes: 0
-      }
+        dataVolumeBytes: 0,
+      },
     };
 
     this.jobs.set(job.id, job);
     this.runningJobs.add(configId);
 
     // Execute sync asynchronously
-    this.executeSync(job, config).catch(err => {
-      job.status = 'failed';
-      job.errors.push({
-        errorType: 'sync_error',
-        errorMessage: err.message,
-        timestamp: new Date(),
-        sourceSystem: '',
-        retryCount: 0,
-        maxRetries: 0
+    this.executeSync(job, config)
+      .catch((err) => {
+        job.status = "failed";
+        job.errors.push({
+          errorType: "sync_error",
+          errorMessage: err.message,
+          timestamp: new Date(),
+          sourceSystem: "",
+          retryCount: 0,
+          maxRetries: 0,
+        });
+      })
+      .finally(() => {
+        this.runningJobs.delete(configId);
+        job.endTime = new Date();
+        job.statistics.duration = job.endTime.getTime() - job.startTime.getTime();
       });
-    }).finally(() => {
-      this.runningJobs.delete(configId);
-      job.endTime = new Date();
-      job.statistics.duration = job.endTime.getTime() - job.startTime.getTime();
-    });
 
     return job;
   }
@@ -91,10 +93,7 @@ export class SyncEngine {
   /**
    * Execute synchronization
    */
-  private async executeSync(
-    job: SyncJob,
-    config: SyncConfiguration
-  ): Promise<void> {
+  private async executeSync(job: SyncJob, config: SyncConfiguration): Promise<void> {
     try {
       // Read from sources
       for (const source of config.sources) {
@@ -104,23 +103,14 @@ export class SyncEngine {
           job.recordsProcessed++;
 
           // Apply transformations
-          const transformed = await this.applyTransformations(
-            record,
-            config.transformations
-          );
+          const transformed = await this.applyTransformations(record, config.transformations);
 
           // Detect conflicts
-          const conflicts = await this.detectConflicts(
-            transformed,
-            config.targets
-          );
+          const conflicts = await this.detectConflicts(transformed, config.targets);
 
           if (conflicts.length > 0) {
             // Resolve conflicts
-            const resolved = await this.resolveConflicts(
-              conflicts,
-              config.conflictResolution
-            );
+            const resolved = await this.resolveConflicts(conflicts, config.conflictResolution);
 
             job.conflicts.push(...conflicts);
 
@@ -135,9 +125,9 @@ export class SyncEngine {
         }
       }
 
-      job.status = 'completed';
+      job.status = "completed";
     } catch (error) {
-      job.status = 'failed';
+      job.status = "failed";
       throw error;
     }
   }
@@ -153,10 +143,7 @@ export class SyncEngine {
   /**
    * Apply transformations
    */
-  private async applyTransformations(
-    data: any,
-    transformations: any[]
-  ): Promise<any> {
+  private async applyTransformations(data: any, transformations: any[]): Promise<any> {
     let result = data;
 
     for (const transform of transformations) {
@@ -186,10 +173,7 @@ export class SyncEngine {
   /**
    * Resolve conflicts
    */
-  private async resolveConflicts(
-    conflicts: SyncConflict[],
-    strategy: any
-  ): Promise<any> {
+  private async resolveConflicts(conflicts: SyncConflict[], strategy: any): Promise<any> {
     // Placeholder for conflict resolution
     return {};
   }
@@ -213,7 +197,7 @@ export class SyncEngine {
    */
   async getJobsForConfiguration(configId: string): Promise<SyncJob[]> {
     return Array.from(this.jobs.values())
-      .filter(job => job.syncConfigId === configId)
+      .filter((job) => job.syncConfigId === configId)
       .sort((a, b) => b.startTime.getTime() - a.startTime.getTime());
   }
 
@@ -222,8 +206,8 @@ export class SyncEngine {
    */
   async cancelJob(jobId: string): Promise<void> {
     const job = this.jobs.get(jobId);
-    if (job && job.status === 'running') {
-      job.status = 'cancelled';
+    if (job && job.status === "running") {
+      job.status = "cancelled";
       job.endTime = new Date();
       this.runningJobs.delete(job.syncConfigId);
     }

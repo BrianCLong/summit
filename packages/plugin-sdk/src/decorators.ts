@@ -1,4 +1,4 @@
-import { PluginPermission } from '@intelgraph/plugin-system';
+import { PluginPermission } from "@intelgraph/plugin-system";
 
 /**
  * Decorator to mark a class as a plugin
@@ -37,7 +37,7 @@ export function RequiresPermission(...permissions: PluginPermission[]): MethodDe
  * Decorator to mark a method as an API endpoint
  */
 export function Endpoint(config: {
-  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   path: string;
 }): MethodDecorator {
   return function (target: any, propertyKey: string | symbol) {

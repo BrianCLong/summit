@@ -3,4 +3,4 @@
  * Relationship inference and prediction algorithms
  */
 
-export * from './LinkPredictor.js';
+export * from "./LinkPredictor.js";

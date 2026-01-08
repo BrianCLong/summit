@@ -1,13 +1,13 @@
-import { promises as fs } from 'fs';
-import path from 'path';
+import { promises as fs } from "fs";
+import path from "path";
 import {
   ClaimMetadata,
   DerivativeStampOptions,
   ProvenanceManifest,
   StampAssetOptions,
   ToolChainEntry,
-} from '../types';
-import { manifestCanonicalString } from '../common/manifest';
+} from "../types";
+import { manifestCanonicalString } from "../common/manifest";
 import {
   computeManifestHash,
   defaultManifestPath,
@@ -15,9 +15,9 @@ import {
   ensureDirectory,
   fingerprintPublicKey,
   hashFile,
-} from './utils';
-import { signPayload } from './signature';
-import { verifyProvenance } from './verify';
+} from "./utils";
+import { signPayload } from "./signature";
+import { verifyProvenance } from "./verify";
 
 function sanitizeToolChain(toolChain: ToolChainEntry[]): ToolChainEntry[] {
   return toolChain.map((entry) => ({
@@ -36,8 +36,9 @@ function buildClaimMetadata(metadata: ClaimMetadata): ClaimMetadata {
   };
 }
 
-export async function stampAsset(options: StampAssetOptions): Promise<{ manifestPath: string; manifest: ProvenanceManifest }>
-{
+export async function stampAsset(
+  options: StampAssetOptions
+): Promise<{ manifestPath: string; manifest: ProvenanceManifest }> {
   const assetHash = await hashFile(options.assetPath);
   const mimeType = determineMime(options.assetPath, options.signer.mimeType);
   const fingerprint = fingerprintPublicKey(options.signer.publicKey);
@@ -45,7 +46,7 @@ export async function stampAsset(options: StampAssetOptions): Promise<{ manifest
   const timestamp = new Date().toISOString();
 
   const manifest: ProvenanceManifest = {
-    version: '1.0',
+    version: "1.0",
     asset: {
       name: path.basename(options.assetPath),
       hash: assetHash,
@@ -63,7 +64,7 @@ export async function stampAsset(options: StampAssetOptions): Promise<{ manifest
       },
       notes: claimMetadata.notes,
     },
-    signature: '',
+    signature: "",
   };
 
   const payload = manifestCanonicalString(manifest);
@@ -77,10 +78,9 @@ export async function stampAsset(options: StampAssetOptions): Promise<{ manifest
 }
 
 export async function createDerivativeStamp(
-  options: DerivativeStampOptions,
-): Promise<{ manifestPath: string; manifest: ProvenanceManifest }>
-{
-  const parentRaw = await fs.readFile(options.parentManifestPath, 'utf8');
+  options: DerivativeStampOptions
+): Promise<{ manifestPath: string; manifest: ProvenanceManifest }> {
+  const parentRaw = await fs.readFile(options.parentManifestPath, "utf8");
   const parentManifest: ProvenanceManifest = JSON.parse(parentRaw);
 
   const parentVerification = await verifyProvenance({
@@ -90,15 +90,15 @@ export async function createDerivativeStamp(
   });
 
   if (!parentVerification.validSignature) {
-    throw new Error('Parent manifest signature verification failed.');
+    throw new Error("Parent manifest signature verification failed.");
   }
 
   if (options.parentAssetPath && !parentVerification.validAssetHash) {
-    throw new Error('Parent asset hash verification failed.');
+    throw new Error("Parent asset hash verification failed.");
   }
 
-  if (parentVerification.issues.some((issue) => issue.level === 'error')) {
-    throw new Error('Parent manifest contains blocking verification issues.');
+  if (parentVerification.issues.some((issue) => issue.level === "error")) {
+    throw new Error("Parent manifest contains blocking verification issues.");
   }
 
   const parentManifestHash = computeManifestHash(parentManifest);
@@ -113,7 +113,7 @@ export async function createDerivativeStamp(
   ];
 
   const manifest: ProvenanceManifest = {
-    version: '1.0',
+    version: "1.0",
     asset: {
       name: path.basename(options.assetPath),
       hash: assetHash,
@@ -129,7 +129,8 @@ export async function createDerivativeStamp(
         algorithm: options.signer.algorithm,
         publicKeyFingerprint: fingerprint,
       },
-      redactions: options.redactions && options.redactions.length > 0 ? [...options.redactions] : undefined,
+      redactions:
+        options.redactions && options.redactions.length > 0 ? [...options.redactions] : undefined,
       notes: options.metadata?.notes ?? parentManifest.claim.notes,
     },
     parent: {
@@ -138,7 +139,7 @@ export async function createDerivativeStamp(
       signerId: parentManifest.claim.signer.id,
       timestamp: parentManifest.claim.timestamp,
     },
-    signature: '',
+    signature: "",
   };
 
   const payload = manifestCanonicalString(manifest);

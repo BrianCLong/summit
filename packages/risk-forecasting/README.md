@@ -16,18 +16,18 @@ Global risk assessment with systemic risk analysis, tipping point detection, and
 ## Usage
 
 ```typescript
-import { RiskForecaster } from '@intelgraph/risk-forecasting';
+import { RiskForecaster } from "@intelgraph/risk-forecasting";
 
 const forecaster = new RiskForecaster();
 
 // Assess global risks
-const risks = await forecaster.assessGlobalRisks(['geopolitical', 'economic', 'technological']);
+const risks = await forecaster.assessGlobalRisks(["geopolitical", "economic", "technological"]);
 
 // Identify black swans
-const blackSwans = await forecaster.identifyBlackSwans('cybersecurity');
+const blackSwans = await forecaster.identifyBlackSwans("cybersecurity");
 
 // Analyze systemic risks
-const systemicRisk = await forecaster.analyzeSystemicRisks('global-supply-chain');
+const systemicRisk = await forecaster.analyzeSystemicRisks("global-supply-chain");
 
 // Detect tipping points
 const tippingPoints = await forecaster.detectTippingPoints(riskId);

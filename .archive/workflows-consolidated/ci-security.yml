@@ -5,7 +5,7 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: '0 2 * * 1' # Weekly scan
+    - cron: "0 2 * * 1" # Weekly scan
 
 jobs:
   gitleaks:
@@ -41,7 +41,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        language: ['javascript', 'python'] # Limiting to JS/TS and Python as per brief
+        language: ["javascript", "python"] # Limiting to JS/TS and Python as per brief
     steps:
       - uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000
       - uses: github/codeql-action/init@b6110717a335152231a71b8447af51af11020a8f # v2
@@ -57,16 +57,16 @@ jobs:
         if: steps.changes.outputs.client == 'true' || steps.changes.outputs.server == 'true' || steps.changes.outputs.python == 'true'
         uses: aquasecurity/trivy-action@77137e9
         with:
-          scan-type: 'fs'
-          severity: 'HIGH,CRITICAL'
-          format: 'github'
-          output: 'trivy-results.sarif'
+          scan-type: "fs"
+          severity: "HIGH,CRITICAL"
+          format: "github"
+          output: "trivy-results.sarif"
 
       - name: Upload Trivy scan results to GitHub Security tab
         if: steps.changes.outputs.client == 'true' || steps.changes.outputs.server == 'true' || steps.changes.outputs.python == 'true'
         uses: github/codeql-action/upload-sarif@b6110717a335152231a71b8447af51af11020a8f # v2
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: "trivy-results.sarif"
 
   trivy-image:
     runs-on: ubuntu-latest
@@ -83,30 +83,30 @@ jobs:
         uses: aquasecurity/trivy-action@77137e9
         with:
           image-ref: ghcr.io/${{ github.repository }}-server:${{ github.sha }}
-          format: 'github'
-          output: 'trivy-server-image-results.sarif'
-          severity: 'HIGH,CRITICAL'
+          format: "github"
+          output: "trivy-server-image-results.sarif"
+          severity: "HIGH,CRITICAL"
 
       - name: Upload Trivy server image scan results to GitHub Security tab
         if: steps.changes.outputs.server == 'true' || steps.changes.outputs.dockerfile == 'true'
         uses: github/codeql-action/upload-sarif@b6110717a335152231a71b8447af51af11020a8f # v2
         with:
-          sarif_file: 'trivy-server-image-results.sarif'
+          sarif_file: "trivy-server-image-results.sarif"
 
       - name: Run Trivy image scan (client)
         if: steps.changes.outputs.client == 'true' || steps.changes.outputs.dockerfile == 'true'
         uses: aquasecurity/trivy-action@77137e9
         with:
           image-ref: ghcr.io/${{ github.repository }}-client:${{ github.sha }}
-          format: 'github'
-          output: 'trivy-client-image-results.sarif'
-          severity: 'HIGH,CRITICAL'
+          format: "github"
+          output: "trivy-client-image-results.sarif"
+          severity: "HIGH,CRITICAL"
 
       - name: Upload Trivy client image scan results to GitHub Security tab
         if: steps.changes.outputs.client == 'true' || steps.changes.outputs.dockerfile == 'true'
         uses: github/codeql-action/upload-sarif@b6110717a335152231a71b8447af51af11020a8f # v2
         with:
-          sarif_file: 'trivy-client-image-results.sarif'
+          sarif_file: "trivy-client-image-results.sarif"
 
   sbom:
     runs-on: ubuntu-latest
@@ -124,8 +124,8 @@ jobs:
         uses: aquasecurity/trivy-action@77137e9
         with:
           image-ref: ghcr.io/${{ github.repository }}-server:${{ github.sha }}
-          format: 'spdx-json'
-          output: 'server-sbom.json'
+          format: "spdx-json"
+          output: "server-sbom.json"
 
       - name: Upload server SBOM
         if: steps.changes.outputs.server == 'true' || steps.changes.outputs.dockerfile == 'true'
@@ -139,8 +139,8 @@ jobs:
         uses: aquasecurity/trivy-action@77137e9
         with:
           image-ref: ghcr.io/${{ github.repository }}-client:${{ github.sha }}
-          format: 'spdx-json'
-          output: 'client-sbom.json'
+          format: "spdx-json"
+          output: "client-sbom.json"
 
       - name: Upload client SBOM
         if: steps.changes.outputs.client == 'true' || steps.changes.outputs.dockerfile == 'true'

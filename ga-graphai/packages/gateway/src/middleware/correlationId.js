@@ -1,6 +1,6 @@
-import { randomUUID } from 'node:crypto';
+import { randomUUID } from "node:crypto";
 
-export const correlationIdHeader = 'x-correlation-id';
+export const correlationIdHeader = "x-correlation-id";
 
 export function correlationIdMiddleware() {
   return (req, res, next) => {
@@ -9,7 +9,7 @@ export function correlationIdMiddleware() {
 
     req.correlationId = correlationId;
     res.locals.correlationId = correlationId;
-    res.setHeader('X-Correlation-Id', correlationId);
+    res.setHeader("X-Correlation-Id", correlationId);
 
     if (!req.aiContext) {
       req.aiContext = {};

@@ -4,30 +4,30 @@ This document provides the canonical commands for common development workflows. 
 
 ## 📋 Quick Reference Table
 
-| Task | Canonical Command | Aliases | Notes |
-|------|-------------------|---------|-------|
-| **Setup** |
-| Install dependencies | `make bootstrap` | - | Run once after clone |
-| Create .env file | `cp .env.example .env` | - | Required before `make up` |
-| **Development** |
-| Start services | `make up` | `./start.sh --skip-smoke` | Starts Docker stack |
-| Start with AI | `make up-ai` | `./start.sh --ai --skip-smoke` | Requires 12GB+ RAM |
-| Stop services | `make down` | - | Cleans up containers |
-| **Validation** |
-| Run smoke tests | `make smoke` | `pnpm smoke`, `npm run smoke` | Golden path validation |
-| Type checking | `pnpm typecheck` | `npm run typecheck` | Validates TypeScript |
-| Linting | `pnpm lint` | `npm run lint` | ESLint + Ruff |
-| Unit tests | `pnpm test` | `npm test` | Jest/Vitest |
-| **All-in-one** |
-| Full setup | `./start.sh` | - | bootstrap + up + smoke |
-| Full setup with AI | `./start.sh --ai` | - | bootstrap + up-ai + smoke |
-| **Debugging** |
-| View logs | `docker-compose logs api` | - | API server logs |
-| Health check | `curl http://localhost:4000/health/detailed \| jq` | - | Detailed status |
-| Container status | `docker-compose ps` | - | Shows all containers |
-| **Help** |
-| Show Makefile help | `make help` | `make` | List available commands |
-| Script help | `./start.sh --help` | - | Bootstrap script options |
+| Task                 | Canonical Command                                  | Aliases                        | Notes                     |
+| -------------------- | -------------------------------------------------- | ------------------------------ | ------------------------- |
+| **Setup**            |
+| Install dependencies | `make bootstrap`                                   | -                              | Run once after clone      |
+| Create .env file     | `cp .env.example .env`                             | -                              | Required before `make up` |
+| **Development**      |
+| Start services       | `make up`                                          | `./start.sh --skip-smoke`      | Starts Docker stack       |
+| Start with AI        | `make up-ai`                                       | `./start.sh --ai --skip-smoke` | Requires 12GB+ RAM        |
+| Stop services        | `make down`                                        | -                              | Cleans up containers      |
+| **Validation**       |
+| Run smoke tests      | `make smoke`                                       | `pnpm smoke`, `npm run smoke`  | Golden path validation    |
+| Type checking        | `pnpm typecheck`                                   | `npm run typecheck`            | Validates TypeScript      |
+| Linting              | `pnpm lint`                                        | `npm run lint`                 | ESLint + Ruff             |
+| Unit tests           | `pnpm test`                                        | `npm test`                     | Jest/Vitest               |
+| **All-in-one**       |
+| Full setup           | `./start.sh`                                       | -                              | bootstrap + up + smoke    |
+| Full setup with AI   | `./start.sh --ai`                                  | -                              | bootstrap + up-ai + smoke |
+| **Debugging**        |
+| View logs            | `docker-compose logs api`                          | -                              | API server logs           |
+| Health check         | `curl http://localhost:4000/health/detailed \| jq` | -                              | Detailed status           |
+| Container status     | `docker-compose ps`                                | -                              | Shows all containers      |
+| **Help**             |
+| Show Makefile help   | `make help`                                        | `make`                         | List available commands   |
+| Script help          | `./start.sh --help`                                | -                              | Bootstrap script options  |
 
 ## 🎯 Common Workflows
 
@@ -104,12 +104,14 @@ make smoke
 ### Canonical vs. Aliases
 
 **Use canonical commands in:**
+
 - Documentation
 - CI workflows
 - Makefiles
 - Scripts that call other scripts
 
 **Aliases are acceptable in:**
+
 - Interactive terminal use
 - Personal shortcuts
 - Quick local iterations
@@ -154,11 +156,13 @@ A: Use `./start.sh` for one-command convenience. Use separate commands if you ne
 
 **Q: How do I know which commands are safe to run in parallel?**
 A: Generally:
+
 - ✅ Safe: `make down`, `pnpm lint`, `pnpm typecheck`, `pnpm test` (when services are up)
 - ❌ Not safe: `make up`, `make bootstrap`, `pnpm smoke` (requires exclusive access)
 
 **Q: Can I create my own aliases?**
 A: Yes! Add them to your shell config (`~/.bashrc`, `~/.zshrc`), not to the repo. Example:
+
 ```bash
 alias summit-up="cd ~/summit && make up"
 alias summit-smoke="cd ~/summit && make smoke"

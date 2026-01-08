@@ -1,10 +1,10 @@
-import { ExtensionPoint } from '../ExtensionPoint.js';
+import { ExtensionPoint } from "../ExtensionPoint.js";
 
 /**
  * Workflow action extension point
  */
 export interface WorkflowExtension extends ExtensionPoint<WorkflowInput, WorkflowResult> {
-  type: 'workflow';
+  type: "workflow";
   actionName: string;
   description: string;
   inputSchema: Record<string, any>;
@@ -29,7 +29,7 @@ export interface WorkflowResult {
 }
 
 export abstract class BaseWorkflowExtension implements WorkflowExtension {
-  readonly type = 'workflow' as const;
+  readonly type = "workflow" as const;
 
   constructor(
     public readonly id: string,

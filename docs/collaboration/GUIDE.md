@@ -28,35 +28,26 @@ The platform is built on a modular architecture with the following key packages:
 **Multi-tenant workspace isolation** with project-based organization:
 
 ```typescript
-import { WorkspaceManager } from '@intelgraph/workspace';
+import { WorkspaceManager } from "@intelgraph/workspace";
 
 // Create workspace
-const workspace = await workspaceManager.createWorkspace(
-  'Intelligence Team',
-  userId,
-  {
-    description: 'Main intelligence analysis workspace',
-    slug: 'intel-team'
-  }
-);
+const workspace = await workspaceManager.createWorkspace("Intelligence Team", userId, {
+  description: "Main intelligence analysis workspace",
+  slug: "intel-team",
+});
 
 // Create project
-const project = await workspaceManager.createProject(
-  workspace.id,
-  'Operation Phoenix',
-  userId,
-  {
-    description: 'Counter-terrorism investigation',
-    color: '#FF5733',
-    icon: '🔥',
-    isPrivate: true
-  }
-);
+const project = await workspaceManager.createProject(workspace.id, "Operation Phoenix", userId, {
+  description: "Counter-terrorism investigation",
+  color: "#FF5733",
+  icon: "🔥",
+  isPrivate: true,
+});
 
 // Invite team members
 const invitation = await workspaceManager.inviteMember(
   workspace.id,
-  'analyst@agency.gov',
+  "analyst@agency.gov",
   WorkspaceRole.MEMBER,
   userId
 );
@@ -68,10 +59,10 @@ const invitation = await workspaceManager.inviteMember(
 // Check permissions
 const permCheck = await workspaceManager.checkPermission(
   {
-    userId: 'user123',
+    userId: "user123",
     workspaceId: workspace.id,
-    resourceType: 'analysis',
-    resourceId: 'analysis456'
+    resourceType: "analysis",
+    resourceId: "analysis456",
   },
   ResourcePermission.WRITE
 );
@@ -81,11 +72,7 @@ if (permCheck.granted) {
 }
 
 // Check role hierarchy
-const canManage = await workspaceManager.hasRole(
-  workspace.id,
-  userId,
-  WorkspaceRole.ADMIN
-);
+const canManage = await workspaceManager.hasRole(workspace.id, userId, WorkspaceRole.ADMIN);
 ```
 
 **Workspace analytics**:
@@ -108,32 +95,27 @@ console.log(metrics);
 **Operational transformation** for concurrent editing:
 
 ```typescript
-import { SyncEngine, OperationalTransform } from '@intelgraph/real-time-sync';
+import { SyncEngine, OperationalTransform } from "@intelgraph/real-time-sync";
 
 // Initialize sync engine
 const syncEngine = new SyncEngine(syncStore);
 
 // Create sync session
-const session = await syncEngine.createSession(
-  documentId,
-  userId,
-  workspaceId,
-  ['read', 'write']
-);
+const session = await syncEngine.createSession(documentId, userId, workspaceId, ["read", "write"]);
 
 // Handle incoming operations
 await syncEngine.handleOperation(session.id, {
-  id: 'op123',
+  id: "op123",
   type: OperationType.INSERT,
   position: 10,
-  content: 'New text',
-  userId: 'user123',
+  content: "New text",
+  userId: "user123",
   timestamp: Date.now(),
-  version: 5
+  version: 5,
 });
 
 // Listen for applied operations
-syncEngine.on('operation:applied', ({ documentId, operation, state }) => {
+syncEngine.on("operation:applied", ({ documentId, operation, state }) => {
   // Broadcast to other clients
   broadcastToClients(operation);
 });
@@ -144,16 +126,16 @@ syncEngine.on('operation:applied', ({ documentId, operation, state }) => {
 ```typescript
 // Update presence
 await syncEngine.updatePresence({
-  userId: 'user123',
-  userName: 'John Analyst',
-  documentId: 'doc456',
+  userId: "user123",
+  userName: "John Analyst",
+  documentId: "doc456",
   cursor: {
     position: 42,
-    selection: { start: 42, end: 58 }
+    selection: { start: 42, end: 58 },
   },
   viewport: { top: 0, bottom: 1000 },
-  status: 'active',
-  lastActivity: new Date()
+  status: "active",
+  lastActivity: new Date(),
 });
 
 // Get all presence info
@@ -165,13 +147,9 @@ const presenceList = await syncEngine.getPresence(documentId);
 
 ```typescript
 // Automatic conflict resolution
-const resolution = await syncEngine.resolveConflict(
-  documentId,
-  conflictingOps,
-  {
-    strategy: ConflictResolutionStrategy.LAST_WRITE_WINS
-  }
-);
+const resolution = await syncEngine.resolveConflict(documentId, conflictingOps, {
+  strategy: ConflictResolutionStrategy.LAST_WRITE_WINS,
+});
 ```
 
 ### 3. Commenting and Annotations
@@ -179,23 +157,17 @@ const resolution = await syncEngine.resolveConflict(
 **Thread-based commenting**:
 
 ```typescript
-import { CommentManager } from '@intelgraph/commenting';
+import { CommentManager } from "@intelgraph/commenting";
 
 // Create comment thread
-const thread = await commentManager.createThread(
-  workspaceId,
-  'entity',
-  entityId,
-  userId,
-  {
-    // Anchor to text selection
-    textPosition: {
-      start: 100,
-      end: 150,
-      text: 'suspicious activity'
-    }
-  }
-);
+const thread = await commentManager.createThread(workspaceId, "entity", entityId, userId, {
+  // Anchor to text selection
+  textPosition: {
+    start: 100,
+    end: 150,
+    text: "suspicious activity",
+  },
+});
 
 // Add comment with rich text
 await commentManager.addComment(
@@ -203,23 +175,25 @@ await commentManager.addComment(
   userId,
   [
     {
-      type: 'paragraph',
-      content: 'This entity requires further investigation',
-      attributes: { bold: true }
+      type: "paragraph",
+      content: "This entity requires further investigation",
+      attributes: { bold: true },
     },
     {
-      type: 'mention',
-      content: '@john can you review?',
-      mentions: [{ userId: 'john123', userName: 'John', position: 0 }]
-    }
+      type: "mention",
+      content: "@john can you review?",
+      mentions: [{ userId: "john123", userName: "John", position: 0 }],
+    },
   ],
   {
-    attachments: [{
-      id: 'att1',
-      name: 'evidence.pdf',
-      url: '/files/evidence.pdf',
-      type: 'application/pdf'
-    }]
+    attachments: [
+      {
+        id: "att1",
+        name: "evidence.pdf",
+        url: "/files/evidence.pdf",
+        type: "application/pdf",
+      },
+    ],
   }
 );
 
@@ -234,32 +208,32 @@ await commentManager.resolveThread(thread.id, userId);
 const layer = await commentManager.createLayer(
   workspaceId,
   resourceId,
-  'Investigation Notes',
+  "Investigation Notes",
   userId
 );
 
 // Add annotation
 const annotation = await commentManager.createAnnotation(
   workspaceId,
-  'map',
+  "map",
   mapId,
   userId,
   AnnotationType.CIRCLE,
   {
     x: 100,
     y: 200,
-    radius: 50
+    radius: 50,
   },
   {
     layerId: layer.id,
     style: {
-      color: '#FF0000',
+      color: "#FF0000",
       opacity: 0.7,
       strokeWidth: 2,
-      strokeColor: '#CC0000'
+      strokeColor: "#CC0000",
     },
-    content: 'Area of interest',
-    linkedCommentId: 'comment123'
+    content: "Area of interest",
+    linkedCommentId: "comment123",
   }
 );
 ```
@@ -282,20 +256,15 @@ const { score, upvotes, downvotes } = await commentManager.getVoteScore(commentI
 **Git-like version control**:
 
 ```typescript
-import { VersionControl } from '@intelgraph/version-control';
+import { VersionControl } from "@intelgraph/version-control";
 
 // Initialize repository
-const repo = await versionControl.initRepository(
-  workspaceId,
-  'analysis',
-  analysisId,
-  userId
-);
+const repo = await versionControl.initRepository(workspaceId, "analysis", analysisId, userId);
 
 // Create branch
 const branch = await versionControl.createBranch(
   repo.id,
-  'feature-enhanced-analysis',
+  "feature-enhanced-analysis",
   mainCommitId,
   userId
 );
@@ -303,40 +272,32 @@ const branch = await versionControl.createBranch(
 // Commit changes
 const commit = await versionControl.commit(
   repo.id,
-  'feature-enhanced-analysis',
+  "feature-enhanced-analysis",
   userId,
-  'Jane Analyst',
-  'Add network analysis section',
+  "Jane Analyst",
+  "Add network analysis section",
   [
     {
-      path: 'analysis/network.json',
+      path: "analysis/network.json",
       type: ChangeType.ADD,
-      contentHash: 'abc123',
-      diff: '...'
-    }
+      contentHash: "abc123",
+      diff: "...",
+    },
   ],
   {
-    description: 'Detailed network analysis with 50+ entities'
+    description: "Detailed network analysis with 50+ entities",
   }
 );
 
 // Get commit history
-const history = await versionControl.getCommitHistory(
-  repo.id,
-  'main',
-  { limit: 20 }
-);
+const history = await versionControl.getCommitHistory(repo.id, "main", { limit: 20 });
 ```
 
 **Diff and comparison**:
 
 ```typescript
 // Compare branches
-const comparison = await versionControl.compare(
-  repo.id,
-  'main',
-  'feature-enhanced-analysis'
-);
+const comparison = await versionControl.compare(repo.id, "main", "feature-enhanced-analysis");
 
 console.log(comparison);
 // {
@@ -348,11 +309,7 @@ console.log(comparison);
 // }
 
 // View diff
-const diffs = await versionControl.diff(
-  repo.id,
-  fromCommitId,
-  toCommitId
-);
+const diffs = await versionControl.diff(repo.id, fromCommitId, toCommitId);
 ```
 
 **Merge and conflict resolution**:
@@ -361,8 +318,8 @@ const diffs = await versionControl.diff(
 // Merge branch
 const mergeResult = await versionControl.merge(
   repo.id,
-  'main',
-  'feature-enhanced-analysis',
+  "main",
+  "feature-enhanced-analysis",
   userId,
   MergeStrategy.RECURSIVE
 );
@@ -380,11 +337,7 @@ if (!mergeResult.success) {
 
 ```typescript
 // Get blame information
-const blame = await versionControl.blame(
-  repo.id,
-  'main',
-  'analysis/summary.md'
-);
+const blame = await versionControl.blame(repo.id, "main", "analysis/summary.md");
 
 // Shows which commit/author modified each line
 for (const line of blame.lines) {
@@ -398,13 +351,13 @@ for (const line of blame.lines) {
 **Wiki-style documentation**:
 
 ```typescript
-import { CollaborationHub } from '@intelgraph/collaboration';
+import { CollaborationHub } from "@intelgraph/collaboration";
 
 // Create document
 const document = await hub.createDocument(
   workspaceId,
   authorId,
-  'Investigation Procedures',
+  "Investigation Procedures",
   `# Investigation Procedures
 
 ## Overview
@@ -417,26 +370,19 @@ Standard operating procedures for...
 `,
   {
     type: DocumentType.WIKI,
-    tags: ['procedures', 'training'],
-    parentDocumentId: 'parent-doc-id'
+    tags: ["procedures", "training"],
+    parentDocumentId: "parent-doc-id",
   }
 );
 
 // Update document (automatically creates version)
-await hub.updateDocument(
-  document.id,
-  userId,
-  {
-    content: updatedContent,
-    isPublished: true
-  }
-);
+await hub.updateDocument(document.id, userId, {
+  content: updatedContent,
+  isPublished: true,
+});
 
 // Search documents
-const results = await hub.searchDocuments(
-  workspaceId,
-  'investigation procedures'
-);
+const results = await hub.searchDocuments(workspaceId, "investigation procedures");
 ```
 
 ### 6. Task and Workflow Management
@@ -445,42 +391,33 @@ const results = await hub.searchDocuments(
 
 ```typescript
 // Create board
-const board = await hub.createBoard(
-  workspaceId,
-  'Investigation Tasks',
-  userId,
-  {
-    type: 'kanban',
-    columns: [
-      { id: '1', name: 'Backlog', status: TaskStatus.TODO, order: 0 },
-      { id: '2', name: 'In Progress', status: TaskStatus.IN_PROGRESS, order: 1 },
-      { id: '3', name: 'Review', status: TaskStatus.IN_REVIEW, order: 2 },
-      { id: '4', name: 'Done', status: TaskStatus.DONE, order: 3 }
-    ]
-  }
-);
+const board = await hub.createBoard(workspaceId, "Investigation Tasks", userId, {
+  type: "kanban",
+  columns: [
+    { id: "1", name: "Backlog", status: TaskStatus.TODO, order: 0 },
+    { id: "2", name: "In Progress", status: TaskStatus.IN_PROGRESS, order: 1 },
+    { id: "3", name: "Review", status: TaskStatus.IN_REVIEW, order: 2 },
+    { id: "4", name: "Done", status: TaskStatus.DONE, order: 3 },
+  ],
+});
 
 // Create task
 const task = await hub.createTask(
   workspaceId,
   board.id,
   reporterId,
-  'Analyze financial transactions',
+  "Analyze financial transactions",
   {
-    description: 'Review transactions for entity XYZ',
+    description: "Review transactions for entity XYZ",
     assigneeId: analystId,
     priority: TaskPriority.HIGH,
-    dueDate: new Date('2024-12-31'),
-    labels: ['analysis', 'financial', 'priority']
+    dueDate: new Date("2024-12-31"),
+    labels: ["analysis", "financial", "priority"],
   }
 );
 
 // Update task status
-await hub.updateTaskStatus(
-  task.id,
-  TaskStatus.IN_PROGRESS,
-  userId
-);
+await hub.updateTaskStatus(task.id, TaskStatus.IN_PROGRESS, userId);
 ```
 
 ### 7. Notifications and Activity Feeds
@@ -493,10 +430,10 @@ await hub.notify(
   userId,
   workspaceId,
   NotificationType.TASK_ASSIGNED,
-  'New task assigned',
-  'You have been assigned to analyze financial transactions',
-  '/tasks/123',
-  { taskId: 'task123', priority: 'high' }
+  "New task assigned",
+  "You have been assigned to analyze financial transactions",
+  "/tasks/123",
+  { taskId: "task123", priority: "high" }
 );
 
 // Get unread notifications
@@ -510,14 +447,11 @@ await hub.markAllNotificationsAsRead(userId);
 
 ```typescript
 // Get activity feed
-const activities = await hub.getActivityFeed(
-  workspaceId,
-  {
-    limit: 50,
-    offset: 0,
-    resourceType: 'analysis'
-  }
-);
+const activities = await hub.getActivityFeed(workspaceId, {
+  limit: 50,
+  offset: 0,
+  resourceType: "analysis",
+});
 
 // Activities are automatically logged
 // when users perform actions:
@@ -535,15 +469,15 @@ const activities = await hub.getActivityFeed(
 // Create share link
 const shareLink = await hub.createShareLink(
   workspaceId,
-  'analysis',
+  "analysis",
   analysisId,
   ShareLinkType.VIEW,
   userId,
   {
-    password: 'secret123',
+    password: "secret123",
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
     maxUses: 10,
-    allowAnonymous: false
+    allowAnonymous: false,
   }
 );
 
@@ -562,23 +496,20 @@ await hub.revokeShareLink(shareLink.id);
 // Publish analysis template
 const asset = await hub.publishToMarketplace(
   authorId,
-  'Financial Crime Investigation Template',
-  'Comprehensive template for investigating financial crimes',
+  "Financial Crime Investigation Template",
+  "Comprehensive template for investigating financial crimes",
   AssetType.TEMPLATE,
-  '/assets/template.json',
+  "/assets/template.json",
   {
-    category: 'templates',
-    tags: ['financial', 'investigation', 'aml'],
+    category: "templates",
+    tags: ["financial", "investigation", "aml"],
     price: 0,
-    isPublic: true
+    isPublic: true,
   }
 );
 
 // Download from marketplace
-const contentUrl = await hub.downloadFromMarketplace(
-  asset.id,
-  userId
-);
+const contentUrl = await hub.downloadFromMarketplace(asset.id, userId);
 ```
 
 ### 10. Video and Audio Collaboration
@@ -587,16 +518,11 @@ const contentUrl = await hub.downloadFromMarketplace(
 
 ```typescript
 // Schedule meeting
-const meeting = await hub.scheduleMeeting(
-  workspaceId,
-  hostId,
-  'Weekly Intelligence Briefing',
-  {
-    description: 'Review current investigations',
-    scheduledAt: new Date('2024-12-20T10:00:00Z'),
-    participants: ['user1', 'user2', 'user3']
-  }
-);
+const meeting = await hub.scheduleMeeting(workspaceId, hostId, "Weekly Intelligence Briefing", {
+  description: "Review current investigations",
+  scheduledAt: new Date("2024-12-20T10:00:00Z"),
+  participants: ["user1", "user2", "user3"],
+});
 
 // Start meeting
 await hub.startMeeting(meeting.id);
@@ -614,22 +540,24 @@ await hub.startMeeting(meeting.id);
 ### Connection
 
 ```javascript
-const ws = new WebSocket('ws://localhost:3010/ws');
+const ws = new WebSocket("ws://localhost:3010/ws");
 
 // Connect to document
-ws.send(JSON.stringify({
-  type: 'connect',
-  userId: 'user123',
-  workspaceId: 'ws123',
-  documentId: 'doc456',
-  permissions: ['read', 'write']
-}));
+ws.send(
+  JSON.stringify({
+    type: "connect",
+    userId: "user123",
+    workspaceId: "ws123",
+    documentId: "doc456",
+    permissions: ["read", "write"],
+  })
+);
 
 // Receive connection confirmation
-ws.on('message', (data) => {
+ws.on("message", (data) => {
   const message = JSON.parse(data);
-  if (message.type === 'connected') {
-    console.log('Session ID:', message.sessionId);
+  if (message.type === "connected") {
+    console.log("Session ID:", message.sessionId);
   }
 });
 ```
@@ -638,24 +566,26 @@ ws.on('message', (data) => {
 
 ```javascript
 // Send operation
-ws.send(JSON.stringify({
-  type: 'operation',
-  sessionId: 'session123',
-  operation: {
-    id: 'op456',
-    type: 'insert',
-    position: 10,
-    content: 'Hello',
-    userId: 'user123',
-    timestamp: Date.now(),
-    version: 5
-  }
-}));
+ws.send(
+  JSON.stringify({
+    type: "operation",
+    sessionId: "session123",
+    operation: {
+      id: "op456",
+      type: "insert",
+      position: 10,
+      content: "Hello",
+      userId: "user123",
+      timestamp: Date.now(),
+      version: 5,
+    },
+  })
+);
 
 // Receive operations from other users
-ws.on('message', (data) => {
+ws.on("message", (data) => {
   const message = JSON.parse(data);
-  if (message.type === 'operation') {
+  if (message.type === "operation") {
     applyOperation(message.operation);
   }
 });
@@ -665,22 +595,24 @@ ws.on('message', (data) => {
 
 ```javascript
 // Send presence update
-ws.send(JSON.stringify({
-  type: 'presence',
-  presence: {
-    userId: 'user123',
-    userName: 'John Analyst',
-    documentId: 'doc456',
-    cursor: { position: 42 },
-    status: 'active',
-    lastActivity: new Date()
-  }
-}));
+ws.send(
+  JSON.stringify({
+    type: "presence",
+    presence: {
+      userId: "user123",
+      userName: "John Analyst",
+      documentId: "doc456",
+      cursor: { position: 42 },
+      status: "active",
+      lastActivity: new Date(),
+    },
+  })
+);
 
 // Receive presence from other users
-ws.on('message', (data) => {
+ws.on("message", (data) => {
   const message = JSON.parse(data);
-  if (message.type === 'presence') {
+  if (message.type === "presence") {
     updateUserCursor(message.presence);
   }
 });
@@ -917,19 +849,22 @@ CREATE INDEX idx_notifications_user_unread ON notifications(user_id, read, creat
 ### Common Issues
 
 **WebSocket disconnections:**
+
 ```javascript
 // Implement reconnection logic
-ws.on('close', () => {
+ws.on("close", () => {
   setTimeout(() => reconnect(), 1000);
 });
 ```
 
 **Sync conflicts:**
+
 - Ensure operations include correct version numbers
 - Implement conflict detection in UI
 - Provide manual resolution options
 
 **Slow queries:**
+
 - Add indexes to frequently queried fields
 - Use database connection pooling
 - Consider materialized views for complex aggregations
@@ -939,8 +874,8 @@ ws.on('close', () => {
 ### React Integration
 
 ```typescript
-import { useEffect, useState } from 'react';
-import { CollaborationHub } from '@intelgraph/collaboration';
+import { useEffect, useState } from "react";
+import { CollaborationHub } from "@intelgraph/collaboration";
 
 function useCollaboration(documentId: string) {
   const [hub] = useState(() => new CollaborationHub(stores));
@@ -948,9 +883,9 @@ function useCollaboration(documentId: string) {
 
   useEffect(() => {
     // Subscribe to presence updates
-    hub.sync.on('presence:updated', ({ presence }) => {
-      setPresence(prev => {
-        const index = prev.findIndex(p => p.userId === presence.userId);
+    hub.sync.on("presence:updated", ({ presence }) => {
+      setPresence((prev) => {
+        const index = prev.findIndex((p) => p.userId === presence.userId);
         if (index >= 0) {
           const next = [...prev];
           next[index] = presence;
@@ -973,6 +908,7 @@ function useCollaboration(documentId: string) {
 The Collaborative Intelligence Platform provides comprehensive collaboration capabilities rivaling Notion, Confluence, and Palantir Foundry. It supports team-based intelligence analysis with real-time co-editing, commenting, version control, and workflow management.
 
 For more information:
+
 - API Reference: `/docs/api`
 - Architecture Guide: `/docs/architecture`
 - Security Guide: `/docs/security`

@@ -1,9 +1,9 @@
-version: '3.8'
+version: "3.8"
 services:
   prometheus:
     image: prom/prometheus@sha256:<PROM_DIGEST>:v2.53.0
     ports:
-      - '9090:9090'
+      - "9090:9090"
     restart: unless-stopped
     volumes:
       - ./ops/prometheus.yml:/etc/prometheus/prometheus.yml:ro
@@ -13,7 +13,7 @@ services:
 grafana:
   image: grafana/grafana@sha256:<GRAFANA_DIGEST>
   ports:
-    - '3001:3000'
+    - "3001:3000"
   restart: unless-stopped
   depends_on:
     - prometheus
@@ -26,5 +26,5 @@ grafana:
   jaeger:
     image: jaegertracing/all-in-one@sha256:<JAEGER_DIGEST>
     ports:
-      - '16686:16686'
+      - "16686:16686"
     restart: unless-stopped

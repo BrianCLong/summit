@@ -1,16 +1,10 @@
-import fs from 'fs';
-import path from 'path';
-import { diffLines } from 'diff';
-import { discoverSpecFiles, loadSpecFromFile } from './loader';
-import {
-  CompiledArtifactSet,
-  Dialect,
-  MetricSpec,
-  RegistryOptions,
-  SpecRecord
-} from './types';
-import { renderUdfSql, renderViewSql } from './sql/generators';
-import { canonicalizeSpec, ensureDir, writeFileIfChanged } from './utils';
+import fs from "fs";
+import path from "path";
+import { diffLines } from "diff";
+import { discoverSpecFiles, loadSpecFromFile } from "./loader";
+import { CompiledArtifactSet, Dialect, MetricSpec, RegistryOptions, SpecRecord } from "./types";
+import { renderUdfSql, renderViewSql } from "./sql/generators";
+import { canonicalizeSpec, ensureDir, writeFileIfChanged } from "./utils";
 
 export class MetricRegistry {
   private readonly specsRoot: string;
@@ -19,9 +13,9 @@ export class MetricRegistry {
   private specCache?: Map<string, SpecRecord[]>;
 
   constructor(options: RegistryOptions = {}) {
-    this.specsRoot = options.specsRoot ?? path.resolve(process.cwd(), 'specs');
-    this.outputRoot = options.outputRoot ?? path.resolve(process.cwd(), 'dist');
-    this.goldenRoot = options.goldenRoot ?? path.resolve(process.cwd(), 'golden');
+    this.specsRoot = options.specsRoot ?? path.resolve(process.cwd(), "specs");
+    this.outputRoot = options.outputRoot ?? path.resolve(process.cwd(), "dist");
+    this.goldenRoot = options.goldenRoot ?? path.resolve(process.cwd(), "golden");
   }
 
   load(): Map<string, SpecRecord[]> {
@@ -60,7 +54,7 @@ export class MetricRegistry {
       throw new Error(`Metric ${metricName} not found in registry`);
     }
     if (version !== undefined) {
-      const record = records.find(entry => entry.spec.version === version);
+      const record = records.find((entry) => entry.spec.version === version);
       if (!record) {
         throw new Error(`Metric ${metricName} does not have version ${version}`);
       }
@@ -72,7 +66,7 @@ export class MetricRegistry {
   compileMetric(spec: MetricSpec, dialect: Dialect): CompiledArtifactSet {
     return {
       view: renderViewSql(spec, dialect),
-      udf: renderUdfSql(spec, dialect)
+      udf: renderUdfSql(spec, dialect),
     };
   }
 
@@ -93,15 +87,15 @@ export class MetricRegistry {
     const written: string[] = [];
     for (const [name, artifacts] of Object.entries(compiled)) {
       const baseDir = path.join(this.outputRoot, dialect, name);
-      const viewPath = path.join(baseDir, 'view.sql');
-      const udfPath = path.join(baseDir, 'udf.sql');
+      const viewPath = path.join(baseDir, "view.sql");
+      const udfPath = path.join(baseDir, "udf.sql");
       if (writeFileIfChanged(viewPath, artifacts.view)) {
         written.push(viewPath);
       }
       if (writeFileIfChanged(udfPath, artifacts.udf)) {
         written.push(udfPath);
       }
-      const manifestPath = path.join(baseDir, 'spec.json');
+      const manifestPath = path.join(baseDir, "spec.json");
       const spec = this.getSpec(name);
       writeFileIfChanged(manifestPath, canonicalizeSpec(spec));
     }
@@ -114,9 +108,9 @@ export class MetricRegistry {
     const diff = diffLines(canonicalizeSpec(left), canonicalizeSpec(right));
     const lines: string[] = [];
     for (const part of diff) {
-      const prefix = part.added ? '+' : part.removed ? '-' : ' ';
-      const value = part.value.replace(/\n$/, '');
-      const splitted = value.split('\n');
+      const prefix = part.added ? "+" : part.removed ? "-" : " ";
+      const value = part.value.replace(/\n$/, "");
+      const splitted = value.split("\n");
       for (const line of splitted) {
         if (line.length === 0) {
           continue;
@@ -124,7 +118,7 @@ export class MetricRegistry {
         lines.push(`${prefix} ${line}`);
       }
     }
-    return lines.join('\n');
+    return lines.join("\n");
   }
 
   runConformance(dialect: Dialect, metricName?: string): string[] {
@@ -132,16 +126,16 @@ export class MetricRegistry {
     const failures: string[] = [];
     for (const [name, artifacts] of Object.entries(compiled)) {
       const baseDir = path.join(this.goldenRoot, dialect, name);
-      const viewGoldenPath = path.join(baseDir, 'view.sql');
-      const udfGoldenPath = path.join(baseDir, 'udf.sql');
+      const viewGoldenPath = path.join(baseDir, "view.sql");
+      const udfGoldenPath = path.join(baseDir, "udf.sql");
       if (!fs.existsSync(viewGoldenPath) || !fs.existsSync(udfGoldenPath)) {
         failures.push(
           `Missing golden outputs for ${dialect}/${name}. Expected ${viewGoldenPath} and ${udfGoldenPath}.`
         );
         continue;
       }
-      const viewGolden = fs.readFileSync(viewGoldenPath, 'utf8').trim();
-      const udfGolden = fs.readFileSync(udfGoldenPath, 'utf8').trim();
+      const viewGolden = fs.readFileSync(viewGoldenPath, "utf8").trim();
+      const udfGolden = fs.readFileSync(udfGoldenPath, "utf8").trim();
       if (viewGolden !== artifacts.view.trim()) {
         failures.push(`View mismatch for ${dialect}/${name}`);
       }
@@ -158,10 +152,10 @@ export class MetricRegistry {
     for (const [name, artifacts] of Object.entries(compiled)) {
       const baseDir = path.join(this.goldenRoot, dialect, name);
       ensureDir(baseDir);
-      const viewPath = path.join(baseDir, 'view.sql');
-      const udfPath = path.join(baseDir, 'udf.sql');
-      fs.writeFileSync(viewPath, `${artifacts.view.trim()  }\n`, 'utf8');
-      fs.writeFileSync(udfPath, `${artifacts.udf.trim()  }\n`, 'utf8');
+      const viewPath = path.join(baseDir, "view.sql");
+      const udfPath = path.join(baseDir, "udf.sql");
+      fs.writeFileSync(viewPath, `${artifacts.view.trim()}\n`, "utf8");
+      fs.writeFileSync(udfPath, `${artifacts.udf.trim()}\n`, "utf8");
       written.push(viewPath, udfPath);
     }
     return written;

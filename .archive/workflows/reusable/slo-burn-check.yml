@@ -15,6 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: '3.12' }
+        with: { python-version: "3.12" }
       - name: Run SLO burn checker
         run: PROM_URL=${{ secrets.PROM_URL }} python scripts/slo_burn_check.py --budget ${{ inputs.budget_path }}

@@ -43,7 +43,7 @@ export interface ColorPalette {
 }
 
 export interface ColorScale {
-  type: 'linear' | 'log' | 'sqrt' | 'categorical' | 'sequential' | 'diverging';
+  type: "linear" | "log" | "sqrt" | "categorical" | "sequential" | "diverging";
   domain: [number, number] | string[];
   range: string[];
 }
@@ -51,7 +51,7 @@ export interface ColorScale {
 export interface AnimationConfig {
   enabled: boolean;
   duration: number;
-  easing: 'linear' | 'ease' | 'ease-in' | 'ease-out' | 'ease-in-out';
+  easing: "linear" | "ease" | "ease-in" | "ease-out" | "ease-in-out";
   delay?: number;
 }
 
@@ -69,16 +69,24 @@ export interface InteractionConfig {
 
 export interface LegendConfig {
   enabled: boolean;
-  position: 'top' | 'right' | 'bottom' | 'left' | 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
-  orientation?: 'horizontal' | 'vertical';
+  position:
+    | "top"
+    | "right"
+    | "bottom"
+    | "left"
+    | "top-right"
+    | "top-left"
+    | "bottom-right"
+    | "bottom-left";
+  orientation?: "horizontal" | "vertical";
   title?: string;
 }
 
 export interface TooltipConfig {
   enabled: boolean;
   format?: (dataPoint: DataPoint) => string;
-  position?: 'mouse' | 'fixed';
-  theme?: 'light' | 'dark';
+  position?: "mouse" | "fixed";
+  theme?: "light" | "dark";
 }
 
 export interface AxesConfig {
@@ -89,7 +97,7 @@ export interface AxesConfig {
 
 export interface AxisConfig {
   label?: string;
-  scale?: 'linear' | 'log' | 'time' | 'band' | 'point';
+  scale?: "linear" | "log" | "time" | "band" | "point";
   domain?: [number, number] | string[];
   ticks?: number;
   format?: (value: any) => string;
@@ -162,24 +170,35 @@ export interface BrushEvent extends VisualizationEvent {
 // Data Operations
 export interface DataFilter {
   field: string;
-  operator: 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'in' | 'nin' | 'contains' | 'startsWith' | 'endsWith';
+  operator:
+    | "eq"
+    | "ne"
+    | "gt"
+    | "gte"
+    | "lt"
+    | "lte"
+    | "in"
+    | "nin"
+    | "contains"
+    | "startsWith"
+    | "endsWith";
   value: any;
 }
 
 export interface DataAggregation {
   field: string;
-  operation: 'count' | 'sum' | 'avg' | 'min' | 'max' | 'median' | 'mode';
+  operation: "count" | "sum" | "avg" | "min" | "max" | "median" | "mode";
   groupBy?: string[];
 }
 
 export interface DataTransform {
-  type: 'filter' | 'aggregate' | 'sort' | 'join' | 'pivot' | 'calculate';
+  type: "filter" | "aggregate" | "sort" | "join" | "pivot" | "calculate";
   config: any;
 }
 
 // Export/Share Types
 export interface ExportConfig {
-  format: 'png' | 'svg' | 'pdf' | 'json' | 'csv';
+  format: "png" | "svg" | "pdf" | "json" | "csv";
   quality?: number;
   scale?: number;
   filename?: string;

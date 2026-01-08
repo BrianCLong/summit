@@ -2,9 +2,9 @@
  * Static Scraper - Fast scraping for static HTML pages
  */
 
-import axios from 'axios';
-import { ContentExtractor } from '../core/ContentExtractor.js';
-import type { ScrapeResult, ScrapeOptions } from '../types/index.js';
+import axios from "axios";
+import { ContentExtractor } from "../core/ContentExtractor.js";
+import type { ScrapeResult, ScrapeOptions } from "../types/index.js";
 
 export class StaticScraper {
   private extractor: ContentExtractor;
@@ -22,12 +22,12 @@ export class StaticScraper {
     try {
       const response = await axios.get(url, {
         headers: {
-          'User-Agent': options?.userAgent || 'Mozilla/5.0 (compatible; IntelGraphOSINT/1.0)',
-          ...options?.headers
+          "User-Agent": options?.userAgent || "Mozilla/5.0 (compatible; IntelGraphOSINT/1.0)",
+          ...options?.headers,
         },
         timeout: options?.timeout || 30000,
         maxRedirects: 5,
-        validateStatus: () => true // Accept all status codes
+        validateStatus: () => true, // Accept all status codes
       });
 
       const html = response.data;
@@ -45,13 +45,13 @@ export class StaticScraper {
           text,
           markdown,
           title: metadata.title,
-          description: metadata.description
+          description: metadata.description,
         },
         metadata,
         performance: {
           loadTime: Date.now() - startTime,
-          domContentLoaded: Date.now() - startTime
-        }
+          domContentLoaded: Date.now() - startTime,
+        },
       };
 
       if (options?.extractLinks) {
@@ -73,8 +73,8 @@ export class StaticScraper {
         error: error instanceof Error ? error.message : String(error),
         performance: {
           loadTime: Date.now() - startTime,
-          domContentLoaded: 0
-        }
+          domContentLoaded: 0,
+        },
       };
     }
   }

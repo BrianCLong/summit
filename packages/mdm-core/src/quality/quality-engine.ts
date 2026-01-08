@@ -12,9 +12,9 @@ import type {
   RuleResult,
   QualityDimension,
   Severity,
-  IssueType
-} from '../types/index.js';
-import { v4 as uuidv4 } from 'uuid';
+  IssueType,
+} from "../types/index.js";
+import { v4 as uuidv4 } from "uuid";
 
 export class QualityEngine {
   private rules: Map<string, QualityRule>;
@@ -63,7 +63,7 @@ export class QualityEngine {
       ruleResults,
       issues,
       lastAssessed: new Date(),
-      assessedBy: 'system'
+      assessedBy: "system",
     };
   }
 
@@ -104,7 +104,7 @@ export class QualityEngine {
       weight: this.getDimensionWeight(dimension),
       passedRules,
       totalRules: rules.length,
-      issues: dimensionIssues
+      issues: dimensionIssues,
     };
   }
 
@@ -122,23 +122,23 @@ export class QualityEngine {
 
     try {
       switch (rule.ruleType) {
-        case 'field_validation':
+        case "field_validation":
           ({ passed, score, errorMessage } = this.evaluateFieldValidation(data, rule));
           break;
 
-        case 'record_validation':
+        case "record_validation":
           ({ passed, score, errorMessage } = this.evaluateRecordValidation(data, rule));
           break;
 
-        case 'cross_field':
+        case "cross_field":
           ({ passed, score, errorMessage } = this.evaluateCrossField(data, rule));
           break;
 
-        case 'business_rule':
+        case "business_rule":
           ({ passed, score, errorMessage } = this.evaluateBusinessRule(data, rule));
           break;
 
-        case 'statistical':
+        case "statistical":
           ({ passed, score, errorMessage } = this.evaluateStatistical(data, rule));
           break;
 
@@ -149,7 +149,7 @@ export class QualityEngine {
     } catch (error) {
       passed = false;
       score = 0;
-      errorMessage = error instanceof Error ? error.message : 'Evaluation failed';
+      errorMessage = error instanceof Error ? error.message : "Evaluation failed";
     }
 
     return {
@@ -159,7 +159,7 @@ export class QualityEngine {
       passed,
       score,
       errorMessage,
-      severity: rule.severity
+      severity: rule.severity,
     };
   }
 
@@ -173,43 +173,43 @@ export class QualityEngine {
     // Parse the expression to get field name and validation logic
     const match = rule.expression.match(/^(\w+)\s*(.+)$/);
     if (!match) {
-      return { passed: false, score: 0, errorMessage: 'Invalid rule expression' };
+      return { passed: false, score: 0, errorMessage: "Invalid rule expression" };
     }
 
     const fieldName = match[1];
     const value = data[fieldName];
 
     // Common validations
-    if (rule.expression.includes('required') || rule.expression.includes('not null')) {
-      const passed = value !== null && value !== undefined && value !== '';
+    if (rule.expression.includes("required") || rule.expression.includes("not null")) {
+      const passed = value !== null && value !== undefined && value !== "";
       return {
         passed,
         score: passed ? 1.0 : 0.0,
-        errorMessage: passed ? undefined : `${fieldName} is required`
+        errorMessage: passed ? undefined : `${fieldName} is required`,
       };
     }
 
-    if (rule.expression.includes('email')) {
+    if (rule.expression.includes("email")) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      const passed = typeof value === 'string' && emailRegex.test(value);
+      const passed = typeof value === "string" && emailRegex.test(value);
       return {
         passed,
         score: passed ? 1.0 : 0.0,
-        errorMessage: passed ? undefined : `${fieldName} must be a valid email`
+        errorMessage: passed ? undefined : `${fieldName} must be a valid email`,
       };
     }
 
-    if (rule.expression.includes('phone')) {
+    if (rule.expression.includes("phone")) {
       const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]*$/;
-      const passed = typeof value === 'string' && phoneRegex.test(value);
+      const passed = typeof value === "string" && phoneRegex.test(value);
       return {
         passed,
         score: passed ? 1.0 : 0.0,
-        errorMessage: passed ? undefined : `${fieldName} must be a valid phone number`
+        errorMessage: passed ? undefined : `${fieldName} must be a valid phone number`,
       };
     }
 
-    if (rule.expression.includes('url')) {
+    if (rule.expression.includes("url")) {
       try {
         new URL(String(value));
         return { passed: true, score: 1.0 };
@@ -223,7 +223,7 @@ export class QualityEngine {
     return {
       passed,
       score: passed ? 1.0 : 0.0,
-      errorMessage: passed ? undefined : `${fieldName} validation failed`
+      errorMessage: passed ? undefined : `${fieldName} validation failed`,
     };
   }
 
@@ -235,11 +235,11 @@ export class QualityEngine {
     rule: QualityRule
   ): { passed: boolean; score: number; errorMessage?: string } {
     // Completeness check
-    if (rule.expression.includes('completeness')) {
+    if (rule.expression.includes("completeness")) {
       const threshold = rule.threshold || 0.8;
       const totalFields = Object.keys(data).length;
       const populatedFields = Object.values(data).filter(
-        v => v !== null && v !== undefined && v !== ''
+        (v) => v !== null && v !== undefined && v !== ""
       ).length;
 
       const completeness = totalFields > 0 ? populatedFields / totalFields : 0;
@@ -248,7 +248,9 @@ export class QualityEngine {
       return {
         passed,
         score: completeness,
-        errorMessage: passed ? undefined : `Record completeness ${(completeness * 100).toFixed(1)}% below threshold ${(threshold * 100).toFixed(1)}%`
+        errorMessage: passed
+          ? undefined
+          : `Record completeness ${(completeness * 100).toFixed(1)}% below threshold ${(threshold * 100).toFixed(1)}%`,
       };
     }
 
@@ -263,7 +265,7 @@ export class QualityEngine {
     rule: QualityRule
   ): { passed: boolean; score: number; errorMessage?: string } {
     // Date range validation (e.g., start_date < end_date)
-    if (rule.expression.includes('<') || rule.expression.includes('>')) {
+    if (rule.expression.includes("<") || rule.expression.includes(">")) {
       const match = rule.expression.match(/(\w+)\s*([<>]=?)\s*(\w+)/);
       if (match) {
         const [, field1, operator, field2] = match;
@@ -275,15 +277,15 @@ export class QualityEngine {
         }
 
         let passed = false;
-        if (operator === '<') passed = value1 < value2;
-        else if (operator === '>') passed = value1 > value2;
-        else if (operator === '<=') passed = value1 <= value2;
-        else if (operator === '>=') passed = value1 >= value2;
+        if (operator === "<") passed = value1 < value2;
+        else if (operator === ">") passed = value1 > value2;
+        else if (operator === "<=") passed = value1 <= value2;
+        else if (operator === ">=") passed = value1 >= value2;
 
         return {
           passed,
           score: passed ? 1.0 : 0.0,
-          errorMessage: passed ? undefined : `Cross-field validation failed: ${rule.expression}`
+          errorMessage: passed ? undefined : `Cross-field validation failed: ${rule.expression}`,
         };
       }
     }
@@ -307,7 +309,7 @@ export class QualityEngine {
       return {
         passed: false,
         score: 0.0,
-        errorMessage: error instanceof Error ? error.message : 'Business rule evaluation failed'
+        errorMessage: error instanceof Error ? error.message : "Business rule evaluation failed",
       };
     }
   }
@@ -327,11 +329,7 @@ export class QualityEngine {
   /**
    * Create quality issue from failed rule
    */
-  private createIssue(
-    recordId: string,
-    rule: QualityRule,
-    result: RuleResult
-  ): QualityIssue {
+  private createIssue(recordId: string, rule: QualityRule, result: RuleResult): QualityIssue {
     return {
       id: uuidv4(),
       recordId,
@@ -340,8 +338,8 @@ export class QualityEngine {
       severity: rule.severity,
       description: result.errorMessage || rule.description,
       detectedAt: new Date(),
-      status: 'open',
-      autoFixable: rule.autoFix
+      status: "open",
+      autoFixable: rule.autoFix,
     };
   }
 
@@ -350,13 +348,13 @@ export class QualityEngine {
    */
   private mapRuleTypeToIssueType(ruleType: string): IssueType {
     const mapping: Record<string, IssueType> = {
-      field_validation: 'invalid_format',
-      record_validation: 'missing_value',
-      cross_field: 'inconsistent',
-      business_rule: 'non_conforming',
-      statistical: 'custom'
+      field_validation: "invalid_format",
+      record_validation: "missing_value",
+      cross_field: "inconsistent",
+      business_rule: "non_conforming",
+      statistical: "custom",
     };
-    return mapping[ruleType] || 'custom';
+    return mapping[ruleType] || "custom";
   }
 
   /**
@@ -384,10 +382,7 @@ export class QualityEngine {
     const totalWeight = dimensionScores.reduce((sum, ds) => sum + ds.weight, 0);
     if (totalWeight === 0) return 1.0;
 
-    const weightedSum = dimensionScores.reduce(
-      (sum, ds) => sum + ds.score * ds.weight,
-      0
-    );
+    const weightedSum = dimensionScores.reduce((sum, ds) => sum + ds.score * ds.weight, 0);
 
     return weightedSum / totalWeight;
   }
@@ -401,10 +396,10 @@ export class QualityEngine {
       accuracy: 0.25,
       consistency: 0.15,
       validity: 0.15,
-      uniqueness: 0.10,
-      timeliness: 0.10,
+      uniqueness: 0.1,
+      timeliness: 0.1,
       conformity: 0.05,
-      integrity: 0.05
+      integrity: 0.05,
     };
     return weights[dimension] || 0.1;
   }
@@ -423,15 +418,15 @@ export class QualityEngine {
       if (!issue.autoFixable) continue;
 
       switch (issue.issueType) {
-        case 'missing_value':
+        case "missing_value":
           // Could set default values
           break;
 
-        case 'invalid_format':
+        case "invalid_format":
           // Could apply formatting corrections
           break;
 
-        case 'inconsistent':
+        case "inconsistent":
           // Could standardize values
           break;
 
@@ -456,6 +451,6 @@ export class QualityEngine {
    * Get all registered rules for a domain
    */
   getRulesForDomain(domain: string): QualityRule[] {
-    return Array.from(this.rules.values()).filter(r => r.domain === domain);
+    return Array.from(this.rules.values()).filter((r) => r.domain === domain);
   }
 }

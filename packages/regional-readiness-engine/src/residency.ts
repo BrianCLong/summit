@@ -1,4 +1,4 @@
-import { CrossBorderAllowance, RegionId, ResidencyControlState } from './types.js';
+import { CrossBorderAllowance, RegionId, ResidencyControlState } from "./types.js";
 
 interface AccessDecision {
   allowed: boolean;
@@ -20,11 +20,13 @@ export class ResidencyPolicyEngine {
 
   allowCrossBorderTransfer(allowance: CrossBorderAllowance): void {
     if (!this.regionControls.has(allowance.fromRegion)) {
-      throw new Error(`Region controls for ${allowance.fromRegion} must be registered before granting allowances`);
+      throw new Error(
+        `Region controls for ${allowance.fromRegion} must be registered before granting allowances`
+      );
     }
 
     if (allowance.expiresAt && allowance.expiresAt < new Date()) {
-      throw new Error('Cannot create an allowance that is already expired');
+      throw new Error("Cannot create an allowance that is already expired");
     }
 
     this.allowances.push({ ...allowance });
@@ -34,7 +36,7 @@ export class ResidencyPolicyEngine {
     const reasons: string[] = [];
     const homeRegion = this.tenantHomeRegions.get(tenantId);
     if (!homeRegion) {
-      reasons.push('Tenant home region not set');
+      reasons.push("Tenant home region not set");
       return { allowed: false, reasons };
     }
 
@@ -45,16 +47,16 @@ export class ResidencyPolicyEngine {
 
     const controls = this.regionControls.get(targetRegion);
     if (!controls || !controls.residencyEnforced) {
-      reasons.push('Residency controls are not registered or not enforced for target region');
+      reasons.push("Residency controls are not registered or not enforced for target region");
       return { allowed: false, reasons };
     }
 
     if (!controls.backupsVerified) {
-      reasons.push('Regional backups are not verified');
+      reasons.push("Regional backups are not verified");
     }
 
     if (!controls.kmsKeyId) {
-      reasons.push('Regional KMS key is not configured');
+      reasons.push("Regional KMS key is not configured");
     }
 
     return { allowed: reasons.length === 0, reasons };
@@ -66,18 +68,18 @@ export class ResidencyPolicyEngine {
     requestRegion: RegionId,
     dataClass: string,
     purpose: string,
-    now: Date = new Date(),
+    now: Date = new Date()
   ): AccessDecision {
     const reasons: string[] = [];
     const homeRegion = this.tenantHomeRegions.get(tenantId);
     if (!homeRegion) {
-      reasons.push('Tenant home region not set');
+      reasons.push("Tenant home region not set");
       return { allowed: false, reasons };
     }
 
     const regionControls = this.regionControls.get(dataRegion);
     if (!regionControls || !regionControls.residencyEnforced) {
-      reasons.push('Residency controls are not enforced for data region');
+      reasons.push("Residency controls are not enforced for data region");
       return { allowed: false, reasons };
     }
 
@@ -86,7 +88,7 @@ export class ResidencyPolicyEngine {
     }
 
     if (!regionControls.egressAllowlist.includes(requestRegion)) {
-      reasons.push('Requested region is not in egress allowlist');
+      reasons.push("Requested region is not in egress allowlist");
       return { allowed: false, reasons };
     }
 
@@ -95,21 +97,21 @@ export class ResidencyPolicyEngine {
         entry.tenantId === tenantId &&
         entry.fromRegion === dataRegion &&
         entry.toRegion === requestRegion &&
-        entry.dataClasses.includes(dataClass),
+        entry.dataClasses.includes(dataClass)
     );
 
     if (!allowance) {
-      reasons.push('No cross-border allowance configured for this data class');
+      reasons.push("No cross-border allowance configured for this data class");
       return { allowed: false, reasons };
     }
 
     if (allowance.expiresAt && allowance.expiresAt < now) {
-      reasons.push('Cross-border allowance has expired');
+      reasons.push("Cross-border allowance has expired");
       return { allowed: false, reasons };
     }
 
     if (!purpose.toLowerCase().includes(allowance.purpose.toLowerCase())) {
-      reasons.push('Purpose does not align with approved allowance');
+      reasons.push("Purpose does not align with approved allowance");
       return { allowed: false, reasons };
     }
 

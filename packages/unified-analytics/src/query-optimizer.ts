@@ -3,7 +3,7 @@
  * Cost-based query optimization
  */
 
-import { ParsedQuery } from './sql-parser.js';
+import { ParsedQuery } from "./sql-parser.js";
 
 export interface OptimizedPlan {
   operations: any[];
@@ -16,7 +16,7 @@ export class QueryOptimizer {
     return {
       operations: [],
       estimatedCost: 0,
-      estimatedRows: 0
+      estimatedRows: 0,
     };
   }
 }

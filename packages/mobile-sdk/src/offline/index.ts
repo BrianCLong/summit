@@ -10,7 +10,7 @@ import {
   updateMutationRetry,
   setSyncStatus,
   getSyncStatus,
-} from '../storage';
+} from "../storage";
 
 export interface SyncOptions {
   maxRetries?: number;
@@ -20,7 +20,7 @@ export interface SyncOptions {
   onError?: (error: Error) => void;
 }
 
-const DEFAULT_OPTIONS: Required<Omit<SyncOptions, 'onProgress' | 'onError'>> = {
+const DEFAULT_OPTIONS: Required<Omit<SyncOptions, "onProgress" | "onError">> = {
   maxRetries: 3,
   retryDelay: 1000,
   batchSize: 10,
@@ -28,18 +28,18 @@ const DEFAULT_OPTIONS: Required<Omit<SyncOptions, 'onProgress' | 'onError'>> = {
 
 // Check if online
 export const isOnline = (): boolean => {
-  return typeof navigator !== 'undefined' && navigator.onLine;
+  return typeof navigator !== "undefined" && navigator.onLine;
 };
 
 // Queue mutation for offline sync
 export const queueMutation = async (operation: string, variables: any): Promise<number> => {
   const id = await addMutation(operation, variables);
-  console.log('[OfflineSync] Mutation queued:', id);
+  console.log("[OfflineSync] Mutation queued:", id);
 
   // Try to sync immediately if online
   if (isOnline()) {
     syncMutations().catch((error) => {
-      console.error('[OfflineSync] Immediate sync failed:', error);
+      console.error("[OfflineSync] Immediate sync failed:", error);
     });
   }
 
@@ -52,20 +52,20 @@ export const syncMutations = async (
   options: SyncOptions = {}
 ): Promise<void> => {
   if (!isOnline()) {
-    console.log('[OfflineSync] Device offline, skipping sync');
+    console.log("[OfflineSync] Device offline, skipping sync");
     return;
   }
 
-  const opts = {...DEFAULT_OPTIONS, ...options};
+  const opts = { ...DEFAULT_OPTIONS, ...options };
   const mutations = await getPendingMutations();
 
   if (mutations.length === 0) {
-    console.log('[OfflineSync] No pending mutations');
+    console.log("[OfflineSync] No pending mutations");
     return;
   }
 
   console.log(`[OfflineSync] Syncing ${mutations.length} mutations`);
-  await setSyncStatus('mutations', 'syncing');
+  await setSyncStatus("mutations", "syncing");
 
   let syncedCount = 0;
   const batch = mutations.slice(0, opts.batchSize);
@@ -91,9 +91,7 @@ export const syncMutations = async (
 
       // Delete if max retries exceeded
       if (mutation.retryCount >= opts.maxRetries) {
-        console.log(
-          `[OfflineSync] Max retries exceeded for mutation ${mutation.id}, deleting`
-        );
+        console.log(`[OfflineSync] Max retries exceeded for mutation ${mutation.id}, deleting`);
         await deleteMutation(mutation.id!);
       }
 
@@ -101,7 +99,7 @@ export const syncMutations = async (
     }
   }
 
-  await setSyncStatus('mutations', 'completed');
+  await setSyncStatus("mutations", "completed");
   console.log(`[OfflineSync] Sync completed: ${syncedCount}/${batch.length}`);
 };
 
@@ -112,12 +110,12 @@ export const getSyncQueueStatus = async (): Promise<{
   status: string;
 }> => {
   const mutations = await getPendingMutations();
-  const syncStatus = await getSyncStatus('mutations');
+  const syncStatus = await getSyncStatus("mutations");
 
   return {
     pending: mutations.length,
     lastSync: syncStatus?.lastSync || null,
-    status: syncStatus?.status || 'idle',
+    status: syncStatus?.status || "idle",
   };
 };
 
@@ -129,22 +127,24 @@ export const clearSyncQueue = async (): Promise<void> => {
     await deleteMutation(mutation.id!);
   }
 
-  console.log('[OfflineSync] Sync queue cleared');
+  console.log("[OfflineSync] Sync queue cleared");
 };
 
 // Network status listeners
 export const onNetworkChange = (callback: (online: boolean) => void): (() => void) => {
-  if (typeof window === 'undefined') {return () => {};}
+  if (typeof window === "undefined") {
+    return () => {};
+  }
 
   const handleOnline = () => callback(true);
   const handleOffline = () => callback(false);
 
-  window.addEventListener('online', handleOnline);
-  window.addEventListener('offline', handleOffline);
+  window.addEventListener("online", handleOnline);
+  window.addEventListener("offline", handleOffline);
 
   return () => {
-    window.removeEventListener('online', handleOnline);
-    window.removeEventListener('offline', handleOffline);
+    window.removeEventListener("online", handleOnline);
+    window.removeEventListener("offline", handleOffline);
   };
 };
 
@@ -155,9 +155,9 @@ export const enableAutoSync = (
 ): (() => void) => {
   const cleanup = onNetworkChange((online) => {
     if (online) {
-      console.log('[OfflineSync] Network restored, syncing...');
+      console.log("[OfflineSync] Network restored, syncing...");
       syncMutations(executor, options).catch((error) => {
-        console.error('[OfflineSync] Auto-sync failed:', error);
+        console.error("[OfflineSync] Auto-sync failed:", error);
       });
     }
   });
@@ -174,12 +174,8 @@ export interface OptimisticUpdate<T> {
 
 const optimisticUpdates = new Map<string, OptimisticUpdate<any>>();
 
-export const addOptimisticUpdate = <T>(
-  id: string,
-  data: T,
-  rollback: () => void
-): void => {
-  optimisticUpdates.set(id, {id, data, rollback});
+export const addOptimisticUpdate = <T>(id: string, data: T, rollback: () => void): void => {
+  optimisticUpdates.set(id, { id, data, rollback });
 };
 
 export const removeOptimisticUpdate = (id: string): void => {

@@ -1,14 +1,14 @@
 meta:
   id: strategic.intent-horizon@v1
   owner: strategy
-  purpose: 'Forecasts long-range intent trajectories of competing actors.'
-  tags: ['strategic', 'intent', 'forecasting']
+  purpose: "Forecasts long-range intent trajectories of competing actors."
+  tags: ["strategic", "intent", "forecasting"]
   guardrails:
-    - 'Base forecasts on resource, incentive, and trend vectors.'
-    - 'Avoid speculative intent attribution without evidence.'
+    - "Base forecasts on resource, incentive, and trend vectors."
+    - "Avoid speculative intent attribution without evidence."
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
 
 inputs:

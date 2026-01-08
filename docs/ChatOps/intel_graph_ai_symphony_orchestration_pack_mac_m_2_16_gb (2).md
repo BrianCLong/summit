@@ -87,37 +87,37 @@ model_list:
   - model_name: local/ollama
     litellm_params:
       provider: openai_compatible
-      api_base: 'http://127.0.0.1:11434/v1'
-      api_key: 'sk-local-ollama'
-      model: 'llama3.1' # default for generic prompts
+      api_base: "http://127.0.0.1:11434/v1"
+      api_key: "sk-local-ollama"
+      model: "llama3.1" # default for generic prompts
 
   - model_name: local/ollama-coder
     litellm_params:
       provider: openai_compatible
-      api_base: 'http://127.0.0.1:11434/v1'
-      api_key: 'sk-local-ollama'
-      model: 'qwen2.5-coder:7b'
+      api_base: "http://127.0.0.1:11434/v1"
+      api_key: "sk-local-ollama"
+      model: "qwen2.5-coder:7b"
 
   - model_name: local/lmstudio
     litellm_params:
       provider: openai_compatible
-      api_base: 'http://127.0.0.1:1234/v1'
-      api_key: 'sk-local-lms'
-      model: 'llama-3.1-8b-instruct'
+      api_base: "http://127.0.0.1:1234/v1"
+      api_key: "sk-local-lms"
+      model: "llama-3.1-8b-instruct"
 
   # ===== OPTIONAL HOSTED (POWER BURSTS: ENABLED WITH LOW CAPS) =====
   - model_name: gemini/1.5-pro
     litellm_params:
       provider: google_ai_studio
-      model: 'gemini-1.5-pro-latest'
-      api_key: '${GOOGLE_API_KEY}'
+      model: "gemini-1.5-pro-latest"
+      api_key: "${GOOGLE_API_KEY}"
 
   - model_name: xai/grok-code-fast-1
     litellm_params:
       provider: openai_compatible
-      api_base: 'https://api.x.ai/v1'
-      api_key: '${XAI_API_KEY}'
-      model: 'grok-code-fast-1'
+      api_base: "https://api.x.ai/v1"
+      api_key: "${XAI_API_KEY}"
+      model: "grok-code-fast-1"
 
 router_settings:
   num_retries: 1
@@ -283,13 +283,13 @@ indent_size = 4
 ```js
 module.exports = {
   root: true,
-  extends: ['eslint:recommended'],
-  parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
+  extends: ["eslint:recommended"],
+  parserOptions: { ecmaVersion: "latest", sourceType: "module" },
   env: { node: true, es2023: true, browser: true, jest: true },
-  plugins: ['import'],
+  plugins: ["import"],
   rules: {
-    'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-    'import/order': ['warn', { 'newlines-between': 'always' }],
+    "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+    "import/order": ["warn", { "newlines-between": "always" }],
   },
 };
 ```
@@ -330,7 +330,7 @@ npx husky add .husky/commit-msg 'npx --no commitlint --edit "$1"'
 `commitlint.config.cjs`:
 
 ```js
-module.exports = { extends: ['@commitlint/config-conventional'] };
+module.exports = { extends: ["@commitlint/config-conventional"] };
 ```
 
 **pre-commit (Python + general):** `.pre-commit-config.yaml`
@@ -345,7 +345,7 @@ repos:
     rev: v0.6.9
     hooks:
       - id: ruff
-        args: ['--fix']
+        args: ["--fix"]
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.3.3
     hooks:
@@ -404,7 +404,7 @@ jobs:
       fail-fast: false
       matrix:
         node: [20]
-        py: ['3.11', '3.12']
+        py: ["3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
@@ -413,7 +413,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Cache npm
         uses: actions/cache@v4
@@ -484,7 +484,7 @@ jobs:
       - name: Python audit
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
       - run: |
           python -m pip install --upgrade pip
           pip install pip-audit
@@ -501,7 +501,7 @@ _(unchanged; ensure repo secret `GOOGLE_API_KEY` is set)_
 name: Nightly Security & Dependency Audit
 on:
   schedule:
-    - cron: '19 3 * * *' # 03:19 UTC nightly
+    - cron: "19 3 * * *" # 03:19 UTC nightly
   workflow_dispatch:
 
 jobs:
@@ -523,7 +523,7 @@ jobs:
       - name: Python audit
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
       - run: |
           python -m pip install --upgrade pip
           pip install pip-audit
@@ -788,24 +788,24 @@ just review src/**.ts
 gates:
   idea:
     checklist:
-      - 'Charter draft exists at /pm/charter.md'
-      - 'Stakeholder register seeded'
-      - 'Initial RAID created with ≥3 risks'
+      - "Charter draft exists at /pm/charter.md"
+      - "Stakeholder register seeded"
+      - "Initial RAID created with ≥3 risks"
   charter:
     checklist:
-      - 'WBS created with top 3 deliverables'
-      - 'Comms plan committed'
-      - 'Benefits register has baseline metrics'
+      - "WBS created with top 3 deliverables"
+      - "Comms plan committed"
+      - "Benefits register has baseline metrics"
   mvp:
     checklist:
-      - 'Test plan + CI green'
-      - 'Security review (Aegis) recorded'
-      - 'Decision log updated for key trade-offs'
+      - "Test plan + CI green"
+      - "Security review (Aegis) recorded"
+      - "Decision log updated for key trade-offs"
   scale:
     checklist:
-      - 'Perf SLOs met'
-      - 'Runbooks + provenance checks in place'
-      - 'Benefits review shows target trend'
+      - "Perf SLOs met"
+      - "Runbooks + provenance checks in place"
+      - "Benefits review shows target trend"
 ```
 
 ### 12.3 GitHub Issue/PR forms
@@ -1152,7 +1152,7 @@ just raid-sync
 **`ops/docker-compose.neo4j.yml`**
 
 ```yaml
-version: '3.9'
+version: "3.9"
 services:
   neo4j:
     image: neo4j:5-community
@@ -1160,21 +1160,15 @@ services:
     environment:
       NEO4J_AUTH: neo4j/test
       NEO4J_dbms_logs_debug_level: INFO
-      NEO4JLABS_PLUGINS: '[]' # enable ["apoc"] if needed
+      NEO4JLABS_PLUGINS: "[]" # enable ["apoc"] if needed
       NEO4J_dbms_memory_heap_initial__size: 512m
       NEO4J_dbms_memory_heap_max__size: 1024m
-      NEO4J_server_config_strict__validation_enabled: 'false'
+      NEO4J_server_config_strict__validation_enabled: "false"
     ports:
-      - '7474:7474'
-      - '7687:7687'
+      - "7474:7474"
+      - "7687:7687"
     healthcheck:
-      test:
-        [
-          'CMD',
-          'bash',
-          '-lc',
-          "cypher-shell -u neo4j -p test 'RETURN 1' || exit 1",
-        ]
+      test: ["CMD", "bash", "-lc", "cypher-shell -u neo4j -p test 'RETURN 1' || exit 1"]
       interval: 5s
       timeout: 3s
       retries: 20
@@ -1260,9 +1254,9 @@ name: Neo4j Guard
 on:
   pull_request:
     paths:
-      - 'db/migrations/**.cypher'
-      - 'ops/docker-compose.neo4j.yml'
-      - 'tools/neo4j_guard.sh'
+      - "db/migrations/**.cypher"
+      - "ops/docker-compose.neo4j.yml"
+      - "tools/neo4j_guard.sh"
 
 jobs:
   guard:
@@ -1545,7 +1539,7 @@ name: Docs
 on:
   push:
     branches: [main]
-    paths: ['docs/**', 'pm/**', 'mkdocs.yml']
+    paths: ["docs/**", "pm/**", "mkdocs.yml"]
 permissions:
   contents: read
   pages: write
@@ -1556,11 +1550,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: '3.12' }
+        with: { python-version: "3.12" }
       - run: pip install mkdocs mkdocs-material
       - run: mkdocs build --strict
       - uses: actions/upload-pages-artifact@v3
-        with: { path: 'site' }
+        with: { path: "site" }
       - uses: actions/deploy-pages@v4
 ```
 
@@ -1641,7 +1635,7 @@ Add to `.pre-commit-config.yaml`:
   rev: v5.0.0
   hooks:
     - id: check-added-large-files
-      args: ['--maxkb=500']
+      args: ["--maxkb=500"]
     - id: end-of-file-fixer
     - id: trailing-whitespace
     - id: detect-private-key
@@ -1655,18 +1649,13 @@ Add to `.pre-commit-config.yaml`:
 
 ```yaml
 prompts:
-  - 'Generate Cypher to answer: {{q}}. Return query + brief rationale.'
+  - "Generate Cypher to answer: {{q}}. Return query + brief rationale."
 tests:
-  - vars: { q: 'Entities co-present within 100m / 30m near X' }
-  - vars: { q: 'Paths from A to B excluding classified edges' }
+  - vars: { q: "Entities co-present within 100m / 30m near X" }
+  - vars: { q: "Paths from A to B excluding classified edges" }
 providers:
   - id: openai:gateway
-    config:
-      {
-        apiBaseUrl: 'http://127.0.0.1:4000/v1',
-        apiKey: 'local',
-        model: 'local/ollama-coder',
-      }
+    config: { apiBaseUrl: "http://127.0.0.1:4000/v1", apiKey: "local", model: "local/ollama-coder" }
 ```
 
 Add Just recipe:

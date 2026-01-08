@@ -33,12 +33,13 @@ export class Router {
 
   constructor(routes: Route[]) {
     this.routes = routes;
-    this.compiledRoutes = routes.map(route => this.compileRoute(route));
+    this.compiledRoutes = routes.map((route) => this.compileRoute(route));
   }
 
   match(path: string, method: string): Route | null {
     for (const compiledRoute of this.compiledRoutes) {
-      const methodMatch = !compiledRoute.method ||
+      const methodMatch =
+        !compiledRoute.method ||
         (Array.isArray(compiledRoute.method)
           ? compiledRoute.method.includes(method)
           : compiledRoute.method === method);
@@ -56,7 +57,7 @@ export class Router {
   }
 
   removeRoute(path: string): void {
-    const index = this.routes.findIndex(r => r.path === path);
+    const index = this.routes.findIndex((r) => r.path === path);
     if (index !== -1) {
       this.routes.splice(index, 1);
       this.compiledRoutes.splice(index, 1);
@@ -70,9 +71,7 @@ export class Router {
   private compileRoute(route: Route): CompiledRoute {
     // Convert path pattern to regex
     // Example: /api/v1/users/:id -> /^\/api\/v1\/users\/([^/]+)$/
-    const pattern = route.path
-      .replace(/:[^/]+/g, '([^/]+)')
-      .replace(/\*/g, '.*');
+    const pattern = route.path.replace(/:[^/]+/g, "([^/]+)").replace(/\*/g, ".*");
 
     return {
       pattern: new RegExp(`^${pattern}$`),

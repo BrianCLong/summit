@@ -1,6 +1,7 @@
 # Service & Capability Catalog v0
 
 ## 1) Catalog data model
+
 - **Entities**
   - **Service**: canonical unit of delivery (API, job, UI, or shared library). Track type (online, batch, library), lifecycle stage, maturity score.
   - **Capability**: user-facing or platform capability (e.g., Auth, Billing, Analytics) that maps to one or more services; owns user outcomes and roadmaps.
@@ -20,6 +21,7 @@
   - **Org Graph**: owner group references canonical team IDs; pulls roster, on-call rotation, and Slack/Teams channels. Ownership changes sync automatically via Org Graph events.
 
 ## 2) Ownership & accountability patterns
+
 - **Assignment**
   - Each service must have: **Primary owner** (team), **Backup owner** (peer team), **Escalation policy** (pager schedule + duty manager). Individuals are derived from on-call rotations, not hard-coded.
   - Ownership is displayed inline on every service page and in search results; surfaces on-call now, upcoming, and last escalated responder.
@@ -33,6 +35,7 @@
   - Sunset path: if service is deprecated >90 days without successor mapping, escalate to architecture review to force replacement or decommission plan.
 
 ## 3) Capabilities map UX
+
 - **Map navigation**
   - Landing page lists capabilities with health (SLO attainment, open incidents), maturity, and coverage score (tenants served vs. planned).
   - Selecting a capability shows constituent services, their runtime tiers, current status (SLO/alerts), and owning teams.
@@ -45,6 +48,7 @@
   - Quick actions: open runbook, view dashboard, launch tracing session, request ownership change, subscribe to change events.
 
 ## 4) Artifacts
+
 - **Service & Capability Catalog v0 outline**
   - Purpose, scope, definitions
   - Data model and required metadata

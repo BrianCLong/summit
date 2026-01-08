@@ -13,6 +13,7 @@ Audited `docker-compose.yml` against the architecture map and fixed critical con
 ### 1. ❌ CRITICAL: PostgreSQL Username Mismatch
 
 **Problem**:
+
 - The `postgres` service defined `POSTGRES_USER: summit`
 - But dependent services (`migrations`, `api`, `worker`, `seed-fixtures`) used `POSTGRES_USER: intelgraph`
 - This caused authentication failures when services attempted to connect to the database
@@ -20,21 +21,24 @@ Audited `docker-compose.yml` against the architecture map and fixed critical con
 **Impact**: Services would fail to start due to database authentication errors
 
 **Fix Applied**:
+
 ```yaml
 # Changed in all services:
 environment:
-  POSTGRES_USER: summit          # was: intelgraph
-  POSTGRES_DB: summit_dev         # was: intelgraph_dev
+  POSTGRES_USER: summit # was: intelgraph
+  POSTGRES_DB: summit_dev # was: intelgraph_dev
   POSTGRES_URL: postgres://summit:dev_password@postgres:5432/summit_dev
 ```
 
 **Services Updated**:
+
 - `migrations` (lines 133-136)
 - `seed-fixtures` (lines 155-157)
 - `api` (lines 186-188)
 - `worker` (lines 271-273)
 
 **Validation**:
+
 - ✅ Matches `.env.example` which uses `POSTGRES_USER=summit`
 - ✅ Consistent across all services
 - ✅ Database name aligned (`summit_dev`)
@@ -44,6 +48,7 @@ environment:
 ### 2. ❌ Grafana Provisioning Paths Incorrect
 
 **Problem**:
+
 ```yaml
 # Incorrect paths in docker-compose.yml:
 volumes:
@@ -57,6 +62,7 @@ volumes:
 **Impact**: Grafana dashboards would not load, no datasources configured
 
 **Fix Applied**:
+
 ```yaml
 # Corrected paths:
 volumes:
@@ -65,6 +71,7 @@ volumes:
 ```
 
 **Validation**:
+
 ```bash
 $ ls -la observability/grafana/provisioning/
 drwxr-xr-x 2 root root 4096 Nov 20 00:13 dashboards
@@ -77,6 +84,7 @@ drwxr-xr-x 2 root root 4096 Nov 20 00:13 datasources
 ### 3. ❌ Prometheus Configuration Path Incorrect
 
 **Problem**:
+
 ```yaml
 # Incorrect path:
 volumes:
@@ -89,6 +97,7 @@ volumes:
 **Impact**: Prometheus would fail to start or use incomplete configuration
 
 **Fix Applied**:
+
 ```yaml
 # Corrected path:
 volumes:
@@ -96,6 +105,7 @@ volumes:
 ```
 
 **Validation**:
+
 ```bash
 $ ls -la observability/prometheus/prometheus-dev.yml
 -rw-r--r-- 1 root root 397 Nov 20 00:13 observability/prometheus/prometheus-dev.yml
@@ -141,17 +151,18 @@ OTEL_SERVICE_NAME: summit-worker
 
 ## Files Changed
 
-| File | Changes | Lines Modified |
-|------|---------|----------------|
-| `docker-compose.yml` | Fixed postgres users, paths, env vars | ~30 lines |
-| `RUNBOOKS/dev-bootstrap.yaml` | Comprehensive bootstrap guide | Complete rewrite |
-| `DOCKER_COMPOSE_FIXES.md` | This summary document | New file |
+| File                          | Changes                               | Lines Modified   |
+| ----------------------------- | ------------------------------------- | ---------------- |
+| `docker-compose.yml`          | Fixed postgres users, paths, env vars | ~30 lines        |
+| `RUNBOOKS/dev-bootstrap.yaml` | Comprehensive bootstrap guide         | Complete rewrite |
+| `DOCKER_COMPOSE_FIXES.md`     | This summary document                 | New file         |
 
 ---
 
 ## Validation Checklist
 
 ### Configuration Validation
+
 - ✅ All postgres services use `POSTGRES_USER=summit`
 - ✅ All postgres services use `POSTGRES_DB=summit_dev`
 - ✅ Grafana paths point to `./observability/grafana/provisioning/`
@@ -160,6 +171,7 @@ OTEL_SERVICE_NAME: summit-worker
 - ✅ OTEL service names standardized
 
 ### File Existence Validation
+
 - ✅ `observability/grafana/provisioning/dashboards/` exists
 - ✅ `observability/grafana/provisioning/datasources/` exists
 - ✅ `observability/prometheus/prometheus-dev.yml` exists
@@ -173,6 +185,7 @@ OTEL_SERVICE_NAME: summit-worker
 - ✅ `scripts/run-compose.sh` exists
 
 ### Service Dependencies
+
 - ✅ All Dockerfiles exist (server, client, ai, ingestion, nlp, reliability)
 - ✅ server/package.json has `npm run dev` and `npm run dev:worker`
 - ✅ Postgres migrations dir exists at `server/db/migrations/postgres/`
@@ -182,6 +195,7 @@ OTEL_SERVICE_NAME: summit-worker
 ## Testing Instructions
 
 ### Quick Validation
+
 ```bash
 # 1. Start the stack
 make bootstrap
@@ -206,6 +220,7 @@ make smoke
 ```
 
 ### Expected Output
+
 ```
 ✅ All containers show "Up" or "healthy"
 ✅ curl http://localhost:4000/health returns { "status": "ok", ... }
@@ -222,24 +237,25 @@ make smoke
 
 After `make up`, the following services are available:
 
-| Service | URL | Credentials |
-|---------|-----|-------------|
-| Frontend | http://localhost:3000 | N/A |
-| GraphQL API | http://localhost:4000/graphql | N/A |
-| Health Check | http://localhost:4000/health | N/A |
-| Metrics | http://localhost:4000/metrics | N/A |
-| Neo4j Browser | http://localhost:7474 | neo4j / dev_password |
-| Prometheus | http://localhost:9090 | N/A |
-| Grafana | http://localhost:8080 | admin / dev_password |
-| Jaeger | http://localhost:16686 | N/A |
-| OPA | http://localhost:8181 | N/A |
-| Worker | http://localhost:4100/health | N/A |
+| Service       | URL                           | Credentials          |
+| ------------- | ----------------------------- | -------------------- |
+| Frontend      | http://localhost:3000         | N/A                  |
+| GraphQL API   | http://localhost:4000/graphql | N/A                  |
+| Health Check  | http://localhost:4000/health  | N/A                  |
+| Metrics       | http://localhost:4000/metrics | N/A                  |
+| Neo4j Browser | http://localhost:7474         | neo4j / dev_password |
+| Prometheus    | http://localhost:9090         | N/A                  |
+| Grafana       | http://localhost:8080         | admin / dev_password |
+| Jaeger        | http://localhost:16686        | N/A                  |
+| OPA           | http://localhost:8181         | N/A                  |
+| Worker        | http://localhost:4100/health  | N/A                  |
 
 ---
 
 ## Troubleshooting
 
 ### If postgres authentication still fails:
+
 ```bash
 # Reset database and volumes
 make down
@@ -248,6 +264,7 @@ make up
 ```
 
 ### If Grafana dashboards don't appear:
+
 ```bash
 # Verify provisioning directories
 ls -la observability/grafana/provisioning/dashboards/
@@ -258,6 +275,7 @@ docker-compose restart grafana
 ```
 
 ### If Prometheus scrape targets are down:
+
 ```bash
 # Check prometheus config is loaded
 docker exec prometheus cat /etc/prometheus/prometheus.yml
@@ -267,6 +285,7 @@ docker ps | grep -E "api|worker"
 ```
 
 ### If services fail health checks:
+
 ```bash
 # View logs for specific service
 docker-compose logs <service-name>
@@ -282,6 +301,7 @@ docker-compose logs <service-name>
 ## Documentation Updates
 
 ### Updated Files
+
 1. **docker-compose.yml** - Fixed configurations
 2. **RUNBOOKS/dev-bootstrap.yaml** - Complete bootstrap guide with:
    - Prerequisites
@@ -294,6 +314,7 @@ docker-compose logs <service-name>
 3. **DOCKER_COMPOSE_FIXES.md** - This summary document
 
 ### Documentation Alignment
+
 - ✅ ARCHITECTURE_MAP.generated.yaml reflects actual service configurations
 - ✅ REPOSITORY-STRUCTURE.md lists correct service ports and paths
 - ✅ README.md service access points updated
@@ -304,6 +325,7 @@ docker-compose logs <service-name>
 ## Next Steps
 
 ### Immediate
+
 1. ✅ Commit fixes to branch
 2. ✅ Push to remote
 3. ⏳ Test `make up` on clean system
@@ -311,6 +333,7 @@ docker-compose logs <service-name>
 5. ⏳ Create PR for review
 
 ### Follow-up
+
 - [ ] Update docker-compose.dev.yml if mismatches found
 - [ ] Verify docker-compose.ai.yml aligns with main compose file
 - [ ] Add health check validation to CI pipeline

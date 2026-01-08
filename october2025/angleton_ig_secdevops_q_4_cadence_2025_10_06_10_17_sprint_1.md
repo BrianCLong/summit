@@ -189,7 +189,7 @@ jobs:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
       - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: 'pnpm' }
+        with: { node-version: 20, cache: "pnpm" }
       - run: corepack enable && pnpm i --frozen-lockfile
       - run: pnpm --filter ./apps/web lint
       - run: pnpm --filter ./apps/web typecheck
@@ -232,7 +232,7 @@ name: release.gate
 on:
   workflow_dispatch:
   push:
-    tags: ['v*.*.*']
+    tags: ["v*.*.*"]
 permissions:
   contents: read
   id-token: write
@@ -261,57 +261,48 @@ jobs:
 **Edit:** `deploy/local/docker-compose.switchboard.yml`
 
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   sfu:
     image: ghcr.io/companyos/media-sfu@sha256:<PINNED>
-    ports: ['50000-50050:50000-50050/udp']
-    environment: ['ENABLE_E2EE=true']
+    ports: ["50000-50050:50000-50050/udp"]
+    environment: ["ENABLE_E2EE=true"]
     read_only: true
-    cap_drop: ['ALL']
+    cap_drop: ["ALL"]
   turn:
     image: docker.io/coturn/coturn@sha256:<PINNED>
-    ports: ['3478:3478/udp', '49160-49200:49160-49200/udp']
+    ports: ["3478:3478/udp", "49160-49200:49160-49200/udp"]
     command:
-      [
-        '-n',
-        '--no-cli',
-        '--no-tls',
-        '--no-dtls',
-        '--min-port',
-        '49160',
-        '--max-port',
-        '49200',
-      ]
+      ["-n", "--no-cli", "--no-tls", "--no-dtls", "--min-port", "49160", "--max-port", "49200"]
     read_only: true
-    cap_drop: ['ALL']
+    cap_drop: ["ALL"]
   signaling:
     image: ghcr.io/companyos/signaling@sha256:<PINNED>
-    ports: ['8080:8080']
+    ports: ["8080:8080"]
     read_only: true
-    cap_drop: ['ALL']
+    cap_drop: ["ALL"]
   nats:
     image: docker.io/library/nats@sha256:<PINNED>
-    command: ['-js']
-    ports: ['4222:4222', '8222:8222']
+    command: ["-js"]
+    ports: ["4222:4222", "8222:8222"]
     read_only: true
-    cap_drop: ['ALL']
+    cap_drop: ["ALL"]
   opa:
     image: openpolicyagent/opa@sha256:<PINNED>
-    command: ['run', '--server', '/policies']
+    command: ["run", "--server", "/policies"]
     volumes:
       - ../../policies:/policies:ro
-    ports: ['8181:8181']
+    ports: ["8181:8181"]
     read_only: true
-    cap_drop: ['ALL']
+    cap_drop: ["ALL"]
   agent-gateway:
     image: ghcr.io/companyos/agent-gateway@sha256:<PINNED>
     environment:
       - NATS_URL=nats://nats:4222
       - OPA_URL=http://opa:8181
-    ports: ['7070:7070']
+    ports: ["7070:7070"]
     read_only: true
-    cap_drop: ['ALL']
+    cap_drop: ["ALL"]
 ```
 
 ### 4.4 OpenAPI hardening (seed)
@@ -338,8 +329,7 @@ components:
     Dispatch:
       {
         type: object,
-        properties:
-          { agentId: { type: string }, action: { type: string }, payload: {} },
+        properties: { agentId: { type: string }, action: { type: string }, payload: {} },
         required: [agentId, action],
       }
 paths:
@@ -348,19 +338,13 @@ paths:
       summary: List registered agents
       security: [{ session: [] }]
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
               {
                 application/json:
-                  {
-                    schema:
-                      {
-                        type: array,
-                        items: { $ref: '#/components/schemas/Agent' },
-                      },
-                  },
+                  { schema: { type: array, items: { $ref: "#/components/schemas/Agent" } } },
               },
           }
   /actions/dispatch:
@@ -370,15 +354,11 @@ paths:
       requestBody:
         {
           required: true,
-          content:
-            {
-              application/json:
-                { schema: { $ref: '#/components/schemas/Dispatch' } },
-            },
+          content: { application/json: { schema: { $ref: "#/components/schemas/Dispatch" } } },
         }
       responses:
-        '202': { description: Accepted }
-        '401': { description: Unauthorized }
+        "202": { description: Accepted }
+        "401": { description: Unauthorized }
 ```
 
 ### 4.5 Renovate safety rails
@@ -388,25 +368,25 @@ paths:
 ```json5
 {
   extends: [
-    'config:recommended',
-    ':semanticCommits',
-    ':separateMajorReleases',
-    'group:allNonMajor',
-    'helpers:pinDigests',
+    "config:recommended",
+    ":semanticCommits",
+    ":separateMajorReleases",
+    "group:allNonMajor",
+    "helpers:pinDigests",
   ],
-  timezone: 'America/Denver',
-  schedule: ['after 3am on Monday'],
-  rangeStrategy: 'bump',
+  timezone: "America/Denver",
+  schedule: ["after 3am on Monday"],
+  rangeStrategy: "bump",
   npm: { enabled: true },
   pnpm: { enabled: true },
   packageRules: [
     {
-      matchDepTypes: ['devDependencies'],
-      matchUpdateTypes: ['minor', 'patch', 'pin', 'digest'],
+      matchDepTypes: ["devDependencies"],
+      matchUpdateTypes: ["minor", "patch", "pin", "digest"],
       automerge: true,
-      requiredStatusChecks: ['CI Switchboard'],
+      requiredStatusChecks: ["CI Switchboard"],
     },
-    { matchPaths: ['apps/web/**', 'src-tauri/**'], automerge: false },
+    { matchPaths: ["apps/web/**", "src-tauri/**"], automerge: false },
   ],
 }
 ```
@@ -422,7 +402,7 @@ permissions: { contents: read }
 jobs:
   analyze:
     uses: github/codeql-action/.github/workflows/codeql.yml@main
-    with: { languages: 'javascript' }
+    with: { languages: "javascript" }
 ```
 
 ---

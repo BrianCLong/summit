@@ -1,5 +1,5 @@
-'use client';
-import { useState } from 'react';
+"use client";
+import { useState } from "react";
 import {
   Mic,
   PhoneCall,
@@ -11,112 +11,107 @@ import {
   Brain,
   Sparkles,
   ListChecks,
-} from 'lucide-react';
-import { motion } from 'framer-motion';
+} from "lucide-react";
+import { motion } from "framer-motion";
 
 const agents = [
-  { id: 'maestro', name: 'Maestro Conductor', tags: ['router', 'exec'] },
-  { id: 'codex', name: 'CodeGen Codex', tags: ['dev', 'test'] },
-  { id: 'sentinel', name: 'Sentinel CI', tags: ['sec', 'policy'] },
-  { id: 'scribe', name: 'Scribe', tags: ['notes', 'transcribe'] },
+  { id: "maestro", name: "Maestro Conductor", tags: ["router", "exec"] },
+  { id: "codex", name: "CodeGen Codex", tags: ["dev", "test"] },
+  { id: "sentinel", name: "Sentinel CI", tags: ["sec", "policy"] },
+  { id: "scribe", name: "Scribe", tags: ["notes", "transcribe"] },
 ];
 
 const tiles = [
   {
-    id: 'status',
-    title: 'System Status',
-    metric: 'OK',
-    desc: 'All lanes green',
+    id: "status",
+    title: "System Status",
+    metric: "OK",
+    desc: "All lanes green",
   },
-  { id: 'incidents', title: 'Incidents', metric: '0', desc: 'No active' },
-  { id: 'deploys', title: 'Deploys', metric: '3', desc: 'prod canary live' },
-  { id: 'cost', title: 'LLM Spend', metric: '$42', desc: '24h window' },
+  { id: "incidents", title: "Incidents", metric: "0", desc: "No active" },
+  { id: "deploys", title: "Deploys", metric: "3", desc: "prod canary live" },
+  { id: "cost", title: "LLM Spend", metric: "$42", desc: "24h window" },
 ];
 
 const prahaladPrompts = [
   {
-    id: 'core-competency',
-    name: 'Core Competency Identifier',
-    focus:
-      'Identify fundamental capabilities that drive sustainable advantage.',
+    id: "core-competency",
+    name: "Core Competency Identifier",
+    focus: "Identify fundamental capabilities that drive sustainable advantage.",
     questions: [
-      'What unique skills or processes are hard to replicate?',
-      'Which give access to multiple markets?',
+      "What unique skills or processes are hard to replicate?",
+      "Which give access to multiple markets?",
     ],
   },
   {
-    id: 'future-market',
-    name: 'Future Market Architect',
-    focus:
-      'Anticipate emerging needs and design a roadmap for future market leadership.',
+    id: "future-market",
+    name: "Future Market Architect",
+    focus: "Anticipate emerging needs and design a roadmap for future market leadership.",
     questions: [
-      'What invisible customer needs exist?',
-      'How will technology and demographics reshape the industry?',
+      "What invisible customer needs exist?",
+      "How will technology and demographics reshape the industry?",
     ],
   },
   {
-    id: 'bop-strategist',
-    name: 'Bottom of the Pyramid Strategist',
-    focus: 'Discover profit and impact in underserved, low-income markets.',
+    id: "bop-strategist",
+    name: "Bottom of the Pyramid Strategist",
+    focus: "Discover profit and impact in underserved, low-income markets.",
     questions: [
-      'How to redesign offerings for overlooked segments?',
-      'What low-margin, high-volume models unlock markets?',
+      "How to redesign offerings for overlooked segments?",
+      "What low-margin, high-volume models unlock markets?",
     ],
   },
   {
-    id: 'strategic-intent',
-    name: 'Strategic Intent Clarifier',
-    focus:
-      'Set ambitious, motivating goals that create intentional resource imbalances.',
+    id: "strategic-intent",
+    name: "Strategic Intent Clarifier",
+    focus: "Set ambitious, motivating goals that create intentional resource imbalances.",
     questions: [
-      'What audacious but achievable position to target?',
-      'Which obsession should drive all strategic decisions?',
+      "What audacious but achievable position to target?",
+      "Which obsession should drive all strategic decisions?",
     ],
   },
   {
-    id: 'resource-leverage',
-    name: 'Resource Leverage Expert',
-    focus:
-      'Maximize value using partnerships, ecosystems, and recombining existing assets.',
+    id: "resource-leverage",
+    name: "Resource Leverage Expert",
+    focus: "Maximize value using partnerships, ecosystems, and recombining existing assets.",
     questions: [
-      'How to borrow, share, or combine resources uniquely?',
-      'What resource blind spots exist?',
+      "How to borrow, share, or combine resources uniquely?",
+      "What resource blind spots exist?",
     ],
   },
   {
-    id: 'co-creation',
-    name: 'Co-Creation Facilitator',
-    focus: 'Shift from isolated development to customer-driven innovation.',
+    id: "co-creation",
+    name: "Co-Creation Facilitator",
+    focus: "Shift from isolated development to customer-driven innovation.",
     questions: [
-      'How to involve customers directly?',
-      'What platforms enable ongoing collaboration?',
-      'How to create personalized experiences?',
+      "How to involve customers directly?",
+      "What platforms enable ongoing collaboration?",
+      "How to create personalized experiences?",
     ],
   },
   {
-    id: 'industry-foresight',
-    name: 'Industry Foresight Builder',
-    focus:
-      'Build early-warning systems for spotting strategic shifts and trends.',
+    id: "industry-foresight",
+    name: "Industry Foresight Builder",
+    focus: "Build early-warning systems for spotting strategic shifts and trends.",
     questions: [
-      'What discontinuities could reshape the landscape?',
-      'What weak signals could become dominant trends?',
+      "What discontinuities could reshape the landscape?",
+      "What weak signals could become dominant trends?",
     ],
   },
 ];
 
 const prahaladPrinciples = [
-  'Core competencies are strategic DNA that outlive product cycles.',
-  'Competing for tomorrow beats fighting for today’s market share.',
-  'Overlooked markets hold transformative opportunities.',
-  'Strategic intent energizes extraordinary effort and innovation.',
-  'Resource leverage through access and partnerships can trump ownership.',
-  'Value co-creation with customers generates richer innovation.',
-  'Constant industry foresight prevents strategic blindness and creates advantage.',
+  "Core competencies are strategic DNA that outlive product cycles.",
+  "Competing for tomorrow beats fighting for today’s market share.",
+  "Overlooked markets hold transformative opportunities.",
+  "Strategic intent energizes extraordinary effort and innovation.",
+  "Resource leverage through access and partnerships can trump ownership.",
+  "Value co-creation with customers generates richer innovation.",
+  "Constant industry foresight prevents strategic blindness and creates advantage.",
 ];
 
 const prahaladMindset =
-  'What unique capabilities can I leverage for future opportunities? How can I create value where others don’t look? What audacious future can I shape?';
+  "What unique capabilities can I leverage for future opportunities? How can I create value where others don’t look? What audacious future can I shape?";
 
 export default function Switchboard() {
   const [open, setOpen] = useState(false);
@@ -139,7 +134,7 @@ export default function Switchboard() {
               >
                 <div>
                   <p className="font-medium">{a.name}</p>
-                  <p className="text-xs opacity-70">{a.tags.join(' • ')}</p>
+                  <p className="text-xs opacity-70">{a.tags.join(" • ")}</p>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -159,10 +154,7 @@ export default function Switchboard() {
             ))}
           </div>
         </div>
-        <button
-          className="w-full px-3 py-2 rounded-xl border"
-          onClick={() => setCmdOpen(true)}
-        >
+        <button className="w-full px-3 py-2 rounded-xl border" onClick={() => setCmdOpen(true)}>
           <Rocket className="h-4 w-4 inline mr-2" />
           Open Command Palette (⌘K)
         </button>
@@ -171,11 +163,7 @@ export default function Switchboard() {
       <main className="col-span-6 space-y-3">
         <div className="grid grid-cols-2 gap-3">
           {tiles.map((t) => (
-            <motion.div
-              key={t.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
+            <motion.div key={t.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
               <div className="rounded-2xl border p-3">
                 <div className="font-semibold flex items-center gap-2 mb-1">
                   <Activity className="h-4 w-4" />
@@ -194,10 +182,7 @@ export default function Switchboard() {
               Live WebRTC Stage
             </div>
           ) : (
-            <button
-              className="px-3 py-2 rounded-xl border"
-              onClick={() => setMeeting(true)}
-            >
+            <button className="px-3 py-2 rounded-xl border" onClick={() => setMeeting(true)}>
               Start Local Meeting
             </button>
           )}
@@ -218,8 +203,7 @@ export default function Switchboard() {
             <button className="px-3 py-2 rounded-xl border">Present</button>
           </div>
           <div className="text-xs opacity-70 mt-2">
-            Context loaded: org, agenda, metrics. Actions will be
-            policy‑checked.
+            Context loaded: org, agenda, metrics. Actions will be policy‑checked.
           </div>
         </div>
         <div className="rounded-2xl border p-3 space-y-3">
@@ -228,8 +212,7 @@ export default function Switchboard() {
             Prahalad Strategy Prompts
           </div>
           <p className="text-xs opacity-70">
-            Use these prompt lenses to shift from incremental to
-            transformational thinking.
+            Use these prompt lenses to shift from incremental to transformational thinking.
           </p>
           <div className="space-y-2">
             {prahaladPrompts.map((prompt) => (

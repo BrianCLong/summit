@@ -28,14 +28,14 @@ Based on analysis of the current codebase, we've defined the following metrics a
 
 ### 1. Cyclomatic Complexity
 
-| Aspect | Value |
-|--------|-------|
-| **Definition** | Number of independent paths through code |
-| **Measurement** | Per function |
-| **Warning Threshold** | > 10 |
-| **Error Threshold** | > 15 |
-| **Current Baseline** | Files with 110 conditionals found |
-| **Tool** | ESLint `complexity` rule |
+| Aspect                | Value                                    |
+| --------------------- | ---------------------------------------- |
+| **Definition**        | Number of independent paths through code |
+| **Measurement**       | Per function                             |
+| **Warning Threshold** | > 10                                     |
+| **Error Threshold**   | > 15                                     |
+| **Current Baseline**  | Files with 110 conditionals found        |
+| **Tool**              | ESLint `complexity` rule                 |
 
 **Why it matters:** High complexity makes code harder to test, understand, and maintain.
 
@@ -45,14 +45,14 @@ Based on analysis of the current codebase, we've defined the following metrics a
 
 ### 2. Cognitive Complexity
 
-| Aspect | Value |
-|--------|-------|
-| **Definition** | How difficult code is to understand |
-| **Measurement** | Per function (more strict than cyclomatic) |
-| **Warning Threshold** | > 12 |
-| **Error Threshold** | > 15 |
-| **Current Baseline** | TBD |
-| **Tool** | ESLint `sonarjs/cognitive-complexity` |
+| Aspect                | Value                                      |
+| --------------------- | ------------------------------------------ |
+| **Definition**        | How difficult code is to understand        |
+| **Measurement**       | Per function (more strict than cyclomatic) |
+| **Warning Threshold** | > 12                                       |
+| **Error Threshold**   | > 15                                       |
+| **Current Baseline**  | TBD                                        |
+| **Tool**              | ESLint `sonarjs/cognitive-complexity`      |
 
 **Why it matters:** Directly correlates with code maintainability and bug density.
 
@@ -62,18 +62,19 @@ Based on analysis of the current codebase, we've defined the following metrics a
 
 ### 3. File Size (Lines of Code)
 
-| Aspect | Value |
-|--------|-------|
-| **Definition** | Total lines per file (excluding blanks/comments) |
-| **Measurement** | Per file |
-| **Warning Threshold** | > 500 lines |
-| **Error Threshold** | > 1000 lines |
-| **Current Baseline** | 71 files > 1000 lines, 4 files > 2000 lines |
-| **Tool** | ESLint `max-lines`, cloc |
+| Aspect                | Value                                            |
+| --------------------- | ------------------------------------------------ |
+| **Definition**        | Total lines per file (excluding blanks/comments) |
+| **Measurement**       | Per file                                         |
+| **Warning Threshold** | > 500 lines                                      |
+| **Error Threshold**   | > 1000 lines                                     |
+| **Current Baseline**  | 71 files > 1000 lines, 4 files > 2000 lines      |
+| **Tool**              | ESLint `max-lines`, cloc                         |
 
 **Why it matters:** Large files indicate poor separation of concerns and are hard to navigate.
 
 **Top violators identified:**
+
 - `EnhancedGraphExplorer.js` - 2,471 lines
 - `ThreatHuntingDarkWeb.tsx` - 2,063 lines
 - `VisualizationService.js` - 2,031 lines
@@ -86,18 +87,19 @@ Based on analysis of the current codebase, we've defined the following metrics a
 
 ### 4. Function Length
 
-| Aspect | Value |
-|--------|-------|
-| **Definition** | Lines of code per function |
-| **Measurement** | Per function |
-| **Warning Threshold** | > 80 lines |
-| **Error Threshold** | > 100 lines |
-| **Current Baseline** | Functions over 200 lines found |
-| **Tool** | ESLint `max-lines-per-function` |
+| Aspect                | Value                           |
+| --------------------- | ------------------------------- |
+| **Definition**        | Lines of code per function      |
+| **Measurement**       | Per function                    |
+| **Warning Threshold** | > 80 lines                      |
+| **Error Threshold**   | > 100 lines                     |
+| **Current Baseline**  | Functions over 200 lines found  |
+| **Tool**              | ESLint `max-lines-per-function` |
 
 **Why it matters:** Long functions are hard to understand, test, and reuse.
 
 **Top violators identified:**
+
 - `initializeReportTemplates()` - 257 lines
 - `EnhancedGraphExplorer()` - 206 lines (component function)
 - `initializeStyleThemes()` - 183 lines
@@ -108,18 +110,19 @@ Based on analysis of the current codebase, we've defined the following metrics a
 
 ### 5. Class Methods Count
 
-| Aspect | Value |
-|--------|-------|
-| **Definition** | Number of methods in a class |
-| **Measurement** | Per class |
-| **Warning Threshold** | > 15 methods |
-| **Error Threshold** | > 20 methods |
-| **Current Baseline** | Classes with 117 methods found (God Objects) |
-| **Tool** | SonarQube, custom analysis |
+| Aspect                | Value                                        |
+| --------------------- | -------------------------------------------- |
+| **Definition**        | Number of methods in a class                 |
+| **Measurement**       | Per class                                    |
+| **Warning Threshold** | > 15 methods                                 |
+| **Error Threshold**   | > 20 methods                                 |
+| **Current Baseline**  | Classes with 117 methods found (God Objects) |
+| **Tool**              | SonarQube, custom analysis                   |
 
 **Why it matters:** Too many methods indicates "God Object" anti-pattern.
 
 **Top violators identified:**
+
 - `ReportingService.js` - 117 methods
 - `AdvancedAnalyticsService.js` - 111 methods
 - `VisualizationService.js` - 108 methods
@@ -132,14 +135,14 @@ Based on analysis of the current codebase, we've defined the following metrics a
 
 ### 6. Function Parameters
 
-| Aspect | Value |
-|--------|-------|
-| **Definition** | Number of parameters per function |
-| **Measurement** | Per function |
-| **Warning Threshold** | > 4 parameters |
-| **Error Threshold** | > 5 parameters |
-| **Current Baseline** | TBD |
-| **Tool** | ESLint `max-params` |
+| Aspect                | Value                             |
+| --------------------- | --------------------------------- |
+| **Definition**        | Number of parameters per function |
+| **Measurement**       | Per function                      |
+| **Warning Threshold** | > 4 parameters                    |
+| **Error Threshold**   | > 5 parameters                    |
+| **Current Baseline**  | TBD                               |
+| **Tool**              | ESLint `max-params`               |
 
 **Why it matters:** Too many parameters indicate poor abstraction and make functions hard to use.
 
@@ -149,14 +152,14 @@ Based on analysis of the current codebase, we've defined the following metrics a
 
 ### 7. Nesting Depth
 
-| Aspect | Value |
-|--------|-------|
-| **Definition** | Maximum depth of nested blocks/callbacks |
-| **Measurement** | Per function |
-| **Warning Threshold** | > 3 levels |
-| **Error Threshold** | > 4 levels |
-| **Current Baseline** | TBD |
-| **Tool** | ESLint `max-depth`, `max-nested-callbacks` |
+| Aspect                | Value                                      |
+| --------------------- | ------------------------------------------ |
+| **Definition**        | Maximum depth of nested blocks/callbacks   |
+| **Measurement**       | Per function                               |
+| **Warning Threshold** | > 3 levels                                 |
+| **Error Threshold**   | > 4 levels                                 |
+| **Current Baseline**  | TBD                                        |
+| **Tool**              | ESLint `max-depth`, `max-nested-callbacks` |
 
 **Why it matters:** Deep nesting reduces readability and increases cognitive load.
 
@@ -166,18 +169,19 @@ Based on analysis of the current codebase, we've defined the following metrics a
 
 ### 8. Code Duplication
 
-| Aspect | Value |
-|--------|-------|
-| **Definition** | Percentage of duplicated code |
-| **Measurement** | Across entire codebase |
-| **Warning Threshold** | > 3% |
-| **Error Threshold** | > 5% |
-| **Current Baseline** | TBD (needs jscpd analysis) |
-| **Tool** | jscpd, SonarQube |
+| Aspect                | Value                         |
+| --------------------- | ----------------------------- |
+| **Definition**        | Percentage of duplicated code |
+| **Measurement**       | Across entire codebase        |
+| **Warning Threshold** | > 3%                          |
+| **Error Threshold**   | > 5%                          |
+| **Current Baseline**  | TBD (needs jscpd analysis)    |
+| **Tool**              | jscpd, SonarQube              |
 
 **Why it matters:** Duplicated code increases maintenance burden and bug risk.
 
 **Known duplicates identified:**
+
 - `AIInsightsPanel.js` - 2 locations
 - `AISuggestionsPanel.js` - 2 locations
 - `MultimodalDataService` - .js and .ts versions
@@ -189,18 +193,19 @@ Based on analysis of the current codebase, we've defined the following metrics a
 
 ### 9. Import Dependencies
 
-| Aspect | Value |
-|--------|-------|
-| **Definition** | Number of imports per file |
-| **Measurement** | Per file |
-| **Warning Threshold** | > 15 imports |
-| **Error Threshold** | > 20 imports |
-| **Current Baseline** | Files with 33 imports found |
-| **Tool** | ESLint `import/max-dependencies` |
+| Aspect                | Value                            |
+| --------------------- | -------------------------------- |
+| **Definition**        | Number of imports per file       |
+| **Measurement**       | Per file                         |
+| **Warning Threshold** | > 15 imports                     |
+| **Error Threshold**   | > 20 imports                     |
+| **Current Baseline**  | Files with 33 imports found      |
+| **Tool**              | ESLint `import/max-dependencies` |
 
 **Why it matters:** Too many imports indicate tight coupling and poor modularity.
 
 **Top violators identified:**
+
 - `EnhancedGraphExplorer.js` - 33 imports
 
 **Target:** Max 20 imports per file. Use barrel exports and composition.
@@ -209,17 +214,18 @@ Based on analysis of the current codebase, we've defined the following metrics a
 
 ### 10. Technical Debt Markers
 
-| Aspect | Value |
-|--------|-------|
-| **Definition** | Number of TODO/FIXME/HACK comments |
-| **Measurement** | Across entire codebase |
-| **Target** | Decreasing trend |
+| Aspect               | Value                                                  |
+| -------------------- | ------------------------------------------------------ |
+| **Definition**       | Number of TODO/FIXME/HACK comments                     |
+| **Measurement**      | Across entire codebase                                 |
+| **Target**           | Decreasing trend                                       |
 | **Current Baseline** | 194 total (101 server, 69 client, 21 apps, 3 packages) |
-| **Tool** | Grep analysis, ESLint `no-warning-comments` |
+| **Tool**             | Grep analysis, ESLint `no-warning-comments`            |
 
 **Why it matters:** Indicates incomplete or problematic code that needs attention.
 
 **Top violators identified:**
+
 - `MultimodalDataService.ts` - 17 TODOs
 - `SocialService.js` - 6 TODOs
 - `usePrefetch.ts` - 4 TODOs
@@ -231,15 +237,16 @@ Based on analysis of the current codebase, we've defined the following metrics a
 
 ### Switch Statement Complexity (Bonus Metric)
 
-| Aspect | Value |
-|--------|-------|
-| **Definition** | Number of cases in switch statements |
-| **Warning Threshold** | > 8 cases |
-| **Error Threshold** | > 10 cases |
-| **Current Baseline** | Switches with 32 cases found |
-| **Tool** | ESLint (custom rule) |
+| Aspect                | Value                                |
+| --------------------- | ------------------------------------ |
+| **Definition**        | Number of cases in switch statements |
+| **Warning Threshold** | > 8 cases                            |
+| **Error Threshold**   | > 10 cases                           |
+| **Current Baseline**  | Switches with 32 cases found         |
+| **Tool**              | ESLint (custom rule)                 |
 
 **Top violators identified:**
+
 - `blue-green.ts` - 32 cases
 - `WarRoomSyncService.js` - 26 cases
 - `performance-monitoring-system.ts` - 25 cases
@@ -257,46 +264,47 @@ Based on analysis of the current codebase, we've defined the following metrics a
 
 ```javascript
 module.exports = {
-  extends: ['./eslint.config.mjs'],
-  plugins: ['complexity', 'sonarjs'],
+  extends: ["./eslint.config.mjs"],
+  plugins: ["complexity", "sonarjs"],
   rules: {
     // Cyclomatic Complexity
-    'complexity': ['error', { max: 15 }],
+    complexity: ["error", { max: 15 }],
 
     // Function/File Size
-    'max-lines-per-function': ['warn', { max: 100, skipBlankLines: true, skipComments: true }],
-    'max-lines': ['warn', { max: 500, skipBlankLines: true, skipComments: true }],
+    "max-lines-per-function": ["warn", { max: 100, skipBlankLines: true, skipComments: true }],
+    "max-lines": ["warn", { max: 500, skipBlankLines: true, skipComments: true }],
 
     // Nesting
-    'max-depth': ['error', { max: 4 }],
-    'max-nested-callbacks': ['error', { max: 3 }],
+    "max-depth": ["error", { max: 4 }],
+    "max-nested-callbacks": ["error", { max: 3 }],
 
     // Parameters
-    'max-params': ['warn', { max: 5 }],
+    "max-params": ["warn", { max: 5 }],
 
     // Cognitive Complexity
-    'sonarjs/cognitive-complexity': ['error', 15],
+    "sonarjs/cognitive-complexity": ["error", 15],
 
     // Duplication
-    'sonarjs/no-duplicate-string': ['warn', { threshold: 3 }],
-    'sonarjs/no-identical-functions': 'error',
+    "sonarjs/no-duplicate-string": ["warn", { threshold: 3 }],
+    "sonarjs/no-identical-functions": "error",
 
     // Class Design
-    'max-classes-per-file': ['error', 1],
+    "max-classes-per-file": ["error", 1],
 
     // Switch Statements
-    'max-cases-per-switch': ['warn', 10],
+    "max-cases-per-switch": ["warn", 10],
 
     // Imports
-    'import/max-dependencies': ['warn', { max: 20 }],
+    "import/max-dependencies": ["warn", { max: 20 }],
 
     // Technical Debt
-    'no-warning-comments': ['warn', { terms: ['TODO', 'FIXME', 'XXX', 'HACK'] }],
+    "no-warning-comments": ["warn", { terms: ["TODO", "FIXME", "XXX", "HACK"] }],
   },
 };
 ```
 
 **Usage:**
+
 ```bash
 # Check all files
 pnpm run metrics:complexity
@@ -362,6 +370,7 @@ sonar.maintainability.rating.threshold=A
 ```
 
 **Setup:**
+
 1. Create account at [SonarCloud.io](https://sonarcloud.io)
 2. Generate authentication token
 3. Add as GitHub secret: `SONAR_TOKEN`
@@ -395,6 +404,7 @@ sonar.maintainability.rating.threshold=A
 **File:** `.github/workflows/maintainability-check.yml`
 
 **Triggers:**
+
 - ✅ Pull requests to `main`
 - ✅ Pushes to `main`
 - ✅ Weekly schedule (Sundays at 2 AM UTC)
@@ -403,6 +413,7 @@ sonar.maintainability.rating.threshold=A
 **Jobs:**
 
 #### Job 1: ESLint Complexity Check
+
 - **Duration:** ~5 minutes
 - **Actions:**
   - Install dependencies
@@ -428,6 +439,7 @@ sonar.maintainability.rating.threshold=A
 ---
 
 #### Job 2: Code Metrics Analysis
+
 - **Duration:** ~3 minutes
 - **Actions:**
   - Generate lines of code report (cloc)
@@ -451,6 +463,7 @@ sonar.maintainability.rating.threshold=A
 ---
 
 #### Job 3: SonarQube Analysis
+
 - **Duration:** ~10 minutes
 - **Conditions:** Only on main branch or when SONAR_TOKEN available
 - **Actions:**
@@ -472,6 +485,7 @@ sonar.maintainability.rating.threshold=A
 ---
 
 #### Job 4: Weekly Trend Report
+
 - **Duration:** ~2 minutes
 - **Conditions:** Only on schedule or manual trigger
 - **Actions:**
@@ -544,17 +558,18 @@ sonar.maintainability.rating.threshold=A
 
 ## 📈 Executive Summary
 
-| Metric | Value | Status | Trend |
-|--------|-------|--------|-------|
-| Total Files | 1,518 | ℹ️ Info | ↔️ Stable |
-| Files > 500 lines | 71 | ❌ Critical | ↘️ Improving |
-| Files > 1000 lines | 71 | ❌ Critical | ↗️ Degrading |
-| Technical Debt Markers | 194 | ⚠️ Warning | ↘️ Improving |
-| Code Duplication | 4.2% | ⚠️ Warning | ↔️ Stable |
-| Total Lines of Code | 156,234 | ℹ️ Info | ↗️ Growing |
-| Test Coverage | 68% | ⚠️ Warning | ↗️ Improving |
+| Metric                 | Value   | Status      | Trend        |
+| ---------------------- | ------- | ----------- | ------------ |
+| Total Files            | 1,518   | ℹ️ Info     | ↔️ Stable    |
+| Files > 500 lines      | 71      | ❌ Critical | ↘️ Improving |
+| Files > 1000 lines     | 71      | ❌ Critical | ↗️ Degrading |
+| Technical Debt Markers | 194     | ⚠️ Warning  | ↘️ Improving |
+| Code Duplication       | 4.2%    | ⚠️ Warning  | ↔️ Stable    |
+| Total Lines of Code    | 156,234 | ℹ️ Info     | ↗️ Growing   |
+| Test Coverage          | 68%     | ⚠️ Warning  | ↗️ Improving |
 
 **Status Indicators:**
+
 - ✅ Good - Within thresholds
 - ⚠️ Warning - Approaching threshold
 - ❌ Critical - Exceeds threshold
@@ -564,28 +579,28 @@ sonar.maintainability.rating.threshold=A
 
 ## 📏 File Size Distribution
 
-| Size Category | Count | Percentage | Change |
-|---------------|-------|------------|--------|
-| 0-200 lines (Small) | 937 | 61.7% | +2.3% |
-| 201-500 lines (Medium) | 279 | 18.4% | +1.1% |
-| 501-1000 lines (Large) | 231 | 15.2% | -1.8% |
-| 1001-1500 lines (Very Large) | 51 | 3.4% | -0.9% |
-| 1500+ lines (Extreme) | 20 | 1.3% | -0.7% |
+| Size Category                | Count | Percentage | Change |
+| ---------------------------- | ----- | ---------- | ------ |
+| 0-200 lines (Small)          | 937   | 61.7%      | +2.3%  |
+| 201-500 lines (Medium)       | 279   | 18.4%      | +1.1%  |
+| 501-1000 lines (Large)       | 231   | 15.2%      | -1.8%  |
+| 1001-1500 lines (Very Large) | 51    | 3.4%       | -0.9%  |
+| 1500+ lines (Extreme)        | 20    | 1.3%       | -0.7%  |
 
 ### 🚨 Top 10 Largest Files
 
-| File | Lines | Status | Priority |
-|------|-------|--------|----------|
-| `client/src/components/graph/EnhancedGraphExplorer.js` | 2,471 | ❌ Critical | P0 |
-| `client/src/components/threat/ThreatHuntingDarkWeb.tsx` | 2,063 | ❌ Critical | P0 |
-| `server/src/services/VisualizationService.js` | 2,031 | ❌ Critical | P0 |
-| `client/src/components/osint/OSINTCollectionFramework.tsx` | 1,859 | ❌ Critical | P0 |
-| `server/src/services/ReportingService.js` | 1,858 | ❌ Critical | P0 |
-| `client/src/routes/HomeRoute.tsx` | 1,863 | ❌ Critical | P1 |
-| `server/src/graphql/resolvers/crudResolvers.ts` | 1,677 | ❌ Critical | P1 |
-| `server/src/services/AdvancedAnalyticsService.js` | 1,584 | ❌ Critical | P1 |
-| `server/src/services/SimulationEngineService.js` | 1,558 | ❌ Critical | P1 |
-| `apps/feed-processor/src/services/FeedProcessorService.ts` | 1,074 | ⚠️ Warning | P2 |
+| File                                                       | Lines | Status      | Priority |
+| ---------------------------------------------------------- | ----- | ----------- | -------- |
+| `client/src/components/graph/EnhancedGraphExplorer.js`     | 2,471 | ❌ Critical | P0       |
+| `client/src/components/threat/ThreatHuntingDarkWeb.tsx`    | 2,063 | ❌ Critical | P0       |
+| `server/src/services/VisualizationService.js`              | 2,031 | ❌ Critical | P0       |
+| `client/src/components/osint/OSINTCollectionFramework.tsx` | 1,859 | ❌ Critical | P0       |
+| `server/src/services/ReportingService.js`                  | 1,858 | ❌ Critical | P0       |
+| `client/src/routes/HomeRoute.tsx`                          | 1,863 | ❌ Critical | P1       |
+| `server/src/graphql/resolvers/crudResolvers.ts`            | 1,677 | ❌ Critical | P1       |
+| `server/src/services/AdvancedAnalyticsService.js`          | 1,584 | ❌ Critical | P1       |
+| `server/src/services/SimulationEngineService.js`           | 1,558 | ❌ Critical | P1       |
+| `apps/feed-processor/src/services/FeedProcessorService.ts` | 1,074 | ⚠️ Warning  | P2       |
 
 ---
 
@@ -593,40 +608,40 @@ sonar.maintainability.rating.threshold=A
 
 ### High Complexity Files
 
-| File | Cyclomatic Complexity | Cognitive Complexity | Status |
-|------|----------------------|---------------------|--------|
-| `server/src/services/AdvancedAnalyticsService.js` | 110 | TBD | ❌ Critical |
-| `server/src/graphql/resolvers/crudResolvers.ts` | 107 | TBD | ❌ Critical |
+| File                                              | Cyclomatic Complexity | Cognitive Complexity | Status      |
+| ------------------------------------------------- | --------------------- | -------------------- | ----------- |
+| `server/src/services/AdvancedAnalyticsService.js` | 110                   | TBD                  | ❌ Critical |
+| `server/src/graphql/resolvers/crudResolvers.ts`   | 107                   | TBD                  | ❌ Critical |
 
 ### God Objects (Classes with 20+ Methods)
 
-| File | Methods | Recommendation |
-|------|---------|----------------|
-| `ReportingService.js` | 117 | Split into: ReportGenerator, ReportExporter, ReportDelivery |
-| `AdvancedAnalyticsService.js` | 111 | Split by analytics domain (ML, Stats, Predictions) |
-| `VisualizationService.js` | 108 | Split into: Themes, Renderers, Transformers |
-| `EnterpriseSecurityService.js` | 102 | Split by security domain (Auth, Audit, Encryption) |
+| File                           | Methods | Recommendation                                              |
+| ------------------------------ | ------- | ----------------------------------------------------------- |
+| `ReportingService.js`          | 117     | Split into: ReportGenerator, ReportExporter, ReportDelivery |
+| `AdvancedAnalyticsService.js`  | 111     | Split by analytics domain (ML, Stats, Predictions)          |
+| `VisualizationService.js`      | 108     | Split into: Themes, Renderers, Transformers                 |
+| `EnterpriseSecurityService.js` | 102     | Split by security domain (Auth, Audit, Encryption)          |
 
 ---
 
 ## 💳 Technical Debt Analysis
 
-| Debt Type | Count | Change | Trend |
-|-----------|-------|--------|-------|
-| TODO | 142 | -8 | ↘️ Improving |
-| FIXME | 37 | +2 | ↗️ Degrading |
-| HACK | 11 | -1 | ↘️ Improving |
-| XXX | 4 | 0 | ↔️ Stable |
+| Debt Type | Count   | Change | Trend            |
+| --------- | ------- | ------ | ---------------- |
+| TODO      | 142     | -8     | ↘️ Improving     |
+| FIXME     | 37      | +2     | ↗️ Degrading     |
+| HACK      | 11      | -1     | ↘️ Improving     |
+| XXX       | 4       | 0      | ↔️ Stable        |
 | **Total** | **194** | **-7** | **↘️ Improving** |
 
 ### Top Files with Technical Debt
 
-| File | TODOs | FIXMEs | Total | Priority |
-|------|-------|--------|-------|----------|
-| `server/src/services/MultimodalDataService.ts` | 17 | 0 | 17 | P0 |
-| `server/src/services/SocialService.js` | 6 | 0 | 6 | P1 |
-| `client/src/features/console/SymphonyOperatorConsole.tsx` | 5 | 0 | 5 | P1 |
-| `client/src/hooks/usePrefetch.ts` | 4 | 0 | 4 | P2 |
+| File                                                      | TODOs | FIXMEs | Total | Priority |
+| --------------------------------------------------------- | ----- | ------ | ----- | -------- |
+| `server/src/services/MultimodalDataService.ts`            | 17    | 0      | 17    | P0       |
+| `server/src/services/SocialService.js`                    | 6     | 0      | 6     | P1       |
+| `client/src/features/console/SymphonyOperatorConsole.tsx` | 5     | 0      | 5     | P1       |
+| `client/src/hooks/usePrefetch.ts`                         | 4     | 0      | 4     | P2       |
 
 ---
 
@@ -634,31 +649,31 @@ sonar.maintainability.rating.threshold=A
 
 **Overall Duplication:** 4.2% (Target: < 3%)
 
-| Duplication Type | Count |
-|------------------|-------|
+| Duplication Type | Count     |
+| ---------------- | --------- |
 | Exact duplicates | 23 blocks |
-| Similar code | 67 blocks |
+| Similar code     | 67 blocks |
 
 ### Known Duplicate Files
 
-| File | Locations | Action Required |
-|------|-----------|-----------------|
-| `AIInsightsPanel.js` | 2 | Consolidate to single location |
-| `AISuggestionsPanel.js` | 2 | Consolidate to single location |
-| `MultimodalDataService` | .js and .ts | Remove .js version |
-| `QueueService` | .js and .ts | Remove .js version |
+| File                    | Locations   | Action Required                |
+| ----------------------- | ----------- | ------------------------------ |
+| `AIInsightsPanel.js`    | 2           | Consolidate to single location |
+| `AISuggestionsPanel.js` | 2           | Consolidate to single location |
+| `MultimodalDataService` | .js and .ts | Remove .js version             |
+| `QueueService`          | .js and .ts | Remove .js version             |
 
 ---
 
 ## 📊 Lines of Code
 
-| Language | Lines | Percentage | Change |
-|----------|-------|------------|--------|
-| TypeScript | 98,456 | 63.0% | +2,134 |
-| JavaScript | 42,891 | 27.4% | -987 |
-| TSX | 11,234 | 7.2% | +456 |
-| JSX | 3,653 | 2.3% | -102 |
-| **Total** | **156,234** | **100%** | **+1,501** |
+| Language   | Lines       | Percentage | Change     |
+| ---------- | ----------- | ---------- | ---------- |
+| TypeScript | 98,456      | 63.0%      | +2,134     |
+| JavaScript | 42,891      | 27.4%      | -987       |
+| TSX        | 11,234      | 7.2%       | +456       |
+| JSX        | 3,653       | 2.3%       | -102       |
+| **Total**  | **156,234** | **100%**   | **+1,501** |
 
 - **Comments:** 18,234 lines (11.7%)
 - **Blank Lines:** 23,456 lines (15.0%)
@@ -712,14 +727,15 @@ sonar.maintainability.rating.threshold=A
 
 ## 📉 Historical Trends (Last 4 Weeks)
 
-| Week | Files >1000 | Debt Markers | Duplication | LOC |
-|------|-------------|--------------|-------------|-----|
-| 2025-W46 | 71 | 194 | 4.2% | 156,234 |
-| 2025-W45 | 73 | 201 | 4.5% | 154,733 |
-| 2025-W44 | 76 | 208 | 4.7% | 153,892 |
-| 2025-W43 | 78 | 215 | 4.9% | 152,456 |
+| Week     | Files >1000 | Debt Markers | Duplication | LOC     |
+| -------- | ----------- | ------------ | ----------- | ------- |
+| 2025-W46 | 71          | 194          | 4.2%        | 156,234 |
+| 2025-W45 | 73          | 201          | 4.5%        | 154,733 |
+| 2025-W44 | 76          | 208          | 4.7%        | 153,892 |
+| 2025-W43 | 78          | 215          | 4.9%        | 152,456 |
 
 **Trend Analysis:**
+
 - ✅ Large files: **Improving** (-9.0% over 4 weeks)
 - ✅ Technical debt: **Improving** (-9.8% over 4 weeks)
 - ✅ Code duplication: **Improving** (-14.3% over 4 weeks)
@@ -729,23 +745,23 @@ sonar.maintainability.rating.threshold=A
 
 ## 📋 Metrics Thresholds Reference
 
-| Metric | Threshold | Current | Status | Action Required |
-|--------|-----------|---------|--------|-----------------|
-| Max File Lines | 500 | 71 violations | ❌ | Refactor large files |
-| Max Function Lines | 100 | TBD | ⚠️ | Run ESLint analysis |
-| Cyclomatic Complexity | 15 | 110 max found | ❌ | Simplify complex functions |
-| Cognitive Complexity | 15 | TBD | ⚠️ | Run SonarQube analysis |
-| Class Methods | 20 | 117 max found | ❌ | Split God Objects |
-| Function Parameters | 5 | TBD | ℹ️ | Monitor in code reviews |
-| Nesting Depth | 4 | TBD | ℹ️ | Monitor in code reviews |
-| Code Duplication | < 5% | 4.2% | ⚠️ | Extract shared utilities |
-| Imports per File | 20 | 33 max found | ❌ | Reduce coupling |
-| Test Coverage | > 70% | 68% | ⚠️ | Add tests |
+| Metric                | Threshold | Current       | Status | Action Required            |
+| --------------------- | --------- | ------------- | ------ | -------------------------- |
+| Max File Lines        | 500       | 71 violations | ❌     | Refactor large files       |
+| Max Function Lines    | 100       | TBD           | ⚠️     | Run ESLint analysis        |
+| Cyclomatic Complexity | 15        | 110 max found | ❌     | Simplify complex functions |
+| Cognitive Complexity  | 15        | TBD           | ⚠️     | Run SonarQube analysis     |
+| Class Methods         | 20        | 117 max found | ❌     | Split God Objects          |
+| Function Parameters   | 5         | TBD           | ℹ️     | Monitor in code reviews    |
+| Nesting Depth         | 4         | TBD           | ℹ️     | Monitor in code reviews    |
+| Code Duplication      | < 5%      | 4.2%          | ⚠️     | Extract shared utilities   |
+| Imports per File      | 20        | 33 max found  | ❌     | Reduce coupling            |
+| Test Coverage         | > 70%     | 68%           | ⚠️     | Add tests                  |
 
 ---
 
-*Report generated automatically by maintainability-check.yml*
-*Next report: 2025-11-27 02:00:00 UTC*
+_Report generated automatically by maintainability-check.yml_
+_Next report: 2025-11-27 02:00:00 UTC_
 ```
 
 ---
@@ -804,12 +820,14 @@ For programmatic access, use `--json` flag to generate:
 ### For Developers
 
 1. **Install tools locally:**
+
    ```bash
    npm install -g cloc jscpd
    pnpm install
    ```
 
 2. **Run maintainability report:**
+
    ```bash
    pnpm run metrics:report
    ```
@@ -839,6 +857,7 @@ For programmatic access, use `--json` flag to generate:
 ## 📖 Documentation
 
 Complete documentation available in:
+
 - **`MAINTAINABILITY.md`** - Comprehensive guide for developers
 - **`.eslintrc.complexity.cjs`** - ESLint configuration with comments
 - **`sonar-project.properties`** - SonarQube configuration
@@ -857,6 +876,7 @@ Complete documentation available in:
 ✅ **Baseline established** from current codebase analysis
 
 **Next Steps:**
+
 1. Review and merge this PR
 2. Configure SonarQube token (optional)
 3. Address Priority 0 items in next sprint
@@ -865,5 +885,5 @@ Complete documentation available in:
 
 ---
 
-*Implementation completed: 2025-11-20*
-*Ready for production use*
+_Implementation completed: 2025-11-20_
+_Ready for production use_

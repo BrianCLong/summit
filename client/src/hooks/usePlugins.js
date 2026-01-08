@@ -8,8 +8,8 @@
  * @module hooks/usePlugins
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { PluginAPI } from '../services/plugin-api';
+import { useState, useEffect, useCallback } from "react";
+import { PluginAPI } from "../services/plugin-api";
 
 /**
  * Hook for listing plugins with filtering and pagination

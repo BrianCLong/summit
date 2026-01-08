@@ -3,13 +3,13 @@ on:
   workflow_dispatch:
     inputs:
       env:
-        description: 'Environment (dev|staging|prod)'
+        description: "Environment (dev|staging|prod)"
         required: true
-        default: 'staging'
+        default: "staging"
       weight:
-        description: 'Canary weight (0-100)'
+        description: "Canary weight (0-100)"
         required: true
-        default: '10'
+        default: "10"
 
 jobs:
   set-weight:
@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Setup kubectl
         uses: azure/setup-kubectl@a8293405358683a03b7f843855a6ab12cf159a6a # v4
-        with: { version: 'v1.30.0' }
+        with: { version: "v1.30.0" }
       - name: Auth to cluster
         uses: azure/k8s-set-context@a8293405358683a03b7f843855a6ab12cf159a6a # v4
         with:

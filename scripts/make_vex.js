@@ -1,21 +1,21 @@
 #!/usr/bin/env node
 // Generate VEX (Vulnerability Exploitability eXchange) in CSAF format
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
 function generateVEX(sbomPath) {
-  const sbom = JSON.parse(fs.readFileSync(sbomPath, 'utf8'));
+  const sbom = JSON.parse(fs.readFileSync(sbomPath, "utf8"));
 
   const vex = {
     document: {
-      category: 'csaf_vex',
-      csaf_version: '2.0',
+      category: "csaf_vex",
+      csaf_version: "2.0",
       publisher: {
-        category: 'vendor',
-        name: 'IntelGraph',
-        namespace: 'https://intelgraph.com',
+        category: "vendor",
+        name: "IntelGraph",
+        namespace: "https://intelgraph.com",
       },
-      title: 'IntelGraph VEX Document',
+      title: "IntelGraph VEX Document",
       tracking: {
         current_release_date: new Date().toISOString(),
         id: `intelgraph-vex-${Date.now()}`,
@@ -23,26 +23,26 @@ function generateVEX(sbomPath) {
         revision_history: [
           {
             date: new Date().toISOString(),
-            number: '1.0.0',
-            summary: 'Initial VEX document',
+            number: "1.0.0",
+            summary: "Initial VEX document",
           },
         ],
-        status: 'final',
-        version: '1.0.0',
+        status: "final",
+        version: "1.0.0",
       },
     },
     product_tree: {
       branches: [
         {
-          category: 'vendor',
-          name: 'IntelGraph',
+          category: "vendor",
+          name: "IntelGraph",
           branches: [
             {
-              category: 'product_name',
-              name: 'IntelGraph Platform',
+              category: "product_name",
+              name: "IntelGraph Platform",
               product: {
-                product_id: 'intelgraph-platform',
-                name: 'IntelGraph Platform',
+                product_id: "intelgraph-platform",
+                name: "IntelGraph Platform",
               },
             },
           ],
@@ -58,12 +58,12 @@ function generateVEX(sbomPath) {
       vex.vulnerabilities.push({
         cve: vuln.id || vuln.cve,
         product_status: {
-          known_not_affected: ['intelgraph-platform'],
+          known_not_affected: ["intelgraph-platform"],
         },
         flags: [
           {
-            label: 'component_not_present',
-            product_ids: ['intelgraph-platform'],
+            label: "component_not_present",
+            product_ids: ["intelgraph-platform"],
           },
         ],
       });
@@ -76,7 +76,7 @@ function generateVEX(sbomPath) {
 if (require.main === module) {
   const sbomPath = process.argv[2];
   if (!sbomPath) {
-    console.error('Usage: node make_vex.js <sbom.json>');
+    console.error("Usage: node make_vex.js <sbom.json>");
     process.exit(1);
   }
 
@@ -84,7 +84,7 @@ if (require.main === module) {
     const vex = generateVEX(sbomPath);
     console.log(vex);
   } catch (error) {
-    console.error('Error generating VEX:', error);
+    console.error("Error generating VEX:", error);
     process.exit(1);
   }
 }

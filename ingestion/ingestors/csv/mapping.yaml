@@ -2,7 +2,7 @@
 version: 1
 source:
   type: s3
-  bucket: 'intelgraph-bucket' # Using a fixed bucket name for the demo
+  bucket: "intelgraph-bucket" # Using a fixed bucket name for the demo
 entities:
   - type: Person
     label: Person

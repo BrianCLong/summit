@@ -162,17 +162,17 @@ owners:
 
 kpis:
   - name: preview_latency_p95_ms
-    target: '<=170'
+    target: "<=170"
   - name: cache_hit_rate
-    target: '>=0.97'
+    target: ">=0.97"
   - name: mapping_coverage
-    target: '>=0.95'
+    target: ">=0.95"
   - name: sso_green_tenants
-    target: '>=0.95'
+    target: ">=0.95"
   - name: reconciliation_delta_pct
-    target: '<=0.3'
+    target: "<=0.3"
   - name: export_latency_p95_ms
-    target: '<=245'
+    target: "<=245"
 
 budget:
   cost_per_req_max_usd: 0.0095
@@ -202,11 +202,7 @@ Freeze window:
 
 ```yaml
 freeze_windows:
-  - {
-      start: '2026-03-15T00:00:00Z',
-      end: '2026-03-16T23:59:00Z',
-      reason: 'pre-release freeze',
-    }
+  - { start: "2026-03-15T00:00:00Z", end: "2026-03-16T23:59:00Z", reason: "pre-release freeze" }
 ```
 
 ---
@@ -282,10 +278,10 @@ jobs:
 // tools/posture/autofix.js (stub)
 console.log(
   JSON.stringify({
-    fixed: ['metadata_refresh'],
-    skipped: ['clock_skew'],
+    fixed: ["metadata_refresh"],
+    skipped: ["clock_skew"],
     ok: true,
-  }),
+  })
 );
 ```
 

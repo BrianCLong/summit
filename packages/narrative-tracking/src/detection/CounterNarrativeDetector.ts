@@ -3,7 +3,7 @@
  * Identifies narratives that contradict or challenge other narratives
  */
 
-import type { Narrative, CounterNarrative } from '../extraction/types.js';
+import type { Narrative, CounterNarrative } from "../extraction/types.js";
 
 export class CounterNarrativeDetector {
   private counterNarratives: Map<string, CounterNarrative[]> = new Map();
@@ -47,10 +47,7 @@ export class CounterNarrativeDetector {
     );
 
     // Check for contradicting themes
-    const themeContradiction = this.checkThemeContradiction(
-      narrative1.themes,
-      narrative2.themes
-    );
+    const themeContradiction = this.checkThemeContradiction(narrative1.themes, narrative2.themes);
 
     // Check for opposing framing
     const framingOpposition = this.checkFramingOpposition(
@@ -63,14 +60,14 @@ export class CounterNarrativeDetector {
 
     if (strength > 0.3) {
       // Determine relationship type
-      let relationshipType: CounterNarrative['relationshipType'] = 'alternative';
+      let relationshipType: CounterNarrative["relationshipType"] = "alternative";
 
       if (strength > 0.7) {
-        relationshipType = 'refutation';
+        relationshipType = "refutation";
       } else if (this.hasDebunkingLanguage(narrative2.description)) {
-        relationshipType = 'debunk';
+        relationshipType = "debunk";
       } else if (this.hasContextualLanguage(narrative2.description)) {
-        relationshipType = 'context';
+        relationshipType = "context";
       }
 
       return {
@@ -100,10 +97,10 @@ export class CounterNarrativeDetector {
 
   private checkThemeContradiction(themes1: string[], themes2: string[]): number {
     const contradictoryPairs: Record<string, string[]> = {
-      threat: ['security', 'safety'],
-      conflict: ['cooperation', 'peace'],
-      crisis: ['stability', 'normalcy'],
-      corruption: ['integrity', 'transparency'],
+      threat: ["security", "safety"],
+      conflict: ["cooperation", "peace"],
+      crisis: ["stability", "normalcy"],
+      corruption: ["integrity", "transparency"],
     };
 
     let contradictions = 0;
@@ -122,15 +119,12 @@ export class CounterNarrativeDetector {
     return totalComparisons > 0 ? contradictions / totalComparisons : 0;
   }
 
-  private checkFramingOpposition(
-    tone1: string,
-    tone2: string
-  ): number {
+  private checkFramingOpposition(tone1: string, tone2: string): number {
     const opposingTones: Record<string, string[]> = {
-      positive: ['negative', 'alarmist'],
-      negative: ['positive', 'celebratory'],
-      alarmist: ['positive', 'celebratory'],
-      celebratory: ['negative', 'alarmist'],
+      positive: ["negative", "alarmist"],
+      negative: ["positive", "celebratory"],
+      alarmist: ["positive", "celebratory"],
+      celebratory: ["negative", "alarmist"],
     };
 
     const opposing = opposingTones[tone1] || [];
@@ -139,28 +133,22 @@ export class CounterNarrativeDetector {
 
   private hasDebunkingLanguage(text: string): boolean {
     const debunkingWords = [
-      'false',
-      'debunk',
-      'myth',
-      'misleading',
-      'incorrect',
-      'wrong',
-      'fact-check',
+      "false",
+      "debunk",
+      "myth",
+      "misleading",
+      "incorrect",
+      "wrong",
+      "fact-check",
     ];
     const lowerText = text.toLowerCase();
-    return debunkingWords.some(word => lowerText.includes(word));
+    return debunkingWords.some((word) => lowerText.includes(word));
   }
 
   private hasContextualLanguage(text: string): boolean {
-    const contextWords = [
-      'context',
-      'however',
-      'actually',
-      'in reality',
-      'more accurately',
-    ];
+    const contextWords = ["context", "however", "actually", "in reality", "more accurately"];
     const lowerText = text.toLowerCase();
-    return contextWords.some(word => lowerText.includes(word));
+    return contextWords.some((word) => lowerText.includes(word));
   }
 
   private extractEvidence(narrative1: Narrative, narrative2: Narrative): string[] {
@@ -171,15 +159,15 @@ export class CounterNarrativeDetector {
       (narrative1.sentiment > 0 && narrative2.sentiment < 0) ||
       (narrative1.sentiment < 0 && narrative2.sentiment > 0)
     ) {
-      evidence.push('Opposing sentiment detected');
+      evidence.push("Opposing sentiment detected");
     }
 
     // Evidence from theme contradiction
     const themes1 = new Set(narrative1.themes);
     const themes2 = new Set(narrative2.themes);
 
-    if (themes1.has('threat') && themes2.has('security')) {
-      evidence.push('Contradictory themes: threat vs. security');
+    if (themes1.has("threat") && themes2.has("security")) {
+      evidence.push("Contradictory themes: threat vs. security");
     }
 
     // Evidence from framing

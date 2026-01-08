@@ -1,4 +1,4 @@
-import { getMaestroConfig, authHeaders } from '../config';
+import { getMaestroConfig, authHeaders } from "../config";
 /**
  * Production-ready Maestro API Client
  * Implements all OpenAPI 3.1 endpoints with proper error handling,
@@ -8,10 +8,9 @@ export class MaestroApiClient {
   constructor() {
     const config = getMaestroConfig();
     this.baseUrl =
-      config.gatewayBase?.replace(/\/$/, '') ||
-      'https://maestro-dev.topicality.co/api/maestro/v1';
+      config.gatewayBase?.replace(/\/$/, "") || "https://maestro-dev.topicality.co/api/maestro/v1";
     this.defaultHeaders = {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...authHeaders(config),
     };
   }
@@ -39,19 +38,19 @@ export class MaestroApiClient {
       const data = await response.json();
       return {
         data,
-        traceId: response.headers.get('x-trace-id') || undefined,
+        traceId: response.headers.get("x-trace-id") || undefined,
       };
     } catch (error) {
       console.error(`API request failed: ${url}`, error);
       return {
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
         traceId: undefined,
       };
     }
   }
   // Control Hub API
   async getSummary() {
-    return this.request('/summary');
+    return this.request("/summary");
   }
   // Runs API
   async getRuns(params = {}) {
@@ -62,14 +61,14 @@ export class MaestroApiClient {
       }
     });
     const query = searchParams.toString();
-    return this.request(`/runs${query ? `?${query}` : ''}`);
+    return this.request(`/runs${query ? `?${query}` : ""}`);
   }
   async getRun(id) {
     return this.request(`/runs/${encodeURIComponent(id)}`);
   }
   async executeRunAction(id, action) {
     return this.request(`/runs/${encodeURIComponent(id)}/actions`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(action),
     });
   }
@@ -78,71 +77,69 @@ export class MaestroApiClient {
   }
   // Pipelines API
   async getPipelines() {
-    return this.request('/pipelines');
+    return this.request("/pipelines");
   }
   async getPipeline(id) {
     return this.request(`/pipelines/${encodeURIComponent(id)}`);
   }
   async simulatePipeline(id, changes) {
     return this.request(`/pipelines/${encodeURIComponent(id)}/simulate`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(changes),
     });
   }
   // Routing API
   async getRoutingCandidates(requestClass) {
-    const params = requestClass
-      ? `?class=${encodeURIComponent(requestClass)}`
-      : '';
+    const params = requestClass ? `?class=${encodeURIComponent(requestClass)}` : "";
     return this.request(`/routing/candidates${params}`);
   }
   async pinRoute(pin) {
-    return this.request('/routing/pin', {
-      method: 'POST',
+    return this.request("/routing/pin", {
+      method: "POST",
       body: JSON.stringify(pin),
     });
   }
   // SLO & Observability API
   async getSLOs() {
-    return this.request('/slo');
+    return this.request("/slo");
   }
   async getAlerts() {
-    return this.request('/alerts');
+    return this.request("/alerts");
   }
   async acknowledgeAlert(id, ack) {
     return this.request(`/alerts/${encodeURIComponent(id)}/ack`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(ack),
     });
   }
   // Evidence & Attestations API
   async generateEvidenceBundle(runId) {
     return this.request(`/evidence/run/${encodeURIComponent(runId)}`, {
-      method: 'POST',
+      method: "POST",
     });
   }
   // Budget & FinOps API
   async getBudgets() {
-    return this.request('/budgets');
+    return this.request("/budgets");
   }
   async updateBudget(budget) {
-    return this.request('/budgets', {
-      method: 'POST',
+    return this.request("/budgets", {
+      method: "POST",
       body: JSON.stringify(budget),
     });
   }
   async freezeBudget(id) {
     return this.request(`/budgets/${encodeURIComponent(id)}/freeze`, {
-      method: 'POST',
+      method: "POST",
     });
   }
   // Recipes API
   async getRecipes() {
-    return this.request('/recipes');
+    return this.request("/recipes");
   }
   async instantiateRecipe(id, params) {
     return this.request(`/recipes/${encodeURIComponent(id)}/instantiate`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(params),
     });
   }
@@ -155,7 +152,7 @@ export class MaestroApiClient {
       }
     });
     const query = searchParams.toString();
-    return this.request(`/audit${query ? `?${query}` : ''}`);
+    return this.request(`/audit${query ? `?${query}` : ""}`);
   }
   // Server-Sent Events connections
   createEventStream(endpoint) {
@@ -164,7 +161,7 @@ export class MaestroApiClient {
   }
   // Health check
   async healthCheck() {
-    return this.request('/health');
+    return this.request("/health");
   }
 }
 // Singleton instance

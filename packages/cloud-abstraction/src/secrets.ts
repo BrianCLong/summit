@@ -9,8 +9,8 @@ import {
   Secret,
   SecretCreateOptions,
   SecretUpdateOptions,
-  SecretsError
-} from './types.js';
+  SecretsError,
+} from "./types.js";
 
 export interface ISecretsProvider {
   readonly provider: CloudProvider;
@@ -23,20 +23,12 @@ export interface ISecretsProvider {
   /**
    * Create secret
    */
-  createSecret(
-    name: string,
-    value: string,
-    options?: SecretCreateOptions
-  ): Promise<string>;
+  createSecret(name: string, value: string, options?: SecretCreateOptions): Promise<string>;
 
   /**
    * Update secret value
    */
-  updateSecret(
-    name: string,
-    value: string,
-    options?: SecretUpdateOptions
-  ): Promise<string>;
+  updateSecret(name: string, value: string, options?: SecretUpdateOptions): Promise<string>;
 
   /**
    * Delete secret

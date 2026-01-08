@@ -134,7 +134,7 @@ done
 
 ```yaml
 name: Feature request
-labels: ['prio:P1']
+labels: ["prio:P1"]
 body:
   - type: textarea
     id: context
@@ -150,19 +150,7 @@ body:
     id: area
     attributes:
       label: Area
-      options:
-        [
-          Graph,
-          Ingest,
-          ER,
-          Analytics,
-          Copilot,
-          Governance,
-          Prov-Ledger,
-          Ops,
-          UI,
-          Docs,
-        ]
+      options: [Graph, Ingest, ER, Analytics, Copilot, Governance, Prov-Ledger, Ops, UI, Docs]
   - type: input
     id: exit
     attributes:
@@ -175,7 +163,7 @@ body:
 
 ```yaml
 name: Bug report
-labels: ['prio:P0']
+labels: ["prio:P0"]
 body:
   - type: textarea
     id: reproduce
@@ -270,7 +258,7 @@ jobs:
 name: Release
 on:
   push:
-    tags: ['v*.*.*']
+    tags: ["v*.*.*"]
 jobs:
   publish-charts:
     runs-on: ubuntu-latest

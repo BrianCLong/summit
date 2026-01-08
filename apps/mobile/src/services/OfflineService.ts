@@ -1,4 +1,10 @@
-import { database, entitiesCollection, investigationsCollection, alertsCollection, geointCollection } from './WatermelonDB';
+import {
+  database,
+  entitiesCollection,
+  investigationsCollection,
+  alertsCollection,
+  geointCollection,
+} from './WatermelonDB';
 import { Q } from '@nozbe/watermelondb';
 import type { Entity, Investigation, Alert, GEOINTFeature } from '@intelgraph/mobile-sdk/db';
 import type { OSINTAlert } from '@/types';
@@ -9,7 +15,7 @@ import type { OSINTAlert } from '@/types';
 
 export const saveEntity = async (entityData: any): Promise<void> => {
   await database.write(async () => {
-    await entitiesCollection.create(entity => {
+    await entitiesCollection.create((entity) => {
       // Use existing ID if available to prevent duplicates
       if (entityData.id) {
         entity._raw.id = entityData.id;
@@ -28,8 +34,8 @@ export const saveEntity = async (entityData: any): Promise<void> => {
 
 export const saveEntities = async (entitiesData: any[]): Promise<void> => {
   await database.write(async () => {
-    const batch = entitiesData.map(data =>
-      entitiesCollection.prepareCreate(entity => {
+    const batch = entitiesData.map((data) =>
+      entitiesCollection.prepareCreate((entity) => {
         if (data.id) {
           entity._raw.id = data.id;
         }
@@ -41,7 +47,7 @@ export const saveEntities = async (entitiesData: any[]): Promise<void> => {
         entity.updatedAt = new Date(data.updatedAt);
         entity.lastSeen = data.lastSeen ? new Date(data.lastSeen) : undefined;
         entity.isTarget = data.isTarget;
-      })
+      }),
     );
     await database.batch(batch);
   });
@@ -71,7 +77,7 @@ export const deleteEntity = async (id: string): Promise<void> => {
 export const clearEntities = async (): Promise<void> => {
   await database.write(async () => {
     const all = await getAllEntities();
-    const batch = all.map(e => e.prepareMarkAsDeleted());
+    const batch = all.map((e) => e.prepareMarkAsDeleted());
     await database.batch(batch);
   });
 };
@@ -86,7 +92,7 @@ export const getEntitiesByType = async (type: string): Promise<Entity[]> => {
 
 export const saveInvestigation = async (data: any): Promise<void> => {
   await database.write(async () => {
-    await investigationsCollection.create(inv => {
+    await investigationsCollection.create((inv) => {
       if (data.id) {
         inv._raw.id = data.id;
       }
@@ -103,8 +109,8 @@ export const saveInvestigation = async (data: any): Promise<void> => {
 
 export const saveInvestigations = async (list: any[]): Promise<void> => {
   await database.write(async () => {
-    const batch = list.map(data =>
-      investigationsCollection.prepareCreate(inv => {
+    const batch = list.map((data) =>
+      investigationsCollection.prepareCreate((inv) => {
         if (data.id) {
           inv._raw.id = data.id;
         }
@@ -115,7 +121,7 @@ export const saveInvestigations = async (list: any[]): Promise<void> => {
         inv.createdAt = new Date(data.createdAt);
         inv.updatedAt = new Date(data.updatedAt);
         inv.assignedTo = data.assignedTo;
-      })
+      }),
     );
     await database.batch(batch);
   });
@@ -145,7 +151,7 @@ export const deleteInvestigation = async (id: string): Promise<void> => {
 export const clearInvestigations = async (): Promise<void> => {
   await database.write(async () => {
     const all = await getAllInvestigations();
-    const batch = all.map(i => i.prepareMarkAsDeleted());
+    const batch = all.map((i) => i.prepareMarkAsDeleted());
     await database.batch(batch);
   });
 };
@@ -156,7 +162,7 @@ export const clearInvestigations = async (): Promise<void> => {
 
 export const saveAlert = async (data: OSINTAlert): Promise<void> => {
   await database.write(async () => {
-    await alertsCollection.create(alert => {
+    await alertsCollection.create((alert) => {
       if (data.id) {
         alert._raw.id = data.id;
       }
@@ -174,8 +180,8 @@ export const saveAlert = async (data: OSINTAlert): Promise<void> => {
 
 export const saveAlerts = async (list: OSINTAlert[]): Promise<void> => {
   await database.write(async () => {
-    const batch = list.map(data =>
-      alertsCollection.prepareCreate(alert => {
+    const batch = list.map((data) =>
+      alertsCollection.prepareCreate((alert) => {
         if (data.id) {
           alert._raw.id = data.id;
         }
@@ -187,7 +193,7 @@ export const saveAlerts = async (list: OSINTAlert[]): Promise<void> => {
         alert.isRead = data.isRead;
         alert.timestamp = new Date(data.timestamp);
         alert.metadata = data.metadata;
-      })
+      }),
     );
     await database.batch(batch);
   });
@@ -202,23 +208,20 @@ export const getAlert = async (id: string): Promise<Alert | null> => {
 };
 
 export const getAllAlerts = async (): Promise<Alert[]> => {
-  return await alertsCollection.query(
-    Q.sortBy('timestamp', Q.desc)
-  ).fetch();
+  return await alertsCollection.query(Q.sortBy('timestamp', Q.desc)).fetch();
 };
 
 export const getUnreadAlerts = async (): Promise<Alert[]> => {
-  return await alertsCollection.query(
-    Q.where('is_read', false),
-    Q.sortBy('timestamp', Q.desc)
-  ).fetch();
+  return await alertsCollection
+    .query(Q.where('is_read', false), Q.sortBy('timestamp', Q.desc))
+    .fetch();
 };
 
 export const markAlertAsRead = async (id: string): Promise<void> => {
   await database.write(async () => {
     const alert = await getAlert(id);
     if (alert) {
-      await alert.update(a => {
+      await alert.update((a) => {
         a.isRead = true;
       });
     }
@@ -237,7 +240,7 @@ export const deleteAlert = async (id: string): Promise<void> => {
 export const clearAlerts = async (): Promise<void> => {
   await database.write(async () => {
     const all = await getAllAlerts();
-    const batch = all.map(a => a.prepareMarkAsDeleted());
+    const batch = all.map((a) => a.prepareMarkAsDeleted());
     await database.batch(batch);
   });
 };
@@ -248,7 +251,7 @@ export const clearAlerts = async (): Promise<void> => {
 
 export const saveGEOINTFeature = async (data: any): Promise<void> => {
   await database.write(async () => {
-    await geointCollection.create(f => {
+    await geointCollection.create((f) => {
       if (data.id) {
         f._raw.id = data.id;
       }
@@ -262,8 +265,8 @@ export const saveGEOINTFeature = async (data: any): Promise<void> => {
 
 export const saveGEOINTFeatures = async (list: any[]): Promise<void> => {
   await database.write(async () => {
-    const batch = list.map(data =>
-      geointCollection.prepareCreate(f => {
+    const batch = list.map((data) =>
+      geointCollection.prepareCreate((f) => {
         if (data.id) {
           f._raw.id = data.id;
         }
@@ -271,7 +274,7 @@ export const saveGEOINTFeatures = async (list: any[]): Promise<void> => {
         f.geometry = data.geometry;
         f.properties = data.properties;
         f.timestamp = new Date(data.timestamp);
-      })
+      }),
     );
     await database.batch(batch);
   });
@@ -284,7 +287,7 @@ export const getAllGEOINTFeatures = async (): Promise<GEOINTFeature[]> => {
 export const clearGEOINTFeatures = async (): Promise<void> => {
   await database.write(async () => {
     const all = await getAllGEOINTFeatures();
-    const batch = all.map(f => f.prepareMarkAsDeleted());
+    const batch = all.map((f) => f.prepareMarkAsDeleted());
     await database.batch(batch);
   });
 };

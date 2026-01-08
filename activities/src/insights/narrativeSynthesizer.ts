@@ -1,4 +1,4 @@
-import transformers from 'sentence-transformers';
+import transformers from "sentence-transformers";
 
 export function narrativeSynthesizer(config) {
   const narrative = transformers.generate({

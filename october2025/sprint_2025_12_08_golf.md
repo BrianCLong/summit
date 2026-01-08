@@ -17,11 +17,11 @@ roles:
   - FinOps Lead
   - Repo Maintainer / Arborist
 objectives:
-  - 'Holiday change policy: freeze window with controlled exceptions, hotfix protocol, and audit evidence.'
-  - 'Contract testing + backward compatibility gates (Pact/Buf) across gateway↔services.'
-  - 'Year‑end compliance hardening: log retention/LTS archives, DPIA templates, dual‑control deletes enforcement.'
-  - 'Scalability push: queue backlog protection, surge autoscaling, and async offload of heavy paths.'
-  - 'Cost & performance: right‑size requests, sleep modes for idle jobs, and p95 ≤ 1.1s on top endpoints in stage.'
+  - "Holiday change policy: freeze window with controlled exceptions, hotfix protocol, and audit evidence."
+  - "Contract testing + backward compatibility gates (Pact/Buf) across gateway↔services."
+  - "Year‑end compliance hardening: log retention/LTS archives, DPIA templates, dual‑control deletes enforcement."
+  - "Scalability push: queue backlog protection, surge autoscaling, and async offload of heavy paths."
+  - "Cost & performance: right‑size requests, sleep modes for idle jobs, and p95 ≤ 1.1s on top endpoints in stage."
 ---
 
 # Sprint 29 Plan — Freeze Discipline, Compatibility Gates, and Year‑End Compliance
@@ -195,8 +195,8 @@ jobs:
 **Path:** `tests/pact/gateway-docs-api.spec.ts`
 
 ```ts
-import { PactV3 } from '@pact-foundation/pact';
-const pact = new PactV3({ consumer: 'gateway', provider: 'docs-api' });
+import { PactV3 } from "@pact-foundation/pact";
+const pact = new PactV3({ consumer: "gateway", provider: "docs-api" });
 // define interactions...
 ```
 
@@ -297,7 +297,7 @@ spec:
     - type: Pods
       pods:
         metric: { name: queue_depth }
-        target: { type: AverageValue, averageValue: '100' }
+        target: { type: AverageValue, averageValue: "100" }
   behavior:
     scaleUp: { stabilizationWindowSeconds: 180 }
     scaleDown: { stabilizationWindowSeconds: 300 }
@@ -318,7 +318,7 @@ spec:
 ```yaml
 name: downshift
 on:
-  schedule: [{ cron: '0 3 * * *' }]
+  schedule: [{ cron: "0 3 * * *" }]
 jobs:
   scale:
     runs-on: ubuntu-latest

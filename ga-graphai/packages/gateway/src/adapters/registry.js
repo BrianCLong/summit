@@ -1,27 +1,27 @@
-import { createHash } from 'node:crypto';
+import { createHash } from "node:crypto";
 
-import { calculateCost, estimateTokens, getModelById } from 'common-types';
+import { calculateCost, estimateTokens, getModelById } from "common-types";
 
 function defaultTemplate(payload, metadata) {
   const header = `${metadata.id} synthesized response`;
-  const objective = payload.objective ? `Objective: ${payload.objective}` : '';
-  const mode = payload.mode ? `Mode: ${payload.mode}` : 'Mode: generate';
-  const context = payload.context ? `Context: ${payload.context}` : '';
+  const objective = payload.objective ? `Objective: ${payload.objective}` : "";
+  const mode = payload.mode ? `Mode: ${payload.mode}` : "Mode: generate";
+  const context = payload.context ? `Context: ${payload.context}` : "";
   const extras = payload.tools?.length
-    ? `Tools: ${payload.tools.map((t) => t.name ?? 'tool').join(', ')}`
-    : '';
-  return [header, objective, mode, context, extras].filter(Boolean).join('\n');
+    ? `Tools: ${payload.tools.map((t) => t.name ?? "tool").join(", ")}`
+    : "";
+  return [header, objective, mode, context, extras].filter(Boolean).join("\n");
 }
 
 function defaultCitations(payload) {
   const attachments = payload.attachments ?? [];
   return attachments.map((attachment) => {
-    const uri = attachment.uri ?? attachment.id ?? 'attachment';
-    const hash = createHash('sha256').update(uri).digest('hex');
+    const uri = attachment.uri ?? attachment.id ?? "attachment";
+    const hash = createHash("sha256").update(uri).digest("hex");
     return {
       uri,
       hash,
-      title: attachment.title ?? 'Attachment',
+      title: attachment.title ?? "Attachment",
       retrievedAt: new Date().toISOString(),
     };
   });
@@ -36,14 +36,13 @@ function createTemplateAdapter(modelId, behaviour = {}) {
   const citationBuilder = behaviour.citations ?? defaultCitations;
   const latency =
     behaviour.latency ??
-    ((tokens) =>
-      Math.max(45, Math.round(tokens * (metadata.local ? 0.6 : 1.5))));
+    ((tokens) => Math.max(45, Math.round(tokens * (metadata.local ? 0.6 : 1.5))));
 
   return {
     id: metadata.id,
     metadata,
     async generate(payload) {
-      const prompt = payload.prompt ?? payload.objective ?? '';
+      const prompt = payload.prompt ?? payload.objective ?? "";
       const tokensIn = estimateTokens(prompt);
       const text = template(payload, metadata);
       const tokensOut = Math.max(estimateTokens(text), 1);
@@ -63,48 +62,45 @@ function createTemplateAdapter(modelId, behaviour = {}) {
 }
 
 function mixtralTemplate(payload, metadata) {
-  const objective = payload.objective ?? 'unspecified objective';
+  const objective = payload.objective ?? "unspecified objective";
   const sections = [
     `Planner: ${metadata.id}`,
     `Objective: ${objective}`,
-    'Phases:',
-    '- Analyze policy inputs and constraints.',
-    '- Draft backlog slices with acceptance criteria.',
-    '- Prepare observability + rollback steps.',
+    "Phases:",
+    "- Analyze policy inputs and constraints.",
+    "- Draft backlog slices with acceptance criteria.",
+    "- Prepare observability + rollback steps.",
   ];
-  return sections.join('\n');
+  return sections.join("\n");
 }
 
 function llamaTemplate(payload, metadata) {
   return (
-    `${metadata.id} condensed response for ${payload.objective ?? 'request'}\n` +
-    'Lightweight reasoning path selected for rapid turnaround.'
+    `${metadata.id} condensed response for ${payload.objective ?? "request"}\n` +
+    "Lightweight reasoning path selected for rapid turnaround."
   );
 }
 
 function qwenTemplate(payload, metadata) {
-  const language = payload.language ?? 'en';
+  const language = payload.language ?? "en";
   return (
     `${metadata.id} multilingual handler (${language})\n` +
-    'Response localized with governance hooks intact.'
+    "Response localized with governance hooks intact."
   );
 }
 
 function falconTemplate(payload, metadata) {
   const attachmentSummary = (payload.attachments ?? [])
-    .map(
-      (attachment) =>
-        `- ${attachment.type ?? 'file'} :: ${attachment.uri ?? 'resource'}`,
-    )
-    .join('\n');
+    .map((attachment) => `- ${attachment.type ?? "file"} :: ${attachment.uri ?? "resource"}`)
+    .join("\n");
   return [
     `${metadata.id} multimodal synthesis`,
-    attachmentSummary || 'No attachments provided',
-  ].join('\n');
+    attachmentSummary || "No attachments provided",
+  ].join("\n");
 }
 
 function paidTemplate(payload, metadata) {
-  return `${metadata.id} paid escape hatch activated. Objective: ${payload.objective ?? 'request'}.`;
+  return `${metadata.id} paid escape hatch activated. Objective: ${payload.objective ?? "request"}.`;
 }
 
 export class ModelRegistry {
@@ -118,18 +114,18 @@ export class ModelRegistry {
 
   registerDefaults() {
     [
-      createTemplateAdapter('mixtral-8x22b-instruct', {
+      createTemplateAdapter("mixtral-8x22b-instruct", {
         template: mixtralTemplate,
       }),
-      createTemplateAdapter('llama-3-8b-instruct', { template: llamaTemplate }),
-      createTemplateAdapter('qwen-14b-instruct', { template: qwenTemplate }),
-      createTemplateAdapter('gemma-2-9b-it'),
-      createTemplateAdapter('falcon-2-vlm', { template: falconTemplate }),
-      createTemplateAdapter('gpt-4o-mini', {
+      createTemplateAdapter("llama-3-8b-instruct", { template: llamaTemplate }),
+      createTemplateAdapter("qwen-14b-instruct", { template: qwenTemplate }),
+      createTemplateAdapter("gemma-2-9b-it"),
+      createTemplateAdapter("falcon-2-vlm", { template: falconTemplate }),
+      createTemplateAdapter("gpt-4o-mini", {
         template: paidTemplate,
         citations: defaultCitations,
       }),
-      createTemplateAdapter('grok-2', {
+      createTemplateAdapter("grok-2", {
         template: paidTemplate,
         citations: defaultCitations,
       }),
@@ -145,9 +141,7 @@ export class ModelRegistry {
   }
 
   list() {
-    return Array.from(this.adapters.values()).map(
-      (adapter) => adapter.metadata,
-    );
+    return Array.from(this.adapters.values()).map((adapter) => adapter.metadata);
   }
 
   async generate(modelId, payload) {

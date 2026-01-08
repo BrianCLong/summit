@@ -29,6 +29,7 @@ Predictive systems face multiple failure modes that can silently degrade predict
 6. **Bias Amplification**: Models amplify or introduce fairness issues over time
 
 **Consequences**:
+
 - Silent failures leading to poor decisions
 - Loss of trust in AI/ML systems
 - Regulatory compliance violations (AI Act, algorithmic accountability)
@@ -125,16 +126,19 @@ Predictive systems face multiple failure modes that can silently degrade predict
 #### Data Drift Detection
 
 **Kolmogorov-Smirnov (KS) Test**:
+
 - Compares current vs. baseline feature distributions
 - Detects significant distribution shifts
 - Per-feature sensitivity
 
 **Population Stability Index (PSI)**:
+
 ```
 PSI = Σ (actual% - expected%) × ln(actual% / expected%)
 ```
 
 **Thresholds**:
+
 - PSI < 0.1: No significant drift
 - 0.1 ≤ PSI < 0.25: Moderate drift (monitor)
 - PSI ≥ 0.25: Severe drift (remediation required)
@@ -142,11 +146,13 @@ PSI = Σ (actual% - expected%) × ln(actual% / expected%)
 #### Concept Drift Detection
 
 **Drift Detection Method (DDM)**:
+
 - Monitors prediction error rate and variance
 - Detects when error distribution changes
 - Early warning system for concept shifts
 
 **ADWIN (Adaptive Windowing)**:
+
 - Maintains sliding window of recent predictions
 - Automatically detects distribution changes
 - Memory-efficient online algorithm
@@ -162,6 +168,7 @@ PSI = Σ (actual% - expected%) × ln(actual% / expected%)
 #### Reconstruction-Based Detection
 
 **Autoencoder Anomaly Scoring**:
+
 ```
 anomaly_score = ||x - decoder(encoder(x))||²
 ```
@@ -171,11 +178,13 @@ Inputs that cannot be reconstructed well are likely adversarial or out-of-distri
 #### Statistical Outlier Detection
 
 **Isolation Forest**:
+
 - Isolates anomalies using random partitioning
 - Path length indicates anomaly likelihood
 - Efficient for high-dimensional data
 
 **Local Outlier Factor (LOF)**:
+
 - Measures local density deviation
 - Identifies outliers in feature space
 - Robust to varying data densities
@@ -213,6 +222,7 @@ P(Y = 1 | Ŷ = p, A = a) ≈ p  for all groups a
 Ensures predicted probabilities are accurate within each group.
 
 **Bias Metrics**:
+
 - Disparate Impact Ratio
 - Statistical Parity Difference
 - Equal Opportunity Difference
@@ -222,31 +232,35 @@ Ensures predicted probabilities are accurate within each group.
 
 #### Severity-Based Remediation
 
-| Severity | Condition | Action |
-|----------|-----------|--------|
-| **Low** | PSI 0.1-0.15, Minor bias | Monitor, log warning |
-| **Medium** | PSI 0.15-0.25, Moderate bias | Recalibrate model, alert team |
-| **High** | PSI > 0.25, High bias, adversarial | Fallback to ensemble, trigger retraining |
-| **Critical** | Multiple failures, persistent attacks | Disable predictions, escalate |
+| Severity     | Condition                             | Action                                   |
+| ------------ | ------------------------------------- | ---------------------------------------- |
+| **Low**      | PSI 0.1-0.15, Minor bias              | Monitor, log warning                     |
+| **Medium**   | PSI 0.15-0.25, Moderate bias          | Recalibrate model, alert team            |
+| **High**     | PSI > 0.25, High bias, adversarial    | Fallback to ensemble, trigger retraining |
+| **Critical** | Multiple failures, persistent attacks | Disable predictions, escalate            |
 
 #### Remediation Strategies
 
 **Model Recalibration**:
+
 - Platt scaling for probability calibration
 - Isotonic regression for non-parametric calibration
 - Temperature scaling for neural networks
 
 **Ensemble Fallback**:
+
 - Switch to ensemble of historical model versions
 - Weighted voting based on recent performance
 - Reduces variance and improves robustness
 
 **Adaptive Thresholds**:
+
 - Dynamic decision thresholds per segment
 - Optimizes for fairness constraints
 - Maintains performance while reducing bias
 
 **Retraining Triggers**:
+
 - Automatic dataset refresh
 - Incremental learning with recent data
 - Notifies MLOps pipeline for full retraining
@@ -260,12 +274,14 @@ Reliability = w₁·DriftScore + w₂·AdversarialScore + w₃·BiasScore + w₄
 ```
 
 **Components**:
+
 - **DriftScore**: 1 - (normalized PSI)
 - **AdversarialScore**: 1 - (anomaly probability)
 - **BiasScore**: 1 - (max bias metric)
 - **UncertaintyScore**: Prediction confidence from model
 
 **Interpretation**:
+
 - 0.9 - 1.0: High reliability
 - 0.7 - 0.9: Moderate reliability (monitor)
 - 0.5 - 0.7: Low reliability (caution)
@@ -282,6 +298,7 @@ See `services/predictive-analytics/predictive-integrity-shield/schema.graphql` f
 #### Key Types
 
 **IntegrityReport**:
+
 ```graphql
 type IntegrityReport {
   id: ID!
@@ -298,6 +315,7 @@ type IntegrityReport {
 ```
 
 **DriftMetric**:
+
 ```graphql
 type DriftMetric {
   dataDrift: Float!
@@ -311,6 +329,7 @@ type DriftMetric {
 ```
 
 **BiasIndicator**:
+
 ```graphql
 type BiasIndicator {
   demographicParity: Float!
@@ -323,6 +342,7 @@ type BiasIndicator {
 ```
 
 **HealingAction**:
+
 ```graphql
 type HealingAction {
   id: ID!
@@ -342,11 +362,7 @@ type Query {
   getIntegrityStatus(modelId: String!): IntegrityReport!
 
   # Check for drift
-  checkDrift(
-    modelId: String!
-    currentData: [JSON!]!
-    baselineData: [JSON!]
-  ): DriftMetric!
+  checkDrift(modelId: String!, currentData: [JSON!]!, baselineData: [JSON!]): DriftMetric!
 
   # Analyze bias
   analyzeBias(
@@ -356,17 +372,10 @@ type Query {
   ): BiasIndicator!
 
   # Get reliability score
-  getReliabilityScore(
-    modelId: String!
-    predictionInput: JSON!
-  ): ReliabilityScoreResult!
+  getReliabilityScore(modelId: String!, predictionInput: JSON!): ReliabilityScoreResult!
 
   # Historical reports
-  getIntegrityReports(
-    modelId: String!
-    startTime: DateTime
-    endTime: DateTime
-  ): [IntegrityReport!]!
+  getIntegrityReports(modelId: String!, startTime: DateTime, endTime: DateTime): [IntegrityReport!]!
 }
 ```
 
@@ -375,28 +384,16 @@ type Query {
 ```graphql
 type Mutation {
   # Enable shield for a model
-  enableShield(
-    modelId: String!
-    config: ShieldConfigInput!
-  ): ShieldStatus!
+  enableShield(modelId: String!, config: ShieldConfigInput!): ShieldStatus!
 
   # Run integrity check on-demand
-  runIntegrityCheck(
-    modelId: String!
-    data: [JSON!]!
-  ): IntegrityReport!
+  runIntegrityCheck(modelId: String!, data: [JSON!]!): IntegrityReport!
 
   # Trigger self-healing
-  triggerSelfHeal(
-    modelId: String!
-    actionType: HealingActionType!
-  ): HealingAction!
+  triggerSelfHeal(modelId: String!, actionType: HealingActionType!): HealingAction!
 
   # Update shield configuration
-  updateShieldConfig(
-    modelId: String!
-    config: ShieldConfigInput!
-  ): ShieldStatus!
+  updateShieldConfig(modelId: String!, config: ShieldConfigInput!): ShieldStatus!
 }
 ```
 
@@ -449,6 +446,7 @@ integrity_shield_checks_failed{model_id="model-1"} 12
 ### Grafana Dashboards
 
 **Shield Overview Dashboard**:
+
 - Reliability score timeline
 - Drift detection heatmap
 - Adversarial attack alerts
@@ -456,6 +454,7 @@ integrity_shield_checks_failed{model_id="model-1"} 12
 - Healing action history
 
 **Model Health Dashboard**:
+
 - Per-model reliability trends
 - Feature drift breakdown
 - Prediction distribution evolution
@@ -464,6 +463,7 @@ integrity_shield_checks_failed{model_id="model-1"} 12
 ### OpenTelemetry Tracing
 
 **Trace Context**:
+
 - Prediction request → Shield check → Detectors → Healing → Response
 - Spans for each detector (drift, adversarial, bias)
 - Attributes: model_id, reliability_score, healing_actions
@@ -532,7 +532,7 @@ interface ShieldConfig {
   adversarialDetection: {
     enabled: boolean;
     anomalyThreshold: number; // 0.95 default
-    methods: ('isolation_forest' | 'lof' | 'autoencoder')[];
+    methods: ("isolation_forest" | "lof" | "autoencoder")[];
   };
 
   // Bias analysis
@@ -578,6 +578,7 @@ interface ShieldConfig {
 - **Total Shield Overhead**: ~50-200ms per prediction
 
 **Optimization Strategies**:
+
 - Async monitoring (non-blocking predictions)
 - Sampling for high-throughput models
 - Caching of baseline statistics
@@ -661,6 +662,7 @@ interface ShieldConfig {
 ### Example Alerts
 
 **Drift Alert**:
+
 ```
 ALERT: Severe drift detected for model "fraud-detector-v2"
 - PSI: 0.28 (threshold: 0.25)
@@ -670,6 +672,7 @@ ALERT: Severe drift detected for model "fraud-detector-v2"
 ```
 
 **Adversarial Alert**:
+
 ```
 ALERT: Adversarial attack suspected on model "credit-scorer"
 - Anomaly score: 0.98 (threshold: 0.95)
@@ -679,6 +682,7 @@ ALERT: Adversarial attack suspected on model "credit-scorer"
 ```
 
 **Bias Alert**:
+
 ```
 ALERT: Bias violation detected for model "hiring-recommender"
 - Demographic parity: 0.72 (threshold: 0.8)

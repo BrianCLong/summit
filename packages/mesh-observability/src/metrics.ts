@@ -5,7 +5,7 @@
  * Compatible with Prometheus exposition format.
  */
 
-export type MetricType = 'counter' | 'gauge' | 'histogram' | 'summary';
+export type MetricType = "counter" | "gauge" | "histogram" | "summary";
 
 export interface MetricConfig {
   name: string;
@@ -29,19 +29,19 @@ export class MetricsRegistry {
   private metrics: Map<string, Metric> = new Map();
   private prefix: string;
 
-  constructor(prefix: string = 'mesh') {
+  constructor(prefix: string = "mesh") {
     this.prefix = prefix;
   }
 
   /**
    * Create or get a counter metric.
    */
-  counter(config: Omit<MetricConfig, 'type'>): Counter {
+  counter(config: Omit<MetricConfig, "type">): Counter {
     const name = `${this.prefix}_${config.name}`;
     let metric = this.metrics.get(name);
 
     if (!metric) {
-      metric = new Counter({ ...config, name, type: 'counter' });
+      metric = new Counter({ ...config, name, type: "counter" });
       this.metrics.set(name, metric);
     }
 
@@ -51,12 +51,12 @@ export class MetricsRegistry {
   /**
    * Create or get a gauge metric.
    */
-  gauge(config: Omit<MetricConfig, 'type'>): Gauge {
+  gauge(config: Omit<MetricConfig, "type">): Gauge {
     const name = `${this.prefix}_${config.name}`;
     let metric = this.metrics.get(name);
 
     if (!metric) {
-      metric = new Gauge({ ...config, name, type: 'gauge' });
+      metric = new Gauge({ ...config, name, type: "gauge" });
       this.metrics.set(name, metric);
     }
 
@@ -66,7 +66,7 @@ export class MetricsRegistry {
   /**
    * Create or get a histogram metric.
    */
-  histogram(config: Omit<MetricConfig, 'type'>): Histogram {
+  histogram(config: Omit<MetricConfig, "type">): Histogram {
     const name = `${this.prefix}_${config.name}`;
     let metric = this.metrics.get(name);
 
@@ -74,7 +74,7 @@ export class MetricsRegistry {
       metric = new Histogram({
         ...config,
         name,
-        type: 'histogram',
+        type: "histogram",
         buckets: config.buckets ?? DEFAULT_BUCKETS,
       });
       this.metrics.set(name, metric);
@@ -93,7 +93,7 @@ export class MetricsRegistry {
       lines.push(...metric.export());
     }
 
-    return lines.join('\n');
+    return lines.join("\n");
   }
 
   /**
@@ -122,13 +122,13 @@ abstract class Metric {
     return Object.entries(labels)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([k, v]) => `${k}="${v}"`)
-      .join(',');
+      .join(",");
   }
 
   protected formatLabels(labels: Record<string, string>): string {
     const entries = Object.entries(labels);
-    if (entries.length === 0) return '';
-    return `{${entries.map(([k, v]) => `${k}="${v}"`).join(',')}}`;
+    if (entries.length === 0) return "";
+    return `{${entries.map(([k, v]) => `${k}="${v}"`).join(",")}}`;
   }
 
   abstract export(): string[];
@@ -151,7 +151,7 @@ export class Counter extends Metric {
     ];
 
     for (const [key, value] of this.values) {
-      const labels = key ? `{${key}}` : '';
+      const labels = key ? `{${key}}` : "";
       lines.push(`${this.config.name}${labels} ${value}`);
     }
 
@@ -195,7 +195,7 @@ export class Gauge extends Metric {
     ];
 
     for (const [key, value] of this.values) {
-      const labels = key ? `{${key}}` : '';
+      const labels = key ? `{${key}}` : "";
       lines.push(`${this.config.name}${labels} ${value}`);
     }
 
@@ -263,18 +263,20 @@ export class Histogram extends Metric {
     ];
 
     for (const [key, bucketCounts] of this.observations) {
-      const baseLabels = key ? `${key},` : '';
+      const baseLabels = key ? `${key},` : "";
 
       // Export bucket values
       let cumulative = 0;
       for (let i = 0; i < this.buckets.length; i++) {
         cumulative += bucketCounts[i];
-        lines.push(`${this.config.name}_bucket{${baseLabels}le="${this.buckets[i]}"} ${cumulative}`);
+        lines.push(
+          `${this.config.name}_bucket{${baseLabels}le="${this.buckets[i]}"} ${cumulative}`
+        );
       }
       lines.push(`${this.config.name}_bucket{${baseLabels}le="+Inf"} ${this.counts.get(key)}`);
 
       // Export sum and count
-      const labels = key ? `{${key}}` : '';
+      const labels = key ? `{${key}}` : "";
       lines.push(`${this.config.name}_sum${labels} ${this.sums.get(key)}`);
       lines.push(`${this.config.name}_count${labels} ${this.counts.get(key)}`);
     }
@@ -299,7 +301,7 @@ const DEFAULT_BUCKETS = [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10
 // PRE-CONFIGURED METRICS
 // ============================================================================
 
-export function createMeshMetrics(prefix: string = 'mesh'): MeshMetrics {
+export function createMeshMetrics(prefix: string = "mesh"): MeshMetrics {
   const registry = new MetricsRegistry(prefix);
 
   return {
@@ -307,76 +309,76 @@ export function createMeshMetrics(prefix: string = 'mesh'): MeshMetrics {
 
     // Task metrics
     tasksTotal: registry.counter({
-      name: 'tasks_total',
-      help: 'Total number of tasks submitted',
-      labels: ['type', 'status'],
+      name: "tasks_total",
+      help: "Total number of tasks submitted",
+      labels: ["type", "status"],
     }),
 
     taskDuration: registry.histogram({
-      name: 'task_duration_seconds',
-      help: 'Task execution duration in seconds',
-      labels: ['type', 'agent'],
+      name: "task_duration_seconds",
+      help: "Task execution duration in seconds",
+      labels: ["type", "agent"],
       buckets: [0.1, 0.5, 1, 2, 5, 10, 30, 60, 120, 300],
     }),
 
     // Agent metrics
     agentInvocations: registry.counter({
-      name: 'agent_invocations_total',
-      help: 'Total agent invocations',
-      labels: ['agent', 'role', 'status'],
+      name: "agent_invocations_total",
+      help: "Total agent invocations",
+      labels: ["agent", "role", "status"],
     }),
 
     activeAgents: registry.gauge({
-      name: 'active_agents',
-      help: 'Number of active agents',
-      labels: ['role'],
+      name: "active_agents",
+      help: "Number of active agents",
+      labels: ["role"],
     }),
 
     // Model metrics
     modelCalls: registry.counter({
-      name: 'model_calls_total',
-      help: 'Total model calls',
-      labels: ['provider', 'model', 'status'],
+      name: "model_calls_total",
+      help: "Total model calls",
+      labels: ["provider", "model", "status"],
     }),
 
     modelLatency: registry.histogram({
-      name: 'model_latency_seconds',
-      help: 'Model call latency in seconds',
-      labels: ['provider', 'model'],
+      name: "model_latency_seconds",
+      help: "Model call latency in seconds",
+      labels: ["provider", "model"],
       buckets: [0.1, 0.25, 0.5, 1, 2, 5, 10, 30],
     }),
 
     modelTokens: registry.counter({
-      name: 'model_tokens_total',
-      help: 'Total tokens used',
-      labels: ['provider', 'model', 'direction'],
+      name: "model_tokens_total",
+      help: "Total tokens used",
+      labels: ["provider", "model", "direction"],
     }),
 
     // Tool metrics
     toolInvocations: registry.counter({
-      name: 'tool_invocations_total',
-      help: 'Total tool invocations',
-      labels: ['tool', 'status'],
+      name: "tool_invocations_total",
+      help: "Total tool invocations",
+      labels: ["tool", "status"],
     }),
 
     toolLatency: registry.histogram({
-      name: 'tool_latency_seconds',
-      help: 'Tool invocation latency in seconds',
-      labels: ['tool'],
+      name: "tool_latency_seconds",
+      help: "Tool invocation latency in seconds",
+      labels: ["tool"],
     }),
 
     // Policy metrics
     policyDecisions: registry.counter({
-      name: 'policy_decisions_total',
-      help: 'Total policy decisions',
-      labels: ['policy', 'action'],
+      name: "policy_decisions_total",
+      help: "Total policy decisions",
+      labels: ["policy", "action"],
     }),
 
     // Cost metrics
     costUsd: registry.counter({
-      name: 'cost_usd_total',
-      help: 'Total cost in USD',
-      labels: ['provider', 'type'],
+      name: "cost_usd_total",
+      help: "Total cost in USD",
+      labels: ["provider", "type"],
     }),
   };
 }

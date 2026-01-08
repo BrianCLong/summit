@@ -44,6 +44,7 @@ ops/
 **Description**: Comprehensive logging standard defining JSON structured log format with required fields: timestamp, level, service, correlationId, message, context.
 
 **Key Features**:
+
 - Pino-based structured logging
 - Automatic PII redaction
 - Log event bus for real-time alerting
@@ -51,6 +52,7 @@ ops/
 - Multiple log levels (trace, debug, info, warn, error, fatal)
 
 **Implementation**:
+
 - `/server/src/logging/structuredLogger.ts` - Main structured logger
 - `/server/src/observability/logging/logger.ts` - Context-aware logger
 - `/server/src/config/logger.js` - Base Pino configuration
@@ -62,6 +64,7 @@ ops/
 **Description**: End-to-end request tracing system using UUID v4 correlation IDs propagated through all services and logs.
 
 **Key Features**:
+
 - Automatic correlation ID generation (UUID v4)
 - Express middleware for request attachment
 - AsyncLocalStorage for context propagation
@@ -70,6 +73,7 @@ ops/
 - Automatic log field injection
 
 **Implementation**:
+
 - `/server/src/middleware/correlation-id.ts` - Correlation middleware
 - Integration with all loggers via AsyncLocalStorage
 - Propagation to downstream services via HTTP headers
@@ -81,6 +85,7 @@ ops/
 **Description**: Grafana dashboard for self-service incident diagnosis with 10 panels covering request rates, errors, latency, AI metrics, and governance verdicts.
 
 **Key Panels**:
+
 1. Request Rate by Endpoint
 2. Error Rate by Endpoint (5xx)
 3. Request Latency (p50, p95, p99)
@@ -93,6 +98,7 @@ ops/
 10. Recent Errors and Warnings
 
 **Template Variables**:
+
 - `correlation_id` - Text input for correlation ID search
 - `DS_PROMETHEUS` - Prometheus datasource
 - `DS_LOKI` - Loki datasource
@@ -106,6 +112,7 @@ ops/
 **Description**: Comprehensive self-service runbook for operators to diagnose and resolve common incidents using correlation IDs and structured logs.
 
 **Coverage**:
+
 1. API Errors (5xx status codes)
 2. High Latency / Slow Requests
 3. AI Copilot Errors or Timeouts
@@ -114,6 +121,7 @@ ops/
 6. Data Residency Violations
 
 **Features**:
+
 - Step-by-step diagnosis procedures
 - Log query patterns (jq, grep, Loki, Prometheus)
 - Resolution paths for each incident type
@@ -127,6 +135,7 @@ ops/
 **Description**: Detailed mapping of operational monitoring capabilities to SOC 2 Trust Services Criteria.
 
 **Controls Mapped**:
+
 - **CC7.2**: System Monitoring
   - Structured logging, log event bus, Grafana dashboards, Prometheus metrics, alert engine
 - **CC7.3**: Incident Identification
@@ -140,18 +149,18 @@ ops/
 
 ## Implementation Status
 
-| Component | Status | Evidence | Tests |
-|-----------|--------|----------|-------|
-| Structured Logging | ✅ Complete | `/server/src/logging/` | `/server/src/logging/__tests__/` |
-| Correlation ID | ✅ Complete | `/server/src/middleware/correlation-id.ts` | `/server/src/middleware/__tests__/requestId.test.ts` |
-| Context-Aware Logger | ✅ Complete | `/server/src/observability/logging/logger.ts` | Covered by integration tests |
-| Log Event Bus | ✅ Complete | `/server/src/logging/logEventBus.ts` | `/server/src/logging/__tests__/` |
-| Log Alert Engine | ✅ Complete | `/server/src/logging/logAlertEngine.ts` | `/server/src/logging/__tests__/logAlertEngine.test.ts` |
-| Log Retention | ✅ Complete | `/server/src/logging/logRetention.ts` | `/server/src/logging/__tests__/logRetention.test.ts` |
-| Audit Log Pipeline | ✅ Complete | `/server/src/logging/auditLogPipeline.ts` | `/server/src/logging/__tests__/auditLogPipeline.test.ts` |
-| Grafana Dashboard | ✅ Complete | `dashboards/operator-dashboard.json` | Manual validation |
-| Operator Runbook | ✅ Complete | `runbooks/INCIDENT-DIAGNOSIS-RUNBOOK.md` | Quarterly drills |
-| SOC 2 Mapping | ✅ Complete | `controls/SOC2-CONTROLS-MAPPING.md` | Audit review pending |
+| Component            | Status      | Evidence                                      | Tests                                                    |
+| -------------------- | ----------- | --------------------------------------------- | -------------------------------------------------------- |
+| Structured Logging   | ✅ Complete | `/server/src/logging/`                        | `/server/src/logging/__tests__/`                         |
+| Correlation ID       | ✅ Complete | `/server/src/middleware/correlation-id.ts`    | `/server/src/middleware/__tests__/requestId.test.ts`     |
+| Context-Aware Logger | ✅ Complete | `/server/src/observability/logging/logger.ts` | Covered by integration tests                             |
+| Log Event Bus        | ✅ Complete | `/server/src/logging/logEventBus.ts`          | `/server/src/logging/__tests__/`                         |
+| Log Alert Engine     | ✅ Complete | `/server/src/logging/logAlertEngine.ts`       | `/server/src/logging/__tests__/logAlertEngine.test.ts`   |
+| Log Retention        | ✅ Complete | `/server/src/logging/logRetention.ts`         | `/server/src/logging/__tests__/logRetention.test.ts`     |
+| Audit Log Pipeline   | ✅ Complete | `/server/src/logging/auditLogPipeline.ts`     | `/server/src/logging/__tests__/auditLogPipeline.test.ts` |
+| Grafana Dashboard    | ✅ Complete | `dashboards/operator-dashboard.json`          | Manual validation                                        |
+| Operator Runbook     | ✅ Complete | `runbooks/INCIDENT-DIAGNOSIS-RUNBOOK.md`      | Quarterly drills                                         |
+| SOC 2 Mapping        | ✅ Complete | `controls/SOC2-CONTROLS-MAPPING.md`           | Audit review pending                                     |
 
 ## Existing Infrastructure Leveraged
 
@@ -213,16 +222,18 @@ grafana:
 ### For Developers
 
 1. **Use Context-Aware Logger**:
+
    ```javascript
-   import { logger } from './observability/logging/logger.js';
-   logger.info('Operation completed', { operation: 'getData' });
+   import { logger } from "./observability/logging/logger.js";
+   logger.info("Operation completed", { operation: "getData" });
    ```
 
 2. **Access Correlation ID in Handlers**:
+
    ```javascript
-   app.get('/api/endpoint', (req, res) => {
+   app.get("/api/endpoint", (req, res) => {
      const correlationId = req.correlationId;
-     logger.info({ correlationId }, 'Processing request');
+     logger.info({ correlationId }, "Processing request");
    });
    ```
 
@@ -230,8 +241,8 @@ grafana:
    ```javascript
    const response = await fetch(url, {
      headers: {
-       'X-Correlation-ID': req.correlationId
-     }
+       "X-Correlation-ID": req.correlationId,
+     },
    });
    ```
 

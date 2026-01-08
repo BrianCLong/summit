@@ -540,7 +540,7 @@ name: release
 on:
   workflow_dispatch:
   push:
-    tags: ['v*']
+    tags: ["v*"]
 jobs:
   build:
     runs-on: ubuntu-latest

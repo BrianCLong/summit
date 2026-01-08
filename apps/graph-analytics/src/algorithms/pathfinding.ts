@@ -4,8 +4,8 @@ import {
   PathQueryConstraints,
   NodePolicyFilter,
   EdgePolicyFilter,
-} from '../types/analytics';
-import { logger } from '../utils/logger';
+} from "../types/analytics";
+import { logger } from "../utils/logger";
 
 /**
  * Pathfinding Algorithms
@@ -27,7 +27,7 @@ function buildAdjacencyList(
   graph: Graph,
   constraints?: PathQueryConstraints,
   nodePolicyFilter?: NodePolicyFilter,
-  edgePolicyFilter?: EdgePolicyFilter,
+  edgePolicyFilter?: EdgePolicyFilter
 ): {
   adj: AdjacencyList;
   filteredNodesCount: number;
@@ -42,22 +42,14 @@ function buildAdjacencyList(
   for (const node of graph.nodes) {
     // Apply label constraints
     if (constraints?.disallowedNodeLabels?.length) {
-      if (
-        node.labels.some((label) =>
-          constraints.disallowedNodeLabels!.includes(label),
-        )
-      ) {
+      if (node.labels.some((label) => constraints.disallowedNodeLabels!.includes(label))) {
         filteredNodesCount++;
         continue;
       }
     }
 
     if (constraints?.requiredNodeLabels?.length) {
-      if (
-        !node.labels.some((label) =>
-          constraints.requiredNodeLabels!.includes(label),
-        )
-      ) {
+      if (!node.labels.some((label) => constraints.requiredNodeLabels!.includes(label))) {
         filteredNodesCount++;
         continue;
       }
@@ -119,8 +111,8 @@ function buildAdjacencyList(
     // Add backward edge for undirected or BOTH direction
     if (
       !constraints?.direction ||
-      constraints.direction === 'BOTH' ||
-      edge.direction === 'undirected'
+      constraints.direction === "BOTH" ||
+      edge.direction === "undirected"
     ) {
       if (!adj[edge.toId]) {
         adj[edge.toId] = { neighbors: [], edges: [] };
@@ -147,7 +139,7 @@ export function shortestPath(
   endNodeId: string,
   constraints?: PathQueryConstraints,
   nodePolicyFilter?: NodePolicyFilter,
-  edgePolicyFilter?: EdgePolicyFilter,
+  edgePolicyFilter?: EdgePolicyFilter
 ): {
   path: Path | null;
   filteredNodesCount: number;
@@ -157,11 +149,11 @@ export function shortestPath(
     graph,
     constraints,
     nodePolicyFilter,
-    edgePolicyFilter,
+    edgePolicyFilter
   );
 
   if (!adj[startNodeId] || !adj[endNodeId]) {
-    logger.warn('Start or end node not found or filtered out');
+    logger.warn("Start or end node not found or filtered out");
     return { path: null, filteredNodesCount, filteredEdgesCount };
   }
 
@@ -173,9 +165,7 @@ export function shortestPath(
   const visited = new Set<string>();
 
   // Priority queue (min-heap) - using array for simplicity
-  const queue: { nodeId: string; distance: number }[] = [
-    { nodeId: startNodeId, distance: 0 },
-  ];
+  const queue: { nodeId: string; distance: number }[] = [{ nodeId: startNodeId, distance: 0 }];
   distances.set(startNodeId, 0);
 
   while (queue.length > 0) {
@@ -254,22 +244,18 @@ export function kShortestPaths(
   k: number,
   constraints?: PathQueryConstraints,
   nodePolicyFilter?: NodePolicyFilter,
-  edgePolicyFilter?: EdgePolicyFilter,
+  edgePolicyFilter?: EdgePolicyFilter
 ): {
   paths: Path[];
   filteredNodesCount: number;
   filteredEdgesCount: number;
 } {
   const results: Path[] = [];
-  const { path: firstPath, filteredNodesCount, filteredEdgesCount } =
-    shortestPath(
-      graph,
-      startNodeId,
-      endNodeId,
-      constraints,
-      nodePolicyFilter,
-      edgePolicyFilter,
-    );
+  const {
+    path: firstPath,
+    filteredNodesCount,
+    filteredEdgesCount,
+  } = shortestPath(graph, startNodeId, endNodeId, constraints, nodePolicyFilter, edgePolicyFilter);
 
   if (!firstPath) {
     return { paths: [], filteredNodesCount, filteredEdgesCount };
@@ -290,7 +276,7 @@ export function kShortestPaths(
         nodeIds: prevPath.nodeIds.slice(0, i + 1),
         edgeIds: prevPath.edgeIds.slice(0, i),
         length: i,
-        weight: prevPath.weight ? (prevPath.weight * i / (prevPath.length || 1)) : i,
+        weight: prevPath.weight ? (prevPath.weight * i) / (prevPath.length || 1) : i,
         relationships: prevPath.relationships.slice(0, i),
       };
 
@@ -301,7 +287,7 @@ export function kShortestPaths(
       for (const existingPath of results) {
         if (existingPath.nodeIds.length > i) {
           const matches = rootPath.nodeIds!.every(
-            (nodeId, idx) => existingPath.nodeIds[idx] === nodeId,
+            (nodeId, idx) => existingPath.nodeIds[idx] === nodeId
           );
           if (matches && i < existingPath.edgeIds.length) {
             edgesToRemove.add(existingPath.edgeIds[i]);
@@ -327,7 +313,7 @@ export function kShortestPaths(
         endNodeId,
         constraints,
         nodePolicyFilter,
-        edgePolicyFilter,
+        edgePolicyFilter
       );
 
       if (spurPath && spurPath.nodeIds.length > 1) {
@@ -336,17 +322,13 @@ export function kShortestPaths(
           nodeIds: [...rootPath.nodeIds!, ...spurPath.nodeIds.slice(1)],
           edgeIds: [...rootPath.edgeIds!, ...spurPath.edgeIds],
           length: rootPath.length! + spurPath.length,
-          weight:
-            (rootPath.weight ?? rootPath.length!) +
-            (spurPath.weight ?? spurPath.length),
+          weight: (rootPath.weight ?? rootPath.length!) + (spurPath.weight ?? spurPath.length),
           relationships: [...rootPath.relationships!, ...spurPath.relationships],
         };
 
         // Check if this path is unique
-        const pathSignature = totalPath.nodeIds.join('->');
-        const isDuplicate = candidates.some(
-          (p) => p.nodeIds.join('->') === pathSignature,
-        );
+        const pathSignature = totalPath.nodeIds.join("->");
+        const isDuplicate = candidates.some((p) => p.nodeIds.join("->") === pathSignature);
 
         if (!isDuplicate) {
           candidates.push(totalPath);
@@ -378,10 +360,7 @@ export function kShortestPaths(
 /**
  * Check if a path satisfies all constraints
  */
-export function validatePath(
-  path: Path,
-  constraints: PathQueryConstraints,
-): boolean {
+export function validatePath(path: Path, constraints: PathQueryConstraints): boolean {
   if (constraints.maxDepth && path.length > constraints.maxDepth) {
     return false;
   }

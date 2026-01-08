@@ -13,8 +13,8 @@ import type {
   OrganizationTimeline,
   TrackingQuery,
   TrackingResult,
-  ThreatIndicator
-} from './types.js';
+  ThreatIndicator,
+} from "./types.js";
 
 export class OrganizationTracker {
   private organizations: Map<string, TerroristOrganization> = new Map();
@@ -91,23 +91,23 @@ export class OrganizationTracker {
 
     // Apply filters
     if (query.organizationIds && query.organizationIds.length > 0) {
-      filtered = filtered.filter(org => query.organizationIds!.includes(org.id));
+      filtered = filtered.filter((org) => query.organizationIds!.includes(org.id));
     }
 
     if (query.regions && query.regions.length > 0) {
-      filtered = filtered.filter(org =>
-        org.operatingRegions.some(region => query.regions!.includes(region))
+      filtered = filtered.filter((org) =>
+        org.operatingRegions.some((region) => query.regions!.includes(region))
       );
     }
 
     if (query.ideologies && query.ideologies.length > 0) {
-      filtered = filtered.filter(org =>
-        org.ideology.some(ideology => query.ideologies!.includes(ideology))
+      filtered = filtered.filter((org) =>
+        org.ideology.some((ideology) => query.ideologies!.includes(ideology))
       );
     }
 
     if (query.status && query.status.length > 0) {
-      filtered = filtered.filter(org => query.status!.includes(org.status));
+      filtered = filtered.filter((org) => query.status!.includes(org.status));
     }
 
     // Generate threat indicators
@@ -117,7 +117,7 @@ export class OrganizationTracker {
       organizations: filtered,
       totalCount: filtered.length,
       threats,
-      networkAnalysis: await this.analyzeNetwork(filtered)
+      networkAnalysis: await this.analyzeNetwork(filtered),
     };
   }
 
@@ -126,10 +126,12 @@ export class OrganizationTracker {
    */
   async getAffiliates(organizationId: string): Promise<TerroristOrganization[]> {
     const org = this.organizations.get(organizationId);
-    if (!org) {return [];}
+    if (!org) {
+      return [];
+    }
 
     return org.affiliates
-      .map(id => this.organizations.get(id))
+      .map((id) => this.organizations.get(id))
       .filter(Boolean) as TerroristOrganization[];
   }
 
@@ -151,11 +153,11 @@ export class OrganizationTracker {
       : undefined;
 
     const children = Array.from(this.organizations.values()).filter(
-      o => o.parentOrganization === organizationId && o.type !== 'SPLINTER'
+      (o) => o.parentOrganization === organizationId && o.type !== "SPLINTER"
     );
 
     const splinters = Array.from(this.organizations.values()).filter(
-      o => o.parentOrganization === organizationId && o.type === 'SPLINTER'
+      (o) => o.parentOrganization === organizationId && o.type === "SPLINTER"
     );
 
     return { parent, children, splinters };
@@ -211,14 +213,14 @@ export class OrganizationTracker {
 
     for (const org of organizations) {
       // Active organization with recent activity
-      if (org.status === 'ACTIVE') {
+      if (org.status === "ACTIVE") {
         indicators.push({
           organizationId: org.id,
-          type: 'ACTIVE_ORGANIZATION',
-          severity: 'HIGH',
+          type: "ACTIVE_ORGANIZATION",
+          severity: "HIGH",
           description: `${org.name} is actively operating`,
           detected: new Date(),
-          confidence: 0.9
+          confidence: 0.9,
         });
       }
 
@@ -226,11 +228,11 @@ export class OrganizationTracker {
       if (org.affiliates.length > 5) {
         indicators.push({
           organizationId: org.id,
-          type: 'EXPANDING_NETWORK',
-          severity: 'HIGH',
+          type: "EXPANDING_NETWORK",
+          severity: "HIGH",
           description: `${org.name} has extensive affiliate network`,
           detected: new Date(),
-          confidence: 0.85
+          confidence: 0.85,
         });
       }
 
@@ -238,11 +240,11 @@ export class OrganizationTracker {
       if (org.operatingRegions.length > 3) {
         indicators.push({
           organizationId: org.id,
-          type: 'TRANSNATIONAL_OPERATIONS',
-          severity: 'CRITICAL',
+          type: "TRANSNATIONAL_OPERATIONS",
+          severity: "CRITICAL",
           description: `${org.name} operates across multiple regions`,
           detected: new Date(),
-          confidence: 0.95
+          confidence: 0.95,
         });
       }
     }
@@ -271,7 +273,7 @@ export class OrganizationTracker {
       facilities,
       supplies,
       timeline,
-      hierarchy
+      hierarchy,
     ] = await Promise.all([
       this.getOrganization(organizationId),
       this.getLeadership(organizationId),
@@ -280,7 +282,7 @@ export class OrganizationTracker {
       this.getFacilities(organizationId),
       this.getSupplyNetwork(organizationId),
       this.getTimeline(organizationId),
-      this.getHierarchy(organizationId)
+      this.getHierarchy(organizationId),
     ]);
 
     return {
@@ -291,7 +293,7 @@ export class OrganizationTracker {
       facilities,
       supplies,
       timeline,
-      hierarchy
+      hierarchy,
     };
   }
 }

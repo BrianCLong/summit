@@ -10,11 +10,11 @@ const conductorMetrics = {
     expertDistribution: {
       'gpt-4': 0.4,
       'claude-3': 0.3,
-      'local-llama': 0.3
+      'local-llama': 0.3,
     },
     qualityGatesPassed: 1240,
     costEfficiency: 0.85,
-    timeSeriesData: []
+    timeSeriesData: [],
   },
   webOrchestration: {
     activeInterfaces: 3,
@@ -22,15 +22,15 @@ const conductorMetrics = {
     complianceScore: 1.0,
     citationCoverage: 0.98,
     contradictionRate: 0.01,
-    interfacePerformance: {}
+    interfacePerformance: {},
   },
   premiumModels: {
     utilizationRate: 0.75,
-    costSavings: 120.50,
+    costSavings: 120.5,
     qualityImprovement: 0.15,
     modelDistribution: {},
     thomsonSamplingConvergence: 0.95,
-    modelPerformance: {}
+    modelPerformance: {},
   },
   infrastructure: {
     uptimePercentage: 99.99,
@@ -40,15 +40,18 @@ const conductorMetrics = {
     resourceUsage: {
       cpu: 45,
       memory: 60,
-      storage: 30
-    }
-  }
+      storage: 30,
+    },
+  },
 }
 
 export const handlers = [
   // GraphQL endpoint
   http.post('*/graphql', async ({ request }) => {
-    const { query, variables } = await request.json() as { query: string; variables?: Record<string, unknown> }
+    const { query, variables } = (await request.json()) as {
+      query: string
+      variables?: Record<string, unknown>
+    }
     const queryString = query.trim()
 
     // Health check
@@ -234,7 +237,10 @@ export const handlers = [
 
   // Auth endpoints
   http.post('*/auth/login', async ({ request }) => {
-    const { email, password } = await request.json() as { email: string; password: string }
+    const { email, password } = (await request.json()) as {
+      email: string
+      password: string
+    }
 
     // Simple mock auth
     if (email && password) {

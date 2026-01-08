@@ -38,7 +38,7 @@ paths:
           name: tag
           schema: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
   /v1/search:
     get:
@@ -49,11 +49,11 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
   /v1/badges/assertions:
     post:
       summary: Create a hosted OpenBadge assertion (admin only)
-      responses: { '201': { description: Created } }
+      responses: { "201": { description: Created } }
 ```
 
 ## A2) Minimal server (Node/Edge)
@@ -61,24 +61,21 @@ paths:
 **`services/docs-api/server.js`**
 
 ```js
-import express from 'express';
-import rateLimit from 'express-rate-limit';
-import crypto from 'crypto';
-import fs from 'fs';
+import express from "express";
+import rateLimit from "express-rate-limit";
+import crypto from "crypto";
+import fs from "fs";
 const app = express();
 app.use(express.json());
-const meta = JSON.parse(fs.readFileSync('docs/ops/meta/index.json', 'utf8'));
-const API_KEYS = new Set(
-  (process.env.DOCS_API_KEYS || '').split(',').filter(Boolean),
-);
+const meta = JSON.parse(fs.readFileSync("docs/ops/meta/index.json", "utf8"));
+const API_KEYS = new Set((process.env.DOCS_API_KEYS || "").split(",").filter(Boolean));
 const auth = (req, res, next) => {
-  const k = req.headers['x-api-key'];
-  if (!k || !API_KEYS.has(k))
-    return res.status(401).json({ error: 'unauthorized' });
+  const k = req.headers["x-api-key"];
+  if (!k || !API_KEYS.has(k)) return res.status(401).json({ error: "unauthorized" });
   next();
 };
-app.use('/v1', rateLimit({ windowMs: 60_000, max: 120 }));
-app.get('/v1/meta/pages', auth, (req, res) => {
+app.use("/v1", rateLimit({ windowMs: 60_000, max: 120 }));
+app.get("/v1/meta/pages", auth, (req, res) => {
   const tag = req.query.tag;
   let rows = meta;
   if (tag) rows = rows.filter((m) => (m.tags || []).includes(tag));
@@ -90,24 +87,23 @@ app.get('/v1/meta/pages', auth, (req, res) => {
       owner,
       lastUpdated,
       tags,
-    })),
+    }))
   );
 });
-app.get('/v1/search', auth, (req, res) => {
-  const q = String(req.query.q || '').toLowerCase();
+app.get("/v1/search", auth, (req, res) => {
+  const q = String(req.query.q || "").toLowerCase();
   const rows = meta
     .filter(
       (m) =>
-        (m.title || '').toLowerCase().includes(q) ||
-        (m.summary || '').toLowerCase().includes(q),
+        (m.title || "").toLowerCase().includes(q) || (m.summary || "").toLowerCase().includes(q)
     )
     .slice(0, 20);
   res.json(rows);
 });
-app.post('/v1/badges/assertions', auth, (req, res) => {
+app.post("/v1/badges/assertions", auth, (req, res) => {
   res.status(201).json({ id: crypto.randomUUID() });
 });
-app.listen(process.env.PORT || 8787, () => console.log('Docs API up'));
+app.listen(process.env.PORT || 8787, () => console.log("Docs API up"));
 ```
 
 ## A3) CI: Build & publish container
@@ -164,20 +160,20 @@ CMD ["node","server.js"]
 **`scripts/webhooks/deliver.js`**
 
 ```js
-import crypto from 'crypto';
-import fs from 'fs';
-const secret = process.env.DOCS_WEBHOOK_SECRET || 'dev';
+import crypto from "crypto";
+import fs from "fs";
+const secret = process.env.DOCS_WEBHOOK_SECRET || "dev";
 export async function send(event, payload) {
   const body = JSON.stringify({ type: event, data: payload, ts: Date.now() });
-  const sig = crypto.createHmac('sha256', secret).update(body).digest('hex');
+  const sig = crypto.createHmac("sha256", secret).update(body).digest("hex");
   const url = process.env.DOCS_WEBHOOK_URL;
-  if (!url) return console.warn('No DOCS_WEBHOOK_URL set');
+  if (!url) return console.warn("No DOCS_WEBHOOK_URL set");
   const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-docs-signature': sig },
+    method: "POST",
+    headers: { "content-type": "application/json", "x-docs-signature": sig },
     body,
   });
-  if (!res.ok) console.error('Webhook failed', res.status);
+  if (!res.ok) console.error("Webhook failed", res.status);
 }
 ```
 
@@ -190,7 +186,7 @@ name: Docs Webhooks
 on:
   push:
     branches: [main]
-    paths: ['docs/**']
+    paths: ["docs/**"]
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -228,12 +224,12 @@ jobs:
 **`src/components/Flags.tsx`**
 
 ```tsx
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from "react";
 const Ctx = createContext<{ flags: any }>({ flags: {} });
 export function FlagsProvider({ children }: { children: any }) {
   const [flags, setFlags] = useState<any>({});
   useEffect(() => {
-    fetch('/ops/flags.json')
+    fetch("/ops/flags.json")
       .then((r) => r.json())
       .then(setFlags)
       .catch(() => setFlags({}));
@@ -249,8 +245,8 @@ export function useFlag(name: string) {
 **`src/theme/Root.tsx`**
 
 ```tsx
-import React from 'react';
-import { FlagsProvider } from '@site/src/components/Flags';
+import React from "react";
+import { FlagsProvider } from "@site/src/components/Flags";
 export default function Root({ children }) {
   return <FlagsProvider>{children}</FlagsProvider>;
 }
@@ -259,7 +255,7 @@ export default function Root({ children }) {
 **Usage in MDX**
 
 ```mdx
-import { useFlag } from '@site/src/components/Flags';
+import { useFlag } from "@site/src/components/Flags";
 
 {useFlag('assistant') && <>**Beta:** Assistant enabled for 50%.</>}
 ```
@@ -294,19 +290,13 @@ import { useFlag } from '@site/src/components/Flags';
 **`docs-site/sw.js`**
 
 ```js
-import { precacheAndRoute } from 'workbox-precaching';
-import { registerRoute } from 'workbox-routing';
-import { StaleWhileRevalidate } from 'workbox-strategies';
+import { precacheAndRoute } from "workbox-precaching";
+import { registerRoute } from "workbox-routing";
+import { StaleWhileRevalidate } from "workbox-strategies";
 // @ts-ignore
 precacheAndRoute(self.__WB_MANIFEST || []);
-registerRoute(
-  ({ request }) => request.destination === 'document',
-  new StaleWhileRevalidate(),
-);
-registerRoute(
-  ({ url }) => url.pathname.startsWith('/assets/'),
-  new StaleWhileRevalidate(),
-);
+registerRoute(({ request }) => request.destination === "document", new StaleWhileRevalidate());
+registerRoute(({ url }) => url.pathname.startsWith("/assets/"), new StaleWhileRevalidate());
 ```
 
 **`docusaurus.config.js`** (Workbox plugin or custom inject)
@@ -347,25 +337,25 @@ owner: security
 **`scripts/trust/collect-evidence.js`**
 
 ```js
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 const items = [
-  { src: 'docs/ops/tta/summary.json', dest: 'artifacts/metrics/tta.json' },
-  { src: 'docs/ops/audit/weekly.json', dest: 'artifacts/audit/weekly.json' },
-  { src: 'docs/ops/warehouse/kpis.csv', dest: 'artifacts/metrics/kpis.csv' },
+  { src: "docs/ops/tta/summary.json", dest: "artifacts/metrics/tta.json" },
+  { src: "docs/ops/audit/weekly.json", dest: "artifacts/audit/weekly.json" },
+  { src: "docs/ops/warehouse/kpis.csv", dest: "artifacts/metrics/kpis.csv" },
   {
-    src: '.github/workflows/docs-policy.yml',
-    dest: 'artifacts/controls/policy-workflow.yml',
+    src: ".github/workflows/docs-policy.yml",
+    dest: "artifacts/controls/policy-workflow.yml",
   },
 ];
 for (const it of items) {
   if (fs.existsSync(it.src)) {
-    const out = path.join('artifacts', it.dest.split('/').slice(1).join('/'));
+    const out = path.join("artifacts", it.dest.split("/").slice(1).join("/"));
     fs.mkdirSync(path.dirname(out), { recursive: true });
     fs.copyFileSync(it.src, out);
   }
 }
-console.log('Evidence collected');
+console.log("Evidence collected");
 ```
 
 ## E3) Evidence pack workflow
@@ -375,7 +365,7 @@ console.log('Evidence collected');
 ```yaml
 name: Trust Evidence Pack
 on:
-  schedule: [{ cron: '0 6 * * 1' }]
+  schedule: [{ cron: "0 6 * * 1" }]
   workflow_dispatch:
 jobs:
   pack:

@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   selectedNodeId: null,
@@ -8,7 +8,7 @@ const initialState = {
 };
 
 const slice = createSlice({
-  name: 'graphInteraction',
+  name: "graphInteraction",
   initialState,
   reducers: {
     selectNode(state, action) {

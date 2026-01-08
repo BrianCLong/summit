@@ -1,10 +1,10 @@
-import { ExtensionPoint } from '../ExtensionPoint.js';
+import { ExtensionPoint } from "../ExtensionPoint.js";
 
 /**
  * Data source connector extension point
  */
 export interface DataSourceExtension extends ExtensionPoint<DataSourceQuery, DataSourceResult> {
-  type: 'data-source';
+  type: "data-source";
   connect(): Promise<void>;
   disconnect(): Promise<void>;
   testConnection(): Promise<boolean>;
@@ -28,7 +28,7 @@ export interface DataSourceResult {
  * Base class for data source extensions
  */
 export abstract class BaseDataSourceExtension implements DataSourceExtension {
-  readonly type = 'data-source' as const;
+  readonly type = "data-source" as const;
 
   constructor(
     public readonly id: string,

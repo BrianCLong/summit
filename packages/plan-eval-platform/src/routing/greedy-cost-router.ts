@@ -1,10 +1,5 @@
-import { BaseRouter } from './base-router.js';
-import type {
-  RoutingConfig,
-  RoutingDecision,
-  ToolCandidate,
-  ScenarioStep,
-} from '../types.js';
+import { BaseRouter } from "./base-router.js";
+import type { RoutingConfig, RoutingDecision, ToolCandidate, ScenarioStep } from "../types.js";
 
 /**
  * GreedyCostRouter - Cost-aware greedy router
@@ -27,7 +22,7 @@ export class GreedyCostRouter extends BaseRouter {
 
   constructor(config?: Partial<RoutingConfig>) {
     super({
-      type: 'greedy_cost',
+      type: "greedy_cost",
       costWeight: 0.5,
       latencyBudgetMs: 5000,
       fallbackEnabled: true,
@@ -42,24 +37,21 @@ export class GreedyCostRouter extends BaseRouter {
   async route(
     step: ScenarioStep,
     candidates: ToolCandidate[],
-    context?: Record<string, unknown>,
+    context?: Record<string, unknown>
   ): Promise<RoutingDecision> {
     if (candidates.length === 0) {
-      throw new Error('No candidates available for routing');
+      throw new Error("No candidates available for routing");
     }
 
     // Apply latency filter
-    let eligibleCandidates = this.filterByLatency(
-      candidates,
-      this.config.latencyBudgetMs,
-    );
+    let eligibleCandidates = this.filterByLatency(candidates, this.config.latencyBudgetMs);
 
     // Fallback if no candidates meet latency
     if (eligibleCandidates.length === 0) {
       if (this.config.fallbackEnabled) {
         eligibleCandidates = candidates;
       } else {
-        throw new Error('No candidates meet latency requirements');
+        throw new Error("No candidates meet latency requirements");
       }
     }
 
@@ -76,7 +68,7 @@ export class GreedyCostRouter extends BaseRouter {
     const reasoning = this.buildReasoning(
       selected.candidate,
       selected.score,
-      scoredCandidates.length,
+      scoredCandidates.length
     );
 
     return this.buildDecision(
@@ -84,7 +76,7 @@ export class GreedyCostRouter extends BaseRouter {
       selected.score,
       reasoning,
       eligibleCandidates,
-      this.config.latencyBudgetMs,
+      this.config.latencyBudgetMs
     );
   }
 
@@ -141,11 +133,7 @@ export class GreedyCostRouter extends BaseRouter {
   /**
    * Build reasoning explanation
    */
-  private buildReasoning(
-    selected: ToolCandidate,
-    score: number,
-    candidateCount: number,
-  ): string[] {
+  private buildReasoning(selected: ToolCandidate, score: number, candidateCount: number): string[] {
     const λ = this.config.costWeight;
     return [
       `Greedy cost-aware selection (λ=${λ.toFixed(2)})`,
@@ -155,10 +143,10 @@ export class GreedyCostRouter extends BaseRouter {
       `Cost: $${selected.estimatedCost.toFixed(4)}`,
       `Latency: ${selected.estimatedLatencyMs}ms`,
       λ > 0.5
-        ? 'Optimizing for cost efficiency'
+        ? "Optimizing for cost efficiency"
         : λ < 0.5
-          ? 'Optimizing for quality'
-          : 'Balancing cost and quality',
+          ? "Optimizing for quality"
+          : "Balancing cost and quality",
     ];
   }
 
@@ -169,7 +157,7 @@ export class GreedyCostRouter extends BaseRouter {
     toolId: string,
     quality: number,
     actualCost: number,
-    actualLatencyMs: number,
+    actualLatencyMs: number
   ): void {
     // Update quality history
     if (!this.qualityHistory.has(toolId)) {
@@ -217,17 +205,10 @@ export class GreedyCostRouter extends BaseRouter {
 
       stats.set(toolId, {
         avgQuality:
-          qualities.length > 0
-            ? qualities.reduce((a, b) => a + b, 0) / qualities.length
-            : 0,
-        avgCost:
-          costs.length > 0
-            ? costs.reduce((a, b) => a + b, 0) / costs.length
-            : 0,
+          qualities.length > 0 ? qualities.reduce((a, b) => a + b, 0) / qualities.length : 0,
+        avgCost: costs.length > 0 ? costs.reduce((a, b) => a + b, 0) / costs.length : 0,
         avgLatency:
-          latencies.length > 0
-            ? latencies.reduce((a, b) => a + b, 0) / latencies.length
-            : 0,
+          latencies.length > 0 ? latencies.reduce((a, b) => a + b, 0) / latencies.length : 0,
         samples: qualities.length,
       });
     }
@@ -250,7 +231,7 @@ export class GreedyCostRouter extends BaseRouter {
  */
 export function createGreedyCostRouter(
   costWeight: number = 0.5,
-  config?: Partial<RoutingConfig>,
+  config?: Partial<RoutingConfig>
 ): GreedyCostRouter {
   return new GreedyCostRouter({
     costWeight,

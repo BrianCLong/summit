@@ -8,8 +8,8 @@ import {
   type ChemicalAgentType,
   StorageCondition,
   type ConfidenceLevel,
-  type WMDIncident
-} from './types.js';
+  type WMDIncident,
+} from "./types.js";
 
 export class ChemicalWeaponsTracker {
   private weapons: Map<string, ChemicalWeapon>;
@@ -35,12 +35,14 @@ export class ChemicalWeaponsTracker {
   }
 
   getStockpileByCountry(country: string): ChemicalWeapon[] {
-    return Array.from(this.weapons.values()).filter(w => w.country === country);
+    return Array.from(this.weapons.values()).filter((w) => w.country === country);
   }
 
   estimateTotalStockpile(country: string): number {
-    return this.getStockpileByCountry(country)
-      .reduce((sum, w) => sum + (w.quantity_estimate || 0), 0);
+    return this.getStockpileByCountry(country).reduce(
+      (sum, w) => sum + (w.quantity_estimate || 0),
+      0
+    );
   }
 
   assessCWCCompliance(country: string): {
@@ -49,14 +51,13 @@ export class ChemicalWeaponsTracker {
     total_facilities: number;
     violations: string[];
   } {
-    const facilities = Array.from(this.facilities.values())
-      .filter(f => f.country === country);
+    const facilities = Array.from(this.facilities.values()).filter((f) => f.country === country);
 
-    const declared = facilities.filter(f => f.cwc_declared).length;
+    const declared = facilities.filter((f) => f.cwc_declared).length;
     const violations: string[] = [];
 
-    facilities.forEach(f => {
-      if (!f.cwc_declared && f.facility_type === 'production') {
+    facilities.forEach((f) => {
+      if (!f.cwc_declared && f.facility_type === "production") {
         violations.push(`Undeclared production facility: ${f.name}`);
       }
     });
@@ -65,22 +66,23 @@ export class ChemicalWeaponsTracker {
       compliant: violations.length === 0,
       declared_facilities: declared,
       total_facilities: facilities.length,
-      violations
+      violations,
     };
   }
 
   identifyPrecursorFlow(precursor: string): {
     sources: string[];
     destinations: string[];
-    risk_assessment: 'high' | 'medium' | 'low';
+    risk_assessment: "high" | "medium" | "low";
   } {
-    const facilities = Array.from(this.facilities.values())
-      .filter(f => f.agents_produced.includes(precursor));
+    const facilities = Array.from(this.facilities.values()).filter((f) =>
+      f.agents_produced.includes(precursor)
+    );
 
     return {
-      sources: facilities.map(f => f.country),
+      sources: facilities.map((f) => f.country),
       destinations: [],
-      risk_assessment: facilities.length > 5 ? 'high' : 'medium'
+      risk_assessment: facilities.length > 5 ? "high" : "medium",
     };
   }
 
@@ -91,15 +93,15 @@ export class ChemicalWeaponsTracker {
     percentage_complete: number;
   } {
     const weapons = this.getStockpileByCountry(country);
-    const destroyed = weapons.filter(w =>
-      w.storage_condition === StorageCondition.DESTRUCTION_QUEUE
+    const destroyed = weapons.filter(
+      (w) => w.storage_condition === StorageCondition.DESTRUCTION_QUEUE
     ).length;
 
     return {
       total_declared: weapons.length,
       destroyed,
       remaining: weapons.length - destroyed,
-      percentage_complete: (destroyed / weapons.length) * 100
+      percentage_complete: (destroyed / weapons.length) * 100,
     };
   }
 }

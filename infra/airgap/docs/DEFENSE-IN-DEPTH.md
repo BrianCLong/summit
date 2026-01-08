@@ -29,13 +29,13 @@ This document describes the defense-in-depth architecture for deploying Summit I
 
 ### Key Security Achievements
 
-| Metric | Target | Implementation |
-|--------|--------|----------------|
-| Malware Reduction | 91% | Multi-engine scanning stations |
-| Network Isolation | Complete | VPC with no internet gateway |
-| Supply Chain | SLSA Level 3 | Cosign-signed attestations |
-| Data Transfer | Controlled | Removable media with scanning |
-| Monitoring | Comprehensive | SNMP + Prometheus + SIEM |
+| Metric            | Target        | Implementation                 |
+| ----------------- | ------------- | ------------------------------ |
+| Malware Reduction | 91%           | Multi-engine scanning stations |
+| Network Isolation | Complete      | VPC with no internet gateway   |
+| Supply Chain      | SLSA Level 3  | Cosign-signed attestations     |
+| Data Transfer     | Controlled    | Removable media with scanning  |
+| Monitoring        | Comprehensive | SNMP + Prometheus + SIEM       |
 
 ---
 
@@ -84,6 +84,7 @@ This document describes the defense-in-depth architecture for deploying Summit I
 **Purpose**: Secure ingress point for data entering the air-gapped environment
 
 **Security Controls**:
+
 - Removable media scanning (multi-engine)
 - File type validation
 - Digital signature verification
@@ -91,6 +92,7 @@ This document describes the defense-in-depth architecture for deploying Summit I
 - Chain of custody logging
 
 **Network Rules**:
+
 ```yaml
 Ingress:
   - From: Physical media handlers only
@@ -105,6 +107,7 @@ Egress:
 **Purpose**: Core IntelGraph platform operations
 
 **Security Controls**:
+
 - Pod Security Standards (Restricted)
 - Network policies (default deny)
 - Image signature verification
@@ -112,6 +115,7 @@ Egress:
 - Runtime security monitoring
 
 **Components**:
+
 - IntelGraph Server
 - IntelGraph Client
 - API Gateway
@@ -125,12 +129,14 @@ Egress:
 **Purpose**: Isolated security monitoring and log retention
 
 **Security Controls**:
+
 - Ingress-only design (no egress)
 - Immutable log storage
 - 7-year retention for compliance
 - Integrity verification (SHA-256)
 
 **Data Sources**:
+
 - Application logs
 - Security events
 - OT sensor data
@@ -142,6 +148,7 @@ Egress:
 **Purpose**: Health monitoring and alerting
 
 **Components**:
+
 - SNMP Exporter
 - Prometheus
 - Alertmanager
@@ -221,21 +228,23 @@ spec:
 
 ### Allowed Device Types
 
-| Device Type | Vendor Whitelist | Requirements |
-|-------------|------------------|--------------|
-| USB Storage | Kingston, SanDisk, Transcend | Hardware encryption, tamper-evident |
-| Optical Media | CD-R, DVD-R | Write-protected |
-| SD Cards | **BLOCKED** | Not permitted |
+| Device Type   | Vendor Whitelist             | Requirements                        |
+| ------------- | ---------------------------- | ----------------------------------- |
+| USB Storage   | Kingston, SanDisk, Transcend | Hardware encryption, tamper-evident |
+| Optical Media | CD-R, DVD-R                  | Write-protected                     |
+| SD Cards      | **BLOCKED**                  | Not permitted                       |
 
 ### File Type Restrictions
 
 **Allowed (Inbound)**:
+
 - `.tar.gz`, `.tar.xz`, `.zip` (Archives)
 - `.sig` (Signatures)
 - `.sbom` (SBOMs)
 - `.json`, `.yaml`, `.yml` (Configuration)
 
 **Blocked**:
+
 - Executables (`.exe`, `.dll`)
 - Scripts (`.ps1`, `.bat`, `.sh`)
 - All other file types
@@ -248,24 +257,24 @@ spec:
 
 The scanning station employs multiple engines for comprehensive detection:
 
-| Engine | Purpose | Update Frequency |
-|--------|---------|------------------|
-| ClamAV | Signature-based AV | Manual (air-gapped) |
-| YARA | Rule-based detection | Manual |
-| Hash Database | Known malware hashes | Weekly import |
-| Static Analysis | PE/ELF analysis | Built-in |
+| Engine          | Purpose              | Update Frequency    |
+| --------------- | -------------------- | ------------------- |
+| ClamAV          | Signature-based AV   | Manual (air-gapped) |
+| YARA            | Rule-based detection | Manual              |
+| Hash Database   | Known malware hashes | Weekly import       |
+| Static Analysis | PE/ELF analysis      | Built-in            |
 
 ### Scanning Configuration
 
 ```yaml
 scanning:
   engines:
-    minimum: 2  # At least 2 engines must scan
+    minimum: 2 # At least 2 engines must scan
     required:
       - clamav
       - yara
   thresholds:
-    blockOnDetection: true  # Any detection = block
+    blockOnDetection: true # Any detection = block
     scanTimeoutTotal: 600s
   quarantine:
     enabled: true
@@ -315,12 +324,12 @@ sum by (engine) (rate(scanner_detections_total[1h]))
 
 ### Monitored Targets
 
-| Target Type | Module | Metrics |
-|-------------|--------|---------|
-| Linux Servers | `linux_server` | CPU, Memory, Disk, Network |
-| Network Devices | `network_device` | Interface stats, CPU, Memory |
-| OT Sensors | `ot_sensor` | Status, Temperature, Sync time |
-| Storage | `storage` | Capacity, Usage, Health |
+| Target Type     | Module           | Metrics                        |
+| --------------- | ---------------- | ------------------------------ |
+| Linux Servers   | `linux_server`   | CPU, Memory, Disk, Network     |
+| Network Devices | `network_device` | Interface stats, CPU, Memory   |
+| OT Sensors      | `ot_sensor`      | Status, Temperature, Sync time |
+| Storage         | `storage`        | Capacity, Usage, Health        |
 
 ### Critical Alerts
 
@@ -347,15 +356,15 @@ sum by (engine) (rate(scanner_detections_total[1h]))
 
 ### SLSA Level 3 Requirements
 
-| Requirement | Implementation |
-|-------------|----------------|
-| Scripted Build | GitHub Actions workflows |
-| Hosted Build | GitHub-hosted runners |
-| Audit Logs | GitHub audit log |
-| Hermetic Build | Docker with pinned deps |
-| Reproducible | Deterministic builds |
-| Isolated | Ephemeral runners |
-| Signed Provenance | Cosign keyless signing |
+| Requirement       | Implementation           |
+| ----------------- | ------------------------ |
+| Scripted Build    | GitHub Actions workflows |
+| Hosted Build      | GitHub-hosted runners    |
+| Audit Logs        | GitHub audit log         |
+| Hermetic Build    | Docker with pinned deps  |
+| Reproducible      | Deterministic builds     |
+| Isolated          | Ephemeral runners        |
+| Signed Provenance | Cosign keyless signing   |
 
 ### Verification Flow
 
@@ -407,19 +416,19 @@ OT sensors communicate through a multi-hop proxy chain for defense-in-depth:
 
 ### Security at Each Hop
 
-| Tier | Security Controls |
-|------|-------------------|
-| Edge Proxy | mTLS, Rate limiting, Content inspection |
-| Zone Proxy | mTLS, CN validation, Payload sanitization |
+| Tier       | Security Controls                          |
+| ---------- | ------------------------------------------ |
+| Edge Proxy | mTLS, Rate limiting, Content inspection    |
+| Zone Proxy | mTLS, CN validation, Payload sanitization  |
 | Core Proxy | mTLS, Full audit logging, Final validation |
 
 ### Backup Policy
 
 ```yaml
 retention:
-  safety-critical: 10years  # Immutable
-  operational: 7years       # Immutable
-  diagnostic: 2years        # Mutable
+  safety-critical: 10years # Immutable
+  operational: 7years # Immutable
+  diagnostic: 2years # Mutable
 ```
 
 ---
@@ -480,6 +489,7 @@ Every log entry includes:
 ### Initial Deployment
 
 1. **Prepare Air-Gapped Environment**
+
    ```bash
    # Apply Terraform infrastructure
    cd infra/airgap/terraform
@@ -489,6 +499,7 @@ Every log entry includes:
    ```
 
 2. **Deploy Kubernetes Components**
+
    ```bash
    # Apply namespaces and policies
    kubectl apply -f kubernetes/namespace.yaml
@@ -510,6 +521,7 @@ Every log entry includes:
    ```
 
 3. **Verify Deployment**
+
    ```bash
    # Check all pods
    kubectl get pods -n intelgraph-airgap
@@ -529,6 +541,7 @@ Every log entry includes:
 ### Image Updates
 
 1. **Generate SBOM on connected system**
+
    ```bash
    ./scripts/generate-sbom.sh -a -f both myimage:v1.0.0
    ```
@@ -555,6 +568,7 @@ Every log entry includes:
 **Trigger**: Malware detected during scan
 
 **Steps**:
+
 1. Quarantine media immediately
 2. Document detection details
 3. Notify security team
@@ -567,6 +581,7 @@ Every log entry includes:
 **Trigger**: `SNMPTargetDown` alert
 
 **Steps**:
+
 1. Verify network connectivity
 2. Check target device status
 3. Verify SNMP configuration
@@ -578,6 +593,7 @@ Every log entry includes:
 **Trigger**: `OTSensorSyncStale` alert
 
 **Steps**:
+
 1. Check proxy chain health
 2. Verify sensor connectivity
 3. Review sensor logs
@@ -588,52 +604,52 @@ Every log entry includes:
 
 ## Compliance Mapping
 
-| Control | NIST 800-53 | FedRAMP | IEC 62443 |
-|---------|-------------|---------|-----------|
-| Network Isolation | SC-7 | SC-7 | SR 5.1 |
-| Malware Protection | SI-3 | SI-3 | SR 3.2 |
-| Media Protection | MP-2, MP-4 | MP-2, MP-4 | SR 2.3 |
-| Audit Logging | AU-2, AU-12 | AU-2, AU-12 | SR 6.1 |
-| Supply Chain | SA-12, SR-3 | SA-12, SR-3 | SR 4.1 |
-| Access Control | AC-3, AC-4 | AC-3, AC-4 | SR 2.1 |
-| Integrity | SI-7 | SI-7 | SR 3.4 |
+| Control            | NIST 800-53 | FedRAMP     | IEC 62443 |
+| ------------------ | ----------- | ----------- | --------- |
+| Network Isolation  | SC-7        | SC-7        | SR 5.1    |
+| Malware Protection | SI-3        | SI-3        | SR 3.2    |
+| Media Protection   | MP-2, MP-4  | MP-2, MP-4  | SR 2.3    |
+| Audit Logging      | AU-2, AU-12 | AU-2, AU-12 | SR 6.1    |
+| Supply Chain       | SA-12, SR-3 | SA-12, SR-3 | SR 4.1    |
+| Access Control     | AC-3, AC-4  | AC-3, AC-4  | SR 2.1    |
+| Integrity          | SI-7        | SI-7        | SR 3.4    |
 
 ---
 
 ## Appendix A: Configuration Files
 
-| File | Purpose |
-|------|---------|
-| `terraform/main.tf` | AWS infrastructure |
-| `terraform/variables.tf` | Configuration variables |
-| `kubernetes/namespace.yaml` | Kubernetes namespaces |
-| `kubernetes/network-policies.yaml` | Network segmentation |
-| `kubernetes/malware-scanning-station.yaml` | Scanner deployment |
-| `kubernetes/removable-media-controller.yaml` | Media controls |
-| `kubernetes/snmp-monitoring.yaml` | SNMP exporter |
-| `kubernetes/proxy-chain-sensor.yaml` | Sensor proxy chain |
-| `kubernetes/siem-ot-backup.yaml` | SIEM collector |
-| `sbom/slsa-sbom-policy.yaml` | SLSA/SBOM policies |
-| `scripts/generate-sbom.sh` | SBOM generation |
+| File                                         | Purpose                 |
+| -------------------------------------------- | ----------------------- |
+| `terraform/main.tf`                          | AWS infrastructure      |
+| `terraform/variables.tf`                     | Configuration variables |
+| `kubernetes/namespace.yaml`                  | Kubernetes namespaces   |
+| `kubernetes/network-policies.yaml`           | Network segmentation    |
+| `kubernetes/malware-scanning-station.yaml`   | Scanner deployment      |
+| `kubernetes/removable-media-controller.yaml` | Media controls          |
+| `kubernetes/snmp-monitoring.yaml`            | SNMP exporter           |
+| `kubernetes/proxy-chain-sensor.yaml`         | Sensor proxy chain      |
+| `kubernetes/siem-ot-backup.yaml`             | SIEM collector          |
+| `sbom/slsa-sbom-policy.yaml`                 | SLSA/SBOM policies      |
+| `scripts/generate-sbom.sh`                   | SBOM generation         |
 
 ---
 
 ## Appendix B: Glossary
 
-| Term | Definition |
-|------|------------|
+| Term       | Definition                                       |
+| ---------- | ------------------------------------------------ |
 | Air-Gapped | Network isolated from internet/external networks |
-| SBOM | Software Bill of Materials |
-| SLSA | Supply-chain Levels for Software Artifacts |
-| OT | Operational Technology |
-| SIEM | Security Information and Event Management |
-| mTLS | Mutual TLS authentication |
-| SNMP | Simple Network Management Protocol |
+| SBOM       | Software Bill of Materials                       |
+| SLSA       | Supply-chain Levels for Software Artifacts       |
+| OT         | Operational Technology                           |
+| SIEM       | Security Information and Event Management        |
+| mTLS       | Mutual TLS authentication                        |
+| SNMP       | Simple Network Management Protocol               |
 
 ---
 
 **Document Control**
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | 2025-11-29 | DevOps | Initial release |
+| Version | Date       | Author | Changes         |
+| ------- | ---------- | ------ | --------------- |
+| 1.0     | 2025-11-29 | DevOps | Initial release |

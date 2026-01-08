@@ -1,4 +1,4 @@
-export type TelemetryMode = 'console' | 'otlp';
+export type TelemetryMode = "console" | "otlp";
 
 export interface NanoEventMetadata {
   readonly correlationId?: string;
@@ -33,13 +33,13 @@ export interface RuntimePerformanceProfile {
 
 export interface RuntimeConfig {
   readonly id: string;
-  readonly environment: 'dev' | 'staging' | 'prod' | 'test';
+  readonly environment: "dev" | "staging" | "prod" | "test";
   readonly telemetry: RuntimeTelemetryConfig;
   readonly security: RuntimeSecurityPolicy;
   readonly performance: RuntimePerformanceProfile;
   readonly auditTrail: {
     readonly enabled: boolean;
-    readonly sink: 'memory' | 'stdout';
+    readonly sink: "memory" | "stdout";
   };
 }
 
@@ -48,7 +48,7 @@ export interface RuntimeDiagnosticsEvent {
   readonly emittedAt: string;
   readonly durationMs?: number;
   readonly plugin?: string;
-  readonly status: 'queued' | 'processed' | 'failed';
+  readonly status: "queued" | "processed" | "failed";
   readonly error?: string;
 }
 

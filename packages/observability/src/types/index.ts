@@ -14,20 +14,20 @@ export interface ServiceConfig {
   /** Service version (semver) */
   version: string;
   /** Deployment environment */
-  environment: 'development' | 'staging' | 'production';
+  environment: "development" | "staging" | "production";
   /** Kubernetes namespace (if applicable) */
   namespace?: string;
   /** Team owning the service */
   team?: string;
   /** Service tier for prioritization */
-  tier?: 'critical' | 'standard' | 'background';
+  tier?: "critical" | "standard" | "background";
 }
 
 // =============================================================================
 // METRIC TYPES
 // =============================================================================
 
-export type MetricType = 'counter' | 'gauge' | 'histogram' | 'summary';
+export type MetricType = "counter" | "gauge" | "histogram" | "summary";
 
 export interface MetricDefinition {
   name: string;
@@ -54,29 +54,29 @@ export interface HttpLabels extends StandardLabels {
 
 /** Database operation labels */
 export interface DatabaseLabels extends StandardLabels {
-  db_system: 'postgresql' | 'neo4j' | 'redis' | 'mongodb';
+  db_system: "postgresql" | "neo4j" | "redis" | "mongodb";
   operation: string;
-  status: 'success' | 'error';
+  status: "success" | "error";
 }
 
 /** Queue/Worker labels */
 export interface QueueLabels extends StandardLabels {
   queue: string;
   job_type: string;
-  status: 'completed' | 'failed' | 'retried';
+  status: "completed" | "failed" | "retried";
 }
 
 /** Cache labels */
 export interface CacheLabels extends StandardLabels {
   cache_name: string;
-  result: 'hit' | 'miss';
+  result: "hit" | "miss";
 }
 
 // =============================================================================
 // LOGGING TYPES
 // =============================================================================
 
-export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+export type LogLevel = "trace" | "debug" | "info" | "warn" | "error" | "fatal";
 
 export interface LogContext {
   /** Trace ID for distributed tracing correlation */
@@ -112,27 +112,27 @@ export interface LogEntry {
 
 /** Fields that must be redacted from logs */
 export const REDACTED_FIELDS = [
-  'password',
-  'token',
-  'secret',
-  'apiKey',
-  'api_key',
-  'authorization',
-  'cookie',
-  'sessionId',
-  'session_id',
-  'creditCard',
-  'credit_card',
-  'ssn',
-  'privateKey',
-  'private_key',
+  "password",
+  "token",
+  "secret",
+  "apiKey",
+  "api_key",
+  "authorization",
+  "cookie",
+  "sessionId",
+  "session_id",
+  "creditCard",
+  "credit_card",
+  "ssn",
+  "privateKey",
+  "private_key",
 ] as const;
 
 // =============================================================================
 // TRACING TYPES
 // =============================================================================
 
-export type SpanKind = 'internal' | 'server' | 'client' | 'producer' | 'consumer';
+export type SpanKind = "internal" | "server" | "client" | "producer" | "consumer";
 
 export interface SpanContext {
   traceId: string;
@@ -156,14 +156,14 @@ export interface TracingConfig {
   /** Sample rate 0.0 - 1.0 */
   sampleRate: number;
   /** Propagation formats */
-  propagators: ('w3c' | 'b3' | 'jaeger')[];
+  propagators: ("w3c" | "b3" | "jaeger")[];
 }
 
 // =============================================================================
 // SLO TYPES
 // =============================================================================
 
-export type SloType = 'availability' | 'latency' | 'throughput' | 'correctness';
+export type SloType = "availability" | "latency" | "throughput" | "correctness";
 
 export interface SloDefinition {
   /** SLO name */
@@ -186,7 +186,7 @@ export interface SloDefinition {
   /** Alert configuration */
   alerts?: {
     burnRate: number;
-    severity: 'critical' | 'warning' | 'info';
+    severity: "critical" | "warning" | "info";
     window: string;
   }[];
 }
@@ -203,14 +203,14 @@ export interface ErrorBudget {
   /** Current burn rate (multiples of allowed rate) */
   burnRate: number;
   /** Status based on burn rate */
-  status: 'healthy' | 'warning' | 'critical' | 'exhausted';
+  status: "healthy" | "warning" | "critical" | "exhausted";
 }
 
 // =============================================================================
 // HEALTH CHECK TYPES
 // =============================================================================
 
-export type HealthStatus = 'healthy' | 'degraded' | 'unhealthy';
+export type HealthStatus = "healthy" | "degraded" | "unhealthy";
 
 export interface HealthCheck {
   name: string;
@@ -238,12 +238,12 @@ export interface HealthReport {
  * Each archetype has pre-defined metrics, SLOs, and dashboard panels.
  */
 export type ServiceArchetype =
-  | 'api-service'      // REST/GraphQL APIs
-  | 'worker-service'   // Background job processors
-  | 'gateway-service'  // API gateways, load balancers
-  | 'data-pipeline'    // ETL, streaming processors
-  | 'storage-service'  // Database proxies, caches
-  | 'ml-service';      // ML inference services
+  | "api-service" // REST/GraphQL APIs
+  | "worker-service" // Background job processors
+  | "gateway-service" // API gateways, load balancers
+  | "data-pipeline" // ETL, streaming processors
+  | "storage-service" // Database proxies, caches
+  | "ml-service"; // ML inference services
 
 export interface ArchetypeConfig {
   archetype: ServiceArchetype;
@@ -265,12 +265,12 @@ export interface ArchetypeConfig {
 
 export interface AuditEvent {
   /** Event type */
-  type: 'auth' | 'access' | 'mutation' | 'admin' | 'security';
+  type: "auth" | "access" | "mutation" | "admin" | "security";
   /** Action performed */
   action: string;
   /** Actor (user/service) */
   actor: {
-    type: 'user' | 'service' | 'system';
+    type: "user" | "service" | "system";
     id: string;
     ip?: string;
   };
@@ -280,7 +280,7 @@ export interface AuditEvent {
     id: string;
   };
   /** Outcome */
-  outcome: 'success' | 'failure' | 'denied';
+  outcome: "success" | "failure" | "denied";
   /** Timestamp */
   timestamp: string;
   /** Request context */

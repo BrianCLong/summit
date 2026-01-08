@@ -516,11 +516,11 @@ const PUBLISH_COMMUNITIES = gql`
 // Overlay publishing service
 async function publishOverlay(
   graphKey: string,
-  overlayType: 'LP' | 'COMMUNITY' | 'ER' | 'ANOMALY',
-  results: any[],
+  overlayType: "LP" | "COMMUNITY" | "ER" | "ANOMALY",
+  results: any[]
 ) {
   const manifest = await createProvenanceManifest({
-    operation: 'overlay_publish',
+    operation: "overlay_publish",
     graphKey,
     overlayType,
     resultCount: results.length,
@@ -530,9 +530,7 @@ async function publishOverlay(
 
   // Write to Neo4j via parameterized Cypher
   const cypher = getCypherForOverlay(overlayType);
-  await neo4j.writeTransaction((tx) =>
-    tx.run(cypher, { results, manifest: manifest.id }),
-  );
+  await neo4j.writeTransaction((tx) => tx.run(cypher, { results, manifest: manifest.id }));
 
   return manifest;
 }
@@ -881,11 +879,7 @@ type Query {
   models(task: TaskType): [Model!]!
   runs(modelId: ID): [Run!]!
   erPairs(decision: ERDecision, minProb: Float, limit: Int = 100): [ERPair!]!
-  predictions(
-    task: TaskType!
-    minScore: Float
-    limit: Int = 100
-  ): [Prediction!]!
+  predictions(task: TaskType!, minScore: Float, limit: Int = 100): [Prediction!]!
   communities(graphKey: String!): [Community!]!
   exports(limit: Int = 50): [Export!]!
 }
@@ -1074,7 +1068,7 @@ const evaluateGraphAIAccess = async (
   user: User,
   operation: string,
   resource: string,
-  context: Context,
+  context: Context
 ): Promise<AccessDecision> => {
   const policy = {
     subject: {
@@ -1083,9 +1077,9 @@ const evaluateGraphAIAccess = async (
       clearance: user.clearance,
     },
     resource: {
-      type: 'graph_ai',
+      type: "graph_ai",
       classification: resource.classification,
-      purpose: 'GRAPH_AI_ANALYSIS',
+      purpose: "GRAPH_AI_ANALYSIS",
     },
     action: operation, // 'train', 'predict', 'export', etc.
     environment: {
@@ -1100,9 +1094,9 @@ const evaluateGraphAIAccess = async (
 
 // Data redaction for different roles
 const redactSensitiveFeatures = (features: Feature[], userRole: string) => {
-  const sensitiveFeatures = ['ssn', 'phone', 'email', 'address'];
+  const sensitiveFeatures = ["ssn", "phone", "email", "address"];
 
-  if (userRole === 'VIEWER') {
+  if (userRole === "VIEWER") {
     return features.filter((f) => !sensitiveFeatures.includes(f.key));
   }
 
@@ -1130,14 +1124,14 @@ const redactSensitiveFeatures = (features: Feature[], userRole: string) => {
 
 ```yaml
 Performance SLAs:
-  embedding_training: '≤10s for 8k-12k nodes'
-  entity_resolution: '≤2min for 10k pairs'
-  link_prediction: '≤2s for 1k predictions'
-  community_detection: '≤2s for 10k nodes'
-  anomaly_detection: '≤5s LOF on 5k embeddings'
-  overlay_publish: '≤1s to Neo4j'
-  ui_response: 'p95 <150ms'
-  export_generation: '≤30s for full bundle'
+  embedding_training: "≤10s for 8k-12k nodes"
+  entity_resolution: "≤2min for 10k pairs"
+  link_prediction: "≤2s for 1k predictions"
+  community_detection: "≤2s for 10k nodes"
+  anomaly_detection: "≤5s LOF on 5k embeddings"
+  overlay_publish: "≤1s to Neo4j"
+  ui_response: "p95 <150ms"
+  export_generation: "≤30s for full bundle"
 ```
 
 ### 🔧 **Optimization Techniques**
@@ -1234,9 +1228,9 @@ def test_export_bundle_integrity():
 **Playwright E2E Tests:**
 
 ```typescript
-test('complete GraphAI pipeline', async ({ page }) => {
+test("complete GraphAI pipeline", async ({ page }) => {
   // Navigate to GraphAI Console
-  await page.goto('/graphai');
+  await page.goto("/graphai");
 
   // Build features
   await page.click('[data-testid="build-features-btn"]');
@@ -1260,7 +1254,7 @@ test('complete GraphAI pipeline', async ({ page }) => {
   await page.waitForSelector('[data-testid="lp-auc-metric"]');
 
   const aucText = await page.textContent('[data-testid="lp-auc-metric"]');
-  const auc = parseFloat(aucText!.replace('AUC: ', ''));
+  const auc = parseFloat(aucText!.replace("AUC: ", ""));
   expect(auc).toBeGreaterThanOrEqual(0.85);
 
   // Publish overlay
@@ -1272,10 +1266,8 @@ test('complete GraphAI pipeline', async ({ page }) => {
   await page.waitForSelector('[data-testid="export-download-link"]');
 
   // Verify manifest integrity
-  const manifestText = await page.textContent(
-    '[data-testid="manifest-signature"]',
-  );
-  expect(manifestText).toContain('✅ Verified');
+  const manifestText = await page.textContent('[data-testid="manifest-signature"]');
+  expect(manifestText).toContain("✅ Verified");
 });
 ```
 
@@ -1289,13 +1281,13 @@ test('complete GraphAI pipeline', async ({ page }) => {
 
 ```yaml
 # docker-compose.yml
-version: '3.8'
+version: "3.8"
 services:
   ga-gateway:
     image: intelgraph/ga-gateway:latest
     ports:
-      - '4000:4000'
-      - '4001:4001' # WebSocket
+      - "4000:4000"
+      - "4001:4001" # WebSocket
     environment:
       - DATABASE_URL=postgresql://user:pass@postgres:5432/graphai
       - NEO4J_URI=bolt://neo4j:7687
@@ -1308,7 +1300,7 @@ services:
   ga-graphai:
     image: intelgraph/ga-graphai:latest
     ports:
-      - '8000:8000'
+      - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://user:pass@postgres:5432/graphai
       - NEO4J_URI=bolt://neo4j:7687
@@ -1330,7 +1322,7 @@ services:
   ga-web:
     image: intelgraph/ga-web:latest
     ports:
-      - '3000:80'
+      - "3000:80"
     environment:
       - VITE_API_URL=http://localhost:4000
       - VITE_WS_URL=ws://localhost:4001
@@ -1338,7 +1330,7 @@ services:
   postgres:
     image: pgvector/pgvector:pg15
     ports:
-      - '5432:5432'
+      - "5432:5432"
     environment:
       POSTGRES_DB: graphai
       POSTGRES_USER: user
@@ -1350,8 +1342,8 @@ services:
   neo4j:
     image: neo4j:5
     ports:
-      - '7474:7474'
-      - '7687:7687'
+      - "7474:7474"
+      - "7687:7687"
     environment:
       NEO4J_AUTH: neo4j/password
       NEO4J_PLUGINS: '["graph-data-science"]'
@@ -1361,15 +1353,15 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - '6379:6379'
+      - "6379:6379"
     volumes:
       - redis_data:/data
 
   minio:
     image: minio/minio
     ports:
-      - '9000:9000'
-      - '9001:9001'
+      - "9000:9000"
+      - "9001:9001"
     environment:
       MINIO_ACCESS_KEY: minioaccess
       MINIO_SECRET_KEY: miniosecret
@@ -1392,7 +1384,7 @@ volumes:
 # helm/graphai/values.yaml
 global:
   namespace: intelgraph-ga
-  imageTag: 'latest'
+  imageTag: "latest"
 
 gateway:
   replicas: 3
@@ -1400,11 +1392,11 @@ gateway:
   port: 4000
   resources:
     requests:
-      memory: '512Mi'
-      cpu: '200m'
+      memory: "512Mi"
+      cpu: "200m"
     limits:
-      memory: '1Gi'
-      cpu: '500m'
+      memory: "1Gi"
+      cpu: "500m"
 
 graphai:
   replicas: 2
@@ -1412,22 +1404,22 @@ graphai:
   port: 8000
   resources:
     requests:
-      memory: '1Gi'
-      cpu: '500m'
+      memory: "1Gi"
+      cpu: "500m"
     limits:
-      memory: '4Gi'
-      cpu: '2000m'
+      memory: "4Gi"
+      cpu: "2000m"
 
 worker:
   replicas: 4
   image: intelgraph/ga-worker
   resources:
     requests:
-      memory: '2Gi'
-      cpu: '1000m'
+      memory: "2Gi"
+      cpu: "1000m"
     limits:
-      memory: '8Gi'
-      cpu: '4000m'
+      memory: "8Gi"
+      cpu: "4000m"
 
 postgresql:
   enabled: true
@@ -1442,7 +1434,7 @@ postgresql:
 neo4j:
   enabled: true
   auth:
-    password: 'secure-password'
+    password: "secure-password"
   core:
     persistentVolume:
       size: 200Gi

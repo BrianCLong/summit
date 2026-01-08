@@ -5,9 +5,11 @@ This directory contains pre-built dashboard templates that can be used as starti
 ## Available Templates
 
 ### 1. Executive Dashboard (`executive-dashboard.json`)
+
 High-level KPIs and metrics for executives
 
 **Features:**
+
 - Revenue, users, conversion rate, and satisfaction metrics
 - Revenue trend line chart
 - Revenue by category pie chart
@@ -17,9 +19,11 @@ High-level KPIs and metrics for executives
 **Best for:** C-level executives, business analysts
 
 ### 2. Threat Intelligence Dashboard (`threat-intel-dashboard.json`)
+
 Security threat monitoring and analysis
 
 **Features:**
+
 - Active threats metric
 - Threat origins heat map
 - Threat network graph
@@ -29,9 +33,11 @@ Security threat monitoring and analysis
 **Best for:** Security analysts, SOC teams
 
 ### 3. Network Analysis Dashboard (`network-analysis-dashboard.json`)
+
 Entity relationship analysis and visualization
 
 **Features:**
+
 - Entity network graph with clustering
 - Node statistics metrics
 - Community detection visualization
@@ -45,8 +51,8 @@ Entity relationship analysis and visualization
 ### Import a Template
 
 ```typescript
-import { useDashboardStore } from '@intelgraph/dashboard-framework';
-import executiveTemplate from './examples/dashboard-templates/executive-dashboard.json';
+import { useDashboardStore } from "@intelgraph/dashboard-framework";
+import executiveTemplate from "./examples/dashboard-templates/executive-dashboard.json";
 
 function importTemplate() {
   const { createDashboard } = useDashboardStore();
@@ -64,20 +70,20 @@ function importTemplate() {
 ### Customize a Template
 
 ```typescript
-import template from './executive-dashboard.json';
+import template from "./executive-dashboard.json";
 
 // Modify template before importing
 const customTemplate = {
   ...template,
-  name: 'My Custom Dashboard',
-  pages: template.pages.map(page => ({
+  name: "My Custom Dashboard",
+  pages: template.pages.map((page) => ({
     ...page,
-    widgets: page.widgets.map(widget => ({
+    widgets: page.widgets.map((widget) => ({
       ...widget,
       // Customize data sources
       dataSource: {
         ...widget.dataSource,
-        endpoint: 'https://my-api.com/graphql',
+        endpoint: "https://my-api.com/graphql",
       },
     })),
   })),
@@ -90,16 +96,16 @@ const customTemplate = {
 2. Export it using the export function:
 
 ```typescript
-import { exportDashboard } from '@intelgraph/dashboard-framework/utils';
+import { exportDashboard } from "@intelgraph/dashboard-framework/utils";
 
 const template = await exportDashboard(dashboardId, {
-  format: 'json',
-  includeData: false,  // Don't include actual data
+  format: "json",
+  includeData: false, // Don't include actual data
 });
 
 // Save to file
 const blob = new Blob([JSON.stringify(template, null, 2)], {
-  type: 'application/json',
+  type: "application/json",
 });
 ```
 
@@ -127,7 +133,9 @@ const blob = new Blob([JSON.stringify(template, null, 2)], {
           "id": "widget-id",
           "type": "chart|metric|table|map|network|timeline",
           "title": "Widget Title",
-          "config": { /* widget-specific config */ },
+          "config": {
+            /* widget-specific config */
+          },
           "layout": {
             "x": 0,
             "y": 0,
@@ -171,6 +179,7 @@ To contribute a new template:
 ## Support
 
 For questions or issues with templates:
+
 - Open an issue on GitHub
 - Check the main documentation at `/docs/visualization/GUIDE.md`
 - Join our community Slack channel

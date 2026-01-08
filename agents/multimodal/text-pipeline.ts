@@ -4,8 +4,8 @@
  * Supports OpenAI embeddings and local sentence-transformers.
  */
 
-import { createHash } from 'crypto';
-import pino from 'pino';
+import { createHash } from "crypto";
+import pino from "pino";
 
 import type {
   TextEmbedding,
@@ -13,32 +13,32 @@ import type {
   SentimentScore,
   EmbeddingModel,
   ProvenanceInfo,
-} from './types.js';
+} from "./types.js";
 
-const logger = pino({ name: 'text-pipeline' });
+const logger = pino({ name: "text-pipeline" });
 
 // Text Model Configurations
 const TEXT_MODELS: Record<string, TextModelConfig> = {
-  'text-embedding-3-small': {
-    name: 'text-embedding-3-small',
+  "text-embedding-3-small": {
+    name: "text-embedding-3-small",
     dimension: 1536,
     maxTokens: 8191,
-    provider: 'openai',
-    endpoint: '/v1/embeddings',
+    provider: "openai",
+    endpoint: "/v1/embeddings",
   },
-  'text-embedding-3-large': {
-    name: 'text-embedding-3-large',
+  "text-embedding-3-large": {
+    name: "text-embedding-3-large",
     dimension: 3072,
     maxTokens: 8191,
-    provider: 'openai',
-    endpoint: '/v1/embeddings',
+    provider: "openai",
+    endpoint: "/v1/embeddings",
   },
-  'all-MiniLM-L6-v2': {
-    name: 'sentence-transformers/all-MiniLM-L6-v2',
+  "all-MiniLM-L6-v2": {
+    name: "sentence-transformers/all-MiniLM-L6-v2",
     dimension: 384,
     maxTokens: 512,
-    provider: 'local',
-    endpoint: '/api/v1/embed',
+    provider: "local",
+    endpoint: "/api/v1/embed",
   },
 };
 
@@ -46,7 +46,7 @@ interface TextModelConfig {
   name: string;
   dimension: number;
   maxTokens: number;
-  provider: 'openai' | 'local' | 'azure';
+  provider: "openai" | "local" | "azure";
   endpoint: string;
 }
 
@@ -82,8 +82,8 @@ export class TextPipeline {
 
   constructor(config: Partial<TextPipelineConfig> = {}) {
     this.config = {
-      model: 'text-embedding-3-small',
-      apiUrl: process.env.EMBEDDING_API_URL || 'https://api.openai.com',
+      model: "text-embedding-3-small",
+      apiUrl: process.env.EMBEDDING_API_URL || "https://api.openai.com",
       apiKey: process.env.OPENAI_API_KEY,
       batchSize: 20,
       maxConcurrency: 5,
@@ -98,10 +98,10 @@ export class TextPipeline {
     };
 
     const modelKey = this.config.model as string;
-    this.modelConfig = TEXT_MODELS[modelKey] || TEXT_MODELS['text-embedding-3-small'];
+    this.modelConfig = TEXT_MODELS[modelKey] || TEXT_MODELS["text-embedding-3-small"];
     this.tokenizer = new SimpleTokenizer();
 
-    logger.info('Text Pipeline initialized', {
+    logger.info("Text Pipeline initialized", {
       model: this.config.model,
       dimension: this.modelConfig.dimension,
       provider: this.modelConfig.provider,
@@ -114,7 +114,7 @@ export class TextPipeline {
   async embedText(
     text: string,
     investigationId: string,
-    sourceId?: string,
+    sourceId?: string
   ): Promise<TextEmbedding> {
     const startTime = Date.now();
     const textId = sourceId || this.generateTextId(text);
@@ -123,7 +123,7 @@ export class TextPipeline {
     if (this.config.cacheEnabled) {
       const cached = this.cache.get(textId);
       if (cached) {
-        logger.debug('Cache hit for text embedding', { textId });
+        logger.debug("Cache hit for text embedding", { textId });
         return cached;
       }
     }
@@ -140,7 +140,7 @@ export class TextPipeline {
         vector: result.embedding,
         dimension: this.modelConfig.dimension,
         model: this.config.model,
-        modality: 'text',
+        modality: "text",
         timestamp: new Date(),
         metadata: {
           sourceId: textId,
@@ -161,7 +161,7 @@ export class TextPipeline {
         this.cache.set(textId, embedding);
       }
 
-      logger.info('Text embedding generated', {
+      logger.info("Text embedding generated", {
         textId,
         dimension: embedding.dimension,
         tokens: result.tokens,
@@ -171,10 +171,10 @@ export class TextPipeline {
 
       return embedding;
     } catch (error) {
-      logger.error('Failed to generate text embedding', {
+      logger.error("Failed to generate text embedding", {
         textId,
         textLength: text.length,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
       });
       throw error;
     }
@@ -183,13 +183,10 @@ export class TextPipeline {
   /**
    * Batch embed multiple texts
    */
-  async embedTextBatch(
-    texts: string[],
-    investigationId: string,
-  ): Promise<TextEmbedding[]> {
+  async embedTextBatch(texts: string[], investigationId: string): Promise<TextEmbedding[]> {
     const startTime = Date.now();
 
-    logger.info('Starting batch text embedding', {
+    logger.info("Starting batch text embedding", {
       textCount: texts.length,
       batchSize: this.config.batchSize,
     });
@@ -215,7 +212,7 @@ export class TextPipeline {
             vector: embedding,
             dimension: this.modelConfig.dimension,
             model: this.config.model,
-            modality: 'text',
+            modality: "text",
             timestamp: new Date(),
             metadata: {
               sourceId: textId,
@@ -235,9 +232,9 @@ export class TextPipeline {
           }
         }
       } catch (error) {
-        logger.error('Batch embedding failed, falling back to individual', {
+        logger.error("Batch embedding failed, falling back to individual", {
           batchStart: i,
-          error: error instanceof Error ? error.message : 'Unknown',
+          error: error instanceof Error ? error.message : "Unknown",
         });
 
         // Fall back to individual processing
@@ -248,14 +245,14 @@ export class TextPipeline {
           } catch (err) {
             errors.push({
               index: i + j,
-              error: err instanceof Error ? err.message : 'Unknown',
+              error: err instanceof Error ? err.message : "Unknown",
             });
           }
         }
       }
     }
 
-    logger.info('Batch text embedding completed', {
+    logger.info("Batch text embedding completed", {
       totalTexts: texts.length,
       successCount: results.length,
       errorCount: errors.length,
@@ -271,7 +268,7 @@ export class TextPipeline {
   async embedLongText(
     text: string,
     investigationId: string,
-    sourceId?: string,
+    sourceId?: string
   ): Promise<{
     chunks: TextEmbedding[];
     aggregateEmbedding: number[];
@@ -282,7 +279,7 @@ export class TextPipeline {
     // Split into chunks
     const chunks = this.chunkText(text);
 
-    logger.info('Chunking long text', {
+    logger.info("Chunking long text", {
       originalLength: text.length,
       chunkCount: chunks.length,
       chunkSize: this.config.chunkSize,
@@ -292,9 +289,7 @@ export class TextPipeline {
     const chunkEmbeddings = await this.embedTextBatch(chunks, investigationId);
 
     // Aggregate embeddings (average)
-    const aggregateEmbedding = this.averageEmbeddings(
-      chunkEmbeddings.map((e) => e.vector),
-    );
+    const aggregateEmbedding = this.averageEmbeddings(chunkEmbeddings.map((e) => e.vector));
 
     return {
       chunks: chunkEmbeddings,
@@ -317,7 +312,7 @@ export class TextPipeline {
     while ((match = emailPattern.exec(text)) !== null) {
       entities.push({
         text: match[0],
-        type: 'EMAIL',
+        type: "EMAIL",
         startOffset: match.index,
         endOffset: match.index + match[0].length,
         confidence: 0.95,
@@ -329,7 +324,7 @@ export class TextPipeline {
     while ((match = phonePattern.exec(text)) !== null) {
       entities.push({
         text: match[0],
-        type: 'PHONE',
+        type: "PHONE",
         startOffset: match.index,
         endOffset: match.index + match[0].length,
         confidence: 0.9,
@@ -341,7 +336,7 @@ export class TextPipeline {
     while ((match = urlPattern.exec(text)) !== null) {
       entities.push({
         text: match[0],
-        type: 'URL',
+        type: "URL",
         startOffset: match.index,
         endOffset: match.index + match[0].length,
         confidence: 0.95,
@@ -349,11 +344,12 @@ export class TextPipeline {
     }
 
     // Extract IP addresses
-    const ipPattern = /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/g;
+    const ipPattern =
+      /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/g;
     while ((match = ipPattern.exec(text)) !== null) {
       entities.push({
         text: match[0],
-        type: 'IP_ADDRESS',
+        type: "IP_ADDRESS",
         startOffset: match.index,
         endOffset: match.index + match[0].length,
         confidence: 0.95,
@@ -361,11 +357,12 @@ export class TextPipeline {
     }
 
     // Extract dates
-    const datePattern = /\b\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}\b|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2},?\s+\d{4}\b/gi;
+    const datePattern =
+      /\b\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}\b|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2},?\s+\d{4}\b/gi;
     while ((match = datePattern.exec(text)) !== null) {
       entities.push({
         text: match[0],
-        type: 'DATE',
+        type: "DATE",
         startOffset: match.index,
         endOffset: match.index + match[0].length,
         confidence: 0.85,
@@ -373,11 +370,12 @@ export class TextPipeline {
     }
 
     // Extract monetary values
-    const moneyPattern = /\$[\d,]+(?:\.\d{2})?|\b\d+(?:,\d{3})*(?:\.\d{2})?\s*(?:USD|EUR|GBP|CAD)\b/gi;
+    const moneyPattern =
+      /\$[\d,]+(?:\.\d{2})?|\b\d+(?:,\d{3})*(?:\.\d{2})?\s*(?:USD|EUR|GBP|CAD)\b/gi;
     while ((match = moneyPattern.exec(text)) !== null) {
       entities.push({
         text: match[0],
-        type: 'MONEY',
+        type: "MONEY",
         startOffset: match.index,
         endOffset: match.index + match[0].length,
         confidence: 0.9,
@@ -394,12 +392,34 @@ export class TextPipeline {
     // Simple sentiment analysis using keyword scoring
     // In production, use a proper sentiment model
     const positiveWords = new Set([
-      'good', 'great', 'excellent', 'positive', 'success', 'happy', 'love',
-      'wonderful', 'fantastic', 'amazing', 'best', 'perfect', 'brilliant',
+      "good",
+      "great",
+      "excellent",
+      "positive",
+      "success",
+      "happy",
+      "love",
+      "wonderful",
+      "fantastic",
+      "amazing",
+      "best",
+      "perfect",
+      "brilliant",
     ]);
     const negativeWords = new Set([
-      'bad', 'terrible', 'poor', 'negative', 'failure', 'sad', 'hate',
-      'awful', 'horrible', 'worst', 'wrong', 'error', 'problem',
+      "bad",
+      "terrible",
+      "poor",
+      "negative",
+      "failure",
+      "sad",
+      "hate",
+      "awful",
+      "horrible",
+      "worst",
+      "wrong",
+      "error",
+      "problem",
     ]);
 
     const words = text.toLowerCase().split(/\s+/);
@@ -430,7 +450,7 @@ export class TextPipeline {
     queryEmbedding: number[],
     candidateEmbeddings: TextEmbedding[],
     topK: number = 10,
-    threshold: number = 0.7,
+    threshold: number = 0.7
   ): Promise<Array<{ embedding: TextEmbedding; similarity: number }>> {
     const similarities = candidateEmbeddings.map((candidate) => ({
       embedding: candidate,
@@ -463,9 +483,7 @@ export class TextPipeline {
       : undefined;
 
     // Detect language
-    const language = this.config.enableLanguageDetection
-      ? this.detectLanguage(text)
-      : undefined;
+    const language = this.config.enableLanguageDetection ? this.detectLanguage(text) : undefined;
 
     const tokens = this.tokenizer.countTokens(text);
 
@@ -485,7 +503,7 @@ export class TextPipeline {
   private async processBatchEmbeddings(texts: string[]): Promise<number[][]> {
     const processedTexts = texts.map((t) => this.preprocessText(t));
 
-    if (this.modelConfig.provider === 'openai') {
+    if (this.modelConfig.provider === "openai") {
       return this.callOpenAIBatchEmbedding(processedTexts);
     }
 
@@ -501,7 +519,7 @@ export class TextPipeline {
    * Call embedding API for single text
    */
   private async callEmbeddingAPI(text: string): Promise<number[]> {
-    if (this.modelConfig.provider === 'openai') {
+    if (this.modelConfig.provider === "openai") {
       const embeddings = await this.callOpenAIBatchEmbedding([text]);
       return embeddings[0];
     }
@@ -521,10 +539,10 @@ export class TextPipeline {
 
     try {
       const response = await fetch(url, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.config.apiKey}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.config.apiKey}`,
         },
         body: JSON.stringify({
           model: this.modelConfig.name,
@@ -559,9 +577,9 @@ export class TextPipeline {
 
     try {
       const response = await fetch(url, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           text,
@@ -586,7 +604,7 @@ export class TextPipeline {
    */
   private preprocessText(text: string): string {
     // Normalize whitespace
-    let processed = text.replace(/\s+/g, ' ').trim();
+    let processed = text.replace(/\s+/g, " ").trim();
 
     // Truncate if too long
     const maxChars = this.modelConfig.maxTokens * 4; // Rough estimate
@@ -603,26 +621,24 @@ export class TextPipeline {
   private chunkText(text: string): string[] {
     const chunks: string[] = [];
     const sentences = text.split(/[.!?]+\s+/);
-    let currentChunk = '';
+    let currentChunk = "";
 
     for (const sentence of sentences) {
-      const potentialChunk = currentChunk
-        ? `${currentChunk} ${sentence}`
-        : sentence;
+      const potentialChunk = currentChunk ? `${currentChunk} ${sentence}` : sentence;
 
       if (this.tokenizer.countTokens(potentialChunk) > this.config.chunkSize) {
         if (currentChunk) {
           chunks.push(currentChunk);
           // Add overlap
-          const overlap = currentChunk.split(' ').slice(-this.config.chunkOverlap).join(' ');
-          currentChunk = overlap + ' ' + sentence;
+          const overlap = currentChunk.split(" ").slice(-this.config.chunkOverlap).join(" ");
+          currentChunk = overlap + " " + sentence;
         } else {
           // Single sentence too long, split by words
-          const words = sentence.split(' ');
+          const words = sentence.split(" ");
           for (let i = 0; i < words.length; i += this.config.chunkSize / 2) {
-            chunks.push(words.slice(i, i + this.config.chunkSize / 2).join(' '));
+            chunks.push(words.slice(i, i + this.config.chunkSize / 2).join(" "));
           }
-          currentChunk = '';
+          currentChunk = "";
         }
       } else {
         currentChunk = potentialChunk;
@@ -675,24 +691,21 @@ export class TextPipeline {
     const lowerText = text.toLowerCase();
 
     // Check for common language-specific characters
-    if (/[а-яё]/i.test(text)) return 'ru';
-    if (/[一-龥]/.test(text)) return 'zh';
-    if (/[ぁ-んァ-ン]/.test(text)) return 'ja';
-    if (/[가-힣]/.test(text)) return 'ko';
-    if (/[أ-ي]/.test(text)) return 'ar';
+    if (/[а-яё]/i.test(text)) return "ru";
+    if (/[一-龥]/.test(text)) return "zh";
+    if (/[ぁ-んァ-ン]/.test(text)) return "ja";
+    if (/[가-힣]/.test(text)) return "ko";
+    if (/[أ-ي]/.test(text)) return "ar";
 
     // Default to English
-    return 'en';
+    return "en";
   }
 
   /**
    * Generate unique text ID
    */
   private generateTextId(text: string): string {
-    return createHash('sha256')
-      .update(text)
-      .digest('hex')
-      .slice(0, 16);
+    return createHash("sha256").update(text).digest("hex").slice(0, 16);
   }
 
   /**
@@ -708,8 +721,8 @@ export class TextPipeline {
 
     // Adjust based on entity extraction
     if (result.entities && result.entities.length > 0) {
-      const avgEntityConf = result.entities.reduce((sum, e) => sum + e.confidence, 0) /
-        result.entities.length;
+      const avgEntityConf =
+        result.entities.reduce((sum, e) => sum + e.confidence, 0) / result.entities.length;
       confidence = Math.max(confidence, avgEntityConf);
     }
 
@@ -721,10 +734,10 @@ export class TextPipeline {
    */
   private buildProvenance(startTime: number): ProvenanceInfo {
     return {
-      extractorName: 'TextPipeline',
-      extractorVersion: '1.0.0',
+      extractorName: "TextPipeline",
+      extractorVersion: "1.0.0",
       modelName: this.modelConfig.name,
-      modelVersion: '1.0',
+      modelVersion: "1.0",
       processingParams: {
         model: this.config.model,
         provider: this.modelConfig.provider,
@@ -741,7 +754,7 @@ export class TextPipeline {
    */
   private cosineSimilarity(a: number[], b: number[]): number {
     if (a.length !== b.length) {
-      throw new Error('Vectors must have same dimension');
+      throw new Error("Vectors must have same dimension");
     }
 
     let dotProduct = 0;
@@ -763,7 +776,7 @@ export class TextPipeline {
    */
   clearCache(): void {
     this.cache.clear();
-    logger.info('Cache cleared');
+    logger.info("Cache cleared");
   }
 
   /**

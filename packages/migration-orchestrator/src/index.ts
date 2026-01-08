@@ -1,14 +1,14 @@
-import { AccountLinkService, TenantLifecycle } from './accounts.ts';
-import { BackfillFramework } from './backfill.ts';
-import { DashboardBuilder } from './dashboard.ts';
-import { EntitlementService } from './entitlements.ts';
-import { IdentityService } from './identity.ts';
-import { IntegrationService } from './integrations.ts';
-import { LegalCompliance } from './legal.ts';
-import { ParityEngine } from './parity.ts';
-import { ReliabilityManager } from './reliability.ts';
-import { SupportManager } from './support.ts';
-import { UXParityService } from './ux.ts';
+import { AccountLinkService, TenantLifecycle } from "./accounts.ts";
+import { BackfillFramework } from "./backfill.ts";
+import { DashboardBuilder } from "./dashboard.ts";
+import { EntitlementService } from "./entitlements.ts";
+import { IdentityService } from "./identity.ts";
+import { IntegrationService } from "./integrations.ts";
+import { LegalCompliance } from "./legal.ts";
+import { ParityEngine } from "./parity.ts";
+import { ReliabilityManager } from "./reliability.ts";
+import { SupportManager } from "./support.ts";
+import { UXParityService } from "./ux.ts";
 
 export class MigrationOrchestrator {
   constructor() {

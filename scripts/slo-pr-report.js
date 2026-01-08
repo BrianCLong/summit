@@ -6,15 +6,15 @@
  * visible before merge. Integrates with error budget tracking.
  */
 
-const https = require('https');
-const fs = require('fs').promises;
+const https = require("https");
+const fs = require("fs").promises;
 
 const config = {
-  owner: process.env.GITHUB_REPOSITORY_OWNER || 'BrianCLong',
-  repo: process.env.GITHUB_REPOSITORY_NAME || 'summit',
+  owner: process.env.GITHUB_REPOSITORY_OWNER || "BrianCLong",
+  repo: process.env.GITHUB_REPOSITORY_NAME || "summit",
   prNumber: process.env.PR_NUMBER || process.env.GITHUB_PR_NUMBER,
   githubToken: process.env.GITHUB_TOKEN,
-  prometheusUrl: process.env.PROMETHEUS_URL || 'http://localhost:9090',
+  prometheusUrl: process.env.PROMETHEUS_URL || "http://localhost:9090",
   baselineHours: 24, // Compare against last 24 hours
   thresholds: {
     availability: 0.999, // 99.9%
@@ -36,19 +36,19 @@ class SLOPRReporter {
    */
   async prometheusQuery(query, time) {
     return new Promise((resolve, reject) => {
-      const url = new URL('/api/v1/query', config.prometheusUrl);
-      url.searchParams.set('query', query);
+      const url = new URL("/api/v1/query", config.prometheusUrl);
+      url.searchParams.set("query", query);
       if (time) {
-        url.searchParams.set('time', time);
+        url.searchParams.set("time", time);
       }
 
       const req = https.get(url, (res) => {
-        let data = '';
-        res.on('data', (chunk) => (data += chunk));
-        res.on('end', () => {
+        let data = "";
+        res.on("data", (chunk) => (data += chunk));
+        res.on("end", () => {
           try {
             const result = JSON.parse(data);
-            if (result.status === 'success') {
+            if (result.status === "success") {
               resolve(result.data);
             } else {
               reject(new Error(`Prometheus query failed: ${result.error}`));
@@ -59,7 +59,7 @@ class SLOPRReporter {
         });
       });
 
-      req.on('error', reject);
+      req.on("error", reject);
     });
   }
 
@@ -67,11 +67,9 @@ class SLOPRReporter {
    * Get baseline metrics (24h ago)
    */
   async getBaselineMetrics() {
-    const baselineTime = Math.floor(
-      (Date.now() - config.baselineHours * 60 * 60 * 1000) / 1000,
-    );
+    const baselineTime = Math.floor((Date.now() - config.baselineHours * 60 * 60 * 1000) / 1000);
 
-    console.log('📊 Fetching baseline metrics...');
+    console.log("📊 Fetching baseline metrics...");
 
     const queries = {
       availability: 'sli:availability:rate1h{service="intelgraph-server"}',
@@ -80,10 +78,8 @@ class SLOPRReporter {
       latency_p99:
         'histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job="intelgraph-server"}[1h])) by (le))',
       error_rate: '1 - sli:availability:rate1h{service="intelgraph-server"}',
-      request_rate:
-        'sum(rate(http_requests_total{job="intelgraph-server"}[1h]))',
-      error_budget_burn:
-        'error_budget:burn_rate:1h{service="intelgraph-server"}',
+      request_rate: 'sum(rate(http_requests_total{job="intelgraph-server"}[1h]))',
+      error_budget_burn: 'error_budget:burn_rate:1h{service="intelgraph-server"}',
     };
 
     const baseline = {};
@@ -105,7 +101,7 @@ class SLOPRReporter {
    * Get current metrics
    */
   async getCurrentMetrics() {
-    console.log('📈 Fetching current metrics...');
+    console.log("📈 Fetching current metrics...");
 
     const queries = {
       availability: 'sli:availability:rate5m{service="intelgraph-server"}',
@@ -114,10 +110,8 @@ class SLOPRReporter {
       latency_p99:
         'histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job="intelgraph-server"}[5m])) by (le))',
       error_rate: '1 - sli:availability:rate5m{service="intelgraph-server"}',
-      request_rate:
-        'sum(rate(http_requests_total{job="intelgraph-server"}[5m]))',
-      error_budget_burn:
-        'error_budget:burn_rate:5m{service="intelgraph-server"}',
+      request_rate: 'sum(rate(http_requests_total{job="intelgraph-server"}[5m]))',
+      error_budget_burn: 'error_budget:burn_rate:5m{service="intelgraph-server"}',
     };
 
     const current = {};
@@ -152,7 +146,7 @@ class SLOPRReporter {
    */
   calculateChanges() {
     if (!this.baselineMetrics || !this.currentMetrics) {
-      throw new Error('Metrics not loaded');
+      throw new Error("Metrics not loaded");
     }
 
     const changes = {};
@@ -174,7 +168,7 @@ class SLOPRReporter {
           current,
           baseline,
           change: null,
-          status: 'unknown',
+          status: "unknown",
         };
       }
     }
@@ -187,30 +181,21 @@ class SLOPRReporter {
    */
   getChangeStatus(metric, current, change) {
     // Check SLO compliance first
-    if (metric === 'availability' && current < config.thresholds.availability) {
-      return 'slo_breach';
+    if (metric === "availability" && current < config.thresholds.availability) {
+      return "slo_breach";
     }
-    if (
-      metric === 'latency_p95' &&
-      current > config.thresholds.latency_p95 / 1000
-    ) {
-      return 'slo_breach';
+    if (metric === "latency_p95" && current > config.thresholds.latency_p95 / 1000) {
+      return "slo_breach";
     }
-    if (
-      metric === 'latency_p99' &&
-      current > config.thresholds.latency_p99 / 1000
-    ) {
-      return 'slo_breach';
+    if (metric === "latency_p99" && current > config.thresholds.latency_p99 / 1000) {
+      return "slo_breach";
     }
-    if (
-      metric === 'error_budget_burn' &&
-      current > config.thresholds.error_budget_burn
-    ) {
-      return 'budget_burn';
+    if (metric === "error_budget_burn" && current > config.thresholds.error_budget_burn) {
+      return "budget_burn";
     }
 
     // Check for significant regressions
-    if (change === null) return 'unknown';
+    if (change === null) return "unknown";
 
     const thresholds = {
       availability: { regression: -0.1, improvement: 0.01 },
@@ -223,11 +208,11 @@ class SLOPRReporter {
     const threshold = thresholds[metric] || { regression: 10, improvement: -5 };
 
     if (change > threshold.regression) {
-      return 'regression';
+      return "regression";
     } else if (change < threshold.improvement) {
-      return 'improvement';
+      return "improvement";
     } else {
-      return 'stable';
+      return "stable";
     }
   }
 
@@ -237,16 +222,11 @@ class SLOPRReporter {
   generateReport(changes) {
     const timestamp = new Date().toISOString();
     const hasRegressions = Object.values(changes).some(
-      (c) =>
-        c.status === 'slo_breach' ||
-        c.status === 'regression' ||
-        c.status === 'budget_burn',
+      (c) => c.status === "slo_breach" || c.status === "regression" || c.status === "budget_burn"
     );
 
-    const statusEmoji = hasRegressions ? '🚨' : '✅';
-    const overallStatus = hasRegressions
-      ? 'REGRESSIONS DETECTED'
-      : 'SLO COMPLIANT';
+    const statusEmoji = hasRegressions ? "🚨" : "✅";
+    const overallStatus = hasRegressions ? "REGRESSIONS DETECTED" : "SLO COMPLIANT";
 
     let report = `## ${statusEmoji} SLO Performance Report
 
@@ -264,13 +244,9 @@ class SLOPRReporter {
     const avail = changes.availability;
     if (avail.current !== null) {
       const availPercent = (avail.current * 100).toFixed(3);
-      const baselinePercent = avail.baseline
-        ? (avail.baseline * 100).toFixed(3)
-        : 'N/A';
+      const baselinePercent = avail.baseline ? (avail.baseline * 100).toFixed(3) : "N/A";
       const changeStr =
-        avail.change !== null
-          ? `${avail.change > 0 ? '+' : ''}${avail.change.toFixed(2)}%`
-          : 'N/A';
+        avail.change !== null ? `${avail.change > 0 ? "+" : ""}${avail.change.toFixed(2)}%` : "N/A";
       const statusIcon = this.getStatusIcon(avail.status);
 
       report += `\n| Availability | ${availPercent}% | ${baselinePercent}% | ${changeStr} | ${statusIcon} ${avail.status} |`;
@@ -280,13 +256,9 @@ class SLOPRReporter {
     const p95 = changes.latency_p95;
     if (p95.current !== null) {
       const p95Ms = (p95.current * 1000).toFixed(0);
-      const baselineMs = p95.baseline
-        ? (p95.baseline * 1000).toFixed(0)
-        : 'N/A';
+      const baselineMs = p95.baseline ? (p95.baseline * 1000).toFixed(0) : "N/A";
       const changeStr =
-        p95.change !== null
-          ? `${p95.change > 0 ? '+' : ''}${p95.change.toFixed(1)}%`
-          : 'N/A';
+        p95.change !== null ? `${p95.change > 0 ? "+" : ""}${p95.change.toFixed(1)}%` : "N/A";
       const statusIcon = this.getStatusIcon(p95.status);
 
       report += `\n| p95 Latency | ${p95Ms}ms | ${baselineMs}ms | ${changeStr} | ${statusIcon} ${p95.status} |`;
@@ -296,13 +268,9 @@ class SLOPRReporter {
     const p99 = changes.latency_p99;
     if (p99.current !== null) {
       const p99Ms = (p99.current * 1000).toFixed(0);
-      const baselineMs = p99.baseline
-        ? (p99.baseline * 1000).toFixed(0)
-        : 'N/A';
+      const baselineMs = p99.baseline ? (p99.baseline * 1000).toFixed(0) : "N/A";
       const changeStr =
-        p99.change !== null
-          ? `${p99.change > 0 ? '+' : ''}${p99.change.toFixed(1)}%`
-          : 'N/A';
+        p99.change !== null ? `${p99.change > 0 ? "+" : ""}${p99.change.toFixed(1)}%` : "N/A";
       const statusIcon = this.getStatusIcon(p99.status);
 
       report += `\n| p99 Latency | ${p99Ms}ms | ${baselineMs}ms | ${changeStr} | ${statusIcon} ${p99.status} |`;
@@ -312,13 +280,11 @@ class SLOPRReporter {
     const errorRate = changes.error_rate;
     if (errorRate.current !== null) {
       const errorPercent = (errorRate.current * 100).toFixed(3);
-      const baselinePercent = errorRate.baseline
-        ? (errorRate.baseline * 100).toFixed(3)
-        : 'N/A';
+      const baselinePercent = errorRate.baseline ? (errorRate.baseline * 100).toFixed(3) : "N/A";
       const changeStr =
         errorRate.change !== null
-          ? `${errorRate.change > 0 ? '+' : ''}${errorRate.change.toFixed(1)}%`
-          : 'N/A';
+          ? `${errorRate.change > 0 ? "+" : ""}${errorRate.change.toFixed(1)}%`
+          : "N/A";
       const statusIcon = this.getStatusIcon(errorRate.status);
 
       report += `\n| Error Rate | ${errorPercent}% | ${baselinePercent}% | ${changeStr} | ${statusIcon} ${errorRate.status} |`;
@@ -328,13 +294,11 @@ class SLOPRReporter {
     const budgetBurn = changes.error_budget_burn;
     if (budgetBurn.current !== null) {
       const burnRate = budgetBurn.current.toFixed(2);
-      const baselineBurn = budgetBurn.baseline
-        ? budgetBurn.baseline.toFixed(2)
-        : 'N/A';
+      const baselineBurn = budgetBurn.baseline ? budgetBurn.baseline.toFixed(2) : "N/A";
       const changeStr =
         budgetBurn.change !== null
-          ? `${budgetBurn.change > 0 ? '+' : ''}${budgetBurn.change.toFixed(1)}%`
-          : 'N/A';
+          ? `${budgetBurn.change > 0 ? "+" : ""}${budgetBurn.change.toFixed(1)}%`
+          : "N/A";
       const statusIcon = this.getStatusIcon(budgetBurn.status);
 
       report += `\n| Error Budget Burn | ${burnRate}x | ${baselineBurn}x | ${changeStr} | ${statusIcon} ${budgetBurn.status} |`;
@@ -345,10 +309,10 @@ class SLOPRReporter {
 
 | Metric | Target | Current Compliance |
 |--------|--------|-------------------|
-| Availability | ≥99.9% | ${avail.current ? (avail.current >= 0.999 ? '✅' : '❌') : '❓'} |
-| p95 Latency | <200ms | ${p95.current ? (p95.current < 0.2 ? '✅' : '❌') : '❓'} |
-| p99 Latency | <500ms | ${p99.current ? (p99.current < 0.5 ? '✅' : '❌') : '❓'} |
-| Error Budget Burn | <2.0x | ${budgetBurn.current ? (budgetBurn.current < 2.0 ? '✅' : '❌') : '❓'} |`;
+| Availability | ≥99.9% | ${avail.current ? (avail.current >= 0.999 ? "✅" : "❌") : "❓"} |
+| p95 Latency | <200ms | ${p95.current ? (p95.current < 0.2 ? "✅" : "❌") : "❓"} |
+| p99 Latency | <500ms | ${p99.current ? (p99.current < 0.5 ? "✅" : "❌") : "❓"} |
+| Error Budget Burn | <2.0x | ${budgetBurn.current ? (budgetBurn.current < 2.0 ? "✅" : "❌") : "❓"} |`;
 
     // Add recommendations if regressions detected
     if (hasRegressions) {
@@ -359,24 +323,24 @@ class SLOPRReporter {
       const regressionList = Object.entries(changes)
         .filter(
           ([_, data]) =>
-            data.status === 'slo_breach' ||
-            data.status === 'regression' ||
-            data.status === 'budget_burn',
+            data.status === "slo_breach" ||
+            data.status === "regression" ||
+            data.status === "budget_burn"
         )
         .map(([metric, data]) => {
           switch (data.status) {
-            case 'slo_breach':
+            case "slo_breach":
               return `- **${metric}**: SLO breach detected - immediate investigation required`;
-            case 'budget_burn':
+            case "budget_burn":
               return `- **${metric}**: Error budget burning too fast - review recent changes`;
-            case 'regression':
+            case "regression":
               return `- **${metric}**: Performance regression detected - consider optimization`;
             default:
               return `- **${metric}**: Issue detected - review performance impact`;
           }
         });
 
-      report += regressionList.join('\n');
+      report += regressionList.join("\n");
 
       report += `\n\n**⚠️ This PR may introduce performance regressions. Consider:**
 - Load testing the changes
@@ -399,14 +363,14 @@ class SLOPRReporter {
    */
   getStatusIcon(status) {
     const icons = {
-      slo_breach: '🚨',
-      budget_burn: '⚠️',
-      regression: '📉',
-      improvement: '📈',
-      stable: '✅',
-      unknown: '❓',
+      slo_breach: "🚨",
+      budget_burn: "⚠️",
+      regression: "📉",
+      improvement: "📈",
+      stable: "✅",
+      unknown: "❓",
     };
-    return icons[status] || '❓';
+    return icons[status] || "❓";
   }
 
   /**
@@ -414,12 +378,12 @@ class SLOPRReporter {
    */
   async updatePRComment(report) {
     if (!config.prNumber || !config.githubToken) {
-      console.log('📝 SLO Report (would be posted to PR):');
+      console.log("📝 SLO Report (would be posted to PR):");
       console.log(report);
       return;
     }
 
-    console.log('📝 Posting SLO report to PR...');
+    console.log("📝 Posting SLO report to PR...");
 
     // Get existing comments
     const commentsUrl = `https://api.github.com/repos/${config.owner}/${config.repo}/issues/${config.prNumber}/comments`;
@@ -430,8 +394,8 @@ class SLOPRReporter {
     // Find existing SLO report comment
     const existingComment = comments.find(
       (comment) =>
-        comment.body.includes('SLO Performance Report') &&
-        comment.user.login === 'github-actions[bot]',
+        comment.body.includes("SLO Performance Report") &&
+        comment.user.login === "github-actions[bot]"
     );
 
     const commentBody = `<!-- SLO-REPORT -->
@@ -440,34 +404,34 @@ ${report}`;
     if (existingComment) {
       // Update existing comment
       const updateUrl = `https://api.github.com/repos/${config.owner}/${config.repo}/issues/comments/${existingComment.id}`;
-      await this.githubRequest(updateUrl, 'PATCH', { body: commentBody });
-      console.log('✅ Updated existing SLO report comment');
+      await this.githubRequest(updateUrl, "PATCH", { body: commentBody });
+      console.log("✅ Updated existing SLO report comment");
     } else {
       // Create new comment
-      await this.githubRequest(commentsUrl, 'POST', { body: commentBody });
-      console.log('✅ Created new SLO report comment');
+      await this.githubRequest(commentsUrl, "POST", { body: commentBody });
+      console.log("✅ Created new SLO report comment");
     }
   }
 
   /**
    * GitHub API helper
    */
-  async githubRequest(url, method = 'GET', body = null) {
+  async githubRequest(url, method = "GET", body = null) {
     return new Promise((resolve, reject) => {
       const options = {
         method,
         headers: {
           Authorization: `token ${config.githubToken}`,
-          Accept: 'application/vnd.github.v3+json',
-          'User-Agent': 'slo-pr-reporter/1.0',
-          'Content-Type': 'application/json',
+          Accept: "application/vnd.github.v3+json",
+          "User-Agent": "slo-pr-reporter/1.0",
+          "Content-Type": "application/json",
         },
       };
 
       const req = https.request(url, options, (res) => {
-        let data = '';
-        res.on('data', (chunk) => (data += chunk));
-        res.on('end', () => {
+        let data = "";
+        res.on("data", (chunk) => (data += chunk));
+        res.on("end", () => {
           try {
             const jsonData = data ? JSON.parse(data) : {};
             resolve({ status: res.statusCode, data: jsonData });
@@ -477,7 +441,7 @@ ${report}`;
         });
       });
 
-      req.on('error', reject);
+      req.on("error", reject);
 
       if (body) {
         req.write(JSON.stringify(body));
@@ -491,9 +455,9 @@ ${report}`;
    * Main execution
    */
   async generateSLOReport() {
-    console.log('🚦 Starting SLO PR report generation...');
+    console.log("🚦 Starting SLO PR report generation...");
     console.log(`📊 Repository: ${config.owner}/${config.repo}`);
-    console.log(`🔀 PR Number: ${config.prNumber || 'N/A'}`);
+    console.log(`🔀 PR Number: ${config.prNumber || "N/A"}`);
 
     try {
       // Fetch metrics
@@ -509,19 +473,17 @@ ${report}`;
       await this.updatePRComment(report);
 
       // Check for blocking issues
-      const hasBlockingIssues = Object.values(changes).some(
-        (c) => c.status === 'slo_breach',
-      );
+      const hasBlockingIssues = Object.values(changes).some((c) => c.status === "slo_breach");
 
       if (hasBlockingIssues) {
-        console.log('🚨 SLO breaches detected - consider blocking merge');
+        console.log("🚨 SLO breaches detected - consider blocking merge");
         process.exit(1);
       } else {
-        console.log('✅ SLO report generated successfully');
+        console.log("✅ SLO report generated successfully");
         process.exit(0);
       }
     } catch (error) {
-      console.error('❌ Failed to generate SLO report:', error.message);
+      console.error("❌ Failed to generate SLO report:", error.message);
       process.exit(1);
     }
   }

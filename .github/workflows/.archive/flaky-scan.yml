@@ -6,7 +6,7 @@ on:
       iterations:
         description: Number of detection iterations
         required: false
-        default: '10'
+        default: "10"
       pattern:
         description: Optional test name pattern to target
         required: false
@@ -15,7 +15,7 @@ on:
         required: false
         default: pnpm exec jest
   schedule:
-    - cron: '0 9 * * 1'
+    - cron: "0 9 * * 1"
 
 permissions:
   contents: read
@@ -31,8 +31,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4

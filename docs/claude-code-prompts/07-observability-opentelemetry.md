@@ -1,10 +1,13 @@
 # Prompt 7: Observability (OpenTelemetry → Prometheus/Grafana)
 
 ## Role
+
 SRE/Observability Engineer
 
 ## Context
+
 IntelGraph requires comprehensive observability to:
+
 - **Meet SLOs** - Track and alert on performance targets
 - **Debug production issues** - Trace requests end-to-end
 - **Optimize performance** - Identify bottlenecks
@@ -13,9 +16,11 @@ IntelGraph requires comprehensive observability to:
 OpenTelemetry provides vendor-neutral instrumentation for metrics, traces, and logs.
 
 ## Task
+
 Implement end-to-end observability with OpenTelemetry:
 
 ### 1. Instrumentation
+
 - Instrument all services with OTel SDK
 - Emit RED metrics (Rate, Errors, Duration)
 - Emit USE metrics (Utilization, Saturation, Errors) for resources
@@ -23,12 +28,14 @@ Implement end-to-end observability with OpenTelemetry:
 - Structured logging with trace correlation
 
 ### 2. Dashboards
+
 - Grafana dashboards for API, ingest, and graph services
 - SLO burn rate alerts at 80% threshold
 - Error budget tracking
 - Resource utilization views
 
 ### 3. Alerting
+
 - Prometheus alerting rules
 - Integration with incident management (PagerDuty, Opsgenie, etc.)
 - Runbook links from alerts
@@ -36,11 +43,13 @@ Implement end-to-end observability with OpenTelemetry:
 ## Guardrails
 
 ### Performance
+
 - **OTel overhead** < 5% CPU, < 100 MB memory per service
 - **Trace sampling** - 1% sample rate for high-volume endpoints
 - **Metric cardinality** - Limit labels to prevent explosion
 
 ### Data Retention
+
 - **Traces**: 7 days
 - **Metrics**: 30 days (high-res), 365 days (downsampled)
 - **Logs**: 30 days
@@ -48,6 +57,7 @@ Implement end-to-end observability with OpenTelemetry:
 ## Deliverables
 
 ### 1. OpenTelemetry Configuration
+
 - [ ] OTel SDK integration for all services (TypeScript/Node.js)
 - [ ] Instrumentation for:
   - [ ] HTTP/GraphQL requests
@@ -58,12 +68,14 @@ Implement end-to-end observability with OpenTelemetry:
 - [ ] Exemplar support (link metrics to traces)
 
 ### 2. Prometheus Setup
+
 - [ ] `prometheus.yml` scrape configuration
 - [ ] Service discovery for Kubernetes
 - [ ] Recording rules for SLO metrics
 - [ ] Alerting rules with thresholds
 
 ### 3. Grafana Dashboards
+
 - [ ] `grafana/dashboards/` directory with JSON dashboards:
   - [ ] `api-overview.json` - API gateway metrics
   - [ ] `ingest-pipeline.json` - Ingest throughput and errors
@@ -72,6 +84,7 @@ Implement end-to-end observability with OpenTelemetry:
   - [ ] `resource-utilization.json` - CPU, memory, disk, network
 
 ### 4. Alerting Rules
+
 - [ ] `prometheus/alerts/` directory with alert rules:
   - [ ] `slo-alerts.yaml` - SLO burn rate alerts
   - [ ] `error-rate-alerts.yaml` - Error rate thresholds
@@ -79,11 +92,13 @@ Implement end-to-end observability with OpenTelemetry:
   - [ ] `resource-alerts.yaml` - Resource saturation alerts
 
 ### 5. Runbooks
+
 - [ ] Runbook links embedded in Grafana panels
 - [ ] Alert annotations with troubleshooting steps
 - [ ] Example runbooks for common alerts
 
 ## Acceptance Criteria
+
 - ✅ Synthetic traffic shows complete traces across gateway → services → databases
 - ✅ SLO dashboard panels reflect configured targets (read p95 ≤ 350ms, etc.)
 - ✅ Alert fires in simulation at 80% error budget burn
@@ -95,34 +110,34 @@ Implement end-to-end observability with OpenTelemetry:
 
 ```typescript
 // services/api/src/instrumentation.ts
-import { NodeSDK } from '@opentelemetry/sdk-node';
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { Resource } from '@opentelemetry/resources';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
+import { PrometheusExporter } from "@opentelemetry/exporter-prometheus";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
+import { Resource } from "@opentelemetry/resources";
+import { SemanticResourceAttributes } from "@opentelemetry/semantic-conventions";
 
 const sdk = new NodeSDK({
   resource: new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: 'api-gateway',
-    [SemanticResourceAttributes.SERVICE_VERSION]: process.env.VERSION || 'dev',
-    [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: process.env.NODE_ENV || 'development',
+    [SemanticResourceAttributes.SERVICE_NAME]: "api-gateway",
+    [SemanticResourceAttributes.SERVICE_VERSION]: process.env.VERSION || "dev",
+    [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: process.env.NODE_ENV || "development",
   }),
 
   traceExporter: new OTLPTraceExporter({
-    url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/traces',
+    url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || "http://localhost:4318/v1/traces",
   }),
 
   metricReader: new PrometheusExporter({
     port: 9464,
-    endpoint: '/metrics',
+    endpoint: "/metrics",
   }),
 
   instrumentations: [
     getNodeAutoInstrumentations({
-      '@opentelemetry/instrumentation-fs': { enabled: false },
-      '@opentelemetry/instrumentation-http': {
-        ignoreIncomingPaths: ['/health', '/metrics'],
+      "@opentelemetry/instrumentation-fs": { enabled: false },
+      "@opentelemetry/instrumentation-http": {
+        ignoreIncomingPaths: ["/health", "/metrics"],
       },
     }),
   ],
@@ -130,7 +145,7 @@ const sdk = new NodeSDK({
 
 sdk.start();
 
-process.on('SIGTERM', () => {
+process.on("SIGTERM", () => {
   sdk.shutdown().finally(() => process.exit(0));
 });
 ```
@@ -143,27 +158,27 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
   external_labels:
-    cluster: 'intelgraph-prod'
+    cluster: "intelgraph-prod"
 
 scrape_configs:
-  - job_name: 'api-gateway'
+  - job_name: "api-gateway"
     static_configs:
-      - targets: ['api-gateway:9464']
+      - targets: ["api-gateway:9464"]
     metric_relabel_configs:
       - source_labels: [__name__]
-        regex: 'go_.*'
-        action: drop  # Drop Go runtime metrics if not needed
+        regex: "go_.*"
+        action: drop # Drop Go runtime metrics if not needed
 
-  - job_name: 'graph-service'
+  - job_name: "graph-service"
     static_configs:
-      - targets: ['graph-service:9464']
+      - targets: ["graph-service:9464"]
 
-  - job_name: 'ingest-service'
+  - job_name: "ingest-service"
     static_configs:
-      - targets: ['ingest-service:9464']
+      - targets: ["ingest-service:9464"]
 
   # Kubernetes service discovery (production)
-  - job_name: 'kubernetes-pods'
+  - job_name: "kubernetes-pods"
     kubernetes_sd_configs:
       - role: pod
     relabel_configs:
@@ -270,6 +285,7 @@ groups:
 ```
 
 ## Related Files
+
 - `/home/user/summit/docs/OBSERVABILITY.md` - Observability guide
 - `/home/user/summit/observability/` - Prometheus/Grafana configs
 - `/home/user/summit/RUNBOOKS/` - Operational runbooks
@@ -285,6 +301,7 @@ claude "Execute prompt 7: Observability implementation"
 ```
 
 ## Notes
+
 - Use OpenTelemetry Collector for batching and sampling
 - Configure tail-based sampling for error traces (keep 100% of errors)
 - Use Tempo or Jaeger for trace storage

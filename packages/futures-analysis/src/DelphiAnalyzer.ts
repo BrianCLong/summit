@@ -2,7 +2,13 @@
  * DelphiAnalyzer - Delphi Method for Expert Forecasting
  */
 
-import { DelphiStudy, DelphiRound, DelphiQuestion, DelphiResponse, ConsensusResult } from './types.js';
+import {
+  DelphiStudy,
+  DelphiRound,
+  DelphiQuestion,
+  DelphiResponse,
+  ConsensusResult,
+} from "./types.js";
 
 export class DelphiAnalyzer {
   private studies: Map<string, DelphiStudy> = new Map();
@@ -19,11 +25,11 @@ export class DelphiAnalyzer {
       consensus: {
         achieved: false,
         consensusLevel: 0,
-        convergence: 'diverging',
+        convergence: "diverging",
         outliers: [],
       },
       startDate: new Date(),
-      status: 'planning',
+      status: "planning",
     };
 
     this.studies.set(study.id, study);
@@ -35,7 +41,7 @@ export class DelphiAnalyzer {
    */
   async conductRound(studyId: string, questions: DelphiQuestion[]): Promise<DelphiRound> {
     const study = this.studies.get(studyId);
-    if (!study) throw new Error('Study not found');
+    if (!study) throw new Error("Study not found");
 
     const round: DelphiRound = {
       roundNumber: study.rounds.length + 1,
@@ -58,7 +64,7 @@ export class DelphiAnalyzer {
       return {
         achieved: false,
         consensusLevel: 0,
-        convergence: 'diverging',
+        convergence: "diverging",
         outliers: [],
       };
     }
@@ -69,7 +75,7 @@ export class DelphiAnalyzer {
     return {
       achieved: false,
       consensusLevel: 0,
-      convergence: 'converging',
+      convergence: "converging",
       outliers: [],
     };
   }

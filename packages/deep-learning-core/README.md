@@ -26,10 +26,10 @@ import {
   InferenceRequest,
   generateModelId,
   formatBytes,
-} from '@intelgraph/deep-learning-core';
+} from "@intelgraph/deep-learning-core";
 
 // Generate model ID
-const modelId = generateModelId('classifier');
+const modelId = generateModelId("classifier");
 
 // Create training configuration
 const config: TrainingConfig = {
@@ -37,13 +37,13 @@ const config: TrainingConfig = {
   batchSize: 32,
   epochs: 50,
   learningRate: 0.001,
-  optimizer: 'adam',
-  lossFunction: 'categorical_crossentropy',
-  metrics: ['accuracy'],
+  optimizer: "adam",
+  lossFunction: "categorical_crossentropy",
+  metrics: ["accuracy"],
 };
 
 // Estimate model size
-const size = estimateModelSize(25600000, 'float32');
+const size = estimateModelSize(25600000, "float32");
 console.log(formatBytes(size)); // "97.66 MB"
 ```
 

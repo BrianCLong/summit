@@ -1,10 +1,10 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
+import React from "react";
+import { useParams } from "react-router-dom";
 
 export default function RunViewer() {
-  const { id = '' } = useParams();
+  const { id = "" } = useParams();
   const [data, setData] = React.useState<any>(null);
-  const [err, setErr] = React.useState<string>('');
+  const [err, setErr] = React.useState<string>("");
 
   React.useEffect(() => {
     let alive = true;
@@ -27,33 +27,31 @@ export default function RunViewer() {
   }, [id]);
 
   const traceId = (data as any)?.traceId || (data as any)?.otelTraceId;
-  const tempo = (import.meta as any).env.VITE_OBS_TEMPO_URL || '';
+  const tempo = (import.meta as any).env.VITE_OBS_TEMPO_URL || "";
   const tracesLink =
-    traceId && tempo
-      ? `${tempo}/search?traceID=${encodeURIComponent(traceId)}`
-      : undefined;
+    traceId && tempo ? `${tempo}/search?traceID=${encodeURIComponent(traceId)}` : undefined;
 
   return (
     <div style={{ padding: 24 }}>
       <h2>Run Viewer — {id}</h2>
-      {err && <p style={{ color: 'crimson' }}>Error: {err}</p>}
+      {err && <p style={{ color: "crimson" }}>Error: {err}</p>}
       {!data && !err && <p>Loading…</p>}
       {data && (
         <>
           <pre
             aria-label="run-json"
             style={{
-              background: '#111',
-              color: '#ccc',
+              background: "#111",
+              color: "#ccc",
               padding: 12,
-              overflow: 'auto',
+              overflow: "auto",
               maxHeight: 300,
             }}
           >
             {JSON.stringify(data, null, 2)}
           </pre>
           <div style={{ marginBottom: 8 }}>
-            <strong>Trace ID:</strong> {traceId || '—'}
+            <strong>Trace ID:</strong> {traceId || "—"}
           </div>
           {tracesLink && (
             <a href={tracesLink} target="_blank" rel="noreferrer">

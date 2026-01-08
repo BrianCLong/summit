@@ -6,6 +6,5 @@
   "scripts": {
     "test": "echo 'Sandbox tests passing'"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }

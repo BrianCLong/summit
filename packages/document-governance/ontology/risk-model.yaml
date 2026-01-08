@@ -1,9 +1,9 @@
-version: '1.0.0'
+version: "1.0.0"
 description: Risk scoring model configuration
 
 risk_model:
   name: Document Risk Assessment Model
-  version: '1.0.0'
+  version: "1.0.0"
   description: Multi-dimensional risk scoring for business documents
 
   dimensions:
@@ -76,7 +76,7 @@ risk_model:
     - level: Low
       min: 0
       max: 3
-      color: '#22c55e'
+      color: "#22c55e"
       description: Minimal risk, standard handling procedures
       actions:
         - Standard document management
@@ -85,7 +85,7 @@ risk_model:
     - level: Medium
       min: 3
       max: 6
-      color: '#f59e0b'
+      color: "#f59e0b"
       description: Moderate risk, enhanced controls recommended
       actions:
         - Enhanced access controls
@@ -95,7 +95,7 @@ risk_model:
     - level: High
       min: 6
       max: 8
-      color: '#ef4444'
+      color: "#ef4444"
       description: Significant risk, strict controls required
       actions:
         - Restricted access
@@ -106,7 +106,7 @@ risk_model:
     - level: Critical
       min: 8
       max: 10
-      color: '#dc2626'
+      color: "#dc2626"
       description: Severe risk, maximum controls and monitoring
       actions:
         - C-level approval required
@@ -174,17 +174,17 @@ risk_model:
 
     retention_period:
       Permanent: 0.5
-      '7y_plus': 0.3
-      '5y': 0.1
-      '3y': 0
-      '1y': -0.2
+      "7y_plus": 0.3
+      "5y": 0.1
+      "3y": 0
+      "1y": -0.2
 
     signature_count:
-      '0': -0.5
-      '1': 0
-      '2': 0.2
-      '3+': 0.5
+      "0": -0.5
+      "1": 0
+      "2": 0.2
+      "3+": 0.5
 
     external_facing:
-      'true': 0.5
-      'false': 0
+      "true": 0.5
+      "false": 0

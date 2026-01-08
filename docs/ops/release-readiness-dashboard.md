@@ -25,6 +25,7 @@ Two authorized endpoints provide release readiness data:
 Returns a summary of readiness checks with overall status.
 
 **Response Structure:**
+
 ```json
 {
   "generatedAt": "2024-01-15T10:30:00Z",
@@ -42,6 +43,7 @@ Returns a summary of readiness checks with overall status.
 ```
 
 **Check Status Values:**
+
 - `pass`: Check succeeded
 - `fail`: Check failed (blocks release)
 - `warn`: Check has warnings (review recommended)
@@ -52,6 +54,7 @@ Returns a summary of readiness checks with overall status.
 Returns structured control and evidence mappings derived from governance artifacts.
 
 **Response Structure:**
+
 ```json
 {
   "controls": [
@@ -76,11 +79,13 @@ Returns structured control and evidence mappings derived from governance artifac
 ```
 
 **Data Sources:**
+
 - `docs/compliance/CONTROL_REGISTRY.md` - Control definitions
 - `docs/compliance/EVIDENCE_INDEX.md` - Evidence mappings
 - File system checks for critical governance files
 
 **Caching:**
+
 - Server responses cached for 5 minutes
 - Deterministic parsing (no external API calls)
 - Safe for high-frequency requests
@@ -115,6 +120,7 @@ Returns structured control and evidence mappings derived from governance artifac
      - Verification command with copy button
 
 **Offline Support:**
+
 - Automatically caches summary and evidence data to `localStorage`
 - Cache expiry: 5 minutes
 - Stale data indicator with timestamp
@@ -122,6 +128,7 @@ Returns structured control and evidence mappings derived from governance artifac
 - Graceful degradation: shows last-known-good data
 
 **Accessibility:**
+
 - All interactive elements have `aria-label` attributes
 - Status icons have semantic color meanings
 - Loading states clearly communicated
@@ -144,6 +151,7 @@ Returns structured control and evidence mappings derived from governance artifac
 4. Run the command in your terminal to verify the evidence exists
 
 Example:
+
 ```bash
 # Copy command from UI
 ls -l docs/governance/CONSTITUTION.md
@@ -191,7 +199,7 @@ Extend `releaseReadinessService.checkGovernanceFiles()` in `server/src/services/
 ```typescript
 const requiredFiles = [
   // ... existing files
-  { path: 'docs/new-artifact.md', name: 'New Artifact' },
+  { path: "docs/new-artifact.md", name: "New Artifact" },
 ];
 ```
 
@@ -241,6 +249,7 @@ While this dashboard surfaces readiness status in-app, the source data (governan
 **Cause:** API endpoints are unreachable and no cached data exists.
 
 **Resolution:**
+
 1. Check server is running
 2. Verify authentication token is valid (`localStorage.getItem('token')`)
 3. Ensure user has ADMIN or OPERATOR role
@@ -251,6 +260,7 @@ While this dashboard surfaces readiness status in-app, the source data (governan
 **Cause:** API endpoints are unreachable but cached data is available.
 
 **Resolution:**
+
 - This is expected behavior during offline/network issues
 - Data is stale but usable
 - Click **Refresh** when connectivity is restored
@@ -260,6 +270,7 @@ While this dashboard surfaces readiness status in-app, the source data (governan
 **Cause:** Check logic failed or file access denied.
 
 **Resolution:**
+
 1. Check server logs for errors
 2. Verify governance files exist in repo
 3. Ensure file permissions allow reads
@@ -269,6 +280,7 @@ While this dashboard surfaces readiness status in-app, the source data (governan
 **Cause:** Parsing failed or markdown format incorrect.
 
 **Resolution:**
+
 1. Verify `CONTROL_REGISTRY.md` and `EVIDENCE_INDEX.md` use correct table format
 2. Check for markdown table syntax errors (missing pipes, etc.)
 3. Review server logs for parsing errors
@@ -280,6 +292,7 @@ The dashboard is controlled by the `release-readiness-dashboard` feature flag:
 **Default:** `true` (enabled)
 
 **To Disable:**
+
 ```bash
 # Environment variable (non-production only)
 export FEATURE_FLAGS="release-readiness-dashboard:false"

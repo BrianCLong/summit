@@ -18,6 +18,11 @@
     "browser": "Chrome",
     "ua": { "platform": "Linux", "architecture": "x86_64" },
     "webauthn": { "userVerified": true, "userPresent": true },
-    "local": { "firewallEnabled": true, "diskEncrypted": false, "screenLock": true, "offlineMode": true }
+    "local": {
+      "firewallEnabled": true,
+      "diskEncrypted": false,
+      "screenLock": true,
+      "offlineMode": true
+    }
   }
 ]

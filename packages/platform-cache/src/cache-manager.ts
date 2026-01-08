@@ -1,7 +1,12 @@
-import { CacheConfigSchema, type CacheConfig, type CacheStats, type CacheMetrics } from './types.js';
-import { CacheClient } from './cache-client.js';
-import { MemoryProvider } from './providers/memory.js';
-import { RedisProvider } from './providers/redis.js';
+import {
+  CacheConfigSchema,
+  type CacheConfig,
+  type CacheStats,
+  type CacheMetrics,
+} from "./types.js";
+import { CacheClient } from "./cache-client.js";
+import { MemoryProvider } from "./providers/memory.js";
+import { RedisProvider } from "./providers/redis.js";
 
 /**
  * Default metrics implementation
@@ -14,9 +19,9 @@ class DefaultMetrics implements CacheMetrics {
   private getLatencies: number[] = [];
   private setLatencies: number[] = [];
 
-  recordHit(source: 'local' | 'redis'): void {
+  recordHit(source: "local" | "redis"): void {
     this.hits++;
-    if (source === 'local') {
+    if (source === "local") {
       this.localHits++;
     } else {
       this.redisHits++;
@@ -43,12 +48,14 @@ class DefaultMetrics implements CacheMetrics {
 
   getStats(): CacheStats {
     const total = this.hits + this.misses;
-    const avgGet = this.getLatencies.length > 0
-      ? this.getLatencies.reduce((a, b) => a + b, 0) / this.getLatencies.length
-      : 0;
-    const avgSet = this.setLatencies.length > 0
-      ? this.setLatencies.reduce((a, b) => a + b, 0) / this.setLatencies.length
-      : 0;
+    const avgGet =
+      this.getLatencies.length > 0
+        ? this.getLatencies.reduce((a, b) => a + b, 0) / this.getLatencies.length
+        : 0;
+    const avgSet =
+      this.setLatencies.length > 0
+        ? this.setLatencies.reduce((a, b) => a + b, 0) / this.setLatencies.length
+        : 0;
 
     return {
       hits: this.hits,
@@ -120,17 +127,12 @@ export class CacheManager {
       // Check Redis availability
       const available = await redisProvider.isAvailable();
       if (!available) {
-        console.warn('Redis not available, falling back to local cache only');
+        console.warn("Redis not available, falling back to local cache only");
         redisProvider = null;
       }
     }
 
-    this.client = new CacheClient(
-      this.config,
-      localProvider,
-      redisProvider,
-      this.metrics
-    );
+    this.client = new CacheClient(this.config, localProvider, redisProvider, this.metrics);
 
     return this.client;
   }

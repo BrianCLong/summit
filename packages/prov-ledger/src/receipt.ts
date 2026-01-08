@@ -1,9 +1,4 @@
-import {
-  hashJson,
-  recordStep,
-  type ProvenanceManifest,
-  type ProvenanceStep,
-} from './primitives';
+import { hashJson, recordStep, type ProvenanceManifest, type ProvenanceStep } from "./primitives";
 
 export interface DecisionReceipt {
   id: string;
@@ -41,8 +36,7 @@ export function emitDecisionReceipt(options: ReceiptOptions): {
 } {
   const retries = options.retries ?? 0;
   const id =
-    options.stepId ||
-    `decision-${options.adapterId ? `${options.adapterId}-` : ''}${Date.now()}`;
+    options.stepId || `decision-${options.adapterId ? `${options.adapterId}-` : ""}${Date.now()}`;
 
   const receipt: DecisionReceipt = {
     id,
@@ -61,8 +55,8 @@ export function emitDecisionReceipt(options: ReceiptOptions): {
 
   const step = recordStep(options.manifest, {
     id,
-    type: 'policy-check',
-    tool: options.tool || 'decision-receipt',
+    type: "policy-check",
+    tool: options.tool || "decision-receipt",
     params: {
       action: options.action,
       decision: options.decision,

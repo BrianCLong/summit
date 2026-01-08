@@ -118,20 +118,17 @@ jobs:
 
 ```ts
 export type VerifyResult = { verified: boolean; sha256: string };
-export async function verifyPack(
-  packUrl: string,
-  sigUrl: string,
-): Promise<VerifyResult> {
+export async function verifyPack(packUrl: string, sigUrl: string): Promise<VerifyResult> {
   // Server-assisted verify call
   const res = await fetch(
-    `/api/verify?pack=${encodeURIComponent(packUrl)}&sig=${encodeURIComponent(sigUrl)}`,
+    `/api/verify?pack=${encodeURIComponent(packUrl)}&sig=${encodeURIComponent(sigUrl)}`
   );
   if (!res.ok) throw new Error(`verify failed: ${res.status}`);
   return res.json();
 }
 export async function getControls(tag: string) {
   const r = await fetch(`/controls?tag=${encodeURIComponent(tag)}`);
-  if (!r.ok) throw new Error('controls fetch failed');
+  if (!r.ok) throw new Error("controls fetch failed");
   return r.json();
 }
 ```
@@ -161,17 +158,17 @@ class AttestationClient:
 **Path:** `services/entitlements/server.mjs`
 
 ```js
-import express from 'express';
-import morgan from 'morgan';
-import { createVerifier } from './verify.js'; // wraps cosign verify
-import policy from './pricing_policy.js';
+import express from "express";
+import morgan from "morgan";
+import { createVerifier } from "./verify.js"; // wraps cosign verify
+import policy from "./pricing_policy.js";
 const app = express();
-app.use(morgan('combined'));
-app.get('/feature/:name', async (req, res) => {
-  const plan = req.get('X-Plan') || 'Starter';
+app.use(morgan("combined"));
+app.get("/feature/:name", async (req, res) => {
+  const plan = req.get("X-Plan") || "Starter";
   const ev = {
-    sig: req.get('X-Pack-Sig') || '',
-    hash: req.get('X-Pack-Hash') || '',
+    sig: req.get("X-Pack-Sig") || "",
+    hash: req.get("X-Pack-Hash") || "",
   };
   const verified = await createVerifier().verify(ev);
   const allowed = policy.allow(plan, req.params.name, verified);
@@ -190,7 +187,7 @@ export default {
       Pro: { vendor: true },
       Enterprise: { vendor: true, auditor: true },
     };
-    const needsVerified = feature === 'vendor' || feature === 'auditor';
+    const needsVerified = feature === "vendor" || feature === "auditor";
     return (matrix[plan]?.[feature] ?? false) && (!needsVerified || verified);
   },
 };
@@ -205,12 +202,8 @@ export default {
 **Path:** `.github/actions/ci-timer/action.yml`
 
 ```yaml
-name: 'CI Timer'
-runs:
-  {
-    using: 'composite',
-    steps: [{ shell:'bash', run:'echo $(date +%s) > .timer.start' }],
-  }
+name: "CI Timer"
+runs: { using: "composite", steps: [{ shell:'bash', run:'echo $(date +%s) > .timer.start' }] }
 ```
 
 **Usage:** add at job start and end; compute delta and push to `metrics/ci_times.json`; show in dashboard.

@@ -1,6 +1,6 @@
-import React from 'react';
-import { Alert, AlertTitle, Button, Box } from '@mui/material';
-import { Refresh, Warning } from '@mui/icons-material';
+import React from "react";
+import { Alert, AlertTitle, Button, Box } from "@mui/material";
+import { Refresh, Warning } from "@mui/icons-material";
 
 interface ConflictBannerProps {
   visible: boolean;
@@ -11,7 +11,7 @@ interface ConflictBannerProps {
 
 export function ConflictBanner({
   visible,
-  message = 'This content has been updated by another user. Your changes may conflict.',
+  message = "This content has been updated by another user. Your changes may conflict.",
   onRefresh,
   onDismiss,
 }: ConflictBannerProps) {
@@ -24,24 +24,19 @@ export function ConflictBanner({
       sx={{
         mb: 2,
         borderLeft: 3,
-        borderColor: 'warning.main',
-        animation: 'slideDown 0.3s ease-out',
-        '@keyframes slideDown': {
-          from: { opacity: 0, transform: 'translateY(-20px)' },
-          to: { opacity: 1, transform: 'translateY(0)' },
+        borderColor: "warning.main",
+        animation: "slideDown 0.3s ease-out",
+        "@keyframes slideDown": {
+          from: { opacity: 0, transform: "translateY(-20px)" },
+          to: { opacity: 1, transform: "translateY(0)" },
         },
       }}
     >
       <AlertTitle>Content Conflict Detected</AlertTitle>
       {message}
 
-      <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
-        <Button
-          size="small"
-          variant="outlined"
-          startIcon={<Refresh />}
-          onClick={onRefresh}
-        >
+      <Box sx={{ mt: 1, display: "flex", gap: 1 }}>
+        <Button size="small" variant="outlined" startIcon={<Refresh />} onClick={onRefresh}>
           Refresh Content
         </Button>
 

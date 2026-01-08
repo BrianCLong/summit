@@ -1,4 +1,4 @@
-import type { CostModelConfig, CostEstimate, TraceEvent } from '../types.js';
+import type { CostModelConfig, CostEstimate, TraceEvent } from "../types.js";
 
 /**
  * Default cost configuration based on typical LLM API pricing
@@ -8,11 +8,11 @@ const DEFAULT_COST_CONFIG: CostModelConfig = {
   outputTokenCostPer1k: 0.015, // $15 per 1M output tokens
   toolCallBaseCost: 0.0001, // Base cost per tool call
   toolCosts: {
-    'code_interpreter': 0.001,
-    'file_search': 0.0005,
-    'web_browse': 0.002,
-    'database_query': 0.0008,
-    'api_call': 0.0003,
+    code_interpreter: 0.001,
+    file_search: 0.0005,
+    web_browse: 0.002,
+    database_query: 0.0008,
+    api_call: 0.0003,
   },
   latencyPenaltyPerMs: 0.00001, // Small penalty for latency (cost of time)
 };
@@ -47,22 +47,17 @@ export class CostModel {
     inputTokens: number,
     outputTokens: number,
     toolName?: string,
-    latencyMs?: number,
+    latencyMs?: number
   ): CostEstimate {
-    const inputTokenCost =
-      (inputTokens / 1000) * this.config.inputTokenCostPer1k;
-    const outputTokenCost =
-      (outputTokens / 1000) * this.config.outputTokenCostPer1k;
+    const inputTokenCost = (inputTokens / 1000) * this.config.inputTokenCostPer1k;
+    const outputTokenCost = (outputTokens / 1000) * this.config.outputTokenCostPer1k;
 
     let toolCallCost = 0;
     if (toolName) {
-      toolCallCost =
-        this.config.toolCosts[toolName] ?? this.config.toolCallBaseCost;
+      toolCallCost = this.config.toolCosts[toolName] ?? this.config.toolCallBaseCost;
     }
 
-    const latencyPenalty = latencyMs
-      ? latencyMs * this.config.latencyPenaltyPerMs
-      : 0;
+    const latencyPenalty = latencyMs ? latencyMs * this.config.latencyPenaltyPerMs : 0;
 
     return {
       inputTokenCost,
@@ -90,17 +85,14 @@ export class CostModel {
       }
 
       // Handle tool calls
-      if (event.type === 'tool_call_end' && event.name) {
-        const toolName = event.name.replace('tool:', '');
-        totalToolCost +=
-          this.config.toolCosts[toolName] ?? this.config.toolCallBaseCost;
+      if (event.type === "tool_call_end" && event.name) {
+        const toolName = event.name.replace("tool:", "");
+        totalToolCost += this.config.toolCosts[toolName] ?? this.config.toolCallBaseCost;
       }
     }
 
-    const inputTokenCost =
-      (totalInputTokens / 1000) * this.config.inputTokenCostPer1k;
-    const outputTokenCost =
-      (totalOutputTokens / 1000) * this.config.outputTokenCostPer1k;
+    const inputTokenCost = (totalInputTokens / 1000) * this.config.inputTokenCostPer1k;
+    const outputTokenCost = (totalOutputTokens / 1000) * this.config.outputTokenCostPer1k;
     const latencyPenalty = totalLatency * this.config.latencyPenaltyPerMs;
 
     return {
@@ -129,7 +121,10 @@ export class CostModel {
   /**
    * Calculate cost savings between two cost estimates
    */
-  static calculateSavings(baseline: CostEstimate, optimized: CostEstimate): {
+  static calculateSavings(
+    baseline: CostEstimate,
+    optimized: CostEstimate
+  ): {
     absoluteSavings: number;
     percentageSavings: number;
     breakdown: {
@@ -140,9 +135,7 @@ export class CostModel {
   } {
     const absoluteSavings = baseline.totalCost - optimized.totalCost;
     const percentageSavings =
-      baseline.totalCost > 0
-        ? (absoluteSavings / baseline.totalCost) * 100
-        : 0;
+      baseline.totalCost > 0 ? (absoluteSavings / baseline.totalCost) * 100 : 0;
 
     return {
       absoluteSavings,
@@ -159,9 +152,7 @@ export class CostModel {
 /**
  * Factory function for common pricing tiers
  */
-export function createCostModel(
-  tier: 'budget' | 'standard' | 'premium' = 'standard',
-): CostModel {
+export function createCostModel(tier: "budget" | "standard" | "premium" = "standard"): CostModel {
   const configs: Record<string, Partial<CostModelConfig>> = {
     budget: {
       inputTokenCostPer1k: 0.0005,

@@ -11,7 +11,7 @@
  * All algorithms are pure functions independent of storage layer.
  */
 
-import { haversineDistance, centroid } from '../utils/distance.js';
+import { haversineDistance, centroid } from "../utils/distance.js";
 import {
   GeoObservation,
   TrajectoryPoint,
@@ -21,9 +21,9 @@ import {
   CoPresenceParams,
   Convoy,
   ConvoyParams,
-} from '../types/geotemporal.js';
-import { GeoPoint } from '../types/geospatial.js';
-import { v4 as uuidv4 } from 'uuid';
+} from "../types/geotemporal.js";
+import { GeoPoint } from "../types/geospatial.js";
+import { v4 as uuidv4 } from "uuid";
 
 /**
  * Build trajectory from geo-observations
@@ -64,7 +64,7 @@ export function buildTrajectory(observations: GeoObservation[]): TrajectoryPoint
  */
 export function detectStayPoints(
   trajectory: TrajectoryPoint[],
-  params: StayPointParams,
+  params: StayPointParams
 ): StayPoint[] {
   const stayPoints: StayPoint[] = [];
 
@@ -127,7 +127,7 @@ export function detectStayPoints(
         radiusMeters: params.radiusMeters,
         numObservations: windowSize,
         locationIds: Array.from(
-          new Set(windowPoints.map((p) => p.locationId).filter((id) => id !== undefined)),
+          new Set(windowPoints.map((p) => p.locationId).filter((id) => id !== undefined))
         ),
         durationMinutes,
       };
@@ -159,7 +159,7 @@ export function detectStayPoints(
  */
 export function detectCoPresence(
   observations: GeoObservation[],
-  params: CoPresenceParams,
+  params: CoPresenceParams
 ): CoPresenceInterval[] {
   const intervals: CoPresenceInterval[] = [];
 
@@ -254,7 +254,7 @@ function mergeCoPresenceIntervals(intervals: CoPresenceInterval[]): CoPresenceIn
   const grouped = new Map<string, CoPresenceInterval[]>();
 
   for (const interval of intervals) {
-    const key = [...interval.entities].sort().join('|');
+    const key = [...interval.entities].sort().join("|");
     if (!grouped.has(key)) {
       grouped.set(key, []);
     }
@@ -267,7 +267,7 @@ function mergeCoPresenceIntervals(intervals: CoPresenceInterval[]): CoPresenceIn
   for (const [_key, group] of grouped) {
     // Sort by start time
     const sorted = group.sort(
-      (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
+      (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
     );
 
     let current = sorted[0];
@@ -284,7 +284,8 @@ function mergeCoPresenceIntervals(intervals: CoPresenceInterval[]): CoPresenceIn
         current = {
           ...current,
           endTime: new Date(Math.max(currentEnd, new Date(next.endTime).getTime())).toISOString(),
-          numOverlappingObservations: current.numOverlappingObservations + next.numOverlappingObservations,
+          numOverlappingObservations:
+            current.numOverlappingObservations + next.numOverlappingObservations,
           maxDistanceMeters: Math.max(current.maxDistanceMeters, next.maxDistanceMeters),
         };
       } else {
@@ -312,10 +313,7 @@ function mergeCoPresenceIntervals(intervals: CoPresenceInterval[]): CoPresenceIn
  * @param params - Detection parameters
  * @returns Array of detected convoys
  */
-export function detectConvoys(
-  observations: GeoObservation[],
-  params: ConvoyParams,
-): Convoy[] {
+export function detectConvoys(observations: GeoObservation[], params: ConvoyParams): Convoy[] {
   const stepDurationMs = (params.stepDurationMinutes || 15) * 60 * 1000;
 
   // Find time bounds
@@ -500,7 +498,7 @@ export function detectConvoys(
  */
 function clusterEntitiesByDistance(
   entities: Map<string, { latitude: number; longitude: number }>,
-  maxDistance: number,
+  maxDistance: number
 ): Array<{ entityIds: Set<string> }> {
   const clusters: Array<{ entityIds: Set<string> }> = [];
   const assigned = new Set<string>();

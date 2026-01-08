@@ -124,16 +124,16 @@ RECORD_EXPLAIN_VIEW_INTERACTION(input: ExplainInteractionInput!)
 
 ```typescript
 const {
-  topEntities,           // Top 5 contributing entities
-  topRelationships,      // Top 5 contributing relationships
-  confidenceStats,       // Confidence distribution
-  provenanceSummary,     // Data source summary
-  provenanceData,        // Raw provenance data
-  isLoading,             // Loading state
-  error,                 // Error state
-  getEntityExplanation,  // Get XAI for specific entity
-  trackInteraction,      // Track user action
-  refetchProvenance,     // Refresh data
+  topEntities, // Top 5 contributing entities
+  topRelationships, // Top 5 contributing relationships
+  confidenceStats, // Confidence distribution
+  provenanceSummary, // Data source summary
+  provenanceData, // Raw provenance data
+  isLoading, // Loading state
+  error, // Error state
+  getEntityExplanation, // Get XAI for specific entity
+  trackInteraction, // Track user action
+  refetchProvenance, // Refresh data
 } = useExplainView({ entities, relationships, activeFilters })
 ```
 
@@ -150,6 +150,7 @@ isExplainViewEnabled(): boolean
 ```
 
 **Environment Variables**:
+
 ```bash
 # .env
 VITE_ENHANCED_TRI_PANE_ENABLED=true
@@ -171,10 +172,11 @@ The explain reducer is now integrated:
 ```
 
 **Explain State**:
+
 ```typescript
 interface ExplainState {
-  open: boolean              // Sidebar visibility
-  policy: PolicyItem[]       // Policy warnings
+  open: boolean // Sidebar visibility
+  policy: PolicyItem[] // Policy warnings
 }
 ```
 
@@ -216,11 +218,7 @@ function InvestigationPage() {
 import { useExplainView } from '@/hooks/useExplainView'
 
 function AnalysisView() {
-  const {
-    topEntities,
-    confidenceStats,
-    trackInteraction,
-  } = useExplainView({
+  const { topEntities, confidenceStats, trackInteraction } = useExplainView({
     entities,
     relationships,
     activeFilters,
@@ -248,16 +246,16 @@ function AnalysisView() {
 
 ## Keyboard Shortcuts
 
-| Shortcut | Action |
-|----------|--------|
-| `⌘1` / `Ctrl+1` | Focus Timeline pane |
-| `⌘2` / `Ctrl+2` | Focus Graph pane |
-| `⌘3` / `Ctrl+3` | Focus Map pane |
-| `P` | Toggle provenance overlay |
-| `X` | Toggle XAI overlays |
-| `Esc` | Clear pane focus |
-| `Tab` | Navigate through interactive elements |
-| `Enter` / `Space` | Activate focused element |
+| Shortcut          | Action                                |
+| ----------------- | ------------------------------------- |
+| `⌘1` / `Ctrl+1`   | Focus Timeline pane                   |
+| `⌘2` / `Ctrl+2`   | Focus Graph pane                      |
+| `⌘3` / `Ctrl+3`   | Focus Map pane                        |
+| `P`               | Toggle provenance overlay             |
+| `X`               | Toggle XAI overlays                   |
+| `Esc`             | Clear pane focus                      |
+| `Tab`             | Navigate through interactive elements |
+| `Enter` / `Space` | Activate focused element              |
 
 ## Accessibility Features
 
@@ -294,6 +292,7 @@ function AnalysisView() {
 The tri-pane view fully supports Summit's theming system:
 
 ### Light Mode
+
 ```css
 .bg-background        /* White background */
 .text-foreground      /* Dark text */
@@ -301,6 +300,7 @@ The tri-pane view fully supports Summit's theming system:
 ```
 
 ### Dark Mode
+
 ```css
 .dark:bg-slate-900    /* Dark background */
 .dark:text-gray-100   /* Light text */
@@ -339,6 +339,7 @@ Themes are managed at the root level and automatically applied to all components
 ### Unit Tests
 
 Located in component files with `.test.tsx` extension:
+
 ```bash
 pnpm test EnhancedTriPaneView
 pnpm test ExplainViewSidebar
@@ -350,11 +351,13 @@ pnpm test MapView
 **Location**: `/apps/web/tests/tri-pane-view.spec.ts`
 
 Run with Playwright:
+
 ```bash
 pnpm exec playwright test tri-pane-view
 ```
 
 Test coverage:
+
 - ✅ Basic pane visibility
 - ✅ Time filtering
 - ✅ Entity selection sync
@@ -454,7 +457,7 @@ export const features = {
   enhancedTriPane: {
     enabled: true,
     rollout: {
-      percentage: 10,  // Start with 10%
+      percentage: 10, // Start with 10%
       allowList: ['user1@example.com', 'user2@example.com'],
     },
   },
@@ -464,6 +467,7 @@ export const features = {
 ### Monitoring
 
 Key metrics to track:
+
 - Load time
 - Interaction latency
 - Error rates
@@ -475,6 +479,7 @@ Key metrics to track:
 ### Common Issues
 
 #### 1. Tri-pane not loading
+
 ```bash
 # Check feature flag
 console.log(isEnhancedTriPaneEnabled())
@@ -484,6 +489,7 @@ console.log(isEnhancedTriPaneEnabled())
 ```
 
 #### 2. Map not rendering
+
 ```bash
 # Check geospatial data format
 # Ensure latitude/longitude are valid numbers
@@ -491,6 +497,7 @@ console.log(isEnhancedTriPaneEnabled())
 ```
 
 #### 3. Explain sidebar empty
+
 ```bash
 # Check if data is being fetched
 # Verify useExplainView hook is called correctly
@@ -498,6 +505,7 @@ console.log(isEnhancedTriPaneEnabled())
 ```
 
 #### 4. Keyboard shortcuts not working
+
 ```bash
 # Check for event listener conflicts
 # Verify focus is on the tri-pane container
@@ -507,18 +515,21 @@ console.log(isEnhancedTriPaneEnabled())
 ## Future Enhancements
 
 ### Short Term
+
 - [ ] Real map integration (Leaflet/Mapbox)
 - [ ] Virtual scrolling for timeline
 - [ ] Advanced XAI visualizations
 - [ ] Collaborative annotations
 
 ### Medium Term
+
 - [ ] AI-powered insights
 - [ ] Pattern detection overlays
 - [ ] Real-time collaboration
 - [ ] Export to STIX/TAXII
 
 ### Long Term
+
 - [ ] 3D graph visualization
 - [ ] AR/VR investigation mode
 - [ ] Voice control
@@ -527,12 +538,14 @@ console.log(isEnhancedTriPaneEnabled())
 ## Resources
 
 ### Documentation
+
 - [React Documentation](https://react.dev)
 - [D3.js Documentation](https://d3js.org)
 - [Playwright Documentation](https://playwright.dev)
 - [WCAG Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
 
 ### Related Files
+
 - `/apps/web/docs/ANALYST_NAVIGATION_PATTERNS.md` - User navigation patterns
 - `/apps/web/src/components/tri-pane/TriPaneAnalysisView.tsx` - Original tri-pane
 - `/apps/web/src/features/focusMode/focusSlice.ts` - Focus mode implementation
@@ -552,6 +565,7 @@ When extending the tri-pane functionality:
 ## Support
 
 For questions or issues:
+
 - File an issue in the Summit repository
 - Contact the frontend team
 - Check the troubleshooting section above

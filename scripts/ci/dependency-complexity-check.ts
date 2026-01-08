@@ -1,22 +1,22 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { execSync } from 'node:child_process';
+import fs from "node:fs";
+import path from "node:path";
+import { execSync } from "node:child_process";
 import {
   buildDependencyGraph,
   calculateComplexityDelta,
   ensureArchitectureDir,
   loadGraphFromFile,
   paths,
-} from '../architecture/dependency-graph.js';
+} from "../architecture/dependency-graph.js";
 
-const threshold = Number(process.env.DEPENDENCY_COMPLEXITY_THRESHOLD ?? '5');
+const threshold = Number(process.env.DEPENDENCY_COMPLEXITY_THRESHOLD ?? "5");
 
 function loadBaselineGraph(): ReturnType<typeof loadGraphFromFile> {
   const relativePath = path.relative(paths.repoRoot, paths.dependencyGraphJson);
   try {
     const content = execSync(`git show origin/main:${relativePath}`, {
       cwd: paths.repoRoot,
-      stdio: ['ignore', 'pipe', 'ignore'],
+      stdio: ["ignore", "pipe", "ignore"],
     }).toString();
     return JSON.parse(content);
   } catch (error) {
@@ -43,11 +43,13 @@ function main() {
   console.log(summary);
 
   if (delta.delta > threshold) {
-    console.error(`Dependency complexity increased by ${delta.delta.toFixed(2)} (> ${threshold}). Architecture review required.`);
+    console.error(
+      `Dependency complexity increased by ${delta.delta.toFixed(2)} (> ${threshold}). Architecture review required.`
+    );
     process.exit(1);
   }
 
-  console.log('Dependency complexity within threshold.');
+  console.log("Dependency complexity within threshold.");
 }
 
 main();

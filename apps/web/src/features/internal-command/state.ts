@@ -1,6 +1,12 @@
 import { formatDistanceToNow } from 'date-fns'
 import config from '@/config'
-import type { StatusAction, StatusKey, StatusLevel, StatusResponse, StatusState } from './types'
+import type {
+  StatusAction,
+  StatusKey,
+  StatusLevel,
+  StatusResponse,
+  StatusState,
+} from './types'
 
 export const statusEndpoints: Record<StatusKey, string> = {
   governance: `${config.apiBaseUrl}/internal/governance/status`,
@@ -12,16 +18,25 @@ export const statusEndpoints: Record<StatusKey, string> = {
   ga: `${config.apiBaseUrl}/internal/ga/status`,
 }
 
-const severityRank: Record<StatusLevel, number> = { green: 0, yellow: 1, red: 2 }
+const severityRank: Record<StatusLevel, number> = {
+  green: 0,
+  yellow: 1,
+  red: 2,
+}
 
-export const deriveChecklistStatus = (checklist: StatusResponse['checklist']): StatusLevel => {
+export const deriveChecklistStatus = (
+  checklist: StatusResponse['checklist']
+): StatusLevel => {
   if (!checklist || checklist.length === 0) return 'red'
   if (checklist.some(item => item.status === 'red')) return 'red'
   if (checklist.some(item => item.status === 'yellow')) return 'yellow'
   return 'green'
 }
 
-const normalizePayload = (key: StatusKey, payload?: Partial<StatusResponse>): StatusResponse => {
+const normalizePayload = (
+  key: StatusKey,
+  payload?: Partial<StatusResponse>
+): StatusResponse => {
   const fallback: StatusResponse = {
     system: key,
     status: 'red',
@@ -44,7 +59,9 @@ const normalizePayload = (key: StatusKey, payload?: Partial<StatusResponse>): St
   return merged
 }
 
-const computeBanner = (statuses: Partial<Record<StatusKey, StatusResponse>>): StatusState['banner'] => {
+const computeBanner = (
+  statuses: Partial<Record<StatusKey, StatusResponse>>
+): StatusState['banner'] => {
   const values = Object.values(statuses)
   if (!values.length) {
     return {
@@ -54,10 +71,15 @@ const computeBanner = (statuses: Partial<Record<StatusKey, StatusResponse>>): St
     }
   }
 
-  const worst = values.reduce<StatusResponse | undefined>((current, candidate) => {
-    if (!current) return candidate
-    return severityRank[candidate.status] > severityRank[current.status] ? candidate : current
-  }, undefined)
+  const worst = values.reduce<StatusResponse | undefined>(
+    (current, candidate) => {
+      if (!current) return candidate
+      return severityRank[candidate.status] > severityRank[current.status]
+        ? candidate
+        : current
+    },
+    undefined
+  )
 
   if (!worst) {
     return {
@@ -67,9 +89,12 @@ const computeBanner = (statuses: Partial<Record<StatusKey, StatusResponse>>): St
     }
   }
 
-  const detail = `Escalated from ${values.length} systems • Updated ${formatDistanceToNow(new Date(worst.updatedAt), {
-    addSuffix: true,
-  })}`
+  const detail = `Escalated from ${values.length} systems • Updated ${formatDistanceToNow(
+    new Date(worst.updatedAt),
+    {
+      addSuffix: true,
+    }
+  )}`
 
   const headline =
     worst.status === 'red'
@@ -95,12 +120,18 @@ export const initialState: StatusState = {
   },
 }
 
-export function statusReducer(state: StatusState, action: StatusAction): StatusState {
+export function statusReducer(
+  state: StatusState,
+  action: StatusAction
+): StatusState {
   switch (action.type) {
     case 'FETCH_START':
       return { ...state, loading: true, error: undefined }
     case 'FETCH_SUCCESS': {
-      const statuses = { ...state.statuses, [action.key]: normalizePayload(action.key, action.payload) }
+      const statuses = {
+        ...state.statuses,
+        [action.key]: normalizePayload(action.key, action.payload),
+      }
       return {
         ...state,
         loading: false,
@@ -110,7 +141,10 @@ export function statusReducer(state: StatusState, action: StatusAction): StatusS
       }
     }
     case 'FETCH_FAILURE': {
-      const statuses = { ...state.statuses, [action.key]: normalizePayload(action.key) }
+      const statuses = {
+        ...state.statuses,
+        [action.key]: normalizePayload(action.key),
+      }
       return {
         ...state,
         loading: false,

@@ -1,5 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 let fail = false;
 function walk(d) {
   for (const f of fs.readdirSync(d)) {
@@ -14,5 +14,5 @@ function walk(d) {
     }
   }
 }
-walk('docs');
+walk("docs");
 process.exit(fail ? 1 : 0);

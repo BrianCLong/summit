@@ -9,13 +9,13 @@
  */
 
 // Export types
-export * from './types.js';
+export * from "./types.js";
 
 // Export interfaces
-export * from './interfaces.js';
+export * from "./interfaces.js";
 
 // Export providers
-export * from './providers/index.js';
+export * from "./providers/index.js";
 
 // Re-export commonly used items
 export type {
@@ -25,27 +25,23 @@ export type {
   TranscriptionSegment,
   TranscriptionWord,
   SpeakerInfo,
-  LanguageDetectionResult
-} from './types.js';
+  LanguageDetectionResult,
+} from "./types.js";
 
-export {
-  STTProvider,
-  WhisperModel,
-  SUPPORTED_LANGUAGES
-} from './types.js';
+export { STTProvider, WhisperModel, SUPPORTED_LANGUAGES } from "./types.js";
 
 export type {
   ISTTProvider,
   IStreamingSTTProvider,
   IRecognitionStream,
   ISpeakerDiarizer,
-  ILanguageDetector
-} from './interfaces.js';
+  ILanguageDetector,
+} from "./interfaces.js";
 
 export {
   STTProviderFactory,
   WhisperProvider,
   GoogleSTTProvider,
   AWSTranscribeProvider,
-  AzureSTTProvider
-} from './providers/index.js';
+  AzureSTTProvider,
+} from "./providers/index.js";

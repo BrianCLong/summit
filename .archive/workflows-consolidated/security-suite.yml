@@ -8,7 +8,7 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: '0 2 * * 1' # Weekly scan on Mondays at 2 AM
+    - cron: "0 2 * * 1" # Weekly scan on Mondays at 2 AM
 
 concurrency:
   group: security-${{ github.ref }}
@@ -134,7 +134,7 @@ jobs:
       - name: 🔍 Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
-          category: '/language:${{ matrix.language }}'
+          category: "/language:${{ matrix.language }}"
 
   # =============================================================================
   # Dependency Review & SBOM
@@ -228,14 +228,7 @@ jobs:
   # =============================================================================
   security-summary:
     name: 📋 Security Summary
-    needs:
-      [
-        secret-scanning,
-        vulnerability-scan,
-        code-analysis,
-        dependency-review,
-        license-check,
-      ]
+    needs: [secret-scanning, vulnerability-scan, code-analysis, dependency-review, license-check]
     if: always()
     runs-on: ubuntu-latest
     steps:

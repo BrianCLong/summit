@@ -4,7 +4,7 @@
 
 export interface TaskContext {
   secrets: (key: string) => Promise<string>;
-  log: (level: 'info' | 'warn' | 'error', message: string, meta?: Record<string, unknown>) => void;
+  log: (level: "info" | "warn" | "error", message: string, meta?: Record<string, unknown>) => void;
   emit: (event: string, payload: unknown) => void;
 }
 

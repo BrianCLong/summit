@@ -155,8 +155,8 @@ This sprint explicitly protects the **Provenance > Prediction** ethos, **Compart
 
 _References: GitHub PR state & titles as of Sep 18–19, 2025; Council Wishbooks for acceptance/guardrails._ ([GitHub][1]) &#x20;
 
-[1]: https://github.com/BrianCLong/summit/pulls?q=is%3Apr+is%3Aclosed 'Pull requests · BrianCLong/summit · GitHub'
-[2]: https://github.com/BrianCLong/summit/pulls 'Pull requests · BrianCLong/summit · GitHub'
+[1]: https://github.com/BrianCLong/summit/pulls?q=is%3Apr+is%3Aclosed "Pull requests · BrianCLong/summit · GitHub"
+[2]: https://github.com/BrianCLong/summit/pulls "Pull requests · BrianCLong/summit · GitHub"
 
 Awesome — moving straight into execution. Here’s the **ready-to-run sprint kit** to intelligently merge those closed PRs, remediate breaking changes, and ship the consolidated release PR.
 
@@ -278,40 +278,38 @@ gh pr create --repo $REPO --base $CONSOLIDATION_BRANCH --head stack/rebrand-docs
 `server/app.ts`
 
 ```ts
-import express, { Request, Response, NextFunction } from 'express';
-import helmet from 'helmet';
-import cors from 'cors';
+import express, { Request, Response, NextFunction } from "express";
+import helmet from "helmet";
+import cors from "cors";
 
 export const createApp = () => {
   const app = express();
 
   app.use(helmet());
   app.use(cors({ origin: true, credentials: true }));
-  app.use(express.json({ limit: '2mb' }));
+  app.use(express.json({ limit: "2mb" }));
 
   // Routes
-  app.get('/healthz', async (_req: Request, res: Response) => {
+  app.get("/healthz", async (_req: Request, res: Response) => {
     return res.status(200).json({ ok: true });
   });
 
-  app.post('/api/entities', async (req: Request, res: Response) => {
+  app.post("/api/entities", async (req: Request, res: Response) => {
     const { type, props } = req.body ?? {};
-    if (!type) throw new Error('Entity type is required');
+    if (!type) throw new Error("Entity type is required");
     // … create entity …
-    return res.status(201).json({ id: 'ent_123', type, props });
+    return res.status(201).json({ id: "ent_123", type, props });
   });
 
   // 404 (must come after routes)
-  app.use((_req, res) => res.status(404).json({ error: 'Not Found' }));
+  app.use((_req, res) => res.status(404).json({ error: "Not Found" }));
 
   // Error handler — final middleware
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.statusCode || 500;
-    const code = err.code || 'INTERNAL_ERROR';
+    const code = err.code || "INTERNAL_ERROR";
     const message =
-      process.env.NODE_ENV === 'production'
-        ? 'Internal error'
-        : err.message || String(err);
+      process.env.NODE_ENV === "production" ? "Internal error" : err.message || String(err);
     // structured error for audit consistency
     res.status(status).json({ error: { code, message } });
   });
@@ -323,8 +321,8 @@ export const createApp = () => {
 `server/index.ts`
 
 ```ts
-import { createServer } from 'http';
-import { createApp } from './app';
+import { createServer } from "http";
+import { createApp } from "./app";
 
 const port = Number(process.env.PORT || 8080);
 const app = createApp();
@@ -332,7 +330,7 @@ const httpServer = createServer(app);
 
 httpServer.listen(port, () => {
   // structured boot log
-  console.log(JSON.stringify({ msg: 'server_listening', port }));
+  console.log(JSON.stringify({ msg: "server_listening", port }));
 });
 ```
 
@@ -341,26 +339,26 @@ httpServer.listen(port, () => {
 `server/__tests__/app.spec.ts`
 
 ```ts
-import request from 'supertest';
-import { createApp } from '../app';
+import request from "supertest";
+import { createApp } from "../app";
 
-describe('Express5 app', () => {
+describe("Express5 app", () => {
   const app = createApp();
 
-  it('GET /healthz → 200', async () => {
-    const res = await request(app).get('/healthz');
+  it("GET /healthz → 200", async () => {
+    const res = await request(app).get("/healthz");
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
   });
 
-  it('POST /api/entities without type → 500 structured error', async () => {
-    const res = await request(app).post('/api/entities').send({ props: {} });
+  it("POST /api/entities without type → 500 structured error", async () => {
+    const res = await request(app).post("/api/entities").send({ props: {} });
     expect(res.status).toBe(500);
-    expect(res.body.error.code).toBe('INTERNAL_ERROR');
+    expect(res.body.error.code).toBe("INTERNAL_ERROR");
   });
 
-  it('GET /nope → 404', async () => {
-    const res = await request(app).get('/nope');
+  it("GET /nope → 404", async () => {
+    const res = await request(app).get("/nope");
     expect(res.status).toBe(404);
   });
 });
@@ -374,27 +372,24 @@ Remove `.eslintrc.*` and add `eslint.config.mjs`:
 
 ```js
 // eslint.config.mjs
-import js from '@eslint/js';
-import ts from 'typescript-eslint';
-import globals from 'globals';
+import js from "@eslint/js";
+import ts from "typescript-eslint";
+import globals from "globals";
 
 export default [
-  { ignores: ['dist/**', 'coverage/**', '**/*.generated.*'] },
+  { ignores: ["dist/**", "coverage/**", "**/*.generated.*"] },
   js.configs.recommended,
   ...ts.configs.recommended,
   {
     languageOptions: {
       ecmaVersion: 2023,
       globals: { ...globals.node, ...globals.browser },
-      parserOptions: { project: ['tsconfig.json'] },
+      parserOptions: { project: ["tsconfig.json"] },
     },
     rules: {
-      'no-console': ['warn', { allow: ['warn', 'error'] }],
-      'no-implicit-coercion': 'error',
-      '@typescript-eslint/consistent-type-imports': [
-        'error',
-        { fixStyle: 'inline-type-imports' },
-      ],
+      "no-console": ["warn", { allow: ["warn", "error"] }],
+      "no-implicit-coercion": "error",
+      "@typescript-eslint/consistent-type-imports": ["error", { fixStyle: "inline-type-imports" }],
     },
   },
 ];
@@ -426,13 +421,13 @@ Update `package.json` scripts:
 `vite.config.ts`
 
 ```ts
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
   server: { port: 5173, strictPort: true },
-  build: { sourcemap: true, target: 'es2020' },
+  build: { sourcemap: true, target: "es2020" },
 });
 ```
 
@@ -441,12 +436,12 @@ export default defineConfig({
 `client/src/map/IntelGraphMap.tsx`
 
 ```tsx
-import { MapContainer, TileLayer } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
+import { MapContainer, TileLayer } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 
 export default function IntelGraphMap() {
   return (
-    <div data-testid="map-root" style={{ width: '100%', height: '100%' }}>
+    <div data-testid="map-root" style={{ width: "100%", height: "100%" }}>
       <MapContainer center={[37.7749, -122.4194]} zoom={12} preferCanvas>
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -464,36 +459,34 @@ export default function IntelGraphMap() {
 `e2e/map.spec.ts`
 
 ```ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test.describe('Map', () => {
-  test('renders and loads tiles', async ({ page }) => {
-    await page.goto('/');
+test.describe("Map", () => {
+  test("renders and loads tiles", async ({ page }) => {
+    await page.goto("/");
 
-    const mapRoot = page.getByTestId('map-root');
+    const mapRoot = page.getByTestId("map-root");
     await expect(mapRoot).toBeVisible();
 
     // Wait until Leaflet signals _loaded (React-Leaflet v5 exposes the container element)
     await page.waitForFunction(
       () => {
-        const el = document.querySelector('.leaflet-container');
+        const el = document.querySelector(".leaflet-container");
         if (!el) return false;
         const anyWin = window as any;
         // find the Leaflet map from DOM (Leaflet attaches _leaflet_id to container)
         const hasMap = !!(el as any)._leaflet_id;
         // heuristically wait until at least one tile img is complete
-        const tiles = Array.from(document.querySelectorAll('.leaflet-tile'));
-        const ready = tiles.some(
-          (img: any) => img.complete && img.naturalWidth > 0,
-        );
+        const tiles = Array.from(document.querySelectorAll(".leaflet-tile"));
+        const ready = tiles.some((img: any) => img.complete && img.naturalWidth > 0);
         return hasMap && ready;
       },
-      { timeout: 15000 },
+      { timeout: 15000 }
     );
 
     // simple interaction sanity: move map by keyboard pan (if enabled)
-    await page.keyboard.press('ArrowRight');
-    await expect(page.locator('.leaflet-pane')).toBeVisible();
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator(".leaflet-pane")).toBeVisible();
   });
 });
 ```
@@ -517,7 +510,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20', cache: 'pnpm' }
+        with: { node-version: "20", cache: "pnpm" }
       - uses: pnpm/action-setup@v4
         with: { version: 9 }
       - name: Install
@@ -535,7 +528,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20', cache: 'pnpm' }
+        with: { node-version: "20", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
       - run: pnpm playwright install --with-deps
       - run: pnpm e2e
@@ -578,34 +571,31 @@ jobs:
 
 ```js
 #!/usr/bin/env node
-const fs = require('fs');
-const crypto = require('crypto');
+const fs = require("fs");
+const crypto = require("crypto");
 
 function sha256(path) {
   const buf = fs.readFileSync(path);
-  return crypto.createHash('sha256').update(buf).digest('hex');
+  return crypto.createHash("sha256").update(buf).digest("hex");
 }
 
 const files = [
-  'package.json',
-  'pnpm-lock.yaml',
-  'dist/server/index.js',
-  'dist/client/assets/index.js',
+  "package.json",
+  "pnpm-lock.yaml",
+  "dist/server/index.js",
+  "dist/client/assets/index.js",
 ].filter((f) => fs.existsSync(f));
 
 const manifest = {
-  schema: 'intelgraph.provenance/v1',
+  schema: "intelgraph.provenance/v1",
   createdAt: new Date().toISOString(),
   git: {
     commit:
       process.env.GITHUB_SHA ||
-      require('child_process').execSync('git rev-parse HEAD').toString().trim(),
+      require("child_process").execSync("git rev-parse HEAD").toString().trim(),
     branch:
       process.env.GITHUB_REF_NAME ||
-      require('child_process')
-        .execSync('git rev-parse --abbrev-ref HEAD')
-        .toString()
-        .trim(),
+      require("child_process").execSync("git rev-parse --abbrev-ref HEAD").toString().trim(),
   },
   artifacts: files.map((f) => ({ path: f, sha256: sha256(f) })),
 };
@@ -617,11 +607,11 @@ process.stdout.write(JSON.stringify(manifest, null, 2));
 
 ```js
 #!/usr/bin/env node
-const fs = require('fs');
-const crypto = require('crypto');
+const fs = require("fs");
+const crypto = require("crypto");
 
-const path = process.argv[2] || 'provenance.json';
-const p = JSON.parse(fs.readFileSync(path, 'utf8'));
+const path = process.argv[2] || "provenance.json";
+const p = JSON.parse(fs.readFileSync(path, "utf8"));
 let ok = true;
 
 for (const a of p.artifacts) {
@@ -630,10 +620,7 @@ for (const a of p.artifacts) {
     ok = false;
     continue;
   }
-  const h = crypto
-    .createHash('sha256')
-    .update(fs.readFileSync(a.path))
-    .digest('hex');
+  const h = crypto.createHash("sha256").update(fs.readFileSync(a.path)).digest("hex");
   if (h !== a.sha256) {
     console.error(`Hash mismatch for ${a.path}. expected=${a.sha256} got=${h}`);
     ok = false;
@@ -641,10 +628,10 @@ for (const a of p.artifacts) {
 }
 
 if (!ok) {
-  console.error('Provenance verification FAILED');
+  console.error("Provenance verification FAILED");
   process.exit(1);
 }
-console.log('Provenance verification OK');
+console.log("Provenance verification OK");
 ```
 
 ---
@@ -726,18 +713,16 @@ gh pr create --title "revert: rollback to $TAG" --body "Emergency rollback to $T
 `contracts/graphql/__tests__/schema.contract.ts`
 
 ```ts
-import fs from 'node:fs';
-import { buildSchema, printSchema } from 'graphql';
-import { makeExecutableSchema } from '@graphql-tools/schema';
-import typeDefs from '../../schema.graphql';
+import fs from "node:fs";
+import { buildSchema, printSchema } from "graphql";
+import { makeExecutableSchema } from "@graphql-tools/schema";
+import typeDefs from "../../schema.graphql";
 
-test('GraphQL schema contract (N-1, N-2)', () => {
+test("GraphQL schema contract (N-1, N-2)", () => {
   const current = printSchema(makeExecutableSchema({ typeDefs }));
-  const baselines = ['schema.N-1.graphql', 'schema.N-2.graphql'].filter((f) =>
-    fs.existsSync(f),
-  );
+  const baselines = ["schema.N-1.graphql", "schema.N-2.graphql"].filter((f) => fs.existsSync(f));
   for (const b of baselines) {
-    const baseline = fs.readFileSync(`contracts/graphql/${b}`, 'utf8');
+    const baseline = fs.readFileSync(`contracts/graphql/${b}`, "utf8");
     expect(current).toBe(baseline);
   }
 });
@@ -1133,18 +1118,18 @@ main "$@"
 `contracts/graphql/__tests__/schema.contract.ts`
 
 ```ts
-import fs from 'node:fs';
-import { makeExecutableSchema } from '@graphql-tools/schema';
-import { printSchema } from 'graphql';
-import typeDefs from '../../schema.graphql';
+import fs from "node:fs";
+import { makeExecutableSchema } from "@graphql-tools/schema";
+import { printSchema } from "graphql";
+import typeDefs from "../../schema.graphql";
 
-test('GraphQL schema contract (N-1, N-2)', () => {
+test("GraphQL schema contract (N-1, N-2)", () => {
   const current = printSchema(makeExecutableSchema({ typeDefs }));
-  const baselines = ['schema.N-1.graphql', 'schema.N-2.graphql'].filter((f) =>
-    fs.existsSync(`contracts/graphql/${f}`),
+  const baselines = ["schema.N-1.graphql", "schema.N-2.graphql"].filter((f) =>
+    fs.existsSync(`contracts/graphql/${f}`)
   );
   for (const b of baselines) {
-    const baseline = fs.readFileSync(`contracts/graphql/${b}`, 'utf8');
+    const baseline = fs.readFileSync(`contracts/graphql/${b}`, "utf8");
     expect(current).toBe(baseline);
   }
 });
@@ -1185,7 +1170,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20', cache: 'pnpm' }
+        with: { node-version: "20", cache: "pnpm" }
       - uses: pnpm/action-setup@v4
         with: { version: 9 }
       - run: pnpm install --frozen-lockfile
@@ -1271,7 +1256,7 @@ Merge shows both variants:
 **Before (old Express 4 style)**
 
 ```ts
-router.post('/api/entities', async (req, res, next) => {
+router.post("/api/entities", async (req, res, next) => {
   try {
     const entity = await svc.create(req.body);
     return res.status(201).json(entity);
@@ -1284,7 +1269,7 @@ router.post('/api/entities', async (req, res, next) => {
 **After (Express 5)**
 
 ```ts
-router.post('/api/entities', async (req, res) => {
+router.post("/api/entities", async (req, res) => {
   const entity = await svc.create(req.body); // thrown errors bubble to the error handler
   return res.status(201).json(entity);
 });
@@ -1316,9 +1301,7 @@ return res.sendStatus(400);
 **Good**
 
 ```ts
-return res
-  .status(400)
-  .json({ error: { code: 'BAD_REQUEST', message: "Missing 'type'" } });
+return res.status(400).json({ error: { code: "BAD_REQUEST", message: "Missing 'type'" } });
 ```
 
 ---
@@ -1332,19 +1315,16 @@ You see two error handlers (one at router level, one global) in conflicting hunk
 ### Canonical order (must be last)
 
 ```ts
-app.use('/api', apiRouter);
+app.use("/api", apiRouter);
 
 // 404 after all routes
-app.use((_req, res) => res.status(404).json({ error: 'Not Found' }));
+app.use((_req, res) => res.status(404).json({ error: "Not Found" }));
 
 // Single, final error handler
 app.use((err, _req, res, _next) => {
   const status = err.statusCode || 500;
-  const code = err.code || 'INTERNAL_ERROR';
-  const msg =
-    process.env.NODE_ENV === 'production'
-      ? 'Internal error'
-      : err.message || String(err);
+  const code = err.code || "INTERNAL_ERROR";
+  const msg = process.env.NODE_ENV === "production" ? "Internal error" : err.message || String(err);
   res.status(status).json({ error: { code, message: msg } });
 });
 ```
@@ -1389,15 +1369,15 @@ Transform validators into **throwing** middlewares (they can be sync functions t
 function validateCreate(req: Request) {
   const ok = schema.validate(req.body);
   if (!ok) {
-    const err: any = new Error('Invalid payload');
+    const err: any = new Error("Invalid payload");
     err.statusCode = 400;
-    err.code = 'BAD_REQUEST';
+    err.code = "BAD_REQUEST";
     throw err;
   }
 }
 
 router.post(
-  '/api/entities',
+  "/api/entities",
   (req, _res, next) => {
     validateCreate(req);
     next();
@@ -1405,7 +1385,7 @@ router.post(
   async (req, res) => {
     const entity = await svc.create(req.body);
     return res.status(201).json(entity);
-  },
+  }
 );
 ```
 
@@ -1425,11 +1405,11 @@ Handlers mixing `res.download`, `res.sendFile`, or `res.write` with async/await 
 - Ensure exactly **one** response path.
 
 ```ts
-import { pipeline } from 'node:stream/promises';
+import { pipeline } from "node:stream/promises";
 
-router.get('/export/:id', async (req, res) => {
+router.get("/export/:id", async (req, res) => {
   const stream = await svc.exportStream(req.params.id);
-  res.setHeader('Content-Type', 'application/octet-stream');
+  res.setHeader("Content-Type", "application/octet-stream");
   await pipeline(stream, res); // errors here bubble to global error handler
 });
 ```
@@ -1592,7 +1572,7 @@ router.post("/api/x", async (req,res,next)=>{try{...}catch(e){next(e)}})
 **After**
 
 ```ts
-router.post('/api/x', async (req, res) => {
+router.post("/api/x", async (req, res) => {
   const r = await svc.create(req.body);
   return res.status(201).json(r);
 });
@@ -1603,7 +1583,7 @@ router.post('/api/x', async (req, res) => {
 ```ts
 throw Object.assign(new Error("Missing 'type'"), {
   statusCode: 400,
-  code: 'BAD_REQUEST',
+  code: "BAD_REQUEST",
 });
 ```
 
@@ -1612,14 +1592,11 @@ Global error handler maps `{ statusCode, code }` → JSON.
 ### C) 404 + Error order
 
 ```ts
-app.use((_req, res) => res.status(404).json({ error: 'Not Found' }));
+app.use((_req, res) => res.status(404).json({ error: "Not Found" }));
 app.use((err, _req, res, _next) => {
   const s = err.statusCode || 500;
-  const c = err.code || 'INTERNAL_ERROR';
-  const m =
-    process.env.NODE_ENV === 'production'
-      ? 'Internal error'
-      : err.message || String(err);
+  const c = err.code || "INTERNAL_ERROR";
+  const m = process.env.NODE_ENV === "production" ? "Internal error" : err.message || String(err);
   res.status(s).json({ error: { code: c, message: m } });
 });
 ```
@@ -1627,10 +1604,10 @@ app.use((err, _req, res, _next) => {
 ### D) Streaming
 
 ```ts
-import { pipeline } from 'node:stream/promises';
-router.get('/export/:id', async (req, res) => {
+import { pipeline } from "node:stream/promises";
+router.get("/export/:id", async (req, res) => {
   const s = await svc.exportStream(req.params.id);
-  res.setHeader('Content-Type', 'application/octet-stream');
+  res.setHeader("Content-Type", "application/octet-stream");
   await pipeline(s, res);
 });
 ```
@@ -1685,7 +1662,7 @@ router.get('/export/:id', async (req, res) => {
 
 ```md
 ---
-name: 'Release Checklist (S25)'
+name: "Release Checklist (S25)"
 about: Gate for consolidated merge
 labels: release
 ---
@@ -1746,7 +1723,7 @@ indent_size = 2
 `playwright.config.ts` (excerpt)
 
 ```ts
-import { defineConfig } from '@playwright/test';
+import { defineConfig } from "@playwright/test";
 export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   timeout: 30_000,
@@ -1783,7 +1760,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20', cache: 'pnpm' }
+        with: { node-version: "20", cache: "pnpm" }
       - uses: pnpm/action-setup@v4
         with: { version: 9 }
       - run: pnpm install --frozen-lockfile
@@ -2009,12 +1986,12 @@ If you want PRs touching these paths to get the `mergefix` label automatically, 
 mergefix:
   - changed-files:
       - any-glob-to-any-file:
-          - 'server/**'
-          - 'policies/**'
-          - 'contracts/graphql/**'
-          - 'docs/merge/**'
-          - 'scripts/merge_s25.sh'
-          - '.github/workflows/**'
+          - "server/**"
+          - "policies/**"
+          - "contracts/graphql/**"
+          - "docs/merge/**"
+          - "scripts/merge_s25.sh"
+          - ".github/workflows/**"
 ```
 
 And enable the official **Pull Request Labeler** action:

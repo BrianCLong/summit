@@ -131,9 +131,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
-        with: { go-version: '1.22' }
+        with: { go-version: "1.22" }
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: "20" }
       - name: Go build & test
         run: |
           make go-build
@@ -272,16 +272,16 @@ labels: bug, needs-triage
 ### 9.2 k6 Smoke Script (Skeleton)
 
 ```js
-import http from 'k6/http';
-import { sleep, check } from 'k6';
-export const options = { vus: 10, duration: '2m' };
+import http from "k6/http";
+import { sleep, check } from "k6";
+export const options = { vus: 10, duration: "2m" };
 export default function () {
-  const r = http.post('https://api.local/query', {
-    cypher: 'MATCH (n)-[r*1..3]->(m) RETURN n LIMIT 100',
+  const r = http.post("https://api.local/query", {
+    cypher: "MATCH (n)-[r*1..3]->(m) RETURN n LIMIT 100",
   });
   check(r, {
-    'status 200': (res) => res.status === 200,
-    'latency ok': (res) => res.timings.duration < 1500,
+    "status 200": (res) => res.status === 200,
+    "latency ok": (res) => res.timings.duration < 1500,
   });
   sleep(1);
 }

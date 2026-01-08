@@ -2,13 +2,13 @@ name: Deploy with Cosign Verification
 
 on:
   workflow_run:
-    workflows: ['Cosign Sign & Attest']
+    workflows: ["Cosign Sign & Attest"]
     types:
       - completed
   workflow_dispatch:
     inputs:
       image_digest:
-        description: 'Image digest to deploy'
+        description: "Image digest to deploy"
         required: true
         type: string
 
@@ -28,7 +28,7 @@ jobs:
       - name: Install cosign
         uses: sigstore/cosign-installer@v3
         with:
-          cosign-release: 'v2.2.0'
+          cosign-release: "v2.2.0"
 
       - name: Get image digest
         id: digest

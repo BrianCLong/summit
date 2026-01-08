@@ -7,12 +7,12 @@
  * @package dlp-core
  */
 
-import type { Request, Response, NextFunction, RequestHandler } from 'express';
-import { DLPService } from './DLPService';
-import type { DLPServiceConfig, ContentScanResult } from './types';
+import type { Request, Response, NextFunction, RequestHandler } from "express";
+import { DLPService } from "./DLPService";
+import type { DLPServiceConfig, ContentScanResult } from "./types";
 
 export interface DLPMiddlewareOptions {
-  inspectionPoints: ('request' | 'response')[];
+  inspectionPoints: ("request" | "response")[];
   asyncMode?: boolean;
   failOpen?: boolean;
   excludePaths?: string[];
@@ -33,10 +33,10 @@ export function createDLPMiddleware(
   const dlpService = new DLPService(serviceConfig);
 
   const defaultOptions: Required<DLPMiddlewareOptions> = {
-    inspectionPoints: ['request', 'response'],
+    inspectionPoints: ["request", "response"],
     asyncMode: false,
     failOpen: false,
-    excludePaths: ['/health', '/metrics', '/ready', '/live'],
+    excludePaths: ["/health", "/metrics", "/ready", "/live"],
     maxBodySize: 10 * 1024 * 1024, // 10MB
     ...options,
   };
@@ -50,7 +50,7 @@ export function createDLPMiddleware(
 
       // Inspect request body if configured
       if (
-        defaultOptions.inspectionPoints.includes('request') &&
+        defaultOptions.inspectionPoints.includes("request") &&
         req.body &&
         Object.keys(req.body).length > 0
       ) {
@@ -59,15 +59,15 @@ export function createDLPMiddleware(
 
           // Skip if body is too large
           if (bodyString.length > defaultOptions.maxBodySize) {
-            console.warn('[DLP] Request body exceeds max size, skipping inspection');
+            console.warn("[DLP] Request body exceeds max size, skipping inspection");
             return next();
           }
 
           const result = await dlpService.scan({
             content: bodyString,
-            contentType: req.get('content-type') || 'application/json',
+            contentType: req.get("content-type") || "application/json",
             context: {
-              contentType: 'request',
+              contentType: "request",
               purpose: getOperationType(req.method, req.path),
               actor: extractActor(req),
             },
@@ -83,8 +83,8 @@ export function createDLPMiddleware(
 
           if (!result.allowed) {
             return res.status(403).json({
-              error: 'DLP_BLOCKED',
-              message: 'Request blocked by data loss prevention policy',
+              error: "DLP_BLOCKED",
+              message: "Request blocked by data loss prevention policy",
               violations: result.violations.map((v) => ({
                 type: v.type,
                 message: v.message,
@@ -94,24 +94,24 @@ export function createDLPMiddleware(
           }
 
           // Handle warnings
-          if (result.action === 'WARN') {
-            res.setHeader('X-DLP-Warning', 'true');
-            res.setHeader('X-DLP-Audit-Id', result.auditEventId);
+          if (result.action === "WARN") {
+            res.setHeader("X-DLP-Warning", "true");
+            res.setHeader("X-DLP-Audit-Id", result.auditEventId);
           }
         } catch (error) {
-          console.error('[DLP] Request inspection failed:', error);
+          console.error("[DLP] Request inspection failed:", error);
 
           if (!defaultOptions.failOpen) {
             return res.status(500).json({
-              error: 'DLP_ERROR',
-              message: 'Data loss prevention check failed',
+              error: "DLP_ERROR",
+              message: "Data loss prevention check failed",
             });
           }
         }
       }
 
       // For response inspection, wrap res.json
-      if (defaultOptions.inspectionPoints.includes('response')) {
+      if (defaultOptions.inspectionPoints.includes("response")) {
         const originalJson = res.json.bind(res);
 
         res.json = function (body: unknown): Response {
@@ -121,10 +121,10 @@ export function createDLPMiddleware(
               try {
                 await dlpService.scan({
                   content: JSON.stringify(body),
-                  contentType: 'application/json',
+                  contentType: "application/json",
                   context: {
-                    contentType: 'response',
-                    purpose: 'EGRESS',
+                    contentType: "response",
+                    purpose: "EGRESS",
                     actor: extractActor(req),
                   },
                   metadata: {
@@ -133,7 +133,7 @@ export function createDLPMiddleware(
                   },
                 });
               } catch (error) {
-                console.error('[DLP] Response inspection failed:', error);
+                console.error("[DLP] Response inspection failed:", error);
               }
             });
             return originalJson(body);
@@ -173,25 +173,25 @@ function extractActor(req: Request): { id: string; tenantId: string; roles: stri
  * Determine operation type from HTTP method and path
  */
 function getOperationType(method: string, path: string): string {
-  if (path.includes('/export') || path.includes('/download')) {
-    return 'EXPORT';
+  if (path.includes("/export") || path.includes("/download")) {
+    return "EXPORT";
   }
-  if (path.includes('/share')) {
-    return 'SHARE';
+  if (path.includes("/share")) {
+    return "SHARE";
   }
 
   switch (method.toUpperCase()) {
-    case 'GET':
-      return 'READ';
-    case 'POST':
-      return 'CREATE';
-    case 'PUT':
-    case 'PATCH':
-      return 'UPDATE';
-    case 'DELETE':
-      return 'DELETE';
+    case "GET":
+      return "READ";
+    case "POST":
+      return "CREATE";
+    case "PUT":
+    case "PATCH":
+      return "UPDATE";
+    case "DELETE":
+      return "DELETE";
     default:
-      return 'UNKNOWN';
+      return "UNKNOWN";
   }
 }
 

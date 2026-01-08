@@ -6,7 +6,7 @@ import type {
   NetworkDesignProblem,
   NetworkDesignSolution,
   ParetoFront,
-} from './types';
+} from "./types";
 
 /**
  * Quantum-Inspired Supply Chain Optimizer
@@ -21,7 +21,7 @@ export class QuantumOptimizer {
    */
   async optimize(
     problem: OptimizationProblem,
-    algorithm: 'qaoa' | 'vqe' | 'quantum_annealing' | 'quantum_inspired_evolutionary' = 'qaoa',
+    algorithm: "qaoa" | "vqe" | "quantum_annealing" | "quantum_inspired_evolutionary" = "qaoa",
     options?: {
       maxIterations?: number;
       convergenceThreshold?: number;
@@ -36,7 +36,7 @@ export class QuantumOptimizer {
 
     const optimalSolution = {
       variables: Object.fromEntries(
-        problem.variables.map(v => [v.variableId, Math.random() * 100])
+        problem.variables.map((v) => [v.variableId, Math.random() * 100])
       ),
       objectiveValue: Math.random() * 1000,
       feasible: true,
@@ -55,7 +55,7 @@ export class QuantumOptimizer {
           rank: 2,
           variables: optimalSolution.variables,
           objectiveValue: optimalSolution.objectiveValue * 1.05,
-          tradeoffs: 'Slightly higher cost but better robustness',
+          tradeoffs: "Slightly higher cost but better robustness",
         },
       ],
       algorithmUsed: algorithm,
@@ -67,14 +67,14 @@ export class QuantumOptimizer {
         energyEfficiency: 0.85,
       },
       metrics: {
-        'optimality Gap': 0.5, // 0.5% from theoretical optimum
+        "optimality Gap": 0.5, // 0.5% from theoretical optimum
         constraintViolations: 0,
         robustness: 0.92,
         stability: 0.95,
       },
       sensitivityAnalysis: [
         {
-          parameter: 'demand',
+          parameter: "demand",
           elasticity: 0.85,
           criticalRange: {
             min: 80,
@@ -83,21 +83,21 @@ export class QuantumOptimizer {
         },
       ],
       insights: [
-        'Solution achieves near-optimal performance with 99.5% optimality',
-        'Robust across 95% of simulated scenarios',
-        'Quantum algorithm provides 1000x speedup over classical methods',
+        "Solution achieves near-optimal performance with 99.5% optimality",
+        "Robust across 95% of simulated scenarios",
+        "Quantum algorithm provides 1000x speedup over classical methods",
       ],
       implementationPlan: [
         {
-          step: 'Phase 1: Validate solution with pilot',
-          timeline: '2 weeks',
+          step: "Phase 1: Validate solution with pilot",
+          timeline: "2 weeks",
           dependencies: [],
           expectedImpact: 15,
         },
         {
-          step: 'Phase 2: Full rollout',
-          timeline: '4 weeks',
-          dependencies: ['Phase 1'],
+          step: "Phase 2: Full rollout",
+          timeline: "4 weeks",
+          dependencies: ["Phase 1"],
           expectedImpact: 85,
         },
       ],
@@ -118,7 +118,7 @@ export class QuantumOptimizer {
 
     const routes = problem.vehicles.map((vehicle, idx) => {
       const numStops = Math.floor(problem.deliveries.length / problem.vehicles.length);
-      const stops = problem.deliveries.slice(idx * numStops, (idx + 1) * numStops).map(d => ({
+      const stops = problem.deliveries.slice(idx * numStops, (idx + 1) * numStops).map((d) => ({
         deliveryId: d.deliveryId,
         arrivalTime: new Date().toISOString(),
         departureTime: new Date().toISOString(),
@@ -162,17 +162,15 @@ export class QuantumOptimizer {
   async optimizeNetworkDesign(problem: NetworkDesignProblem): Promise<NetworkDesignSolution> {
     // Select subset of candidate facilities using quantum optimization
     const numToSelect = Math.min(5, problem.candidateFacilities.length);
-    const selectedFacilities = problem.candidateFacilities
-      .slice(0, numToSelect)
-      .map(f => ({
-        facilityId: f.facilityId,
-        location: f.location,
-        assignedDemand: Math.random() * 1000 + 500,
-        utilization: 70 + Math.random() * 25,
-        totalCost: f.fixedCost + f.operatingCost * (Math.random() * 1000),
-      }));
+    const selectedFacilities = problem.candidateFacilities.slice(0, numToSelect).map((f) => ({
+      facilityId: f.facilityId,
+      location: f.location,
+      assignedDemand: Math.random() * 1000 + 500,
+      utilization: 70 + Math.random() * 25,
+      totalCost: f.fixedCost + f.operatingCost * (Math.random() * 1000),
+    }));
 
-    const assignments = problem.demandPoints.map(dp => {
+    const assignments = problem.demandPoints.map((dp) => {
       const facility = selectedFacilities[Math.floor(Math.random() * selectedFacilities.length)];
       return {
         demandPointId: dp.pointId,
@@ -183,7 +181,8 @@ export class QuantumOptimizer {
     });
 
     const totalFixedCost = selectedFacilities.reduce(
-      (sum, f) => sum + problem.candidateFacilities.find(cf => cf.facilityId === f.facilityId)!.fixedCost,
+      (sum, f) =>
+        sum + problem.candidateFacilities.find((cf) => cf.facilityId === f.facilityId)!.fixedCost,
       0
     );
     const totalTransportationCost = assignments.reduce((sum, a) => sum + a.cost, 0);
@@ -195,11 +194,15 @@ export class QuantumOptimizer {
       summary: {
         facilitiesOpened: selectedFacilities.length,
         totalFixedCost,
-        totalOperatingCost: selectedFacilities.reduce((sum, f) => sum + f.totalCost - totalFixedCost / selectedFacilities.length, 0),
+        totalOperatingCost: selectedFacilities.reduce(
+          (sum, f) => sum + f.totalCost - totalFixedCost / selectedFacilities.length,
+          0
+        ),
         totalTransportationCost,
         totalCost: totalFixedCost + totalTransportationCost,
         coverage: 98.5,
-        avgDistanceToCustomer: assignments.reduce((sum, a) => sum + a.distance, 0) / assignments.length,
+        avgDistanceToCustomer:
+          assignments.reduce((sum, a) => sum + a.distance, 0) / assignments.length,
       },
       optimizationQuality: 96.8,
       generatedAt: new Date().toISOString(),
@@ -218,11 +221,9 @@ export class QuantumOptimizer {
     const numSolutions = 20;
     const solutions = Array.from({ length: numSolutions }, (_, i) => ({
       solutionId: `solution-${i}`,
-      objectives: Object.fromEntries(
-        objectives.map(obj => [obj, Math.random() * 100])
-      ),
+      objectives: Object.fromEntries(objectives.map((obj) => [obj, Math.random() * 100])),
       variables: Object.fromEntries(
-        problem.variables.map(v => [v.variableId, Math.random() * 100])
+        problem.variables.map((v) => [v.variableId, Math.random() * 100])
       ),
       dominanceRank: Math.floor(i / 4) + 1,
       crowdingDistance: Math.random(),
@@ -242,10 +243,10 @@ export class QuantumOptimizer {
 
     const recommendations = solutions.slice(0, 3).map((sol, idx) => ({
       solutionId: sol.solutionId,
-      scenario: ['Balanced', 'Cost-focused', 'Service-focused'][idx],
-      rationale: 'Optimal for the given scenario priorities',
+      scenario: ["Balanced", "Cost-focused", "Service-focused"][idx],
+      rationale: "Optimal for the given scenario priorities",
       expectedOutcomes: Object.fromEntries(
-        objectives.map(obj => [obj, `${sol.objectives[obj].toFixed(1)} units`])
+        objectives.map((obj) => [obj, `${sol.objectives[obj].toFixed(1)} units`])
       ),
     }));
 
@@ -269,7 +270,10 @@ export class QuantumOptimizer {
     uncertainVariables: Record<string, { distribution: string; parameters: any }>,
     numSamples: number = 10000
   ): Promise<{
-    statistics: Record<string, { mean: number; stdDev: number; percentiles: Record<number, number> }>;
+    statistics: Record<
+      string,
+      { mean: number; stdDev: number; percentiles: Record<number, number> }
+    >;
     riskMetrics: {
       valueAtRisk95: number;
       conditionalValueAtRisk: number;
@@ -305,7 +309,7 @@ export class QuantumOptimizer {
     return {
       model: {},
       accuracy: 0.92,
-      quantumAdvantage: 'Exponential speedup for high-dimensional data',
+      quantumAdvantage: "Exponential speedup for high-dimensional data",
     };
   }
 }

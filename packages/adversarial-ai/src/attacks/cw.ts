@@ -1,4 +1,4 @@
-import { AdversarialExample, AttackConfig, AdversarialAttackType } from '../types';
+import { AdversarialExample, AttackConfig, AdversarialAttackType } from "../types";
 
 /**
  * Carlini & Wagner (C&W) Attack
@@ -22,7 +22,7 @@ export class CarliniWagnerAttack {
     const c = 1.0; // Regularization constant
 
     // Initialize perturbation in tanh space for box constraints
-    let w = input.map(x => this.inverseTagnh(x));
+    let w = input.map((x) => this.inverseTagnh(x));
 
     let bestPerturbation: number[] = [];
     let bestDistance = Infinity;
@@ -30,7 +30,7 @@ export class CarliniWagnerAttack {
 
     for (let iter = 0; iter < iterations; iter++) {
       // Convert from tanh space to input space
-      const perturbedInput = w.map(wi => this.tanh(wi));
+      const perturbedInput = w.map((wi) => this.tanh(wi));
 
       // Calculate loss and gradients
       const loss = await getLoss(perturbedInput, config.targetClass);
@@ -38,9 +38,7 @@ export class CarliniWagnerAttack {
 
       // Calculate L2 distance
       const perturbation = perturbedInput.map((val, idx) => val - input[idx]);
-      const l2Distance = Math.sqrt(
-        perturbation.reduce((sum, p) => sum + p * p, 0)
-      );
+      const l2Distance = Math.sqrt(perturbation.reduce((sum, p) => sum + p * p, 0));
 
       // Update if better adversarial found
       if (loss > confidence && l2Distance < bestDistance) {
@@ -61,7 +59,8 @@ export class CarliniWagnerAttack {
       id: this.generateId(),
       originalInput: input,
       perturbedInput: bestAdversarial.length > 0 ? bestAdversarial : input,
-      perturbation: bestPerturbation.length > 0 ? bestPerturbation : new Array(input.length).fill(0),
+      perturbation:
+        bestPerturbation.length > 0 ? bestPerturbation : new Array(input.length).fill(0),
       originalPrediction: 0,
       adversarialPrediction: 0,
       confidence: 0,
@@ -71,11 +70,11 @@ export class CarliniWagnerAttack {
         iterations,
         confidenceParameter: confidence,
         c,
-        norm: 'L2',
-        method: 'C&W-L2',
-        converged: bestDistance < Infinity
+        norm: "L2",
+        method: "C&W-L2",
+        converged: bestDistance < Infinity,
       },
-      createdAt: new Date()
+      createdAt: new Date(),
     };
   }
 
@@ -125,7 +124,8 @@ export class CarliniWagnerAttack {
       id: this.generateId(),
       originalInput: input,
       perturbedInput: bestAdversarial.length > 0 ? bestAdversarial : input,
-      perturbation: bestPerturbation.length > 0 ? bestPerturbation : new Array(input.length).fill(0),
+      perturbation:
+        bestPerturbation.length > 0 ? bestPerturbation : new Array(input.length).fill(0),
       originalPrediction: 0,
       adversarialPrediction: 0,
       confidence: 0,
@@ -134,11 +134,11 @@ export class CarliniWagnerAttack {
       metadata: {
         iterations,
         confidenceParameter: confidence,
-        norm: 'L-inf',
-        method: 'C&W-LInf',
-        converged: bestLInfNorm < Infinity
+        norm: "L-inf",
+        method: "C&W-LInf",
+        converged: bestLInfNorm < Infinity,
       },
-      createdAt: new Date()
+      createdAt: new Date(),
     };
   }
 
@@ -172,7 +172,9 @@ export class CarliniWagnerAttack {
 
         // Update only active pixels
         perturbedInput = perturbedInput.map((val, idx) => {
-          if (!activePixels.has(idx)) {return input[idx];}
+          if (!activePixels.has(idx)) {
+            return input[idx];
+          }
 
           const newVal = val - 0.01 * gradients[idx];
           perturbation[idx] = newVal - input[idx];
@@ -180,7 +182,7 @@ export class CarliniWagnerAttack {
         });
 
         if (loss > confidence) {
-          const l0Norm = perturbation.filter(p => Math.abs(p) > 1e-6).length;
+          const l0Norm = perturbation.filter((p) => Math.abs(p) > 1e-6).length;
           if (l0Norm < bestL0Norm) {
             bestL0Norm = l0Norm;
             bestPerturbation = [...perturbation];
@@ -192,7 +194,7 @@ export class CarliniWagnerAttack {
       // Remove pixel with smallest perturbation
       let minPerturbIdx = -1;
       let minPerturb = Infinity;
-      activePixels.forEach(idx => {
+      activePixels.forEach((idx) => {
         if (Math.abs(perturbation[idx]) < minPerturb) {
           minPerturb = Math.abs(perturbation[idx]);
           minPerturbIdx = idx;
@@ -210,7 +212,8 @@ export class CarliniWagnerAttack {
       id: this.generateId(),
       originalInput: input,
       perturbedInput: bestAdversarial.length > 0 ? bestAdversarial : input,
-      perturbation: bestPerturbation.length > 0 ? bestPerturbation : new Array(input.length).fill(0),
+      perturbation:
+        bestPerturbation.length > 0 ? bestPerturbation : new Array(input.length).fill(0),
       originalPrediction: 0,
       adversarialPrediction: 0,
       confidence: 0,
@@ -219,11 +222,11 @@ export class CarliniWagnerAttack {
       metadata: {
         iterations,
         confidenceParameter: confidence,
-        norm: 'L0',
-        method: 'C&W-L0',
-        modifiedPixels: bestL0Norm
+        norm: "L0",
+        method: "C&W-L0",
+        modifiedPixels: bestL0Norm,
       },
-      createdAt: new Date()
+      createdAt: new Date(),
     };
   }
 

@@ -2,12 +2,12 @@
  * Timeline Reconstructor - Reconstructs activity timelines
  */
 
-import type { SocialPost } from '../types/index.js';
+import type { SocialPost } from "../types/index.js";
 
 export interface TimelineEvent {
   timestamp: Date;
   platform: string;
-  type: 'post' | 'comment' | 'like' | 'share' | 'follow';
+  type: "post" | "comment" | "like" | "share" | "follow";
   content?: string;
   target?: string;
   metadata?: Record<string, any>;
@@ -32,16 +32,16 @@ export class TimelineReconstructor {
    * Build comprehensive timeline from multiple sources
    */
   buildTimeline(posts: SocialPost[]): Timeline {
-    const events: TimelineEvent[] = posts.map(post => ({
+    const events: TimelineEvent[] = posts.map((post) => ({
       timestamp: post.timestamp,
       platform: post.platform,
-      type: 'post',
+      type: "post",
       content: post.content,
       metadata: {
         likes: post.likes,
         comments: post.comments,
-        shares: post.shares
-      }
+        shares: post.shares,
+      },
     }));
 
     // Sort by timestamp
@@ -49,7 +49,7 @@ export class TimelineReconstructor {
 
     const startDate = events[0]?.timestamp || new Date();
     const endDate = events[events.length - 1]?.timestamp || new Date();
-    const platforms = Array.from(new Set(events.map(e => e.platform)));
+    const platforms = Array.from(new Set(events.map((e) => e.platform)));
 
     return {
       events,
@@ -57,7 +57,7 @@ export class TimelineReconstructor {
       endDate,
       totalEvents: events.length,
       platforms,
-      activityPattern: this.analyzeActivityPattern(events)
+      activityPattern: this.analyzeActivityPattern(events),
     };
   }
 
@@ -73,7 +73,7 @@ export class TimelineReconstructor {
     const hourly = new Array(24).fill(0);
     const daily = new Array(7).fill(0);
 
-    events.forEach(event => {
+    events.forEach((event) => {
       const hour = event.timestamp.getHours();
       const day = event.timestamp.getDay();
       hourly[hour]++;
@@ -87,7 +87,7 @@ export class TimelineReconstructor {
       hourly,
       daily,
       peakHour,
-      peakDay
+      peakDay,
     };
   }
 
@@ -110,7 +110,7 @@ export class TimelineReconstructor {
         gaps.push({
           start: events[i - 1].timestamp,
           end: events[i].timestamp,
-          durationDays: gapDays
+          durationDays: gapDays,
         });
       }
     }
@@ -127,8 +127,8 @@ export class TimelineReconstructor {
   } {
     // Group events by date
     const dailyCounts = new Map<string, number>();
-    timeline.events.forEach(event => {
-      const dateKey = event.timestamp.toISOString().split('T')[0];
+    timeline.events.forEach((event) => {
+      const dateKey = event.timestamp.toISOString().split("T")[0];
       dailyCounts.set(dateKey, (dailyCounts.get(dateKey) || 0) + 1);
     });
 
@@ -140,7 +140,7 @@ export class TimelineReconstructor {
     const heatmapData: Array<{ hour: number; day: number; value: number }> = [];
     const heatmap = new Array(7).fill(0).map(() => new Array(24).fill(0));
 
-    timeline.events.forEach(event => {
+    timeline.events.forEach((event) => {
       const hour = event.timestamp.getHours();
       const day = event.timestamp.getDay();
       heatmap[day][hour]++;
@@ -154,7 +154,7 @@ export class TimelineReconstructor {
 
     return {
       timeSeriesData,
-      heatmapData
+      heatmapData,
     };
   }
 }

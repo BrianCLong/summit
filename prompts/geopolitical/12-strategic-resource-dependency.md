@@ -1,6 +1,7 @@
 # Strategic Resource Dependency Analysis
 
 ## Objective
+
 Assess dependencies on strategic resources critical to economic security, technological advancement, and national security.
 
 ## Analysis Framework
@@ -36,37 +37,44 @@ Assess dependencies on strategic resources critical to economic security, techno
 ### Dependency Assessment Dimensions
 
 **Supply Concentration Risk**
+
 - Geographic concentration (Herfindahl index)
 - Producer market shares
 - Processing/refining concentration
 - Reserve depletion rates
 
 **Import Dependence**
+
 - Percentage imported
 - Source country diversity
 - Reliability of suppliers
 - Alternative source availability
 
 **Strategic Reserve Adequacy**
+
 - Current stockpile levels
 - Days/months of consumption
 - Release mechanisms
 - Replenishment plans
 
 **Substitution Potential**
+
 - Technical substitutes available
 - Cost of substitution
 - Time required to switch
 - Performance trade-offs
 
 **Domestic Production Potential**
+
 - Resource presence domestically
 - Economic viability
 - Environmental constraints
 - Time to production
 
 ### Criticality Scoring (0-100)
+
 Combines:
+
 - Economic importance (40%)
 - Supply risk (40%)
 - Substitutability (20%)
@@ -77,6 +85,7 @@ Combines:
 **0-49**: Low dependency, minimal risk
 
 ### Geopolitical Vulnerability
+
 - Dependence on potential adversaries
 - Transit through risky territories
 - Political leverage implications
@@ -86,35 +95,41 @@ Combines:
 ### Mitigation Strategies
 
 **Short-term (0-2 years):**
+
 - Build strategic reserves
 - Diversify suppliers
 - Secure long-term contracts
 - Improve efficiency
 
 **Medium-term (2-5 years):**
+
 - Develop domestic sources
 - Allied partnerships
 - Substitution R&D
 - Recycling and circular economy
 
 **Long-term (5+ years):**
+
 - Technology transitions
 - New material development
 - Deep-sea or space resources
 - Structural demand reduction
 
 ### Scenario Analysis
+
 - **Supply Disruption**: Sudden cutoff, impacts and responses
 - **Price Shock**: Severe price increase, economic effects
 - **Technology Shift**: Demand changes from innovation
 - **Geopolitical Weaponization**: Deliberate supply leverage
 
 ### Monitoring Indicators
+
 - Monthly: Prices, trade flows, inventory levels
 - Quarterly: Production data, new discoveries, policy changes
 - Annually: Reserve assessments, technology advances, demand forecasts
 
 ### Ethical Considerations
+
 - Environmental sustainability
 - Fair trade and labor standards
 - Indigenous rights in extraction
@@ -122,6 +137,7 @@ Combines:
 - Equitable global access
 
 ### Applications
+
 - Industrial policy development
 - National security strategy
 - Trade policy formulation

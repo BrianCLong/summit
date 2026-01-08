@@ -11,8 +11,8 @@ import type {
   SkillsTransfer,
   BorderAlert,
   TrackingQuery,
-  TrackingResult
-} from './types.js';
+  TrackingResult,
+} from "./types.js";
 
 export class FighterTracker {
   private fighters: Map<string, ForeignFighter> = new Map();
@@ -38,7 +38,7 @@ export class FighterTracker {
     // Update fighter status
     const fighter = this.fighters.get(profile.fighterId);
     if (fighter) {
-      fighter.status = 'RETURNED';
+      fighter.status = "RETURNED";
     }
   }
 
@@ -53,7 +53,7 @@ export class FighterTracker {
    * Monitor veteran fighter network
    */
   async monitorVeteranNetwork(network: VeteranFighterNetwork): Promise<void> {
-    const id = network.members.join('-');
+    const id = network.members.join("-");
     this.veteranNetworks.set(id, network);
   }
 
@@ -84,32 +84,30 @@ export class FighterTracker {
     let filtered = Array.from(this.fighters.values());
 
     if (query.status && query.status.length > 0) {
-      filtered = filtered.filter(f => query.status!.includes(f.status));
+      filtered = filtered.filter((f) => query.status!.includes(f.status));
     }
 
     if (query.nationalities && query.nationalities.length > 0) {
-      filtered = filtered.filter(f =>
-        query.nationalities!.includes(f.personalInfo.nationality)
-      );
+      filtered = filtered.filter((f) => query.nationalities!.includes(f.personalInfo.nationality));
     }
 
     if (query.threatLevels && query.threatLevels.length > 0) {
-      filtered = filtered.filter(f => query.threatLevels!.includes(f.threatLevel));
+      filtered = filtered.filter((f) => query.threatLevels!.includes(f.threatLevel));
     }
 
     if (query.conflictZones && query.conflictZones.length > 0) {
-      filtered = filtered.filter(f =>
+      filtered = filtered.filter((f) =>
         query.conflictZones!.includes(f.combatExperience.conflictZone)
       );
     }
 
     if (query.returnees) {
-      filtered = filtered.filter(f => f.status === 'RETURNED');
+      filtered = filtered.filter((f) => f.status === "RETURNED");
     }
 
     const returneeProfiles = filtered
-      .filter(f => f.status === 'RETURNED')
-      .map(f => this.returnees.get(f.id))
+      .filter((f) => f.status === "RETURNED")
+      .map((f) => this.returnees.get(f.id))
       .filter(Boolean) as ReturneeProfile[];
 
     return {
@@ -117,7 +115,7 @@ export class FighterTracker {
       totalCount: filtered.length,
       networks: Array.from(this.networks.values()),
       returnees: returneeProfiles,
-      trends: this.calculateTrends(filtered)
+      trends: this.calculateTrends(filtered),
     };
   }
 
@@ -139,7 +137,7 @@ export class FighterTracker {
    * Get fighter's network
    */
   async getFighterNetwork(fighterId: string): Promise<FighterNetwork[]> {
-    return Array.from(this.networks.values()).filter(network =>
+    return Array.from(this.networks.values()).filter((network) =>
       network.members.includes(fighterId)
     );
   }
@@ -149,7 +147,9 @@ export class FighterTracker {
    */
   async assessReturneeRisk(fighterId: string): Promise<number> {
     const returnee = this.returnees.get(fighterId);
-    if (!returnee) {return 0;}
+    if (!returnee) {
+      return 0;
+    }
 
     return returnee.riskAssessment.overallRisk;
   }
@@ -159,7 +159,7 @@ export class FighterTracker {
    */
   async identifyHighRiskReturnees(): Promise<ReturneeProfile[]> {
     return Array.from(this.returnees.values()).filter(
-      returnee => returnee.riskAssessment.overallRisk >= 0.7
+      (returnee) => returnee.riskAssessment.overallRisk >= 0.7
     );
   }
 
@@ -174,9 +174,9 @@ export class FighterTracker {
     const fighters = Array.from(this.fighters.values());
 
     return {
-      outgoing: fighters.filter(f => f.status === 'TRAVELING').length,
-      incoming: fighters.filter(f => f.status === 'RETURNED').length,
-      inConflictZone: fighters.filter(f => f.status === 'IN_CONFLICT_ZONE').length
+      outgoing: fighters.filter((f) => f.status === "TRAVELING").length,
+      incoming: fighters.filter((f) => f.status === "RETURNED").length,
+      inConflictZone: fighters.filter((f) => f.status === "IN_CONFLICT_ZONE").length,
     };
   }
 
@@ -184,7 +184,7 @@ export class FighterTracker {
    * Get border alerts for fighter
    */
   async getFighterAlerts(fighterId: string): Promise<BorderAlert[]> {
-    return this.borderAlerts.filter(alert => alert.fighterId === fighterId);
+    return this.borderAlerts.filter((alert) => alert.fighterId === fighterId);
   }
 
   /**
@@ -192,17 +192,17 @@ export class FighterTracker {
    */
 
   private calculateTrends(fighters: ForeignFighter[]) {
-    const returnees = fighters.filter(f => f.status === 'RETURNED').length;
-    const active = fighters.filter(f => f.status === 'IN_CONFLICT_ZONE').length;
+    const returnees = fighters.filter((f) => f.status === "RETURNED").length;
+    const active = fighters.filter((f) => f.status === "IN_CONFLICT_ZONE").length;
 
     return [
       {
-        type: 'Foreign Fighters',
-        direction: 'STABLE' as const,
+        type: "Foreign Fighters",
+        direction: "STABLE" as const,
         magnitude: fighters.length,
-        period: '30-days',
-        description: `${fighters.length} tracked fighters, ${returnees} returnees`
-      }
+        period: "30-days",
+        description: `${fighters.length} tracked fighters, ${returnees} returnees`,
+      },
     ];
   }
 }

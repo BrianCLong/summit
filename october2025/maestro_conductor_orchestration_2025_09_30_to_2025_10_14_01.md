@@ -317,7 +317,7 @@ jobs:
         run: node scripts/policy-sim.js policies/ ./reports/policy.json
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
-        with: { name: evidence, path: 'sbom.spdx.json reports/**' }
+        with: { name: evidence, path: "sbom.spdx.json reports/**" }
 ```
 
 ### Helm Overlay — Region Shard (extract)
@@ -333,21 +333,21 @@ router:
 ### k6 Baseline (extract)
 
 ```js
-import http from 'k6/http';
-import { check, sleep } from 'k6';
+import http from "k6/http";
+import { check, sleep } from "k6";
 export const options = {
   vus: 10,
-  duration: '2m',
+  duration: "2m",
   thresholds: {
-    http_req_duration: ['p(95)<350', 'p(99)<900'],
+    http_req_duration: ["p(95)<350", "p(99)<900"],
   },
 };
 export default function () {
-  const q = JSON.stringify({ query: 'query { me { tenantId } }' });
+  const q = JSON.stringify({ query: "query { me { tenantId } }" });
   const res = http.post(__ENV.GRAPHQL_URL, q, {
-    headers: { 'Content-Type': 'application/json' },
+    headers: { "Content-Type": "application/json" },
   });
-  check(res, { 'status 200': (r) => r.status === 200 });
+  check(res, { "status 200": (r) => r.status === 200 });
   sleep(0.5);
 }
 ```
@@ -355,17 +355,17 @@ export default function () {
 ### Playwright E2E (extract)
 
 ```ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test('tenant isolation', async ({ request }) => {
-  const res = await request.post('/graphql', {
-    data: { query: '{ me { tenantId } }' },
-    headers: { Authorization: 'Bearer TENANT_ALPHA' },
+test("tenant isolation", async ({ request }) => {
+  const res = await request.post("/graphql", {
+    data: { query: "{ me { tenantId } }" },
+    headers: { Authorization: "Bearer TENANT_ALPHA" },
   });
   expect(res.ok()).toBeTruthy();
-  const res2 = await request.post('/graphql', {
+  const res2 = await request.post("/graphql", {
     data: { query: '{ asset(id:"beta-1"){ id } }' },
-    headers: { Authorization: 'Bearer TENANT_ALPHA' },
+    headers: { Authorization: "Bearer TENANT_ALPHA" },
   });
   expect(res2.status()).toBe(403);
 });
@@ -387,12 +387,12 @@ deny_reason[msg] { not allow; msg := "tenant or purpose mismatch" }
 ### Apollo Gateway (extract)
 
 ```ts
-import express from 'express';
-import { ApolloServer } from '@apollo/server';
-import { expressMiddleware } from '@apollo/server/express4';
-import { typeDefs, resolvers } from './schema';
-import { authn, authz } from './middleware';
-import { telemetry } from './otel';
+import express from "express";
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@apollo/server/express4";
+import { typeDefs, resolvers } from "./schema";
+import { authn, authz } from "./middleware";
+import { telemetry } from "./otel";
 
 const app = express();
 app.use(telemetry());
@@ -404,7 +404,7 @@ const server = new ApolloServer({
   nodeEnv: process.env.NODE_ENV,
 });
 await server.start();
-app.use('/graphql', authz(), expressMiddleware(server));
+app.use("/graphql", authz(), expressMiddleware(server));
 app.listen(process.env.PORT || 4000);
 ```
 

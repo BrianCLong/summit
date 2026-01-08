@@ -12,10 +12,10 @@ This directory contains validation scripts used in the Golden Path CI/CD pipelin
 
 The pipeline defined in `.github/workflows/golden-path-ci.yml` requires the following GitHub Secrets to be configured in the repository settings:
 
-| Secret Name | Description |
-|-------------|-------------|
-| `KUBE_CONFIG` | The kubeconfig file content for accessing your Kubernetes cluster. |
-| `SLACK_WEBHOOK_URL` | Webhook URL for sending notifications to a Slack channel. |
+| Secret Name         | Description                                                        |
+| ------------------- | ------------------------------------------------------------------ |
+| `KUBE_CONFIG`       | The kubeconfig file content for accessing your Kubernetes cluster. |
+| `SLACK_WEBHOOK_URL` | Webhook URL for sending notifications to a Slack channel.          |
 
 ### Enabling the Workflow
 

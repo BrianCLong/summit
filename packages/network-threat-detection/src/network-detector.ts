@@ -9,9 +9,9 @@ import {
   NetworkEvent,
   ThreatCategory,
   ThreatSeverity,
-  EventSource
-} from '@intelgraph/threat-detection-core';
-import { v4 as uuidv4 } from 'uuid';
+  EventSource,
+} from "@intelgraph/threat-detection-core";
+import { v4 as uuidv4 } from "uuid";
 
 export interface NetworkDetectorConfig {
   // DDoS thresholds
@@ -69,7 +69,7 @@ export class NetworkThreatDetector implements INetworkThreatDetector {
 
     for (const [destIp, destEvents] of byDestination.entries()) {
       const recentEvents = destEvents.filter(
-        e => now - e.timestamp.getTime() < this.config.ddosTimeWindow
+        (e) => now - e.timestamp.getTime() < this.config.ddosTimeWindow
       );
 
       if (recentEvents.length === 0) continue;
@@ -77,18 +77,19 @@ export class NetworkThreatDetector implements INetworkThreatDetector {
       // Calculate request rate
       const timeSpan = Math.max(
         1000,
-        now - Math.min(...recentEvents.map(e => e.timestamp.getTime()))
+        now - Math.min(...recentEvents.map((e) => e.timestamp.getTime()))
       );
       const requestRate = (recentEvents.length / timeSpan) * 1000; // per second
 
       // Count unique sources
-      const uniqueSources = new Set(recentEvents.map(e => e.sourceIp)).size;
+      const uniqueSources = new Set(recentEvents.map((e) => e.sourceIp)).size;
 
       // Detect DDoS
       if (requestRate > this.config.ddosRequestThreshold) {
-        const severity = uniqueSources > this.config.ddosSourceThreshold
-          ? ThreatSeverity.CRITICAL
-          : ThreatSeverity.HIGH;
+        const severity =
+          uniqueSources > this.config.ddosSourceThreshold
+            ? ThreatSeverity.CRITICAL
+            : ThreatSeverity.HIGH;
 
         threats.push({
           id: uuidv4(),
@@ -99,11 +100,11 @@ export class NetworkThreatDetector implements INetworkThreatDetector {
           destinationIp: destIp,
           threatScore: Math.min(1, requestRate / (this.config.ddosRequestThreshold * 2)),
           confidenceScore: 0.9,
-          indicators: [destIp, ...Array.from(new Set(recentEvents.map(e => e.sourceIp)))],
+          indicators: [destIp, ...Array.from(new Set(recentEvents.map((e) => e.sourceIp)))],
           description: `DDoS attack detected: ${requestRate.toFixed(0)} req/s from ${uniqueSources} sources`,
           rawData: { recentEvents: recentEvents.length, requestRate, uniqueSources },
-          metadata: { detectionMethod: 'rate_based' },
-          responded: false
+          metadata: { detectionMethod: "rate_based" },
+          responded: false,
         });
       }
     }
@@ -120,16 +121,14 @@ export class NetworkThreatDetector implements INetworkThreatDetector {
 
     for (const [sourceIp, sourceEvents] of bySource.entries()) {
       const recentEvents = sourceEvents.filter(
-        e => now - e.timestamp.getTime() < this.config.portScanTimeWindow
+        (e) => now - e.timestamp.getTime() < this.config.portScanTimeWindow
       );
 
       if (recentEvents.length === 0) continue;
 
       // Count unique destination ports
       const uniquePorts = new Set(
-        recentEvents
-          .filter(e => e.destinationPort !== undefined)
-          .map(e => e.destinationPort)
+        recentEvents.filter((e) => e.destinationPort !== undefined).map((e) => e.destinationPort)
       );
 
       if (uniquePorts.size >= this.config.portScanPortsThreshold) {
@@ -145,10 +144,10 @@ export class NetworkThreatDetector implements INetworkThreatDetector {
           indicators: [sourceIp],
           description: `Port scan detected: ${uniquePorts.size} unique ports accessed`,
           rawData: { portsScanned: Array.from(uniquePorts), eventCount: recentEvents.length },
-          metadata: { detectionMethod: 'port_diversity' },
-          mitreAttackTactics: ['reconnaissance'],
-          mitreAttackTechniques: ['T1046'],
-          responded: false
+          metadata: { detectionMethod: "port_diversity" },
+          mitreAttackTactics: ["reconnaissance"],
+          mitreAttackTechniques: ["T1046"],
+          responded: false,
         });
       }
     }
@@ -165,27 +164,23 @@ export class NetworkThreatDetector implements INetworkThreatDetector {
 
     for (const [sourceIp, sourceEvents] of bySource.entries()) {
       const recentEvents = sourceEvents.filter(
-        e => now - e.timestamp.getTime() < this.config.exfiltrationTimeWindow
+        (e) => now - e.timestamp.getTime() < this.config.exfiltrationTimeWindow
       );
 
       if (recentEvents.length === 0) continue;
 
       // Calculate total bytes transferred
-      const totalBytes = recentEvents.reduce(
-        (sum, e) => sum + (e.bytesTransferred || 0),
-        0
-      );
+      const totalBytes = recentEvents.reduce((sum, e) => sum + (e.bytesTransferred || 0), 0);
 
       if (totalBytes > this.config.exfiltrationBytesThreshold) {
         // Additional indicators
-        const isEncrypted = recentEvents.some(e => e.tlsVersion !== undefined);
-        const isUnusualPort = recentEvents.some(e =>
-          e.destinationPort && ![80, 443, 22, 21].includes(e.destinationPort)
+        const isEncrypted = recentEvents.some((e) => e.tlsVersion !== undefined);
+        const isUnusualPort = recentEvents.some(
+          (e) => e.destinationPort && ![80, 443, 22, 21].includes(e.destinationPort)
         );
 
-        const severity = (isEncrypted && isUnusualPort)
-          ? ThreatSeverity.CRITICAL
-          : ThreatSeverity.HIGH;
+        const severity =
+          isEncrypted && isUnusualPort ? ThreatSeverity.CRITICAL : ThreatSeverity.HIGH;
 
         threats.push({
           id: uuidv4(),
@@ -199,10 +194,10 @@ export class NetworkThreatDetector implements INetworkThreatDetector {
           indicators: [sourceIp],
           description: `Potential data exfiltration: ${(totalBytes / (1024 * 1024)).toFixed(2)} MB transferred`,
           rawData: { totalBytes, eventCount: recentEvents.length, isEncrypted, isUnusualPort },
-          metadata: { detectionMethod: 'volume_based' },
-          mitreAttackTactics: ['exfiltration'],
-          mitreAttackTechniques: ['T1041'],
-          responded: false
+          metadata: { detectionMethod: "volume_based" },
+          mitreAttackTactics: ["exfiltration"],
+          mitreAttackTechniques: ["T1041"],
+          responded: false,
         });
       }
     }
@@ -234,10 +229,9 @@ export class NetworkThreatDetector implements INetworkThreatDetector {
 
       // Check for regular intervals (C2 beaconing)
       const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
-      const variance = intervals.reduce(
-        (sum, interval) => sum + Math.pow(interval - avgInterval, 2),
-        0
-      ) / intervals.length;
+      const variance =
+        intervals.reduce((sum, interval) => sum + Math.pow(interval - avgInterval, 2), 0) /
+        intervals.length;
       const stdDev = Math.sqrt(variance);
 
       // Low standard deviation indicates regular beaconing
@@ -251,15 +245,15 @@ export class NetworkThreatDetector implements INetworkThreatDetector {
           category: ThreatCategory.C2_COMMUNICATION,
           severity: ThreatSeverity.HIGH,
           sourceIp,
-          threatScore: Math.min(1, 1 - (stdDev / avgInterval)),
+          threatScore: Math.min(1, 1 - stdDev / avgInterval),
           confidenceScore: 0.75,
           indicators: [sourceIp],
           description: `C2 beaconing detected: regular ${(avgInterval / 1000).toFixed(0)}s intervals`,
           rawData: { avgInterval, stdDev, requestCount: sorted.length },
-          metadata: { detectionMethod: 'interval_regularity' },
-          mitreAttackTactics: ['command-and-control'],
-          mitreAttackTechniques: ['T1071'],
-          responded: false
+          metadata: { detectionMethod: "interval_regularity" },
+          mitreAttackTactics: ["command-and-control"],
+          mitreAttackTechniques: ["T1071"],
+          responded: false,
         });
       }
     }

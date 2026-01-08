@@ -19,7 +19,7 @@ Results are stored in `.evidence/eval_results/`.
 ## Adding a New Eval Case
 
 1.  **Create/Update Dataset**: Add JSONL entries to `GOLDEN/datasets/`.
-    *   Format: `{"context": "...", "expected_output": "...", "keywords": [...]}`
+    - Format: `{"context": "...", "expected_output": "...", "keywords": [...]}`
 2.  **Update Suite**: Edit `eval/suites/core_evals.yaml` to include the new task.
     ```yaml
     - id: my_new_task
@@ -35,6 +35,6 @@ If the score drops by more than 0.1, it flags a regression.
 
 ## Metrics
 
-*   **exact_match**: 1.0 if output matches expected string exactly (trimmed), 0.0 otherwise.
-*   **keyword_match**: Fraction of keywords found in the output.
-*   **refusal_check**: 1.0 if output contains refusal terms (e.g., "cannot", "policy"), 0.0 otherwise.
+- **exact_match**: 1.0 if output matches expected string exactly (trimmed), 0.0 otherwise.
+- **keyword_match**: Fraction of keywords found in the output.
+- **refusal_check**: 1.0 if output contains refusal terms (e.g., "cannot", "policy"), 0.0 otherwise.

@@ -1,6 +1,6 @@
-import type { GeoPoint, Geofence, GeofenceEvent, MovementTrack } from '../types/geospatial.js';
-import { pointInGeometry } from '../utils/geometry.js';
-import { haversineDistance } from '../utils/distance.js';
+import type { GeoPoint, Geofence, GeofenceEvent, MovementTrack } from "../types/geospatial.js";
+import { pointInGeometry } from "../utils/geometry.js";
+import { haversineDistance } from "../utils/distance.js";
 
 export interface GeofenceEvaluationOptions {
   dwellThresholdMs?: number;
@@ -8,10 +8,14 @@ export interface GeofenceEvaluationOptions {
 
 const insideFence = (location: GeoPoint, geofence: Geofence): boolean => {
   if (!geofence.enabled) return false;
-  if (geofence.type === 'proximity' && geofence.radius) {
-    const target = geofence.geometry.type === 'Point'
-      ? { latitude: geofence.geometry.coordinates[1], longitude: geofence.geometry.coordinates[0] }
-      : location;
+  if (geofence.type === "proximity" && geofence.radius) {
+    const target =
+      geofence.geometry.type === "Point"
+        ? {
+            latitude: geofence.geometry.coordinates[1],
+            longitude: geofence.geometry.coordinates[0],
+          }
+        : location;
     return haversineDistance(location, target) <= geofence.radius;
   }
   return pointInGeometry(location, geofence.geometry);
@@ -37,7 +41,7 @@ export const evaluateGeofences = (
             id: `${track.id}-${geofence.id}-entry-${idx}`,
             geofenceId: geofence.id,
             entityId: track.entityId,
-            eventType: 'entry',
+            eventType: "entry",
             timestamp: point.timestamp ?? new Date(),
             location: point,
           });
@@ -53,7 +57,7 @@ export const evaluateGeofences = (
             id: `${track.id}-${geofence.id}-exit-${idx}`,
             geofenceId: geofence.id,
             entityId: track.entityId,
-            eventType: 'exit',
+            eventType: "exit",
             timestamp: point.timestamp ?? new Date(),
             location: point,
           });
@@ -65,7 +69,7 @@ export const evaluateGeofences = (
                 id: `${track.id}-${geofence.id}-dwell-${idx}`,
                 geofenceId: geofence.id,
                 entityId: track.entityId,
-                eventType: 'dwell',
+                eventType: "dwell",
                 timestamp: point.timestamp,
                 location: point,
                 metadata: { dwellTime },

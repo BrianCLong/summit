@@ -177,11 +177,11 @@ spec:
       match:
         resources: { kinds: [Pod, Deployment, StatefulSet, Job, Rollout] }
       validate:
-        message: 'Image base not approved'
+        message: "Image base not approved"
         pattern:
           spec:
             containers:
-              - image: 'ghcr.io/intelgraph/*|public.ecr.aws/intelgraph/*'
+              - image: "ghcr.io/intelgraph/*|public.ecr.aws/intelgraph/*"
 ```
 
 ### 5) eBPF/Falco Runtime Signals (minimal)
@@ -192,7 +192,7 @@ Falco rule example `runtime/falco/rules.yaml`:
 - rule: Suspicious Shell In Container
   desc: A shell was spawned in a container
   condition: container and proc.name in (bash, sh, zsh)
-  output: 'Shell in container (user=%user.name container=%container.id proc=%proc.name)'
+  output: "Shell in container (user=%user.name container=%container.id proc=%proc.name)"
   priority: WARNING
 ```
 
@@ -217,7 +217,7 @@ spec:
             region: us-west-2
             values: environments/prod/us-west.yaml
   template:
-    metadata: { name: '{{name}}' }
+    metadata: { name: "{{name}}" }
     spec:
       project: default
       source:
@@ -225,7 +225,7 @@ spec:
         targetRevision: HEAD
         path: charts/core
         helm:
-          valueFiles: ['{{values}}']
+          valueFiles: ["{{values}}"]
       destination:
         server: https://kubernetes.default.svc
         namespace: core

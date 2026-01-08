@@ -3,11 +3,11 @@
  * Main Map Container Component with Leaflet integration
  */
 
-import React, { useEffect, useRef, useState } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import { Box } from '@mui/material';
-import type { GeoPoint } from '@intelgraph/geospatial';
+import React, { useEffect, useRef, useState } from "react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { Box } from "@mui/material";
+import type { GeoPoint } from "@intelgraph/geospatial";
 
 export interface MapContainerProps {
   center?: GeoPoint;
@@ -27,8 +27,8 @@ export interface MapContainerProps {
 export const MapContainer: React.FC<MapContainerProps> = ({
   center = { latitude: 38.9072, longitude: -77.0369 }, // Washington DC default
   zoom = 10,
-  height = '600px',
-  width = '100%',
+  height = "600px",
+  width = "100%",
   minZoom = 2,
   maxZoom = 18,
   onMapReady,
@@ -55,14 +55,14 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     });
 
     // Add base layer (OpenStreetMap)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap contributors",
       maxZoom: 19,
     }).addTo(map);
 
     // Click handler
     if (onClick) {
-      map.on('click', onClick);
+      map.on("click", onClick);
     }
 
     mapInstanceRef.current = map;
@@ -79,7 +79,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         mapInstanceRef.current = null;
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Update center when prop changes
@@ -90,20 +90,18 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   }, [center.latitude, center.longitude, zoom, isReady]);
 
   return (
-    <Box sx={{ position: 'relative', width, height }}>
+    <Box sx={{ position: "relative", width, height }}>
       <div
         ref={mapRef}
         style={{
-          width: '100%',
-          height: '100%',
-          position: 'relative',
+          width: "100%",
+          height: "100%",
+          position: "relative",
           zIndex: 0,
         }}
       />
       {isReady && children && (
-        <MapContext.Provider value={mapInstanceRef.current}>
-          {children}
-        </MapContext.Provider>
+        <MapContext.Provider value={mapInstanceRef.current}>{children}</MapContext.Provider>
       )}
     </Box>
   );
@@ -122,7 +120,7 @@ export const MapContext = React.createContext<L.Map | null>(null);
 export const useMap = () => {
   const map = React.useContext(MapContext);
   if (!map) {
-    throw new Error('useMap must be used within a MapContainer');
+    throw new Error("useMap must be used within a MapContainer");
   }
   return map;
 };

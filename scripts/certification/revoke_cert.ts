@@ -1,13 +1,13 @@
-import fs from 'node:fs';
-import path from 'node:path';
+import fs from "node:fs";
+import path from "node:path";
 
 // Mock Registry File
-const REGISTRY_FILE = 'certification_registry.json';
+const REGISTRY_FILE = "certification_registry.json";
 
 interface RegistryEntry {
   type: string;
   level: string;
-  status: 'active' | 'revoked' | 'expired';
+  status: "active" | "revoked" | "expired";
   validUntil: string;
   revocationReason?: string;
   revokedAt?: string;
@@ -22,7 +22,7 @@ function loadRegistry(): Registry {
   if (!fs.existsSync(REGISTRY_FILE)) {
     return { entities: {} };
   }
-  return JSON.parse(fs.readFileSync(REGISTRY_FILE, 'utf-8'));
+  return JSON.parse(fs.readFileSync(REGISTRY_FILE, "utf-8"));
 }
 
 // Helper to save registry
@@ -40,12 +40,12 @@ function revokeCert(id: string, reason: string) {
 
   const entry = registry.entities[id];
 
-  if (entry.status === 'revoked') {
+  if (entry.status === "revoked") {
     console.log(`Entity ${id} is already revoked.`);
     return;
   }
 
-  entry.status = 'revoked';
+  entry.status = "revoked";
   entry.revocationReason = reason;
   entry.revokedAt = new Date().toISOString();
 
@@ -55,35 +55,37 @@ function revokeCert(id: string, reason: string) {
 
 // CLI Parsing
 const args = process.argv.slice(2);
-let id = '';
-let reason = 'unspecified';
+let id = "";
+let reason = "unspecified";
 
-args.forEach(arg => {
-  if (arg.startsWith('--id=')) {
-    id = arg.split('=')[1];
-  } else if (arg.startsWith('--reason=')) {
-    reason = arg.split('=')[1];
+args.forEach((arg) => {
+  if (arg.startsWith("--id=")) {
+    id = arg.split("=")[1];
+  } else if (arg.startsWith("--reason=")) {
+    reason = arg.split("=")[1];
   }
 });
 
 if (!id) {
-  console.log('Usage: npx tsx scripts/certification/revoke_cert.ts --id=<entity_id> --reason=<reason>');
+  console.log(
+    "Usage: npx tsx scripts/certification/revoke_cert.ts --id=<entity_id> --reason=<reason>"
+  );
 
   // Create a dummy registry for testing purposes if it doesn't exist
   if (!fs.existsSync(REGISTRY_FILE)) {
-      console.log('Creating dummy registry for testing...');
-      const dummyRegistry: Registry = {
-          entities: {
-              'test.plugin': {
-                  type: 'plugin',
-                  level: 'verified',
-                  status: 'active',
-                  validUntil: '2099-12-31'
-              }
-          }
-      };
-      saveRegistry(dummyRegistry);
-      console.log(`Created ${REGISTRY_FILE} with test.plugin`);
+    console.log("Creating dummy registry for testing...");
+    const dummyRegistry: Registry = {
+      entities: {
+        "test.plugin": {
+          type: "plugin",
+          level: "verified",
+          status: "active",
+          validUntil: "2099-12-31",
+        },
+      },
+    };
+    saveRegistry(dummyRegistry);
+    console.log(`Created ${REGISTRY_FILE} with test.plugin`);
   }
 
   process.exit(1);

@@ -17,6 +17,7 @@ curl -s http://localhost:4000/health/detailed | jq
 ## All Service Health Checks
 
 ### API Server
+
 ```bash
 curl -s http://localhost:4000/health
 curl -s http://localhost:4000/health/ready
@@ -24,11 +25,13 @@ curl -s http://localhost:4000/health/live
 ```
 
 ### Metrics Endpoint
+
 ```bash
 curl -s http://localhost:4000/metrics | head -20
 ```
 
 ### GraphQL Endpoint
+
 ```bash
 curl -X POST http://localhost:4000/graphql \
   -H "Content-Type: application/json" \
@@ -36,26 +39,31 @@ curl -X POST http://localhost:4000/graphql \
 ```
 
 ### PostgreSQL
+
 ```bash
 docker-compose exec postgres pg_isready -U postgres
 ```
 
 ### Neo4j
+
 ```bash
 curl -s http://localhost:7474/ | head -5
 ```
 
 ### Redis
+
 ```bash
 docker-compose exec redis redis-cli ping
 ```
 
 ### Client (if running)
+
 ```bash
 curl -s http://localhost:3000 | head -5
 ```
 
 ### Grafana (Observability)
+
 ```bash
 curl -s http://localhost:3001/api/health
 ```
@@ -89,6 +97,7 @@ echo "=== Check Complete ==="
 ## Health Endpoint Response Format
 
 The `/health/detailed` endpoint returns:
+
 ```json
 {
   "status": "healthy",
@@ -105,18 +114,21 @@ The `/health/detailed` endpoint returns:
 ## Troubleshooting Unhealthy Services
 
 ### Service Not Responding
+
 ```bash
 docker-compose ps
 docker-compose restart <service-name>
 ```
 
 ### High Latency
+
 ```bash
 docker stats
 # Check for CPU/memory issues
 ```
 
 ### Connection Refused
+
 ```bash
 # Check if port is in use
 lsof -i :4000

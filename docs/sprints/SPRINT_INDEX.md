@@ -252,24 +252,24 @@ Located in `/october2025/`
 
 **15+ sprints spanning Jan-Jul 2026**
 
-| Sprint       | File                                  | Focus           | Dates               |
-| ------------ | ------------------------------------- | --------------- | ------------------- |
-| **IG v1.01** | `sprint_2026_01_05_intelgraph_v_1.md` | Foundation      | Jan 5-16, 2026      |
-| **Sprint 01**| `sprint_01_legitimacy_as_leverage.md` | Governance/Legitimacy | Jan 5-16, 2026 |
-| **IG v1.02** | `sprint_2026_01_19_intelgraph_v_1.md` | Core features   | Jan 19-30, 2026     |
-| **IG v1.03** | `sprint_2026_02_02_intelgraph_v_1.md` | Integration     | Feb 2-13, 2026      |
-| **IG v1.04** | `sprint_2026_02_16_intelgraph_v_1.md` | Refinement      | Feb 16-27, 2026     |
-| **IG v1.05** | `sprint_2026_03_02_intelgraph_v_1.md` | Enhancement     | Mar 2-13, 2026      |
-| **IG v1.06** | `sprint_2026_03_16_intelgraph_v_1.md` | Testing         | Mar 16-27, 2026     |
-| **IG v1.07** | `sprint_2026_03_30_intelgraph_v_1.md` | Optimization    | Mar 30-Apr 10, 2026 |
-| **IG v1.08** | `sprint_2026_04_13_intelgraph_v_1.md` | Security review | Apr 13-24, 2026     |
-| **IG v1.09** | `sprint_2026_04_27_intelgraph_v_1.md` | Performance     | Apr 27-May 8, 2026  |
-| **IG v1.10** | `sprint_2026_05_11_intelgraph_v_1.md` | Scale testing   | May 11-22, 2026     |
-| **IG v1.11** | `sprint_2026_05_25_intelgraph_v_1.md` | GA preparation  | May 25-Jun 5, 2026  |
-| **IG v1.12** | `sprint_2026_06_08_intelgraph_v_1.md` | GA launch       | Jun 8-19, 2026      |
-| **IG v1.13** | `sprint_2026_06_22_intelgraph_v_1.md` | Post-launch     | Jun 22-Jul 3, 2026  |
-| **IG v1.14** | `sprint_2026_07_06_intelgraph_v_1.md` | Stabilization   | Jul 6-17, 2026      |
-| **IG v1.15** | `sprint_2026_07_20_intelgraph_v_1.md` | Enhancement     | Jul 20-31, 2026     |
+| Sprint        | File                                  | Focus                 | Dates               |
+| ------------- | ------------------------------------- | --------------------- | ------------------- |
+| **IG v1.01**  | `sprint_2026_01_05_intelgraph_v_1.md` | Foundation            | Jan 5-16, 2026      |
+| **Sprint 01** | `sprint_01_legitimacy_as_leverage.md` | Governance/Legitimacy | Jan 5-16, 2026      |
+| **IG v1.02**  | `sprint_2026_01_19_intelgraph_v_1.md` | Core features         | Jan 19-30, 2026     |
+| **IG v1.03**  | `sprint_2026_02_02_intelgraph_v_1.md` | Integration           | Feb 2-13, 2026      |
+| **IG v1.04**  | `sprint_2026_02_16_intelgraph_v_1.md` | Refinement            | Feb 16-27, 2026     |
+| **IG v1.05**  | `sprint_2026_03_02_intelgraph_v_1.md` | Enhancement           | Mar 2-13, 2026      |
+| **IG v1.06**  | `sprint_2026_03_16_intelgraph_v_1.md` | Testing               | Mar 16-27, 2026     |
+| **IG v1.07**  | `sprint_2026_03_30_intelgraph_v_1.md` | Optimization          | Mar 30-Apr 10, 2026 |
+| **IG v1.08**  | `sprint_2026_04_13_intelgraph_v_1.md` | Security review       | Apr 13-24, 2026     |
+| **IG v1.09**  | `sprint_2026_04_27_intelgraph_v_1.md` | Performance           | Apr 27-May 8, 2026  |
+| **IG v1.10**  | `sprint_2026_05_11_intelgraph_v_1.md` | Scale testing         | May 11-22, 2026     |
+| **IG v1.11**  | `sprint_2026_05_25_intelgraph_v_1.md` | GA preparation        | May 25-Jun 5, 2026  |
+| **IG v1.12**  | `sprint_2026_06_08_intelgraph_v_1.md` | GA launch             | Jun 8-19, 2026      |
+| **IG v1.13**  | `sprint_2026_06_22_intelgraph_v_1.md` | Post-launch           | Jun 22-Jul 3, 2026  |
+| **IG v1.14**  | `sprint_2026_07_06_intelgraph_v_1.md` | Stabilization         | Jul 6-17, 2026      |
+| **IG v1.15**  | `sprint_2026_07_20_intelgraph_v_1.md` | Enhancement           | Jul 20-31, 2026     |
 
 ### Summit Next Series (2026)
 

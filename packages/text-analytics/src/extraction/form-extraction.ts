@@ -11,10 +11,10 @@ export class FormExtractor {
 
     // Extract common form patterns
     const patterns = [
-      { key: 'name', pattern: /name:\s*(.+?)(?:\n|$)/i },
-      { key: 'email', pattern: /email:\s*(.+?)(?:\n|$)/i },
-      { key: 'phone', pattern: /phone:\s*(.+?)(?:\n|$)/i },
-      { key: 'address', pattern: /address:\s*(.+?)(?:\n|$)/i },
+      { key: "name", pattern: /name:\s*(.+?)(?:\n|$)/i },
+      { key: "email", pattern: /email:\s*(.+?)(?:\n|$)/i },
+      { key: "phone", pattern: /phone:\s*(.+?)(?:\n|$)/i },
+      { key: "address", pattern: /address:\s*(.+?)(?:\n|$)/i },
     ];
 
     for (const { key, pattern } of patterns) {

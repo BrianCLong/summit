@@ -5,19 +5,19 @@
  */
 
 // Document types
-export * from './document.js';
+export * from "./document.js";
 
 // Relationship types
-export * from './relationship.js';
+export * from "./relationship.js";
 
 // Lifecycle types
-export * from './lifecycle.js';
+export * from "./lifecycle.js";
 
 // Compliance and risk types
-export * from './compliance.js';
+export * from "./compliance.js";
 
 // AI provenance types
-export * from './provenance.js';
+export * from "./provenance.js";
 
 // Re-export commonly used schemas for convenience
 export {
@@ -26,25 +26,16 @@ export {
   ClassificationLevelSchema,
   RiskLevelSchema,
   LifecycleTypeSchema,
-} from './document.js';
+} from "./document.js";
 
-export {
-  RelationshipTypeIdSchema,
-  DocumentRelationshipSchema,
-} from './relationship.js';
+export { RelationshipTypeIdSchema, DocumentRelationshipSchema } from "./relationship.js";
 
 export {
   LifecycleDefinitionSchema,
   TransitionRequestSchema,
   TransitionResultSchema,
-} from './lifecycle.js';
+} from "./lifecycle.js";
 
-export {
-  ComplianceCheckResultSchema,
-  RiskScoreSchema,
-} from './compliance.js';
+export { ComplianceCheckResultSchema, RiskScoreSchema } from "./compliance.js";
 
-export {
-  AIProvenanceMetadataSchema,
-  CreationSourceSchema,
-} from './provenance.js';
+export { AIProvenanceMetadataSchema, CreationSourceSchema } from "./provenance.js";

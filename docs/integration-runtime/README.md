@@ -90,7 +90,7 @@ interface SummitInformationMetadata {
 
   // Layer 1: Information Hygiene
   hygiene: {
-    quality_score: number;        // 0.0-1.0
+    quality_score: number; // 0.0-1.0
     provenance_chain: ProvenanceLink[];
     certifications: Certification[];
     usage_metrics: UsageMetrics;
@@ -99,8 +99,8 @@ interface SummitInformationMetadata {
 
   // Layer 2: Truth Operations
   truth_ops: {
-    confidence: number;           // Traditional metric
-    integrity_score: number;      // Adversarial-aware
+    confidence: number; // Traditional metric
+    integrity_score: number; // Adversarial-aware
     integrity_breakdown: {
       source_volatility: number;
       correlation_independence: number;
@@ -129,7 +129,7 @@ interface SummitInformationMetadata {
     human_judgment_required: boolean;
     contributes_to_capture_risk: boolean;
     alternative_sources_required: number;
-    independence_impact: number;  // Effect on independence score
+    independence_impact: number; // Effect on independence score
   };
 
   // Cross-cutting
@@ -632,10 +632,10 @@ summit_runtime:
   layers:
     information_hygiene: ENFORCING
     truth_operations: ENFORCING
-    decision_enforcement: MONITORING  # Not ready yet
-    epistemic_sovereignty: MONITORING  # Gradual rollout
+    decision_enforcement: MONITORING # Not ready yet
+    epistemic_sovereignty: MONITORING # Gradual rollout
   policy_response:
-    deny: BLOCK  # For enforcing layers
+    deny: BLOCK # For enforcing layers
     warn: ALERT_AND_LOG
 ```
 
@@ -645,13 +645,13 @@ summit_runtime:
 
 ### Latency Budget
 
-| Layer | Target Latency | Maximum Tolerable |
-|-------|---------------|-------------------|
-| Hygiene | 10ms | 50ms |
-| Truth Ops | 50ms | 200ms |
-| Decision | 20ms | 100ms |
-| Sovereignty | 30ms | 150ms |
-| **Total** | **110ms** | **500ms** |
+| Layer       | Target Latency | Maximum Tolerable |
+| ----------- | -------------- | ----------------- |
+| Hygiene     | 10ms           | 50ms              |
+| Truth Ops   | 50ms           | 200ms             |
+| Decision    | 20ms           | 100ms             |
+| Sovereignty | 30ms           | 150ms             |
+| **Total**   | **110ms**      | **500ms**         |
 
 ### Optimization Strategies
 
@@ -688,24 +688,28 @@ summit.health.layer_consistency (gauge)
 ### Dashboards
 
 **Dashboard 1: Real-Time Health**
+
 - Overall system status
 - Per-layer health indicators
 - Current alerts
 - Processing throughput
 
 **Dashboard 2: Integrity Trends**
+
 - Average integrity scores over time
 - Threat detections per hour
 - Containment events
 - False positive rate
 
 **Dashboard 3: Sovereignty Metrics**
+
 - Independence Score trend
 - AI dependency ratio
 - Judgment maintenance quotient
 - Capture risk indicators
 
 **Dashboard 4: Policy Compliance**
+
 - Violation rate by policy
 - Override frequency
 - Approval/denial ratios

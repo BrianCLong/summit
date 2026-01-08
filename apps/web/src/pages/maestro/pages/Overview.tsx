@@ -90,8 +90,12 @@ function HealthCard({
   }
 
   const getTrendIcon = () => {
-    if (trend === 'up') {return '↗'}
-    if (trend === 'down') {return '↘'}
+    if (trend === 'up') {
+      return '↗'
+    }
+    if (trend === 'down') {
+      return '↘'
+    }
     return ''
   }
 
@@ -270,7 +274,9 @@ export default function Overview() {
           }
           icon={CurrencyDollarIcon}
           status={
-            healthData && healthData.budgetRemaining > 20 ? 'success' : 'warning'
+            healthData && healthData.budgetRemaining > 20
+              ? 'success'
+              : 'warning'
           }
           onClick={() => (window.location.hash = '/maestro/budgets')}
         />

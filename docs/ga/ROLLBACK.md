@@ -32,15 +32,16 @@ This document defines the **comprehensive rollback procedures** for Summit MVP-4
 
 Execute rollback **immediately without discussion** if any of the following occurs:
 
-| Trigger | Detection | Evidence |
-|---------|-----------|----------|
-| **Data Corruption** | Invalid writes, schema violations | Database errors, data integrity check failures |
-| **Security Breach** | Unauthorized data access detected | Auth failures, tenant isolation breach |
-| **Global Outage** | 5xx error rate > 5% for > 5 minutes | Prometheus alert: `HighErrorRate` |
-| **Critical CVE** | Zero-day vulnerability actively exploited | Security scan, external disclosure |
-| **Database Failure** | Cannot write to database | Connection errors, transaction failures |
+| Trigger              | Detection                                 | Evidence                                       |
+| -------------------- | ----------------------------------------- | ---------------------------------------------- |
+| **Data Corruption**  | Invalid writes, schema violations         | Database errors, data integrity check failures |
+| **Security Breach**  | Unauthorized data access detected         | Auth failures, tenant isolation breach         |
+| **Global Outage**    | 5xx error rate > 5% for > 5 minutes       | Prometheus alert: `HighErrorRate`              |
+| **Critical CVE**     | Zero-day vulnerability actively exploited | Security scan, external disclosure             |
+| **Database Failure** | Cannot write to database                  | Connection errors, transaction failures        |
 
 **Command**:
+
 ```bash
 # EMERGENCY ROLLBACK
 ./scripts/emergency-rollback.sh --reason="[TRIGGER]" --incident-id="[ID]"
@@ -54,15 +55,16 @@ Execute rollback **immediately without discussion** if any of the following occu
 
 Execute rollback **within 15 minutes** after confirmation:
 
-| Trigger | Detection | Evidence |
-|---------|-----------|----------|
-| **SLO Breach** | P95 latency > 2s for > 10 minutes | Prometheus alert: `LatencySLOBreach` |
-| **Error Rate Spike** | Error rate > 1% for > 5 minutes | Grafana dashboard, logs |
-| **Policy Failures** | Policy evaluation failures > 5% | OPA logs, audit trail gaps |
-| **Memory Leak** | Memory usage > 90% and climbing | Pod metrics, OOM kills |
-| **Cascading Failures** | Multiple services degraded | Service mesh metrics |
+| Trigger                | Detection                         | Evidence                             |
+| ---------------------- | --------------------------------- | ------------------------------------ |
+| **SLO Breach**         | P95 latency > 2s for > 10 minutes | Prometheus alert: `LatencySLOBreach` |
+| **Error Rate Spike**   | Error rate > 1% for > 5 minutes   | Grafana dashboard, logs              |
+| **Policy Failures**    | Policy evaluation failures > 5%   | OPA logs, audit trail gaps           |
+| **Memory Leak**        | Memory usage > 90% and climbing   | Pod metrics, OOM kills               |
+| **Cascading Failures** | Multiple services degraded        | Service mesh metrics                 |
 
 **Command**:
+
 ```bash
 # URGENT ROLLBACK
 ./scripts/urgent-rollback.sh --reason="[TRIGGER]" --approval="[RELEASE_CAPTAIN]"
@@ -76,14 +78,15 @@ Execute rollback **within 15 minutes** after confirmation:
 
 Execute rollback **within 1 hour** after team discussion:
 
-| Trigger | Detection | Evidence |
-|---------|-----------|----------|
-| **Feature Regression** | Critical feature not working | User reports, QA testing |
-| **Performance Degradation** | P95 latency 50% higher than baseline | Metrics trending upward |
-| **Audit Trail Issues** | Missing audit records | Audit log gaps |
-| **Configuration Drift** | Unexpected config changes | Config validation failures |
+| Trigger                     | Detection                            | Evidence                   |
+| --------------------------- | ------------------------------------ | -------------------------- |
+| **Feature Regression**      | Critical feature not working         | User reports, QA testing   |
+| **Performance Degradation** | P95 latency 50% higher than baseline | Metrics trending upward    |
+| **Audit Trail Issues**      | Missing audit records                | Audit log gaps             |
+| **Configuration Drift**     | Unexpected config changes            | Config validation failures |
 
 **Command**:
+
 ```bash
 # PLANNED ROLLBACK
 ./scripts/planned-rollback.sh --reason="[TRIGGER]" --schedule="[TIME]"
@@ -97,11 +100,11 @@ Execute rollback **within 1 hour** after team discussion:
 
 ### 2.1 Authority Matrix
 
-| Severity | Decision Maker | Required Approval | Notification |
-|----------|---------------|-------------------|--------------|
+| Severity           | Decision Maker  | Required Approval              | Notification                 |
+| ------------------ | --------------- | ------------------------------ | ---------------------------- |
 | **P0 (Immediate)** | Any On-Call SRE | None (act first, report later) | All stakeholders immediately |
-| **P1 (Urgent)** | Release Captain | SRE Lead (async) | Eng leadership within 15 min |
-| **P2 (Planned)** | Release Captain | Product + SRE consensus | Stakeholders 30 min ahead |
+| **P1 (Urgent)**    | Release Captain | SRE Lead (async)               | Eng leadership within 15 min |
+| **P2 (Planned)**   | Release Captain | Product + SRE consensus        | Stakeholders 30 min ahead    |
 
 ### 2.2 Escalation Path
 
@@ -170,6 +173,7 @@ echo "✅ Application rollback complete"
 **Expected Duration**: 3-5 minutes
 
 **Verification**:
+
 ```bash
 # Check pod versions
 kubectl get pods -n production -l app=summit-server -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.containers[0].image}{"\n"}{end}'
@@ -331,6 +335,7 @@ echo "✅ Configuration rollback complete"
 #### Immediate Announcement (P0)
 
 **Slack (#summit-incidents)**:
+
 ```
 🚨 EMERGENCY ROLLBACK INITIATED 🚨
 
@@ -412,6 +417,7 @@ Duration: [ACTUAL_DURATION]
 ### 4.3 Stakeholder Notification
 
 **Email Template**:
+
 ```
 Subject: [URGENT] Summit Production Rollback - INC-[ID]
 
@@ -507,14 +513,14 @@ Create incident record in `incidents/INC-[ID].md`:
 
 ## Timeline
 
-| Time | Event |
-|------|-------|
+| Time  | Event                                |
+| ----- | ------------------------------------ |
 | 10:30 | Issue detected: High error rate (7%) |
-| 10:31 | Rollback initiated by [NAME] |
+| 10:31 | Rollback initiated by [NAME]         |
 | 10:34 | Application rolled back to v3.0.0-ga |
-| 10:36 | Policy rolled back |
-| 10:38 | Health checks passed |
-| 10:40 | Rollback complete |
+| 10:36 | Policy rolled back                   |
+| 10:38 | Health checks passed                 |
+| 10:40 | Rollback complete                    |
 
 ## Root Cause
 
@@ -544,6 +550,7 @@ Rolled back to previous stable version (v3.0.0-ga).
 ### 5.3 Postmortem (Within 24 hours)
 
 **Required Attendees**:
+
 - Release Captain
 - SRE Lead
 - Engineering Lead
@@ -551,6 +558,7 @@ Rolled back to previous stable version (v3.0.0-ga).
 - Security (if security-related)
 
 **Agenda**:
+
 1. Timeline review (blameless)
 2. Root cause analysis (5 Whys)
 3. What went well / What went wrong
@@ -642,17 +650,18 @@ Before declaring rollback ready:
 
 ### 7.1 Key Performance Indicators
 
-| Metric | Target | Actual (Last 3 Rollbacks) |
-|--------|--------|---------------------------|
-| **Time to Decision** | < 5 min | 3 min avg |
-| **Execution Time** | < 10 min | 7 min avg |
-| **Data Loss** | None | 0 incidents |
-| **Communication Delay** | < 2 min | 1 min avg |
-| **Verification Time** | < 5 min | 4 min avg |
+| Metric                  | Target   | Actual (Last 3 Rollbacks) |
+| ----------------------- | -------- | ------------------------- |
+| **Time to Decision**    | < 5 min  | 3 min avg                 |
+| **Execution Time**      | < 10 min | 7 min avg                 |
+| **Data Loss**           | None     | 0 incidents               |
+| **Communication Delay** | < 2 min  | 1 min avg                 |
+| **Verification Time**   | < 5 min  | 4 min avg                 |
 
 ### 7.2 Continuous Improvement
 
 After each rollback:
+
 1. Review execution time
 2. Identify bottlenecks
 3. Update automation
@@ -662,6 +671,7 @@ After each rollback:
 ---
 
 **Document Control**:
+
 - **Version**: 1.0
 - **Owner**: Release Captain + SRE Team
 - **Approvers**: VP Engineering, SRE Lead

@@ -1,10 +1,10 @@
-import { randomUUID } from 'node:crypto';
-import type { EvidenceBundle } from 'common-types';
-import { stableHash } from '@ga-graphai/data-integrity';
-import type { ExportManifest } from './manifest.js';
-import { verifyManifest } from './manifest.js';
+import { randomUUID } from "node:crypto";
+import type { EvidenceBundle } from "common-types";
+import { stableHash } from "@ga-graphai/data-integrity";
+import type { ExportManifest } from "./manifest.js";
+import { verifyManifest } from "./manifest.js";
 
-export type ValidationStatus = 'verified' | 'rejected' | 'error';
+export type ValidationStatus = "verified" | "rejected" | "error";
 
 export interface ExternalValidationPayload {
   bundleHash: string;
@@ -23,14 +23,14 @@ export interface ExternalVerificationReceipt {
 export interface ComplianceAttestation {
   framework: string;
   attestedBy: string;
-  status: 'compliant' | 'non-compliant' | 'unverified';
+  status: "compliant" | "non-compliant" | "unverified";
   issuedAt: string;
   evidenceRef: string;
   controlsTested: string[];
   notes?: string;
 }
 
-export type CustodyStage = 'received' | 'submitted' | 'verified' | 'attested';
+export type CustodyStage = "received" | "submitted" | "verified" | "attested";
 
 export interface ChainOfCustodyEvent {
   stage: CustodyStage;
@@ -67,21 +67,19 @@ export class ProvenanceBundleValidator {
 
   constructor(
     private readonly validator: ThirdPartyValidator,
-    options: ValidatorOptions = {},
+    options: ValidatorOptions = {}
   ) {
     this.now = options.now ?? (() => new Date());
-    this.complianceFramework = options.complianceFramework ?? 'SOC2';
+    this.complianceFramework = options.complianceFramework ?? "SOC2";
     this.attestor = options.attestor ?? validator.name;
     this.custodyLocation = options.custodyLocation;
   }
 
   async validate(
     bundle: EvidenceBundle,
-    manifest: ExportManifest,
+    manifest: ExportManifest
   ): Promise<ExternalValidationReport> {
-    const custodyTrail: ChainOfCustodyEvent[] = [
-      this.buildCustodyEvent('received', 'prov-ledger'),
-    ];
+    const custodyTrail: ChainOfCustodyEvent[] = [this.buildCustodyEvent("received", "prov-ledger")];
 
     const manifestVerification = verifyManifest(manifest, bundle.entries, {
       evidence: bundle,
@@ -94,24 +92,26 @@ export class ProvenanceBundleValidator {
     };
 
     custodyTrail.push(
-      this.buildCustodyEvent('submitted', this.validator.name, 'Submitted for independent verification'),
+      this.buildCustodyEvent(
+        "submitted",
+        this.validator.name,
+        "Submitted for independent verification"
+      )
     );
 
     const thirdParty = await this.safeVerify(payload);
 
     custodyTrail.push(
-      this.buildCustodyEvent('verified', this.validator.name, `status=${thirdParty.status}`),
+      this.buildCustodyEvent("verified", this.validator.name, `status=${thirdParty.status}`)
     );
 
     const compliance = this.buildComplianceAttestation(
       payload.bundleHash,
-      manifestVerification.valid && thirdParty.status === 'verified',
-      thirdParty.notes,
+      manifestVerification.valid && thirdParty.status === "verified",
+      thirdParty.notes
     );
 
-    custodyTrail.push(
-      this.buildCustodyEvent('attested', compliance.attestedBy, compliance.status),
-    );
+    custodyTrail.push(this.buildCustodyEvent("attested", compliance.attestedBy, compliance.status));
 
     return { manifestVerification, thirdParty, compliance, custodyTrail };
   }
@@ -119,15 +119,15 @@ export class ProvenanceBundleValidator {
   private buildComplianceAttestation(
     evidenceRef: string,
     success: boolean,
-    notes?: string,
+    notes?: string
   ): ComplianceAttestation {
     return {
       framework: this.complianceFramework,
       attestedBy: this.attestor,
-      status: success ? 'compliant' : 'non-compliant',
+      status: success ? "compliant" : "non-compliant",
       issuedAt: this.now().toISOString(),
       evidenceRef,
-      controlsTested: ['integrity', 'traceability', 'immutability'],
+      controlsTested: ["integrity", "traceability", "immutability"],
       notes,
     };
   }
@@ -135,7 +135,7 @@ export class ProvenanceBundleValidator {
   private buildCustodyEvent(
     stage: CustodyStage,
     actor: string,
-    notes?: string,
+    notes?: string
   ): ChainOfCustodyEvent {
     return {
       stage,
@@ -147,16 +147,15 @@ export class ProvenanceBundleValidator {
   }
 
   private async safeVerify(
-    payload: ExternalValidationPayload,
+    payload: ExternalValidationPayload
   ): Promise<ExternalVerificationReceipt> {
     try {
       return await this.validator.verify(payload);
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Unknown validator failure';
+      const message = error instanceof Error ? error.message : "Unknown validator failure";
       return {
         validator: this.validator.name,
-        status: 'error',
+        status: "error",
         correlationId: randomUUID(),
         checkedAt: this.now().toISOString(),
         notes: message,
@@ -167,7 +166,7 @@ export class ProvenanceBundleValidator {
 
 export function hashBundle(bundle: EvidenceBundle): string {
   if (!bundle.headHash) {
-    throw new Error('Evidence bundle is missing required headHash');
+    throw new Error("Evidence bundle is missing required headHash");
   }
 
   const seenEntries = new Set<string>();
@@ -184,7 +183,7 @@ export function hashBundle(bundle: EvidenceBundle): string {
   });
 
   return stableHash({
-    domain: 'prov-ledger:evidence-bundle:v1',
+    domain: "prov-ledger:evidence-bundle:v1",
     headHash: bundle.headHash,
     entries: canonicalEntries,
   });

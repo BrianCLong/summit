@@ -65,7 +65,7 @@ metadata:
   name: container-vulnerability-scan
   namespace: intelgraph-security
 spec:
-  schedule: '0 2 * * *' # Daily at 2 AM
+  schedule: "0 2 * * *" # Daily at 2 AM
   jobTemplate:
     spec:
       template:
@@ -146,12 +146,12 @@ kind: ClusterRole
 metadata:
   name: scanner-role
 rules:
-  - apiGroups: ['']
-    resources: ['pods']
-    verbs: ['get', 'list']
-  - apiGroups: ['apps']
-    resources: ['deployments', 'replicasets']
-    verbs: ['get', 'list']
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets"]
+    verbs: ["get", "list"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -225,11 +225,11 @@ spec:
             - containerPort: 8080
           env:
             - name: SCANNER_CONFIG_PATH
-              value: '/etc/scanner/config.yaml'
+              value: "/etc/scanner/config.yaml"
             - name: TRIVY_CONFIG_PATH
-              value: '/etc/trivy/trivy.yaml'
+              value: "/etc/trivy/trivy.yaml"
             - name: SNYK_CONFIG_PATH
-              value: '/etc/snyk/snyk.json'
+              value: "/etc/snyk/snyk.json"
           volumeMounts:
             - name: scanner-config
               mountPath: /etc/scanner
@@ -391,7 +391,7 @@ metadata:
   name: sbom-generator
   namespace: intelgraph-security
 spec:
-  schedule: '0 3 * * 0' # Weekly on Sunday at 3 AM
+  schedule: "0 3 * * 0" # Weekly on Sunday at 3 AM
   jobTemplate:
     spec:
       template:
@@ -447,11 +447,11 @@ metadata:
   namespace: intelgraph-security
 type: Opaque
 data:
-  dashboard-url: '' # Base64 encoded security dashboard URL
-  api-token: '' # Base64 encoded API token
-  artifact-repo-url: '' # Base64 encoded artifact repository URL
-  slack-webhook-url: '' # Base64 encoded Slack webhook URL
-  security-webhook-url: '' # Base64 encoded security webhook URL
+  dashboard-url: "" # Base64 encoded security dashboard URL
+  api-token: "" # Base64 encoded API token
+  artifact-repo-url: "" # Base64 encoded artifact repository URL
+  slack-webhook-url: "" # Base64 encoded Slack webhook URL
+  security-webhook-url: "" # Base64 encoded security webhook URL
 
 ---
 # Network Policy for security scanner

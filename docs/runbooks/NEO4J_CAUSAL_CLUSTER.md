@@ -93,7 +93,7 @@ CALL dbms.cluster.overview();
 
 ```cypher
 // Check cluster topology
-CALL dbms.cluster.overview() 
+CALL dbms.cluster.overview()
 YIELD id, addresses, role, groups, database;
 
 // Verify leader election
@@ -204,9 +204,9 @@ kubectl delete pod neo4j-cluster-core-1 neo4j-cluster-core-2 -n neo4j
 
 ```cypher
 // Check transaction log size
-CALL dbms.queryJmx('org.neo4j:*') 
-YIELD name, attributes 
-WHERE name CONTAINS 'LogRotation' 
+CALL dbms.queryJmx('org.neo4j:*')
+YIELD name, attributes
+WHERE name CONTAINS 'LogRotation'
 RETURN name, attributes;
 
 // Force log rotation
@@ -275,22 +275,26 @@ kubectl exec -it neo4j-cluster-core-0 -n neo4j -- cypher-shell -u neo4j -p <old-
 
 ## Acceptance Criteria Validation
 
-✅ **3-core cluster + read replicas via Helm/K8s**  
+✅ **3-core cluster + read replicas via Helm/K8s**
+
 - Deployed via official Neo4j Helm chart
 - 3 core members for consensus
 - 2+ read replicas for query scaling
 
-✅ **Automated leader elections verified; failover < 10s**  
+✅ **Automated leader elections verified; failover < 10s**
+
 - Raft consensus protocol automatic
 - Tested failover scenarios
 - Monitored election timing
 
-✅ **TLS between members; secrets in K8s**  
+✅ **TLS between members; secrets in K8s**
+
 - TLS enabled for intra-cluster communication
 - Kubernetes secrets for credentials
 - cert-manager for certificate lifecycle
 
-✅ **Runbook for maintenance and upgrades**  
+✅ **Runbook for maintenance and upgrades**
+
 - Comprehensive operations documentation
 - Backup/restore procedures
 - Upgrade process defined

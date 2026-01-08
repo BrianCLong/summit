@@ -1,5 +1,5 @@
-import React from 'react';
-import { useTriPane } from './EventBus';
+import React from "react";
+import { useTriPane } from "./EventBus";
 
 export function Toast() {
   const { state, dispatch } = useTriPane();
@@ -7,9 +7,9 @@ export function Toast() {
   if (!state.toast) return null;
 
   const toneStyles =
-    state.toast.tone === 'warning'
-      ? 'border-amber-400 bg-amber-950/70 text-amber-100'
-      : 'border-accent bg-accent/15 text-sand';
+    state.toast.tone === "warning"
+      ? "border-amber-400 bg-amber-950/70 text-amber-100"
+      : "border-accent bg-accent/15 text-sand";
 
   return (
     <div
@@ -22,7 +22,7 @@ export function Toast() {
         <button
           type="button"
           className="rounded-full border border-sand/20 px-2 py-1 text-xs text-sand/70"
-          onClick={() => dispatch({ type: 'dismissToast' })}
+          onClick={() => dispatch({ type: "dismissToast" })}
           aria-label="Dismiss notification"
         >
           Close

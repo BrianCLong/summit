@@ -4,9 +4,9 @@
  * Connects authority decisions to the provenance ledger for audit trails.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import type { PolicyDecision, Operation } from './schema/policy.schema';
-import type { EvaluationContext } from './evaluator';
+import { v4 as uuidv4 } from "uuid";
+import type { PolicyDecision, Operation } from "./schema/policy.schema";
+import type { EvaluationContext } from "./evaluator";
 
 // -----------------------------------------------------------------------------
 // Provenance Event Types
@@ -16,7 +16,12 @@ export interface AuthorityProvenanceEvent {
   /** Unique event ID */
   eventId: string;
   /** Event type */
-  eventType: 'authority_evaluation' | 'authority_grant' | 'authority_deny' | 'two_person_request' | 'two_person_approval';
+  eventType:
+    | "authority_evaluation"
+    | "authority_grant"
+    | "authority_deny"
+    | "two_person_request"
+    | "two_person_approval";
   /** Timestamp */
   timestamp: Date;
   /** User who triggered the event */
@@ -101,19 +106,29 @@ export class InMemoryProvenanceRecorder implements ProvenanceRecorder {
   }
 
   async getUserEvents(userId: string, limit = 100): Promise<AuthorityProvenanceEvent[]> {
-    return this.events
-      .filter((e) => e.userId === userId)
-      .slice(-limit);
+    return this.events.filter((e) => e.userId === userId).slice(-limit);
   }
 
   async generateAuditReport(options: AuditReportOptions): Promise<AuditReport> {
     const filtered = this.events.filter((e) => {
-      if (e.timestamp < options.startDate || e.timestamp > options.endDate) {return false;}
-      if (options.userId && e.userId !== options.userId) {return false;}
-      if (options.entityType && e.resource.type !== options.entityType) {return false;}
-      if (options.investigationId && e.resource.investigationId !== options.investigationId) {return false;}
-      if (!options.includeAllowed && e.decision.allowed) {return false;}
-      if (!options.includeDenied && !e.decision.allowed) {return false;}
+      if (e.timestamp < options.startDate || e.timestamp > options.endDate) {
+        return false;
+      }
+      if (options.userId && e.userId !== options.userId) {
+        return false;
+      }
+      if (options.entityType && e.resource.type !== options.entityType) {
+        return false;
+      }
+      if (options.investigationId && e.resource.investigationId !== options.investigationId) {
+        return false;
+      }
+      if (!options.includeAllowed && e.decision.allowed) {
+        return false;
+      }
+      if (!options.includeDenied && !e.decision.allowed) {
+        return false;
+      }
       return true;
     });
 
@@ -124,8 +139,11 @@ export class InMemoryProvenanceRecorder implements ProvenanceRecorder {
 
     for (const event of filtered) {
       uniqueUsers.add(event.userId);
-      if (event.decision.allowed) {allowedCount++;}
-      else {deniedCount++;}
+      if (event.decision.allowed) {
+        allowedCount++;
+      } else {
+        deniedCount++;
+      }
       operationCounts.set(event.operation, (operationCounts.get(event.operation) || 0) + 1);
     }
 
@@ -154,10 +172,7 @@ export class InMemoryProvenanceRecorder implements ProvenanceRecorder {
 /**
  * Create provenance recording wrapper for policy evaluator
  */
-export function withProvenanceRecording(
-  evaluator: any,
-  recorder: ProvenanceRecorder
-): any {
+export function withProvenanceRecording(evaluator: any, recorder: ProvenanceRecorder): any {
   const originalEvaluate = evaluator.evaluate.bind(evaluator);
 
   evaluator.evaluate = async (context: EvaluationContext) => {
@@ -166,7 +181,7 @@ export function withProvenanceRecording(
     // Record provenance event
     const event: AuthorityProvenanceEvent = {
       eventId: uuidv4(),
-      eventType: decision.allowed ? 'authority_grant' : 'authority_deny',
+      eventType: decision.allowed ? "authority_grant" : "authority_deny",
       timestamp: new Date(),
       userId: context.user.id,
       tenantId: context.user.tenantId,
@@ -212,7 +227,7 @@ function hashContext(context: EvaluationContext): string {
   let hash = 0;
   for (let i = 0; i < data.length; i++) {
     const char = data.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash;
   }
   return hash.toString(16);
@@ -234,8 +249,8 @@ export class ProvLedgerClient implements ProvenanceRecorder {
 
   async recordEvent(event: AuthorityProvenanceEvent): Promise<void> {
     await fetch(`${this.baseUrl}/claims`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         type: event.eventType,
         subject: event.userId,
@@ -268,8 +283,12 @@ export class ProvLedgerClient implements ProvenanceRecorder {
       startDate: options.startDate.toISOString(),
       endDate: options.endDate.toISOString(),
     });
-    if (options.userId) {params.set('userId', options.userId);}
-    if (options.entityType) {params.set('entityType', options.entityType);}
+    if (options.userId) {
+      params.set("userId", options.userId);
+    }
+    if (options.entityType) {
+      params.set("entityType", options.entityType);
+    }
 
     const response = await fetch(`${this.baseUrl}/audit/report?${params}`);
     return response.json();

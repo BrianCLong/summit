@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import LineTimeseries from '../components/charts/LineTimeseries';
-import { getProviderUsage } from '../api';
+import React, { useEffect, useState } from "react";
+import LineTimeseries from "../components/charts/LineTimeseries";
+import { getProviderUsage } from "../api";
 
 export default function ProviderRatesChart() {
   const [series, setSeries] = useState<{ x: string; y: number }[]>([]);
@@ -32,9 +32,7 @@ export default function ProviderRatesChart() {
         data={series}
         ariaLabel="Provider RPM over time"
       />
-      {limit != null && (
-        <div className="text-sm text-gray-600">Current limit: {limit} rpm</div>
-      )}
+      {limit != null && <div className="text-sm text-gray-600">Current limit: {limit} rpm</div>}
       {err && <div className="text-red-600 text-sm">{err}</div>}
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 
 interface Claim {
   type: string;
@@ -14,9 +14,9 @@ interface ClaimSet {
 export default function ClaimsViewer({ runId }: { runId: string }) {
   const [sets, setSets] = useState<ClaimSet[]>([]);
   useEffect(() => {
-    fetch('/graphql', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
+    fetch("/graphql", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({
         query: `{ claims(runId:"${runId}"){ id merkleRoot claims{type subject} } }`,
       }),
@@ -38,9 +38,7 @@ export default function ClaimsViewer({ runId }: { runId: string }) {
           {sets.map((s: ClaimSet) => (
             <tr key={s.id} className="border-b">
               <td className="font-mono">{String(s.id).slice(0, 8)}…</td>
-              <td className="font-mono">
-                {String(s.merkleRoot || '').slice(0, 12)}…
-              </td>
+              <td className="font-mono">{String(s.merkleRoot || "").slice(0, 12)}…</td>
             </tr>
           ))}
         </tbody>

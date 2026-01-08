@@ -27,51 +27,51 @@ export interface MissileSystem {
 }
 
 export enum MissileType {
-  BALLISTIC_ICBM = 'ballistic_icbm', // Intercontinental (>5500km)
-  BALLISTIC_IRBM = 'ballistic_irbm', // Intermediate Range (3000-5500km)
-  BALLISTIC_MRBM = 'ballistic_mrbm', // Medium Range (1000-3000km)
-  BALLISTIC_SRBM = 'ballistic_srbm', // Short Range (<1000km)
-  CRUISE_GROUND = 'cruise_ground',
-  CRUISE_AIR = 'cruise_air',
-  CRUISE_SEA = 'cruise_sea',
-  HYPERSONIC_GLIDE = 'hypersonic_glide',
-  HYPERSONIC_CRUISE = 'hypersonic_cruise',
-  SPACE_LAUNCH = 'space_launch',
-  ANTI_SATELLITE = 'anti_satellite'
+  BALLISTIC_ICBM = "ballistic_icbm", // Intercontinental (>5500km)
+  BALLISTIC_IRBM = "ballistic_irbm", // Intermediate Range (3000-5500km)
+  BALLISTIC_MRBM = "ballistic_mrbm", // Medium Range (1000-3000km)
+  BALLISTIC_SRBM = "ballistic_srbm", // Short Range (<1000km)
+  CRUISE_GROUND = "cruise_ground",
+  CRUISE_AIR = "cruise_air",
+  CRUISE_SEA = "cruise_sea",
+  HYPERSONIC_GLIDE = "hypersonic_glide",
+  HYPERSONIC_CRUISE = "hypersonic_cruise",
+  SPACE_LAUNCH = "space_launch",
+  ANTI_SATELLITE = "anti_satellite",
 }
 
 export enum MissileClassification {
-  STRATEGIC = 'strategic',
-  TACTICAL = 'tactical',
-  THEATER = 'theater',
-  INTERMEDIATE = 'intermediate'
+  STRATEGIC = "strategic",
+  TACTICAL = "tactical",
+  THEATER = "theater",
+  INTERMEDIATE = "intermediate",
 }
 
 export enum PropulsionType {
-  LIQUID_FUEL = 'liquid_fuel',
-  SOLID_FUEL = 'solid_fuel',
-  HYBRID = 'hybrid',
-  RAMJET = 'ramjet',
-  SCRAMJET = 'scramjet',
-  ROCKET = 'rocket'
+  LIQUID_FUEL = "liquid_fuel",
+  SOLID_FUEL = "solid_fuel",
+  HYBRID = "hybrid",
+  RAMJET = "ramjet",
+  SCRAMJET = "scramjet",
+  ROCKET = "rocket",
 }
 
 export enum WarheadType {
-  NUCLEAR = 'nuclear',
-  CONVENTIONAL = 'conventional',
-  CHEMICAL = 'chemical',
-  BIOLOGICAL = 'biological',
-  EMP = 'emp', // Electromagnetic Pulse
-  KINETIC = 'kinetic'
+  NUCLEAR = "nuclear",
+  CONVENTIONAL = "conventional",
+  CHEMICAL = "chemical",
+  BIOLOGICAL = "biological",
+  EMP = "emp", // Electromagnetic Pulse
+  KINETIC = "kinetic",
 }
 
 export enum OperationalStatus {
-  OPERATIONAL = 'operational',
-  DEVELOPMENT = 'development',
-  TESTING = 'testing',
-  DEPLOYED = 'deployed',
-  RETIRED = 'retired',
-  SUSPECTED = 'suspected'
+  OPERATIONAL = "operational",
+  DEVELOPMENT = "development",
+  TESTING = "testing",
+  DEPLOYED = "deployed",
+  RETIRED = "retired",
+  SUSPECTED = "suspected",
 }
 
 export interface MissileTest {
@@ -92,12 +92,12 @@ export interface MissileTest {
 }
 
 export enum TestType {
-  FULL_RANGE = 'full_range',
-  REDUCED_RANGE = 'reduced_range',
-  SUBORBITAL = 'suborbital',
-  PROOF_OF_CONCEPT = 'proof_of_concept',
-  OPERATIONAL_TEST = 'operational_test',
-  FAILURE = 'failure'
+  FULL_RANGE = "full_range",
+  REDUCED_RANGE = "reduced_range",
+  SUBORBITAL = "suborbital",
+  PROOF_OF_CONCEPT = "proof_of_concept",
+  OPERATIONAL_TEST = "operational_test",
+  FAILURE = "failure",
 }
 
 export interface LaunchFacility {
@@ -115,18 +115,18 @@ export interface LaunchFacility {
 }
 
 export enum LaunchFacilityType {
-  SILO = 'silo',
-  MOBILE_LAUNCHER = 'mobile_launcher',
-  SUBMARINE = 'submarine',
-  AIRCRAFT = 'aircraft',
-  SURFACE_SHIP = 'surface_ship',
-  SPACE_PORT = 'space_port',
-  TEST_RANGE = 'test_range'
+  SILO = "silo",
+  MOBILE_LAUNCHER = "mobile_launcher",
+  SUBMARINE = "submarine",
+  AIRCRAFT = "aircraft",
+  SURFACE_SHIP = "surface_ship",
+  SPACE_PORT = "space_port",
+  TEST_RANGE = "test_range",
 }
 
 export interface ReentryVehicle {
   missile_system_id: string;
-  rv_type: 'single' | 'mirv' | 'marv'; // MARV = Maneuverable RV
+  rv_type: "single" | "mirv" | "marv"; // MARV = Maneuverable RV
   number_of_rvs?: number;
   penetration_aids: string[];
   maneuvering_capability: boolean;
@@ -148,10 +148,10 @@ export interface MissileDefense {
 }
 
 export enum DefenseType {
-  TERMINAL = 'terminal',
-  MIDCOURSE = 'midcourse',
-  BOOST_PHASE = 'boost_phase',
-  LAYERED = 'layered'
+  TERMINAL = "terminal",
+  MIDCOURSE = "midcourse",
+  BOOST_PHASE = "boost_phase",
+  LAYERED = "layered",
 }
 
 export interface GeoLocation {
@@ -161,11 +161,11 @@ export interface GeoLocation {
 }
 
 export enum ConfidenceLevel {
-  CONFIRMED = 'confirmed',
-  HIGH = 'high',
-  MODERATE = 'moderate',
-  LOW = 'low',
-  SUSPECTED = 'suspected'
+  CONFIRMED = "confirmed",
+  HIGH = "high",
+  MODERATE = "moderate",
+  LOW = "low",
+  SUSPECTED = "suspected",
 }
 
 export interface MissileCapability {
@@ -180,5 +180,5 @@ export interface MissileCapability {
   submarine_platforms: number;
   second_strike_capability: boolean;
   first_strike_capability: boolean;
-  overall_assessment: 'advanced' | 'intermediate' | 'developing' | 'nascent';
+  overall_assessment: "advanced" | "intermediate" | "developing" | "nascent";
 }

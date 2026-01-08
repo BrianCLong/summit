@@ -1,24 +1,19 @@
-import { Pool } from 'pg';
-import { RedisClientType } from 'redis';
-import { logger } from '../utils/logger';
-import axios from 'axios';
+import { Pool } from "pg";
+import { RedisClientType } from "redis";
+import { logger } from "../utils/logger";
+import axios from "axios";
 import {
   ProcessedFeedItem,
   ExtractedEntity,
   GeolocationData,
   SentimentData,
   ThreatIndicator,
-} from './FeedProcessorService';
+} from "./FeedProcessorService";
 
 export interface EnrichmentProvider {
   id: string;
   name: string;
-  type:
-    | 'geolocation'
-    | 'sentiment'
-    | 'threat_intel'
-    | 'entity_extraction'
-    | 'translation';
+  type: "geolocation" | "sentiment" | "threat_intel" | "entity_extraction" | "translation";
   apiUrl: string;
   apiKey?: string;
   rateLimit: {
@@ -46,7 +41,7 @@ export interface GeocodingResult {
 
 export interface ThreatIntelResult {
   indicator: string;
-  type: 'domain' | 'ip' | 'url' | 'hash' | 'email';
+  type: "domain" | "ip" | "url" | "hash" | "email";
   malicious: boolean;
   confidence: number;
   sources: string[];
@@ -76,15 +71,12 @@ export interface EntityExtractionResult {
 }
 
 export class EnrichmentService {
-  private rateLimiters = new Map<
-    string,
-    { requests: number; resetTime: number }
-  >();
+  private rateLimiters = new Map<string, { requests: number; resetTime: number }>();
   private providers: Map<string, EnrichmentProvider> = new Map();
 
   constructor(
     private pgPool: Pool,
-    private redisClient: RedisClientType,
+    private redisClient: RedisClientType
   ) {
     this.initializeProviders();
   }
@@ -93,41 +85,41 @@ export class EnrichmentService {
     // Initialize built-in enrichment providers
     const builtInProviders: EnrichmentProvider[] = [
       {
-        id: 'openstreetmap-geocoding',
-        name: 'OpenStreetMap Nominatim',
-        type: 'geolocation',
-        apiUrl: 'https://nominatim.openstreetmap.org/search',
+        id: "openstreetmap-geocoding",
+        name: "OpenStreetMap Nominatim",
+        type: "geolocation",
+        apiUrl: "https://nominatim.openstreetmap.org/search",
         rateLimit: { requestsPerMinute: 60, burstLimit: 10 },
         isActive: true,
       },
       {
-        id: 'virustotal-threat',
-        name: 'VirusTotal',
-        type: 'threat_intel',
-        apiUrl: 'https://www.virustotal.com/vtapi/v2',
+        id: "virustotal-threat",
+        name: "VirusTotal",
+        type: "threat_intel",
+        apiUrl: "https://www.virustotal.com/vtapi/v2",
         apiKey: process.env.VIRUSTOTAL_API_KEY,
         rateLimit: { requestsPerMinute: 4, burstLimit: 1 },
         isActive: !!process.env.VIRUSTOTAL_API_KEY,
-        cost: { perRequest: 0.01, currency: 'USD' },
+        cost: { perRequest: 0.01, currency: "USD" },
       },
       {
-        id: 'abuseipdb-threat',
-        name: 'AbuseIPDB',
-        type: 'threat_intel',
-        apiUrl: 'https://api.abuseipdb.com/api/v2',
+        id: "abuseipdb-threat",
+        name: "AbuseIPDB",
+        type: "threat_intel",
+        apiUrl: "https://api.abuseipdb.com/api/v2",
         apiKey: process.env.ABUSEIPDB_API_KEY,
         rateLimit: { requestsPerMinute: 1000, burstLimit: 10 },
         isActive: !!process.env.ABUSEIPDB_API_KEY,
       },
       {
-        id: 'textrazor-entities',
-        name: 'TextRazor',
-        type: 'entity_extraction',
-        apiUrl: 'https://api.textrazor.com',
+        id: "textrazor-entities",
+        name: "TextRazor",
+        type: "entity_extraction",
+        apiUrl: "https://api.textrazor.com",
         apiKey: process.env.TEXTRAZOR_API_KEY,
         rateLimit: { requestsPerMinute: 500, burstLimit: 20 },
         isActive: !!process.env.TEXTRAZOR_API_KEY,
-        cost: { perRequest: 0.001, currency: 'USD' },
+        cost: { perRequest: 0.001, currency: "USD" },
       },
     ];
 
@@ -171,27 +163,19 @@ export class EnrichmentService {
       });
     } catch (error) {
       logger.error(`Error enriching item ${item.id}:`, error);
-      enrichedItem.processingErrors = [
-        ...(enrichedItem.processingErrors || []),
-        error.message,
-      ];
+      enrichedItem.processingErrors = [...(enrichedItem.processingErrors || []), error.message];
     }
 
     return enrichedItem;
   }
 
-  async extractEntitiesAdvanced(
-    item: ProcessedFeedItem,
-  ): Promise<EntityExtractionResult> {
-    const provider = this.providers.get('textrazor-entities');
+  async extractEntitiesAdvanced(item: ProcessedFeedItem): Promise<EntityExtractionResult> {
+    const provider = this.providers.get("textrazor-entities");
     if (!provider || !provider.isActive) {
       return this.extractEntitiesBasic(item);
     }
 
-    const text = `${item.title}\n${item.description}\n${item.content}`.slice(
-      0,
-      200000,
-    ); // API limit
+    const text = `${item.title}\n${item.description}\n${item.content}`.slice(0, 200000); // API limit
 
     try {
       if (!(await this.checkRateLimit(provider.id))) {
@@ -204,34 +188,32 @@ export class EnrichmentService {
         `text=${encodeURIComponent(text)}&extractors=entities,relations,topics`,
         {
           headers: {
-            'X-TextRazor-Key': provider.apiKey!,
-            'Content-Type': 'application/x-www-form-urlencoded',
+            "X-TextRazor-Key": provider.apiKey!,
+            "Content-Type": "application/x-www-form-urlencoded",
           },
           timeout: 30000,
-        },
+        }
       );
 
       const result = response.data.response;
 
-      const entities: ExtractedEntity[] = (result.entities || []).map(
-        (entity: any) => ({
-          type: this.mapEntityType(entity.type),
-          text: entity.matchedText,
-          confidence: entity.confidenceScore || 0.5,
-          startIndex: entity.startingPos || 0,
-          endIndex: entity.endingPos || 0,
-          properties: {
-            wikipediaLink: entity.wikipediaLink,
-            freebaseId: entity.freebaseId,
-            types: entity.type,
-          },
-        }),
-      );
+      const entities: ExtractedEntity[] = (result.entities || []).map((entity: any) => ({
+        type: this.mapEntityType(entity.type),
+        text: entity.matchedText,
+        confidence: entity.confidenceScore || 0.5,
+        startIndex: entity.startingPos || 0,
+        endIndex: entity.endingPos || 0,
+        properties: {
+          wikipediaLink: entity.wikipediaLink,
+          freebaseId: entity.freebaseId,
+          types: entity.type,
+        },
+      }));
 
       const relationships = (result.relations || []).map((rel: any) => ({
-        entity1: rel.params?.[0]?.entityId || '',
-        entity2: rel.params?.[1]?.entityId || '',
-        relationship: rel.predicate || 'RELATED_TO',
+        entity1: rel.params?.[0]?.entityId || "",
+        entity2: rel.params?.[1]?.entityId || "",
+        relationship: rel.predicate || "RELATED_TO",
         confidence: rel.confidenceScore || 0.5,
       }));
 
@@ -249,46 +231,43 @@ export class EnrichmentService {
     }
   }
 
-  private extractEntitiesBasic(
-    item: ProcessedFeedItem,
-  ): EntityExtractionResult {
-    const text =
-      `${item.title} ${item.description} ${item.content}`.toLowerCase();
+  private extractEntitiesBasic(item: ProcessedFeedItem): EntityExtractionResult {
+    const text = `${item.title} ${item.description} ${item.content}`.toLowerCase();
     const entities: ExtractedEntity[] = [];
 
     // Basic regex patterns for common entities
     const patterns = {
       email: {
         regex: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
-        type: 'email' as const,
+        type: "email" as const,
       },
       ip: {
         regex: /\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/g,
-        type: 'ip' as const,
+        type: "ip" as const,
       },
       domain: {
         regex: /\b(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}\b/g,
-        type: 'domain' as const,
+        type: "domain" as const,
       },
       url: {
         regex: /https?:\/\/[^\s<>"{}|\\^`[\]]+/g,
-        type: 'url' as const,
+        type: "url" as const,
       },
       cve: {
         regex: /CVE-\d{4}-\d{4,7}/gi,
-        type: 'vulnerability' as const,
+        type: "vulnerability" as const,
       },
       hash_md5: {
         regex: /\b[a-fA-F0-9]{32}\b/g,
-        type: 'hash' as const,
+        type: "hash" as const,
       },
       hash_sha1: {
         regex: /\b[a-fA-F0-9]{40}\b/g,
-        type: 'hash' as const,
+        type: "hash" as const,
       },
       hash_sha256: {
         regex: /\b[a-fA-F0-9]{64}\b/g,
-        type: 'hash' as const,
+        type: "hash" as const,
       },
     };
 
@@ -303,7 +282,7 @@ export class EnrichmentService {
           confidence: 0.8,
           startIndex: match.index,
           endIndex: match.index + match[0].length,
-          properties: { extractionMethod: 'regex', pattern: patternName },
+          properties: { extractionMethod: "regex", pattern: patternName },
         });
       }
     });
@@ -318,9 +297,9 @@ export class EnrichmentService {
     // Find location entities
     const locationEntities = entities.filter(
       (e) =>
-        e.type === 'location' ||
-        e.properties?.types?.includes('City') ||
-        e.properties?.types?.includes('Country'),
+        e.type === "location" ||
+        e.properties?.types?.includes("City") ||
+        e.properties?.types?.includes("Country")
     );
 
     for (const entity of locationEntities) {
@@ -337,10 +316,8 @@ export class EnrichmentService {
     return locations;
   }
 
-  private async geocodeLocation(
-    location: string,
-  ): Promise<GeocodingResult | null> {
-    const provider = this.providers.get('openstreetmap-geocoding');
+  private async geocodeLocation(location: string): Promise<GeocodingResult | null> {
+    const provider = this.providers.get("openstreetmap-geocoding");
     if (!provider || !provider.isActive) {
       return null;
     }
@@ -361,13 +338,13 @@ export class EnrichmentService {
       const response = await axios.get(provider.apiUrl, {
         params: {
           q: location,
-          format: 'json',
+          format: "json",
           limit: 1,
           addressdetails: 1,
         },
         timeout: 10000,
         headers: {
-          'User-Agent': 'IntelGraph-FeedProcessor/1.0',
+          "User-Agent": "IntelGraph-FeedProcessor/1.0",
         },
       });
 
@@ -377,14 +354,10 @@ export class EnrichmentService {
           location,
           latitude: parseFloat(result.lat),
           longitude: parseFloat(result.lon),
-          countryCode: result.address?.country_code?.toUpperCase() || '',
-          countryName: result.address?.country || '',
-          region: result.address?.state || result.address?.region || '',
-          city:
-            result.address?.city ||
-            result.address?.town ||
-            result.address?.village ||
-            '',
+          countryCode: result.address?.country_code?.toUpperCase() || "",
+          countryName: result.address?.country || "",
+          region: result.address?.state || result.address?.region || "",
+          city: result.address?.city || result.address?.town || result.address?.village || "",
           confidence: parseFloat(result.importance) || 0.5,
           source: provider.name,
         };
@@ -402,23 +375,16 @@ export class EnrichmentService {
     return null;
   }
 
-  async enrichThreatIntelligence(
-    item: ProcessedFeedItem,
-  ): Promise<ThreatIndicator[]> {
+  async enrichThreatIntelligence(item: ProcessedFeedItem): Promise<ThreatIndicator[]> {
     const threatIndicators: ThreatIndicator[] = [];
     const entities = item.processedData.entities || [];
 
     // Find IOCs in entities
-    const iocs = entities.filter((e) =>
-      ['ip', 'domain', 'url', 'hash', 'email'].includes(e.type),
-    );
+    const iocs = entities.filter((e) => ["ip", "domain", "url", "hash", "email"].includes(e.type));
 
     for (const ioc of iocs) {
       try {
-        const threatInfo = await this.checkThreatIntelligence(
-          ioc.text,
-          ioc.type as any,
-        );
+        const threatInfo = await this.checkThreatIntelligence(ioc.text, ioc.type as any);
         if (threatInfo) {
           threatIndicators.push({
             type: threatInfo.type,
@@ -441,7 +407,7 @@ export class EnrichmentService {
 
   private async checkThreatIntelligence(
     indicator: string,
-    type: 'domain' | 'ip' | 'url' | 'hash' | 'email',
+    type: "domain" | "ip" | "url" | "hash" | "email"
   ): Promise<ThreatIntelResult | null> {
     // Check cache first
     const cacheKey = `threat:${type}:${indicator}`;
@@ -453,17 +419,12 @@ export class EnrichmentService {
     let result: ThreatIntelResult | null = null;
 
     // Try VirusTotal first
-    if (
-      type === 'domain' ||
-      type === 'ip' ||
-      type === 'url' ||
-      type === 'hash'
-    ) {
+    if (type === "domain" || type === "ip" || type === "url" || type === "hash") {
       result = await this.checkVirusTotal(indicator, type);
     }
 
     // Try AbuseIPDB for IPs
-    if (!result && type === 'ip') {
+    if (!result && type === "ip") {
       result = await this.checkAbuseIPDB(indicator);
     }
 
@@ -477,9 +438,9 @@ export class EnrichmentService {
 
   private async checkVirusTotal(
     indicator: string,
-    type: 'domain' | 'ip' | 'url' | 'hash',
+    type: "domain" | "ip" | "url" | "hash"
   ): Promise<ThreatIntelResult | null> {
-    const provider = this.providers.get('virustotal-threat');
+    const provider = this.providers.get("virustotal-threat");
     if (!provider || !provider.isActive || !provider.apiKey) {
       return null;
     }
@@ -490,24 +451,24 @@ export class EnrichmentService {
         return null;
       }
 
-      let endpoint = '';
+      let endpoint = "";
       const params: any = { apikey: provider.apiKey };
 
       switch (type) {
-        case 'domain':
-          endpoint = '/domain/report';
+        case "domain":
+          endpoint = "/domain/report";
           params.domain = indicator;
           break;
-        case 'ip':
-          endpoint = '/ip-address/report';
+        case "ip":
+          endpoint = "/ip-address/report";
           params.ip = indicator;
           break;
-        case 'url':
-          endpoint = '/url/report';
+        case "url":
+          endpoint = "/url/report";
           params.resource = indicator;
           break;
-        case 'hash':
-          endpoint = '/file/report';
+        case "hash":
+          endpoint = "/file/report";
           params.resource = indicator;
           break;
       }
@@ -531,7 +492,7 @@ export class EnrichmentService {
           type,
           malicious,
           confidence,
-          sources: ['VirusTotal'],
+          sources: ["VirusTotal"],
           categories: data.categories || [],
           lastSeen: data.scan_date ? new Date(data.scan_date) : undefined,
           reputation: malicious ? -confidence : confidence,
@@ -545,7 +506,7 @@ export class EnrichmentService {
   }
 
   private async checkAbuseIPDB(ip: string): Promise<ThreatIntelResult | null> {
-    const provider = this.providers.get('abuseipdb-threat');
+    const provider = this.providers.get("abuseipdb-threat");
     if (!provider || !provider.isActive || !provider.apiKey) {
       return null;
     }
@@ -560,11 +521,11 @@ export class EnrichmentService {
         params: {
           ipAddress: ip,
           maxAgeInDays: 90,
-          verbose: '',
+          verbose: "",
         },
         headers: {
           Key: provider.apiKey,
-          Accept: 'application/json',
+          Accept: "application/json",
         },
         timeout: 30000,
       });
@@ -579,14 +540,12 @@ export class EnrichmentService {
 
         return {
           indicator: ip,
-          type: 'ip',
+          type: "ip",
           malicious,
           confidence,
-          sources: ['AbuseIPDB'],
+          sources: ["AbuseIPDB"],
           categories: data.usageType ? [data.usageType] : [],
-          lastSeen: data.lastReportedAt
-            ? new Date(data.lastReportedAt)
-            : undefined,
+          lastSeen: data.lastReportedAt ? new Date(data.lastReportedAt) : undefined,
           reputation: malicious ? -confidence : confidence,
         };
       }
@@ -597,58 +556,52 @@ export class EnrichmentService {
     return null;
   }
 
-  async analyzeSentimentAdvanced(
-    item: ProcessedFeedItem,
-  ): Promise<SentimentData | null> {
+  async analyzeSentimentAdvanced(item: ProcessedFeedItem): Promise<SentimentData | null> {
     // This would integrate with advanced sentiment analysis APIs
     // For now, use basic keyword-based approach
     const text = `${item.title} ${item.description}`.toLowerCase();
 
     const positiveWords = [
-      'good',
-      'great',
-      'excellent',
-      'positive',
-      'success',
-      'achievement',
-      'improvement',
-      'progress',
-      'beneficial',
-      'effective',
-      'secure',
+      "good",
+      "great",
+      "excellent",
+      "positive",
+      "success",
+      "achievement",
+      "improvement",
+      "progress",
+      "beneficial",
+      "effective",
+      "secure",
     ];
 
     const negativeWords = [
-      'bad',
-      'terrible',
-      'negative',
-      'failure',
-      'attack',
-      'breach',
-      'vulnerability',
-      'threat',
-      'malware',
-      'hack',
-      'compromise',
-      'exploit',
-      'ransomware',
-      'phishing',
+      "bad",
+      "terrible",
+      "negative",
+      "failure",
+      "attack",
+      "breach",
+      "vulnerability",
+      "threat",
+      "malware",
+      "hack",
+      "compromise",
+      "exploit",
+      "ransomware",
+      "phishing",
     ];
 
     const words = text.split(/\s+/);
-    const positiveCount = words.filter((word) =>
-      positiveWords.includes(word),
-    ).length;
-    const negativeCount = words.filter((word) =>
-      negativeWords.includes(word),
-    ).length;
+    const positiveCount = words.filter((word) => positiveWords.includes(word)).length;
+    const negativeCount = words.filter((word) => negativeWords.includes(word)).length;
     const totalSentimentWords = positiveCount + negativeCount;
 
     if (totalSentimentWords === 0) {
       return {
         score: 0,
         magnitude: 0,
-        label: 'neutral',
+        label: "neutral",
         confidence: 0.3,
       };
     }
@@ -656,9 +609,9 @@ export class EnrichmentService {
     const score = (positiveCount - negativeCount) / totalSentimentWords;
     const magnitude = totalSentimentWords / words.length;
 
-    let label: 'positive' | 'negative' | 'neutral' = 'neutral';
-    if (score > 0.1) label = 'positive';
-    else if (score < -0.1) label = 'negative';
+    let label: "positive" | "negative" | "neutral" = "neutral";
+    if (score > 0.1) label = "positive";
+    else if (score < -0.1) label = "negative";
 
     return {
       score,
@@ -668,25 +621,24 @@ export class EnrichmentService {
     };
   }
 
-  private mapEntityType(apiType: string[]): ExtractedEntity['type'] {
-    if (!apiType || apiType.length === 0) return 'misc';
+  private mapEntityType(apiType: string[]): ExtractedEntity["type"] {
+    if (!apiType || apiType.length === 0) return "misc";
 
     const type = apiType[0].toLowerCase();
 
-    if (type.includes('person') || type.includes('people')) return 'person';
-    if (type.includes('organization') || type.includes('company'))
-      return 'organization';
+    if (type.includes("person") || type.includes("people")) return "person";
+    if (type.includes("organization") || type.includes("company")) return "organization";
     if (
-      type.includes('location') ||
-      type.includes('place') ||
-      type.includes('city') ||
-      type.includes('country')
+      type.includes("location") ||
+      type.includes("place") ||
+      type.includes("city") ||
+      type.includes("country")
     )
-      return 'location';
-    if (type.includes('event')) return 'event';
-    if (type.includes('product')) return 'product';
+      return "location";
+    if (type.includes("event")) return "event";
+    if (type.includes("product")) return "product";
 
-    return 'misc';
+    return "misc";
   }
 
   private async checkRateLimit(providerId: string): Promise<boolean> {
@@ -723,12 +675,10 @@ export class EnrichmentService {
   async getProviderStats(): Promise<
     Array<{ provider: string; requests: number; resetTime: number }>
   > {
-    return Array.from(this.rateLimiters.entries()).map(
-      ([providerId, limiter]) => ({
-        provider: providerId,
-        requests: limiter.requests,
-        resetTime: limiter.resetTime,
-      }),
-    );
+    return Array.from(this.rateLimiters.entries()).map(([providerId, limiter]) => ({
+      provider: providerId,
+      requests: limiter.requests,
+      resetTime: limiter.resetTime,
+    }));
   }
 }

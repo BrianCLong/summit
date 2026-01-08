@@ -176,8 +176,8 @@ trim_trailing_whitespace = false
 
 ```js
 /* eslint-disable no-console */
-const fs = require('fs');
-console.log(fs.existsSync('yarn.lock') ? 'Using Yarn' : 'Using npm');
+const fs = require("fs");
+console.log(fs.existsSync("yarn.lock") ? "Using Yarn" : "Using npm");
 ```
 
 ---
@@ -194,28 +194,25 @@ console.log(fs.existsSync('yarn.lock') ? 'Using Yarn' : 'Using npm');
 module.exports = {
   root: true,
   env: { node: true, browser: true, es2022: true, jest: true },
-  parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'react', 'react-hooks', 'jsx-a11y'],
+  parser: "@typescript-eslint/parser",
+  plugins: ["@typescript-eslint", "react", "react-hooks", "jsx-a11y"],
   extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:react/recommended',
-    'plugin:react-hooks/recommended',
-    'plugin:jsx-a11y/recommended',
-    'plugin:import/recommended',
-    'plugin:import/typescript',
-    'prettier',
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:jsx-a11y/recommended",
+    "plugin:import/recommended",
+    "plugin:import/typescript",
+    "prettier",
   ],
-  settings: { react: { version: '18.0' } },
+  settings: { react: { version: "18.0" } },
   rules: {
-    'import/order': [
-      'error',
-      { 'newlines-between': 'always', alphabetize: { order: 'asc' } },
-    ],
-    'react/prop-types': 'off',
-    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    "import/order": ["error", { "newlines-between": "always", alphabetize: { order: "asc" } }],
+    "react/prop-types": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
   },
-  ignorePatterns: ['dist', 'build', 'coverage', 'node_modules'],
+  ignorePatterns: ["dist", "build", "coverage", "node_modules"],
 };
 ```
 
@@ -261,13 +258,13 @@ repos:
       - id: detect-private-key
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.5.7
-    hooks: [{ id: ruff, args: ['--fix'] }, { id: ruff-format }]
+    hooks: [{ id: ruff, args: ["--fix"] }, { id: ruff-format }]
   - repo: https://github.com/psf/black
     rev: 24.8.0
     hooks: [{ id: black }]
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.10.0
-    hooks: [{ id: mypy, additional_dependencies: ['types-requests'] }]
+    hooks: [{ id: mypy, additional_dependencies: ["types-requests"] }]
   - repo: https://github.com/pre-commit/mirrors-eslint
     rev: v9.9.0
     hooks:
@@ -286,7 +283,7 @@ repos:
 **commitlint.config.cjs**
 
 ```js
-module.exports = { extends: ['@commitlint/config-conventional'] };
+module.exports = { extends: ["@commitlint/config-conventional"] };
 ```
 
 **.husky/commit-msg**
@@ -312,16 +309,16 @@ npx --no lint-staged
 **.graphqlrc.yml**
 
 ```yaml
-schema: 'packages/graphql/schema.graphql'
+schema: "packages/graphql/schema.graphql"
 documents:
-  - 'apps/frontend/src/**/*.graphql'
+  - "apps/frontend/src/**/*.graphql"
 ```
 
 **codegen.yml**
 
 ```yaml
 overwrite: true
-schema: 'packages/graphql/schema.graphql'
+schema: "packages/graphql/schema.graphql"
 generates:
   packages/graphql/__generated__/client.ts:
     plugins:
@@ -347,9 +344,9 @@ generates:
 
 ```js
 module.exports = {
-  client: 'pg',
+  client: "pg",
   connection: process.env.DATABASE_URL,
-  migrations: { directory: __dirname + '/migrations' },
+  migrations: { directory: __dirname + "/migrations" },
 };
 ```
 
@@ -357,11 +354,8 @@ module.exports = {
 
 ```js
 exports.up = async (knex) =>
-  knex.raw(
-    'CREATE INDEX IF NOT EXISTS idx_investigation_created_at ON investigation (created_at)',
-  );
-exports.down = async (knex) =>
-  knex.raw('DROP INDEX IF EXISTS idx_investigation_created_at');
+  knex.raw("CREATE INDEX IF NOT EXISTS idx_investigation_created_at ON investigation (created_at)");
+exports.down = async (knex) => knex.raw("DROP INDEX IF EXISTS idx_investigation_created_at");
 ```
 
 ### Neo4j
@@ -396,26 +390,26 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env: { POSTGRES_PASSWORD: postgres, POSTGRES_DB: intelgraph }
-        ports: ['5432:5432']
+        ports: ["5432:5432"]
         options: >-
           --health-cmd="pg_isready -U postgres" --health-interval=10s
       neo4j:
         image: neo4j:5.22
         env: { NEO4J_AUTH: neo4j/test }
-        ports: ['7687:7687', '7474:7474']
+        ports: ["7687:7687", "7474:7474"]
 
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
 
       - uses: actions/setup-node@v4
-        with: { node-version: '18.20.4', cache: 'npm' }
+        with: { node-version: "18.20.4", cache: "npm" }
 
       - name: Enable Corepack (Yarn)
         run: corepack enable
 
       - uses: actions/setup-python@v5
-        with: { python-version: '3.12' }
+        with: { python-version: "3.12" }
 
       - name: Install JS deps
         run: |
@@ -443,10 +437,7 @@ jobs:
 
       - name: Postgres (Prisma) migrate + generate
         if: ${{ hashFiles('packages/db/prisma/schema.prisma') != '' }}
-        env:
-          {
-            DATABASE_URL: postgresql://postgres:postgres@localhost:5432/intelgraph,
-          }
+        env: { DATABASE_URL: postgresql://postgres:postgres@localhost:5432/intelgraph }
         run: |
           npm run db:pg:generate
           npm run db:pg:migrate
@@ -454,19 +445,11 @@ jobs:
 
       - name: Postgres (Knex) migrate
         if: ${{ hashFiles('packages/db/knex/knexfile.cjs') != '' }}
-        env:
-          {
-            DATABASE_URL: postgresql://postgres:postgres@localhost:5432/intelgraph,
-          }
+        env: { DATABASE_URL: postgresql://postgres:postgres@localhost:5432/intelgraph }
         run: npm run db:knex:migrate
 
       - name: Neo4j migrations
-        env:
-          {
-            NEO4J_URI: bolt://localhost:7687,
-            NEO4J_USER: neo4j,
-            NEO4J_PASSWORD: test,
-          }
+        env: { NEO4J_URI: bolt://localhost:7687, NEO4J_USER: neo4j, NEO4J_PASSWORD: test }
         run: npm run db:neo4j:migrate
 
       - name: actionlint (GitHub Workflows)
@@ -474,7 +457,7 @@ jobs:
 
       - name: hadolint (Dockerfiles)
         uses: hadolint/hadolint-action@v3.1.0
-        with: { dockerfile: '**/Dockerfile' }
+        with: { dockerfile: "**/Dockerfile" }
 
       - name: Trivy (dependency & fs scan)
         uses: aquasecurity/trivy-action@0.16.0
@@ -536,19 +519,19 @@ jobs:
 ```yaml
 version: 2
 updates:
-  - package-ecosystem: 'npm'
-    directory: '/'
-    schedule: { interval: 'weekly' }
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule: { interval: "weekly" }
     open-pull-requests-limit: 10
-  - package-ecosystem: 'pip'
-    directory: '/'
-    schedule: { interval: 'weekly' }
-  - package-ecosystem: 'docker'
-    directory: '/'
-    schedule: { interval: 'weekly' }
-  - package-ecosystem: 'github-actions'
-    directory: '/'
-    schedule: { interval: 'weekly' }
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule: { interval: "weekly" }
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule: { interval: "weekly" }
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule: { interval: "weekly" }
 ```
 
 **.github/workflows/dependabot-auto-merge.yml**
@@ -584,7 +567,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: kentaro-m/auto-assign-action@v1.2.1
-        with: { configuration-path: '.github/auto-assign.yml' }
+        with: { configuration-path: ".github/auto-assign.yml" }
 ```
 
 **.github/auto-assign.yml**
@@ -617,7 +600,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: CycloneDX/gh-node-module-generatebom@v3
-        with: { output: 'bom.xml' }
+        with: { output: "bom.xml" }
       - uses: actions/upload-artifact@v4
         with: { name: sbom, path: bom.xml }
 ```
@@ -658,7 +641,7 @@ jobs:
 ```yaml
 name: Close Stale Issues
 on:
-  schedule: [{ cron: '0 3 * * *' }]
+  schedule: [{ cron: "0 3 * * *" }]
   workflow_dispatch: {}
 
 jobs:
@@ -667,10 +650,10 @@ jobs:
     steps:
       - uses: actions/stale@v9
         with:
-          stale-issue-message: 'This issue is stale because it has been open 30 days with no activity.'
+          stale-issue-message: "This issue is stale because it has been open 30 days with no activity."
           days-before-stale: 30
           days-before-close: 14
-          exempt-issue-labels: 'pinned,security'
+          exempt-issue-labels: "pinned,security"
 ```
 
 ---
@@ -821,7 +804,7 @@ on:
   workflow_dispatch: {}
   push:
     branches: [main]
-    paths: ['.changeset/**']
+    paths: [".changeset/**"]
 
 jobs:
   release:
@@ -829,7 +812,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '18.20.4' }
+        with: { node-version: "18.20.4" }
       - run: npm ci
       - run: npx changeset version
       - run: npx changeset publish
@@ -1189,20 +1172,20 @@ labels: [epic]
 body:
   - type: input
     id: goal
-    attributes: { label: Goal, placeholder: 'Outcome to achieve' }
+    attributes: { label: Goal, placeholder: "Outcome to achieve" }
     validations: { required: true }
   - type: textarea
     id: narrative
-    attributes: { label: Narrative, description: 'Why now? Who benefits?' }
+    attributes: { label: Narrative, description: "Why now? Who benefits?" }
   - type: textarea
     id: scope
     attributes: { label: In/Out of Scope }
   - type: textarea
     id: measures
-    attributes: { label: Success Measures, description: 'KPIs/SLIs' }
+    attributes: { label: Success Measures, description: "KPIs/SLIs" }
   - type: textarea
     id: plan
-    attributes: { label: Plan, description: 'Milestones, risks, dependencies' }
+    attributes: { label: Plan, description: "Milestones, risks, dependencies" }
   - type: checkboxes
     id: links
     attributes:
@@ -1263,11 +1246,7 @@ body:
     attributes: { label: Timebox (hours) }
   - type: textarea
     id: outcomes
-    attributes:
-      {
-        label: Expected Outcomes,
-        description: 'Decision options, risks, next steps',
-      }
+    attributes: { label: Expected Outcomes, description: "Decision options, risks, next steps" }
 ```
 
 ### 26.9.4 `incident.yml`
@@ -1281,7 +1260,7 @@ body:
     attributes: { label: Severity (SEV0–SEV3) }
   - type: textarea
     id: impact
-    attributes: { label: Impact, description: 'Users, duration, scope' }
+    attributes: { label: Impact, description: "Users, duration, scope" }
   - type: textarea
     id: timeline
     attributes: { label: Timeline of events }

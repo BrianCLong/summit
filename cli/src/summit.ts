@@ -1,31 +1,33 @@
 #!/usr/bin/env node
-import chalk from 'chalk';
-import { Command } from 'commander';
-import { AUTOMATION_WORKFLOWS, runAutomationWorkflow } from './automation.js';
-import { DoctorCheckResult, runDoctor } from './summit-doctor.js';
+import chalk from "chalk";
+import { Command } from "commander";
+import { AUTOMATION_WORKFLOWS, runAutomationWorkflow } from "./automation.js";
+import { DoctorCheckResult, runDoctor } from "./summit-doctor.js";
 
 function renderResult(result: DoctorCheckResult): void {
-  const statusIcon =
-    result.status === 'pass' ? '✅' : result.status === 'warn' ? '⚠️ ' : '❌';
+  const statusIcon = result.status === "pass" ? "✅" : result.status === "warn" ? "⚠️ " : "❌";
   console.log(`${statusIcon} ${chalk.bold(result.name)}: ${result.message}`);
   if (result.fix) {
     console.log(chalk.gray(`   Fix: ${result.fix}`));
   }
   if (result.autoFixed) {
-    console.log(chalk.green('   Auto-heal applied'));
+    console.log(chalk.green("   Auto-heal applied"));
   }
 }
 
-function renderAutomationReport(report: Awaited<ReturnType<typeof runAutomationWorkflow>>, asJson: boolean) {
+function renderAutomationReport(
+  report: Awaited<ReturnType<typeof runAutomationWorkflow>>,
+  asJson: boolean
+) {
   if (asJson) {
     console.log(JSON.stringify(report, null, 2));
     return;
   }
 
   console.log(chalk.bold(`\n⚙️  summit ${report.workflow} workflow`));
-  console.log('----------------------------------------------');
+  console.log("----------------------------------------------");
   report.results.forEach((result) => {
-    const icon = result.status === 'success' ? '✅' : '❌';
+    const icon = result.status === "success" ? "✅" : "❌";
     const duration = `${result.durationMs}ms`;
     console.log(`${icon} ${chalk.bold(result.name)} (${result.command}) [${duration}]`);
     if (result.stderr.trim()) {
@@ -33,22 +35,22 @@ function renderAutomationReport(report: Awaited<ReturnType<typeof runAutomationW
     }
   });
 
-  console.log('\nSummary:');
+  console.log("\nSummary:");
   console.log(
-    `  Success: ${report.summary.successCount}/${report.summary.total} | Failed: ${report.summary.failedCount} | Duration: ${report.summary.durationMs}ms`,
+    `  Success: ${report.summary.successCount}/${report.summary.total} | Failed: ${report.summary.failedCount} | Duration: ${report.summary.durationMs}ms`
   );
 }
 
 async function main() {
   const program = new Command();
 
-  program.name('summit').description('Summit developer toolbox CLI');
+  program.name("summit").description("Summit developer toolbox CLI");
 
-  (['init', 'check', 'test', 'release-dry-run'] as const).forEach((workflowName) => {
+  (["init", "check", "test", "release-dry-run"] as const).forEach((workflowName) => {
     program
       .command(workflowName)
-      .description(AUTOMATION_WORKFLOWS[workflowName].map((step) => step.description).join(' → '))
-      .option('--json', 'Output JSON instead of human-friendly text', false)
+      .description(AUTOMATION_WORKFLOWS[workflowName].map((step) => step.description).join(" → "))
+      .option("--json", "Output JSON instead of human-friendly text", false)
       .action(async (options) => {
         const report = await runAutomationWorkflow(workflowName);
         renderAutomationReport(report, options.json);
@@ -60,11 +62,11 @@ async function main() {
   });
 
   program
-    .command('doctor')
-    .description('Verify local Summit developer environment and auto-heal common issues')
-    .option('--env-file <path>', 'Path to the .env file', '.env')
-    .option('--fix', 'Attempt to auto-heal missing dependencies', false)
-    .option('--json', 'Output JSON instead of human-friendly text', false)
+    .command("doctor")
+    .description("Verify local Summit developer environment and auto-heal common issues")
+    .option("--env-file <path>", "Path to the .env file", ".env")
+    .option("--fix", "Attempt to auto-heal missing dependencies", false)
+    .option("--json", "Output JSON instead of human-friendly text", false)
     .action(async (options) => {
       const report = await runDoctor({
         envFile: options.envFile,
@@ -74,12 +76,12 @@ async function main() {
       if (options.json) {
         console.log(JSON.stringify(report, null, 2));
       } else {
-        console.log(chalk.bold('\n🩺 Summit Doctor - local environment diagnostics'));
-        console.log('----------------------------------------------');
+        console.log(chalk.bold("\n🩺 Summit Doctor - local environment diagnostics"));
+        console.log("----------------------------------------------");
         report.results.forEach(renderResult);
-        console.log('\nSummary:');
+        console.log("\nSummary:");
         console.log(
-          `  Passed: ${report.summary.passed}/${report.summary.total} | Warnings: ${report.summary.warnings} | Failed: ${report.summary.failed}`,
+          `  Passed: ${report.summary.passed}/${report.summary.total} | Warnings: ${report.summary.warnings} | Failed: ${report.summary.failed}`
         );
         if (report.summary.autoFixed > 0) {
           console.log(`  Auto-healed items: ${report.summary.autoFixed}`);
@@ -96,6 +98,8 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(chalk.red(`Summit doctor failed: ${error instanceof Error ? error.message : String(error)}`));
+  console.error(
+    chalk.red(`Summit doctor failed: ${error instanceof Error ? error.message : String(error)}`)
+  );
   process.exit(1);
 });

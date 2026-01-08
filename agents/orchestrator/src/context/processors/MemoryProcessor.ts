@@ -1,4 +1,4 @@
-import { ContextProcessor, Session, WorkingContext, CompilationOptions } from '../types.js';
+import { ContextProcessor, Session, WorkingContext, CompilationOptions } from "../types.js";
 
 /**
  * MemoryProcessor
@@ -6,7 +6,7 @@ import { ContextProcessor, Session, WorkingContext, CompilationOptions } from '.
  * Injects semantic memory search results (Reactive/Proactive).
  */
 export class MemoryProcessor implements ContextProcessor {
-  name = 'MemoryProcessor';
+  name = "MemoryProcessor";
 
   async process(
     context: WorkingContext,
@@ -15,8 +15,8 @@ export class MemoryProcessor implements ContextProcessor {
   ): Promise<WorkingContext> {
     // Check if session has pro-active memory hits in metadata
     if (session.metadata?.relevantMemories) {
-        const memories = session.metadata.relevantMemories as any[];
-        context.memories.push(...memories);
+      const memories = session.metadata.relevantMemories as any[];
+      context.memories.push(...memories);
     }
     return context;
   }

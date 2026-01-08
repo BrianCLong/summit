@@ -1,6 +1,7 @@
 # CompanyOS – 15-Minute Quickstart
 
 1. Clone & enter repo
+
    ```bash
    git clone https://github.com/BrianCLong/summit.git
    cd summit

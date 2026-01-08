@@ -17,9 +17,9 @@ groups:
           service: summit-api
           component: api
         annotations:
-          summary: 'Summit API Error Rate > 1%'
-          description: 'The API is experiencing a high error rate ({{ $value | humanizePercentage }}).'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/summit-api-errors'
+          summary: "Summit API Error Rate > 1%"
+          description: "The API is experiencing a high error rate ({{ $value | humanizePercentage }})."
+          runbook_url: "https://docs.intelgraph.com/runbooks/summit-api-errors"
 
       - alert: SummitApiLatencyHigh
         expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 1.0
@@ -29,9 +29,9 @@ groups:
           service: summit-api
           component: api
         annotations:
-          summary: 'Summit API P95 Latency > 1s'
-          description: '95th percentile latency is {{ $value }}s, exceeding the 1s threshold.'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/summit-api-latency'
+          summary: "Summit API P95 Latency > 1s"
+          description: "95th percentile latency is {{ $value }}s, exceeding the 1s threshold."
+          runbook_url: "https://docs.intelgraph.com/runbooks/summit-api-latency"
 
   # GraphQL Specific
   - alert: GraphQLHighErrorRate
@@ -46,9 +46,9 @@ groups:
       service: summit-api
       component: graphql
     annotations:
-      summary: 'GraphQL Error Rate > 2%'
-      description: 'GraphQL operations are failing at a rate of {{ $value | humanizePercentage }}.'
-      runbook_url: 'https://docs.intelgraph.com/runbooks/graphql-errors'
+      summary: "GraphQL Error Rate > 2%"
+      description: "GraphQL operations are failing at a rate of {{ $value | humanizePercentage }}."
+      runbook_url: "https://docs.intelgraph.com/runbooks/graphql-errors"
 
   # Database Health
   - name: summit.database
@@ -61,9 +61,9 @@ groups:
           service: summit-api
           component: database
         annotations:
-          summary: 'Postgres Connection Pool Saturated'
-          description: 'Active Postgres connections are at {{ $value }}, nearing the limit.'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/db-pool-saturation'
+          summary: "Postgres Connection Pool Saturated"
+          description: "Active Postgres connections are at {{ $value }}, nearing the limit."
+          runbook_url: "https://docs.intelgraph.com/runbooks/db-pool-saturation"
 
       - alert: Neo4jQueryLatencyHigh
         expr: histogram_quantile(0.95, sum(rate(db_query_duration_seconds_bucket{database="neo4j"}[5m])) by (le)) > 2.0
@@ -73,9 +73,9 @@ groups:
           service: summit-api
           component: database
         annotations:
-          summary: 'Neo4j Query P95 Latency > 2s'
-          description: 'Graph database queries are slow ({{ $value }}s).'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/neo4j-latency'
+          summary: "Neo4j Query P95 Latency > 2s"
+          description: "Graph database queries are slow ({{ $value }}s)."
+          runbook_url: "https://docs.intelgraph.com/runbooks/neo4j-latency"
 
   # Redis / Cache
   - name: summit.cache
@@ -88,9 +88,9 @@ groups:
           service: summit-api
           component: redis
         annotations:
-          summary: 'Redis is down'
-          description: 'Redis instance is unreachable.'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/redis-down'
+          summary: "Redis is down"
+          description: "Redis instance is unreachable."
+          runbook_url: "https://docs.intelgraph.com/runbooks/redis-down"
 
   # System Resources
   - name: summit.resources
@@ -103,6 +103,6 @@ groups:
           service: summit-api
           component: system
         annotations:
-          summary: 'Summit API High Memory Usage'
-          description: 'Memory usage is {{ $value }}MB, exceeding 1.5GB.'
-          runbook_url: 'https://docs.intelgraph.com/runbooks/high-memory'
+          summary: "Summit API High Memory Usage"
+          description: "Memory usage is {{ $value }}MB, exceeding 1.5GB."
+          runbook_url: "https://docs.intelgraph.com/runbooks/high-memory"

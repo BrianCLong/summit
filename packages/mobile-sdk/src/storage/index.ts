@@ -18,7 +18,9 @@ export interface SyncStatus {
 }
 
 // Stub implementations for offline sync
-export async function addMutation(_mutation: Omit<PendingMutation, 'id' | 'timestamp' | 'retryCount'>): Promise<string> {
+export async function addMutation(
+  _mutation: Omit<PendingMutation, "id" | "timestamp" | "retryCount">
+): Promise<string> {
   return crypto.randomUUID();
 }
 

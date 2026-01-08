@@ -5,10 +5,10 @@ permissions:
 on:
   push:
     paths:
-      - 'policy/**'
+      - "policy/**"
   pull_request:
     paths:
-      - 'policy/**'
+      - "policy/**"
 
 jobs:
   test-sign-publish:
@@ -33,7 +33,7 @@ jobs:
         uses: sigstore/cosign-installer@v3
       - name: Build and sign policy bundle (keyless)
         env:
-          COSIGN_EXPERIMENTAL: '1'
+          COSIGN_EXPERIMENTAL: "1"
         run: |
           bash policy/build.sh
           # If not signed by script, sign again here keyless

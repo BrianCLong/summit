@@ -139,7 +139,7 @@ export interface Macro {
   id: string;
   name: string;
   steps: Array<CommandRef>;
-  scope: 'global' | 'graph' | 'timeline' | 'map';
+  scope: "global" | "graph" | "timeline" | "map";
   hotkey?: string;
 }
 ```

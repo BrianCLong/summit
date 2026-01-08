@@ -2,12 +2,12 @@ name: CI Governance
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'src/intelgraph/governance/**'
-      - 'tests/test_redaction.py'
+      - "src/intelgraph/governance/**"
+      - "tests/test_redaction.py"
 
 jobs:
   test-governance:

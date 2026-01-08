@@ -12,6 +12,7 @@
 **Overall Risk Level**: **MEDIUM** (7 risks identified: 2 High, 3 Medium, 2 Low)
 
 **Key Findings**:
+
 1. ❌ Actions not pinned to SHA (supply chain risk)
 2. ❌ No artifact signing/verification
 3. ❌ Security scans are non-blocking (`continue-on-error: true`)
@@ -24,15 +25,15 @@
 
 ## Security Risks & Mitigations
 
-| # | Risk | Likelihood | Impact | Severity | Mitigation | Effort |
-|---|------|-----------|--------|----------|------------|--------|
-| **1** | **Unpinned GitHub Actions** | High | High | **HIGH** | Pin all actions to commit SHA | Low |
-| **2** | **No Artifact Signing** | Medium | High | **HIGH** | Sign container images, SBOM | Medium |
-| **3** | **Security Scans Non-Blocking** | High | Medium | **MEDIUM** | Make Trivy blocking for CRITICAL | Low |
-| **4** | **Docker Cache Poisoning** | Low | High | **MEDIUM** | Use registry cache instead of local | Medium |
-| **5** | **No SLSA Provenance** | Medium | Medium | **MEDIUM** | Add provenance attestation | Medium |
-| **6** | **Overly Broad Permissions** | Low | Low | **LOW** | Use job-level permissions | Low |
-| **7** | **No Dependency Hash Verification** | Low | Medium | **LOW** | Add Sigstore cosign verification | High |
+| #     | Risk                                | Likelihood | Impact | Severity   | Mitigation                          | Effort |
+| ----- | ----------------------------------- | ---------- | ------ | ---------- | ----------------------------------- | ------ |
+| **1** | **Unpinned GitHub Actions**         | High       | High   | **HIGH**   | Pin all actions to commit SHA       | Low    |
+| **2** | **No Artifact Signing**             | Medium     | High   | **HIGH**   | Sign container images, SBOM         | Medium |
+| **3** | **Security Scans Non-Blocking**     | High       | Medium | **MEDIUM** | Make Trivy blocking for CRITICAL    | Low    |
+| **4** | **Docker Cache Poisoning**          | Low        | High   | **MEDIUM** | Use registry cache instead of local | Medium |
+| **5** | **No SLSA Provenance**              | Medium     | Medium | **MEDIUM** | Add provenance attestation          | Medium |
+| **6** | **Overly Broad Permissions**        | Low        | Low    | **LOW**    | Use job-level permissions           | Low    |
+| **7** | **No Dependency Hash Verification** | Low        | Medium | **LOW**    | Add Sigstore cosign verification    | High   |
 
 ---
 
@@ -41,6 +42,7 @@
 ### Risk #1: Unpinned GitHub Actions (HIGH)
 
 **Current Code**:
+
 ```yaml
 - uses: actions/checkout@v4
 - uses: actions/setup-node@v4
@@ -53,26 +55,30 @@
 ```
 
 **Problem**: Using mutable tags (v4, v3, @v0) allows upstream maintainers to change action code. A compromised action could:
+
 - Steal secrets (GITHUB_TOKEN, npm tokens)
 - Inject malicious code into build
 - Exfiltrate source code
 
 **Exploit Scenario**:
+
 1. Attacker compromises `actions/checkout` repository
 2. Pushes malicious code to v4 tag
 3. Our workflow runs compromised action
 4. Secrets exfiltrated, backdoor injected into build
 
 **Mitigation**:
+
 ```yaml
 # Pin to commit SHA with comment showing version
-- uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
-- uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8  # v4.0.2
-- uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398b4e9f4d  # v4.0.0
-- uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9  # v4.0.2
+- uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+- uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+- uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398b4e9f4d # v4.0.0
+- uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
 ```
 
 **Automation**: Use Dependabot to keep SHAs up-to-date:
+
 ```yaml
 # .github/dependabot.yml
 version: 2
@@ -91,15 +97,17 @@ updates:
 ### Risk #2: No Artifact Signing (HIGH)
 
 **Current Code**:
+
 ```yaml
 - name: Build API image (cached)
   uses: docker/build-push-action@v6
   with:
     tags: summit/api:ci
-    push: false  # ← No signing
+    push: false # ← No signing
 ```
 
 **Problem**: No cryptographic guarantee that artifacts are from legitimate builds. Attacker who gains access to artifact storage could:
+
 - Replace images with trojaned versions
 - MITM download and inject malware
 
@@ -108,10 +116,10 @@ Add Sigstore cosign signing:
 
 ```yaml
 - name: Install cosign
-  uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20  # v3.5.0
+  uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 # v3.5.0
 
 - name: Build and sign API image
-  uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671  # v6.5.0
+  uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671 # v6.5.0
   with:
     context: ./server
     file: ./server/Dockerfile.dev
@@ -136,6 +144,7 @@ Add Sigstore cosign signing:
 ```
 
 **Setup**:
+
 ```bash
 # Generate signing key pair
 cosign generate-key-pair
@@ -150,6 +159,7 @@ git add .github/cosign.pub && git commit -m "Add cosign public key"
 ```
 
 **Verification** (in deployment):
+
 ```bash
 cosign verify --key .github/cosign.pub summit/api:ci-<sha>
 ```
@@ -159,15 +169,16 @@ cosign verify --key .github/cosign.pub summit/api:ci-<sha>
 ### Risk #3: Security Scans Non-Blocking (MEDIUM)
 
 **Current Code**:
+
 ```yaml
 security-scan:
   runs-on: ubuntu-latest
-  continue-on-error: true  # ← Non-blocking!
+  continue-on-error: true # ← Non-blocking!
   steps:
     - name: Trivy vulnerability scan
       uses: aquasecurity/trivy-action@0.24.0
       with:
-        exit-code: '0'  # ← Never fails!
+        exit-code: "0" # ← Never fails!
         severity: CRITICAL,HIGH
 ```
 
@@ -181,16 +192,16 @@ security-scan:
   runs-on: ubuntu-latest
   # Remove continue-on-error
   steps:
-    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
     - name: Trivy vulnerability scan (CRITICAL = block)
-      uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9bd0d8  # v0.24.0
+      uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9bd0d8 # v0.24.0
       with:
         scan-type: fs
         format: sarif
         output: trivy-results.sarif
         severity: CRITICAL
-        exit-code: '1'  # Fail on CRITICAL
+        exit-code: "1" # Fail on CRITICAL
 
     - name: Upload Trivy results to GitHub Security
       uses: github/codeql-action/upload-sarif@v3
@@ -199,16 +210,17 @@ security-scan:
         sarif_file: trivy-results.sarif
 
     - name: Trivy scan for HIGH (advisory only)
-      uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9bd0d8  # v0.24.0
+      uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9bd0d8 # v0.24.0
       with:
         scan-type: fs
         format: table
         severity: HIGH
-        exit-code: '0'  # Advisory only
+        exit-code: "0" # Advisory only
       continue-on-error: true
 ```
 
 **Branch Protection Rule**:
+
 ```
 Require status checks to pass:
   ✓ security-scan
@@ -219,6 +231,7 @@ Require status checks to pass:
 ### Risk #4: Docker Cache Poisoning (MEDIUM)
 
 **Current Code**:
+
 ```yaml
 - name: Cache Docker layers
   uses: actions/cache@v4
@@ -229,20 +242,23 @@ Require status checks to pass:
 ```
 
 **Problem**: Cache can be poisoned by:
+
 1. A malicious PR updating files used in cache key hash
 2. Restoring cache from forked PR runs (if enabled)
 3. Cache key collision
 
 **Exploit Scenario**:
+
 1. Attacker opens PR modifying `docker-compose.dev.yml` (cache key input)
 2. PR workflow populates cache with trojaned layers
 3. Main branch workflow restores poisoned cache
 4. Malicious code included in production build
 
 **Mitigation #1**: Use registry cache instead of local:
+
 ```yaml
 - name: Build API image (with registry cache)
-  uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671  # v6.5.0
+  uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671 # v6.5.0
   with:
     context: ./server
     file: ./server/Dockerfile.dev
@@ -253,9 +269,10 @@ Require status checks to pass:
 ```
 
 **Mitigation #2**: Isolate PR caches:
+
 ```yaml
 - name: Cache Docker layers
-  uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9  # v4.0.2
+  uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
   with:
     path: /tmp/.buildx-cache
     key: ${{ runner.os }}-buildx-${{ github.event_name }}-${{ github.ref }}-${{ hashFiles(...) }}
@@ -269,6 +286,7 @@ Require status checks to pass:
 **Current State**: No build provenance attestation
 
 **Problem**: Can't verify:
+
 - Build was from this repo
 - Build used expected workflow
 - Artifacts are authentic
@@ -296,13 +314,13 @@ jobs:
     outputs:
       image-digest: ${{ steps.build.outputs.digest }}
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226  # v3.3.0
+        uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3.3.0
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d  # v3.0.0
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -310,7 +328,7 @@ jobs:
 
       - name: Build and push
         id: build
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671  # v6.5.0
+        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671 # v6.5.0
         with:
           context: ./server
           push: true
@@ -332,6 +350,7 @@ jobs:
 ```
 
 **Verification**:
+
 ```bash
 # Install slsa-verifier
 gh release download -R slsa-framework/slsa-verifier -p "slsa-verifier-linux-amd64"
@@ -346,6 +365,7 @@ gh release download -R slsa-framework/slsa-verifier -p "slsa-verifier-linux-amd6
 ### Risk #6: Overly Broad Permissions (LOW)
 
 **Current Code** (workflow-level):
+
 ```yaml
 permissions:
   contents: read
@@ -363,17 +383,17 @@ permissions: {}
 jobs:
   fast-checks:
     permissions:
-      contents: read  # Only needs to read code
+      contents: read # Only needs to read code
 
   security-scan:
     permissions:
       contents: read
-      security-events: write  # Only security job needs this
+      security-events: write # Only security job needs this
 
   golden-path:
     permissions:
       contents: read
-      actions: read  # For downloading artifacts
+      actions: read # For downloading artifacts
 ```
 
 ---
@@ -381,6 +401,7 @@ jobs:
 ### Risk #7: No Dependency Hash Verification (LOW)
 
 **Current Code**:
+
 ```yaml
 - uses: pnpm/action-setup@v4
   with:
@@ -397,6 +418,7 @@ jobs:
 ```
 
 Or add post-install integrity check:
+
 ```yaml
 - name: Verify dependencies
   run: pnpm audit signatures
@@ -424,7 +446,7 @@ permissions: {}
 
 env:
   PNPM_CACHE_FOLDER: ~/.pnpm-store
-  NODE_VERSION: '20.x'
+  NODE_VERSION: "20.x"
 
 jobs:
   fast-checks:
@@ -433,22 +455,22 @@ jobs:
       contents: read
     steps:
       # Pin all actions to SHA
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
-      - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8  # v4.0.2
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Enable corepack
         run: corepack enable
 
-      - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398b4e9f4d  # v4.0.0
+      - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398b4e9f4d # v4.0.0
         with:
           version: 9
           run_install: false
 
       - name: Cache pnpm store
-        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9  # v4.0.2
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         with:
           path: ${{ env.PNPM_CACHE_FOLDER }}
           key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
@@ -483,17 +505,17 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       # CRITICAL vulnerabilities = blocking
       - name: Trivy scan (CRITICAL blocking)
-        uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9bd0d8  # v0.24.0
+        uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9bd0d8 # v0.24.0
         with:
           scan-type: fs
           format: sarif
           output: trivy-results.sarif
           severity: CRITICAL
-          exit-code: '1'  # Block on CRITICAL
+          exit-code: "1" # Block on CRITICAL
 
       - name: Upload Trivy SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
@@ -503,23 +525,23 @@ jobs:
 
       # HIGH vulnerabilities = advisory
       - name: Trivy scan (HIGH advisory)
-        uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9bd0d8  # v0.24.0
+        uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9bd0d8 # v0.24.0
         with:
           scan-type: fs
           format: table
           severity: HIGH
-          exit-code: '0'
+          exit-code: "0"
         continue-on-error: true
 
       - name: Generate SBOM
-        uses: anchore/sbom-action@e8d2a6937ecead383dfe75190d104edd1f9c5751  # v0.16.0
+        uses: anchore/sbom-action@e8d2a6937ecead383dfe75190d104edd1f9c5751 # v0.16.0
         with:
           path: .
           format: spdx-json
           output-file: sbom.spdx.json
 
       - name: Upload SBOM
-        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3  # v4.3.1
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
         with:
           name: sbom-spdx
           path: sbom.spdx.json
@@ -530,16 +552,16 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
-      - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8  # v4.0.2
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Enable corepack
         run: corepack enable
 
-      - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398b4e9f4d  # v4.0.0
+      - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398b4e9f4d # v4.0.0
         with:
           version: 9
           run_install: false
@@ -554,7 +576,7 @@ jobs:
         run: pnpm -w run test
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3  # v4.3.1
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
         with:
           name: build-artifacts
           path: |
@@ -570,18 +592,21 @@ jobs:
 ## Implementation Checklist
 
 **Phase 1: Quick Wins** (1-2 days)
+
 - [ ] Pin all GitHub Actions to commit SHA
 - [ ] Enable Dependabot for actions
 - [ ] Make Trivy CRITICAL blocking
 - [ ] Add job-level permissions
 
 **Phase 2: Signing & Attestation** (3-5 days)
+
 - [ ] Generate cosign key pair
 - [ ] Add image signing to build workflow
 - [ ] Add SBOM attestation
 - [ ] Implement SLSA provenance workflow
 
 **Phase 3: Cache Hardening** (2-3 days)
+
 - [ ] Migrate to registry-based cache
 - [ ] Isolate PR caches from main
 - [ ] Add cache verification

@@ -2,14 +2,14 @@
  * Text normalization utilities
  */
 
-import type { NormalizationOptions } from '../types';
+import type { NormalizationOptions } from "../types";
 
 export class TextNormalizer {
   private options: Required<NormalizationOptions>;
 
   constructor(options: NormalizationOptions = {}) {
     this.options = {
-      unicodeNormalization: options.unicodeNormalization ?? 'NFKC',
+      unicodeNormalization: options.unicodeNormalization ?? "NFKC",
       caseFolding: options.caseFolding ?? true,
       accentRemoval: options.accentRemoval ?? false,
       numberNormalization: options.numberNormalization ?? false,
@@ -55,9 +55,7 @@ export class TextNormalizer {
    * Remove accent marks from characters
    */
   private removeAccents(text: string): string {
-    return text
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '');
+    return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   }
 
   /**
@@ -74,9 +72,7 @@ export class TextNormalizer {
    * Normalize whitespace
    */
   private normalizeWhitespace(text: string): string {
-    return text
-      .replace(/\s+/g, ' ')
-      .replace(/^\s+|\s+$/g, '');
+    return text.replace(/\s+/g, " ").replace(/^\s+|\s+$/g, "");
   }
 }
 
@@ -123,29 +119,29 @@ export const unicode = {
    * Canonical Decomposition
    */
   NFD(text: string): string {
-    return text.normalize('NFD');
+    return text.normalize("NFD");
   },
 
   /**
    * Canonical Composition
    */
   NFC(text: string): string {
-    return text.normalize('NFC');
+    return text.normalize("NFC");
   },
 
   /**
    * Compatibility Decomposition
    */
   NFKD(text: string): string {
-    return text.normalize('NFKD');
+    return text.normalize("NFKD");
   },
 
   /**
    * Compatibility Composition
    */
   NFKC(text: string): string {
-    return text.normalize('NFKC');
+    return text.normalize("NFKC");
   },
 };
 
-export * from './advanced';
+export * from "./advanced";

@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   useSupplyChainVerification,
   SupplyChainVerificationResult,
-} from '../utils/supplyChainVerification';
+} from "../utils/supplyChainVerification";
 
 interface SupplyChainVerificationPanelProps {
   runId: string;
@@ -10,9 +10,11 @@ interface SupplyChainVerificationPanelProps {
   className?: string;
 }
 
-const SupplyChainVerificationPanel: React.FC<
-  SupplyChainVerificationPanelProps
-> = ({ runId, artifacts = [], className = '' }) => {
+const SupplyChainVerificationPanel: React.FC<SupplyChainVerificationPanelProps> = ({
+  runId,
+  artifacts = [],
+  className = "",
+}) => {
   const { isVerifying, results, batchVerify, generateReport, clearResults } =
     useSupplyChainVerification();
 
@@ -22,10 +24,7 @@ const SupplyChainVerificationPanel: React.FC<
     requireSBOM: true,
     requireSLSA: true,
     minSLSALevel: 2,
-    allowedIssuers: [
-      'https://accounts.google.com',
-      'https://login.microsoftonline.com',
-    ],
+    allowedIssuers: ["https://accounts.google.com", "https://login.microsoftonline.com"],
     maxAge: 168, // 7 days
   });
 
@@ -49,21 +48,21 @@ const SupplyChainVerificationPanel: React.FC<
   };
 
   const getStatusColor = (verified: boolean) => {
-    return verified ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50';
+    return verified ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50";
   };
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'critical':
-        return 'text-red-600 bg-red-100';
-      case 'high':
-        return 'text-orange-600 bg-orange-100';
-      case 'medium':
-        return 'text-yellow-600 bg-yellow-100';
-      case 'low':
-        return 'text-blue-600 bg-blue-100';
+      case "critical":
+        return "text-red-600 bg-red-100";
+      case "high":
+        return "text-orange-600 bg-orange-100";
+      case "medium":
+        return "text-yellow-600 bg-yellow-100";
+      case "low":
+        return "text-blue-600 bg-blue-100";
       default:
-        return 'text-gray-600 bg-gray-100';
+        return "text-gray-600 bg-gray-100";
     }
   };
 
@@ -77,11 +76,11 @@ const SupplyChainVerificationPanel: React.FC<
             <span
               className={`px-2 py-1 rounded-full text-xs font-medium ${
                 result.cosignVerification?.signatureValid
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-red-100 text-red-800'
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-800"
               }`}
             >
-              {result.cosignVerification?.signatureValid ? 'Valid' : 'Invalid'}
+              {result.cosignVerification?.signatureValid ? "Valid" : "Invalid"}
             </span>
           </div>
 
@@ -90,37 +89,31 @@ const SupplyChainVerificationPanel: React.FC<
               <div>
                 <span className="text-gray-500">Signature:</span>
                 <span
-                  className={`ml-2 ${result.cosignVerification.signatureValid ? 'text-green-600' : 'text-red-600'}`}
+                  className={`ml-2 ${result.cosignVerification.signatureValid ? "text-green-600" : "text-red-600"}`}
                 >
-                  {result.cosignVerification.signatureValid
-                    ? '✓ Valid'
-                    : '✗ Invalid'}
+                  {result.cosignVerification.signatureValid ? "✓ Valid" : "✗ Invalid"}
                 </span>
               </div>
               <div>
                 <span className="text-gray-500">Certificate:</span>
                 <span
-                  className={`ml-2 ${result.cosignVerification.certificateValid ? 'text-green-600' : 'text-red-600'}`}
+                  className={`ml-2 ${result.cosignVerification.certificateValid ? "text-green-600" : "text-red-600"}`}
                 >
-                  {result.cosignVerification.certificateValid
-                    ? '✓ Valid'
-                    : '✗ Invalid'}
+                  {result.cosignVerification.certificateValid ? "✓ Valid" : "✗ Invalid"}
                 </span>
               </div>
               <div>
                 <span className="text-gray-500">Rekor Entry:</span>
                 <span
-                  className={`ml-2 ${result.cosignVerification.rekorEntryValid ? 'text-green-600' : 'text-red-600'}`}
+                  className={`ml-2 ${result.cosignVerification.rekorEntryValid ? "text-green-600" : "text-red-600"}`}
                 >
-                  {result.cosignVerification.rekorEntryValid
-                    ? '✓ Valid'
-                    : '✗ Invalid'}
+                  {result.cosignVerification.rekorEntryValid ? "✓ Valid" : "✗ Invalid"}
                 </span>
               </div>
               <div>
                 <span className="text-gray-500">Issuer:</span>
                 <span className="ml-2 text-gray-900 font-mono text-xs">
-                  {result.cosignVerification.fulcioIssuer || 'N/A'}
+                  {result.cosignVerification.fulcioIssuer || "N/A"}
                 </span>
               </div>
             </div>
@@ -130,23 +123,21 @@ const SupplyChainVerificationPanel: React.FC<
         {/* SBOM Status */}
         <div className="bg-white border rounded-lg p-4">
           <div className="flex items-center justify-between mb-2">
-            <h4 className="font-medium text-gray-900">
-              SBOM (Software Bill of Materials)
-            </h4>
+            <h4 className="font-medium text-gray-900">SBOM (Software Bill of Materials)</h4>
             <span
               className={`px-2 py-1 rounded-full text-xs font-medium ${
                 result.sbomVerification?.valid
-                  ? 'bg-green-100 text-green-800'
+                  ? "bg-green-100 text-green-800"
                   : result.sbomVerification?.present
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : 'bg-gray-100 text-gray-800'
+                    ? "bg-yellow-100 text-yellow-800"
+                    : "bg-gray-100 text-gray-800"
               }`}
             >
               {result.sbomVerification?.valid
-                ? 'Valid'
+                ? "Valid"
                 : result.sbomVerification?.present
-                  ? 'Invalid'
-                  : 'Not Present'}
+                  ? "Invalid"
+                  : "Not Present"}
             </span>
           </div>
 
@@ -154,9 +145,7 @@ const SupplyChainVerificationPanel: React.FC<
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-500">Components:</span>
-                <span className="font-medium">
-                  {result.sbomVerification.componentsCount}
-                </span>
+                <span className="font-medium">{result.sbomVerification.componentsCount}</span>
               </div>
 
               {result.sbomVerification.vulnerabilities &&
@@ -164,26 +153,17 @@ const SupplyChainVerificationPanel: React.FC<
                   <div>
                     <span className="text-gray-500">Vulnerabilities:</span>
                     <div className="mt-1 space-y-1">
-                      {result.sbomVerification.vulnerabilities
-                        .slice(0, 5)
-                        .map((vuln, idx) => (
-                          <div
-                            key={idx}
-                            className="flex items-center justify-between text-xs"
-                          >
-                            <span className="font-mono">{vuln.id}</span>
-                            <span
-                              className={`px-2 py-1 rounded ${getSeverityColor(vuln.severity)}`}
-                            >
-                              {vuln.severity}
-                            </span>
-                          </div>
-                        ))}
+                      {result.sbomVerification.vulnerabilities.slice(0, 5).map((vuln, idx) => (
+                        <div key={idx} className="flex items-center justify-between text-xs">
+                          <span className="font-mono">{vuln.id}</span>
+                          <span className={`px-2 py-1 rounded ${getSeverityColor(vuln.severity)}`}>
+                            {vuln.severity}
+                          </span>
+                        </div>
+                      ))}
                       {result.sbomVerification.vulnerabilities.length > 5 && (
                         <div className="text-xs text-gray-500">
-                          ...and{' '}
-                          {result.sbomVerification.vulnerabilities.length - 5}{' '}
-                          more
+                          ...and {result.sbomVerification.vulnerabilities.length - 5} more
                         </div>
                       )}
                     </div>
@@ -206,17 +186,17 @@ const SupplyChainVerificationPanel: React.FC<
               <span
                 className={`px-2 py-1 rounded-full text-xs font-medium ${
                   result.slsaVerification?.valid
-                    ? 'bg-green-100 text-green-800'
+                    ? "bg-green-100 text-green-800"
                     : result.slsaVerification?.present
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-gray-100 text-gray-800'
+                      ? "bg-yellow-100 text-yellow-800"
+                      : "bg-gray-100 text-gray-800"
                 }`}
               >
                 {result.slsaVerification?.valid
-                  ? 'Valid'
+                  ? "Valid"
                   : result.slsaVerification?.present
-                    ? 'Invalid'
-                    : 'Not Present'}
+                    ? "Invalid"
+                    : "Not Present"}
               </span>
             </div>
           </div>
@@ -246,9 +226,7 @@ const SupplyChainVerificationPanel: React.FC<
 
             {result.errors.length > 0 && (
               <div className="mb-2">
-                <h5 className="text-sm font-medium text-red-600 mb-1">
-                  Errors:
-                </h5>
+                <h5 className="text-sm font-medium text-red-600 mb-1">Errors:</h5>
                 <ul className="text-xs text-red-600 space-y-1">
                   {result.errors.map((error, idx) => (
                     <li key={idx}>• {error}</li>
@@ -259,9 +237,7 @@ const SupplyChainVerificationPanel: React.FC<
 
             {result.warnings.length > 0 && (
               <div>
-                <h5 className="text-sm font-medium text-yellow-600 mb-1">
-                  Warnings:
-                </h5>
+                <h5 className="text-sm font-medium text-yellow-600 mb-1">Warnings:</h5>
                 <ul className="text-xs text-yellow-600 space-y-1">
                   {result.warnings.map((warning, idx) => (
                     <li key={idx}>• {warning}</li>
@@ -281,9 +257,7 @@ const SupplyChainVerificationPanel: React.FC<
       <div className="bg-white border-b px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">
-              Supply Chain Verification
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900">Supply Chain Verification</h3>
             <p className="text-sm text-gray-600">
               Cosign signatures, SBOM analysis, and SLSA provenance verification
             </p>
@@ -329,7 +303,7 @@ const SupplyChainVerificationPanel: React.FC<
                   ></path>
                 </svg>
               )}
-              {isVerifying ? 'Verifying...' : 'Verify All'}
+              {isVerifying ? "Verifying..." : "Verify All"}
             </button>
           </div>
         </div>
@@ -394,27 +368,19 @@ const SupplyChainVerificationPanel: React.FC<
         <div className="bg-white border-b px-6 py-4">
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">
-                {reportData.summary.total}
-              </div>
+              <div className="text-2xl font-bold text-gray-900">{reportData.summary.total}</div>
               <div className="text-xs text-gray-500">Total Artifacts</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">
-                {reportData.summary.verified}
-              </div>
+              <div className="text-2xl font-bold text-green-600">{reportData.summary.verified}</div>
               <div className="text-xs text-gray-500">Verified</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-red-600">
-                {reportData.summary.failed}
-              </div>
+              <div className="text-2xl font-bold text-red-600">{reportData.summary.failed}</div>
               <div className="text-xs text-gray-500">Failed</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">
-                {reportData.summary.withSBOM}
-              </div>
+              <div className="text-2xl font-bold text-blue-600">{reportData.summary.withSBOM}</div>
               <div className="text-xs text-gray-500">With SBOM</div>
             </div>
             <div className="text-center">
@@ -452,8 +418,7 @@ const SupplyChainVerificationPanel: React.FC<
             </svg>
             <p>No artifacts to verify for this run.</p>
             <p className="text-sm mt-1">
-              Supply chain verification will appear here when artifacts are
-              available.
+              Supply chain verification will appear here when artifacts are available.
             </p>
           </div>
         ) : (
@@ -474,28 +439,23 @@ const SupplyChainVerificationPanel: React.FC<
                     <span
                       className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(result.verified)}`}
                     >
-                      {result.verified ? '✓ Verified' : '✗ Failed'}
+                      {result.verified ? "✓ Verified" : "✗ Failed"}
                     </span>
 
                     <button
                       onClick={() =>
                         setSelectedArtifact(
-                          selectedArtifact === result.artifact
-                            ? null
-                            : result.artifact,
+                          selectedArtifact === result.artifact ? null : result.artifact
                         )
                       }
                       className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                     >
-                      {selectedArtifact === result.artifact
-                        ? 'Hide Details'
-                        : 'Show Details'}
+                      {selectedArtifact === result.artifact ? "Hide Details" : "Show Details"}
                     </button>
                   </div>
                 </div>
 
-                {selectedArtifact === result.artifact &&
-                  renderVerificationStatus(result)}
+                {selectedArtifact === result.artifact && renderVerificationStatus(result)}
               </div>
             ))}
           </div>
@@ -525,9 +485,7 @@ const SupplyChainVerificationPanel: React.FC<
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               ></path>
             </svg>
-            <p className="text-sm text-gray-600">
-              Verifying supply chain integrity...
-            </p>
+            <p className="text-sm text-gray-600">Verifying supply chain integrity...</p>
           </div>
         </div>
       )}

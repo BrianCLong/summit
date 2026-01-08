@@ -87,7 +87,7 @@ interface ChainOfCustody {
 
   // Legal Status
   legalHold: boolean;
-  admissibilityStatus: 'PENDING' | 'APPROVED' | 'CHALLENGED';
+  admissibilityStatus: "PENDING" | "APPROVED" | "CHALLENGED";
   expertWitness: string;
   courtDate?: Date;
 }
@@ -237,7 +237,7 @@ interface IntegrityMonitoring {
   lastVerification: Date;
   nextVerification: Date;
 
-  integrityStatus: 'INTACT' | 'COMPROMISED' | 'UNKNOWN';
+  integrityStatus: "INTACT" | "COMPROMISED" | "UNKNOWN";
   hashValidation: {
     originalHash: string;
     currentHash: string;

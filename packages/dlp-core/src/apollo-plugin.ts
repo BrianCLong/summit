@@ -7,9 +7,9 @@
  * @package dlp-core
  */
 
-import type { ApolloServerPlugin, GraphQLRequestListener } from '@apollo/server';
-import { DLPService } from './DLPService';
-import type { DLPServiceConfig } from './types';
+import type { ApolloServerPlugin, GraphQLRequestListener } from "@apollo/server";
+import { DLPService } from "./DLPService";
+import type { DLPServiceConfig } from "./types";
 
 export interface DLPApolloPluginOptions {
   inspectQueries?: boolean;
@@ -41,13 +41,13 @@ export function DLPApolloPlugin(
     inspectMutations: true,
     inspectResponses: true,
     redactInResponse: true,
-    excludeOperations: ['IntrospectionQuery', '__schema', '__type'],
+    excludeOperations: ["IntrospectionQuery", "__schema", "__type"],
     ...options,
   };
 
   return {
     async requestDidStart({ request, contextValue }): Promise<GraphQLRequestListener<DLPContext>> {
-      const operationName = request.operationName || 'unknown';
+      const operationName = request.operationName || "unknown";
 
       // Skip excluded operations
       if (defaultOptions.excludeOperations.includes(operationName)) {
@@ -56,8 +56,8 @@ export function DLPApolloPlugin(
 
       return {
         async didResolveOperation({ operation }) {
-          const isMutation = operation.operation === 'mutation';
-          const isQuery = operation.operation === 'query';
+          const isMutation = operation.operation === "mutation";
+          const isQuery = operation.operation === "query";
 
           // Check if we should inspect this operation type
           if (isMutation && !defaultOptions.inspectMutations) return;
@@ -67,10 +67,10 @@ export function DLPApolloPlugin(
           if (request.variables && Object.keys(request.variables).length > 0) {
             const result = await dlpService.scan({
               content: JSON.stringify(request.variables),
-              contentType: 'application/json',
+              contentType: "application/json",
               context: {
-                contentType: 'graphql-variables',
-                purpose: isMutation ? 'CREATE' : 'READ',
+                contentType: "graphql-variables",
+                purpose: isMutation ? "CREATE" : "READ",
                 actor: contextValue.user,
               },
               metadata: {
@@ -81,7 +81,7 @@ export function DLPApolloPlugin(
 
             if (!result.allowed) {
               throw new Error(
-                `DLP Policy Violation: ${result.violations.map((v) => v.message).join(', ')}`
+                `DLP Policy Violation: ${result.violations.map((v) => v.message).join(", ")}`
               );
             }
           }
@@ -91,15 +91,15 @@ export function DLPApolloPlugin(
           if (!defaultOptions.inspectResponses) return;
 
           // Response inspection for GraphQL
-          if (response.body.kind === 'single' && response.body.singleResult.data) {
+          if (response.body.kind === "single" && response.body.singleResult.data) {
             const responseData = JSON.stringify(response.body.singleResult.data);
 
             const result = await dlpService.scan({
               content: responseData,
-              contentType: 'application/json',
+              contentType: "application/json",
               context: {
-                contentType: 'graphql-response',
-                purpose: 'EGRESS',
+                contentType: "graphql-response",
+                purpose: "EGRESS",
                 actor: contextValue.user,
               },
               metadata: {
@@ -110,7 +110,7 @@ export function DLPApolloPlugin(
             // If redaction is needed and enabled
             if (
               defaultOptions.redactInResponse &&
-              result.action === 'REDACT' &&
+              result.action === "REDACT" &&
               result.detection.hasDetections
             ) {
               const redacted = await dlpService.redact({
@@ -123,14 +123,14 @@ export function DLPApolloPlugin(
                 response.body.singleResult.data = JSON.parse(redacted.redactedContent);
               } catch {
                 // If parsing fails, leave original
-                console.warn('[DLP] Failed to apply redaction to GraphQL response');
+                console.warn("[DLP] Failed to apply redaction to GraphQL response");
               }
             }
 
             // Add DLP headers to response
             if (result.detection.hasDetections) {
-              response.http?.headers.set('X-DLP-Scanned', 'true');
-              response.http?.headers.set('X-DLP-Audit-Id', result.auditEventId);
+              response.http?.headers.set("X-DLP-Scanned", "true");
+              response.http?.headers.set("X-DLP-Audit-Id", result.auditEventId);
             }
           }
         },

@@ -1,5 +1,5 @@
-import { BaseModule } from './moduleBase';
-import { defaultModules } from './modules';
+import { BaseModule } from "./moduleBase";
+import { defaultModules } from "./modules";
 import {
   ModuleExecutionResult,
   ModuleSnapshot,
@@ -8,13 +8,13 @@ import {
   OrchestratorTask,
   TaskValidationIssue,
   TaskRecord,
-} from './types';
+} from "./types";
 
 interface EventPayloads {
-  'module:status': { moduleId: string; status: ModuleStatus };
-  'task:started': TaskRecord;
-  'task:completed': TaskRecord;
-  'task:error': TaskRecord;
+  "module:status": { moduleId: string; status: ModuleStatus };
+  "task:started": TaskRecord;
+  "task:completed": TaskRecord;
+  "task:error": TaskRecord;
 }
 
 type EventName = keyof EventPayloads;
@@ -32,7 +32,7 @@ export class LaunchableOrchestrator {
 
   addModule(module: BaseModule): void {
     this.modules.set(module.definition.id, module);
-    this.emit('module:status', {
+    this.emit("module:status", {
       moduleId: module.definition.id,
       status: this.decorateStatus(module.getStatus()),
     });
@@ -58,7 +58,7 @@ export class LaunchableOrchestrator {
     for (const module of this.modules.values()) {
       const status = this.decorateStatus(await module.start());
       statuses.push({ definition: module.definition, status });
-      this.emit('module:status', {
+      this.emit("module:status", {
         moduleId: module.definition.id,
         status,
       });
@@ -69,7 +69,7 @@ export class LaunchableOrchestrator {
   async stopAll(): Promise<void> {
     for (const module of this.modules.values()) {
       const status = this.decorateStatus(await module.stop());
-      this.emit('module:status', {
+      this.emit("module:status", {
         moduleId: module.definition.id,
         status,
       });
@@ -80,20 +80,20 @@ export class LaunchableOrchestrator {
     const record: TaskRecord = {
       task,
       startedAt: new Date().toISOString(),
-      status: 'running',
+      status: "running",
       results: [],
     };
     this.tasks = [record, ...this.tasks];
-    this.emit('task:started', record);
+    this.emit("task:started", record);
 
     const validationIssues = this.validateTask(task);
     if (validationIssues.length > 0) {
-      record.status = 'error';
+      record.status = "error";
       record.completedAt = new Date().toISOString();
       record.results = validationIssues.map((issue) =>
-        this.buildErrorResult(issue.moduleId, issue.action, issue.message),
+        this.buildErrorResult(issue.moduleId, issue.action, issue.message)
       );
-      this.emit('task:error', record);
+      this.emit("task:error", record);
       return record;
     }
 
@@ -101,20 +101,16 @@ export class LaunchableOrchestrator {
       const module = this.modules.get(action.moduleId);
       if (!module) {
         const errorMessage = `Module ${action.moduleId} not registered`;
-        const errorResult = this.buildErrorResult(
-          action.moduleId,
-          action.action,
-          errorMessage,
-        );
-        record.status = 'error';
+        const errorResult = this.buildErrorResult(action.moduleId, action.action, errorMessage);
+        record.status = "error";
         record.completedAt = new Date().toISOString();
         record.results.push(errorResult);
-        this.emit('task:error', record);
+        this.emit("task:error", record);
         return record;
       }
 
       module.queueTask();
-      this.emit('module:status', {
+      this.emit("module:status", {
         moduleId: module.definition.id,
         status: this.decorateStatus(module.getStatus()),
       });
@@ -122,7 +118,7 @@ export class LaunchableOrchestrator {
       try {
         const result = await module.executeTask(task, action);
         record.results.push(result);
-        this.emit('module:status', {
+        this.emit("module:status", {
           moduleId: module.definition.id,
           status: this.decorateStatus(module.getStatus()),
         });
@@ -130,23 +126,23 @@ export class LaunchableOrchestrator {
         const failure: ModuleExecutionResult = this.buildErrorResult(
           module.definition.id,
           action.action,
-          error instanceof Error ? error.message : 'Unknown error',
+          error instanceof Error ? error.message : "Unknown error"
         );
         record.results.push(failure);
-        record.status = 'error';
+        record.status = "error";
         record.completedAt = new Date().toISOString();
-        this.emit('module:status', {
+        this.emit("module:status", {
           moduleId: module.definition.id,
           status: this.decorateStatus(module.getStatus()),
         });
-        this.emit('task:error', record);
+        this.emit("task:error", record);
         return record;
       }
     }
 
-    record.status = 'completed';
+    record.status = "completed";
     record.completedAt = new Date().toISOString();
-    this.emit('task:completed', record);
+    this.emit("task:completed", record);
     return record;
   }
 
@@ -176,9 +172,7 @@ export class LaunchableOrchestrator {
     if (!listeners) {
       return;
     }
-    listeners.forEach((listener) =>
-      listener(payload as EventPayloads[EventName]),
-    );
+    listeners.forEach((listener) => listener(payload as EventPayloads[EventName]));
   }
 
   validateTask(task: OrchestratorTask): TaskValidationIssue[] {
@@ -216,12 +210,12 @@ export class LaunchableOrchestrator {
   private buildErrorResult(
     moduleId: string,
     action: string,
-    message: string,
+    message: string
   ): ModuleExecutionResult {
     return {
       moduleId,
       action,
-      status: 'error',
+      status: "error",
       message,
       output: { message },
       durationMs: 0,
@@ -231,7 +225,7 @@ export class LaunchableOrchestrator {
 }
 
 export function createLaunchableOrchestrator(
-  modules: BaseModule[] = defaultModules,
+  modules: BaseModule[] = defaultModules
 ): LaunchableOrchestrator {
   return new LaunchableOrchestrator(modules);
 }

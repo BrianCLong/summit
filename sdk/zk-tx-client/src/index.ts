@@ -1,5 +1,5 @@
-import { Buffer } from 'buffer';
-import { hash } from 'blake3';
+import { Buffer } from "buffer";
+import { hash } from "blake3";
 
 export interface TenantCommitment {
   commitments: string[];
@@ -26,10 +26,10 @@ export interface OverlapProofResponse {
 }
 
 export function pedersenMiMCStubCommitment(selector: string, salt: string): string {
-  const prefix = Buffer.from('pedersen-mimc-stub');
+  const prefix = Buffer.from("pedersen-mimc-stub");
   const payload = Buffer.concat([prefix, Buffer.from(salt), Buffer.from(selector)]);
   const digest = hash(payload);
-  return Buffer.from(digest).toString('hex');
+  return Buffer.from(digest).toString("hex");
 }
 
 type FetchLike = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
@@ -39,11 +39,11 @@ export class ZkTxClient {
   private readonly fetchImpl: FetchLike;
 
   constructor(baseUrl: string, fetchImpl?: FetchLike) {
-    this.baseUrl = baseUrl.replace(/\/$/, '');
+    this.baseUrl = baseUrl.replace(/\/$/, "");
     const globalFetch = (globalThis as unknown as { fetch?: FetchLike }).fetch;
     this.fetchImpl = fetchImpl ?? globalFetch;
     if (!this.fetchImpl) {
-      throw new Error('fetch implementation required for ZkTxClient');
+      throw new Error("fetch implementation required for ZkTxClient");
     }
   }
 
@@ -61,14 +61,14 @@ export class ZkTxClient {
       payload.circuit_hint = request.circuitHint;
     }
 
-    if (typeof request.redTeam === 'boolean') {
+    if (typeof request.redTeam === "boolean") {
       payload.red_team = request.redTeam;
     }
 
     const response = await this.fetchImpl(`${this.baseUrl}/overlap-proof`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'content-type': 'application/json',
+        "content-type": "application/json",
       },
       body: JSON.stringify(payload),
     });
@@ -99,7 +99,7 @@ export class ZkTxClient {
 
 export function buildTenantCommitment(selectors: string[], tenantLabel: string): TenantCommitment {
   const commitments = selectors.map((selector, index) =>
-    pedersenMiMCStubCommitment(selector, `${tenantLabel}-${index}`),
+    pedersenMiMCStubCommitment(selector, `${tenantLabel}-${index}`)
   );
   return { commitments };
 }

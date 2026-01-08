@@ -3,10 +3,10 @@
  * Metadata management for lakehouse tables
  */
 
-import { TableMetadata } from './types.js';
-import pino from 'pino';
+import { TableMetadata } from "./types.js";
+import pino from "pino";
 
-const logger = pino({ name: 'lakehouse-catalog' });
+const logger = pino({ name: "lakehouse-catalog" });
 
 export interface CatalogEntry {
   metadata: TableMetadata;
@@ -19,23 +19,23 @@ export class LakehouseCatalog {
 
   constructor() {
     this.entries = new Map();
-    logger.info('Lakehouse catalog initialized');
+    logger.info("Lakehouse catalog initialized");
   }
 
   async registerTable(metadata: TableMetadata): Promise<void> {
     const entry: CatalogEntry = {
       metadata,
       registeredAt: new Date(),
-      lastAccessed: new Date()
+      lastAccessed: new Date(),
     };
 
     this.entries.set(metadata.name, entry);
-    logger.info({ table: metadata.name }, 'Table registered in catalog');
+    logger.info({ table: metadata.name }, "Table registered in catalog");
   }
 
   async unregisterTable(name: string): Promise<void> {
     this.entries.delete(name);
-    logger.info({ table: name }, 'Table unregistered from catalog');
+    logger.info({ table: name }, "Table unregistered from catalog");
   }
 
   async getTableMetadata(name: string): Promise<TableMetadata | undefined> {
@@ -48,14 +48,14 @@ export class LakehouseCatalog {
   }
 
   async listTables(): Promise<TableMetadata[]> {
-    return Array.from(this.entries.values()).map(e => e.metadata);
+    return Array.from(this.entries.values()).map((e) => e.metadata);
   }
 
   async searchTables(pattern: string): Promise<TableMetadata[]> {
-    const regex = new RegExp(pattern, 'i');
+    const regex = new RegExp(pattern, "i");
     return Array.from(this.entries.values())
-      .filter(e => regex.test(e.metadata.name))
-      .map(e => e.metadata);
+      .filter((e) => regex.test(e.metadata.name))
+      .map((e) => e.metadata);
   }
 
   async updateTableMetadata(name: string, updates: Partial<TableMetadata>): Promise<void> {
@@ -66,14 +66,14 @@ export class LakehouseCatalog {
 
     Object.assign(entry.metadata, updates);
     entry.metadata.updatedAt = new Date();
-    logger.info({ table: name }, 'Table metadata updated');
+    logger.info({ table: name }, "Table metadata updated");
   }
 
   async getStatistics(): Promise<any> {
     return {
       totalTables: this.entries.size,
       tablesByFormat: this.getTablesByFormat(),
-      totalSize: this.getTotalSize()
+      totalSize: this.getTotalSize(),
     };
   }
 

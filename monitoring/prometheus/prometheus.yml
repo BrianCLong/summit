@@ -6,18 +6,18 @@ rule_files:
   - "/etc/prometheus/alerts.yaml"
 
 scrape_configs:
-  - job_name: 'summit-server'
-    metrics_path: '/metrics'
+  - job_name: "summit-server"
+    metrics_path: "/metrics"
     static_configs:
-      - targets: ['host.docker.internal:3000']
+      - targets: ["host.docker.internal:3000"]
         labels:
-          service: 'summit-api'
-          env: 'development'
+          service: "summit-api"
+          env: "development"
 
-  - job_name: 'prometheus'
+  - job_name: "prometheus"
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: ["localhost:9090"]
 
-  - job_name: 'jaeger'
+  - job_name: "jaeger"
     static_configs:
-      - targets: ['jaeger:14269']
+      - targets: ["jaeger:14269"]

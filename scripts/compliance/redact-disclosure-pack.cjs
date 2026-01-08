@@ -10,77 +10,71 @@
  *   node scripts/compliance/redact-disclosure-pack.cjs <pack-dir> --denylist <path> --patterns <path>
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const DEFAULT_DENYLIST = path.resolve(
-  __dirname,
-  '../../compliance/pii-denylist.txt'
-);
-const DEFAULT_PATTERNS = path.resolve(
-  __dirname,
-  '../../compliance/secret-patterns.json'
-);
+const DEFAULT_DENYLIST = path.resolve(__dirname, "../../compliance/pii-denylist.txt");
+const DEFAULT_PATTERNS = path.resolve(__dirname, "../../compliance/secret-patterns.json");
 
 const TEXT_EXTENSIONS = new Set([
-  '.md',
-  '.txt',
-  '.json',
-  '.yaml',
-  '.yml',
-  '.csv',
-  '.log',
-  '.sha256',
-  '.spdx',
-  '.xml',
-  '.html',
-  '.htm',
-  '.js',
-  '.ts',
-  '.jsx',
-  '.tsx',
-  '.css',
-  '.scss',
-  '.sh',
-  '.bash',
-  '.env',
-  '.conf',
-  '.cfg',
-  '.ini',
-  '.toml',
+  ".md",
+  ".txt",
+  ".json",
+  ".yaml",
+  ".yml",
+  ".csv",
+  ".log",
+  ".sha256",
+  ".spdx",
+  ".xml",
+  ".html",
+  ".htm",
+  ".js",
+  ".ts",
+  ".jsx",
+  ".tsx",
+  ".css",
+  ".scss",
+  ".sh",
+  ".bash",
+  ".env",
+  ".conf",
+  ".cfg",
+  ".ini",
+  ".toml",
 ]);
 
 const BINARY_EXTENSIONS = new Set([
-  '.png',
-  '.jpg',
-  '.jpeg',
-  '.gif',
-  '.webp',
-  '.ico',
-  '.svg',
-  '.zip',
-  '.gz',
-  '.tar',
-  '.tgz',
-  '.bz2',
-  '.xz',
-  '.pdf',
-  '.doc',
-  '.docx',
-  '.xls',
-  '.xlsx',
-  '.ppt',
-  '.pptx',
-  '.exe',
-  '.dll',
-  '.so',
-  '.dylib',
-  '.wasm',
-  '.woff',
-  '.woff2',
-  '.ttf',
-  '.otf',
-  '.eot',
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".gif",
+  ".webp",
+  ".ico",
+  ".svg",
+  ".zip",
+  ".gz",
+  ".tar",
+  ".tgz",
+  ".bz2",
+  ".xz",
+  ".pdf",
+  ".doc",
+  ".docx",
+  ".xls",
+  ".xlsx",
+  ".ppt",
+  ".pptx",
+  ".exe",
+  ".dll",
+  ".so",
+  ".dylib",
+  ".wasm",
+  ".woff",
+  ".woff2",
+  ".ttf",
+  ".otf",
+  ".eot",
 ]);
 
 /**
@@ -91,11 +85,11 @@ function loadDenylist(filePath) {
     console.warn(`Denylist file not found: ${filePath}`);
     return [];
   }
-  const content = fs.readFileSync(filePath, 'utf8');
+  const content = fs.readFileSync(filePath, "utf8");
   return content
     .split(/\r?\n/)
     .map((line) => line.trim())
-    .filter((line) => line.length > 0 && !line.startsWith('#'));
+    .filter((line) => line.length > 0 && !line.startsWith("#"));
 }
 
 /**
@@ -106,17 +100,17 @@ function loadPatterns(filePath) {
     console.warn(`Patterns file not found: ${filePath}`);
     return [];
   }
-  const content = fs.readFileSync(filePath, 'utf8');
+  const content = fs.readFileSync(filePath, "utf8");
   const patterns = JSON.parse(content);
   if (!Array.isArray(patterns)) {
     throw new Error(`Pattern file must be an array: ${filePath}`);
   }
   return patterns.map((entry) => {
-    const flags = entry.flags ?? 'g';
+    const flags = entry.flags ?? "g";
     return {
-      name: entry.name ?? 'pattern',
+      name: entry.name ?? "pattern",
       pattern: entry.pattern,
-      replacement: entry.replacement ?? '[REDACTED]',
+      replacement: entry.replacement ?? "[REDACTED]",
       regex: new RegExp(entry.pattern, flags),
     };
   });
@@ -147,9 +141,9 @@ function redactContent(content, denylist, patterns) {
   // Apply denylist terms
   for (const term of denylist) {
     if (redacted.includes(term)) {
-      const count = (redacted.match(new RegExp(escapeRegex(term), 'g')) || []).length;
-      redacted = redacted.split(term).join('[REDACTED]');
-      matches.push({ type: 'denylist', term, count });
+      const count = (redacted.match(new RegExp(escapeRegex(term), "g")) || []).length;
+      redacted = redacted.split(term).join("[REDACTED]");
+      matches.push({ type: "denylist", term, count });
     }
   }
 
@@ -160,7 +154,7 @@ function redactContent(content, denylist, patterns) {
     if (patternMatches && patternMatches.length > 0) {
       redacted = redacted.replace(patternDef.regex, patternDef.replacement);
       matches.push({
-        type: 'pattern',
+        type: "pattern",
         name: patternDef.name,
         count: patternMatches.length,
       });
@@ -174,7 +168,7 @@ function redactContent(content, denylist, patterns) {
  * Escape special regex characters in a string
  */
 function escapeRegex(str) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /**
@@ -210,7 +204,7 @@ function processDirectory(dir, denylist, patterns, options = {}) {
     }
 
     try {
-      const content = fs.readFileSync(filePath, 'utf8');
+      const content = fs.readFileSync(filePath, "utf8");
       const { redacted, matches } = redactContent(content, denylist, patterns);
 
       stats.filesProcessed++;
@@ -222,7 +216,7 @@ function processDirectory(dir, denylist, patterns, options = {}) {
         if (verbose) {
           console.log(`\nRedactions in ${filePath}:`);
           for (const match of matches) {
-            if (match.type === 'denylist') {
+            if (match.type === "denylist") {
               console.log(`  - Denylist term "${match.term}": ${match.count} occurrences`);
             } else {
               console.log(`  - Pattern "${match.name}": ${match.count} occurrences`);
@@ -231,7 +225,7 @@ function processDirectory(dir, denylist, patterns, options = {}) {
         }
 
         if (!dryRun) {
-          fs.writeFileSync(filePath, redacted, 'utf8');
+          fs.writeFileSync(filePath, redacted, "utf8");
         }
       }
     } catch (error) {
@@ -248,7 +242,7 @@ function processDirectory(dir, denylist, patterns, options = {}) {
 function main() {
   const args = process.argv.slice(2);
 
-  if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
+  if (args.length === 0 || args.includes("--help") || args.includes("-h")) {
     console.log(`
 Usage: node redact-disclosure-pack.cjs <directory> [options]
 
@@ -269,13 +263,13 @@ Options:
   let verbose = false;
 
   for (let i = 1; i < args.length; i++) {
-    if (args[i] === '--denylist' && args[i + 1]) {
+    if (args[i] === "--denylist" && args[i + 1]) {
       denylistPath = args[++i];
-    } else if (args[i] === '--patterns' && args[i + 1]) {
+    } else if (args[i] === "--patterns" && args[i + 1]) {
       patternsPath = args[++i];
-    } else if (args[i] === '--dry-run') {
+    } else if (args[i] === "--dry-run") {
       dryRun = true;
-    } else if (args[i] === '--verbose') {
+    } else if (args[i] === "--verbose") {
       verbose = true;
     }
   }
@@ -289,20 +283,20 @@ Options:
   console.log(`Denylist: ${denylistPath}`);
   console.log(`Patterns: ${patternsPath}`);
   if (dryRun) {
-    console.log('Mode: DRY RUN (no files will be modified)');
+    console.log("Mode: DRY RUN (no files will be modified)");
   }
-  console.log('');
+  console.log("");
 
   const denylist = loadDenylist(denylistPath);
   const patterns = loadPatterns(patternsPath);
 
   console.log(`Loaded ${denylist.length} denylist terms`);
   console.log(`Loaded ${patterns.length} secret patterns`);
-  console.log('');
+  console.log("");
 
   const stats = processDirectory(dir, denylist, patterns, { dryRun, verbose });
 
-  console.log('\n--- Summary ---');
+  console.log("\n--- Summary ---");
   console.log(`Files processed: ${stats.filesProcessed}`);
   console.log(`Files modified: ${stats.filesModified}`);
   console.log(`Total redactions: ${stats.totalMatches}`);
@@ -316,7 +310,7 @@ Options:
   }
 
   if (stats.totalMatches > 0 && !dryRun) {
-    console.log('\nRedaction complete. Please review modified files before shipping.');
+    console.log("\nRedaction complete. Please review modified files before shipping.");
   }
 
   process.exit(0);

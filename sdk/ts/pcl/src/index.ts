@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance } from "axios";
 
 export interface EvidenceInput {
   source: string;
@@ -32,23 +32,23 @@ export class PCLClient {
     this.client = axios.create({
       baseURL,
       headers: {
-        'x-authority-id': authorityId || 'anonymous'
-      }
+        "x-authority-id": authorityId || "anonymous",
+      },
     });
   }
 
   async registerEvidence(evidence: EvidenceInput): Promise<string> {
-    const res = await this.client.post<{ evidenceId: string }>('/evidence', evidence);
+    const res = await this.client.post<{ evidenceId: string }>("/evidence", evidence);
     return res.data.evidenceId;
   }
 
   async registerTransform(transform: TransformInput): Promise<string> {
-    const res = await this.client.post<{ transformId: string }>('/transform', transform);
+    const res = await this.client.post<{ transformId: string }>("/transform", transform);
     return res.data.transformId;
   }
 
   async registerClaim(claim: ClaimInput): Promise<string> {
-    const res = await this.client.post<{ claimId: string }>('/claim', claim);
+    const res = await this.client.post<{ claimId: string }>("/claim", claim);
     return res.data.claimId;
   }
 

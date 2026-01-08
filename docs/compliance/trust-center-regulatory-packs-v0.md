@@ -37,25 +37,25 @@ The Trust Center & Regulatory Packs system transforms CompanyOS's compliance pos
 
 ### 1.1 Artifact Types
 
-| Artifact Type | Description | Retention | Access Level |
-|---------------|-------------|-----------|--------------|
-| **Control Description** | Human-readable control narrative with technical implementation details | Indefinite | Public |
-| **Test Procedure** | Automated or manual test steps validating control effectiveness | Indefinite | Customer |
-| **Evidence Snapshot** | Point-in-time capture of system state proving control operation | 7 years | Customer (scoped) |
-| **Compliance Report** | Aggregated assessment across multiple controls | 7 years | Customer |
-| **Attestation** | Signed statement by authorized personnel | 7 years | Customer |
-| **Certification** | Third-party audit certification (SOC 2, ISO, etc.) | 7 years | Customer (NDA) |
-| **Penetration Test Summary** | Redacted findings from security assessments | 3 years | Customer (NDA) |
-| **SLO Dashboard** | Real-time service level metrics | Live | Public |
+| Artifact Type                | Description                                                            | Retention  | Access Level      |
+| ---------------------------- | ---------------------------------------------------------------------- | ---------- | ----------------- |
+| **Control Description**      | Human-readable control narrative with technical implementation details | Indefinite | Public            |
+| **Test Procedure**           | Automated or manual test steps validating control effectiveness        | Indefinite | Customer          |
+| **Evidence Snapshot**        | Point-in-time capture of system state proving control operation        | 7 years    | Customer (scoped) |
+| **Compliance Report**        | Aggregated assessment across multiple controls                         | 7 years    | Customer          |
+| **Attestation**              | Signed statement by authorized personnel                               | 7 years    | Customer          |
+| **Certification**            | Third-party audit certification (SOC 2, ISO, etc.)                     | 7 years    | Customer (NDA)    |
+| **Penetration Test Summary** | Redacted findings from security assessments                            | 3 years    | Customer (NDA)    |
+| **SLO Dashboard**            | Real-time service level metrics                                        | Live       | Public            |
 
 ### 1.2 Artifact Data Model
 
 ```typescript
 interface AssuranceArtifact {
-  id: string;                          // UUID v7 (time-sortable)
+  id: string; // UUID v7 (time-sortable)
   type: ArtifactType;
-  version: string;                     // Semantic versioning
-  status: 'draft' | 'published' | 'superseded' | 'archived';
+  version: string; // Semantic versioning
+  status: "draft" | "published" | "superseded" | "archived";
 
   // Metadata
   title: string;
@@ -78,51 +78,51 @@ interface AssuranceArtifact {
   classification: DataClassification;
 
   // Integrity
-  contentHash: string;                 // SHA-256
+  contentHash: string; // SHA-256
   signature?: CryptographicSignature;
   provenanceChainId?: string;
 }
 
 interface FrameworkMapping {
   framework: ComplianceFramework;
-  controlId: string;                   // e.g., "CC6.1", "A.9.4.1"
+  controlId: string; // e.g., "CC6.1", "A.9.4.1"
   requirement: string;
-  mappingConfidence: 'exact' | 'partial' | 'related';
+  mappingConfidence: "exact" | "partial" | "related";
 }
 
 interface ArtifactScope {
-  level: 'platform' | 'tenant' | 'workspace';
+  level: "platform" | "tenant" | "workspace";
   tenantId?: string;
   workspaceId?: string;
   redactionRules: RedactionRule[];
 }
 
 type ComplianceFramework =
-  | 'SOC2_TYPE_I'
-  | 'SOC2_TYPE_II'
-  | 'ISO_27001'
-  | 'ISO_27017'
-  | 'ISO_27018'
-  | 'HIPAA'
-  | 'HITRUST'
-  | 'FEDRAMP_MODERATE'
-  | 'FEDRAMP_HIGH'
-  | 'PCI_DSS_4'
-  | 'GDPR'
-  | 'CCPA'
-  | 'SOX'
-  | 'NIST_CSF'
-  | 'NIST_800_53'
-  | 'CIS_CONTROLS';
+  | "SOC2_TYPE_I"
+  | "SOC2_TYPE_II"
+  | "ISO_27001"
+  | "ISO_27017"
+  | "ISO_27018"
+  | "HIPAA"
+  | "HITRUST"
+  | "FEDRAMP_MODERATE"
+  | "FEDRAMP_HIGH"
+  | "PCI_DSS_4"
+  | "GDPR"
+  | "CCPA"
+  | "SOX"
+  | "NIST_CSF"
+  | "NIST_800_53"
+  | "CIS_CONTROLS";
 ```
 
 ### 1.3 Platform vs. Tenant Evidence
 
-| Evidence Type | Scope | Examples |
-|---------------|-------|----------|
-| **Platform-Level** | Shared infrastructure controls | Network security, physical security, encryption at rest, vendor management |
-| **Tenant-Level** | Customer-specific controls | Access logs for tenant users, tenant data retention, tenant-specific configurations |
-| **Hybrid** | Platform + tenant overlay | Audit logs (platform system + tenant activity), SLOs (platform + tenant-specific) |
+| Evidence Type      | Scope                          | Examples                                                                            |
+| ------------------ | ------------------------------ | ----------------------------------------------------------------------------------- |
+| **Platform-Level** | Shared infrastructure controls | Network security, physical security, encryption at rest, vendor management          |
+| **Tenant-Level**   | Customer-specific controls     | Access logs for tenant users, tenant data retention, tenant-specific configurations |
+| **Hybrid**         | Platform + tenant overlay      | Audit logs (platform system + tenant activity), SLOs (platform + tenant-specific)   |
 
 ---
 
@@ -134,25 +134,25 @@ type ComplianceFramework =
 
 #### Self-Service Features
 
-| Feature | Access | Description |
-|---------|--------|-------------|
-| **Security Overview** | Public | High-level security architecture and practices |
-| **Compliance Certifications** | Public | List of active certifications with validity periods |
-| **Service Status** | Public | Real-time uptime and incident history |
-| **SLO Dashboard** | Public | Current SLO metrics (availability, latency, durability) |
-| **Security Whitepaper** | Public | Downloadable technical security documentation |
-| **Subprocessor List** | Public | Current list of data subprocessors |
+| Feature                       | Access | Description                                             |
+| ----------------------------- | ------ | ------------------------------------------------------- |
+| **Security Overview**         | Public | High-level security architecture and practices          |
+| **Compliance Certifications** | Public | List of active certifications with validity periods     |
+| **Service Status**            | Public | Real-time uptime and incident history                   |
+| **SLO Dashboard**             | Public | Current SLO metrics (availability, latency, durability) |
+| **Security Whitepaper**       | Public | Downloadable technical security documentation           |
+| **Subprocessor List**         | Public | Current list of data subprocessors                      |
 
 #### Authenticated Customer Features
 
-| Feature | Access | Description |
-|---------|--------|-------------|
-| **Compliance Reports** | Customer | SOC 2 Type II reports, ISO certificates |
-| **Penetration Test Summaries** | NDA Required | Redacted annual pentest findings |
-| **Control Evidence** | Customer | Tenant-scoped evidence snapshots |
-| **Security Questionnaire API** | Customer | Programmatic access for GRC tool integration |
-| **Custom Evidence Requests** | Customer | Request specific evidence for audits |
-| **Audit Log Export** | Customer | Export tenant-specific audit logs |
+| Feature                        | Access       | Description                                  |
+| ------------------------------ | ------------ | -------------------------------------------- |
+| **Compliance Reports**         | Customer     | SOC 2 Type II reports, ISO certificates      |
+| **Penetration Test Summaries** | NDA Required | Redacted annual pentest findings             |
+| **Control Evidence**           | Customer     | Tenant-scoped evidence snapshots             |
+| **Security Questionnaire API** | Customer     | Programmatic access for GRC tool integration |
+| **Custom Evidence Requests**   | Customer     | Request specific evidence for audits         |
+| **Audit Log Export**           | Customer     | Export tenant-specific audit logs            |
 
 ### 2.2 Trust Center UI Components
 
@@ -211,14 +211,14 @@ sequenceDiagram
 
 ### 2.4 Multi-Tenant Redaction Rules
 
-| Data Category | Redaction Rule | Example |
-|---------------|----------------|---------|
-| **Other Tenant IDs** | Full replacement | `tenant_abc` → `[REDACTED_TENANT]` |
-| **Internal IPs** | Network masking | `10.0.45.67` → `10.0.x.x` |
-| **Employee Names** | Role replacement | `jane.doe@company.io` → `[ADMIN_USER]` |
-| **Internal Systems** | Generic labels | `prod-neo4j-03` → `[DATABASE_SERVER]` |
-| **Secrets/Keys** | Full removal | `sk_live_xxx` → `[CREDENTIAL]` |
-| **Investigation Data** | Tenant filter | Only show requesting tenant's data |
+| Data Category          | Redaction Rule   | Example                                |
+| ---------------------- | ---------------- | -------------------------------------- |
+| **Other Tenant IDs**   | Full replacement | `tenant_abc` → `[REDACTED_TENANT]`     |
+| **Internal IPs**       | Network masking  | `10.0.45.67` → `10.0.x.x`              |
+| **Employee Names**     | Role replacement | `jane.doe@company.io` → `[ADMIN_USER]` |
+| **Internal Systems**   | Generic labels   | `prod-neo4j-03` → `[DATABASE_SERVER]`  |
+| **Secrets/Keys**       | Full removal     | `sk_live_xxx` → `[CREDENTIAL]`         |
+| **Investigation Data** | Tenant filter    | Only show requesting tenant's data     |
 
 ---
 
@@ -259,7 +259,7 @@ controls:
 
       - type: metric
         source: prometheus
-        query: 'sum(rate(auth_attempts_total[24h]))'
+        query: "sum(rate(auth_attempts_total[24h]))"
 
     tests:
       - id: CC6.1.T1
@@ -272,7 +272,7 @@ controls:
 
         automation:
           script: tests/compliance/cc6-1-access-control.test.ts
-          schedule: "0 */4 * * *"  # Every 4 hours
+          schedule: "0 */4 * * *" # Every 4 hours
 
     mappings:
       - framework: ISO_27001
@@ -296,16 +296,16 @@ artifacts:
 
 ### 3.2 Available Regulatory Packs
 
-| Pack ID | Framework | Status | Last Updated |
-|---------|-----------|--------|--------------|
-| `soc2-type-ii-2025` | SOC 2 Type II | Active | 2025-02-15 |
-| `iso-27001-2024` | ISO 27001:2022 | Active | 2024-11-01 |
-| `hipaa-2025` | HIPAA Security Rule | Active | 2025-01-15 |
-| `fedramp-moderate-2025` | FedRAMP Moderate | In Progress | - |
-| `pci-dss-4-2025` | PCI DSS v4.0 | Planned | - |
-| `gdpr-2025` | GDPR | Active | 2025-01-01 |
-| `ccpa-2025` | CCPA/CPRA | Active | 2025-01-01 |
-| `nist-csf-2` | NIST CSF 2.0 | Active | 2024-12-01 |
+| Pack ID                 | Framework           | Status      | Last Updated |
+| ----------------------- | ------------------- | ----------- | ------------ |
+| `soc2-type-ii-2025`     | SOC 2 Type II       | Active      | 2025-02-15   |
+| `iso-27001-2024`        | ISO 27001:2022      | Active      | 2024-11-01   |
+| `hipaa-2025`            | HIPAA Security Rule | Active      | 2025-01-15   |
+| `fedramp-moderate-2025` | FedRAMP Moderate    | In Progress | -            |
+| `pci-dss-4-2025`        | PCI DSS v4.0        | Planned     | -            |
+| `gdpr-2025`             | GDPR                | Active      | 2025-01-01   |
+| `ccpa-2025`             | CCPA/CPRA           | Active      | 2025-01-01   |
+| `nist-csf-2`            | NIST CSF 2.0        | Active      | 2024-12-01   |
 
 ### 3.3 Pack Automation
 
@@ -313,7 +313,7 @@ artifacts:
 
 ```typescript
 interface PackUpdateTrigger {
-  type: 'control_change' | 'policy_change' | 'evidence_expiry' | 'manual';
+  type: "control_change" | "policy_change" | "evidence_expiry" | "manual";
   source: string;
   timestamp: ISO8601DateTime;
   changes: ControlChange[];
@@ -329,24 +329,24 @@ interface PackUpdateTrigger {
 
 #### Evidence Freshness
 
-| Evidence Type | Refresh Frequency | Staleness Threshold |
-|---------------|-------------------|---------------------|
-| Audit Logs | Continuous | 1 hour |
-| Configuration | On change + daily | 24 hours |
-| Metrics/SLOs | Real-time | 5 minutes |
-| Certifications | Annual | 30 days before expiry |
-| Penetration Tests | Annual | 365 days |
-| Access Reviews | Quarterly | 90 days |
+| Evidence Type     | Refresh Frequency | Staleness Threshold   |
+| ----------------- | ----------------- | --------------------- |
+| Audit Logs        | Continuous        | 1 hour                |
+| Configuration     | On change + daily | 24 hours              |
+| Metrics/SLOs      | Real-time         | 5 minutes             |
+| Certifications    | Annual            | 30 days before expiry |
+| Penetration Tests | Annual            | 365 days              |
+| Access Reviews    | Quarterly         | 90 days               |
 
 ### 3.4 Export Formats
 
-| Format | Use Case | Includes |
-|--------|----------|----------|
-| **JSON/YAML** | GRC Tool Import | Machine-readable control data |
-| **PDF Report** | Executive Review | Formatted compliance report |
-| **CSV Matrix** | Spreadsheet Analysis | Control-to-evidence mapping |
-| **OSCAL** | Federal Compliance | NIST OSCAL formatted data |
-| **CAIQ** | Cloud Security | CSA CAIQ questionnaire |
+| Format         | Use Case             | Includes                      |
+| -------------- | -------------------- | ----------------------------- |
+| **JSON/YAML**  | GRC Tool Import      | Machine-readable control data |
+| **PDF Report** | Executive Review     | Formatted compliance report   |
+| **CSV Matrix** | Spreadsheet Analysis | Control-to-evidence mapping   |
+| **OSCAL**      | Federal Compliance   | NIST OSCAL formatted data     |
+| **CAIQ**       | Cloud Security       | CSA CAIQ questionnaire        |
 
 ---
 
@@ -781,18 +781,11 @@ type Query {
     scope: EvidenceScope
   ): ControlEvidence!
 
-  complianceReport(
-    framework: ComplianceFramework!
-    reportType: ReportType!
-  ): ComplianceReport
+  complianceReport(framework: ComplianceFramework!, reportType: ReportType!): ComplianceReport
 
-  regulatoryPack(
-    packId: String!
-  ): RegulatoryPack
+  regulatoryPack(packId: String!): RegulatoryPack
 
-  availablePacks(
-    frameworks: [ComplianceFramework!]
-  ): [RegulatoryPackSummary!]!
+  availablePacks(frameworks: [ComplianceFramework!]): [RegulatoryPackSummary!]!
 }
 
 type Mutation {
@@ -865,20 +858,20 @@ enum ComplianceFramework {
 
 ### 6.2 REST API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/v1/trust/status` | Public trust center status |
-| `GET` | `/api/v1/trust/certifications` | List certifications |
-| `GET` | `/api/v1/trust/slo` | Current SLO metrics |
-| `GET` | `/api/v1/packs` | List available regulatory packs |
-| `GET` | `/api/v1/packs/:packId` | Get pack details |
-| `GET` | `/api/v1/packs/:packId/controls` | Get pack controls |
-| `GET` | `/api/v1/controls/:controlId/evidence` | Get control evidence |
-| `POST` | `/api/v1/evidence/request` | Request evidence package |
-| `GET` | `/api/v1/reports/:reportId` | Download report |
-| `POST` | `/api/v1/reports/generate` | Generate compliance report |
-| `GET` | `/api/v1/questionnaire/caiq` | Get CAIQ responses |
-| `GET` | `/api/v1/export/oscal` | OSCAL format export |
+| Method | Endpoint                               | Description                     |
+| ------ | -------------------------------------- | ------------------------------- |
+| `GET`  | `/api/v1/trust/status`                 | Public trust center status      |
+| `GET`  | `/api/v1/trust/certifications`         | List certifications             |
+| `GET`  | `/api/v1/trust/slo`                    | Current SLO metrics             |
+| `GET`  | `/api/v1/packs`                        | List available regulatory packs |
+| `GET`  | `/api/v1/packs/:packId`                | Get pack details                |
+| `GET`  | `/api/v1/packs/:packId/controls`       | Get pack controls               |
+| `GET`  | `/api/v1/controls/:controlId/evidence` | Get control evidence            |
+| `POST` | `/api/v1/evidence/request`             | Request evidence package        |
+| `GET`  | `/api/v1/reports/:reportId`            | Download report                 |
+| `POST` | `/api/v1/reports/generate`             | Generate compliance report      |
+| `GET`  | `/api/v1/questionnaire/caiq`           | Get CAIQ responses              |
+| `GET`  | `/api/v1/export/oscal`                 | OSCAL format export             |
 
 ---
 
@@ -921,14 +914,14 @@ enum ComplianceFramework {
 
 ### A. Glossary
 
-| Term | Definition |
-|------|------------|
-| **Artifact** | A piece of evidence, report, or documentation supporting compliance |
-| **Control** | A security measure designed to mitigate risk |
-| **Evidence** | Data demonstrating that a control is operating effectively |
-| **Framework** | A structured set of compliance requirements (e.g., SOC 2) |
-| **Pack** | A pre-configured bundle of controls, mappings, and evidence for a framework |
-| **TSC** | Trust Services Criteria (SOC 2 framework) |
+| Term          | Definition                                                                  |
+| ------------- | --------------------------------------------------------------------------- |
+| **Artifact**  | A piece of evidence, report, or documentation supporting compliance         |
+| **Control**   | A security measure designed to mitigate risk                                |
+| **Evidence**  | Data demonstrating that a control is operating effectively                  |
+| **Framework** | A structured set of compliance requirements (e.g., SOC 2)                   |
+| **Pack**      | A pre-configured bundle of controls, mappings, and evidence for a framework |
+| **TSC**       | Trust Services Criteria (SOC 2 framework)                                   |
 
 ### B. Related Documents
 
@@ -940,6 +933,6 @@ enum ComplianceFramework {
 
 ### C. Change Log
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 0.1.0 | 2025-12-07 | Trust Center Team | Initial draft |
+| Version | Date       | Author            | Changes       |
+| ------- | ---------- | ----------------- | ------------- |
+| 0.1.0   | 2025-12-07 | Trust Center Team | Initial draft |

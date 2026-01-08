@@ -5,8 +5,8 @@
  * with governance gates, hallucination scoring, and fallback routing.
  */
 
-import { EventEmitter } from 'eventemitter3';
-import { v4 as uuid } from 'uuid';
+import { EventEmitter } from "eventemitter3";
+import { v4 as uuid } from "uuid";
 import {
   LLMRequest,
   LLMResponse,
@@ -23,31 +23,23 @@ import {
   BudgetConfig,
   OrchestratorEvent,
   OrchestratorEventPayload,
-} from './types/index.js';
+} from "./types/index.js";
+import { ProviderRegistry, ProviderFactory, BaseLLMProvider } from "./providers/index.js";
+import { CircuitBreakerRegistry, FallbackRouter, RoutingConfig } from "./routing/index.js";
+import { RedisStateManager, RedisStateConfig } from "./state/index.js";
+import { GovernanceEngine, GovernanceResult } from "./governance/index.js";
+import { HallucinationScorer } from "./scoring/index.js";
 import {
-  ProviderRegistry,
-  ProviderFactory,
-  BaseLLMProvider,
-} from './providers/index.js';
-import {
-  CircuitBreakerRegistry,
-  FallbackRouter,
-  RoutingConfig,
-} from './routing/index.js';
-import { RedisStateManager, RedisStateConfig } from './state/index.js';
-import { GovernanceEngine, GovernanceResult } from './governance/index.js';
-import { HallucinationScorer } from './scoring/index.js';
-import {
-    ContextCompiler,
-    ContextProcessor,
-    Session,
-    Event,
-    CompilationOptions,
-    HistoryProcessor,
-    InstructionProcessor,
-    ArtifactProcessor,
-    MemoryProcessor,
-} from './context/index.js';
+  ContextCompiler,
+  ContextProcessor,
+  Session,
+  Event,
+  CompilationOptions,
+  HistoryProcessor,
+  InstructionProcessor,
+  ArtifactProcessor,
+  MemoryProcessor,
+} from "./context/index.js";
 
 export interface MultiLLMOrchestratorConfig {
   redis?: Partial<RedisStateConfig>;
@@ -75,7 +67,7 @@ export class MultiLLMOrchestrator extends EventEmitter {
   constructor(config: MultiLLMOrchestratorConfig = {}) {
     super();
     this.config = {
-      defaultModel: config.defaultModel ?? 'claude-3-5-sonnet-20241022',
+      defaultModel: config.defaultModel ?? "claude-3-5-sonnet-20241022",
       maxChainDepth: config.maxChainDepth ?? 10,
       enableMetrics: config.enableMetrics ?? true,
       hallucinationScoring: config.hallucinationScoring ?? true,
@@ -93,15 +85,15 @@ export class MultiLLMOrchestrator extends EventEmitter {
     this.fallbackRouter = new FallbackRouter(
       this.providerRegistry,
       this.circuitRegistry,
-      config.routing,
+      config.routing
     );
 
     // Initialize Context Engineering Pipeline (Google ADK Pattern)
     const processors = config.contextProcessors ?? [
-        new InstructionProcessor([]),
-        new ArtifactProcessor(),
-        new MemoryProcessor(),
-        new HistoryProcessor()
+      new InstructionProcessor([]),
+      new ArtifactProcessor(),
+      new MemoryProcessor(),
+      new HistoryProcessor(),
     ];
     this.contextCompiler = new ContextCompiler(processors);
 
@@ -122,10 +114,10 @@ export class MultiLLMOrchestrator extends EventEmitter {
       userId?: string;
       skipGovernance?: boolean;
       skipHallucinationCheck?: boolean;
-    } = {},
+    } = {}
   ): Promise<LLMResponse & { governance: GovernanceResult; hallucination?: HallucinationScore }> {
     const sessionId = options.sessionId ?? uuid();
-    const userId = options.userId ?? 'anonymous';
+    const userId = options.userId ?? "anonymous";
 
     // Create or get session
     let redisSession = await this.stateManager.getSession(sessionId);
@@ -135,17 +127,17 @@ export class MultiLLMOrchestrator extends EventEmitter {
 
     // Adapt to Context Session
     const session: Session = {
-        id: redisSession.sessionId,
-        userId: redisSession.userId,
-        events: redisSession.messages.map(m => this.mapLLMMessageToEvent(m)),
-        metadata: redisSession.context,
-        variables: {},
+      id: redisSession.sessionId,
+      userId: redisSession.userId,
+      events: redisSession.messages.map((m) => this.mapLLMMessageToEvent(m)),
+      metadata: redisSession.context,
+      variables: {},
     };
 
     // Build context
     const context: ChainContext = {
       chainId: uuid(),
-      stepId: 'single-completion',
+      stepId: "single-completion",
       sessionId,
       userId,
       startTime: new Date(),
@@ -161,18 +153,20 @@ export class MultiLLMOrchestrator extends EventEmitter {
     // We will stick to the existing logic for 'complete' but add governance/scoring.
 
     // Run governance check on input
-    let governanceResult: GovernanceResult = { allowed: true, violations: [], warnings: [], score: 1 };
+    let governanceResult: GovernanceResult = {
+      allowed: true,
+      violations: [],
+      warnings: [],
+      score: 1,
+    };
     if (!options.skipGovernance) {
-      governanceResult = await this.governanceEngine.evaluateMessages(
-        request.messages,
-        context,
-      );
+      governanceResult = await this.governanceEngine.evaluateMessages(request.messages, context);
 
       if (!governanceResult.allowed) {
-        this.emitEvent('governance:blocked', sessionId, context.chainId, undefined, {
+        this.emitEvent("governance:blocked", sessionId, context.chainId, undefined, {
           violations: governanceResult.violations,
         });
-        throw new GovernanceError('Request blocked by governance', governanceResult.violations);
+        throw new GovernanceError("Request blocked by governance", governanceResult.violations);
       }
     }
 
@@ -183,21 +177,21 @@ export class MultiLLMOrchestrator extends EventEmitter {
       {
         daily: this.config.budget?.maxDailyCostUSD ?? 50,
         monthly: this.config.budget?.maxMonthlyCostUSD ?? 500,
-      },
+      }
     );
 
     if (!budgetCheck.allowed) {
-      this.emitEvent('budget:exceeded', sessionId, context.chainId, undefined, {
+      this.emitEvent("budget:exceeded", sessionId, context.chainId, undefined, {
         reason: budgetCheck.reason,
       });
-      throw new BudgetError(budgetCheck.reason ?? 'Budget exceeded');
+      throw new BudgetError(budgetCheck.reason ?? "Budget exceeded");
     }
 
     // Route and execute request
     const routingResult = await this.fallbackRouter.route(request, context);
 
     if (!routingResult.success || !routingResult.response) {
-      throw new OrchestratorError(routingResult.error ?? 'All providers failed');
+      throw new OrchestratorError(routingResult.error ?? "All providers failed");
     }
 
     const response = routingResult.response;
@@ -206,12 +200,12 @@ export class MultiLLMOrchestrator extends EventEmitter {
     // Note: Request messages might contain full history or just last turn.
     // We assume just last turn for storage if length > history
     const lastUserMessage = request.messages[request.messages.length - 1];
-    if (lastUserMessage && lastUserMessage.role === 'user') {
-        await this.stateManager.addMessage(sessionId, lastUserMessage);
+    if (lastUserMessage && lastUserMessage.role === "user") {
+      await this.stateManager.addMessage(sessionId, lastUserMessage);
     }
 
     await this.stateManager.addMessage(sessionId, {
-      role: 'assistant',
+      role: "assistant",
       content: response.content,
     });
     await this.stateManager.updateUsage(sessionId, response.usage);
@@ -233,7 +227,7 @@ export class MultiLLMOrchestrator extends EventEmitter {
       hallucinationScore = await this.hallucinationScorer.score(
         response,
         context,
-        request.messages.map((m) => m.content).join('\n'),
+        request.messages.map((m) => m.content).join("\n")
       );
     }
 
@@ -242,7 +236,7 @@ export class MultiLLMOrchestrator extends EventEmitter {
       const outputGovernance = await this.governanceEngine.evaluate(
         response.content,
         context,
-        'response',
+        "response"
       );
       governanceResult.violations.push(...outputGovernance.violations);
       governanceResult.warnings.push(...outputGovernance.warnings);
@@ -266,7 +260,7 @@ export class MultiLLMOrchestrator extends EventEmitter {
       sessionId?: string;
       userId?: string;
       variables?: Record<string, unknown>;
-    } = {},
+    } = {}
   ): Promise<ChainResult> {
     const chain = this.chains.get(chainId);
     if (!chain) {
@@ -274,7 +268,7 @@ export class MultiLLMOrchestrator extends EventEmitter {
     }
 
     const sessionId = options.sessionId ?? uuid();
-    const userId = options.userId ?? 'anonymous';
+    const userId = options.userId ?? "anonymous";
     const startTime = Date.now();
 
     // Create session
@@ -285,7 +279,7 @@ export class MultiLLMOrchestrator extends EventEmitter {
 
     const context: ChainContext = {
       chainId,
-      stepId: '',
+      stepId: "",
       sessionId,
       userId,
       startTime: new Date(),
@@ -294,7 +288,7 @@ export class MultiLLMOrchestrator extends EventEmitter {
       metadata: {},
     };
 
-    this.emitEvent('chain:started', sessionId, chainId, undefined, { input });
+    this.emitEvent("chain:started", sessionId, chainId, undefined, { input });
 
     const stepResults: StepResult[] = [];
     const allViolations: GovernanceViolation[] = [];
@@ -305,7 +299,7 @@ export class MultiLLMOrchestrator extends EventEmitter {
     try {
       // Execute chain based on strategy
       switch (chain.strategy) {
-        case 'sequential':
+        case "sequential":
           for (const step of chain.steps) {
             const result = await this.executeStep(step, currentInput, context);
             stepResults.push(result);
@@ -320,17 +314,17 @@ export class MultiLLMOrchestrator extends EventEmitter {
           }
           break;
 
-        case 'parallel':
+        case "parallel":
           const parallelResults = await Promise.all(
-            chain.steps.map((step) => this.executeStep(step, input, context)),
+            chain.steps.map((step) => this.executeStep(step, input, context))
           );
           stepResults.push(...parallelResults);
-          currentInput = parallelResults.map((r) => r.output).join('\n\n');
+          currentInput = parallelResults.map((r) => r.output).join("\n\n");
           totalCostUSD = parallelResults.reduce((sum, r) => sum + r.costUSD, 0);
           totalTokens = parallelResults.reduce((sum, r) => sum + r.tokens.totalTokens, 0);
           break;
 
-        case 'fallback':
+        case "fallback":
           for (const step of chain.steps) {
             const result = await this.executeStep(step, input, context);
             stepResults.push(result);
@@ -344,9 +338,9 @@ export class MultiLLMOrchestrator extends EventEmitter {
           }
           break;
 
-        case 'consensus':
+        case "consensus":
           const consensusResults = await Promise.all(
-            chain.steps.map((step) => this.executeStep(step, input, context)),
+            chain.steps.map((step) => this.executeStep(step, input, context))
           );
           stepResults.push(...consensusResults);
 
@@ -367,13 +361,16 @@ export class MultiLLMOrchestrator extends EventEmitter {
             const consensusScore = await this.hallucinationScorer.scoreConsensus(
               responses,
               context,
-              input,
+              input
             );
 
             // Use the response with highest individual quality
             const bestResult = consensusResults
               .filter((r) => r.success)
-              .sort((a, b) => (b.hallucinationScore?.overall ?? 0) - (a.hallucinationScore?.overall ?? 0))[0];
+              .sort(
+                (a, b) =>
+                  (b.hallucinationScore?.overall ?? 0) - (a.hallucinationScore?.overall ?? 0)
+              )[0];
 
             if (bestResult) {
               currentInput = bestResult.output;
@@ -387,7 +384,7 @@ export class MultiLLMOrchestrator extends EventEmitter {
 
       // Run governance gates
       for (const gate of chain.governanceGates) {
-        const result = await this.governanceEngine.evaluate(currentInput, context, 'response');
+        const result = await this.governanceEngine.evaluate(currentInput, context, "response");
         allViolations.push(...result.violations);
       }
 
@@ -395,9 +392,14 @@ export class MultiLLMOrchestrator extends EventEmitter {
       const finalResponse: LLMResponse = {
         id: uuid(),
         model: this.config.defaultModel!,
-        provider: 'claude',
+        provider: "claude",
         content: currentInput,
-        usage: { promptTokens: 0, completionTokens: 0, totalTokens, estimatedCostUSD: totalCostUSD },
+        usage: {
+          promptTokens: 0,
+          completionTokens: 0,
+          totalTokens,
+          estimatedCostUSD: totalCostUSD,
+        },
         latencyMs: Date.now() - startTime,
         cached: false,
       };
@@ -405,7 +407,7 @@ export class MultiLLMOrchestrator extends EventEmitter {
       const hallucinationScore = await this.hallucinationScorer.score(
         finalResponse,
         context,
-        input,
+        input
       );
 
       const result: ChainResult = {
@@ -420,11 +422,10 @@ export class MultiLLMOrchestrator extends EventEmitter {
         hallucinationScore,
       };
 
-      this.emitEvent('chain:completed', sessionId, chainId, undefined, { result });
+      this.emitEvent("chain:completed", sessionId, chainId, undefined, { result });
       return result;
-
     } catch (error) {
-      this.emitEvent('chain:failed', sessionId, chainId, undefined, {
+      this.emitEvent("chain:failed", sessionId, chainId, undefined, {
         error: (error as Error).message,
       });
       throw error;
@@ -448,17 +449,17 @@ export class MultiLLMOrchestrator extends EventEmitter {
       name: string;
       model: LLMModel;
       systemPrompt: string;
-    }>,
+    }>
   ): ChainConfig {
     const chain: ChainConfig = {
       id,
       name,
       description: `Simple ${steps.length}-step chain`,
-      strategy: 'sequential',
+      strategy: "sequential",
       steps: steps.map((s, i) => ({
         id: `${id}-step-${i}`,
         name: s.name,
-        provider: s.model.startsWith('claude') ? 'claude' : s.model.startsWith('o1') ? 'o1' : 'gpt',
+        provider: s.model.startsWith("claude") ? "claude" : s.model.startsWith("o1") ? "o1" : "gpt",
         model: s.model,
         systemPrompt: s.systemPrompt,
       })),
@@ -471,7 +472,7 @@ export class MultiLLMOrchestrator extends EventEmitter {
         maxDailyCostUSD: 50,
         maxMonthlyCostUSD: 500,
         warningThreshold: 0.8,
-        enforcementMode: 'hard',
+        enforcementMode: "hard",
       },
     };
 
@@ -554,12 +555,12 @@ export class MultiLLMOrchestrator extends EventEmitter {
   private async executeStep(
     step: ChainStep,
     input: string,
-    context: ChainContext,
+    context: ChainContext
   ): Promise<StepResult> {
     const stepContext = { ...context, stepId: step.id };
     const startTime = Date.now();
 
-    this.emitEvent('step:started', context.sessionId, context.chainId, step.id, { input });
+    this.emitEvent("step:started", context.sessionId, context.chainId, step.id, { input });
 
     try {
       // Apply transform if provided
@@ -575,31 +576,31 @@ export class MultiLLMOrchestrator extends EventEmitter {
       // 1. Fetch current session from Redis
       const redisSession = await this.stateManager.getSession(context.sessionId);
       if (!redisSession) {
-          throw new OrchestratorError('Session not found');
+        throw new OrchestratorError("Session not found");
       }
 
       // 2. Adapt to Context Session
       const session: Session = {
-          id: redisSession.sessionId,
-          userId: redisSession.userId,
-          events: redisSession.messages.map(m => this.mapLLMMessageToEvent(m)),
-          metadata: { ...redisSession.context, systemInstructions: step.systemPrompt },
-          variables: context.variables,
+        id: redisSession.sessionId,
+        userId: redisSession.userId,
+        events: redisSession.messages.map((m) => this.mapLLMMessageToEvent(m)),
+        metadata: { ...redisSession.context, systemInstructions: step.systemPrompt },
+        variables: context.variables,
       };
 
       // 3. Add pending user input to session (transiently for compilation)
       session.events.push({
-          id: uuid(),
-          type: 'message',
-          role: 'user',
-          content: transformedInput,
-          timestamp: new Date(),
+        id: uuid(),
+        type: "message",
+        role: "user",
+        content: transformedInput,
+        timestamp: new Date(),
       });
 
       // 4. Compile Context
       const request = await this.contextCompiler.compile(session, {
-          model: step.model ?? this.config.defaultModel!,
-          tokenLimit: 4096, // Could be configured per step
+        model: step.model ?? this.config.defaultModel!,
+        tokenLimit: 4096, // Could be configured per step
       });
 
       // ----------------------------------------------------------------------
@@ -609,13 +610,13 @@ export class MultiLLMOrchestrator extends EventEmitter {
       if (!routingResult.success || !routingResult.response) {
         // Try fallback if defined
         if (step.fallback) {
-          this.emitEvent('step:fallback', context.sessionId, context.chainId, step.id, {
+          this.emitEvent("step:fallback", context.sessionId, context.chainId, step.id, {
             originalError: routingResult.error,
           });
           return this.executeStep(step.fallback, input, context);
         }
 
-        throw new Error(routingResult.error ?? 'Step execution failed');
+        throw new Error(routingResult.error ?? "Step execution failed");
       }
 
       const response = routingResult.response;
@@ -625,7 +626,9 @@ export class MultiLLMOrchestrator extends EventEmitter {
       if (step.validate) {
         const validation = step.validate(response.content, stepContext);
         if (!validation.valid) {
-          throw new Error(`Validation failed: ${validation.issues.map((i) => i.message).join(', ')}`);
+          throw new Error(
+            `Validation failed: ${validation.issues.map((i) => i.message).join(", ")}`
+          );
         }
       }
 
@@ -633,7 +636,7 @@ export class MultiLLMOrchestrator extends EventEmitter {
       const hallucinationScore = await this.hallucinationScorer.score(
         response,
         stepContext,
-        transformedInput,
+        transformedInput
       );
 
       const result: StepResult = {
@@ -651,9 +654,8 @@ export class MultiLLMOrchestrator extends EventEmitter {
         hallucinationScore,
       };
 
-      this.emitEvent('step:completed', context.sessionId, context.chainId, step.id, { result });
+      this.emitEvent("step:completed", context.sessionId, context.chainId, step.id, { result });
       return result;
-
     } catch (error) {
       const latencyMs = Date.now() - startTime;
 
@@ -663,7 +665,7 @@ export class MultiLLMOrchestrator extends EventEmitter {
         provider: step.provider,
         model: step.model ?? this.config.defaultModel!,
         success: false,
-        output: '',
+        output: "",
         latencyMs,
         costUSD: 0,
         tokens: { promptTokens: 0, completionTokens: 0, totalTokens: 0, estimatedCostUSD: 0 },
@@ -672,7 +674,7 @@ export class MultiLLMOrchestrator extends EventEmitter {
         usedFallback: false,
       };
 
-      this.emitEvent('step:failed', context.sessionId, context.chainId, step.id, {
+      this.emitEvent("step:failed", context.sessionId, context.chainId, step.id, {
         error: (error as Error).message,
       });
 
@@ -681,18 +683,18 @@ export class MultiLLMOrchestrator extends EventEmitter {
   }
 
   private mapLLMMessageToEvent(message: LLMMessage): Event {
-      return {
-          id: uuid(),
-          type: message.role === 'tool' ? 'tool_result' : 'message',
-          role: message.role,
-          content: message.content,
-          metadata: {
-              name: message.name,
-              toolCalls: message.toolCalls,
-              toolCallId: message.toolCallId,
-          },
-          timestamp: new Date(), // RedisStateManager doesn't store timestamps per msg yet
-      };
+    return {
+      id: uuid(),
+      type: message.role === "tool" ? "tool_result" : "message",
+      role: message.role,
+      content: message.content,
+      metadata: {
+        name: message.name,
+        toolCalls: message.toolCalls,
+        toolCallId: message.toolCallId,
+      },
+      timestamp: new Date(), // RedisStateManager doesn't store timestamps per msg yet
+    };
   }
 
   private estimateRequestCost(request: LLMRequest): number {
@@ -706,7 +708,7 @@ export class MultiLLMOrchestrator extends EventEmitter {
     sessionId: string,
     chainId?: string,
     stepId?: string,
-    data: Record<string, unknown> = {},
+    data: Record<string, unknown> = {}
   ): void {
     const payload: OrchestratorEventPayload = {
       event,
@@ -717,32 +719,32 @@ export class MultiLLMOrchestrator extends EventEmitter {
       data,
     };
     this.emit(event, payload);
-    this.emit('event', payload);
+    this.emit("event", payload);
   }
 
   private setupEventForwarding(): void {
     // Forward circuit breaker events
-    this.fallbackRouter.on('routing:failure', (data) => {
-      this.emit('routing:failure', data);
+    this.fallbackRouter.on("routing:failure", (data) => {
+      this.emit("routing:failure", data);
     });
 
-    this.fallbackRouter.on('routing:success', (data) => {
-      this.emit('routing:success', data);
+    this.fallbackRouter.on("routing:success", (data) => {
+      this.emit("routing:success", data);
     });
 
     // Forward governance events
-    this.governanceEngine.on('governance:violation', (data) => {
-      this.emit('governance:violation', data);
+    this.governanceEngine.on("governance:violation", (data) => {
+      this.emit("governance:violation", data);
     });
 
     // Forward hallucination events
-    this.hallucinationScorer.on('hallucination:detected', (data) => {
-      this.emit('hallucination:detected', data);
+    this.hallucinationScorer.on("hallucination:detected", (data) => {
+      this.emit("hallucination:detected", data);
     });
 
     // Forward state manager events
-    this.stateManager.on('session:created', (data) => {
-      this.emit('session:created', data);
+    this.stateManager.on("session:created", (data) => {
+      this.emit("session:created", data);
     });
   }
 }
@@ -754,23 +756,23 @@ export class MultiLLMOrchestrator extends EventEmitter {
 export class OrchestratorError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'OrchestratorError';
+    this.name = "OrchestratorError";
   }
 }
 
 export class GovernanceError extends Error {
   constructor(
     message: string,
-    public violations: GovernanceViolation[],
+    public violations: GovernanceViolation[]
   ) {
     super(message);
-    this.name = 'GovernanceError';
+    this.name = "GovernanceError";
   }
 }
 
 export class BudgetError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'BudgetError';
+    this.name = "BudgetError";
   }
 }

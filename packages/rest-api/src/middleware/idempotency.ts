@@ -4,7 +4,13 @@
  * Ensures idempotent request handling
  */
 
-import type { Request, Response, NextFunction, IdempotencyOptions, IdempotencyRecord } from '../types';
+import type {
+  Request,
+  Response,
+  NextFunction,
+  IdempotencyOptions,
+  IdempotencyRecord,
+} from "../types";
 
 /**
  * In-memory idempotency storage (for demo, use Redis in production)
@@ -49,7 +55,7 @@ class MemoryIdempotencyStorage {
 
 export function idempotencyMiddleware(options: IdempotencyOptions) {
   const storage = options.storage || new MemoryIdempotencyStorage();
-  const headerName = options.header || 'idempotency-key';
+  const headerName = options.header || "idempotency-key";
   const ttl = options.ttl || 86400; // 24 hours default
 
   // Cleanup expired entries every hour
@@ -59,7 +65,7 @@ export function idempotencyMiddleware(options: IdempotencyOptions) {
 
   return async (req: Request, res: Response, next: NextFunction) => {
     // Only apply to mutating operations
-    if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
+    if (!["POST", "PUT", "PATCH", "DELETE"].includes(req.method)) {
       return next();
     }
 
@@ -109,7 +115,7 @@ export function idempotencyMiddleware(options: IdempotencyOptions) {
         };
 
         storage.set(idempotencyKey, record, ttl).catch((err) => {
-          console.error('Failed to store idempotency record:', err);
+          console.error("Failed to store idempotency record:", err);
         });
 
         return originalJson(body);

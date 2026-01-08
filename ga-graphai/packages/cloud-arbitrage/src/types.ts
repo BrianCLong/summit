@@ -1,4 +1,4 @@
-export type ResourceClass = 'compute' | 'storage' | 'network';
+export type ResourceClass = "compute" | "storage" | "network";
 
 export interface ProviderRegionKey {
   provider: string;
@@ -56,7 +56,7 @@ export interface WorkloadProfile {
   id: string;
   description: string;
   resourceBreakdown: Record<ResourceClass, number>;
-  availabilityTier: 'mission-critical' | 'standard' | 'flex';
+  availabilityTier: "mission-critical" | "standard" | "flex";
   burstable: boolean;
   sustainabilityWeight: number;
 }
@@ -83,7 +83,7 @@ export interface StrategySummary {
 }
 
 export interface HeadToHeadResult {
-  baselineTool: 'aws-compute-optimizer' | 'spot-io' | 'google-recommender';
+  baselineTool: "aws-compute-optimizer" | "spot-io" | "google-recommender";
   workloadId: string;
   agentSummary: StrategySummary;
   baselineSavings: number;

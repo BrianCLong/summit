@@ -70,9 +70,7 @@
       "options": {
         "footer": {
           "fields": "",
-          "reducer": [
-            "sum"
-          ],
+          "reducer": ["sum"],
           "show": false
         },
         "showHeader": true
@@ -98,11 +96,7 @@
   "refresh": "",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": [
-    "golden-path",
-    "security",
-    "health"
-  ],
+  "tags": ["golden-path", "security", "health"],
   "templating": {
     "list": [
       {

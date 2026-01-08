@@ -320,6 +320,7 @@ Run all analytics (communities, centrality, patterns) in parallel.
 ### 1. Pathfinding
 
 #### Shortest Path
+
 - **Algorithm**: BFS (unweighted) or Dijkstra (weighted)
 - **Time Complexity**: O(V + E) for BFS, O((V + E) log V) for Dijkstra
 - **Features**:
@@ -328,6 +329,7 @@ Run all analytics (communities, centrality, patterns) in parallel.
   - Support for directed/undirected graphs
 
 #### K-Shortest Paths
+
 - **Algorithm**: Yen's algorithm (simplified)
 - **Time Complexity**: O(K × V × (E + V log V))
 - **Features**:
@@ -338,21 +340,25 @@ Run all analytics (communities, centrality, patterns) in parallel.
 ### 2. Centrality Metrics
 
 #### Degree Centrality
+
 - **Formula**: degree(v) = number of edges incident to v
 - **Time Complexity**: O(V + E)
 - **Use Case**: Identify highly connected nodes
 
 #### Betweenness Centrality
+
 - **Algorithm**: Brandes' algorithm
 - **Time Complexity**: O(V × E)
 - **Use Case**: Identify broker nodes that control information flow
 
 #### Eigenvector Centrality
+
 - **Algorithm**: Power iteration
 - **Time Complexity**: O(iterations × E)
 - **Use Case**: Identify influential nodes connected to other influential nodes
 
 #### Closeness Centrality
+
 - **Algorithm**: BFS from each node
 - **Time Complexity**: O(V × (V + E))
 - **Use Case**: Identify nodes with shortest average distance to all others
@@ -360,12 +366,14 @@ Run all analytics (communities, centrality, patterns) in parallel.
 ### 3. Community Detection
 
 #### Louvain Algorithm
+
 - **Method**: Modularity optimization
 - **Time Complexity**: O(E × log V) (approximate)
 - **Advantages**: Fast, hierarchical, high modularity
 - **Best For**: Large graphs, clear community structure
 
 #### Label Propagation
+
 - **Method**: Iterative label spreading
 - **Time Complexity**: O(iterations × E)
 - **Advantages**: Simple, scalable, no prior community count needed
@@ -374,16 +382,19 @@ Run all analytics (communities, centrality, patterns) in parallel.
 ### 4. Pattern Detection
 
 #### Star Patterns
+
 - **Definition**: Central node with ≥ N neighbors
 - **Time Complexity**: O(V + E)
 - **Indicators**: Hubs, central control, broadcasting
 
 #### Bipartite Fan Patterns
+
 - **Definition**: Many sources → intermediary → many targets
 - **Time Complexity**: O(V + E)
 - **Indicators**: Structuring, aggregation, layering
 
 #### Repeated Interactions
+
 - **Definition**: Multiple edges between same node pairs over time
 - **Time Complexity**: O(E)
 - **Indicators**: Coordination, recurring relationships
@@ -393,18 +404,18 @@ Run all analytics (communities, centrality, patterns) in parallel.
 ### Example 1: Find Paths with Policy Filtering
 
 ```typescript
-import { EnhancedGraphAnalyticsService } from './services/EnhancedGraphAnalyticsService';
+import { EnhancedGraphAnalyticsService } from "./services/EnhancedGraphAnalyticsService";
 
 const service = new EnhancedGraphAnalyticsService(neo4jDriver, pgPool, redisClient);
 
 const result = await service.analyzePaths({
-  startNodeId: 'account_1',
-  endNodeId: 'account_2',
+  startNodeId: "account_1",
+  endNodeId: "account_2",
   k: 5,
   constraints: {
     maxDepth: 4,
-    disallowedNodeLabels: ['Sanctioned'],
-    requiredEdgeTypes: ['TRANSACTION'],
+    disallowedNodeLabels: ["Sanctioned"],
+    requiredEdgeTypes: ["TRANSACTION"],
   },
   nodePolicyFilter: (node) => !node.properties.blocked,
 });
@@ -419,7 +430,7 @@ console.log(`Found ${result.paths.length} paths`);
 const result = await service.analyzeCommunities({
   nodeIds: investigationNodeIds,
   depth: 3,
-  algorithm: 'louvain',
+  algorithm: "louvain",
 });
 
 console.log(`Detected ${result.communities.numCommunities} communities`);
@@ -448,12 +459,12 @@ for (const pattern of result.patterns) {
 
 ### Recommended Limits
 
-| Operation | Max Nodes | Max Depth | Max K Paths | Cache TTL |
-|-----------|-----------|-----------|-------------|-----------|
-| Pathfinding | 10,000 | 6 | 10 | 1 hour |
-| Community Detection | 5,000 | 3 | N/A | 1 hour |
-| Centrality | 2,000 | 2 | N/A | 1 hour |
-| Pattern Detection | 5,000 | 3 | N/A | 1 hour |
+| Operation           | Max Nodes | Max Depth | Max K Paths | Cache TTL |
+| ------------------- | --------- | --------- | ----------- | --------- |
+| Pathfinding         | 10,000    | 6         | 10          | 1 hour    |
+| Community Detection | 5,000     | 3         | N/A         | 1 hour    |
+| Centrality          | 2,000     | 2         | N/A         | 1 hour    |
+| Pattern Detection   | 5,000     | 3         | N/A         | 1 hour    |
 
 ### Optimization Tips
 
@@ -473,6 +484,7 @@ pnpm test
 ```
 
 Test coverage includes:
+
 - Unit tests for each algorithm
 - Integration tests with Neo4j
 - Policy filter validation

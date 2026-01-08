@@ -1,6 +1,6 @@
 image:
   repository: ghcr.io/BrianCLong/intelgraph/nlp-service
-  tag: ''
+  tag: ""
   pullPolicy: IfNotPresent
 
 replicaCount: 1

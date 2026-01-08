@@ -6,8 +6,8 @@
  * Creates an interactive HTML dashboard with charts and visualizations
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from "fs";
+import * as path from "path";
 
 interface DashboardSummary {
   totalPRs: number;
@@ -44,31 +44,31 @@ interface DashboardJSONData {
 
 function generateHTML(data: DashboardJSONData): string {
   const categoryColors: Record<string, string> = {
-    feature: '#22c55e',
-    bug: '#ef4444',
-    docs: '#3b82f6',
-    dependencies: '#f59e0b',
-    chore: '#8b5cf6',
-    other: '#6b7280',
+    feature: "#22c55e",
+    bug: "#ef4444",
+    docs: "#3b82f6",
+    dependencies: "#f59e0b",
+    chore: "#8b5cf6",
+    other: "#6b7280",
   };
 
   const categoryEmojis: Record<string, string> = {
-    feature: '✨',
-    bug: '🐛',
-    docs: '📚',
-    dependencies: '📦',
-    chore: '🔧',
-    other: '📝',
+    feature: "✨",
+    bug: "🐛",
+    docs: "📚",
+    dependencies: "📦",
+    chore: "🔧",
+    other: "📝",
   };
 
   // Generate category data for charts
   const categoryLabels = Object.keys(data.categories);
-  const categoryCounts = categoryLabels.map(cat => data.categories[cat].count);
-  const categoryColorsArray = categoryLabels.map(cat => categoryColors[cat] || '#6b7280');
+  const categoryCounts = categoryLabels.map((cat) => data.categories[cat].count);
+  const categoryColorsArray = categoryLabels.map((cat) => categoryColors[cat] || "#6b7280");
 
   // Generate contributor data
-  const contributorNames = data.topContributors.map(c => c.author);
-  const contributorCounts = data.topContributors.map(c => c.count);
+  const contributorNames = data.topContributors.map((c) => c.author);
+  const contributorCounts = data.topContributors.map((c) => c.count);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -296,18 +296,18 @@ function generateHTML(data: DashboardJSONData): string {
       <div class="stat-card">
         <h3>Features</h3>
         <div class="value" style="color: ${categoryColors.feature};">${data.categories.feature?.count || 0}</div>
-        <div class="label">${((data.categories.feature?.count || 0) / data.summary.totalPRs * 100).toFixed(1)}% of total</div>
+        <div class="label">${(((data.categories.feature?.count || 0) / data.summary.totalPRs) * 100).toFixed(1)}% of total</div>
       </div>
 
       <div class="stat-card">
         <h3>Bug Fixes</h3>
         <div class="value" style="color: ${categoryColors.bug};">${data.categories.bug?.count || 0}</div>
-        <div class="label">${((data.categories.bug?.count || 0) / data.summary.totalPRs * 100).toFixed(1)}% of total</div>
+        <div class="label">${(((data.categories.bug?.count || 0) / data.summary.totalPRs) * 100).toFixed(1)}% of total</div>
       </div>
 
       <div class="stat-card">
         <h3>Top Contributor</h3>
-        <div class="value" style="font-size: 1.5rem;">${data.topContributors[0]?.author || 'N/A'}</div>
+        <div class="value" style="font-size: 1.5rem;">${data.topContributors[0]?.author || "N/A"}</div>
         <div class="label">${data.topContributors[0]?.count || 0} PRs</div>
       </div>
     </div>
@@ -347,15 +347,16 @@ function generateHTML(data: DashboardJSONData): string {
     <div class="category-list">
       <h2>Recent PRs by Category</h2>
 
-      ${categoryLabels.map(category => {
-        const categoryData = data.categories[category];
-        if (!categoryData || categoryData.count === 0) return '';
+      ${categoryLabels
+        .map((category) => {
+          const categoryData = data.categories[category];
+          if (!categoryData || categoryData.count === 0) return "";
 
-        const recentPRs = categoryData.prs.slice(0, 10);
-        const emoji = categoryEmojis[category] || '📝';
-        const color = categoryColors[category] || '#6b7280';
+          const recentPRs = categoryData.prs.slice(0, 10);
+          const emoji = categoryEmojis[category] || "📝";
+          const color = categoryColors[category] || "#6b7280";
 
-        return `
+          return `
           <div class="category-section">
             <div class="category-header">
               <span style="font-size: 1.5rem;">${emoji}</span>
@@ -365,21 +366,26 @@ function generateHTML(data: DashboardJSONData): string {
               </span>
             </div>
             <ul class="pr-list">
-              ${recentPRs.map(pr => `
+              ${recentPRs
+                .map(
+                  (pr) => `
                 <li class="pr-item">
                   <div class="pr-title">
-                    ${pr.prNumber ? `<span class="pr-number">#${pr.prNumber}</span>` : ''}
+                    ${pr.prNumber ? `<span class="pr-number">#${pr.prNumber}</span>` : ""}
                     ${pr.title}
                   </div>
                   <div class="pr-meta">
                     ${new Date(pr.date).toLocaleDateString()} • ${pr.author}
                   </div>
                 </li>
-              `).join('')}
+              `
+                )
+                .join("")}
             </ul>
           </div>
         `;
-      }).join('')}
+        })
+        .join("")}
     </div>
 
     <!-- Footer -->
@@ -404,7 +410,7 @@ function generateHTML(data: DashboardJSONData): string {
     new Chart(document.getElementById('categoryChart'), {
       type: 'bar',
       data: {
-        labels: ${JSON.stringify(categoryLabels.map(c => c.charAt(0).toUpperCase() + c.slice(1)))},
+        labels: ${JSON.stringify(categoryLabels.map((c) => c.charAt(0).toUpperCase() + c.slice(1)))},
         datasets: [{
           label: 'Number of PRs',
           data: ${JSON.stringify(categoryCounts)},
@@ -430,7 +436,7 @@ function generateHTML(data: DashboardJSONData): string {
     new Chart(document.getElementById('pieChart'), {
       type: 'pie',
       data: {
-        labels: ${JSON.stringify(categoryLabels.map(c => c.charAt(0).toUpperCase() + c.slice(1)))},
+        labels: ${JSON.stringify(categoryLabels.map((c) => c.charAt(0).toUpperCase() + c.slice(1)))},
         datasets: [{
           data: ${JSON.stringify(categoryCounts)},
           backgroundColor: ${JSON.stringify(categoryColorsArray)},
@@ -469,7 +475,7 @@ function generateHTML(data: DashboardJSONData): string {
     new Chart(document.getElementById('doughnutChart'), {
       type: 'doughnut',
       data: {
-        labels: ${JSON.stringify(categoryLabels.map(c => c.charAt(0).toUpperCase() + c.slice(1)))},
+        labels: ${JSON.stringify(categoryLabels.map((c) => c.charAt(0).toUpperCase() + c.slice(1)))},
         datasets: [{
           data: ${JSON.stringify(categoryCounts)},
           backgroundColor: ${JSON.stringify(categoryColorsArray)},
@@ -489,11 +495,11 @@ function generateHTML(data: DashboardJSONData): string {
 
 function main(): void {
   try {
-    const jsonPath = path.join(process.cwd(), 'pr-dashboard-report.json');
-    const htmlPath = path.join(process.cwd(), 'pr-dashboard.html');
+    const jsonPath = path.join(process.cwd(), "pr-dashboard-report.json");
+    const htmlPath = path.join(process.cwd(), "pr-dashboard.html");
 
     // Read JSON data
-    const jsonData = fs.readFileSync(jsonPath, 'utf-8');
+    const jsonData = fs.readFileSync(jsonPath, "utf-8");
     const data: DashboardJSONData = JSON.parse(jsonData);
 
     // Generate HTML
@@ -506,7 +512,7 @@ function main(): void {
     console.log(`📄 Output: ${htmlPath}`);
     console.log(`🌐 Open in browser: file://${htmlPath}`);
   } catch (error) {
-    console.error('Error generating HTML dashboard:', error);
+    console.error("Error generating HTML dashboard:", error);
     process.exit(1);
   }
 }

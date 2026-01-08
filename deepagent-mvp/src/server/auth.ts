@@ -1,9 +1,9 @@
-import { expressjwt, GetVerificationKey } from 'express-jwt';
-import jwksRsa from 'jwks-rsa';
-import { config } from '../config';
-import { Request } from 'express';
-import jwt from 'jsonwebtoken';
-import { logger } from '../observability/logging';
+import { expressjwt, GetVerificationKey } from "express-jwt";
+import jwksRsa from "jwks-rsa";
+import { config } from "../config";
+import { Request } from "express";
+import jwt from "jsonwebtoken";
+import { logger } from "../observability/logging";
 
 export interface AuthContext {
   tenantId: string;
@@ -24,7 +24,7 @@ const getPublicKey: GetVerificationKey = (req, token) => {
 
     client.getSigningKey(token.header.kid, (err, key) => {
       if (err) {
-        logger.error('Error getting signing key from JWKS', { error: err.message });
+        logger.error("Error getting signing key from JWKS", { error: err.message });
         return reject(err);
       }
       const signingKey = key.getPublicKey();
@@ -40,26 +40,31 @@ const getPublicKey: GetVerificationKey = (req, token) => {
 export const getContext = async ({ req }: { req: Request }): Promise<AuthContext> => {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
-    throw new Error('Authentication error: Authorization header missing.');
+    throw new Error("Authentication error: Authorization header missing.");
   }
 
-  const token = authHeader.split(' ')[1];
+  const token = authHeader.split(" ")[1];
   if (!token) {
-    throw new Error('Authentication error: Token missing from Authorization header.');
+    throw new Error("Authentication error: Token missing from Authorization header.");
   }
 
   try {
     const decoded = await new Promise<jwt.JwtPayload>((resolve, reject) => {
-      jwt.verify(token, getPublicKey as jwt.Secret, {
-        audience: config.auth.audience,
-        issuer: config.auth.issuer,
-        algorithms: ['RS256'],
-      }, (err, decoded) => {
-        if (err) {
-          return reject(err);
+      jwt.verify(
+        token,
+        getPublicKey as jwt.Secret,
+        {
+          audience: config.auth.audience,
+          issuer: config.auth.issuer,
+          algorithms: ["RS256"],
+        },
+        (err, decoded) => {
+          if (err) {
+            return reject(err);
+          }
+          resolve(decoded as jwt.JwtPayload);
         }
-        resolve(decoded as jwt.JwtPayload);
-      });
+      );
     });
 
     // In a real application, you would have more robust logic to extract tenantId and actor
@@ -67,12 +72,12 @@ export const getContext = async ({ req }: { req: Request }): Promise<AuthContext
     const { tenantId, actor } = decoded;
 
     if (!tenantId || !actor) {
-      throw new Error('Authentication error: tenantId or actor missing from token.');
+      throw new Error("Authentication error: tenantId or actor missing from token.");
     }
 
     return { tenantId, actor };
   } catch (error) {
-    logger.error('JWT validation failed', { error: error.message });
+    logger.error("JWT validation failed", { error: error.message });
     throw new Error(`Authentication error: ${error.message}`);
   }
 };

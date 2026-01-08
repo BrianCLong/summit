@@ -1,4 +1,4 @@
-import { PolicyTemplatePack } from './types.js';
+import { PolicyTemplatePack } from "./types.js";
 
 export interface LintFinding {
   locale: string;
@@ -16,19 +16,19 @@ export class DarkPatternLinter {
   private lintLocale(locale: string, copy: unknown): LintFinding[] {
     const findings: LintFinding[] = [];
     const inspect = (value: unknown): void => {
-      if (typeof value === 'string') {
+      if (typeof value === "string") {
         this.disallowedPatterns.forEach((pattern) => {
           if (value.toLowerCase().includes(pattern.toLowerCase())) {
             findings.push({
               locale,
               message: `Found disallowed pattern "${pattern}" in text: ${value}`,
-              pattern
+              pattern,
             });
           }
         });
       } else if (Array.isArray(value)) {
         value.forEach(inspect);
-      } else if (value && typeof value === 'object') {
+      } else if (value && typeof value === "object") {
         Object.values(value as Record<string, unknown>).forEach(inspect);
       }
     };

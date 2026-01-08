@@ -2,7 +2,7 @@
  * Link Analyzer - Analyzes links and creates relationship maps
  */
 
-import type { Link } from '../types/index.js';
+import type { Link } from "../types/index.js";
 
 export interface LinkAnalysis {
   totalLinks: number;
@@ -20,11 +20,11 @@ export class LinkAnalyzer {
   analyze(links: Link[]): LinkAnalysis {
     const analysis: LinkAnalysis = {
       totalLinks: links.length,
-      internalLinks: links.filter(l => l.type === 'internal').length,
-      externalLinks: links.filter(l => l.type === 'external').length,
+      internalLinks: links.filter((l) => l.type === "internal").length,
+      externalLinks: links.filter((l) => l.type === "external").length,
       uniqueDomains: [],
       brokenLinks: [],
-      linkGraph: new Map()
+      linkGraph: new Map(),
     };
 
     // Extract unique domains
@@ -80,7 +80,7 @@ export class LinkAnalyzer {
       /\.exe$/i,
       /\.scr$/i,
       /\.bat$/i,
-      /\.cmd$/i
+      /\.cmd$/i,
     ];
 
     for (const link of links) {
@@ -105,23 +105,23 @@ export class LinkAnalyzer {
       linkedin: [],
       instagram: [],
       youtube: [],
-      github: []
+      github: [],
     };
 
     for (const link of links) {
       const href = link.href.toLowerCase();
 
-      if (href.includes('twitter.com') || href.includes('x.com')) {
+      if (href.includes("twitter.com") || href.includes("x.com")) {
         socialMedia.twitter.push(link.href);
-      } else if (href.includes('facebook.com')) {
+      } else if (href.includes("facebook.com")) {
         socialMedia.facebook.push(link.href);
-      } else if (href.includes('linkedin.com')) {
+      } else if (href.includes("linkedin.com")) {
         socialMedia.linkedin.push(link.href);
-      } else if (href.includes('instagram.com')) {
+      } else if (href.includes("instagram.com")) {
         socialMedia.instagram.push(link.href);
-      } else if (href.includes('youtube.com')) {
+      } else if (href.includes("youtube.com")) {
         socialMedia.youtube.push(link.href);
-      } else if (href.includes('github.com')) {
+      } else if (href.includes("github.com")) {
         socialMedia.github.push(link.href);
       }
     }

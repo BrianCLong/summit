@@ -1,21 +1,21 @@
 #!/usr/bin/env npx tsx
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'fs';
-import path from 'path';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from "fs";
+import path from "path";
 
 // --- Configuration ---
-const DOCS_DIR = 'docs/ops';
-const METRICS_DIR = '.'; // Root for now, or where artifacts are found
-const OUTPUT_FILE_JSON = 'health-score.json';
-const OUTPUT_FILE_MD = path.join(DOCS_DIR, 'dashboard-health.md');
+const DOCS_DIR = "docs/ops";
+const METRICS_DIR = "."; // Root for now, or where artifacts are found
+const OUTPUT_FILE_JSON = "health-score.json";
+const OUTPUT_FILE_MD = path.join(DOCS_DIR, "dashboard-health.md");
 
 // Component Weights
 const WEIGHTS = {
   reliability: 0.35,
-  availability: 0.20,
+  availability: 0.2,
   quality: 0.15,
   security: 0.15,
-  efficiency: 0.10,
+  efficiency: 0.1,
   velocity: 0.05,
 };
 
@@ -45,8 +45,8 @@ interface MetricData {
 
 // --- Data Gathering Functions ---
 
-function getReliabilityMetrics(): MetricData['reliability'] {
-  const files = ['test-summary-junit.xml', 'junit.xml'];
+function getReliabilityMetrics(): MetricData["reliability"] {
+  const files = ["test-summary-junit.xml", "junit.xml"];
   let passed = 0;
   let total = 0;
   let skipped = 0;
@@ -56,7 +56,7 @@ function getReliabilityMetrics(): MetricData['reliability'] {
     const p = path.join(METRICS_DIR, file);
     if (existsSync(p)) {
       try {
-        const content = readFileSync(p, 'utf-8');
+        const content = readFileSync(p, "utf-8");
         // Simple regex parsing for junit xml
         const testsMatch = content.match(/tests="(\d+)"/);
         const failuresMatch = content.match(/failures="(\d+)"/);
@@ -73,7 +73,7 @@ function getReliabilityMetrics(): MetricData['reliability'] {
             total += t;
             // Passed = Total - Failures - Errors
             // Assuming failures/errors are counts of failed tests.
-            passed += (t - f - e);
+            passed += t - f - e;
             skipped += s;
             found = true;
           }
@@ -85,26 +85,28 @@ function getReliabilityMetrics(): MetricData['reliability'] {
   }
 
   if (!found) {
-    console.warn('No JUnit XML files found or parsed. Defaulting to 100% reliability (optimistic).');
+    console.warn(
+      "No JUnit XML files found or parsed. Defaulting to 100% reliability (optimistic)."
+    );
     return { passed: 1, total: 1, skipped: 0 };
   }
 
   return { passed: passed - skipped, total, skipped };
 }
 
-function getAvailabilityMetrics(): MetricData['availability'] {
+function getAvailabilityMetrics(): MetricData["availability"] {
   // Try to find slo-results.json
-  const p = path.join(METRICS_DIR, 'slo-results.json');
+  const p = path.join(METRICS_DIR, "slo-results.json");
   if (existsSync(p)) {
     try {
-      const content = JSON.parse(readFileSync(p, 'utf-8'));
+      const content = JSON.parse(readFileSync(p, "utf-8"));
       // Assume structure { errorRate: number, uptime: number }
       return {
         errorRate: content.errorRate ?? 0,
-        uptime: content.uptime ?? 100
+        uptime: content.uptime ?? 100,
       };
     } catch (e) {
-      console.warn('Failed to parse slo-results.json');
+      console.warn("Failed to parse slo-results.json");
     }
   }
 
@@ -112,28 +114,32 @@ function getAvailabilityMetrics(): MetricData['availability'] {
   return { errorRate: 0, uptime: 100 };
 }
 
-function getQualityMetrics(): MetricData['quality'] {
+function getQualityMetrics(): MetricData["quality"] {
   // Try to find issues.json or issues-stats.json
-  const p = path.join(METRICS_DIR, 'issues.json');
+  const p = path.join(METRICS_DIR, "issues.json");
   if (existsSync(p)) {
     try {
-      const content = JSON.parse(readFileSync(p, 'utf-8'));
+      const content = JSON.parse(readFileSync(p, "utf-8"));
       return { criticalBugs: content.criticalBugs ?? 0 };
-    } catch (e) { console.warn('Failed to parse issues.json'); }
+    } catch (e) {
+      console.warn("Failed to parse issues.json");
+    }
   }
 
   // Using default 0.
   return { criticalBugs: 0 };
 }
 
-function getSecurityMetrics(): MetricData['security'] {
+function getSecurityMetrics(): MetricData["security"] {
   // Parse vulns-*.txt
   // Look for files starting with vulns-
   let files: string[] = [];
   try {
-    files = readdirSync(METRICS_DIR).filter((fn: string) => fn.startsWith('vulns-') && fn.endsWith('.txt'));
+    files = readdirSync(METRICS_DIR).filter(
+      (fn: string) => fn.startsWith("vulns-") && fn.endsWith(".txt")
+    );
   } catch (e) {
-    console.warn('Failed to list vulnerability files');
+    console.warn("Failed to list vulnerability files");
   }
 
   let critical = 0;
@@ -141,13 +147,13 @@ function getSecurityMetrics(): MetricData['security'] {
 
   for (const file of files) {
     try {
-      const content = readFileSync(path.join(METRICS_DIR, file), 'utf-8');
+      const content = readFileSync(path.join(METRICS_DIR, file), "utf-8");
       const critMatch = content.match(/Critical:\s*(\d+)/i);
       const highMatch = content.match(/High:\s*(\d+)/i);
 
       if (critMatch) critical += parseInt(critMatch[1], 10);
       if (highMatch) high += parseInt(highMatch[1], 10);
-    } catch(e) {
+    } catch (e) {
       console.warn(`Failed to read ${file}`);
     }
   }
@@ -155,12 +161,12 @@ function getSecurityMetrics(): MetricData['security'] {
   return { criticalVulns: critical, highVulns: high };
 }
 
-function getEfficiencyMetrics(): MetricData['efficiency'] {
+function getEfficiencyMetrics(): MetricData["efficiency"] {
   // budget.json
-  const p = path.join(METRICS_DIR, 'budget.json');
+  const p = path.join(METRICS_DIR, "budget.json");
   if (existsSync(p)) {
     try {
-      const content = JSON.parse(readFileSync(p, 'utf-8'));
+      const content = JSON.parse(readFileSync(p, "utf-8"));
       return { budget: content.budget ?? 1000, cost: content.cost ?? 0 };
     } catch (e) {}
   }
@@ -168,13 +174,13 @@ function getEfficiencyMetrics(): MetricData['efficiency'] {
   return { budget: 1000, cost: 500 };
 }
 
-function getVelocityMetrics(): MetricData['velocity'] {
+function getVelocityMetrics(): MetricData["velocity"] {
   // velocity.json
-  const p = path.join(METRICS_DIR, 'velocity.json');
+  const p = path.join(METRICS_DIR, "velocity.json");
   if (existsSync(p)) {
     try {
-        const content = JSON.parse(readFileSync(p, 'utf-8'));
-        return { leadTimeHours: content.leadTimeHours ?? 12 };
+      const content = JSON.parse(readFileSync(p, "utf-8"));
+      return { leadTimeHours: content.leadTimeHours ?? 12 };
     } catch (e) {}
   }
   return { leadTimeHours: 12 };
@@ -182,7 +188,7 @@ function getVelocityMetrics(): MetricData['velocity'] {
 
 // --- Calculation Functions ---
 
-function calculateScore(metrics: MetricData): { score: number, components: HealthComponents } {
+function calculateScore(metrics: MetricData): { score: number; components: HealthComponents } {
   // 1. Reliability
   // Passed / Total * 100
   // Note: metrics.reliability.passed excludes skipped.
@@ -194,9 +200,10 @@ function calculateScore(metrics: MetricData): { score: number, components: Healt
   // If the spec says "Passed / Total", let's stick to that but handle div by zero.
   // Given the earlier thought process: let's use passed / total.
 
-  const relRaw = metrics.reliability.total > 0
-    ? (metrics.reliability.passed / metrics.reliability.total) * 100
-    : 100;
+  const relRaw =
+    metrics.reliability.total > 0
+      ? (metrics.reliability.passed / metrics.reliability.total) * 100
+      : 100;
   const sReliability = Math.max(0, Math.min(100, relRaw));
 
   // 2. Availability
@@ -207,10 +214,10 @@ function calculateScore(metrics: MetricData): { score: number, components: Healt
   else sAvailability = 0;
 
   // 3. Quality
-  const sQuality = Math.max(0, 100 - (5 * metrics.quality.criticalBugs));
+  const sQuality = Math.max(0, 100 - 5 * metrics.quality.criticalBugs);
 
   // 4. Security
-  const sSecurity = Math.max(0, 100 - (20 * metrics.security.criticalVulns));
+  const sSecurity = Math.max(0, 100 - 20 * metrics.security.criticalVulns);
 
   // 5. Efficiency
   let sEfficiency = 50;
@@ -224,12 +231,12 @@ function calculateScore(metrics: MetricData): { score: number, components: Healt
 
   // Total
   const totalScore =
-    (WEIGHTS.reliability * sReliability) +
-    (WEIGHTS.availability * sAvailability) +
-    (WEIGHTS.quality * sQuality) +
-    (WEIGHTS.security * sSecurity) +
-    (WEIGHTS.efficiency * sEfficiency) +
-    (WEIGHTS.velocity * sVelocity);
+    WEIGHTS.reliability * sReliability +
+    WEIGHTS.availability * sAvailability +
+    WEIGHTS.quality * sQuality +
+    WEIGHTS.security * sSecurity +
+    WEIGHTS.efficiency * sEfficiency +
+    WEIGHTS.velocity * sVelocity;
 
   return {
     score: Math.round(totalScore * 10) / 10, // 1 decimal place
@@ -239,47 +246,47 @@ function calculateScore(metrics: MetricData): { score: number, components: Healt
       quality: sQuality,
       security: sSecurity,
       efficiency: sEfficiency,
-      velocity: sVelocity
-    }
+      velocity: sVelocity,
+    },
   };
 }
 
 // --- Main Execution ---
 
 function main() {
-  console.log('Gathering metrics...');
+  console.log("Gathering metrics...");
   const data: MetricData = {
     reliability: getReliabilityMetrics(),
     availability: getAvailabilityMetrics(),
     quality: getQualityMetrics(),
     security: getSecurityMetrics(),
     efficiency: getEfficiencyMetrics(),
-    velocity: getVelocityMetrics()
+    velocity: getVelocityMetrics(),
   };
 
-  console.log('Metrics gathered:', JSON.stringify(data, null, 2));
+  console.log("Metrics gathered:", JSON.stringify(data, null, 2));
 
   const result = calculateScore(data);
-  console.log('Calculated Score:', result.score);
+  console.log("Calculated Score:", result.score);
 
   // Status
-  let status = '🔴 Critical';
-  let color = 'red';
+  let status = "🔴 Critical";
+  let color = "red";
   if (result.score >= THRESHOLDS.healthy) {
-    status = '🟢 Healthy';
-    color = 'green';
+    status = "🟢 Healthy";
+    color = "green";
   } else if (result.score >= THRESHOLDS.degraded) {
-    status = '🟡 Degraded';
-    color = 'yellow';
+    status = "🟡 Degraded";
+    color = "yellow";
   }
 
   // Generate JSON
   const outputJson = {
     timestamp: new Date().toISOString(),
     score: result.score,
-    status: status.split(' ')[1], // Just the word
+    status: status.split(" ")[1], // Just the word
     components: result.components,
-    metrics: data
+    metrics: data,
   };
   writeFileSync(OUTPUT_FILE_JSON, JSON.stringify(outputJson, null, 2));
   console.log(`Written JSON to ${OUTPUT_FILE_JSON}`);
@@ -295,19 +302,19 @@ function main() {
 
 | Component | Score | Weight | Weighted Score |
 |-----------|-------|--------|----------------|
-| **Reliability** | ${result.components.reliability.toFixed(1)} | ${(WEIGHTS.reliability * 100)}% | ${(result.components.reliability * WEIGHTS.reliability).toFixed(1)} |
-| **Availability** | ${result.components.availability.toFixed(1)} | ${(WEIGHTS.availability * 100)}% | ${(result.components.availability * WEIGHTS.availability).toFixed(1)} |
-| **Quality** | ${result.components.quality.toFixed(1)} | ${(WEIGHTS.quality * 100)}% | ${(result.components.quality * WEIGHTS.quality).toFixed(1)} |
-| **Security** | ${result.components.security.toFixed(1)} | ${(WEIGHTS.security * 100)}% | ${(result.components.security * WEIGHTS.security).toFixed(1)} |
-| **Efficiency** | ${result.components.efficiency.toFixed(1)} | ${(WEIGHTS.efficiency * 100)}% | ${(result.components.efficiency * WEIGHTS.efficiency).toFixed(1)} |
-| **Velocity** | ${result.components.velocity.toFixed(1)} | ${(WEIGHTS.velocity * 100)}% | ${(result.components.velocity * WEIGHTS.velocity).toFixed(1)} |
+| **Reliability** | ${result.components.reliability.toFixed(1)} | ${WEIGHTS.reliability * 100}% | ${(result.components.reliability * WEIGHTS.reliability).toFixed(1)} |
+| **Availability** | ${result.components.availability.toFixed(1)} | ${WEIGHTS.availability * 100}% | ${(result.components.availability * WEIGHTS.availability).toFixed(1)} |
+| **Quality** | ${result.components.quality.toFixed(1)} | ${WEIGHTS.quality * 100}% | ${(result.components.quality * WEIGHTS.quality).toFixed(1)} |
+| **Security** | ${result.components.security.toFixed(1)} | ${WEIGHTS.security * 100}% | ${(result.components.security * WEIGHTS.security).toFixed(1)} |
+| **Efficiency** | ${result.components.efficiency.toFixed(1)} | ${WEIGHTS.efficiency * 100}% | ${(result.components.efficiency * WEIGHTS.efficiency).toFixed(1)} |
+| **Velocity** | ${result.components.velocity.toFixed(1)} | ${WEIGHTS.velocity * 100}% | ${(result.components.velocity * WEIGHTS.velocity).toFixed(1)} |
 
 ## Metrics Detail
 
 ### Reliability
 - **Passed Tests**: ${data.reliability.passed}
 - **Total Tests**: ${data.reliability.total}
-- **Pass Rate**: ${data.reliability.total > 0 ? ((data.reliability.passed/data.reliability.total)*100).toFixed(1) : 0}%
+- **Pass Rate**: ${data.reliability.total > 0 ? ((data.reliability.passed / data.reliability.total) * 100).toFixed(1) : 0}%
 
 ### Availability
 - **Error Rate**: ${data.availability.errorRate}%
@@ -323,7 +330,7 @@ function main() {
 ### Efficiency
 - **Budget**: $${data.efficiency.budget}
 - **Cost**: $${data.efficiency.cost}
-- **Usage**: ${((data.efficiency.cost/data.efficiency.budget)*100).toFixed(1)}%
+- **Usage**: ${((data.efficiency.cost / data.efficiency.budget) * 100).toFixed(1)}%
 
 ### Velocity
 - **PR Lead Time**: ${data.velocity.leadTimeHours}h
@@ -333,7 +340,7 @@ function main() {
 `;
 
   if (!existsSync(DOCS_DIR)) {
-      mkdirSync(DOCS_DIR, { recursive: true });
+    mkdirSync(DOCS_DIR, { recursive: true });
   }
 
   writeFileSync(OUTPUT_FILE_MD, mdContent);

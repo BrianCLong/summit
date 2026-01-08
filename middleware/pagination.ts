@@ -8,7 +8,7 @@
  * - Offset-based pagination support
  */
 
-import pino from 'pino';
+import pino from "pino";
 
 const logger = pino();
 
@@ -82,7 +82,7 @@ export interface PageResult<T> {
  * Encode cursor from object ID
  */
 export function encodeCursor(id: string | number): string {
-  return Buffer.from(`cursor:${id}`).toString('base64');
+  return Buffer.from(`cursor:${id}`).toString("base64");
 }
 
 /**
@@ -90,17 +90,17 @@ export function encodeCursor(id: string | number): string {
  */
 export function decodeCursor(cursor: string): string {
   try {
-    const decoded = Buffer.from(cursor, 'base64').toString('utf-8');
-    const [prefix, id] = decoded.split(':');
+    const decoded = Buffer.from(cursor, "base64").toString("utf-8");
+    const [prefix, id] = decoded.split(":");
 
-    if (prefix !== 'cursor') {
-      throw new Error('Invalid cursor format');
+    if (prefix !== "cursor") {
+      throw new Error("Invalid cursor format");
     }
 
     return id;
   } catch (error) {
-    logger.error('Failed to decode cursor:', error);
-    throw new Error('Invalid cursor');
+    logger.error("Failed to decode cursor:", error);
+    throw new Error("Invalid cursor");
   }
 }
 
@@ -134,7 +134,9 @@ export function validatePaginationInput(input: CursorPaginationInput): {
 
   if (limit > PAGINATION_DEFAULTS.MAX_PAGE_SIZE) {
     limit = PAGINATION_DEFAULTS.MAX_PAGE_SIZE;
-    logger.warn(`Pagination limit exceeded maximum, capping at ${PAGINATION_DEFAULTS.MAX_PAGE_SIZE}`);
+    logger.warn(
+      `Pagination limit exceeded maximum, capping at ${PAGINATION_DEFAULTS.MAX_PAGE_SIZE}`
+    );
   }
 
   // Get cursor if provided
@@ -149,7 +151,7 @@ export function validatePaginationInput(input: CursorPaginationInput): {
 export function createConnection<T extends { id: string | number }>(
   items: T[],
   input: CursorPaginationInput,
-  totalCount?: number,
+  totalCount?: number
 ): Connection<T> {
   const { limit, isForward } = validatePaginationInput(input);
 
@@ -185,11 +187,11 @@ export function createConnection<T extends { id: string | number }>(
 export function createPageResult<T>(
   items: T[],
   totalCount: number,
-  input: OffsetPaginationInput,
+  input: OffsetPaginationInput
 ): PageResult<T> {
   const limit = Math.min(
     input.limit || PAGINATION_DEFAULTS.DEFAULT_PAGE_SIZE,
-    PAGINATION_DEFAULTS.MAX_PAGE_SIZE,
+    PAGINATION_DEFAULTS.MAX_PAGE_SIZE
   );
   const offset = input.offset || 0;
 
@@ -212,22 +214,22 @@ export class PostgresCursorPagination {
   static buildWhereClause(
     cursor: string | undefined,
     isForward: boolean,
-    cursorColumn: string = 'id',
+    cursorColumn: string = "id"
   ): { where: string; params: any[] } {
     if (!cursor) {
-      return { where: '', params: [] };
+      return { where: "", params: [] };
     }
 
     try {
       const cursorValue = decodeCursor(cursor);
-      const operator = isForward ? '>' : '<';
+      const operator = isForward ? ">" : "<";
       return {
         where: `${cursorColumn} ${operator} $1`,
         params: [cursorValue],
       };
     } catch (error) {
-      logger.error('Invalid cursor in pagination:', error);
-      return { where: '', params: [] };
+      logger.error("Invalid cursor in pagination:", error);
+      return { where: "", params: [] };
     }
   }
 
@@ -236,14 +238,14 @@ export class PostgresCursorPagination {
    */
   static buildOrderClause(
     isForward: boolean,
-    orderColumn: string = 'id',
-    direction: 'ASC' | 'DESC' = 'ASC',
+    orderColumn: string = "id",
+    direction: "ASC" | "DESC" = "ASC"
   ): string {
     if (isForward) {
       return `ORDER BY ${orderColumn} ${direction}`;
     } else {
       // Reverse order for backward pagination
-      const reverseDirection = direction === 'ASC' ? 'DESC' : 'ASC';
+      const reverseDirection = direction === "ASC" ? "DESC" : "ASC";
       return `ORDER BY ${orderColumn} ${reverseDirection}`;
     }
   }
@@ -266,32 +268,29 @@ export class Neo4jCursorPagination {
   static buildWhereClause(
     cursor: string | undefined,
     isForward: boolean,
-    cursorProperty: string = 'id',
+    cursorProperty: string = "id"
   ): { where: string; params: any } {
     if (!cursor) {
-      return { where: '', params: {} };
+      return { where: "", params: {} };
     }
 
     try {
       const cursorValue = decodeCursor(cursor);
-      const operator = isForward ? '>' : '<';
+      const operator = isForward ? ">" : "<";
       return {
         where: `n.${cursorProperty} ${operator} $cursorValue`,
         params: { cursorValue },
       };
     } catch (error) {
-      logger.error('Invalid cursor in pagination:', error);
-      return { where: '', params: {} };
+      logger.error("Invalid cursor in pagination:", error);
+      return { where: "", params: {} };
     }
   }
 
   /**
    * Build ORDER BY clause for cursor-based pagination
    */
-  static buildOrderClause(
-    isForward: boolean,
-    orderProperty: string = 'id',
-  ): string {
+  static buildOrderClause(isForward: boolean, orderProperty: string = "id"): string {
     if (isForward) {
       return `ORDER BY n.${orderProperty} ASC`;
     } else {
@@ -312,12 +311,12 @@ export class Neo4jCursorPagination {
  */
 export async function getTotalCount(
   queryFn: () => Promise<number>,
-  useCache: boolean = true,
+  useCache: boolean = true
 ): Promise<number> {
   try {
     return await queryFn();
   } catch (error) {
-    logger.error('Failed to get total count:', error);
+    logger.error("Failed to get total count:", error);
     return 0;
   }
 }
@@ -354,15 +353,12 @@ export const exampleResolver = {
   entities: async (
     parent: any,
     args: { first?: number; after?: string },
-    context: any,
+    context: any
   ): Promise<Connection<any>> => {
     const { limit, isForward, cursor } = validatePaginationInput(args);
 
     // Build query with cursor
-    const { where, params } = PostgresCursorPagination.buildWhereClause(
-      cursor,
-      isForward,
-    );
+    const { where, params } = PostgresCursorPagination.buildWhereClause(cursor, isForward);
     const orderBy = PostgresCursorPagination.buildOrderClause(isForward);
     const limitClause = PostgresCursorPagination.buildLimitClause(limit);
 

@@ -4,7 +4,7 @@
  * Tracks the full chain of evidence from source to assertion to transform.
  */
 
-import { createHash } from 'crypto';
+import { createHash } from "crypto";
 
 // -----------------------------------------------------------------------------
 // Types
@@ -14,7 +14,7 @@ export interface EvidenceNode {
   /** Unique node ID */
   id: string;
   /** Node type */
-  type: 'source' | 'assertion' | 'transform' | 'inference' | 'verification';
+  type: "source" | "assertion" | "transform" | "inference" | "verification";
   /** Content hash (SHA-256) */
   hash: string;
   /** Previous node hashes (for chain integrity) */
@@ -36,7 +36,7 @@ export interface EvidenceNode {
     /** Source credibility (0-1) */
     credibility: number;
     /** Source type */
-    sourceType: 'connector' | 'manual' | 'ai' | 'external' | 'derived';
+    sourceType: "connector" | "manual" | "ai" | "external" | "derived";
   };
   /** Confidence in this evidence (0-1) */
   confidence: number;
@@ -95,7 +95,7 @@ export class EvidenceChainBuilder {
    */
   addSource(
     content: string | Buffer,
-    source: EvidenceNode['source'],
+    source: EvidenceNode["source"],
     options: {
       validFrom?: Date;
       observedAt?: Date;
@@ -107,7 +107,7 @@ export class EvidenceChainBuilder {
     const hash = this.computeHash(content);
     const node: EvidenceNode = {
       id: this.generateId(),
-      type: 'source',
+      type: "source",
       hash,
       parentHashes: [],
       temporal: {
@@ -140,14 +140,14 @@ export class EvidenceChainBuilder {
       confidence: number;
       createdBy: string;
       tenantId: string;
-      sourceType?: EvidenceNode['source']['sourceType'];
+      sourceType?: EvidenceNode["source"]["sourceType"];
       metadata?: Record<string, unknown>;
     }
   ): string {
     const hash = this.computeHash(content);
     const node: EvidenceNode = {
       id: this.generateId(),
-      type: 'assertion',
+      type: "assertion",
       hash,
       parentHashes,
       temporal: {
@@ -157,9 +157,9 @@ export class EvidenceChainBuilder {
         recordedAt: new Date(),
       },
       source: {
-        sourceId: 'derived',
+        sourceId: "derived",
         credibility: options.confidence,
-        sourceType: options.sourceType || 'derived',
+        sourceType: options.sourceType || "derived",
       },
       confidence: options.confidence,
       createdBy: options.createdBy,
@@ -190,7 +190,7 @@ export class EvidenceChainBuilder {
     // Create transform node
     const node: EvidenceNode = {
       id: this.generateId(),
-      type: 'transform',
+      type: "transform",
       hash: outputHash,
       parentHashes: inputHashes,
       temporal: {
@@ -202,7 +202,7 @@ export class EvidenceChainBuilder {
       source: {
         sourceId: transformType,
         credibility: options.confidence || 1.0,
-        sourceType: 'derived',
+        sourceType: "derived",
       },
       confidence: options.confidence || 1.0,
       createdBy: options.performedBy,
@@ -245,7 +245,7 @@ export class EvidenceChainBuilder {
     const hash = this.computeHash(content);
     const node: EvidenceNode = {
       id: this.generateId(),
-      type: 'inference',
+      type: "inference",
       hash,
       parentHashes,
       temporal: {
@@ -257,7 +257,7 @@ export class EvidenceChainBuilder {
       source: {
         sourceId: `ai:${options.modelId}:${options.modelVersion}`,
         credibility: options.confidence,
-        sourceType: 'ai',
+        sourceType: "ai",
       },
       confidence: options.confidence,
       createdBy: options.createdBy,
@@ -279,7 +279,7 @@ export class EvidenceChainBuilder {
    */
   build(): EvidenceChain {
     if (!this.rootHash) {
-      throw new Error('No nodes in evidence chain');
+      throw new Error("No nodes in evidence chain");
     }
 
     const nodes = Array.from(this.nodes.values());
@@ -302,9 +302,7 @@ export class EvidenceChainBuilder {
    * Compute hash of content
    */
   private computeHash(content: string | Buffer): string {
-    return createHash('sha256')
-      .update(content)
-      .digest('hex');
+    return createHash("sha256").update(content).digest("hex");
   }
 
   /**
@@ -323,7 +321,9 @@ export class EvidenceChainBuilder {
     while (changed) {
       changed = false;
       for (const node of this.nodes.values()) {
-        if (depths.has(node.hash)) {continue;}
+        if (depths.has(node.hash)) {
+          continue;
+        }
 
         const parentDepths = node.parentHashes
           .map((h) => depths.get(h))
@@ -362,7 +362,7 @@ export class EvidenceChainVerifier {
     // Check root exists
     const rootNode = chain.nodes.find((n) => n.hash === chain.rootHash);
     if (!rootNode) {
-      errors.push('Root node not found in chain');
+      errors.push("Root node not found in chain");
     }
 
     // Verify all parent references
@@ -377,7 +377,7 @@ export class EvidenceChainVerifier {
 
     // Check for cycles
     if (this.hasCycles(chain)) {
-      errors.push('Evidence chain contains cycles');
+      errors.push("Evidence chain contains cycles");
     }
 
     // Verify temporal consistency
@@ -395,8 +395,9 @@ export class EvidenceChainVerifier {
     // Check confidence propagation
     for (const node of chain.nodes) {
       if (node.parentHashes.length > 0) {
-        const parentConfidences = node.parentHashes
-          .map((h) => chain.nodes.find((n) => n.hash === h)?.confidence || 0);
+        const parentConfidences = node.parentHashes.map(
+          (h) => chain.nodes.find((n) => n.hash === h)?.confidence || 0
+        );
         const maxParentConfidence = Math.max(...parentConfidences);
         if (node.confidence > maxParentConfidence) {
           warnings.push(`Node ${node.id} has higher confidence than parents`);
@@ -428,7 +429,9 @@ export class EvidenceChainVerifier {
       if (node) {
         for (const parentHash of node.parentHashes) {
           if (!visited.has(parentHash)) {
-            if (dfs(parentHash)) {return true;}
+            if (dfs(parentHash)) {
+              return true;
+            }
           } else if (recursionStack.has(parentHash)) {
             return true;
           }
@@ -441,7 +444,9 @@ export class EvidenceChainVerifier {
 
     for (const node of chain.nodes) {
       if (!visited.has(node.hash)) {
-        if (dfs(node.hash)) {return true;}
+        if (dfs(node.hash)) {
+          return true;
+        }
       }
     }
 

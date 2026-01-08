@@ -109,7 +109,7 @@ endpoints:
           source_id_field: $.event.source_system_id
           properties:
             ingested_at: $.processed_at
-            ingest_job_id: {{ingest_id}}
+            ingest_job_id: { { ingest_id } }
             purpose_tags: $.event.purpose_tags
             provenance_ref: $.provenance_ref
 
@@ -210,4 +210,3 @@ observability:
   tracing:
     exporter: otlp
     endpoint: http://otel-collector:4318/v1/traces
-

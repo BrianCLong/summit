@@ -12,18 +12,18 @@
  * @module signal-envelope
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
-import { SignalTypeIdSchema } from './signal-types.js';
+import { SignalTypeIdSchema } from "./signal-types.js";
 
 /**
  * Quality indicator for signal data
  */
 export const SignalQuality = {
-  HIGH: 'high',
-  MEDIUM: 'medium',
-  LOW: 'low',
-  UNKNOWN: 'unknown',
+  HIGH: "high",
+  MEDIUM: "medium",
+  LOW: "low",
+  UNKNOWN: "unknown",
 } as const;
 
 export type SignalQualityType = (typeof SignalQuality)[keyof typeof SignalQuality];
@@ -36,7 +36,7 @@ export const SignalSourceSchema = z.object({
   sourceId: z.string().min(1),
 
   /** Type of source (e.g., 'device', 'application', 'feed', 'manual') */
-  sourceType: z.enum(['device', 'application', 'feed', 'manual', 'synthetic']),
+  sourceType: z.enum(["device", "application", "feed", "manual", "synthetic"]),
 
   /** Human-readable name of the source */
   sourceName: z.string().optional(),
@@ -66,7 +66,7 @@ export const GeoLocationSchema = z.object({
   accuracy: z.number().positive().optional(),
   heading: z.number().min(0).max(360).optional(),
   speed: z.number().nonnegative().optional(),
-  source: z.enum(['gps', 'cell', 'wifi', 'ip', 'manual']).optional(),
+  source: z.enum(["gps", "cell", "wifi", "ip", "manual"]).optional(),
 });
 
 export type GeoLocation = z.infer<typeof GeoLocationSchema>;
@@ -98,7 +98,7 @@ export const ProvenanceSchema = z.object({
       timestamp: z.number(),
       processor: z.string(),
       version: z.string().optional(),
-    }),
+    })
   ),
 
   /** Original source reference */
@@ -157,7 +157,7 @@ export const EnrichmentDataSchema = z.object({
           entityId: z.string(),
           entityType: z.string(),
           confidence: z.number().min(0).max(1),
-        }),
+        })
       ),
     })
     .optional(),
@@ -197,13 +197,13 @@ export const SignalMetadataSchema = z.object({
   causationId: z.string().optional(),
 
   /** Schema version of the envelope */
-  envelopeVersion: z.string().default('1.0.0'),
+  envelopeVersion: z.string().default("1.0.0"),
 
   /** Schema version of the payload */
   payloadSchemaVersion: z.string().optional(),
 
   /** Signal quality indicator */
-  quality: z.enum(['high', 'medium', 'low', 'unknown']).default('unknown'),
+  quality: z.enum(["high", "medium", "low", "unknown"]).default("unknown"),
 
   /** Policy labels for access control */
   policyLabels: z.array(z.string()).default([]),
@@ -212,7 +212,7 @@ export const SignalMetadataSchema = z.object({
   classification: z.string().optional(),
 
   /** Priority override (if different from type default) */
-  priorityOverride: z.enum(['low', 'medium', 'high', 'critical']).optional(),
+  priorityOverride: z.enum(["low", "medium", "high", "critical"]).optional(),
 
   /** Tags for categorization and search */
   tags: z.array(z.string()).default([]),
@@ -252,10 +252,7 @@ export const SignalEnvelopeSchema = z.object({
   headers: z.record(z.string(), z.string()).optional(),
 });
 
-export type SignalEnvelope<T = unknown> = Omit<
-  z.infer<typeof SignalEnvelopeSchema>,
-  'payload'
-> & {
+export type SignalEnvelope<T = unknown> = Omit<z.infer<typeof SignalEnvelopeSchema>, "payload"> & {
   payload: T;
 };
 
@@ -266,7 +263,7 @@ export const RawSignalInputSchema = z.object({
   signalType: SignalTypeIdSchema,
   tenantId: z.string().min(1),
   sourceId: z.string().min(1),
-  sourceType: z.enum(['device', 'application', 'feed', 'manual', 'synthetic']),
+  sourceType: z.enum(["device", "application", "feed", "manual", "synthetic"]),
   payload: z.unknown(),
   timestamp: z.number().positive().optional(),
   correlationId: z.string().optional(),
@@ -289,7 +286,7 @@ export function createSignalEnvelope<T>(
     quality?: SignalQualityType;
     policyLabels?: string[];
     classification?: string;
-  },
+  }
 ): SignalEnvelope<T> {
   const now = Date.now();
   const signalId = options?.signalId ?? crypto.randomUUID();
@@ -306,8 +303,8 @@ export function createSignalEnvelope<T>(
         sourceType: input.sourceType,
       },
       correlationId: input.correlationId,
-      envelopeVersion: '1.0.0',
-      quality: options?.quality ?? 'unknown',
+      envelopeVersion: "1.0.0",
+      quality: options?.quality ?? "unknown",
       policyLabels: options?.policyLabels ?? [],
       classification: options?.classification,
       tags: input.tags ?? [],
@@ -318,10 +315,10 @@ export function createSignalEnvelope<T>(
     provenance: {
       chain: [
         {
-          step: 'ingestion',
+          step: "ingestion",
           timestamp: now,
-          processor: 'signal-bus-service',
-          version: '1.0.0',
+          processor: "signal-bus-service",
+          version: "1.0.0",
         },
       ],
     },
@@ -336,7 +333,7 @@ export function addProvenanceStep<T>(
   envelope: SignalEnvelope<T>,
   step: string,
   processor: string,
-  version?: string,
+  version?: string
 ): SignalEnvelope<T> {
   return {
     ...envelope,
@@ -359,7 +356,7 @@ export function addProvenanceStep<T>(
  * Validate a signal envelope
  */
 export function validateSignalEnvelope(
-  input: unknown,
+  input: unknown
 ): z.SafeParseReturnType<unknown, SignalEnvelope> {
   return SignalEnvelopeSchema.safeParse(input);
 }
@@ -376,6 +373,6 @@ export function getPartitionKey(envelope: SignalEnvelope): string {
  * Get routing key for downstream fan-out
  */
 export function getRoutingKey(envelope: SignalEnvelope): string {
-  const category = envelope.metadata.signalType.split('.')[0];
+  const category = envelope.metadata.signalType.split(".")[0];
   return `${envelope.metadata.tenantId}:${category}`;
 }

@@ -3,12 +3,8 @@
  * Detects data drift, prediction drift, and concept drift in production models
  */
 
-import {
-  DriftDetectionResult,
-  DriftType,
-  ModelMonitoringConfig,
-} from '@intelgraph/mlops-platform';
-import { EventEmitter } from 'events';
+import { DriftDetectionResult, DriftType, ModelMonitoringConfig } from "@intelgraph/mlops-platform";
+import { EventEmitter } from "events";
 
 export interface DataSample {
   features: Record<string, any>;
@@ -43,7 +39,7 @@ export class DriftDetector extends EventEmitter {
    */
   async setReferenceData(samples: DataSample[]): Promise<void> {
     this.referenceData = samples;
-    this.emit('reference:updated', {
+    this.emit("reference:updated", {
       sampleCount: samples.length,
     });
   }
@@ -73,7 +69,7 @@ export class DriftDetector extends EventEmitter {
    */
   async detectDrift(): Promise<DriftDetectionResult[]> {
     if (this.referenceData.length === 0) {
-      throw new Error('Reference data not set');
+      throw new Error("Reference data not set");
     }
 
     const results: DriftDetectionResult[] = [];
@@ -102,7 +98,7 @@ export class DriftDetector extends EventEmitter {
     // Emit events for detected drift
     for (const result of results) {
       if (result.detected) {
-        this.emit('drift:detected', result);
+        this.emit("drift:detected", result);
       }
     }
 
@@ -114,21 +110,16 @@ export class DriftDetector extends EventEmitter {
    */
   private async detectDataDrift(): Promise<DriftDetectionResult | null> {
     const featureNames = this.getFeatureNames();
-    const affectedFeatures: DriftDetectionResult['affectedFeatures'] = [];
+    const affectedFeatures: DriftDetectionResult["affectedFeatures"] = [];
 
     let maxDrift = 0;
 
     for (const featureName of featureNames) {
-      const referenceValues = this.referenceData.map(
-        s => s.features[featureName]
-      );
-      const currentValues = this.currentData.map(s => s.features[featureName]);
+      const referenceValues = this.referenceData.map((s) => s.features[featureName]);
+      const currentValues = this.currentData.map((s) => s.features[featureName]);
 
       // Calculate drift metrics
-      const metrics = await this.calculateDriftMetrics(
-        referenceValues,
-        currentValues
-      );
+      const metrics = await this.calculateDriftMetrics(referenceValues, currentValues);
 
       const driftScore = this.getDriftScore(metrics);
 
@@ -150,7 +141,7 @@ export class DriftDetector extends EventEmitter {
 
     return {
       timestamp: new Date(),
-      driftType: 'data-drift',
+      driftType: "data-drift",
       detected,
       severity: this.getSeverity(maxDrift),
       metrics: {
@@ -160,9 +151,9 @@ export class DriftDetector extends EventEmitter {
       affectedFeatures,
       recommendations: detected
         ? [
-            'Review feature engineering pipeline',
-            'Check data source changes',
-            'Consider model retraining',
+            "Review feature engineering pipeline",
+            "Check data source changes",
+            "Consider model retraining",
           ]
         : [],
     };
@@ -173,28 +164,25 @@ export class DriftDetector extends EventEmitter {
    */
   private async detectPredictionDrift(): Promise<DriftDetectionResult | null> {
     const referencePredictions = this.referenceData
-      .map(s => s.prediction)
-      .filter(p => p !== undefined);
+      .map((s) => s.prediction)
+      .filter((p) => p !== undefined);
 
     const currentPredictions = this.currentData
-      .map(s => s.prediction)
-      .filter(p => p !== undefined);
+      .map((s) => s.prediction)
+      .filter((p) => p !== undefined);
 
     if (referencePredictions.length === 0 || currentPredictions.length === 0) {
       return null;
     }
 
-    const metrics = await this.calculateDriftMetrics(
-      referencePredictions,
-      currentPredictions
-    );
+    const metrics = await this.calculateDriftMetrics(referencePredictions, currentPredictions);
 
     const driftScore = this.getDriftScore(metrics);
     const detected = driftScore > this.config.driftDetection.threshold;
 
     return {
       timestamp: new Date(),
-      driftType: 'prediction-drift',
+      driftType: "prediction-drift",
       detected,
       severity: this.getSeverity(driftScore),
       metrics: {
@@ -203,9 +191,9 @@ export class DriftDetector extends EventEmitter {
       },
       recommendations: detected
         ? [
-            'Investigate prediction distribution shift',
-            'Check for upstream data changes',
-            'Validate model performance',
+            "Investigate prediction distribution shift",
+            "Check for upstream data changes",
+            "Validate model performance",
           ]
         : [],
     };
@@ -216,7 +204,7 @@ export class DriftDetector extends EventEmitter {
    */
   private async detectConceptDrift(): Promise<DriftDetectionResult | null> {
     const samplesWithActuals = this.currentData.filter(
-      s => s.prediction !== undefined && s.actual !== undefined
+      (s) => s.prediction !== undefined && s.actual !== undefined
     );
 
     if (samplesWithActuals.length < 100) {
@@ -224,9 +212,7 @@ export class DriftDetector extends EventEmitter {
     }
 
     // Calculate accuracy/error rate
-    const errors = samplesWithActuals.filter(
-      s => s.prediction !== s.actual
-    ).length;
+    const errors = samplesWithActuals.filter((s) => s.prediction !== s.actual).length;
     const errorRate = errors / samplesWithActuals.length;
 
     // Compare with expected error rate
@@ -237,7 +223,7 @@ export class DriftDetector extends EventEmitter {
 
     return {
       timestamp: new Date(),
-      driftType: 'concept-drift',
+      driftType: "concept-drift",
       detected,
       severity: this.getSeverity(drift * 2),
       metrics: {
@@ -246,9 +232,9 @@ export class DriftDetector extends EventEmitter {
       },
       recommendations: detected
         ? [
-            'Model retraining required',
-            'Investigate relationship changes',
-            'Review feature relevance',
+            "Model retraining required",
+            "Investigate relationship changes",
+            "Review feature relevance",
           ]
         : [],
     };
@@ -257,10 +243,7 @@ export class DriftDetector extends EventEmitter {
   /**
    * Calculate drift metrics
    */
-  private async calculateDriftMetrics(
-    reference: any[],
-    current: any[]
-  ): Promise<DriftMetrics> {
+  private async calculateDriftMetrics(reference: any[], current: any[]): Promise<DriftMetrics> {
     // PSI (Population Stability Index)
     const psi = this.calculatePSI(reference, current);
 
@@ -318,8 +301,8 @@ export class DriftDetector extends EventEmitter {
    */
   private calculateKS(reference: any[], current: any[]): number {
     // Only for numeric data
-    const refNums = reference.filter(v => typeof v === 'number').sort((a, b) => a - b);
-    const currNums = current.filter(v => typeof v === 'number').sort((a, b) => a - b);
+    const refNums = reference.filter((v) => typeof v === "number").sort((a, b) => a - b);
+    const currNums = current.filter((v) => typeof v === "number").sort((a, b) => a - b);
 
     if (refNums.length === 0 || currNums.length === 0) {
       return 0;
@@ -329,8 +312,8 @@ export class DriftDetector extends EventEmitter {
     const allValues = [...new Set([...refNums, ...currNums])].sort((a, b) => a - b);
 
     for (const value of allValues) {
-      const refCDF = refNums.filter(v => v <= value).length / refNums.length;
-      const currCDF = currNums.filter(v => v <= value).length / currNums.length;
+      const refCDF = refNums.filter((v) => v <= value).length / refNums.length;
+      const currCDF = currNums.filter((v) => v <= value).length / currNums.length;
       maxDiff = Math.max(maxDiff, Math.abs(refCDF - currCDF));
     }
 
@@ -384,7 +367,7 @@ export class DriftDetector extends EventEmitter {
    * Calculate statistics for a feature
    */
   private calculateStats(values: any[]): Record<string, number> {
-    const nums = values.filter(v => typeof v === 'number');
+    const nums = values.filter((v) => typeof v === "number");
 
     if (nums.length === 0) {
       return {};
@@ -408,26 +391,25 @@ export class DriftDetector extends EventEmitter {
    */
   private getDriftScore(metrics: DriftMetrics): number {
     // Weighted combination of metrics
-    return (
-      metrics.psi * 0.3 +
-      metrics.kl * 0.3 +
-      metrics.ks * 0.2 +
-      metrics.chiSquared * 0.2
-    );
+    return metrics.psi * 0.3 + metrics.kl * 0.3 + metrics.ks * 0.2 + metrics.chiSquared * 0.2;
   }
 
   /**
    * Get severity level
    */
-  private getSeverity(
-    drift: number
-  ): 'low' | 'medium' | 'high' | 'critical' {
+  private getSeverity(drift: number): "low" | "medium" | "high" | "critical" {
     const threshold = this.config.driftDetection.threshold;
 
-    if (drift > threshold * 3) {return 'critical';}
-    if (drift > threshold * 2) {return 'high';}
-    if (drift > threshold) {return 'medium';}
-    return 'low';
+    if (drift > threshold * 3) {
+      return "critical";
+    }
+    if (drift > threshold * 2) {
+      return "high";
+    }
+    if (drift > threshold) {
+      return "medium";
+    }
+    return "low";
   }
 
   /**
@@ -452,15 +434,15 @@ export class DriftDetector extends EventEmitter {
     let history = [...this.driftHistory];
 
     if (driftType) {
-      history = history.filter(h => h.driftType === driftType);
+      history = history.filter((h) => h.driftType === driftType);
     }
 
     if (startTime) {
-      history = history.filter(h => h.timestamp >= startTime);
+      history = history.filter((h) => h.timestamp >= startTime);
     }
 
     if (endTime) {
-      history = history.filter(h => h.timestamp <= endTime);
+      history = history.filter((h) => h.timestamp <= endTime);
     }
 
     return history;

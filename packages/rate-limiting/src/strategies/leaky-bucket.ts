@@ -4,7 +4,7 @@
  * Processes requests at a constant rate, smoothing bursts
  */
 
-import { RateLimiter, RateLimitConfig, RateLimitResult } from '../rate-limiter.js';
+import { RateLimiter, RateLimitConfig, RateLimitResult } from "../rate-limiter.js";
 
 export interface LeakyBucketConfig extends RateLimitConfig {
   capacity: number;
@@ -47,7 +47,7 @@ export class LeakyBucketLimiter extends RateLimiter {
       bucket.water += 1;
     }
 
-    const resetTime = now + ((bucket.water / this.bucketConfig.leakRate) * 1000);
+    const resetTime = now + (bucket.water / this.bucketConfig.leakRate) * 1000;
 
     const result: RateLimitResult = {
       allowed,
@@ -57,7 +57,9 @@ export class LeakyBucketLimiter extends RateLimiter {
         remaining: Math.max(0, Math.floor(this.bucketConfig.capacity - bucket.water)),
         resetTime,
       },
-      retryAfter: allowed ? undefined : Math.ceil((bucket.water - this.bucketConfig.capacity + 1) / this.bucketConfig.leakRate),
+      retryAfter: allowed
+        ? undefined
+        : Math.ceil((bucket.water - this.bucketConfig.capacity + 1) / this.bucketConfig.leakRate),
     };
 
     this.logRateLimit(key, result);

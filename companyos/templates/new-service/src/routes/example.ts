@@ -3,9 +3,9 @@
  * Demonstrates pattern for implementing API endpoints
  */
 
-import { Router, Request, Response } from 'express';
-import { requirePermission } from '../middleware/auth.js';
-import { logger } from '../utils/logger.js';
+import { Router, Request, Response } from "express";
+import { requirePermission } from "../middleware/auth.js";
+import { logger } from "../utils/logger.js";
 
 export const exampleRoutes = Router();
 
@@ -24,17 +24,15 @@ const resources: Map<string, ExampleResource> = new Map();
  * Protected by OPA - requires 'resource:list' permission
  */
 exampleRoutes.get(
-  '/resources',
-  requirePermission('resource:list'),
+  "/resources",
+  requirePermission("resource:list"),
   async (req: Request, res: Response) => {
     const tenantId = req.tenantContext?.tenantId;
 
     // Filter by tenant
-    const tenantResources = Array.from(resources.values()).filter(
-      (r) => r.tenantId === tenantId
-    );
+    const tenantResources = Array.from(resources.values()).filter((r) => r.tenantId === tenantId);
 
-    logger.info('Listed resources', {
+    logger.info("Listed resources", {
       tenantId,
       count: tenantResources.length,
     });
@@ -51,8 +49,8 @@ exampleRoutes.get(
  * Protected by OPA - requires 'resource:read' permission
  */
 exampleRoutes.get(
-  '/resources/:id',
-  requirePermission('resource:read'),
+  "/resources/:id",
+  requirePermission("resource:read"),
   async (req: Request, res: Response) => {
     const { id } = req.params;
     const tenantId = req.tenantContext?.tenantId;
@@ -60,17 +58,17 @@ exampleRoutes.get(
     const resource = resources.get(id);
 
     if (!resource) {
-      res.status(404).json({ error: 'Resource not found' });
+      res.status(404).json({ error: "Resource not found" });
       return;
     }
 
     // Tenant isolation check
     if (resource.tenantId !== tenantId) {
-      logger.warn('Cross-tenant access attempt', {
+      logger.warn("Cross-tenant access attempt", {
         requestedTenant: resource.tenantId,
         userTenant: tenantId,
       });
-      res.status(404).json({ error: 'Resource not found' });
+      res.status(404).json({ error: "Resource not found" });
       return;
     }
 
@@ -83,14 +81,14 @@ exampleRoutes.get(
  * Protected by OPA - requires 'resource:create' permission
  */
 exampleRoutes.post(
-  '/resources',
-  requirePermission('resource:create'),
+  "/resources",
+  requirePermission("resource:create"),
   async (req: Request, res: Response) => {
     const { name } = req.body;
     const tenantId = req.tenantContext?.tenantId;
 
     if (!name) {
-      res.status(400).json({ error: 'Name is required' });
+      res.status(400).json({ error: "Name is required" });
       return;
     }
 
@@ -103,7 +101,7 @@ exampleRoutes.post(
 
     resources.set(resource.id, resource);
 
-    logger.info('Created resource', {
+    logger.info("Created resource", {
       resourceId: resource.id,
       tenantId,
     });
@@ -117,8 +115,8 @@ exampleRoutes.post(
  * Protected by OPA - requires 'resource:update' permission
  */
 exampleRoutes.put(
-  '/resources/:id',
-  requirePermission('resource:update'),
+  "/resources/:id",
+  requirePermission("resource:update"),
   async (req: Request, res: Response) => {
     const { id } = req.params;
     const { name } = req.body;
@@ -127,14 +125,14 @@ exampleRoutes.put(
     const resource = resources.get(id);
 
     if (!resource || resource.tenantId !== tenantId) {
-      res.status(404).json({ error: 'Resource not found' });
+      res.status(404).json({ error: "Resource not found" });
       return;
     }
 
     resource.name = name || resource.name;
     resources.set(id, resource);
 
-    logger.info('Updated resource', { resourceId: id, tenantId });
+    logger.info("Updated resource", { resourceId: id, tenantId });
 
     res.json({ data: resource });
   }
@@ -145,8 +143,8 @@ exampleRoutes.put(
  * Protected by OPA - requires 'resource:delete' permission
  */
 exampleRoutes.delete(
-  '/resources/:id',
-  requirePermission('resource:delete'),
+  "/resources/:id",
+  requirePermission("resource:delete"),
   async (req: Request, res: Response) => {
     const { id } = req.params;
     const tenantId = req.tenantContext?.tenantId;
@@ -154,13 +152,13 @@ exampleRoutes.delete(
     const resource = resources.get(id);
 
     if (!resource || resource.tenantId !== tenantId) {
-      res.status(404).json({ error: 'Resource not found' });
+      res.status(404).json({ error: "Resource not found" });
       return;
     }
 
     resources.delete(id);
 
-    logger.info('Deleted resource', { resourceId: id, tenantId });
+    logger.info("Deleted resource", { resourceId: id, tenantId });
 
     res.status(204).send();
   }

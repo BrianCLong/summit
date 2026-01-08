@@ -5,7 +5,7 @@
 export interface ScrapeTask {
   id: string;
   url: string;
-  method: 'static' | 'dynamic' | 'archive';
+  method: "static" | "dynamic" | "archive";
   options?: ScrapeOptions;
 }
 
@@ -55,7 +55,7 @@ export interface ScrapeResult {
 export interface Link {
   href: string;
   text: string;
-  type: 'internal' | 'external';
+  type: "internal" | "external";
   rel?: string;
   target?: string;
 }

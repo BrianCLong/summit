@@ -6,31 +6,31 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: '0 3 * * *'  # Daily at 3 AM UTC
+    - cron: "0 3 * * *" # Daily at 3 AM UTC
   workflow_dispatch:
     inputs:
       target:
-        description: 'Scan target (image, path, or SBOM file)'
+        description: "Scan target (image, path, or SBOM file)"
         required: false
-        default: '.'
+        default: "."
       auto_fix:
-        description: 'Enable auto-fix for vulnerabilities'
+        description: "Enable auto-fix for vulnerabilities"
         type: boolean
         default: false
       dry_run:
-        description: 'Dry run mode (no changes)'
+        description: "Dry run mode (no changes)"
         type: boolean
         default: true
 
 permissions:
   contents: read
   security-events: write
-  id-token: write  # For keyless signing
+  id-token: write # For keyless signing
   pull-requests: write
   packages: read
 
 env:
-  COSIGN_EXPERIMENTAL: '1'
+  COSIGN_EXPERIMENTAL: "1"
   SBOM_EXCLUDES: "**/node_modules/.cache/** **/dist/** **/.git/** **/coverage/**"
 
 jobs:
@@ -51,7 +51,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
@@ -156,12 +156,12 @@ jobs:
         id: scan
         uses: aquasecurity/trivy-action@0.24.0
         with:
-          scan-type: 'sbom'
-          input: 'sbom.cdx.json'
-          format: 'json'
-          output: 'trivy-results.json'
-          severity: 'CRITICAL,HIGH,MEDIUM,LOW'
-          exit-code: '0'  # Don't fail, we'll evaluate policy separately
+          scan-type: "sbom"
+          input: "sbom.cdx.json"
+          format: "json"
+          output: "trivy-results.json"
+          severity: "CRITICAL,HIGH,MEDIUM,LOW"
+          exit-code: "0" # Don't fail, we'll evaluate policy separately
 
       - name: Parse scan results
         id: parse
@@ -189,17 +189,17 @@ jobs:
       - name: Generate SARIF report
         uses: aquasecurity/trivy-action@0.24.0
         with:
-          scan-type: 'sbom'
-          input: 'sbom.cdx.json'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH,MEDIUM'
+          scan-type: "sbom"
+          input: "sbom.cdx.json"
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "CRITICAL,HIGH,MEDIUM"
 
       - name: Upload SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-results.sarif
-          category: 'trivy-vulnerability-scan'
+          category: "trivy-vulnerability-scan"
 
       - name: Evaluate vulnerability policy
         id: policy
@@ -350,7 +350,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v3

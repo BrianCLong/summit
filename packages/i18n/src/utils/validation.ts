@@ -1,20 +1,17 @@
-import type { Locale, ValidationResult, TranslationStats, Messages } from '../types';
+import type { Locale, ValidationResult, TranslationStats, Messages } from "../types";
 
 /**
  * Flatten nested messages object to dot-notation keys
  */
-export function flattenMessages(
-  messages: Messages,
-  prefix = ''
-): Record<string, string> {
+export function flattenMessages(messages: Messages, prefix = ""): Record<string, string> {
   const result: Record<string, string> = {};
 
   for (const [key, value] of Object.entries(messages)) {
     const fullKey = prefix ? `${prefix}.${key}` : key;
 
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       result[fullKey] = value;
-    } else if (typeof value === 'object' && value !== null) {
+    } else if (typeof value === "object" && value !== null) {
       Object.assign(result, flattenMessages(value, fullKey));
     }
   }
@@ -53,7 +50,7 @@ export function validateTranslations(
 
   // Find empty values
   const emptyValues = Object.entries(targetFlat)
-    .filter(([_, value]) => !value || value.trim() === '')
+    .filter(([_, value]) => !value || value.trim() === "")
     .map(([key]) => key);
 
   // Find invalid interpolations (mismatched variables)
@@ -74,7 +71,7 @@ export function validateTranslations(
 
   // Calculate coverage
   const translatedCount = Array.from(baseKeys).filter(
-    (key) => targetFlat[key] && targetFlat[key].trim() !== ''
+    (key) => targetFlat[key] && targetFlat[key].trim() !== ""
   ).length;
   const coverage = baseKeys.size > 0 ? (translatedCount / baseKeys.size) * 100 : 0;
 
@@ -91,15 +88,10 @@ export function validateTranslations(
 /**
  * Calculate translation statistics
  */
-export function calculateTranslationStats(
-  locale: Locale,
-  messages: Messages
-): TranslationStats {
+export function calculateTranslationStats(locale: Locale, messages: Messages): TranslationStats {
   const flat = flattenMessages(messages);
   const totalKeys = Object.keys(flat).length;
-  const translatedKeys = Object.values(flat).filter(
-    (value) => value && value.trim() !== ''
-  ).length;
+  const translatedKeys = Object.values(flat).filter((value) => value && value.trim() !== "").length;
   const coverage = totalKeys > 0 ? (translatedKeys / totalKeys) * 100 : 0;
 
   return {
@@ -113,14 +105,14 @@ export function calculateTranslationStats(
 /**
  * Find duplicate translations (same value for different keys)
  */
-export function findDuplicateTranslations(
-  messages: Messages
-): Map<string, string[]> {
+export function findDuplicateTranslations(messages: Messages): Map<string, string[]> {
   const flat = flattenMessages(messages);
   const valueToKeys = new Map<string, string[]>();
 
   for (const [key, value] of Object.entries(flat)) {
-    if (!value || value.trim() === '') {continue;}
+    if (!value || value.trim() === "") {
+      continue;
+    }
 
     const normalizedValue = value.trim().toLowerCase();
     const keys = valueToKeys.get(normalizedValue) || [];
@@ -153,7 +145,7 @@ export function findUntranslatedStrings(
 
   for (const [key, baseValue] of Object.entries(baseFlat)) {
     const targetValue = targetFlat[key];
-    if (targetValue && targetValue === baseValue && baseValue.trim() !== '') {
+    if (targetValue && targetValue === baseValue && baseValue.trim() !== "") {
       // Skip if it's a technical term or proper noun (all caps, camelCase, etc.)
       if (!/^[A-Z_]+$/.test(baseValue) && !/^[a-z][a-zA-Z0-9]*$/.test(baseValue)) {
         untranslated.push(key);
@@ -173,15 +165,19 @@ export function validateICUFormat(text: string): { valid: boolean; errors: strin
   // Check for balanced braces
   let braceCount = 0;
   for (const char of text) {
-    if (char === '{') {braceCount++;}
-    if (char === '}') {braceCount--;}
+    if (char === "{") {
+      braceCount++;
+    }
+    if (char === "}") {
+      braceCount--;
+    }
     if (braceCount < 0) {
-      errors.push('Unmatched closing brace');
+      errors.push("Unmatched closing brace");
       break;
     }
   }
   if (braceCount > 0) {
-    errors.push('Unmatched opening brace');
+    errors.push("Unmatched opening brace");
   }
 
   // Check for valid plural syntax
@@ -191,7 +187,7 @@ export function validateICUFormat(text: string): { valid: boolean; errors: strin
     const [, varName, pluralForms] = match;
 
     // Check for required 'other' form
-    if (!pluralForms.includes('other')) {
+    if (!pluralForms.includes("other")) {
       errors.push(`Plural form for '${varName}' missing required 'other' case`);
     }
   }
@@ -202,7 +198,7 @@ export function validateICUFormat(text: string): { valid: boolean; errors: strin
     const [, varName, selectForms] = match;
 
     // Check for required 'other' form
-    if (!selectForms.includes('other')) {
+    if (!selectForms.includes("other")) {
       errors.push(`Select form for '${varName}' missing required 'other' case`);
     }
   }
@@ -224,7 +220,9 @@ export function generateCoverageReport(
   const report: Record<Locale, ValidationResult> = {} as any;
 
   for (const [locale, messages] of locales.entries()) {
-    if (locale === baseLocale) {continue;}
+    if (locale === baseLocale) {
+      continue;
+    }
     report[locale] = validateTranslations(baseLocale, locale, baseMessages, messages);
   }
 

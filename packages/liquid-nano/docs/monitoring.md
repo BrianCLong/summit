@@ -10,10 +10,10 @@ The pilot includes baseline telemetry plumbing so SRE teams can observe runtime 
 
 Metrics export options:
 
-| Mode       | Description                                              |
-| ---------- | -------------------------------------------------------- |
-| `console`  | Default. Structured logs ship metrics for lightweight pilots. |
-| `otlp`     | Configure `telemetry.endpoint` for OTLP/HTTP exports to OpenTelemetry Collector. |
+| Mode      | Description                                                                      |
+| --------- | -------------------------------------------------------------------------------- |
+| `console` | Default. Structured logs ship metrics for lightweight pilots.                    |
+| `otlp`    | Configure `telemetry.endpoint` for OTLP/HTTP exports to OpenTelemetry Collector. |
 
 Prometheus scrape configuration is provided in `monitoring/prometheus-scrape.yaml`. The Grafana dashboard JSON under `monitoring/grafana-dashboard.json` visualizes throughput, error rates, and latency.
 

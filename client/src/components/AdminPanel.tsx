@@ -1,31 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 
 export default function AdminPanel() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const api = (import.meta as any).env?.VITE_API_URL || 'http://localhost:4000';
+  const api = (import.meta as any).env?.VITE_API_URL || "http://localhost:4000";
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [tenants, setTenants] = useState<any[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [users, setUsers] = useState<any[]>([]);
   const [flags, setFlags] = useState<Record<string, boolean>>({});
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState("");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [audit, setAudit] = useState<any[]>([]);
-  const [q, setQ] = useState('');
-  const [policy, setPolicy] = useState('');
+  const [q, setQ] = useState("");
+  const [policy, setPolicy] = useState("");
 
   useEffect(() => {
     refresh();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function refresh() {
     try {
-      const t = await (await fetch(api + '/admin/tenants')).json();
+      const t = await (await fetch(api + "/admin/tenants")).json();
       setTenants(t.items || []);
-      const u = await (await fetch(api + '/admin/users')).json();
+      const u = await (await fetch(api + "/admin/users")).json();
       setUsers(u.items || []);
-      const f = await (await fetch(api + '/admin/flags')).json();
+      const f = await (await fetch(api + "/admin/flags")).json();
       setFlags(f.flags || {});
       await loadAudit();
       await loadPolicy();
@@ -36,43 +36,39 @@ export default function AdminPanel() {
 
   async function toggleFlag(k: string) {
     const v = !flags[k];
-    await fetch(api + '/admin/flags/' + k, {
-      method: 'PUT',
-      headers: { 'content-type': 'application/json' },
+    await fetch(api + "/admin/flags/" + k, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({ value: v }),
     });
     setFlags({ ...flags, [k]: v });
   }
   async function loadAudit() {
     const a = await (
-      await fetch(
-        api +
-          '/admin/audit?limit=200' +
-          (q ? `&query=${encodeURIComponent(q)}` : ''),
-      )
+      await fetch(api + "/admin/audit?limit=200" + (q ? `&query=${encodeURIComponent(q)}` : ""))
     ).json();
     setAudit(a.items || []);
   }
   async function loadPolicy() {
     try {
-      const txt = await (await fetch(api + '/admin/policy')).text();
+      const txt = await (await fetch(api + "/admin/policy")).text();
       setPolicy(txt);
-    // eslint-disable-next-line no-empty
+      // eslint-disable-next-line no-empty
     } catch {}
   }
   async function savePolicy() {
-    await fetch(api + '/admin/policy', {
-      method: 'PUT',
-      headers: { 'content-type': 'application/json' },
+    await fetch(api + "/admin/policy", {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({ content: policy }),
     });
-    setStatus('Policy saved');
+    setStatus("Policy saved");
   }
 
   return (
-    <div style={{ border: '1px solid #ddd', borderRadius: 6, padding: 12 }}>
+    <div style={{ border: "1px solid #ddd", borderRadius: 6, padding: 12 }}>
       <strong>Admin</strong>
-      {status && <div style={{ color: '#a00' }}>{status}</div>}
+      {status && <div style={{ color: "#a00" }}>{status}</div>}
       <div style={{ marginTop: 8 }}>
         <div style={{ fontWeight: 600 }}>Tenants</div>
         <ul>
@@ -100,30 +96,19 @@ export default function AdminPanel() {
           {Object.entries(flags).map(([k, v]) => (
             <li key={k}>
               <label>
-                <input
-                  type="checkbox"
-                  checked={!!v}
-                  onChange={() => toggleFlag(k)}
-                />{' '}
-                {k}
+                <input type="checkbox" checked={!!v} onChange={() => toggleFlag(k)} /> {k}
               </label>
             </li>
           ))}
           <li>
-            <button onClick={() => toggleFlag('demo-mode')}>
-              Toggle demo-mode
-            </button>
+            <button onClick={() => toggleFlag("demo-mode")}>Toggle demo-mode</button>
           </li>
         </ul>
       </div>
       <div style={{ marginTop: 8 }}>
         <div style={{ fontWeight: 600 }}>Audit (filter)</div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <input
-            placeholder="query"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
+        <div style={{ display: "flex", gap: 8 }}>
+          <input placeholder="query" value={q} onChange={(e) => setQ(e.target.value)} />
           <button onClick={loadAudit}>Search</button>
         </div>
         <ul>
@@ -140,7 +125,7 @@ export default function AdminPanel() {
           rows={8}
           value={policy}
           onChange={(e) => setPolicy(e.target.value)}
-          style={{ width: '100%', fontFamily: 'monospace' }}
+          style={{ width: "100%", fontFamily: "monospace" }}
         />
         <div>
           <button onClick={savePolicy}>Save Policy</button>

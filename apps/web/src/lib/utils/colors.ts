@@ -1,10 +1,9 @@
-
 // Generate a consistent color from a string (e.g. userId)
 export const getStringColor = (str: string): string => {
-  let hash = 0;
+  let hash = 0
   for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    hash = str.charCodeAt(i) + ((hash << 5) - hash)
   }
-  const c = (hash & 0x00ffffff).toString(16).toUpperCase();
-  return '#' + '00000'.substring(0, 6 - c.length) + c;
-};
+  const c = (hash & 0x00ffffff).toString(16).toUpperCase()
+  return '#' + '00000'.substring(0, 6 - c.length) + c
+}

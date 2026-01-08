@@ -1,15 +1,15 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Helper to resolve paths relative to repo root
-const repoRoot = path.resolve(__dirname, '../../');
+const repoRoot = path.resolve(__dirname, "../../");
 const resolvePath = (p: string) => path.join(repoRoot, p);
 
-const CLAIMS_FILE = resolvePath('docs/claims/CLAIMS_REGISTRY.md');
+const CLAIMS_FILE = resolvePath("docs/claims/CLAIMS_REGISTRY.md");
 
 function fail(message: string) {
   console.error(`❌ ${message}`);
@@ -27,7 +27,7 @@ function validateClaims() {
     fail(`Claims registry not found at ${CLAIMS_FILE}`);
   }
 
-  const content = fs.readFileSync(CLAIMS_FILE, 'utf-8');
+  const content = fs.readFileSync(CLAIMS_FILE, "utf-8");
 
   // Regex to find table rows with links: | ID | Claim | `Path` ...
   // This looks for rows that start with | **ABC-123** | ... | `path`
@@ -45,16 +45,16 @@ function validateClaims() {
 
     let exists = false;
     try {
-        exists = fs.existsSync(fullPath);
+      exists = fs.existsSync(fullPath);
     } catch (e) {
-        exists = false;
+      exists = false;
     }
 
     if (!exists) {
       console.error(`❌ Claim Evidence Missing: ${relativePath}`);
       errors++;
     } else {
-       // console.log(`   Verified: ${relativePath}`);
+      // console.log(`   Verified: ${relativePath}`);
     }
   }
 

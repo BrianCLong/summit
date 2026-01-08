@@ -19,15 +19,15 @@ This document defines the **non-negotiable acceptance criteria** for promoting S
 
 ### 1.1 Core Capabilities
 
-| Capability | Acceptance Test | Evidence Location | Status |
-|------------|----------------|-------------------|--------|
-| **Authentication** | User can authenticate via OIDC/JWT | `test/integration/auth.test.ts` | ✅ |
-| **Policy Enforcement** | All mutations blocked without policy approval | `policies/tests/` | ✅ |
-| **Tenant Isolation** | Cross-tenant data access denied | `test/integration/tenant-isolation.test.ts` | ✅ |
-| **Rate Limiting** | 429 returned when limits exceeded | `test/integration/rate-limit.test.ts` | ✅ |
-| **Provenance** | All entities have immutable audit trail | `test/integration/provenance.test.ts` | ✅ |
-| **Approval Workflows** | High-risk ops trigger human approval | `test/integration/approval-workflow.test.ts` | ⚠️ Manual |
-| **Evidence Bundle** | SBOM + SLSA provenance generated | `.github/workflows/release-ga.yml` | ✅ |
+| Capability             | Acceptance Test                               | Evidence Location                            | Status    |
+| ---------------------- | --------------------------------------------- | -------------------------------------------- | --------- |
+| **Authentication**     | User can authenticate via OIDC/JWT            | `test/integration/auth.test.ts`              | ✅        |
+| **Policy Enforcement** | All mutations blocked without policy approval | `policies/tests/`                            | ✅        |
+| **Tenant Isolation**   | Cross-tenant data access denied               | `test/integration/tenant-isolation.test.ts`  | ✅        |
+| **Rate Limiting**      | 429 returned when limits exceeded             | `test/integration/rate-limit.test.ts`        | ✅        |
+| **Provenance**         | All entities have immutable audit trail       | `test/integration/provenance.test.ts`        | ✅        |
+| **Approval Workflows** | High-risk ops trigger human approval          | `test/integration/approval-workflow.test.ts` | ⚠️ Manual |
+| **Evidence Bundle**    | SBOM + SLSA provenance generated              | `.github/workflows/release-ga.yml`           | ✅        |
 
 **Verdict**: ✅ All core capabilities functional
 
@@ -57,12 +57,12 @@ pnpm schema:diff:strict
 
 ### 2.1 Authentication & Authorization
 
-| Check | Test Command | Acceptance Criteria |
-|-------|-------------|---------------------|
-| **No unauthenticated access** | `./scripts/audit-verify.sh --auth` | 100% of sensitive routes require auth |
-| **Policy coverage** | `opa test policies/ -v` | 100% of mutations have policy guard |
-| **Tenant isolation** | `./test/security/tenant-isolation.sh` | Zero cross-tenant leaks |
-| **RBAC enforcement** | `./test/security/rbac-matrix.sh` | All role combinations tested |
+| Check                         | Test Command                          | Acceptance Criteria                   |
+| ----------------------------- | ------------------------------------- | ------------------------------------- |
+| **No unauthenticated access** | `./scripts/audit-verify.sh --auth`    | 100% of sensitive routes require auth |
+| **Policy coverage**           | `opa test policies/ -v`               | 100% of mutations have policy guard   |
+| **Tenant isolation**          | `./test/security/tenant-isolation.sh` | Zero cross-tenant leaks               |
+| **RBAC enforcement**          | `./test/security/rbac-matrix.sh`      | All role combinations tested          |
 
 **Verdict**: ✅ Security controls enforced
 
@@ -92,14 +92,15 @@ pnpm audit --audit-level=critical
 
 ### 3.1 Latency SLOs
 
-| Operation | p50 | p95 | p99 | SLO | Status |
-|-----------|-----|-----|-----|-----|--------|
-| **Policy Evaluation** | 3ms | 8ms | 12ms | <20ms | ✅ |
-| **Entity Read** | 45ms | 120ms | 180ms | <200ms | ✅ |
-| **Entity Write** | 60ms | 150ms | 220ms | <300ms | ✅ |
-| **Approval Workflow** | 80ms | 180ms | 280ms | <500ms | ✅ |
+| Operation             | p50  | p95   | p99   | SLO    | Status |
+| --------------------- | ---- | ----- | ----- | ------ | ------ |
+| **Policy Evaluation** | 3ms  | 8ms   | 12ms  | <20ms  | ✅     |
+| **Entity Read**       | 45ms | 120ms | 180ms | <200ms | ✅     |
+| **Entity Write**      | 60ms | 150ms | 220ms | <300ms | ✅     |
+| **Approval Workflow** | 80ms | 180ms | 280ms | <500ms | ✅     |
 
 **Test Command**:
+
 ```bash
 ./scripts/performance/load-test.sh --profile=ga --duration=10m
 ```
@@ -122,14 +123,15 @@ pnpm audit --audit-level=critical
 
 ### 4.1 Resilience
 
-| Scenario | Test | Acceptance |
-|----------|------|------------|
-| **Database failure** | Simulate Postgres down | Circuit breaker opens, clear error returned |
-| **OPA failure** | Simulate OPA pod crash | Falls back to deny-all, alerts fire |
-| **Redis failure** | Flush cache | Degraded performance, no errors |
-| **Network partition** | Chaos mesh partition | Services auto-retry, eventual consistency |
+| Scenario              | Test                   | Acceptance                                  |
+| --------------------- | ---------------------- | ------------------------------------------- |
+| **Database failure**  | Simulate Postgres down | Circuit breaker opens, clear error returned |
+| **OPA failure**       | Simulate OPA pod crash | Falls back to deny-all, alerts fire         |
+| **Redis failure**     | Flush cache            | Degraded performance, no errors             |
+| **Network partition** | Chaos mesh partition   | Services auto-retry, eventual consistency   |
 
 **Test Command**:
+
 ```bash
 ./scripts/chaos/resilience-suite.sh
 ```
@@ -152,12 +154,12 @@ pnpm audit --audit-level=critical
 
 ### 5.1 Deployment
 
-| Capability | Test | Status |
-|------------|------|--------|
-| **One-click deploy** | `./scripts/deploy.sh staging` | ✅ |
-| **Rollback < 5 min** | `./scripts/auto-rollback.sh` | ✅ |
-| **Zero-downtime** | Rolling update test | ✅ |
-| **Config validation** | Pre-flight checks | ✅ |
+| Capability            | Test                          | Status |
+| --------------------- | ----------------------------- | ------ |
+| **One-click deploy**  | `./scripts/deploy.sh staging` | ✅     |
+| **Rollback < 5 min**  | `./scripts/auto-rollback.sh`  | ✅     |
+| **Zero-downtime**     | Rolling update test           | ✅     |
+| **Config validation** | Pre-flight checks             | ✅     |
 
 **Verdict**: ✅ Deployment automation verified
 
@@ -170,6 +172,7 @@ pnpm audit --audit-level=critical
 ```
 
 **Acceptance**:
+
 - ✅ All API routes have distributed tracing
 - ✅ All errors logged with correlation IDs
 - ✅ All SLOs have Prometheus metrics
@@ -177,12 +180,12 @@ pnpm audit --audit-level=critical
 
 ### 5.3 Runbooks
 
-| Incident | Runbook | Tested |
-|----------|---------|--------|
-| **Database failover** | `docs/runbooks/db-failover.md` | ✅ |
-| **OPA policy rollback** | `docs/runbooks/policy-rollback.md` | ✅ |
-| **Rate limit spike** | `docs/runbooks/rate-limit-incident.md` | ✅ |
-| **Audit log overflow** | `docs/runbooks/audit-disk-full.md` | ✅ |
+| Incident                | Runbook                                | Tested |
+| ----------------------- | -------------------------------------- | ------ |
+| **Database failover**   | `docs/runbooks/db-failover.md`         | ✅     |
+| **OPA policy rollback** | `docs/runbooks/policy-rollback.md`     | ✅     |
+| **Rate limit spike**    | `docs/runbooks/rate-limit-incident.md` | ✅     |
+| **Audit log overflow**  | `docs/runbooks/audit-disk-full.md`     | ✅     |
 
 **Verdict**: ✅ All P0 runbooks tested in simulation
 
@@ -192,15 +195,15 @@ pnpm audit --audit-level=critical
 
 ### 6.1 Completeness
 
-| Document | Exists | Accurate | Reviewed |
-|----------|--------|----------|----------|
-| **Architecture** | ✅ | ✅ | ✅ |
-| **API Reference** | ✅ | ✅ | ✅ |
-| **Deployment Guide** | ✅ | ✅ | ✅ |
-| **Observability Guide** | ✅ | ✅ | ✅ |
-| **Rollback Protocol** | ✅ | ✅ | ✅ |
-| **Canary Strategy** | ✅ | ✅ | ✅ |
-| **Acceptance Criteria** | ✅ | ✅ | ✅ |
+| Document                | Exists | Accurate | Reviewed |
+| ----------------------- | ------ | -------- | -------- |
+| **Architecture**        | ✅     | ✅       | ✅       |
+| **API Reference**       | ✅     | ✅       | ✅       |
+| **Deployment Guide**    | ✅     | ✅       | ✅       |
+| **Observability Guide** | ✅     | ✅       | ✅       |
+| **Rollback Protocol**   | ✅     | ✅       | ✅       |
+| **Canary Strategy**     | ✅     | ✅       | ✅       |
+| **Acceptance Criteria** | ✅     | ✅       | ✅       |
 
 **Verdict**: ✅ All GA documentation complete and reviewed
 
@@ -254,23 +257,23 @@ tar -tzf release-assets/evidence.tar.gz
 
 ### Decision Matrix
 
-| Category | Weight | Score | Weighted Score |
-|----------|--------|-------|----------------|
-| **Functional** | 25% | 100% | 25 |
-| **Security** | 30% | 100% | 30 |
-| **Performance** | 15% | 100% | 15 |
-| **Reliability** | 15% | 100% | 15 |
-| **Operational** | 10% | 100% | 10 |
-| **Compliance** | 5% | 100% | 5 |
-| **Total** | 100% | - | **100** |
+| Category        | Weight | Score | Weighted Score |
+| --------------- | ------ | ----- | -------------- |
+| **Functional**  | 25%    | 100%  | 25             |
+| **Security**    | 30%    | 100%  | 30             |
+| **Performance** | 15%    | 100%  | 15             |
+| **Reliability** | 15%    | 100%  | 15             |
+| **Operational** | 10%    | 100%  | 10             |
+| **Compliance**  | 5%     | 100%  | 5              |
+| **Total**       | 100%   | -     | **100**        |
 
 ### Acceptance Thresholds
 
-| Threshold | Verdict |
-|-----------|---------|
-| **≥95%** | ✅ **GO FOR GA** |
-| **90-94%** | ⚠️ CAUTION (Council Vote) |
-| **<90%** | ❌ **NO GO** (Fix blockers first) |
+| Threshold  | Verdict                           |
+| ---------- | --------------------------------- |
+| **≥95%**   | ✅ **GO FOR GA**                  |
+| **90-94%** | ⚠️ CAUTION (Council Vote)         |
+| **<90%**   | ❌ **NO GO** (Fix blockers first) |
 
 ---
 
@@ -311,6 +314,7 @@ Compliance:      ___________________ Date: _______
 ---
 
 **Document Control**:
+
 - **Version**: 1.0
 - **Owner**: Release Captain
 - **Approvers**: Security, SRE, Product, Compliance

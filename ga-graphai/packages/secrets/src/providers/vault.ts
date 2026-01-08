@@ -1,11 +1,11 @@
-import type { SecretRef, VaultSecretRef } from 'common-types';
-import { rotationStatusForRef } from '../rotation.js';
+import type { SecretRef, VaultSecretRef } from "common-types";
+import { rotationStatusForRef } from "../rotation.js";
 import type {
   HttpClient,
   SecretResolution,
   SecretRotationResult,
   SecretsProvider,
-} from '../types.js';
+} from "../types.js";
 
 interface VaultJwtOptions {
   baseUrl: string;
@@ -30,7 +30,7 @@ interface VaultSecretPayload {
 }
 
 export class VaultJwtSecretsProvider implements SecretsProvider {
-  readonly name = 'vault-jwt';
+  readonly name = "vault-jwt";
   private readonly options: VaultJwtOptions;
   private readonly httpClient: HttpClient;
   private tokenCache?: { token: string; expiresAt: number };
@@ -41,7 +41,7 @@ export class VaultJwtSecretsProvider implements SecretsProvider {
       options.httpClient ??
       (async (url: string, init?: { headers?: Record<string, string>; body?: string }) => {
         const response = await fetch(url, {
-          method: init?.body ? 'POST' : 'GET',
+          method: init?.body ? "POST" : "GET",
           headers: init?.headers,
           body: init?.body,
         });
@@ -57,10 +57,10 @@ export class VaultJwtSecretsProvider implements SecretsProvider {
   }
 
   private async getJwt(): Promise<string> {
-    if (typeof this.options.jwt === 'function') {
+    if (typeof this.options.jwt === "function") {
       const token = await this.options.jwt();
       if (!token) {
-        throw new Error('JWT provider returned an empty token');
+        throw new Error("JWT provider returned an empty token");
       }
       return token;
     }
@@ -69,23 +69,20 @@ export class VaultJwtSecretsProvider implements SecretsProvider {
 
   private async fetchToken(): Promise<string> {
     const jwt = await this.getJwt();
-    const response = await this.httpClient(
-      `${this.options.baseUrl}/v1/auth/jwt/login`,
-      {
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          role: this.options.role,
-          jwt,
-        }),
-      },
-    );
+    const response = await this.httpClient(`${this.options.baseUrl}/v1/auth/jwt/login`, {
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        role: this.options.role,
+        jwt,
+      }),
+    });
 
     const payload = (await response.json()) as VaultLoginResponse;
     const token = payload.auth?.client_token;
     const leaseDuration = payload.auth?.lease_duration ?? 0;
 
     if (!token) {
-      throw new Error('Vault JWT login did not return a client token');
+      throw new Error("Vault JWT login did not return a client token");
     }
 
     const expiryMs = Date.now() + Math.max(leaseDuration - 5, 0) * 1000;
@@ -102,21 +99,21 @@ export class VaultJwtSecretsProvider implements SecretsProvider {
 
   private assertVaultRef(ref: SecretRef): VaultSecretRef {
     if (!this.supports(ref)) {
-      throw new Error('VaultJwtSecretsProvider only handles vault references');
+      throw new Error("VaultJwtSecretsProvider only handles vault references");
     }
     return ref as VaultSecretRef;
   }
 
   private buildPath(ref: VaultSecretRef): string {
-    const mount = this.options.mount ?? 'secret';
-    const cleanPath = ref.vault.replace(/^vault:\/\//, '');
+    const mount = this.options.mount ?? "secret";
+    const cleanPath = ref.vault.replace(/^vault:\/\//, "");
     return `${this.options.baseUrl}/v1/${mount}/data/${cleanPath}`;
   }
 
   private async readSecret(ref: VaultSecretRef): Promise<SecretResolution> {
     const token = await this.getToken();
     const response = await this.httpClient(this.buildPath(ref), {
-      headers: { 'X-Vault-Token': token },
+      headers: { "X-Vault-Token": token },
     });
 
     if (response.status >= 400) {

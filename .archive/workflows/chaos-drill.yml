@@ -2,7 +2,7 @@ name: Scheduled Chaos Drill (Staging)
 
 on:
   schedule:
-    - cron: '0 0 * * 1' # Every Monday at midnight UTC
+    - cron: "0 0 * * 1" # Every Monday at midnight UTC
   workflow_dispatch:
 
 permissions:
@@ -20,7 +20,7 @@ jobs:
       - name: Setup kubectl
         uses: azure/setup-kubectl@v3
         with:
-          version: 'v1.28.0'
+          version: "v1.28.0"
 
       - name: Configure kubeconfig
         run: |

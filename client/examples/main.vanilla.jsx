@@ -1,18 +1,18 @@
 // Pure vanilla JavaScript test - no React
-console.log('🧪 VANILLA JS TEST STARTING...');
+console.log("🧪 VANILLA JS TEST STARTING...");
 
-console.log('Environment:', {
+console.log("Environment:", {
   userAgent: navigator.userAgent,
   url: window.location.href,
   readyState: document.readyState,
 });
 
 // Test 1: Direct DOM manipulation
-const root = document.getElementById('root');
-console.log('Root element:', root);
+const root = document.getElementById("root");
+console.log("Root element:", root);
 
 if (root) {
-  console.log('✅ Root found, adding content directly...');
+  console.log("✅ Root found, adding content directly...");
 
   root.innerHTML = `
     <div style="padding: 40px; background: linear-gradient(45deg, #FF6B6B, #4ECDC4); color: white; font-family: Arial, sans-serif; min-height: 100vh;">
@@ -52,70 +52,70 @@ if (root) {
     </div>
   `;
 
-  console.log('✅ Content added to DOM');
+  console.log("✅ Content added to DOM");
 
   // Add the test function to global scope
   window.testReactImport = function () {
-    console.log('🧪 Testing React import...');
-    const testDiv = document.getElementById('react-test');
+    console.log("🧪 Testing React import...");
+    const testDiv = document.getElementById("react-test");
 
-    import('react')
+    import("react")
       .then((React) => {
-        console.log('✅ React imported:', React);
+        console.log("✅ React imported:", React);
         testDiv.innerHTML =
           '<div style="background: rgba(76,175,80,0.3); padding: 15px; border-radius: 8px; margin-top: 10px;"><strong>✅ React import successful!</strong><br/>Version: ' +
-          (React.version || 'Unknown') +
-          '</div>';
+          (React.version || "Unknown") +
+          "</div>";
 
         // Test ReactDOM
-        return import('react-dom/client');
+        return import("react-dom/client");
       })
       .then((ReactDOM) => {
-        console.log('✅ ReactDOM imported:', ReactDOM);
+        console.log("✅ ReactDOM imported:", ReactDOM);
         testDiv.innerHTML +=
           '<div style="background: rgba(76,175,80,0.3); padding: 15px; border-radius: 8px; margin-top: 10px;"><strong>✅ ReactDOM import successful!</strong></div>';
 
         // Try to create a React element
-        return import('react').then((React) => {
+        return import("react").then((React) => {
           const element = React.createElement(
-            'div',
+            "div",
             {
               style: {
-                background: 'rgba(33,150,243,0.3)',
-                padding: '15px',
-                borderRadius: '8px',
-                marginTop: '10px',
+                background: "rgba(33,150,243,0.3)",
+                padding: "15px",
+                borderRadius: "8px",
+                marginTop: "10px",
               },
             },
-            '🎉 React element created successfully!',
+            "🎉 React element created successfully!"
           );
 
           const tempRoot = ReactDOM.createRoot(
-            testDiv.querySelector('#temp-react') ||
+            testDiv.querySelector("#temp-react") ||
               (() => {
-                const div = document.createElement('div');
-                div.id = 'temp-react';
+                const div = document.createElement("div");
+                div.id = "temp-react";
                 testDiv.appendChild(div);
                 return div;
-              })(),
+              })()
           );
 
           tempRoot.render(element);
-          console.log('✅ React element rendered!');
+          console.log("✅ React element rendered!");
         });
       })
       .catch((error) => {
-        console.error('❌ React import/render failed:', error);
+        console.error("❌ React import/render failed:", error);
         testDiv.innerHTML =
           '<div style="background: rgba(244,67,54,0.3); padding: 15px; border-radius: 8px; margin-top: 10px;"><strong>❌ React test failed:</strong><br/>' +
           error.message +
-          '</div>';
+          "</div>";
       });
   };
 } else {
-  console.error('❌ Root element not found!');
+  console.error("❌ Root element not found!");
   document.body.innerHTML =
     '<h1 style="color: red; font-family: Arial;">❌ ROOT ELEMENT NOT FOUND</h1>';
 }
 
-console.log('🧪 Vanilla JS test complete');
+console.log("🧪 Vanilla JS test complete");

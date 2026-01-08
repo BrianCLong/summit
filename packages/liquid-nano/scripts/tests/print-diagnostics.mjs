@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { createRuntime } from '../../dist/index.js';
+import { createRuntime } from "../../dist/index.js";
 
 const runtime = createRuntime();
 const diagnostics = runtime.flushDiagnostics();

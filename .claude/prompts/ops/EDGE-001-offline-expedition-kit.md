@@ -102,6 +102,7 @@ Build offline-capable UI with three synchronized panes:
    - Geofencing and spatial queries
 
 All panes must:
+
 - Work without network connectivity
 - Sync state bidirectionally (e.g., click entity in graph → highlight on map)
 - Support undo/redo with local operation log
@@ -126,7 +127,7 @@ interface ProvenanceWallet {
 }
 
 interface Operation {
-  type: 'create' | 'update' | 'delete' | 'query';
+  type: "create" | "update" | "delete" | "query";
   entityType: string;
   entityId: string;
   payload: any;
@@ -137,11 +138,11 @@ interface Operation {
 interface ProvenanceEntry {
   id: string;
   operation: Operation;
-  actor: string;        // User ID
-  device: string;       // Device fingerprint
-  location?: GeoPoint;  // GPS coords if available
-  parentEntries: string[];  // Chain linkage
-  hash: string;         // SHA-256 of operation + parents
+  actor: string; // User ID
+  device: string; // Device fingerprint
+  location?: GeoPoint; // GPS coords if available
+  parentEntries: string[]; // Chain linkage
+  hash: string; // SHA-256 of operation + parents
 }
 ```
 
@@ -152,17 +153,19 @@ Store in PouchDB for offline persistence and built-in sync.
 Use Automerge or Yjs for CRDT implementation:
 
 **Entity Model (CRDT-aware)**:
+
 ```typescript
-import * as Automerge from '@automerge/automerge';
+import * as Automerge from "@automerge/automerge";
 
 interface Entity {
   id: string;
-  name: string;          // LWW (Last-Write-Wins) register
-  type: string;          // LWW
-  attributes: {          // Map CRDT
+  name: string; // LWW (Last-Write-Wins) register
+  type: string; // LWW
+  attributes: {
+    // Map CRDT
     [key: string]: any;
   };
-  tags: string[];        // OR-Set (add-only, removals resolved)
+  tags: string[]; // OR-Set (add-only, removals resolved)
   relationships: string[]; // OR-Set
   _meta: {
     created: number;
@@ -250,7 +253,7 @@ interface ResyncLog {
   operations: Operation[];
   conflicts: Conflict[];
   provenanceChain: ProvenanceChain;
-  signature: string;  // Ed25519 signature over hash(operations + conflicts + provenance)
+  signature: string; // Ed25519 signature over hash(operations + conflicts + provenance)
 }
 
 // Sign log
@@ -259,9 +262,9 @@ function signResyncLog(log: ResyncLog, privateKey: CryptoKey): Promise<string> {
     syncId: log.syncId,
     operations: log.operations,
     conflicts: log.conflicts,
-    provenanceChain: log.provenanceChain
+    provenanceChain: log.provenanceChain,
   });
-  return crypto.subtle.sign('Ed25519', privateKey, Buffer.from(payload));
+  return crypto.subtle.sign("Ed25519", privateKey, Buffer.from(payload));
 }
 ```
 
@@ -313,6 +316,7 @@ offline-kit apply-updates \
 ### Technical Specifications
 
 **Application Structure**:
+
 ```
 packages/offline-kit/
 ├── src/
@@ -339,17 +343,19 @@ packages/offline-kit/
 ```
 
 **Local Storage Schema** (IndexedDB):
+
 ```typescript
 interface OfflineDB {
-  entities: EntityStore;        // CRDT entity documents
+  entities: EntityStore; // CRDT entity documents
   relationships: RelationshipStore;
   provenance: ProvenanceStore;
-  operations: OperationLog;     // All local ops for replay
+  operations: OperationLog; // All local ops for replay
   syncCheckpoints: CheckpointStore;
 }
 ```
 
 **Sync Protocol**:
+
 1. Client generates `SyncRequest` with last known checkpoint
 2. Server computes delta since checkpoint
 3. Client applies delta using CRDT merge
@@ -412,10 +418,12 @@ interface OfflineDB {
 ### CRDT Library Choice
 
 **Automerge** (recommended):
+
 - Pros: Rich data types (text, counters, maps), mature, TypeScript support
 - Cons: Larger bundle size
 
 **Yjs**:
+
 - Pros: Extremely fast, smaller bundles, great for collaborative editing
 - Cons: More low-level, less ergonomic API
 

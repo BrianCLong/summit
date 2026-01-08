@@ -53,7 +53,9 @@ describe('TriPaneShell', () => {
       )
 
       // Check for pane headings - Timeline is a heading
-      expect(screen.getByRole('heading', { name: 'Timeline' })).toBeInTheDocument()
+      expect(
+        screen.getByRole('heading', { name: 'Timeline' })
+      ).toBeInTheDocument()
       expect(screen.getByText('Entity Graph')).toBeInTheDocument()
       expect(screen.getByText('Geographic View')).toBeInTheDocument()
     })
@@ -317,9 +319,7 @@ describe('TriPaneShell', () => {
         />
       )
 
-      expect(
-        screen.getByLabelText(/provenance overlay/i)
-      ).toBeInTheDocument()
+      expect(screen.getByLabelText(/provenance overlay/i)).toBeInTheDocument()
       expect(screen.getByLabelText('Reset all filters')).toBeInTheDocument()
       expect(screen.getByLabelText('Export data')).toBeInTheDocument()
     })
@@ -335,7 +335,9 @@ describe('TriPaneShell', () => {
         />
       )
 
-      expect(screen.getByTitle('Toggle provenance overlay (P)')).toBeInTheDocument()
+      expect(
+        screen.getByTitle('Toggle provenance overlay (P)')
+      ).toBeInTheDocument()
       expect(screen.getByTitle('Reset filters (R)')).toBeInTheDocument()
       expect(screen.getByTitle('Export data (E)')).toBeInTheDocument()
     })

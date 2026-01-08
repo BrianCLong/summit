@@ -2,13 +2,13 @@
  * Knowledge Graph Visualization
  */
 
-import { Driver } from 'neo4j-driver';
+import { Driver } from "neo4j-driver";
 
 export interface VisualizationOptions {
   maxNodes?: number;
   maxDepth?: number;
   includeLabels?: boolean;
-  layout?: 'force' | 'hierarchical' | 'circular' | 'radial';
+  layout?: "force" | "hierarchical" | "circular" | "radial";
   nodeSize?: (node: any) => number;
   edgeWeight?: (edge: any) => number;
 }
@@ -44,7 +44,7 @@ export class GraphVisualization {
    */
   async extractSubgraph(
     startNodeId: string,
-    options: VisualizationOptions = {},
+    options: VisualizationOptions = {}
   ): Promise<GraphData> {
     const maxNodes = options.maxNodes || 100;
     const maxDepth = options.maxDepth || 2;
@@ -59,7 +59,7 @@ export class GraphVisualization {
         RETURN value
         LIMIT $maxNodes
         `,
-        { startNodeId, maxNodes },
+        { startNodeId, maxNodes }
       );
 
       // Fallback if apoc is not available
@@ -71,37 +71,37 @@ export class GraphVisualization {
         RETURN DISTINCT start, connected, rels
         LIMIT $maxNodes
         `,
-        { startNodeId, maxNodes },
+        { startNodeId, maxNodes }
       );
 
       const nodes = new Map<string, any>();
-      const edges: GraphData['edges'] = [];
+      const edges: GraphData["edges"] = [];
 
       for (const record of nodesResult.records) {
         // Add start node
-        const startNode = record.get('start');
+        const startNode = record.get("start");
         if (!nodes.has(startNode.properties.id)) {
           nodes.set(startNode.properties.id, {
             id: startNode.properties.id,
             label: this.getNodeLabel(startNode),
-            type: startNode.labels[0] || 'Unknown',
+            type: startNode.labels[0] || "Unknown",
             properties: startNode.properties,
           });
         }
 
         // Add connected node
-        const connectedNode = record.get('connected');
+        const connectedNode = record.get("connected");
         if (!nodes.has(connectedNode.properties.id)) {
           nodes.set(connectedNode.properties.id, {
             id: connectedNode.properties.id,
             label: this.getNodeLabel(connectedNode),
-            type: connectedNode.labels[0] || 'Unknown',
+            type: connectedNode.labels[0] || "Unknown",
             properties: connectedNode.properties,
           });
         }
 
         // Add edges
-        const rels = record.get('rels');
+        const rels = record.get("rels");
         for (const rel of rels) {
           edges.push({
             id: rel.properties.id || `${rel.start}-${rel.type}-${rel.end}`,
@@ -119,7 +119,7 @@ export class GraphVisualization {
         edges,
       };
     } catch (error) {
-      console.error('Subgraph extraction error:', error);
+      console.error("Subgraph extraction error:", error);
       return { nodes: [], edges: [] };
     } finally {
       await session.close();
@@ -129,11 +129,7 @@ export class GraphVisualization {
   /**
    * Find paths between two nodes
    */
-  async findPaths(
-    sourceId: string,
-    targetId: string,
-    maxLength = 5,
-  ): Promise<GraphData> {
+  async findPaths(sourceId: string, targetId: string, maxLength = 5): Promise<GraphData> {
     const session = this.driver.session();
     try {
       const result = await session.run(
@@ -141,14 +137,14 @@ export class GraphVisualization {
         MATCH path = shortestPath((source {id: $sourceId})-[*..${maxLength}]-(target {id: $targetId}))
         RETURN path
         `,
-        { sourceId, targetId, maxLength },
+        { sourceId, targetId, maxLength }
       );
 
       const nodes = new Map<string, any>();
-      const edges: GraphData['edges'] = [];
+      const edges: GraphData["edges"] = [];
 
       for (const record of result.records) {
-        const path = record.get('path');
+        const path = record.get("path");
 
         // Extract nodes from path
         for (const node of path.segments.flatMap((s: any) => [s.start, s.end])) {
@@ -156,7 +152,7 @@ export class GraphVisualization {
             nodes.set(node.properties.id, {
               id: node.properties.id,
               label: this.getNodeLabel(node),
-              type: node.labels[0] || 'Unknown',
+              type: node.labels[0] || "Unknown",
               properties: node.properties,
             });
           }
@@ -187,7 +183,7 @@ export class GraphVisualization {
   /**
    * Detect and visualize clusters
    */
-  async detectClusters(algorithm: 'louvain' | 'label_propagation' = 'louvain'): Promise<GraphData> {
+  async detectClusters(algorithm: "louvain" | "label_propagation" = "louvain"): Promise<GraphData> {
     const session = this.driver.session();
     try {
       // This requires Neo4j Graph Data Science library
@@ -202,7 +198,7 @@ export class GraphVisualization {
 
       // Run clustering algorithm
       const algoQuery =
-        algorithm === 'louvain'
+        algorithm === "louvain"
           ? `CALL gds.louvain.stream('clustersGraph')`
           : `CALL gds.labelPropagation.stream('clustersGraph')`;
 
@@ -217,8 +213,8 @@ export class GraphVisualization {
       const communities = new Map<number, string[]>();
 
       for (const record of result.records) {
-        const nodeId = record.get('nodeId');
-        const communityId = record.get('communityId').toNumber();
+        const nodeId = record.get("nodeId");
+        const communityId = record.get("communityId").toNumber();
 
         if (!communities.has(communityId)) {
           communities.set(communityId, []);
@@ -241,7 +237,7 @@ export class GraphVisualization {
         clusters,
       };
     } catch (error) {
-      console.error('Cluster detection error:', error);
+      console.error("Cluster detection error:", error);
       return { nodes: [], edges: [] };
     } finally {
       await session.close();
@@ -252,14 +248,14 @@ export class GraphVisualization {
    * Export graph data in various formats
    */
   async exportGraph(
-    format: 'json' | 'cytoscape' | 'd3' | 'graphml',
-    graphData: GraphData,
+    format: "json" | "cytoscape" | "d3" | "graphml",
+    graphData: GraphData
   ): Promise<any> {
     switch (format) {
-      case 'json':
+      case "json":
         return JSON.stringify(graphData, null, 2);
 
-      case 'cytoscape':
+      case "cytoscape":
         return {
           elements: {
             nodes: graphData.nodes.map((n) => ({ data: n })),
@@ -267,7 +263,7 @@ export class GraphVisualization {
           },
         };
 
-      case 'd3':
+      case "d3":
         return {
           nodes: graphData.nodes,
           links: graphData.edges.map((e) => ({
@@ -277,7 +273,7 @@ export class GraphVisualization {
           })),
         };
 
-      case 'graphml':
+      case "graphml":
         // Generate GraphML XML
         let graphml = '<?xml version="1.0" encoding="UTF-8"?>\n';
         graphml += '<graphml xmlns="http://graphml.graphdrawing.org/xmlns">\n';
@@ -291,8 +287,8 @@ export class GraphVisualization {
           graphml += `    <edge source="${edge.source}" target="${edge.target}"/>\n`;
         }
 
-        graphml += '  </graph>\n';
-        graphml += '</graphml>';
+        graphml += "  </graph>\n";
+        graphml += "</graphml>";
 
         return graphml;
 
@@ -306,6 +302,6 @@ export class GraphVisualization {
    */
   private getNodeLabel(node: any): string {
     const props = node.properties;
-    return props.name || props.label || props.id || 'Unknown';
+    return props.name || props.label || props.id || "Unknown";
   }
 }

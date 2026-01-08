@@ -1,13 +1,13 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import yaml from 'js-yaml';
-import './types.js';
+import fs from "node:fs/promises";
+import path from "node:path";
+import yaml from "js-yaml";
+import "./types.js";
 
-const SEMANTIC_TAG_KEYS = ['x-classification', 'x-semantic', 'x-tags'];
+const SEMANTIC_TAG_KEYS = ["x-classification", "x-semantic", "x-tags"];
 
 export async function loadSchemaFile(filePath) {
-  const content = await fs.readFile(filePath, 'utf8');
-  if (filePath.endsWith('.yaml') || filePath.endsWith('.yml')) {
+  const content = await fs.readFile(filePath, "utf8");
+  if (filePath.endsWith(".yaml") || filePath.endsWith(".yml")) {
     return yaml.load(content);
   }
 
@@ -25,7 +25,11 @@ export async function collectSchemas(dir) {
       for (const [relative, schema] of nested.entries()) {
         collected.set(path.join(entry.name, relative), schema);
       }
-    } else if (entry.name.endsWith('.json') || entry.name.endsWith('.yaml') || entry.name.endsWith('.yml')) {
+    } else if (
+      entry.name.endsWith(".json") ||
+      entry.name.endsWith(".yaml") ||
+      entry.name.endsWith(".yml")
+    ) {
       const schema = await loadSchemaFile(fullPath);
       collected.set(entry.name, schema);
     }
@@ -73,10 +77,17 @@ function semanticsChanged(baselineSchema, currentSchema, propertyName) {
 }
 
 function addChange(target, file, change) {
-  target.push({ ...change, file, path: change.path.replace(/^\./, '') });
+  target.push({ ...change, file, path: change.path.replace(/^\./, "") });
 }
 
-function compareObjects(baseline, current, file, prefix = '', accumBreaking = [], accumNonBreaking = []) {
+function compareObjects(
+  baseline,
+  current,
+  file,
+  prefix = "",
+  accumBreaking = [],
+  accumNonBreaking = []
+) {
   const baselineProps = baseline.properties ?? {};
   const currentProps = current.properties ?? {};
   const baselineRequired = new Set(baseline.required ?? []);
@@ -85,25 +96,25 @@ function compareObjects(baseline, current, file, prefix = '', accumBreaking = []
   for (const requiredField of baselineRequired) {
     if (!currentRequired.has(requiredField)) {
       addChange(accumBreaking, file, {
-        code: 'required.removed',
-        path: `${prefix}${prefix ? '.' : ''}${requiredField}`,
+        code: "required.removed",
+        path: `${prefix}${prefix ? "." : ""}${requiredField}`,
         message: `Required field "${requiredField}" was removed or made optional in ${file}`,
-        severity: 'breaking',
+        severity: "breaking",
       });
     }
   }
 
   for (const [propName, baselineProp] of Object.entries(baselineProps)) {
     const currentProp = currentProps[propName];
-    const propPath = `${prefix}${prefix ? '.' : ''}${propName}`;
+    const propPath = `${prefix}${prefix ? "." : ""}${propName}`;
 
     if (!currentProp) {
       if (baselineRequired.has(propName)) {
         addChange(accumBreaking, file, {
-          code: 'property.missing',
+          code: "property.missing",
           path: propPath,
           message: `Property "${propName}" was removed from ${file}`,
-          severity: 'breaking',
+          severity: "breaking",
         });
       }
       continue;
@@ -111,29 +122,29 @@ function compareObjects(baseline, current, file, prefix = '', accumBreaking = []
 
     if (isTypeNarrowing(baselineProp.type, currentProp.type)) {
       addChange(accumBreaking, file, {
-        code: 'type.narrowed',
+        code: "type.narrowed",
         path: propPath,
         message: `Type for "${propName}" narrowed from ${String(baselineProp.type)} to ${String(currentProp.type)} in ${file}`,
-        severity: 'breaking',
+        severity: "breaking",
       });
     }
 
     if (compareEnums(baselineProp.enum, currentProp.enum)) {
       addChange(accumBreaking, file, {
-        code: 'enum.value.removed',
+        code: "enum.value.removed",
         path: propPath,
         message: `Enum on "${propName}" removed one or more values in ${file}`,
-        severity: 'breaking',
+        severity: "breaking",
       });
     }
 
     const semanticChange = semanticsChanged(baseline, current, propName);
     if (semanticChange.changed) {
       addChange(accumBreaking, file, {
-        code: 'semantics.changed',
+        code: "semantics.changed",
         path: propPath,
         message: `Semantic tag ${semanticChange.key} changed for "${propName}" (${semanticChange.from} -> ${semanticChange.to})`,
-        severity: 'breaking',
+        severity: "breaking",
         details: {
           from: semanticChange.from,
           to: semanticChange.to,
@@ -150,10 +161,10 @@ function compareObjects(baseline, current, file, prefix = '', accumBreaking = []
   for (const propName of Object.keys(currentProps)) {
     if (!Object.prototype.hasOwnProperty.call(baselineProps, propName)) {
       addChange(accumNonBreaking, file, {
-        code: 'property.missing',
-        path: `${prefix}${prefix ? '.' : ''}${propName}`,
+        code: "property.missing",
+        path: `${prefix}${prefix ? "." : ""}${propName}`,
         message: `Property "${propName}" added to ${file}`,
-        severity: 'info',
+        severity: "info",
       });
     }
   }
@@ -177,13 +188,13 @@ function markAllowed(changes, compatibility, versionBumps) {
   const allowIndex = new Map();
 
   for (const entry of compatibility?.allow ?? []) {
-    const fileKey = entry.file ?? '*';
+    const fileKey = entry.file ?? "*";
     allowIndex.set(`${entry.code}:${fileKey}:${entry.path}`, entry);
   }
 
   return changes.map((change) => {
     const candidateKeys = [
-      `${change.code}:${change.file ?? '*'}:${change.path}`,
+      `${change.code}:${change.file ?? "*"}:${change.path}`,
       `${change.code}:*:${change.path}`,
     ];
 
@@ -193,13 +204,21 @@ function markAllowed(changes, compatibility, versionBumps) {
         return {
           ...change,
           allowed: true,
-          details: { ...change.details, allowedBy: 'compatibility-map', rationale: allow?.rationale },
+          details: {
+            ...change.details,
+            allowedBy: "compatibility-map",
+            rationale: allow?.rationale,
+          },
         };
       }
     }
 
     if (change.file && versionBumps.has(change.file)) {
-      return { ...change, allowed: true, details: { ...change.details, allowedBy: 'major-version' } };
+      return {
+        ...change,
+        allowed: true,
+        details: { ...change.details, allowedBy: "major-version" },
+      };
     }
 
     return change;
@@ -209,13 +228,13 @@ function markAllowed(changes, compatibility, versionBumps) {
 export function diffSchemas(file, baseline, current) {
   const breaking = [];
   const nonBreaking = [];
-  compareObjects(baseline, current, file, '', breaking, nonBreaking);
+  compareObjects(baseline, current, file, "", breaking, nonBreaking);
   return {
     file,
     breaking,
     nonBreaking,
-    version: current['x-version'],
-    baselineVersion: baseline['x-version'],
+    version: current["x-version"],
+    baselineVersion: baseline["x-version"],
   };
 }
 
@@ -231,10 +250,10 @@ export async function compareDirectories(options) {
     const currentSchema = currentSchemas.get(file);
     if (!currentSchema) {
       breaking.push({
-        code: 'property.missing',
+        code: "property.missing",
         path: file,
         message: `${file} missing from current schemas`,
-        severity: 'breaking',
+        severity: "breaking",
         file,
       });
       continue;
@@ -251,7 +270,9 @@ export async function compareDirectories(options) {
   }
 
   const allowed = markAllowed(breaking, options.compatibility, versionBumps);
-  const finalUnresolved = allowed.filter((change) => change.severity === 'breaking' && !change.allowed);
+  const finalUnresolved = allowed.filter(
+    (change) => change.severity === "breaking" && !change.allowed
+  );
   const finalAllowed = allowed.filter((change) => change.allowed);
 
   return {

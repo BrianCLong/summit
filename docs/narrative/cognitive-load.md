@@ -8,42 +8,44 @@ Operators are drowning in data but starving for insight. They are asked to funct
 
 ## Summit's Thesis: Remove Unnecessary Thinking
 
-Summit is designed to be a **cognitive load shedding** system. Its goal is to allow operators to perform *fewer, higher-quality* cognitive cycles.
+Summit is designed to be a **cognitive load shedding** system. Its goal is to allow operators to perform _fewer, higher-quality_ cognitive cycles.
 
 ### 1. From Alert Flood to Choice Architecture
 
 Summit sits between the raw telemetry stream and the human operator. It does not just aggregate alerts; it synthesizes them into **Narratives**.
 
-*   **Before Summit:** 500 alerts about "High CPU," "Latency Spike," and "Error Rate."
-*   **With Summit:** 1 Narrative: "Service Degradation in Payment Gateway likely caused by Deployment #1234."
+- **Before Summit:** 500 alerts about "High CPU," "Latency Spike," and "Error Rate."
+- **With Summit:** 1 Narrative: "Service Degradation in Payment Gateway likely caused by Deployment #1234."
 
 The operator is presented with a **Choice**, not a puzzle.
-*   *Option A:* Auto-remediate (Rollback).
-*   *Option B:* Investigate further (Open War Room).
-*   *Option C:* Ignore (Mark as False Positive).
+
+- _Option A:_ Auto-remediate (Rollback).
+- _Option B:_ Investigate further (Open War Room).
+- _Option C:_ Ignore (Mark as False Positive).
 
 ### 2. Explained Relevance
 
-Summit never just says *that* something happened. It explains *why it matters*.
+Summit never just says _that_ something happened. It explains _why it matters_.
 Every narrative includes:
-*   **Causality:** What likely caused this? (Provenance Graph)
-*   **Impact:** What is currently broken? (Dependency Graph)
-*   **Urgency:** How much time do we have? (SLA/SLO context)
+
+- **Causality:** What likely caused this? (Provenance Graph)
+- **Impact:** What is currently broken? (Dependency Graph)
+- **Urgency:** How much time do we have? (SLA/SLO context)
 
 This "pre-digestion" of context saves the operator 15-30 minutes of manual correlation per incident.
 
 ### 3. Bounded Responsibility
 
 Anxiety comes from open-ended responsibility ("I don't know what I don't know"). Summit provides **Bounded Responsibility**.
-The system says: *"Here is the complete context as known. Here are the valid actions permitted by policy."*
+The system says: _"Here is the complete context as known. Here are the valid actions permitted by policy."_
 
 This reduces the "Fear Of Missing Out" (FOMO) on critical data and allows the operator to trust that the system has done the heavy lifting.
 
 ## Psychological Impact
 
-*   **Reduced Burnout:** Operators spend less time parsing logs and more time solving problems.
-*   **Higher Confidence:** Decisions are backed by visible evidence, reducing "imposter syndrome" in crises.
-*   **Less "Residue":** Because the system tracks the state, operators don't have to carry the mental model of the incident home with them.
+- **Reduced Burnout:** Operators spend less time parsing logs and more time solving problems.
+- **Higher Confidence:** Decisions are backed by visible evidence, reducing "imposter syndrome" in crises.
+- **Less "Residue":** Because the system tracks the state, operators don't have to carry the mental model of the incident home with them.
 
 ## Conclusion
 

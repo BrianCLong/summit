@@ -14,6 +14,6 @@ export class BaseConnector implements Connector {
 
 export function createEmitter(stream: NodeJS.WritableStream) {
   return (record: unknown) => {
-    stream.write(JSON.stringify(record) + '\n');
+    stream.write(JSON.stringify(record) + "\n");
   };
 }

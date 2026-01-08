@@ -5,6 +5,7 @@
 This document describes the autoscaling policies for the IntelGraph platform, ensuring optimal resource utilization while meeting performance SLOs.
 
 **Performance Targets:**
+
 - **P95 query latency**: < 1.5s
 - **CPU utilization**: 60-80% (target 70%)
 - **Memory utilization**: < 85%
@@ -49,16 +50,16 @@ spec:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: 70  # Target 70% CPU
-    
+          averageUtilization: 70 # Target 70% CPU
+
     # Memory-based scaling
     - type: Resource
       resource:
         name: memory
         target:
           type: Utilization
-          averageUtilization: 80  # Target 80% memory
-    
+          averageUtilization: 80 # Target 80% memory
+
     # Custom metric: Query latency
     - type: Pods
       pods:
@@ -66,8 +67,8 @@ spec:
           name: intelgraph_query_latency_p95
         target:
           type: AverageValue
-          averageValue: "1200m"  # 1.2s (buffer before 1.5s SLO)
-    
+          averageValue: "1200m" # 1.2s (buffer before 1.5s SLO)
+
     # Custom metric: HTTP request rate
     - type: Pods
       pods:
@@ -75,33 +76,34 @@ spec:
           name: http_requests_per_second
         target:
           type: AverageValue
-          averageValue: "100"  # 100 req/s per pod
-  
+          averageValue: "100" # 100 req/s per pod
+
   behavior:
     scaleUp:
-      stabilizationWindowSeconds: 60  # Wait 60s before scaling up
+      stabilizationWindowSeconds: 60 # Wait 60s before scaling up
       policies:
         - type: Percent
-          value: 50  # Scale up by 50% of current replicas
+          value: 50 # Scale up by 50% of current replicas
           periodSeconds: 60
         - type: Pods
-          value: 2  # Or add 2 pods
+          value: 2 # Or add 2 pods
           periodSeconds: 60
-      selectPolicy: Max  # Use whichever adds more pods
-    
+      selectPolicy: Max # Use whichever adds more pods
+
     scaleDown:
-      stabilizationWindowSeconds: 300  # Wait 5 minutes before scaling down
+      stabilizationWindowSeconds: 300 # Wait 5 minutes before scaling down
       policies:
         - type: Percent
-          value: 25  # Scale down by 25% of current replicas
+          value: 25 # Scale down by 25% of current replicas
           periodSeconds: 60
         - type: Pods
-          value: 1  # Or remove 1 pod
+          value: 1 # Or remove 1 pod
           periodSeconds: 60
-      selectPolicy: Min  # Use whichever removes fewer pods
+      selectPolicy: Min # Use whichever removes fewer pods
 ```
 
 **Rationale:**
+
 - **Min replicas: 3** - Ensures high availability (survives 1 node failure)
 - **Max replicas: 20** - Caps costs while handling peak load
 - **CPU target: 70%** - Leaves headroom for spikes
@@ -137,8 +139,8 @@ spec:
               queue: "default"
         target:
           type: AverageValue
-          averageValue: "10"  # 10 jobs per worker
-  
+          averageValue: "10" # 10 jobs per worker
+
   behavior:
     scaleUp:
       stabilizationWindowSeconds: 30
@@ -155,6 +157,7 @@ spec:
 ```
 
 **Rationale:**
+
 - Scales based on actual work (queue length) rather than resource usage
 - Fast scale-up to clear backlogs
 - Moderate scale-down to avoid killing in-progress jobs
@@ -179,7 +182,7 @@ spec:
     kind: Deployment
     name: intelgraph-server
   updatePolicy:
-    updateMode: "Auto"  # Automatically apply recommendations
+    updateMode: "Auto" # Automatically apply recommendations
   resourcePolicy:
     containerPolicies:
       - containerName: intelgraph-server
@@ -195,6 +198,7 @@ spec:
 ```
 
 **Rationale:**
+
 - Optimizes resource requests over time based on actual usage
 - Prevents over-provisioning (wasted resources)
 - Prevents under-provisioning (OOMKilled, CPU throttling)
@@ -218,18 +222,19 @@ data:
   scale-down-enabled: "true"
   scale-down-delay-after-add: "10m"
   scale-down-unneeded-time: "10m"
-  scale-down-utilization-threshold: "0.5"  # Scale down if node < 50% utilized
+  scale-down-utilization-threshold: "0.5" # Scale down if node < 50% utilized
   max-node-provision-time: "15m"
-  
+
   # Node group limits
   min-nodes: "3"
   max-nodes: "20"
-  
+
   # Instance types
   instance-types: "m5.xlarge,m5.2xlarge,c5.xlarge,c5.2xlarge"
 ```
 
 **Scaling Triggers:**
+
 - **Scale up**: When pods cannot be scheduled due to insufficient resources
 - **Scale down**: When node utilization < 50% for 10 minutes
 - **Protection**: Don't scale down if it would violate pod disruption budgets
@@ -243,7 +248,7 @@ metadata:
   name: intelgraph-server-pdb
   namespace: default
 spec:
-  minAvailable: 2  # Always keep at least 2 pods running
+  minAvailable: 2 # Always keep at least 2 pods running
   selector:
     matchLabels:
       app: intelgraph-server
@@ -266,16 +271,16 @@ spec:
     name: intelgraph-worker
   minReplicaCount: 2
   maxReplicaCount: 20
-  pollingInterval: 15  # Check every 15 seconds
-  cooldownPeriod: 120  # Wait 2 minutes before scaling down
+  pollingInterval: 15 # Check every 15 seconds
+  cooldownPeriod: 120 # Wait 2 minutes before scaling down
   triggers:
     # Redis list length trigger
     - type: redis
       metadata:
         address: redis:6379
         listName: bull:queue:default
-        listLength: "10"  # Scale up if queue > 10
-        
+        listLength: "10" # Scale up if queue > 10
+
     # Prometheus metric trigger (query latency)
     - type: prometheus
       metadata:
@@ -285,10 +290,11 @@ spec:
           histogram_quantile(0.95, 
             rate(intelgraph_query_latency_seconds_bucket[2m])
           )
-        threshold: "1.2"  # Scale if P95 > 1.2s
+        threshold: "1.2" # Scale if P95 > 1.2s
 ```
 
 **Advantages of KEDA:**
+
 - Scales to zero when idle (cost savings)
 - Faster response to external events than HPA
 - Supports multiple trigger sources
@@ -322,6 +328,7 @@ const pool = new Pool({
 ```
 
 **Rationale:**
+
 - Total connections scale with workload
 - Prevents connection exhaustion on database
 - Maintains optimal pool size per pod
@@ -369,7 +376,7 @@ container_cpu_usage_seconds_total
 container_memory_working_set_bytes
 
 # Query Latency (triggers scaling)
-histogram_quantile(0.95, 
+histogram_quantile(0.95,
   rate(intelgraph_query_latency_seconds_bucket[5m])
 )
 
@@ -396,7 +403,7 @@ groups:
         annotations:
           summary: "HPA {{ $labels.hpa }} is at max replicas"
           description: "Consider increasing max replicas or optimizing performance"
-      
+
       # Frequent scaling events (thrashing)
       - alert: HPAThrashing
         expr: changes(kube_hpa_status_current_replicas[15m]) > 5
@@ -405,7 +412,7 @@ groups:
         annotations:
           summary: "HPA {{ $labels.hpa }} is thrashing"
           description: "Too many scale events, consider adjusting stabilization windows"
-      
+
       # Query latency approaching SLO
       - alert: QueryLatencyHigh
         expr: |
@@ -424,14 +431,14 @@ groups:
 
 ## Scaling Decision Matrix
 
-| Metric | Threshold | Action | Reasoning |
-|--------|-----------|--------|-----------|
-| CPU > 70% | For 60s | Scale up 50% | Prevent CPU throttling |
-| Memory > 80% | For 60s | Scale up 50% | Prevent OOM kills |
-| P95 latency > 1.2s | For 60s | Scale up 2 pods | Approaching 1.5s SLO |
-| Queue length > 100 | Immediate | Scale up 2 workers | Clear backlog quickly |
-| CPU < 40% | For 300s | Scale down 25% | Reduce costs |
-| Queue length = 0 | For 120s | Scale to min | KEDA scale to zero |
+| Metric             | Threshold | Action             | Reasoning              |
+| ------------------ | --------- | ------------------ | ---------------------- |
+| CPU > 70%          | For 60s   | Scale up 50%       | Prevent CPU throttling |
+| Memory > 80%       | For 60s   | Scale up 50%       | Prevent OOM kills      |
+| P95 latency > 1.2s | For 60s   | Scale up 2 pods    | Approaching 1.5s SLO   |
+| Queue length > 100 | Immediate | Scale up 2 workers | Clear backlog quickly  |
+| CPU < 40%          | For 300s  | Scale down 25%     | Reduce costs           |
+| Queue length = 0   | For 120s  | Scale to min       | KEDA scale to zero     |
 
 ---
 
@@ -449,11 +456,11 @@ groups:
 ```yaml
 resources:
   requests:
-    cpu: "800m"      # 80% of observed usage (1 CPU)
-    memory: "1.6Gi"  # 80% of observed usage (2Gi)
+    cpu: "800m" # 80% of observed usage (1 CPU)
+    memory: "1.6Gi" # 80% of observed usage (2Gi)
   limits:
-    cpu: "1500m"     # 150% headroom for spikes
-    memory: "3Gi"    # 150% headroom
+    cpu: "1500m" # 150% headroom for spikes
+    memory: "3Gi" # 150% headroom
 ```
 
 ### Savings Estimate
@@ -505,12 +512,14 @@ kubectl get hpa -w
 **Symptoms**: Load increases but replicas stay at min
 
 **Diagnosis**:
+
 ```bash
 kubectl describe hpa intelgraph-server
 kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1 | jq .
 ```
 
 **Common Causes**:
+
 - Metrics server not installed: `kubectl top nodes`
 - Custom metrics not available
 - HPA min/max misconfigured
@@ -521,12 +530,14 @@ kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1 | jq .
 **Symptoms**: Pods OOMKilled or CrashLoopBackOff after scale-up
 
 **Diagnosis**:
+
 ```bash
 kubectl get pods | grep -E 'OOMKilled|CrashLoop'
 kubectl logs <pod> --previous
 ```
 
 **Solution**:
+
 - Increase memory limits
 - Check for memory leaks
 - Adjust VPA min/max bounds
@@ -538,4 +549,3 @@ kubectl logs <pod> --previous
 - [Kubernetes HPA Documentation](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
 - [KEDA Documentation](https://keda.sh/)
 - [AWS EKS Autoscaling](https://docs.aws.amazon.com/eks/latest/userguide/autoscaling.html)
-

@@ -3,14 +3,14 @@
  * Automated machine learning with hyperparameter optimization and neural architecture search
  */
 
-import { AutoMLConfig } from '@intelgraph/mlops-platform';
-import { EventEmitter } from 'events';
+import { AutoMLConfig } from "@intelgraph/mlops-platform";
+import { EventEmitter } from "events";
 
 export interface Trial {
   id: string;
   parameters: Record<string, any>;
   score: number;
-  status: 'pending' | 'running' | 'completed' | 'failed';
+  status: "pending" | "running" | "completed" | "failed";
   startTime?: Date;
   endTime?: Date;
   metrics?: Record<string, number>;
@@ -40,7 +40,7 @@ export class AutoMLEngine extends EventEmitter {
   async run(): Promise<AutoMLResult> {
     const startTime = Date.now();
 
-    this.emit('automl:started', { config: this.config });
+    this.emit("automl:started", { config: this.config });
 
     const { maxTrials } = this.config.optimization.budget;
 
@@ -49,7 +49,7 @@ export class AutoMLEngine extends EventEmitter {
 
       if (!this.bestTrial || this.isBetter(trial, this.bestTrial)) {
         this.bestTrial = trial;
-        this.emit('automl:best-trial-updated', trial);
+        this.emit("automl:best-trial-updated", trial);
       }
 
       // Check budget constraints
@@ -66,7 +66,7 @@ export class AutoMLEngine extends EventEmitter {
       totalTime,
     };
 
-    this.emit('automl:completed', result);
+    this.emit("automl:completed", result);
 
     return result;
   }
@@ -81,12 +81,12 @@ export class AutoMLEngine extends EventEmitter {
       id: `trial-${index}`,
       parameters,
       score: 0,
-      status: 'running',
+      status: "running",
       startTime: new Date(),
     };
 
     this.trials.set(trial.id, trial);
-    this.emit('trial:started', trial);
+    this.emit("trial:started", trial);
 
     try {
       // Simulate training
@@ -94,14 +94,14 @@ export class AutoMLEngine extends EventEmitter {
 
       // Mock score
       trial.score = Math.random();
-      trial.status = 'completed';
+      trial.status = "completed";
       trial.endTime = new Date();
 
-      this.emit('trial:completed', trial);
+      this.emit("trial:completed", trial);
     } catch (error) {
-      trial.status = 'failed';
+      trial.status = "failed";
       trial.endTime = new Date();
-      this.emit('trial:failed', { trial, error });
+      this.emit("trial:failed", { trial, error });
     }
 
     return trial;
@@ -119,13 +119,13 @@ export class AutoMLEngine extends EventEmitter {
 
     for (const [name, space] of Object.entries(this.config.searchSpace.hyperparameters)) {
       switch (space.type) {
-        case 'categorical':
+        case "categorical":
           parameters[name] = space.values![Math.floor(Math.random() * space.values!.length)];
           break;
-        case 'continuous':
+        case "continuous":
           parameters[name] = space.min! + Math.random() * (space.max! - space.min!);
           break;
-        case 'discrete':
+        case "discrete":
           parameters[name] = Math.floor(space.min! + Math.random() * (space.max! - space.min!));
           break;
       }
@@ -140,7 +140,7 @@ export class AutoMLEngine extends EventEmitter {
   private isBetter(trial: Trial, best: Trial): boolean {
     const { direction } = this.config.optimization;
 
-    if (direction === 'maximize') {
+    if (direction === "maximize") {
       return trial.score > best.score;
     } else {
       return trial.score < best.score;
@@ -180,6 +180,6 @@ export class AutoMLEngine extends EventEmitter {
   }
 
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

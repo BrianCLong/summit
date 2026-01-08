@@ -1,12 +1,12 @@
-import { Driver, Session } from 'neo4j-driver';
-import { logger } from '../utils/logger';
+import { Driver, Session } from "neo4j-driver";
+import { logger } from "../utils/logger";
 import {
   Graph,
   GraphNode,
   GraphEdge,
   SubgraphQuery,
   GraphRepository as IGraphRepository,
-} from '../types/analytics';
+} from "../types/analytics";
 
 /**
  * Neo4j-backed Graph Repository
@@ -23,20 +23,20 @@ export class Neo4jGraphRepository implements IGraphRepository {
   async getSubgraph(params: SubgraphQuery): Promise<Graph> {
     const session = this.driver.session();
     try {
-      logger.debug('Fetching subgraph', params);
+      logger.debug("Fetching subgraph", params);
 
       // Build node filter
-      let nodeFilter = '';
+      let nodeFilter = "";
       if (params.nodeIds && params.nodeIds.length > 0) {
-        nodeFilter = 'WHERE n.id IN $nodeIds';
+        nodeFilter = "WHERE n.id IN $nodeIds";
       } else if (params.filters?.nodeLabels && params.filters.nodeLabels.length > 0) {
-        nodeFilter = 'WHERE any(label in labels(n) WHERE label IN $nodeLabels)';
+        nodeFilter = "WHERE any(label in labels(n) WHERE label IN $nodeLabels)";
       }
 
       // Build edge filter
-      let edgeFilter = '';
+      let edgeFilter = "";
       if (params.edgeTypes && params.edgeTypes.length > 0) {
-        edgeFilter = 'WHERE type(r) IN $edgeTypes';
+        edgeFilter = "WHERE type(r) IN $edgeTypes";
       }
 
       const depth = params.depth || 1;
@@ -83,12 +83,12 @@ export class Neo4jGraphRepository implements IGraphRepository {
       }
 
       const record = result.records[0];
-      const nodes: GraphNode[] = record.get('nodes') || [];
-      const edges: GraphEdge[] = (record.get('edges') || []).filter(
-        (e: GraphEdge | null) => e !== null && e.fromId && e.toId,
+      const nodes: GraphNode[] = record.get("nodes") || [];
+      const edges: GraphEdge[] = (record.get("edges") || []).filter(
+        (e: GraphEdge | null) => e !== null && e.fromId && e.toId
       );
 
-      logger.debug('Subgraph fetched', {
+      logger.debug("Subgraph fetched", {
         nodes: nodes.length,
         edges: edges.length,
       });
@@ -98,7 +98,7 @@ export class Neo4jGraphRepository implements IGraphRepository {
         edges: edges.slice(0, limit * 2), // Allow more edges than nodes
       };
     } catch (error) {
-      logger.error('Error fetching subgraph:', error);
+      logger.error("Error fetching subgraph:", error);
       throw error;
     } finally {
       await session.close();
@@ -111,22 +111,20 @@ export class Neo4jGraphRepository implements IGraphRepository {
   async getNeighbors(
     nodeId: string,
     depth: number = 1,
-    filters?: Record<string, any>,
+    filters?: Record<string, any>
   ): Promise<Graph> {
     const session = this.driver.session();
     try {
       logger.debug(`Fetching neighbors for node ${nodeId}`, { depth, filters });
 
-      const edgeFilter = filters?.edgeTypes?.length
-        ? 'WHERE type(r) IN $edgeTypes'
-        : '';
+      const edgeFilter = filters?.edgeTypes?.length ? "WHERE type(r) IN $edgeTypes" : "";
 
       const query = `
         MATCH (center {id: $nodeId})
         CALL apoc.path.subgraphNodes(center, {
           maxLevel: $depth,
-          relationshipFilter: '${filters?.edgeTypes?.join('|') || ''}',
-          direction: '${filters?.direction || 'BOTH'}'
+          relationshipFilter: '${filters?.edgeTypes?.join("|") || ""}',
+          direction: '${filters?.direction || "BOTH"}'
         })
         YIELD node
         WITH DISTINCT node
@@ -157,7 +155,7 @@ export class Neo4jGraphRepository implements IGraphRepository {
         });
       } catch (apocError) {
         // Fallback if APOC not available
-        logger.warn('APOC not available, using simple path expansion');
+        logger.warn("APOC not available, using simple path expansion");
         const fallbackQuery = `
           MATCH path = ({id: $nodeId})-[r*1..${depth}]-(neighbor)
           ${edgeFilter}
@@ -190,19 +188,19 @@ export class Neo4jGraphRepository implements IGraphRepository {
       }
 
       const record = result.records[0];
-      const nodes: GraphNode[] = record.get('nodes') || [];
-      const edges: GraphEdge[] = (record.get('edges') || []).filter(
-        (e: GraphEdge | null) => e !== null,
+      const nodes: GraphNode[] = record.get("nodes") || [];
+      const edges: GraphEdge[] = (record.get("edges") || []).filter(
+        (e: GraphEdge | null) => e !== null
       );
 
-      logger.debug('Neighbors fetched', {
+      logger.debug("Neighbors fetched", {
         nodes: nodes.length,
         edges: edges.length,
       });
 
       return { nodes, edges };
     } catch (error) {
-      logger.error('Error fetching neighbors:', error);
+      logger.error("Error fetching neighbors:", error);
       throw error;
     } finally {
       await session.close();
@@ -227,9 +225,9 @@ export class Neo4jGraphRepository implements IGraphRepository {
       const result = await session.run(query, { limit });
 
       return result.records.map((record) => ({
-        id: record.get('id'),
-        labels: record.get('labels'),
-        properties: record.get('properties'),
+        id: record.get("id"),
+        labels: record.get("labels"),
+        properties: record.get("properties"),
       }));
     } finally {
       await session.close();
@@ -256,11 +254,11 @@ export class Neo4jGraphRepository implements IGraphRepository {
       const result = await session.run(query, { limit });
 
       return result.records.map((record) => ({
-        id: record.get('id').toString(),
-        fromId: record.get('fromId'),
-        toId: record.get('toId'),
-        type: record.get('type'),
-        properties: record.get('properties'),
+        id: record.get("id").toString(),
+        fromId: record.get("fromId"),
+        toId: record.get("toId"),
+        type: record.get("type"),
+        properties: record.get("properties"),
       }));
     } finally {
       await session.close();
@@ -291,9 +289,7 @@ export class InMemoryGraphRepository implements IGraphRepository {
     // Filter by node labels
     if (params.filters?.nodeLabels && params.filters.nodeLabels.length > 0) {
       const labelSet = new Set(params.filters.nodeLabels);
-      nodes = nodes.filter((n) =>
-        n.labels.some((label) => labelSet.has(label)),
-      );
+      nodes = nodes.filter((n) => n.labels.some((label) => labelSet.has(label)));
     }
 
     // Get connected nodes up to depth
@@ -331,9 +327,7 @@ export class InMemoryGraphRepository implements IGraphRepository {
       nodes = nodes.slice(0, params.limit);
       // Keep edges that connect the limited nodes
       const nodeIdSet = new Set(nodes.map((n) => n.id));
-      edges = edges.filter(
-        (e) => nodeIdSet.has(e.fromId) && nodeIdSet.has(e.toId),
-      );
+      edges = edges.filter((e) => nodeIdSet.has(e.fromId) && nodeIdSet.has(e.toId));
     }
 
     return { nodes, edges };
@@ -342,7 +336,7 @@ export class InMemoryGraphRepository implements IGraphRepository {
   async getNeighbors(
     nodeId: string,
     depth: number = 1,
-    filters?: Record<string, any>,
+    filters?: Record<string, any>
   ): Promise<Graph> {
     const visited = new Set<string>([nodeId]);
     const nodesToExplore = [nodeId];
@@ -361,10 +355,7 @@ export class InMemoryGraphRepository implements IGraphRepository {
             visited.add(edge.toId);
             currentLevel.push(edge.toId);
             resultEdges.push(edge);
-          } else if (
-            edge.toId === currentNodeId &&
-            !visited.has(edge.fromId)
-          ) {
+          } else if (edge.toId === currentNodeId && !visited.has(edge.fromId)) {
             visited.add(edge.fromId);
             currentLevel.push(edge.fromId);
             resultEdges.push(edge);

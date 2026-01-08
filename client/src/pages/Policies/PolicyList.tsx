@@ -8,7 +8,7 @@
  * @module pages/Policies/PolicyList
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback } from "react";
 import {
   Box,
   Paper,
@@ -39,7 +39,7 @@ import {
   Snackbar,
   CircularProgress,
   Menu,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Search as SearchIcon,
   Add as AddIcon,
@@ -52,55 +52,81 @@ import {
   History as HistoryIcon,
   MoreVert as MoreIcon,
   Refresh as RefreshIcon,
-} from '@mui/icons-material';
-import { usePolicies, usePolicyOperations } from '../../hooks/usePolicies';
-import { ManagedPolicy } from '../../services/policy-api';
-import PolicyEditor from './PolicyEditor';
+} from "@mui/icons-material";
+import { usePolicies, usePolicyOperations } from "../../hooks/usePolicies";
+import { ManagedPolicy } from "../../services/policy-api";
+import PolicyEditor from "./PolicyEditor";
 
 // ============================================================================
 // Helper Functions
 // ============================================================================
 
-const getStatusColor = (status: ManagedPolicy['status']): 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning' => {
+const getStatusColor = (
+  status: ManagedPolicy["status"]
+): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
   switch (status) {
-    case 'draft': return 'default';
-    case 'pending_approval': return 'warning';
-    case 'approved': return 'info';
-    case 'active': return 'success';
-    case 'deprecated': return 'secondary';
-    case 'archived': return 'error';
-    default: return 'default';
+    case "draft":
+      return "default";
+    case "pending_approval":
+      return "warning";
+    case "approved":
+      return "info";
+    case "active":
+      return "success";
+    case "deprecated":
+      return "secondary";
+    case "archived":
+      return "error";
+    default:
+      return "default";
   }
 };
 
-const getCategoryColor = (category: ManagedPolicy['category']): 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning' => {
+const getCategoryColor = (
+  category: ManagedPolicy["category"]
+): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
   switch (category) {
-    case 'access': return 'primary';
-    case 'data': return 'info';
-    case 'export': return 'warning';
-    case 'retention': return 'secondary';
-    case 'compliance': return 'success';
-    case 'operational': return 'default';
-    case 'safety': return 'error';
-    default: return 'default';
+    case "access":
+      return "primary";
+    case "data":
+      return "info";
+    case "export":
+      return "warning";
+    case "retention":
+      return "secondary";
+    case "compliance":
+      return "success";
+    case "operational":
+      return "default";
+    case "safety":
+      return "error";
+    default:
+      return "default";
   }
 };
 
-const getActionColor = (action: ManagedPolicy['action']): 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning' => {
+const getActionColor = (
+  action: ManagedPolicy["action"]
+): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
   switch (action) {
-    case 'ALLOW': return 'success';
-    case 'DENY': return 'error';
-    case 'ESCALATE': return 'warning';
-    case 'WARN': return 'info';
-    default: return 'default';
+    case "ALLOW":
+      return "success";
+    case "DENY":
+      return "error";
+    case "ESCALATE":
+      return "warning";
+    case "WARN":
+      return "info";
+    default:
+      return "default";
   }
 };
 
 const formatDate = (dateString: string): string => {
   return new Date(dateString).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+    year: "numeric",
+    month: "short",
+    day: "numeric",
   });
 };
 
@@ -116,51 +142,64 @@ const PolicyList: React.FC = () => {
   const [policyToDelete, setPolicyToDelete] = useState<ManagedPolicy | null>(null);
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
   const [policyToSubmit, setPolicyToSubmit] = useState<ManagedPolicy | null>(null);
-  const [submitReason, setSubmitReason] = useState('');
+  const [submitReason, setSubmitReason] = useState("");
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [policyToApprove, setPolicyToApprove] = useState<ManagedPolicy | null>(null);
-  const [approveNotes, setApproveNotes] = useState('');
-  const [menuAnchor, setMenuAnchor] = useState<{ el: HTMLElement; policy: ManagedPolicy } | null>(null);
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
+  const [approveNotes, setApproveNotes] = useState("");
+  const [menuAnchor, setMenuAnchor] = useState<{ el: HTMLElement; policy: ManagedPolicy } | null>(
+    null
+  );
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error";
+  }>({
     open: false,
-    message: '',
-    severity: 'success',
+    message: "",
+    severity: "success",
   });
 
   // Hooks
-  const {
-    policies,
-    loading,
-    error,
-    pagination,
-    filters,
-    refresh,
-    updateFilters,
-    goToPage,
-  } = usePolicies();
+  const { policies, loading, error, pagination, filters, refresh, updateFilters, goToPage } =
+    usePolicies();
 
   const operations = usePolicyOperations();
 
   // Handlers
-  const handleSearch = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    updateFilters({ search: event.target.value, page: 1 });
-  }, [updateFilters]);
+  const handleSearch = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      updateFilters({ search: event.target.value, page: 1 });
+    },
+    [updateFilters]
+  );
 
-  const handleStatusFilter = useCallback((event: any) => {
-    updateFilters({ status: event.target.value || undefined, page: 1 });
-  }, [updateFilters]);
+  const handleStatusFilter = useCallback(
+    (event: any) => {
+      updateFilters({ status: event.target.value || undefined, page: 1 });
+    },
+    [updateFilters]
+  );
 
-  const handleCategoryFilter = useCallback((event: any) => {
-    updateFilters({ category: event.target.value || undefined, page: 1 });
-  }, [updateFilters]);
+  const handleCategoryFilter = useCallback(
+    (event: any) => {
+      updateFilters({ category: event.target.value || undefined, page: 1 });
+    },
+    [updateFilters]
+  );
 
-  const handleChangePage = useCallback((_: unknown, newPage: number) => {
-    goToPage(newPage + 1);
-  }, [goToPage]);
+  const handleChangePage = useCallback(
+    (_: unknown, newPage: number) => {
+      goToPage(newPage + 1);
+    },
+    [goToPage]
+  );
 
-  const handleChangeRowsPerPage = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    updateFilters({ pageSize: parseInt(event.target.value, 10), page: 1 });
-  }, [updateFilters]);
+  const handleChangeRowsPerPage = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      updateFilters({ pageSize: parseInt(event.target.value, 10), page: 1 });
+    },
+    [updateFilters]
+  );
 
   const handleOpenEditor = useCallback((policy?: ManagedPolicy) => {
     setEditingPolicy(policy || null);
@@ -177,24 +216,30 @@ const PolicyList: React.FC = () => {
     refresh();
     setSnackbar({
       open: true,
-      message: editingPolicy ? 'Policy updated successfully' : 'Policy created successfully',
-      severity: 'success',
+      message: editingPolicy ? "Policy updated successfully" : "Policy created successfully",
+      severity: "success",
     });
   }, [handleCloseEditor, refresh, editingPolicy]);
 
-  const handleMenuOpen = useCallback((event: React.MouseEvent<HTMLElement>, policy: ManagedPolicy) => {
-    setMenuAnchor({ el: event.currentTarget, policy });
-  }, []);
+  const handleMenuOpen = useCallback(
+    (event: React.MouseEvent<HTMLElement>, policy: ManagedPolicy) => {
+      setMenuAnchor({ el: event.currentTarget, policy });
+    },
+    []
+  );
 
   const handleMenuClose = useCallback(() => {
     setMenuAnchor(null);
   }, []);
 
-  const handleDeleteClick = useCallback((policy: ManagedPolicy) => {
-    setPolicyToDelete(policy);
-    setDeleteDialogOpen(true);
-    handleMenuClose();
-  }, [handleMenuClose]);
+  const handleDeleteClick = useCallback(
+    (policy: ManagedPolicy) => {
+      setPolicyToDelete(policy);
+      setDeleteDialogOpen(true);
+      handleMenuClose();
+    },
+    [handleMenuClose]
+  );
 
   const handleDeleteConfirm = useCallback(async () => {
     if (!policyToDelete) return;
@@ -203,64 +248,89 @@ const PolicyList: React.FC = () => {
     setPolicyToDelete(null);
     if (success) {
       refresh();
-      setSnackbar({ open: true, message: 'Policy archived successfully', severity: 'success' });
+      setSnackbar({ open: true, message: "Policy archived successfully", severity: "success" });
     } else {
-      setSnackbar({ open: true, message: operations.error || 'Failed to archive policy', severity: 'error' });
+      setSnackbar({
+        open: true,
+        message: operations.error || "Failed to archive policy",
+        severity: "error",
+      });
     }
   }, [policyToDelete, operations, refresh]);
 
-  const handleSubmitClick = useCallback((policy: ManagedPolicy) => {
-    setPolicyToSubmit(policy);
-    setSubmitReason('');
-    setSubmitDialogOpen(true);
-    handleMenuClose();
-  }, [handleMenuClose]);
+  const handleSubmitClick = useCallback(
+    (policy: ManagedPolicy) => {
+      setPolicyToSubmit(policy);
+      setSubmitReason("");
+      setSubmitDialogOpen(true);
+      handleMenuClose();
+    },
+    [handleMenuClose]
+  );
 
   const handleSubmitConfirm = useCallback(async () => {
     if (!policyToSubmit) return;
     const result = await operations.submitForApproval(policyToSubmit.id, submitReason);
     setSubmitDialogOpen(false);
     setPolicyToSubmit(null);
-    setSubmitReason('');
+    setSubmitReason("");
     if (result) {
       refresh();
-      setSnackbar({ open: true, message: 'Policy submitted for approval', severity: 'success' });
+      setSnackbar({ open: true, message: "Policy submitted for approval", severity: "success" });
     } else {
-      setSnackbar({ open: true, message: operations.error || 'Failed to submit policy', severity: 'error' });
+      setSnackbar({
+        open: true,
+        message: operations.error || "Failed to submit policy",
+        severity: "error",
+      });
     }
   }, [policyToSubmit, submitReason, operations, refresh]);
 
-  const handleApproveClick = useCallback((policy: ManagedPolicy) => {
-    setPolicyToApprove(policy);
-    setApproveNotes('');
-    setApproveDialogOpen(true);
-    handleMenuClose();
-  }, [handleMenuClose]);
+  const handleApproveClick = useCallback(
+    (policy: ManagedPolicy) => {
+      setPolicyToApprove(policy);
+      setApproveNotes("");
+      setApproveDialogOpen(true);
+      handleMenuClose();
+    },
+    [handleMenuClose]
+  );
 
   const handleApproveConfirm = useCallback(async () => {
     if (!policyToApprove) return;
     const result = await operations.approvePolicy(policyToApprove.id, approveNotes);
     setApproveDialogOpen(false);
     setPolicyToApprove(null);
-    setApproveNotes('');
+    setApproveNotes("");
     if (result) {
       refresh();
-      setSnackbar({ open: true, message: 'Policy approved', severity: 'success' });
+      setSnackbar({ open: true, message: "Policy approved", severity: "success" });
     } else {
-      setSnackbar({ open: true, message: operations.error || 'Failed to approve policy', severity: 'error' });
+      setSnackbar({
+        open: true,
+        message: operations.error || "Failed to approve policy",
+        severity: "error",
+      });
     }
   }, [policyToApprove, approveNotes, operations, refresh]);
 
-  const handlePublish = useCallback(async (policy: ManagedPolicy) => {
-    handleMenuClose();
-    const result = await operations.publishPolicy(policy.id);
-    if (result) {
-      refresh();
-      setSnackbar({ open: true, message: 'Policy published successfully', severity: 'success' });
-    } else {
-      setSnackbar({ open: true, message: operations.error || 'Failed to publish policy', severity: 'error' });
-    }
-  }, [operations, refresh, handleMenuClose]);
+  const handlePublish = useCallback(
+    async (policy: ManagedPolicy) => {
+      handleMenuClose();
+      const result = await operations.publishPolicy(policy.id);
+      if (result) {
+        refresh();
+        setSnackbar({ open: true, message: "Policy published successfully", severity: "success" });
+      } else {
+        setSnackbar({
+          open: true,
+          message: operations.error || "Failed to publish policy",
+          severity: "error",
+        });
+      }
+    },
+    [operations, refresh, handleMenuClose]
+  );
 
   const handleSnackbarClose = useCallback(() => {
     setSnackbar((prev) => ({ ...prev, open: false }));
@@ -270,21 +340,17 @@ const PolicyList: React.FC = () => {
   return (
     <Box sx={{ p: 3 }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
         <Typography variant="h4" component="h1">
           Policy Management
         </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: "flex", gap: 1 }}>
           <Tooltip title="Refresh">
             <IconButton onClick={refresh} disabled={loading}>
               <RefreshIcon />
             </IconButton>
           </Tooltip>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => handleOpenEditor()}
-          >
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenEditor()}>
             Create Policy
           </Button>
         </Box>
@@ -299,11 +365,11 @@ const PolicyList: React.FC = () => {
 
       {/* Filters */}
       <Paper sx={{ p: 2, mb: 2 }}>
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+        <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
           <TextField
             size="small"
             placeholder="Search policies..."
-            value={filters.search || ''}
+            value={filters.search || ""}
             onChange={handleSearch}
             InputProps={{
               startAdornment: (
@@ -316,11 +382,7 @@ const PolicyList: React.FC = () => {
           />
           <FormControl size="small" sx={{ minWidth: 150 }}>
             <InputLabel>Status</InputLabel>
-            <Select
-              value={filters.status || ''}
-              onChange={handleStatusFilter}
-              label="Status"
-            >
+            <Select value={filters.status || ""} onChange={handleStatusFilter} label="Status">
               <MenuItem value="">All</MenuItem>
               <MenuItem value="draft">Draft</MenuItem>
               <MenuItem value="pending_approval">Pending Approval</MenuItem>
@@ -332,11 +394,7 @@ const PolicyList: React.FC = () => {
           </FormControl>
           <FormControl size="small" sx={{ minWidth: 150 }}>
             <InputLabel>Category</InputLabel>
-            <Select
-              value={filters.category || ''}
-              onChange={handleCategoryFilter}
-              label="Category"
-            >
+            <Select value={filters.category || ""} onChange={handleCategoryFilter} label="Category">
               <MenuItem value="">All</MenuItem>
               <MenuItem value="access">Access</MenuItem>
               <MenuItem value="data">Data</MenuItem>
@@ -410,7 +468,7 @@ const PolicyList: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label={policy.status.replace('_', ' ')}
+                        label={policy.status.replace("_", " ")}
                         size="small"
                         color={getStatusColor(policy.status)}
                       />
@@ -419,12 +477,12 @@ const PolicyList: React.FC = () => {
                     <TableCell>v{policy.version}</TableCell>
                     <TableCell>{formatDate(policy.updatedAt)}</TableCell>
                     <TableCell align="right">
-                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
+                      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 0.5 }}>
                         <Tooltip title="Edit">
                           <IconButton
                             size="small"
                             onClick={() => handleOpenEditor(policy)}
-                            disabled={policy.status === 'archived'}
+                            disabled={policy.status === "archived"}
                           >
                             <EditIcon fontSize="small" />
                           </IconButton>
@@ -438,10 +496,7 @@ const PolicyList: React.FC = () => {
                             <SimulateIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
-                        <IconButton
-                          size="small"
-                          onClick={(e) => handleMenuOpen(e, policy)}
-                        >
+                        <IconButton size="small" onClick={(e) => handleMenuOpen(e, policy)}>
                           <MoreIcon fontSize="small" />
                         </IconButton>
                       </Box>
@@ -464,24 +519,20 @@ const PolicyList: React.FC = () => {
       </Paper>
 
       {/* Action Menu */}
-      <Menu
-        anchorEl={menuAnchor?.el}
-        open={Boolean(menuAnchor)}
-        onClose={handleMenuClose}
-      >
-        {menuAnchor?.policy.status === 'draft' && (
+      <Menu anchorEl={menuAnchor?.el} open={Boolean(menuAnchor)} onClose={handleMenuClose}>
+        {menuAnchor?.policy.status === "draft" && (
           <MenuItem onClick={() => handleSubmitClick(menuAnchor.policy)}>
             <SubmitIcon fontSize="small" sx={{ mr: 1 }} />
             Submit for Approval
           </MenuItem>
         )}
-        {menuAnchor?.policy.status === 'pending_approval' && (
+        {menuAnchor?.policy.status === "pending_approval" && (
           <MenuItem onClick={() => handleApproveClick(menuAnchor.policy)}>
             <ApproveIcon fontSize="small" sx={{ mr: 1 }} />
             Approve
           </MenuItem>
         )}
-        {menuAnchor?.policy.status === 'approved' && (
+        {menuAnchor?.policy.status === "approved" && (
           <MenuItem onClick={() => handlePublish(menuAnchor.policy)}>
             <PublishIcon fontSize="small" sx={{ mr: 1 }} />
             Publish
@@ -491,7 +542,7 @@ const PolicyList: React.FC = () => {
           <HistoryIcon fontSize="small" sx={{ mr: 1 }} />
           View History
         </MenuItem>
-        {menuAnchor?.policy.status !== 'archived' && (
+        {menuAnchor?.policy.status !== "archived" && (
           <MenuItem onClick={() => handleDeleteClick(menuAnchor!.policy)}>
             <DeleteIcon fontSize="small" sx={{ mr: 1 }} color="error" />
             Archive
@@ -512,14 +563,14 @@ const PolicyList: React.FC = () => {
         <DialogTitle>Archive Policy</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to archive the policy "{policyToDelete?.displayName}"?
-            This action can be reversed by an administrator.
+            Are you sure you want to archive the policy "{policyToDelete?.displayName}"? This action
+            can be reversed by an administrator.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
           <Button onClick={handleDeleteConfirm} color="error" disabled={operations.loading}>
-            {operations.loading ? <CircularProgress size={20} /> : 'Archive'}
+            {operations.loading ? <CircularProgress size={20} /> : "Archive"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -544,7 +595,7 @@ const PolicyList: React.FC = () => {
         <DialogActions>
           <Button onClick={() => setSubmitDialogOpen(false)}>Cancel</Button>
           <Button onClick={handleSubmitConfirm} variant="contained" disabled={operations.loading}>
-            {operations.loading ? <CircularProgress size={20} /> : 'Submit'}
+            {operations.loading ? <CircularProgress size={20} /> : "Submit"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -568,8 +619,13 @@ const PolicyList: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setApproveDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleApproveConfirm} variant="contained" color="success" disabled={operations.loading}>
-            {operations.loading ? <CircularProgress size={20} /> : 'Approve'}
+          <Button
+            onClick={handleApproveConfirm}
+            variant="contained"
+            color="success"
+            disabled={operations.loading}
+          >
+            {operations.loading ? <CircularProgress size={20} /> : "Approve"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -579,7 +635,7 @@ const PolicyList: React.FC = () => {
         open={snackbar.open}
         autoHideDuration={4000}
         onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
         <Alert onClose={handleSnackbarClose} severity={snackbar.severity} variant="filled">
           {snackbar.message}

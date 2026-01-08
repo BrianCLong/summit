@@ -9,14 +9,17 @@ vi.mock('../../canvas/LinkAnalysisCanvas', () => ({
   LinkAnalysisCanvas: ({ nodes }: any) => {
     const { selectEntity } = useWorkbenchStore()
     return (
-        <div data-testid="canvas" onClick={() => {
-            // Simulate selecting the first node
-            if(nodes.length > 0) selectEntity(nodes[0].id)
-        }}>
+      <div
+        data-testid="canvas"
+        onClick={() => {
+          // Simulate selecting the first node
+          if (nodes.length > 0) selectEntity(nodes[0].id)
+        }}
+      >
         Canvas with {nodes.length} nodes
-        </div>
+      </div>
     )
-  }
+  },
 }))
 
 vi.mock('../../inspector/InspectorPanel', () => ({
@@ -27,7 +30,7 @@ vi.mock('../../inspector/InspectorPanel', () => ({
         Inspector: {selectedEntityIds.length} selected
       </div>
     )
-  }
+  },
 }))
 
 describe('WorkbenchShell Integration Smoke Test', () => {

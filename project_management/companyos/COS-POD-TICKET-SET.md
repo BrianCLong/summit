@@ -3,6 +3,7 @@
 The following tickets are ready to paste into Jira/Linear. Each ticket follows the standard format: **Title**, **Type**, **Estimate (S/M/L)**, **Description**, **Dependencies**, **Acceptance Criteria**.
 
 ### Reference stack assumptions
+
 - Source control: GitHub
 - CI/CD: GitHub Actions
 - Language baseline: TypeScript/Node.js for services and tooling
@@ -10,12 +11,13 @@ The following tickets are ready to paste into Jira/Linear. Each ticket follows t
 - Security/Policy: OPA for authorization, Sigstore/Cosign for signing
 
 ### Copy/paste ticket template (YAML)
+
 Use this if your tracker supports YAML intake; replace the `TODO` values with the details from each ticket below.
 
 ```yaml
 title: TODO
-type: TODO  # Story | Task | Spike
-estimate: TODO  # S | M | L
+type: TODO # Story | Task | Spike
+estimate: TODO # S | M | L
 description: |
   TODO
 dependencies:
@@ -27,6 +29,7 @@ acceptance_criteria:
 ## 1) Golden Path Platform
 
 ### GP-1 — Define Standard Service Repo Layout
+
 - **Type:** Story
 - **Estimate:** M
 - **Description:** Document and propose a standard folder and config layout for a new CompanyOS service (API-focused for v1). Include conventions for config, tests, infra, and docs.
@@ -37,6 +40,7 @@ acceptance_criteria:
   - Example skeleton tree included (code or pseudo).
 
 ### GP-2 — ADR: “Standard Service Template & CI Baseline v1”
+
 - **Type:** Task
 - **Estimate:** S
 - **Description:** Create an ADR summarizing chosen repo layout, language/tooling assumptions, and CI baseline stages.
@@ -47,6 +51,7 @@ acceptance_criteria:
   - Linked from the platform README.
 
 ### GP-3 — Implement Reference Service Template (API)
+
 - **Type:** Story
 - **Estimate:** L
 - **Description:** Create a new repo or directory with a minimal API service implementing the golden layout and wiring in CI hooks (even if stubs).
@@ -57,6 +62,7 @@ acceptance_criteria:
   - Basic health-check endpoint available.
 
 ### GP-4 — CI Template with SBOM & Provenance
+
 - **Type:** Story
 - **Estimate:** M
 - **Description:** Implement a reusable CI template (e.g., GitHub Actions workflow / GitLab template) including: build, tests, lint, SAST, secret scan, SBOM generation, and artifact publishing with build metadata.
@@ -67,6 +73,7 @@ acceptance_criteria:
   - Build metadata (commit SHA, timestamp) attached to artifacts.
 
 ### GP-5 — Scaffold Command (`companyos scaffold service`)
+
 - **Type:** Story
 - **Estimate:** M
 - **Description:** Implement a CLI or template command that generates a new service repo from the golden path (or prints instructions if not fully automated).
@@ -79,6 +86,7 @@ acceptance_criteria:
 ## 2) Identity & Policy
 
 ### IDP-1 — ADR: “CompanyOS Identity Model v1”
+
 - **Type:** Task
 - **Estimate:** M
 - **Description:** Define identity types (user, service, tenant, env) and core attributes (role, groups, tenant_id, data_access_level). Capture assumptions and constraints.
@@ -89,6 +97,7 @@ acceptance_criteria:
   - Reviewed by Security + Platform leads.
 
 ### IDP-2 — Define AuthZ Input & Decision Schema
+
 - **Type:** Story
 - **Estimate:** S
 - **Description:** Define JSON schema for requests to the authorization engine (OPA) and responses (allow/deny, reason, obligation).
@@ -99,6 +108,7 @@ acceptance_criteria:
   - Schema referenced in OPA policy repo.
 
 ### IDP-3 — OPA Policy for “Read Customer Record”
+
 - **Type:** Story
 - **Estimate:** M
 - **Description:** Implement an OPA policy that decides whether a given identity can read a specific customer record based on role, tenant, and attributes.
@@ -109,6 +119,7 @@ acceptance_criteria:
   - Policy documented with examples.
 
 ### IDP-4 — Integrate OPA Check in Reference Service
+
 - **Type:** Story
 - **Estimate:** M
 - **Description:** Wire the reference API service from Golden Path to call OPA for read operations on customer records. Deny-by-default.
@@ -119,6 +130,7 @@ acceptance_criteria:
   - Local dev environment can run with a local OPA instance.
 
 ### IDP-5 — Step-Up Auth Policy Spec
+
 - **Type:** Task
 - **Estimate:** S
 - **Description:** Define which actions require step-up authentication and capture the rules in a policy document (even if implementation is stubbed).
@@ -131,6 +143,7 @@ acceptance_criteria:
 ## 3) Observability
 
 ### OBS-1 — ADR: “Observability Baseline v1”
+
 - **Type:** Task
 - **Estimate:** M
 - **Description:** Define required metrics, log fields, and tracing conventions for all services.
@@ -141,6 +154,7 @@ acceptance_criteria:
   - Signed off by Reliability & Platform leads.
 
 ### OBS-2 — Implement Observability Middleware for Reference Service
+
 - **Type:** Story
 - **Estimate:** M
 - **Description:** Add metrics, structured logging, and tracing middleware to the reference API service.
@@ -151,6 +165,7 @@ acceptance_criteria:
   - Docs updated: how to enable in another service.
 
 ### OBS-3 — Create Golden Grafana Dashboard Template
+
 - **Type:** Story
 - **Estimate:** M
 - **Description:** Build a dashboard template that shows latency, error rate, traffic, and saturation for any service following the baseline.
@@ -161,6 +176,7 @@ acceptance_criteria:
   - Snapshot or screenshot stored in docs.
 
 ### OBS-4 — Define SLO & Error Budget for Reference Service
+
 - **Type:** Story
 - **Estimate:** S
 - **Description:** Define SLOs (e.g., p95 latency, availability) and compute error budgets for the reference service.
@@ -173,6 +189,7 @@ acceptance_criteria:
 ## 4) Data Spine
 
 ### DATA-1 — ADR: “Canonical Entity Schemas v1”
+
 - **Type:** Task
 - **Estimate:** M
 - **Description:** Define canonical schemas for `Org`, `User`, and `Event`, with field types and IDs.
@@ -183,6 +200,7 @@ acceptance_criteria:
   - Alignment with Identity model attributes.
 
 ### DATA-2 — Schema Repository Setup
+
 - **Type:** Story
 - **Estimate:** M
 - **Description:** Create a dedicated location (repo or directory) for schemas (JSON Schema/Avro/Protobuf) with tooling for validation.
@@ -193,6 +211,7 @@ acceptance_criteria:
   - README describing how to use schemes.
 
 ### DATA-3 — Schema Versioning & Evolution Policy
+
 - **Type:** Task
 - **Estimate:** S
 - **Description:** Document rules for schema evolution (backward/forward compatibility, deprecation process).
@@ -203,6 +222,7 @@ acceptance_criteria:
   - Linked from ADR and referenced in contribution guidelines.
 
 ### DATA-4 — Lineage & Provenance Model v1
+
 - **Type:** Story
 - **Estimate:** M
 - **Description:** Define minimal model for tracking data lineage and provenance for Events as they flow into Summit/IntelGraph.
@@ -213,6 +233,7 @@ acceptance_criteria:
   - Summit/IntelGraph team reviews and accepts.
 
 ### DATA-5 — Residency & Retention Rules for User Data
+
 - **Type:** Story
 - **Estimate:** M
 - **Description:** Define rules for data residency and retention for User entity; describe enforcement approach.
@@ -225,6 +246,7 @@ acceptance_criteria:
 ## 5) Reliability & Release
 
 ### REL-1 — ADR: “Standard Release Strategy v1”
+
 - **Type:** Task
 - **Estimate:** M
 - **Description:** Document canary/rolling release strategy for K8s/Helm-based services, including when to use which.
@@ -235,6 +257,7 @@ acceptance_criteria:
   - Links to Helm/infra repos.
 
 ### REL-2 — Define Release Gates & Canary Thresholds
+
 - **Type:** Story
 - **Estimate:** M
 - **Description:** Specify metrics and thresholds needed to progress/rollback a canary (error rate, latency, etc.).
@@ -245,6 +268,7 @@ acceptance_criteria:
   - Reviewed by Observability lead.
 
 ### REL-3 — Implement Helm/Infra Template for Canary
+
 - **Type:** Story
 - **Estimate:** L
 - **Description:** Add canary support to Helm chart or deployment templates used by the reference service.
@@ -255,6 +279,7 @@ acceptance_criteria:
   - Docs show how to enable/disable.
 
 ### REL-4 — Rollback Runbook for Reference Service
+
 - **Type:** Task
 - **Estimate:** S
 - **Description:** Write a runbook that describes step-by-step how to rollback a bad release using the new canary setup.
@@ -267,6 +292,7 @@ acceptance_criteria:
 ## 6) Developer Ergonomics
 
 ### DEVX-1 — ADR: “Local Dev Environment v1”
+
 - **Type:** Task
 - **Estimate:** S
 - **Description:** Document goals and decisions for standard local dev environment (Docker Compose dev stack, auth approach, etc.).
@@ -277,6 +303,7 @@ acceptance_criteria:
   - Alignment with Golden Path service.
 
 ### DEVX-2 — Docker Compose Stack for Reference Service
+
 - **Type:** Story
 - **Estimate:** M
 - **Description:** Create a Docker Compose (or equivalent) configuration that brings up the reference service and dependencies for local dev.
@@ -287,6 +314,7 @@ acceptance_criteria:
   - Docs include environment variables and basic troubleshooting.
 
 ### DEVX-3 — Seed Data & Fixtures
+
 - **Type:** Story
 - **Estimate:** S
 - **Description:** Implement seed data scripts/fixtures to allow meaningful local testing without manual DB setup.
@@ -297,6 +325,7 @@ acceptance_criteria:
   - Seed script idempotent.
 
 ### DEVX-4 — Standard Test Commands & Pre-Commit Hooks
+
 - **Type:** Story
 - **Estimate:** M
 - **Description:** Define and implement standard commands (`make test-unit`, `make test-integration`, etc.) plus pre-commit hooks for linting/tests where appropriate.
@@ -307,6 +336,7 @@ acceptance_criteria:
   - At least unit tests executed locally via single command.
 
 ### DEVX-5 — New Engineer Quickstart Guide
+
 - **Type:** Task
 - **Estimate:** S
 - **Description:** Write a step-by-step guide: clone repo → start dev stack → run tests in ≤15 minutes.
@@ -319,6 +349,7 @@ acceptance_criteria:
 ## 7) Product Verticals (Compliance Ops Example)
 
 ### PROD-1 — ADR: “Compliance Ops Vertical Definition v1”
+
 - **Type:** Task
 - **Estimate:** M
 - **Description:** Define the Compliance Ops vertical: personas, JTBD, constraints, and high-level boundaries.
@@ -329,6 +360,7 @@ acceptance_criteria:
   - Aligned with leadership/PM expectations.
 
 ### PROD-2 — Identify & Rank 3–5 Candidate Capabilities
+
 - **Type:** Story
 - **Estimate:** S
 - **Description:** Brainstorm and prioritize candidate capabilities (e.g., automated disclosure packs, evidence repository).
@@ -338,6 +370,7 @@ acceptance_criteria:
   - One top candidate selected and justified.
 
 ### PROD-3 — Detailed Spec: “Automated Disclosure Pack v1” (example)
+
 - **Type:** Story
 - **Estimate:** L
 - **Description:** Produce a full feature spec for the top capability: problem, ROI, data touchpoints, policy implications, dependencies, user flow.
@@ -348,6 +381,7 @@ acceptance_criteria:
   - User journey and 2–3 main flows sketched.
 
 ### PROD-4 — Telemetry & Success Metrics Definition
+
 - **Type:** Story
 - **Estimate:** S
 - **Description:** Define the analytics events and product metrics for the first capability (engagement, time-to-value, completion rate, etc.).
@@ -360,6 +394,7 @@ acceptance_criteria:
 ## 8) Risk & Compliance Automation
 
 ### RISK-1 — ADR: “SBOM & Signing Strategy v1”
+
 - **Type:** Task
 - **Estimate:** M
 - **Description:** Decide on tools and process for generating SBOMs and signing artifacts for CompanyOS services.
@@ -370,6 +405,7 @@ acceptance_criteria:
   - Alignment with Security & Platform.
 
 ### RISK-2 — Add SBOM Generation to Reference Service CI
+
 - **Type:** Story
 - **Estimate:** M
 - **Description:** Implement SBOM generation step for reference service’s CI pipeline and publish artifact to artifact store.
@@ -380,6 +416,7 @@ acceptance_criteria:
   - Failure modes documented if SBOM generation fails.
 
 ### RISK-3 — Implement Artifact Signing in CI
+
 - **Type:** Story
 - **Estimate:** M
 - **Description:** Add signing step to the CI of reference service (e.g., sign container image) and verify signature in deploy pipeline.
@@ -390,6 +427,7 @@ acceptance_criteria:
   - Build fails if signing or verification fails.
 
 ### RISK-4 — Vulnerability Scan & Gating Policy
+
 - **Type:** Story
 - **Estimate:** M
 - **Description:** Integrate vulnerability scanning in CI and define gating rules for critical/high CVEs.
@@ -400,6 +438,7 @@ acceptance_criteria:
   - Policy documented and linked in ADR.
 
 ### RISK-5 — Disclosure Pack v0 Template
+
 - **Type:** Task
 - **Estimate:** S
 - **Description:** Create a structured template for disclosure packs including SBOM link, signing status, test results, and vuln scan summary.

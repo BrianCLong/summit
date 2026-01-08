@@ -27,57 +27,57 @@ Comprehensive tracking and analysis of multilateral organizations, UN system, re
 ## Usage
 
 ```typescript
-import { MultilateralTracker, OrganizationType } from '@intelgraph/multilateral-tracking';
+import { MultilateralTracker, OrganizationType } from "@intelgraph/multilateral-tracking";
 
 const tracker = new MultilateralTracker();
 
 // Track an organization
 tracker.trackOrganization({
-  id: 'un-001',
-  name: 'United Nations',
-  acronym: 'UN',
+  id: "un-001",
+  name: "United Nations",
+  acronym: "UN",
   type: OrganizationType.UN_SYSTEM,
   // ... other details
 });
 
 // Analyze country's multilateral engagement
-const engagement = tracker.analyzeCountryEngagement('USA');
+const engagement = tracker.analyzeCountryEngagement("USA");
 console.log(`Total memberships: ${engagement.totalMemberships}`);
 console.log(`Leadership positions: ${engagement.leadershipPositions}`);
 
 // Analyze power dynamics
-const dynamics = tracker.analyzePowerDynamics('un-001');
+const dynamics = tracker.analyzePowerDynamics("un-001");
 console.log(`Balance: ${dynamics.balanceOfPower.type}`);
 console.log(`Dominant actors: ${dynamics.dominantActors.length}`);
 
 // Monitor activity levels
 const activities = tracker.monitorActivityLevels();
-activities.forEach(org => {
+activities.forEach((org) => {
   console.log(`${org.organization}: ${org.activityLevel} (${org.trend})`);
 });
 
 // Track voting patterns
 tracker.trackVotingPattern({
-  country: 'USA',
-  organization: 'UN General Assembly',
+  country: "USA",
+  organization: "UN General Assembly",
   totalVotes: 150,
   votingAlignment: [
-    { withCountry: 'UK', agreementRate: 85 },
-    { withCountry: 'France', agreementRate: 80 }
+    { withCountry: "UK", agreementRate: 85 },
+    { withCountry: "France", agreementRate: 80 },
   ],
   // ... other details
 });
 
 // Predict organization trajectory
-const prediction = tracker.predictOrganizationTrajectory('un-001');
+const prediction = tracker.predictOrganizationTrajectory("un-001");
 console.log(`Current effectiveness: ${prediction.currentEffectiveness}`);
 console.log(`Projected effectiveness: ${prediction.projectedEffectiveness}`);
-console.log(`Key risks: ${prediction.risks.join(', ')}`);
+console.log(`Key risks: ${prediction.risks.join(", ")}`);
 
 // Compare organizations
-const comparison = tracker.compareOrganizationEffectiveness(['un-001', 'nato-001', 'eu-001']);
+const comparison = tracker.compareOrganizationEffectiveness(["un-001", "nato-001", "eu-001"]);
 console.log(`Effectiveness ranking:`);
-comparison.effectivenessRanking.forEach(r => {
+comparison.effectivenessRanking.forEach((r) => {
   console.log(`  ${r.ranking}. ${r.organization}: ${r.score}`);
 });
 ```
@@ -106,7 +106,9 @@ comparison.effectivenessRanking.forEach(r => {
 ## Data Models
 
 ### MultilateralOrganization
+
 Complete organization profile including:
+
 - Basic info (name, type, founded, headquarters)
 - Membership (members, status, voting power)
 - Governance structure
@@ -117,14 +119,18 @@ Complete organization profile including:
 - Performance metrics
 
 ### VotingPattern
+
 Track voting behavior:
+
 - Voting alignment with other countries
 - Key positions on issues
 - Bloc voting patterns
 - Agreement rates
 
 ### PowerDynamics
+
 Analyze power structure:
+
 - Dominant actors
 - Coalitions and blocs
 - Balance of power assessment

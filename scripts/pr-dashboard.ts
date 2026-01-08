@@ -9,16 +9,16 @@
  * - Time period: past 6 months
  */
 
-import { execSync } from 'child_process';
-import * as fs from 'fs';
-import * as path from 'path';
+import { execSync } from "child_process";
+import * as fs from "fs";
+import * as path from "path";
 
 interface PRData {
   hash: string;
   title: string;
   date: string;
   author: string;
-  category: 'feature' | 'bug' | 'docs' | 'dependencies' | 'chore' | 'other';
+  category: "feature" | "bug" | "docs" | "dependencies" | "chore" | "other";
   prNumber?: string;
 }
 
@@ -40,40 +40,59 @@ interface DashboardData {
 /**
  * Categorize a PR based on its title/message
  */
-function categorizePR(title: string): PRData['category'] {
+function categorizePR(title: string): PRData["category"] {
   const lowerTitle = title.toLowerCase();
 
   // Check for dependency updates
-  if (lowerTitle.includes('chore(deps)') || lowerTitle.includes('bump') ||
-      lowerTitle.includes('update') && (lowerTitle.includes('dependencies') || lowerTitle.includes('package'))) {
-    return 'dependencies';
+  if (
+    lowerTitle.includes("chore(deps)") ||
+    lowerTitle.includes("bump") ||
+    (lowerTitle.includes("update") &&
+      (lowerTitle.includes("dependencies") || lowerTitle.includes("package")))
+  ) {
+    return "dependencies";
   }
 
   // Check for features
-  if (lowerTitle.startsWith('feat') || lowerTitle.includes('feature') ||
-      lowerTitle.includes('add ') || lowerTitle.includes('enhance')) {
-    return 'feature';
+  if (
+    lowerTitle.startsWith("feat") ||
+    lowerTitle.includes("feature") ||
+    lowerTitle.includes("add ") ||
+    lowerTitle.includes("enhance")
+  ) {
+    return "feature";
   }
 
   // Check for bugs/fixes
-  if (lowerTitle.startsWith('fix') || lowerTitle.includes('bug') ||
-      lowerTitle.includes('hotfix') || lowerTitle.includes('patch')) {
-    return 'bug';
+  if (
+    lowerTitle.startsWith("fix") ||
+    lowerTitle.includes("bug") ||
+    lowerTitle.includes("hotfix") ||
+    lowerTitle.includes("patch")
+  ) {
+    return "bug";
   }
 
   // Check for documentation
-  if (lowerTitle.startsWith('docs') || lowerTitle.includes('documentation') ||
-      lowerTitle.includes('readme')) {
-    return 'docs';
+  if (
+    lowerTitle.startsWith("docs") ||
+    lowerTitle.includes("documentation") ||
+    lowerTitle.includes("readme")
+  ) {
+    return "docs";
   }
 
   // Check for chore
-  if (lowerTitle.startsWith('chore') || lowerTitle.includes('refactor') ||
-      lowerTitle.includes('test') || lowerTitle.includes('ci')) {
-    return 'chore';
+  if (
+    lowerTitle.startsWith("chore") ||
+    lowerTitle.includes("refactor") ||
+    lowerTitle.includes("test") ||
+    lowerTitle.includes("ci")
+  ) {
+    return "chore";
   }
 
-  return 'other';
+  return "other";
 }
 
 /**
@@ -88,20 +107,20 @@ function extractPRNumber(title: string): string | undefined {
  * Parse git log data
  */
 function parseGitLog(logData: string): PRData[] {
-  const lines = logData.trim().split('\n');
+  const lines = logData.trim().split("\n");
   const prs: PRData[] = [];
 
   for (const line of lines) {
     if (!line) continue;
 
-    const [hash, title, date, author] = line.split('|');
+    const [hash, title, date, author] = line.split("|");
     if (!hash || !title) continue;
 
     const pr: PRData = {
       hash: hash.trim(),
       title: title.trim(),
-      date: date?.trim() || '',
-      author: author?.trim() || 'Unknown',
+      date: date?.trim() || "",
+      author: author?.trim() || "Unknown",
       category: categorizePR(title),
       prNumber: extractPRNumber(title),
     };
@@ -136,7 +155,7 @@ function analyzePRs(prs: PRData[]): DashboardData {
   }
 
   // Get date range
-  const dates = prs.map(pr => new Date(pr.date)).filter(d => !isNaN(d.getTime()));
+  const dates = prs.map((pr) => new Date(pr.date)).filter((d) => !isNaN(d.getTime()));
   const sortedDates = dates.sort((a, b) => a.getTime() - b.getTime());
 
   // Get top contributors
@@ -149,8 +168,8 @@ function analyzePRs(prs: PRData[]): DashboardData {
     totalPRs: prs.length,
     categories,
     timeRange: {
-      start: sortedDates[0]?.toISOString().split('T')[0] || 'N/A',
-      end: sortedDates[sortedDates.length - 1]?.toISOString().split('T')[0] || 'N/A',
+      start: sortedDates[0]?.toISOString().split("T")[0] || "N/A",
+      end: sortedDates[sortedDates.length - 1]?.toISOString().split("T")[0] || "N/A",
     },
     topContributors,
   };
@@ -162,18 +181,18 @@ function analyzePRs(prs: PRData[]): DashboardData {
 function generateBarChart(value: number, max: number, width: number = 40): string {
   const filled = Math.round((value / max) * width);
   const empty = width - filled;
-  return '█'.repeat(filled) + '░'.repeat(empty);
+  return "█".repeat(filled) + "░".repeat(empty);
 }
 
 /**
  * Render dashboard to console
  */
 function renderDashboard(data: DashboardData): void {
-  const maxCount = Math.max(...Object.values(data.categories).map(c => c.count));
+  const maxCount = Math.max(...Object.values(data.categories).map((c) => c.count));
 
-  console.log('\n' + '='.repeat(80));
-  console.log('  PR DASHBOARD - Past 6 Months Summary');
-  console.log('='.repeat(80));
+  console.log("\n" + "=".repeat(80));
+  console.log("  PR DASHBOARD - Past 6 Months Summary");
+  console.log("=".repeat(80));
   console.log();
 
   console.log(`📊 Overview:`);
@@ -181,48 +200,52 @@ function renderDashboard(data: DashboardData): void {
   console.log(`   Date Range: ${data.timeRange.start} to ${data.timeRange.end}`);
   console.log();
 
-  console.log('📈 PRs by Category:');
+  console.log("📈 PRs by Category:");
   console.log();
 
   const categoryEmojis: Record<string, string> = {
-    feature: '✨',
-    bug: '🐛',
-    docs: '📚',
-    dependencies: '📦',
-    chore: '🔧',
-    other: '📝',
+    feature: "✨",
+    bug: "🐛",
+    docs: "📚",
+    dependencies: "📦",
+    chore: "🔧",
+    other: "📝",
   };
 
-  const categoryOrder = ['feature', 'bug', 'docs', 'dependencies', 'chore', 'other'];
+  const categoryOrder = ["feature", "bug", "docs", "dependencies", "chore", "other"];
 
   for (const category of categoryOrder) {
     const stats = data.categories[category];
-    const emoji = categoryEmojis[category] || '•';
+    const emoji = categoryEmojis[category] || "•";
     const percentage = ((stats.count / data.totalPRs) * 100).toFixed(1);
     const bar = generateBarChart(stats.count, maxCount, 40);
 
-    console.log(`  ${emoji} ${category.padEnd(15)} ${stats.count.toString().padStart(4)} (${percentage.padStart(5)}%)  ${bar}`);
+    console.log(
+      `  ${emoji} ${category.padEnd(15)} ${stats.count.toString().padStart(4)} (${percentage.padStart(5)}%)  ${bar}`
+    );
   }
 
   console.log();
-  console.log('👥 Top Contributors:');
+  console.log("👥 Top Contributors:");
   console.log();
 
   data.topContributors.slice(0, 5).forEach((contributor, index) => {
     const percentage = ((contributor.count / data.totalPRs) * 100).toFixed(1);
     const bar = generateBarChart(contributor.count, data.topContributors[0].count, 30);
-    console.log(`  ${(index + 1).toString().padStart(2)}. ${contributor.author.padEnd(30)} ${contributor.count.toString().padStart(4)} (${percentage.padStart(5)}%)  ${bar}`);
+    console.log(
+      `  ${(index + 1).toString().padStart(2)}. ${contributor.author.padEnd(30)} ${contributor.count.toString().padStart(4)} (${percentage.padStart(5)}%)  ${bar}`
+    );
   });
 
   console.log();
-  console.log('📋 Recent PRs by Category:');
+  console.log("📋 Recent PRs by Category:");
   console.log();
 
   for (const category of categoryOrder) {
     const stats = data.categories[category];
     if (stats.count === 0) continue;
 
-    const emoji = categoryEmojis[category] || '•';
+    const emoji = categoryEmojis[category] || "•";
     console.log(`  ${emoji} ${category.toUpperCase()} (${stats.count} total):`);
 
     // Show up to 5 most recent PRs
@@ -231,15 +254,15 @@ function renderDashboard(data: DashboardData): void {
       .slice(0, 5);
 
     for (const pr of recentPRs) {
-      const dateStr = new Date(pr.date).toISOString().split('T')[0];
-      const prNum = pr.prNumber ? `#${pr.prNumber}` : '';
-      const titlePreview = pr.title.substring(0, 80) + (pr.title.length > 80 ? '...' : '');
+      const dateStr = new Date(pr.date).toISOString().split("T")[0];
+      const prNum = pr.prNumber ? `#${pr.prNumber}` : "";
+      const titlePreview = pr.title.substring(0, 80) + (pr.title.length > 80 ? "..." : "");
       console.log(`     ${prNum.padEnd(8)} ${dateStr}  ${titlePreview}`);
     }
     console.log();
   }
 
-  console.log('='.repeat(80));
+  console.log("=".repeat(80));
   console.log();
 }
 
@@ -261,7 +284,7 @@ function saveDashboardData(data: DashboardData, outputPath: string): void {
         cat,
         {
           count: stats.count,
-          prs: stats.prs.map(pr => ({
+          prs: stats.prs.map((pr) => ({
             prNumber: pr.prNumber,
             title: pr.title,
             date: pr.date,
@@ -283,13 +306,13 @@ function saveDashboardData(data: DashboardData, outputPath: string): void {
  */
 function main(): void {
   try {
-    console.log('Analyzing PR data from git history...');
+    console.log("Analyzing PR data from git history...");
 
     // Fetch git log data (past 6 months)
     const gitLogCommand = `git log --since="6 months ago" --grep="Merge pull request\\|^feat\\|^fix\\|^docs\\|^chore" --pretty=format:"%H|%s|%ai|%an" --all`;
 
     const logData = execSync(gitLogCommand, {
-      encoding: 'utf-8',
+      encoding: "utf-8",
       maxBuffer: 10 * 1024 * 1024, // 10MB buffer
     });
 
@@ -301,11 +324,10 @@ function main(): void {
     renderDashboard(dashboardData);
 
     // Save to JSON
-    const outputPath = path.join(process.cwd(), 'pr-dashboard-report.json');
+    const outputPath = path.join(process.cwd(), "pr-dashboard-report.json");
     saveDashboardData(dashboardData, outputPath);
-
   } catch (error) {
-    console.error('Error generating PR dashboard:', error);
+    console.error("Error generating PR dashboard:", error);
     process.exit(1);
   }
 }

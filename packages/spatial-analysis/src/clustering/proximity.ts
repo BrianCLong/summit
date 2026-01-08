@@ -2,8 +2,8 @@
  * Proximity and distance-based analysis algorithms
  */
 
-import { GeoPoint } from '@intelgraph/geospatial';
-import { haversineDistance } from '@intelgraph/geospatial';
+import { GeoPoint } from "@intelgraph/geospatial";
+import { haversineDistance } from "@intelgraph/geospatial";
 
 export interface NearestNeighbor {
   point: GeoPoint;
@@ -37,9 +37,7 @@ export function kNearestNeighbors(
   neighbors.sort((a, b) => a.distance - b.distance);
 
   // Return top k (excluding the point itself if it's in the array)
-  return neighbors
-    .filter((n) => n.distance > 0)
-    .slice(0, k);
+  return neighbors.filter((n) => n.distance > 0).slice(0, k);
 }
 
 /**

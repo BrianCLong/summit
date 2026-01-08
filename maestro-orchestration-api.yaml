@@ -17,14 +17,14 @@ paths:
       tags:
         - Runs
       responses:
-        '200':
+        "200":
           description: A list of runs
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Run'
+                  $ref: "#/components/schemas/Run"
     post:
       operationId: createRun
       summary: Create a new Maestro run
@@ -35,14 +35,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateRunRequest'
+              $ref: "#/components/schemas/CreateRunRequest"
       responses:
-        '201':
+        "201":
           description: Run created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Run'
+                $ref: "#/components/schemas/Run"
   /runs/{runId}:
     get:
       operationId: getRunById
@@ -57,13 +57,13 @@ paths:
             type: string
           description: ID of the run to retrieve
       responses:
-        '200':
+        "200":
           description: Run details
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Run'
-        '404':
+                $ref: "#/components/schemas/Run"
+        "404":
           description: Run not found
   /runs/deprecated-endpoint:
     get:
@@ -90,7 +90,7 @@ paths:
       x-migration-guide: "https://docs.internal/migrations/v1-to-v2"
       x-support-channel: "#api-migrations"
       responses:
-        '200':
+        "200":
           description: A list of runs (deprecated format)
           headers:
             Deprecation:
@@ -118,7 +118,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Run'
+                  $ref: "#/components/schemas/Run"
               examples:
                 deprecatedResponse:
                   summary: Example deprecated response
@@ -131,7 +131,7 @@ paths:
                       cost: 0.25
                       createdAt: "2025-01-15T10:30:00Z"
                       traceId: "abc123def456"
-        '410':
+        "410":
           description: Gone - Endpoint has been removed (after sunset date)
           content:
             application/json:
@@ -157,14 +157,14 @@ paths:
       tags:
         - Pipelines
       responses:
-        '200':
+        "200":
           description: A list of pipelines
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Pipeline'
+                  $ref: "#/components/schemas/Pipeline"
   /budgets/tenant:
     get:
       operationId: getTenantBudget
@@ -179,12 +179,12 @@ paths:
             type: string
           description: Tenant ID
       responses:
-        '200':
+        "200":
           description: Tenant budget information
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Budget'
+                $ref: "#/components/schemas/Budget"
   /alertcenter/events:
     get:
       operationId: listAlertEvents
@@ -192,14 +192,14 @@ paths:
       tags:
         - Alerts
       responses:
-        '200':
+        "200":
           description: A list of alert events
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AlertEvent'
+                  $ref: "#/components/schemas/AlertEvent"
   /handoff/fastlane:
     post:
       operationId: submitFastlaneHandoff
@@ -211,15 +211,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/FastlaneHandoffRequest'
+              $ref: "#/components/schemas/FastlaneHandoffRequest"
       responses:
-        '200':
+        "200":
           description: Handoff request accepted
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FastlaneHandoffResponse'
-        '429':
+                $ref: "#/components/schemas/FastlaneHandoffResponse"
+        "429":
           description: Rate limit exceeded or fastlane capacity full
 components:
   schemas:
@@ -301,7 +301,7 @@ components:
           format: float
           description: Current spend for the month in USD
         policy:
-          $ref: '#/components/schemas/BudgetPolicy'
+          $ref: "#/components/schemas/BudgetPolicy"
       required:
         - tenant
         - monthlyUsd
@@ -310,7 +310,7 @@ components:
       properties:
         type:
           type: string
-          enum: ['hard', 'soft']
+          enum: ["hard", "soft"]
           description: Type of budget enforcement
         limit:
           type: number
@@ -331,7 +331,7 @@ components:
           description: Unique request ID for tracking
         priority:
           type: string
-          enum: ['urgent', 'high', 'normal']
+          enum: ["urgent", "high", "normal"]
           description: Priority level for fastlane processing
         agentId:
           type: string

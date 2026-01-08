@@ -3,12 +3,8 @@
  * Manages schema versions, compatibility checks, and schema evolution
  */
 
-import {
-  SchemaVersion,
-  SchemaFormat,
-  SchemaVersionStatus,
-} from '../types/metadata.js';
-import { IMetadataStore } from '../stores/PostgresMetadataStore.js';
+import { SchemaVersion, SchemaFormat, SchemaVersionStatus } from "../types/metadata.js";
+import { IMetadataStore } from "../stores/PostgresMetadataStore.js";
 
 export interface SchemaCompatibilityResult {
   compatible: boolean;
@@ -17,7 +13,7 @@ export interface SchemaCompatibilityResult {
 }
 
 export class SchemaRegistryService {
-  constructor(private store: IMetadataStore) { }
+  constructor(private store: IMetadataStore) {}
 
   /**
    * Register a new schema version
@@ -43,11 +39,7 @@ export class SchemaRegistryService {
     let breakingChanges: string[] = [];
 
     if (options.checkCompatibility && latestVersion) {
-      const compatibility = this.checkCompatibility(
-        latestVersion.schema,
-        schema,
-        format
-      );
+      const compatibility = this.checkCompatibility(latestVersion.schema, schema, format);
       backwardCompatible = compatibility.compatible;
       breakingChanges = compatibility.breakingChanges;
     }
@@ -151,25 +143,25 @@ export class SchemaRegistryService {
     switch (format) {
       case SchemaFormat.JSON_SCHEMA:
         if (!schema.$schema) {
-          errors.push('Missing $schema property');
+          errors.push("Missing $schema property");
         }
         if (!schema.type && !schema.properties) {
-          errors.push('Schema must have type or properties');
+          errors.push("Schema must have type or properties");
         }
         break;
 
       case SchemaFormat.AVRO:
         if (!schema.type) {
-          errors.push('Avro schema must have type');
+          errors.push("Avro schema must have type");
         }
         if (!schema.name) {
-          errors.push('Avro schema must have name');
+          errors.push("Avro schema must have name");
         }
         break;
 
       case SchemaFormat.SQL_DDL:
         if (!schema.columns || !Array.isArray(schema.columns)) {
-          errors.push('SQL DDL schema must have columns array');
+          errors.push("SQL DDL schema must have columns array");
         }
         break;
 
@@ -189,10 +181,7 @@ export class SchemaRegistryService {
   /**
    * Check JSON Schema compatibility
    */
-  private checkJsonSchemaCompatibility(
-    oldSchema: any,
-    newSchema: any
-  ): SchemaCompatibilityResult {
+  private checkJsonSchemaCompatibility(oldSchema: any, newSchema: any): SchemaCompatibilityResult {
     const breakingChanges: string[] = [];
     const warnings: string[] = [];
 
@@ -245,10 +234,7 @@ export class SchemaRegistryService {
   /**
    * Check SQL DDL compatibility
    */
-  private checkSqlDdlCompatibility(
-    oldSchema: any,
-    newSchema: any
-  ): SchemaCompatibilityResult {
+  private checkSqlDdlCompatibility(oldSchema: any, newSchema: any): SchemaCompatibilityResult {
     const breakingChanges: string[] = [];
     const warnings: string[] = [];
 
@@ -295,10 +281,7 @@ export class SchemaRegistryService {
   /**
    * Generic field-level compatibility check
    */
-  private checkGenericCompatibility(
-    oldSchema: any,
-    newSchema: any
-  ): SchemaCompatibilityResult {
+  private checkGenericCompatibility(oldSchema: any, newSchema: any): SchemaCompatibilityResult {
     const breakingChanges: string[] = [];
     const warnings: string[] = [];
 
@@ -352,17 +335,17 @@ export class SchemaRegistryService {
     const modified: string[] = [];
 
     for (const change of compatibility.breakingChanges) {
-      if (change.startsWith('Added')) {
+      if (change.startsWith("Added")) {
         added.push(change);
-      } else if (change.startsWith('Removed')) {
+      } else if (change.startsWith("Removed")) {
         removed.push(change);
-      } else if (change.startsWith('Changed')) {
+      } else if (change.startsWith("Changed")) {
         modified.push(change);
       }
     }
 
     for (const warning of compatibility.warnings) {
-      if (warning.startsWith('Added')) {
+      if (warning.startsWith("Added")) {
         added.push(warning);
       }
     }

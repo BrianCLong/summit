@@ -16,6 +16,7 @@ This memo documents the risk assessment and ethical considerations for the "Prov
 ### Scope
 
 The following components are covered:
+
 - IntelGraph decision provenance schema and APIs
 - Maestro decision run orchestration
 - Disclosure pack generation
@@ -28,6 +29,7 @@ The following components are covered:
 ### 2.1 What This Value Slice Does
 
 The system enables users to:
+
 1. Create structured decisions with supporting claims and evidence
 2. Run AI-augmented analysis to generate recommendations
 3. Track full provenance of how decisions were made
@@ -49,38 +51,38 @@ The system enables users to:
 
 ### 3.1 Data Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Sensitive data in claims/evidence | High | High | Policy labels, clearance checks, redaction in disclosure packs |
-| PII exposure in exports | Medium | High | Automatic redaction for non-cleared users, audit logging |
-| Data staleness leading to wrong decisions | Medium | Medium | Evidence freshness tracking, expiry dates, warnings in UI |
-| Hash collision (theoretical) | Very Low | Medium | SHA-256 provides sufficient collision resistance |
+| Risk                                      | Likelihood | Impact | Mitigation                                                     |
+| ----------------------------------------- | ---------- | ------ | -------------------------------------------------------------- |
+| Sensitive data in claims/evidence         | High       | High   | Policy labels, clearance checks, redaction in disclosure packs |
+| PII exposure in exports                   | Medium     | High   | Automatic redaction for non-cleared users, audit logging       |
+| Data staleness leading to wrong decisions | Medium     | Medium | Evidence freshness tracking, expiry dates, warnings in UI      |
+| Hash collision (theoretical)              | Very Low   | Medium | SHA-256 provides sufficient collision resistance               |
 
 ### 3.2 Security Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Unauthorized access to decisions | Medium | High | RBAC/ABAC with OPA, tenant isolation |
-| Tampering with claims/evidence | Low | Critical | Content hashing, Merkle trees, provenance chain |
-| Token/credential exposure | Low | Critical | JWT validation, secret rotation, no default secrets in prod |
-| API abuse/DoS | Medium | Medium | Rate limiting, budget controls on Maestro runs |
+| Risk                             | Likelihood | Impact   | Mitigation                                                  |
+| -------------------------------- | ---------- | -------- | ----------------------------------------------------------- |
+| Unauthorized access to decisions | Medium     | High     | RBAC/ABAC with OPA, tenant isolation                        |
+| Tampering with claims/evidence   | Low        | Critical | Content hashing, Merkle trees, provenance chain             |
+| Token/credential exposure        | Low        | Critical | JWT validation, secret rotation, no default secrets in prod |
+| API abuse/DoS                    | Medium     | Medium   | Rate limiting, budget controls on Maestro runs              |
 
 ### 3.3 AI/ML Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Hallucination in recommendations | Medium | High | Confidence scoring, mandatory human approval for low confidence |
-| Bias in AI outputs | Medium | Medium | Diverse evidence requirements, human review, audit trail |
-| Over-reliance on AI recommendations | Medium | High | "AI-assisted" framing, human-in-the-loop approvals |
-| Model version drift | Low | Medium | Model version tracking in run metadata |
+| Risk                                | Likelihood | Impact | Mitigation                                                      |
+| ----------------------------------- | ---------- | ------ | --------------------------------------------------------------- |
+| Hallucination in recommendations    | Medium     | High   | Confidence scoring, mandatory human approval for low confidence |
+| Bias in AI outputs                  | Medium     | Medium | Diverse evidence requirements, human review, audit trail        |
+| Over-reliance on AI recommendations | Medium     | High   | "AI-assisted" framing, human-in-the-loop approvals              |
+| Model version drift                 | Low        | Medium | Model version tracking in run metadata                          |
 
 ### 3.4 Operational Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Audit trail gaps | Low | High | Automatic provenance triggers, audit middleware |
-| Disclosure pack tampering | Low | High | Merkle root verification, optional signatures |
-| Orphaned data (claims without evidence) | Medium | Low | Validation warnings, graph integrity checks |
+| Risk                                    | Likelihood | Impact | Mitigation                                      |
+| --------------------------------------- | ---------- | ------ | ----------------------------------------------- |
+| Audit trail gaps                        | Low        | High   | Automatic provenance triggers, audit middleware |
+| Disclosure pack tampering               | Low        | High   | Merkle root verification, optional signatures   |
+| Orphaned data (claims without evidence) | Medium     | Low    | Validation warnings, graph integrity checks     |
 
 ---
 
@@ -91,6 +93,7 @@ The system enables users to:
 **Principle:** Humans must remain in control of consequential decisions.
 
 **Implementation:**
+
 - All high-impact decisions require human approval
 - AI recommendations include explicit confidence scores
 - Approval chain tracks who made the final call
@@ -101,6 +104,7 @@ The system enables users to:
 **Principle:** Users must understand how recommendations were generated.
 
 **Implementation:**
+
 - Full provenance chain from evidence → claims → decision
 - Disclosure packs document all inputs and reasoning
 - AI rationale included in decision records
@@ -111,6 +115,7 @@ The system enables users to:
 **Principle:** Decisions should not perpetuate unfair bias.
 
 **Implementation:**
+
 - Multiple evidence sources required for high-confidence claims
 - Human reviewers can flag biased recommendations
 - Audit trail enables retrospective bias analysis
@@ -121,6 +126,7 @@ The system enables users to:
 **Principle:** Personal and sensitive data must be protected.
 
 **Implementation:**
+
 - Policy labels for sensitivity classification
 - Clearance-based access control
 - Automatic redaction in exports
@@ -131,6 +137,7 @@ The system enables users to:
 **Principle:** Clear responsibility for decisions and their outcomes.
 
 **Implementation:**
+
 - Immutable audit log of all actions
 - Decision maker explicitly recorded
 - Approval chain with timestamps
@@ -143,6 +150,7 @@ The system enables users to:
 ### 5.1 Two-Way Decisions (Reversible)
 
 These decisions can be undone with minimal cost:
+
 - Draft decisions (can be modified/deleted)
 - Pending approval decisions (can be rejected)
 - Resource allocation changes (can be reallocated)
@@ -152,12 +160,14 @@ These decisions can be undone with minimal cost:
 ### 5.2 One-Way Decisions (Irreversible or High-Cost)
 
 These decisions are difficult or impossible to reverse:
+
 - Vendor contract terminations
 - Personnel actions based on assessments
 - Public disclosures
 - Regulatory submissions
 
 **Recommendation:** Require additional scrutiny:
+
 - Multiple approvers
 - Mandatory waiting period
 - Explicit acknowledgment of irreversibility
@@ -197,23 +207,23 @@ Given the current MVP maturity level, the following compensating controls are in
 
 ### 7.1 SOC2 Trust Services Criteria (Relevant Subset)
 
-| Control | TSC | Status | Notes |
-|---------|-----|--------|-------|
-| Access Control | CC6.1 | Partial | RBAC implemented, need access reviews |
-| Change Management | CC8.1 | Partial | Git-based, need formal change board |
-| Risk Assessment | CC3.1 | In Progress | This document |
-| Monitoring | CC7.2 | Partial | Audit logs, need alerting |
-| Incident Response | CC7.3 | Gap | Need documented runbook |
-| Data Integrity | PI1.3 | Implemented | Hashing, provenance |
+| Control           | TSC   | Status      | Notes                                 |
+| ----------------- | ----- | ----------- | ------------------------------------- |
+| Access Control    | CC6.1 | Partial     | RBAC implemented, need access reviews |
+| Change Management | CC8.1 | Partial     | Git-based, need formal change board   |
+| Risk Assessment   | CC3.1 | In Progress | This document                         |
+| Monitoring        | CC7.2 | Partial     | Audit logs, need alerting             |
+| Incident Response | CC7.3 | Gap         | Need documented runbook               |
+| Data Integrity    | PI1.3 | Implemented | Hashing, provenance                   |
 
 ### 7.2 NIST AI RMF Alignment
 
-| Function | Category | Status |
-|----------|----------|--------|
-| Govern | Accountability | Partial - need formal RACI |
-| Map | Context | Implemented - use case documentation |
-| Measure | Performance | Gap - need metrics dashboard |
-| Manage | Risk Treatment | Partial - this document |
+| Function | Category       | Status                               |
+| -------- | -------------- | ------------------------------------ |
+| Govern   | Accountability | Partial - need formal RACI           |
+| Map      | Context        | Implemented - use case documentation |
+| Measure  | Performance    | Gap - need metrics dashboard         |
+| Manage   | Risk Treatment | Partial - this document              |
 
 ---
 
@@ -257,9 +267,9 @@ This Risk & Ethics Memo is accepted when:
 
 ## 10. Revision History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0.0 | 2025-11-28 | Engineering | Initial version |
+| Version | Date       | Author      | Changes         |
+| ------- | ---------- | ----------- | --------------- |
+| 1.0.0   | 2025-11-28 | Engineering | Initial version |
 
 ---
 

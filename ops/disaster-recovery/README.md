@@ -3,6 +3,7 @@
 This package delivers an end-to-end disaster recovery capability for PostgreSQL workloads, covering automated backups, point-in-time recovery (PITR), cross-region replication, failover automation, verification testing, and operational runbooks.
 
 ## Components
+
 - **Architecture**: See `architecture.md` for topology, RPO/RTO targets, security controls, and drills.
 - **Policies**: `config/backup-policy.yaml` codifies schedules, retention tiers, replication, and observability expectations.
 - **Automation**:
@@ -11,6 +12,7 @@ This package delivers an end-to-end disaster recovery capability for PostgreSQL 
 - **Runbooks**: `runbooks/recovery-runbook.md` defines PITR, cross-region failover, verification, and rollback steps.
 
 ## Usage
+
 1. Export environment variables for PostgreSQL and AWS (or compatible object storage) before running scripts. Example:
    ```bash
    export PGHOST=db-primary.internal \ \
@@ -26,10 +28,12 @@ This package delivers an end-to-end disaster recovery capability for PostgreSQL 
 4. Follow `runbooks/recovery-runbook.md` during incidents or drills to execute PITR and failover safely.
 
 ## Observability
+
 - Emit metrics to your telemetry stack (Prometheus/OpenTelemetry) using script output or sidecar exporters.
 - Alerts: backup/verification failure (critical), replica lag > 900s, replication disabled, RPO breach.
 
 ## Compliance & Safety
+
 - No secrets are stored on disk; scripts expect environment injection.
 - Backups use KMS encryption and checksum validation to guard integrity and confidentiality.
 - Lifecycle policies and versioning prevent accidental deletion; replication protects against regional loss.

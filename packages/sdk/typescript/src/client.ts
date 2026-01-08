@@ -8,8 +8,8 @@
  * @module @summit/sdk
  */
 
-import { GovernanceClient } from './governance.js';
-import { ComplianceClient } from './compliance.js';
+import { GovernanceClient } from "./governance.js";
+import { ComplianceClient } from "./compliance.js";
 import type {
   AuditLogEntry,
   AuditQueryParams,
@@ -24,7 +24,7 @@ import type {
   Tenant,
   TenantSettings,
   UserInfo,
-} from './types.js';
+} from "./types.js";
 
 /**
  * Default configuration values
@@ -99,17 +99,17 @@ export class SummitClient {
    */
   private getHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     };
 
     if (this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
+      headers["Authorization"] = `Bearer ${this.token}`;
     } else if (this.config.apiKey) {
-      headers['X-API-Key'] = this.config.apiKey;
+      headers["X-API-Key"] = this.config.apiKey;
     }
 
     if (this.config.tenantId) {
-      headers['X-Tenant-Id'] = this.config.tenantId;
+      headers["X-Tenant-Id"] = this.config.tenantId;
     }
 
     return headers;
@@ -150,16 +150,16 @@ export class SummitClient {
 
         if (response.status === 401) {
           this.config.onUnauthorized?.();
-          throw this.createError('Unauthorized', 'AUTH_REQUIRED', 401);
+          throw this.createError("Unauthorized", "AUTH_REQUIRED", 401);
         }
 
         if (!response.ok) {
           const errorBody = await response.json().catch(() => ({}));
           throw this.createError(
             errorBody.message || errorBody.error || `HTTP ${response.status}`,
-            errorBody.code || 'API_ERROR',
+            errorBody.code || "API_ERROR",
             response.status,
-            response.headers.get('X-Request-Id') || undefined,
+            response.headers.get("X-Request-Id") || undefined,
             errorBody.details
           );
         }
@@ -169,7 +169,7 @@ export class SummitClient {
         lastError = error as Error;
 
         // Don't retry on client errors (4xx)
-        if (error instanceof Error && 'statusCode' in error) {
+        if (error instanceof Error && "statusCode" in error) {
           const statusCode = (error as any).statusCode;
           if (statusCode >= 400 && statusCode < 500) {
             throw error;
@@ -205,23 +205,20 @@ export class SummitClient {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  private async get<T>(
-    path: string,
-    params?: Record<string, string>
-  ): Promise<DataEnvelope<T>> {
-    return this.request<T>('GET', path, undefined, params);
+  private async get<T>(path: string, params?: Record<string, string>): Promise<DataEnvelope<T>> {
+    return this.request<T>("GET", path, undefined, params);
   }
 
   private async post<T>(path: string, body: unknown): Promise<DataEnvelope<T>> {
-    return this.request<T>('POST', path, body);
+    return this.request<T>("POST", path, body);
   }
 
   private async put<T>(path: string, body: unknown): Promise<DataEnvelope<T>> {
-    return this.request<T>('PUT', path, body);
+    return this.request<T>("PUT", path, body);
   }
 
   private async delete<T>(path: string): Promise<DataEnvelope<T>> {
-    return this.request<T>('DELETE', path);
+    return this.request<T>("DELETE", path);
   }
 
   // ==========================================================================
@@ -236,7 +233,7 @@ export class SummitClient {
    * @returns Authentication response with token
    */
   async login(email: string, password: string): Promise<DataEnvelope<AuthResponse>> {
-    const response = await this.post<AuthResponse>('/auth/login', { email, password });
+    const response = await this.post<AuthResponse>("/auth/login", { email, password });
     this.token = response.data.token;
     return response;
   }
@@ -249,7 +246,7 @@ export class SummitClient {
    */
   async authenticateWithApiKey(apiKey: string): Promise<DataEnvelope<AuthResponse>> {
     this.config.apiKey = apiKey;
-    return this.post<AuthResponse>('/auth/api-key', { apiKey });
+    return this.post<AuthResponse>("/auth/api-key", { apiKey });
   }
 
   /**
@@ -259,7 +256,7 @@ export class SummitClient {
    * @returns New authentication response
    */
   async refreshToken(refreshToken: string): Promise<DataEnvelope<AuthResponse>> {
-    const response = await this.post<AuthResponse>('/auth/refresh', { refreshToken });
+    const response = await this.post<AuthResponse>("/auth/refresh", { refreshToken });
     this.token = response.data.token;
     return response;
   }
@@ -268,7 +265,7 @@ export class SummitClient {
    * Logout and invalidate token
    */
   async logout(): Promise<void> {
-    await this.post('/auth/logout', {});
+    await this.post("/auth/logout", {});
     this.token = undefined;
   }
 
@@ -278,7 +275,7 @@ export class SummitClient {
    * @returns Current user details
    */
   async getCurrentUser(): Promise<DataEnvelope<UserInfo>> {
-    return this.get<UserInfo>('/auth/me');
+    return this.get<UserInfo>("/auth/me");
   }
 
   // ==========================================================================
@@ -291,7 +288,7 @@ export class SummitClient {
    * @returns Tenant details
    */
   async getTenant(): Promise<DataEnvelope<Tenant>> {
-    return this.get<Tenant>('/tenants/current');
+    return this.get<Tenant>("/tenants/current");
   }
 
   /**
@@ -301,7 +298,7 @@ export class SummitClient {
    * @returns Updated tenant
    */
   async updateTenantSettings(settings: TenantSettings): Promise<DataEnvelope<Tenant>> {
-    return this.put<Tenant>('/tenants/current/settings', settings);
+    return this.put<Tenant>("/tenants/current/settings", settings);
   }
 
   /**
@@ -310,7 +307,7 @@ export class SummitClient {
    * @returns List of users
    */
   async listUsers(): Promise<DataEnvelope<UserInfo[]>> {
-    return this.get<UserInfo[]>('/users');
+    return this.get<UserInfo[]>("/users");
   }
 
   /**
@@ -333,7 +330,7 @@ export class SummitClient {
    * @returns List of integrations
    */
   async listIntegrations(): Promise<DataEnvelope<Integration[]>> {
-    return this.get<Integration[]>('/integrations');
+    return this.get<Integration[]>("/integrations");
   }
 
   /**
@@ -367,10 +364,10 @@ export class SummitClient {
   async executeIntegrationAction(
     request: IntegrationActionRequest
   ): Promise<DataEnvelope<IntegrationActionResult>> {
-    return this.post<IntegrationActionResult>(
-      `/integrations/${request.integrationId}/execute`,
-      { action: request.action, payload: request.payload }
-    );
+    return this.post<IntegrationActionResult>(`/integrations/${request.integrationId}/execute`, {
+      action: request.action,
+      payload: request.payload,
+    });
   }
 
   // ==========================================================================
@@ -383,7 +380,7 @@ export class SummitClient {
    * @returns List of plugins
    */
   async listPlugins(): Promise<DataEnvelope<Plugin[]>> {
-    return this.get<Plugin[]>('/plugins');
+    return this.get<Plugin[]>("/plugins");
   }
 
   /**
@@ -446,7 +443,7 @@ export class SummitClient {
     if (params?.outcome) queryParams.outcome = params.outcome;
     if (params?.limit) queryParams.limit = params.limit.toString();
     if (params?.offset) queryParams.offset = params.offset.toString();
-    return this.get<AuditLogEntry[]>('/audit/logs', queryParams);
+    return this.get<AuditLogEntry[]>("/audit/logs", queryParams);
   }
 
   /**
@@ -469,9 +466,9 @@ export class SummitClient {
    * @returns Health status
    */
   async health(): Promise<
-    DataEnvelope<{ status: 'healthy' | 'degraded' | 'unhealthy'; version: string }>
+    DataEnvelope<{ status: "healthy" | "degraded" | "unhealthy"; version: string }>
   > {
-    return this.get('/health');
+    return this.get("/health");
   }
 
   /**
@@ -480,11 +477,11 @@ export class SummitClient {
    * @returns Version details
    */
   async version(): Promise<DataEnvelope<{ version: string; apiVersion: string }>> {
-    return this.get('/version');
+    return this.get("/version");
   }
 }
 
 // Re-export types and sub-clients
-export * from './types.js';
-export { GovernanceClient } from './governance.js';
-export { ComplianceClient } from './compliance.js';
+export * from "./types.js";
+export { GovernanceClient } from "./governance.js";
+export { ComplianceClient } from "./compliance.js";

@@ -3,7 +3,7 @@ name: slo-watch
 permissions:
   contents: read
 on:
-  schedule: [{ cron: '*/5 * * * *' }]
+  schedule: [{ cron: "*/5 * * * *" }]
 jobs:
   probe:
     runs-on: ubuntu-latest
@@ -22,5 +22,5 @@ jobs:
         if: steps.probe.outputs.breach == 'true'
         uses: peter-evans/create-issue-from-file @docs/velocity-plan-v5.md
         with:
-          title: 'SLO breach: error/latency over threshold'
+          title: "SLO breach: error/latency over threshold"
           content-file: .github/ISSUE_TEMPLATE/slo-breach.md

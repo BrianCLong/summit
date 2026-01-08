@@ -14,14 +14,14 @@ Phase 1 aligns with the "Foundation" scope from the specification and targets:
 
 ## 2. Cross-Functional Teams
 
-| Team | Lead | Functional Areas | Key Deliverables |
-| --- | --- | --- | --- |
-| Ingestion & Edge | Priya Raman | API gateways, CI/CD agents, schema registry | Telemetry gateway, signed SDKs, schema validation pipelines |
-| Data Platform | Mateo Ortiz | Kafka, Flink, ClickHouse, OpenSearch, Prometheus | Normalization jobs, storage clusters, retention policies |
-| Build Intelligence | Holly Chen | Build graph, pipeline explorer, DORA metrics | Build DAG service, pipeline dashboards, flaky test detector |
-| Runtime Observability | Jamal King | Error tracking, tracing, metrics ingestion | Error service, trace correlator, metrics remote-write endpoint |
-| Insights & Alerting | Sofia Alvarez | Alert orchestrator, ML features, notifications | Alert routing, Slack/PagerDuty integrations, baseline ML features |
-| Security & Governance | Leah Patel | RBAC, audit logs, compliance | Tenant isolation controls, audit ledger, data residency configs |
+| Team                  | Lead          | Functional Areas                                 | Key Deliverables                                                  |
+| --------------------- | ------------- | ------------------------------------------------ | ----------------------------------------------------------------- |
+| Ingestion & Edge      | Priya Raman   | API gateways, CI/CD agents, schema registry      | Telemetry gateway, signed SDKs, schema validation pipelines       |
+| Data Platform         | Mateo Ortiz   | Kafka, Flink, ClickHouse, OpenSearch, Prometheus | Normalization jobs, storage clusters, retention policies          |
+| Build Intelligence    | Holly Chen    | Build graph, pipeline explorer, DORA metrics     | Build DAG service, pipeline dashboards, flaky test detector       |
+| Runtime Observability | Jamal King    | Error tracking, tracing, metrics ingestion       | Error service, trace correlator, metrics remote-write endpoint    |
+| Insights & Alerting   | Sofia Alvarez | Alert orchestrator, ML features, notifications   | Alert routing, Slack/PagerDuty integrations, baseline ML features |
+| Security & Governance | Leah Patel    | RBAC, audit logs, compliance                     | Tenant isolation controls, audit ledger, data residency configs   |
 
 ## 3. Milestone Breakdown
 
@@ -82,13 +82,13 @@ Phase 1 aligns with the "Foundation" scope from the specification and targets:
 
 ## 5. Risk Register & Mitigation
 
-| Risk | Impact | Mitigation |
-| --- | --- | --- |
+| Risk                                 | Impact                       | Mitigation                                                             |
+| ------------------------------------ | ---------------------------- | ---------------------------------------------------------------------- |
 | Kafka saturation under burst traffic | Data loss, increased latency | Auto-scaling MSK brokers, k6 stress tests, circuit breakers at gateway |
-| Schema drift from SDK updates | Ingestion failures | Schema registry with compatibility checks, SDK contract tests |
-| Build graph data quality gaps | Incorrect analytics | Automated reconciliation jobs, developer self-service validation tools |
-| Alert noise | Alert fatigue | Adaptive thresholds, alert analytics reviews, ML feedback loop |
-| Compliance audit delays | Launch slip | Early engagement with compliance team, evidence automation |
+| Schema drift from SDK updates        | Ingestion failures           | Schema registry with compatibility checks, SDK contract tests          |
+| Build graph data quality gaps        | Incorrect analytics          | Automated reconciliation jobs, developer self-service validation tools |
+| Alert noise                          | Alert fatigue                | Adaptive thresholds, alert analytics reviews, ML feedback loop         |
+| Compliance audit delays              | Launch slip                  | Early engagement with compliance team, evidence automation             |
 
 ## 6. Communication Plan
 

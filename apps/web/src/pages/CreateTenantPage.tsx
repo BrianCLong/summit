@@ -1,22 +1,22 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import React, { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/Alert';
-import { useNavigate } from 'react-router-dom';
+} from '@/components/ui/select'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/Alert'
+import { useNavigate } from 'react-router-dom'
 
 const createTenantSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -25,14 +25,14 @@ const createTenantSchema = z.object({
     .min(3, 'Slug must be at least 3 characters')
     .regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
   residency: z.enum(['US', 'EU']),
-});
+})
 
-type CreateTenantFormValues = z.infer<typeof createTenantSchema>;
+type CreateTenantFormValues = z.infer<typeof createTenantSchema>
 
 export const CreateTenantPage: React.FC = () => {
-  const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate()
+  const [error, setError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<CreateTenantFormValues>({
     resolver: zodResolver(createTenantSchema),
@@ -41,11 +41,11 @@ export const CreateTenantPage: React.FC = () => {
       slug: '',
       residency: 'US',
     },
-  });
+  })
 
   const onSubmit = async (data: CreateTenantFormValues) => {
-    setIsSubmitting(true);
-    setError(null);
+    setIsSubmitting(true)
+    setError(null)
 
     try {
       const response = await fetch('/api/tenants', {
@@ -54,25 +54,25 @@ export const CreateTenantPage: React.FC = () => {
           'Content-Type': 'application/json',
           // Assuming Auth token is handled by a global interceptor or cookie
           // If not, we might need to retrieve it from localStorage
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
         body: JSON.stringify(data),
-      });
+      })
 
-      const result = await response.json();
+      const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to create tenant');
+        throw new Error(result.error || 'Failed to create tenant')
       }
 
       // Success!
-      navigate(`/dashboard?tenantId=${result.data.id}`);
+      navigate(`/dashboard?tenantId=${result.data.id}`)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      setError(err instanceof Error ? err.message : 'An unknown error occurred')
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-slate-50 dark:bg-slate-900 p-4">
@@ -123,7 +123,7 @@ export const CreateTenantPage: React.FC = () => {
             <div className="space-y-2">
               <Label htmlFor="residency">Data Residency</Label>
               <Select
-                onValueChange={(value) =>
+                onValueChange={value =>
                   form.setValue('residency', value as 'US' | 'EU')
                 }
                 defaultValue="US"
@@ -153,7 +153,7 @@ export const CreateTenantPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
-};
+  )
+}
 
-export default CreateTenantPage;
+export default CreateTenantPage

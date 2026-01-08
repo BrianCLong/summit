@@ -8,13 +8,13 @@ The Research Track is designed for exploration, not as a direct pipeline to prod
 
 **Under no circumstances will research code, prototypes, or proofs-of-concept be directly deployed into or merged with production systems.**
 
-If a research *concept* is approved for graduation, it must be entirely re-implemented from scratch by the production engineering team. This new implementation must adhere to all production standards, including but not limited to:
+If a research _concept_ is approved for graduation, it must be entirely re-implemented from scratch by the production engineering team. This new implementation must adhere to all production standards, including but not limited to:
 
-*   Coding standards and style guides
-*   Comprehensive testing (unit, integration, end-to-end)
-*   Security reviews and threat modeling
-*   Compliance and governance checks
-*   Full integration with production CI/CD pipelines and observability stacks
+- Coding standards and style guides
+- Comprehensive testing (unit, integration, end-to-end)
+- Security reviews and threat modeling
+- Compliance and governance checks
+- Full integration with production CI/CD pipelines and observability stacks
 
 The original research artifact serves as a blueprint and a set of learnings, not as a codebase.
 
@@ -34,10 +34,10 @@ Before a formal proposal can even be submitted, the following conditions must be
 
 Once pre-requisites are met, the sponsoring production team and the research team must jointly submit a formal Graduation Proposal. This proposal must include:
 
-*   A detailed cost-benefit analysis.
-*   A thorough risk assessment, including potential impacts on security, stability, and operations.
-*   A high-level plan for the production-grade re-implementation.
-*   Evidence of strategic alignment.
+- A detailed cost-benefit analysis.
+- A thorough risk assessment, including potential impacts on security, stability, and operations.
+- A high-level plan for the production-grade re-implementation.
+- Evidence of strategic alignment.
 
 This proposal will be reviewed by:
 

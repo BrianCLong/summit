@@ -1,4 +1,4 @@
-import type { UndoRedoCommand } from './types.js';
+import type { UndoRedoCommand } from "./types.js";
 
 export class UndoRedoManager<TState> {
   private readonly history: UndoRedoCommand<TState>[] = [];
@@ -30,7 +30,7 @@ export class UndoRedoManager<TState> {
 
   undo(): TState {
     if (!this.canUndo) {
-      throw new Error('No actions to undo');
+      throw new Error("No actions to undo");
     }
     const command = this.history.pop()!;
     this.state = command.revert(this.state);
@@ -40,7 +40,7 @@ export class UndoRedoManager<TState> {
 
   redo(): TState {
     if (!this.canRedo) {
-      throw new Error('No actions to redo');
+      throw new Error("No actions to redo");
     }
     const command = this.undone.pop()!;
     this.state = command.apply(this.state);

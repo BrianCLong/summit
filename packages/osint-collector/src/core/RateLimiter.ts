@@ -2,7 +2,7 @@
  * Rate Limiter - Controls request rates for respectful crawling
  */
 
-import { RateLimiterMemory } from 'rate-limiter-flexible';
+import { RateLimiterMemory } from "rate-limiter-flexible";
 
 export class RateLimiter {
   private limiters: Map<string, RateLimiterMemory> = new Map();
@@ -10,15 +10,11 @@ export class RateLimiter {
   /**
    * Create a rate limiter for a specific source
    */
-  createLimiter(
-    source: string,
-    points: number,
-    duration: number
-  ): void {
+  createLimiter(source: string, points: number, duration: number): void {
     const limiter = new RateLimiterMemory({
       points, // Number of requests
       duration, // Per duration in seconds
-      blockDuration: 0 // Do not block, just delay
+      blockDuration: 0, // Do not block, just delay
     });
 
     this.limiters.set(source, limiter);
@@ -38,7 +34,7 @@ export class RateLimiter {
     } catch (rejRes: any) {
       // Wait for the required time
       const delay = rejRes.msBeforeNext || 1000;
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
       // Retry
       await limiter.consume(source, points);
     }
@@ -63,7 +59,7 @@ export class RateLimiter {
 
     return {
       remainingPoints: res.remainingPoints,
-      consumedPoints: res.consumedPoints
+      consumedPoints: res.consumedPoints,
     };
   }
 

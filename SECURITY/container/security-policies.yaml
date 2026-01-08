@@ -17,31 +17,31 @@ spec:
   requiredDropCapabilities:
     - ALL
   volumes:
-    - 'configMap'
-    - 'emptyDir'
-    - 'projected'
-    - 'secret'
-    - 'downwardAPI'
-    - 'persistentVolumeClaim'
+    - "configMap"
+    - "emptyDir"
+    - "projected"
+    - "secret"
+    - "downwardAPI"
+    - "persistentVolumeClaim"
   hostNetwork: false
   hostIPC: false
   hostPID: false
   runAsUser:
-    rule: 'MustRunAsNonRoot'
+    rule: "MustRunAsNonRoot"
   runAsGroup:
-    rule: 'MustRunAs'
+    rule: "MustRunAs"
     ranges:
       - min: 1
         max: 65535
   seLinux:
-    rule: 'RunAsAny'
+    rule: "RunAsAny"
   supplementalGroups:
-    rule: 'MustRunAs'
+    rule: "MustRunAs"
     ranges:
       - min: 1
         max: 65535
   fsGroup:
-    rule: 'RunAsAny'
+    rule: "RunAsAny"
   readOnlyRootFilesystem: true
 
 ---
@@ -176,13 +176,13 @@ metadata:
   namespace: intelgraph
   name: intelgraph-role
 rules:
-  - apiGroups: ['']
-    resources: ['configmaps', 'secrets']
-    verbs: ['get', 'list']
-  - apiGroups: ['']
-    resources: ['pods']
-    verbs: ['get', 'list']
-    resourceNames: ['intelgraph-*']
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+    resourceNames: ["intelgraph-*"]
 
 ---
 # Role Binding
@@ -298,9 +298,9 @@ metadata:
 spec:
   match:
     kinds:
-      - apiGroups: ['apps']
-        kinds: ['Deployment']
-    namespaces: ['intelgraph']
+      - apiGroups: ["apps"]
+        kinds: ["Deployment"]
+    namespaces: ["intelgraph"]
   parameters:
     requiredSecurityContext:
       runAsNonRoot: true
@@ -386,15 +386,15 @@ metadata:
   namespace: intelgraph
 spec:
   hard:
-    requests.cpu: '4'
+    requests.cpu: "4"
     requests.memory: 8Gi
-    limits.cpu: '8'
+    limits.cpu: "8"
     limits.memory: 16Gi
-    pods: '20'
-    persistentvolumeclaims: '10'
-    services: '10'
-    secrets: '20'
-    configmaps: '20'
+    pods: "20"
+    persistentvolumeclaims: "10"
+    services: "10"
+    secrets: "20"
+    configmaps: "20"
 
 ---
 # Limit Range for default resource limits
@@ -413,7 +413,7 @@ spec:
         memory: 128Mi
       type: Container
     - max:
-        cpu: '2'
+        cpu: "2"
         memory: 2Gi
       min:
         cpu: 10m
@@ -430,9 +430,9 @@ metadata:
 type: Opaque
 data:
   # Base64 encoded security configurations
-  api-key: '' # Replace with actual base64 encoded API key
-  jwt-secret: '' # Replace with actual base64 encoded JWT secret
-  encryption-key: '' # Replace with actual base64 encoded encryption key
+  api-key: "" # Replace with actual base64 encoded API key
+  jwt-secret: "" # Replace with actual base64 encoded JWT secret
+  encryption-key: "" # Replace with actual base64 encoded encryption key
 
 ---
 # ConfigMap for security monitoring configuration

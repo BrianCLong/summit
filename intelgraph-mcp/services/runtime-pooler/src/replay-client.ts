@@ -1,38 +1,38 @@
-import { createHash } from 'node:crypto';
+import { createHash } from "node:crypto";
 
-const BASE_URL = process.env.REPLAY_ENGINE_URL ?? 'http://localhost:8081';
+const BASE_URL = process.env.REPLAY_ENGINE_URL ?? "http://localhost:8081";
 const BATCH_SIZE = Number(process.env.REPLAY_BATCH_SIZE ?? 100);
 const BATCH_INTERVAL_MS = Number(process.env.REPLAY_BATCH_INTERVAL_MS ?? 1000);
 
-type PendingEvent = { dir: 'in' | 'out'; channel: string; payload: unknown };
+type PendingEvent = { dir: "in" | "out"; channel: string; payload: unknown };
 type PendingBatch = { events: PendingEvent[]; timer?: NodeJS.Timeout };
 
 const batches = new Map<string, PendingBatch>();
 
 export async function createRecording(
   sessionId: string,
-  toolClass: string,
+  toolClass: string
 ): Promise<string | undefined> {
   try {
     const res = await fetch(`${BASE_URL}/v1/recordings`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ sessionId, seed: '0', meta: { toolClass } }),
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ sessionId, seed: "0", meta: { toolClass } }),
     });
     if (!res.ok) throw new Error(`replay create failed: ${res.status}`);
     const json = (await res.json()) as { id: string };
     return json.id;
   } catch (err) {
-    console.warn('replay createRecording failed', err);
+    console.warn("replay createRecording failed", err);
     return undefined;
   }
 }
 
 export function recordEvent(
   recordingId: string | undefined,
-  dir: 'in' | 'out',
+  dir: "in" | "out",
   channel: string,
-  payload: unknown,
+  payload: unknown
 ) {
   if (!recordingId) return;
   let batch = batches.get(recordingId);
@@ -62,23 +62,23 @@ async function flush(recordingId: string) {
   }
   const events = batch.events.splice(0, batch.events.length);
   const payload = JSON.stringify({ events });
-  const signature = createHash('sha256').update(payload).digest('hex');
+  const signature = createHash("sha256").update(payload).digest("hex");
   try {
     const res = await fetch(`${BASE_URL}/v1/recordings/${recordingId}/events`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'content-type': 'application/json',
-        'x-ig-signature': `sha256=${signature}`,
+        "content-type": "application/json",
+        "x-ig-signature": `sha256=${signature}`,
       },
       body: payload,
     });
     if (!res.ok) {
-      console.warn('replay recordEvent failed', res.status);
+      console.warn("replay recordEvent failed", res.status);
       batch.events.unshift(...events);
       schedule(recordingId, batch);
     }
   } catch (err) {
-    console.warn('replay recordEvent error', err);
+    console.warn("replay recordEvent error", err);
     batch.events.unshift(...events);
     schedule(recordingId, batch);
   }

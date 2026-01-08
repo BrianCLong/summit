@@ -5,33 +5,33 @@ on:
     types: [opened, synchronize, reopened]
     paths:
       # Auth & Security
-      - 'services/authz-gateway/**'
-      - 'policy/**'
-      - 'server/src/middleware/auth*/**'
-      - 'server/src/services/Auth*'
+      - "services/authz-gateway/**"
+      - "policy/**"
+      - "server/src/middleware/auth*/**"
+      - "server/src/services/Auth*"
       # Data & Graph
-      - 'server/src/graph/**'
-      - 'server/src/db/migrations/**'
-      - 'server/src/workers/OutboxNeo4jSync.ts'
+      - "server/src/graph/**"
+      - "server/src/db/migrations/**"
+      - "server/src/workers/OutboxNeo4jSync.ts"
       # API
-      - '**/*.graphql'
-      - 'gateway/supergraph/**'
-      - 'apps/*/schema.graphql'
+      - "**/*.graphql"
+      - "gateway/supergraph/**"
+      - "apps/*/schema.graphql"
       # Copilot & AI
-      - 'server/src/services/rag.ts'
-      - 'server/src/services/copilot/**'
-      - 'server/src/llm/**'
+      - "server/src/services/rag.ts"
+      - "server/src/services/copilot/**"
+      - "server/src/llm/**"
       # Provenance & Compliance
-      - 'packages/prov-ledger/**'
-      - 'prov-ledger-service/**'
-      - 'server/src/services/ProvenanceService.ts'
+      - "packages/prov-ledger/**"
+      - "prov-ledger-service/**"
+      - "server/src/services/ProvenanceService.ts"
       # Authority & Policy Compiler
-      - 'packages/authority-compiler/**'
-      - 'authority-definitions/**'
+      - "packages/authority-compiler/**"
+      - "authority-definitions/**"
       # Multi-tenancy
-      - 'server/src/middleware/tenant*'
-      - 'server/src/db/rls-policies.sql'
-      - 'server/src/services/CompartmentService.ts'
+      - "server/src/middleware/tenant*"
+      - "server/src/db/rls-policies.sql"
+      - "server/src/services/CompartmentService.ts"
 
 jobs:
   check-adr-update:
@@ -42,7 +42,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Need full history to check changed files
+          fetch-depth: 0 # Need full history to check changed files
 
       - name: Get changed files
         id: changed-files

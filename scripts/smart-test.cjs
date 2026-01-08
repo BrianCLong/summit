@@ -1,13 +1,13 @@
 #!/usr/bin/env node
-const { execSync } = require('child_process');
+const { execSync } = require("child_process");
 
 // Mappings of paths to test commands
 const TEST_MAP = [
-  { path: 'server', command: 'npm run test:server', name: 'Server Tests' },
-  { path: 'client', command: 'npm run test:client', name: 'Client Tests' },
-  { path: 'apps/web', command: 'npm run test:web', name: 'Web App Tests' },
+  { path: "server", command: "npm run test:server", name: "Server Tests" },
+  { path: "client", command: "npm run test:client", name: "Client Tests" },
+  { path: "apps/web", command: "npm run test:web", name: "Web App Tests" },
   // If packages change, run all tests (or we could be more granular)
-  { path: 'packages', command: 'npm run test', name: 'All Tests (Package Change)' },
+  { path: "packages", command: "npm run test", name: "All Tests (Package Change)" },
 ];
 
 function getChangedFiles() {
@@ -16,11 +16,13 @@ function getChangedFiles() {
     // If we are on main, or in a detached state, this might fail or show nothing.
     // We assume we are in a PR or feature branch.
     // Try 'origin/main'
-    const diffCommand = 'git diff --name-only origin/main...HEAD';
-    const output = execSync(diffCommand, { encoding: 'utf-8' });
-    return output.split('\n').filter(Boolean);
+    const diffCommand = "git diff --name-only origin/main...HEAD";
+    const output = execSync(diffCommand, { encoding: "utf-8" });
+    return output.split("\n").filter(Boolean);
   } catch (error) {
-    console.warn("⚠️ Could not diff against origin/main (maybe in detached HEAD or no upstream). Falling back to running all tests.");
+    console.warn(
+      "⚠️ Could not diff against origin/main (maybe in detached HEAD or no upstream). Falling back to running all tests."
+    );
     return null;
   }
 }
@@ -31,13 +33,13 @@ function determineTests(changedFiles) {
   const testsToRun = new Set();
   let runAll = false;
 
-  changedFiles.forEach(file => {
+  changedFiles.forEach((file) => {
     // Root level changes usually imply running everything
-    if (file === 'package.json' || file === 'pnpm-lock.yaml') {
+    if (file === "package.json" || file === "pnpm-lock.yaml") {
       runAll = true;
     }
 
-    TEST_MAP.forEach(test => {
+    TEST_MAP.forEach((test) => {
       if (file.startsWith(test.path)) {
         testsToRun.add(test);
       }
@@ -54,7 +56,7 @@ function runTests() {
   const changedFiles = getChangedFiles();
 
   if (changedFiles) {
-      console.log(`📝 Detected ${changedFiles.length} changed files.`);
+    console.log(`📝 Detected ${changedFiles.length} changed files.`);
   }
 
   const tests = determineTests(changedFiles);
@@ -62,18 +64,18 @@ function runTests() {
   if (!tests) {
     console.log("⚠️ Global changes detected or unable to determine scope. Running ALL tests.");
     try {
-      execSync('npm run test', { stdio: 'inherit' });
+      execSync("npm run test", { stdio: "inherit" });
     } catch (e) {
       process.exit(1);
     }
   } else if (tests.length === 0) {
     console.log("✅ No relevant code changes detected for defined test scopes. Skipping tests.");
   } else {
-    console.log(`🎯 Running targeted tests: ${tests.map(t => t.name).join(', ')}`);
+    console.log(`🎯 Running targeted tests: ${tests.map((t) => t.name).join(", ")}`);
     for (const test of tests) {
       console.log(`\n▶️ Executing: ${test.name}`);
       try {
-        execSync(test.command, { stdio: 'inherit' });
+        execSync(test.command, { stdio: "inherit" });
       } catch (e) {
         console.error(`❌ ${test.name} failed!`);
         process.exit(1);

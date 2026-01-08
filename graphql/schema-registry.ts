@@ -32,11 +32,11 @@
  * ```
  */
 
-import { parse, printSchema, buildSchema, GraphQLSchema, GraphQLError } from 'graphql';
-import { diff, Change, CriticalityLevel } from '@graphql-inspector/core';
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import * as crypto from 'crypto';
+import { parse, printSchema, buildSchema, GraphQLSchema, GraphQLError } from "graphql";
+import { diff, Change, CriticalityLevel } from "@graphql-inspector/core";
+import * as fs from "fs/promises";
+import * as path from "path";
+import * as crypto from "crypto";
 
 /**
  * Represents a versioned schema in the registry
@@ -65,7 +65,7 @@ export interface SchemaVersion {
  */
 export interface SchemaChange {
   /** Classification of change impact */
-  type: 'BREAKING' | 'DANGEROUS' | 'NON_BREAKING';
+  type: "BREAKING" | "DANGEROUS" | "NON_BREAKING";
   /** Human-readable description of the change */
   message: string;
   /** GraphQL path where change occurred (e.g., "Query.user") */
@@ -114,7 +114,7 @@ export class SchemaRegistryError extends Error {
     public readonly details?: Record<string, any>
   ) {
     super(message);
-    this.name = 'SchemaRegistryError';
+    this.name = "SchemaRegistryError";
     Object.setPrototypeOf(this, SchemaRegistryError.prototype);
   }
 }
@@ -134,19 +134,19 @@ export interface RegistryLogger {
  */
 class ConsoleLogger implements RegistryLogger {
   debug(message: string, context?: Record<string, any>): void {
-    console.debug('[SchemaRegistry:DEBUG]', message, context || '');
+    console.debug("[SchemaRegistry:DEBUG]", message, context || "");
   }
 
   info(message: string, context?: Record<string, any>): void {
-    console.info('[SchemaRegistry:INFO]', message, context || '');
+    console.info("[SchemaRegistry:INFO]", message, context || "");
   }
 
   warn(message: string, context?: Record<string, any>): void {
-    console.warn('[SchemaRegistry:WARN]', message, context || '');
+    console.warn("[SchemaRegistry:WARN]", message, context || "");
   }
 
   error(message: string, error?: Error, context?: Record<string, any>): void {
-    console.error('[SchemaRegistry:ERROR]', message, error, context || '');
+    console.error("[SchemaRegistry:ERROR]", message, error, context || "");
   }
 }
 
@@ -169,7 +169,7 @@ export class SchemaRegistry {
    * @param registryPath - Directory path for storing schema versions
    * @param logger - Optional custom logger implementation
    */
-  constructor(registryPath: string = './graphql/versions', logger?: RegistryLogger) {
+  constructor(registryPath: string = "./graphql/versions", logger?: RegistryLogger) {
     this.registryPath = path.resolve(registryPath);
     this.logger = logger || new ConsoleLogger();
   }
@@ -193,12 +193,12 @@ export class SchemaRegistry {
    */
   async initialize(): Promise<void> {
     if (this.initialized) {
-      this.logger.debug('Registry already initialized, skipping');
+      this.logger.debug("Registry already initialized, skipping");
       return;
     }
 
     try {
-      this.logger.info('Initializing schema registry', { path: this.registryPath });
+      this.logger.info("Initializing schema registry", { path: this.registryPath });
 
       // Create directory with recursive option (won't fail if exists)
       await fs.mkdir(this.registryPath, { recursive: true });
@@ -207,18 +207,18 @@ export class SchemaRegistry {
       await this.loadVersions();
 
       this.initialized = true;
-      this.logger.info('Schema registry initialized successfully', {
+      this.logger.info("Schema registry initialized successfully", {
         versionsLoaded: this.versions.size,
-        path: this.registryPath
+        path: this.registryPath,
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.error('Failed to initialize schema registry', error as Error, {
-        path: this.registryPath
+      this.logger.error("Failed to initialize schema registry", error as Error, {
+        path: this.registryPath,
       });
       throw new SchemaRegistryError(
         `Failed to initialize schema registry: ${errorMessage}`,
-        'INIT_ERROR',
+        "INIT_ERROR",
         { path: this.registryPath, originalError: errorMessage }
       );
     }
@@ -239,14 +239,14 @@ export class SchemaRegistry {
       try {
         await fs.access(this.registryPath);
       } catch {
-        this.logger.warn('Registry directory does not exist yet', {
-          path: this.registryPath
+        this.logger.warn("Registry directory does not exist yet", {
+          path: this.registryPath,
         });
         return;
       }
 
       const files = await fs.readdir(this.registryPath);
-      const jsonFiles = files.filter(file => file.endsWith('.json'));
+      const jsonFiles = files.filter((file) => file.endsWith(".json"));
 
       this.logger.debug(`Found ${jsonFiles.length} version files to load`);
 
@@ -256,14 +256,14 @@ export class SchemaRegistry {
       for (const file of jsonFiles) {
         try {
           const filepath = path.join(this.registryPath, file);
-          const content = await fs.readFile(filepath, 'utf-8');
+          const content = await fs.readFile(filepath, "utf-8");
 
           // Parse and validate JSON structure
           const version: SchemaVersion = JSON.parse(content);
 
           // Validate required fields
           if (!version.version || !version.schema || !version.hash) {
-            throw new Error('Missing required fields in version file');
+            throw new Error("Missing required fields in version file");
           }
 
           // Convert timestamp string back to Date object
@@ -271,7 +271,7 @@ export class SchemaRegistry {
 
           // Verify timestamp is valid
           if (isNaN(version.timestamp.getTime())) {
-            throw new Error('Invalid timestamp in version file');
+            throw new Error("Invalid timestamp in version file");
           }
 
           // Store in memory map
@@ -280,26 +280,26 @@ export class SchemaRegistry {
 
           this.logger.debug(`Loaded version ${version.version}`, {
             file,
-            changeCount: version.changes.length
+            changeCount: version.changes.length,
           });
         } catch (error) {
           errorCount++;
           this.logger.warn(`Failed to load version file: ${file}`, {
-            error: error instanceof Error ? error.message : String(error)
+            error: error instanceof Error ? error.message : String(error),
           });
           // Continue loading other versions despite errors
         }
       }
 
-      this.logger.info('Version loading complete', {
+      this.logger.info("Version loading complete", {
         loaded: loadedCount,
         errors: errorCount,
-        total: jsonFiles.length
+        total: jsonFiles.length,
       });
     } catch (error) {
       // If readdir fails, directory might not exist yet (first run)
-      this.logger.warn('Could not load existing versions', {
-        error: error instanceof Error ? error.message : String(error)
+      this.logger.warn("Could not load existing versions", {
+        error: error instanceof Error ? error.message : String(error),
       });
       // Don't throw - empty registry is valid for first run
     }
@@ -340,41 +340,36 @@ export class SchemaRegistry {
     // Ensure registry is initialized
     if (!this.initialized) {
       throw new SchemaRegistryError(
-        'Registry must be initialized before registering schemas',
-        'NOT_INITIALIZED'
+        "Registry must be initialized before registering schemas",
+        "NOT_INITIALIZED"
       );
     }
 
-    this.logger.info('Registering new schema version', { version, author });
+    this.logger.info("Registering new schema version", { version, author });
 
     try {
       // Normalize schema to string format
-      const schemaString = typeof schema === 'string' ? schema : printSchema(schema);
+      const schemaString = typeof schema === "string" ? schema : printSchema(schema);
 
       // Validate schema string is not empty
       if (!schemaString || schemaString.trim().length === 0) {
-        throw new SchemaRegistryError(
-          'Schema cannot be empty',
-          'INVALID_SCHEMA'
-        );
+        throw new SchemaRegistryError("Schema cannot be empty", "INVALID_SCHEMA");
       }
 
       // Validate version format (basic semantic versioning check)
       if (!this.isValidVersion(version)) {
         throw new SchemaRegistryError(
           `Invalid version format: ${version}. Expected semantic version (e.g., v1.2.3)`,
-          'INVALID_VERSION',
+          "INVALID_VERSION",
           { providedVersion: version }
         );
       }
 
       // Check if version already exists
       if (this.versions.has(version)) {
-        throw new SchemaRegistryError(
-          `Version ${version} already exists`,
-          'VERSION_EXISTS',
-          { version }
-        );
+        throw new SchemaRegistryError(`Version ${version} already exists`, "VERSION_EXISTS", {
+          version,
+        });
       }
 
       // Generate SHA-256 hash for integrity verification
@@ -386,7 +381,7 @@ export class SchemaRegistry {
         if (existingVersion) {
           throw new SchemaRegistryError(
             `Schema already registered as version ${existingVersion.version}`,
-            'DUPLICATE_SCHEMA',
+            "DUPLICATE_SCHEMA",
             { existingVersion: existingVersion.version, hash }
           );
         }
@@ -396,11 +391,9 @@ export class SchemaRegistry {
       if (options.customValidator) {
         const customErrors = await options.customValidator(schemaString);
         if (customErrors.length > 0) {
-          throw new SchemaRegistryError(
-            'Custom validation failed',
-            'CUSTOM_VALIDATION_FAILED',
-            { errors: customErrors }
-          );
+          throw new SchemaRegistryError("Custom validation failed", "CUSTOM_VALIDATION_FAILED", {
+            errors: customErrors,
+          });
         }
       }
 
@@ -408,16 +401,16 @@ export class SchemaRegistry {
       const changes = await this.compareWithLatest(schemaString);
 
       // Check for breaking changes
-      const breakingChanges = changes.filter(c => c.type === 'BREAKING');
+      const breakingChanges = changes.filter((c) => c.type === "BREAKING");
       if (breakingChanges.length > 0 && !options.allowBreaking) {
         throw new SchemaRegistryError(
           `Schema contains ${breakingChanges.length} breaking change(s). Use allowBreaking option to override.`,
-          'BREAKING_CHANGES_DETECTED',
+          "BREAKING_CHANGES_DETECTED",
           {
-            breakingChanges: breakingChanges.map(c => ({
+            breakingChanges: breakingChanges.map((c) => ({
               message: c.message,
-              path: c.path
-            }))
+              path: c.path,
+            })),
           }
         );
       }
@@ -431,7 +424,7 @@ export class SchemaRegistry {
         changes,
         author,
         description,
-        tags: options.tags
+        tags: options.tags,
       };
 
       // Persist to disk (atomic operation)
@@ -440,11 +433,11 @@ export class SchemaRegistry {
       // Update in-memory cache
       this.versions.set(version, schemaVersion);
 
-      this.logger.info('Schema registered successfully', {
+      this.logger.info("Schema registered successfully", {
         version,
         hash,
         changeCount: changes.length,
-        breakingCount: breakingChanges.length
+        breakingCount: breakingChanges.length,
       });
 
       return schemaVersion;
@@ -456,10 +449,10 @@ export class SchemaRegistry {
 
       // Wrap other errors
       const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.error('Failed to register schema', error as Error, { version });
+      this.logger.error("Failed to register schema", error as Error, { version });
       throw new SchemaRegistryError(
         `Failed to register schema: ${errorMessage}`,
-        'REGISTRATION_FAILED',
+        "REGISTRATION_FAILED",
         { version, originalError: errorMessage }
       );
     }
@@ -510,27 +503,20 @@ export class SchemaRegistry {
    * @returns Array of changes between versions
    * @throws {SchemaRegistryError} If either version is not found
    */
-  async compareVersions(
-    fromVersion: string,
-    toVersion: string
-  ): Promise<SchemaChange[]> {
+  async compareVersions(fromVersion: string, toVersion: string): Promise<SchemaChange[]> {
     const from = this.versions.get(fromVersion);
     const to = this.versions.get(toVersion);
 
     if (!from) {
-      throw new SchemaRegistryError(
-        `Version ${fromVersion} not found`,
-        'VERSION_NOT_FOUND',
-        { version: fromVersion }
-      );
+      throw new SchemaRegistryError(`Version ${fromVersion} not found`, "VERSION_NOT_FOUND", {
+        version: fromVersion,
+      });
     }
 
     if (!to) {
-      throw new SchemaRegistryError(
-        `Version ${toVersion} not found`,
-        'VERSION_NOT_FOUND',
-        { version: toVersion }
-      );
+      throw new SchemaRegistryError(`Version ${toVersion} not found`, "VERSION_NOT_FOUND", {
+        version: toVersion,
+      });
     }
 
     return this.diffSchemas(from.schema, to.schema);
@@ -547,12 +533,12 @@ export class SchemaRegistry {
     const latest = this.getLatestVersion();
     if (!latest) {
       // No previous version exists - return empty changes
-      this.logger.debug('No previous version to compare with');
+      this.logger.debug("No previous version to compare with");
       return [];
     }
 
-    this.logger.debug('Comparing with latest version', {
-      latestVersion: latest.version
+    this.logger.debug("Comparing with latest version", {
+      latestVersion: latest.version,
     });
 
     return this.diffSchemas(latest.schema, schema);
@@ -569,10 +555,7 @@ export class SchemaRegistry {
    * @param newSchema - New schema string
    * @returns Array of detected changes
    */
-  private async diffSchemas(
-    oldSchema: string,
-    newSchema: string
-  ): Promise<SchemaChange[]> {
+  private async diffSchemas(oldSchema: string, newSchema: string): Promise<SchemaChange[]> {
     try {
       // Parse both schemas into AST
       const oldAST = parse(oldSchema);
@@ -581,8 +564,8 @@ export class SchemaRegistry {
       // Use graphql-inspector to detect changes
       const changes = await diff(oldAST, newAST);
 
-      this.logger.debug('Schema diff complete', {
-        totalChanges: changes.length
+      this.logger.debug("Schema diff complete", {
+        totalChanges: changes.length,
       });
 
       // Map changes to our internal format
@@ -593,11 +576,11 @@ export class SchemaRegistry {
         criticality: change.criticality?.level || CriticalityLevel.NonBreaking,
         metadata: {
           // Include additional metadata from the change
-          ...(change as any)
-        }
+          ...(change as any),
+        },
       }));
     } catch (error) {
-      this.logger.error('Error diffing schemas', error as Error);
+      this.logger.error("Error diffing schemas", error as Error);
       // Return empty array rather than throwing - diff errors shouldn't break registration
       return [];
     }
@@ -610,14 +593,14 @@ export class SchemaRegistry {
    */
   private mapCriticalityToType(
     level?: CriticalityLevel
-  ): 'BREAKING' | 'DANGEROUS' | 'NON_BREAKING' {
+  ): "BREAKING" | "DANGEROUS" | "NON_BREAKING" {
     switch (level) {
       case CriticalityLevel.Breaking:
-        return 'BREAKING';
+        return "BREAKING";
       case CriticalityLevel.Dangerous:
-        return 'DANGEROUS';
+        return "DANGEROUS";
       default:
-        return 'NON_BREAKING';
+        return "NON_BREAKING";
     }
   }
 
@@ -632,33 +615,22 @@ export class SchemaRegistry {
    * @returns Markdown-formatted changelog
    * @throws {SchemaRegistryError} If specified versions don't exist
    */
-  async generateChangelog(
-    fromVersion?: string,
-    toVersion?: string
-  ): Promise<string> {
-    const from = fromVersion
-      ? this.versions.get(fromVersion)
-      : this.getOldestVersion();
-    const to = toVersion
-      ? this.versions.get(toVersion)
-      : this.getLatestVersion();
+  async generateChangelog(fromVersion?: string, toVersion?: string): Promise<string> {
+    const from = fromVersion ? this.versions.get(fromVersion) : this.getOldestVersion();
+    const to = toVersion ? this.versions.get(toVersion) : this.getLatestVersion();
 
     if (!from) {
       throw new SchemaRegistryError(
-        fromVersion
-          ? `Version ${fromVersion} not found`
-          : 'No versions in registry',
-        'VERSION_NOT_FOUND',
+        fromVersion ? `Version ${fromVersion} not found` : "No versions in registry",
+        "VERSION_NOT_FOUND",
         { version: fromVersion }
       );
     }
 
     if (!to) {
       throw new SchemaRegistryError(
-        toVersion
-          ? `Version ${toVersion} not found`
-          : 'No versions in registry',
-        'VERSION_NOT_FOUND',
+        toVersion ? `Version ${toVersion} not found` : "No versions in registry",
+        "VERSION_NOT_FOUND",
         { version: toVersion }
       );
     }
@@ -669,10 +641,7 @@ export class SchemaRegistry {
 
     // Get all versions between from and to (inclusive)
     const versions = this.getAllVersions()
-      .filter(v =>
-        v.timestamp >= from.timestamp &&
-        v.timestamp <= to.timestamp
-      )
+      .filter((v) => v.timestamp >= from.timestamp && v.timestamp <= to.timestamp)
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 
     for (const version of versions) {
@@ -684,19 +653,19 @@ export class SchemaRegistry {
       if (version.author) changelog += `**Author:** ${version.author}\n`;
       if (version.description) changelog += `**Description:** ${version.description}\n`;
       if (version.tags && version.tags.length > 0) {
-        changelog += `**Tags:** ${version.tags.join(', ')}\n`;
+        changelog += `**Tags:** ${version.tags.join(", ")}\n`;
       }
       changelog += `\n`;
 
       // Group changes by type
-      const breaking = version.changes.filter(c => c.type === 'BREAKING');
-      const dangerous = version.changes.filter(c => c.type === 'DANGEROUS');
-      const nonBreaking = version.changes.filter(c => c.type === 'NON_BREAKING');
+      const breaking = version.changes.filter((c) => c.type === "BREAKING");
+      const dangerous = version.changes.filter((c) => c.type === "DANGEROUS");
+      const nonBreaking = version.changes.filter((c) => c.type === "NON_BREAKING");
 
       if (breaking.length > 0) {
         changelog += `#### ⚠️  Breaking Changes\n\n`;
         for (const change of breaking) {
-          changelog += `- ${change.message}${change.path ? ` (${change.path})` : ''}\n`;
+          changelog += `- ${change.message}${change.path ? ` (${change.path})` : ""}\n`;
         }
         changelog += `\n`;
       }
@@ -704,7 +673,7 @@ export class SchemaRegistry {
       if (dangerous.length > 0) {
         changelog += `#### ⚡ Dangerous Changes\n\n`;
         for (const change of dangerous) {
-          changelog += `- ${change.message}${change.path ? ` (${change.path})` : ''}\n`;
+          changelog += `- ${change.message}${change.path ? ` (${change.path})` : ""}\n`;
         }
         changelog += `\n`;
       }
@@ -712,7 +681,7 @@ export class SchemaRegistry {
       if (nonBreaking.length > 0) {
         changelog += `#### ✨ Non-Breaking Changes\n\n`;
         for (const change of nonBreaking) {
-          changelog += `- ${change.message}${change.path ? ` (${change.path})` : ''}\n`;
+          changelog += `- ${change.message}${change.path ? ` (${change.path})` : ""}\n`;
         }
         changelog += `\n`;
       }
@@ -761,16 +730,16 @@ export class SchemaRegistry {
 
     try {
       // Write to temp files first (atomic pattern)
-      await fs.writeFile(jsonTempPath, JSON.stringify(version, null, 2), 'utf-8');
-      await fs.writeFile(schemaTempPath, version.schema, 'utf-8');
+      await fs.writeFile(jsonTempPath, JSON.stringify(version, null, 2), "utf-8");
+      await fs.writeFile(schemaTempPath, version.schema, "utf-8");
 
       // Atomic rename
       await fs.rename(jsonTempPath, jsonFilepath);
       await fs.rename(schemaTempPath, schemaFilepath);
 
-      this.logger.debug('Version saved to disk', {
+      this.logger.debug("Version saved to disk", {
         version: version.version,
-        path: this.registryPath
+        path: this.registryPath,
       });
     } catch (error) {
       // Clean up temp files if they exist
@@ -793,10 +762,7 @@ export class SchemaRegistry {
    * @returns Hexadecimal hash string
    */
   private hashSchema(schema: string): string {
-    return crypto
-      .createHash('sha256')
-      .update(schema, 'utf-8')
-      .digest('hex');
+    return crypto.createHash("sha256").update(schema, "utf-8").digest("hex");
   }
 
   /**
@@ -807,7 +773,7 @@ export class SchemaRegistry {
    * @returns Matching SchemaVersion or undefined
    */
   private findVersionByHash(hash: string): SchemaVersion | undefined {
-    return Array.from(this.versions.values()).find(v => v.hash === hash);
+    return Array.from(this.versions.values()).find((v) => v.hash === hash);
   }
 
   /**
@@ -831,7 +797,7 @@ export class SchemaRegistry {
    */
   async hasBreakingChanges(schema: string): Promise<boolean> {
     const changes = await this.compareWithLatest(schema);
-    return changes.some(c => c.type === 'BREAKING');
+    return changes.some((c) => c.type === "BREAKING");
   }
 
   /**
@@ -856,7 +822,7 @@ export class SchemaRegistry {
 
     // 1. Validate schema is not empty
     if (!schema || schema.trim().length === 0) {
-      errors.push('Schema cannot be empty');
+      errors.push("Schema cannot be empty");
       return { valid: false, errors, warnings };
     }
 
@@ -872,14 +838,12 @@ export class SchemaRegistry {
     // 3. Check for breaking changes (if we have a previous version)
     if (this.getLatestVersion()) {
       const changes = await this.compareWithLatest(schema);
-      breakingChanges = changes.filter(c => c.type === 'BREAKING');
+      breakingChanges = changes.filter((c) => c.type === "BREAKING");
 
       if (breakingChanges.length > 0) {
         if (!allowBreaking) {
-          errors.push(
-            `Schema contains ${breakingChanges.length} breaking change(s):`
-          );
-          breakingChanges.forEach(c => {
+          errors.push(`Schema contains ${breakingChanges.length} breaking change(s):`);
+          breakingChanges.forEach((c) => {
             errors.push(`  - ${c.message}`);
           });
         } else {
@@ -890,12 +854,10 @@ export class SchemaRegistry {
       }
 
       // Also warn about dangerous changes
-      const dangerousChanges = changes.filter(c => c.type === 'DANGEROUS');
+      const dangerousChanges = changes.filter((c) => c.type === "DANGEROUS");
       if (dangerousChanges.length > 0) {
-        warnings.push(
-          `Warning: Schema contains ${dangerousChanges.length} dangerous change(s):`
-        );
-        dangerousChanges.forEach(c => {
+        warnings.push(`Warning: Schema contains ${dangerousChanges.length} dangerous change(s):`);
+        dangerousChanges.forEach((c) => {
           warnings.push(`  - ${c.message}`);
         });
       }
@@ -907,7 +869,7 @@ export class SchemaRegistry {
       valid,
       errors,
       warnings,
-      breakingChanges
+      breakingChanges,
     };
   }
 
@@ -933,21 +895,19 @@ export class SchemaRegistry {
 
       await Promise.all([
         fs.unlink(jsonPath).catch(() => {}), // Ignore if file doesn't exist
-        fs.unlink(graphqlPath).catch(() => {})
+        fs.unlink(graphqlPath).catch(() => {}),
       ]);
 
       // Delete from memory
       this.versions.delete(version);
 
-      this.logger.info('Version deleted', { version });
+      this.logger.info("Version deleted", { version });
       return true;
     } catch (error) {
-      this.logger.error('Failed to delete version', error as Error, { version });
-      throw new SchemaRegistryError(
-        `Failed to delete version ${version}`,
-        'DELETE_FAILED',
-        { version }
-      );
+      this.logger.error("Failed to delete version", error as Error, { version });
+      throw new SchemaRegistryError(`Failed to delete version ${version}`, "DELETE_FAILED", {
+        version,
+      });
     }
   }
 
@@ -965,20 +925,17 @@ export class SchemaRegistry {
   } {
     const versions = this.getAllVersions();
     const totalBreakingChanges = versions.reduce(
-      (sum, v) => sum + v.changes.filter(c => c.type === 'BREAKING').length,
+      (sum, v) => sum + v.changes.filter((c) => c.type === "BREAKING").length,
       0
     );
-    const totalChanges = versions.reduce(
-      (sum, v) => sum + v.changes.length,
-      0
-    );
+    const totalChanges = versions.reduce((sum, v) => sum + v.changes.length, 0);
 
     return {
       totalVersions: versions.length,
       oldestVersion: this.getOldestVersion()?.version,
       latestVersion: this.getLatestVersion()?.version,
       totalBreakingChanges,
-      totalChanges
+      totalChanges,
     };
   }
 }

@@ -4,14 +4,14 @@
  * OpenTelemetry-based tracing for Summit platform
  */
 
-import { NodeSDK } from '@opentelemetry/sdk-node';
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { Resource } from '@opentelemetry/resources';
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
+import { Resource } from "@opentelemetry/resources";
 import {
   SemanticResourceAttributes,
   SemanticAttributes,
-} from '@opentelemetry/semantic-conventions';
+} from "@opentelemetry/semantic-conventions";
 import {
   trace,
   context,
@@ -22,28 +22,30 @@ import {
   Tracer,
   Context,
   SpanOptions,
-} from '@opentelemetry/api';
-import { W3CTraceContextPropagator } from '@opentelemetry/core';
-import { z } from 'zod';
+} from "@opentelemetry/api";
+import { W3CTraceContextPropagator } from "@opentelemetry/core";
+import { z } from "zod";
 
 /**
  * Tracing configuration schema
  */
 export const TracingConfigSchema = z.object({
   serviceName: z.string(),
-  serviceVersion: z.string().default('1.0.0'),
-  environment: z.string().default('development'),
+  serviceVersion: z.string().default("1.0.0"),
+  environment: z.string().default("development"),
   enabled: z.boolean().default(true),
   samplingRate: z.number().min(0).max(1).default(1.0),
   exporterEndpoint: z.string().optional(),
   exporterHeaders: z.record(z.string()).optional(),
-  instrumentations: z.object({
-    http: z.boolean().default(true),
-    express: z.boolean().default(true),
-    graphql: z.boolean().default(true),
-    pg: z.boolean().default(true),
-    redis: z.boolean().default(true),
-  }).default({}),
+  instrumentations: z
+    .object({
+      http: z.boolean().default(true),
+      express: z.boolean().default(true),
+      graphql: z.boolean().default(true),
+      pg: z.boolean().default(true),
+      redis: z.boolean().default(true),
+    })
+    .default({}),
 });
 
 export type TracingConfig = z.infer<typeof TracingConfigSchema>;
@@ -53,36 +55,36 @@ export type TracingConfig = z.infer<typeof TracingConfigSchema>;
  */
 export const SummitAttributes = {
   // User context
-  USER_ID: 'summit.user.id',
-  USER_ROLE: 'summit.user.role',
-  SESSION_ID: 'summit.session.id',
+  USER_ID: "summit.user.id",
+  USER_ROLE: "summit.user.role",
+  SESSION_ID: "summit.session.id",
 
   // Investigation context
-  INVESTIGATION_ID: 'summit.investigation.id',
-  INVESTIGATION_TYPE: 'summit.investigation.type',
+  INVESTIGATION_ID: "summit.investigation.id",
+  INVESTIGATION_TYPE: "summit.investigation.type",
 
   // Entity context
-  ENTITY_ID: 'summit.entity.id',
-  ENTITY_TYPE: 'summit.entity.type',
+  ENTITY_ID: "summit.entity.id",
+  ENTITY_TYPE: "summit.entity.type",
 
   // Graph context
-  GRAPH_PATTERN: 'summit.graph.pattern',
-  GRAPH_DEPTH: 'summit.graph.depth',
-  NODES_VISITED: 'summit.graph.nodes_visited',
-  RELATIONSHIPS_FOLLOWED: 'summit.graph.relationships_followed',
+  GRAPH_PATTERN: "summit.graph.pattern",
+  GRAPH_DEPTH: "summit.graph.depth",
+  NODES_VISITED: "summit.graph.nodes_visited",
+  RELATIONSHIPS_FOLLOWED: "summit.graph.relationships_followed",
 
   // Cache context
-  CACHE_HIT: 'summit.cache.hit',
-  CACHE_LAYER: 'summit.cache.layer',
+  CACHE_HIT: "summit.cache.hit",
+  CACHE_LAYER: "summit.cache.layer",
 
   // AI/Copilot context
-  COPILOT_ACTION: 'summit.copilot.action',
-  COPILOT_MODEL: 'summit.copilot.model',
-  COPILOT_TOKENS: 'summit.copilot.tokens',
+  COPILOT_ACTION: "summit.copilot.action",
+  COPILOT_MODEL: "summit.copilot.model",
+  COPILOT_TOKENS: "summit.copilot.tokens",
 
   // Error context
-  ERROR_CODE: 'summit.error.code',
-  ERROR_MESSAGE: 'summit.error.message',
+  ERROR_CODE: "summit.error.code",
+  ERROR_MESSAGE: "summit.error.message",
 } as const;
 
 let sdk: NodeSDK | null = null;
@@ -112,24 +114,24 @@ export function initializeTracing(config: Partial<TracingConfig>): NodeSDK {
     : undefined;
 
   const instrumentations = getNodeAutoInstrumentations({
-    '@opentelemetry/instrumentation-http': {
+    "@opentelemetry/instrumentation-http": {
       enabled: validatedConfig.instrumentations.http,
     },
-    '@opentelemetry/instrumentation-express': {
+    "@opentelemetry/instrumentation-express": {
       enabled: validatedConfig.instrumentations.express,
     },
-    '@opentelemetry/instrumentation-graphql': {
+    "@opentelemetry/instrumentation-graphql": {
       enabled: validatedConfig.instrumentations.graphql,
     },
-    '@opentelemetry/instrumentation-pg': {
+    "@opentelemetry/instrumentation-pg": {
       enabled: validatedConfig.instrumentations.pg,
     },
-    '@opentelemetry/instrumentation-redis-4': {
+    "@opentelemetry/instrumentation-redis-4": {
       enabled: validatedConfig.instrumentations.redis,
     },
     // Disable noisy instrumentations
-    '@opentelemetry/instrumentation-fs': { enabled: false },
-    '@opentelemetry/instrumentation-dns': { enabled: false },
+    "@opentelemetry/instrumentation-fs": { enabled: false },
+    "@opentelemetry/instrumentation-dns": { enabled: false },
   });
 
   sdk = new NodeSDK({
@@ -170,7 +172,7 @@ export async function shutdownTracing(): Promise<void> {
  */
 export function getTracer(): Tracer {
   if (!globalTracer) {
-    globalTracer = trace.getTracer('summit-default');
+    globalTracer = trace.getTracer("summit-default");
   }
   return globalTracer;
 }
@@ -204,7 +206,7 @@ export async function withSpan<T>(
   } catch (error) {
     span.setStatus({
       code: SpanStatusCode.ERROR,
-      message: error instanceof Error ? error.message : 'Unknown error',
+      message: error instanceof Error ? error.message : "Unknown error",
     });
     span.recordException(error as Error);
     throw error;
@@ -269,11 +271,15 @@ export function traced<TArgs extends unknown[], TResult>(
   options?: SpanOptions
 ): (...args: TArgs) => Promise<TResult> {
   return async (...args: TArgs): Promise<TResult> => {
-    return withSpan(name, async (span) => {
-      // Add function arguments as attributes (be careful with sensitive data)
-      span.setAttribute('function.args_count', args.length);
-      return fn(...args);
-    }, options);
+    return withSpan(
+      name,
+      async (span) => {
+        // Add function arguments as attributes (be careful with sensitive data)
+        span.setAttribute("function.args_count", args.length);
+        return fn(...args);
+      },
+      options
+    );
   };
 }
 
@@ -281,20 +287,24 @@ export function traced<TArgs extends unknown[], TResult>(
  * Decorator for tracing class methods
  */
 export function Trace(name?: string, options?: SpanOptions) {
-  return function (
-    target: unknown,
-    propertyKey: string,
-    descriptor: PropertyDescriptor
-  ) {
+  return function (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
-    const spanName = name || `${(target as { constructor: { name: string } }).constructor.name}.${propertyKey}`;
+    const spanName =
+      name || `${(target as { constructor: { name: string } }).constructor.name}.${propertyKey}`;
 
     descriptor.value = async function (...args: unknown[]) {
-      return withSpan(spanName, async (span) => {
-        span.setAttribute('class', (target as { constructor: { name: string } }).constructor.name);
-        span.setAttribute('method', propertyKey);
-        return originalMethod.apply(this, args);
-      }, options);
+      return withSpan(
+        spanName,
+        async (span) => {
+          span.setAttribute(
+            "class",
+            (target as { constructor: { name: string } }).constructor.name
+          );
+          span.setAttribute("method", propertyKey);
+          return originalMethod.apply(this, args);
+        },
+        options
+      );
     };
 
     return descriptor;
@@ -308,64 +318,84 @@ export const spans = {
   /**
    * Create a database query span
    */
-  dbQuery(database: string, operation: string): (fn: (span: Span) => Promise<unknown>) => Promise<unknown> {
-    return (fn) => withSpan(`db.${operation}`, fn, {
-      kind: SpanKind.CLIENT,
-      attributes: {
-        [SemanticAttributes.DB_SYSTEM]: database,
-        [SemanticAttributes.DB_OPERATION]: operation,
-      },
-    });
+  dbQuery(
+    database: string,
+    operation: string
+  ): (fn: (span: Span) => Promise<unknown>) => Promise<unknown> {
+    return (fn) =>
+      withSpan(`db.${operation}`, fn, {
+        kind: SpanKind.CLIENT,
+        attributes: {
+          [SemanticAttributes.DB_SYSTEM]: database,
+          [SemanticAttributes.DB_OPERATION]: operation,
+        },
+      });
   },
 
   /**
    * Create an HTTP request span
    */
-  httpRequest(method: string, url: string): (fn: (span: Span) => Promise<unknown>) => Promise<unknown> {
-    return (fn) => withSpan(`HTTP ${method}`, fn, {
-      kind: SpanKind.CLIENT,
-      attributes: {
-        [SemanticAttributes.HTTP_METHOD]: method,
-        [SemanticAttributes.HTTP_URL]: url,
-      },
-    });
+  httpRequest(
+    method: string,
+    url: string
+  ): (fn: (span: Span) => Promise<unknown>) => Promise<unknown> {
+    return (fn) =>
+      withSpan(`HTTP ${method}`, fn, {
+        kind: SpanKind.CLIENT,
+        attributes: {
+          [SemanticAttributes.HTTP_METHOD]: method,
+          [SemanticAttributes.HTTP_URL]: url,
+        },
+      });
   },
 
   /**
    * Create a graph traversal span
    */
-  graphTraversal(pattern: string, depth: number): (fn: (span: Span) => Promise<unknown>) => Promise<unknown> {
-    return (fn) => withSpan('graph.traversal', fn, {
-      kind: SpanKind.INTERNAL,
-      attributes: {
-        [SummitAttributes.GRAPH_PATTERN]: pattern,
-        [SummitAttributes.GRAPH_DEPTH]: depth,
-      },
-    });
+  graphTraversal(
+    pattern: string,
+    depth: number
+  ): (fn: (span: Span) => Promise<unknown>) => Promise<unknown> {
+    return (fn) =>
+      withSpan("graph.traversal", fn, {
+        kind: SpanKind.INTERNAL,
+        attributes: {
+          [SummitAttributes.GRAPH_PATTERN]: pattern,
+          [SummitAttributes.GRAPH_DEPTH]: depth,
+        },
+      });
   },
 
   /**
    * Create a cache operation span
    */
-  cacheOperation(operation: string, layer: string): (fn: (span: Span) => Promise<unknown>) => Promise<unknown> {
-    return (fn) => withSpan(`cache.${operation}`, fn, {
-      kind: SpanKind.CLIENT,
-      attributes: {
-        [SummitAttributes.CACHE_LAYER]: layer,
-      },
-    });
+  cacheOperation(
+    operation: string,
+    layer: string
+  ): (fn: (span: Span) => Promise<unknown>) => Promise<unknown> {
+    return (fn) =>
+      withSpan(`cache.${operation}`, fn, {
+        kind: SpanKind.CLIENT,
+        attributes: {
+          [SummitAttributes.CACHE_LAYER]: layer,
+        },
+      });
   },
 
   /**
    * Create a copilot request span
    */
-  copilotRequest(action: string, model: string): (fn: (span: Span) => Promise<unknown>) => Promise<unknown> {
-    return (fn) => withSpan('copilot.request', fn, {
-      kind: SpanKind.CLIENT,
-      attributes: {
-        [SummitAttributes.COPILOT_ACTION]: action,
-        [SummitAttributes.COPILOT_MODEL]: model,
-      },
-    });
+  copilotRequest(
+    action: string,
+    model: string
+  ): (fn: (span: Span) => Promise<unknown>) => Promise<unknown> {
+    return (fn) =>
+      withSpan("copilot.request", fn, {
+        kind: SpanKind.CLIENT,
+        attributes: {
+          [SummitAttributes.COPILOT_ACTION]: action,
+          [SummitAttributes.COPILOT_MODEL]: model,
+        },
+      });
   },
 };

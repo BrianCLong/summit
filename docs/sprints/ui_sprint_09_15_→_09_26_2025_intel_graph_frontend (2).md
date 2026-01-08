@@ -335,7 +335,7 @@ paths:
                 querySpec: { type: object }
                 counterfactual: { type: object }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -344,7 +344,7 @@ paths:
                 properties:
                   rationales: { type: array, items: { type: object } }
                   costEstimate: { type: object }
-        '400': { description: Bad Request }
+        "400": { description: Bad Request }
   /evidence/bundle:
     get:
       summary: Get evidence bundle for a node/edge
@@ -354,7 +354,7 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
   /policy/reason:
     post:
       summary: Explain a guardrail decision
@@ -368,7 +368,7 @@ paths:
                 policyId: { type: string }
                 context: { type: object }
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
 ```
 
 ---
@@ -486,19 +486,19 @@ QA/UXR,R-402,Usability Sessions x5,3,Jamie,"research;uxr",QA-401,2025-09-24,SUS 
 
 ```tsx
 // src/components/ExplainPanel.tsx
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Copy, GitCompare } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
-import { useEffect } from 'react';
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Copy, GitCompare } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { useEffect } from "react";
 
 export type Rationale = {
   id: string;
   title: string;
   summary: string;
-  confidence: 'low' | 'medium' | 'high';
+  confidence: "low" | "medium" | "high";
   assumptions?: string[];
   citations?: Array<{ id: string; label: string }>;
 };
@@ -522,13 +522,13 @@ export default function ExplainPanel({
 }: ExplainPanelProps) {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === '?') {
+      if (e.key === "?") {
         e.preventDefault();
         onClose();
       }
     }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
   return (
@@ -540,7 +540,7 @@ export default function ExplainPanel({
           initial={{ x: 480, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: 480, opacity: 0 }}
-          transition={{ type: 'spring', stiffness: 260, damping: 26 }}
+          transition={{ type: "spring", stiffness: 260, damping: 26 }}
           className="fixed right-0 top-0 h-dvh w-[420px] bg-white dark:bg-neutral-900 shadow-2xl border-l z-50 grid grid-rows-[auto,1fr]"
         >
           <div className="flex items-center justify-between p-4 border-b">
@@ -548,12 +548,7 @@ export default function ExplainPanel({
               <GitCompare className="h-4 w-4" />
               <span className="font-medium">Explain this view</span>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Close explain panel"
-              onClick={onClose}
-            >
+            <Button variant="ghost" size="icon" aria-label="Close explain panel" onClick={onClose}>
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -566,11 +561,11 @@ export default function ExplainPanel({
                       <span>{r.title}</span>
                       <Badge
                         variant={
-                          r.confidence === 'high'
-                            ? 'default'
-                            : r.confidence === 'medium'
-                              ? 'secondary'
-                              : 'outline'
+                          r.confidence === "high"
+                            ? "default"
+                            : r.confidence === "medium"
+                              ? "secondary"
+                              : "outline"
                         }
                         aria-label={`confidence ${r.confidence}`}
                       >
@@ -588,10 +583,7 @@ export default function ExplainPanel({
                       </ul>
                     ) : null}
                     {!!r.citations?.length && (
-                      <div
-                        className="flex flex-wrap gap-2"
-                        aria-label="citations"
-                      >
+                      <div className="flex flex-wrap gap-2" aria-label="citations">
                         {r.citations.map((c) => (
                           <Badge key={c.id} variant="outline">
                             {c.label}
@@ -600,21 +592,13 @@ export default function ExplainPanel({
                       </div>
                     )}
                     <div className="mt-3 flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => onCopy?.(r)}
-                      >
+                      <Button size="sm" variant="outline" onClick={() => onCopy?.(r)}>
                         <Copy className="h-3 w-3 mr-1" /> Copy to notes
                       </Button>
                       <Button
                         size="sm"
-                        variant={
-                          counterfactualEnabled ? 'default' : 'secondary'
-                        }
-                        onClick={() =>
-                          onToggleCounterfactual?.(!counterfactualEnabled)
-                        }
+                        variant={counterfactualEnabled ? "default" : "secondary"}
+                        onClick={() => onToggleCounterfactual?.(!counterfactualEnabled)}
                       >
                         Counterfactual
                       </Button>
@@ -633,30 +617,28 @@ export default function ExplainPanel({
 
 ```tsx
 // src/components/ExplainPanel.stories.tsx
-import type { Meta, StoryObj } from '@storybook/react';
-import ExplainPanel, { Rationale } from './ExplainPanel';
+import type { Meta, StoryObj } from "@storybook/react";
+import ExplainPanel, { Rationale } from "./ExplainPanel";
 
 const meta: Meta<typeof ExplainPanel> = {
-  title: 'IntelGraph/ExplainPanel',
+  title: "IntelGraph/ExplainPanel",
   component: ExplainPanel,
   args: {
     isOpen: true,
     rationales: [
       {
-        id: 'r1',
-        title: 'Shortest paths emphasize broker node',
-        summary:
-          'Paths weighted by betweenness centrality highlight Broker‑42 as a cut vertex.',
-        confidence: 'high',
-        assumptions: ['Weights derived from last 24h edges'],
-        citations: [{ id: 'c1', label: 'EVID‑128' }],
+        id: "r1",
+        title: "Shortest paths emphasize broker node",
+        summary: "Paths weighted by betweenness centrality highlight Broker‑42 as a cut vertex.",
+        confidence: "high",
+        assumptions: ["Weights derived from last 24h edges"],
+        citations: [{ id: "c1", label: "EVID‑128" }],
       },
       {
-        id: 'r2',
-        title: 'Counterfactual removes vendor edges',
-        summary:
-          'Removing vendor edges isolates two communities; suspect link disappears.',
-        confidence: 'medium',
+        id: "r2",
+        title: "Counterfactual removes vendor edges",
+        summary: "Removing vendor edges isolates two communities; suspect link disappears.",
+        confidence: "medium",
       },
     ] satisfies Rationale[],
   },
@@ -669,22 +651,17 @@ export const Default: StoryObj<typeof ExplainPanel> = {};
 
 ```tsx
 // src/components/ProvenanceTooltip.tsx
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-  TooltipProvider,
-} from '@/components/ui/tooltip';
-import { Badge } from '@/components/ui/badge';
-import { Info } from 'lucide-react';
-import { ReactNode } from 'react';
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
+import { Info } from "lucide-react";
+import { ReactNode } from "react";
 
 export interface ProvenanceTooltipProps {
   children: ReactNode;
   sourceId: string;
   transformChain: string[];
   licenseCode: string;
-  confidence: 'low' | 'medium' | 'high';
+  confidence: "low" | "medium" | "high";
 }
 
 export default function ProvenanceTooltip({
@@ -713,18 +690,17 @@ export default function ProvenanceTooltip({
               <span className="opacity-70">Source:</span> {sourceId}
             </div>
             <div>
-              <span className="opacity-70">Transform:</span>{' '}
-              {transformChain.join(' → ')}
+              <span className="opacity-70">Transform:</span> {transformChain.join(" → ")}
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="outline">{licenseCode}</Badge>
               <Badge
                 variant={
-                  confidence === 'high'
-                    ? 'default'
-                    : confidence === 'medium'
-                      ? 'secondary'
-                      : 'outline'
+                  confidence === "high"
+                    ? "default"
+                    : confidence === "medium"
+                      ? "secondary"
+                      : "outline"
                 }
                 aria-label={`confidence ${confidence}`}
               >
@@ -741,17 +717,17 @@ export default function ProvenanceTooltip({
 
 ```tsx
 // src/components/ProvenanceTooltip.stories.tsx
-import type { Meta, StoryObj } from '@storybook/react';
-import ProvenanceTooltip from './ProvenanceTooltip';
+import type { Meta, StoryObj } from "@storybook/react";
+import ProvenanceTooltip from "./ProvenanceTooltip";
 
 const meta: Meta<typeof ProvenanceTooltip> = {
-  title: 'IntelGraph/ProvenanceTooltip',
+  title: "IntelGraph/ProvenanceTooltip",
   component: ProvenanceTooltip,
   args: {
-    sourceId: 'SRC‑A12',
-    transformChain: ['normalize', 'geocode', 'join: vendors'],
-    licenseCode: 'CC‑BY‑SA',
-    confidence: 'medium',
+    sourceId: "SRC‑A12",
+    transformChain: ["normalize", "geocode", "join: vendors"],
+    licenseCode: "CC‑BY‑SA",
+    confidence: "medium",
   },
 };
 export default meta;
@@ -768,7 +744,7 @@ export const Default: StoryObj<typeof ProvenanceTooltip> = {
 
 ```tsx
 // src/components/TimeBrush.tsx
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from "react";
 
 export interface TimeBrushProps {
   start: number; // epoch ms
@@ -778,13 +754,7 @@ export interface TimeBrushProps {
   onNudge?: (deltaMs: number) => void;
 }
 
-export default function TimeBrush({
-  start,
-  end,
-  value,
-  onChange,
-  onNudge,
-}: TimeBrushProps) {
+export default function TimeBrush({ start, end, value, onChange, onNudge }: TimeBrushProps) {
   const [v, setV] = useState<[number, number]>(value);
   const width = 600;
   const pxPerMs = width / (end - start);
@@ -792,11 +762,11 @@ export default function TimeBrush({
   useEffect(() => setV(value), [value]);
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === '[') onNudge?.(-5 * 60 * 1000);
-      if (e.key === ']') onNudge?.(5 * 60 * 1000);
+      if (e.key === "[") onNudge?.(-5 * 60 * 1000);
+      if (e.key === "]") onNudge?.(5 * 60 * 1000);
     }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [onNudge]);
 
   function clamp(ms: number) {
@@ -804,13 +774,12 @@ export default function TimeBrush({
   }
   function moveHandle(which: 0 | 1, clientX: number) {
     const rect = (
-      document.getElementById('brush-track') as HTMLDivElement
+      document.getElementById("brush-track") as HTMLDivElement
     )?.getBoundingClientRect();
     if (!rect) return;
     const ms = clamp(start + (clientX - rect.left) / pxPerMs);
     const next: [number, number] = which === 0 ? [ms, v[1]] : [v[0], ms];
-    const sorted: [number, number] =
-      next[0] <= next[1] ? next : [next[1], next[0]];
+    const sorted: [number, number] = next[0] <= next[1] ? next : [next[1], next[0]];
     setV(sorted);
     onChange(sorted);
   }
@@ -842,14 +811,13 @@ export default function TimeBrush({
             className="absolute top-0 h-10 w-3 -ml-1.5 bg-white border rounded-md shadow cursor-col-resize"
             style={{ left: (v[i as 0 | 1] - start) * pxPerMs }}
             onMouseDown={(e) => {
-              const onMove = (ev: MouseEvent) =>
-                moveHandle(i as 0 | 1, ev.clientX);
+              const onMove = (ev: MouseEvent) => moveHandle(i as 0 | 1, ev.clientX);
               const onUp = () => {
-                window.removeEventListener('mousemove', onMove);
-                window.removeEventListener('mouseup', onUp);
+                window.removeEventListener("mousemove", onMove);
+                window.removeEventListener("mouseup", onUp);
               };
-              window.addEventListener('mousemove', onMove);
-              window.addEventListener('mouseup', onUp);
+              window.addEventListener("mousemove", onMove);
+              window.addEventListener("mouseup", onUp);
             }}
           />
         ))}
@@ -861,23 +829,21 @@ export default function TimeBrush({
 
 ```tsx
 // src/components/TimeBrush.stories.tsx
-import type { Meta, StoryObj } from '@storybook/react';
-import TimeBrush from './TimeBrush';
+import type { Meta, StoryObj } from "@storybook/react";
+import TimeBrush from "./TimeBrush";
 
 const now = Date.now();
 const start = now - 6 * 60 * 60 * 1000;
 const end = now;
 
 const meta: Meta<typeof TimeBrush> = {
-  title: 'IntelGraph/TimeBrush',
+  title: "IntelGraph/TimeBrush",
   component: TimeBrush,
   args: { start, end, value: [start + 60 * 60 * 1000, end - 60 * 60 * 1000] },
 };
 export default meta;
 export const Default: StoryObj<typeof TimeBrush> = {
-  render: (args) => (
-    <TimeBrush {...args} onChange={() => {}} onNudge={() => {}} />
-  ),
+  render: (args) => <TimeBrush {...args} onChange={() => {}} onNudge={() => {}} />,
 };
 ```
 
@@ -885,12 +851,12 @@ export const Default: StoryObj<typeof TimeBrush> = {
 
 ```tsx
 // src/components/GuardrailNotice.tsx
-import { ShieldAlert } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { ShieldAlert } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 export interface GuardrailNoticeProps {
-  variant?: 'toast' | 'inline';
+  variant?: "toast" | "inline";
   policyId: string;
   legalBasis: string;
   reason: string;
@@ -898,7 +864,7 @@ export interface GuardrailNoticeProps {
 }
 
 export default function GuardrailNotice({
-  variant = 'inline',
+  variant = "inline",
   policyId,
   legalBasis,
   reason,
@@ -920,7 +886,7 @@ export default function GuardrailNotice({
       </div>
     </div>
   );
-  return variant === 'toast' ? (
+  return variant === "toast" ? (
     <div
       role="status"
       className="fixed bottom-4 right-4 max-w-sm p-3 rounded-xl shadow-lg bg-white border"
@@ -928,10 +894,7 @@ export default function GuardrailNotice({
       {body}
     </div>
   ) : (
-    <div
-      role="note"
-      className="w-full p-3 rounded-xl border bg-amber-50 text-amber-950"
-    >
+    <div role="note" className="w-full p-3 rounded-xl border bg-amber-50 text-amber-950">
       {body}
     </div>
   );
@@ -940,25 +903,24 @@ export default function GuardrailNotice({
 
 ```tsx
 // src/components/GuardrailNotice.stories.tsx
-import type { Meta, StoryObj } from '@storybook/react';
-import GuardrailNotice from './GuardrailNotice';
+import type { Meta, StoryObj } from "@storybook/react";
+import GuardrailNotice from "./GuardrailNotice";
 
 const meta: Meta<typeof GuardrailNotice> = {
-  title: 'IntelGraph/GuardrailNotice',
+  title: "IntelGraph/GuardrailNotice",
   component: GuardrailNotice,
   args: {
-    policyId: 'POL‑R‑17',
-    legalBasis: 'License EULA §4b',
-    reason:
-      'Export of full text from Source‑X is restricted in this workspace.',
+    policyId: "POL‑R‑17",
+    legalBasis: "License EULA §4b",
+    reason: "Export of full text from Source‑X is restricted in this workspace.",
   },
 };
 export default meta;
 export const Inline: StoryObj<typeof GuardrailNotice> = {
-  args: { variant: 'inline', onAppeal: () => {} },
+  args: { variant: "inline", onAppeal: () => {} },
 };
 export const Toast: StoryObj<typeof GuardrailNotice> = {
-  args: { variant: 'toast', onAppeal: () => {} },
+  args: { variant: "toast", onAppeal: () => {} },
 };
 ```
 
@@ -968,82 +930,62 @@ export const Toast: StoryObj<typeof GuardrailNotice> = {
 
 ```tsx
 // src/components/ExplainPanel.test.tsx
-import { render, screen } from '@testing-library/react';
-import ExplainPanel from './ExplainPanel';
+import { render, screen } from "@testing-library/react";
+import ExplainPanel from "./ExplainPanel";
 
-test('renders rationale titles and confidence badges', () => {
+test("renders rationale titles and confidence badges", () => {
   render(
     <ExplainPanel
       isOpen
-      rationales={[{ id: '1', title: 'T', summary: 'S', confidence: 'high' }]}
+      rationales={[{ id: "1", title: "T", summary: "S", confidence: "high" }]}
       onClose={() => {}}
-    />,
+    />
   );
-  expect(screen.getByText('T')).toBeInTheDocument();
+  expect(screen.getByText("T")).toBeInTheDocument();
   expect(screen.getByLabelText(/confidence high/i)).toBeInTheDocument();
 });
 ```
 
 ```tsx
 // src/components/ProvenanceTooltip.test.tsx
-import { render, screen } from '@testing-library/react';
-import ProvenanceTooltip from './ProvenanceTooltip';
+import { render, screen } from "@testing-library/react";
+import ProvenanceTooltip from "./ProvenanceTooltip";
 
-test('has focusable trigger', () => {
+test("has focusable trigger", () => {
   render(
-    <ProvenanceTooltip
-      sourceId="S"
-      transformChain={['a', 'b']}
-      licenseCode="L"
-      confidence="low"
-    >
+    <ProvenanceTooltip sourceId="S" transformChain={["a", "b"]} licenseCode="L" confidence="low">
       <span>trigger</span>
-    </ProvenanceTooltip>,
+    </ProvenanceTooltip>
   );
-  expect(screen.getByText('trigger').closest('span')).toHaveAttribute(
-    'tabindex',
-    '0',
-  );
+  expect(screen.getByText("trigger").closest("span")).toHaveAttribute("tabindex", "0");
 });
 ```
 
 ```tsx
 // src/components/TimeBrush.test.tsx
-import { render } from '@testing-library/react';
-import TimeBrush from './TimeBrush';
+import { render } from "@testing-library/react";
+import TimeBrush from "./TimeBrush";
 
-test('renders selection area', () => {
+test("renders selection area", () => {
   const now = Date.now();
   const start = now - 3600000;
   const end = now;
   const { container } = render(
-    <TimeBrush
-      start={start}
-      end={end}
-      value={[start + 600000, end - 600000]}
-      onChange={() => {}}
-    />,
+    <TimeBrush start={start} end={end} value={[start + 600000, end - 600000]} onChange={() => {}} />
   );
-  expect(container.querySelector('#brush-track')).toBeTruthy();
+  expect(container.querySelector("#brush-track")).toBeTruthy();
 });
 ```
 
 ```tsx
 // src/components/GuardrailNotice.test.tsx
-import { render, screen } from '@testing-library/react';
-import GuardrailNotice from './GuardrailNotice';
+import { render, screen } from "@testing-library/react";
+import GuardrailNotice from "./GuardrailNotice";
 
-test('renders policy info', () => {
-  render(
-    <GuardrailNotice
-      policyId="P1"
-      legalBasis="LAB"
-      reason="Nope"
-      onAppeal={() => {}}
-    />,
-  );
-  expect(screen.getByText('P1')).toBeInTheDocument();
-  expect(screen.getByText('LAB')).toBeInTheDocument();
+test("renders policy info", () => {
+  render(<GuardrailNotice policyId="P1" legalBasis="LAB" reason="Nope" onAppeal={() => {}} />);
+  expect(screen.getByText("P1")).toBeInTheDocument();
+  expect(screen.getByText("LAB")).toBeInTheDocument();
 });
 ```
 

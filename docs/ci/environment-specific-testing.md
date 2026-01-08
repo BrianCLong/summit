@@ -47,13 +47,12 @@ For staging runs you need `kubectl` access to a cluster. Locally you can create 
 
 ## Artefact reference
 
-| Artefact | Purpose |
-| --- | --- |
-| `docker-compose.env-tests.yml` | Defines the Docker Compose services used for dev/prod synthetic checks. |
-| `scripts/tests/run_env_tests.sh` | Unified entry point that selects Docker Compose or Kubernetes orchestration. |
-| `scripts/tests/run_local_env_tests.sh` | Handles Docker Compose orchestration for Node.js/Python containers. |
-| `scripts/tests/run_k8s_env_tests.sh` | Creates the staging Kubernetes job and streams its logs. |
-| `scripts/tests/run_node_tests.mjs` | Node.js synthetic assertions executed in both Docker Compose and Kubernetes flows. |
-| `scripts/tests/run_python_tests.py` | Python synthetic assertions executed in both Docker Compose and Kubernetes flows. |
-| `scripts/tests/data/synthetic-test-data.json` | Shared dataset describing expected environment behaviour. |
-
+| Artefact                                      | Purpose                                                                            |
+| --------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `docker-compose.env-tests.yml`                | Defines the Docker Compose services used for dev/prod synthetic checks.            |
+| `scripts/tests/run_env_tests.sh`              | Unified entry point that selects Docker Compose or Kubernetes orchestration.       |
+| `scripts/tests/run_local_env_tests.sh`        | Handles Docker Compose orchestration for Node.js/Python containers.                |
+| `scripts/tests/run_k8s_env_tests.sh`          | Creates the staging Kubernetes job and streams its logs.                           |
+| `scripts/tests/run_node_tests.mjs`            | Node.js synthetic assertions executed in both Docker Compose and Kubernetes flows. |
+| `scripts/tests/run_python_tests.py`           | Python synthetic assertions executed in both Docker Compose and Kubernetes flows.  |
+| `scripts/tests/data/synthetic-test-data.json` | Shared dataset describing expected environment behaviour.                          |

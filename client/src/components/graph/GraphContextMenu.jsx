@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Menu,
   MenuItem,
@@ -11,22 +11,22 @@ import {
   Button,
   Snackbar,
   Alert,
-} from '@mui/material';
-import { useMutation } from '@apollo/client';
-import { EXPAND_NEIGHBORS, TAG_ENTITY } from '../../graphql/graph.gql';
-import { graphInteractionActions as g } from '../../store/slices/graphInteractionSlice';
-import { getSocket } from '../../realtime/socket';
+} from "@mui/material";
+import { useMutation } from "@apollo/client";
+import { EXPAND_NEIGHBORS, TAG_ENTITY } from "../../graphql/graph.gql";
+import { graphInteractionActions as g } from "../../store/slices/graphInteractionSlice";
+import { getSocket } from "../../realtime/socket";
 
 export default function GraphContextMenu() {
   const dispatch = useDispatch();
   const { contextMenu } = useSelector((s) => s.graphInteraction);
   const [anchorPos, setAnchorPos] = useState(null);
   const [tagOpen, setTagOpen] = useState(false);
-  const [tag, setTag] = useState('');
+  const [tag, setTag] = useState("");
   const [snackbar, setSnackbar] = useState({
     open: false,
-    message: '',
-    severity: 'error',
+    message: "",
+    severity: "error",
   });
 
   const [expand] = useMutation(EXPAND_NEIGHBORS);
@@ -50,7 +50,7 @@ export default function GraphContextMenu() {
       });
       const payload = data?.expandNeighbors;
       if (payload?.nodes || payload?.edges) {
-        const event = new CustomEvent('graph:addElements', {
+        const event = new CustomEvent("graph:addElements", {
           detail: { nodes: payload.nodes || [], edges: payload.edges || [] },
         });
         document.dispatchEvent(event);
@@ -59,14 +59,14 @@ export default function GraphContextMenu() {
         setSnackbar({
           open: true,
           message: `Neighbors expanded: +${n} nodes, +${e} edges`,
-          severity: 'success',
+          severity: "success",
         });
       }
     } catch (e) {
       setSnackbar({
         open: true,
         message: `Expand failed: ${e.message || e}`,
-        severity: 'error',
+        severity: "error",
       });
     }
   };
@@ -75,19 +75,19 @@ export default function GraphContextMenu() {
   const onSaveTag = async () => {
     try {
       await tagEntity({ variables: { entityId: contextMenu.targetId, tag } });
-      setTag('');
+      setTag("");
       setTagOpen(false);
       closeMenu();
       setSnackbar({
         open: true,
         message: `Tag '${tag}' added`,
-        severity: 'success',
+        severity: "success",
       });
     } catch (e) {
       setSnackbar({
         open: true,
         message: `Tag failed: ${e.message || e}`,
-        severity: 'error',
+        severity: "error",
       });
     }
   };
@@ -96,24 +96,24 @@ export default function GraphContextMenu() {
     closeMenu();
     if (!contextMenu?.targetId) return;
     try {
-      socket.emit('ai:request', { entityId: contextMenu.targetId });
+      socket.emit("ai:request", { entityId: contextMenu.targetId });
       setSnackbar({
         open: true,
-        message: 'AI analysis requested',
-        severity: 'success',
+        message: "AI analysis requested",
+        severity: "success",
       });
     } catch (e) {
       setSnackbar({
         open: true,
         message: `AI request failed: ${e.message || e}`,
-        severity: 'error',
+        severity: "error",
       });
     }
   };
 
   const onExploreSubgraph = () => {
     closeMenu();
-    document.dispatchEvent(new CustomEvent('graph:exploreSubgraph'));
+    document.dispatchEvent(new CustomEvent("graph:exploreSubgraph"));
   };
 
   return (
@@ -122,24 +122,20 @@ export default function GraphContextMenu() {
         open={!!anchorPos}
         onClose={closeMenu}
         anchorReference="anchorPosition"
-        anchorPosition={
-          anchorPos
-            ? { top: anchorPos.mouseX, left: anchorPos.mouseY }
-            : undefined
-        }
+        anchorPosition={anchorPos ? { top: anchorPos.mouseX, left: anchorPos.mouseY } : undefined}
       >
         <MenuItem onClick={onExpand}>Expand Neighbors</MenuItem>
         <MenuItem onClick={onTag}>Tag Entity</MenuItem>
         <MenuItem onClick={onExploreSubgraph}>Explore Subgraph</MenuItem>
         <MenuItem onClick={onSendToAI}>Send to AI Analysis</MenuItem>
-        {contextMenu?.targetType === 'edge' && (
+        {contextMenu?.targetType === "edge" && (
           <MenuItem
             onClick={() => {
               closeMenu();
               document.dispatchEvent(
-                new CustomEvent('graph:openEdgeInspector', {
+                new CustomEvent("graph:openEdgeInspector", {
                   detail: { edgeId: contextMenu.targetId },
-                }),
+                })
               );
             }}
           >
@@ -161,11 +157,7 @@ export default function GraphContextMenu() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setTagOpen(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={onSaveTag}
-            disabled={!tag.trim()}
-          >
+          <Button variant="contained" onClick={onSaveTag} disabled={!tag.trim()}>
             Save
           </Button>
         </DialogActions>
@@ -181,7 +173,7 @@ export default function GraphContextMenu() {
     <Alert
       onClose={() => setSnackbar({ ...snackbar, open: false })}
       severity={snackbar.severity}
-      sx={{ width: '100%' }}
+      sx={{ width: "100%" }}
     >
       {snackbar.message}
     </Alert>

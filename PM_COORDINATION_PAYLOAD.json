@@ -22,7 +22,10 @@
           "id": "MS-001-2",
           "name": "Database & Repos 90% Coverage",
           "due_date": "2025-12-20",
-          "deliverables": ["server/src/repos/__tests__/*.test.ts", "server/src/db/__tests__/*.test.ts"]
+          "deliverables": [
+            "server/src/repos/__tests__/*.test.ts",
+            "server/src/db/__tests__/*.test.ts"
+          ]
         },
         {
           "id": "MS-001-3",
@@ -83,7 +86,10 @@
           "id": "MS-002-1",
           "name": "OPA Strict Mode Enabled",
           "due_date": "2025-12-06",
-          "deliverables": ["policies/intelgraph/abac/allow.rego", "FEATURE_WARRANT_ENFORCEMENT=true"]
+          "deliverables": [
+            "policies/intelgraph/abac/allow.rego",
+            "FEATURE_WARRANT_ENFORCEMENT=true"
+          ]
         },
         {
           "id": "MS-002-2",
@@ -213,7 +219,15 @@
     },
     "github": {
       "repo": "BrianCLong/summit",
-      "labels_to_create": ["epic", "critical", "high", "medium", "testing", "security", "observability"]
+      "labels_to_create": [
+        "epic",
+        "critical",
+        "high",
+        "medium",
+        "testing",
+        "security",
+        "observability"
+      ]
     },
     "slack": {
       "workspace": "summit-team",

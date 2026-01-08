@@ -41,20 +41,20 @@ import {
   PluginSandbox,
   DefaultDependencyResolver,
   InMemoryPluginRegistry,
-} from '@intelgraph/plugin-system';
+} from "@intelgraph/plugin-system";
 
 // Initialize components
 const sandbox = new PluginSandbox();
 const loader = new DefaultPluginLoader(sandbox);
 const registry = new InMemoryPluginRegistry();
-const resolver = new DefaultDependencyResolver('1.0.0');
+const resolver = new DefaultDependencyResolver("1.0.0");
 
 // Create plugin manager
-const manager = new PluginManager(loader, registry, resolver, '1.0.0');
+const manager = new PluginManager(loader, registry, resolver, "1.0.0");
 
 // Install and enable plugin
 await manager.install(manifest, source);
-await manager.enable('my-plugin');
+await manager.enable("my-plugin");
 
 // Plugin is now active!
 ```
@@ -101,19 +101,19 @@ const manager = new PluginManager(loader, registry, resolver, platformVersion);
 await manager.install(manifest, source);
 
 // Enable plugin
-await manager.enable('plugin-id');
+await manager.enable("plugin-id");
 
 // Disable plugin
-await manager.disable('plugin-id');
+await manager.disable("plugin-id");
 
 // Update plugin
-await manager.update('plugin-id', '2.0.0');
+await manager.update("plugin-id", "2.0.0");
 
 // Hot reload
-await manager.reload('plugin-id');
+await manager.reload("plugin-id");
 
 // Health check
-const health = await manager.checkHealth('plugin-id');
+const health = await manager.checkHealth("plugin-id");
 ```
 
 ### PluginSandbox
@@ -127,7 +127,7 @@ const sandbox = new PluginSandbox();
 const plugin = await sandbox.loadPlugin(pluginPath, manifest);
 
 // Get resource usage
-const usage = await sandbox.getResourceUsage('plugin-id');
+const usage = await sandbox.getResourceUsage("plugin-id");
 ```
 
 ### PluginSecurity
@@ -138,22 +138,13 @@ Security scanning and enforcement:
 const security = new PluginSecurity();
 
 // Verify signature
-const valid = await security.verifySignature(
-  pluginId,
-  content,
-  signature,
-  publicKey
-);
+const valid = await security.verifySignature(pluginId, content, signature, publicKey);
 
 // Scan for vulnerabilities
 const scanResult = await security.scanPlugin(pluginPath, manifest);
 
 // Check permission
-const allowed = security.checkPermission(
-  manifest,
-  PluginPermission.NETWORK_ACCESS,
-  context
-);
+const allowed = security.checkPermission(manifest, PluginPermission.NETWORK_ACCESS, context);
 ```
 
 ## Extension Points
@@ -161,7 +152,7 @@ const allowed = security.checkPermission(
 ### Data Source
 
 ```typescript
-import { BaseDataSourceExtension } from '@intelgraph/extension-api';
+import { BaseDataSourceExtension } from "@intelgraph/extension-api";
 
 class MyDataSource extends BaseDataSourceExtension {
   async execute(query: DataSourceQuery): Promise<DataSourceResult> {
@@ -174,7 +165,7 @@ class MyDataSource extends BaseDataSourceExtension {
 ### Analyzer
 
 ```typescript
-import { BaseAnalyzerExtension } from '@intelgraph/extension-api';
+import { BaseAnalyzerExtension } from "@intelgraph/extension-api";
 
 class MyAnalyzer extends BaseAnalyzerExtension {
   async execute(input: AnalyzerInput): Promise<AnalyzerResult> {
@@ -187,7 +178,7 @@ class MyAnalyzer extends BaseAnalyzerExtension {
 ### Visualization
 
 ```typescript
-import { BaseVisualizationExtension } from '@intelgraph/extension-api';
+import { BaseVisualizationExtension } from "@intelgraph/extension-api";
 
 class MyVisualization extends BaseVisualizationExtension {
   async execute(input: VisualizationData): Promise<VisualizationConfig> {
@@ -205,10 +196,10 @@ Plugins must declare required permissions:
 
 ```typescript
 enum PluginPermission {
-  READ_DATA = 'read:data',
-  WRITE_DATA = 'write:data',
-  NETWORK_ACCESS = 'network:access',
-  FILE_SYSTEM = 'filesystem:access',
+  READ_DATA = "read:data",
+  WRITE_DATA = "write:data",
+  NETWORK_ACCESS = "network:access",
+  FILE_SYSTEM = "filesystem:access",
   // ... more permissions
 }
 ```
@@ -231,6 +222,7 @@ Enforce resource limits:
 ### Sandboxing
 
 Plugins run in isolated VM contexts with:
+
 - Memory limits
 - CPU usage limits
 - No direct file system access

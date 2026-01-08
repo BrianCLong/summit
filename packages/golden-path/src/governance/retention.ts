@@ -1,4 +1,4 @@
-import { AuditTrailEntry, EventRecord } from '../types.js';
+import { AuditTrailEntry, EventRecord } from "../types.js";
 
 export interface RetentionResult {
   deletedIds: string[];
@@ -9,7 +9,7 @@ export function runRetentionSweeper(
   events: EventRecord[],
   now: Date,
   dryRun = false,
-  auditTrail: AuditTrailEntry[] = [],
+  auditTrail: AuditTrailEntry[] = []
 ): RetentionResult {
   const kept: EventRecord[] = [];
   const deleted: string[] = [];
@@ -19,7 +19,7 @@ export function runRetentionSweeper(
     if (expiry <= now) {
       const entry: AuditTrailEntry = {
         timestamp: now.toISOString(),
-        message: dryRun ? 'Retention candidate' : 'Retention delete',
+        message: dryRun ? "Retention candidate" : "Retention delete",
         context: { eventId: event.id, expiredOn: expiry.toISOString() },
       };
       auditTrail.push(entry);

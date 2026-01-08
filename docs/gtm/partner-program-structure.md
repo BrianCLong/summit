@@ -12,12 +12,12 @@ Summit's partner program is designed to accelerate go-to-market in government, d
 
 ### Partner Types
 
-| Type | Description | Typical Partners |
-|------|-------------|------------------|
-| **Referral** | Introduces opportunities; Summit closes and delivers | Consultants, advisors, former customers |
-| **Resell** | Contracts with customer; Summit delivers through partner | Regional SIs, boutique firms |
-| **Co-Delivery** | Joint sales and delivery | Tier 1/2 primes, large SIs |
-| **Technology** | Integration partners | Data providers, adjacent platforms |
+| Type            | Description                                              | Typical Partners                        |
+| --------------- | -------------------------------------------------------- | --------------------------------------- |
+| **Referral**    | Introduces opportunities; Summit closes and delivers     | Consultants, advisors, former customers |
+| **Resell**      | Contracts with customer; Summit delivers through partner | Regional SIs, boutique firms            |
+| **Co-Delivery** | Joint sales and delivery                                 | Tier 1/2 primes, large SIs              |
+| **Technology**  | Integration partners                                     | Data providers, adjacent platforms      |
 
 ---
 
@@ -27,17 +27,20 @@ Summit's partner program is designed to accelerate go-to-market in government, d
 
 **Commitment:** Minimal; intro-level engagement
 **Benefits:**
+
 - Partner portal access
 - Basic sales enablement materials
 - Referral fee eligibility (15%)
 - Quarterly partner newsletter
 
 **Requirements:**
+
 - Signed partner agreement
 - Complete partner onboarding (1 hour)
 - Identify 2+ potential opportunities
 
 **Support:**
+
 - Email support
 - Quarterly check-ins
 
@@ -47,6 +50,7 @@ Summit's partner program is designed to accelerate go-to-market in government, d
 
 **Commitment:** Moderate; trained and enabled
 **Benefits:**
+
 - All Registered benefits, plus:
 - Enhanced referral fee (20%)
 - Resell authorization (15% margin)
@@ -56,12 +60,14 @@ Summit's partner program is designed to accelerate go-to-market in government, d
 - Joint marketing fund access ($5k/year)
 
 **Requirements:**
+
 - 2+ team members complete Summit certification
 - $100k+ influenced pipeline (trailing 12 months)
 - Quarterly business reviews
 - Customer success commitment
 
 **Support:**
+
 - Dedicated partner manager
 - Pre-sales technical support
 - Monthly syncs
@@ -72,6 +78,7 @@ Summit's partner program is designed to accelerate go-to-market in government, d
 
 **Commitment:** Strategic; deep integration
 **Benefits:**
+
 - All Certified benefits, plus:
 - Premium referral fee (25%)
 - Enhanced resell margin (20-25%)
@@ -83,6 +90,7 @@ Summit's partner program is designed to accelerate go-to-market in government, d
 - Custom training/enablement
 
 **Requirements:**
+
 - $500k+ closed revenue (trailing 12 months)
 - 3+ certified practitioners
 - Named account alignment
@@ -90,6 +98,7 @@ Summit's partner program is designed to accelerate go-to-market in government, d
 - Joint go-to-market plan
 
 **Support:**
+
 - Executive sponsor
 - Dedicated solutions architect
 - Weekly pipeline reviews
@@ -100,13 +109,14 @@ Summit's partner program is designed to accelerate go-to-market in government, d
 
 ### Referral Fees
 
-| Tier | Fee (% of Year 1 TCV) | Payment Terms |
-|------|----------------------|---------------|
-| Registered | 15% | Net 30 after customer payment |
-| Certified | 20% | Net 30 after customer payment |
-| Premier | 25% | Net 30 after customer payment |
+| Tier       | Fee (% of Year 1 TCV) | Payment Terms                 |
+| ---------- | --------------------- | ----------------------------- |
+| Registered | 15%                   | Net 30 after customer payment |
+| Certified  | 20%                   | Net 30 after customer payment |
+| Premier    | 25%                   | Net 30 after customer payment |
 
 **Eligibility:**
+
 - Referral must be net-new opportunity
 - Deal registration required within 14 days of intro
 - Customer must close within 12 months
@@ -116,12 +126,13 @@ Summit's partner program is designed to accelerate go-to-market in government, d
 
 ### Resell Margins
 
-| Tier | Margin (% of Customer Price) | Notes |
-|------|------------------------------|-------|
-| Certified | 15% | Standard products/services |
-| Premier | 20-25% | Volume-based; negotiable |
+| Tier      | Margin (% of Customer Price) | Notes                      |
+| --------- | ---------------------------- | -------------------------- |
+| Certified | 15%                          | Standard products/services |
+| Premier   | 20-25%                       | Volume-based; negotiable   |
 
 **Terms:**
+
 - Partner contracts with customer
 - Summit invoices partner at discounted rate
 - Partner responsible for collections
@@ -133,13 +144,13 @@ Summit's partner program is designed to accelerate go-to-market in government, d
 
 For joint delivery engagements:
 
-| Component | Summit | Partner |
-|-----------|--------|---------|
-| Platform license | 100% | 0% |
-| Implementation (Summit-led) | 100% | 0% |
-| Implementation (Partner-led) | 0% | 100% |
-| Implementation (Joint) | 50% | 50% |
-| Ongoing support | Negotiated | Negotiated |
+| Component                    | Summit     | Partner    |
+| ---------------------------- | ---------- | ---------- |
+| Platform license             | 100%       | 0%         |
+| Implementation (Summit-led)  | 100%       | 0%         |
+| Implementation (Partner-led) | 0%         | 100%       |
+| Implementation (Joint)       | 50%        | 50%        |
+| Ongoing support              | Negotiated | Negotiated |
 
 ---
 
@@ -155,12 +166,12 @@ For joint delivery engagements:
 
 ### Protection Rules
 
-| Scenario | Protection Period | Resolution |
-|----------|------------------|------------|
-| First to register | 90 days (extendable) | Registered partner owns opportunity |
-| Multiple registrations | N/A | First valid registration wins |
-| Summit direct conflict | 90 days to resolve | Partner manager arbitration |
-| Stale registration | Expires after 90 days inactive | Must re-register |
+| Scenario               | Protection Period              | Resolution                          |
+| ---------------------- | ------------------------------ | ----------------------------------- |
+| First to register      | 90 days (extendable)           | Registered partner owns opportunity |
+| Multiple registrations | N/A                            | First valid registration wins       |
+| Summit direct conflict | 90 days to resolve             | Partner manager arbitration         |
+| Stale registration     | Expires after 90 days inactive | Must re-register                    |
 
 ---
 
@@ -170,12 +181,14 @@ For joint delivery engagements:
 
 **Duration:** 4 hours (self-paced + live assessment)
 **Content:**
+
 - Summit platform overview (1 hr)
 - Value proposition & positioning (1 hr)
 - Demo certification (1 hr)
 - Sales process & deal registration (1 hr)
 
 **Assessment:**
+
 - Platform demo delivery (pass/fail)
 - Value proposition pitch (pass/fail)
 
@@ -188,12 +201,14 @@ For joint delivery engagements:
 **Duration:** 8 hours (instructor-led + hands-on)
 **Prerequisites:** Certified Practitioner
 **Content:**
+
 - Technical architecture deep dive (2 hrs)
 - Deployment patterns (cloud, on-prem, air-gap) (2 hrs)
 - Integration & data sources (2 hrs)
 - Security & compliance (2 hrs)
 
 **Assessment:**
+
 - Architecture design exercise
 - Hands-on deployment lab
 
@@ -203,16 +218,16 @@ For joint delivery engagements:
 
 ### Enablement Resources
 
-| Resource | Access | Format |
-|----------|--------|--------|
-| Partner Portal | All partners | Web |
-| Sales playbook | Certified+ | PDF |
-| Demo environment | Certified+ | Sandbox |
-| Technical documentation | All partners | Web |
-| Competitive battlecards | Certified+ | PDF |
-| ROI calculator | Certified+ | Excel/Web |
-| Co-branded templates | Certified+ | PPT/Word |
-| Case studies | All partners | PDF |
+| Resource                | Access       | Format    |
+| ----------------------- | ------------ | --------- |
+| Partner Portal          | All partners | Web       |
+| Sales playbook          | Certified+   | PDF       |
+| Demo environment        | Certified+   | Sandbox   |
+| Technical documentation | All partners | Web       |
+| Competitive battlecards | Certified+   | PDF       |
+| ROI calculator          | Certified+   | Excel/Web |
+| Co-branded templates    | Certified+   | PPT/Word  |
+| Case studies            | All partners | PDF       |
 
 ---
 
@@ -220,12 +235,13 @@ For joint delivery engagements:
 
 ### Marketing Development Funds (MDF)
 
-| Tier | Annual MDF | Eligible Activities |
-|------|-----------|---------------------|
-| Certified | $5,000 | Events, content, campaigns |
-| Premier | $25,000 | Events, content, campaigns, ABM |
+| Tier      | Annual MDF | Eligible Activities             |
+| --------- | ---------- | ------------------------------- |
+| Certified | $5,000     | Events, content, campaigns      |
+| Premier   | $25,000    | Events, content, campaigns, ABM |
 
 **MDF Rules:**
+
 - 50/50 cost share (partner matches Summit contribution)
 - Pre-approval required
 - Receipts/proof of performance required
@@ -233,13 +249,13 @@ For joint delivery engagements:
 
 ### Co-Marketing Activities
 
-| Activity | Lead | Support |
-|----------|------|---------|
-| Joint webinar | Partner | Summit content, speakers |
+| Activity            | Lead    | Support                     |
+| ------------------- | ------- | --------------------------- |
+| Joint webinar       | Partner | Summit content, speakers    |
 | Co-authored content | Partner | Summit review, distribution |
-| Event sponsorship | Partner | Summit presence, collateral |
-| Customer case study | Summit | Partner coordination |
-| Joint press release | Summit | Partner quotes, approval |
+| Event sponsorship   | Partner | Summit presence, collateral |
+| Customer case study | Summit  | Partner coordination        |
+| Joint press release | Summit  | Partner quotes, approval    |
 
 ---
 
@@ -247,29 +263,29 @@ For joint delivery engagements:
 
 ### Week 1: Foundation
 
-| Day | Activity | Owner |
-|-----|----------|-------|
-| 1 | Partner agreement signed | Legal |
-| 1 | Portal access provisioned | Partner Ops |
-| 2 | Welcome call with partner manager | Partner Manager |
-| 3-5 | Self-paced enablement (Certified Practitioner) | Partner |
+| Day | Activity                                       | Owner           |
+| --- | ---------------------------------------------- | --------------- |
+| 1   | Partner agreement signed                       | Legal           |
+| 1   | Portal access provisioned                      | Partner Ops     |
+| 2   | Welcome call with partner manager              | Partner Manager |
+| 3-5 | Self-paced enablement (Certified Practitioner) | Partner         |
 
 ### Week 2: Activation
 
-| Day | Activity | Owner |
-|-----|----------|-------|
-| 8 | Live certification assessment | Partner Manager |
-| 9 | Demo environment access | Partner Ops |
-| 10 | Deal registration walkthrough | Partner Manager |
-| 10 | First opportunity identification | Partner |
+| Day | Activity                         | Owner           |
+| --- | -------------------------------- | --------------- |
+| 8   | Live certification assessment    | Partner Manager |
+| 9   | Demo environment access          | Partner Ops     |
+| 10  | Deal registration walkthrough    | Partner Manager |
+| 10  | First opportunity identification | Partner         |
 
 ### Week 3-4: Launch
 
-| Day | Activity | Owner |
-|-----|----------|-------|
-| 15 | First deal registered | Partner |
-| 21 | First joint customer meeting | Partner + Summit |
-| 28 | 30-day review | Partner Manager |
+| Day | Activity                     | Owner            |
+| --- | ---------------------------- | ---------------- |
+| 15  | First deal registered        | Partner          |
+| 21  | First joint customer meeting | Partner + Summit |
+| 28  | 30-day review                | Partner Manager  |
 
 ---
 
@@ -277,25 +293,25 @@ For joint delivery engagements:
 
 ### Standard Terms
 
-| Term | Standard Position |
-|------|-------------------|
-| **Term** | 1 year, auto-renew |
-| **Territory** | Non-exclusive; named accounts negotiable |
-| **Exclusivity** | None (standard); Premier may negotiate |
-| **Termination** | 30 days written notice; 90 days for cause |
-| **IP** | Summit retains all platform IP |
-| **Data** | Customer owns data; partner has no rights |
-| **Confidentiality** | Mutual NDA; 3-year survival |
-| **Indemnification** | Mutual; standard software terms |
+| Term                | Standard Position                         |
+| ------------------- | ----------------------------------------- |
+| **Term**            | 1 year, auto-renew                        |
+| **Territory**       | Non-exclusive; named accounts negotiable  |
+| **Exclusivity**     | None (standard); Premier may negotiate    |
+| **Termination**     | 30 days written notice; 90 days for cause |
+| **IP**              | Summit retains all platform IP            |
+| **Data**            | Customer owns data; partner has no rights |
+| **Confidentiality** | Mutual NDA; 3-year survival               |
+| **Indemnification** | Mutual; standard software terms           |
 
 ### Premier Partner Negotiables
 
-| Term | Negotiable Range |
-|------|------------------|
-| Territory | Named account exclusivity (limited) |
-| Margin | 20-25% based on volume |
-| MDF | $25k-$100k based on plan |
-| Roadmap input | Advisory board seat |
+| Term          | Negotiable Range                    |
+| ------------- | ----------------------------------- |
+| Territory     | Named account exclusivity (limited) |
+| Margin        | 20-25% based on volume              |
+| MDF           | $25k-$100k based on plan            |
+| Roadmap input | Advisory board seat                 |
 
 ---
 
@@ -304,6 +320,7 @@ For joint delivery engagements:
 ### Quarterly Business Review (QBR)
 
 **Agenda:**
+
 1. Pipeline review (registered, qualified, closing)
 2. Closed business (trailing quarter)
 3. Enablement status (certifications, training)
@@ -313,12 +330,12 @@ For joint delivery engagements:
 
 ### Performance Metrics
 
-| Metric | Registered | Certified | Premier |
-|--------|------------|-----------|---------|
-| Pipeline generated | $50k+ | $100k+ | $500k+ |
-| Closed revenue | N/A | $50k+ | $250k+ |
-| Certifications | 1 | 2+ | 3+ |
-| Customer satisfaction | N/A | 4+/5 | 4.5+/5 |
+| Metric                | Registered | Certified | Premier |
+| --------------------- | ---------- | --------- | ------- |
+| Pipeline generated    | $50k+      | $100k+    | $500k+  |
+| Closed revenue        | N/A        | $50k+     | $250k+  |
+| Certifications        | 1          | 2+        | 3+      |
+| Customer satisfaction | N/A        | 4+/5      | 4.5+/5  |
 
 ### Tier Movement
 
@@ -332,20 +349,20 @@ For joint delivery engagements:
 
 ### Gov/Defense Focus
 
-| Partner Type | Target Quantity | Profile |
-|--------------|-----------------|---------|
-| Tier 1 Primes | 3-5 | Lockheed, RTX, Northrop, Boeing, GDIT |
-| Tier 2 Primes | 5-10 | SAIC, Leidos, Booz Allen, CACI, Peraton |
-| Boutique Gov SIs | 10-15 | Cleared, mission-focused |
-| Gov consultants | 20-30 | Former IC/DoD, trusted advisors |
+| Partner Type     | Target Quantity | Profile                                 |
+| ---------------- | --------------- | --------------------------------------- |
+| Tier 1 Primes    | 3-5             | Lockheed, RTX, Northrop, Boeing, GDIT   |
+| Tier 2 Primes    | 5-10            | SAIC, Leidos, Booz Allen, CACI, Peraton |
+| Boutique Gov SIs | 10-15           | Cleared, mission-focused                |
+| Gov consultants  | 20-30           | Former IC/DoD, trusted advisors         |
 
 ### Enterprise Focus
 
-| Partner Type | Target Quantity | Profile |
-|--------------|-----------------|---------|
-| Security-focused SIs | 5-10 | Optiv, Coalfire, etc. |
-| Threat intel specialists | 5-10 | Boutique threat intel firms |
-| Regional SIs | 10-20 | Geographic coverage |
+| Partner Type             | Target Quantity | Profile                     |
+| ------------------------ | --------------- | --------------------------- |
+| Security-focused SIs     | 5-10            | Optiv, Coalfire, etc.       |
+| Threat intel specialists | 5-10            | Boutique threat intel firms |
+| Regional SIs             | 10-20           | Geographic coverage         |
 
 ---
 
@@ -376,12 +393,12 @@ For joint delivery engagements:
 
 ## Key Contacts
 
-| Role | Name | Email | Responsibility |
-|------|------|-------|----------------|
-| VP Partnerships | {{Name}} | {{email}} | Strategy, Premier partners |
-| Partner Manager | {{Name}} | {{email}} | Day-to-day, Certified partners |
-| Partner Operations | {{Name}} | {{email}} | Portal, enablement, MDF |
-| Partner Marketing | {{Name}} | {{email}} | Co-marketing, events |
+| Role               | Name     | Email     | Responsibility                 |
+| ------------------ | -------- | --------- | ------------------------------ |
+| VP Partnerships    | {{Name}} | {{email}} | Strategy, Premier partners     |
+| Partner Manager    | {{Name}} | {{email}} | Day-to-day, Certified partners |
+| Partner Operations | {{Name}} | {{email}} | Portal, enablement, MDF        |
+| Partner Marketing  | {{Name}} | {{email}} | Co-marketing, events           |
 
 ---
 

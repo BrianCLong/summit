@@ -26,7 +26,7 @@ grep -r "license\|tos" services/*/src/ | head -10
 
 ## Claude Prompt
 
-```
+````
 You are implementing the Ingest Wizard for IntelGraph - a no-code data mapper with PII detection and license enforcement.
 
 CONTEXT:
@@ -213,9 +213,10 @@ export interface Column {
   type: 'string' | 'number' | 'date' | 'boolean';
   samples: any[];
 }
-```
+````
 
 SAMPLE MAPPING SUGGESTION (AI):
+
 ```json
 {
   "sourceField": "email_address",
@@ -227,6 +228,7 @@ SAMPLE MAPPING SUGGESTION (AI):
 ```
 
 SAMPLE PII DETECTION:
+
 ```python
 import re
 
@@ -252,6 +254,7 @@ class PIIClassifier:
 ```
 
 SAMPLE LICENSE REGISTRY SCHEMA (PostgreSQL):
+
 ```sql
 CREATE TABLE licenses (
   id SERIAL PRIMARY KEY,
@@ -274,6 +277,7 @@ CREATE TABLE license_rules (
 ```
 
 SAMPLE DPIA CHECKLIST:
+
 ```json
 {
   "questions": [
@@ -315,6 +319,7 @@ Provide:
 (f) Golden dataset (10 test files)
 (g) Integration tests (CSV → Neo4j)
 (h) User guide (paralegal-friendly)
+
 ```
 
 ---
@@ -343,3 +348,4 @@ Provide:
 - Connectors: `services/ingest/src/connectors/HttpCsvConnector.ts`
 - PII regex patterns: https://rgxdb.com/
 - GDPR DPIA: https://gdpr.eu/data-protection-impact-assessment-template/
+```

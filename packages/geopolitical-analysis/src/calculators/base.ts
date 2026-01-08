@@ -3,12 +3,8 @@
  * @module @intelgraph/geopolitical-analysis/calculators/base
  */
 
-import {
-  BaseIndicator,
-  RiskLevel,
-  ConfidenceLevel,
-} from '../types/index.js';
-import { scoreToRiskLevel, calculateConfidence } from '../utils/scoring.js';
+import { BaseIndicator, RiskLevel, ConfidenceLevel } from "../types/index.js";
+import { scoreToRiskLevel, calculateConfidence } from "../utils/scoring.js";
 
 /**
  * Input data for indicator calculation
@@ -33,12 +29,12 @@ export abstract class BaseCalculator<T extends BaseIndicator> {
    * Validate input data
    */
   protected validateInput(input: IndicatorInput): void {
-    if (!input.countryCode || input.countryCode.length !== 2 && input.countryCode.length !== 3) {
-      throw new Error('Invalid country code');
+    if (!input.countryCode || (input.countryCode.length !== 2 && input.countryCode.length !== 3)) {
+      throw new Error("Invalid country code");
     }
 
     if (!input.countryName || input.countryName.trim().length === 0) {
-      throw new Error('Country name is required');
+      throw new Error("Country name is required");
     }
   }
 
@@ -49,7 +45,7 @@ export abstract class BaseCalculator<T extends BaseIndicator> {
     input: IndicatorInput,
     score: number,
     metadata: Record<string, unknown> = {}
-  ): Omit<BaseIndicator, 'type'> {
+  ): Omit<BaseIndicator, "type"> {
     const riskLevel = scoreToRiskLevel(score);
     const confidence = this.calculateConfidenceLevel(input, metadata);
 
@@ -64,7 +60,7 @@ export abstract class BaseCalculator<T extends BaseIndicator> {
       metadata: {
         ...metadata,
         calculatedAt: new Date().toISOString(),
-        calculatorVersion: '1.0.0',
+        calculatorVersion: "1.0.0",
       },
     };
   }
@@ -87,10 +83,10 @@ export abstract class BaseCalculator<T extends BaseIndicator> {
   ): ConfidenceLevel {
     // Default confidence calculation
     // Can be overridden by specific calculators
-    const dataRecency = metadata.dataRecencyDays as number || 30;
-    const sourceReliability = metadata.sourceReliability as number || 70;
+    const dataRecency = (metadata.dataRecencyDays as number) || 30;
+    const sourceReliability = (metadata.sourceReliability as number) || 70;
     const dataCompleteness = this.assessDataCompleteness(input);
-    const expertConsensus = metadata.expertConsensus as number || 60;
+    const expertConsensus = (metadata.expertConsensus as number) || 60;
 
     return calculateConfidence({
       dataRecency,
@@ -109,8 +105,7 @@ export abstract class BaseCalculator<T extends BaseIndicator> {
       (key) => input[key] !== null && input[key] !== undefined
     );
 
-    const completeness =
-      (providedFields.length / (requiredFields.length + 2)) * 100; // +2 for country code and name
+    const completeness = (providedFields.length / (requiredFields.length + 2)) * 100; // +2 for country code and name
 
     return Math.min(100, completeness);
   }

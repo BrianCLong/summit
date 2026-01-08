@@ -4,8 +4,8 @@
  * Exposes extension commands to the UI command palette.
  */
 
-import { ExtensionRegistry } from '../registry.js';
-import { Extension, ExtensionCapability } from '../types.js';
+import { ExtensionRegistry } from "../registry.js";
+import { Extension, ExtensionCapability } from "../types.js";
 
 export interface UICommand {
   id: string;
@@ -20,7 +20,7 @@ export interface UIWidget {
   id: string;
   title: string;
   component: string;
-  placement?: 'dashboard' | 'sidebar' | 'panel';
+  placement?: "dashboard" | "sidebar" | "panel";
   extension: string;
 }
 
@@ -43,9 +43,7 @@ export class CommandPaletteIntegration {
       await this.registerExtension(ext);
     }
 
-    console.info(
-      `Registered ${this.commands.size} UI commands and ${this.widgets.size} widgets`
-    );
+    console.info(`Registered ${this.commands.size} UI commands and ${this.widgets.size} widgets`);
   }
 
   /**
@@ -132,7 +130,7 @@ export class CommandPaletteIntegration {
       throw new Error(`Extension ${ext.manifest.name} not loaded`);
     }
 
-    const exportName = entrypoint.export || 'default';
+    const exportName = entrypoint.export || "default";
     const exported = module[exportName];
 
     if (!exported) {
@@ -141,13 +139,13 @@ export class CommandPaletteIntegration {
 
     if (entrypoint.handler) {
       const handler = exported[entrypoint.handler];
-      if (typeof handler !== 'function') {
+      if (typeof handler !== "function") {
         throw new Error(`Handler ${entrypoint.handler} is not a function`);
       }
       return handler.bind(exported);
     }
 
-    if (typeof exported !== 'function') {
+    if (typeof exported !== "function") {
       throw new Error(`Export ${exportName} is not a function`);
     }
 
@@ -205,9 +203,7 @@ export class CommandPaletteIntegration {
    */
   searchCommands(query: string): UICommand[] {
     const lowerQuery = query.toLowerCase();
-    return this.getCommands().filter((cmd) =>
-      cmd.title.toLowerCase().includes(lowerQuery)
-    );
+    return this.getCommands().filter((cmd) => cmd.title.toLowerCase().includes(lowerQuery));
   }
 
   /**

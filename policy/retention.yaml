@@ -232,4 +232,3 @@ residency:
     global-reference:
       storage_endpoint: neo4j://cluster.global.summit
       backup_bucket: s3://summit-global-reference
-

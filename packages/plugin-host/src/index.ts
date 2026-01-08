@@ -1,6 +1,6 @@
-export { PluginHostService, type PluginHostConfig } from './PluginHostService.js';
-export { PluginHostAPI } from './api/PluginHostAPI.js';
-export { createLogger, type Logger } from './types.js';
+export { PluginHostService, type PluginHostConfig } from "./PluginHostService.js";
+export { PluginHostAPI } from "./api/PluginHostAPI.js";
+export { createLogger, type Logger } from "./types.js";
 
 /**
  * Example usage:

@@ -1,17 +1,17 @@
 export type CanonicalEntityName =
-  | 'user'
-  | 'account'
-  | 'tenant'
-  | 'asset'
-  | 'document'
-  | 'ticket'
-  | 'runbook'
-  | 'model'
-  | 'dataset'
-  | 'feature'
-  | 'automation'
-  | 'policy'
-  | 'release';
+  | "user"
+  | "account"
+  | "tenant"
+  | "asset"
+  | "document"
+  | "ticket"
+  | "runbook"
+  | "model"
+  | "dataset"
+  | "feature"
+  | "automation"
+  | "policy"
+  | "release";
 
 export interface SchemaDefinition {
   name: CanonicalEntityName;
@@ -25,7 +25,7 @@ export interface SchemaValidationResult {
   errors: string[];
 }
 
-export type IntentVerb = 'request' | 'approve' | 'escalate' | 'undo' | 'preview';
+export type IntentVerb = "request" | "approve" | "escalate" | "undo" | "preview";
 
 export interface IntentEvent {
   id: string;
@@ -54,7 +54,7 @@ export interface DataQualityRecord {
 export interface QualityAlert {
   table: string;
   reason: string;
-  severity: 'warning' | 'critical';
+  severity: "warning" | "critical";
   records: DataQualityRecord[];
 }
 
@@ -92,7 +92,7 @@ export interface FeatureRetrievalResult {
 
 export interface PiiRule {
   path: string;
-  action: 'redact' | 'hash' | 'drop';
+  action: "redact" | "hash" | "drop";
 }
 
 export interface ProvenanceRecord {

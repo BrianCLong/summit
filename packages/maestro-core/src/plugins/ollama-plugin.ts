@@ -3,8 +3,8 @@
  * Integrates with Ollama for local AI model execution with GPU-aware scheduling
  */
 
-import axios, { AxiosInstance } from 'axios';
-import { StepPlugin, RunContext, WorkflowStep, StepExecution } from '../engine';
+import axios, { AxiosInstance } from "axios";
+import { StepPlugin, RunContext, WorkflowStep, StepExecution } from "../engine";
 
 export interface OllamaConfig {
   baseUrl: string;
@@ -18,7 +18,7 @@ export interface OllamaStepConfig {
   model: string;
   prompt?: string;
   messages?: Array<{
-    role: 'system' | 'user' | 'assistant';
+    role: "system" | "user" | "assistant";
     content: string;
   }>;
   template?: string;
@@ -26,7 +26,7 @@ export interface OllamaStepConfig {
   context?: number[];
   stream?: boolean;
   raw?: boolean;
-  format?: 'json';
+  format?: "json";
   options?: {
     temperature?: number;
     top_k?: number;
@@ -76,7 +76,7 @@ interface OllamaModelInfo {
 }
 
 export class OllamaPlugin implements StepPlugin {
-  name = 'ollama';
+  name = "ollama";
   private client: AxiosInstance;
   private config: OllamaConfig;
   private availableModels: Map<string, OllamaModelInfo> = new Map();
@@ -89,7 +89,7 @@ export class OllamaPlugin implements StepPlugin {
       baseURL: config.baseUrl,
       timeout: config.timeout || 300000, // 5 minutes default for local models
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
@@ -101,33 +101,28 @@ export class OllamaPlugin implements StepPlugin {
     const stepConfig = config as OllamaStepConfig;
 
     if (!stepConfig.model) {
-      throw new Error('Ollama step requires model configuration');
+      throw new Error("Ollama step requires model configuration");
     }
 
     // Validate that either prompt or messages are provided
     if (!stepConfig.prompt && !stepConfig.messages && !stepConfig.template) {
-      throw new Error(
-        'Ollama step requires either prompt, messages, or template',
-      );
+      throw new Error("Ollama step requires either prompt, messages, or template");
     }
 
     // Validate options
     if (stepConfig.options) {
       const opts = stepConfig.options;
 
-      if (
-        opts.temperature !== undefined &&
-        (opts.temperature < 0 || opts.temperature > 2)
-      ) {
-        throw new Error('temperature must be between 0 and 2');
+      if (opts.temperature !== undefined && (opts.temperature < 0 || opts.temperature > 2)) {
+        throw new Error("temperature must be between 0 and 2");
       }
 
       if (opts.top_p !== undefined && (opts.top_p < 0 || opts.top_p > 1)) {
-        throw new Error('top_p must be between 0 and 1');
+        throw new Error("top_p must be between 0 and 1");
       }
 
       if (opts.num_ctx && opts.num_ctx > 32768) {
-        console.warn('num_ctx > 32768 may cause high memory usage');
+        console.warn("num_ctx > 32768 may cause high memory usage");
       }
     }
   }
@@ -135,7 +130,7 @@ export class OllamaPlugin implements StepPlugin {
   async execute(
     context: RunContext,
     step: WorkflowStep,
-    execution: StepExecution,
+    execution: StepExecution
   ): Promise<{
     output?: any;
     cost_usd?: number;
@@ -148,7 +143,7 @@ export class OllamaPlugin implements StepPlugin {
       this.config.maxConcurrentRequests &&
       this.activeRequests >= this.config.maxConcurrentRequests
     ) {
-      throw new Error('Maximum concurrent Ollama requests reached');
+      throw new Error("Maximum concurrent Ollama requests reached");
     }
 
     this.activeRequests++;
@@ -190,12 +185,7 @@ export class OllamaPlugin implements StepPlugin {
     } catch (error) {
       // Try fallback models if configured
       if (stepConfig.fallback_models && stepConfig.fallback_models.length > 0) {
-        return await this.executeWithFallback(
-          stepConfig,
-          context,
-          execution,
-          error as Error,
-        );
+        return await this.executeWithFallback(stepConfig, context, execution, error as Error);
       }
 
       throw new Error(`Ollama execution failed: ${(error as Error).message}`);
@@ -207,7 +197,7 @@ export class OllamaPlugin implements StepPlugin {
   async compensate(
     context: RunContext,
     step: WorkflowStep,
-    execution: StepExecution,
+    execution: StepExecution
   ): Promise<void> {
     // For Ollama, compensation might involve:
     // 1. Cleaning up any cached context
@@ -232,22 +222,19 @@ export class OllamaPlugin implements StepPlugin {
     return Array.from(this.availableModels.keys());
   }
 
-  async pullModel(
-    modelName: string,
-    progressCallback?: (progress: any) => void,
-  ): Promise<void> {
+  async pullModel(modelName: string, progressCallback?: (progress: any) => void): Promise<void> {
     const response = await this.client.post(
-      '/api/pull',
+      "/api/pull",
       { name: modelName },
       {
-        responseType: 'stream',
+        responseType: "stream",
         timeout: 0, // No timeout for model downloads
-      },
+      }
     );
 
     return new Promise((resolve, reject) => {
-      response.data.on('data', (chunk: Buffer) => {
-        const lines = chunk.toString().trim().split('\n');
+      response.data.on("data", (chunk: Buffer) => {
+        const lines = chunk.toString().trim().split("\n");
 
         for (const line of lines) {
           try {
@@ -255,7 +242,7 @@ export class OllamaPlugin implements StepPlugin {
             if (progressCallback) {
               progressCallback(data);
             }
-            if (data.status === 'success') {
+            if (data.status === "success") {
               resolve();
               return;
             }
@@ -269,14 +256,12 @@ export class OllamaPlugin implements StepPlugin {
         }
       });
 
-      response.data.on('end', resolve);
-      response.data.on('error', reject);
+      response.data.on("end", resolve);
+      response.data.on("error", reject);
     });
   }
 
-  private async selectOptimalModel(
-    stepConfig: OllamaStepConfig,
-  ): Promise<string> {
+  private async selectOptimalModel(stepConfig: OllamaStepConfig): Promise<string> {
     if (!this.config.autoModelSelection) {
       return stepConfig.model;
     }
@@ -291,9 +276,7 @@ export class OllamaPlugin implements StepPlugin {
     ) {
       const smallerModel = this.findSmallerAlternative(stepConfig.model);
       if (smallerModel) {
-        console.log(
-          `Selected smaller model ${smallerModel} due to GPU memory constraints`,
-        );
+        console.log(`Selected smaller model ${smallerModel} due to GPU memory constraints`);
         return smallerModel;
       }
     }
@@ -303,7 +286,7 @@ export class OllamaPlugin implements StepPlugin {
 
   private async refreshModelList(): Promise<void> {
     try {
-      const response = await this.client.get('/api/tags');
+      const response = await this.client.get("/api/tags");
       const models = response.data.models || [];
 
       this.availableModels.clear();
@@ -311,15 +294,11 @@ export class OllamaPlugin implements StepPlugin {
         this.availableModels.set(model.name, model);
       }
     } catch (error) {
-      console.error('Failed to refresh Ollama model list:', error);
+      console.error("Failed to refresh Ollama model list:", error);
     }
   }
 
-  private preparePayload(
-    stepConfig: OllamaStepConfig,
-    model: string,
-    context: RunContext,
-  ): any {
+  private preparePayload(stepConfig: OllamaStepConfig, model: string, context: RunContext): any {
     const payload: any = {
       model,
       stream: stepConfig.stream || false,
@@ -351,7 +330,7 @@ export class OllamaPlugin implements StepPlugin {
   }
 
   private async makeRequest(payload: any): Promise<any> {
-    const endpoint = payload.messages ? '/api/chat' : '/api/generate';
+    const endpoint = payload.messages ? "/api/chat" : "/api/generate";
     return await this.client.post(endpoint, payload);
   }
 
@@ -359,37 +338,33 @@ export class OllamaPlugin implements StepPlugin {
     if (responseData.message) {
       // Chat API response
       return {
-        type: 'chat',
+        type: "chat",
         content: responseData.message.content,
         role: responseData.message.role,
       };
     } else if (responseData.response) {
       // Generate API response
       return {
-        type: 'generate',
+        type: "generate",
         content: responseData.response,
       };
     }
 
-    throw new Error('Invalid response format from Ollama');
+    throw new Error("Invalid response format from Ollama");
   }
 
   private async executeWithFallback(
     stepConfig: OllamaStepConfig,
     context: RunContext,
     execution: StepExecution,
-    originalError: Error,
+    originalError: Error
   ): Promise<any> {
     for (const fallbackModel of stepConfig.fallback_models || []) {
       try {
         console.log(`Trying fallback model: ${fallbackModel}`);
 
         const fallbackConfig = { ...stepConfig, model: fallbackModel };
-        const payload = this.preparePayload(
-          fallbackConfig,
-          fallbackModel,
-          context,
-        );
+        const payload = this.preparePayload(fallbackConfig, fallbackModel, context);
 
         const startTime = Date.now();
         const response = await this.makeRequest(payload);
@@ -410,10 +385,7 @@ export class OllamaPlugin implements StepPlugin {
           },
         };
       } catch (fallbackError) {
-        console.log(
-          `Fallback model ${fallbackModel} also failed:`,
-          fallbackError,
-        );
+        console.log(`Fallback model ${fallbackModel} also failed:`, fallbackError);
         continue;
       }
     }
@@ -433,10 +405,10 @@ export class OllamaPlugin implements StepPlugin {
 
   private getModelComputeMultiplier(model: string): number {
     // Rough multipliers based on model size/complexity
-    if (model.includes('7b') || model.includes('7B')) return 1.0;
-    if (model.includes('13b') || model.includes('13B')) return 2.0;
-    if (model.includes('34b') || model.includes('34B')) return 4.0;
-    if (model.includes('70b') || model.includes('70B')) return 8.0;
+    if (model.includes("7b") || model.includes("7B")) return 1.0;
+    if (model.includes("13b") || model.includes("13B")) return 2.0;
+    if (model.includes("34b") || model.includes("34B")) return 4.0;
+    if (model.includes("70b") || model.includes("70B")) return 8.0;
 
     return 1.5; // Default multiplier
   }
@@ -444,10 +416,10 @@ export class OllamaPlugin implements StepPlugin {
   private findSmallerAlternative(model: string): string | null {
     // Logic to find smaller variants of models
     const alternatives: Record<string, string> = {
-      'llama2:70b': 'llama2:13b',
-      'llama2:13b': 'llama2:7b',
-      'codellama:34b': 'codellama:13b',
-      'codellama:13b': 'codellama:7b',
+      "llama2:70b": "llama2:13b",
+      "llama2:13b": "llama2:7b",
+      "codellama:34b": "codellama:13b",
+      "codellama:13b": "codellama:7b",
     };
 
     return alternatives[model] || null;

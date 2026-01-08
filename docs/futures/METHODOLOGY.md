@@ -22,12 +22,14 @@ This document describes the methodologies used in the Emerging Threats and Futur
 8. **Monitor and Update**: Track indicators and update scenarios
 
 **Output**:
+
 - 4-6 alternative future scenarios
 - Signposts for scenario monitoring
 - Strategic implications
 - Decision options
 
 **When to Use**:
+
 - Long-term strategic planning (5-20 years)
 - High uncertainty environments
 - Multiple stakeholder perspectives needed
@@ -48,12 +50,14 @@ This document describes the methodologies used in the Emerging Threats and Futur
 7. **Escalate Findings**: Report significant developments
 
 **Output**:
+
 - Weak signals catalog
 - Emerging issues database
 - Trend briefings
 - Wild card alerts
 
 **When to Use**:
+
 - Continuous environmental monitoring
 - Early warning systems
 - Innovation tracking
@@ -74,12 +78,14 @@ This document describes the methodologies used in the Emerging Threats and Futur
 7. **Synthesize**: Develop consensus forecast
 
 **Output**:
+
 - Consensus forecasts with confidence intervals
 - Probability distributions
 - Expert rationale
 - Dissenting views
 
 **When to Use**:
+
 - Technology forecasting
 - Timeline estimation
 - Impact assessment
@@ -100,12 +106,14 @@ This document describes the methodologies used in the Emerging Threats and Futur
 7. **Analyze Results**: Identify most likely scenario paths
 
 **Output**:
+
 - Adjusted event probabilities
 - Scenario likelihoods
 - Event interdependencies
 - Critical trigger events
 
 **When to Use**:
+
 - Understanding complex interdependencies
 - Risk assessment
 - Scenario refinement
@@ -126,12 +134,14 @@ This document describes the methodologies used in the Emerging Threats and Futur
 7. **Develop Action Plan**: Create implementation roadmap
 
 **Output**:
+
 - Transition pathways
 - Required milestones
 - Necessary changes (policy, technology, behavior)
 - Implementation timeline
 
 **When to Use**:
+
 - Normative futures (desired outcomes)
 - Strategic planning
 - Policy development
@@ -152,12 +162,14 @@ This document describes the methodologies used in the Emerging Threats and Futur
 7. **Synthesize Insights**: Draw strategic conclusions
 
 **Output**:
+
 - Consequence map
 - Impact chains
 - Unexpected implications
 - Strategic insights
 
 **When to Use**:
+
 - Impact assessment
 - Unintended consequences exploration
 - Causal thinking
@@ -184,12 +196,14 @@ This document describes the methodologies used in the Emerging Threats and Futur
 6. **Transform**: Develop strategies for different layers
 
 **Output**:
+
 - Multi-layered analysis
 - Deep causation understanding
 - Alternative worldviews
 - Transformative strategies
 
 **When to Use**:
+
 - Deep problem understanding
 - Paradigm shift analysis
 - Cultural futures
@@ -211,12 +225,14 @@ This document describes the methodologies used in the Emerging Threats and Futur
 8. **Select Solutions**: Choose promising configurations
 
 **Output**:
+
 - Morphological field
 - Consistent configurations
 - Solution space map
 - Novel options
 
 **When to Use**:
+
 - Solution exploration
 - Option generation
 - Complex problem-solving
@@ -250,6 +266,7 @@ This document describes the methodologies used in the Emerging Threats and Futur
 ### 2. Weak Signal Detection
 
 **Characteristics of Weak Signals**:
+
 - Low visibility
 - High ambiguity
 - Potentially high impact
@@ -268,6 +285,7 @@ This document describes the methodologies used in the Emerging Threats and Futur
 ### 3. Black Swan Identification
 
 **Black Swan Characteristics**:
+
 - Extreme rarity
 - Severe impact
 - Retrospective predictability
@@ -285,6 +303,7 @@ This document describes the methodologies used in the Emerging Threats and Futur
 ### 4. Threat Assessment Matrix
 
 **Dimensions**:
+
 - **Probability**: Likelihood of threat manifestation
 - **Impact**: Severity of consequences
 - **Velocity**: Speed of threat development
@@ -310,6 +329,7 @@ This document describes the methodologies used in the Emerging Threats and Futur
 ### 2. Early Warning Indicators
 
 **Indicator Characteristics**:
+
 - **Leading**: Precede the event
 - **Measurable**: Quantifiable or observable
 - **Reliable**: Consistently predictive
@@ -344,6 +364,7 @@ This document describes the methodologies used in the Emerging Threats and Futur
 ### 1. Technology Convergence Assessment
 
 **Dimensions**:
+
 - **Technical Maturity**: Individual technology readiness
 - **Integration Level**: Degree of integration achieved
 - **Synergy Magnitude**: Enhancement from combination
@@ -363,12 +384,14 @@ This document describes the methodologies used in the Emerging Threats and Futur
 ### 2. Synergy Analysis
 
 **Synergy Types**:
+
 - **Additive**: 1 + 1 = 2
 - **Multiplicative**: 1 + 1 = 3+
 - **Enabling**: Technology A enables Technology B
 - **Transformative**: Combination creates new paradigm
 
 **Measurement**:
+
 - Performance improvement
 - Capability expansion
 - Cost reduction

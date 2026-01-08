@@ -3,18 +3,11 @@
  * High-level service for managing data sources, datasets, fields, mappings, and licenses
  */
 
-import {
-  DataSource,
-  Dataset,
-  Field,
-  Mapping,
-  License,
-  LineageSummary,
-} from '../types/metadata.js';
-import { IMetadataStore } from '../stores/PostgresMetadataStore.js';
+import { DataSource, Dataset, Field, Mapping, License, LineageSummary } from "../types/metadata.js";
+import { IMetadataStore } from "../stores/PostgresMetadataStore.js";
 
 export class MetadataService {
-  constructor(private store: IMetadataStore) { }
+  constructor(private store: IMetadataStore) {}
 
   // ====== DataSource Operations ======
 
@@ -22,12 +15,12 @@ export class MetadataService {
    * Register a new data source
    */
   async registerDataSource(
-    source: Omit<DataSource, 'id' | 'createdAt' | 'updatedAt'>
+    source: Omit<DataSource, "id" | "createdAt" | "updatedAt">
   ): Promise<DataSource> {
     const now = new Date();
     const dataSource: DataSource = {
       ...source,
-      id: this.generateId('source', source.name),
+      id: this.generateId("source", source.name),
       createdAt: now,
       updatedAt: now,
     };
@@ -40,7 +33,7 @@ export class MetadataService {
    */
   async updateDataSourceStatus(
     id: string,
-    status: DataSource['connectionStatus'],
+    status: DataSource["connectionStatus"],
     lastConnectedAt?: Date
   ): Promise<DataSource> {
     return this.store.updateDataSource(id, {
@@ -72,12 +65,12 @@ export class MetadataService {
    * Register a new dataset
    */
   async registerDataset(
-    dataset: Omit<Dataset, 'id' | 'createdAt' | 'updatedAt' | 'fields'>
+    dataset: Omit<Dataset, "id" | "createdAt" | "updatedAt" | "fields">
   ): Promise<Dataset> {
     const now = new Date();
     const newDataset: Dataset = {
       ...dataset,
-      id: this.generateId('dataset', dataset.fullyQualifiedName),
+      id: this.generateId("dataset", dataset.fullyQualifiedName),
       fields: [],
       createdAt: now,
       updatedAt: now,
@@ -91,8 +84,8 @@ export class MetadataService {
    * Register dataset with fields
    */
   async registerDatasetWithFields(
-    dataset: Omit<Dataset, 'id' | 'createdAt' | 'updatedAt'>,
-    fields: Omit<Field, 'id' | 'datasetId' | 'createdAt' | 'updatedAt'>[]
+    dataset: Omit<Dataset, "id" | "createdAt" | "updatedAt">,
+    fields: Omit<Field, "id" | "datasetId" | "createdAt" | "updatedAt">[]
   ): Promise<Dataset> {
     // Create dataset first
     const createdDataset = await this.registerDataset({
@@ -106,7 +99,7 @@ export class MetadataService {
     for (const field of fields) {
       const newField: Field = {
         ...field,
-        id: this.generateId('field', `${createdDataset.id}-${field.name}`),
+        id: this.generateId("field", `${createdDataset.id}-${field.name}`),
         datasetId: createdDataset.id,
         createdAt: now,
         updatedAt: now,
@@ -148,19 +141,17 @@ export class MetadataService {
     let datasets = await this.store.listDatasets(criteria.sourceId);
 
     if (criteria.licenseId) {
-      datasets = datasets.filter(d => d.licenseId === criteria.licenseId);
+      datasets = datasets.filter((d) => d.licenseId === criteria.licenseId);
     }
 
     if (criteria.policyTags && criteria.policyTags.length > 0) {
-      datasets = datasets.filter(d =>
-        criteria.policyTags!.some(tag => d.policyTags.includes(tag))
+      datasets = datasets.filter((d) =>
+        criteria.policyTags!.some((tag) => d.policyTags.includes(tag))
       );
     }
 
     if (criteria.tags && criteria.tags.length > 0) {
-      datasets = datasets.filter(d =>
-        criteria.tags!.some(tag => d.tags.includes(tag))
-      );
+      datasets = datasets.filter((d) => criteria.tags!.some((tag) => d.tags.includes(tag)));
     }
 
     return datasets;
@@ -172,12 +163,12 @@ export class MetadataService {
    * Create a new mapping
    */
   async createMapping(
-    mapping: Omit<Mapping, 'id' | 'createdAt' | 'updatedAt' | 'version'>
+    mapping: Omit<Mapping, "id" | "createdAt" | "updatedAt" | "version">
   ): Promise<Mapping> {
     const now = new Date();
     const newMapping: Mapping = {
       ...mapping,
-      id: this.generateId('mapping', mapping.name),
+      id: this.generateId("mapping", mapping.name),
       version: 1,
       createdAt: now,
       updatedAt: now,
@@ -191,7 +182,7 @@ export class MetadataService {
    */
   async validateMapping(id: string, validatedBy: string): Promise<Mapping> {
     return this.store.updateMapping(id, {
-      status: 'ACTIVE' as any,
+      status: "ACTIVE" as any,
       validatedAt: new Date(),
       validatedBy,
     });
@@ -209,7 +200,7 @@ export class MetadataService {
    */
   async findDatasetsAffectedByMapping(mappingId: string): Promise<Dataset[]> {
     const allDatasets = await this.store.listDatasets();
-    return allDatasets.filter(d => d.canonicalMappingId === mappingId);
+    return allDatasets.filter((d) => d.canonicalMappingId === mappingId);
   }
 
   // ====== License Operations ======
@@ -217,13 +208,11 @@ export class MetadataService {
   /**
    * Create a new license
    */
-  async createLicense(
-    license: Omit<License, 'id' | 'createdAt' | 'updatedAt'>
-  ): Promise<License> {
+  async createLicense(license: Omit<License, "id" | "createdAt" | "updatedAt">): Promise<License> {
     const now = new Date();
     const newLicense: License = {
       ...license,
-      id: this.generateId('license', license.name),
+      id: this.generateId("license", license.name),
       createdAt: now,
       updatedAt: now,
     };
@@ -236,7 +225,7 @@ export class MetadataService {
    */
   async getDatasetsWithLicense(licenseId: string): Promise<Dataset[]> {
     const allDatasets = await this.store.listDatasets();
-    return allDatasets.filter(d => d.licenseId === licenseId);
+    return allDatasets.filter((d) => d.licenseId === licenseId);
   }
 
   /**
@@ -244,7 +233,7 @@ export class MetadataService {
    */
   async getActiveLicenses(): Promise<License[]> {
     const licenses = await this.store.listLicenses();
-    return licenses.filter(l => l.status === 'ACTIVE');
+    return licenses.filter((l) => l.status === "ACTIVE");
   }
 
   // ====== Lineage Operations ======
@@ -254,7 +243,7 @@ export class MetadataService {
    */
   async computeLineageSummary(
     entityId: string,
-    entityType: LineageSummary['entityType']
+    entityType: LineageSummary["entityType"]
   ): Promise<LineageSummary> {
     // This is a placeholder - actual lineage computation would be more complex
     // and would involve traversing the graph of sources, datasets, mappings, etc.
@@ -272,7 +261,7 @@ export class MetadataService {
       computedAt: new Date(),
     };
 
-    if (entityType === 'DATASET') {
+    if (entityType === "DATASET") {
       const dataset = await this.store.getDataset(entityId);
       if (dataset) {
         summary.upstreamSources = [dataset.sourceId];
@@ -306,7 +295,7 @@ export class MetadataService {
 
     // Find mappings that reference this dataset
     const allMappings = await this.store.listMappings();
-    const affectedMappings = allMappings.filter(m => m.datasetId === datasetId);
+    const affectedMappings = allMappings.filter((m) => m.datasetId === datasetId);
 
     return { affectedDatasets, affectedMappings };
   }
@@ -318,7 +307,10 @@ export class MetadataService {
    */
   private generateId(prefix: string, name: string): string {
     const timestamp = Date.now();
-    const sanitized = name.toLowerCase().replace(/[^a-z0-9]/g, '-').substring(0, 50);
+    const sanitized = name
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "-")
+      .substring(0, 50);
     return `${prefix}-${sanitized}-${timestamp}`;
   }
 }

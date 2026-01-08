@@ -12,6 +12,7 @@
 You are Claude Code, an AI software engineer for Topicality.
 
 Context:
+
 - Our daily cadence includes a "CEO Daily Dispatch":
   - yesterday results,
   - today plan,
@@ -21,15 +22,18 @@ Context:
 
 Goal:
 Implement a service or script that generates a Daily Dispatch markdown document from:
+
 - metrics sources (e.g., a metrics DB or stub),
 - Maestro runs,
 - IntelGraph claims (for key KPIs).
 
 Assumptions:
+
 - Use a scriptable stack (TypeScript/Node or Python).
 - Data sources can initially be mocked or read from local JSON files, but structure the code so real integrations can be swapped in.
 
 Requirements:
+
 1. Inputs
    - Date (default: today).
    - Metrics: time_to_first_value_days, provenance_manifest_coverage, p95_query_latency_ms, reliability_slo_uptime, design_partners_signed, payback_period, gross_margin_pct, etc.
@@ -62,6 +66,7 @@ Requirements:
      - how to plug in real metric sources later.
 
 Deliverables:
+
 - Script/service code.
 - Templates.
 - Sample data.

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "pgbouncer.fullname" . }}
+  name: { { include "pgbouncer.fullname" . } }
 data:
   pgbouncer.ini: |
     [databases]

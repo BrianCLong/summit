@@ -13,6 +13,7 @@ The Nuclear and WMD Intelligence Platform provides comprehensive monitoring, tra
 Tracks nuclear facilities, enrichment operations, reprocessing plants, and nuclear testing.
 
 **Key Components:**
+
 - `NuclearFacilityTracker` - Track nuclear facilities worldwide
 - `EnrichmentMonitor` - Monitor uranium enrichment activities
 - `ReprocessingSurveillance` - Track plutonium production
@@ -22,22 +23,23 @@ Tracks nuclear facilities, enrichment operations, reprocessing plants, and nucle
 - `NuclearInfrastructureMonitor` - Assess overall nuclear capabilities
 
 **Example Usage:**
+
 ```typescript
-import { NuclearFacilityTracker, EnrichmentMonitor } from '@intelgraph/nuclear-monitoring';
+import { NuclearFacilityTracker, EnrichmentMonitor } from "@intelgraph/nuclear-monitoring";
 
 const tracker = new NuclearFacilityTracker();
 
 // Register a facility
 tracker.registerFacility({
-  id: 'facility-001',
-  name: 'Natanz Enrichment Facility',
-  type: 'enrichment_plant',
+  id: "facility-001",
+  name: "Natanz Enrichment Facility",
+  type: "enrichment_plant",
   location: { latitude: 33.7208, longitude: 51.7278 },
-  country: 'Iran',
-  status: 'operational',
+  country: "Iran",
+  status: "operational",
   iaea_safeguards: true,
   declared: true,
-  confidence_level: 'confirmed',
+  confidence_level: "confirmed",
   // ... other fields
 });
 
@@ -46,7 +48,7 @@ const undeclared = tracker.getUndeclaredFacilities();
 
 // Assess enrichment risk
 const enrichmentMonitor = new EnrichmentMonitor();
-const risk = enrichmentMonitor.assessProliferationRisk('facility-001');
+const risk = enrichmentMonitor.assessProliferationRisk("facility-001");
 ```
 
 #### 2. WMD Tracking (`@intelgraph/wmd-tracking`)
@@ -54,6 +56,7 @@ const risk = enrichmentMonitor.assessProliferationRisk('facility-001');
 Comprehensive tracking of chemical, biological, and nuclear weapons programs.
 
 **Key Components:**
+
 - `ChemicalWeaponsTracker` - Track chemical weapons stockpiles and facilities
 - `BiologicalWeaponsTracker` - Monitor bioweapon threats and BSL facilities
 - `WeaponsDevelopmentTracker` - Track WMD program development
@@ -61,16 +64,17 @@ Comprehensive tracking of chemical, biological, and nuclear weapons programs.
 - `WMDThreatAssessor` - Assess overall WMD threats
 
 **Example Usage:**
+
 ```typescript
-import { ChemicalWeaponsTracker } from '@intelgraph/wmd-tracking';
+import { ChemicalWeaponsTracker } from "@intelgraph/wmd-tracking";
 
 const cwTracker = new ChemicalWeaponsTracker();
 
 // Check CWC compliance
-const compliance = cwTracker.assessCWCCompliance('Syria');
+const compliance = cwTracker.assessCWCCompliance("Syria");
 
 // Track destruction progress
-const progress = cwTracker.getDestructionProgress('Syria');
+const progress = cwTracker.getDestructionProgress("Syria");
 ```
 
 #### 3. Missile Intelligence (`@intelgraph/missile-intelligence`)
@@ -78,21 +82,23 @@ const progress = cwTracker.getDestructionProgress('Syria');
 Tracks ballistic missiles, cruise missiles, hypersonic weapons, and delivery systems.
 
 **Key Components:**
+
 - `MissileTracker` - Track missile systems and launchers
 - `MissileTestMonitor` - Monitor missile tests
 - `MissileCapabilityAssessor` - Assess country missile capabilities
 
 **Example Usage:**
+
 ```typescript
-import { MissileTracker } from '@intelgraph/missile-intelligence';
+import { MissileTracker } from "@intelgraph/missile-intelligence";
 
 const tracker = new MissileTracker();
 
 // Assess hypersonic capability
-const hypersonicCap = tracker.assessHypersonicCapability('Russia');
+const hypersonicCap = tracker.assessHypersonicCapability("Russia");
 
 // Get strategic missiles
-const strategic = tracker.getStrategicMissiles('China');
+const strategic = tracker.getStrategicMissiles("China");
 ```
 
 #### 4. Proliferation Networks (`@intelgraph/proliferation-networks`)
@@ -100,13 +106,15 @@ const strategic = tracker.getStrategicMissiles('China');
 Tracks illicit procurement networks, smuggling routes, and technology transfer.
 
 **Key Components:**
+
 - `NetworkTracker` - Track proliferation networks
 - `ProcurementMonitor` - Monitor illicit procurement activities
 - `FinancialTracker` - Track financial flows
 
 **Example Usage:**
+
 ```typescript
-import { NetworkTracker } from '@intelgraph/proliferation-networks';
+import { NetworkTracker } from "@intelgraph/proliferation-networks";
 
 const tracker = new NetworkTracker();
 
@@ -114,7 +122,7 @@ const tracker = new NetworkTracker();
 const active = tracker.getActiveNetworks();
 
 // Track specific material
-const networks = tracker.trackMaterial('centrifuge_components');
+const networks = tracker.trackMaterial("centrifuge_components");
 ```
 
 #### 5. Treaty Verification (`@intelgraph/treaty-verification`)
@@ -122,14 +130,16 @@ const networks = tracker.trackMaterial('centrifuge_components');
 Monitors compliance with nonproliferation treaties.
 
 **Key Components:**
+
 - `NPTMonitor` - Nuclear Non-Proliferation Treaty monitoring
 - `CTBTMonitor` - Comprehensive Test Ban Treaty monitoring
 - `IAEASafeguardsMonitor` - IAEA safeguards verification
 - `CWCMonitor` - Chemical Weapons Convention monitoring
 
 **Example Usage:**
+
 ```typescript
-import { NPTMonitor, IAEASafeguardsMonitor } from '@intelgraph/treaty-verification';
+import { NPTMonitor, IAEASafeguardsMonitor } from "@intelgraph/treaty-verification";
 
 const nptMonitor = new NPTMonitor();
 const nonCompliant = nptMonitor.getNonCompliantCountries();
@@ -143,14 +153,16 @@ const withoutAP = iaeaMonitor.getCountriesWithoutAdditionalProtocol();
 Advanced technical analysis using satellite imagery, seismic detection, and OSINT.
 
 **Key Components:**
+
 - `SatelliteImageryAnalyzer` - Analyze satellite images for facility changes
 - `SeismicDetectionSystem` - Detect and analyze seismic events
 - `RadionuclideMonitor` - Monitor atmospheric radionuclides
 - `OSINTAnalyzer` - Open-source intelligence analysis
 
 **Example Usage:**
+
 ```typescript
-import { SeismicDetectionSystem } from '@intelgraph/technical-analysis';
+import { SeismicDetectionSystem } from "@intelgraph/technical-analysis";
 
 const seismic = new SeismicDetectionSystem();
 
@@ -168,22 +180,24 @@ const yield_estimate = seismic.estimateYield(5.2); // magnitude
 Central coordination service integrating all monitoring capabilities.
 
 **Key Methods:**
+
 - `assessCountryWMDCapability(country)` - Comprehensive capability assessment
 - `detectEarlyWarningIndicators()` - Early warning system
 - `generateIntelligenceReport(country)` - Generate comprehensive reports
 - `monitorFacilityConstruction(facilityId, images)` - Track construction activity
 
 **Example Usage:**
+
 ```typescript
-import WMDIntelligenceService from '@intelgraph/wmd-intelligence-service';
+import WMDIntelligenceService from "@intelgraph/wmd-intelligence-service";
 
 const service = new WMDIntelligenceService();
 
 // Comprehensive assessment
-const assessment = await service.assessCountryWMDCapability('North Korea');
+const assessment = await service.assessCountryWMDCapability("North Korea");
 
 // Generate report
-const report = await service.generateIntelligenceReport('Iran');
+const report = await service.generateIntelligenceReport("Iran");
 
 // Early warning
 const warnings = await service.detectEarlyWarningIndicators();
@@ -194,6 +208,7 @@ const warnings = await service.detectEarlyWarningIndicators();
 Treaty monitoring, verification, and response coordination.
 
 **Key Methods:**
+
 - `assessTreatyCompliance(country)` - Assess treaty compliance
 - `trackVerificationActivities(country)` - Track inspections and verification
 - `assessExportControlCompliance(country)` - Export control assessment
@@ -201,20 +216,21 @@ Treaty monitoring, verification, and response coordination.
 - `promoteConfidenceBuildingMeasures(region)` - Support CBMs
 
 **Example Usage:**
+
 ```typescript
-import NonproliferationService from '@intelgraph/nonproliferation-service';
+import NonproliferationService from "@intelgraph/nonproliferation-service";
 
 const service = new NonproliferationService();
 
 // Check compliance
-const compliance = await service.assessTreatyCompliance('Iran');
+const compliance = await service.assessTreatyCompliance("Iran");
 
 // Coordinate response to threat
 const response = await service.coordinateResponse({
-  type: 'nuclear_test',
-  country: 'North Korea',
-  severity: 'critical',
-  details: 'Underground nuclear test detected'
+  type: "nuclear_test",
+  country: "North Korea",
+  severity: "critical",
+  details: "Underground nuclear test detected",
 });
 ```
 
@@ -273,6 +289,7 @@ interface ChemicalWeapon {
 ### 1. Data Classification
 
 All WMD intelligence data is highly sensitive. Follow proper classification protocols:
+
 - Mark all data with appropriate classification levels
 - Use secure channels for transmission
 - Apply need-to-know principles
@@ -281,6 +298,7 @@ All WMD intelligence data is highly sensitive. Follow proper classification prot
 ### 2. Source Verification
 
 Always verify intelligence from multiple sources:
+
 - Satellite imagery + signals intelligence
 - Human intelligence + technical analysis
 - Cross-reference with treaty declarations
@@ -289,6 +307,7 @@ Always verify intelligence from multiple sources:
 ### 3. Analysis Standards
 
 Maintain rigorous analysis standards:
+
 - Document all assumptions
 - Provide confidence assessments
 - Include alternative hypotheses
@@ -297,6 +316,7 @@ Maintain rigorous analysis standards:
 ### 4. Operational Security
 
 Protect intelligence methods and sources:
+
 - Minimize disclosure of collection methods
 - Protect human sources
 - Secure technical capabilities
@@ -307,24 +327,28 @@ Protect intelligence methods and sources:
 ### Risk Levels
 
 **Critical:**
+
 - Weapons-grade enrichment detected
 - Nuclear test conducted
 - Large-scale treaty violations
 - Imminent proliferation threat
 
 **High:**
+
 - HEU production capability
 - Advanced missile development
 - Active WMD program
 - Significant safeguards concerns
 
 **Moderate:**
+
 - Dual-use facilities
 - Export control violations
 - Partial treaty compliance
 - Emerging capabilities
 
 **Low:**
+
 - Full treaty compliance
 - Transparent operations
 - No proliferation indicators
@@ -346,6 +370,7 @@ Standard intelligence report structure:
 ### Alert System
 
 Early warning alerts are generated for:
+
 - Undeclared facility detection
 - Nuclear test events
 - Treaty violations
@@ -361,16 +386,17 @@ Services can be integrated via REST APIs:
 
 ```typescript
 // Example API endpoint structure
-POST /api/wmd/assess-capability
-GET /api/wmd/facilities/{country}
-POST /api/wmd/early-warning
-GET /api/treaty/compliance/{country}
-POST /api/proliferation/track-network
+POST / api / wmd / assess - capability;
+GET / api / wmd / facilities / { country };
+POST / api / wmd / early - warning;
+GET / api / treaty / compliance / { country };
+POST / api / proliferation / track - network;
 ```
 
 ### Data Sources
 
 Integrate with external data sources:
+
 - IAEA public reports and databases
 - CTBTO monitoring stations
 - Satellite imagery providers
@@ -381,6 +407,7 @@ Integrate with external data sources:
 ## Support and Training
 
 For training and support:
+
 - Review threat assessment guides
 - Consult with WMD subject matter experts
 - Attend regular training sessions

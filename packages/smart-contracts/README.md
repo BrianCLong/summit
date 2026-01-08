@@ -23,15 +23,15 @@ pnpm add @intelgraph/smart-contracts
 ### Deploy Contract
 
 ```typescript
-import { SmartContractExecutor } from '@intelgraph/smart-contracts';
-import pino from 'pino';
+import { SmartContractExecutor } from "@intelgraph/smart-contracts";
+import pino from "pino";
 
 const executor = new SmartContractExecutor(pino());
 
 const contract = {
-  address: '0x123...',
-  name: 'AccessControlPolicy',
-  version: '1.0.0',
+  address: "0x123...",
+  name: "AccessControlPolicy",
+  version: "1.0.0",
   code: `
     function checkAccess(userId, resourceId) {
       const user = getState('user:' + userId);
@@ -45,20 +45,22 @@ const contract = {
     }
   `,
   abi: {
-    functions: [{
-      name: 'checkAccess',
-      inputs: [
-        { name: 'userId', type: 'string' },
-        { name: 'resourceId', type: 'string' }
-      ],
-      outputs: [{ name: 'allowed', type: 'boolean' }],
-      stateMutability: 'view'
-    }],
-    events: []
+    functions: [
+      {
+        name: "checkAccess",
+        inputs: [
+          { name: "userId", type: "string" },
+          { name: "resourceId", type: "string" },
+        ],
+        outputs: [{ name: "allowed", type: "boolean" }],
+        stateMutability: "view",
+      },
+    ],
+    events: [],
   },
-  deployer: 'admin-user',
+  deployer: "admin-user",
   deployedAt: Date.now(),
-  state: {}
+  state: {},
 };
 
 await executor.deployContract(contract);
@@ -68,25 +70,25 @@ await executor.deployContract(contract);
 
 ```typescript
 const context = {
-  caller: 'user-123',
-  contract: '0x123...',
+  caller: "user-123",
+  contract: "0x123...",
   blockHeight: 1000,
-  blockHash: '0xabc...',
+  blockHash: "0xabc...",
   timestamp: Date.now(),
-  transactionId: 'tx-456'
+  transactionId: "tx-456",
 };
 
 const result = await executor.executeContract(
-  '0x123...',
-  'checkAccess',
-  ['user-123', 'resource-789'],
+  "0x123...",
+  "checkAccess",
+  ["user-123", "resource-789"],
   context
 );
 
 if (result.success) {
-  console.log('Access allowed:', result.returnValue);
-  console.log('Gas used:', result.gasUsed);
-  console.log('State changes:', result.stateChanges);
+  console.log("Access allowed:", result.returnValue);
+  console.log("Gas used:", result.gasUsed);
+  console.log("State changes:", result.stateChanges);
 }
 ```
 
@@ -96,20 +98,20 @@ if (result.success) {
 
 ```javascript
 function checkAccess(userId, resourceId, action) {
-  const policy = getState('policy:access_control');
+  const policy = getState("policy:access_control");
 
   for (const rule of policy.rules) {
     if (rule.resource === resourceId && rule.action === action) {
       // Evaluate conditions
-      const user = getState('user:' + userId);
+      const user = getState("user:" + userId);
 
       for (const condition of rule.conditions) {
         if (!evaluateCondition(user, condition)) {
-          return rule.effect === 'deny';
+          return rule.effect === "deny";
         }
       }
 
-      return rule.effect === 'allow';
+      return rule.effect === "allow";
     }
   }
 
@@ -121,20 +123,20 @@ function checkAccess(userId, resourceId, action) {
 
 ```javascript
 function enforceRetention(dataId) {
-  const data = getState('data:' + dataId);
-  const policy = getState('policy:retention');
+  const data = getState("data:" + dataId);
+  const policy = getState("policy:retention");
 
   const ageInDays = (Date.now() - data.createdAt) / (24 * 60 * 60 * 1000);
 
   if (ageInDays > policy.deleteAfterDays) {
-    emit('DataDeletionRequired', { dataId });
-    return 'delete';
+    emit("DataDeletionRequired", { dataId });
+    return "delete";
   } else if (ageInDays > policy.archiveAfterDays) {
-    emit('DataArchivalRequired', { dataId });
-    return 'archive';
+    emit("DataArchivalRequired", { dataId });
+    return "archive";
   }
 
-  return 'retain';
+  return "retain";
 }
 ```
 

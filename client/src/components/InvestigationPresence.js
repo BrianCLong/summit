@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Box, Avatar, Tooltip, Typography, Paper } from '@mui/material';
-import { useSocket } from '../../hooks/useSocket';
-import { useParams } from 'react-router-dom';
+import { Box, Avatar, Tooltip, Typography, Paper } from "@mui/material";
+import { useSocket } from "../../hooks/useSocket";
+import { useParams } from "react-router-dom";
 
 function InvestigationPresence() {
   const { id: investigationId } = useParams(); // Get investigation ID from URL params
-  const { socket, connected } = useSocket('/realtime'); // Connect to the /realtime namespace
+  const { socket, connected } = useSocket("/realtime"); // Connect to the /realtime namespace
   const [activeUsers, setActiveUsers] = useState({}); // { userId: { username, avatarUrl, sid } }
 
   useEffect(() => {
     if (connected && investigationId) {
       // Join the investigation room
-      socket.emit('join_investigation', { investigationId });
+      socket.emit("join_investigation", { investigationId });
 
       // Listen for presence updates
-      socket.on('presence:join', (data) => {
+      socket.on("presence:join", (data) => {
         setActiveUsers((prevUsers) => ({
           ...prevUsers,
           [data.userId]: {
@@ -26,7 +26,7 @@ function InvestigationPresence() {
         }));
       });
 
-      socket.on('presence:leave', (data) => {
+      socket.on("presence:leave", (data) => {
         setActiveUsers((prevUsers) => {
           const newUsers = { ...prevUsers };
           delete newUsers[data.userId]; // Remove user when they leave
@@ -37,9 +37,9 @@ function InvestigationPresence() {
       // Cleanup on unmount or disconnect
       return () => {
         if (socket) {
-          socket.emit('leave_investigation', { investigationId });
-          socket.off('presence:join');
-          socket.off('presence:leave');
+          socket.emit("leave_investigation", { investigationId });
+          socket.off("presence:join");
+          socket.off("presence:leave");
         }
       };
     }
@@ -56,10 +56,10 @@ function InvestigationPresence() {
       elevation={1}
       sx={{
         p: 1,
-        display: 'flex',
-        alignItems: 'center',
+        display: "flex",
+        alignItems: "center",
         gap: 1,
-        flexWrap: 'wrap',
+        flexWrap: "wrap",
       }}
     >
       <Typography variant="caption" color="text.secondary">

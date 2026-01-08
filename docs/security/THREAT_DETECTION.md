@@ -76,6 +76,7 @@ The IntelGraph Advanced Threat Detection System is an enterprise-grade security 
 ### 1. Behavioral Anomaly Detection
 
 **User Behavior Analytics (UBA)**:
+
 - Baseline behavior profiling for each user
 - Statistical anomaly detection (z-score, IQR, MAD)
 - Temporal pattern analysis (time of day, day of week)
@@ -84,12 +85,14 @@ The IntelGraph Advanced Threat Detection System is an enterprise-grade security 
 - Access pattern analysis
 
 **Entity Behavior Analytics (EBA)**:
+
 - System behavior profiling
 - Application behavior monitoring
 - Resource usage anomaly detection
 - API usage pattern analysis
 
 **Adaptive Thresholds**:
+
 - Automatic threshold adjustment based on historical data
 - Seasonal pattern recognition
 - Trend analysis and forecasting
@@ -97,6 +100,7 @@ The IntelGraph Advanced Threat Detection System is an enterprise-grade security 
 ### 2. Machine Learning Threat Models
 
 **Supervised Learning**:
+
 - Multi-class threat classifier
 - Deep neural network architecture
 - Support for imbalanced datasets with class weights
@@ -104,27 +108,32 @@ The IntelGraph Advanced Threat Detection System is an enterprise-grade security 
 - Gradient-based explainability
 
 **Unsupervised Learning**:
+
 - Isolation Forest for novel threat discovery
 - Autoencoder for anomaly detection
 - Reconstruction error-based scoring
 - No labeled data required
 
 **Semi-Supervised Learning**:
+
 - Online learning with limited labels
 - Continuous model adaptation
 - Sliding window approach
 
 **Ensemble Methods**:
+
 - Model voting and averaging
 - Weighted ensemble
 - Robust detection with multiple models
 
 **Online Learning**:
+
 - Real-time model updates
 - Adaptive to evolving threats
 - No full retraining required
 
 **Explainable AI**:
+
 - LIME/SHAP integration
 - Feature contribution analysis
 - Human-readable threat reasoning
@@ -132,28 +141,33 @@ The IntelGraph Advanced Threat Detection System is an enterprise-grade security 
 ### 3. Network Threat Detection
 
 **DDoS Detection**:
+
 - Request rate monitoring
 - Distributed attack detection
 - Volumetric analysis
 - Protocol-specific detection
 
 **Port Scanning**:
+
 - Horizontal and vertical scan detection
 - Threshold-based detection
 - MITRE ATT&CK T1046 mapping
 
 **Lateral Movement**:
+
 - Internal network traversal detection
 - Unusual authentication patterns
 - Privilege escalation attempts
 
 **C2 Communication**:
+
 - Beaconing pattern detection
 - Regular interval analysis
 - Domain generation algorithm (DGA) detection
 - DNS tunneling detection
 
 **Data Exfiltration**:
+
 - Volume-based detection
 - Unusual destination analysis
 - Protocol anomaly detection
@@ -162,18 +176,21 @@ The IntelGraph Advanced Threat Detection System is an enterprise-grade security 
 ### 4. MITRE ATT&CK TTP Detection
 
 **Tactic Mapping**:
+
 - 14 MITRE ATT&CK tactics supported
 - Automatic technique identification
 - Kill chain analysis
 - Campaign tracking
 
 **Technique Coverage**:
+
 - 200+ techniques tracked
 - Sub-technique granularity
 - Confidence scoring
 - False positive reduction
 
 **Detection Logic**:
+
 - Signature-based detection
 - Behavioral pattern matching
 - Statistical analysis
@@ -182,17 +199,20 @@ The IntelGraph Advanced Threat Detection System is an enterprise-grade security 
 ### 5. Advanced Persistent Threat (APT) Detection
 
 **Long-term Tracking**:
+
 - Dwell time analysis
 - Multi-stage attack correlation
 - Persistence mechanism detection
 - Stealth technique identification
 
 **Low-and-Slow Detection**:
+
 - Extended timeline analysis
 - Subtle behavior changes
 - Correlation across weeks/months
 
 **Attribution**:
+
 - Threat actor profiling
 - TTP correlation
 - Campaign identification
@@ -201,12 +221,14 @@ The IntelGraph Advanced Threat Detection System is an enterprise-grade security 
 ### 6. Threat Intelligence Integration
 
 **Supported Formats**:
+
 - STIX/TAXII 2.x
 - MISP
 - Custom feeds
 - Commercial intelligence (Recorded Future, CrowdStrike, etc.)
 
 **IOC Types**:
+
 - IP addresses
 - Domains
 - URLs
@@ -215,6 +237,7 @@ The IntelGraph Advanced Threat Detection System is an enterprise-grade security 
 - CVE identifiers
 
 **Enrichment**:
+
 - Geolocation
 - ASN information
 - Reputation scoring
@@ -224,6 +247,7 @@ The IntelGraph Advanced Threat Detection System is an enterprise-grade security 
 ### 7. Real-time Alerting
 
 **Channels**:
+
 - Email (SMTP)
 - SMS (Twilio, etc.)
 - Slack
@@ -233,6 +257,7 @@ The IntelGraph Advanced Threat Detection System is an enterprise-grade security 
 - SIEM integration
 
 **Alert Features**:
+
 - Priority scoring
 - Deduplication
 - Correlation grouping
@@ -243,6 +268,7 @@ The IntelGraph Advanced Threat Detection System is an enterprise-grade security 
 ### 8. SOAR Integration
 
 **Supported Platforms**:
+
 - Splunk Phantom
 - Palo Alto Cortex XSOAR
 - IBM Resilient
@@ -250,6 +276,7 @@ The IntelGraph Advanced Threat Detection System is an enterprise-grade security 
 - Custom integrations
 
 **Response Playbooks**:
+
 - Automated investigation
 - Containment actions
 - Evidence collection
@@ -258,6 +285,7 @@ The IntelGraph Advanced Threat Detection System is an enterprise-grade security 
 ### 9. Threat Hunting
 
 **Hunt Types**:
+
 - Hypothesis-driven hunting
 - Indicator-based hunting
 - TTP-based hunting
@@ -265,6 +293,7 @@ The IntelGraph Advanced Threat Detection System is an enterprise-grade security 
 - Intelligence-driven hunting
 
 **Features**:
+
 - Custom query builder
 - Historical data analysis
 - Automated playbooks
@@ -274,6 +303,7 @@ The IntelGraph Advanced Threat Detection System is an enterprise-grade security 
 ### 10. Visualization
 
 **Dashboards**:
+
 - Real-time threat overview
 - Kill chain visualization
 - Attack timeline
@@ -425,17 +455,17 @@ RECORDED_FUTURE_API_KEY=<api_key>
 ### Detector Configuration
 
 ```typescript
-import { BehaviorAnalyzer } from '@intelgraph/anomaly-detection';
+import { BehaviorAnalyzer } from "@intelgraph/anomaly-detection";
 
 const behaviorAnalyzer = new BehaviorAnalyzer({
   redis: {
-    host: 'localhost',
-    port: 6379
+    host: "localhost",
+    port: 6379,
   },
   learningPeriodDays: 7,
   minSamplesForBaseline: 100,
   adaptiveThresholds: true,
-  contextualAnalysis: true
+  contextualAnalysis: true,
 });
 ```
 
@@ -444,8 +474,8 @@ const behaviorAnalyzer = new BehaviorAnalyzer({
 ### Basic Threat Detection
 
 ```typescript
-import { NetworkThreatDetector } from '@intelgraph/network-threat-detection';
-import { BehaviorAnalyzer } from '@intelgraph/anomaly-detection';
+import { NetworkThreatDetector } from "@intelgraph/network-threat-detection";
+import { BehaviorAnalyzer } from "@intelgraph/anomaly-detection";
 
 // Initialize detectors
 const networkDetector = new NetworkThreatDetector({
@@ -457,19 +487,19 @@ const networkDetector = new NetworkThreatDetector({
   exfiltrationBytesThreshold: 100 * 1024 * 1024,
   exfiltrationTimeWindow: 300000,
   beaconingMinRequests: 10,
-  beaconingIntervalTolerance: 5000
+  beaconingIntervalTolerance: 5000,
 });
 
 // Analyze network event
 const networkEvent = {
   timestamp: new Date(),
-  sourceIp: '192.168.1.100',
-  destinationIp: '10.0.0.1',
+  sourceIp: "192.168.1.100",
+  destinationIp: "10.0.0.1",
   sourcePort: 45123,
   destinationPort: 80,
-  protocol: 'TCP',
+  protocol: "TCP",
   bytesTransferred: 1024,
-  packetsCount: 10
+  packetsCount: 10,
 };
 
 const threat = await networkDetector.analyzeNetworkEvent(networkEvent);
@@ -485,21 +515,18 @@ if (threat) {
 
 ```typescript
 // Analyze user behavior
-const userId = 'user123';
+const userId = "user123";
 const behaviorEvent = {
   timestamp: new Date(),
-  entityType: 'user',
+  entityType: "user",
   requestRate: 50,
   bytesTransferred: 5242880,
-  endpoint: '/api/users',
-  geoLocation: 'US-CA',
-  userAgent: 'Mozilla/5.0...'
+  endpoint: "/api/users",
+  geoLocation: "US-CA",
+  userAgent: "Mozilla/5.0...",
 };
 
-const anomalyScore = await behaviorAnalyzer.analyzeBehavior(
-  userId,
-  behaviorEvent
-);
+const anomalyScore = await behaviorAnalyzer.analyzeBehavior(userId, behaviorEvent);
 
 if (anomalyScore.score > 0.7) {
   console.log(`Behavioral anomaly detected: ${anomalyScore.explanation}`);
@@ -509,11 +536,11 @@ if (anomalyScore.score > 0.7) {
 ### ML-based Detection
 
 ```typescript
-import { MLThreatClient } from '@intelgraph/ml-models';
+import { MLThreatClient } from "@intelgraph/ml-models";
 
 const mlClient = new MLThreatClient({
-  endpoint: 'http://localhost:8000',
-  apiKey: process.env.ML_API_KEY
+  endpoint: "http://localhost:8000",
+  apiKey: process.env.ML_API_KEY,
 });
 
 // Detect anomaly using autoencoder
@@ -521,7 +548,7 @@ const features = {
   requestRate: 100,
   dataTransfer: 10485760,
   sessionDuration: 3600,
-  errorRate: 0.05
+  errorRate: 0.05,
 };
 
 const result = await mlClient.detectAnomaly(features);
@@ -566,43 +593,43 @@ POST /api/v1/models/:id/predict    - Get prediction
 ### Creating a Hunt
 
 ```typescript
-import { ThreatHunt, HuntType } from '@intelgraph/threat-detection-core';
+import { ThreatHunt, HuntType } from "@intelgraph/threat-detection-core";
 
 const hunt: ThreatHunt = {
   id: uuidv4(),
-  name: 'Suspicious PowerShell Activity',
-  description: 'Hunt for encoded PowerShell commands',
+  name: "Suspicious PowerShell Activity",
+  description: "Hunt for encoded PowerShell commands",
   type: HuntType.TTP_BASED,
-  hypothesis: 'Adversaries using obfuscated PowerShell for execution',
+  hypothesis: "Adversaries using obfuscated PowerShell for execution",
   targetScope: {
-    systems: ['windows-servers'],
+    systems: ["windows-servers"],
     timeRange: {
       start: new Date(Date.now() - 7 * 24 * 3600 * 1000),
-      end: new Date()
-    }
+      end: new Date(),
+    },
   },
   ttps: [
     {
-      tactic: 'execution',
-      technique: 'T1059.001',
+      tactic: "execution",
+      technique: "T1059.001",
       detectionLogic: {
-        processName: 'powershell.exe',
-        commandLine: /\-[eE]nc(odedCommand)?/
-      }
-    }
+        processName: "powershell.exe",
+        commandLine: /\-[eE]nc(odedCommand)?/,
+      },
+    },
   ],
-  status: 'PLANNING',
-  hunters: ['analyst1@company.com'],
-  leadHunter: 'analyst1@company.com',
+  status: "PLANNING",
+  hunters: ["analyst1@company.com"],
+  leadHunter: "analyst1@company.com",
   findings: [],
   queries: [],
   totalEventsAnalyzed: 0,
   suspiciousEventsFound: 0,
   threatsConfirmed: 0,
   metrics: {},
-  notes: '',
+  notes: "",
   createdAt: new Date(),
-  updatedAt: new Date()
+  updatedAt: new Date(),
 };
 ```
 
@@ -752,6 +779,7 @@ Pre-built dashboards available in `monitoring/grafana/dashboards/`:
 ## Support
 
 For issues, questions, or contributions:
+
 - Internal documentation: Confluence
 - Bug reports: JIRA Security Board
 - Questions: #security-ops Slack channel

@@ -48,8 +48,8 @@ export class SEIRSInformationModel {
     const N = susceptible + exposed + infected + recovered;
 
     // Differential equations
-    const dS = -beta * susceptible * infected / N + delta * recovered;
-    const dE = beta * susceptible * infected / N - sigma * exposed;
+    const dS = (-beta * susceptible * infected) / N + delta * recovered;
+    const dE = (beta * susceptible * infected) / N - sigma * exposed;
     const dI = sigma * exposed - gamma * infected;
     const dR = gamma * infected - delta * recovered;
 
@@ -106,10 +106,7 @@ export class NetworkContagionModel {
   private nodeStates: Map<string, NodeState>;
   private params: NetworkContagionParams;
 
-  constructor(
-    network: Map<string, string[]>,
-    params: NetworkContagionParams
-  ) {
+  constructor(network: Map<string, string[]>, params: NetworkContagionParams) {
     this.network = network;
     this.params = params;
     this.nodeStates = new Map();
@@ -117,7 +114,7 @@ export class NetworkContagionModel {
     // Initialize all nodes as susceptible
     for (const node of network.keys()) {
       this.nodeStates.set(node, {
-        state: 'S',
+        state: "S",
         exposureCount: 0,
         infectionTime: null,
       });
@@ -131,7 +128,7 @@ export class NetworkContagionModel {
     for (const node of nodes) {
       const state = this.nodeStates.get(node);
       if (state) {
-        state.state = 'I';
+        state.state = "I";
         state.infectionTime = 0;
       }
     }
@@ -146,14 +143,14 @@ export class NetworkContagionModel {
 
     // Process each node
     for (const [node, state] of this.nodeStates.entries()) {
-      if (state.state === 'S') {
+      if (state.state === "S") {
         // Check for infection
         const neighbors = this.network.get(node) || [];
         const infectedNeighbors = neighbors.filter(
-          (n) => this.nodeStates.get(n)?.state === 'I'
+          (n) => this.nodeStates.get(n)?.state === "I"
         ).length;
 
-        if (this.params.contagionType === 'SIMPLE') {
+        if (this.params.contagionType === "SIMPLE") {
           // Simple contagion: each exposure has independent probability
           const infectionProb = 1 - Math.pow(1 - this.params.beta, infectedNeighbors);
           if (Math.random() < infectionProb) {
@@ -167,7 +164,7 @@ export class NetworkContagionModel {
             newInfections.push(node);
           }
         }
-      } else if (state.state === 'I') {
+      } else if (state.state === "I") {
         // Check for recovery
         if (state.infectionTime !== null && t - state.infectionTime > 1 / this.params.gamma) {
           recoveries.push(node);
@@ -178,34 +175,36 @@ export class NetworkContagionModel {
     // Apply state changes
     for (const node of newInfections) {
       const state = this.nodeStates.get(node)!;
-      state.state = 'I';
+      state.state = "I";
       state.infectionTime = t;
     }
 
     for (const node of recoveries) {
       const state = this.nodeStates.get(node)!;
-      state.state = 'R';
+      state.state = "R";
     }
 
     return {
       t,
       newInfections: newInfections.length,
-      totalInfected: this.countByState('I'),
-      totalRecovered: this.countByState('R'),
+      totalInfected: this.countByState("I"),
+      totalRecovered: this.countByState("R"),
     };
   }
 
-  private countByState(state: 'S' | 'E' | 'I' | 'R'): number {
+  private countByState(state: "S" | "E" | "I" | "R"): number {
     let count = 0;
     for (const ns of this.nodeStates.values()) {
-      if (ns.state === state) {count++;}
+      if (ns.state === state) {
+        count++;
+      }
     }
     return count;
   }
 }
 
 interface NodeState {
-  state: 'S' | 'E' | 'I' | 'R';
+  state: "S" | "E" | "I" | "R";
   exposureCount: number;
   infectionTime: number | null;
 }
@@ -213,7 +212,7 @@ interface NodeState {
 interface NetworkContagionParams {
   beta: number;
   gamma: number;
-  contagionType: 'SIMPLE' | 'COMPLEX';
+  contagionType: "SIMPLE" | "COMPLEX";
   threshold?: number;
 }
 

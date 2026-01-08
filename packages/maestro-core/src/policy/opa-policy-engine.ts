@@ -3,8 +3,8 @@
  * Provides ABAC authorization with explainable decisions
  */
 
-import axios, { AxiosInstance } from 'axios';
-import { PolicyEngine } from '../engine';
+import axios, { AxiosInstance } from "axios";
+import { PolicyEngine } from "../engine";
 
 export interface OPAPolicyEngineConfig {
   opaUrl: string;
@@ -43,7 +43,7 @@ export class OPAPolicyEngine implements PolicyEngine {
       baseURL: config.opaUrl,
       timeout: config.timeout || 5000,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...(config.apiKey && { Authorization: `Bearer ${config.apiKey}` }),
       },
     });
@@ -52,7 +52,7 @@ export class OPAPolicyEngine implements PolicyEngine {
   async check(
     action: string,
     subject: string,
-    attributes: Record<string, any>,
+    attributes: Record<string, any>
   ): Promise<{ allowed: boolean; reason?: string }> {
     try {
       const input = {
@@ -61,7 +61,7 @@ export class OPAPolicyEngine implements PolicyEngine {
         attributes: {
           ...attributes,
           timestamp: new Date().toISOString(),
-          source: 'maestro-orchestrator',
+          source: "maestro-orchestrator",
         },
       };
 
@@ -73,26 +73,24 @@ export class OPAPolicyEngine implements PolicyEngine {
         },
         {
           params: {
-            explain: 'full',
+            explain: "full",
             metrics: true,
           },
-        },
+        }
       );
 
       const decision: PolicyDecision = response.data;
 
       // If decision is explicit boolean
-      if (typeof decision.result === 'boolean') {
+      if (typeof decision.result === "boolean") {
         return {
           allowed: decision.result,
-          reason: decision.result
-            ? undefined
-            : this.extractDenialReason(decision),
+          reason: decision.result ? undefined : this.extractDenialReason(decision),
         };
       }
 
       // If decision is object with allow field
-      if (decision.result && typeof decision.result.allow === 'boolean') {
+      if (decision.result && typeof decision.result.allow === "boolean") {
         return {
           allowed: decision.result.allow,
           reason: decision.result.allow
@@ -104,10 +102,10 @@ export class OPAPolicyEngine implements PolicyEngine {
       // Default to deny if unclear
       return {
         allowed: false,
-        reason: 'Policy evaluation returned unclear result',
+        reason: "Policy evaluation returned unclear result",
       };
     } catch (error) {
-      console.error('Policy check failed:', error);
+      console.error("Policy check failed:", error);
 
       // In case of policy engine failure, default behavior depends on configuration
       // For security-critical systems, fail closed (deny)
@@ -123,7 +121,7 @@ export class OPAPolicyEngine implements PolicyEngine {
       action: string;
       subject: string;
       attributes: Record<string, any>;
-    }>,
+    }>
   ): Promise<Array<{ allowed: boolean; reason?: string }>> {
     try {
       const inputs = checks.map((check) => ({
@@ -132,33 +130,30 @@ export class OPAPolicyEngine implements PolicyEngine {
         attributes: {
           ...check.attributes,
           timestamp: new Date().toISOString(),
-          source: 'maestro-orchestrator',
+          source: "maestro-orchestrator",
         },
       }));
 
       // Batch query to OPA
-      const response = await this.client.post(
-        `/v1/data/${this.packageName}/batch_allow`,
-        {
-          inputs,
-        },
-      );
+      const response = await this.client.post(`/v1/data/${this.packageName}/batch_allow`, {
+        inputs,
+      });
 
       const results = response.data.result;
 
       if (!Array.isArray(results)) {
-        throw new Error('Batch policy check returned non-array result');
+        throw new Error("Batch policy check returned non-array result");
       }
 
       return results.map((result: any, index: number) => {
-        if (typeof result === 'boolean') {
+        if (typeof result === "boolean") {
           return {
             allowed: result,
             reason: result ? undefined : `Policy denied batch check ${index}`,
           };
         }
 
-        if (result && typeof result.allow === 'boolean') {
+        if (result && typeof result.allow === "boolean") {
           return {
             allowed: result.allow,
             reason: result.allow ? undefined : result.reason,
@@ -171,7 +166,7 @@ export class OPAPolicyEngine implements PolicyEngine {
         };
       });
     } catch (error) {
-      console.error('Batch policy check failed:', error);
+      console.error("Batch policy check failed:", error);
 
       // Return denials for all checks
       return checks.map((_, index) => ({
@@ -181,11 +176,9 @@ export class OPAPolicyEngine implements PolicyEngine {
     }
   }
 
-  async validatePolicy(
-    policy: string,
-  ): Promise<{ valid: boolean; errors?: string[] }> {
+  async validatePolicy(policy: string): Promise<{ valid: boolean; errors?: string[] }> {
     try {
-      const response = await this.client.put('/v1/policies/validation', {
+      const response = await this.client.put("/v1/policies/validation", {
         policy,
       });
 
@@ -204,24 +197,24 @@ export class OPAPolicyEngine implements PolicyEngine {
   async getPolicyInfo(): Promise<{
     version: string;
     policies: string[];
-    health: 'healthy' | 'unhealthy';
+    health: "healthy" | "unhealthy";
   }> {
     try {
       const [healthResponse, policiesResponse] = await Promise.all([
-        this.client.get('/health'),
-        this.client.get('/v1/policies'),
+        this.client.get("/health"),
+        this.client.get("/v1/policies"),
       ]);
 
       return {
-        version: healthResponse.data.version || 'unknown',
+        version: healthResponse.data.version || "unknown",
         policies: Object.keys(policiesResponse.data.result || {}),
-        health: healthResponse.status === 200 ? 'healthy' : 'unhealthy',
+        health: healthResponse.status === 200 ? "healthy" : "unhealthy",
       };
     } catch (error) {
       return {
-        version: 'unknown',
+        version: "unknown",
         policies: [],
-        health: 'unhealthy',
+        health: "unhealthy",
       };
     }
   }
@@ -230,7 +223,7 @@ export class OPAPolicyEngine implements PolicyEngine {
     // Try to extract meaningful denial reason from trace
     if (decision.explainability?.trace) {
       const failedRule = decision.explainability.trace
-        .filter((step) => step.op === 'eval' && step.result === false)
+        .filter((step) => step.op === "eval" && step.result === false)
         .pop();
 
       if (failedRule) {
@@ -238,7 +231,7 @@ export class OPAPolicyEngine implements PolicyEngine {
       }
     }
 
-    return 'Access denied by policy';
+    return "Access denied by policy";
   }
 }
 

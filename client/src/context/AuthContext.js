@@ -1,15 +1,13 @@
-import React, { createContext, useContext } from 'react';
-import { useQuery } from '@apollo/client';
-import { CURRENT_USER } from '../graphql/user.gql.js';
-import {
-  hasCapability,
-} from '../utils/capabilities';
+import React, { createContext, useContext } from "react";
+import { useQuery } from "@apollo/client";
+import { CURRENT_USER } from "../graphql/user.gql.js";
+import { hasCapability } from "../utils/capabilities";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const { data, loading } = useQuery(CURRENT_USER, {
-    fetchPolicy: 'cache-first',
+    fetchPolicy: "cache-first",
   });
   const user = data?.me;
 

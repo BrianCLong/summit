@@ -20,28 +20,28 @@ pnpm add @intelgraph/observability
 ## Quick Start
 
 ```typescript
-import express from 'express';
+import express from "express";
 import {
   initializeObservability,
   setupObservability,
   createLogger,
-} from '@intelgraph/observability';
+} from "@intelgraph/observability";
 
 const app = express();
 
 // Service configuration
 const serviceConfig = {
-  name: 'my-api',
-  version: '1.0.0',
-  environment: process.env.NODE_ENV as 'development' | 'staging' | 'production',
-  team: 'platform',
-  tier: 'standard' as const,
+  name: "my-api",
+  version: "1.0.0",
+  environment: process.env.NODE_ENV as "development" | "staging" | "production",
+  team: "platform",
+  tier: "standard" as const,
 };
 
 // Initialize all observability systems
 await initializeObservability({
   service: serviceConfig,
-  archetype: 'api-service',
+  archetype: "api-service",
 });
 
 // Setup Express middleware (metrics, tracing, logging, health endpoints)
@@ -51,8 +51,8 @@ const middleware = setupObservability(app, { service: serviceConfig });
 const logger = createLogger({ service: serviceConfig });
 
 // Your routes
-app.get('/api/users', async (req, res) => {
-  (req as any).log.info('Fetching users');
+app.get("/api/users", async (req, res) => {
+  (req as any).log.info("Fetching users");
   res.json({ users: [] });
 });
 
@@ -60,7 +60,7 @@ app.get('/api/users', async (req, res) => {
 app.use(middleware.errorHandler);
 
 app.listen(3000, () => {
-  logger.info('Server started on port 3000');
+  logger.info("Server started on port 3000");
 });
 ```
 
@@ -68,14 +68,14 @@ app.listen(3000, () => {
 
 Choose the archetype that best matches your service type:
 
-| Archetype | Description | Default Availability SLO | Default Latency P99 |
-|-----------|-------------|-------------------------|---------------------|
-| `api-service` | REST/GraphQL APIs | 99.9% | 500ms |
-| `gateway-service` | API gateways, load balancers | 99.95% | 100ms |
-| `worker-service` | Background job processors | 99.5% | 5 min |
-| `data-pipeline` | ETL, streaming processors | 99.0% | 10 min |
-| `storage-service` | Database proxies, caches | 99.99% | 100ms |
-| `ml-service` | ML inference services | 99.5% | 5s |
+| Archetype         | Description                  | Default Availability SLO | Default Latency P99 |
+| ----------------- | ---------------------------- | ------------------------ | ------------------- |
+| `api-service`     | REST/GraphQL APIs            | 99.9%                    | 500ms               |
+| `gateway-service` | API gateways, load balancers | 99.95%                   | 100ms               |
+| `worker-service`  | Background job processors    | 99.5%                    | 5 min               |
+| `data-pipeline`   | ETL, streaming processors    | 99.0%                    | 10 min              |
+| `storage-service` | Database proxies, caches     | 99.99%                   | 100ms               |
+| `ml-service`      | ML inference services        | 99.5%                    | 5s                  |
 
 ## Metrics
 
@@ -116,22 +116,22 @@ import {
   recordCacheOperation,
   recordJob,
   recordError,
-} from '@intelgraph/observability';
+} from "@intelgraph/observability";
 
 // Record an HTTP request
-recordHttpRequest('GET', '/api/users', 200, 0.045, 'my-service');
+recordHttpRequest("GET", "/api/users", 200, 0.045, "my-service");
 
 // Record a database query
-recordDbQuery('postgresql', 'SELECT', 0.012, true, 'my-service');
+recordDbQuery("postgresql", "SELECT", 0.012, true, "my-service");
 
 // Record a cache operation
-recordCacheOperation('user-cache', 'get', true, 0.001, 'my-service');
+recordCacheOperation("user-cache", "get", true, 0.001, "my-service");
 
 // Record a job completion
-recordJob('emails', 'send-welcome', 'completed', 1.5, 'my-service');
+recordJob("emails", "send-welcome", "completed", 1.5, "my-service");
 
 // Record an error
-recordError('ValidationError', 'medium', 'my-service');
+recordError("ValidationError", "medium", "my-service");
 ```
 
 ## Logging
@@ -139,23 +139,28 @@ recordError('ValidationError', 'medium', 'my-service');
 ### Structured Logging
 
 ```typescript
-import { createLogger, createAuditLogger } from '@intelgraph/observability';
+import { createLogger, createAuditLogger } from "@intelgraph/observability";
 
 const logger = createLogger({
   service: serviceConfig,
-  level: 'info',
-  redactFields: ['customSecret'], // Additional fields to redact
+  level: "info",
+  redactFields: ["customSecret"], // Additional fields to redact
 });
 
 // Basic logging
-logger.info('User created');
-logger.info({ userId: '123', action: 'signup' }, 'User created');
-logger.error({ err: error }, 'Failed to process request');
+logger.info("User created");
+logger.info({ userId: "123", action: "signup" }, "User created");
+logger.error({ err: error }, "Failed to process request");
 
 // Audit logging
 const auditLogger = createAuditLogger(logger);
-auditLogger.logAuth('login', { type: 'user', id: '123', ip: '1.2.3.4' }, 'success');
-auditLogger.logMutation('create', { type: 'user', id: '123' }, { type: 'user', id: '456' }, 'success');
+auditLogger.logAuth("login", { type: "user", id: "123", ip: "1.2.3.4" }, "success");
+auditLogger.logMutation(
+  "create",
+  { type: "user", id: "123" },
+  { type: "user", id: "456" },
+  "success"
+);
 ```
 
 ### Log Schema
@@ -183,6 +188,7 @@ All logs follow this schema:
 ### Automatic Instrumentation
 
 The SDK automatically instruments:
+
 - HTTP requests (incoming and outgoing)
 - Database queries (PostgreSQL, Neo4j, Redis)
 - GraphQL operations
@@ -197,24 +203,24 @@ import {
   createDbSpan,
   addSpanAttributes,
   recordException,
-} from '@intelgraph/observability';
+} from "@intelgraph/observability";
 
 // Wrap an async operation
-const result = await withSpan('processOrder', async (span) => {
-  span.setAttribute('order.id', orderId);
+const result = await withSpan("processOrder", async (span) => {
+  span.setAttribute("order.id", orderId);
 
   // Your logic here
   const order = await orderService.process(orderId);
 
-  span.setAttribute('order.total', order.total);
+  span.setAttribute("order.total", order.total);
   return order;
 });
 
 // Manual span management
-const span = startSpan('customOperation', { kind: 'internal' });
+const span = startSpan("customOperation", { kind: "internal" });
 try {
   // Your logic
-  addSpanAttributes({ 'custom.key': 'value' });
+  addSpanAttributes({ "custom.key": "value" });
 } catch (error) {
   recordException(error as Error);
   throw error;
@@ -223,7 +229,7 @@ try {
 }
 
 // Database operation span
-const dbSpan = createDbSpan('postgresql', 'SELECT', 'SELECT * FROM users');
+const dbSpan = createDbSpan("postgresql", "SELECT", "SELECT * FROM users");
 // ... execute query
 dbSpan.end();
 ```
@@ -231,14 +237,14 @@ dbSpan.end();
 ### Context Propagation
 
 ```typescript
-import { extractContext, injectContext } from '@intelgraph/observability';
+import { extractContext, injectContext } from "@intelgraph/observability";
 
 // Extract context from incoming request headers
 const parentContext = extractContext(req.headers);
 
 // Inject context into outgoing request headers
 const headers = injectContext({});
-await fetch('http://other-service/api', { headers });
+await fetch("http://other-service/api", { headers });
 ```
 
 ## SLOs
@@ -246,25 +252,25 @@ await fetch('http://other-service/api', { headers });
 ### Generating SLO Configuration
 
 ```typescript
-import { generateSloConfig, DEFAULT_SLO_TARGETS } from '@intelgraph/observability';
+import { generateSloConfig, DEFAULT_SLO_TARGETS } from "@intelgraph/observability";
 
 // Generate SLOs for a service
-const { slos, prometheusRules } = generateSloConfig('my-api', 'api-service');
+const { slos, prometheusRules } = generateSloConfig("my-api", "api-service");
 
-console.log('SLO Definitions:', slos);
-console.log('Prometheus Rules:', prometheusRules);
+console.log("SLO Definitions:", slos);
+console.log("Prometheus Rules:", prometheusRules);
 ```
 
 ### Error Budget Calculation
 
 ```typescript
-import { calculateErrorBudget, timeToExhaustion } from '@intelgraph/observability';
+import { calculateErrorBudget, timeToExhaustion } from "@intelgraph/observability";
 
 const budget = calculateErrorBudget(
-  99.9,    // SLO target (%)
-  30,      // Window (days)
-  99.85,   // Current success rate (%)
-  15       // Days elapsed
+  99.9, // SLO target (%)
+  30, // Window (days)
+  99.85, // Current success rate (%)
+  15 // Days elapsed
 );
 
 console.log(budget);
@@ -293,18 +299,18 @@ import {
   createRedisHealthCheck,
   createHttpHealthCheck,
   runHealthChecks,
-} from '@intelgraph/observability';
+} from "@intelgraph/observability";
 
 // Register database health check
-registerHealthCheck('postgres', createPostgresHealthCheck(pgPool));
+registerHealthCheck("postgres", createPostgresHealthCheck(pgPool));
 
 // Register cache health check
-registerHealthCheck('redis', createRedisHealthCheck(redisClient));
+registerHealthCheck("redis", createRedisHealthCheck(redisClient));
 
 // Register external service health check
 registerHealthCheck(
-  'payment-service',
-  createHttpHealthCheck('http://payment-service/health', 'payment-service')
+  "payment-service",
+  createHttpHealthCheck("http://payment-service/health", "payment-service")
 );
 
 // Run all health checks
@@ -344,7 +350,7 @@ import {
   requestLoggingMiddleware,
   errorMiddleware,
   metricsHandler,
-} from '@intelgraph/observability';
+} from "@intelgraph/observability";
 
 const config = { service: serviceConfig };
 
@@ -354,7 +360,7 @@ app.use(tracingMiddleware(config));
 app.use(metricsMiddleware(config));
 
 // Metrics endpoint
-app.get('/metrics', metricsHandler());
+app.get("/metrics", metricsHandler());
 
 // Error handler (must be last)
 app.use(errorMiddleware(config));
@@ -365,7 +371,7 @@ app.use(errorMiddleware(config));
 ```typescript
 setupObservability(app, {
   service: serviceConfig,
-  excludeRoutes: ['/health', '/metrics', '/internal/*'],
+  excludeRoutes: ["/health", "/metrics", "/internal/*"],
   requestLogging: true,
   tracing: true,
   routeNormalizer: (req) => req.route?.path || req.path,
@@ -374,13 +380,13 @@ setupObservability(app, {
 
 ## Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `LOG_LEVEL` | Minimum log level | `info` |
-| `OTEL_ENABLED` | Enable tracing | `true` |
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP collector endpoint | `http://localhost:4318` |
-| `OTEL_SAMPLE_RATE` | Trace sample rate (0.0-1.0) | `1.0` |
-| `PROMETHEUS_ENABLED` | Enable metrics | `true` |
+| Variable                      | Description                 | Default                 |
+| ----------------------------- | --------------------------- | ----------------------- |
+| `LOG_LEVEL`                   | Minimum log level           | `info`                  |
+| `OTEL_ENABLED`                | Enable tracing              | `true`                  |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP collector endpoint     | `http://localhost:4318` |
+| `OTEL_SAMPLE_RATE`            | Trace sample rate (0.0-1.0) | `1.0`                   |
+| `PROMETHEUS_ENABLED`          | Enable metrics              | `true`                  |
 
 ## Templates
 

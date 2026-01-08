@@ -1,11 +1,11 @@
-import { randomUUID } from 'node:crypto';
+import { randomUUID } from "node:crypto";
 
 export type QualityAspect =
-  | 'relevance'
-  | 'clarity'
-  | 'completeness'
-  | 'factuality'
-  | 'safety'
+  | "relevance"
+  | "clarity"
+  | "completeness"
+  | "factuality"
+  | "safety"
   | (string & {});
 
 export interface RSIPIterationLog {
@@ -26,7 +26,11 @@ export interface RSIPRunResult {
 
 export interface RSIPOptions {
   aspects: QualityAspect[];
-  generator: (prompt: string, iteration: number, history: RSIPIterationLog[]) => Promise<string> | string;
+  generator: (
+    prompt: string,
+    iteration: number,
+    history: RSIPIterationLog[]
+  ) => Promise<string> | string;
   evaluator: (
     output: string,
     aspect: QualityAspect,
@@ -52,7 +56,7 @@ const DEFAULT_ASPECT_WEIGHTS: Record<QualityAspect, number> = {
   clarity: 0.2,
   completeness: 0.25,
   factuality: 0.2,
-  safety: 0.05
+  safety: 0.05,
 };
 
 const DEFAULT_MAX_ITERATIONS = 5;
@@ -78,18 +82,18 @@ function normalizeWeights(weights: Record<QualityAspect, number>): Record<Qualit
 
 export class RecursiveSelfImprovementEngine {
   private readonly aspects: QualityAspect[];
-  private readonly generator: RSIPOptions['generator'];
-  private readonly evaluator: RSIPOptions['evaluator'];
-  private readonly refinePrompt?: RSIPOptions['refinePrompt'];
+  private readonly generator: RSIPOptions["generator"];
+  private readonly evaluator: RSIPOptions["evaluator"];
+  private readonly refinePrompt?: RSIPOptions["refinePrompt"];
   private readonly maxIterations: number;
   private readonly qualityThreshold: number;
   private readonly focusWindow: number;
   private readonly weights: Record<QualityAspect, number>;
-  private readonly logger?: RSIPOptions['logger'];
+  private readonly logger?: RSIPOptions["logger"];
 
   constructor(options: RSIPOptions) {
     if (options.aspects.length === 0) {
-      throw new Error('RSIP requires at least one quality aspect.');
+      throw new Error("RSIP requires at least one quality aspect.");
     }
     this.aspects = [...options.aspects];
     this.generator = options.generator;
@@ -124,7 +128,7 @@ export class RecursiveSelfImprovementEngine {
         output,
         aspectScores,
         prioritizedAspects,
-        aggregateScore
+        aggregateScore,
       };
       logs.push(iterationLog);
       if (this.logger) {
@@ -135,17 +139,23 @@ export class RecursiveSelfImprovementEngine {
           success: true,
           finalOutput: output,
           iterations: iteration,
-          logs
+          logs,
         };
       }
-      currentPrompt = this.buildRefinementPrompt(currentPrompt, output, prioritizedAspects, iteration, logs);
+      currentPrompt = this.buildRefinementPrompt(
+        currentPrompt,
+        output,
+        prioritizedAspects,
+        iteration,
+        logs
+      );
     }
     const finalLog = logs[logs.length - 1];
     return {
       success: false,
-      finalOutput: finalLog?.output ?? '',
+      finalOutput: finalLog?.output ?? "",
       iterations: logs.length,
-      logs
+      logs,
     };
   }
 
@@ -156,7 +166,9 @@ export class RecursiveSelfImprovementEngine {
     const window = history.slice(Math.max(0, history.length - (this.focusWindow - 1)));
     const blendedScores = new Map<QualityAspect, number>();
     for (const aspect of this.aspects) {
-      const historical = window.map(entry => entry.aspectScores[aspect]).filter(score => typeof score === 'number');
+      const historical = window
+        .map((entry) => entry.aspectScores[aspect])
+        .filter((score) => typeof score === "number");
       const historyAverage =
         historical.length === 0
           ? 1
@@ -170,7 +182,10 @@ export class RecursiveSelfImprovementEngine {
   }
 
   private aggregateScore(aspectScores: Record<QualityAspect, number>): number {
-    return this.aspects.reduce((acc, aspect) => acc + (aspectScores[aspect] ?? 0) * (this.weights[aspect] ?? 0), 0);
+    return this.aspects.reduce(
+      (acc, aspect) => acc + (aspectScores[aspect] ?? 0) * (this.weights[aspect] ?? 0),
+      0
+    );
   }
 
   private buildRefinementPrompt(
@@ -183,16 +198,16 @@ export class RecursiveSelfImprovementEngine {
     if (this.refinePrompt) {
       return this.refinePrompt(previousPrompt, output, prioritizedAspects, iteration, history);
     }
-    const focus = prioritizedAspects.slice(0, 2).join(' and ') || 'overall quality';
+    const focus = prioritizedAspects.slice(0, 2).join(" and ") || "overall quality";
     return [
-      'You are refining a draft response. Improve it with focus on the weakest aspects.',
+      "You are refining a draft response. Improve it with focus on the weakest aspects.",
       `Priority aspects: ${focus}.`,
-      'Original prompt:',
+      "Original prompt:",
       previousPrompt,
-      'Current draft:',
+      "Current draft:",
       output,
-      'Return an improved version that addresses the priority aspects while keeping strengths intact.'
-    ].join('\n\n');
+      "Return an improved version that addresses the priority aspects while keeping strengths intact.",
+    ].join("\n\n");
   }
 }
 
@@ -269,15 +284,15 @@ export class ContextAwareDecomposer {
     }
     const threshold = this.computeThreshold(scoredSegments);
     const selected = scoredSegments
-      .filter(segment => segment.saliency >= threshold)
+      .filter((segment) => segment.saliency >= threshold)
       .sort((a, b) => b.saliency - a.saliency);
     const cappedSelected = this.maxSegments ? selected.slice(0, this.maxSegments) : selected;
-    const selectedIds = new Set(cappedSelected.map(segment => segment.id));
-    const discarded = scoredSegments.filter(segment => !selectedIds.has(segment.id));
+    const selectedIds = new Set(cappedSelected.map((segment) => segment.id));
+    const discarded = scoredSegments.filter((segment) => !selectedIds.has(segment.id));
     return {
       selected: cappedSelected,
       discarded,
-      threshold
+      threshold,
     };
   }
 
@@ -285,7 +300,7 @@ export class ContextAwareDecomposer {
     if (!this.adaptiveThreshold || segments.length === 0) {
       return this.saliencyThreshold;
     }
-    const values = segments.map(segment => segment.saliency).sort((a, b) => a - b);
+    const values = segments.map((segment) => segment.saliency).sort((a, b) => a - b);
     const median = values[Math.floor(values.length / 2)];
     const dynamic = Math.max(this.saliencyThreshold, (median + Math.max(...values)) / 2 - 0.1);
     return clamp(dynamic, this.saliencyThreshold, 0.95);
@@ -361,7 +376,7 @@ export class TokenAwareRetriever {
     return {
       documents: selected,
       usedTokens,
-      budget: this.tokenBudget
+      budget: this.tokenBudget,
     };
   }
 }
@@ -428,18 +443,20 @@ export class MetaPromptPlanner {
         estimatedTokens += module.estimatedTokens;
       }
     }
-    const promptSections = selected.map(module => module.template(context));
+    const promptSections = selected.map((module) => module.template(context));
     return {
-      prompt: promptSections.join('\n\n'),
-      modules: selected.map(module => module.name),
-      estimatedTokens
+      prompt: promptSections.join("\n\n"),
+      modules: selected.map((module) => module.name),
+      estimatedTokens,
     };
   }
 
   recordFeedback(feedback: PlannerFeedback): void {
     const current = this.weights.get(feedback.module) ?? 1;
     const adjustment = feedback.score >= 0.8 ? 0.1 : feedback.score < 0.4 ? -0.2 : -0.05;
-    const tokenPenalty = feedback.tokenCost ? Math.max(0, feedback.tokenCost - this.tokenBudget) / this.tokenBudget : 0;
+    const tokenPenalty = feedback.tokenCost
+      ? Math.max(0, feedback.tokenCost - this.tokenBudget) / this.tokenBudget
+      : 0;
     const next = clamp(current + adjustment - tokenPenalty, 0.1, 3);
     this.weights.set(feedback.module, next);
   }
@@ -490,7 +507,7 @@ function averageVector(vectors: number[][]): number[] {
       result[i] += vector[i];
     }
   }
-  return result.map(value => value / vectors.length);
+  return result.map((value) => value / vectors.length);
 }
 
 export class SelfConsensusEngine {
@@ -508,12 +525,18 @@ export class SelfConsensusEngine {
       const embedding = await options.embed(text);
       candidates.push({ variant, text, embedding });
     }
-    const clusters = this.clusterCandidates(candidates, options.similarityThreshold ?? DEFAULT_SIMILARITY_THRESHOLD);
+    const clusters = this.clusterCandidates(
+      candidates,
+      options.similarityThreshold ?? DEFAULT_SIMILARITY_THRESHOLD
+    );
     const consensus = this.selectConsensus(clusters, candidates);
     return {
       consensus,
       clusters,
-      candidates: candidates.map(candidate => ({ variant: candidate.variant, text: candidate.text }))
+      candidates: candidates.map((candidate) => ({
+        variant: candidate.variant,
+        text: candidate.text,
+      })),
     };
   }
 
@@ -528,7 +551,7 @@ export class SelfConsensusEngine {
         const similarity = this.similarity(cluster.centroid, candidate.embedding);
         if (similarity >= threshold) {
           cluster.members.push(candidate);
-          cluster.centroid = averageVector(cluster.members.map(member => member.embedding));
+          cluster.centroid = averageVector(cluster.members.map((member) => member.embedding));
           added = true;
           break;
         }
@@ -537,7 +560,7 @@ export class SelfConsensusEngine {
         clusters.push({
           id: randomUUID(),
           members: [candidate],
-          centroid: [...candidate.embedding]
+          centroid: [...candidate.embedding],
         });
       }
     }
@@ -549,7 +572,7 @@ export class SelfConsensusEngine {
     candidates: { variant: number; text: string; embedding: number[] }[]
   ): string {
     if (clusters.length === 0) {
-      return '';
+      return "";
     }
     const sortedClusters = [...clusters].sort((a, b) => b.members.length - a.members.length);
     const primary = sortedClusters[0];
@@ -571,7 +594,11 @@ export class SelfConsensusEngine {
     if (candidates.length <= 1) {
       return 1;
     }
-    const total = candidates.reduce((acc, other) => acc + (other === candidate ? 0 : this.similarity(candidate.embedding, other.embedding)), 0);
+    const total = candidates.reduce(
+      (acc, other) =>
+        acc + (other === candidate ? 0 : this.similarity(candidate.embedding, other.embedding)),
+      0
+    );
     return total / (candidates.length - 1);
   }
 }
@@ -597,7 +624,7 @@ export class HierarchicalSummarizer {
 
   constructor(options: HierarchicalSummarizerOptions) {
     if (options.layers.length === 0) {
-      throw new Error('Hierarchical summarizer requires at least one layer.');
+      throw new Error("Hierarchical summarizer requires at least one layer.");
     }
     this.layers = options.layers;
     this.estimateTokens = options.tokenEstimator ?? defaultTokenEstimator;
@@ -668,11 +695,11 @@ export class CollaborativeContextBroker {
     const blendedRelevance = existing
       ? existing.relevance !== undefined && state.relevance !== undefined
         ? clamp(existing.relevance * this.decay + state.relevance * (1 - this.decay), 0, 1)
-        : state.relevance ?? existing.relevance
+        : (state.relevance ?? existing.relevance)
       : state.relevance;
     this.states.set(state.id, {
       ...state,
-      relevance: blendedRelevance
+      relevance: blendedRelevance,
     });
   }
 
@@ -699,11 +726,7 @@ export class CollaborativeContextBroker {
     return selected;
   }
 
-  assignContext(
-    agents: string[],
-    basePrompt: string,
-    timestamp: number
-  ): AgentAssignment[] {
+  assignContext(agents: string[], basePrompt: string, timestamp: number): AgentAssignment[] {
     const diffs = this.diffSince(timestamp);
     const assignments: AgentAssignment[] = [];
     let diffIndex = 0;
@@ -721,8 +744,8 @@ export class CollaborativeContextBroker {
       }
       assignments.push({
         agent,
-        prompt: sections.join('\n\n'),
-        contextIds
+        prompt: sections.join("\n\n"),
+        contextIds,
       });
     }
     return assignments;
@@ -733,7 +756,4 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
-export {
-  clamp as clampValue,
-  cosineSimilarity
-};
+export { clamp as clampValue, cosineSimilarity };

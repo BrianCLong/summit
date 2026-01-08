@@ -5,14 +5,14 @@
  * Primary implementation uses Neo4j, but interface allows for other backends.
  */
 
-import type { Driver, Session } from 'neo4j-driver';
+import type { Driver, Session } from "neo4j-driver";
 import {
   GeoObservation,
   TimeRange,
   EntityType,
   Location,
   GeoTemporalQueryOptions,
-} from '../types/geotemporal.js';
+} from "../types/geotemporal.js";
 
 /**
  * Repository interface for geo-temporal data
@@ -26,10 +26,7 @@ export interface IGeoGraphRepository {
   /**
    * Get observations for multiple entities
    */
-  getObservationsForEntities(
-    entityIds: string[],
-    timeRange?: TimeRange,
-  ): Promise<GeoObservation[]>;
+  getObservationsForEntities(entityIds: string[], timeRange?: TimeRange): Promise<GeoObservation[]>;
 
   /**
    * Query observations with advanced filters
@@ -57,7 +54,10 @@ export interface IGeoGraphRepository {
  *   - (:Observation)-[:AT_LOCATION]->(:Location)
  */
 export class Neo4jGeoGraphRepository implements IGeoGraphRepository {
-  constructor(private driver: Driver, private database: string = 'neo4j') {}
+  constructor(
+    private driver: Driver,
+    private database: string = "neo4j"
+  ) {}
 
   private getSession(): Session {
     return this.driver.session({ database: this.database });
@@ -65,14 +65,14 @@ export class Neo4jGeoGraphRepository implements IGeoGraphRepository {
 
   async getObservationsForEntity(
     entityId: string,
-    timeRange?: TimeRange,
+    timeRange?: TimeRange
   ): Promise<GeoObservation[]> {
     return this.getObservationsForEntities([entityId], timeRange);
   }
 
   async getObservationsForEntities(
     entityIds: string[],
-    timeRange?: TimeRange,
+    timeRange?: TimeRange
   ): Promise<GeoObservation[]> {
     const session = this.getSession();
 
@@ -312,27 +312,27 @@ export class Neo4jGeoGraphRepository implements IGeoGraphRepository {
 
   private recordToObservation(record: any): GeoObservation {
     const location: Location = {
-      id: record.get('locationId'),
-      latitude: record.get('latitude'),
-      longitude: record.get('longitude'),
-      name: record.get('locationName'),
-      countryCode: record.get('countryCode'),
-      city: record.get('city'),
-      accuracyMeters: record.get('accuracyMeters'),
-      elevation: record.get('elevation'),
+      id: record.get("locationId"),
+      latitude: record.get("latitude"),
+      longitude: record.get("longitude"),
+      name: record.get("locationName"),
+      countryCode: record.get("countryCode"),
+      city: record.get("city"),
+      accuracyMeters: record.get("accuracyMeters"),
+      elevation: record.get("elevation"),
     };
 
     return {
-      id: record.get('obsId'),
-      entityId: record.get('entityId'),
-      entityType: record.get('entityType') as EntityType,
+      id: record.get("obsId"),
+      entityId: record.get("entityId"),
+      entityType: record.get("entityType") as EntityType,
       location,
-      startTime: record.get('startTime'),
-      endTime: record.get('endTime'),
-      sourceSystem: record.get('sourceSystem'),
-      confidence: record.get('confidence'),
-      tags: record.get('tags') || [],
-      metadata: record.get('metadata') || {},
+      startTime: record.get("startTime"),
+      endTime: record.get("endTime"),
+      sourceSystem: record.get("sourceSystem"),
+      confidence: record.get("confidence"),
+      tags: record.get("tags") || [],
+      metadata: record.get("metadata") || {},
     };
   }
 }
@@ -345,14 +345,14 @@ export class InMemoryGeoGraphRepository implements IGeoGraphRepository {
 
   async getObservationsForEntity(
     entityId: string,
-    timeRange?: TimeRange,
+    timeRange?: TimeRange
   ): Promise<GeoObservation[]> {
     return this.getObservationsForEntities([entityId], timeRange);
   }
 
   async getObservationsForEntities(
     entityIds: string[],
-    timeRange?: TimeRange,
+    timeRange?: TimeRange
   ): Promise<GeoObservation[]> {
     let filtered = this.observations.filter((obs) => entityIds.includes(obs.entityId));
 
@@ -367,7 +367,7 @@ export class InMemoryGeoGraphRepository implements IGeoGraphRepository {
     }
 
     return filtered.sort(
-      (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
+      (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
     );
   }
 
@@ -399,7 +399,7 @@ export class InMemoryGeoGraphRepository implements IGeoGraphRepository {
           obs.location.latitude >= minLat &&
           obs.location.latitude <= maxLat &&
           obs.location.longitude >= minLon &&
-          obs.location.longitude <= maxLon,
+          obs.location.longitude <= maxLon
       );
     }
 

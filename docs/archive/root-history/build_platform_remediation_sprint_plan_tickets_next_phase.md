@@ -209,9 +209,9 @@ jobs:
 
 ```js
 // tools/policy/check-helm-digests.js
-const fs = require('fs');
-const path = require('path');
-const YAML = require('yaml');
+const fs = require("fs");
+const path = require("path");
+const YAML = require("yaml");
 
 function walk(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((d) => {
@@ -220,13 +220,13 @@ function walk(dir) {
   });
 }
 
-const chartPaths = walk('charts').filter((p) => p.endsWith('values.yaml'));
+const chartPaths = walk("charts").filter((p) => p.endsWith("values.yaml"));
 let failed = false;
 for (const p of chartPaths) {
-  const doc = YAML.parse(fs.readFileSync(p, 'utf8')) || {};
+  const doc = YAML.parse(fs.readFileSync(p, "utf8")) || {};
   const img = doc.image || {};
-  const tag = (img.tag || '').trim();
-  const digest = (img.digest || '').trim();
+  const tag = (img.tag || "").trim();
+  const digest = (img.digest || "").trim();
   if (tag) {
     console.error(`[FAIL] ${p}: image.tag must be empty (found: ${tag})`);
     failed = true;

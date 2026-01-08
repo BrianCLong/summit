@@ -16,7 +16,7 @@ paths:
                 inferenceId: { type: string }
                 k: { type: integer, default: 3 }
       responses:
-        '200': { description: Rationale returned }
+        "200": { description: Rationale returned }
   /xai/v1/counterfactual:
     post:
       summary: Counterfactual explanation for inference
@@ -30,7 +30,7 @@ paths:
                 inferenceId: { type: string }
                 constraints: { type: object }
       responses:
-        '200': { description: Counterfactual returned }
+        "200": { description: Counterfactual returned }
   /xai/v1/fairness:
     get:
       summary: Fairness/robustness summary (stub)
@@ -39,4 +39,4 @@ paths:
           name: model
           schema: { type: string }
       responses:
-        '200': { description: Summary returned }
+        "200": { description: Summary returned }

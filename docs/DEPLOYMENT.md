@@ -6,6 +6,7 @@ The strategy supports both **Kubernetes** (using Ingress/Service Mesh) and **VM/
 ## Strategy: Blue-Green Deployment
 
 We utilize a **Blue-Green Deployment** strategy to ensure zero downtime.
+
 - **Blue (Current)**: The version currently serving live traffic.
 - **Green (New)**: The new version being deployed.
 
@@ -21,6 +22,7 @@ We utilize a **Blue-Green Deployment** strategy to ensure zero downtime.
 ## Automatic Rollback
 
 The `RollbackEngine` handles failures at any stage:
+
 - **Pre-Switch Failure**: If Green fails health checks, deployment is aborted. No traffic is impacted.
 - **Post-Switch Failure**: If Green shows high error rates or latency after the switch, the Load Balancer is immediately reverted to point to Blue.
 - **Database Rollback**: If database migrations were applied, the `RollbackEngine` attempts to revert them using the `db_rollback.cjs` script.
@@ -55,7 +57,7 @@ In Kubernetes, this strategy is implemented using **Argo Rollouts** or **Ingress
 2.  **Service**: The Service selector is updated to point to the Green ReplicaSet.
 3.  **Ingress**: For weighted traffic splitting (Canary), the Ingress annotations (e.g., `nginx.ingress.kubernetes.io/canary-weight`) are updated.
 
-*Note: The current `BlueGreenDeployer` implementation simulates the Nginx approach but can be extended with a `KubernetesAdapter`.*
+_Note: The current `BlueGreenDeployer` implementation simulates the Nginx approach but can be extended with a `KubernetesAdapter`._
 
 ## Tools & Scripts
 

@@ -1,7 +1,7 @@
-import type { AudioBuffer } from '@intelgraph/audio-processing';
-import { BaseSTTProvider } from './base.js';
-import type { STTConfig, TranscriptionResult } from '../types.js';
-import { STTProvider, SUPPORTED_LANGUAGES } from '../types.js';
+import type { AudioBuffer } from "@intelgraph/audio-processing";
+import { BaseSTTProvider } from "./base.js";
+import type { STTConfig, TranscriptionResult } from "../types.js";
+import { STTProvider, SUPPORTED_LANGUAGES } from "../types.js";
 
 /**
  * Azure Speech Services Provider
@@ -15,13 +15,13 @@ export class AzureSTTProvider extends BaseSTTProvider {
   constructor(config: { subscriptionKey?: string; region?: string } = {}) {
     super(config);
     this.subscriptionKey = config.subscriptionKey || process.env.AZURE_SPEECH_KEY;
-    this.region = config.region || process.env.AZURE_SPEECH_REGION || 'eastus';
+    this.region = config.region || process.env.AZURE_SPEECH_REGION || "eastus";
     // Lazy load Azure Speech SDK
     // this.initializeSpeechConfig();
   }
 
   getName(): string {
-    return 'Azure Speech Services';
+    return "Azure Speech Services";
   }
 
   async transcribe(audio: AudioBuffer, config: STTConfig): Promise<TranscriptionResult> {
@@ -66,7 +66,11 @@ export class AzureSTTProvider extends BaseSTTProvider {
     return 600;
   }
 
-  private transformAzureResponse(response: any, config: STTConfig, audio: AudioBuffer): TranscriptionResult {
+  private transformAzureResponse(
+    response: any,
+    config: STTConfig,
+    audio: AudioBuffer
+  ): TranscriptionResult {
     // Transform Azure response to our format
     const segments = (response.results || []).map((result: any, index: number) => ({
       text: result.text,
@@ -77,11 +81,11 @@ export class AzureSTTProvider extends BaseSTTProvider {
         word: word.text,
         startTime: word.offset / 10000000,
         endTime: (word.offset + word.duration) / 10000000,
-        confidence: word.confidence || 1.0
-      }))
+        confidence: word.confidence || 1.0,
+      })),
     }));
 
-    const fullText = segments.map(seg => seg.text).join(' ');
+    const fullText = segments.map((seg) => seg.text).join(" ");
 
     return {
       text: fullText,
@@ -90,10 +94,10 @@ export class AzureSTTProvider extends BaseSTTProvider {
       languageConfidence: 1.0,
       duration: audio.metadata.duration,
       provider: STTProvider.AZURE,
-      model: 'azure-speech',
+      model: "azure-speech",
       metadata: {
-        recognitionId: response.recognitionId
-      }
+        recognitionId: response.recognitionId,
+      },
     };
   }
 }

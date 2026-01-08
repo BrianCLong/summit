@@ -4,7 +4,7 @@
  * @module @intelgraph/strands-agents/governance
  */
 
-import { RiskTierSchema, type RiskTier } from '../types.js';
+import { RiskTierSchema, type RiskTier } from "../types.js";
 
 // ============================================================================
 // Types
@@ -22,7 +22,7 @@ export interface ToolRiskProfile {
   /** Can be executed autonomously */
   autonomous: boolean;
   /** Audit requirements */
-  auditLevel: 'none' | 'basic' | 'detailed' | 'full';
+  auditLevel: "none" | "basic" | "detailed" | "full";
 }
 
 export interface PolicyCheck {
@@ -60,170 +60,170 @@ export interface GovernanceConfig {
 export const DEFAULT_TOOL_RISKS: Record<string, ToolRiskProfile> = {
   // Graph tools
   execute_cypher: {
-    name: 'execute_cypher',
-    tier: 'SUPERVISED',
-    operations: ['graph:read', 'graph:query'],
+    name: "execute_cypher",
+    tier: "SUPERVISED",
+    operations: ["graph:read", "graph:query"],
     requiresApproval: false,
     autonomous: true,
-    auditLevel: 'basic',
+    auditLevel: "basic",
   },
   find_path: {
-    name: 'find_path',
-    tier: 'AUTONOMOUS',
-    operations: ['graph:read'],
+    name: "find_path",
+    tier: "AUTONOMOUS",
+    operations: ["graph:read"],
     requiresApproval: false,
     autonomous: true,
-    auditLevel: 'basic',
+    auditLevel: "basic",
   },
   get_neighbors: {
-    name: 'get_neighbors',
-    tier: 'AUTONOMOUS',
-    operations: ['graph:read'],
+    name: "get_neighbors",
+    tier: "AUTONOMOUS",
+    operations: ["graph:read"],
     requiresApproval: false,
     autonomous: true,
-    auditLevel: 'basic',
+    auditLevel: "basic",
   },
   get_subgraph: {
-    name: 'get_subgraph',
-    tier: 'AUTONOMOUS',
-    operations: ['graph:read'],
+    name: "get_subgraph",
+    tier: "AUTONOMOUS",
+    operations: ["graph:read"],
     requiresApproval: false,
     autonomous: true,
-    auditLevel: 'basic',
+    auditLevel: "basic",
   },
   get_graph_stats: {
-    name: 'get_graph_stats',
-    tier: 'AUTONOMOUS',
-    operations: ['graph:read'],
+    name: "get_graph_stats",
+    tier: "AUTONOMOUS",
+    operations: ["graph:read"],
     requiresApproval: false,
     autonomous: true,
-    auditLevel: 'none',
+    auditLevel: "none",
   },
 
   // Entity tools
   search_entities: {
-    name: 'search_entities',
-    tier: 'AUTONOMOUS',
-    operations: ['entity:read'],
+    name: "search_entities",
+    tier: "AUTONOMOUS",
+    operations: ["entity:read"],
     requiresApproval: false,
     autonomous: true,
-    auditLevel: 'basic',
+    auditLevel: "basic",
   },
   get_entity: {
-    name: 'get_entity',
-    tier: 'AUTONOMOUS',
-    operations: ['entity:read'],
+    name: "get_entity",
+    tier: "AUTONOMOUS",
+    operations: ["entity:read"],
     requiresApproval: false,
     autonomous: true,
-    auditLevel: 'basic',
+    auditLevel: "basic",
   },
   create_entity: {
-    name: 'create_entity',
-    tier: 'SUPERVISED',
-    operations: ['entity:create'],
+    name: "create_entity",
+    tier: "SUPERVISED",
+    operations: ["entity:create"],
     requiresApproval: true,
     autonomous: false,
-    auditLevel: 'detailed',
+    auditLevel: "detailed",
   },
   find_similar_entities: {
-    name: 'find_similar_entities',
-    tier: 'AUTONOMOUS',
-    operations: ['entity:read'],
+    name: "find_similar_entities",
+    tier: "AUTONOMOUS",
+    operations: ["entity:read"],
     requiresApproval: false,
     autonomous: true,
-    auditLevel: 'basic',
+    auditLevel: "basic",
   },
   resolve_entity: {
-    name: 'resolve_entity',
-    tier: 'SUPERVISED',
-    operations: ['entity:read', 'entity:create'],
+    name: "resolve_entity",
+    tier: "SUPERVISED",
+    operations: ["entity:read", "entity:create"],
     requiresApproval: false,
     autonomous: true,
-    auditLevel: 'detailed',
+    auditLevel: "detailed",
   },
 
   // Investigation tools
   get_investigation: {
-    name: 'get_investigation',
-    tier: 'AUTONOMOUS',
-    operations: ['investigation:read'],
+    name: "get_investigation",
+    tier: "AUTONOMOUS",
+    operations: ["investigation:read"],
     requiresApproval: false,
     autonomous: true,
-    auditLevel: 'basic',
+    auditLevel: "basic",
   },
   create_hypothesis: {
-    name: 'create_hypothesis',
-    tier: 'SUPERVISED',
-    operations: ['investigation:write'],
+    name: "create_hypothesis",
+    tier: "SUPERVISED",
+    operations: ["investigation:write"],
     requiresApproval: false,
     autonomous: true,
-    auditLevel: 'detailed',
+    auditLevel: "detailed",
   },
   update_hypothesis: {
-    name: 'update_hypothesis',
-    tier: 'SUPERVISED',
-    operations: ['investigation:write'],
+    name: "update_hypothesis",
+    tier: "SUPERVISED",
+    operations: ["investigation:write"],
     requiresApproval: false,
     autonomous: true,
-    auditLevel: 'detailed',
+    auditLevel: "detailed",
   },
   add_finding: {
-    name: 'add_finding',
-    tier: 'SUPERVISED',
-    operations: ['investigation:write'],
+    name: "add_finding",
+    tier: "SUPERVISED",
+    operations: ["investigation:write"],
     requiresApproval: false,
     autonomous: true,
-    auditLevel: 'detailed',
+    auditLevel: "detailed",
   },
   link_entities_to_investigation: {
-    name: 'link_entities_to_investigation',
-    tier: 'SUPERVISED',
-    operations: ['investigation:write'],
+    name: "link_entities_to_investigation",
+    tier: "SUPERVISED",
+    operations: ["investigation:write"],
     requiresApproval: false,
     autonomous: true,
-    auditLevel: 'detailed',
+    auditLevel: "detailed",
   },
   get_timeline: {
-    name: 'get_timeline',
-    tier: 'AUTONOMOUS',
-    operations: ['investigation:read'],
+    name: "get_timeline",
+    tier: "AUTONOMOUS",
+    operations: ["investigation:read"],
     requiresApproval: false,
     autonomous: true,
-    auditLevel: 'basic',
+    auditLevel: "basic",
   },
 
   // Analysis tools
   detect_patterns: {
-    name: 'detect_patterns',
-    tier: 'AUTONOMOUS',
-    operations: ['analysis:read'],
+    name: "detect_patterns",
+    tier: "AUTONOMOUS",
+    operations: ["analysis:read"],
     requiresApproval: false,
     autonomous: true,
-    auditLevel: 'basic',
+    auditLevel: "basic",
   },
   analyze_centrality: {
-    name: 'analyze_centrality',
-    tier: 'AUTONOMOUS',
-    operations: ['analysis:read'],
+    name: "analyze_centrality",
+    tier: "AUTONOMOUS",
+    operations: ["analysis:read"],
     requiresApproval: false,
     autonomous: true,
-    auditLevel: 'basic',
+    auditLevel: "basic",
   },
   detect_anomalies: {
-    name: 'detect_anomalies',
-    tier: 'AUTONOMOUS',
-    operations: ['analysis:read'],
+    name: "detect_anomalies",
+    tier: "AUTONOMOUS",
+    operations: ["analysis:read"],
     requiresApproval: false,
     autonomous: true,
-    auditLevel: 'basic',
+    auditLevel: "basic",
   },
   compare_entities: {
-    name: 'compare_entities',
-    tier: 'AUTONOMOUS',
-    operations: ['entity:read'],
+    name: "compare_entities",
+    tier: "AUTONOMOUS",
+    operations: ["entity:read"],
     requiresApproval: false,
     autonomous: true,
-    auditLevel: 'basic',
+    auditLevel: "basic",
   },
 };
 
@@ -263,7 +263,7 @@ export function createGovernanceMiddleware(config: GovernanceConfig = {}) {
   const {
     gatewayUrl,
     apiKey,
-    defaultRiskTolerance = 'SUPERVISED',
+    defaultRiskTolerance = "SUPERVISED",
     tenantId,
     dryRun = false,
   } = config;
@@ -272,14 +272,16 @@ export function createGovernanceMiddleware(config: GovernanceConfig = {}) {
    * Get risk profile for a tool
    */
   function getToolRisk(toolName: string): ToolRiskProfile {
-    return DEFAULT_TOOL_RISKS[toolName] || {
-      name: toolName,
-      tier: 'RESTRICTED',
-      operations: ['unknown'],
-      requiresApproval: true,
-      autonomous: false,
-      auditLevel: 'full',
-    };
+    return (
+      DEFAULT_TOOL_RISKS[toolName] || {
+        name: toolName,
+        tier: "RESTRICTED",
+        operations: ["unknown"],
+        requiresApproval: true,
+        autonomous: false,
+        auditLevel: "full",
+      }
+    );
   }
 
   /**
@@ -287,7 +289,7 @@ export function createGovernanceMiddleware(config: GovernanceConfig = {}) {
    */
   function isAllowedByRiskTier(toolName: string, riskTolerance: RiskTier): boolean {
     const profile = getToolRisk(toolName);
-    const tierOrder: RiskTier[] = ['AUTONOMOUS', 'SUPERVISED', 'RESTRICTED', 'PROHIBITED'];
+    const tierOrder: RiskTier[] = ["AUTONOMOUS", "SUPERVISED", "RESTRICTED", "PROHIBITED"];
 
     const toolTierIndex = tierOrder.indexOf(profile.tier);
     const toleranceIndex = tierOrder.indexOf(riskTolerance);
@@ -317,7 +319,7 @@ export function createGovernanceMiddleware(config: GovernanceConfig = {}) {
       return {
         allowed: false,
         reason: `Tool ${toolName} requires approval`,
-        requiredApprovals: ['supervisor'],
+        requiredApprovals: ["supervisor"],
       };
     }
 
@@ -341,7 +343,7 @@ export function createGovernanceMiddleware(config: GovernanceConfig = {}) {
 
     return {
       allowed: true,
-      reason: 'Operation allowed by local policy',
+      reason: "Operation allowed by local policy",
     };
   }
 
@@ -407,7 +409,7 @@ export function createGovernanceMiddleware(config: GovernanceConfig = {}) {
         return result;
       } catch (error) {
         const executionTimeMs = Date.now() - startTime;
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
 
         // Log failed execution
         console.error(`[AUDIT] Tool failed`, {
@@ -440,10 +442,7 @@ export function createGovernanceMiddleware(config: GovernanceConfig = {}) {
   /**
    * Get all tools filtered by risk tier
    */
-  function filterToolsByRisk<T extends { name: string }>(
-    tools: T[],
-    maxTier: RiskTier
-  ): T[] {
+  function filterToolsByRisk<T extends { name: string }>(tools: T[], maxTier: RiskTier): T[] {
     return tools.filter((tool) => isAllowedByRiskTier(tool.name, maxTier));
   }
 

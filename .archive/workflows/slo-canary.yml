@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       targetUrl:
-        description: 'Base URL to probe'
+        description: "Base URL to probe"
         required: true
 permissions: { contents: read }
 jobs:

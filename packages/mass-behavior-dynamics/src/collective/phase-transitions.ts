@@ -5,7 +5,7 @@
  * statistical physics and complexity science approaches.
  */
 
-import { PhaseTransitionIndicator, TransitionType, EarlyWarningSignal } from '../index.js';
+import { PhaseTransitionIndicator, TransitionType, EarlyWarningSignal } from "../index.js";
 
 export interface PhaseTransitionConfig {
   windowSize: number;
@@ -41,7 +41,7 @@ export class PhaseTransitionDetector {
     // Calculate autocorrelation at lag 1
     const autocorr = this.calculateAutocorrelation(timeSeries, 1);
     signals.push({
-      signal: 'AUTOCORRELATION',
+      signal: "AUTOCORRELATION",
       value: autocorr,
       threshold: 0.7,
       trend: this.calculateTrend(timeSeries, (ts) => this.calculateAutocorrelation(ts, 1)),
@@ -52,7 +52,7 @@ export class PhaseTransitionDetector {
     const variance = this.calculateVariance(timeSeries);
     const varianceTrend = this.calculateTrend(timeSeries, this.calculateVariance.bind(this));
     signals.push({
-      signal: 'VARIANCE',
+      signal: "VARIANCE",
       value: variance,
       threshold: 0, // Context-dependent
       trend: varianceTrend,
@@ -62,7 +62,7 @@ export class PhaseTransitionDetector {
     // Calculate skewness (asymmetry indicating approach to boundary)
     const skewness = this.calculateSkewness(timeSeries);
     signals.push({
-      signal: 'SKEWNESS',
+      signal: "SKEWNESS",
       value: skewness,
       threshold: 1,
       trend: this.calculateTrend(timeSeries, this.calculateSkewness.bind(this)),
@@ -72,7 +72,7 @@ export class PhaseTransitionDetector {
     // Detect flickering (bimodality)
     const flickering = this.detectFlickering(timeSeries);
     signals.push({
-      signal: 'FLICKERING',
+      signal: "FLICKERING",
       value: flickering,
       threshold: 0.5,
       trend: 0,
@@ -85,18 +85,18 @@ export class PhaseTransitionDetector {
   /**
    * Estimate distance to critical transition
    */
-  estimateDistanceToTransition(
-    signals: EarlyWarningSignal[]
-  ): { distance: number; confidence: number } {
+  estimateDistanceToTransition(signals: EarlyWarningSignal[]): {
+    distance: number;
+    confidence: number;
+  } {
     // Weighted combination of signal strengths
     let totalWeight = 0;
     let weightedDistance = 0;
 
     for (const signal of signals) {
       const weight = signal.significance;
-      const signalDistance = signal.threshold > 0
-        ? 1 - signal.value / signal.threshold
-        : 1 - Math.tanh(signal.trend);
+      const signalDistance =
+        signal.threshold > 0 ? 1 - signal.value / signal.threshold : 1 - Math.tanh(signal.trend);
 
       totalWeight += weight;
       weightedDistance += weight * signalDistance;
@@ -122,35 +122,33 @@ export class PhaseTransitionDetector {
     contextIndicators: ContextIndicator[]
   ): TransitionType {
     // Use signal patterns and context to classify
-    const hasHighAutocorr = signals.find(
-      (s) => s.signal === 'AUTOCORRELATION' && s.value > 0.7
-    );
-    const hasFlickering = signals.find(
-      (s) => s.signal === 'FLICKERING' && s.value > 0.5
-    );
+    const hasHighAutocorr = signals.find((s) => s.signal === "AUTOCORRELATION" && s.value > 0.7);
+    const hasFlickering = signals.find((s) => s.signal === "FLICKERING" && s.value > 0.5);
     const hasTrustIndicators = contextIndicators.some(
-      (c) => c.type === 'INSTITUTIONAL_TRUST' && c.value < 0.3
+      (c) => c.type === "INSTITUTIONAL_TRUST" && c.value < 0.3
     );
     const hasMobilizationIndicators = contextIndicators.some(
-      (c) => c.type === 'MOBILIZATION_ACTIVITY'
+      (c) => c.type === "MOBILIZATION_ACTIVITY"
     );
 
     if (hasMobilizationIndicators && hasHighAutocorr) {
-      return 'MASS_MOBILIZATION';
+      return "MASS_MOBILIZATION";
     }
     if (hasTrustIndicators && hasFlickering) {
-      return 'TRUST_COLLAPSE';
+      return "TRUST_COLLAPSE";
     }
     if (hasFlickering) {
-      return 'OPINION_SHIFT';
+      return "OPINION_SHIFT";
     }
 
-    return 'OPINION_SHIFT';
+    return "OPINION_SHIFT";
   }
 
   private calculateAutocorrelation(series: number[], lag: number): number {
     const n = series.length;
-    if (n <= lag) {return 0;}
+    if (n <= lag) {
+      return 0;
+    }
 
     const mean = series.reduce((a, b) => a + b, 0) / n;
     let numerator = 0;
@@ -179,18 +177,19 @@ export class PhaseTransitionDetector {
     const variance = this.calculateVariance(series);
     const std = Math.sqrt(variance);
 
-    if (std === 0) {return 0;}
+    if (std === 0) {
+      return 0;
+    }
 
     const m3 = series.reduce((sum, x) => sum + ((x - mean) / std) ** 3, 0) / n;
     return m3;
   }
 
-  private calculateTrend(
-    series: number[],
-    statFn: (s: number[]) => number
-  ): number {
+  private calculateTrend(series: number[], statFn: (s: number[]) => number): number {
     const windowSize = Math.floor(series.length / 4);
-    if (windowSize < 2) {return 0;}
+    if (windowSize < 2) {
+      return 0;
+    }
 
     const stats: number[] = [];
     for (let i = 0; i <= series.length - windowSize; i += windowSize) {
@@ -198,7 +197,9 @@ export class PhaseTransitionDetector {
       stats.push(statFn(window));
     }
 
-    if (stats.length < 2) {return 0;}
+    if (stats.length < 2) {
+      return 0;
+    }
 
     // Simple slope
     const slope = (stats[stats.length - 1] - stats[0]) / stats.length;

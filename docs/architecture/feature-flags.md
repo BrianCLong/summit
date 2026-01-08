@@ -22,16 +22,16 @@ This document describes the minimal feature-flag toolkit for Summit. The goal is
 Use the lightweight helper in `server/src/lib/featureFlags.ts`:
 
 ```ts
-import { get, getVariant, isEnabled } from '../lib/featureFlags.js';
+import { get, getVariant, isEnabled } from "../lib/featureFlags.js";
 
-if (isEnabled('graph-query-optimizer', { userId: req.user?.id })) {
+if (isEnabled("graph-query-optimizer", { userId: req.user?.id })) {
   enableQueryOptimizer();
 }
 
-const cacheStrategy = getVariant('cache-strategy', { sessionId: req.sessionID });
-logger.info({ cacheStrategy }, 'Using cache strategy');
+const cacheStrategy = getVariant("cache-strategy", { sessionId: req.sessionID });
+logger.info({ cacheStrategy }, "Using cache strategy");
 
-const rawFlag = get('ai-orchestrator-v2');
+const rawFlag = get("ai-orchestrator-v2");
 ```
 
 ### Frontend (React)
@@ -39,10 +39,10 @@ const rawFlag = get('ai-orchestrator-v2');
 Use the hook in `client/src/hooks/useFeatureFlag.ts`:
 
 ```tsx
-import { useFeatureFlag, useFeatureVariant } from './hooks/useFeatureFlag';
+import { useFeatureFlag, useFeatureVariant } from "./hooks/useFeatureFlag";
 
-const showNewPanel = useFeatureFlag('ui-insights-panel', { userId: user.id });
-const orchestrationArm = useFeatureVariant('ai-orchestrator-v2', { userId: user.id });
+const showNewPanel = useFeatureFlag("ui-insights-panel", { userId: user.id });
+const orchestrationArm = useFeatureVariant("ai-orchestrator-v2", { userId: user.id });
 ```
 
 - Flags can be overridden during local dev with `VITE_FEATURE_FLAGS=flag=true,flag2=variantB`.

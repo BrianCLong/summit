@@ -1,4 +1,4 @@
-import torch from 'torch';
+import torch from "torch";
 
 export function engagementCascade(config) {
   const cascade = torch.recursive({ scale: config.globalImpact });

@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo } from 'react';
-import { Provider } from 'react-redux';
+import React, { useEffect, useMemo } from "react";
+import { Provider } from "react-redux";
 import {
   ThemeProvider,
   CssBaseline,
@@ -10,10 +10,10 @@ import {
   Typography,
   Button,
   Grid,
-} from '@mui/material';
-import { getIntelGraphTheme } from './theme/intelgraphTheme';
-import { store } from './store';
-import { useSelector } from 'react-redux';
+} from "@mui/material";
+import { getIntelGraphTheme } from "./theme/intelgraphTheme";
+import { store } from "./store";
+import { useSelector } from "react-redux";
 
 // Simple Dashboard with MUI components
 function Dashboard() {
@@ -60,9 +60,7 @@ function Dashboard() {
               <Typography variant="h5" component="h2" gutterBottom>
                 🎯 Platform Features
               </Typography>
-              <Box
-                sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}
-              >
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1 }}>
                 <div>• Graph Analytics</div>
                 <div>• AI Copilot</div>
                 <div>• Collaboration</div>
@@ -82,7 +80,7 @@ function Dashboard() {
               <Typography variant="h5" component="h2" gutterBottom>
                 🔗 Quick Actions
               </Typography>
-              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+              <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
                 <Button variant="contained" color="primary">
                   Dashboard
                 </Button>
@@ -123,15 +121,13 @@ function Dashboard() {
 
 // Themed App Shell
 function ThemedAppShell({ children }) {
-  const mode = useSelector((state) => state.ui?.theme || 'light');
+  const mode = useSelector((state) => state.ui?.theme || "light");
   const theme = useMemo(() => getIntelGraphTheme(mode), [mode]);
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
-        {children}
-      </Box>
+      <Box sx={{ bgcolor: "background.default", minHeight: "100vh" }}>{children}</Box>
     </ThemeProvider>
   );
 }
@@ -139,11 +135,11 @@ function ThemedAppShell({ children }) {
 function App() {
   useEffect(() => {
     // eslint-disable-next-line no-console
-    console.log('🚀 Progressive IntelGraph App mounting...');
+    console.log("🚀 Progressive IntelGraph App mounting...");
     // eslint-disable-next-line no-console
-    console.log('✅ Redux store connected');
+    console.log("✅ Redux store connected");
     // eslint-disable-next-line no-console
-    console.log('✅ Material-UI theme loaded');
+    console.log("✅ Material-UI theme loaded");
   }, []);
 
   return (

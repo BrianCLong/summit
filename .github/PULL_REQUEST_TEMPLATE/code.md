@@ -1,9 +1,9 @@
 ---
 name: Code Change
 about: Standard pull request for code changes (features, fixes, refactors)
-title: ''
-labels: 'area/code'
-assignees: ''
+title: ""
+labels: "area/code"
+assignees: ""
 ---
 
 ## Summary
@@ -22,6 +22,7 @@ assignees: ''
 ## Risk Assessment
 
 <!-- Select one -->
+
 - [ ] **Low**: No production impact, isolated change
 - [ ] **Medium**: Touches shared components, needs review
 - [ ] **High**: Critical path, security-sensitive, or wide-reaching
@@ -46,6 +47,7 @@ assignees: ''
 - [ ] CI passing (all gates green)
 
 **Test Commands**:
+
 ```bash
 pnpm test:unit
 pnpm test:integration

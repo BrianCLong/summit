@@ -1,24 +1,18 @@
 // @ts-nocheck
-import { z } from 'zod';
+import { z } from "zod";
 
-export type AdapterCapability =
-  | 'ingest'
-  | 'export'
-  | 'notary'
-  | 'identity'
-  | 'webhook';
+export type AdapterCapability = "ingest" | "export" | "notary" | "identity" | "webhook";
 
 export const AdapterLifecycle = {
-  Install: 'install',
-  Enable: 'enable',
-  Configure: 'configure',
-  Run: 'run',
-  Disable: 'disable',
-  Uninstall: 'uninstall',
+  Install: "install",
+  Enable: "enable",
+  Configure: "configure",
+  Run: "run",
+  Disable: "disable",
+  Uninstall: "uninstall",
 } as const;
 
-export type AdapterLifecycleStage =
-  (typeof AdapterLifecycle)[keyof typeof AdapterLifecycle];
+export type AdapterLifecycleStage = (typeof AdapterLifecycle)[keyof typeof AdapterLifecycle];
 
 export interface AdapterContext {
   tenantId: string;

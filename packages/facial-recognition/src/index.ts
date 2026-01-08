@@ -5,4 +5,4 @@
  * recognition, age progression, emotion analysis, and facial intelligence.
  */
 
-export * from './types.js';
+export * from "./types.js";

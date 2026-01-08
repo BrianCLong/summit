@@ -1,4 +1,4 @@
-import qutip from 'qutip';
+import qutip from "qutip";
 
 export function quantumEcosystemSanctuary(config) {
   const sanctuary = qutip.sanctuary({ scale: config.globalImpact });

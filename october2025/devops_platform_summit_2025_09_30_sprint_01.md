@@ -99,7 +99,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: "20" }
       - name: Install deps
         run: npm ci --prefer-offline
       - name: Unit + Lint
@@ -279,11 +279,11 @@ metrics:
       - name: p95_latency
         query: histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{job="gateway"}[5m])) by (le))
         threshold: 1.5
-        comparator: '<'
+        comparator: "<"
       - name: error_rate
         query: sum(rate(http_requests_total{job="gateway",status=~"5.."}[5m])) / sum(rate(http_requests_total{job="gateway"}[5m]))
         threshold: 0.01
-        comparator: '<'
+        comparator: "<"
 ```
 
 ### 4.4 Observability — OTEL + PrometheusRules + Dashboards
@@ -305,12 +305,12 @@ spec:
           expr: job:http_request_error_rate:ratio_rate5m > 0.01
           for: 10m
           labels: { severity: critical }
-          annotations: { summary: 'Gateway error budget burn >1%' }
+          annotations: { summary: "Gateway error budget burn >1%" }
         - alert: GatewayLatencyHigh
           expr: histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{job="gateway"}[5m])) by (le)) > 1.5
           for: 10m
           labels: { severity: warning }
-          annotations: { summary: 'Gateway p95 latency >1.5s' }
+          annotations: { summary: "Gateway p95 latency >1.5s" }
 ```
 
 ```yaml
@@ -543,12 +543,12 @@ branches:
 ### Appendix A — Minimal k6 Load for Canary Gate
 
 ```js
-import http from 'k6/http';
-import { check, sleep } from 'k6';
-export const options = { vus: 20, duration: '10m' };
+import http from "k6/http";
+import { check, sleep } from "k6";
+export const options = { vus: 20, duration: "10m" };
 export default function () {
   const res = http.get(`${__ENV.BASE}/health`);
-  check(res, { 'status is 200': (r) => r.status === 200 });
+  check(res, { "status is 200": (r) => r.status === 200 });
   sleep(1);
 }
 ```
@@ -558,7 +558,7 @@ export default function () {
 ```yaml
 - name: Gitleaks Scan
   uses: gitleaks/gitleaks-action@v2
-  with: { args: 'detect --redact --exit-code 1' }
+  with: { args: "detect --redact --exit-code 1" }
 ```
 
 ### Appendix C — ChatOps Commands (slash‑commands)

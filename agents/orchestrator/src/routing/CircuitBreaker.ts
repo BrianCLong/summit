@@ -5,15 +5,11 @@
  * failover with configurable thresholds and recovery strategies.
  */
 
-import { EventEmitter } from 'eventemitter3';
-import {
-  CircuitState,
-  CircuitBreakerConfig,
-  CircuitBreakerState,
-} from '../types/index.js';
+import { EventEmitter } from "eventemitter3";
+import { CircuitState, CircuitBreakerConfig, CircuitBreakerState } from "../types/index.js";
 
 export class CircuitBreaker extends EventEmitter {
-  private state: CircuitState = 'closed';
+  private state: CircuitState = "closed";
   private failures: number = 0;
   private successes: number = 0;
   private lastFailure?: Date;
@@ -40,15 +36,15 @@ export class CircuitBreaker extends EventEmitter {
     this.checkWindowExpiry();
 
     switch (this.state) {
-      case 'closed':
+      case "closed":
         return true;
-      case 'open':
+      case "open":
         if (this.nextAttempt && new Date() >= this.nextAttempt) {
-          this.transitionTo('half-open');
+          this.transitionTo("half-open");
           return true;
         }
         return false;
-      case 'half-open':
+      case "half-open":
         return true;
       default:
         return false;
@@ -63,18 +59,18 @@ export class CircuitBreaker extends EventEmitter {
     this.successes++;
 
     switch (this.state) {
-      case 'half-open':
+      case "half-open":
         if (this.successes >= this.config.successThreshold) {
-          this.transitionTo('closed');
+          this.transitionTo("closed");
         }
         break;
-      case 'closed':
+      case "closed":
         // Reset failure count on success
         this.failures = 0;
         break;
     }
 
-    this.emit('success', {
+    this.emit("success", {
       providerId: this.providerId,
       state: this.state,
       successes: this.successes,
@@ -89,18 +85,18 @@ export class CircuitBreaker extends EventEmitter {
     this.failures++;
 
     switch (this.state) {
-      case 'closed':
+      case "closed":
         if (this.failures >= this.config.failureThreshold) {
-          this.transitionTo('open');
+          this.transitionTo("open");
         }
         break;
-      case 'half-open':
+      case "half-open":
         // Any failure in half-open state reopens the circuit
-        this.transitionTo('open');
+        this.transitionTo("open");
         break;
     }
 
-    this.emit('failure', {
+    this.emit("failure", {
       providerId: this.providerId,
       state: this.state,
       failures: this.failures,
@@ -133,13 +129,13 @@ export class CircuitBreaker extends EventEmitter {
    * Reset the circuit breaker
    */
   reset(): void {
-    this.state = 'closed';
+    this.state = "closed";
     this.failures = 0;
     this.successes = 0;
     this.lastFailure = undefined;
     this.lastSuccess = undefined;
     this.nextAttempt = undefined;
-    this.emit('reset', { providerId: this.providerId });
+    this.emit("reset", { providerId: this.providerId });
   }
 
   /**
@@ -150,32 +146,32 @@ export class CircuitBreaker extends EventEmitter {
     this.state = newState;
 
     switch (newState) {
-      case 'open':
+      case "open":
         this.nextAttempt = new Date(Date.now() + this.config.timeout);
         this.successes = 0;
-        this.emit('circuit:opened', {
+        this.emit("circuit:opened", {
           providerId: this.providerId,
           failures: this.failures,
           nextAttempt: this.nextAttempt,
         });
         break;
-      case 'half-open':
+      case "half-open":
         this.successes = 0;
-        this.emit('circuit:half-open', {
+        this.emit("circuit:half-open", {
           providerId: this.providerId,
         });
         break;
-      case 'closed':
+      case "closed":
         this.failures = 0;
         this.successes = 0;
         this.nextAttempt = undefined;
-        this.emit('circuit:closed', {
+        this.emit("circuit:closed", {
           providerId: this.providerId,
         });
         break;
     }
 
-    this.emit('state-change', {
+    this.emit("state-change", {
       providerId: this.providerId,
       oldState,
       newState,
@@ -186,7 +182,7 @@ export class CircuitBreaker extends EventEmitter {
    * Check if monitoring window has expired and reset if needed
    */
   private checkWindowExpiry(): void {
-    if (this.state === 'closed' && this.lastFailure) {
+    if (this.state === "closed" && this.lastFailure) {
       const windowExpiry = new Date(this.lastFailure.getTime() + this.config.monitoringWindow);
       if (new Date() > windowExpiry) {
         this.failures = 0;

@@ -3,7 +3,7 @@
  * Hyperparameter Optimization
  */
 
-import type { Dataset, HyperparameterSearchResult, ModelPerformance } from '../types/index.js';
+import type { Dataset, HyperparameterSearchResult, ModelPerformance } from "../types/index.js";
 
 export interface ParameterSpace {
   [key: string]: number[] | string[] | boolean[];
@@ -12,7 +12,7 @@ export interface ParameterSpace {
 export interface OptimizerConfig {
   nIterations: number;
   nFolds: number;
-  scoringMetric: 'accuracy' | 'f1' | 'rmse' | 'r2';
+  scoringMetric: "accuracy" | "f1" | "rmse" | "r2";
   randomState?: number;
 }
 
@@ -26,7 +26,7 @@ export class GridSearchCV {
     this.config = {
       nIterations: config.nIterations || 10,
       nFolds: config.nFolds || 5,
-      scoringMetric: config.scoringMetric || 'accuracy',
+      scoringMetric: config.scoringMetric || "accuracy",
       randomState: config.randomState,
     };
   }
@@ -74,7 +74,7 @@ export class GridSearchCV {
    */
   private generateParameterGrid(space: ParameterSpace): Array<Record<string, unknown>> {
     const keys = Object.keys(space);
-    const values = keys.map(k => space[k]);
+    const values = keys.map((k) => space[k]);
 
     const grid: Array<Record<string, unknown>> = [];
 
@@ -143,8 +143,8 @@ export class GridSearchCV {
       const foldIndices = indices.slice(start, end);
 
       folds.push({
-        features: foldIndices.map(idx => dataset.features[idx]),
-        labels: foldIndices.map(idx => dataset.labels[idx]),
+        features: foldIndices.map((idx) => dataset.features[idx]),
+        labels: foldIndices.map((idx) => dataset.labels[idx]),
       });
     }
 
@@ -156,8 +156,8 @@ export class GridSearchCV {
    */
   private combineFolds(folds: Dataset[]): Dataset {
     return {
-      features: folds.flatMap(f => f.features),
-      labels: folds.flatMap(f => f.labels),
+      features: folds.flatMap((f) => f.features),
+      labels: folds.flatMap((f) => f.labels),
     };
   }
 
@@ -166,13 +166,13 @@ export class GridSearchCV {
    */
   private extractScore(performance: ModelPerformance): number {
     switch (this.config.scoringMetric) {
-      case 'accuracy':
+      case "accuracy":
         return performance.accuracy || 0;
-      case 'f1':
+      case "f1":
         return performance.f1Score || 0;
-      case 'rmse':
+      case "rmse":
         return -(performance.rmse || Infinity); // Negative because lower is better
-      case 'r2':
+      case "r2":
         return performance.r2 || 0;
       default:
         return 0;
@@ -181,7 +181,7 @@ export class GridSearchCV {
 
   private std(arr: number[]): number {
     const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
-    const squareDiffs = arr.map(x => Math.pow(x - mean, 2));
+    const squareDiffs = arr.map((x) => Math.pow(x - mean, 2));
     return Math.sqrt(squareDiffs.reduce((a, b) => a + b, 0) / arr.length);
   }
 }
@@ -196,7 +196,7 @@ export class RandomSearchCV {
     this.config = {
       nIterations: config.nIterations || 10,
       nFolds: config.nFolds || 5,
-      scoringMetric: config.scoringMetric || 'accuracy',
+      scoringMetric: config.scoringMetric || "accuracy",
       randomState: config.randomState,
     };
   }
@@ -294,8 +294,8 @@ export class RandomSearchCV {
       const foldIndices = indices.slice(start, end);
 
       folds.push({
-        features: foldIndices.map(idx => dataset.features[idx]),
-        labels: foldIndices.map(idx => dataset.labels[idx]),
+        features: foldIndices.map((idx) => dataset.features[idx]),
+        labels: foldIndices.map((idx) => dataset.labels[idx]),
       });
     }
 
@@ -304,20 +304,20 @@ export class RandomSearchCV {
 
   private combineFolds(folds: Dataset[]): Dataset {
     return {
-      features: folds.flatMap(f => f.features),
-      labels: folds.flatMap(f => f.labels),
+      features: folds.flatMap((f) => f.features),
+      labels: folds.flatMap((f) => f.labels),
     };
   }
 
   private extractScore(performance: ModelPerformance): number {
     switch (this.config.scoringMetric) {
-      case 'accuracy':
+      case "accuracy":
         return performance.accuracy || 0;
-      case 'f1':
+      case "f1":
         return performance.f1Score || 0;
-      case 'rmse':
+      case "rmse":
         return -(performance.rmse || Infinity);
-      case 'r2':
+      case "r2":
         return performance.r2 || 0;
       default:
         return 0;
@@ -326,7 +326,7 @@ export class RandomSearchCV {
 
   private std(arr: number[]): number {
     const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
-    const squareDiffs = arr.map(x => Math.pow(x - mean, 2));
+    const squareDiffs = arr.map((x) => Math.pow(x - mean, 2));
     return Math.sqrt(squareDiffs.reduce((a, b) => a + b, 0) / arr.length);
   }
 }

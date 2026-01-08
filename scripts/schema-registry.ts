@@ -1,5 +1,5 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
+import fs from "node:fs/promises";
+import path from "node:path";
 
 export interface SchemaRegistry {
   name: string;
@@ -9,23 +9,23 @@ export interface SchemaRegistry {
 }
 
 export const REGISTRY_FILES = [
-  path.resolve(process.cwd(), 'migrations/sql/registry.json'),
-  path.resolve(process.cwd(), 'migrations/graph/registry.json'),
-  path.resolve(process.cwd(), 'migrations/vector/registry.json'),
-  path.resolve(process.cwd(), 'migrations/json/registry.json')
+  path.resolve(process.cwd(), "migrations/sql/registry.json"),
+  path.resolve(process.cwd(), "migrations/graph/registry.json"),
+  path.resolve(process.cwd(), "migrations/vector/registry.json"),
+  path.resolve(process.cwd(), "migrations/json/registry.json"),
 ];
 
 export const DEFAULT_IGNORES = [
-  '**/node_modules/**',
-  '**/.turbo/**',
-  '**/dist/**',
-  '**/build/**',
-  '**/coverage/**',
-  '**/.git/**'
+  "**/node_modules/**",
+  "**/.turbo/**",
+  "**/dist/**",
+  "**/build/**",
+  "**/coverage/**",
+  "**/.git/**",
 ];
 
 async function readRegistry(filePath: string): Promise<SchemaRegistry> {
-  const raw = await fs.readFile(filePath, 'utf8');
+  const raw = await fs.readFile(filePath, "utf8");
   const parsed = JSON.parse(raw) as Partial<SchemaRegistry>;
 
   if (!parsed.name) {
@@ -38,9 +38,9 @@ async function readRegistry(filePath: string): Promise<SchemaRegistry> {
 
   return {
     name: parsed.name,
-    description: parsed.description ?? '',
+    description: parsed.description ?? "",
     schemaGlobs: parsed.schemaGlobs,
-    migrationGlobs: parsed.migrationGlobs
+    migrationGlobs: parsed.migrationGlobs,
   };
 }
 

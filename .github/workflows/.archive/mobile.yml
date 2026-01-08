@@ -2,15 +2,15 @@ name: Mobile CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
     paths:
-      - 'apps/mobile/**'
-      - 'packages/mobile-sdk/**'
+      - "apps/mobile/**"
+      - "packages/mobile-sdk/**"
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
     paths:
-      - 'apps/mobile/**'
-      - 'packages/mobile-sdk/**'
+      - "apps/mobile/**"
+      - "packages/mobile-sdk/**"
 
 jobs:
   validate:
@@ -56,8 +56,8 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
-          java-version: '17'
+          distribution: "zulu"
+          java-version: "17"
 
       - name: Setup Node.js
         uses: actions/setup-node@v3

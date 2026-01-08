@@ -64,7 +64,11 @@ export interface QueueActResult {
 export interface QueueAdapter {
   list: (filters?: QueueFilters) => Promise<QueueItem[]>
   get: (id: string) => Promise<QueueItem | undefined>
-  act: (id: string, action: QueueAction, payload?: QueueActPayload) => Promise<QueueActResult | undefined>
+  act: (
+    id: string,
+    action: QueueAction,
+    payload?: QueueActPayload
+  ) => Promise<QueueActResult | undefined>
   decisions: QueueDecision[]
   reset?: () => void
 }

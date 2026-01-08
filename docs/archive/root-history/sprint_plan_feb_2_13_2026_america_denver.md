@@ -147,13 +147,13 @@ Demonstrate **operationally boring SaaS** by Feb 13, 2026: hold **API uptime 99.
 
 ## 11) Risk Register (RAID)
 
-| Risk                                                | Prob. | Impact | Owner | Mitigation                                         |
-| --------------------------------------------------- | ----- | -----: | ----- | -------------------------------------------------- |
-| Ramp controller false positives halt ramps          | Med   |    Med | A2    | Tune burn thresholds; manual override; dry runs    |
-| Benchmark infra unavailable for 50k graph           | Med   |    High | C1    | Use current max dataset; parallel infra request    |
-| DR drill misses RPO/RTO due to backup lag           | Low   |   High | B2    | Pre-drill restore rehearsal; tighter backup SLO    |
-| Chaos-lite impacts shared staging tenants           | Med   |    Med | B3    | Schedule windows; announce; traffic shaping        |
-| Cost data gaps reduce attribution accuracy          | Med   |    Med | D1    | Fallback estimators; alert on missing sources      |
+| Risk                                       | Prob. | Impact | Owner | Mitigation                                      |
+| ------------------------------------------ | ----- | -----: | ----- | ----------------------------------------------- |
+| Ramp controller false positives halt ramps | Med   |    Med | A2    | Tune burn thresholds; manual override; dry runs |
+| Benchmark infra unavailable for 50k graph  | Med   |   High | C1    | Use current max dataset; parallel infra request |
+| DR drill misses RPO/RTO due to backup lag  | Low   |   High | B2    | Pre-drill restore rehearsal; tighter backup SLO |
+| Chaos-lite impacts shared staging tenants  | Med   |    Med | B3    | Schedule windows; announce; traffic shaping     |
+| Cost data gaps reduce attribution accuracy | Med   |    Med | D1    | Fallback estimators; alert on missing sources   |
 
 ---
 
@@ -182,11 +182,11 @@ Demonstrate **operationally boring SaaS** by Feb 13, 2026: hold **API uptime 99.
 
 ## 15) Demo Flow (live)
 
-1) Deploy new build and start tenant ramp.
-2) Induce controlled error-rate increase → ramp auto-pauses/rolls back; capture Switchboard timeline and receipts.
-3) Run DR restore validation → present RPO/RTO metrics and signed drill report.
-4) Show benchmark dashboard trendline vs last sprint and FinOps reconciliation score.
+1. Deploy new build and start tenant ramp.
+2. Induce controlled error-rate increase → ramp auto-pauses/rolls back; capture Switchboard timeline and receipts.
+3. Run DR restore validation → present RPO/RTO metrics and signed drill report.
+4. Show benchmark dashboard trendline vs last sprint and FinOps reconciliation score.
 
 ---
 
-_Prepared by: Covert Insights — updated for Sprint 4 (America/Denver)._ 
+_Prepared by: Covert Insights — updated for Sprint 4 (America/Denver)._

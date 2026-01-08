@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
   Avatar,
@@ -16,7 +16,7 @@ import {
   Divider,
   Button,
   Collapse,
-} from '@mui/material';
+} from "@mui/material";
 import {
   People,
   Visibility,
@@ -25,14 +25,12 @@ import {
   KeyboardArrowDown,
   KeyboardArrowUp,
   Circle,
-} from '@mui/icons-material';
-import { formatDistanceToNow } from 'date-fns';
+} from "@mui/icons-material";
+import { formatDistanceToNow } from "date-fns";
 
 function PresenceIndicator({ socket, investigationId }) {
   const [onlineUsers, setOnlineUsers] = useState([]);
-  const [investigationParticipants, setInvestigationParticipants] = useState(
-    [],
-  );
+  const [investigationParticipants, setInvestigationParticipants] = useState([]);
   const [userCursors, setUserCursors] = useState(new Map());
   const [typingUsers, setTypingUsers] = useState(new Map());
   const [presenceDrawerOpen, setPresenceDrawerOpen] = useState(false);
@@ -42,26 +40,26 @@ function PresenceIndicator({ socket, investigationId }) {
   useEffect(() => {
     if (socket) {
       // Listen for presence events
-      socket.on('presence:initial', handleInitialPresence);
-      socket.on('presence:update', handlePresenceUpdate);
-      socket.on('presence:user_online', handleUserOnline);
-      socket.on('presence:user_offline', handleUserOffline);
-      socket.on('investigation:user_joined', handleUserJoinedInvestigation);
-      socket.on('investigation:user_left', handleUserLeftInvestigation);
-      socket.on('cursor:update', handleCursorUpdate);
-      socket.on('cursor:click', handleCursorClick);
-      socket.on('activity:typing', handleTypingIndicator);
+      socket.on("presence:initial", handleInitialPresence);
+      socket.on("presence:update", handlePresenceUpdate);
+      socket.on("presence:user_online", handleUserOnline);
+      socket.on("presence:user_offline", handleUserOffline);
+      socket.on("investigation:user_joined", handleUserJoinedInvestigation);
+      socket.on("investigation:user_left", handleUserLeftInvestigation);
+      socket.on("cursor:update", handleCursorUpdate);
+      socket.on("cursor:click", handleCursorClick);
+      socket.on("activity:typing", handleTypingIndicator);
 
       return () => {
-        socket.off('presence:initial');
-        socket.off('presence:update');
-        socket.off('presence:user_online');
-        socket.off('presence:user_offline');
-        socket.off('investigation:user_joined');
-        socket.off('investigation:user_left');
-        socket.off('cursor:update');
-        socket.off('cursor:click');
-        socket.off('activity:typing');
+        socket.off("presence:initial");
+        socket.off("presence:update");
+        socket.off("presence:user_online");
+        socket.off("presence:user_offline");
+        socket.off("investigation:user_joined");
+        socket.off("investigation:user_left");
+        socket.off("cursor:update");
+        socket.off("cursor:click");
+        socket.off("activity:typing");
       };
     }
   }, [socket]);
@@ -69,13 +67,13 @@ function PresenceIndicator({ socket, investigationId }) {
   useEffect(() => {
     // Join investigation room when component mounts
     if (socket && investigationId) {
-      socket.emit('investigation:join', { investigationId });
+      socket.emit("investigation:join", { investigationId });
     }
 
     return () => {
       // Leave investigation room when component unmounts
       if (socket && investigationId) {
-        socket.emit('investigation:leave', { investigationId });
+        socket.emit("investigation:leave", { investigationId });
       }
     };
   }, [socket, investigationId]);
@@ -93,7 +91,7 @@ function PresenceIndicator({ socket, investigationId }) {
         // Throttle cursor updates
         clearTimeout(window.cursorUpdateTimeout);
         window.cursorUpdateTimeout = setTimeout(() => {
-          socket.emit('cursor:move', { investigationId, position });
+          socket.emit("cursor:move", { investigationId, position });
         }, 100);
       }
     };
@@ -106,7 +104,7 @@ function PresenceIndicator({ socket, investigationId }) {
           element: e.target.id || e.target.className,
         };
 
-        socket.emit('cursor:click', {
+        socket.emit("cursor:click", {
           investigationId,
           position,
           target: {
@@ -118,12 +116,12 @@ function PresenceIndicator({ socket, investigationId }) {
       }
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('click', handleMouseClick);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("click", handleMouseClick);
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('click', handleMouseClick);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("click", handleMouseClick);
       clearTimeout(window.cursorUpdateTimeout);
     };
   }, [socket, investigationId]);
@@ -135,10 +133,8 @@ function PresenceIndicator({ socket, investigationId }) {
   const handlePresenceUpdate = (data) => {
     setOnlineUsers((prev) =>
       prev.map((user) =>
-        user.userId === data.userId
-          ? { ...user, presence: data.presence }
-          : user,
-      ),
+        user.userId === data.userId ? { ...user, presence: data.presence } : user
+      )
     );
   };
 
@@ -151,7 +147,7 @@ function PresenceIndicator({ socket, investigationId }) {
         {
           userId: data.userId,
           user: data.user,
-          presence: { status: 'online', lastSeen: data.timestamp },
+          presence: { status: "online", lastSeen: data.timestamp },
         },
       ];
     });
@@ -165,12 +161,12 @@ function PresenceIndicator({ socket, investigationId }) {
               ...user,
               presence: {
                 ...user.presence,
-                status: 'offline',
+                status: "offline",
                 lastSeen: data.timestamp,
               },
             }
-          : user,
-      ),
+          : user
+      )
     );
   };
 
@@ -191,9 +187,7 @@ function PresenceIndicator({ socket, investigationId }) {
   };
 
   const handleUserLeftInvestigation = (data) => {
-    setInvestigationParticipants((prev) =>
-      prev.filter((p) => p.userId !== data.userId),
-    );
+    setInvestigationParticipants((prev) => prev.filter((p) => p.userId !== data.userId));
 
     // Remove cursor
     setUserCursors((prev) => {
@@ -228,27 +222,26 @@ function PresenceIndicator({ socket, investigationId }) {
 
   const handleCursorClick = (data) => {
     // Show click animation
-    const clickIndicator = document.createElement('div');
-    clickIndicator.style.position = 'fixed';
+    const clickIndicator = document.createElement("div");
+    clickIndicator.style.position = "fixed";
     clickIndicator.style.left = `${data.position.x}px`;
     clickIndicator.style.top = `${data.position.y}px`;
-    clickIndicator.style.width = '20px';
-    clickIndicator.style.height = '20px';
-    clickIndicator.style.borderRadius = '50%';
+    clickIndicator.style.width = "20px";
+    clickIndicator.style.height = "20px";
+    clickIndicator.style.borderRadius = "50%";
     clickIndicator.style.backgroundColor = getUserColor(data.userId);
-    clickIndicator.style.pointerEvents = 'none';
-    clickIndicator.style.zIndex = '10000';
-    clickIndicator.style.transform = 'scale(0)';
-    clickIndicator.style.transition =
-      'transform 0.3s ease-out, opacity 0.3s ease-out';
-    clickIndicator.style.opacity = '0.8';
+    clickIndicator.style.pointerEvents = "none";
+    clickIndicator.style.zIndex = "10000";
+    clickIndicator.style.transform = "scale(0)";
+    clickIndicator.style.transition = "transform 0.3s ease-out, opacity 0.3s ease-out";
+    clickIndicator.style.opacity = "0.8";
 
     document.body.appendChild(clickIndicator);
 
     // Animate
     requestAnimationFrame(() => {
-      clickIndicator.style.transform = 'scale(2)';
-      clickIndicator.style.opacity = '0';
+      clickIndicator.style.transform = "scale(2)";
+      clickIndicator.style.opacity = "0";
     });
 
     // Remove after animation
@@ -288,33 +281,33 @@ function PresenceIndicator({ socket, investigationId }) {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'online':
-        return '#4caf50';
-      case 'away':
-        return '#ff9800';
-      case 'busy':
-        return '#f44336';
-      case 'offline':
-        return '#9e9e9e';
+      case "online":
+        return "#4caf50";
+      case "away":
+        return "#ff9800";
+      case "busy":
+        return "#f44336";
+      case "offline":
+        return "#9e9e9e";
       default:
-        return '#9e9e9e';
+        return "#9e9e9e";
     }
   };
 
   const getUserColor = (userId) => {
     const colors = [
-      '#FF6B35',
-      '#4ECDC4',
-      '#45B7D1',
-      '#96CEB4',
-      '#FFEAA7',
-      '#DDA0DD',
-      '#98D8C8',
-      '#F7DC6F',
-      '#BB8FCE',
-      '#85C1E9',
+      "#FF6B35",
+      "#4ECDC4",
+      "#45B7D1",
+      "#96CEB4",
+      "#FFEAA7",
+      "#DDA0DD",
+      "#98D8C8",
+      "#F7DC6F",
+      "#BB8FCE",
+      "#85C1E9",
     ];
-    const hash = userId.split('').reduce((a, b) => {
+    const hash = userId.split("").reduce((a, b) => {
       a = (a << 5) - a + b.charCodeAt(0);
       return a & a;
     }, 0);
@@ -322,21 +315,21 @@ function PresenceIndicator({ socket, investigationId }) {
   };
 
   const getInitials = (user) => {
-    return `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase();
+    return `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase();
   };
 
   return (
     <>
       {/* Presence Indicator Button */}
-      <Box sx={{ position: 'relative' }}>
+      <Box sx={{ position: "relative" }}>
         <Tooltip title="Show online users">
           <IconButton
             onClick={() => setPresenceDrawerOpen(true)}
             sx={{
-              position: 'relative',
-              bgcolor: 'background.paper',
+              position: "relative",
+              bgcolor: "background.paper",
               border: 1,
-              borderColor: 'divider',
+              borderColor: "divider",
             }}
           >
             <Badge badgeContent={onlineUsers.length} color="primary">
@@ -348,11 +341,11 @@ function PresenceIndicator({ socket, investigationId }) {
         {/* Active Users Avatars */}
         <Box
           sx={{
-            position: 'absolute',
+            position: "absolute",
             top: -5,
             right: -5,
-            display: 'flex',
-            flexDirection: 'row-reverse',
+            display: "flex",
+            flexDirection: "row-reverse",
           }}
         >
           {investigationParticipants.slice(0, 3).map((participant, index) => (
@@ -365,9 +358,9 @@ function PresenceIndicator({ socket, investigationId }) {
                   width: 24,
                   height: 24,
                   bgcolor: getUserColor(participant.userId),
-                  fontSize: '0.75rem',
+                  fontSize: "0.75rem",
                   border: 2,
-                  borderColor: 'background.paper',
+                  borderColor: "background.paper",
                   ml: index > 0 ? -0.5 : 0,
                 }}
               >
@@ -382,12 +375,12 @@ function PresenceIndicator({ socket, investigationId }) {
       <Box
         ref={cursorLayerRef}
         sx={{
-          position: 'fixed',
+          position: "fixed",
           top: 0,
           left: 0,
-          width: '100vw',
-          height: '100vh',
-          pointerEvents: 'none',
+          width: "100vw",
+          height: "100vh",
+          pointerEvents: "none",
           zIndex: 9999,
         }}
       >
@@ -395,11 +388,11 @@ function PresenceIndicator({ socket, investigationId }) {
           <Box
             key={userId}
             sx={{
-              position: 'absolute',
+              position: "absolute",
               left: cursor.position.x,
               top: cursor.position.y,
-              transform: 'translate(-2px, -2px)',
-              pointerEvents: 'none',
+              transform: "translate(-2px, -2px)",
+              pointerEvents: "none",
               zIndex: 10000,
             }}
           >
@@ -407,31 +400,31 @@ function PresenceIndicator({ socket, investigationId }) {
               sx={{
                 color: getUserColor(userId),
                 fontSize: 20,
-                filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.3))',
+                filter: "drop-shadow(1px 1px 2px rgba(0,0,0,0.3))",
               }}
             />
             <Paper
               elevation={2}
               sx={{
-                position: 'absolute',
+                position: "absolute",
                 left: 20,
                 top: -5,
                 px: 1,
                 py: 0.5,
                 bgcolor: getUserColor(userId),
-                color: 'white',
-                fontSize: '0.75rem',
-                whiteSpace: 'nowrap',
-                '&::before': {
+                color: "white",
+                fontSize: "0.75rem",
+                whiteSpace: "nowrap",
+                "&::before": {
                   content: '""',
-                  position: 'absolute',
+                  position: "absolute",
                   left: -4,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
+                  top: "50%",
+                  transform: "translateY(-50%)",
                   width: 0,
                   height: 0,
-                  borderTop: '4px solid transparent',
-                  borderBottom: '4px solid transparent',
+                  borderTop: "4px solid transparent",
+                  borderBottom: "4px solid transparent",
                   borderRight: `4px solid ${getUserColor(userId)}`,
                 },
               }}
@@ -446,7 +439,7 @@ function PresenceIndicator({ socket, investigationId }) {
       {typingUsers.size > 0 && (
         <Box
           sx={{
-            position: 'fixed',
+            position: "fixed",
             bottom: 20,
             left: 20,
             zIndex: 1000,
@@ -455,12 +448,9 @@ function PresenceIndicator({ socket, investigationId }) {
           <Paper elevation={3} sx={{ p: 2, maxWidth: 300 }}>
             <Typography variant="body2" color="text.secondary">
               {Array.from(typingUsers.values())
-                .map(
-                  (typing) =>
-                    `${typing.user.firstName} ${typing.user.lastName}`,
-                )
-                .join(', ')}{' '}
-              {typingUsers.size === 1 ? 'is' : 'are'} typing...
+                .map((typing) => `${typing.user.firstName} ${typing.user.lastName}`)
+                .join(", ")}{" "}
+              {typingUsers.size === 1 ? "is" : "are"} typing...
             </Typography>
           </Paper>
         </Box>
@@ -471,7 +461,7 @@ function PresenceIndicator({ socket, investigationId }) {
         anchor="right"
         open={presenceDrawerOpen}
         onClose={() => setPresenceDrawerOpen(false)}
-        sx={{ '& .MuiDrawer-paper': { width: 350 } }}
+        sx={{ "& .MuiDrawer-paper": { width: 350 } }}
       >
         <Box sx={{ p: 2 }}>
           <Typography variant="h6" sx={{ mb: 2 }}>
@@ -479,10 +469,7 @@ function PresenceIndicator({ socket, investigationId }) {
           </Typography>
 
           {/* Investigation Participants */}
-          <Typography
-            variant="subtitle1"
-            sx={{ mb: 1, display: 'flex', alignItems: 'center' }}
-          >
+          <Typography variant="subtitle1" sx={{ mb: 1, display: "flex", alignItems: "center" }}>
             <Visibility sx={{ mr: 1 }} />
             Active in Investigation ({investigationParticipants.length})
           </Typography>
@@ -493,11 +480,11 @@ function PresenceIndicator({ socket, investigationId }) {
                 <ListItemAvatar>
                   <Badge
                     overlap="circular"
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                    anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                     badgeContent={
                       <Circle
                         sx={{
-                          color: getStatusColor('online'),
+                          color: getStatusColor("online"),
                           fontSize: 12,
                         }}
                       />
@@ -513,7 +500,7 @@ function PresenceIndicator({ socket, investigationId }) {
                   secondary={
                     <Box>
                       <Typography variant="caption" display="block">
-                        Joined{' '}
+                        Joined{" "}
                         {formatDistanceToNow(new Date(participant.joinedAt), {
                           addSuffix: true,
                         })}
@@ -548,26 +535,19 @@ function PresenceIndicator({ socket, investigationId }) {
           {/* All Online Users */}
           <Box
             sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
               mb: 1,
             }}
           >
             <Typography variant="subtitle1">
-              All Online Users (
-              {
-                onlineUsers.filter((u) => u.presence?.status === 'online')
-                  .length
-              }
-              )
+              All Online Users ({onlineUsers.filter((u) => u.presence?.status === "online").length})
             </Typography>
             <Button
               size="small"
               onClick={() => setShowDetails(!showDetails)}
-              endIcon={
-                showDetails ? <KeyboardArrowUp /> : <KeyboardArrowDown />
-              }
+              endIcon={showDetails ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
             >
               Details
             </Button>
@@ -576,22 +556,20 @@ function PresenceIndicator({ socket, investigationId }) {
           <Collapse in={showDetails}>
             <List dense>
               {onlineUsers
-                .filter((user) => user.presence?.status === 'online')
+                .filter((user) => user.presence?.status === "online")
                 .map((user) => (
                   <ListItem key={user.userId}>
                     <ListItemAvatar>
                       <Badge
                         overlap="circular"
                         anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'right',
+                          vertical: "bottom",
+                          horizontal: "right",
                         }}
                         badgeContent={
                           <Circle
                             sx={{
-                              color: getStatusColor(
-                                user.presence?.status || 'offline',
-                              ),
+                              color: getStatusColor(user.presence?.status || "offline"),
                               fontSize: 12,
                             }}
                           />
@@ -606,11 +584,10 @@ function PresenceIndicator({ socket, investigationId }) {
                       primary={`${user.user.firstName} ${user.user.lastName}`}
                       secondary={
                         <Typography variant="caption">
-                          Last seen{' '}
-                          {formatDistanceToNow(
-                            new Date(user.presence?.lastSeen),
-                            { addSuffix: true },
-                          )}
+                          Last seen{" "}
+                          {formatDistanceToNow(new Date(user.presence?.lastSeen), {
+                            addSuffix: true,
+                          })}
                         </Typography>
                       }
                     />

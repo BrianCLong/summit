@@ -14,27 +14,27 @@ on:
       node_version:
         required: false
         type: string
-        default: '20'
+        default: "20"
       setup_cmd:
         required: false
         type: string
-        default: 'corepack enable && pnpm i --frozen-lockfile'
+        default: "corepack enable && pnpm i --frozen-lockfile"
       lint_cmd:
         required: false
         type: string
-        default: 'pnpm lint'
+        default: "pnpm lint"
       typecheck_cmd:
         required: false
         type: string
-        default: 'pnpm -w ts:check || pnpm typecheck || true'
+        default: "pnpm -w ts:check || pnpm typecheck || true"
       test_cmd:
         required: false
         type: string
-        default: 'pnpm test -- --run'
+        default: "pnpm test -- --run"
       build_cmd:
         required: false
         type: string
-        default: 'pnpm -w build || pnpm build'
+        default: "pnpm -w build || pnpm build"
 permissions:
   contents: read
   security-events: write
@@ -70,7 +70,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node_version }}
-          cache: 'pnpm'
+          cache: "pnpm"
       - name: Setup & Install
         run: |
           ${inputs.setup_cmd}

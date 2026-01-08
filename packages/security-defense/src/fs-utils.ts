@@ -1,13 +1,13 @@
-import fs from 'fs';
-import path from 'path';
-import fg from 'fast-glob';
+import fs from "fs";
+import path from "path";
+import fg from "fast-glob";
 
 export const readJsonFile = <T = unknown>(filePath: string): T | null => {
   try {
-    const content = fs.readFileSync(filePath, 'utf8');
+    const content = fs.readFileSync(filePath, "utf8");
     return JSON.parse(content) as T;
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
       return null;
     }
     throw error;
@@ -26,9 +26,9 @@ export const findFiles = (root: string, patterns: string[]): string[] => {
 
 export const loadFile = (filePath: string): string | null => {
   try {
-    return fs.readFileSync(filePath, 'utf8');
+    return fs.readFileSync(filePath, "utf8");
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
       return null;
     }
     throw error;

@@ -9,12 +9,12 @@ This document defines the **Canonical Permission Tiers** for all automated agent
 **Scope**: Safe, non-invasive analysis and reporting.
 **Role**: `agent:tier-0`
 
-| Allowed Paths | Allowed Operations | Prohibited Actions |
-| :--- | :--- | :--- |
-| `docs/` | `read` | No write access |
-| `scripts/analysis/` | `read` | No execution of production scripts |
-| `server/src/` | `read` | No code modification |
-| `.github/workflows/` | `read` | No workflow triggering |
+| Allowed Paths        | Allowed Operations | Prohibited Actions                 |
+| :------------------- | :----------------- | :--------------------------------- |
+| `docs/`              | `read`             | No write access                    |
+| `scripts/analysis/`  | `read`             | No execution of production scripts |
+| `server/src/`        | `read`             | No code modification               |
+| `.github/workflows/` | `read`             | No workflow triggering             |
 
 **Artifacts**:
 
@@ -26,11 +26,11 @@ This document defines the **Canonical Permission Tiers** for all automated agent
 **Scope**: Documentation updates, fix typos, grammar, and non-functional content.
 **Role**: `agent:tier-1`
 
-| Allowed Paths | Allowed Operations | Prohibited Actions |
-| :--- | :--- | :--- |
+| Allowed Paths  | Allowed Operations | Prohibited Actions           |
+| :------------- | :----------------- | :--------------------------- |
 | `docs/**/*.md` | `create`, `update` | Modifying `docs/governance/` |
-| `*.md` (root) | `update` | Modifying `CONTRIBUTING.md` |
-| `AGENTS.md` | `read` | Editing instructions |
+| `*.md` (root)  | `update`           | Modifying `CONTRIBUTING.md`  |
+| `AGENTS.md`    | `read`             | Editing instructions         |
 
 **Requires**:
 
@@ -41,11 +41,11 @@ This document defines the **Canonical Permission Tiers** for all automated agent
 **Scope**: Isolated feature development within safe boundaries.
 **Role**: `agent:tier-2`
 
-| Allowed Paths | Allowed Operations | Prohibited Actions |
-| :--- | :--- | :--- |
-| `packages/*` | `create`, `update`, `delete` | Modifying `packages/shared-core` |
-| `apps/web/src/*` | `create`, `update` | Modifying `auth` or `billing` modules |
-| `server/src/services/*` | `create`, `update` | Modifying `server/src/infra/` |
+| Allowed Paths           | Allowed Operations           | Prohibited Actions                    |
+| :---------------------- | :--------------------------- | :------------------------------------ |
+| `packages/*`            | `create`, `update`, `delete` | Modifying `packages/shared-core`      |
+| `apps/web/src/*`        | `create`, `update`           | Modifying `auth` or `billing` modules |
+| `server/src/services/*` | `create`, `update`           | Modifying `server/src/infra/`         |
 
 **Requires**:
 
@@ -57,11 +57,11 @@ This document defines the **Canonical Permission Tiers** for all automated agent
 **Scope**: Core system logic, infrastructure, and cross-cutting concerns.
 **Role**: `agent:tier-3`
 
-| Allowed Paths | Allowed Operations | Prohibited Actions |
-| :--- | :--- | :--- |
-| `server/src/**` | `all` | Direct push to `main` |
-| `infra/**` | `create`, `update` | Deleting production resources |
-| `.github/workflows/*` | `read` | Modifying CI/CD pipelines |
+| Allowed Paths         | Allowed Operations | Prohibited Actions            |
+| :-------------------- | :----------------- | :---------------------------- |
+| `server/src/**`       | `all`              | Direct push to `main`         |
+| `infra/**`            | `create`, `update` | Deleting production resources |
+| `.github/workflows/*` | `read`             | Modifying CI/CD pipelines     |
 
 **Requires**:
 
@@ -73,11 +73,11 @@ This document defines the **Canonical Permission Tiers** for all automated agent
 **Scope**: CI/CD, Governance Rules, Security Policies, Release Management.
 **Role**: `agent:tier-4` (e.g., Jules, ReleaseBots)
 
-| Allowed Paths | Allowed Operations | Prohibited Actions |
-| :--- | :--- | :--- |
-| `.github/**` | `all` | None (subject to Audit) |
-| `docs/governance/**` | `all` | Violation of `CONSTITUTION.md` |
-| `policy/**` | `all` | Weakening security gates |
+| Allowed Paths        | Allowed Operations | Prohibited Actions             |
+| :------------------- | :----------------- | :----------------------------- |
+| `.github/**`         | `all`              | None (subject to Audit)        |
+| `docs/governance/**` | `all`              | Violation of `CONSTITUTION.md` |
+| `policy/**`          | `all`              | Weakening security gates       |
 
 **Requires**:
 

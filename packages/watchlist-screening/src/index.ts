@@ -5,4 +5,4 @@
  * encounter tracking, and travel pattern analysis.
  */
 
-export * from './types.js';
+export * from "./types.js";

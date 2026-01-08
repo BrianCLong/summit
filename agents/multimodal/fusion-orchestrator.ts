@@ -4,9 +4,9 @@
  * Coordinates CLIP/ViT, text transformers, and Neo4j graph embeddings.
  */
 
-import { createHash, randomUUID } from 'crypto';
-import { EventEmitter } from 'events';
-import pino from 'pino';
+import { createHash, randomUUID } from "crypto";
+import { EventEmitter } from "events";
+import pino from "pino";
 
 import type {
   FusedEmbedding,
@@ -26,15 +26,15 @@ import type {
   VerificationStatus,
   PipelineMetrics,
   PerformanceMetrics,
-} from './types.js';
-import { CLIPPipeline } from './clip-pipeline.js';
-import { TextPipeline } from './text-pipeline.js';
-import { VideoPipeline } from './video-pipeline.js';
-import { HallucinationGuard } from './hallucination-guard.js';
-import { PgVectorStore } from './pgvector-store.js';
-import { Neo4jEmbeddings } from './neo4j-embeddings.js';
+} from "./types.js";
+import { CLIPPipeline } from "./clip-pipeline.js";
+import { TextPipeline } from "./text-pipeline.js";
+import { VideoPipeline } from "./video-pipeline.js";
+import { HallucinationGuard } from "./hallucination-guard.js";
+import { PgVectorStore } from "./pgvector-store.js";
+import { Neo4jEmbeddings } from "./neo4j-embeddings.js";
 
-const logger = pino({ name: 'fusion-orchestrator' });
+const logger = pino({ name: "fusion-orchestrator" });
 
 export interface FusionOrchestratorConfig extends Partial<FusionPipelineConfig> {
   enableGraphEmbeddings: boolean;
@@ -64,9 +64,9 @@ export class FusionOrchestrator extends EventEmitter {
     super();
 
     this.config = {
-      clipModel: 'clip-vit-large-patch14',
-      textModel: 'text-embedding-3-small',
-      fusionMethod: 'weighted_average',
+      clipModel: "clip-vit-large-patch14",
+      textModel: "text-embedding-3-small",
+      fusionMethod: "weighted_average",
       targetDimension: 768,
       hallucinationThreshold: 0.7,
       crossModalThreshold: 0.6,
@@ -140,7 +140,7 @@ export class FusionOrchestrator extends EventEmitter {
       memoryUsageMB: 0,
     };
 
-    logger.info('Fusion Orchestrator initialized', {
+    logger.info("Fusion Orchestrator initialized", {
       fusionMethod: this.config.fusionMethod,
       targetDimension: this.config.targetDimension,
       enableGraphEmbeddings: this.config.enableGraphEmbeddings,
@@ -163,7 +163,7 @@ export class FusionOrchestrator extends EventEmitter {
     }
 
     await Promise.all(initPromises);
-    logger.info('Fusion Orchestrator fully initialized');
+    logger.info("Fusion Orchestrator fully initialized");
   }
 
   /**
@@ -172,7 +172,7 @@ export class FusionOrchestrator extends EventEmitter {
   async processJob(
     investigationId: string,
     sources: SourceInput[],
-    entityId?: string,
+    entityId?: string
   ): Promise<FusedEmbedding> {
     const jobId = randomUUID();
     const startTime = Date.now();
@@ -181,17 +181,17 @@ export class FusionOrchestrator extends EventEmitter {
     const job: PipelineJob = {
       id: jobId,
       investigationId,
-      status: 'pending',
+      status: "pending",
       sources,
       progress: 0,
       errors: [],
     };
 
     this.jobs.set(jobId, job);
-    this.emitEvent({ type: 'job_started', jobId, timestamp: new Date() });
+    this.emitEvent({ type: "job_started", jobId, timestamp: new Date() });
 
     try {
-      job.status = 'processing';
+      job.status = "processing";
       job.startedAt = new Date();
 
       // Step 1: Process each modality
@@ -203,7 +203,7 @@ export class FusionOrchestrator extends EventEmitter {
       const fusedEmbedding = await this.fuseEmbeddings(
         modalityEmbeddings,
         investigationId,
-        entityId || jobId,
+        entityId || jobId
       );
 
       job.progress = 0.7;
@@ -212,17 +212,15 @@ export class FusionOrchestrator extends EventEmitter {
       if (this.config.enableHallucinationGuard) {
         const validation = await this.hallucinationGuard.validate(
           fusedEmbedding,
-          modalityEmbeddings,
+          modalityEmbeddings
         );
 
         fusedEmbedding.hallucinationScore = validation.score;
-        fusedEmbedding.verificationStatus = this.mapValidationToStatus(
-          validation.suggestedAction,
-        );
+        fusedEmbedding.verificationStatus = this.mapValidationToStatus(validation.suggestedAction);
 
         if (validation.isHallucination) {
           this.emitEvent({
-            type: 'hallucination_detected',
+            type: "hallucination_detected",
             jobId,
             sourceId: fusedEmbedding.entityId,
             score: validation.score,
@@ -237,18 +235,18 @@ export class FusionOrchestrator extends EventEmitter {
         try {
           const graphEmbedding = await this.neo4jEmbeddings.embedNode(
             fusedEmbedding.entityId,
-            investigationId,
+            investigationId
           );
 
           // Optionally combine with graph embedding
           fusedEmbedding.fusedVector = this.combineWithGraphEmbedding(
             fusedEmbedding.fusedVector,
-            graphEmbedding.embedding,
+            graphEmbedding.embedding
           );
         } catch (error) {
-          logger.warn('Graph embedding failed, continuing without', {
+          logger.warn("Graph embedding failed, continuing without", {
             entityId: fusedEmbedding.entityId,
-            error: error instanceof Error ? error.message : 'Unknown',
+            error: error instanceof Error ? error.message : "Unknown",
           });
         }
       }
@@ -261,7 +259,7 @@ export class FusionOrchestrator extends EventEmitter {
       }
 
       // Complete job
-      job.status = 'completed';
+      job.status = "completed";
       job.completedAt = new Date();
       job.progress = 1.0;
       job.results = [fusedEmbedding];
@@ -270,19 +268,19 @@ export class FusionOrchestrator extends EventEmitter {
       this.updateMetrics(job, modalityEmbeddings, Date.now() - startTime);
 
       this.emitEvent({
-        type: 'fusion_completed',
+        type: "fusion_completed",
         jobId,
         entityId: fusedEmbedding.entityId,
         fusedEmbeddingId: fusedEmbedding.id,
       });
 
       this.emitEvent({
-        type: 'job_completed',
+        type: "job_completed",
         jobId,
         totalEmbeddings: 1,
       });
 
-      logger.info('Fusion job completed', {
+      logger.info("Fusion job completed", {
         jobId,
         entityId: fusedEmbedding.entityId,
         modalityCount: modalityEmbeddings.length,
@@ -291,18 +289,18 @@ export class FusionOrchestrator extends EventEmitter {
 
       return fusedEmbedding;
     } catch (error) {
-      job.status = 'failed';
+      job.status = "failed";
       job.errors.push({
-        code: 'FUSION_ERROR',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        code: "FUSION_ERROR",
+        message: error instanceof Error ? error.message : "Unknown error",
         timestamp: new Date(),
         recoverable: false,
       });
 
       this.emitEvent({
-        type: 'job_failed',
+        type: "job_failed",
         jobId,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
       });
 
       throw error;
@@ -314,7 +312,7 @@ export class FusionOrchestrator extends EventEmitter {
    */
   async processBatch(
     investigationId: string,
-    sourceGroups: Array<{ entityId: string; sources: SourceInput[] }>,
+    sourceGroups: Array<{ entityId: string; sources: SourceInput[] }>
   ): Promise<FusedEmbedding[]> {
     const results: FusedEmbedding[] = [];
 
@@ -325,41 +323,34 @@ export class FusionOrchestrator extends EventEmitter {
       for (const chunk of chunks) {
         const chunkResults = await Promise.all(
           chunk.map((group) =>
-            this.processJob(investigationId, group.sources, group.entityId)
-              .catch((error) => {
-                logger.error('Batch item failed', {
-                  entityId: group.entityId,
-                  error: error instanceof Error ? error.message : 'Unknown',
-                });
-                return null;
-              }),
-          ),
+            this.processJob(investigationId, group.sources, group.entityId).catch((error) => {
+              logger.error("Batch item failed", {
+                entityId: group.entityId,
+                error: error instanceof Error ? error.message : "Unknown",
+              });
+              return null;
+            })
+          )
         );
 
-        results.push(
-          ...chunkResults.filter((r): r is FusedEmbedding => r !== null),
-        );
+        results.push(...chunkResults.filter((r): r is FusedEmbedding => r !== null));
       }
     } else {
       // Sequential processing
       for (const group of sourceGroups) {
         try {
-          const result = await this.processJob(
-            investigationId,
-            group.sources,
-            group.entityId,
-          );
+          const result = await this.processJob(investigationId, group.sources, group.entityId);
           results.push(result);
         } catch (error) {
-          logger.error('Batch item failed', {
+          logger.error("Batch item failed", {
             entityId: group.entityId,
-            error: error instanceof Error ? error.message : 'Unknown',
+            error: error instanceof Error ? error.message : "Unknown",
           });
         }
       }
     }
 
-    logger.info('Batch processing completed', {
+    logger.info("Batch processing completed", {
       total: sourceGroups.length,
       successful: results.length,
     });
@@ -372,7 +363,7 @@ export class FusionOrchestrator extends EventEmitter {
    */
   private async processModalities(
     job: PipelineJob,
-    sources: SourceInput[],
+    sources: SourceInput[]
   ): Promise<BaseEmbedding[]> {
     const embeddings: BaseEmbedding[] = [];
 
@@ -381,36 +372,27 @@ export class FusionOrchestrator extends EventEmitter {
         let embedding: BaseEmbedding;
 
         switch (source.type) {
-          case 'text':
-            embedding = await this.textPipeline.embedText(
-              source.uri,
-              job.investigationId,
-            );
+          case "text":
+            embedding = await this.textPipeline.embedText(source.uri, job.investigationId);
             break;
 
-          case 'image':
-            embedding = await this.clipPipeline.embedImage(
-              source.uri,
-              job.investigationId,
-            );
+          case "image":
+            embedding = await this.clipPipeline.embedImage(source.uri, job.investigationId);
             break;
 
-          case 'video':
-            embedding = await this.videoPipeline.embedVideo(
-              source.uri,
-              job.investigationId,
-            );
+          case "video":
+            embedding = await this.videoPipeline.embedVideo(source.uri, job.investigationId);
             break;
 
           default:
-            logger.warn('Unsupported modality', { type: source.type });
+            logger.warn("Unsupported modality", { type: source.type });
             continue;
         }
 
         embeddings.push(embedding);
 
         this.emitEvent({
-          type: 'modality_processed',
+          type: "modality_processed",
           jobId: job.id,
           modality: source.type,
           sourceId: embedding.id,
@@ -420,8 +402,8 @@ export class FusionOrchestrator extends EventEmitter {
         this.metrics.modalityDistribution[source.type]++;
       } catch (error) {
         const pipelineError: PipelineError = {
-          code: 'MODALITY_ERROR',
-          message: error instanceof Error ? error.message : 'Unknown error',
+          code: "MODALITY_ERROR",
+          message: error instanceof Error ? error.message : "Unknown error",
           sourceId: source.uri,
           modality: source.type,
           timestamp: new Date(),
@@ -429,7 +411,7 @@ export class FusionOrchestrator extends EventEmitter {
         };
 
         job.errors.push(pipelineError);
-        logger.error('Failed to process modality', {
+        logger.error("Failed to process modality", {
           type: source.type,
           uri: source.uri,
           error: pipelineError.message,
@@ -446,10 +428,10 @@ export class FusionOrchestrator extends EventEmitter {
   private async fuseEmbeddings(
     embeddings: BaseEmbedding[],
     investigationId: string,
-    entityId: string,
+    entityId: string
   ): Promise<FusedEmbedding> {
     if (embeddings.length === 0) {
-      throw new Error('No embeddings to fuse');
+      throw new Error("No embeddings to fuse");
     }
 
     // Create modality vectors
@@ -465,23 +447,23 @@ export class FusionOrchestrator extends EventEmitter {
     let fusedVector: number[];
 
     switch (this.config.fusionMethod) {
-      case 'concatenation':
+      case "concatenation":
         fusedVector = this.fuseConcatenation(modalityVectors);
         break;
 
-      case 'average':
+      case "average":
         fusedVector = this.fuseAverage(modalityVectors);
         break;
 
-      case 'weighted_average':
+      case "weighted_average":
         fusedVector = this.fuseWeightedAverage(modalityVectors);
         break;
 
-      case 'attention':
+      case "attention":
         fusedVector = this.fuseAttention(modalityVectors);
         break;
 
-      case 'cross_modal_transformer':
+      case "cross_modal_transformer":
         fusedVector = await this.fuseCrossModalTransformer(modalityVectors);
         break;
 
@@ -505,7 +487,7 @@ export class FusionOrchestrator extends EventEmitter {
       fusedDimension: fusedVector.length,
       crossModalScore,
       hallucinationScore: 0,
-      verificationStatus: 'unverified',
+      verificationStatus: "unverified",
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -588,7 +570,7 @@ export class FusionOrchestrator extends EventEmitter {
         if (i !== j) {
           const sim = this.cosineSimilarity(
             this.padOrTruncate(vectors[i].vector, maxDim),
-            this.padOrTruncate(vectors[j].vector, maxDim),
+            this.padOrTruncate(vectors[j].vector, maxDim)
           );
           score += sim;
         }
@@ -617,9 +599,7 @@ export class FusionOrchestrator extends EventEmitter {
   /**
    * Cross-modal transformer fusion (simplified)
    */
-  private async fuseCrossModalTransformer(
-    vectors: ModalityVector[],
-  ): Promise<number[]> {
+  private async fuseCrossModalTransformer(vectors: ModalityVector[]): Promise<number[]> {
     // Simplified cross-modal attention
     // In production, this would use an actual transformer model
 
@@ -628,9 +608,7 @@ export class FusionOrchestrator extends EventEmitter {
     const maxDim = Math.max(...vectors.map((v) => v.vector.length));
 
     // Create queries, keys, values from each modality
-    const projected = vectors.map((v) =>
-      this.padOrTruncate(v.vector, maxDim),
-    );
+    const projected = vectors.map((v) => this.padOrTruncate(v.vector, maxDim));
 
     // Cross-attention: each modality attends to all others
     const crossAttended: number[][] = [];
@@ -670,10 +648,7 @@ export class FusionOrchestrator extends EventEmitter {
   /**
    * Combine with graph embedding
    */
-  private combineWithGraphEmbedding(
-    fusedVector: number[],
-    graphEmbedding: number[],
-  ): number[] {
+  private combineWithGraphEmbedding(fusedVector: number[], graphEmbedding: number[]): number[] {
     // Simple concatenation with projection back to target dimension
     const combined = [...fusedVector, ...graphEmbedding];
     return this.projectToTargetDimension(combined);
@@ -694,7 +669,7 @@ export class FusionOrchestrator extends EventEmitter {
       for (let j = i + 1; j < vectors.length; j++) {
         const sim = this.cosineSimilarity(
           this.padOrTruncate(vectors[i].vector, maxDim),
-          this.padOrTruncate(vectors[j].vector, maxDim),
+          this.padOrTruncate(vectors[j].vector, maxDim)
         );
         totalSimilarity += sim;
         pairCount++;
@@ -780,33 +755,28 @@ export class FusionOrchestrator extends EventEmitter {
   /**
    * Generate fusion ID
    */
-  private generateFusionId(
-    entityId: string,
-    embeddings: BaseEmbedding[],
-  ): string {
-    const hash = createHash('sha256');
+  private generateFusionId(entityId: string, embeddings: BaseEmbedding[]): string {
+    const hash = createHash("sha256");
     hash.update(entityId);
     for (const emb of embeddings) {
       hash.update(emb.id);
     }
-    return hash.digest('hex').slice(0, 16);
+    return hash.digest("hex").slice(0, 16);
   }
 
   /**
    * Map validation action to verification status
    */
-  private mapValidationToStatus(
-    action: string,
-  ): VerificationStatus {
+  private mapValidationToStatus(action: string): VerificationStatus {
     switch (action) {
-      case 'accept':
-        return 'auto_verified';
-      case 'reject':
-        return 'rejected';
-      case 'flag_for_review':
-        return 'flagged';
+      case "accept":
+        return "auto_verified";
+      case "reject":
+        return "rejected";
+      case "flag_for_review":
+        return "flagged";
       default:
-        return 'unverified';
+        return "unverified";
     }
   }
 
@@ -827,28 +797,25 @@ export class FusionOrchestrator extends EventEmitter {
   private updateMetrics(
     job: PipelineJob,
     embeddings: BaseEmbedding[],
-    processingTimeMs: number,
+    processingTimeMs: number
   ): void {
     this.metrics.totalJobsProcessed++;
     this.metrics.totalEmbeddingsGenerated += embeddings.length;
 
     // Update average processing time
     const totalTime =
-      this.metrics.averageProcessingTime * (this.metrics.totalJobsProcessed - 1) +
-      processingTimeMs;
+      this.metrics.averageProcessingTime * (this.metrics.totalJobsProcessed - 1) + processingTimeMs;
     this.metrics.averageProcessingTime = totalTime / this.metrics.totalJobsProcessed;
 
     // Update error rate
     const totalErrors = job.errors.length;
     this.metrics.errorRate =
-      (this.metrics.errorRate * (this.metrics.totalJobsProcessed - 1) +
-        (totalErrors > 0 ? 1 : 0)) /
+      (this.metrics.errorRate * (this.metrics.totalJobsProcessed - 1) + (totalErrors > 0 ? 1 : 0)) /
       this.metrics.totalJobsProcessed;
 
     // Update performance metrics
     this.performanceMetrics.embeddingLatencyMs = processingTimeMs / embeddings.length;
-    this.performanceMetrics.throughputPerSecond =
-      1000 / this.performanceMetrics.embeddingLatencyMs;
+    this.performanceMetrics.throughputPerSecond = 1000 / this.performanceMetrics.embeddingLatencyMs;
   }
 
   /**
@@ -856,7 +823,7 @@ export class FusionOrchestrator extends EventEmitter {
    */
   private emitEvent(event: PipelineEvent): void {
     this.emit(event.type, event);
-    this.emit('event', event);
+    this.emit("event", event);
   }
 
   /**
@@ -864,41 +831,41 @@ export class FusionOrchestrator extends EventEmitter {
    */
   onEvent(handler: PipelineEventHandler): void {
     if (handler.onJobStarted) {
-      this.on('job_started', (e: PipelineEvent) => {
-        if (e.type === 'job_started') handler.onJobStarted!(e.jobId);
+      this.on("job_started", (e: PipelineEvent) => {
+        if (e.type === "job_started") handler.onJobStarted!(e.jobId);
       });
     }
     if (handler.onModalityProcessed) {
-      this.on('modality_processed', (e: PipelineEvent) => {
-        if (e.type === 'modality_processed') {
+      this.on("modality_processed", (e: PipelineEvent) => {
+        if (e.type === "modality_processed") {
           handler.onModalityProcessed!(e.jobId, e.modality, e.sourceId);
         }
       });
     }
     if (handler.onFusionCompleted) {
-      this.on('fusion_completed', (e: PipelineEvent) => {
-        if (e.type === 'fusion_completed') {
+      this.on("fusion_completed", (e: PipelineEvent) => {
+        if (e.type === "fusion_completed") {
           handler.onFusionCompleted!(e.jobId, e.entityId, e.fusedEmbeddingId);
         }
       });
     }
     if (handler.onHallucinationDetected) {
-      this.on('hallucination_detected', (e: PipelineEvent) => {
-        if (e.type === 'hallucination_detected') {
+      this.on("hallucination_detected", (e: PipelineEvent) => {
+        if (e.type === "hallucination_detected") {
           handler.onHallucinationDetected!(e.jobId, e.sourceId, e.score);
         }
       });
     }
     if (handler.onJobCompleted) {
-      this.on('job_completed', (e: PipelineEvent) => {
-        if (e.type === 'job_completed') {
+      this.on("job_completed", (e: PipelineEvent) => {
+        if (e.type === "job_completed") {
           handler.onJobCompleted!(e.jobId, e.totalEmbeddings);
         }
       });
     }
     if (handler.onJobFailed) {
-      this.on('job_failed', (e: PipelineEvent) => {
-        if (e.type === 'job_failed') handler.onJobFailed!(e.jobId, e.error);
+      this.on("job_failed", (e: PipelineEvent) => {
+        if (e.type === "job_failed") handler.onJobFailed!(e.jobId, e.error);
       });
     }
   }
@@ -940,10 +907,10 @@ export class FusionOrchestrator extends EventEmitter {
       topK?: number;
       threshold?: number;
       investigationId?: string;
-    } = {},
+    } = {}
   ): Promise<FusedEmbedding[]> {
     if (!this.pgVectorStore) {
-      throw new Error('PgVector storage not enabled');
+      throw new Error("PgVector storage not enabled");
     }
 
     const results = await this.pgVectorStore.search(queryVector, options);
@@ -951,15 +918,15 @@ export class FusionOrchestrator extends EventEmitter {
     // Return as FusedEmbedding placeholders
     return results.map((r) => ({
       id: r.id,
-      investigationId: '',
+      investigationId: "",
       entityId: r.entityId,
-      fusionMethod: 'weighted_average' as FusionMethod,
+      fusionMethod: "weighted_average" as FusionMethod,
       modalityVectors: [],
       fusedVector: [],
       fusedDimension: 0,
       crossModalScore: r.similarity,
       hallucinationScore: 0,
-      verificationStatus: 'unverified' as VerificationStatus,
+      verificationStatus: "unverified" as VerificationStatus,
       createdAt: new Date(),
       updatedAt: new Date(),
     }));
@@ -980,7 +947,7 @@ export class FusionOrchestrator extends EventEmitter {
     }
 
     await Promise.all(closePromises);
-    logger.info('Fusion Orchestrator closed');
+    logger.info("Fusion Orchestrator closed");
   }
 }
 

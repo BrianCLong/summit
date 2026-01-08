@@ -1,14 +1,14 @@
-import { readFile, writeFile, mkdir } from 'fs/promises';
-import { dirname, resolve } from 'path';
-import { fileURLToPath } from 'url';
+import { readFile, writeFile, mkdir } from "fs/promises";
+import { dirname, resolve } from "path";
+import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const dataPath = resolve(__dirname, '../data/state.json');
+const dataPath = resolve(__dirname, "../data/state.json");
 
 const defaultState = {
   appeals: [],
   policyProposals: [],
-  auditLogs: []
+  auditLogs: [],
 };
 
 export class DataStore {
@@ -22,10 +22,10 @@ export class DataStore {
       return;
     }
 
-    await mkdir(resolve(__dirname, '../data'), { recursive: true });
+    await mkdir(resolve(__dirname, "../data"), { recursive: true });
 
     try {
-      const raw = await readFile(dataPath, 'utf-8');
+      const raw = await readFile(dataPath, "utf-8");
       this.state = JSON.parse(raw);
     } catch (error) {
       await this.save();

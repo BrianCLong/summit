@@ -1,7 +1,7 @@
-import { CooperationArtifact, TaskSpec } from '@ga-graphai/common-types';
+import { CooperationArtifact, TaskSpec } from "@ga-graphai/common-types";
 
-import { GenerationInput, ResourceAdapter } from '../capabilityRegistry.js';
-import { GuardedGenerator } from '../promptOps.js';
+import { GenerationInput, ResourceAdapter } from "../capabilityRegistry.js";
+import { GuardedGenerator } from "../promptOps.js";
 
 function parseChallenges(content: string): string[] {
   return content
@@ -23,17 +23,17 @@ export class CausalChallengeGamesCoordinator {
     task: TaskSpec,
     proposer: ResourceAdapter,
     challenger: ResourceAdapter,
-    repairer: ResourceAdapter,
+    repairer: ResourceAdapter
   ): Promise<ChallengeResult> {
     const base = await proposer.generate({
       task,
-      strand: 'implementation',
+      strand: "implementation",
       prompt: `Propose solution for ${task.title} honoring all acceptance criteria.`,
     } satisfies GenerationInput);
 
     const challengesOutput = await challenger.generate({
       task,
-      strand: 'challenge',
+      strand: "challenge",
       prompt: `Craft minimal counter-examples or stress cases for proposal: ${base.content}`,
     } satisfies GenerationInput);
 
@@ -43,24 +43,24 @@ export class CausalChallengeGamesCoordinator {
     let revisedContent = base.content;
 
     for (const challenge of challenges) {
-      if (new RegExp(challenge, 'i').test(base.content)) {
+      if (new RegExp(challenge, "i").test(base.content)) {
         passed.push(challenge);
         continue;
       }
       failed.push(challenge);
       const repaired = await repairer.generate({
         task,
-        strand: 'implementation',
+        strand: "implementation",
         prompt: `Repair solution to handle challenge: ${challenge}. Base: ${revisedContent}`,
       } satisfies GenerationInput);
       revisedContent = repaired.content;
     }
 
     const { artifact } = this.guard.enforce(
-      'causal-challenge-games',
+      "causal-challenge-games",
       revisedContent,
       [],
-      [...(base.evidence ?? []), ...(challengesOutput.evidence ?? [])],
+      [...(base.evidence ?? []), ...(challengesOutput.evidence ?? [])]
     );
 
     return {

@@ -4,7 +4,7 @@ This repository now emits focused OpenTelemetry traces and Prometheus metrics fo
 
 ## View metrics locally
 
-1) Start the API server with tracing + metrics exporters enabled (defaults to :4000 for HTTP and :9464 for the OTEL Prometheus exporter):
+1. Start the API server with tracing + metrics exporters enabled (defaults to :4000 for HTTP and :9464 for the OTEL Prometheus exporter):
 
 ```bash
 cd server
@@ -14,19 +14,19 @@ OTEL_SERVICE_NAME=intelgraph-server \
 pnpm dev
 ```
 
-2) Scrape in-process business metrics (including p50/p95 summaries and queue depth gauges):
+2. Scrape in-process business metrics (including p50/p95 summaries and queue depth gauges):
 
 ```bash
 curl -s http://localhost:4000/metrics | grep reliability_
 ```
 
-3) Scrape OTEL SDK metrics directly if you run a co-located collector:
+3. Scrape OTEL SDK metrics directly if you run a co-located collector:
 
 ```bash
 curl -s http://localhost:9464/metrics | head
 ```
 
-4) Inspect latency percentiles and error rates in PromQL/Grafana:
+4. Inspect latency percentiles and error rates in PromQL/Grafana:
 
 ```promql
 histogram_quantile(0.50, rate(reliability_request_duration_seconds_bucket{endpoint="ingest"}[5m]))

@@ -78,13 +78,18 @@ export default function AlertsPage() {
 
   // Filter alerts
   const filteredAlerts = alerts.filter(alert => {
-    if (selectedSeverity && alert.severity !== selectedSeverity) {return false}
-    if (selectedStatus && alert.status !== selectedStatus) {return false}
+    if (selectedSeverity && alert.severity !== selectedSeverity) {
+      return false
+    }
+    if (selectedStatus && alert.status !== selectedStatus) {
+      return false
+    }
     if (
       searchQuery &&
       !alert.title.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-      {return false}
+    ) {
+      return false
+    }
     return true
   })
 
@@ -99,7 +104,9 @@ export default function AlertsPage() {
         alerts.filter(a => a.severity === 'critical').length > 0
           ? 'error'
           : 'success',
-      ...(alertsData ? { change: { value: 12, direction: 'up', period: 'last hour' } } : {}),
+      ...(alertsData
+        ? { change: { value: 12, direction: 'up', period: 'last hour' } }
+        : {}),
     },
     {
       id: 'active',
@@ -107,7 +114,9 @@ export default function AlertsPage() {
       value: alerts.filter(a => a.status === 'open').length,
       format: 'number',
       status: 'warning',
-      ...(alertsData ? { change: { value: 5, direction: 'down', period: 'last hour' } } : {}),
+      ...(alertsData
+        ? { change: { value: 5, direction: 'down', period: 'last hour' } }
+        : {}),
     },
     {
       id: 'resolved',
@@ -115,7 +124,9 @@ export default function AlertsPage() {
       value: alerts.filter(a => a.status === 'resolved').length,
       format: 'number',
       status: 'success',
-      ...(alertsData ? { change: { value: 23, direction: 'up', period: 'yesterday' } } : {}),
+      ...(alertsData
+        ? { change: { value: 23, direction: 'up', period: 'yesterday' } }
+        : {}),
     },
     {
       id: 'response',
@@ -123,7 +134,9 @@ export default function AlertsPage() {
       value: 156,
       format: 'duration',
       status: 'neutral',
-      ...(alertsData ? { change: { value: 8, direction: 'down', period: 'last week' } } : {}),
+      ...(alertsData
+        ? { change: { value: 8, direction: 'down', period: 'last week' } }
+        : {}),
     },
   ]
 
@@ -362,7 +375,15 @@ export default function AlertsPage() {
                       </Badge>
                     </td>
                     <td>
-                      <Badge variant={getStatusColor(alert.status) as 'destructive' | 'warning' | 'success' | 'secondary'}>
+                      <Badge
+                        variant={
+                          getStatusColor(alert.status) as
+                            | 'destructive'
+                            | 'warning'
+                            | 'success'
+                            | 'secondary'
+                        }
+                      >
                         {alert.status}
                       </Badge>
                     </td>

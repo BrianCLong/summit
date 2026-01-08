@@ -2,16 +2,13 @@
  * Automated Feature Generation
  */
 
-import type { FeatureSet } from '../types/index.js';
+import type { FeatureSet } from "../types/index.js";
 
 export class AutomatedFeatureGenerator {
   /**
    * Generate polynomial features
    */
-  generatePolynomialFeatures(
-    data: number[][],
-    degree: number = 2
-  ): FeatureSet {
+  generatePolynomialFeatures(data: number[][], degree: number = 2): FeatureSet {
     const features: number[][] = [];
     const featureNames: string[] = [];
     const nFeatures = data[0].length;
@@ -52,16 +49,16 @@ export class AutomatedFeatureGenerator {
   generateTimeFeatures(timestamps: Date[]): FeatureSet {
     const features: number[][] = [];
     const featureNames = [
-      'hour',
-      'day_of_week',
-      'day_of_month',
-      'month',
-      'quarter',
-      'is_weekend',
-      'hour_sin',
-      'hour_cos',
-      'day_sin',
-      'day_cos',
+      "hour",
+      "day_of_week",
+      "day_of_month",
+      "month",
+      "quarter",
+      "is_weekend",
+      "hour_sin",
+      "hour_cos",
+      "day_sin",
+      "day_cos",
     ];
 
     for (const ts of timestamps) {
@@ -73,10 +70,10 @@ export class AutomatedFeatureGenerator {
       const isWeekend = dayOfWeek === 0 || dayOfWeek === 6 ? 1 : 0;
 
       // Cyclic encoding
-      const hourSin = Math.sin(2 * Math.PI * hour / 24);
-      const hourCos = Math.cos(2 * Math.PI * hour / 24);
-      const daySin = Math.sin(2 * Math.PI * dayOfWeek / 7);
-      const dayCos = Math.cos(2 * Math.PI * dayOfWeek / 7);
+      const hourSin = Math.sin((2 * Math.PI * hour) / 24);
+      const hourCos = Math.cos((2 * Math.PI * hour) / 24);
+      const daySin = Math.sin((2 * Math.PI * dayOfWeek) / 7);
+      const dayCos = Math.cos((2 * Math.PI * dayOfWeek) / 7);
 
       features.push([
         hour,
@@ -98,17 +95,14 @@ export class AutomatedFeatureGenerator {
   /**
    * Generate lag features for time series
    */
-  generateLagFeatures(
-    data: number[],
-    lags: number[]
-  ): FeatureSet {
+  generateLagFeatures(data: number[], lags: number[]): FeatureSet {
     const features: number[][] = [];
-    const featureNames = lags.map(l => `lag_${l}`);
+    const featureNames = lags.map((l) => `lag_${l}`);
 
     const maxLag = Math.max(...lags);
 
     for (let i = maxLag; i < data.length; i++) {
-      const lagFeatures = lags.map(lag => data[i - lag]);
+      const lagFeatures = lags.map((lag) => data[i - lag]);
       features.push(lagFeatures);
     }
 
@@ -118,10 +112,7 @@ export class AutomatedFeatureGenerator {
   /**
    * Generate rolling statistics features
    */
-  generateRollingFeatures(
-    data: number[],
-    windows: number[]
-  ): FeatureSet {
+  generateRollingFeatures(data: number[], windows: number[]): FeatureSet {
     const features: number[][] = [];
     const featureNames: string[] = [];
 
@@ -157,7 +148,7 @@ export class AutomatedFeatureGenerator {
 
   private std(arr: number[]): number {
     const avg = this.mean(arr);
-    const squareDiffs = arr.map(x => Math.pow(x - avg, 2));
+    const squareDiffs = arr.map((x) => Math.pow(x - avg, 2));
     return Math.sqrt(this.mean(squareDiffs));
   }
 }

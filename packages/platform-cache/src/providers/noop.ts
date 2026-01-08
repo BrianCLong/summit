@@ -1,10 +1,10 @@
-import type { CacheProvider } from '../types.js';
+import type { CacheProvider } from "../types.js";
 
 /**
  * No-op cache provider for testing
  */
 export class NoOpProvider implements CacheProvider {
-  readonly name = 'noop';
+  readonly name = "noop";
 
   async isAvailable(): Promise<boolean> {
     return true;

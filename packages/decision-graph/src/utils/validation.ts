@@ -2,7 +2,7 @@
  * Validation utilities for decision graph objects
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 import {
   ClaimSchema,
   DecisionSchema,
@@ -12,8 +12,8 @@ import {
   type Decision,
   type Evidence,
   type Entity,
-} from '../schema/index.js';
-import { generateHash } from './hash.js';
+} from "../schema/index.js";
+import { generateHash } from "./hash.js";
 
 export interface ValidationResult<T> {
   success: boolean;
@@ -54,7 +54,7 @@ export function validateClaim(data: unknown): ValidationResult<Claim> {
   });
 
   if (claim.hash !== expectedHash) {
-    warnings.push('Claim hash does not match content - possible tampering');
+    warnings.push("Claim hash does not match content - possible tampering");
   }
 
   // Check confidence consistency
@@ -69,7 +69,7 @@ export function validateClaim(data: unknown): ValidationResult<Claim> {
   const [min, max] = confidenceLevelRanges[claim.confidence_level] || [0, 1];
   if (claim.confidence_score < min || claim.confidence_score > max) {
     warnings.push(
-      `Confidence score ${claim.confidence_score} does not match level ${claim.confidence_level}`,
+      `Confidence score ${claim.confidence_score} does not match level ${claim.confidence_level}`
     );
   }
 
@@ -105,13 +105,13 @@ export function validateEvidence(data: unknown): ValidationResult<Evidence> {
   if (evidence.expiry_date) {
     const expiryDate = new Date(evidence.expiry_date);
     if (expiryDate < now) {
-      warnings.push('Evidence has expired');
+      warnings.push("Evidence has expired");
     }
   }
 
   // Check reliability threshold
   if (evidence.reliability_score < 0.5) {
-    warnings.push('Evidence has low reliability score');
+    warnings.push("Evidence has low reliability score");
   }
 
   return {
@@ -142,34 +142,32 @@ export function validateDecision(data: unknown): ValidationResult<Decision> {
   });
 
   if (decision.hash !== expectedHash) {
-    warnings.push('Decision hash does not match content - possible tampering');
+    warnings.push("Decision hash does not match content - possible tampering");
   }
 
   // Check for minimum evidence
   if (decision.evidence_ids.length === 0) {
-    warnings.push('Decision has no supporting evidence');
+    warnings.push("Decision has no supporting evidence");
   }
 
   // Check for minimum claims
   if (decision.claim_ids.length === 0) {
-    warnings.push('Decision has no supporting claims');
+    warnings.push("Decision has no supporting claims");
   }
 
   // Check approval chain completeness
-  if (decision.status === 'approved') {
-    const hasApproval = decision.approval_chain.some(a => a.status === 'approved');
+  if (decision.status === "approved") {
+    const hasApproval = decision.approval_chain.some((a) => a.status === "approved");
     if (!hasApproval) {
-      warnings.push('Decision marked as approved but no approvals in chain');
+      warnings.push("Decision marked as approved but no approvals in chain");
     }
   }
 
   // Check option selection
   if (decision.selected_option_id) {
-    const selectedOption = decision.options.find(
-      o => o.id === decision.selected_option_id,
-    );
+    const selectedOption = decision.options.find((o) => o.id === decision.selected_option_id);
     if (!selectedOption) {
-      warnings.push('Selected option ID does not match any option');
+      warnings.push("Selected option ID does not match any option");
     }
   }
 
@@ -186,7 +184,7 @@ export function validateDecision(data: unknown): ValidationResult<Decision> {
 export function validateDecisionGraph(
   decision: Decision,
   claims: Claim[],
-  evidence: Evidence[],
+  evidence: Evidence[]
 ): ValidationResult<{
   decision: Decision;
   claims: Claim[];
@@ -195,7 +193,7 @@ export function validateDecisionGraph(
   const warnings: string[] = [];
 
   // Verify all claim references exist
-  const claimIds = new Set(claims.map(c => c.id));
+  const claimIds = new Set(claims.map((c) => c.id));
   for (const claimId of decision.claim_ids) {
     if (!claimIds.has(claimId)) {
       warnings.push(`Referenced claim ${claimId} not found in provided claims`);
@@ -203,7 +201,7 @@ export function validateDecisionGraph(
   }
 
   // Verify all evidence references exist
-  const evidenceIds = new Set(evidence.map(e => e.id));
+  const evidenceIds = new Set(evidence.map((e) => e.id));
   for (const evidenceId of decision.evidence_ids) {
     if (!evidenceIds.has(evidenceId)) {
       warnings.push(`Referenced evidence ${evidenceId} not found in provided evidence`);
@@ -215,7 +213,7 @@ export function validateDecisionGraph(
     for (const evidenceId of claim.evidence_ids) {
       if (!evidenceIds.has(evidenceId)) {
         warnings.push(
-          `Claim ${claim.id} references evidence ${evidenceId} not in provided evidence`,
+          `Claim ${claim.id} references evidence ${evidenceId} not in provided evidence`
         );
       }
     }

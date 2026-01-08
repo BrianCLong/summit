@@ -23,6 +23,11 @@
     "url": "https://github.com/BrianCLong/summit",
     "directory": "packages/explainability-sdk"
   },
-  "keywords": ["explainability", "ai-trust", "provenance", "audit"],
+  "keywords": [
+    "explainability",
+    "ai-trust",
+    "provenance",
+    "audit"
+  ],
   "license": "MIT"
 }

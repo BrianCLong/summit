@@ -3,12 +3,12 @@
  * Comprehensive threat actor tracking with MITRE ATT&CK mapping
  */
 
-export * from './types.js';
+export * from "./types.js";
 
 // Placeholder for threat actor tracking implementations
 export class ThreatActorTracker {
   async createActor(actor: any) {
-    return { id: 'actor-' + Date.now(), ...actor };
+    return { id: "actor-" + Date.now(), ...actor };
   }
 
   async linkToMitreAttack(actorId: string, techniques: string[]) {
@@ -16,10 +16,10 @@ export class ThreatActorTracker {
   }
 
   async trackCampaign(campaign: any) {
-    return { id: 'campaign-' + Date.now(), ...campaign };
+    return { id: "campaign-" + Date.now(), ...campaign };
   }
 
   async analyzeTTP(ttp: any) {
-    return { id: 'ttp-' + Date.now(), ...ttp };
+    return { id: "ttp-" + Date.now(), ...ttp };
   }
 }

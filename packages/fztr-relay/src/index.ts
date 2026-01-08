@@ -1,6 +1,6 @@
-import express, { Request, Response } from 'express';
-import bodyParser from 'body-parser';
-import { createHash } from 'crypto';
+import express, { Request, Response } from "express";
+import bodyParser from "body-parser";
+import { createHash } from "crypto";
 
 export interface VerifiableCredential {
   id: string;
@@ -15,11 +15,11 @@ export class FZTRRelay {
 
   constructor() {
     this.app = express();
-    this.app.use(bodyParser.json({ limit: '1mb' }));
+    this.app.use(bodyParser.json({ limit: "1mb" }));
     this.knownIssuers = new Set(); // In a real system, this would be a more robust registry
 
-    this.app.post('/relay/submit', this.handleSubmit.bind(this));
-    this.app.get('/relay/retrieve/:id', this.handleRetrieve.bind(this));
+    this.app.post("/relay/submit", this.handleSubmit.bind(this));
+    this.app.get("/relay/retrieve/:id", this.handleRetrieve.bind(this));
   }
 
   registerIssuer(issuerId: string) {
@@ -29,18 +29,20 @@ export class FZTRRelay {
   verifyCredential(credential: VerifiableCredential): boolean {
     // Placeholder for actual cryptographic verification
     // Check issuer, signature, and payload integrity
-    const payloadHash = createHash('sha256').update(credential.payload).digest('hex');
-    return this.knownIssuers.has(credential.issuer) && credential.signature === `mock-sig-${payloadHash}`;
+    const payloadHash = createHash("sha256").update(credential.payload).digest("hex");
+    return (
+      this.knownIssuers.has(credential.issuer) && credential.signature === `mock-sig-${payloadHash}`
+    );
   }
 
   private handleSubmit(req: Request, res: Response) {
     const credential: VerifiableCredential = req.body;
     if (!this.verifyCredential(credential)) {
-      return res.status(401).send('Invalid or unverified credential');
+      return res.status(401).send("Invalid or unverified credential");
     }
     // In a real system, store the credential securely (e.g., IPFS, distributed ledger)
     // For MVP, we'll just acknowledge
-    res.status(200).send({ message: 'Credential submitted', id: credential.id });
+    res.status(200).send({ message: "Credential submitted", id: credential.id });
   }
 
   private handleRetrieve(req: Request, res: Response) {
@@ -48,10 +50,10 @@ export class FZTRRelay {
     // In a real system, retrieve the credential by ID
     // For MVP, return a mock credential
     const mockPayload = JSON.stringify({ data: `retrieved-data-for-${id}` });
-    const mockHash = createHash('sha256').update(mockPayload).digest('hex');
+    const mockHash = createHash("sha256").update(mockPayload).digest("hex");
     const mockCredential: VerifiableCredential = {
       id,
-      issuer: 'mock-issuer',
+      issuer: "mock-issuer",
       signature: `mock-sig-${mockHash}`,
       payload: mockPayload,
     };

@@ -16,8 +16,8 @@ This document identifies technical patterns and vectors that repeatedly introduc
 
 ## 3. Data Exports & Logging
 
-- **Unlogged Exports:** "Download CSV" buttons that don't generate an audit log entry make it impossible to prove *who* took the data.
-- **Logging Gaps:** Failure to log *read* access to sensitive records (only logging writes) hampers investigation.
+- **Unlogged Exports:** "Download CSV" buttons that don't generate an audit log entry make it impossible to prove _who_ took the data.
+- **Logging Gaps:** Failure to log _read_ access to sensitive records (only logging writes) hampers investigation.
 - **Over-Logging:** Logging PII/Secrets (passwords, keys) into plain-text logs (breach risk).
 
 ## 4. Operational Gaps

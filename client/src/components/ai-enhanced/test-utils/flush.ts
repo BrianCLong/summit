@@ -1,4 +1,4 @@
-import { act } from '@testing-library/react';
+import { act } from "@testing-library/react";
 
 export async function flushMicrotasks() {
   await act(async () => {
@@ -8,7 +8,7 @@ export async function flushMicrotasks() {
 
 export async function flushAllTimersAndMicrotasks() {
   await act(async () => {
-    if (jest.getTimerCount?.() > 0 && 'runOnlyPendingTimersAsync' in jest) {
+    if (jest.getTimerCount?.() > 0 && "runOnlyPendingTimersAsync" in jest) {
       // @ts-ignore
       await jest.runOnlyPendingTimersAsync();
     }

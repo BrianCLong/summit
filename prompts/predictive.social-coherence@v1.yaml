@@ -1,14 +1,14 @@
 meta:
   id: predictive.social-coherence@v1
   owner: hr-people
-  purpose: 'Models the field of coherence within organizations or communities.'
-  tags: ['predictive', 'social-coherence', 'organizational-health']
+  purpose: "Models the field of coherence within organizations or communities."
+  tags: ["predictive", "social-coherence", "organizational-health"]
   guardrails:
-    - 'Prioritize organizational unity and mission alignment.'
-    - 'Identify structural risks to coherence.'
+    - "Prioritize organizational unity and mission alignment."
+    - "Identify structural risks to coherence."
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
 
 inputs:

@@ -178,12 +178,7 @@ allow {
     "retention_days": { "type": "integer", "minimum": 0 },
     "lawful_basis": {
       "type": "string",
-      "enum": [
-        "contract",
-        "consent",
-        "legitimate_interest",
-        "legal_obligation"
-      ],
+      "enum": ["contract", "consent", "legitimate_interest", "legal_obligation"],
       "nullable": true
     },
     "pii_hint": {

@@ -14,11 +14,11 @@ roles:
   - Repo Maintainer / Arborist
   - Merge & Release Captain
 objectives:
-  - 'Zero-downtime schema migrations with guarded rollout + online backfill.'
-  - 'SLSA provenance + signed images (cosign) for all deployables.'
-  - 'FinOps: cost budgets, autoscaling right-sizing, and idle resource reaping.'
-  - 'Chaos & DR confidence: game days + automated failover smoke in stage.'
-  - 'Product SLO v1: per-service p95/availability baselines captured and alerted.'
+  - "Zero-downtime schema migrations with guarded rollout + online backfill."
+  - "SLSA provenance + signed images (cosign) for all deployables."
+  - "FinOps: cost budgets, autoscaling right-sizing, and idle resource reaping."
+  - "Chaos & DR confidence: game days + automated failover smoke in stage."
+  - "Product SLO v1: per-service p95/availability baselines captured and alerted."
 ---
 
 # Sprint 25 Plan — Progressive Hardening & Governed Delivery
@@ -164,29 +164,26 @@ Assumes Sprint 24 artifacts are live (canaries, preview envs, OTEL baseline, OPA
 **Path:** `ops/migrations/backfill.ts`
 
 ```ts
-import pLimit from 'p-limit';
-import { Pool } from 'pg';
-const limit = pLimit(Number(process.env.CONCURRENCY || '4'));
-const BATCH = Number(process.env.BATCH || '1000');
-const SLEEP = Number(process.env.SLEEP_MS || '250');
+import pLimit from "p-limit";
+import { Pool } from "pg";
+const limit = pLimit(Number(process.env.CONCURRENCY || "4"));
+const BATCH = Number(process.env.BATCH || "1000");
+const SLEEP = Number(process.env.SLEEP_MS || "250");
 (async () => {
   const db = new Pool({ connectionString: process.env.DATABASE_URL });
-  let lastId = Number(process.env.START_ID || '0');
+  let lastId = Number(process.env.START_ID || "0");
   while (true) {
     const { rows } = await db.query(
-      'SELECT id, old_col FROM items WHERE id > $1 ORDER BY id ASC LIMIT $2',
-      [lastId, BATCH],
+      "SELECT id, old_col FROM items WHERE id > $1 ORDER BY id ASC LIMIT $2",
+      [lastId, BATCH]
     );
     if (!rows.length) break;
     await Promise.all(
       rows.map((r) =>
         limit(async () => {
-          await db.query('UPDATE items SET new_col = $1 WHERE id=$2', [
-            transform(r.old_col),
-            r.id,
-          ]);
-        }),
-      ),
+          await db.query("UPDATE items SET new_col = $1 WHERE id=$2", [transform(r.old_col), r.id]);
+        })
+      )
     );
     lastId = rows[rows.length - 1].id;
     await sleep(SLEEP);
@@ -207,9 +204,9 @@ function transform(x: any) {
 
 ```ts
 export async function saveDoc(input) {
-  await db.insert('docs_new', input);
-  if (process.env.FLAG_DUAL_WRITE === 'true') {
-    await db.insert('docs_old', downgrade(input));
+  await db.insert("docs_new", input);
+  if (process.env.FLAG_DUAL_WRITE === "true") {
+    await db.insert("docs_old", downgrade(input));
   }
 }
 ```
@@ -221,7 +218,7 @@ export async function saveDoc(input) {
 ```yaml
 name: zap-baseline
 on:
-  schedule: [{ cron: '0 7 * * *' }]
+  schedule: [{ cron: "0 7 * * *" }]
   workflow_dispatch:
 jobs:
   zap:
@@ -230,7 +227,7 @@ jobs:
       - uses: zaproxy/action-baseline@v0.11.0
         with:
           target: ${{ secrets.ZAP_TARGET_URL }}
-          cmd_options: '-m 5 -t 60'
+          cmd_options: "-m 5 -t 60"
 ```
 
 ### 5.5 k6 e2e Path Checks
@@ -238,19 +235,19 @@ jobs:
 **Path:** `tests/k6/e2e.js`
 
 ```js
-import http from 'k6/http';
-import { check, sleep } from 'k6';
+import http from "k6/http";
+import { check, sleep } from "k6";
 export const options = {
   thresholds: {
-    http_req_duration: ['p(95)<1500'],
-    http_req_failed: ['rate<0.02'],
+    http_req_duration: ["p(95)<1500"],
+    http_req_failed: ["rate<0.02"],
   },
 };
 export default function () {
   const s = http.get(`${__ENV.BASE_URL}/search?q=ok`);
-  check(s, { 'search 200': (r) => r.status === 200 });
+  check(s, { "search 200": (r) => r.status === 200 });
   const d = http.get(`${__ENV.BASE_URL}/docs/1`);
-  check(d, { 'doc 200': (r) => r.status === 200 });
+  check(d, { "doc 200": (r) => r.status === 200 });
   sleep(1);
 }
 ```
@@ -303,8 +300,8 @@ spec:
     - name: verify-signature
       match: { resources: { kinds: [Deployment, StatefulSet, DaemonSet] } }
       verifyImages:
-        - image: 'ghcr.io/your-org/*'
-          key: 'k8s://kyverno/signing-key'
+        - image: "ghcr.io/your-org/*"
+          key: "k8s://kyverno/signing-key"
 ```
 
 ### 5.7 Cost Dashboard & Budgets
@@ -336,7 +333,7 @@ data:
 ```yaml
 name: preview-ttl-reaper
 on:
-  schedule: [{ cron: '0 */6 * * *' }]
+  schedule: [{ cron: "0 */6 * * *" }]
 jobs:
   reap:
     runs-on: ubuntu-latest

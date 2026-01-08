@@ -57,7 +57,7 @@ export class AdaptiveQuantumApp extends EventEmitter {
   async learnFromExecution(
     executionId: string,
     results: ExecutionResults,
-    feedback: PerformanceFeedback,
+    feedback: PerformanceFeedback
   ): Promise<LearningUpdate>;
   async getNextParameters(): Promise<QuantumCircuitParameters>;
   async selectOptimalBackend(): Promise<string>;
@@ -83,7 +83,7 @@ export class LinUCBOptimizer extends EventEmitter {
   async updateWithReward(
     armId: number,
     context: ContextVector,
-    reward: number,
+    reward: number
   ): Promise<UpdateResult>;
   private calculateUCB(armState: ArmState, features: number[]): UCBResult;
 }
@@ -108,13 +108,9 @@ export class RedisStateManager extends EventEmitter {
     appId: string,
     tenantId: string,
     stateData: any,
-    tags: string[],
+    tags: string[]
   ): Promise<StateSnapshot>;
-  async loadState(
-    appId: string,
-    tenantId: string,
-    stateId?: string,
-  ): Promise<StateSnapshot | null>;
+  async loadState(appId: string, tenantId: string, stateId?: string): Promise<StateSnapshot | null>;
   private async generateMerkleRoot(data: any): Promise<string>;
 }
 ```
@@ -135,10 +131,7 @@ export class RedisStateManager extends EventEmitter {
 ```typescript
 export class DifferentialPrivacyAccountant extends EventEmitter {
   async consumeBudget(query: PrivacyQuery): Promise<PrivacyLoss>;
-  async calculateComposition(
-    queries: PrivacyQuery[],
-    method: string,
-  ): Promise<CompositionResult>;
+  async calculateComposition(queries: PrivacyQuery[], method: string): Promise<CompositionResult>;
   private convertToRDP(epsilon: number, delta: number, order: number): number;
 }
 ```
@@ -163,11 +156,11 @@ export class ContextualRewardsV2 extends EventEmitter {
     route: RouteType,
     provider: string,
     rawMetrics: any,
-    context: ExecutionContext,
+    context: ExecutionContext
   ): Promise<MultiObjectiveReward>;
   async calculateParetoAwareDelta(
     recentRewards: MultiObjectiveReward[],
-    timeWindowHours: number,
+    timeWindowHours: number
   ): Promise<any>;
   private calculateHypervolume(solutions: MultiObjectiveReward[]): number;
 }
@@ -191,16 +184,13 @@ export class KeyRiskMLExplainer extends EventEmitter {
   async generateSHAPExplanation(
     keyId: string,
     features: any,
-    modelPrediction: KeyRiskPrediction,
+    modelPrediction: KeyRiskPrediction
   ): Promise<SHAPExplanation>;
-  async getFeatureImportanceTrends(
-    keyId: string,
-    timeRange: [Date, Date],
-  ): Promise<FeatureTrends>;
+  async getFeatureImportanceTrends(keyId: string, timeRange: [Date, Date]): Promise<FeatureTrends>;
   private async calculateKernelSHAP(
     keyId: string,
     features: any,
-    prediction: KeyRiskPrediction,
+    prediction: KeyRiskPrediction
   ): Promise<SHAPValue[]>;
 }
 ```
@@ -220,14 +210,8 @@ export class KeyRiskMLExplainer extends EventEmitter {
 
 ```typescript
 export class StateMerkleAnchor extends EventEmitter {
-  async anchorState(
-    stateSnapshot: any,
-    priority: number,
-  ): Promise<MerkleAnchor>;
-  async verifyStateIntegrity(
-    currentState: any,
-    anchorId?: string,
-  ): Promise<VerificationResult>;
+  async anchorState(stateSnapshot: any, priority: number): Promise<MerkleAnchor>;
+  async verifyStateIntegrity(currentState: any, anchorId?: string): Promise<VerificationResult>;
   private buildMerkleTree(stateHashes: string[]): any;
 }
 ```

@@ -31,13 +31,7 @@ export function createLineageGraph(params: {
 }): ProvenanceGraph {
   const { commit, attestation, sbom, artifacts, deployments } = params;
 
-  const nodes = [
-    commit,
-    attestation,
-    sbom,
-    ...artifacts,
-    ...deployments,
-  ];
+  const nodes = [commit, attestation, sbom, ...artifacts, ...deployments];
 
   const edges = [
     {
@@ -74,9 +68,7 @@ export function computeIntegrity(graph: ProvenanceGraph): LineageIntegrity {
 
   // For now, treat edges as valid if they reference existing nodes.
   const ids = new Set(graph.nodes.map((n) => n.id));
-  const edgesValid = graph.edges.every(
-    (e) => ids.has(e.from) && ids.has(e.to),
-  );
+  const edgesValid = graph.edges.every((e) => ids.has(e.from) && ids.has(e.to));
 
   // You can extend this with more detailed acyclicity / reachability checks.
   const noGaps = hasFullProvenance && edgesValid;
@@ -88,10 +80,7 @@ export function computeIntegrity(graph: ProvenanceGraph): LineageIntegrity {
   };
 }
 
-export function writeLineageJson(
-  graph: ProvenanceGraph,
-  outputDir = process.cwd(),
-) {
+export function writeLineageJson(graph: ProvenanceGraph, outputDir = process.cwd()) {
   const integrity = computeIntegrity(graph);
   const out: LineageCheckInput = {
     graph,

@@ -1,6 +1,6 @@
-import DataLoader from 'dataloader';
+import DataLoader from "dataloader";
 
-test('dataloader batches requests', async () => {
+test("dataloader batches requests", async () => {
   let calls = 0;
   const loader = new DataLoader(async (keys: readonly string[]) => {
     calls++;

@@ -1,6 +1,6 @@
 route:
   receiver: abac-oncall
-  group_by: ['service']
+  group_by: ["service"]
   match:
     service: authz-gateway
   routes:

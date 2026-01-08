@@ -5,8 +5,7 @@
   display: flex;
   flex-direction: column;
   background: #f8f9fa;
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   position: relative;
 }
 
@@ -908,7 +907,7 @@
 }
 
 .ioc-value {
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   background: white;
   padding: 0.5rem;
   border-radius: 4px;
@@ -962,7 +961,7 @@
 }
 
 .query-code code {
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 0.85rem;
   color: #495057;
   white-space: pre-wrap;
@@ -1275,7 +1274,7 @@
 }
 
 .source-url {
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 0.85rem;
   color: #6c757d;
   margin-bottom: 0.5rem;
@@ -1413,7 +1412,7 @@
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.8rem;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 .more-iocs {

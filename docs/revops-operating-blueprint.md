@@ -3,6 +3,7 @@
 This blueprint operationalizes the nine epics into a single, auditable operating system for Revenue Operations. It defines systems of record, stage governance, routing, quote-to-cash alignment, forecasting, productivity instrumentation, lifecycle handoffs, data quality, and governance controls. Each section includes the canonical object definitions, mandatory controls, and automation requirements to eliminate shadow processes.
 
 ## 1. Systems of Record & Object Definitions
+
 - **Systems of Record**
   - Leads/Contacts: CRM (single tenant).
   - Accounts: CRM with parent/child hierarchy synchronized to billing and CLM domains.
@@ -27,6 +28,7 @@ This blueprint operationalizes the nine epics into a single, auditable operating
   - Change-control board for fields/automations with RFC templates and approval SLAs.
 
 ## 2. Funnel & Stage Governance
+
 - **Stage Exit Criteria**
   - Documented, evidence-based criteria per segment; stored as validation rules that block advancement without artifacts (e.g., confirmed problem + budget owner for Discovery → Evaluation).
 - **Reasons & Hygiene**
@@ -42,6 +44,7 @@ This blueprint operationalizes the nine epics into a single, auditable operating
   - Weekly pipeline reviews driven by data exports from the CRM, not anecdote.
 
 ## 3. Territory, Routing & Coverage Model
+
 - **Territory Model**
   - Geo + Segment + Vertical with named accounts; parent/child inheritance for ownership; quarterly gap analysis.
 - **Routing Rules**
@@ -53,6 +56,7 @@ This blueprint operationalizes the nine epics into a single, auditable operating
   - SDR queues prioritize intent + ICP; enforce work-in-progress limits to prevent hoarding.
 
 ## 4. Quote-to-Cash Alignment
+
 - **SKU & Packaging Governance**
   - Single SKU catalog shared by CRM ↔ CPQ ↔ billing; configuration rules to prevent invalid bundles.
   - Pricing floors/ceilings with approval workflows and give/get matrices.
@@ -65,6 +69,7 @@ This blueprint operationalizes the nine epics into a single, auditable operating
   - Concessions register with expiry tied to renewal events; quote-to-cash failure instrumentation and alerts.
 
 ## 5. Forecasting System
+
 - **Models & Cadence**
   - Segment-aligned models (pipeline-based, commit-based, telemetry-augmented). Weekly commits; monthly rollups with correction logs.
 - **Controls**
@@ -74,6 +79,7 @@ This blueprint operationalizes the nine epics into a single, auditable operating
   - Accuracy dashboards by rep/manager/segment; slip reasons captured on close date moves; quarterly forecast postmortems feed stage criteria updates.
 
 ## 6. Sales Productivity & Enablement Instrumentation
+
 - **Activity Model**
   - Track meetings → evaluations → proposals; avoid vanity metrics. Instrument calls/meetings/touches/artifacts in CRM.
 - **Coaching & Content**
@@ -84,6 +90,7 @@ This blueprint operationalizes the nine epics into a single, auditable operating
   - Time-to-productivity metrics for new reps; experiment program for sequences/talk tracks with measurable outcomes.
 
 ## 7. Customer Lifecycle & Handoffs
+
 - **Handoff Protocols**
   - Defined handoffs SDR→AE, AE→SE, AE→CS, CS→Renewals with mandatory packets (use case, success criteria, risks, commitments).
   - Commitment registry for security/roadmap/services promises with owner and due date.
@@ -94,6 +101,7 @@ This blueprint operationalizes the nine epics into a single, auditable operating
   - Handoff quality tracked (rework, escalations, churn correlation); customer timeline view spanning sales → onboarding → incidents → renewal.
 
 ## 8. Data Quality, Attribution & Marketing Alignment
+
 - **Attribution Model**
   - Lead source hierarchy with rules/windows; enforced UTM discipline and campaign taxonomy with merge-gated fields.
   - MQL/SQL definitions with SLAs and acceptance rules; dedupe on domain/email with fuzzy match safeguards.
@@ -103,6 +111,7 @@ This blueprint operationalizes the nine epics into a single, auditable operating
   - Data change RFC workflow for GTM analytics; hygiene incentives tied to compensation where applicable.
 
 ## 9. Governance, Compliance & Auditability
+
 - **Oversight**
   - RevOps council (Sales/Marketing/CS/Finance/Legal) with decision SLAs; GTM risk register for mis-selling, claims drift, discount leakage, data privacy.
   - Quarterly role-based access reviews for CRM/CPQ/CLM; audit logs for pricing overrides, term deviations, data exports.
@@ -114,6 +123,7 @@ This blueprint operationalizes the nine epics into a single, auditable operating
   - Institutionalize: **if it isn’t in the system, it didn’t happen.**
 
 ## Delivery & Change Control
+
 - **Implementation Wave Plan**
   - Wave 1: Systems of record + object definitions + routing enforcement + stage validation.
   - Wave 2: Quote-to-cash alignment + forecast categories + dashboards + SLA alerts.
@@ -125,6 +135,7 @@ This blueprint operationalizes the nine epics into a single, auditable operating
   - Event-driven integrations (routing, SLA breaches, exception expiry); observability via metrics (SLA adherence, hygiene), alerts (routing/quote failures), and audit logs.
 
 ## Forward-Looking Enhancements
+
 - Predictive routing using intent + product-usage propensity models to pre-score inbound leads.
 - Automated deal risk signals from product telemetry (feature depth, active seats) feeding forecast confidence adjustments.
 - Periodic data quality fuzz-testing to detect duplicate patterns and taxonomy drift before they reach production.

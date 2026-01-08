@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs from "fs";
 // Inputs: judgments.tsv (query \t doc \t label)
 // Outputs: nDCG@10, ERR@20 per variant
 
@@ -18,36 +18,30 @@ interface EvalMetrics {
 export class OfflineEvaluator {
   private judgments: JudgmentRecord[] = [];
 
-  constructor(private judgmentsPath: string = './judgments.tsv') {
+  constructor(private judgmentsPath: string = "./judgments.tsv") {
     this.loadJudgments();
   }
 
   private loadJudgments(): void {
     try {
-      const content = fs.readFileSync(this.judgmentsPath, 'utf-8');
-      const lines = content.trim().split('\n');
+      const content = fs.readFileSync(this.judgmentsPath, "utf-8");
+      const lines = content.trim().split("\n");
 
       this.judgments = lines.map((line) => {
-        const [query, doc, label] = line.split('\t');
+        const [query, doc, label] = line.split("\t");
         return { query, doc, label: parseInt(label) };
       });
     } catch (error) {
-      console.error('Failed to load judgments:', error);
+      console.error("Failed to load judgments:", error);
       this.judgments = [];
     }
   }
 
-  private calculateNDCG10(
-    rankings: Array<{ doc: string; score: number }>,
-    query: string,
-  ): number {
+  private calculateNDCG10(rankings: Array<{ doc: string; score: number }>, query: string): number {
     // Calculate nDCG@10 for given rankings and query
     const relevantDocs = this.judgments
       .filter((j) => j.query === query)
-      .reduce(
-        (acc, j) => ({ ...acc, [j.doc]: j.label }),
-        {} as Record<string, number>,
-      );
+      .reduce((acc, j) => ({ ...acc, [j.doc]: j.label }), {} as Record<string, number>);
 
     let dcg = 0;
     let idcg = 0;
@@ -84,8 +78,8 @@ export class OfflineEvaluator {
 
     for (const query of queries) {
       // Mock rankings for v1 and v2
-      const rankings_v1 = this.getMockRankings(query, 'v1');
-      const rankings_v2 = this.getMockRankings(query, 'v2');
+      const rankings_v1 = this.getMockRankings(query, "v1");
+      const rankings_v2 = this.getMockRankings(query, "v2");
 
       ndcg10_v1 += this.calculateNDCG10(rankings_v1, query);
       ndcg10_v2 += this.calculateNDCG10(rankings_v2, query);
@@ -109,27 +103,21 @@ export class OfflineEvaluator {
     };
   }
 
-  private getMockRankings(
-    query: string,
-    variant: string,
-  ): Array<{ doc: string; score: number }> {
+  private getMockRankings(query: string, variant: string): Array<{ doc: string; score: number }> {
     // Mock implementation - in production, this would call the actual ranking service
     const relevantDocs = this.judgments.filter((j) => j.query === query);
 
     return relevantDocs
       .map((j, i) => ({
         doc: j.doc,
-        score:
-          variant === 'v2'
-            ? Math.random() * 0.9 + 0.1
-            : Math.random() * 0.8 + 0.2,
+        score: variant === "v2" ? Math.random() * 0.9 + 0.1 : Math.random() * 0.8 + 0.2,
       }))
       .sort((a, b) => b.score - a.score);
   }
 
   private getMockClicks(
     rankings: Array<{ doc: string; score: number }>,
-    query: string,
+    query: string
   ): { bad: number; total: number } {
     // Mock click analysis - in production, this would analyze actual click logs
     const totalClicks = Math.floor(Math.random() * 100) + 50;

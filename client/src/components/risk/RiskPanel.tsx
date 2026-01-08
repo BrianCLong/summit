@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 type RiskResult = {
   band: string;
   contributions: Array<{ feature: string; delta: number }>;

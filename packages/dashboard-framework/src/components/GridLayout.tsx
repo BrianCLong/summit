@@ -1,9 +1,9 @@
-import React, { useCallback } from 'react';
-import RGL, { WidthProvider, Layout } from 'react-grid-layout';
-import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';
-import { useDashboardStore } from '../store';
-import { WidgetLayout } from '../types';
+import React, { useCallback } from "react";
+import RGL, { WidthProvider, Layout } from "react-grid-layout";
+import "react-grid-layout/css/styles.css";
+import "react-resizable/css/styles.css";
+import { useDashboardStore } from "../store";
+import { WidgetLayout } from "../types";
 
 const ReactGridLayout = WidthProvider(RGL);
 
@@ -18,12 +18,9 @@ export function GridLayout({
   pageId,
   children,
   editable = false,
-  className = '',
+  className = "",
 }: GridLayoutProps) {
-  const {
-    getActivePage,
-    updateWidgetLayout,
-  } = useDashboardStore();
+  const { getActivePage, updateWidgetLayout } = useDashboardStore();
 
   const page = getActivePage();
 
@@ -34,7 +31,7 @@ export function GridLayout({
   const { layout: layoutConfig, widgets } = page;
 
   // Convert widget layouts to react-grid-layout format
-  const layouts: Layout[] = widgets.map(widget => ({
+  const layouts: Layout[] = widgets.map((widget) => ({
     i: widget.id,
     x: widget.layout.x,
     y: widget.layout.y,
@@ -49,31 +46,36 @@ export function GridLayout({
     isResizable: widget.layout.isResizable !== false && editable,
   }));
 
-  const handleLayoutChange = useCallback((newLayout: Layout[]) => {
-    if (!editable) { return; }
-
-    newLayout.forEach(item => {
-      const widget = widgets.find(w => w.id === item.i);
-      if (widget) {
-        const layoutUpdate: Partial<WidgetLayout> = {
-          x: item.x,
-          y: item.y,
-          w: item.w,
-          h: item.h,
-        };
-
-        // Only update if changed
-        if (
-          widget.layout.x !== item.x ||
-          widget.layout.y !== item.y ||
-          widget.layout.w !== item.w ||
-          widget.layout.h !== item.h
-        ) {
-          updateWidgetLayout(widget.id, layoutUpdate);
-        }
+  const handleLayoutChange = useCallback(
+    (newLayout: Layout[]) => {
+      if (!editable) {
+        return;
       }
-    });
-  }, [widgets, updateWidgetLayout, editable]);
+
+      newLayout.forEach((item) => {
+        const widget = widgets.find((w) => w.id === item.i);
+        if (widget) {
+          const layoutUpdate: Partial<WidgetLayout> = {
+            x: item.x,
+            y: item.y,
+            w: item.w,
+            h: item.h,
+          };
+
+          // Only update if changed
+          if (
+            widget.layout.x !== item.x ||
+            widget.layout.y !== item.y ||
+            widget.layout.w !== item.w ||
+            widget.layout.h !== item.h
+          ) {
+            updateWidgetLayout(widget.id, layoutUpdate);
+          }
+        }
+      });
+    },
+    [widgets, updateWidgetLayout, editable]
+  );
 
   const handleDrag = useCallback((layout: Layout[], oldItem: Layout, newItem: Layout) => {
     // Optional: Add drag feedback
@@ -90,8 +92,10 @@ export function GridLayout({
       cols={layoutConfig.columns || 12}
       rowHeight={layoutConfig.rowHeight || 80}
       margin={layoutConfig.gaps ? [layoutConfig.gaps.x, layoutConfig.gaps.y] : [16, 16]}
-      containerPadding={layoutConfig.margin ? [layoutConfig.margin.x, layoutConfig.margin.y] : [0, 0]}
-      compactType={layoutConfig.compactType || 'vertical'}
+      containerPadding={
+        layoutConfig.margin ? [layoutConfig.margin.x, layoutConfig.margin.y] : [0, 0]
+      }
+      compactType={layoutConfig.compactType || "vertical"}
       preventCollision={layoutConfig.preventCollision || false}
       isDraggable={editable}
       isResizable={editable}
@@ -99,9 +103,9 @@ export function GridLayout({
       onDrag={handleDrag}
       onResize={handleResize}
       draggableHandle=".widget-drag-handle"
-      resizeHandles={['se', 'sw', 'ne', 'nw']}
+      resizeHandles={["se", "sw", "ne", "nw"]}
       style={{
-        minHeight: '100%',
+        minHeight: "100%",
       }}
     >
       {children as any}

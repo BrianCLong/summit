@@ -9,24 +9,24 @@ metadata:
     app.kubernetes.io/component: security
 data:
   # Encryption settings
-  encryption-at-rest: 'AES256'
-  encryption-in-transit: 'TLS1.3'
-  kms-key-rotation-days: '90'
+  encryption-at-rest: "AES256"
+  encryption-in-transit: "TLS1.3"
+  kms-key-rotation-days: "90"
 
   # Access control settings
-  backup-retention-days: '30'
-  audit-retention-days: '365'
-  access-review-frequency: 'quarterly'
+  backup-retention-days: "30"
+  audit-retention-days: "365"
+  access-review-frequency: "quarterly"
 
   # Compliance settings
-  gdpr-compliant: 'true'
-  sox-compliant: 'true'
-  hipaa-compliant: 'false' # Set to true if handling healthcare data
+  gdpr-compliant: "true"
+  sox-compliant: "true"
+  hipaa-compliant: "false" # Set to true if handling healthcare data
 
   # Security scanning settings
-  vulnerability-scan-enabled: 'true'
-  malware-scan-enabled: 'true'
-  integrity-check-enabled: 'true'
+  vulnerability-scan-enabled: "true"
+  malware-scan-enabled: "true"
+  integrity-check-enabled: "true"
 
 ---
 # Backup Encryption Service
@@ -66,11 +66,11 @@ spec:
               name: https
           env:
             - name: PORT
-              value: '8443'
+              value: "8443"
             - name: TLS_CERT_PATH
-              value: '/etc/certs/tls.crt'
+              value: "/etc/certs/tls.crt"
             - name: TLS_KEY_PATH
-              value: '/etc/certs/tls.key'
+              value: "/etc/certs/tls.key"
             - name: KMS_KEY_ID
               valueFrom:
                 secretKeyRef:
@@ -83,11 +83,11 @@ spec:
                   key: aws-region
           resources:
             requests:
-              memory: '256Mi'
-              cpu: '200m'
+              memory: "256Mi"
+              cpu: "200m"
             limits:
-              memory: '512Mi'
-              cpu: '500m'
+              memory: "512Mi"
+              cpu: "500m"
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -121,10 +121,10 @@ spec:
         - name: tmp
           emptyDir: {}
       tolerations:
-        - key: 'backup-workload'
-          operator: 'Equal'
-          value: 'true'
-          effect: 'NoSchedule'
+        - key: "backup-workload"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
 ---
 apiVersion: v1
 kind: Service
@@ -153,8 +153,8 @@ metadata:
     app.kubernetes.io/name: backup-security-audit
     app.kubernetes.io/component: security
 spec:
-  schedule: '0 6 * * 0' # Weekly on Sunday at 6 AM UTC
-  timeZone: 'UTC'
+  schedule: "0 6 * * 0" # Weekly on Sunday at 6 AM UTC
+  timeZone: "UTC"
   successfulJobsHistoryLimit: 4
   failedJobsHistoryLimit: 2
   concurrencyPolicy: Forbid
@@ -420,11 +420,11 @@ spec:
                       key: aws-secret-access-key
               resources:
                 requests:
-                  memory: '512Mi'
-                  cpu: '250m'
+                  memory: "512Mi"
+                  cpu: "250m"
                 limits:
-                  memory: '1Gi'
-                  cpu: '500m'
+                  memory: "1Gi"
+                  cpu: "500m"
               volumeMounts:
                 - name: audit-storage
                   mountPath: /audits
@@ -493,7 +493,7 @@ metadata:
   name: backup-encryption-service
   namespace: backup-system
   annotations:
-    eks.amazonaws.com/role-arn: 'arn:aws:iam::123456789012:role/backup-encryption-service-role'
+    eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/backup-encryption-service-role"
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -501,4 +501,4 @@ metadata:
   name: backup-security-audit
   namespace: backup-system
   annotations:
-    eks.amazonaws.com/role-arn: 'arn:aws:iam::123456789012:role/backup-security-audit-role'
+    eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/backup-security-audit-role"

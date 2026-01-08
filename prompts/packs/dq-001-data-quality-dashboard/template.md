@@ -87,6 +87,7 @@ Build a comprehensive data quality (DQ) dashboard service that continuously moni
 ### Core Requirements
 
 **(a) OpenTelemetry Metrics Export**
+
 - Compute and export the following DQ dimensions as OTel metrics:
   - **Completeness**: Percentage of non-null required fields per dataset
   - **Consistency**: Cross-field validation failures (e.g., date ranges, referential integrity)
@@ -98,6 +99,7 @@ Build a comprehensive data quality (DQ) dashboard service that continuously moni
 - Support both batch (scheduled) and streaming (event-driven) computation
 
 **(b) Policy-Labeled Anomaly Alerts**
+
 - Integrate with OPA policy engine to retrieve dataset policy labels
 - Define alert thresholds per policy tier (e.g., classified data has tighter SLOs)
 - Generate alerts when DQ metrics fall below thresholds:
@@ -106,12 +108,14 @@ Build a comprehensive data quality (DQ) dashboard service that continuously moni
 - Include runbook links in alert payloads
 
 **(c) Contradiction Density Chart**
+
 - Detect contradictory records (same entity, conflicting attributes, overlapping validity periods)
 - Visualize contradiction density over time per dataset
 - Link contradictions to provenance records for root-cause analysis
 - Expose via GraphQL query: `contradictionDensity(datasetId: ID!, timeRange: DateRange!)`
 
 **(d) Steward Workflows (Owner → Custodian → Ombuds)**
+
 - Implement role-based workflow for DQ issue resolution:
   1. **Owner**: Receives DQ alert, reviews issue
   2. **Custodian**: Investigates root cause, proposes remediation
@@ -123,6 +127,7 @@ Build a comprehensive data quality (DQ) dashboard service that continuously moni
 ### Technical Specifications
 
 **Service Structure** (following Summit conventions):
+
 ```
 services/dq-dashboard/
 ├── src/
@@ -141,6 +146,7 @@ services/dq-dashboard/
 ```
 
 **GraphQL Schema** (extend existing):
+
 ```graphql
 type DQMetrics {
   datasetId: ID!
@@ -192,6 +198,7 @@ extend type Mutation {
 ```
 
 **Database Schema** (PostgreSQL):
+
 ```sql
 CREATE TABLE dq_metrics (
   id SERIAL PRIMARY KEY,
@@ -277,6 +284,7 @@ CREATE TABLE dq_workflow_log (
 ### Test Scenarios
 
 #### Scenario 1: Completeness Detection
+
 ```json
 {
   "dataset": "test-entities-001",
@@ -291,18 +299,20 @@ CREATE TABLE dq_workflow_log (
 ```
 
 #### Scenario 2: Contradiction Detection
+
 ```json
 {
   "entity_id": "e-123",
   "records": [
-    {"attr": "nationality", "value": "US", "valid_from": "2020-01-01"},
-    {"attr": "nationality", "value": "UK", "valid_from": "2020-01-01"}
+    { "attr": "nationality", "value": "US", "valid_from": "2020-01-01" },
+    { "attr": "nationality", "value": "UK", "valid_from": "2020-01-01" }
   ],
   "expected_contradiction": true
 }
 ```
 
 #### Scenario 3: Steward Workflow
+
 ```yaml
 steps:
   - actor: owner
@@ -322,14 +332,17 @@ expected_audit_entries: 3
 ### Integration with Existing Services
 
 **Provenance Ledger**
+
 - Query provenance coverage via `prov-ledger` API
 - Link DQ issues to provenance chain for root-cause analysis
 
 **Policy Engine (OPA)**
+
 - Fetch dataset policy labels on DQ computation
 - Use labels to determine alert thresholds and routing
 
 **Audit Service**
+
 - Publish workflow transitions as audit events
 - Ensure steward actions are logged with actor identity
 
@@ -349,6 +362,7 @@ expected_audit_entries: 3
 ### Configuration
 
 Example `.env` entries:
+
 ```bash
 DQ_DASHBOARD_PORT=8090
 DQ_BATCH_SCHEDULE="0 2 * * *"  # 2 AM daily

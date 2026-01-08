@@ -114,16 +114,11 @@ export interface EigenvectorCentralityResult {
  */
 export function calculateClosenessCentrality(
   graph: GraphData,
-  options: ClosenessCentralityOptions = {},
+  options: ClosenessCentralityOptions = {}
 ): ClosenessCentralityResult {
   const startTime = performance.now();
 
-  const {
-    normalized = true,
-    directed = false,
-    weightProperty,
-    harmonic = false,
-  } = options;
+  const { normalized = true, directed = false, weightProperty, harmonic = false } = options;
 
   const nodes = graph.nodes;
   const nodeCount = nodes.length;
@@ -198,8 +193,7 @@ export function calculateClosenessCentrality(
     }
   }
 
-  const avgCloseness =
-    Array.from(closeness.values()).reduce((sum, c) => sum + c, 0) / nodeCount;
+  const avgCloseness = Array.from(closeness.values()).reduce((sum, c) => sum + c, 0) / nodeCount;
 
   const executionTime = performance.now() - startTime;
 
@@ -224,7 +218,7 @@ export function calculateClosenessCentrality(
  */
 export function calculateEigenvectorCentrality(
   graph: GraphData,
-  options: EigenvectorCentralityOptions = {},
+  options: EigenvectorCentralityOptions = {}
 ): EigenvectorCentralityResult {
   const startTime = performance.now();
 
@@ -333,7 +327,7 @@ export function calculateEigenvectorCentrality(
 function calculateShortestPaths(
   source: string,
   adjacency: Map<string, Map<string, number>>,
-  weighted: boolean,
+  weighted: boolean
 ): Map<string, number> {
   const distances = new Map<string, number>();
 
@@ -352,7 +346,9 @@ function calculateShortestPaths(
       queue.sort((a, b) => a.dist - b.dist);
       const { node: current, dist: currentDist } = queue.shift()!;
 
-      if (visited.has(current)) {continue;}
+      if (visited.has(current)) {
+        continue;
+      }
       visited.add(current);
 
       const neighbors = adjacency.get(current) || new Map();
@@ -398,14 +394,9 @@ export function calculateCompositeCentrality(
   betweenness: Map<string, number>,
   closeness: Map<string, number>,
   eigenvector: Map<string, number>,
-  weights: { pr?: number; bc?: number; cc?: number; ec?: number } = {},
+  weights: { pr?: number; bc?: number; cc?: number; ec?: number } = {}
 ): Map<string, number> {
-  const {
-    pr = 0.25,
-    bc = 0.25,
-    cc = 0.25,
-    ec = 0.25,
-  } = weights;
+  const { pr = 0.25, bc = 0.25, cc = 0.25, ec = 0.25 } = weights;
 
   // Normalize weights
   const totalWeight = pr + bc + cc + ec;
@@ -442,7 +433,7 @@ export function calculateCompositeCentrality(
  */
 export function findMostCentralNodes(
   composite: Map<string, number>,
-  k: number = 10,
+  k: number = 10
 ): Array<{ node: string; score: number }> {
   return Array.from(composite.entries())
     .map(([node, score]) => ({ node, score }))

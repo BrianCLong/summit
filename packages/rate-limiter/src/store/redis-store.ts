@@ -5,13 +5,9 @@
  * Copyright (c) 2025 IntelGraph
  */
 
-import Redis from 'ioredis';
-import pino from 'pino';
-import type {
-  IRateLimitStore,
-  RateLimitState,
-  TokenBucketState,
-} from '../types.js';
+import Redis from "ioredis";
+import pino from "pino";
+import type { IRateLimitStore, RateLimitState, TokenBucketState } from "../types.js";
 
 const logger = pino();
 
@@ -19,7 +15,7 @@ export class RedisRateLimitStore implements IRateLimitStore {
   private client: Redis;
   private keyPrefix: string;
 
-  constructor(redisClient: Redis, keyPrefix = 'ratelimit:') {
+  constructor(redisClient: Redis, keyPrefix = "ratelimit:") {
     this.client = redisClient;
     this.keyPrefix = keyPrefix;
   }
@@ -71,7 +67,7 @@ export class RedisRateLimitStore implements IRateLimitStore {
         now.toString(),
         windowStart.toString(),
         windowMs.toString(),
-        ttlMs.toString(),
+        ttlMs.toString()
       );
 
       const [count, resetAt] = result as [number, number];
@@ -89,7 +85,7 @@ export class RedisRateLimitStore implements IRateLimitStore {
       };
     } catch (error) {
       logger.error({
-        message: 'Redis rate limit increment failed',
+        message: "Redis rate limit increment failed",
         key,
         error: error instanceof Error ? error.message : String(error),
       });
@@ -126,7 +122,7 @@ export class RedisRateLimitStore implements IRateLimitStore {
       };
     } catch (error) {
       logger.error({
-        message: 'Redis rate limit get failed',
+        message: "Redis rate limit get failed",
         key,
         error: error instanceof Error ? error.message : String(error),
       });
@@ -144,7 +140,7 @@ export class RedisRateLimitStore implements IRateLimitStore {
       await this.client.del(prefixedKey);
     } catch (error) {
       logger.error({
-        message: 'Redis rate limit reset failed',
+        message: "Redis rate limit reset failed",
         key,
         error: error instanceof Error ? error.message : String(error),
       });
@@ -156,7 +152,7 @@ export class RedisRateLimitStore implements IRateLimitStore {
    * Get token bucket state
    */
   async getTokenBucket(key: string): Promise<TokenBucketState | null> {
-    const prefixedKey = `${this.keyPrefix  }tb:${  key}`;
+    const prefixedKey = `${this.keyPrefix}tb:${key}`;
 
     try {
       const data = await this.client.hgetall(prefixedKey);
@@ -173,7 +169,7 @@ export class RedisRateLimitStore implements IRateLimitStore {
       };
     } catch (error) {
       logger.error({
-        message: 'Redis token bucket get failed',
+        message: "Redis token bucket get failed",
         key,
         error: error instanceof Error ? error.message : String(error),
       });
@@ -188,9 +184,9 @@ export class RedisRateLimitStore implements IRateLimitStore {
     key: string,
     tokensToConsume: number,
     capacity: number,
-    refillRate: number,
+    refillRate: number
   ): Promise<TokenBucketState> {
-    const prefixedKey = `${this.keyPrefix  }tb:${  key}`;
+    const prefixedKey = `${this.keyPrefix}tb:${key}`;
     const now = Date.now();
 
     try {
@@ -246,7 +242,7 @@ export class RedisRateLimitStore implements IRateLimitStore {
         tokensToConsume.toString(),
         capacity.toString(),
         refillRate.toString(),
-        ttlSeconds.toString(),
+        ttlSeconds.toString()
       );
 
       const [tokens, lastRefill] = result as [number, number, number];
@@ -259,7 +255,7 @@ export class RedisRateLimitStore implements IRateLimitStore {
       };
     } catch (error) {
       logger.error({
-        message: 'Redis token bucket consume failed',
+        message: "Redis token bucket consume failed",
         key,
         error: error instanceof Error ? error.message : String(error),
       });
@@ -273,10 +269,10 @@ export class RedisRateLimitStore implements IRateLimitStore {
   async healthCheck(): Promise<boolean> {
     try {
       const result = await this.client.ping();
-      return result === 'PONG';
+      return result === "PONG";
     } catch (error) {
       logger.error({
-        message: 'Redis health check failed',
+        message: "Redis health check failed",
         error: error instanceof Error ? error.message : String(error),
       });
       return false;

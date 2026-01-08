@@ -10,7 +10,7 @@ groups:
           service: policy-engine
           slo: decision-latency
         annotations:
-          summary: 'Policy decision latency p95 above 250ms'
+          summary: "Policy decision latency p95 above 250ms"
           description: |
             p95 policy decision latency is {{ $value | printf "%.0f" }}ms over 10m.
             Check OPA pods, cache hit rate, and upstream identity latency.
@@ -24,7 +24,7 @@ groups:
           service: policy-engine
           slo: deny-rate
         annotations:
-          summary: 'Policy deny ratio above 10%'
+          summary: "Policy deny ratio above 10%"
           description: |
             Deny ratio across tenants is above 10% for 10m.
             Validate recent policy pushes and tenant overrides.
@@ -38,7 +38,7 @@ groups:
           service: policy-engine
           slo: cache-hit-rate
         annotations:
-          summary: 'Policy cache miss ratio above 30%'
+          summary: "Policy cache miss ratio above 30%"
           description: |
             Cache miss rate exceeded 30% for 15m. Investigate Redis health or TTL regressions.
           runbook_url: https://git.example.com/runbooks/policy-cache
@@ -51,7 +51,7 @@ groups:
           service: provenance-ledger
           slo: receipt-anchoring
         annotations:
-          summary: 'No policy receipts anchored in the last 15m'
+          summary: "No policy receipts anchored in the last 15m"
           description: |
             evidence_registrations_total did not increase for 15 minutes.
             Check ledger writers, export queues, and upstream receipt emitters.
@@ -65,7 +65,7 @@ groups:
           service: export-gateway
           slo: receipt-delivery
         annotations:
-          summary: 'Blocked exports detected for policy receipts'
+          summary: "Blocked exports detected for policy receipts"
           description: |
             export_blocks_total increased in the last 5 minutes. Investigate export policy failures and downstream sinks.
           runbook_url: https://git.example.com/runbooks/receipt-blockers

@@ -1,45 +1,45 @@
-version: '3.9'
+version: "3.9"
 services:
   neo4j:
     image: neo4j:5.25
     environment:
       - NEO4J_AUTH=neo4j/test
-    ports: [ "7474:7474", "7687:7687" ]
+    ports: ["7474:7474", "7687:7687"]
     volumes:
       - neo4j_data:/data
 
   redis:
     image: redis:7-alpine
-    ports: [ "6379:6379" ]
+    ports: ["6379:6379"]
 
   postgres:
     image: postgres:16-alpine
     environment:
       - POSTGRES_PASSWORD=postgres
-    ports: [ "5432:5432" ]
+    ports: ["5432:5432"]
     volumes:
       - pg_data:/var/lib/postgresql/data
 
   prov-ledger:
     build: ./services/prov-ledger
     command: node dist/index.js
-    ports: [ "4010:4010" ]
-    depends_on: [ redis ]
+    ports: ["4010:4010"]
+    depends_on: [redis]
 
   policy-lac:
     build: ./gateway/policy-lac
     command: node dist/index.js
-    ports: [ "4000:4000" ]
+    ports: ["4000:4000"]
 
   nl2cypher:
     build: ./server/ai/nl2cypher
     command: node dist/index.js
-    ports: [ "4020:4020" ]
+    ports: ["4020:4020"]
 
   report-studio:
     build: ./apps/web/report-studio
     command: node dist/index.js
-    ports: [ "3000:3000" ]
+    ports: ["3000:3000"]
 
 volumes:
   neo4j_data: {}

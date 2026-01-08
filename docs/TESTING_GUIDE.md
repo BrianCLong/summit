@@ -18,15 +18,17 @@ We follow the testing pyramid:
 - **Mocking**: Extensive mocking of external dependencies (DB, API).
 
 **Example:**
-```typescript
-import { sum } from './math';
 
-test('adds 1 + 2 to equal 3', () => {
+```typescript
+import { sum } from "./math";
+
+test("adds 1 + 2 to equal 3", () => {
   expect(sum(1, 2)).toBe(3);
 });
 ```
 
 To run unit tests:
+
 ```bash
 cd server
 npm run test:unit
@@ -40,23 +42,22 @@ npm run test:unit
 - **Setup**: Requires a running (or mocked) database environment.
 
 **Example:**
+
 ```typescript
-import request from 'supertest';
-import app from '../src/app';
+import request from "supertest";
+import app from "../src/app";
 
-describe('GET /health', () => {
-  it('responds with json', async () => {
-    const response = await request(app)
-      .get('/health')
-      .expect('Content-Type', /json/)
-      .expect(200);
+describe("GET /health", () => {
+  it("responds with json", async () => {
+    const response = await request(app).get("/health").expect("Content-Type", /json/).expect(200);
 
-    expect(response.body.status).toBe('ok');
+    expect(response.body.status).toBe("ok");
   });
 });
 ```
 
 To run integration tests:
+
 ```bash
 cd server
 npm run test:integration
@@ -95,5 +96,6 @@ make smoke
 ## Continuous Integration
 
 Tests are automatically run on GitHub Actions for every Pull Request.
+
 - `unit-tests`: Runs on every push.
 - `e2e-tests`: Runs on PRs to main.

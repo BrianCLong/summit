@@ -26,7 +26,7 @@ aws s3 ls 2>/dev/null || echo "Configure AWS CLI or use localstack"
 
 ## Claude Prompt
 
-```
+````
 You are implementing Cost Guard for IntelGraph - budget enforcement, query optimization, and archival tiering.
 
 CONTEXT:
@@ -163,9 +163,10 @@ CREATE TABLE query_costs (
   duration_ms INT,
   timestamp TIMESTAMPTZ DEFAULT NOW()
 );
-```
+````
 
 SAMPLE OPTIMIZATION SUGGESTION:
+
 ```json
 {
   "original": "MATCH (p:Person)-[*1..5]->(o:Organization) WHERE p.name = 'John' RETURN o",
@@ -176,6 +177,7 @@ SAMPLE OPTIMIZATION SUGGESTION:
 ```
 
 SAMPLE ARCHIVAL METADATA (GraphML):
+
 ```xml
 <graphml>
   <graph id="case-123-archive-2025-11-29">
@@ -191,21 +193,25 @@ SAMPLE ARCHIVAL METADATA (GraphML):
 ```
 
 K6 BENCHMARK WORKLOAD (tests/k6/cost-benchmark.js):
-```javascript
-import http from 'k6/http';
-import { check } from 'k6';
 
-export default function() {
+```javascript
+import http from "k6/http";
+import { check } from "k6";
+
+export default function () {
   const queries = [
-    'MATCH (p:Person)-[*1..3]->(o) RETURN count(o)',
-    'MATCH (p:Person) WHERE p.name STARTS WITH "A" RETURN p LIMIT 100'
+    "MATCH (p:Person)-[*1..3]->(o) RETURN count(o)",
+    'MATCH (p:Person) WHERE p.name STARTS WITH "A" RETURN p LIMIT 100',
   ];
 
-  queries.forEach(q => {
-    const res = http.post('http://localhost:4000/graphql', JSON.stringify({
-      query: `query { runCypher(cypher: "${q}") { cost } }`
-    }));
-    check(res, { 'cost reduced': (r) => JSON.parse(r.body).data.cost < 100 });
+  queries.forEach((q) => {
+    const res = http.post(
+      "http://localhost:4000/graphql",
+      JSON.stringify({
+        query: `query { runCypher(cypher: "${q}") { cost } }`,
+      })
+    );
+    check(res, { "cost reduced": (r) => JSON.parse(r.body).data.cost < 100 });
   });
 }
 ```
@@ -220,6 +226,7 @@ Provide:
 (f) Prometheus metrics + Grafana dashboard
 (g) k6 benchmark suite
 (h) Integration tests
+
 ```
 
 ---
@@ -248,3 +255,4 @@ Provide:
 - AWS S3 SDK: https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/
 - GraphML format: http://graphml.graphdrawing.org/
 - k6 load testing: https://k6.io/docs/
+```

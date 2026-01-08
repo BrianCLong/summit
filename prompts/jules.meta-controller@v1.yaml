@@ -185,7 +185,15 @@ outputSchema:
     coordination_strategy: { type: string }
     outcome_summary: { type: string }
     session_update: { type: string }
-  required: [assessment, selected_modes, execution_plan, coordination_strategy, outcome_summary, session_update]
+  required:
+    [
+      assessment,
+      selected_modes,
+      execution_plan,
+      coordination_strategy,
+      outcome_summary,
+      session_update,
+    ]
 
 examples:
   - name: feature-implementation

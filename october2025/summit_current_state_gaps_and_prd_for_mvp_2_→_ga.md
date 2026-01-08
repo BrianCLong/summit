@@ -343,12 +343,12 @@ then:
 
 ```yaml
 id: pb-001
-name: 'Coordinate takedown request'
+name: "Coordinate takedown request"
 triggers: [alert.created where severity >= HIGH and source == influence]
 steps:
   - id: draft-brief
     action: template.render
-    input: { template: 'takedown_request_v1', case_id: $case.id }
+    input: { template: "takedown_request_v1", case_id: $case.id }
     approvals: [T&S Lead]
   - id: send-legal
     action: http.post

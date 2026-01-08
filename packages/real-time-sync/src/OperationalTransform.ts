@@ -1,4 +1,4 @@
-import { Operation, OperationType } from './types';
+import { Operation, OperationType } from "./types";
 
 /**
  * Operational Transformation engine for concurrent editing
@@ -42,28 +42,16 @@ export class OperationalTransform {
 
     if (pos1 < pos2) {
       // op1 is before op2, adjust op2's position
-      return [
-        op1,
-        { ...op2, position: pos2 + this.getContentLength(op1) }
-      ];
+      return [op1, { ...op2, position: pos2 + this.getContentLength(op1) }];
     } else if (pos1 > pos2) {
       // op2 is before op1, adjust op1's position
-      return [
-        { ...op1, position: pos1 + this.getContentLength(op2) },
-        op2
-      ];
+      return [{ ...op1, position: pos1 + this.getContentLength(op2) }, op2];
     } else {
       // Same position - use timestamp as tiebreaker
       if (op1.timestamp < op2.timestamp) {
-        return [
-          op1,
-          { ...op2, position: pos2 + this.getContentLength(op1) }
-        ];
+        return [op1, { ...op2, position: pos2 + this.getContentLength(op1) }];
       } else {
-        return [
-          { ...op1, position: pos1 + this.getContentLength(op2) },
-          op2
-        ];
+        return [{ ...op1, position: pos1 + this.getContentLength(op2) }, op2];
       }
     }
   }
@@ -75,22 +63,16 @@ export class OperationalTransform {
 
     if (insPos <= delPos) {
       // Insert is before delete, adjust delete position
-      return [
-        insert,
-        { ...del, position: delPos + this.getContentLength(insert) }
-      ];
+      return [insert, { ...del, position: delPos + this.getContentLength(insert) }];
     } else if (insPos >= delPos + delLen) {
       // Insert is after delete, adjust insert position
-      return [
-        { ...insert, position: insPos - delLen },
-        del
-      ];
+      return [{ ...insert, position: insPos - delLen }, del];
     } else {
       // Insert is within delete range
       // Adjust both operations
       return [
         { ...insert, position: delPos },
-        { ...del, length: delLen + this.getContentLength(insert) }
+        { ...del, length: delLen + this.getContentLength(insert) },
       ];
     }
   }
@@ -103,15 +85,9 @@ export class OperationalTransform {
 
     // No overlap
     if (pos1 + len1 <= pos2) {
-      return [
-        op1,
-        { ...op2, position: pos2 - len1 }
-      ];
+      return [op1, { ...op2, position: pos2 - len1 }];
     } else if (pos2 + len2 <= pos1) {
-      return [
-        { ...op1, position: pos1 - len2 },
-        op2
-      ];
+      return [{ ...op1, position: pos1 - len2 }, op2];
     }
 
     // Overlapping deletes - need to merge
@@ -123,7 +99,7 @@ export class OperationalTransform {
 
     return [
       { ...op1, position: start, length: len1 - overlap },
-      { ...op2, position: start, length: len2 - overlap }
+      { ...op2, position: start, length: len2 - overlap },
     ];
   }
 
@@ -152,7 +128,7 @@ export class OperationalTransform {
         return {
           ...op1,
           type: OperationType.RETAIN,
-          content: undefined
+          content: undefined,
         };
       }
     }
@@ -164,7 +140,7 @@ export class OperationalTransform {
           ...op1,
           type: OperationType.UPDATE,
           content: op2.content,
-          length: op1.length
+          length: op1.length,
         };
       }
     }
@@ -192,7 +168,7 @@ export class OperationalTransform {
   }
 
   private applyInsert(content: string, op: Operation): string {
-    const insertContent = typeof op.content === 'string' ? op.content : JSON.stringify(op.content);
+    const insertContent = typeof op.content === "string" ? op.content : JSON.stringify(op.content);
     return content.slice(0, op.position) + insertContent + content.slice(op.position);
   }
 
@@ -203,12 +179,12 @@ export class OperationalTransform {
 
   private applyUpdate(content: string, op: Operation): string {
     const length = op.length || 0;
-    const updateContent = typeof op.content === 'string' ? op.content : JSON.stringify(op.content);
+    const updateContent = typeof op.content === "string" ? op.content : JSON.stringify(op.content);
     return content.slice(0, op.position) + updateContent + content.slice(op.position + length);
   }
 
   private getContentLength(op: Operation): number {
-    if (typeof op.content === 'string') {
+    if (typeof op.content === "string") {
       return op.content.length;
     }
     return 1; // For non-string content, treat as single unit
@@ -227,7 +203,7 @@ export class OperationalTransform {
 
   private getOperationRange(op: Operation): { start: number; end: number } {
     const start = op.position;
-    const length = op.type === OperationType.DELETE ? (op.length || 0) : this.getContentLength(op);
+    const length = op.type === OperationType.DELETE ? op.length || 0 : this.getContentLength(op);
     return { start, end: start + length };
   }
 }

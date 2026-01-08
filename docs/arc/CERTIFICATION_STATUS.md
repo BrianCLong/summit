@@ -4,12 +4,12 @@ This document tracks the annual renewal and revocation of platform, plugin, and 
 
 ## Platform Certification
 
-| Control | Status | Evidence |
-|---|---|---|
-| ... | Renewed / Revoked | ... |
+| Control | Status            | Evidence |
+| ------- | ----------------- | -------- |
+| ...     | Renewed / Revoked | ...      |
 
 ## Plugin & Partner Certification
 
-| Plugin/Partner | Status | Conformance Check |
-|---|---|---|
-| ... | Renewed / Revoked | ... |
+| Plugin/Partner | Status            | Conformance Check |
+| -------------- | ----------------- | ----------------- |
+| ...            | Renewed / Revoked | ...               |

@@ -2,8 +2,8 @@
  * Validation utilities for threat detection
  */
 
-import { z } from 'zod';
-import { ThreatEvent, ThreatSeverity, ThreatCategory, EventSource } from '../types/events';
+import { z } from "zod";
+import { ThreatEvent, ThreatSeverity, ThreatCategory, EventSource } from "../types/events";
 
 /**
  * Zod schema for ThreatEvent validation
@@ -35,7 +35,7 @@ export const ThreatEventSchema = z.object({
   relatedEvents: z.array(z.string()).optional(),
 
   responded: z.boolean(),
-  responseActions: z.array(z.string()).optional()
+  responseActions: z.array(z.string()).optional(),
 });
 
 /**
@@ -65,8 +65,8 @@ export function isValidIp(ip: string): boolean {
   const ipv6Regex = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
 
   if (ipv4Regex.test(ip)) {
-    const parts = ip.split('.');
-    return parts.every(part => parseInt(part, 10) <= 255);
+    const parts = ip.split(".");
+    return parts.every((part) => parseInt(part, 10) <= 255);
   }
 
   return ipv6Regex.test(ip);
@@ -95,12 +95,12 @@ export function isValidUrl(url: string): boolean {
 /**
  * Validate hash (MD5, SHA1, SHA256, SHA512)
  */
-export function isValidHash(hash: string, type?: 'md5' | 'sha1' | 'sha256' | 'sha512'): boolean {
+export function isValidHash(hash: string, type?: "md5" | "sha1" | "sha256" | "sha512"): boolean {
   const patterns = {
     md5: /^[a-fA-F0-9]{32}$/,
     sha1: /^[a-fA-F0-9]{40}$/,
     sha256: /^[a-fA-F0-9]{64}$/,
-    sha512: /^[a-fA-F0-9]{128}$/
+    sha512: /^[a-fA-F0-9]{128}$/,
   };
 
   if (type) {
@@ -108,7 +108,7 @@ export function isValidHash(hash: string, type?: 'md5' | 'sha1' | 'sha256' | 'sh
   }
 
   // Try all patterns if type not specified
-  return Object.values(patterns).some(pattern => pattern.test(hash));
+  return Object.values(patterns).some((pattern) => pattern.test(hash));
 }
 
 /**
@@ -133,9 +133,9 @@ export function isValidMitreTechnique(techniqueId: string): boolean {
  */
 export function sanitizeInput(input: string): string {
   return input
-    .replace(/[<>]/g, '') // Remove < and >
-    .replace(/['"]/g, '') // Remove quotes
-    .replace(/[\\]/g, '') // Remove backslashes
+    .replace(/[<>]/g, "") // Remove < and >
+    .replace(/['"]/g, "") // Remove quotes
+    .replace(/[\\]/g, "") // Remove backslashes
     .trim();
 }
 
@@ -144,14 +144,25 @@ export function sanitizeInput(input: string): string {
  */
 export function sanitizeSqlInput(input: string): string {
   const dangerous = [
-    'DROP', 'DELETE', 'UPDATE', 'INSERT', 'EXEC', 'EXECUTE',
-    'CREATE', 'ALTER', 'GRANT', 'REVOKE', '--', ';', 'xp_'
+    "DROP",
+    "DELETE",
+    "UPDATE",
+    "INSERT",
+    "EXEC",
+    "EXECUTE",
+    "CREATE",
+    "ALTER",
+    "GRANT",
+    "REVOKE",
+    "--",
+    ";",
+    "xp_",
   ];
 
   let sanitized = input.trim();
 
   for (const keyword of dangerous) {
-    const regex = new RegExp(keyword, 'gi');
+    const regex = new RegExp(keyword, "gi");
     if (regex.test(sanitized)) {
       throw new Error(`Potentially dangerous SQL keyword detected: ${keyword}`);
     }
@@ -175,16 +186,20 @@ export function isValidJson(data: string): boolean {
 /**
  * Validate time range
  */
-export function isValidTimeRange(start: Date, end: Date, maxRange?: number): {
+export function isValidTimeRange(
+  start: Date,
+  end: Date,
+  maxRange?: number
+): {
   valid: boolean;
   error?: string;
 } {
   if (start > end) {
-    return { valid: false, error: 'Start time must be before end time' };
+    return { valid: false, error: "Start time must be before end time" };
   }
 
   if (start > new Date()) {
-    return { valid: false, error: 'Start time cannot be in the future' };
+    return { valid: false, error: "Start time cannot be in the future" };
   }
 
   if (maxRange) {
@@ -207,38 +222,41 @@ export function isValidThreatScore(score: number): boolean {
 /**
  * Validate indicator type and value
  */
-export function validateIndicator(type: string, value: string): {
+export function validateIndicator(
+  type: string,
+  value: string
+): {
   valid: boolean;
   error?: string;
 } {
   switch (type) {
-    case 'ip':
+    case "ip":
       if (!isValidIp(value)) {
-        return { valid: false, error: 'Invalid IP address format' };
+        return { valid: false, error: "Invalid IP address format" };
       }
       break;
 
-    case 'domain':
+    case "domain":
       if (!isValidDomain(value)) {
-        return { valid: false, error: 'Invalid domain format' };
+        return { valid: false, error: "Invalid domain format" };
       }
       break;
 
-    case 'url':
+    case "url":
       if (!isValidUrl(value)) {
-        return { valid: false, error: 'Invalid URL format' };
+        return { valid: false, error: "Invalid URL format" };
       }
       break;
 
-    case 'hash':
+    case "hash":
       if (!isValidHash(value)) {
-        return { valid: false, error: 'Invalid hash format' };
+        return { valid: false, error: "Invalid hash format" };
       }
       break;
 
-    case 'email':
+    case "email":
       if (!isValidEmail(value)) {
-        return { valid: false, error: 'Invalid email format' };
+        return { valid: false, error: "Invalid email format" };
       }
       break;
 
@@ -272,13 +290,13 @@ export class RateLimitValidator {
       // New window
       this.counts.set(key, {
         count: 1,
-        resetAt: now + this.windowMs
+        resetAt: now + this.windowMs,
       });
 
       return {
         allowed: true,
         remaining: this.maxRequests - 1,
-        resetAt: now + this.windowMs
+        resetAt: now + this.windowMs,
       };
     }
 
@@ -286,7 +304,7 @@ export class RateLimitValidator {
       return {
         allowed: false,
         remaining: 0,
-        resetAt: record.resetAt
+        resetAt: record.resetAt,
       };
     }
 
@@ -295,7 +313,7 @@ export class RateLimitValidator {
     return {
       allowed: true,
       remaining: this.maxRequests - record.count,
-      resetAt: record.resetAt
+      resetAt: record.resetAt,
     };
   }
 

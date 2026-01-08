@@ -1,9 +1,9 @@
-import { EventEmitter } from 'eventemitter3';
-import pino from 'pino';
-import { CheckpointConfig, StateBackend } from './types';
-import { StateManager } from './state';
+import { EventEmitter } from "eventemitter3";
+import pino from "pino";
+import { CheckpointConfig, StateBackend } from "./types";
+import { StateManager } from "./state";
 
-const logger = pino({ name: 'checkpoint-manager' });
+const logger = pino({ name: "checkpoint-manager" });
 
 /**
  * Checkpoint manager for fault tolerance
@@ -28,12 +28,12 @@ export class CheckpointManager extends EventEmitter {
    */
   start(): void {
     if (this.checkpointInterval) {
-      logger.warn('Checkpointing already started');
+      logger.warn("Checkpointing already started");
       return;
     }
 
     if (!this.config.enabled) {
-      logger.info('Checkpointing disabled');
+      logger.info("Checkpointing disabled");
       return;
     }
 
@@ -41,7 +41,7 @@ export class CheckpointManager extends EventEmitter {
       this.triggerCheckpoint();
     }, this.config.interval);
 
-    logger.info({ interval: this.config.interval }, 'Checkpointing started');
+    logger.info({ interval: this.config.interval }, "Checkpointing started");
   }
 
   /**
@@ -51,7 +51,7 @@ export class CheckpointManager extends EventEmitter {
     if (this.checkpointInterval) {
       clearInterval(this.checkpointInterval);
       this.checkpointInterval = null;
-      logger.info('Checkpointing stopped');
+      logger.info("Checkpointing stopped");
     }
   }
 
@@ -62,13 +62,13 @@ export class CheckpointManager extends EventEmitter {
     // Check minimum pause between checkpoints
     const now = Date.now();
     if (now - this.lastCheckpointTime < this.config.minPauseBetweenCheckpoints) {
-      logger.debug('Skipping checkpoint due to min pause');
+      logger.debug("Skipping checkpoint due to min pause");
       return;
     }
 
     // Check concurrent checkpoints
     if (this.checkpointInProgress) {
-      logger.warn('Checkpoint already in progress');
+      logger.warn("Checkpoint already in progress");
       return;
     }
 
@@ -76,8 +76,8 @@ export class CheckpointManager extends EventEmitter {
     const checkpointId = ++this.checkpointId;
     const startTime = Date.now();
 
-    logger.info({ checkpointId }, 'Checkpoint started');
-    this.emit('checkpoint-start', checkpointId);
+    logger.info({ checkpointId }, "Checkpoint started");
+    this.emit("checkpoint-start", checkpointId);
 
     try {
       // Perform checkpoint (this is where state would be snapshotted)
@@ -102,11 +102,11 @@ export class CheckpointManager extends EventEmitter {
       this.trimCheckpointHistory();
 
       this.lastCheckpointTime = Date.now();
-      this.emit('checkpoint-complete', metadata);
+      this.emit("checkpoint-complete", metadata);
 
-      logger.info({ checkpointId, duration }, 'Checkpoint completed');
+      logger.info({ checkpointId, duration }, "Checkpoint completed");
     } catch (error) {
-      logger.error({ error, checkpointId }, 'Checkpoint failed');
+      logger.error({ error, checkpointId }, "Checkpoint failed");
 
       const metadata: CheckpointMetadata = {
         id: checkpointId,
@@ -117,7 +117,7 @@ export class CheckpointManager extends EventEmitter {
       };
 
       this.checkpointHistory.push(metadata);
-      this.emit('checkpoint-failed', metadata);
+      this.emit("checkpoint-failed", metadata);
 
       throw error;
     } finally {
@@ -136,7 +136,7 @@ export class CheckpointManager extends EventEmitter {
     // 4. Acknowledge checkpoint
 
     // For now, we just emit an event
-    this.emit('checkpoint', checkpointId);
+    this.emit("checkpoint", checkpointId);
 
     // Simulate checkpoint work
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -146,7 +146,7 @@ export class CheckpointManager extends EventEmitter {
    * Restore from checkpoint
    */
   async restoreFromCheckpoint(checkpointId: number): Promise<void> {
-    logger.info({ checkpointId }, 'Restoring from checkpoint');
+    logger.info({ checkpointId }, "Restoring from checkpoint");
 
     try {
       // In a real implementation, this would:
@@ -154,16 +154,16 @@ export class CheckpointManager extends EventEmitter {
       // 2. Restore operator state
       // 3. Reposition stream offsets
 
-      this.emit('restore-start', checkpointId);
+      this.emit("restore-start", checkpointId);
 
       // Simulate restore work
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      this.emit('restore-complete', checkpointId);
-      logger.info({ checkpointId }, 'Restore completed');
+      this.emit("restore-complete", checkpointId);
+      logger.info({ checkpointId }, "Restore completed");
     } catch (error) {
-      logger.error({ error, checkpointId }, 'Restore failed');
-      this.emit('restore-failed', checkpointId);
+      logger.error({ error, checkpointId }, "Restore failed");
+      this.emit("restore-failed", checkpointId);
       throw error;
     }
   }
@@ -192,9 +192,7 @@ export class CheckpointManager extends EventEmitter {
    */
   private trimCheckpointHistory(): void {
     if (this.checkpointHistory.length > this.maxCheckpointHistory) {
-      this.checkpointHistory = this.checkpointHistory.slice(
-        -this.maxCheckpointHistory
-      );
+      this.checkpointHistory = this.checkpointHistory.slice(-this.maxCheckpointHistory);
     }
   }
 
@@ -205,14 +203,10 @@ export class CheckpointManager extends EventEmitter {
     const successful = this.checkpointHistory.filter((c) => c.success).length;
     const failed = this.checkpointHistory.length - successful;
 
-    const durations = this.checkpointHistory
-      .filter((c) => c.success)
-      .map((c) => c.duration);
+    const durations = this.checkpointHistory.filter((c) => c.success).map((c) => c.duration);
 
     const avgDuration =
-      durations.length > 0
-        ? durations.reduce((a, b) => a + b, 0) / durations.length
-        : 0;
+      durations.length > 0 ? durations.reduce((a, b) => a + b, 0) / durations.length : 0;
 
     return {
       totalCheckpoints: this.checkpointHistory.length,

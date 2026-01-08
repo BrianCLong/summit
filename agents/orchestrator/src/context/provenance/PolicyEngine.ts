@@ -12,8 +12,8 @@ import {
   PolicyViolation,
   EnforcementResult,
   ContextSegment,
-  TrustTier
-} from './types.js';
+  TrustTier,
+} from "./types.js";
 
 /**
  * PolicyEngine
@@ -57,13 +57,13 @@ export class PolicyEngine {
 
     for (const segment of segments) {
       // Skip already-revoked segments
-      if (segment.metadata.verificationStatus === 'revoked') {
+      if (segment.metadata.verificationStatus === "revoked") {
         violations.push({
-          ruleId: 'revocation-check',
+          ruleId: "revocation-check",
           segmentId: segment.id,
-          message: 'Segment has been revoked',
-          action: 'deny',
-          timestamp: new Date()
+          message: "Segment has been revoked",
+          action: "deny",
+          timestamp: new Date(),
         });
         allowed = false;
         continue;
@@ -78,28 +78,28 @@ export class PolicyEngine {
             message: `Policy violation: ${rule.description}`,
             action: rule.action,
             timestamp: new Date(),
-            remediation: rule.justification
+            remediation: rule.justification,
           };
 
           violations.push(violation);
 
           // Apply action
           switch (rule.action) {
-            case 'deny':
-              if (rule.severity === 'block') {
+            case "deny":
+              if (rule.severity === "block") {
                 allowed = false;
               }
               break;
 
-            case 'redact':
+            case "redact":
               redactedSegments.push(segment.id);
               break;
 
-            case 'flag':
+            case "flag":
               flaggedSegments.push(segment.id);
               break;
 
-            case 'permit':
+            case "permit":
               // Explicit permit (no-op, but logged)
               break;
           }
@@ -111,7 +111,7 @@ export class PolicyEngine {
       allowed,
       violations,
       redactedSegments,
-      flaggedSegments
+      flaggedSegments,
     };
   }
 
@@ -121,7 +121,7 @@ export class PolicyEngine {
   applyRedactions(segments: ContextSegment[], redactedIds: string[]): ContextSegment[] {
     const redactedSet = new Set(redactedIds);
 
-    return segments.map(segment => {
+    return segments.map((segment) => {
       if (redactedSet.has(segment.id)) {
         return {
           ...segment,
@@ -129,8 +129,8 @@ export class PolicyEngine {
           metadata: {
             ...segment.metadata,
             // Mark as redacted in metadata
-            redacted: true
-          } as any
+            redacted: true,
+          } as any,
         };
       }
       return segment;
@@ -147,12 +147,12 @@ export class PolicyEngine {
  */
 export function revokedAgentRule(): PolicyRule {
   return {
-    id: 'revoked-agent-block',
-    description: 'Block context from revoked agents',
-    condition: (segment) => segment.metadata.verificationStatus === 'revoked',
-    action: 'deny',
-    justification: 'Agent has been revoked due to security concerns',
-    severity: 'block'
+    id: "revoked-agent-block",
+    description: "Block context from revoked agents",
+    condition: (segment) => segment.metadata.verificationStatus === "revoked",
+    action: "deny",
+    justification: "Agent has been revoked due to security concerns",
+    severity: "block",
   };
 }
 
@@ -161,12 +161,12 @@ export function revokedAgentRule(): PolicyRule {
  */
 export function externalTrustRedactionRule(highSecurityMode: boolean): PolicyRule {
   return {
-    id: 'external-trust-redaction',
-    description: 'Redact external trust tier content in high-security mode',
-    condition: (segment) => highSecurityMode && segment.metadata.trustTier === 'external',
-    action: 'redact',
-    justification: 'High-security mode requires verified or system-level context only',
-    severity: 'warn'
+    id: "external-trust-redaction",
+    description: "Redact external trust tier content in high-security mode",
+    condition: (segment) => highSecurityMode && segment.metadata.trustTier === "external",
+    action: "redact",
+    justification: "High-security mode requires verified or system-level context only",
+    severity: "warn",
   };
 }
 
@@ -175,12 +175,12 @@ export function externalTrustRedactionRule(highSecurityMode: boolean): PolicyRul
  */
 export function unsignedSegmentAuditRule(): PolicyRule {
   return {
-    id: 'unsigned-segment-audit',
-    description: 'Flag unsigned segments for review',
-    condition: (segment) => segment.metadata.verificationStatus === 'unsigned',
-    action: 'flag',
-    justification: 'Unsigned segments should be audited for origin verification',
-    severity: 'info'
+    id: "unsigned-segment-audit",
+    description: "Flag unsigned segments for review",
+    condition: (segment) => segment.metadata.verificationStatus === "unsigned",
+    action: "flag",
+    justification: "Unsigned segments should be audited for origin verification",
+    severity: "info",
   };
 }
 
@@ -191,12 +191,12 @@ export function policyDomainMismatchRule(allowedDomains: string[]): PolicyRule {
   const allowedSet = new Set(allowedDomains);
 
   return {
-    id: 'policy-domain-mismatch',
-    description: 'Block segments from unauthorized policy domains',
+    id: "policy-domain-mismatch",
+    description: "Block segments from unauthorized policy domains",
     condition: (segment) => !allowedSet.has(segment.metadata.policyDomain),
-    action: 'deny',
-    justification: `Only policy domains ${allowedDomains.join(', ')} are permitted`,
-    severity: 'block'
+    action: "deny",
+    justification: `Only policy domains ${allowedDomains.join(", ")} are permitted`,
+    severity: "block",
   };
 }
 
@@ -207,15 +207,17 @@ export function agentQuarantineRule(quarantinedAgentIds: string[]): PolicyRule {
   const quarantinedSet = new Set(quarantinedAgentIds);
 
   return {
-    id: 'agent-quarantine',
-    description: 'Redact context from quarantined agents',
+    id: "agent-quarantine",
+    description: "Redact context from quarantined agents",
     condition: (segment) => {
-      return segment.metadata.sourceAgentId !== undefined &&
-             quarantinedSet.has(segment.metadata.sourceAgentId);
+      return (
+        segment.metadata.sourceAgentId !== undefined &&
+        quarantinedSet.has(segment.metadata.sourceAgentId)
+      );
     },
-    action: 'redact',
-    justification: 'Agent is under investigation; context quarantined',
-    severity: 'block'
+    action: "redact",
+    justification: "Agent is under investigation; context quarantined",
+    severity: "block",
   };
 }
 
@@ -224,20 +226,20 @@ export function agentQuarantineRule(quarantinedAgentIds: string[]): PolicyRule {
  */
 export function trustTierEscalationRule(
   requiredTier: TrustTier,
-  tierHierarchy: TrustTier[] = ['system', 'verified', 'user', 'external']
+  tierHierarchy: TrustTier[] = ["system", "verified", "user", "external"]
 ): PolicyRule {
   const requiredLevel = tierHierarchy.indexOf(requiredTier);
 
   return {
-    id: 'trust-tier-escalation',
+    id: "trust-tier-escalation",
     description: `Require trust tier ${requiredTier} or higher`,
     condition: (segment) => {
       const segmentLevel = tierHierarchy.indexOf(segment.metadata.trustTier);
       return segmentLevel > requiredLevel; // Lower trust tier (higher index)
     },
-    action: 'deny',
+    action: "deny",
     justification: `Session requires minimum trust tier: ${requiredTier}`,
-    severity: 'block'
+    severity: "block",
   };
 }
 
@@ -246,15 +248,15 @@ export function trustTierEscalationRule(
  */
 export function contextExpirationRule(maxAgeDays: number): PolicyRule {
   return {
-    id: 'context-expiration',
+    id: "context-expiration",
     description: `Block context older than ${maxAgeDays} days`,
     condition: (segment) => {
       const ageMs = Date.now() - segment.metadata.timestamp.getTime();
       const ageDays = ageMs / (1000 * 60 * 60 * 24);
       return ageDays > maxAgeDays;
     },
-    action: 'deny',
-    justification: 'Expired context may contain outdated or invalid information',
-    severity: 'warn'
+    action: "deny",
+    justification: "Expired context may contain outdated or invalid information",
+    severity: "warn",
   };
 }

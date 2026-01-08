@@ -8,5 +8,5 @@ groups:
         labels:
           severity: page
         annotations:
-          summary: 'API error budget burn > 0.1%'
-          description: 'Investigate GraphQL 5xx spikes and recent deploys.'
+          summary: "API error budget burn > 0.1%"
+          description: "Investigate GraphQL 5xx spikes and recent deploys."

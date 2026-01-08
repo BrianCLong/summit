@@ -1,4 +1,3 @@
-
 export interface ReleaseArtifact {
   name: string;
   path: string;
@@ -23,7 +22,7 @@ export function parseManifest(jsonString: string): ReleaseStatus {
     const data = JSON.parse(jsonString);
     // Basic validation could go here
     if (!data.tag || !data.sha) {
-        throw new Error("Invalid manifest: missing tag or sha");
+      throw new Error("Invalid manifest: missing tag or sha");
     }
     return data as ReleaseStatus;
   } catch (e) {
@@ -32,14 +31,14 @@ export function parseManifest(jsonString: string): ReleaseStatus {
 }
 
 export function parseChecksums(content: string): Record<string, string> {
-  const lines = content.split('\n');
+  const lines = content.split("\n");
   const result: Record<string, string> = {};
   for (const line of lines) {
     if (!line.trim()) continue;
     const parts = line.trim().split(/\s+/);
     if (parts.length >= 2) {
       const sha = parts[0];
-      const file = parts.slice(1).join(' ');
+      const file = parts.slice(1).join(" ");
       result[file] = sha;
     }
   }
@@ -47,5 +46,5 @@ export function parseChecksums(content: string): Record<string, string> {
 }
 
 export function isBrowser(): boolean {
-  return typeof window !== 'undefined' && typeof window.document !== 'undefined';
+  return typeof window !== "undefined" && typeof window.document !== "undefined";
 }

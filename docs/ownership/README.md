@@ -10,31 +10,31 @@ This document defines the ownership model for the IntelGraph repository. It maps
 
 ## Ownership Map
 
-| Path | Owner Team | Description |
-| :--- | :--- | :--- |
-| **Root Config** | | |
-| `/` | `@intelgraph-core` | Root config, build scripts, Makefile |
-| `.github/` | `@intelgraph-ops` | CI/CD workflows, templates |
-| **Core Platform** | | |
-| `server/` | `@intelgraph-core` | Core API Server |
-| `client/` | `@intelgraph-core` | Core Web Client |
-| `apps/web/` | `@intelgraph-core` | Next-gen Web App |
-| **Services** | | |
-| `services/ai-*` | `@intelgraph-ai` | AI/ML Services |
-| `services/graph-*` | `@intelgraph-graph` | Graph Database Services |
-| `services/audit-*` | `@intelgraph-security`| Audit & Compliance Services |
-| `services/policy-*`| `@intelgraph-security`| Policy Engine |
-| **Infrastructure** | | |
-| `infra/` | `@intelgraph-ops` | Infrastructure as Code |
-| `k8s/`, `helm/` | `@intelgraph-ops` | Kubernetes Manifests |
-| **Documentation** | | |
-| `docs/` | `@intelgraph-docs` | Documentation |
+| Path                | Owner Team             | Description                          |
+| :------------------ | :--------------------- | :----------------------------------- |
+| **Root Config**     |                        |                                      |
+| `/`                 | `@intelgraph-core`     | Root config, build scripts, Makefile |
+| `.github/`          | `@intelgraph-ops`      | CI/CD workflows, templates           |
+| **Core Platform**   |                        |                                      |
+| `server/`           | `@intelgraph-core`     | Core API Server                      |
+| `client/`           | `@intelgraph-core`     | Core Web Client                      |
+| `apps/web/`         | `@intelgraph-core`     | Next-gen Web App                     |
+| **Services**        |                        |                                      |
+| `services/ai-*`     | `@intelgraph-ai`       | AI/ML Services                       |
+| `services/graph-*`  | `@intelgraph-graph`    | Graph Database Services              |
+| `services/audit-*`  | `@intelgraph-security` | Audit & Compliance Services          |
+| `services/policy-*` | `@intelgraph-security` | Policy Engine                        |
+| **Infrastructure**  |                        |                                      |
+| `infra/`            | `@intelgraph-ops`      | Infrastructure as Code               |
+| `k8s/`, `helm/`     | `@intelgraph-ops`      | Kubernetes Manifests                 |
+| **Documentation**   |                        |                                      |
+| `docs/`             | `@intelgraph-docs`     | Documentation                        |
 
 ## Review Requirements
 
-*   **Core Changes**: Require 1 approval from `@intelgraph-core`.
-*   **Infrastructure**: Require 1 approval from `@intelgraph-ops`.
-*   **Security Critical**: Changes to `services/auth*`, `services/policy*` require `@intelgraph-security`.
+- **Core Changes**: Require 1 approval from `@intelgraph-core`.
+- **Infrastructure**: Require 1 approval from `@intelgraph-ops`.
+- **Security Critical**: Changes to `services/auth*`, `services/policy*` require `@intelgraph-security`.
 
 ## Updating Ownership
 

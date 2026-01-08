@@ -56,8 +56,8 @@
 
 ## Sign-off
 
-| Role | Name | Date | Signature |
-|------|------|------|-----------|
-| Security Lead | | | |
-| Compliance Officer | | | |
-| Legal Representative | | | |
+| Role                 | Name | Date | Signature |
+| -------------------- | ---- | ---- | --------- |
+| Security Lead        |      |      |           |
+| Compliance Officer   |      |      |           |
+| Legal Representative |      |      |           |

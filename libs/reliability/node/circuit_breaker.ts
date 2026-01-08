@@ -1,7 +1,7 @@
-import EventEmitter from 'events';
-import { collectDefaultMetrics, Counter, Gauge, Histogram, Registry } from 'prom-client';
+import EventEmitter from "events";
+import { collectDefaultMetrics, Counter, Gauge, Histogram, Registry } from "prom-client";
 
-export type CircuitState = 'closed' | 'open' | 'half-open';
+export type CircuitState = "closed" | "open" | "half-open";
 
 export interface CircuitBreakerOptions {
   failureThreshold: number;
@@ -13,7 +13,7 @@ export interface CircuitBreakerOptions {
 
 export class CircuitBreaker extends EventEmitter {
   private failures = 0;
-  private state: CircuitState = 'closed';
+  private state: CircuitState = "closed";
   private readonly registry: Registry;
   private readonly stateGauge: Gauge<string>;
   private readonly latencyHist: Histogram<string>;
@@ -26,32 +26,32 @@ export class CircuitBreaker extends EventEmitter {
     collectDefaultMetrics({ register: this.registry });
 
     this.stateGauge = new Gauge({
-      name: 'db_cb_state',
-      help: 'Circuit breaker state (0=closed,1=open,2=half-open)',
-      labelNames: ['service', 'store'],
+      name: "db_cb_state",
+      help: "Circuit breaker state (0=closed,1=open,2=half-open)",
+      labelNames: ["service", "store"],
       registers: [this.registry],
     });
 
     this.latencyHist = new Histogram({
-      name: 'db_query_latency_seconds',
-      help: 'Latency histogram for DB calls',
-      labelNames: ['store', 'op'],
+      name: "db_query_latency_seconds",
+      help: "Latency histogram for DB calls",
+      labelNames: ["store", "op"],
       buckets: [0.01, 0.025, 0.05, 0.1, 0.15, 0.25, 0.5, 1, 2, 3],
       registers: [this.registry],
     });
 
     this.errorsTotal = new Counter({
-      name: 'db_errors_total',
-      help: 'Total DB errors',
-      labelNames: ['store', 'code'],
+      name: "db_errors_total",
+      help: "Total DB errors",
+      labelNames: ["store", "code"],
       registers: [this.registry],
     });
   }
 
   public async execute<T>(op: string, fn: () => Promise<T>): Promise<T> {
-    if (this.state === 'open') {
-      this.errorsTotal.inc({ store: this.options.store, code: 'circuit_open' });
-      throw new Error('Circuit breaker is open');
+    if (this.state === "open") {
+      this.errorsTotal.inc({ store: this.options.store, code: "circuit_open" });
+      throw new Error("Circuit breaker is open");
     }
 
     const start = process.hrtime.bigint();
@@ -63,7 +63,7 @@ export class CircuitBreaker extends EventEmitter {
     } catch (err) {
       this.recordLatency(op, start);
       this.failures += 1;
-      this.errorsTotal.inc({ store: this.options.store, code: 'operation_failed' });
+      this.errorsTotal.inc({ store: this.options.store, code: "operation_failed" });
       if (this.failures >= this.options.failureThreshold) {
         this.trip();
       }
@@ -72,11 +72,11 @@ export class CircuitBreaker extends EventEmitter {
   }
 
   public async withHalfOpen<T>(fn: () => Promise<T>): Promise<T> {
-    if (this.state !== 'open') return this.execute('half_open_probe', fn);
-    this.state = 'half-open';
+    if (this.state !== "open") return this.execute("half_open_probe", fn);
+    this.state = "half-open";
     this.updateGauge();
     try {
-      const result = await this.execute('half_open_probe', fn);
+      const result = await this.execute("half_open_probe", fn);
       this.reset();
       return result;
     } catch (err) {
@@ -91,29 +91,29 @@ export class CircuitBreaker extends EventEmitter {
   }
 
   private trip() {
-    if (this.state === 'open') return;
-    this.state = 'open';
+    if (this.state === "open") return;
+    this.state = "open";
     this.updateGauge();
-    this.emit('open');
+    this.emit("open");
     this.timer?.unref();
     this.timer = setTimeout(() => {
-      this.state = 'half-open';
+      this.state = "half-open";
       this.updateGauge();
-      this.emit('half-open');
+      this.emit("half-open");
     }, this.options.recoverySeconds * 1000);
   }
 
   private reset() {
     this.failures = 0;
-    if (this.state !== 'closed') {
-      this.state = 'closed';
+    if (this.state !== "closed") {
+      this.state = "closed";
       this.updateGauge();
-      this.emit('closed');
+      this.emit("closed");
     }
   }
 
   private updateGauge() {
-    const stateValue = this.state === 'closed' ? 0 : this.state === 'open' ? 1 : 2;
+    const stateValue = this.state === "closed" ? 0 : this.state === "open" ? 1 : 2;
     this.stateGauge.set({ service: this.options.service, store: this.options.store }, stateValue);
   }
 

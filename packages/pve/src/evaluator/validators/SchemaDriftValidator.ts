@@ -7,14 +7,10 @@
  * @module pve/evaluator/validators/SchemaDriftValidator
  */
 
-import type {
-  EvaluationContext,
-  PolicyResult,
-  SchemaDriftInput,
-} from '../../types/index.js';
-import { pass, fail, warn } from '../PolicyResult.js';
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
+import type { EvaluationContext, PolicyResult, SchemaDriftInput } from "../../types/index.js";
+import { pass, fail, warn } from "../PolicyResult.js";
+import Ajv from "ajv";
+import addFormats from "ajv-formats";
 
 export interface SchemaDriftValidatorConfig {
   /** Allow adding new required fields */
@@ -52,7 +48,7 @@ const DEFAULT_CONFIG: SchemaDriftValidatorConfig = {
   allowNewRequired: false,
   allowRemoveOptional: false,
   allowTypeChanges: false,
-  immutableFields: ['id', 'type'],
+  immutableFields: ["id", "type"],
 };
 
 export class SchemaDriftValidator {
@@ -66,7 +62,7 @@ export class SchemaDriftValidator {
   }
 
   async validate(context: EvaluationContext): Promise<PolicyResult[]> {
-    if (context.type !== 'schema_drift') {
+    if (context.type !== "schema_drift") {
       return [];
     }
 
@@ -81,14 +77,18 @@ export class SchemaDriftValidator {
       const validationResult = this.validateSchema(current, input.schemaType);
       if (!validationResult.valid) {
         results.push(
-          fail('pve.schema.invalid', `Current schema is invalid: ${validationResult.errors?.join(', ')}`, {
-            severity: 'error',
-            location: input.filePath ? { file: input.filePath } : undefined,
-          }),
+          fail(
+            "pve.schema.invalid",
+            `Current schema is invalid: ${validationResult.errors?.join(", ")}`,
+            {
+              severity: "error",
+              location: input.filePath ? { file: input.filePath } : undefined,
+            }
+          )
         );
         return results;
       }
-      results.push(pass('pve.schema.valid'));
+      results.push(pass("pve.schema.valid"));
 
       // Compare schemas
       const comparison = this.compareSchemas(previous, current);
@@ -97,8 +97,8 @@ export class SchemaDriftValidator {
       if (comparison.breaking.length > 0) {
         for (const change of comparison.breaking) {
           results.push(
-            fail('pve.schema.breaking_change', change.message, {
-              severity: 'error',
+            fail("pve.schema.breaking_change", change.message, {
+              severity: "error",
               location: input.filePath ? { file: input.filePath, field: change.path } : undefined,
               details: {
                 path: change.path,
@@ -107,11 +107,11 @@ export class SchemaDriftValidator {
                 current: change.current,
               },
               fix: this.getSuggestedFix(change),
-            }),
+            })
           );
         }
       } else {
-        results.push(pass('pve.schema.breaking_change', 'No breaking changes detected'));
+        results.push(pass("pve.schema.breaking_change", "No breaking changes detected"));
       }
 
       // Check immutable fields
@@ -119,37 +119,48 @@ export class SchemaDriftValidator {
       if (immutableViolations.length > 0) {
         for (const violation of immutableViolations) {
           results.push(
-            fail('pve.schema.immutable_field', `Immutable field changed: ${violation}`, {
-              severity: 'error',
+            fail("pve.schema.immutable_field", `Immutable field changed: ${violation}`, {
+              severity: "error",
               location: input.filePath ? { file: input.filePath, field: violation } : undefined,
-            }),
+            })
           );
         }
       } else {
-        results.push(pass('pve.schema.immutable_field'));
+        results.push(pass("pve.schema.immutable_field"));
       }
 
       // Report non-breaking changes as info
       if (comparison.additions.length > 0) {
         results.push(
-          pass('pve.schema.additions', `Added ${comparison.additions.length} new field(s): ${comparison.additions.join(', ')}`),
+          pass(
+            "pve.schema.additions",
+            `Added ${comparison.additions.length} new field(s): ${comparison.additions.join(", ")}`
+          )
         );
       }
 
       if (comparison.removals.length > 0 && !this.config.allowRemoveOptional) {
         results.push(
-          warn('pve.schema.removals', `Removed ${comparison.removals.length} field(s): ${comparison.removals.join(', ')}`, {
-            location: input.filePath ? { file: input.filePath } : undefined,
-            fix: 'Mark fields as deprecated before removing them',
-          }),
+          warn(
+            "pve.schema.removals",
+            `Removed ${comparison.removals.length} field(s): ${comparison.removals.join(", ")}`,
+            {
+              location: input.filePath ? { file: input.filePath } : undefined,
+              fix: "Mark fields as deprecated before removing them",
+            }
+          )
         );
       }
     } catch (error) {
       results.push(
-        fail('pve.schema.parse_error', `Failed to parse schema: ${error instanceof Error ? error.message : String(error)}`, {
-          severity: 'error',
-          location: input.filePath ? { file: input.filePath } : undefined,
-        }),
+        fail(
+          "pve.schema.parse_error",
+          `Failed to parse schema: ${error instanceof Error ? error.message : String(error)}`,
+          {
+            severity: "error",
+            location: input.filePath ? { file: input.filePath } : undefined,
+          }
+        )
       );
     }
 
@@ -157,13 +168,13 @@ export class SchemaDriftValidator {
   }
 
   private parseSchema(schema: string | object, schemaType: string): object {
-    if (typeof schema === 'string') {
+    if (typeof schema === "string") {
       switch (schemaType) {
-        case 'json_schema':
+        case "json_schema":
           return JSON.parse(schema);
-        case 'typescript':
+        case "typescript":
           return this.parseTypeScript(schema);
-        case 'graphql':
+        case "graphql":
           return this.parseGraphQL(schema);
         default:
           return JSON.parse(schema);
@@ -174,17 +185,17 @@ export class SchemaDriftValidator {
 
   private parseTypeScript(_schema: string): object {
     // Simplified TypeScript parsing - in production, use ts-morph or similar
-    return { type: 'object', properties: {} };
+    return { type: "object", properties: {} };
   }
 
   private parseGraphQL(_schema: string): object {
     // Simplified GraphQL parsing - in production, use graphql-js
-    return { type: 'object', properties: {} };
+    return { type: "object", properties: {} };
   }
 
   private validateSchema(
     schema: object,
-    _schemaType: string,
+    _schemaType: string
   ): { valid: boolean; errors?: string[] } {
     try {
       this.ajv.compile(schema);
@@ -217,7 +228,7 @@ export class SchemaDriftValidator {
         if (prevRequired.has(key)) {
           result.breaking.push({
             path: key,
-            type: 'field_removed',
+            type: "field_removed",
             message: `Required field "${key}" was removed`,
             previous: value,
           });
@@ -232,7 +243,7 @@ export class SchemaDriftValidator {
         if (currRequired.has(key) && !this.config.allowNewRequired) {
           result.breaking.push({
             path: key,
-            type: 'required_field_added',
+            type: "required_field_added",
             message: `New required field "${key}" was added`,
             current: value,
           });
@@ -244,7 +255,7 @@ export class SchemaDriftValidator {
         if (prevType !== currType && !this.config.allowTypeChanges) {
           result.breaking.push({
             path: key,
-            type: 'type_changed',
+            type: "type_changed",
             message: `Type of field "${key}" changed from "${prevType}" to "${currType}"`,
             previous: prevType,
             current: currType,
@@ -258,7 +269,7 @@ export class SchemaDriftValidator {
       if (!prevRequired.has(req) && req in prevProps) {
         result.breaking.push({
           path: req,
-          type: 'made_required',
+          type: "made_required",
           message: `Field "${req}" was made required`,
         });
       }
@@ -278,14 +289,14 @@ export class SchemaDriftValidator {
   }
 
   private getFieldType(field: unknown): string {
-    if (typeof field !== 'object' || field === null) {
+    if (typeof field !== "object" || field === null) {
       return String(field);
     }
     const f = field as { type?: string | string[] };
     if (Array.isArray(f.type)) {
-      return f.type.join('|');
+      return f.type.join("|");
     }
-    return f.type || 'unknown';
+    return f.type || "unknown";
   }
 
   private checkImmutableFields(comparison: SchemaComparison): string[] {
@@ -306,16 +317,16 @@ export class SchemaDriftValidator {
 
   private getSuggestedFix(change: BreakingChange): string {
     switch (change.type) {
-      case 'field_removed':
+      case "field_removed":
         return `Deprecate the field "${change.path}" first, then remove it in a later version`;
-      case 'required_field_added':
+      case "required_field_added":
         return `Make the field "${change.path}" optional with a default value`;
-      case 'type_changed':
+      case "type_changed":
         return `Keep the old type and add a new field with the new type, then deprecate the old one`;
-      case 'made_required':
+      case "made_required":
         return `Keep the field "${change.path}" optional and handle missing values in code`;
       default:
-        return 'Consider making the change backwards-compatible';
+        return "Consider making the change backwards-compatible";
     }
   }
 }

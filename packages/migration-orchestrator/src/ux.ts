@@ -16,7 +16,7 @@ export class UXParityService {
     const existing = items.find((item) => item.workflow === workflow);
     const record = {
       workflow,
-      status: 'compat-mode',
+      status: "compat-mode",
       compatToggleExpiresAt: expiresAt,
       notes,
     };

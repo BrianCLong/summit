@@ -1,22 +1,22 @@
-import { trace } from '@opentelemetry/api';
-import pino = require('pino');
-import { Pool } from 'pg';
-import { DomainEvent, EventStore, EventSourcedAggregate } from './types';
+import { trace } from "@opentelemetry/api";
+import pino = require("pino");
+import { Pool } from "pg";
+import { DomainEvent, EventStore, EventSourcedAggregate } from "./types";
 
-const logger = pino({ name: 'EventSourcingStore' });
-const tracer = trace.getTracer('message-queue-enhanced');
+const logger = pino({ name: "EventSourcingStore" });
+const tracer = trace.getTracer("message-queue-enhanced");
 
 /**
  * Event sourcing store with PostgreSQL backend
  */
 export class EventSourcingStore implements EventStore {
-  constructor(private pool: Pool) { }
+  constructor(private pool: Pool) {}
 
   /**
    * Initialize event store schema
    */
   async initialize(): Promise<void> {
-    const span = tracer.startSpan('EventSourcingStore.initialize');
+    const span = tracer.startSpan("EventSourcingStore.initialize");
 
     try {
       await this.pool.query(`
@@ -43,7 +43,7 @@ export class EventSourcingStore implements EventStore {
           ON event_store (timestamp);
       `);
 
-      logger.info('Event store initialized');
+      logger.info("Event store initialized");
     } catch (error) {
       span.recordException(error as Error);
       throw error;
@@ -56,7 +56,7 @@ export class EventSourcingStore implements EventStore {
    * Append event to store
    */
   async append(event: DomainEvent): Promise<void> {
-    const span = tracer.startSpan('EventSourcingStore.append');
+    const span = tracer.startSpan("EventSourcingStore.append");
 
     try {
       await this.pool.query(
@@ -84,7 +84,7 @@ export class EventSourcingStore implements EventStore {
         version: event.version,
       });
 
-      logger.debug({ event: event.eventType, aggregate: event.aggregateId }, 'Event appended');
+      logger.debug({ event: event.eventType, aggregate: event.aggregateId }, "Event appended");
     } catch (error) {
       span.recordException(error as Error);
       throw error;
@@ -96,11 +96,8 @@ export class EventSourcingStore implements EventStore {
   /**
    * Get events for an aggregate
    */
-  async getEvents(
-    aggregateId: string,
-    fromVersion: number = 0
-  ): Promise<DomainEvent[]> {
-    const span = tracer.startSpan('EventSourcingStore.getEvents');
+  async getEvents(aggregateId: string, fromVersion: number = 0): Promise<DomainEvent[]> {
+    const span = tracer.startSpan("EventSourcingStore.getEvents");
 
     try {
       const result = await this.pool.query(
@@ -141,7 +138,7 @@ export class EventSourcingStore implements EventStore {
    * Get all events (for event replay)
    */
   async getAllEvents(fromPosition: number = 0): Promise<DomainEvent[]> {
-    const span = tracer.startSpan('EventSourcingStore.getAllEvents');
+    const span = tracer.startSpan("EventSourcingStore.getAllEvents");
 
     try {
       const result = await this.pool.query(
@@ -165,7 +162,7 @@ export class EventSourcingStore implements EventStore {
         timestamp: parseInt(row.timestamp, 10),
       }));
 
-      span.setAttribute('eventCount', events.length);
+      span.setAttribute("eventCount", events.length);
 
       return events;
     } catch (error) {
@@ -184,7 +181,7 @@ export class EventSourcingStore implements EventStore {
     applyEvent: (aggregate: T, event: DomainEvent) => T,
     initialState: T
   ): Promise<T> {
-    const span = tracer.startSpan('EventSourcingStore.rebuildAggregate');
+    const span = tracer.startSpan("EventSourcingStore.rebuildAggregate");
 
     try {
       const events = await this.getEvents(aggregateId);
@@ -223,7 +220,7 @@ export class EventSourcingStore implements EventStore {
       [aggregateId, JSON.stringify(state), state.version]
     );
 
-    logger.debug({ aggregateId, version: state.version }, 'Snapshot created');
+    logger.debug({ aggregateId, version: state.version }, "Snapshot created");
   }
 
   /**

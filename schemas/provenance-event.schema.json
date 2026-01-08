@@ -3,14 +3,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Provenance Event",
   "type": "object",
-  "required": [
-    "id",
-    "timestamp",
-    "actor",
-    "action",
-    "subject",
-    "context"
-  ],
+  "required": ["id", "timestamp", "actor", "action", "subject", "context"],
   "properties": {
     "id": {
       "type": "string",
@@ -22,19 +15,11 @@
     },
     "actor": {
       "type": "object",
-      "required": [
-        "type",
-        "id"
-      ],
+      "required": ["type", "id"],
       "properties": {
         "type": {
           "type": "string",
-          "enum": [
-            "user",
-            "service",
-            "agent",
-            "system"
-          ]
+          "enum": ["user", "service", "agent", "system"]
         },
         "id": {
           "type": "string"
@@ -68,21 +53,11 @@
     },
     "subject": {
       "type": "object",
-      "required": [
-        "type",
-        "id"
-      ],
+      "required": ["type", "id"],
       "properties": {
         "type": {
           "type": "string",
-          "enum": [
-            "artifact",
-            "service",
-            "environment",
-            "document",
-            "agent-run",
-            "other"
-          ]
+          "enum": ["artifact", "service", "environment", "document", "agent-run", "other"]
         },
         "id": {
           "type": "string"

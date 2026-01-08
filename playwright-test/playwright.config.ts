@@ -1,6 +1,6 @@
-import { defineConfig } from '@playwright/test';
+import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
-  testDir: '.',
+  testDir: ".",
   timeout: 30_000,
 });

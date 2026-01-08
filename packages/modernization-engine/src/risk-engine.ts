@@ -1,6 +1,6 @@
-import { predictiveRiskGauge } from './metrics.js';
-import { DomainEvent, TrafficDirective } from './types.js';
-import { DomainRegistry } from './domain-registry.js';
+import { predictiveRiskGauge } from "./metrics.js";
+import { DomainEvent, TrafficDirective } from "./types.js";
+import { DomainRegistry } from "./domain-registry.js";
 
 const RISK_THRESHOLD = 0.65;
 
@@ -14,7 +14,10 @@ export class PredictiveRiskEngine {
       const latencyContribution = Math.min(event.latencyMs / 1000, 1) * 0.4;
       const violationContribution = event.violationObserved ? 0.4 : 0;
       const driftContribution = Math.min(Math.abs(event.driftDelta ?? 0) / 10, 1) * 0.3;
-      const riskScore = Math.min(baseline + latencyContribution + violationContribution + driftContribution, 1);
+      const riskScore = Math.min(
+        baseline + latencyContribution + violationContribution + driftContribution,
+        1
+      );
       const current = riskByDomain.get(event.domain) ?? 0;
       riskByDomain.set(event.domain, Math.max(current, riskScore));
     });
@@ -35,7 +38,7 @@ export class PredictiveRiskEngine {
         [`${domain.name}-shadow-mode`]: riskScore > 0.4,
       };
       if (shouldAlert) {
-        predictiveRiskGauge.labels({ domain: domain.name, severity: 'high' }).inc();
+        predictiveRiskGauge.labels({ domain: domain.name, severity: "high" }).inc();
       }
       directives.push({
         domain: domain.name,

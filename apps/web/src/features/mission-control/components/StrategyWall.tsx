@@ -1,19 +1,19 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
+import React from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import { Badge } from '@/components/ui/Badge'
 
 interface StrategyWallProps {
-  plan: any;
-  loading: boolean;
+  plan: any
+  loading: boolean
 }
 
 export default function StrategyWall({ plan, loading }: StrategyWallProps) {
   if (loading) {
-    return <div>Loading Strategy Wall...</div>;
+    return <div>Loading Strategy Wall...</div>
   }
 
   if (!plan) {
-    return <div>No active strategic plan found.</div>;
+    return <div>No active strategic plan found.</div>
   }
 
   return (
@@ -29,11 +29,17 @@ export default function StrategyWall({ plan, loading }: StrategyWallProps) {
                 <div key={obj.id} className="p-3 bg-muted/50 rounded-lg">
                   <div className="flex justify-between items-start mb-2">
                     <h4 className="font-semibold text-sm">{obj.name}</h4>
-                    <Badge variant={obj.status === 'COMPLETED' ? 'default' : 'secondary'}>
+                    <Badge
+                      variant={
+                        obj.status === 'COMPLETED' ? 'default' : 'secondary'
+                      }
+                    >
                       {obj.status}
                     </Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground line-clamp-2">{obj.description}</p>
+                  <p className="text-xs text-muted-foreground line-clamp-2">
+                    {obj.description}
+                  </p>
                   <div className="mt-2 w-full bg-secondary h-1.5 rounded-full overflow-hidden">
                     <div
                       className="bg-primary h-full"
@@ -56,14 +62,16 @@ export default function StrategyWall({ plan, loading }: StrategyWallProps) {
                 <div key={init.id} className="p-3 bg-muted/50 rounded-lg">
                   <div className="flex justify-between items-start mb-2">
                     <h4 className="font-semibold text-sm">{init.name}</h4>
-                     <Badge variant="outline">{init.status}</Badge>
+                    <Badge variant="outline">{init.status}</Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground line-clamp-2">{init.description}</p>
-                   {init.budgetUtilization !== null && (
-                      <div className="mt-2 text-xs text-muted-foreground">
-                        Budget: {Math.round(init.budgetUtilization)}%
-                      </div>
-                   )}
+                  <p className="text-xs text-muted-foreground line-clamp-2">
+                    {init.description}
+                  </p>
+                  {init.budgetUtilization !== null && (
+                    <div className="mt-2 text-xs text-muted-foreground">
+                      Budget: {Math.round(init.budgetUtilization)}%
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -75,21 +83,35 @@ export default function StrategyWall({ plan, loading }: StrategyWallProps) {
             <CardTitle>Metrics (KPIs)</CardTitle>
           </CardHeader>
           <CardContent>
-             <div className="space-y-4">
+            <div className="space-y-4">
               {plan.kpis?.map((kpi: any) => (
-                <div key={kpi.id} className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                <div
+                  key={kpi.id}
+                  className="flex justify-between items-center p-3 bg-muted/50 rounded-lg"
+                >
                   <div>
                     <h4 className="font-semibold text-sm">{kpi.name}</h4>
-                    <p className="text-xs text-muted-foreground">Target: {kpi.targetValue} {kpi.unit}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Target: {kpi.targetValue} {kpi.unit}
+                    </p>
                   </div>
                   <div className="text-right">
                     <div className="text-lg font-bold">
-                        {kpi.currentValue} <span className="text-xs font-normal text-muted-foreground">{kpi.unit}</span>
+                      {kpi.currentValue}{' '}
+                      <span className="text-xs font-normal text-muted-foreground">
+                        {kpi.unit}
+                      </span>
                     </div>
-                    <div className={`text-xs ${
-                        kpi.trend === 'UP' ? 'text-green-500' : kpi.trend === 'DOWN' ? 'text-red-500' : 'text-gray-500'
-                    }`}>
-                        {kpi.trend}
+                    <div
+                      className={`text-xs ${
+                        kpi.trend === 'UP'
+                          ? 'text-green-500'
+                          : kpi.trend === 'DOWN'
+                            ? 'text-red-500'
+                            : 'text-gray-500'
+                      }`}
+                    >
+                      {kpi.trend}
                     </div>
                   </div>
                 </div>
@@ -99,5 +121,5 @@ export default function StrategyWall({ plan, loading }: StrategyWallProps) {
         </Card>
       </div>
     </div>
-  );
+  )
 }

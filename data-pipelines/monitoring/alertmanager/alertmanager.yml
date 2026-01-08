@@ -11,14 +11,14 @@ receivers:
   - name: slack-page
     slack_configs:
       - api_url: ${SLACK_WEBHOOK_URL}
-        channel: '#oncall'
-        title: '[PAGE] {{ .CommonAnnotations.summary }}'
+        channel: "#oncall"
+        title: "[PAGE] {{ .CommonAnnotations.summary }}"
         text: >-
           {{ range .Alerts }}\n*{{ .Labels.alertname }}* on *{{ .Labels.instance }}*\n{{ .Annotations.description }}\n{{ end }}
   - name: slack-warn
     slack_configs:
       - api_url: ${SLACK_WEBHOOK_URL}
-        channel: '#data-alerts'
-        title: '[WARN] {{ .CommonAnnotations.summary }}'
+        channel: "#data-alerts"
+        title: "[WARN] {{ .CommonAnnotations.summary }}"
         text: >-
           {{ range .Alerts }}\n*{{ .Labels.alertname }}* on *{{ .Labels.instance }}*\n{{ .Annotations.description }}\n{{ end }}

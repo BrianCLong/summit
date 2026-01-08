@@ -1,11 +1,11 @@
 ---
-title: 'Docs Workstream — Sprint 03 Plan (IntelGraph + Maestro)'
-summary: 'Scale docs from ‘green & governed’ to ‘discoverable, localizable, and testable’. Adds site search, i18n, executable examples, and UX polish.'
-owner: 'Documentation Expert (Doc IG)'
-version: 'v0.1'
-lastUpdated: '2025-09-30'
-sprintWindow: '2025-10-27 → 2025-11-07 (America/Denver)'
-status: 'Planned — ready to start'
+title: "Docs Workstream — Sprint 03 Plan (IntelGraph + Maestro)"
+summary: "Scale docs from ‘green & governed’ to ‘discoverable, localizable, and testable’. Adds site search, i18n, executable examples, and UX polish."
+owner: "Documentation Expert (Doc IG)"
+version: "v0.1"
+lastUpdated: "2025-09-30"
+sprintWindow: "2025-10-27 → 2025-11-07 (America/Denver)"
+status: "Planned — ready to start"
 ---
 
 # Docs Workstream — Sprint 03 Plan & Export Pack
@@ -72,7 +72,7 @@ status: 'Planned — ready to start'
 name: docs-examples
 on:
   pull_request:
-    paths: ['docs/**', 'scripts/**', '.ci/**']
+    paths: ["docs/**", "scripts/**", ".ci/**"]
 
 jobs:
   run-examples:
@@ -90,34 +90,33 @@ jobs:
 ### 4.2 Example Runner — `.ci/scripts/examples-runner.mjs`
 
 ````js
-import fs from 'node:fs';
-import globby from 'globby';
-import { execa } from 'execa';
+import fs from "node:fs";
+import globby from "globby";
+import { execa } from "execa";
 
-const files = await globby(['docs/**/*.md']);
-const allow = new Set(['bash', 'sh', 'js', 'javascript']);
+const files = await globby(["docs/**/*.md"]);
+const allow = new Set(["bash", "sh", "js", "javascript"]);
 let failures = 0,
   ran = 0;
 
 for (const f of files) {
-  const txt = fs.readFileSync(f, 'utf8');
+  const txt = fs.readFileSync(f, "utf8");
   const blocks = [...txt.matchAll(/```(\w+)\n([\s\S]*?)```/g)];
   for (const [, lang, code] of blocks) {
     if (!allow.has(lang)) continue;
     ran++;
     try {
-      if (lang === 'bash' || lang === 'sh') {
+      if (lang === "bash" || lang === "sh") {
         // Safe mode: no destructive commands
-        if (/rm -rf|shutdown|mkfs|drop database/i.test(code))
-          throw new Error('Unsafe command');
-        await execa('bash', ['-lc', code], {
-          stdio: 'inherit',
-          env: { CI: '1' },
+        if (/rm -rf|shutdown|mkfs|drop database/i.test(code)) throw new Error("Unsafe command");
+        await execa("bash", ["-lc", code], {
+          stdio: "inherit",
+          env: { CI: "1" },
         });
-      } else if (lang === 'js' || lang === 'javascript') {
-        await execa('node', ['-e', code], {
-          stdio: 'inherit',
-          env: { CI: '1' },
+      } else if (lang === "js" || lang === "javascript") {
+        await execa("node", ["-e", code], {
+          stdio: "inherit",
+          env: { CI: "1" },
         });
       }
     } catch (e) {
@@ -127,7 +126,7 @@ for (const f of files) {
   }
 }
 if (ran < 20) {
-  console.log('Need ≥20 runnable examples');
+  console.log("Need ≥20 runnable examples");
   failures++;
 }
 if (failures) process.exit(1);
@@ -140,7 +139,7 @@ console.log(`✅ Executed ${ran} code examples successfully`);
 name: docs-lighthouse
 on:
   pull_request:
-    paths: ['docs/**', 'website/**']
+    paths: ["docs/**", "website/**"]
 
 jobs:
   lhci:
@@ -162,47 +161,45 @@ jobs:
 ### 4.4 Redirects & 404 Reporter — `.ci/scripts/redirect-check.mjs`
 
 ```js
-import fs from 'node:fs';
-import globby from 'globby';
-const redirects = JSON.parse(
-  fs.readFileSync('docs/_data/redirects.json', 'utf8'),
-);
-const files = await globby(['docs/**/*.md']);
+import fs from "node:fs";
+import globby from "globby";
+const redirects = JSON.parse(fs.readFileSync("docs/_data/redirects.json", "utf8"));
+const files = await globby(["docs/**/*.md"]);
 let missing = [];
 for (const [from, to] of Object.entries(redirects)) {
   const exists = fs.existsSync(to) || files.some((f) => f.endsWith(to));
   if (!exists) missing.push({ from, to });
 }
 if (missing.length) {
-  console.log('Broken redirects:', missing);
+  console.log("Broken redirects:", missing);
   process.exit(1);
 }
-console.log('✅ Redirect map valid');
+console.log("✅ Redirect map valid");
 ```
 
 ### 4.5 PDF Export — `scripts/export-pdf.mjs`
 
 ```js
-import fs from 'node:fs';
-import path from 'node:path';
-import puppeteer from 'puppeteer';
+import fs from "node:fs";
+import path from "node:path";
+import puppeteer from "puppeteer";
 
 const pages = [
-  'docs/latest/release-notes/2025-11-07.md',
-  'docs/latest/operations/runbooks/operator-manual.md',
+  "docs/latest/release-notes/2025-11-07.md",
+  "docs/latest/operations/runbooks/operator-manual.md",
 ];
 
-const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+const browser = await puppeteer.launch({ args: ["--no-sandbox"] });
 const page = await browser.newPage();
 for (const mdPath of pages) {
-  const html = mdPath.replace(/\.md$/, '.html');
-  const url = 'file://' + path.resolve('dist', html);
-  await page.goto(url, { waitUntil: 'networkidle0' });
-  const out = path.basename(mdPath, '.md') + '.pdf';
+  const html = mdPath.replace(/\.md$/, ".html");
+  const url = "file://" + path.resolve("dist", html);
+  await page.goto(url, { waitUntil: "networkidle0" });
+  const out = path.basename(mdPath, ".md") + ".pdf";
   await page.pdf({
     path: `dist/pdf/${out}`,
     printBackground: true,
-    format: 'Letter',
+    format: "Letter",
   });
 }
 await browser.close();
@@ -223,19 +220,16 @@ await browser.close();
 ### 5.2 Extractor — `.ci/scripts/i18n-extract.mjs`
 
 ```js
-import fs from 'node:fs';
-import globby from 'globby';
-const files = await globby(['docs/**/*.md']);
+import fs from "node:fs";
+import globby from "globby";
+const files = await globby(["docs/**/*.md"]);
 const terms = new Set();
 for (const f of files) {
-  const s = fs.readFileSync(f, 'utf8');
+  const s = fs.readFileSync(f, "utf8");
   // Collect headings to translate
   for (const m of s.matchAll(/^##?\s+(.+)$/gm)) terms.add(m[1].trim());
 }
-fs.writeFileSync(
-  'i18n/en/translations.json',
-  JSON.stringify([...terms], null, 2),
-);
+fs.writeFileSync("i18n/en/translations.json", JSON.stringify([...terms], null, 2));
 console.log(`Extracted ${terms.size} strings`);
 ```
 
@@ -275,11 +269,11 @@ export default function LanguageSwitcher() {
 
 ```markdown
 ---
-title: 'Search Tips'
-summary: 'Find what you need fast.'
-owner: 'Docs'
-version: '1.0'
-lastUpdated: '2025-10-27'
+title: "Search Tips"
+summary: "Find what you need fast."
+owner: "Docs"
+version: "1.0"
+lastUpdated: "2025-10-27"
 ---
 
 - Use quotes for exact phrases.
@@ -291,11 +285,11 @@ lastUpdated: '2025-10-27'
 
 ```markdown
 ---
-title: 'Operator Manual'
-summary: 'Day‑2 operations guide for IntelGraph + Maestro.'
-owner: 'Platform Ops'
-version: '1.0'
-lastUpdated: '2025-11-07'
+title: "Operator Manual"
+summary: "Day‑2 operations guide for IntelGraph + Maestro."
+owner: "Platform Ops"
+version: "1.0"
+lastUpdated: "2025-11-07"
 ---
 
 ## Daily Checks

@@ -4,7 +4,7 @@
  * Collects and aggregates API metrics
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 
 export interface Metric {
   name: string;
@@ -41,7 +41,7 @@ export class MetricsCollector extends EventEmitter {
 
   recordRequest(duration: number, statusCode: number, tags?: Record<string, string>): void {
     const metric: Metric = {
-      name: 'api.request',
+      name: "api.request",
       value: 1,
       timestamp: Date.now(),
       tags: { ...tags, status: String(statusCode) },
@@ -50,43 +50,43 @@ export class MetricsCollector extends EventEmitter {
     this.metrics.push(metric);
     this.requestDurations.push(duration);
 
-    this.emit('metric', metric);
+    this.emit("metric", metric);
   }
 
   recordError(statusCode: number, error: string, tags?: Record<string, string>): void {
     const metric: Metric = {
-      name: 'api.error',
+      name: "api.error",
       value: 1,
       timestamp: Date.now(),
       tags: { ...tags, status: String(statusCode), error },
     };
 
     this.metrics.push(metric);
-    this.emit('error', metric);
+    this.emit("error", metric);
   }
 
   getAggregatedMetrics(windowMs: number = 60000): AggregatedMetrics {
     const now = Date.now();
     const windowStart = now - windowMs;
 
-    const recentMetrics = this.metrics.filter(m => m.timestamp >= windowStart);
-    const recentDurations = this.requestDurations.filter((_, i) =>
-      this.metrics[i]?.timestamp >= windowStart
+    const recentMetrics = this.metrics.filter((m) => m.timestamp >= windowStart);
+    const recentDurations = this.requestDurations.filter(
+      (_, i) => this.metrics[i]?.timestamp >= windowStart
     );
 
-    const requests = recentMetrics.filter(m => m.name === 'api.request');
-    const errors = recentMetrics.filter(m => m.name === 'api.error');
+    const requests = recentMetrics.filter((m) => m.name === "api.request");
+    const errors = recentMetrics.filter((m) => m.name === "api.error");
 
-    const successful = requests.filter(m => {
-      const status = parseInt(m.tags?.status || '0');
+    const successful = requests.filter((m) => {
+      const status = parseInt(m.tags?.status || "0");
       return status >= 200 && status < 400;
     }).length;
 
     const failed = requests.length - successful;
 
     const errorsByCode: Record<number, number> = {};
-    errors.forEach(m => {
-      const status = parseInt(m.tags?.status || '0');
+    errors.forEach((m) => {
+      const status = parseInt(m.tags?.status || "0");
       errorsByCode[status] = (errorsByCode[status] || 0) + 1;
     });
 
@@ -103,7 +103,7 @@ export class MetricsCollector extends EventEmitter {
         min: sortedDurations[0] || 0,
         max: sortedDurations[sortedDurations.length - 1] || 0,
         avg: sortedDurations.reduce((a, b) => a + b, 0) / sortedDurations.length || 0,
-        p50: this.percentile(sortedDurations, 0.50),
+        p50: this.percentile(sortedDurations, 0.5),
         p95: this.percentile(sortedDurations, 0.95),
         p99: this.percentile(sortedDurations, 0.99),
       },
@@ -116,7 +116,9 @@ export class MetricsCollector extends EventEmitter {
   }
 
   private percentile(sorted: number[], p: number): number {
-    if (sorted.length === 0) {return 0;}
+    if (sorted.length === 0) {
+      return 0;
+    }
     const index = Math.ceil(sorted.length * p) - 1;
     return sorted[Math.max(0, index)];
   }

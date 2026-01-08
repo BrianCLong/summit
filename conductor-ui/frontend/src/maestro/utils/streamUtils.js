@@ -1,5 +1,5 @@
 // Stream resilience utilities for SSE and WebSocket connections
-import React from 'react';
+import React from "react";
 const DEFAULT_OPTIONS = {
   maxRetries: 10,
   initialRetryDelay: 1000,
@@ -7,7 +7,7 @@ const DEFAULT_OPTIONS = {
   backoffMultiplier: 1.5,
   reconnectOnVisibilityChange: true,
   heartbeatInterval: 30000,
-  idempotencyKey: '',
+  idempotencyKey: "",
 };
 export class ResilientEventSource {
   constructor(url, options = {}) {
@@ -20,13 +20,13 @@ export class ResilientEventSource {
     this.eventHandlers = new Map();
     this.seenEventIds = new Set();
     this.handleOpen = () => {
-      console.log('EventSource connected');
+      console.log("EventSource connected");
       this.isConnected = true;
       this.retryCount = 0;
       this.onConnectionChange?.(true);
     };
     this.handleError = () => {
-      console.log('EventSource error, attempting reconnect');
+      console.log("EventSource error, attempting reconnect");
       this.isConnected = false;
       this.onConnectionChange?.(false);
       this.scheduleReconnect();
@@ -46,7 +46,7 @@ export class ResilientEventSource {
         // Check for duplicates using event ID
         if (streamEvent.id) {
           if (this.seenEventIds.has(streamEvent.id)) {
-            console.log('Duplicate event received, skipping:', streamEvent.id);
+            console.log("Duplicate event received, skipping:", streamEvent.id);
             return;
           }
           this.seenEventIds.add(streamEvent.id);
@@ -56,14 +56,14 @@ export class ResilientEventSource {
             this.seenEventIds.delete(firstId);
           }
         }
-        this.emit('message', streamEvent);
+        this.emit("message", streamEvent);
       } catch (error) {
-        console.error('Failed to parse SSE message:', error);
+        console.error("Failed to parse SSE message:", error);
       }
     };
     this.handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && !this.isConnected) {
-        console.log('Page became visible, reconnecting');
+      if (document.visibilityState === "visible" && !this.isConnected) {
+        console.log("Page became visible, reconnecting");
         this.connect();
       }
     };
@@ -71,10 +71,7 @@ export class ResilientEventSource {
     this.options = { ...DEFAULT_OPTIONS, ...options };
     // Handle page visibility changes
     if (this.options.reconnectOnVisibilityChange) {
-      document.addEventListener(
-        'visibilitychange',
-        this.handleVisibilityChange,
-      );
+      document.addEventListener("visibilitychange", this.handleVisibilityChange);
     }
   }
   connect() {
@@ -88,7 +85,7 @@ export class ResilientEventSource {
       // Set up heartbeat
       this.startHeartbeat();
     } catch (error) {
-      console.error('Failed to create EventSource:', error);
+      console.error("Failed to create EventSource:", error);
       this.scheduleReconnect();
     }
   }
@@ -107,11 +104,8 @@ export class ResilientEventSource {
     }
     this.eventHandlers.get(event).add(handler);
     // Register with EventSource if connected
-    if (this.eventSource && event !== 'message') {
-      this.eventSource.addEventListener(
-        event,
-        this.createEventHandler(event, handler),
-      );
+    if (this.eventSource && event !== "message") {
+      this.eventSource.addEventListener(event, this.createEventHandler(event, handler));
     }
   }
   off(event, handler) {
@@ -136,7 +130,7 @@ export class ResilientEventSource {
   }
   buildUrlWithLastEventId() {
     if (!this.lastEventId) return this.url;
-    const separator = this.url.includes('?') ? '&' : '?';
+    const separator = this.url.includes("?") ? "&" : "?";
     return `${this.url}${separator}lastEventId=${encodeURIComponent(this.lastEventId)}`;
   }
   createEventHandler(eventType, handler) {
@@ -157,23 +151,22 @@ export class ResilientEventSource {
         try {
           handler(data);
         } catch (error) {
-          console.error('Error in event handler:', error);
+          console.error("Error in event handler:", error);
         }
       });
     }
   }
   scheduleReconnect() {
     if (this.retryCount >= this.options.maxRetries) {
-      console.error('Maximum retry attempts reached');
+      console.error("Maximum retry attempts reached");
       return;
     }
     const delay = Math.min(
-      this.options.initialRetryDelay *
-        Math.pow(this.options.backoffMultiplier, this.retryCount),
-      this.options.maxRetryDelay,
+      this.options.initialRetryDelay * Math.pow(this.options.backoffMultiplier, this.retryCount),
+      this.options.maxRetryDelay
     );
     console.log(
-      `Reconnecting in ${delay}ms (attempt ${this.retryCount + 1}/${this.options.maxRetries})`,
+      `Reconnecting in ${delay}ms (attempt ${this.retryCount + 1}/${this.options.maxRetries})`
     );
     this.reconnectTimer = setTimeout(() => {
       this.retryCount++;
@@ -183,11 +176,8 @@ export class ResilientEventSource {
   startHeartbeat() {
     this.clearHeartbeat();
     this.heartbeatTimer = setInterval(() => {
-      if (
-        !this.isConnected &&
-        this.eventSource?.readyState !== EventSource.OPEN
-      ) {
-        console.log('Heartbeat detected disconnection');
+      if (!this.isConnected && this.eventSource?.readyState !== EventSource.OPEN) {
+        console.log("Heartbeat detected disconnection");
         this.handleError();
       }
     }, this.options.heartbeatInterval);
@@ -207,10 +197,7 @@ export class ResilientEventSource {
   }
   destroy() {
     this.disconnect();
-    document.removeEventListener(
-      'visibilitychange',
-      this.handleVisibilityChange,
-    );
+    document.removeEventListener("visibilitychange", this.handleVisibilityChange);
     this.eventHandlers.clear();
     this.seenEventIds.clear();
   }
@@ -226,7 +213,7 @@ export class ResilientWebSocket {
     this.messageQueue = [];
     this.eventHandlers = new Map();
     this.handleOpen = () => {
-      console.log('WebSocket connected');
+      console.log("WebSocket connected");
       this.isConnected = true;
       this.retryCount = 0;
       this.onConnectionChange?.(true);
@@ -239,7 +226,7 @@ export class ResilientWebSocket {
       this.startPing();
     };
     this.handleClose = (event) => {
-      console.log('WebSocket closed:', event.code, event.reason);
+      console.log("WebSocket closed:", event.code, event.reason);
       this.isConnected = false;
       this.onConnectionChange?.(false);
       // Only reconnect if not a manual close
@@ -248,7 +235,7 @@ export class ResilientWebSocket {
       }
     };
     this.handleError = () => {
-      console.log('WebSocket error');
+      console.log("WebSocket error");
       this.isConnected = false;
       this.onConnectionChange?.(false);
     };
@@ -256,19 +243,19 @@ export class ResilientWebSocket {
       try {
         const data = JSON.parse(event.data);
         // Handle pong messages
-        if (data.type === 'pong') {
+        if (data.type === "pong") {
           this.pongReceived = true;
           return;
         }
-        this.emit('message', data);
+        this.emit("message", data);
         // Emit specific event types
         if (data.type) {
           this.emit(data.type, data);
         }
       } catch (error) {
-        console.error('Failed to parse WebSocket message:', error);
+        console.error("Failed to parse WebSocket message:", error);
         // Emit raw data for non-JSON messages
-        this.emit('message', event.data);
+        this.emit("message", event.data);
       }
     };
     this.url = url;
@@ -284,13 +271,13 @@ export class ResilientWebSocket {
       this.ws.onerror = this.handleError.bind(this);
       this.ws.onmessage = this.handleMessage.bind(this);
     } catch (error) {
-      console.error('Failed to create WebSocket:', error);
+      console.error("Failed to create WebSocket:", error);
       this.scheduleReconnect();
     }
   }
   disconnect() {
     if (this.ws) {
-      this.ws.close(1000, 'Manual disconnect');
+      this.ws.close(1000, "Manual disconnect");
       this.ws = null;
     }
     this.clearTimers();
@@ -303,7 +290,7 @@ export class ResilientWebSocket {
         this.ws.send(JSON.stringify(data));
         return true;
       } catch (error) {
-        console.error('Failed to send WebSocket message:', error);
+        console.error("Failed to send WebSocket message:", error);
         return false;
       }
     } else {
@@ -337,23 +324,22 @@ export class ResilientWebSocket {
         try {
           handler(data);
         } catch (error) {
-          console.error('Error in WebSocket event handler:', error);
+          console.error("Error in WebSocket event handler:", error);
         }
       });
     }
   }
   scheduleReconnect() {
     if (this.retryCount >= this.options.maxRetries) {
-      console.error('Maximum WebSocket retry attempts reached');
+      console.error("Maximum WebSocket retry attempts reached");
       return;
     }
     const delay = Math.min(
-      this.options.initialRetryDelay *
-        Math.pow(this.options.backoffMultiplier, this.retryCount),
-      this.options.maxRetryDelay,
+      this.options.initialRetryDelay * Math.pow(this.options.backoffMultiplier, this.retryCount),
+      this.options.maxRetryDelay
     );
     console.log(
-      `WebSocket reconnecting in ${delay}ms (attempt ${this.retryCount + 1}/${this.options.maxRetries})`,
+      `WebSocket reconnecting in ${delay}ms (attempt ${this.retryCount + 1}/${this.options.maxRetries})`
     );
     this.reconnectTimer = setTimeout(() => {
       this.retryCount++;
@@ -365,12 +351,12 @@ export class ResilientWebSocket {
     this.pingTimer = setInterval(() => {
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
         if (!this.pongReceived) {
-          console.log('Pong not received, reconnecting WebSocket');
-          this.ws.close(1002, 'Ping timeout');
+          console.log("Pong not received, reconnecting WebSocket");
+          this.ws.close(1002, "Ping timeout");
           return;
         }
         this.pongReceived = false;
-        this.send({ type: 'ping', timestamp: Date.now() });
+        this.send({ type: "ping", timestamp: Date.now() });
       }
     }, this.options.heartbeatInterval);
   }
@@ -403,14 +389,14 @@ export const useResilientStream = (url, options = {}) => {
     const stream = new ResilientEventSource(url, options);
     stream.onConnectionChange((isConnected) => {
       setConnected(isConnected);
-      setError(isConnected ? null : 'Connection lost');
+      setError(isConnected ? null : "Connection lost");
     });
-    stream.on('message', (event) => {
+    stream.on("message", (event) => {
       setEvents((prev) => [...prev.slice(-99), event]); // Keep last 100 events
       setError(null);
     });
-    stream.on('error', (event) => {
-      setError(event.data?.message || 'Stream error');
+    stream.on("error", (event) => {
+      setError(event.data?.message || "Stream error");
     });
     stream.connect();
     setConnection(stream);

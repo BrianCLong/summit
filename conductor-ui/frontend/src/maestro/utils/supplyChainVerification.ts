@@ -1,5 +1,5 @@
-import React from 'react';
-import { z } from 'zod';
+import React from "react";
+import { z } from "zod";
 
 // SBOM (Software Bill of Materials) Schema
 export const SBOMSchema = z.object({
@@ -12,21 +12,21 @@ export const SBOMSchema = z.object({
       z.object({
         name: z.string(),
         version: z.string(),
-      }),
+      })
     ),
     authors: z
       .array(
         z.object({
           name: z.string(),
           email: z.string().optional(),
-        }),
+        })
       )
       .optional(),
   }),
   components: z.array(
     z.object({
-      type: z.enum(['application', 'library', 'framework', 'container']),
-      'bom-ref': z.string(),
+      type: z.enum(["application", "library", "framework", "container"]),
+      "bom-ref": z.string(),
       name: z.string(),
       version: z.string(),
       purl: z.string().optional(),
@@ -35,7 +35,7 @@ export const SBOMSchema = z.object({
           z.object({
             alg: z.string(),
             content: z.string(),
-          }),
+          })
         )
         .optional(),
       licenses: z
@@ -45,7 +45,7 @@ export const SBOMSchema = z.object({
               id: z.string().optional(),
               name: z.string().optional(),
             }),
-          }),
+          })
         )
         .optional(),
       supplier: z
@@ -54,20 +54,20 @@ export const SBOMSchema = z.object({
           url: z.string().optional(),
         })
         .optional(),
-    }),
+    })
   ),
 });
 
 // SLSA (Supply-chain Levels for Software Artifacts) Schema
 export const SLSASchema = z.object({
-  _type: z.literal('https://in-toto.io/Statement/v0.1'),
+  _type: z.literal("https://in-toto.io/Statement/v0.1"),
   subject: z.array(
     z.object({
       name: z.string(),
       digest: z.record(z.string()),
-    }),
+    })
   ),
-  predicateType: z.literal('https://slsa.dev/provenance/v0.2'),
+  predicateType: z.literal("https://slsa.dev/provenance/v0.2"),
   predicate: z.object({
     builder: z.object({
       id: z.string(),
@@ -97,7 +97,7 @@ export const SLSASchema = z.object({
       z.object({
         uri: z.string(),
         digest: z.record(z.string()),
-      }),
+      })
     ),
   }),
 });
@@ -168,7 +168,7 @@ export interface SupplyChainVerificationResult {
     componentsCount: number;
     vulnerabilities?: {
       id: string;
-      severity: 'low' | 'medium' | 'high' | 'critical';
+      severity: "low" | "medium" | "high" | "critical";
       component: string;
       version: string;
       fixedVersion?: string;
@@ -197,12 +197,11 @@ export class SupplyChainVerifier {
       cosignPublicKey?: string;
       rekorUrl?: string;
       fulcioUrl?: string;
-    } = {},
+    } = {}
   ) {
-    this.cosignPublicKey =
-      config.cosignPublicKey || process.env.COSIGN_PUBLIC_KEY || '';
-    this.rekorUrl = config.rekorUrl || 'https://rekor.sigstore.dev';
-    this.fulcioUrl = config.fulcioUrl || 'https://fulcio.sigstore.dev';
+    this.cosignPublicKey = config.cosignPublicKey || process.env.COSIGN_PUBLIC_KEY || "";
+    this.rekorUrl = config.rekorUrl || "https://rekor.sigstore.dev";
+    this.fulcioUrl = config.fulcioUrl || "https://fulcio.sigstore.dev";
   }
 
   async verifyArtifact(
@@ -213,7 +212,7 @@ export class SupplyChainVerifier {
       minSLSALevel?: number;
       allowedIssuers?: string[];
       maxAge?: number; // in hours
-    } = {},
+    } = {}
   ): Promise<SupplyChainVerificationResult> {
     const result: SupplyChainVerificationResult = {
       artifact: artifactReference,
@@ -225,8 +224,7 @@ export class SupplyChainVerifier {
 
     try {
       // Verify Cosign signatures
-      result.cosignVerification =
-        await this.verifyCosignSignature(artifactReference);
+      result.cosignVerification = await this.verifyCosignSignature(artifactReference);
 
       // Verify SBOM if present
       result.sbomVerification = await this.verifySBOM(artifactReference);
@@ -238,7 +236,7 @@ export class SupplyChainVerifier {
       result.verified = this.evaluateVerificationRules(result, options);
     } catch (error) {
       result.errors.push(
-        `Verification failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Verification failed: ${error instanceof Error ? error.message : "Unknown error"}`
       );
       result.verified = false;
     }
@@ -253,20 +251,17 @@ export class SupplyChainVerifier {
 
       // Fetch signature from registry
       const signatureResponse = await fetch(
-        `/api/maestro/v1/supply-chain/cosign/signature/${encodeURIComponent(artifactReference)}`,
+        `/api/maestro/v1/supply-chain/cosign/signature/${encodeURIComponent(artifactReference)}`
       );
 
       if (!signatureResponse.ok) {
-        throw new Error('No cosign signature found');
+        throw new Error("No cosign signature found");
       }
 
       const signature: CosignSignature = await signatureResponse.json();
 
       // Verify signature with public key or certificate
-      const signatureValid = await this.validateSignature(
-        artifactReference,
-        signature,
-      );
+      const signatureValid = await this.validateSignature(artifactReference, signature);
 
       // Verify certificate chain if using keyless signing
       const certificateValid = signature.cert
@@ -288,7 +283,7 @@ export class SupplyChainVerifier {
       };
     } catch (error) {
       throw new Error(
-        `Cosign verification failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Cosign verification failed: ${error instanceof Error ? error.message : "Unknown error"}`
       );
     }
   }
@@ -296,7 +291,7 @@ export class SupplyChainVerifier {
   private async verifySBOM(artifactReference: string) {
     try {
       const sbomResponse = await fetch(
-        `/api/maestro/v1/supply-chain/sbom/${encodeURIComponent(artifactReference)}`,
+        `/api/maestro/v1/supply-chain/sbom/${encodeURIComponent(artifactReference)}`
       );
 
       if (!sbomResponse.ok) {
@@ -322,9 +317,7 @@ export class SupplyChainVerifier {
       }
 
       // Scan for vulnerabilities
-      const vulnerabilities = await this.scanVulnerabilities(
-        validationResult.data.components,
-      );
+      const vulnerabilities = await this.scanVulnerabilities(validationResult.data.components);
 
       return {
         present: true,
@@ -347,7 +340,7 @@ export class SupplyChainVerifier {
   private async verifySLSA(artifactReference: string) {
     try {
       const slsaResponse = await fetch(
-        `/api/maestro/v1/supply-chain/slsa/${encodeURIComponent(artifactReference)}`,
+        `/api/maestro/v1/supply-chain/slsa/${encodeURIComponent(artifactReference)}`
       );
 
       if (!slsaResponse.ok) {
@@ -355,7 +348,7 @@ export class SupplyChainVerifier {
           present: false,
           valid: false,
           level: 0,
-          buildPlatform: '',
+          buildPlatform: "",
         };
       }
 
@@ -369,7 +362,7 @@ export class SupplyChainVerifier {
           present: true,
           valid: false,
           level: 0,
-          buildPlatform: '',
+          buildPlatform: "",
         };
       }
 
@@ -394,24 +387,18 @@ export class SupplyChainVerifier {
         present: false,
         valid: false,
         level: 0,
-        buildPlatform: '',
+        buildPlatform: "",
       };
     }
   }
 
-  private async validateSignature(
-    _artifact: string,  
-    signature: CosignSignature,
-  ): Promise<boolean> {
+  private async validateSignature(_artifact: string, signature: CosignSignature): Promise<boolean> {
     // In production, this would use cryptographic libraries to verify the signature
     // For now, simulate verification
     return signature.sig.length > 0;
   }
 
-  private async validateCertificate(
-     
-    _cert: string,
-  ): Promise<boolean> {
+  private async validateCertificate(_cert: string): Promise<boolean> {
     try {
       // Validate certificate chain against Fulcio root
       const certResponse = await fetch(`${this.fulcioUrl}/api/v1/rootCert`);
@@ -431,9 +418,7 @@ export class SupplyChainVerifier {
     try {
       // Verify transparency log entry exists and is valid
       for (const entry of bundle.verificationMaterial.tlogEntries) {
-        const rekorResponse = await fetch(
-          `${this.rekorUrl}/api/v1/log/entries/${entry.logIndex}`,
-        );
+        const rekorResponse = await fetch(`${this.rekorUrl}/api/v1/log/entries/${entry.logIndex}`);
         if (!rekorResponse.ok) {
           return false;
         }
@@ -446,48 +431,41 @@ export class SupplyChainVerifier {
 
   private extractFulcioIssuer(signature: CosignSignature): string | undefined {
     // Extract issuer from certificate extensions
-    return signature.bundle?.verificationMaterial?.x509CertificateChain
-      ?.certificates?.[0]
-      ? 'https://accounts.google.com'
+    return signature.bundle?.verificationMaterial?.x509CertificateChain?.certificates?.[0]
+      ? "https://accounts.google.com"
       : undefined;
   }
 
   private extractSubject(signature: CosignSignature): string | undefined {
     // Extract subject from certificate
-    return signature.bundle ? 'user@example.com' : undefined;
+    return signature.bundle ? "user@example.com" : undefined;
   }
 
-  private extractExtensions(
-     
-    _signature: CosignSignature,
-  ): Record<string, unknown> {
+  private extractExtensions(_signature: CosignSignature): Record<string, unknown> {
     // Extract certificate extensions
     return {
-      'github.com/workflow': 'release.yml',
-      'github.com/repository': 'BrianCLong/summit',
+      "github.com/workflow": "release.yml",
+      "github.com/repository": "BrianCLong/summit",
     };
   }
 
   private async scanVulnerabilities(
-    components: { name: string; version: string; purl?: string }[],
+    components: { name: string; version: string; purl?: string }[]
   ): Promise<object[]> {
     // In production, integrate with vulnerability databases like OSV, NVD
     const vulnerabilities: object[] = [];
 
     for (const component of components) {
       try {
-        const vulnResponse = await fetch(
-          `/api/maestro/v1/supply-chain/vulnerabilities/scan`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              name: component.name,
-              version: component.version,
-              purl: component.purl,
-            }),
-          },
-        );
+        const vulnResponse = await fetch(`/api/maestro/v1/supply-chain/vulnerabilities/scan`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: component.name,
+            version: component.version,
+            purl: component.purl,
+          }),
+        });
 
         if (vulnResponse.ok) {
           const vulns = await vulnResponse.json();
@@ -527,10 +505,7 @@ export class SupplyChainVerifier {
     }
 
     // SLSA Level 3: Source protected, no manual access to build service
-    if (
-      predicate.metadata.reproducible &&
-      predicate.metadata.completeness.environment
-    ) {
+    if (predicate.metadata.reproducible && predicate.metadata.completeness.environment) {
       level = 3;
     }
 
@@ -549,35 +524,35 @@ export class SupplyChainVerifier {
       requireSLSA?: boolean;
       minSLSALevel?: number;
       allowedIssuers?: string[];
-    },
+    }
   ): boolean {
     const errors: string[] = [];
 
     // Check Cosign signature
     if (!result.cosignVerification?.signatureValid) {
-      errors.push('Cosign signature verification failed');
+      errors.push("Cosign signature verification failed");
     }
 
     if (!result.cosignVerification?.certificateValid) {
-      errors.push('Certificate validation failed');
+      errors.push("Certificate validation failed");
     }
 
     if (!result.cosignVerification?.rekorEntryValid) {
-      errors.push('Rekor transparency log verification failed');
+      errors.push("Rekor transparency log verification failed");
     }
 
     // Check SBOM requirements
     if (options.requireSBOM && !result.sbomVerification?.present) {
-      errors.push('SBOM is required but not present');
+      errors.push("SBOM is required but not present");
     }
 
     if (result.sbomVerification?.present && !result.sbomVerification.valid) {
-      errors.push('SBOM is present but invalid');
+      errors.push("SBOM is present but invalid");
     }
 
     // Check for critical vulnerabilities
     const criticalVulns = result.sbomVerification?.vulnerabilities?.filter(
-      (v) => v.severity === 'critical',
+      (v) => v.severity === "critical"
     );
     if (criticalVulns && criticalVulns.length > 0) {
       errors.push(`${criticalVulns.length} critical vulnerabilities found`);
@@ -585,30 +560,23 @@ export class SupplyChainVerifier {
 
     // Check SLSA requirements
     if (options.requireSLSA && !result.slsaVerification?.present) {
-      errors.push('SLSA attestation is required but not present');
+      errors.push("SLSA attestation is required but not present");
     }
 
     if (result.slsaVerification?.present && !result.slsaVerification.valid) {
-      errors.push('SLSA attestation is present but invalid');
+      errors.push("SLSA attestation is present but invalid");
     }
 
-    if (
-      options.minSLSALevel &&
-      (result.slsaVerification?.level || 0) < options.minSLSALevel
-    ) {
+    if (options.minSLSALevel && (result.slsaVerification?.level || 0) < options.minSLSALevel) {
       errors.push(
-        `SLSA level ${result.slsaVerification?.level} is below required level ${options.minSLSALevel}`,
+        `SLSA level ${result.slsaVerification?.level} is below required level ${options.minSLSALevel}`
       );
     }
 
     // Check issuer allowlist
     if (options.allowedIssuers && result.cosignVerification?.fulcioIssuer) {
-      if (
-        !options.allowedIssuers.includes(result.cosignVerification.fulcioIssuer)
-      ) {
-        errors.push(
-          `Issuer ${result.cosignVerification.fulcioIssuer} is not in allowlist`,
-        );
+      if (!options.allowedIssuers.includes(result.cosignVerification.fulcioIssuer)) {
+        errors.push(`Issuer ${result.cosignVerification.fulcioIssuer} is not in allowlist`);
       }
     }
 
@@ -618,18 +586,16 @@ export class SupplyChainVerifier {
 
   async batchVerifyArtifacts(
     artifacts: string[],
-    options?: object,
+    options?: object
   ): Promise<SupplyChainVerificationResult[]> {
     const results = await Promise.all(
-      artifacts.map((artifact) => this.verifyArtifact(artifact, options)),
+      artifacts.map((artifact) => this.verifyArtifact(artifact, options))
     );
 
     return results;
   }
 
-  async generateVerificationReport(
-    results: SupplyChainVerificationResult[],
-  ): Promise<{
+  async generateVerificationReport(results: SupplyChainVerificationResult[]): Promise<{
     summary: {
       total: number;
       verified: number;
@@ -658,9 +624,7 @@ export class SupplyChainVerifier {
     const criticalVulnerabilities = results.reduce((total, r) => {
       return (
         total +
-        (r.sbomVerification?.vulnerabilities?.filter(
-          (v) => v.severity === 'critical',
-        ).length || 0)
+        (r.sbomVerification?.vulnerabilities?.filter((v) => v.severity === "critical").length || 0)
       );
     }, 0);
 
@@ -684,43 +648,29 @@ export const supplyChainVerifier = new SupplyChainVerifier();
 // Hook for using supply chain verification in React components
 export const useSupplyChainVerification = () => {
   const [isVerifying, setIsVerifying] = React.useState(false);
-  const [results, setResults] = React.useState<SupplyChainVerificationResult[]>(
-    [],
-  );
+  const [results, setResults] = React.useState<SupplyChainVerificationResult[]>([]);
 
-  const verifyArtifact = React.useCallback(
-    async (artifact: string, options?: object) => {
-      setIsVerifying(true);
-      try {
-        const result = await supplyChainVerifier.verifyArtifact(
-          artifact,
-          options,
-        );
-        setResults((prev) => [...prev, result]);
-        return result;
-      } finally {
-        setIsVerifying(false);
-      }
-    },
-    [],
-  );
+  const verifyArtifact = React.useCallback(async (artifact: string, options?: object) => {
+    setIsVerifying(true);
+    try {
+      const result = await supplyChainVerifier.verifyArtifact(artifact, options);
+      setResults((prev) => [...prev, result]);
+      return result;
+    } finally {
+      setIsVerifying(false);
+    }
+  }, []);
 
-  const batchVerify = React.useCallback(
-    async (artifacts: string[], options?: object) => {
-      setIsVerifying(true);
-      try {
-        const batchResults = await supplyChainVerifier.batchVerifyArtifacts(
-          artifacts,
-          options,
-        );
-        setResults(batchResults);
-        return batchResults;
-      } finally {
-        setIsVerifying(false);
-      }
-    },
-    [],
-  );
+  const batchVerify = React.useCallback(async (artifacts: string[], options?: object) => {
+    setIsVerifying(true);
+    try {
+      const batchResults = await supplyChainVerifier.batchVerifyArtifacts(artifacts, options);
+      setResults(batchResults);
+      return batchResults;
+    } finally {
+      setIsVerifying(false);
+    }
+  }, []);
 
   const clearResults = React.useCallback(() => {
     setResults([]);
@@ -734,7 +684,7 @@ export const useSupplyChainVerification = () => {
     clearResults,
     generateReport: React.useCallback(
       () => supplyChainVerifier.generateVerificationReport(results),
-      [results],
+      [results]
     ),
   };
 };

@@ -15,13 +15,13 @@
  *   1 - One or more checks failed
  */
 
-import { execSync } from 'node:child_process';
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { execSync } from "node:child_process";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT_DIR = join(__dirname, '..', '..');
+const ROOT_DIR = join(__dirname, "..", "..");
 
 interface CheckResult {
   name: string;
@@ -37,17 +37,17 @@ function log(msg: string): void {
 }
 
 function section(title: string): void {
-  log(`\n${'='.repeat(60)}`);
+  log(`\n${"=".repeat(60)}`);
   log(`  ${title}`);
-  log('='.repeat(60));
+  log("=".repeat(60));
 }
 
 function check(name: string, passed: boolean, message: string, details?: string[]): void {
   results.push({ name, passed, message, details });
-  const icon = passed ? '\u2705' : '\u274C';
+  const icon = passed ? "\u2705" : "\u274C";
   log(`${icon} ${name}: ${message}`);
   if (details && details.length > 0 && !passed) {
-    details.forEach(d => log(`   - ${d}`));
+    details.forEach((d) => log(`   - ${d}`));
   }
 }
 
@@ -55,37 +55,37 @@ function check(name: string, passed: boolean, message: string, details?: string[
 // Check 1: Node and Package Manager Versions
 // ============================================================================
 function checkVersions(): void {
-  section('Runtime Versions');
+  section("Runtime Versions");
 
   try {
-    const nodeVersion = execSync('node --version', { encoding: 'utf8' }).trim();
+    const nodeVersion = execSync("node --version", { encoding: "utf8" }).trim();
     const nodeMatch = nodeVersion.match(/v(\d+)\.(\d+)/);
     const nodeMajor = nodeMatch ? parseInt(nodeMatch[1], 10) : 0;
 
     check(
-      'Node.js Version',
+      "Node.js Version",
       nodeMajor >= 18,
       `${nodeVersion} (required: >=18.18)`,
-      nodeMajor < 18 ? ['Upgrade Node.js to v18.18 or later'] : undefined
+      nodeMajor < 18 ? ["Upgrade Node.js to v18.18 or later"] : undefined
     );
   } catch {
-    check('Node.js Version', false, 'Failed to detect Node.js version');
+    check("Node.js Version", false, "Failed to detect Node.js version");
   }
 
   try {
-    const pnpmVersion = execSync('pnpm --version', { encoding: 'utf8' }).trim();
+    const pnpmVersion = execSync("pnpm --version", { encoding: "utf8" }).trim();
     const pnpmMatch = pnpmVersion.match(/^(\d+)/);
     const pnpmMajor = pnpmMatch ? parseInt(pnpmMatch[1], 10) : 0;
 
     check(
-      'pnpm Version',
+      "pnpm Version",
       pnpmMajor >= 9,
       `v${pnpmVersion} (required: >=9.0.0)`,
-      pnpmMajor < 9 ? ['Upgrade pnpm: npm install -g pnpm@latest'] : undefined
+      pnpmMajor < 9 ? ["Upgrade pnpm: npm install -g pnpm@latest"] : undefined
     );
   } catch {
-    check('pnpm Version', false, 'pnpm not installed or not in PATH', [
-      'Install pnpm: npm install -g pnpm'
+    check("pnpm Version", false, "pnpm not installed or not in PATH", [
+      "Install pnpm: npm install -g pnpm",
     ]);
   }
 }
@@ -94,30 +94,25 @@ function checkVersions(): void {
 // Check 2: Lockfile and Install Mode
 // ============================================================================
 function checkLockfile(): void {
-  section('Lockfile Verification');
+  section("Lockfile Verification");
 
-  const lockfilePath = join(ROOT_DIR, 'pnpm-lock.yaml');
+  const lockfilePath = join(ROOT_DIR, "pnpm-lock.yaml");
   const lockfileExists = existsSync(lockfilePath);
 
   check(
-    'pnpm-lock.yaml exists',
+    "pnpm-lock.yaml exists",
     lockfileExists,
-    lockfileExists ? 'Present' : 'Missing',
-    lockfileExists ? undefined : ['Run: pnpm install to generate lockfile']
+    lockfileExists ? "Present" : "Missing",
+    lockfileExists ? undefined : ["Run: pnpm install to generate lockfile"]
   );
 
   if (lockfileExists) {
-    const npmrcPath = join(ROOT_DIR, '.npmrc');
+    const npmrcPath = join(ROOT_DIR, ".npmrc");
     if (existsSync(npmrcPath)) {
-      const npmrc = readFileSync(npmrcPath, 'utf8');
+      const npmrc = readFileSync(npmrcPath, "utf8");
       // Check for hoisted node linker (common source of resolution issues)
-      const hasHoisted = npmrc.includes('nodeLinker=hoisted');
-      check(
-        'Node linker mode',
-        true,
-        hasHoisted ? 'hoisted (default)' : 'pnpm default',
-        undefined
-      );
+      const hasHoisted = npmrc.includes("nodeLinker=hoisted");
+      check("Node linker mode", true, hasHoisted ? "hoisted (default)" : "pnpm default", undefined);
     }
   }
 }
@@ -139,14 +134,14 @@ interface PackageRunnerInfo {
 
 function findPackages(): string[] {
   const packages: string[] = [];
-  const workspaceDirs = ['client', 'server', 'packages', 'services', 'apps', 'tools', 'sdk'];
+  const workspaceDirs = ["client", "server", "packages", "services", "apps", "tools", "sdk"];
 
   for (const dir of workspaceDirs) {
     const fullPath = join(ROOT_DIR, dir);
     if (!existsSync(fullPath)) continue;
 
     // Check if the directory itself is a package
-    if (existsSync(join(fullPath, 'package.json'))) {
+    if (existsSync(join(fullPath, "package.json"))) {
       packages.push(fullPath);
     }
 
@@ -156,7 +151,7 @@ function findPackages(): string[] {
       for (const entry of entries) {
         const entryPath = join(fullPath, entry);
         if (statSync(entryPath).isDirectory()) {
-          if (existsSync(join(entryPath, 'package.json'))) {
+          if (existsSync(join(entryPath, "package.json"))) {
             packages.push(entryPath);
           }
         }
@@ -170,34 +165,36 @@ function findPackages(): string[] {
 }
 
 function analyzePackageRunner(pkgPath: string): PackageRunnerInfo | null {
-  const pkgJsonPath = join(pkgPath, 'package.json');
+  const pkgJsonPath = join(pkgPath, "package.json");
   if (!existsSync(pkgJsonPath)) return null;
 
   try {
-    const pkgJson = JSON.parse(readFileSync(pkgJsonPath, 'utf8'));
+    const pkgJson = JSON.parse(readFileSync(pkgJsonPath, "utf8"));
     const testScript = pkgJson.scripts?.test || null;
 
     const hasJestConfig =
-      existsSync(join(pkgPath, 'jest.config.js')) ||
-      existsSync(join(pkgPath, 'jest.config.cjs')) ||
-      existsSync(join(pkgPath, 'jest.config.ts')) ||
-      existsSync(join(pkgPath, 'jest.config.mjs'));
+      existsSync(join(pkgPath, "jest.config.js")) ||
+      existsSync(join(pkgPath, "jest.config.cjs")) ||
+      existsSync(join(pkgPath, "jest.config.ts")) ||
+      existsSync(join(pkgPath, "jest.config.mjs"));
 
     const hasVitestConfig =
-      existsSync(join(pkgPath, 'vitest.config.ts')) ||
-      existsSync(join(pkgPath, 'vitest.config.js')) ||
-      existsSync(join(pkgPath, 'vitest.config.mjs'));
+      existsSync(join(pkgPath, "vitest.config.ts")) ||
+      existsSync(join(pkgPath, "vitest.config.js")) ||
+      existsSync(join(pkgPath, "vitest.config.mjs"));
 
-    const usesJest = testScript?.includes('jest') || false;
-    const usesVitest = testScript?.includes('vitest') || false;
-    const usesNodeTest = testScript?.includes('node --test') || testScript?.includes('node:test') || false;
+    const usesJest = testScript?.includes("jest") || false;
+    const usesVitest = testScript?.includes("vitest") || false;
+    const usesNodeTest =
+      testScript?.includes("node --test") || testScript?.includes("node:test") || false;
 
     // Detect dual runner pattern (problematic)
-    const hasDualRunners = (usesJest && usesVitest) || (hasJestConfig && hasVitestConfig && usesJest && usesVitest);
+    const hasDualRunners =
+      (usesJest && usesVitest) || (hasJestConfig && hasVitestConfig && usesJest && usesVitest);
 
     return {
-      path: pkgPath.replace(ROOT_DIR + '/', ''),
-      name: pkgJson.name || 'unknown',
+      path: pkgPath.replace(ROOT_DIR + "/", ""),
+      name: pkgJson.name || "unknown",
       hasJestConfig,
       hasVitestConfig,
       testScript,
@@ -212,7 +209,7 @@ function analyzePackageRunner(pkgPath: string): PackageRunnerInfo | null {
 }
 
 function checkRunnerConfigs(): void {
-  section('Runner Configuration Consistency');
+  section("Runner Configuration Consistency");
 
   const packages = findPackages();
   const dualRunnerPackages: string[] = [];
@@ -243,27 +240,29 @@ function checkRunnerConfigs(): void {
     }
   }
 
-  log(`\nRunner distribution: Jest=${jestCount}, Vitest=${vitestCount}, node:test=${nodeTestCount}`);
+  log(
+    `\nRunner distribution: Jest=${jestCount}, Vitest=${vitestCount}, node:test=${nodeTestCount}`
+  );
 
   check(
-    'No dual-runner packages',
+    "No dual-runner packages",
     dualRunnerPackages.length === 0,
     dualRunnerPackages.length === 0
-      ? 'All packages use single runner'
+      ? "All packages use single runner"
       : `${dualRunnerPackages.length} package(s) use multiple runners`,
     dualRunnerPackages.length > 0
-      ? [...dualRunnerPackages, '', 'FIX: Choose one runner per package']
+      ? [...dualRunnerPackages, "", "FIX: Choose one runner per package"]
       : undefined
   );
 
   check(
-    'No orphan runner configs',
+    "No orphan runner configs",
     orphanConfigPackages.length === 0,
     orphanConfigPackages.length === 0
-      ? 'All configs are in use'
+      ? "All configs are in use"
       : `${orphanConfigPackages.length} orphan config(s) found`,
     orphanConfigPackages.length > 0
-      ? [...orphanConfigPackages, '', 'FIX: Remove unused config files']
+      ? [...orphanConfigPackages, "", "FIX: Remove unused config files"]
       : undefined
   );
 }
@@ -272,31 +271,32 @@ function checkRunnerConfigs(): void {
 // Check 4: Critical Module Resolution
 // ============================================================================
 function checkModuleResolution(): void {
-  section('Module Resolution Probes');
+  section("Module Resolution Probes");
 
   // Common problematic modules that often cause ERR_MODULE_NOT_FOUND
   const criticalModules = [
-    { name: 'zod', required: true },
-    { name: 'pino', required: false },
-    { name: 'prom-client', required: false },
-    { name: 'ioredis', required: false },
-    { name: 'neo4j-driver', required: false },
+    { name: "zod", required: true },
+    { name: "pino", required: false },
+    { name: "prom-client", required: false },
+    { name: "ioredis", required: false },
+    { name: "neo4j-driver", required: false },
   ];
 
   for (const mod of criticalModules) {
     try {
       // Try to resolve the module from root
-      const result = execSync(
-        `node -e "require.resolve('${mod.name}')"`,
-        { encoding: 'utf8', cwd: ROOT_DIR, stdio: ['pipe', 'pipe', 'pipe'] }
-      );
-      check(`Module: ${mod.name}`, true, 'Resolvable');
+      const result = execSync(`node -e "require.resolve('${mod.name}')"`, {
+        encoding: "utf8",
+        cwd: ROOT_DIR,
+        stdio: ["pipe", "pipe", "pipe"],
+      });
+      check(`Module: ${mod.name}`, true, "Resolvable");
     } catch (e) {
       const passed = !mod.required;
       check(
         `Module: ${mod.name}`,
         passed,
-        passed ? 'Not installed (optional)' : 'MISSING - required dependency',
+        passed ? "Not installed (optional)" : "MISSING - required dependency",
         passed ? undefined : [`Install: pnpm add ${mod.name}`]
       );
     }
@@ -312,15 +312,15 @@ function checkModuleResolution(): void {
 
   try {
     execSync(`node --input-type=module -e "${esmCheck}"`, {
-      encoding: 'utf8',
+      encoding: "utf8",
       cwd: ROOT_DIR,
-      stdio: ['pipe', 'pipe', 'pipe']
+      stdio: ["pipe", "pipe", "pipe"],
     });
-    check('ESM dynamic import (zod)', true, 'Works');
+    check("ESM dynamic import (zod)", true, "Works");
   } catch {
-    check('ESM dynamic import (zod)', false, 'Failed', [
-      'ESM resolution may be broken',
-      'Check node_modules and reinstall if needed'
+    check("ESM dynamic import (zod)", false, "Failed", [
+      "ESM resolution may be broken",
+      "Check node_modules and reinstall if needed",
     ]);
   }
 }
@@ -329,35 +329,35 @@ function checkModuleResolution(): void {
 // Check 5: Root Package Type
 // ============================================================================
 function checkPackageType(): void {
-  section('ESM Configuration');
+  section("ESM Configuration");
 
-  const rootPkgPath = join(ROOT_DIR, 'package.json');
+  const rootPkgPath = join(ROOT_DIR, "package.json");
   try {
-    const rootPkg = JSON.parse(readFileSync(rootPkgPath, 'utf8'));
-    const isEsm = rootPkg.type === 'module';
+    const rootPkg = JSON.parse(readFileSync(rootPkgPath, "utf8"));
+    const isEsm = rootPkg.type === "module";
 
     check(
-      'Root package type',
+      "Root package type",
       isEsm,
-      isEsm ? '"module" (ESM)' : `"${rootPkg.type || 'commonjs'}" - should be "module"`,
+      isEsm ? '"module" (ESM)' : `"${rootPkg.type || "commonjs"}" - should be "module"`,
       isEsm ? undefined : ['Set "type": "module" in root package.json']
     );
 
     // Check that jest config uses .cjs
-    const jestConfigCjs = existsSync(join(ROOT_DIR, 'jest.config.cjs'));
-    const jestConfigJs = existsSync(join(ROOT_DIR, 'jest.config.js'));
-    const jestConfigTs = existsSync(join(ROOT_DIR, 'jest.config.ts'));
+    const jestConfigCjs = existsSync(join(ROOT_DIR, "jest.config.cjs"));
+    const jestConfigJs = existsSync(join(ROOT_DIR, "jest.config.js"));
+    const jestConfigTs = existsSync(join(ROOT_DIR, "jest.config.ts"));
 
     if (isEsm) {
       check(
-        'Jest config extension',
+        "Jest config extension",
         jestConfigCjs && !jestConfigJs,
-        jestConfigCjs ? 'Uses .cjs (correct for ESM)' : 'Should use .cjs for ESM compatibility',
-        !jestConfigCjs ? ['Rename jest.config.js to jest.config.cjs'] : undefined
+        jestConfigCjs ? "Uses .cjs (correct for ESM)" : "Should use .cjs for ESM compatibility",
+        !jestConfigCjs ? ["Rename jest.config.js to jest.config.cjs"] : undefined
       );
     }
   } catch {
-    check('Root package.json', false, 'Could not read root package.json');
+    check("Root package.json", false, "Could not read root package.json");
   }
 }
 
@@ -365,27 +365,29 @@ function checkPackageType(): void {
 // Check 6: ESM/CJS Config Compatibility
 // ============================================================================
 function checkConfigCompatibility(): void {
-  section('Config Compatibility');
+  section("Config Compatibility");
 
   const packages = findPackages();
   const incompatibleConfigs: string[] = [];
 
   for (const pkgPath of packages) {
-    const pkgJsonPath = join(pkgPath, 'package.json');
+    const pkgJsonPath = join(pkgPath, "package.json");
     if (!existsSync(pkgJsonPath)) continue;
 
     try {
-      const pkgJson = JSON.parse(readFileSync(pkgJsonPath, 'utf8'));
-      const isEsm = pkgJson.type === 'module';
-      const relativePath = pkgPath.replace(ROOT_DIR + '/', '');
+      const pkgJson = JSON.parse(readFileSync(pkgJsonPath, "utf8"));
+      const isEsm = pkgJson.type === "module";
+      const relativePath = pkgPath.replace(ROOT_DIR + "/", "");
 
       // In ESM packages, .js files are treated as ESM, so jest configs need .cjs
       if (isEsm) {
-        const hasJsConfig = existsSync(join(pkgPath, 'jest.config.js'));
-        const hasCjsConfig = existsSync(join(pkgPath, 'jest.config.cjs'));
+        const hasJsConfig = existsSync(join(pkgPath, "jest.config.js"));
+        const hasCjsConfig = existsSync(join(pkgPath, "jest.config.cjs"));
 
         if (hasJsConfig && !hasCjsConfig) {
-          incompatibleConfigs.push(`${relativePath}: ESM package has jest.config.js (should be .cjs)`);
+          incompatibleConfigs.push(
+            `${relativePath}: ESM package has jest.config.js (should be .cjs)`
+          );
         }
       }
     } catch {
@@ -394,13 +396,13 @@ function checkConfigCompatibility(): void {
   }
 
   check(
-    'ESM/CJS config compatibility',
+    "ESM/CJS config compatibility",
     incompatibleConfigs.length === 0,
     incompatibleConfigs.length === 0
-      ? 'All configs use correct extensions'
+      ? "All configs use correct extensions"
       : `${incompatibleConfigs.length} incompatible config(s)`,
     incompatibleConfigs.length > 0
-      ? [...incompatibleConfigs, '', 'FIX: Rename .js to .cjs in ESM packages']
+      ? [...incompatibleConfigs, "", "FIX: Rename .js to .cjs in ESM packages"]
       : undefined
   );
 }
@@ -409,13 +411,13 @@ function checkConfigCompatibility(): void {
 // Check 7: Test Setup Files
 // ============================================================================
 function checkTestSetupFiles(): void {
-  section('Test Setup Files');
+  section("Test Setup Files");
 
   // Check key setup files exist
   const setupFiles = [
-    { path: 'server/tests/setup/jest.setup.cjs', required: true },
-    { path: 'server/tests/setup/globalSetup.cjs', required: true },
-    { path: 'server/tests/setup/globalTeardown.cjs', required: true },
+    { path: "server/tests/setup/jest.setup.cjs", required: true },
+    { path: "server/tests/setup/globalSetup.cjs", required: true },
+    { path: "server/tests/setup/globalTeardown.cjs", required: true },
   ];
 
   let allExist = true;
@@ -432,9 +434,9 @@ function checkTestSetupFiles(): void {
   }
 
   check(
-    'Test setup files exist',
+    "Test setup files exist",
     allExist,
-    allExist ? 'All required setup files present' : `Missing ${missingFiles.length} file(s)`,
+    allExist ? "All required setup files present" : `Missing ${missingFiles.length} file(s)`,
     missingFiles.length > 0 ? missingFiles : undefined
   );
 }
@@ -443,37 +445,37 @@ function checkTestSetupFiles(): void {
 // Check 8: Transform Patterns
 // ============================================================================
 function checkTransformPatterns(): void {
-  section('Transform Configuration');
+  section("Transform Configuration");
 
   // Check that transformIgnorePatterns is configured for ESM packages
-  const jestConfigPath = join(ROOT_DIR, 'jest.config.cjs');
+  const jestConfigPath = join(ROOT_DIR, "jest.config.cjs");
   if (!existsSync(jestConfigPath)) {
-    check('Transform patterns', false, 'jest.config.cjs not found');
+    check("Transform patterns", false, "jest.config.cjs not found");
     return;
   }
 
   try {
-    const configContent = readFileSync(jestConfigPath, 'utf8');
+    const configContent = readFileSync(jestConfigPath, "utf8");
 
     // Check for transformIgnorePatterns
-    const hasTransformIgnore = configContent.includes('transformIgnorePatterns');
+    const hasTransformIgnore = configContent.includes("transformIgnorePatterns");
     check(
-      'transformIgnorePatterns configured',
+      "transformIgnorePatterns configured",
       hasTransformIgnore,
-      hasTransformIgnore ? 'Present' : 'Missing - may cause ESM import issues',
-      hasTransformIgnore ? undefined : ['Add transformIgnorePatterns to handle ESM-only packages']
+      hasTransformIgnore ? "Present" : "Missing - may cause ESM import issues",
+      hasTransformIgnore ? undefined : ["Add transformIgnorePatterns to handle ESM-only packages"]
     );
 
     // Check for moduleNameMapper for .js extensions
-    const hasJsMapper = configContent.includes('.js$');
+    const hasJsMapper = configContent.includes(".js$");
     check(
-      'JS extension mapper',
+      "JS extension mapper",
       hasJsMapper,
-      hasJsMapper ? 'Configured' : 'Missing - may cause ESM resolution issues',
+      hasJsMapper ? "Configured" : "Missing - may cause ESM resolution issues",
       hasJsMapper ? undefined : ['Add moduleNameMapper: { "^(.*)\\.js$": "$1" }']
     );
   } catch {
-    check('Transform patterns', false, 'Could not read jest.config.cjs');
+    check("Transform patterns", false, "Could not read jest.config.cjs");
   }
 }
 
@@ -481,10 +483,10 @@ function checkTransformPatterns(): void {
 // Main
 // ============================================================================
 async function main(): Promise<void> {
-  log('\n' + '='.repeat(60));
-  log('  IntelGraph Runtime Verification');
-  log('  ' + new Date().toISOString());
-  log('='.repeat(60));
+  log("\n" + "=".repeat(60));
+  log("  IntelGraph Runtime Verification");
+  log("  " + new Date().toISOString());
+  log("=".repeat(60));
 
   checkVersions();
   checkLockfile();
@@ -496,10 +498,10 @@ async function main(): Promise<void> {
   checkModuleResolution();
 
   // Summary
-  section('Summary');
+  section("Summary");
 
-  const passed = results.filter(r => r.passed).length;
-  const failed = results.filter(r => !r.passed).length;
+  const passed = results.filter((r) => r.passed).length;
+  const failed = results.filter((r) => !r.passed).length;
   const total = results.length;
 
   log(`\nResults: ${passed}/${total} checks passed`);
@@ -507,22 +509,22 @@ async function main(): Promise<void> {
   if (failed > 0) {
     log(`\n\u274C ${failed} check(s) FAILED:\n`);
     results
-      .filter(r => !r.passed)
-      .forEach(r => {
+      .filter((r) => !r.passed)
+      .forEach((r) => {
         log(`  - ${r.name}: ${r.message}`);
         if (r.details) {
-          r.details.forEach(d => log(`      ${d}`));
+          r.details.forEach((d) => log(`      ${d}`));
         }
       });
-    log('\nSee docs/ops/TEST_RUNTIME.md for resolution guidance.');
+    log("\nSee docs/ops/TEST_RUNTIME.md for resolution guidance.");
     process.exit(1);
   }
 
-  log('\n\u2705 All runtime checks passed!');
+  log("\n\u2705 All runtime checks passed!");
   process.exit(0);
 }
 
 main().catch((err) => {
-  console.error('Verification script failed:', err);
+  console.error("Verification script failed:", err);
   process.exit(1);
 });

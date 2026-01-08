@@ -1,6 +1,6 @@
-import { createHash } from 'crypto';
-import { v4 as uuidv4 } from 'uuid';
-import type { AuditEvent, AuditEventAction } from '@intelgraph/mdm-core';
+import { createHash } from "crypto";
+import { v4 as uuidv4 } from "uuid";
+import type { AuditEvent, AuditEventAction } from "@intelgraph/mdm-core";
 
 export interface AuditEventInput {
   recordId: string;
@@ -25,9 +25,7 @@ export class AuditLedger {
       prevHash,
     };
 
-    const hash = createHash('sha256')
-      .update(JSON.stringify(payload))
-      .digest('hex');
+    const hash = createHash("sha256").update(JSON.stringify(payload)).digest("hex");
 
     const event: AuditEvent = {
       id: uuidv4(),
@@ -42,7 +40,7 @@ export class AuditLedger {
   }
 
   getEventsForRecord(recordId: string): AuditEvent[] {
-    return this.events.filter(e => e.recordId === recordId);
+    return this.events.filter((e) => e.recordId === recordId);
   }
 
   getAllEvents(): AuditEvent[] {
@@ -64,9 +62,7 @@ export class AuditLedger {
         timestamp: event.timestamp.toISOString(),
         prevHash,
       };
-      const expected = createHash('sha256')
-        .update(JSON.stringify(payload))
-        .digest('hex');
+      const expected = createHash("sha256").update(JSON.stringify(payload)).digest("hex");
       if (expected !== event.hash || event.prevHash !== prevHash) {
         return false;
       }

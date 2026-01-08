@@ -1,15 +1,15 @@
-import { ApolloClient, InMemoryCache, HttpLink, split, from } from '@apollo/client';
-import { getMainDefinition } from '@apollo/client/utilities';
-import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
+import {ApolloClient, InMemoryCache, HttpLink, split, from} from '@apollo/client';
+import {getMainDefinition} from '@apollo/client/utilities';
+import {GraphQLWsLink} from '@apollo/client/link/subscriptions';
 // @ts-ignore
-import { createClient } from 'graphql-ws';
-import { setContext } from '@apollo/client/link/context';
-import { onError } from '@apollo/client/link/error';
-import { RetryLink } from '@apollo/client/link/retry';
+import {createClient} from 'graphql-ws';
+import {setContext} from '@apollo/client/link/context';
+import {onError} from '@apollo/client/link/error';
+import {RetryLink} from '@apollo/client/link/retry';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { GRAPHQL_URL, WS_URL } from '../config';
-import { getAuthToken } from './AuthService';
+import {GRAPHQL_URL, WS_URL} from '../config';
+import {getAuthToken} from './AuthService';
 
 // HTTP Link
 const httpLink = new HttpLink({
@@ -32,7 +32,7 @@ const wsLink = new GraphQLWsLink(
 );
 
 // Auth Link - Add auth token to requests
-const authLink = setContext(async (_, { headers }) => {
+const authLink = setContext(async (_, {headers}) => {
   const token = await getAuthToken();
   return {
     headers: {
@@ -44,9 +44,9 @@ const authLink = setContext(async (_, { headers }) => {
 
 // Error Link - Handle errors globally
 const errorLink = onError((error: any) => {
-  const { graphQLErrors, networkError, operation, forward } = error;
+  const {graphQLErrors, networkError, operation, forward} = error;
   if (graphQLErrors) {
-    graphQLErrors.forEach(({ message, locations, path }: any) => {
+    graphQLErrors.forEach(({message, locations, path}: any) => {
       console.error(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`);
 
       // Handle authentication errors
@@ -79,12 +79,9 @@ const retryLink = new RetryLink({
 
 // Split link for HTTP and WebSocket
 const splitLink = split(
-  ({ query }) => {
+  ({query}) => {
     const definition = getMainDefinition(query);
-    return (
-      definition.kind === 'OperationDefinition' &&
-      definition.operation === 'subscription'
-    );
+    return definition.kind === 'OperationDefinition' && definition.operation === 'subscription';
   },
   wsLink,
   from([retryLink, authLink, errorLink, httpLink]),

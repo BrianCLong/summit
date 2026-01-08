@@ -3,7 +3,7 @@
  * Enhanced graph analysis and manipulation tools for IntelGraph
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from "react";
 import {
   Box,
   Paper,
@@ -30,7 +30,7 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-} from '@mui/material';
+} from "@mui/material";
 import {
   AccountTree,
   Analytics,
@@ -52,7 +52,7 @@ import {
   Hub,
   Memory,
   Speed,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 // Types
 interface GraphNode {
@@ -82,7 +82,7 @@ interface AnalysisMetric {
   name: string;
   value: number;
   description: string;
-  category: 'centrality' | 'structure' | 'connectivity';
+  category: "centrality" | "structure" | "connectivity";
 }
 
 interface AdvancedGraphInteractionsProps {
@@ -98,34 +98,34 @@ interface AdvancedGraphInteractionsProps {
 // Mock data generators
 const generateAnalysisMetrics = (): AnalysisMetric[] => [
   {
-    name: 'Network Density',
+    name: "Network Density",
     value: 0.23,
-    description: 'Proportion of edges to possible connections',
-    category: 'structure',
+    description: "Proportion of edges to possible connections",
+    category: "structure",
   },
   {
-    name: 'Clustering Coefficient',
+    name: "Clustering Coefficient",
     value: 0.67,
-    description: 'Tendency of nodes to cluster together',
-    category: 'structure',
+    description: "Tendency of nodes to cluster together",
+    category: "structure",
   },
   {
-    name: 'Average Path Length',
+    name: "Average Path Length",
     value: 3.2,
-    description: 'Average shortest path between all node pairs',
-    category: 'connectivity',
+    description: "Average shortest path between all node pairs",
+    category: "connectivity",
   },
   {
-    name: 'Betweenness Centrality',
+    name: "Betweenness Centrality",
     value: 0.45,
-    description: 'Nodes acting as bridges between communities',
-    category: 'centrality',
+    description: "Nodes acting as bridges between communities",
+    category: "centrality",
   },
   {
-    name: 'PageRank Score',
+    name: "PageRank Score",
     value: 0.78,
-    description: 'Node importance based on connection quality',
-    category: 'centrality',
+    description: "Node importance based on connection quality",
+    category: "centrality",
   },
 ];
 
@@ -133,44 +133,42 @@ const generateClusteringResults = (): ClusteringResult => ({
   clusters: {
     0: [
       {
-        id: '1',
-        label: 'Person A',
-        type: 'person',
+        id: "1",
+        label: "Person A",
+        type: "person",
         properties: {},
         centrality: 0.8,
       },
       {
-        id: '2',
-        label: 'Company X',
-        type: 'organization',
+        id: "2",
+        label: "Company X",
+        type: "organization",
         properties: {},
         centrality: 0.6,
       },
     ],
     1: [
       {
-        id: '3',
-        label: 'Location Y',
-        type: 'location',
+        id: "3",
+        label: "Location Y",
+        type: "location",
         properties: {},
         centrality: 0.4,
       },
       {
-        id: '4',
-        label: 'Event Z',
-        type: 'event',
+        id: "4",
+        label: "Event Z",
+        type: "event",
         properties: {},
         centrality: 0.5,
       },
     ],
   },
   modularity: 0.73,
-  algorithm: 'Louvain',
+  algorithm: "Louvain",
 });
 
-export const AdvancedGraphInteractions: React.FC<
-  AdvancedGraphInteractionsProps
-> = ({
+export const AdvancedGraphInteractions: React.FC<AdvancedGraphInteractionsProps> = ({
   nodes = [],
   edges = [],
   onNodeSelect,
@@ -180,16 +178,14 @@ export const AdvancedGraphInteractions: React.FC<
   enableAdvancedFeatures = true,
 }) => {
   const [activeTab, setActiveTab] = useState(0);
-  const [selectedLayout, setSelectedLayout] = useState('force-directed');
-  const [analysisMetrics, setAnalysisMetrics] = useState<AnalysisMetric[]>(
-    generateAnalysisMetrics(),
-  );
-  const [clusteringResults, setClusteringResults] =
-    useState<ClusteringResult | null>(null);
+  const [selectedLayout, setSelectedLayout] = useState("force-directed");
+  const [analysisMetrics, setAnalysisMetrics] =
+    useState<AnalysisMetric[]>(generateAnalysisMetrics());
+  const [clusteringResults, setClusteringResults] = useState<ClusteringResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [filters, setFilters] = useState({
-    nodeTypes: new Set<string>(['person', 'organization', 'location']),
-    edgeTypes: new Set<string>(['knows', 'works_at', 'located_at']),
+    nodeTypes: new Set<string>(["person", "organization", "location"]),
+    edgeTypes: new Set<string>(["knows", "works_at", "located_at"]),
     centralityThreshold: 0.3,
     showClusters: false,
   });
@@ -201,15 +197,15 @@ export const AdvancedGraphInteractions: React.FC<
     const results = generateClusteringResults();
     setClusteringResults(results);
     setIsAnalyzing(false);
-    onAnalysisRun?.('clustering', { algorithm: 'louvain' });
+    onAnalysisRun?.("clustering", { algorithm: "louvain" });
   }, [onAnalysisRun]);
 
   // Layout algorithms
   const layoutOptions = [
-    { value: 'force-directed', label: 'Force Directed', icon: <Hub /> },
-    { value: 'hierarchical', label: 'Hierarchical', icon: <AccountTree /> },
-    { value: 'circular', label: 'Circular', icon: <BubbleChart /> },
-    { value: 'grid', label: 'Grid', icon: <ScatterPlot /> },
+    { value: "force-directed", label: "Force Directed", icon: <Hub /> },
+    { value: "hierarchical", label: "Hierarchical", icon: <AccountTree /> },
+    { value: "circular", label: "Circular", icon: <BubbleChart /> },
+    { value: "grid", label: "Grid", icon: <ScatterPlot /> },
   ];
 
   const handleLayoutChange = (layout: string) => {
@@ -236,9 +232,9 @@ export const AdvancedGraphInteractions: React.FC<
             <CardContent sx={{ p: 2 }}>
               <Box
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
                   mb: 1,
                 }}
               >
@@ -247,19 +243,17 @@ export const AdvancedGraphInteractions: React.FC<
                   size="small"
                   label={metric.category}
                   color={
-                    metric.category === 'centrality'
-                      ? 'primary'
-                      : metric.category === 'structure'
-                        ? 'secondary'
-                        : 'info'
+                    metric.category === "centrality"
+                      ? "primary"
+                      : metric.category === "structure"
+                        ? "secondary"
+                        : "info"
                   }
                 />
               </Box>
 
               <Typography variant="h6" color="primary" sx={{ mb: 1 }}>
-                {typeof metric.value === 'number'
-                  ? metric.value.toFixed(2)
-                  : metric.value}
+                {typeof metric.value === "number" ? metric.value.toFixed(2) : metric.value}
               </Typography>
 
               <Typography variant="caption" color="text.secondary">
@@ -276,14 +270,14 @@ export const AdvancedGraphInteractions: React.FC<
           startIcon={isAnalyzing ? <Memory /> : <Analytics />}
           fullWidth
         >
-          {isAnalyzing ? 'Analyzing...' : 'Run Community Detection'}
+          {isAnalyzing ? "Analyzing..." : "Run Community Detection"}
         </Button>
 
         {clusteringResults && (
           <Alert severity="success">
             <Typography variant="body2">
-              Found {Object.keys(clusteringResults.clusters).length} communities
-              with modularity score of {clusteringResults.modularity.toFixed(3)}
+              Found {Object.keys(clusteringResults.clusters).length} communities with modularity
+              score of {clusteringResults.modularity.toFixed(3)}
             </Typography>
           </Alert>
         )}
@@ -307,7 +301,7 @@ export const AdvancedGraphInteractions: React.FC<
           >
             {layoutOptions.map((option) => (
               <MenuItem key={option.value} value={option.value}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   {option.icon}
                   {option.label}
                 </Box>
@@ -322,16 +316,14 @@ export const AdvancedGraphInteractions: React.FC<
           </Typography>
           <Slider
             value={filters.centralityThreshold}
-            onChange={(_, value) =>
-              handleFilterChange('centralityThreshold', value)
-            }
+            onChange={(_, value) => handleFilterChange("centralityThreshold", value)}
             min={0}
             max={1}
             step={0.1}
             marks={[
-              { value: 0, label: '0' },
-              { value: 0.5, label: '0.5' },
-              { value: 1, label: '1' },
+              { value: 0, label: "0" },
+              { value: 0.5, label: "0.5" },
+              { value: 1, label: "1" },
             ]}
           />
         </Box>
@@ -340,9 +332,7 @@ export const AdvancedGraphInteractions: React.FC<
           control={
             <Switch
               checked={filters.showClusters}
-              onChange={(e) =>
-                handleFilterChange('showClusters', e.target.checked)
-              }
+              onChange={(e) => handleFilterChange("showClusters", e.target.checked)}
             />
           }
           label="Show Communities"
@@ -353,11 +343,11 @@ export const AdvancedGraphInteractions: React.FC<
             Node Types
           </Typography>
           <Stack direction="row" spacing={1} flexWrap="wrap">
-            {['person', 'organization', 'location', 'event'].map((type) => (
+            {["person", "organization", "location", "event"].map((type) => (
               <Chip
                 key={type}
                 label={type}
-                variant={filters.nodeTypes.has(type) ? 'filled' : 'outlined'}
+                variant={filters.nodeTypes.has(type) ? "filled" : "outlined"}
                 onClick={() => {
                   const newTypes = new Set(filters.nodeTypes);
                   if (newTypes.has(type)) {
@@ -365,7 +355,7 @@ export const AdvancedGraphInteractions: React.FC<
                   } else {
                     newTypes.add(type);
                   }
-                  handleFilterChange('nodeTypes', newTypes);
+                  handleFilterChange("nodeTypes", newTypes);
                 }}
                 size="small"
               />
@@ -388,77 +378,74 @@ export const AdvancedGraphInteractions: React.FC<
         <Stack spacing={2}>
           <Alert severity="info">
             <Typography variant="body2">
-              Detected {Object.keys(clusteringResults.clusters).length}{' '}
-              communities using {clusteringResults.algorithm} algorithm
+              Detected {Object.keys(clusteringResults.clusters).length} communities using{" "}
+              {clusteringResults.algorithm} algorithm
             </Typography>
           </Alert>
 
-          {Object.entries(clusteringResults.clusters).map(
-            ([clusterId, clusterNodes]) => (
-              <Accordion key={clusterId}>
-                <AccordionSummary expandIcon={<ExpandMore />}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Badge badgeContent={clusterNodes.length} color="primary">
-                      <Hub />
-                    </Badge>
-                    <Typography>Community {parseInt(clusterId) + 1}</Typography>
-                  </Box>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <Stack spacing={1}>
-                    {clusterNodes.map((node) => (
-                      <Box
-                        key={node.id}
-                        sx={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          p: 1,
-                          border: '1px solid',
-                          borderColor: 'divider',
-                          borderRadius: 1,
-                          cursor: 'pointer',
-                          '&:hover': { bgcolor: 'action.hover' },
-                        }}
-                        onClick={() => onNodeSelect?.(node.id)}
-                      >
-                        <Box>
-                          <Typography variant="body2">{node.label}</Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {node.type}
-                          </Typography>
-                        </Box>
-                        <Chip
-                          size="small"
-                          label={`${(node.centrality * 100).toFixed(0)}%`}
-                          variant="outlined"
-                        />
+          {Object.entries(clusteringResults.clusters).map(([clusterId, clusterNodes]) => (
+            <Accordion key={clusterId}>
+              <AccordionSummary expandIcon={<ExpandMore />}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Badge badgeContent={clusterNodes.length} color="primary">
+                    <Hub />
+                  </Badge>
+                  <Typography>Community {parseInt(clusterId) + 1}</Typography>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Stack spacing={1}>
+                  {clusterNodes.map((node) => (
+                    <Box
+                      key={node.id}
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        p: 1,
+                        border: "1px solid",
+                        borderColor: "divider",
+                        borderRadius: 1,
+                        cursor: "pointer",
+                        "&:hover": { bgcolor: "action.hover" },
+                      }}
+                      onClick={() => onNodeSelect?.(node.id)}
+                    >
+                      <Box>
+                        <Typography variant="body2">{node.label}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {node.type}
+                        </Typography>
                       </Box>
-                    ))}
-                  </Stack>
-                </AccordionDetails>
-              </Accordion>
-            ),
-          )}
+                      <Chip
+                        size="small"
+                        label={`${(node.centrality * 100).toFixed(0)}%`}
+                        variant="outlined"
+                      />
+                    </Box>
+                  ))}
+                </Stack>
+              </AccordionDetails>
+            </Accordion>
+          ))}
         </Stack>
       ) : (
         <Alert severity="info">
-          Run community detection analysis to identify node clusters and
-          relationships.
+          Run community detection analysis to identify node clusters and relationships.
         </Alert>
       )}
     </Box>
   );
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
       {/* Header */}
       <Paper elevation={1} sx={{ p: 2, mb: 2 }}>
         <Box
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
           }}
         >
           <Box>
@@ -501,14 +488,11 @@ export const AdvancedGraphInteractions: React.FC<
       </Paper>
 
       {/* Content Tabs */}
-      <Paper
-        elevation={1}
-        sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}
-      >
+      <Paper elevation={1} sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
         <Tabs
           value={activeTab}
           onChange={(_, newValue) => setActiveTab(newValue)}
-          sx={{ borderBottom: 1, borderColor: 'divider' }}
+          sx={{ borderBottom: 1, borderColor: "divider" }}
         >
           <Tab icon={<TrendingUp />} label="Metrics" />
           <Tab icon={<FilterAlt />} label="Filters" />
@@ -516,7 +500,7 @@ export const AdvancedGraphInteractions: React.FC<
           <Tab icon={<Timeline />} label="Pathfinding" />
         </Tabs>
 
-        <Box sx={{ flex: 1, overflow: 'auto', p: 3 }}>
+        <Box sx={{ flex: 1, overflow: "auto", p: 3 }}>
           {activeTab === 0 && <NetworkMetricsPanel />}
           {activeTab === 1 && <FilterPanel />}
           {activeTab === 2 && <ClusteringPanel />}

@@ -4,26 +4,26 @@
  */
 
 // Event types
-export * from './types/events';
-export * from './types/threats';
-export * from './types/alerts';
-export * from './types/ml';
-export * from './types/threat-intelligence';
-export * from './types/hunting';
+export * from "./types/events";
+export * from "./types/threats";
+export * from "./types/alerts";
+export * from "./types/ml";
+export * from "./types/threat-intelligence";
+export * from "./types/hunting";
 
 // Interfaces
-export * from './interfaces/detector';
+export * from "./interfaces/detector";
 
 // Utilities
-export * from './utils/scoring';
-export * from './utils/validators';
-export * from './utils/correlation';
+export * from "./utils/scoring";
+export * from "./utils/validators";
+export * from "./utils/correlation";
 
 // Utility types
 export interface ThreatDetectionConfig {
   // General
   enabled: boolean;
-  logLevel: 'debug' | 'info' | 'warn' | 'error';
+  logLevel: "debug" | "info" | "warn" | "error";
 
   // Data retention
   eventRetentionDays: number;
@@ -102,7 +102,7 @@ export interface Logger {
 // Constants
 export const DEFAULT_CONFIG: ThreatDetectionConfig = {
   enabled: true,
-  logLevel: 'info',
+  logLevel: "info",
   eventRetentionDays: 90,
   alertRetentionDays: 365,
   batchSize: 1000,
@@ -113,7 +113,7 @@ export const DEFAULT_CONFIG: ThreatDetectionConfig = {
   alertingEnabled: true,
   alertChannels: [],
   autoResponseEnabled: false,
-  requireApprovalForActions: true
+  requireApprovalForActions: true,
 };
 
 export const THREAT_SCORE_THRESHOLDS = {
@@ -121,22 +121,22 @@ export const THREAT_SCORE_THRESHOLDS = {
   HIGH: 0.7,
   MEDIUM: 0.5,
   LOW: 0.3,
-  INFO: 0.0
+  INFO: 0.0,
 };
 
 export const MITRE_ATTACK_TACTICS = [
-  'reconnaissance',
-  'resource-development',
-  'initial-access',
-  'execution',
-  'persistence',
-  'privilege-escalation',
-  'defense-evasion',
-  'credential-access',
-  'discovery',
-  'lateral-movement',
-  'collection',
-  'command-and-control',
-  'exfiltration',
-  'impact'
+  "reconnaissance",
+  "resource-development",
+  "initial-access",
+  "execution",
+  "persistence",
+  "privilege-escalation",
+  "defense-evasion",
+  "credential-access",
+  "discovery",
+  "lateral-movement",
+  "collection",
+  "command-and-control",
+  "exfiltration",
+  "impact",
 ];

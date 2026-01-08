@@ -78,33 +78,33 @@ export interface FHEComputationResult {
 }
 
 export enum FHEScheme {
-  CKKS = 'ckks', // For approximate numbers (ML/analytics)
-  BGV = 'bgv', // For exact integer arithmetic
-  BFV = 'bfv', // For integer arithmetic
-  TFHE = 'tfhe', // For boolean circuits
-  FHEW = 'fhew', // For boolean operations
+  CKKS = "ckks", // For approximate numbers (ML/analytics)
+  BGV = "bgv", // For exact integer arithmetic
+  BFV = "bfv", // For integer arithmetic
+  TFHE = "tfhe", // For boolean circuits
+  FHEW = "fhew", // For boolean operations
 }
 
 export enum FHEEncoding {
-  INTEGER = 'integer',
-  RATIONAL = 'rational',
-  COMPLEX = 'complex',
-  BOOLEAN = 'boolean',
-  BATCH = 'batch',
+  INTEGER = "integer",
+  RATIONAL = "rational",
+  COMPLEX = "complex",
+  BOOLEAN = "boolean",
+  BATCH = "batch",
 }
 
 export enum FHEOperation {
-  ADD = 'add',
-  MULTIPLY = 'multiply',
-  SUBTRACT = 'subtract',
-  ROTATE = 'rotate',
-  RESCALE = 'rescale',
-  BOOTSTRAP = 'bootstrap',
-  COMPARE = 'compare',
-  AND = 'and',
-  OR = 'or',
-  NOT = 'not',
-  XOR = 'xor',
+  ADD = "add",
+  MULTIPLY = "multiply",
+  SUBTRACT = "subtract",
+  ROTATE = "rotate",
+  RESCALE = "rescale",
+  BOOTSTRAP = "bootstrap",
+  COMPARE = "compare",
+  AND = "and",
+  OR = "or",
+  NOT = "not",
+  XOR = "xor",
 }
 
 /**
@@ -121,8 +121,7 @@ export class HomomorphicEncryptionEngine {
     const contextId = `ctx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // Generate key pair based on scheme
-    const { publicKey, privateKey, relinKeys, galoisKeys } =
-      await this.generateKeys(config);
+    const { publicKey, privateKey, relinKeys, galoisKeys } = await this.generateKeys(config);
 
     const context: FHEContext = {
       scheme: config.scheme,
@@ -190,12 +189,10 @@ export class HomomorphicEncryptionEngine {
 
     // Public key: (b, a) where b = -a*s - e (mod q)
     const b = this.polynomialArithmetic(
-      this.polynomialNegate(
-        this.polynomialMultiply(a, secretKey, config.coeffModulus),
-      ),
+      this.polynomialNegate(this.polynomialMultiply(a, secretKey, config.coeffModulus)),
       this.polynomialSubtract([], e0, config.coeffModulus),
       config.coeffModulus,
-      'add',
+      "add"
     );
 
     // Generate relinearization keys
@@ -236,12 +233,10 @@ export class HomomorphicEncryptionEngine {
     const e = this.generateErrorPolynomial(n);
 
     const b = this.polynomialArithmetic(
-      this.polynomialNegate(
-        this.polynomialMultiply(a, secretKey, config.coeffModulus),
-      ),
+      this.polynomialNegate(this.polynomialMultiply(a, secretKey, config.coeffModulus)),
       e,
       config.coeffModulus,
-      'add',
+      "add"
     );
 
     const relinKeys = this.generateRelinearizationKeys(secretKey, config);
@@ -289,9 +284,7 @@ export class HomomorphicEncryptionEngine {
 
     return {
       publicKey: {
-        data: Buffer.from(
-          JSON.stringify({ matrix: publicKeyMatrix, error: errorVector }),
-        ),
+        data: Buffer.from(JSON.stringify({ matrix: publicKeyMatrix, error: errorVector })),
         scheme: FHEScheme.TFHE,
         created: new Date(),
       },
@@ -309,7 +302,7 @@ export class HomomorphicEncryptionEngine {
   async encrypt(
     contextId: string,
     data: number | number[] | boolean | boolean[],
-    encoding: FHEEncoding = FHEEncoding.INTEGER,
+    encoding: FHEEncoding = FHEEncoding.INTEGER
   ): Promise<FHECiphertext> {
     const context = this.contexts.get(contextId);
     if (!context) {
@@ -339,7 +332,7 @@ export class HomomorphicEncryptionEngine {
    */
   async decrypt(
     contextId: string,
-    ciphertext: FHECiphertext,
+    ciphertext: FHECiphertext
   ): Promise<number | number[] | boolean | boolean[]> {
     const context = this.contexts.get(contextId);
     if (!context) {
@@ -373,18 +366,14 @@ export class HomomorphicEncryptionEngine {
   /**
    * Perform homomorphic addition
    */
-  async add(
-    contextId: string,
-    ct1: FHECiphertext,
-    ct2: FHECiphertext,
-  ): Promise<FHECiphertext> {
+  async add(contextId: string, ct1: FHECiphertext, ct2: FHECiphertext): Promise<FHECiphertext> {
     const context = this.contexts.get(contextId);
     if (!context) {
       throw new Error(`Context not found: ${contextId}`);
     }
 
     if (ct1.scheme !== ct2.scheme) {
-      throw new Error('Ciphertext schemes must match');
+      throw new Error("Ciphertext schemes must match");
     }
 
     switch (ct1.scheme) {
@@ -406,7 +395,7 @@ export class HomomorphicEncryptionEngine {
   async multiply(
     contextId: string,
     ct1: FHECiphertext,
-    ct2: FHECiphertext,
+    ct2: FHECiphertext
   ): Promise<FHECiphertext> {
     const context = this.contexts.get(contextId);
     if (!context) {
@@ -414,7 +403,7 @@ export class HomomorphicEncryptionEngine {
     }
 
     if (ct1.scheme !== ct2.scheme) {
-      throw new Error('Ciphertext schemes must match');
+      throw new Error("Ciphertext schemes must match");
     }
 
     let result: FHECiphertext;
@@ -431,9 +420,7 @@ export class HomomorphicEncryptionEngine {
         result = this.multiplyTFHE(ct1, ct2, context);
         break;
       default:
-        throw new Error(
-          `Multiplication not supported for scheme: ${ct1.scheme}`,
-        );
+        throw new Error(`Multiplication not supported for scheme: ${ct1.scheme}`);
     }
 
     // Relinearize to reduce ciphertext size
@@ -450,11 +437,11 @@ export class HomomorphicEncryptionEngine {
   async rotate(
     contextId: string,
     ciphertext: FHECiphertext,
-    steps: number,
+    steps: number
   ): Promise<FHECiphertext> {
     const context = this.contexts.get(contextId);
     if (!context || !context.galoisKeys) {
-      throw new Error('Context or Galois keys not available');
+      throw new Error("Context or Galois keys not available");
     }
 
     switch (ciphertext.scheme) {
@@ -463,26 +450,21 @@ export class HomomorphicEncryptionEngine {
       case FHEScheme.BFV:
         return this.rotateBatched(ciphertext, steps, context);
       default:
-        throw new Error(
-          `Rotation not supported for scheme: ${ciphertext.scheme}`,
-        );
+        throw new Error(`Rotation not supported for scheme: ${ciphertext.scheme}`);
     }
   }
 
   /**
    * Rescale ciphertext (CKKS only)
    */
-  async rescale(
-    contextId: string,
-    ciphertext: FHECiphertext,
-  ): Promise<FHECiphertext> {
+  async rescale(contextId: string, ciphertext: FHECiphertext): Promise<FHECiphertext> {
     const context = this.contexts.get(contextId);
     if (!context) {
       throw new Error(`Context not found: ${contextId}`);
     }
 
     if (ciphertext.scheme !== FHEScheme.CKKS) {
-      throw new Error('Rescaling only supported for CKKS');
+      throw new Error("Rescaling only supported for CKKS");
     }
 
     return this.rescaleCKKS(ciphertext, context);
@@ -491,10 +473,7 @@ export class HomomorphicEncryptionEngine {
   /**
    * Bootstrap ciphertext to refresh noise
    */
-  async bootstrap(
-    contextId: string,
-    ciphertext: FHECiphertext,
-  ): Promise<FHECiphertext> {
+  async bootstrap(contextId: string, ciphertext: FHECiphertext): Promise<FHECiphertext> {
     const context = this.contexts.get(contextId);
     if (!context) {
       throw new Error(`Context not found: ${contextId}`);
@@ -505,9 +484,7 @@ export class HomomorphicEncryptionEngine {
       case FHEScheme.TFHE:
         return this.bootstrapTFHE(ciphertext, context);
       default:
-        throw new Error(
-          `Bootstrapping not implemented for scheme: ${ciphertext.scheme}`,
-        );
+        throw new Error(`Bootstrapping not implemented for scheme: ${ciphertext.scheme}`);
     }
   }
 
@@ -517,7 +494,7 @@ export class HomomorphicEncryptionEngine {
   async computeCircuit(
     contextId: string,
     inputs: FHECiphertext[],
-    circuit: FHECircuit,
+    circuit: FHECircuit
   ): Promise<FHEComputationResult> {
     const startTime = Date.now();
     const operations: FHEOperation[] = [];
@@ -593,19 +570,13 @@ export class HomomorphicEncryptionEngine {
       .map(() => (Math.random() < 0.5 ? 1 : 0));
   }
 
-  private generateErrorPolynomial(
-    degree: number,
-    sigma: number = 3.2,
-  ): number[] {
+  private generateErrorPolynomial(degree: number, sigma: number = 3.2): number[] {
     return Array(degree)
       .fill(0)
       .map(() => this.sampleGaussian(sigma));
   }
 
-  private generateRandomPolynomial(
-    degree: number,
-    modulus: number[],
-  ): number[] {
+  private generateRandomPolynomial(degree: number, modulus: number[]): number[] {
     const q = modulus[0]; // Use first coefficient modulus
     return Array(degree)
       .fill(0)
@@ -618,7 +589,7 @@ export class HomomorphicEncryptionEngine {
       .map(() =>
         Array(cols)
           .fill(0)
-          .map(() => Math.floor(Math.random() * 1000)),
+          .map(() => Math.floor(Math.random() * 1000))
       );
   }
 
@@ -636,11 +607,7 @@ export class HomomorphicEncryptionEngine {
     return Math.round(z * sigma);
   }
 
-  private polynomialMultiply(
-    a: number[],
-    b: number[],
-    modulus: number[],
-  ): number[] {
+  private polynomialMultiply(a: number[], b: number[], modulus: number[]): number[] {
     const result = new Array(a.length + b.length - 1).fill(0);
     for (let i = 0; i < a.length; i++) {
       for (let j = 0; j < b.length; j++) {
@@ -654,7 +621,7 @@ export class HomomorphicEncryptionEngine {
     a: number[],
     b: number[],
     modulus: number[],
-    op: 'add' | 'subtract',
+    op: "add" | "subtract"
   ): number[] {
     const maxLen = Math.max(a.length, b.length);
     const result = new Array(maxLen).fill(0);
@@ -663,7 +630,7 @@ export class HomomorphicEncryptionEngine {
       const aVal = i < a.length ? a[i] : 0;
       const bVal = i < b.length ? b[i] : 0;
 
-      if (op === 'add') {
+      if (op === "add") {
         result[i] = (aVal + bVal) % modulus[0];
       } else {
         result[i] = (aVal - bVal + modulus[0]) % modulus[0];
@@ -673,12 +640,8 @@ export class HomomorphicEncryptionEngine {
     return result;
   }
 
-  private polynomialSubtract(
-    a: number[],
-    b: number[],
-    modulus: number[],
-  ): number[] {
-    return this.polynomialArithmetic(a, b, modulus, 'subtract');
+  private polynomialSubtract(a: number[], b: number[], modulus: number[]): number[] {
+    return this.polynomialArithmetic(a, b, modulus, "subtract");
   }
 
   private polynomialNegate(poly: number[]): number[] {
@@ -687,14 +650,14 @@ export class HomomorphicEncryptionEngine {
 
   private generateRelinearizationKeys(
     secretKey: number[],
-    config: FHEConfig,
+    config: FHEConfig
   ): FHERelinearizationKeys {
     // Simplified relinearization key generation
     const keyData = Buffer.from(
       JSON.stringify({
         secretKey: secretKey.map((x) => x * x), // s^2 for relinearization
         parameters: config,
-      }),
+      })
     );
 
     return {
@@ -703,10 +666,7 @@ export class HomomorphicEncryptionEngine {
     };
   }
 
-  private generateGaloisKeys(
-    secretKey: number[],
-    config: FHEConfig,
-  ): FHEGaloisKeys {
+  private generateGaloisKeys(secretKey: number[], config: FHEConfig): FHEGaloisKeys {
     // Simplified Galois key generation for rotation
     const steps = [1, 2, 4, 8, 16]; // Powers of 2 for efficient rotation
     const keyData = Buffer.from(
@@ -714,7 +674,7 @@ export class HomomorphicEncryptionEngine {
         secretKey,
         steps,
         parameters: config,
-      }),
+      })
     );
 
     return {
@@ -728,15 +688,13 @@ export class HomomorphicEncryptionEngine {
   private encode(
     data: number | number[] | boolean | boolean[],
     encoding: FHEEncoding,
-    scheme: FHEScheme,
+    scheme: FHEScheme
   ): FHEPlaintext {
     let encodedData: number[];
 
     switch (encoding) {
       case FHEEncoding.INTEGER:
-        encodedData = Array.isArray(data)
-          ? (data as number[])
-          : [data as number];
+        encodedData = Array.isArray(data) ? (data as number[]) : [data as number];
         break;
       case FHEEncoding.BOOLEAN:
         encodedData = Array.isArray(data)
@@ -754,9 +712,7 @@ export class HomomorphicEncryptionEngine {
     };
   }
 
-  private decode(
-    plaintext: FHEPlaintext,
-  ): number | number[] | boolean | boolean[] {
+  private decode(plaintext: FHEPlaintext): number | number[] | boolean | boolean[] {
     const data = JSON.parse(plaintext.data.toString()) as number[];
 
     switch (plaintext.encoding) {
@@ -772,10 +728,7 @@ export class HomomorphicEncryptionEngine {
 
   // Scheme-specific encryption/decryption methods (simplified implementations)
 
-  private encryptCKKS(
-    plaintext: FHEPlaintext,
-    context: FHEContext,
-  ): FHECiphertext {
+  private encryptCKKS(plaintext: FHEPlaintext, context: FHEContext): FHECiphertext {
     const data = JSON.parse(plaintext.data.toString());
     return {
       data: Buffer.from(JSON.stringify({ encrypted: data, noise: 0.1 })),
@@ -786,10 +739,7 @@ export class HomomorphicEncryptionEngine {
     };
   }
 
-  private decryptCKKS(
-    ciphertext: FHECiphertext,
-    context: FHEContext,
-  ): FHEPlaintext {
+  private decryptCKKS(ciphertext: FHECiphertext, context: FHEContext): FHEPlaintext {
     const data = JSON.parse(ciphertext.data.toString());
     return {
       data: Buffer.from(JSON.stringify(data.encrypted)),
@@ -798,10 +748,7 @@ export class HomomorphicEncryptionEngine {
     };
   }
 
-  private encryptBGV(
-    plaintext: FHEPlaintext,
-    context: FHEContext,
-  ): FHECiphertext {
+  private encryptBGV(plaintext: FHEPlaintext, context: FHEContext): FHECiphertext {
     const data = JSON.parse(plaintext.data.toString());
     return {
       data: Buffer.from(JSON.stringify({ encrypted: data, noise: 0.05 })),
@@ -811,10 +758,7 @@ export class HomomorphicEncryptionEngine {
     };
   }
 
-  private decryptBGV(
-    ciphertext: FHECiphertext,
-    context: FHEContext,
-  ): FHEPlaintext {
+  private decryptBGV(ciphertext: FHECiphertext, context: FHEContext): FHEPlaintext {
     const data = JSON.parse(ciphertext.data.toString());
     return {
       data: Buffer.from(JSON.stringify(data.encrypted)),
@@ -823,24 +767,15 @@ export class HomomorphicEncryptionEngine {
     };
   }
 
-  private encryptBFV(
-    plaintext: FHEPlaintext,
-    context: FHEContext,
-  ): FHECiphertext {
+  private encryptBFV(plaintext: FHEPlaintext, context: FHEContext): FHECiphertext {
     return this.encryptBGV(plaintext, context); // Similar to BGV
   }
 
-  private decryptBFV(
-    ciphertext: FHECiphertext,
-    context: FHEContext,
-  ): FHEPlaintext {
+  private decryptBFV(ciphertext: FHECiphertext, context: FHEContext): FHEPlaintext {
     return this.decryptBGV(ciphertext, context); // Similar to BGV
   }
 
-  private encryptTFHE(
-    plaintext: FHEPlaintext,
-    context: FHEContext,
-  ): FHECiphertext {
+  private encryptTFHE(plaintext: FHEPlaintext, context: FHEContext): FHECiphertext {
     const data = JSON.parse(plaintext.data.toString());
     return {
       data: Buffer.from(JSON.stringify({ encrypted: data, noise: 0.2 })),
@@ -850,10 +785,7 @@ export class HomomorphicEncryptionEngine {
     };
   }
 
-  private decryptTFHE(
-    ciphertext: FHECiphertext,
-    context: FHEContext,
-  ): FHEPlaintext {
+  private decryptTFHE(ciphertext: FHECiphertext, context: FHEContext): FHEPlaintext {
     const data = JSON.parse(ciphertext.data.toString());
     return {
       data: Buffer.from(JSON.stringify(data.encrypted)),
@@ -864,24 +796,18 @@ export class HomomorphicEncryptionEngine {
 
   // Homomorphic operation implementations (simplified)
 
-  private addCKKS(
-    ct1: FHECiphertext,
-    ct2: FHECiphertext,
-    context: FHEContext,
-  ): FHECiphertext {
+  private addCKKS(ct1: FHECiphertext, ct2: FHECiphertext, context: FHEContext): FHECiphertext {
     const data1 = JSON.parse(ct1.data.toString());
     const data2 = JSON.parse(ct2.data.toString());
 
-    const result = data1.encrypted.map(
-      (x: number, i: number) => x + (data2.encrypted[i] || 0),
-    );
+    const result = data1.encrypted.map((x: number, i: number) => x + (data2.encrypted[i] || 0));
 
     return {
       data: Buffer.from(
         JSON.stringify({
           encrypted: result,
           noise: ct1.noiseLevel + ct2.noiseLevel,
-        }),
+        })
       ),
       scheme: FHEScheme.CKKS,
       noiseLevel: ct1.noiseLevel + ct2.noiseLevel,
@@ -890,24 +816,18 @@ export class HomomorphicEncryptionEngine {
     };
   }
 
-  private addBGV(
-    ct1: FHECiphertext,
-    ct2: FHECiphertext,
-    context: FHEContext,
-  ): FHECiphertext {
+  private addBGV(ct1: FHECiphertext, ct2: FHECiphertext, context: FHEContext): FHECiphertext {
     const data1 = JSON.parse(ct1.data.toString());
     const data2 = JSON.parse(ct2.data.toString());
 
-    const result = data1.encrypted.map(
-      (x: number, i: number) => x + (data2.encrypted[i] || 0),
-    );
+    const result = data1.encrypted.map((x: number, i: number) => x + (data2.encrypted[i] || 0));
 
     return {
       data: Buffer.from(
         JSON.stringify({
           encrypted: result,
           noise: ct1.noiseLevel + ct2.noiseLevel,
-        }),
+        })
       ),
       scheme: ct1.scheme,
       noiseLevel: ct1.noiseLevel + ct2.noiseLevel,
@@ -915,25 +835,19 @@ export class HomomorphicEncryptionEngine {
     };
   }
 
-  private addTFHE(
-    ct1: FHECiphertext,
-    ct2: FHECiphertext,
-    context: FHEContext,
-  ): FHECiphertext {
+  private addTFHE(ct1: FHECiphertext, ct2: FHECiphertext, context: FHEContext): FHECiphertext {
     // TFHE addition (XOR for boolean)
     const data1 = JSON.parse(ct1.data.toString());
     const data2 = JSON.parse(ct2.data.toString());
 
-    const result = data1.encrypted.map(
-      (x: number, i: number) => x ^ (data2.encrypted[i] || 0),
-    );
+    const result = data1.encrypted.map((x: number, i: number) => x ^ (data2.encrypted[i] || 0));
 
     return {
       data: Buffer.from(
         JSON.stringify({
           encrypted: result,
           noise: ct1.noiseLevel + ct2.noiseLevel,
-        }),
+        })
       ),
       scheme: FHEScheme.TFHE,
       noiseLevel: ct1.noiseLevel + ct2.noiseLevel,
@@ -941,24 +855,18 @@ export class HomomorphicEncryptionEngine {
     };
   }
 
-  private multiplyCKKS(
-    ct1: FHECiphertext,
-    ct2: FHECiphertext,
-    context: FHEContext,
-  ): FHECiphertext {
+  private multiplyCKKS(ct1: FHECiphertext, ct2: FHECiphertext, context: FHEContext): FHECiphertext {
     const data1 = JSON.parse(ct1.data.toString());
     const data2 = JSON.parse(ct2.data.toString());
 
-    const result = data1.encrypted.map(
-      (x: number, i: number) => x * (data2.encrypted[i] || 1),
-    );
+    const result = data1.encrypted.map((x: number, i: number) => x * (data2.encrypted[i] || 1));
 
     return {
       data: Buffer.from(
         JSON.stringify({
           encrypted: result,
           noise: ct1.noiseLevel * ct2.noiseLevel,
-        }),
+        })
       ),
       scheme: FHEScheme.CKKS,
       noiseLevel: ct1.noiseLevel * ct2.noiseLevel,
@@ -967,24 +875,18 @@ export class HomomorphicEncryptionEngine {
     };
   }
 
-  private multiplyBGV(
-    ct1: FHECiphertext,
-    ct2: FHECiphertext,
-    context: FHEContext,
-  ): FHECiphertext {
+  private multiplyBGV(ct1: FHECiphertext, ct2: FHECiphertext, context: FHEContext): FHECiphertext {
     const data1 = JSON.parse(ct1.data.toString());
     const data2 = JSON.parse(ct2.data.toString());
 
-    const result = data1.encrypted.map(
-      (x: number, i: number) => x * (data2.encrypted[i] || 1),
-    );
+    const result = data1.encrypted.map((x: number, i: number) => x * (data2.encrypted[i] || 1));
 
     return {
       data: Buffer.from(
         JSON.stringify({
           encrypted: result,
           noise: ct1.noiseLevel * ct2.noiseLevel,
-        }),
+        })
       ),
       scheme: ct1.scheme,
       noiseLevel: ct1.noiseLevel * ct2.noiseLevel,
@@ -992,25 +894,19 @@ export class HomomorphicEncryptionEngine {
     };
   }
 
-  private multiplyTFHE(
-    ct1: FHECiphertext,
-    ct2: FHECiphertext,
-    context: FHEContext,
-  ): FHECiphertext {
+  private multiplyTFHE(ct1: FHECiphertext, ct2: FHECiphertext, context: FHEContext): FHECiphertext {
     // TFHE multiplication (AND for boolean)
     const data1 = JSON.parse(ct1.data.toString());
     const data2 = JSON.parse(ct2.data.toString());
 
-    const result = data1.encrypted.map(
-      (x: number, i: number) => x & (data2.encrypted[i] || 0),
-    );
+    const result = data1.encrypted.map((x: number, i: number) => x & (data2.encrypted[i] || 0));
 
     return {
       data: Buffer.from(
         JSON.stringify({
           encrypted: result,
           noise: ct1.noiseLevel + ct2.noiseLevel + 0.1,
-        }),
+        })
       ),
       scheme: FHEScheme.TFHE,
       noiseLevel: ct1.noiseLevel + ct2.noiseLevel + 0.1,
@@ -1018,10 +914,7 @@ export class HomomorphicEncryptionEngine {
     };
   }
 
-  private relinearize(
-    ciphertext: FHECiphertext,
-    context: FHEContext,
-  ): FHECiphertext {
+  private relinearize(ciphertext: FHECiphertext, context: FHEContext): FHECiphertext {
     // Simplified relinearization
     return {
       ...ciphertext,
@@ -1033,28 +926,20 @@ export class HomomorphicEncryptionEngine {
   private rotateBatched(
     ciphertext: FHECiphertext,
     steps: number,
-    context: FHEContext,
+    context: FHEContext
   ): FHECiphertext {
     const data = JSON.parse(ciphertext.data.toString());
 
     // Rotate the encrypted array
-    const rotated = [
-      ...data.encrypted.slice(steps),
-      ...data.encrypted.slice(0, steps),
-    ];
+    const rotated = [...data.encrypted.slice(steps), ...data.encrypted.slice(0, steps)];
 
     return {
       ...ciphertext,
-      data: Buffer.from(
-        JSON.stringify({ encrypted: rotated, noise: data.noise }),
-      ),
+      data: Buffer.from(JSON.stringify({ encrypted: rotated, noise: data.noise })),
     };
   }
 
-  private rescaleCKKS(
-    ciphertext: FHECiphertext,
-    context: FHEContext,
-  ): FHECiphertext {
+  private rescaleCKKS(ciphertext: FHECiphertext, context: FHEContext): FHECiphertext {
     const data = JSON.parse(ciphertext.data.toString());
     const scale = ciphertext.scale || 1;
 
@@ -1062,18 +947,13 @@ export class HomomorphicEncryptionEngine {
 
     return {
       ...ciphertext,
-      data: Buffer.from(
-        JSON.stringify({ encrypted: rescaled, noise: data.noise }),
-      ),
+      data: Buffer.from(JSON.stringify({ encrypted: rescaled, noise: data.noise })),
       scale: 1,
       noiseLevel: ciphertext.noiseLevel * 0.9, // Reduce noise slightly
     };
   }
 
-  private bootstrapTFHE(
-    ciphertext: FHECiphertext,
-    context: FHEContext,
-  ): FHECiphertext {
+  private bootstrapTFHE(ciphertext: FHECiphertext, context: FHEContext): FHECiphertext {
     // Bootstrapping refreshes the noise
     return {
       ...ciphertext,
@@ -1083,7 +963,7 @@ export class HomomorphicEncryptionEngine {
 
   private async addMultiple(
     contextId: string,
-    ciphertexts: FHECiphertext[],
+    ciphertexts: FHECiphertext[]
   ): Promise<FHECiphertext> {
     let result = ciphertexts[0];
     for (let i = 1; i < ciphertexts.length; i++) {
@@ -1094,7 +974,7 @@ export class HomomorphicEncryptionEngine {
 
   private async multiplyMultiple(
     contextId: string,
-    ciphertexts: FHECiphertext[],
+    ciphertexts: FHECiphertext[]
   ): Promise<FHECiphertext> {
     let result = ciphertexts[0];
     for (let i = 1; i < ciphertexts.length; i++) {
@@ -1103,10 +983,7 @@ export class HomomorphicEncryptionEngine {
     return result;
   }
 
-  private estimateMemoryUsage(
-    result: FHECiphertext,
-    operationCount: number,
-  ): number {
+  private estimateMemoryUsage(result: FHECiphertext, operationCount: number): number {
     return result.size * operationCount * 8; // Rough estimate in bytes
   }
 

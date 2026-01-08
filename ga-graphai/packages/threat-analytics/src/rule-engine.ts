@@ -1,4 +1,4 @@
-import type { DetectionRule, RuleContext } from './types';
+import type { DetectionRule, RuleContext } from "./types";
 
 export class DetectionRuleEngine {
   private readonly rules: DetectionRule[];

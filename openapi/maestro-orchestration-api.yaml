@@ -57,15 +57,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OrchestrationRequest'
+              $ref: "#/components/schemas/OrchestrationRequest"
       responses:
-        '200':
+        "200":
           description: Orchestration completed successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrchestrationResult'
-        '202':
+                $ref: "#/components/schemas/OrchestrationResult"
+        "202":
           description: Orchestration started, check status using orchestrationId
           content:
             application/json:
@@ -78,10 +78,10 @@ paths:
                   status:
                     type: string
                     example: processing
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '429':
-          $ref: '#/components/responses/RateLimitError'
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "429":
+          $ref: "#/components/responses/RateLimitError"
 
   /orchestrations/{orchestrationId}:
     get:
@@ -96,14 +96,14 @@ paths:
             type: string
           example: maestro-1736950200000-abc123def
       responses:
-        '200':
+        "200":
           description: Orchestration status and results
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrchestrationStatus'
-        '404':
-          $ref: '#/components/responses/NotFoundError'
+                $ref: "#/components/schemas/OrchestrationStatus"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
 
   /orchestrations:
     get:
@@ -135,7 +135,7 @@ paths:
             type: string
             enum: [intelligence_analysis, research, documentation, development]
       responses:
-        '200':
+        "200":
           description: List of orchestrations
           content:
             application/json:
@@ -145,9 +145,9 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/OrchestrationSummary'
+                      $ref: "#/components/schemas/OrchestrationSummary"
                   pagination:
-                    $ref: '#/components/schemas/Pagination'
+                    $ref: "#/components/schemas/Pagination"
 
   # Workflow Management
   /workflows:
@@ -166,14 +166,14 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: List of workflows
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/WorkflowTemplate'
+                  $ref: "#/components/schemas/WorkflowTemplate"
 
     post:
       tags: [Workflows]
@@ -184,16 +184,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateWorkflowRequest'
+              $ref: "#/components/schemas/CreateWorkflowRequest"
       responses:
-        '201':
+        "201":
           description: Workflow template created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WorkflowTemplate'
-        '422':
-          $ref: '#/components/responses/ValidationError'
+                $ref: "#/components/schemas/WorkflowTemplate"
+        "422":
+          $ref: "#/components/responses/ValidationError"
 
   /workflows/{workflowId}:
     get:
@@ -208,14 +208,14 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
+        "200":
           description: Workflow template details
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WorkflowTemplate'
-        '404':
-          $ref: '#/components/responses/NotFoundError'
+                $ref: "#/components/schemas/WorkflowTemplate"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
 
   /workflows/{workflowId}/execute:
     post:
@@ -240,18 +240,18 @@ paths:
                   type: object
                   additionalProperties: true
                   example:
-                    source_bucket: 'intel-data-staging'
-                    caseId: 'CASE-2024-001'
+                    source_bucket: "intel-data-staging"
+                    caseId: "CASE-2024-001"
                 dryRun:
                   type: boolean
                   default: false
       responses:
-        '202':
+        "202":
           description: Workflow execution started
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WorkflowExecution'
+                $ref: "#/components/schemas/WorkflowExecution"
 
   # Runbook Management
   /runbooks:
@@ -269,14 +269,14 @@ paths:
           schema:
             type: boolean
       responses:
-        '200':
+        "200":
           description: List of runbooks
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/RunbookSummary'
+                  $ref: "#/components/schemas/RunbookSummary"
 
     post:
       tags: [Runbooks]
@@ -287,14 +287,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateRunbookRequest'
+              $ref: "#/components/schemas/CreateRunbookRequest"
       responses:
-        '201':
+        "201":
           description: Runbook created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Runbook'
+                $ref: "#/components/schemas/Runbook"
 
   /runbooks/{runbookId}/execute:
     post:
@@ -321,13 +321,13 @@ paths:
                   type: string
                   description: Required for runbooks that need approval
       responses:
-        '202':
+        "202":
           description: Runbook execution started
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RunbookExecution'
-        '403':
+                $ref: "#/components/schemas/RunbookExecution"
+        "403":
           description: Approval required or insufficient permissions
 
   # Premium Model Router
@@ -337,14 +337,14 @@ paths:
       summary: List available models
       description: Retrieve list of available premium models with current performance metrics
       responses:
-        '200':
+        "200":
           description: List of available models
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ModelInfo'
+                  $ref: "#/components/schemas/ModelInfo"
 
   /router/optimize:
     post:
@@ -356,14 +356,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ModelRoutingRequest'
+              $ref: "#/components/schemas/ModelRoutingRequest"
       responses:
-        '200':
+        "200":
           description: Model routing recommendation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ModelRoutingResponse'
+                $ref: "#/components/schemas/ModelRoutingResponse"
 
   # Compliance and Audit
   /compliance/validate:
@@ -386,12 +386,12 @@ paths:
                   items:
                     type: string
       responses:
-        '200':
+        "200":
           description: Compliance validation result
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ComplianceValidation'
+                $ref: "#/components/schemas/ComplianceValidation"
 
   /audit/logs:
     get:
@@ -425,7 +425,7 @@ paths:
             minimum: 1
             default: 1
       responses:
-        '200':
+        "200":
           description: Audit log entries
           content:
             application/json:
@@ -435,9 +435,9 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/AuditLogEntry'
+                      $ref: "#/components/schemas/AuditLogEntry"
                   pagination:
-                    $ref: '#/components/schemas/Pagination'
+                    $ref: "#/components/schemas/Pagination"
 
   # System Health
   /health:
@@ -447,12 +447,12 @@ paths:
       description: Check system health and component status
       security: []
       responses:
-        '200':
+        "200":
           description: System health status
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SystemHealth'
+                $ref: "#/components/schemas/SystemHealth"
 
   /metrics:
     get:
@@ -461,7 +461,7 @@ paths:
       description: Prometheus-compatible metrics endpoint
       security: []
       responses:
-        '200':
+        "200":
           description: Metrics data
           content:
             text/plain:
@@ -483,7 +483,7 @@ components:
         query:
           type: string
           maxLength: 5000
-          example: 'Analyze the threat landscape for financial services sector in Q4 2024'
+          example: "Analyze the threat landscape for financial services sector in Q4 2024"
         context:
           type: object
           required: [userId, tenantId, purpose]
@@ -499,8 +499,7 @@ components:
               format: uuid
             purpose:
               type: string
-              enum:
-                [intelligence_analysis, research, documentation, development]
+              enum: [intelligence_analysis, research, documentation, development]
               example: intelligence_analysis
             urgency:
               type: string
@@ -546,12 +545,12 @@ components:
               type: array
               items:
                 type: string
-              example: ['reuters.com', 'bbc.com', 'cnn.com']
+              example: ["reuters.com", "bbc.com", "cnn.com"]
             blockedDomains:
               type: array
               items:
                 type: string
-              example: ['example-blocked.com']
+              example: ["example-blocked.com"]
             requireCitations:
               type: boolean
               default: true
@@ -570,7 +569,7 @@ components:
           example: maestro-1736950200000-abc123def
         answer:
           type: string
-          example: 'Based on analysis of 15 sources, the Q4 2024 threat landscape shows increased sophistication in financial sector attacks...'
+          example: "Based on analysis of 15 sources, the Q4 2024 threat landscape shows increased sophistication in financial sector attacks..."
         confidence:
           type: number
           format: float
@@ -580,19 +579,19 @@ components:
         citations:
           type: array
           items:
-            $ref: '#/components/schemas/Citation'
+            $ref: "#/components/schemas/Citation"
         metadata:
-          $ref: '#/components/schemas/OrchestrationMetadata'
+          $ref: "#/components/schemas/OrchestrationMetadata"
         warnings:
           type: array
           items:
             type: string
-          example: ['Cost $6.50 exceeded budget $5.00']
+          example: ["Cost $6.50 exceeded budget $5.00"]
         fallbacksUsed:
           type: array
           items:
             type: string
-          example: ['web_search_fallback']
+          example: ["web_search_fallback"]
 
     OrchestrationMetadata:
       type: object
@@ -602,7 +601,7 @@ components:
           example: 15
         synthesisMethod:
           type: string
-          example: 'web_consensus+premium_gpt4'
+          example: "web_consensus+premium_gpt4"
         totalCost:
           type: number
           format: float
@@ -630,16 +629,16 @@ components:
         url:
           type: string
           format: uri
-          example: 'https://www.reuters.com/technology/cybersecurity/financial-sector-attacks-2024'
+          example: "https://www.reuters.com/technology/cybersecurity/financial-sector-attacks-2024"
         title:
           type: string
-          example: 'Financial Sector Cyberattacks Rise 40% in Q4 2024'
+          example: "Financial Sector Cyberattacks Rise 40% in Q4 2024"
         snippet:
           type: string
-          example: 'Analysis shows a significant increase in sophisticated attacks targeting financial institutions...'
+          example: "Analysis shows a significant increase in sophisticated attacks targeting financial institutions..."
         domain:
           type: string
-          example: 'reuters.com'
+          example: "reuters.com"
         relevanceScore:
           type: number
           format: float
@@ -648,7 +647,7 @@ components:
           example: 0.92
         licenseInfo:
           type: string
-          example: '© 2024 Reuters. Fair use for research purposes.'
+          example: "© 2024 Reuters. Fair use for research purposes."
 
     OrchestrationStatus:
       type: object
@@ -666,9 +665,9 @@ components:
           example: 0.75
         currentStage:
           type: string
-          example: 'premium_synthesis'
+          example: "premium_synthesis"
         result:
-          $ref: '#/components/schemas/OrchestrationResult'
+          $ref: "#/components/schemas/OrchestrationResult"
         error:
           type: string
         createdAt:
@@ -708,29 +707,29 @@ components:
           format: uuid
         name:
           type: string
-          example: 'ingest-enrich-handoff'
+          example: "ingest-enrich-handoff"
         version:
           type: string
-          example: '1.2.0'
+          example: "1.2.0"
         description:
           type: string
-          example: 'Ingest raw files, validate, normalize, and hand off to SIG'
+          example: "Ingest raw files, validate, normalize, and hand off to SIG"
         owner:
           type: string
-          example: 'platform@summit'
+          example: "platform@summit"
         labels:
           type: array
           items:
             type: string
-          example: ['sig', 'etl', 'production']
+          example: ["sig", "etl", "production"]
         parameters:
           type: array
           items:
-            $ref: '#/components/schemas/WorkflowParameter'
+            $ref: "#/components/schemas/WorkflowParameter"
         tasks:
           type: array
           items:
-            $ref: '#/components/schemas/WorkflowTask'
+            $ref: "#/components/schemas/WorkflowTask"
         createdAt:
           type: string
           format: date-time
@@ -740,11 +739,11 @@ components:
       properties:
         name:
           type: string
-          example: 'source_bucket'
+          example: "source_bucket"
         type:
           type: string
           enum: [string, integer, boolean, array, object]
-          example: 'string'
+          example: "string"
         required:
           type: boolean
           example: true
@@ -758,15 +757,15 @@ components:
       properties:
         id:
           type: string
-          example: 'fetch_raw'
+          example: "fetch_raw"
         uses:
           type: string
-          example: 'tasks/s3.get@1.4.3'
+          example: "tasks/s3.get@1.4.3"
         needs:
           type: array
           items:
             type: string
-          example: ['validate_schema']
+          example: ["validate_schema"]
         with:
           type: object
           additionalProperties: true
@@ -819,13 +818,13 @@ components:
       properties:
         name:
           type: string
-          example: 'backfill-entity-resolver'
+          example: "backfill-entity-resolver"
         version:
           type: string
-          example: '0.9.0'
+          example: "0.9.0"
         owner:
           type: string
-          example: 'sre@summit'
+          example: "sre@summit"
         approvals:
           type: object
           properties:
@@ -837,11 +836,11 @@ components:
                 type: string
         workflowRef:
           type: string
-          example: 'ingest-enrich-handoff@1.2.0'
+          example: "ingest-enrich-handoff@1.2.0"
 
     Runbook:
       allOf:
-        - $ref: '#/components/schemas/RunbookSummary'
+        - $ref: "#/components/schemas/RunbookSummary"
         - type: object
           properties:
             allowList:
@@ -854,7 +853,7 @@ components:
             inputs:
               type: array
               items:
-                $ref: '#/components/schemas/RunbookInput'
+                $ref: "#/components/schemas/RunbookInput"
             schedule:
               type: string
               nullable: true
@@ -890,8 +889,7 @@ components:
           type: string
         status:
           type: string
-          enum:
-            [pending_approval, approved, running, completed, failed, cancelled]
+          enum: [pending_approval, approved, running, completed, failed, cancelled]
         inputs:
           type: object
           additionalProperties: true
@@ -906,18 +904,18 @@ components:
       properties:
         id:
           type: string
-          example: 'gpt-4-turbo'
+          example: "gpt-4-turbo"
         name:
           type: string
-          example: 'GPT-4 Turbo'
+          example: "GPT-4 Turbo"
         provider:
           type: string
-          example: 'openai'
+          example: "openai"
         capabilities:
           type: array
           items:
             type: string
-          example: ['reasoning', 'analysis', 'synthesis']
+          example: ["reasoning", "analysis", "synthesis"]
         costPerToken:
           type: number
           format: float
@@ -985,7 +983,7 @@ components:
       type: object
       properties:
         selectedModel:
-          $ref: '#/components/schemas/ModelInfo'
+          $ref: "#/components/schemas/ModelInfo"
         confidence:
           type: number
           format: float
@@ -994,14 +992,14 @@ components:
           example: 0.87
         reasoning:
           type: string
-          example: 'Selected GPT-4 Turbo based on high quality requirement and sufficient budget'
+          example: "Selected GPT-4 Turbo based on high quality requirement and sufficient budget"
         alternatives:
           type: array
           items:
             type: object
             properties:
               model:
-                $ref: '#/components/schemas/ModelInfo'
+                $ref: "#/components/schemas/ModelInfo"
               score:
                 type: number
                 format: float
@@ -1057,16 +1055,16 @@ components:
           format: uuid
         action:
           type: string
-          example: 'orchestration_request'
+          example: "orchestration_request"
         resource:
           type: string
-          example: 'orchestration/maestro-1736950200000-abc123def'
+          example: "orchestration/maestro-1736950200000-abc123def"
         details:
           type: object
           additionalProperties: true
         ipAddress:
           type: string
-          example: '192.168.1.100'
+          example: "192.168.1.100"
         userAgent:
           type: string
         outcome:
@@ -1088,13 +1086,13 @@ components:
           type: object
           properties:
             orchestrator:
-              $ref: '#/components/schemas/ServiceHealth'
+              $ref: "#/components/schemas/ServiceHealth"
             premiumRouter:
-              $ref: '#/components/schemas/ServiceHealth'
+              $ref: "#/components/schemas/ServiceHealth"
             complianceGate:
-              $ref: '#/components/schemas/ServiceHealth'
+              $ref: "#/components/schemas/ServiceHealth"
             rateLimiter:
-              $ref: '#/components/schemas/ServiceHealth'
+              $ref: "#/components/schemas/ServiceHealth"
 
     ServiceHealth:
       type: object
@@ -1152,33 +1150,33 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
 
     NotFoundError:
       description: Resource not found
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
 
     ValidationError:
       description: Validation error
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
 
     RateLimitError:
       description: Rate limit exceeded
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           example:
             error:
               code: RATE_LIMIT_EXCEEDED
               message: Rate limit exceeded. Retry after 3600 seconds.
-            timestamp: '2024-01-15T10:30:00Z'
+            timestamp: "2024-01-15T10:30:00Z"
 
 tags:
   - name: Orchestration

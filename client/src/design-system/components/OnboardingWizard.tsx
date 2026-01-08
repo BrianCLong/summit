@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Box,
   Button,
@@ -8,13 +8,13 @@ import {
   Stack,
   Typography,
   useMediaQuery,
-} from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import ReplayIcon from '@mui/icons-material/Replay';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import { useDesignSystemTelemetry } from '../DesignSystemProvider';
+} from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import ReplayIcon from "@mui/icons-material/Replay";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import { useDesignSystemTelemetry } from "../DesignSystemProvider";
 
 export type WizardStep = {
   id: string;
@@ -34,10 +34,15 @@ export type OnboardingWizardProps = {
 
 const storageKey = (flowId: string) => `onboarding-wizard:${flowId}`;
 
-export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ flowId, steps, onComplete, onReset }) => {
+export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
+  flowId,
+  steps,
+  onComplete,
+  onReset,
+}) => {
   const telemetry = useDesignSystemTelemetry();
   const theme = useTheme();
-  const prefersReducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
+  const prefersReducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
   const [activeStep, setActiveStep] = React.useState<number>(() => {
     const saved = localStorage.getItem(storageKey(flowId));
     const parsed = saved ? Number(saved) : 0;
@@ -45,7 +50,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ flowId, step
   });
 
   React.useEffect(() => {
-    telemetry.record('OnboardingWizard', '1.0.0', { flowId, steps: steps.map((s) => s.id) });
+    telemetry.record("OnboardingWizard", "1.0.0", { flowId, steps: steps.map((s) => s.id) });
   }, [flowId, steps, telemetry]);
 
   React.useEffect(() => {
@@ -66,7 +71,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ flowId, step
     localStorage.removeItem(storageKey(flowId));
     setActiveStep(0);
     onReset?.();
-    telemetry.record('OnboardingWizardReset', '1.0.0', { flowId });
+    telemetry.record("OnboardingWizardReset", "1.0.0", { flowId });
   };
 
   const currentStep = steps[activeStep];
@@ -85,8 +90,10 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ flowId, step
   const completed = currentStep?.isComplete?.() ?? false;
 
   return (
-    <Paper variant="outlined" sx={{ p: 3, position: 'relative', overflow: 'hidden' }}>
-      {prefersReducedMotion ? null : <LinearProgress variant="determinate" value={((activeStep + 1) / steps.length) * 100} />}
+    <Paper variant="outlined" sx={{ p: 3, position: "relative", overflow: "hidden" }}>
+      {prefersReducedMotion ? null : (
+        <LinearProgress variant="determinate" value={((activeStep + 1) / steps.length) * 100} />
+      )}
       <Stack spacing={1} mb={2} mt={prefersReducedMotion ? 0 : 2}>
         <Typography variant="overline" color="text.secondary">
           Step {activeStep + 1} of {steps.length}
@@ -111,7 +118,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ flowId, step
         steps={steps.length}
         position="bottom"
         activeStep={activeStep}
-        sx={{ background: 'transparent', pt: 2 }}
+        sx={{ background: "transparent", pt: 2 }}
         nextButton={
           <Button
             size="small"
@@ -120,21 +127,33 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ flowId, step
             endIcon={<ArrowForwardIcon />}
             aria-label="Next step"
           >
-            {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+            {activeStep === steps.length - 1 ? "Finish" : "Next"}
           </Button>
         }
         backButton={
-          <Button size="small" onClick={handleBack} disabled={activeStep === 0} startIcon={<ArrowBackIcon />} aria-label="Previous step">
+          <Button
+            size="small"
+            onClick={handleBack}
+            disabled={activeStep === 0}
+            startIcon={<ArrowBackIcon />}
+            aria-label="Previous step"
+          >
             Back
           </Button>
         }
       />
       <Stack direction="row" justifyContent="space-between" alignItems="center" mt={2} spacing={2}>
-        <Button variant="text" color="inherit" startIcon={<ReplayIcon />} onClick={handleReset} aria-label="Reset wizard">
+        <Button
+          variant="text"
+          color="inherit"
+          startIcon={<ReplayIcon />}
+          onClick={handleReset}
+          aria-label="Reset wizard"
+        >
           Reset progress
         </Button>
         <Typography variant="caption" color="text.secondary">
-          Honors reduced motion: {prefersReducedMotion ? 'on' : 'off'} | Theme: {theme.palette.mode}
+          Honors reduced motion: {prefersReducedMotion ? "on" : "off"} | Theme: {theme.palette.mode}
         </Typography>
       </Stack>
     </Paper>

@@ -4,17 +4,18 @@
 
 ## 1. Change lifecycle
 
-| Stage | Purpose | Expected artifacts | Risk-sensitive rules |
-| --- | --- | --- | --- |
-| Idea / Intake | Capture intent and align on value | Lightweight ticket with problem, desired outcome, stakeholders, rough scope | Risk rating selected (Low/Med/High). High risk requires early lead approval. |
-| Design / ADR | Decide approach and interfaces | ADR (or design doc) with options, decision, tradeoffs, security/privacy considerations, telemetry plan | High risk: formal ADR with reviewers from security + reliability; Low risk: inline design note in ticket. |
-| Implementation | Build the change | Code + tests, feature flags/toggles, telemetry hooks, migration scripts as needed | High risk: pair/mob or design walkthrough; Low: solo ok. |
-| Review | Validate correctness & readiness | PR with description, scope of change, risk summary, test evidence, rollout/rollback notes | High risk: 2 approvals incl. domain owner or security; Medium: 1 domain owner; Low: 1 reviewer. |
-| Merge | Land safely to main | CI green, conventional commit, labels set, changelog entry (if user-facing) | High risk: protected branch with required checks + signed commits. |
-| Release | Deliver to users | Release plan (phased/flagged), runbook, monitoring dashboards/alerts updated | High risk: staged rollout + canary; Medium: progressive; Low: direct deploy allowed. |
-| Post-release validation | Confirm impact & learn | Telemetry review, incident log if issues, retro item if defects found | High risk: 24–48h focused watch with SLOs and alert review. |
+| Stage                   | Purpose                           | Expected artifacts                                                                                     | Risk-sensitive rules                                                                                      |
+| ----------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| Idea / Intake           | Capture intent and align on value | Lightweight ticket with problem, desired outcome, stakeholders, rough scope                            | Risk rating selected (Low/Med/High). High risk requires early lead approval.                              |
+| Design / ADR            | Decide approach and interfaces    | ADR (or design doc) with options, decision, tradeoffs, security/privacy considerations, telemetry plan | High risk: formal ADR with reviewers from security + reliability; Low risk: inline design note in ticket. |
+| Implementation          | Build the change                  | Code + tests, feature flags/toggles, telemetry hooks, migration scripts as needed                      | High risk: pair/mob or design walkthrough; Low: solo ok.                                                  |
+| Review                  | Validate correctness & readiness  | PR with description, scope of change, risk summary, test evidence, rollout/rollback notes              | High risk: 2 approvals incl. domain owner or security; Medium: 1 domain owner; Low: 1 reviewer.           |
+| Merge                   | Land safely to main               | CI green, conventional commit, labels set, changelog entry (if user-facing)                            | High risk: protected branch with required checks + signed commits.                                        |
+| Release                 | Deliver to users                  | Release plan (phased/flagged), runbook, monitoring dashboards/alerts updated                           | High risk: staged rollout + canary; Medium: progressive; Low: direct deploy allowed.                      |
+| Post-release validation | Confirm impact & learn            | Telemetry review, incident log if issues, retro item if defects found                                  | High risk: 24–48h focused watch with SLOs and alert review.                                               |
 
 ### Risk levels
+
 - **Low:** Small, revertible, no auth/data model changes; guarded by flags. Follows lightweight design (ticket note), 1 reviewer, smoke tests.
 - **Medium:** Moderate scope or user-visible UX changes. Requires brief design/ADR, owner review, regression tests, rollout notes.
 - **High:** Security/auth/data migrations, billing, availability, or multi-team impact. Requires formal ADR, dual review (incl. security or reliability), canary plan, rollback procedure, and post-release watch.
@@ -22,6 +23,7 @@
 ## 2. Code review standards
 
 Reviewers are responsible for:
+
 - **Correctness & clarity:** logic is sound, edge cases covered, code is readable and scoped narrowly.
 - **Security & privacy:** input validation, authz, data handling, secrets, dependency risk.
 - **Performance & scalability:** complexity, hot paths, N+1 queries, resource limits.
@@ -30,11 +32,13 @@ Reviewers are responsible for:
 - **Accessibility/UX (when applicable):** ARIA/keyboard, responsive behavior, copy clarity.
 
 ### Expectations for PRs
+
 - **Size/structure:** Prefer <300 lines changed; larger changes split by feature flag or staged PRs. Keep commits logically grouped; avoid drive-by changes.
 - **Description:** Problem, approach, risk level, screenshots for UI, test plan (commands + results), rollout/rollback notes, links to ticket/ADR.
 - **Scope hygiene:** No unrelated refactors; generated files excluded; migrations clearly called out.
 
 ### Review SLAs & ownership
+
 - **SLA:** First response within 1 business day; high-risk or blocking fixes within 4 business hours.
 - **Ownership:** Codeowners auto-assigned; domain owners review high-risk changes in their area.
 - **Disagreements:** Use “request changes” with rationale; escalate to tech lead after two rounds or 24h deadlock; document decision in PR/ADR.
@@ -58,10 +62,12 @@ Reviewers are responsible for:
 ## 4. Artifacts
 
 ### 4.1 Engineering Change Workflow v0 outline
+
 - Lifecycle stages, risk definitions, approval matrix, and required artifacts summarized above.
 - Default release patterns: trunk-based, feature-flag-first, canary for high risk.
 
 ### 4.2 Example PR template (risky change)
+
 ```
 ## Summary
 - What problem are we solving?
@@ -96,6 +102,7 @@ Reviewers are responsible for:
 ```
 
 ### 4.3 Governance pass checklist
+
 - Risk level declared and matches scope.
 - Ticket and (if medium/high) ADR linked; decisions recorded.
 - PR description complete (summary, risk, tests, rollout/rollback, observability, security notes).

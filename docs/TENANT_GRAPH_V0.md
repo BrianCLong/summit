@@ -50,6 +50,7 @@ Tenant Graph Slice v0 delivers multi-tenant graph ingestion, storage, and query 
 ### Entities
 
 Canonical entity types with stable ID generation:
+
 - **Person**: name, email (PII), phone (PII), nationality
 - **Organization**: name, industry, jurisdiction, registration number
 - **Asset**: type, description, value, serial number
@@ -57,11 +58,13 @@ Canonical entity types with stable ID generation:
 - **Indicator**: type, value, pattern, confidence, TLP level
 
 **Stable ID Formula**:
+
 ```
 ID = tenant:kind:SHA256(naturalKeys)
 ```
 
 Natural keys per type:
+
 - Person: `name + dateOfBirth + nationality`
 - Organization: `name + jurisdiction + registrationNumber`
 - Asset: `assetType + serialNumber`
@@ -71,12 +74,14 @@ Natural keys per type:
 ### Relationships
 
 Edge types with confidence scores:
+
 - `MEMBER_OF`: Person → Organization
 - `OWNS`: Organization → Asset
 - `MENTIONED_IN`: Entity → Event
 - `RELATED_TO`: Entity → Entity
 
 All relationships include:
+
 - Temporal tracking (first_seen, last_seen)
 - Confidence score (0.0-1.0)
 - Source attribution
@@ -84,19 +89,20 @@ All relationships include:
 
 ### Retention & Privacy
 
-| Entity Type | Has PII | Retention Class | TTL    |
-|-------------|---------|-----------------|--------|
-| Person      | Yes     | short-30d       | 30 days|
-| Person      | No      | standard-365d   | 365 days|
-| Organization| No      | standard-365d   | 365 days|
-| Asset       | No      | standard-365d   | 365 days|
-| Indicator   | No      | long-1095d      | 1095 days|
+| Entity Type  | Has PII | Retention Class | TTL       |
+| ------------ | ------- | --------------- | --------- |
+| Person       | Yes     | short-30d       | 30 days   |
+| Person       | No      | standard-365d   | 365 days  |
+| Organization | No      | standard-365d   | 365 days  |
+| Asset        | No      | standard-365d   | 365 days  |
+| Indicator    | No      | long-1095d      | 1095 days |
 
 ## API Reference
 
 ### GraphQL Queries
 
 #### `entityById`
+
 Get entity by ID with tenant scope.
 
 ```graphql
@@ -107,7 +113,7 @@ query GetEntity($id: ID!, $tenantId: ID!) {
     labels
     ... on Person {
       name
-      email  # Redacted unless user has 'investigation' purpose
+      email # Redacted unless user has 'investigation' purpose
     }
   }
 }
@@ -116,6 +122,7 @@ query GetEntity($id: ID!, $tenantId: ID!) {
 **Performance**: p50 < 50ms, p95 < 150ms
 
 #### `searchEntities`
+
 Full-text search across all entity types.
 
 ```graphql
@@ -124,11 +131,11 @@ query Search($tenantId: ID!, $q: String!, $limit: Int) {
     entities {
       id
       labels
-      score  # Relevance score
+      score # Relevance score
     }
     total
     hasMore
-    took   # Query time in ms
+    took # Query time in ms
   }
 }
 ```
@@ -136,18 +143,22 @@ query Search($tenantId: ID!, $q: String!, $limit: Int) {
 **SLO**: p95 < 350ms, 99.9% availability monthly
 
 #### `neighbors`
+
 Graph traversal with configurable hop depth.
 
 ```graphql
-query GetNeighbors(
-  $id: ID!,
-  $tenantId: ID!,
-  $hops: Int,
-  $filter: NeighborFilter
-) {
+query GetNeighbors($id: ID!, $tenantId: ID!, $hops: Int, $filter: NeighborFilter) {
   neighbors(id: $id, tenantId: $tenantId, hops: $hops, filter: $filter) {
-    entities { id labels }
-    relationships { fromEntityId toEntityId relationshipType confidence }
+    entities {
+      id
+      labels
+    }
+    relationships {
+      fromEntityId
+      toEntityId
+      relationshipType
+      confidence
+    }
     total
     took
   }
@@ -155,18 +166,21 @@ query GetNeighbors(
 ```
 
 **SLOs**:
+
 - 1-hop: p95 < 300ms
 - 2-hop: p95 < 1200ms
 
 ### HTTP Ingest API
 
 #### `POST /api/v1/ingest`
+
 Ingest entities and relationships via HTTP.
 
 **Authentication**: JWT Bearer token required
 **Authorization**: `ingest:write` permission via OPA
 
 **Request**:
+
 ```json
 {
   "tenantId": "tenant-001",
@@ -199,6 +213,7 @@ Ingest entities and relationships via HTTP.
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -283,6 +298,7 @@ pnpm tsx scripts/ingest-csv.ts \
 ### Multi-Tenancy
 
 **Row-Level Security (RLS)**:
+
 ```sql
 CREATE POLICY tenant_isolation ON entities
   USING (tenant_id = current_setting('app.current_tenant'));
@@ -293,11 +309,13 @@ CREATE POLICY tenant_isolation ON entities
 ### ABAC (Attribute-Based Access Control)
 
 OPA policies enforce:
+
 - **Tenant isolation**: User can only access their tenant's data
 - **Purpose tags**: PII requires 'investigation' or 'threat-intel' purpose
 - **Action permissions**: `entity:read`, `ingest:write`, etc.
 
 **Example Policy**:
+
 ```rego
 allow {
   input.user.tenantId == input.tenantId
@@ -309,11 +327,13 @@ allow {
 ### PII Protection
 
 Fields marked with `@pii` directive are:
+
 1. **Encrypted at rest** using AES-256-GCM
 2. **Redacted in responses** unless user has proper purpose
 3. **Subject to short retention** (30 days by default)
 
 **Example Redaction**:
+
 ```json
 // Without 'investigation' purpose:
 {
@@ -326,17 +346,18 @@ Fields marked with `@pii` directive are:
 
 ### Service Level Objectives
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Availability | 99.9% | Monthly uptime |
-| Search latency | p95 < 350ms | Per-query |
-| 1-hop neighbors | p95 < 300ms | Per-query |
-| 2-hop neighbors | p95 < 1200ms | Per-query |
-| Ingest throughput | ≥100k entities/sec | Per worker |
+| Metric            | Target             | Measurement    |
+| ----------------- | ------------------ | -------------- |
+| Availability      | 99.9%              | Monthly uptime |
+| Search latency    | p95 < 350ms        | Per-query      |
+| 1-hop neighbors   | p95 < 300ms        | Per-query      |
+| 2-hop neighbors   | p95 < 1200ms       | Per-query      |
+| Ingest throughput | ≥100k entities/sec | Per worker     |
 
 ### Metrics
 
 **Prometheus Metrics**:
+
 - `graphql_search_latency_ms{quantile}`
 - `graphql_neighbors_latency_ms{hops, quantile}`
 - `ingest_entities_created_total`
@@ -348,6 +369,7 @@ Fields marked with `@pii` directive are:
 **Grafana Dashboard**: `observability/dashboards/tenant-graph-v0.json`
 
 Panels:
+
 - Search/neighbors latency (p50, p95, p99)
 - Ingest throughput
 - Error rates & SLO burn
@@ -357,6 +379,7 @@ Panels:
 ### Alerts
 
 **SLO Burn Alerts** (50%, 80%, 100% of error budget):
+
 ```yaml
 - alert: SearchLatencySLOBurn
   expr: histogram_quantile(0.95, rate(graphql_search_latency_ms_bucket[5m])) > 350
@@ -370,16 +393,19 @@ Panels:
 ### k6 Tests
 
 Run SLO validation:
+
 ```bash
 k6 run --vus 100 --duration 5m tests/load/tenant-graph-slo.js
 ```
 
 **Test Scenarios**:
+
 - 50% search queries
 - 30% 1-hop neighbor queries
 - 20% 2-hop neighbor queries
 
 **Pass Criteria**:
+
 - Error rate < 0.1%
 - All SLO thresholds met at p95
 - No crashes or memory leaks
@@ -387,12 +413,14 @@ k6 run --vus 100 --duration 5m tests/load/tenant-graph-slo.js
 ### Expected Performance
 
 **Local Development** (MacBook Pro M1):
+
 - Search: p95 ~ 180ms
 - 1-hop: p95 ~ 120ms
 - 2-hop: p95 ~ 450ms
 - Ingest: ~80k entities/sec
 
 **Production** (k8s cluster, 4 replicas):
+
 - Search: p95 ~ 250ms
 - 1-hop: p95 ~ 180ms
 - 2-hop: p95 ~ 800ms
@@ -466,21 +494,24 @@ kubectl rollout status deployment/tenant-graph-api
 
 **Issue**: Search queries slow (>350ms)
 
-*Solutions*:
+_Solutions_:
+
 1. Check Neo4j full-text index: `SHOW INDEXES`
 2. Verify index is populated: `CALL db.index.fulltext.queryNodes('entitySearch', 'test')`
 3. Increase Neo4j heap: `NEO4J_HEAP_INITIAL=2g NEO4J_HEAP_MAX=4g`
 
 **Issue**: Ingest fails with "entity not found" errors
 
-*Solutions*:
+_Solutions_:
+
 1. Check external ID mapping in CSV
 2. Verify entities are created before relationships
 3. Review provenance logs: `SELECT * FROM provenance_records WHERE id = 'prov-xxx'`
 
 **Issue**: PII fields not redacted
 
-*Solutions*:
+_Solutions_:
+
 1. Verify user has correct purpose tags
 2. Check OPA policies are loaded: `curl http://localhost:8181/v1/policies`
 3. Review resolver redaction logic in `tenantGraph.ts`
@@ -501,12 +532,14 @@ docker exec summit-neo4j cat /logs/query.log | tail -20
 ## Roadmap
 
 ### v0.2 (Next)
+
 - [ ] Streaming ingest (Kafka connector)
 - [ ] GraphQL subscriptions (real-time updates)
 - [ ] Advanced ER (entity resolution) with ML scoring
 - [ ] Multi-region replication
 
 ### v1.0 (Future)
+
 - [ ] Temporal graph queries (time-travel)
 - [ ] Graph ML (embeddings, link prediction)
 - [ ] Federated query across tenants

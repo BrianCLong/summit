@@ -1,6 +1,6 @@
 #!/usr/bin/env -S node --loader ts-node/esm
-import fs from 'node:fs';
-import path from 'node:path';
+import fs from "node:fs";
+import path from "node:path";
 
 interface UsageEntry {
   timestamp: string;
@@ -15,7 +15,7 @@ interface UsageEntry {
   environment?: string;
 }
 
-const DEFAULT_LOG_PATH = process.env.LLM_USAGE_LOG_PATH || 'logs/llm-usage.ndjson';
+const DEFAULT_LOG_PATH = process.env.LLM_USAGE_LOG_PATH || "logs/llm-usage.ndjson";
 
 function loadEntries(logPath: string): UsageEntry[] {
   if (!fs.existsSync(logPath)) {
@@ -23,18 +23,18 @@ function loadEntries(logPath: string): UsageEntry[] {
     return [];
   }
 
-  const raw = fs.readFileSync(logPath, 'utf8');
+  const raw = fs.readFileSync(logPath, "utf8");
   const lines = raw
-    .split('\n')
-    .map(line => line.trim())
+    .split("\n")
+    .map((line) => line.trim())
     .filter(Boolean);
 
   return lines
-    .map(line => {
+    .map((line) => {
       try {
         return JSON.parse(line) as UsageEntry;
       } catch (err) {
-        console.warn('Skipping malformed line in log:', err);
+        console.warn("Skipping malformed line in log:", err);
         return null;
       }
     })
@@ -45,7 +45,7 @@ function aggregate(entries: UsageEntry[], key: (entry: UsageEntry) => string) {
   const totals: Record<string, { cost: number; tokens: number; calls: number }> = {};
 
   for (const entry of entries) {
-    const bucket = key(entry) || 'unspecified';
+    const bucket = key(entry) || "unspecified";
     if (!totals[bucket]) {
       totals[bucket] = { cost: 0, tokens: 0, calls: 0 };
     }
@@ -57,24 +57,27 @@ function aggregate(entries: UsageEntry[], key: (entry: UsageEntry) => string) {
   return totals;
 }
 
-function printSection(title: string, totals: Record<string, { cost: number; tokens: number; calls: number }>) {
+function printSection(
+  title: string,
+  totals: Record<string, { cost: number; tokens: number; calls: number }>
+) {
   console.log(`\n${title}`);
-  console.log('---------------------------');
+  console.log("---------------------------");
   const entries = Object.entries(totals);
   if (!entries.length) {
-    console.log('No data available.');
+    console.log("No data available.");
     return;
   }
 
   for (const [bucket, stats] of entries) {
     console.log(
-      `${bucket}: cost=$${stats.cost.toFixed(4)} tokens=${stats.tokens} calls=${stats.calls}`,
+      `${bucket}: cost=$${stats.cost.toFixed(4)} tokens=${stats.tokens} calls=${stats.calls}`
     );
   }
 }
 
 function main() {
-  const logPathArgIndex = process.argv.findIndex(arg => arg === '--log');
+  const logPathArgIndex = process.argv.findIndex((arg) => arg === "--log");
   const logPath =
     logPathArgIndex !== -1 && process.argv[logPathArgIndex + 1]
       ? process.argv[logPathArgIndex + 1]
@@ -84,9 +87,18 @@ function main() {
   const entries = loadEntries(resolvedLogPath);
 
   console.log(`Reading LLM usage from ${resolvedLogPath}`);
-  printSection('Cost by provider', aggregate(entries, entry => entry.vendor));
-  printSection('Cost by feature', aggregate(entries, entry => entry.feature || 'unspecified'));
-  printSection('Cost by tenant', aggregate(entries, entry => entry.tenantId || 'multi-tenant'));
+  printSection(
+    "Cost by provider",
+    aggregate(entries, (entry) => entry.vendor)
+  );
+  printSection(
+    "Cost by feature",
+    aggregate(entries, (entry) => entry.feature || "unspecified")
+  );
+  printSection(
+    "Cost by tenant",
+    aggregate(entries, (entry) => entry.tenantId || "multi-tenant")
+  );
 }
 
 main();

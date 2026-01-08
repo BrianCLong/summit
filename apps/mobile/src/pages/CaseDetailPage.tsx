@@ -85,10 +85,7 @@ interface EntityItemProps {
 
 function EntityItem({ entity, onClick }: EntityItemProps) {
   return (
-    <ListItem
-      onClick={onClick}
-      sx={{ borderRadius: 2, cursor: 'pointer' }}
-    >
+    <ListItem onClick={onClick} sx={{ borderRadius: 2, cursor: 'pointer' }}>
       <ListItemAvatar>
         <Avatar src={entity.thumbnailUrl}>
           {entityIcons[entity.type] || entity.name.charAt(0)}
@@ -250,11 +247,7 @@ export function CaseDetailPage() {
 
       {/* Status and Priority */}
       <Box sx={{ px: 2, mb: 2, display: 'flex', gap: 1 }}>
-        <Chip
-          label={caseData.status.replace('_', ' ')}
-          size="small"
-          color="primary"
-        />
+        <Chip label={caseData.status.replace('_', ' ')} size="small" color="primary" />
         <Chip
           label={caseData.priority}
           size="small"
@@ -267,11 +260,7 @@ export function CaseDetailPage() {
 
       {/* Tabs */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs
-          value={tabValue}
-          onChange={(_, v) => setTabValue(v)}
-          variant="fullWidth"
-        >
+        <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)} variant="fullWidth">
           <Tab label="Overview" />
           <Tab label="Entities" />
           <Tab label="Notes" />
@@ -371,7 +360,9 @@ export function CaseDetailPage() {
                       <ListItem key={task.id} disablePadding sx={{ py: 0.5 }}>
                         <ListItemText
                           primary={task.title}
-                          secondary={task.dueDate && `Due: ${new Date(task.dueDate).toLocaleDateString()}`}
+                          secondary={
+                            task.dueDate && `Due: ${new Date(task.dueDate).toLocaleDateString()}`
+                          }
                         />
                       </ListItem>
                     ))}

@@ -1,5 +1,5 @@
-import { DriftSignal, FeatureVector, Modality } from './types.js';
-import { FeatureStore } from './featureStore.js';
+import { DriftSignal, FeatureVector, Modality } from "./types.js";
+import { FeatureStore } from "./featureStore.js";
 
 export class OnlineLearner {
   constructor(private readonly featureStore: FeatureStore) {}

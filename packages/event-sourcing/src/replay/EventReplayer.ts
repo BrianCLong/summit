@@ -4,10 +4,10 @@
  * Stream and replay events with progress tracking
  */
 
-import { EventEmitter } from 'events';
-import { EventStore } from '../store/EventStore.js';
-import pino from 'pino';
-import type { DomainEvent, ReplayOptions } from '../store/types.js';
+import { EventEmitter } from "events";
+import { EventStore } from "../store/EventStore.js";
+import pino from "pino";
+import type { DomainEvent, ReplayOptions } from "../store/types.js";
 
 export type EventHandler = (event: DomainEvent) => Promise<void> | void;
 
@@ -28,7 +28,7 @@ export class EventReplayer extends EventEmitter {
   constructor(eventStore: EventStore) {
     super();
     this.eventStore = eventStore;
-    this.logger = pino({ name: 'EventReplayer' });
+    this.logger = pino({ name: "EventReplayer" });
   }
 
   /**
@@ -58,44 +58,29 @@ export class EventReplayer extends EventEmitter {
     let processedEvents = 0;
     let totalEvents = 0;
 
-    this.logger.info({ options }, 'Starting event replay');
-    this.emit('replay:started');
+    this.logger.info({ options }, "Starting event replay");
+    this.emit("replay:started");
 
     try {
       const batchSize = options.batchSize || 1000;
-      const eventBatches = await this.eventStore.getAllEvents(
-        options.fromTimestamp,
-        batchSize
-      );
+      const eventBatches = await this.eventStore.getAllEvents(options.fromTimestamp, batchSize);
 
       for await (const events of eventBatches) {
         // Filter events by version and timestamp
-        const filteredEvents = events.filter(event => {
-          if (
-            options.fromVersion !== undefined &&
-            event.version < options.fromVersion
-          ) {
+        const filteredEvents = events.filter((event) => {
+          if (options.fromVersion !== undefined && event.version < options.fromVersion) {
             return false;
           }
 
-          if (
-            options.toVersion !== undefined &&
-            event.version > options.toVersion
-          ) {
+          if (options.toVersion !== undefined && event.version > options.toVersion) {
             return false;
           }
 
-          if (
-            options.fromTimestamp &&
-            event.timestamp < options.fromTimestamp
-          ) {
+          if (options.fromTimestamp && event.timestamp < options.fromTimestamp) {
             return false;
           }
 
-          if (
-            options.toTimestamp &&
-            event.timestamp > options.toTimestamp
-          ) {
+          if (options.toTimestamp && event.timestamp > options.toTimestamp) {
             return false;
           }
 
@@ -110,30 +95,22 @@ export class EventReplayer extends EventEmitter {
           processedEvents++;
 
           if (processedEvents % 1000 === 0) {
-            const progress = this.calculateProgress(
-              startTime,
-              totalEvents,
-              processedEvents
-            );
-            this.emit('replay:progress', progress);
-            this.logger.info(progress, 'Replay progress');
+            const progress = this.calculateProgress(startTime, totalEvents, processedEvents);
+            this.emit("replay:progress", progress);
+            this.logger.info(progress, "Replay progress");
           }
         }
       }
 
-      const finalProgress = this.calculateProgress(
-        startTime,
-        totalEvents,
-        processedEvents
-      );
+      const finalProgress = this.calculateProgress(startTime, totalEvents, processedEvents);
 
-      this.emit('replay:completed', finalProgress);
-      this.logger.info(finalProgress, 'Replay completed');
+      this.emit("replay:completed", finalProgress);
+      this.logger.info(finalProgress, "Replay completed");
 
       return finalProgress;
     } catch (err) {
-      this.logger.error({ err }, 'Replay failed');
-      this.emit('replay:failed', err);
+      this.logger.error({ err }, "Replay failed");
+      this.emit("replay:failed", err);
       throw err;
     }
   }
@@ -141,16 +118,10 @@ export class EventReplayer extends EventEmitter {
   /**
    * Replay events for specific aggregate
    */
-  async replayAggregate(
-    aggregateId: string,
-    fromVersion: number = 0
-  ): Promise<number> {
-    this.logger.info({ aggregateId, fromVersion }, 'Replaying aggregate');
+  async replayAggregate(aggregateId: string, fromVersion: number = 0): Promise<number> {
+    this.logger.info({ aggregateId, fromVersion }, "Replaying aggregate");
 
-    const stream = await this.eventStore.getEventStream(
-      aggregateId,
-      fromVersion
-    );
+    const stream = await this.eventStore.getEventStream(aggregateId, fromVersion);
 
     for (const event of stream.events) {
       await this.processEvent(event);
@@ -175,13 +146,13 @@ export class EventReplayer extends EventEmitter {
         await handler(event);
       }
 
-      this.emit('event:processed', event);
+      this.emit("event:processed", event);
     } catch (err) {
       this.logger.error(
         { err, eventId: event.eventId, eventType: event.eventType },
-        'Event processing failed'
+        "Event processing failed"
       );
-      this.emit('event:failed', { event, error: err });
+      this.emit("event:failed", { event, error: err });
       throw err;
     }
   }
@@ -202,7 +173,7 @@ export class EventReplayer extends EventEmitter {
       processedEvents,
       startTime,
       elapsedMs,
-      eventsPerSecond
+      eventsPerSecond,
     };
   }
 }

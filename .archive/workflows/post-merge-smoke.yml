@@ -5,10 +5,10 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      preview_url: { description: 'Preview URL', required: false, type: string }
-      prod_url: { description: 'Prod URL', required: false, type: string }
+      preview_url: { description: "Preview URL", required: false, type: string }
+      prod_url: { description: "Prod URL", required: false, type: string }
   workflow_run:
-    workflows: ['ci', 'ui-ci']
+    workflows: ["ci", "ui-ci"]
     types: [completed]
 
 jobs:

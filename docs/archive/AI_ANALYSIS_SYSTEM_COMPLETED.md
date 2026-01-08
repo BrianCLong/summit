@@ -132,12 +132,12 @@ The IntelGraph Platform now features a comprehensive AI-powered analysis system 
 
 ```javascript
 // Semantic Relationship Types:
--EMPLOYED_BY('John works at TechCorp') -
-  LEADS('Sarah is CEO of StartupInc') -
-  MET_WITH('Alice met with Bob yesterday') -
-  LOCATED_IN('Office located in New York') -
-  OWNS('Microsoft owns GitHub') -
-  COLLABORATES_WITH('Team A and Team B are partners');
+-EMPLOYED_BY("John works at TechCorp") -
+  LEADS("Sarah is CEO of StartupInc") -
+  MET_WITH("Alice met with Bob yesterday") -
+  LOCATED_IN("Office located in New York") -
+  OWNS("Microsoft owns GitHub") -
+  COLLABORATES_WITH("Team A and Team B are partners");
 ```
 
 ### **3. Sentiment Analysis**

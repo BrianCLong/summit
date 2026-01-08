@@ -2,7 +2,7 @@
  * Sentiment and emotion analysis
  */
 
-import type { SentimentResult, AspectSentiment, EmotionScore } from '../types';
+import type { SentimentResult, AspectSentiment, EmotionScore } from "../types";
 
 export class SentimentAnalyzer {
   private positiveWords: Set<string>;
@@ -25,17 +25,25 @@ export class SentimentAnalyzer {
     let negativeCount = 0;
 
     for (const word of words) {
-      if (this.positiveWords.has(word)) {positiveCount++;}
-      if (this.negativeWords.has(word)) {negativeCount++;}
+      if (this.positiveWords.has(word)) {
+        positiveCount++;
+      }
+      if (this.negativeWords.has(word)) {
+        negativeCount++;
+      }
     }
 
     const total = positiveCount + negativeCount;
     const score = total === 0 ? 0 : (positiveCount - negativeCount) / total;
 
-    let sentiment: 'positive' | 'negative' | 'neutral';
-    if (score > 0.1) {sentiment = 'positive';}
-    else if (score < -0.1) {sentiment = 'negative';}
-    else {sentiment = 'neutral';}
+    let sentiment: "positive" | "negative" | "neutral";
+    if (score > 0.1) {
+      sentiment = "positive";
+    } else if (score < -0.1) {
+      sentiment = "negative";
+    } else {
+      sentiment = "neutral";
+    }
 
     const confidence = Math.min(Math.abs(score) + 0.5, 1.0);
 
@@ -73,12 +81,12 @@ export class SentimentAnalyzer {
    */
   detectEmotions(text: string): EmotionScore[] {
     const emotions: Map<string, number> = new Map([
-      ['joy', 0],
-      ['anger', 0],
-      ['fear', 0],
-      ['sadness', 0],
-      ['surprise', 0],
-      ['disgust', 0],
+      ["joy", 0],
+      ["anger", 0],
+      ["fear", 0],
+      ["sadness", 0],
+      ["surprise", 0],
+      ["disgust", 0],
     ]);
 
     const words = text.toLowerCase().match(/\w+/g) || [];
@@ -97,7 +105,7 @@ export class SentimentAnalyzer {
     for (const [emotion, score] of emotions) {
       if (score > 0) {
         result.push({
-          emotion: emotion as EmotionScore['emotion'],
+          emotion: emotion as EmotionScore["emotion"],
           score,
           confidence: Math.min(score / 5, 1.0),
         });
@@ -112,19 +120,21 @@ export class SentimentAnalyzer {
    */
   detectSarcasm(text: string): { isSarcastic: boolean; confidence: number } {
     const sarcasmIndicators = [
-      'yeah right',
-      'sure',
-      'totally',
-      'obviously',
-      'clearly',
-      'of course',
+      "yeah right",
+      "sure",
+      "totally",
+      "obviously",
+      "clearly",
+      "of course",
     ];
 
     const lower = text.toLowerCase();
     let indicatorCount = 0;
 
     for (const indicator of sarcasmIndicators) {
-      if (lower.includes(indicator)) {indicatorCount++;}
+      if (lower.includes(indicator)) {
+        indicatorCount++;
+      }
     }
 
     // Check for contradicting sentiment
@@ -132,10 +142,7 @@ export class SentimentAnalyzer {
     const hasExclamation = /!+/.test(text);
     const hasQuotes = /"[^"]*"/.test(text);
 
-    const sarcasmScore =
-      indicatorCount * 0.3 +
-      (hasExclamation ? 0.2 : 0) +
-      (hasQuotes ? 0.2 : 0);
+    const sarcasmScore = indicatorCount * 0.3 + (hasExclamation ? 0.2 : 0) + (hasQuotes ? 0.2 : 0);
 
     return {
       isSarcastic: sarcasmScore > 0.5,
@@ -163,7 +170,7 @@ export class SentimentAnalyzer {
     aspect: string
   ): Array<{ text: string; start: number; end: number }> {
     const mentions: Array<{ text: string; start: number; end: number }> = [];
-    const pattern = new RegExp(`\\b${aspect}\\b`, 'gi');
+    const pattern = new RegExp(`\\b${aspect}\\b`, "gi");
     let match;
 
     while ((match = pattern.exec(text)) !== null) {
@@ -184,9 +191,9 @@ export class SentimentAnalyzer {
     text: string,
     aspect: string,
     mentions: Array<{ start: number; end: number }>
-  ): { sentiment: 'positive' | 'negative' | 'neutral'; score: number } {
+  ): { sentiment: "positive" | "negative" | "neutral"; score: number } {
     if (mentions.length === 0) {
-      return { sentiment: 'neutral', score: 0 };
+      return { sentiment: "neutral", score: 0 };
     }
 
     let totalScore = 0;
@@ -203,10 +210,14 @@ export class SentimentAnalyzer {
 
     const avgScore = totalScore / mentions.length;
 
-    let sentiment: 'positive' | 'negative' | 'neutral';
-    if (avgScore > 0.1) {sentiment = 'positive';}
-    else if (avgScore < -0.1) {sentiment = 'negative';}
-    else {sentiment = 'neutral';}
+    let sentiment: "positive" | "negative" | "neutral";
+    if (avgScore > 0.1) {
+      sentiment = "positive";
+    } else if (avgScore < -0.1) {
+      sentiment = "negative";
+    } else {
+      sentiment = "neutral";
+    }
 
     return { sentiment, score: avgScore };
   }
@@ -216,10 +227,29 @@ export class SentimentAnalyzer {
    */
   private loadPositiveWords(): Set<string> {
     return new Set([
-      'good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic',
-      'love', 'best', 'perfect', 'awesome', 'brilliant', 'outstanding',
-      'superb', 'magnificent', 'exceptional', 'marvelous', 'fabulous',
-      'happy', 'joy', 'pleased', 'delighted', 'satisfied', 'positive',
+      "good",
+      "great",
+      "excellent",
+      "amazing",
+      "wonderful",
+      "fantastic",
+      "love",
+      "best",
+      "perfect",
+      "awesome",
+      "brilliant",
+      "outstanding",
+      "superb",
+      "magnificent",
+      "exceptional",
+      "marvelous",
+      "fabulous",
+      "happy",
+      "joy",
+      "pleased",
+      "delighted",
+      "satisfied",
+      "positive",
       // Add more positive words
     ]);
   }
@@ -229,10 +259,29 @@ export class SentimentAnalyzer {
    */
   private loadNegativeWords(): Set<string> {
     return new Set([
-      'bad', 'terrible', 'awful', 'horrible', 'poor', 'worst',
-      'hate', 'disappointing', 'useless', 'pathetic', 'disgusting',
-      'sad', 'angry', 'frustrated', 'annoyed', 'upset', 'negative',
-      'fail', 'failed', 'failure', 'wrong', 'broken', 'error',
+      "bad",
+      "terrible",
+      "awful",
+      "horrible",
+      "poor",
+      "worst",
+      "hate",
+      "disappointing",
+      "useless",
+      "pathetic",
+      "disgusting",
+      "sad",
+      "angry",
+      "frustrated",
+      "annoyed",
+      "upset",
+      "negative",
+      "fail",
+      "failed",
+      "failure",
+      "wrong",
+      "broken",
+      "error",
       // Add more negative words
     ]);
   }
@@ -244,28 +293,28 @@ export class SentimentAnalyzer {
     const lexicon = new Map<string, EmotionScore[]>();
 
     // Joy
-    lexicon.set('happy', [{ emotion: 'joy', score: 0.9, confidence: 0.9 }]);
-    lexicon.set('joy', [{ emotion: 'joy', score: 1.0, confidence: 1.0 }]);
-    lexicon.set('delighted', [{ emotion: 'joy', score: 0.95, confidence: 0.95 }]);
+    lexicon.set("happy", [{ emotion: "joy", score: 0.9, confidence: 0.9 }]);
+    lexicon.set("joy", [{ emotion: "joy", score: 1.0, confidence: 1.0 }]);
+    lexicon.set("delighted", [{ emotion: "joy", score: 0.95, confidence: 0.95 }]);
 
     // Anger
-    lexicon.set('angry', [{ emotion: 'anger', score: 0.9, confidence: 0.9 }]);
-    lexicon.set('furious', [{ emotion: 'anger', score: 1.0, confidence: 1.0 }]);
-    lexicon.set('mad', [{ emotion: 'anger', score: 0.8, confidence: 0.8 }]);
+    lexicon.set("angry", [{ emotion: "anger", score: 0.9, confidence: 0.9 }]);
+    lexicon.set("furious", [{ emotion: "anger", score: 1.0, confidence: 1.0 }]);
+    lexicon.set("mad", [{ emotion: "anger", score: 0.8, confidence: 0.8 }]);
 
     // Fear
-    lexicon.set('afraid', [{ emotion: 'fear', score: 0.9, confidence: 0.9 }]);
-    lexicon.set('scared', [{ emotion: 'fear', score: 0.9, confidence: 0.9 }]);
-    lexicon.set('terrified', [{ emotion: 'fear', score: 1.0, confidence: 1.0 }]);
+    lexicon.set("afraid", [{ emotion: "fear", score: 0.9, confidence: 0.9 }]);
+    lexicon.set("scared", [{ emotion: "fear", score: 0.9, confidence: 0.9 }]);
+    lexicon.set("terrified", [{ emotion: "fear", score: 1.0, confidence: 1.0 }]);
 
     // Sadness
-    lexicon.set('sad', [{ emotion: 'sadness', score: 0.9, confidence: 0.9 }]);
-    lexicon.set('depressed', [{ emotion: 'sadness', score: 1.0, confidence: 1.0 }]);
-    lexicon.set('miserable', [{ emotion: 'sadness', score: 0.95, confidence: 0.95 }]);
+    lexicon.set("sad", [{ emotion: "sadness", score: 0.9, confidence: 0.9 }]);
+    lexicon.set("depressed", [{ emotion: "sadness", score: 1.0, confidence: 1.0 }]);
+    lexicon.set("miserable", [{ emotion: "sadness", score: 0.95, confidence: 0.95 }]);
 
     return lexicon;
   }
 }
 
-export * from './aspect-based';
-export * from './multilingual';
+export * from "./aspect-based";
+export * from "./multilingual";

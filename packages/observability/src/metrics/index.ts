@@ -14,8 +14,8 @@ import client, {
   Gauge,
   Summary,
   collectDefaultMetrics,
-} from 'prom-client';
-import type { ServiceConfig, ServiceArchetype } from '../types/index.js';
+} from "prom-client";
+import type { ServiceConfig, ServiceArchetype } from "../types/index.js";
 
 // =============================================================================
 // METRIC REGISTRIES
@@ -48,24 +48,24 @@ export const HISTOGRAM_BUCKETS = {
  * HTTP Request Metrics - Required for all API services
  */
 export const httpRequestsTotal = new Counter({
-  name: 'http_requests_total',
-  help: 'Total number of HTTP requests received',
-  labelNames: ['service', 'method', 'route', 'status_code'],
+  name: "http_requests_total",
+  help: "Total number of HTTP requests received",
+  labelNames: ["service", "method", "route", "status_code"],
   registers: [registry],
 });
 
 export const httpRequestDuration = new Histogram({
-  name: 'http_request_duration_seconds',
-  help: 'HTTP request duration in seconds',
-  labelNames: ['service', 'method', 'route', 'status_code'],
+  name: "http_request_duration_seconds",
+  help: "HTTP request duration in seconds",
+  labelNames: ["service", "method", "route", "status_code"],
   buckets: [...HISTOGRAM_BUCKETS.http],
   registers: [registry],
 });
 
 export const httpRequestsInFlight = new Gauge({
-  name: 'http_requests_in_flight',
-  help: 'Number of HTTP requests currently being processed',
-  labelNames: ['service', 'method'],
+  name: "http_requests_in_flight",
+  help: "Number of HTTP requests currently being processed",
+  labelNames: ["service", "method"],
   registers: [registry],
 });
 
@@ -73,9 +73,9 @@ export const httpRequestsInFlight = new Gauge({
  * Error Metrics - Required for ALL services
  */
 export const errorsTotal = new Counter({
-  name: 'errors_total',
-  help: 'Total number of errors by type',
-  labelNames: ['service', 'error_type', 'severity'],
+  name: "errors_total",
+  help: "Total number of errors by type",
+  labelNames: ["service", "error_type", "severity"],
   registers: [registry],
 });
 
@@ -83,31 +83,31 @@ export const errorsTotal = new Counter({
  * Database Metrics - Required for services using databases
  */
 export const dbQueriesTotal = new Counter({
-  name: 'db_queries_total',
-  help: 'Total number of database queries',
-  labelNames: ['service', 'db_system', 'operation', 'status'],
+  name: "db_queries_total",
+  help: "Total number of database queries",
+  labelNames: ["service", "db_system", "operation", "status"],
   registers: [registry],
 });
 
 export const dbQueryDuration = new Histogram({
-  name: 'db_query_duration_seconds',
-  help: 'Database query duration in seconds',
-  labelNames: ['service', 'db_system', 'operation'],
+  name: "db_query_duration_seconds",
+  help: "Database query duration in seconds",
+  labelNames: ["service", "db_system", "operation"],
   buckets: [...HISTOGRAM_BUCKETS.database],
   registers: [registry],
 });
 
 export const dbConnectionsActive = new Gauge({
-  name: 'db_connections_active',
-  help: 'Number of active database connections',
-  labelNames: ['service', 'db_system', 'pool'],
+  name: "db_connections_active",
+  help: "Number of active database connections",
+  labelNames: ["service", "db_system", "pool"],
   registers: [registry],
 });
 
 export const dbConnectionsIdle = new Gauge({
-  name: 'db_connections_idle',
-  help: 'Number of idle database connections',
-  labelNames: ['service', 'db_system', 'pool'],
+  name: "db_connections_idle",
+  help: "Number of idle database connections",
+  labelNames: ["service", "db_system", "pool"],
   registers: [registry],
 });
 
@@ -115,16 +115,16 @@ export const dbConnectionsIdle = new Gauge({
  * Cache Metrics - Required for services using caching
  */
 export const cacheOperationsTotal = new Counter({
-  name: 'cache_operations_total',
-  help: 'Total cache operations by result',
-  labelNames: ['service', 'cache_name', 'operation', 'result'],
+  name: "cache_operations_total",
+  help: "Total cache operations by result",
+  labelNames: ["service", "cache_name", "operation", "result"],
   registers: [registry],
 });
 
 export const cacheLatency = new Histogram({
-  name: 'cache_operation_duration_seconds',
-  help: 'Cache operation duration in seconds',
-  labelNames: ['service', 'cache_name', 'operation'],
+  name: "cache_operation_duration_seconds",
+  help: "Cache operation duration in seconds",
+  labelNames: ["service", "cache_name", "operation"],
   buckets: [...HISTOGRAM_BUCKETS.cache],
   registers: [registry],
 });
@@ -133,31 +133,31 @@ export const cacheLatency = new Histogram({
  * Queue/Job Metrics - Required for worker services
  */
 export const jobsProcessedTotal = new Counter({
-  name: 'jobs_processed_total',
-  help: 'Total number of jobs processed',
-  labelNames: ['service', 'queue', 'job_type', 'status'],
+  name: "jobs_processed_total",
+  help: "Total number of jobs processed",
+  labelNames: ["service", "queue", "job_type", "status"],
   registers: [registry],
 });
 
 export const jobDuration = new Histogram({
-  name: 'job_duration_seconds',
-  help: 'Job processing duration in seconds',
-  labelNames: ['service', 'queue', 'job_type'],
+  name: "job_duration_seconds",
+  help: "Job processing duration in seconds",
+  labelNames: ["service", "queue", "job_type"],
   buckets: [...HISTOGRAM_BUCKETS.job],
   registers: [registry],
 });
 
 export const jobsInQueue = new Gauge({
-  name: 'jobs_in_queue',
-  help: 'Number of jobs waiting in queue',
-  labelNames: ['service', 'queue', 'priority'],
+  name: "jobs_in_queue",
+  help: "Number of jobs waiting in queue",
+  labelNames: ["service", "queue", "priority"],
   registers: [registry],
 });
 
 export const jobsInProgress = new Gauge({
-  name: 'jobs_in_progress',
-  help: 'Number of jobs currently being processed',
-  labelNames: ['service', 'queue'],
+  name: "jobs_in_progress",
+  help: "Number of jobs currently being processed",
+  labelNames: ["service", "queue"],
   registers: [registry],
 });
 
@@ -165,16 +165,16 @@ export const jobsInProgress = new Gauge({
  * External Service Metrics - Required for services calling external APIs
  */
 export const externalRequestsTotal = new Counter({
-  name: 'external_requests_total',
-  help: 'Total number of external service requests',
-  labelNames: ['service', 'target_service', 'method', 'status'],
+  name: "external_requests_total",
+  help: "Total number of external service requests",
+  labelNames: ["service", "target_service", "method", "status"],
   registers: [registry],
 });
 
 export const externalRequestDuration = new Histogram({
-  name: 'external_request_duration_seconds',
-  help: 'External service request duration in seconds',
-  labelNames: ['service', 'target_service', 'method'],
+  name: "external_request_duration_seconds",
+  help: "External service request duration in seconds",
+  labelNames: ["service", "target_service", "method"],
   buckets: [...HISTOGRAM_BUCKETS.external],
   registers: [registry],
 });
@@ -183,24 +183,24 @@ export const externalRequestDuration = new Histogram({
  * ML/AI Metrics - Required for ML services
  */
 export const mlInferenceTotal = new Counter({
-  name: 'ml_inference_total',
-  help: 'Total number of ML inference requests',
-  labelNames: ['service', 'model', 'version', 'status'],
+  name: "ml_inference_total",
+  help: "Total number of ML inference requests",
+  labelNames: ["service", "model", "version", "status"],
   registers: [registry],
 });
 
 export const mlInferenceDuration = new Histogram({
-  name: 'ml_inference_duration_seconds',
-  help: 'ML inference duration in seconds',
-  labelNames: ['service', 'model', 'version'],
+  name: "ml_inference_duration_seconds",
+  help: "ML inference duration in seconds",
+  labelNames: ["service", "model", "version"],
   buckets: [...HISTOGRAM_BUCKETS.ml],
   registers: [registry],
 });
 
 export const mlModelLoadTime = new Gauge({
-  name: 'ml_model_load_time_seconds',
-  help: 'Time taken to load ML model',
-  labelNames: ['service', 'model', 'version'],
+  name: "ml_model_load_time_seconds",
+  help: "Time taken to load ML model",
+  labelNames: ["service", "model", "version"],
   registers: [registry],
 });
 
@@ -208,9 +208,9 @@ export const mlModelLoadTime = new Gauge({
  * Business Metrics - Custom per service
  */
 export const businessEventsTotal = new Counter({
-  name: 'business_events_total',
-  help: 'Total business events by type',
-  labelNames: ['service', 'event_type', 'status'],
+  name: "business_events_total",
+  help: "Total business events by type",
+  labelNames: ["service", "event_type", "status"],
   registers: [registry],
 });
 
@@ -218,31 +218,31 @@ export const businessEventsTotal = new Counter({
  * GraphQL Metrics - For GraphQL services
  */
 export const graphqlOperationsTotal = new Counter({
-  name: 'graphql_operations_total',
-  help: 'Total GraphQL operations',
-  labelNames: ['service', 'operation_name', 'operation_type'],
+  name: "graphql_operations_total",
+  help: "Total GraphQL operations",
+  labelNames: ["service", "operation_name", "operation_type"],
   registers: [registry],
 });
 
 export const graphqlOperationDuration = new Histogram({
-  name: 'graphql_operation_duration_seconds',
-  help: 'GraphQL operation duration in seconds',
-  labelNames: ['service', 'operation_name', 'operation_type'],
+  name: "graphql_operation_duration_seconds",
+  help: "GraphQL operation duration in seconds",
+  labelNames: ["service", "operation_name", "operation_type"],
   buckets: [...HISTOGRAM_BUCKETS.http],
   registers: [registry],
 });
 
 export const graphqlErrorsTotal = new Counter({
-  name: 'graphql_errors_total',
-  help: 'Total GraphQL errors',
-  labelNames: ['service', 'operation_name', 'error_code'],
+  name: "graphql_errors_total",
+  help: "Total GraphQL errors",
+  labelNames: ["service", "operation_name", "error_code"],
   registers: [registry],
 });
 
 export const graphqlResolverDuration = new Histogram({
-  name: 'graphql_resolver_duration_seconds',
-  help: 'GraphQL resolver duration in seconds',
-  labelNames: ['service', 'resolver', 'parent_type'],
+  name: "graphql_resolver_duration_seconds",
+  help: "GraphQL resolver duration in seconds",
+  labelNames: ["service", "resolver", "parent_type"],
   buckets: [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1],
   registers: [registry],
 });
@@ -279,7 +279,7 @@ export function initializeMetrics(config: MetricsConfig): Registry {
   if (collectDefault) {
     collectDefaultMetrics({
       register: registry,
-      prefix: 'nodejs_',
+      prefix: "nodejs_",
       gcDurationBuckets: [0.001, 0.01, 0.1, 1, 2, 5],
       eventLoopMonitoringPrecision: 10,
     });
@@ -307,13 +307,13 @@ export function recordHttpRequest(
  * Record a database query with all standard metrics
  */
 export function recordDbQuery(
-  dbSystem: 'postgresql' | 'neo4j' | 'redis' | 'mongodb',
+  dbSystem: "postgresql" | "neo4j" | "redis" | "mongodb",
   operation: string,
   durationSeconds: number,
   success: boolean,
   service: string
 ): void {
-  const status = success ? 'success' : 'error';
+  const status = success ? "success" : "error";
   dbQueriesTotal.labels({ service, db_system: dbSystem, operation, status }).inc();
   dbQueryDuration.labels({ service, db_system: dbSystem, operation }).observe(durationSeconds);
 }
@@ -323,12 +323,12 @@ export function recordDbQuery(
  */
 export function recordCacheOperation(
   cacheName: string,
-  operation: 'get' | 'set' | 'delete',
+  operation: "get" | "set" | "delete",
   hit: boolean,
   durationSeconds: number,
   service: string
 ): void {
-  const result = operation === 'get' ? (hit ? 'hit' : 'miss') : 'success';
+  const result = operation === "get" ? (hit ? "hit" : "miss") : "success";
   cacheOperationsTotal.labels({ service, cache_name: cacheName, operation, result }).inc();
   cacheLatency.labels({ service, cache_name: cacheName, operation }).observe(durationSeconds);
 }
@@ -339,7 +339,7 @@ export function recordCacheOperation(
 export function recordJob(
   queue: string,
   jobType: string,
-  status: 'completed' | 'failed' | 'retried',
+  status: "completed" | "failed" | "retried",
   durationSeconds: number,
   service: string
 ): void {
@@ -357,7 +357,7 @@ export function recordExternalCall(
   durationSeconds: number,
   service: string
 ): void {
-  const status = statusCode >= 200 && statusCode < 400 ? 'success' : 'error';
+  const status = statusCode >= 200 && statusCode < 400 ? "success" : "error";
   externalRequestsTotal.labels({ service, target_service: targetService, method, status }).inc();
   externalRequestDuration
     .labels({ service, target_service: targetService, method })
@@ -369,7 +369,7 @@ export function recordExternalCall(
  */
 export function recordError(
   errorType: string,
-  severity: 'low' | 'medium' | 'high' | 'critical',
+  severity: "low" | "medium" | "high" | "critical",
   service: string
 ): void {
   errorsTotal.labels({ service, error_type: errorType, severity }).inc();
@@ -380,19 +380,23 @@ export function recordError(
  */
 export function recordGraphQLOperation(
   operationName: string,
-  operationType: 'query' | 'mutation' | 'subscription',
+  operationType: "query" | "mutation" | "subscription",
   durationSeconds: number,
   errorCode?: string,
   service?: string
 ): void {
-  const svc = service || 'unknown';
-  graphqlOperationsTotal.labels({ service: svc, operation_name: operationName, operation_type: operationType }).inc();
+  const svc = service || "unknown";
+  graphqlOperationsTotal
+    .labels({ service: svc, operation_name: operationName, operation_type: operationType })
+    .inc();
   graphqlOperationDuration
     .labels({ service: svc, operation_name: operationName, operation_type: operationType })
     .observe(durationSeconds);
 
   if (errorCode) {
-    graphqlErrorsTotal.labels({ service: svc, operation_name: operationName, error_code: errorCode }).inc();
+    graphqlErrorsTotal
+      .labels({ service: svc, operation_name: operationName, error_code: errorCode })
+      .inc();
   }
 }
 
@@ -418,70 +422,66 @@ export function getMetricsContentType(): string {
  * Get required metrics for a service archetype
  */
 export function getRequiredMetrics(archetype: ServiceArchetype): string[] {
-  const baseMetrics = [
-    'http_requests_total',
-    'http_request_duration_seconds',
-    'errors_total',
-  ];
+  const baseMetrics = ["http_requests_total", "http_request_duration_seconds", "errors_total"];
 
   switch (archetype) {
-    case 'api-service':
+    case "api-service":
       return [
         ...baseMetrics,
-        'graphql_operations_total',
-        'graphql_operation_duration_seconds',
-        'graphql_errors_total',
-        'db_queries_total',
-        'db_query_duration_seconds',
+        "graphql_operations_total",
+        "graphql_operation_duration_seconds",
+        "graphql_errors_total",
+        "db_queries_total",
+        "db_query_duration_seconds",
       ];
 
-    case 'gateway-service':
+    case "gateway-service":
       return [
         ...baseMetrics,
-        'http_requests_in_flight',
-        'external_requests_total',
-        'external_request_duration_seconds',
+        "http_requests_in_flight",
+        "external_requests_total",
+        "external_request_duration_seconds",
       ];
 
-    case 'worker-service':
+    case "worker-service":
       return [
-        'jobs_processed_total',
-        'job_duration_seconds',
-        'jobs_in_queue',
-        'jobs_in_progress',
-        'errors_total',
-        'db_queries_total',
-        'db_query_duration_seconds',
+        "jobs_processed_total",
+        "job_duration_seconds",
+        "jobs_in_queue",
+        "jobs_in_progress",
+        "errors_total",
+        "db_queries_total",
+        "db_query_duration_seconds",
       ];
 
-    case 'data-pipeline':
+    case "data-pipeline":
       return [
-        'jobs_processed_total',
-        'job_duration_seconds',
-        'jobs_in_queue',
-        'errors_total',
-        'db_queries_total',
-        'db_query_duration_seconds',
-        'business_events_total',
+        "jobs_processed_total",
+        "job_duration_seconds",
+        "jobs_in_queue",
+        "errors_total",
+        "db_queries_total",
+        "db_query_duration_seconds",
+        "business_events_total",
       ];
 
-    case 'storage-service':
-      return [
-        ...baseMetrics,
-        'db_queries_total',
-        'db_query_duration_seconds',
-        'db_connections_active',
-        'db_connections_idle',
-        'cache_operations_total',
-        'cache_operation_duration_seconds',
-      ];
-
-    case 'ml-service':
+    case "storage-service":
       return [
         ...baseMetrics,
-        'ml_inference_total',
-        'ml_inference_duration_seconds',
-        'ml_model_load_time_seconds',
+        "db_queries_total",
+        "db_query_duration_seconds",
+        "db_connections_active",
+        "db_connections_idle",
+        "cache_operations_total",
+        "cache_operation_duration_seconds",
+      ];
+
+    case "ml-service":
+      return [
+        ...baseMetrics,
+        "ml_inference_total",
+        "ml_inference_duration_seconds",
+        "ml_model_load_time_seconds",
       ];
 
     default:

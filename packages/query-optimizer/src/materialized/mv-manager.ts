@@ -3,12 +3,12 @@
  * Manages materialized views for query acceleration
  */
 
-import { Pool } from 'pg';
+import { Pool } from "pg";
 
 export interface MaterializedViewDefinition {
   name: string;
   query: string;
-  refreshStrategy: 'manual' | 'scheduled' | 'incremental';
+  refreshStrategy: "manual" | "scheduled" | "incremental";
   refreshInterval?: number;
   indexes?: string[];
 }
@@ -33,7 +33,7 @@ export class MaterializedViewManager {
   }
 
   async refreshMaterializedView(name: string, concurrently: boolean = false): Promise<void> {
-    const concurrent = concurrently ? 'CONCURRENTLY' : '';
+    const concurrent = concurrently ? "CONCURRENTLY" : "";
     await this.pool.query(`REFRESH MATERIALIZED VIEW ${concurrent} ${name}`);
   }
 
@@ -46,16 +46,13 @@ export class MaterializedViewManager {
     rowCount: number;
     lastRefresh: Date;
   }> {
-    const sizeResult = await this.pool.query(
-      `SELECT pg_total_relation_size($1) as size`,
-      [name],
-    );
+    const sizeResult = await this.pool.query(`SELECT pg_total_relation_size($1) as size`, [name]);
 
     const countResult = await this.pool.query(`SELECT COUNT(*) as count FROM ${name}`);
 
     return {
-      size: parseInt(sizeResult.rows[0]?.size || '0'),
-      rowCount: parseInt(countResult.rows[0]?.count || '0'),
+      size: parseInt(sizeResult.rows[0]?.size || "0"),
+      rowCount: parseInt(countResult.rows[0]?.count || "0"),
       lastRefresh: new Date(),
     };
   }

@@ -13,28 +13,26 @@
  * - node scripts/generate-persisted-queries.js
  */
 
-const fs = require('fs').promises;
-const path = require('path');
-const crypto = require('crypto');
-const glob = require('glob');
+const fs = require("fs").promises;
+const path = require("path");
+const crypto = require("crypto");
+const glob = require("glob");
 
 class PersistedQueryGenerator {
   constructor(options = {}) {
     this.options = {
-      clientDir: options.clientDir || path.join(process.cwd(), 'client'),
-      outputFile:
-        options.outputFile ||
-        path.join(process.cwd(), 'persisted-queries.json'),
+      clientDir: options.clientDir || path.join(process.cwd(), "client"),
+      outputFile: options.outputFile || path.join(process.cwd(), "persisted-queries.json"),
       includePatterns: options.includePatterns || [
-        'client/**/*.{js,jsx,ts,tsx}',
-        'client/**/*.{graphql,gql}',
-        'server/**/*.test.{js,ts}',
-        'tests/**/*.{js,ts}',
+        "client/**/*.{js,jsx,ts,tsx}",
+        "client/**/*.{graphql,gql}",
+        "server/**/*.test.{js,ts}",
+        "tests/**/*.{js,ts}",
       ],
       excludePatterns: options.excludePatterns || [
-        '**/node_modules/**',
-        '**/dist/**',
-        '**/build/**',
+        "**/node_modules/**",
+        "**/dist/**",
+        "**/build/**",
       ],
       ...options,
     };
@@ -46,7 +44,7 @@ class PersistedQueryGenerator {
    * Generate hash for a query
    */
   generateHash(query) {
-    return crypto.createHash('sha256').update(query.trim()).digest('hex');
+    return crypto.createHash("sha256").update(query.trim()).digest("hex");
   }
 
   /**
@@ -76,33 +74,32 @@ class PersistedQueryGenerator {
         operations.push({
           query,
           source: filePath,
-          type: 'template-literal',
+          type: "template-literal",
         });
       }
     }
 
     // Match .graphql/.gql file content
-    if (filePath.endsWith('.graphql') || filePath.endsWith('.gql')) {
+    if (filePath.endsWith(".graphql") || filePath.endsWith(".gql")) {
       const query = content.trim();
       if (query) {
         operations.push({
           query,
           source: filePath,
-          type: 'graphql-file',
+          type: "graphql-file",
         });
       }
     }
 
     // Match GraphQL strings in test files
-    const testQueryRegex =
-      /(?:query|mutation|subscription)\s*[^"']*["']([^"']+)["']/gs;
+    const testQueryRegex = /(?:query|mutation|subscription)\s*[^"']*["']([^"']+)["']/gs;
     while ((match = testQueryRegex.exec(content)) !== null) {
       const query = match[1].trim();
-      if (query && query.includes('{')) {
+      if (query && query.includes("{")) {
         operations.push({
           query,
           source: filePath,
-          type: 'test-string',
+          type: "test-string",
         });
       }
     }
@@ -114,9 +111,7 @@ class PersistedQueryGenerator {
    * Parse operation name from GraphQL query
    */
   parseOperationName(query) {
-    const operationMatch = query.match(
-      /(?:query|mutation|subscription)\s+(\w+)/,
-    );
+    const operationMatch = query.match(/(?:query|mutation|subscription)\s+(\w+)/);
     return operationMatch ? operationMatch[1] : null;
   }
 
@@ -125,7 +120,7 @@ class PersistedQueryGenerator {
    */
   async processFile(filePath) {
     try {
-      const content = await fs.readFile(filePath, 'utf8');
+      const content = await fs.readFile(filePath, "utf8");
       const operations = this.extractOperations(content, filePath);
 
       for (const operation of operations) {
@@ -141,7 +136,7 @@ class PersistedQueryGenerator {
             complexity,
             sources: [],
             firstSeen: new Date().toISOString(),
-            source: 'build-time',
+            source: "build-time",
           });
         }
 
@@ -180,7 +175,7 @@ class PersistedQueryGenerator {
   addServerQueries() {
     const serverQueries = [
       {
-        name: 'GetUser',
+        name: "GetUser",
         query: `
           query GetUser($id: ID!) {
             user(id: $id) {
@@ -194,7 +189,7 @@ class PersistedQueryGenerator {
         `,
       },
       {
-        name: 'Health',
+        name: "Health",
         query: `
           query Health {
             __typename
@@ -202,7 +197,7 @@ class PersistedQueryGenerator {
         `,
       },
       {
-        name: 'GetGraphStats',
+        name: "GetGraphStats",
         query: `
           query GetGraphStats($investigationId: ID!) {
             investigation(id: $investigationId) {
@@ -225,9 +220,9 @@ class PersistedQueryGenerator {
         query: query.trim(),
         operationName: name,
         complexity,
-        sources: ['server-common'],
+        sources: ["server-common"],
         firstSeen: new Date().toISOString(),
-        source: 'server',
+        source: "server",
       });
     }
   }
@@ -236,7 +231,7 @@ class PersistedQueryGenerator {
    * Generate the persisted queries file
    */
   async generate() {
-    console.log('🔍 Finding GraphQL operations...');
+    console.log("🔍 Finding GraphQL operations...");
 
     const files = await this.findFiles();
     console.log(`Found ${files.length} files to process`);
@@ -259,15 +254,11 @@ class PersistedQueryGenerator {
     }
 
     // Write to file
-    await fs.writeFile(
-      this.options.outputFile,
-      JSON.stringify(output, null, 2),
-      'utf8',
-    );
+    await fs.writeFile(this.options.outputFile, JSON.stringify(output, null, 2), "utf8");
 
     // Generate summary
     const stats = this.generateStats();
-    console.log('\n✅ Persisted queries generated successfully!');
+    console.log("\n✅ Persisted queries generated successfully!");
     console.log(`📄 Output: ${this.options.outputFile}`);
     console.log(`📊 Total queries: ${stats.total}`);
     console.log(`🔧 Average complexity: ${stats.averageComplexity.toFixed(1)}`);
@@ -277,13 +268,9 @@ class PersistedQueryGenerator {
     }
 
     if (stats.duplicateQueries.length > 0) {
-      console.log(
-        `\n⚠️  Found ${stats.duplicateQueries.length} duplicate queries:`,
-      );
+      console.log(`\n⚠️  Found ${stats.duplicateQueries.length} duplicate queries:`);
       stats.duplicateQueries.forEach((dup) => {
-        console.log(
-          `   ${dup.operationName || 'unnamed'} (${dup.sources.length} sources)`,
-        );
+        console.log(`   ${dup.operationName || "unnamed"} (${dup.sources.length} sources)`);
       });
     }
 
@@ -302,11 +289,8 @@ class PersistedQueryGenerator {
         acc[q.source] = (acc[q.source] || 0) + 1;
         return acc;
       }, {}),
-      averageComplexity:
-        queries.reduce((sum, q) => sum + q.complexity, 0) / queries.length,
-      duplicateQueries: queries.filter(
-        (q) => q.sources && q.sources.length > 1,
-      ),
+      averageComplexity: queries.reduce((sum, q) => sum + q.complexity, 0) / queries.length,
+      duplicateQueries: queries.filter((q) => q.sources && q.sources.length > 1),
       highComplexity: queries.filter((q) => q.complexity > 100),
     };
   }
@@ -315,7 +299,7 @@ class PersistedQueryGenerator {
    * Validate generated queries
    */
   async validate() {
-    console.log('\n🔍 Validating generated queries...');
+    console.log("\n🔍 Validating generated queries...");
 
     const queries = Array.from(this.queries.values());
     const issues = [];
@@ -323,9 +307,7 @@ class PersistedQueryGenerator {
     for (const query of queries) {
       // Check for basic GraphQL syntax
       if (!query.query.match(/^(query|mutation|subscription)/)) {
-        issues.push(
-          `Invalid operation type: ${query.operationName || query.hash}`,
-        );
+        issues.push(`Invalid operation type: ${query.operationName || query.hash}`);
       }
 
       // Check for balanced braces
@@ -337,19 +319,17 @@ class PersistedQueryGenerator {
 
       // Check for extremely high complexity
       if (query.complexity > 500) {
-        issues.push(
-          `High complexity (${query.complexity}): ${query.operationName || query.hash}`,
-        );
+        issues.push(`High complexity (${query.complexity}): ${query.operationName || query.hash}`);
       }
     }
 
     if (issues.length > 0) {
-      console.log('❌ Validation issues found:');
+      console.log("❌ Validation issues found:");
       issues.forEach((issue) => console.log(`   ${issue}`));
       return false;
     }
 
-    console.log('✅ All queries validated successfully');
+    console.log("✅ All queries validated successfully");
     return true;
   }
 }
@@ -366,9 +346,9 @@ async function main() {
       process.exit(1);
     }
 
-    console.log('\n🎉 Persisted queries generation complete!');
+    console.log("\n🎉 Persisted queries generation complete!");
   } catch (error) {
-    console.error('❌ Failed to generate persisted queries:', error);
+    console.error("❌ Failed to generate persisted queries:", error);
     process.exit(1);
   }
 }

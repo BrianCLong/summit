@@ -129,9 +129,9 @@ spec:
               name: mesh-control
       ports:
         - protocol: TCP
-          port: 7687  # Bolt protocol
+          port: 7687 # Bolt protocol
         - protocol: TCP
-          port: 7474  # HTTP
+          port: 7474 # HTTP
 
     # From ops zone (monitoring, admin UI)
     - from:
@@ -165,7 +165,7 @@ spec:
               name: mesh-control
       ports:
         - protocol: TCP
-          port: 9092  # Kafka
+          port: 9092 # Kafka
 
     # From data plane (consumers only)
     - from:
@@ -207,7 +207,7 @@ spec:
               app: kafka
       ports:
         - protocol: TCP
-          port: 9093  # Inter-broker
+          port: 9093 # Inter-broker
   egress:
     # To other Kafka brokers
     - to:
@@ -296,10 +296,10 @@ spec:
     - from: []
       ports:
         - protocol: TCP
-          port: 5432  # PostgreSQL
+          port: 5432 # PostgreSQL
         - protocol: TCP
-          port: 6379  # Redis
+          port: 6379 # Redis
         - protocol: TCP
-          port: 7474  # Neo4j HTTP
+          port: 7474 # Neo4j HTTP
         - protocol: TCP
-          port: 9092  # Kafka
+          port: 9092 # Kafka

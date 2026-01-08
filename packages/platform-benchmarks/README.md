@@ -25,27 +25,27 @@ pnpm add @intelgraph/platform-benchmarks
 Create a `benchmarks/api.bench.ts` file:
 
 ```typescript
-import type { BenchmarkSuite } from '@intelgraph/platform-benchmarks';
+import type { BenchmarkSuite } from "@intelgraph/platform-benchmarks";
 
 export default function registerBenchmarks(suite: BenchmarkSuite) {
   suite.add({
-    name: 'entity-serialization',
+    name: "entity-serialization",
     config: {
-      subsystem: 'api',
-      workloadType: 'cpu',
+      subsystem: "api",
+      workloadType: "cpu",
       iterations: 10000,
     },
     fn: () => {
-      const entity = { id: '123', name: 'Test', type: 'Person' };
+      const entity = { id: "123", name: "Test", type: "Person" };
       JSON.stringify(entity);
     },
   });
 
   suite.add({
-    name: 'entity-parsing',
+    name: "entity-parsing",
     config: {
-      subsystem: 'api',
-      workloadType: 'cpu',
+      subsystem: "api",
+      workloadType: "cpu",
       iterations: 10000,
     },
     fn: () => {
@@ -79,20 +79,20 @@ pnpm benchmark --format markdown --output BENCHMARK.md
 Low-level harness for running individual benchmarks:
 
 ```typescript
-import { BenchmarkHarness } from '@intelgraph/platform-benchmarks';
+import { BenchmarkHarness } from "@intelgraph/platform-benchmarks";
 
 const harness = new BenchmarkHarness({
-  name: 'my-benchmark',
-  subsystem: 'api',
-  language: 'typescript',
-  workloadType: 'cpu',
+  name: "my-benchmark",
+  subsystem: "api",
+  language: "typescript",
+  workloadType: "cpu",
   iterations: 1000,
   warmupIterations: 100,
   timeout: 30000,
-  tags: ['serialization'],
+  tags: ["serialization"],
 });
 
-harness.add('serialize', () => {
+harness.add("serialize", () => {
   JSON.stringify({ test: true });
 });
 
@@ -105,27 +105,33 @@ console.log(result.stats.mean); // Mean time in nanoseconds
 High-level suite for organizing multiple benchmarks:
 
 ```typescript
-import { createBenchmarkSuite } from '@intelgraph/platform-benchmarks';
-import { JsonReporter } from '@intelgraph/platform-benchmarks/reporters';
+import { createBenchmarkSuite } from "@intelgraph/platform-benchmarks";
+import { JsonReporter } from "@intelgraph/platform-benchmarks/reporters";
 
 const suite = createBenchmarkSuite({
-  name: 'API Benchmarks',
+  name: "API Benchmarks",
   defaultIterations: 1000,
   thresholds: {
     maxMean: 1_000_000, // 1ms
-    maxP99: 5_000_000,  // 5ms
-    maxRegression: 10,  // 10%
+    maxP99: 5_000_000, // 5ms
+    maxRegression: 10, // 10%
   },
 });
 
 suite.clearReporters();
-suite.addReporter(new JsonReporter('results.json'));
+suite.addReporter(new JsonReporter("results.json"));
 
 suite.add({
-  name: 'benchmark-1',
-  setup: async () => { /* prepare */ },
-  teardown: async () => { /* cleanup */ },
-  fn: () => { /* benchmark */ },
+  name: "benchmark-1",
+  setup: async () => {
+    /* prepare */
+  },
+  teardown: async () => {
+    /* cleanup */
+  },
+  fn: () => {
+    /* benchmark */
+  },
 });
 
 const results = await suite.run();
@@ -136,14 +142,14 @@ const results = await suite.run();
 Compare results against a baseline:
 
 ```typescript
-import { BaselineComparator } from '@intelgraph/platform-benchmarks';
+import { BaselineComparator } from "@intelgraph/platform-benchmarks";
 
 const comparator = new BaselineComparator(10); // 10% threshold
-await comparator.loadBaseline('baseline.json');
+await comparator.loadBaseline("baseline.json");
 
 const regressions = comparator.getRegressions(results);
 if (regressions.length > 0) {
-  console.log('Regressions detected!');
+  console.log("Regressions detected!");
   for (const r of regressions) {
     console.log(comparator.formatComparison(r));
   }
@@ -219,13 +225,13 @@ Configure performance thresholds:
 
 ```typescript
 const suite = createBenchmarkSuite({
-  name: 'Suite',
+  name: "Suite",
   thresholds: {
-    maxMean: 1_000_000,     // Max mean time (ns)
-    maxP99: 5_000_000,      // Max p99 time (ns)
-    minOpsPerSecond: 1000,  // Min ops/sec
-    maxRsd: 10,             // Max relative std dev (%)
-    maxRegression: 10,      // Max regression from baseline (%)
+    maxMean: 1_000_000, // Max mean time (ns)
+    maxP99: 5_000_000, // Max p99 time (ns)
+    minOpsPerSecond: 1000, // Min ops/sec
+    maxRsd: 10, // Max relative std dev (%)
+    maxRegression: 10, // Max regression from baseline (%)
   },
 });
 ```

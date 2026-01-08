@@ -14,9 +14,9 @@
   "collection": {
     "name": "cases_shadow",
     "fields": [
-      {"name": "id", "type": "string", "facet": false},
-      {"name": "title", "type": "string"},
-      {"name": "updated_at", "type": "int64"}
+      { "name": "id", "type": "string", "facet": false },
+      { "name": "title", "type": "string" },
+      { "name": "updated_at", "type": "int64" }
     ],
     "default_sorting_field": "updated_at"
   },

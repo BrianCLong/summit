@@ -5,7 +5,7 @@
  * including misuse, policy violations, safety breaches, and supply chain issues.
  */
 
-import crypto from 'node:crypto';
+import crypto from "node:crypto";
 import {
   Incident,
   IncidentType,
@@ -22,7 +22,7 @@ import {
   FleetId,
   SessionId,
   AgentClassification,
-} from '../types';
+} from "../types";
 
 // ============================================================================
 // Configuration
@@ -40,7 +40,7 @@ export interface IncidentResponseConfig {
 
 export interface NotificationChannel {
   id: string;
-  type: 'email' | 'slack' | 'pagerduty' | 'webhook' | 'siem';
+  type: "email" | "slack" | "pagerduty" | "webhook" | "siem";
   config: Record<string, unknown>;
   severityFilter: IncidentSeverity[];
 }
@@ -54,8 +54,8 @@ export interface MitigationPolicy {
 }
 
 export interface MitigationAction {
-  type: 'isolate' | 'throttle' | 'block' | 'rollback' | 'alert' | 'terminate';
-  target: 'agent' | 'fleet' | 'session' | 'user';
+  type: "isolate" | "throttle" | "block" | "rollback" | "alert" | "terminate";
+  target: "agent" | "fleet" | "session" | "user";
   parameters: Record<string, unknown>;
   automated: boolean;
 }
@@ -67,11 +67,11 @@ const DEFAULT_CONFIG: IncidentResponseConfig = {
   retentionDays: 90,
   notificationChannels: [],
   severityEscalation: {
-    low: ['team-lead'],
-    medium: ['team-lead', 'manager'],
-    high: ['team-lead', 'manager', 'director'],
-    critical: ['team-lead', 'manager', 'director', 'vp'],
-    catastrophic: ['team-lead', 'manager', 'director', 'vp', 'ciso'],
+    low: ["team-lead"],
+    medium: ["team-lead", "manager"],
+    high: ["team-lead", "manager", "director"],
+    critical: ["team-lead", "manager", "director", "vp"],
+    catastrophic: ["team-lead", "manager", "director", "vp", "ciso"],
   },
   mitigationPolicies: [],
 };
@@ -119,7 +119,7 @@ export class IncidentResponseManager {
       id: `INC-${Date.now()}-${crypto.randomUUID().substring(0, 8)}`,
       type: params.type,
       severity: params.severity,
-      status: 'detected',
+      status: "detected",
       title: params.title,
       description: params.description,
       detectedAt: new Date(),
@@ -130,7 +130,7 @@ export class IncidentResponseManager {
       timeline: [
         {
           timestamp: new Date(),
-          type: 'detection',
+          type: "detection",
           actor: params.reporter,
           description: `Incident detected: ${params.title}`,
           automated: false,
@@ -142,18 +142,18 @@ export class IncidentResponseManager {
     };
 
     this.incidents.set(incident.id, incident);
-    this.updateMetrics('detected', params.severity);
+    this.updateMetrics("detected", params.severity);
 
     // Emit detection event
     this.emitEvent({
       id: crypto.randomUUID(),
       timestamp: new Date(),
-      type: 'incident_detected',
-      source: 'IncidentResponseManager',
+      type: "incident_detected",
+      source: "IncidentResponseManager",
       actor: params.reporter,
-      action: 'report_incident',
+      action: "report_incident",
       resource: incident.id,
-      outcome: 'success',
+      outcome: "success",
       classification: params.classification,
       details: {
         incidentType: params.type,
@@ -171,7 +171,7 @@ export class IncidentResponseManager {
     }
 
     // Send notifications
-    await this.sendNotifications(incident, 'detected');
+    await this.sendNotifications(incident, "detected");
 
     return incident;
   }
@@ -189,7 +189,9 @@ export class IncidentResponseManager {
 
     // Run all detectors
     for (const detector of this.detectors.values()) {
-      if (!detector.enabled) {continue;}
+      if (!detector.enabled) {
+        continue;
+      }
 
       const detection = await this.runDetector(detector, event);
       if (detection) {
@@ -205,7 +207,7 @@ export class IncidentResponseManager {
    */
   private async runDetector(
     detector: IncidentDetector,
-    event: GovernanceEvent,
+    event: GovernanceEvent
   ): Promise<Incident | null> {
     // Check if event type matches detector
     const relevantTypes = this.mapIncidentTypeToEventTypes(detector.type);
@@ -218,9 +220,7 @@ export class IncidentResponseManager {
       const isTriggered = await this.checkThreshold(threshold, event);
       if (isTriggered) {
         // Find matching action
-        const action = detector.actions.find(
-          (a) => a.trigger === 'threshold_exceeded',
-        );
+        const action = detector.actions.find((a) => a.trigger === "threshold_exceeded");
 
         if (action) {
           return this.createIncidentFromDetection(detector, threshold, event, action);
@@ -236,32 +236,29 @@ export class IncidentResponseManager {
    */
   private async checkThreshold(
     threshold: DetectorThreshold,
-    event: GovernanceEvent,
+    event: GovernanceEvent
   ): Promise<boolean> {
     const windowStart = Date.now() - threshold.window;
 
     // Count events in window matching the metric
     const matchingEvents = this.eventBuffer.filter((e) => {
-      return (
-        e.timestamp.getTime() >= windowStart &&
-        this.eventMatchesMetric(e, threshold.metric)
-      );
+      return e.timestamp.getTime() >= windowStart && this.eventMatchesMetric(e, threshold.metric);
     });
 
     const count = matchingEvents.length;
 
     switch (threshold.operator) {
-      case 'gt':
+      case "gt":
         return count > threshold.value;
-      case 'gte':
+      case "gte":
         return count >= threshold.value;
-      case 'lt':
+      case "lt":
         return count < threshold.value;
-      case 'lte':
+      case "lte":
         return count <= threshold.value;
-      case 'eq':
+      case "eq":
         return count === threshold.value;
-      case 'anomaly':
+      case "anomaly":
         return this.detectAnomaly(matchingEvents, threshold.value);
       default:
         return false;
@@ -272,9 +269,13 @@ export class IncidentResponseManager {
    * Check if event matches a metric pattern
    */
   private eventMatchesMetric(event: GovernanceEvent, metric: string): boolean {
-    const [eventType, outcome] = metric.split(':');
-    if (eventType && event.type !== eventType) {return false;}
-    if (outcome && event.outcome !== outcome) {return false;}
+    const [eventType, outcome] = metric.split(":");
+    if (eventType && event.type !== eventType) {
+      return false;
+    }
+    if (outcome && event.outcome !== outcome) {
+      return false;
+    }
     return true;
   }
 
@@ -282,12 +283,12 @@ export class IncidentResponseManager {
    * Simple anomaly detection
    */
   private detectAnomaly(events: GovernanceEvent[], sensitivity: number): boolean {
-    if (events.length < 10) {return false;}
+    if (events.length < 10) {
+      return false;
+    }
 
     // Calculate simple moving average and detect spike
-    const recentCount = events.filter(
-      (e) => e.timestamp.getTime() >= Date.now() - 60_000,
-    ).length;
+    const recentCount = events.filter((e) => e.timestamp.getTime() >= Date.now() - 60_000).length;
     const historicalAvg = events.length / 10; // Rough average
 
     return recentCount > historicalAvg * sensitivity;
@@ -300,7 +301,7 @@ export class IncidentResponseManager {
     detector: IncidentDetector,
     threshold: DetectorThreshold,
     event: GovernanceEvent,
-    action: DetectorAction,
+    action: DetectorAction
   ): Promise<Incident> {
     return this.reportIncident({
       type: detector.type[0],
@@ -312,12 +313,12 @@ export class IncidentResponseManager {
       affectedSessions: event.sessionId ? [event.sessionId] : [],
       evidence: [
         {
-          type: 'audit_record',
+          type: "audit_record",
           source: detector.id,
           data: { event, threshold, action },
         },
       ],
-      reporter: 'system/auto-detector',
+      reporter: "system/auto-detector",
       classification: event.classification,
     });
   }
@@ -328,16 +329,18 @@ export class IncidentResponseManager {
   private async escalateIncident(incident: Incident): Promise<void> {
     const escalationPath = this.config.severityEscalation[incident.severity] || [];
 
-    if (escalationPath.length === 0) {return;}
+    if (escalationPath.length === 0) {
+      return;
+    }
 
-    incident.status = 'investigating';
+    incident.status = "investigating";
     incident.assignees = escalationPath;
 
     incident.timeline.push({
       timestamp: new Date(),
-      type: 'escalation',
-      actor: 'system',
-      description: `Escalated to: ${escalationPath.join(', ')}`,
+      type: "escalation",
+      actor: "system",
+      description: `Escalated to: ${escalationPath.join(", ")}`,
       automated: true,
     });
 
@@ -350,19 +353,20 @@ export class IncidentResponseManager {
   private async autoMitigate(incident: Incident): Promise<void> {
     const policy = this.config.mitigationPolicies.find(
       (p) =>
-        p.incidentType === incident.type &&
-        this.compareSeverity(incident.severity, p.severity) >= 0,
+        p.incidentType === incident.type && this.compareSeverity(incident.severity, p.severity) >= 0
     );
 
-    if (!policy) {return;}
+    if (!policy) {
+      return;
+    }
 
     if (policy.requiresApproval) {
       // Queue for approval
       incident.timeline.push({
         timestamp: new Date(),
-        type: 'update',
-        actor: 'system',
-        description: `Mitigation requires approval from: ${policy.approvers?.join(', ')}`,
+        type: "update",
+        actor: "system",
+        description: `Mitigation requires approval from: ${policy.approvers?.join(", ")}`,
         automated: true,
       });
       return;
@@ -374,7 +378,7 @@ export class IncidentResponseManager {
       incident.mitigations.push(mitigation);
     }
 
-    incident.status = 'mitigating';
+    incident.status = "mitigating";
     this.incidents.set(incident.id, incident);
   }
 
@@ -383,52 +387,52 @@ export class IncidentResponseManager {
    */
   private async executeMitigation(
     incident: Incident,
-    action: MitigationAction,
+    action: MitigationAction
   ): Promise<IncidentMitigation> {
     const mitigation: IncidentMitigation = {
       id: crypto.randomUUID(),
       action: `${action.type}:${action.target}`,
-      status: 'in_progress',
+      status: "in_progress",
       automated: action.automated,
       startedAt: new Date(),
     };
 
     try {
       switch (action.type) {
-        case 'isolate':
+        case "isolate":
           await this.isolateTarget(action.target, incident);
           break;
-        case 'throttle':
+        case "throttle":
           await this.throttleTarget(action.target, incident, action.parameters);
           break;
-        case 'block':
+        case "block":
           await this.blockTarget(action.target, incident);
           break;
-        case 'terminate':
+        case "terminate":
           await this.terminateTarget(action.target, incident);
           break;
-        case 'alert':
+        case "alert":
           // Already handled by notifications
           break;
-        case 'rollback':
+        case "rollback":
           // Delegate to rollback manager
           mitigation.rollbackId = await this.triggerRollback(incident, action);
           break;
       }
 
-      mitigation.status = 'completed';
+      mitigation.status = "completed";
       mitigation.completedAt = new Date();
-      mitigation.result = 'Success';
+      mitigation.result = "Success";
     } catch (error) {
-      mitigation.status = 'failed';
+      mitigation.status = "failed";
       mitigation.completedAt = new Date();
       mitigation.result = error instanceof Error ? error.message : String(error);
     }
 
     incident.timeline.push({
       timestamp: new Date(),
-      type: 'mitigation',
-      actor: 'system',
+      type: "mitigation",
+      actor: "system",
       description: `Mitigation ${action.type} on ${action.target}: ${mitigation.status}`,
       automated: true,
       metadata: { mitigationId: mitigation.id },
@@ -440,10 +444,7 @@ export class IncidentResponseManager {
   /**
    * Mitigation: Isolate target
    */
-  private async isolateTarget(
-    target: string,
-    incident: Incident,
-  ): Promise<void> {
+  private async isolateTarget(target: string, incident: Incident): Promise<void> {
     console.log(`[Mitigation] Isolating ${target} for incident ${incident.id}`);
     // Implementation would integrate with agent runtime
   }
@@ -454,9 +455,9 @@ export class IncidentResponseManager {
   private async throttleTarget(
     target: string,
     incident: Incident,
-    params: Record<string, unknown>,
+    params: Record<string, unknown>
   ): Promise<void> {
-    const rate = params.rate as number || 10;
+    const rate = (params.rate as number) || 10;
     console.log(`[Mitigation] Throttling ${target} to ${rate} req/s for incident ${incident.id}`);
     // Implementation would integrate with rate limiter
   }
@@ -464,10 +465,7 @@ export class IncidentResponseManager {
   /**
    * Mitigation: Block target
    */
-  private async blockTarget(
-    target: string,
-    incident: Incident,
-  ): Promise<void> {
+  private async blockTarget(target: string, incident: Incident): Promise<void> {
     console.log(`[Mitigation] Blocking ${target} for incident ${incident.id}`);
     // Implementation would integrate with policy engine
   }
@@ -475,10 +473,7 @@ export class IncidentResponseManager {
   /**
    * Mitigation: Terminate target
    */
-  private async terminateTarget(
-    target: string,
-    incident: Incident,
-  ): Promise<void> {
+  private async terminateTarget(target: string, incident: Incident): Promise<void> {
     console.log(`[Mitigation] Terminating ${target} for incident ${incident.id}`);
     // Implementation would integrate with agent runtime
   }
@@ -486,10 +481,7 @@ export class IncidentResponseManager {
   /**
    * Mitigation: Trigger rollback
    */
-  private async triggerRollback(
-    incident: Incident,
-    action: MitigationAction,
-  ): Promise<string> {
+  private async triggerRollback(incident: Incident, action: MitigationAction): Promise<string> {
     // Would delegate to RollbackManager
     const rollbackId = crypto.randomUUID();
     console.log(`[Mitigation] Triggering rollback ${rollbackId} for incident ${incident.id}`);
@@ -501,10 +493,10 @@ export class IncidentResponseManager {
    */
   private async sendNotifications(
     incident: Incident,
-    event: 'detected' | 'escalated' | 'mitigated' | 'resolved',
+    event: "detected" | "escalated" | "mitigated" | "resolved"
   ): Promise<void> {
     const channels = this.config.notificationChannels.filter((c) =>
-      c.severityFilter.includes(incident.severity),
+      c.severityFilter.includes(incident.severity)
     );
 
     for (const channel of channels) {
@@ -522,7 +514,7 @@ export class IncidentResponseManager {
   private async sendToChannel(
     channel: NotificationChannel,
     incident: Incident,
-    event: string,
+    event: string
   ): Promise<void> {
     const payload = {
       incidentId: incident.id,
@@ -534,20 +526,20 @@ export class IncidentResponseManager {
     };
 
     switch (channel.type) {
-      case 'webhook':
+      case "webhook":
         await fetch(channel.config.url as string, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
         break;
-      case 'slack':
+      case "slack":
         // Slack integration
         break;
-      case 'pagerduty':
+      case "pagerduty":
         // PagerDuty integration
         break;
-      case 'siem':
+      case "siem":
         // SIEM integration
         break;
       default:
@@ -564,45 +556,47 @@ export class IncidentResponseManager {
       resolver: string;
       rootCause?: string;
       lessonsLearned?: string[];
-    },
+    }
   ): Promise<Incident | null> {
     const incident = this.incidents.get(incidentId);
-    if (!incident) {return null;}
+    if (!incident) {
+      return null;
+    }
 
-    incident.status = 'resolved';
+    incident.status = "resolved";
     incident.resolvedAt = new Date();
     incident.rootCause = resolution.rootCause;
     incident.lessonsLearned = resolution.lessonsLearned;
 
     incident.timeline.push({
       timestamp: new Date(),
-      type: 'resolution',
+      type: "resolution",
       actor: resolution.resolver,
-      description: `Incident resolved${resolution.rootCause ? `: ${resolution.rootCause}` : ''}`,
+      description: `Incident resolved${resolution.rootCause ? `: ${resolution.rootCause}` : ""}`,
       automated: false,
     });
 
     this.incidents.set(incidentId, incident);
-    this.updateMetrics('resolved', incident.severity);
+    this.updateMetrics("resolved", incident.severity);
 
     // Emit resolution event
     this.emitEvent({
       id: crypto.randomUUID(),
       timestamp: new Date(),
-      type: 'incident_resolved',
-      source: 'IncidentResponseManager',
+      type: "incident_resolved",
+      source: "IncidentResponseManager",
       actor: resolution.resolver,
-      action: 'resolve_incident',
+      action: "resolve_incident",
       resource: incidentId,
-      outcome: 'success',
-      classification: 'UNCLASSIFIED',
+      outcome: "success",
+      classification: "UNCLASSIFIED",
       details: {
         rootCause: resolution.rootCause,
         mttr: incident.resolvedAt.getTime() - incident.detectedAt.getTime(),
       },
     });
 
-    await this.sendNotifications(incident, 'resolved');
+    await this.sendNotifications(incident, "resolved");
 
     return incident;
   }
@@ -620,37 +614,37 @@ export class IncidentResponseManager {
   private registerDefaultDetectors(): void {
     // Policy violation detector
     this.registerDetector({
-      id: 'policy-violation-detector',
-      name: 'Policy Violation Detector',
-      type: ['policy_violation'],
+      id: "policy-violation-detector",
+      name: "Policy Violation Detector",
+      type: ["policy_violation"],
       enabled: true,
       config: {},
       thresholds: [
         {
-          metric: 'policy_violation:failure',
-          operator: 'gte',
+          metric: "policy_violation:failure",
+          operator: "gte",
           value: 5,
           window: 60_000, // 1 minute
-          severity: 'high',
+          severity: "high",
         },
         {
-          metric: 'policy_violation:failure',
-          operator: 'gte',
+          metric: "policy_violation:failure",
+          operator: "gte",
           value: 20,
           window: 300_000, // 5 minutes
-          severity: 'critical',
+          severity: "critical",
         },
       ],
       actions: [
         {
-          trigger: 'threshold_exceeded',
-          action: 'alert',
+          trigger: "threshold_exceeded",
+          action: "alert",
           automated: true,
           config: {},
         },
         {
-          trigger: 'threshold_exceeded',
-          action: 'throttle',
+          trigger: "threshold_exceeded",
+          action: "throttle",
           automated: true,
           config: { rate: 5 },
         },
@@ -659,24 +653,24 @@ export class IncidentResponseManager {
 
     // Misuse detector
     this.registerDetector({
-      id: 'misuse-detector',
-      name: 'Agent Misuse Detector',
-      type: ['misuse'],
+      id: "misuse-detector",
+      name: "Agent Misuse Detector",
+      type: ["misuse"],
       enabled: true,
       config: {},
       thresholds: [
         {
-          metric: 'policy_violation',
-          operator: 'anomaly',
+          metric: "policy_violation",
+          operator: "anomaly",
           value: 3, // 3x normal rate
           window: 300_000,
-          severity: 'critical',
+          severity: "critical",
         },
       ],
       actions: [
         {
-          trigger: 'anomaly_detected',
-          action: 'block',
+          trigger: "anomaly_detected",
+          action: "block",
           automated: true,
           config: {},
         },
@@ -685,24 +679,24 @@ export class IncidentResponseManager {
 
     // Hallucination rate detector
     this.registerDetector({
-      id: 'hallucination-detector',
-      name: 'High Hallucination Rate Detector',
-      type: ['hallucination'],
+      id: "hallucination-detector",
+      name: "High Hallucination Rate Detector",
+      type: ["hallucination"],
       enabled: true,
       config: {},
       thresholds: [
         {
-          metric: 'hallucination_detected',
-          operator: 'gte',
+          metric: "hallucination_detected",
+          operator: "gte",
           value: 10,
           window: 300_000,
-          severity: 'high',
+          severity: "high",
         },
       ],
       actions: [
         {
-          trigger: 'threshold_exceeded',
-          action: 'alert',
+          trigger: "threshold_exceeded",
+          action: "alert",
           automated: true,
           config: {},
         },
@@ -715,14 +709,14 @@ export class IncidentResponseManager {
    */
   private mapIncidentTypeToEventTypes(types: IncidentType[]): string[] {
     const mapping: Record<IncidentType, string[]> = {
-      misuse: ['policy_violation', 'policy_evaluation'],
-      hallucination: ['hallucination_detected'],
-      data_leak: ['policy_violation'],
-      policy_violation: ['policy_violation'],
-      safety_breach: ['policy_violation', 'incident_detected'],
-      integrity_failure: ['attestation_created'],
-      availability_issue: ['chain_executed'],
-      supply_chain_compromise: ['attestation_created'],
+      misuse: ["policy_violation", "policy_evaluation"],
+      hallucination: ["hallucination_detected"],
+      data_leak: ["policy_violation"],
+      policy_violation: ["policy_violation"],
+      safety_breach: ["policy_violation", "incident_detected"],
+      integrity_failure: ["attestation_created"],
+      availability_issue: ["chain_executed"],
+      supply_chain_compromise: ["attestation_created"],
     };
 
     const eventTypes: string[] = [];
@@ -739,12 +733,12 @@ export class IncidentResponseManager {
     const data = partial.data || {};
     return {
       id: crypto.randomUUID(),
-      type: partial.type || 'audit_record',
-      source: partial.source || 'unknown',
+      type: partial.type || "audit_record",
+      source: partial.source || "unknown",
       timestamp: partial.timestamp || new Date(),
       data,
-      hash: crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex'),
-      classification: partial.classification || 'UNCLASSIFIED',
+      hash: crypto.createHash("sha256").update(JSON.stringify(data)).digest("hex"),
+      classification: partial.classification || "UNCLASSIFIED",
     };
   }
 
@@ -752,7 +746,7 @@ export class IncidentResponseManager {
    * Compare severity levels
    */
   private compareSeverity(a: IncidentSeverity, b: IncidentSeverity): number {
-    const levels: IncidentSeverity[] = ['low', 'medium', 'high', 'critical', 'catastrophic'];
+    const levels: IncidentSeverity[] = ["low", "medium", "high", "critical", "catastrophic"];
     return levels.indexOf(a) - levels.indexOf(b);
   }
 
@@ -774,8 +768,8 @@ export class IncidentResponseManager {
   /**
    * Update metrics
    */
-  private updateMetrics(event: 'detected' | 'resolved', severity: IncidentSeverity): void {
-    if (event === 'detected') {
+  private updateMetrics(event: "detected" | "resolved", severity: IncidentSeverity): void {
+    if (event === "detected") {
       this.metrics.totalIncidents++;
       this.metrics.activeIncidents++;
       this.metrics.bySeverity[severity]++;
@@ -798,7 +792,7 @@ export class IncidentResponseManager {
    */
   getActiveIncidents(): Incident[] {
     return Array.from(this.incidents.values()).filter(
-      (i) => !['resolved', 'post_mortem'].includes(i.status),
+      (i) => !["resolved", "post_mortem"].includes(i.status)
     );
   }
 
@@ -824,7 +818,7 @@ export class IncidentResponseManager {
       try {
         listener(event);
       } catch (error) {
-        console.error('Event listener error:', error);
+        console.error("Event listener error:", error);
       }
     }
   }

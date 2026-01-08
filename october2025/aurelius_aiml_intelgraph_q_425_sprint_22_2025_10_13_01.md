@@ -290,12 +290,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
+        with: { python-version: "3.11" }
       - run: pip install -U pip && pip install -e ./impl -r requirements.txt
       - run: pytest -q
       - name: Generate SBOM
         uses: anchore/sbom-action@v0
-        with: { path: '.', format: 'spdx-json', output-file: 'sbom.json' }
+        with: { path: ".", format: "spdx-json", output-file: "sbom.json" }
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with: { name: sbom, path: sbom.json }
@@ -307,7 +307,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: SLSA provenance
         uses: slsa-framework/slsa-github-generator/actions/create-slsa3-provenance@v2
-        with: { artifact_path: 'sbom.json' }
+        with: { artifact_path: "sbom.json" }
 ```
 
 ### 7.2 Attestation Verification (`/integration/gh_actions/release.verify.yml`)

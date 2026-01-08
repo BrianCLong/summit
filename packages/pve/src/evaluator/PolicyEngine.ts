@@ -8,39 +8,35 @@
  * @module pve/evaluator/PolicyEngine
  */
 
-import path from 'node:path';
+import path from "node:path";
 import type {
   PolicyResult,
   PolicyConfig,
   EvaluationContext,
   EvaluationType,
   PolicySeverity,
-} from '../types/index.js';
-import { OPAAdapter, type OPAConfig } from './OPAAdapter.js';
+} from "../types/index.js";
+import { OPAAdapter, type OPAConfig } from "./OPAAdapter.js";
 import {
   PolicyResultBuilder,
   pass,
   fail,
   aggregateResults,
   formatResults,
-} from './PolicyResult.js';
-import {
-  loadPolicies,
-  loadRegoPolicies,
-  type LoadedPolicy,
-} from '../utils/policyLoader.js';
-import { logger, createLogger, type Logger } from '../utils/logger.js';
-import { hashObject } from '../utils/hash.js';
+} from "./PolicyResult.js";
+import { loadPolicies, loadRegoPolicies, type LoadedPolicy } from "../utils/policyLoader.js";
+import { logger, createLogger, type Logger } from "../utils/logger.js";
+import { hashObject } from "../utils/hash.js";
 
 // Built-in validators
-import { PRDiffValidator } from './validators/PRDiffValidator.js';
-import { SchemaDriftValidator } from './validators/SchemaDriftValidator.js';
-import { TSConfigValidator } from './validators/TSConfigValidator.js';
-import { AgentOutputValidator } from './validators/AgentOutputValidator.js';
-import { MetadataInvariantValidator } from './validators/MetadataInvariantValidator.js';
-import { CIIntegrityValidator } from './validators/CIIntegrityValidator.js';
-import { DependencyAuditValidator } from './validators/DependencyAuditValidator.js';
-import { SecurityScanValidator } from './validators/SecurityScanValidator.js';
+import { PRDiffValidator } from "./validators/PRDiffValidator.js";
+import { SchemaDriftValidator } from "./validators/SchemaDriftValidator.js";
+import { TSConfigValidator } from "./validators/TSConfigValidator.js";
+import { AgentOutputValidator } from "./validators/AgentOutputValidator.js";
+import { MetadataInvariantValidator } from "./validators/MetadataInvariantValidator.js";
+import { CIIntegrityValidator } from "./validators/CIIntegrityValidator.js";
+import { DependencyAuditValidator } from "./validators/DependencyAuditValidator.js";
+import { SecurityScanValidator } from "./validators/SecurityScanValidator.js";
 
 export interface PolicyEngineConfig {
   /** Directory containing policy files */
@@ -136,13 +132,13 @@ export class PolicyEngine {
     this.config = {
       useBuiltIn: true,
       failFast: false,
-      defaultSeverity: 'warning',
+      defaultSeverity: "warning",
       cacheResults: false,
       ...config,
     };
 
     this.opa = new OPAAdapter(config.opa);
-    this.logger = config.logger || createLogger({ level: 'info' });
+    this.logger = config.logger || createLogger({ level: "info" });
 
     // Register built-in validators
     if (this.config.useBuiltIn) {
@@ -180,7 +176,7 @@ export class PolicyEngine {
 
     // Load built-in policies
     if (this.config.useBuiltIn) {
-      const builtInDir = path.join(__dirname, '..', 'policies');
+      const builtInDir = path.join(__dirname, "..", "policies");
       try {
         const builtIn = await loadPolicies({ baseDir: builtInDir });
         for (const policy of builtIn) {
@@ -197,7 +193,7 @@ export class PolicyEngine {
         }
       } catch {
         // Built-in policies may not exist yet
-        this.logger.debug('No built-in policies found');
+        this.logger.debug("No built-in policies found");
       }
     }
 
@@ -205,7 +201,7 @@ export class PolicyEngine {
     this.applyOverrides();
 
     this.initialized = true;
-    this.logger.info('Policy engine initialized', {
+    this.logger.info("Policy engine initialized", {
       policies: this.policies.size,
       regoPolicies: this.regoPolicies.size,
       validators: this.validators.size,
@@ -218,43 +214,43 @@ export class PolicyEngine {
   private registerBuiltInValidators(): void {
     const builtInValidators: CustomValidator[] = [
       {
-        id: 'pve.pr_diff',
-        handles: ['pr_diff'],
+        id: "pve.pr_diff",
+        handles: ["pr_diff"],
         validate: (ctx) => new PRDiffValidator().validate(ctx),
       },
       {
-        id: 'pve.schema_drift',
-        handles: ['schema_drift'],
+        id: "pve.schema_drift",
+        handles: ["schema_drift"],
         validate: (ctx) => new SchemaDriftValidator().validate(ctx),
       },
       {
-        id: 'pve.tsconfig_integrity',
-        handles: ['tsconfig_integrity'],
+        id: "pve.tsconfig_integrity",
+        handles: ["tsconfig_integrity"],
         validate: (ctx) => new TSConfigValidator().validate(ctx),
       },
       {
-        id: 'pve.agent_output',
-        handles: ['agent_output'],
+        id: "pve.agent_output",
+        handles: ["agent_output"],
         validate: (ctx) => new AgentOutputValidator().validate(ctx),
       },
       {
-        id: 'pve.metadata_invariant',
-        handles: ['metadata_invariant'],
+        id: "pve.metadata_invariant",
+        handles: ["metadata_invariant"],
         validate: (ctx) => new MetadataInvariantValidator().validate(ctx),
       },
       {
-        id: 'pve.ci_integrity',
-        handles: ['ci_integrity'],
+        id: "pve.ci_integrity",
+        handles: ["ci_integrity"],
         validate: (ctx) => new CIIntegrityValidator().validate(ctx),
       },
       {
-        id: 'pve.dependency_audit',
-        handles: ['dependency_audit'],
+        id: "pve.dependency_audit",
+        handles: ["dependency_audit"],
         validate: (ctx) => new DependencyAuditValidator().validate(ctx),
       },
       {
-        id: 'pve.security_scan',
-        handles: ['security_scan'],
+        id: "pve.security_scan",
+        handles: ["security_scan"],
         validate: (ctx) => new SecurityScanValidator().validate(ctx),
       },
     ];
@@ -269,7 +265,7 @@ export class PolicyEngine {
    */
   registerValidator(validator: CustomValidator): void {
     this.validators.set(validator.id, validator);
-    this.logger.debug('Registered validator', { id: validator.id });
+    this.logger.debug("Registered validator", { id: validator.id });
   }
 
   /**
@@ -311,13 +307,11 @@ export class PolicyEngine {
    */
   private findMatchingPolicies(pattern: string): LoadedPolicy[] {
     const results: LoadedPolicy[] = [];
-    const isGlob = pattern.includes('*');
+    const isGlob = pattern.includes("*");
 
     for (const [id, policy] of this.policies) {
       if (isGlob) {
-        const regex = new RegExp(
-          '^' + pattern.replace(/\*/g, '.*').replace(/\?/g, '.') + '$',
-        );
+        const regex = new RegExp("^" + pattern.replace(/\*/g, ".*").replace(/\?/g, ".") + "$");
         if (regex.test(id)) {
           results.push(policy);
         }
@@ -334,7 +328,7 @@ export class PolicyEngine {
    */
   async evaluate(
     context: EvaluationContext,
-    options: EvaluationOptions = {},
+    options: EvaluationOptions = {}
   ): Promise<EvaluationReport> {
     await this.initialize();
 
@@ -366,19 +360,19 @@ export class PolicyEngine {
 
           if (
             this.config.failFast &&
-            validatorResults.some((r) => !r.allowed && r.severity === 'error')
+            validatorResults.some((r) => !r.allowed && r.severity === "error")
           ) {
             break;
           }
         } catch (error) {
-          this.logger.error('Validator failed', {
+          this.logger.error("Validator failed", {
             validator: id,
             error: error instanceof Error ? error.message : String(error),
           });
           results.push(
             fail(`${id}:execution`, `Validator execution failed: ${error}`, {
-              severity: 'error',
-            }),
+              severity: "error",
+            })
           );
         }
       }
@@ -392,7 +386,7 @@ export class PolicyEngine {
 
       if (
         !policy.config.appliesTo.includes(context.type) &&
-        !policy.config.appliesTo.includes('custom')
+        !policy.config.appliesTo.includes("custom")
       ) {
         continue;
       }
@@ -401,10 +395,7 @@ export class PolicyEngine {
         continue;
       }
 
-      if (
-        options.tags &&
-        !options.tags.some((t) => policy.config.tags?.includes(t))
-      ) {
+      if (options.tags && !options.tags.some((t) => policy.config.tags?.includes(t))) {
         continue;
       }
 
@@ -413,22 +404,18 @@ export class PolicyEngine {
         results.push(policyResult);
         policiesEvaluated.push(id);
 
-        if (
-          this.config.failFast &&
-          !policyResult.allowed &&
-          policyResult.severity === 'error'
-        ) {
+        if (this.config.failFast && !policyResult.allowed && policyResult.severity === "error") {
           break;
         }
       } catch (error) {
-        this.logger.error('Policy evaluation failed', {
+        this.logger.error("Policy evaluation failed", {
           policy: id,
           error: error instanceof Error ? error.message : String(error),
         });
         results.push(
           fail(id, `Policy evaluation failed: ${error}`, {
-            severity: 'error',
-          }),
+            severity: "error",
+          })
         );
       }
     }
@@ -461,7 +448,7 @@ export class PolicyEngine {
       this.resultCache.set(cacheKey, report);
     }
 
-    this.logger.info('Evaluation complete', {
+    this.logger.info("Evaluation complete", {
       passed: report.passed,
       total: report.summary.total,
       duration,
@@ -475,19 +462,16 @@ export class PolicyEngine {
    */
   private async evaluatePolicy(
     policy: LoadedPolicy,
-    context: EvaluationContext,
+    context: EvaluationContext
   ): Promise<PolicyResult> {
     // If this is a Rego policy, use OPA
     const regoContent = this.regoPolicies.get(policy.config.id);
     if (regoContent) {
-      const opaResult = await this.opa.evaluate(
-        policy.source,
-        context.input,
-      );
+      const opaResult = await this.opa.evaluate(policy.source, context.input);
 
       if (!opaResult.allow) {
         const violations = opaResult.violations || [];
-        return fail(policy.config.id, violations[0]?.message || 'Policy violation', {
+        return fail(policy.config.id, violations[0]?.message || "Policy violation", {
           severity: policy.config.severity,
           details: {
             violations,
@@ -500,28 +484,22 @@ export class PolicyEngine {
     }
 
     // Default: pass if no specific evaluator
-    return pass(policy.config.id, 'No evaluator configured');
+    return pass(policy.config.id, "No evaluator configured");
   }
 
   /**
    * Assert that all policies pass
    */
-  async assertAll(
-    context: EvaluationContext,
-    options?: EvaluationOptions,
-  ): Promise<void> {
+  async assertAll(context: EvaluationContext, options?: EvaluationOptions): Promise<void> {
     const report = await this.evaluate(context, options);
 
     if (!report.passed) {
       const errorMessages = report.results
-        .filter((r) => !r.allowed && r.severity === 'error')
+        .filter((r) => !r.allowed && r.severity === "error")
         .map((r) => `${r.policy}: ${r.message}`)
-        .join('\n');
+        .join("\n");
 
-      throw new PolicyViolationError(
-        `Policy validation failed:\n${errorMessages}`,
-        report,
-      );
+      throw new PolicyViolationError(`Policy validation failed:\n${errorMessages}`, report);
     }
   }
 
@@ -563,7 +541,7 @@ export class PolicyEngine {
    */
   formatReport(
     report: EvaluationReport,
-    options?: { verbose?: boolean; colors?: boolean },
+    options?: { verbose?: boolean; colors?: boolean }
   ): string {
     return formatResults(report.results, options);
   }
@@ -575,10 +553,10 @@ export class PolicyEngine {
 export class PolicyViolationError extends Error {
   constructor(
     message: string,
-    public readonly report: EvaluationReport,
+    public readonly report: EvaluationReport
   ) {
     super(message);
-    this.name = 'PolicyViolationError';
+    this.name = "PolicyViolationError";
   }
 }
 

@@ -3,9 +3,9 @@
  * Tracks all cryptographic usage across the system
  */
 
-import { CryptoInventory, CryptoInventoryItem, CryptoOperation } from '../types';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+import { CryptoInventory, CryptoInventoryItem, CryptoOperation } from "../types";
+import * as fs from "fs/promises";
+import * as path from "path";
 
 export class CryptoInventoryImpl implements CryptoInventory {
   private items: Map<string, CryptoInventoryItem> = new Map();
@@ -44,16 +44,17 @@ export class CryptoInventoryImpl implements CryptoInventory {
     return Array.from(this.items.values());
   }
 
-  getByStatus(status: CryptoInventoryItem['migrationStatus']): CryptoInventoryItem[] {
-    return this.getAll().filter(item => item.migrationStatus === status);
+  getByStatus(status: CryptoInventoryItem["migrationStatus"]): CryptoInventoryItem[] {
+    return this.getAll().filter((item) => item.migrationStatus === status);
   }
 
   getHighPriority(): CryptoInventoryItem[] {
-    return this.getAll().filter(item =>
-      item.criticality === 'high' ||
-      item.criticality === 'critical' ||
-      item.dataClassification === 'secret' ||
-      item.dataClassification === 'top-secret'
+    return this.getAll().filter(
+      (item) =>
+        item.criticality === "high" ||
+        item.criticality === "critical" ||
+        item.dataClassification === "secret" ||
+        item.dataClassification === "top-secret"
     );
   }
 
@@ -85,7 +86,7 @@ export class CryptoInventoryImpl implements CryptoInventory {
     const items: CryptoInventoryItem[] = [];
 
     try {
-      const content = await fs.readFile(filePath, 'utf-8');
+      const content = await fs.readFile(filePath, "utf-8");
 
       // Scan for cryptographic patterns
       items.push(...this.detectRSA(filePath, content));
@@ -100,71 +101,63 @@ export class CryptoInventoryImpl implements CryptoInventory {
   }
 
   private detectRSA(filePath: string, content: string): CryptoInventoryItem[] {
-    const patterns = [
-      /RSA/i,
-      /PKCS1/i,
-      /generateKeyPair.*rsa/i,
-      /createSign.*RSA/i,
-    ];
+    const patterns = [/RSA/i, /PKCS1/i, /generateKeyPair.*rsa/i, /createSign.*RSA/i];
 
-    if (patterns.some(pattern => pattern.test(content))) {
-      return [{
-        location: filePath,
-        operation: CryptoOperation.DIGITAL_SIGNATURE,
-        algorithm: 'RSA',
-        version: '1.0',
-        lastUpdated: new Date(),
-        criticality: 'high',
-        dataClassification: 'confidential',
-        migrationStatus: 'pending',
-      }];
+    if (patterns.some((pattern) => pattern.test(content))) {
+      return [
+        {
+          location: filePath,
+          operation: CryptoOperation.DIGITAL_SIGNATURE,
+          algorithm: "RSA",
+          version: "1.0",
+          lastUpdated: new Date(),
+          criticality: "high",
+          dataClassification: "confidential",
+          migrationStatus: "pending",
+        },
+      ];
     }
 
     return [];
   }
 
   private detectECDSA(filePath: string, content: string): CryptoInventoryItem[] {
-    const patterns = [
-      /ECDSA/i,
-      /secp256/i,
-      /P-256/i,
-      /elliptic.*curve/i,
-    ];
+    const patterns = [/ECDSA/i, /secp256/i, /P-256/i, /elliptic.*curve/i];
 
-    if (patterns.some(pattern => pattern.test(content))) {
-      return [{
-        location: filePath,
-        operation: CryptoOperation.DIGITAL_SIGNATURE,
-        algorithm: 'ECDSA',
-        version: '1.0',
-        lastUpdated: new Date(),
-        criticality: 'high',
-        dataClassification: 'confidential',
-        migrationStatus: 'pending',
-      }];
+    if (patterns.some((pattern) => pattern.test(content))) {
+      return [
+        {
+          location: filePath,
+          operation: CryptoOperation.DIGITAL_SIGNATURE,
+          algorithm: "ECDSA",
+          version: "1.0",
+          lastUpdated: new Date(),
+          criticality: "high",
+          dataClassification: "confidential",
+          migrationStatus: "pending",
+        },
+      ];
     }
 
     return [];
   }
 
   private detectAES(filePath: string, content: string): CryptoInventoryItem[] {
-    const patterns = [
-      /AES/i,
-      /aes-256-gcm/i,
-      /createCipheriv.*aes/i,
-    ];
+    const patterns = [/AES/i, /aes-256-gcm/i, /createCipheriv.*aes/i];
 
-    if (patterns.some(pattern => pattern.test(content))) {
-      return [{
-        location: filePath,
-        operation: CryptoOperation.ENCRYPTION,
-        algorithm: 'AES-256-GCM',
-        version: '1.0',
-        lastUpdated: new Date(),
-        criticality: 'medium',
-        dataClassification: 'confidential',
-        migrationStatus: 'not-applicable', // AES is quantum-resistant for symmetric encryption
-      }];
+    if (patterns.some((pattern) => pattern.test(content))) {
+      return [
+        {
+          location: filePath,
+          operation: CryptoOperation.ENCRYPTION,
+          algorithm: "AES-256-GCM",
+          version: "1.0",
+          lastUpdated: new Date(),
+          criticality: "medium",
+          dataClassification: "confidential",
+          migrationStatus: "not-applicable", // AES is quantum-resistant for symmetric encryption
+        },
+      ];
     }
 
     return [];
@@ -178,12 +171,12 @@ export class CryptoInventoryImpl implements CryptoInventory {
       items.push({
         location: filePath,
         operation: CryptoOperation.KEY_ENCAPSULATION,
-        algorithm: 'Kyber',
-        version: '3.0',
+        algorithm: "Kyber",
+        version: "3.0",
         lastUpdated: new Date(),
-        criticality: 'low',
-        dataClassification: 'internal',
-        migrationStatus: 'completed',
+        criticality: "low",
+        dataClassification: "internal",
+        migrationStatus: "completed",
       });
     }
 
@@ -192,12 +185,12 @@ export class CryptoInventoryImpl implements CryptoInventory {
       items.push({
         location: filePath,
         operation: CryptoOperation.DIGITAL_SIGNATURE,
-        algorithm: 'Dilithium',
-        version: '3.1',
+        algorithm: "Dilithium",
+        version: "3.1",
         lastUpdated: new Date(),
-        criticality: 'low',
-        dataClassification: 'internal',
-        migrationStatus: 'completed',
+        criticality: "low",
+        dataClassification: "internal",
+        migrationStatus: "completed",
       });
     }
 
@@ -208,13 +201,11 @@ export class CryptoInventoryImpl implements CryptoInventory {
     const items = this.getAll();
     const summary = {
       total: items.length,
-      byStatus: this.groupBy(items, 'migrationStatus'),
-      byCriticality: this.groupBy(items, 'criticality'),
-      byAlgorithm: this.groupBy(items, 'algorithm'),
-      quantumVulnerable: items.filter(item =>
-        item.algorithm === 'RSA' ||
-        item.algorithm === 'ECDSA' ||
-        item.algorithm === 'DH'
+      byStatus: this.groupBy(items, "migrationStatus"),
+      byCriticality: this.groupBy(items, "criticality"),
+      byAlgorithm: this.groupBy(items, "algorithm"),
+      quantumVulnerable: items.filter(
+        (item) => item.algorithm === "RSA" || item.algorithm === "ECDSA" || item.algorithm === "DH"
       ).length,
     };
 
@@ -225,11 +216,14 @@ export class CryptoInventoryImpl implements CryptoInventory {
     items: CryptoInventoryItem[],
     key: K
   ): Record<string, number> {
-    return items.reduce((acc, item) => {
-      const value = String(item[key]);
-      acc[value] = (acc[value] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    return items.reduce(
+      (acc, item) => {
+        const value = String(item[key]);
+        acc[value] = (acc[value] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
   }
 }
 

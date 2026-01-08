@@ -8,10 +8,10 @@
  * @security Critical - All images must pass verification before deployment
  */
 
-import { spawn } from 'child_process';
-import { createHash } from 'crypto';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { dirname, join } from 'path';
+import { spawn } from "child_process";
+import { createHash } from "crypto";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { dirname, join } from "path";
 
 // ============================================================================
 // Types & Interfaces
@@ -36,7 +36,7 @@ export interface SignatureInfo {
   subject?: string;
   signedAt: Date;
   payload: Record<string, unknown>;
-  verificationMode: 'keyless' | 'key';
+  verificationMode: "keyless" | "key";
   certificateChain?: string[];
   rekorEntry?: RekorEntryInfo;
 }
@@ -94,15 +94,15 @@ export interface RekorEntryInfo {
 // ============================================================================
 
 const DEFAULT_CONFIG: CosignConfig = {
-  cosignBinaryPath: '/usr/local/bin/cosign',
-  cacheDir: '/var/cache/cosign',
+  cosignBinaryPath: "/usr/local/bin/cosign",
+  cacheDir: "/var/cache/cosign",
   timeout: 60000, // 60 seconds
   retryAttempts: 3,
   retryDelay: 1000,
   offline: false,
-  rekorUrl: 'https://rekor.sigstore.dev',
-  fulcioUrl: 'https://fulcio.sigstore.dev',
-  rekorUuidStorePath: '/var/cache/cosign/rekor-entries.json',
+  rekorUrl: "https://rekor.sigstore.dev",
+  fulcioUrl: "https://fulcio.sigstore.dev",
+  rekorUuidStorePath: "/var/cache/cosign/rekor-entries.json",
 };
 
 const DEFAULT_POLICY: VerificationPolicy = {
@@ -110,17 +110,11 @@ const DEFAULT_POLICY: VerificationPolicy = {
   requireKeyless: true,
   allowManagedFallback: true,
   preferKeyless: true,
-  trustedIssuers: [
-    'https://accounts.google.com',
-    'https://token.actions.githubusercontent.com',
-  ],
+  trustedIssuers: ["https://accounts.google.com", "https://token.actions.githubusercontent.com"],
   trustedSubjects: [],
   trustedKeyRefs: [],
   requireAttestation: false,
-  attestationPredicateTypes: [
-    'https://slsa.dev/provenance/v0.2',
-    'https://slsa.dev/provenance/v1',
-  ],
+  attestationPredicateTypes: ["https://slsa.dev/provenance/v0.2", "https://slsa.dev/provenance/v1"],
 };
 
 // ============================================================================
@@ -132,16 +126,13 @@ export class CosignVerifier {
   private policy: VerificationPolicy;
   private verificationCache: Map<string, CosignVerificationResult>;
 
-  constructor(
-    config: Partial<CosignConfig> = {},
-    policy: Partial<VerificationPolicy> = {}
-  ) {
+  constructor(config: Partial<CosignConfig> = {}, policy: Partial<VerificationPolicy> = {}) {
     this.config = {
       ...DEFAULT_CONFIG,
       ...config,
       rekorUuidStorePath:
         config.rekorUuidStorePath ||
-        join(config.cacheDir ?? DEFAULT_CONFIG.cacheDir, 'rekor-entries.json'),
+        join(config.cacheDir ?? DEFAULT_CONFIG.cacheDir, "rekor-entries.json"),
     };
     this.policy = {
       ...DEFAULT_POLICY,
@@ -178,9 +169,9 @@ export class CosignVerifier {
     // Resolve image digest
     const digest = await this.resolveDigest(imageRef);
     if (!digest) {
-      return this.createFailedResult(imageRef, '', startTime, [
+      return this.createFailedResult(imageRef, "", startTime, [
         {
-          code: 'DIGEST_RESOLUTION_FAILED',
+          code: "DIGEST_RESOLUTION_FAILED",
           message: `Failed to resolve digest for image: ${imageRef}`,
           recoverable: true,
         },
@@ -197,9 +188,8 @@ export class CosignVerifier {
 
       if (sigResult.usedManagedFallback) {
         errors.push({
-          code: 'KEYLESS_FALLBACK_USED',
-          message:
-            'Keyless verification was unavailable; used managed key fallback',
+          code: "KEYLESS_FALLBACK_USED",
+          message: "Keyless verification was unavailable; used managed key fallback",
           recoverable: true,
         });
       }
@@ -225,9 +215,7 @@ export class CosignVerifier {
       signatures,
       attestations,
       rekorEntries,
-      usedManagedFallback: this.policy.allowManagedFallback
-        ? usedManagedFallback
-        : false,
+      usedManagedFallback: this.policy.allowManagedFallback ? usedManagedFallback : false,
       timestamp: new Date(),
       verificationDuration: Date.now() - startTime,
       errors,
@@ -304,7 +292,7 @@ export class CosignVerifier {
 
       if (signatures.length === 0) {
         errors.push({
-          code: 'NO_VALID_SIGNATURES',
+          code: "NO_VALID_SIGNATURES",
           message: `No valid signatures found for image: ${imageRef}`,
           recoverable: false,
         });
@@ -314,14 +302,14 @@ export class CosignVerifier {
         !this.policy.allowManagedFallback
       ) {
         errors.push({
-          code: 'KEYLESS_REQUIRED',
-          message: 'Keyless verification required but no valid keyless signature found',
+          code: "KEYLESS_REQUIRED",
+          message: "Keyless verification required but no valid keyless signature found",
           recoverable: false,
         });
       }
     } catch (err) {
       errors.push({
-        code: 'SIGNATURE_VERIFICATION_ERROR',
+        code: "SIGNATURE_VERIFICATION_ERROR",
         message: `Signature verification failed: ${err instanceof Error ? err.message : String(err)}`,
         recoverable: true,
       });
@@ -342,10 +330,7 @@ export class CosignVerifier {
 
     try {
       for (const predicateType of this.policy.attestationPredicateTypes) {
-        const result = await this.runCosignVerifyAttestation(
-          imageRef,
-          predicateType
-        );
+        const result = await this.runCosignVerifyAttestation(imageRef, predicateType);
 
         if (result.success && result.attestation) {
           attestations.push({
@@ -358,14 +343,14 @@ export class CosignVerifier {
 
       if (attestations.length === 0) {
         errors.push({
-          code: 'NO_VALID_ATTESTATIONS',
+          code: "NO_VALID_ATTESTATIONS",
           message: `No valid attestations found for image: ${imageRef}`,
           recoverable: false,
         });
       }
     } catch (err) {
       errors.push({
-        code: 'ATTESTATION_VERIFICATION_ERROR',
+        code: "ATTESTATION_VERIFICATION_ERROR",
         message: `Attestation verification failed: ${err instanceof Error ? err.message : String(err)}`,
         recoverable: true,
       });
@@ -389,10 +374,10 @@ export class CosignVerifier {
     signatures?: SignatureInfo[];
     rekorEntries?: RekorEntryInfo[];
   }> {
-    const args = ['verify', '--output=json'];
+    const args = ["verify", "--output=json"];
 
     if (options.keyless) {
-      args.push('--certificate-identity-regexp=.*');
+      args.push("--certificate-identity-regexp=.*");
       if (options.issuer) {
         args.push(`--certificate-oidc-issuer=${options.issuer}`);
       }
@@ -401,7 +386,7 @@ export class CosignVerifier {
     }
 
     if (this.config.offline) {
-      args.push('--offline');
+      args.push("--offline");
     }
 
     args.push(`--rekor-url=${this.config.rekorUrl}`);
@@ -413,29 +398,29 @@ export class CosignVerifier {
         timeout: this.config.timeout,
         env: {
           ...globalThis.process.env,
-          COSIGN_EXPERIMENTAL: '1',
-          TUF_ROOT: this.config.tufRoot || '',
+          COSIGN_EXPERIMENTAL: "1",
+          TUF_ROOT: this.config.tufRoot || "",
         },
       });
 
-      let stdout = '';
-      let stderr = '';
+      let stdout = "";
+      let stderr = "";
 
-      process.stdout.on('data', (data) => {
+      process.stdout.on("data", (data) => {
         stdout += data.toString();
       });
 
-      process.stderr.on('data', (data) => {
+      process.stderr.on("data", (data) => {
         stderr += data.toString();
       });
 
-      process.on('close', (code) => {
+      process.on("close", (code) => {
         if (code === 0) {
           try {
             const output = JSON.parse(stdout);
             const { signatures, rekorEntries } = this.parseSignatures(
               output,
-              options.keyless ? 'keyless' : 'key'
+              options.keyless ? "keyless" : "key"
             );
             resolve({ success: true, signatures, rekorEntries });
           } catch {
@@ -447,7 +432,7 @@ export class CosignVerifier {
         }
       });
 
-      process.on('error', (err) => {
+      process.on("error", (err) => {
         console.error(`Cosign process error: ${err.message}`);
         resolve({ success: false });
       });
@@ -465,15 +450,15 @@ export class CosignVerifier {
     attestation?: { predicate: Record<string, unknown> };
   }> {
     const args = [
-      'verify-attestation',
-      '--output=json',
+      "verify-attestation",
+      "--output=json",
       `--type=${predicateType}`,
-      '--certificate-identity-regexp=.*',
-      '--certificate-oidc-issuer-regexp=.*',
+      "--certificate-identity-regexp=.*",
+      "--certificate-oidc-issuer-regexp=.*",
     ];
 
     if (this.config.offline) {
-      args.push('--offline');
+      args.push("--offline");
     }
 
     args.push(imageRef);
@@ -483,17 +468,17 @@ export class CosignVerifier {
         timeout: this.config.timeout,
         env: {
           ...globalThis.process.env,
-          COSIGN_EXPERIMENTAL: '1',
+          COSIGN_EXPERIMENTAL: "1",
         },
       });
 
-      let stdout = '';
+      let stdout = "";
 
-      process.stdout.on('data', (data) => {
+      process.stdout.on("data", (data) => {
         stdout += data.toString();
       });
 
-      process.on('close', (code) => {
+      process.on("close", (code) => {
         if (code === 0) {
           try {
             const output = JSON.parse(stdout);
@@ -509,7 +494,7 @@ export class CosignVerifier {
         }
       });
 
-      process.on('error', () => {
+      process.on("error", () => {
         resolve({ success: false });
       });
     });
@@ -520,27 +505,23 @@ export class CosignVerifier {
    */
   private async resolveDigest(imageRef: string): Promise<string | null> {
     // If already a digest reference, extract it
-    if (imageRef.includes('@sha256:')) {
-      return imageRef.split('@')[1];
+    if (imageRef.includes("@sha256:")) {
+      return imageRef.split("@")[1];
     }
 
     // Use crane or skopeo to resolve digest
     return new Promise((resolve) => {
-      const process = spawn(
-        'crane',
-        ['digest', imageRef, '--platform=linux/amd64'],
-        {
-          timeout: this.config.timeout,
-        }
-      );
+      const process = spawn("crane", ["digest", imageRef, "--platform=linux/amd64"], {
+        timeout: this.config.timeout,
+      });
 
-      let stdout = '';
+      let stdout = "";
 
-      process.stdout.on('data', (data) => {
+      process.stdout.on("data", (data) => {
         stdout += data.toString();
       });
 
-      process.on('close', (code) => {
+      process.on("close", (code) => {
         if (code === 0) {
           resolve(stdout.trim());
         } else {
@@ -548,7 +529,7 @@ export class CosignVerifier {
         }
       });
 
-      process.on('error', () => {
+      process.on("error", () => {
         resolve(null);
       });
     });
@@ -559,22 +540,20 @@ export class CosignVerifier {
    */
   private parseSignatures(
     output: unknown,
-    verificationMode: 'keyless' | 'key'
+    verificationMode: "keyless" | "key"
   ): { signatures: SignatureInfo[]; rekorEntries: RekorEntryInfo[] } {
     const signatures: SignatureInfo[] = [];
     const rekorEntries: RekorEntryInfo[] = [];
 
     if (Array.isArray(output)) {
       for (const entry of output) {
-        if (entry.critical?.identity?.['docker-reference']) {
+        if (entry.critical?.identity?.["docker-reference"]) {
           const rekorEntry = this.parseRekorBundle(entry.optional?.Bundle || entry.bundle);
           const signature: SignatureInfo = {
-            keyId: entry.critical?.identity?.['docker-reference'] || 'unknown',
+            keyId: entry.critical?.identity?.["docker-reference"] || "unknown",
             issuer: entry.optional?.Issuer,
             subject: entry.optional?.Subject,
-            signedAt: new Date(
-              entry.optional?.['Bundle']?.SignedEntryTimestamp || Date.now()
-            ),
+            signedAt: new Date(entry.optional?.["Bundle"]?.SignedEntryTimestamp || Date.now()),
             payload: entry,
             verificationMode,
             rekorEntry,
@@ -594,7 +573,8 @@ export class CosignVerifier {
 
   private parseRekorBundle(bundle?: Record<string, unknown>): RekorEntryInfo | undefined {
     if (!bundle) return undefined;
-    const payload = (bundle as Record<string, any>).Payload || (bundle as Record<string, any>).payload;
+    const payload =
+      (bundle as Record<string, any>).Payload || (bundle as Record<string, any>).payload;
     const entry: RekorEntryInfo = {};
 
     if (payload?.logIndex || payload?.logIndex === 0) {
@@ -605,17 +585,15 @@ export class CosignVerifier {
     }
 
     const logId = payload?.logID || payload?.uuid;
-    if (typeof logId === 'string') {
+    if (typeof logId === "string") {
       entry.uuid = logId;
     } else if (logId?.uuid) {
       entry.uuid = logId.uuid;
     }
 
-    if (!entry.uuid && typeof payload?.body === 'string') {
+    if (!entry.uuid && typeof payload?.body === "string") {
       try {
-        const decoded = JSON.parse(
-          Buffer.from(payload.body, 'base64').toString('utf-8')
-        );
+        const decoded = JSON.parse(Buffer.from(payload.body, "base64").toString("utf-8"));
         entry.uuid = decoded?.logID?.uuid || decoded?.logID;
         entry.logIndex = decoded?.logIndex ?? entry.logIndex;
         entry.integratedTime = decoded?.integratedTime ?? entry.integratedTime;
@@ -635,7 +613,7 @@ export class CosignVerifier {
    * Generate cache key for image
    */
   private getCacheKey(imageRef: string): string {
-    return createHash('sha256').update(imageRef).digest('hex');
+    return createHash("sha256").update(imageRef).digest("hex");
   }
 
   /**
@@ -676,7 +654,7 @@ export class CosignVerifier {
     if (!existsSync(this.config.cosignBinaryPath)) {
       console.warn(
         `Cosign binary not found at ${this.config.cosignBinaryPath}. ` +
-          'Verification will fail until cosign is installed.'
+          "Verification will fail until cosign is installed."
       );
     }
 
@@ -685,8 +663,7 @@ export class CosignVerifier {
     }
 
     const rekorDir = dirname(
-      this.config.rekorUuidStorePath ||
-        join(this.config.cacheDir, 'rekor-entries.json')
+      this.config.rekorUuidStorePath || join(this.config.cacheDir, "rekor-entries.json")
     );
 
     if (!existsSync(rekorDir)) {
@@ -714,20 +691,13 @@ export class CosignVerifier {
       })),
     };
 
-    const reportPath = join(
-      this.config.cacheDir,
-      `verification-report-${Date.now()}.json`
-    );
+    const reportPath = join(this.config.cacheDir, `verification-report-${Date.now()}.json`);
     writeFileSync(reportPath, JSON.stringify(report, null, 2));
 
     return reportPath;
   }
 
-  private persistRekorEntries(
-    imageRef: string,
-    digest: string,
-    entries: RekorEntryInfo[]
-  ): void {
+  private persistRekorEntries(imageRef: string, digest: string, entries: RekorEntryInfo[]): void {
     if (!this.config.rekorUuidStorePath) {
       return;
     }
@@ -744,7 +714,7 @@ export class CosignVerifier {
       };
 
       const existing: Array<typeof record> = existsSync(storePath)
-        ? JSON.parse(readFileSync(storePath, 'utf-8'))
+        ? JSON.parse(readFileSync(storePath, "utf-8"))
         : [];
 
       const deduped = existing.filter((e) => e.imageRef !== imageRef);
@@ -820,18 +790,13 @@ export class CosignAdmissionController {
     }
 
     // Verify all images
-    const results = await Promise.all(
-      images.map((img) => this.verifier.verifyImage(img))
-    );
+    const results = await Promise.all(images.map((img) => this.verifier.verifyImage(img)));
 
     const failedImages = results.filter((r) => !r.verified);
     if (failedImages.length > 0) {
       const errorMessages = failedImages
-        .map(
-          (r) =>
-            `${r.imageRef}: ${r.errors.map((e) => e.message).join(', ')}`
-        )
-        .join('; ');
+        .map((r) => `${r.imageRef}: ${r.errors.map((e) => e.message).join(", ")}`)
+        .join("; ");
 
       return {
         uid: request.uid,
@@ -848,7 +813,7 @@ export class CosignAdmissionController {
       allowed: true,
       warnings: results
         .filter((r) => r.errors.length > 0)
-        .map((r) => `${r.imageRef}: ${r.errors.map((e) => e.message).join(', ')}`),
+        .map((r) => `${r.imageRef}: ${r.errors.map((e) => e.message).join(", ")}`),
     };
   }
 
@@ -881,10 +846,10 @@ export async function main(): Promise<void> {
   const verifier = new CosignVerifier();
 
   switch (command) {
-    case 'verify': {
+    case "verify": {
       const imageRef = args[1];
       if (!imageRef) {
-        console.error('Usage: cosign-verifier verify <image-ref>');
+        console.error("Usage: cosign-verifier verify <image-ref>");
         process.exit(1);
       }
 
@@ -894,20 +859,18 @@ export async function main(): Promise<void> {
       break;
     }
 
-    case 'batch-verify': {
+    case "batch-verify": {
       const imagesFile = args[1];
       if (!imagesFile || !existsSync(imagesFile)) {
-        console.error('Usage: cosign-verifier batch-verify <images-file>');
+        console.error("Usage: cosign-verifier batch-verify <images-file>");
         process.exit(1);
       }
 
-      const images = readFileSync(imagesFile, 'utf-8')
-        .split('\n')
-        .filter((line) => line.trim() && !line.startsWith('#'));
+      const images = readFileSync(imagesFile, "utf-8")
+        .split("\n")
+        .filter((line) => line.trim() && !line.startsWith("#"));
 
-      const results = await Promise.all(
-        images.map((img) => verifier.verifyImage(img))
-      );
+      const results = await Promise.all(images.map((img) => verifier.verifyImage(img)));
 
       const reportPath = await verifier.exportReport(results);
       console.log(`Report saved to: ${reportPath}`);
@@ -923,7 +886,7 @@ export async function main(): Promise<void> {
     }
 
     default:
-      console.error('Unknown command. Available: verify, batch-verify');
+      console.error("Unknown command. Available: verify, batch-verify");
       process.exit(1);
   }
 }

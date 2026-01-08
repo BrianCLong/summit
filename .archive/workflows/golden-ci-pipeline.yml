@@ -1,5 +1,5 @@
 # Golden CI Pipeline for IntelGraph Maestro - One pipeline to rule them all
-name: '🚀 IntelGraph Golden CI Pipeline'
+name: "🚀 IntelGraph Golden CI Pipeline"
 
 on:
   push:
@@ -27,7 +27,7 @@ permissions:
 jobs:
   # Stage 1: Code Quality and Security Gates
   quality-gates:
-    name: '🔍 Quality & Security Gates'
+    name: "🔍 Quality & Security Gates"
     runs-on: ubuntu-latest
     permissions:
       checks: write
@@ -56,14 +56,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'pnpm'
+          node-version: "20.x"
+          cache: "pnpm"
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-          cache: 'pip'
+          python-version: "3.12"
+          cache: "pip"
 
       - name: Get pnpm store directory
         shell: bash
@@ -103,8 +103,8 @@ jobs:
         id: split-tests
         uses: actions/split-tests@v1
         with:
-          test-files: '**/*.test.ts'
-          timings-file: 'ci/test-timings.json'
+          test-files: "**/*.test.ts"
+          timings-file: "ci/test-timings.json"
           total-shards: ${{ matrix.shard-total }}
           shard-index: ${{ matrix.shard-index }}
 
@@ -137,16 +137,16 @@ jobs:
       - name: Container security scan
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
+          scan-type: "fs"
+          scan-ref: "."
+          format: "sarif"
+          output: "trivy-results.sarif"
 
       - name: Upload Trivy scan results
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: "trivy-results.sarif"
 
       - name: Check image pins
         if: github.event_name == 'pull_request'
@@ -166,7 +166,7 @@ jobs:
 
   # Stage 2: Build and Sign Images + Generate SBOM
   python-worker-tests:
-    name: '🐍 Python Worker Tests'
+    name: "🐍 Python Worker Tests"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -174,15 +174,15 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-          cache: 'pip'
+          python-version: "3.12"
+          cache: "pip"
       - name: Install dependencies
         run: pip install -r worker/requirements.txt
       - name: Run tests
         run: pytest -q --maxfail=1 --disable-warnings --junitxml=pytest.xml
 
   dbt-build:
-    name: '💧 dbt Build'
+    name: "💧 dbt Build"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -190,7 +190,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
       - name: Cache dbt packages
         uses: actions/cache@v4
         with:
@@ -208,7 +208,7 @@ jobs:
         working-directory: ./warehouse
 
   helm-chart-test:
-    name: 'Helm Chart Test'
+    name: "Helm Chart Test"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -225,7 +225,7 @@ jobs:
         run: ct test
 
   flaky-tests:
-    name: ' flaky-tests'
+    name: " flaky-tests"
     runs-on: ubuntu-latest
     needs: [quality-gates]
     if: always()
@@ -239,15 +239,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Run flaky tests
         run: pnpm -w turbo run test -- --tag=flaky
 
   build-sign-sbom:
-    name: '🏗️ Build, Sign & SBOM'
+    name: "🏗️ Build, Sign & SBOM"
     permissions:
       packages: write
     needs: [quality-gates]
@@ -333,7 +333,7 @@ jobs:
 
   # Stage 3: Deploy to Dev Environment
   deploy-dev:
-    name: '🚀 Deploy to Dev'
+    name: "🚀 Deploy to Dev"
     permissions:
       deployments: write
     needs: [quality-gates, build-sign-sbom]
@@ -351,12 +351,12 @@ jobs:
       - name: Setup kubectl
         uses: azure/setup-kubectl@v3
         with:
-          version: 'v1.28.0'
+          version: "v1.28.0"
 
       - name: Setup Helm
         uses: azure/setup-helm@v3
         with:
-          version: '3.12.0'
+          version: "3.12.0"
 
       - name: Configure dev kubeconfig
         run: |
@@ -406,7 +406,7 @@ jobs:
 
   # Stage 4: Deploy to UAT (if main branch)
   deploy-uat:
-    name: '🧪 Deploy to UAT'
+    name: "🧪 Deploy to UAT"
     permissions:
       deployments: write
     needs: [quality-gates, build-sign-sbom, deploy-dev]
@@ -461,7 +461,7 @@ jobs:
 
   # Stage 5: Deploy to Production (on release)
   deploy-production:
-    name: '🌟 Deploy to Production'
+    name: "🌟 Deploy to Production"
     permissions:
       deployments: write
     needs: [quality-gates, build-sign-sbom]
@@ -500,17 +500,10 @@ jobs:
 
   # Notification and Cleanup
   notify:
-    name: '📢 Notify & Cleanup'
+    name: "📢 Notify & Cleanup"
     permissions:
       deployments: write
-    needs:
-      [
-        quality-gates,
-        build-sign-sbom,
-        deploy-dev,
-        deploy-uat,
-        deploy-production,
-      ]
+    needs: [quality-gates, build-sign-sbom, deploy-dev, deploy-uat, deploy-production]
     if: always()
     runs-on: ubuntu-latest
 
@@ -519,7 +512,7 @@ jobs:
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
-          channel: '#intelgraph-deployments'
+          channel: "#intelgraph-deployments"
           webhook_url: ${{ secrets.SLACK_WEBHOOK }}
           fields: repo,message,commit,author,action,eventName,ref,workflow
         env:
@@ -528,13 +521,13 @@ jobs:
       - name: Update GitHub deployment status
         uses: chrnorm/deployment-status@v2
         with:
-          token: '${{ github.token }}'
-          state: '${{ job.status }}'
+          token: "${{ github.token }}"
+          state: "${{ job.status }}"
           deployment-id: ${{ github.event.deployment.id }}
 
   # Security scanning and compliance
   security-compliance:
-    name: '🔒 Security & Compliance'
+    name: "🔒 Security & Compliance"
     needs: build-sign-sbom
     if: needs.quality-gates.outputs.should-deploy == 'true'
     runs-on: ubuntu-latest

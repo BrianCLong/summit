@@ -16,28 +16,28 @@
  *   --report <file>    Output report to file (JSON)
  */
 
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
 function loadTranslations(localesDir, locale, namespace) {
   try {
     const filePath = path.join(localesDir, locale, `${namespace}.json`);
-    const content = fs.readFileSync(filePath, 'utf-8');
+    const content = fs.readFileSync(filePath, "utf-8");
     return JSON.parse(content);
   } catch (error) {
     return null;
   }
 }
 
-function flattenMessages(messages, prefix = '') {
+function flattenMessages(messages, prefix = "") {
   const result = {};
 
   for (const [key, value] of Object.entries(messages)) {
     const fullKey = prefix ? `${prefix}.${key}` : key;
 
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       result[fullKey] = value;
-    } else if (typeof value === 'object' && value !== null) {
+    } else if (typeof value === "object" && value !== null) {
       Object.assign(result, flattenMessages(value, fullKey));
     }
   }
@@ -83,7 +83,7 @@ function validateLocale(baseMessages, targetMessages, targetLocale) {
 
   // Empty values
   for (const [key, value] of Object.entries(targetFlat)) {
-    if (!value || value.trim() === '') {
+    if (!value || value.trim() === "") {
       issues.emptyValues.push(key);
     }
   }
@@ -114,7 +114,7 @@ function validateLocale(baseMessages, targetMessages, targetLocale) {
     const baseValue = baseFlat[key];
     const targetValue = targetFlat[key];
 
-    if (targetValue && targetValue === baseValue && baseValue.trim() !== '') {
+    if (targetValue && targetValue === baseValue && baseValue.trim() !== "") {
       // Skip technical terms, constants, etc.
       if (!/^[A-Z_]+$/.test(baseValue) && !/^[a-z][a-zA-Z0-9]*$/.test(baseValue)) {
         issues.possiblyUntranslated.push({
@@ -159,7 +159,11 @@ function printIssues(issues, baseCount) {
     console.log(`   🤔 ${issues.possiblyUntranslated.length} possibly untranslated`);
   }
 
-  if (coverage === 100 && issues.extraKeys.length === 0 && issues.invalidInterpolations.length === 0) {
+  if (
+    coverage === 100 &&
+    issues.extraKeys.length === 0 &&
+    issues.invalidInterpolations.length === 0
+  ) {
     console.log(`   ✅ Perfect!`);
   }
 }
@@ -182,10 +186,10 @@ function printDetailedIssues(issues) {
       console.log(`         Base: ${item.base}`);
       console.log(`         Target: ${item.target}`);
       if (item.missingVars.length > 0) {
-        console.log(`         Missing vars: ${item.missingVars.join(', ')}`);
+        console.log(`         Missing vars: ${item.missingVars.join(", ")}`);
       }
       if (item.extraVars.length > 0) {
-        console.log(`         Extra vars: ${item.extraVars.join(', ')}`);
+        console.log(`         Extra vars: ${item.extraVars.join(", ")}`);
       }
     }
     if (issues.invalidInterpolations.length > 5) {
@@ -196,8 +200,8 @@ function printDetailedIssues(issues) {
 
 async function validateTranslations(options = {}) {
   const {
-    localesDir = './locales',
-    baseLocale = 'en-US',
+    localesDir = "./locales",
+    baseLocale = "en-US",
     verbose = false,
     reportFile = null,
   } = options;
@@ -206,26 +210,28 @@ async function validateTranslations(options = {}) {
   console.log(`   Base locale: ${baseLocale}\n`);
 
   // Get all locales
-  const locales = fs.readdirSync(localesDir, { withFileTypes: true })
-    .filter(dirent => dirent.isDirectory())
-    .map(dirent => dirent.name);
+  const locales = fs
+    .readdirSync(localesDir, { withFileTypes: true })
+    .filter((dirent) => dirent.isDirectory())
+    .map((dirent) => dirent.name);
 
-  console.log(`📂 Found ${locales.length} locales: ${locales.join(', ')}\n`);
+  console.log(`📂 Found ${locales.length} locales: ${locales.join(", ")}\n`);
 
   // Get all namespaces from base locale
   const baseLocalePath = path.join(localesDir, baseLocale);
-  const namespaces = fs.readdirSync(baseLocalePath)
-    .filter(file => file.endsWith('.json'))
-    .map(file => file.replace('.json', ''));
+  const namespaces = fs
+    .readdirSync(baseLocalePath)
+    .filter((file) => file.endsWith(".json"))
+    .map((file) => file.replace(".json", ""));
 
-  console.log(`📚 Found ${namespaces.length} namespaces: ${namespaces.join(', ')}\n`);
+  console.log(`📚 Found ${namespaces.length} namespaces: ${namespaces.join(", ")}\n`);
 
   const allIssues = {};
   let totalBaseKeys = 0;
 
   for (const namespace of namespaces) {
     console.log(`\n📖 Namespace: ${namespace}`);
-    console.log(`${'='.repeat(50)}`);
+    console.log(`${"=".repeat(50)}`);
 
     const baseMessages = loadTranslations(localesDir, baseLocale, namespace);
     if (!baseMessages) {
@@ -260,13 +266,13 @@ async function validateTranslations(options = {}) {
   }
 
   // Summary
-  console.log(`\n\n${'='.repeat(50)}`);
+  console.log(`\n\n${"=".repeat(50)}`);
   console.log(`📊 Summary`);
-  console.log(`${'='.repeat(50)}`);
+  console.log(`${"=".repeat(50)}`);
 
   const summaryByLocale = {};
   for (const [key, issues] of Object.entries(allIssues)) {
-    const locale = key.split('/')[0];
+    const locale = key.split("/")[0];
     if (!summaryByLocale[locale]) {
       summaryByLocale[locale] = {
         totalMissing: 0,
@@ -284,14 +290,17 @@ async function validateTranslations(options = {}) {
 
   for (const [locale, summary] of Object.entries(summaryByLocale)) {
     const totalIssues = summary.totalMissing + summary.totalEmpty + summary.totalInvalid;
-    const coverage = totalBaseKeys > 0
-      ? ((totalBaseKeys - summary.totalMissing - summary.totalEmpty) / totalBaseKeys * 100)
-      : 0;
+    const coverage =
+      totalBaseKeys > 0
+        ? ((totalBaseKeys - summary.totalMissing - summary.totalEmpty) / totalBaseKeys) * 100
+        : 0;
 
     console.log(`\n${locale}:`);
     console.log(`   Coverage: ${coverage.toFixed(1)}%`);
     console.log(`   Total issues: ${totalIssues}`);
-    console.log(`   Missing: ${summary.totalMissing}, Empty: ${summary.totalEmpty}, Invalid: ${summary.totalInvalid}`);
+    console.log(
+      `   Missing: ${summary.totalMissing}, Empty: ${summary.totalEmpty}, Invalid: ${summary.totalInvalid}`
+    );
 
     if (totalIssues === 0) {
       console.log(`   ✅ All good!`);
@@ -309,7 +318,7 @@ async function validateTranslations(options = {}) {
       details: allIssues,
     };
 
-    fs.writeFileSync(reportFile, JSON.stringify(report, null, 2), 'utf-8');
+    fs.writeFileSync(reportFile, JSON.stringify(report, null, 2), "utf-8");
     console.log(`\n💾 Report saved to: ${reportFile}`);
   }
 
@@ -321,13 +330,13 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const args = process.argv.slice(2);
 
   const options = {
-    localesDir: args.find((arg, i) => args[i - 1] === '--locales') || './locales',
-    baseLocale: args.find((arg, i) => args[i - 1] === '--base') || 'en-US',
-    verbose: args.includes('--verbose') || args.includes('-v'),
-    reportFile: args.find((arg, i) => args[i - 1] === '--report'),
+    localesDir: args.find((arg, i) => args[i - 1] === "--locales") || "./locales",
+    baseLocale: args.find((arg, i) => args[i - 1] === "--base") || "en-US",
+    verbose: args.includes("--verbose") || args.includes("-v"),
+    reportFile: args.find((arg, i) => args[i - 1] === "--report"),
   };
 
-  if (args.includes('--help') || args.includes('-h')) {
+  if (args.includes("--help") || args.includes("-h")) {
     console.log(`
 Translation Validation Tool
 

@@ -6,14 +6,14 @@ on:
       - main
       - develop
     paths:
-      - 'openapi/**'
-      - 'docs/**'
-      - 'services/api/src/docs/**'
-      - '.github/workflows/api-docs.yml'
+      - "openapi/**"
+      - "docs/**"
+      - "services/api/src/docs/**"
+      - ".github/workflows/api-docs.yml"
   pull_request:
     paths:
-      - 'openapi/**'
-      - 'docs/**'
+      - "openapi/**"
+      - "docs/**"
   workflow_dispatch:
 
 permissions:
@@ -23,7 +23,7 @@ permissions:
 
 # Allow one concurrent deployment
 concurrency:
-  group: 'pages'
+  group: "pages"
   cancel-in-progress: true
 
 jobs:
@@ -48,7 +48,7 @@ jobs:
       - name: OpenAPI Lint
         uses: stoplightio/spectral-action@v0.8.11
         with:
-          file_glob: 'openapi/*.yaml'
+          file_glob: "openapi/*.yaml"
 
   # Generate SDKs
   generate-sdks:
@@ -63,12 +63,12 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Generate TypeScript SDK
         run: |
@@ -102,7 +102,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Install dependencies
         run: |
@@ -131,7 +131,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'docs'
+          path: "docs"
 
       - name: Deploy to GitHub Pages
         id: deployment
@@ -156,8 +156,8 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: "18"
+          registry-url: "https://registry.npmjs.org"
 
       - name: Publish TypeScript SDK to npm
         if: secrets.NPM_TOKEN != ''
@@ -170,7 +170,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Publish Python SDK to PyPI
         if: secrets.PYPI_TOKEN != ''

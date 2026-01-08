@@ -1,14 +1,21 @@
 // @ts-nocheck
-import { createHash, createPrivateKey, createPublicKey, generateKeyPairSync, sign, verify } from 'node:crypto';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { referenceAdapters } from './index';
-import type { ReferenceAdapterDefinition } from './types';
+import {
+  createHash,
+  createPrivateKey,
+  createPublicKey,
+  generateKeyPairSync,
+  sign,
+  verify,
+} from "node:crypto";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { referenceAdapters } from "./index";
+import type { ReferenceAdapterDefinition } from "./types";
 
-const defaultOutputDir = join(process.cwd(), 'adapters/reference/dist');
+const defaultOutputDir = join(process.cwd(), "adapters/reference/dist");
 
 export interface BundleSignature {
-  algorithm: 'ed25519';
+  algorithm: "ed25519";
   digest: string;
   signature: string;
   publicKey: string;
@@ -31,26 +38,30 @@ export function createSigningMaterial(inputKey?: string): SigningMaterial {
     const privateKey = createPrivateKey(inputKey);
     const publicKey = createPublicKey(privateKey);
     return {
-      privateKeyPem: privateKey.export({ format: 'pem', type: 'pkcs8' }).toString(),
-      publicKeyPem: publicKey.export({ format: 'pem', type: 'spki' }).toString(),
+      privateKeyPem: privateKey.export({ format: "pem", type: "pkcs8" }).toString(),
+      publicKeyPem: publicKey.export({ format: "pem", type: "spki" }).toString(),
     };
   }
 
-  const { privateKey, publicKey } = generateKeyPairSync('ed25519');
+  const { privateKey, publicKey } = generateKeyPairSync("ed25519");
   return {
-    privateKeyPem: privateKey.export({ format: 'pem', type: 'pkcs8' }).toString(),
-    publicKeyPem: publicKey.export({ format: 'pem', type: 'spki' }).toString(),
+    privateKeyPem: privateKey.export({ format: "pem", type: "pkcs8" }).toString(),
+    publicKeyPem: publicKey.export({ format: "pem", type: "spki" }).toString(),
   };
 }
 
-export function signPayload(payload: string, privateKeyPem: string, publicKeyPem: string): BundleSignature {
-  const digest = createHash('sha256').update(payload).digest('hex');
+export function signPayload(
+  payload: string,
+  privateKeyPem: string,
+  publicKeyPem: string
+): BundleSignature {
+  const digest = createHash("sha256").update(payload).digest("hex");
   const signatureBuffer = sign(null, Buffer.from(payload), createPrivateKey(privateKeyPem));
 
   return {
-    algorithm: 'ed25519',
+    algorithm: "ed25519",
     digest,
-    signature: signatureBuffer.toString('base64'),
+    signature: signatureBuffer.toString("base64"),
     publicKey: publicKeyPem,
   };
 }
@@ -60,7 +71,7 @@ export function verifySignature(payload: string, bundleSignature: BundleSignatur
     null,
     Buffer.from(payload),
     createPublicKey(bundleSignature.publicKey),
-    Buffer.from(bundleSignature.signature, 'base64'),
+    Buffer.from(bundleSignature.signature, "base64")
   );
 }
 
@@ -77,7 +88,7 @@ function serializeAdapter(definition: ReferenceAdapterDefinition) {
 export function writeAdapterBundle(
   definition: ReferenceAdapterDefinition,
   outputDir: string,
-  signingMaterial?: SigningMaterial,
+  signingMaterial?: SigningMaterial
 ): BundleArtifact {
   mkdirSync(outputDir, { recursive: true });
 
@@ -89,11 +100,11 @@ export function writeAdapterBundle(
   const bundlePath = join(outputDir, `${definition.manifest.name}.bundle.json`);
   const signaturePath = join(outputDir, `${definition.manifest.name}.signature.json`);
 
-  writeFileSync(bundlePath, payloadString, 'utf8');
+  writeFileSync(bundlePath, payloadString, "utf8");
   writeFileSync(
     signaturePath,
     `${JSON.stringify({ adapter: definition.manifest.name, signature }, null, 2)}\n`,
-    'utf8',
+    "utf8"
   );
 
   return {
@@ -104,13 +115,20 @@ export function writeAdapterBundle(
   };
 }
 
-export function buildReferenceBundles(options?: { outputDir?: string; signingKeyPath?: string; signingKeyPem?: string }) {
+export function buildReferenceBundles(options?: {
+  outputDir?: string;
+  signingKeyPath?: string;
+  signingKeyPem?: string;
+}) {
   const outputDir = options?.outputDir ?? defaultOutputDir;
   const signingKeyPem =
-    options?.signingKeyPem ?? (options?.signingKeyPath ? readFileSync(options.signingKeyPath, 'utf8') : undefined);
+    options?.signingKeyPem ??
+    (options?.signingKeyPath ? readFileSync(options.signingKeyPath, "utf8") : undefined);
 
   const signingMaterial = createSigningMaterial(signingKeyPem);
-  const artifacts = referenceAdapters.map((adapter) => writeAdapterBundle(adapter, outputDir, signingMaterial));
+  const artifacts = referenceAdapters.map((adapter) =>
+    writeAdapterBundle(adapter, outputDir, signingMaterial)
+  );
 
   const manifest = {
     generatedAt: new Date().toISOString(),
@@ -122,11 +140,15 @@ export function buildReferenceBundles(options?: { outputDir?: string; signingKey
     })),
   };
 
-  writeFileSync(join(outputDir, 'reference-adapters.manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
+  writeFileSync(
+    join(outputDir, "reference-adapters.manifest.json"),
+    `${JSON.stringify(manifest, null, 2)}\n`,
+    "utf8"
+  );
   return artifacts;
 }
 
-if (process.argv[1] && process.argv[1].includes('packaging')) {
+if (process.argv[1] && process.argv[1].includes("packaging")) {
   const outDir = process.env.REFERENCE_ADAPTER_OUT_DIR ?? defaultOutputDir;
   const signingKeyPath = process.env.REFERENCE_ADAPTER_SIGNING_KEY;
 

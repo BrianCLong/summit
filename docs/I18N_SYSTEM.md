@@ -41,6 +41,7 @@ The Summit/IntelGraph platform now includes a comprehensive internationalization
 #### LTR (Left-to-Right)
 
 **NATO Countries** (33 languages):
+
 - 🇺🇸 English (US), 🇬🇧 English (UK)
 - 🇫🇷 French, 🇩🇪 German, 🇪🇸 Spanish, 🇮🇹 Italian, 🇵🇹 Portuguese, 🇳🇱 Dutch
 - 🇩🇰 Danish, 🇳🇴 Norwegian, 🇸🇪 Swedish, 🇫🇮 Finnish, 🇮🇸 Icelandic
@@ -48,6 +49,7 @@ The Summit/IntelGraph platform now includes a comprehensive internationalization
 - And 16 more...
 
 **Asian Languages**:
+
 - 🇨🇳 Chinese (Simplified), 🇹🇼 Chinese (Traditional)
 - 🇯🇵 Japanese, 🇰🇷 Korean
 
@@ -131,8 +133,8 @@ pnpm add @intelgraph/i18n
 
 ```tsx
 // apps/web/src/main.tsx
-import { I18nProvider } from '@intelgraph/i18n';
-import App from './App';
+import { I18nProvider } from "@intelgraph/i18n";
+import App from "./App";
 
 function Root() {
   return (
@@ -147,15 +149,17 @@ function Root() {
 
 ```tsx
 // src/components/Dashboard.tsx
-import { useI18n } from '@intelgraph/i18n';
+import { useI18n } from "@intelgraph/i18n";
 
 function Dashboard() {
   const { t, locale, setLocale, formatDate, isRTL } = useI18n();
 
   return (
-    <div dir={isRTL ? 'rtl' : 'ltr'}>
-      <h1>{t('dashboard.title')}</h1>
-      <p>{t('dashboard.stats.activeInvestigations')}: {count}</p>
+    <div dir={isRTL ? "rtl" : "ltr"}>
+      <h1>{t("dashboard.title")}</h1>
+      <p>
+        {t("dashboard.stats.activeInvestigations")}: {count}
+      </p>
       <p>{formatDate(new Date())}</p>
     </div>
   );
@@ -166,7 +170,7 @@ function Dashboard() {
 
 ```tsx
 // src/components/Header.tsx
-import { LanguageSwitcher } from '@intelgraph/i18n';
+import { LanguageSwitcher } from "@intelgraph/i18n";
 
 function Header() {
   return (
@@ -210,20 +214,20 @@ Use namespaced, hierarchical keys:
 const { t } = useI18n();
 
 // Simple translation
-t('common.save') // "Save"
+t("common.save"); // "Save"
 
 // With parameters
-t('common.welcomeBack', { name: 'Alice' }) // "Welcome back, Alice!"
+t("common.welcomeBack", { name: "Alice" }); // "Welcome back, Alice!"
 
 // With pluralization
-t('common.item', { count: 1 }) // "1 item"
-t('common.item', { count: 5 }) // "5 items"
+t("common.item", { count: 1 }); // "1 item"
+t("common.item", { count: 5 }); // "5 items"
 
 // With context
-t('button.submit', {}, { context: 'form' })
+t("button.submit", {}, { context: "form" });
 
 // With default value
-t('custom.key', {}, { defaultValue: 'Fallback text' })
+t("custom.key", {}, { defaultValue: "Fallback text" });
 ```
 
 ### Pluralization
@@ -257,7 +261,7 @@ formatDate(new Date());
 // de-DE: "21.11.2025"
 // ja-JP: "2025/11/21"
 
-formatDate(new Date(), { dateStyle: 'full' });
+formatDate(new Date(), { dateStyle: "full" });
 // en-US: "Thursday, November 21, 2025"
 // es-ES: "jueves, 21 de noviembre de 2025"
 
@@ -268,7 +272,7 @@ formatNumber(1234567.89);
 // fr-FR: "1 234 567,89"
 
 // Currency
-formatCurrency(1234.56, 'EUR');
+formatCurrency(1234.56, "EUR");
 // en-US: "€1,234.56"
 // de-DE: "1.234,56 €"
 // fr-FR: "1 234,56 €"
@@ -393,14 +397,13 @@ const { isRTL, direction } = useI18n();
 // <html lang="ar-SA" dir="rtl">
 
 // Apply to containers
-<div dir={direction}>
-  {/* Content automatically mirrors */}
-</div>
+<div dir={direction}>{/* Content automatically mirrors */}</div>;
 ```
 
 ### CSS Considerations
 
 **Automatic Mirroring** (works automatically):
+
 - `margin-left` ↔ `margin-right`
 - `padding-left` ↔ `padding-right`
 - `left` ↔ `right`
@@ -433,6 +436,7 @@ padding-inline-end: 0.5rem;
 ### RTL Exceptions
 
 Some elements should NOT mirror:
+
 - Numbers (always LTR)
 - Dates (usually LTR)
 - Code blocks
@@ -454,12 +458,14 @@ Use `dir="ltr"` to override:
 ### 1. Always Use Translation Keys
 
 ❌ **Bad:**
+
 ```tsx
 <button>Save</button>
 <h1>Dashboard</h1>
 ```
 
 ✅ **Good:**
+
 ```tsx
 <button>{t('common.save')}</button>
 <h1>{t('dashboard.title')}</h1>
@@ -489,32 +495,58 @@ Use namespaces and hierarchies:
 ### 3. Parameterize Dynamic Content
 
 ❌ **Bad:**
+
 ```tsx
-{t('welcome')} {userName}
-{count} {t('items')}
+{
+  t("welcome");
+}
+{
+  userName;
+}
+{
+  count;
+}
+{
+  t("items");
+}
 ```
 
 ✅ **Good:**
+
 ```tsx
-{t('welcomeBack', { name: userName })}
-{t('item', { count })}
+{
+  t("welcomeBack", { name: userName });
+}
+{
+  t("item", { count });
+}
 ```
 
 ### 4. Handle Pluralization Properly
 
 ❌ **Bad:**
+
 ```tsx
-{count} {count === 1 ? 'item' : 'items'}
+{
+  count;
+}
+{
+  count === 1 ? "item" : "items";
+}
 ```
 
 ✅ **Good:**
+
 ```tsx
-{t('item', { count })}
+{
+  t("item", { count });
+}
 ```
 
 ### 5. Don't Translate Technical Terms
 
 **Never translate:**
+
 - Entity IDs, UUIDs
 - API endpoints (`/api/v1/entities`)
 - Technical constants (`HTTP_200_OK`)
@@ -523,6 +555,7 @@ Use namespaces and hierarchies:
 - URLs
 
 **Do translate:**
+
 - UI labels
 - Error messages
 - Help text
@@ -535,9 +568,9 @@ Use descriptive keys and add comments:
 ```json
 {
   "button": {
-    "submit": "Submit",           // Generic submit button
+    "submit": "Submit", // Generic submit button
     "submit_form": "Submit Form", // Form-specific
-    "submit_search": "Search"     // Search-specific
+    "submit_search": "Search" // Search-specific
   }
 }
 ```
@@ -623,11 +656,11 @@ Translations are loaded on-demand:
 
 ```tsx
 // ✅ Only loads when locale is selected
-i18n.changeLanguage('fr-FR');
+i18n.changeLanguage("fr-FR");
 // → Fetches /locales/fr-FR/*.json
 
 // ✅ Cached after first load
-i18n.changeLanguage('fr-FR'); // Instant (cached)
+i18n.changeLanguage("fr-FR"); // Instant (cached)
 ```
 
 ### Bundle Size
@@ -649,7 +682,7 @@ i18n.changeLanguage('fr-FR'); // Instant (cached)
 useEffect(() => {
   const browserLang = navigator.language;
   if (browserLang !== locale) {
-    loadTranslationBundle(browserLang as Locale, 'common');
+    loadTranslationBundle(browserLang as Locale, "common");
   }
 }, []);
 ```
@@ -663,6 +696,7 @@ useEffect(() => {
 **Symptom**: UI shows translation keys instead of translated text
 
 **Solutions**:
+
 1. Check file exists: `locales/{locale}/{namespace}.json`
 2. Verify JSON is valid (use JSON validator)
 3. Check browser console for import errors
@@ -673,6 +707,7 @@ useEffect(() => {
 **Symptom**: Console warning: `Translation key "x.y.z" not found`
 
 **Solutions**:
+
 1. Add key to `locales/en-US/{namespace}.json`
 2. Run `pnpm validate` to find missing keys
 3. Check key spelling and namespace
@@ -682,6 +717,7 @@ useEffect(() => {
 **Symptom**: Layout doesn't mirror correctly for RTL languages
 
 **Solutions**:
+
 1. Ensure `dir` attribute is set: `<div dir={direction}>`
 2. Use logical CSS properties
 3. Check for hardcoded `left`/`right` values
@@ -692,6 +728,7 @@ useEffect(() => {
 **Symptom**: Language resets on page reload
 
 **Solutions**:
+
 1. Check localStorage is accessible
 2. Verify `i18nextLng` key is set
 3. Check browser privacy settings
@@ -702,6 +739,7 @@ useEffect(() => {
 **Symptom**: Slow language switching
 
 **Solutions**:
+
 1. Enable caching: Translation bundles are cached
 2. Reduce translation file size
 3. Use code splitting for large namespaces
@@ -725,11 +763,11 @@ pnpm add @intelgraph/i18n
 
 ```tsx
 // Old
-import { useI18n } from '../hooks/useI18n';
-import LocaleSelector from '../components/i18n/LocaleSelector';
+import { useI18n } from "../hooks/useI18n";
+import LocaleSelector from "../components/i18n/LocaleSelector";
 
 // New
-import { useI18n, LanguageSwitcher } from '@intelgraph/i18n';
+import { useI18n, LanguageSwitcher } from "@intelgraph/i18n";
 ```
 
 #### Step 3: Update Provider
@@ -800,10 +838,7 @@ type UserPreferences {
 
 # Mutation
 mutation UpdateUserLocale($userId: ID!, $locale: String!) {
-  updateUserPreferences(
-    userId: $userId
-    preferences: { locale: $locale }
-  ) {
+  updateUserPreferences(userId: $userId, preferences: { locale: $locale }) {
     id
     preferences {
       locale
@@ -824,8 +859,8 @@ query GetUserPreferences($userId: ID!) {
 ### Implementation
 
 ```tsx
-import { useMutation, useQuery } from '@apollo/client';
-import { useI18n } from '@intelgraph/i18n';
+import { useMutation, useQuery } from "@apollo/client";
+import { useI18n } from "@intelgraph/i18n";
 
 function App() {
   const { setLocale } = useI18n();
@@ -847,8 +882,8 @@ function App() {
     updateLocale({
       variables: {
         userId: currentUserId,
-        locale: newLocale
-      }
+        locale: newLocale,
+      },
     });
   };
 

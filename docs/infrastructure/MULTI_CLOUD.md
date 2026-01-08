@@ -175,25 +175,25 @@ The `@intelgraph/cloud-abstraction` package provides unified APIs for:
 ### Object Storage
 
 ```typescript
-import { CloudFactory, CloudProvider } from '@intelgraph/cloud-abstraction';
+import { CloudFactory, CloudProvider } from "@intelgraph/cloud-abstraction";
 
 // Create storage provider
 const storage = CloudFactory.createStorage({
   provider: CloudProvider.AWS,
-  region: 'us-east-1'
+  region: "us-east-1",
 });
 
 // Upload file
-await storage.upload('my-bucket', 'file.txt', data, {
-  contentType: 'text/plain',
-  metadata: { author: 'summit' }
+await storage.upload("my-bucket", "file.txt", data, {
+  contentType: "text/plain",
+  metadata: { author: "summit" },
 });
 
 // Download file
-const data = await storage.download('my-bucket', 'file.txt');
+const data = await storage.download("my-bucket", "file.txt");
 
 // List objects
-const result = await storage.list('my-bucket', { prefix: 'documents/' });
+const result = await storage.list("my-bucket", { prefix: "documents/" });
 ```
 
 ### Multi-Cloud with Failover
@@ -201,13 +201,13 @@ const result = await storage.list('my-bucket', { prefix: 'documents/' });
 ```typescript
 // Automatic failover across providers
 const storage = CloudFactory.createMultiCloudStorage([
-  { provider: CloudProvider.AWS, region: 'us-east-1' },
-  { provider: CloudProvider.AZURE, region: 'eastus' },
-  { provider: CloudProvider.GCP, region: 'us-central1' }
+  { provider: CloudProvider.AWS, region: "us-east-1" },
+  { provider: CloudProvider.AZURE, region: "eastus" },
+  { provider: CloudProvider.GCP, region: "us-central1" },
 ]);
 
 // Operations failover automatically on provider failure
-await storage.upload('my-bucket', 'file.txt', data);
+await storage.upload("my-bucket", "file.txt", data);
 ```
 
 ### Supported Services
@@ -253,11 +253,12 @@ spec:
   selector:
     app: api
   ports:
-  - port: 8080
-    targetPort: 8080
+    - port: 8080
+      targetPort: 8080
 ```
 
 Istio automatically:
+
 - Discovers services across all clusters
 - Load balances requests across clusters
 - Handles failover on cluster failure
@@ -370,6 +371,7 @@ curl http://disaster-recovery:3002/api/failover/status/:test-id
 4. **Disaster Recovery**: Backup status, RTO/RPO
 
 Access dashboards:
+
 ```bash
 kubectl port-forward -n monitoring svc/grafana 3000:80
 # Open http://localhost:3000
@@ -395,6 +397,7 @@ kubectl port-forward -n monitoring svc/grafana 3000:80
 ### Step-by-Step Deployment
 
 1. **Configure Cloud Credentials**
+
 ```bash
 # AWS
 aws configure
@@ -408,6 +411,7 @@ gcloud config set project your-project-id
 ```
 
 2. **Deploy Infrastructure**
+
 ```bash
 cd infrastructure/terraform/multi-cloud
 terraform init
@@ -416,18 +420,21 @@ terraform apply
 ```
 
 3. **Configure kubectl**
+
 ```bash
 # Run the output commands from Terraform
 terraform output kubeconfig_commands
 ```
 
 4. **Deploy Service Mesh**
+
 ```bash
 cd infrastructure/kubernetes/multi-cluster/istio
 ./setup-multi-cluster.sh
 ```
 
 5. **Deploy Applications**
+
 ```bash
 kubectl apply -f infrastructure/kubernetes/multi-cluster/configs/ --context=eks-primary
 kubectl apply -f infrastructure/kubernetes/multi-cluster/configs/ --context=aks-primary
@@ -435,6 +442,7 @@ kubectl apply -f infrastructure/kubernetes/multi-cluster/configs/ --context=gke-
 ```
 
 6. **Deploy Services**
+
 ```bash
 # Cost Optimization Service
 kubectl apply -f services/cost-optimization/k8s/
@@ -447,6 +455,7 @@ kubectl apply -f services/disaster-recovery/k8s/
 ```
 
 7. **Verify Deployment**
+
 ```bash
 # Check cluster health
 istioctl proxy-status
@@ -483,6 +492,7 @@ gcloud container clusters resize summit-production-gke --num-nodes=5
 ### Troubleshooting
 
 **Issue: Cross-cluster communication failing**
+
 ```bash
 # Check Istio connectivity
 istioctl proxy-config cluster pod/api-pod.summit -n summit
@@ -495,6 +505,7 @@ istioctl authn tls-check pod/api-pod.summit api-service.summit.svc.cluster.local
 ```
 
 **Issue: High costs**
+
 ```bash
 # Get rightsizing recommendations
 curl http://cost-optimization:3000/api/rightsizing/recommendations
@@ -547,6 +558,7 @@ curl http://cost-optimization:3000/api/costs/breakdown?groupBy=service
 ## Support
 
 For issues or questions:
+
 - **Infrastructure**: infrastructure-team@company.com
 - **On-Call**: PagerDuty escalation
 - **Documentation**: [Internal Wiki](https://wiki.company.com/summit)

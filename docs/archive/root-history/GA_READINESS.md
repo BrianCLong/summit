@@ -17,49 +17,53 @@ This document tracks the readiness of Summit for General Availability across fou
 ---
 
 ## 🏗️ A. Deployment & Environment Hardening
+
 > “It installs, upgrades, and rolls back cleanly.”
 
 - [x] **Helm Charts**
-    - [x] Production values validated (`helm/summit/values.prod.yaml`) - *Hardened with security context & resource limits.*
-    - [x] Air-gapped installation guide verified (`infra/airgap/README.md`) - *Created comprehensive guide.*
-    - [x] Base values & Templates updated - *Added probes, affinity, and standard helpers.*
+  - [x] Production values validated (`helm/summit/values.prod.yaml`) - _Hardened with security context & resource limits._
+  - [x] Air-gapped installation guide verified (`infra/airgap/README.md`) - _Created comprehensive guide._
+  - [x] Base values & Templates updated - _Added probes, affinity, and standard helpers._
 - [x] **Upgrade/Rollback**
-    - [x] Database migration rollback tested
-    - [x] `helm rollback` verified
+  - [x] Database migration rollback tested
+  - [x] `helm rollback` verified
 - [x] **Secrets**
-    - [x] SOPS/Sealed Secrets configuration documented (referenced in Airgap guide)
+  - [x] SOPS/Sealed Secrets configuration documented (referenced in Airgap guide)
 
 ## 🔌 B. Ecosystem & Integration Readiness
+
 > “It fits into real customer stacks.”
 
 - [x] **Identity**
-    - [x] OIDC/SAML (Okta/Azure AD) configuration guide (`docs/integrations/SSO.md`)
+  - [x] OIDC/SAML (Okta/Azure AD) configuration guide (`docs/integrations/SSO.md`)
 - [x] **Data Export**
-    - [x] Webhook payload documentation
-    - [x] SIEM (Splunk/Elastic) integration guide (`docs/integrations/SIEM.md`)
+  - [x] Webhook payload documentation
+  - [x] SIEM (Splunk/Elastic) integration guide (`docs/integrations/SIEM.md`)
 - [x] **SDKs**
-    - [x] Python SDK stable & documented
-    - [x] JS SDK stable & documented
+  - [x] Python SDK stable & documented
+  - [x] JS SDK stable & documented
 
 ## 🛠️ C. Operational Excellence
+
 > “It survives bad days.”
 
 - [x] **Runbooks**
-    - [x] Incident Response Playbook (`RUNBOOKS/INCIDENT_RESPONSE_PLAYBOOK.md`) - *Verified complete.*
-    - [x] Disaster Recovery Playbook (`docs/runbooks/DR_RUNBOOK.md`) - *Upgraded to Production Grade (S3/PITR).*
+  - [x] Incident Response Playbook (`RUNBOOKS/INCIDENT_RESPONSE_PLAYBOOK.md`) - _Verified complete._
+  - [x] Disaster Recovery Playbook (`docs/runbooks/DR_RUNBOOK.md`) - _Upgraded to Production Grade (S3/PITR)._
 - [x] **Reliability**
-    - [x] Load tests (k6) passing for 2x expected load
-    - [x] Alerting rules tuned (no noise)
+  - [x] Load tests (k6) passing for 2x expected load
+  - [x] Alerting rules tuned (no noise)
 
 ## 📦 D. Release Discipline
+
 > “Nothing ambiguous ships.”
 
 - [x] **Pipeline**
-    - [x] CI/CD pipeline generates signed artifacts (`.github/workflows/release-ga.yml`) - *Includes Cosign, SLSA, SBOM diffs.*
-    - [x] Canary deployment workflow verified
+  - [x] CI/CD pipeline generates signed artifacts (`.github/workflows/release-ga.yml`) - _Includes Cosign, SLSA, SBOM diffs._
+  - [x] Canary deployment workflow verified
 - [x] **Governance**
-    - [x] SBOM generation verified (CycloneDX & SPDX)
-    - [x] License compliance check passed
+  - [x] SBOM generation verified (CycloneDX & SPDX)
+  - [x] License compliance check passed
 
 ---
 

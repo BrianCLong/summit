@@ -3,10 +3,10 @@
  * Narrative extraction and tracking for influence operations detection
  */
 
-export { NarrativeExtractor } from './extraction/NarrativeExtractor.js';
-export { FramingAnalyzer } from './framing/FramingAnalyzer.js';
-export { NarrativeTracker } from './tracking/NarrativeTracker.js';
-export { CounterNarrativeDetector } from './detection/CounterNarrativeDetector.js';
+export { NarrativeExtractor } from "./extraction/NarrativeExtractor.js";
+export { FramingAnalyzer } from "./framing/FramingAnalyzer.js";
+export { NarrativeTracker } from "./tracking/NarrativeTracker.js";
+export { CounterNarrativeDetector } from "./detection/CounterNarrativeDetector.js";
 
 export type {
   Narrative,
@@ -21,4 +21,4 @@ export type {
   DivergencePoint,
   ConvergencePoint,
   NarrativeCluster,
-} from './extraction/types.js';
+} from "./extraction/types.js";

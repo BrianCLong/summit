@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version (e.g., 1.2.3)'
+        description: "Release version (e.g., 1.2.3)"
         required: false
         type: string
 
@@ -36,7 +36,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20.14.0
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -162,7 +162,7 @@ jobs:
         if: always()
         with:
           status: ${{ job.status }}
-          channel: '#deployments'
+          channel: "#deployments"
           text: |
             🚀 IntelGraph v${{ needs.release.outputs.version }} deployed to staging
             URL: https://staging.intelgraph.dev

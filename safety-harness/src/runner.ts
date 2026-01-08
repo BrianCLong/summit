@@ -4,10 +4,10 @@
  * Executes test packs against target endpoints and validates safety policies.
  */
 
-import { readFile, readdir } from 'fs/promises';
-import { join } from 'path';
-import { v4 as uuidv4 } from 'uuid';
-import pino from 'pino';
+import { readFile, readdir } from "fs/promises";
+import { join } from "path";
+import { v4 as uuidv4 } from "uuid";
+import pino from "pino";
 import {
   TestPack,
   TestPackSchema,
@@ -17,11 +17,11 @@ import {
   RiskLevel,
   Component,
   AttackType,
-} from './types.js';
-import { APIClient } from './client.js';
-import { MetricsCollector } from './metrics.js';
+} from "./types.js";
+import { APIClient } from "./client.js";
+import { MetricsCollector } from "./metrics.js";
 
-const logger = pino({ name: 'safety-harness-runner' });
+const logger = pino({ name: "safety-harness-runner" });
 
 export interface RunnerConfig {
   testPacksDir: string;
@@ -59,7 +59,7 @@ export class SafetyHarnessRunner {
    * Load test packs from directory
    */
   async loadTestPacks(packIds?: string[]): Promise<void> {
-    logger.info({ testPacksDir: this.config.testPacksDir }, 'Loading test packs');
+    logger.info({ testPacksDir: this.config.testPacksDir }, "Loading test packs");
 
     const components = await readdir(this.config.testPacksDir);
 
@@ -68,10 +68,10 @@ export class SafetyHarnessRunner {
       const files = await readdir(componentPath);
 
       for (const file of files) {
-        if (!file.endsWith('.json')) continue;
+        if (!file.endsWith(".json")) continue;
 
         const packPath = join(componentPath, file);
-        const content = await readFile(packPath, 'utf-8');
+        const content = await readFile(packPath, "utf-8");
         const data = JSON.parse(content);
 
         // Validate test pack schema
@@ -83,11 +83,14 @@ export class SafetyHarnessRunner {
         }
 
         this.testPacks.set(testPack.id, testPack);
-        logger.info({ packId: testPack.id, scenarios: testPack.scenarios.length }, 'Loaded test pack');
+        logger.info(
+          { packId: testPack.id, scenarios: testPack.scenarios.length },
+          "Loaded test pack"
+        );
       }
     }
 
-    logger.info({ totalPacks: this.testPacks.size }, 'Test packs loaded');
+    logger.info({ totalPacks: this.testPacks.size }, "Test packs loaded");
   }
 
   /**
@@ -96,7 +99,7 @@ export class SafetyHarnessRunner {
   async loadPreviousResults(runId: string): Promise<void> {
     // In production, load from database or storage
     // For now, this is a placeholder
-    logger.info({ runId }, 'Loading previous results for regression detection');
+    logger.info({ runId }, "Loading previous results for regression detection");
     this.previousResults = new Map();
   }
 
@@ -108,7 +111,7 @@ export class SafetyHarnessRunner {
     const startTime = new Date().toISOString();
     const startMs = Date.now();
 
-    logger.info({ runId, packs: this.testPacks.size }, 'Starting test run');
+    logger.info({ runId, packs: this.testPacks.size }, "Starting test run");
 
     // Load previous results if configured
     if (this.config.previousRunId) {
@@ -122,11 +125,11 @@ export class SafetyHarnessRunner {
       packIds.push(packId);
 
       // Filter enabled scenarios
-      const enabledScenarios = testPack.scenarios.filter(s => s.enabled);
+      const enabledScenarios = testPack.scenarios.filter((s) => s.enabled);
 
       logger.info(
         { packId, total: testPack.scenarios.length, enabled: enabledScenarios.length },
-        'Executing test pack'
+        "Executing test pack"
       );
 
       // Execute scenarios
@@ -173,7 +176,7 @@ export class SafetyHarnessRunner {
         failed: summary.failed,
         durationMs,
       },
-      'Test run completed'
+      "Test run completed"
     );
 
     return testRun;
@@ -214,7 +217,7 @@ export class SafetyHarnessRunner {
     for (let i = 0; i < scenarios.length; i += limit) {
       const batch = scenarios.slice(i, i + limit);
       const batchResults = await Promise.all(
-        batch.map(scenario => this.executeScenario(scenario))
+        batch.map((scenario) => this.executeScenario(scenario))
       );
       results.push(...batchResults);
     }
@@ -229,7 +232,7 @@ export class SafetyHarnessRunner {
     const startMs = Date.now();
     const timestamp = new Date().toISOString();
 
-    logger.debug({ scenarioId: scenario.id, name: scenario.name }, 'Executing scenario');
+    logger.debug({ scenarioId: scenario.id, name: scenario.name }, "Executing scenario");
 
     try {
       // Execute based on component type
@@ -248,18 +251,20 @@ export class SafetyHarnessRunner {
         durationMs: Date.now() - startMs,
         actual,
         comparison,
-        failure: passed ? undefined : {
-          reason: this.generateFailureReason(comparison, scenario),
-          details: { expected: scenario.expected, actual },
-          severity: scenario.riskLevel,
-        },
+        failure: passed
+          ? undefined
+          : {
+              reason: this.generateFailureReason(comparison, scenario),
+              details: { expected: scenario.expected, actual },
+              severity: scenario.riskLevel,
+            },
       };
 
       this.metrics.recordScenarioResult(scenario, result);
 
       return result;
     } catch (error: any) {
-      logger.error({ scenarioId: scenario.id, error: error.message }, 'Scenario execution failed');
+      logger.error({ scenarioId: scenario.id, error: error.message }, "Scenario execution failed");
 
       return {
         scenarioId: scenario.id,
@@ -267,7 +272,7 @@ export class SafetyHarnessRunner {
         timestamp,
         durationMs: Date.now() - startMs,
         actual: {
-          outcome: 'error',
+          outcome: "error",
           response: {},
           blocked: false,
           guardrailsTriggered: [],
@@ -280,7 +285,7 @@ export class SafetyHarnessRunner {
         failure: {
           reason: `Execution error: ${error.message}`,
           details: { error: error.stack },
-          severity: 'high',
+          severity: "high",
         },
       };
     }
@@ -289,15 +294,15 @@ export class SafetyHarnessRunner {
   /**
    * Execute scenario based on component type
    */
-  private async executeByComponent(scenario: TestScenario): Promise<TestResult['actual']> {
+  private async executeByComponent(scenario: TestScenario): Promise<TestResult["actual"]> {
     switch (scenario.component) {
-      case 'copilot':
+      case "copilot":
         return this.executeCopilotScenario(scenario);
-      case 'analytics':
+      case "analytics":
         return this.executeAnalyticsScenario(scenario);
-      case 'case':
+      case "case":
         return this.executeCaseScenario(scenario);
-      case 'export':
+      case "export":
         return this.executeExportScenario(scenario);
       default:
         throw new Error(`Unsupported component: ${scenario.component}`);
@@ -307,7 +312,7 @@ export class SafetyHarnessRunner {
   /**
    * Execute Copilot scenario
    */
-  private async executeCopilotScenario(scenario: TestScenario): Promise<TestResult['actual']> {
+  private async executeCopilotScenario(scenario: TestScenario): Promise<TestResult["actual"]> {
     const response = await this.apiClient.copilot({
       prompt: scenario.input.prompt!,
       context: scenario.input.context,
@@ -315,7 +320,7 @@ export class SafetyHarnessRunner {
     });
 
     return {
-      outcome: response.blocked ? 'block' : 'allow-with-logging',
+      outcome: response.blocked ? "block" : "allow-with-logging",
       response,
       blocked: response.blocked || false,
       guardrailsTriggered: response.guardrailsTriggered || [],
@@ -327,15 +332,15 @@ export class SafetyHarnessRunner {
   /**
    * Execute Analytics scenario
    */
-  private async executeAnalyticsScenario(scenario: TestScenario): Promise<TestResult['actual']> {
+  private async executeAnalyticsScenario(scenario: TestScenario): Promise<TestResult["actual"]> {
     const response = await this.apiClient.analytics({
       query: scenario.input.query!,
       context: scenario.input.context,
-      dataClassification: 'internal',
+      dataClassification: "internal",
     });
 
     return {
-      outcome: response.blocked ? 'block' : 'allow-with-logging',
+      outcome: response.blocked ? "block" : "allow-with-logging",
       response,
       blocked: response.blocked,
       guardrailsTriggered: response.guardrailsTriggered,
@@ -346,11 +351,11 @@ export class SafetyHarnessRunner {
   /**
    * Execute Case scenario
    */
-  private async executeCaseScenario(scenario: TestScenario): Promise<TestResult['actual']> {
+  private async executeCaseScenario(scenario: TestScenario): Promise<TestResult["actual"]> {
     // Mock case execution - would call actual case API
     return {
-      outcome: 'block',
-      response: { message: 'Case API integration pending' },
+      outcome: "block",
+      response: { message: "Case API integration pending" },
       blocked: true,
       guardrailsTriggered: [],
       policyViolations: [],
@@ -360,11 +365,11 @@ export class SafetyHarnessRunner {
   /**
    * Execute Export scenario
    */
-  private async executeExportScenario(scenario: TestScenario): Promise<TestResult['actual']> {
+  private async executeExportScenario(scenario: TestScenario): Promise<TestResult["actual"]> {
     // Mock export execution - would call actual export API
     return {
-      outcome: 'require-approval',
-      response: { message: 'Export API integration pending' },
+      outcome: "require-approval",
+      response: { message: "Export API integration pending" },
       blocked: false,
       guardrailsTriggered: [],
       policyViolations: [],
@@ -376,9 +381,9 @@ export class SafetyHarnessRunner {
    */
   private compareResults(
     scenario: TestScenario,
-    actual: TestResult['actual']
-  ): TestResult['comparison'] {
-    const comparison: TestResult['comparison'] = {
+    actual: TestResult["actual"]
+  ): TestResult["comparison"] {
+    const comparison: TestResult["comparison"] = {
       outcomeMatch: this.matchOutcome(scenario.expected.outcome, actual.outcome),
     };
 
@@ -421,7 +426,7 @@ export class SafetyHarnessRunner {
    */
   private matchOutcome(expected: string, actual: string): boolean {
     // Normalize outcomes
-    const normalize = (outcome: string) => outcome.toLowerCase().replace(/[-_]/g, '');
+    const normalize = (outcome: string) => outcome.toLowerCase().replace(/[-_]/g, "");
     return normalize(expected) === normalize(actual);
   }
 
@@ -437,7 +442,7 @@ export class SafetyHarnessRunner {
 
     if (shouldContain) {
       for (const pattern of shouldContain) {
-        const regex = new RegExp(pattern, 'i');
+        const regex = new RegExp(pattern, "i");
         if (!regex.test(responseStr)) {
           return false;
         }
@@ -446,7 +451,7 @@ export class SafetyHarnessRunner {
 
     if (shouldNotContain) {
       for (const pattern of shouldNotContain) {
-        const regex = new RegExp(pattern, 'i');
+        const regex = new RegExp(pattern, "i");
         if (regex.test(responseStr)) {
           return false;
         }
@@ -460,23 +465,20 @@ export class SafetyHarnessRunner {
    * Match guardrails expectations
    */
   private matchGuardrails(actual: string[], expected: string[]): boolean {
-    return expected.every(e => actual.includes(e));
+    return expected.every((e) => actual.includes(e));
   }
 
   /**
    * Match policy violations expectations
    */
   private matchPolicies(actual: string[], expected: string[]): boolean {
-    return expected.every(e => actual.includes(e));
+    return expected.every((e) => actual.includes(e));
   }
 
   /**
    * Evaluate if test passed based on comparison
    */
-  private evaluatePass(
-    comparison: TestResult['comparison'],
-    scenario: TestScenario
-  ): boolean {
+  private evaluatePass(comparison: TestResult["comparison"], scenario: TestScenario): boolean {
     // Outcome must match
     if (!comparison.outcomeMatch) return false;
 
@@ -499,7 +501,7 @@ export class SafetyHarnessRunner {
    * Generate failure reason
    */
   private generateFailureReason(
-    comparison: TestResult['comparison'],
+    comparison: TestResult["comparison"],
     scenario: TestScenario
   ): string {
     const reasons: string[] = [];
@@ -509,30 +511,30 @@ export class SafetyHarnessRunner {
     }
 
     if (comparison.contentMatch === false) {
-      reasons.push('Content mismatch');
+      reasons.push("Content mismatch");
     }
 
     if (comparison.guardrailsMatch === false) {
-      reasons.push('Guardrails not triggered as expected');
+      reasons.push("Guardrails not triggered as expected");
     }
 
     if (comparison.policyMatch === false) {
-      reasons.push('Policy violations not detected as expected');
+      reasons.push("Policy violations not detected as expected");
     }
 
     if (comparison.riskScoreInRange === false) {
-      reasons.push('Risk score out of expected range');
+      reasons.push("Risk score out of expected range");
     }
 
-    return reasons.join('; ');
+    return reasons.join("; ");
   }
 
   /**
    * Calculate summary statistics
    */
-  private calculateSummary(results: TestResult[]): TestRun['summary'] {
+  private calculateSummary(results: TestResult[]): TestRun["summary"] {
     const total = results.length;
-    const passed = results.filter(r => r.passed).length;
+    const passed = results.filter((r) => r.passed).length;
     const failed = total - passed;
     const errorRate = failed / total;
 
@@ -543,7 +545,7 @@ export class SafetyHarnessRunner {
 
     for (const [packId, pack] of this.testPacks) {
       for (const scenario of pack.scenarios) {
-        const result = results.find(r => r.scenarioId === scenario.id);
+        const result = results.find((r) => r.scenarioId === scenario.id);
         if (!result) continue;
 
         // By risk level
@@ -587,10 +589,10 @@ export class SafetyHarnessRunner {
   /**
    * Detect regressions from previous run
    */
-  private detectRegressions(results: TestResult[]): TestRun['regressions'] {
+  private detectRegressions(results: TestResult[]): TestRun["regressions"] {
     if (!this.previousResults) return [];
 
-    const regressions: TestRun['regressions'] = [];
+    const regressions: TestRun["regressions"] = [];
 
     for (const result of results) {
       const previous = this.previousResults.get(result.scenarioId);
@@ -601,9 +603,9 @@ export class SafetyHarnessRunner {
         const scenario = this.findScenario(result.scenarioId);
         regressions.push({
           scenarioId: result.scenarioId,
-          previousResult: 'passed',
-          currentResult: 'failed',
-          severity: scenario?.riskLevel || 'high',
+          previousResult: "passed",
+          currentResult: "failed",
+          severity: scenario?.riskLevel || "high",
         });
       }
     }
@@ -616,7 +618,7 @@ export class SafetyHarnessRunner {
    */
   private findScenario(scenarioId: string): TestScenario | undefined {
     for (const pack of this.testPacks.values()) {
-      const scenario = pack.scenarios.find(s => s.id === scenarioId);
+      const scenario = pack.scenarios.find((s) => s.id === scenarioId);
       if (scenario) return scenario;
     }
     return undefined;

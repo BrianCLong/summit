@@ -27,7 +27,9 @@ export function PatternDetectionPanel({
   onResults,
   className,
 }: PatternDetectionPanelProps) {
-  const [templates, setTemplates] = useState<Record<string, PatternTemplate>>({})
+  const [templates, setTemplates] = useState<Record<string, PatternTemplate>>(
+    {}
+  )
   const [selectedTemplate, setSelectedTemplate] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [running, setRunning] = useState(false)
@@ -42,8 +44,8 @@ export function PatternDetectionPanel({
       setLoading(true)
       const res = await fetch('/api/patterns/templates', {
         headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
       })
       if (!res.ok) {
         throw new Error('Failed to fetch templates')
@@ -64,14 +66,17 @@ export function PatternDetectionPanel({
     try {
       setRunning(true)
       setError(null)
-      const res = await fetch(`/api/patterns/templates/${selectedTemplate}/execute`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({}), // Params can be added here later
-      })
+      const res = await fetch(
+        `/api/patterns/templates/${selectedTemplate}/execute`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: JSON.stringify({}), // Params can be added here later
+        }
+      )
 
       if (!res.ok) {
         const errData = await res.json()
@@ -87,21 +92,24 @@ export function PatternDetectionPanel({
 
       if (Array.isArray(data.data)) {
         data.data.forEach((match: any) => {
-            if (match.nodes) allEntities.push(...match.nodes)
-            if (match.edges) allRelationships.push(...match.edges)
+          if (match.nodes) allEntities.push(...match.nodes)
+          if (match.edges) allRelationships.push(...match.edges)
         })
       }
 
       // Deduplicate by ID
-      const uniqueEntities = Array.from(new Map(allEntities.map(e => [e.id, e])).values())
-      const uniqueRelationships = Array.from(new Map(allRelationships.map(r => [r.id, r])).values())
+      const uniqueEntities = Array.from(
+        new Map(allEntities.map(e => [e.id, e])).values()
+      )
+      const uniqueRelationships = Array.from(
+        new Map(allRelationships.map(r => [r.id, r])).values()
+      )
 
       onResults(uniqueEntities, uniqueRelationships)
 
       if (uniqueEntities.length === 0) {
-          setError('No matches found for this pattern.')
+        setError('No matches found for this pattern.')
       }
-
     } catch (err: any) {
       console.error(err)
       setError(err.message)
@@ -114,8 +122,8 @@ export function PatternDetectionPanel({
     <div className={`flex flex-col gap-4 p-4 ${className}`}>
       <div className="space-y-2">
         <h3 className="font-semibold text-lg flex items-center gap-2">
-            <Info className="h-5 w-5" />
-            Pattern Detection
+          <Info className="h-5 w-5" />
+          Pattern Detection
         </h3>
         <p className="text-sm text-muted-foreground">
           Run sophisticated graph algorithms to detect threats and anomalies.
@@ -175,9 +183,13 @@ export function PatternDetectionPanel({
           </Button>
 
           {error && (
-            <Alert variant={error.includes('No matches') ? "default" : "destructive"}>
+            <Alert
+              variant={error.includes('No matches') ? 'default' : 'destructive'}
+            >
               <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>{error.includes('No matches') ? 'Info' : 'Error'}</AlertTitle>
+              <AlertTitle>
+                {error.includes('No matches') ? 'Info' : 'Error'}
+              </AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}

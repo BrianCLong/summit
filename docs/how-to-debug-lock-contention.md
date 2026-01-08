@@ -23,6 +23,7 @@ Authorization: Bearer <admin token>
 ```
 
 Response highlights:
+
 - `data.locks`: waiting/blocking PIDs, lock modes, relations, and wait durations.
 - `data.slowQueries`: source (`pg_stat_statements` when available, otherwise the app slow log) and top statements.
 - `data.explain`: `EXPLAIN (FORMAT JSON)` for the whitelisted template you requested.
@@ -35,6 +36,7 @@ cd server && pnpm db:observability -- --explain=activeSessions --params=limit=10
 ```
 
 What you get:
+
 - A short textual summary for incident comms.
 - The full JSON payload for timelines or SIEM ingestion.
 - `--list` shows allowed explain templates; arbitrary SQL is blocked.

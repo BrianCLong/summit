@@ -335,7 +335,7 @@ paths:
                 querySpec: { type: object }
                 counterfactual: { type: object }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -344,7 +344,7 @@ paths:
                 properties:
                   rationales: { type: array, items: { type: object } }
                   costEstimate: { type: object }
-        '400': { description: Bad Request }
+        "400": { description: Bad Request }
   /evidence/bundle:
     get:
       summary: Get evidence bundle for a node/edge
@@ -354,7 +354,7 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
   /policy/reason:
     post:
       summary: Explain a guardrail decision
@@ -368,7 +368,7 @@ paths:
                 policyId: { type: string }
                 context: { type: object }
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
 ```
 
 ---

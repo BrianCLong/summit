@@ -1,13 +1,10 @@
-import {
-  type PreflightObligation,
-  type PreflightRequestContract
-} from '../contracts/actions.js';
+import { type PreflightObligation, type PreflightRequestContract } from "../contracts/actions.js";
 
 interface OpaSimulationResponse {
   result?: {
     allow?: boolean;
     allowed?: boolean;
-    decision?: 'allow' | 'deny';
+    decision?: "allow" | "deny";
     reason?: string;
     obligations?: Array<Record<string, unknown>>;
     annotations?: Record<string, unknown>;
@@ -27,57 +24,53 @@ export interface PolicySimulationService {
   simulate(input: PreflightRequestContract): Promise<PolicyDecisionResult>;
 }
 
-function normalizeObligations(
-  result: OpaSimulationResponse['result']
-): PreflightObligation[] {
+function normalizeObligations(result: OpaSimulationResponse["result"]): PreflightObligation[] {
   if (!result?.obligations || !Array.isArray(result.obligations)) {
     return [];
   }
 
   return result.obligations.map((obligation, index) => {
     const code =
-      (typeof obligation.code === 'string' && obligation.code) ||
-      (typeof obligation.type === 'string' && obligation.type) ||
+      (typeof obligation.code === "string" && obligation.code) ||
+      (typeof obligation.type === "string" && obligation.type) ||
       `obligation-${index + 1}`;
     const message =
-      typeof obligation.message === 'string'
+      typeof obligation.message === "string"
         ? obligation.message
-        : typeof obligation.note === 'string'
+        : typeof obligation.note === "string"
           ? obligation.note
           : undefined;
     const targets = Array.isArray(obligation.targets)
-      ? obligation.targets.filter((target) => typeof target === 'string')
+      ? obligation.targets.filter((target) => typeof target === "string")
       : Array.isArray(obligation.fields)
-        ? obligation.fields.filter((field) => typeof field === 'string')
+        ? obligation.fields.filter((field) => typeof field === "string")
         : Array.isArray(obligation.redact)
-          ? obligation.redact.filter((field) => typeof field === 'string')
+          ? obligation.redact.filter((field) => typeof field === "string")
           : undefined;
 
     return {
       code,
       message,
-      targets
+      targets,
     };
   });
 }
 
 function normalizeRedactions(
-  result: OpaSimulationResponse['result'],
+  result: OpaSimulationResponse["result"],
   obligations: PreflightObligation[]
 ): string[] {
   const redactions = new Set<string>();
-  const fromResult = Array.isArray(result?.redactions)
-    ? result?.redactions
-    : [];
+  const fromResult = Array.isArray(result?.redactions) ? result?.redactions : [];
 
   fromResult.forEach((item) => {
-    if (typeof item === 'string') {
+    if (typeof item === "string") {
       redactions.add(item);
     }
   });
 
   obligations.forEach((obligation) => {
-    if (obligation.code === 'redact' || obligation.code === 'mask') {
+    if (obligation.code === "redact" || obligation.code === "mask") {
       obligation.targets?.forEach((target) => redactions.add(target));
     }
   });
@@ -85,7 +78,7 @@ function normalizeRedactions(
   const annotations = result?.annotations;
   if (annotations && Array.isArray((annotations as any).redactions)) {
     (annotations as any).redactions
-      .filter((value: unknown) => typeof value === 'string')
+      .filter((value: unknown) => typeof value === "string")
       .forEach((value: string) => redactions.add(value));
   }
 
@@ -104,7 +97,7 @@ export class OpaPolicySimulationService implements PolicySimulationService {
     return (
       this.options.endpoint ||
       process.env.OPA_SIMULATION_ENDPOINT ||
-      'http://localhost:8181/v1/data/actions/preflight'
+      "http://localhost:8181/v1/data/actions/preflight"
     );
   }
 
@@ -114,14 +107,14 @@ export class OpaPolicySimulationService implements PolicySimulationService {
 
   async simulate(input: PreflightRequestContract): Promise<PolicyDecisionResult> {
     const response = await this.fetcher(this.endpoint, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         input,
-        simulate: true
-      })
+        simulate: true,
+      }),
     });
 
     if (!response.ok) {
@@ -135,16 +128,14 @@ export class OpaPolicySimulationService implements PolicySimulationService {
     const obligations = normalizeObligations(payload.result);
 
     const allow =
-      result.allow ??
-      result.allowed ??
-      (result.decision ? result.decision === 'allow' : false);
+      result.allow ?? result.allowed ?? (result.decision ? result.decision === "allow" : false);
 
     return {
       allow: Boolean(allow),
       reason: result.reason,
       obligations,
       redactions: normalizeRedactions(payload.result, obligations),
-      raw: payload
+      raw: payload,
     };
   }
 }

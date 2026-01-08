@@ -1,6 +1,7 @@
 # Adversarial Misinformation Defense Platform - User Guide
 
 ## Table of Contents
+
 1. [Introduction](#introduction)
 2. [Installation](#installation)
 3. [Quick Start](#quick-start)
@@ -33,18 +34,21 @@ The Adversarial Misinformation Defense Platform is a comprehensive system design
 ### Installation Steps
 
 1. **Clone the Repository**:
+
    ```bash
    git clone <repository-url>
    cd adversarial-misinfo-defense-platform
    ```
 
 2. **Create Virtual Environment** (optional but recommended):
+
    ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
 3. **Install Dependencies**:
+
    ```bash
    pip install -r requirements.txt
    ```
@@ -144,6 +148,7 @@ session = exercise_manager.start_exercise_session(
 The platform includes specialized detection modules for each modality:
 
 #### Text Detection
+
 Detects adversarial text patterns including clickbait, emotional manipulation, and false authority claims.
 
 ```python
@@ -153,6 +158,7 @@ results = text_detector.detect_misinfo(["Sample text for analysis"])
 ```
 
 #### Image Detection
+
 Identifies manipulated images and visual misinformation using computer vision techniques.
 
 ```python
@@ -162,6 +168,7 @@ results = image_detector.detect_misinfo(["/path/to/image.jpg"])
 ```
 
 #### Audio Detection
+
 Detects deepfake audio and acoustic anomalies using signal processing.
 
 ```python
@@ -171,6 +178,7 @@ results = audio_detector.detect_misinfo(["/path/to/audio.wav"])
 ```
 
 #### Video Detection
+
 Analyzes video content for temporal inconsistencies and deepfake artifacts.
 
 ```python
@@ -180,6 +188,7 @@ results = video_detector.detect_misinfo(["/path/to/video.mp4"])
 ```
 
 #### Meme Detection
+
 Recognizes manipulated meme templates and deceptive captions.
 
 ```python
@@ -189,6 +198,7 @@ results = meme_detector.detect_misinfo(["/path/to/meme.jpg"])
 ```
 
 #### Deepfake Detection
+
 Comprehensive deepfake detection across all modalities.
 
 ```python
@@ -520,28 +530,37 @@ report = manager.complete_exercise_session(session.session_id, {"final_score": 0
 ### Common Issues
 
 1. **Import Errors**
+
    ```
    ImportError: No module named 'torch'
    ```
+
    **Solution**: Install PyTorch:
+
    ```bash
    pip install torch torchvision torchaudio
    ```
 
 2. **GPU Memory Issues**
+
    ```
    CUDA out of memory
    ```
+
    **Solution**: Reduce batch size or disable GPU processing:
+
    ```python
    detector.set_max_workers(4)  # Reduce parallel processing
    ```
 
 3. **Missing Dependencies**
+
    ```
    ModuleNotFoundError: No module named 'transformers'
    ```
+
    **Solution**: Install missing dependencies:
+
    ```bash
    pip install -r requirements.txt
    ```
@@ -558,11 +577,13 @@ report = manager.complete_exercise_session(session.session_id, {"final_score": 0
 ### Performance Tuning
 
 1. **Adjust Worker Count**
+
    ```python
    detector.set_max_workers(4)  # Adjust based on CPU cores
    ```
 
 2. **Optimize Memory Usage**
+
    ```python
    detector.set_batch_size(32)  # Reduce batch size for memory constraints
    ```
@@ -577,26 +598,31 @@ report = manager.complete_exercise_session(session.session_id, {"final_score": 0
 ### Development Setup
 
 1. **Fork the Repository**
+
    ```bash
    git fork <repository-url>
    ```
 
 2. **Create Feature Branch**
+
    ```bash
    git checkout -b feature/my-new-feature
    ```
 
 3. **Install Development Dependencies**
+
    ```bash
    pip install -e .[dev]
    ```
 
 4. **Run Tests**
+
    ```bash
    python -m pytest tests/
    ```
 
 5. **Code Formatting**
+
    ```bash
    black .
    flake8 .
@@ -610,6 +636,7 @@ report = manager.complete_exercise_session(session.session_id, {"final_score": 0
 ### Code Style
 
 Follow these guidelines:
+
 - Use Black for code formatting
 - Follow PEP 8 style guide
 - Include type hints for all functions
@@ -638,6 +665,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Support
 
 For questions, issues, or contributions, please:
+
 1. Open an issue on the GitHub repository
 2. Join our community Discord server
 3. Contact the development team at support@example.com

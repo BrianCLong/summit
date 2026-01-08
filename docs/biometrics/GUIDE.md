@@ -98,53 +98,57 @@ pnpm --filter @intelgraph/identity-fusion-service dev
 ### Quick Start Example
 
 ```typescript
-import { BiometricService } from '@intelgraph/biometric-service';
-import { BiometricModality } from '@intelgraph/biometrics';
+import { BiometricService } from "@intelgraph/biometric-service";
+import { BiometricModality } from "@intelgraph/biometrics";
 
 const service = new BiometricService();
 
 // Enroll a person with face biometric
 const person = await service.enrollPerson({
-  templates: [{
-    id: crypto.randomUUID(),
-    modality: BiometricModality.FACE,
-    format: 'JPEG',
-    data: base64EncodedImage,
-    quality: {
-      score: 85,
-      isAcceptable: true,
-      timestamp: new Date().toISOString()
+  templates: [
+    {
+      id: crypto.randomUUID(),
+      modality: BiometricModality.FACE,
+      format: "JPEG",
+      data: base64EncodedImage,
+      quality: {
+        score: 85,
+        isAcceptable: true,
+        timestamp: new Date().toISOString(),
+      },
+      captureDate: new Date().toISOString(),
+      source: "enrollment_station_1",
     },
-    captureDate: new Date().toISOString(),
-    source: 'enrollment_station_1'
-  }],
+  ],
   metadata: {
-    firstName: 'John',
-    lastName: 'Doe'
-  }
+    firstName: "John",
+    lastName: "Doe",
+  },
 });
 
-console.log('Enrolled person:', person.personId);
+console.log("Enrolled person:", person.personId);
 
 // Screen against watchlists
 const screeningResult = await service.screenWatchlists({
   requestId: crypto.randomUUID(),
-  requestType: 'VERIFICATION',
-  priority: 'HIGH',
+  requestType: "VERIFICATION",
+  priority: "HIGH",
   subject: {
     identityId: person.personId,
-    biometricData: [{
-      modality: BiometricModality.FACE,
-      templateId: person.templates[0].id
-    }]
+    biometricData: [
+      {
+        modality: BiometricModality.FACE,
+        templateId: person.templates[0].id,
+      },
+    ],
   },
   context: {
     timestamp: new Date().toISOString(),
-    location: 'Airport Terminal 1'
-  }
+    location: "Airport Terminal 1",
+  },
 });
 
-console.log('Screening result:', screeningResult.recommendation);
+console.log("Screening result:", screeningResult.recommendation);
 ```
 
 ## Core Capabilities
@@ -154,7 +158,7 @@ console.log('Screening result:', screeningResult.recommendation);
 #### Face Detection
 
 ```typescript
-import { FaceDetection } from '@intelgraph/facial-recognition';
+import { FaceDetection } from "@intelgraph/facial-recognition";
 
 // Detect faces in image
 const detection: FaceDetection = {
@@ -163,65 +167,65 @@ const detection: FaceDetection = {
     x: 100,
     y: 150,
     width: 200,
-    height: 200
+    height: 200,
   },
   confidence: 0.98,
   landmarks: [
-    { type: 'LEFT_EYE', x: 150, y: 180, confidence: 0.99 },
-    { type: 'RIGHT_EYE', x: 250, y: 180, confidence: 0.99 },
-    { type: 'NOSE_TIP', x: 200, y: 220, confidence: 0.97 }
+    { type: "LEFT_EYE", x: 150, y: 180, confidence: 0.99 },
+    { type: "RIGHT_EYE", x: 250, y: 180, confidence: 0.99 },
+    { type: "NOSE_TIP", x: 200, y: 220, confidence: 0.97 },
   ],
   pose: {
     roll: 2.5,
     pitch: -5.0,
-    yaw: 10.0
+    yaw: 10.0,
   },
   quality: {
     score: 85,
     isAcceptable: true,
-    timestamp: new Date().toISOString()
-  }
+    timestamp: new Date().toISOString(),
+  },
 };
 ```
 
 #### Face Recognition
 
 ```typescript
-import { FaceEncoding } from '@intelgraph/facial-recognition';
+import { FaceEncoding } from "@intelgraph/facial-recognition";
 
 // Extract face encoding
 const encoding: FaceEncoding = {
   encodingId: crypto.randomUUID(),
-  algorithm: 'FACENET',
-  version: '2023.1',
-  vector: [0.12, -0.45, 0.78, /* ... 512 dimensions */],
+  algorithm: "FACENET",
+  version: "2023.1",
+  vector: [0.12, -0.45, 0.78 /* ... 512 dimensions */],
   dimensions: 512,
   normalized: true,
   quality: qualityScore,
   metadata: {
     extractionTime: 150,
-    imageSize: { width: 1920, height: 1080 }
-  }
+    imageSize: { width: 1920, height: 1080 },
+  },
 };
 ```
 
 #### Age Progression
 
 ```typescript
-import { AgeProgression } from '@intelgraph/facial-recognition';
+import { AgeProgression } from "@intelgraph/facial-recognition";
 
 // Age progress a face photo
 const progression: AgeProgression = {
   sourceAge: 25,
   targetAge: 45,
-  sourceImage: 'base64_encoded_image',
-  progressedImage: 'base64_aged_image',
-  method: 'GAN',
+  sourceImage: "base64_encoded_image",
+  progressedImage: "base64_aged_image",
+  method: "GAN",
   confidence: 0.82,
   metadata: {
     processingTime: 5000,
-    modelVersion: 'v2.1'
-  }
+    modelVersion: "v2.1",
+  },
 };
 ```
 
@@ -230,37 +234,41 @@ const progression: AgeProgression = {
 #### Gait Analysis
 
 ```typescript
-import { GaitSignature } from '@intelgraph/behavioral-analysis';
+import { GaitSignature } from "@intelgraph/behavioral-analysis";
 
 const gaitSignature: GaitSignature = {
   signatureId: crypto.randomUUID(),
   personId: personId,
-  features: [/* gait features */],
+  features: [
+    /* gait features */
+  ],
   summary: {
     averageVelocity: 1.3,
     averageCadence: 110,
-    gaitPattern: 'NORMAL',
+    gaitPattern: "NORMAL",
     asymmetry: 0.05,
-    stability: 0.92
+    stability: 0.92,
   },
   captureInfo: {
     duration: 10,
     distance: 13,
     viewAngle: 90,
-    resolution: '1920x1080'
-  }
+    resolution: "1920x1080",
+  },
 };
 ```
 
 #### Keystroke Dynamics
 
 ```typescript
-import { KeystrokeProfile } from '@intelgraph/behavioral-analysis';
+import { KeystrokeProfile } from "@intelgraph/behavioral-analysis";
 
 const keystrokeProfile: KeystrokeProfile = {
   profileId: crypto.randomUUID(),
   sessionId: sessionId,
-  events: [/* keystroke events */],
+  events: [
+    /* keystroke events */
+  ],
   statistics: {
     averageDwellTime: 95,
     dwellTimeStdDev: 15,
@@ -269,8 +277,8 @@ const keystrokeProfile: KeystrokeProfile = {
     typingSpeed: 65, // WPM
     errorRate: 0.02,
     backspaceFrequency: 0.08,
-    pausePatterns: []
-  }
+    pausePatterns: [],
+  },
 };
 ```
 
@@ -279,22 +287,22 @@ const keystrokeProfile: KeystrokeProfile = {
 #### Cross-Source Matching
 
 ```typescript
-import { IdentityFusionService } from '@intelgraph/identity-fusion-service';
+import { IdentityFusionService } from "@intelgraph/identity-fusion-service";
 
 const service = new IdentityFusionService();
 
 // Resolve identity across multiple sources
 const resolution = await service.resolveIdentity({
   targetIdentity: {
-    type: 'PERSON',
+    type: "PERSON",
     biographicData: {
-      fullName: 'John Doe',
-      dateOfBirth: '1980-01-15',
-      nationality: ['US']
-    }
+      fullName: "John Doe",
+      dateOfBirth: "1980-01-15",
+      nationality: ["US"],
+    },
   },
-  sources: ['border_database', 'visa_system', 'law_enforcement'],
-  threshold: 80
+  sources: ["border_database", "visa_system", "law_enforcement"],
+  threshold: 80,
 });
 ```
 
@@ -305,16 +313,16 @@ const resolution = await service.resolveIdentity({
 const fusionResult = await service.fuseBiometrics({
   identityId: personId,
   modalityScores: [
-    { modality: 'FACE', score: 85, confidence: 0.92 },
-    { modality: 'FINGERPRINT', score: 92, confidence: 0.95 },
-    { modality: 'IRIS', score: 88, confidence: 0.90 }
+    { modality: "FACE", score: 85, confidence: 0.92 },
+    { modality: "FINGERPRINT", score: 92, confidence: 0.95 },
+    { modality: "IRIS", score: 88, confidence: 0.9 },
   ],
-  strategy: 'SCORE_LEVEL',
-  threshold: 80
+  strategy: "SCORE_LEVEL",
+  threshold: 80,
 });
 
 // Result: fusedScore = 88.2, fusedConfidence = 0.93
-console.log('Fused result:', fusionResult.isMatch); // true
+console.log("Fused result:", fusionResult.isMatch); // true
 ```
 
 ### 4. Watchlist Screening
@@ -322,34 +330,36 @@ console.log('Fused result:', fusionResult.isMatch); // true
 #### Screen Subject
 
 ```typescript
-import { ScreeningRequest } from '@intelgraph/watchlist-screening';
+import { ScreeningRequest } from "@intelgraph/watchlist-screening";
 
 const screeningRequest: ScreeningRequest = {
   requestId: crypto.randomUUID(),
-  requestType: 'IDENTIFICATION',
-  priority: 'HIGH',
+  requestType: "IDENTIFICATION",
+  priority: "HIGH",
   subject: {
     biographicData: {
-      fullName: 'John Doe',
-      dateOfBirth: '1980-01-15',
-      nationality: 'US'
+      fullName: "John Doe",
+      dateOfBirth: "1980-01-15",
+      nationality: "US",
     },
-    biometricData: [{
-      modality: 'FACE',
-      templateId: faceTemplateId
-    }]
+    biometricData: [
+      {
+        modality: "FACE",
+        templateId: faceTemplateId,
+      },
+    ],
   },
   thresholds: {
     biometric: 85,
     biographic: 80,
-    overall: 82
+    overall: 82,
   },
   context: {
-    location: 'JFK Airport',
+    location: "JFK Airport",
     timestamp: new Date().toISOString(),
-    operator: 'officer_123',
-    purpose: 'border_control'
-  }
+    operator: "officer_123",
+    purpose: "border_control",
+  },
 };
 
 const result = await service.screenWatchlists(screeningRequest);
@@ -358,24 +368,24 @@ const result = await service.screenWatchlists(screeningRequest);
 #### Handle Alerts
 
 ```typescript
-import { Alert } from '@intelgraph/watchlist-screening';
+import { Alert } from "@intelgraph/watchlist-screening";
 
-if (result.status === 'HIGH_CONFIDENCE_MATCH') {
+if (result.status === "HIGH_CONFIDENCE_MATCH") {
   // Generate alert for review
   const alert: Alert = {
     alertId: crypto.randomUUID(),
     screeningResultId: result.resultId,
-    alertType: 'WATCHLIST_HIT',
-    severity: 'HIGH',
-    status: 'NEW',
+    alertType: "WATCHLIST_HIT",
+    severity: "HIGH",
+    status: "NEW",
     subject: {
       identityId: personId,
-      name: 'John Doe'
+      name: "John Doe",
     },
-    priority: 'URGENT',
+    priority: "URGENT",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    escalated: true
+    escalated: true,
   };
 
   // Route to appropriate personnel
@@ -388,7 +398,7 @@ if (result.status === 'HIGH_CONFIDENCE_MATCH') {
 #### Verify Travel Document
 
 ```typescript
-import { DocumentVerification } from '@intelgraph/document-verification';
+import { DocumentVerification } from "@intelgraph/document-verification";
 
 const verification: DocumentVerification = {
   verificationId: crypto.randomUUID(),
@@ -401,28 +411,28 @@ const verification: DocumentVerification = {
     confidence: 0.95,
     overallScore: 95,
     securityFeatures: [
-      { featureType: 'HOLOGRAM', detected: true, authentic: true, confidence: 0.98 },
-      { featureType: 'UV_FEATURE', detected: true, authentic: true, confidence: 0.96 },
-      { featureType: 'WATERMARK', detected: true, authentic: true, confidence: 0.94 }
+      { featureType: "HOLOGRAM", detected: true, authentic: true, confidence: 0.98 },
+      { featureType: "UV_FEATURE", detected: true, authentic: true, confidence: 0.96 },
+      { featureType: "WATERMARK", detected: true, authentic: true, confidence: 0.94 },
     ],
     metadata: {
       processingTime: 2500,
-      algorithmVersion: '3.1',
-      timestamp: new Date().toISOString()
-    }
+      algorithmVersion: "3.1",
+      timestamp: new Date().toISOString(),
+    },
   },
   overallResult: {
     verified: true,
     confidence: 0.95,
     score: 95,
-    recommendation: 'ACCEPT'
+    recommendation: "ACCEPT",
   },
   metadata: {
     totalProcessingTime: 3000,
     verificationDate: new Date().toISOString(),
-    verifiedBy: 'system',
-    location: 'border_post_1'
-  }
+    verifiedBy: "system",
+    location: "border_post_1",
+  },
 };
 ```
 
@@ -431,25 +441,30 @@ const verification: DocumentVerification = {
 ### Biometric Service API
 
 #### POST /api/v1/enroll
+
 Enroll a new person with biometric data.
 
 **Request:**
+
 ```json
 {
-  "templates": [{
-    "id": "uuid",
-    "modality": "FACE",
-    "format": "JPEG",
-    "data": "base64_encoded",
-    "quality": { "score": 85, "isAcceptable": true },
-    "captureDate": "2025-11-20T10:00:00Z",
-    "source": "enrollment_station"
-  }],
+  "templates": [
+    {
+      "id": "uuid",
+      "modality": "FACE",
+      "format": "JPEG",
+      "data": "base64_encoded",
+      "quality": { "score": 85, "isAcceptable": true },
+      "captureDate": "2025-11-20T10:00:00Z",
+      "source": "enrollment_station"
+    }
+  ],
   "metadata": { "firstName": "John", "lastName": "Doe" }
 }
 ```
 
 **Response:**
+
 ```json
 {
   "personId": "uuid",
@@ -459,29 +474,37 @@ Enroll a new person with biometric data.
 ```
 
 #### POST /api/v1/verify
+
 Verify 1:1 biometric match.
 
 #### POST /api/v1/identify
+
 Identify 1:N biometric search.
 
 #### POST /api/v1/screen
+
 Screen against watchlists.
 
 #### GET /api/v1/persons/:personId
+
 Retrieve person record.
 
 ### Identity Fusion Service API
 
 #### POST /api/v1/fuse
+
 Fuse multiple biometric modalities.
 
 #### POST /api/v1/resolve
+
 Resolve identity across sources.
 
 #### GET /api/v1/graph/:identityId
+
 Build identity relationship graph.
 
 #### POST /api/v1/attribute
+
 Attribute digital activities to identity.
 
 ## Integration Guide
@@ -489,7 +512,7 @@ Attribute digital activities to identity.
 ### Border Control Integration
 
 ```typescript
-import { BiometricService } from '@intelgraph/biometric-service';
+import { BiometricService } from "@intelgraph/biometric-service";
 
 class BorderControlSystem {
   private biometricService: BiometricService;
@@ -502,28 +525,28 @@ class BorderControlSystem {
     // 2. Screen against watchlists
     const screening = await this.biometricService.screenWatchlists({
       requestId: crypto.randomUUID(),
-      requestType: 'BORDER_CROSSING',
-      priority: 'HIGH',
+      requestType: "BORDER_CROSSING",
+      priority: "HIGH",
       subject: {
         biometricData: [
-          { modality: 'FACE', templateId: await extractTemplate(faceImage) },
-          { modality: 'FINGERPRINT', templateId: await extractTemplate(fingerprints) }
+          { modality: "FACE", templateId: await extractTemplate(faceImage) },
+          { modality: "FINGERPRINT", templateId: await extractTemplate(fingerprints) },
         ],
-        documentData: traveler.passport
+        documentData: traveler.passport,
       },
       context: {
         timestamp: new Date().toISOString(),
-        location: 'POE_Airport_Terminal_1'
-      }
+        location: "POE_Airport_Terminal_1",
+      },
     });
 
     // 3. Make decision
-    if (screening.recommendation === 'CLEAR') {
-      return { decision: 'ADMIT', screening };
-    } else if (screening.recommendation === 'SECONDARY_SCREENING') {
-      return { decision: 'REFER_SECONDARY', screening };
+    if (screening.recommendation === "CLEAR") {
+      return { decision: "ADMIT", screening };
+    } else if (screening.recommendation === "SECONDARY_SCREENING") {
+      return { decision: "REFER_SECONDARY", screening };
     } else {
-      return { decision: 'DENY', screening };
+      return { decision: "DENY", screening };
     }
   }
 }
@@ -532,7 +555,7 @@ class BorderControlSystem {
 ### Law Enforcement Integration
 
 ```typescript
-import { IdentityFusionService } from '@intelgraph/identity-fusion-service';
+import { IdentityFusionService } from "@intelgraph/identity-fusion-service";
 
 class InvestigationSystem {
   async investigateSuspect(evidence: Evidence) {
@@ -540,7 +563,7 @@ class InvestigationSystem {
     const graph = await fusionService.buildIdentityGraph(evidence.subjectId);
 
     // Find aliases and related identities
-    const aliases = graph.edges.filter(e => e.edgeType === 'ALIAS_OF');
+    const aliases = graph.edges.filter((e) => e.edgeType === "ALIAS_OF");
 
     // Search across databases
     const matches = await identifyAcrossDatabases(evidence.biometrics);
@@ -549,7 +572,7 @@ class InvestigationSystem {
       graph,
       aliases,
       matches,
-      riskAssessment: await assessRisk(evidence.subjectId)
+      riskAssessment: await assessRisk(evidence.subjectId),
     };
   }
 }
@@ -562,9 +585,9 @@ class InvestigationSystem {
 ```typescript
 // JWT-based authentication
 app.use((req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
+  const token = req.headers.authorization?.split(" ")[1];
   if (!token) {
-    return res.status(401).json({ error: 'Unauthorized' });
+    return res.status(401).json({ error: "Unauthorized" });
   }
 
   try {
@@ -572,7 +595,7 @@ app.use((req, res, next) => {
     req.user = decoded;
     next();
   } catch (error) {
-    res.status(401).json({ error: 'Invalid token' });
+    res.status(401).json({ error: "Invalid token" });
   }
 });
 ```
@@ -584,14 +607,14 @@ app.use((req, res, next) => {
 function requireRole(role: string) {
   return (req, res, next) => {
     if (!req.user.roles.includes(role)) {
-      return res.status(403).json({ error: 'Forbidden' });
+      return res.status(403).json({ error: "Forbidden" });
     }
     next();
   };
 }
 
-app.post('/api/v1/enroll', requireRole('ENROLLMENT_OFFICER'), enrollHandler);
-app.post('/api/v1/screen', requireRole('SCREENING_OFFICER'), screenHandler);
+app.post("/api/v1/enroll", requireRole("ENROLLMENT_OFFICER"), enrollHandler);
+app.post("/api/v1/screen", requireRole("SCREENING_OFFICER"), screenHandler);
 ```
 
 ### Encryption
@@ -599,14 +622,14 @@ app.post('/api/v1/screen', requireRole('SCREENING_OFFICER'), screenHandler);
 All biometric data encrypted at rest with AES-256:
 
 ```typescript
-import crypto from 'crypto';
+import crypto from "crypto";
 
 function encryptBiometric(data: string, key: Buffer): string {
   const iv = crypto.randomBytes(16);
-  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
-  const encrypted = Buffer.concat([cipher.update(data, 'utf8'), cipher.final()]);
+  const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
+  const encrypted = Buffer.concat([cipher.update(data, "utf8"), cipher.final()]);
   const tag = cipher.getAuthTag();
-  return Buffer.concat([iv, tag, encrypted]).toString('base64');
+  return Buffer.concat([iv, tag, encrypted]).toString("base64");
 }
 ```
 
@@ -636,7 +659,7 @@ function encryptBiometric(data: string, key: Buffer): string {
 ```typescript
 // Check biometric quality before matching
 if (template.quality.score < 70) {
-  console.warn('Low quality biometric sample');
+  console.warn("Low quality biometric sample");
   // Request recapture
 }
 ```
@@ -663,13 +686,13 @@ const matches = await identify({
 // Adjust thresholds
 const screening = await screen({
   threshold: 90, // Increase threshold to reduce false positives
-  maxResults: 5  // Limit candidates
+  maxResults: 5, // Limit candidates
 });
 
 // Use multi-modal fusion
 const fused = await fuse({
   modalityScores: [face, fingerprint, iris],
-  strategy: 'SCORE_LEVEL'
+  strategy: "SCORE_LEVEL",
 }); // More accurate than single modality
 ```
 

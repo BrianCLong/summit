@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Alert, AlertDescription } from '../ui/alert';
+import React, { useState } from "react";
+import { Alert, AlertDescription } from "../ui/alert";
 
 interface QueryCondition {
   field: string;
@@ -16,41 +16,35 @@ interface PolicyPreview {
 
 export const QueryBuilder: React.FC = () => {
   const [conditions, setConditions] = useState<QueryCondition[]>([
-    { field: '', operator: '', value: '' },
+    { field: "", operator: "", value: "" },
   ]);
-  const [policyPreview, setPolicyPreview] = useState<PolicyPreview | null>(
-    null,
-  );
+  const [policyPreview, setPolicyPreview] = useState<PolicyPreview | null>(null);
   const [isPreviewingExport, setIsPreviewingExport] = useState(false);
 
   const fieldOptions = [
-    { value: 'entity.type', label: 'Entity Type' },
-    { value: 'entity.classification', label: 'Classification' },
-    { value: 'relationship.type', label: 'Relationship Type' },
-    { value: 'timestamp', label: 'Timestamp' },
-    { value: 'confidence', label: 'Confidence Score' },
+    { value: "entity.type", label: "Entity Type" },
+    { value: "entity.classification", label: "Classification" },
+    { value: "relationship.type", label: "Relationship Type" },
+    { value: "timestamp", label: "Timestamp" },
+    { value: "confidence", label: "Confidence Score" },
   ];
 
   const operatorOptions = [
-    { value: 'equals', label: 'Equals' },
-    { value: 'contains', label: 'Contains' },
-    { value: 'greater_than', label: 'Greater Than' },
-    { value: 'less_than', label: 'Less Than' },
+    { value: "equals", label: "Equals" },
+    { value: "contains", label: "Contains" },
+    { value: "greater_than", label: "Greater Than" },
+    { value: "less_than", label: "Less Than" },
   ];
 
   const addCondition = () => {
-    setConditions([...conditions, { field: '', operator: '', value: '' }]);
+    setConditions([...conditions, { field: "", operator: "", value: "" }]);
   };
 
   const removeCondition = (index: number) => {
     setConditions(conditions.filter((_, i) => i !== index));
   };
 
-  const updateCondition = (
-    index: number,
-    field: keyof QueryCondition,
-    value: string,
-  ) => {
+  const updateCondition = (index: number, field: keyof QueryCondition, value: string) => {
     const newConditions = [...conditions];
     newConditions[index][field] = value;
     setConditions(newConditions);
@@ -61,13 +55,13 @@ export const QueryBuilder: React.FC = () => {
 
     // Call OPA policy endpoint to preview export
     try {
-      const response = await fetch('/api/policy/preview-export', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/policy/preview-export", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           query: conditions,
-          action: 'export',
-          stepUpToken: localStorage.getItem('stepUpToken'),
+          action: "export",
+          stepUpToken: localStorage.getItem("stepUpToken"),
         }),
       });
 
@@ -76,7 +70,7 @@ export const QueryBuilder: React.FC = () => {
     } catch (error) {
       setPolicyPreview({
         allowed: false,
-        reason: 'Error checking policy: ' + error,
+        reason: "Error checking policy: " + error,
         requiredStepUp: false,
       });
     } finally {
@@ -86,14 +80,14 @@ export const QueryBuilder: React.FC = () => {
 
   const executeQuery = async () => {
     // Execute the actual query
-    const response = await fetch('/api/query', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const response = await fetch("/api/query", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ conditions }),
     });
 
     const results = await response.json();
-    console.log('Query results:', results);
+    console.log("Query results:", results);
   };
 
   return (
@@ -105,7 +99,7 @@ export const QueryBuilder: React.FC = () => {
           <div key={index} className="condition-row flex gap-2 items-center">
             <select
               value={condition.field}
-              onChange={(e) => updateCondition(index, 'field', e.target.value)}
+              onChange={(e) => updateCondition(index, "field", e.target.value)}
               className="flex-1 p-2 border rounded"
             >
               <option value="">Select field...</option>
@@ -118,9 +112,7 @@ export const QueryBuilder: React.FC = () => {
 
             <select
               value={condition.operator}
-              onChange={(e) =>
-                updateCondition(index, 'operator', e.target.value)
-              }
+              onChange={(e) => updateCondition(index, "operator", e.target.value)}
               className="flex-1 p-2 border rounded"
             >
               <option value="">Select operator...</option>
@@ -134,7 +126,7 @@ export const QueryBuilder: React.FC = () => {
             <input
               type="text"
               value={condition.value}
-              onChange={(e) => updateCondition(index, 'value', e.target.value)}
+              onChange={(e) => updateCondition(index, "value", e.target.value)}
               placeholder="Value..."
               className="flex-1 p-2 border rounded"
             />
@@ -171,22 +163,16 @@ export const QueryBuilder: React.FC = () => {
           disabled={isPreviewingExport}
           className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 disabled:opacity-50"
         >
-          {isPreviewingExport ? 'Checking Policy...' : 'Preview Export Policy'}
+          {isPreviewingExport ? "Checking Policy..." : "Preview Export Policy"}
         </button>
       </div>
 
       {policyPreview && (
-        <Alert
-          className={
-            policyPreview.allowed ? 'border-green-500' : 'border-red-500'
-          }
-        >
+        <Alert className={policyPreview.allowed ? "border-green-500" : "border-red-500"}>
           <AlertDescription>
             <div className="space-y-2">
               <div className="font-bold">
-                {policyPreview.allowed
-                  ? '✅ Export Allowed'
-                  : '🚫 Export Blocked'}
+                {policyPreview.allowed ? "✅ Export Allowed" : "🚫 Export Blocked"}
               </div>
               <div className="text-sm">
                 <strong>Reason:</strong> {policyPreview.reason}
@@ -196,17 +182,16 @@ export const QueryBuilder: React.FC = () => {
                   ⚠️ Step-up authentication required for this export
                 </div>
               )}
-              {policyPreview.dlpViolations &&
-                policyPreview.dlpViolations.length > 0 && (
-                  <div className="text-sm">
-                    <strong>DLP Violations:</strong>
-                    <ul className="list-disc list-inside">
-                      {policyPreview.dlpViolations.map((v, i) => (
-                        <li key={i}>{v}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+              {policyPreview.dlpViolations && policyPreview.dlpViolations.length > 0 && (
+                <div className="text-sm">
+                  <strong>DLP Violations:</strong>
+                  <ul className="list-disc list-inside">
+                    {policyPreview.dlpViolations.map((v, i) => (
+                      <li key={i}>{v}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </AlertDescription>
         </Alert>

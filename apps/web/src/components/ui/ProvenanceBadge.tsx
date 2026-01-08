@@ -1,19 +1,25 @@
-import React from 'react';
-import { ShieldCheck, ShieldAlert, FileSearch } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/Dialog';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
+import React from 'react'
+import { ShieldCheck, ShieldAlert, FileSearch } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/Dialog'
+import { Button } from '@/components/ui/Button'
+import { Badge } from '@/components/ui/Badge'
 
 interface ProvenanceBadgeProps {
-  status: 'verified' | 'unverified' | 'tampered';
-  manifestId?: string;
-  className?: string;
+  status: 'verified' | 'unverified' | 'tampered'
+  manifestId?: string
+  className?: string
 }
 
 export const ProvenanceBadge: React.FC<ProvenanceBadgeProps> = ({
   status,
   manifestId,
-  className
+  className,
 }) => {
   const getStatusConfig = () => {
     switch (status) {
@@ -22,36 +28,39 @@ export const ProvenanceBadge: React.FC<ProvenanceBadgeProps> = ({
           icon: <ShieldCheck className="w-4 h-4 mr-1" />,
           text: 'Verified',
           variant: 'default' as const, // Map to valid badge variant
-          color: 'bg-green-600'
-        };
+          color: 'bg-green-600',
+        }
       case 'tampered':
         return {
           icon: <ShieldAlert className="w-4 h-4 mr-1" />,
           text: 'Tampered',
           variant: 'destructive' as const,
-          color: 'bg-red-600'
-        };
+          color: 'bg-red-600',
+        }
       case 'unverified':
       default:
         return {
           icon: <FileSearch className="w-4 h-4 mr-1" />,
           text: 'Unverified',
           variant: 'secondary' as const,
-          color: 'bg-gray-500'
-        };
+          color: 'bg-gray-500',
+        }
     }
-  };
+  }
 
-  const config = getStatusConfig();
+  const config = getStatusConfig()
 
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button variant="ghost" size="sm" className={`h-6 px-2 ${className}`}>
-           <Badge variant={config.variant} className={`flex items-center ${config.color} hover:${config.color}`}>
-             {config.icon}
-             <span>{config.text}</span>
-           </Badge>
+          <Badge
+            variant={config.variant}
+            className={`flex items-center ${config.color} hover:${config.color}`}
+          >
+            {config.icon}
+            <span>{config.text}</span>
+          </Badge>
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -60,7 +69,9 @@ export const ProvenanceBadge: React.FC<ProvenanceBadgeProps> = ({
         </DialogHeader>
         <div className="space-y-4">
           <div className="flex items-center space-x-2">
-            <div className={`p-2 rounded-full ${config.color} bg-opacity-10 text-${config.color}`}>
+            <div
+              className={`p-2 rounded-full ${config.color} bg-opacity-10 text-${config.color}`}
+            >
               {config.icon}
             </div>
             <div>
@@ -69,8 +80,8 @@ export const ProvenanceBadge: React.FC<ProvenanceBadgeProps> = ({
                 {status === 'verified'
                   ? 'Cryptographic signature and hash chain match the immutable ledger.'
                   : status === 'tampered'
-                  ? 'Data integrity check failed. The content has been modified.'
-                  : 'No provenance manifest found for this item.'}
+                    ? 'Data integrity check failed. The content has been modified.'
+                    : 'No provenance manifest found for this item.'}
               </p>
             </div>
           </div>
@@ -82,10 +93,10 @@ export const ProvenanceBadge: React.FC<ProvenanceBadgeProps> = ({
           )}
 
           <div className="text-xs text-muted-foreground mt-4">
-             Verification Authority: IntelGraph Prov-Ledger v1.0
+            Verification Authority: IntelGraph Prov-Ledger v1.0
           </div>
         </div>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}

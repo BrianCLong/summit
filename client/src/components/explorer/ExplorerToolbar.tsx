@@ -3,15 +3,15 @@
  * Toolbar component for graph exploration controls
  */
 
-import React, { useState } from 'react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Slider } from '@/components/ui/slider';
-import { Label } from '@/components/ui/label';
-import { LAYOUT_OPTIONS, ExplorerFilters } from './types';
+import React, { useState } from "react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
+import { LAYOUT_OPTIONS, ExplorerFilters } from "./types";
 
 interface ExplorerToolbarProps {
   layout: string;
@@ -54,9 +54,7 @@ export function ExplorerToolbar({
 
   const handleNodeTypeToggle = (type: string) => {
     const current = filters.nodeTypes;
-    const updated = current.includes(type)
-      ? current.filter((t) => t !== type)
-      : [...current, type];
+    const updated = current.includes(type) ? current.filter((t) => t !== type) : [...current, type];
     onFiltersChange({ ...filters, nodeTypes: updated });
   };
 
@@ -69,7 +67,7 @@ export function ExplorerToolbar({
       nodeTypes: [],
       edgeTypes: [],
       minConfidence: 0,
-      searchQuery: '',
+      searchQuery: "",
     });
   };
 
@@ -94,7 +92,7 @@ export function ExplorerToolbar({
           />
           {filters.searchQuery && (
             <button
-              onClick={() => onFiltersChange({ ...filters, searchQuery: '' })}
+              onClick={() => onFiltersChange({ ...filters, searchQuery: "" })}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             >
               <svg
@@ -122,7 +120,7 @@ export function ExplorerToolbar({
           {LAYOUT_OPTIONS.map((opt) => (
             <Button
               key={opt.name}
-              variant={layout === opt.name ? 'default' : 'ghost'}
+              variant={layout === opt.name ? "default" : "ghost"}
               size="sm"
               onClick={() => onLayoutChange(opt.name)}
               className="h-8 px-2"
@@ -233,7 +231,7 @@ export function ExplorerToolbar({
 
         {/* Filter toggle */}
         <Button
-          variant={showFilters ? 'secondary' : 'ghost'}
+          variant={showFilters ? "secondary" : "ghost"}
           size="sm"
           onClick={() => setShowFilters(!showFilters)}
           className="h-8"
@@ -261,13 +259,7 @@ export function ExplorerToolbar({
         </Button>
 
         {/* Refresh */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onRefresh}
-          disabled={loading}
-          className="h-8"
-        >
+        <Button variant="ghost" size="sm" onClick={onRefresh} disabled={loading} className="h-8">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
@@ -278,7 +270,7 @@ export function ExplorerToolbar({
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className={cn('mr-1', loading && 'animate-spin')}
+            className={cn("mr-1", loading && "animate-spin")}
           >
             <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
           </svg>
@@ -288,11 +280,11 @@ export function ExplorerToolbar({
         {/* Stats */}
         <div className="flex items-center gap-2 ml-auto text-sm text-muted-foreground">
           <span>
-            {nodeCount} {nodeCount === 1 ? 'node' : 'nodes'}
+            {nodeCount} {nodeCount === 1 ? "node" : "nodes"}
           </span>
           <span className="text-muted-foreground/50">|</span>
           <span>
-            {edgeCount} {edgeCount === 1 ? 'edge' : 'edges'}
+            {edgeCount} {edgeCount === 1 ? "edge" : "edges"}
           </span>
         </div>
       </div>
@@ -303,16 +295,12 @@ export function ExplorerToolbar({
           <div className="flex flex-wrap gap-6">
             {/* Node type filters */}
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground">
-                Entity Types
-              </Label>
+              <Label className="text-xs font-medium text-muted-foreground">Entity Types</Label>
               <div className="flex flex-wrap gap-1">
                 {nodeTypes.map((type) => (
                   <Button
                     key={type}
-                    variant={
-                      filters.nodeTypes.includes(type) ? 'default' : 'outline'
-                    }
+                    variant={filters.nodeTypes.includes(type) ? "default" : "outline"}
                     size="sm"
                     className="h-6 px-2 text-xs"
                     onClick={() => handleNodeTypeToggle(type)}

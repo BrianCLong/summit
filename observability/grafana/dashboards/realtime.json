@@ -11,15 +11,16 @@
     {
       "title": "Fanout Rate",
       "type": "graph",
-      "targets": [
-        { "expr": "rate(rt_events_fanout_total[1m])", "legendFormat": "{{tenant}}" }
-      ]
+      "targets": [{ "expr": "rate(rt_events_fanout_total[1m])", "legendFormat": "{{tenant}}" }]
     },
     {
       "title": "Delivery Lag (p95)",
       "type": "graph",
       "targets": [
-        { "expr": "histogram_quantile(0.95, rate(rt_delivery_lag_seconds_bucket[1m]))", "legendFormat": "{{tenant}}" }
+        {
+          "expr": "histogram_quantile(0.95, rate(rt_delivery_lag_seconds_bucket[1m]))",
+          "legendFormat": "{{tenant}}"
+        }
       ]
     }
   ]

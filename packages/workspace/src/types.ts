@@ -1,20 +1,20 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // Role-based access control
 export enum WorkspaceRole {
-  OWNER = 'owner',
-  ADMIN = 'admin',
-  MEMBER = 'member',
-  VIEWER = 'viewer',
-  GUEST = 'guest'
+  OWNER = "owner",
+  ADMIN = "admin",
+  MEMBER = "member",
+  VIEWER = "viewer",
+  GUEST = "guest",
 }
 
 export enum ResourcePermission {
-  READ = 'read',
-  WRITE = 'write',
-  DELETE = 'delete',
-  SHARE = 'share',
-  ADMIN = 'admin'
+  READ = "read",
+  WRITE = "write",
+  DELETE = "delete",
+  SHARE = "share",
+  ADMIN = "admin",
 }
 
 // Workspace schemas
@@ -25,24 +25,28 @@ export const WorkspaceSchema = z.object({
   description: z.string().optional(),
   ownerId: z.string(),
   organizationId: z.string().optional(),
-  settings: z.object({
-    isPublic: z.boolean().default(false),
-    allowGuestAccess: z.boolean().default(false),
-    defaultMemberRole: z.nativeEnum(WorkspaceRole).default(WorkspaceRole.MEMBER),
-    features: z.object({
-      realTimeCollaboration: z.boolean().default(true),
-      versionControl: z.boolean().default(true),
-      commenting: z.boolean().default(true),
-      taskManagement: z.boolean().default(true),
-      knowledgeBase: z.boolean().default(true),
-      videoConferencing: z.boolean().default(false),
-      marketplace: z.boolean().default(false)
-    }).default({})
-  }).default({}),
+  settings: z
+    .object({
+      isPublic: z.boolean().default(false),
+      allowGuestAccess: z.boolean().default(false),
+      defaultMemberRole: z.nativeEnum(WorkspaceRole).default(WorkspaceRole.MEMBER),
+      features: z
+        .object({
+          realTimeCollaboration: z.boolean().default(true),
+          versionControl: z.boolean().default(true),
+          commenting: z.boolean().default(true),
+          taskManagement: z.boolean().default(true),
+          knowledgeBase: z.boolean().default(true),
+          videoConferencing: z.boolean().default(false),
+          marketplace: z.boolean().default(false),
+        })
+        .default({}),
+    })
+    .default({}),
   metadata: z.record(z.any()).optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
-  archivedAt: z.date().optional()
+  archivedAt: z.date().optional(),
 });
 
 export const WorkspaceMemberSchema = z.object({
@@ -54,7 +58,7 @@ export const WorkspaceMemberSchema = z.object({
   customPermissions: z.record(z.boolean()).optional(),
   joinedAt: z.date(),
   invitedBy: z.string().optional(),
-  lastActiveAt: z.date().optional()
+  lastActiveAt: z.date().optional(),
 });
 
 export const ProjectSchema = z.object({
@@ -66,15 +70,19 @@ export const ProjectSchema = z.object({
   color: z.string().optional(),
   icon: z.string().optional(),
   ownerId: z.string(),
-  settings: z.object({
-    isPrivate: z.boolean().default(false),
-    requireApproval: z.boolean().default(false),
-    defaultPermissions: z.array(z.nativeEnum(ResourcePermission)).default([ResourcePermission.READ])
-  }).default({}),
+  settings: z
+    .object({
+      isPrivate: z.boolean().default(false),
+      requireApproval: z.boolean().default(false),
+      defaultPermissions: z
+        .array(z.nativeEnum(ResourcePermission))
+        .default([ResourcePermission.READ]),
+    })
+    .default({}),
   metadata: z.record(z.any()).optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
-  archivedAt: z.date().optional()
+  archivedAt: z.date().optional(),
 });
 
 export const ProjectMemberSchema = z.object({
@@ -84,7 +92,7 @@ export const ProjectMemberSchema = z.object({
   role: z.nativeEnum(WorkspaceRole),
   permissions: z.array(z.nativeEnum(ResourcePermission)),
   addedAt: z.date(),
-  addedBy: z.string()
+  addedBy: z.string(),
 });
 
 export const WorkspaceInvitationSchema = z.object({
@@ -96,7 +104,7 @@ export const WorkspaceInvitationSchema = z.object({
   token: z.string(),
   expiresAt: z.date(),
   acceptedAt: z.date().optional(),
-  createdAt: z.date()
+  createdAt: z.date(),
 });
 
 export const WorkspaceTemplateSchema = z.object({
@@ -106,21 +114,29 @@ export const WorkspaceTemplateSchema = z.object({
   category: z.string(),
   icon: z.string().optional(),
   config: z.object({
-    defaultProjects: z.array(z.object({
-      name: z.string(),
-      description: z.string().optional(),
-      color: z.string().optional()
-    })).default([]),
-    defaultChannels: z.array(z.object({
-      name: z.string(),
-      description: z.string().optional()
-    })).default([]),
-    defaultSettings: z.record(z.any()).default({})
+    defaultProjects: z
+      .array(
+        z.object({
+          name: z.string(),
+          description: z.string().optional(),
+          color: z.string().optional(),
+        })
+      )
+      .default([]),
+    defaultChannels: z
+      .array(
+        z.object({
+          name: z.string(),
+          description: z.string().optional(),
+        })
+      )
+      .default([]),
+    defaultSettings: z.record(z.any()).default({}),
   }),
   isPublic: z.boolean().default(true),
   usageCount: z.number().default(0),
   createdBy: z.string().optional(),
-  createdAt: z.date()
+  createdAt: z.date(),
 });
 
 export const WorkspaceActivitySchema = z.object({
@@ -128,25 +144,25 @@ export const WorkspaceActivitySchema = z.object({
   workspaceId: z.string(),
   userId: z.string(),
   action: z.enum([
-    'workspace.created',
-    'workspace.updated',
-    'workspace.deleted',
-    'member.added',
-    'member.removed',
-    'member.role_changed',
-    'project.created',
-    'project.updated',
-    'project.deleted',
-    'resource.created',
-    'resource.updated',
-    'resource.deleted',
-    'resource.shared',
-    'settings.updated'
+    "workspace.created",
+    "workspace.updated",
+    "workspace.deleted",
+    "member.added",
+    "member.removed",
+    "member.role_changed",
+    "project.created",
+    "project.updated",
+    "project.deleted",
+    "resource.created",
+    "resource.updated",
+    "resource.deleted",
+    "resource.shared",
+    "settings.updated",
   ]),
   resourceType: z.string().optional(),
   resourceId: z.string().optional(),
   metadata: z.record(z.any()).optional(),
-  createdAt: z.date()
+  createdAt: z.date(),
 });
 
 // Type exports

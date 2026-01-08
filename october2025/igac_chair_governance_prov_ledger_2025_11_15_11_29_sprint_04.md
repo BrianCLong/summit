@@ -178,8 +178,8 @@ Operate governed analytics as a **compliance‑grade system**: sealed compute, v
 ```ts
 // tools/vectorStore.ts
 export async function exportEmbeddings(q: Query, token?: PolicyToken) {
-  if (!token || !token.allows({ type: 'embedding_export', case: q.caseId })) {
-    throw new Error('EgressDenied:EmbeddingExport');
+  if (!token || !token.allows({ type: "embedding_export", case: q.caseId })) {
+    throw new Error("EgressDenied:EmbeddingExport");
   }
   return underlying.export(q);
 }
@@ -212,7 +212,7 @@ function detectShadowCopy(events: AccessEvent[]): boolean {
 
 ```ts
 if (revocationCPU > budget.cpu * 0.85 || revocationIOPS > budget.iops * 0.85) {
-  breaker.open('RevocationStorm');
+  breaker.open("RevocationStorm");
 }
 ```
 
@@ -232,8 +232,8 @@ if (revocationCPU > budget.cpu * 0.85 || revocationIOPS > budget.iops * 0.85) {
 ### 6) Residency Tests (example)
 
 ```ts
-it('denies non‑EU lineage under EU‑only pack', async () => {
-  const res = await request(app).get('/query').set('jurisdiction', 'EU');
+it("denies non‑EU lineage under EU‑only pack", async () => {
+  const res = await request(app).get("/query").set("jurisdiction", "EU");
   expect(res.status).toBe(403);
   expect(res.body.reason).toMatch(/EU-only/);
 });

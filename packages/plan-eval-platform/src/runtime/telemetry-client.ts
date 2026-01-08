@@ -1,6 +1,6 @@
-import { createWriteStream, mkdirSync } from 'node:fs';
-import { dirname } from 'node:path';
-import type { Trace, TelemetryConfig, TelemetryExport, EvalMetrics } from '../types.js';
+import { createWriteStream, mkdirSync } from "node:fs";
+import { dirname } from "node:path";
+import type { Trace, TelemetryConfig, TelemetryExport, EvalMetrics } from "../types.js";
 
 /**
  * TelemetryClient - Synchronous writer to JSONL with optional Prometheus/OTel export
@@ -19,8 +19,8 @@ export class TelemetryClient {
 
   constructor(config: Partial<TelemetryConfig> = {}) {
     this.config = {
-      outputPath: config.outputPath ?? './eval-traces.jsonl',
-      format: config.format ?? 'jsonl',
+      outputPath: config.outputPath ?? "./eval-traces.jsonl",
+      format: config.format ?? "jsonl",
       flushIntervalMs: config.flushIntervalMs ?? 5000,
       enableMetrics: config.enableMetrics ?? true,
       enableTracing: config.enableTracing ?? true,
@@ -37,10 +37,10 @@ export class TelemetryClient {
     mkdirSync(dir, { recursive: true });
 
     // Open write stream for JSONL
-    if (this.config.format === 'jsonl') {
+    if (this.config.format === "jsonl") {
       this.writeStream = createWriteStream(this.config.outputPath, {
-        flags: 'a',
-        encoding: 'utf8',
+        flags: "a",
+        encoding: "utf8",
       });
     }
 
@@ -57,28 +57,19 @@ export class TelemetryClient {
     this.traces.push(trace);
 
     // Write to JSONL immediately
-    if (this.writeStream && this.config.format === 'jsonl') {
-      this.writeStream.write(JSON.stringify(trace) + '\n');
+    if (this.writeStream && this.config.format === "jsonl") {
+      this.writeStream.write(JSON.stringify(trace) + "\n");
     }
 
     // Update metrics buffer
     if (trace.summary) {
-      this.incrementMetric('traces_total', 1);
-      this.incrementMetric(
-        'traces_success',
-        trace.summary.success ? 1 : 0,
-      );
-      this.incrementMetric('tokens_total', trace.summary.totalTokens);
-      this.incrementMetric('cost_usd_total', trace.summary.totalCostUsd);
-      this.incrementMetric(
-        'tool_calls_total',
-        trace.summary.toolCallCount,
-      );
-      this.incrementMetric('errors_total', trace.summary.errorCount);
-      this.incrementMetric(
-        'safety_violations_total',
-        trace.summary.safetyViolations,
-      );
+      this.incrementMetric("traces_total", 1);
+      this.incrementMetric("traces_success", trace.summary.success ? 1 : 0);
+      this.incrementMetric("tokens_total", trace.summary.totalTokens);
+      this.incrementMetric("cost_usd_total", trace.summary.totalCostUsd);
+      this.incrementMetric("tool_calls_total", trace.summary.toolCallCount);
+      this.incrementMetric("errors_total", trace.summary.errorCount);
+      this.incrementMetric("safety_violations_total", trace.summary.safetyViolations);
     }
   }
 
@@ -87,7 +78,9 @@ export class TelemetryClient {
    */
   recordMetric(name: string, value: number, labels?: Record<string, string>): void {
     const key = labels
-      ? `${name}{${Object.entries(labels).map(([k, v]) => `${k}="${v}"`).join(',')}}`
+      ? `${name}{${Object.entries(labels)
+          .map(([k, v]) => `${k}="${v}"`)
+          .join(",")}}`
       : name;
     this.metricsBuffer.set(key, value);
   }
@@ -130,7 +123,7 @@ export class TelemetryClient {
     // Stub: In production, use prom-client to expose metrics
     // const register = new Registry();
     // const gauge = new Gauge({ name: 'eval_traces_total', help: '...' });
-    console.log('[Telemetry] Prometheus export stub - port:', this.config.prometheusPort);
+    console.log("[Telemetry] Prometheus export stub - port:", this.config.prometheusPort);
   }
 
   /**
@@ -139,7 +132,7 @@ export class TelemetryClient {
   private exportToOTLP(): void {
     // Stub: In production, use OpenTelemetry SDK
     // const exporter = new OTLPTraceExporter({ url: this.config.otlpEndpoint });
-    console.log('[Telemetry] OTLP export stub - endpoint:', this.config.otlpEndpoint);
+    console.log("[Telemetry] OTLP export stub - endpoint:", this.config.otlpEndpoint);
   }
 
   /**
@@ -162,56 +155,35 @@ export class TelemetryClient {
    * Calculate aggregate metrics from all traces
    */
   private calculateAggregateMetrics(): EvalMetrics {
-    const successCount = this.traces.filter(
-      (t) => t.summary?.success,
-    ).length;
+    const successCount = this.traces.filter((t) => t.summary?.success).length;
     const totalDurationMs = this.traces.reduce(
       (sum, t) => sum + (t.summary?.totalDurationMs ?? 0),
-      0,
+      0
     );
-    const totalTokens = this.traces.reduce(
-      (sum, t) => sum + (t.summary?.totalTokens ?? 0),
-      0,
-    );
-    const totalCostUsd = this.traces.reduce(
-      (sum, t) => sum + (t.summary?.totalCostUsd ?? 0),
-      0,
-    );
-    const totalToolCalls = this.traces.reduce(
-      (sum, t) => sum + (t.summary?.toolCallCount ?? 0),
-      0,
-    );
-    const totalErrors = this.traces.reduce(
-      (sum, t) => sum + (t.summary?.errorCount ?? 0),
-      0,
-    );
+    const totalTokens = this.traces.reduce((sum, t) => sum + (t.summary?.totalTokens ?? 0), 0);
+    const totalCostUsd = this.traces.reduce((sum, t) => sum + (t.summary?.totalCostUsd ?? 0), 0);
+    const totalToolCalls = this.traces.reduce((sum, t) => sum + (t.summary?.toolCallCount ?? 0), 0);
+    const totalErrors = this.traces.reduce((sum, t) => sum + (t.summary?.errorCount ?? 0), 0);
     const totalSafetyViolations = this.traces.reduce(
       (sum, t) => sum + (t.summary?.safetyViolations ?? 0),
-      0,
+      0
     );
 
     // Calculate latency percentiles
-    const durations = this.traces
-      .map((t) => t.summary?.totalDurationMs ?? 0)
-      .sort((a, b) => a - b);
+    const durations = this.traces.map((t) => t.summary?.totalDurationMs ?? 0).sort((a, b) => a - b);
     const p50 = durations[Math.floor(durations.length * 0.5)] ?? 0;
     const p95 = durations[Math.floor(durations.length * 0.95)] ?? 0;
     const p99 = durations[Math.floor(durations.length * 0.99)] ?? 0;
-    const avg =
-      durations.length > 0
-        ? durations.reduce((a, b) => a + b, 0) / durations.length
-        : 0;
+    const avg = durations.length > 0 ? durations.reduce((a, b) => a + b, 0) / durations.length : 0;
 
     return {
-      taskSuccessRate:
-        this.traces.length > 0 ? successCount / this.traces.length : 0,
+      taskSuccessRate: this.traces.length > 0 ? successCount / this.traces.length : 0,
       taskCompletionTime: totalDurationMs,
       totalTokens,
       inputTokens: 0, // Would need to aggregate from events
       outputTokens: 0,
       totalCostUsd,
-      costPerSuccessfulTask:
-        successCount > 0 ? totalCostUsd / successCount : 0,
+      costPerSuccessfulTask: successCount > 0 ? totalCostUsd / successCount : 0,
       p50LatencyMs: p50,
       p95LatencyMs: p95,
       p99LatencyMs: p99,
@@ -220,10 +192,7 @@ export class TelemetryClient {
       toolSuccessRate: totalToolCalls > 0 ? 1 - totalErrors / totalToolCalls : 1,
       avgToolLatencyMs: totalToolCalls > 0 ? totalDurationMs / totalToolCalls : 0,
       safetyViolationCount: totalSafetyViolations,
-      safetyViolationRate:
-        this.traces.length > 0
-          ? totalSafetyViolations / this.traces.length
-          : 0,
+      safetyViolationRate: this.traces.length > 0 ? totalSafetyViolations / this.traces.length : 0,
       jailbreakAttempts: 0, // Would need specific tracking
       jailbreakSuccesses: 0,
       routingDecisionCount: 0, // Would aggregate from events
@@ -256,12 +225,10 @@ export class TelemetryClient {
 /**
  * Create a default telemetry client for quick setup
  */
-export function createTelemetryClient(
-  outputPath?: string,
-): TelemetryClient {
+export function createTelemetryClient(outputPath?: string): TelemetryClient {
   return new TelemetryClient({
-    outputPath: outputPath ?? './experiments/traces.jsonl',
-    format: 'jsonl',
+    outputPath: outputPath ?? "./experiments/traces.jsonl",
+    format: "jsonl",
     enableMetrics: true,
     enableTracing: true,
   });

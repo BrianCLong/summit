@@ -12,77 +12,77 @@ This document describes the CompanyOS data model, classification, retention poli
 
 ### Classification Levels
 
-| Level | Description | Examples | Handling Requirements |
-|-------|-------------|----------|----------------------|
-| **Public** | Non-sensitive, can be shared externally | Product documentation, public APIs | Standard handling |
-| **Internal** | Internal business data | Tenant names, aggregate metrics | Internal access only |
-| **Confidential** | Sensitive business data | Contact emails, billing info | Encrypted at rest |
-| **Restricted** | Highly sensitive data | API keys, credentials | Encrypted, audit logged |
-| **PII** | Personal Identifiable Information | Email, name, IP address | GDPR/CCPA compliant |
+| Level            | Description                             | Examples                           | Handling Requirements   |
+| ---------------- | --------------------------------------- | ---------------------------------- | ----------------------- |
+| **Public**       | Non-sensitive, can be shared externally | Product documentation, public APIs | Standard handling       |
+| **Internal**     | Internal business data                  | Tenant names, aggregate metrics    | Internal access only    |
+| **Confidential** | Sensitive business data                 | Contact emails, billing info       | Encrypted at rest       |
+| **Restricted**   | Highly sensitive data                   | API keys, credentials              | Encrypted, audit logged |
+| **PII**          | Personal Identifiable Information       | Email, name, IP address            | GDPR/CCPA compliant     |
 
 ### Data Fields by Classification
 
 #### Tenant Data
 
-| Field | Classification | PII | Encrypted | Retention |
-|-------|---------------|-----|-----------|-----------|
-| `id` | Internal | No | No | Indefinite |
-| `externalId` | Internal | No | No | Indefinite |
-| `name` | Internal | No | No | Indefinite |
-| `displayName` | Internal | No | No | Indefinite |
-| `status` | Internal | No | No | Indefinite |
-| `tier` | Internal | No | No | Indefinite |
-| `region` | Internal | No | No | Indefinite |
-| `primaryContactEmail` | Confidential | **Yes** | Yes | 30 days post-deletion |
-| `primaryContactName` | Confidential | **Yes** | Yes | 30 days post-deletion |
-| `billingEmail` | Confidential | **Yes** | Yes | 7 years (regulatory) |
-| `metadata` | Varies | Possible | Conditional | 30 days post-deletion |
-| `createdAt` | Internal | No | No | Indefinite |
-| `deletedAt` | Internal | No | No | Indefinite |
+| Field                 | Classification | PII      | Encrypted   | Retention             |
+| --------------------- | -------------- | -------- | ----------- | --------------------- |
+| `id`                  | Internal       | No       | No          | Indefinite            |
+| `externalId`          | Internal       | No       | No          | Indefinite            |
+| `name`                | Internal       | No       | No          | Indefinite            |
+| `displayName`         | Internal       | No       | No          | Indefinite            |
+| `status`              | Internal       | No       | No          | Indefinite            |
+| `tier`                | Internal       | No       | No          | Indefinite            |
+| `region`              | Internal       | No       | No          | Indefinite            |
+| `primaryContactEmail` | Confidential   | **Yes**  | Yes         | 30 days post-deletion |
+| `primaryContactName`  | Confidential   | **Yes**  | Yes         | 30 days post-deletion |
+| `billingEmail`        | Confidential   | **Yes**  | Yes         | 7 years (regulatory)  |
+| `metadata`            | Varies         | Possible | Conditional | 30 days post-deletion |
+| `createdAt`           | Internal       | No       | No          | Indefinite            |
+| `deletedAt`           | Internal       | No       | No          | Indefinite            |
 
 #### Tenant Admin Data
 
-| Field | Classification | PII | Encrypted | Retention |
-|-------|---------------|-----|-----------|-----------|
-| `userId` | Internal | No | No | 30 days post-deletion |
-| `email` | Confidential | **Yes** | Yes | 30 days post-deletion |
-| `displayName` | Confidential | **Yes** | Yes | 30 days post-deletion |
-| `role` | Internal | No | No | 30 days post-deletion |
-| `invitedAt` | Internal | No | No | 30 days post-deletion |
+| Field         | Classification | PII     | Encrypted | Retention             |
+| ------------- | -------------- | ------- | --------- | --------------------- |
+| `userId`      | Internal       | No      | No        | 30 days post-deletion |
+| `email`       | Confidential   | **Yes** | Yes       | 30 days post-deletion |
+| `displayName` | Confidential   | **Yes** | Yes       | 30 days post-deletion |
+| `role`        | Internal       | No      | No        | 30 days post-deletion |
+| `invitedAt`   | Internal       | No      | No        | 30 days post-deletion |
 
 #### Audit Events
 
-| Field | Classification | PII | Encrypted | Retention |
-|-------|---------------|-----|-----------|-----------|
-| `actorId` | Internal | No | No | 365 days |
-| `actorEmail` | Confidential | **Yes** | Yes | 365 days |
-| `ipAddress` | Confidential | **Yes** | Yes | 90 days |
-| `userAgent` | Internal | No | No | 90 days |
-| `details` | Varies | Possible | Conditional | 365 days |
-| `occurredAt` | Internal | No | No | 365 days |
+| Field        | Classification | PII      | Encrypted   | Retention |
+| ------------ | -------------- | -------- | ----------- | --------- |
+| `actorId`    | Internal       | No       | No          | 365 days  |
+| `actorEmail` | Confidential   | **Yes**  | Yes         | 365 days  |
+| `ipAddress`  | Confidential   | **Yes**  | Yes         | 90 days   |
+| `userAgent`  | Internal       | No       | No          | 90 days   |
+| `details`    | Varies         | Possible | Conditional | 365 days  |
+| `occurredAt` | Internal       | No       | No          | 365 days  |
 
 ## Retention Policies
 
 ### Standard Retention Periods
 
-| Data Type | Active | Post-Deletion | Regulatory |
-|-----------|--------|---------------|------------|
-| Tenant Core Data | Indefinite | 30 days | N/A |
-| User/Admin Data | Active tenure | 30 days | N/A |
-| Audit Logs | 365 days | 365 days | 7 years for SOX |
-| Access Logs | 90 days | 90 days | N/A |
-| Billing Records | Active | 7 years | 7 years (tax) |
-| Security Events | 365 days | 365 days | 7 years |
+| Data Type        | Active        | Post-Deletion | Regulatory      |
+| ---------------- | ------------- | ------------- | --------------- |
+| Tenant Core Data | Indefinite    | 30 days       | N/A             |
+| User/Admin Data  | Active tenure | 30 days       | N/A             |
+| Audit Logs       | 365 days      | 365 days      | 7 years for SOX |
+| Access Logs      | 90 days       | 90 days       | N/A             |
+| Billing Records  | Active        | 7 years       | 7 years (tax)   |
+| Security Events  | 365 days      | 365 days      | 7 years         |
 
 ### Retention by Tier
 
-| Tier | Audit Log Retention | Access Log Retention |
-|------|---------------------|---------------------|
-| Starter | 90 days | 30 days |
-| Bronze | 180 days | 60 days |
-| Silver | 365 days | 90 days |
-| Gold | 730 days | 180 days |
-| Enterprise | Custom (up to 7 years) | Custom |
+| Tier       | Audit Log Retention    | Access Log Retention |
+| ---------- | ---------------------- | -------------------- |
+| Starter    | 90 days                | 30 days              |
+| Bronze     | 180 days               | 60 days              |
+| Silver     | 365 days               | 90 days              |
+| Gold       | 730 days               | 180 days             |
+| Enterprise | Custom (up to 7 years) | Custom               |
 
 ## Data Lifecycle
 
@@ -101,13 +101,13 @@ This document describes the CompanyOS data model, classification, retention poli
 
 ### State Descriptions
 
-| State | Data Access | Write Access | API Response |
-|-------|-------------|--------------|--------------|
-| `PENDING` | Full | Full | Normal |
-| `ACTIVE` | Full | Full | Normal |
-| `SUSPENDED` | Read-only | Blocked | 403 on writes |
-| `DELETION_REQUESTED` | Read-only | Blocked | 403 + warning |
-| `DELETED` | None | None | 404 |
+| State                | Data Access | Write Access | API Response  |
+| -------------------- | ----------- | ------------ | ------------- |
+| `PENDING`            | Full        | Full         | Normal        |
+| `ACTIVE`             | Full        | Full         | Normal        |
+| `SUSPENDED`          | Read-only   | Blocked      | 403 on writes |
+| `DELETION_REQUESTED` | Read-only   | Blocked      | 403 + warning |
+| `DELETED`            | None        | None         | 404           |
 
 ### Deletion Process
 
@@ -149,21 +149,21 @@ Day 90+: Full purge (Enterprise only)
 
 ### Supported Regions
 
-| Region | Code | Data Center | Residency Class |
-|--------|------|-------------|-----------------|
-| US East | `us-east-1` | Virginia | Standard |
-| US West | `us-west-2` | Oregon | Standard |
-| EU West | `eu-west-1` | Ireland | GDPR |
-| EU Central | `eu-central-1` | Frankfurt | GDPR |
-| APAC | `ap-southeast-1` | Singapore | Standard |
+| Region     | Code             | Data Center | Residency Class |
+| ---------- | ---------------- | ----------- | --------------- |
+| US East    | `us-east-1`      | Virginia    | Standard        |
+| US West    | `us-west-2`      | Oregon      | Standard        |
+| EU West    | `eu-west-1`      | Ireland     | GDPR            |
+| EU Central | `eu-central-1`   | Frankfurt   | GDPR            |
+| APAC       | `ap-southeast-1` | Singapore   | Standard        |
 
 ### Residency Classes
 
-| Class | Description | Cross-Region Access |
-|-------|-------------|---------------------|
-| `standard` | Default, US-based | Allowed |
-| `restricted` | Limited regions | With approval |
-| `sovereign` | Single region only | Blocked |
+| Class        | Description        | Cross-Region Access |
+| ------------ | ------------------ | ------------------- |
+| `standard`   | Default, US-based  | Allowed             |
+| `restricted` | Limited regions    | With approval       |
+| `sovereign`  | Single region only | Blocked             |
 
 ### Cross-Region Data Flow
 
@@ -194,12 +194,12 @@ Day 90+: Full purge (Enterprise only)
 
 ### Export Types
 
-| Export Type | Availability | Format | Contains PII |
-|-------------|--------------|--------|--------------|
-| Tenant Config | All tiers | JSON | Yes |
-| Audit Logs | Silver+ | JSON/CSV | Yes |
-| Usage Metrics | All tiers | JSON | No |
-| Full Data Export | Enterprise | Custom | Yes |
+| Export Type      | Availability | Format   | Contains PII |
+| ---------------- | ------------ | -------- | ------------ |
+| Tenant Config    | All tiers    | JSON     | Yes          |
+| Audit Logs       | Silver+      | JSON/CSV | Yes          |
+| Usage Metrics    | All tiers    | JSON     | No           |
+| Full Data Export | Enterprise   | Custom   | Yes          |
 
 ### Export Process
 
@@ -267,9 +267,9 @@ Day 90+: Full purge (Enterprise only)
 
 ## Document History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 0.1 | 2024-12-08 | Claude | Initial draft |
+| Version | Date       | Author | Changes       |
+| ------- | ---------- | ------ | ------------- |
+| 0.1     | 2024-12-08 | Claude | Initial draft |
 
 ## References
 

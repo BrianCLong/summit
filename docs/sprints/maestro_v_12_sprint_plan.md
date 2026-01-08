@@ -55,22 +55,13 @@ export type Region = {
   healthy: boolean;
   costUSDPerK: number;
 };
-export function pickRegion(
-  rs: Region[],
-  need: { maxP95: number; preferLowCarbon: boolean },
-) {
+export function pickRegion(rs: Region[], need: { maxP95: number; preferLowCarbon: boolean }) {
   const healthy = rs.filter((r) => r.healthy && r.p95 <= need.maxP95);
   const scored = healthy.map((r) => ({
     r,
-    s:
-      r.costUSDPerK +
-      (need.preferLowCarbon ? r.carbon * 1e-6 : 0) +
-      r.p95 / 5000,
+    s: r.costUSDPerK + (need.preferLowCarbon ? r.carbon * 1e-6 : 0) + r.p95 / 5000,
   }));
-  return (
-    scored.sort((a, b) => a.s - b.s)[0]?.r ||
-    rs.sort((a, b) => a.p95 - b.p95)[0]
-  );
+  return scored.sort((a, b) => a.s - b.s)[0]?.r || rs.sort((a, b) => a.p95 - b.p95)[0];
 }
 ```
 
@@ -111,16 +102,10 @@ export function failProb(features: number[], w: number[], bias = -2.0) {
   const z = features.reduce((s, x, i) => s + w[i] * x, bias);
   return 1 / (1 + Math.exp(-z));
 }
-export function pickTests(
-  tests: { id: string; f: number[] }[],
-  w: number[],
-  targetRisk = 0.02,
-) {
+export function pickTests(tests: { id: string; f: number[] }[], w: number[], targetRisk = 0.02) {
   let cumRisk = 0;
   const out = [] as string[];
-  const scored = tests
-    .map((t) => ({ id: t.id, p: failProb(t.f, w) }))
-    .sort((a, b) => b.p - a.p);
+  const scored = tests.map((t) => ({ id: t.id, p: failProb(t.f, w) })).sort((a, b) => b.p - a.p);
   for (const t of scored) {
     out.push(t.id);
     cumRisk += t.p * (1 - cumRisk);
@@ -152,12 +137,12 @@ export function pickTests(
 
 ```ts
 // server/plugins/reviewVerify.ts
-import * as crypto from 'crypto';
+import * as crypto from "crypto";
 export function verify(sigB64: string, body: string, pubPem: string) {
-  const v = crypto.createVerify('RSA-SHA256');
+  const v = crypto.createVerify("RSA-SHA256");
   v.update(body);
   v.end();
-  return v.verify(pubPem, Buffer.from(sigB64, 'base64'));
+  return v.verify(pubPem, Buffer.from(sigB64, "base64"));
 }
 ```
 
@@ -242,31 +227,27 @@ query:
       $(function () {
         function fmt(c) {
           return (
-            '<div><span class=k>arm</span> ' +
+            "<div><span class=k>arm</span> " +
             c.chosenArm +
-            ' · <span class=k>eval</span> ' +
+            " · <span class=k>eval</span> " +
             c.predictedEval.toFixed(2) +
-            ' · <span class=k>$</span>' +
+            " · <span class=k>$</span>" +
             c.predictedCostUSD.toFixed(2) +
-            '</div><pre>' +
+            "</div><pre>" +
             c.rationale +
-            '</pre>'
+            "</pre>"
           );
         }
         var card = {
-          chosenArm: 'impl@small',
+          chosenArm: "impl@small",
           predictedEval: 0.94,
           predictedCostUSD: 0.18,
-          rationale: 'Cheapest capable; low risk',
+          rationale: "Cheapest capable; low risk",
         };
-        $('#body').html(fmt(card));
-        $('#a1').on('click', () =>
-          $.post('/api/decision/alt', { arm: 'impl@medium' }),
-        );
-        $('#a2').on('click', () => $.post('/api/decision/downshift'));
-        $('#a3').on('click', () =>
-          $.post('/api/decision/tests', { mode: 'high' }),
-        );
+        $("#body").html(fmt(card));
+        $("#a1").on("click", () => $.post("/api/decision/alt", { arm: "impl@medium" }));
+        $("#a2").on("click", () => $.post("/api/decision/downshift"));
+        $("#a3").on("click", () => $.post("/api/decision/tests", { mode: "high" }));
       });
     </script>
   </body>

@@ -1,4 +1,4 @@
-import { AuditEntry, ReviewDecision } from './models.js';
+import { AuditEntry, ReviewDecision } from "./models.js";
 
 export class ReviewAuditLog {
   private entries: AuditEntry[] = [];

@@ -1,5 +1,5 @@
-import React, { useCallback, useMemo } from 'react';
-import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
+import React, { useCallback, useMemo } from "react";
+import { FixedSizeList as List, ListChildComponentProps } from "react-window";
 
 type Column<T> = {
   key: string;
@@ -36,7 +36,7 @@ function RowRenderer<T>({ index, style, data }: ListChildComponentProps<ItemData
       role="row"
       tabIndex={0}
       data-row-index={index}
-      style={{ ...style, display: 'grid', gridTemplateColumns: data.gridTemplate }}
+      style={{ ...style, display: "grid", gridTemplateColumns: data.gridTemplate }}
       className="border-b border-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500 bg-white"
       aria-rowindex={index + 1}
       key={rowId}
@@ -64,16 +64,13 @@ export function VirtualizedListTable<T>({
   overscan = 6,
   getRowId,
   ariaLabel,
-  emptyMessage = 'No rows',
+  emptyMessage = "No rows",
 }: VirtualizedListTableProps<T>) {
-  const gridTemplate = useMemo(
-    () => columns.map((col) => col.width || '1fr').join(' '),
-    [columns],
-  );
+  const gridTemplate = useMemo(() => columns.map((col) => col.width || "1fr").join(" "), [columns]);
 
   const itemData = useMemo<ItemData<T>>(
     () => ({ items, columns, gridTemplate, getRowId }),
-    [items, columns, gridTemplate, getRowId],
+    [items, columns, gridTemplate, getRowId]
   );
 
   const renderStaticRows = useCallback(
@@ -86,7 +83,7 @@ export function VirtualizedListTable<T>({
             tabIndex={0}
             data-row-index={index}
             key={rowId}
-            style={{ display: 'grid', gridTemplateColumns: gridTemplate }}
+            style={{ display: "grid", gridTemplateColumns: gridTemplate }}
             className="border-b border-gray-200 bg-white"
             aria-rowindex={index + 1}
           >
@@ -103,11 +100,15 @@ export function VirtualizedListTable<T>({
           </div>
         );
       }),
-    [items, columns, gridTemplate, getRowId],
+    [items, columns, gridTemplate, getRowId]
   );
 
   return (
-    <div role="table" aria-label={ariaLabel} className="w-full border border-gray-200 rounded-md overflow-hidden">
+    <div
+      role="table"
+      aria-label={ariaLabel}
+      className="w-full border border-gray-200 rounded-md overflow-hidden"
+    >
       <div role="rowgroup" className="bg-gray-50 border-b border-gray-200">
         <div
           role="row"

@@ -47,7 +47,23 @@
               "type": {
                 "description": "PostgreSQL column type for casting.",
                 "type": "string",
-                "enum": ["text", "integer", "bigint", "boolean", "timestamp", "timestamptz", "date", "json", "jsonb", "uuid", "numeric", "real", "double precision", "bytea", "array"]
+                "enum": [
+                  "text",
+                  "integer",
+                  "bigint",
+                  "boolean",
+                  "timestamp",
+                  "timestamptz",
+                  "date",
+                  "json",
+                  "jsonb",
+                  "uuid",
+                  "numeric",
+                  "real",
+                  "double precision",
+                  "bytea",
+                  "array"
+                ]
               },
               "nullable": {
                 "type": "boolean",

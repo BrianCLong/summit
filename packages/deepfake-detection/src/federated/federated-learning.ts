@@ -22,18 +22,18 @@ export interface DifferentialPrivacyConfig {
 }
 
 export enum NoiseMechanism {
-  GAUSSIAN = 'gaussian',
-  LAPLACIAN = 'laplacian',
-  EXPONENTIAL = 'exponential',
+  GAUSSIAN = "gaussian",
+  LAPLACIAN = "laplacian",
+  EXPONENTIAL = "exponential",
 }
 
 export enum AggregationStrategy {
-  FEDAVG = 'fedavg',
-  FEDPROX = 'fedprox',
-  SCAFFOLD = 'scaffold',
-  FEDADAM = 'fedadam',
-  FEDYOGI = 'fedyogi',
-  QFEDAVG = 'qfedavg', // Fair aggregation
+  FEDAVG = "fedavg",
+  FEDPROX = "fedprox",
+  SCAFFOLD = "scaffold",
+  FEDADAM = "fedadam",
+  FEDYOGI = "fedyogi",
+  QFEDAVG = "qfedavg", // Fair aggregation
 }
 
 export interface FederatedRound {
@@ -47,11 +47,11 @@ export interface FederatedRound {
 }
 
 export enum RoundStatus {
-  PENDING = 'pending',
-  IN_PROGRESS = 'in_progress',
-  AGGREGATING = 'aggregating',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
+  PENDING = "pending",
+  IN_PROGRESS = "in_progress",
+  AGGREGATING = "aggregating",
+  COMPLETED = "completed",
+  FAILED = "failed",
 }
 
 export interface ParticipantInfo {
@@ -64,11 +64,11 @@ export interface ParticipantInfo {
 }
 
 export enum ParticipantStatus {
-  SELECTED = 'selected',
-  TRAINING = 'training',
-  SUBMITTED = 'submitted',
-  VALIDATED = 'validated',
-  REJECTED = 'rejected',
+  SELECTED = "selected",
+  TRAINING = "training",
+  SUBMITTED = "submitted",
+  VALIDATED = "validated",
+  REJECTED = "rejected",
 }
 
 export interface ParticipantContribution {
@@ -87,10 +87,10 @@ export interface EncryptedModelUpdate {
 }
 
 export enum EncryptionScheme {
-  PAILLIER = 'paillier',
-  CKKS = 'ckks', // Homomorphic
-  SECRET_SHARING = 'secret_sharing',
-  SECURE_AGGREGATION = 'secure_aggregation',
+  PAILLIER = "paillier",
+  CKKS = "ckks", // Homomorphic
+  SECRET_SHARING = "secret_sharing",
+  SECURE_AGGREGATION = "secure_aggregation",
 }
 
 export interface ZeroKnowledgeProof {
@@ -189,13 +189,15 @@ export class FederatedLearningOrchestrator {
     const selectedParticipants = await this.selectParticipants();
 
     if (selectedParticipants.length < this.config.minParticipants) {
-      throw new Error(`Insufficient participants: ${selectedParticipants.length} < ${this.config.minParticipants}`);
+      throw new Error(
+        `Insufficient participants: ${selectedParticipants.length} < ${this.config.minParticipants}`
+      );
     }
 
     const round: FederatedRound = {
       roundId,
       startTime: new Date(),
-      participants: selectedParticipants.map(p => ({
+      participants: selectedParticipants.map((p) => ({
         participantId: p.id,
         dataSize: p.dataSize,
         computeCapacity: p.computeCapacity,
@@ -223,10 +225,10 @@ export class FederatedLearningOrchestrator {
    * Select participants for current round
    */
   private async selectParticipants(): Promise<Participant[]> {
-    const available = Array.from(this.participants.values()).filter(p => p.isAvailable);
+    const available = Array.from(this.participants.values()).filter((p) => p.isAvailable);
 
     // Selection based on data quality, compute capacity, and trust
-    const scored = available.map(p => ({
+    const scored = available.map((p) => ({
       participant: p,
       score: p.trustScore * 0.4 + p.dataQuality * 0.3 + p.computeCapacity * 0.3,
     }));
@@ -239,7 +241,7 @@ export class FederatedLearningOrchestrator {
       this.config.minParticipants * 2
     );
 
-    return scored.slice(0, targetCount).map(s => s.participant);
+    return scored.slice(0, targetCount).map((s) => s.participant);
   }
 
   /**
@@ -253,12 +255,12 @@ export class FederatedLearningOrchestrator {
   ): Promise<void> {
     const round = this.rounds[roundId];
     if (!round || round.status !== RoundStatus.IN_PROGRESS) {
-      throw new Error('Invalid round');
+      throw new Error("Invalid round");
     }
 
-    const participantInfo = round.participants.find(p => p.participantId === participantId);
+    const participantInfo = round.participants.find((p) => p.participantId === participantId);
     if (!participantInfo) {
-      throw new Error('Participant not in round');
+      throw new Error("Participant not in round");
     }
 
     // Validate update
@@ -278,7 +280,7 @@ export class FederatedLearningOrchestrator {
 
     // Check if all participants have submitted
     const submittedCount = round.participants.filter(
-      p => p.status === ParticipantStatus.SUBMITTED || p.status === ParticipantStatus.VALIDATED
+      (p) => p.status === ParticipantStatus.SUBMITTED || p.status === ParticipantStatus.VALIDATED
     ).length;
 
     if (submittedCount >= this.config.minParticipants) {
@@ -321,15 +323,15 @@ export class FederatedLearningOrchestrator {
     round.status = RoundStatus.AGGREGATING;
 
     const validContributions = round.participants
-      .filter(p => p.status === ParticipantStatus.SUBMITTED)
-      .map(p => p.contribution);
+      .filter((p) => p.status === ParticipantStatus.SUBMITTED)
+      .map((p) => p.contribution);
 
     // Decrypt and aggregate
     let aggregatedWeights: Float32Array;
 
     if (this.config.secureAggregation) {
       aggregatedWeights = await this.secureAggregator.aggregate(
-        validContributions.map(c => c.modelUpdate)
+        validContributions.map((c) => c.modelUpdate)
       );
     } else {
       aggregatedWeights = await this.standardAggregate(validContributions);
@@ -378,17 +380,12 @@ export class FederatedLearningOrchestrator {
   /**
    * Standard FedAvg aggregation
    */
-  private async standardAggregate(
-    contributions: ParticipantContribution[]
-  ): Promise<Float32Array> {
-    const totalSamples = contributions.reduce(
-      (sum, c) => sum + c.dataDistribution.totalSamples,
-      0
-    );
+  private async standardAggregate(contributions: ParticipantContribution[]): Promise<Float32Array> {
+    const totalSamples = contributions.reduce((sum, c) => sum + c.dataDistribution.totalSamples, 0);
 
     // Decrypt all updates
     const decryptedUpdates = await Promise.all(
-      contributions.map(c => this.decryptUpdate(c.modelUpdate))
+      contributions.map((c) => this.decryptUpdate(c.modelUpdate))
     );
 
     // Weighted average based on sample count
@@ -411,8 +408,8 @@ export class FederatedLearningOrchestrator {
   }
 
   private calculateRoundMetrics(contributions: ParticipantContribution[]): RoundMetrics {
-    const losses = contributions.map(c => c.localMetrics.loss);
-    const accuracies = contributions.map(c => c.localMetrics.accuracy);
+    const losses = contributions.map((c) => c.localMetrics.loss);
+    const accuracies = contributions.map((c) => c.localMetrics.accuracy);
 
     const avgLoss = losses.reduce((a, b) => a + b, 0) / losses.length;
     const avgAccuracy = accuracies.reduce((a, b) => a + b, 0) / accuracies.length;
@@ -438,7 +435,7 @@ export class FederatedLearningOrchestrator {
     if (this.rounds.length < 2) return 0;
 
     const recentRounds = this.rounds.slice(-5);
-    const losses = recentRounds.map(r => r.metrics?.globalLoss || 1);
+    const losses = recentRounds.map((r) => r.metrics?.globalLoss || 1);
 
     let improvementSum = 0;
     for (let i = 1; i < losses.length; i++) {
@@ -501,7 +498,7 @@ class Participant {
 
 class GlobalModel {
   private weights: Float32Array;
-  private version: string = '0.0.0';
+  private version: string = "0.0.0";
 
   constructor() {
     this.weights = new Float32Array(1000);

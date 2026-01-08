@@ -12,15 +12,15 @@ import neo4j, {
   Path,
   Integer,
   ResultSummary,
-} from 'neo4j-driver';
-import { z } from 'zod';
-import type { Neo4jConfig } from './config.js';
+} from "neo4j-driver";
+import { z } from "zod";
+import type { Neo4jConfig } from "./config.js";
 import {
   DEFAULT_QUERY_LIMIT,
   MAX_QUERY_RESULTS,
   DEFAULT_TIMEOUT_MS,
   type QueryLanguage,
-} from './constants.js';
+} from "./constants.js";
 
 export interface GraphQueryResult {
   columns: string[];
@@ -72,7 +72,7 @@ export interface QueryOptions {
 }
 
 const QueryOptionsSchema = z.object({
-  language: z.enum(['cypher', 'gremlin', 'sparql']).default('cypher'),
+  language: z.enum(["cypher", "gremlin", "sparql"]).default("cypher"),
   limit: z.number().min(1).max(MAX_QUERY_RESULTS).default(DEFAULT_QUERY_LIMIT),
   timeout: z.number().min(1000).default(DEFAULT_TIMEOUT_MS),
   parameters: z.record(z.unknown()).default({}),
@@ -96,7 +96,7 @@ export class GraphClient {
       : undefined;
 
     this.driver = neo4j.driver(this.config.uri, auth, {
-      encrypted: this.config.encrypted ? 'ENCRYPTION_ON' : 'ENCRYPTION_OFF',
+      encrypted: this.config.encrypted ? "ENCRYPTION_ON" : "ENCRYPTION_OFF",
       maxConnectionLifetime: 3 * 60 * 60 * 1000, // 3 hours
       maxConnectionPoolSize: 50,
       connectionAcquisitionTimeout: 60 * 1000, // 60 seconds
@@ -113,10 +113,7 @@ export class GraphClient {
     }
   }
 
-  async query(
-    queryString: string,
-    options: QueryOptions = {}
-  ): Promise<GraphQueryResult> {
+  async query(queryString: string, options: QueryOptions = {}): Promise<GraphQueryResult> {
     const opts = QueryOptionsSchema.parse(options);
 
     if (!this.driver) {
@@ -144,12 +141,12 @@ export class GraphClient {
     properties?: Record<string, unknown>,
     options: QueryOptions = {}
   ): Promise<NodeResult[]> {
-    const labelClause = label ? `:${label}` : '';
+    const labelClause = label ? `:${label}` : "";
     const whereClause = properties
       ? Object.keys(properties)
           .map((k, i) => `n.${k} = $prop${i}`)
-          .join(' AND ')
-      : '';
+          .join(" AND ")
+      : "";
 
     const params: Record<string, unknown> = {};
     if (properties) {
@@ -160,7 +157,7 @@ export class GraphClient {
 
     const query = `
       MATCH (n${labelClause})
-      ${whereClause ? `WHERE ${whereClause}` : ''}
+      ${whereClause ? `WHERE ${whereClause}` : ""}
       RETURN n
       LIMIT $limit
     `;
@@ -177,7 +174,7 @@ export class GraphClient {
     type?: string,
     options: QueryOptions = {}
   ): Promise<RelationshipResult[]> {
-    const typeClause = type ? `:${type}` : '';
+    const typeClause = type ? `:${type}` : "";
 
     const query = `
       MATCH ()-[r${typeClause}]->()
@@ -190,9 +187,7 @@ export class GraphClient {
       parameters: { limit: neo4j.int(options.limit || DEFAULT_QUERY_LIMIT) },
     });
 
-    return result.rows.map((row) =>
-      this.relationshipToResult(row[0] as Relationship)
-    );
+    return result.rows.map((row) => this.relationshipToResult(row[0] as Relationship));
   }
 
   async findPaths(
@@ -223,11 +218,10 @@ export class GraphClient {
 
   async getNeighbors(
     nodeId: string,
-    direction: 'in' | 'out' | 'both' = 'both',
+    direction: "in" | "out" | "both" = "both",
     options: QueryOptions = {}
   ): Promise<NodeResult[]> {
-    const directionPattern =
-      direction === 'in' ? '<-[]-' : direction === 'out' ? '-[]->' : '-[]-';
+    const directionPattern = direction === "in" ? "<-[]-" : direction === "out" ? "-[]->" : "-[]-";
 
     const query = `
       MATCH (n)${directionPattern}(neighbor)
@@ -253,15 +247,14 @@ export class GraphClient {
     labels: string[];
     relationshipTypes: string[];
   }> {
-    const [nodeCountResult, relCountResult, labelsResult, typesResult] =
-      await Promise.all([
-        this.query('MATCH (n) RETURN count(n) as count'),
-        this.query('MATCH ()-[r]->() RETURN count(r) as count'),
-        this.query('CALL db.labels() YIELD label RETURN collect(label) as labels'),
-        this.query(
-          'CALL db.relationshipTypes() YIELD relationshipType RETURN collect(relationshipType) as types'
-        ),
-      ]);
+    const [nodeCountResult, relCountResult, labelsResult, typesResult] = await Promise.all([
+      this.query("MATCH (n) RETURN count(n) as count"),
+      this.query("MATCH ()-[r]->() RETURN count(r) as count"),
+      this.query("CALL db.labels() YIELD label RETURN collect(label) as labels"),
+      this.query(
+        "CALL db.relationshipTypes() YIELD relationshipType RETURN collect(relationshipType) as types"
+      ),
+    ]);
 
     return {
       nodeCount: this.toNumber(nodeCountResult.rows[0]?.[0]),
@@ -298,7 +291,7 @@ export class GraphClient {
         await this.connect();
       }
 
-      await this.query('RETURN 1 as ping');
+      await this.query("RETURN 1 as ping");
       const latencyMs = Date.now() - start;
 
       const serverInfo = await this.driver!.getServerInfo();
@@ -307,8 +300,8 @@ export class GraphClient {
         connected: true,
         latencyMs,
         serverInfo: {
-          version: serverInfo.protocolVersion?.toString() || 'unknown',
-          edition: 'community',
+          version: serverInfo.protocolVersion?.toString() || "unknown",
+          edition: "community",
         },
       };
     } catch {
@@ -376,7 +369,7 @@ export class GraphClient {
       return value.map((v) => this.transformValue(v));
     }
 
-    if (typeof value === 'object') {
+    if (typeof value === "object") {
       const obj: Record<string, unknown> = {};
       for (const [k, v] of Object.entries(value)) {
         obj[k] = this.transformValue(v);
@@ -407,21 +400,19 @@ export class GraphClient {
 
   private pathToResult(path: Path): PathResult {
     return {
-      nodes: path.segments.map((s) => this.nodeToResult(s.start)).concat(
-        path.segments.length > 0
-          ? [this.nodeToResult(path.segments[path.segments.length - 1].end)]
-          : []
-      ),
-      relationships: path.segments.map((s) =>
-        this.relationshipToResult(s.relationship)
-      ),
+      nodes: path.segments
+        .map((s) => this.nodeToResult(s.start))
+        .concat(
+          path.segments.length > 0
+            ? [this.nodeToResult(path.segments[path.segments.length - 1].end)]
+            : []
+        ),
+      relationships: path.segments.map((s) => this.relationshipToResult(s.relationship)),
       length: path.length,
     };
   }
 
-  private transformProperties(
-    props: Record<string, unknown>
-  ): Record<string, unknown> {
+  private transformProperties(props: Record<string, unknown>): Record<string, unknown> {
     const result: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(props)) {
       result[key] = this.transformValue(value);
@@ -433,7 +424,7 @@ export class GraphClient {
     if (neo4j.isInt(value)) {
       return (value as Integer).toNumber();
     }
-    return typeof value === 'number' ? value : 0;
+    return typeof value === "number" ? value : 0;
   }
 }
 

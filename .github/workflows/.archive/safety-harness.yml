@@ -7,19 +7,19 @@ on:
     branches: [main, develop]
   schedule:
     # Run nightly at 2 AM UTC
-    - cron: '0 2 * * *'
+    - cron: "0 2 * * *"
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Target environment'
+        description: "Target environment"
         required: true
-        default: 'staging'
+        default: "staging"
         type: choice
         options:
           - staging
           - production
       fail_on_high:
-        description: 'Fail on high-severity findings'
+        description: "Fail on high-severity findings"
         required: false
         default: false
         type: boolean
@@ -42,8 +42,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'pnpm'
+          node-version: "18"
+          cache: "pnpm"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
@@ -71,10 +71,10 @@ jobs:
           TARGET_ENDPOINT: ${{ secrets.SAFETY_TEST_ENDPOINT || 'http://localhost:4000' }}
           ENVIRONMENT: ${{ github.event.inputs.environment || 'ci' }}
           BUILD_VERSION: ${{ github.sha }}
-          CI_SAFETY_GATE_ENABLED: 'true'
-          CI_FAIL_ON_CRITICAL: 'true'
+          CI_SAFETY_GATE_ENABLED: "true"
+          CI_FAIL_ON_CRITICAL: "true"
           CI_FAIL_ON_HIGH: ${{ github.event.inputs.fail_on_high || 'false' }}
-          CI_MAX_FAILURE_RATE: '0.10'
+          CI_MAX_FAILURE_RATE: "0.10"
           OUTPUT_DIR: ./safety-reports
         run: |
           cd safety-harness

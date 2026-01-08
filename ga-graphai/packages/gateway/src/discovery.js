@@ -38,7 +38,7 @@ export class DiscoveryEngine {
       return this.all();
     }
     return this.all().filter((candidate) =>
-      candidate.skills.some((skill) => skills.includes(skill)),
+      candidate.skills.some((skill) => skills.includes(skill))
     );
   }
 
@@ -66,11 +66,8 @@ export class DiscoveryEngine {
     if (history.length === 0) {
       return false;
     }
-    const avgQuality =
-      history.reduce((acc, entry) => acc + entry.qualityDelta, 0) /
-      history.length;
-    const avgCost =
-      history.reduce((acc, entry) => acc + entry.costDelta, 0) / history.length;
+    const avgQuality = history.reduce((acc, entry) => acc + entry.qualityDelta, 0) / history.length;
+    const avgCost = history.reduce((acc, entry) => acc + entry.costDelta, 0) / history.length;
     return avgQuality >= minDelta && avgCost <= 0;
   }
 }

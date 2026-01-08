@@ -1,13 +1,12 @@
-
-import fs from 'node:fs';
-import path from 'node:path';
-import crypto from 'node:crypto';
+import fs from "node:fs";
+import path from "node:path";
+import crypto from "node:crypto";
 
 // ============================================================================
 // Configuration
 // ============================================================================
 
-const EVIDENCE_ROOT = 'evidence/security';
+const EVIDENCE_ROOT = "evidence/security";
 
 // ============================================================================
 // Helpers
@@ -15,9 +14,9 @@ const EVIDENCE_ROOT = 'evidence/security';
 
 function computeSha256(filePath: string): string {
   const fileBuffer = fs.readFileSync(filePath);
-  const hashSum = crypto.createHash('sha256');
+  const hashSum = crypto.createHash("sha256");
   hashSum.update(fileBuffer);
-  return hashSum.digest('hex');
+  return hashSum.digest("hex");
 }
 
 interface EvidenceIndex {
@@ -30,17 +29,23 @@ interface EvidenceIndex {
 // ============================================================================
 
 function main() {
-  console.log('Starting Security Drift Check...');
+  console.log("Starting Security Drift Check...");
 
   // 1. Find latest evidence pack
   if (!fs.existsSync(EVIDENCE_ROOT)) {
-    console.error(`No evidence packs found in ${EVIDENCE_ROOT}. Please run 'pnpm security:evidence-pack'.`);
+    console.error(
+      `No evidence packs found in ${EVIDENCE_ROOT}. Please run 'pnpm security:evidence-pack'.`
+    );
     process.exit(1);
   }
 
-  const packs = fs.readdirSync(EVIDENCE_ROOT).filter(f => fs.statSync(path.join(EVIDENCE_ROOT, f)).isDirectory());
+  const packs = fs
+    .readdirSync(EVIDENCE_ROOT)
+    .filter((f) => fs.statSync(path.join(EVIDENCE_ROOT, f)).isDirectory());
   if (packs.length === 0) {
-    console.error(`No evidence packs found in ${EVIDENCE_ROOT}. Please run 'pnpm security:evidence-pack'.`);
+    console.error(
+      `No evidence packs found in ${EVIDENCE_ROOT}. Please run 'pnpm security:evidence-pack'.`
+    );
     process.exit(1);
   }
 
@@ -48,7 +53,7 @@ function main() {
   packs.sort().reverse();
   const latestPack = packs[0];
   const latestPackPath = path.join(EVIDENCE_ROOT, latestPack);
-  const indexPath = path.join(latestPackPath, 'index.json');
+  const indexPath = path.join(latestPackPath, "index.json");
 
   if (!fs.existsSync(indexPath)) {
     console.error(`Latest pack ${latestPack} is missing index.json. Corrupt pack?`);
@@ -56,7 +61,7 @@ function main() {
   }
 
   console.log(`Comparing against latest evidence pack: ${latestPack}`);
-  const index: EvidenceIndex = JSON.parse(fs.readFileSync(indexPath, 'utf-8'));
+  const index: EvidenceIndex = JSON.parse(fs.readFileSync(indexPath, "utf-8"));
 
   // 2. Compare Artifacts
   let driftFound = false;
@@ -95,14 +100,16 @@ function main() {
   // I will stick to checking the files listed in the index.
 
   if (driftFound) {
-    console.error('\nSecurity Posture Drift Detected!');
-    console.error('The following artifacts have changed since the last evidence pack:');
-    driftDetails.forEach(d => console.error(` - ${d}`));
-    console.error('\nAction Required: Run \'pnpm security:evidence-pack\' to capture the new state and commit the evidence.');
+    console.error("\nSecurity Posture Drift Detected!");
+    console.error("The following artifacts have changed since the last evidence pack:");
+    driftDetails.forEach((d) => console.error(` - ${d}`));
+    console.error(
+      "\nAction Required: Run 'pnpm security:evidence-pack' to capture the new state and commit the evidence."
+    );
     process.exit(1);
   }
 
-  console.log('No drift detected. Security artifacts match the latest evidence pack.');
+  console.log("No drift detected. Security artifacts match the latest evidence pack.");
   process.exit(0);
 }
 

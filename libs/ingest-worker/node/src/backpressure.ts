@@ -8,9 +8,9 @@
  * - Drain and brownout modes
  */
 
-import { EventEmitter } from 'events';
-import type { BackpressureConfig, WorkerState, WorkerMetrics } from './types.js';
-import { TokenBucket } from './rate-limiter.js';
+import { EventEmitter } from "events";
+import type { BackpressureConfig, WorkerState, WorkerMetrics } from "./types.js";
+import { TokenBucket } from "./rate-limiter.js";
 
 export interface BackpressureEvents {
   stateChange: (state: WorkerState, metrics: WorkerMetrics) => void;
@@ -19,7 +19,7 @@ export interface BackpressureEvents {
 }
 
 export class BackpressureController extends EventEmitter {
-  private state: WorkerState = 'idle';
+  private state: WorkerState = "idle";
   private concurrencyUsed = 0;
   private queueDepth = 0;
   private tokenBucket: TokenBucket;
@@ -60,15 +60,15 @@ export class BackpressureController extends EventEmitter {
   }> {
     // Check drain mode
     if (this.drainMode) {
-      return { acquired: false, waitMs: 0, reason: 'drain_mode' };
+      return { acquired: false, waitMs: 0, reason: "drain_mode" };
     }
 
     // Check brownout - drop low-priority tasks probabilistically
     if (this.brownoutMode && priority < 50) {
       if (Math.random() > this.config.brownoutSampleRate) {
         this.totalDropped++;
-        this.emit('drop', 'brownout');
-        return { acquired: false, waitMs: 0, reason: 'brownout' };
+        this.emit("drop", "brownout");
+        return { acquired: false, waitMs: 0, reason: "brownout" };
       }
     }
 
@@ -77,8 +77,8 @@ export class BackpressureController extends EventEmitter {
       this.throttleCount++;
       this.updateState();
       const waitMs = this.calculateBackoffMs();
-      this.emit('throttle', waitMs, 'concurrency');
-      return { acquired: false, waitMs, reason: 'concurrency_limit' };
+      this.emit("throttle", waitMs, "concurrency");
+      return { acquired: false, waitMs, reason: "concurrency_limit" };
     }
 
     // Check token bucket
@@ -86,8 +86,8 @@ export class BackpressureController extends EventEmitter {
       this.throttleCount++;
       this.updateState();
       const waitMs = this.tokenBucket.getWaitTime(1);
-      this.emit('throttle', waitMs, 'rate_limit');
-      return { acquired: false, waitMs, reason: 'rate_limit' };
+      this.emit("throttle", waitMs, "rate_limit");
+      return { acquired: false, waitMs, reason: "rate_limit" };
     }
 
     // Acquire concurrency slot
@@ -130,15 +130,15 @@ export class BackpressureController extends EventEmitter {
   /**
    * Signal backpressure from downstream.
    */
-  signalBackpressure(severity: 'light' | 'moderate' | 'severe'): void {
+  signalBackpressure(severity: "light" | "moderate" | "severe"): void {
     switch (severity) {
-      case 'light':
+      case "light":
         // Minor throttling
         break;
-      case 'moderate':
-        this.setState('running');
+      case "moderate":
+        this.setState("running");
         break;
-      case 'severe':
+      case "severe":
         this.enableBrownout();
         break;
     }
@@ -149,7 +149,7 @@ export class BackpressureController extends EventEmitter {
    */
   enableDrain(): void {
     this.drainMode = true;
-    this.setState('draining');
+    this.setState("draining");
   }
 
   /**
@@ -168,7 +168,7 @@ export class BackpressureController extends EventEmitter {
     if (sampleRate !== undefined) {
       this.config.brownoutSampleRate = Math.max(0, Math.min(1, sampleRate));
     }
-    this.setState('brownout');
+    this.setState("brownout");
   }
 
   /**
@@ -183,14 +183,14 @@ export class BackpressureController extends EventEmitter {
    * Pause all processing.
    */
   pause(): void {
-    this.setState('paused');
+    this.setState("paused");
   }
 
   /**
    * Resume processing.
    */
   resume(): void {
-    if (this.state === 'paused') {
+    if (this.state === "paused") {
       this.updateState();
     }
   }
@@ -199,15 +199,15 @@ export class BackpressureController extends EventEmitter {
    * Stop the controller.
    */
   stop(): void {
-    this.setState('stopped');
+    this.setState("stopped");
   }
 
   /**
    * Start the controller.
    */
   start(): void {
-    if (this.state === 'stopped' || this.state === 'idle') {
-      this.setState('running');
+    if (this.state === "stopped" || this.state === "idle") {
+      this.setState("running");
     }
   }
 
@@ -217,8 +217,8 @@ export class BackpressureController extends EventEmitter {
   isAccepting(): boolean {
     return (
       !this.drainMode &&
-      this.state !== 'paused' &&
-      this.state !== 'stopped' &&
+      this.state !== "paused" &&
+      this.state !== "stopped" &&
       this.concurrencyUsed < this.maxConcurrency
     );
   }
@@ -240,7 +240,7 @@ export class BackpressureController extends EventEmitter {
   /**
    * Get current metrics.
    */
-  getMetrics(): Omit<WorkerMetrics, 'circuitState'> {
+  getMetrics(): Omit<WorkerMetrics, "circuitState"> {
     // Calculate current RPS
     const now = Date.now();
     const elapsed = now - this.windowStart;
@@ -293,40 +293,40 @@ export class BackpressureController extends EventEmitter {
   private updateState(): void {
     const previousState = this.state;
 
-    if (this.state === 'stopped') {
+    if (this.state === "stopped") {
       return; // Don't change from stopped
     }
 
-    if (this.state === 'paused') {
+    if (this.state === "paused") {
       return; // Don't change from paused (must explicitly resume)
     }
 
     if (this.drainMode) {
-      this.state = 'draining';
+      this.state = "draining";
     } else if (this.brownoutMode) {
-      this.state = 'brownout';
+      this.state = "brownout";
     } else if (this.queueDepth > this.config.highWaterMark) {
       // Auto-enable brownout on high queue depth
       this.brownoutMode = true;
-      this.state = 'brownout';
+      this.state = "brownout";
     } else if (this.queueDepth < this.config.lowWaterMark) {
       this.brownoutMode = false;
-      this.state = 'running';
+      this.state = "running";
     } else if (this.concurrencyUsed > 0) {
-      this.state = 'running';
+      this.state = "running";
     } else {
-      this.state = 'idle';
+      this.state = "idle";
     }
 
     if (previousState !== this.state) {
-      this.emit('stateChange', this.state, { ...this.getMetrics(), circuitState: 'closed' });
+      this.emit("stateChange", this.state, { ...this.getMetrics(), circuitState: "closed" });
     }
   }
 
   private setState(state: WorkerState): void {
     if (this.state !== state) {
       this.state = state;
-      this.emit('stateChange', state, { ...this.getMetrics(), circuitState: 'closed' });
+      this.emit("stateChange", state, { ...this.getMetrics(), circuitState: "closed" });
     }
   }
 

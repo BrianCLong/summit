@@ -4,7 +4,7 @@
  * Allows burst traffic while maintaining average rate
  */
 
-import { RateLimiter, RateLimitConfig, RateLimitResult } from '../rate-limiter.js';
+import { RateLimiter, RateLimitConfig, RateLimitResult } from "../rate-limiter.js";
 
 export interface TokenBucketConfig extends RateLimitConfig {
   bucketSize: number;
@@ -47,7 +47,7 @@ export class TokenBucketLimiter extends RateLimiter {
       bucket.tokens -= 1;
     }
 
-    const resetTime = now + ((1 - bucket.tokens % 1) / this.bucketConfig.refillRate) * 1000;
+    const resetTime = now + ((1 - (bucket.tokens % 1)) / this.bucketConfig.refillRate) * 1000;
 
     const result: RateLimitResult = {
       allowed,
@@ -57,7 +57,7 @@ export class TokenBucketLimiter extends RateLimiter {
         remaining: Math.floor(bucket.tokens),
         resetTime,
       },
-      retryAfter: allowed ? undefined : Math.ceil((1 / this.bucketConfig.refillRate)),
+      retryAfter: allowed ? undefined : Math.ceil(1 / this.bucketConfig.refillRate),
     };
 
     this.logRateLimit(key, result);

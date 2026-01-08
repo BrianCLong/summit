@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Drawer,
   Box,
@@ -12,18 +12,16 @@ import {
   Tooltip,
   Tabs,
   Tab,
-} from '@mui/material';
-import AISuggestLinksGQL from '../ai/AISuggestLinksGQL';
-import CloseIcon from '@mui/icons-material/Close';
-import $ from 'jquery';
-import { graphInteractionActions as g } from '../../store/slices/graphInteractionSlice';
-import { getSocket } from '../../realtime/socket';
+} from "@mui/material";
+import AISuggestLinksGQL from "../ai/AISuggestLinksGQL";
+import CloseIcon from "@mui/icons-material/Close";
+import $ from "jquery";
+import { graphInteractionActions as g } from "../../store/slices/graphInteractionSlice";
+import { getSocket } from "../../realtime/socket";
 
 export default function AIInsightsPanel({ open, onClose }) {
   const dispatch = useDispatch();
-  const { selectedNodeId, selectedEdgeId, aiInsights } = useSelector(
-    (s) => s.graphInteraction,
-  );
+  const { selectedNodeId, selectedEdgeId, aiInsights } = useSelector((s) => s.graphInteraction);
   const entityId = selectedNodeId || selectedEdgeId;
   const insight = entityId ? aiInsights[entityId] : null;
   const [connected, setConnected] = useState(false);
@@ -43,43 +41,35 @@ export default function AIInsightsPanel({ open, onClose }) {
         g.insightReceived({
           entityId: payload.entityId,
           data: payload.data || {},
-        }),
+        })
       );
     }
 
-    $(document).on('socket:connect', onConnect);
-    $(document).on('socket:disconnect', onDisconnect);
-    $(document).on('ai:insight', onInsight);
+    $(document).on("socket:connect", onConnect);
+    $(document).on("socket:disconnect", onDisconnect);
+    $(document).on("ai:insight", onInsight);
 
     return () => {
-      $(document).off('socket:connect', onConnect);
-      $(document).off('socket:disconnect', onDisconnect);
-      $(document).off('ai:insight', onInsight);
+      $(document).off("socket:connect", onConnect);
+      $(document).off("socket:disconnect", onDisconnect);
+      $(document).off("ai:insight", onInsight);
     };
   }, [dispatch]);
 
   return (
-    <Drawer
-      anchor="right"
-      open={open}
-      onClose={onClose}
-      PaperProps={{ sx: { width: 360 } }}
-    >
+    <Drawer anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: 360 } }}>
       <Box
         sx={{
           p: 2,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
         <Typography variant="h6">AI Insights</Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography
-            variant="caption"
-            color={connected ? 'success.main' : 'text.secondary'}
-          >
-            {connected ? 'live' : 'offline'}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Typography variant="caption" color={connected ? "success.main" : "text.secondary"}>
+            {connected ? "live" : "offline"}
           </Typography>
           <Tooltip title="Close">
             <IconButton onClick={onClose} size="small">
@@ -98,21 +88,17 @@ export default function AIInsightsPanel({ open, onClose }) {
         {tab === 0 && (
           <>
             {!entityId && (
-              <Typography color="text.secondary">
-                Select a node or edge to see insights.
-              </Typography>
+              <Typography color="text.secondary">Select a node or edge to see insights.</Typography>
             )}
             {entityId && !insight && (
-              <Typography color="text.secondary">
-                Waiting for insights…
-              </Typography>
+              <Typography color="text.secondary">Waiting for insights…</Typography>
             )}
             {entityId && insight && (
               <>
                 <Typography variant="subtitle1" sx={{ mb: 1 }}>
                   Summary
                 </Typography>
-                <Typography sx={{ mb: 2 }}>{insight.summary || '—'}</Typography>
+                <Typography sx={{ mb: 2 }}>{insight.summary || "—"}</Typography>
 
                 <Typography variant="subtitle1" sx={{ mb: 1 }}>
                   Suggested Next Actions
@@ -131,20 +117,14 @@ export default function AIInsightsPanel({ open, onClose }) {
                 <List dense>
                   {(insight.related || []).map((r) => (
                     <ListItem key={r.id}>
-                      <ListItemText
-                        primary={r.label || r.id}
-                        secondary={r.type}
-                      />
+                      <ListItemText primary={r.label || r.id} secondary={r.type} />
                     </ListItem>
                   ))}
                 </List>
 
                 <Divider sx={{ my: 2 }} />
                 <Typography variant="caption" color="text.secondary">
-                  Updated:{' '}
-                  {insight.updatedAt
-                    ? new Date(insight.updatedAt).toLocaleString()
-                    : '—'}
+                  Updated: {insight.updatedAt ? new Date(insight.updatedAt).toLocaleString() : "—"}
                 </Typography>
               </>
             )}

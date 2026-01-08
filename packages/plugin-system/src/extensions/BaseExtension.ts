@@ -1,9 +1,4 @@
-import {
-  Plugin,
-  PluginManifest,
-  PluginContext,
-  PluginHealthStatus,
-} from '../types/plugin.js';
+import { Plugin, PluginManifest, PluginContext, PluginHealthStatus } from "../types/plugin.js";
 
 /**
  * Base class for all plugin extensions
@@ -83,7 +78,7 @@ export abstract class BaseExtension implements Plugin {
     } catch (error) {
       return {
         healthy: false,
-        message: error instanceof Error ? error.message : 'Health check failed',
+        message: error instanceof Error ? error.message : "Health check failed",
       };
     }
   }
@@ -121,10 +116,8 @@ export abstract class BaseExtension implements Plugin {
   protected log = {
     debug: (message: string, meta?: Record<string, any>) =>
       this.context.logger.debug(message, meta),
-    info: (message: string, meta?: Record<string, any>) =>
-      this.context.logger.info(message, meta),
-    warn: (message: string, meta?: Record<string, any>) =>
-      this.context.logger.warn(message, meta),
+    info: (message: string, meta?: Record<string, any>) => this.context.logger.info(message, meta),
+    warn: (message: string, meta?: Record<string, any>) => this.context.logger.warn(message, meta),
     error: (message: string, error?: Error, meta?: Record<string, any>) =>
       this.context.logger.error(message, error, meta),
   };

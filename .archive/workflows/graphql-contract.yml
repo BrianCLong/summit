@@ -2,9 +2,9 @@ name: graphql-contract
 on:
   pull_request:
     paths:
-      - 'schema/**'
-      - 'apps/**/schema/**'
-      - 'services/**/schema/**'
+      - "schema/**"
+      - "apps/**/schema/**"
+      - "services/**/schema/**"
 permissions: { contents: read }
 jobs:
   check:

@@ -174,15 +174,15 @@ owners:
 
 kpis:
   - name: partial_proof_p95_ms
-    target: '<=800'
+    target: "<=800"
   - name: semantic_accuracy
-    target: '>=0.92'
+    target: ">=0.92"
   - name: preview_latency_p95_ms
-    target: '<=220'
+    target: "<=220"
   - name: metering_accuracy
-    target: '>=0.99'
+    target: ">=0.99"
   - name: availability
-    target: '>=0.999'
+    target: ">=0.999"
 
 budget:
   cost_per_req_max_usd: 0.01
@@ -236,7 +236,7 @@ name: Release Gate (GA v1.0)
 on:
   workflow_dispatch: {}
   push:
-    tags: ['v1.*']
+    tags: ["v1.*"]
 jobs:
   gate:
     runs-on: ubuntu-latest

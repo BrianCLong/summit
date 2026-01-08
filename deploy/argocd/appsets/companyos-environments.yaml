@@ -24,14 +24,14 @@ spec:
             revision: main
   template:
     metadata:
-      name: 'companyos-{{name}}'
+      name: "companyos-{{name}}"
       labels:
         argocd.argoproj.io/managed-by: argocd
     spec:
       project: companyos
       source:
         repoURL: https://github.com/BrianCLong/summit.git
-        targetRevision: '{{revision}}'
+        targetRevision: "{{revision}}"
         path: charts/companyos
         helm:
           valueFiles:
@@ -43,8 +43,8 @@ spec:
             - name: global.domain.console
               value: console.{{domain_suffix}}
       destination:
-        server: '{{cluster}}'
-        namespace: '{{namespace}}'
+        server: "{{cluster}}"
+        namespace: "{{namespace}}"
       syncPolicy:
         automated:
           prune: true

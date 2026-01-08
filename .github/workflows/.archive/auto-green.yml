@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
       - uses: actions/setup-node@v4
-        with: { node-version: '18' }
+        with: { node-version: "18" }
       - name: Install (no scripts)
         run: |
           corepack enable
@@ -32,7 +32,7 @@ jobs:
       - name: Commit fixes (if any)
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: 'chore(auto-green): apply safe autofixes'
+          commit_message: "chore(auto-green): apply safe autofixes"
           branch: ${{ github.head_ref }}
       - name: Note gate
         run: echo "Gate - Stabilization - Build and Unit Tests"

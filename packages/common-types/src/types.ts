@@ -1,25 +1,25 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const entityKinds = [
-  'Person',
-  'Org',
-  'Location',
-  'Event',
-  'Document',
-  'Indicator',
-  'Case',
-  'Claim',
+  "Person",
+  "Org",
+  "Location",
+  "Event",
+  "Document",
+  "Indicator",
+  "Case",
+  "Claim",
 ] as const;
 
 export const edgeTypes = [
-  'relatesTo',
-  'locatedAt',
-  'participatesIn',
-  'derivedFrom',
-  'mentions',
-  'contradicts',
-  'supports',
-  'enrichedFrom',
+  "relatesTo",
+  "locatedAt",
+  "participatesIn",
+  "derivedFrom",
+  "mentions",
+  "contradicts",
+  "supports",
+  "enrichedFrom",
 ] as const;
 
 export const entitySchema = z.object({
@@ -55,7 +55,7 @@ export const connectorSchema = z.object({
   id: z.string(),
   name: z.string(),
   version: z.string(),
-  kind: z.enum(['BUILTIN', 'PLUGIN']),
+  kind: z.enum(["BUILTIN", "PLUGIN"]),
   entrypoint: z.string(),
   manifestHash: z.string().optional(),
   permissions: z.array(z.string()),
@@ -64,13 +64,7 @@ export const connectorSchema = z.object({
   createdAt: z.string().datetime(),
 });
 
-export const runStatusEnum = z.enum([
-  'PENDING',
-  'RUNNING',
-  'SUCCEEDED',
-  'FAILED',
-  'DLQ',
-]);
+export const runStatusEnum = z.enum(["PENDING", "RUNNING", "SUCCEEDED", "FAILED", "DLQ"]);
 
 export const runSchema = z.object({
   id: z.string(),
@@ -94,13 +88,13 @@ export const runSchema = z.object({
 export const secretSchema = z.object({
   id: z.string(),
   name: z.string(),
-  scope: z.enum(['TENANT', 'GLOBAL']),
+  scope: z.enum(["TENANT", "GLOBAL"]),
   valueEnc: z.string(),
   createdAt: z.string().datetime(),
   rotationAt: z.string().datetime().optional(),
 });
 
-export const envelopeKindEnum = z.enum(['ENTITY', 'EDGE']);
+export const envelopeKindEnum = z.enum(["ENTITY", "EDGE"]);
 
 export const envelopeSchema = z.object({
   tenantId: z.string(),

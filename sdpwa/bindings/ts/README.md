@@ -19,8 +19,8 @@ npm install @intelgraph/sdpwa
 3. Instantiate the aggregator inside your application:
 
 ```ts
-import init from './pkg/sdpwa.js'
-import { StreamingDpWindowAggregator } from '@intelgraph/sdpwa'
+import init from "./pkg/sdpwa.js";
+import { StreamingDpWindowAggregator } from "@intelgraph/sdpwa";
 
 const aggregator = await StreamingDpWindowAggregator.create(
   init as any,
@@ -29,24 +29,24 @@ const aggregator = await StreamingDpWindowAggregator.create(
       epsilonCount: 0.5,
       epsilonSum: 1.0,
       deltaPerWindow: 1e-6,
-      ledgerDeltaTolerance: 1e-5
+      ledgerDeltaTolerance: 1e-5,
     },
     bounds: {
       maxContributionsPerWindow: 2,
       minValue: -5,
-      maxValue: 5
+      maxValue: 5,
     },
     window: {
       windowSizeMs: 60_000,
-      windowStrideMs: 30_000
-    }
+      windowStrideMs: 30_000,
+    },
   },
-  new TextEncoder().encode('deterministic-seed')
-)
+  new TextEncoder().encode("deterministic-seed")
+);
 
-aggregator.ingest({ identity: 'alice', value: 1.2, timestampMs: Date.now() })
-const releases = aggregator.release(Date.now())
-console.log(releases[0].privacy.cumulativeEpsilon)
+aggregator.ingest({ identity: "alice", value: 1.2, timestampMs: Date.now() });
+const releases = aggregator.release(Date.now());
+console.log(releases[0].privacy.cumulativeEpsilon);
 ```
 
 ### Auditor Support

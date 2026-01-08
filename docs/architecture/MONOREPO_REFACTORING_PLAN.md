@@ -18,6 +18,7 @@ This document outlines a comprehensive refactoring plan for the Summit/IntelGrap
 - **TypeScript strict mode disabled**, allowing unsafe code patterns
 
 **Goals:**
+
 1. Reduce workspaces from 417 → 80-120 (70% reduction)
 2. Consolidate services from 194 → 30-50 (75% reduction)
 3. Improve build times by 2-3x (target: 5-8 min cold, <2 min cached)
@@ -42,21 +43,23 @@ This document outlines a comprehensive refactoring plan for the Summit/IntelGrap
 
 ### Workspace Distribution
 
-| Category | Current Count | Issues |
-|----------|---------------|--------|
-| **Apps** | 21 | Includes stubs (`apps/server`), types packages misplaced |
-| **Packages** | 202 | Many contain server logic, unclear boundaries |
-| **Services** | 194 | Massive overlap, unclear responsibilities |
-| **Root** | 2 | `server/` and `client/` are production apps |
+| Category     | Current Count | Issues                                                   |
+| ------------ | ------------- | -------------------------------------------------------- |
+| **Apps**     | 21            | Includes stubs (`apps/server`), types packages misplaced |
+| **Packages** | 202           | Many contain server logic, unclear boundaries            |
+| **Services** | 194           | Massive overlap, unclear responsibilities                |
+| **Root**     | 2             | `server/` and `client/` are production apps              |
 
 ### Critical Pain Points
 
 #### 1. Workspace Type Confusion
+
 - `apps/server` (26KB stub) vs `server/` (27MB production)
 - `apps/types` should be in `packages/`
 - Business logic scattered across all three categories
 
 #### 2. Service Sprawl
+
 ```
 Authentication (5 services):
 ├── services/authz-gateway
@@ -83,12 +86,14 @@ Data Ingestion (5 services):
 ```
 
 #### 3. Build Performance
+
 - Only **46/417 workspaces** in TypeScript project references
 - Serial build chains: `test → build → ^build`
 - **35 separate Jest configs** (fragmented testing)
 - Estimated **30-50% slower** than optimal
 
 #### 4. CI/CD Complexity
+
 - **212 active GitHub workflows**
 - Overlapping: `ci.yml`, `ci-main.yml`, `ci.unified.yml`, `ci-comprehensive.yml`
 - **74 docker-compose files**, **94 Dockerfiles**
@@ -142,29 +147,30 @@ summit/
 
 ### Service Consolidation Map
 
-| Current Services | Consolidated Service | Rationale |
-|------------------|---------------------|-----------|
-| `authz-gateway`, `authz_svc`, `identity-fusion`, `identity-spiffe` | `services/auth` | Single auth boundary |
-| `graph-api`, `graph-core`, `graph-compute` | `services/graph` | Unified graph operations |
-| `ingest`, `ingest_svc`, `ingest-sandbox`, `feed-processor` | `services/ingest` | Single ingestion pipeline |
-| `conductor`, `maestro-core` | `services/orchestrator` | Unified workflow engine |
+| Current Services                                                   | Consolidated Service    | Rationale                 |
+| ------------------------------------------------------------------ | ----------------------- | ------------------------- |
+| `authz-gateway`, `authz_svc`, `identity-fusion`, `identity-spiffe` | `services/auth`         | Single auth boundary      |
+| `graph-api`, `graph-core`, `graph-compute`                         | `services/graph`        | Unified graph operations  |
+| `ingest`, `ingest_svc`, `ingest-sandbox`, `feed-processor`         | `services/ingest`       | Single ingestion pipeline |
+| `conductor`, `maestro-core`                                        | `services/orchestrator` | Unified workflow engine   |
 
 ### Target Metrics
 
-| Metric | Current | Target | Improvement |
-|--------|---------|--------|-------------|
-| Workspaces | 417 | 80-120 | 70% reduction |
-| Services | 194 | 30-50 | 75% reduction |
-| CI Workflows | 212 | 10-20 | 90% reduction |
-| Jest Configs | 35 | 3 | 90% reduction |
-| Cold Build | 15-25 min | 5-8 min | 2-3x faster |
-| Cached Build | 3-8 min | 30s-2 min | 4-6x faster |
+| Metric       | Current   | Target    | Improvement   |
+| ------------ | --------- | --------- | ------------- |
+| Workspaces   | 417       | 80-120    | 70% reduction |
+| Services     | 194       | 30-50     | 75% reduction |
+| CI Workflows | 212       | 10-20     | 90% reduction |
+| Jest Configs | 35        | 3         | 90% reduction |
+| Cold Build   | 15-25 min | 5-8 min   | 2-3x faster   |
+| Cached Build | 3-8 min   | 30s-2 min | 4-6x faster   |
 
 ---
 
 ## Refactoring Phases
 
 ### Phase 1: Quick Wins (Week 1-2)
+
 **Goal:** Immediate performance improvements with minimal risk
 
 1. **Expand TypeScript Project References**
@@ -188,6 +194,7 @@ summit/
    - Expected: 40% CI time reduction
 
 ### Phase 2: Taxonomy Enforcement (Week 3-4)
+
 **Goal:** Clear workspace boundaries and ownership
 
 1. **Define Workspace Categories**
@@ -207,6 +214,7 @@ summit/
    - Update `package.json` names accordingly
 
 ### Phase 3: Service Consolidation (Week 5-8)
+
 **Goal:** Reduce service count by 75%
 
 1. **Auth Service Consolidation**
@@ -230,6 +238,7 @@ summit/
    - Target: 194 → 50 services
 
 ### Phase 4: Build System Modernization (Week 9-10)
+
 **Goal:** Optimal build performance
 
 1. **Enable TypeScript Strict Mode**
@@ -248,6 +257,7 @@ summit/
    - Add merge queue support
 
 ### Phase 5: Legacy Migration (Week 11-12)
+
 **Goal:** Clean up archived and deprecated code
 
 1. **Archive Assessment**
@@ -273,6 +283,7 @@ summit/
 ### Backward Compatibility
 
 All changes must maintain:
+
 1. **API Compatibility** - No breaking changes to GraphQL schema
 2. **Import Paths** - Use `paths` aliases for migration
 3. **CI/CD** - Keep old workflows until new ones are verified
@@ -281,20 +292,22 @@ All changes must maintain:
 ### Migration Patterns
 
 #### Pattern 1: Facade Migration
+
 ```typescript
 // Old location: services/authz-gateway/src/auth.ts
 // New location: services/auth/src/auth.ts
 
 // Facade in old location:
 // services/authz-gateway/src/auth.ts
-export * from '@intelgraph/auth-service';
-console.warn('DEPRECATED: Import from services/auth instead');
+export * from "@intelgraph/auth-service";
+console.warn("DEPRECATED: Import from services/auth instead");
 ```
 
 #### Pattern 2: Feature Flags
+
 ```typescript
 // Use feature flags for gradual rollout
-const useNewAuthService = process.env.USE_NEW_AUTH_SERVICE === 'true';
+const useNewAuthService = process.env.USE_NEW_AUTH_SERVICE === "true";
 
 if (useNewAuthService) {
   return newAuthService.authenticate(token);
@@ -304,6 +317,7 @@ if (useNewAuthService) {
 ```
 
 #### Pattern 3: Strangler Fig
+
 ```
 Phase 1: New service shadows old service (read-only)
 Phase 2: New service handles 10% traffic (canary)
@@ -315,6 +329,7 @@ Phase 5: Old service deprecated and archived
 ### Rollback Plan
 
 Each phase includes rollback procedures:
+
 1. **Git tags** before major changes
 2. **Feature flags** for instant rollback
 3. **Database migrations** are reversible
@@ -326,12 +341,12 @@ Each phase includes rollback procedures:
 
 ### High Risk Items
 
-| Risk | Mitigation | Owner |
-|------|------------|-------|
-| Breaking production | Feature flags, canary releases | Platform Team |
-| Build system breakage | Parallel CI pipeline during migration | DevOps Team |
-| Developer disruption | Clear communication, migration guides | Tech Lead |
-| Data loss during consolidation | Database backups, audit logging | Data Team |
+| Risk                           | Mitigation                            | Owner         |
+| ------------------------------ | ------------------------------------- | ------------- |
+| Breaking production            | Feature flags, canary releases        | Platform Team |
+| Build system breakage          | Parallel CI pipeline during migration | DevOps Team   |
+| Developer disruption           | Clear communication, migration guides | Tech Lead     |
+| Data loss during consolidation | Database backups, audit logging       | Data Team     |
 
 ### Testing Strategy
 
@@ -354,30 +369,30 @@ Each phase includes rollback procedures:
 
 ### Build Performance
 
-| Metric | Current | Target | Measurement |
-|--------|---------|--------|-------------|
-| Cold build time | 15-25 min | 5-8 min | CI pipeline duration |
-| Cached build time | 3-8 min | <2 min | Turbo cache hit builds |
-| `pnpm install` | 2-3 min | <1 min | Fresh install time |
-| Test execution | 10-15 min | 3-5 min | Jest run duration |
+| Metric            | Current   | Target  | Measurement            |
+| ----------------- | --------- | ------- | ---------------------- |
+| Cold build time   | 15-25 min | 5-8 min | CI pipeline duration   |
+| Cached build time | 3-8 min   | <2 min  | Turbo cache hit builds |
+| `pnpm install`    | 2-3 min   | <1 min  | Fresh install time     |
+| Test execution    | 10-15 min | 3-5 min | Jest run duration      |
 
 ### Maintainability
 
-| Metric | Current | Target | Measurement |
-|--------|---------|--------|-------------|
-| Workspace count | 417 | 80-120 | `ls -la apps packages services | wc -l` |
-| Service count | 194 | 30-50 | `ls services | wc -l` |
-| CI workflow count | 212 | 10-20 | `ls .github/workflows | wc -l` |
-| TODO/FIXME count | 366 | <100 | `grep -r "TODO\|FIXME" --include="*.ts" | wc -l` |
+| Metric            | Current | Target | Measurement                              |
+| ----------------- | ------- | ------ | ---------------------------------------- | ------ |
+| Workspace count   | 417     | 80-120 | `ls -la apps packages services           | wc -l` |
+| Service count     | 194     | 30-50  | `ls services                             | wc -l` |
+| CI workflow count | 212     | 10-20  | `ls .github/workflows                    | wc -l` |
+| TODO/FIXME count  | 366     | <100   | `grep -r "TODO\|FIXME" --include="\*.ts" | wc -l` |
 
 ### Developer Experience
 
-| Metric | Current | Target | Measurement |
-|--------|---------|--------|-------------|
-| Onboarding time | 2-3 days | <1 day | New dev survey |
-| PR review cycle | 2-4 hours | <1 hour | GitHub metrics |
-| Merge conflicts | High | Low | Git conflict frequency |
-| Documentation accuracy | 70% | 95% | Doc audit score |
+| Metric                 | Current   | Target  | Measurement            |
+| ---------------------- | --------- | ------- | ---------------------- |
+| Onboarding time        | 2-3 days  | <1 day  | New dev survey         |
+| PR review cycle        | 2-4 hours | <1 hour | GitHub metrics         |
+| Merge conflicts        | High      | Low     | Git conflict frequency |
+| Documentation accuracy | 70%       | 95%     | Doc audit score        |
 
 ---
 
@@ -441,6 +456,7 @@ Generated by `npx madge --image docs/architecture/service-deps.svg services/`
 ### C. Build Performance Baseline
 
 Captured via:
+
 ```bash
 # Cold build
 time turbo run build --force
@@ -458,18 +474,21 @@ time turbo run test
 ## Migration: [Service Name]
 
 ### Pre-Migration
+
 - [ ] Backup database
 - [ ] Document current API surface
 - [ ] Identify dependent services
 - [ ] Create rollback plan
 
 ### Migration
+
 - [ ] Create new service structure
 - [ ] Migrate core logic
 - [ ] Update import paths
 - [ ] Add deprecation warnings to old code
 
 ### Post-Migration
+
 - [ ] Run smoke tests
 - [ ] Monitor error rates
 - [ ] Update documentation

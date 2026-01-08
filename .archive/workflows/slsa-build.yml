@@ -2,7 +2,7 @@ name: slsa-build
 on:
   push:
     branches: [main]
-    tags: ['v*']
+    tags: ["v*"]
   pull_request:
     branches: [main]
 
@@ -302,7 +302,6 @@ jobs:
           head -n 5 dist/release/SHA256SUMS >> $GITHUB_STEP_SUMMARY
           echo "..." >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-
 
       - name: Upload release artifacts
         uses: actions/upload-artifact@v4

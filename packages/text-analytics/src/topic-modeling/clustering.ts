@@ -2,7 +2,7 @@
  * Document clustering
  */
 
-import type { DocumentCluster } from '../types';
+import type { DocumentCluster } from "../types";
 
 export class DocumentClusterer {
   /**

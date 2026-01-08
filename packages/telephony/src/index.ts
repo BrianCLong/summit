@@ -9,22 +9,22 @@
  * - Call quality metrics
  */
 
-import { z } from 'zod';
-import type { AudioBuffer, AudioCodec } from '@intelgraph/audio-processing';
+import { z } from "zod";
+import type { AudioBuffer, AudioCodec } from "@intelgraph/audio-processing";
 
 export enum CallDirection {
-  INBOUND = 'inbound',
-  OUTBOUND = 'outbound'
+  INBOUND = "inbound",
+  OUTBOUND = "outbound",
 }
 
 export enum CallStatus {
-  INITIATED = 'initiated',
-  RINGING = 'ringing',
-  CONNECTED = 'connected',
-  ON_HOLD = 'on_hold',
-  TRANSFERRED = 'transferred',
-  ENDED = 'ended',
-  FAILED = 'failed'
+  INITIATED = "initiated",
+  RINGING = "ringing",
+  CONNECTED = "connected",
+  ON_HOLD = "on_hold",
+  TRANSFERRED = "transferred",
+  ENDED = "ended",
+  FAILED = "failed",
 }
 
 export const CallMetadataSchema = z.object({
@@ -37,19 +37,19 @@ export const CallMetadataSchema = z.object({
   duration: z.number().optional(),
   status: z.nativeEnum(CallStatus),
   codec: z.string(),
-  recordingUrl: z.string().optional()
+  recordingUrl: z.string().optional(),
 });
 
 export type CallMetadata = z.infer<typeof CallMetadataSchema>;
 
 export const CallQualityMetricsSchema = z.object({
-  mos: z.number().min(1).max(5).describe('Mean Opinion Score'),
+  mos: z.number().min(1).max(5).describe("Mean Opinion Score"),
   rFactor: z.number(),
-  jitter: z.number().describe('Jitter in ms'),
-  packetLoss: z.number().min(0).max(100).describe('Packet loss percentage'),
-  latency: z.number().describe('Latency in ms'),
+  jitter: z.number().describe("Jitter in ms"),
+  packetLoss: z.number().min(0).max(100).describe("Packet loss percentage"),
+  latency: z.number().describe("Latency in ms"),
   bitrate: z.number(),
-  audioClarity: z.number().min(0).max(1)
+  audioClarity: z.number().min(0).max(1),
 });
 
 export type CallQualityMetrics = z.infer<typeof CallQualityMetricsSchema>;
@@ -57,7 +57,7 @@ export type CallQualityMetrics = z.infer<typeof CallQualityMetricsSchema>;
 export const DTMFEventSchema = z.object({
   digit: z.string().regex(/^[0-9*#ABCD]$/),
   timestamp: z.number(),
-  duration: z.number()
+  duration: z.number(),
 });
 
 export type DTMFEvent = z.infer<typeof DTMFEventSchema>;
@@ -81,7 +81,7 @@ export interface PBXConfig {
   port: number;
   username: string;
   password: string;
-  protocol: 'sip' | 'h323' | 'proprietary';
+  protocol: "sip" | "h323" | "proprietary";
 }
 
 export interface CallFilter {

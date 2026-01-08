@@ -84,7 +84,7 @@ jobs:
         if: env.SIGN_ENABLED == 'true'
         uses: sigstore/cosign-installer@v3.5.0
         with:
-          cosign-release: 'v2.4.1'
+          cosign-release: "v2.4.1"
 
       - name: Keyless sign digest
         if: env.SIGN_ENABLED == 'true'
@@ -152,7 +152,7 @@ jobs:
         if: env.VERIFY_ENABLED_STAGE == 'true'
         uses: sigstore/cosign-installer@v3.5.0
         with:
-          cosign-release: 'v2.4.1'
+          cosign-release: "v2.4.1"
 
       - name: Verify signature
         if: env.VERIFY_ENABLED_STAGE == 'true'

@@ -8,8 +8,8 @@ metadata:
     app.kubernetes.io/component: backup
     app.kubernetes.io/part-of: intelgraph
 spec:
-  schedule: '0 */6 * * *' # Every 6 hours
-  timeZone: 'UTC'
+  schedule: "0 */6 * * *" # Every 6 hours
+  timeZone: "UTC"
   successfulJobsHistoryLimit: 7
   failedJobsHistoryLimit: 3
   concurrencyPolicy: Forbid
@@ -177,9 +177,9 @@ spec:
 
               env:
                 - name: REDIS_HOST
-                  value: 'redis.database'
+                  value: "redis.database"
                 - name: REDIS_PORT
-                  value: '6379'
+                  value: "6379"
                 - name: BACKUP_BUCKET
                   valueFrom:
                     configMapKeyRef:
@@ -217,11 +217,11 @@ spec:
                       key: aws-secret-access-key
               resources:
                 requests:
-                  memory: '256Mi'
-                  cpu: '100m'
+                  memory: "256Mi"
+                  cpu: "100m"
                 limits:
-                  memory: '1Gi'
-                  cpu: '500m'
+                  memory: "1Gi"
+                  cpu: "500m"
               volumeMounts:
                 - name: backup-storage
                   mountPath: /backups
@@ -235,12 +235,12 @@ spec:
               emptyDir:
                 sizeLimit: 1Gi
           tolerations:
-            - key: 'backup-workload'
-              operator: 'Equal'
-              value: 'true'
-              effect: 'NoSchedule'
+            - key: "backup-workload"
+              operator: "Equal"
+              value: "true"
+              effect: "NoSchedule"
           nodeSelector:
-            node-type: 'backup-optimized'
+            node-type: "backup-optimized"
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -251,7 +251,7 @@ metadata:
     app.kubernetes.io/name: redis-backup
     app.kubernetes.io/component: backup
   annotations:
-    eks.amazonaws.com/role-arn: 'arn:aws:iam::123456789012:role/redis-backup-role'
+    eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/redis-backup-role"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -259,12 +259,12 @@ metadata:
   namespace: database
   name: redis-backup
 rules:
-  - apiGroups: ['']
-    resources: ['pods', 'services']
-    verbs: ['get', 'list']
-  - apiGroups: ['']
-    resources: ['secrets', 'configmaps']
-    verbs: ['get']
+  - apiGroups: [""]
+    resources: ["pods", "services"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["secrets", "configmaps"]
+    verbs: ["get"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

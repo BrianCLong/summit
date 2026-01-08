@@ -1,7 +1,7 @@
-import { ExtensionPoint } from '../ExtensionPoint.js';
+import { ExtensionPoint } from "../ExtensionPoint.js";
 
 export interface DataQuery {
-  operation: 'read' | 'write' | 'list' | 'delete';
+  operation: "read" | "write" | "list" | "delete";
   resource: string;
   parameters?: Record<string, any>;
   data?: any; // For write
@@ -27,10 +27,10 @@ export interface DataResult {
  * Data Connector Extension - Defines a connection to an external data source.
  */
 export interface DataConnectorExtension extends ExtensionPoint<DataQuery, DataResult> {
-  type: 'data-connector';
+  type: "data-connector";
 
   connectorType: string;
-  capabilities: ('read' | 'write' | 'list' | 'delete' | 'stream')[];
+  capabilities: ("read" | "write" | "list" | "delete" | "stream")[];
   requiredScopes?: string[];
 
   connect(config: Record<string, any>): Promise<boolean>;
@@ -39,12 +39,12 @@ export interface DataConnectorExtension extends ExtensionPoint<DataQuery, DataRe
 }
 
 export abstract class BaseDataConnectorExtension implements DataConnectorExtension {
-  readonly type = 'data-connector' as const;
+  readonly type = "data-connector" as const;
 
   constructor(
     public readonly id: string,
     public readonly connectorType: string,
-    public readonly capabilities: ('read' | 'write' | 'list' | 'delete' | 'stream')[],
+    public readonly capabilities: ("read" | "write" | "list" | "delete" | "stream")[],
     public readonly requiredScopes: string[] = []
   ) {}
 

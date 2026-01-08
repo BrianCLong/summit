@@ -31,10 +31,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   const translateY = useSharedValue(SCREEN_HEIGHT);
   const context = useSharedValue({ y: 0 });
 
-  const maxTranslateY = useMemo(
-    () => -SCREEN_HEIGHT * Math.max(...snapPoints),
-    [snapPoints],
-  );
+  const maxTranslateY = useMemo(() => -SCREEN_HEIGHT * Math.max(...snapPoints), [snapPoints]);
 
   const scrollTo = useCallback(
     (destination: number) => {
@@ -60,10 +57,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
       context.value = { y: translateY.value };
     })
     .onUpdate((event) => {
-      translateY.value = Math.max(
-        context.value.y + event.translationY,
-        maxTranslateY,
-      );
+      translateY.value = Math.max(context.value.y + event.translationY, maxTranslateY);
     })
     .onEnd((event) => {
       if (event.velocityY > 500) {
@@ -100,17 +94,12 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
       <GestureDetector gesture={gesture}>
         <Animated.View
           style={[{ height: SCREEN_HEIGHT }, rBottomSheetStyle]}
-          className={cn(
-            'absolute w-full bg-dark-surface rounded-t-3xl',
-            className,
-          )}
+          className={cn('absolute w-full bg-dark-surface rounded-t-3xl', className)}
         >
           <View className="w-12 h-1 bg-dark-muted rounded-full self-center my-3" />
           {title && (
             <View className="px-4 pb-4 border-b border-dark-border">
-              <Text className="text-lg font-semibold text-white text-center">
-                {title}
-              </Text>
+              <Text className="text-lg font-semibold text-white text-center">{title}</Text>
             </View>
           )}
           <View className="flex-1 px-4">{children}</View>

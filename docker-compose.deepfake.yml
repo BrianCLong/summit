@@ -1,7 +1,7 @@
 # Docker Compose configuration for Deepfake Detection System
 # Extends the main development stack with deepfake-specific services
 
-version: '3.8'
+version: "3.8"
 
 services:
   # Deepfake Detection Service (Python FastAPI)
@@ -26,10 +26,10 @@ services:
       - S3_BUCKET=intelgraph-media
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - ENABLE_GPU=false  # Set to true if GPU available
+      - ENABLE_GPU=false # Set to true if GPU available
     volumes:
       - deepfake-models:/app/models
-      - ./services/deepfake-detection-service/src:/app/src  # Hot reload for dev
+      - ./services/deepfake-detection-service/src:/app/src # Hot reload for dev
     depends_on:
       - redis
       - minio
@@ -45,10 +45,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '4.0'
+          cpus: "4.0"
           memory: 8G
         reservations:
-          cpus: '2.0'
+          cpus: "2.0"
           memory: 4G
 
   # MinIO (S3-compatible storage for media files and models)
@@ -57,7 +57,7 @@ services:
     container_name: minio
     ports:
       - "9000:9000"
-      - "9001:9001"  # Console
+      - "9001:9001" # Console
     environment:
       - MINIO_ROOT_USER=minioadmin
       - MINIO_ROOT_PASSWORD=minioadmin
@@ -115,8 +115,8 @@ services:
     image: neo4j:5-community
     container_name: neo4j
     ports:
-      - "7474:7474"  # HTTP
-      - "7687:7687"  # Bolt
+      - "7474:7474" # HTTP
+      - "7687:7687" # Bolt
     environment:
       - NEO4J_AUTH=neo4j/devpassword
       - NEO4J_dbms_memory_heap_max__size=2G
@@ -144,9 +144,9 @@ services:
     ports:
       - "9090:9090"
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--storage.tsdb.retention.time=30d'
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=30d"
     volumes:
       - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus

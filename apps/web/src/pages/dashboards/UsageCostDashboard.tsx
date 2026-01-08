@@ -48,7 +48,9 @@ export default function UsageCostDashboard() {
     date.setDate(date.getDate() - 30)
     return date.toISOString().slice(0, 10)
   })
-  const [toDate, setToDate] = useState(() => new Date().toISOString().slice(0, 10))
+  const [toDate, setToDate] = useState(() =>
+    new Date().toISOString().slice(0, 10)
+  )
 
   useEffect(() => {
     const loadUsage = async () => {

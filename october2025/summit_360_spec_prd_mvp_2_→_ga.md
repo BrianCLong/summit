@@ -263,7 +263,7 @@ jobs:
         with: { fetch-depth: 0 }
       - name: Set up node
         uses: actions/setup-node@v4
-        with: { node-version: '20', cache: 'npm' }
+        with: { node-version: "20", cache: "npm" }
       - name: Cosign install
         uses: sigstore/cosign-installer@v3
       - name: Build & tag
@@ -280,7 +280,7 @@ jobs:
           cdxgen -o sbom.cdx.json
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
-        with: { name: sbom-and-provenance, path: 'sbom.cdx.json' }
+        with: { name: sbom-and-provenance, path: "sbom.cdx.json" }
 ```
 
 ### 2) OPA Policy Gate (CI)
@@ -306,9 +306,9 @@ apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: K8sRequiredAnnotations
 metadata: { name: require-signed-images }
 spec:
-  match: { kinds: [{ apiGroups: [''], kinds: ['Pod', 'Deployment'] }] }
+  match: { kinds: [{ apiGroups: [""], kinds: ["Pod", "Deployment"] }] }
   parameters:
-    message: 'Unsigned images are not permitted'
+    message: "Unsigned images are not permitted"
 ```
 
 ### 4) Micro‑Canary Promotion (Helm values)
@@ -317,9 +317,9 @@ spec:
 # charts/service/values.yaml (excerpt)
 rollout:
   waves:
-    - { percentage: 1, minDuration: 30m, slo: { errorRate: '<1%' } }
-    - { percentage: 10, minDuration: 1h, slo: { errorRate: '<1%' } }
-    - { percentage: 50, minDuration: 2h, slo: { errorRate: '<1%' } }
+    - { percentage: 1, minDuration: 30m, slo: { errorRate: "<1%" } }
+    - { percentage: 10, minDuration: 1h, slo: { errorRate: "<1%" } }
+    - { percentage: 50, minDuration: 2h, slo: { errorRate: "<1%" } }
     - { percentage: 100 }
 ```
 

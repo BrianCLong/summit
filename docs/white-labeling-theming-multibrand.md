@@ -1,12 +1,15 @@
 # CompanyOS White-Labeling, Theming, and Multi-Brand Support
 
 ## High-level summary and principles
+
 - Enable customers and partners to operate CompanyOS under their own brand while preserving platform security, reliability, and upgradeability.
 - Treat branding, theming, and configuration as declarative data with explicit precedence (platform < environment < partner < tenant < user/experience surface) and immutable, versioned releases.
 - Optimize for fast, cache-friendly delivery of theme assets with integrity guarantees, while keeping guardrails that prevent weakening required controls.
 
 ## Branding & theming model
+
 ### What is configurable (per theme)
+
 - **Identity**: logo (primary, monochrome, favicon, app icon), wordmark lockups, loading indicators, watermark overlays.
 - **Colors**: palette tokens (primary, secondary, accent, success, warning, danger, neutral), gradients, data-visualization palettes, semantic state mappings, light/dark variants.
 - **Typography**: primary/secondary font families, weights, sizes/line-heights, heading scales, numeral styles, locale fallbacks.
@@ -18,6 +21,7 @@
 - **Operational toggles**: watermarking level, legal footer placement, cookie banner style, compliance badges.
 
 ### Override hierarchy
+
 1. **Platform defaults**: secure baseline, maintained by CompanyOS.
 2. **Environment** (dev/stage/prod/region): operational overrides (e.g., staging banner, test payment gateway branding).
 3. **Partner**: shared defaults across the partner’s tenants (logos, palette, email domain, SLO posture). Partners cannot loosen mandatory controls (see guardrails).
@@ -27,6 +31,7 @@
 Conflict resolution: lowest level wins if allowed; forbidden keys fall back to higher-scope value with audit log entry. Missing values inherit from the next higher scope. All merges are validated against schema and guardrails.
 
 ### Performance and caching
+
 - **Static asset separation**: upload logos/fonts to CDN with cache-busting file hashes; reference via signed URLs in the theme payload.
 - **Edge caching**: cache resolved theme payloads (post-merge) at the edge keyed by {environment, partner, tenant, locale, surface, version}; short TTL for preview, longer for prod.
 - **Deterministic payloads**: fully expanded, normalized theme JSON; avoid runtime DB hits on every request by precomputing on publish.
@@ -35,11 +40,14 @@ Conflict resolution: lowest level wins if allowed; forbidden keys fall back to h
 - **Fail-safe**: if theme fetch fails, fall back to platform default while alerting and logging.
 
 ## Configuration profiles
+
 ### Profile purpose
+
 - Provide curated defaults for **industries** (e.g., Finance, Healthcare, Public Sector), **regions** (e.g., EU, APAC, US FedRAMP), and **risk postures** (High, Standard, Low).
 - Profiles bundle **policies**, **SLOs/SLAs**, **feature sets**, **data residency**, **audit retention**, **authN/Z defaults**, **DLP**, **observability**, and **privacy banners**.
 
 ### Packing defaults
+
 - Declarative YAML/JSON documents referencing canonical policy IDs and feature flags.
 - Include versioned **policy bundles** (e.g., `policy/baseline@1.3.0`, `policy/pci@2.0.1`).
 - SLO objects define target/error budgets and alert thresholds; attach to services/components.
@@ -47,11 +55,13 @@ Conflict resolution: lowest level wins if allowed; forbidden keys fall back to h
 - Data residency and storage class settings reference approved regions and encryption modes.
 
 ### Safe overrides & guardrails
+
 - **Never-loosen list**: MFA required, password rotation minimums, audit log immutability, data encryption at rest/in transit, PII masking in logs, DLP baseline, rate-limits per API class, minimum contrast/accessibility settings.
 - **Only-stronger overrides**: partners/tenants may tighten (e.g., shorter session TTL, stricter IP allowlists, higher SLO targets) but cannot relax below baseline.
 - Validation pipeline enforces guardrails and emits diffs; violations are rejected with machine-readable errors.
 
 ## Management & rollout
+
 - **APIs**: REST/GraphQL `themes` and `profiles` endpoints with CRUD, diff, validate, publish, rollback. Signed per-partner keys + RBAC + audit trails.
 - **Console**: Partner console for branding uploads, live preview, A/B variants, scheduled releases; tenant admins can opt into profiles and adjust allowed fields.
 - **Preview flows**: ephemeral preview tokens/URLs rendering merged theme/profile with short TTL; snapshotting of assets; accessibility and contrast checks in preview gate.
@@ -61,6 +71,7 @@ Conflict resolution: lowest level wins if allowed; forbidden keys fall back to h
 - **Testing**: automated validation (schema + guardrails), screenshot diff for UI regressions, accessibility scan, contract tests for email templates.
 
 ## Architecture
+
 - **Data model**: `Theme` and `ConfigProfile` entities stored in versioned collections (e.g., Postgres + object storage for assets). `Release` references a specific theme/profile version per environment.
 - **Merge engine**: deterministic merge/resolution layer applying hierarchy and guardrails; outputs normalized payload cached at edge.
 - **Asset pipeline**: ingestion service validates file types/sizes, generates renditions (e.g., SVG/PNG, light/dark), uploads to per-tenant buckets with signed URLs.
@@ -69,6 +80,7 @@ Conflict resolution: lowest level wins if allowed; forbidden keys fall back to h
 - **Security**: CSP, SRI, mandatory asset scanning, RBAC for partner/tenant actions, per-tenant encryption keys, domain verification for custom domains and email senders.
 
 ## White-Label Config Schema (outline)
+
 ```yaml
 apiVersion: companyos.io/v1
 kind: Theme
@@ -198,6 +210,7 @@ spec:
 ```
 
 ## Example configuration profile (Partner "Atlas Cloud")
+
 - **Context**: Atlas Cloud resells CompanyOS to EU fintechs. Needs strong compliance defaults, dark mode branding, and high SLO targets.
 
 ```yaml
@@ -290,6 +303,7 @@ spec:
 ```
 
 ## Checklist: "White-label configuration is safe and supported if…"
+
 - ✅ Theme and profile validate against schema and guardrails; forbidden keys not overridden.
 - ✅ Assets scanned and stored in tenant/partner-isolated buckets with hashed filenames and SRI metadata.
 - ✅ Domain/email ownership verified; DMARC/SPF/DKIM checks pass; CORS/ CSP updated.
@@ -302,6 +316,7 @@ spec:
 - ✅ Support playbook updated with current version IDs, known limitations, and contact paths for partner ops.
 
 ## Management & rollout lifecycle (operational playbook)
+
 1. Partner drafts theme/profile via console or API; uploads assets → validation + security scan.
 2. System generates preview build, runs accessibility + screenshot diff + contract tests for communications.
 3. Partner/tenant approves preview; publish creates immutable version and triggers cache warm + release artifact.
@@ -310,6 +325,7 @@ spec:
 6. Post-release review logs diffs, incidents, and open follow-ups; update documentation and support runbooks.
 
 ## Forward-leaning enhancements
+
 - **Policy-aware dynamic theming**: context-aware theme variants that automatically adjust watermarking, legal notices, and contrast based on policy triggers (e.g., high-risk session, external sharing).
 - **Adaptive asset delivery**: client capability detection (color-gamut, prefers-reduced-motion) to select optimal asset renditions at the CDN edge.
 - **Typed SDKs + config codegen**: generate strongly-typed client/server SDKs from the schema (TS/Go/Rust) ensuring validation parity and autocomplete.

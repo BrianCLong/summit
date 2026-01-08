@@ -8,8 +8,8 @@
  * @module canonical-entities/temporal
  */
 
-import { BitemporalFields } from './types';
-import { GraphEdge, GraphSnapshot } from './edges';
+import { BitemporalFields } from "./types";
+import { GraphEdge, GraphSnapshot } from "./edges";
 
 // -----------------------------------------------------------------------------
 // Temporal Types
@@ -51,9 +51,9 @@ export interface Bitemporal extends Temporal {
  */
 export function isValidAt(
   temporal: { validFrom?: Date | null; validTo?: Date | null },
-  at: Date | string,
+  at: Date | string
 ): boolean {
-  const checkDate = typeof at === 'string' ? new Date(at) : at;
+  const checkDate = typeof at === "string" ? new Date(at) : at;
   const { validFrom, validTo } = temporal;
 
   // If validFrom is set and checkDate is before it, not valid
@@ -78,7 +78,7 @@ export function isValidAt(
  */
 export function validityOverlaps(
   a: { validFrom?: Date | null; validTo?: Date | null },
-  b: { validFrom?: Date | null; validTo?: Date | null },
+  b: { validFrom?: Date | null; validTo?: Date | null }
 ): boolean {
   // Get effective bounds (null means infinity)
   const aStart = a.validFrom ? a.validFrom.getTime() : -Infinity;
@@ -126,7 +126,7 @@ export function isCurrent(temporal: { validFrom?: Date | null; validTo?: Date | 
 export function isBitemporallyValid(
   obj: Bitemporal,
   validAt: Date | string,
-  recordedAt?: Date | string,
+  recordedAt?: Date | string
 ): boolean {
   // Check valid time dimension
   if (!isValidAt(obj, validAt)) {
@@ -135,7 +135,7 @@ export function isBitemporallyValid(
 
   // If recordedAt is specified, check transaction time dimension
   if (recordedAt) {
-    const recordedCheck = typeof recordedAt === 'string' ? new Date(recordedAt) : recordedAt;
+    const recordedCheck = typeof recordedAt === "string" ? new Date(recordedAt) : recordedAt;
     const objRecordedAt = obj.recordedAt;
 
     // The fact must have been recorded by the recordedAt time
@@ -170,7 +170,7 @@ export function isBitemporallyValid(
  */
 export function filterEntitiesAsOf<T extends { validFrom?: Date | null; validTo?: Date | null }>(
   entities: T[],
-  at: Date | string,
+  at: Date | string
 ): T[] {
   return entities.filter((entity) => isValidAt(entity, at));
 }
@@ -184,7 +184,7 @@ export function filterEntitiesAsOf<T extends { validFrom?: Date | null; validTo?
  */
 export function filterEdgesAsOf<T extends { validFrom?: Date | null; validTo?: Date | null }>(
   edges: T[],
-  at: Date | string,
+  at: Date | string
 ): T[] {
   return edges.filter((edge) => isValidAt(edge, at));
 }
@@ -200,7 +200,7 @@ export function filterEdgesAsOf<T extends { validFrom?: Date | null; validTo?: D
 export function filterEntitiesBitemporal<T extends Bitemporal>(
   entities: T[],
   validAt: Date | string,
-  recordedAt?: Date | string,
+  recordedAt?: Date | string
 ): T[] {
   return entities.filter((entity) => isBitemporallyValid(entity, validAt, recordedAt));
 }
@@ -224,11 +224,16 @@ export function filterEntitiesBitemporal<T extends Bitemporal>(
  * ```
  */
 export function buildGraphSnapshotAtTime(
-  nodes: Array<{ id: string; validFrom?: Date | null; validTo?: Date | null; [key: string]: unknown }>,
+  nodes: Array<{
+    id: string;
+    validFrom?: Date | null;
+    validTo?: Date | null;
+    [key: string]: unknown;
+  }>,
   edges: GraphEdge[],
-  at: Date | string,
+  at: Date | string
 ): GraphSnapshot {
-  const checkDate = typeof at === 'string' ? new Date(at) : at;
+  const checkDate = typeof at === "string" ? new Date(at) : at;
 
   const filteredNodes = filterEntitiesAsOf(nodes, checkDate);
   const filteredEdges = filterEdgesAsOf(edges, checkDate);
@@ -238,7 +243,7 @@ export function buildGraphSnapshotAtTime(
 
   // Filter edges to only include those connecting valid nodes
   const validEdges = filteredEdges.filter(
-    (edge) => validNodeIds.has(edge.fromId) && validNodeIds.has(edge.toId),
+    (edge) => validNodeIds.has(edge.fromId) && validNodeIds.has(edge.toId)
   );
 
   return {
@@ -266,21 +271,21 @@ export function buildBitemporalGraphSnapshot(
   nodes: Array<{ id: string; [key: string]: unknown } & Bitemporal>,
   edges: GraphEdge[],
   validAt: Date | string,
-  recordedAt: Date | string,
+  recordedAt: Date | string
 ): GraphSnapshot {
-  const validDate = typeof validAt === 'string' ? new Date(validAt) : validAt;
-  const recordedDate = typeof recordedAt === 'string' ? new Date(recordedAt) : recordedAt;
+  const validDate = typeof validAt === "string" ? new Date(validAt) : validAt;
+  const recordedDate = typeof recordedAt === "string" ? new Date(recordedAt) : recordedAt;
 
   const filteredNodes = filterEntitiesBitemporal(nodes, validDate, recordedDate);
   const filteredEdges = filterEntitiesBitemporal(
     edges as (GraphEdge & Bitemporal)[],
     validDate,
-    recordedDate,
+    recordedDate
   );
 
   const validNodeIds = new Set(filteredNodes.map((n) => n.id));
   const validEdges = filteredEdges.filter(
-    (edge) => validNodeIds.has(edge.fromId) && validNodeIds.has(edge.toId),
+    (edge) => validNodeIds.has(edge.fromId) && validNodeIds.has(edge.toId)
   );
 
   return {
@@ -310,7 +315,7 @@ export function buildBitemporalGraphSnapshot(
  * @returns Sorted array of entity versions (oldest to newest)
  */
 export function getEntityVersions<T extends { validFrom?: Date | null; validTo?: Date | null }>(
-  entities: T[],
+  entities: T[]
 ): T[] {
   return [...entities].sort((a, b) => {
     const aTime = a.validFrom?.getTime() ?? -Infinity;
@@ -328,7 +333,7 @@ export function getEntityVersions<T extends { validFrom?: Date | null; validTo?:
  */
 export function getLatestVersionAt<T extends { validFrom?: Date | null; validTo?: Date | null }>(
   entities: T[],
-  at: Date | string,
+  at: Date | string
 ): T | undefined {
   const validVersions = filterEntitiesAsOf(entities, at);
   return validVersions.sort((a, b) => {
@@ -344,10 +349,10 @@ export function getLatestVersionAt<T extends { validFrom?: Date | null; validTo?
  * @param entity - Entity with temporal fields
  * @returns Object with start and end dates
  */
-export function getValidityPeriod(entity: {
-  validFrom?: Date | null;
-  validTo?: Date | null;
-}): { start: Date | null; end: Date | null } {
+export function getValidityPeriod(entity: { validFrom?: Date | null; validTo?: Date | null }): {
+  start: Date | null;
+  end: Date | null;
+} {
   return {
     start: entity.validFrom || null,
     end: entity.validTo || null,

@@ -4,7 +4,7 @@
  * Tracks and aggregates test execution metrics.
  */
 
-import { TestScenario, TestResult, RiskLevel, Component, AttackType } from './types.js';
+import { TestScenario, TestResult, RiskLevel, Component, AttackType } from "./types.js";
 
 export interface MetricsSummary {
   totalScenarios: number;
@@ -59,18 +59,12 @@ export class MetricsCollector {
 
     // Track guardrails
     for (const guardrail of result.actual.guardrailsTriggered) {
-      this.guardrailCounts.set(
-        guardrail,
-        (this.guardrailCounts.get(guardrail) || 0) + 1
-      );
+      this.guardrailCounts.set(guardrail, (this.guardrailCounts.get(guardrail) || 0) + 1);
     }
 
     // Track policy violations
     for (const policy of result.actual.policyViolations) {
-      this.policyViolationCounts.set(
-        policy,
-        (this.policyViolationCounts.get(policy) || 0) + 1
-      );
+      this.policyViolationCounts.set(policy, (this.policyViolationCounts.get(policy) || 0) + 1);
     }
   }
 
@@ -86,7 +80,7 @@ export class MetricsCollector {
    */
   getSummary(scenarios: TestScenario[], results: TestResult[]): MetricsSummary {
     const totalScenarios = results.length;
-    const passed = results.filter(r => r.passed).length;
+    const passed = results.filter((r) => r.passed).length;
     const failed = totalScenarios - passed;
 
     // Calculate breakdowns
@@ -95,19 +89,11 @@ export class MetricsCollector {
     const byAttackType = this.calculateBreakdownByAttackType(scenarios, results);
 
     // Count failures by severity
-    const failedResults = results.filter(r => !r.passed);
-    const criticalFailures = failedResults.filter(
-      r => r.failure?.severity === 'critical'
-    ).length;
-    const highFailures = failedResults.filter(
-      r => r.failure?.severity === 'high'
-    ).length;
-    const mediumFailures = failedResults.filter(
-      r => r.failure?.severity === 'medium'
-    ).length;
-    const lowFailures = failedResults.filter(
-      r => r.failure?.severity === 'low'
-    ).length;
+    const failedResults = results.filter((r) => !r.passed);
+    const criticalFailures = failedResults.filter((r) => r.failure?.severity === "critical").length;
+    const highFailures = failedResults.filter((r) => r.failure?.severity === "high").length;
+    const mediumFailures = failedResults.filter((r) => r.failure?.severity === "medium").length;
+    const lowFailures = failedResults.filter((r) => r.failure?.severity === "low").length;
 
     // Calculate durations
     const totalDurationMs = results.reduce((sum, r) => sum + r.durationMs, 0);
@@ -179,16 +165,16 @@ export class MetricsCollector {
     results: TestResult[]
   ): Record<RiskLevel, MetricBreakdown> {
     const breakdown: Record<string, MetricBreakdown> = {};
-    const riskLevels: RiskLevel[] = ['critical', 'high', 'medium', 'low'];
+    const riskLevels: RiskLevel[] = ["critical", "high", "medium", "low"];
 
     for (const level of riskLevels) {
-      const scenariosAtLevel = scenarios.filter(s => s.riskLevel === level);
-      const resultsAtLevel = results.filter(r =>
-        scenariosAtLevel.some(s => s.id === r.scenarioId)
+      const scenariosAtLevel = scenarios.filter((s) => s.riskLevel === level);
+      const resultsAtLevel = results.filter((r) =>
+        scenariosAtLevel.some((s) => s.id === r.scenarioId)
       );
 
       const total = resultsAtLevel.length;
-      const passed = resultsAtLevel.filter(r => r.passed).length;
+      const passed = resultsAtLevel.filter((r) => r.passed).length;
       const failed = total - passed;
 
       breakdown[level] = {
@@ -211,23 +197,23 @@ export class MetricsCollector {
   ): Record<Component, MetricBreakdown> {
     const breakdown: Record<string, MetricBreakdown> = {};
     const components: Component[] = [
-      'copilot',
-      'analytics',
-      'case',
-      'export',
-      'graph-query',
-      'search',
-      'api-gateway',
+      "copilot",
+      "analytics",
+      "case",
+      "export",
+      "graph-query",
+      "search",
+      "api-gateway",
     ];
 
     for (const component of components) {
-      const scenariosForComponent = scenarios.filter(s => s.component === component);
-      const resultsForComponent = results.filter(r =>
-        scenariosForComponent.some(s => s.id === r.scenarioId)
+      const scenariosForComponent = scenarios.filter((s) => s.component === component);
+      const resultsForComponent = results.filter((r) =>
+        scenariosForComponent.some((s) => s.id === r.scenarioId)
       );
 
       const total = resultsForComponent.length;
-      const passed = resultsForComponent.filter(r => r.passed).length;
+      const passed = resultsForComponent.filter((r) => r.passed).length;
       const failed = total - passed;
 
       breakdown[component] = {
@@ -250,29 +236,29 @@ export class MetricsCollector {
   ): Record<AttackType, MetricBreakdown> {
     const breakdown: Record<string, MetricBreakdown> = {};
     const attackTypes: AttackType[] = [
-      'data-exfiltration',
-      'profiling',
-      'discrimination',
-      'overreach',
-      'prompt-injection',
-      'jailbreak',
-      'pii-leak',
-      'toxicity',
-      'bias',
-      'policy-bypass',
-      'unauthorized-access',
-      'privilege-escalation',
-      'denial-of-service',
+      "data-exfiltration",
+      "profiling",
+      "discrimination",
+      "overreach",
+      "prompt-injection",
+      "jailbreak",
+      "pii-leak",
+      "toxicity",
+      "bias",
+      "policy-bypass",
+      "unauthorized-access",
+      "privilege-escalation",
+      "denial-of-service",
     ];
 
     for (const attackType of attackTypes) {
-      const scenariosForType = scenarios.filter(s => s.attackType === attackType);
-      const resultsForType = results.filter(r =>
-        scenariosForType.some(s => s.id === r.scenarioId)
+      const scenariosForType = scenarios.filter((s) => s.attackType === attackType);
+      const resultsForType = results.filter((r) =>
+        scenariosForType.some((s) => s.id === r.scenarioId)
       );
 
       const total = resultsForType.length;
-      const passed = resultsForType.filter(r => r.passed).length;
+      const passed = resultsForType.filter((r) => r.passed).length;
       const failed = total - passed;
 
       breakdown[attackType] = {
@@ -294,7 +280,7 @@ export class MetricsCollector {
     if (!results) return undefined;
 
     const total = results.length;
-    const passed = results.filter(r => r.passed).length;
+    const passed = results.filter((r) => r.passed).length;
     const failed = total - passed;
 
     return {

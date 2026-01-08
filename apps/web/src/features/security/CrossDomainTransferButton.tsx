@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/Button';
+import React, { useState } from 'react'
+import { Button } from '@/components/ui/Button'
 import {
   Dialog,
   DialogContent,
@@ -10,21 +10,21 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/Dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from '@/components/ui/Dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/components/ui/select'
 
 interface CrossDomainTransferButtonProps {
-  entityId: string;
-  currentDomain: string;
-  onTransferComplete?: () => void;
+  entityId: string
+  currentDomain: string
+  onTransferComplete?: () => void
 }
 
 export function CrossDomainTransferButton({
@@ -32,23 +32,23 @@ export function CrossDomainTransferButton({
   currentDomain,
   onTransferComplete,
 }: CrossDomainTransferButtonProps) {
-  const [open, setOpen] = useState(false);
-  const [targetDomain, setTargetDomain] = useState<string>('');
-  const [justification, setJustification] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [open, setOpen] = useState(false)
+  const [targetDomain, setTargetDomain] = useState<string>('')
+  const [justification, setJustification] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // Hardcoded for now, could be fetched from API
   const domains = [
     { id: 'high-side', name: 'High Side (TS/SCI)' },
     { id: 'low-side', name: 'Low Side (UNCLASSIFIED)' },
-  ].filter((d) => d.id !== currentDomain);
+  ].filter(d => d.id !== currentDomain)
 
   const handleTransfer = async () => {
-    setLoading(true);
-    setError(null);
+    setLoading(true)
+    setError(null)
     try {
-      const token = localStorage.getItem('token'); // Simplistic auth handling
+      const token = localStorage.getItem('token') // Simplistic auth handling
       const response = await fetch('/api/cds/transfer', {
         method: 'POST',
         headers: {
@@ -61,28 +61,31 @@ export function CrossDomainTransferButton({
           targetDomainId: targetDomain,
           justification,
         }),
-      });
+      })
 
-      const data = await response.json();
+      const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Transfer failed');
+        throw new Error(data.error || 'Transfer failed')
       }
 
-      setOpen(false);
-      if (onTransferComplete) onTransferComplete();
-      alert('Transfer Successful. Transfer ID: ' + data.transferId);
+      setOpen(false)
+      if (onTransferComplete) onTransferComplete()
+      alert('Transfer Successful. Transfer ID: ' + data.transferId)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      setError(err instanceof Error ? err.message : 'An unknown error occurred')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="ml-2 bg-amber-900/20 text-amber-500 border-amber-900/50 hover:bg-amber-900/30">
+        <Button
+          variant="outline"
+          className="ml-2 bg-amber-900/20 text-amber-500 border-amber-900/50 hover:bg-amber-900/30"
+        >
           Transfer Domain
         </Button>
       </DialogTrigger>
@@ -103,8 +106,12 @@ export function CrossDomainTransferButton({
                 <SelectValue placeholder="Select domain" />
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-slate-600">
-                {domains.map((d) => (
-                  <SelectItem key={d.id} value={d.id} className="text-slate-200 focus:bg-slate-700">
+                {domains.map(d => (
+                  <SelectItem
+                    key={d.id}
+                    value={d.id}
+                    className="text-slate-200 focus:bg-slate-700"
+                  >
                     {d.name}
                   </SelectItem>
                 ))}
@@ -112,18 +119,23 @@ export function CrossDomainTransferButton({
             </Select>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="justification" className="text-right text-slate-300">
+            <Label
+              htmlFor="justification"
+              className="text-right text-slate-300"
+            >
               Justification
             </Label>
             <Input
               id="justification"
               value={justification}
-              onChange={(e) => setJustification(e.target.value)}
+              onChange={e => setJustification(e.target.value)}
               className="col-span-3 bg-slate-800 border-slate-600 text-slate-200"
               placeholder="Mission requirement..."
             />
           </div>
-          {error && <div className="text-red-400 text-sm text-center">{error}</div>}
+          {error && (
+            <div className="text-red-400 text-sm text-center">{error}</div>
+          )}
         </div>
         <DialogFooter>
           <Button
@@ -137,5 +149,5 @@ export function CrossDomainTransferButton({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

@@ -27,12 +27,14 @@ Ingestion follows a standard 4-stage pipeline:
 ### Connectors
 
 Connectors live in `server/src/connectors/` and implement `SourceConnector`.
+
 - `FileConnector`: Reads local/S3 files.
 - `HttpConnector`: Polls REST APIs.
 
 ## RAG & Retrieval
 
 Retrieval is handled by `RetrievalService` which supports:
+
 - **Vector Search**: Finds relevant Chunks using embeddings.
 - **Keyword Search**: Fallback to text matching.
 - **Graph Expansion**: Finds Entities related to the retrieved Documents.
@@ -50,9 +52,9 @@ Retrieval is handled by `RetrievalService` which supports:
 \`\`\`bash
 POST /api/ingestion/pipelines/my-pipeline/run
 {
-  "key": "my-pipeline",
-  "tenantId": "tenant-1",
-  "source": { "type": "api", "config": { "url": "..." } },
-  "stages": ["raw", "normalize", "enrich", "index"]
+"key": "my-pipeline",
+"tenantId": "tenant-1",
+"source": { "type": "api", "config": { "url": "..." } },
+"stages": ["raw", "normalize", "enrich", "index"]
 }
 \`\`\`

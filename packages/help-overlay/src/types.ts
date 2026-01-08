@@ -50,7 +50,10 @@ export interface HelpContextValue {
   searchResults: HelpArticle[];
   isSearching: boolean;
   search: (query: string) => Promise<void>;
-  fetchContextualHelp: (route: string, anchorKey?: string) => Promise<ContextualHelpResponse | null>;
+  fetchContextualHelp: (
+    route: string,
+    anchorKey?: string
+  ) => Promise<ContextualHelpResponse | null>;
   config: HelpProviderConfig;
 }
 
@@ -68,7 +71,7 @@ export interface HelpSidebarProps {
 export interface HelpTooltipProps {
   anchorKey: string;
   children: React.ReactNode;
-  placement?: 'top' | 'bottom' | 'left' | 'right';
+  placement?: "top" | "bottom" | "left" | "right";
 }
 
 export interface HelpArticleViewProps {

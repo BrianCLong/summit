@@ -2,8 +2,8 @@
  * Scenario Generator - Creates synthetic graph data for testing
  */
 
-import { SeededRandom } from '../utils/random.js';
-import { SafetyGuard } from '../utils/safety.js';
+import { SeededRandom } from "../utils/random.js";
+import { SafetyGuard } from "../utils/safety.js";
 import type {
   AttributeDistribution,
   Entity,
@@ -15,8 +15,8 @@ import type {
   RelationshipTemplate,
   ScenarioTemplate,
   Signal,
-} from '../types/index.js';
-import { v4 as uuidv4 } from 'uuid';
+} from "../types/index.js";
+import { v4 as uuidv4 } from "uuid";
 
 export class ScenarioGenerator {
   private rng: SeededRandom;
@@ -25,9 +25,7 @@ export class ScenarioGenerator {
 
   constructor(options: GeneratorOptions) {
     const template =
-      typeof options.template === 'string'
-        ? this.loadTemplate(options.template)
-        : options.template;
+      typeof options.template === "string" ? this.loadTemplate(options.template) : options.template;
 
     // Merge params with template defaults
     this.template = {
@@ -67,11 +65,7 @@ export class ScenarioGenerator {
     const signals = this.generateSignals(entities);
 
     // Compute expected outcomes
-    const expectedOutcomes = this.computeExpectedOutcomes(
-      entities,
-      relationships,
-      signals,
-    );
+    const expectedOutcomes = this.computeExpectedOutcomes(entities, relationships, signals);
 
     return {
       id: scenarioId,
@@ -100,9 +94,7 @@ export class ScenarioGenerator {
         const entity: Entity = {
           type: entityTemplate.type,
           name: this.generateEntityName(entityTemplate.type, i),
-          properties: this.generateAttributes(
-            entityTemplate.distribution.attributes || {},
-          ),
+          properties: this.generateAttributes(entityTemplate.distribution.attributes || {}),
         };
 
         entities.push(entity);
@@ -117,73 +109,28 @@ export class ScenarioGenerator {
    */
   private generateEntityName(type: string, index: number): string {
     const prefixes: Record<string, string[]> = {
-      PERSON: [
-        'Alex',
-        'Jordan',
-        'Morgan',
-        'Casey',
-        'Riley',
-        'Taylor',
-        'Quinn',
-        'Avery',
-      ],
-      ORGANIZATION: [
-        'Alpha',
-        'Beta',
-        'Gamma',
-        'Delta',
-        'Epsilon',
-        'Zeta',
-        'Eta',
-        'Theta',
-      ],
-      LOCATION: [
-        'North',
-        'South',
-        'East',
-        'West',
-        'Central',
-        'Upper',
-        'Lower',
-        'New',
-      ],
+      PERSON: ["Alex", "Jordan", "Morgan", "Casey", "Riley", "Taylor", "Quinn", "Avery"],
+      ORGANIZATION: ["Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Eta", "Theta"],
+      LOCATION: ["North", "South", "East", "West", "Central", "Upper", "Lower", "New"],
     };
 
     const suffixes: Record<string, string[]> = {
-      PERSON: [
-        'Smith',
-        'Johnson',
-        'Williams',
-        'Brown',
-        'Jones',
-        'Garcia',
-        'Miller',
-        'Davis',
-      ],
-      ORGANIZATION: [
-        'Corp',
-        'Inc',
-        'LLC',
-        'Holdings',
-        'Trust',
-        'Group',
-        'Partners',
-        'Ventures',
-      ],
-      LOCATION: ['City', 'Town', 'District', 'Region', 'Zone', 'Sector'],
+      PERSON: ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis"],
+      ORGANIZATION: ["Corp", "Inc", "LLC", "Holdings", "Trust", "Group", "Partners", "Ventures"],
+      LOCATION: ["City", "Town", "District", "Region", "Zone", "Sector"],
     };
 
-    const prefix = this.rng.choice(prefixes[type] || ['Entity']);
-    const suffix = this.rng.choice(suffixes[type] || ['']);
+    const prefix = this.rng.choice(prefixes[type] || ["Entity"]);
+    const suffix = this.rng.choice(suffixes[type] || [""]);
 
-    return `${prefix} ${suffix}${index > 0 ? ` ${index}` : ''}`.trim();
+    return `${prefix} ${suffix}${index > 0 ? ` ${index}` : ""}`.trim();
   }
 
   /**
    * Generate attributes from distribution
    */
   private generateAttributes(
-    attributes: Record<string, AttributeDistribution>,
+    attributes: Record<string, AttributeDistribution>
   ): Record<string, any> {
     const result: Record<string, any> = {};
 
@@ -202,18 +149,16 @@ export class ScenarioGenerator {
       return this.rng.choice(dist);
     }
 
-    if (typeof dist === 'object' && 'distribution' in dist) {
+    if (typeof dist === "object" && "distribution" in dist) {
       switch (dist.distribution) {
-        case 'normal':
+        case "normal":
           return Math.round(this.rng.nextNormal(dist.mean, dist.stddev));
-        case 'lognormal':
+        case "lognormal":
           return Math.round(this.rng.nextLogNormal(dist.mean, dist.stddev));
-        case 'uniform':
+        case "uniform":
           return this.rng.nextFloat(dist.min, dist.max);
-        case 'daterange':
-          return this.rng
-            .nextDate(new Date(dist.start), new Date(dist.end))
-            .toISOString();
+        case "daterange":
+          return this.rng.nextDate(new Date(dist.start), new Date(dist.end)).toISOString();
         default:
           return null;
       }
@@ -309,7 +254,7 @@ export class ScenarioGenerator {
           type: signalTemplate.type,
           description: this.generateSignalDescription(
             signalTemplate.type,
-            signalTemplate.entities || [],
+            signalTemplate.entities || []
           ),
         };
 
@@ -335,12 +280,12 @@ export class ScenarioGenerator {
    */
   private generateSignalDescription(type: string, entities: string[]): string {
     switch (type) {
-      case 'anomaly':
-        return `Anomalous pattern detected involving ${entities.join(', ')}`;
-      case 'missing_data':
-        return 'Incomplete data records requiring investigation';
-      case 'conflicting_evidence':
-        return 'Conflicting information sources detected';
+      case "anomaly":
+        return `Anomalous pattern detected involving ${entities.join(", ")}`;
+      case "missing_data":
+        return "Incomplete data records requiring investigation";
+      case "conflicting_evidence":
+        return "Conflicting information sources detected";
       default:
         return `Signal of type ${type}`;
     }
@@ -352,13 +297,13 @@ export class ScenarioGenerator {
   private computeExpectedOutcomes(
     entities: Entity[],
     relationships: Relationship[],
-    signals: Signal[],
+    signals: Signal[]
   ): ExpectedOutcomes {
     // Identify critical entities (high risk, many connections)
     const connectionCounts = new Map<number, number>();
     for (const rel of relationships) {
-      const fromIdx = typeof rel.from === 'number' ? rel.from : 0;
-      const toIdx = typeof rel.to === 'number' ? rel.to : 0;
+      const fromIdx = typeof rel.from === "number" ? rel.from : 0;
+      const toIdx = typeof rel.to === "number" ? rel.to : 0;
       connectionCounts.set(fromIdx, (connectionCounts.get(fromIdx) || 0) + 1);
       connectionCounts.set(toIdx, (connectionCounts.get(toIdx) || 0) + 1);
     }
@@ -411,9 +356,9 @@ export class ScenarioGenerator {
 export function getBuiltInTemplates(): ScenarioTemplate[] {
   return [
     {
-      name: 'fraud-ring',
-      type: 'financial-crime',
-      description: 'Financial fraud network with shell companies',
+      name: "fraud-ring",
+      type: "financial-crime",
+      description: "Financial fraud network with shell companies",
       params: {
         nodeCount: 50,
         edgeDensity: 0.3,
@@ -422,79 +367,79 @@ export function getBuiltInTemplates(): ScenarioTemplate[] {
       },
       entities: [
         {
-          type: 'PERSON',
+          type: "PERSON",
           distribution: {
             count: 20,
             attributes: {
-              role: ['analyst', 'executive', 'intermediary', 'facilitator'],
-              risk_score: { distribution: 'normal', mean: 60, stddev: 15 },
+              role: ["analyst", "executive", "intermediary", "facilitator"],
+              risk_score: { distribution: "normal", mean: 60, stddev: 15 },
             },
           },
         },
         {
-          type: 'ORGANIZATION',
+          type: "ORGANIZATION",
           distribution: {
             count: 20,
             attributes: {
-              sector: ['finance', 'tech', 'shell', 'consulting'],
-              risk_score: { distribution: 'normal', mean: 70, stddev: 20 },
+              sector: ["finance", "tech", "shell", "consulting"],
+              risk_score: { distribution: "normal", mean: 70, stddev: 20 },
             },
           },
         },
         {
-          type: 'LOCATION',
+          type: "LOCATION",
           distribution: {
             count: 10,
             attributes: {
-              country: ['USA', 'Cayman Islands', 'Switzerland', 'Singapore'],
+              country: ["USA", "Cayman Islands", "Switzerland", "Singapore"],
             },
           },
         },
       ],
       relationships: [
         {
-          type: 'OWNS',
-          from: 'PERSON',
-          to: 'ORGANIZATION',
+          type: "OWNS",
+          from: "PERSON",
+          to: "ORGANIZATION",
           probability: 0.3,
           attributes: {
-            stake: { distribution: 'uniform', min: 10, max: 100 },
-            since: { distribution: 'daterange', start: '2020-01-01', end: '2024-12-31' },
+            stake: { distribution: "uniform", min: 10, max: 100 },
+            since: { distribution: "daterange", start: "2020-01-01", end: "2024-12-31" },
           },
         },
         {
-          type: 'TRANSACTS_WITH',
-          from: 'ORGANIZATION',
-          to: 'ORGANIZATION',
+          type: "TRANSACTS_WITH",
+          from: "ORGANIZATION",
+          to: "ORGANIZATION",
           probability: 0.4,
           attributes: {
-            amount: { distribution: 'lognormal', mean: 11.5, stddev: 1.0 },
-            timestamp: { distribution: 'daterange', start: '2024-01-01', end: '2024-12-31' },
+            amount: { distribution: "lognormal", mean: 11.5, stddev: 1.0 },
+            timestamp: { distribution: "daterange", start: "2024-01-01", end: "2024-12-31" },
           },
         },
         {
-          type: 'LOCATED_IN',
-          from: 'ORGANIZATION',
-          to: 'LOCATION',
+          type: "LOCATED_IN",
+          from: "ORGANIZATION",
+          to: "LOCATION",
           probability: 0.5,
         },
       ],
       signals: [
         {
-          type: 'anomaly',
-          entities: ['suspicious-transaction-pattern'],
+          type: "anomaly",
+          entities: ["suspicious-transaction-pattern"],
           count: 5,
         },
         {
-          type: 'missing_data',
+          type: "missing_data",
           probability: 0.1,
         },
       ],
     },
     {
-      name: 'terror-cell',
-      type: 'security-threat',
-      description: 'Terror network with communication patterns',
+      name: "terror-cell",
+      type: "security-threat",
+      description: "Terror network with communication patterns",
       params: {
         nodeCount: 30,
         edgeDensity: 0.25,
@@ -503,47 +448,47 @@ export function getBuiltInTemplates(): ScenarioTemplate[] {
       },
       entities: [
         {
-          type: 'PERSON',
+          type: "PERSON",
           distribution: {
             count: 20,
             attributes: {
-              role: ['leader', 'operative', 'courier', 'financier'],
-              threat_level: { distribution: 'normal', mean: 70, stddev: 20 },
+              role: ["leader", "operative", "courier", "financier"],
+              threat_level: { distribution: "normal", mean: 70, stddev: 20 },
             },
           },
         },
         {
-          type: 'LOCATION',
+          type: "LOCATION",
           distribution: {
             count: 10,
             attributes: {
-              type: ['safe_house', 'meeting_point', 'border_crossing'],
+              type: ["safe_house", "meeting_point", "border_crossing"],
             },
           },
         },
       ],
       relationships: [
         {
-          type: 'COMMUNICATES_WITH',
-          from: 'PERSON',
-          to: 'PERSON',
+          type: "COMMUNICATES_WITH",
+          from: "PERSON",
+          to: "PERSON",
           probability: 0.3,
           attributes: {
-            frequency: { distribution: 'uniform', min: 1, max: 10 },
-            last_contact: { distribution: 'daterange', start: '2024-01-01', end: '2024-12-31' },
+            frequency: { distribution: "uniform", min: 1, max: 10 },
+            last_contact: { distribution: "daterange", start: "2024-01-01", end: "2024-12-31" },
           },
         },
         {
-          type: 'VISITS',
-          from: 'PERSON',
-          to: 'LOCATION',
+          type: "VISITS",
+          from: "PERSON",
+          to: "LOCATION",
           probability: 0.4,
         },
       ],
       signals: [
         {
-          type: 'anomaly',
-          entities: ['communication-spike'],
+          type: "anomaly",
+          entities: ["communication-spike"],
           count: 3,
         },
       ],

@@ -206,8 +206,7 @@ type Query {
 }
 
 type Mutation {
-  setTenantBudget(tenantId: ID!, budget: Budget!): Boolean
-    @auth(abac: "admin.write")
+  setTenantBudget(tenantId: ID!, budget: Budget!): Boolean @auth(abac: "admin.write")
 }
 ```
 
@@ -309,8 +308,8 @@ repo/
 **SCIM Server (excerpt)**
 
 ```ts
-app.post('/scim/v2/Users', verifySig, dryRunGuard, handleUser);
-app.post('/scim/v2/Groups', verifySig, dryRunGuard, handleGroup);
+app.post("/scim/v2/Users", verifySig, dryRunGuard, handleUser);
+app.post("/scim/v2/Groups", verifySig, dryRunGuard, handleGroup);
 ```
 
 **Quota middleware (TS)**
@@ -318,8 +317,7 @@ app.post('/scim/v2/Groups', verifySig, dryRunGuard, handleGroup);
 ```ts
 export function enforceQuota(tenant: string, cost: number) {
   const b = getBudget(tenant);
-  if (b.costMonthToDate + cost > b.monthlyCapUSD)
-    throw new Error('BudgetExceeded');
+  if (b.costMonthToDate + cost > b.monthlyCapUSD) throw new Error("BudgetExceeded");
 }
 ```
 

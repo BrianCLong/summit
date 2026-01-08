@@ -64,6 +64,7 @@ cp .env.example .env
 ```
 
 Required variables:
+
 - `API_URL`: Backend API URL
 - `GRAPHQL_URL`: GraphQL endpoint URL
 - `WS_URL`: WebSocket URL for subscriptions
@@ -173,6 +174,7 @@ src/
 ### Offline-First
 
 The app is built with an offline-first architecture:
+
 - All data is cached locally in SQLite
 - Mutations are queued when offline and synced when online
 - Apollo Client cache persistence
@@ -189,6 +191,7 @@ The app is built with an offline-first architecture:
 ### Navigation
 
 React Navigation with:
+
 - Stack Navigator: Screen navigation
 - Bottom Tab Navigator: Main app tabs
 - Drawer Navigator: Side menu

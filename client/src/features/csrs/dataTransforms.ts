@@ -1,9 +1,4 @@
-import type {
-  DependencyRow,
-  PurposeTimeline,
-  RetentionPlan,
-  TimelineRow,
-} from './types';
+import type { DependencyRow, PurposeTimeline, RetentionPlan, TimelineRow } from "./types";
 
 const NEAR_BREACH_BUFFER_DAYS = 2;
 
@@ -34,9 +29,9 @@ export function buildDependencyRows(plan: RetentionPlan): DependencyRow[] {
   );
 }
 
-export function determineRiskLevel(purpose: PurposeTimeline): TimelineRow['riskLevel'] {
-  if (purpose.compliance_risk.some((entry) => entry.status === 'breach')) {
-    return 'breach';
+export function determineRiskLevel(purpose: PurposeTimeline): TimelineRow["riskLevel"] {
+  if (purpose.compliance_risk.some((entry) => entry.status === "breach")) {
+    return "breach";
   }
   if (
     purpose.compliance_risk.some(
@@ -45,15 +40,16 @@ export function determineRiskLevel(purpose: PurposeTimeline): TimelineRow['riskL
         entry.allowed_days - entry.projected_shift_days <= NEAR_BREACH_BUFFER_DAYS
     )
   ) {
-    return 'elevated';
+    return "elevated";
   }
-  return 'ok';
+  return "ok";
 }
 
 function formatRiskNotes(purpose: PurposeTimeline): string[] {
   return purpose.compliance_risk.map((entry) => {
-    const prefix = `${entry.type.replace('_', ' ')}: ${entry.status}`;
-    const delta = entry.delta_days === 0 ? '' : ` (${entry.delta_days > 0 ? '+' : ''}${entry.delta_days}d)`;
+    const prefix = `${entry.type.replace("_", " ")}: ${entry.status}`;
+    const delta =
+      entry.delta_days === 0 ? "" : ` (${entry.delta_days > 0 ? "+" : ""}${entry.delta_days}d)`;
     return `${prefix}${delta}`.trim();
   });
 }

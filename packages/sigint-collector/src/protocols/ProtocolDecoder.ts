@@ -3,7 +3,7 @@
  * TRAINING/SIMULATION ONLY
  */
 
-import { SignalType, ModulationType } from '../types';
+import { SignalType, ModulationType } from "../types";
 
 export interface ProtocolSignature {
   id: string;
@@ -20,7 +20,7 @@ export interface ProtocolSignature {
     frameDuration?: number;
     symbolRate?: number;
     channelSpacing?: number;
-    accessMethod?: 'FDMA' | 'TDMA' | 'CDMA' | 'OFDMA';
+    accessMethod?: "FDMA" | "TDMA" | "CDMA" | "OFDMA";
   };
   description: string;
 }
@@ -44,116 +44,116 @@ export class ProtocolDecoder {
   private initializeSignatures(): void {
     const protocols: ProtocolSignature[] = [
       {
-        id: 'gsm',
-        name: 'GSM (2G)',
-        signalType: 'CELLULAR_2G',
-        modulation: 'GMSK',
+        id: "gsm",
+        name: "GSM (2G)",
+        signalType: "CELLULAR_2G",
+        modulation: "GMSK",
         frequency: { min: 880e6, max: 960e6, typical: 900e6 },
         bandwidth: 200e3,
         characteristics: {
           frameDuration: 4.615,
           symbolRate: 270833,
           channelSpacing: 200e3,
-          accessMethod: 'TDMA'
+          accessMethod: "TDMA",
         },
-        description: 'Global System for Mobile Communications'
+        description: "Global System for Mobile Communications",
       },
       {
-        id: 'umts',
-        name: 'UMTS (3G)',
-        signalType: 'CELLULAR_3G',
-        modulation: 'QPSK',
+        id: "umts",
+        name: "UMTS (3G)",
+        signalType: "CELLULAR_3G",
+        modulation: "QPSK",
         frequency: { min: 1920e6, max: 2170e6, typical: 2100e6 },
         bandwidth: 5e6,
         characteristics: {
           symbolRate: 3840000,
           channelSpacing: 5e6,
-          accessMethod: 'CDMA'
+          accessMethod: "CDMA",
         },
-        description: 'Universal Mobile Telecommunications System'
+        description: "Universal Mobile Telecommunications System",
       },
       {
-        id: 'lte',
-        name: 'LTE (4G)',
-        signalType: 'CELLULAR_4G',
-        modulation: 'OFDM',
+        id: "lte",
+        name: "LTE (4G)",
+        signalType: "CELLULAR_4G",
+        modulation: "OFDM",
         frequency: { min: 700e6, max: 2600e6, typical: 1800e6 },
         bandwidth: 20e6,
         characteristics: {
           frameDuration: 10,
           channelSpacing: 15e3,
-          accessMethod: 'OFDMA'
+          accessMethod: "OFDMA",
         },
-        description: 'Long-Term Evolution'
+        description: "Long-Term Evolution",
       },
       {
-        id: '5g-nr',
-        name: '5G NR',
-        signalType: 'CELLULAR_5G',
-        modulation: 'OFDM',
+        id: "5g-nr",
+        name: "5G NR",
+        signalType: "CELLULAR_5G",
+        modulation: "OFDM",
         frequency: { min: 600e6, max: 39e9, typical: 3500e6 },
         bandwidth: 100e6,
         characteristics: {
           channelSpacing: 30e3,
-          accessMethod: 'OFDMA'
+          accessMethod: "OFDMA",
         },
-        description: '5G New Radio'
+        description: "5G New Radio",
       },
       {
-        id: 'wifi-ac',
-        name: 'WiFi 802.11ac',
-        signalType: 'WIFI',
-        modulation: 'OFDM',
+        id: "wifi-ac",
+        name: "WiFi 802.11ac",
+        signalType: "WIFI",
+        modulation: "OFDM",
         frequency: { min: 5170e6, max: 5835e6, typical: 5500e6 },
         bandwidth: 80e6,
         characteristics: {
           channelSpacing: 312.5e3,
-          accessMethod: 'OFDMA'
+          accessMethod: "OFDMA",
         },
-        description: 'IEEE 802.11ac WiFi'
+        description: "IEEE 802.11ac WiFi",
       },
       {
-        id: 'bluetooth',
-        name: 'Bluetooth',
-        signalType: 'BLUETOOTH',
-        modulation: 'GFSK',
+        id: "bluetooth",
+        name: "Bluetooth",
+        signalType: "BLUETOOTH",
+        modulation: "GFSK",
         frequency: { min: 2402e6, max: 2480e6, typical: 2440e6 },
         bandwidth: 1e6,
         characteristics: {
           symbolRate: 1e6,
           channelSpacing: 1e6,
-          accessMethod: 'FDMA'
+          accessMethod: "FDMA",
         },
-        description: 'Bluetooth Classic'
+        description: "Bluetooth Classic",
       },
       {
-        id: 'gps',
-        name: 'GPS L1',
-        signalType: 'NAVIGATION',
-        modulation: 'BPSK',
+        id: "gps",
+        name: "GPS L1",
+        signalType: "NAVIGATION",
+        modulation: "BPSK",
         frequency: { min: 1575.42e6, max: 1575.42e6, typical: 1575.42e6 },
         bandwidth: 2.046e6,
         characteristics: {
           symbolRate: 1.023e6,
-          accessMethod: 'CDMA'
+          accessMethod: "CDMA",
         },
-        description: 'GPS L1 C/A Signal'
+        description: "GPS L1 C/A Signal",
       },
       {
-        id: 'adsb',
-        name: 'ADS-B',
-        signalType: 'TELEMETRY',
-        modulation: 'PPM',
+        id: "adsb",
+        name: "ADS-B",
+        signalType: "TELEMETRY",
+        modulation: "PPM",
         frequency: { min: 1090e6, max: 1090e6, typical: 1090e6 },
         bandwidth: 1e6,
         characteristics: {
-          frameDuration: 0.12
+          frameDuration: 0.12,
         },
-        description: 'Automatic Dependent Surveillance-Broadcast'
-      }
+        description: "Automatic Dependent Surveillance-Broadcast",
+      },
     ];
 
-    protocols.forEach(p => this.signatures.set(p.id, p));
+    protocols.forEach((p) => this.signatures.set(p.id, p));
   }
 
   /**
@@ -170,8 +170,10 @@ export class ProtocolDecoder {
       let confidence = 0;
 
       // Check frequency match
-      if (params.frequency >= signature.frequency.min &&
-        params.frequency <= signature.frequency.max) {
+      if (
+        params.frequency >= signature.frequency.min &&
+        params.frequency <= signature.frequency.max
+      ) {
         confidence += 0.4;
 
         // Bonus for typical frequency
@@ -204,12 +206,11 @@ export class ProtocolDecoder {
   /**
    * Decode protocol data (simulated)
    */
-  decodeProtocol(
-    protocolId: string,
-    _data: Uint8Array | Float32Array
-  ): DecodingResult | null {
+  decodeProtocol(protocolId: string, _data: Uint8Array | Float32Array): DecodingResult | null {
     const signature = this.signatures.get(protocolId);
-    if (!signature) {return null;}
+    if (!signature) {
+      return null;
+    }
 
     // Generate simulated decoded data
     return {
@@ -218,11 +219,11 @@ export class ProtocolDecoder {
       parameters: {
         ...signature.characteristics,
         frequency: signature.frequency.typical,
-        bandwidth: signature.bandwidth
+        bandwidth: signature.bandwidth,
       },
-      rawData: '[SIMULATED PROTOCOL DATA]',
+      rawData: "[SIMULATED PROTOCOL DATA]",
       timestamp: new Date(),
-      isSimulated: true
+      isSimulated: true,
     };
   }
 
@@ -244,7 +245,6 @@ export class ProtocolDecoder {
    * Get protocols by signal type
    */
   getProtocolsByType(signalType: SignalType): ProtocolSignature[] {
-    return Array.from(this.signatures.values())
-      .filter(s => s.signalType === signalType);
+    return Array.from(this.signatures.values()).filter((s) => s.signalType === signalType);
   }
 }

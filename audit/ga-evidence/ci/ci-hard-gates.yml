@@ -7,11 +7,11 @@ on:
   pull_request:
     branches:
       - main
-      - 'release/**'
+      - "release/**"
   push:
     branches:
       - main
-      - 'release/**'
+      - "release/**"
   workflow_dispatch:
 
 # Only allow one CI run per PR to prevent race conditions
@@ -20,13 +20,13 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: '18.18'
+  NODE_VERSION: "18.18"
   CACHE_VERSION: v1
 
 jobs:
   # Gate 1: Lint - Code quality and style enforcement
   lint:
-    name: 'Gate 1: ESLint'
+    name: "Gate 1: ESLint"
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -34,13 +34,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Full history for proper diffing
+          fetch-depth: 0 # Full history for proper diffing
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
@@ -95,7 +95,7 @@ jobs:
 
   # Gate 2: Type Check - TypeScript type safety
   typecheck:
-    name: 'Gate 2: TypeScript'
+    name: "Gate 2: TypeScript"
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -107,7 +107,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
@@ -138,7 +138,7 @@ jobs:
 
   # Gate 3: Build - Verify code compiles
   build:
-    name: 'Gate 3: Build'
+    name: "Gate 3: Build"
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -150,7 +150,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
@@ -195,7 +195,7 @@ jobs:
 
   # Gate 4: Unit Tests - Core functionality verification
   test-unit:
-    name: 'Gate 4: Unit Tests'
+    name: "Gate 4: Unit Tests"
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -207,7 +207,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
@@ -282,7 +282,7 @@ jobs:
 
   # Gate 5: Governance Tests - Policy enforcement
   test-governance:
-    name: 'Gate 5: Governance'
+    name: "Gate 5: Governance"
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -294,7 +294,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
@@ -330,7 +330,7 @@ jobs:
 
   # Gate 6: Provenance Tests - Supply chain integrity
   test-provenance:
-    name: 'Gate 6: Provenance'
+    name: "Gate 6: Provenance"
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -342,7 +342,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
@@ -387,7 +387,7 @@ jobs:
 
   # Gate 7: Schema Diff Check - Breaking change detection
   schema-diff:
-    name: 'Gate 7: Schema Diff'
+    name: "Gate 7: Schema Diff"
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -401,7 +401,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
@@ -432,7 +432,7 @@ jobs:
 
   # Gate 8: Security Scans - Vulnerability detection
   security:
-    name: 'Gate 8: Security'
+    name: "Gate 8: Security"
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -467,9 +467,10 @@ jobs:
 
   # Final Gate: Generate Merge-Safe Artifact
   generate-artifact:
-    name: 'Generate Merge-Safe Artifact'
+    name: "Generate Merge-Safe Artifact"
     runs-on: ubuntu-latest
-    needs: [lint, typecheck, build, test-unit, test-governance, test-provenance, schema-diff, security]
+    needs:
+      [lint, typecheck, build, test-unit, test-governance, test-provenance, schema-diff, security]
     if: always()
     timeout-minutes: 10
 

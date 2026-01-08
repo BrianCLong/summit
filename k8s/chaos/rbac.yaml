@@ -6,9 +6,9 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata: { name: chaos, namespace: stage }
 rules:
-  - apiGroups: ['']
-    resources: ['pods']
-    verbs: ['get', 'list', 'delete']
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "delete"]
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1

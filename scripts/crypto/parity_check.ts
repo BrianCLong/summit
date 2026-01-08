@@ -1,14 +1,14 @@
-import { Pool } from 'pg';
-import { AwsKmsProvider } from '../../services/crypto/index';
+import { Pool } from "pg";
+import { AwsKmsProvider } from "../../services/crypto/index";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 async function checkParity() {
-  const primaryKms = new AwsKmsProvider('alias/conductor/stage/mrk');
-  const secondaryKms = new AwsKmsProvider('alias/conductor/stage/mrk'); // Assuming same alias, different regions configured in SDK
+  const primaryKms = new AwsKmsProvider("alias/conductor/stage/mrk");
+  const secondaryKms = new AwsKmsProvider("alias/conductor/stage/mrk"); // Assuming same alias, different regions configured in SDK
 
   const { rows } = await pool.query(
-    'SELECT id, edek, ctx FROM secrets_vault ORDER BY random() LIMIT 10',
+    "SELECT id, edek, ctx FROM secrets_vault ORDER BY random() LIMIT 10"
   );
 
   for (const row of rows) {

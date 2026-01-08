@@ -23,14 +23,14 @@ export interface DimensionScore {
 }
 
 export type QualityDimension =
-  | 'completeness'
-  | 'accuracy'
-  | 'consistency'
-  | 'validity'
-  | 'uniqueness'
-  | 'timeliness'
-  | 'conformity'
-  | 'integrity';
+  | "completeness"
+  | "accuracy"
+  | "consistency"
+  | "validity"
+  | "uniqueness"
+  | "timeliness"
+  | "conformity"
+  | "integrity";
 
 export interface RuleResult {
   ruleId: string;
@@ -44,7 +44,7 @@ export interface RuleResult {
   severity: Severity;
 }
 
-export type Severity = 'critical' | 'high' | 'medium' | 'low' | 'info';
+export type Severity = "critical" | "high" | "medium" | "low" | "info";
 
 export interface QualityIssue {
   id: string;
@@ -62,23 +62,23 @@ export interface QualityIssue {
 }
 
 export type IssueType =
-  | 'missing_value'
-  | 'invalid_format'
-  | 'out_of_range'
-  | 'duplicate'
-  | 'inconsistent'
-  | 'stale'
-  | 'non_conforming'
-  | 'referential_integrity'
-  | 'custom';
+  | "missing_value"
+  | "invalid_format"
+  | "out_of_range"
+  | "duplicate"
+  | "inconsistent"
+  | "stale"
+  | "non_conforming"
+  | "referential_integrity"
+  | "custom";
 
 export type IssueStatus =
-  | 'open'
-  | 'in_progress'
-  | 'resolved'
-  | 'deferred'
-  | 'false_positive'
-  | 'wont_fix';
+  | "open"
+  | "in_progress"
+  | "resolved"
+  | "deferred"
+  | "false_positive"
+  | "wont_fix";
 
 export interface IssueResolution {
   resolvedBy: string;
@@ -89,12 +89,7 @@ export interface IssueResolution {
   notes?: string;
 }
 
-export type ResolutionType =
-  | 'corrected'
-  | 'accepted'
-  | 'deferred'
-  | 'automated_fix'
-  | 'manual_fix';
+export type ResolutionType = "corrected" | "accepted" | "deferred" | "automated_fix" | "manual_fix";
 
 export interface QualityRule {
   id: string;
@@ -113,13 +108,13 @@ export interface QualityRule {
 }
 
 export type QualityRuleType =
-  | 'field_validation'
-  | 'record_validation'
-  | 'cross_field'
-  | 'cross_record'
-  | 'business_rule'
-  | 'statistical'
-  | 'ml_based';
+  | "field_validation"
+  | "record_validation"
+  | "cross_field"
+  | "cross_record"
+  | "business_rule"
+  | "statistical"
+  | "ml_based";
 
 export interface QualityRuleMetadata {
   createdAt: Date;
@@ -176,15 +171,15 @@ export interface DataQualityTransformation {
 }
 
 export type DataQualityTransformationType =
-  | 'lookup'
-  | 'calculation'
-  | 'concatenation'
-  | 'splitting'
-  | 'formatting'
-  | 'normalization'
-  | 'geocoding'
-  | 'api_call'
-  | 'custom';
+  | "lookup"
+  | "calculation"
+  | "concatenation"
+  | "splitting"
+  | "formatting"
+  | "normalization"
+  | "geocoding"
+  | "api_call"
+  | "custom";
 
 export interface EnrichmentProvider {
   id: string;
@@ -198,12 +193,12 @@ export interface EnrichmentProvider {
 }
 
 export type ProviderType =
-  | 'internal'
-  | 'external_api'
-  | 'database'
-  | 'file'
-  | 'ml_model'
-  | 'custom';
+  | "internal"
+  | "external_api"
+  | "database"
+  | "file"
+  | "ml_model"
+  | "custom";
 
 export interface StandardizationRule {
   id: string;

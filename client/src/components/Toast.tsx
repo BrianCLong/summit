@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 export interface ToastProps {
   id: string;
-  type: 'info' | 'success' | 'warning' | 'error';
+  type: "info" | "success" | "warning" | "error";
   title: string;
   message?: string;
   duration?: number;
@@ -50,27 +50,27 @@ const Toast: React.FC<ToastProps> = ({
 
   const getIcon = () => {
     switch (type) {
-      case 'success':
-        return '✅';
-      case 'error':
-        return '❌';
-      case 'warning':
-        return '⚠️';
+      case "success":
+        return "✅";
+      case "error":
+        return "❌";
+      case "warning":
+        return "⚠️";
       default:
-        return 'ℹ️';
+        return "ℹ️";
     }
   };
 
   const getColorClasses = () => {
     switch (type) {
-      case 'success':
-        return 'bg-green-50 border-green-200 text-green-800';
-      case 'error':
-        return 'bg-red-50 border-red-200 text-red-800';
-      case 'warning':
-        return 'bg-yellow-50 border-yellow-200 text-yellow-800';
+      case "success":
+        return "bg-green-50 border-green-200 text-green-800";
+      case "error":
+        return "bg-red-50 border-red-200 text-red-800";
+      case "warning":
+        return "bg-yellow-50 border-yellow-200 text-yellow-800";
       default:
-        return 'bg-blue-50 border-blue-200 text-blue-800';
+        return "bg-blue-50 border-blue-200 text-blue-800";
     }
   };
 
@@ -78,7 +78,7 @@ const Toast: React.FC<ToastProps> = ({
     <div
       className={`
         transform transition-all duration-300 ease-in-out
-        ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}
+        ${isVisible ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"}
         max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto border
         ${getColorClasses()}
       `}

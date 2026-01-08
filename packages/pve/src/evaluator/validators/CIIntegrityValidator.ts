@@ -7,12 +7,8 @@
  * @module pve/evaluator/validators/CIIntegrityValidator
  */
 
-import type {
-  EvaluationContext,
-  PolicyResult,
-  CIIntegrityInput,
-} from '../../types/index.js';
-import { pass, fail, warn } from '../PolicyResult.js';
+import type { EvaluationContext, PolicyResult, CIIntegrityInput } from "../../types/index.js";
+import { pass, fail, warn } from "../PolicyResult.js";
 
 export interface CIIntegrityValidatorConfig {
   /** Required jobs in the pipeline */
@@ -32,14 +28,14 @@ export interface CIIntegrityValidatorConfig {
 }
 
 const DEFAULT_CONFIG: CIIntegrityValidatorConfig = {
-  requiredJobs: ['lint', 'test', 'build'],
+  requiredJobs: ["lint", "test", "build"],
   requiredSteps: [],
   forbiddenCommands: [
-    'curl.*\\|.*sh',
-    'wget.*\\|.*sh',
-    'eval\\s+\\$',
-    'npm\\s+publish.*--force',
-    'git\\s+push.*--force',
+    "curl.*\\|.*sh",
+    "wget.*\\|.*sh",
+    "eval\\s+\\$",
+    "npm\\s+publish.*--force",
+    "git\\s+push.*--force",
   ],
   requireProductionApproval: true,
   maxJobTimeout: 60, // 60 minutes
@@ -53,7 +49,7 @@ export class CIIntegrityValidator {
   }
 
   async validate(context: EvaluationContext): Promise<PolicyResult[]> {
-    if (context.type !== 'ci_integrity') {
+    if (context.type !== "ci_integrity") {
       return [];
     }
 
@@ -61,16 +57,16 @@ export class CIIntegrityValidator {
     const results: PolicyResult[] = [];
 
     switch (input.platform) {
-      case 'github_actions':
+      case "github_actions":
         results.push(...this.validateGitHubActions(input));
         break;
-      case 'gitlab_ci':
+      case "gitlab_ci":
         results.push(...this.validateGitLabCI(input));
         break;
-      case 'jenkins':
+      case "jenkins":
         results.push(...this.validateJenkins(input));
         break;
-      case 'circleci':
+      case "circleci":
         results.push(...this.validateCircleCI(input));
         break;
       default:
@@ -84,12 +80,12 @@ export class CIIntegrityValidator {
     const results: PolicyResult[] = [];
     const config = input.config as GitHubActionsConfig;
 
-    if (!config || typeof config !== 'object') {
+    if (!config || typeof config !== "object") {
       results.push(
-        fail('pve.ci.invalid_config', 'Invalid GitHub Actions configuration', {
-          severity: 'error',
+        fail("pve.ci.invalid_config", "Invalid GitHub Actions configuration", {
+          severity: "error",
           location: { file: input.filePath },
-        }),
+        })
       );
       return results;
     }
@@ -97,23 +93,23 @@ export class CIIntegrityValidator {
     // Check required jobs
     const jobs = Object.keys(config.jobs || {});
     for (const required of this.config.requiredJobs || []) {
-      const hasJob = jobs.some(
-        (j) => j.toLowerCase().includes(required.toLowerCase()),
-      );
+      const hasJob = jobs.some((j) => j.toLowerCase().includes(required.toLowerCase()));
       if (!hasJob) {
         results.push(
-          warn('pve.ci.missing_job', `Missing required job type: ${required}`, {
+          warn("pve.ci.missing_job", `Missing required job type: ${required}`, {
             location: { file: input.filePath },
             fix: `Add a job that includes "${required}" in its name or purpose`,
-          }),
+          })
         );
       }
     }
 
-    if ((this.config.requiredJobs || []).every((r) =>
-      jobs.some((j) => j.toLowerCase().includes(r.toLowerCase())),
-    )) {
-      results.push(pass('pve.ci.required_jobs'));
+    if (
+      (this.config.requiredJobs || []).every((r) =>
+        jobs.some((j) => j.toLowerCase().includes(r.toLowerCase()))
+      )
+    ) {
+      results.push(pass("pve.ci.required_jobs"));
     }
 
     // Check for forbidden commands
@@ -128,14 +124,18 @@ export class CIIntegrityValidator {
 
     // Check timeouts
     for (const [jobName, job] of Object.entries(config.jobs || {})) {
-      if (job && typeof job === 'object') {
-        const jobConfig = job as { 'timeout-minutes'?: number };
-        if (this.config.maxJobTimeout && jobConfig['timeout-minutes']) {
-          if (jobConfig['timeout-minutes'] > this.config.maxJobTimeout) {
+      if (job && typeof job === "object") {
+        const jobConfig = job as { "timeout-minutes"?: number };
+        if (this.config.maxJobTimeout && jobConfig["timeout-minutes"]) {
+          if (jobConfig["timeout-minutes"] > this.config.maxJobTimeout) {
             results.push(
-              warn('pve.ci.job_timeout', `Job "${jobName}" timeout exceeds maximum of ${this.config.maxJobTimeout} minutes`, {
-                location: { file: input.filePath, field: `jobs.${jobName}.timeout-minutes` },
-              }),
+              warn(
+                "pve.ci.job_timeout",
+                `Job "${jobName}" timeout exceeds maximum of ${this.config.maxJobTimeout} minutes`,
+                {
+                  location: { file: input.filePath, field: `jobs.${jobName}.timeout-minutes` },
+                }
+              )
             );
           }
         }
@@ -154,7 +154,7 @@ export class CIIntegrityValidator {
     const steps: string[] = [];
 
     for (const job of Object.values(config.jobs || {})) {
-      if (job && typeof job === 'object') {
+      if (job && typeof job === "object") {
         const jobConfig = job as { steps?: Array<{ run?: string; uses?: string }> };
         for (const step of jobConfig.steps || []) {
           if (step.run) {
@@ -172,42 +172,43 @@ export class CIIntegrityValidator {
 
   private checkGitHubActionsPermissions(
     config: GitHubActionsConfig,
-    filePath: string,
+    filePath: string
   ): PolicyResult[] {
     const results: PolicyResult[] = [];
 
     // Check for overly permissive permissions
-    if (config.permissions === 'write-all') {
+    if (config.permissions === "write-all") {
       results.push(
-        fail('pve.ci.permissions', 'Workflow has write-all permissions which is overly permissive', {
-          severity: 'error',
-          location: { file: filePath, field: 'permissions' },
-          fix: 'Use least-privilege permissions for each job',
-        }),
+        fail(
+          "pve.ci.permissions",
+          "Workflow has write-all permissions which is overly permissive",
+          {
+            severity: "error",
+            location: { file: filePath, field: "permissions" },
+            fix: "Use least-privilege permissions for each job",
+          }
+        )
       );
     } else if (!config.permissions) {
       results.push(
-        warn('pve.ci.permissions', 'Workflow does not explicitly set permissions', {
+        warn("pve.ci.permissions", "Workflow does not explicitly set permissions", {
           location: { file: filePath },
-          fix: 'Add explicit permissions block with least-privilege access',
-        }),
+          fix: "Add explicit permissions block with least-privilege access",
+        })
       );
     } else {
-      results.push(pass('pve.ci.permissions'));
+      results.push(pass("pve.ci.permissions"));
     }
 
     return results;
   }
 
-  private checkPinnedActions(
-    config: GitHubActionsConfig,
-    filePath: string,
-  ): PolicyResult[] {
+  private checkPinnedActions(config: GitHubActionsConfig, filePath: string): PolicyResult[] {
     const results: PolicyResult[] = [];
     const unpinnedActions: string[] = [];
 
     for (const [jobName, job] of Object.entries(config.jobs || {})) {
-      if (job && typeof job === 'object') {
+      if (job && typeof job === "object") {
         const jobConfig = job as { steps?: Array<{ uses?: string }> };
         for (const step of jobConfig.steps || []) {
           if (step.uses && !this.isActionPinned(step.uses)) {
@@ -219,14 +220,18 @@ export class CIIntegrityValidator {
 
     if (unpinnedActions.length > 0) {
       results.push(
-        warn('pve.ci.unpinned_actions', `${unpinnedActions.length} action(s) are not pinned to a SHA`, {
-          location: { file: filePath },
-          fix: 'Pin actions to a full commit SHA for security',
-          details: { unpinnedActions: unpinnedActions.slice(0, 5) },
-        }),
+        warn(
+          "pve.ci.unpinned_actions",
+          `${unpinnedActions.length} action(s) are not pinned to a SHA`,
+          {
+            location: { file: filePath },
+            fix: "Pin actions to a full commit SHA for security",
+            details: { unpinnedActions: unpinnedActions.slice(0, 5) },
+          }
+        )
       );
     } else {
-      results.push(pass('pve.ci.pinned_actions'));
+      results.push(pass("pve.ci.pinned_actions"));
     }
 
     return results;
@@ -234,44 +239,43 @@ export class CIIntegrityValidator {
 
   private isActionPinned(uses: string): boolean {
     // Check if action is pinned to a SHA (40 hex characters)
-    const sha = uses.split('@')[1];
+    const sha = uses.split("@")[1];
     return sha ? /^[a-f0-9]{40}$/i.test(sha) : false;
   }
 
-  private checkProductionProtection(
-    config: GitHubActionsConfig,
-    filePath: string,
-  ): PolicyResult[] {
+  private checkProductionProtection(config: GitHubActionsConfig, filePath: string): PolicyResult[] {
     const results: PolicyResult[] = [];
     let hasProductionProtection = false;
 
     for (const [jobName, job] of Object.entries(config.jobs || {})) {
-      if (job && typeof job === 'object') {
+      if (job && typeof job === "object") {
         const jobConfig = job as { environment?: string | { name: string } };
         const envName =
-          typeof jobConfig.environment === 'string'
+          typeof jobConfig.environment === "string"
             ? jobConfig.environment
             : jobConfig.environment?.name;
 
         if (
           envName &&
-          (envName.toLowerCase().includes('prod') ||
-            envName.toLowerCase().includes('production'))
+          (envName.toLowerCase().includes("prod") || envName.toLowerCase().includes("production"))
         ) {
           hasProductionProtection = true;
         }
 
         // Check for deployment jobs without environment protection
         if (
-          (jobName.toLowerCase().includes('deploy') ||
-            jobName.toLowerCase().includes('release')) &&
+          (jobName.toLowerCase().includes("deploy") || jobName.toLowerCase().includes("release")) &&
           !envName
         ) {
           results.push(
-            warn('pve.ci.unprotected_deployment', `Deployment job "${jobName}" has no environment protection`, {
-              location: { file: filePath, field: `jobs.${jobName}` },
-              fix: 'Add environment protection with required reviewers',
-            }),
+            warn(
+              "pve.ci.unprotected_deployment",
+              `Deployment job "${jobName}" has no environment protection`,
+              {
+                location: { file: filePath, field: `jobs.${jobName}` },
+                fix: "Add environment protection with required reviewers",
+              }
+            )
           );
         }
       }
@@ -279,40 +283,37 @@ export class CIIntegrityValidator {
 
     if (!hasProductionProtection) {
       results.push(
-        warn('pve.ci.no_production_environment', 'No production environment protection detected', {
+        warn("pve.ci.no_production_environment", "No production environment protection detected", {
           location: { file: filePath },
-          fix: 'Add a protected environment for production deployments',
-        }),
+          fix: "Add a protected environment for production deployments",
+        })
       );
     } else {
-      results.push(pass('pve.ci.production_protection'));
+      results.push(pass("pve.ci.production_protection"));
     }
 
     return results;
   }
 
-  private checkForbiddenCommands(
-    commands: string[],
-    filePath: string,
-  ): PolicyResult[] {
+  private checkForbiddenCommands(commands: string[], filePath: string): PolicyResult[] {
     const results: PolicyResult[] = [];
-    const combined = commands.join('\n');
+    const combined = commands.join("\n");
 
     for (const forbidden of this.config.forbiddenCommands || []) {
-      const regex = new RegExp(forbidden, 'i');
+      const regex = new RegExp(forbidden, "i");
       if (regex.test(combined)) {
         results.push(
-          fail('pve.ci.forbidden_command', `Forbidden command pattern detected: ${forbidden}`, {
-            severity: 'error',
+          fail("pve.ci.forbidden_command", `Forbidden command pattern detected: ${forbidden}`, {
+            severity: "error",
             location: { file: filePath },
-            fix: 'Remove or replace the dangerous command pattern',
-          }),
+            fix: "Remove or replace the dangerous command pattern",
+          })
         );
       }
     }
 
     if (results.filter((r) => !r.allowed).length === 0) {
-      results.push(pass('pve.ci.forbidden_commands'));
+      results.push(pass("pve.ci.forbidden_commands"));
     }
 
     return results;
@@ -320,23 +321,25 @@ export class CIIntegrityValidator {
 
   private validateGitLabCI(input: CIIntegrityInput): PolicyResult[] {
     // Placeholder for GitLab CI validation
-    return [pass('pve.ci.gitlab', 'GitLab CI validation placeholder')];
+    return [pass("pve.ci.gitlab", "GitLab CI validation placeholder")];
   }
 
   private validateJenkins(input: CIIntegrityInput): PolicyResult[] {
     // Placeholder for Jenkins validation
-    return [pass('pve.ci.jenkins', 'Jenkins validation placeholder')];
+    return [pass("pve.ci.jenkins", "Jenkins validation placeholder")];
   }
 
   private validateCircleCI(input: CIIntegrityInput): PolicyResult[] {
     // Placeholder for CircleCI validation
-    return [pass('pve.ci.circleci', 'CircleCI validation placeholder')];
+    return [pass("pve.ci.circleci", "CircleCI validation placeholder")];
   }
 
   private validateGeneric(input: CIIntegrityInput): PolicyResult[] {
-    return [warn('pve.ci.unknown_platform', `Unknown CI platform: ${input.platform}`, {
-      location: { file: input.filePath },
-    })];
+    return [
+      warn("pve.ci.unknown_platform", `Unknown CI platform: ${input.platform}`, {
+        location: { file: input.filePath },
+      }),
+    ];
   }
 }
 

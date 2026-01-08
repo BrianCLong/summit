@@ -11,9 +11,5 @@ type WorkloadPolicy {
 }
 
 type Mutation {
-  setWorkloadPolicy(
-    id: ID!
-    placement: String!
-    pinned: Boolean
-  ): WorkloadPolicy!
+  setWorkloadPolicy(id: ID!, placement: String!, pinned: Boolean): WorkloadPolicy!
 }

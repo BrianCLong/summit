@@ -7,16 +7,16 @@
  * - Query parameter versioning (?version=v1)
  */
 
-import type { IncomingMessage } from 'http';
-import { createLogger } from '../utils/logger.js';
+import type { IncomingMessage } from "http";
+import { createLogger } from "../utils/logger.js";
 
-const logger = createLogger('versioning');
+const logger = createLogger("versioning");
 
 export enum VersioningStrategy {
-  URL_PATH = 'URL_PATH',
-  HEADER = 'HEADER',
-  QUERY_PARAM = 'QUERY_PARAM',
-  CONTENT_TYPE = 'CONTENT_TYPE',
+  URL_PATH = "URL_PATH",
+  HEADER = "HEADER",
+  QUERY_PARAM = "QUERY_PARAM",
+  CONTENT_TYPE = "CONTENT_TYPE",
 }
 
 export interface VersioningConfig {
@@ -32,9 +32,9 @@ export class VersionManager {
 
   constructor(config: VersioningConfig) {
     this.config = {
-      headerName: 'Accept-Version',
-      queryParamName: 'version',
-      defaultVersion: 'v1',
+      headerName: "Accept-Version",
+      queryParamName: "version",
+      defaultVersion: "v1",
       ...config,
     };
   }
@@ -44,13 +44,13 @@ export class VersionManager {
 
     switch (this.config.strategy) {
       case VersioningStrategy.URL_PATH:
-        version = this.extractFromUrlPath(req.url || '');
+        version = this.extractFromUrlPath(req.url || "");
         break;
       case VersioningStrategy.HEADER:
         version = this.extractFromHeader(req);
         break;
       case VersioningStrategy.QUERY_PARAM:
-        version = this.extractFromQueryParam(req.url || '');
+        version = this.extractFromQueryParam(req.url || "");
         break;
       case VersioningStrategy.CONTENT_TYPE:
         version = this.extractFromContentType(req);
@@ -59,7 +59,7 @@ export class VersionManager {
 
     // Validate version
     if (version && !this.isVersionSupported(version)) {
-      logger.warn('Unsupported API version requested', {
+      logger.warn("Unsupported API version requested", {
         version,
         supported: this.config.supportedVersions,
       });
@@ -75,16 +75,16 @@ export class VersionManager {
   }
 
   private extractFromHeader(req: IncomingMessage): string | null {
-    return req.headers[this.config.headerName!.toLowerCase()] as string || null;
+    return (req.headers[this.config.headerName!.toLowerCase()] as string) || null;
   }
 
   private extractFromQueryParam(url: string): string | null {
-    const urlObj = new URL(url, 'http://localhost');
+    const urlObj = new URL(url, "http://localhost");
     return urlObj.searchParams.get(this.config.queryParamName!) || null;
   }
 
   private extractFromContentType(req: IncomingMessage): string | null {
-    const contentType = req.headers['content-type'] || '';
+    const contentType = req.headers["content-type"] || "";
     const match = contentType.match(/version=(v\d+)/);
     return match ? match[1] : null;
   }
@@ -97,9 +97,9 @@ export class VersionManager {
     // Rewrite URL to include version if not already present
     if (this.config.strategy === VersioningStrategy.URL_PATH) {
       if (!url.match(/\/v\d+\//)) {
-        const parts = url.split('/');
+        const parts = url.split("/");
         parts.splice(1, 0, version);
-        return parts.join('/');
+        return parts.join("/");
       }
     }
     return url;
@@ -110,6 +110,6 @@ export class VersionManager {
   }
 
   getDefaultVersion(): string {
-    return this.config.defaultVersion || 'v1';
+    return this.config.defaultVersion || "v1";
   }
 }

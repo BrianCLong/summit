@@ -24,7 +24,7 @@ ls -la services/graph-analytics/
 
 ## Claude Prompt
 
-```
+````
 You are implementing the Predictive Threat Suite (Alpha) for IntelGraph - timeline forecasting and counterfactual analysis.
 
 CONTEXT:
@@ -183,9 +183,10 @@ SAMPLE FORECAST API RESPONSE:
   "modelVersion": "v1.0.0-alpha",
   "seed": 42
 }
-```
+````
 
 SAMPLE COUNTERFACTUAL API RESPONSE:
+
 ```json
 {
   "analysisId": "cf-789",
@@ -204,8 +205,8 @@ SAMPLE COUNTERFACTUAL API RESPONSE:
     {
       "type": "addEntity",
       "entity": "entity-E",
-      "attributes": {"type": "regulator"},
-      "impact": 0.20
+      "attributes": { "type": "regulator" },
+      "impact": 0.2
     }
   ],
   "sensitivity": {
@@ -216,9 +217,10 @@ SAMPLE COUNTERFACTUAL API RESPONSE:
 ```
 
 SAMPLE XAI VISUALIZATION (XAIPanel.tsx):
+
 ```tsx
-import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
+import React from "react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 
 interface XAIProps {
   factors: Array<{ feature: string; importance: number }>;
@@ -241,6 +243,7 @@ export function XAIPanel({ factors }: XAIProps) {
 ```
 
 STUB MODEL (for alpha):
+
 ```python
 from prophet import Prophet
 import pandas as pd
@@ -273,6 +276,7 @@ Provide:
 (f) API documentation (OpenAPI/Swagger)
 (g) Tests (reproducibility, golden dataset)
 (h) Helm chart updates
+
 ```
 
 ---
@@ -301,3 +305,4 @@ Provide:
 - SHAP: https://shap.readthedocs.io/
 - Counterfactual explanations: https://christophm.github.io/interpretable-ml-book/counterfactual.html
 - Helm chart: `charts/ig-platform/values.yaml` (predictiveSuite)
+```

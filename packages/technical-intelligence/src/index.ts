@@ -5,4 +5,4 @@
  * SIGINT, IMINT, MASINT, cyber operations, and technical surveillance.
  */
 
-export * from './techint-analyzer.js';
+export * from "./techint-analyzer.js";

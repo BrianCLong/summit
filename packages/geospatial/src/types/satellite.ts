@@ -3,51 +3,51 @@
  * Supports raster/vector fusion, change detection, and Neo4j integration
  */
 
-import { Geometry, Position } from 'geojson';
-import { BoundingBox, GeoPoint, IntelFeature } from './geospatial.js';
+import { Geometry, Position } from "geojson";
+import { BoundingBox, GeoPoint, IntelFeature } from "./geospatial.js";
 
 /**
  * Spectral band definitions for satellite imagery
  */
 export type SpectralBand =
-  | 'panchromatic'
-  | 'red'
-  | 'green'
-  | 'blue'
-  | 'nir' // Near-infrared
-  | 'swir1' // Short-wave infrared 1
-  | 'swir2' // Short-wave infrared 2
-  | 'thermal'
-  | 'coastal'
-  | 'cirrus';
+  | "panchromatic"
+  | "red"
+  | "green"
+  | "blue"
+  | "nir" // Near-infrared
+  | "swir1" // Short-wave infrared 1
+  | "swir2" // Short-wave infrared 2
+  | "thermal"
+  | "coastal"
+  | "cirrus";
 
 /**
  * Satellite platform/constellation identifier
  */
 export type SatellitePlatform =
-  | 'sentinel-2'
-  | 'landsat-8'
-  | 'landsat-9'
-  | 'worldview-3'
-  | 'worldview-4'
-  | 'planet'
-  | 'maxar'
-  | 'iceye'
-  | 'capella'
-  | 'synthetic' // Test data
-  | 'classified';
+  | "sentinel-2"
+  | "landsat-8"
+  | "landsat-9"
+  | "worldview-3"
+  | "worldview-4"
+  | "planet"
+  | "maxar"
+  | "iceye"
+  | "capella"
+  | "synthetic" // Test data
+  | "classified";
 
 /**
  * Image processing level
  */
 export type ProcessingLevel =
-  | 'L0' // Raw
-  | 'L1A' // Radiometric correction
-  | 'L1B' // Geometric correction
-  | 'L1C' // Orthorectified
-  | 'L2A' // Atmospherically corrected
-  | 'L3' // Derived product
-  | 'analysis_ready';
+  | "L0" // Raw
+  | "L1A" // Radiometric correction
+  | "L1B" // Geometric correction
+  | "L1C" // Orthorectified
+  | "L2A" // Atmospherically corrected
+  | "L3" // Derived product
+  | "analysis_ready";
 
 /**
  * Comprehensive satellite scene metadata
@@ -66,7 +66,7 @@ export interface SatelliteScene {
   sunElevation?: number;
   sunAzimuth?: number;
   viewAngle?: number;
-  classification: 'unclassified' | 'cui' | 'secret' | 'top_secret';
+  classification: "unclassified" | "cui" | "secret" | "top_secret";
 
   // Storage references
   tileUrls?: Record<SpectralBand, string>;
@@ -115,7 +115,7 @@ export interface TileStatistics {
  * Vector feature extracted from imagery
  */
 export interface ExtractedFeature extends IntelFeature {
-  properties: IntelFeature['properties'] & {
+  properties: IntelFeature["properties"] & {
     sceneId: string;
     extractionMethod: string;
     detectionConfidence: number;
@@ -130,16 +130,16 @@ export interface ExtractedFeature extends IntelFeature {
  * Change detection types
  */
 export type ChangeType =
-  | 'construction'
-  | 'demolition'
-  | 'vegetation_gain'
-  | 'vegetation_loss'
-  | 'water_change'
-  | 'vehicle_movement'
-  | 'infrastructure'
-  | 'activity_increase'
-  | 'activity_decrease'
-  | 'unknown';
+  | "construction"
+  | "demolition"
+  | "vegetation_gain"
+  | "vegetation_loss"
+  | "water_change"
+  | "vehicle_movement"
+  | "infrastructure"
+  | "activity_increase"
+  | "activity_decrease"
+  | "unknown";
 
 /**
  * Change detection result
@@ -161,12 +161,12 @@ export interface ChangeDetectionResult {
  * Change detection method
  */
 export type ChangeDetectionMethod =
-  | 'spectral_differencing'
-  | 'ndvi_differencing'
-  | 'object_based'
-  | 'deep_learning'
-  | 'hybrid'
-  | 'agentic_ensemble';
+  | "spectral_differencing"
+  | "ndvi_differencing"
+  | "object_based"
+  | "deep_learning"
+  | "hybrid"
+  | "agentic_ensemble";
 
 /**
  * Individual detected change
@@ -192,9 +192,9 @@ export interface DetectedChange {
 export interface GDALProcessingOptions {
   inputSRS?: string;
   outputSRS?: string;
-  resampleMethod?: 'nearest' | 'bilinear' | 'cubic' | 'cubicspline' | 'lanczos';
-  outputFormat?: 'GTiff' | 'COG' | 'VRT' | 'PNG' | 'JPEG';
-  compression?: 'DEFLATE' | 'LZW' | 'ZSTD' | 'JPEG' | 'NONE';
+  resampleMethod?: "nearest" | "bilinear" | "cubic" | "cubicspline" | "lanczos";
+  outputFormat?: "GTiff" | "COG" | "VRT" | "PNG" | "JPEG";
+  compression?: "DEFLATE" | "LZW" | "ZSTD" | "JPEG" | "NONE";
   tileSize?: number;
   overviewLevels?: number[];
   noDataValue?: number;
@@ -210,10 +210,10 @@ export interface GDALProcessingOptions {
 export interface FusionConfig {
   vectorLayers: string[];
   rasterBands: SpectralBand[];
-  fusionMethod: 'overlay' | 'zonal_stats' | 'sample_extraction' | 'segmentation';
-  outputType: 'enriched_vectors' | 'raster_attributes' | 'graph_nodes';
+  fusionMethod: "overlay" | "zonal_stats" | "sample_extraction" | "segmentation";
+  outputType: "enriched_vectors" | "raster_attributes" | "graph_nodes";
   bufferMeters?: number;
-  aggregationMethod?: 'mean' | 'median' | 'mode' | 'max' | 'min' | 'sum';
+  aggregationMethod?: "mean" | "median" | "mode" | "max" | "min" | "sum";
 }
 
 /**
@@ -264,16 +264,16 @@ export interface GeoNode {
  * Types of geospatial nodes in the graph
  */
 export type GeoNodeType =
-  | 'facility'
-  | 'infrastructure'
-  | 'vehicle'
-  | 'vessel'
-  | 'aircraft'
-  | 'natural_feature'
-  | 'activity_site'
-  | 'change_event'
-  | 'observation'
-  | 'aoi'; // Area of Interest
+  | "facility"
+  | "infrastructure"
+  | "vehicle"
+  | "vessel"
+  | "aircraft"
+  | "natural_feature"
+  | "activity_site"
+  | "change_event"
+  | "observation"
+  | "aoi"; // Area of Interest
 
 /**
  * Relationship between geo nodes
@@ -293,15 +293,15 @@ export interface GeoRelationship {
  * Types of relationships between geo nodes
  */
 export type GeoRelationshipType =
-  | 'near' // Spatial proximity
-  | 'contains' // Spatial containment
-  | 'intersects' // Spatial intersection
-  | 'connected_to' // Infrastructure connection
-  | 'observed_with' // Co-observation
-  | 'changed_from' // Temporal change
-  | 'part_of' // Hierarchical
-  | 'activity_at' // Activity relationship
-  | 'moved_to'; // Movement track
+  | "near" // Spatial proximity
+  | "contains" // Spatial containment
+  | "intersects" // Spatial intersection
+  | "connected_to" // Infrastructure connection
+  | "observed_with" // Co-observation
+  | "changed_from" // Temporal change
+  | "part_of" // Hierarchical
+  | "activity_at" // Activity relationship
+  | "moved_to"; // Movement track
 
 /**
  * Provenance record for audit trail
@@ -324,13 +324,13 @@ export interface ProvenanceRecord {
 export interface CacheEntry {
   key: string;
   data: Buffer | string | object;
-  dataType: 'raster' | 'vector' | 'metadata' | 'model' | 'tile';
+  dataType: "raster" | "vector" | "metadata" | "model" | "tile";
   sizeBytes: number;
   createdAt: Date;
   expiresAt?: Date;
   accessCount: number;
   lastAccessedAt: Date;
-  priority: 'critical' | 'high' | 'normal' | 'low';
+  priority: "critical" | "high" | "normal" | "low";
   checksumMd5: string;
   compressed: boolean;
   encryption?: {
@@ -361,7 +361,7 @@ export interface CacheStats {
 export interface PipelineStatus {
   pipelineId: string;
   name: string;
-  status: 'idle' | 'running' | 'completed' | 'failed' | 'paused';
+  status: "idle" | "running" | "completed" | "failed" | "paused";
   progress: number; // 0-100
   currentStep?: string;
   startedAt?: Date;
@@ -381,8 +381,8 @@ export interface PipelineStatus {
  */
 export interface AgenticTask {
   taskId: string;
-  taskType: 'monitor' | 'detect' | 'analyze' | 'alert';
-  priority: 'flash' | 'immediate' | 'priority' | 'routine';
+  taskType: "monitor" | "detect" | "analyze" | "alert";
+  priority: "flash" | "immediate" | "priority" | "routine";
   aoi: Geometry;
   parameters: {
     minConfidence?: number;
@@ -391,7 +391,7 @@ export interface AgenticTask {
     revisitIntervalHours?: number;
     alertThreshold?: number;
   };
-  status: 'queued' | 'running' | 'completed' | 'failed';
+  status: "queued" | "running" | "completed" | "failed";
   createdAt: Date;
   lastRunAt?: Date;
   nextRunAt?: Date;
@@ -414,7 +414,7 @@ export interface Visualization3DConfig {
   terrain: {
     enabled: boolean;
     exaggeration: number;
-    provider: 'cesium' | 'mapbox' | 'local';
+    provider: "cesium" | "mapbox" | "local";
   };
   lighting: {
     dateTime: Date;
@@ -434,7 +434,7 @@ export interface Visualization3DConfig {
  */
 export interface VisualizationLayer {
   id: string;
-  type: 'imagery' | 'terrain' | 'vector' | 'heatmap' | '3d_tiles' | 'point_cloud';
+  type: "imagery" | "terrain" | "vector" | "heatmap" | "3d_tiles" | "point_cloud";
   visible: boolean;
   opacity: number;
   source: string;

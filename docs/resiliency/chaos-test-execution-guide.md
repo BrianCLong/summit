@@ -31,11 +31,11 @@ kubectl get crds | grep chaos-mesh
 
 ## 3. Map Services to Chaos Experiments
 
-| Service | Chaos Object | Purpose |
-| --- | --- | --- |
-| Node.js backend (`app=intelgraph, component=backend`) | `nodejs-backend-pod-chaos.yaml` | Validate pod auto-recovery and load balancer health.
-| Python analytics API (`app.kubernetes.io/name=analytics-api`) | `python-api-network-latency.yaml` | Validate graceful degradation and retry logic under latency.
-| PostgreSQL primary (`app.kubernetes.io/name=intelgraph-postgres, role=primary`) | `postgres-primary-failure.yaml` | Validate failover and connection pooling behavior.
+| Service                                                                         | Chaos Object                      | Purpose                                                      |
+| ------------------------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------ |
+| Node.js backend (`app=intelgraph, component=backend`)                           | `nodejs-backend-pod-chaos.yaml`   | Validate pod auto-recovery and load balancer health.         |
+| Python analytics API (`app.kubernetes.io/name=analytics-api`)                   | `python-api-network-latency.yaml` | Validate graceful degradation and retry logic under latency. |
+| PostgreSQL primary (`app.kubernetes.io/name=intelgraph-postgres, role=primary`) | `postgres-primary-failure.yaml`   | Validate failover and connection pooling behavior.           |
 
 Update the label selectors if your deployment uses different labels or namespaces.
 

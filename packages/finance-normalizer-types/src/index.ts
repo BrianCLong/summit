@@ -5,7 +5,7 @@
  * @packageDocumentation
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================================================
 // MONETARY PRIMITIVES (Decimal-Safe)
@@ -36,13 +36,16 @@ export const exchangeRateSchema = z.object({
   /** Rate as a string to preserve precision (e.g., "1.23456789") */
   rate: z.string().regex(/^\d+(\.\d+)?$/),
   /** Inverse rate for reverse conversion */
-  inverseRate: z.string().regex(/^\d+(\.\d+)?$/).optional(),
+  inverseRate: z
+    .string()
+    .regex(/^\d+(\.\d+)?$/)
+    .optional(),
   /** Rate effective timestamp */
   effectiveAt: z.string().datetime(),
   /** Rate source (e.g., "ECB", "REUTERS", "INTERNAL") */
   source: z.string(),
   /** Rate type */
-  rateType: z.enum(['SPOT', 'FORWARD', 'HISTORICAL', 'INDICATIVE']).default('SPOT'),
+  rateType: z.enum(["SPOT", "FORWARD", "HISTORICAL", "INDICATIVE"]).default("SPOT"),
 });
 
 export type ExchangeRate = z.infer<typeof exchangeRateSchema>;
@@ -52,28 +55,28 @@ export type ExchangeRate = z.infer<typeof exchangeRateSchema>;
 // ============================================================================
 
 export const partyTypes = [
-  'INDIVIDUAL',
-  'CORPORATION',
-  'FINANCIAL_INSTITUTION',
-  'GOVERNMENT',
-  'NONPROFIT',
-  'TRUST',
-  'PARTNERSHIP',
-  'UNKNOWN',
+  "INDIVIDUAL",
+  "CORPORATION",
+  "FINANCIAL_INSTITUTION",
+  "GOVERNMENT",
+  "NONPROFIT",
+  "TRUST",
+  "PARTNERSHIP",
+  "UNKNOWN",
 ] as const;
 
 export const partyIdentifierTypes = [
-  'LEI',          // Legal Entity Identifier
-  'BIC',          // Bank Identifier Code (SWIFT)
-  'DUNS',         // Dun & Bradstreet
-  'EIN',          // US Employer ID
-  'VAT',          // VAT Registration
-  'NATIONAL_ID',  // National ID number
-  'PASSPORT',     // Passport number
-  'SSN',          // Social Security Number (hashed)
-  'ACCOUNT_NUMBER', // Bank account number
-  'INTERNAL',     // Internal system ID
-  'OTHER',
+  "LEI", // Legal Entity Identifier
+  "BIC", // Bank Identifier Code (SWIFT)
+  "DUNS", // Dun & Bradstreet
+  "EIN", // US Employer ID
+  "VAT", // VAT Registration
+  "NATIONAL_ID", // National ID number
+  "PASSPORT", // Passport number
+  "SSN", // Social Security Number (hashed)
+  "ACCOUNT_NUMBER", // Bank account number
+  "INTERNAL", // Internal system ID
+  "OTHER",
 ] as const;
 
 export const partyIdentifierSchema = z.object({
@@ -103,16 +106,18 @@ export const partySchema = z.object({
   /** Jurisdiction/country of registration */
   jurisdiction: z.string().length(2).toUpperCase().optional(),
   /** Address information */
-  address: z.object({
-    street: z.string().optional(),
-    city: z.string().optional(),
-    region: z.string().optional(),
-    postalCode: z.string().optional(),
-    country: z.string().length(2).toUpperCase().optional(),
-    formatted: z.string().optional(),
-  }).optional(),
+  address: z
+    .object({
+      street: z.string().optional(),
+      city: z.string().optional(),
+      region: z.string().optional(),
+      postalCode: z.string().optional(),
+      country: z.string().length(2).toUpperCase().optional(),
+      formatted: z.string().optional(),
+    })
+    .optional(),
   /** Risk classification */
-  riskClassification: z.enum(['LOW', 'MEDIUM', 'HIGH', 'PROHIBITED']).optional(),
+  riskClassification: z.enum(["LOW", "MEDIUM", "HIGH", "PROHIBITED"]).optional(),
   /** PEP (Politically Exposed Person) flag */
   isPep: z.boolean().default(false),
   /** Sanctions list match */
@@ -138,34 +143,34 @@ export type Party = z.infer<typeof partySchema>;
 // ============================================================================
 
 export const accountTypes = [
-  'CHECKING',
-  'SAVINGS',
-  'MONEY_MARKET',
-  'CERTIFICATE_OF_DEPOSIT',
-  'BROKERAGE',
-  'RETIREMENT',
-  'CREDIT_CARD',
-  'LOAN',
-  'MORTGAGE',
-  'LINE_OF_CREDIT',
-  'ESCROW',
-  'CUSTODIAL',
-  'CORRESPONDENT',
-  'NOSTRO',
-  'VOSTRO',
-  'SUSPENSE',
-  'CLEARING',
-  'SETTLEMENT',
-  'OTHER',
+  "CHECKING",
+  "SAVINGS",
+  "MONEY_MARKET",
+  "CERTIFICATE_OF_DEPOSIT",
+  "BROKERAGE",
+  "RETIREMENT",
+  "CREDIT_CARD",
+  "LOAN",
+  "MORTGAGE",
+  "LINE_OF_CREDIT",
+  "ESCROW",
+  "CUSTODIAL",
+  "CORRESPONDENT",
+  "NOSTRO",
+  "VOSTRO",
+  "SUSPENSE",
+  "CLEARING",
+  "SETTLEMENT",
+  "OTHER",
 ] as const;
 
 export const accountStatuses = [
-  'ACTIVE',
-  'DORMANT',
-  'FROZEN',
-  'CLOSED',
-  'PENDING_ACTIVATION',
-  'SUSPENDED',
+  "ACTIVE",
+  "DORMANT",
+  "FROZEN",
+  "CLOSED",
+  "PENDING_ACTIVATION",
+  "SUSPENDED",
 ] as const;
 
 export const accountSchema = z.object({
@@ -223,20 +228,20 @@ export type Account = z.infer<typeof accountSchema>;
 // ============================================================================
 
 export const instrumentTypes = [
-  'CURRENCY',
-  'EQUITY',
-  'BOND',
-  'DERIVATIVE',
-  'COMMODITY',
-  'CRYPTOCURRENCY',
-  'FUND',
-  'ETF',
-  'OPTION',
-  'FUTURE',
-  'SWAP',
-  'STRUCTURED_PRODUCT',
-  'REAL_ESTATE',
-  'OTHER',
+  "CURRENCY",
+  "EQUITY",
+  "BOND",
+  "DERIVATIVE",
+  "COMMODITY",
+  "CRYPTOCURRENCY",
+  "FUND",
+  "ETF",
+  "OPTION",
+  "FUTURE",
+  "SWAP",
+  "STRUCTURED_PRODUCT",
+  "REAL_ESTATE",
+  "OTHER",
 ] as const;
 
 export const instrumentSchema = z.object({
@@ -244,7 +249,7 @@ export const instrumentSchema = z.object({
   /** Standard identifier (e.g., ISIN, CUSIP, ticker) */
   identifier: z.string().min(1),
   /** Identifier type */
-  identifierType: z.enum(['ISIN', 'CUSIP', 'SEDOL', 'TICKER', 'FIGI', 'INTERNAL', 'OTHER']),
+  identifierType: z.enum(["ISIN", "CUSIP", "SEDOL", "TICKER", "FIGI", "INTERNAL", "OTHER"]),
   name: z.string().max(500),
   type: z.enum(instrumentTypes),
   /** ISO currency code for currency instruments */
@@ -278,58 +283,58 @@ export type Instrument = z.infer<typeof instrumentSchema>;
 
 export const transactionTypes = [
   // Payments
-  'PAYMENT',
-  'TRANSFER',
-  'WIRE',
-  'ACH',
-  'CHECK',
-  'CASH',
+  "PAYMENT",
+  "TRANSFER",
+  "WIRE",
+  "ACH",
+  "CHECK",
+  "CASH",
   // Card transactions
-  'CARD_PURCHASE',
-  'CARD_REFUND',
-  'CARD_CHARGEBACK',
+  "CARD_PURCHASE",
+  "CARD_REFUND",
+  "CARD_CHARGEBACK",
   // Fees
-  'FEE',
-  'INTEREST',
-  'PENALTY',
+  "FEE",
+  "INTEREST",
+  "PENALTY",
   // Adjustments
-  'REVERSAL',
-  'CORRECTION',
-  'ADJUSTMENT',
+  "REVERSAL",
+  "CORRECTION",
+  "ADJUSTMENT",
   // Investment
-  'BUY',
-  'SELL',
-  'DIVIDEND',
-  'INTEREST_INCOME',
-  'CAPITAL_GAIN',
+  "BUY",
+  "SELL",
+  "DIVIDEND",
+  "INTEREST_INCOME",
+  "CAPITAL_GAIN",
   // Loans
-  'LOAN_DISBURSEMENT',
-  'LOAN_REPAYMENT',
-  'PRINCIPAL',
-  'INTEREST_PAYMENT',
+  "LOAN_DISBURSEMENT",
+  "LOAN_REPAYMENT",
+  "PRINCIPAL",
+  "INTEREST_PAYMENT",
   // Other
-  'DEPOSIT',
-  'WITHDRAWAL',
-  'STANDING_ORDER',
-  'DIRECT_DEBIT',
-  'FX_CONVERSION',
-  'OTHER',
+  "DEPOSIT",
+  "WITHDRAWAL",
+  "STANDING_ORDER",
+  "DIRECT_DEBIT",
+  "FX_CONVERSION",
+  "OTHER",
 ] as const;
 
 export const transactionStatuses = [
-  'PENDING',
-  'PROCESSING',
-  'COMPLETED',
-  'FAILED',
-  'CANCELLED',
-  'REVERSED',
-  'ON_HOLD',
-  'DISPUTED',
+  "PENDING",
+  "PROCESSING",
+  "COMPLETED",
+  "FAILED",
+  "CANCELLED",
+  "REVERSED",
+  "ON_HOLD",
+  "DISPUTED",
 ] as const;
 
 export const transactionDirections = [
-  'CREDIT',   // Money coming in
-  'DEBIT',    // Money going out
+  "CREDIT", // Money coming in
+  "DEBIT", // Money going out
 ] as const;
 
 export const transactionSchema = z.object({
@@ -364,11 +369,15 @@ export const transactionSchema = z.object({
   /** Exchange rate used (if FX involved) */
   exchangeRate: exchangeRateSchema.optional(),
   /** Fees associated with this transaction */
-  fees: z.array(z.object({
-    type: z.enum(['WIRE_FEE', 'FX_FEE', 'SERVICE_FEE', 'PROCESSING_FEE', 'OTHER']),
-    amount: monetaryAmountSchema,
-    description: z.string().optional(),
-  })).default([]),
+  fees: z
+    .array(
+      z.object({
+        type: z.enum(["WIRE_FEE", "FX_FEE", "SERVICE_FEE", "PROCESSING_FEE", "OTHER"]),
+        amount: monetaryAmountSchema,
+        description: z.string().optional(),
+      })
+    )
+    .default([]),
   /** Total fees amount */
   totalFees: monetaryAmountSchema.optional(),
 
@@ -438,30 +447,24 @@ export type Transaction = z.infer<typeof transactionSchema>;
 // ============================================================================
 
 export const flowPatternTypes = [
-  'FAN_IN',           // Multiple sources to single destination
-  'FAN_OUT',          // Single source to multiple destinations
-  'ROUND_TRIP',       // Funds return to origin
-  'LAYERING',         // Multiple sequential transfers
-  'STRUCTURING',      // Breaking up amounts below thresholds
-  'RAPID_MOVEMENT',   // Quick in/out of accounts
-  'CIRCULAR',         // Funds cycling through entities
-  'MIRROR',           // Matching patterns across accounts
-  'PASS_THROUGH',     // Immediate forwarding
-  'SMURFING',         // Multiple small deposits
-  'VELOCITY_SPIKE',   // Unusual transaction volume
-  'DORMANT_ACTIVATION', // Sudden activity on dormant account
-  'CONCENTRATION',    // Aggregation of funds
-  'DISPERSION',       // Distribution of funds
-  'CUSTOM',           // User-defined pattern
+  "FAN_IN", // Multiple sources to single destination
+  "FAN_OUT", // Single source to multiple destinations
+  "ROUND_TRIP", // Funds return to origin
+  "LAYERING", // Multiple sequential transfers
+  "STRUCTURING", // Breaking up amounts below thresholds
+  "RAPID_MOVEMENT", // Quick in/out of accounts
+  "CIRCULAR", // Funds cycling through entities
+  "MIRROR", // Matching patterns across accounts
+  "PASS_THROUGH", // Immediate forwarding
+  "SMURFING", // Multiple small deposits
+  "VELOCITY_SPIKE", // Unusual transaction volume
+  "DORMANT_ACTIVATION", // Sudden activity on dormant account
+  "CONCENTRATION", // Aggregation of funds
+  "DISPERSION", // Distribution of funds
+  "CUSTOM", // User-defined pattern
 ] as const;
 
-export const flowPatternSeverities = [
-  'INFO',
-  'LOW',
-  'MEDIUM',
-  'HIGH',
-  'CRITICAL',
-] as const;
+export const flowPatternSeverities = ["INFO", "LOW", "MEDIUM", "HIGH", "CRITICAL"] as const;
 
 export const flowPatternSchema = z.object({
   id: z.string().uuid(),
@@ -512,23 +515,31 @@ export const flowPatternSchema = z.object({
 
   // Graph representation
   /** Flow graph in adjacency list format */
-  flowGraph: z.object({
-    nodes: z.array(z.object({
-      id: z.string(),
-      type: z.enum(['PARTY', 'ACCOUNT']),
-      label: z.string().optional(),
-    })),
-    edges: z.array(z.object({
-      source: z.string(),
-      target: z.string(),
-      transactionId: z.string().uuid(),
-      amount: monetaryAmountSchema,
-      timestamp: z.string().datetime(),
-    })),
-  }).optional(),
+  flowGraph: z
+    .object({
+      nodes: z.array(
+        z.object({
+          id: z.string(),
+          type: z.enum(["PARTY", "ACCOUNT"]),
+          label: z.string().optional(),
+        })
+      ),
+      edges: z.array(
+        z.object({
+          source: z.string(),
+          target: z.string(),
+          transactionId: z.string().uuid(),
+          amount: monetaryAmountSchema,
+          timestamp: z.string().datetime(),
+        })
+      ),
+    })
+    .optional(),
 
   // Review status
-  reviewStatus: z.enum(['PENDING', 'UNDER_REVIEW', 'CLEARED', 'ESCALATED', 'REPORTED']).default('PENDING'),
+  reviewStatus: z
+    .enum(["PENDING", "UNDER_REVIEW", "CLEARED", "ESCALATED", "REPORTED"])
+    .default("PENDING"),
   reviewedBy: z.string().optional(),
   reviewedAt: z.string().datetime().optional(),
   reviewNotes: z.string().optional(),
@@ -549,18 +560,18 @@ export const aggregatedFlowSchema = z.object({
   id: z.string().uuid(),
   /** Source party/account */
   sourceId: z.string().uuid(),
-  sourceType: z.enum(['PARTY', 'ACCOUNT']),
+  sourceType: z.enum(["PARTY", "ACCOUNT"]),
   sourceName: z.string().optional(),
   /** Destination party/account */
   destinationId: z.string().uuid(),
-  destinationType: z.enum(['PARTY', 'ACCOUNT']),
+  destinationType: z.enum(["PARTY", "ACCOUNT"]),
   destinationName: z.string().optional(),
 
   // Aggregation period
   periodStart: z.string().datetime(),
   periodEnd: z.string().datetime(),
   /** Aggregation granularity */
-  granularity: z.enum(['HOURLY', 'DAILY', 'WEEKLY', 'MONTHLY', 'QUARTERLY', 'YEARLY']),
+  granularity: z.enum(["HOURLY", "DAILY", "WEEKLY", "MONTHLY", "QUARTERLY", "YEARLY"]),
 
   // Aggregated metrics
   /** Total gross flow (sum of all transactions) */
@@ -583,11 +594,15 @@ export const aggregatedFlowSchema = z.object({
   stdDeviation: z.string().optional(), // Stored as string for precision
 
   // Breakdown by type
-  byTransactionType: z.array(z.object({
-    type: z.enum(transactionTypes),
-    count: z.number().int().nonnegative(),
-    totalAmount: monetaryAmountSchema,
-  })).default([]),
+  byTransactionType: z
+    .array(
+      z.object({
+        type: z.enum(transactionTypes),
+        count: z.number().int().nonnegative(),
+        totalAmount: monetaryAmountSchema,
+      })
+    )
+    .default([]),
 
   // Constituent transaction IDs (optional, for drill-down)
   transactionIds: z.array(z.string().uuid()).optional(),
@@ -604,29 +619,29 @@ export type AggregatedFlow = z.infer<typeof aggregatedFlowSchema>;
 // ============================================================================
 
 export const importFormats = [
-  'CSV',
-  'SWIFT_MT940',
-  'SWIFT_MT942',
-  'SWIFT_MT103',
-  'CAMT_053',
-  'CAMT_052',
-  'BAI2',
-  'OFX',
-  'QIF',
-  'JSON',
-  'CUSTOM',
+  "CSV",
+  "SWIFT_MT940",
+  "SWIFT_MT942",
+  "SWIFT_MT103",
+  "CAMT_053",
+  "CAMT_052",
+  "BAI2",
+  "OFX",
+  "QIF",
+  "JSON",
+  "CUSTOM",
 ] as const;
 
 export const importStatusEnum = z.enum([
-  'PENDING',
-  'VALIDATING',
-  'PARSING',
-  'NORMALIZING',
-  'ENRICHING',
-  'COMPLETED',
-  'COMPLETED_WITH_WARNINGS',
-  'FAILED',
-  'CANCELLED',
+  "PENDING",
+  "VALIDATING",
+  "PARSING",
+  "NORMALIZING",
+  "ENRICHING",
+  "COMPLETED",
+  "COMPLETED_WITH_WARNINGS",
+  "FAILED",
+  "CANCELLED",
 ]);
 
 export const importJobSchema = z.object({
@@ -656,14 +671,18 @@ export const importJobSchema = z.object({
   skippedCount: z.number().int().nonnegative().default(0),
 
   // Error details
-  errors: z.array(z.object({
-    recordIndex: z.number().int().optional(),
-    field: z.string().optional(),
-    code: z.string(),
-    message: z.string(),
-    severity: z.enum(['ERROR', 'WARNING']),
-    rawValue: z.unknown().optional(),
-  })).default([]),
+  errors: z
+    .array(
+      z.object({
+        recordIndex: z.number().int().optional(),
+        field: z.string().optional(),
+        code: z.string(),
+        message: z.string(),
+        severity: z.enum(["ERROR", "WARNING"]),
+        rawValue: z.unknown().optional(),
+      })
+    )
+    .default([]),
 
   // Output references
   /** IDs of created transactions */
@@ -695,12 +714,12 @@ export type ImportStatus = z.infer<typeof importStatusEnum>;
 // ============================================================================
 
 export const streamEventTypes = [
-  'TRANSACTION_RECEIVED',
-  'TRANSACTION_NORMALIZED',
-  'TRANSACTION_ENRICHED',
-  'PATTERN_DETECTED',
-  'ALERT_GENERATED',
-  'ERROR',
+  "TRANSACTION_RECEIVED",
+  "TRANSACTION_NORMALIZED",
+  "TRANSACTION_ENRICHED",
+  "PATTERN_DETECTED",
+  "ALERT_GENERATED",
+  "ERROR",
 ] as const;
 
 export const streamEventSchema = z.object({
@@ -733,7 +752,7 @@ export const flowQuerySchema = z.object({
   /** Party or account IDs to query flows for */
   entityIds: z.array(z.string().uuid()).min(1),
   /** Entity type */
-  entityType: z.enum(['PARTY', 'ACCOUNT']),
+  entityType: z.enum(["PARTY", "ACCOUNT"]),
   /** Optional counterparty filter */
   counterpartyIds: z.array(z.string().uuid()).optional(),
   /** Start of query period */
@@ -749,14 +768,14 @@ export const flowQuerySchema = z.object({
   /** Direction filter */
   direction: z.enum(transactionDirections).optional(),
   /** Aggregation granularity (if aggregated view requested) */
-  aggregation: z.enum(['NONE', 'HOURLY', 'DAILY', 'WEEKLY', 'MONTHLY']).default('NONE'),
+  aggregation: z.enum(["NONE", "HOURLY", "DAILY", "WEEKLY", "MONTHLY"]).default("NONE"),
   /** Maximum results */
   limit: z.number().int().positive().max(10000).default(100),
   /** Offset for pagination */
   offset: z.number().int().nonnegative().default(0),
   /** Sort order */
-  sortBy: z.enum(['DATE', 'AMOUNT', 'COUNTERPARTY']).default('DATE'),
-  sortOrder: z.enum(['ASC', 'DESC']).default('DESC'),
+  sortBy: z.enum(["DATE", "AMOUNT", "COUNTERPARTY"]).default("DATE"),
+  sortOrder: z.enum(["ASC", "DESC"]).default("DESC"),
 });
 
 export type FlowQuery = z.infer<typeof flowQuerySchema>;
@@ -768,18 +787,17 @@ export const flowQueryResultSchema = z.object({
   /** Whether more results exist */
   hasMore: z.boolean(),
   /** Transactions or aggregated flows */
-  results: z.union([
-    z.array(transactionSchema),
-    z.array(aggregatedFlowSchema),
-  ]),
+  results: z.union([z.array(transactionSchema), z.array(aggregatedFlowSchema)]),
   /** Summary statistics */
-  summary: z.object({
-    totalGrossFlow: monetaryAmountSchema,
-    totalNetFlow: monetaryAmountSchema,
-    transactionCount: z.number().int().nonnegative(),
-    distinctCounterparties: z.number().int().nonnegative(),
-    averageTransactionSize: monetaryAmountSchema.optional(),
-  }).optional(),
+  summary: z
+    .object({
+      totalGrossFlow: monetaryAmountSchema,
+      totalNetFlow: monetaryAmountSchema,
+      transactionCount: z.number().int().nonnegative(),
+      distinctCounterparties: z.number().int().nonnegative(),
+      averageTransactionSize: monetaryAmountSchema.optional(),
+    })
+    .optional(),
   /** Query execution time in ms */
   executionTimeMs: z.number().int().nonnegative(),
 });
@@ -796,12 +814,12 @@ export const importLedgerInputSchema = z.object({
   /** Base64-encoded file content or URI */
   source: z.union([
     z.object({
-      type: z.literal('inline'),
+      type: z.literal("inline"),
       content: z.string(), // Base64
       filename: z.string().optional(),
     }),
     z.object({
-      type: z.literal('uri'),
+      type: z.literal("uri"),
       uri: z.string().url(),
     }),
   ]),
@@ -855,7 +873,7 @@ export function createMonetaryAmount(
   currency: string,
   decimalPlaces = 2
 ): MonetaryAmount {
-  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+  const numAmount = typeof amount === "string" ? parseFloat(amount) : amount;
   const multiplier = Math.pow(10, decimalPlaces);
   // Use Math.round to handle floating-point precision issues
   const minorUnits = BigInt(Math.round(numAmount * multiplier));
@@ -874,7 +892,7 @@ export function formatMonetaryAmount(amount: MonetaryAmount): string {
   const divisor = BigInt(Math.pow(10, amount.decimalPlaces));
   const wholePart = amount.minorUnits / divisor;
   const fractionalPart = amount.minorUnits % divisor;
-  const paddedFractional = fractionalPart.toString().padStart(amount.decimalPlaces, '0');
+  const paddedFractional = fractionalPart.toString().padStart(amount.decimalPlaces, "0");
   return `${wholePart}.${paddedFractional}`;
 }
 

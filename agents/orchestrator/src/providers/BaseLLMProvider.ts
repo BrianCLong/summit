@@ -5,7 +5,7 @@
  * including retries, timeouts, and metrics tracking.
  */
 
-import { EventEmitter } from 'eventemitter3';
+import { EventEmitter } from "eventemitter3";
 import {
   LLMProvider,
   LLMModel,
@@ -14,7 +14,7 @@ import {
   LLMProviderConfig,
   TokenUsage,
   ProviderMetrics,
-} from '../types/index.js';
+} from "../types/index.js";
 
 export abstract class BaseLLMProvider extends EventEmitter {
   protected config: LLMProviderConfig;
@@ -49,7 +49,7 @@ export abstract class BaseLLMProvider extends EventEmitter {
    */
   protected async executeWithRetry<T>(
     operation: () => Promise<T>,
-    maxRetries: number = this.config.retries,
+    maxRetries: number = this.config.retries
   ): Promise<T> {
     let lastError: Error | undefined;
 
@@ -61,7 +61,7 @@ export abstract class BaseLLMProvider extends EventEmitter {
 
         if (attempt < maxRetries) {
           const delay = Math.min(1000 * Math.pow(2, attempt), 30000);
-          this.emit('retry', {
+          this.emit("retry", {
             provider: this.provider,
             attempt: attempt + 1,
             maxRetries,
@@ -83,7 +83,7 @@ export abstract class BaseLLMProvider extends EventEmitter {
     return Promise.race([
       promise,
       new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error(`Request timed out after ${timeoutMs}ms`)), timeoutMs),
+        setTimeout(() => reject(new Error(`Request timed out after ${timeoutMs}ms`)), timeoutMs)
       ),
     ]);
   }
@@ -109,8 +109,7 @@ export abstract class BaseLLMProvider extends EventEmitter {
 
     // Update latency (exponential moving average)
     const alpha = 0.1;
-    this.metrics.averageLatencyMs =
-      (1 - alpha) * this.metrics.averageLatencyMs + alpha * latencyMs;
+    this.metrics.averageLatencyMs = (1 - alpha) * this.metrics.averageLatencyMs + alpha * latencyMs;
 
     // Update p95/p99 (simplified)
     if (latencyMs > this.metrics.p95LatencyMs * 0.95) {

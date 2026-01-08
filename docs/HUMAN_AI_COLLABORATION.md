@@ -12,38 +12,38 @@ This document establishes clear ownership patterns, autonomy levels, and collabo
 
 ### H = Human-Led (Humans design/decide; AI generates boilerplate)
 
-| Activity | Human Role | AI Role |
-|----------|-----------|---------|
+| Activity               | Human Role                          | AI Role                              |
+| ---------------------- | ----------------------------------- | ------------------------------------ |
 | Architecture decisions | Design, evaluate trade-offs, decide | Research options, document decisions |
-| Policy semantics | Define rules, acceptance criteria | Generate Rego/YAML, test cases |
-| UX/UI flows | Sketch wireframes, user stories | Implement components, accessibility |
-| Risk acceptance | Evaluate security implications | Generate threat models, mitigations |
-| Customer narratives | Define use cases, priorities | Generate documentation, examples |
-| Data model design | Entity relationships, cardinality | Generate schemas, migrations |
-| SLO definitions | Define targets, thresholds | Implement dashboards, alerts |
+| Policy semantics       | Define rules, acceptance criteria   | Generate Rego/YAML, test cases       |
+| UX/UI flows            | Sketch wireframes, user stories     | Implement components, accessibility  |
+| Risk acceptance        | Evaluate security implications      | Generate threat models, mitigations  |
+| Customer narratives    | Define use cases, priorities        | Generate documentation, examples     |
+| Data model design      | Entity relationships, cardinality   | Generate schemas, migrations         |
+| SLO definitions        | Define targets, thresholds          | Implement dashboards, alerts         |
 
 ### A = AI-Heavy (AI drafts/maintains; humans validate)
 
-| Activity | AI Role | Human Role |
-|----------|---------|-----------|
-| Test generation | Write unit/integration/E2E tests | Review coverage, edge cases |
-| Documentation | Generate docs, ADRs, runbooks | Review accuracy, approve |
-| Error messages | Draft user-friendly messages | Review tone, completeness |
-| Refactoring | Identify opportunities, implement | Review changes, approve merge |
-| Config generation | Generate YAML, JSON, Terraform | Validate correctness |
-| Code formatting | Apply linting, formatting | N/A (auto-merge) |
-| Dependency updates | Generate PRs for patches | Review breaking changes |
-| Boilerplate code | Generate scaffolding | Review patterns |
+| Activity           | AI Role                           | Human Role                    |
+| ------------------ | --------------------------------- | ----------------------------- |
+| Test generation    | Write unit/integration/E2E tests  | Review coverage, edge cases   |
+| Documentation      | Generate docs, ADRs, runbooks     | Review accuracy, approve      |
+| Error messages     | Draft user-friendly messages      | Review tone, completeness     |
+| Refactoring        | Identify opportunities, implement | Review changes, approve merge |
+| Config generation  | Generate YAML, JSON, Terraform    | Validate correctness          |
+| Code formatting    | Apply linting, formatting         | N/A (auto-merge)              |
+| Dependency updates | Generate PRs for patches          | Review breaking changes       |
+| Boilerplate code   | Generate scaffolding              | Review patterns               |
 
 ### M = Mixed (AI scaffolds; humans define semantics)
 
-| Activity | Collaboration Model |
-|----------|---------------------|
-| Schema migrations | Human defines fields/constraints; AI generates SQL/Cypher |
-| Connector manifests | Human defines capabilities; AI implements SDK integration |
-| DAG workflows | Human defines steps/gates; AI generates orchestration code |
-| Telemetry setup | Human defines metrics/SLOs; AI instruments code |
-| API contracts | Human defines endpoints; AI generates types, validation |
+| Activity            | Collaboration Model                                        |
+| ------------------- | ---------------------------------------------------------- |
+| Schema migrations   | Human defines fields/constraints; AI generates SQL/Cypher  |
+| Connector manifests | Human defines capabilities; AI implements SDK integration  |
+| DAG workflows       | Human defines steps/gates; AI generates orchestration code |
+| Telemetry setup     | Human defines metrics/SLOs; AI instruments code            |
+| API contracts       | Human defines endpoints; AI generates types, validation    |
 
 ---
 
@@ -61,6 +61,7 @@ AI can iterate and merge autonomously for:
 - **Config tweaks** - Non-sensitive configuration adjustments
 
 **Safeguards:**
+
 - CI must pass
 - No changes to security-critical files
 - No new dependencies
@@ -79,6 +80,7 @@ Human must approve before merge:
 - **Performance changes** - Query optimizations, caching
 
 **Review Guidelines:**
+
 - Check for security implications
 - Verify test coverage
 - Ensure documentation updated
@@ -209,6 +211,7 @@ Human drives with AI support:
 ### AI → Human
 
 **When to escalate:**
+
 - Security implications detected
 - Breaking changes required
 - Multiple valid approaches exist
@@ -217,18 +220,21 @@ Human drives with AI support:
 - Performance trade-offs
 
 **How to escalate:**
+
 ```markdown
 ## Decision Required
 
 **Context:** [Brief description of the situation]
 
 **Options:**
+
 1. [Option A] - Pros: ... Cons: ...
 2. [Option B] - Pros: ... Cons: ...
 
 **Recommendation:** [AI's suggested approach]
 
 **Questions for Human:**
+
 - [Specific question 1]
 - [Specific question 2]
 ```
@@ -236,17 +242,20 @@ Human drives with AI support:
 ### Human → AI
 
 **Clear task specification:**
+
 ```markdown
 ## Task: [Clear title]
 
 **Objective:** [What should be accomplished]
 
 **Constraints:**
+
 - [Must do X]
 - [Must not do Y]
 - [Should consider Z]
 
 **Acceptance Criteria:**
+
 - [ ] Criterion 1
 - [ ] Criterion 2
 
@@ -261,43 +270,43 @@ Human drives with AI support:
 
 ### Wave 0 Metrics
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Golden path passes | 100% | `make smoke` success rate |
-| Test coverage | ≥70% | Jest coverage report |
-| Entity types defined | 8/8 | GraphQL schema check |
-| Connector registry | 13/13 | JSON validation |
-| CLI doctor validates | 100% | Health check pass rate |
+| Metric               | Target | Measurement               |
+| -------------------- | ------ | ------------------------- |
+| Golden path passes   | 100%   | `make smoke` success rate |
+| Test coverage        | ≥70%   | Jest coverage report      |
+| Entity types defined | 8/8    | GraphQL schema check      |
+| Connector registry   | 13/13  | JSON validation           |
+| CLI doctor validates | 100%   | Health check pass rate    |
 
 ### Wave 1 Metrics
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Authority enforcement | 100% | Integration tests |
-| Copilot citations | ≥90% | Response audit |
-| PII detection rate | ≥95% | Test suite |
-| Provenance coverage | ≥80% | Audit log analysis |
-| Safety harness scenarios | ≥50 | Red-team test count |
+| Metric                   | Target | Measurement         |
+| ------------------------ | ------ | ------------------- |
+| Authority enforcement    | 100%   | Integration tests   |
+| Copilot citations        | ≥90%   | Response audit      |
+| PII detection rate       | ≥95%   | Test suite          |
+| Provenance coverage      | ≥80%   | Audit log analysis  |
+| Safety harness scenarios | ≥50    | Red-team test count |
 
 ### Wave 2 Metrics
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| DR drill RTO | <4 hours | Drill execution time |
-| Connector certification | 100% | Test suite pass rate |
-| Cost attribution accuracy | ±5% | FinOps validation |
-| p95 query latency | <500ms | Prometheus metrics |
-| Chaos test coverage | ≥80% | Scenario count |
+| Metric                    | Target   | Measurement          |
+| ------------------------- | -------- | -------------------- |
+| DR drill RTO              | <4 hours | Drill execution time |
+| Connector certification   | 100%     | Test suite pass rate |
+| Cost attribution accuracy | ±5%      | FinOps validation    |
+| p95 query latency         | <500ms   | Prometheus metrics   |
+| Chaos test coverage       | ≥80%     | Scenario count       |
 
 ### Wave 3 Metrics
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| WCAG 2.1 AA compliance | 100% | Accessibility audit |
-| Onboarding completion | ≥80% | User telemetry |
-| Documentation coverage | ≥90% | Doc lint results |
-| i18n locale support | ≥3 | Locale count |
-| Design system coverage | ≥70% | Component usage |
+| Metric                 | Target | Measurement         |
+| ---------------------- | ------ | ------------------- |
+| WCAG 2.1 AA compliance | 100%   | Accessibility audit |
+| Onboarding completion  | ≥80%   | User telemetry      |
+| Documentation coverage | ≥90%   | Doc lint results    |
+| i18n locale support    | ≥3     | Locale count        |
+| Design system coverage | ≥70%   | Component usage     |
 
 ---
 
@@ -331,14 +340,14 @@ Human drives with AI support:
 
 ## Escalation Matrix
 
-| Issue Type | First Responder | Escalation |
-|------------|-----------------|------------|
-| Test failures | AI auto-fix | Human if repeated |
-| Security alert | Human immediately | Security team |
-| Performance regression | AI diagnosis | Human review |
-| Customer impact | Human lead | Product team |
-| Data integrity | Human lead | Data team |
-| Policy violation | Human immediately | Compliance team |
+| Issue Type             | First Responder   | Escalation        |
+| ---------------------- | ----------------- | ----------------- |
+| Test failures          | AI auto-fix       | Human if repeated |
+| Security alert         | Human immediately | Security team     |
+| Performance regression | AI diagnosis      | Human review      |
+| Customer impact        | Human lead        | Product team      |
+| Data integrity         | Human lead        | Data team         |
+| Policy violation       | Human immediately | Compliance team   |
 
 ---
 

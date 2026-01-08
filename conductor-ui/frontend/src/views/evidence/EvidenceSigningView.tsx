@@ -1,5 +1,5 @@
 // conductor-ui/frontend/src/views/evidence/EvidenceSigningView.tsx
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 type SignatureInfo = { signature: string; signer: string; timestamp: string };
 type VerificationInfo = {
@@ -13,38 +13,33 @@ const signEvidence = async (runId: string): Promise<SignatureInfo> => {
   console.log(`Requesting server-side signature for run ${runId}...`);
   await new Promise((res) => setTimeout(res, 800));
   return {
-    signature: 'z123...abc',
-    signer: 'prod-signer-service-v2',
+    signature: "z123...abc",
+    signer: "prod-signer-service-v2",
     timestamp: new Date().toISOString(),
   };
 };
 
-const verifySignature = async (
-  signatureInfo: SignatureInfo,
-): Promise<VerificationInfo> => {
+const verifySignature = async (signatureInfo: SignatureInfo): Promise<VerificationInfo> => {
   console.log(`Verifying signature from ${signatureInfo.signer}...`);
   await new Promise((res) => setTimeout(res, 500));
   // In a real app, this would involve crypto against a trust store.
-  if (signatureInfo.signer.includes('prod')) {
+  if (signatureInfo.signer.includes("prod")) {
     return {
       isValid: true,
-      message: 'Signature verified against production trust store.',
+      message: "Signature verified against production trust store.",
       checkedAt: new Date().toISOString(),
     };
   }
   return {
     isValid: false,
-    message: 'Signer is not in the trusted set.',
+    message: "Signer is not in the trusted set.",
     checkedAt: new Date().toISOString(),
   };
 };
 
 export const EvidenceSigningView = ({ runId }: { runId: string }) => {
-  const [signatureInfo, setSignatureInfo] = useState<SignatureInfo | null>(
-    null,
-  );
-  const [verificationInfo, setVerificationInfo] =
-    useState<VerificationInfo | null>(null);
+  const [signatureInfo, setSignatureInfo] = useState<SignatureInfo | null>(null);
+  const [verificationInfo, setVerificationInfo] = useState<VerificationInfo | null>(null);
   const [isSigning, setIsSigning] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
 
@@ -72,7 +67,7 @@ export const EvidenceSigningView = ({ runId }: { runId: string }) => {
       </p>
 
       <button onClick={handleSign} disabled={isSigning || isVerifying}>
-        {isSigning ? 'Signing...' : 'Generate Server-Side Signature'}
+        {isSigning ? "Signing..." : "Generate Server-Side Signature"}
       </button>
 
       {signatureInfo && (
@@ -87,11 +82,8 @@ export const EvidenceSigningView = ({ runId }: { runId: string }) => {
           <p>
             <strong>Signature:</strong> <pre>{signatureInfo.signature}</pre>
           </p>
-          <button
-            onClick={handleVerify}
-            disabled={isVerifying || !signatureInfo}
-          >
-            {isVerifying ? 'Verifying...' : 'Verify Signature'}
+          <button onClick={handleVerify} disabled={isVerifying || !signatureInfo}>
+            {isVerifying ? "Verifying..." : "Verify Signature"}
           </button>
         </div>
       )}
@@ -99,13 +91,12 @@ export const EvidenceSigningView = ({ runId }: { runId: string }) => {
       {verificationInfo && (
         <div
           style={{
-            border: `2px solid ${verificationInfo.isValid ? 'green' : 'red'}`,
+            border: `2px solid ${verificationInfo.isValid ? "green" : "red"}`,
           }}
         >
           <h3>Verification Result</h3>
           <p>
-            <strong>Status:</strong>{' '}
-            {verificationInfo.isValid ? 'VALID' : 'INVALID'}
+            <strong>Status:</strong> {verificationInfo.isValid ? "VALID" : "INVALID"}
           </p>
           <p>
             <strong>Details:</strong> {verificationInfo.message}

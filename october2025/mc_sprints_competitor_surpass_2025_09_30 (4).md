@@ -341,14 +341,14 @@ CREATE TABLE invoices (
 ```yaml
 # fixtures/daily_ai_brief.yaml
 inputs:
-  topic: 'AI policy and research'
+  topic: "AI policy and research"
   sources:
     - rss: https://example.com/ai.xml
 expectations:
   summary_length: 200-400
   contains_keywords:
-    - 'policy'
-    - 'research'
+    - "policy"
+    - "research"
 policy:
   retention: short-30d
   license: OPEN_DATA_OK
@@ -357,27 +357,27 @@ policy:
 ### 7.2 Playwright e2e (Creator Flow)
 
 ```ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test('build-and-publish-daily-brief', async ({ page }) => {
-  await page.goto('/studio');
-  await page.getByRole('button', { name: 'Create from Template' }).click();
-  await page.getByText('Daily AI Brief').click();
-  await page.getByRole('button', { name: 'Run with Fixture' }).click();
-  await expect(page.getByText('Run Succeeded')).toBeVisible();
-  await page.getByRole('button', { name: 'Export Evidence' }).click();
-  await page.getByRole('button', { name: 'Publish' }).click();
-  await expect(page.getByText('Policy Scan Passed')).toBeVisible();
+test("build-and-publish-daily-brief", async ({ page }) => {
+  await page.goto("/studio");
+  await page.getByRole("button", { name: "Create from Template" }).click();
+  await page.getByText("Daily AI Brief").click();
+  await page.getByRole("button", { name: "Run with Fixture" }).click();
+  await expect(page.getByText("Run Succeeded")).toBeVisible();
+  await page.getByRole("button", { name: "Export Evidence" }).click();
+  await page.getByRole("button", { name: "Publish" }).click();
+  await expect(page.getByText("Policy Scan Passed")).toBeVisible();
 });
 ```
 
 ### 7.3 k6 Load (Router Policy)
 
 ```js
-import http from 'k6/http';
-import { check, sleep } from 'k6';
+import http from "k6/http";
+import { check, sleep } from "k6";
 
-export const options = { vus: 50, duration: '2m' };
+export const options = { vus: 50, duration: "2m" };
 
 export default function () {
   const res = http.post(
@@ -388,12 +388,12 @@ export default function () {
     }),
     {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${__ENV.TOKEN}`,
       },
-    },
+    }
   );
-  check(res, { 'status 200': (r) => r.status === 200 });
+  check(res, { "status 200": (r) => r.status === 200 });
   sleep(1);
 }
 ```
@@ -401,10 +401,10 @@ export default function () {
 ### 7.4 Jest Unit (Provenance Signatures)
 
 ```ts
-import { sign, verify } from '../crypto';
+import { sign, verify } from "../crypto";
 
-test('evidence signatures verify', () => {
-  const claim = { in: 'h1', out: 'h2', model: 'x', cost: 0.001 };
+test("evidence signatures verify", () => {
+  const claim = { in: "h1", out: "h2", model: "x", cost: 0.001 };
   const sig = sign(claim);
   expect(verify(claim, sig)).toBe(true);
 });
@@ -502,8 +502,8 @@ Each ships with: fixtures, e2e tests, policy notes, cost estimates, and evidence
 orchestrator:
   replicas: 3
   resources:
-    requests: { cpu: '500m', memory: '1Gi' }
-    limits: { cpu: '2', memory: '4Gi' }
+    requests: { cpu: "500m", memory: "1Gi" }
+    limits: { cpu: "2", memory: "4Gi" }
   env:
     OPA_URL: http://opa:8181
     OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
@@ -601,7 +601,7 @@ run: 1a2b-3c4d
 flow: daily-brief@1.0.0
 claims:
   - node: rss
-    in: '-'
+    in: "-"
     out: 1a1a1a
     latency_ms: 120
     sig: abcd...
@@ -674,59 +674,59 @@ intelgraph-mc/
 **docker-compose.yml** (dev)
 
 ```yaml
-version: '3.9'
+version: "3.9"
 services:
   postgres:
     image: postgres:16
     environment:
       POSTGRES_PASSWORD: postgres
-    ports: ['5432:5432']
+    ports: ["5432:5432"]
   neo4j:
     image: neo4j:5
     environment:
       NEO4J_AUTH: neo4j/test
-    ports: ['7474:7474', '7687:7687']
+    ports: ["7474:7474", "7687:7687"]
   redis:
     image: redis:7
-    ports: ['6379:6379']
+    ports: ["6379:6379"]
   minio:
     image: minio/minio
     command: server /data
     environment:
       MINIO_ROOT_USER: minio
       MINIO_ROOT_PASSWORD: miniominiO
-    ports: ['9000:9000', '9001:9001']
+    ports: ["9000:9000", "9001:9001"]
   opa:
     image: openpolicyagent/opa:latest
-    command: ['run', '--server', '/policies']
-    volumes: ['./infra/opa/policies:/policies']
-    ports: ['8181:8181']
+    command: ["run", "--server", "/policies"]
+    volumes: ["./infra/opa/policies:/policies"]
+    ports: ["8181:8181"]
   otel-collector:
     image: otel/opentelemetry-collector:latest
-    volumes: ['./infra/otel/collector.yaml:/etc/otelcol/config.yaml']
-    command: ['--config', '/etc/otelcol/config.yaml']
-    ports: ['4317:4317']
+    volumes: ["./infra/otel/collector.yaml:/etc/otelcol/config.yaml"]
+    command: ["--config", "/etc/otelcol/config.yaml"]
+    ports: ["4317:4317"]
   grafana:
     image: grafana/grafana:10
-    ports: ['3001:3000']
+    ports: ["3001:3000"]
   tempo:
     image: grafana/tempo:latest
-    ports: ['3200:3200']
+    ports: ["3200:3200"]
   prometheus:
     image: prom/prometheus:latest
-    ports: ['9090:9090']
+    ports: ["9090:9090"]
   api-gateway:
     build: ./apps/api-gateway
     env_file: ./apps/api-gateway/.env.dev
     depends_on: [postgres, neo4j, redis, opa]
-    ports: ['4000:4000']
+    ports: ["4000:4000"]
   orchestrator:
     build: ./apps/orchestrator
     env_file: ./apps/orchestrator/.env.dev
     depends_on: [redis, opa]
   studio-fe:
     build: ./apps/studio-fe
-    ports: ['5173:5173']
+    ports: ["5173:5173"]
 ```
 
 ### 18.2 API Gateway (Node/Apollo/TypeScript)
@@ -734,13 +734,13 @@ services:
 **apps/api-gateway/src/index.ts**
 
 ```ts
-import 'dotenv/config';
-import { ApolloServer } from '@apollo/server';
-import { startStandaloneServer } from '@apollo/server/standalone';
-import { typeDefs } from './schema';
-import { resolvers } from './resolvers';
-import { policyClient } from '@mc/policy-client';
-import { traceMiddleware } from '@mc/tracing';
+import "dotenv/config";
+import { ApolloServer } from "@apollo/server";
+import { startStandaloneServer } from "@apollo/server/standalone";
+import { typeDefs } from "./schema";
+import { resolvers } from "./resolvers";
+import { policyClient } from "@mc/policy-client";
+import { traceMiddleware } from "@mc/tracing";
 
 const server = new ApolloServer({ typeDefs, resolvers });
 
@@ -749,10 +749,10 @@ const server = new ApolloServer({ typeDefs, resolvers });
     listen: { port: Number(process.env.PORT || 4000) },
     context: async ({ req }) => {
       const authz = await policyClient.admission({
-        subject: req.headers['x-user'] || 'anon',
-        action: 'graphql:mutate',
+        subject: req.headers["x-user"] || "anon",
+        action: "graphql:mutate",
       });
-      if (!authz.allow) throw new Error('policy:denied');
+      if (!authz.allow) throw new Error("policy:denied");
       return { trace: traceMiddleware(req), authz };
     },
   });
@@ -782,39 +782,30 @@ export const typeDefs = `#graphql
 **apps/api-gateway/src/resolvers.ts** (stub)
 
 ```ts
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid } from "uuid";
 export const resolvers = {
   Query: {
     flow: (_: any, { id }: any, { db }: any) => db.flows.get(id),
-    runs: (_: any, { flowId, limit }: any, { db }: any) =>
-      db.runs.list(flowId, limit),
+    runs: (_: any, { flowId, limit }: any, { db }: any) => db.runs.list(flowId, limit),
     listing: (_: any, { id }: any, { db }: any) => db.listings.get(id),
   },
   Mutation: {
     createFlow: (_: any, { name, manifest }: any, { db }: any) =>
-      db.flows.create({ id: uuid(), name, version: '1.0.0', manifest }),
+      db.flows.create({ id: uuid(), name, version: "1.0.0", manifest }),
     runFlow: async (_: any, { flowId, fixture }: any, { orchestrator }: any) =>
       orchestrator.enqueue({ flowId, fixture }),
-    publishListing: async (
-      _: any,
-      { flowId, priceCents }: any,
-      { policy, db }: any,
-    ) => {
+    publishListing: async (_: any, { flowId, priceCents }: any, { policy, db }: any) => {
       const report = await policy.scanFlow(flowId);
-      if (!report.pass) throw new Error('policy:fail');
+      if (!report.pass) throw new Error("policy:fail");
       return db.listings.create({
         id: uuid(),
         flowId,
-        status: 'ACTIVE',
+        status: "ACTIVE",
         priceCents,
         policyReport: report,
       });
     },
-    purchase: async (
-      _: any,
-      { listingId }: any,
-      { billing, db, orchestrator }: any,
-    ) => {
+    purchase: async (_: any, { listingId }: any, { billing, db, orchestrator }: any) => {
       const listing = await db.listings.get(listingId);
       await billing.entitle(listing);
       return orchestrator.enqueue({ flowId: listing.flowId });
@@ -828,8 +819,8 @@ export const resolvers = {
 **apps/orchestrator/src/worker.ts**
 
 ```ts
-import { router } from '@mc/model-adapters/router';
-import { Evidence } from '@mc/evidence-ledger';
+import { router } from "@mc/model-adapters/router";
+import { Evidence } from "@mc/evidence-ledger";
 
 export async function runJob(job: any) {
   const start = Date.now();
@@ -840,17 +831,17 @@ export async function runJob(job: any) {
   const result = await llm.invoke(job.input);
   claims.push(
     Evidence.claim({
-      nodeId: 'summary',
-      in: 'h-in',
-      out: 'h-out',
+      nodeId: "summary",
+      in: "h-in",
+      out: "h-out",
       provider: llm.provider,
       model: llm.name,
       latency: Date.now() - nodeStart,
       cost: llm.chargeEstimate(result),
-    }),
+    })
   );
   await Evidence.persist(job.runId, claims);
-  return { status: 'SUCCEEDED', duration: Date.now() - start };
+  return { status: "SUCCEEDED", duration: Date.now() - start };
 }
 ```
 
@@ -859,13 +850,13 @@ export async function runJob(job: any) {
 **libs/policy-client/index.ts**
 
 ```ts
-import fetch from 'node-fetch';
+import fetch from "node-fetch";
 export const policyClient = {
   async admission(input: any) {
-    const r = await fetch(process.env.OPA_URL + '/v1/data/mc/policy/license', {
-      method: 'POST',
+    const r = await fetch(process.env.OPA_URL + "/v1/data/mc/policy/license", {
+      method: "POST",
       body: JSON.stringify({ input }),
-      headers: { 'content-type': 'application/json' },
+      headers: { "content-type": "application/json" },
     });
     const data = await r.json();
     return { allow: !data.result?.violation?.length, report: data.result };
@@ -884,7 +875,7 @@ export const policyClient = {
 **libs/evidence-ledger/index.ts**
 
 ```ts
-import crypto from 'crypto';
+import crypto from "crypto";
 export const Evidence = {
   claim({
     nodeId,
@@ -904,10 +895,7 @@ export const Evidence = {
     cost: number;
   }) {
     const payload = { nodeId, in: _in, out, provider, model, latency, cost };
-    const sig = crypto
-      .createHash('sha256')
-      .update(JSON.stringify(payload))
-      .digest('hex');
+    const sig = crypto.createHash("sha256").update(JSON.stringify(payload)).digest("hex");
     return { ...payload, sig };
   },
   async persist(runId: string, claims: any[]) {
@@ -943,7 +931,7 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     services:
-      redis: { image: redis:7, ports: ['6379:6379'] }
+      redis: { image: redis:7, ports: ["6379:6379"] }
     steps:
       - uses: actions/checkout@v4
       - run: docker compose up -d --build
@@ -957,7 +945,7 @@ name: release
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
 jobs:
   cut-release:
     runs-on: ubuntu-latest
@@ -965,7 +953,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: ./scripts/generate-release-notes.sh > RELEASE_NOTES.md
       - uses: softprops/action-gh-release@v2
-        with: { files: 'evidence/*.zip' }
+        with: { files: "evidence/*.zip" }
 ```
 
 ---
@@ -1031,10 +1019,10 @@ service:
 **infra/k6/router-policy.js** (adds checks for p95)
 
 ```js
-import http from 'k6/http';
-import { Trend } from 'k6/metrics';
-const lat = new Trend('latency');
-export const options = { vus: 100, duration: '5m' };
+import http from "k6/http";
+import { Trend } from "k6/metrics";
+const lat = new Trend("latency");
+export const options = { vus: 100, duration: "5m" };
 export default function () {
   const r = http.post(
     `${__ENV.API}/run`,
@@ -1044,10 +1032,10 @@ export default function () {
     }),
     {
       headers: {
-        'content-type': 'application/json',
+        "content-type": "application/json",
         authorization: `Bearer ${__ENV.TOKEN}`,
       },
-    },
+    }
   );
   lat.add(r.timings.duration);
 }
@@ -1056,20 +1044,20 @@ export default function () {
 **infra/playwright/build-publish.spec.ts** (aligns with §7.2, expanded)
 
 ```ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
 test.setTimeout(180000);
 
-test('creator can publish governed app in < 5 minutes', async ({ page }) => {
+test("creator can publish governed app in < 5 minutes", async ({ page }) => {
   const start = Date.now();
-  await page.goto('http://localhost:5173/studio');
-  await page.getByRole('button', { name: 'Create from Template' }).click();
-  await page.getByText('Daily AI Brief').click();
-  await page.getByRole('button', { name: 'Run with Fixture' }).click();
-  await expect(page.getByText('Run Succeeded')).toBeVisible();
-  await page.getByRole('button', { name: 'Export Evidence' }).click();
-  await page.getByRole('button', { name: 'Publish' }).click();
-  await expect(page.getByText('Policy Scan Passed')).toBeVisible();
+  await page.goto("http://localhost:5173/studio");
+  await page.getByRole("button", { name: "Create from Template" }).click();
+  await page.getByText("Daily AI Brief").click();
+  await page.getByRole("button", { name: "Run with Fixture" }).click();
+  await expect(page.getByText("Run Succeeded")).toBeVisible();
+  await page.getByRole("button", { name: "Export Evidence" }).click();
+  await page.getByRole("button", { name: "Publish" }).click();
+  await expect(page.getByText("Policy Scan Passed")).toBeVisible();
   expect(Date.now() - start).toBeLessThan(5 * 60 * 1000);
 });
 ```
@@ -1287,7 +1275,7 @@ tasks:
     metrics:
       - latency_p95
       - cost_delta
-      - keyword_recall: ['policy', 'research', 'funding']
+      - keyword_recall: ["policy", "research", "funding"]
       - hallucination_score
 router_policies:
   - name: low_cost_under_latency
@@ -1606,7 +1594,7 @@ violation[msg] {
 - **AC:** No critical violations on Studio & Marketplace
 
 ```ts
-import { AxeBuilder } from '@axe-core/playwright';
+import { AxeBuilder } from "@axe-core/playwright";
 const results = await new AxeBuilder({ page }).analyze();
 expect(results.violations.length).toBe(0);
 ```
@@ -1695,13 +1683,7 @@ mcctl run start --flow daily-brief --fixture fixtures/news_small.json \
     "nodes": { "type": "array" },
     "edges": { "type": "array" },
     "retention_tier": {
-      "enum": [
-        "ephemeral-7d",
-        "short-30d",
-        "standard-365d",
-        "long-1825d",
-        "legal-hold"
-      ]
+      "enum": ["ephemeral-7d", "short-30d", "standard-365d", "long-1825d", "legal-hold"]
     }
   }
 }
@@ -1713,10 +1695,10 @@ mcctl run start --flow daily-brief --fixture fixtures/news_small.json \
 
 ```mdx
 ---
-title: 'Daily AI Brief'
+title: "Daily AI Brief"
 price: 299
-badges: ['Policy‑Scanned', 'Provenance‑Backed', 'SLO‑Ready']
-locales: ['en', 'es']
+badges: ["Policy‑Scanned", "Provenance‑Backed", "SLO‑Ready"]
+locales: ["en", "es"]
 ---
 
 A concise daily summary of AI policy and research, with citations and exportable evidence.
@@ -1915,7 +1897,7 @@ groups:
         expr: histogram_quantile(0.95, sum(rate(http_server_duration_seconds_bucket[5m])) by (le)) > 0.35
         for: 10m
         labels: { severity: page }
-        annotations: { summary: 'API p95 above 350ms' }
+        annotations: { summary: "API p95 above 350ms" }
       - alert: RouterSuccessLow
         expr: (sum(rate(mc_router_success_total[5m])) / sum(rate(mc_router_requests_total[5m]))) < 0.98
         for: 10m
@@ -1952,9 +1934,9 @@ INSERT INTO rtbf_queue(subject_id, requested_at) VALUES ($1, now());
 ```ts
 // worker
 for (const s of queue.pull()) {
-  redact('runs', s, ['user_email', 'user_name']);
-  redact('flows', s, ['owner_email']);
-  writeEvidenceNote(s, 'rtbf-applied');
+  redact("runs", s, ["user_email", "user_name"]);
+  redact("flows", s, ["owner_email"]);
+  writeEvidenceNote(s, "rtbf-applied");
 }
 ```
 
@@ -1992,7 +1974,7 @@ export function tokenBucket(key: string, rate = 10, burst = 100) {
   const refill = Math.floor(((now - b.last) / 1000) * rate);
   b.tokens = Math.min(burst, b.tokens + refill);
   b.last = now;
-  if (b.tokens <= 0) throw new Error('rate_limited');
+  if (b.tokens <= 0) throw new Error("rate_limited");
   b.tokens--;
   buckets.set(key, b);
 }

@@ -3,7 +3,7 @@ name: release-train
 permissions:
   contents: read
 on:
-  schedule: [{ cron: '0 18 * * 4' }] # Thu 18:00 UTC
+  schedule: [{ cron: "0 18 * * 4" }] # Thu 18:00 UTC
   workflow_dispatch: {}
 
 jobs:

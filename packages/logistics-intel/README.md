@@ -20,7 +20,7 @@ pnpm add @intelgraph/logistics-intel
 ## Usage
 
 ```typescript
-import { LogisticsTracker } from '@intelgraph/logistics-intel';
+import { LogisticsTracker } from "@intelgraph/logistics-intel";
 
 const tracker = new LogisticsTracker();
 
@@ -33,7 +33,7 @@ const route = tracker.optimizeRoute(origin, destination, { prioritizeSpeed: true
 console.log(`Recommended: ${route.recommendedRoute.mode}`);
 
 // Monitor port congestion
-const congestion = await tracker.monitorPortCongestion('Port of Los Angeles');
+const congestion = await tracker.monitorPortCongestion("Port of Los Angeles");
 console.log(`Congestion: ${congestion.congestionLevel}`);
 
 // Evaluate carrier

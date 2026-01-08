@@ -1,7 +1,7 @@
 meta:
   id: plan.mock-data-factory@v1
-  owner: 'data-engineering'
-  purpose: 'Create consistent test data utilities across languages'
+  owner: "data-engineering"
+  purpose: "Create consistent test data utilities across languages"
   tags:
     - testing
     - mock-data
@@ -9,13 +9,13 @@ meta:
     - seed
     - deterministic
   guardrails:
-    - 'Mock data must be deterministic'
-    - 'No PII in generated data'
-    - 'Data must be realistic for testing'
-    - 'Cross-language consistency required'
+    - "Mock data must be deterministic"
+    - "No PII in generated data"
+    - "Data must be realistic for testing"
+    - "Cross-language consistency required"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -295,15 +295,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'test-data-factory'
+  - name: "test-data-factory"
     inputs:
-      data_types: 'Entities, Relationships, Investigations, Users, Queries'
-      languages: 'TypeScript, Python'
-      testing_frameworks: 'Jest, Pytest, Playwright'
-      database_targets: 'Neo4j, PostgreSQL, in-memory'
-      special_requirements: 'Golden path scenario, performance datasets'
+      data_types: "Entities, Relationships, Investigations, Users, Queries"
+      languages: "TypeScript, Python"
+      testing_frameworks: "Jest, Pytest, Playwright"
+      database_targets: "Neo4j, PostgreSQL, in-memory"
+      special_requirements: "Golden path scenario, performance datasets"
     expected_contains:
-      - 'Entity Factories'
-      - 'Seed Datasets'
-      - 'Cross-Language'
-      - 'Usage Examples'
+      - "Entity Factories"
+      - "Seed Datasets"
+      - "Cross-Language"
+      - "Usage Examples"

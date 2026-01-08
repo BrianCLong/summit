@@ -3,11 +3,7 @@
   "name": "Tri-Pane View with Explainer",
   "version": "1.0.0",
   "description": "Synchronized timeline/map/graph panes with brushing, XAI overlays, and provenance tooltips",
-  "permissions": [
-    "graph:read",
-    "view:create",
-    "view:save"
-  ],
+  "permissions": ["graph:read", "view:create", "view:save"],
   "entrypoints": {
     "ui": "./dist/index.js"
   },

@@ -88,7 +88,7 @@ const sloSummary = {
   availability_target: 0.99,
   availability_actual: null,
   latency_target_ms_p95: null,
-  latency_actual_ms_p95: null
+  latency_actual_ms_p95: null,
 };
 
 const disclosurePack = {
@@ -107,11 +107,11 @@ const disclosurePack = {
         critical,
         high,
         medium,
-        low
-      }
-    }
+        low,
+      },
+    },
   ],
-  slo_summary: sloSummary
+  slo_summary: sloSummary,
 };
 
 fs.writeFileSync(args.out, JSON.stringify(disclosurePack, null, 2), "utf8");

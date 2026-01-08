@@ -9,16 +9,16 @@ datasources:
     editable: true
     jsonData:
       tracesToLogsV2:
-        datasourceUid: 'loki'
-        spanStartTimeShift: '-1h'
-        spanEndTimeShift: '1h'
-        tags: ['service', 'trace_id', 'span_id']
+        datasourceUid: "loki"
+        spanStartTimeShift: "-1h"
+        spanEndTimeShift: "1h"
+        tags: ["service", "trace_id", "span_id"]
         filterByTraceID: true
         filterBySpanID: false
       tracesToMetrics:
-        datasourceUid: 'prometheus'
-        spanStartTimeShift: '-1h'
-        spanEndTimeShift: '1h'
-        tags: [{key: 'service', value: 'service'}]
+        datasourceUid: "prometheus"
+        spanStartTimeShift: "-1h"
+        spanEndTimeShift: "1h"
+        tags: [{ key: "service", value: "service" }]
       nodeGraph:
         enabled: true

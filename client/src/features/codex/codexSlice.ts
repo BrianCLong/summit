@@ -1,12 +1,12 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export type CodexCard = {
   id: string;
-  type: 'entity' | 'note' | 'snapshot';
+  type: "entity" | "note" | "snapshot";
   entityId?: string;
   title: string;
   text?: string;
-  media?: { kind: 'image'; dataUrl: string };
+  media?: { kind: "image"; dataUrl: string };
   provenance: {
     sourceId: string;
     queryHash?: string;
@@ -43,7 +43,7 @@ const initialState: CodexState = {
 };
 
 const slice = createSlice({
-  name: 'codex',
+  name: "codex",
   initialState,
   reducers: {
     addSection(state, action: PayloadAction<string>) {
@@ -51,10 +51,7 @@ const slice = createSlice({
       state.sectionOrder.push(id);
       state.sections[id] = { id, title: action.payload, cardIds: [] };
     },
-    addCard(
-      state,
-      action: PayloadAction<{ sectionId: string; card: CodexCard }>,
-    ) {
+    addCard(state, action: PayloadAction<{ sectionId: string; card: CodexCard }>) {
       const { sectionId, card } = action.payload;
       state.cards[card.id] = card;
       state.sections[sectionId]?.cardIds.push(card.id);
@@ -64,7 +61,7 @@ const slice = createSlice({
       action: PayloadAction<{
         from: { sectionId: string; index: number };
         to: { sectionId: string; index: number };
-      }>,
+      }>
     ) {
       const { from, to } = action.payload;
       const fromIds = state.sections[from.sectionId].cardIds;
@@ -78,7 +75,7 @@ const slice = createSlice({
         cardId: string;
         fields: string[];
         reason: string;
-      }>,
+      }>
     ) {
       const { cardId, fields, reason } = action.payload;
       const card = state.cards[cardId];

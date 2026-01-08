@@ -1,16 +1,16 @@
-import { existsSync } from 'node:fs';
-import { CompatibilityOptions, CompatibilityReport, SchemaDefinition } from './types.js';
+import { existsSync } from "node:fs";
+import { CompatibilityOptions, CompatibilityReport, SchemaDefinition } from "./types.js";
 
 function buildIssues(oldDef: SchemaDefinition, newDef: SchemaDefinition) {
-  const issues = [] as CompatibilityReport['issues'];
+  const issues = [] as CompatibilityReport["issues"];
   const oldFields = oldDef.fields;
   const newFields = newDef.fields;
   for (const [name, meta] of Object.entries(oldFields)) {
     if (!newFields[name]) {
       issues.push({
         field: name,
-        reason: 'Field removed',
-        severity: 'breaking',
+        reason: "Field removed",
+        severity: "breaking",
       });
       continue;
     }
@@ -19,21 +19,21 @@ function buildIssues(oldDef: SchemaDefinition, newDef: SchemaDefinition) {
       issues.push({
         field: name,
         reason: `Type changed from ${meta.type} to ${candidate.type}`,
-        severity: 'breaking',
+        severity: "breaking",
       });
     }
     if (meta.required && !candidate.required) {
       issues.push({
         field: name,
-        reason: 'Field changed from required to optional',
-        severity: 'warning',
+        reason: "Field changed from required to optional",
+        severity: "warning",
       });
     }
     if (!meta.required && candidate.required) {
       issues.push({
         field: name,
-        reason: 'Field changed from optional to required',
-        severity: 'breaking',
+        reason: "Field changed from optional to required",
+        severity: "breaking",
       });
     }
   }
@@ -41,8 +41,8 @@ function buildIssues(oldDef: SchemaDefinition, newDef: SchemaDefinition) {
     if (!oldFields[name]) {
       issues.push({
         field: name,
-        reason: meta.required ? 'New required field' : 'New optional field',
-        severity: meta.required ? 'breaking' : 'warning',
+        reason: meta.required ? "New required field" : "New optional field",
+        severity: meta.required ? "breaking" : "warning",
       });
     }
   }
@@ -52,19 +52,19 @@ function buildIssues(oldDef: SchemaDefinition, newDef: SchemaDefinition) {
 export function compareSchemas(
   oldDef: SchemaDefinition,
   newDef: SchemaDefinition,
-  options: CompatibilityOptions = {},
+  options: CompatibilityOptions = {}
 ): CompatibilityReport {
   const issues = buildIssues(oldDef, newDef);
-  const breakingIssues = issues.filter((issue) => issue.severity === 'breaking');
-  const allowBreaking = options.allowBreaking || process.env.BREAKING_CHANGE_APPROVED === 'true';
+  const breakingIssues = issues.filter((issue) => issue.severity === "breaking");
+  const allowBreaking = options.allowBreaking || process.env.BREAKING_CHANGE_APPROVED === "true";
 
   if (breakingIssues.length > 0 && allowBreaking) {
     const migrationDoc = options.migrationDocument ?? process.env.MIGRATION_DOC;
     if (!migrationDoc || !existsSync(migrationDoc)) {
       const issue = {
-        field: 'migration',
-        reason: 'BREAKING_CHANGE_APPROVED set but migration document missing',
-        severity: 'breaking',
+        field: "migration",
+        reason: "BREAKING_CHANGE_APPROVED set but migration document missing",
+        severity: "breaking",
       } as const;
       breakingIssues.push(issue);
       issues.push(issue);

@@ -6,12 +6,12 @@
  * Blocks PRs/commits that violate UX governance decisions
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+const fs = require("fs");
+const path = require("path");
+const { execSync } = require("child_process");
 
 // Load UX Doctrine
-const uxDoctrine = JSON.parse(fs.readFileSync('./ux-doctrine.json', 'utf8'));
+const uxDoctrine = JSON.parse(fs.readFileSync("./ux-doctrine.json", "utf8"));
 
 class UXCIEnforcer {
   constructor() {
@@ -22,17 +22,23 @@ class UXCIEnforcer {
   getChangedFiles() {
     try {
       // Get list of files changed in current commit/PR
-      const changedFiles = execSync('git diff --name-only HEAD~1 HEAD', { encoding: 'utf-8' });
-      return changedFiles.trim().split('\n').filter(f => f.length > 0);
+      const changedFiles = execSync("git diff --name-only HEAD~1 HEAD", { encoding: "utf-8" });
+      return changedFiles
+        .trim()
+        .split("\n")
+        .filter((f) => f.length > 0);
     } catch (e) {
-      console.log('Not in a git repository, checking all tracked files');
-      const allFiles = execSync('git ls-files', { encoding: 'utf-8' });
-      return allFiles.trim().split('\n').filter(f => f.length > 0);
+      console.log("Not in a git repository, checking all tracked files");
+      const allFiles = execSync("git ls-files", { encoding: "utf-8" });
+      return allFiles
+        .trim()
+        .split("\n")
+        .filter((f) => f.length > 0);
     }
   }
 
   validate() {
-    console.log('🔍 Running UX CI Enforcer...\n');
+    console.log("🔍 Running UX CI Enforcer...\n");
 
     // Validate each type of violation
     this.validateAccessibilityCompliance();
@@ -43,40 +49,39 @@ class UXCIEnforcer {
 
     // Report results
     if (this.violations.length > 0) {
-      console.log('\n❌ UX CI Enforcer found violations:');
+      console.log("\n❌ UX CI Enforcer found violations:");
       this.violations.forEach((violation, index) => {
         console.log(`${index + 1}. ${violation.type}: ${violation.message}`);
         console.log(`   File: ${violation.file}`);
         console.log(`   Severity: ${violation.severity}\n`);
       });
-      
-      console.log('⚠️  UX Violations detected! PR/Commit blocked.');
+
+      console.log("⚠️  UX Violations detected! PR/Commit blocked.");
       process.exit(1);
     } else {
-      console.log('✅ All UX checks passed! No violations detected.');
+      console.log("✅ All UX checks passed! No violations detected.");
       process.exit(0);
     }
   }
 
   validateAccessibilityCompliance() {
     // Check for accessibility violations in JSX/TSX files
-    const jsxFiles = this.changes.filter(file => 
-      (file.endsWith('.jsx') || file.endsWith('.tsx')) && 
-      fs.existsSync(file)
+    const jsxFiles = this.changes.filter(
+      (file) => (file.endsWith(".jsx") || file.endsWith(".tsx")) && fs.existsSync(file)
     );
 
-    jsxFiles.forEach(file => {
-      const content = fs.readFileSync(file, 'utf8');
-      
+    jsxFiles.forEach((file) => {
+      const content = fs.readFileSync(file, "utf8");
+
       // Check for missing alt attributes in images
       const imgWithoutAlt = /<img(?!\s+alt=)[^>]*>/g;
       const matches = content.match(imgWithoutAlt);
       if (matches) {
         this.violations.push({
-          type: 'ACCESSIBILITY',
+          type: "ACCESSIBILITY",
           message: `Image elements missing 'alt' attributes (${matches.length} instances)`,
           file: file,
-          severity: 'P0'
+          severity: "P0",
         });
       }
 
@@ -85,10 +90,10 @@ class UXCIEnforcer {
       const ariaMatches = content.match(interactiveWithoutAria);
       if (ariaMatches) {
         this.violations.push({
-          type: 'ACCESSIBILITY',
+          type: "ACCESSIBILITY",
           message: `Interactive elements missing ARIA attributes (${ariaMatches.length} instances)`,
           file: file,
-          severity: 'P0'
+          severity: "P0",
         });
       }
     });
@@ -96,31 +101,23 @@ class UXCIEnforcer {
 
   validateCriticalActionPattern() {
     // Check for critical actions without proper confirmation
-    const jsxFiles = this.changes.filter(file => 
-      (file.endsWith('.jsx') || file.endsWith('.tsx')) && 
-      fs.existsSync(file)
+    const jsxFiles = this.changes.filter(
+      (file) => (file.endsWith(".jsx") || file.endsWith(".tsx")) && fs.existsSync(file)
     );
 
-    jsxFiles.forEach(file => {
-      const content = fs.readFileSync(file, 'utf8');
-      
+    jsxFiles.forEach((file) => {
+      const content = fs.readFileSync(file, "utf8");
+
       // Look for destructive operations without confirmation
-      const destructiveActions = [
-        /delete/i,
-        /remove/i,
-        /destroy/i,
-        /erase/i,
-        /clear/i,
-        /reset/i
-      ];
-      
+      const destructiveActions = [/delete/i, /remove/i, /destroy/i, /erase/i, /clear/i, /reset/i];
+
       for (const pattern of destructiveActions) {
         if (pattern.test(content) && !this.hasConfirmPattern(content)) {
           this.violations.push({
-            type: 'CRITICAL_ACTION',
+            type: "CRITICAL_ACTION",
             message: `Critical action without proper confirmation pattern detected`,
             file: file,
-            severity: 'P0'
+            severity: "P0",
           });
         }
       }
@@ -134,25 +131,24 @@ class UXCIEnforcer {
 
   validateDesignSystemConsistency() {
     // Check for mixed design system usage
-    const jsxFiles = this.changes.filter(file => 
-      (file.endsWith('.jsx') || file.endsWith('.tsx')) && 
-      fs.existsSync(file)
+    const jsxFiles = this.changes.filter(
+      (file) => (file.endsWith(".jsx") || file.endsWith(".tsx")) && fs.existsSync(file)
     );
 
-    jsxFiles.forEach(file => {
-      const content = fs.readFileSync(file, 'utf8');
-      
+    jsxFiles.forEach((file) => {
+      const content = fs.readFileSync(file, "utf8");
+
       // Check for mixed design system imports
       const hasMui = /@mui\/material/.test(content);
       const hasRadix = /@radix-ui/.test(content);
       const hasTailwind = /className=.*tw-/.test(content) || /className=.*\s+bg-/.test(content);
-      
+
       if (hasMui && (hasRadix || hasTailwind)) {
         this.violations.push({
-          type: 'DESIGN_SYSTEM',
+          type: "DESIGN_SYSTEM",
           message: `Mixed design systems detected: MUI components used with Radix/Tailwind patterns`,
           file: file,
-          severity: 'P1'
+          severity: "P1",
         });
       }
     });
@@ -160,25 +156,27 @@ class UXCIEnforcer {
 
   validateInformationHierarchy() {
     // Check for dashboard information overload
-    const jsxFiles = this.changes.filter(file => 
-      (file.endsWith('.jsx') || file.endsWith('.tsx')) && 
-      fs.existsSync(file) &&
-      (file.includes('dashboard') || file.includes('Dashboard'))
+    const jsxFiles = this.changes.filter(
+      (file) =>
+        (file.endsWith(".jsx") || file.endsWith(".tsx")) &&
+        fs.existsSync(file) &&
+        (file.includes("dashboard") || file.includes("Dashboard"))
     );
 
-    jsxFiles.forEach(file => {
-      const content = fs.readFileSync(file, 'utf8');
-      
+    jsxFiles.forEach((file) => {
+      const content = fs.readFileSync(file, "utf8");
+
       // Check for excessive metrics/components in dashboards
       // Count number of visual components
       const componentCount = (content.match(/<\w+(?!\s+className=.*simplified)/g) || []).length;
-      
-      if (componentCount > 10) {  // Arbitrary threshold, adjust as needed
+
+      if (componentCount > 10) {
+        // Arbitrary threshold, adjust as needed
         this.violations.push({
-          type: 'INFO_HIERARCHY',
+          type: "INFO_HIERARCHY",
           message: `Dashboard has ${componentCount} components (exceeds recommended limit of 10)`,
           file: file,
-          severity: 'P1'
+          severity: "P1",
         });
       }
     });
@@ -186,21 +184,20 @@ class UXCIEnforcer {
 
   validateTrustBoundaries() {
     // Check for oversimplified trust indicators
-    const jsxFiles = this.changes.filter(file => 
-      (file.endsWith('.jsx') || file.endsWith('.tsx')) && 
-      fs.existsSync(file)
+    const jsxFiles = this.changes.filter(
+      (file) => (file.endsWith(".jsx") || file.endsWith(".tsx")) && fs.existsSync(file)
     );
 
-    jsxFiles.forEach(file => {
-      const content = fs.readFileSync(file, 'utf8');
-      
+    jsxFiles.forEach((file) => {
+      const content = fs.readFileSync(file, "utf8");
+
       // Look for simple trust indicators without detail
       if (/(✅ Attested|trusted|secure)/i.test(content) && !this.hasTrustDetail(content)) {
         this.violations.push({
-          type: 'TRUST_BOUNDARY',
+          type: "TRUST_BOUNDARY",
           message: `Trust indicator without detailed information detected`,
           file: file,
-          severity: 'P1'
+          severity: "P1",
         });
       }
     });
@@ -208,7 +205,9 @@ class UXCIEnforcer {
 
   hasTrustDetail(content) {
     // Check if trust indicators include detailed information
-    return /detail|status|verification|certificate|fingerprint|timestamp/.test(content.toLowerCase());
+    return /detail|status|verification|certificate|fingerprint|timestamp/.test(
+      content.toLowerCase()
+    );
   }
 }
 

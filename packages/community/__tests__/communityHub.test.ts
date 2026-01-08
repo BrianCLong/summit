@@ -1,12 +1,7 @@
-import assert from 'node:assert/strict';
-import test from 'node:test';
+import assert from "node:assert/strict";
+import test from "node:test";
 
-import {
-  CommunityHub,
-  type DiscussionThread,
-  type Post,
-  type UserProfile,
-} from '../src/index.js';
+import { CommunityHub, type DiscussionThread, type Post, type UserProfile } from "../src/index.js";
 
 const createUser = (hub: CommunityHub, name: string): UserProfile =>
   hub.profiles.createProfile({ displayName: name });
@@ -15,45 +10,40 @@ const createThreadWithReply = (
   hub: CommunityHub,
   categoryId: string,
   author: UserProfile,
-  replier: UserProfile,
+  replier: UserProfile
 ): { thread: DiscussionThread; firstReply: Post } => {
   const thread = hub.forum.createThread({
-    title: 'How to build accessible dashboards?',
+    title: "How to build accessible dashboards?",
     categoryId,
     authorId: author.id,
-    body: 'Share your best WCAG 2.1 tips.',
-    tags: ['accessibility', 'dashboards'],
+    body: "Share your best WCAG 2.1 tips.",
+    tags: ["accessibility", "dashboards"],
   });
 
   const parentPostId = thread.postIds[0];
-  assert.ok(parentPostId, 'Expected the seed post to exist');
+  assert.ok(parentPostId, "Expected the seed post to exist");
 
   const reply = hub.forum.createPost({
     threadId: thread.id,
     authorId: replier.id,
     parentPostId,
-    content: 'Consider keyboard traps and focus states!',
+    content: "Consider keyboard traps and focus states!",
   });
 
   return { thread, firstReply: reply };
 };
 
-test('CommunityHub integration flow', () => {
+test("CommunityHub integration flow", () => {
   const hub = new CommunityHub();
-  const researcher = createUser(hub, 'Researcher Robin');
-  const analyst = createUser(hub, 'Analyst Alex');
+  const researcher = createUser(hub, "Researcher Robin");
+  const analyst = createUser(hub, "Analyst Alex");
 
   const category = hub.forum.createCategory({
-    name: 'Best Practices',
-    description: 'Share frameworks, playbooks, and UI heuristics.',
+    name: "Best Practices",
+    description: "Share frameworks, playbooks, and UI heuristics.",
   });
 
-  const { thread, firstReply } = createThreadWithReply(
-    hub,
-    category.id,
-    researcher,
-    analyst,
-  );
+  const { thread, firstReply } = createThreadWithReply(hub, category.id, researcher, analyst);
 
   assert.strictEqual(thread.postIds.length, 1);
   assert.strictEqual(firstReply.parentPostId, thread.postIds[0]);
@@ -61,7 +51,7 @@ test('CommunityHub integration flow', () => {
   const notificationsForResearcher = hub.notifications.list(researcher.id);
   assert.strictEqual(notificationsForResearcher.length, 1);
   const threadReplyNotification = notificationsForResearcher[0];
-  assert.ok(threadReplyNotification, 'Expected a reply notification');
+  assert.ok(threadReplyNotification, "Expected a reply notification");
   assert.match(threadReplyNotification.message, /replied to your post/);
 
   const notificationsForAnalyst = hub.notifications.list(analyst.id);
@@ -73,15 +63,15 @@ test('CommunityHub integration flow', () => {
   const flagged = hub.moderation.flagPost({
     postId: firstReply.id,
     userId: researcher.id,
-    reason: 'Contains sensitive project names',
+    reason: "Contains sensitive project names",
   });
   assert.ok(flagged.flaggedBy.includes(researcher.id));
 
   const removed = hub.moderation.moderatePost({
     postId: firstReply.id,
     moderatorId: analyst.id,
-    action: 'remove',
-    reason: 'PII detected',
+    action: "remove",
+    reason: "PII detected",
   });
   assert.strictEqual(removed.isRemoved, true);
   const moderationEvents = hub.moderation.listModerationActions();
@@ -90,8 +80,8 @@ test('CommunityHub integration flow', () => {
   hub.moderation.moderateThread({
     threadId: thread.id,
     moderatorId: analyst.id,
-    action: 'lock',
-    reason: 'Investigation complete',
+    action: "lock",
+    reason: "Investigation complete",
   });
   const lockedThread = hub.store.getThread(thread.id);
   assert.strictEqual(lockedThread?.isLocked ?? false, true);
@@ -101,31 +91,31 @@ test('CommunityHub integration flow', () => {
       hub.forum.createPost({
         threadId: thread.id,
         authorId: researcher.id,
-        content: 'Thanks for the update!',
+        content: "Thanks for the update!",
       }),
-    /Thread is locked/,
+    /Thread is locked/
   );
 
   hub.moderation.moderateThread({
     threadId: thread.id,
     moderatorId: analyst.id,
-    action: 'unlock',
-    reason: 'Continuing knowledge sharing',
+    action: "unlock",
+    reason: "Continuing knowledge sharing",
   });
 
   const reopened = hub.forum.createPost({
     threadId: thread.id,
     authorId: researcher.id,
-    content: 'Documenting mitigation steps for accessible dashboards.',
+    content: "Documenting mitigation steps for accessible dashboards.",
   });
   assert.strictEqual(reopened.isRemoved, false);
 
-  const searchResults = hub.search.search('dashboards accessibility');
-  assert.ok(searchResults.some((result) => result.type === 'thread'));
-  assert.ok(searchResults.some((result) => result.type === 'post'));
+  const searchResults = hub.search.search("dashboards accessibility");
+  assert.ok(searchResults.some((result) => result.type === "thread"));
+  assert.ok(searchResults.some((result) => result.type === "post"));
 
-  const tagSuggestions = hub.search.suggestTags('dash');
-  assert.ok(tagSuggestions.includes('dashboards'));
+  const tagSuggestions = hub.search.suggestTags("dash");
+  assert.ok(tagSuggestions.includes("dashboards"));
 
   const snapshot = hub.analytics.snapshot();
   assert.strictEqual(snapshot.totalUsers, 2);

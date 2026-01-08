@@ -3,13 +3,13 @@
  * Heatmap Layer Component
  */
 
-import React, { useEffect, useRef } from 'react';
-import L from 'leaflet';
-import 'leaflet.heat';
-import { useMap } from '../MapContainer';
-import type { GeoPoint } from '@intelgraph/geospatial';
+import React, { useEffect, useRef } from "react";
+import L from "leaflet";
+import "leaflet.heat";
+import { useMap } from "../MapContainer";
+import type { GeoPoint } from "@intelgraph/geospatial";
 
-declare module 'leaflet' {
+declare module "leaflet" {
   function heatLayer(
     latlngs: Array<[number, number, number?]>,
     options?: HeatMapOptions
@@ -62,11 +62,11 @@ export const HeatmapLayer: React.FC<HeatmapLayerProps> = ({
 
     // Default gradient (blue to red)
     const defaultGradient = {
-      0.0: 'blue',
-      0.25: 'cyan',
-      0.5: 'lime',
-      0.75: 'yellow',
-      1.0: 'red',
+      0.0: "blue",
+      0.25: "cyan",
+      0.5: "lime",
+      0.75: "yellow",
+      1.0: "red",
     };
 
     // Convert points to heatmap format [lat, lng, intensity]
@@ -93,7 +93,7 @@ export const HeatmapLayer: React.FC<HeatmapLayerProps> = ({
         heatLayerRef.current.remove();
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map]);
 
   // Update heatmap when points change

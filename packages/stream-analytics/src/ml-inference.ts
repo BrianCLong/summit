@@ -1,7 +1,7 @@
-import { EventEmitter } from 'events';
-import pino from 'pino';
+import { EventEmitter } from "events";
+import pino from "pino";
 
-const logger = pino({ name: 'ml-inference' });
+const logger = pino({ name: "ml-inference" });
 
 /**
  * Real-time ML model inference
@@ -15,7 +15,7 @@ export class MLInferenceEngine extends EventEmitter {
    */
   registerModel(name: string, model: MLModel): void {
     this.models.set(name, model);
-    logger.info({ modelName: name }, 'Model registered');
+    logger.info({ modelName: name }, "Model registered");
   }
 
   /**
@@ -34,17 +34,17 @@ export class MLInferenceEngine extends EventEmitter {
       const prediction = await model.predict(features);
       const latency = Date.now() - startTime;
 
-      this.emit('prediction', {
+      this.emit("prediction", {
         modelName,
         latency,
         timestamp: Date.now(),
       });
 
-      logger.debug({ modelName, latency }, 'Prediction completed');
+      logger.debug({ modelName, latency }, "Prediction completed");
 
       return prediction as R;
     } catch (error) {
-      logger.error({ error, modelName }, 'Prediction failed');
+      logger.error({ error, modelName }, "Prediction failed");
       throw error;
     }
   }
@@ -69,7 +69,7 @@ export class MLInferenceEngine extends EventEmitter {
       const latency = Date.now() - startTime;
       const avgLatency = latency / batchFeatures.length;
 
-      this.emit('batch-prediction', {
+      this.emit("batch-prediction", {
         modelName,
         batchSize: batchFeatures.length,
         totalLatency: latency,
@@ -79,7 +79,7 @@ export class MLInferenceEngine extends EventEmitter {
 
       return predictions as R[];
     } catch (error) {
-      logger.error({ error, modelName }, 'Batch prediction failed');
+      logger.error({ error, modelName }, "Batch prediction failed");
       throw error;
     }
   }
@@ -94,7 +94,7 @@ export class MLInferenceEngine extends EventEmitter {
       try {
         features[extractor.name] = extractor.extract(event);
       } catch (error) {
-        logger.warn({ error, extractor: extractor.name }, 'Feature extraction failed');
+        logger.warn({ error, extractor: extractor.name }, "Feature extraction failed");
         features[extractor.name] = null;
       }
     }
@@ -201,7 +201,7 @@ export class ClassificationModel implements MLModel {
     // In production, this would call a model serving endpoint
     // For now, return mock prediction
     return {
-      class: 'normal',
+      class: "normal",
       probability: 0.85,
     };
   }

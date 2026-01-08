@@ -2,15 +2,15 @@ name: Deploy Hardened Lambda
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'deploy/terraform/examples/lambda-hardened-example/**'
-      - 'deploy/terraform/modules/lambda-hardened/**'
+      - "deploy/terraform/examples/lambda-hardened-example/**"
+      - "deploy/terraform/modules/lambda-hardened/**"
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'deploy/terraform/examples/lambda-hardened-example/**'
-      - 'deploy/terraform/modules/lambda-hardened/**'
+      - "deploy/terraform/examples/lambda-hardened-example/**"
+      - "deploy/terraform/modules/lambda-hardened/**"
 
 permissions:
   id-token: write # For AWS OIDC
@@ -26,79 +26,79 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v2
-      with:
-        role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsRole # Replace with actual role
-        aws-region: ${{ env.AWS_REGION }}
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsRole # Replace with actual role
+          aws-region: ${{ env.AWS_REGION }}
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: 1.5.0
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
 
-    - name: Terraform Init
-      working-directory: ${{ env.TF_WORKING_DIR }}
-      run: terraform init
+      - name: Terraform Init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform init
 
-    - name: Terraform Format
-      working-directory: ${{ env.TF_WORKING_DIR }}
-      run: terraform fmt -check
+      - name: Terraform Format
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform fmt -check
 
-    - name: Terraform Plan
-      working-directory: ${{ env.TF_WORKING_DIR }}
-      run: terraform plan -out=tfplan
+      - name: Terraform Plan
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform plan -out=tfplan
 
-    - name: Terraform Apply
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      working-directory: ${{ env.TF_WORKING_DIR }}
-      run: terraform apply -auto-approve tfplan
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform apply -auto-approve tfplan
 
-    - name: Trigger CodeDeploy
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      working-directory: ${{ env.TF_WORKING_DIR }}
-      run: |
-        # Get Outputs
-        APP_NAME=$(terraform output -raw app_name)
-        DEPLOYMENT_GROUP=$(terraform output -raw deployment_group_name)
-        BUCKET=$(terraform output -raw s3_bucket) # Assuming we output this if used, or we just rely on the new version.
+      - name: Trigger CodeDeploy
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          # Get Outputs
+          APP_NAME=$(terraform output -raw app_name)
+          DEPLOYMENT_GROUP=$(terraform output -raw deployment_group_name)
+          BUCKET=$(terraform output -raw s3_bucket) # Assuming we output this if used, or we just rely on the new version.
 
-        # Note: In a real scenario, you'd construct an AppSpec or just trigger a deployment
-        # that updates the alias to the new version published by Terraform.
-        # However, Terraform's aws_lambda_function publishes a version.
-        # We need to find that latest version.
+          # Note: In a real scenario, you'd construct an AppSpec or just trigger a deployment
+          # that updates the alias to the new version published by Terraform.
+          # However, Terraform's aws_lambda_function publishes a version.
+          # We need to find that latest version.
 
-        FUNCTION_NAME=$(terraform output -raw lambda_function_name)
+          FUNCTION_NAME=$(terraform output -raw lambda_function_name)
 
-        # Get the current version the alias points to
-        CURRENT_VERSION=$(aws lambda get-alias --function-name $FUNCTION_NAME --name live --query 'FunctionVersion' --output text || echo "")
+          # Get the current version the alias points to
+          CURRENT_VERSION=$(aws lambda get-alias --function-name $FUNCTION_NAME --name live --query 'FunctionVersion' --output text || echo "")
 
-        # Get the newly published version (the latest one)
-        TARGET_VERSION=$(aws lambda list-versions-by-function --function-name $FUNCTION_NAME --query 'Versions[-1].Version' --output text)
+          # Get the newly published version (the latest one)
+          TARGET_VERSION=$(aws lambda list-versions-by-function --function-name $FUNCTION_NAME --query 'Versions[-1].Version' --output text)
 
-        if [ -z "$CURRENT_VERSION" ] || [ "$CURRENT_VERSION" == "\$LATEST" ]; then
-            echo "Alias 'live' not found or points to \$LATEST. Initializing alias to $TARGET_VERSION without CodeDeploy rollout."
-            aws lambda update-alias --function-name $FUNCTION_NAME --name live --function-version $TARGET_VERSION
-        elif [ "$CURRENT_VERSION" == "$TARGET_VERSION" ]; then
-            echo "Current version is already $TARGET_VERSION. Nothing to deploy."
-        else
-            echo "Deploying from $CURRENT_VERSION to $TARGET_VERSION"
+          if [ -z "$CURRENT_VERSION" ] || [ "$CURRENT_VERSION" == "\$LATEST" ]; then
+              echo "Alias 'live' not found or points to \$LATEST. Initializing alias to $TARGET_VERSION without CodeDeploy rollout."
+              aws lambda update-alias --function-name $FUNCTION_NAME --name live --function-version $TARGET_VERSION
+          elif [ "$CURRENT_VERSION" == "$TARGET_VERSION" ]; then
+              echo "Current version is already $TARGET_VERSION. Nothing to deploy."
+          else
+              echo "Deploying from $CURRENT_VERSION to $TARGET_VERSION"
 
-            aws deploy create-deployment \
-              --application-name $APP_NAME \
-              --deployment-group-name $DEPLOYMENT_GROUP \
-              --revision "{\"revisionType\":\"AppSpecContent\",\"appSpecContent\":{\"content\":\"{\\\"version\\\":0.0,\\\"Resources\\\":[{\\\"myLambdaFunction\\\":{\\\"Type\\\":\\\"AWS::Lambda::Function\\\",\\\"Properties\\\":{\\\"Name\\\":\\\"$FUNCTION_NAME\\\",\\\"Alias\\\":\\\"live\\\",\\\"CurrentVersion\\\":\\\"$CURRENT_VERSION\\\",\\\"TargetVersion\\\":\\\"$TARGET_VERSION\\\"}}}]}\"}}"
-        fi
+              aws deploy create-deployment \
+                --application-name $APP_NAME \
+                --deployment-group-name $DEPLOYMENT_GROUP \
+                --revision "{\"revisionType\":\"AppSpecContent\",\"appSpecContent\":{\"content\":\"{\\\"version\\\":0.0,\\\"Resources\\\":[{\\\"myLambdaFunction\\\":{\\\"Type\\\":\\\"AWS::Lambda::Function\\\",\\\"Properties\\\":{\\\"Name\\\":\\\"$FUNCTION_NAME\\\",\\\"Alias\\\":\\\"live\\\",\\\"CurrentVersion\\\":\\\"$CURRENT_VERSION\\\",\\\"TargetVersion\\\":\\\"$TARGET_VERSION\\\"}}}]}\"}}"
+          fi
 
-    - name: Run Smoke Test
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      working-directory: ${{ env.TF_WORKING_DIR }}
-      run: |
-        FUNCTION_NAME=$(terraform output -raw lambda_function_name)
-        # We verify the 'live' alias which should now be pointing to the new version (or shifting traffic)
-        # Note: During a Blue/Green deployment, traffic might still be split.
-        # This smoke test verifies that the endpoint is responsive.
-        ./tests/smoke.sh $FUNCTION_NAME live
+      - name: Run Smoke Test
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          FUNCTION_NAME=$(terraform output -raw lambda_function_name)
+          # We verify the 'live' alias which should now be pointing to the new version (or shifting traffic)
+          # Note: During a Blue/Green deployment, traffic might still be split.
+          # This smoke test verifies that the endpoint is responsive.
+          ./tests/smoke.sh $FUNCTION_NAME live

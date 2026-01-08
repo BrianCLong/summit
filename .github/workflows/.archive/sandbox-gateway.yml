@@ -4,23 +4,23 @@ on:
   push:
     branches:
       - main
-      - 'release/**'
+      - "release/**"
     paths:
-      - 'services/sandbox-gateway/**'
-      - 'services/sandbox-tenant-profile/**'
-      - 'services/datalab-service/**'
-      - '.github/workflows/sandbox-gateway.yml'
+      - "services/sandbox-gateway/**"
+      - "services/sandbox-tenant-profile/**"
+      - "services/datalab-service/**"
+      - ".github/workflows/sandbox-gateway.yml"
   pull_request:
     branches:
       - main
     paths:
-      - 'services/sandbox-gateway/**'
-      - 'services/sandbox-tenant-profile/**'
-      - 'services/datalab-service/**'
+      - "services/sandbox-gateway/**"
+      - "services/sandbox-tenant-profile/**"
+      - "services/datalab-service/**"
 
 env:
-  NODE_VERSION: '20'
-  PNPM_VERSION: '9'
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9"
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}/sandbox-gateway
 
@@ -45,7 +45,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -116,7 +116,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -185,7 +185,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -223,7 +223,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -235,17 +235,17 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: 'services/sandbox-gateway'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH'
+          scan-type: "fs"
+          scan-ref: "services/sandbox-gateway"
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "CRITICAL,HIGH"
 
       - name: Upload Trivy scan results
         uses: github/codeql-action/upload-sarif@v2
         if: always()
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: "trivy-results.sarif"
 
       - name: Run Gitleaks
         uses: gitleaks/gitleaks-action@v2
@@ -331,7 +331,7 @@ jobs:
       - name: Setup Helm
         uses: azure/setup-helm@v3
         with:
-          version: 'v3.13.0'
+          version: "v3.13.0"
 
       - name: Configure kubectl
         uses: azure/k8s-set-context@v3
@@ -369,7 +369,7 @@ jobs:
       - name: Setup Helm
         uses: azure/setup-helm@v3
         with:
-          version: 'v3.13.0'
+          version: "v3.13.0"
 
       - name: Configure kubectl
         uses: azure/k8s-set-context@v3

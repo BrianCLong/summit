@@ -2,7 +2,7 @@
  * Event extraction
  */
 
-import type { EventExtraction } from '../types';
+import type { EventExtraction } from "../types";
 
 export class EventExtractor {
   /**
@@ -12,19 +12,17 @@ export class EventExtractor {
     const events: EventExtraction[] = [];
 
     // Simplified event extraction
-    const eventPatterns = [
-      /(\w+)\s+(attacked|met|visited|signed|announced)\s+(\w+)/gi,
-    ];
+    const eventPatterns = [/(\w+)\s+(attacked|met|visited|signed|announced)\s+(\w+)/gi];
 
     for (const pattern of eventPatterns) {
       let match;
       while ((match = pattern.exec(text)) !== null) {
         events.push({
           event: match[2],
-          eventType: 'action',
+          eventType: "action",
           participants: [
-            { role: 'agent', entity: match[1] },
-            { role: 'patient', entity: match[3] },
+            { role: "agent", entity: match[1] },
+            { role: "patient", entity: match[3] },
           ],
           confidence: 0.7,
         });

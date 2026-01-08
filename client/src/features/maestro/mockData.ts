@@ -1,6 +1,6 @@
-import { addMinutes, formatISO } from 'date-fns';
+import { addMinutes, formatISO } from "date-fns";
 
-export type PipelineStatus = 'healthy' | 'degraded' | 'failed';
+export type PipelineStatus = "healthy" | "degraded" | "failed";
 
 export interface PipelineRecord {
   id: string;
@@ -47,7 +47,7 @@ export interface RunMetadata {
   durationSeconds: number;
   retries: number;
   startedAt: string;
-  status: 'running' | 'passed' | 'failed';
+  status: "running" | "passed" | "failed";
 }
 
 export interface ReleaseTrain {
@@ -55,8 +55,8 @@ export interface ReleaseTrain {
   name: string;
   windowStart: string;
   windowEnd: string;
-  status: 'scheduled' | 'running' | 'completed' | 'blocked';
-  gateStatus: 'pass' | 'fail' | 'pending';
+  status: "scheduled" | "running" | "completed" | "blocked";
+  gateStatus: "pass" | "fail" | "pending";
   approvalsRequired: number;
   approvalsComplete: number;
 }
@@ -68,7 +68,7 @@ export interface SloSnapshot {
   saturation: number;
 }
 
-const owners = ['alex', 'casey', 'devon', 'jules', 'morgan'];
+const owners = ["alex", "casey", "devon", "jules", "morgan"];
 
 function randomChoice<T>(items: T[]): T {
   return items[Math.floor(Math.random() * items.length)];
@@ -78,7 +78,7 @@ function buildPipelines(total: number): PipelineRecord[] {
   const now = new Date();
   return Array.from({ length: total }, (_, index) => {
     const id = `pipe-${index + 1}`;
-    const statusPool: PipelineStatus[] = ['healthy', 'degraded', 'failed'];
+    const statusPool: PipelineStatus[] = ["healthy", "degraded", "failed"];
     const status = statusPool[Math.floor(Math.random() * statusPool.length)];
     const lastRun = addMinutes(now, -Math.floor(Math.random() * 720));
     const queueDepth = Math.floor(Math.random() * 12);
@@ -87,7 +87,7 @@ function buildPipelines(total: number): PipelineRecord[] {
       id,
       name: `Pipeline ${index + 1}`,
       owners: [randomChoice(owners), randomChoice(owners)].filter(
-        (v, idx, arr) => arr.indexOf(v) === idx,
+        (v, idx, arr) => arr.indexOf(v) === idx
       ),
       status,
       lastRun: formatISO(lastRun),
@@ -147,14 +147,13 @@ function buildRuns(): RunMetadata[] {
   return Array.from({ length: 12 }, (_, idx) => ({
     id: `run-${idx + 1}`,
     commit: `c${(1000 + idx).toString(16)}`,
-    branch: idx % 2 === 0 ? 'main' : 'release/2025.09',
-    initiator: idx % 3 === 0 ? 'build-bot' : randomChoice(owners),
-    environment:
-      idx % 4 === 0 ? 'production' : idx % 4 === 1 ? 'staging' : 'dev',
+    branch: idx % 2 === 0 ? "main" : "release/2025.09",
+    initiator: idx % 3 === 0 ? "build-bot" : randomChoice(owners),
+    environment: idx % 4 === 0 ? "production" : idx % 4 === 1 ? "staging" : "dev",
     durationSeconds: 360 + Math.floor(Math.random() * 900),
     retries: idx % 5 === 0 ? 1 : 0,
     startedAt: formatISO(addMinutes(now, -idx * 120)),
-    status: idx % 6 === 0 ? 'failed' : idx % 3 === 0 ? 'running' : 'passed',
+    status: idx % 6 === 0 ? "failed" : idx % 3 === 0 ? "running" : "passed",
   }));
 }
 
@@ -162,32 +161,32 @@ function buildReleases(): ReleaseTrain[] {
   const now = new Date();
   return [
     {
-      id: 'release-1',
-      name: 'Release Train Alpha',
+      id: "release-1",
+      name: "Release Train Alpha",
       windowStart: formatISO(addMinutes(now, -180)),
       windowEnd: formatISO(addMinutes(now, 60)),
-      status: 'running',
-      gateStatus: 'pending',
+      status: "running",
+      gateStatus: "pending",
       approvalsRequired: 4,
       approvalsComplete: 2,
     },
     {
-      id: 'release-2',
-      name: 'Release Train Beta',
+      id: "release-2",
+      name: "Release Train Beta",
       windowStart: formatISO(addMinutes(now, 240)),
       windowEnd: formatISO(addMinutes(now, 480)),
-      status: 'scheduled',
-      gateStatus: 'pending',
+      status: "scheduled",
+      gateStatus: "pending",
       approvalsRequired: 3,
       approvalsComplete: 0,
     },
     {
-      id: 'release-0',
-      name: 'Release Train Omega',
+      id: "release-0",
+      name: "Release Train Omega",
       windowStart: formatISO(addMinutes(now, -720)),
       windowEnd: formatISO(addMinutes(now, -300)),
-      status: 'completed',
-      gateStatus: 'pass',
+      status: "completed",
+      gateStatus: "pass",
       approvalsRequired: 3,
       approvalsComplete: 3,
     },
@@ -197,19 +196,19 @@ function buildReleases(): ReleaseTrain[] {
 function buildSloSnapshots(): SloSnapshot[] {
   return [
     {
-      service: 'pipeline-api',
+      service: "pipeline-api",
       latencyP95Ms: 820,
       errorRate: 0.002,
       saturation: 0.61,
     },
     {
-      service: 'artifact-proxy',
+      service: "artifact-proxy",
       latencyP95Ms: 1340,
       errorRate: 0.006,
       saturation: 0.72,
     },
     {
-      service: 'policy-engine',
+      service: "policy-engine",
       latencyP95Ms: 640,
       errorRate: 0.001,
       saturation: 0.55,
@@ -225,15 +224,15 @@ export const sloSnapshots = buildSloSnapshots();
 
 export const policyDenials = [
   {
-    id: 'denial-1',
-    tenant: 'acme-co',
-    reason: 'Promotion blocked: missing change ticket',
+    id: "denial-1",
+    tenant: "acme-co",
+    reason: "Promotion blocked: missing change ticket",
     occurredAt: formatISO(addMinutes(new Date(), -45)),
   },
   {
-    id: 'denial-2',
-    tenant: 'aurora-labs',
-    reason: 'Artifact export denied: PII redaction required',
+    id: "denial-2",
+    tenant: "aurora-labs",
+    reason: "Artifact export denied: PII redaction required",
     occurredAt: formatISO(addMinutes(new Date(), -12)),
   },
 ];

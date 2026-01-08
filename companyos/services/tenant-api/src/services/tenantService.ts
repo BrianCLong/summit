@@ -4,7 +4,7 @@
  * Business logic for tenant CRUD operations
  */
 
-import { pool } from '../db/postgres.js';
+import { pool } from "../db/postgres.js";
 import type {
   Tenant,
   TenantFeature,
@@ -13,8 +13,8 @@ import type {
   SetFeatureFlagInput,
   EffectiveFeatureFlags,
   TENANT_FEATURE_FLAGS,
-} from '../types/index.js';
-import { v4 as uuidv4 } from 'uuid';
+} from "../types/index.js";
+import { v4 as uuidv4 } from "uuid";
 
 // Row to Tenant mapping
 function rowToTenant(row: any): Tenant {
@@ -52,10 +52,7 @@ export class TenantService {
   /**
    * Create a new tenant
    */
-  async createTenant(
-    input: CreateTenantInput,
-    actorId?: string,
-  ): Promise<Tenant> {
+  async createTenant(input: CreateTenantInput, actorId?: string): Promise<Tenant> {
     const id = uuidv4();
     const now = new Date();
 
@@ -73,9 +70,9 @@ export class TenantService {
       input.name,
       input.slug,
       input.description || null,
-      input.dataRegion || 'us-east-1',
-      input.classification || 'unclassified',
-      'active',
+      input.dataRegion || "us-east-1",
+      input.classification || "unclassified",
+      "active",
       true,
       JSON.stringify(input.settings || {}),
       now,
@@ -125,11 +122,11 @@ export class TenantService {
   }): Promise<{ tenants: Tenant[]; totalCount: number }> {
     const { limit = 50, offset = 0, status } = options;
 
-    let whereClause = '';
+    let whereClause = "";
     const values: any[] = [];
 
     if (status) {
-      whereClause = 'WHERE status = $1';
+      whereClause = "WHERE status = $1";
       values.push(status);
     }
 
@@ -156,7 +153,7 @@ export class TenantService {
   async updateTenant(
     id: string,
     input: UpdateTenantInput,
-    actorId?: string,
+    actorId?: string
   ): Promise<Tenant | null> {
     const existing = await this.getTenantById(id);
     if (!existing) {
@@ -188,7 +185,7 @@ export class TenantService {
       values.push(input.status);
       // Also update is_active based on status
       updates.push(`is_active = $${paramIndex++}`);
-      values.push(input.status === 'active');
+      values.push(input.status === "active");
     }
     if (input.settings !== undefined) {
       updates.push(`settings = $${paramIndex++}`);
@@ -205,7 +202,7 @@ export class TenantService {
 
     const query = `
       UPDATE companyos_tenants
-      SET ${updates.join(', ')}
+      SET ${updates.join(", ")}
       WHERE id = $${paramIndex}
       RETURNING *
     `;
@@ -232,10 +229,7 @@ export class TenantService {
   /**
    * Set a feature flag for a tenant
    */
-  async setFeatureFlag(
-    input: SetFeatureFlagInput,
-    actorId?: string,
-  ): Promise<TenantFeature> {
+  async setFeatureFlag(input: SetFeatureFlagInput, actorId?: string): Promise<TenantFeature> {
     const query = `
       INSERT INTO companyos_tenant_features (
         id, tenant_id, flag_name, enabled, config, created_at, updated_at, updated_by
@@ -283,9 +277,7 @@ export class TenantService {
   /**
    * Get effective feature flags for a tenant (with defaults)
    */
-  async getEffectiveFeatureFlags(
-    tenantId: string,
-  ): Promise<EffectiveFeatureFlags> {
+  async getEffectiveFeatureFlags(tenantId: string): Promise<EffectiveFeatureFlags> {
     const features = await this.getTenantFeatures(tenantId);
 
     const flagMap: Record<string, boolean> = {};
@@ -294,14 +286,14 @@ export class TenantService {
     }
 
     return {
-      aiCopilotAccess: flagMap['ai_copilot_access'] ?? false,
-      billingEnabled: flagMap['billing_enabled'] ?? false,
-      advancedAnalytics: flagMap['advanced_analytics'] ?? false,
-      exportEnabled: flagMap['export_enabled'] ?? true, // Default enabled
-      apiAccess: flagMap['api_access'] ?? true, // Default enabled
-      ssoEnabled: flagMap['sso_enabled'] ?? false,
-      customBranding: flagMap['custom_branding'] ?? false,
-      auditLogExport: flagMap['audit_log_export'] ?? false,
+      aiCopilotAccess: flagMap["ai_copilot_access"] ?? false,
+      billingEnabled: flagMap["billing_enabled"] ?? false,
+      advancedAnalytics: flagMap["advanced_analytics"] ?? false,
+      exportEnabled: flagMap["export_enabled"] ?? true, // Default enabled
+      apiAccess: flagMap["api_access"] ?? true, // Default enabled
+      ssoEnabled: flagMap["sso_enabled"] ?? false,
+      customBranding: flagMap["custom_branding"] ?? false,
+      auditLogExport: flagMap["audit_log_export"] ?? false,
       raw: flagMap,
     };
   }

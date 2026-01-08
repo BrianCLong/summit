@@ -90,7 +90,7 @@ Security and performance via allow-listed queries:
 
 ```typescript
 interface PersistedQuery {
-  hash: string;  // SHA-256 of query
+  hash: string; // SHA-256 of query
   query: string;
   operationName: string;
   createdAt: Date;
@@ -102,7 +102,7 @@ const persistedQueries = new Map<string, PersistedQuery>();
 
 // Build persisted query manifest
 async function buildPersistedQueryManifest(): Promise<void> {
-  const queries = await loadQueriesFromFiles('queries/**/*.graphql');
+  const queries = await loadQueriesFromFiles("queries/**/*.graphql");
 
   for (const query of queries) {
     const hash = sha256(query.query);
@@ -111,13 +111,13 @@ async function buildPersistedQueryManifest(): Promise<void> {
       query: query.query,
       operationName: query.operationName,
       createdAt: new Date(),
-      deprecated: false
+      deprecated: false,
     });
   }
 
   // Write manifest
   await fs.writeFile(
-    'persisted-queries.json',
+    "persisted-queries.json",
     JSON.stringify(Array.from(persistedQueries.values()))
   );
 }
@@ -132,8 +132,8 @@ const persistedQueryPlugin: ApolloServerPlugin = {
       const persisted = persistedQueries.get(sha256Hash);
 
       if (!persisted) {
-        throw new GraphQLError('Persisted query not found', {
-          extensions: { code: 'PERSISTED_QUERY_NOT_FOUND' }
+        throw new GraphQLError("Persisted query not found", {
+          extensions: { code: "PERSISTED_QUERY_NOT_FOUND" },
         });
       }
 
@@ -145,25 +145,25 @@ const persistedQueryPlugin: ApolloServerPlugin = {
       request.query = persisted.query;
     } else {
       // Require persisted queries in production
-      if (process.env.NODE_ENV === 'production') {
-        throw new GraphQLError('Only persisted queries allowed in production', {
-          extensions: { code: 'PERSISTED_QUERY_REQUIRED' }
+      if (process.env.NODE_ENV === "production") {
+        throw new GraphQLError("Only persisted queries allowed in production", {
+          extensions: { code: "PERSISTED_QUERY_REQUIRED" },
         });
       }
     }
-  }
+  },
 };
 
 // Client usage
 const client = new ApolloClient({
   link: createPersistedQueryLink({ sha256 }).concat(httpLink),
-  cache: new InMemoryCache()
+  cache: new InMemoryCache(),
 });
 
 // Query by hash
 const { data } = await client.query({
-  query: GET_ENTITIES,  // Will be sent as hash only
-  variables: { limit: 10 }
+  query: GET_ENTITIES, // Will be sent as hash only
+  variables: { limit: 10 },
 });
 ```
 
@@ -195,12 +195,12 @@ const costRules = {
   Mutation: 10,
 
   // Field costs
-  'Entity.relationships': (args) => args.limit || 100,  // Cost = # relationships fetched
-  'Investigation.entities': (args) => args.limit || 100,
-  'Entity.relatedEntities': (args) => (args.depth || 1) * 50,  // Exponential cost for deep traversal
+  "Entity.relationships": (args) => args.limit || 100, // Cost = # relationships fetched
+  "Investigation.entities": (args) => args.limit || 100,
+  "Entity.relatedEntities": (args) => (args.depth || 1) * 50, // Exponential cost for deep traversal
 
   // Multipliers
-  complexity_multiplier: (depth) => Math.pow(2, depth - 1)
+  complexity_multiplier: (depth) => Math.pow(2, depth - 1),
 };
 
 class CostAnalyzerImpl implements CostAnalyzer {
@@ -222,17 +222,17 @@ class CostAnalyzerImpl implements CostAnalyzer {
             return acc;
           }, {});
 
-          const cost = typeof costFn === 'function' ? costFn(args) : costFn;
+          const cost = typeof costFn === "function" ? costFn(args) : costFn;
           breakdown[costKey] = (breakdown[costKey] || 0) + cost;
           totalCost += cost;
         }
-      }
+      },
     });
 
     return {
       totalCost,
       breakdown,
-      estimatedMs: totalCost * 10  // Estimate 10ms per cost unit
+      estimatedMs: totalCost * 10, // Estimate 10ms per cost unit
     };
   }
 
@@ -250,19 +250,16 @@ const costLimitPlugin: ApolloServerPlugin = {
     const userLimit = contextValue.user.queryComplexityLimit || 1000;
 
     if (!costAnalyzer.withinLimit(cost, userLimit)) {
-      throw new GraphQLError(
-        `Query cost ${cost.totalCost} exceeds limit ${userLimit}`,
-        {
-          extensions: {
-            code: 'COST_LIMIT_EXCEEDED',
-            cost: cost.totalCost,
-            limit: userLimit,
-            breakdown: cost.breakdown
-          }
-        }
-      );
+      throw new GraphQLError(`Query cost ${cost.totalCost} exceeds limit ${userLimit}`, {
+        extensions: {
+          code: "COST_LIMIT_EXCEEDED",
+          cost: cost.totalCost,
+          limit: userLimit,
+          breakdown: cost.breakdown,
+        },
+      });
     }
-  }
+  },
 };
 ```
 
@@ -441,7 +438,7 @@ interface RateLimitResult {
 class TokenBucketRateLimiter implements RateLimiter {
   private redis: Redis;
   private bucketSize: number;
-  private refillRate: number;  // tokens/second
+  private refillRate: number; // tokens/second
 
   async checkLimit(key: string): Promise<RateLimitResult> {
     const now = Date.now() / 1000;
@@ -459,13 +456,13 @@ class TokenBucketRateLimiter implements RateLimiter {
       return {
         allowed: true,
         remaining: Math.floor(tokens - 1),
-        resetAt: new Date((now + (this.bucketSize - tokens) / this.refillRate) * 1000)
+        resetAt: new Date((now + (this.bucketSize - tokens) / this.refillRate) * 1000),
       };
     } else {
       return {
         allowed: false,
         remaining: 0,
-        resetAt: new Date((now + (1 - tokens) / this.refillRate) * 1000)
+        resetAt: new Date((now + (1 - tokens) / this.refillRate) * 1000),
       };
     }
   }
@@ -474,7 +471,8 @@ class TokenBucketRateLimiter implements RateLimiter {
     const now = Date.now() / 1000;
 
     // Consume token
-    await this.redis.eval(`
+    await this.redis.eval(
+      `
       local key = KEYS[1]
       local now = tonumber(ARGV[1])
       local bucketSize = tonumber(ARGV[2])
@@ -493,7 +491,13 @@ class TokenBucketRateLimiter implements RateLimiter {
       redis.call('EXPIRE', key, 3600)
 
       return tokens
-    `, 1, `ratelimit:${key}`, now, this.bucketSize, this.refillRate);
+    `,
+      1,
+      `ratelimit:${key}`,
+      now,
+      this.bucketSize,
+      this.refillRate
+    );
   }
 }
 
@@ -504,20 +508,20 @@ const rateLimitPlugin: ApolloServerPlugin = {
     const result = await rateLimiter.checkLimit(key);
 
     if (!result.allowed) {
-      throw new GraphQLError('Rate limit exceeded', {
+      throw new GraphQLError("Rate limit exceeded", {
         extensions: {
-          code: 'RATE_LIMIT_EXCEEDED',
-          resetAt: result.resetAt.toISOString()
-        }
+          code: "RATE_LIMIT_EXCEEDED",
+          resetAt: result.resetAt.toISOString(),
+        },
       });
     }
 
     await rateLimiter.recordRequest(key);
 
     // Add headers
-    contextValue.res.setHeader('X-RateLimit-Remaining', result.remaining);
-    contextValue.res.setHeader('X-RateLimit-Reset', result.resetAt.toISOString());
-  }
+    contextValue.res.setHeader("X-RateLimit-Remaining", result.remaining);
+    contextValue.res.setHeader("X-RateLimit-Reset", result.resetAt.toISOString());
+  },
 };
 ```
 
@@ -529,8 +533,8 @@ Reliable event delivery:
 interface Webhook {
   id: string;
   url: string;
-  events: string[];  // e.g., ['entity.created', 'investigation.updated']
-  secret: string;  // For HMAC signing
+  events: string[]; // e.g., ['entity.created', 'investigation.updated']
+  secret: string; // For HMAC signing
   enabled: boolean;
 }
 
@@ -542,24 +546,17 @@ interface WebhookDelivery {
   signature: string;
   attempts: number;
   maxAttempts: number;
-  status: 'pending' | 'delivered' | 'failed';
+  status: "pending" | "delivered" | "failed";
   nextRetryAt?: Date;
 }
 
 // Sign payload
 function signPayload(payload: any, secret: string): string {
-  return crypto
-    .createHmac('sha256', secret)
-    .update(JSON.stringify(payload))
-    .digest('hex');
+  return crypto.createHmac("sha256", secret).update(JSON.stringify(payload)).digest("hex");
 }
 
 // Deliver webhook
-async function deliverWebhook(
-  webhook: Webhook,
-  event: string,
-  payload: any
-): Promise<void> {
+async function deliverWebhook(webhook: Webhook, event: string, payload: any): Promise<void> {
   const delivery: WebhookDelivery = {
     id: uuidv4(),
     webhookId: webhook.id,
@@ -568,7 +565,7 @@ async function deliverWebhook(
     signature: signPayload(payload, webhook.secret),
     attempts: 0,
     maxAttempts: 5,
-    status: 'pending'
+    status: "pending",
   };
 
   await webhookQueue.enqueue(delivery);
@@ -582,19 +579,19 @@ async function processWebhookQueue(): Promise<void> {
 
     try {
       const response = await fetch(webhook.url, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-Webhook-Signature': `sha256=${delivery.signature}`,
-          'X-Webhook-Event': delivery.event,
-          'X-Webhook-Delivery-ID': delivery.id
+          "Content-Type": "application/json",
+          "X-Webhook-Signature": `sha256=${delivery.signature}`,
+          "X-Webhook-Event": delivery.event,
+          "X-Webhook-Delivery-ID": delivery.id,
         },
         body: JSON.stringify(delivery.payload),
-        timeout: 10000
+        timeout: 10000,
       });
 
       if (response.ok) {
-        delivery.status = 'delivered';
+        delivery.status = "delivered";
         await webhookDeliveryDb.update(delivery);
       } else {
         throw new Error(`HTTP ${response.status}`);
@@ -604,7 +601,7 @@ async function processWebhookQueue(): Promise<void> {
 
       if (delivery.attempts >= delivery.maxAttempts) {
         // Move to DLQ
-        delivery.status = 'failed';
+        delivery.status = "failed";
         await deadLetterQueue.enqueue(delivery);
       } else {
         // Retry with exponential backoff
@@ -642,19 +639,20 @@ ariadne-codegen
 ```
 
 **TypeScript SDK**:
+
 ```typescript
-import { ApolloClient, InMemoryCache } from '@apollo/client';
-import { createPersistedQueryLink } from '@apollo/client/link/persisted-queries';
+import { ApolloClient, InMemoryCache } from "@apollo/client";
+import { createPersistedQueryLink } from "@apollo/client/link/persisted-queries";
 
 const client = new ApolloClient({
   link: createPersistedQueryLink({ sha256 }).concat(httpLink),
-  cache: new InMemoryCache()
+  cache: new InMemoryCache(),
 });
 
 // Usage
 const { data } = await client.query({
   query: GET_ENTITIES,
-  variables: { limit: 10 }
+  variables: { limit: 10 },
 });
 ```
 
@@ -664,8 +662,8 @@ Ensure API contract stability:
 
 ```typescript
 // tests/contract/entities.test.ts
-describe('Entities API Contract', () => {
-  it('should return entities with required fields', async () => {
+describe("Entities API Contract", () => {
+  it("should return entities with required fields", async () => {
     const { data } = await client.query({
       query: gql`
         query GetEntities {
@@ -675,7 +673,7 @@ describe('Entities API Contract', () => {
             type
           }
         }
-      `
+      `,
     });
 
     expect(data.entities).toBeDefined();
@@ -685,12 +683,12 @@ describe('Entities API Contract', () => {
       expect(entity).toMatchObject({
         id: expect.any(String),
         name: expect.any(String),
-        type: expect.any(String)
+        type: expect.any(String),
       });
     }
   });
 
-  it('should enforce field-level authz', async () => {
+  it("should enforce field-level authz", async () => {
     // Low-clearance user
     const { data } = await lowClearanceClient.query({
       query: gql`
@@ -702,12 +700,12 @@ describe('Entities API Contract', () => {
           }
         }
       `,
-      variables: { id: 'e-classified-123' }
+      variables: { id: "e-classified-123" },
     });
 
     expect(data.entity.id).toBeDefined();
     expect(data.entity.name).toBeDefined();
-    expect(data.entity.classification).toBeNull();  // Filtered
+    expect(data.entity.classification).toBeNull(); // Filtered
   });
 });
 ```

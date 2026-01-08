@@ -1,6 +1,6 @@
-import type { PluginManifest } from '../types/plugin.js';
+import type { PluginManifest } from "../types/plugin.js";
 
-export type SignatureVerificationStatus = 'verified' | 'unverified' | 'invalid';
+export type SignatureVerificationStatus = "verified" | "unverified" | "invalid";
 
 export interface SignatureVerificationInput {
   manifest: PluginManifest;
@@ -18,7 +18,7 @@ export function verifySignature(
   _input: SignatureVerificationInput
 ): Promise<SignatureVerificationResult> {
   return Promise.resolve({
-    status: 'unverified',
-    reason: 'Signature verification not implemented',
+    status: "unverified",
+    reason: "Signature verification not implemented",
   });
 }

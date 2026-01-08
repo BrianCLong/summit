@@ -1,24 +1,24 @@
-import { AdapterLifecycleStage, AdapterRequest } from '../contracts/types';
+import { AdapterLifecycleStage, AdapterRequest } from "../contracts/types";
 
 export interface PolicyDecision {
-  decision: 'allow' | 'deny';
+  decision: "allow" | "deny";
   reason?: string;
   receiptId?: string;
 }
 
 export type PolicyEvaluator = (
   lifecycle: AdapterLifecycleStage,
-  request: AdapterRequest,
+  request: AdapterRequest
 ) => Promise<PolicyDecision>;
 
 export async function enforcePolicy(
   lifecycle: AdapterLifecycleStage,
   request: AdapterRequest,
-  evaluator: PolicyEvaluator,
+  evaluator: PolicyEvaluator
 ): Promise<PolicyDecision> {
   const decision = await evaluator(lifecycle, request);
-  if (decision.decision === 'deny') {
-    const reason = decision.reason ?? 'policy denied execution';
+  if (decision.decision === "deny") {
+    const reason = decision.reason ?? "policy denied execution";
     throw new Error(`Adapter policy violation: ${reason}`);
   }
   return decision;

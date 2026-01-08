@@ -1,9 +1,9 @@
-import React, { useEffect, useRef } from 'react';
-import { Box, Typography, CircularProgress, Alert, Paper } from '@mui/material';
-import { useQuery, gql } from '@apollo/client';
-import cytoscape from 'cytoscape';
-import cola from 'cytoscape-cola'; // Assuming cola layout is available or can be added
-import dagre from 'cytoscape-dagre'; // Assuming dagre layout is available or can be added
+import React, { useEffect, useRef } from "react";
+import { Box, Typography, CircularProgress, Alert, Paper } from "@mui/material";
+import { useQuery, gql } from "@apollo/client";
+import cytoscape from "cytoscape";
+import cola from "cytoscape-cola"; // Assuming cola layout is available or can be added
+import dagre from "cytoscape-dagre"; // Assuming dagre layout is available or can be added
 
 // Register layouts if not already registered globally
 cytoscape.use(cola);
@@ -41,32 +41,32 @@ const NarrativeHeatmap: React.FC<NarrativeHeatmapProps> = ({ scenarioId }) => {
         elements: [], // Initial empty elements
         style: [
           {
-            selector: 'node',
+            selector: "node",
             style: {
-              'background-color': '#666',
-              label: 'data(narrative)',
-              'text-valign': 'center',
-              color: 'white',
-              'text-outline-width': 2,
-              'text-outline-color': '#333',
-              width: 'mapData(intensity, 0, 10, 20, 80)', // Scale node size by intensity
-              height: 'mapData(intensity, 0, 10, 20, 80)',
-              'font-size': 'mapData(intensity, 0, 10, 8, 24)',
+              "background-color": "#666",
+              label: "data(narrative)",
+              "text-valign": "center",
+              color: "white",
+              "text-outline-width": 2,
+              "text-outline-color": "#333",
+              width: "mapData(intensity, 0, 10, 20, 80)", // Scale node size by intensity
+              height: "mapData(intensity, 0, 10, 20, 80)",
+              "font-size": "mapData(intensity, 0, 10, 8, 24)",
             } as any,
           },
           {
-            selector: 'edge',
+            selector: "edge",
             style: {
               width: 3,
-              'line-color': '#ccc',
-              'target-arrow-color': '#ccc',
-              'target-arrow-shape': 'triangle',
-              'curve-style': 'bezier',
+              "line-color": "#ccc",
+              "target-arrow-color": "#ccc",
+              "target-arrow-shape": "triangle",
+              "curve-style": "bezier",
             } as any,
           },
         ],
         layout: {
-          name: 'cola', // Use cola for a force-directed layout
+          name: "cola", // Use cola for a force-directed layout
           animate: true,
           randomize: false,
           maxSimulationTime: 1500,
@@ -101,7 +101,7 @@ const NarrativeHeatmap: React.FC<NarrativeHeatmapProps> = ({ scenarioId }) => {
       // those would be added as edges. For now, just nodes.
 
       cy.json({ elements: elements });
-      cy.layout({ name: 'cola' } as any).run(); // Re-run layout on data update
+      cy.layout({ name: "cola" } as any).run(); // Re-run layout on data update
     }
   }, [data]); // Re-run effect when data changes
 
@@ -115,12 +115,7 @@ const NarrativeHeatmap: React.FC<NarrativeHeatmapProps> = ({ scenarioId }) => {
   }, []);
 
   if (loading) return <CircularProgress />;
-  if (error)
-    return (
-      <Alert severity="error">
-        Error loading heatmap data: {error.message}
-      </Alert>
-    );
+  if (error) return <Alert severity="error">Error loading heatmap data: {error.message}</Alert>;
 
   const heatmapData = data?.getNarrativeHeatmapData || [];
 
@@ -130,18 +125,18 @@ const NarrativeHeatmap: React.FC<NarrativeHeatmapProps> = ({ scenarioId }) => {
         Narrative Heatmaps
       </Typography>
       <Alert severity="info" sx={{ mb: 2 }}>
-        WAR-GAMED SIMULATION - Visualizations are based on simulated data and
-        for decision support only.
+        WAR-GAMED SIMULATION - Visualizations are based on simulated data and for decision support
+        only.
       </Alert>
 
       {heatmapData.length === 0 ? (
         <Typography variant="body1" color="text.secondary">
-          No narrative heatmap data available for this scenario yet. Run a
-          simulation to generate data.
+          No narrative heatmap data available for this scenario yet. Run a simulation to generate
+          data.
         </Typography>
       ) : (
-        <Paper elevation={3} sx={{ p: 2, height: 600, width: '100%' }}>
-          <div ref={cyRef} style={{ width: '100%', height: '100%' }} />
+        <Paper elevation={3} sx={{ p: 2, height: 600, width: "100%" }}>
+          <div ref={cyRef} style={{ width: "100%", height: "100%" }} />
         </Paper>
       )}
     </Box>

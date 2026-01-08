@@ -1,10 +1,10 @@
-import { Pool } from 'pg';
-import { createClient, type RedisClientType } from 'redis';
-import { createLogger, format, transports, Logger } from 'winston';
+import { Pool } from "pg";
+import { createClient, type RedisClientType } from "redis";
+import { createLogger, format, transports, Logger } from "winston";
 
 type Redis = RedisClientType;
 
-import { SearchQuery, SearchAnalytics } from '../types';
+import { SearchQuery, SearchAnalytics } from "../types";
 
 export interface QueryPerformance {
   query: string;
@@ -38,20 +38,16 @@ export class SearchAnalyticsService {
 
   constructor(
     private pg: Pool,
-    redisClient: Redis,
+    redisClient: Redis
   ) {
     this.redis = redisClient;
 
     this.logger = createLogger({
-      level: process.env.LOG_LEVEL || 'info',
-      format: format.combine(
-        format.timestamp(),
-        format.errors({ stack: true }),
-        format.json(),
-      ),
+      level: process.env.LOG_LEVEL || "info",
+      format: format.combine(format.timestamp(), format.errors({ stack: true }), format.json()),
       transports: [
         new transports.Console(),
-        new transports.File({ filename: 'logs/search-analytics.log' }),
+        new transports.File({ filename: "logs/search-analytics.log" }),
       ],
     });
   }
@@ -65,7 +61,7 @@ export class SearchAnalyticsService {
     resultCount: number,
     executionTime: number,
     success: boolean = true,
-    sessionId?: string,
+    sessionId?: string
   ): Promise<string> {
     const queryId = this.generateQueryId();
 
@@ -83,24 +79,19 @@ export class SearchAnalyticsService {
           queryId,
           userId,
           query.query,
-          query.searchType || 'fulltext',
+          query.searchType || "fulltext",
           JSON.stringify(query.filters || {}),
           resultCount,
           executionTime,
           success,
           sessionId,
-        ],
+        ]
       );
 
       // Update real-time metrics in Redis
-      await this.updateRealTimeMetrics(
-        query.query,
-        executionTime,
-        resultCount,
-        success,
-      );
+      await this.updateRealTimeMetrics(query.query, executionTime, resultCount, success);
 
-      this.logger.debug('Query tracked', {
+      this.logger.debug("Query tracked", {
         queryId,
         query: query.query,
         resultCount,
@@ -109,7 +100,7 @@ export class SearchAnalyticsService {
 
       return queryId;
     } catch (error) {
-      this.logger.error('Failed to track query', {
+      this.logger.error("Failed to track query", {
         error: error instanceof Error ? error.message : String(error),
       });
       throw error;
@@ -119,11 +110,7 @@ export class SearchAnalyticsService {
   /**
    * Track user click on a search result
    */
-  async trackClick(
-    queryId: string,
-    resultId: string,
-    position: number,
-  ): Promise<void> {
+  async trackClick(queryId: string, resultId: string, position: number): Promise<void> {
     try {
       await this.pg.query(
         `
@@ -131,7 +118,7 @@ export class SearchAnalyticsService {
           query_id, result_id, position, timestamp
         ) VALUES ($1, $2, $3, NOW())
         `,
-        [queryId, resultId, position],
+        [queryId, resultId, position]
       );
 
       // Update click-through rate in Redis
@@ -139,9 +126,9 @@ export class SearchAnalyticsService {
       await this.redis.incr(key);
       await this.redis.expire(key, 86400); // 24 hours
 
-      this.logger.debug('Click tracked', { queryId, resultId, position });
+      this.logger.debug("Click tracked", { queryId, resultId, position });
     } catch (error) {
-      this.logger.error('Failed to track click', {
+      this.logger.error("Failed to track click", {
         error: error instanceof Error ? error.message : String(error),
       });
     }
@@ -154,7 +141,7 @@ export class SearchAnalyticsService {
     queryId: string,
     originalQuery: string,
     refinedQuery: string,
-    refinementType: 'filter' | 'spelling' | 'suggestion' | 'facet',
+    refinementType: "filter" | "spelling" | "suggestion" | "facet"
   ): Promise<void> {
     try {
       await this.pg.query(
@@ -164,15 +151,15 @@ export class SearchAnalyticsService {
           refinement_type, timestamp
         ) VALUES ($1, $2, $3, $4, NOW())
         `,
-        [queryId, originalQuery, refinedQuery, refinementType],
+        [queryId, originalQuery, refinedQuery, refinementType]
       );
 
-      this.logger.debug('Refinement tracked', {
+      this.logger.debug("Refinement tracked", {
         queryId,
         refinementType,
       });
     } catch (error) {
-      this.logger.error('Failed to track refinement', {
+      this.logger.error("Failed to track refinement", {
         error: error instanceof Error ? error.message : String(error),
       });
     }
@@ -181,15 +168,11 @@ export class SearchAnalyticsService {
   /**
    * Get search metrics for a time period
    */
-  async getMetrics(
-    startDate: Date,
-    endDate: Date,
-    userId?: string,
-  ): Promise<SearchMetrics> {
+  async getMetrics(startDate: Date, endDate: Date, userId?: string): Promise<SearchMetrics> {
     try {
       const whereClause = userId
-        ? 'WHERE timestamp BETWEEN $1 AND $2 AND user_id = $3'
-        : 'WHERE timestamp BETWEEN $1 AND $2';
+        ? "WHERE timestamp BETWEEN $1 AND $2 AND user_id = $3"
+        : "WHERE timestamp BETWEEN $1 AND $2";
       const params = userId ? [startDate, endDate, userId] : [startDate, endDate];
 
       // Get overall metrics
@@ -203,7 +186,7 @@ export class SearchAnalyticsService {
         FROM search_analytics
         ${whereClause}
         `,
-        params,
+        params
       );
 
       const overall = overallResult.rows[0];
@@ -230,7 +213,7 @@ export class SearchAnalyticsService {
         ORDER BY execution_count DESC
         LIMIT 10
         `,
-        params,
+        params
       );
 
       // Get slow queries
@@ -250,7 +233,7 @@ export class SearchAnalyticsService {
         ORDER BY avg_execution_time DESC
         LIMIT 10
         `,
-        params,
+        params
       );
 
       // Get cache hit rate from Redis
@@ -278,7 +261,7 @@ export class SearchAnalyticsService {
         cacheHitRate,
       };
     } catch (error) {
-      this.logger.error('Failed to get metrics', {
+      this.logger.error("Failed to get metrics", {
         error: error instanceof Error ? error.message : String(error),
       });
       throw error;
@@ -288,10 +271,7 @@ export class SearchAnalyticsService {
   /**
    * Get query suggestions based on popular searches
    */
-  async getQuerySuggestions(
-    prefix: string,
-    limit: number = 10,
-  ): Promise<string[]> {
+  async getQuerySuggestions(prefix: string, limit: number = 10): Promise<string[]> {
     try {
       const result = await this.pg.query(
         `
@@ -302,12 +282,12 @@ export class SearchAnalyticsService {
         ORDER BY COUNT(*) DESC
         LIMIT $2
         `,
-        [`${prefix}%`, limit],
+        [`${prefix}%`, limit]
       );
 
       return result.rows.map((row) => row.query_text);
     } catch (error) {
-      this.logger.error('Failed to get query suggestions', {
+      this.logger.error("Failed to get query suggestions", {
         error: error instanceof Error ? error.message : String(error),
       });
       return [];
@@ -317,10 +297,7 @@ export class SearchAnalyticsService {
   /**
    * Get personalized query suggestions for a user
    */
-  async getPersonalizedSuggestions(
-    userId: string,
-    limit: number = 10,
-  ): Promise<string[]> {
+  async getPersonalizedSuggestions(userId: string, limit: number = 10): Promise<string[]> {
     try {
       const result = await this.pg.query(
         `
@@ -331,12 +308,12 @@ export class SearchAnalyticsService {
         ORDER BY MAX(timestamp) DESC, frequency DESC
         LIMIT $2
         `,
-        [userId, limit],
+        [userId, limit]
       );
 
       return result.rows.map((row) => row.query_text);
     } catch (error) {
-      this.logger.error('Failed to get personalized suggestions', {
+      this.logger.error("Failed to get personalized suggestions", {
         error: error instanceof Error ? error.message : String(error),
       });
       return [];
@@ -350,19 +327,19 @@ export class SearchAnalyticsService {
     query: string,
     executionTime: number,
     resultCount: number,
-    success: boolean,
+    success: boolean
   ): Promise<void> {
     const key = `search:metrics:${this.getDateKey()}`;
 
     try {
-      await this.redis.hIncrBy(key, 'total_queries', 1);
-      await this.redis.hIncrBy(key, 'total_execution_time', executionTime);
-      await this.redis.hIncrBy(key, 'total_results', resultCount);
+      await this.redis.hIncrBy(key, "total_queries", 1);
+      await this.redis.hIncrBy(key, "total_execution_time", executionTime);
+      await this.redis.hIncrBy(key, "total_results", resultCount);
 
       if (success) {
-        await this.redis.hIncrBy(key, 'successful_queries', 1);
+        await this.redis.hIncrBy(key, "successful_queries", 1);
       } else {
-        await this.redis.hIncrBy(key, 'failed_queries', 1);
+        await this.redis.hIncrBy(key, "failed_queries", 1);
       }
 
       await this.redis.expire(key, 604800); // 7 days
@@ -372,7 +349,7 @@ export class SearchAnalyticsService {
       await this.redis.zIncrBy(queryKey, 1, query);
       await this.redis.expire(queryKey, 604800);
     } catch (error) {
-      this.logger.warn('Failed to update real-time metrics', {
+      this.logger.warn("Failed to update real-time metrics", {
         error: error instanceof Error ? error.message : String(error),
       });
     }
@@ -384,16 +361,16 @@ export class SearchAnalyticsService {
   private async getCacheHitRate(): Promise<number> {
     try {
       const key = `search:cache:${this.getDateKey()}`;
-      const hits = await this.redis.hGet(key, 'hits');
-      const misses = await this.redis.hGet(key, 'misses');
+      const hits = await this.redis.hGet(key, "hits");
+      const misses = await this.redis.hGet(key, "misses");
 
-      const hitsNum = parseInt((hits as string | null) ?? '0');
-      const missesNum = parseInt((misses as string | null) ?? '0');
+      const hitsNum = parseInt((hits as string | null) ?? "0");
+      const missesNum = parseInt((misses as string | null) ?? "0");
       const total = hitsNum + missesNum;
 
       return total > 0 ? hitsNum / total : 0;
     } catch (error) {
-      this.logger.warn('Failed to get cache hit rate', {
+      this.logger.warn("Failed to get cache hit rate", {
         error: error instanceof Error ? error.message : String(error),
       });
       return 0;
@@ -405,13 +382,13 @@ export class SearchAnalyticsService {
    */
   async trackCacheHit(hit: boolean): Promise<void> {
     const key = `search:cache:${this.getDateKey()}`;
-    const field = hit ? 'hits' : 'misses';
+    const field = hit ? "hits" : "misses";
 
     try {
       await this.redis.hIncrBy(key, field, 1);
       await this.redis.expire(key, 604800); // 7 days
     } catch (error) {
-      this.logger.warn('Failed to track cache hit', {
+      this.logger.warn("Failed to track cache hit", {
         error: error instanceof Error ? error.message : String(error),
       });
     }
@@ -435,7 +412,7 @@ export class SearchAnalyticsService {
         ORDER BY execution_count DESC
         LIMIT $1
         `,
-        [limit],
+        [limit]
       );
 
       return result.rows.map((row) => ({
@@ -445,7 +422,7 @@ export class SearchAnalyticsService {
         avgClickThroughRate: 0,
       }));
     } catch (error) {
-      this.logger.error('Failed to get zero-result queries', {
+      this.logger.error("Failed to get zero-result queries", {
         error: error instanceof Error ? error.message : String(error),
       });
       return [];
@@ -464,7 +441,7 @@ export class SearchAnalyticsService {
    */
   private getDateKey(): string {
     const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   }
 
   /**
@@ -480,15 +457,15 @@ export class SearchAnalyticsService {
         DELETE FROM search_analytics
         WHERE timestamp < $1
         `,
-        [cutoffDate],
+        [cutoffDate]
       );
 
-      this.logger.info('Cleaned up old analytics data', {
+      this.logger.info("Cleaned up old analytics data", {
         rowsDeleted: result.rowCount,
         cutoffDate,
       });
     } catch (error) {
-      this.logger.error('Failed to cleanup old data', {
+      this.logger.error("Failed to cleanup old data", {
         error: error instanceof Error ? error.message : String(error),
       });
     }

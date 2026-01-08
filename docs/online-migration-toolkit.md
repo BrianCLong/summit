@@ -23,19 +23,22 @@ Created automatically (and via the managed migration):
 The runnable example lives at `server/src/db/online-migrations/exampleUserDisplayNameMigration.ts` and is backed by the managed migration `202604150001_online_migration_toolkit.up.sql`.
 
 ```ts
-import { OnlineMigrationToolkit } from '@/db/online-migrations/toolkit.js';
-import { runExampleDisplayNameMigration, buildDisplayNameDualWriter } from '@/db/online-migrations/exampleUserDisplayNameMigration.js';
+import { OnlineMigrationToolkit } from "@/db/online-migrations/toolkit.js";
+import {
+  runExampleDisplayNameMigration,
+  buildDisplayNameDualWriter,
+} from "@/db/online-migrations/exampleUserDisplayNameMigration.js";
 
 const toolkit = new OnlineMigrationToolkit(pool);
 await toolkit.ensureStateTables();
 
 // Expand
-await toolkit.markPhase('users-display-name-canonical', 'expand');
-await toolkit.ensureColumn('users', 'display_name_canonical', 'TEXT');
+await toolkit.markPhase("users-display-name-canonical", "expand");
+await toolkit.ensureColumn("users", "display_name_canonical", "TEXT");
 
 // Dual-write on new writes
 const writer = buildDisplayNameDualWriter(pool);
-await writer.write({ userId, displayName: 'Ada Lovelace' });
+await writer.write({ userId, displayName: "Ada Lovelace" });
 
 // Backfill + validate + move to contract-ready
 await runExampleDisplayNameMigration(pool);

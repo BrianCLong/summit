@@ -13,13 +13,13 @@ Complete production-ready implementation of **Tenant Graph Slice v0**, deliverin
 
 ## 📊 Key Metrics & SLOs
 
-| Metric | Target | Status |
-|--------|--------|--------|
-| **Search Latency** | p95 < 350ms | ✅ Implemented + Monitored |
-| **1-hop Neighbors** | p95 < 300ms | ✅ Implemented + Monitored |
-| **2-hop Neighbors** | p95 < 1200ms | ✅ Implemented + Monitored |
+| Metric                | Target             | Status                     |
+| --------------------- | ------------------ | -------------------------- |
+| **Search Latency**    | p95 < 350ms        | ✅ Implemented + Monitored |
+| **1-hop Neighbors**   | p95 < 300ms        | ✅ Implemented + Monitored |
+| **2-hop Neighbors**   | p95 < 1200ms       | ✅ Implemented + Monitored |
 | **Ingest Throughput** | ≥100k entities/sec | ✅ Optimized with batching |
-| **Availability** | 99.9% monthly | ✅ Error tracking + alerts |
+| **Availability**      | 99.9% monthly      | ✅ Error tracking + alerts |
 
 ---
 
@@ -37,6 +37,7 @@ Complete production-ready implementation of **Tenant Graph Slice v0**, deliverin
 ### ✅ Data Model
 
 **Canonical Entity Types**:
+
 - Person (with PII fields: email, phone, dateOfBirth)
 - Organization (name, industry, jurisdiction, registrationNumber)
 - Asset (type, description, value, serialNumber)
@@ -44,15 +45,18 @@ Complete production-ready implementation of **Tenant Graph Slice v0**, deliverin
 - Indicator (IoC/TTP with TLP classification)
 
 **Relationship Types**:
+
 - MEMBER_OF (Person → Organization)
 - OWNS (Organization → Asset)
 - MENTIONED_IN (Entity → Event)
 - RELATED_TO (Entity → Entity)
 
 **Stable ID Generation**:
+
 ```
 ID = tenant:kind:SHA256(naturalKeys)
 ```
+
 Ensures idempotent ingests and automatic deduplication.
 
 ### ✅ Ingest Capabilities
@@ -127,35 +131,44 @@ Ensures idempotent ingests and automatic deduplication.
 ### Added (14 files, ~4,080 lines)
 
 **GraphQL Layer**:
+
 - `server/src/graphql/schema/tenant-graph.graphql` - SDL with Entity interface, queries, mutations
 - `server/src/graphql/resolvers/tenantGraph.ts` - Resolvers with OPA checks, SLO logging
 
 **Services**:
+
 - `server/src/services/IngestService.ts` - Core ingestion logic with stable IDs, provenance
 - `server/src/services/CSVConnector.ts` - CSV parsing with YAML mapping support
 - `server/src/services/__tests__/IngestService.test.ts` - Unit test suite
 
 **HTTP API**:
+
 - `server/src/routes/ingest.ts` - REST endpoint with validation, rate limiting
 
 **Database**:
+
 - `server/src/db/migrations/001_tenant_graph_schema.sql` - PostgreSQL schema (entities, relationships, provenance, outbox, retention)
 - `server/src/db/migrations/neo4j/002_tenant_graph_indices.cypher` - Neo4j indices (full-text, constraints)
 
 **Configuration & Data**:
+
 - `data/tenant-graph/mapping-example.yaml` - CSV mapping example
 
 **Scripts**:
+
 - `scripts/generate-golden-sample.ts` - 30 MB test data generator
 - `scripts/demo.sh` - End-to-end demonstration
 
 **Testing**:
+
 - `tests/load/tenant-graph-slo.js` - k6 load tests for SLO validation
 
 **Observability**:
+
 - `observability/dashboards/tenant-graph-v0.json` - Grafana dashboard
 
 **Documentation**:
+
 - `docs/TENANT_GRAPH_V0.md` - Complete technical documentation (API reference, deployment, troubleshooting)
 
 ### Modified (1 file)
@@ -217,6 +230,7 @@ make up
 ```
 
 **Expected Output**:
+
 - 30 MB CSV generated with ~36k entities
 - Ingest completes in <60s
 - Search returns results in <350ms (SLO met)
@@ -234,6 +248,7 @@ k6 run --vus 100 --duration 5m tests/load/tenant-graph-slo.js
 ```
 
 **Pass Criteria**:
+
 - ✅ All checks pass (http_req_failed < 0.1%)
 - ✅ Search p95 < 350ms
 - ✅ Neighbors 1-hop p95 < 300ms
@@ -255,31 +270,37 @@ pnpm test -- IngestService.test.ts
 All acceptance criteria from the original spec have been met:
 
 ### ✅ AC1: Ingest
+
 Upload of 25+ MB CSV ingests with provenance tracking and hash manifest.
 
 **Evidence**: `scripts/demo.sh` generates 30 MB sample and ingests successfully with provenance ID logged.
 
 ### ✅ AC2: Model
+
 `neighbors(id, hop:2)` query returns results with p95 ≤ 1200ms.
 
 **Evidence**: k6 tests validate 2-hop p95 under load; SLO tracking via Prometheus.
 
 ### ✅ AC3: API
+
 `searchEntities(q)` achieves p95 ≤ 350ms with 99.9% availability target.
 
 **Evidence**: Full-text index on Neo4j + SLO monitoring; k6 tests enforce threshold.
 
 ### ✅ AC4: Security
+
 Requests without proper tenant/purpose claims are denied via OPA.
 
 **Evidence**: `verifyTenantAccess()` and `checkPurpose()` enforce ABAC; unit tests included.
 
 ### ✅ AC5: Privacy
+
 PII fields tagged, encrypted (infrastructure), and redacted based on purpose; retention job ready.
 
 **Evidence**: `@pii` directive, `redactPII()` function, retention_policy table with check function.
 
 ### ✅ AC6: DX/CI
+
 `make up` brings full stack; demo script runs persisted queries.
 
 **Evidence**: `scripts/demo.sh` orchestrates end-to-end flow; k6 tests CI-ready.
@@ -320,6 +341,7 @@ cypher-shell -u neo4j -p <password> -c "SHOW INDEXES"
 ### Environment Variables
 
 Add to `.env`:
+
 ```bash
 # Already configured in existing .env.example, just ensure these are set:
 DATABASE_URL=postgresql://summit:${POSTGRES_PASSWORD}@localhost:5432/summit_dev
@@ -378,6 +400,7 @@ cypher-shell -u neo4j -p <password> -c "RETURN 1"
 ### Technical Debt & Future Work
 
 **None introduced**. All code is production-ready with:
+
 - Complete error handling
 - Comprehensive logging
 - Unit test coverage for core logic
@@ -385,6 +408,7 @@ cypher-shell -u neo4j -p <password> -c "RETURN 1"
 - Documentation
 
 **Roadmap items** (documented in `docs/TENANT_GRAPH_V0.md`):
+
 - v0.2: Kafka streaming ingest, GraphQL subscriptions, advanced ER
 - v1.0: Temporal graph queries, graph ML embeddings, GDPR automation
 
@@ -394,23 +418,23 @@ cypher-shell -u neo4j -p <password> -c "RETURN 1"
 
 ### Local Development (MacBook Pro M1, Docker)
 
-| Operation | p50 | p95 | p99 | SLO Status |
-|-----------|-----|-----|-----|------------|
-| searchEntities | 120ms | 180ms | 250ms | ✅ (< 350ms) |
-| neighbors (1-hop) | 80ms | 120ms | 180ms | ✅ (< 300ms) |
-| neighbors (2-hop) | 300ms | 450ms | 600ms | ✅ (< 1200ms) |
-| ingest (1k entities) | 1.2s | 1.8s | 2.5s | ✅ (~800 entities/sec) |
+| Operation            | p50   | p95   | p99   | SLO Status             |
+| -------------------- | ----- | ----- | ----- | ---------------------- |
+| searchEntities       | 120ms | 180ms | 250ms | ✅ (< 350ms)           |
+| neighbors (1-hop)    | 80ms  | 120ms | 180ms | ✅ (< 300ms)           |
+| neighbors (2-hop)    | 300ms | 450ms | 600ms | ✅ (< 1200ms)          |
+| ingest (1k entities) | 1.2s  | 1.8s  | 2.5s  | ✅ (~800 entities/sec) |
 
 ### Expected Production (k8s, 4 replicas, dedicated DB)
 
-| Operation | p50 | p95 | p99 |
-|-----------|-----|-----|-----|
-| searchEntities | 150ms | 250ms | 320ms |
-| neighbors (1-hop) | 100ms | 180ms | 250ms |
-| neighbors (2-hop) | 400ms | 800ms | 1100ms |
-| ingest (10k entities/worker) | 8s | 12s | 15s (~800-1200 entities/sec) |
+| Operation                    | p50   | p95   | p99                          |
+| ---------------------------- | ----- | ----- | ---------------------------- |
+| searchEntities               | 150ms | 250ms | 320ms                        |
+| neighbors (1-hop)            | 100ms | 180ms | 250ms                        |
+| neighbors (2-hop)            | 400ms | 800ms | 1100ms                       |
+| ingest (10k entities/worker) | 8s    | 12s   | 15s (~800-1200 entities/sec) |
 
-*Note: Production benchmarks to be validated post-deployment*
+_Note: Production benchmarks to be validated post-deployment_
 
 ---
 
@@ -419,6 +443,7 @@ cypher-shell -u neo4j -p <password> -c "RETURN 1"
 **Primary Documentation**: `docs/TENANT_GRAPH_V0.md` (600+ lines)
 
 Includes:
+
 - Architecture diagrams
 - Complete API reference with examples
 - Security & compliance guide
@@ -429,6 +454,7 @@ Includes:
 - Roadmap
 
 **Inline Documentation**:
+
 - All services, resolvers, and utilities have JSDoc comments
 - Complex logic explained with inline comments
 - Migration files include schema documentation
@@ -465,12 +491,14 @@ Includes:
 ## 👥 Reviewers
 
 **Suggested Reviewers**:
+
 - Backend: @backend-team (GraphQL, services, database schema)
 - Security: @security-team (OPA policies, PII handling, tenant isolation)
 - Data: @data-team (Graph model, CSV mapping, provenance)
 - SRE: @sre-team (Observability, SLOs, deployment)
 
 **Review Focus Areas**:
+
 1. **Security**: Verify tenant isolation is bulletproof (RLS + app-level + OPA)
 2. **Performance**: Confirm index strategy will scale to millions of entities
 3. **Privacy**: Validate PII redaction logic covers all edge cases

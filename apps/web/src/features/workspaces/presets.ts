@@ -49,44 +49,46 @@ const createPreset = (
   }
 }
 
-export const defaultWorkspacePresets: Record<WorkspacePresetId, WorkspacePreset> =
-  {
-    investigate: createPreset(
-      'investigate',
-      'Investigate',
-      'Graph-forward workspace tuned for discovery.',
-      '/analysis/tri-pane',
-      {
-        graph: { size: 7 },
-        timeline: { size: 3, visible: true },
-        map: { size: 2 },
-      }
-    ),
-    review: createPreset(
-      'review',
-      'Review',
-      'Queue-heavy workspace for triage and follow-up.',
-      '/cases',
-      {
-        graph: { size: 4 },
-        timeline: { size: 4 },
-        map: { size: 2 },
-        queue: { visible: true, size: 4 },
-      }
-    ),
-    briefing: createPreset(
-      'briefing',
-      'Briefing',
-      'Notes-forward view for exports and briefings.',
-      '/reports',
-      {
-        graph: { size: 4 },
-        timeline: { size: 3 },
-        map: { visible: false, size: 2 },
-        notes: { visible: true, size: 5 },
-      }
-    ),
-  }
+export const defaultWorkspacePresets: Record<
+  WorkspacePresetId,
+  WorkspacePreset
+> = {
+  investigate: createPreset(
+    'investigate',
+    'Investigate',
+    'Graph-forward workspace tuned for discovery.',
+    '/analysis/tri-pane',
+    {
+      graph: { size: 7 },
+      timeline: { size: 3, visible: true },
+      map: { size: 2 },
+    }
+  ),
+  review: createPreset(
+    'review',
+    'Review',
+    'Queue-heavy workspace for triage and follow-up.',
+    '/cases',
+    {
+      graph: { size: 4 },
+      timeline: { size: 4 },
+      map: { size: 2 },
+      queue: { visible: true, size: 4 },
+    }
+  ),
+  briefing: createPreset(
+    'briefing',
+    'Briefing',
+    'Notes-forward view for exports and briefings.',
+    '/reports',
+    {
+      graph: { size: 4 },
+      timeline: { size: 3 },
+      map: { visible: false, size: 2 },
+      notes: { visible: true, size: 5 },
+    }
+  ),
+}
 
 export const workspacePanelOrder: Array<keyof typeof basePanels> = [
   'timeline',

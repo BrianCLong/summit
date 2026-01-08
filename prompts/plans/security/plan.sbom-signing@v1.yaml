@@ -1,7 +1,7 @@
 meta:
   id: plan.sbom-signing@v1
-  owner: 'security-engineering'
-  purpose: 'Strengthen provenance with SBOM generation and artifact signing'
+  owner: "security-engineering"
+  purpose: "Strengthen provenance with SBOM generation and artifact signing"
   tags:
     - security
     - sbom
@@ -9,13 +9,13 @@ meta:
     - provenance
     - supply-chain
   guardrails:
-    - 'SBOM must be complete and accurate'
-    - 'Signatures must be verifiable offline'
-    - 'Key management must follow best practices'
-    - 'Provenance must meet SLSA Level 2+'
+    - "SBOM must be complete and accurate"
+    - "Signatures must be verifiable offline"
+    - "Key management must follow best practices"
+    - "Provenance must meet SLSA Level 2+"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -232,15 +232,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'sigstore-integration'
+  - name: "sigstore-integration"
     inputs:
-      artifact_types: 'Docker images, npm packages, Python wheels'
-      current_sbom_tooling: 'Basic syft in CI, no signing'
-      signing_requirements: 'Keyless preferred, SLSA Level 2'
-      distribution_channels: 'GHCR, npm registry, internal PyPI'
-      compliance_requirements: 'Executive Order 14028, SOC2'
+      artifact_types: "Docker images, npm packages, Python wheels"
+      current_sbom_tooling: "Basic syft in CI, no signing"
+      signing_requirements: "Keyless preferred, SLSA Level 2"
+      distribution_channels: "GHCR, npm registry, internal PyPI"
+      compliance_requirements: "Executive Order 14028, SOC2"
     expected_contains:
-      - 'SBOM Generation'
-      - 'Signing Flow'
-      - 'cosign'
-      - 'SLSA'
+      - "SBOM Generation"
+      - "Signing Flow"
+      - "cosign"
+      - "SLSA"

@@ -12,11 +12,11 @@ This package provides a lightweight interface for working with plans emitted by 
 ## Usage
 
 ```ts
-import { loadPlanFromFile, policyGateSummary } from '@intelgraph/pcqp-sdk';
+import { loadPlanFromFile, policyGateSummary } from "@intelgraph/pcqp-sdk";
 
-const plan = await loadPlanFromFile('../pcqp/tests/golden/compliant_plan.json');
+const plan = await loadPlanFromFile("../pcqp/tests/golden/compliant_plan.json");
 const gates = policyGateSummary(plan);
-console.log(gates['policy::residency::us']);
+console.log(gates["policy::residency::us"]);
 ```
 
 To regenerate plans from fresh logical queries, invoke the Rust CLI:

@@ -35,31 +35,27 @@
       $(function () {
         function fmt(c) {
           return (
-            '<div><span class=k>arm</span> ' +
+            "<div><span class=k>arm</span> " +
             c.chosenArm +
-            ' · <span class=k>eval</span> ' +
+            " · <span class=k>eval</span> " +
             c.predictedEval.toFixed(2) +
-            ' · <span class=k>$</span>' +
+            " · <span class=k>$</span>" +
             c.predictedCostUSD.toFixed(2) +
-            '</div><pre>' +
+            "</div><pre>" +
             c.rationale +
-            '</pre>'
+            "</pre>"
           );
         }
         var card = {
-          chosenArm: 'impl@small',
+          chosenArm: "impl@small",
           predictedEval: 0.94,
           predictedCostUSD: 0.18,
-          rationale: 'Cheapest capable; low risk',
+          rationale: "Cheapest capable; low risk",
         };
-        $('#body').html(fmt(card));
-        $('#a1').on('click', () =>
-          $.post('/api/decision/alt', { arm: 'impl@medium' }),
-        );
-        $('#a2').on('click', () => $.post('/api/decision/downshift'));
-        $('#a3').on('click', () =>
-          $.post('/api/decision/tests', { mode: 'high' }),
-        );
+        $("#body").html(fmt(card));
+        $("#a1").on("click", () => $.post("/api/decision/alt", { arm: "impl@medium" }));
+        $("#a2").on("click", () => $.post("/api/decision/downshift"));
+        $("#a3").on("click", () => $.post("/api/decision/tests", { mode: "high" }));
       });
     </script>
   </body>

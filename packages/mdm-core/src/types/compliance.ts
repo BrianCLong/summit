@@ -1,15 +1,15 @@
-import { z } from 'zod';
-import type { MasterRecord } from './master-record.js';
+import { z } from "zod";
+import type { MasterRecord } from "./master-record.js";
 
 export type AuditEventAction =
-  | 'create'
-  | 'update'
-  | 'merge'
-  | 'access'
-  | 'delete'
-  | 'hold_applied'
-  | 'hold_released'
-  | 'export';
+  | "create"
+  | "update"
+  | "merge"
+  | "access"
+  | "delete"
+  | "hold_applied"
+  | "hold_released"
+  | "export";
 
 export interface AuditEvent {
   id: string;
@@ -37,7 +37,7 @@ export interface LegalHold {
   id: string;
   recordType: string;
   tenantId: string;
-  scope: 'record' | 'type' | 'tenant';
+  scope: "record" | "type" | "tenant";
   recordIds?: string[];
   appliedBy: string;
   reason: string;
@@ -80,7 +80,7 @@ export interface RecordDefinition {
   type: string;
   description: string;
   schema: z.ZodTypeAny;
-  classification: 'public' | 'internal' | 'confidential' | 'restricted';
+  classification: "public" | "internal" | "confidential" | "restricted";
   retentionPolicy?: RetentionPolicy;
   fields?: string[];
 }
@@ -98,7 +98,7 @@ export interface RecordSearchQuery {
 }
 
 export interface RoleTemplate {
-  name: 'records_officer' | 'records_admin' | 'records_operator';
+  name: "records_officer" | "records_admin" | "records_operator";
   permissions: string[];
   description: string;
 }

@@ -400,25 +400,25 @@ interface ComplianceMonitoring {
 ```yaml
 Legal Audit Results:
   external_counsel_review:
-    firm: 'Covington & Burling LLP'
-    partners: ['Privacy & Data Security', 'National Security', 'White Collar']
-    completion_date: '2025-08-20'
-    overall_rating: 'Compliant with Recommendations'
+    firm: "Covington & Burling LLP"
+    partners: ["Privacy & Data Security", "National Security", "White Collar"]
+    completion_date: "2025-08-20"
+    overall_rating: "Compliant with Recommendations"
     critical_issues: 0
     recommendations: 8
-    implementation_status: '100% Complete'
+    implementation_status: "100% Complete"
 
   regulatory_consultation:
-    agencies: ['DOJ', 'FTC', 'CISA', 'NIST']
-    guidance_received: 'Formal Written Guidance'
-    compliance_confirmation: 'Affirmative Compliance Statement'
-    ongoing_liaison: 'Established Regulatory Relationships'
+    agencies: ["DOJ", "FTC", "CISA", "NIST"]
+    guidance_received: "Formal Written Guidance"
+    compliance_confirmation: "Affirmative Compliance Statement"
+    ongoing_liaison: "Established Regulatory Relationships"
 
   industry_certification:
-    standards: ['SOC2 Type II', 'ISO 27001', 'PCI DSS Level 1']
-    certification_dates: ['2025-08-15', '2025-08-18', '2025-08-22']
-    validity_periods: ['1 Year', '3 Years', '1 Year']
-    audit_findings: 'No Material Weaknesses'
+    standards: ["SOC2 Type II", "ISO 27001", "PCI DSS Level 1"]
+    certification_dates: ["2025-08-15", "2025-08-18", "2025-08-22"]
+    validity_periods: ["1 Year", "3 Years", "1 Year"]
+    audit_findings: "No Material Weaknesses"
 ```
 
 ### 📊 **Compliance Metrics Dashboard**
@@ -446,28 +446,28 @@ Legal Audit Results:
 ```yaml
 Legal Risk Register:
   cross_border_data_transfers:
-    risk_level: 'MODERATE'
-    mitigation: 'Standard Contractual Clauses implemented'
-    monitoring: 'Adequacy decision tracking active'
-    contingency: 'Data localization procedures prepared'
+    risk_level: "MODERATE"
+    mitigation: "Standard Contractual Clauses implemented"
+    monitoring: "Adequacy decision tracking active"
+    contingency: "Data localization procedures prepared"
 
   export_control_violations:
-    risk_level: 'LOW-MODERATE'
-    mitigation: 'Automated screening systems deployed'
-    monitoring: 'Real-time sanctions list monitoring'
-    contingency: 'Voluntary self-disclosure procedures'
+    risk_level: "LOW-MODERATE"
+    mitigation: "Automated screening systems deployed"
+    monitoring: "Real-time sanctions list monitoring"
+    contingency: "Voluntary self-disclosure procedures"
 
   evidence_admissibility_challenges:
-    risk_level: 'LOW'
-    mitigation: 'Expert qualification maintenance program'
-    monitoring: 'Continuous tool validation'
-    contingency: 'Alternative evidence pathways prepared'
+    risk_level: "LOW"
+    mitigation: "Expert qualification maintenance program"
+    monitoring: "Continuous tool validation"
+    contingency: "Alternative evidence pathways prepared"
 
   privacy_regulation_changes:
-    risk_level: 'MODERATE'
-    mitigation: 'Regulatory monitoring service subscribed'
-    monitoring: 'Quarterly legal update reviews'
-    contingency: 'Rapid compliance adjustment procedures'
+    risk_level: "MODERATE"
+    mitigation: "Regulatory monitoring service subscribed"
+    monitoring: "Quarterly legal update reviews"
+    contingency: "Rapid compliance adjustment procedures"
 ```
 
 ### 🛡️ **Legal Insurance & Indemnification**
@@ -544,30 +544,30 @@ Legal Documentation Structure:
 ```yaml
 Legal Approval Framework:
   general_counsel_approval:
-    name: 'Sarah Chen, Esq.'
-    title: 'General Counsel & Chief Compliance Officer'
-    date: 'August 24, 2025'
-    scope: 'Complete IntelGraph GA Architecture'
-    recommendation: 'APPROVED FOR PRODUCTION LAUNCH'
-    conditions: 'Subject to ongoing compliance monitoring'
+    name: "Sarah Chen, Esq."
+    title: "General Counsel & Chief Compliance Officer"
+    date: "August 24, 2025"
+    scope: "Complete IntelGraph GA Architecture"
+    recommendation: "APPROVED FOR PRODUCTION LAUNCH"
+    conditions: "Subject to ongoing compliance monitoring"
 
   external_counsel_concurrence:
-    firm: 'Covington & Burling LLP'
-    lead_partner: 'John Smith, Partner'
-    specialization: 'Technology, Privacy & National Security'
-    opinion_date: 'August 23, 2025'
-    conclusion: 'LEGALLY COMPLIANT FOR GA LAUNCH'
+    firm: "Covington & Burling LLP"
+    lead_partner: "John Smith, Partner"
+    specialization: "Technology, Privacy & National Security"
+    opinion_date: "August 23, 2025"
+    conclusion: "LEGALLY COMPLIANT FOR GA LAUNCH"
 
   regulatory_liaison_confirmation:
-    agencies_consulted: ['DOJ', 'FTC', 'CISA', 'State Dept']
-    guidance_status: 'AFFIRMATIVE COMPLIANCE GUIDANCE RECEIVED'
-    ongoing_obligations: 'Quarterly compliance reporting established'
+    agencies_consulted: ["DOJ", "FTC", "CISA", "State Dept"]
+    guidance_status: "AFFIRMATIVE COMPLIANCE GUIDANCE RECEIVED"
+    ongoing_obligations: "Quarterly compliance reporting established"
 
   risk_assessment_final:
-    overall_legal_risk: 'LOW-MODERATE'
-    critical_issues: 'ZERO OUTSTANDING'
-    mitigation_status: 'COMPREHENSIVE MITIGATION IMPLEMENTED'
-    insurance_coverage: 'ADEQUATE PROTECTION VERIFIED'
+    overall_legal_risk: "LOW-MODERATE"
+    critical_issues: "ZERO OUTSTANDING"
+    mitigation_status: "COMPREHENSIVE MITIGATION IMPLEMENTED"
+    insurance_coverage: "ADEQUATE PROTECTION VERIFIED"
 ```
 
 ### 📊 **Legal Readiness Metrics**

@@ -9,20 +9,20 @@ spec:
     - name: verify-signature
       match:
         any:
-        - resources:
-            kinds:
-              - Pod
+          - resources:
+              kinds:
+                - Pod
       verifyImages:
-      - imageReferences:
-        - "ghcr.io/briancclong/summit/*"
-        attestations:
-        - predicateType: https://slsa.dev/provenance/v0.2
-          conditions:
-          - all:
-            - key: "{{ builder.id }}"
-              operator: Equals
-              value: "https://github.com/actions/runner-images"
-        key: |-
-          -----BEGIN PUBLIC KEY-----
-          (Insert your Cosign public key here)
-          -----END PUBLIC KEY-----
+        - imageReferences:
+            - "ghcr.io/briancclong/summit/*"
+          attestations:
+            - predicateType: https://slsa.dev/provenance/v0.2
+              conditions:
+                - all:
+                    - key: "{{ builder.id }}"
+                      operator: Equals
+                      value: "https://github.com/actions/runner-images"
+          key: |-
+            -----BEGIN PUBLIC KEY-----
+            (Insert your Cosign public key here)
+            -----END PUBLIC KEY-----

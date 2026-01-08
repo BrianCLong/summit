@@ -17,12 +17,12 @@ Configuration resolution follows a "winner-takes-all" approach from specific to 
 
 ### Types
 
-| Type | Characteristics | Source of Truth | Example |
-| :--- | :--- | :--- | :--- |
-| **Static Config** | Immutable at boot time. Requires restart/redeploy to change. | Environment Variables (`.env`), `config/index.ts` | Database URL, JWT Secret, Port |
-| **Dynamic Config** | Changeable at runtime. Cached with TTL. | Redis / DB / Config Service | Rate Limits, Cache TTLs, Circuit Breaker Thresholds |
-| **Secrets** | Encrypted, sensitive. Never committed. | Vault / K8s Secrets / `.env` (local) | API Keys, Private Keys, DB Passwords |
-| **Feature Flags** | Boolean or Multivariate toggles for code paths. | Feature Flag Service (DB + Cache) | `enable_new_dashboard`, `graph_search_algo_v2` |
+| Type               | Characteristics                                              | Source of Truth                                   | Example                                             |
+| :----------------- | :----------------------------------------------------------- | :------------------------------------------------ | :-------------------------------------------------- |
+| **Static Config**  | Immutable at boot time. Requires restart/redeploy to change. | Environment Variables (`.env`), `config/index.ts` | Database URL, JWT Secret, Port                      |
+| **Dynamic Config** | Changeable at runtime. Cached with TTL.                      | Redis / DB / Config Service                       | Rate Limits, Cache TTLs, Circuit Breaker Thresholds |
+| **Secrets**        | Encrypted, sensitive. Never committed.                       | Vault / K8s Secrets / `.env` (local)              | API Keys, Private Keys, DB Passwords                |
+| **Feature Flags**  | Boolean or Multivariate toggles for code paths.              | Feature Flag Service (DB + Cache)                 | `enable_new_dashboard`, `graph_search_algo_v2`      |
 
 ### Precedence Rules
 
@@ -44,70 +44,70 @@ We adopt a "Flag First" development culture. Every non-trivial change must be gu
 ### Taxonomy
 
 1.  **Release Flags**: Short-lived. Used to merge code early and toggle it on when ready.
-    *   *Default*: `false`
-    *   *Lifecycle*: Days/Weeks. Remove after GA.
+    - _Default_: `false`
+    - _Lifecycle_: Days/Weeks. Remove after GA.
 2.  **Ops Flags (Circuit Breakers)**: Long-lived. Used to degrade functionality under load.
-    *   *Default*: `true`
-    *   *Lifecycle*: Permanent.
-    *   *Example*: `enable_heavy_graph_queries`
+    - _Default_: `true`
+    - _Lifecycle_: Permanent.
+    - _Example_: `enable_heavy_graph_queries`
 3.  **Permission Flags**: Long-lived. Control access to premium features or admin tools.
-    *   *Default*: Based on tier.
-    *   *Lifecycle*: Permanent.
-    *   *Example*: `advanced_export_capabilities`
+    - _Default_: Based on tier.
+    - _Lifecycle_: Permanent.
+    - _Example_: `advanced_export_capabilities`
 4.  **Experiment Flags**: Short-lived. Multivariate A/B testing.
-    *   *Default*: Control group.
-    *   *Lifecycle*: Weeks. Remove after significance reached.
+    - _Default_: Control group.
+    - _Lifecycle_: Weeks. Remove after significance reached.
 
 ### Rollout Patterns
 
-*   **Dark Launch**: Deploy code with flag `off`. Verify in production with internal users via header overrides.
-*   **Canary / Gradual Rollout**:
-    *   1% -> 5% -> 25% -> 50% -> 100%.
-    *   Automatic "bake time" between stages (e.g., 4 hours).
-*   **Tenant Cohorts**: Enable for "Beta Testers" group first, then "Standard", then "Enterprise".
-*   **Kill Switch**: Instant rollback. Disables the feature globally or per tenant.
+- **Dark Launch**: Deploy code with flag `off`. Verify in production with internal users via header overrides.
+- **Canary / Gradual Rollout**:
+  - 1% -> 5% -> 25% -> 50% -> 100%.
+  - Automatic "bake time" between stages (e.g., 4 hours).
+- **Tenant Cohorts**: Enable for "Beta Testers" group first, then "Standard", then "Enterprise".
+- **Kill Switch**: Instant rollback. Disables the feature globally or per tenant.
 
 ### Guardrails
 
-*   **Mandatory Metadata**: Owner, Expiry Date (for release flags), Description.
-*   **Performance Gates**: Flag automatically disables if:
-    *   Error rate > X%
-    *   P95 Latency > Y ms
-*   **Stale Flag Alert**: CI/CD warns if temporary flags exist > 90 days.
+- **Mandatory Metadata**: Owner, Expiry Date (for release flags), Description.
+- **Performance Gates**: Flag automatically disables if:
+  - Error rate > X%
+  - P95 Latency > Y ms
+- **Stale Flag Alert**: CI/CD warns if temporary flags exist > 90 days.
 
 ## 3. Change Management Workflows
 
 ### Roles (RBAC)
 
-| Role | Scope | Can Change | Approval Required? |
-| :--- | :--- | :--- | :--- |
-| **System** | Automated | Circuit Breakers (Open/Close) | No (Automated) |
-| **Developer** | Dev/Staging | All Flags in Dev/Staging | No |
-| **Product Mgr** | Production | Experiment Flags, Feature Release (Gradual) | No (if within guardrails) |
-| **Operator/SRE**| Production | Ops Flags, Global Config, Secrets | **YES (4-Eyes)** |
-| **Admin** | Tenant | Tenant Settings | No |
+| Role             | Scope       | Can Change                                  | Approval Required?        |
+| :--------------- | :---------- | :------------------------------------------ | :------------------------ |
+| **System**       | Automated   | Circuit Breakers (Open/Close)               | No (Automated)            |
+| **Developer**    | Dev/Staging | All Flags in Dev/Staging                    | No                        |
+| **Product Mgr**  | Production  | Experiment Flags, Feature Release (Gradual) | No (if within guardrails) |
+| **Operator/SRE** | Production  | Ops Flags, Global Config, Secrets           | **YES (4-Eyes)**          |
+| **Admin**        | Tenant      | Tenant Settings                             | No                        |
 
 ### Approval Flows
 
 1.  **Standard Change**: (e.g., Increasing rollout 10% -> 25%)
-    *   *Flow*: User initiates -> System verifies guardrails -> Applied immediately.
-    *   *Audit*: Logged.
+    - _Flow_: User initiates -> System verifies guardrails -> Applied immediately.
+    - _Audit_: Logged.
 2.  **Risky Change**: (e.g., Global Config change, 0% -> 100% jump)
-    *   *Flow*: User initiates -> **Peer Review Request** -> Second approver confirms -> Applied.
-    *   *Justification*: Required text field.
+    - _Flow_: User initiates -> **Peer Review Request** -> Second approver confirms -> Applied.
+    - _Justification_: Required text field.
 3.  **Emergency**:
-    *   *Flow*: User initiates "Break Glass" -> Applied immediately.
-    *   *Post-Condition*: Incident ticket automatically created. Review required within 24h.
+    - _Flow_: User initiates "Break Glass" -> Applied immediately.
+    - _Post-Condition_: Incident ticket automatically created. Review required within 24h.
 
 ### Audit & History
 
 All configuration changes must be recorded in the `audit_log` table and emitted to the observability platform.
 
-*   **Who**: Actor ID (User or Service Account)
-*   **What**: Diff (Old Value -> New Value)
-*   **Where**: Environment / Tenant / Scope
-*   **Why**: Linked Jira Ticket or Justification
-*   **When**: Timestamp
+- **Who**: Actor ID (User or Service Account)
+- **What**: Diff (Old Value -> New Value)
+- **Where**: Environment / Tenant / Scope
+- **Why**: Linked Jira Ticket or Justification
+- **When**: Timestamp
 
 ## 4. Artifacts
 
@@ -171,14 +171,14 @@ A configuration or feature flag is **Production Ready** if:
 ## 5. Implementation Roadmap
 
 1.  **Phase 1: Standardization**:
-    *   Formalize the JSON schema for config objects.
-    *   Migrate `scripts/feature-flag-manager.js` logic to a proper backend service or library.
-    *   Replace hardcoded client `useFlag` with API-driven (cached) flag evaluation.
+    - Formalize the JSON schema for config objects.
+    - Migrate `scripts/feature-flag-manager.js` logic to a proper backend service or library.
+    - Replace hardcoded client `useFlag` with API-driven (cached) flag evaluation.
 
 2.  **Phase 2: Unified Service**:
-    *   Deploy `ConfigurationService` (or enhance `FeatureFlagManager.ts`).
-    *   Implement Redis caching layer for dynamic config.
+    - Deploy `ConfigurationService` (or enhance `FeatureFlagManager.ts`).
+    - Implement Redis caching layer for dynamic config.
 
 3.  **Phase 3: Governance**:
-    *   Implement the "4-Eyes" approval workflow in the Admin UI.
-    *   Connect Audit Logs to the Provenance Ledger.
+    - Implement the "4-Eyes" approval workflow in the Admin UI.
+    - Connect Audit Logs to the Provenance Ledger.

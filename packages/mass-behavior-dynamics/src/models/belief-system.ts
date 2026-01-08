@@ -64,7 +64,7 @@ export class PopulationBeliefTracker {
   calculatePolarizationTrend(topic: string, windowSize: number): PolarizationTrend {
     const history = this.history.get(topic) || [];
     if (history.length < windowSize) {
-      return { trend: 'INSUFFICIENT_DATA', slope: 0, confidence: 0 };
+      return { trend: "INSUFFICIENT_DATA", slope: 0, confidence: 0 };
     }
 
     const recent = history.slice(-windowSize);
@@ -74,7 +74,7 @@ export class PopulationBeliefTracker {
     const slope = this.calculateSlope(polarizationValues);
 
     return {
-      trend: slope > 0.01 ? 'INCREASING' : slope < -0.01 ? 'DECREASING' : 'STABLE',
+      trend: slope > 0.01 ? "INCREASING" : slope < -0.01 ? "DECREASING" : "STABLE",
       slope,
       confidence: this.calculateConfidence(polarizationValues, slope),
     };
@@ -82,7 +82,10 @@ export class PopulationBeliefTracker {
 
   private calculateSlope(values: number[]): number {
     const n = values.length;
-    let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+    let sumX = 0,
+      sumY = 0,
+      sumXY = 0,
+      sumXX = 0;
 
     for (let i = 0; i < n; i++) {
       sumX += i;
@@ -107,7 +110,7 @@ export class PopulationBeliefTracker {
 }
 
 export interface PolarizationTrend {
-  trend: 'INCREASING' | 'DECREASING' | 'STABLE' | 'INSUFFICIENT_DATA';
+  trend: "INCREASING" | "DECREASING" | "STABLE" | "INSUFFICIENT_DATA";
   slope: number;
   confidence: number;
 }

@@ -1,4 +1,4 @@
-import type { EventEnvelope, ProjectionHandler, ProjectionState } from './types.js';
+import type { EventEnvelope, ProjectionHandler, ProjectionState } from "./types.js";
 
 export interface Projection<TState> {
   get(): ProjectionState<TState>;

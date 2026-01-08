@@ -4,8 +4,8 @@
  * and provenance tooltips - all as a loadable extension
  */
 
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { create } from 'zustand';
+import React, { useState, useCallback, useEffect, useMemo } from "react";
+import { create } from "zustand";
 
 // ============================================================================
 // Types
@@ -29,7 +29,7 @@ interface SavedView {
 
 interface XAIOverlay {
   nodeId: string;
-  overlayType: 'importance' | 'confidence' | 'provenance' | 'anomaly';
+  overlayType: "importance" | "confidence" | "provenance" | "anomaly";
   value: number;
   explanation: string;
 }
@@ -222,12 +222,8 @@ const GraphPane: React.FC<GraphPaneProps> = ({ data, onNodeSelect, onBrush }) =>
     <div className="graph-pane" role="application" aria-label="Graph visualization">
       <svg width="100%" height="100%">
         {/* Graph would be rendered here */}
-        <g className="nodes">
-          {/* Nodes with XAI overlays */}
-        </g>
-        <g className="edges">
-          {/* Edges */}
-        </g>
+        <g className="nodes">{/* Nodes with XAI overlays */}</g>
+        <g className="edges">{/* Edges */}</g>
       </svg>
       {/* XAI Legend */}
       <div className="xai-legend" aria-label="Importance scale">
@@ -249,11 +245,7 @@ interface TimelinePaneProps {
   onEventSelect: (eventId: string) => void;
 }
 
-const TimelinePane: React.FC<TimelinePaneProps> = ({
-  data,
-  onTimeRangeSelect,
-  onEventSelect,
-}) => {
+const TimelinePane: React.FC<TimelinePaneProps> = ({ data, onTimeRangeSelect, onEventSelect }) => {
   const { viewState } = useTriPaneStore();
 
   return (
@@ -262,9 +254,7 @@ const TimelinePane: React.FC<TimelinePaneProps> = ({
         {/* Timeline axis */}
         <g className="axis" />
         {/* Events */}
-        <g className="events">
-          {/* Event markers with provenance tooltips */}
-        </g>
+        <g className="events">{/* Event markers with provenance tooltips */}</g>
         {/* Brush for selection */}
         <g className="brush" />
       </svg>
@@ -282,11 +272,7 @@ interface MapPaneProps {
   onExtentChange: (extent: [[number, number], [number, number]]) => void;
 }
 
-const MapPane: React.FC<MapPaneProps> = ({
-  data,
-  onLocationSelect,
-  onExtentChange,
-}) => {
+const MapPane: React.FC<MapPaneProps> = ({ data, onLocationSelect, onExtentChange }) => {
   const { viewState } = useTriPaneStore();
 
   // Leaflet map would be initialized here
@@ -297,7 +283,7 @@ const MapPane: React.FC<MapPaneProps> = ({
 
   return (
     <div className="map-pane" role="application" aria-label="Map visualization">
-      <div id="map" style={{ width: '100%', height: '100%' }} />
+      <div id="map" style={{ width: "100%", height: "100%" }} />
     </div>
   );
 };
@@ -380,74 +366,76 @@ interface Command {
 
 const useCommandPalette = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const store = useTriPaneStore();
 
   const commands: Command[] = useMemo(
     () => [
       {
-        id: 'undo',
-        label: 'Undo',
-        shortcut: 'Ctrl+Z',
+        id: "undo",
+        label: "Undo",
+        shortcut: "Ctrl+Z",
         action: store.undo,
       },
       {
-        id: 'redo',
-        label: 'Redo',
-        shortcut: 'Ctrl+Shift+Z',
+        id: "redo",
+        label: "Redo",
+        shortcut: "Ctrl+Shift+Z",
         action: store.redo,
       },
       {
-        id: 'save-view',
-        label: 'Save Current View',
-        shortcut: 'Ctrl+S',
+        id: "save-view",
+        label: "Save Current View",
+        shortcut: "Ctrl+S",
         action: () => {
-          const name = prompt('View name:');
-          if (name) {store.saveView(name);}
+          const name = prompt("View name:");
+          if (name) {
+            store.saveView(name);
+          }
         },
       },
       {
-        id: 'clear-selection',
-        label: 'Clear Selection',
-        shortcut: 'Escape',
+        id: "clear-selection",
+        label: "Clear Selection",
+        shortcut: "Escape",
         action: () => store.setSelectedNodes([]),
       },
       {
-        id: 'toggle-xai',
-        label: 'Toggle XAI Overlays',
+        id: "toggle-xai",
+        label: "Toggle XAI Overlays",
         action: () => {
           // Toggle XAI overlay visibility
         },
       },
       {
-        id: 'export-view',
-        label: 'Export View as Image',
+        id: "export-view",
+        label: "Export View as Image",
         action: () => {
           // Export current view
         },
       },
     ],
-    [store],
+    [store]
   );
 
   const filteredCommands = commands.filter((cmd) =>
-    cmd.label.toLowerCase().includes(search.toLowerCase()),
+    cmd.label.toLowerCase().includes(search.toLowerCase())
   );
 
   // Keyboard shortcut handler
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
         setIsOpen(true);
       }
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         setIsOpen(false);
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   return { isOpen, setIsOpen, search, setSearch, commands: filteredCommands };
@@ -458,10 +446,10 @@ const useCommandPalette = () => {
 // ============================================================================
 
 interface TriPaneMainProps {
-  layout?: 'horizontal' | 'vertical' | 'grid';
+  layout?: "horizontal" | "vertical" | "grid";
 }
 
-export const TriPaneMain: React.FC<TriPaneMainProps> = ({ layout = 'horizontal' }) => {
+export const TriPaneMain: React.FC<TriPaneMainProps> = ({ layout = "horizontal" }) => {
   const store = useTriPaneStore();
   const commandPalette = useCommandPalette();
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
@@ -478,11 +466,11 @@ export const TriPaneMain: React.FC<TriPaneMainProps> = ({ layout = 'horizontal' 
       // Would send to analytics
       // analytics.track('tri_pane_ttfi', { ttfi });
 
-      window.removeEventListener('click', handleFirstInteraction);
+      window.removeEventListener("click", handleFirstInteraction);
     };
 
-    window.addEventListener('click', handleFirstInteraction);
-    return () => window.removeEventListener('click', handleFirstInteraction);
+    window.addEventListener("click", handleFirstInteraction);
+    return () => window.removeEventListener("click", handleFirstInteraction);
   }, []);
 
   // Synchronized brushing handler
@@ -491,7 +479,7 @@ export const TriPaneMain: React.FC<TriPaneMainProps> = ({ layout = 'horizontal' 
       store.setSelectedNodes(nodeIds);
       store.highlightElements(nodeIds);
     },
-    [store],
+    [store]
   );
 
   const layoutClass = `tri-pane-container layout-${layout}`;
@@ -529,30 +517,16 @@ export const TriPaneMain: React.FC<TriPaneMainProps> = ({ layout = 'horizontal' 
 
       {/* Toolbar */}
       <div className="toolbar" role="toolbar" aria-label="View controls">
-        <button
-          onClick={store.undo}
-          disabled={!store.canUndo()}
-          aria-label="Undo"
-        >
+        <button onClick={store.undo} disabled={!store.canUndo()} aria-label="Undo">
           Undo
         </button>
-        <button
-          onClick={store.redo}
-          disabled={!store.canRedo()}
-          aria-label="Redo"
-        >
+        <button onClick={store.redo} disabled={!store.canRedo()} aria-label="Redo">
           Redo
         </button>
-        <button
-          onClick={() => commandPalette.setIsOpen(true)}
-          aria-label="Open command palette"
-        >
+        <button onClick={() => commandPalette.setIsOpen(true)} aria-label="Open command palette">
           Commands (Ctrl+K)
         </button>
-        <select
-          aria-label="Saved views"
-          onChange={(e) => store.loadView(e.target.value)}
-        >
+        <select aria-label="Saved views" onChange={(e) => store.loadView(e.target.value)}>
           <option value="">Load saved view...</option>
           {store.savedViews.map((view) => (
             <option key={view.id} value={view.id}>
@@ -564,11 +538,7 @@ export const TriPaneMain: React.FC<TriPaneMainProps> = ({ layout = 'horizontal' 
 
       {/* Panes */}
       <div className="panes">
-        <GraphPane
-          data={{}}
-          onNodeSelect={setSelectedElement}
-          onBrush={handleBrush}
-        />
+        <GraphPane data={{}} onNodeSelect={setSelectedElement} onBrush={handleBrush} />
         <TimelinePane
           data={{}}
           onTimeRangeSelect={(range) => store.setTimeRange(range)}
@@ -603,23 +573,23 @@ export const TriPaneMain: React.FC<TriPaneMainProps> = ({ layout = 'horizontal' 
 // ============================================================================
 
 export function registerUiExtension(extensionId: string): void {
-  if (extensionId === 'tri-pane') {
-    console.log('[tri-pane-explain] Registered as UI extension');
+  if (extensionId === "tri-pane") {
+    console.log("[tri-pane-explain] Registered as UI extension");
 
     // Register with plugin loader
-    if (typeof window !== 'undefined' && (window as any).__INTELGRAPH_PLUGINS__) {
+    if (typeof window !== "undefined" && (window as any).__INTELGRAPH_PLUGINS__) {
       (window as any).__INTELGRAPH_PLUGINS__.register({
-        id: 'tri-pane-explain',
+        id: "tri-pane-explain",
         component: TriPaneMain,
-        panels: ['tri-pane-main', 'explainer-panel'],
+        panels: ["tri-pane-main", "explainer-panel"],
       });
     }
   }
 }
 
 // Auto-register if in browser context
-if (typeof window !== 'undefined') {
-  registerUiExtension('tri-pane');
+if (typeof window !== "undefined") {
+  registerUiExtension("tri-pane");
 }
 
 export default TriPaneMain;

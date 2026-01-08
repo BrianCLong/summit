@@ -22,7 +22,7 @@ export interface ContractFunction {
   name: string;
   inputs: ContractParameter[];
   outputs: ContractParameter[];
-  stateMutability: 'pure' | 'view' | 'nonpayable' | 'payable';
+  stateMutability: "pure" | "view" | "nonpayable" | "payable";
   description?: string;
 }
 
@@ -80,12 +80,12 @@ export interface AccessRule {
   resource: string;
   action: string;
   conditions: RuleCondition[];
-  effect: 'allow' | 'deny';
+  effect: "allow" | "deny";
 }
 
 export interface RuleCondition {
   attribute: string;
-  operator: 'eq' | 'ne' | 'gt' | 'lt' | 'gte' | 'lte' | 'in' | 'contains';
+  operator: "eq" | "ne" | "gt" | "lt" | "gte" | "lte" | "in" | "contains";
   value: any;
 }
 
@@ -100,13 +100,13 @@ export interface DataRetentionPolicy {
 
 export interface ComplianceRule {
   id: string;
-  framework: 'SOX' | 'GDPR' | 'HIPAA' | 'SOC2' | 'NIST' | 'ISO27001';
+  framework: "SOX" | "GDPR" | "HIPAA" | "SOC2" | "NIST" | "ISO27001";
   name: string;
   description: string;
   automated: boolean;
   checkFunction: string;
   remediationSteps: string[];
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
 }
 
 export interface ApprovalWorkflow {
@@ -115,7 +115,7 @@ export interface ApprovalWorkflow {
   requiredApprovers: number;
   approvers: string[];
   currentApprovals: string[];
-  status: 'pending' | 'approved' | 'rejected' | 'expired';
+  status: "pending" | "approved" | "rejected" | "expired";
   expiresAt: number;
   payload: Record<string, any>;
 }

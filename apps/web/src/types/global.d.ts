@@ -5,108 +5,108 @@
 
 // jQuery - legacy dependency
 declare module 'jquery' {
-  const jQuery: any;
-  export = jQuery;
+  const jQuery: any
+  export = jQuery
 }
 
 // Redux Toolkit - may need to be installed
 declare module '@reduxjs/toolkit' {
-  export * from '@reduxjs/toolkit';
-  export const createSlice: any;
-  export const createAsyncThunk: any;
-  export const createSelector: any;
-  export const configureStore: any;
+  export * from '@reduxjs/toolkit'
+  export const createSlice: any
+  export const createAsyncThunk: any
+  export const createSelector: any
+  export const configureStore: any
   export type PayloadAction<T = any> = {
-    payload: T;
-    type: string;
-  };
-  export type Middleware = any;
+    payload: T
+    type: string
+  }
+  export type Middleware = any
 }
 
 // React Redux
 declare module 'react-redux' {
-  export * from 'react-redux';
-  export const useSelector: any;
-  export const useDispatch: any;
-  export const Provider: any;
+  export * from 'react-redux'
+  export const useSelector: any
+  export const useDispatch: any
+  export const Provider: any
 }
 
 // Immer
 declare module 'immer' {
-  export * from 'immer';
-  export const produce: any;
-  export const Draft: any;
-  export const applyPatches: any;
-  export const enablePatches: any;
+  export * from 'immer'
+  export const produce: any
+  export const Draft: any
+  export const applyPatches: any
+  export const enablePatches: any
 }
 
 // DOMPurify
 declare module 'dompurify' {
   const DOMPurify: {
-    sanitize: (dirty: string, config?: any) => string;
-  };
-  export default DOMPurify;
+    sanitize: (dirty: string, config?: any) => string
+  }
+  export default DOMPurify
 }
 
 // Lodash
 declare module 'lodash' {
-  export * from 'lodash';
-  const lodash: any;
-  export default lodash;
+  export * from 'lodash'
+  const lodash: any
+  export default lodash
 }
 
 // Cytoscape
 declare module 'cytoscape' {
-  const cytoscape: any;
-  export default cytoscape;
+  const cytoscape: any
+  export default cytoscape
 }
 
 // Mermaid
 declare module 'mermaid' {
   const mermaid: {
-    initialize: (config: any) => void;
-    render: (id: string, text: string, callback?: (svg: string) => void) => void;
-  };
-  export default mermaid;
+    initialize: (config: any) => void
+    render: (id: string, text: string, callback?: (svg: string) => void) => void
+  }
+  export default mermaid
 }
 
 // MUI Data Grid
 declare module '@mui/x-data-grid' {
-  export * from '@mui/x-data-grid';
-  export const DataGrid: any;
-  export const GridColDef: any;
+  export * from '@mui/x-data-grid'
+  export const DataGrid: any
+  export const GridColDef: any
 }
 
 // Radix UI Slot
 declare module '@radix-ui/react-slot' {
-  import type { ComponentType, HTMLAttributes } from 'react';
+  import type { ComponentType, HTMLAttributes } from 'react'
 
   export interface SlotProps extends HTMLAttributes<HTMLElement> {
-    children?: React.ReactNode;
+    children?: React.ReactNode
   }
 
-  export const Slot: ComponentType<SlotProps>;
+  export const Slot: ComponentType<SlotProps>
 }
 
 // Internal monorepo packages
 declare module '@intelgraph/graph-algos-js' {
-  export const graphAlgos: any;
-  export const pagerank: any;
+  export const graphAlgos: any
+  export const pagerank: any
 }
 
 declare module '../../../../packages/sdk/collab-js/src/collabClient' {
-  export const CollabClient: any;
+  export const CollabClient: any
 }
 
 // Internal slice files that may not exist yet
 declare module '../viewSync/viewSyncSlice' {
-  export const viewSyncSlice: any;
+  export const viewSyncSlice: any
 }
 
 declare module '../features/viewSync/viewSyncSlice' {
-  export const viewSyncSlice: any;
+  export const viewSyncSlice: any
 }
 
 declare module '../features/codex/codexSlice' {
-  export const codexSlice: any;
+  export const codexSlice: any
 }

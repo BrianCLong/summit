@@ -148,9 +148,18 @@
         "defaults": {
           "color": { "mode": "thresholds" },
           "mappings": [
-            { "options": { "healthy": { "color": "green", "index": 0, "text": "Healthy" } }, "type": "value" },
-            { "options": { "warning": { "color": "yellow", "index": 1, "text": "Warning" } }, "type": "value" },
-            { "options": { "critical": { "color": "red", "index": 2, "text": "Critical" } }, "type": "value" }
+            {
+              "options": { "healthy": { "color": "green", "index": 0, "text": "Healthy" } },
+              "type": "value"
+            },
+            {
+              "options": { "warning": { "color": "yellow", "index": 1, "text": "Warning" } },
+              "type": "value"
+            },
+            {
+              "options": { "critical": { "color": "red", "index": 2, "text": "Critical" } },
+              "type": "value"
+            }
           ],
           "thresholds": {
             "mode": "absolute",
@@ -225,14 +234,25 @@
             "thresholdsStyle": { "mode": "line" }
           },
           "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 0 }] },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 0 }
+            ]
+          },
           "unit": "percent"
         }
       },
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
       "id": 5,
       "options": {
-        "legend": { "calcs": ["lastNotNull", "min"], "displayMode": "table", "placement": "right", "showLegend": true },
+        "legend": {
+          "calcs": ["lastNotNull", "min"],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
         "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "targets": [
@@ -294,7 +314,12 @@
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 17 },
       "id": 6,
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
         "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "targets": [
@@ -352,7 +377,12 @@
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 17 },
       "id": 7,
       "options": {
-        "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "legend": {
+          "calcs": ["lastNotNull"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
         "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "targets": [
@@ -437,14 +467,25 @@
             "thresholdsStyle": { "mode": "line" }
           },
           "mappings": [],
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 99 }] },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 99 }
+            ]
+          },
           "unit": "percent"
         }
       },
       "gridPos": { "h": 6, "w": 16, "x": 8, "y": 26 },
       "id": 9,
       "options": {
-        "legend": { "calcs": ["mean", "lastNotNull"], "displayMode": "table", "placement": "right", "showLegend": true },
+        "legend": {
+          "calcs": ["mean", "lastNotNull"],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
         "tooltip": { "mode": "multi", "sort": "desc" }
       },
       "targets": [
@@ -489,7 +530,10 @@
         "multi": false,
         "name": "service",
         "options": [],
-        "query": { "query": "label_values(http_requests_total, service)", "refId": "StandardVariableQuery" },
+        "query": {
+          "query": "label_values(http_requests_total, service)",
+          "refId": "StandardVariableQuery"
+        },
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,

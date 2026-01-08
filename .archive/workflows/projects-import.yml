@@ -3,7 +3,7 @@ name: Projects Import
 on:
   push:
     paths:
-      - 'project_management/github-projects-import.json'
+      - "project_management/github-projects-import.json"
 
 permissions:
   contents: write

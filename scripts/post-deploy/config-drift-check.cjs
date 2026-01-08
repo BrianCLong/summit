@@ -11,9 +11,9 @@
  *   node scripts/post-deploy/config-drift-check.cjs --simulate-mismatch
  */
 
-const crypto = require('crypto');
-const fs = require('fs');
-const path = require('path');
+const crypto = require("crypto");
+const fs = require("fs");
+const path = require("path");
 
 const args = new Set(process.argv.slice(2));
 const getArgValue = (flag) => {
@@ -22,12 +22,12 @@ const getArgValue = (flag) => {
   return process.argv[index + 1];
 };
 
-const configPath = process.env.DRIFT_CONFIG || 'config/drift-baseline.json';
-const envName = getArgValue('--env') || process.env.DRIFT_ENV || 'staging';
-const outputDir = process.env.DRIFT_OUTPUT_DIR || 'artifacts/drift';
-const forceMismatch = args.has('--simulate-mismatch') || process.env.DRIFT_FORCE_MISMATCH === '1';
-const writeSnapshot = args.has('--write-snapshot');
-const failOnDrift = process.env.DRIFT_FAIL_ON_DRIFT !== '0';
+const configPath = process.env.DRIFT_CONFIG || "config/drift-baseline.json";
+const envName = getArgValue("--env") || process.env.DRIFT_ENV || "staging";
+const outputDir = process.env.DRIFT_OUTPUT_DIR || "artifacts/drift";
+const forceMismatch = args.has("--simulate-mismatch") || process.env.DRIFT_FORCE_MISMATCH === "1";
+const writeSnapshot = args.has("--write-snapshot");
+const failOnDrift = process.env.DRIFT_FAIL_ON_DRIFT !== "0";
 
 /**
  * Read drift configuration
@@ -36,7 +36,7 @@ const readConfig = () => {
   if (!fs.existsSync(configPath)) {
     throw new Error(`Config file not found: ${configPath}`);
   }
-  return JSON.parse(fs.readFileSync(configPath, 'utf8'));
+  return JSON.parse(fs.readFileSync(configPath, "utf8"));
 };
 
 /**
@@ -61,7 +61,7 @@ const collectFiles = (dir, extensions, rootDir = dir) => {
       if (extensions.includes(ext)) {
         files.push({
           relativePath: path.relative(rootDir, fullPath),
-          content: fs.readFileSync(fullPath, 'utf8'),
+          content: fs.readFileSync(fullPath, "utf8"),
         });
       }
     }
@@ -74,14 +74,14 @@ const collectFiles = (dir, extensions, rootDir = dir) => {
  * Compute hash of file collection
  */
 const computeHash = (files) => {
-  const hash = crypto.createHash('sha256');
+  const hash = crypto.createHash("sha256");
   for (const file of files) {
     hash.update(file.relativePath);
-    hash.update('\0');
+    hash.update("\0");
     hash.update(file.content);
-    hash.update('\0');
+    hash.update("\0");
   }
-  return hash.digest('hex');
+  return hash.digest("hex");
 };
 
 /**
@@ -118,11 +118,11 @@ const writeSnapshotFile = (snapshotPath, baseline, hash) => {
  * Main drift check
  */
 const main = () => {
-  console.log('Config Drift Check');
-  console.log('==================');
+  console.log("Config Drift Check");
+  console.log("==================");
   console.log(`Environment: ${envName}`);
   console.log(`Config: ${configPath}`);
-  console.log('');
+  console.log("");
 
   const config = readConfig();
   const baseline = config.baseline;
@@ -148,23 +148,23 @@ const main = () => {
   // Read existing snapshot
   if (!fs.existsSync(snapshotPath)) {
     console.log(`Snapshot not found: ${snapshotPath}`);
-    console.log('Run with --write-snapshot to create initial snapshot');
+    console.log("Run with --write-snapshot to create initial snapshot");
     process.exit(1);
   }
 
-  const snapshot = JSON.parse(fs.readFileSync(snapshotPath, 'utf8'));
+  const snapshot = JSON.parse(fs.readFileSync(snapshotPath, "utf8"));
   const snapshotHash = snapshot.baselineHash;
 
   console.log(`Snapshot: ${snapshotPath}`);
   console.log(`Snapshot hash: ${snapshotHash}`);
-  console.log('');
+  console.log("");
 
   // Check for drift
   let drifted = baselineHash !== snapshotHash;
 
   // Force mismatch for testing
   if (forceMismatch) {
-    console.log('⚠️  Simulating drift mismatch');
+    console.log("⚠️  Simulating drift mismatch");
     drifted = true;
   }
 
@@ -185,36 +185,38 @@ const main = () => {
     checkedAt: new Date().toISOString(),
   };
   fs.writeFileSync(
-    path.join(outputDir, 'config-drift-summary.json'),
+    path.join(outputDir, "config-drift-summary.json"),
     JSON.stringify(summary, null, 2)
   );
 
   // Prometheus metrics
   fs.writeFileSync(
-    path.join(outputDir, 'config-drift.prom'),
+    path.join(outputDir, "config-drift.prom"),
     generatePromMetrics(drifted, envName, baseline.name)
   );
 
   // Result
   if (drifted) {
-    console.log('❌ DRIFT DETECTED');
-    console.log('');
-    console.log('Config has changed since the snapshot was taken.');
-    console.log('Review changes and update snapshot with:');
-    console.log(`  node scripts/post-deploy/config-drift-check.cjs --write-snapshot --env ${envName}`);
+    console.log("❌ DRIFT DETECTED");
+    console.log("");
+    console.log("Config has changed since the snapshot was taken.");
+    console.log("Review changes and update snapshot with:");
+    console.log(
+      `  node scripts/post-deploy/config-drift-check.cjs --write-snapshot --env ${envName}`
+    );
 
     // Alert JSON
     const alert = {
-      alert: 'IntelGraphConfigDriftDetected',
-      severity: 'critical',
+      alert: "IntelGraphConfigDriftDetected",
+      severity: "critical",
       env: envName,
       source: baseline.name,
       detected: true,
-      reportPath: path.join(outputDir, 'config-drift-summary.json'),
+      reportPath: path.join(outputDir, "config-drift-summary.json"),
       detectedAt: new Date().toISOString(),
     };
     fs.writeFileSync(
-      path.join(outputDir, 'config-drift-alert.json'),
+      path.join(outputDir, "config-drift-alert.json"),
       JSON.stringify(alert, null, 2)
     );
 
@@ -222,10 +224,10 @@ const main = () => {
       process.exit(1);
     }
   } else {
-    console.log('✅ No drift detected');
+    console.log("✅ No drift detected");
   }
 
-  console.log('');
+  console.log("");
   console.log(`Output: ${outputDir}/`);
 };
 

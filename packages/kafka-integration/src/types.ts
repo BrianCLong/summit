@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { KafkaConfig, ProducerConfig, ConsumerConfig } from 'kafkajs';
+import { z } from "zod";
+import { KafkaConfig, ProducerConfig, ConsumerConfig } from "kafkajs";
 
 /**
  * Message metadata schema
@@ -13,7 +13,7 @@ export const MessageMetadataSchema = z.object({
   causationId: z.string().optional(),
   tenantId: z.string().optional(),
   userId: z.string().optional(),
-  version: z.string().default('1.0'),
+  version: z.string().default("1.0"),
   schemaVersion: z.string().optional(),
 });
 
@@ -32,10 +32,10 @@ export interface StreamMessage<T = unknown> {
  * Partition strategy types
  */
 export enum PartitionStrategy {
-  ROUND_ROBIN = 'round_robin',
-  MURMUR2 = 'murmur2',
-  CONSISTENT_HASH = 'consistent_hash',
-  CUSTOM = 'custom',
+  ROUND_ROBIN = "round_robin",
+  MURMUR2 = "murmur2",
+  CONSISTENT_HASH = "consistent_hash",
+  CUSTOM = "custom",
 }
 
 /**
@@ -46,7 +46,7 @@ export interface KafkaClusterConfig {
   clientId: string;
   ssl?: boolean;
   sasl?: {
-    mechanism: 'plain' | 'scram-sha-256' | 'scram-sha-512' | 'aws';
+    mechanism: "plain" | "scram-sha-256" | "scram-sha-512" | "aws";
     username?: string;
     password?: string;
   };
@@ -69,7 +69,7 @@ export interface EOSProducerConfig extends ProducerConfig {
   idempotent: true;
   maxInFlightRequests: 1 | 5;
   acks: -1;
-  compression?: 'gzip' | 'snappy' | 'lz4' | 'zstd';
+  compression?: "gzip" | "snappy" | "lz4" | "zstd";
   batchSize?: number;
   lingerMs?: number;
 }
@@ -111,8 +111,8 @@ export interface TopicConfig {
   numPartitions: number;
   replicationFactor: number;
   retentionMs?: number;
-  cleanupPolicy?: 'delete' | 'compact';
-  compressionType?: 'gzip' | 'snappy' | 'lz4' | 'zstd' | 'uncompressed';
+  cleanupPolicy?: "delete" | "compact";
+  compressionType?: "gzip" | "snappy" | "lz4" | "zstd" | "uncompressed";
   minInsyncReplicas?: number;
   segmentMs?: number;
   segmentBytes?: number;
@@ -134,10 +134,10 @@ export interface SchemaRegistryConfig {
  * Message serialization format
  */
 export enum SerializationFormat {
-  JSON = 'json',
-  AVRO = 'avro',
-  PROTOBUF = 'protobuf',
-  STRING = 'string',
+  JSON = "json",
+  AVRO = "avro",
+  PROTOBUF = "protobuf",
+  STRING = "string",
 }
 
 /**

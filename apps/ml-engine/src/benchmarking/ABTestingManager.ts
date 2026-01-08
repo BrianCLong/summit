@@ -1,13 +1,8 @@
-import crypto from 'crypto';
-import { Pool } from 'pg';
-import { logger } from '../utils/logger.js';
-import {
-  ABTestAssignment,
-  ABTestConfig,
-  ABTestOutcome,
-  ABTestVariant,
-} from './types.js';
-import { ModelBenchmarkingService } from './ModelBenchmarkingService.js';
+import crypto from "crypto";
+import { Pool } from "pg";
+import { logger } from "../utils/logger.js";
+import { ABTestAssignment, ABTestConfig, ABTestOutcome, ABTestVariant } from "./types.js";
+import { ModelBenchmarkingService } from "./ModelBenchmarkingService.js";
 
 interface CachedExperiment {
   id: string;
@@ -19,7 +14,7 @@ export class ABTestingManager {
 
   constructor(
     private readonly pool: Pool,
-    private readonly benchmarkingService: ModelBenchmarkingService,
+    private readonly benchmarkingService: ModelBenchmarkingService
   ) {}
 
   async initialize(): Promise<void> {
@@ -55,9 +50,9 @@ export class ABTestingManager {
         config.description ?? null,
         config.modelType,
         JSON.stringify(normalized),
-        config.status ?? 'active',
+        config.status ?? "active",
         JSON.stringify(config.metadata ?? {}),
-      ],
+      ]
     );
 
     const cached: CachedExperiment = {
@@ -70,13 +65,10 @@ export class ABTestingManager {
     return cached;
   }
 
-  async assignVariant(
-    experimentName: string,
-    subjectId: string,
-  ): Promise<ABTestAssignment> {
+  async assignVariant(experimentName: string, subjectId: string): Promise<ABTestAssignment> {
     const experiment = await this.getExperiment(experimentName);
 
-    if (experiment.config.status === 'paused') {
+    if (experiment.config.status === "paused") {
       throw new Error(`Experiment ${experimentName} is paused`);
     }
 
@@ -92,7 +84,7 @@ export class ABTestingManager {
           metrics
         ) VALUES ($1, 'exposure', $2, $3, '{}'::jsonb)
       `,
-      [experiment.id, subjectId, variant.id],
+      [experiment.id, subjectId, variant.id]
     );
 
     return {
@@ -120,10 +112,10 @@ export class ABTestingManager {
         outcome.subjectId,
         outcome.variantId,
         JSON.stringify(outcome.metrics ?? {}),
-      ],
+      ]
     );
 
-    logger.debug('Recorded AB test outcome', {
+    logger.debug("Recorded AB test outcome", {
       experimentId: outcome.experimentId,
       variantId: outcome.variantId,
     });
@@ -139,7 +131,7 @@ export class ABTestingManager {
         WHERE experiment_id = $1 AND event_type = 'exposure'
         GROUP BY variant
       `,
-      [experiment.id],
+      [experiment.id]
     );
 
     const outcomeResult = await this.pool.query(
@@ -148,7 +140,7 @@ export class ABTestingManager {
         FROM ml_model_ab_test_events
         WHERE experiment_id = $1 AND event_type = 'outcome'
       `,
-      [experiment.id],
+      [experiment.id]
     );
 
     const exposureMap = new Map<string, number>();
@@ -156,14 +148,17 @@ export class ABTestingManager {
       exposureMap.set(row.variant, Number(row.exposures));
     }
 
-    const variantMetrics = new Map<string, {
-      count: number;
-      accuracy: number;
-      precision: number;
-      recall: number;
-      f1Score: number;
-      latency: number;
-    }>();
+    const variantMetrics = new Map<
+      string,
+      {
+        count: number;
+        accuracy: number;
+        precision: number;
+        recall: number;
+        f1Score: number;
+        latency: number;
+      }
+    >();
 
     for (const row of outcomeResult.rows) {
       const metrics = row.metrics || {};
@@ -212,7 +207,7 @@ export class ABTestingManager {
         name: experiment.config.name,
         description: experiment.config.description,
         modelType: experiment.config.modelType,
-        status: experiment.config.status ?? 'active',
+        status: experiment.config.status ?? "active",
       },
       variants,
     };
@@ -221,7 +216,7 @@ export class ABTestingManager {
   private normalizeVariants(variants: ABTestVariant[]): ABTestVariant[] {
     const totalWeight = variants.reduce((sum, variant) => sum + variant.weight, 0);
     if (totalWeight === 0) {
-      throw new Error('Variant weights must be greater than zero');
+      throw new Error("Variant weights must be greater than zero");
     }
 
     return variants.map((variant) => ({
@@ -242,7 +237,7 @@ export class ABTestingManager {
         FROM ml_model_ab_tests
         WHERE experiment_name = $1
       `,
-      [name],
+      [name]
     );
 
     if (result.rowCount === 0) {
@@ -279,7 +274,7 @@ export class ABTestingManager {
         FROM ml_model_ab_tests
         WHERE id = $1
       `,
-      [id],
+      [id]
     );
 
     if (result.rowCount === 0) {
@@ -292,12 +287,9 @@ export class ABTestingManager {
   private pickVariant(
     variants: ABTestVariant[],
     experimentName: string,
-    subjectId: string,
+    subjectId: string
   ): ABTestVariant {
-    const hash = crypto
-      .createHash('sha256')
-      .update(`${experimentName}:${subjectId}`)
-      .digest('hex');
+    const hash = crypto.createHash("sha256").update(`${experimentName}:${subjectId}`).digest("hex");
     const bucket = parseInt(hash.slice(0, 8), 16) % 10000;
 
     let cumulative = 0;

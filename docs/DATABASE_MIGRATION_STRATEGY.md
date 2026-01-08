@@ -12,12 +12,14 @@ This document defines Summit/IntelGraph's comprehensive database migration and s
 ### Key Findings from Audit
 
 **Strengths:**
+
 - ✅ Advanced migration framework with 3-phase support (expand, migrate, contract)
 - ✅ Zero-downtime migration script with rollback capabilities
 - ✅ CI/CD migration validation workflows
 - ✅ Comprehensive monitoring and metrics
 
 **Gaps Identified:**
+
 - ⚠️ Multiple migration tools creating fragmentation (Prisma, Knex, custom)
 - ⚠️ ~40+ migration files scattered across different services
 - ⚠️ Inconsistent naming conventions (V1-V18, date-based, numbered)
@@ -64,12 +66,12 @@ This document defines Summit/IntelGraph's comprehensive database migration and s
 
 ### Database Responsibilities
 
-| Database | Primary Use | Migration Scope | Current Tools |
-|----------|-------------|-----------------|---------------|
-| **PostgreSQL** | Relational data, metadata, audit logs | High | Knex, custom framework |
-| **Neo4j** | Entity graphs, relationships | High | Custom .js migrations, .cypher scripts |
-| **TimescaleDB** | Time-series data, analytics traces | Medium | Direct SQL, custom framework |
-| **Redis** | Caching, sessions, locks | Low | Schema-less (config only) |
+| Database        | Primary Use                           | Migration Scope | Current Tools                          |
+| --------------- | ------------------------------------- | --------------- | -------------------------------------- |
+| **PostgreSQL**  | Relational data, metadata, audit logs | High            | Knex, custom framework                 |
+| **Neo4j**       | Entity graphs, relationships          | High            | Custom .js migrations, .cypher scripts |
+| **TimescaleDB** | Time-series data, analytics traces    | Medium          | Direct SQL, custom framework           |
+| **Redis**       | Caching, sessions, locks              | Low             | Schema-less (config only)              |
 
 ### Current Migration File Locations
 
@@ -121,17 +123,17 @@ prov-ledger/migrations/                  # 1 file
 
 ```typescript
 interface Migration {
-  id: string;                    // Unique identifier
-  name: string;                  // Human-readable name
-  description: string;           // What this migration does
-  type: 'postgresql' | 'neo4j' | 'mixed';
-  version: string;               // Semantic version (e.g., "1.2.0")
-  dependencies: string[];        // Migration IDs this depends on
+  id: string; // Unique identifier
+  name: string; // Human-readable name
+  description: string; // What this migration does
+  type: "postgresql" | "neo4j" | "mixed";
+  version: string; // Semantic version (e.g., "1.2.0")
+  dependencies: string[]; // Migration IDs this depends on
 
   phases: {
-    expand?: MigrationStep[];    // Add new schema elements
-    migrate?: MigrationStep[];   // Migrate data
-    contract?: MigrationStep[];  // Remove old schema elements
+    expand?: MigrationStep[]; // Add new schema elements
+    migrate?: MigrationStep[]; // Migrate data
+    contract?: MigrationStep[]; // Remove old schema elements
   };
 
   rollback?: {
@@ -143,7 +145,7 @@ interface Migration {
   metadata: {
     author: string;
     createdAt: Date;
-    estimatedDuration: number;   // in seconds
+    estimatedDuration: number; // in seconds
     breakingChange: boolean;
     tenantScoped: boolean;
   };
@@ -227,16 +229,16 @@ ALTER TABLE users ALTER COLUMN email_verified SET NOT NULL;
 
 ### Pattern Catalog
 
-| Pattern | Use Case | Phases Required | Complexity |
-|---------|----------|-----------------|------------|
-| **Add Column** | New optional field | Expand only | Low |
-| **Add Required Column** | New mandatory field | Expand → Migrate → Contract | Medium |
-| **Rename Column** | Change column name | Expand (dual write) → Migrate → Contract | Medium |
-| **Drop Column** | Remove unused field | Expand (stop reading) → Contract | Low |
-| **Split Table** | Normalize schema | Expand → Migrate → Contract | High |
-| **Change Type** | Alter column datatype | Expand → Migrate → Contract | High |
-| **Add Index** | Performance optimization | Expand (CREATE CONCURRENTLY) | Low |
-| **Add Constraint** | Data integrity | Expand (validate) → Contract (enforce) | Medium |
+| Pattern                 | Use Case                 | Phases Required                          | Complexity |
+| ----------------------- | ------------------------ | ---------------------------------------- | ---------- |
+| **Add Column**          | New optional field       | Expand only                              | Low        |
+| **Add Required Column** | New mandatory field      | Expand → Migrate → Contract              | Medium     |
+| **Rename Column**       | Change column name       | Expand (dual write) → Migrate → Contract | Medium     |
+| **Drop Column**         | Remove unused field      | Expand (stop reading) → Contract         | Low        |
+| **Split Table**         | Normalize schema         | Expand → Migrate → Contract              | High       |
+| **Change Type**         | Alter column datatype    | Expand → Migrate → Contract              | High       |
+| **Add Index**           | Performance optimization | Expand (CREATE CONCURRENTLY)             | Low        |
+| **Add Constraint**      | Data integrity           | Expand (validate) → Contract (enforce)   | Medium     |
 
 ### PostgreSQL-Specific Best Practices
 
@@ -383,9 +385,7 @@ Examples:
 {
   "id": "20251120_150000_data_backfill_canonical_ids",
   "version": "2.1.0",
-  "dependencies": [
-    "20251120_143000_schema_add_canonical_id_column"
-  ],
+  "dependencies": ["20251120_143000_schema_add_canonical_id_column"],
   "description": "Backfill canonical IDs for existing entities"
 }
 ```
@@ -397,6 +397,7 @@ Examples:
 ### Automated Schema Validation
 
 Implement continuous schema validation to detect drift between:
+
 1. Expected schema (migrations)
 2. Actual database schema
 3. Application models/types
@@ -466,7 +467,7 @@ name: Schema Validation
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # Every 6 hours
+    - cron: "0 */6 * * *" # Every 6 hours
   workflow_dispatch:
 
 jobs:
@@ -503,8 +504,8 @@ jobs:
 ```typescript
 // scripts/database/detect-schema-drift.ts
 
-import { getPostgresPool } from '../server/src/db/postgres';
-import { getNeo4jDriver } from '../server/src/db/neo4j';
+import { getPostgresPool } from "../server/src/db/postgres";
+import { getNeo4jDriver } from "../server/src/db/neo4j";
 
 interface DriftResult {
   database: string;
@@ -513,7 +514,7 @@ interface DriftResult {
 }
 
 interface SchemaDifference {
-  type: 'missing_table' | 'missing_column' | 'type_mismatch' | 'missing_index';
+  type: "missing_table" | "missing_column" | "type_mismatch" | "missing_index";
   table: string;
   column?: string;
   expected: string;
@@ -524,7 +525,7 @@ async function detectPostgresDrift(): Promise<DriftResult> {
   const pool = getPostgresPool();
 
   // Load expected schema from migration files
-  const expectedSchema = await loadExpectedSchema('postgresql');
+  const expectedSchema = await loadExpectedSchema("postgresql");
 
   // Query actual schema
   const actualTables = await pool.query(`
@@ -538,7 +539,7 @@ async function detectPostgresDrift(): Promise<DriftResult> {
   const differences = compareSchemas(expectedSchema, actualTables.rows);
 
   return {
-    database: 'postgresql',
+    database: "postgresql",
     driftDetected: differences.length > 0,
     differences,
   };
@@ -550,14 +551,14 @@ async function detectNeo4jDrift(): Promise<DriftResult> {
 
   try {
     // Check constraints
-    const constraints = await session.run('SHOW CONSTRAINTS');
+    const constraints = await session.run("SHOW CONSTRAINTS");
 
     // Check indexes
-    const indexes = await session.run('SHOW INDEXES');
+    const indexes = await session.run("SHOW INDEXES");
 
     // Compare with expected
-    const expectedConstraints = await loadExpectedSchema('neo4j_constraints');
-    const expectedIndexes = await loadExpectedSchema('neo4j_indexes');
+    const expectedConstraints = await loadExpectedSchema("neo4j_constraints");
+    const expectedIndexes = await loadExpectedSchema("neo4j_indexes");
 
     const differences = [
       ...compareNeo4jConstraints(expectedConstraints, constraints.records),
@@ -565,7 +566,7 @@ async function detectNeo4jDrift(): Promise<DriftResult> {
     ];
 
     return {
-      database: 'neo4j',
+      database: "neo4j",
       driftDetected: differences.length > 0,
       differences,
     };
@@ -580,7 +581,7 @@ async function sendDriftAlert(results: DriftResult[]) {
 
   if (driftDetected) {
     // Send Slack/email alert
-    console.error('🚨 Schema drift detected!', results);
+    console.error("🚨 Schema drift detected!", results);
 
     // Create GitHub issue
     // await createGitHubIssue('Schema Drift Detected', formatDriftReport(results));
@@ -598,12 +599,12 @@ Every migration MUST include rollback logic. The migration framework already sup
 
 #### Rollback Types
 
-| Scenario | Rollback Approach | Automation Level |
-|----------|-------------------|------------------|
-| **Failed Migration** | Automatic (transaction rollback) | Fully automated |
-| **Failed Validation** | Automatic (execute rollback steps) | Fully automated |
-| **Production Issue** | Manual trigger (via script) | Semi-automated |
-| **Data Corruption** | Restore from backup + replay | Manual |
+| Scenario              | Rollback Approach                  | Automation Level |
+| --------------------- | ---------------------------------- | ---------------- |
+| **Failed Migration**  | Automatic (transaction rollback)   | Fully automated  |
+| **Failed Validation** | Automatic (execute rollback steps) | Fully automated  |
+| **Production Issue**  | Manual trigger (via script)        | Semi-automated   |
+| **Data Corruption**   | Restore from backup + replay       | Manual           |
 
 ### Example Migration with Rollback
 
@@ -611,19 +612,19 @@ Every migration MUST include rollback logic. The migration framework already sup
 // migrations/20251120_150000_add_user_preferences.ts
 
 export const migration: Migration = {
-  id: '20251120_150000_add_user_preferences',
-  name: 'Add user preferences table',
-  description: 'Create user_preferences table for personalization',
-  type: 'postgresql',
-  version: '2.1.0',
+  id: "20251120_150000_add_user_preferences",
+  name: "Add user preferences table",
+  description: "Create user_preferences table for personalization",
+  type: "postgresql",
+  version: "2.1.0",
   dependencies: [],
 
   phases: {
     expand: [
       {
-        id: 'create_preferences_table',
-        name: 'Create user_preferences table',
-        type: 'sql',
+        id: "create_preferences_table",
+        name: "Create user_preferences table",
+        type: "sql",
         content: `
           CREATE TABLE user_preferences (
             id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -648,9 +649,9 @@ export const migration: Migration = {
   rollback: {
     expand: [
       {
-        id: 'drop_preferences_table',
-        name: 'Drop user_preferences table',
-        type: 'sql',
+        id: "drop_preferences_table",
+        name: "Drop user_preferences table",
+        type: "sql",
         content: `
           DROP TABLE IF EXISTS user_preferences CASCADE;
         `,
@@ -661,8 +662,8 @@ export const migration: Migration = {
 
   validation: [
     {
-      name: 'verify_table_exists',
-      type: 'post',
+      name: "verify_table_exists",
+      type: "post",
       check: `sql:SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'user_preferences'`,
       expectedResult: { count: 1 },
       critical: true,
@@ -670,8 +671,8 @@ export const migration: Migration = {
   ],
 
   metadata: {
-    author: 'platform-team',
-    createdAt: new Date('2025-11-20'),
+    author: "platform-team",
+    createdAt: new Date("2025-11-20"),
     estimatedDuration: 30,
     breakingChange: false,
     tenantScoped: false,
@@ -717,7 +718,7 @@ async function canRollback(migrationId: string): Promise<boolean> {
   // Check 1: Migration has rollback steps defined
   const migration = await loadMigration(migrationId);
   if (!migration.rollback) {
-    console.error('No rollback steps defined for this migration');
+    console.error("No rollback steps defined for this migration");
     return false;
   }
 
@@ -731,14 +732,15 @@ async function canRollback(migrationId: string): Promise<boolean> {
   // Check 3: Backup exists
   const backupExists = await checkBackupExists(migrationId);
   if (!backupExists) {
-    console.warn('No backup found - rollback may result in data loss');
+    console.warn("No backup found - rollback may result in data loss");
     // return false; // Optionally enforce backup requirement
   }
 
   // Check 4: Not too old (optional constraint)
   const migrationAge = await getMigrationAge(migrationId);
-  if (migrationAge > 30) { // days
-    console.warn('Migration is over 30 days old - consider restore from backup instead');
+  if (migrationAge > 30) {
+    // days
+    console.warn("Migration is over 30 days old - consider restore from backup instead");
   }
 
   return true;
@@ -759,9 +761,9 @@ name: Migration Gate
 on:
   pull_request:
     paths:
-      - '**/migrations/**'
-      - 'server/src/migrations/**'
-      - 'db/**'
+      - "**/migrations/**"
+      - "server/src/migrations/**"
+      - "db/**"
 
 jobs:
   migration-checks:
@@ -842,7 +844,7 @@ name: Weekly Schema Validation
 
 on:
   schedule:
-    - cron: '0 2 * * 0'  # Sundays at 2 AM
+    - cron: "0 2 * * 0" # Sundays at 2 AM
   workflow_dispatch:
 
 jobs:
@@ -990,6 +992,7 @@ Before running migrations in production:
 If a migration causes issues in production:
 
 1. **Assess Impact**
+
    ```bash
    # Check error rate
    kubectl logs -l app=api -n production --tail=100
@@ -1003,6 +1006,7 @@ If a migration causes issues in production:
    - Fix forward if: Minor issues, rollback would cause data loss
 
 3. **Execute Rollback**
+
    ```bash
    # Enable maintenance mode
    ./scripts/enable-maintenance-mode.sh
@@ -1045,6 +1049,7 @@ If a migration causes issues in production:
   - [ ] Update documentation
 
 **Deliverables**:
+
 - Single source of truth for all migrations
 - Migration catalog with dependency graph
 - Updated developer documentation
@@ -1064,6 +1069,7 @@ If a migration causes issues in production:
   - [ ] Implement automated rollback testing
 
 **Deliverables**:
+
 - `scripts/create-migration.sh` tool
 - Schema drift detection in CI
 - Automated migration testing pipeline
@@ -1083,6 +1089,7 @@ If a migration causes issues in production:
   - [ ] Add automated rollback policies
 
 **Deliverables**:
+
 - Database versioning system
 - Breaking change detection
 - Migration governance policies
@@ -1102,6 +1109,7 @@ If a migration causes issues in production:
   - [ ] Create migration runbooks
 
 **Deliverables**:
+
 - Migration metrics dashboard
 - Automated alerts for schema drift
 - Comprehensive runbooks
@@ -1206,7 +1214,6 @@ ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
 
 ## Change Log
 
-| Date | Version | Author | Changes |
-|------|---------|--------|---------|
-| 2025-11-20 | 1.0 | Platform Team | Initial comprehensive strategy document |
-
+| Date       | Version | Author        | Changes                                 |
+| ---------- | ------- | ------------- | --------------------------------------- |
+| 2025-11-20 | 1.0     | Platform Team | Initial comprehensive strategy document |

@@ -1,15 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import {
-  Box,
-  Paper,
-  Typography,
-  IconButton,
-  Tooltip,
-  Button,
-  TextField,
-} from '@mui/material';
-import { Refresh, Timeline } from '@mui/icons-material';
-import { gql, useLazyQuery } from '@apollo/client';
+import React, { useEffect, useMemo, useState } from "react";
+import { Box, Paper, Typography, IconButton, Tooltip, Button, TextField } from "@mui/material";
+import { Refresh, Timeline } from "@mui/icons-material";
+import { gql, useLazyQuery } from "@apollo/client";
 
 const GEOINT_TS_QUERY = gql`
   query GeointTimeSeries($points: JSON!, $intervalMinutes: Int) {
@@ -17,13 +9,9 @@ const GEOINT_TS_QUERY = gql`
   }
 `;
 
-function GeointTimeSeriesPanel({
-  points = null,
-  intervalMinutes = 60,
-  onSelectBin,
-}) {
+function GeointTimeSeriesPanel({ points = null, intervalMinutes = 60, onSelectBin }) {
   const [loadTs, { data, loading }] = useLazyQuery(GEOINT_TS_QUERY);
-  const [pointsText, setPointsText] = useState('');
+  const [pointsText, setPointsText] = useState("");
 
   useEffect(() => {
     if (points && points.length) {
@@ -48,19 +36,15 @@ function GeointTimeSeriesPanel({
     const w = 320,
       h = 120,
       pad = 24;
-    if (!series.length)
-      return <Typography variant="caption">No data</Typography>;
+    if (!series.length) return <Typography variant="caption">No data</Typography>;
     const xs = series.map((d, i) => i);
     const ys = series.map((d) => d.averageSpeedKph || 0);
     const maxY = Math.max(1, ...ys);
     const dx = (w - pad * 2) / Math.max(1, xs.length - 1);
     const scaleY = (y) => h - pad - (y / maxY) * (h - pad * 2);
     const path = xs
-      .map(
-        (x, i) =>
-          `${i === 0 ? 'M' : 'L'} ${pad + dx * i} ${scaleY(ys[i]).toFixed(2)}`,
-      )
-      .join(' ');
+      .map((x, i) => `${i === 0 ? "M" : "L"} ${pad + dx * i} ${scaleY(ys[i]).toFixed(2)}`)
+      .join(" ");
     return (
       <svg width={w} height={h} role="img" aria-label="GEOINT time series">
         <rect x={0} y={0} width={w} height={h} fill="#fff" />
@@ -86,16 +70,13 @@ function GeointTimeSeriesPanel({
     <Paper elevation={3} sx={{ p: 1.5, width: 360 }}>
       <Box
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
           mb: 1,
         }}
       >
-        <Typography
-          variant="subtitle2"
-          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-        >
+        <Typography variant="subtitle2" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Timeline fontSize="small" /> GEOINT Time Series
         </Typography>
         <Tooltip title="Refresh">
@@ -105,7 +86,7 @@ function GeointTimeSeriesPanel({
               disabled={loading}
               onClick={() => {
                 try {
-                  const parsed = JSON.parse(pointsText || '[]');
+                  const parsed = JSON.parse(pointsText || "[]");
                   loadTs({ variables: { points: parsed, intervalMinutes } });
                 } catch {}
               }}
@@ -126,12 +107,12 @@ function GeointTimeSeriesPanel({
           onChange={(e) => setPointsText(e.target.value)}
           placeholder="Paste points JSON to analyze"
         />
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
           <Button
             size="small"
             onClick={() => {
               try {
-                const parsed = JSON.parse(pointsText || '[]');
+                const parsed = JSON.parse(pointsText || "[]");
                 loadTs({ variables: { points: parsed, intervalMinutes } });
               } catch {}
             }}

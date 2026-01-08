@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+import crypto from "node:crypto";
 
 export class IntegrationService {
   constructor() {
@@ -24,18 +24,18 @@ export class IntegrationService {
   }
 
   signWebhook(payload, secret) {
-    return crypto.createHmac('sha256', secret).update(payload).digest('hex');
+    return crypto.createHmac("sha256", secret).update(payload).digest("hex");
   }
 
   verifyWebhook(payload, secret, signature) {
     const expected = this.signWebhook(payload, secret);
-    return crypto.timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(signature, 'hex'));
+    return crypto.timingSafeEqual(Buffer.from(expected, "hex"), Buffer.from(signature, "hex"));
   }
 
   healthSummary(tenantId) {
     const integrations = this.integrations.get(tenantId) ?? [];
     return integrations.reduce((acc, integration) => {
-      acc[integration.id] = integration.health ?? 'healthy';
+      acc[integration.id] = integration.health ?? "healthy";
       return acc;
     }, {});
   }

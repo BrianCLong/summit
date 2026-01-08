@@ -2,9 +2,9 @@
  * Point-in-polygon and geometric query algorithms
  */
 
-import { GeoPoint } from '@intelgraph/geospatial';
-import { Position, Polygon, MultiPolygon } from 'geojson';
-import * as turf from '@turf/turf';
+import { GeoPoint } from "@intelgraph/geospatial";
+import { Position, Polygon, MultiPolygon } from "geojson";
+import * as turf from "@turf/turf";
 
 /**
  * Ray casting algorithm for point-in-polygon test
@@ -63,7 +63,10 @@ export function isPointInPolygon(point: GeoPoint, polygonCoords: Position[][]): 
 /**
  * Check if point is within any polygon in a MultiPolygon
  */
-export function isPointInMultiPolygon(point: GeoPoint, multiPolygonCoords: Position[][][]): boolean {
+export function isPointInMultiPolygon(
+  point: GeoPoint,
+  multiPolygonCoords: Position[][][]
+): boolean {
   return multiPolygonCoords.some((polygonCoords) => isPointInPolygon(point, polygonCoords));
 }
 
@@ -83,7 +86,7 @@ export function pointsWithinRadius(
   radiusMeters: number
 ): GeoPoint[] {
   const turfCenter = turf.point([center.longitude, center.latitude]);
-  const circle = turf.circle(turfCenter, radiusMeters / 1000, { units: 'kilometers' });
+  const circle = turf.circle(turfCenter, radiusMeters / 1000, { units: "kilometers" });
 
   return points.filter((point) => {
     const turfPoint = turf.point([point.longitude, point.latitude]);
@@ -104,7 +107,7 @@ export function polygonArea(polygonCoords: Position[][]): number {
  */
 export function polygonPerimeter(polygonCoords: Position[][]): number {
   const turfPolygon = turf.polygon(polygonCoords);
-  return turf.length(turf.polygonToLine(turfPolygon), { units: 'meters' });
+  return turf.length(turf.polygonToLine(turfPolygon), { units: "meters" });
 }
 
 /**
@@ -132,7 +135,7 @@ export function polygonIntersectionArea(polygon1: Position[][], polygon2: Positi
  */
 export function bufferPolygon(polygonCoords: Position[][], radiusMeters: number): Position[][] {
   const turfPolygon = turf.polygon(polygonCoords);
-  const buffered = turf.buffer(turfPolygon, radiusMeters / 1000, { units: 'kilometers' });
+  const buffered = turf.buffer(turfPolygon, radiusMeters / 1000, { units: "kilometers" });
   return buffered ? (buffered.geometry as Polygon).coordinates : polygonCoords;
 }
 

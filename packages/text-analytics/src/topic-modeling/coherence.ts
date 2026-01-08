@@ -2,7 +2,7 @@
  * Topic coherence optimization
  */
 
-import type { Topic } from '../types';
+import type { Topic } from "../types";
 
 export class CoherenceOptimizer {
   /**
@@ -15,11 +15,7 @@ export class CoherenceOptimizer {
 
     for (let i = 0; i < keywords.length - 1; i++) {
       for (let j = i + 1; j < keywords.length; j++) {
-        totalCoherence += this.pairwiseCoherence(
-          keywords[i],
-          keywords[j],
-          documents
-        );
+        totalCoherence += this.pairwiseCoherence(keywords[i], keywords[j], documents);
       }
     }
 
@@ -39,9 +35,15 @@ export class CoherenceOptimizer {
       const hasWord1 = doc.includes(word1);
       const hasWord2 = doc.includes(word2);
 
-      if (hasWord1 && hasWord2) {cooccurrence++;}
-      if (hasWord1) {word1Count++;}
-      if (hasWord2) {word2Count++;}
+      if (hasWord1 && hasWord2) {
+        cooccurrence++;
+      }
+      if (hasWord1) {
+        word1Count++;
+      }
+      if (hasWord2) {
+        word2Count++;
+      }
     }
 
     const denominator = Math.max(word1Count, word2Count);

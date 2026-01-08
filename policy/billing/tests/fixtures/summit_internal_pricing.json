@@ -2,7 +2,7 @@
   "before": {
     "prices": {
       "cpu_hour": 0.12,
-      "storage_gb": 0.20
+      "storage_gb": 0.2
     },
     "discounts": {
       "default": 0.05
@@ -23,7 +23,7 @@
     "prices": {
       "cpu_hour": 0.06,
       "storage_gb": 0.18,
-      "ai_pack": 0.90
+      "ai_pack": 0.9
     },
     "discounts": {
       "default": 0.15

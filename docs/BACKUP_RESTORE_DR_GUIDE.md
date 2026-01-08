@@ -58,13 +58,13 @@ The maximum acceptable downtime for Summit services. This represents the time fr
 
 #### RTO Breakdown by Phase
 
-| Phase | Duration | Activities |
-|-------|----------|------------|
-| Assessment & Preparation | 30 min | Damage assessment, backup identification, DR infrastructure verification |
-| Infrastructure Recovery | 90 min | Database restoration, service deployment, network configuration |
-| Service Validation | 60 min | Health checks, data integrity verification, smoke tests |
-| DNS & Traffic Cutover | 30 min | DNS updates, SSL verification, traffic routing |
-| Final Validation | 30 min | Golden path tests, demo stories, monitoring activation |
+| Phase                    | Duration | Activities                                                               |
+| ------------------------ | -------- | ------------------------------------------------------------------------ |
+| Assessment & Preparation | 30 min   | Damage assessment, backup identification, DR infrastructure verification |
+| Infrastructure Recovery  | 90 min   | Database restoration, service deployment, network configuration          |
+| Service Validation       | 60 min   | Health checks, data integrity verification, smoke tests                  |
+| DNS & Traffic Cutover    | 30 min   | DNS updates, SSL verification, traffic routing                           |
+| Final Validation         | 30 min   | Golden path tests, demo stories, monitoring activation                   |
 
 **Total**: 3.5 hours (30-minute buffer within 4-hour target)
 
@@ -84,13 +84,13 @@ The maximum acceptable data loss measured in time. Summit maintains backup sched
 
 ### RTO/RPO by Environment
 
-| Environment | RTO | RPO | Backup Frequency | Retention |
-|-------------|-----|-----|------------------|-----------|
-| Production | 4 hours | 15 minutes | Hourly incremental, Daily full | 30 days |
-| Staging | 8 hours | 1 hour | Daily | 14 days |
-| DR Rehearsal | 4 hours | 15 minutes | Same as production | 60 days |
-| Development | 24 hours | 4 hours | Daily | 7 days |
-| Testing | 24 hours | 4 hours | On-demand | 7 days |
+| Environment  | RTO      | RPO        | Backup Frequency               | Retention |
+| ------------ | -------- | ---------- | ------------------------------ | --------- |
+| Production   | 4 hours  | 15 minutes | Hourly incremental, Daily full | 30 days   |
+| Staging      | 8 hours  | 1 hour     | Daily                          | 14 days   |
+| DR Rehearsal | 4 hours  | 15 minutes | Same as production             | 60 days   |
+| Development  | 24 hours | 4 hours    | Daily                          | 7 days    |
+| Testing      | 24 hours | 4 hours    | On-demand                      | 7 days    |
 
 ---
 
@@ -106,6 +106,7 @@ Summit supports multiple backup set configurations optimized for different use c
 **Storage**: Local + S3
 
 **Components**:
+
 - ✅ Neo4j full database (dump format)
 - ✅ PostgreSQL full database (custom format)
 - ✅ TimescaleDB hypertables (events, temporal_patterns, analytics_traces)
@@ -121,6 +122,7 @@ Summit supports multiple backup set configurations optimized for different use c
 **Estimated Duration**: 30 minutes
 
 **Example**:
+
 ```bash
 ./scripts/backup-enhanced.sh --set=full
 ```
@@ -133,6 +135,7 @@ Summit supports multiple backup set configurations optimized for different use c
 **Storage**: Local only
 
 **Components**:
+
 - ✅ PostgreSQL core tables only (entities, investigations, users, runs, tasks, runbooks)
 - ✅ Neo4j core entities and critical relationships
 - ✅ Redis cache (excluding sessions and temporary data)
@@ -141,6 +144,7 @@ Summit supports multiple backup set configurations optimized for different use c
 **Estimated Duration**: 5 minutes
 
 **Example**:
+
 ```bash
 ./scripts/backup-enhanced.sh --set=minimal
 ```
@@ -153,6 +157,7 @@ Summit supports multiple backup set configurations optimized for different use c
 **Storage**: Local + S3
 
 **Components**:
+
 - ✅ PostgreSQL tenant data (filtered by tenant_id)
 - ✅ Neo4j tenant graph (filtered by tenant_id)
 - ✅ Tenant-specific configuration
@@ -164,6 +169,7 @@ Summit supports multiple backup set configurations optimized for different use c
 **Estimated Duration**: 3 minutes per tenant
 
 **Example**:
+
 ```bash
 TENANT_ID=customer-acme ./scripts/backup-enhanced.sh --set=tenant
 ```
@@ -176,6 +182,7 @@ TENANT_ID=customer-acme ./scripts/backup-enhanced.sh --set=tenant
 **Storage**: Local + S3
 
 **Components**:
+
 - ✅ PostgreSQL project data (investigation, runs, tasks, results)
 - ✅ Neo4j project graph (investigation entities and relationships)
 - ✅ Project artifacts (outputs, reports, attachments)
@@ -187,6 +194,7 @@ TENANT_ID=customer-acme ./scripts/backup-enhanced.sh --set=tenant
 **Estimated Duration**: 2 minutes per project
 
 **Example**:
+
 ```bash
 PROJECT_ID=investigation-2025-001 ./scripts/backup-enhanced.sh --set=project
 ```
@@ -199,6 +207,7 @@ PROJECT_ID=investigation-2025-001 ./scripts/backup-enhanced.sh --set=project
 **Storage**: Local + S3 + Git
 
 **Components**:
+
 - ✅ Configuration files (all docker-compose, .env files)
 - ✅ Secrets (encrypted)
 - ✅ OPA policies (security policies)
@@ -209,6 +218,7 @@ PROJECT_ID=investigation-2025-001 ./scripts/backup-enhanced.sh --set=project
 **Estimated Duration**: 1 minute
 
 **Example**:
+
 ```bash
 ./scripts/backup-enhanced.sh --set=config_only
 ```
@@ -221,6 +231,7 @@ PROJECT_ID=investigation-2025-001 ./scripts/backup-enhanced.sh --set=project
 **Storage**: S3 primary region + S3 DR region
 
 **Components**:
+
 - ✅ All components from Full System Backup
 - ✅ Kubernetes configurations (ConfigMaps, Secrets, Services, Deployments)
 - ✅ Infrastructure state (Terraform state files)
@@ -231,6 +242,7 @@ PROJECT_ID=investigation-2025-001 ./scripts/backup-enhanced.sh --set=project
 **Estimated Duration**: 45 minutes
 
 **Example**:
+
 ```bash
 S3_BUCKET=summit-dr-backups ./scripts/backup-enhanced.sh --set=disaster_recovery
 ```
@@ -251,11 +263,13 @@ S3_BUCKET=summit-dr-backups ./scripts/backup-enhanced.sh --set=disaster_recovery
 #### Step-by-Step: Full Backup
 
 1. **Navigate to project root**:
+
    ```bash
    cd /path/to/summit
    ```
 
 2. **Set environment variables** (optional):
+
    ```bash
    export BACKUP_BASE=./backups
    export S3_BUCKET=summit-backups-prod
@@ -263,11 +277,13 @@ S3_BUCKET=summit-dr-backups ./scripts/backup-enhanced.sh --set=disaster_recovery
    ```
 
 3. **Execute backup**:
+
    ```bash
    ./scripts/backup-enhanced.sh --set=full
    ```
 
 4. **Verify backup**:
+
    ```bash
    BACKUP_ID=$(ls -t backups/summit-backup-full-* | head -1 | xargs basename)
    ./scripts/restore-enhanced.sh "$BACKUP_ID" --mode=verify-only
@@ -281,12 +297,14 @@ S3_BUCKET=summit-dr-backups ./scripts/backup-enhanced.sh --set=disaster_recovery
 #### Step-by-Step: Tenant Backup
 
 1. **Identify tenant ID**:
+
    ```bash
    docker exec postgres psql -U intelgraph -d intelgraph_dev \
      -c "SELECT DISTINCT tenant_id FROM entities;"
    ```
 
 2. **Create tenant backup**:
+
    ```bash
    TENANT_ID=customer-acme ./scripts/backup-enhanced.sh --set=tenant
    ```
@@ -322,32 +340,33 @@ Add to `/etc/crontab` or user crontab:
 See `/home/user/summit/k8s/db/cron-backup.yaml` for PostgreSQL backups and `/home/user/summit/k8s/neo4j/cron-backup.yaml` for Neo4j backups.
 
 Example:
+
 ```yaml
 apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: summit-full-backup
 spec:
-  schedule: "0 2 * * *"  # Daily at 2 AM
+  schedule: "0 2 * * *" # Daily at 2 AM
   jobTemplate:
     spec:
       template:
         spec:
           containers:
-          - name: backup
-            image: summit/backup:latest
-            command:
-            - /bin/bash
-            - -c
-            - ./scripts/backup-enhanced.sh --set=full
-            env:
-            - name: S3_BUCKET
-              value: summit-backups-prod
-            - name: ENCRYPTION_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: encryption-key
+            - name: backup
+              image: summit/backup:latest
+              command:
+                - /bin/bash
+                - -c
+                - ./scripts/backup-enhanced.sh --set=full
+              env:
+                - name: S3_BUCKET
+                  value: summit-backups-prod
+                - name: ENCRYPTION_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: encryption-key
 ```
 
 ---
@@ -360,39 +379,44 @@ Summit's enhanced restore script supports different target environments with aut
 
 #### Restore Environments
 
-| Environment | Sanitization | Data Reduction | Use Case |
-|-------------|--------------|----------------|----------|
-| `production` | ❌ No | None | Production disaster recovery |
-| `staging` | ⚠️ Minimal | None | Pre-production testing |
-| `dr_rehearsal` | ❌ No | None | DR drill validation |
-| `dev` | ✅ Full | 10% | Development environments |
-| `test` | ✅ Full | 20% | Automated testing |
+| Environment    | Sanitization | Data Reduction | Use Case                     |
+| -------------- | ------------ | -------------- | ---------------------------- |
+| `production`   | ❌ No        | None           | Production disaster recovery |
+| `staging`      | ⚠️ Minimal   | None           | Pre-production testing       |
+| `dr_rehearsal` | ❌ No        | None           | DR drill validation          |
+| `dev`          | ✅ Full      | 10%            | Development environments     |
+| `test`         | ✅ Full      | 20%            | Automated testing            |
 
 ### Step-by-Step: Production Restore
 
 **CRITICAL**: This procedure stops all services and overwrites data. Only use during actual disasters.
 
 1. **Verify backup availability**:
+
    ```bash
    ls -lh backups/summit-backup-disaster_recovery-*
    ```
 
 2. **Identify target backup**:
+
    ```bash
    BACKUP_ID=summit-backup-disaster_recovery-20250120T020000Z
    ```
 
 3. **Verify backup integrity**:
+
    ```bash
    ./scripts/restore-enhanced.sh "$BACKUP_ID" --mode=verify-only
    ```
 
 4. **Execute restore** (with approval):
+
    ```bash
    ./scripts/restore-enhanced.sh "$BACKUP_ID" --env=production --mode=full
    ```
 
 5. **Verify restoration**:
+
    ```bash
    # Check databases
    docker exec postgres psql -U intelgraph -d intelgraph_dev -c "SELECT COUNT(*) FROM entities;"
@@ -401,6 +425,7 @@ Summit's enhanced restore script supports different target environments with aut
    ```
 
 6. **Run health checks**:
+
    ```bash
    curl -f http://localhost:4000/health
    ```
@@ -415,17 +440,20 @@ Summit's enhanced restore script supports different target environments with aut
 This automatically sanitizes data for safe development use.
 
 1. **Select recent backup**:
+
    ```bash
    BACKUP_ID=$(ls -t backups/summit-backup-full-* | head -1 | xargs basename)
    echo "Using backup: $BACKUP_ID"
    ```
 
 2. **Restore with sanitization**:
+
    ```bash
    ./scripts/restore-enhanced.sh "$BACKUP_ID" --env=dev
    ```
 
 3. **Verify sanitization**:
+
    ```bash
    # Check for sanitized emails
    docker exec postgres psql -U intelgraph -d intelgraph_dev \
@@ -443,6 +471,7 @@ This automatically sanitizes data for safe development use.
 Restore only specific components without affecting others.
 
 1. **Set selective restore flags**:
+
    ```bash
    export RESTORE_POSTGRES=true
    export RESTORE_NEO4J=false
@@ -476,6 +505,7 @@ For dev/test environments, Summit automatically sanitizes sensitive data to comp
 #### 1. PII (Personally Identifiable Information)
 
 **Users Table**:
+
 ```sql
 UPDATE users SET
     email = 'dev_' || id || '@example.com',
@@ -485,6 +515,7 @@ WHERE email NOT LIKE '%@example.com';
 ```
 
 **Entities Table**:
+
 ```sql
 UPDATE entities SET
     contact_email = 'entity_' || id || '@example.com',
@@ -495,6 +526,7 @@ WHERE contact_email IS NOT NULL;
 #### 2. Sensitive Data
 
 **Investigations**:
+
 ```sql
 UPDATE investigations SET
     classified_info = '[REDACTED FOR DEV/TEST]',
@@ -503,6 +535,7 @@ WHERE classified_info IS NOT NULL OR internal_notes IS NOT NULL;
 ```
 
 **Audit Logs**:
+
 ```sql
 UPDATE audit_logs SET
     user_ip = MD5(user_ip || 'dev_salt'),
@@ -513,6 +546,7 @@ WHERE user_ip IS NOT NULL;
 #### 3. Production Credentials
 
 **Configuration**:
+
 ```sql
 UPDATE configuration SET
     value = 'dev_test_key_' || name
@@ -522,6 +556,7 @@ WHERE name LIKE '%_KEY' OR name LIKE '%_SECRET' OR name LIKE '%_PASSWORD';
 #### 4. Financial Data
 
 **Billing**:
+
 ```sql
 UPDATE billing SET
     credit_card = '****-****-****-0000',
@@ -561,6 +596,7 @@ For development and testing environments, data volumes are reduced to improve pe
 - **Test Environment**: Retains 20% of non-critical data
 
 **Affected Tables**:
+
 - `audit_logs`: Keep last 30 days
 - `analytics_traces`: Keep sample based on reduction factor
 - `events`: Keep last 30 days
@@ -578,6 +614,7 @@ Summit includes comprehensive DR drill scenarios integrated with the chaos engin
 **Frequency**: Monthly
 
 **Phases**:
+
 1. Baseline Capture (15 min)
 2. Disaster Simulation (5 min) - Destroys all data volumes
 3. Recovery Initiation (10 min)
@@ -586,12 +623,14 @@ Summit includes comprehensive DR drill scenarios integrated with the chaos engin
 6. Cleanup (10 min)
 
 **Success Criteria**:
+
 - ✅ RTO < 4 hours
 - ✅ Data integrity 100%
 - ✅ Golden path tests 100% pass
 - ✅ Demo stories 100% pass
 
 **Execution**:
+
 ```bash
 ./RUNBOOKS/execute-dr-drill.sh scenario-1-total-data-loss
 ```
@@ -603,6 +642,7 @@ Summit includes comprehensive DR drill scenarios integrated with the chaos engin
 **Frequency**: Bi-weekly
 
 **Phases**:
+
 1. Corrupt Database (simulated)
 2. Detect and Respond
 3. Selective Restore (PostgreSQL only)
@@ -615,6 +655,7 @@ Summit includes comprehensive DR drill scenarios integrated with the chaos engin
 **Frequency**: Quarterly
 
 **Phases**:
+
 1. Primary Region Failure (simulated)
 2. DR Infrastructure Activation
 3. Data Restore in DR Region
@@ -629,6 +670,7 @@ Summit includes comprehensive DR drill scenarios integrated with the chaos engin
 **Frequency**: Weekly (automated via CI/CD)
 
 **Phases**:
+
 1. Select Recent Backup
 2. Integrity Check (checksums)
 3. Test Restore (dry run)
@@ -644,6 +686,7 @@ Summit includes comprehensive DR drill scenarios integrated with the chaos engin
 **Frequency**: On-demand
 
 **Phases**:
+
 1. Backup Tenant Data
 2. Simulate Tenant Data Loss
 3. Restore Tenant Data
@@ -656,6 +699,7 @@ Summit includes comprehensive DR drill scenarios integrated with the chaos engin
 **Frequency**: Monthly
 
 **Chaos Experiments**:
+
 - Network partition (postgres) - 5 min
 - Service degradation (neo4j, 50%) - 10 min
 - Data corruption (redis, 10%) - recovery via restore
@@ -695,6 +739,7 @@ Summit includes a comprehensive CI/CD workflow for automated backup and restore 
 #### Running Manually
 
 Via GitHub UI:
+
 1. Navigate to Actions → Backup & Restore Validation
 2. Click "Run workflow"
 3. Select backup_set: `minimal`, `full`, or `config_only`
@@ -702,6 +747,7 @@ Via GitHub UI:
 5. Click "Run workflow"
 
 Via GitHub CLI:
+
 ```bash
 gh workflow run backup-restore-validation.yml \
   -f backup_set=minimal \
@@ -711,6 +757,7 @@ gh workflow run backup-restore-validation.yml \
 ### Monitoring Backup Success
 
 **Prometheus Metrics**:
+
 - `backup_success_total`: Counter of successful backups
 - `backup_failure_total`: Counter of failed backups
 - `backup_duration_seconds`: Histogram of backup duration
@@ -719,9 +766,11 @@ gh workflow run backup-restore-validation.yml \
 - `restore_duration_seconds`: Histogram of restore duration
 
 **Grafana Dashboards**:
+
 - `/home/user/summit/ops/observability/grafana/dashboards/backup-monitoring.json`
 
 **Alerts**:
+
 - Backup failure rate > 2% in 24h window
 - Backup duration exceeds threshold (30 min for full, 5 min for minimal)
 - Backup size growth > 50% unexpectedly
@@ -734,13 +783,13 @@ gh workflow run backup-restore-validation.yml \
 
 ### Storage Requirements
 
-| Backup Set | Size | Retention | Daily Increment | Monthly Total |
-|------------|------|-----------|-----------------|---------------|
-| Full | 40 GB | 30 days | 40 GB | 1.2 TB |
-| Minimal | 3 GB | 7 days | 72 GB (hourly) | 630 GB |
-| Tenant | 500 MB | 14 days | 12 GB (per tenant) | Variable |
-| Config | 20 MB | 90 days | 120 MB | 5 GB |
-| DR Snapshot | 50 GB | 60 days | 200 GB (4x daily) | 3 TB |
+| Backup Set  | Size   | Retention | Daily Increment    | Monthly Total |
+| ----------- | ------ | --------- | ------------------ | ------------- |
+| Full        | 40 GB  | 30 days   | 40 GB              | 1.2 TB        |
+| Minimal     | 3 GB   | 7 days    | 72 GB (hourly)     | 630 GB        |
+| Tenant      | 500 MB | 14 days   | 12 GB (per tenant) | Variable      |
+| Config      | 20 MB  | 90 days   | 120 MB             | 5 GB          |
+| DR Snapshot | 50 GB  | 60 days   | 200 GB (4x daily)  | 3 TB          |
 
 **Total Storage Estimate**: ~5 TB (with overhead and multi-region replication)
 
@@ -759,6 +808,7 @@ Bucket: summit-backups-prod
 ```
 
 **Lifecycle Policy**:
+
 - Transition to STANDARD_IA after 30 days
 - Transition to GLACIER after 90 days
 - Delete after retention period + 30 days
@@ -795,7 +845,9 @@ Bucket: summit-backups-dr
 ### Daily Operations
 
 **Morning**:
+
 1. ✅ Verify overnight backups completed successfully
+
    ```bash
    ls -lh backups/summit-backup-full-$(date +%Y%m%d)*
    ```
@@ -809,8 +861,10 @@ Bucket: summit-backups-dr
    - Check for alerts
 
 **Weekly**:
+
 1. ✅ Execute Scenario 4: Automated Backup Validation (automated)
 2. ✅ Review backup storage usage
+
    ```bash
    du -sh backups/
    aws s3 ls s3://summit-backups-prod/ --recursive --human-readable --summarize
@@ -823,6 +877,7 @@ Bucket: summit-backups-dr
    ```
 
 **Monthly**:
+
 1. ✅ Execute Scenario 1: Total Data Loss DR Drill
 2. ✅ Execute Scenario 6: Chaos Engineering + DR Recovery
 3. ✅ Review and update DR documentation
@@ -830,6 +885,7 @@ Bucket: summit-backups-dr
 5. ✅ Review RTO/RPO compliance reports
 
 **Quarterly**:
+
 1. ✅ Execute Scenario 3: Multi-Region Failover Drill
 2. ✅ Review and test DR runbook procedures
 3. ✅ Update emergency contact information
@@ -841,12 +897,15 @@ Bucket: summit-backups-dr
 #### Backup Failure
 
 **Detection**:
+
 - Prometheus alert: `BackupFailed`
 - Email notification to ops team
 - Slack/webhook notification
 
 **Response**:
+
 1. Check backup logs:
+
    ```bash
    tail -f /var/log/summit-backup.log
    ```
@@ -854,6 +913,7 @@ Bucket: summit-backups-dr
 2. Identify failure cause (disk space, database connection, S3 access, etc.)
 
 3. Resolve issue and retry backup:
+
    ```bash
    ./scripts/backup-enhanced.sh --set=full
    ```
@@ -863,18 +923,22 @@ Bucket: summit-backups-dr
 #### Restore Failure
 
 **Detection**:
+
 - Manual restore command fails
 - DR drill validation fails
 
 **Response**:
+
 1. Check restore logs and error messages
 
 2. Verify backup integrity:
+
    ```bash
    ./scripts/restore-enhanced.sh "$BACKUP_ID" --mode=verify-only
    ```
 
 3. Try alternative backup:
+
    ```bash
    BACKUP_ID=$(ls -t backups/summit-backup-full-* | head -2 | tail -1 | xargs basename)
    ./scripts/restore-enhanced.sh "$BACKUP_ID" --env=dr_rehearsal
@@ -887,12 +951,15 @@ Bucket: summit-backups-dr
 #### Data Corruption Detected
 
 **Detection**:
+
 - Application errors
 - Data integrity checks fail
 - User reports
 
 **Response**:
+
 1. Immediately create backup of current state:
+
    ```bash
    ./scripts/backup-enhanced.sh --set=full
    ```
@@ -914,24 +981,29 @@ Bucket: summit-backups-dr
 #### Issue: Backup script fails with "disk space" error
 
 **Symptoms**:
+
 ```
 ❌ Backup failed
 tar: Cannot write: No space left on device
 ```
 
 **Resolution**:
+
 1. Check disk space:
+
    ```bash
    df -h
    ```
 
 2. Clean up old backups:
+
    ```bash
    # Remove backups older than 30 days
    find backups/ -name "summit-backup-*" -type d -mtime +30 -exec rm -rf {} \;
    ```
 
 3. Adjust `RETENTION_DAYS`:
+
    ```bash
    RETENTION_DAYS=7 ./scripts/backup-enhanced.sh --set=full
    ```
@@ -944,18 +1016,22 @@ tar: Cannot write: No space left on device
 #### Issue: Neo4j restore fails with "database already exists"
 
 **Symptoms**:
+
 ```
 ❌ Neo4j restore failed
 Error: database 'neo4j' already exists
 ```
 
 **Resolution**:
+
 1. Stop Neo4j:
+
    ```bash
    docker stop neo4j
    ```
 
 2. Remove existing data volume:
+
    ```bash
    docker volume rm summit_neo4j_data
    docker volume create summit_neo4j_data
@@ -969,18 +1045,22 @@ Error: database 'neo4j' already exists
 #### Issue: PostgreSQL restore fails with "permission denied"
 
 **Symptoms**:
+
 ```
 ❌ PostgreSQL restore failed
 pg_restore: [archiver] could not open input file: Permission denied
 ```
 
 **Resolution**:
+
 1. Check file permissions:
+
    ```bash
    ls -lh backups/$BACKUP_ID/postgres-full.dump
    ```
 
 2. Fix permissions:
+
    ```bash
    chmod 644 backups/$BACKUP_ID/postgres-full.dump
    ```
@@ -990,13 +1070,16 @@ pg_restore: [archiver] could not open input file: Permission denied
 #### Issue: Restore validation fails in CI/CD
 
 **Symptoms**:
+
 - GitHub Actions job fails
 - Restore validation report shows errors
 
 **Resolution**:
+
 1. Review job logs in GitHub Actions
 
 2. Run locally to debug:
+
    ```bash
    BACKUP_ID=$(ls -t backups/summit-backup-minimal-* | head -1 | xargs basename)
    ./scripts/restore-enhanced.sh "$BACKUP_ID" --env=test --dry-run
@@ -1009,16 +1092,20 @@ pg_restore: [archiver] could not open input file: Permission denied
 #### Issue: Data sanitization not applied
 
 **Symptoms**:
+
 - Production emails visible in dev environment
 - Production credentials present
 
 **Resolution**:
+
 1. Verify restore environment:
+
    ```bash
    echo $RESTORE_ENV  # Should be 'dev' or 'test'
    ```
 
 2. Force sanitization:
+
    ```bash
    ./scripts/restore-enhanced.sh "$BACKUP_ID" --env=dev --sanitize=true
    ```
@@ -1028,12 +1115,15 @@ pg_restore: [archiver] could not open input file: Permission denied
 #### Issue: S3 upload fails
 
 **Symptoms**:
+
 ```
 ⚠️ AWS CLI not available, skipping S3 upload
 ```
 
 **Resolution**:
+
 1. Install AWS CLI:
+
    ```bash
    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
    unzip awscliv2.zip
@@ -1041,11 +1131,13 @@ pg_restore: [archiver] could not open input file: Permission denied
    ```
 
 2. Configure AWS credentials:
+
    ```bash
    aws configure
    ```
 
 3. Test S3 access:
+
    ```bash
    aws s3 ls s3://summit-backups-prod/
    ```
@@ -1071,28 +1163,33 @@ pg_restore: [archiver] could not open input file: Permission denied
 ### Useful Commands
 
 #### List all backups
+
 ```bash
 ls -lht backups/
 ```
 
 #### Find backups by set type
+
 ```bash
 ls backups/ | grep "summit-backup-full"
 ls backups/ | grep "summit-backup-tenant"
 ```
 
 #### Get backup metadata
+
 ```bash
 BACKUP_ID=summit-backup-full-20250120T020000Z
 cat backups/$BACKUP_ID/backup-metadata.json | jq .
 ```
 
 #### Calculate backup size
+
 ```bash
 du -sh backups/*
 ```
 
 #### Check database row counts
+
 ```bash
 # PostgreSQL
 docker exec postgres psql -U intelgraph -d intelgraph_dev -c "SELECT COUNT(*) FROM entities;"
@@ -1102,6 +1199,7 @@ docker exec neo4j cypher-shell -u neo4j -p local_dev_pw "MATCH (n) RETURN COUNT(
 ```
 
 #### Test database connectivity
+
 ```bash
 docker exec postgres psql -U intelgraph -d intelgraph_dev -c "SELECT version();"
 docker exec neo4j cypher-shell -u neo4j -p local_dev_pw "RETURN 'OK';"
@@ -1116,6 +1214,7 @@ docker exec redis redis-cli ping
 **Security Team**: security@example.com
 
 **Escalation Path**:
+
 1. On-call engineer (PagerDuty)
 2. Senior platform engineer
 3. VP of Engineering

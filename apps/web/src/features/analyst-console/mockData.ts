@@ -132,7 +132,10 @@ export function generateMockEntities(count: number = 20): AnalystEntity[] {
     for (let i = 0; i < typeCount; i++) {
       id++
       const name = names[i % names.length]
-      const uniqueLabel = typeCount > names.length ? `${name} ${Math.floor(i / names.length) + 1}` : name
+      const uniqueLabel =
+        typeCount > names.length
+          ? `${name} ${Math.floor(i / names.length) + 1}`
+          : name
 
       entities.push({
         id: `entity-${id}`,
@@ -145,8 +148,12 @@ export function generateMockEntities(count: number = 20): AnalystEntity[] {
           category: type,
         },
         tags: Math.random() > 0.5 ? ['priority', 'verified'] : ['unverified'],
-        createdAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
-        updatedAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+        createdAt: new Date(
+          Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000
+        ).toISOString(),
+        updatedAt: new Date(
+          Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000
+        ).toISOString(),
       })
     }
   }
@@ -180,7 +187,9 @@ export function generateMockLinks(
       targetId: entities[targetIdx].id,
       type: linkType,
       weight: Math.random(),
-      timestamp: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+      timestamp: new Date(
+        Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000
+      ).toISOString(),
       confidence: 0.5 + Math.random() * 0.5,
       properties: {
         description: `${linkType} relationship`,
@@ -201,7 +210,8 @@ export function generateMockEvents(
   const events: AnalystEvent[] = []
 
   for (let i = 0; i < count; i++) {
-    const eventType = EVENT_TYPES[Math.floor(Math.random() * EVENT_TYPES.length)]
+    const eventType =
+      EVENT_TYPES[Math.floor(Math.random() * EVENT_TYPES.length)]
     const severity = SEVERITIES[Math.floor(Math.random() * SEVERITIES.length)]
 
     // Pick 1-3 random entities for this event
@@ -261,13 +271,16 @@ export function generateMockEvents(
     }
 
     const summaryOptions = summaries[eventType] || ['Event occurred']
-    const summary = summaryOptions[Math.floor(Math.random() * summaryOptions.length)]
+    const summary =
+      summaryOptions[Math.floor(Math.random() * summaryOptions.length)]
 
     events.push({
       id: `event-${i + 1}`,
       type: eventType,
       entityIds: involvedEntities.map(e => e.id),
-      timestamp: new Date(Date.now() - Math.random() * 14 * 24 * 60 * 60 * 1000).toISOString(),
+      timestamp: new Date(
+        Date.now() - Math.random() * 14 * 24 * 60 * 60 * 1000
+      ).toISOString(),
       durationMinutes: Math.floor(Math.random() * 120) + 5,
       summary,
       severity,
@@ -305,8 +318,12 @@ export function generateMockLocations(
         ? personEntities[Math.floor(Math.random() * personEntities.length)]
         : undefined
 
-    const firstSeen = new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000)
-    const lastSeen = new Date(firstSeen.getTime() + Math.random() * 7 * 24 * 60 * 60 * 1000)
+    const firstSeen = new Date(
+      Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000
+    )
+    const lastSeen = new Date(
+      firstSeen.getTime() + Math.random() * 7 * 24 * 60 * 60 * 1000
+    )
 
     locations.push({
       id: `location-${i + 1}`,

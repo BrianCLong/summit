@@ -46,9 +46,9 @@
 
 ```typescript
 // DON'T: This loads all pages on initial load
-import HomePage from '@/pages/HomePage'
-import ExplorePage from '@/pages/ExplorePage'
-import AlertsPage from '@/pages/AlertsPage'
+import HomePage from "@/pages/HomePage";
+import ExplorePage from "@/pages/ExplorePage";
+import AlertsPage from "@/pages/AlertsPage";
 ```
 
 **✅ Good**: Lazy load routes
@@ -130,9 +130,9 @@ function TimelineChart() {
 
 ```typescript
 // ✅ Best: Import only what you need
-import { scaleTime, scaleLinear } from 'd3-scale'
-import { axisBottom, axisLeft } from 'd3-axis'
-import { line } from 'd3-shape'
+import { scaleTime, scaleLinear } from "d3-scale";
+import { axisBottom, axisLeft } from "d3-axis";
+import { line } from "d3-shape";
 
 // Instead of entire D3 (~250KB), you're only loading ~30KB
 ```
@@ -306,12 +306,12 @@ If context updates frequently, split it into separate contexts:
 
 ```typescript
 // ❌ Bad: Single context with fast-changing and slow-changing data
-const AppContext = createContext({ user, theme, notifications })
+const AppContext = createContext({ user, theme, notifications });
 
 // ✅ Good: Separate contexts
-const UserContext = createContext(null) // Changes rarely
-const ThemeContext = createContext('light') // Changes rarely
-const NotificationsContext = createContext([]) // Changes frequently
+const UserContext = createContext(null); // Changes rarely
+const ThemeContext = createContext("light"); // Changes rarely
+const NotificationsContext = createContext([]); // Changes frequently
 
 // Now components can subscribe to only what they need
 ```
@@ -407,17 +407,17 @@ query GetEntityDetail($id: ID!) {
 
 ```typescript
 // ❌ Bad: Loading all entities at once
-const { data } = useQuery(GET_ALL_ENTITIES)
+const { data } = useQuery(GET_ALL_ENTITIES);
 
 // ✅ Good: Paginated query
 const { data, fetchMore } = useQuery(GET_ENTITIES, {
   variables: { first: 50, offset: 0 },
-})
+});
 
 function loadMore() {
   fetchMore({
     variables: { offset: data.entities.length },
-  })
+  });
 }
 ```
 
@@ -425,15 +425,15 @@ function loadMore() {
 
 ```typescript
 const { data } = useQuery(GET_ENTITIES, {
-  fetchPolicy: 'cache-first', // Use cache first, then network
-  nextFetchPolicy: 'cache-first', // Continue using cache
-})
+  fetchPolicy: "cache-first", // Use cache first, then network
+  nextFetchPolicy: "cache-first", // Continue using cache
+});
 
 // For frequently changing data
 const { data } = useQuery(GET_LIVE_METRICS, {
-  fetchPolicy: 'network-only', // Always fetch fresh data
+  fetchPolicy: "network-only", // Always fetch fresh data
   pollInterval: 30000, // Poll every 30 seconds
-})
+});
 ```
 
 ---
@@ -445,15 +445,15 @@ const { data } = useQuery(GET_LIVE_METRICS, {
 Our optimized `vite.config.js`:
 
 ```javascript
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import { visualizer } from 'rollup-plugin-visualizer'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import { visualizer } from "rollup-plugin-visualizer";
 
 export default defineConfig({
   plugins: [
     react(),
     visualizer({
-      filename: './dist/stats.html',
+      filename: "./dist/stats.html",
       open: false,
       gzipSize: true,
       brotliSize: true,
@@ -464,17 +464,17 @@ export default defineConfig({
       output: {
         manualChunks: {
           // Split vendor code for better caching
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'apollo-vendor': ['@apollo/client', 'graphql', 'graphql-ws'],
-          'mui-vendor': ['@mui/material', '@mui/icons-material'],
-          'graph-vendor': ['cytoscape', /* cytoscape plugins */],
-          'd3-vendor': ['d3'],
-          'map-vendor': ['leaflet', 'react-leaflet'],
+          "react-vendor": ["react", "react-dom", "react-router-dom"],
+          "apollo-vendor": ["@apollo/client", "graphql", "graphql-ws"],
+          "mui-vendor": ["@mui/material", "@mui/icons-material"],
+          "graph-vendor": ["cytoscape" /* cytoscape plugins */],
+          "d3-vendor": ["d3"],
+          "map-vendor": ["leaflet", "react-leaflet"],
         },
       },
     },
     chunkSizeWarningLimit: 1000,
-    minify: 'terser',
+    minify: "terser",
     terserOptions: {
       compress: {
         drop_console: true,
@@ -483,10 +483,10 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', '@apollo/client'],
-    exclude: ['cytoscape', 'd3', 'leaflet'], // Lazy loaded
+    include: ["react", "react-dom", "@apollo/client"],
+    exclude: ["cytoscape", "d3", "leaflet"], // Lazy loaded
   },
-})
+});
 ```
 
 ### Analyze Bundle
@@ -503,13 +503,13 @@ open dist/stats.html
 
 ```typescript
 // ❌ Bad: Imports entire library
-import _ from 'lodash'
-import * as d3 from 'd3'
+import _ from "lodash";
+import * as d3 from "d3";
 
 // ✅ Good: Import only what you need
-import debounce from 'lodash/debounce'
-import uniq from 'lodash/uniq'
-import { scaleLinear } from 'd3-scale'
+import debounce from "lodash/debounce";
+import uniq from "lodash/uniq";
+import { scaleLinear } from "d3-scale";
 ```
 
 ---
@@ -522,35 +522,35 @@ Add Web Vitals monitoring to track real user performance:
 
 ```typescript
 // src/lib/performance.ts
-import { onCLS, onFID, onFCP, onLCP, onTTFB } from 'web-vitals'
+import { onCLS, onFID, onFCP, onLCP, onTTFB } from "web-vitals";
 
 export function reportWebVitals() {
-  onCLS(console.log)
-  onFID(console.log)
-  onFCP(console.log)
-  onLCP(console.log)
-  onTTFB(console.log)
+  onCLS(console.log);
+  onFID(console.log);
+  onFCP(console.log);
+  onLCP(console.log);
+  onTTFB(console.log);
 }
 
 // In production, send to analytics
 export function reportWebVitalsToAnalytics() {
   function sendToAnalytics(metric) {
     // Send to your analytics service
-    fetch('/api/analytics', {
-      method: 'POST',
+    fetch("/api/analytics", {
+      method: "POST",
       body: JSON.stringify(metric),
-    })
+    });
   }
 
-  onCLS(sendToAnalytics)
-  onFID(sendToAnalytics)
-  onFCP(sendToAnalytics)
-  onLCP(sendToAnalytics)
-  onTTFB(sendToAnalytics)
+  onCLS(sendToAnalytics);
+  onFID(sendToAnalytics);
+  onFCP(sendToAnalytics);
+  onLCP(sendToAnalytics);
+  onTTFB(sendToAnalytics);
 }
 
 // In main.tsx or App.tsx
-reportWebVitals()
+reportWebVitals();
 ```
 
 ### React DevTools Profiler
@@ -672,25 +672,25 @@ function Component({ data }) {
 ```typescript
 // ❌ Bad: Destroys and recreates entire DOM
 useEffect(() => {
-  const svg = d3.select(svgRef.current)
-  svg.selectAll('*').remove() // ❌ Expensive!
+  const svg = d3.select(svgRef.current);
+  svg.selectAll("*").remove(); // ❌ Expensive!
 
   // Recreate everything...
-}, [data])
+}, [data]);
 
 // ✅ Good: Use D3's join pattern
 useEffect(() => {
-  const svg = d3.select(svgRef.current)
+  const svg = d3.select(svgRef.current);
 
   svg
-    .selectAll('circle')
+    .selectAll("circle")
     .data(data, (d) => d.id) // ✅ Key function
     .join(
-      (enter) => enter.append('circle').attr('r', 0),
-      (update) => update.attr('cx', (d) => d.x),
+      (enter) => enter.append("circle").attr("r", 0),
+      (update) => update.attr("cx", (d) => d.x),
       (exit) => exit.remove()
-    )
-}, [data])
+    );
+}, [data]);
 ```
 
 ---

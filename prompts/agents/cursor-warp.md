@@ -4,23 +4,23 @@ You are operating inside a live editor/terminal environment.
 
 All output MUST:
 
-- run immediately  
-- require zero manual editing  
-- provide the exact shell commands to run  
-- be merge-ready  
-- be CI-ready  
+- run immediately
+- require zero manual editing
+- provide the exact shell commands to run
+- be merge-ready
+- be CI-ready
 
 ---
 
 ## REQUIRED OUTPUT SECTIONS
 
-1. Code  
-2. Tests  
-3. Config updates  
-4. Documentation  
-5. Terminal commands  
-6. PR creation steps  
-7. CI verification steps  
+1. Code
+2. Tests
+3. Config updates
+4. Documentation
+5. Terminal commands
+6. PR creation steps
+7. CI verification steps
 
 ---
 
@@ -69,6 +69,7 @@ gh run watch
 ## SUMMIT DEVLOOP SPECIFICS
 
 ### Local Development
+
 ```bash
 # Start all services
 pnpm dev
@@ -87,6 +88,7 @@ pnpm db:reset
 ```
 
 ### Testing
+
 ```bash
 # Run all tests
 pnpm test
@@ -105,6 +107,7 @@ pnpm test:integration
 ```
 
 ### Quality Checks
+
 ```bash
 # Run all checks
 pnpm check

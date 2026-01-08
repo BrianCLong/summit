@@ -1,15 +1,12 @@
-import React from 'react';
-import { describe, expect, it, jest } from '@jest/globals';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { MaestroApp } from '../../maestro/MaestroApp';
+import React from "react";
+import { describe, expect, it, jest } from "@jest/globals";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { MaestroApp } from "../../maestro/MaestroApp";
 
-jest.mock('react-virtualized', async () => {
-  const actual =
-    await jest.importActual<typeof import('react-virtualized')>(
-      'react-virtualized',
-    );
+jest.mock("react-virtualized", async () => {
+  const actual = await jest.importActual<typeof import("react-virtualized")>("react-virtualized");
   return {
     ...actual,
     AutoSizer: ({
@@ -36,21 +33,21 @@ jest.mock('react-virtualized', async () => {
     }) => (
       <div data-testid="virtualized-list">
         {Array.from({ length: rowCount }).map((_, index) =>
-          rowRenderer({ index, key: `row-${index}`, style: { height: 90 } }),
+          rowRenderer({ index, key: `row-${index}`, style: { height: 90 } })
         )}
       </div>
     ),
-  } as typeof import('react-virtualized');
+  } as typeof import("react-virtualized");
 });
 
-describe('MaestroApp', () => {
-  it('renders dashboard overview with health stats', () => {
+describe("MaestroApp", () => {
+  it("renders dashboard overview with health stats", () => {
     render(
-      <MemoryRouter initialEntries={[{ pathname: '/' }]}>
+      <MemoryRouter initialEntries={[{ pathname: "/" }]}>
         <Routes>
           <Route path="/*" element={<MaestroApp />} />
         </Routes>
-      </MemoryRouter>,
+      </MemoryRouter>
     );
 
     expect(screen.getByText(/Dashboard/i)).toBeInTheDocument();
@@ -58,54 +55,48 @@ describe('MaestroApp', () => {
     expect(screen.getByText(/Policy Denials/)).toBeInTheDocument();
   });
 
-  it('filters pipelines with debounced search and updates query string', async () => {
+  it("filters pipelines with debounced search and updates query string", async () => {
     const user = userEvent.setup();
     render(
-      <MemoryRouter initialEntries={[{ pathname: '/pipelines' }]}>
+      <MemoryRouter initialEntries={[{ pathname: "/pipelines" }]}>
         <Routes>
           <Route path="/*" element={<MaestroApp />} />
         </Routes>
-      </MemoryRouter>,
+      </MemoryRouter>
     );
 
     const input = screen.getByLabelText(/Search/i);
     await user.clear(input);
-    await user.type(input, 'Pipeline 42');
+    await user.type(input, "Pipeline 42");
     await waitFor(() => {
-      expect(
-        screen.getByText(/Virtualized list of 1 pipelines/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/Virtualized list of 1 pipelines/i)).toBeInTheDocument();
     });
     expect(screen.getByText(/Pipeline 42/)).toBeInTheDocument();
   });
 
-  it('prompts for reason before opening artifacts and stores audit entry', async () => {
+  it("prompts for reason before opening artifacts and stores audit entry", async () => {
     const user = userEvent.setup();
     render(
-      <MemoryRouter initialEntries={[{ pathname: '/runs/run-1' }]}>
+      <MemoryRouter initialEntries={[{ pathname: "/runs/run-1" }]}>
         <Routes>
           <Route path="/*" element={<MaestroApp />} />
         </Routes>
-      </MemoryRouter>,
+      </MemoryRouter>
     );
 
-    const artifactsTab = screen.getByRole('button', { name: /Artifacts/i });
+    const artifactsTab = screen.getByRole("button", { name: /Artifacts/i });
     await user.click(artifactsTab);
     const modal = await screen.findByText(/Reason for access required/i);
     expect(modal).toBeInTheDocument();
 
     const reasonInput = screen.getByLabelText(/Reason/i);
-    await user.type(reasonInput, 'Investigating artifact integrity');
-    await user.click(screen.getByRole('button', { name: /Continue/i }));
+    await user.type(reasonInput, "Investigating artifact integrity");
+    await user.click(screen.getByRole("button", { name: /Continue/i }));
 
-    expect(
-      await screen.findByText(/Investigating artifact integrity/),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/Investigating artifact integrity/)).toBeInTheDocument();
 
-    await user.click(screen.getByRole('link', { name: /Admin/i }));
+    await user.click(screen.getByRole("link", { name: /Admin/i }));
     expect(await screen.findByText(/Access reasons/)).toBeInTheDocument();
-    expect(
-      screen.getByText(/Investigating artifact integrity/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Investigating artifact integrity/)).toBeInTheDocument();
   });
 });

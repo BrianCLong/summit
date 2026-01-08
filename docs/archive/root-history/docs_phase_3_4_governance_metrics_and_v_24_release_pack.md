@@ -125,7 +125,7 @@ flowchart TD
 name: Docs Freeze Gate
 on:
   pull_request:
-    branches: ['release/**']
+    branches: ["release/**"]
 jobs:
   gate:
     runs-on: ubuntu-latest
@@ -150,35 +150,34 @@ features:
     name: ZIP Export & Certification
     owners: [platform, security]
     docs:
-      howto: 'how-to/zip-export.md'
-      reference: 'reference/zip-export-spec.md'
+      howto: "how-to/zip-export.md"
+      reference: "reference/zip-export-spec.md"
       tutorial: null
   - id: coherence-ecosystem
     name: Global Coherence Ecosystem (v24)
     owners: [ml]
     docs:
-      howto: 'how-to/coherence/operate.md'
-      reference: 'reference/coherence/apis.md'
+      howto: "how-to/coherence/operate.md"
+      reference: "reference/coherence/apis.md"
 ```
 
 **`scripts/docs/verify-coverage.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const yaml = require('js-yaml');
+const fs = require("fs");
+const path = require("path");
+const yaml = require("js-yaml");
 
-const idx = yaml.load(fs.readFileSync('docs/_meta/features.yml', 'utf8'));
+const idx = yaml.load(fs.readFileSync("docs/_meta/features.yml", "utf8"));
 let missing = [];
 for (const f of idx.features) {
-  for (const k of ['howto', 'reference']) {
+  for (const k of ["howto", "reference"]) {
     const p = f.docs?.[k];
-    if (!p || !fs.existsSync(path.join('docs', p)))
-      missing.push(`${f.id}:${k}`);
+    if (!p || !fs.existsSync(path.join("docs", p))) missing.push(`${f.id}:${k}`);
   }
 }
 if (missing.length) {
-  console.error('Missing docs artifacts:', missing.join(', '));
+  console.error("Missing docs artifacts:", missing.join(", "));
   process.exit(1);
 }
 ```
@@ -208,15 +207,14 @@ if (missing.length) {
 **`scripts/docs/metrics.js`**
 
 ```js
-const fs = require('fs');
+const fs = require("fs");
 const metrics = {
   timestamp: new Date().toISOString(),
   brokenLinks: Number(process.env.LINK_FAILS || 0),
   a11y: Number(process.env.A11Y_FAILS || 0),
-  staleCount: JSON.parse(fs.readFileSync('docs-stale-report.json', 'utf8'))
-    .length,
+  staleCount: JSON.parse(fs.readFileSync("docs-stale-report.json", "utf8")).length,
 };
-fs.writeFileSync('docs-metrics.json', JSON.stringify(metrics, null, 2));
+fs.writeFileSync("docs-metrics.json", JSON.stringify(metrics, null, 2));
 ```
 
 **`.github/workflows/docs-metrics.yml`**
@@ -224,7 +222,7 @@ fs.writeFileSync('docs-metrics.json', JSON.stringify(metrics, null, 2));
 ```yaml
 name: Docs Metrics
 on:
-  schedule: [{ cron: '0 13 * * 1-5' }]
+  schedule: [{ cron: "0 13 * * 1-5" }]
   workflow_dispatch:
 jobs:
   metrics:
@@ -255,13 +253,13 @@ jobs:
 **`src/components/Feedback.tsx`**
 
 ```tsx
-import React, { useState } from 'react';
+import React, { useState } from "react";
 export default function Feedback() {
-  const [v, setV] = useState(null as null | 'up' | 'down');
+  const [v, setV] = useState(null as null | "up" | "down");
   const url = (title: string) =>
     `https://github.com/intelgraph/intelgraph/issues/new?title=Docs%20feedback:%20${encodeURIComponent(title)}&labels=docs-feedback`;
-  const t = (document?.title || 'Untitled').replace(' | IntelGraph Docs', '');
-  if (v === 'down') {
+  const t = (document?.title || "Untitled").replace(" | IntelGraph Docs", "");
+  if (v === "down") {
     return (
       <a className="button" href={url(t)} target="_blank">
         Open a feedback issue
@@ -271,10 +269,10 @@ export default function Feedback() {
   return (
     <div className="flex gap-2 items-center">
       <span>Was this helpful?</span>
-      <button onClick={() => setV('up')} className="button button--sm">
+      <button onClick={() => setV("up")} className="button button--sm">
         👍
       </button>
-      <button onClick={() => setV('down')} className="button button--sm">
+      <button onClick={() => setV("down")} className="button button--sm">
         👎
       </button>
     </div>
@@ -285,7 +283,7 @@ export default function Feedback() {
 **Usage** in MDX pages:
 
 ```mdx
-import Feedback from '@site/src/components/Feedback';
+import Feedback from "@site/src/components/Feedback";
 
 <Feedback />
 ```
@@ -298,9 +296,9 @@ import Feedback from '@site/src/components/Feedback';
 **`scripts/docs/run-snippets.js`**
 
 ````js
-const fs = require('fs');
-const path = require('path');
-const { spawnSync } = require('child_process');
+const fs = require("fs");
+const path = require("path");
+const { spawnSync } = require("child_process");
 const files = [];
 (function walk(d) {
   for (const f of fs.readdirSync(d)) {
@@ -308,22 +306,20 @@ const files = [];
     const s = fs.statSync(p);
     s.isDirectory() ? walk(p) : files.push(p);
   }
-})('docs');
+})("docs");
 let failed = 0;
 for (const f of files)
   if (/\.mdx?$/.test(f)) {
-    const src = fs.readFileSync(f, 'utf8');
-    const blocks = [
-      ...src.matchAll(/<!--\s*test:.*?-->[\s\S]*?```(\w+)[\s\S]*?```/g),
-    ];
+    const src = fs.readFileSync(f, "utf8");
+    const blocks = [...src.matchAll(/<!--\s*test:.*?-->[\s\S]*?```(\w+)[\s\S]*?```/g)];
     for (const b of blocks) {
       const lang = b[1];
       const code = b[0]
-        .split('```' + lang)[1]
-        .split('```')[0]
+        .split("```" + lang)[1]
+        .split("```")[0]
         .trim();
-      if (lang === 'bash' || lang === 'sh') {
-        const r = spawnSync('bash', ['-n'], { input: code, encoding: 'utf8' });
+      if (lang === "bash" || lang === "sh") {
+        const r = spawnSync("bash", ["-n"], { input: code, encoding: "utf8" });
         if (r.status !== 0) {
           console.error(f, r.stderr);
           failed++;
@@ -361,7 +357,7 @@ jobs:
           npm i -g @mermaid-js/mermaid-cli@10
           mmdc -i docs/diagrams/sample.mmd -o /tmp/out.svg || true
       - uses: timbru31/setup-java@v3
-        with: { java-version: '17' }
+        with: { java-version: "17" }
       - run: |
           curl -L https://github.com/plantuml/plantuml/releases/latest/download/plantuml.jar -o plantuml.jar
           java -jar plantuml.jar -version

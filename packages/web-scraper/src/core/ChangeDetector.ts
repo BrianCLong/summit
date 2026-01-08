@@ -2,8 +2,8 @@
  * Change Detector - Detects changes in web pages
  */
 
-import { createHash } from 'crypto';
-import type { ChangeDetection } from '../types/index.js';
+import { createHash } from "crypto";
+import type { ChangeDetection } from "../types/index.js";
 
 export class ChangeDetector {
   private checksums: Map<string, string> = new Map();
@@ -23,10 +23,10 @@ export class ChangeDetector {
 
       return {
         url,
-        previousChecksum: '',
+        previousChecksum: "",
         currentChecksum,
         changed: false,
-        changedAt: new Date()
+        changedAt: new Date(),
       };
     }
 
@@ -37,11 +37,11 @@ export class ChangeDetector {
       previousChecksum,
       currentChecksum,
       changed,
-      changedAt: new Date()
+      changedAt: new Date(),
     };
 
     if (changed) {
-      const previousText = this.previousContent.get(url) || '';
+      const previousText = this.previousContent.get(url) || "";
       result.diff = this.computeDiff(previousText, content);
 
       // Update stored values
@@ -56,7 +56,7 @@ export class ChangeDetector {
    * Compute checksum of content
    */
   private computeChecksum(content: string): string {
-    return createHash('sha256').update(content).digest('hex');
+    return createHash("sha256").update(content).digest("hex");
   }
 
   /**
@@ -66,8 +66,8 @@ export class ChangeDetector {
     oldContent: string,
     newContent: string
   ): { added: string[]; removed: string[]; modified: string[] } {
-    const oldLines = oldContent.split('\n');
-    const newLines = newContent.split('\n');
+    const oldLines = oldContent.split("\n");
+    const newLines = newContent.split("\n");
 
     const added: string[] = [];
     const removed: string[] = [];

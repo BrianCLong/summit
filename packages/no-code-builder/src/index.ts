@@ -3,9 +3,9 @@
  * Form builder, UI components, business logic configuration, and validation
  */
 
-import { EventEmitter } from 'events';
-import { v4 as uuidv4 } from 'uuid';
-import Ajv from 'ajv';
+import { EventEmitter } from "events";
+import { v4 as uuidv4 } from "uuid";
+import Ajv from "ajv";
 
 export interface FormDefinition {
   id: string;
@@ -38,26 +38,26 @@ export interface FormField {
 }
 
 export type FieldType =
-  | 'text'
-  | 'textarea'
-  | 'number'
-  | 'email'
-  | 'url'
-  | 'tel'
-  | 'date'
-  | 'time'
-  | 'datetime'
-  | 'checkbox'
-  | 'radio'
-  | 'select'
-  | 'multi-select'
-  | 'file'
-  | 'image'
-  | 'rating'
-  | 'slider'
-  | 'color'
-  | 'wysiwyg'
-  | 'custom';
+  | "text"
+  | "textarea"
+  | "number"
+  | "email"
+  | "url"
+  | "tel"
+  | "date"
+  | "time"
+  | "datetime"
+  | "checkbox"
+  | "radio"
+  | "select"
+  | "multi-select"
+  | "file"
+  | "image"
+  | "rating"
+  | "slider"
+  | "color"
+  | "wysiwyg"
+  | "custom";
 
 export interface FieldOption {
   label: string;
@@ -76,25 +76,28 @@ export interface FieldValidation {
   messages?: Record<string, string>;
 }
 
-export type ValidationFunction = (value: any, formData: Record<string, any>) => {
+export type ValidationFunction = (
+  value: any,
+  formData: Record<string, any>
+) => {
   valid: boolean;
   message?: string;
 };
 
 export interface ConditionalLogic {
   conditions: LogicCondition[];
-  action: 'show' | 'hide' | 'enable' | 'disable' | 'required';
-  operator: 'and' | 'or';
+  action: "show" | "hide" | "enable" | "disable" | "required";
+  operator: "and" | "or";
 }
 
 export interface LogicCondition {
   field: string;
-  operator: 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'contains' | 'empty';
+  operator: "eq" | "ne" | "gt" | "gte" | "lt" | "lte" | "contains" | "empty";
   value?: any;
 }
 
 export interface FormLayout {
-  type: 'single-column' | 'two-column' | 'three-column' | 'grid' | 'custom';
+  type: "single-column" | "two-column" | "three-column" | "grid" | "custom";
   sections?: FormSection[];
   responsive?: boolean;
 }
@@ -118,17 +121,17 @@ export interface ValidationRules {
 }
 
 export interface FormStyling {
-  theme?: 'light' | 'dark' | 'custom';
+  theme?: "light" | "dark" | "custom";
   primaryColor?: string;
   fontFamily?: string;
   customCSS?: string;
-  fieldSpacing?: 'compact' | 'normal' | 'relaxed';
+  fieldSpacing?: "compact" | "normal" | "relaxed";
 }
 
 export interface BusinessLogic {
   id: string;
-  type: 'calculation' | 'transformation' | 'workflow' | 'custom';
-  trigger: 'onchange' | 'onsubmit' | 'onload' | 'custom';
+  type: "calculation" | "transformation" | "workflow" | "custom";
+  trigger: "onchange" | "onsubmit" | "onload" | "custom";
   sourceFields?: string[];
   targetField?: string;
   expression?: string;
@@ -139,7 +142,7 @@ export interface FormSubmission {
   id: string;
   formId: string;
   data: Record<string, any>;
-  status: 'draft' | 'submitted' | 'approved' | 'rejected';
+  status: "draft" | "submitted" | "approved" | "rejected";
   submittedBy?: string;
   submittedAt?: Date;
   validationErrors?: ValidationError[];
@@ -164,7 +167,7 @@ export interface DataModel {
 
 export interface DataField {
   name: string;
-  type: 'string' | 'number' | 'boolean' | 'date' | 'object' | 'array';
+  type: "string" | "number" | "boolean" | "date" | "object" | "array";
   required: boolean;
   unique?: boolean;
   default?: any;
@@ -173,7 +176,7 @@ export interface DataField {
 
 export interface DataRelationship {
   name: string;
-  type: 'one-to-one' | 'one-to-many' | 'many-to-many';
+  type: "one-to-one" | "one-to-many" | "many-to-many";
   targetModel: string;
   foreignKey?: string;
 }
@@ -191,9 +194,7 @@ export class FormBuilder extends EventEmitter {
   /**
    * Create a new form definition
    */
-  createForm(
-    form: Omit<FormDefinition, 'id' | 'createdAt' | 'updatedAt'>,
-  ): FormDefinition {
+  createForm(form: Omit<FormDefinition, "id" | "createdAt" | "updatedAt">): FormDefinition {
     const id = uuidv4();
     const now = new Date();
 
@@ -207,20 +208,17 @@ export class FormBuilder extends EventEmitter {
     this.validateFormDefinition(formDefinition);
     this.forms.set(id, formDefinition);
 
-    this.emit('form.created', formDefinition);
+    this.emit("form.created", formDefinition);
     return formDefinition;
   }
 
   /**
    * Update an existing form definition
    */
-  updateForm(
-    id: string,
-    updates: Partial<FormDefinition>,
-  ): FormDefinition {
+  updateForm(id: string, updates: Partial<FormDefinition>): FormDefinition {
     const form = this.forms.get(id);
     if (!form) {
-      throw new Error('Form not found');
+      throw new Error("Form not found");
     }
 
     const updatedForm: FormDefinition = {
@@ -234,17 +232,17 @@ export class FormBuilder extends EventEmitter {
     this.validateFormDefinition(updatedForm);
     this.forms.set(id, updatedForm);
 
-    this.emit('form.updated', updatedForm);
+    this.emit("form.updated", updatedForm);
     return updatedForm;
   }
 
   /**
    * Add a field to a form
    */
-  addField(formId: string, field: Omit<FormField, 'id'>): FormField {
+  addField(formId: string, field: Omit<FormField, "id">): FormField {
     const form = this.forms.get(formId);
     if (!form) {
-      throw new Error('Form not found');
+      throw new Error("Form not found");
     }
 
     const fieldId = uuidv4();
@@ -256,7 +254,7 @@ export class FormBuilder extends EventEmitter {
     form.fields.push(newField);
     form.updatedAt = new Date();
 
-    this.emit('form.field.added', { form, field: newField });
+    this.emit("form.field.added", { form, field: newField });
     return newField;
   }
 
@@ -266,18 +264,18 @@ export class FormBuilder extends EventEmitter {
   removeField(formId: string, fieldId: string): void {
     const form = this.forms.get(formId);
     if (!form) {
-      throw new Error('Form not found');
+      throw new Error("Form not found");
     }
 
     const index = form.fields.findIndex((f) => f.id === fieldId);
     if (index === -1) {
-      throw new Error('Field not found');
+      throw new Error("Field not found");
     }
 
     form.fields.splice(index, 1);
     form.updatedAt = new Date();
 
-    this.emit('form.field.removed', { form, fieldId });
+    this.emit("form.field.removed", { form, fieldId });
   }
 
   /**
@@ -287,7 +285,7 @@ export class FormBuilder extends EventEmitter {
     // Check for duplicate field names
     const fieldNames = form.fields.map((f) => f.name);
     if (new Set(fieldNames).size !== fieldNames.length) {
-      throw new Error('Duplicate field names found');
+      throw new Error("Duplicate field names found");
     }
 
     // Validate conditional logic references
@@ -295,9 +293,7 @@ export class FormBuilder extends EventEmitter {
       if (field.conditional) {
         field.conditional.conditions.forEach((condition) => {
           if (!fieldNames.includes(condition.field)) {
-            throw new Error(
-              `Conditional logic references non-existent field: ${condition.field}`,
-            );
+            throw new Error(`Conditional logic references non-existent field: ${condition.field}`);
           }
         });
       }
@@ -307,15 +303,13 @@ export class FormBuilder extends EventEmitter {
     form.logic?.forEach((logic) => {
       logic.sourceFields?.forEach((fieldName) => {
         if (!fieldNames.includes(fieldName)) {
-          throw new Error(
-            `Business logic references non-existent field: ${fieldName}`,
-          );
+          throw new Error(`Business logic references non-existent field: ${fieldName}`);
         }
       });
 
       if (logic.targetField && !fieldNames.includes(logic.targetField)) {
         throw new Error(
-          `Business logic references non-existent target field: ${logic.targetField}`,
+          `Business logic references non-existent target field: ${logic.targetField}`
         );
       }
     });
@@ -326,14 +320,14 @@ export class FormBuilder extends EventEmitter {
    */
   validateSubmission(
     formId: string,
-    data: Record<string, any>,
+    data: Record<string, any>
   ): {
     valid: boolean;
     errors: ValidationError[];
   } {
     const form = this.forms.get(formId);
     if (!form) {
-      throw new Error('Form not found');
+      throw new Error("Form not found");
     }
 
     const errors: ValidationError[] = [];
@@ -343,11 +337,11 @@ export class FormBuilder extends EventEmitter {
       const value = data[field.name];
 
       // Check required fields
-      if (field.required && (value === undefined || value === null || value === '')) {
+      if (field.required && (value === undefined || value === null || value === "")) {
         errors.push({
           field: field.name,
           message: field.validation?.messages?.required || `${field.label} is required`,
-          type: 'required',
+          type: "required",
         });
         return;
       }
@@ -369,9 +363,9 @@ export class FormBuilder extends EventEmitter {
       form.validation.customRules.forEach((rule) => {
         if (!rule.rule(data)) {
           errors.push({
-            field: '__form__',
+            field: "__form__",
             message: rule.message,
-            type: 'custom',
+            type: "custom",
           });
         }
       });
@@ -385,9 +379,9 @@ export class FormBuilder extends EventEmitter {
       if (!valid && validate.errors) {
         validate.errors.forEach((error) => {
           errors.push({
-            field: error.instancePath.slice(1) || '__form__',
-            message: error.message || 'Validation error',
-            type: 'schema',
+            field: error.instancePath.slice(1) || "__form__",
+            message: error.message || "Validation error",
+            type: "schema",
           });
         });
       }
@@ -405,18 +399,18 @@ export class FormBuilder extends EventEmitter {
   private validateField(
     field: FormField,
     value: any,
-    formData: Record<string, any>,
+    formData: Record<string, any>
   ): ValidationError[] {
     const errors: ValidationError[] = [];
     const validation = field.validation!;
 
     // Min/max validation for numbers
-    if (field.type === 'number') {
+    if (field.type === "number") {
       if (validation.min !== undefined && value < validation.min) {
         errors.push({
           field: field.name,
           message: validation.messages?.min || `Must be at least ${validation.min}`,
-          type: 'min',
+          type: "min",
         });
       }
 
@@ -424,20 +418,19 @@ export class FormBuilder extends EventEmitter {
         errors.push({
           field: field.name,
           message: validation.messages?.max || `Must be at most ${validation.max}`,
-          type: 'max',
+          type: "max",
         });
       }
     }
 
     // Length validation for strings
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       if (validation.minLength !== undefined && value.length < validation.minLength) {
         errors.push({
           field: field.name,
           message:
-            validation.messages?.minLength ||
-            `Must be at least ${validation.minLength} characters`,
-          type: 'minLength',
+            validation.messages?.minLength || `Must be at least ${validation.minLength} characters`,
+          type: "minLength",
         });
       }
 
@@ -445,9 +438,8 @@ export class FormBuilder extends EventEmitter {
         errors.push({
           field: field.name,
           message:
-            validation.messages?.maxLength ||
-            `Must be at most ${validation.maxLength} characters`,
-          type: 'maxLength',
+            validation.messages?.maxLength || `Must be at most ${validation.maxLength} characters`,
+          type: "maxLength",
         });
       }
 
@@ -458,7 +450,7 @@ export class FormBuilder extends EventEmitter {
           errors.push({
             field: field.name,
             message: validation.messages?.pattern || `Invalid format`,
-            type: 'pattern',
+            type: "pattern",
           });
         }
       }
@@ -471,8 +463,8 @@ export class FormBuilder extends EventEmitter {
         if (!result.valid) {
           errors.push({
             field: field.name,
-            message: result.message || 'Validation failed',
-            type: 'custom',
+            message: result.message || "Validation failed",
+            type: "custom",
           });
         }
       });
@@ -484,14 +476,10 @@ export class FormBuilder extends EventEmitter {
   /**
    * Submit form data
    */
-  submitForm(
-    formId: string,
-    data: Record<string, any>,
-    submittedBy?: string,
-  ): FormSubmission {
+  submitForm(formId: string, data: Record<string, any>, submittedBy?: string): FormSubmission {
     const form = this.forms.get(formId);
     if (!form) {
-      throw new Error('Form not found');
+      throw new Error("Form not found");
     }
 
     // Apply business logic
@@ -505,7 +493,7 @@ export class FormBuilder extends EventEmitter {
       id: submissionId,
       formId,
       data: processedData,
-      status: validation.valid ? 'submitted' : 'draft',
+      status: validation.valid ? "submitted" : "draft",
       submittedBy,
       submittedAt: validation.valid ? new Date() : undefined,
       validationErrors: validation.errors,
@@ -517,17 +505,14 @@ export class FormBuilder extends EventEmitter {
     }
     this.submissions.get(formId)!.push(submission);
 
-    this.emit('form.submitted', submission);
+    this.emit("form.submitted", submission);
     return submission;
   }
 
   /**
    * Apply business logic to form data
    */
-  private applyBusinessLogic(
-    form: FormDefinition,
-    data: Record<string, any>,
-  ): Record<string, any> {
+  private applyBusinessLogic(form: FormDefinition, data: Record<string, any>): Record<string, any> {
     const processedData = { ...data };
 
     if (!form.logic) {
@@ -536,10 +521,10 @@ export class FormBuilder extends EventEmitter {
 
     // Apply logic in order
     form.logic
-      .filter((logic) => logic.trigger === 'onsubmit')
+      .filter((logic) => logic.trigger === "onsubmit")
       .forEach((logic) => {
         switch (logic.type) {
-          case 'calculation':
+          case "calculation":
             if (logic.expression && logic.targetField) {
               try {
                 // Simple expression evaluation (production would use a safe evaluator)
@@ -547,12 +532,12 @@ export class FormBuilder extends EventEmitter {
                 processedData[logic.targetField] = result;
               } catch (error) {
                 // Log error but don't fail submission
-                this.emit('logic.error', { logic, error });
+                this.emit("logic.error", { logic, error });
               }
             }
             break;
 
-          case 'transformation':
+          case "transformation":
             if (logic.customLogic) {
               try {
                 const result = logic.customLogic(processedData);
@@ -560,17 +545,17 @@ export class FormBuilder extends EventEmitter {
                   processedData[logic.targetField] = result;
                 }
               } catch (error) {
-                this.emit('logic.error', { logic, error });
+                this.emit("logic.error", { logic, error });
               }
             }
             break;
 
-          case 'custom':
+          case "custom":
             if (logic.customLogic) {
               try {
                 logic.customLogic(processedData);
               } catch (error) {
-                this.emit('logic.error', { logic, error });
+                this.emit("logic.error", { logic, error });
               }
             }
             break;
@@ -583,10 +568,7 @@ export class FormBuilder extends EventEmitter {
   /**
    * Evaluate a simple expression
    */
-  private evaluateExpression(
-    expression: string,
-    data: Record<string, any>,
-  ): any {
+  private evaluateExpression(expression: string, data: Record<string, any>): any {
     // Very simple expression evaluator
     // Production would use a proper expression parser
     try {
@@ -624,7 +606,7 @@ export class FormBuilder extends EventEmitter {
   exportToJsonSchema(formId: string): any {
     const form = this.forms.get(formId);
     if (!form) {
-      throw new Error('Form not found');
+      throw new Error("Form not found");
     }
 
     const properties: Record<string, any> = {};
@@ -638,39 +620,39 @@ export class FormBuilder extends EventEmitter {
 
       // Map field type to JSON schema type
       switch (field.type) {
-        case 'text':
-        case 'textarea':
-        case 'email':
-        case 'url':
-        case 'tel':
-          fieldSchema.type = 'string';
+        case "text":
+        case "textarea":
+        case "email":
+        case "url":
+        case "tel":
+          fieldSchema.type = "string";
           break;
-        case 'number':
-        case 'rating':
-        case 'slider':
-          fieldSchema.type = 'number';
+        case "number":
+        case "rating":
+        case "slider":
+          fieldSchema.type = "number";
           break;
-        case 'checkbox':
-          fieldSchema.type = 'boolean';
+        case "checkbox":
+          fieldSchema.type = "boolean";
           break;
-        case 'date':
-        case 'time':
-        case 'datetime':
-          fieldSchema.type = 'string';
+        case "date":
+        case "time":
+        case "datetime":
+          fieldSchema.type = "string";
           fieldSchema.format = field.type;
           break;
-        case 'select':
-        case 'radio':
-          fieldSchema.type = 'string';
+        case "select":
+        case "radio":
+          fieldSchema.type = "string";
           if (field.options) {
             fieldSchema.enum = field.options.map((o) => o.value);
           }
           break;
-        case 'multi-select':
-          fieldSchema.type = 'array';
+        case "multi-select":
+          fieldSchema.type = "array";
           if (field.options) {
             fieldSchema.items = {
-              type: 'string',
+              type: "string",
               enum: field.options.map((o) => o.value),
             };
           }
@@ -708,8 +690,8 @@ export class FormBuilder extends EventEmitter {
     });
 
     return {
-      $schema: 'http://json-schema.org/draft-07/schema#',
-      type: 'object',
+      $schema: "http://json-schema.org/draft-07/schema#",
+      type: "object",
       title: form.name,
       description: form.description,
       properties,
@@ -724,7 +706,7 @@ export class FormBuilder extends EventEmitter {
 export class DataModelBuilder extends EventEmitter {
   private models = new Map<string, DataModel>();
 
-  createModel(model: Omit<DataModel, 'id'>): DataModel {
+  createModel(model: Omit<DataModel, "id">): DataModel {
     const id = uuidv4();
     const dataModel: DataModel = {
       ...model,
@@ -732,7 +714,7 @@ export class DataModelBuilder extends EventEmitter {
     };
 
     this.models.set(id, dataModel);
-    this.emit('model.created', dataModel);
+    this.emit("model.created", dataModel);
     return dataModel;
   }
 

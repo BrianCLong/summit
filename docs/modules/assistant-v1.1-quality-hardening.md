@@ -1,9 +1,9 @@
 ---
 name: Assistant v1.1 — Quality Hardening
 about: Track mutation testing, k6 perf budgets, and flaky test scrub
-title: 'Assistant v1.1: Quality Hardening'
-labels: ['release: v1.1', 'theme: quality', 'area: ci', 'area: testing']
-milestone: 'Assistant v1.1'
+title: "Assistant v1.1: Quality Hardening"
+labels: ["release: v1.1", "theme: quality", "area: ci", "area: testing"]
+milestone: "Assistant v1.1"
 ---
 
 ## Scope

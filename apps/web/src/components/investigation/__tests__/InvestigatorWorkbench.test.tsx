@@ -11,24 +11,26 @@ vi.mock('@/graphs/GraphCanvas', () => {
       React.useImperativeHandle(ref, () => ({
         exportAsPNG: vi.fn().mockResolvedValue(new Blob()),
         exportAsSVG: vi.fn().mockReturnValue('<svg>...</svg>'),
-        exportAsJSON: vi.fn().mockReturnValue('{}')
+        exportAsJSON: vi.fn().mockReturnValue('{}'),
       }))
 
       return (
         <div
-           data-testid="graph-canvas"
-           onDrop={(e) => {
-             // Simulate drop logic
-             const type = 'PERSON' // Simplified for test
-             onNodeDrop(type, 100, 100)
-           }}
+          data-testid="graph-canvas"
+          onDrop={e => {
+            // Simulate drop logic
+            const type = 'PERSON' // Simplified for test
+            onNodeDrop(type, 100, 100)
+          }}
         >
           {entities.map((e: any) => (
-            <div key={e.id} data-testid={`node-${e.id}`}>{e.name}</div>
+            <div key={e.id} data-testid={`node-${e.id}`}>
+              {e.name}
+            </div>
           ))}
         </div>
       )
-    })
+    }),
   }
 })
 
@@ -38,9 +40,9 @@ vi.mock('@/components/ui/slider', () => ({
     <input
       type="range"
       data-testid="timeline-slider"
-      onChange={(e) => onValueChange([parseInt(e.target.value), 100])}
+      onChange={e => onValueChange([parseInt(e.target.value), 100])}
     />
-  )
+  ),
 }))
 
 describe('InvestigatorWorkbench', () => {
@@ -81,9 +83,9 @@ describe('InvestigatorWorkbench', () => {
   })
 
   it('renders export buttons', () => {
-      render(<InvestigatorWorkbench />)
-      expect(screen.getByText('Export PNG')).toBeDefined()
-      expect(screen.getByText('Export SVG')).toBeDefined()
-      expect(screen.getByText('Export JSON')).toBeDefined()
+    render(<InvestigatorWorkbench />)
+    expect(screen.getByText('Export PNG')).toBeDefined()
+    expect(screen.getByText('Export SVG')).toBeDefined()
+    expect(screen.getByText('Export JSON')).toBeDefined()
   })
 })

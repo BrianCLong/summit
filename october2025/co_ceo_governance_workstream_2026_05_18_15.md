@@ -81,10 +81,7 @@ export function TenantSwitcher({
   onSelect: (t: string) => void;
 }) {
   return (
-    <select
-      className="p-2 rounded-2xl shadow"
-      onChange={(e) => onSelect(e.target.value)}
-    >
+    <select className="p-2 rounded-2xl shadow" onChange={(e) => onSelect(e.target.value)}>
       {tenants.map((t) => (
         <option key={t}>{t}</option>
       ))}
@@ -111,24 +108,21 @@ allow_field {
 
 ```js
 #!/usr/bin/env node
-import fs from 'fs';
-import { spawnSync as sh } from 'child_process';
+import fs from "fs";
+import { spawnSync as sh } from "child_process";
 const csv = fs
-  .readFileSync(process.argv[2] || 'tenants.csv', 'utf8')
+  .readFileSync(process.argv[2] || "tenants.csv", "utf8")
   .trim()
   .split(/\r?\n/);
 for (const line of csv) {
-  const [tenant, webhook] = line.split(',');
-  console.log('Onboarding', tenant);
-  sh('npm', ['create', 'trust-portal', tenant], { stdio: 'inherit' });
-  sh('curl', ['-fsS', '-X', 'POST', webhook, '-d', '{"ping":true}'], {
-    stdio: 'inherit',
+  const [tenant, webhook] = line.split(",");
+  console.log("Onboarding", tenant);
+  sh("npm", ["create", "trust-portal", tenant], { stdio: "inherit" });
+  sh("curl", ["-fsS", "-X", "POST", webhook, "-d", '{"ping":true}'], {
+    stdio: "inherit",
   });
   // emit telemetry row
-  fs.appendFileSync(
-    'onboarding.log',
-    `${new Date().toISOString()},${tenant},ok\n`,
-  );
+  fs.appendFileSync("onboarding.log", `${new Date().toISOString()},${tenant},ok\n`);
 }
 ```
 
@@ -146,10 +140,10 @@ for (const line of csv) {
 **Path:** `tools/board/midq2.mjs`
 
 ```js
-import fs from 'fs';
-const m = JSON.parse(fs.readFileSync('metrics/summary.json', 'utf8'));
+import fs from "fs";
+const m = JSON.parse(fs.readFileSync("metrics/summary.json", "utf8"));
 const pdf = `# Board — Mid Q2 2026\n\n- North Star: ${m.north_star}\n- Evidence coverage: ${m.evidence_coverage}%\n- Uptime: ${m.uptime}\n- API p95: ${m.p95} ms\n- Partners: ${m.partners}\n- SLSA L3 repos: ${m.slsa_l3}\n- Revenue (MTD): $${m.revenue_mtd}\n\n## Links\n- Disclosure Portal: ${m.portal_url}\n- Latest tag: ${m.latest_tag}\n- Ledger hash: ${m.ledger_hash}\n`;
-fs.writeFileSync('board-mid-Q2-2026.md', pdf);
+fs.writeFileSync("board-mid-Q2-2026.md", pdf);
 ```
 
 **CI step:** render to PDF and attach to release.
@@ -172,8 +166,7 @@ fs.writeFileSync('board-mid-Q2-2026.md', pdf);
 
 ```yaml
 name: cache-node
-runs:
-  { using: 'composite', steps: [{ shell:'bash', run:'echo using pnpm cache' }] }
+runs: { using: "composite", steps: [{ shell:'bash', run:'echo using pnpm cache' }] }
 ```
 
 Integrate `actions/cache@v4` for pnpm store; parallelize OSV/Trivy with job matrix; gate only on combined status.

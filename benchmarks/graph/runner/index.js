@@ -8,67 +8,66 @@
  *   node runner/index.js --help
  */
 
-import neo4j from 'neo4j-driver';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import yargs from 'yargs';
-import { hideBin } from 'yargs/helpers';
-import pino from 'pino';
-import { generateDataset, generateCypherStatements } from '../fixtures/dataset-generator.js';
-import { getScenarios } from '../scenarios/index.js';
+import neo4j from "neo4j-driver";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
+import pino from "pino";
+import { generateDataset, generateCypherStatements } from "../fixtures/dataset-generator.js";
+import { getScenarios } from "../scenarios/index.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const logger = pino({ name: 'graph-benchmark', level: 'info' });
+const logger = pino({ name: "graph-benchmark", level: "info" });
 
 // Parse CLI arguments
 const argv = yargs(hideBin(process.argv))
-  .option('size', {
-    describe: 'Dataset size(s) to benchmark',
-    type: 'string',
-    default: 'small',
-    choices: ['small', 'medium', 'large', 'xl', 'all']
+  .option("size", {
+    describe: "Dataset size(s) to benchmark",
+    type: "string",
+    default: "small",
+    choices: ["small", "medium", "large", "xl", "all"],
   })
-  .option('scenarios', {
-    describe: 'Scenario group to run',
-    type: 'string',
-    default: 'all',
-    choices: ['quick', 'ci', 'all']
+  .option("scenarios", {
+    describe: "Scenario group to run",
+    type: "string",
+    default: "all",
+    choices: ["quick", "ci", "all"],
   })
-  .option('iterations', {
-    describe: 'Number of iterations per query',
-    type: 'number',
-    default: 100
+  .option("iterations", {
+    describe: "Number of iterations per query",
+    type: "number",
+    default: 100,
   })
-  .option('warmup', {
-    describe: 'Number of warmup iterations',
-    type: 'number',
-    default: 10
+  .option("warmup", {
+    describe: "Number of warmup iterations",
+    type: "number",
+    default: 10,
   })
-  .option('budget-check', {
-    describe: 'Check against performance budgets and fail if exceeded',
-    type: 'boolean',
-    default: false
+  .option("budget-check", {
+    describe: "Check against performance budgets and fail if exceeded",
+    type: "boolean",
+    default: false,
   })
-  .option('neo4j-uri', {
-    describe: 'Neo4j connection URI',
-    type: 'string',
-    default: 'bolt://localhost:7687'
+  .option("neo4j-uri", {
+    describe: "Neo4j connection URI",
+    type: "string",
+    default: "bolt://localhost:7687",
   })
-  .option('neo4j-user', {
-    describe: 'Neo4j username',
-    type: 'string',
-    default: 'neo4j'
+  .option("neo4j-user", {
+    describe: "Neo4j username",
+    type: "string",
+    default: "neo4j",
   })
-  .option('neo4j-password', {
-    describe: 'Neo4j password',
-    type: 'string',
-    default: 'testtest1'
+  .option("neo4j-password", {
+    describe: "Neo4j password",
+    type: "string",
+    default: "testtest1",
   })
-  .help()
-  .argv;
+  .help().argv;
 
 class BenchmarkRunner {
   constructor(config) {
@@ -81,15 +80,15 @@ class BenchmarkRunner {
           sizes: config.sizes,
           scenarios: config.scenarioMode,
           iterations: config.iterations,
-          warmup: config.warmup
+          warmup: config.warmup,
         },
         environment: {
           neo4jUri: config.neo4jUri,
           nodeVersion: process.version,
-          platform: process.platform
-        }
+          platform: process.platform,
+        },
       },
-      benchmarks: []
+      benchmarks: [],
     };
   }
 
@@ -100,25 +99,27 @@ class BenchmarkRunner {
       neo4j.auth.basic(this.config.neo4jUser, this.config.neo4jPassword),
       {
         maxConnectionPoolSize: 50,
-        connectionAcquisitionTimeout: 60000
+        connectionAcquisitionTimeout: 60000,
       }
     );
 
     // Verify connection
     await this.driver.verifyConnectivity();
-    logger.info('Connected to Neo4j successfully');
+    logger.info("Connected to Neo4j successfully");
   }
 
   async disconnect() {
     if (this.driver) {
       await this.driver.close();
-      logger.info('Disconnected from Neo4j');
+      logger.info("Disconnected from Neo4j");
     }
   }
 
   async loadDataset(dataset) {
     const session = this.driver.session();
-    logger.info(`Loading dataset: ${dataset.metadata.size} (${dataset.metadata.nodeCount} nodes, ${dataset.metadata.edgeCount} edges)`);
+    logger.info(
+      `Loading dataset: ${dataset.metadata.size} (${dataset.metadata.nodeCount} nodes, ${dataset.metadata.edgeCount} edges)`
+    );
 
     try {
       const statements = generateCypherStatements(dataset);
@@ -150,7 +151,7 @@ class BenchmarkRunner {
       const scenarioResults = {
         scenario: scenario.name,
         description: scenario.description,
-        queries: []
+        queries: [],
       };
 
       // Run each query in the scenario
@@ -189,7 +190,7 @@ class BenchmarkRunner {
         const memUsageAfter = process.memoryUsage();
         const memDelta = {
           heapUsed: memUsageAfter.heapUsed - memUsageBefore.heapUsed,
-          external: memUsageAfter.external - memUsageBefore.external
+          external: memUsageAfter.external - memUsageBefore.external,
         };
 
         // Calculate statistics
@@ -201,10 +202,12 @@ class BenchmarkRunner {
           name: queryDef.name,
           iterations: this.config.iterations,
           errorCount,
-          ...stats
+          ...stats,
         });
 
-        logger.info(`    p50: ${stats.p50.toFixed(2)}ms, p95: ${stats.p95.toFixed(2)}ms, p99: ${stats.p99.toFixed(2)}ms, errors: ${errorCount}`);
+        logger.info(
+          `    p50: ${stats.p50.toFixed(2)}ms, p95: ${stats.p95.toFixed(2)}ms, p99: ${stats.p99.toFixed(2)}ms, errors: ${errorCount}`
+        );
       }
 
       return scenarioResults;
@@ -224,13 +227,13 @@ class BenchmarkRunner {
     const stddev = Math.sqrt(variance);
 
     return {
-      p50: sorted[Math.floor(0.50 * sorted.length)],
+      p50: sorted[Math.floor(0.5 * sorted.length)],
       p95: sorted[Math.floor(0.95 * sorted.length)],
       p99: sorted[Math.floor(0.99 * sorted.length)],
       min: sorted[0],
       max: sorted[sorted.length - 1],
       mean,
-      stddev
+      stddev,
     };
   }
 
@@ -238,9 +241,9 @@ class BenchmarkRunner {
     const scenarios = getScenarios(this.config.scenarioMode);
 
     for (const size of this.config.sizes) {
-      logger.info(`\n${'='.repeat(60)}`);
+      logger.info(`\n${"=".repeat(60)}`);
       logger.info(`Benchmarking dataset size: ${size}`);
-      logger.info('='.repeat(60));
+      logger.info("=".repeat(60));
 
       // Generate and load dataset
       const dataset = generateDataset(size, `bench-${size}`);
@@ -249,7 +252,7 @@ class BenchmarkRunner {
       const sizeResults = {
         size,
         dataset: dataset.metadata,
-        scenarios: []
+        scenarios: [],
       };
 
       // Run all scenarios
@@ -263,9 +266,9 @@ class BenchmarkRunner {
   }
 
   checkBudgets(budgets) {
-    logger.info('\n' + '='.repeat(60));
-    logger.info('Checking Performance Budgets');
-    logger.info('='.repeat(60));
+    logger.info("\n" + "=".repeat(60));
+    logger.info("Checking Performance Budgets");
+    logger.info("=".repeat(60));
 
     let violations = [];
 
@@ -282,14 +285,14 @@ class BenchmarkRunner {
 
           // Check each threshold
           const checks = [
-            { metric: 'p50', actual: query.p50, threshold: budget.thresholds.p50 },
-            { metric: 'p95', actual: query.p95, threshold: budget.thresholds.p95 },
-            { metric: 'p99', actual: query.p99, threshold: budget.thresholds.p99 }
+            { metric: "p50", actual: query.p50, threshold: budget.thresholds.p50 },
+            { metric: "p95", actual: query.p95, threshold: budget.thresholds.p95 },
+            { metric: "p99", actual: query.p99, threshold: budget.thresholds.p99 },
           ];
 
           for (const check of checks) {
             const exceeded = check.actual > check.threshold;
-            const status = exceeded ? '❌ FAIL' : '✅ PASS';
+            const status = exceeded ? "❌ FAIL" : "✅ PASS";
             const msg = `  ${status} ${benchmark.size}/${query.name}/${check.metric}: ${check.actual.toFixed(2)}ms (budget: ${check.threshold}ms)`;
 
             if (exceeded) {
@@ -301,7 +304,7 @@ class BenchmarkRunner {
                   metric: check.metric,
                   actual: check.actual,
                   threshold: check.threshold,
-                  critical: true
+                  critical: true,
                 });
               }
             } else {
@@ -314,32 +317,32 @@ class BenchmarkRunner {
 
     this.results.budgetCheck = {
       passed: violations.length === 0,
-      violations
+      violations,
     };
 
     if (violations.length > 0) {
       logger.error(`\n❌ Budget check FAILED: ${violations.length} critical violations`);
       return false;
     } else {
-      logger.info('\n✅ Budget check PASSED: All queries within budgets');
+      logger.info("\n✅ Budget check PASSED: All queries within budgets");
       return true;
     }
   }
 
   async saveResults() {
-    const reportsDir = path.join(__dirname, '..', 'reports');
+    const reportsDir = path.join(__dirname, "..", "reports");
     if (!fs.existsSync(reportsDir)) {
       fs.mkdirSync(reportsDir, { recursive: true });
     }
 
-    const timestamp = new Date().toISOString().replace(/:/g, '-').split('.')[0];
+    const timestamp = new Date().toISOString().replace(/:/g, "-").split(".")[0];
     const jsonPath = path.join(reportsDir, `benchmark-${timestamp}.json`);
 
     fs.writeFileSync(jsonPath, JSON.stringify(this.results, null, 2));
     logger.info(`\nResults saved to: ${jsonPath}`);
 
     // Also save as latest.json for easy access
-    const latestPath = path.join(reportsDir, 'latest.json');
+    const latestPath = path.join(reportsDir, "latest.json");
     fs.writeFileSync(latestPath, JSON.stringify(this.results, null, 2));
 
     return jsonPath;
@@ -347,19 +350,17 @@ class BenchmarkRunner {
 }
 
 async function main() {
-  const sizes = argv.size === 'all'
-    ? ['small', 'medium', 'large', 'xl']
-    : argv.size.split(',');
+  const sizes = argv.size === "all" ? ["small", "medium", "large", "xl"] : argv.size.split(",");
 
   const config = {
     sizes,
     scenarioMode: argv.scenarios,
     iterations: argv.iterations,
     warmup: argv.warmup,
-    neo4jUri: argv['neo4j-uri'],
-    neo4jUser: argv['neo4j-user'],
-    neo4jPassword: argv['neo4j-password'],
-    budgetCheck: argv['budget-check']
+    neo4jUri: argv["neo4j-uri"],
+    neo4jUser: argv["neo4j-user"],
+    neo4jPassword: argv["neo4j-password"],
+    budgetCheck: argv["budget-check"],
   };
 
   const runner = new BenchmarkRunner(config);
@@ -371,8 +372,8 @@ async function main() {
 
     // Check budgets if requested
     if (config.budgetCheck) {
-      const budgetsPath = path.join(__dirname, '..', 'config', 'budgets.json');
-      const budgets = JSON.parse(fs.readFileSync(budgetsPath, 'utf8'));
+      const budgetsPath = path.join(__dirname, "..", "config", "budgets.json");
+      const budgets = JSON.parse(fs.readFileSync(budgetsPath, "utf8"));
       const passed = runner.checkBudgets(budgets);
 
       if (!passed) {
@@ -380,10 +381,10 @@ async function main() {
       }
     }
 
-    logger.info('\n✅ Benchmark completed successfully');
+    logger.info("\n✅ Benchmark completed successfully");
     logger.info(`\nTo generate a report, run: npm run report`);
   } catch (error) {
-    logger.error('Benchmark failed:', error);
+    logger.error("Benchmark failed:", error);
     process.exit(1);
   } finally {
     await runner.disconnect();

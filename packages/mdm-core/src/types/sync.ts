@@ -18,11 +18,11 @@ export interface SyncConfiguration {
   metadata: SyncMetadata;
 }
 
-export type SyncType = 'real_time' | 'batch' | 'scheduled' | 'event_driven' | 'hybrid';
+export type SyncType = "real_time" | "batch" | "scheduled" | "event_driven" | "hybrid";
 
-export type SyncDirection = 'unidirectional' | 'bidirectional' | 'multi_directional';
+export type SyncDirection = "unidirectional" | "bidirectional" | "multi_directional";
 
-export type SyncStatus = 'active' | 'paused' | 'stopped' | 'error' | 'configuring';
+export type SyncStatus = "active" | "paused" | "stopped" | "error" | "configuring";
 
 export interface SyncSource {
   id: string;
@@ -35,13 +35,7 @@ export interface SyncSource {
   readOnly: boolean;
 }
 
-export type SourceType =
-  | 'database'
-  | 'api'
-  | 'file'
-  | 'stream'
-  | 'message_queue'
-  | 'custom';
+export type SourceType = "database" | "api" | "file" | "stream" | "message_queue" | "custom";
 
 export interface ConnectionConfig {
   protocol: string;
@@ -68,22 +62,32 @@ export interface SyncTransformation {
 }
 
 export type SyncTransformationType =
-  | 'mapping'
-  | 'conversion'
-  | 'calculation'
-  | 'concatenation'
-  | 'split'
-  | 'lookup'
-  | 'custom';
+  | "mapping"
+  | "conversion"
+  | "calculation"
+  | "concatenation"
+  | "split"
+  | "lookup"
+  | "custom";
 
 export interface DataFilter {
   field: string;
   operator: FilterOperator;
   value: unknown;
-  logicalOperator?: 'AND' | 'OR';
+  logicalOperator?: "AND" | "OR";
 }
 
-export type FilterOperator = 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'in' | 'not_in' | 'contains' | 'starts_with';
+export type FilterOperator =
+  | "eq"
+  | "ne"
+  | "gt"
+  | "gte"
+  | "lt"
+  | "lte"
+  | "in"
+  | "not_in"
+  | "contains"
+  | "starts_with";
 
 export interface SyncTarget {
   id: string;
@@ -94,22 +98,22 @@ export interface SyncTarget {
   writeMode: WriteMode;
 }
 
-export type TargetType = 'database' | 'api' | 'file' | 'message_queue' | 'custom';
+export type TargetType = "database" | "api" | "file" | "message_queue" | "custom";
 
-export type WriteMode = 'insert' | 'update' | 'upsert' | 'delete' | 'merge';
+export type WriteMode = "insert" | "update" | "upsert" | "delete" | "merge";
 
 export interface SyncSchedule {
   scheduleType: ScheduleType;
   cronExpression?: string;
   interval?: number;
-  intervalUnit?: 'seconds' | 'minutes' | 'hours' | 'days';
+  intervalUnit?: "seconds" | "minutes" | "hours" | "days";
   startTime?: Date;
   endTime?: Date;
   timezone?: string;
   enabled: boolean;
 }
 
-export type ScheduleType = 'cron' | 'interval' | 'event_based' | 'manual';
+export type ScheduleType = "cron" | "interval" | "event_based" | "manual";
 
 export interface ConflictResolutionStrategy {
   strategy: ConflictStrategy;
@@ -120,12 +124,12 @@ export interface ConflictResolutionStrategy {
 }
 
 export type ConflictStrategy =
-  | 'source_priority'
-  | 'target_wins'
-  | 'most_recent'
-  | 'highest_quality'
-  | 'manual_resolution'
-  | 'custom';
+  | "source_priority"
+  | "target_wins"
+  | "most_recent"
+  | "highest_quality"
+  | "manual_resolution"
+  | "custom";
 
 export interface PriorityRule {
   sourceId: string;
@@ -171,7 +175,7 @@ export interface SyncJob {
   statistics: SyncStatistics;
 }
 
-export type SyncJobStatus = 'queued' | 'running' | 'completed' | 'failed' | 'cancelled' | 'partial';
+export type SyncJobStatus = "queued" | "running" | "completed" | "failed" | "cancelled" | "partial";
 
 export interface SyncError {
   recordId?: string;
@@ -197,11 +201,11 @@ export interface SyncConflict {
 }
 
 export type ConflictType =
-  | 'value_mismatch'
-  | 'concurrent_update'
-  | 'delete_conflict'
-  | 'version_conflict'
-  | 'schema_mismatch';
+  | "value_mismatch"
+  | "concurrent_update"
+  | "delete_conflict"
+  | "version_conflict"
+  | "schema_mismatch";
 
 export interface SyncConflictResolution {
   strategy: string;
@@ -231,7 +235,7 @@ export interface DeltaChange {
   checksum?: string;
 }
 
-export type SyncChangeType = 'insert' | 'update' | 'delete' | 'merge';
+export type SyncChangeType = "insert" | "update" | "delete" | "merge";
 
 export interface SyncFieldChange {
   fieldName: string;
@@ -244,7 +248,7 @@ export interface PublishSubscribeConfig {
   topic: string;
   publishers: Publisher[];
   subscribers: Subscriber[];
-  messageFormat: 'json' | 'xml' | 'avro' | 'protobuf' | 'custom';
+  messageFormat: "json" | "xml" | "avro" | "protobuf" | "custom";
   qos: QualityOfService;
 }
 
@@ -262,10 +266,10 @@ export interface Subscriber {
   targetSystem: string;
   eventTypes: string[];
   filterCriteria?: Record<string, unknown>;
-  deliveryMode: 'push' | 'pull';
+  deliveryMode: "push" | "pull";
 }
 
-export type QualityOfService = 'at_most_once' | 'at_least_once' | 'exactly_once';
+export type QualityOfService = "at_most_once" | "at_least_once" | "exactly_once";
 
 export interface SyncMonitor {
   configId: string;
@@ -277,11 +281,11 @@ export interface SyncMonitor {
   metrics: MonitoringMetrics;
 }
 
-export type HealthStatus = 'healthy' | 'degraded' | 'unhealthy' | 'unknown';
+export type HealthStatus = "healthy" | "degraded" | "unhealthy" | "unknown";
 
 export interface SyncAlert {
   id: string;
-  severity: 'critical' | 'warning' | 'info';
+  severity: "critical" | "warning" | "info";
   alertType: string;
   message: string;
   timestamp: Date;

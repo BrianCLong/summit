@@ -1,4 +1,4 @@
-import { ZERO_SPEND_OPTIMIZATIONS, buildMemoCacheKey } from 'common-types';
+import { ZERO_SPEND_OPTIMIZATIONS, buildMemoCacheKey } from "common-types";
 
 const EFFECTS = {
   [ZERO_SPEND_OPTIMIZATIONS.KV_CACHE]: {

@@ -17,6 +17,7 @@ This document summarizes the implementation of the **Agentic Mesh Evaluation & A
 **Purpose**: TypeScript SDK providing type definitions, validators, and utilities.
 
 **Key Components**:
+
 - ✅ Comprehensive TypeScript types for all evaluation concepts
 - ✅ Zod validators for runtime type checking
 - ✅ Utility functions for scoring, aggregation, formatting
@@ -24,6 +25,7 @@ This document summarizes the implementation of the **Agentic Mesh Evaluation & A
 - ✅ Export-ready API
 
 **Files**:
+
 ```
 packages/mesh-eval-sdk/
 ├── src/
@@ -37,8 +39,9 @@ packages/mesh-eval-sdk/
 ```
 
 **Usage**:
+
 ```typescript
-import { EvalScenario, validateScenario, aggregateScores } from '@intelgraph/mesh-eval-sdk';
+import { EvalScenario, validateScenario, aggregateScores } from "@intelgraph/mesh-eval-sdk";
 ```
 
 ---
@@ -48,6 +51,7 @@ import { EvalScenario, validateScenario, aggregateScores } from '@intelgraph/mes
 **Purpose**: REST API for managing evaluation scenarios with PostgreSQL storage.
 
 **Key Features**:
+
 - ✅ CRUD operations for scenarios
 - ✅ Filtering and search (by type, tags, difficulty, creator)
 - ✅ Pagination and sorting
@@ -56,6 +60,7 @@ import { EvalScenario, validateScenario, aggregateScores } from '@intelgraph/mes
 - ✅ Database migrations
 
 **API Endpoints**:
+
 ```
 POST   /scenarios              # Create scenario
 GET    /scenarios              # List scenarios (with filters)
@@ -68,6 +73,7 @@ GET    /health                 # Health check
 ```
 
 **Files**:
+
 ```
 services/scenario-registry/
 ├── src/
@@ -81,6 +87,7 @@ services/scenario-registry/
 ```
 
 **Quick Start**:
+
 ```bash
 cd services/scenario-registry
 pnpm db:migrate
@@ -94,18 +101,21 @@ pnpm dev
 **Purpose**: Pluggable framework for evaluating agent outputs using multiple strategies.
 
 **Scoring Strategies**:
+
 - ✅ **Rule-Based**: Assertions, regex, exact match
 - ✅ **LLM-Judged**: Use judge models for subjective evaluation
 - ✅ **Policy-Based**: Policy compliance metrics
 - ✅ **Hybrid**: Combine multiple strategies with weighted averaging
 
 **Key Features**:
+
 - Composable scorer architecture
 - Support for multi-dimensional scoring
 - Confidence calculations
 - Extensible for custom scorers
 
 **Files**:
+
 ```
 services/scoring-engine/
 ├── src/
@@ -116,8 +126,9 @@ services/scoring-engine/
 ```
 
 **Usage**:
+
 ```typescript
-import { ScoringEngine } from '@intelgraph/scoring-engine';
+import { ScoringEngine } from "@intelgraph/scoring-engine";
 
 const engine = new ScoringEngine(modelClient);
 const score = await engine.score({
@@ -134,6 +145,7 @@ const score = await engine.score({
 **Purpose**: High-quality example scenarios covering diverse evaluation needs.
 
 **Scenarios Created**:
+
 1. ✅ **Code Transformation** (`code-001-simple-refactor.yaml`)
    - Refactor nested conditionals to early returns
    - Hybrid scoring (rule-based + LLM judge)
@@ -162,6 +174,7 @@ const score = await engine.score({
    - **Critical**: Any compliance with injection = failure
 
 **Scenario Coverage**:
+
 - ✅ Code quality and refactoring
 - ✅ Incident investigation and debugging
 - ✅ Security and data protection
@@ -173,6 +186,7 @@ const score = await engine.score({
 ### 5. Documentation
 
 **Architecture Documentation** (`docs/agentic-mesh/20-eval-architecture.md`):
+
 - Complete system architecture
 - Component descriptions
 - Data models
@@ -181,6 +195,7 @@ const score = await engine.score({
 - Observability recommendations
 
 **Getting Started Guide** (`docs/agentic-mesh/29-eval-getting-started.md`):
+
 - Quick start instructions
 - Scenario creation guide
 - Running evaluations
@@ -217,18 +232,21 @@ const score = await engine.score({
 ## What's Next (Pending Implementation)
 
 ### Phase 2: Integration & Orchestration
+
 - [ ] **Eval Runner Service**: Orchestrate evaluation runs
 - [ ] **CLI Tool**: Command-line interface for eval operations
 - [ ] **Baseline Storage**: Database and API for baseline management
 - [ ] **CI/CD Integration**: GitHub Actions workflow
 
 ### Phase 3: Intelligence & Auto-Improvement
+
 - [ ] **Self-Play Coordinator**: Multi-agent self-play for stress testing
 - [ ] **Curriculum Engine**: Adaptive scenario generation
 - [ ] **Feedback Optimizer**: Convert insights into routing/policy updates
 - [ ] **Proposal Workflow**: Human-in-the-loop approval system
 
 ### Phase 4: Observability & Production Hardening
+
 - [ ] **Metrics Exporter**: Prometheus/OpenTelemetry integration
 - [ ] **Grafana Dashboards**: Visualization of eval metrics
 - [ ] **Alerting Rules**: Regression detection alerts
@@ -240,26 +258,31 @@ const score = await engine.score({
 ## Key Design Decisions
 
 ### 1. TypeScript-First with Runtime Validation
+
 - Strong typing for developer experience
 - Zod validators for runtime safety
 - Gradual strictness migration path
 
 ### 2. Pluggable Scoring Architecture
+
 - Multiple scoring strategies (rule, LLM, policy, hybrid)
 - Composable scorer design
 - Easy to extend with custom scorers
 
 ### 3. PostgreSQL for Flexible Storage
+
 - JSONB for scenario flexibility
 - Strong indexing for performance
 - Standard SQL for queries and filtering
 
 ### 4. YAML for Scenario Definition
+
 - Human-readable and editable
 - Version control friendly
 - Easy to review in PRs
 
 ### 5. Production-Grade from Day One
+
 - Health checks and observability hooks
 - Structured logging (Pino)
 - Error handling and validation
@@ -273,37 +296,41 @@ const score = await engine.score({
 ### Creating a Scenario
 
 ```typescript
-import { EvalScenario } from '@intelgraph/mesh-eval-sdk';
+import { EvalScenario } from "@intelgraph/mesh-eval-sdk";
 
 const scenario: EvalScenario = {
-  id: 'sc-my-scenario-001',
-  version: '1.0.0',
-  type: 'custom',
-  name: 'My Custom Scenario',
-  description: 'Test agent ability to...',
-  tags: ['custom', 'testing'],
-  inputs: [{
-    type: 'text',
-    content: 'Agent prompt here...',
-  }],
-  constraints: [{
-    type: 'time_limit',
-    value: 60000,
-    strict: true,
-  }],
+  id: "sc-my-scenario-001",
+  version: "1.0.0",
+  type: "custom",
+  name: "My Custom Scenario",
+  description: "Test agent ability to...",
+  tags: ["custom", "testing"],
+  inputs: [
+    {
+      type: "text",
+      content: "Agent prompt here...",
+    },
+  ],
+  constraints: [
+    {
+      type: "time_limit",
+      value: 60000,
+      strict: true,
+    },
+  ],
   scoringStrategy: {
-    method: 'llm_judged',
+    method: "llm_judged",
     llmJudge: {
-      model: 'claude-sonnet-4',
-      prompt: 'Evaluate on...',
-      dimensions: ['quality', 'completeness'],
+      model: "claude-sonnet-4",
+      prompt: "Evaluate on...",
+      dimensions: ["quality", "completeness"],
     },
   },
-  difficulty: 'medium',
+  difficulty: "medium",
   estimatedCost: 0.05,
   estimatedDuration: 10000,
   createdAt: new Date(),
-  createdBy: 'user',
+  createdBy: "user",
   updatedAt: new Date(),
 };
 ```
@@ -311,7 +338,7 @@ const scenario: EvalScenario = {
 ### Scoring an Output
 
 ```typescript
-import { ScoringEngine } from '@intelgraph/scoring-engine';
+import { ScoringEngine } from "@intelgraph/scoring-engine";
 
 const engine = new ScoringEngine();
 
@@ -329,13 +356,13 @@ console.log(`Rationale: ${score.rationale}`);
 ### Comparing to Baseline
 
 ```typescript
-import { compareToBaseline } from '@intelgraph/mesh-eval-sdk';
+import { compareToBaseline } from "@intelgraph/mesh-eval-sdk";
 
 const comparison = compareToBaseline(evalRun, baseline);
 
 if (comparison.regressions.length > 0) {
-  console.error('REGRESSIONS DETECTED:');
-  comparison.regressions.forEach(r => {
+  console.error("REGRESSIONS DETECTED:");
+  comparison.regressions.forEach((r) => {
     console.error(`  ${r.subject}: ${r.metric} = ${r.current} (was ${r.baseline})`);
   });
   process.exit(1);
@@ -382,11 +409,13 @@ CREATE INDEX idx_scenarios_created_at ON eval_scenarios(created_at DESC);
 ## Testing Strategy
 
 ### Current State
+
 - ✅ Type definitions with comprehensive JSDoc
 - ✅ Runtime validators with Zod
 - ✅ Example scenarios demonstrating all features
 
 ### Planned Tests
+
 - [ ] Unit tests for SDK utilities
 - [ ] Integration tests for Scenario Registry
 - [ ] Scoring engine tests with mock outputs
@@ -398,12 +427,14 @@ CREATE INDEX idx_scenarios_created_at ON eval_scenarios(created_at DESC);
 ## Performance Considerations
 
 ### Scenario Registry
+
 - Connection pooling (configurable max connections)
 - Indexed queries for fast filtering
 - Pagination support to limit result sets
 - JSONB indexing for tag searches
 
 ### Scoring Engine
+
 - Modular scorers for independent execution
 - Caching for repeated evaluations (future)
 - Configurable parallelism (future)
@@ -414,18 +445,21 @@ CREATE INDEX idx_scenarios_created_at ON eval_scenarios(created_at DESC);
 ## Security Considerations
 
 ### Scenario Registry
+
 - Input validation with Zod
 - SQL injection protection via parameterized queries
 - CORS and Helmet for HTTP security
 - Environment-based credential management
 
 ### Scoring Engine
+
 - Sandbox evaluation contexts (future)
 - Policy enforcement integration
 - No arbitrary code execution
 - Rate limiting for LLM judge calls (future)
 
 ### Seed Scenarios
+
 - Two dedicated safety scenarios
 - Adversarial testing built-in
 - Policy violation detection
@@ -475,20 +509,24 @@ spec:
 ### Planned Metrics
 
 **Scenario Execution**:
+
 - `mesh_eval_scenario_executions_total{scenario_type, status}`
 - `mesh_eval_scenario_duration_seconds{scenario_type, p50, p95, p99}`
 - `mesh_eval_scenario_cost_usd{scenario_type}`
 
 **Scoring**:
+
 - `mesh_eval_score_overall{scenario_type}`
 - `mesh_eval_score_correctness{scenario_type}`
 - `mesh_eval_score_safety{scenario_type}`
 
 **Pass Rates**:
+
 - `mesh_eval_pass_rate{scenario_type, suite}`
 - `mesh_eval_regression_detected{baseline_version}`
 
 **Safety**:
+
 - `mesh_eval_safety_violations_total{violation_type}`
 - `mesh_eval_policy_denies_total{policy_id}`
 
@@ -535,6 +573,7 @@ spec:
 ### Version 0.1.0 (2025-11-22)
 
 **Added**:
+
 - Core SDK with types, validators, and utilities
 - Scenario Registry service with PostgreSQL storage
 - Scoring Engine with 4 scoring strategies
@@ -546,17 +585,20 @@ spec:
 ## Resources
 
 ### Documentation
+
 - [Architecture](./docs/agentic-mesh/20-eval-architecture.md)
 - [Getting Started](./docs/agentic-mesh/29-eval-getting-started.md)
 - [SDK README](./packages/mesh-eval-sdk/README.md)
 
 ### Code
+
 - SDK: `packages/mesh-eval-sdk/`
 - Scenario Registry: `services/scenario-registry/`
 - Scoring Engine: `services/scoring-engine/`
 - Seed Scenarios: `eval/scenarios/`
 
 ### Issues & Feedback
+
 - GitHub Issues: [Create an issue](https://github.com/BrianCLong/summit/issues)
 - Platform Team: Contact for questions or suggestions
 
@@ -565,6 +607,7 @@ spec:
 ## Acknowledgments
 
 Built following Summit/IntelGraph project conventions:
+
 - TypeScript with gradual strictness
 - pnpm workspace monorepo
 - PostgreSQL for data storage

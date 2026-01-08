@@ -3,6 +3,7 @@
 ## Executive Summary
 
 **Test Results**:
+
 - **Total test suites**: 538
 - **Passing**: 104 (19%)
 - **Failing**: 434 (81%)
@@ -15,6 +16,7 @@
 **Impact**: Prevents ~200 test suites from running
 
 #### Missing Type Declarations
+
 **Affected files**: Client-side test suites
 
 ```
@@ -28,6 +30,7 @@ Cannot find module '@jest/globals' or its corresponding type declarations
 **Root cause**: Missing `@types/*` packages or misconfigured TypeScript paths
 
 **Files affected** (sample):
+
 - `client/src/components/ai-enhanced/__tests__/EnhancedAIAssistant.test.tsx`
 - `client/src/components/mlops/__tests__/ModelManagementDashboard.test.tsx`
 - `client/src/components/graph-advanced/__tests__/AdvancedGraphInteractions.test.tsx`
@@ -35,6 +38,7 @@ Cannot find module '@jest/globals' or its corresponding type declarations
 - `client/src/components/__tests__/ToastContainer.test.tsx`
 
 **Fix**:
+
 ```bash
 # Install missing type declarations
 pnpm add -D @types/react @types/react-dom @types/node
@@ -48,7 +52,9 @@ pnpm add -D @types/react @types/react-dom @types/node
 ---
 
 #### Jest Matcher Types Missing
+
 **Error pattern**:
+
 ```
 Property 'toBeInTheDocument' does not exist on type 'JestMatchers<any>'
 Property 'toHaveTextContent' does not exist on type 'JestMatchers<any>'
@@ -60,9 +66,10 @@ Property 'toHaveValue' does not exist on type 'JestMatchers<any>'
 **Root cause**: Missing `@testing-library/jest-dom` import in jest setup
 
 **Fix**:
+
 ```typescript
 // jest.setup.js or client/jest.setup.js
-import '@testing-library/jest-dom';
+import "@testing-library/jest-dom";
 ```
 
 **Priority**: **CRITICAL** - Affects all client tests
@@ -70,11 +77,14 @@ import '@testing-library/jest-dom';
 ---
 
 #### Module Resolution Errors
+
 **Examples**:
+
 - `server/tests/integration/graphql.test.ts:2` - Cannot find module `../../src/server`
 - React JSX runtime missing: `This JSX tag requires the module path 'react/jsx-runtime' to exist`
 
 **Fix**:
+
 - Verify `server/src/server.ts` or `server/src/server.js` exists
 - Ensure React 17+ and proper JSX transform configuration
 
@@ -85,17 +95,21 @@ import '@testing-library/jest-dom';
 ### 2. Native Binary Modules (BLOCKING)
 
 #### argon2 Native Binding Missing
+
 **Error**:
+
 ```
 Cannot find module '/home/blong/summit/node_modules/.pnpm/argon2@0.31.2/node_modules/argon2/lib/binding/napi-v3/argon2.node'
 ```
 
 **Affected tests**:
+
 - `server/src/tests/enterpriseSecurity.test.js` (3 tests fail)
 
 **Root cause**: argon2 native bindings not compiled for current platform
 
 **Fix**:
+
 ```bash
 # Rebuild native modules
 pnpm rebuild argon2
@@ -114,9 +128,11 @@ sudo apt-get install -y python3 make g++
 ### 3. Performance/Timeout Issues
 
 #### Dataset Processing Timeout
+
 **File**: `server/src/tests/advancedAnalytics.test.js:535`
 
 **Error**:
+
 ```
 expect(received).toBeLessThan(expected)
 Expected: < 5000ms
@@ -130,10 +146,13 @@ Received:   5514ms
 ---
 
 #### Streaming Test Timeouts
+
 **Files**:
+
 - `server/tests/graph-operations.test.js:206,481`
 
 **Error**:
+
 ```
 Exceeded timeout of 5000ms for a test while waiting for `done()` to be called
 ```
@@ -141,8 +160,9 @@ Exceeded timeout of 5000ms for a test while waiting for `done()` to be called
 **Root cause**: Streaming tests not calling `done()` callback
 
 **Fix**: Increase timeout in test:
+
 ```javascript
-it('should stream large graph exports', (done) => {
+it("should stream large graph exports", (done) => {
   // test code
 }, 10000); // 10 second timeout
 ```
@@ -154,9 +174,11 @@ it('should stream large graph exports', (done) => {
 ### 4. Assertion Mismatches
 
 #### Content-Type Charset
+
 **File**: `server/tests/graph-operations.test.js:179,191`
 
 **Error**:
+
 ```
 Expected: "text/csv; charset=utf-8"
 Received: "text/csv"
@@ -166,6 +188,7 @@ Received: "application/xml"
 ```
 
 **Fix**: Update response headers or relax assertions:
+
 ```javascript
 expect(response.type).toMatch(/^text\/csv/);
 expect(response.type).toMatch(/^application\/xml/);
@@ -176,9 +199,11 @@ expect(response.type).toMatch(/^application\/xml/);
 ---
 
 #### Transfer-Encoding Missing
+
 **File**: `server/tests/graph-operations.test.js:218,493`
 
 **Error**:
+
 ```
 Expected: "chunked"
 Received: undefined
@@ -195,9 +220,11 @@ Received: undefined
 ### 5. WebSocket/Real-time Tests
 
 #### Socket.io Connection Timeouts
+
 **File**: `server/tests/realtime-collab.test.ts:28,32`
 
 **Error**:
+
 ```
 Timeout - WebSocket connection failed
 ```
@@ -205,6 +232,7 @@ Timeout - WebSocket connection failed
 **Root cause**: WebSocket server not started or wrong URL
 
 **Fix**:
+
 - Ensure WebSocket server starts in `beforeAll`
 - Verify URL and port configuration
 - Add connection timeout handling
@@ -216,9 +244,11 @@ Timeout - WebSocket connection failed
 ### 6. Test Container Issues
 
 #### Docker Testcontainers Teardown
+
 **File**: `server/tests/graphops.cache.int.test.js:14`
 
 **Error**:
+
 ```
 ReferenceError: You are trying to `import` a file after the Jest environment has been torn down
 ```
@@ -226,6 +256,7 @@ ReferenceError: You are trying to `import` a file after the Jest environment has
 **Root cause**: Async container cleanup after Jest teardown
 
 **Fix**:
+
 ```javascript
 afterAll(async () => {
   if (container) {
@@ -241,12 +272,15 @@ afterAll(async () => {
 ### 7. Configuration Warnings
 
 #### ts-jest Config Deprecated
+
 **Warning**:
+
 ```
 Define `ts-jest` config under `globals` is deprecated
 ```
 
 **Fix**: Update `jest.config.js`:
+
 ```javascript
 // OLD (deprecated)
 globals: {
@@ -267,26 +301,26 @@ transform: {
 
 ### By Root Cause
 
-| Category | Count | % of Failures | Priority |
-|----------|-------|---------------|----------|
-| TypeScript type errors | ~200 | 46% | CRITICAL |
-| Module not found | ~100 | 23% | HIGH |
-| Native bindings | 3 | <1% | HIGH |
-| Timeouts | ~50 | 12% | MEDIUM |
-| Assertion mismatches | ~30 | 7% | LOW |
-| WebSocket/async | ~20 | 5% | MEDIUM |
-| Testcontainers | ~15 | 3% | MEDIUM |
-| Other | ~16 | 4% | VARIES |
+| Category               | Count | % of Failures | Priority |
+| ---------------------- | ----- | ------------- | -------- |
+| TypeScript type errors | ~200  | 46%           | CRITICAL |
+| Module not found       | ~100  | 23%           | HIGH     |
+| Native bindings        | 3     | <1%           | HIGH     |
+| Timeouts               | ~50   | 12%           | MEDIUM   |
+| Assertion mismatches   | ~30   | 7%            | LOW      |
+| WebSocket/async        | ~20   | 5%            | MEDIUM   |
+| Testcontainers         | ~15   | 3%            | MEDIUM   |
+| Other                  | ~16   | 4%            | VARIES   |
 
 ### By Component
 
-| Component | Passing | Failing | Pass Rate |
-|-----------|---------|---------|-----------|
-| Server core | 45 | 120 | 27% |
-| Client UI | 5 | 180 | 3% |
-| Integration tests | 8 | 65 | 11% |
-| E2E tests | 2 | 25 | 7% |
-| Packages | 44 | 44 | 50% |
+| Component         | Passing | Failing | Pass Rate |
+| ----------------- | ------- | ------- | --------- |
+| Server core       | 45      | 120     | 27%       |
+| Client UI         | 5       | 180     | 3%        |
+| Integration tests | 8       | 65      | 11%       |
+| E2E tests         | 2       | 25      | 7%        |
+| Packages          | 44      | 44      | 50%       |
 
 **Client tests severely impacted** by TypeScript configuration issues.
 
@@ -371,6 +405,7 @@ transform: {
 ## Commands to Run
 
 ### Fix TypeScript Types
+
 ```bash
 # Install missing type declarations
 pnpm add -D @types/react@^18 @types/react-dom@^18 @types/node@^20
@@ -381,6 +416,7 @@ echo "import '@testing-library/jest-dom';" >> jest.setup.js
 ```
 
 ### Rebuild Native Bindings
+
 ```bash
 # Install build tools (if not present)
 sudo apt-get update && sudo apt-get install -y python3 make g++
@@ -393,12 +429,14 @@ pnpm approve-builds
 ```
 
 ### Update Jest Config
+
 ```bash
 # Update jest.config.cjs or jest.projects.cjs
 # Move ts-jest config from globals to transform
 ```
 
 ### Rerun Tests
+
 ```bash
 # Run full test suite
 pnpm test 2>&1 | tee /tmp/test-results-week2-day1.log
@@ -430,6 +468,6 @@ pnpm test -- client/src/components/ai-enhanced/__tests__/EnhancedAIAssistant.tes
 
 ---
 
-*Generated by Claude Code on 2025-12-07*
-*Test log: `/tmp/test-results-20251207.log` (15,866 lines)*
-*Total test suites: 538 (104 PASS, 434 FAIL)*
+_Generated by Claude Code on 2025-12-07_
+_Test log: `/tmp/test-results-20251207.log` (15,866 lines)_
+_Total test suites: 538 (104 PASS, 434 FAIL)_

@@ -1,14 +1,17 @@
 # Migrations Rollback Playbook
 
 ## Goals
+
 Quickly revert schema/index changes with minimal blast radius, restoring traffic to legacy paths.
 
 ## Pre-rollback checklist
+
 - Dual-write enabled and healthy metrics.
 - Shadow read mismatch ratio near zero.
 - Pre-apply snapshots captured (pg_dump/neo4j dump/typesense export).
 
 ## Execution Steps
+
 1. **Freeze writes**
    - Set `db.dual_write=false` and pause backfill workers.
 2. **Revert routing**
@@ -25,9 +28,11 @@ Quickly revert schema/index changes with minimal blast radius, restoring traffic
    - Enable writes gradually, monitor SLOs and error budgets.
 
 ## Validation
+
 - Metrics return to baseline (zero dual-write errors, zero mismatch ratio).
 - Smoke tests on golden paths succeed.
 
 ## Communication
+
 - Announce rollback start/finish in #release channel.
 - File post-incident note including root cause and prevention actions.

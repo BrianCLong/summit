@@ -20,6 +20,7 @@ These are the primary workflows that run on every pull request and push to `main
 This is the main, consolidated Continuous Integration (CI) workflow. It orchestrates the entire validation pipeline for the application.
 
 **Key Stages:**
+
 1.  **Setup**: Initializes the environment, installs dependencies, and restores caches using the `_reusable-setup.yml` workflow.
 2.  **Lint**: Runs static code analysis to enforce code style and catch common errors.
 3.  **Typecheck**: Performs TypeScript type checking to ensure type safety across the codebase.

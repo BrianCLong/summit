@@ -7,10 +7,12 @@
 - Intended trigger: gh workflow run cd-rollback.yml -f environment=staging -f image_tag=rollback-drill
 
 ## Workflow steps validated
-  - Checkout code
-  - Login to GHCR
-  - Rollback deployment
+
+- Checkout code
+- Login to GHCR
+- Rollback deployment
 
 ## Observations
+
 - Workflow pulls the requested tag from GHCR, recreates server/client via docker compose on the target host, and prunes unused images.
 - Use this workflow for staged rollback drills; confirm secrets and host reachability before running in prod.

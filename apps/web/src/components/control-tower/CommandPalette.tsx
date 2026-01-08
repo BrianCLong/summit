@@ -2,7 +2,7 @@
  * Command Palette - Global search and quick actions (⌘K)
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -16,7 +16,7 @@ import {
   Divider,
   InputAdornment,
   useTheme,
-} from '@mui/material';
+} from '@mui/material'
 import {
   Search as SearchIcon,
   History as HistoryIcon,
@@ -27,21 +27,21 @@ import {
   PlayArrow as PlayIcon,
   NotificationsActive as AlertIcon,
   Send as SendIcon,
-} from '@mui/icons-material';
+} from '@mui/icons-material'
 
 export interface CommandItem {
-  id: string;
-  type: 'recent' | 'action' | 'navigation' | 'help';
-  icon: React.ReactNode;
-  title: string;
-  description?: string;
-  shortcut?: string;
+  id: string
+  type: 'recent' | 'action' | 'navigation' | 'help'
+  icon: React.ReactNode
+  title: string
+  description?: string
+  shortcut?: string
 }
 
 export interface CommandPaletteProps {
-  open: boolean;
-  onClose: () => void;
-  onCommandSelect: (command: string, args?: Record<string, unknown>) => void;
+  open: boolean
+  onClose: () => void
+  onCommandSelect: (command: string, args?: Record<string, unknown>) => void
 }
 
 export const CommandPalette: React.FC<CommandPaletteProps> = ({
@@ -49,9 +49,9 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   onClose,
   onCommandSelect,
 }) => {
-  const theme = useTheme();
-  const [query, setQuery] = useState('');
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const theme = useTheme()
+  const [query, setQuery] = useState('')
+  const [selectedIndex, setSelectedIndex] = useState(0)
 
   // Default commands
   const defaultCommands: CommandItem[] = useMemo(
@@ -131,19 +131,19 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       },
     ],
     []
-  );
+  )
 
   // Filter commands based on query
   const filteredCommands = useMemo(() => {
-    if (!query) return defaultCommands;
+    if (!query) return defaultCommands
 
-    const lowerQuery = query.toLowerCase();
+    const lowerQuery = query.toLowerCase()
     return defaultCommands.filter(
-      (cmd) =>
+      cmd =>
         cmd.title.toLowerCase().includes(lowerQuery) ||
         cmd.description?.toLowerCase().includes(lowerQuery)
-    );
-  }, [query, defaultCommands]);
+    )
+  }, [query, defaultCommands])
 
   // Group commands by type
   const groupedCommands = useMemo(() => {
@@ -152,75 +152,75 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       action: [],
       navigation: [],
       help: [],
-    };
+    }
 
-    filteredCommands.forEach((cmd) => {
+    filteredCommands.forEach(cmd => {
       if (groups[cmd.type]) {
-        groups[cmd.type].push(cmd);
+        groups[cmd.type].push(cmd)
       }
-    });
+    })
 
-    return groups;
-  }, [filteredCommands]);
+    return groups
+  }, [filteredCommands])
 
   // Reset state when opening
   useEffect(() => {
     if (open) {
-      setQuery('');
-      setSelectedIndex(0);
+      setQuery('')
+      setSelectedIndex(0)
     }
-  }, [open]);
+  }, [open])
 
   // Keyboard navigation
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       switch (e.key) {
         case 'ArrowDown':
-          e.preventDefault();
-          setSelectedIndex((prev) =>
+          e.preventDefault()
+          setSelectedIndex(prev =>
             prev < filteredCommands.length - 1 ? prev + 1 : prev
-          );
-          break;
+          )
+          break
         case 'ArrowUp':
-          e.preventDefault();
-          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : prev));
-          break;
+          e.preventDefault()
+          setSelectedIndex(prev => (prev > 0 ? prev - 1 : prev))
+          break
         case 'Enter':
-          e.preventDefault();
+          e.preventDefault()
           if (filteredCommands[selectedIndex]) {
-            handleSelect(filteredCommands[selectedIndex]);
+            handleSelect(filteredCommands[selectedIndex])
           }
-          break;
+          break
         case 'Escape':
-          e.preventDefault();
-          onClose();
-          break;
+          e.preventDefault()
+          onClose()
+          break
       }
     },
     [filteredCommands, selectedIndex, onClose]
-  );
+  )
 
   const handleSelect = (command: CommandItem) => {
-    onCommandSelect(command.id, { query });
-    onClose();
-  };
+    onCommandSelect(command.id, { query })
+    onClose()
+  }
 
   const getGroupTitle = (type: string): string => {
     switch (type) {
       case 'recent':
-        return 'Recent';
+        return 'Recent'
       case 'action':
-        return 'Quick Actions';
+        return 'Quick Actions'
       case 'navigation':
-        return 'Navigation';
+        return 'Navigation'
       case 'help':
-        return 'Help';
+        return 'Help'
       default:
-        return type;
+        return type
     }
-  };
+  }
 
-  let currentIndex = -1;
+  let currentIndex = -1
 
   return (
     <Dialog
@@ -243,7 +243,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
           fullWidth
           placeholder="Search or type a command..."
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={e => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           InputProps={{
             startAdornment: (
@@ -275,9 +275,9 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                     {getGroupTitle(type)}
                   </Typography>
 
-                  {commands.map((command) => {
-                    currentIndex++;
-                    const isSelected = currentIndex === selectedIndex;
+                  {commands.map(command => {
+                    currentIndex++
+                    const isSelected = currentIndex === selectedIndex
 
                     return (
                       <ListItem
@@ -320,7 +320,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                           </Typography>
                         )}
                       </ListItem>
-                    );
+                    )
                   })}
                 </Box>
               )
@@ -356,7 +356,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         </Box>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export default CommandPalette;
+export default CommandPalette

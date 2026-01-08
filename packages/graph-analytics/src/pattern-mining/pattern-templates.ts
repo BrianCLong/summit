@@ -38,7 +38,7 @@ export interface PatternExplanation {
   /**
    * Element type
    */
-  elementType: 'node' | 'edge' | 'pattern';
+  elementType: "node" | "edge" | "pattern";
 
   /**
    * Importance/anomaly score (0-1)
@@ -175,7 +175,7 @@ export interface FinancialStructuringOptions {
   /**
    * Pattern type to detect
    */
-  patternType: 'fan-in' | 'fan-out' | 'both';
+  patternType: "fan-in" | "fan-out" | "both";
 
   /**
    * Entity types for center nodes
@@ -265,10 +265,7 @@ export interface CommunicationBurstResult {
 /**
  * Detect co-travel/co-presence patterns in spacetime
  */
-export function detectCoTravelPatterns(
-  graph: GraphData,
-  options: CoTravelOptions,
-): CoTravelResult {
+export function detectCoTravelPatterns(graph: GraphData, options: CoTravelOptions): CoTravelResult {
   const startTime = performance.now();
 
   const {
@@ -283,7 +280,7 @@ export function detectCoTravelPatterns(
   // Filter nodes by entity type and time range
   let nodes = graph.nodes.filter((n) => {
     if (entityTypes && entityTypes.length > 0) {
-      if (!entityTypes.includes(n.type || '')) return false;
+      if (!entityTypes.includes(n.type || "")) return false;
     }
     if (analysisStart !== undefined && n.timestamp !== undefined) {
       if (n.timestamp < analysisStart) return false;
@@ -315,8 +312,7 @@ export function detectCoTravelPatterns(
       const distance = calculateDistance(node1.location, node2.location);
 
       if (timeDiff <= timeWindow && distance <= distanceThreshold) {
-        const pairKey =
-          node1.id < node2.id ? `${node1.id}|${node2.id}` : `${node2.id}|${node1.id}`;
+        const pairKey = node1.id < node2.id ? `${node1.id}|${node2.id}` : `${node2.id}|${node1.id}`;
         coOccurrences.set(pairKey, (coOccurrences.get(pairKey) || 0) + 1);
 
         if (!coOccurrenceEvents.has(pairKey)) {
@@ -334,7 +330,7 @@ export function detectCoTravelPatterns(
   let patternId = 0;
   for (const [pairKey, count] of coOccurrences.entries()) {
     if (count >= minCoOccurrences) {
-      const [node1Id, node2Id] = pairKey.split('|');
+      const [node1Id, node2Id] = pairKey.split("|");
       const events = coOccurrenceEvents.get(pairKey) || [];
 
       const node1 = nodes.find((n) => n.id === node1Id);
@@ -347,7 +343,7 @@ export function detectCoTravelPatterns(
       const explanations: PatternExplanation[] = [
         {
           elementId: `cotravel-${patternId}`,
-          elementType: 'pattern',
+          elementType: "pattern",
           importanceScore: confidence,
           reasoning: `Co-travel pattern detected: ${node1Id} and ${node2Id} were co-located ${count} times within ${timeWindow / 1000}s and ${distanceThreshold}m`,
           evidence: [
@@ -366,13 +362,10 @@ export function detectCoTravelPatterns(
         },
         {
           elementId: node1Id,
-          elementType: 'node',
+          elementType: "node",
           importanceScore: 0.8,
           reasoning: `Entity ${node1Id} participated in ${count} co-location events`,
-          evidence: [
-            `Node type: ${node1.type || 'Unknown'}`,
-            `Co-travel events: ${count}`,
-          ],
+          evidence: [`Node type: ${node1.type || "Unknown"}`, `Co-travel events: ${count}`],
           uncertainty: 0.1,
           featureImportances: {
             participation_count: 1.0,
@@ -380,13 +373,10 @@ export function detectCoTravelPatterns(
         },
         {
           elementId: node2Id,
-          elementType: 'node',
+          elementType: "node",
           importanceScore: 0.8,
           reasoning: `Entity ${node2Id} participated in ${count} co-location events`,
-          evidence: [
-            `Node type: ${node2.type || 'Unknown'}`,
-            `Co-travel events: ${count}`,
-          ],
+          evidence: [`Node type: ${node2.type || "Unknown"}`, `Co-travel events: ${count}`],
           uncertainty: 0.1,
           featureImportances: {
             participation_count: 1.0,
@@ -433,18 +423,12 @@ export function detectCoTravelPatterns(
  */
 export function detectFinancialStructuring(
   graph: GraphData,
-  options: FinancialStructuringOptions,
+  options: FinancialStructuringOptions
 ): FinancialStructuringResult {
   const startTime = performance.now();
 
-  const {
-    timeWindow,
-    minBranches,
-    maxHops,
-    amountThreshold,
-    patternType,
-    centerNodeTypes,
-  } = options;
+  const { timeWindow, minBranches, maxHops, amountThreshold, patternType, centerNodeTypes } =
+    options;
 
   const patterns: PatternMatch[] = [];
 
@@ -480,10 +464,10 @@ export function detectFinancialStructuring(
   let patternId = 0;
 
   // Detect fan-out patterns
-  if (patternType === 'fan-out' || patternType === 'both') {
+  if (patternType === "fan-out" || patternType === "both") {
     for (const node of graph.nodes) {
       if (centerNodeTypes && centerNodeTypes.length > 0) {
-        if (!centerNodeTypes.includes(node.type || '')) continue;
+        if (!centerNodeTypes.includes(node.type || "")) continue;
       }
 
       const outgoingEdges = outgoing.get(node.id) || [];
@@ -500,11 +484,11 @@ export function detectFinancialStructuring(
           const explanations: PatternExplanation[] = [
             {
               elementId: `fan-out-${patternId}`,
-              elementType: 'pattern',
+              elementType: "pattern",
               importanceScore: confidence,
               reasoning: `Fan-out structuring pattern: ${node.id} distributed to ${group.edges.length} entities within ${timeWindow / 1000}s`,
               evidence: [
-                `Center node: ${node.id} (${node.type || 'Unknown'})`,
+                `Center node: ${node.id} (${node.type || "Unknown"})`,
                 `Branches: ${group.edges.length}`,
                 `Time window: ${timeWindow / 1000}s`,
                 `Total amount: ${totalAmount.toFixed(2)}`,
@@ -520,11 +504,11 @@ export function detectFinancialStructuring(
             },
             {
               elementId: node.id,
-              elementType: 'node',
+              elementType: "node",
               importanceScore: 0.9,
               reasoning: `Center of fan-out pattern with ${group.edges.length} branches`,
               evidence: [
-                `Node type: ${node.type || 'Unknown'}`,
+                `Node type: ${node.type || "Unknown"}`,
                 `Outgoing branches: ${group.edges.length}`,
               ],
               uncertainty: 0.1,
@@ -540,7 +524,7 @@ export function detectFinancialStructuring(
             edges: group.edges.map((e) => ({ source: node.id, target: e.target })),
             confidence,
             metadata: {
-              patternType: 'fan-out',
+              patternType: "fan-out",
               centerNode: node.id,
               branches: group.edges.length,
               totalAmount,
@@ -555,10 +539,10 @@ export function detectFinancialStructuring(
   }
 
   // Detect fan-in patterns
-  if (patternType === 'fan-in' || patternType === 'both') {
+  if (patternType === "fan-in" || patternType === "both") {
     for (const node of graph.nodes) {
       if (centerNodeTypes && centerNodeTypes.length > 0) {
-        if (!centerNodeTypes.includes(node.type || '')) continue;
+        if (!centerNodeTypes.includes(node.type || "")) continue;
       }
 
       const incomingEdges = incoming.get(node.id) || [];
@@ -575,11 +559,11 @@ export function detectFinancialStructuring(
           const explanations: PatternExplanation[] = [
             {
               elementId: `fan-in-${patternId}`,
-              elementType: 'pattern',
+              elementType: "pattern",
               importanceScore: confidence,
               reasoning: `Fan-in structuring pattern: ${group.edges.length} entities converged to ${node.id} within ${timeWindow / 1000}s`,
               evidence: [
-                `Center node: ${node.id} (${node.type || 'Unknown'})`,
+                `Center node: ${node.id} (${node.type || "Unknown"})`,
                 `Branches: ${group.edges.length}`,
                 `Time window: ${timeWindow / 1000}s`,
                 `Total amount: ${totalAmount.toFixed(2)}`,
@@ -595,11 +579,11 @@ export function detectFinancialStructuring(
             },
             {
               elementId: node.id,
-              elementType: 'node',
+              elementType: "node",
               importanceScore: 0.9,
               reasoning: `Center of fan-in pattern with ${group.edges.length} branches`,
               evidence: [
-                `Node type: ${node.type || 'Unknown'}`,
+                `Node type: ${node.type || "Unknown"}`,
                 `Incoming branches: ${group.edges.length}`,
               ],
               uncertainty: 0.1,
@@ -615,7 +599,7 @@ export function detectFinancialStructuring(
             edges: group.edges.map((e) => ({ source: (e as any).source, target: node.id })),
             confidence,
             metadata: {
-              patternType: 'fan-in',
+              patternType: "fan-in",
               centerNode: node.id,
               branches: group.edges.length,
               totalAmount,
@@ -647,7 +631,7 @@ export function detectFinancialStructuring(
  */
 export function detectCommunicationBursts(
   graph: GraphData,
-  options: CommunicationBurstOptions,
+  options: CommunicationBurstOptions
 ): CommunicationBurstResult {
   const startTime = performance.now();
 
@@ -664,7 +648,7 @@ export function detectCommunicationBursts(
   let edges = graph.edges.filter((e) => e.timestamp !== undefined);
 
   if (communicationTypes && communicationTypes.length > 0) {
-    edges = edges.filter((e) => communicationTypes.includes(e.type || ''));
+    edges = edges.filter((e) => communicationTypes.includes(e.type || ""));
   }
 
   // Sort edges by timestamp
@@ -699,7 +683,7 @@ export function detectCommunicationBursts(
 
   while (windowStart <= (edges[edges.length - 1].timestamp || 0)) {
     const windowEdges = edges.filter(
-      (e) => (e.timestamp || 0) >= windowStart && (e.timestamp || 0) < windowEnd,
+      (e) => (e.timestamp || 0) >= windowStart && (e.timestamp || 0) < windowEnd
     );
 
     const windowRate = windowEdges.length;
@@ -718,7 +702,7 @@ export function detectCommunicationBursts(
       const explanations: PatternExplanation[] = [
         {
           elementId: `burst-${burstId}`,
-          elementType: 'pattern',
+          elementType: "pattern",
           importanceScore: confidence,
           reasoning: `Communication burst detected: ${windowRate} messages (${(windowRate / calculatedBaselineRate).toFixed(1)}x baseline) in ${timeWindow / 1000}s`,
           evidence: [
@@ -757,7 +741,7 @@ export function detectCommunicationBursts(
     if (windowRate < calculatedBaselineRate * lullThreshold) {
       const confidence = Math.min(
         1.0,
-        (calculatedBaselineRate * lullThreshold - windowRate) / calculatedBaselineRate,
+        (calculatedBaselineRate * lullThreshold - windowRate) / calculatedBaselineRate
       );
 
       const involvedNodes = new Set<string>();
@@ -769,7 +753,7 @@ export function detectCommunicationBursts(
       const explanations: PatternExplanation[] = [
         {
           elementId: `lull-${lullId}`,
-          elementType: 'pattern',
+          elementType: "pattern",
           importanceScore: confidence,
           reasoning: `Communication lull detected: ${windowRate} messages (${(windowRate / calculatedBaselineRate).toFixed(1)}x baseline) in ${timeWindow / 1000}s`,
           evidence: [
@@ -809,9 +793,7 @@ export function detectCommunicationBursts(
   }
 
   // Filter by minimum duration
-  const filteredBursts = bursts.filter(
-    (b) => (b.metadata.duration || 0) >= minBurstDuration,
-  );
+  const filteredBursts = bursts.filter((b) => (b.metadata.duration || 0) >= minBurstDuration);
 
   const executionTime = performance.now() - startTime;
 
@@ -831,7 +813,7 @@ export function detectCommunicationBursts(
 
 function calculateDistance(
   loc1: { lat: number; lon: number },
-  loc2: { lat: number; lon: number },
+  loc2: { lat: number; lon: number }
 ): number {
   // Haversine formula for distance in meters
   const R = 6371000; // Earth radius in meters
@@ -851,7 +833,7 @@ function calculateDistance(
 
 function groupByTimeWindow<T extends { timestamp: number }>(
   items: T[],
-  timeWindow: number,
+  timeWindow: number
 ): Array<{ edges: T[]; startTime: number; endTime: number }> {
   if (items.length === 0) return [];
 

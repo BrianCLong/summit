@@ -5,13 +5,13 @@
 
 ## Sign-offs
 
-| Role | Name | Vote | Signature/Date |
-|------|------|------|----------------|
-| **Product Lead** | [Name] | [GO/NO-GO] | |
-| **Engineering Lead** | [Name] | [GO/NO-GO] | |
-| **Ops/SRE Lead** | [Name] | [GO/NO-GO] | |
-| **Security Lead** | [Name] | [GO/NO-GO] | |
-| **Sales/GTM Lead** | [Name] | [GO/NO-GO] | |
+| Role                 | Name   | Vote       | Signature/Date |
+| -------------------- | ------ | ---------- | -------------- |
+| **Product Lead**     | [Name] | [GO/NO-GO] |                |
+| **Engineering Lead** | [Name] | [GO/NO-GO] |                |
+| **Ops/SRE Lead**     | [Name] | [GO/NO-GO] |                |
+| **Security Lead**    | [Name] | [GO/NO-GO] |                |
+| **Sales/GTM Lead**   | [Name] | [GO/NO-GO] |                |
 
 ## Automated Gates
 
@@ -22,8 +22,10 @@
 
 ## Decision Record
 
-**Final Status**: ___________
+**Final Status**: ****\_\_\_****
 
 **Notes/Conditions**:
-__________________________________________________________________________
-__________________________________________________________________________
+
+---
+
+---

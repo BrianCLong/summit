@@ -1,4 +1,4 @@
-import { stableHash } from '../canonical/canonicalizer.js';
+import { stableHash } from "../canonical/canonicalizer.js";
 
 export interface CanonicalEvent {
   id: string;
@@ -20,7 +20,7 @@ export class EventLog {
   private events: CanonicalEvent[] = [];
   constructor(private readonly options: EventLogOptions = {}) {}
 
-  append(event: Omit<CanonicalEvent, 'payloadHash' | 'prevHash' | 'signature'>): CanonicalEvent {
+  append(event: Omit<CanonicalEvent, "payloadHash" | "prevHash" | "signature">): CanonicalEvent {
     const payloadHash = stableHash(event.payload);
     const prevHash = this.events.at(-1)?.payloadHash;
     const signature = this.options.signer ? this.options.signer(payloadHash) : undefined;

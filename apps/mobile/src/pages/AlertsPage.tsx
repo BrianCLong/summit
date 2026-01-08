@@ -89,11 +89,7 @@ function AlertItem({ alert, onAcknowledge, onSelect }: AlertItemProps) {
       </ListItemIcon>
       <ListItemText
         primary={
-          <Typography
-            variant="body1"
-            fontWeight={alert.isRead ? 400 : 600}
-            noWrap
-          >
+          <Typography variant="body1" fontWeight={alert.isRead ? 400 : 600} noWrap>
             {alert.title}
           </Typography>
         }
@@ -173,10 +169,7 @@ function TaskItem({ task, onComplete, onSelect }: TaskItemProps) {
         secondary={
           <Box>
             {task.dueDate && (
-              <Typography
-                variant="caption"
-                color={isOverdue ? 'error' : 'text.secondary'}
-              >
+              <Typography variant="caption" color={isOverdue ? 'error' : 'text.secondary'}>
                 Due: {new Date(task.dueDate).toLocaleDateString()}
                 {isOverdue && ' (Overdue)'}
               </Typography>
@@ -256,11 +249,7 @@ export function AlertsPage() {
 
       {/* Tabs */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 2 }}>
-        <Tabs
-          value={tabValue}
-          onChange={(_, v) => setTabValue(v)}
-          variant="fullWidth"
-        >
+        <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)} variant="fullWidth">
           <Tab
             label={
               <Badge badgeContent={unreadCount} color="error">
@@ -289,18 +278,11 @@ export function AlertsPage() {
         <Box sx={{ px: 2 }}>
           {alertsLoading ? (
             Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton
-                key={i}
-                variant="rounded"
-                height={80}
-                sx={{ mb: 1, borderRadius: 2 }}
-              />
+              <Skeleton key={i} variant="rounded" height={80} sx={{ mb: 1, borderRadius: 2 }} />
             ))
           ) : alerts.length === 0 ? (
             <Box textAlign="center" py={4}>
-              <NotificationsActive
-                sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }}
-              />
+              <NotificationsActive sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
               <Typography color="text.secondary">No alerts</Typography>
             </Box>
           ) : (
@@ -323,12 +305,7 @@ export function AlertsPage() {
         <Box sx={{ px: 2 }}>
           {tasksLoading ? (
             Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton
-                key={i}
-                variant="rounded"
-                height={80}
-                sx={{ mb: 1, borderRadius: 2 }}
-              />
+              <Skeleton key={i} variant="rounded" height={80} sx={{ mb: 1, borderRadius: 2 }} />
             ))
           ) : tasks.length === 0 ? (
             <Box textAlign="center" py={4}>
@@ -366,11 +343,7 @@ export function AlertsPage() {
               <SeverityIcon severity={selectedAlert.severity} />
               <Box flex={1}>
                 <Typography variant="h6">{selectedAlert.title}</Typography>
-                <Chip
-                  label={selectedAlert.type.replace('_', ' ')}
-                  size="small"
-                  sx={{ mt: 0.5 }}
-                />
+                <Chip label={selectedAlert.type.replace('_', ' ')} size="small" sx={{ mt: 0.5 }} />
               </Box>
             </Box>
             <Typography variant="body1" paragraph>

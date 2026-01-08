@@ -7,8 +7,8 @@ import {
   Violation,
   Party,
   Amendment,
-  Dispute
-} from './types.js';
+  Dispute,
+} from "./types.js";
 
 /**
  * TreatyMonitor
@@ -39,7 +39,7 @@ export class TreatyMonitor {
 
     // Index by parties
     for (const party of treaty.parties) {
-      const partyKey = party.country || party.organization || '';
+      const partyKey = party.country || party.organization || "";
       if (!this.treatiesByParty.has(partyKey)) {
         this.treatiesByParty.set(partyKey, new Set());
       }
@@ -66,7 +66,7 @@ export class TreatyMonitor {
   getTreatiesByCategory(category: TreatyCategory): Treaty[] {
     const treatyIds = this.treatiesByCategory.get(category) || new Set();
     return Array.from(treatyIds)
-      .map(id => this.treaties.get(id))
+      .map((id) => this.treaties.get(id))
       .filter((t): t is Treaty => t !== undefined);
   }
 
@@ -76,7 +76,7 @@ export class TreatyMonitor {
   getTreatiesByParty(party: string): Treaty[] {
     const treatyIds = this.treatiesByParty.get(party) || new Set();
     return Array.from(treatyIds)
-      .map(id => this.treaties.get(id))
+      .map((id) => this.treaties.get(id))
       .filter((t): t is Treaty => t !== undefined);
   }
 
@@ -87,11 +87,11 @@ export class TreatyMonitor {
     const treaties1 = this.treatiesByParty.get(party1) || new Set();
     const treaties2 = this.treatiesByParty.get(party2) || new Set();
 
-    const bilateralIds = Array.from(treaties1).filter(id => treaties2.has(id));
+    const bilateralIds = Array.from(treaties1).filter((id) => treaties2.has(id));
     return bilateralIds
-      .map(id => this.treaties.get(id))
+      .map((id) => this.treaties.get(id))
       .filter((t): t is Treaty => t !== undefined)
-      .filter(t => t.parties.length === 2);
+      .filter((t) => t.parties.length === 2);
   }
 
   /**
@@ -147,7 +147,7 @@ export class TreatyMonitor {
     treaty.parties.push(party);
 
     // Update indexes
-    const partyKey = party.country || party.organization || '';
+    const partyKey = party.country || party.organization || "";
     if (!this.treatiesByParty.has(partyKey)) {
       this.treatiesByParty.set(partyKey, new Set());
     }
@@ -166,7 +166,7 @@ export class TreatyMonitor {
 
     // This is a simplified check - real logic would be more complex
     // based on specific entry-into-force provisions
-    const activeParties = treaty.parties.filter(p => p.status === 'ACTIVE');
+    const activeParties = treaty.parties.filter((p) => p.status === "ACTIVE");
 
     if (activeParties.length >= treaty.signatories.length * 0.5) {
       this.updateTreatyStatus(treatyId, TreatyStatus.IN_FORCE);
@@ -182,11 +182,11 @@ export class TreatyMonitor {
     if (!treaty) return undefined;
 
     // Find latest compliance record
-    const complianceRecords = treaty.complianceRecords.filter(r => r.party === party);
+    const complianceRecords = treaty.complianceRecords.filter((r) => r.party === party);
     if (complianceRecords.length === 0) return undefined;
 
-    return complianceRecords.sort((a, b) =>
-      b.assessmentDate.getTime() - a.assessmentDate.getTime()
+    return complianceRecords.sort(
+      (a, b) => b.assessmentDate.getTime() - a.assessmentDate.getTime()
     )[0];
   }
 
@@ -226,11 +226,12 @@ export class TreatyMonitor {
     cutoffDate.setDate(cutoffDate.getDate() + daysAhead);
 
     return Array.from(this.treaties.values())
-      .filter(t =>
-        t.expiryDate &&
-        t.expiryDate <= cutoffDate &&
-        t.expiryDate > new Date() &&
-        t.status === TreatyStatus.IN_FORCE
+      .filter(
+        (t) =>
+          t.expiryDate &&
+          t.expiryDate <= cutoffDate &&
+          t.expiryDate > new Date() &&
+          t.status === TreatyStatus.IN_FORCE
       )
       .sort((a, b) => {
         if (!a.expiryDate || !b.expiryDate) return 0;
@@ -242,13 +243,11 @@ export class TreatyMonitor {
    * Get treaties pending ratification for a party
    */
   getPendingRatifications(party: string): Treaty[] {
-    return Array.from(this.treaties.values()).filter(treaty => {
-      const isSigner = treaty.signatories.some(s =>
-        (s.country === party || s.organization === party) && s.pending
+    return Array.from(this.treaties.values()).filter((treaty) => {
+      const isSigner = treaty.signatories.some(
+        (s) => (s.country === party || s.organization === party) && s.pending
       );
-      const isParty = treaty.parties.some(p =>
-        p.country === party || p.organization === party
-      );
+      const isParty = treaty.parties.some((p) => p.country === party || p.organization === party);
 
       return isSigner && !isParty;
     });
@@ -271,7 +270,7 @@ export class TreatyMonitor {
         partiesInCompliance: 0,
         partiesInViolation: 0,
         criticalIssues: [],
-        recommendations: []
+        recommendations: [],
       };
     }
 
@@ -297,24 +296,22 @@ export class TreatyMonitor {
         partiesInViolation++;
 
         for (const violation of record.violations) {
-          if (violation.severity === 'SERIOUS' || violation.severity === 'GRAVE') {
+          if (violation.severity === "SERIOUS" || violation.severity === "GRAVE") {
             criticalIssues.push(`${record.party}: ${violation.description}`);
           }
         }
       }
     }
 
-    const overallProgress = latestRecords.size > 0
-      ? totalCompliance / latestRecords.size
-      : 0;
+    const overallProgress = latestRecords.size > 0 ? totalCompliance / latestRecords.size : 0;
 
     const recommendations: string[] = [];
     if (partiesInViolation > partiesInCompliance) {
-      recommendations.push('Consider strengthening monitoring mechanisms');
-      recommendations.push('Increase technical assistance to non-compliant parties');
+      recommendations.push("Consider strengthening monitoring mechanisms");
+      recommendations.push("Increase technical assistance to non-compliant parties");
     }
     if (criticalIssues.length > 0) {
-      recommendations.push('Convene emergency session to address critical violations');
+      recommendations.push("Convene emergency session to address critical violations");
     }
 
     return {
@@ -322,7 +319,7 @@ export class TreatyMonitor {
       partiesInCompliance,
       partiesInViolation,
       criticalIssues,
-      recommendations
+      recommendations,
     };
   }
 
@@ -354,11 +351,9 @@ export class TreatyMonitor {
 
       // Count bilateral partners
       if (treaty.parties.length === 2) {
-        const partner = treaty.parties.find(p =>
-          p.country !== party && p.organization !== party
-        );
+        const partner = treaty.parties.find((p) => p.country !== party && p.organization !== party);
         if (partner) {
-          const partnerKey = partner.country || partner.organization || '';
+          const partnerKey = partner.country || partner.organization || "";
           bilateralCounts.set(partnerKey, (bilateralCounts.get(partnerKey) || 0) + 1);
         }
       }
@@ -385,8 +380,8 @@ export class TreatyMonitor {
     // Count pending obligations
     let pendingObligations = 0;
     for (const treaty of treaties) {
-      pendingObligations += treaty.keyObligations.filter(o =>
-        o.status === 'PENDING' || o.status === 'IN_PROGRESS'
+      pendingObligations += treaty.keyObligations.filter(
+        (o) => o.status === "PENDING" || o.status === "IN_PROGRESS"
       ).length;
     }
 
@@ -396,7 +391,7 @@ export class TreatyMonitor {
       treatiesByStatus,
       bilateralPartners,
       complianceRate,
-      pendingObligations
+      pendingObligations,
     };
   }
 
@@ -406,13 +401,13 @@ export class TreatyMonitor {
   detectTerminationRisks(): {
     treatyId: string;
     title: string;
-    riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+    riskLevel: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
     indicators: string[];
   }[] {
     const risks: {
       treatyId: string;
       title: string;
-      riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+      riskLevel: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
       indicators: string[];
     }[] = [];
 
@@ -430,8 +425,8 @@ export class TreatyMonitor {
 
       // Check for serious violations
       const violations = this.getViolations(treaty.id);
-      const seriousViolations = violations.filter(v =>
-        v.severity === 'SERIOUS' || v.severity === 'GRAVE'
+      const seriousViolations = violations.filter(
+        (v) => v.severity === "SERIOUS" || v.severity === "GRAVE"
       );
       if (seriousViolations.length > 0) {
         indicators.push(`${seriousViolations.length} serious violations detected`);
@@ -440,8 +435,8 @@ export class TreatyMonitor {
 
       // Check for active disputes
       if (treaty.disputes) {
-        const activeDisputes = treaty.disputes.filter(d =>
-          d.status === 'PENDING' || d.status === 'IN_PROGRESS'
+        const activeDisputes = treaty.disputes.filter(
+          (d) => d.status === "PENDING" || d.status === "IN_PROGRESS"
         );
         if (activeDisputes.length > 0) {
           indicators.push(`${activeDisputes.length} active disputes`);
@@ -452,22 +447,22 @@ export class TreatyMonitor {
       // Check compliance rates
       const implementation = this.analyzeTreatyImplementation(treaty.id);
       if (implementation.overallProgress < 50) {
-        indicators.push('Low overall implementation progress');
+        indicators.push("Low overall implementation progress");
         riskScore += 15;
       }
 
       if (riskScore > 0) {
-        let riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-        if (riskScore >= 30) riskLevel = 'CRITICAL';
-        else if (riskScore >= 20) riskLevel = 'HIGH';
-        else if (riskScore >= 10) riskLevel = 'MEDIUM';
-        else riskLevel = 'LOW';
+        let riskLevel: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+        if (riskScore >= 30) riskLevel = "CRITICAL";
+        else if (riskScore >= 20) riskLevel = "HIGH";
+        else if (riskScore >= 10) riskLevel = "MEDIUM";
+        else riskLevel = "LOW";
 
         risks.push({
           treatyId: treaty.id,
           title: treaty.title,
           riskLevel,
-          indicators
+          indicators,
         });
       }
     }
@@ -499,8 +494,8 @@ export class TreatyMonitor {
       }
 
       for (const party of treaty.parties) {
-        if (party.status === 'ACTIVE') {
-          activeParties.add(party.country || party.organization || '');
+        if (party.status === "ACTIVE") {
+          activeParties.add(party.country || party.organization || "");
         }
       }
     }
@@ -509,7 +504,7 @@ export class TreatyMonitor {
       totalTreaties: this.treaties.size,
       treatiesByStatus,
       treatiesByCategory,
-      activeParties
+      activeParties,
     };
   }
 }

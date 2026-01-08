@@ -58,10 +58,11 @@ const fv: FeatureVector = buildFeatureVector(A, B);
 Apply weighted scoring:
 
 ```typescript
-score = Σ(normalizedFeatureValue * weight)
+score = Σ(normalizedFeatureValue * weight);
 ```
 
 Example:
+
 ```
 score = 0.92 * 0.3 (name)
       + 1.0 * 0.4  (email)
@@ -75,9 +76,9 @@ score = 0.92 * 0.3 (name)
 Apply thresholds:
 
 ```typescript
-if (score >= 0.8) return 'MERGE';
-if (score <= 0.5) return 'NO_MATCH';
-return 'REVIEW';
+if (score >= 0.8) return "MERGE";
+if (score <= 0.5) return "NO_MATCH";
+return "REVIEW";
 ```
 
 ### 4. Explainability
@@ -132,6 +133,7 @@ Comparing all pairs of N records requires O(N²) comparisons.
 ### Example
 
 Records:
+
 ```
 A: email=alice@example.com
 B: email=bob@example.com
@@ -139,6 +141,7 @@ C: email=charlie@different.com
 ```
 
 Blocking groups:
+
 ```
 email_domain:example.com → [A, B]
 email_domain:different.com → [C]
@@ -254,14 +257,14 @@ if (analystConfirms) {
     decision.recordIdA,
     decision.recordIdB,
     analystUserId,
-    'Confirmed by analyst',
+    "Confirmed by analyst",
     decision.id
   );
 }
 
 // 4. If incorrect, analyst can split later
 if (analystRealizesError) {
-  await erService.split(mergeId, 'Incorrect merge', analystUserId);
+  await erService.split(mergeId, "Incorrect merge", analystUserId);
 }
 ```
 
@@ -319,9 +322,9 @@ Monitor:
 
 ```typescript
 const groups = groupByBlockingKeys(records);
-const groupSizes = Array.from(groups.values()).map(g => g.length);
-console.log('Avg group size:', avg(groupSizes));
-console.log('Max group size:', Math.max(...groupSizes));
+const groupSizes = Array.from(groups.values()).map((g) => g.length);
+console.log("Avg group size:", avg(groupSizes));
+console.log("Max group size:", Math.max(...groupSizes));
 ```
 
 ### Scalability
@@ -345,6 +348,7 @@ See [services/entity-resolution/README.md](../services/entity-resolution/README.
 ### Test Coverage
 
 Run:
+
 ```bash
 cd services/entity-resolution
 pnpm test -- --coverage

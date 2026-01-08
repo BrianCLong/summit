@@ -20,15 +20,15 @@ pnpm add @intelgraph/third-party-risk
 ## Usage
 
 ```typescript
-import { ThirdPartyRiskManager } from '@intelgraph/third-party-risk';
+import { ThirdPartyRiskManager } from "@intelgraph/third-party-risk";
 
 const manager = new ThirdPartyRiskManager();
 
 // Initiate vendor onboarding
-const onboarding = manager.initiateOnboarding(vendorId, 'ACME Corp');
+const onboarding = manager.initiateOnboarding(vendorId, "ACME Corp");
 
 // Conduct assessment
-const assessment = await manager.conductAssessment(vendor, 'initial-onboarding');
+const assessment = await manager.conductAssessment(vendor, "initial-onboarding");
 console.log(`Recommendation: ${assessment.recommendation}`);
 
 // Monitor vendor

@@ -12,7 +12,7 @@ spec:
         app: summit-server
     spec:
       containers:
-      - name: summit-server
-        image: summit/server
-        ports:
-        - containerPort: 4000
+        - name: summit-server
+          image: summit/server
+          ports:
+            - containerPort: 4000

@@ -1,7 +1,7 @@
 name: Feature
 description: Track a feature with acceptance criteria
-title: 'feat: <short title>'
-labels: ['ui', 'docs']
+title: "feat: <short title>"
+labels: ["ui", "docs"]
 body:
   - type: input
     id: summary
@@ -31,4 +31,4 @@ body:
     id: security
     attributes:
       label: OPA policies updated?
-      options: ['Yes', 'N/A']
+      options: ["Yes", "N/A"]

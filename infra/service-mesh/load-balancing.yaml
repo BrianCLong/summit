@@ -23,23 +23,23 @@ spec:
       localityLbSetting:
         enabled: true
         distribute:
-        - from: us-east-1a
-          to:
-            "us-east-1a": 90
-            "us-east-1b": 10
-        - from: us-east-1b
-          to:
-            "us-east-1b": 90
-            "us-east-1a": 10
-        - from: us-west-2a
-          to:
-            "us-west-2a": 90
-            "us-west-2b": 10
+          - from: us-east-1a
+            to:
+              "us-east-1a": 90
+              "us-east-1b": 10
+          - from: us-east-1b
+            to:
+              "us-east-1b": 90
+              "us-east-1a": 10
+          - from: us-west-2a
+            to:
+              "us-west-2a": 90
+              "us-west-2b": 10
         failover:
-        - from: us-east-1
-          to: us-west-2
-        - from: us-west-2
-          to: us-east-1
+          - from: us-east-1
+            to: us-west-2
+          - from: us-west-2
+            to: us-east-1
 
 ---
 # API Gateway - Consistent hashing for session affinity
@@ -61,27 +61,27 @@ spec:
       localityLbSetting:
         enabled: true
         failover:
-        - from: us-east-1
-          to: us-west-2
+          - from: us-east-1
+            to: us-west-2
   subsets:
-  - name: v1
-    labels:
-      version: v1
-    trafficPolicy:
-      loadBalancer:
-        simple: LEAST_REQUEST
-  - name: v2
-    labels:
-      version: v2
-    trafficPolicy:
-      loadBalancer:
-        simple: LEAST_REQUEST
-  - name: canary
-    labels:
-      version: canary
-    trafficPolicy:
-      loadBalancer:
-        simple: ROUND_ROBIN
+    - name: v1
+      labels:
+        version: v1
+      trafficPolicy:
+        loadBalancer:
+          simple: LEAST_REQUEST
+    - name: v2
+      labels:
+        version: v2
+      trafficPolicy:
+        loadBalancer:
+          simple: LEAST_REQUEST
+    - name: canary
+      labels:
+        version: canary
+      trafficPolicy:
+        loadBalancer:
+          simple: ROUND_ROBIN
 
 ---
 # Graph Core - Tenant-based consistent hashing
@@ -100,12 +100,12 @@ spec:
       localityLbSetting:
         enabled: true
   subsets:
-  - name: stable
-    labels:
-      track: stable
-  - name: canary
-    labels:
-      track: canary
+    - name: stable
+      labels:
+        track: stable
+    - name: canary
+      labels:
+        track: canary
 
 ---
 # Neo4j - Primary/Read-Replica topology
@@ -120,18 +120,18 @@ spec:
     loadBalancer:
       simple: ROUND_ROBIN
   subsets:
-  - name: primary
-    labels:
-      role: primary
-    trafficPolicy:
-      loadBalancer:
-        simple: PASSTHROUGH # Direct connection to leader
-  - name: read-replica
-    labels:
-      role: read-replica
-    trafficPolicy:
-      loadBalancer:
-        simple: LEAST_REQUEST # Distribute reads
+    - name: primary
+      labels:
+        role: primary
+      trafficPolicy:
+        loadBalancer:
+          simple: PASSTHROUGH # Direct connection to leader
+    - name: read-replica
+      labels:
+        role: read-replica
+      trafficPolicy:
+        loadBalancer:
+          simple: LEAST_REQUEST # Distribute reads
 
 ---
 # VirtualService for Neo4j read/write splitting
@@ -142,34 +142,34 @@ metadata:
   namespace: summit
 spec:
   hosts:
-  - neo4j.summit.svc.cluster.local
+    - neo4j.summit.svc.cluster.local
   http:
-  - match:
-    - headers:
-        x-neo4j-mode:
-          exact: write
-    route:
-    - destination:
-        host: neo4j.summit.svc.cluster.local
-        subset: primary
-      weight: 100
-  - match:
-    - headers:
-        x-neo4j-mode:
-          exact: read
-    route:
-    - destination:
-        host: neo4j.summit.svc.cluster.local
-        subset: read-replica
-      weight: 90
-    - destination:
-        host: neo4j.summit.svc.cluster.local
-        subset: primary
-      weight: 10 # Fallback to primary
-  - route: # Default to primary for safety
-    - destination:
-        host: neo4j.summit.svc.cluster.local
-        subset: primary
+    - match:
+        - headers:
+            x-neo4j-mode:
+              exact: write
+      route:
+        - destination:
+            host: neo4j.summit.svc.cluster.local
+            subset: primary
+          weight: 100
+    - match:
+        - headers:
+            x-neo4j-mode:
+              exact: read
+      route:
+        - destination:
+            host: neo4j.summit.svc.cluster.local
+            subset: read-replica
+          weight: 90
+        - destination:
+            host: neo4j.summit.svc.cluster.local
+            subset: primary
+          weight: 10 # Fallback to primary
+    - route: # Default to primary for safety
+        - destination:
+            host: neo4j.summit.svc.cluster.local
+            subset: primary
 
 ---
 # PostgreSQL - Connection pooling with PgBouncer
@@ -187,15 +187,15 @@ spec:
       tcp:
         maxConnections: 100
   subsets:
-  - name: primary
-    labels:
-      role: primary
-  - name: replica
-    labels:
-      role: replica
-    trafficPolicy:
-      loadBalancer:
-        simple: ROUND_ROBIN
+    - name: primary
+      labels:
+        role: primary
+    - name: replica
+      labels:
+        role: replica
+      trafficPolicy:
+        loadBalancer:
+          simple: ROUND_ROBIN
 
 ---
 # Redis - Primary/Replica with sentinel
@@ -210,18 +210,18 @@ spec:
     loadBalancer:
       simple: LEAST_REQUEST
   subsets:
-  - name: primary
-    labels:
-      role: master
-    trafficPolicy:
-      loadBalancer:
-        simple: PASSTHROUGH
-  - name: replica
-    labels:
-      role: replica
-    trafficPolicy:
-      loadBalancer:
-        simple: ROUND_ROBIN
+    - name: primary
+      labels:
+        role: master
+      trafficPolicy:
+        loadBalancer:
+          simple: PASSTHROUGH
+    - name: replica
+      labels:
+        role: replica
+      trafficPolicy:
+        loadBalancer:
+          simple: ROUND_ROBIN
 
 ---
 # VirtualService for Redis read/write splitting
@@ -232,15 +232,15 @@ metadata:
   namespace: summit
 spec:
   hosts:
-  - redis.summit.svc.cluster.local
+    - redis.summit.svc.cluster.local
   tcp:
-  - match:
-    - port: 6379
-    route:
-    - destination:
-        host: redis.summit.svc.cluster.local
-        subset: primary
-      weight: 100
+    - match:
+        - port: 6379
+      route:
+        - destination:
+            host: redis.summit.svc.cluster.local
+            subset: primary
+          weight: 100
 
 ---
 # NLP Service - Least request for optimal distribution
@@ -307,8 +307,8 @@ spec:
       localityLbSetting:
         enabled: true
         failover:
-        - from: us-east-1
-          to: us-west-2
+          - from: us-east-1
+            to: us-west-2
 
 ---
 # Webhook Services - Session-based routing
@@ -334,26 +334,26 @@ metadata:
   namespace: summit
 spec:
   hosts:
-  - graph-core.summit.svc.cluster.local
+    - graph-core.summit.svc.cluster.local
   http:
-  - match:
-    - headers:
-        x-canary:
-          exact: "true"
-    route:
-    - destination:
-        host: graph-core.summit.svc.cluster.local
-        subset: canary
-      weight: 100
-  - route:
-    - destination:
-        host: graph-core.summit.svc.cluster.local
-        subset: stable
-      weight: 95
-    - destination:
-        host: graph-core.summit.svc.cluster.local
-        subset: canary
-      weight: 5 # 5% canary traffic
+    - match:
+        - headers:
+            x-canary:
+              exact: "true"
+      route:
+        - destination:
+            host: graph-core.summit.svc.cluster.local
+            subset: canary
+          weight: 100
+    - route:
+        - destination:
+            host: graph-core.summit.svc.cluster.local
+            subset: stable
+          weight: 95
+        - destination:
+            host: graph-core.summit.svc.cluster.local
+            subset: canary
+          weight: 5 # 5% canary traffic
 
 ---
 # Geographic Load Balancing
@@ -369,29 +369,29 @@ spec:
       localityLbSetting:
         enabled: true
         distribute:
-        - from: us-east-1/*
-          to:
-            "us-east-1/*": 80
-            "us-west-2/*": 20
-        - from: us-west-2/*
-          to:
-            "us-west-2/*": 80
-            "us-east-1/*": 20
-        - from: eu-west-1/*
-          to:
-            "eu-west-1/*": 80
-            "us-east-1/*": 20
+          - from: us-east-1/*
+            to:
+              "us-east-1/*": 80
+              "us-west-2/*": 20
+          - from: us-west-2/*
+            to:
+              "us-west-2/*": 80
+              "us-east-1/*": 20
+          - from: eu-west-1/*
+            to:
+              "eu-west-1/*": 80
+              "us-east-1/*": 20
         failover:
-        - from: us-east-1
-          to: us-west-2
-        - from: us-west-2
-          to: us-east-1
-        - from: eu-west-1
-          to: us-east-1
+          - from: us-east-1
+            to: us-west-2
+          - from: us-west-2
+            to: us-east-1
+          - from: eu-west-1
+            to: us-east-1
         failoverPriority:
-        - us-east-1
-        - us-west-2
-        - eu-west-1
+          - us-east-1
+          - us-west-2
+          - eu-west-1
 
 ---
 # Priority-based Load Balancing
@@ -403,25 +403,25 @@ metadata:
 spec:
   host: high-priority.summit.svc.cluster.local
   subsets:
-  - name: high-performance
-    labels:
-      tier: premium
-      performance: high
-    trafficPolicy:
-      loadBalancer:
-        simple: LEAST_REQUEST
-  - name: standard
-    labels:
-      tier: standard
-    trafficPolicy:
-      loadBalancer:
-        simple: ROUND_ROBIN
-  - name: best-effort
-    labels:
-      tier: best-effort
-    trafficPolicy:
-      loadBalancer:
-        simple: RANDOM
+    - name: high-performance
+      labels:
+        tier: premium
+        performance: high
+      trafficPolicy:
+        loadBalancer:
+          simple: LEAST_REQUEST
+    - name: standard
+      labels:
+        tier: standard
+      trafficPolicy:
+        loadBalancer:
+          simple: ROUND_ROBIN
+    - name: best-effort
+      labels:
+        tier: best-effort
+      trafficPolicy:
+        loadBalancer:
+          simple: RANDOM
 
 ---
 # VirtualService for Priority Routing
@@ -432,28 +432,28 @@ metadata:
   namespace: summit
 spec:
   hosts:
-  - high-priority.summit.svc.cluster.local
+    - high-priority.summit.svc.cluster.local
   http:
-  - match:
-    - headers:
-        x-priority:
-          exact: high
-    route:
-    - destination:
-        host: high-priority.summit.svc.cluster.local
-        subset: high-performance
-  - match:
-    - headers:
-        x-priority:
-          exact: standard
-    route:
-    - destination:
-        host: high-priority.summit.svc.cluster.local
-        subset: standard
-  - route: # Default to best-effort
-    - destination:
-        host: high-priority.summit.svc.cluster.local
-        subset: best-effort
+    - match:
+        - headers:
+            x-priority:
+              exact: high
+      route:
+        - destination:
+            host: high-priority.summit.svc.cluster.local
+            subset: high-performance
+    - match:
+        - headers:
+            x-priority:
+              exact: standard
+      route:
+        - destination:
+            host: high-priority.summit.svc.cluster.local
+            subset: standard
+    - route: # Default to best-effort
+        - destination:
+            host: high-priority.summit.svc.cluster.local
+            subset: best-effort
 
 ---
 # Health-based Load Balancing
@@ -484,11 +484,11 @@ metadata:
   namespace: summit
 spec:
   hosts:
-  - summit.remote-cluster.example.com
+    - summit.remote-cluster.example.com
   ports:
-  - number: 443
-    name: https
-    protocol: HTTPS
+    - number: 443
+      name: https
+      protocol: HTTPS
   location: MESH_EXTERNAL
   resolution: DNS
 
@@ -507,8 +507,8 @@ spec:
       localityLbSetting:
         enabled: true
         failover:
-        - from: primary-cluster
-          to: secondary-cluster
+          - from: primary-cluster
+            to: secondary-cluster
     tls:
       mode: ISTIO_MUTUAL
       sni: summit.remote-cluster.example.com

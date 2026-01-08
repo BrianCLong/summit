@@ -15,25 +15,25 @@ export interface StrategicForesight {
 }
 
 export type ForesightMethodology =
-  | 'futures-wheel'
-  | 'causal-layered-analysis'
-  | 'morphological-analysis'
-  | 'cross-impact-analysis'
-  | 'relevance-trees'
-  | 'roadmapping';
+  | "futures-wheel"
+  | "causal-layered-analysis"
+  | "morphological-analysis"
+  | "cross-impact-analysis"
+  | "relevance-trees"
+  | "roadmapping";
 
 export interface ForesightInsight {
   id: string;
   insight: string;
   implications: string[];
-  confidence: 'low' | 'medium' | 'high';
+  confidence: "low" | "medium" | "high";
   evidence: string[];
 }
 
 export interface StrategicRecommendation {
   id: string;
   recommendation: string;
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  priority: "low" | "medium" | "high" | "critical";
   timeframe: string;
   stakeholders: string[];
   resources: string[];

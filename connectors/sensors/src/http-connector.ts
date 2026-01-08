@@ -7,11 +7,15 @@
  * @module http-connector
  */
 
-import type { Logger } from 'pino';
+import type { Logger } from "pino";
 
-import { SignalTypeId, type RawSignalInput, type SignalTypeIdType } from '@intelgraph/signal-contracts';
+import {
+  SignalTypeId,
+  type RawSignalInput,
+  type SignalTypeIdType,
+} from "@intelgraph/signal-contracts";
 
-import { BaseConnector, type BaseConnectorConfig } from './base-connector.js';
+import { BaseConnector, type BaseConnectorConfig } from "./base-connector.js";
 
 /**
  * HTTP connector configuration
@@ -48,7 +52,7 @@ export class HttpConnector extends BaseConnector {
    */
   protected async doConnect(): Promise<void> {
     this.isListening = true;
-    this.logger.info({ webhookPath: this.httpConfig.webhookPath }, 'HTTP connector ready');
+    this.logger.info({ webhookPath: this.httpConfig.webhookPath }, "HTTP connector ready");
   }
 
   /**
@@ -56,7 +60,7 @@ export class HttpConnector extends BaseConnector {
    */
   protected async doDisconnect(): Promise<void> {
     this.isListening = false;
-    this.logger.info('HTTP connector stopped');
+    this.logger.info("HTTP connector stopped");
   }
 
   /**
@@ -69,20 +73,23 @@ export class HttpConnector extends BaseConnector {
   /**
    * Handle incoming webhook data
    */
-  handleWebhook(data: unknown, headers?: Record<string, string>): {
+  handleWebhook(
+    data: unknown,
+    headers?: Record<string, string>
+  ): {
     success: boolean;
     signalCount: number;
     error?: string;
   } {
     if (!this.isListening) {
-      return { success: false, signalCount: 0, error: 'Connector not listening' };
+      return { success: false, signalCount: 0, error: "Connector not listening" };
     }
 
     // Validate auth token if configured
     if (this.httpConfig.authToken) {
-      const authHeader = headers?.['authorization'] ?? headers?.['Authorization'];
+      const authHeader = headers?.["authorization"] ?? headers?.["Authorization"];
       if (authHeader !== `Bearer ${this.httpConfig.authToken}`) {
-        return { success: false, signalCount: 0, error: 'Unauthorized' };
+        return { success: false, signalCount: 0, error: "Unauthorized" };
       }
     }
 
@@ -107,17 +114,17 @@ export class HttpConnector extends BaseConnector {
           ...signal,
           tenantId: signal.tenantId ?? this.httpConfig.tenantId,
           sourceId: signal.sourceId ?? this.httpConfig.connectorId,
-          sourceType: signal.sourceType ?? 'application',
+          sourceType: signal.sourceType ?? "application",
         });
       }
 
       return { success: true, signalCount: signals.length };
     } catch (error) {
-      this.logger.error({ error }, 'Failed to process webhook data');
+      this.logger.error({ error }, "Failed to process webhook data");
       return {
         success: false,
         signalCount: 0,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
       };
     }
   }

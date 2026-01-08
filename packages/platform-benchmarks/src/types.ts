@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Benchmark configuration schema
@@ -6,9 +6,9 @@ import { z } from 'zod';
 export const BenchmarkConfigSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
-  subsystem: z.enum(['api', 'graph', 'ml', 'worker', 'cache', 'db']),
-  language: z.enum(['typescript', 'python', 'go']),
-  workloadType: z.enum(['cpu', 'memory', 'io', 'network', 'mixed']),
+  subsystem: z.enum(["api", "graph", "ml", "worker", "cache", "db"]),
+  language: z.enum(["typescript", "python", "go"]),
+  workloadType: z.enum(["cpu", "memory", "io", "network", "mixed"]),
   iterations: z.number().int().positive().default(1000),
   warmupIterations: z.number().int().nonnegative().default(100),
   timeout: z.number().positive().default(30000), // ms
@@ -129,7 +129,7 @@ export interface BaselineComparison {
   /** Whether this is a regression */
   isRegression: boolean;
   /** Regression severity if applicable */
-  severity?: 'minor' | 'moderate' | 'severe';
+  severity?: "minor" | "moderate" | "severe";
 }
 
 /**
@@ -198,7 +198,7 @@ export interface BenchmarkReporter {
 /**
  * CI output format
  */
-export type OutputFormat = 'json' | 'markdown' | 'csv' | 'console';
+export type OutputFormat = "json" | "markdown" | "csv" | "console";
 
 /**
  * CLI options

@@ -18,7 +18,7 @@ paths:
                 request:
                   type: object
       responses:
-        '200':
+        "200":
           description: Run executed
           content:
             application/json:

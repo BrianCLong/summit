@@ -3,20 +3,25 @@
  * Types and interfaces for scenario planning and foresight analysis
  */
 
-export type ScenarioType = 'baseline' | 'optimistic' | 'pessimistic' | 'transformative' | 'disruptive';
+export type ScenarioType =
+  | "baseline"
+  | "optimistic"
+  | "pessimistic"
+  | "transformative"
+  | "disruptive";
 
 export type ForesightMethod =
-  | 'scenario-planning'
-  | 'delphi'
-  | 'horizon-scanning'
-  | 'trend-analysis'
-  | 'cross-impact-analysis'
-  | 'morphological-analysis'
-  | 'backcasting'
-  | 'futures-wheel'
-  | 'causal-layered-analysis';
+  | "scenario-planning"
+  | "delphi"
+  | "horizon-scanning"
+  | "trend-analysis"
+  | "cross-impact-analysis"
+  | "morphological-analysis"
+  | "backcasting"
+  | "futures-wheel"
+  | "causal-layered-analysis";
 
-export type TimeHorizon = 'near-term' | 'mid-term' | 'long-term' | 'very-long-term';
+export type TimeHorizon = "near-term" | "mid-term" | "long-term" | "very-long-term";
 
 export interface FutureScenario {
   id: string;
@@ -41,11 +46,11 @@ export interface FutureScenario {
 export interface DrivingForce {
   id: string;
   name: string;
-  category: 'political' | 'economic' | 'social' | 'technological' | 'environmental' | 'legal';
+  category: "political" | "economic" | "social" | "technological" | "environmental" | "legal";
   description: string;
-  trajectory: 'increasing' | 'decreasing' | 'stable' | 'volatile' | 'uncertain';
-  impact: 'low' | 'medium' | 'high' | 'very-high';
-  uncertainty: 'low' | 'medium' | 'high';
+  trajectory: "increasing" | "decreasing" | "stable" | "volatile" | "uncertain";
+  impact: "low" | "medium" | "high" | "very-high";
+  uncertainty: "low" | "medium" | "high";
   interconnections: string[];
 }
 
@@ -56,7 +61,7 @@ export interface Uncertainty {
   dimension: string;
   outcomes: UncertaintyOutcome[];
   currentIndicators: string[];
-  criticalityLevel: 'low' | 'medium' | 'high' | 'critical';
+  criticalityLevel: "low" | "medium" | "high" | "critical";
 }
 
 export interface UncertaintyOutcome {
@@ -73,13 +78,13 @@ export interface ScenarioIndicator {
   scenarioValue: number | string;
   unit?: string;
   source?: string;
-  confidence: 'low' | 'medium' | 'high';
+  confidence: "low" | "medium" | "high";
 }
 
 export interface Implication {
   domain: string;
   description: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   opportunities: string[];
   threats: string[];
   requiredActions: string[];
@@ -92,7 +97,7 @@ export interface Signpost {
   threshold?: string;
   observed: boolean;
   observedDate?: Date;
-  significance: 'low' | 'medium' | 'high' | 'critical';
+  significance: "low" | "medium" | "high" | "critical";
 }
 
 export interface AlternativeFuture {
@@ -130,7 +135,7 @@ export interface BranchingPoint {
   description: string;
   decision: string;
   options: BranchOption[];
-  criticality: 'low' | 'medium' | 'high' | 'critical';
+  criticality: "low" | "medium" | "high" | "critical";
   timeframe: string;
 }
 
@@ -147,9 +152,9 @@ export interface TrendAnalysis {
   trend: string;
   description: string;
   category: string;
-  strength: 'weak' | 'emerging' | 'strong' | 'dominant';
-  direction: 'ascending' | 'descending' | 'stable' | 'cyclical';
-  velocity: 'slow' | 'moderate' | 'fast' | 'accelerating';
+  strength: "weak" | "emerging" | "strong" | "dominant";
+  direction: "ascending" | "descending" | "stable" | "cyclical";
+  velocity: "slow" | "moderate" | "fast" | "accelerating";
   dataPoints: TrendDataPoint[];
   projection: TrendProjection;
   inflectionPoints: InflectionPoint[];
@@ -160,7 +165,7 @@ export interface TrendDataPoint {
   date: Date;
   value: number;
   source: string;
-  confidence: 'low' | 'medium' | 'high';
+  confidence: "low" | "medium" | "high";
 }
 
 export interface TrendProjection {
@@ -178,7 +183,7 @@ export interface InflectionPoint {
   date: Date;
   description: string;
   cause: string;
-  impact: 'minor' | 'moderate' | 'major' | 'transformative';
+  impact: "minor" | "moderate" | "major" | "transformative";
 }
 
 export interface HorizonScan {
@@ -198,9 +203,9 @@ export interface ScanFinding {
   description: string;
   source: string;
   category: string;
-  novelty: 'incremental' | 'significant' | 'breakthrough' | 'paradigm-shift';
-  relevance: 'low' | 'medium' | 'high' | 'critical';
-  urgency: 'low' | 'medium' | 'high' | 'immediate';
+  novelty: "incremental" | "significant" | "breakthrough" | "paradigm-shift";
+  relevance: "low" | "medium" | "high" | "critical";
+  urgency: "low" | "medium" | "high" | "immediate";
 }
 
 export interface EmergingIssue {
@@ -208,7 +213,7 @@ export interface EmergingIssue {
   issue: string;
   description: string;
   firstIdentified: Date;
-  momentum: 'stalling' | 'stable' | 'growing' | 'accelerating';
+  momentum: "stalling" | "stable" | "growing" | "accelerating";
   stakeholders: string[];
   potentialImpact: string[];
   responseOptions: string[];
@@ -222,7 +227,7 @@ export interface DelphiStudy {
   consensus: ConsensusResult;
   startDate: Date;
   endDate?: Date;
-  status: 'planning' | 'active' | 'completed' | 'archived';
+  status: "planning" | "active" | "completed" | "archived";
 }
 
 export interface DelphiRound {
@@ -236,7 +241,7 @@ export interface DelphiRound {
 export interface DelphiQuestion {
   id: string;
   question: string;
-  type: 'forecast' | 'probability' | 'impact' | 'timeline' | 'ranking';
+  type: "forecast" | "probability" | "impact" | "timeline" | "ranking";
   context?: string;
 }
 
@@ -262,7 +267,7 @@ export interface ConsensusResult {
   medianValue?: number;
   iqr?: [number, number];
   outliers: DelphiResponse[];
-  convergence: 'diverging' | 'stable' | 'converging' | 'consensus';
+  convergence: "diverging" | "stable" | "converging" | "consensus";
 }
 
 export interface CrossImpactAnalysis {
@@ -301,7 +306,7 @@ export interface BackcastingAnalysis {
 export interface BackcastingPathway {
   name: string;
   steps: BackcastingStep[];
-  feasibility: 'low' | 'medium' | 'high';
+  feasibility: "low" | "medium" | "high";
   risks: string[];
   enablers: string[];
 }
@@ -322,9 +327,9 @@ export interface BackcastingMilestone {
 }
 
 export interface RequiredChange {
-  type: 'policy' | 'technology' | 'behavior' | 'infrastructure' | 'institutional';
+  type: "policy" | "technology" | "behavior" | "infrastructure" | "institutional";
   description: string;
-  magnitude: 'incremental' | 'substantial' | 'transformational';
+  magnitude: "incremental" | "substantial" | "transformational";
   timeframe: string;
   stakeholders: string[];
 }

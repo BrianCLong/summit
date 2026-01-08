@@ -54,7 +54,7 @@ spec:
       containers:
         - name: blackbox-exporter
           image: prom/blackbox-exporter:v0.25.0
-          args: ['--config.file=/etc/blackbox/blackbox.yml']
+          args: ["--config.file=/etc/blackbox/blackbox.yml"]
           ports: [{ containerPort: 9115 }]
           volumeMounts:
             - name: cfg
@@ -127,17 +127,17 @@ groups:
       - alert: GatewayDown
         expr: probe_success{job="blackbox-gateway"} == 0
         for: 2m
-        labels: { severity: critical, team: 'intelgraph' }
+        labels: { severity: critical, team: "intelgraph" }
         annotations:
-          summary: 'Gateway GraphQL unreachable'
-          description: 'Synthetic probe failed for 2m. Check ingress, DNS, pods.'
+          summary: "Gateway GraphQL unreachable"
+          description: "Synthetic probe failed for 2m. Check ingress, DNS, pods."
       - alert: WalletVerifyDown
         expr: probe_success{job="blackbox-wallet"} == 0
         for: 5m
-        labels: { severity: warning, team: 'intelgraph' }
+        labels: { severity: warning, team: "intelgraph" }
         annotations:
-          summary: 'Wallet verify endpoint unreachable'
-          description: 'Wallet health probe failing.'
+          summary: "Wallet verify endpoint unreachable"
+          description: "Wallet health probe failing."
 ```
 
 ```yaml
@@ -169,7 +169,7 @@ route:
 # .github/workflows/synthetics-check.yaml
 name: synthetics-check
 on:
-  schedule: [{ cron: '*/5 * * * *' }]
+  schedule: [{ cron: "*/5 * * * *" }]
   workflow_dispatch: {}
 jobs:
   ext:
@@ -226,7 +226,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata: { name: intelgraph-backup, namespace: intelgraph }
 spec:
-  schedule: '0 2 * * *'
+  schedule: "0 2 * * *"
   jobTemplate:
     spec:
       template:
@@ -236,7 +236,7 @@ spec:
             - name: backup
               image: ghcr.io/ORG/intelgraph/ops-runner:latest
               envFrom: [{ secretRef: { name: intelgraph-secrets } }]
-              command: ['/bin/sh', '-lc', 'bash ops/backup/backup.sh']
+              command: ["/bin/sh", "-lc", "bash ops/backup/backup.sh"]
 ```
 
 ### 2.3 DR Playbook
@@ -296,18 +296,9 @@ name: helm-release
 on:
   workflow_dispatch:
     inputs:
-      version:
-        {
-          description: 'Chart semver (e.g., 1.0.0)',
-          required: true,
-          type: string,
-        }
+      version: { description: "Chart semver (e.g., 1.0.0)", required: true, type: string }
       appVersion:
-        {
-          description: 'App version tag (e.g., v1.0.0-uni)',
-          required: true,
-          type: string,
-        }
+        { description: "App version tag (e.g., v1.0.0-uni)", required: true, type: string }
 jobs:
   publish:
     runs-on: ubuntu-latest

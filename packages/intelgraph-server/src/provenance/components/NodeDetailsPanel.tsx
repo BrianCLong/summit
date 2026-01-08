@@ -1,9 +1,5 @@
 import React from "react";
-import type {
-  ProvenanceNode,
-  SBOMNode,
-  AttestationNode,
-} from "../graphTypes";
+import type { ProvenanceNode, SBOMNode, AttestationNode } from "../graphTypes";
 
 interface Props {
   node: ProvenanceNode | null;
@@ -70,9 +66,7 @@ export const NodeDetailsPanel: React.FC<Props> = ({ node }) => {
           </div>
           <div>
             <div className="text-xs text-gray-500">Commit</div>
-            <div className="font-mono text-xs break-all">
-              {att.metadata.commit}
-            </div>
+            <div className="font-mono text-xs break-all">{att.metadata.commit}</div>
           </div>
           <div>
             <div className="text-xs text-gray-500">Repo</div>
@@ -80,9 +74,7 @@ export const NodeDetailsPanel: React.FC<Props> = ({ node }) => {
           </div>
           <div>
             <div className="text-xs text-gray-500">Signature</div>
-            <div>
-              {att.metadata.signatureVerified ? "Verified ✅" : "Unverified ⚠️"}
-            </div>
+            <div>{att.metadata.signatureVerified ? "Verified ✅" : "Unverified ⚠️"}</div>
           </div>
         </div>
       </div>

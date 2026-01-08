@@ -1,15 +1,15 @@
 meta:
   id: implement.fix-test@v1
-  owner: 'platform-ai'
-  purpose: 'Fix failing unit tests without changing public API'
+  owner: "platform-ai"
+  purpose: "Fix failing unit tests without changing public API"
   guardrails:
-    - 'Never introduce network calls in unit tests'
-    - 'Respect license/TOS of any pasted snippet; cite source or omit'
-    - 'If unsure about behavior, create a TODO with hypothesis & confidence'
-    - 'Preserve existing test structure and naming conventions'
+    - "Never introduce network calls in unit tests"
+    - "Respect license/TOS of any pasted snippet; cite source or omit"
+    - "If unsure about behavior, create a TODO with hypothesis & confidence"
+    - "Preserve existing test structure and naming conventions"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.0
   maxTokens: 2000
 
@@ -59,26 +59,26 @@ template: |
   [any new test cases needed]
 
 examples:
-  - name: 'typescript-async-test-fix'
+  - name: "typescript-async-test-fix"
     inputs:
       test_output: "TypeError: Cannot read property 'then' of undefined at UserService.test.ts:45"
-      code_context: 'async getUserById(id: string) { return this.db.findUser(id); }'
+      code_context: "async getUserById(id: string) { return this.db.findUser(id); }"
       budget_usd: 1.5
-      file_path: 'src/services/UserService.ts'
+      file_path: "src/services/UserService.ts"
     expected_contains:
-      - 'async getUserById'
-      - 'await this.db.findUser'
-      - 'Root cause:'
-      - 'Confidence:'
+      - "async getUserById"
+      - "await this.db.findUser"
+      - "Root cause:"
+      - "Confidence:"
 
-  - name: 'react-component-test-fix'
+  - name: "react-component-test-fix"
     inputs:
       test_output: "Expected component to render 'Loading...' but got null"
-      code_context: 'const Loading = ({ isLoading }) => isLoading ? <div>Loading...</div> : null'
+      code_context: "const Loading = ({ isLoading }) => isLoading ? <div>Loading...</div> : null"
       budget_usd: 2.0
-      file_path: 'src/components/Loading.tsx'
+      file_path: "src/components/Loading.tsx"
     expected_contains:
-      - 'isLoading'
-      - 'Loading...'
-      - 'diff'
-      - 'Risk assessment:'
+      - "isLoading"
+      - "Loading..."
+      - "diff"
+      - "Risk assessment:"

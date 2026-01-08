@@ -69,9 +69,7 @@
     {
       "type": "stat",
       "title": "Requests per second",
-      "targets": [
-        { "expr": "sum(rate(graphql_requests_total[$__rate_interval]))" }
-      ],
+      "targets": [{ "expr": "sum(rate(graphql_requests_total[$__rate_interval]))" }],
       "gridPos": { "h": 6, "w": 8, "x": 16, "y": 14 }
     }
   ],

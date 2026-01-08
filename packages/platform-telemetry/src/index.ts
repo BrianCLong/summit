@@ -12,11 +12,11 @@
  */
 
 // Metrics exports
-export * from './metrics/taxonomy.js';
-export * from './metrics/registry.js';
+export * from "./metrics/taxonomy.js";
+export * from "./metrics/registry.js";
 
 // Tracing exports
-export * from './tracing/tracer.js';
+export * from "./tracing/tracer.js";
 
 // Re-export commonly used types
 export {
@@ -30,7 +30,7 @@ export {
   RuntimeMetrics,
   getAllMetrics,
   getMetricByName,
-} from './metrics/taxonomy.js';
+} from "./metrics/taxonomy.js";
 
 export {
   MetricsRegistry,
@@ -38,7 +38,7 @@ export {
   httpMetrics,
   dbMetrics,
   cacheMetrics,
-} from './metrics/registry.js';
+} from "./metrics/registry.js";
 
 export {
   initializeTracing,
@@ -54,13 +54,13 @@ export {
   Trace,
   spans,
   SummitAttributes,
-} from './tracing/tracer.js';
+} from "./tracing/tracer.js";
 
 // Convenience initialization
-import type { TracingConfig } from './tracing/tracer.js';
-import type { MetricsConfig } from './metrics/registry.js';
-import { initializeTracing } from './tracing/tracer.js';
-import { getMetricsRegistry } from './metrics/registry.js';
+import type { TracingConfig } from "./tracing/tracer.js";
+import type { MetricsConfig } from "./metrics/registry.js";
+import { initializeTracing } from "./tracing/tracer.js";
+import { getMetricsRegistry } from "./metrics/registry.js";
 
 export interface TelemetryConfig {
   tracing: Partial<TracingConfig>;

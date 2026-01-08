@@ -3,10 +3,10 @@ namespace: intelgraph-dev
 image:
   app:
     repository: <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/intelgraph/app
-    tag: 'latest'
+    tag: "latest"
   web:
     repository: <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/intelgraph/web
-    tag: 'latest'
+    tag: "latest"
 
 ingress:
   enabled: true
@@ -37,7 +37,7 @@ signer:
   replicas: 1
   image:
     repository: <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/intelgraph/signer
-    tag: 'latest'
+    tag: "latest"
   service:
     port: 8081
   bundle:
@@ -52,9 +52,9 @@ signer:
       memory: 512Mi
 
 neo4j:
-  acceptLicenseAgreement: 'yes'
+  acceptLicenseAgreement: "yes"
   neo4j:
-    password: 'please-reset-in-secret' # overridden by secret
+    password: "please-reset-in-secret" # overridden by secret
   resources:
-    cpu: '1'
-    memory: '2Gi'
+    cpu: "1"
+    memory: "2Gi"

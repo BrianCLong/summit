@@ -47,16 +47,16 @@ The Agentic Mesh is a secure, auditable, ultra-resilient multi-LLM, multi-tool, 
 
 ### Service Descriptions
 
-| Service | Purpose | Port |
-|---------|---------|------|
-| **mesh-orchestrator** | Top-level task coordination, flow execution | 5000 |
-| **routing-gateway** | Model/agent selection based on policy, cost, latency | 5001 |
-| **policy-enforcer** | OPA-style policy evaluation for all operations | 5002 |
-| **provenance-service** | Audit trail, decision lineage, explainability | 5003 |
-| **agent-registry** | Agent discovery, capability matching, health checks | 5004 |
-| **tool-registry** | Tool discovery, invocation proxying, rate limiting | 5005 |
-| **events-bus** | Pub/sub for async agent communication (Redis Streams/Kafka) | 5006 |
-| **task-queue** | Durable task scheduling and retry (BullMQ/Temporal) | 5007 |
+| Service                | Purpose                                                     | Port |
+| ---------------------- | ----------------------------------------------------------- | ---- |
+| **mesh-orchestrator**  | Top-level task coordination, flow execution                 | 5000 |
+| **routing-gateway**    | Model/agent selection based on policy, cost, latency        | 5001 |
+| **policy-enforcer**    | OPA-style policy evaluation for all operations              | 5002 |
+| **provenance-service** | Audit trail, decision lineage, explainability               | 5003 |
+| **agent-registry**     | Agent discovery, capability matching, health checks         | 5004 |
+| **tool-registry**      | Tool discovery, invocation proxying, rate limiting          | 5005 |
+| **events-bus**         | Pub/sub for async agent communication (Redis Streams/Kafka) | 5006 |
+| **task-queue**         | Durable task scheduling and retry (BullMQ/Temporal)         | 5007 |
 
 ---
 
@@ -197,21 +197,21 @@ CREATE TABLE tools (
 
 ### Model Provider Failures
 
-| Scenario | Response |
-|----------|----------|
-| Provider timeout | Retry with exponential backoff (3 attempts) |
-| Provider down | Failover to secondary provider |
-| Rate limit hit | Queue tasks, apply backpressure |
-| Token budget exceeded | Reject task with clear error |
+| Scenario              | Response                                    |
+| --------------------- | ------------------------------------------- |
+| Provider timeout      | Retry with exponential backoff (3 attempts) |
+| Provider down         | Failover to secondary provider              |
+| Rate limit hit        | Queue tasks, apply backpressure             |
+| Token budget exceeded | Reject task with clear error                |
 
 ### Agent Failures
 
-| Scenario | Response |
-|----------|----------|
-| Agent crash | Re-route to equivalent agent |
-| Agent timeout | Kill, log, retry on different agent |
-| Agent produces invalid output | Route to CriticAgent for review |
-| No available agents | Queue with SLO-aware timeout |
+| Scenario                      | Response                            |
+| ----------------------------- | ----------------------------------- |
+| Agent crash                   | Re-route to equivalent agent        |
+| Agent timeout                 | Kill, log, retry on different agent |
+| Agent produces invalid output | Route to CriticAgent for review     |
+| No available agents           | Queue with SLO-aware timeout        |
 
 ### Backpressure Mechanisms
 

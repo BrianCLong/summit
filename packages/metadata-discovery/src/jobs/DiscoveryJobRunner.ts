@@ -11,9 +11,9 @@ import {
   ErrorSeverity,
   DataSourceConfig,
   ExtractionResult,
-} from '../types/discovery.js';
-import { PostgresExtractor } from '../extractors/PostgresExtractor.js';
-import { DataProfiler } from '../profilers/DataProfiler.js';
+} from "../types/discovery.js";
+import { PostgresExtractor } from "../extractors/PostgresExtractor.js";
+import { DataProfiler } from "../profilers/DataProfiler.js";
 
 export interface IDiscoveryJobStore {
   getJob(jobId: string): Promise<DiscoveryJobConfig | null>;
@@ -66,8 +66,8 @@ export class DiscoveryJobRunner {
       execution.status = JobStatus.FAILED;
       execution.completedAt = new Date();
       execution.errors.push({
-        code: 'EXECUTION_FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        code: "EXECUTION_FAILED",
+        message: error instanceof Error ? error.message : "Unknown error",
         source: jobConfig.name,
         timestamp: new Date(),
         severity: ErrorSeverity.CRITICAL,
@@ -87,7 +87,7 @@ export class DiscoveryJobRunner {
     jobConfig: DiscoveryJobConfig
   ): Promise<ExtractionResult> {
     switch (sourceConfig.type) {
-      case 'POSTGRESQL':
+      case "POSTGRESQL":
         return this.extractFromPostgres(sourceConfig, jobConfig);
       // Add more source types as needed
       default:
@@ -115,11 +115,18 @@ export class DiscoveryJobRunner {
   /**
    * Profile discovered assets
    */
-  private async profileAssets(extractionResult: ExtractionResult, jobConfig: DiscoveryJobConfig): Promise<void> {
+  private async profileAssets(
+    extractionResult: ExtractionResult,
+    jobConfig: DiscoveryJobConfig
+  ): Promise<void> {
     for (const asset of extractionResult.assets) {
       if (asset.sampleData.length > 0 && asset.schema?.columns) {
         const columnNames = asset.schema.columns.map((c: any) => c.name);
-        const profilingResult = await this.profiler.profileData(asset.name, asset.sampleData, columnNames);
+        const profilingResult = await this.profiler.profileData(
+          asset.name,
+          asset.sampleData,
+          columnNames
+        );
 
         // Store profiling results
         asset.statistics = {

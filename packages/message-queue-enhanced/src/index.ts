@@ -11,9 +11,9 @@
  * - Backpressure handling
  */
 
-export { KafkaEventStream } from './KafkaEventStream';
-export { RabbitMQQueue } from './RabbitMQQueue';
-export { DeadLetterQueue } from './DeadLetterQueue';
-export { EventSourcingStore } from './EventSourcingStore';
-export { MessageRouter } from './MessageRouter';
-export * from './types';
+export { KafkaEventStream } from "./KafkaEventStream";
+export { RabbitMQQueue } from "./RabbitMQQueue";
+export { DeadLetterQueue } from "./DeadLetterQueue";
+export { EventSourcingStore } from "./EventSourcingStore";
+export { MessageRouter } from "./MessageRouter";
+export * from "./types";

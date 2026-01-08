@@ -9,5 +9,5 @@ export declare function createProvenanceRecord(
   data: Buffer | string,
   algorithm?: string,
   version?: string,
-  timestamp?: string,
+  timestamp?: string
 ): ProvenanceRecord;

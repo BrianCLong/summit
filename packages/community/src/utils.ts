@@ -1,12 +1,8 @@
-import { randomUUID } from 'node:crypto';
+import { randomUUID } from "node:crypto";
 
 export const createId = (prefix: string): string => `${prefix}_${randomUUID()}`;
 
-export const clamp = (
-  value: number,
-  minimum: number,
-  maximum: number,
-): number => {
+export const clamp = (value: number, minimum: number, maximum: number): number => {
   if (value < minimum) {
     return minimum;
   }
@@ -19,9 +15,9 @@ export const clamp = (
 export const normalizeText = (value: string): string =>
   value
     .toLocaleLowerCase()
-    .normalize('NFKD')
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .replace(/\s+/g, ' ')
+    .normalize("NFKD")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
 
 export const scoreMatch = (query: string, target: string): number => {
@@ -36,7 +32,7 @@ export const scoreMatch = (query: string, target: string): number => {
   }
 
   let score = 0;
-  for (const token of normalizedQuery.split(' ')) {
+  for (const token of normalizedQuery.split(" ")) {
     if (normalizedTarget.includes(token)) {
       score += token.length / normalizedTarget.length;
     }

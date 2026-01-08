@@ -4,8 +4,8 @@
  * Detects: anger, fear, joy, sadness, surprise, disgust, trust
  */
 
-import { pipeline, type Pipeline } from '@xenova/transformers';
-import type { EmotionScore, ModelConfig } from '../core/types.js';
+import { pipeline, type Pipeline } from "@xenova/transformers";
+import type { EmotionScore, ModelConfig } from "../core/types.js";
 
 export class EmotionClassifier {
   private pipeline: Pipeline | null = null;
@@ -14,10 +14,10 @@ export class EmotionClassifier {
 
   constructor(config: Partial<ModelConfig> = {}) {
     this.config = {
-      modelName: config.modelName || 'j-hartmann/emotion-english-distilroberta-base',
+      modelName: config.modelName || "j-hartmann/emotion-english-distilroberta-base",
       maxLength: config.maxLength || 512,
       batchSize: config.batchSize || 8,
-      device: config.device || 'cpu',
+      device: config.device || "cpu",
       quantize: config.quantize ?? true,
     };
   }
@@ -28,13 +28,13 @@ export class EmotionClassifier {
     }
 
     try {
-      this.pipeline = await pipeline('text-classification', this.config.modelName, {
+      this.pipeline = await pipeline("text-classification", this.config.modelName, {
         quantized: this.config.quantize,
       });
       this.isInitialized = true;
       console.log(`Emotion classifier initialized: ${this.config.modelName}`);
     } catch (error) {
-      console.error('Failed to initialize emotion classifier:', error);
+      console.error("Failed to initialize emotion classifier:", error);
       throw new Error(`Emotion classifier initialization failed: ${error}`);
     }
   }
@@ -53,7 +53,7 @@ export class EmotionClassifier {
 
       return this.transformToEmotionScore(result);
     } catch (error) {
-      console.error('Emotion classification failed:', error);
+      console.error("Emotion classification failed:", error);
       // Return neutral emotions on error
       return this.getNeutralEmotions();
     }
@@ -68,9 +68,7 @@ export class EmotionClassifier {
 
     for (let i = 0; i < texts.length; i += this.config.batchSize) {
       const batch = texts.slice(i, i + this.config.batchSize);
-      const batchResults = await Promise.all(
-        batch.map(text => this.classifyEmotions(text))
-      );
+      const batchResults = await Promise.all(batch.map((text) => this.classifyEmotions(text)));
       results.push(...batchResults);
     }
 
@@ -93,19 +91,19 @@ export class EmotionClassifier {
         const label = item.label.toLowerCase();
         const score = item.score;
 
-        if (label.includes('anger')) {
+        if (label.includes("anger")) {
           emotions.anger = score;
-        } else if (label.includes('fear')) {
+        } else if (label.includes("fear")) {
           emotions.fear = score;
-        } else if (label.includes('joy') || label.includes('happy')) {
+        } else if (label.includes("joy") || label.includes("happy")) {
           emotions.joy = score;
-        } else if (label.includes('sad')) {
+        } else if (label.includes("sad")) {
           emotions.sadness = score;
-        } else if (label.includes('surprise')) {
+        } else if (label.includes("surprise")) {
           emotions.surprise = score;
-        } else if (label.includes('disgust')) {
+        } else if (label.includes("disgust")) {
           emotions.disgust = score;
-        } else if (label.includes('trust') || label.includes('neutral')) {
+        } else if (label.includes("trust") || label.includes("neutral")) {
           emotions.trust = score;
         }
       }

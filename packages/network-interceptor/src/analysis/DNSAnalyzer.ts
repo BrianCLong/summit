@@ -3,7 +3,7 @@
  * TRAINING/SIMULATION ONLY
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid } from "uuid";
 
 export interface DNSQuery {
   id: string;
@@ -32,19 +32,37 @@ export interface DNSResponse {
 export interface DNSRecord {
   name: string;
   type: DNSRecordType;
-  class: 'IN' | 'CH' | 'HS';
+  class: "IN" | "CH" | "HS";
   ttl: number;
   data: string;
 }
 
 export type DNSRecordType =
-  | 'A' | 'AAAA' | 'CNAME' | 'MX' | 'NS' | 'PTR'
-  | 'SOA' | 'SRV' | 'TXT' | 'CAA' | 'DNSKEY' | 'DS'
-  | 'NSEC' | 'RRSIG' | 'ANY';
+  | "A"
+  | "AAAA"
+  | "CNAME"
+  | "MX"
+  | "NS"
+  | "PTR"
+  | "SOA"
+  | "SRV"
+  | "TXT"
+  | "CAA"
+  | "DNSKEY"
+  | "DS"
+  | "NSEC"
+  | "RRSIG"
+  | "ANY";
 
 export type DNSResponseCode =
-  | 'NOERROR' | 'FORMERR' | 'SERVFAIL' | 'NXDOMAIN'
-  | 'NOTIMP' | 'REFUSED' | 'YXDOMAIN' | 'YXRRSET';
+  | "NOERROR"
+  | "FORMERR"
+  | "SERVFAIL"
+  | "NXDOMAIN"
+  | "NOTIMP"
+  | "REFUSED"
+  | "YXDOMAIN"
+  | "YXRRSET";
 
 export interface DNSStatistics {
   totalQueries: number;
@@ -59,8 +77,8 @@ export interface DNSStatistics {
 }
 
 export interface DNSThreatIndicator {
-  type: 'DGA' | 'TUNNEL' | 'FAST_FLUX' | 'TYPOSQUAT' | 'EXFILTRATION';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  type: "DGA" | "TUNNEL" | "FAST_FLUX" | "TYPOSQUAT" | "EXFILTRATION";
+  severity: "low" | "medium" | "high" | "critical";
   domain: string;
   indicators: string[];
   confidence: number;
@@ -76,11 +94,11 @@ export class DNSAnalyzer {
   /**
    * Process a DNS query
    */
-  processQuery(query: Omit<DNSQuery, 'id' | 'isSimulated'>): DNSQuery {
+  processQuery(query: Omit<DNSQuery, "id" | "isSimulated">): DNSQuery {
     const dnsQuery: DNSQuery = {
       ...query,
       id: uuid(),
-      isSimulated: true
+      isSimulated: true,
     };
 
     this.queries.set(dnsQuery.id, dnsQuery);
@@ -88,7 +106,10 @@ export class DNSAnalyzer {
     // Update statistics
     const domain = this.extractBaseDomain(query.queryName);
     this.domainCounts.set(domain, (this.domainCounts.get(domain) || 0) + 1);
-    this.resolverCounts.set(query.destinationIP, (this.resolverCounts.get(query.destinationIP) || 0) + 1);
+    this.resolverCounts.set(
+      query.destinationIP,
+      (this.resolverCounts.get(query.destinationIP) || 0) + 1
+    );
 
     // Check for threats
     this.analyzeThreat(dnsQuery);
@@ -99,11 +120,11 @@ export class DNSAnalyzer {
   /**
    * Process a DNS response
    */
-  processResponse(response: Omit<DNSResponse, 'id' | 'isSimulated'>): DNSResponse {
+  processResponse(response: Omit<DNSResponse, "id" | "isSimulated">): DNSResponse {
     const dnsResponse: DNSResponse = {
       ...response,
       id: uuid(),
-      isSimulated: true
+      isSimulated: true,
     };
 
     this.responses.set(dnsResponse.id, dnsResponse);
@@ -116,33 +137,33 @@ export class DNSAnalyzer {
    */
   private analyzeThreat(query: DNSQuery): DNSThreatIndicator | null {
     const indicators: string[] = [];
-    let threatType: DNSThreatIndicator['type'] | null = null;
-    let severity: DNSThreatIndicator['severity'] = 'low';
+    let threatType: DNSThreatIndicator["type"] | null = null;
+    let severity: DNSThreatIndicator["severity"] = "low";
 
     const domain = query.queryName.toLowerCase();
 
     // Check for DGA (Domain Generation Algorithm)
     if (this.isDGALike(domain)) {
-      indicators.push('High entropy domain name');
-      indicators.push('Consonant clusters unusual for natural language');
-      threatType = 'DGA';
-      severity = 'high';
+      indicators.push("High entropy domain name");
+      indicators.push("Consonant clusters unusual for natural language");
+      threatType = "DGA";
+      severity = "high";
     }
 
     // Check for DNS tunneling indicators
     if (this.isTunnelLike(domain)) {
-      indicators.push('Unusually long subdomain');
-      indicators.push('Base64-like encoding in subdomain');
-      threatType = 'TUNNEL';
-      severity = 'high';
+      indicators.push("Unusually long subdomain");
+      indicators.push("Base64-like encoding in subdomain");
+      threatType = "TUNNEL";
+      severity = "high";
     }
 
     // Check for typosquatting
     const typosquatTarget = this.checkTyposquat(domain);
     if (typosquatTarget) {
       indicators.push(`Similar to legitimate domain: ${typosquatTarget}`);
-      threatType = 'TYPOSQUAT';
-      severity = 'medium';
+      threatType = "TYPOSQUAT";
+      severity = "medium";
     }
 
     if (threatType) {
@@ -152,7 +173,7 @@ export class DNSAnalyzer {
         severity,
         domain,
         indicators,
-        confidence: 0.7 + Math.random() * 0.2
+        confidence: 0.7 + Math.random() * 0.2,
       };
     }
 
@@ -163,7 +184,7 @@ export class DNSAnalyzer {
    * Check if domain looks like DGA-generated
    */
   private isDGALike(domain: string): boolean {
-    const parts = domain.split('.');
+    const parts = domain.split(".");
     const name = parts[0];
 
     if (name.length < 8) return false;
@@ -188,7 +209,7 @@ export class DNSAnalyzer {
    * Check if domain shows DNS tunneling patterns
    */
   private isTunnelLike(domain: string): boolean {
-    const parts = domain.split('.');
+    const parts = domain.split(".");
 
     // Check for very long subdomains
     for (const part of parts.slice(0, -2)) {
@@ -212,8 +233,14 @@ export class DNSAnalyzer {
    */
   private checkTyposquat(domain: string): string | null {
     const knownDomains = [
-      'google.com', 'facebook.com', 'amazon.com', 'microsoft.com',
-      'apple.com', 'twitter.com', 'linkedin.com', 'paypal.com'
+      "google.com",
+      "facebook.com",
+      "amazon.com",
+      "microsoft.com",
+      "apple.com",
+      "twitter.com",
+      "linkedin.com",
+      "paypal.com",
     ];
 
     const baseDomain = this.extractBaseDomain(domain);
@@ -231,7 +258,10 @@ export class DNSAnalyzer {
   /**
    * Generate simulated DNS traffic for training
    */
-  generateSimulatedTraffic(count: number, includeMalicious: boolean = true): {
+  generateSimulatedTraffic(
+    count: number,
+    includeMalicious: boolean = true
+  ): {
     queries: DNSQuery[];
     responses: DNSResponse[];
     threats: DNSThreatIndicator[];
@@ -241,15 +271,19 @@ export class DNSAnalyzer {
     const threats: DNSThreatIndicator[] = [];
 
     const normalDomains = [
-      'www.example.com', 'api.service.com', 'cdn.provider.net',
-      'mail.company.org', 'app.platform.io', 'static.assets.com'
+      "www.example.com",
+      "api.service.com",
+      "cdn.provider.net",
+      "mail.company.org",
+      "app.platform.io",
+      "static.assets.com",
     ];
 
     const maliciousDomains = [
-      'xkjh3kj4h5kjh3.malware.net',  // DGA-like
-      'YWJjZGVmZ2hpamtsbW5vcA.tunnel.com',  // Base64 subdomain
-      'gooogle.com',  // Typosquat
-      'amaz0n.com',   // Typosquat
+      "xkjh3kj4h5kjh3.malware.net", // DGA-like
+      "YWJjZGVmZ2hpamtsbW5vcA.tunnel.com", // Base64 subdomain
+      "gooogle.com", // Typosquat
+      "amaz0n.com", // Typosquat
     ];
 
     for (let i = 0; i < count; i++) {
@@ -262,9 +296,9 @@ export class DNSAnalyzer {
         timestamp: new Date(),
         transactionId: Math.floor(Math.random() * 65535),
         queryName: domain,
-        queryType: 'A',
+        queryType: "A",
         sourceIP: `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
-        destinationIP: '8.8.8.8'
+        destinationIP: "8.8.8.8",
       });
 
       queries.push(query);
@@ -273,18 +307,20 @@ export class DNSAnalyzer {
       const response = this.processResponse({
         queryId: query.id,
         timestamp: new Date(query.timestamp.getTime() + Math.random() * 100),
-        responseCode: isMalicious && Math.random() < 0.3 ? 'NXDOMAIN' : 'NOERROR',
-        answers: [{
-          name: domain,
-          type: 'A',
-          class: 'IN',
-          ttl: 300,
-          data: `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`
-        }],
+        responseCode: isMalicious && Math.random() < 0.3 ? "NXDOMAIN" : "NOERROR",
+        answers: [
+          {
+            name: domain,
+            type: "A",
+            class: "IN",
+            ttl: 300,
+            data: `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
+          },
+        ],
         authoritative: false,
         truncated: false,
         recursionAvailable: true,
-        responseTime: 5 + Math.random() * 50
+        responseTime: 5 + Math.random() * 50,
       });
 
       responses.push(response);
@@ -313,7 +349,7 @@ export class DNSAnalyzer {
     for (const response of this.responses.values()) {
       responseCodes[response.responseCode] = (responseCodes[response.responseCode] || 0) + 1;
       totalResponseTime += response.responseTime;
-      if (response.responseCode === 'NXDOMAIN') nxdomainCount++;
+      if (response.responseCode === "NXDOMAIN") nxdomainCount++;
     }
 
     const topDomains = Array.from(this.domainCounts.entries())
@@ -335,7 +371,7 @@ export class DNSAnalyzer {
       topResolvers: topResolvers,
       averageResponseTime: this.responses.size > 0 ? totalResponseTime / this.responses.size : 0,
       nxdomainRate: this.responses.size > 0 ? nxdomainCount / this.responses.size : 0,
-      suspiciousQueries: this.suspiciousDomains.size
+      suspiciousQueries: this.suspiciousDomains.size,
     };
   }
 
@@ -347,9 +383,9 @@ export class DNSAnalyzer {
   }
 
   private extractBaseDomain(domain: string): string {
-    const parts = domain.split('.');
+    const parts = domain.split(".");
     if (parts.length >= 2) {
-      return parts.slice(-2).join('.');
+      return parts.slice(-2).join(".");
     }
     return domain;
   }

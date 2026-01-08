@@ -82,14 +82,14 @@ export interface WalletManifest {
   createdAt: string;
   merkleRoot: string;
   signer: string;
-  algo: 'RSA-SHA256';
+  algo: "RSA-SHA256";
   signature: string; // base64
 }
 
 export interface InclusionProof {
   stepId: string;
   leaf: string; // hex
-  path: { dir: 'L' | 'R'; hash: string }[];
+  path: { dir: "L" | "R"; hash: string }[];
 }
 
 export interface SelectiveDisclosureBundle {

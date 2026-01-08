@@ -1,7 +1,7 @@
-import { Platform } from 'react-native';
+import {Platform} from 'react-native';
 import * as Sentry from '@sentry/react-native';
 import analytics from '@react-native-firebase/analytics';
-import { performance } from 'react-native-performance';
+import {performance} from 'react-native-performance';
 
 interface PerformanceMetric {
   name: string;
@@ -106,7 +106,8 @@ class PerformanceMonitor {
       const expected = 1000; // 1 second
       const drift = delta - expected;
 
-      if (drift > 100) { // More than 100ms drift indicates JS thread blocking
+      if (drift > 100) {
+        // More than 100ms drift indicates JS thread blocking
         this.recordMetric({
           name: 'js_thread_blocked',
           value: drift,
@@ -142,7 +143,11 @@ class PerformanceMonitor {
   /**
    * Measure the time between a mark and now
    */
-  measure(name: string, category: PerformanceMetric['category'] = 'custom', metadata?: Record<string, any>): number {
+  measure(
+    name: string,
+    category: PerformanceMetric['category'] = 'custom',
+    metadata?: Record<string, any>,
+  ): number {
     if (!this.isEnabled) return 0;
 
     const mark = this.marks.get(name);
@@ -352,12 +357,19 @@ export const performanceMonitor = new PerformanceMonitor();
 
 // Export convenience functions
 export const mark = (name: string) => performanceMonitor.mark(name);
-export const measure = (name: string, category?: PerformanceMetric['category'], metadata?: Record<string, any>) =>
-  performanceMonitor.measure(name, category, metadata);
+export const measure = (
+  name: string,
+  category?: PerformanceMetric['category'],
+  metadata?: Record<string, any>,
+) => performanceMonitor.measure(name, category, metadata);
 export const trackRender = (componentName: string, renderTime: number, props?: any) =>
   performanceMonitor.trackRender(componentName, renderTime, props);
-export const trackNetworkRequest = (url: string, duration: number, size: number, success: boolean) =>
-  performanceMonitor.trackNetworkRequest(url, duration, size, success);
+export const trackNetworkRequest = (
+  url: string,
+  duration: number,
+  size: number,
+  success: boolean,
+) => performanceMonitor.trackNetworkRequest(url, duration, size, success);
 export const trackStorageOperation = (operation: string, duration: number, dataSize?: number) =>
   performanceMonitor.trackStorageOperation(operation, duration, dataSize);
 export const trackNavigation = (from: string, to: string, duration: number) =>

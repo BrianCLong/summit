@@ -3,15 +3,15 @@ name: Neo4j Guard - Migration Testing
 on:
   pull_request:
     paths:
-      - 'db/migrations/**/*.cypher'
-      - 'tools/neo4j_guard*.sh'
-      - 'docker-compose.neo4j.yml'
-      - '.github/workflows/neo4j-guard.yml'
+      - "db/migrations/**/*.cypher"
+      - "tools/neo4j_guard*.sh"
+      - "docker-compose.neo4j.yml"
+      - ".github/workflows/neo4j-guard.yml"
   push:
     branches: [main]
     paths:
-      - 'db/migrations/**/*.cypher'
-      - 'tools/neo4j_guard*.sh'
+      - "db/migrations/**/*.cypher"
+      - "tools/neo4j_guard*.sh"
 
 jobs:
   neo4j-migration-guard:
@@ -88,9 +88,9 @@ jobs:
         env:
           COMPOSE_FILE: docker-compose.neo4j.yml
           MIG_DIR: db/migrations
-          KEEP_DB: '0'
-          VALIDATION_MODE: '1'
-          MAX_WAIT_TIME: '300'
+          KEEP_DB: "0"
+          VALIDATION_MODE: "1"
+          MAX_WAIT_TIME: "300"
         run: |
           echo "🚀 Running Enhanced Neo4j Guard"
           bash tools/neo4j_guard_enhanced.sh
@@ -100,7 +100,7 @@ jobs:
         env:
           COMPOSE_FILE: docker-compose.neo4j.yml
           MIG_DIR: db/migrations
-          KEEP_DB: '0'
+          KEEP_DB: "0"
         run: |
           echo "🔄 Running legacy guard for compatibility verification"
           bash tools/neo4j_guard.sh

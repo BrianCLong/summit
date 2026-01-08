@@ -8,8 +8,8 @@ image:
 replicaCount: 3
 
 resources:
-  requests: { cpu: '300m', memory: '512Mi' }
-  limits: { cpu: '1500m', memory: '1Gi' }
+  requests: { cpu: "300m", memory: "512Mi" }
+  limits: { cpu: "1500m", memory: "1Gi" }
 
 env:
   - name: NODE_ENV
@@ -17,11 +17,7 @@ env:
   - name: BASE_URL
     valueFrom: { secretKeyRef: { name: maestro-secrets, key: BASE_URL } }
   - name: OTEL_EXPORTER_OTLP_ENDPOINT
-    valueFrom:
-      {
-        secretKeyRef:
-          { name: maestro-secrets, key: OTEL_EXPORTER_OTLP_ENDPOINT },
-      }
+    valueFrom: { secretKeyRef: { name: maestro-secrets, key: OTEL_EXPORTER_OTLP_ENDPOINT } }
 
 service:
   type: ClusterIP
@@ -32,7 +28,7 @@ ingress:
   className: nginx
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
   hosts:
     - host: maestro.dev.intelgraph.local
       paths:

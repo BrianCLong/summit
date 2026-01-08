@@ -26,8 +26,9 @@ const DrawerOverlay = React.forwardRef<
 ))
 DrawerOverlay.displayName = DialogPrimitive.Overlay.displayName
 
-interface DrawerContentProps
-  extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> {
+interface DrawerContentProps extends React.ComponentPropsWithoutRef<
+  typeof DialogPrimitive.Content
+> {
   side?: 'left' | 'right' | 'top' | 'bottom'
 }
 

@@ -1,17 +1,17 @@
 meta:
   id: financial.central-bank-whisperer@v1
   owner: financial-ops
-  purpose: 'Predict central bank rate moves from speech analysis'
+  purpose: "Predict central bank rate moves from speech analysis"
   tags:
     - financial-warfare
     - high-frequency
     - dark-pool
   guardrails:
-    - 'Ensure full legal compliance in jurisdiction of operation.'
-    - 'Do not trigger market instability without authorization.'
+    - "Ensure full legal compliance in jurisdiction of operation."
+    - "Do not trigger market instability without authorization."
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4096
 

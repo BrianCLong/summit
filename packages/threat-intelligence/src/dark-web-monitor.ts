@@ -1,5 +1,5 @@
-import axios, { AxiosInstance } from 'axios';
-import { DarkWebMonitor, DarkWebFinding, DarkWebSourceEnum } from './types.js';
+import axios, { AxiosInstance } from "axios";
+import { DarkWebMonitor, DarkWebFinding, DarkWebSourceEnum } from "./types.js";
 
 /**
  * Dark Web Monitoring Service
@@ -14,7 +14,7 @@ export class DarkWebMonitorService {
     this.httpClient = axios.create({
       timeout: 60000, // Longer timeout for Tor
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
       },
     });
   }
@@ -99,17 +99,17 @@ export class DarkWebMonitorService {
    */
   private async performScan(monitor: DarkWebMonitor): Promise<DarkWebFinding[]> {
     switch (monitor.sourceType) {
-      case 'FORUM':
+      case "FORUM":
         return this.scanForum(monitor);
-      case 'MARKETPLACE':
+      case "MARKETPLACE":
         return this.scanMarketplace(monitor);
-      case 'PASTE_SITE':
+      case "PASTE_SITE":
         return this.scanPasteSite(monitor);
-      case 'CHAT':
+      case "CHAT":
         return this.scanChat(monitor);
-      case 'BLOG':
+      case "BLOG":
         return this.scanBlog(monitor);
-      case 'LEAK_SITE':
+      case "LEAK_SITE":
         return this.scanLeakSite(monitor);
       default:
         console.warn(`Unsupported source type: ${monitor.sourceType}`);
@@ -125,7 +125,7 @@ export class DarkWebMonitorService {
 
     try {
       const config: any = {
-        method: 'GET',
+        method: "GET",
         url: monitor.url,
       };
 
@@ -134,7 +134,7 @@ export class DarkWebMonitorService {
         config.proxy = {
           host: monitor.proxyConfig.host,
           port: monitor.proxyConfig.port || 9050,
-          protocol: monitor.proxyConfig.protocol || 'socks5',
+          protocol: monitor.proxyConfig.protocol || "socks5",
         };
       }
 
@@ -150,7 +150,7 @@ export class DarkWebMonitorService {
       const content = response.data;
 
       // Search for keywords in content
-      const matchedKeywords = monitor.keywords.filter(keyword =>
+      const matchedKeywords = monitor.keywords.filter((keyword) =>
         content.toLowerCase().includes(keyword.toLowerCase())
       );
 
@@ -158,7 +158,7 @@ export class DarkWebMonitorService {
         findings.push({
           id: this.generateId(),
           monitorId: monitor.id,
-          title: this.extractTitle(content) || 'Forum Post',
+          title: this.extractTitle(content) || "Forum Post",
           content: this.extractRelevantContent(content, monitor.keywords),
           url: monitor.url,
           author: this.extractAuthor(content),
@@ -166,7 +166,7 @@ export class DarkWebMonitorService {
           keywords: matchedKeywords,
           severity: this.calculateSeverity(matchedKeywords),
           metadata: {
-            sourceType: 'FORUM',
+            sourceType: "FORUM",
             fullContent: content,
           },
           analyzed: false,
@@ -189,7 +189,7 @@ export class DarkWebMonitorService {
 
     try {
       const config: any = {
-        method: 'GET',
+        method: "GET",
         url: monitor.url,
       };
 
@@ -197,7 +197,7 @@ export class DarkWebMonitorService {
         config.proxy = {
           host: monitor.proxyConfig.host,
           port: monitor.proxyConfig.port || 9050,
-          protocol: monitor.proxyConfig.protocol || 'socks5',
+          protocol: monitor.proxyConfig.protocol || "socks5",
         };
       }
 
@@ -205,9 +205,10 @@ export class DarkWebMonitorService {
       const listings = this.parseMarketplaceListings(response.data);
 
       for (const listing of listings) {
-        const matchedKeywords = monitor.keywords.filter(keyword =>
-          listing.title.toLowerCase().includes(keyword.toLowerCase()) ||
-          listing.description.toLowerCase().includes(keyword.toLowerCase())
+        const matchedKeywords = monitor.keywords.filter(
+          (keyword) =>
+            listing.title.toLowerCase().includes(keyword.toLowerCase()) ||
+            listing.description.toLowerCase().includes(keyword.toLowerCase())
         );
 
         if (matchedKeywords.length > 0) {
@@ -222,7 +223,7 @@ export class DarkWebMonitorService {
             keywords: matchedKeywords,
             severity: this.calculateMarketplaceSeverity(listing, matchedKeywords),
             metadata: {
-              sourceType: 'MARKETPLACE',
+              sourceType: "MARKETPLACE",
               price: listing.price,
               category: listing.category,
               vendor: listing.vendor,
@@ -252,7 +253,7 @@ export class DarkWebMonitorService {
       const pastes = this.parsePasteSite(response.data);
 
       for (const paste of pastes) {
-        const matchedKeywords = monitor.keywords.filter(keyword =>
+        const matchedKeywords = monitor.keywords.filter((keyword) =>
           paste.content.toLowerCase().includes(keyword.toLowerCase())
         );
 
@@ -260,7 +261,7 @@ export class DarkWebMonitorService {
           findings.push({
             id: this.generateId(),
             monitorId: monitor.id,
-            title: paste.title || 'Paste',
+            title: paste.title || "Paste",
             content: paste.content,
             url: paste.url,
             author: paste.author,
@@ -268,7 +269,7 @@ export class DarkWebMonitorService {
             keywords: matchedKeywords,
             severity: this.calculatePasteSeverity(paste, matchedKeywords),
             metadata: {
-              sourceType: 'PASTE_SITE',
+              sourceType: "PASTE_SITE",
               syntax: paste.syntax,
               size: paste.content.length,
             },
@@ -305,9 +306,10 @@ export class DarkWebMonitorService {
       const posts = this.parseBlogPosts(response.data);
 
       for (const post of posts) {
-        const matchedKeywords = monitor.keywords.filter(keyword =>
-          post.title.toLowerCase().includes(keyword.toLowerCase()) ||
-          post.content.toLowerCase().includes(keyword.toLowerCase())
+        const matchedKeywords = monitor.keywords.filter(
+          (keyword) =>
+            post.title.toLowerCase().includes(keyword.toLowerCase()) ||
+            post.content.toLowerCase().includes(keyword.toLowerCase())
         );
 
         if (matchedKeywords.length > 0) {
@@ -320,9 +322,9 @@ export class DarkWebMonitorService {
             author: post.author,
             timestamp: post.published || new Date().toISOString(),
             keywords: matchedKeywords,
-            severity: 'MEDIUM',
+            severity: "MEDIUM",
             metadata: {
-              sourceType: 'BLOG',
+              sourceType: "BLOG",
               tags: post.tags,
             },
             analyzed: false,
@@ -349,9 +351,10 @@ export class DarkWebMonitorService {
       const leaks = this.parseLeakSite(response.data);
 
       for (const leak of leaks) {
-        const matchedKeywords = monitor.keywords.filter(keyword =>
-          leak.title.toLowerCase().includes(keyword.toLowerCase()) ||
-          leak.description.toLowerCase().includes(keyword.toLowerCase())
+        const matchedKeywords = monitor.keywords.filter(
+          (keyword) =>
+            leak.title.toLowerCase().includes(keyword.toLowerCase()) ||
+            leak.description.toLowerCase().includes(keyword.toLowerCase())
         );
 
         if (matchedKeywords.length > 0) {
@@ -364,9 +367,9 @@ export class DarkWebMonitorService {
             author: leak.group,
             timestamp: leak.published || new Date().toISOString(),
             keywords: matchedKeywords,
-            severity: 'CRITICAL',
+            severity: "CRITICAL",
             metadata: {
-              sourceType: 'LEAK_SITE',
+              sourceType: "LEAK_SITE",
               victim: leak.victim,
               size: leak.size,
               leaked: leak.leaked,
@@ -408,42 +411,50 @@ export class DarkWebMonitorService {
     const snippets: string[] = [];
 
     for (const keyword of keywords) {
-      const regex = new RegExp(`.{0,100}${keyword}.{0,100}`, 'gi');
+      const regex = new RegExp(`.{0,100}${keyword}.{0,100}`, "gi");
       const matches = content.match(regex);
       if (matches) {
         snippets.push(...matches);
       }
     }
 
-    return snippets.join('\n...\n').substring(0, 2000);
+    return snippets.join("\n...\n").substring(0, 2000);
   }
 
-  private calculateSeverity(keywords: string[]): 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'INFO' {
+  private calculateSeverity(keywords: string[]): "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" | "INFO" {
     // High-risk keywords trigger higher severity
-    const highRisk = ['exploit', 'zero-day', 'ransomware', 'breach', 'leak'];
-    const hasHighRisk = keywords.some(k =>
-      highRisk.some(hr => k.toLowerCase().includes(hr))
-    );
+    const highRisk = ["exploit", "zero-day", "ransomware", "breach", "leak"];
+    const hasHighRisk = keywords.some((k) => highRisk.some((hr) => k.toLowerCase().includes(hr)));
 
-    return hasHighRisk ? 'CRITICAL' : 'MEDIUM';
+    return hasHighRisk ? "CRITICAL" : "MEDIUM";
   }
 
-  private calculateMarketplaceSeverity(listing: any, keywords: string[]): 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'INFO' {
+  private calculateMarketplaceSeverity(
+    listing: any,
+    keywords: string[]
+  ): "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" | "INFO" {
     // Data, credentials, and exploits are high severity
-    if (listing.category?.toLowerCase().includes('data') ||
-        listing.category?.toLowerCase().includes('credential') ||
-        listing.category?.toLowerCase().includes('exploit')) {
-      return 'HIGH';
+    if (
+      listing.category?.toLowerCase().includes("data") ||
+      listing.category?.toLowerCase().includes("credential") ||
+      listing.category?.toLowerCase().includes("exploit")
+    ) {
+      return "HIGH";
     }
 
     return this.calculateSeverity(keywords);
   }
 
-  private calculatePasteSeverity(paste: any, keywords: string[]): 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'INFO' {
+  private calculatePasteSeverity(
+    paste: any,
+    keywords: string[]
+  ): "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" | "INFO" {
     // Large pastes with credentials are critical
-    if (paste.content.length > 10000 &&
-        paste.content.match(/password|credential|token|api_key/gi)) {
-      return 'CRITICAL';
+    if (
+      paste.content.length > 10000 &&
+      paste.content.match(/password|credential|token|api_key/gi)
+    ) {
+      return "CRITICAL";
     }
 
     return this.calculateSeverity(keywords);

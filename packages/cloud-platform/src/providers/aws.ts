@@ -3,14 +3,19 @@
  * Comprehensive AWS integration for multi-cloud platform
  */
 
-import { S3Client, ListBucketsCommand, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
-import { EC2Client, DescribeInstancesCommand, RunInstancesCommand } from '@aws-sdk/client-ec2';
-import { CloudWatchClient, GetMetricStatisticsCommand } from '@aws-sdk/client-cloudwatch';
-import { CloudProvider, CloudConfig, CloudResource, CloudMetrics } from '../types.js';
-import { BaseCloudProvider } from './base.js';
-import pino from 'pino';
+import {
+  S3Client,
+  ListBucketsCommand,
+  PutObjectCommand,
+  GetObjectCommand,
+} from "@aws-sdk/client-s3";
+import { EC2Client, DescribeInstancesCommand, RunInstancesCommand } from "@aws-sdk/client-ec2";
+import { CloudWatchClient, GetMetricStatisticsCommand } from "@aws-sdk/client-cloudwatch";
+import { CloudProvider, CloudConfig, CloudResource, CloudMetrics } from "../types.js";
+import { BaseCloudProvider } from "./base.js";
+import pino from "pino";
 
-const logger = pino({ name: 'aws-provider' });
+const logger = pino({ name: "aws-provider" });
 
 export class AWSProvider extends BaseCloudProvider {
   private s3Client: S3Client;
@@ -22,10 +27,12 @@ export class AWSProvider extends BaseCloudProvider {
 
     const clientConfig = {
       region: config.region,
-      credentials: config.credentials ? {
-        accessKeyId: config.credentials.accessKeyId!,
-        secretAccessKey: config.credentials.secretAccessKey!
-      } : undefined
+      credentials: config.credentials
+        ? {
+            accessKeyId: config.credentials.accessKeyId!,
+            secretAccessKey: config.credentials.secretAccessKey!,
+          }
+        : undefined,
     };
 
     this.s3Client = new S3Client(clientConfig);
@@ -36,10 +43,10 @@ export class AWSProvider extends BaseCloudProvider {
   async validateConnection(): Promise<boolean> {
     try {
       await this.s3Client.send(new ListBucketsCommand({}));
-      logger.info({ provider: 'aws', region: this.config.region }, 'AWS connection validated');
+      logger.info({ provider: "aws", region: this.config.region }, "AWS connection validated");
       return true;
     } catch (error) {
-      logger.error({ error, provider: 'aws' }, 'AWS connection validation failed');
+      logger.error({ error, provider: "aws" }, "AWS connection validation failed");
       return false;
     }
   }
@@ -49,7 +56,7 @@ export class AWSProvider extends BaseCloudProvider {
 
     try {
       // List S3 buckets
-      if (!type || type === 'storage') {
+      if (!type || type === "storage") {
         const bucketsResponse = await this.s3Client.send(new ListBucketsCommand({}));
         if (bucketsResponse.Buckets) {
           for (const bucket of bucketsResponse.Buckets) {
@@ -57,19 +64,19 @@ export class AWSProvider extends BaseCloudProvider {
               id: bucket.Name!,
               provider: CloudProvider.AWS,
               region: this.config.region,
-              type: 'storage',
-              status: 'active',
+              type: "storage",
+              status: "active",
               tags: {},
               metadata: { bucketName: bucket.Name },
               createdAt: bucket.CreationDate!,
-              updatedAt: bucket.CreationDate!
+              updatedAt: bucket.CreationDate!,
             });
           }
         }
       }
 
       // List EC2 instances
-      if (!type || type === 'compute') {
+      if (!type || type === "compute") {
         const instancesResponse = await this.ec2Client.send(new DescribeInstancesCommand({}));
         if (instancesResponse.Reservations) {
           for (const reservation of instancesResponse.Reservations) {
@@ -79,16 +86,16 @@ export class AWSProvider extends BaseCloudProvider {
                   id: instance.InstanceId!,
                   provider: CloudProvider.AWS,
                   region: this.config.region,
-                  type: 'compute',
-                  status: instance.State?.Name === 'running' ? 'active' : 'inactive',
+                  type: "compute",
+                  status: instance.State?.Name === "running" ? "active" : "inactive",
                   tags: this.extractTags(instance.Tags),
                   metadata: {
                     instanceType: instance.InstanceType,
                     publicIp: instance.PublicIpAddress,
-                    privateIp: instance.PrivateIpAddress
+                    privateIp: instance.PrivateIpAddress,
                   },
                   createdAt: instance.LaunchTime!,
-                  updatedAt: new Date()
+                  updatedAt: new Date(),
                 });
               }
             }
@@ -98,7 +105,7 @@ export class AWSProvider extends BaseCloudProvider {
 
       return resources;
     } catch (error) {
-      logger.error({ error, type }, 'Failed to list AWS resources');
+      logger.error({ error, type }, "Failed to list AWS resources");
       throw error;
     }
   }
@@ -111,13 +118,13 @@ export class AWSProvider extends BaseCloudProvider {
       // Get CPU metrics
       const cpuMetrics = await this.cloudWatchClient.send(
         new GetMetricStatisticsCommand({
-          Namespace: 'AWS/EC2',
-          MetricName: 'CPUUtilization',
-          Dimensions: [{ Name: 'InstanceId', Value: resourceId }],
+          Namespace: "AWS/EC2",
+          MetricName: "CPUUtilization",
+          Dimensions: [{ Name: "InstanceId", Value: resourceId }],
           StartTime: startTime,
           EndTime: endTime,
           Period: 300,
-          Statistics: ['Average']
+          Statistics: ["Average"],
         })
       );
 
@@ -129,33 +136,33 @@ export class AWSProvider extends BaseCloudProvider {
         timestamp: new Date(),
         cpu: {
           utilization: cpuUtilization,
-          throttled: cpuUtilization > 90
+          throttled: cpuUtilization > 90,
         },
         memory: {
           used: 0,
           total: 0,
-          utilization: 0
+          utilization: 0,
         },
         disk: {
           readOps: 0,
           writeOps: 0,
-          throughputMBps: 0
+          throughputMBps: 0,
         },
         network: {
           inboundMbps: 0,
           outboundMbps: 0,
-          connections: 0
-        }
+          connections: 0,
+        },
       };
     } catch (error) {
-      logger.error({ error, resourceId }, 'Failed to get AWS metrics');
+      logger.error({ error, resourceId }, "Failed to get AWS metrics");
       throw error;
     }
   }
 
   async provisionResource(type: string, config: any): Promise<CloudResource> {
     try {
-      if (type === 'compute') {
+      if (type === "compute") {
         const response = await this.ec2Client.send(
           new RunInstancesCommand({
             ImageId: config.imageId,
@@ -164,10 +171,13 @@ export class AWSProvider extends BaseCloudProvider {
             MaxCount: 1,
             TagSpecifications: [
               {
-                ResourceType: 'instance',
-                Tags: Object.entries(config.tags || {}).map(([Key, Value]) => ({ Key, Value: String(Value) }))
-              }
-            ]
+                ResourceType: "instance",
+                Tags: Object.entries(config.tags || {}).map(([Key, Value]) => ({
+                  Key,
+                  Value: String(Value),
+                })),
+              },
+            ],
           })
         );
 
@@ -176,34 +186,37 @@ export class AWSProvider extends BaseCloudProvider {
           id: instance.InstanceId!,
           provider: CloudProvider.AWS,
           region: this.config.region,
-          type: 'compute',
-          status: 'provisioning',
+          type: "compute",
+          status: "provisioning",
           tags: config.tags || {},
           metadata: { instanceType: config.instanceType },
           createdAt: new Date(),
-          updatedAt: new Date()
+          updatedAt: new Date(),
         };
       }
 
       throw new Error(`Unsupported resource type: ${type}`);
     } catch (error) {
-      logger.error({ error, type }, 'Failed to provision AWS resource');
+      logger.error({ error, type }, "Failed to provision AWS resource");
       throw error;
     }
   }
 
   async deleteResource(resourceId: string): Promise<void> {
     // Implementation for resource deletion
-    logger.info({ resourceId }, 'Deleting AWS resource');
+    logger.info({ resourceId }, "Deleting AWS resource");
   }
 
   private extractTags(tags?: Array<{ Key?: string; Value?: string }>): Record<string, string> {
     if (!tags) return {};
-    return tags.reduce((acc, tag) => {
-      if (tag.Key && tag.Value) {
-        acc[tag.Key] = tag.Value;
-      }
-      return acc;
-    }, {} as Record<string, string>);
+    return tags.reduce(
+      (acc, tag) => {
+        if (tag.Key && tag.Value) {
+          acc[tag.Key] = tag.Value;
+        }
+        return acc;
+      },
+      {} as Record<string, string>
+    );
   }
 }

@@ -6,7 +6,7 @@ permissions:
 on:
   workflow_dispatch: {}
   workflow_run:
-    workflows: ['CD Pipeline']
+    workflows: ["CD Pipeline"]
     types: [completed]
 
 jobs:
@@ -36,8 +36,8 @@ jobs:
         if: ${{ secrets.E2E_TEST_USER != '' && secrets.E2E_TEST_PASS != '' }}
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install Playwright
         if: ${{ secrets.E2E_TEST_USER != '' && secrets.E2E_TEST_PASS != '' }}

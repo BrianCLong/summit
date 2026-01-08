@@ -22,7 +22,7 @@ jobs:
   quarantine-tests:
     name: Quarantine Tests (Flaky)
     runs-on: ubuntu-latest
-    continue-on-error: true  # NON-BLOCKING
+    continue-on-error: true # NON-BLOCKING
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -54,7 +54,7 @@ jobs:
   jest-legacy-suite:
     name: Jest/ts-jest Suite (ESM Issues)
     runs-on: ubuntu-latest
-    continue-on-error: true  # NON-BLOCKING (ESM loader issues)
+    continue-on-error: true # NON-BLOCKING (ESM loader issues)
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -85,7 +85,7 @@ jobs:
   experimental-checks:
     name: Experimental Checks
     runs-on: ubuntu-latest
-    continue-on-error: true  # NON-BLOCKING
+    continue-on-error: true # NON-BLOCKING
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -124,7 +124,7 @@ jobs:
   deprecated-checks:
     name: Deprecated Checks (Migration in Progress)
     runs-on: ubuntu-latest
-    continue-on-error: true  # NON-BLOCKING
+    continue-on-error: true # NON-BLOCKING
     steps:
       - uses: actions/checkout@v4
         with:
@@ -162,7 +162,7 @@ jobs:
   performance-regression:
     name: Performance Regression Tests
     runs-on: ubuntu-latest
-    continue-on-error: true  # NON-BLOCKING
+    continue-on-error: true # NON-BLOCKING
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -194,7 +194,7 @@ jobs:
   accessibility-audit:
     name: Web Accessibility Audit
     runs-on: ubuntu-latest
-    continue-on-error: true  # NON-BLOCKING
+    continue-on-error: true # NON-BLOCKING
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

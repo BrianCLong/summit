@@ -1,7 +1,7 @@
 meta:
   id: plan.canary-rollback@v1
-  owner: 'platform-engineering'
-  purpose: 'Implement canary deployments and quick rollback for safer releases'
+  owner: "platform-engineering"
+  purpose: "Implement canary deployments and quick rollback for safer releases"
   tags:
     - deployment
     - canary
@@ -9,13 +9,13 @@ meta:
     - feature-flags
     - safety
   guardrails:
-    - 'Canary must receive representative traffic'
-    - 'Rollback must complete in < 2 minutes'
-    - 'Metrics guardrails must prevent bad deploys'
-    - 'Feature flags must have kill switches'
+    - "Canary must receive representative traffic"
+    - "Rollback must complete in < 2 minutes"
+    - "Metrics guardrails must prevent bad deploys"
+    - "Feature flags must have kill switches"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -208,15 +208,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'api-server-canary'
+  - name: "api-server-canary"
     inputs:
-      target_service: 'api-server'
-      deployment_platform: 'Kubernetes with Argo Rollouts'
-      current_strategy: 'Rolling update, 25% max unavailable'
-      traffic_patterns: '1000 req/min average, 3000 peak'
-      rollback_requirements: '< 2 minute rollback, zero data loss'
+      target_service: "api-server"
+      deployment_platform: "Kubernetes with Argo Rollouts"
+      current_strategy: "Rolling update, 25% max unavailable"
+      traffic_patterns: "1000 req/min average, 3000 peak"
+      rollback_requirements: "< 2 minute rollback, zero data loss"
     expected_contains:
-      - 'canary stages'
-      - 'Rollback Procedure'
-      - 'Metrics Guardrails'
-      - 'Feature Flag'
+      - "canary stages"
+      - "Rollback Procedure"
+      - "Metrics Guardrails"
+      - "Feature Flag"

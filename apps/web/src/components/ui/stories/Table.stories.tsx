@@ -23,10 +23,34 @@ type AnalystRow = {
 }
 
 const rows: AnalystRow[] = [
-  { id: 'A-1992', name: 'J. Alvarez', role: 'Lead Analyst', status: 'Active', alerts: 12 },
-  { id: 'A-2001', name: 'R. Smith', role: 'Responder', status: 'Active', alerts: 7 },
-  { id: 'A-2122', name: 'L. Chen', role: 'Reviewer', status: 'Paused', alerts: 2 },
-  { id: 'A-2188', name: 'M. Adeyemi', role: 'Responder', status: 'Blocked', alerts: 0 },
+  {
+    id: 'A-1992',
+    name: 'J. Alvarez',
+    role: 'Lead Analyst',
+    status: 'Active',
+    alerts: 12,
+  },
+  {
+    id: 'A-2001',
+    name: 'R. Smith',
+    role: 'Responder',
+    status: 'Active',
+    alerts: 7,
+  },
+  {
+    id: 'A-2122',
+    name: 'L. Chen',
+    role: 'Reviewer',
+    status: 'Paused',
+    alerts: 2,
+  },
+  {
+    id: 'A-2188',
+    name: 'M. Adeyemi',
+    role: 'Responder',
+    status: 'Blocked',
+    alerts: 0,
+  },
 ]
 
 const meta: Meta<typeof Table> = {

@@ -5,4 +5,4 @@
  * travel patterns, communication methods, and agent networks.
  */
 
-export * from './agent-analyzer.js';
+export * from "./agent-analyzer.js";

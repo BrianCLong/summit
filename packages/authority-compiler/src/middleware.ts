@@ -4,17 +4,17 @@
  * Integrates the authority compiler into the request pipeline.
  */
 
-import type { Request, Response, NextFunction } from 'express';
-import { PolicyEvaluator, EvaluationContext } from './evaluator';
-import { Operation, ClassificationLevel } from './schema/policy.schema';
+import type { Request, Response, NextFunction } from "express";
+import { PolicyEvaluator, EvaluationContext } from "./evaluator";
+import { Operation, ClassificationLevel } from "./schema/policy.schema";
 
 export interface AuthorityMiddlewareOptions {
   /** Policy evaluator instance */
   evaluator: PolicyEvaluator;
   /** Function to extract user from request */
-  extractUser: (req: Request) => EvaluationContext['user'] | null;
+  extractUser: (req: Request) => EvaluationContext["user"] | null;
   /** Function to extract resource from request */
-  extractResource?: (req: Request) => EvaluationContext['resource'];
+  extractResource?: (req: Request) => EvaluationContext["resource"];
   /** Default operation if not specified */
   defaultOperation?: Operation;
   /** Skip evaluation for certain paths */
@@ -31,8 +31,8 @@ export function createAuthorityMiddleware(options: AuthorityMiddlewareOptions) {
     evaluator,
     extractUser,
     extractResource,
-    defaultOperation = 'READ',
-    skipPaths = ['/health', '/metrics'],
+    defaultOperation = "READ",
+    skipPaths = ["/health", "/metrics"],
     onDeny,
   } = options;
 
@@ -46,26 +46,26 @@ export function createAuthorityMiddleware(options: AuthorityMiddlewareOptions) {
     const user = extractUser(req);
     if (!user) {
       if (onDeny) {
-        return onDeny(req, res, 'User not authenticated');
+        return onDeny(req, res, "User not authenticated");
       }
-      return res.status(401).json({ error: 'Unauthorized', message: 'User not authenticated' });
+      return res.status(401).json({ error: "Unauthorized", message: "User not authenticated" });
     }
 
     // Determine operation from HTTP method
     let operation: Operation = defaultOperation;
     switch (req.method) {
-      case 'GET':
-        operation = 'READ';
+      case "GET":
+        operation = "READ";
         break;
-      case 'POST':
-        operation = 'CREATE';
+      case "POST":
+        operation = "CREATE";
         break;
-      case 'PUT':
-      case 'PATCH':
-        operation = 'UPDATE';
+      case "PUT":
+      case "PATCH":
+        operation = "UPDATE";
         break;
-      case 'DELETE':
-        operation = 'DELETE';
+      case "DELETE":
+        operation = "DELETE";
         break;
     }
 
@@ -79,10 +79,10 @@ export function createAuthorityMiddleware(options: AuthorityMiddlewareOptions) {
       resource,
       request: {
         ip: req.ip || req.socket.remoteAddress,
-        userAgent: req.get('User-Agent'),
+        userAgent: req.get("User-Agent"),
         timestamp: new Date(),
-        justification: req.get('X-Access-Justification'),
-        mfaVerified: req.get('X-MFA-Verified') === 'true',
+        justification: req.get("X-Access-Justification"),
+        mfaVerified: req.get("X-MFA-Verified") === "true",
       },
     };
 
@@ -97,7 +97,7 @@ export function createAuthorityMiddleware(options: AuthorityMiddlewareOptions) {
         return onDeny(req, res, decision.reason);
       }
       return res.status(403).json({
-        error: 'Forbidden',
+        error: "Forbidden",
         message: decision.reason,
         auditId: decision.auditId,
       });
@@ -106,11 +106,11 @@ export function createAuthorityMiddleware(options: AuthorityMiddlewareOptions) {
     // Handle two-person control requirement
     if (decision.requiresTwoPersonControl) {
       // Check if approval header is present
-      const approvalId = req.get('X-Two-Person-Approval');
+      const approvalId = req.get("X-Two-Person-Approval");
       if (!approvalId) {
         return res.status(403).json({
-          error: 'Two-Person Control Required',
-          message: 'This operation requires two-person approval',
+          error: "Two-Person Control Required",
+          message: "This operation requires two-person approval",
           twoPersonControlId: decision.twoPersonControlId,
           auditId: decision.auditId,
         });
@@ -122,7 +122,7 @@ export function createAuthorityMiddleware(options: AuthorityMiddlewareOptions) {
     if (decision.conditions && decision.conditions.length > 0) {
       // Check if conditions are satisfied
       const conditionsSatisfied = decision.conditions.every((condition) => {
-        if (condition === 'Justification required') {
+        if (condition === "Justification required") {
           return Boolean(context.request.justification);
         }
         return true;
@@ -130,8 +130,8 @@ export function createAuthorityMiddleware(options: AuthorityMiddlewareOptions) {
 
       if (!conditionsSatisfied) {
         return res.status(403).json({
-          error: 'Conditions Not Met',
-          message: `Required conditions: ${decision.conditions.join(', ')}`,
+          error: "Conditions Not Met",
+          message: `Required conditions: ${decision.conditions.join(", ")}`,
           conditions: decision.conditions,
           auditId: decision.auditId,
         });
@@ -168,7 +168,10 @@ export function createAuthorityDirective(evaluator: PolicyEvaluator) {
  */
 export function extractClassification(props: Record<string, any>): ClassificationLevel | undefined {
   const classification = props?.classification || props?.securityClassification;
-  if (classification && ['UNCLASSIFIED', 'CUI', 'CONFIDENTIAL', 'SECRET', 'TOP_SECRET'].includes(classification)) {
+  if (
+    classification &&
+    ["UNCLASSIFIED", "CUI", "CONFIDENTIAL", "SECRET", "TOP_SECRET"].includes(classification)
+  ) {
     return classification as ClassificationLevel;
   }
   return undefined;
@@ -180,7 +183,7 @@ export function extractClassification(props: Record<string, any>): Classificatio
 export function extractCompartments(props: Record<string, any>): string[] {
   const compartments = props?.compartments || props?.accessCompartments;
   if (Array.isArray(compartments)) {
-    return compartments.filter((c) => typeof c === 'string');
+    return compartments.filter((c) => typeof c === "string");
   }
   return [];
 }

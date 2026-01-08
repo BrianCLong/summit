@@ -1,4 +1,4 @@
-import { ExperimentDefinition, ExperimentVariant } from './types.js';
+import { ExperimentDefinition, ExperimentVariant } from "./types.js";
 
 export class ExperimentEngine {
   private readonly experiments: Map<string, ExperimentDefinition> = new Map();
@@ -32,7 +32,8 @@ export class ExperimentEngine {
       }
     }
 
-    const fallback = experiment.variants[experiment.variants.length - 1] ?? experiment.controlVariant;
+    const fallback =
+      experiment.variants[experiment.variants.length - 1] ?? experiment.controlVariant;
     this.lastSelection.set(experimentName, fallback);
     return fallback;
   }

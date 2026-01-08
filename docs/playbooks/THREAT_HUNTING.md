@@ -16,6 +16,7 @@
 **TTPs**: T1003.001 (LSASS Memory)
 
 **Data Sources**:
+
 - Process creation logs
 - File access logs
 - Memory access logs
@@ -23,6 +24,7 @@
 **Hunt Steps**:
 
 1. **Query for LSASS Access**:
+
    ```sql
    SELECT *
    FROM security_events
@@ -54,11 +56,13 @@
 **TTPs**: T1218 (Signed Binary Proxy Execution)
 
 **Data Sources**:
+
 - Command-line logs
 - Process creation
 - Network connections
 
 **Suspicious Binaries**:
+
 - certutil.exe (download files)
 - bitsadmin.exe (download/upload)
 - regsvr32.exe (execute scripts)
@@ -66,6 +70,7 @@
 - rundll32.exe (execute DLLs)
 
 **Hunt Query**:
+
 ```sql
 SELECT
     event_time,
@@ -97,12 +102,14 @@ ORDER BY event_time DESC;
 **TTPs**: T1059.001 (PowerShell)
 
 **Indicators**:
+
 - Base64 encoded commands
 - Download cradles
 - Reflective PE injection
 - AMSI bypass attempts
 
 **Hunt Query**:
+
 ```sql
 SELECT *
 FROM security_events
@@ -119,6 +126,7 @@ ORDER BY event_time DESC;
 ```
 
 **Analysis Steps**:
+
 1. Decode base64 commands
 2. Analyze PowerShell scripts
 3. Check for known Empire stagers
@@ -130,11 +138,13 @@ ORDER BY event_time DESC;
 **TTPs**: T1021.001 (Remote Desktop Protocol)
 
 **Data Sources**:
+
 - Authentication logs
 - Network connections
 - RDP session logs
 
 **Hunt Query**:
+
 ```sql
 WITH rdp_sessions AS (
     SELECT
@@ -165,6 +175,7 @@ ORDER BY event_time;
 **Hunt Steps**:
 
 1. **Baseline Calculation**:
+
    ```sql
    SELECT
        user_id,
@@ -210,6 +221,7 @@ ORDER BY event_time;
 **Hypothesis**: Compromised accounts accessing systems during unusual hours
 
 **Hunt Query**:
+
 ```sql
 WITH user_patterns AS (
     SELECT
@@ -249,6 +261,7 @@ ORDER BY e.event_time DESC;
 **Hunt Steps**:
 
 1. **Query Recent IOCs**:
+
    ```sql
    SELECT
        indicator_type,
@@ -284,12 +297,14 @@ ORDER BY e.event_time DESC;
 ### Hunt 8: Cobalt Strike Beacons
 
 **Indicators**:
+
 - Regular beaconing intervals
 - Specific user agents
 - JA3 SSL fingerprints
 - Named pipe patterns
 
 **Hunt Query**:
+
 ```sql
 WITH connection_intervals AS (
     SELECT
@@ -374,6 +389,7 @@ ORDER BY stddev_interval ASC;
 ### SQL Queries
 
 Use TimescaleDB's time-series functions:
+
 - `time_bucket()` for aggregation
 - `LAG()` and `LEAD()` for sequence analysis
 - Window functions for pattern detection
@@ -402,7 +418,7 @@ async function executeHunt(hunt: ThreatHunt) {
         timestamp: new Date(),
         resultsCount: data.rows.length,
         suspiciousResults: analyzeSuspiciousness(data.rows),
-        data: data.rows
+        data: data.rows,
       };
 
       results.push(finding);
@@ -411,7 +427,7 @@ async function executeHunt(hunt: ThreatHunt) {
         await createAlert({
           huntId: hunt.id,
           finding: finding,
-          severity: calculateSeverity(finding)
+          severity: calculateSeverity(finding),
         });
       }
     }

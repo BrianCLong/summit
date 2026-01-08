@@ -47,7 +47,9 @@ const generateMockCases = (): Case[] => {
     const createdAt = new Date(
       Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000
     )
-    const dueDate = new Date(createdAt.getTime() + Math.random() * 14 * 24 * 60 * 60 * 1000)
+    const dueDate = new Date(
+      createdAt.getTime() + Math.random() * 14 * 24 * 60 * 60 * 1000
+    )
 
     return {
       id: `case-${i + 1}`,
@@ -63,7 +65,10 @@ const generateMockCases = (): Case[] => {
         { length: Math.floor(Math.random() * 5) + 1 },
         (_, j) => `alert-${i}-${j}`
       ),
-      assignedTo: Math.random() > 0.2 ? analysts[Math.floor(Math.random() * analysts.length)] : undefined,
+      assignedTo:
+        Math.random() > 0.2
+          ? analysts[Math.floor(Math.random() * analysts.length)]
+          : undefined,
       createdAt: createdAt.toISOString(),
       updatedAt: new Date(
         createdAt.getTime() + Math.random() * 7 * 24 * 60 * 60 * 1000
@@ -79,7 +84,8 @@ const generateMockCases = (): Case[] => {
 
 const PRIORITY_COLORS: Record<Priority, string> = {
   low: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-  medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+  medium:
+    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
   high: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
   critical: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
 }
@@ -97,7 +103,9 @@ export default function CasesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState<CaseStatus | 'all'>('all')
   const [filterPriority, setFilterPriority] = useState<Priority | 'all'>('all')
-  const [sortBy, setSortBy] = useState<'priority' | 'updated' | 'due'>('priority')
+  const [sortBy, setSortBy] = useState<'priority' | 'updated' | 'due'>(
+    'priority'
+  )
 
   // Filter and sort cases
   const filteredCases = useMemo(() => {
@@ -106,10 +114,13 @@ export default function CasesPage() {
         searchQuery === '' ||
         c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         c.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+        c.tags.some(tag =>
+          tag.toLowerCase().includes(searchQuery.toLowerCase())
+        )
 
       const matchesStatus = filterStatus === 'all' || c.status === filterStatus
-      const matchesPriority = filterPriority === 'all' || c.priority === filterPriority
+      const matchesPriority =
+        filterPriority === 'all' || c.priority === filterPriority
 
       return matchesSearch && matchesStatus && matchesPriority
     })
@@ -194,7 +205,9 @@ export default function CasesPage() {
               <label className="text-sm font-medium mb-1 block">Status</label>
               <select
                 value={filterStatus}
-                onChange={e => setFilterStatus(e.target.value as CaseStatus | 'all')}
+                onChange={e =>
+                  setFilterStatus(e.target.value as CaseStatus | 'all')
+                }
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
                 <option value="all">All Statuses</option>
@@ -209,7 +222,9 @@ export default function CasesPage() {
               <label className="text-sm font-medium mb-1 block">Priority</label>
               <select
                 value={filterPriority}
-                onChange={e => setFilterPriority(e.target.value as Priority | 'all')}
+                onChange={e =>
+                  setFilterPriority(e.target.value as Priority | 'all')
+                }
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
                 <option value="all">All Priorities</option>
@@ -279,7 +294,9 @@ export default function CasesPage() {
                             {caseItem.title}
                           </h3>
                           <div className="flex flex-wrap gap-2 mb-3">
-                            <Badge className={PRIORITY_COLORS[caseItem.priority]}>
+                            <Badge
+                              className={PRIORITY_COLORS[caseItem.priority]}
+                            >
                               {caseItem.priority}
                             </Badge>
                             <Badge className={STATUS_COLORS[caseItem.status]}>
@@ -363,7 +380,11 @@ export default function CasesPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {cases.filter(c => c.status === 'open' || c.status === 'in_progress').length}
+              {
+                cases.filter(
+                  c => c.status === 'open' || c.status === 'in_progress'
+                ).length
+              }
             </div>
           </CardContent>
         </Card>

@@ -6,35 +6,35 @@
 
 module.exports = {
   // Use ts-jest preset for TypeScript support
-  preset: 'ts-jest',
+  preset: "ts-jest",
 
   // Test environment
-  testEnvironment: 'node',
+  testEnvironment: "node",
 
   // Root directory for tests
-  rootDir: '..',
+  rootDir: "..",
 
   // Test match patterns
   testMatch: [
-    '<rootDir>/graphql/__tests__/**/*.test.ts',
-    '<rootDir>/graphql/**/__tests__/**/*.test.ts',
+    "<rootDir>/graphql/__tests__/**/*.test.ts",
+    "<rootDir>/graphql/**/__tests__/**/*.test.ts",
   ],
 
   // Module paths
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/graphql/$1',
+    "^@/(.*)$": "<rootDir>/graphql/$1",
   },
 
   // Coverage configuration
   collectCoverageFrom: [
-    'graphql/**/*.ts',
-    '!graphql/**/*.d.ts',
-    '!graphql/__tests__/**',
-    '!graphql/examples/**',
-    '!graphql/**/index.ts',
+    "graphql/**/*.ts",
+    "!graphql/**/*.d.ts",
+    "!graphql/__tests__/**",
+    "!graphql/examples/**",
+    "!graphql/**/index.ts",
   ],
 
-  coverageDirectory: '<rootDir>/coverage/graphql',
+  coverageDirectory: "<rootDir>/coverage/graphql",
 
   coverageThresholds: {
     global: {
@@ -46,15 +46,15 @@ module.exports = {
   },
 
   // Coverage reporters
-  coverageReporters: ['text', 'lcov', 'html', 'json-summary'],
+  coverageReporters: ["text", "lcov", "html", "json-summary"],
 
   // Setup files
-  setupFilesAfterEnv: ['<rootDir>/graphql/__tests__/setup.ts'],
+  setupFilesAfterEnv: ["<rootDir>/graphql/__tests__/setup.ts"],
 
   // Transform configuration
   transform: {
-    '^.+\\.tsx?$': [
-      'ts-jest',
+    "^.+\\.tsx?$": [
+      "ts-jest",
       {
         tsconfig: {
           esModuleInterop: true,
@@ -65,10 +65,10 @@ module.exports = {
   },
 
   // Module file extensions
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
+  moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json"],
 
   // Ignore patterns
-  testPathIgnorePatterns: ['/node_modules/', '/dist/', '/coverage/'],
+  testPathIgnorePatterns: ["/node_modules/", "/dist/", "/coverage/"],
 
   // Verbose output
   verbose: true,

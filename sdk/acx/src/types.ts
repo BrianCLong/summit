@@ -1,9 +1,9 @@
-export type ConsentDecision = 'accept' | 'reject' | 'custom';
+export type ConsentDecision = "accept" | "reject" | "custom";
 
 export interface PurposeDefinition {
   id: string;
   category: string;
-  legalBasis: 'consent' | 'legitimate-interest';
+  legalBasis: "consent" | "legitimate-interest";
   defaultEnabled: boolean;
   description: Record<string, string>;
 }

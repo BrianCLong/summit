@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 import {
   Box,
   Container,
@@ -14,7 +14,7 @@ import {
   Alert,
   IconButton,
   Badge,
-} from '@mui/material';
+} from '@mui/material'
 import {
   Dashboard as DashboardIcon,
   People as PeopleIcon,
@@ -24,12 +24,12 @@ import {
   GetApp as ExportIcon,
   Settings as SettingsIcon,
   Notifications as NotificationsIcon,
-} from '@mui/icons-material';
-import { useQuery } from '@apollo/client/react';
-import { gql } from '@apollo/client';
+} from '@mui/icons-material'
+import { useQuery } from '@apollo/client/react'
+import { gql } from '@apollo/client'
 
-import DashboardOverview from '../components/admin/DashboardOverview';
-import UserManagement from '../components/admin/UserManagement';
+import DashboardOverview from '../components/admin/DashboardOverview'
+import UserManagement from '../components/admin/UserManagement'
 // TODO: Implement missing admin components
 // import ModerationQueue from '../components/admin/ModerationQueue';
 // import FeatureFlagsPanel from '../components/admin/FeatureFlagsPanel';
@@ -87,7 +87,7 @@ const GET_DASHBOARD_STATS = gql`
       }
     }
   }
-`;
+`
 
 const GET_ACTIVE_ALERTS = gql`
   query GetActiveAlerts {
@@ -100,71 +100,71 @@ const GET_ACTIVE_ALERTS = gql`
       createdAt
     }
   }
-`;
+`
 
 // ============================================================================
 // TYPES
 // ============================================================================
 
 interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
+  children?: React.ReactNode
+  index: number
+  value: number
 }
 
 interface Alert {
-  id: string;
-  alertType: string;
-  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
-  title: string;
-  message: string;
-  createdAt: string;
+  id: string
+  alertType: string
+  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW'
+  title: string
+  message: string
+  createdAt: string
 }
 
 interface AdminDashboardData {
   adminDashboard?: {
     users?: {
-      totalUsers: number;
-      activeUsers: number;
-      suspendedUsers: number;
-      adminUsers: number;
-      analystUsers: number;
-      viewerUsers: number;
-      activeToday: number;
-      activeThisWeek: number;
-      newThisMonth: number;
-    };
+      totalUsers: number
+      activeUsers: number
+      suspendedUsers: number
+      adminUsers: number
+      analystUsers: number
+      viewerUsers: number
+      activeToday: number
+      activeThisWeek: number
+      newThisMonth: number
+    }
     audit?: {
-      totalEvents: number;
-      eventsToday: number;
-      eventsThisWeek: number;
-      successfulEvents: number;
-      failedEvents: number;
-      uniqueUsers: number;
-      topActions: Array<{ action: string; count: number }>;
-    };
+      totalEvents: number
+      eventsToday: number
+      eventsThisWeek: number
+      successfulEvents: number
+      failedEvents: number
+      uniqueUsers: number
+      topActions: Array<{ action: string; count: number }>
+    }
     moderation?: {
-      totalItems: number;
-      pendingItems: number;
-      approvedItems: number;
-      rejectedItems: number;
-      criticalItems: number;
-      highPriorityItems: number;
-      avgResolutionTimeSeconds: number;
-    };
+      totalItems: number
+      pendingItems: number
+      approvedItems: number
+      rejectedItems: number
+      criticalItems: number
+      highPriorityItems: number
+      avgResolutionTimeSeconds: number
+    }
     alerts?: {
-      totalAlerts: number;
-      activeAlerts: number;
-      criticalAlerts: number;
-      highSeverityAlerts: number;
-      securityAlerts: number;
-      performanceAlerts: number;
-    };
-  };
+      totalAlerts: number
+      activeAlerts: number
+      criticalAlerts: number
+      highSeverityAlerts: number
+      securityAlerts: number
+      performanceAlerts: number
+    }
+  }
 }
 
 interface AlertsData {
-  adminAlerts?: Alert[];
+  adminAlerts?: Alert[]
 }
 
 // ============================================================================
@@ -172,7 +172,7 @@ interface AlertsData {
 // ============================================================================
 
 function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
+  const { children, value, index, ...other } = props
 
   return (
     <div
@@ -184,14 +184,14 @@ function TabPanel(props: TabPanelProps) {
     >
       {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
     </div>
-  );
+  )
 }
 
 function a11yProps(index: number) {
   return {
     id: `admin-tab-${index}`,
     'aria-controls': `admin-tabpanel-${index}`,
-  };
+  }
 }
 
 // ============================================================================
@@ -199,26 +199,28 @@ function a11yProps(index: number) {
 // ============================================================================
 
 export default function AdminDashboard() {
-  const [currentTab, setCurrentTab] = useState(0);
+  const [currentTab, setCurrentTab] = useState(0)
 
-  const { data: dashboardData, loading: dashboardLoading, error: dashboardError } = useQuery<AdminDashboardData>(
-    GET_DASHBOARD_STATS,
-    {
-      pollInterval: 30000, // Refresh every 30 seconds
-    }
-  );
+  const {
+    data: dashboardData,
+    loading: dashboardLoading,
+    error: dashboardError,
+  } = useQuery<AdminDashboardData>(GET_DASHBOARD_STATS, {
+    pollInterval: 30000, // Refresh every 30 seconds
+  })
 
   const { data: alertsData } = useQuery<AlertsData>(GET_ACTIVE_ALERTS, {
     pollInterval: 15000, // Refresh every 15 seconds
-  });
+  })
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setCurrentTab(newValue);
-  };
+    setCurrentTab(newValue)
+  }
 
-  const activeAlertCount = alertsData?.adminAlerts?.filter(
-    (alert) => alert.severity === 'CRITICAL' || alert.severity === 'HIGH'
-  ).length || 0;
+  const activeAlertCount =
+    alertsData?.adminAlerts?.filter(
+      alert => alert.severity === 'CRITICAL' || alert.severity === 'HIGH'
+    ).length || 0
 
   if (dashboardError) {
     return (
@@ -231,13 +233,20 @@ export default function AdminDashboard() {
           </Alert>
         </Box>
       </Container>
-    );
+    )
   }
 
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 3,
+        }}
+      >
         <Typography variant="h4" component="h1" gutterBottom>
           Admin Panel
         </Typography>
@@ -250,15 +259,15 @@ export default function AdminDashboard() {
 
       {/* Critical Alerts Banner */}
       {alertsData?.adminAlerts?.some(
-        (alert) => alert.severity === 'CRITICAL'
+        alert => alert.severity === 'CRITICAL'
       ) && (
         <Alert severity="error" sx={{ mb: 3 }}>
           <Typography variant="subtitle1" fontWeight="bold">
             Critical Alerts Require Attention
           </Typography>
           {alertsData.adminAlerts
-            .filter((alert) => alert.severity === 'CRITICAL')
-            .map((alert) => (
+            .filter(alert => alert.severity === 'CRITICAL')
+            .map(alert => (
               <Typography key={alert.id} variant="body2">
                 • {alert.title}
               </Typography>
@@ -280,7 +289,9 @@ export default function AdminDashboard() {
           <Tab
             icon={
               <Badge
-                badgeContent={dashboardData?.adminDashboard?.moderation?.pendingItems || 0}
+                badgeContent={
+                  dashboardData?.adminDashboard?.moderation?.pendingItems || 0
+                }
                 color="warning"
               >
                 <GavelIcon />
@@ -292,7 +303,11 @@ export default function AdminDashboard() {
           <Tab icon={<FlagIcon />} label="Feature Flags" {...a11yProps(3)} />
           <Tab icon={<AuditIcon />} label="Audit Logs" {...a11yProps(4)} />
           <Tab icon={<ExportIcon />} label="Data Exports" {...a11yProps(5)} />
-          <Tab icon={<SettingsIcon />} label="System Config" {...a11yProps(6)} />
+          <Tab
+            icon={<SettingsIcon />}
+            label="System Config"
+            {...a11yProps(6)}
+          />
           <Tab
             icon={
               <Badge badgeContent={activeAlertCount} color="error">
@@ -341,5 +356,5 @@ export default function AdminDashboard() {
         <Typography>Alerts Panel (Coming Soon)</Typography>
       </TabPanel>
     </Container>
-  );
+  )
 }

@@ -9,8 +9,8 @@ import type {
   EvaluationReport,
   GeneratedScenario,
   LatencyMetrics,
-} from '../types/index.js';
-import { v4 as uuidv4 } from 'uuid';
+} from "../types/index.js";
+import { v4 as uuidv4 } from "uuid";
 
 export class MetricsCollector {
   private sessions: AnalystSession[] = [];
@@ -33,20 +33,22 @@ export class MetricsCollector {
   /**
    * Generate evaluation report
    */
-  async generateReport(options: {
-    format?: 'json' | 'csv' | 'html';
-    output?: string;
-    baseline?: AggregateMetrics;
-    baselineVersion?: string;
-    candidateVersion?: string;
-  } = {}): Promise<EvaluationReport> {
+  async generateReport(
+    options: {
+      format?: "json" | "csv" | "html";
+      output?: string;
+      baseline?: AggregateMetrics;
+      baselineVersion?: string;
+      candidateVersion?: string;
+    } = {}
+  ): Promise<EvaluationReport> {
     const aggregateMetrics = this.computeAggregateMetrics();
 
     const report: EvaluationReport = {
       id: `report-${uuidv4()}`,
       timestamp: new Date().toISOString(),
-      scenarioId: this.scenario?.id || 'unknown',
-      scenarioName: this.scenario?.name || 'unknown',
+      scenarioId: this.scenario?.id || "unknown",
+      scenarioName: this.scenario?.name || "unknown",
       sessions: this.sessions,
       aggregateMetrics,
     };
@@ -57,7 +59,7 @@ export class MetricsCollector {
         options.baseline,
         aggregateMetrics,
         options.baselineVersion,
-        options.candidateVersion,
+        options.candidateVersion
       );
     }
 
@@ -69,22 +71,18 @@ export class MetricsCollector {
    */
   private computeAggregateMetrics(): AggregateMetrics {
     if (this.sessions.length === 0) {
-      throw new Error('No sessions to aggregate');
+      throw new Error("No sessions to aggregate");
     }
 
-    const completedSessions = this.sessions.filter(
-      (s) => s.status === 'completed',
-    );
-    const failedSessions = this.sessions.filter((s) => s.status === 'failed');
-    const timeoutSessions = this.sessions.filter((s) => s.status === 'timeout');
+    const completedSessions = this.sessions.filter((s) => s.status === "completed");
+    const failedSessions = this.sessions.filter((s) => s.status === "failed");
+    const timeoutSessions = this.sessions.filter((s) => s.status === "timeout");
 
     // Performance metrics
     const durations = this.sessions.map((s) => s.metrics.totalDuration);
     const avgDuration = this.mean(durations);
 
-    const allLatencySamples = this.sessions.flatMap(
-      (s) => s.metrics.queryLatency.samples,
-    );
+    const allLatencySamples = this.sessions.flatMap((s) => s.metrics.queryLatency.samples);
     const avgQueryLatency = this.computeLatencyMetrics(allLatencySamples);
 
     const insightTimes = this.sessions
@@ -93,19 +91,15 @@ export class MetricsCollector {
     const avgTimeToInsight = insightTimes.length > 0 ? this.mean(insightTimes) : 0;
 
     // Correctness metrics
-    const totalEntitiesFound = this.sum(
-      this.sessions.map((s) => s.metrics.entitiesFound),
-    );
+    const totalEntitiesFound = this.sum(this.sessions.map((s) => s.metrics.entitiesFound));
     const totalRelationshipsFound = this.sum(
-      this.sessions.map((s) => s.metrics.relationshipsFound),
+      this.sessions.map((s) => s.metrics.relationshipsFound)
     );
 
     const expectedEntities = this.scenario?.expectedOutcomes.minEntitiesFound || 1;
-    const expectedRelationships =
-      this.scenario?.expectedOutcomes.minRelationshipsFound || 1;
+    const expectedRelationships = this.scenario?.expectedOutcomes.minRelationshipsFound || 1;
 
-    const entitiesFoundRate =
-      totalEntitiesFound / (expectedEntities * this.sessions.length);
+    const entitiesFoundRate = totalEntitiesFound / (expectedEntities * this.sessions.length);
     const relationshipsFoundRate =
       totalRelationshipsFound / (expectedRelationships * this.sessions.length);
 
@@ -145,7 +139,7 @@ export class MetricsCollector {
     baseline: AggregateMetrics,
     candidate: AggregateMetrics,
     baselineVersion: string,
-    candidateVersion: string,
+    candidateVersion: string
   ): ComparisonMetrics {
     return {
       baseline: {
@@ -158,65 +152,54 @@ export class MetricsCollector {
       },
       deltas: {
         performance: {
-          avgDuration:
-            this.percentChange(
-              baseline.performance.avgDuration,
-              candidate.performance.avgDuration,
-            ),
-          avgQueryLatency_p50:
-            this.percentChange(
-              baseline.performance.avgQueryLatency.p50,
-              candidate.performance.avgQueryLatency.p50,
-            ),
-          avgQueryLatency_p95:
-            this.percentChange(
-              baseline.performance.avgQueryLatency.p95,
-              candidate.performance.avgQueryLatency.p95,
-            ),
-          avgTimeToInsight:
-            this.percentChange(
-              baseline.performance.avgTimeToInsight,
-              candidate.performance.avgTimeToInsight,
-            ),
+          avgDuration: this.percentChange(
+            baseline.performance.avgDuration,
+            candidate.performance.avgDuration
+          ),
+          avgQueryLatency_p50: this.percentChange(
+            baseline.performance.avgQueryLatency.p50,
+            candidate.performance.avgQueryLatency.p50
+          ),
+          avgQueryLatency_p95: this.percentChange(
+            baseline.performance.avgQueryLatency.p95,
+            candidate.performance.avgQueryLatency.p95
+          ),
+          avgTimeToInsight: this.percentChange(
+            baseline.performance.avgTimeToInsight,
+            candidate.performance.avgTimeToInsight
+          ),
         },
         correctness: {
-          entitiesFoundRate:
-            this.percentChange(
-              baseline.correctness.entitiesFoundRate,
-              candidate.correctness.entitiesFoundRate,
-            ),
-          relationshipsFoundRate:
-            this.percentChange(
-              baseline.correctness.relationshipsFoundRate,
-              candidate.correctness.relationshipsFoundRate,
-            ),
-          falsePositiveRate:
-            this.percentChange(
-              baseline.correctness.falsePositiveRate,
-              candidate.correctness.falsePositiveRate,
-            ),
-          falseNegativeRate:
-            this.percentChange(
-              baseline.correctness.falseNegativeRate,
-              candidate.correctness.falseNegativeRate,
-            ),
+          entitiesFoundRate: this.percentChange(
+            baseline.correctness.entitiesFoundRate,
+            candidate.correctness.entitiesFoundRate
+          ),
+          relationshipsFoundRate: this.percentChange(
+            baseline.correctness.relationshipsFoundRate,
+            candidate.correctness.relationshipsFoundRate
+          ),
+          falsePositiveRate: this.percentChange(
+            baseline.correctness.falsePositiveRate,
+            candidate.correctness.falsePositiveRate
+          ),
+          falseNegativeRate: this.percentChange(
+            baseline.correctness.falseNegativeRate,
+            candidate.correctness.falseNegativeRate
+          ),
         },
         reliability: {
-          successRate:
-            this.percentChange(
-              baseline.reliability.successRate,
-              candidate.reliability.successRate,
-            ),
-          errorRate:
-            this.percentChange(
-              baseline.reliability.errorRate,
-              candidate.reliability.errorRate,
-            ),
-          timeoutRate:
-            this.percentChange(
-              baseline.reliability.timeoutRate,
-              candidate.reliability.timeoutRate,
-            ),
+          successRate: this.percentChange(
+            baseline.reliability.successRate,
+            candidate.reliability.successRate
+          ),
+          errorRate: this.percentChange(
+            baseline.reliability.errorRate,
+            candidate.reliability.errorRate
+          ),
+          timeoutRate: this.percentChange(
+            baseline.reliability.timeoutRate,
+            candidate.reliability.timeoutRate
+          ),
         },
       },
     };

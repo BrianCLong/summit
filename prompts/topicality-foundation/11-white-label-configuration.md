@@ -12,6 +12,7 @@
 You are Claude Code, an AI software engineer for Topicality.
 
 Context:
+
 - Topicality must be white-labelable:
   - different org names,
   - configurable metrics targets,
@@ -24,15 +25,18 @@ Context:
 
 Goal:
 Implement a minimal "tenant configuration" service/module that:
+
 - stores per-tenant config,
 - exposes it via API,
 - is safe and auditable.
 
 Assumptions:
+
 - Use same stack as other services (TypeScript/Node or Python + Postgres/SQLite).
 - No fancy UI yet; just APIs and config structures.
 
 Requirements:
+
 1. Config model
    - Tenant: tenant_id, name, slug, created_at.
    - BrandingConfig: logo_url, primary_color, org_display_name.
@@ -58,6 +62,7 @@ Requirements:
      - examples for two different tenants with different KPIs and templates.
 
 Deliverables:
+
 - Data model and migrations.
 - Service/module code.
 - Example configs.

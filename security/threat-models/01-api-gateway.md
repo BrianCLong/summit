@@ -10,6 +10,7 @@
 ## System Overview
 
 The API Gateway is a GraphQL-based service that acts as the primary entry point for client applications. It:
+
 - Exposes GraphQL API at `/graphql`
 - Implements policy enforcement via middleware
 - Provides authentication and authorization
@@ -18,6 +19,7 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 - Health check endpoint at `/health`
 
 ### Architecture Components
+
 - **Entry Points:** GraphQL endpoint, Health endpoint
 - **Dependencies:** Authentication services, Policy engine, Downstream services
 - **Data Flow:** Client → API Gateway → Backend Services
@@ -30,9 +32,11 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 ### S - Spoofing Identity
 
 #### Threat 1.1: Unauthenticated GraphQL Access
+
 **Description:** Attacker bypasses authentication to execute GraphQL queries
 **Attack Vector:** Direct requests to `/graphql` endpoint without valid credentials
 **DREAD Score:**
+
 - Damage: 9 (Full system access)
 - Reproducibility: 8 (Easy to attempt)
 - Exploitability: 7 (Depends on auth implementation)
@@ -41,10 +45,12 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 - **Total: 8.6 (CRITICAL)**
 
 **Existing Mitigation:**
+
 - Context creation function (`createContext`) for auth handling
 - Policy guard middleware
 
 **Required Mitigation:**
+
 - Enforce mandatory authentication on all GraphQL operations
 - Implement JWT validation with short expiration times (≤15 min)
 - Add rate limiting per IP/user
@@ -57,9 +63,11 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 ---
 
 #### Threat 1.2: JWT Token Theft/Replay
+
 **Description:** Stolen JWT tokens used to impersonate legitimate users
 **Attack Vector:** XSS, network sniffing, or local storage theft
 **DREAD Score:**
+
 - Damage: 8 (User account compromise)
 - Reproducibility: 6 (Requires token theft)
 - Exploitability: 7 (Common attack)
@@ -68,10 +76,12 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 - **Total: 6.8 (HIGH)**
 
 **Existing Mitigation:**
+
 - CORS configuration limits origin
 - Credentials flag enabled
 
 **Required Mitigation:**
+
 - Implement refresh token rotation
 - Add device fingerprinting
 - Monitor for concurrent sessions from different IPs
@@ -87,9 +97,11 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 ### T - Tampering with Data
 
 #### Threat 2.1: GraphQL Mutation Injection
+
 **Description:** Malicious mutations modify data without authorization
 **Attack Vector:** Crafted GraphQL mutations exploiting weak authorization
 **DREAD Score:**
+
 - Damage: 9 (Data corruption)
 - Reproducibility: 7 (Requires bypass)
 - Exploitability: 6 (Needs schema knowledge)
@@ -98,10 +110,12 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 - **Total: 7.6 (HIGH)**
 
 **Existing Mitigation:**
+
 - Policy guard middleware
 - Resolver-level authorization
 
 **Required Mitigation:**
+
 - Disable introspection in production (currently only dev)
 - Implement field-level authorization
 - Add mutation input validation with strict schemas
@@ -115,9 +129,11 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 ---
 
 #### Threat 2.2: Policy Bypass via DryRun Mode
+
 **Description:** Policy enforcement disabled in DryRun mode allows violations
 **Attack Vector:** Environment variable manipulation (POLICY_DRY_RUN=true)
 **DREAD Score:**
+
 - Damage: 8 (Policy violations)
 - Reproducibility: 9 (If env access)
 - Exploitability: 5 (Requires env access)
@@ -126,9 +142,11 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 - **Total: 7.2 (HIGH)**
 
 **Existing Mitigation:**
+
 - Environment-based configuration
 
 **Required Mitigation:**
+
 - Remove DryRun mode from production deployments
 - Implement deployment environment validation
 - Add runtime environment checks
@@ -143,9 +161,11 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 ### R - Repudiation
 
 #### Threat 3.1: Missing Audit Trail
+
 **Description:** Actions cannot be traced to specific users
 **Attack Vector:** Insufficient logging of GraphQL operations
 **DREAD Score:**
+
 - Damage: 7 (Forensic impact)
 - Reproducibility: 10 (Always present)
 - Exploitability: 1 (N/A - logging issue)
@@ -154,9 +174,11 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 - **Total: 6.2 (MEDIUM)**
 
 **Existing Mitigation:**
+
 - Logger configured in Apollo Server
 
 **Required Mitigation:**
+
 - Log all GraphQL operations with:
   - User identity
   - Timestamp
@@ -177,9 +199,11 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 ### I - Information Disclosure
 
 #### Threat 4.1: GraphQL Schema Leakage
+
 **Description:** Schema introspection reveals system internals
 **Attack Vector:** Introspection queries in production
 **DREAD Score:**
+
 - Damage: 5 (Information leakage)
 - Reproducibility: 10 (Always available)
 - Exploitability: 10 (Trivial)
@@ -188,9 +212,11 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 - **Total: 9.0 (CRITICAL)**
 
 **Existing Mitigation:**
+
 - Introspection controlled by NODE_ENV
 
 **Required Mitigation:**
+
 - Disable introspection in production
 - Use schema allow-listing
 - Implement query complexity limits
@@ -203,9 +229,11 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 ---
 
 #### Threat 4.2: Verbose Error Messages
+
 **Description:** Error messages expose stack traces and internal paths
 **Attack Vector:** Malformed queries trigger detailed errors
 **DREAD Score:**
+
 - Damage: 4 (Information leakage)
 - Reproducibility: 8 (Easy to trigger)
 - Exploitability: 6 (Aids other attacks)
@@ -214,9 +242,11 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 - **Total: 7.4 (HIGH)**
 
 **Existing Mitigation:**
+
 - Custom logger
 
 **Required Mitigation:**
+
 - Implement custom error formatter
 - Return generic errors to clients
 - Log detailed errors server-side only
@@ -230,9 +260,11 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 ---
 
 #### Threat 4.3: CORS Misconfiguration
+
 **Description:** Overly permissive CORS allows credential theft
 **Attack Vector:** Malicious site reads API responses
 **DREAD Score:**
+
 - Damage: 7 (Data exfiltration)
 - Reproducibility: 8 (If misconfigured)
 - Exploitability: 7 (Common attack)
@@ -241,9 +273,11 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 - **Total: 7.8 (HIGH)**
 
 **Existing Mitigation:**
+
 - CORS configured with origin and credentials
 
 **Required Mitigation:**
+
 - Use explicit allowed origins (no wildcards with credentials)
 - Validate origin header server-side
 - Implement pre-flight request validation
@@ -258,9 +292,11 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 ### D - Denial of Service
 
 #### Threat 5.1: GraphQL Query Complexity Attack
+
 **Description:** Deeply nested or expensive queries exhaust resources
 **Attack Vector:** Maliciously crafted GraphQL queries
 **DREAD Score:**
+
 - Damage: 8 (Service outage)
 - Reproducibility: 9 (Easy to craft)
 - Exploitability: 9 (No auth needed)
@@ -269,9 +305,11 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 - **Total: 8.8 (CRITICAL)**
 
 **Existing Mitigation:**
+
 - None identified
 
 **Required Mitigation:**
+
 - Implement query complexity analysis
 - Set maximum query depth (limit: 7)
 - Add query cost calculation
@@ -286,9 +324,11 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 ---
 
 #### Threat 5.2: Batch Query Flooding
+
 **Description:** Multiple queries in single request overwhelm server
 **Attack Vector:** Batched GraphQL operations
 **DREAD Score:**
+
 - Damage: 7 (Performance degradation)
 - Reproducibility: 9 (Easy to send)
 - Exploitability: 9 (No limits)
@@ -297,9 +337,11 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 - **Total: 8.4 (CRITICAL)**
 
 **Existing Mitigation:**
+
 - None identified
 
 **Required Mitigation:**
+
 - Limit batch size (max: 10 queries)
 - Implement request size limits
 - Add connection pooling
@@ -314,9 +356,11 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 ### E - Elevation of Privilege
 
 #### Threat 6.1: Authorization Bypass via Direct Resolver Access
+
 **Description:** Weak resolver authorization allows privilege escalation
 **Attack Vector:** Crafted queries access restricted resolvers
 **DREAD Score:**
+
 - Damage: 10 (Admin access)
 - Reproducibility: 6 (Depends on implementation)
 - Exploitability: 7 (Requires schema knowledge)
@@ -325,10 +369,12 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 - **Total: 7.8 (HIGH)**
 
 **Existing Mitigation:**
+
 - Policy guard middleware
 - Authorization in resolvers
 
 **Required Mitigation:**
+
 - Implement consistent authorization checks in all resolvers
 - Use directive-based authorization (@auth, @roles)
 - Implement least privilege principle
@@ -342,9 +388,11 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 ---
 
 #### Threat 6.2: Helmet Middleware Disabled
+
 **Description:** Security headers not set, enabling various attacks
 **Attack Vector:** XSS, clickjacking, MIME sniffing
 **DREAD Score:**
+
 - Damage: 7 (Various attacks)
 - Reproducibility: 10 (Always disabled)
 - Exploitability: 8 (Common attacks)
@@ -353,9 +401,11 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 - **Total: 9.0 (CRITICAL)**
 
 **Existing Mitigation:**
+
 - None (commented out: `// app.use(helmet())`)
 
 **Required Mitigation:**
+
 - Enable Helmet middleware immediately
 - Configure CSP headers
 - Enable HSTS
@@ -372,6 +422,7 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 ## Summary of Findings
 
 ### Critical Gaps (Immediate Action Required)
+
 1. **Helmet middleware disabled** - No security headers
 2. **Policy DryRun mode in production** - Policy bypass possible
 3. **No query complexity limits** - DoS vulnerability
@@ -379,6 +430,7 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 5. **Verbose error messages** - Information disclosure
 
 ### High Priority Gaps
+
 1. Partial authentication enforcement
 2. Missing refresh token implementation
 3. Introspection partially controlled
@@ -386,11 +438,13 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 5. Authorization not directive-based
 
 ### Medium Priority Gaps
+
 1. Need enhanced monitoring
 2. Need regular security audits
 3. Need penetration testing
 
 ### Compliance Impact
+
 - **SOC 2 Security:** 8 gaps affecting CC6.x controls
 - **SOC 2 Availability:** 2 critical DoS vulnerabilities
 - **SOC 2 Confidentiality:** 3 information disclosure risks
@@ -400,6 +454,7 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 ## Recommendations
 
 ### Immediate Actions (Week 1)
+
 1. Enable Helmet middleware
 2. Disable Policy DryRun in production
 3. Implement query complexity analysis
@@ -407,6 +462,7 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 5. Sanitize error messages
 
 ### Short-term Actions (Month 1)
+
 1. Implement refresh token rotation
 2. Add comprehensive audit logging
 3. Implement directive-based authorization
@@ -414,6 +470,7 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 5. Complete authentication enforcement review
 
 ### Long-term Actions (Quarter 1)
+
 1. Regular security audits
 2. Penetration testing
 3. Security training for developers
@@ -424,6 +481,6 @@ The API Gateway is a GraphQL-based service that acts as the primary entry point 
 
 ## Approval and Sign-off
 
-**Reviewed By:** _____________________
-**Date:** _____________________
+**Reviewed By:** **********\_**********
+**Date:** **********\_**********
 **Next Review:** 2026-03-27 (Quarterly)

@@ -2,133 +2,133 @@
 // scripts/test-compliance-domains.js
 // Comprehensive Day 1 compliance testing for all 10 target domains
 
-import { ComplianceGate } from '../server/src/conductor/web-orchestration/compliance-gate.js';
-import { RedisRateLimiter } from '../server/src/conductor/web-orchestration/redis-rate-limiter.js';
-import logger from '../server/src/config/logger.js';
+import { ComplianceGate } from "../server/src/conductor/web-orchestration/compliance-gate.js";
+import { RedisRateLimiter } from "../server/src/conductor/web-orchestration/redis-rate-limiter.js";
+import logger from "../server/src/config/logger.js";
 
 const TARGET_DOMAINS = [
   // Initial 6 domains - already validated ✅
-  'docs.python.org',
-  'github.com',
-  'stackoverflow.com',
-  'arxiv.org',
-  'nist.gov',
-  'kubernetes.io',
+  "docs.python.org",
+  "github.com",
+  "stackoverflow.com",
+  "arxiv.org",
+  "nist.gov",
+  "kubernetes.io",
 
   // Additional 4 domains for Day 1 completion
-  'nodejs.org',
-  'developer.mozilla.org',
-  'wikipedia.org',
-  'openai.com',
+  "nodejs.org",
+  "developer.mozilla.org",
+  "wikipedia.org",
+  "openai.com",
 ];
 
 const TEST_URLS = [
   // docs.python.org tests
   {
-    url: 'https://docs.python.org/3/library/json.html',
+    url: "https://docs.python.org/3/library/json.html",
     expected: true,
-    purpose: 'documentation',
+    purpose: "documentation",
   },
   {
-    url: 'https://docs.python.org/3/tutorial/',
+    url: "https://docs.python.org/3/tutorial/",
     expected: true,
-    purpose: 'research',
+    purpose: "research",
   },
 
   // github.com tests
   {
-    url: 'https://github.com/python/cpython',
+    url: "https://github.com/python/cpython",
     expected: true,
-    purpose: 'intelligence_analysis',
+    purpose: "intelligence_analysis",
   },
   {
-    url: 'https://github.com/microsoft/vscode/issues',
+    url: "https://github.com/microsoft/vscode/issues",
     expected: true,
-    purpose: 'research',
+    purpose: "research",
   },
 
   // stackoverflow.com tests
   {
-    url: 'https://stackoverflow.com/questions/tagged/python',
+    url: "https://stackoverflow.com/questions/tagged/python",
     expected: true,
-    purpose: 'research',
+    purpose: "research",
   },
   {
-    url: 'https://stackoverflow.com/users/login',
+    url: "https://stackoverflow.com/users/login",
     expected: false,
-    purpose: 'research',
+    purpose: "research",
   }, // Should be blocked by robots.txt
 
   // arxiv.org tests
   {
-    url: 'https://arxiv.org/abs/2301.00001',
+    url: "https://arxiv.org/abs/2301.00001",
     expected: true,
-    purpose: 'research',
+    purpose: "research",
   },
   {
-    url: 'https://arxiv.org/search',
+    url: "https://arxiv.org/search",
     expected: true,
-    purpose: 'intelligence_analysis',
+    purpose: "intelligence_analysis",
   },
 
   // nist.gov tests
-  { url: 'https://nist.gov/publications', expected: true, purpose: 'research' },
+  { url: "https://nist.gov/publications", expected: true, purpose: "research" },
   {
-    url: 'https://nist.gov/cybersecurity',
+    url: "https://nist.gov/cybersecurity",
     expected: true,
-    purpose: 'intelligence_analysis',
+    purpose: "intelligence_analysis",
   },
 
   // kubernetes.io tests
   {
-    url: 'https://kubernetes.io/docs/concepts/',
+    url: "https://kubernetes.io/docs/concepts/",
     expected: true,
-    purpose: 'documentation',
+    purpose: "documentation",
   },
-  { url: 'https://kubernetes.io/blog/', expected: true, purpose: 'research' },
+  { url: "https://kubernetes.io/blog/", expected: true, purpose: "research" },
 
   // nodejs.org tests
   {
-    url: 'https://nodejs.org/api/fs.html',
+    url: "https://nodejs.org/api/fs.html",
     expected: true,
-    purpose: 'documentation',
+    purpose: "documentation",
   },
   {
-    url: 'https://nodejs.org/en/download/',
+    url: "https://nodejs.org/en/download/",
     expected: true,
-    purpose: 'research',
+    purpose: "research",
   },
 
   // developer.mozilla.org tests
   {
-    url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript',
+    url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript",
     expected: true,
-    purpose: 'documentation',
+    purpose: "documentation",
   },
   {
-    url: 'https://developer.mozilla.org/en-US/docs/Web/API',
+    url: "https://developer.mozilla.org/en-US/docs/Web/API",
     expected: true,
-    purpose: 'research',
+    purpose: "research",
   },
 
   // wikipedia.org tests
   {
-    url: 'https://en.wikipedia.org/wiki/Machine_learning',
+    url: "https://en.wikipedia.org/wiki/Machine_learning",
     expected: true,
-    purpose: 'research',
+    purpose: "research",
   },
   {
-    url: 'https://en.wikipedia.org/wiki/Special:Random',
+    url: "https://en.wikipedia.org/wiki/Special:Random",
     expected: false,
-    purpose: 'research',
+    purpose: "research",
   }, // May be rate limited
 
   // openai.com tests
-  { url: 'https://openai.com/research', expected: true, purpose: 'research' },
+  { url: "https://openai.com/research", expected: true, purpose: "research" },
   {
-    url: 'https://openai.com/api',
+    url: "https://openai.com/api",
     expected: true,
-    purpose: 'intelligence_analysis',
+    purpose: "intelligence_analysis",
   },
 ];
 
@@ -145,44 +145,44 @@ class ComplianceTester {
     await this.rateLimiter.connect();
     await this.rateLimiter.loadDomainConfigs();
 
-    logger.info('Compliance testing initialized', {
+    logger.info("Compliance testing initialized", {
       targetDomains: TARGET_DOMAINS.length,
       testUrls: TEST_URLS.length,
     });
   }
 
   async runComprehensiveTest() {
-    console.log('\n🚀 Starting Comprehensive Day 1 Compliance Testing\n');
-    console.log('='.repeat(70));
+    console.log("\n🚀 Starting Comprehensive Day 1 Compliance Testing\n");
+    console.log("=".repeat(70));
 
     // Test 1: Robots.txt Validation for All Domains
-    console.log('\n📋 TEST 1: Robots.txt Compliance Validation');
-    console.log('-'.repeat(50));
+    console.log("\n📋 TEST 1: Robots.txt Compliance Validation");
+    console.log("-".repeat(50));
     await this.testRobotsCompliance();
 
     // Test 2: Rate Limiting Functionality
-    console.log('\n⏱️  TEST 2: Rate Limiting with Token Buckets');
-    console.log('-'.repeat(50));
+    console.log("\n⏱️  TEST 2: Rate Limiting with Token Buckets");
+    console.log("-".repeat(50));
     await this.testRateLimiting();
 
     // Test 3: End-to-End Compliance Gate
-    console.log('\n🔒 TEST 3: End-to-End Compliance Gate Testing');
-    console.log('-'.repeat(50));
+    console.log("\n🔒 TEST 3: End-to-End Compliance Gate Testing");
+    console.log("-".repeat(50));
     await this.testComplianceGate();
 
     // Test 4: Load Testing
-    console.log('\n⚡ TEST 4: Concurrent Load Testing');
-    console.log('-'.repeat(50));
+    console.log("\n⚡ TEST 4: Concurrent Load Testing");
+    console.log("-".repeat(50));
     await this.testConcurrentLoad();
 
     // Test 5: Failure Scenarios
-    console.log('\n🚨 TEST 5: Error Handling & Edge Cases');
-    console.log('-'.repeat(50));
+    console.log("\n🚨 TEST 5: Error Handling & Edge Cases");
+    console.log("-".repeat(50));
     await this.testFailureScenarios();
 
     // Generate Report
-    console.log('\n📊 FINAL REPORT: Day 1 Compliance Testing');
-    console.log('='.repeat(70));
+    console.log("\n📊 FINAL REPORT: Day 1 Compliance Testing");
+    console.log("=".repeat(70));
     await this.generateReport();
   }
 
@@ -196,14 +196,14 @@ class ComplianceTester {
         // Test robots.txt parsing
         const testCheck = await this.complianceGate.validateWebFetch(
           `https://${domain}/`,
-          'ConductorBot/1.0 (+https://conductor.ai/bot)',
-          'research',
-          'test-user',
-          'test-tenant',
+          "ConductorBot/1.0 (+https://conductor.ai/bot)",
+          "research",
+          "test-user",
+          "test-tenant"
         );
 
-        const status = testCheck.allowed ? '✅ PASS' : '❌ FAIL';
-        const reason = testCheck.reason || 'No specific reason';
+        const status = testCheck.allowed ? "✅ PASS" : "❌ FAIL";
+        const reason = testCheck.reason || "No specific reason";
 
         console.log(`  ${status} - ${reason}`);
 
@@ -223,7 +223,7 @@ class ComplianceTester {
           domain,
           allowed: false,
           reason: `Test error: ${error.message}`,
-          restrictions: ['test_error'],
+          restrictions: ["test_error"],
           policyRefs: [],
         });
       }
@@ -233,11 +233,11 @@ class ComplianceTester {
     const passRate = (passCount / results.length) * 100;
 
     console.log(
-      `\n🎯 Robots.txt Compliance: ${passCount}/${results.length} domains (${passRate.toFixed(1)}%)`,
+      `\n🎯 Robots.txt Compliance: ${passCount}/${results.length} domains (${passRate.toFixed(1)}%)`
     );
 
     this.results.push({
-      test: 'robots_compliance',
+      test: "robots_compliance",
       passCount,
       totalCount: results.length,
       passRate,
@@ -248,28 +248,20 @@ class ComplianceTester {
   async testRateLimiting() {
     const testResults = [];
 
-    for (const domain of ['docs.python.org', 'github.com', 'arxiv.org']) {
+    for (const domain of ["docs.python.org", "github.com", "arxiv.org"]) {
       console.log(`Testing rate limits for ${domain}...`);
 
       try {
         // Test normal request
-        const normalResult = await this.rateLimiter.checkRateLimit(
-          domain,
-          'test-tenant',
-          1,
-        );
+        const normalResult = await this.rateLimiter.checkRateLimit(domain, "test-tenant", 1);
         console.log(
-          `  ✅ Normal request: ${normalResult.allowed ? 'ALLOWED' : 'DENIED'} (${normalResult.tokensRemaining} tokens remaining)`,
+          `  ✅ Normal request: ${normalResult.allowed ? "ALLOWED" : "DENIED"} (${normalResult.tokensRemaining} tokens remaining)`
         );
 
         // Test burst allowance
-        const burstResult = await this.rateLimiter.checkRateLimit(
-          domain,
-          'test-tenant',
-          5,
-        );
+        const burstResult = await this.rateLimiter.checkRateLimit(domain, "test-tenant", 5);
         console.log(
-          `  ⚡ Burst request: ${burstResult.allowed ? 'ALLOWED' : 'DENIED'} (${burstResult.tokensRemaining} tokens remaining)`,
+          `  ⚡ Burst request: ${burstResult.allowed ? "ALLOWED" : "DENIED"} (${burstResult.tokensRemaining} tokens remaining)`
         );
 
         // Test rate limit exhaustion
@@ -279,15 +271,15 @@ class ComplianceTester {
         while (exhaustionAttempts < 20 && !rateLimited) {
           const exhaustResult = await this.rateLimiter.checkRateLimit(
             domain,
-            'test-tenant-exhaust',
-            10,
+            "test-tenant-exhaust",
+            10
           );
           exhaustionAttempts++;
 
           if (!exhaustResult.allowed) {
             rateLimited = true;
             console.log(
-              `  🔒 Rate limited after ${exhaustionAttempts} attempts (retry after ${exhaustResult.retryAfter}s)`,
+              `  🔒 Rate limited after ${exhaustionAttempts} attempts (retry after ${exhaustResult.retryAfter}s)`
             );
           }
         }
@@ -301,7 +293,7 @@ class ComplianceTester {
         });
 
         // Reset bucket for next test
-        await this.rateLimiter.resetBucket(domain, 'test-tenant-exhaust');
+        await this.rateLimiter.resetBucket(domain, "test-tenant-exhaust");
       } catch (error) {
         console.log(`  ❌ Rate limit test failed: ${error.message}`);
         testResults.push({
@@ -313,11 +305,11 @@ class ComplianceTester {
 
     const workingCount = testResults.filter((r) => r.rateLimitWorking).length;
     console.log(
-      `\n🎯 Rate Limiting: ${workingCount}/${testResults.length} domains working correctly`,
+      `\n🎯 Rate Limiting: ${workingCount}/${testResults.length} domains working correctly`
     );
 
     this.results.push({
-      test: 'rate_limiting',
+      test: "rate_limiting",
       passCount: workingCount,
       totalCount: testResults.length,
       details: testResults,
@@ -336,19 +328,19 @@ class ComplianceTester {
       try {
         const result = await this.complianceGate.validateWebFetch(
           testCase.url,
-          'ConductorBot/1.0 (+https://conductor.ai/bot)',
+          "ConductorBot/1.0 (+https://conductor.ai/bot)",
           testCase.purpose,
-          'test-user',
-          'test-tenant',
+          "test-user",
+          "test-tenant"
         );
 
         const matches = result.allowed === testCase.expected;
-        const status = matches ? '✅ PASS' : '❌ FAIL';
+        const status = matches ? "✅ PASS" : "❌ FAIL";
 
         if (matches) passCount++;
 
         console.log(
-          `  ${status} - Expected: ${testCase.expected}, Got: ${result.allowed} - ${result.reason}`,
+          `  ${status} - Expected: ${testCase.expected}, Got: ${result.allowed} - ${result.reason}`
         );
 
         results.push({
@@ -376,11 +368,11 @@ class ComplianceTester {
 
     const passRate = (passCount / totalCount) * 100;
     console.log(
-      `\n🎯 End-to-End Compliance: ${passCount}/${totalCount} tests passed (${passRate.toFixed(1)}%)`,
+      `\n🎯 End-to-End Compliance: ${passCount}/${totalCount} tests passed (${passRate.toFixed(1)}%)`
     );
 
     this.results.push({
-      test: 'end_to_end_compliance',
+      test: "end_to_end_compliance",
       passCount,
       totalCount,
       passRate,
@@ -389,16 +381,16 @@ class ComplianceTester {
   }
 
   async testConcurrentLoad() {
-    console.log('Running 5 concurrent compliance checks...');
+    console.log("Running 5 concurrent compliance checks...");
 
     const concurrentTests = Array.from({ length: 5 }, (_, i) =>
       this.complianceGate.validateWebFetch(
         `https://docs.python.org/3/library/json.html?test=${i}`,
-        'ConductorBot/1.0 (+https://conductor.ai/bot)',
-        'research',
+        "ConductorBot/1.0 (+https://conductor.ai/bot)",
+        "research",
         `test-user-${i}`,
-        'test-tenant',
-      ),
+        "test-tenant"
+      )
     );
 
     const startTime = Date.now();
@@ -409,11 +401,11 @@ class ComplianceTester {
     const avgLatency = duration / results.length;
 
     console.log(
-      `✅ Concurrent load test: ${successCount}/5 successful, ${avgLatency.toFixed(0)}ms avg latency`,
+      `✅ Concurrent load test: ${successCount}/5 successful, ${avgLatency.toFixed(0)}ms avg latency`
     );
 
     this.results.push({
-      test: 'concurrent_load',
+      test: "concurrent_load",
       successCount,
       totalRequests: 5,
       avgLatency,
@@ -423,21 +415,21 @@ class ComplianceTester {
 
   async testFailureScenarios() {
     const scenarios = [
-      { name: 'Invalid URL', url: 'not-a-url', shouldFail: true },
+      { name: "Invalid URL", url: "not-a-url", shouldFail: true },
       {
-        name: 'Non-existent domain',
-        url: 'https://thisisnotarealdomain12345.com/',
+        name: "Non-existent domain",
+        url: "https://thisisnotarealdomain12345.com/",
         shouldFail: true,
       },
       {
-        name: 'Blocked path',
-        url: 'https://stackoverflow.com/admin',
+        name: "Blocked path",
+        url: "https://stackoverflow.com/admin",
         shouldFail: true,
       },
       {
-        name: 'Empty purpose',
-        url: 'https://docs.python.org/',
-        purpose: '',
+        name: "Empty purpose",
+        url: "https://docs.python.org/",
+        purpose: "",
         shouldFail: true,
       },
     ];
@@ -450,16 +442,14 @@ class ComplianceTester {
       try {
         const result = await this.complianceGate.validateWebFetch(
           scenario.url,
-          'ConductorBot/1.0 (+https://conductor.ai/bot)',
-          scenario.purpose || 'research',
-          'test-user',
-          'test-tenant',
+          "ConductorBot/1.0 (+https://conductor.ai/bot)",
+          scenario.purpose || "research",
+          "test-user",
+          "test-tenant"
         );
 
-        const correctlyHandled = scenario.shouldFail
-          ? !result.allowed
-          : result.allowed;
-        const status = correctlyHandled ? '✅ CORRECT' : '❌ INCORRECT';
+        const correctlyHandled = scenario.shouldFail ? !result.allowed : result.allowed;
+        const status = correctlyHandled ? "✅ CORRECT" : "❌ INCORRECT";
 
         if (correctlyHandled) correctFailures++;
 
@@ -470,19 +460,17 @@ class ComplianceTester {
           correctFailures++;
           console.log(`  ✅ CORRECT - Exception handled: ${error.message}`);
         } else {
-          console.log(
-            `  ❌ INCORRECT - Unexpected exception: ${error.message}`,
-          );
+          console.log(`  ❌ INCORRECT - Unexpected exception: ${error.message}`);
         }
       }
     }
 
     console.log(
-      `\n🎯 Error Handling: ${correctFailures}/${scenarios.length} scenarios handled correctly`,
+      `\n🎯 Error Handling: ${correctFailures}/${scenarios.length} scenarios handled correctly`
     );
 
     this.results.push({
-      test: 'error_handling',
+      test: "error_handling",
       correctFailures,
       totalScenarios: scenarios.length,
     });
@@ -495,74 +483,58 @@ class ComplianceTester {
       timestamp: new Date().toISOString(),
       duration: totalDuration,
       tests: this.results.length,
-      overallStatus: 'CALCULATING',
+      overallStatus: "CALCULATING",
     };
 
-    console.log('\n📋 COMPLIANCE TESTING SUMMARY');
-    console.log('='.repeat(50));
+    console.log("\n📋 COMPLIANCE TESTING SUMMARY");
+    console.log("=".repeat(50));
 
     for (const result of this.results) {
-      const passRate =
-        result.passRate || (result.passCount / result.totalCount) * 100 || 0;
-      const status =
-        passRate >= 95 ? '✅ PASS' : passRate >= 80 ? '⚠️  WARN' : '❌ FAIL';
+      const passRate = result.passRate || (result.passCount / result.totalCount) * 100 || 0;
+      const status = passRate >= 95 ? "✅ PASS" : passRate >= 80 ? "⚠️  WARN" : "❌ FAIL";
 
       console.log(
-        `${result.test.toUpperCase().replace(/_/g, ' ')}: ${status} (${passRate.toFixed(1)}%)`,
+        `${result.test.toUpperCase().replace(/_/g, " ")}: ${status} (${passRate.toFixed(1)}%)`
       );
     }
 
     // Calculate overall success
-    const robotsPass =
-      this.results.find((r) => r.test === 'robots_compliance')?.passRate >= 95;
-    const rateLimitPass =
-      this.results.find((r) => r.test === 'rate_limiting')?.passCount >= 2;
-    const e2ePass =
-      this.results.find((r) => r.test === 'end_to_end_compliance')?.passRate >=
-      90;
-    const loadPass =
-      this.results.find((r) => r.test === 'concurrent_load')?.successCount >= 4;
-    const errorPass =
-      this.results.find((r) => r.test === 'error_handling')?.correctFailures >=
-      3;
+    const robotsPass = this.results.find((r) => r.test === "robots_compliance")?.passRate >= 95;
+    const rateLimitPass = this.results.find((r) => r.test === "rate_limiting")?.passCount >= 2;
+    const e2ePass = this.results.find((r) => r.test === "end_to_end_compliance")?.passRate >= 90;
+    const loadPass = this.results.find((r) => r.test === "concurrent_load")?.successCount >= 4;
+    const errorPass = this.results.find((r) => r.test === "error_handling")?.correctFailures >= 3;
 
-    const overallPass =
-      robotsPass && rateLimitPass && e2ePass && loadPass && errorPass;
-    summary.overallStatus = overallPass ? 'PASS' : 'FAIL';
+    const overallPass = robotsPass && rateLimitPass && e2ePass && loadPass && errorPass;
+    summary.overallStatus = overallPass ? "PASS" : "FAIL";
 
-    console.log('\n🎯 DAY 1 SUCCESS CRITERIA VALIDATION');
-    console.log('='.repeat(50));
+    console.log("\n🎯 DAY 1 SUCCESS CRITERIA VALIDATION");
+    console.log("=".repeat(50));
+    console.log(`✅ Policy Gate Operational: ${robotsPass ? "PASS" : "FAIL"} (≥95% compliance)`);
+    console.log(`✅ Rate Limiting Functional: ${rateLimitPass ? "PASS" : "FAIL"} (Redis backend)`);
+    console.log(`✅ End-to-End Audit Trail: ${e2ePass ? "PASS" : "FAIL"} (100% decisions logged)`);
     console.log(
-      `✅ Policy Gate Operational: ${robotsPass ? 'PASS' : 'FAIL'} (≥95% compliance)`,
+      `✅ Robots.txt Compliance: ${robotsPass ? "PASS" : "FAIL"} (10+ domains validated)`
     );
     console.log(
-      `✅ Rate Limiting Functional: ${rateLimitPass ? 'PASS' : 'FAIL'} (Redis backend)`,
-    );
-    console.log(
-      `✅ End-to-End Audit Trail: ${e2ePass ? 'PASS' : 'FAIL'} (100% decisions logged)`,
-    );
-    console.log(
-      `✅ Robots.txt Compliance: ${robotsPass ? 'PASS' : 'FAIL'} (10+ domains validated)`,
-    );
-    console.log(
-      `✅ Concurrent Performance: ${loadPass ? 'PASS' : 'FAIL'} (<100ms avg policy decisions)`,
+      `✅ Concurrent Performance: ${loadPass ? "PASS" : "FAIL"} (<100ms avg policy decisions)`
     );
 
     console.log(
-      `\n🏁 OVERALL DAY 1 STATUS: ${overallPass ? '✅ READY FOR DAY 2' : '❌ NEEDS ATTENTION'}`,
+      `\n🏁 OVERALL DAY 1 STATUS: ${overallPass ? "✅ READY FOR DAY 2" : "❌ NEEDS ATTENTION"}`
     );
     console.log(`   Test Duration: ${(totalDuration / 1000).toFixed(2)}s`);
     console.log(`   Domains Validated: ${TARGET_DOMAINS.length}/10`);
     console.log(
-      `   Policy Coverage: ${(this.results.find((r) => r.test === 'end_to_end_compliance')?.passRate || 0).toFixed(1)}%`,
+      `   Policy Coverage: ${(this.results.find((r) => r.test === "end_to_end_compliance")?.passRate || 0).toFixed(1)}%`
     );
 
     if (overallPass) {
-      console.log('\n🚀 Day 1 Foundation Deployment: COMPLETE ✅');
-      console.log('   Ready to proceed to Day 2: Web Orchestrator Deployment');
+      console.log("\n🚀 Day 1 Foundation Deployment: COMPLETE ✅");
+      console.log("   Ready to proceed to Day 2: Web Orchestrator Deployment");
     } else {
-      console.log('\n⚠️  Day 1 Foundation Deployment: NEEDS ATTENTION');
-      console.log('   Review failed tests before proceeding to Day 2');
+      console.log("\n⚠️  Day 1 Foundation Deployment: NEEDS ATTENTION");
+      console.log("   Review failed tests before proceeding to Day 2");
     }
 
     return summary;
@@ -578,7 +550,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     await tester.runComprehensiveTest();
     process.exit(0);
   } catch (error) {
-    console.error('❌ Testing failed:', error.message);
+    console.error("❌ Testing failed:", error.message);
     process.exit(1);
   }
 }

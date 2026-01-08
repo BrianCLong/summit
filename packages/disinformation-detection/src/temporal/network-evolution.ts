@@ -32,20 +32,20 @@ export interface NodeState {
 }
 
 export enum NodeType {
-  ORGANIC = 'organic',
-  BOT = 'bot',
-  CYBORG = 'cyborg',
-  AMPLIFIER = 'amplifier',
-  COORDINATOR = 'coordinator',
-  SUPERSPREADER = 'superspreader',
+  ORGANIC = "organic",
+  BOT = "bot",
+  CYBORG = "cyborg",
+  AMPLIFIER = "amplifier",
+  COORDINATOR = "coordinator",
+  SUPERSPREADER = "superspreader",
 }
 
 export enum NodeStatus {
-  ACTIVE = 'active',
-  DORMANT = 'dormant',
-  SUSPENDED = 'suspended',
-  DELETED = 'deleted',
-  NEW = 'new',
+  ACTIVE = "active",
+  DORMANT = "dormant",
+  SUSPENDED = "suspended",
+  DELETED = "deleted",
+  NEW = "new",
 }
 
 export interface EdgeState {
@@ -59,12 +59,12 @@ export interface EdgeState {
 }
 
 export enum EdgeType {
-  FOLLOW = 'follow',
-  RETWEET = 'retweet',
-  MENTION = 'mention',
-  REPLY = 'reply',
-  QUOTE = 'quote',
-  COORDINATION = 'coordination',
+  FOLLOW = "follow",
+  RETWEET = "retweet",
+  MENTION = "mention",
+  REPLY = "reply",
+  QUOTE = "quote",
+  COORDINATION = "coordination",
 }
 
 export interface SnapshotMetrics {
@@ -119,7 +119,7 @@ export interface TransformationMetrics {
 
 export interface TopologyShift {
   timestamp: Date;
-  type: 'centralization' | 'decentralization' | 'fragmentation' | 'consolidation';
+  type: "centralization" | "decentralization" | "fragmentation" | "consolidation";
   magnitude: number;
   affectedNodes: string[];
 }
@@ -158,14 +158,14 @@ export interface EvolutionPattern {
 }
 
 export enum PatternType {
-  ASTROTURFING_BUILDUP = 'astroturfing_buildup',
-  COORDINATED_SURGE = 'coordinated_surge',
-  DORMANCY_AWAKENING = 'dormancy_awakening',
-  NETWORK_HIJACKING = 'network_hijacking',
-  SLEEPER_ACTIVATION = 'sleeper_activation',
-  DECOY_DISTRACTION = 'decoy_distraction',
-  NARRATIVE_INJECTION = 'narrative_injection',
-  INFLUENCE_LAUNDERING = 'influence_laundering',
+  ASTROTURFING_BUILDUP = "astroturfing_buildup",
+  COORDINATED_SURGE = "coordinated_surge",
+  DORMANCY_AWAKENING = "dormancy_awakening",
+  NETWORK_HIJACKING = "network_hijacking",
+  SLEEPER_ACTIVATION = "sleeper_activation",
+  DECOY_DISTRACTION = "decoy_distraction",
+  NARRATIVE_INJECTION = "narrative_injection",
+  INFLUENCE_LAUNDERING = "influence_laundering",
 }
 
 export interface EvolutionPrediction {
@@ -178,12 +178,12 @@ export interface EvolutionPrediction {
 }
 
 export enum PredictionType {
-  SURGE_IMMINENT = 'surge_imminent',
-  NETWORK_EXPANSION = 'network_expansion',
-  NARRATIVE_SHIFT = 'narrative_shift',
-  COORDINATION_INCREASE = 'coordination_increase',
-  DORMANCY_PERIOD = 'dormancy_period',
-  PLATFORM_MIGRATION = 'platform_migration',
+  SURGE_IMMINENT = "surge_imminent",
+  NETWORK_EXPANSION = "network_expansion",
+  NARRATIVE_SHIFT = "narrative_shift",
+  COORDINATION_INCREASE = "coordination_increase",
+  DORMANCY_PERIOD = "dormancy_period",
+  PLATFORM_MIGRATION = "platform_migration",
 }
 
 export interface ImpactAssessment {
@@ -204,12 +204,12 @@ export interface TemporalAnomaly {
 }
 
 export enum AnomalyType {
-  SUDDEN_GROWTH = 'sudden_growth',
-  MASS_ACTIVATION = 'mass_activation',
-  COORDINATED_POSTING = 'coordinated_posting',
-  UNNATURAL_TIMING = 'unnatural_timing',
-  CONTENT_FLOODING = 'content_flooding',
-  NETWORK_RESET = 'network_reset',
+  SUDDEN_GROWTH = "sudden_growth",
+  MASS_ACTIVATION = "mass_activation",
+  COORDINATED_POSTING = "coordinated_posting",
+  UNNATURAL_TIMING = "unnatural_timing",
+  CONTENT_FLOODING = "content_flooding",
+  NETWORK_RESET = "network_reset",
 }
 
 export interface CampaignTimeline {
@@ -261,9 +261,7 @@ export class TemporalNetworkEvolutionAnalyzer {
   /**
    * Analyze network evolution over time
    */
-  async analyzeEvolution(
-    snapshots: NetworkSnapshot[]
-  ): Promise<NetworkEvolutionAnalysis> {
+  async analyzeEvolution(snapshots: NetworkSnapshot[]): Promise<NetworkEvolutionAnalysis> {
     this.snapshots = snapshots.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
 
     // Calculate evolution metrics
@@ -320,7 +318,8 @@ export class TemporalNetworkEvolutionAnalyzer {
     const duration = last.timestamp.getTime() - first.timestamp.getTime();
 
     const nodeGrowth = (last.metrics.nodeCount - first.metrics.nodeCount) / first.metrics.nodeCount;
-    const edgeGrowth = (last.metrics.edgeCount - first.metrics.edgeCount) / Math.max(first.metrics.edgeCount, 1);
+    const edgeGrowth =
+      (last.metrics.edgeCount - first.metrics.edgeCount) / Math.max(first.metrics.edgeCount, 1);
 
     // Calculate influence growth
     const firstInfluence = first.nodes.reduce((sum, n) => sum + n.influence, 0);
@@ -360,7 +359,12 @@ export class TemporalNetworkEvolutionAnalyzer {
 
   private calculateStabilityMetrics(): StabilityMetrics {
     if (this.snapshots.length < 2) {
-      return { coreStability: 1, peripheryChurn: 0, clusterPersistence: 1, narrativeConsistency: 1 };
+      return {
+        coreStability: 1,
+        peripheryChurn: 0,
+        clusterPersistence: 1,
+        narrativeConsistency: 1,
+      };
     }
 
     // Calculate core stability (nodes present throughout)
@@ -374,16 +378,17 @@ export class TemporalNetworkEvolutionAnalyzer {
       }
     }
 
-    const persistentNodes = Array.from(nodePersistence.entries())
-      .filter(([, count]) => count === this.snapshots.length);
+    const persistentNodes = Array.from(nodePersistence.entries()).filter(
+      ([, count]) => count === this.snapshots.length
+    );
     const coreStability = persistentNodes.length / allNodeIds.size;
 
     // Calculate periphery churn
     let totalJoins = 0;
     let totalLeaves = 0;
     for (let i = 1; i < this.snapshots.length; i++) {
-      const prevIds = new Set(this.snapshots[i - 1].nodes.map(n => n.id));
-      const currIds = new Set(this.snapshots[i].nodes.map(n => n.id));
+      const prevIds = new Set(this.snapshots[i - 1].nodes.map((n) => n.id));
+      const currIds = new Set(this.snapshots[i].nodes.map((n) => n.id));
 
       for (const id of currIds) if (!prevIds.has(id)) totalJoins++;
       for (const id of prevIds) if (!currIds.has(id)) totalLeaves++;
@@ -399,8 +404,9 @@ export class TemporalNetworkEvolutionAnalyzer {
         clusterPersistenceMap.set(cluster.id, (clusterPersistenceMap.get(cluster.id) || 0) + 1);
       }
     }
-    const persistentClusters = Array.from(clusterPersistenceMap.values())
-      .filter(count => count >= this.snapshots.length * 0.8);
+    const persistentClusters = Array.from(clusterPersistenceMap.values()).filter(
+      (count) => count >= this.snapshots.length * 0.8
+    );
     const clusterPersistence = persistentClusters.length / Math.max(clusterIds.size, 1);
 
     return {
@@ -425,14 +431,14 @@ export class TemporalNetworkEvolutionAnalyzer {
       if (Math.abs(densityChange) > 0.1) {
         topologyShifts.push({
           timestamp: curr.timestamp,
-          type: densityChange > 0 ? 'consolidation' : 'fragmentation',
+          type: densityChange > 0 ? "consolidation" : "fragmentation",
           magnitude: Math.abs(densityChange),
-          affectedNodes: curr.nodes.slice(0, 10).map(n => n.id),
+          affectedNodes: curr.nodes.slice(0, 10).map((n) => n.id),
         });
       }
 
       // Detect role transitions
-      const prevNodeMap = new Map(prev.nodes.map(n => [n.id, n]));
+      const prevNodeMap = new Map(prev.nodes.map((n) => [n.id, n]));
       for (const node of curr.nodes) {
         const prevNode = prevNodeMap.get(node.id);
         if (prevNode && prevNode.type !== node.type) {
@@ -508,7 +514,7 @@ export class TemporalNetworkEvolutionAnalyzer {
     // Look for gradual accumulation of low-authenticity nodes
     for (let i = 5; i < this.snapshots.length; i++) {
       const window = this.snapshots.slice(i - 5, i + 1);
-      const botRatios = window.map(s => s.metrics.botRatio);
+      const botRatios = window.map((s) => s.metrics.botRatio);
 
       // Check for steady increase
       let increasing = true;
@@ -525,11 +531,11 @@ export class TemporalNetworkEvolutionAnalyzer {
           confidence: 0.85,
           startTime: window[0].timestamp,
           endTime: window[window.length - 1].timestamp,
-          description: 'Gradual accumulation of inauthentic accounts detected',
-          indicators: ['Increasing bot ratio', 'Similar account creation patterns'],
+          description: "Gradual accumulation of inauthentic accounts detected",
+          indicators: ["Increasing bot ratio", "Similar account creation patterns"],
           affectedNodes: window[window.length - 1].nodes
-            .filter(n => n.type === NodeType.BOT)
-            .map(n => n.id)
+            .filter((n) => n.type === NodeType.BOT)
+            .map((n) => n.id)
             .slice(0, 20),
         });
       }
@@ -545,12 +551,17 @@ export class TemporalNetworkEvolutionAnalyzer {
       const prev = this.snapshots[i - 1];
       const curr = this.snapshots[i];
 
-      const activityIncrease = curr.nodes.reduce((sum, n) => sum + n.activity, 0) /
-        Math.max(prev.nodes.reduce((sum, n) => sum + n.activity, 0), 1);
+      const activityIncrease =
+        curr.nodes.reduce((sum, n) => sum + n.activity, 0) /
+        Math.max(
+          prev.nodes.reduce((sum, n) => sum + n.activity, 0),
+          1
+        );
 
       if (activityIncrease > 3) {
         // Check for coordination
-        const avgCoordination = curr.clusters.reduce((sum, c) => sum + c.coordination, 0) /
+        const avgCoordination =
+          curr.clusters.reduce((sum, c) => sum + c.coordination, 0) /
           Math.max(curr.clusters.length, 1);
 
         if (avgCoordination > this.detectionThresholds.coordinationThreshold) {
@@ -559,11 +570,15 @@ export class TemporalNetworkEvolutionAnalyzer {
             confidence: Math.min(activityIncrease / 5, 0.95),
             startTime: curr.timestamp,
             description: `${(activityIncrease * 100).toFixed(0)}% activity surge with high coordination`,
-            indicators: ['Sudden activity increase', 'High cluster coordination', 'Synchronized timing'],
+            indicators: [
+              "Sudden activity increase",
+              "High cluster coordination",
+              "Synchronized timing",
+            ],
             affectedNodes: curr.nodes
               .sort((a, b) => b.activity - a.activity)
               .slice(0, 20)
-              .map(n => n.id),
+              .map((n) => n.id),
           });
         }
       }
@@ -599,7 +614,7 @@ export class TemporalNetworkEvolutionAnalyzer {
           confidence: 0.8,
           startTime: snapshot.timestamp,
           description: `${activatedSleepers.length} dormant accounts simultaneously activated`,
-          indicators: ['Long dormancy period', 'Sudden high activity', 'Coordinated timing'],
+          indicators: ["Long dormancy period", "Sudden high activity", "Coordinated timing"],
           affectedNodes: activatedSleepers,
         });
       }
@@ -616,14 +631,17 @@ export class TemporalNetworkEvolutionAnalyzer {
       const curr = this.snapshots[i];
 
       // Check for new narratives appearing in clusters
-      const prevNarratives = new Set(prev.clusters.filter(c => c.narrative).map(c => c.narrative));
+      const prevNarratives = new Set(
+        prev.clusters.filter((c) => c.narrative).map((c) => c.narrative)
+      );
       const newNarratives = curr.clusters
-        .filter(c => c.narrative && !prevNarratives.has(c.narrative))
-        .map(c => c.narrative!);
+        .filter((c) => c.narrative && !prevNarratives.has(c.narrative))
+        .map((c) => c.narrative!);
 
       if (newNarratives.length > 0) {
-        const affectedClusters = curr.clusters.filter(c => newNarratives.includes(c.narrative!));
-        const avgCoordination = affectedClusters.reduce((sum, c) => sum + c.coordination, 0) /
+        const affectedClusters = curr.clusters.filter((c) => newNarratives.includes(c.narrative!));
+        const avgCoordination =
+          affectedClusters.reduce((sum, c) => sum + c.coordination, 0) /
           Math.max(affectedClusters.length, 1);
 
         if (avgCoordination > this.detectionThresholds.narrativeShiftThreshold) {
@@ -632,8 +650,8 @@ export class TemporalNetworkEvolutionAnalyzer {
             confidence: avgCoordination,
             startTime: curr.timestamp,
             description: `New coordinated narrative detected: "${newNarratives[0]}"`,
-            indicators: ['New narrative emergence', 'High coordination', 'Rapid spread'],
-            affectedNodes: affectedClusters.flatMap(c => c.nodes).slice(0, 20),
+            indicators: ["New narrative emergence", "High coordination", "Rapid spread"],
+            affectedNodes: affectedClusters.flatMap((c) => c.nodes).slice(0, 20),
           });
         }
       }
@@ -668,11 +686,11 @@ export class TemporalNetworkEvolutionAnalyzer {
           persistenceLikelihood: 0.6,
           countermeasureDifficulty: 0.7,
         },
-        indicators: ['Accelerating growth', 'Increasing coordination'],
+        indicators: ["Accelerating growth", "Increasing coordination"],
         preventiveActions: [
-          'Increase monitoring frequency',
-          'Prepare content moderation resources',
-          'Alert fact-checking partners',
+          "Increase monitoring frequency",
+          "Prepare content moderation resources",
+          "Alert fact-checking partners",
         ],
       });
     }
@@ -693,11 +711,11 @@ export class TemporalNetworkEvolutionAnalyzer {
           persistenceLikelihood: 0.8,
           countermeasureDifficulty: 0.6,
         },
-        indicators: ['Sustained node growth', 'New cluster formation'],
+        indicators: ["Sustained node growth", "New cluster formation"],
         preventiveActions: [
-          'Monitor new account creation',
-          'Track cluster formation patterns',
-          'Identify potential coordinators',
+          "Monitor new account creation",
+          "Track cluster formation patterns",
+          "Identify potential coordinators",
         ],
       });
     }
@@ -722,18 +740,18 @@ export class TemporalNetworkEvolutionAnalyzer {
           timestamp: curr.timestamp,
           type: AnomalyType.SUDDEN_GROWTH,
           severity: Math.min(nodeGrowth / 3, 1),
-          affectedMetrics: ['nodeCount', 'edgeCount'],
-          possibleCauses: ['Coordinated account creation', 'Bot network activation'],
+          affectedMetrics: ["nodeCount", "edgeCount"],
+          possibleCauses: ["Coordinated account creation", "Bot network activation"],
           relatedNodes: curr.nodes
-            .filter(n => n.status === NodeStatus.NEW)
-            .map(n => n.id)
+            .filter((n) => n.status === NodeStatus.NEW)
+            .map((n) => n.id)
             .slice(0, 10),
         });
       }
 
       // Mass activation anomaly
-      const dormantToActive = curr.nodes.filter(n => {
-        const prevNode = prev.nodes.find(pn => pn.id === n.id);
+      const dormantToActive = curr.nodes.filter((n) => {
+        const prevNode = prev.nodes.find((pn) => pn.id === n.id);
         return prevNode && prevNode.status === NodeStatus.DORMANT && n.status === NodeStatus.ACTIVE;
       });
 
@@ -742,9 +760,9 @@ export class TemporalNetworkEvolutionAnalyzer {
           timestamp: curr.timestamp,
           type: AnomalyType.MASS_ACTIVATION,
           severity: dormantToActive.length / prev.nodes.length,
-          affectedMetrics: ['activity', 'nodeStatus'],
-          possibleCauses: ['Sleeper network activation', 'Campaign launch'],
-          relatedNodes: dormantToActive.map(n => n.id).slice(0, 10),
+          affectedMetrics: ["activity", "nodeStatus"],
+          possibleCauses: ["Sleeper network activation", "Campaign launch"],
+          relatedNodes: dormantToActive.map((n) => n.id).slice(0, 10),
         });
       }
     }
@@ -787,10 +805,7 @@ export class TemporalNetworkEvolutionAnalyzer {
     return campaigns;
   }
 
-  private buildCampaignFromPatterns(
-    patterns: EvolutionPattern[],
-    index: number
-  ): CampaignTimeline {
+  private buildCampaignFromPatterns(patterns: EvolutionPattern[], index: number): CampaignTimeline {
     const phases: CampaignPhase[] = patterns.map((p, i) => ({
       name: `Phase ${i + 1}: ${p.type}`,
       startTime: p.startTime,
@@ -804,7 +819,7 @@ export class TemporalNetworkEvolutionAnalyzer {
       },
     }));
 
-    const trajectory: TrajectoryPoint[] = patterns.map(p => ({
+    const trajectory: TrajectoryPoint[] = patterns.map((p) => ({
       timestamp: p.startTime,
       influence: p.confidence * 100,
       reach: p.affectedNodes.length * 50,
@@ -814,7 +829,8 @@ export class TemporalNetworkEvolutionAnalyzer {
     return {
       campaignId: `campaign_${index}`,
       phases,
-      overallDuration: patterns[patterns.length - 1].startTime.getTime() - patterns[0].startTime.getTime(),
+      overallDuration:
+        patterns[patterns.length - 1].startTime.getTime() - patterns[0].startTime.getTime(),
       currentPhase: phases[phases.length - 1].name,
       evolutionTrajectory: trajectory,
     };

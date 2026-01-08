@@ -1,4 +1,4 @@
-import { AdversarialExample, AttackConfig, AdversarialAttackType } from '../types';
+import { AdversarialExample, AttackConfig, AdversarialAttackType } from "../types";
 
 /**
  * DeepFool Attack
@@ -34,7 +34,9 @@ export class DeepFoolAttack {
       const f: number[] = [];
 
       for (let k = 0; k < logits.length; k++) {
-        if (k === currentClass) {continue;}
+        if (k === currentClass) {
+          continue;
+        }
 
         // Get gradients for current class and class k
         const gradCurrent = await getGradients(perturbedInput, currentClass);
@@ -60,7 +62,7 @@ export class DeepFoolAttack {
           minDistance = distance;
           // Perturbation: r = (f / ||w||^2) * w
           const normSquared = wNorm * wNorm;
-          minPerturbation = w[i].map(wi => (f[i] / normSquared) * wi * (1 + overshoot));
+          minPerturbation = w[i].map((wi) => (f[i] / normSquared) * wi * (1 + overshoot));
         }
       }
 
@@ -78,9 +80,7 @@ export class DeepFoolAttack {
       iter++;
     }
 
-    const perturbationNorm = Math.sqrt(
-      totalPerturbation.reduce((sum, p) => sum + p * p, 0)
-    );
+    const perturbationNorm = Math.sqrt(totalPerturbation.reduce((sum, p) => sum + p * p, 0));
 
     return {
       id: this.generateId(),
@@ -95,10 +95,10 @@ export class DeepFoolAttack {
       metadata: {
         iterations: iter,
         overshoot,
-        method: 'DeepFool',
-        boundaryDistance: perturbationNorm
+        method: "DeepFool",
+        boundaryDistance: perturbationNorm,
       },
-      createdAt: new Date()
+      createdAt: new Date(),
     };
   }
 
@@ -127,7 +127,9 @@ export class DeepFoolAttack {
       const f: number[] = [];
 
       for (let k = 0; k < logits.length; k++) {
-        if (k === originalClass) {continue;}
+        if (k === originalClass) {
+          continue;
+        }
 
         const gradCurrent = await getGradients(perturbedInput, currentClass);
         const gradK = await getGradients(perturbedInput, k);
@@ -148,9 +150,7 @@ export class DeepFoolAttack {
         if (distance < minLInfDistance) {
           minLInfDistance = distance;
           // L-inf perturbation: sign of gradient weighted by distance
-          minPerturbation = w[i].map(wi =>
-            (f[i] / lInfNorm) * Math.sign(wi) * (1 + overshoot)
-          );
+          minPerturbation = w[i].map((wi) => (f[i] / lInfNorm) * Math.sign(wi) * (1 + overshoot));
         }
       }
 
@@ -180,10 +180,10 @@ export class DeepFoolAttack {
       metadata: {
         iterations: iter,
         overshoot,
-        norm: 'L-inf',
-        method: 'DeepFool-LInf'
+        norm: "L-inf",
+        method: "DeepFool-LInf",
       },
-      createdAt: new Date()
+      createdAt: new Date(),
     };
   }
 

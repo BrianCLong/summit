@@ -27,18 +27,23 @@ This document establishes the release and runtime reliability framework for Comp
 ## Core Principles
 
 ### 1. Safe by Default
+
 Every deployment follows the safe path unless explicitly overridden with audit trail.
 
 ### 2. Observable Always
+
 No change goes to production without metrics, logs, and traces in place.
 
 ### 3. Reversible Immediately
+
 Every deployment can be rolled back within 5 minutes.
 
 ### 4. Policy-Enforced
+
 OPA policies gate all promotions—no exceptions without documented override.
 
 ### 5. Budget-Aware
+
 Error budgets drive deployment velocity—burn rate determines risk appetite.
 
 ---
@@ -51,33 +56,33 @@ Services are classified into tiers that determine deployment strategy and releas
 
 **Definition**: Services directly in the golden path (Investigation → Entities → Relationships → Copilot → Results)
 
-| Service | Impact | SLO Target | Deployment Strategy |
-|---------|--------|------------|---------------------|
-| `api` | User-facing API | 99.9% availability, p95 < 500ms | Progressive canary |
-| `graphql-gateway` | Query federation | 99.9% availability | Progressive canary |
-| `neo4j` | Graph storage | 99.99% durability | Blue-green |
-| `copilot` | AI assistance | 99.5% availability | Canary with shadow |
+| Service           | Impact           | SLO Target                      | Deployment Strategy |
+| ----------------- | ---------------- | ------------------------------- | ------------------- |
+| `api`             | User-facing API  | 99.9% availability, p95 < 500ms | Progressive canary  |
+| `graphql-gateway` | Query federation | 99.9% availability              | Progressive canary  |
+| `neo4j`           | Graph storage    | 99.99% durability               | Blue-green          |
+| `copilot`         | AI assistance    | 99.5% availability              | Canary with shadow  |
 
 ### Tier 2: Supporting Services
 
 **Definition**: Services that support but don't directly block the golden path
 
-| Service | Impact | SLO Target | Deployment Strategy |
-|---------|--------|------------|---------------------|
-| `conductor` | Orchestration | 99.5% availability | Standard canary |
-| `audit-svc` | Audit logging | 99.9% durability | Rolling update |
-| `prov-ledger` | Provenance | 99.5% availability | Rolling update |
-| `worker-*` | Background jobs | 95% completion rate | Rolling update |
+| Service       | Impact          | SLO Target          | Deployment Strategy |
+| ------------- | --------------- | ------------------- | ------------------- |
+| `conductor`   | Orchestration   | 99.5% availability  | Standard canary     |
+| `audit-svc`   | Audit logging   | 99.9% durability    | Rolling update      |
+| `prov-ledger` | Provenance      | 99.5% availability  | Rolling update      |
+| `worker-*`    | Background jobs | 95% completion rate | Rolling update      |
 
 ### Tier 3: Internal Services
 
 **Definition**: Internal tooling and non-customer-facing services
 
-| Service | Impact | SLO Target | Deployment Strategy |
-|---------|--------|------------|---------------------|
-| `devtools` | Developer productivity | 95% availability | Direct deploy |
-| `docs-*` | Documentation | Best effort | Direct deploy |
-| `sandbox` | Testing environments | Best effort | Direct deploy |
+| Service    | Impact                 | SLO Target       | Deployment Strategy |
+| ---------- | ---------------------- | ---------------- | ------------------- |
+| `devtools` | Developer productivity | 95% availability | Direct deploy       |
+| `docs-*`   | Documentation          | Best effort      | Direct deploy       |
+| `sandbox`  | Testing environments   | Best effort      | Direct deploy       |
 
 ---
 
@@ -151,6 +156,7 @@ strategy:
 ```
 
 **Traffic Progression Timeline**:
+
 ```
 Time:     0    1m    6m    16m    31m    Complete
 Traffic:  1%   10%   25%   50%    100%
@@ -193,10 +199,11 @@ strategy:
       templates: [migration-validation, data-integrity-check]
     postPromotionAnalysis:
       templates: [smoke-check, slo-check]
-    scaleDownDelaySeconds: 300  # Keep old pods for 5 minutes
+    scaleDownDelaySeconds: 300 # Keep old pods for 5 minutes
 ```
 
 **Blue-Green Workflow**:
+
 ```
 ┌────────────────────────────────────────────────────────────────┐
 │  1. Deploy Green Environment (preview)                         │
@@ -223,29 +230,27 @@ For gradual feature exposure with instant rollback.
 ```typescript
 // Feature flag configuration
 const featureConfig = {
-  name: 'new-search-algorithm',
+  name: "new-search-algorithm",
   rollout: {
-    type: 'percentage',
+    type: "percentage",
     percentage: 5,
-    sticky: true,  // Consistent experience per user
+    sticky: true, // Consistent experience per user
   },
   targeting: {
-    allowList: ['beta-testers', 'internal-users'],
-    rules: [
-      { attribute: 'plan', operator: 'in', values: ['enterprise'] }
-    ]
+    allowList: ["beta-testers", "internal-users"],
+    rules: [{ attribute: "plan", operator: "in", values: ["enterprise"] }],
   },
   metrics: {
-    track: ['search_latency_p95', 'search_relevance_score'],
+    track: ["search_latency_p95", "search_relevance_score"],
     successCriteria: {
-      'search_latency_p95': { operator: 'lt', value: 200 },
-      'search_relevance_score': { operator: 'gt', value: 0.85 }
-    }
+      search_latency_p95: { operator: "lt", value: 200 },
+      search_relevance_score: { operator: "gt", value: 0.85 },
+    },
   },
   killSwitch: {
-    errorThreshold: 0.05,  // 5% error rate triggers kill
-    latencyThreshold: 500   // 500ms p95 triggers kill
-  }
+    errorThreshold: 0.05, // 5% error rate triggers kill
+    latencyThreshold: 500, // 500ms p95 triggers kill
+  },
 };
 ```
 
@@ -375,8 +380,8 @@ slo_gates:
     override: requires_sre_approval
 
   burn_rate:
-    fast_burn_threshold: 2.0   # 2x burn rate
-    slow_burn_threshold: 1.0   # 1x burn rate
+    fast_burn_threshold: 2.0 # 2x burn rate
+    slow_burn_threshold: 1.0 # 1x burn rate
     block_on: fast_burn > threshold
 
   active_incidents:
@@ -528,7 +533,7 @@ approval_gates:
 
   change_window:
     allowed_days: [monday, tuesday, wednesday, thursday]
-    allowed_hours: [9, 16]  # 09:00-16:00 local
+    allowed_hours: [9, 16] # 09:00-16:00 local
     override: emergency_hotfix
 
   freeze_check:
@@ -624,7 +629,7 @@ kind: CronJob
 metadata:
   name: golden-path-synthetic
 spec:
-  schedule: "*/2 * * * *"  # Every 2 minutes
+  schedule: "*/2 * * * *" # Every 2 minutes
   jobTemplate:
     spec:
       template:
@@ -769,21 +774,21 @@ error_budget:
 
   slo_targets:
     api:
-      availability: 99.9  # 43.2 minutes/month downtime budget
-      latency_p95: 99.0   # 1% requests can exceed 500ms
+      availability: 99.9 # 43.2 minutes/month downtime budget
+      latency_p95: 99.0 # 1% requests can exceed 500ms
 
     graphql-gateway:
       availability: 99.9
       latency_p95: 99.0
 
     copilot:
-      availability: 99.5  # 3.6 hours/month downtime budget
-      latency_p95: 95.0   # AI responses can be slower
+      availability: 99.5 # 3.6 hours/month downtime budget
+      latency_p95: 95.0 # AI responses can be slower
 
   burn_rate_thresholds:
-    critical: 14.4   # Budget exhausted in 2 hours
-    warning: 6.0     # Budget exhausted in 5 hours
-    elevated: 1.0    # Budget exhausted in 30 days
+    critical: 14.4 # Budget exhausted in 2 hours
+    warning: 6.0 # Budget exhausted in 5 hours
+    elevated: 1.0 # Budget exhausted in 30 days
 ```
 
 ### Budget-Driven Deployment Policy
@@ -970,6 +975,7 @@ echo "Rollback completed successfully"
 For cases requiring human judgment:
 
 1. **Assess the situation**
+
    ```bash
    # Check current rollout status
    kubectl argo rollouts status <service> -n production
@@ -987,6 +993,7 @@ For cases requiring human judgment:
    - Database migration: Follow blue-green rollback procedure
 
 3. **Execute rollback**
+
    ```bash
    # Abort current rollout
    kubectl argo rollouts abort <service> -n production
@@ -999,6 +1006,7 @@ For cases requiring human judgment:
    ```
 
 4. **Verify and document**
+
    ```bash
    # Wait for rollback
    kubectl argo rollouts status <service> -n production
@@ -1040,13 +1048,13 @@ For cases requiring human judgment:
 
 ### Exception Types and Approvers
 
-| Exception Type | Required Approver | Time Limit | Audit Level |
-|----------------|-------------------|------------|-------------|
-| Deployment window | Release Captain | 4 hours | Standard |
-| Security CVE waiver | Security Team + Engineering Director | 7 days | High |
-| SLO gate bypass | SRE Lead | 2 hours | High |
-| Budget exhaustion deploy | VP Engineering | 1 hour | Critical |
-| Deployment freeze override | VP Engineering + CTO | Per-case | Critical |
+| Exception Type             | Required Approver                    | Time Limit | Audit Level |
+| -------------------------- | ------------------------------------ | ---------- | ----------- |
+| Deployment window          | Release Captain                      | 4 hours    | Standard    |
+| Security CVE waiver        | Security Team + Engineering Director | 7 days     | High        |
+| SLO gate bypass            | SRE Lead                             | 2 hours    | High        |
+| Budget exhaustion deploy   | VP Engineering                       | 1 hour     | Critical    |
+| Deployment freeze override | VP Engineering + CTO                 | Per-case   | Critical    |
 
 ### Exception Logging
 
@@ -1056,7 +1064,7 @@ All exceptions are logged to the audit trail:
 interface ExceptionRecord {
   id: string;
   timestamp: string;
-  type: 'window' | 'security' | 'slo' | 'budget' | 'freeze';
+  type: "window" | "security" | "slo" | "budget" | "freeze";
   service: string;
   requestor: string;
   approvers: string[];
@@ -1097,23 +1105,23 @@ kubectl argo rollouts history <service>
 
 ### Key Metrics to Watch
 
-| Metric | Warning | Critical |
-|--------|---------|----------|
-| Error rate (5xx) | > 1% | > 5% |
-| Latency p95 | > 300ms | > 500ms |
-| CPU usage | > 70% | > 85% |
-| Memory usage | > 75% | > 90% |
-| Error budget burn | > 1x | > 5x |
+| Metric            | Warning | Critical |
+| ----------------- | ------- | -------- |
+| Error rate (5xx)  | > 1%    | > 5%     |
+| Latency p95       | > 300ms | > 500ms  |
+| CPU usage         | > 70%   | > 85%    |
+| Memory usage      | > 75%   | > 90%    |
+| Error budget burn | > 1x    | > 5x     |
 
 ### Contact Information
 
-| Role | Slack | PagerDuty |
-|------|-------|-----------|
-| Release Captain | #release-captain | @release-oncall |
-| SRE Team | #sre-team | @sre-oncall |
-| Platform Team | #platform-team | @platform-oncall |
-| Security Team | #security | @security-oncall |
+| Role            | Slack            | PagerDuty        |
+| --------------- | ---------------- | ---------------- |
+| Release Captain | #release-captain | @release-oncall  |
+| SRE Team        | #sre-team        | @sre-oncall      |
+| Platform Team   | #platform-team   | @platform-oncall |
+| Security Team   | #security        | @security-oncall |
 
 ---
 
-*Document maintained by Reliability & Release Team. Review quarterly or after major incidents.*
+_Document maintained by Reliability & Release Team. Review quarterly or after major incidents._

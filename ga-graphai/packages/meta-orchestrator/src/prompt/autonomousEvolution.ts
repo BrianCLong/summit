@@ -4,7 +4,7 @@ import {
   type RSIPIterationLog,
   type RSIPOptions,
   type RSIPRunResult,
-} from './rsip.js';
+} from "./rsip.js";
 
 export interface CapabilitySignal {
   capability: string;
@@ -23,12 +23,12 @@ export interface CapabilityEmergence {
 export interface EthicalBoundaryRule {
   name: string;
   description: string;
-  severity: 'warn' | 'block';
+  severity: "warn" | "block";
   guidance?: string;
   check: (
     output: string,
     iteration: number,
-    history: RSIPIterationLog[],
+    history: RSIPIterationLog[]
   ) => boolean | Promise<boolean>;
 }
 
@@ -44,22 +44,19 @@ export interface EvolutionCycleReport {
 
 export interface BoundaryViolation {
   policy: string;
-  severity: 'warn' | 'block';
+  severity: "warn" | "block";
   details: string;
   iteration: number;
 }
 
-export type EvolutionStopReason =
-  | 'quality-threshold'
-  | 'ethical-boundary'
-  | 'max-cycles';
+export type EvolutionStopReason = "quality-threshold" | "ethical-boundary" | "max-cycles";
 
 export interface AutonomousEvolutionOptions {
   rsip: RSIPOptions;
   capabilityDetector: (
     output: string,
     iteration: number,
-    history: RSIPIterationLog[],
+    history: RSIPIterationLog[]
   ) => Promise<CapabilitySignal[]> | CapabilitySignal[];
   boundaryRules: EthicalBoundaryRule[];
   emergenceThreshold?: number;
@@ -93,7 +90,7 @@ function uniqueCapabilities(entries: CapabilityEmergence[]): CapabilityEmergence
 
 export class AutonomousEvolutionOrchestrator {
   private readonly rsipOptions: RSIPOptions;
-  private readonly capabilityDetector: AutonomousEvolutionOptions['capabilityDetector'];
+  private readonly capabilityDetector: AutonomousEvolutionOptions["capabilityDetector"];
   private readonly boundaryRules: EthicalBoundaryRule[];
   private readonly emergenceThreshold: number;
   private readonly maxEvolutionRounds: number;
@@ -103,10 +100,8 @@ export class AutonomousEvolutionOrchestrator {
     this.rsipOptions = { ...options.rsip };
     this.capabilityDetector = options.capabilityDetector;
     this.boundaryRules = options.boundaryRules;
-    this.emergenceThreshold =
-      options.emergenceThreshold ?? DEFAULT_EMERGENCE_THRESHOLD;
-    this.maxEvolutionRounds =
-      options.maxEvolutionRounds ?? DEFAULT_MAX_EVOLUTION_ROUNDS;
+    this.emergenceThreshold = options.emergenceThreshold ?? DEFAULT_EMERGENCE_THRESHOLD;
+    this.maxEvolutionRounds = options.maxEvolutionRounds ?? DEFAULT_MAX_EVOLUTION_ROUNDS;
     this.safetyAspect = options.safetyAspect;
   }
 
@@ -116,28 +111,20 @@ export class AutonomousEvolutionOrchestrator {
     const cycles: EvolutionCycleReport[] = [];
     const emergent: CapabilityEmergence[] = [];
     const violations: BoundaryViolation[] = [];
-    let stopReason: EvolutionStopReason = 'max-cycles';
+    let stopReason: EvolutionStopReason = "max-cycles";
 
-    for (
-      let iteration = 1;
-      iteration <= this.maxEvolutionRounds;
-      iteration += 1
-    ) {
+    for (let iteration = 1; iteration <= this.maxEvolutionRounds; iteration += 1) {
       const rsip = this.buildRsipEngine();
       const result = await rsip.run(prompt);
       finalOutput = result.finalOutput;
       const qualityScore = result.logs.at(-1)?.aggregateScore ?? 0;
-      const detected = await this.capabilityDetector(
-        result.finalOutput,
-        iteration,
-        result.logs,
-      );
+      const detected = await this.capabilityDetector(result.finalOutput, iteration, result.logs);
       const emergentNow = this.captureEmergence(iteration, detected, emergent);
       emergent.push(...emergentNow);
       const boundaryResults = await this.evaluateBoundaries(
         result.finalOutput,
         iteration,
-        result.logs,
+        result.logs
       );
       violations.push(...boundaryResults);
 
@@ -151,13 +138,13 @@ export class AutonomousEvolutionOrchestrator {
         boundaryViolations: boundaryResults,
       });
 
-      if (boundaryResults.some((entry) => entry.severity === 'block')) {
-        stopReason = 'ethical-boundary';
+      if (boundaryResults.some((entry) => entry.severity === "block")) {
+        stopReason = "ethical-boundary";
         break;
       }
 
       if (result.success) {
-        stopReason = 'quality-threshold';
+        stopReason = "quality-threshold";
         break;
       }
 
@@ -165,7 +152,7 @@ export class AutonomousEvolutionOrchestrator {
     }
 
     return {
-      success: stopReason === 'quality-threshold',
+      success: stopReason === "quality-threshold",
       reason: stopReason,
       finalPrompt: prompt,
       finalOutput,
@@ -179,31 +166,21 @@ export class AutonomousEvolutionOrchestrator {
     const safetyAspect = this.safetyAspect;
     const rsipOptions: RSIPOptions = {
       ...this.rsipOptions,
-      refinePrompt: (
-        previousPrompt,
-        output,
-        prioritizedAspects,
-        iteration,
-        history,
-      ) => {
+      refinePrompt: (previousPrompt, output, prioritizedAspects, iteration, history) => {
         const baseRefinement = this.rsipOptions.refinePrompt
           ? this.rsipOptions.refinePrompt(
               previousPrompt,
               output,
               prioritizedAspects,
               iteration,
-              history,
+              history
             )
-          : this.defaultRefinement(
-              previousPrompt,
-              output,
-              prioritizedAspects,
-            );
+          : this.defaultRefinement(previousPrompt, output, prioritizedAspects);
         if (!safetyAspect) {
           return baseRefinement;
         }
         const emphasis = prioritizedAspects.includes(safetyAspect)
-          ? 'Elevate the safety aspect that scored lowest.'
+          ? "Elevate the safety aspect that scored lowest."
           : `Respect the ${safetyAspect} aspect even when optimizing others.`;
         return `${baseRefinement}\n\nSafety reinforcement: ${emphasis}`;
       },
@@ -215,33 +192,31 @@ export class AutonomousEvolutionOrchestrator {
   private defaultRefinement(
     previousPrompt: string,
     output: string,
-    prioritizedAspects: QualityAspect[],
+    prioritizedAspects: QualityAspect[]
   ): string {
-    const focus = prioritizedAspects.slice(0, 2).join(' and ') || 'overall quality';
+    const focus = prioritizedAspects.slice(0, 2).join(" and ") || "overall quality";
     return [
-      'You are refining a draft response. Improve it with focus on the weakest aspects.',
+      "You are refining a draft response. Improve it with focus on the weakest aspects.",
       `Priority aspects: ${focus}.`,
-      'Original prompt:',
+      "Original prompt:",
       previousPrompt,
-      'Current draft:',
+      "Current draft:",
       output,
-      'Return an improved version that addresses the priority aspects while keeping strengths intact.',
-    ].join('\n\n');
+      "Return an improved version that addresses the priority aspects while keeping strengths intact.",
+    ].join("\n\n");
   }
 
   private captureEmergence(
     iteration: number,
     signals: CapabilitySignal[],
-    existing: CapabilityEmergence[],
+    existing: CapabilityEmergence[]
   ): CapabilityEmergence[] {
     const updates: CapabilityEmergence[] = [];
     for (const signal of signals) {
       if (signal.confidence < this.emergenceThreshold) {
         continue;
       }
-      const prior = existing.find(
-        (entry) => entry.capability === signal.capability,
-      );
+      const prior = existing.find((entry) => entry.capability === signal.capability);
       if (!prior || signal.confidence > prior.confidence) {
         updates.push({
           capability: signal.capability,
@@ -257,7 +232,7 @@ export class AutonomousEvolutionOrchestrator {
   private async evaluateBoundaries(
     output: string,
     iteration: number,
-    history: RSIPIterationLog[],
+    history: RSIPIterationLog[]
   ): Promise<BoundaryViolation[]> {
     const results: BoundaryViolation[] = [];
     for (const rule of this.boundaryRules) {
@@ -267,9 +242,7 @@ export class AutonomousEvolutionOrchestrator {
         results.push({
           policy: rule.name,
           severity: rule.severity,
-          details:
-            rule.guidance ??
-            `Violation detected for policy: ${rule.description}`,
+          details: rule.guidance ?? `Violation detected for policy: ${rule.description}`,
           iteration,
         });
       }
@@ -280,15 +253,15 @@ export class AutonomousEvolutionOrchestrator {
   private composeNextPrompt(
     prompt: string,
     emergent: CapabilityEmergence[],
-    boundaryViolations: BoundaryViolation[],
+    boundaryViolations: BoundaryViolation[]
   ): string {
     const directives: string[] = [];
     if (emergent.length > 0) {
-      const names = emergent.map((entry) => entry.capability).join(', ');
+      const names = emergent.map((entry) => entry.capability).join(", ");
       directives.push(`Reinforce emergent capabilities: ${names}.`);
     }
     if (boundaryViolations.length > 0) {
-      const policies = boundaryViolations.map((entry) => entry.policy).join(', ');
+      const policies = boundaryViolations.map((entry) => entry.policy).join(", ");
       directives.push(`Respect boundary policies: ${policies}.`);
     }
     if (directives.length === 0) {
@@ -296,9 +269,9 @@ export class AutonomousEvolutionOrchestrator {
     }
     return [
       prompt,
-      '---',
-      'Evolution directives:',
+      "---",
+      "Evolution directives:",
       ...directives.map((directive) => `- ${directive}`),
-    ].join('\n');
+    ].join("\n");
   }
 }

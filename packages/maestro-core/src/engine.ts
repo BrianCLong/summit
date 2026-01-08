@@ -3,8 +3,8 @@
  * Core DAG execution engine with retry, compensation, and state persistence
  */
 
-import { EventEmitter } from 'events';
-import { v4 as uuid } from 'uuid';
+import { EventEmitter } from "events";
+import { v4 as uuid } from "uuid";
 
 export interface WorkflowStep {
   id: string;
@@ -29,7 +29,7 @@ export interface WorkflowDefinition {
   version: string;
   steps: WorkflowStep[];
   global_timeout_ms?: number;
-  on_failure?: 'stop' | 'continue' | 'compensate';
+  on_failure?: "stop" | "continue" | "compensate";
 }
 
 export interface RunContext {
@@ -48,7 +48,7 @@ export interface RunContext {
 export interface StepExecution {
   step_id: string;
   run_id: string;
-  status: 'pending' | 'running' | 'succeeded' | 'failed' | 'cancelled';
+  status: "pending" | "running" | "succeeded" | "failed" | "cancelled";
   attempt: number;
   started_at?: Date;
   completed_at?: Date;
@@ -64,17 +64,13 @@ export interface StepPlugin {
   execute(
     context: RunContext,
     step: WorkflowStep,
-    execution: StepExecution,
+    execution: StepExecution
   ): Promise<{
     output?: any;
     cost_usd?: number;
     metadata?: Record<string, any>;
   }>;
-  compensate?(
-    context: RunContext,
-    step: WorkflowStep,
-    execution: StepExecution,
-  ): Promise<void>;
+  compensate?(context: RunContext, step: WorkflowStep, execution: StepExecution): Promise<void>;
 }
 
 export class MaestroEngine extends EventEmitter {
@@ -84,14 +80,14 @@ export class MaestroEngine extends EventEmitter {
   constructor(
     private stateStore: StateStore,
     private artifactStore: ArtifactStore,
-    private policyEngine: PolicyEngine,
+    private policyEngine: PolicyEngine
   ) {
     super();
   }
 
   registerPlugin(plugin: StepPlugin): void {
     this.plugins.set(plugin.name, plugin);
-    this.emit('plugin:registered', { name: plugin.name });
+    this.emit("plugin:registered", { name: plugin.name });
   }
 
   async startRun(context: RunContext): Promise<string> {
@@ -99,15 +95,11 @@ export class MaestroEngine extends EventEmitter {
     this.validateWorkflow(context.workflow);
 
     // Check policy permissions
-    const permitted = await this.policyEngine.check(
-      'workflow:execute',
-      context.tenant_id,
-      {
-        workflow: context.workflow.name,
-        environment: context.environment,
-        budget: context.budget,
-      },
-    );
+    const permitted = await this.policyEngine.check("workflow:execute", context.tenant_id, {
+      workflow: context.workflow.name,
+      environment: context.environment,
+      budget: context.budget,
+    });
 
     if (!permitted.allowed) {
       throw new Error(`Policy denied: ${permitted.reason}`);
@@ -122,13 +114,13 @@ export class MaestroEngine extends EventEmitter {
       await this.stateStore.createStepExecution({
         step_id: step.id,
         run_id: context.run_id,
-        status: 'pending',
+        status: "pending",
         attempt: 0,
         metadata: {},
       });
     }
 
-    this.emit('run:started', { run_id: context.run_id });
+    this.emit("run:started", { run_id: context.run_id });
 
     // Start execution (async)
     setImmediate(() => this.executeWorkflow(context));
@@ -152,7 +144,7 @@ export class MaestroEngine extends EventEmitter {
 
         // Check if run should continue
         const runStatus = await this.stateStore.getRunStatus(context.run_id);
-        if (runStatus === 'cancelled' || runStatus === 'failed') {
+        if (runStatus === "cancelled" || runStatus === "failed") {
           break;
         }
       }
@@ -163,10 +155,7 @@ export class MaestroEngine extends EventEmitter {
     }
   }
 
-  private async executeStepWithRetry(
-    context: RunContext,
-    step: WorkflowStep,
-  ): Promise<void> {
+  private async executeStepWithRetry(context: RunContext, step: WorkflowStep): Promise<void> {
     const plugin = this.plugins.get(step.plugin);
     if (!plugin) {
       throw new Error(`Plugin not found: ${step.plugin}`);
@@ -179,7 +168,7 @@ export class MaestroEngine extends EventEmitter {
       const execution: StepExecution = {
         step_id: step.id,
         run_id: context.run_id,
-        status: 'running',
+        status: "running",
         attempt,
         started_at: new Date(),
         metadata: {},
@@ -193,26 +182,26 @@ export class MaestroEngine extends EventEmitter {
         const result = await Promise.race([
           plugin.execute(context, step, execution),
           new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error('Step timeout')), timeoutMs),
+            setTimeout(() => reject(new Error("Step timeout")), timeoutMs)
           ),
         ]);
 
         // Success
-        execution.status = 'succeeded';
+        execution.status = "succeeded";
         execution.completed_at = new Date();
         execution.output = result.output;
         execution.cost_usd = result.cost_usd;
         execution.metadata = { ...execution.metadata, ...result.metadata };
 
         await this.stateStore.updateStepExecution(execution);
-        this.emit('step:completed', {
+        this.emit("step:completed", {
           run_id: context.run_id,
           step_id: step.id,
         });
         return;
       } catch (error) {
         // Failure
-        execution.status = 'failed';
+        execution.status = "failed";
         execution.completed_at = new Date();
         execution.error = (error as Error).message;
 
@@ -220,7 +209,7 @@ export class MaestroEngine extends EventEmitter {
 
         if (attempt === maxAttempts) {
           // Final attempt failed
-          this.emit('step:failed', {
+          this.emit("step:failed", {
             run_id: context.run_id,
             step_id: step.id,
             error: execution.error,
@@ -236,9 +225,7 @@ export class MaestroEngine extends EventEmitter {
 
         // Retry with backoff
         const backoffMs = step.retry?.backoff_ms ?? 1000;
-        const delay = step.retry?.exponential
-          ? backoffMs * Math.pow(2, attempt - 1)
-          : backoffMs;
+        const delay = step.retry?.exponential ? backoffMs * Math.pow(2, attempt - 1) : backoffMs;
 
         await new Promise((resolve) => setTimeout(resolve, delay));
         attempt++;
@@ -249,7 +236,7 @@ export class MaestroEngine extends EventEmitter {
   private async executeCompensation(
     context: RunContext,
     step: WorkflowStep,
-    execution: StepExecution,
+    execution: StepExecution
   ): Promise<void> {
     if (!step.compensation) return;
 
@@ -258,12 +245,12 @@ export class MaestroEngine extends EventEmitter {
 
     try {
       await plugin.compensate(context, step, execution);
-      this.emit('step:compensated', {
+      this.emit("step:compensated", {
         run_id: context.run_id,
         step_id: step.id,
       });
     } catch (error) {
-      this.emit('step:compensation_failed', {
+      this.emit("step:compensation_failed", {
         run_id: context.run_id,
         step_id: step.id,
         error: (error as Error).message,
@@ -309,7 +296,7 @@ export class MaestroEngine extends EventEmitter {
 
   private validateWorkflow(workflow: WorkflowDefinition): void {
     if (!workflow.name || !workflow.version || !workflow.steps) {
-      throw new Error('Invalid workflow definition');
+      throw new Error("Invalid workflow definition");
     }
 
     const stepIds = new Set(workflow.steps.map((s) => s.id));
@@ -335,17 +322,14 @@ export class MaestroEngine extends EventEmitter {
     }
   }
 
-  private async areDepenciesSatisfied(
-    runId: string,
-    step: WorkflowStep,
-  ): Promise<boolean> {
+  private async areDepenciesSatisfied(runId: string, step: WorkflowStep): Promise<boolean> {
     if (!step.depends_on || step.depends_on.length === 0) {
       return true;
     }
 
     for (const depId of step.depends_on) {
       const execution = await this.stateStore.getStepExecution(runId, depId);
-      if (!execution || execution.status !== 'succeeded') {
+      if (!execution || execution.status !== "succeeded") {
         return false;
       }
     }
@@ -354,28 +338,21 @@ export class MaestroEngine extends EventEmitter {
   }
 
   private async completeRun(context: RunContext): Promise<void> {
-    await this.stateStore.updateRunStatus(context.run_id, 'completed');
+    await this.stateStore.updateRunStatus(context.run_id, "completed");
     this.activeRuns.delete(context.run_id);
-    this.emit('run:completed', { run_id: context.run_id });
+    this.emit("run:completed", { run_id: context.run_id });
   }
 
-  private async handleRunFailure(
-    context: RunContext,
-    error: Error,
-  ): Promise<void> {
-    await this.stateStore.updateRunStatus(
-      context.run_id,
-      'failed',
-      error.message,
-    );
+  private async handleRunFailure(context: RunContext, error: Error): Promise<void> {
+    await this.stateStore.updateRunStatus(context.run_id, "failed", error.message);
     this.activeRuns.delete(context.run_id);
-    this.emit('run:failed', { run_id: context.run_id, error: error.message });
+    this.emit("run:failed", { run_id: context.run_id, error: error.message });
   }
 
   async cancelRun(runId: string): Promise<void> {
-    await this.stateStore.updateRunStatus(runId, 'cancelled');
+    await this.stateStore.updateRunStatus(runId, "cancelled");
     this.activeRuns.delete(runId);
-    this.emit('run:cancelled', { run_id: runId });
+    this.emit("run:cancelled", { run_id: runId });
   }
 
   async getRunStatus(runId: string): Promise<any> {
@@ -391,19 +368,11 @@ export interface StateStore {
   getRunDetails(runId: string): Promise<any>;
   createStepExecution(execution: StepExecution): Promise<void>;
   updateStepExecution(execution: StepExecution): Promise<void>;
-  getStepExecution(
-    runId: string,
-    stepId: string,
-  ): Promise<StepExecution | null>;
+  getStepExecution(runId: string, stepId: string): Promise<StepExecution | null>;
 }
 
 export interface ArtifactStore {
-  store(
-    runId: string,
-    stepId: string,
-    name: string,
-    data: Buffer,
-  ): Promise<string>;
+  store(runId: string, stepId: string, name: string, data: Buffer): Promise<string>;
   retrieve(runId: string, stepId: string, name: string): Promise<Buffer>;
   list(runId: string): Promise<string[]>;
 }
@@ -412,6 +381,6 @@ export interface PolicyEngine {
   check(
     action: string,
     subject: string,
-    attributes: Record<string, any>,
+    attributes: Record<string, any>
   ): Promise<{ allowed: boolean; reason?: string }>;
 }

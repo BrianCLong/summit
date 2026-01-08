@@ -1,25 +1,25 @@
 /// <reference types="node" />
 
-import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 
-import { criticalQueries } from './critical-queries';
+import { criticalQueries } from "./critical-queries";
 import {
   PlanBaseline,
   PlanBaselineEntry,
   PlanCheckResult,
   PlanDiff,
   PlanSignatureNode,
-} from './types';
+} from "./types";
 
 const ESTIMATE_TOLERANCE = 0.25; // 25% drift allowed before we flag it
 export const DEFAULT_BASELINE_PATH = path.join(
   process.cwd(),
-  'reliability',
-  'plan-regression',
-  'fixtures',
-  'postgres-plan-baseline.json',
+  "reliability",
+  "plan-regression",
+  "fixtures",
+  "postgres-plan-baseline.json"
 );
 
 export interface QueryPlanRunner {
@@ -27,22 +27,20 @@ export interface QueryPlanRunner {
 }
 
 export function hashSql(sql: string): string {
-  return createHash('sha1')
-    .update(sql.replace(/\s+/g, ' ').trim())
-    .digest('hex');
+  return createHash("sha1").update(sql.replace(/\s+/g, " ").trim()).digest("hex");
 }
 
 export function normalizePlanNode(plan: any): PlanSignatureNode {
   const node: PlanSignatureNode = {
-    nodeType: plan['Node Type'] ?? 'Unknown',
-    relationName: plan['Relation Name'],
-    indexName: plan['Index Name'],
-    joinType: plan['Join Type'],
-    estimatedRows: plan['Plan Rows'] ?? plan['Actual Rows'],
-    filter: plan['Filter'],
+    nodeType: plan["Node Type"] ?? "Unknown",
+    relationName: plan["Relation Name"],
+    indexName: plan["Index Name"],
+    joinType: plan["Join Type"],
+    estimatedRows: plan["Plan Rows"] ?? plan["Actual Rows"],
+    filter: plan["Filter"],
   };
 
-  const children = (plan['Plans'] as any[] | undefined)?.map(normalizePlanNode);
+  const children = (plan["Plans"] as any[] | undefined)?.map(normalizePlanNode);
   if (children && children.length > 0) {
     node.children = children;
   }
@@ -53,13 +51,13 @@ export function normalizePlanNode(plan: any): PlanSignatureNode {
 export function collectPlanSignature(planPayload: any[]): PlanSignatureNode {
   const root = planPayload?.[0]?.Plan ?? planPayload?.[0];
   if (!root) {
-    throw new Error('EXPLAIN payload missing Plan root node');
+    throw new Error("EXPLAIN payload missing Plan root node");
   }
   return normalizePlanNode(root);
 }
 
 function formatPath(node: PlanSignatureNode, parentPath: string): string {
-  const relationSuffix = node.relationName ? `:${node.relationName}` : '';
+  const relationSuffix = node.relationName ? `:${node.relationName}` : "";
   const pathSegment = `${node.nodeType}${relationSuffix}`;
   return parentPath ? `${parentPath} > ${pathSegment}` : pathSegment;
 }
@@ -67,19 +65,14 @@ function formatPath(node: PlanSignatureNode, parentPath: string): string {
 export function comparePlanSignatures(
   baseline: PlanSignatureNode,
   current: PlanSignatureNode,
-  parentPath = '',
-  diffs: PlanDiff[] = [],
+  parentPath = "",
+  diffs: PlanDiff[] = []
 ): PlanDiff[] {
   const pathLabel = formatPath(current, parentPath);
 
   const comparableFields: Array<
-    Exclude<keyof PlanSignatureNode, 'children' | 'estimatedRows' | 'filter'>
-  > = [
-    'nodeType',
-    'relationName',
-    'indexName',
-    'joinType',
-  ];
+    Exclude<keyof PlanSignatureNode, "children" | "estimatedRows" | "filter">
+  > = ["nodeType", "relationName", "indexName", "joinType"];
 
   for (const field of comparableFields) {
     if (baseline[field] !== current[field]) {
@@ -93,17 +86,14 @@ export function comparePlanSignatures(
     }
   }
 
-  if (
-    typeof baseline.estimatedRows === 'number' &&
-    typeof current.estimatedRows === 'number'
-  ) {
+  if (typeof baseline.estimatedRows === "number" && typeof current.estimatedRows === "number") {
     const delta =
       Math.abs(current.estimatedRows - baseline.estimatedRows) /
       Math.max(baseline.estimatedRows, 1);
     if (delta > ESTIMATE_TOLERANCE) {
       diffs.push({
         path: pathLabel,
-        field: 'estimatedRows',
+        field: "estimatedRows",
         baseline: baseline.estimatedRows,
         current: current.estimatedRows,
         message: `estimatedRows drifted by ${(delta * 100).toFixed(1)}%`,
@@ -116,17 +106,14 @@ export function comparePlanSignatures(
   if (baselineChildren.length !== currentChildren.length) {
     diffs.push({
       path: pathLabel,
-      field: 'children',
+      field: "children",
       baseline: baselineChildren.length,
       current: currentChildren.length,
-      message: 'child plan count changed',
+      message: "child plan count changed",
     });
   }
 
-  const maxChildren = Math.min(
-    baselineChildren.length,
-    currentChildren.length,
-  );
+  const maxChildren = Math.min(baselineChildren.length, currentChildren.length);
   for (let i = 0; i < maxChildren; i += 1) {
     const baselineChild = baselineChildren[i];
     const currentChild = currentChildren[i];
@@ -138,13 +125,9 @@ export function comparePlanSignatures(
   return diffs;
 }
 
-export function formatPlanDiffs(
-  queryId: string,
-  sql: string,
-  diffs: PlanDiff[],
-): string {
+export function formatPlanDiffs(queryId: string, sql: string, diffs: PlanDiff[]): string {
   if (diffs.length === 0) {
-    return '';
+    return "";
   }
 
   const header = `Plan regression detected for "${queryId}"`;
@@ -152,31 +135,31 @@ export function formatPlanDiffs(
     .map(
       (d) =>
         `- ${d.path} :: ${d.field} — ${d.message} (baseline: ${String(
-          d.baseline ?? '∅',
-        )}, current: ${String(d.current ?? '∅')})`,
+          d.baseline ?? "∅"
+        )}, current: ${String(d.current ?? "∅")})`
     )
-    .join('\n');
+    .join("\n");
 
   return `${header}\nSQL: ${sql.trim()}\n${body}`;
 }
 
 export function loadBaseline(baselinePath = DEFAULT_BASELINE_PATH): PlanBaseline {
-  const raw = readFileSync(baselinePath, 'utf8');
+  const raw = readFileSync(baselinePath, "utf8");
   return JSON.parse(raw) as PlanBaseline;
 }
 
 export async function runExplain(
   pool: QueryPlanRunner,
   sql: string,
-  analyze = false,
+  analyze = false
 ): Promise<PlanSignatureNode> {
   const explainPrefix = analyze
-    ? 'EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)'
-    : 'EXPLAIN (FORMAT JSON)';
+    ? "EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)"
+    : "EXPLAIN (FORMAT JSON)";
   const { rows } = await pool.query(`${explainPrefix} ${sql}`);
-  const planPayload = rows?.[0]?.['QUERY PLAN'];
+  const planPayload = rows?.[0]?.["QUERY PLAN"];
   if (!planPayload) {
-    throw new Error('EXPLAIN returned no plan payload');
+    throw new Error("EXPLAIN returned no plan payload");
   }
 
   return collectPlanSignature(planPayload);
@@ -203,8 +186,8 @@ export async function checkPlansAgainstBaseline(options: {
         differences: [
           {
             path: query.id,
-            field: 'baseline',
-            message: 'Missing baseline entry for query',
+            field: "baseline",
+            message: "Missing baseline entry for query",
           },
         ],
       });
@@ -215,21 +198,21 @@ export async function checkPlansAgainstBaseline(options: {
     if (baselineEntry.sqlHash && baselineEntry.sqlHash !== currentSqlHash) {
       diffs.push({
         path: query.id,
-        field: 'sqlHash',
+        field: "sqlHash",
         baseline: baselineEntry.sqlHash,
         current: currentSqlHash,
-        message: 'SQL text changed; refresh baseline required',
+        message: "SQL text changed; refresh baseline required",
       });
     }
 
     const signature = await runExplain(
       options.pool,
       query.sql,
-      options.analyze ?? baseline.analyze,
+      options.analyze ?? baseline.analyze
     );
 
     if (baselineEntry.signature) {
-      comparePlanSignatures(baselineEntry.signature, signature, '', diffs);
+      comparePlanSignatures(baselineEntry.signature, signature, "", diffs);
     }
 
     results.push({

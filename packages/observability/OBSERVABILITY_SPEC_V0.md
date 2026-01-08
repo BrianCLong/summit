@@ -43,13 +43,13 @@ This specification defines the observability standards that **all CompanyOS serv
 
 ### Technology Stack
 
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| Metrics | Prometheus + prom-client | Time-series metrics |
-| Logging | Pino + Loki | Structured logs |
-| Tracing | OpenTelemetry + Jaeger | Distributed traces |
-| Dashboards | Grafana | Visualization |
-| Alerting | Prometheus AlertManager | Alert routing |
+| Component  | Technology               | Purpose             |
+| ---------- | ------------------------ | ------------------- |
+| Metrics    | Prometheus + prom-client | Time-series metrics |
+| Logging    | Pino + Loki              | Structured logs     |
+| Tracing    | OpenTelemetry + Jaeger   | Distributed traces  |
+| Dashboards | Grafana                  | Visualization       |
+| Alerting   | Prometheus AlertManager  | Alert routing       |
 
 ---
 
@@ -61,23 +61,28 @@ Every compliant service must implement this contract:
 interface ObservabilityContract {
   // Service identification
   service: {
-    name: string;           // Unique service name
-    version: string;        // Semver version
-    environment: string;    // development | staging | production
-    team?: string;          // Owning team
-    tier?: string;          // critical | standard | background
+    name: string; // Unique service name
+    version: string; // Semver version
+    environment: string; // development | staging | production
+    team?: string; // Owning team
+    tier?: string; // critical | standard | background
   };
 
   // Archetype determines default metrics/SLOs
-  archetype: 'api-service' | 'worker-service' | 'gateway-service' |
-             'data-pipeline' | 'storage-service' | 'ml-service';
+  archetype:
+    | "api-service"
+    | "worker-service"
+    | "gateway-service"
+    | "data-pipeline"
+    | "storage-service"
+    | "ml-service";
 
   // Required endpoints
   endpoints: {
-    metrics: '/metrics';           // Prometheus scrape endpoint
-    health: '/health';             // Liveness probe
-    ready: '/health/ready';        // Readiness probe
-    detailed: '/health/detailed';  // Detailed health report
+    metrics: "/metrics"; // Prometheus scrape endpoint
+    health: "/health"; // Liveness probe
+    ready: "/health/ready"; // Readiness probe
+    detailed: "/health/detailed"; // Detailed health report
   };
 
   // Required capabilities
@@ -103,6 +108,7 @@ All metrics must follow this naming pattern:
 ```
 
 Examples:
+
 - `http_requests_total` (counter)
 - `http_request_duration_seconds` (histogram)
 - `db_connections_active` (gauge)
@@ -111,11 +117,11 @@ Examples:
 
 Every metric must include these labels:
 
-| Label | Description | Example |
-|-------|-------------|---------|
-| `service` | Service name | `user-api` |
-| `environment` | Deployment env | `production` |
-| `version` | Service version | `1.2.3` |
+| Label         | Description     | Example      |
+| ------------- | --------------- | ------------ |
+| `service`     | Service name    | `user-api`   |
+| `environment` | Deployment env  | `production` |
+| `version`     | Service version | `1.2.3`      |
 
 ### Standard Metrics by Category
 
@@ -190,14 +196,14 @@ Every metric must include these labels:
 
 ### Histogram Bucket Guidelines
 
-| Operation Type | Recommended Buckets (seconds) |
-|----------------|------------------------------|
-| HTTP requests | 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10 |
+| Operation Type   | Recommended Buckets (seconds)                           |
+| ---------------- | ------------------------------------------------------- |
+| HTTP requests    | 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10 |
 | Database queries | 0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5 |
-| Background jobs | 0.1, 0.5, 1, 5, 10, 30, 60, 120, 300, 600 |
-| Cache operations | 0.0001, 0.0005, 0.001, 0.005, 0.01, 0.025, 0.05, 0.1 |
-| External APIs | 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, 30 |
-| ML inference | 0.1, 0.25, 0.5, 1, 2.5, 5, 10, 30, 60 |
+| Background jobs  | 0.1, 0.5, 1, 5, 10, 30, 60, 120, 300, 600               |
+| Cache operations | 0.0001, 0.0005, 0.001, 0.005, 0.01, 0.025, 0.05, 0.1    |
+| External APIs    | 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, 30                 |
+| ML inference     | 0.1, 0.25, 0.5, 1, 2.5, 5, 10, 30, 60                   |
 
 ---
 
@@ -210,21 +216,21 @@ All logs must be structured JSON with this schema:
 ```typescript
 interface LogEntry {
   // Required fields
-  timestamp: string;      // ISO 8601 format
-  level: string;          // TRACE | DEBUG | INFO | WARN | ERROR | FATAL
-  message: string;        // Human-readable message
-  service: string;        // Service name
-  environment: string;    // Deployment environment
-  version: string;        // Service version
+  timestamp: string; // ISO 8601 format
+  level: string; // TRACE | DEBUG | INFO | WARN | ERROR | FATAL
+  message: string; // Human-readable message
+  service: string; // Service name
+  environment: string; // Deployment environment
+  version: string; // Service version
 
   // Trace correlation (required when available)
-  traceId?: string;       // OpenTelemetry trace ID
-  spanId?: string;        // OpenTelemetry span ID
+  traceId?: string; // OpenTelemetry trace ID
+  spanId?: string; // OpenTelemetry span ID
 
   // Request context (when applicable)
-  requestId?: string;     // Unique request identifier
-  userId?: string;        // Authenticated user ID
-  tenantId?: string;      // Tenant ID (multi-tenant)
+  requestId?: string; // Unique request identifier
+  userId?: string; // Authenticated user ID
+  tenantId?: string; // Tenant ID (multi-tenant)
 
   // Error details (when level is ERROR or FATAL)
   error?: {
@@ -243,22 +249,22 @@ interface LogEntry {
 
 ### Log Levels
 
-| Level | Usage | Example |
-|-------|-------|---------|
-| TRACE | Detailed debugging | Function entry/exit |
-| DEBUG | Development debugging | Variable values |
-| INFO | Normal operations | Request completed |
-| WARN | Potential issues | Retry attempt |
-| ERROR | Errors (recoverable) | Failed external call |
-| FATAL | Critical failures | Cannot start service |
+| Level | Usage                 | Example              |
+| ----- | --------------------- | -------------------- |
+| TRACE | Detailed debugging    | Function entry/exit  |
+| DEBUG | Development debugging | Variable values      |
+| INFO  | Normal operations     | Request completed    |
+| WARN  | Potential issues      | Retry attempt        |
+| ERROR | Errors (recoverable)  | Failed external call |
+| FATAL | Critical failures     | Cannot start service |
 
 ### Production Log Levels
 
 | Environment | Minimum Level |
-|-------------|---------------|
-| Development | DEBUG |
-| Staging | INFO |
-| Production | INFO |
+| ----------- | ------------- |
+| Development | DEBUG         |
+| Staging     | INFO          |
+| Production  | INFO          |
 
 ### PII Redaction
 
@@ -266,10 +272,24 @@ The following fields are automatically redacted:
 
 ```typescript
 const REDACTED_FIELDS = [
-  'password', 'token', 'secret', 'apiKey', 'api_key',
-  'authorization', 'cookie', 'sessionId', 'session_id',
-  'creditCard', 'credit_card', 'ssn', 'privateKey', 'private_key',
-  'accessToken', 'access_token', 'refreshToken', 'refresh_token',
+  "password",
+  "token",
+  "secret",
+  "apiKey",
+  "api_key",
+  "authorization",
+  "cookie",
+  "sessionId",
+  "session_id",
+  "creditCard",
+  "credit_card",
+  "ssn",
+  "privateKey",
+  "private_key",
+  "accessToken",
+  "access_token",
+  "refreshToken",
+  "refresh_token",
 ];
 ```
 
@@ -279,11 +299,11 @@ Security-relevant events must be logged as audit events:
 
 ```typescript
 interface AuditEvent {
-  type: 'auth' | 'access' | 'mutation' | 'admin' | 'security';
+  type: "auth" | "access" | "mutation" | "admin" | "security";
   action: string;
   actor: { type: string; id: string; ip?: string };
   resource: { type: string; id: string };
-  outcome: 'success' | 'failure' | 'denied';
+  outcome: "success" | "failure" | "denied";
   timestamp: string;
   context: { traceId?: string; requestId?: string; tenantId?: string };
 }
@@ -296,6 +316,7 @@ interface AuditEvent {
 ### Trace Context Propagation
 
 All services must:
+
 1. Extract trace context from incoming requests
 2. Propagate context to downstream services
 3. Create spans for significant operations
@@ -308,13 +329,13 @@ All services must:
 
 ### Span Naming Convention
 
-| Operation Type | Naming Pattern | Example |
-|----------------|----------------|---------|
-| HTTP Server | `HTTP {method} {route}` | `HTTP GET /api/users` |
-| HTTP Client | `HTTP {method}` | `HTTP POST` |
-| Database | `{db_system} {operation}` | `postgresql SELECT` |
-| Queue | `{queue} {operation}` | `orders publish` |
-| GraphQL | `graphql.{type}` | `graphql.query` |
+| Operation Type | Naming Pattern            | Example               |
+| -------------- | ------------------------- | --------------------- |
+| HTTP Server    | `HTTP {method} {route}`   | `HTTP GET /api/users` |
+| HTTP Client    | `HTTP {method}`           | `HTTP POST`           |
+| Database       | `{db_system} {operation}` | `postgresql SELECT`   |
+| Queue          | `{queue} {operation}`     | `orders publish`      |
+| GraphQL        | `graphql.{type}`          | `graphql.query`       |
 
 ### Required Span Attributes
 
@@ -334,7 +355,7 @@ http.response_content_length: 256
 ```yaml
 db.system: postgresql
 db.operation: SELECT
-db.statement: SELECT * FROM users WHERE id = $1  # Optional, may contain PII
+db.statement: SELECT * FROM users WHERE id = $1 # Optional, may contain PII
 ```
 
 #### Messaging Spans
@@ -351,14 +372,14 @@ messaging.operation: publish
 
 ### Default SLO Targets by Archetype
 
-| Archetype | Availability | Latency P99 | Latency P95 |
-|-----------|--------------|-------------|-------------|
-| api-service | 99.9% | 500ms | 200ms |
-| gateway-service | 99.95% | 100ms | 50ms |
-| worker-service | 99.5% | 5min | 1min |
-| data-pipeline | 99.0% | 10min | 5min |
-| storage-service | 99.99% | 100ms | 50ms |
-| ml-service | 99.5% | 5s | 2s |
+| Archetype       | Availability | Latency P99 | Latency P95 |
+| --------------- | ------------ | ----------- | ----------- |
+| api-service     | 99.9%        | 500ms       | 200ms       |
+| gateway-service | 99.95%       | 100ms       | 50ms        |
+| worker-service  | 99.5%        | 5min        | 1min        |
+| data-pipeline   | 99.0%        | 10min       | 5min        |
+| storage-service | 99.99%       | 100ms       | 50ms        |
+| ml-service      | 99.5%        | 5s          | 2s          |
 
 ### Error Budget Calculation
 
@@ -370,12 +391,12 @@ Example: 99.9% SLO = 0.1% error budget = 43.8 minutes/month downtime
 
 ### Multi-Window Burn Rate Alerts
 
-| Severity | Long Window | Short Window | Burn Rate | Action |
-|----------|-------------|--------------|-----------|--------|
-| Critical | 1h | 5m | 14.4x | Page immediately |
-| High | 6h | 30m | 6x | Page (business hours) |
-| Medium | 3d | 6h | 1x | Create ticket |
-| Low | 7d | 1d | 0.5x | Review weekly |
+| Severity | Long Window | Short Window | Burn Rate | Action                |
+| -------- | ----------- | ------------ | --------- | --------------------- |
+| Critical | 1h          | 5m           | 14.4x     | Page immediately      |
+| High     | 6h          | 30m          | 6x        | Page (business hours) |
+| Medium   | 3d          | 6h           | 1x        | Create ticket         |
+| Low      | 7d          | 1d           | 0.5x      | Review weekly         |
 
 ### SLI Definitions
 
@@ -402,25 +423,25 @@ histogram_quantile(0.99,
 
 ### Required Endpoints
 
-| Endpoint | Purpose | Response |
-|----------|---------|----------|
-| `/health` | Liveness probe | `{ "status": "ok" }` |
-| `/health/live` | Kubernetes liveness | `{ "status": "ok" }` |
-| `/health/ready` | Kubernetes readiness | Full health report |
+| Endpoint           | Purpose              | Response                   |
+| ------------------ | -------------------- | -------------------------- |
+| `/health`          | Liveness probe       | `{ "status": "ok" }`       |
+| `/health/live`     | Kubernetes liveness  | `{ "status": "ok" }`       |
+| `/health/ready`    | Kubernetes readiness | Full health report         |
 | `/health/detailed` | Detailed diagnostics | Full health + dependencies |
 
 ### Health Report Schema
 
 ```typescript
 interface HealthReport {
-  status: 'healthy' | 'degraded' | 'unhealthy';
+  status: "healthy" | "degraded" | "unhealthy";
   service: string;
   version: string;
   uptime_seconds: number;
   timestamp: string;
   checks: Array<{
     name: string;
-    status: 'healthy' | 'degraded' | 'unhealthy';
+    status: "healthy" | "degraded" | "unhealthy";
     latency_ms?: number;
     message?: string;
   }>;
@@ -429,14 +450,14 @@ interface HealthReport {
 
 ### Required Health Checks
 
-| Archetype | Required Checks |
-|-----------|-----------------|
-| api-service | database, cache (if used) |
-| worker-service | database, queue |
-| gateway-service | downstream services |
-| data-pipeline | database, queue, storage |
-| storage-service | database |
-| ml-service | model availability |
+| Archetype       | Required Checks           |
+| --------------- | ------------------------- |
+| api-service     | database, cache (if used) |
+| worker-service  | database, queue           |
+| gateway-service | downstream services       |
+| data-pipeline   | database, queue, storage  |
+| storage-service | database                  |
+| ml-service      | model availability        |
 
 ---
 
@@ -447,6 +468,7 @@ interface HealthReport {
 HTTP/GraphQL APIs serving synchronous requests.
 
 **Required Metrics:**
+
 - `http_requests_total`
 - `http_request_duration_seconds`
 - `graphql_operations_total` (if GraphQL)
@@ -455,6 +477,7 @@ HTTP/GraphQL APIs serving synchronous requests.
 - `db_query_duration_seconds`
 
 **Default SLOs:**
+
 - Availability: 99.9%
 - Latency P99: 500ms
 
@@ -463,12 +486,14 @@ HTTP/GraphQL APIs serving synchronous requests.
 Background job processors.
 
 **Required Metrics:**
+
 - `jobs_processed_total`
 - `job_duration_seconds`
 - `jobs_in_queue`
 - `jobs_in_progress`
 
 **Default SLOs:**
+
 - Job Success Rate: 99.5%
 - Job Duration P99: 5 minutes
 
@@ -477,6 +502,7 @@ Background job processors.
 API gateways, load balancers.
 
 **Required Metrics:**
+
 - `http_requests_total`
 - `http_request_duration_seconds`
 - `http_requests_in_flight`
@@ -484,6 +510,7 @@ API gateways, load balancers.
 - `external_request_duration_seconds`
 
 **Default SLOs:**
+
 - Availability: 99.95%
 - Latency P99: 100ms
 
@@ -492,11 +519,13 @@ API gateways, load balancers.
 ETL and streaming processors.
 
 **Required Metrics:**
+
 - `jobs_processed_total`
 - `job_duration_seconds`
 - `business_events_total`
 
 **Default SLOs:**
+
 - Success Rate: 99.0%
 - Processing Time P99: 10 minutes
 
@@ -505,12 +534,14 @@ ETL and streaming processors.
 Database proxies, caches.
 
 **Required Metrics:**
+
 - `db_queries_total`
 - `db_query_duration_seconds`
 - `db_connections_active`
 - `cache_operations_total` (if cache)
 
 **Default SLOs:**
+
 - Availability: 99.99%
 - Latency P99: 100ms
 
@@ -519,11 +550,13 @@ Database proxies, caches.
 ML inference services.
 
 **Required Metrics:**
+
 - `ml_inference_total`
 - `ml_inference_duration_seconds`
 - `ml_model_load_time_seconds`
 
 **Default SLOs:**
+
 - Availability: 99.5%
 - Inference Latency P99: 5 seconds
 
@@ -567,6 +600,7 @@ Every service must have an SLO dashboard with:
 ```
 
 Examples:
+
 - `UserAPI_Availability_Critical`
 - `OrderWorker_QueueDepth_Warning`
 
@@ -582,11 +616,11 @@ annotations:
 
 ### Alert Routing
 
-| Severity | Routing |
-|----------|---------|
-| Critical | PagerDuty (immediate) |
-| Warning | Slack + PagerDuty (business hours) |
-| Info | Slack only |
+| Severity | Routing                            |
+| -------- | ---------------------------------- |
+| Critical | PagerDuty (immediate)              |
+| Warning  | Slack + PagerDuty (business hours) |
+| Info     | Slack only                         |
 
 ---
 
@@ -595,12 +629,14 @@ annotations:
 Use this checklist when onboarding a new service:
 
 ### Metrics
+
 - [ ] Service emits all required metrics for its archetype
 - [ ] Metrics include standard labels (service, environment, version)
 - [ ] `/metrics` endpoint returns Prometheus format
 - [ ] Histogram buckets are appropriate for operation types
 
 ### Logging
+
 - [ ] All logs are structured JSON
 - [ ] Log schema matches specification
 - [ ] Trace IDs are included when available
@@ -608,6 +644,7 @@ Use this checklist when onboarding a new service:
 - [ ] Audit events are logged for security-relevant operations
 
 ### Tracing
+
 - [ ] OpenTelemetry SDK is initialized
 - [ ] Trace context is extracted from incoming requests
 - [ ] Trace context is propagated to downstream calls
@@ -615,23 +652,27 @@ Use this checklist when onboarding a new service:
 - [ ] Span attributes follow naming conventions
 
 ### Health Checks
+
 - [ ] `/health` endpoint returns liveness status
 - [ ] `/health/ready` endpoint checks dependencies
 - [ ] `/health/detailed` endpoint returns full report
 - [ ] Health checks have appropriate timeouts
 
 ### SLOs
+
 - [ ] Availability SLO is defined
 - [ ] Latency SLO is defined (if applicable)
 - [ ] Prometheus recording rules are deployed
 - [ ] Burn rate alerts are configured
 
 ### Dashboards
+
 - [ ] Golden signals dashboard exists
 - [ ] SLO dashboard exists
 - [ ] Dashboards are provisioned in Grafana
 
 ### Alerts
+
 - [ ] SLO burn rate alerts are configured
 - [ ] Alerts have runbook URLs
 - [ ] Alerts are routed appropriately
@@ -653,24 +694,24 @@ import {
   initializeObservability,
   createLogger,
   setupObservability,
-} from '@intelgraph/observability';
-import express from 'express';
+} from "@intelgraph/observability";
+import express from "express";
 
 const app = express();
 
 // Service configuration
 const serviceConfig = {
-  name: 'my-service',
-  version: '1.0.0',
-  environment: process.env.NODE_ENV as 'development' | 'staging' | 'production',
-  team: 'platform',
-  tier: 'standard' as const,
+  name: "my-service",
+  version: "1.0.0",
+  environment: process.env.NODE_ENV as "development" | "staging" | "production",
+  team: "platform",
+  tier: "standard" as const,
 };
 
 // Initialize observability
 await initializeObservability({
   service: serviceConfig,
-  archetype: 'api-service',
+  archetype: "api-service",
 });
 
 // Setup Express middleware
@@ -680,8 +721,8 @@ const middleware = setupObservability(app, { service: serviceConfig });
 const logger = createLogger({ service: serviceConfig });
 
 // Your routes here
-app.get('/api/users', async (req, res) => {
-  (req as any).log.info('Fetching users');
+app.get("/api/users", async (req, res) => {
+  (req as any).log.info("Fetching users");
   // ...
 });
 
@@ -694,20 +735,16 @@ app.listen(3000);
 ### Manual Instrumentation
 
 ```typescript
-import {
-  withSpan,
-  recordDbQuery,
-  recordCacheOperation,
-} from '@intelgraph/observability';
+import { withSpan, recordDbQuery, recordCacheOperation } from "@intelgraph/observability";
 
 // Wrap operations in spans
-const result = await withSpan('fetchUser', async (span) => {
-  span.setAttribute('user.id', userId);
+const result = await withSpan("fetchUser", async (span) => {
+  span.setAttribute("user.id", userId);
 
   // Record database query
   const start = Date.now();
-  const user = await db.query('SELECT * FROM users WHERE id = $1', [userId]);
-  recordDbQuery('postgresql', 'SELECT', (Date.now() - start) / 1000, true, 'my-service');
+  const user = await db.query("SELECT * FROM users WHERE id = $1", [userId]);
+  recordDbQuery("postgresql", "SELECT", (Date.now() - start) / 1000, true, "my-service");
 
   return user;
 });
@@ -719,13 +756,13 @@ const result = await withSpan('fetchUser', async (span) => {
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `LOG_LEVEL` | Minimum log level | `info` |
-| `OTEL_ENABLED` | Enable tracing | `true` |
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP endpoint | `http://localhost:4318` |
-| `OTEL_SAMPLE_RATE` | Trace sample rate | `1.0` |
-| `PROMETHEUS_ENABLED` | Enable metrics | `true` |
+| Variable                      | Description       | Default                 |
+| ----------------------------- | ----------------- | ----------------------- |
+| `LOG_LEVEL`                   | Minimum log level | `info`                  |
+| `OTEL_ENABLED`                | Enable tracing    | `true`                  |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP endpoint     | `http://localhost:4318` |
+| `OTEL_SAMPLE_RATE`            | Trace sample rate | `1.0`                   |
+| `PROMETHEUS_ENABLED`          | Enable metrics    | `true`                  |
 
 ### References
 
@@ -739,6 +776,6 @@ const result = await withSpan('fetchUser', async (span) => {
 
 **Document Changelog:**
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 0.1.0 | 2025-12-07 | Initial draft |
+| Version | Date       | Changes       |
+| ------- | ---------- | ------------- |
+| 0.1.0   | 2025-12-07 | Initial draft |

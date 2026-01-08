@@ -4,14 +4,14 @@
  * Manages parallel realities (Feature Flags, Experiments, Universes).
  */
 
-type Universe = 'prime' | 'beta' | 'canary' | string;
+type Universe = "prime" | "beta" | "canary" | string;
 
 export class Multiverse {
-  private activeUniverses: Set<Universe> = new Set(['prime']);
+  private activeUniverses: Set<Universe> = new Set(["prime"]);
   private featureFlags: Map<string, boolean> = new Map();
 
   constructor() {
-    console.log('🌀 TIER-11: Multiverse Module Initialized');
+    console.log("🌀 TIER-11: Multiverse Module Initialized");
   }
 
   public spawnUniverse(name: Universe) {
@@ -20,7 +20,7 @@ export class Multiverse {
   }
 
   public collapseUniverse(name: Universe) {
-    if (name === 'prime') {
+    if (name === "prime") {
       console.error("🚫 Cannot collapse the Prime Universe!");
       return;
     }
@@ -28,13 +28,13 @@ export class Multiverse {
     console.log(`💥 Universe '${name}' collapsed into void.`);
   }
 
-  public setFeature(flag: string, enabled: boolean, universe: Universe = 'prime') {
+  public setFeature(flag: string, enabled: boolean, universe: Universe = "prime") {
     const key = `${universe}:${flag}`;
     this.featureFlags.set(key, enabled);
     console.log(`🚩 Flag '${flag}' set to ${enabled} in universe '${universe}'`);
   }
 
-  public isEnabled(flag: string, universe: Universe = 'prime'): boolean {
+  public isEnabled(flag: string, universe: Universe = "prime"): boolean {
     return this.featureFlags.get(`${universe}:${flag}`) ?? false;
   }
 

@@ -17,7 +17,7 @@ import {
   Activity,
   Map as MapIcon,
   Shield,
-  HelpCircle
+  HelpCircle,
 } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useAuth } from '@/contexts/AuthContext'
@@ -30,7 +30,7 @@ export function CommandPalette(): React.ReactElement {
   // Toggle the menu when ⌘K is pressed
   useHotkeys(['meta+k', 'ctrl+k'], (e: KeyboardEvent) => {
     e.preventDefault()
-    setOpen((open) => !open)
+    setOpen(open => !open)
   })
 
   const runCommand = React.useCallback((command: () => void) => {
@@ -47,7 +47,10 @@ export function CommandPalette(): React.ReactElement {
       className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-popover text-popover-foreground rounded-xl shadow-2xl border w-[640px] max-w-[90vw] overflow-hidden z-50 p-0"
     >
       <div className="flex items-center border-b px-3">
-        <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" aria-hidden="true" />
+        <Search
+          className="mr-2 h-4 w-4 shrink-0 opacity-50"
+          aria-hidden="true"
+        />
         <Command.Input
           placeholder="Type a command or search..."
           aria-label="Type a command or search"
@@ -55,10 +58,18 @@ export function CommandPalette(): React.ReactElement {
         />
       </div>
 
-      <Command.List className="max-h-[300px] overflow-y-auto p-2" aria-label="Command results">
-        <Command.Empty className="py-6 text-center text-sm">No results found.</Command.Empty>
+      <Command.List
+        className="max-h-[300px] overflow-y-auto p-2"
+        aria-label="Command results"
+      >
+        <Command.Empty className="py-6 text-center text-sm">
+          No results found.
+        </Command.Empty>
 
-        <Command.Group heading="Navigation" className="text-xs font-medium text-muted-foreground px-2 py-1.5">
+        <Command.Group
+          heading="Navigation"
+          className="text-xs font-medium text-muted-foreground px-2 py-1.5"
+        >
           <Command.Item
             onSelect={() => runCommand(() => navigate('/'))}
             className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
@@ -100,15 +111,18 @@ export function CommandPalette(): React.ReactElement {
           </Command.Item>
         </Command.Group>
 
-        <Command.Group heading="Investigation" className="text-xs font-medium text-muted-foreground px-2 py-1.5">
-           <Command.Item
+        <Command.Group
+          heading="Investigation"
+          className="text-xs font-medium text-muted-foreground px-2 py-1.5"
+        >
+          <Command.Item
             onSelect={() => runCommand(() => navigate('/analysis/tri-pane'))}
             className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground"
           >
             <Network className="mr-2 h-4 w-4" aria-hidden="true" />
             <span>Open Graph View</span>
           </Command.Item>
-           <Command.Item
+          <Command.Item
             onSelect={() => runCommand(() => navigate('/analysis/tri-pane'))}
             className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground"
           >
@@ -117,18 +131,21 @@ export function CommandPalette(): React.ReactElement {
           </Command.Item>
         </Command.Group>
 
-        <Command.Group heading="System" className="text-xs font-medium text-muted-foreground px-2 py-1.5">
+        <Command.Group
+          heading="System"
+          className="text-xs font-medium text-muted-foreground px-2 py-1.5"
+        >
           <Command.Item
-             onSelect={() => runCommand(() => navigate('/help'))}
-             className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground"
+            onSelect={() => runCommand(() => navigate('/help'))}
+            className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground"
           >
             <HelpCircle className="mr-2 h-4 w-4" aria-hidden="true" />
             <span>Help</span>
           </Command.Item>
 
           <Command.Item
-             onSelect={() => runCommand(() => navigate('/admin/settings'))}
-             className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground"
+            onSelect={() => runCommand(() => navigate('/admin/settings'))}
+            className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground"
           >
             <Settings className="mr-2 h-4 w-4" aria-hidden="true" />
             <span>Settings</span>

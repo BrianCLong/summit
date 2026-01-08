@@ -17,7 +17,7 @@ export {
   type ApiResponse,
   type PaginatedResponse,
   type SummitClientEvents,
-} from './SummitClient.js';
+} from "./SummitClient.js";
 
 // Policy client
 export {
@@ -35,7 +35,7 @@ export {
   type CreatePolicyRequest,
   type UpdatePolicyRequest,
   type ListPoliciesOptions,
-} from './PolicyClient.js';
+} from "./PolicyClient.js";
 
 // Compliance client
 export {
@@ -56,15 +56,15 @@ export {
   type CreateEvidenceRequest,
   type StartAssessmentRequest,
   type GenerateReportRequest,
-} from './ComplianceClient.js';
+} from "./ComplianceClient.js";
 
 // ============================================================================
 // Convenience Factory
 // ============================================================================
 
-import { SummitClient, SummitClientConfig } from './SummitClient.js';
-import { PolicyClient } from './PolicyClient.js';
-import { ComplianceClient } from './ComplianceClient.js';
+import { SummitClient, SummitClientConfig } from "./SummitClient.js";
+import { PolicyClient } from "./PolicyClient.js";
+import { ComplianceClient } from "./ComplianceClient.js";
 
 /**
  * Summit SDK with all clients

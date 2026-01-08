@@ -19,12 +19,12 @@ metadata:
   name: require-signed-and-provenance
 spec:
   images:
-    - glob: 'ghcr.io/<org>/<repo>/*'
+    - glob: "ghcr.io/<org>/<repo>/*"
   authorities:
     - keyless:
         identities:
           - issuer: https://token.actions.githubusercontent.com
-            subjectRegExp: '.*'
+            subjectRegExp: ".*"
   attestations:
     - name: slsa-provenance
       predicateType: https://slsa.dev/provenance/v1
@@ -53,12 +53,12 @@ containers:
     - name: Install cosign
       uses: sigstore/cosign-installer@v3
     - name: Sign image (keyless)
-      env: { COSIGN_EXPERIMENTAL: 'true' }
+      env: { COSIGN_EXPERIMENTAL: "true" }
       run: cosign sign --yes $IMAGE
     - name: Generate SLSA provenance
       uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.0.0
       with:
-        base64-subjects: 'sha256:${{ steps.digest.outputs.sha256 }}'
+        base64-subjects: "sha256:${{ steps.digest.outputs.sha256 }}"
         upload-assets: true
 ```
 
@@ -85,15 +85,15 @@ spec:
     - name: disallow-latest-tag
       match: { resources: { kinds: [Pod] } }
       validate:
-        message: 'Image tag :latest is not allowed'
+        message: "Image tag :latest is not allowed"
         pattern:
           spec:
             containers:
-              - image: '!*:latest'
+              - image: "!*:latest"
     - name: require-nonroot-readonly
       match: { resources: { kinds: [Pod] } }
       validate:
-        message: 'Containers must run as non-root and read-only'
+        message: "Containers must run as non-root and read-only"
         pattern:
           spec:
             securityContext:
@@ -110,30 +110,30 @@ spec:
             containers:
               - securityContext:
                   capabilities:
-                    drop: ['ALL']
+                    drop: ["ALL"]
     - name: require-requests-limits
       match: { resources: { kinds: [Pod] } }
       validate:
-        message: 'CPU/Memory requests & limits required'
+        message: "CPU/Memory requests & limits required"
         pattern:
           spec:
             containers:
               - resources:
                   requests:
-                    cpu: '?*'
-                    memory: '?*'
+                    cpu: "?*"
+                    memory: "?*"
                   limits:
-                    cpu: '?*'
-                    memory: '?*'
+                    cpu: "?*"
+                    memory: "?*"
     - name: require-owner-labels
       match: { resources: { kinds: [Pod, Deployment, Rollout] } }
       validate:
-        message: 'owner and tier labels are required'
+        message: "owner and tier labels are required"
         pattern:
           metadata:
             labels:
-              owner: '?*'
-              tier: '?*'
+              owner: "?*"
+              tier: "?*"
 ```
 
 **Rollback:** Set `validationFailureAction: audit`.
@@ -154,8 +154,8 @@ kind: Namespace
 metadata:
   name: prod
   labels:
-    pod-security.kubernetes.io/enforce: 'restricted'
-    pod-security.kubernetes.io/enforce-version: 'latest'
+    pod-security.kubernetes.io/enforce: "restricted"
+    pod-security.kubernetes.io/enforce-version: "latest"
 ```
 
 **Rollback:** Remove/relax PSA labels to `baseline`.
@@ -328,12 +328,12 @@ analysis:
 **`load/k6/smoke.js`**
 
 ```js
-import http from 'k6/http';
-import { check, sleep } from 'k6';
-export const options = { vus: 5, duration: '2m' };
+import http from "k6/http";
+import { check, sleep } from "k6";
+export const options = { vus: 5, duration: "2m" };
 export default function () {
   const res = http.get(`${__ENV.BASE_URL}/healthz`);
-  check(res, { 'status is 200': (r) => r.status === 200 });
+  check(res, { "status is 200": (r) => r.status === 200 });
   sleep(1);
 }
 ```
@@ -375,10 +375,10 @@ plan:
 **`scripts/infracost_enforce.js`**
 
 ```js
-const fs = require('fs');
-const data = JSON.parse(fs.readFileSync('infracost.json', 'utf8'));
+const fs = require("fs");
+const data = JSON.parse(fs.readFileSync("infracost.json", "utf8"));
 const delta = data.projects?.[0]?.breakdown?.totalMonthlyCost?.diff || 0;
-const LIMIT = parseFloat(process.env.INFRACOST_LIMIT || '50'); // $50/month
+const LIMIT = parseFloat(process.env.INFRACOST_LIMIT || "50"); // $50/month
 if (delta > LIMIT) {
   console.error(`❌ Cost delta ${delta} > ${LIMIT}`);
   process.exit(1);
@@ -402,7 +402,7 @@ console.log(`✅ Cost delta ${delta} <= ${LIMIT}`);
 name: infra-drift
 on:
   schedule:
-    - cron: '0 6 * * *' # daily 06:00 UTC
+    - cron: "0 6 * * *" # daily 06:00 UTC
 jobs:
   plan:
     runs-on: ubuntu-latest
@@ -470,21 +470,19 @@ features:
     default: false
     owners: [data]
     guardrails:
-      requires: ['db_migration_2025_09_gate']
+      requires: ["db_migration_2025_09_gate"]
 ```
 
 **`scripts/ffctl.ts`**
 
 ```ts
 #!/usr/bin/env ts-node
-import fs from 'fs';
-const flags = JSON.parse(
-  JSON.stringify(require('../feature-flags/flags.yaml')),
-);
+import fs from "fs";
+const flags = JSON.parse(JSON.stringify(require("../feature-flags/flags.yaml")));
 const [name, value] = process.argv.slice(2);
-if (!flags.features[name]) throw new Error('Unknown flag');
-flags.features[name].default = value === 'true';
-fs.writeFileSync('feature-flags/flags.yaml', flags);
+if (!flags.features[name]) throw new Error("Unknown flag");
+flags.features[name].default = value === "true";
+fs.writeFileSync("feature-flags/flags.yaml", flags);
 console.log(`Set ${name}=${value}`);
 ```
 

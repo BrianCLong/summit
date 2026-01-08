@@ -440,7 +440,7 @@ metadata:
   name: backup-integrity-check
   namespace: intelgraph-siem
 spec:
-  schedule: "0 */4 * * *"  # Every 4 hours
+  schedule: "0 */4 * * *" # Every 4 hours
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:

@@ -14,7 +14,7 @@ import type {
   ImprovementInfo,
   RegressionInfo,
   ScenarioResult,
-} from './types.js';
+} from "./types.js";
 
 // ============================================================================
 // ID Generation
@@ -24,16 +24,16 @@ import type {
  * Generate a unique scenario ID
  */
 export function generateScenarioId(type: string, sequence?: number): string {
-  const prefix = 'sc';
-  const typeSlug = type.toLowerCase().replace(/_/g, '-');
-  const seq = sequence ? String(sequence).padStart(3, '0') : generateShortId();
+  const prefix = "sc";
+  const typeSlug = type.toLowerCase().replace(/_/g, "-");
+  const seq = sequence ? String(sequence).padStart(3, "0") : generateShortId();
   return `${prefix}-${typeSlug}-${seq}`;
 }
 
 /**
  * Generate a unique run ID
  */
-export function generateRunId(prefix = 'run'): string {
+export function generateRunId(prefix = "run"): string {
   const timestamp = Date.now().toString(36);
   const random = generateShortId();
   return `${prefix}-${timestamp}-${random}`;
@@ -43,8 +43,8 @@ export function generateRunId(prefix = 'run'): string {
  * Generate a short random ID
  */
 export function generateShortId(length = 6): string {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
   for (let i = 0; i < length; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
@@ -67,7 +67,7 @@ export function generateFindingId(runId: string, scenarioId: string, index: numb
  */
 export function calculateOverallScore(
   dimensions: Record<string, number>,
-  weights?: Record<string, number>,
+  weights?: Record<string, number>
 ): number {
   const keys = Object.keys(dimensions);
   if (keys.length === 0) return 0;
@@ -104,10 +104,10 @@ export function normalizeScore(score: number, min = 0, max = 100): number {
 /**
  * Determine pass/fail status from score
  */
-export function determinePassFail(score: number, threshold = 0.7): 'pass' | 'fail' | 'partial' {
-  if (score >= threshold) return 'pass';
-  if (score >= threshold * 0.5) return 'partial';
-  return 'fail';
+export function determinePassFail(score: number, threshold = 0.7): "pass" | "fail" | "partial" {
+  if (score >= threshold) return "pass";
+  if (score >= threshold * 0.5) return "partial";
+  return "fail";
 }
 
 /**
@@ -115,10 +115,10 @@ export function determinePassFail(score: number, threshold = 0.7): 'pass' | 'fai
  */
 export function aggregateScores(results: ScenarioResult[]): EvalSummary {
   const total = results.length;
-  const passed = results.filter((r) => r.status === 'pass').length;
-  const failed = results.filter((r) => r.status === 'fail').length;
-  const skipped = results.filter((r) => r.status === 'skip').length;
-  const errors = results.filter((r) => r.status === 'error').length;
+  const passed = results.filter((r) => r.status === "pass").length;
+  const failed = results.filter((r) => r.status === "fail").length;
+  const skipped = results.filter((r) => r.status === "skip").length;
+  const errors = results.filter((r) => r.status === "error").length;
 
   const passRate = total > 0 ? passed / total : 0;
 
@@ -129,13 +129,13 @@ export function aggregateScores(results: ScenarioResult[]): EvalSummary {
   const totalCost = results.reduce((acc, r) => acc + r.cost, 0);
 
   const safetyViolations = results.reduce(
-    (acc, r) => acc + r.findings.filter((f) => f.type === 'safety_violation').length,
-    0,
+    (acc, r) => acc + r.findings.filter((f) => f.type === "safety_violation").length,
+    0
   );
 
   const policyDenials = results.reduce(
-    (acc, r) => acc + r.policyEvents.filter((e) => e.action === 'deny').length,
-    0,
+    (acc, r) => acc + r.policyEvents.filter((e) => e.action === "deny").length,
+    0
   );
 
   // Aggregate dimension averages
@@ -198,8 +198,8 @@ export function compareToBaseline(run: EvalRun, baseline: BaselineSnapshot): Bas
   // Check overall score
   if (overallDelta < 0) {
     regressions.push({
-      subject: 'overall',
-      metric: 'avgScore',
+      subject: "overall",
+      metric: "avgScore",
       baseline: baseline.metrics.avgCorrectness,
       current: run.summary.avgScore,
       delta: overallDelta,
@@ -207,8 +207,8 @@ export function compareToBaseline(run: EvalRun, baseline: BaselineSnapshot): Bas
     });
   } else if (overallDelta > 0) {
     improvements.push({
-      subject: 'overall',
-      metric: 'avgScore',
+      subject: "overall",
+      metric: "avgScore",
       baseline: baseline.metrics.avgCorrectness,
       current: run.summary.avgScore,
       delta: overallDelta,
@@ -226,7 +226,7 @@ export function compareToBaseline(run: EvalRun, baseline: BaselineSnapshot): Bas
       // Regression threshold: -5%
       regressions.push({
         subject: dim,
-        metric: 'score',
+        metric: "score",
         baseline: baselineScore,
         current: currentScore,
         delta,
@@ -236,7 +236,7 @@ export function compareToBaseline(run: EvalRun, baseline: BaselineSnapshot): Bas
       // Improvement threshold: +5%
       improvements.push({
         subject: dim,
-        metric: 'score',
+        metric: "score",
         baseline: baselineScore,
         current: currentScore,
         delta,
@@ -258,10 +258,10 @@ export function compareToBaseline(run: EvalRun, baseline: BaselineSnapshot): Bas
  * Determine severity based on magnitude of regression
  */
 function determineSeverity(magnitude: number): FindingSeverity {
-  if (magnitude >= 0.2) return 'critical';
-  if (magnitude >= 0.1) return 'error';
-  if (magnitude >= 0.05) return 'warning';
-  return 'info';
+  if (magnitude >= 0.2) return "critical";
+  if (magnitude >= 0.1) return "error";
+  if (magnitude >= 0.05) return "warning";
+  return "info";
 }
 
 // ============================================================================
@@ -304,16 +304,16 @@ export function formatDuration(milliseconds: number): string {
  */
 export function formatTimestamp(date: Date, includeTime = true): string {
   const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
 
   if (!includeTime) {
     return `${year}-${month}-${day}`;
   }
 
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  const seconds = String(date.getSeconds()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
 
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
@@ -379,7 +379,10 @@ export function calculateStats(values: number[]): StatSummary {
 /**
  * Filter results by status
  */
-export function filterByStatus(results: ScenarioResult[], status: string | string[]): ScenarioResult[] {
+export function filterByStatus(
+  results: ScenarioResult[],
+  status: string | string[]
+): ScenarioResult[] {
   const statuses = Array.isArray(status) ? status : [status];
   return results.filter((r) => statuses.includes(r.status));
 }
@@ -396,7 +399,7 @@ export function filterByMinScore(results: ScenarioResult[], minScore: number): S
  */
 export function groupByScenarioType(
   results: ScenarioResult[],
-  scenarios: Map<string, { type: string }>,
+  scenarios: Map<string, { type: string }>
 ): Record<string, ScenarioResult[]> {
   const grouped: Record<string, ScenarioResult[]> = {};
 
@@ -424,40 +427,40 @@ export function generateMarkdownSummary(run: EvalRun): string {
 
   const lines = [
     `# Evaluation Run: ${run.id}`,
-    '',
+    "",
     `**Status**: ${run.status}`,
     `**Started**: ${formatTimestamp(run.startedAt)}`,
-    run.completedAt ? `**Completed**: ${formatTimestamp(run.completedAt)}` : '',
+    run.completedAt ? `**Completed**: ${formatTimestamp(run.completedAt)}` : "",
     `**Environment**: ${run.environment}`,
-    run.branch ? `**Branch**: ${run.branch}` : '',
-    run.gitCommit ? `**Commit**: ${run.gitCommit}` : '',
-    '',
-    '## Summary',
-    '',
+    run.branch ? `**Branch**: ${run.branch}` : "",
+    run.gitCommit ? `**Commit**: ${run.gitCommit}` : "",
+    "",
+    "## Summary",
+    "",
     `- **Total Scenarios**: ${summary.totalScenarios}`,
     `- **Passed**: ${summary.passed} (${formatScore(summary.passRate)})`,
     `- **Failed**: ${summary.failed}`,
     `- **Skipped**: ${summary.skipped}`,
     `- **Errors**: ${summary.errors}`,
-    '',
+    "",
     `- **Average Score**: ${formatScore(summary.avgScore)}`,
     `- **Total Cost**: ${formatCost(summary.totalCost)}`,
     `- **Total Time**: ${formatDuration(summary.totalExecutionTime)}`,
-    '',
+    "",
     `- **Safety Violations**: ${summary.safetyViolations}`,
     `- **Policy Denials**: ${summary.policyDenials}`,
-    '',
+    "",
   ];
 
   if (Object.keys(summary.dimensionAverages).length > 0) {
-    lines.push('## Dimension Scores', '');
+    lines.push("## Dimension Scores", "");
     for (const [dim, score] of Object.entries(summary.dimensionAverages)) {
       lines.push(`- **${dim}**: ${formatScore(score)}`);
     }
-    lines.push('');
+    lines.push("");
   }
 
-  return lines.filter(Boolean).join('\n');
+  return lines.filter(Boolean).join("\n");
 }
 
 /**
@@ -475,7 +478,7 @@ export function generateJsonArtifact(run: EvalRun): string {
  * Check if a score is valid (0-1 range)
  */
 export function isValidScore(score: number): boolean {
-  return typeof score === 'number' && score >= 0 && score <= 1 && !isNaN(score);
+  return typeof score === "number" && score >= 0 && score <= 1 && !isNaN(score);
 }
 
 /**

@@ -1,5 +1,5 @@
-'use client';
-import React, { useState } from 'react';
+"use client";
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -10,13 +10,13 @@ import {
   DialogContent,
   DialogTitle,
   Typography,
-} from '@mui/material';
-import { Lightbulb, Mic } from '@mui/icons-material';
-import AgentCard from './AgentCard';
-import SystemStatusCard from './SystemStatusCard';
-import ActionsPanel from './ActionsPanel';
-import CommandPalette from './CommandPalette';
-import { agents, systemStatus } from './mockData';
+} from "@mui/material";
+import { Lightbulb, Mic } from "@mui/icons-material";
+import AgentCard from "./AgentCard";
+import SystemStatusCard from "./SystemStatusCard";
+import ActionsPanel from "./ActionsPanel";
+import CommandPalette from "./CommandPalette";
+import { agents, systemStatus } from "./mockData";
 
 export default function Switchboard() {
   const [openChat, setOpenChat] = useState(false);
@@ -24,9 +24,9 @@ export default function Switchboard() {
   const [meeting, setMeeting] = useState(false);
 
   const handleCommandSelect = (command: string) => {
-    if (command.includes('meeting')) {
+    if (command.includes("meeting")) {
       setMeeting(true);
-    } else if (command.includes('Scribe')) {
+    } else if (command.includes("Scribe")) {
       setOpenChat(true);
     }
     setCmdOpen(false);
@@ -48,9 +48,7 @@ export default function Switchboard() {
           ))}
         </Box>
         <Card className="rounded-2xl">
-          <CardHeader
-            title={<Typography variant="h6">Meeting Stage</Typography>}
-          />
+          <CardHeader title={<Typography variant="h6">Meeting Stage</Typography>} />
           <CardContent>
             {meeting ? (
               <Box className="h-48 rounded-xl bg-black/80 text-white flex items-center justify-center">
@@ -84,20 +82,14 @@ export default function Switchboard() {
               <Button variant="outlined">Present</Button>
             </Box>
             <Typography variant="caption" className="opacity-70">
-              Context loaded: org, agenda, metrics. Actions will be
-              policy‑checked.
+              Context loaded: org, agenda, metrics. Actions will be policy‑checked.
             </Typography>
           </CardContent>
         </Card>
       </Box>
 
       {/* Chat dialog */}
-      <Dialog
-        open={openChat}
-        onClose={() => setOpenChat(false)}
-        maxWidth="sm"
-        fullWidth
-      >
+      <Dialog open={openChat} onClose={() => setOpenChat(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Chat with Agent</DialogTitle>
         <DialogContent>
           <Box className="rounded-xl border p-3 min-h-32 bg-gray-50 dark:bg-gray-900">

@@ -1,10 +1,10 @@
 /* eslint-disable no-console */
-import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import path from 'node:path';
-import yaml from 'js-yaml';
+import { spawnSync } from "node:child_process";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import path from "node:path";
+import yaml from "js-yaml";
 
-type EvidenceStatus = 'passed' | 'failed' | 'skipped' | 'missing';
+type EvidenceStatus = "passed" | "failed" | "skipped" | "missing";
 
 type ControlMapping = {
   id: string;
@@ -25,7 +25,7 @@ type ControlResult = {
   id: string;
   name: string;
   category: string;
-  status: 'PASS' | 'FAIL' | 'UNKNOWN';
+  status: "PASS" | "FAIL" | "UNKNOWN";
   evidence: EvidenceResult[];
 };
 
@@ -35,20 +35,20 @@ type ComplianceReport = {
   controls: ControlResult[];
 };
 
-const DEFAULT_MATRIX_PATH = 'compliance/control-matrix.yml';
+const DEFAULT_MATRIX_PATH = "compliance/control-matrix.yml";
 
 function parseArgs(): { outputPath: string; markdownPath?: string } {
   const args = process.argv.slice(2);
   const today = new Date();
-  const dateStamp = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
-  let outputPath = path.join('artifacts', `compliance-report-${dateStamp}.json`);
+  const dateStamp = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, "0")}${String(today.getDate()).padStart(2, "0")}`;
+  let outputPath = path.join("artifacts", `compliance-report-${dateStamp}.json`);
   let markdownPath: string | undefined;
 
   for (let i = 0; i < args.length; i += 1) {
-    if (args[i] === '--output' && args[i + 1]) {
+    if (args[i] === "--output" && args[i + 1]) {
       outputPath = args[i + 1];
       i += 1;
-    } else if (args[i] === '--markdown' && args[i + 1]) {
+    } else if (args[i] === "--markdown" && args[i + 1]) {
       markdownPath = args[i + 1];
       i += 1;
     }
@@ -62,7 +62,7 @@ function loadControlMatrix(matrixPath: string): ControlMapping[] {
     throw new Error(`Control matrix not found at ${matrixPath}`);
   }
 
-  const raw = readFileSync(matrixPath, 'utf-8');
+  const raw = readFileSync(matrixPath, "utf-8");
   const parsed = yaml.load(raw) as { controls?: ControlMapping[] };
 
   if (!parsed?.controls || !Array.isArray(parsed.controls)) {
@@ -77,57 +77,76 @@ function ensureDir(targetPath: string) {
 }
 
 function sanitizeId(id: string): string {
-  return id.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  return id.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 }
 
 function runEvidenceScript(controlId: string, scriptPath: string, logDir: string): EvidenceResult {
   if (!existsSync(scriptPath)) {
-    return { script: scriptPath, status: 'missing', message: 'Script not found' };
+    return { script: scriptPath, status: "missing", message: "Script not found" };
   }
 
-  if (scriptPath.startsWith('.github/workflows') || scriptPath.endsWith('.yml') || scriptPath.endsWith('.yaml')) {
-    return { script: scriptPath, status: 'skipped', message: 'Workflow reference captured (not executable in runner)' };
+  if (
+    scriptPath.startsWith(".github/workflows") ||
+    scriptPath.endsWith(".yml") ||
+    scriptPath.endsWith(".yaml")
+  ) {
+    return {
+      script: scriptPath,
+      status: "skipped",
+      message: "Workflow reference captured (not executable in runner)",
+    };
   }
 
   const safeId = sanitizeId(controlId);
-  const scriptName = path.basename(scriptPath).replace(/\.[^.]+$/, '');
+  const scriptName = path.basename(scriptPath).replace(/\.[^.]+$/, "");
   const logPath = path.join(logDir, `${safeId}-${scriptName}.log`);
   const execution = spawnSync(scriptPath, {
     shell: true,
-    encoding: 'utf-8',
+    encoding: "utf-8",
   });
 
   ensureDir(path.dirname(logPath));
-  const combinedOutput = `${execution.stdout ?? ''}${execution.stderr ?? ''}`;
-  writeFileSync(logPath, combinedOutput, 'utf-8');
+  const combinedOutput = `${execution.stdout ?? ""}${execution.stderr ?? ""}`;
+  writeFileSync(logPath, combinedOutput, "utf-8");
 
-  const status: EvidenceStatus = execution.status === 0 ? 'passed' : 'failed';
+  const status: EvidenceStatus = execution.status === 0 ? "passed" : "failed";
   return {
     script: scriptPath,
     status,
     outputPath: logPath,
-    message: execution.status === 0 ? 'Completed successfully' : execution.stderr || execution.stdout,
+    message:
+      execution.status === 0 ? "Completed successfully" : execution.stderr || execution.stdout,
   };
 }
 
 function evaluateControl(control: ControlMapping, logDir: string): ControlResult {
   const evidenceScripts = control.evidence_scripts ?? [];
   if (evidenceScripts.length === 0) {
-    return { id: control.id, name: control.name, category: control.category, status: 'UNKNOWN', evidence: [] };
+    return {
+      id: control.id,
+      name: control.name,
+      category: control.category,
+      status: "UNKNOWN",
+      evidence: [],
+    };
   }
 
-  const evidenceResults = evidenceScripts.map((script) => runEvidenceScript(control.id, script, logDir));
-  const hasFailure = evidenceResults.some((result) => result.status === 'failed' || result.status === 'missing');
-  const hasPass = evidenceResults.some((result) => result.status === 'passed');
-  const allSkipped = evidenceResults.every((result) => result.status === 'skipped');
+  const evidenceResults = evidenceScripts.map((script) =>
+    runEvidenceScript(control.id, script, logDir)
+  );
+  const hasFailure = evidenceResults.some(
+    (result) => result.status === "failed" || result.status === "missing"
+  );
+  const hasPass = evidenceResults.some((result) => result.status === "passed");
+  const allSkipped = evidenceResults.every((result) => result.status === "skipped");
 
-  let status: ControlResult['status'] = 'UNKNOWN';
+  let status: ControlResult["status"] = "UNKNOWN";
   if (hasFailure) {
-    status = 'FAIL';
+    status = "FAIL";
   } else if (hasPass) {
-    status = 'PASS';
+    status = "PASS";
   } else if (allSkipped) {
-    status = 'UNKNOWN';
+    status = "UNKNOWN";
   }
 
   return {
@@ -140,22 +159,33 @@ function evaluateControl(control: ControlMapping, logDir: string): ControlResult
 }
 
 function writeMarkdown(report: ComplianceReport, markdownPath: string) {
-  const lines = ['# Compliance Check Summary', '', `Generated: ${report.generatedAt}`, '', '| Control | Status | Evidence |', '| --- | --- | --- |'];
+  const lines = [
+    "# Compliance Check Summary",
+    "",
+    `Generated: ${report.generatedAt}`,
+    "",
+    "| Control | Status | Evidence |",
+    "| --- | --- | --- |",
+  ];
 
   report.controls.forEach((control) => {
     const evidenceList = control.evidence
-      .map((item) => `${item.script} (${item.status}${item.outputPath ? ` → ${item.outputPath}` : ''})`)
-      .join('<br>');
-    lines.push(`| ${control.id} — ${control.name} | ${control.status} | ${evidenceList || 'None'} |`);
+      .map(
+        (item) => `${item.script} (${item.status}${item.outputPath ? ` → ${item.outputPath}` : ""})`
+      )
+      .join("<br>");
+    lines.push(
+      `| ${control.id} — ${control.name} | ${control.status} | ${evidenceList || "None"} |`
+    );
   });
 
   ensureDir(path.dirname(markdownPath));
-  writeFileSync(markdownPath, lines.join('\n'), 'utf-8');
+  writeFileSync(markdownPath, lines.join("\n"), "utf-8");
 }
 
 function generateReport(matrixPath: string, outputPath: string, markdownPath?: string) {
   const controls = loadControlMatrix(matrixPath);
-  const logDir = path.join(path.dirname(outputPath), 'compliance-logs');
+  const logDir = path.join(path.dirname(outputPath), "compliance-logs");
   ensureDir(logDir);
   ensureDir(path.dirname(outputPath));
 
@@ -166,7 +196,7 @@ function generateReport(matrixPath: string, outputPath: string, markdownPath?: s
     controls: results,
   };
 
-  writeFileSync(outputPath, JSON.stringify(report, null, 2), 'utf-8');
+  writeFileSync(outputPath, JSON.stringify(report, null, 2), "utf-8");
 
   if (markdownPath) {
     writeMarkdown(report, markdownPath);
@@ -186,7 +216,7 @@ function main() {
 try {
   main();
 } catch (error) {
-  const message = error instanceof Error ? error.message : 'Unknown error';
+  const message = error instanceof Error ? error.message : "Unknown error";
   console.error(`Compliance check failed: ${message}`);
   process.exitCode = 1;
 }

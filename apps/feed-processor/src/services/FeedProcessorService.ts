@@ -1,34 +1,25 @@
-import { Pool } from 'pg';
-import { Driver } from 'neo4j-driver';
-import { RedisClientType } from 'redis';
-import { EventEmitter } from 'events';
-import { logger } from '../utils/logger';
-import { v4 as uuidv4 } from 'uuid';
-import axios, { AxiosResponse } from 'axios';
-import * as xml2js from 'xml2js';
-import { pipeline, Transform } from 'stream';
-import { promisify } from 'util';
+import { Pool } from "pg";
+import { Driver } from "neo4j-driver";
+import { RedisClientType } from "redis";
+import { EventEmitter } from "events";
+import { logger } from "../utils/logger";
+import { v4 as uuidv4 } from "uuid";
+import axios, { AxiosResponse } from "axios";
+import * as xml2js from "xml2js";
+import { pipeline, Transform } from "stream";
+import { promisify } from "util";
 
 const pipelineAsync = promisify(pipeline);
 
 export interface FeedSource {
   id: string;
   name: string;
-  type:
-    | 'rss'
-    | 'json'
-    | 'xml'
-    | 'csv'
-    | 'stix'
-    | 'taxii'
-    | 'api'
-    | 'webhook'
-    | 'file';
+  type: "rss" | "json" | "xml" | "csv" | "stix" | "taxii" | "api" | "webhook" | "file";
   url?: string;
   configuration: {
     pollInterval: number; // milliseconds
     authentication?: {
-      type: 'none' | 'basic' | 'bearer' | 'api_key';
+      type: "none" | "basic" | "bearer" | "api_key";
       credentials: Record<string, string>;
     };
     format: {
@@ -49,7 +40,7 @@ export interface FeedSource {
       sentiment: boolean;
     };
   };
-  status: 'active' | 'inactive' | 'error' | 'paused';
+  status: "active" | "inactive" | "error" | "paused";
   lastPoll?: Date;
   lastSuccess?: Date;
   errorCount: number;
@@ -78,13 +69,13 @@ export interface ProcessedFeedItem {
     threatIndicators?: ThreatIndicator[];
     relevanceScore?: number;
   };
-  processingStatus: 'pending' | 'processed' | 'enriched' | 'stored' | 'error';
+  processingStatus: "pending" | "processed" | "enriched" | "stored" | "error";
   processingErrors?: string[];
   processedAt?: Date;
 }
 
 export interface ExtractedEntity {
-  type: 'person' | 'organization' | 'location' | 'event' | 'product' | 'misc';
+  type: "person" | "organization" | "location" | "event" | "product" | "misc";
   text: string;
   confidence: number;
   startIndex: number;
@@ -105,12 +96,12 @@ export interface GeolocationData {
 export interface SentimentData {
   score: number; // -1 to 1
   magnitude: number; // 0 to infinity
-  label: 'positive' | 'negative' | 'neutral';
+  label: "positive" | "negative" | "neutral";
   confidence: number;
 }
 
 export interface ThreatIndicator {
-  type: 'domain' | 'ip' | 'url' | 'hash' | 'email' | 'cve';
+  type: "domain" | "ip" | "url" | "hash" | "email" | "cve";
   value: string;
   confidence: number;
   malicious: boolean;
@@ -138,23 +129,20 @@ export class FeedProcessorService extends EventEmitter {
   constructor(
     private pgPool: Pool,
     private neo4jDriver: Driver,
-    private redisClient: RedisClientType,
+    private redisClient: RedisClientType
   ) {
     super();
     this.startProcessingLoop();
   }
 
   async createFeedSource(
-    source: Omit<
-      FeedSource,
-      'id' | 'createdAt' | 'updatedAt' | 'errorCount' | 'totalProcessed'
-    >,
-    userId: string,
+    source: Omit<FeedSource, "id" | "createdAt" | "updatedAt" | "errorCount" | "totalProcessed">,
+    userId: string
   ): Promise<FeedSource> {
     const client = await this.pgPool.connect();
 
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
 
       const sourceId = uuidv4();
       const now = new Date();
@@ -189,20 +177,20 @@ export class FeedProcessorService extends EventEmitter {
         userId,
       ]);
 
-      await client.query('COMMIT');
+      await client.query("COMMIT");
 
       // Start polling if source is active
-      if (source.status === 'active') {
+      if (source.status === "active") {
         this.startPolling(feedSource);
       }
 
       logger.info(`Feed source created: ${sourceId} (${source.name})`);
-      this.emit('feed.source.created', feedSource);
+      this.emit("feed.source.created", feedSource);
 
       return feedSource;
     } catch (error) {
-      await client.query('ROLLBACK');
-      logger.error('Error creating feed source:', error);
+      await client.query("ROLLBACK");
+      logger.error("Error creating feed source:", error);
       throw error;
     } finally {
       client.release();
@@ -214,9 +202,7 @@ export class FeedProcessorService extends EventEmitter {
       this.stopPolling(source.id);
     }
 
-    logger.info(
-      `Starting polling for feed source: ${source.name} (${source.id})`,
-    );
+    logger.info(`Starting polling for feed source: ${source.name} (${source.id})`);
 
     // Initial poll
     this.pollFeedSource(source);
@@ -247,19 +233,19 @@ export class FeedProcessorService extends EventEmitter {
       let data: any;
 
       switch (source.type) {
-        case 'rss':
-        case 'xml':
+        case "rss":
+        case "xml":
           data = await this.fetchXmlFeed(source);
           break;
-        case 'json':
-        case 'api':
+        case "json":
+        case "api":
           data = await this.fetchJsonFeed(source);
           break;
-        case 'csv':
+        case "csv":
           data = await this.fetchCsvFeed(source);
           break;
-        case 'stix':
-        case 'taxii':
+        case "stix":
+        case "taxii":
           data = await this.fetchStixFeed(source);
           break;
         default:
@@ -281,10 +267,10 @@ export class FeedProcessorService extends EventEmitter {
 
       const processingTime = Date.now() - startTime;
       logger.info(
-        `Polled feed source: ${source.name}, ${filteredItems.length} items, ${processingTime}ms`,
+        `Polled feed source: ${source.name}, ${filteredItems.length} items, ${processingTime}ms`
       );
 
-      this.emit('feed.poll.completed', {
+      this.emit("feed.poll.completed", {
         sourceId: source.id,
         itemCount: filteredItems.length,
         processingTime,
@@ -296,10 +282,10 @@ export class FeedProcessorService extends EventEmitter {
       await this.updateSourceStatus(source.id, {
         lastPoll: new Date(),
         errorCount: newErrorCount,
-        status: newErrorCount > 5 ? 'error' : source.status,
+        status: newErrorCount > 5 ? "error" : source.status,
       });
 
-      this.emit('feed.poll.error', {
+      this.emit("feed.poll.error", {
         sourceId: source.id,
         error: error.message,
         errorCount: newErrorCount,
@@ -331,32 +317,32 @@ export class FeedProcessorService extends EventEmitter {
 
   private async makeHttpRequest(source: FeedSource): Promise<AxiosResponse> {
     if (!source.url) {
-      throw new Error('Feed source URL is required');
+      throw new Error("Feed source URL is required");
     }
 
     const config: any = {
       url: source.url,
-      method: 'GET',
+      method: "GET",
       timeout: 30000,
       headers: {
-        'User-Agent': 'IntelGraph-FeedProcessor/1.0',
+        "User-Agent": "IntelGraph-FeedProcessor/1.0",
       },
     };
 
     // Add authentication
     const auth = source.configuration.authentication;
-    if (auth && auth.type !== 'none') {
+    if (auth && auth.type !== "none") {
       switch (auth.type) {
-        case 'basic':
+        case "basic":
           config.auth = {
             username: auth.credentials.username,
             password: auth.credentials.password,
           };
           break;
-        case 'bearer':
-          config.headers['Authorization'] = `Bearer ${auth.credentials.token}`;
+        case "bearer":
+          config.headers["Authorization"] = `Bearer ${auth.credentials.token}`;
           break;
-        case 'api_key':
+        case "api_key":
           if (auth.credentials.header) {
             config.headers[auth.credentials.header] = auth.credentials.key;
           } else {
@@ -377,20 +363,17 @@ export class FeedProcessorService extends EventEmitter {
       let feedItems: any[] = [];
 
       switch (source.type) {
-        case 'rss':
+        case "rss":
           feedItems = data.rss?.channel?.[0]?.item || [];
           break;
-        case 'json':
-          feedItems = Array.isArray(data)
-            ? data
-            : data.items || data.results || [data];
+        case "json":
+          feedItems = Array.isArray(data) ? data : data.items || data.results || [data];
           break;
-        case 'xml':
-          const rootElement =
-            source.configuration.format.rootElement || 'items';
+        case "xml":
+          const rootElement = source.configuration.format.rootElement || "items";
           feedItems = data[rootElement] || [];
           break;
-        case 'stix':
+        case "stix":
           feedItems = data.objects || [];
           break;
         default:
@@ -402,25 +385,18 @@ export class FeedProcessorService extends EventEmitter {
           const processedItem: ProcessedFeedItem = {
             id: uuidv4(),
             sourceId: source.id,
-            originalId: this.extractField(item, mapping.id || 'id'),
-            title:
-              this.extractField(item, mapping.title || 'title') ||
-              `Item ${index}`,
-            description: this.extractField(
-              item,
-              mapping.description || 'description',
-            ),
-            content: this.extractField(item, mapping.content || 'content'),
-            publishedAt: this.parseDate(
-              this.extractField(item, mapping.publishedAt || 'pubDate'),
-            ),
-            url: this.extractField(item, mapping.url || 'link'),
-            author: this.extractField(item, mapping.author || 'author'),
-            category: this.extractField(item, mapping.category || 'category'),
-            tags: this.extractTags(item, mapping.tags || 'tags'),
+            originalId: this.extractField(item, mapping.id || "id"),
+            title: this.extractField(item, mapping.title || "title") || `Item ${index}`,
+            description: this.extractField(item, mapping.description || "description"),
+            content: this.extractField(item, mapping.content || "content"),
+            publishedAt: this.parseDate(this.extractField(item, mapping.publishedAt || "pubDate")),
+            url: this.extractField(item, mapping.url || "link"),
+            author: this.extractField(item, mapping.author || "author"),
+            category: this.extractField(item, mapping.category || "category"),
+            tags: this.extractTags(item, mapping.tags || "tags"),
             rawData: item,
             processedData: {},
-            processingStatus: 'pending',
+            processingStatus: "pending",
           };
 
           items.push(processedItem);
@@ -429,7 +405,7 @@ export class FeedProcessorService extends EventEmitter {
         }
       });
     } catch (error) {
-      logger.error('Error parsing feed data:', error);
+      logger.error("Error parsing feed data:", error);
       throw error;
     }
 
@@ -439,7 +415,7 @@ export class FeedProcessorService extends EventEmitter {
   private extractField(item: any, path: string): any {
     if (!path || !item) return undefined;
 
-    return path.split('.').reduce((current, key) => {
+    return path.split(".").reduce((current, key) => {
       if (Array.isArray(current) && current.length > 0) {
         current = current[0];
       }
@@ -455,7 +431,7 @@ export class FeedProcessorService extends EventEmitter {
       return value.map((v) => String(v));
     }
 
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       return value
         .split(/[,;]/)
         .map((tag) => tag.trim())
@@ -477,36 +453,23 @@ export class FeedProcessorService extends EventEmitter {
     }
   }
 
-  private applyFilters(
-    items: ProcessedFeedItem[],
-    source: FeedSource,
-  ): ProcessedFeedItem[] {
+  private applyFilters(items: ProcessedFeedItem[], source: FeedSource): ProcessedFeedItem[] {
     const filters = source.configuration.filters;
     if (!filters) return items;
 
     return items.filter((item) => {
       // Include patterns
       if (filters.includePatterns?.length > 0) {
-        const content =
-          `${item.title} ${item.description} ${item.content}`.toLowerCase();
-        if (
-          !filters.includePatterns.some((pattern) =>
-            content.includes(pattern.toLowerCase()),
-          )
-        ) {
+        const content = `${item.title} ${item.description} ${item.content}`.toLowerCase();
+        if (!filters.includePatterns.some((pattern) => content.includes(pattern.toLowerCase()))) {
           return false;
         }
       }
 
       // Exclude patterns
       if (filters.excludePatterns?.length > 0) {
-        const content =
-          `${item.title} ${item.description} ${item.content}`.toLowerCase();
-        if (
-          filters.excludePatterns.some((pattern) =>
-            content.includes(pattern.toLowerCase()),
-          )
-        ) {
+        const content = `${item.title} ${item.description} ${item.content}`.toLowerCase();
+        if (filters.excludePatterns.some((pattern) => content.includes(pattern.toLowerCase()))) {
           return false;
         }
       }
@@ -523,49 +486,36 @@ export class FeedProcessorService extends EventEmitter {
     });
   }
 
-  private evaluateFilter(
-    value: any,
-    operator: string,
-    filterValue: any,
-  ): boolean {
+  private evaluateFilter(value: any, operator: string, filterValue: any): boolean {
     switch (operator) {
-      case 'eq':
+      case "eq":
         return value === filterValue;
-      case 'ne':
+      case "ne":
         return value !== filterValue;
-      case 'gt':
+      case "gt":
         return value > filterValue;
-      case 'gte':
+      case "gte":
         return value >= filterValue;
-      case 'lt':
+      case "lt":
         return value < filterValue;
-      case 'lte':
+      case "lte":
         return value <= filterValue;
-      case 'contains':
-        return String(value)
-          .toLowerCase()
-          .includes(String(filterValue).toLowerCase());
-      case 'startsWith':
-        return String(value)
-          .toLowerCase()
-          .startsWith(String(filterValue).toLowerCase());
-      case 'endsWith':
-        return String(value)
-          .toLowerCase()
-          .endsWith(String(filterValue).toLowerCase());
-      case 'in':
+      case "contains":
+        return String(value).toLowerCase().includes(String(filterValue).toLowerCase());
+      case "startsWith":
+        return String(value).toLowerCase().startsWith(String(filterValue).toLowerCase());
+      case "endsWith":
+        return String(value).toLowerCase().endsWith(String(filterValue).toLowerCase());
+      case "in":
         return Array.isArray(filterValue) && filterValue.includes(value);
-      case 'regex':
+      case "regex":
         return new RegExp(filterValue).test(String(value));
       default:
         return true;
     }
   }
 
-  private queueItemsForProcessing(
-    items: ProcessedFeedItem[],
-    source: FeedSource,
-  ): void {
+  private queueItemsForProcessing(items: ProcessedFeedItem[], source: FeedSource): void {
     if (!this.processingQueues.has(source.id)) {
       this.processingQueues.set(source.id, []);
     }
@@ -573,10 +523,8 @@ export class FeedProcessorService extends EventEmitter {
     const queue = this.processingQueues.get(source.id)!;
     queue.push(...items);
 
-    logger.debug(
-      `Queued ${items.length} items for processing from ${source.name}`,
-    );
-    this.emit('items.queued', { sourceId: source.id, count: items.length });
+    logger.debug(`Queued ${items.length} items for processing from ${source.name}`);
+    this.emit("items.queued", { sourceId: source.id, count: items.length });
   }
 
   private async startProcessingLoop(): Promise<void> {
@@ -595,7 +543,7 @@ export class FeedProcessorService extends EventEmitter {
           await this.processBatch(batch);
         }
       } catch (error) {
-        logger.error('Error in processing loop:', error);
+        logger.error("Error in processing loop:", error);
       } finally {
         this.isProcessing = false;
       }
@@ -616,7 +564,7 @@ export class FeedProcessorService extends EventEmitter {
       // Get source configuration for enrichment
       const source = await this.getFeedSource(item.sourceId);
       if (!source) {
-        throw new Error('Feed source not found');
+        throw new Error("Feed source not found");
       }
 
       const enrichment = source.configuration.enrichment;
@@ -638,8 +586,7 @@ export class FeedProcessorService extends EventEmitter {
 
       // Threat intelligence
       if (enrichment?.threatIntelligence) {
-        item.processedData.threatIndicators =
-          await this.extractThreatIndicators(item);
+        item.processedData.threatIndicators = await this.extractThreatIndicators(item);
       }
 
       // Calculate relevance score
@@ -648,13 +595,13 @@ export class FeedProcessorService extends EventEmitter {
       // Store processed item
       await this.storeProcessedItem(item);
 
-      item.processingStatus = 'stored';
+      item.processingStatus = "stored";
       item.processedAt = new Date();
 
       const processingTime = Date.now() - startTime;
       logger.debug(`Processed item: ${item.title} in ${processingTime}ms`);
 
-      this.emit('item.processed', {
+      this.emit("item.processed", {
         itemId: item.id,
         sourceId: item.sourceId,
         processingTime,
@@ -662,11 +609,11 @@ export class FeedProcessorService extends EventEmitter {
     } catch (error) {
       logger.error(`Error processing item ${item.id}:`, error);
 
-      item.processingStatus = 'error';
+      item.processingStatus = "error";
       item.processingErrors = [error.message];
       item.processedAt = new Date();
 
-      this.emit('item.error', {
+      this.emit("item.error", {
         itemId: item.id,
         sourceId: item.sourceId,
         error: error.message,
@@ -674,12 +621,9 @@ export class FeedProcessorService extends EventEmitter {
     }
   }
 
-  private async extractEntities(
-    item: ProcessedFeedItem,
-  ): Promise<ExtractedEntity[]> {
+  private async extractEntities(item: ProcessedFeedItem): Promise<ExtractedEntity[]> {
     // Placeholder for entity extraction using NLP
-    const content =
-      `${item.title} ${item.description} ${item.content}`.toLowerCase();
+    const content = `${item.title} ${item.description} ${item.content}`.toLowerCase();
     const entities: ExtractedEntity[] = [];
 
     // Simple pattern-based entity extraction (in production, use NLP libraries)
@@ -706,46 +650,31 @@ export class FeedProcessorService extends EventEmitter {
     return entities;
   }
 
-  private async extractGeolocation(
-    item: ProcessedFeedItem,
-  ): Promise<GeolocationData> {
+  private async extractGeolocation(item: ProcessedFeedItem): Promise<GeolocationData> {
     // Placeholder for geolocation extraction
     return { locations: [] };
   }
 
-  private async analyzeSentiment(
-    item: ProcessedFeedItem,
-  ): Promise<SentimentData> {
+  private async analyzeSentiment(item: ProcessedFeedItem): Promise<SentimentData> {
     // Placeholder for sentiment analysis
     const content = `${item.title} ${item.description}`.toLowerCase();
 
     // Simple keyword-based sentiment (in production, use ML models)
-    const positiveWords = ['good', 'great', 'excellent', 'positive', 'success'];
-    const negativeWords = [
-      'bad',
-      'terrible',
-      'negative',
-      'failure',
-      'attack',
-      'breach',
-    ];
+    const positiveWords = ["good", "great", "excellent", "positive", "success"];
+    const negativeWords = ["bad", "terrible", "negative", "failure", "attack", "breach"];
 
-    const positiveCount = positiveWords.filter((word) =>
-      content.includes(word),
-    ).length;
-    const negativeCount = negativeWords.filter((word) =>
-      content.includes(word),
-    ).length;
+    const positiveCount = positiveWords.filter((word) => content.includes(word)).length;
+    const negativeCount = negativeWords.filter((word) => content.includes(word)).length;
 
     let score = 0;
-    let label: 'positive' | 'negative' | 'neutral' = 'neutral';
+    let label: "positive" | "negative" | "neutral" = "neutral";
 
     if (positiveCount > negativeCount) {
       score = 0.5;
-      label = 'positive';
+      label = "positive";
     } else if (negativeCount > positiveCount) {
       score = -0.5;
-      label = 'negative';
+      label = "negative";
     }
 
     return {
@@ -756,26 +685,24 @@ export class FeedProcessorService extends EventEmitter {
     };
   }
 
-  private async extractThreatIndicators(
-    item: ProcessedFeedItem,
-  ): Promise<ThreatIndicator[]> {
+  private async extractThreatIndicators(item: ProcessedFeedItem): Promise<ThreatIndicator[]> {
     const indicators: ThreatIndicator[] = [];
     const content = `${item.title} ${item.description} ${item.content}`;
 
     // Extract IOCs from entities
     if (item.processedData.entities) {
       item.processedData.entities.forEach((entity) => {
-        let type: ThreatIndicator['type'] | null = null;
+        let type: ThreatIndicator["type"] | null = null;
 
         switch (entity.type) {
-          case 'email':
-            type = 'email';
+          case "email":
+            type = "email";
             break;
-          case 'ip':
-            type = 'ip';
+          case "ip":
+            type = "ip";
             break;
-          case 'domain':
-            type = 'domain';
+          case "domain":
+            type = "domain";
             break;
         }
 
@@ -809,13 +736,12 @@ export class FeedProcessorService extends EventEmitter {
     }
 
     // Adjust based on sentiment (negative content might be more relevant for security)
-    if (item.processedData.sentiment?.label === 'negative') {
+    if (item.processedData.sentiment?.label === "negative") {
       score += 0.1;
     }
 
     // Recency boost (newer items are more relevant)
-    const ageInDays =
-      (Date.now() - item.publishedAt.getTime()) / (24 * 60 * 60 * 1000);
+    const ageInDays = (Date.now() - item.publishedAt.getTime()) / (24 * 60 * 60 * 1000);
     if (ageInDays < 1) {
       score += 0.2;
     } else if (ageInDays < 7) {
@@ -829,7 +755,7 @@ export class FeedProcessorService extends EventEmitter {
     const client = await this.pgPool.connect();
 
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
 
       // Store feed item
       const insertItemQuery = `
@@ -859,17 +785,14 @@ export class FeedProcessorService extends EventEmitter {
       ]);
 
       // Create entities in graph if extracted
-      if (
-        item.processedData.entities &&
-        item.processedData.entities.length > 0
-      ) {
+      if (item.processedData.entities && item.processedData.entities.length > 0) {
         await this.createGraphEntities(item);
       }
 
-      await client.query('COMMIT');
+      await client.query("COMMIT");
     } catch (error) {
-      await client.query('ROLLBACK');
-      logger.error('Error storing processed item:', error);
+      await client.query("ROLLBACK");
+      logger.error("Error storing processed item:", error);
       throw error;
     } finally {
       client.release();
@@ -899,7 +822,7 @@ export class FeedProcessorService extends EventEmitter {
           publishedAt: item.publishedAt.toISOString(),
           url: item.url,
           relevanceScore: item.processedData.relevanceScore || 0,
-        },
+        }
       );
 
       // Create entity nodes and relationships
@@ -926,27 +849,24 @@ export class FeedProcessorService extends EventEmitter {
             itemId: item.id,
             startIndex: entity.startIndex,
             endIndex: entity.endIndex,
-          },
+          }
         );
       }
     } catch (error) {
-      logger.error('Error creating graph entities:', error);
+      logger.error("Error creating graph entities:", error);
       throw error;
     } finally {
       await session.close();
     }
   }
 
-  private async updateSourceStatus(
-    sourceId: string,
-    updates: Partial<FeedSource>,
-  ): Promise<void> {
+  private async updateSourceStatus(sourceId: string, updates: Partial<FeedSource>): Promise<void> {
     const setClause = [];
     const values = [];
     let paramIndex = 1;
 
     Object.entries(updates).forEach(([key, value]) => {
-      const columnName = key.replace(/([A-Z])/g, '_$1').toLowerCase();
+      const columnName = key.replace(/([A-Z])/g, "_$1").toLowerCase();
       setClause.push(`${columnName} = $${paramIndex}`);
       values.push(value);
       paramIndex++;
@@ -956,7 +876,7 @@ export class FeedProcessorService extends EventEmitter {
 
     const query = `
       UPDATE feed_sources 
-      SET ${setClause.join(', ')}, updated_at = CURRENT_TIMESTAMP
+      SET ${setClause.join(", ")}, updated_at = CURRENT_TIMESTAMP
       WHERE id = $${paramIndex}
     `;
 
@@ -966,7 +886,7 @@ export class FeedProcessorService extends EventEmitter {
   }
 
   async getFeedSource(sourceId: string): Promise<FeedSource | null> {
-    const query = 'SELECT * FROM feed_sources WHERE id = $1';
+    const query = "SELECT * FROM feed_sources WHERE id = $1";
     const result = await this.pgPool.query(query, [sourceId]);
 
     if (result.rows.length === 0) {
@@ -1007,11 +927,11 @@ export class FeedProcessorService extends EventEmitter {
 
     const params = [];
     if (sourceId) {
-      query += ' WHERE fs.id = $1';
+      query += " WHERE fs.id = $1";
       params.push(sourceId);
     }
 
-    query += ' GROUP BY fs.id, fs.name ORDER BY fs.name';
+    query += " GROUP BY fs.id, fs.name ORDER BY fs.name";
 
     const result = await this.pgPool.query(query, params);
 
@@ -1027,20 +947,20 @@ export class FeedProcessorService extends EventEmitter {
   }
 
   async pauseSource(sourceId: string): Promise<void> {
-    await this.updateSourceStatus(sourceId, { status: 'paused' });
+    await this.updateSourceStatus(sourceId, { status: "paused" });
     this.stopPolling(sourceId);
 
-    this.emit('feed.source.paused', { sourceId });
+    this.emit("feed.source.paused", { sourceId });
     logger.info(`Feed source paused: ${sourceId}`);
   }
 
   async resumeSource(sourceId: string): Promise<void> {
     const source = await this.getFeedSource(sourceId);
     if (source) {
-      await this.updateSourceStatus(sourceId, { status: 'active' });
+      await this.updateSourceStatus(sourceId, { status: "active" });
       await this.startPolling(source);
 
-      this.emit('feed.source.resumed', { sourceId });
+      this.emit("feed.source.resumed", { sourceId });
       logger.info(`Feed source resumed: ${sourceId}`);
     }
   }
@@ -1050,22 +970,20 @@ export class FeedProcessorService extends EventEmitter {
 
     const client = await this.pgPool.connect();
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
 
       // Delete feed items
-      await client.query('DELETE FROM feed_items WHERE source_id = $1', [
-        sourceId,
-      ]);
+      await client.query("DELETE FROM feed_items WHERE source_id = $1", [sourceId]);
 
       // Delete source
-      await client.query('DELETE FROM feed_sources WHERE id = $1', [sourceId]);
+      await client.query("DELETE FROM feed_sources WHERE id = $1", [sourceId]);
 
-      await client.query('COMMIT');
+      await client.query("COMMIT");
 
-      this.emit('feed.source.deleted', { sourceId });
+      this.emit("feed.source.deleted", { sourceId });
       logger.info(`Feed source deleted: ${sourceId}`);
     } catch (error) {
-      await client.query('ROLLBACK');
+      await client.query("ROLLBACK");
       throw error;
     } finally {
       client.release();

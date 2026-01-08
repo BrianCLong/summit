@@ -1,6 +1,6 @@
 # Sprint Plan — Jul 6–17, 2026 (America/Denver)
 
-> **Context:** Sprint 15 — *“Autonomy at Scale: More Workflows, Safer Simulation, and Switchboard Copilot.”* Push automation coverage, reduce approval fatigue through policy-aware simulation + bounded auto-approvals, and ship a constrained evidence-first Copilot in Switchboard.
+> **Context:** Sprint 15 — _“Autonomy at Scale: More Workflows, Safer Simulation, and Switchboard Copilot.”_ Push automation coverage, reduce approval fatigue through policy-aware simulation + bounded auto-approvals, and ship a constrained evidence-first Copilot in Switchboard.
 
 ---
 
@@ -68,20 +68,20 @@ Expand automation to **8–10** operational workflows while reducing required ap
 
 ## 5) Backlog (Ready for Sprint)
 
-| ID        | Title                                          | Owner        | Est | Dependencies        | Acceptance Criteria (summary)                                          |
-| --------- | ---------------------------------------------- | ------------ | --: | ------------------- | ---------------------------------------------------------------------- |
-| SIM-201   | Simulation Harness v1                          | Policy+BE    |   5 | Policy engine, data | Preflight + deps + blast radius; Simulation Report with digest+receipt |
-| APRV-211  | Auto-Approval Rules (Low-Risk)                 | Policy+Ops   |   5 | SIM-201             | Rules for DLQ replay, stateless restart, meter reruns; receipts        |
-| WF-221    | Metering Lag Recovery Workflow                 | BE+Ops       |   4 | SIM-201             | Plan→simulate→approve→execute; validation + receipt                    |
-| WF-231    | Anchor Backlog Recovery Workflow               | Ops          |   4 | SIM-201             | Anchoring retry + DLQ replay; obligations surfaced                     |
-| WF-241    | Adapter Health Remediation Workflow            | BE+Ops       |   4 | SIM-201             | Disable/rollback adapter; receipts + rollback plan                     |
-| WF-251    | Key Rotation Assistance Workflow               | Security     |   4 | SIM-201             | Scheduled rotation + verification; approvals required                  |
-| WF-261    | Retention/Purge Scheduling Workflow            | Policy+Ops   |   4 | SIM-201             | Deletion plan; approvals; evidence export                              |
-| WF-271    | Noisy Neighbor Mitigation Workflow             | Ops          |   4 | SIM-201             | Rate-limit or move tenant; entitlements checked                        |
-| WF-281    | Upgrade Assistant Workflow                     | Ops+QE       |   4 | SIM-201             | Preflight, smoke, pause on failure; receipts                           |
-| COPILOT-291| Switchboard Copilot (Ask + Plan Draft)        | FE+BE        |   6 | Data graphs/logs    | Evidence-linked answers; plan drafting; privacy guardrails; no exec    |
-| OPS-301   | Time-Saved Accounting + Ops Dashboard          | Ops+Data     |   3 | Workflow receipts   | Time-saved + approvals/week + failure types dashboard                  |
-| GAME-311  | Game-Day Evidence Bundles (x2)                 | Ops          |   2 | Workflows ready     | Two game-days run; evidence bundles exported                           |
+| ID          | Title                                  | Owner      | Est | Dependencies        | Acceptance Criteria (summary)                                          |
+| ----------- | -------------------------------------- | ---------- | --: | ------------------- | ---------------------------------------------------------------------- |
+| SIM-201     | Simulation Harness v1                  | Policy+BE  |   5 | Policy engine, data | Preflight + deps + blast radius; Simulation Report with digest+receipt |
+| APRV-211    | Auto-Approval Rules (Low-Risk)         | Policy+Ops |   5 | SIM-201             | Rules for DLQ replay, stateless restart, meter reruns; receipts        |
+| WF-221      | Metering Lag Recovery Workflow         | BE+Ops     |   4 | SIM-201             | Plan→simulate→approve→execute; validation + receipt                    |
+| WF-231      | Anchor Backlog Recovery Workflow       | Ops        |   4 | SIM-201             | Anchoring retry + DLQ replay; obligations surfaced                     |
+| WF-241      | Adapter Health Remediation Workflow    | BE+Ops     |   4 | SIM-201             | Disable/rollback adapter; receipts + rollback plan                     |
+| WF-251      | Key Rotation Assistance Workflow       | Security   |   4 | SIM-201             | Scheduled rotation + verification; approvals required                  |
+| WF-261      | Retention/Purge Scheduling Workflow    | Policy+Ops |   4 | SIM-201             | Deletion plan; approvals; evidence export                              |
+| WF-271      | Noisy Neighbor Mitigation Workflow     | Ops        |   4 | SIM-201             | Rate-limit or move tenant; entitlements checked                        |
+| WF-281      | Upgrade Assistant Workflow             | Ops+QE     |   4 | SIM-201             | Preflight, smoke, pause on failure; receipts                           |
+| COPILOT-291 | Switchboard Copilot (Ask + Plan Draft) | FE+BE      |   6 | Data graphs/logs    | Evidence-linked answers; plan drafting; privacy guardrails; no exec    |
+| OPS-301     | Time-Saved Accounting + Ops Dashboard  | Ops+Data   |   3 | Workflow receipts   | Time-saved + approvals/week + failure types dashboard                  |
+| GAME-311    | Game-Day Evidence Bundles (x2)         | Ops        |   2 | Workflows ready     | Two game-days run; evidence bundles exported                           |
 
 > **Planned:** ~49 pts including stretch; trim stretch if capacity tight.
 

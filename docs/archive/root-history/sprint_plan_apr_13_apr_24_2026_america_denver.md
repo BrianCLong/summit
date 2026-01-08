@@ -60,17 +60,17 @@ By **Fri Apr 24, 2026**, deliver a production-ready efficiency release that make
 
 ## 5) Backlog (Ready for Sprint)
 
-| ID      | Title                                       | Owner    | Est | Dependencies | Acceptance Criteria (summary)                               |
-| ------- | ------------------------------------------- | -------- | --: | ------------ | ----------------------------------------------------------- |
-| PERF-901| Tenant-partition indexes & query plans      | BE/DB    |   5 | telemetry    | Top-N traversals faster 20–30% p95; plans reviewed; index map |
-| PERF-902| Decision cache + bundle distro              | Policy   |   5 | OPA bundles  | Cache keyed per spec; TTL; metrics per bundle version       |
-| PERF-903| Orchestration batching                      | BE       |   4 | PERF-901     | Reduced round-trips; payload trimmed; receipts intact       |
-| PROV-911| Receipt compaction v1 + reconstructor       | Ledger   |   6 | schema       | Dictionary tables; dual-write; reconstructor passes sig checks |
-| PROV-912| Evidence tiering + purge manifests          | Ledger   |   5 | storage      | Hot/warm/cold tiers; purge manifests verifiable; savings dashboards |
-| COGS-921| Right-size recommendations                   | FinOps   |   4 | metrics      | Idle/bursty tenants flagged; recs with confidence + actions |
-| COGS-922| Pool efficiency + noisy-neighbor signals    | Infra    |   4 | scheduler    | Scheduling tweaks landed; variance signals exposed          |
-| COGS-923| Egress minimization                         | Export   |   4 | exporters    | Compressed/resumable exports; duplicate evidence avoided    |
-| GATE-931| Load harness & perf/COGS regression gates   | QA/Perf  |   6 | PERF-901-903 | Harness covers flows; gates trip on regressions; dashboards wired |
+| ID       | Title                                     | Owner   | Est | Dependencies | Acceptance Criteria (summary)                                       |
+| -------- | ----------------------------------------- | ------- | --: | ------------ | ------------------------------------------------------------------- |
+| PERF-901 | Tenant-partition indexes & query plans    | BE/DB   |   5 | telemetry    | Top-N traversals faster 20–30% p95; plans reviewed; index map       |
+| PERF-902 | Decision cache + bundle distro            | Policy  |   5 | OPA bundles  | Cache keyed per spec; TTL; metrics per bundle version               |
+| PERF-903 | Orchestration batching                    | BE      |   4 | PERF-901     | Reduced round-trips; payload trimmed; receipts intact               |
+| PROV-911 | Receipt compaction v1 + reconstructor     | Ledger  |   6 | schema       | Dictionary tables; dual-write; reconstructor passes sig checks      |
+| PROV-912 | Evidence tiering + purge manifests        | Ledger  |   5 | storage      | Hot/warm/cold tiers; purge manifests verifiable; savings dashboards |
+| COGS-921 | Right-size recommendations                | FinOps  |   4 | metrics      | Idle/bursty tenants flagged; recs with confidence + actions         |
+| COGS-922 | Pool efficiency + noisy-neighbor signals  | Infra   |   4 | scheduler    | Scheduling tweaks landed; variance signals exposed                  |
+| COGS-923 | Egress minimization                       | Export  |   4 | exporters    | Compressed/resumable exports; duplicate evidence avoided            |
+| GATE-931 | Load harness & perf/COGS regression gates | QA/Perf |   6 | PERF-901-903 | Harness covers flows; gates trip on regressions; dashboards wired   |
 
 > Planned: ~43 pts including stretch buffer; trim or pull stretch based on mid-sprint burndown.
 
@@ -124,12 +124,12 @@ By **Fri Apr 24, 2026**, deliver a production-ready efficiency release that make
 
 ## 11) Risks & Mitigations
 
-| Risk                                             | Prob. | Impact | Mitigation                                                     |
-| ------------------------------------------------ | ----- | -----: | -------------------------------------------------------------- |
-| Compaction breaks verification or replay         | Med   |   High | Keep full+compacted dual-write; reconstructor + sig tests; fast rollback |
-| Cache staleness affecting policy decisions       | Med   |   Med  | Short TTLs; explicit invalidation hooks; bundle-version metrics |
-| Cost savings not realized in staging             | Med   |   Med  | Calibrate cost model; widen sample tenants; add sensitivity analysis |
-| Load harness drift vs prod patterns              | Low   |   Med  | Mirror top-N queries; rotate fixtures weekly; review telemetry |
+| Risk                                       | Prob. | Impact | Mitigation                                                               |
+| ------------------------------------------ | ----- | -----: | ------------------------------------------------------------------------ |
+| Compaction breaks verification or replay   | Med   |   High | Keep full+compacted dual-write; reconstructor + sig tests; fast rollback |
+| Cache staleness affecting policy decisions | Med   |    Med | Short TTLs; explicit invalidation hooks; bundle-version metrics          |
+| Cost savings not realized in staging       | Med   |    Med | Calibrate cost model; widen sample tenants; add sensitivity analysis     |
+| Load harness drift vs prod patterns        | Low   |    Med | Mirror top-N queries; rotate fixtures weekly; review telemetry           |
 
 ---
 

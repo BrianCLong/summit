@@ -45,6 +45,7 @@ The IntelGraph GEOINT (Geospatial Intelligence) platform provides military-grade
 ### 1. Geospatial Data Package (@intelgraph/geospatial)
 
 #### Features
+
 - **Multi-format Data Ingestion**
   - GeoJSON parsing and export
   - KML (Keyhole Markup Language) support
@@ -52,6 +53,7 @@ The IntelGraph GEOINT (Geospatial Intelligence) platform provides military-grade
   - Custom IntelGraph format with metadata
 
 - **Core Data Types**
+
   ```typescript
   interface GeoPoint {
     latitude: number;
@@ -83,13 +85,13 @@ The IntelGraph GEOINT (Geospatial Intelligence) platform provides military-grade
 #### Usage Examples
 
 ```typescript
-import { GeoJSONParser, haversineDistance } from '@intelgraph/geospatial';
+import { GeoJSONParser, haversineDistance } from "@intelgraph/geospatial";
 
 // Parse GeoJSON
 const collection = GeoJSONParser.parse(geojsonString);
 
 // Calculate distance
-const nyc = { latitude: 40.7128, longitude: -74.0060 };
+const nyc = { latitude: 40.7128, longitude: -74.006 };
 const la = { latitude: 34.0522, longitude: -118.2437 };
 const distance = haversineDistance(nyc, la); // ~3935 km
 ```
@@ -97,12 +99,20 @@ const distance = haversineDistance(nyc, la); // ~3935 km
 ### 2. Spatial Analysis Package (@intelgraph/spatial-analysis)
 
 #### Point-in-Polygon Queries
+
 ```typescript
-import { isPointInPolygon, pointsWithinRadius } from '@intelgraph/spatial-analysis';
+import { isPointInPolygon, pointsWithinRadius } from "@intelgraph/spatial-analysis";
 
 // Check if point is in polygon
-const point = { latitude: 40.7128, longitude: -74.0060 };
-const polygon = [[[-74.1, 40.7], [-73.9, 40.7], [-73.9, 40.8], [-74.1, 40.8]]];
+const point = { latitude: 40.7128, longitude: -74.006 };
+const polygon = [
+  [
+    [-74.1, 40.7],
+    [-73.9, 40.7],
+    [-73.9, 40.8],
+    [-74.1, 40.8],
+  ],
+];
 const inside = isPointInPolygon(point, polygon);
 
 // Find all points within radius
@@ -110,14 +120,15 @@ const nearbyPoints = pointsWithinRadius(points, center, 1000); // 1000m radius
 ```
 
 #### DBSCAN Clustering
+
 Density-based spatial clustering for identifying groups of related incidents.
 
 ```typescript
-import { dbscan, findOptimalEpsilon } from '@intelgraph/spatial-analysis';
+import { dbscan, findOptimalEpsilon } from "@intelgraph/spatial-analysis";
 
 const points = [
-  { latitude: 40.7128, longitude: -74.0060 },
-  { latitude: 40.7138, longitude: -74.0070 },
+  { latitude: 40.7128, longitude: -74.006 },
+  { latitude: 40.7138, longitude: -74.007 },
   // ... more points
 ];
 
@@ -130,27 +141,29 @@ const clusters = dbscan(points, epsilon, 3);
 ```
 
 **Cluster Analysis:**
+
 - **Core Points**: Points with at least minPoints neighbors within epsilon
 - **Border Points**: Points within epsilon of core points
 - **Noise**: Points that don't belong to any cluster
 - **Density**: Points per square meter within cluster
 
-#### Hotspot Detection (Getis-Ord Gi*)
+#### Hotspot Detection (Getis-Ord Gi\*)
+
 Statistical analysis to identify significant spatial clusters.
 
 ```typescript
-import { detectHotspots } from '@intelgraph/spatial-analysis';
+import { detectHotspots } from "@intelgraph/spatial-analysis";
 
 const incidentPoints = [
-  { latitude: 40.7128, longitude: -74.0060, value: 5 },
-  { latitude: 40.7138, longitude: -74.0070, value: 8 },
+  { latitude: 40.7128, longitude: -74.006, value: 5 },
+  { latitude: 40.7138, longitude: -74.007, value: 8 },
   // ... more incident locations with counts
 ];
 
 const hotspots = detectHotspots(incidentPoints, 500, 0.05);
 // distanceThreshold: 500m, significanceLevel: 0.05 (95% confidence)
 
-hotspots.forEach(hotspot => {
+hotspots.forEach((hotspot) => {
   console.log(`Location: ${hotspot.location.latitude}, ${hotspot.location.longitude}`);
   console.log(`Z-Score: ${hotspot.zScore}`);
   console.log(`P-Value: ${hotspot.pValue}`);
@@ -159,24 +172,26 @@ hotspots.forEach(hotspot => {
 ```
 
 **Interpretation:**
+
 - **Z-Score > +1.96**: Statistically significant hot spot (95% confidence)
 - **Z-Score < -1.96**: Statistically significant cold spot (95% confidence)
 - **Z-Score > +2.58**: Highly significant (99% confidence)
 
 #### Movement Pattern Analysis
+
 ```typescript
-import { MovementAnalyzer } from '@intelgraph/spatial-analysis';
+import { MovementAnalyzer } from "@intelgraph/spatial-analysis";
 
 const track = {
-  id: 'track1',
-  entityId: 'entity1',
+  id: "track1",
+  entityId: "entity1",
   points: [
-    { latitude: 40.7128, longitude: -74.0060, timestamp: new Date('2025-01-01T10:00:00Z') },
-    { latitude: 40.7138, longitude: -74.0070, timestamp: new Date('2025-01-01T10:05:00Z') },
+    { latitude: 40.7128, longitude: -74.006, timestamp: new Date("2025-01-01T10:00:00Z") },
+    { latitude: 40.7138, longitude: -74.007, timestamp: new Date("2025-01-01T10:05:00Z") },
     // ... more track points
   ],
-  startTime: new Date('2025-01-01T10:00:00Z'),
-  endTime: new Date('2025-01-01T12:00:00Z'),
+  startTime: new Date("2025-01-01T10:00:00Z"),
+  endTime: new Date("2025-01-01T12:00:00Z"),
 };
 
 // Calculate metrics
@@ -202,6 +217,7 @@ RESTful API for address geocoding and IP geolocation.
 #### Endpoints
 
 **Geocode Address**
+
 ```http
 GET /api/geocoding/geocode?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA
 
@@ -230,6 +246,7 @@ Response:
 ```
 
 **Reverse Geocode**
+
 ```http
 GET /api/geocoding/reverse?lat=37.4224764&lon=-122.0842499
 
@@ -248,6 +265,7 @@ Response:
 ```
 
 **Batch Geocoding**
+
 ```http
 POST /api/geocoding/batch
 Content-Type: application/json
@@ -261,6 +279,7 @@ Content-Type: application/json
 ```
 
 **IP Geolocation**
+
 ```http
 GET /api/geocoding/ip/8.8.8.8
 
@@ -288,6 +307,7 @@ GEOCODING_API_KEY=your_api_key_here  # for Google/Mapbox
 ```
 
 #### Providers
+
 - **Nominatim (OpenStreetMap)**: Free, no API key required
 - **Google Maps**: High accuracy, requires API key
 - **Mapbox**: Good balance, requires API key
@@ -295,20 +315,22 @@ GEOCODING_API_KEY=your_api_key_here  # for Google/Mapbox
 ### 4. Map Components (React/Leaflet)
 
 #### MapContainer
+
 Base container with Leaflet integration.
 
 ```tsx
-import { MapContainer } from '@/components/Map/MapContainer';
+import { MapContainer } from "@/components/Map/MapContainer";
 
 <MapContainer
   center={{ latitude: 38.9072, longitude: -77.0369 }}
   zoom={10}
   height="600px"
-  onMapReady={(map) => console.log('Map ready', map)}
-/>
+  onMapReady={(map) => console.log("Map ready", map)}
+/>;
 ```
 
 #### Marker Layers
+
 ```tsx
 import { Marker, MarkerClusterLayer } from '@/components/Map/layers/MarkerLayer';
 
@@ -332,26 +354,28 @@ import { Marker, MarkerClusterLayer } from '@/components/Map/layers/MarkerLayer'
 ```
 
 #### Heatmap Layer
+
 ```tsx
-import { HeatmapLayer } from '@/components/Map/layers/HeatmapLayer';
+import { HeatmapLayer } from "@/components/Map/layers/HeatmapLayer";
 
 <HeatmapLayer
-  points={incidents.map(i => ({
+  points={incidents.map((i) => ({
     latitude: i.lat,
     longitude: i.lon,
-    intensity: i.severity / 10
+    intensity: i.severity / 10,
   }))}
   radius={25}
   blur={15}
   gradient={{
-    0.0: 'blue',
-    0.5: 'yellow',
-    1.0: 'red'
+    0.0: "blue",
+    0.5: "yellow",
+    1.0: "red",
   }}
-/>
+/>;
 ```
 
 #### GeoJSON Layer
+
 ```tsx
 import { GeoJSONLayer, ChoroplethLayer } from '@/components/Map/layers/GeoJSONLayer';
 
@@ -371,6 +395,7 @@ import { GeoJSONLayer, ChoroplethLayer } from '@/components/Map/layers/GeoJSONLa
 ```
 
 #### Geospatial Dashboard
+
 Comprehensive dashboard with stats, layers, and controls.
 
 ```tsx
@@ -391,16 +416,17 @@ import { GeospatialDashboard } from '@/components/Map/GeospatialDashboard';
 ## Advanced Use Cases
 
 ### 1. Crime Analysis
+
 ```typescript
 // Detect crime hotspots
-const crimePoints = incidents.map(i => ({
+const crimePoints = incidents.map((i) => ({
   latitude: i.location.lat,
   longitude: i.location.lon,
-  value: i.severity
+  value: i.severity,
 }));
 
 const hotspots = detectHotspots(crimePoints, 500);
-const highPriority = hotspots.filter(h => h.significance === 'high' && h.zScore > 0);
+const highPriority = hotspots.filter((h) => h.significance === "high" && h.zScore > 0);
 
 // Cluster related incidents
 const clusters = dbscan(crimePoints, 200, 3);
@@ -408,18 +434,19 @@ console.log(`Found ${clusters.length} crime clusters`);
 ```
 
 ### 2. Asset Tracking
+
 ```typescript
 // Track vehicle movements
 const vehicleTrack = {
-  id: 'vehicle-001',
-  entityId: 'patrol-car-12',
-  points: gpsData.map(d => ({
+  id: "vehicle-001",
+  entityId: "patrol-car-12",
+  points: gpsData.map((d) => ({
     latitude: d.lat,
     longitude: d.lon,
-    timestamp: new Date(d.timestamp)
+    timestamp: new Date(d.timestamp),
   })),
   startTime: new Date(gpsData[0].timestamp),
-  endTime: new Date(gpsData[gpsData.length - 1].timestamp)
+  endTime: new Date(gpsData[gpsData.length - 1].timestamp),
 };
 
 const metrics = MovementAnalyzer.calculateMetrics(vehicleTrack);
@@ -431,23 +458,26 @@ console.log(`Stops: ${stops.length}`);
 ```
 
 ### 3. Geofencing & Alerts
+
 ```typescript
 // Define geofence
 const geofence = {
-  id: 'secure-zone-1',
-  name: 'Restricted Area',
+  id: "secure-zone-1",
+  name: "Restricted Area",
   geometry: {
-    type: 'Polygon',
-    coordinates: [[
-      [-77.1, 38.9],
-      [-77.0, 38.9],
-      [-77.0, 39.0],
-      [-77.1, 39.0],
-      [-77.1, 38.9]
-    ]]
+    type: "Polygon",
+    coordinates: [
+      [
+        [-77.1, 38.9],
+        [-77.0, 38.9],
+        [-77.0, 39.0],
+        [-77.1, 39.0],
+        [-77.1, 38.9],
+      ],
+    ],
   },
-  type: 'entry',
-  enabled: true
+  type: "entry",
+  enabled: true,
 };
 
 // Check if entity is in geofence
@@ -455,14 +485,15 @@ const entityPosition = { latitude: 38.95, longitude: -77.05 };
 const isInside = isPointInPolygon(entityPosition, geofence.geometry.coordinates);
 
 if (isInside) {
-  console.log('ALERT: Entity entered restricted area!');
+  console.log("ALERT: Entity entered restricted area!");
 }
 ```
 
 ### 4. Proximity Analysis
+
 ```typescript
 // Find entities near incident
-const incidentLocation = { latitude: 40.7128, longitude: -74.0060 };
+const incidentLocation = { latitude: 40.7128, longitude: -74.006 };
 const nearbyEntities = pointsWithinRadius(
   entityLocations,
   incidentLocation,
@@ -481,8 +512,9 @@ nearest.forEach((asset, i) => {
 ## Performance Optimization
 
 ### Spatial Indexing
+
 ```typescript
-import { SpatialIndex } from '@intelgraph/spatial-analysis';
+import { SpatialIndex } from "@intelgraph/spatial-analysis";
 
 // Create spatial index for fast proximity queries
 const index = new SpatialIndex(points, 1000); // 1km cell size
@@ -492,7 +524,9 @@ const nearby = index.neighborsWithinRadius(target, 500);
 ```
 
 ### Clustering for Large Datasets
+
 Use marker clustering to handle thousands of points:
+
 ```tsx
 <MarkerClusterLayer
   markers={largeDataset} // Can handle 10k+ markers
@@ -501,8 +535,9 @@ Use marker clustering to handle thousands of points:
 ```
 
 ### Data Simplification
+
 ```typescript
-import { simplifyPolygon } from '@intelgraph/spatial-analysis';
+import { simplifyPolygon } from "@intelgraph/spatial-analysis";
 
 // Reduce polygon complexity
 const simplified = simplifyPolygon(complexPolygon, 0.01); // tolerance
@@ -522,9 +557,9 @@ const simplified = simplifyPolygon(complexPolygon, 0.01); // tolerance
 // Combine geospatial clustering with entity relationships
 const spatialClusters = dbscan(entityLocations, 200, 3);
 
-spatialClusters.forEach(cluster => {
+spatialClusters.forEach((cluster) => {
   // Find relationships between entities in same spatial cluster
-  const entityIds = cluster.points.map(p => p.entityId);
+  const entityIds = cluster.points.map((p) => p.entityId);
   const relationships = findRelationships(entityIds);
 
   console.log(`Cluster ${cluster.id}: ${entityIds.length} entities`);
@@ -541,6 +576,7 @@ spatialClusters.forEach(cluster => {
 ## Deployment
 
 ### Docker
+
 ```dockerfile
 # services/geocoding-api/Dockerfile
 FROM node:18-alpine
@@ -554,6 +590,7 @@ CMD ["npm", "start"]
 ```
 
 ### Environment Variables
+
 ```bash
 # Production configuration
 NODE_ENV=production

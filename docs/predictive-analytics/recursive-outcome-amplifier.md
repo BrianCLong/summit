@@ -34,6 +34,7 @@ Traditional analysis often focuses on immediate, first-order effects while missi
 ### Example Scenarios
 
 **Scenario 1: Economic Sanctions**
+
 ```
 1st Order: Trade restrictions imposed
 2nd Order: Supply chain disruptions → price increases
@@ -43,6 +44,7 @@ Traditional analysis often focuses on immediate, first-order effects while missi
 ```
 
 **Scenario 2: Technology Deployment**
+
 ```
 1st Order: New surveillance system deployed
 2nd Order: Privacy concerns → public backlash
@@ -92,6 +94,7 @@ Traditional analysis often focuses on immediate, first-order effects while missi
 ### Data Model
 
 #### OutcomeNode
+
 ```typescript
 {
   id: string;
@@ -109,6 +112,7 @@ Traditional analysis often focuses on immediate, first-order effects while missi
 ```
 
 #### CascadeMap
+
 ```typescript
 {
   id: string;
@@ -124,14 +128,15 @@ Traditional analysis often focuses on immediate, first-order effects while missi
 ```
 
 #### LeveragePoint
+
 ```typescript
 {
   nodeId: string;
-  leverageScore: number;            // Impact of intervention
-  centrality: number;               // Network position importance
-  interventionType: string;         // Block, Amplify, Redirect
-  downstreamImpact: number;         // Affected downstream nodes
-  interventionCost: number;         // Estimated resource requirement
+  leverageScore: number; // Impact of intervention
+  centrality: number; // Network position importance
+  interventionType: string; // Block, Amplify, Redirect
+  downstreamImpact: number; // Affected downstream nodes
+  interventionCost: number; // Estimated resource requirement
 }
 ```
 
@@ -144,6 +149,7 @@ Traditional analysis often focuses on immediate, first-order effects while missi
 **Purpose**: Trace effects through multiple causal orders
 
 **Algorithm**:
+
 ```typescript
 function propagateOutcomes(
   rootEvent: Event,
@@ -166,12 +172,7 @@ function propagateOutcomes(
     const causalLinks = findCausalLinks(node, context);
 
     for (const link of causalLinks) {
-      const childNode = createOutcomeNode(
-        link,
-        order + 1,
-        node,
-        context
-      );
+      const childNode = createOutcomeNode(link, order + 1, node, context);
 
       // Apply dampening: effects attenuate with distance
       childNode.probability *= calculateDampening(order, link);
@@ -186,6 +187,7 @@ function propagateOutcomes(
 ```
 
 **Dampening Model**:
+
 ```typescript
 function calculateDampening(order: number, link: CausalLink): number {
   // Effects decay exponentially with causal distance
@@ -201,17 +203,11 @@ function calculateDampening(order: number, link: CausalLink): number {
 **Purpose**: Build complete cascade map from root event
 
 **Algorithm**:
+
 ```typescript
-function simulateCascade(
-  rootEvent: Event,
-  options: SimulationOptions
-): CascadeMap {
+function simulateCascade(rootEvent: Event, options: SimulationOptions): CascadeMap {
   // Phase 1: Generate outcome nodes
-  const nodes = propagateOutcomes(
-    rootEvent,
-    options.maxOrder,
-    options.context
-  );
+  const nodes = propagateOutcomes(rootEvent, options.maxOrder, options.context);
 
   // Phase 2: Build DAG structure
   const dag = buildCascadeDAG(nodes);
@@ -219,7 +215,7 @@ function simulateCascade(
   // Phase 3: Identify critical paths
   const criticalPaths = findCriticalPaths(dag, {
     minProbability: options.probabilityThreshold,
-    minMagnitude: options.magnitudeThreshold
+    minMagnitude: options.magnitudeThreshold,
   });
 
   // Phase 4: Calculate amplification
@@ -237,7 +233,7 @@ function simulateCascade(
     leveragePoints,
     amplificationFactor,
     createdAt: new Date(),
-    metadata: { options }
+    metadata: { options },
   };
 }
 ```
@@ -247,6 +243,7 @@ function simulateCascade(
 **Purpose**: Find high-impact intervention opportunities
 
 **Algorithm**:
+
 ```typescript
 function identifyLeveragePoints(
   dag: CascadeDAG,
@@ -276,14 +273,12 @@ function identifyLeveragePoints(
       centrality,
       interventionType: determineInterventionType(node),
       downstreamImpact,
-      interventionCost
+      interventionCost,
     });
   }
 
   // Return top leverage points
-  return leveragePoints
-    .sort((a, b) => b.leverageScore - a.leverageScore)
-    .slice(0, 10);
+  return leveragePoints.sort((a, b) => b.leverageScore - a.leverageScore).slice(0, 10);
 }
 ```
 
@@ -292,13 +287,11 @@ function identifyLeveragePoints(
 **Purpose**: Identify most likely/impactful outcome sequences
 
 **Algorithm**:
+
 ```typescript
-function findCriticalPaths(
-  dag: CascadeDAG,
-  criteria: PathCriteria
-): PropagationPath[] {
+function findCriticalPaths(dag: CascadeDAG, criteria: PathCriteria): PropagationPath[] {
   const paths: PropagationPath[] = [];
-  const rootNodes = dag.nodes.filter(n => n.order === 1);
+  const rootNodes = dag.nodes.filter((n) => n.order === 1);
 
   for (const root of rootNodes) {
     traversePaths(root, [root], 1.0, 0, paths, criteria, dag);
@@ -306,7 +299,7 @@ function findCriticalPaths(
 
   // Rank by combined probability × magnitude
   return paths
-    .sort((a, b) => (b.probability * b.totalMagnitude) - (a.probability * a.totalMagnitude))
+    .sort((a, b) => b.probability * b.totalMagnitude - a.probability * a.totalMagnitude)
     .slice(0, 20);
 }
 
@@ -331,25 +324,17 @@ function traversePaths(
       nodes: [...path],
       probability: newProbability,
       totalMagnitude: newMagnitude,
-      pathLength: path.length
+      pathLength: path.length,
     });
     return;
   }
 
   // Recurse to children
   for (const childId of node.childNodes) {
-    const child = dag.nodes.find(n => n.id === childId);
+    const child = dag.nodes.find((n) => n.id === childId);
     if (!child) continue;
 
-    traversePaths(
-      child,
-      [...path, child],
-      newProbability,
-      newMagnitude,
-      results,
-      criteria,
-      dag
-    );
+    traversePaths(child, [...path, child], newProbability, newMagnitude, results, criteria, dag);
   }
 }
 ```
@@ -442,45 +427,42 @@ input SimulationOptions {
 }
 
 type Query {
-  """Get cascade map for an event"""
+  """
+  Get cascade map for an event
+  """
   getCascadeMap(cascadeId: ID!): CascadeMap
 
-  """Find leverage points in a cascade"""
-  findLeveragePoints(
-    cascadeId: ID!
-    topN: Int! = 10
-  ): [LeveragePoint!]!
+  """
+  Find leverage points in a cascade
+  """
+  findLeveragePoints(cascadeId: ID!, topN: Int! = 10): [LeveragePoint!]!
 
-  """Get amplification analysis"""
-  getAmplificationPath(
-    cascadeId: ID!
-    targetNodeId: ID!
-  ): PropagationPath
+  """
+  Get amplification analysis
+  """
+  getAmplificationPath(cascadeId: ID!, targetNodeId: ID!): PropagationPath
 
-  """List all cascade simulations"""
-  listCascades(
-    limit: Int! = 20
-    offset: Int! = 0
-  ): [CascadeMap!]!
+  """
+  List all cascade simulations
+  """
+  listCascades(limit: Int! = 20, offset: Int! = 0): [CascadeMap!]!
 }
 
 type Mutation {
-  """Amplify outcomes for an event"""
-  amplifyOutcome(
-    event: EventInput!
-    options: SimulationOptions
-  ): CascadeMap!
+  """
+  Amplify outcomes for an event
+  """
+  amplifyOutcome(event: EventInput!, options: SimulationOptions): CascadeMap!
 
-  """Run cascade simulation"""
-  runCascadeSimulation(
-    eventId: ID!
-    options: SimulationOptions
-  ): CascadeMap!
+  """
+  Run cascade simulation
+  """
+  runCascadeSimulation(eventId: ID!, options: SimulationOptions): CascadeMap!
 
-  """Define a new event for analysis"""
-  defineEvent(
-    event: EventInput!
-  ): OutcomeNode!
+  """
+  Define a new event for analysis
+  """
+  defineEvent(event: EventInput!): OutcomeNode!
 }
 ```
 
@@ -500,6 +482,7 @@ POST   /api/amplifier/analyze
 ### Graph Schema
 
 #### Node Labels
+
 ```cypher
 // Event nodes
 (:Event {
@@ -533,6 +516,7 @@ POST   /api/amplifier/analyze
 ```
 
 #### Relationships
+
 ```cypher
 // Causal relationships
 (:Outcome)-[:CAUSES {
@@ -554,6 +538,7 @@ POST   /api/amplifier/analyze
 ### Cypher Queries
 
 #### Store Cascade Map
+
 ```cypher
 MERGE (cm:CascadeMap {id: $cascadeId})
 SET cm.rootEvent = $rootEvent,
@@ -583,6 +568,7 @@ RETURN cm
 ```
 
 #### Find Critical Paths
+
 ```cypher
 MATCH (cm:CascadeMap {id: $cascadeId})
 MATCH (cm)-[:CONTAINS]->(root:Outcome {order: 1})
@@ -604,6 +590,7 @@ LIMIT 20
 ```
 
 #### Calculate Betweenness Centrality
+
 ```cypher
 MATCH (cm:CascadeMap {id: $cascadeId})
 MATCH (cm)-[:CONTAINS]->(o:Outcome)
@@ -649,6 +636,7 @@ ORDER BY centrality DESC
 ## Use Cases
 
 ### 1. Policy Impact Assessment
+
 ```typescript
 // Simulate healthcare policy change
 const cascade = await amplifyOutcome({
@@ -656,12 +644,12 @@ const cascade = await amplifyOutcome({
     description: "Universal healthcare mandate",
     domain: "POLICY",
     initialMagnitude: 8.5,
-    context: { country: "US", population: 330000000 }
+    context: { country: "US", population: 330000000 },
   },
   options: {
     maxOrder: 6,
-    probabilityThreshold: 0.15
-  }
+    probabilityThreshold: 0.15,
+  },
 });
 
 // Find intervention opportunities
@@ -669,6 +657,7 @@ const leveragePoints = cascade.leveragePoints.slice(0, 5);
 ```
 
 ### 2. Geopolitical Event Analysis
+
 ```typescript
 // Analyze sanctions impact
 const cascade = await amplifyOutcome({
@@ -676,21 +665,22 @@ const cascade = await amplifyOutcome({
     description: "Comprehensive trade sanctions imposed",
     domain: "GEOPOLITICAL",
     initialMagnitude: 7.0,
-    context: { target: "Country X", sectors: ["energy", "technology"] }
+    context: { target: "Country X", sectors: ["energy", "technology"] },
   },
   options: {
     maxOrder: 7,
-    timeHorizon: 365 * 24 // 1 year
-  }
+    timeHorizon: 365 * 24, // 1 year
+  },
 });
 
 // Identify unintended consequences
 const unexpectedPaths = cascade.criticalPaths.filter(
-  p => p.nodes[p.nodes.length - 1].domain !== "ECONOMIC"
+  (p) => p.nodes[p.nodes.length - 1].domain !== "ECONOMIC"
 );
 ```
 
 ### 3. Technology Deployment Risk
+
 ```typescript
 // Assess AI system rollout
 const cascade = await amplifyOutcome({
@@ -698,18 +688,16 @@ const cascade = await amplifyOutcome({
     description: "Deploy facial recognition in public spaces",
     domain: "TECHNOLOGY",
     initialMagnitude: 6.0,
-    context: { scale: "national", sensitivity: "high" }
+    context: { scale: "national", sensitivity: "high" },
   },
   options: {
     maxOrder: 5,
-    includeWeakLinks: true // Include uncertain effects
-  }
+    includeWeakLinks: true, // Include uncertain effects
+  },
 });
 
 // Find high-leverage mitigation points
-const mitigationPoints = cascade.leveragePoints.filter(
-  lp => lp.interventionType === "BLOCK"
-);
+const mitigationPoints = cascade.leveragePoints.filter((lp) => lp.interventionType === "BLOCK");
 ```
 
 ---
@@ -764,9 +752,9 @@ const mitigationPoints = cascade.leveragePoints.filter(
 
 ## References
 
-- Systems Thinking: Meadows, D. (2008). *Thinking in Systems*
-- Causal Inference: Pearl, J. (2009). *Causality*
-- Network Science: Barabási, A. (2016). *Network Science*
+- Systems Thinking: Meadows, D. (2008). _Thinking in Systems_
+- Causal Inference: Pearl, J. (2009). _Causality_
+- Network Science: Barabási, A. (2016). _Network Science_
 - Leverage Points: Meadows, D. (1999). "Leverage Points: Places to Intervene in a System"
 
 ---
@@ -774,5 +762,6 @@ const mitigationPoints = cascade.leveragePoints.filter(
 **Document Owner**: Predictive Analytics Team
 **Review Cadence**: Quarterly
 **Related Documents**:
+
 - [Parallel Timeline Validator](./parallel-timeline-validator.md)
 - [Predictive Analytics Architecture](./architecture.md)

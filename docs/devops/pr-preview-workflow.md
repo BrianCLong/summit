@@ -1,11 +1,13 @@
 # PR Preview Environment Workflow
 
 ## Objectives
+
 - Provide isolated, per-PR preview environments with unique namespaces to prevent cross-tenant bleed-over.
 - Enforce automatic expiry to control cost and avoid configuration drift from stale previews.
 - Tear down previews automatically when the PR closes or merges so resources never outlive code changes.
 
 ## Architecture Overview
+
 - **Triggers**: GitHub Actions workflows react to `pull_request` events (`opened`, `synchronize`, `reopened`, `closed`) and a nightly `schedule` for stale cleanup.
 - **Build & Publish**: CI builds immutable images (app + supporting services) and pushes to `ghcr.io/<org>/<app>` tagged with `pr-<number>-<shortsha>`.
 - **Namespace-per-PR**: Each preview is deployed into Kubernetes namespace `preview-pr-<number>`, created on demand with strict RBAC and resource quotas.
@@ -14,13 +16,16 @@
 - **Safety Rails**: Admission policy checks enforce signed images and SBOM validation; preview ingress is gated behind OIDC (GitHub SSO) with HTTPS+HSTS.
 
 ## Namespace Isolation Controls
+
 - Namespace label set: `app=preview`, `pr=<number>`, `ttl-hours=<N>` for policy targeting and cleanup.
 - Network policies restrict egress to approved services (e.g., mock dependencies) and disable access to production networks.
 - ResourceQuota/LimitRange applied per namespace to cap CPU/memory and prevent noisy neighbors.
 - ServiceAccounts bound via Role/RoleBinding so jobs in one preview cannot interact with another namespace.
 
 ## Lifecycle
+
 ### Create / Update (PR opened or synchronized)
+
 1. CI job builds/pushes images and calculates `ttl-hours` (default 72h unless overridden by label like `preview-ttl/<hours>` on the PR). The job writes the computed expiry into an artifact for later teardown workflows and comments.
 2. Provision namespace with labels/annotations:
    ```yaml
@@ -31,12 +36,13 @@
        pr: "1234"
        ttl-hours: "72"
      annotations:
-       preview.summit.dev/expires-at: "2025-02-07T12:00:00Z"  # computed from creation + ttl
-    ```
+       preview.summit.dev/expires-at: "2025-02-07T12:00:00Z" # computed from creation + ttl
+   ```
 3. Apply infrastructure chart (databases/queues) and application chart with PR-specific values (image tags, ingress host, feature flag toggles).
 4. Post PR comment containing the preview URL, expiry timestamp, and status of smoke tests.
 
 **Suggested GitHub Actions job (create/update):**
+
 ```yaml
 name: preview-upsert
 on:
@@ -114,20 +120,23 @@ jobs:
 ```
 
 ### Smoke & Policy Gates
+
 - After deploy, run lightweight smoke suite (e.g., Playwright or Cypress) against the preview URL.
 - Enforce admission policies: block deploy if image signature or SBOM verification fails, or if required secrets are missing.
 
 ### Auto-Expiry for Stale Previews
+
 - A scheduled cleanup job (GitHub Action or cluster CronJob) scans namespaces with `app=preview`.
 - It reads `preview.summit.dev/expires-at` or computes expiry from `ttl-hours`; any namespace past expiry is deleted (`helm uninstall` and namespace delete). Logs are pushed to SIEM for audit.
 - Optional: send Slack/PR comment warning 12 hours before expiry.
 
 **Suggested cleanup flow:**
+
 ```yaml
 name: preview-cleanup
 on:
   schedule:
-    - cron: "0 * * * *"  # hourly expiry sweep
+    - cron: "0 * * * *" # hourly expiry sweep
 jobs:
   delete-expired:
     runs-on: ubuntu-latest
@@ -155,6 +164,7 @@ jobs:
 ```
 
 ### Teardown on PR Close/Merge
+
 - `pull_request.closed` event triggers a teardown workflow that:
   1. Looks up namespace `preview-pr-<number>`.
   2. Runs `helm uninstall`/`argocd app delete` for that PR.
@@ -162,6 +172,7 @@ jobs:
   4. Marks the PR with a final status (e.g., "Preview torn down") to keep auditability.
 
 **Suggested teardown job:**
+
 ```yaml
 name: preview-teardown
 on:
@@ -184,11 +195,13 @@ jobs:
 ```
 
 ## Observability & Audit
+
 - Emit deployment/teardown events to an audit log with PR number, namespace, actor, and timestamps.
 - Attach preview URL and TTL to PR check outputs for quick triage.
 - Collect per-namespace cost and usage metrics to tune TTL defaults and quotas.
 
 ## Safeguards
+
 - Protect registries with signed images (Cosign) and enforce signature verification in admission controllers.
 - Restrict preview ingress with OIDC or GitHub SSO where required; enforce HTTPS and HSTS.
 - Disallow connection strings or endpoints pointing to production by validating environment variables during deploy.

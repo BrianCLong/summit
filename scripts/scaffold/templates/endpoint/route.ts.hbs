@@ -1,56 +1,25 @@
-import { Router } from 'express';
-import { getPostgresPool } from '../db/postgres.js';
-import logger from '../config/logger.js';
-import { ensureAuthenticated } from '../middleware/auth.js';
-
-const router = Router();
-const routeLogger = logger.child({ name: '{{PASCAL_NAME}}Routes' });
-
-/**
- * GET /api/{{KEBAB_NAME}}
- * List {{PASCAL_NAME}} resources
- */
-router.get('/', ensureAuthenticated, async (req, res) => {
-  try {
-    const tenantId = req.user?.tenantId;
-    if (!tenantId) {
-      return res.status(400).json({ error: 'Tenant context required' });
-    }
-
-    const pg = getPostgresPool();
-    // TODO: Implement list logic
-    // const result = await pg.query('SELECT * FROM ... WHERE tenant_id = $1', [tenantId]);
-
-    routeLogger.info({ tenantId, count: 0 }, 'Listed {{PASCAL_NAME}} resources');
-
-    res.json({ data: [] });
-  } catch (error) {
-    routeLogger.error({ error }, 'Failed to list {{PASCAL_NAME}} resources');
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-/**
- * POST /api/{{KEBAB_NAME}}
- * Create a new {{PASCAL_NAME}} resource
- */
-router.post('/', ensureAuthenticated, async (req, res) => {
-  try {
-    const tenantId = req.user?.tenantId;
-    if (!tenantId) {
-      return res.status(400).json({ error: 'Tenant context required' });
-    }
-
-    // TODO: Validate body
-    const data = req.body;
-
-    routeLogger.info({ tenantId }, 'Created {{PASCAL_NAME}} resource');
-
-    res.status(201).json({ id: 'new-id', ...data });
-  } catch (error) {
-    routeLogger.error({ error }, 'Failed to create {{PASCAL_NAME}} resource');
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-export default router;
+import { Router } from 'express'; import { getPostgresPool } from '../db/postgres.js'; import logger
+from '../config/logger.js'; import { ensureAuthenticated } from '../middleware/auth.js'; const
+router = Router(); const routeLogger = logger.child({ name: '{{PASCAL_NAME}}Routes' }); /** * GET
+/api/{{KEBAB_NAME}}
+* List
+{{PASCAL_NAME}}
+resources */ router.get('/', ensureAuthenticated, async (req, res) => { try { const tenantId =
+req.user?.tenantId; if (!tenantId) { return res.status(400).json({ error: 'Tenant context required'
+}); } const pg = getPostgresPool(); // TODO: Implement list logic // const result = await
+pg.query('SELECT * FROM ... WHERE tenant_id = $1', [tenantId]); routeLogger.info({ tenantId, count:
+0 }, 'Listed
+{{PASCAL_NAME}}
+resources'); res.json({ data: [] }); } catch (error) { routeLogger.error({ error }, 'Failed to list
+{{PASCAL_NAME}}
+resources'); res.status(500).json({ error: 'Internal Server Error' }); } }); /** * POST /api/{{KEBAB_NAME}}
+* Create a new
+{{PASCAL_NAME}}
+resource */ router.post('/', ensureAuthenticated, async (req, res) => { try { const tenantId =
+req.user?.tenantId; if (!tenantId) { return res.status(400).json({ error: 'Tenant context required'
+}); } // TODO: Validate body const data = req.body; routeLogger.info({ tenantId }, 'Created
+{{PASCAL_NAME}}
+resource'); res.status(201).json({ id: 'new-id', ...data }); } catch (error) { routeLogger.error({
+error }, 'Failed to create
+{{PASCAL_NAME}}
+resource'); res.status(500).json({ error: 'Internal Server Error' }); } }); export default router;

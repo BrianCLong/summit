@@ -13,28 +13,28 @@ Ensure the Go toolchain is available in the environment when the bindings run.
 ## Usage
 
 ```ts
-import { JurisdictionalPolicyResolver } from '@intelgraph/jpr';
+import { JurisdictionalPolicyResolver } from "@intelgraph/jpr";
 
 const resolver = new JurisdictionalPolicyResolver({
-  policiesPath: '/etc/policies/jpr.yaml'
+  policiesPath: "/etc/policies/jpr.yaml",
 });
 
 const decision = resolver.can({
-  action: 'share',
-  jurisdiction: 'DE',
-  dataClass: 'sensitive',
-  purpose: 'marketing',
-  decisionTime: new Date('2024-06-01')
+  action: "share",
+  jurisdiction: "DE",
+  dataClass: "sensitive",
+  purpose: "marketing",
+  decisionTime: new Date("2024-06-01"),
 });
 
 console.log(decision.allowed);
 
 const explanation = resolver.explain({
-  action: 'share',
-  jurisdiction: 'DE',
-  dataClass: 'sensitive',
-  purpose: 'marketing',
-  decisionTime: new Date('2024-06-01')
+  action: "share",
+  jurisdiction: "DE",
+  dataClass: "sensitive",
+  purpose: "marketing",
+  decisionTime: new Date("2024-06-01"),
 });
 
 console.table(explanation.chain);
@@ -46,11 +46,10 @@ Pass a `cliCommand` array or `cliCwd` to point the bindings at a custom build of
 
 ```ts
 const resolver = new JurisdictionalPolicyResolver({
-  policiesPath: 'policies.yaml',
-  cliCommand: ['/usr/local/bin/jprcli'],
-  cliCwd: '/var/lib/jpr'
+  policiesPath: "policies.yaml",
+  cliCommand: ["/usr/local/bin/jprcli"],
+  cliCwd: "/var/lib/jpr",
 });
 ```
 
 The binding hashes the YAML to compute an ETag and will recompile when the document changes or the TTL returned by the Go engine expires.
-

@@ -6,10 +6,10 @@ groups:
         for: 10m
         labels: { severity: page }
         annotations:
-          summary: 'p95 route/execute over SLO'
+          summary: "p95 route/execute over SLO"
       - alert: BudgetExhaustion
         expr: max_over_time(symphony_model_budget_fraction_used[5m]) > 0.8
         for: 2m
         labels: { severity: warn }
         annotations:
-          summary: 'Model budget at >80%'
+          summary: "Model budget at >80%"

@@ -3,12 +3,8 @@
  * Business logic for SLO violation tracking
  */
 
-import { Pool } from 'pg';
-import {
-  SLOViolation,
-  CreateSLOViolationInput,
-  SLOComplianceSummary,
-} from '../models/slo';
+import { Pool } from "pg";
+import { SLOViolation, CreateSLOViolationInput, SLOComplianceSummary } from "../models/slo";
 
 export class SLOService {
   constructor(private db: Pool) {}
@@ -71,10 +67,7 @@ export class SLOService {
     return result.rows.map((row) => this.mapRowToViolation(row));
   }
 
-  async getComplianceSummary(
-    serviceName?: string,
-    days = 28
-  ): Promise<SLOComplianceSummary[]> {
+  async getComplianceSummary(serviceName?: string, days = 28): Promise<SLOComplianceSummary[]> {
     let query = `SELECT * FROM maestro.slo_compliance_view WHERE 1=1`;
     const values: any[] = [];
     let paramIndex = 1;
@@ -94,12 +87,8 @@ export class SLOService {
       totalErrorBudgetConsumed: row.total_error_budget_consumed
         ? parseFloat(row.total_error_budget_consumed)
         : undefined,
-      avgActualValue: row.avg_actual_value
-        ? parseFloat(row.avg_actual_value)
-        : undefined,
-      thresholdValue: row.threshold_value
-        ? parseFloat(row.threshold_value)
-        : undefined,
+      avgActualValue: row.avg_actual_value ? parseFloat(row.avg_actual_value) : undefined,
+      thresholdValue: row.threshold_value ? parseFloat(row.threshold_value) : undefined,
     }));
   }
 
@@ -114,10 +103,7 @@ export class SLOService {
     return result.rows[0] ? this.mapRowToViolation(result.rows[0]) : null;
   }
 
-  async linkToIncident(
-    violationId: string,
-    incidentId: string
-  ): Promise<SLOViolation | null> {
+  async linkToIncident(violationId: string, incidentId: string): Promise<SLOViolation | null> {
     const query = `
       UPDATE maestro.slo_violations
       SET incident_id = $2, updated_at = NOW()
@@ -142,9 +128,7 @@ export class SLOService {
       severity: row.severity,
       incidentId: row.incident_id,
       alertId: row.alert_id,
-      errorBudgetImpact: row.error_budget_impact
-        ? parseFloat(row.error_budget_impact)
-        : undefined,
+      errorBudgetImpact: row.error_budget_impact ? parseFloat(row.error_budget_impact) : undefined,
       prometheusQuery: row.prometheus_query,
       prometheusValueJson: row.prometheus_value_json,
       metadata: row.metadata,

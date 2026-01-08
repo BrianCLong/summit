@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: 'Git reference to checkout (default: main)'
+        description: "Git reference to checkout (default: main)"
         required: false
-        default: 'main'
+        default: "main"
 
 jobs:
   generate-pack:
@@ -20,7 +20,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install Dependencies
         run: npm install -g pnpm && pnpm install

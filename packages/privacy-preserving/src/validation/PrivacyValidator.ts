@@ -2,10 +2,10 @@
  * PrivacyValidator - Validate privacy guarantees and assess re-identification risk
  */
 
-import { TabularData } from '@intelgraph/synthetic-data';
+import { TabularData } from "@intelgraph/synthetic-data";
 
 export interface PrivacyAssessment {
-  overallRisk: 'low' | 'medium' | 'high' | 'critical';
+  overallRisk: "low" | "medium" | "high" | "critical";
   metrics: {
     reidentificationRisk: number;
     membershipInferenceRisk: number;
@@ -52,10 +52,7 @@ export class PrivacyValidator {
       config.quasiIdentifiers
     );
 
-    const membershipInferenceRisk = this.computeMembershipInferenceRisk(
-      original,
-      synthetic
-    );
+    const membershipInferenceRisk = this.computeMembershipInferenceRisk(original, synthetic);
 
     const attributeDisclosureRisk = this.computeAttributeDisclosureRisk(
       original,
@@ -70,7 +67,7 @@ export class PrivacyValidator {
       reidentificationRisk,
       membershipInferenceRisk,
       attributeDisclosureRisk,
-      privacyLoss
+      privacyLoss,
     });
 
     // Check compliance
@@ -78,7 +75,7 @@ export class PrivacyValidator {
       reidentificationRisk,
       membershipInferenceRisk,
       attributeDisclosureRisk,
-      privacyLoss
+      privacyLoss,
     });
 
     // Generate recommendations
@@ -87,7 +84,7 @@ export class PrivacyValidator {
       membershipInferenceRisk,
       attributeDisclosureRisk,
       privacyLoss,
-      overallRisk
+      overallRisk,
     });
 
     return {
@@ -96,10 +93,10 @@ export class PrivacyValidator {
         reidentificationRisk,
         membershipInferenceRisk,
         attributeDisclosureRisk,
-        privacyLoss
+        privacyLoss,
       },
       compliance,
-      recommendations
+      recommendations,
     };
   }
 
@@ -113,7 +110,7 @@ export class PrivacyValidator {
   ): number {
     // Use distance-based approach
     // For each synthetic record, find the closest original record
-    const qiIndices = quasiIdentifiers.map(qi => synthetic.columns.indexOf(qi));
+    const qiIndices = quasiIdentifiers.map((qi) => synthetic.columns.indexOf(qi));
 
     let totalRisk = 0;
     const syntheticCount = synthetic.data.length;
@@ -122,11 +119,7 @@ export class PrivacyValidator {
       let minDistance = Infinity;
 
       for (const origRecord of original.data) {
-        const distance = this.computeRecordDistance(
-          synthRecord,
-          origRecord,
-          qiIndices
-        );
+        const distance = this.computeRecordDistance(synthRecord, origRecord, qiIndices);
 
         minDistance = Math.min(minDistance, distance);
       }
@@ -152,11 +145,9 @@ export class PrivacyValidator {
 
     for (const synthRecord of synthetic.data) {
       for (const origRecord of original.data) {
-        const distance = this.computeRecordDistance(
-          synthRecord,
-          origRecord,
-          [...Array(synthRecord.length).keys()]
-        );
+        const distance = this.computeRecordDistance(synthRecord, origRecord, [
+          ...Array(synthRecord.length).keys(),
+        ]);
 
         if (distance < threshold) {
           matches++;
@@ -177,7 +168,7 @@ export class PrivacyValidator {
     sensitiveAttributes: string[]
   ): number {
     // Check if sensitive attributes can be inferred
-    const sensIndices = sensitiveAttributes.map(sa => synthetic.columns.indexOf(sa));
+    const sensIndices = sensitiveAttributes.map((sa) => synthetic.columns.indexOf(sa));
 
     let totalRisk = 0;
 
@@ -193,17 +184,23 @@ export class PrivacyValidator {
   /**
    * Determine overall risk level
    */
-  private static determineOverallRisk(metrics: any): 'low' | 'medium' | 'high' | 'critical' {
+  private static determineOverallRisk(metrics: any): "low" | "medium" | "high" | "critical" {
     const maxRisk = Math.max(
       metrics.reidentificationRisk,
       metrics.membershipInferenceRisk,
       metrics.attributeDisclosureRisk
     );
 
-    if (maxRisk < 0.1) {return 'low';}
-    if (maxRisk < 0.3) {return 'medium';}
-    if (maxRisk < 0.6) {return 'high';}
-    return 'critical';
+    if (maxRisk < 0.1) {
+      return "low";
+    }
+    if (maxRisk < 0.3) {
+      return "medium";
+    }
+    if (maxRisk < 0.6) {
+      return "high";
+    }
+    return "critical";
   }
 
   /**
@@ -215,26 +212,26 @@ export class PrivacyValidator {
     // GDPR compliance (requires low re-identification risk)
     const gdpr = metrics.reidentificationRisk < 0.1;
     if (!gdpr) {
-      notes.push('Re-identification risk too high for GDPR compliance');
+      notes.push("Re-identification risk too high for GDPR compliance");
     }
 
     // HIPAA compliance (requires k-anonymity, typically k>=5)
     const hipaa = metrics.reidentificationRisk < 0.2;
     if (!hipaa) {
-      notes.push('Consider additional anonymization for HIPAA compliance');
+      notes.push("Consider additional anonymization for HIPAA compliance");
     }
 
     // CCPA compliance
     const ccpa = metrics.attributeDisclosureRisk < 0.15;
     if (!ccpa) {
-      notes.push('Attribute disclosure risk may not meet CCPA standards');
+      notes.push("Attribute disclosure risk may not meet CCPA standards");
     }
 
     return {
       gdpr,
       hipaa,
       ccpa,
-      notes
+      notes,
     };
   }
 
@@ -245,23 +242,23 @@ export class PrivacyValidator {
     const recommendations: string[] = [];
 
     if (assessment.reidentificationRisk > 0.3) {
-      recommendations.push('Apply additional anonymization techniques (k-anonymity, l-diversity)');
-      recommendations.push('Increase generalization of quasi-identifiers');
+      recommendations.push("Apply additional anonymization techniques (k-anonymity, l-diversity)");
+      recommendations.push("Increase generalization of quasi-identifiers");
     }
 
     if (assessment.membershipInferenceRisk > 0.2) {
-      recommendations.push('Increase privacy budget (epsilon) to add more noise');
-      recommendations.push('Use differential privacy with lower epsilon value');
+      recommendations.push("Increase privacy budget (epsilon) to add more noise");
+      recommendations.push("Use differential privacy with lower epsilon value");
     }
 
     if (assessment.attributeDisclosureRisk > 0.25) {
-      recommendations.push('Apply suppression to sensitive attributes');
-      recommendations.push('Ensure t-closeness for sensitive attributes');
+      recommendations.push("Apply suppression to sensitive attributes");
+      recommendations.push("Ensure t-closeness for sensitive attributes");
     }
 
-    if (assessment.overallRisk === 'high' || assessment.overallRisk === 'critical') {
-      recommendations.push('Consider regenerating synthetic data with stronger privacy guarantees');
-      recommendations.push('Conduct thorough privacy audit before release');
+    if (assessment.overallRisk === "high" || assessment.overallRisk === "critical") {
+      recommendations.push("Consider regenerating synthetic data with stronger privacy guarantees");
+      recommendations.push("Conduct thorough privacy audit before release");
     }
 
     return recommendations;
@@ -270,11 +267,7 @@ export class PrivacyValidator {
   /**
    * Compute distance between two records
    */
-  private static computeRecordDistance(
-    record1: any[],
-    record2: any[],
-    indices: number[]
-  ): number {
+  private static computeRecordDistance(record1: any[], record2: any[], indices: number[]): number {
     let distance = 0;
     let count = 0;
 
@@ -282,7 +275,7 @@ export class PrivacyValidator {
       const v1 = record1[idx];
       const v2 = record2[idx];
 
-      if (typeof v1 === 'number' && typeof v2 === 'number') {
+      if (typeof v1 === "number" && typeof v2 === "number") {
         // Normalized Euclidean distance
         distance += Math.pow(v1 - v2, 2);
       } else {
@@ -322,14 +315,16 @@ export class PrivacyValidator {
   /**
    * Estimate privacy budget consumption
    */
-  static estimatePrivacyBudget(operations: Array<{
-    type: string;
-    epsilon: number;
-    delta: number;
-  }>): number {
+  static estimatePrivacyBudget(
+    operations: Array<{
+      type: string;
+      epsilon: number;
+      delta: number;
+    }>
+  ): number {
     // Advanced composition
     const k = operations.length;
-    const maxEpsilon = Math.max(...operations.map(op => op.epsilon));
+    const maxEpsilon = Math.max(...operations.map((op) => op.epsilon));
 
     // Use advanced composition theorem
     const totalEpsilon = Math.sqrt(2 * k * Math.log(1.25 / 1e-5)) * maxEpsilon;

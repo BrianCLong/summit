@@ -10,13 +10,13 @@ on:
     branches: [main]
   schedule:
     # Run full load tests nightly at 2 AM UTC
-    - cron: '0 2 * * *'
+    - cron: "0 2 * * *"
   workflow_dispatch:
     inputs:
       test_type:
-        description: 'Type of load test to run'
+        description: "Type of load test to run"
         required: true
-        default: 'smoke'
+        default: "smoke"
         type: choice
         options:
           - smoke
@@ -24,13 +24,13 @@ on:
           - soak
           - capacity
       duration:
-        description: 'Test duration (for load tests)'
+        description: "Test duration (for load tests)"
         required: false
-        default: '300s'
+        default: "300s"
       vus:
-        description: 'Virtual users (for load tests)'
+        description: "Virtual users (for load tests)"
         required: false
-        default: '50'
+        default: "50"
 
 jobs:
   smoke-test:
@@ -70,8 +70,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
           cache-dependency-path: server/pnpm-lock.yaml
 
       - name: Install dependencies
@@ -92,7 +92,7 @@ jobs:
           timeout 60 bash -c 'until curl -f http://localhost:4000/health; do sleep 2; done'
         env:
           JWT_SECRET: test-secret-key-for-ci
-          CONDUCTOR_ENABLED: 'false'
+          CONDUCTOR_ENABLED: "false"
 
       - name: Install k6
         run: |
@@ -146,8 +146,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
           cache-dependency-path: server/pnpm-lock.yaml
 
       - name: Install dependencies
@@ -167,7 +167,7 @@ jobs:
           timeout 60 bash -c 'until curl -f http://localhost:4000/health; do sleep 2; done'
         env:
           JWT_SECRET: test-secret-key-for-ci
-          CONDUCTOR_ENABLED: 'false'
+          CONDUCTOR_ENABLED: "false"
 
       - name: Install k6
         run: |
@@ -233,8 +233,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
           cache-dependency-path: server/pnpm-lock.yaml
 
       - name: Install dependencies
@@ -254,7 +254,7 @@ jobs:
           timeout 60 bash -c 'until curl -f http://localhost:4000/health; do sleep 2; done'
         env:
           JWT_SECRET: test-secret-key-for-ci
-          CONDUCTOR_ENABLED: 'false'
+          CONDUCTOR_ENABLED: "false"
 
       - name: Install k6
         run: |
@@ -340,8 +340,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
           cache-dependency-path: server/pnpm-lock.yaml
 
       - name: Install dependencies
@@ -372,7 +372,7 @@ jobs:
           done) > memory-monitor.log &
         env:
           JWT_SECRET: test-secret-key-for-ci
-          CONDUCTOR_ENABLED: 'false'
+          CONDUCTOR_ENABLED: "false"
 
       - name: Install k6
         run: |

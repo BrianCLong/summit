@@ -12,7 +12,7 @@
  * @module provenance/revocation-daemon
  */
 
-import { AIProvenanceManager } from './AIProvenanceManager';
+import { AIProvenanceManager } from "./AIProvenanceManager";
 
 /**
  * Revocation certificate issued by authorized party
@@ -22,7 +22,7 @@ export interface RevocationCertificate {
   revokedNodeHash: string;
 
   /** Reason code for revocation */
-  reason: 'model_poisoning' | 'data_breach' | 'agent_compromise' | 'regulatory_change';
+  reason: "model_poisoning" | "data_breach" | "agent_compromise" | "regulatory_change";
 
   /** Timestamp when revocation was issued */
   revocationTime: Date;
@@ -87,7 +87,7 @@ export interface TaintProof {
  */
 export class RevocationDaemon {
   constructor(
-    private provenanceManager: AIProvenanceManager,
+    private provenanceManager: AIProvenanceManager
     // TODO: Add PostgreSQL client for provenance_merkle_tree table
     // TODO: Add Redis client for Bloom filter cache
   ) {}

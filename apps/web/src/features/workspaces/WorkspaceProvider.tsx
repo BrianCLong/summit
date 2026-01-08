@@ -29,11 +29,7 @@ interface WorkspaceContextValue {
 export const WorkspaceContext =
   React.createContext<WorkspaceContextValue | null>(null)
 
-export function WorkspaceProvider({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
@@ -75,9 +71,7 @@ export function WorkspaceProvider({
 
   const activeWorkspace = state.workspaces[state.activeWorkspaceId]
 
-  const switchWorkspace = useCallback<
-    WorkspaceContextValue['switchWorkspace']
-  >(
+  const switchWorkspace = useCallback<WorkspaceContextValue['switchWorkspace']>(
     (workspaceId, options = {}) => {
       let targetRoute: string | undefined
 
@@ -138,10 +132,7 @@ export function WorkspaceProvider({
     (workspaceId?: WorkspacePresetId) => {
       setState(prev => {
         const targetId = workspaceId || prev.activeWorkspaceId
-        const defaultPreset = getDefaultPresetFor(
-          targetId,
-          location.pathname
-        )
+        const defaultPreset = getDefaultPresetFor(targetId, location.pathname)
         if (!defaultPreset) return prev
 
         return {
@@ -171,7 +162,14 @@ export function WorkspaceProvider({
       settingsOpen,
       setSettingsOpen,
     }),
-    [activeWorkspace, resetWorkspace, settingsOpen, state.workspaces, switchWorkspace, updatePanel]
+    [
+      activeWorkspace,
+      resetWorkspace,
+      settingsOpen,
+      state.workspaces,
+      switchWorkspace,
+      updatePanel,
+    ]
   )
 
   return (

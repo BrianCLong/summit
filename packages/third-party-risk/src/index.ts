@@ -1,1 +1,1 @@
-export * from './vendor-manager.js';
+export * from "./vendor-manager.js";

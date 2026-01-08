@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { getSocket, sendCollabEvent } from '../services/socket';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getSocket, sendCollabEvent } from "../services/socket";
 
 const noopVector = {};
 
@@ -29,11 +29,11 @@ export default function useCollaborationLog(investigationId, currentUser) {
     const socket = getSocket();
     if (!socket || !investigationId) return undefined;
 
-    socket.emit('collab:history', { investigationId });
+    socket.emit("collab:history", { investigationId });
 
     const handleOp = (entry) => {
       if (entry?.investigationId !== investigationId) return;
-      if (appliedOps.current.has(entry.opId) && entry.status !== 'reapplied') return;
+      if (appliedOps.current.has(entry.opId) && entry.status !== "reapplied") return;
       upsertEntry(entry);
       if (entry.authorId === currentUser?.id) {
         setUndoStack((prev) => [...prev, entry]);
@@ -44,9 +44,7 @@ export default function useCollaborationLog(investigationId, currentUser) {
 
     const handleHistory = (payload) => {
       if (payload?.investigationId !== investigationId) return;
-      opCache.current = new Map(
-        (payload.entries || []).map((entry) => [entry.opId, entry]),
-      );
+      opCache.current = new Map((payload.entries || []).map((entry) => [entry.opId, entry]));
       setHistory(payload.entries || []);
       setVersionVector(payload.versionVector || noopVector);
       setUndoStack([]);
@@ -54,20 +52,20 @@ export default function useCollaborationLog(investigationId, currentUser) {
     };
 
     const handleNoop = (payload) => {
-      if (payload?.reason && process.env.NODE_ENV !== 'production') {
+      if (payload?.reason && process.env.NODE_ENV !== "production") {
         // eslint-disable-next-line no-console
-        console.debug('Collaboration noop:', payload.reason);
+        console.debug("Collaboration noop:", payload.reason);
       }
     };
 
-    socket.on('collab:op', handleOp);
-    socket.on('collab:history', handleHistory);
-    socket.on('collab:noop', handleNoop);
+    socket.on("collab:op", handleOp);
+    socket.on("collab:history", handleHistory);
+    socket.on("collab:noop", handleNoop);
 
     return () => {
-      socket.off('collab:op', handleOp);
-      socket.off('collab:history', handleHistory);
-      socket.off('collab:noop', handleNoop);
+      socket.off("collab:op", handleOp);
+      socket.off("collab:history", handleHistory);
+      socket.off("collab:noop", handleNoop);
     };
   }, [currentUser?.id, investigationId, upsertEntry]);
 
@@ -83,13 +81,13 @@ export default function useCollaborationLog(investigationId, currentUser) {
         opId,
         event,
         investigationId,
-        authorId: currentUser?.id || 'local-user',
+        authorId: currentUser?.id || "local-user",
         timestamp: new Date().toISOString(),
         version: history.length + 1,
         versionVector,
         payload,
         optimistic: true,
-        status: 'pending',
+        status: "pending",
       };
       appliedOps.current.add(opId);
       upsertEntry(optimistic);
@@ -97,24 +95,24 @@ export default function useCollaborationLog(investigationId, currentUser) {
       setRedoStack([]);
       return opId;
     },
-    [currentUser?.id, history.length, investigationId, upsertEntry, versionVector],
+    [currentUser?.id, history.length, investigationId, upsertEntry, versionVector]
   );
 
   const requestUndo = useCallback(() => {
     const socket = getSocket();
     if (!socket || !investigationId) return;
-    socket.emit('collab:undo', { investigationId });
+    socket.emit("collab:undo", { investigationId });
   }, [investigationId]);
 
   const requestRedo = useCallback(() => {
     const socket = getSocket();
     if (!socket || !investigationId) return;
-    socket.emit('collab:redo', { investigationId });
+    socket.emit("collab:redo", { investigationId });
   }, [investigationId]);
 
   const timeline = useMemo(
     () => history.slice().sort((a, b) => (a.version || 0) - (b.version || 0)),
-    [history],
+    [history]
   );
 
   const nextUnapplied = useCallback(
@@ -125,7 +123,7 @@ export default function useCollaborationLog(investigationId, currentUser) {
       applier?.(pending);
       return pending;
     },
-    [timeline],
+    [timeline]
   );
 
   return {

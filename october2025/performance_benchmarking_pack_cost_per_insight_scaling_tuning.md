@@ -69,24 +69,23 @@ CALL gds.graph.project('ig_louvain','Entity','RELATES');
 
 ```js
 // perf/k6/wave-nl2c.js
-import http from 'k6/http';
-import { sleep } from 'k6';
+import http from "k6/http";
+import { sleep } from "k6";
 export const options = {
   stages: [
-    { duration: '1m', target: 10 },
-    { duration: '2m', target: 50 },
-    { duration: '1m', target: 0 },
+    { duration: "1m", target: 10 },
+    { duration: "2m", target: 50 },
+    { duration: "1m", target: 0 },
   ],
 };
 export default function () {
   http.post(
-    'http://localhost:7000/graphql',
+    "http://localhost:7000/graphql",
     JSON.stringify({
-      query:
-        'mutation($i:NLQueryInput!){ generateCypher(input:$i){ estimateMs cypher }}',
-      variables: { i: { text: 'top 50 nodes by pagerank' } },
+      query: "mutation($i:NLQueryInput!){ generateCypher(input:$i){ estimateMs cypher }}",
+      variables: { i: { text: "top 50 nodes by pagerank" } },
     }),
-    { headers: { 'content-type': 'application/json' } },
+    { headers: { "content-type": "application/json" } }
   );
   sleep(1);
 }
@@ -94,16 +93,16 @@ export default function () {
 
 ```js
 // perf/k6/wave-analytics.js
-import http from 'k6/http';
-import { sleep } from 'k6';
-export const options = { vus: 30, duration: '3m' };
+import http from "k6/http";
+import { sleep } from "k6";
+export const options = { vus: 30, duration: "3m" };
 export default function () {
   http.post(
-    'http://localhost:7000/graphql',
+    "http://localhost:7000/graphql",
     JSON.stringify({
       query: 'mutation{ runAnalytics(name:"pagerank"){ name }}',
     }),
-    { headers: { 'content-type': 'application/json' } },
+    { headers: { "content-type": "application/json" } }
   );
   sleep(0.5);
 }
@@ -111,26 +110,26 @@ export default function () {
 
 ```js
 // perf/k6/wave-runbook.js
-import http from 'k6/http';
-import { sleep } from 'k6';
+import http from "k6/http";
+import { sleep } from "k6";
 export const options = {
   stages: [
-    { duration: '30s', target: 5 },
-    { duration: '2m', target: 20 },
-    { duration: '30s', target: 0 },
+    { duration: "30s", target: 5 },
+    { duration: "2m", target: 20 },
+    { duration: "30s", target: 0 },
   ],
 };
 export default function () {
   const rb = {
-    id: 'R7',
-    name: 'Community Snapshot',
+    id: "R7",
+    name: "Community Snapshot",
     nodes: [
-      { id: 'nl', type: 'nl2cypher', params: { text: 'community detection' } },
-      { id: 'an', type: 'analytics', params: { name: 'louvain' } },
+      { id: "nl", type: "nl2cypher", params: { text: "community detection" } },
+      { id: "an", type: "analytics", params: { name: "louvain" } },
     ],
   };
-  http.post('http://localhost:7008/run', JSON.stringify(rb), {
-    headers: { 'content-type': 'application/json' },
+  http.post("http://localhost:7008/run", JSON.stringify(rb), {
+    headers: { "content-type": "application/json" },
   });
   sleep(1);
 }
@@ -138,35 +137,32 @@ export default function () {
 
 ```js
 // perf/k6/storm-mix.js
-import http from 'k6/http';
-import { sleep } from 'k6';
-export const options = { vus: 60, duration: '5m' };
+import http from "k6/http";
+import { sleep } from "k6";
+export const options = { vus: 60, duration: "5m" };
 export default function () {
   const r = Math.random();
   if (r < 0.3) {
     http.post(
-      'http://localhost:7000/graphql',
+      "http://localhost:7000/graphql",
       JSON.stringify({
         query: 'mutation{ runAnalytics(name:"pagerank"){ name }}',
       }),
-      { headers: { 'content-type': 'application/json' } },
+      { headers: { "content-type": "application/json" } }
     );
   } else if (r < 0.6) {
     http.post(
-      'http://localhost:7000/graphql',
+      "http://localhost:7000/graphql",
       JSON.stringify({
-        query:
-          'mutation($i:NLQueryInput!){ generateCypher(input:$i){ cypher }}',
-        variables: { i: { text: 'shortest path from A to D' } },
+        query: "mutation($i:NLQueryInput!){ generateCypher(input:$i){ cypher }}",
+        variables: { i: { text: "shortest path from A to D" } },
       }),
-      { headers: { 'content-type': 'application/json' } },
+      { headers: { "content-type": "application/json" } }
     );
   } else {
-    http.post(
-      'http://localhost:7004/pattern/cotravel',
-      JSON.stringify({ withinHours: 6 }),
-      { headers: { 'content-type': 'application/json' } },
-    );
+    http.post("http://localhost:7004/pattern/cotravel", JSON.stringify({ withinHours: 6 }), {
+      headers: { "content-type": "application/json" },
+    });
   }
   sleep(0.3);
 }
@@ -178,31 +174,31 @@ export default function () {
 
 ```ts
 // perf/scripts/run-suite.ts
-import { execSync } from 'child_process';
-import fs from 'fs';
+import { execSync } from "child_process";
+import fs from "fs";
 function run(cmd: string) {
-  console.log('> ' + cmd);
-  execSync(cmd, { stdio: 'inherit' });
+  console.log("> " + cmd);
+  execSync(cmd, { stdio: "inherit" });
 }
 function scrape() {
-  execSync('node perf/scripts/export-metrics.ts', { stdio: 'inherit' });
+  execSync("node perf/scripts/export-metrics.ts", { stdio: "inherit" });
 }
 
-const profile = process.env.PROFILE || 'demo';
-const waves = ['wave-nl2c', 'wave-analytics', 'wave-runbook', 'storm-mix'];
-run('node perf/scripts/cache-warm.ts');
+const profile = process.env.PROFILE || "demo";
+const waves = ["wave-nl2c", "wave-analytics", "wave-runbook", "storm-mix"];
+run("node perf/scripts/cache-warm.ts");
 for (const w of waves) {
   run(`docker run --network host -i grafana/k6 run - < perf/k6/${w}.js`);
   scrape();
 }
-run('node perf/scripts/summarize.ts');
+run("node perf/scripts/summarize.ts");
 ```
 
 ```ts
 // perf/scripts/export-metrics.ts
-import fs from 'fs';
-import fetch from 'node-fetch';
-const prom = process.env.PROM_URL || 'http://localhost:9090';
+import fs from "fs";
+import fetch from "node-fetch";
+const prom = process.env.PROM_URL || "http://localhost:9090";
 const Q = (q: string) => `${prom}/api/v1/query?query=${encodeURIComponent(q)}`;
 async function main() {
   const metrics = {} as any;
@@ -210,23 +206,20 @@ async function main() {
     metrics[name] = await (await fetch(Q(q))).json();
   }
   await grab(
-    'analytics_latency_ms',
-    'histogram_quantile(0.95, sum(rate(http_server_duration_bucket{service="analytics-service"}[5m])) by (le))',
+    "analytics_latency_ms",
+    'histogram_quantile(0.95, sum(rate(http_server_duration_bucket{service="analytics-service"}[5m])) by (le))'
   );
-  await grab(
-    'gateway_rps',
-    'sum(rate(http_requests_total{service="gateway-graphql"}[5m]))',
-  );
-  await grab('neo4j_pagecache_hit_ratio', 'avg(neo4j_page_cache_hit_ratio)');
-  fs.writeFileSync('perf-metrics.json', JSON.stringify(metrics, null, 2));
+  await grab("gateway_rps", 'sum(rate(http_requests_total{service="gateway-graphql"}[5m]))');
+  await grab("neo4j_pagecache_hit_ratio", "avg(neo4j_page_cache_hit_ratio)");
+  fs.writeFileSync("perf-metrics.json", JSON.stringify(metrics, null, 2));
 }
 main();
 ```
 
 ```ts
 // perf/scripts/summarize.ts
-import fs from 'fs';
-const m = JSON.parse(fs.readFileSync('perf-metrics.json', 'utf8'));
+import fs from "fs";
+const m = JSON.parse(fs.readFileSync("perf-metrics.json", "utf8"));
 function val(x: any) {
   return Number(x.data.result?.[0]?.value?.[1] || 0);
 }
@@ -243,18 +236,18 @@ console.log(
     pagecache_hit: hit,
     insights_per_min: insights,
     cost_per_insight: cpi,
-  }),
+  })
 );
 ```
 
 ```ts
 // perf/scripts/cache-warm.ts
-import fetch from 'node-fetch';
+import fetch from "node-fetch";
 (async () => {
-  await fetch('http://localhost:7474', {}).catch(() => {});
-  await fetch('http://localhost:7000/graphql', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
+  await fetch("http://localhost:7474", {}).catch(() => {});
+  await fetch("http://localhost:7000/graphql", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
     body: JSON.stringify({
       query: 'mutation{ runAnalytics(name:"pagerank"){ name }}',
     }),

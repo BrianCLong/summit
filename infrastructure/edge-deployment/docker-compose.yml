@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   edge-gateway:
@@ -67,8 +67,8 @@ services:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
     restart: unless-stopped
     networks:
       - edge-network

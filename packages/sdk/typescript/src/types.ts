@@ -15,7 +15,7 @@
 /**
  * Governance verdict for all platform operations
  */
-export type GovernanceVerdict = 'ALLOW' | 'DENY' | 'FLAG' | 'REVIEW_REQUIRED';
+export type GovernanceVerdict = "ALLOW" | "DENY" | "FLAG" | "REVIEW_REQUIRED";
 
 /**
  * Data envelope wrapper for all API responses
@@ -108,7 +108,7 @@ export interface Policy {
 /**
  * Policy status
  */
-export type PolicyStatus = 'draft' | 'active' | 'archived' | 'pending_approval';
+export type PolicyStatus = "draft" | "active" | "archived" | "pending_approval";
 
 /**
  * Policy rule definition
@@ -116,7 +116,7 @@ export type PolicyStatus = 'draft' | 'active' | 'archived' | 'pending_approval';
 export interface PolicyRule {
   id: string;
   condition: string;
-  action: 'allow' | 'deny' | 'flag' | 'review';
+  action: "allow" | "deny" | "flag" | "review";
   priority: number;
   metadata?: Record<string, unknown>;
 }
@@ -191,7 +191,7 @@ export interface Tenant {
 /**
  * Tenant status
  */
-export type TenantStatus = 'active' | 'suspended' | 'pending' | 'archived';
+export type TenantStatus = "active" | "suspended" | "pending" | "archived";
 
 /**
  * Tenant settings
@@ -211,12 +211,12 @@ export interface TenantSettings {
 /**
  * Compliance framework identifier
  */
-export type ComplianceFramework = 'SOC2' | 'ISO27001' | 'GDPR' | 'HIPAA';
+export type ComplianceFramework = "SOC2" | "ISO27001" | "GDPR" | "HIPAA";
 
 /**
  * Control status
  */
-export type ControlStatus = 'compliant' | 'non_compliant' | 'partial' | 'not_assessed';
+export type ControlStatus = "compliant" | "non_compliant" | "partial" | "not_assessed";
 
 /**
  * Compliance control
@@ -227,7 +227,7 @@ export interface Control {
   description: string;
   category: string;
   requirement: string;
-  frequency: 'continuous' | 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'annual';
+  frequency: "continuous" | "daily" | "weekly" | "monthly" | "quarterly" | "annual";
   framework: ComplianceFramework;
 }
 
@@ -257,19 +257,19 @@ export interface Evidence {
   hash: string;
   collectedAt: string;
   collectedBy: string;
-  status: 'pending' | 'verified' | 'rejected' | 'expired';
+  status: "pending" | "verified" | "rejected" | "expired";
 }
 
 /**
  * Evidence type
  */
 export type EvidenceType =
-  | 'configuration'
-  | 'log'
-  | 'screenshot'
-  | 'report'
-  | 'policy'
-  | 'attestation';
+  | "configuration"
+  | "log"
+  | "screenshot"
+  | "report"
+  | "policy"
+  | "attestation";
 
 /**
  * Compliance summary
@@ -297,7 +297,7 @@ export interface ComplianceSummary {
 export interface AuditReadiness {
   framework: ComplianceFramework;
   overallScore: number;
-  readinessLevel: 'ready' | 'mostly_ready' | 'needs_work' | 'not_ready';
+  readinessLevel: "ready" | "mostly_ready" | "needs_work" | "not_ready";
   gaps: AuditGap[];
   recommendations: string[];
 }
@@ -308,10 +308,10 @@ export interface AuditReadiness {
 export interface AuditGap {
   controlId: string;
   controlName: string;
-  gapType: 'missing_evidence' | 'stale_evidence' | 'failed_assessment' | 'no_assessment';
-  severity: 'critical' | 'high' | 'medium' | 'low';
+  gapType: "missing_evidence" | "stale_evidence" | "failed_assessment" | "no_assessment";
+  severity: "critical" | "high" | "medium" | "low";
   remediation: string;
-  effort: 'low' | 'medium' | 'high';
+  effort: "low" | "medium" | "high";
 }
 
 // ============================================================================
@@ -335,7 +335,7 @@ export interface Integration {
 /**
  * Integration status
  */
-export type IntegrationStatus = 'active' | 'inactive' | 'error' | 'pending_approval';
+export type IntegrationStatus = "active" | "inactive" | "error" | "pending_approval";
 
 /**
  * Integration action request
@@ -374,7 +374,7 @@ export interface AuditLogEntry {
     type: string;
     id: string;
   };
-  outcome: 'success' | 'failure' | 'denied';
+  outcome: "success" | "failure" | "denied";
   verdict?: GovernanceVerdict;
   metadata?: Record<string, unknown>;
   ipAddress?: string;
@@ -390,7 +390,7 @@ export interface AuditQueryParams {
   userId?: string;
   action?: string;
   resourceType?: string;
-  outcome?: 'success' | 'failure' | 'denied';
+  outcome?: "success" | "failure" | "denied";
   limit?: number;
   offset?: number;
 }
@@ -416,7 +416,7 @@ export interface Plugin {
 /**
  * Plugin status
  */
-export type PluginStatus = 'enabled' | 'disabled' | 'error' | 'pending';
+export type PluginStatus = "enabled" | "disabled" | "error" | "pending";
 
 // ============================================================================
 // Error Types
@@ -449,7 +449,7 @@ export class SummitError extends Error {
     details?: Record<string, unknown>
   ) {
     super(message);
-    this.name = 'SummitError';
+    this.name = "SummitError";
     this.code = code;
     this.statusCode = statusCode;
     this.requestId = requestId;

@@ -3,16 +3,16 @@ on:
   workflow_dispatch:
     inputs:
       events:
-        description: 'Events processed this period'
+        description: "Events processed this period"
         required: true
       eventsCost:
-        description: 'USD cost for ingest infra'
+        description: "USD cost for ingest infra"
         required: true
       graphql:
-        description: 'GraphQL requests this period'
+        description: "GraphQL requests this period"
         required: true
       graphqlCost:
-        description: 'USD cost for API infra'
+        description: "USD cost for API infra"
         required: true
 permissions: { contents: write }
 jobs:
@@ -29,5 +29,5 @@ jobs:
           path: unit-cost.json
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: 'chore(cost): update unit-cost snapshot'
+          commit_message: "chore(cost): update unit-cost snapshot"
           file_pattern: unit-cost.json

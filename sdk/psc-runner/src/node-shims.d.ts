@@ -1,4 +1,4 @@
-declare module 'node:child_process' {
+declare module "node:child_process" {
   export interface SpawnSyncReturns<T> {
     status: number | null;
     stdout: T;
@@ -14,7 +14,7 @@ declare module 'node:child_process' {
   export function spawnSync(
     command: string,
     args?: ReadonlyArray<string>,
-    options?: SpawnSyncOptions<string>,
+    options?: SpawnSyncOptions<string>
   ): SpawnSyncReturns<string>;
 }
 

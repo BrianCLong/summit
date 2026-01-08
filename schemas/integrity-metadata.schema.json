@@ -37,7 +37,13 @@
         },
         "source_type": {
           "type": "string",
-          "enum": ["automated_system", "human_operator", "external_api", "monitoring_system", "user_input"],
+          "enum": [
+            "automated_system",
+            "human_operator",
+            "external_api",
+            "monitoring_system",
+            "user_input"
+          ],
           "description": "Type of information source"
         },
         "source_age_days": {
@@ -455,12 +461,7 @@
         },
         "silence_type": {
           "type": "string",
-          "enum": [
-            "OBSERVATIONAL",
-            "DENIAL",
-            "PRIORITIZATION",
-            "UNCERTAINTY"
-          ],
+          "enum": ["OBSERVATIONAL", "DENIAL", "PRIORITIZATION", "UNCERTAINTY"],
           "description": "Type of strategic silence"
         },
         "silence_justification": {

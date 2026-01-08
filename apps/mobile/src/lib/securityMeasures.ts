@@ -119,10 +119,7 @@ export function blockKeyboardShortcuts(): void {
 }
 
 // Session timeout handler
-export function setupSessionTimeout(
-  timeoutMs: number,
-  onTimeout: () => void
-): () => void {
+export function setupSessionTimeout(timeoutMs: number, onTimeout: () => void): () => void {
   let timeoutId: number;
   let lastActivity = Date.now();
 
@@ -238,10 +235,7 @@ export function initializeSecurityMeasures(config: {
   }
 
   if (config.sessionTimeoutMs && config.onSessionTimeout) {
-    const cleanup = setupSessionTimeout(
-      config.sessionTimeoutMs,
-      config.onSessionTimeout
-    );
+    const cleanup = setupSessionTimeout(config.sessionTimeoutMs, config.onSessionTimeout);
     cleanupFns.push(cleanup);
   }
 

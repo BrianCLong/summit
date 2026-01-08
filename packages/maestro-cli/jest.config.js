@@ -1,19 +1,17 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
-  preset: 'ts-jest/presets/default-esm',
-  testEnvironment: 'node',
+  preset: "ts-jest/presets/default-esm",
+  testEnvironment: "node",
   transform: {
-    '^.+\\.tsx?$': [
-      'ts-jest',
+    "^.+\\.tsx?$": [
+      "ts-jest",
       {
         useESM: true,
       },
     ],
   },
   moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1',
+    "^(\\.{1,2}/.*)\\.js$": "$1",
   },
-  transformIgnorePatterns: [
-    'node_modules/(?!(chalk|#ansi-styles)/)',
-  ],
+  transformIgnorePatterns: ["node_modules/(?!(chalk|#ansi-styles)/)"],
 };

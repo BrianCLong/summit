@@ -51,16 +51,16 @@ To add safety checks, implement the `SafetyGuardrail` interface:
 
 ```typescript
 export interface SafetyGuardrail {
-    name: string;
-    validateRequest(request: LLMRequest): Promise<LLMRequest>;
-    validateResponse(response: LLMResponse): Promise<LLMResponse>;
+  name: string;
+  validateRequest(request: LLMRequest): Promise<LLMRequest>;
+  validateResponse(response: LLMResponse): Promise<LLMResponse>;
 }
 ```
 
 ## Caching & Replay Logs
 
-*   **Caching**: Currently uses an in-memory LRU cache. This is intended for short-term identical request deduplication.
-*   **Replay Logs**: Full request/response pairs are logged to JSON files in the configured `logDir`. This allows for offline analysis, debugging, and dataset generation. **Warning**: These logs may contain sensitive data; ensure `PIIGuardrail` is enabled and configured correctly.
+- **Caching**: Currently uses an in-memory LRU cache. This is intended for short-term identical request deduplication.
+- **Replay Logs**: Full request/response pairs are logged to JSON files in the configured `logDir`. This allows for offline analysis, debugging, and dataset generation. **Warning**: These logs may contain sensitive data; ensure `PIIGuardrail` is enabled and configured correctly.
 
 ## Configuration
 

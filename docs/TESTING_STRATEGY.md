@@ -85,12 +85,12 @@ Red → Green → Refactor
 
 All packages must meet these minimum coverage thresholds:
 
-| Metric | Threshold | Description |
-|--------|-----------|-------------|
-| **Statements** | 80% | Percentage of statements executed |
-| **Branches** | 75% | Percentage of conditional branches tested |
-| **Functions** | 80% | Percentage of functions called |
-| **Lines** | 80% | Percentage of lines executed |
+| Metric         | Threshold | Description                               |
+| -------------- | --------- | ----------------------------------------- |
+| **Statements** | 80%       | Percentage of statements executed         |
+| **Branches**   | 75%       | Percentage of conditional branches tested |
+| **Functions**  | 80%       | Percentage of functions called            |
+| **Lines**      | 80%       | Percentage of lines executed              |
 
 ### Critical Paths
 
@@ -118,18 +118,18 @@ Coverage is configured in `jest.coverage.config.cjs`:
 
 ```javascript
 module.exports = {
-  ...require('./jest.config.cjs'),
+  ...require("./jest.config.cjs"),
   collectCoverage: true,
-  coverageDirectory: 'coverage',
+  coverageDirectory: "coverage",
   collectCoverageFrom: [
-    'server/src/**/*.{ts,tsx,js,jsx}',
-    'services/*/src/**/*.{ts,tsx,js,jsx}',
-    'packages/*/src/**/*.{ts,tsx,js,jsx}',
-    '!**/*.d.ts',
-    '!**/node_modules/**',
-    '!**/dist/**',
-    '!**/coverage/**',
-    '!**/*.config.{js,ts}',
+    "server/src/**/*.{ts,tsx,js,jsx}",
+    "services/*/src/**/*.{ts,tsx,js,jsx}",
+    "packages/*/src/**/*.{ts,tsx,js,jsx}",
+    "!**/*.d.ts",
+    "!**/node_modules/**",
+    "!**/dist/**",
+    "!**/coverage/**",
+    "!**/*.config.{js,ts}",
   ],
   coverageThresholds: {
     global: {
@@ -139,7 +139,7 @@ module.exports = {
       lines: 80,
     },
   },
-  coverageReporters: ['text', 'lcov', 'html', 'json-summary'],
+  coverageReporters: ["text", "lcov", "html", "json-summary"],
 };
 ```
 
@@ -152,18 +152,21 @@ module.exports = {
 **Purpose**: Test individual functions/classes in isolation
 
 **Characteristics**:
+
 - Fast (< 100ms per test)
 - No external dependencies (databases, APIs, file system)
 - Use mocks/stubs for dependencies
 - Test edge cases and error conditions
 
 **Example Use Cases**:
+
 - Utility functions
 - Business logic
 - Validators
 - Transformers
 
 **Location**: Co-located with source code
+
 - `src/__tests__/`
 - `src/**/*.test.ts`
 
@@ -172,18 +175,21 @@ module.exports = {
 **Purpose**: Test interactions between components
 
 **Characteristics**:
+
 - Slower (< 5s per test)
 - May use test databases or in-memory alternatives
 - Test real integrations (GraphQL → Service → Database)
 - Validate data flow
 
 **Example Use Cases**:
+
 - GraphQL resolver → Service → Repository
 - Database operations (PostgreSQL + Neo4j dual-write)
 - Message queue producers/consumers
 - External API integrations
 
 **Location**:
+
 - `tests/integration/`
 - `src/**/*.integration.test.ts`
 
@@ -192,18 +198,21 @@ module.exports = {
 **Purpose**: Test complete user workflows
 
 **Characteristics**:
+
 - Slowest (< 30s per test)
 - Use real browser (Playwright)
 - Test against running application
 - Simulate user interactions
 
 **Example Use Cases**:
+
 - Golden path workflow
 - Authentication flows
 - Complex UI interactions
 - Critical business processes
 
 **Location**:
+
 - `e2e/`
 - `tests/e2e/`
 
@@ -212,18 +221,21 @@ module.exports = {
 **Purpose**: Verify system health and critical paths
 
 **Characteristics**:
+
 - Quick health checks (< 2 minutes total)
 - Run after deployment
 - Validate golden path
 - Test against production-like environment
 
 **Example Use Cases**:
+
 - Service health endpoints
 - Database connectivity
 - GraphQL schema validation
 - Critical API endpoints
 
 **Location**:
+
 - `scripts/smoke-test.js`
 
 ### 5. Performance Tests
@@ -231,18 +243,21 @@ module.exports = {
 **Purpose**: Validate system performance and scalability
 
 **Characteristics**:
+
 - Measure response times
 - Test under load
 - Identify bottlenecks
 - Validate SLA compliance
 
 **Example Use Cases**:
+
 - GraphQL query performance
 - Database query optimization
 - Batch operation throughput
 - Concurrent user simulation
 
 **Location**:
+
 - `tests/performance/`
 - `tests/load/`
 
@@ -251,18 +266,21 @@ module.exports = {
 **Purpose**: Validate security controls and identify vulnerabilities
 
 **Characteristics**:
+
 - Test authentication/authorization
 - Validate input sanitization
 - Check for common vulnerabilities
 - Test security policies
 
 **Example Use Cases**:
+
 - RBAC/ABAC enforcement
 - SQL injection prevention
 - XSS prevention
 - CSRF protection
 
 **Location**:
+
 - `tests/security/`
 - `tests/e2e/security/`
 
@@ -275,23 +293,23 @@ module.exports = {
 Structure tests in three phases:
 
 ```typescript
-describe('EntityService', () => {
-  it('should create entity with valid data', async () => {
+describe("EntityService", () => {
+  it("should create entity with valid data", async () => {
     // Arrange: Setup test data and mocks
     const entityData = {
-      tenantId: 'tenant-123',
-      kind: 'Person',
-      props: { name: 'John Doe' },
+      tenantId: "tenant-123",
+      kind: "Person",
+      props: { name: "John Doe" },
     };
     const mockRepo = createMockEntityRepo();
 
     // Act: Execute the operation
-    const result = await entityService.create(entityData, 'user-456');
+    const result = await entityService.create(entityData, "user-456");
 
     // Assert: Verify the outcome
-    expect(result).toHaveProperty('id');
-    expect(result.kind).toBe('Person');
-    expect(mockRepo.create).toHaveBeenCalledWith(entityData, 'user-456');
+    expect(result).toHaveProperty("id");
+    expect(result.kind).toBe("Person");
+    expect(mockRepo.create).toHaveBeenCalledWith(entityData, "user-456");
   });
 });
 ```
@@ -301,14 +319,14 @@ describe('EntityService', () => {
 Use descriptive test names for behavior-driven tests:
 
 ```typescript
-describe('Investigation Workflow', () => {
-  describe('Given an authenticated user', () => {
-    describe('When creating a new investigation', () => {
-      it('Then should create investigation with default status', async () => {
+describe("Investigation Workflow", () => {
+  describe("Given an authenticated user", () => {
+    describe("When creating a new investigation", () => {
+      it("Then should create investigation with default status", async () => {
         // Test implementation
       });
 
-      it('Then should emit investigation.created event', async () => {
+      it("Then should emit investigation.created event", async () => {
         // Test implementation
       });
     });
@@ -323,18 +341,18 @@ Use factories for creating test data:
 ```typescript
 // tests/factories/entityFactory.ts
 export const createMockEntity = (overrides = {}) => ({
-  id: 'entity-' + Math.random().toString(36).substr(2, 9),
-  tenantId: 'tenant-123',
-  kind: 'Person',
-  labels: ['Individual'],
-  props: { name: 'Test User' },
+  id: "entity-" + Math.random().toString(36).substr(2, 9),
+  tenantId: "tenant-123",
+  kind: "Person",
+  labels: ["Individual"],
+  props: { name: "Test User" },
   createdAt: new Date(),
   updatedAt: new Date(),
   ...overrides,
 });
 
 // Usage in tests
-const entity = createMockEntity({ kind: 'Organization' });
+const entity = createMockEntity({ kind: "Organization" });
 ```
 
 ### Pattern 4: Mock Services
@@ -369,7 +387,7 @@ services.entityRepo.findById.mockResolvedValue(mockEntity);
 Use snapshots for complex data structures:
 
 ```typescript
-it('should generate correct GraphQL schema', () => {
+it("should generate correct GraphQL schema", () => {
   const schema = buildSchema();
   expect(schema).toMatchSnapshot();
 });
@@ -380,11 +398,11 @@ it('should generate correct GraphQL schema', () => {
 Test multiple scenarios with test.each:
 
 ```typescript
-describe('Input Validation', () => {
+describe("Input Validation", () => {
   test.each([
-    ['', 'Name is required'],
-    ['a', 'Name must be at least 2 characters'],
-    ['a'.repeat(256), 'Name must be less than 255 characters'],
+    ["", "Name is required"],
+    ["a", "Name must be at least 2 characters"],
+    ["a".repeat(256), "Name must be less than 255 characters"],
   ])('should validate name "%s" with error "%s"', (name, expectedError) => {
     const result = validateName(name);
     expect(result.error).toBe(expectedError);
@@ -408,10 +426,10 @@ See: `docs/test-templates/graphql-resolver.test.ts`
  * of context, services, and database operations.
  */
 
-import { jest } from '@jest/globals';
-import type { GraphQLContext } from '../types';
+import { jest } from "@jest/globals";
+import type { GraphQLContext } from "../types";
 
-describe('EntityResolver', () => {
+describe("EntityResolver", () => {
   let mockContext: GraphQLContext;
   let mockServices: any;
 
@@ -430,7 +448,7 @@ describe('EntityResolver', () => {
     };
 
     mockContext = {
-      user: { id: 'user-123', tenantId: 'tenant-456' },
+      user: { id: "user-123", tenantId: "tenant-456" },
       services: mockServices,
       logger: console,
       authorize: jest.fn().mockResolvedValue(true),
@@ -441,101 +459,84 @@ describe('EntityResolver', () => {
     jest.clearAllMocks();
   });
 
-  describe('Query.entity', () => {
-    it('should fetch entity by id', async () => {
+  describe("Query.entity", () => {
+    it("should fetch entity by id", async () => {
       // Arrange
       const mockEntity = {
-        id: 'entity-789',
-        tenantId: 'tenant-456',
-        kind: 'Person',
-        props: { name: 'John Doe' },
+        id: "entity-789",
+        tenantId: "tenant-456",
+        kind: "Person",
+        props: { name: "John Doe" },
       };
       mockServices.entityRepo.findById.mockResolvedValue(mockEntity);
 
       // Act
-      const result = await resolvers.Query.entity(
-        null,
-        { id: 'entity-789' },
-        mockContext,
-      );
+      const result = await resolvers.Query.entity(null, { id: "entity-789" }, mockContext);
 
       // Assert
       expect(result).toEqual(mockEntity);
-      expect(mockContext.authorize).toHaveBeenCalledWith('entity:read');
-      expect(mockServices.entityRepo.findById).toHaveBeenCalledWith(
-        'entity-789',
-        'tenant-456',
-      );
+      expect(mockContext.authorize).toHaveBeenCalledWith("entity:read");
+      expect(mockServices.entityRepo.findById).toHaveBeenCalledWith("entity-789", "tenant-456");
     });
 
-    it('should throw error when entity not found', async () => {
+    it("should throw error when entity not found", async () => {
       // Arrange
       mockServices.entityRepo.findById.mockResolvedValue(null);
 
       // Act & Assert
       await expect(
-        resolvers.Query.entity(null, { id: 'nonexistent' }, mockContext),
-      ).rejects.toThrow('Entity not found');
+        resolvers.Query.entity(null, { id: "nonexistent" }, mockContext)
+      ).rejects.toThrow("Entity not found");
     });
 
-    it('should enforce authorization', async () => {
+    it("should enforce authorization", async () => {
       // Arrange
-      mockContext.authorize.mockRejectedValue(
-        new Error('Unauthorized'),
-      );
+      mockContext.authorize.mockRejectedValue(new Error("Unauthorized"));
 
       // Act & Assert
-      await expect(
-        resolvers.Query.entity(null, { id: 'entity-789' }, mockContext),
-      ).rejects.toThrow('Unauthorized');
+      await expect(resolvers.Query.entity(null, { id: "entity-789" }, mockContext)).rejects.toThrow(
+        "Unauthorized"
+      );
     });
   });
 
-  describe('Mutation.createEntity', () => {
-    it('should create entity with valid input', async () => {
+  describe("Mutation.createEntity", () => {
+    it("should create entity with valid input", async () => {
       // Arrange
       const input = {
-        kind: 'Person',
-        props: { name: 'Jane Smith', email: 'jane@example.com' },
+        kind: "Person",
+        props: { name: "Jane Smith", email: "jane@example.com" },
       };
       const mockCreatedEntity = {
-        id: 'entity-new',
-        tenantId: 'tenant-456',
+        id: "entity-new",
+        tenantId: "tenant-456",
         ...input,
         createdAt: new Date(),
       };
       mockServices.entityRepo.create.mockResolvedValue(mockCreatedEntity);
 
       // Act
-      const result = await resolvers.Mutation.createEntity(
-        null,
-        { input },
-        mockContext,
-      );
+      const result = await resolvers.Mutation.createEntity(null, { input }, mockContext);
 
       // Assert
       expect(result).toEqual(mockCreatedEntity);
-      expect(mockContext.authorize).toHaveBeenCalledWith('entity:create');
+      expect(mockContext.authorize).toHaveBeenCalledWith("entity:create");
       expect(mockServices.auditService.log).toHaveBeenCalledWith(
         expect.objectContaining({
-          action: 'entity.created',
+          action: "entity.created",
           entityId: mockCreatedEntity.id,
-        }),
+        })
       );
     });
 
-    it('should validate input', async () => {
+    it("should validate input", async () => {
       // Arrange
-      const invalidInput = { kind: '', props: {} };
+      const invalidInput = { kind: "", props: {} };
 
       // Act & Assert
       await expect(
-        resolvers.Mutation.createEntity(
-          null,
-          { input: invalidInput },
-          mockContext,
-        ),
-      ).rejects.toThrow('Validation error');
+        resolvers.Mutation.createEntity(null, { input: invalidInput }, mockContext)
+      ).rejects.toThrow("Validation error");
     });
   });
 });
@@ -699,14 +700,14 @@ Use clear, descriptive names:
 
 ```typescript
 // ✅ Good
-it('should create entity when input is valid')
-it('should throw error when user is unauthorized')
-it('should return empty array when no results found')
+it("should create entity when input is valid");
+it("should throw error when user is unauthorized");
+it("should return empty array when no results found");
 
 // ❌ Bad
-it('works')
-it('test 1')
-it('should do stuff')
+it("works");
+it("test 1");
+it("should do stuff");
 ```
 
 ### Assertion Best Practices
@@ -715,8 +716,8 @@ Be specific with assertions:
 
 ```typescript
 // ✅ Good
-expect(result.id).toBe('entity-123');
-expect(result.name).toBe('John Doe');
+expect(result.id).toBe("entity-123");
+expect(result.name).toBe("John Doe");
 expect(result.createdAt).toBeInstanceOf(Date);
 
 // ❌ Bad
@@ -730,15 +731,15 @@ Always await async operations:
 
 ```typescript
 // ✅ Good
-it('should create entity', async () => {
+it("should create entity", async () => {
   const result = await entityService.create(data);
-  expect(result).toHaveProperty('id');
+  expect(result).toHaveProperty("id");
 });
 
 // ❌ Bad
-it('should create entity', () => {
-  entityService.create(data).then(result => {
-    expect(result).toHaveProperty('id');
+it("should create entity", () => {
+  entityService.create(data).then((result) => {
+    expect(result).toHaveProperty("id");
   });
 });
 ```
@@ -904,14 +905,14 @@ export const waitFor = async (condition: () => boolean, timeout = 5000) => {
   const start = Date.now();
   while (!condition()) {
     if (Date.now() - start > timeout) {
-      throw new Error('Timeout waiting for condition');
+      throw new Error("Timeout waiting for condition");
     }
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
 };
 
 export const createTestContext = (): GraphQLContext => ({
-  user: { id: 'test-user', tenantId: 'test-tenant' },
+  user: { id: "test-user", tenantId: "test-tenant" },
   services: createMockServices(),
   logger: console,
   authorize: jest.fn().mockResolvedValue(true),

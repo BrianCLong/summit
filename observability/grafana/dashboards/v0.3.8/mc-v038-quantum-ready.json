@@ -2,13 +2,7 @@
   "dashboard": {
     "id": null,
     "title": "MC v0.3.8 - Quantum-Ready Equilibrium",
-    "tags": [
-      "mc-platform",
-      "v0.3.8",
-      "quantum-ready",
-      "beyond-mythic",
-      "equilibrium"
-    ],
+    "tags": ["mc-platform", "v0.3.8", "quantum-ready", "beyond-mythic", "equilibrium"],
     "timezone": "browser",
     "panels": [
       {

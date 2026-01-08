@@ -3,31 +3,27 @@
  * Demonstrates how to use all governance features together
  */
 
-import { ApolloServer } from '@apollo/server';
-import { expressMiddleware } from '@apollo/server/express4';
-import { buildSchema } from 'graphql';
-import express from 'express';
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@apollo/server/express4";
+import { buildSchema } from "graphql";
+import express from "express";
 
 // Import governance components
-import { schemaRegistry } from '../schema-registry';
-import { validateSchema } from '../validation-rules';
-import {
-  authDirective,
-  rateLimitDirective,
-  deprecatedDirective,
-} from '../directives/auth';
+import { schemaRegistry } from "../schema-registry";
+import { validateSchema } from "../validation-rules";
+import { authDirective, rateLimitDirective, deprecatedDirective } from "../directives/auth";
 import {
   createComplexityLimitRule,
   createDepthLimitRule,
   defaultComplexityConfig,
-} from '../complexity-calculator';
+} from "../complexity-calculator";
 import {
   globalPerformanceMonitor,
   createPerformanceMonitoringPlugin,
   createDataLoaderContext,
   formatPerformanceReport,
-} from '../performance-monitor';
-import { generateDocumentation } from '../documentation-generator';
+} from "../performance-monitor";
+import { generateDocumentation } from "../documentation-generator";
 
 // Example schema
 const typeDefs = `
@@ -116,23 +112,23 @@ const resolvers = {
  * Main integration function
  */
 export async function setupGraphQLGovernance() {
-  console.log('🚀 Setting up GraphQL Schema Governance...\n');
+  console.log("🚀 Setting up GraphQL Schema Governance...\n");
 
   // Step 1: Initialize Schema Registry
-  console.log('1️⃣  Initializing Schema Registry...');
+  console.log("1️⃣  Initializing Schema Registry...");
   await schemaRegistry.initialize();
 
   // Step 2: Validate Schema
-  console.log('2️⃣  Validating Schema...');
+  console.log("2️⃣  Validating Schema...");
   const schema = buildSchema(typeDefs);
   const validation = validateSchema(schema);
 
   if (!validation.valid) {
-    console.error('❌ Schema validation failed:');
+    console.error("❌ Schema validation failed:");
     validation.errors.forEach((err) => {
       console.error(`  - [${err.rule}] ${err.message}`);
     });
-    throw new Error('Schema validation failed');
+    throw new Error("Schema validation failed");
   }
 
   console.log(`✅ Schema validation passed`);
@@ -144,27 +140,27 @@ export async function setupGraphQLGovernance() {
   }
 
   // Step 3: Register Schema Version
-  console.log('\n3️⃣  Registering Schema Version...');
+  console.log("\n3️⃣  Registering Schema Version...");
   const canRegister = await schemaRegistry.validateCanRegister(typeDefs);
   if (canRegister.valid) {
     await schemaRegistry.registerSchema(
       typeDefs,
-      'v1.0.0',
-      'system@example.com',
-      'Initial schema with governance'
+      "v1.0.0",
+      "system@example.com",
+      "Initial schema with governance"
     );
-    console.log('✅ Schema registered as v1.0.0');
+    console.log("✅ Schema registered as v1.0.0");
   }
 
   // Step 4: Apply Authorization Directives
-  console.log('\n4️⃣  Applying Authorization Directives...');
+  console.log("\n4️⃣  Applying Authorization Directives...");
   const { typeDefs: authTypeDefs } = authDirective();
   const { typeDefs: rateLimitTypeDefs } = rateLimitDirective();
   const { typeDefs: deprecatedTypeDefs } = deprecatedDirective();
-  console.log('✅ Authorization directives configured');
+  console.log("✅ Authorization directives configured");
 
   // Step 5: Configure Complexity Limits
-  console.log('\n5️⃣  Configuring Complexity Limits...');
+  console.log("\n5️⃣  Configuring Complexity Limits...");
   const complexityRules = [
     createComplexityLimitRule(defaultComplexityConfig),
     createDepthLimitRule(10),
@@ -173,42 +169,40 @@ export async function setupGraphQLGovernance() {
   console.log(`✅ Max Depth: ${defaultComplexityConfig.maxDepth}`);
 
   // Step 6: Setup Performance Monitoring
-  console.log('\n6️⃣  Setting up Performance Monitoring...');
-  const performancePlugin = createPerformanceMonitoringPlugin(
-    globalPerformanceMonitor
-  );
-  console.log('✅ Performance monitoring enabled');
+  console.log("\n6️⃣  Setting up Performance Monitoring...");
+  const performancePlugin = createPerformanceMonitoringPlugin(globalPerformanceMonitor);
+  console.log("✅ Performance monitoring enabled");
 
   // Step 7: Generate Documentation
-  console.log('\n7️⃣  Generating Documentation...');
+  console.log("\n7️⃣  Generating Documentation...");
   try {
     await generateDocumentation(schema, {
-      outputPath: './docs/graphql/api-reference.md',
-      format: 'markdown',
+      outputPath: "./docs/graphql/api-reference.md",
+      format: "markdown",
       includeExamples: true,
       includeDeprecated: false,
     });
-    console.log('✅ Documentation generated at docs/graphql/api-reference.md');
+    console.log("✅ Documentation generated at docs/graphql/api-reference.md");
   } catch (error) {
-    console.log('⚠️  Documentation generation skipped (optional)');
+    console.log("⚠️  Documentation generation skipped (optional)");
   }
 
   // Step 8: Create Apollo Server
-  console.log('\n8️⃣  Creating Apollo Server...');
+  console.log("\n8️⃣  Creating Apollo Server...");
   const server = new ApolloServer({
     typeDefs: [authTypeDefs, rateLimitTypeDefs, deprecatedTypeDefs, typeDefs],
     resolvers,
     plugins: [performancePlugin],
     validationRules: complexityRules,
     introspection: true,
-    includeStacktraceInErrorResponses: process.env.NODE_ENV !== 'production',
+    includeStacktraceInErrorResponses: process.env.NODE_ENV !== "production",
   });
 
   await server.start();
-  console.log('✅ Apollo Server started');
+  console.log("✅ Apollo Server started");
 
   // Step 9: Setup Express Middleware
-  console.log('\n9️⃣  Setting up Express Middleware...');
+  console.log("\n9️⃣  Setting up Express Middleware...");
   const app = express();
   app.use(express.json());
 
@@ -216,17 +210,17 @@ export async function setupGraphQLGovernance() {
   app.use((req, res, next) => {
     // In production, validate JWT token here
     (req as any).user = {
-      id: 'user-123',
-      email: 'user@example.com',
-      roles: ['analyst'],
-      permissions: ['read:entities', 'write:entities'],
-      tenantId: 'tenant-123',
+      id: "user-123",
+      email: "user@example.com",
+      roles: ["analyst"],
+      permissions: ["read:entities", "write:entities"],
+      tenantId: "tenant-123",
     };
     next();
   });
 
   app.use(
-    '/graphql',
+    "/graphql",
     expressMiddleware(server, {
       context: async ({ req }) => {
         // Create context with DataLoaders and auth
@@ -248,16 +242,16 @@ export async function setupGraphQLGovernance() {
   );
 
   // Serve GraphQL Playground
-  app.get('/playground', (req, res) => {
-    res.sendFile('playground.html', { root: './graphql' });
+  app.get("/playground", (req, res) => {
+    res.sendFile("playground.html", { root: "./graphql" });
   });
 
   // Health check endpoint
-  app.get('/health', (req, res) => {
+  app.get("/health", (req, res) => {
     const report = globalPerformanceMonitor.generateReport();
     res.json({
-      status: 'healthy',
-      version: 'v1.0.0',
+      status: "healthy",
+      version: "v1.0.0",
       performance: {
         totalExecutionTime: report.totalExecutionTime,
         slowResolvers: report.slowResolvers.length,
@@ -267,21 +261,21 @@ export async function setupGraphQLGovernance() {
   });
 
   // Performance report endpoint
-  app.get('/performance', (req, res) => {
+  app.get("/performance", (req, res) => {
     const report = globalPerformanceMonitor.generateReport();
-    res.type('text/plain').send(formatPerformanceReport(report));
+    res.type("text/plain").send(formatPerformanceReport(report));
   });
 
-  console.log('\n✅ GraphQL Schema Governance Setup Complete!\n');
-  console.log('📊 Features Enabled:');
-  console.log('  ✓ Schema versioning and registry');
-  console.log('  ✓ Automated validation rules');
-  console.log('  ✓ Field-level authorization (@auth, @rateLimit)');
-  console.log('  ✓ Query complexity limits');
-  console.log('  ✓ Performance monitoring');
-  console.log('  ✓ N+1 query detection');
-  console.log('  ✓ Auto-generated documentation');
-  console.log('  ✓ GraphQL Playground with auth\n');
+  console.log("\n✅ GraphQL Schema Governance Setup Complete!\n");
+  console.log("📊 Features Enabled:");
+  console.log("  ✓ Schema versioning and registry");
+  console.log("  ✓ Automated validation rules");
+  console.log("  ✓ Field-level authorization (@auth, @rateLimit)");
+  console.log("  ✓ Query complexity limits");
+  console.log("  ✓ Performance monitoring");
+  console.log("  ✓ N+1 query detection");
+  console.log("  ✓ Auto-generated documentation");
+  console.log("  ✓ GraphQL Playground with auth\n");
 
   return { app, server };
 }
@@ -304,7 +298,7 @@ async function main() {
 // Run if executed directly
 if (require.main === module) {
   main().catch((error) => {
-    console.error('❌ Fatal error:', error);
+    console.error("❌ Fatal error:", error);
     process.exit(1);
   });
 }

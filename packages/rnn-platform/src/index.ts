@@ -3,7 +3,7 @@
  * Recurrent and sequence modeling platform
  */
 
-import type { NeuralNetworkArchitecture } from '@intelgraph/deep-learning-core';
+import type { NeuralNetworkArchitecture } from "@intelgraph/deep-learning-core";
 
 // LSTM architecture
 export function createLSTM(config: {
@@ -14,12 +14,12 @@ export function createLSTM(config: {
   bidirectional?: boolean;
 }): NeuralNetworkArchitecture {
   const layers: any[] = [
-    { type: 'input', name: 'input', config: { shape: [null, config.inputDim] } },
+    { type: "input", name: "input", config: { shape: [null, config.inputDim] } },
   ];
 
   for (let i = 0; i < config.numLayers; i++) {
     layers.push({
-      type: 'lstm',
+      type: "lstm",
       name: `lstm_${i}`,
       config: {
         units: config.units,
@@ -30,15 +30,15 @@ export function createLSTM(config: {
     });
   }
 
-  layers.push({ type: 'dense', name: 'output', config: { units: config.inputDim } });
+  layers.push({ type: "dense", name: "output", config: { units: config.inputDim } });
 
   return {
-    name: 'LSTM',
-    type: 'recurrent',
+    name: "LSTM",
+    type: "recurrent",
     layers,
     inputShape: [-1, config.inputDim],
     outputShape: [config.inputDim],
-    description: 'Long Short-Term Memory network',
+    description: "Long Short-Term Memory network",
   };
 }
 
@@ -49,19 +49,31 @@ export function createSeq2Seq(config: {
   latentDim: number;
 }): NeuralNetworkArchitecture {
   return {
-    name: 'Seq2Seq',
-    type: 'recurrent',
+    name: "Seq2Seq",
+    type: "recurrent",
     layers: [
-      { type: 'encoder_input', name: 'encoder_input', config: { shape: [null, config.encoderInputDim] } },
-      { type: 'lstm', name: 'encoder', config: { units: config.latentDim, returnState: true } },
-      { type: 'decoder_input', name: 'decoder_input', config: { shape: [null, config.decoderInputDim] } },
-      { type: 'lstm', name: 'decoder', config: { units: config.latentDim, returnSequences: true } },
-      { type: 'attention', name: 'attention', config: {} },
-      { type: 'dense', name: 'output', config: { units: config.decoderInputDim, activation: 'softmax' } },
+      {
+        type: "encoder_input",
+        name: "encoder_input",
+        config: { shape: [null, config.encoderInputDim] },
+      },
+      { type: "lstm", name: "encoder", config: { units: config.latentDim, returnState: true } },
+      {
+        type: "decoder_input",
+        name: "decoder_input",
+        config: { shape: [null, config.decoderInputDim] },
+      },
+      { type: "lstm", name: "decoder", config: { units: config.latentDim, returnSequences: true } },
+      { type: "attention", name: "attention", config: {} },
+      {
+        type: "dense",
+        name: "output",
+        config: { units: config.decoderInputDim, activation: "softmax" },
+      },
     ],
     inputShape: [-1, config.encoderInputDim],
     outputShape: [-1, config.decoderInputDim],
-    description: 'Sequence-to-Sequence with attention',
+    description: "Sequence-to-Sequence with attention",
   };
 }
 
@@ -74,16 +86,16 @@ export interface ForecastingConfig {
 
 export function createTimeSeriesForecaster(config: ForecastingConfig): NeuralNetworkArchitecture {
   return {
-    name: 'TimeSeriesForecaster',
-    type: 'recurrent',
+    name: "TimeSeriesForecaster",
+    type: "recurrent",
     layers: [
-      { type: 'input', name: 'input', config: { shape: [config.lookbackWindow, config.features] } },
-      { type: 'lstm', name: 'lstm1', config: { units: 128, returnSequences: true } },
-      { type: 'lstm', name: 'lstm2', config: { units: 64 } },
-      { type: 'dense', name: 'output', config: { units: config.forecastHorizon } },
+      { type: "input", name: "input", config: { shape: [config.lookbackWindow, config.features] } },
+      { type: "lstm", name: "lstm1", config: { units: 128, returnSequences: true } },
+      { type: "lstm", name: "lstm2", config: { units: 64 } },
+      { type: "dense", name: "output", config: { units: config.forecastHorizon } },
     ],
     inputShape: [config.lookbackWindow, config.features],
     outputShape: [config.forecastHorizon],
-    description: 'LSTM-based time series forecasting',
+    description: "LSTM-based time series forecasting",
   };
 }

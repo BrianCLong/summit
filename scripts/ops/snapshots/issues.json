@@ -2,14 +2,14 @@
   {
     "number": 101,
     "title": "Critical security vulnerability in auth",
-    "labels": [{"name": "P0"}, {"name": "security"}],
+    "labels": [{ "name": "P0" }, { "name": "security" }],
     "updatedAt": "2024-05-19T10:00:00Z",
     "state": "OPEN"
   },
   {
     "number": 102,
     "title": "Documentation outdated",
-    "labels": [{"name": "documentation"}, {"name": "P2"}],
+    "labels": [{ "name": "documentation" }, { "name": "P2" }],
     "updatedAt": "2024-05-18T10:00:00Z",
     "state": "OPEN"
   }

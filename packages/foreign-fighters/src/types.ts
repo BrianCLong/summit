@@ -27,12 +27,12 @@ export interface PersonalInfo {
 }
 
 export enum FighterStatus {
-  TRAVELING = 'TRAVELING',
-  IN_CONFLICT_ZONE = 'IN_CONFLICT_ZONE',
-  RETURNED = 'RETURNED',
-  DETAINED = 'DETAINED',
-  DECEASED = 'DECEASED',
-  UNKNOWN = 'UNKNOWN'
+  TRAVELING = "TRAVELING",
+  IN_CONFLICT_ZONE = "IN_CONFLICT_ZONE",
+  RETURNED = "RETURNED",
+  DETAINED = "DETAINED",
+  DECEASED = "DECEASED",
+  UNKNOWN = "UNKNOWN",
 }
 
 export interface Journey {
@@ -54,7 +54,7 @@ export interface TravelLeg {
 }
 
 export interface TravelDocument {
-  type: 'PASSPORT' | 'ID' | 'VISA' | 'FRAUDULENT' | 'STOLEN';
+  type: "PASSPORT" | "ID" | "VISA" | "FRAUDULENT" | "STOLEN";
   number?: string;
   country: string;
   authentic: boolean;
@@ -89,11 +89,11 @@ export interface OperationParticipation {
 }
 
 export enum ThreatLevel {
-  CRITICAL = 'CRITICAL',
-  HIGH = 'HIGH',
-  MEDIUM = 'MEDIUM',
-  LOW = 'LOW',
-  MINIMAL = 'MINIMAL'
+  CRITICAL = "CRITICAL",
+  HIGH = "HIGH",
+  MEDIUM = "MEDIUM",
+  LOW = "LOW",
+  MINIMAL = "MINIMAL",
 }
 
 export interface MonitoringStatus {
@@ -116,13 +116,13 @@ export interface ReturneeProfile {
 }
 
 export enum ReturnReason {
-  DISILLUSIONMENT = 'DISILLUSIONMENT',
-  INJURY = 'INJURY',
-  FAMILY = 'FAMILY',
-  DEPORTATION = 'DEPORTATION',
-  MISSION = 'MISSION',
-  CONFLICT_END = 'CONFLICT_END',
-  UNKNOWN = 'UNKNOWN'
+  DISILLUSIONMENT = "DISILLUSIONMENT",
+  INJURY = "INJURY",
+  FAMILY = "FAMILY",
+  DEPORTATION = "DEPORTATION",
+  MISSION = "MISSION",
+  CONFLICT_END = "CONFLICT_END",
+  UNKNOWN = "UNKNOWN",
 }
 
 export interface Debrief {
@@ -130,13 +130,13 @@ export interface Debrief {
   date?: Date;
   agency?: string;
   intelligence: IntelligenceGathered[];
-  cooperation: 'FULL' | 'PARTIAL' | 'MINIMAL' | 'NONE';
+  cooperation: "FULL" | "PARTIAL" | "MINIMAL" | "NONE";
 }
 
 export interface IntelligenceGathered {
   category: string;
   description: string;
-  value: 'HIGH' | 'MEDIUM' | 'LOW';
+  value: "HIGH" | "MEDIUM" | "LOW";
   verified: boolean;
 }
 
@@ -145,12 +145,12 @@ export interface ReintegrationProgram {
   program?: string;
   startDate?: Date;
   components: ProgramComponent[];
-  progress: 'SUCCESSFUL' | 'ONGOING' | 'STRUGGLING' | 'FAILED';
+  progress: "SUCCESSFUL" | "ONGOING" | "STRUGGLING" | "FAILED";
 }
 
 export interface ProgramComponent {
-  type: 'DERADICALIZATION' | 'VOCATIONAL' | 'EDUCATION' | 'COUNSELING' | 'COMMUNITY';
-  status: 'COMPLETED' | 'IN_PROGRESS' | 'NOT_STARTED';
+  type: "DERADICALIZATION" | "VOCATIONAL" | "EDUCATION" | "COUNSELING" | "COMMUNITY";
+  status: "COMPLETED" | "IN_PROGRESS" | "NOT_STARTED";
   provider: string;
 }
 
@@ -196,7 +196,7 @@ export interface TravelRoute {
   origin: string;
   destination: string;
   waypoints: string[];
-  frequency: 'HIGH' | 'MEDIUM' | 'LOW';
+  frequency: "HIGH" | "MEDIUM" | "LOW";
   lastUsed?: Date;
   detected: boolean;
 }
@@ -240,7 +240,7 @@ export interface TrackingResult {
 
 export interface FighterTrend {
   type: string;
-  direction: 'INCREASING' | 'DECREASING' | 'STABLE';
+  direction: "INCREASING" | "DECREASING" | "STABLE";
   magnitude: number;
   period: string;
   description: string;
@@ -248,10 +248,10 @@ export interface FighterTrend {
 
 export interface BorderAlert {
   fighterId: string;
-  type: 'DEPARTURE' | 'ENTRY' | 'TRANSIT';
+  type: "DEPARTURE" | "ENTRY" | "TRANSIT";
   location: string;
   date: Date;
   detected: boolean;
-  action: 'ALLOWED' | 'DETAINED' | 'REFUSED_ENTRY' | 'MONITORING';
+  action: "ALLOWED" | "DETAINED" | "REFUSED_ENTRY" | "MONITORING";
   agencies: string[];
 }

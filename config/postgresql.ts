@@ -9,8 +9,8 @@
  * - Query performance monitoring
  */
 
-import { Pool, PoolConfig, QueryConfig } from 'pg';
-import pino from 'pino';
+import { Pool, PoolConfig, QueryConfig } from "pg";
+import pino from "pino";
 
 const logger = pino();
 
@@ -51,7 +51,7 @@ export const defaultPostgresConfig: PostgresOptimizedConfig = {
   logSlowQueries: true,
 
   // PostgreSQL specific settings
-  application_name: 'intelgraph',
+  application_name: "intelgraph",
 };
 
 /**
@@ -63,7 +63,7 @@ export interface CompositeIndexDefinition {
   columns: string[];
   unique?: boolean;
   where?: string;
-  method?: 'btree' | 'hash' | 'gist' | 'gin' | 'brin';
+  method?: "btree" | "hash" | "gist" | "gin" | "brin";
 }
 
 /**
@@ -72,142 +72,142 @@ export interface CompositeIndexDefinition {
 export const COMPOSITE_INDEXES: CompositeIndexDefinition[] = [
   // Entities table
   {
-    table: 'entities',
-    name: 'idx_entities_tenant_type',
-    columns: ['tenant_id', 'type'],
-    method: 'btree',
+    table: "entities",
+    name: "idx_entities_tenant_type",
+    columns: ["tenant_id", "type"],
+    method: "btree",
   },
   {
-    table: 'entities',
-    name: 'idx_entities_tenant_created',
-    columns: ['tenant_id', 'created_at'],
-    method: 'btree',
+    table: "entities",
+    name: "idx_entities_tenant_created",
+    columns: ["tenant_id", "created_at"],
+    method: "btree",
   },
   {
-    table: 'entities',
-    name: 'idx_entities_type_confidence',
-    columns: ['type', 'confidence'],
-    method: 'btree',
-    where: 'confidence > 0.5',
+    table: "entities",
+    name: "idx_entities_type_confidence",
+    columns: ["type", "confidence"],
+    method: "btree",
+    where: "confidence > 0.5",
   },
   {
-    table: 'entities',
-    name: 'idx_entities_canonical_tenant',
-    columns: ['canonical_id', 'tenant_id'],
-    method: 'btree',
+    table: "entities",
+    name: "idx_entities_canonical_tenant",
+    columns: ["canonical_id", "tenant_id"],
+    method: "btree",
   },
 
   // Relationships table
   {
-    table: 'relationships',
-    name: 'idx_relationships_source_target',
-    columns: ['source_id', 'target_id'],
-    method: 'btree',
+    table: "relationships",
+    name: "idx_relationships_source_target",
+    columns: ["source_id", "target_id"],
+    method: "btree",
   },
   {
-    table: 'relationships',
-    name: 'idx_relationships_tenant_type',
-    columns: ['tenant_id', 'type'],
-    method: 'btree',
+    table: "relationships",
+    name: "idx_relationships_tenant_type",
+    columns: ["tenant_id", "type"],
+    method: "btree",
   },
   {
-    table: 'relationships',
-    name: 'idx_relationships_tenant_created',
-    columns: ['tenant_id', 'created_at'],
-    method: 'btree',
+    table: "relationships",
+    name: "idx_relationships_tenant_created",
+    columns: ["tenant_id", "created_at"],
+    method: "btree",
   },
 
   // Investigations table
   {
-    table: 'investigations',
-    name: 'idx_investigations_tenant_status',
-    columns: ['tenant_id', 'status'],
-    method: 'btree',
+    table: "investigations",
+    name: "idx_investigations_tenant_status",
+    columns: ["tenant_id", "status"],
+    method: "btree",
   },
   {
-    table: 'investigations',
-    name: 'idx_investigations_tenant_priority',
-    columns: ['tenant_id', 'priority'],
-    method: 'btree',
+    table: "investigations",
+    name: "idx_investigations_tenant_priority",
+    columns: ["tenant_id", "priority"],
+    method: "btree",
   },
   {
-    table: 'investigations',
-    name: 'idx_investigations_status_created',
-    columns: ['status', 'created_at'],
-    method: 'btree',
+    table: "investigations",
+    name: "idx_investigations_status_created",
+    columns: ["status", "created_at"],
+    method: "btree",
   },
   {
-    table: 'investigations',
-    name: 'idx_investigations_assigned_user',
-    columns: ['assigned_to', 'status'],
-    method: 'btree',
-    where: 'assigned_to IS NOT NULL',
+    table: "investigations",
+    name: "idx_investigations_assigned_user",
+    columns: ["assigned_to", "status"],
+    method: "btree",
+    where: "assigned_to IS NOT NULL",
   },
 
   // Sources table
   {
-    table: 'sources',
-    name: 'idx_sources_tenant_type',
-    columns: ['tenant_id', 'type'],
-    method: 'btree',
+    table: "sources",
+    name: "idx_sources_tenant_type",
+    columns: ["tenant_id", "type"],
+    method: "btree",
   },
   {
-    table: 'sources',
-    name: 'idx_sources_entity_created',
-    columns: ['entity_id', 'created_at'],
-    method: 'btree',
+    table: "sources",
+    name: "idx_sources_entity_created",
+    columns: ["entity_id", "created_at"],
+    method: "btree",
   },
 
   // Users table
   {
-    table: 'users',
-    name: 'idx_users_tenant_role',
-    columns: ['tenant_id', 'role'],
-    method: 'btree',
+    table: "users",
+    name: "idx_users_tenant_role",
+    columns: ["tenant_id", "role"],
+    method: "btree",
   },
   {
-    table: 'users',
-    name: 'idx_users_email_tenant',
-    columns: ['email', 'tenant_id'],
+    table: "users",
+    name: "idx_users_email_tenant",
+    columns: ["email", "tenant_id"],
     unique: true,
   },
 
   // Audit logs (if exists)
   {
-    table: 'audit_logs',
-    name: 'idx_audit_tenant_created',
-    columns: ['tenant_id', 'created_at'],
-    method: 'btree',
+    table: "audit_logs",
+    name: "idx_audit_tenant_created",
+    columns: ["tenant_id", "created_at"],
+    method: "btree",
   },
   {
-    table: 'audit_logs',
-    name: 'idx_audit_user_action',
-    columns: ['user_id', 'action'],
-    method: 'btree',
+    table: "audit_logs",
+    name: "idx_audit_user_action",
+    columns: ["user_id", "action"],
+    method: "btree",
   },
 
   // Entity embeddings (vector similarity)
   {
-    table: 'entity_embeddings',
-    name: 'idx_entity_embeddings_entity',
-    columns: ['entity_id'],
-    method: 'btree',
+    table: "entity_embeddings",
+    name: "idx_entity_embeddings_entity",
+    columns: ["entity_id"],
+    method: "btree",
   },
 
   // MCP sessions
   {
-    table: 'mcp_sessions',
-    name: 'idx_mcp_sessions_user_created',
-    columns: ['user_id', 'created_at'],
-    method: 'btree',
+    table: "mcp_sessions",
+    name: "idx_mcp_sessions_user_created",
+    columns: ["user_id", "created_at"],
+    method: "btree",
   },
 
   // Pipelines
   {
-    table: 'pipelines',
-    name: 'idx_pipelines_tenant_status',
-    columns: ['tenant_id', 'status'],
-    method: 'btree',
+    table: "pipelines",
+    name: "idx_pipelines_tenant_status",
+    columns: ["tenant_id", "status"],
+    method: "btree",
   },
 ];
 
@@ -220,27 +220,28 @@ export function createOptimizedPool(config: PostgresOptimizedConfig): Pool {
     min: config.min ?? defaultPostgresConfig.min,
     max: config.max ?? defaultPostgresConfig.max,
     idleTimeoutMillis: config.idleTimeoutMillis ?? defaultPostgresConfig.idleTimeoutMillis,
-    connectionTimeoutMillis: config.connectionTimeoutMillis ?? defaultPostgresConfig.connectionTimeoutMillis,
+    connectionTimeoutMillis:
+      config.connectionTimeoutMillis ?? defaultPostgresConfig.connectionTimeoutMillis,
     application_name: config.application_name ?? defaultPostgresConfig.application_name,
   };
 
   const pool = new Pool(poolConfig);
 
   // Monitor pool events
-  pool.on('connect', () => {
-    logger.debug('New PostgreSQL client connected to pool');
+  pool.on("connect", () => {
+    logger.debug("New PostgreSQL client connected to pool");
   });
 
-  pool.on('acquire', () => {
-    logger.debug('PostgreSQL client acquired from pool');
+  pool.on("acquire", () => {
+    logger.debug("PostgreSQL client acquired from pool");
   });
 
-  pool.on('remove', () => {
-    logger.debug('PostgreSQL client removed from pool');
+  pool.on("remove", () => {
+    logger.debug("PostgreSQL client removed from pool");
   });
 
-  pool.on('error', (err) => {
-    logger.error('Unexpected error on idle PostgreSQL client:', err);
+  pool.on("error", (err) => {
+    logger.error("Unexpected error on idle PostgreSQL client:", err);
   });
 
   return pool;
@@ -257,7 +258,8 @@ export class OptimizedPostgresClient {
 
   constructor(pool: Pool, config: PostgresOptimizedConfig = {}) {
     this.pool = pool;
-    this.slowQueryThreshold = config.slowQueryThreshold ?? defaultPostgresConfig.slowQueryThreshold!;
+    this.slowQueryThreshold =
+      config.slowQueryThreshold ?? defaultPostgresConfig.slowQueryThreshold!;
     this.preparedStatements = new Map();
     this.queryStats = new Map();
   }
@@ -285,7 +287,7 @@ export class OptimizedPostgresClient {
       // Log slow queries
       if (duration > this.slowQueryThreshold) {
         logger.warn({
-          msg: 'Slow query detected',
+          msg: "Slow query detected",
           query: text.substring(0, 200),
           duration,
           threshold: this.slowQueryThreshold,
@@ -297,7 +299,7 @@ export class OptimizedPostgresClient {
     } catch (error) {
       const duration = Date.now() - startTime;
       logger.error({
-        msg: 'Query failed',
+        msg: "Query failed",
         query: text.substring(0, 200),
         duration,
         error: (error as Error).message,
@@ -312,12 +314,12 @@ export class OptimizedPostgresClient {
   async transaction<T>(callback: (client: any) => Promise<T>): Promise<T> {
     const client = await this.pool.connect();
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
       const result = await callback(client);
-      await client.query('COMMIT');
+      await client.query("COMMIT");
       return result;
     } catch (error) {
-      await client.query('ROLLBACK');
+      await client.query("ROLLBACK");
       throw error;
     } finally {
       client.release();
@@ -370,7 +372,7 @@ export class OptimizedPostgresClient {
    */
   private hashQuery(text: string): string {
     // Normalize query by removing whitespace and values
-    return text.replace(/\s+/g, ' ').substring(0, 100);
+    return text.replace(/\s+/g, " ").substring(0, 100);
   }
 
   /**
@@ -397,14 +399,14 @@ export class OptimizedPostgresClient {
  */
 export async function applyCompositeIndexes(
   client: any,
-  indexes: CompositeIndexDefinition[],
+  indexes: CompositeIndexDefinition[]
 ): Promise<void> {
   for (const index of indexes) {
     try {
-      const columns = index.columns.join(', ');
-      const unique = index.unique ? 'UNIQUE' : '';
-      const method = index.method ? `USING ${index.method.toUpperCase()}` : '';
-      const where = index.where ? `WHERE ${index.where}` : '';
+      const columns = index.columns.join(", ");
+      const unique = index.unique ? "UNIQUE" : "";
+      const method = index.method ? `USING ${index.method.toUpperCase()}` : "";
+      const where = index.where ? `WHERE ${index.where}` : "";
 
       const query = `
         CREATE ${unique} INDEX IF NOT EXISTS ${index.name}
@@ -482,7 +484,7 @@ export async function getSlowQueries(client: any, limit: number = 10): Promise<a
     return result.rows;
   } catch (error) {
     // pg_stat_statements extension might not be enabled
-    logger.warn('pg_stat_statements not available');
+    logger.warn("pg_stat_statements not available");
     return [];
   }
 }

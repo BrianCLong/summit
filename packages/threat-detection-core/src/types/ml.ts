@@ -3,15 +3,15 @@
  */
 
 export enum ModelType {
-  SUPERVISED_CLASSIFIER = 'SUPERVISED_CLASSIFIER',
-  UNSUPERVISED_ANOMALY = 'UNSUPERVISED_ANOMALY',
-  SEMI_SUPERVISED = 'SEMI_SUPERVISED',
-  AUTOENCODER = 'AUTOENCODER',
-  GAN = 'GAN',
-  ENSEMBLE = 'ENSEMBLE',
-  ONLINE_LEARNING = 'ONLINE_LEARNING',
-  DEEP_LEARNING = 'DEEP_LEARNING',
-  TIME_SERIES = 'TIME_SERIES'
+  SUPERVISED_CLASSIFIER = "SUPERVISED_CLASSIFIER",
+  UNSUPERVISED_ANOMALY = "UNSUPERVISED_ANOMALY",
+  SEMI_SUPERVISED = "SEMI_SUPERVISED",
+  AUTOENCODER = "AUTOENCODER",
+  GAN = "GAN",
+  ENSEMBLE = "ENSEMBLE",
+  ONLINE_LEARNING = "ONLINE_LEARNING",
+  DEEP_LEARNING = "DEEP_LEARNING",
+  TIME_SERIES = "TIME_SERIES",
 }
 
 export interface MLModel {
@@ -86,7 +86,7 @@ export interface PredictionResult {
 
   // Explainability
   explanation?: {
-    method: 'lime' | 'shap' | 'attention' | 'feature_importance';
+    method: "lime" | "shap" | "attention" | "feature_importance";
     featureContributions: Record<string, number>;
     reasoning?: string;
   };
@@ -98,13 +98,13 @@ export interface PredictionResult {
 }
 
 export interface AnomalyDetectionModel {
-  algorithm: 'isolation_forest' | 'one_class_svm' | 'autoencoder' | 'lstm' | 'gan' | 'statistical';
+  algorithm: "isolation_forest" | "one_class_svm" | "autoencoder" | "lstm" | "gan" | "statistical";
   threshold: number;
   contaminationRate?: number; // For unsupervised models
 
   // Statistical parameters
   statisticalParams?: {
-    method: 'zscore' | 'iqr' | 'mad' | 'grubbs';
+    method: "zscore" | "iqr" | "mad" | "grubbs";
     windowSize?: number;
     sensitivity: number;
   };
@@ -120,7 +120,7 @@ export interface AnomalyDetectionModel {
 
 export interface EnsembleModel {
   baseModels: string[]; // Model IDs
-  aggregationMethod: 'voting' | 'averaging' | 'weighted_average' | 'stacking';
+  aggregationMethod: "voting" | "averaging" | "weighted_average" | "stacking";
   weights?: Record<string, number>;
 
   // Meta-learner for stacking
@@ -156,19 +156,19 @@ export interface FeatureEngineering {
 
   // Normalization
   normalization?: {
-    method: 'minmax' | 'zscore' | 'robust' | 'none';
+    method: "minmax" | "zscore" | "robust" | "none";
     parameters: Record<string, any>;
   };
 
   // Encoding
   categoricalEncoding?: {
-    method: 'onehot' | 'label' | 'target' | 'embedding';
+    method: "onehot" | "label" | "target" | "embedding";
     columns: string[];
   };
 
   // Dimensionality reduction
   dimensionalityReduction?: {
-    method: 'pca' | 'tsne' | 'umap' | 'autoencoder';
+    method: "pca" | "tsne" | "umap" | "autoencoder";
     targetDimensions: number;
   };
 }
@@ -180,17 +180,20 @@ export interface ModelMonitoring {
   dataDrift: {
     detected: boolean;
     score: number;
-    features: Record<string, {
-      driftScore: number;
-      drifted: boolean;
-    }>;
+    features: Record<
+      string,
+      {
+        driftScore: number;
+        drifted: boolean;
+      }
+    >;
   };
 
   // Concept drift
   conceptDrift: {
     detected: boolean;
     score: number;
-    method: 'adwin' | 'ddm' | 'eddm' | 'page_hinkley';
+    method: "adwin" | "ddm" | "eddm" | "page_hinkley";
   };
 
   // Performance degradation
@@ -205,7 +208,7 @@ export interface ModelMonitoring {
   recommendations: {
     retrain: boolean;
     reason: string;
-    priority: 'low' | 'medium' | 'high' | 'critical';
+    priority: "low" | "medium" | "high" | "critical";
   }[];
 
   lastChecked: Date;

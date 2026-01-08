@@ -3,8 +3,8 @@
  * Multi-framework model serving with auto-scaling and load balancing
  */
 
-import { ServingConfig, DeploymentStrategy } from '@intelgraph/mlops-platform';
-import { EventEmitter } from 'events';
+import { ServingConfig, DeploymentStrategy } from "@intelgraph/mlops-platform";
+import { EventEmitter } from "events";
 
 export interface PredictionRequest {
   modelId: string;
@@ -12,7 +12,7 @@ export interface PredictionRequest {
   input: Record<string, any>;
   options?: {
     timeout?: number;
-    priority?: 'low' | 'normal' | 'high';
+    priority?: "low" | "normal" | "high";
     explainability?: boolean;
   };
 }
@@ -34,7 +34,7 @@ export interface PredictionResponse {
 export interface ModelDeployment {
   id: string;
   config: ServingConfig;
-  status: 'deploying' | 'healthy' | 'degraded' | 'unhealthy' | 'terminated';
+  status: "deploying" | "healthy" | "degraded" | "unhealthy" | "terminated";
   endpoints: string[];
   replicas: {
     current: number;
@@ -74,7 +74,7 @@ export class ModelServer extends EventEmitter {
     const deployment: ModelDeployment = {
       id: config.deploymentId,
       config,
-      status: 'deploying',
+      status: "deploying",
       endpoints: [],
       replicas: {
         current: 0,
@@ -95,7 +95,7 @@ export class ModelServer extends EventEmitter {
     };
 
     this.deployments.set(config.deploymentId, deployment);
-    this.emit('deployment:started', deployment);
+    this.emit("deployment:started", deployment);
 
     // Simulate deployment process
     await this.performDeployment(deployment);
@@ -110,16 +110,16 @@ export class ModelServer extends EventEmitter {
     const { strategy } = deployment.config;
 
     switch (strategy) {
-      case 'blue-green':
+      case "blue-green":
         await this.blueGreenDeploy(deployment);
         break;
-      case 'canary':
+      case "canary":
         await this.canaryDeploy(deployment);
         break;
-      case 'shadow':
+      case "shadow":
         await this.shadowDeploy(deployment);
         break;
-      case 'rolling':
+      case "rolling":
         await this.rollingDeploy(deployment);
         break;
       default:
@@ -132,10 +132,8 @@ export class ModelServer extends EventEmitter {
    */
   private async blueGreenDeploy(deployment: ModelDeployment): Promise<void> {
     // 1. Deploy new version (green) alongside current (blue)
-    deployment.status = 'deploying';
-    deployment.endpoints = [
-      `https://model-${deployment.id}-green.example.com`,
-    ];
+    deployment.status = "deploying";
+    deployment.endpoints = [`https://model-${deployment.id}-green.example.com`];
 
     // 2. Run health checks
     await this.runHealthChecks(deployment.id);
@@ -143,9 +141,9 @@ export class ModelServer extends EventEmitter {
     // 3. Switch traffic
     deployment.replicas.current = deployment.config.resources.replicas;
     deployment.replicas.ready = deployment.replicas.current;
-    deployment.status = 'healthy';
+    deployment.status = "healthy";
 
-    this.emit('deployment:completed', deployment);
+    this.emit("deployment:completed", deployment);
   }
 
   /**
@@ -156,10 +154,8 @@ export class ModelServer extends EventEmitter {
     const canaryPercentage = strategyConfig?.canaryPercentage || 10;
 
     // 1. Deploy canary version
-    deployment.status = 'deploying';
-    deployment.endpoints = [
-      `https://model-${deployment.id}-canary.example.com`,
-    ];
+    deployment.status = "deploying";
+    deployment.endpoints = [`https://model-${deployment.id}-canary.example.com`];
 
     // 2. Route small percentage of traffic
     await this.sleep(1000);
@@ -171,12 +167,12 @@ export class ModelServer extends EventEmitter {
       // 4. Gradually increase traffic
       deployment.replicas.current = deployment.config.resources.replicas;
       deployment.replicas.ready = deployment.replicas.current;
-      deployment.status = 'healthy';
-      this.emit('deployment:completed', deployment);
+      deployment.status = "healthy";
+      this.emit("deployment:completed", deployment);
     } else {
       // Rollback
-      deployment.status = 'unhealthy';
-      this.emit('deployment:failed', deployment);
+      deployment.status = "unhealthy";
+      this.emit("deployment:failed", deployment);
     }
   }
 
@@ -185,16 +181,14 @@ export class ModelServer extends EventEmitter {
    */
   private async shadowDeploy(deployment: ModelDeployment): Promise<void> {
     // Deploy shadow version that receives traffic copy but doesn't serve responses
-    deployment.status = 'deploying';
-    deployment.endpoints = [
-      `https://model-${deployment.id}-shadow.example.com`,
-    ];
+    deployment.status = "deploying";
+    deployment.endpoints = [`https://model-${deployment.id}-shadow.example.com`];
 
     deployment.replicas.current = deployment.config.resources.replicas;
     deployment.replicas.ready = deployment.replicas.current;
-    deployment.status = 'healthy';
+    deployment.status = "healthy";
 
-    this.emit('deployment:shadow-active', deployment);
+    this.emit("deployment:shadow-active", deployment);
   }
 
   /**
@@ -202,23 +196,23 @@ export class ModelServer extends EventEmitter {
    */
   private async rollingDeploy(deployment: ModelDeployment): Promise<void> {
     const totalReplicas = deployment.config.resources.replicas;
-    deployment.status = 'deploying';
+    deployment.status = "deploying";
 
     // Update replicas one by one
     for (let i = 1; i <= totalReplicas; i++) {
       deployment.replicas.current = i;
       deployment.replicas.ready = i;
       await this.sleep(500);
-      this.emit('deployment:replica-updated', {
+      this.emit("deployment:replica-updated", {
         deploymentId: deployment.id,
         replica: i,
         total: totalReplicas,
       });
     }
 
-    deployment.status = 'healthy';
+    deployment.status = "healthy";
     deployment.endpoints = [`https://model-${deployment.id}.example.com`];
-    this.emit('deployment:completed', deployment);
+    this.emit("deployment:completed", deployment);
   }
 
   /**
@@ -226,17 +220,17 @@ export class ModelServer extends EventEmitter {
    */
   private async recreateDeploy(deployment: ModelDeployment): Promise<void> {
     // Terminate old version and create new
-    deployment.status = 'deploying';
+    deployment.status = "deploying";
     deployment.replicas.current = 0;
 
     await this.sleep(1000);
 
     deployment.replicas.current = deployment.config.resources.replicas;
     deployment.replicas.ready = deployment.replicas.current;
-    deployment.status = 'healthy';
+    deployment.status = "healthy";
     deployment.endpoints = [`https://model-${deployment.id}.example.com`];
 
-    this.emit('deployment:completed', deployment);
+    this.emit("deployment:completed", deployment);
   }
 
   /**
@@ -246,14 +240,11 @@ export class ModelServer extends EventEmitter {
     const startTime = Date.now();
 
     // Find deployment
-    const deployment = this.findDeploymentForModel(
-      request.modelId,
-      request.version
-    );
+    const deployment = this.findDeploymentForModel(request.modelId, request.version);
 
     if (!deployment) {
       throw new Error(
-        `No deployment found for model ${request.modelId} version ${request.version || 'latest'}`
+        `No deployment found for model ${request.modelId} version ${request.version || "latest"}`
       );
     }
 
@@ -270,23 +261,23 @@ export class ModelServer extends EventEmitter {
     const response: PredictionResponse = {
       predictionId: this.generatePredictionId(),
       modelId: request.modelId,
-      version: request.version || 'latest',
+      version: request.version || "latest",
       output: {
-        prediction: Math.random() > 0.5 ? 'positive' : 'negative',
+        prediction: Math.random() > 0.5 ? "positive" : "negative",
         confidence: Math.random(),
       },
       latency,
       timestamp: new Date(),
       metadata: {
         serverId: deployment.id,
-        framework: 'pytorch', // Mock
+        framework: "pytorch", // Mock
       },
     };
 
     // Update metrics
     await this.updateMetrics(deployment.id, latency, true);
 
-    this.emit('prediction:completed', response);
+    this.emit("prediction:completed", response);
 
     return response;
   }
@@ -294,10 +285,8 @@ export class ModelServer extends EventEmitter {
   /**
    * Batch prediction
    */
-  async batchPredict(
-    requests: PredictionRequest[]
-  ): Promise<PredictionResponse[]> {
-    const results = await Promise.all(requests.map(req => this.predict(req)));
+  async batchPredict(requests: PredictionRequest[]): Promise<PredictionResponse[]> {
+    const results = await Promise.all(requests.map((req) => this.predict(req)));
     return results;
   }
 
@@ -320,7 +309,7 @@ export class ModelServer extends EventEmitter {
       await this.sleep(200);
     }
 
-    this.emit('deployment:scaled', {
+    this.emit("deployment:scaled", {
       deploymentId,
       replicas,
     });
@@ -342,18 +331,12 @@ export class ModelServer extends EventEmitter {
 
     // Simple scaling algorithm
     if (currentValue > targetValue * 1.2) {
-      const newReplicas = Math.min(
-        deployment.replicas.current + 1,
-        maxReplicas
-      );
+      const newReplicas = Math.min(deployment.replicas.current + 1, maxReplicas);
       if (newReplicas !== deployment.replicas.current) {
         await this.scale(deploymentId, newReplicas);
       }
     } else if (currentValue < targetValue * 0.8) {
-      const newReplicas = Math.max(
-        deployment.replicas.current - 1,
-        minReplicas
-      );
+      const newReplicas = Math.max(deployment.replicas.current - 1, minReplicas);
       if (newReplicas !== deployment.replicas.current) {
         await this.scale(deploymentId, newReplicas);
       }
@@ -363,13 +346,15 @@ export class ModelServer extends EventEmitter {
   /**
    * Update traffic split for A/B testing
    */
-  async updateTrafficSplit(splits: Array<{
-    deploymentId: string;
-    percentage: number;
-  }>): Promise<void> {
+  async updateTrafficSplit(
+    splits: Array<{
+      deploymentId: string;
+      percentage: number;
+    }>
+  ): Promise<void> {
     const total = splits.reduce((sum, s) => sum + s.percentage, 0);
     if (Math.abs(total - 100) > 0.01) {
-      throw new Error('Traffic percentages must sum to 100');
+      throw new Error("Traffic percentages must sum to 100");
     }
 
     for (const split of splits) {
@@ -380,7 +365,7 @@ export class ModelServer extends EventEmitter {
       }
     }
 
-    this.emit('traffic:updated', splits);
+    this.emit("traffic:updated", splits);
   }
 
   /**
@@ -392,16 +377,16 @@ export class ModelServer extends EventEmitter {
       throw new Error(`Deployment ${deploymentId} not found`);
     }
 
-    deployment.status = 'deploying';
-    this.emit('deployment:rollback-started', deployment);
+    deployment.status = "deploying";
+    this.emit("deployment:rollback-started", deployment);
 
     // Simulate rollback
     await this.sleep(1000);
 
-    deployment.status = 'healthy';
+    deployment.status = "healthy";
     deployment.updatedAt = new Date();
 
-    this.emit('deployment:rollback-completed', deployment);
+    this.emit("deployment:rollback-completed", deployment);
   }
 
   /**
@@ -413,12 +398,12 @@ export class ModelServer extends EventEmitter {
       throw new Error(`Deployment ${deploymentId} not found`);
     }
 
-    deployment.status = 'terminated';
+    deployment.status = "terminated";
     deployment.replicas.desired = 0;
     deployment.replicas.current = 0;
     deployment.replicas.ready = 0;
 
-    this.emit('deployment:terminated', deployment);
+    this.emit("deployment:terminated", deployment);
   }
 
   /**
@@ -434,24 +419,20 @@ export class ModelServer extends EventEmitter {
   async listDeployments(filter?: {
     modelId?: string;
     environment?: string;
-    status?: ModelDeployment['status'];
+    status?: ModelDeployment["status"];
   }): Promise<ModelDeployment[]> {
     let deployments = Array.from(this.deployments.values());
 
     if (filter?.modelId) {
-      deployments = deployments.filter(
-        d => d.config.modelId === filter.modelId
-      );
+      deployments = deployments.filter((d) => d.config.modelId === filter.modelId);
     }
 
     if (filter?.environment) {
-      deployments = deployments.filter(
-        d => d.config.environment === filter.environment
-      );
+      deployments = deployments.filter((d) => d.config.environment === filter.environment);
     }
 
     if (filter?.status) {
-      deployments = deployments.filter(d => d.status === filter.status);
+      deployments = deployments.filter((d) => d.status === filter.status);
     }
 
     return deployments;
@@ -460,33 +441,30 @@ export class ModelServer extends EventEmitter {
   /**
    * Get deployment metrics
    */
-  async getMetrics(
-    deploymentId: string,
-    startTime?: Date,
-    endTime?: Date
-  ): Promise<any[]> {
+  async getMetrics(deploymentId: string, startTime?: Date, endTime?: Date): Promise<any[]> {
     const metrics = this.metrics.get(deploymentId) || [];
 
     if (!startTime && !endTime) {
       return metrics;
     }
 
-    return metrics.filter(m => {
+    return metrics.filter((m) => {
       const timestamp = new Date(m.timestamp);
-      if (startTime && timestamp < startTime) {return false;}
-      if (endTime && timestamp > endTime) {return false;}
+      if (startTime && timestamp < startTime) {
+        return false;
+      }
+      if (endTime && timestamp > endTime) {
+        return false;
+      }
       return true;
     });
   }
 
-  private findDeploymentForModel(
-    modelId: string,
-    version?: string
-  ): ModelDeployment | null {
+  private findDeploymentForModel(modelId: string, version?: string): ModelDeployment | null {
     for (const deployment of this.deployments.values()) {
       if (deployment.config.modelId === modelId) {
         if (!version || deployment.config.modelVersion === version) {
-          if (deployment.status === 'healthy') {
+          if (deployment.status === "healthy") {
             return deployment;
           }
         }
@@ -500,10 +478,7 @@ export class ModelServer extends EventEmitter {
     return deployment.metrics.requestsPerSecond > 1000;
   }
 
-  private async queueRequest(
-    deploymentId: string,
-    request: PredictionRequest
-  ): Promise<void> {
+  private async queueRequest(deploymentId: string, request: PredictionRequest): Promise<void> {
     const queue = this.requestQueue.get(deploymentId) || [];
     queue.push(request);
     this.requestQueue.set(deploymentId, queue);
@@ -514,10 +489,7 @@ export class ModelServer extends EventEmitter {
     return true;
   }
 
-  private async monitorCanary(
-    deploymentId: string,
-    percentage: number
-  ): Promise<boolean> {
+  private async monitorCanary(deploymentId: string, percentage: number): Promise<boolean> {
     await this.sleep(2000);
     // In real implementation, compare error rates, latency, etc.
     return Math.random() > 0.1; // 90% success rate
@@ -529,16 +501,16 @@ export class ModelServer extends EventEmitter {
     success: boolean
   ): Promise<void> {
     const deployment = this.deployments.get(deploymentId);
-    if (!deployment) {return;}
+    if (!deployment) {
+      return;
+    }
 
     // Update real-time metrics
     deployment.metrics.requestsPerSecond += 0.1;
-    deployment.metrics.averageLatency =
-      (deployment.metrics.averageLatency * 0.9 + latency * 0.1);
+    deployment.metrics.averageLatency = deployment.metrics.averageLatency * 0.9 + latency * 0.1;
 
     if (!success) {
-      deployment.metrics.errorRate =
-        (deployment.metrics.errorRate * 0.99 + 1 * 0.01);
+      deployment.metrics.errorRate = deployment.metrics.errorRate * 0.99 + 1 * 0.01;
     }
 
     // Store historical metrics
@@ -551,18 +523,15 @@ export class ModelServer extends EventEmitter {
     this.metrics.set(deploymentId, metrics);
   }
 
-  private getCurrentMetricValue(
-    deployment: ModelDeployment,
-    metric: string
-  ): number {
+  private getCurrentMetricValue(deployment: ModelDeployment, metric: string): number {
     switch (metric) {
-      case 'cpu':
+      case "cpu":
         return deployment.metrics.cpuUsage;
-      case 'memory':
+      case "memory":
         return deployment.metrics.memoryUsage;
-      case 'requests-per-second':
+      case "requests-per-second":
         return deployment.metrics.requestsPerSecond;
-      case 'latency':
+      case "latency":
         return deployment.metrics.averageLatency;
       default:
         return 0;
@@ -574,6 +543,6 @@ export class ModelServer extends EventEmitter {
   }
 
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

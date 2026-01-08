@@ -10,7 +10,7 @@ import {
   FacetValue,
   AssetMetadata,
   FilterOperator,
-} from '@intelgraph/data-catalog';
+} from "@intelgraph/data-catalog";
 
 export interface ISearchIndex {
   search(request: SearchRequest): Promise<SearchResponse>;
@@ -54,15 +54,18 @@ export class SearchService {
   /**
    * Search with suggestions
    */
-  async searchWithSuggestions(query: string, userId?: string): Promise<{
+  async searchWithSuggestions(
+    query: string,
+    userId?: string
+  ): Promise<{
     results: SearchResponse;
     suggestions: string[];
   }> {
     const request: SearchRequest = {
       query,
       filters: [],
-      facets: ['type', 'status', 'domain', 'owner'],
-      sort: [{ field: '_score', direction: 'DESC' }],
+      facets: ["type", "status", "domain", "owner"],
+      sort: [{ field: "_score", direction: "DESC" }],
       offset: 0,
       limit: 20,
     };
@@ -89,8 +92,8 @@ export class SearchService {
     const request: SearchRequest = {
       query,
       filters,
-      facets: ['type', 'status', 'domain', 'owner', 'classification', 'tags'],
-      sort: [{ field: '_score', direction: 'DESC' }],
+      facets: ["type", "status", "domain", "owner", "classification", "tags"],
+      sort: [{ field: "_score", direction: "DESC" }],
       offset: 0,
       limit: 20,
     };
@@ -104,7 +107,7 @@ export class SearchService {
   async advancedSearch(
     query: string,
     filters: Record<string, any>,
-    sort: { field: string; direction: 'ASC' | 'DESC' }[] = [],
+    sort: { field: string; direction: "ASC" | "DESC" }[] = [],
     offset: number = 0,
     limit: number = 20,
     userId?: string
@@ -114,8 +117,8 @@ export class SearchService {
     const request: SearchRequest = {
       query,
       filters: searchFilters,
-      facets: ['type', 'status', 'domain', 'owner', 'classification'],
-      sort: sort.length > 0 ? sort : [{ field: '_score', direction: 'DESC' }],
+      facets: ["type", "status", "domain", "owner", "classification"],
+      sort: sort.length > 0 ? sort : [{ field: "_score", direction: "DESC" }],
       offset,
       limit,
     };
@@ -167,7 +170,12 @@ export class SearchService {
   /**
    * Record search click
    */
-  async recordClick(query: string, assetId: string, position: number, userId: string): Promise<void> {
+  async recordClick(
+    query: string,
+    assetId: string,
+    position: number,
+    userId: string
+  ): Promise<void> {
     if (this.analytics) {
       await this.analytics.recordClick(query, assetId, position, userId);
     }
@@ -209,7 +217,7 @@ export class SearchService {
           operator: FilterOperator.IN,
           value,
         });
-      } else if (typeof value === 'object' && 'operator' in value) {
+      } else if (typeof value === "object" && "operator" in value) {
         filters.push({
           field,
           operator: value.operator,

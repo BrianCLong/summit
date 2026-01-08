@@ -22,7 +22,7 @@ export type CompensationHandler = (context: SagaContext) => Promise<void>;
 
 export interface RetryPolicy {
   maxAttempts: number;
-  backoff: 'linear' | 'exponential';
+  backoff: "linear" | "exponential";
   delay: number;
 }
 
@@ -38,12 +38,12 @@ export interface SagaContext {
 }
 
 export enum SagaStatus {
-  PENDING = 'pending',
-  RUNNING = 'running',
-  COMPLETED = 'completed',
-  COMPENSATING = 'compensating',
-  COMPENSATED = 'compensated',
-  FAILED = 'failed'
+  PENDING = "pending",
+  RUNNING = "running",
+  COMPLETED = "completed",
+  COMPENSATING = "compensating",
+  COMPENSATED = "compensated",
+  FAILED = "failed",
 }
 
 export interface SagaState {
@@ -57,8 +57,14 @@ export interface SagaState {
 }
 
 export interface SagaEvent {
-  eventType: 'saga.started' | 'saga.step.completed' | 'saga.step.failed' |
-    'saga.completed' | 'saga.compensating' | 'saga.compensated' | 'saga.failed';
+  eventType:
+    | "saga.started"
+    | "saga.step.completed"
+    | "saga.step.failed"
+    | "saga.completed"
+    | "saga.compensating"
+    | "saga.compensated"
+    | "saga.failed";
   sagaId: string;
   stepId?: string;
   timestamp: Date;

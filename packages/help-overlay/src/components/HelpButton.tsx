@@ -3,15 +3,11 @@
  * Trigger button for opening contextual help
  */
 
-import React, { useCallback } from 'react';
-import { useHelp } from '../HelpContext.js';
-import type { HelpButtonProps } from '../types.js';
+import React, { useCallback } from "react";
+import { useHelp } from "../HelpContext.js";
+import type { HelpButtonProps } from "../types.js";
 
-export function HelpButton({
-  anchorKey,
-  className = '',
-  children,
-}: HelpButtonProps): JSX.Element {
+export function HelpButton({ anchorKey, className = "", children }: HelpButtonProps): JSX.Element {
   const { openHelp, fetchContextualHelp, setCurrentArticle } = useHelp();
 
   const handleClick = useCallback(async () => {
@@ -28,18 +24,18 @@ export function HelpButton({
   }, [anchorKey, openHelp, fetchContextualHelp, setCurrentArticle]);
 
   const defaultStyles: React.CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '24px',
-    height: '24px',
-    borderRadius: '50%',
-    border: '1px solid #ccc',
-    background: '#f5f5f5',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: 'bold',
-    color: '#666',
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "24px",
+    height: "24px",
+    borderRadius: "50%",
+    border: "1px solid #ccc",
+    background: "#f5f5f5",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "bold",
+    color: "#666",
   };
 
   return (
@@ -51,7 +47,7 @@ export function HelpButton({
       aria-label="Open help"
       title="Get help (press ? key)"
     >
-      {children || '?'}
+      {children || "?"}
     </button>
   );
 }

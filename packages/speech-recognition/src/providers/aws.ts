@@ -1,7 +1,7 @@
-import type { AudioBuffer } from '@intelgraph/audio-processing';
-import { BaseSTTProvider } from './base.js';
-import type { STTConfig, TranscriptionResult } from '../types.js';
-import { STTProvider, SUPPORTED_LANGUAGES } from '../types.js';
+import type { AudioBuffer } from "@intelgraph/audio-processing";
+import { BaseSTTProvider } from "./base.js";
+import type { STTConfig, TranscriptionResult } from "../types.js";
+import { STTProvider, SUPPORTED_LANGUAGES } from "../types.js";
 
 /**
  * AWS Transcribe Provider
@@ -14,13 +14,13 @@ export class AWSTranscribeProvider extends BaseSTTProvider {
 
   constructor(config: { region?: string; bucketName?: string } = {}) {
     super(config);
-    this.bucketName = config.bucketName || process.env.AWS_TRANSCRIBE_BUCKET || '';
+    this.bucketName = config.bucketName || process.env.AWS_TRANSCRIBE_BUCKET || "";
     // Lazy load AWS SDK
     // this.initializeClient(config);
   }
 
   getName(): string {
-    return 'AWS Transcribe';
+    return "AWS Transcribe";
   }
 
   async transcribe(audio: AudioBuffer, config: STTConfig): Promise<TranscriptionResult> {
@@ -41,15 +41,15 @@ export class AWSTranscribeProvider extends BaseSTTProvider {
         LanguageCode: this.mapLanguageCode(mergedConfig.language),
         MediaFormat: audio.metadata.format,
         Media: {
-          MediaFileUri: `s3://${this.bucketName}/${s3Key}`
+          MediaFileUri: `s3://${this.bucketName}/${s3Key}`,
         },
         Settings: {
           ShowSpeakerLabels: mergedConfig.enableSpeakerDiarization,
           MaxSpeakerLabels: mergedConfig.maxSpeakers,
           ChannelIdentification: audio.metadata.channels > 1,
           ShowAlternatives: true,
-          MaxAlternatives: 3
-        }
+          MaxAlternatives: 3,
+        },
       };
 
       // Add custom vocabulary if provided
@@ -83,12 +83,12 @@ export class AWSTranscribeProvider extends BaseSTTProvider {
   private mapLanguageCode(languageCode: string): string {
     // AWS uses different format for some languages
     const mapping: Record<string, string> = {
-      'en-US': 'en-US',
-      'en-GB': 'en-GB',
-      'es-ES': 'es-ES',
-      'es-MX': 'es-US',
-      'fr-FR': 'fr-FR',
-      'de-DE': 'de-DE'
+      "en-US": "en-US",
+      "en-GB": "en-GB",
+      "es-ES": "es-ES",
+      "es-MX": "es-US",
+      "fr-FR": "fr-FR",
+      "de-DE": "de-DE",
       // Add more mappings as needed
     };
     return mapping[languageCode] || languageCode;
@@ -109,34 +109,39 @@ export class AWSTranscribeProvider extends BaseSTTProvider {
       // }
 
       // Wait 5 seconds before next poll
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
     }
 
-    throw new Error('Transcription job timeout');
+    throw new Error("Transcription job timeout");
   }
 
-  private transformAWSResponse(response: any, config: STTConfig, audio: AudioBuffer): TranscriptionResult {
+  private transformAWSResponse(
+    response: any,
+    config: STTConfig,
+    audio: AudioBuffer
+  ): TranscriptionResult {
     // Transform AWS Transcribe response to our format
     const transcript = response.Transcript || { results: [] };
-    const segments = transcript.results
-      ?.filter((result: any) => !result.isPartial)
-      .map((result: any) => {
-        const alternative = result.alternatives[0];
-        return {
-          text: alternative.transcript,
-          startTime: parseFloat(result.start_time || '0'),
-          endTime: parseFloat(result.end_time || audio.metadata.duration.toString()),
-          confidence: parseFloat(alternative.confidence || '1.0'),
-          words: result.items?.map((item: any) => ({
-            word: item.content,
-            startTime: parseFloat(item.start_time || '0'),
-            endTime: parseFloat(item.end_time || '0'),
-            confidence: parseFloat(item.confidence || '1.0')
-          }))
-        };
-      }) || [];
+    const segments =
+      transcript.results
+        ?.filter((result: any) => !result.isPartial)
+        .map((result: any) => {
+          const alternative = result.alternatives[0];
+          return {
+            text: alternative.transcript,
+            startTime: parseFloat(result.start_time || "0"),
+            endTime: parseFloat(result.end_time || audio.metadata.duration.toString()),
+            confidence: parseFloat(alternative.confidence || "1.0"),
+            words: result.items?.map((item: any) => ({
+              word: item.content,
+              startTime: parseFloat(item.start_time || "0"),
+              endTime: parseFloat(item.end_time || "0"),
+              confidence: parseFloat(item.confidence || "1.0"),
+            })),
+          };
+        }) || [];
 
-    const fullText = segments.map((seg: any) => seg.text).join(' ');
+    const fullText = segments.map((seg: any) => seg.text).join(" ");
 
     return {
       text: fullText,
@@ -145,10 +150,10 @@ export class AWSTranscribeProvider extends BaseSTTProvider {
       languageConfidence: 1.0,
       duration: audio.metadata.duration,
       provider: STTProvider.AWS,
-      model: 'transcribe',
+      model: "transcribe",
       metadata: {
-        jobName: response.TranscriptionJobName
-      }
+        jobName: response.TranscriptionJobName,
+      },
     };
   }
 }

@@ -35,10 +35,12 @@ kubectl port-forward <pod-name> 8080:80 -n <namespace>
 ### 1. Pod Stuck in Pending
 
 **Symptoms**:
+
 - Pod status: `Pending`
 - No containers running
 
 **Diagnosis**:
+
 ```bash
 kubectl describe pod <pod-name> -n <namespace>
 ```
@@ -46,21 +48,27 @@ kubectl describe pod <pod-name> -n <namespace>
 **Common Causes**:
 
 #### Insufficient Resources
+
 ```
 Events:
   Warning  FailedScheduling  pod didn't trigger scale-up (not enough cpu)
 ```
+
 **Solution**:
+
 - Scale up cluster or add nodes
 - Reduce resource requests
 - Check resource quotas: `kubectl describe resourcequota -n <namespace>`
 
 #### PVC Not Bound
+
 ```
 Events:
   Warning  FailedMount  unable to mount volume
 ```
+
 **Solution**:
+
 ```bash
 kubectl get pvc -n <namespace>
 kubectl describe pvc <pvc-name> -n <namespace>
@@ -69,21 +77,26 @@ kubectl get storageclass
 ```
 
 #### Node Selector/Affinity Not Satisfied
+
 ```
 Events:
   Warning  FailedScheduling  0/3 nodes are available: 3 node(s) didn't match Pod's node affinity
 ```
+
 **Solution**:
+
 - Check node labels: `kubectl get nodes --show-labels`
 - Update pod affinity or add labels to nodes
 
 ### 2. CrashLoopBackOff
 
 **Symptoms**:
+
 - Pod status: `CrashLoopBackOff`
 - Container repeatedly restarting
 
 **Diagnosis**:
+
 ```bash
 kubectl logs <pod-name> -n <namespace> --previous
 kubectl describe pod <pod-name> -n <namespace>
@@ -92,12 +105,15 @@ kubectl describe pod <pod-name> -n <namespace>
 **Common Causes**:
 
 #### Application Error
+
 **Check logs for**:
+
 - Uncaught exceptions
 - Missing environment variables
 - Database connection failures
 
 **Solution**:
+
 ```bash
 # Check environment variables
 kubectl get pod <pod-name> -n <namespace> -o jsonpath='{.spec.containers[0].env}'
@@ -110,21 +126,27 @@ docker run --rm -it <image> /bin/sh
 ```
 
 #### Health Check Failure
+
 ```
 Liveness probe failed: HTTP probe failed with statuscode: 503
 ```
+
 **Solution**:
+
 - Verify health check endpoint works
 - Increase `initialDelaySeconds` or `failureThreshold`
 - Check app startup time
+
 ```yaml
 livenessProbe:
-  initialDelaySeconds: 60  # Increase
-  failureThreshold: 5      # Increase
+  initialDelaySeconds: 60 # Increase
+  failureThreshold: 5 # Increase
 ```
 
 #### Missing Dependencies
+
 **Solution**:
+
 ```bash
 # Check init containers
 kubectl logs <pod-name> -c <init-container-name> -n <namespace>
@@ -137,10 +159,12 @@ kubectl exec -it <pod-name> -n <namespace> -- nc -zv redis 6379
 ### 3. ImagePullBackOff
 
 **Symptoms**:
+
 - Pod status: `ImagePullBackOff` or `ErrImagePull`
 - Cannot pull container image
 
 **Diagnosis**:
+
 ```bash
 kubectl describe pod <pod-name> -n <namespace> | grep -A 10 "Events"
 ```
@@ -148,10 +172,13 @@ kubectl describe pod <pod-name> -n <namespace> | grep -A 10 "Events"
 **Common Causes**:
 
 #### Image Doesn't Exist
+
 ```
 Failed to pull image "ghcr.io/user/app:tag": rpc error: code = NotFound
 ```
+
 **Solution**:
+
 ```bash
 # Verify image exists
 docker pull ghcr.io/user/app:tag
@@ -164,10 +191,13 @@ curl -H "Authorization: Bearer $TOKEN" https://ghcr.io/v2/user/app/tags/list
 ```
 
 #### Authentication Failed
+
 ```
 Failed to pull image: unauthorized: authentication required
 ```
+
 **Solution**:
+
 ```bash
 # Check image pull secret exists
 kubectl get secrets -n <namespace> | grep docker
@@ -189,10 +219,13 @@ spec:
 ```
 
 #### Rate Limiting
+
 ```
 toomanyrequests: You have reached your pull rate limit
 ```
+
 **Solution**:
+
 - Use authenticated pulls
 - Implement image caching/registry proxy
 - Spread pulls across time
@@ -200,11 +233,13 @@ toomanyrequests: You have reached your pull rate limit
 ### 4. Pod Running but Not Ready
 
 **Symptoms**:
+
 - Pod status: `Running`
 - Ready: `0/1`
 - Not receiving traffic
 
 **Diagnosis**:
+
 ```bash
 kubectl describe pod <pod-name> -n <namespace> | grep -A 20 "Conditions"
 kubectl logs <pod-name> -n <namespace>
@@ -213,10 +248,13 @@ kubectl logs <pod-name> -n <namespace>
 **Common Causes**:
 
 #### Readiness Probe Failing
+
 ```
 Readiness probe failed: HTTP probe failed with statuscode: 503
 ```
+
 **Solution**:
+
 ```bash
 # Test health endpoint manually
 kubectl exec -it <pod-name> -n <namespace> -- curl http://localhost:4000/health/ready
@@ -236,7 +274,9 @@ readinessProbe:
 ```
 
 #### Dependencies Not Ready
+
 **Solution**:
+
 ```bash
 # Check dependency status
 kubectl get pods -n <namespace> -l app=postgres
@@ -250,11 +290,13 @@ kubectl exec -it <pod-name> -n <namespace> -- redis-cli -h redis ping
 ### 5. High CPU/Memory Usage
 
 **Symptoms**:
+
 - Pods being OOMKilled
 - CPU throttling
 - Slow performance
 
 **Diagnosis**:
+
 ```bash
 kubectl top pods -n <namespace>
 kubectl top nodes
@@ -264,12 +306,15 @@ kubectl describe pod <pod-name> -n <namespace> | grep -A 5 "Limits"
 **Common Causes**:
 
 #### Memory Limit Too Low
+
 ```
 Last State:     Terminated
   Reason:       OOMKilled
   Exit Code:    137
 ```
+
 **Solution**:
+
 ```bash
 # Check current limits
 kubectl get pod <pod-name> -n <namespace> -o jsonpath='{.spec.containers[0].resources}'
@@ -283,21 +328,26 @@ resources:
 ```
 
 #### CPU Throttling
+
 ```bash
 # Check CPU usage vs limit
 kubectl top pod <pod-name> -n <namespace>
 ```
+
 **Solution**:
+
 ```yaml
 resources:
   requests:
-    cpu: 500m      # Increase
+    cpu: 500m # Increase
   limits:
-    cpu: 2000m     # Increase
+    cpu: 2000m # Increase
 ```
 
 #### Memory Leak
+
 **Solution**:
+
 - Enable heap profiling
 - Analyze with profiling tools
 - Update application code
@@ -305,10 +355,12 @@ resources:
 ### 6. HPA Not Scaling
 
 **Symptoms**:
+
 - HPA shows `<unknown>` for metrics
 - Pods not scaling despite load
 
 **Diagnosis**:
+
 ```bash
 kubectl get hpa -n <namespace>
 kubectl describe hpa <hpa-name> -n <namespace>
@@ -318,10 +370,13 @@ kubectl get apiservices | grep metrics
 **Common Causes**:
 
 #### Metrics Server Not Installed
+
 ```
 unable to get metrics for resource cpu: no metrics returned from resource metrics API
 ```
+
 **Solution**:
+
 ```bash
 # Install metrics-server
 kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
@@ -332,10 +387,13 @@ kubectl top nodes  # Should work if installed correctly
 ```
 
 #### Custom Metrics Not Available
+
 ```
 unable to get external metric: unable to fetch metrics from external metrics API
 ```
+
 **Solution**:
+
 ```bash
 # Check prometheus-adapter
 kubectl get pods -n monitoring | grep prometheus-adapter
@@ -348,22 +406,26 @@ kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1
 ```
 
 #### Resource Requests Not Set
+
 **HPA requires resource requests to be defined**
+
 ```yaml
 resources:
   requests:
-    cpu: 250m      # Required for CPU-based HPA
-    memory: 512Mi  # Required for memory-based HPA
+    cpu: 250m # Required for CPU-based HPA
+    memory: 512Mi # Required for memory-based HPA
 ```
 
 ### 7. Network Issues
 
 **Symptoms**:
+
 - Pods can't communicate
 - Connection timeouts
 - DNS resolution failures
 
 **Diagnosis**:
+
 ```bash
 # Test DNS
 kubectl exec -it <pod-name> -n <namespace> -- nslookup kubernetes.default
@@ -381,6 +443,7 @@ kubectl describe service <service-name> -n <namespace>
 **Common Causes**:
 
 #### Network Policy Blocking
+
 ```bash
 # Check network policies
 kubectl get networkpolicy -n <namespace>
@@ -391,6 +454,7 @@ kubectl delete networkpolicy --all -n <namespace>
 ```
 
 #### Service Selector Mismatch
+
 ```bash
 # Check service selector
 kubectl get service <service-name> -n <namespace> -o jsonpath='{.spec.selector}'
@@ -402,6 +466,7 @@ kubectl get pods -n <namespace> --show-labels
 ```
 
 #### DNS Issues
+
 ```bash
 # Check CoreDNS
 kubectl get pods -n kube-system | grep coredns
@@ -414,11 +479,13 @@ kubectl run -it --rm debug --image=busybox --restart=Never -- nslookup kubernete
 ### 8. Persistent Volume Issues
 
 **Symptoms**:
+
 - PVC stuck in `Pending`
 - Mount failures
 - Permission denied errors
 
 **Diagnosis**:
+
 ```bash
 kubectl get pvc -n <namespace>
 kubectl describe pvc <pvc-name> -n <namespace>
@@ -429,6 +496,7 @@ kubectl describe pv <pv-name>
 **Common Causes**:
 
 #### No Available PV
+
 ```bash
 # Check storage classes
 kubectl get storageclass
@@ -440,23 +508,27 @@ kubectl get storageclass <class-name> -o yaml | grep provisioner
 ```
 
 #### Permission Issues
+
 ```
 chown: changing ownership of '/data': Operation not permitted
 ```
+
 **Solution**:
+
 ```yaml
 spec:
   securityContext:
-    fsGroup: 1001  # Must match volume ownership
+    fsGroup: 1001 # Must match volume ownership
   volumes:
-  - name: data
-    persistentVolumeClaim:
-      claimName: my-pvc
+    - name: data
+      persistentVolumeClaim:
+        claimName: my-pvc
 ```
 
 ### 9. Build Issues
 
 **Symptoms**:
+
 - Docker build fails
 - Slow builds
 - Layer caching not working
@@ -464,6 +536,7 @@ spec:
 **Common Causes**:
 
 #### Build Context Too Large
+
 ```bash
 # Check context size
 du -sh .
@@ -478,6 +551,7 @@ EOF
 ```
 
 #### Dependency Installation Fails
+
 ```bash
 # Enable BuildKit for better error messages
 DOCKER_BUILDKIT=1 docker build -t myapp:tag .
@@ -488,6 +562,7 @@ docker run -it myapp:debug /bin/sh
 ```
 
 #### Multi-platform Build Fails
+
 ```bash
 # Setup buildx
 docker buildx create --name multiplatform --use

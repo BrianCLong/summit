@@ -1,5 +1,5 @@
-import { EventLog } from '../eventlog/eventLog.js';
-import { stableHash } from '../canonical/canonicalizer.js';
+import { EventLog } from "../eventlog/eventLog.js";
+import { stableHash } from "../canonical/canonicalizer.js";
 
 export interface ProvenanceMetadata {
   origin: string;
@@ -42,21 +42,21 @@ export interface LineageTrace {
 export interface AuditTrail {
   trace: LineageTrace;
   verification: { valid: boolean; tamperedAt?: number };
-  ledger: ReturnType<EventLog['list']>;
+  ledger: ReturnType<EventLog["list"]>;
 }
 
 function assertMetadata(metadata: ProvenanceMetadata): void {
   if (!metadata.origin || metadata.origin.trim().length === 0) {
-    throw new Error('Provenance origin is required for every artifact');
+    throw new Error("Provenance origin is required for every artifact");
   }
   if (Number.isNaN(metadata.confidence) || metadata.confidence < 0 || metadata.confidence > 1) {
-    throw new Error('Provenance confidence must be between 0 and 1');
+    throw new Error("Provenance confidence must be between 0 and 1");
   }
-  if (typeof metadata.isSimulated !== 'boolean') {
-    throw new Error('Provenance must explicitly declare isSimulated');
+  if (typeof metadata.isSimulated !== "boolean") {
+    throw new Error("Provenance must explicitly declare isSimulated");
   }
   if (!metadata.observedAt || Number.isNaN(Date.parse(metadata.observedAt))) {
-    throw new Error('Provenance observedAt must be an ISO-8601 timestamp');
+    throw new Error("Provenance observedAt must be an ISO-8601 timestamp");
   }
 }
 
@@ -67,7 +67,7 @@ export class LineageService {
   private readonly events = new Map<string, LineageEvent>();
   private readonly ledger: EventLog;
 
-  constructor(private readonly scope = 'lineage') {
+  constructor(private readonly scope = "lineage") {
     this.ledger = new EventLog();
   }
 
@@ -82,7 +82,7 @@ export class LineageService {
     this.artifacts.set(artifact.id, canonicalArtifact);
     this.events.set(eventId, {
       id: eventId,
-      operation: 'register',
+      operation: "register",
       inputs: [],
       outputs: [canonicalArtifact],
       timestamp,
@@ -90,9 +90,9 @@ export class LineageService {
     this.outputEventByArtifact.set(artifact.id, eventId);
     this.ledger.append({
       id: eventId,
-      type: 'lineage-register',
+      type: "lineage-register",
       scope: this.scope,
-      actor: 'system',
+      actor: "system",
       timestamp,
       payload: {
         artifactId: artifact.id,
@@ -103,7 +103,9 @@ export class LineageService {
     return canonicalArtifact;
   }
 
-  recordTransformation(event: Omit<LineageEvent, 'timestamp'> & { timestamp?: string }): LineageEvent {
+  recordTransformation(
+    event: Omit<LineageEvent, "timestamp"> & { timestamp?: string }
+  ): LineageEvent {
     const timestamp = event.timestamp ?? new Date().toISOString();
     for (const input of event.inputs) {
       if (!this.artifacts.has(input)) {
@@ -131,9 +133,9 @@ export class LineageService {
     }
     this.ledger.append({
       id: event.id,
-      type: 'lineage-transformation',
+      type: "lineage-transformation",
       scope: this.scope,
-      actor: event.actor ?? 'system',
+      actor: event.actor ?? "system",
       timestamp,
       payload: {
         operation: event.operation,
@@ -149,7 +151,7 @@ export class LineageService {
     return storedEvent;
   }
 
-  trace(itemId: string, direction: 'backward' | 'forward' | 'both' = 'both'): LineageTrace {
+  trace(itemId: string, direction: "backward" | "forward" | "both" = "both"): LineageTrace {
     if (!this.artifacts.has(itemId)) {
       throw new Error(`Artifact ${itemId} is not registered`);
     }
@@ -160,7 +162,7 @@ export class LineageService {
 
     while (queue.length > 0) {
       const current = queue.shift()!;
-      if (direction === 'backward' || direction === 'both') {
+      if (direction === "backward" || direction === "both") {
         const producerEventId = this.outputEventByArtifact.get(current);
         if (producerEventId) {
           const producer = this.events.get(producerEventId);
@@ -176,7 +178,7 @@ export class LineageService {
         }
       }
 
-      if (direction === 'forward' || direction === 'both') {
+      if (direction === "forward" || direction === "both") {
         const consumerEvents = this.consumerEventsByArtifact.get(current);
         if (consumerEvents) {
           for (const consumerEventId of consumerEvents) {
@@ -214,7 +216,7 @@ export class LineageService {
   }
 
   auditTrail(itemId: string): AuditTrail {
-    const trace = this.trace(itemId, 'both');
+    const trace = this.trace(itemId, "both");
     const verification = this.ledger.verify(this.scope);
     const ledger = this.ledger.list(0, Number.MAX_SAFE_INTEGER);
     return { trace, verification, ledger };

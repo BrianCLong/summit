@@ -15,19 +15,19 @@ export interface FinancialEntity {
 }
 
 export enum EntityType {
-  INDIVIDUAL = 'INDIVIDUAL',
-  ORGANIZATION = 'ORGANIZATION',
-  BUSINESS = 'BUSINESS',
-  CHARITY = 'CHARITY',
-  FINANCIAL_INSTITUTION = 'FINANCIAL_INSTITUTION',
-  SHELL_COMPANY = 'SHELL_COMPANY'
+  INDIVIDUAL = "INDIVIDUAL",
+  ORGANIZATION = "ORGANIZATION",
+  BUSINESS = "BUSINESS",
+  CHARITY = "CHARITY",
+  FINANCIAL_INSTITUTION = "FINANCIAL_INSTITUTION",
+  SHELL_COMPANY = "SHELL_COMPANY",
 }
 
 export enum EntityStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  FROZEN = 'FROZEN',
-  UNDER_INVESTIGATION = 'UNDER_INVESTIGATION'
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  FROZEN = "FROZEN",
+  UNDER_INVESTIGATION = "UNDER_INVESTIGATION",
 }
 
 export interface Identifier {
@@ -52,15 +52,15 @@ export interface Transaction {
 }
 
 export enum TransactionMethod {
-  BANK_TRANSFER = 'BANK_TRANSFER',
-  CASH = 'CASH',
-  HAWALA = 'HAWALA',
-  CRYPTOCURRENCY = 'CRYPTOCURRENCY',
-  MONEY_SERVICE = 'MONEY_SERVICE',
-  TRADE_BASED = 'TRADE_BASED',
-  CASH_COURIER = 'CASH_COURIER',
-  PREPAID_CARD = 'PREPAID_CARD',
-  ONLINE_PAYMENT = 'ONLINE_PAYMENT'
+  BANK_TRANSFER = "BANK_TRANSFER",
+  CASH = "CASH",
+  HAWALA = "HAWALA",
+  CRYPTOCURRENCY = "CRYPTOCURRENCY",
+  MONEY_SERVICE = "MONEY_SERVICE",
+  TRADE_BASED = "TRADE_BASED",
+  CASH_COURIER = "CASH_COURIER",
+  PREPAID_CARD = "PREPAID_CARD",
+  ONLINE_PAYMENT = "ONLINE_PAYMENT",
 }
 
 export interface HawalaNetwork {
@@ -168,7 +168,7 @@ export interface Disbursement {
 export interface ExtortionOperation {
   id: string;
   organizationId: string;
-  type: 'PROTECTION_RACKET' | 'TAXATION' | 'KIDNAPPING' | 'INTIMIDATION';
+  type: "PROTECTION_RACKET" | "TAXATION" | "KIDNAPPING" | "INTIMIDATION";
   location: string;
   targets: string[];
   estimatedRevenue?: number;
@@ -184,7 +184,7 @@ export interface KidnappingForRansom {
   date: Date;
   ransomDemand?: number;
   ransomPaid?: number;
-  outcome: 'RELEASED' | 'ESCAPED' | 'DECEASED' | 'ONGOING';
+  outcome: "RELEASED" | "ESCAPED" | "DECEASED" | "ONGOING";
 }
 
 export interface DrugTrafficking {
@@ -207,19 +207,19 @@ export interface StateSponsor {
 }
 
 export enum SupportType {
-  FINANCIAL = 'FINANCIAL',
-  WEAPONS = 'WEAPONS',
-  TRAINING = 'TRAINING',
-  SAFE_HAVEN = 'SAFE_HAVEN',
-  LOGISTICAL = 'LOGISTICAL',
-  INTELLIGENCE = 'INTELLIGENCE'
+  FINANCIAL = "FINANCIAL",
+  WEAPONS = "WEAPONS",
+  TRAINING = "TRAINING",
+  SAFE_HAVEN = "SAFE_HAVEN",
+  LOGISTICAL = "LOGISTICAL",
+  INTELLIGENCE = "INTELLIGENCE",
 }
 
 export interface Evidence {
   type: string;
   description: string;
   date: Date;
-  confidence: 'HIGH' | 'MEDIUM' | 'LOW';
+  confidence: "HIGH" | "MEDIUM" | "LOW";
   source: string;
 }
 
@@ -229,12 +229,12 @@ export interface AssetFreeze {
   date: Date;
   assets: FrozenAsset[];
   amount?: number;
-  status: 'ACTIVE' | 'LIFTED' | 'PARTIAL';
+  status: "ACTIVE" | "LIFTED" | "PARTIAL";
   legalBasis: string;
 }
 
 export interface FrozenAsset {
-  type: 'BANK_ACCOUNT' | 'PROPERTY' | 'BUSINESS' | 'INVESTMENT' | 'OTHER';
+  type: "BANK_ACCOUNT" | "PROPERTY" | "BUSINESS" | "INVESTMENT" | "OTHER";
   description: string;
   value?: number;
   location?: string;
@@ -246,16 +246,16 @@ export interface Sanction {
   type: SanctionType[];
   imposed: Date;
   expires?: Date;
-  status: 'ACTIVE' | 'EXPIRED' | 'LIFTED';
+  status: "ACTIVE" | "EXPIRED" | "LIFTED";
   violations: SanctionViolation[];
 }
 
 export enum SanctionType {
-  ASSET_FREEZE = 'ASSET_FREEZE',
-  TRAVEL_BAN = 'TRAVEL_BAN',
-  ARMS_EMBARGO = 'ARMS_EMBARGO',
-  TRADE_RESTRICTION = 'TRADE_RESTRICTION',
-  FINANCIAL_RESTRICTION = 'FINANCIAL_RESTRICTION'
+  ASSET_FREEZE = "ASSET_FREEZE",
+  TRAVEL_BAN = "TRAVEL_BAN",
+  ARMS_EMBARGO = "ARMS_EMBARGO",
+  TRADE_RESTRICTION = "TRADE_RESTRICTION",
+  FINANCIAL_RESTRICTION = "FINANCIAL_RESTRICTION",
 }
 
 export interface SanctionViolation {
@@ -288,7 +288,7 @@ export interface MoneyLaunderingScheme {
 }
 
 export interface LaunderingStage {
-  stage: 'PLACEMENT' | 'LAYERING' | 'INTEGRATION';
+  stage: "PLACEMENT" | "LAYERING" | "INTEGRATION";
   method: string;
   entities: string[];
   amount?: number;
@@ -315,7 +315,7 @@ export interface FinanceResult {
 
 export interface FinancialTrend {
   type: string;
-  direction: 'INCREASING' | 'DECREASING' | 'STABLE';
+  direction: "INCREASING" | "DECREASING" | "STABLE";
   magnitude: number;
   period: string;
   description: string;

@@ -2,14 +2,14 @@
  * Archive Scraper - Scrapes from Wayback Machine and archive.today
  */
 
-import axios from 'axios';
-import { ContentExtractor } from '../core/ContentExtractor.js';
-import type { ScrapeResult, ScrapeOptions } from '../types/index.js';
+import axios from "axios";
+import { ContentExtractor } from "../core/ContentExtractor.js";
+import type { ScrapeResult, ScrapeOptions } from "../types/index.js";
 
 export class ArchiveScraper {
   private extractor: ContentExtractor;
-  private waybackUrl = 'https://web.archive.org';
-  private archiveTodayUrl = 'https://archive.today';
+  private waybackUrl = "https://web.archive.org";
+  private archiveTodayUrl = "https://archive.today";
 
   constructor() {
     this.extractor = new ContentExtractor();
@@ -19,7 +19,7 @@ export class ArchiveScraper {
    * Scrape from Wayback Machine
    */
   async scrape(url: string, options?: ScrapeOptions): Promise<ScrapeResult> {
-    const timestamp = options?.headers?.['archive-timestamp'] || '';
+    const timestamp = options?.headers?.["archive-timestamp"] || "";
     return await this.scrapeWayback(url, timestamp);
   }
 
@@ -36,7 +36,7 @@ export class ArchiveScraper {
 
       const snapshot = availabilityResponse.data?.archived_snapshots?.closest;
       if (!snapshot) {
-        throw new Error('No archived snapshot found');
+        throw new Error("No archived snapshot found");
       }
 
       // Fetch the archived page
@@ -58,16 +58,16 @@ export class ArchiveScraper {
           text,
           markdown,
           title: metadata.title,
-          description: metadata.description
+          description: metadata.description,
         },
         metadata: {
           ...metadata,
-          canonical: url // Original URL
+          canonical: url, // Original URL
         },
         performance: {
           loadTime: Date.now() - startTime,
-          domContentLoaded: Date.now() - startTime
-        }
+          domContentLoaded: Date.now() - startTime,
+        },
       };
     } catch (error) {
       return {
@@ -79,8 +79,8 @@ export class ArchiveScraper {
         error: error instanceof Error ? error.message : String(error),
         performance: {
           loadTime: Date.now() - startTime,
-          domContentLoaded: 0
-        }
+          domContentLoaded: 0,
+        },
       };
     }
   }
@@ -88,10 +88,12 @@ export class ArchiveScraper {
   /**
    * Get all available snapshots for a URL
    */
-  async getSnapshots(url: string): Promise<Array<{
-    timestamp: Date;
-    url: string;
-  }>> {
+  async getSnapshots(url: string): Promise<
+    Array<{
+      timestamp: Date;
+      url: string;
+    }>
+  > {
     try {
       const cdxUrl = `${this.waybackUrl}/cdx/search/cdx?url=${encodeURIComponent(url)}&output=json`;
       const response = await axios.get(cdxUrl);
@@ -102,7 +104,7 @@ export class ArchiveScraper {
         timestamp: new Date(
           `${row[1].substring(0, 4)}-${row[1].substring(4, 6)}-${row[1].substring(6, 8)}`
         ),
-        url: `${this.waybackUrl}/web/${row[1]}/${row[2]}`
+        url: `${this.waybackUrl}/web/${row[1]}/${row[2]}`,
       }));
     } catch (error) {
       return [];
@@ -119,7 +121,7 @@ export class ArchiveScraper {
 
       return {
         success: true,
-        archiveUrl: response.headers['content-location']
+        archiveUrl: response.headers["content-location"],
       };
     } catch (error) {
       return { success: false };

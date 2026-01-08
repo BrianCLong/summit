@@ -1,5 +1,5 @@
-import { addDays, isAfter, isBefore } from 'date-fns';
-import { RenewalEvent } from './types';
+import { addDays, isAfter, isBefore } from "date-fns";
+import { RenewalEvent } from "./types";
 
 export class RenewalCalendar {
   private events: RenewalEvent[] = [];
@@ -15,7 +15,8 @@ export class RenewalCalendar {
 
   negotiationWindows(reference: Date = new Date()): RenewalEvent[] {
     return this.events.filter(
-      (event) => isAfter(reference, event.negotiationWindowStart) && isBefore(reference, event.renewalDate)
+      (event) =>
+        isAfter(reference, event.negotiationWindowStart) && isBefore(reference, event.renewalDate)
     );
   }
 }

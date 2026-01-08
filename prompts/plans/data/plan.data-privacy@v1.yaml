@@ -1,7 +1,7 @@
 meta:
   id: plan.data-privacy@v1
-  owner: 'security-engineering'
-  purpose: 'Ensure privacy-aware data practices with masking and PII handling'
+  owner: "security-engineering"
+  purpose: "Ensure privacy-aware data practices with masking and PII handling"
   tags:
     - privacy
     - pii
@@ -9,13 +9,13 @@ meta:
     - masking
     - compliance
   guardrails:
-    - 'PII must never be exposed unnecessarily'
-    - 'Data masking must be consistent'
-    - 'Deletion requests must be honored'
-    - 'Audit trail for data access'
+    - "PII must never be exposed unnecessarily"
+    - "Data masking must be consistent"
+    - "Deletion requests must be honored"
+    - "Audit trail for data access"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -322,15 +322,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'privacy-implementation'
+  - name: "privacy-implementation"
     inputs:
-      pii_types: 'Names, emails, phone numbers, addresses, organization affiliations'
-      data_stores: 'Neo4j, PostgreSQL, Elasticsearch, logs'
-      use_cases: 'Investigation analysis, reporting, audit'
-      compliance_requirements: 'GDPR, CCPA, internal privacy policy'
-      access_patterns: 'Analysts view full data, API returns masked, logs fully redacted'
+      pii_types: "Names, emails, phone numbers, addresses, organization affiliations"
+      data_stores: "Neo4j, PostgreSQL, Elasticsearch, logs"
+      use_cases: "Investigation analysis, reporting, audit"
+      compliance_requirements: "GDPR, CCPA, internal privacy policy"
+      access_patterns: "Analysts view full data, API returns masked, logs fully redacted"
     expected_contains:
-      - 'PII Classification'
-      - 'Data Masking'
-      - 'Privacy Guardrails'
-      - 'GDPR'
+      - "PII Classification"
+      - "Data Masking"
+      - "Privacy Guardrails"
+      - "GDPR"

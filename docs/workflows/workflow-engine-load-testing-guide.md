@@ -36,20 +36,20 @@ The workflow-engine drives Summit's orchestration by dispatching Argo Workflows.
 
 ### Environment variables
 
-| Variable | Description | Default |
-| --- | --- | --- |
-| `ARGO_BASE_URL` | Base URL of the Argo Workflows API server. | `http://localhost:2746` |
-| `ARGO_NAMESPACE` | Namespace for workflow submissions. | `argo` |
-| `ARGO_TOKEN` | Bearer token used for API authentication. | _empty_ |
-| `WORKFLOW_TEMPLATE` | Template name to submit. | `stress-test-dag` |
-| `START_RATE` | Initial workflow submissions per second. | `5` |
-| `STAGES` | JSON array describing the ramping arrival rate stages. | `[{"target":20,"duration":"2m"},{"target":60,"duration":"5m"},{"target":0,"duration":"1m"}]` |
-| `PREALLOCATED_VUS` | Preallocated virtual users. | `100` |
-| `MAX_VUS` | Maximum virtual users allowed during the test. | `500` |
-| `MAX_STATUS_POLLS` | Maximum polls for workflow completion. | `120` |
-| `STATUS_POLL_INTERVAL` | Seconds between status checks. | `5` |
-| `MAX_RETRIES` | Submission retries before flagging an error. | `3` |
-| `PAUSE_BETWEEN_WORKFLOWS` | Delay between iterations. | `1` |
+| Variable                  | Description                                            | Default                                                                                      |
+| ------------------------- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| `ARGO_BASE_URL`           | Base URL of the Argo Workflows API server.             | `http://localhost:2746`                                                                      |
+| `ARGO_NAMESPACE`          | Namespace for workflow submissions.                    | `argo`                                                                                       |
+| `ARGO_TOKEN`              | Bearer token used for API authentication.              | _empty_                                                                                      |
+| `WORKFLOW_TEMPLATE`       | Template name to submit.                               | `stress-test-dag`                                                                            |
+| `START_RATE`              | Initial workflow submissions per second.               | `5`                                                                                          |
+| `STAGES`                  | JSON array describing the ramping arrival rate stages. | `[{"target":20,"duration":"2m"},{"target":60,"duration":"5m"},{"target":0,"duration":"1m"}]` |
+| `PREALLOCATED_VUS`        | Preallocated virtual users.                            | `100`                                                                                        |
+| `MAX_VUS`                 | Maximum virtual users allowed during the test.         | `500`                                                                                        |
+| `MAX_STATUS_POLLS`        | Maximum polls for workflow completion.                 | `120`                                                                                        |
+| `STATUS_POLL_INTERVAL`    | Seconds between status checks.                         | `5`                                                                                          |
+| `MAX_RETRIES`             | Submission retries before flagging an error.           | `3`                                                                                          |
+| `PAUSE_BETWEEN_WORKFLOWS` | Delay between iterations.                              | `1`                                                                                          |
 
 ### Run locally with Prometheus remote write
 
@@ -139,16 +139,15 @@ Key visualizations include:
 
 ## Troubleshooting
 
-| Symptom | Possible Cause | Resolution |
-| --- | --- | --- |
-| `401 Unauthorized` on submit | Missing or incorrect `ARGO_TOKEN`. | Refresh the service account token, verify API server audience. |
-| Workflows stuck in `Pending` | Insufficient workflow-engine capacity or Kubernetes quota. | Scale the workflow-engine deployment and review pod quotas. |
-| Prometheus missing k6 metrics | Incorrect `--out` URL or network policy blocking port 6565. | Validate the remote write endpoint and network connectivity. |
-| Grafana panels show `No data` | Dashboard PromQL queries don't match metric labels. | Confirm scrape config labels (`service="k6-load-test"`) and namespace filter. |
+| Symptom                       | Possible Cause                                              | Resolution                                                                    |
+| ----------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `401 Unauthorized` on submit  | Missing or incorrect `ARGO_TOKEN`.                          | Refresh the service account token, verify API server audience.                |
+| Workflows stuck in `Pending`  | Insufficient workflow-engine capacity or Kubernetes quota.  | Scale the workflow-engine deployment and review pod quotas.                   |
+| Prometheus missing k6 metrics | Incorrect `--out` URL or network policy blocking port 6565. | Validate the remote write endpoint and network connectivity.                  |
+| Grafana panels show `No data` | Dashboard PromQL queries don't match metric labels.         | Confirm scrape config labels (`service="k6-load-test"`) and namespace filter. |
 
 ## Next Steps
 
 - Integrate k6 execution into CI by running staged loads nightly and alerting on threshold breaches.
 - Expand the script with additional checks (e.g., verifying workflow outputs or artifacts).
 - Store historical runs in a time-series database (Prometheus + Thanos) to track performance trends over time.
-

@@ -107,6 +107,7 @@ apps/desktop-electron/
 ### Application Menu
 
 Custom application menu with platform-specific items:
+
 - File operations
 - Edit operations
 - View controls
@@ -116,6 +117,7 @@ Custom application menu with platform-specific items:
 ### System Tray
 
 System tray icon with quick actions:
+
 - Show/hide main window
 - Quick access to common features
 - Quit application
@@ -143,11 +145,13 @@ System tray icon with quick actions:
 ## Storage
 
 Data is stored using `electron-store`:
+
 - **User Preferences**: Application settings
 - **Window State**: Window size/position
 - **Cache**: Application cache
 
 Storage location:
+
 - **Windows**: `%APPDATA%/intelgraph`
 - **macOS**: `~/Library/Application Support/intelgraph`
 - **Linux**: `~/.config/intelgraph`
@@ -155,6 +159,7 @@ Storage location:
 ## Logs
 
 Application logs using `electron-log`:
+
 - **Windows**: `%USERPROFILE%\AppData\Roaming\intelgraph\logs`
 - **macOS**: `~/Library/Logs/intelgraph`
 - **Linux**: `~/.config/intelgraph/logs`
@@ -172,6 +177,7 @@ intelgraph://search?q=keyword
 ## Building Icons
 
 Icon requirements:
+
 - **Windows**: 256x256 PNG → ICO
 - **macOS**: 1024x1024 PNG → ICNS
 - **Linux**: 512x512 PNG

@@ -1,4 +1,4 @@
-export { BitemporalStore } from './BitemporalStore.js';
+export { BitemporalStore } from "./BitemporalStore.js";
 export type {
   BitemporalRecord,
   TemporalSnapshot,
@@ -7,4 +7,4 @@ export type {
   UpsertOptions,
   SignedAudit,
   TemporalInterval,
-} from './types.js';
+} from "./types.js";

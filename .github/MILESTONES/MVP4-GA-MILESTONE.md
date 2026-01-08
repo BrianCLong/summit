@@ -34,12 +34,16 @@ area:compliance    # Audit/compliance features
 ## P0 Blockers (Must Fix Before ANY Customer)
 
 ### 1. Graph Performance - Hairball Fix
+
 **Label**: `p0-blocker`, `area:graph`
+
 ```markdown
 ## Problem
+
 Large graphs (>5K nodes) cause browser freezing and memory exhaustion.
 
 ## Acceptance Criteria
+
 - [ ] 50K nodes render in <1 second
 - [ ] 30+ FPS maintained during interaction
 - [ ] Memory usage <2GB for 50K nodes
@@ -47,30 +51,37 @@ Large graphs (>5K nodes) cause browser freezing and memory exhaustion.
 - [ ] Viewport culling implemented
 
 ## Technical Approach
+
 1. Integrate WebGL-based renderer (Sigma.js)
 2. Implement progressive loading with batching
 3. Add LOD (Level-of-Detail) controls
 4. Enable viewport culling for off-screen elements
 
 ## Test Plan
+
 - [ ] Benchmark suite with 10K, 50K, 100K nodes
 - [ ] Memory profiling under sustained load
 - [ ] FPS measurement during pan/zoom
 ```
 
 ### 2. Supernode Query Optimization
+
 **Label**: `p0-blocker`, `area:graph`
+
 ```markdown
 ## Problem
+
 Queries involving popular entities (>1000 connections) timeout.
 
 ## Acceptance Criteria
+
 - [ ] Supernode queries complete in <2s
 - [ ] Automatic pagination for large results
 - [ ] Pre-computed aggregations for top supernodes
 - [ ] User warning for expensive queries
 
 ## Technical Approach
+
 1. Add connection_count index to Neo4j
 2. Implement query planner with supernode detection
 3. Create pagination wrapper for traversals
@@ -78,12 +89,16 @@ Queries involving popular entities (>1000 connections) timeout.
 ```
 
 ### 3. GraphRAG Hallucination Guardrails
+
 **Label**: `p0-blocker`, `area:graphrag`
+
 ```markdown
 ## Problem
+
 AI makes confident assertions without citations, creating trust/liability issues.
 
 ## Acceptance Criteria
+
 - [ ] Every factual claim has entity/evidence citation
 - [ ] Confidence scores displayed (0-100%)
 - [ ] Low-confidence warnings shown
@@ -91,6 +106,7 @@ AI makes confident assertions without citations, creating trust/liability issues
 - [ ] Citation links are clickable
 
 ## Technical Approach
+
 1. Enhance citation-gate.ts validation
 2. Implement citation extraction in LLM response parser
 3. Add confidence scoring model
@@ -98,12 +114,16 @@ AI makes confident assertions without citations, creating trust/liability issues
 ```
 
 ### 4. Test Coverage 70%
+
 **Label**: `p0-blocker`, `area:testing`
+
 ```markdown
 ## Problem
+
 Current test coverage (~22%) is insufficient for production confidence.
 
 ## Acceptance Criteria
+
 - [ ] 70% overall line coverage
 - [ ] 80% coverage on P0 modules
 - [ ] Zero flaky tests
@@ -111,6 +131,7 @@ Current test coverage (~22%) is insufficient for production confidence.
 - [ ] All tests pass in <5 minutes
 
 ## Test Priority
+
 1. Middleware (auth, validation, abuse guard)
 2. CRUD resolvers
 3. GraphRAGService
@@ -119,12 +140,16 @@ Current test coverage (~22%) is insufficient for production confidence.
 ```
 
 ### 5. API Determinism
+
 **Label**: `p0-blocker`, `area:security`
+
 ```markdown
 ## Problem
+
 Some 500 errors on malformed input; need typed error responses.
 
 ## Acceptance Criteria
+
 - [ ] All inputs produce 4xx or typed errors (never 500)
 - [ ] Global error handler catches all exceptions
 - [ ] Error responses include error code + message
@@ -133,12 +158,16 @@ Some 500 errors on malformed input; need typed error responses.
 ```
 
 ### 6. Security Audit Pass
+
 **Label**: `p0-blocker`, `area:security`
+
 ```markdown
 ## Problem
+
 Need verified security posture before enterprise customers.
 
 ## Acceptance Criteria
+
 - [ ] OWASP Top 10 scan: 0 high/critical
 - [ ] Dependency audit: 0 high/critical CVEs
 - [ ] Secret scanning active in CI
@@ -151,12 +180,16 @@ Need verified security posture before enterprise customers.
 ## P1 Required (Enterprise Blockers)
 
 ### 7. Audit Logging
+
 **Label**: `p1-required`, `area:compliance`
+
 ```markdown
 ## Problem
+
 No comprehensive audit trail for SOC 2 compliance.
 
 ## Acceptance Criteria
+
 - [ ] All mutations logged with actor/timestamp
 - [ ] Audit logs queryable via GraphQL
 - [ ] Tamper-evident logging (hash chains)
@@ -165,12 +198,16 @@ No comprehensive audit trail for SOC 2 compliance.
 ```
 
 ### 8. WebSocket Horizontal Scaling
+
 **Label**: `p1-required`, `area:performance`
+
 ```markdown
 ## Problem
+
 Single-server WebSocket limits concurrent collaboration to ~50 users.
 
 ## Acceptance Criteria
+
 - [ ] 1000 concurrent WebSocket connections
 - [ ] Redis pub/sub for multi-server
 - [ ] Graceful failover on disconnect
@@ -179,12 +216,16 @@ Single-server WebSocket limits concurrent collaboration to ~50 users.
 ```
 
 ### 9. Entity Resolution Pipeline
+
 **Label**: `p1-required`, `area:graph`
+
 ```markdown
 ## Problem
+
 Duplicate entities proliferate without fuzzy matching.
 
 ## Acceptance Criteria
+
 - [ ] Fuzzy matching on entity ingest
 - [ ] Similarity scoring for matches
 - [ ] Human review queue for ambiguous cases
@@ -193,12 +234,16 @@ Duplicate entities proliferate without fuzzy matching.
 ```
 
 ### 10. Field-Level Encryption
+
 **Label**: `p1-required`, `area:security`
+
 ```markdown
 ## Problem
+
 PII stored in plaintext; blocks CJIS/FedRAMP.
 
 ## Acceptance Criteria
+
 - [ ] PII fields encrypted at rest
 - [ ] Encryption keys in AWS KMS or Vault
 - [ ] Key rotation capability
@@ -211,19 +256,25 @@ PII stored in plaintext; blocks CJIS/FedRAMP.
 ## P2 Nice-to-Have (Can Slip)
 
 ### 11. One-Click Release to Staging
+
 **Label**: `p2-nice-to-have`, `area:devops`
+
 ```markdown
 Automate the staging deployment process with a single button in CI.
 ```
 
 ### 12. Mobile-Responsive Graph View
+
 **Label**: `p2-nice-to-have`, `area:graph`
+
 ```markdown
 Optimize graph visualization for tablet/phone viewports.
 ```
 
 ### 13. Docs Generated from Code
+
 **Label**: `p2-nice-to-have`, `area:docs`
+
 ```markdown
 Auto-generate API docs from GraphQL schema and JSDoc comments.
 ```
@@ -233,6 +284,7 @@ Auto-generate API docs from GraphQL schema and JSDoc comments.
 ## Milestone Checklist
 
 ### Week 1-2 (Sprint 1)
+
 - [ ] GRAPH-001: 10K+ node rendering
 - [ ] GRAPH-002: Progressive loading
 - [ ] GRAPH-003: Supernode optimization
@@ -241,6 +293,7 @@ Auto-generate API docs from GraphQL schema and JSDoc comments.
 - [ ] Critical bug fixes
 
 ### Week 3-4 (Sprint 2)
+
 - [ ] TEST-001: Middleware tests (80% coverage)
 - [ ] TEST-002: CRUD resolver tests
 - [ ] TEST-003: GraphRAGService tests
@@ -248,12 +301,14 @@ Auto-generate API docs from GraphQL schema and JSDoc comments.
 - [ ] ER-001: Entity resolution
 
 ### Week 5-6 (Sprint 3)
+
 - [ ] WS-001: WebSocket scaling
 - [ ] SEC-001: OWASP scan pass
 - [ ] SEC-002: CVE remediation
 - [ ] PERF-001: p95 <200ms
 
 ### Week 7-8 (Sprint 4)
+
 - [ ] E2E test suite complete
 - [ ] Documentation updated
 - [ ] 70% test coverage achieved

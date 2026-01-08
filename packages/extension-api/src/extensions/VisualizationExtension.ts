@@ -1,10 +1,13 @@
-import { ExtensionPoint } from '../ExtensionPoint.js';
+import { ExtensionPoint } from "../ExtensionPoint.js";
 
 /**
  * Visualization widget extension point
  */
-export interface VisualizationExtension extends ExtensionPoint<VisualizationData, VisualizationConfig> {
-  type: 'visualization';
+export interface VisualizationExtension extends ExtensionPoint<
+  VisualizationData,
+  VisualizationConfig
+> {
+  type: "visualization";
   name: string;
   description: string;
   componentPath: string;
@@ -28,7 +31,7 @@ export interface VisualizationConfig {
  * Base class for visualization extensions
  */
 export abstract class BaseVisualizationExtension implements VisualizationExtension {
-  readonly type = 'visualization' as const;
+  readonly type = "visualization" as const;
 
   constructor(
     public readonly id: string,

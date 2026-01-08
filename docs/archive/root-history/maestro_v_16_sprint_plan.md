@@ -61,7 +61,7 @@ export function step(
   episodes: Episode[],
   lambdaCost = 1.0,
   lambdaEval = 1.0,
-  lr = 1e-2,
+  lr = 1e-2
 ) {
   // softmax policy over arms
   const grad = theta.map((r) => r.map(() => 0));
@@ -207,7 +207,7 @@ external: SOC2-CC7.2
 maps_to:
   - IG-AUT-1
   - IG-SC-5
-narrative: 'All merges pass policy & provenance; SBOM criticals=0; attest verify=pass'
+narrative: "All merges pass policy & provenance; SBOM criticals=0; attest verify=pass"
 ```
 
 ---
@@ -228,17 +228,16 @@ narrative: 'All merges pass policy & provenance; SBOM criticals=0; attest verify
 
 ```ts
 // services/redteam/policyFuzz.ts
-import { opaEval } from '../policy/opa';
+import { opaEval } from "../policy/opa";
 export async function fuzz(iter = 200) {
   for (let i = 0; i < iter; i++) {
     const input = {
-      action: Math.random() < 0.5 ? 'write' : 'model_call',
+      action: Math.random() < 0.5 ? "write" : "model_call",
       path: `/etc/${i}`,
       budget: Math.random() * 5,
     };
     const out = await opaEval(input);
-    if (out.allow && input.path.startsWith('/etc'))
-      throw new Error('Bypass detected');
+    if (out.allow && input.path.startsWith("/etc")) throw new Error("Bypass detected");
   }
 }
 ```
@@ -287,21 +286,17 @@ export async function fuzz(iter = 200) {
   <body>
     <div id="dock">
       <div id="log"></div>
-      <div>
-        <input id="q" placeholder="ask: cost of PR#512?" /><button id="go">
-          Go
-        </button>
-      </div>
+      <div><input id="q" placeholder="ask: cost of PR#512?" /><button id="go">Go</button></div>
     </div>
     <script>
       $(function () {
         function say(t) {
-          $('#log').append('<div>' + t + '</div>');
-          $('#log').scrollTop(1e6);
+          $("#log").append("<div>" + t + "</div>");
+          $("#log").scrollTop(1e6);
         }
-        $('#go').on('click', function () {
-          var q = $('#q').val();
-          $.getJSON('/api/chatops', { q: q }, function (r) {
+        $("#go").on("click", function () {
+          var q = $("#q").val();
+          $.getJSON("/api/chatops", { q: q }, function (r) {
             say(r.answer);
           });
         });

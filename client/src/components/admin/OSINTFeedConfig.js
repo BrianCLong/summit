@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { Box, TextField, Button, Typography } from '@mui/material';
-import { AdminAPI } from '../../services/api';
+import React, { useEffect, useState } from "react";
+import { Box, TextField, Button, Typography } from "@mui/material";
+import { AdminAPI } from "../../services/api";
 
 export default function OSINTFeedConfig() {
   const [config, setConfig] = useState({
@@ -8,7 +8,7 @@ export default function OSINTFeedConfig() {
     recencyWeight: 0.3,
     semanticDensityWeight: 0.3,
   });
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -28,7 +28,7 @@ export default function OSINTFeedConfig() {
   const save = async () => {
     try {
       await AdminAPI.updateOsintFeedConfig(config);
-      setMessage('Saved');
+      setMessage("Saved");
     } catch (e) {
       setMessage(e.message);
     }
@@ -44,7 +44,7 @@ export default function OSINTFeedConfig() {
         type="number"
         value={config.qualityWeight}
         inputProps={{ step: 0.1, min: 0, max: 1 }}
-        onChange={handleChange('qualityWeight')}
+        onChange={handleChange("qualityWeight")}
         fullWidth
         margin="normal"
       />
@@ -53,7 +53,7 @@ export default function OSINTFeedConfig() {
         type="number"
         value={config.recencyWeight}
         inputProps={{ step: 0.1, min: 0, max: 1 }}
-        onChange={handleChange('recencyWeight')}
+        onChange={handleChange("recencyWeight")}
         fullWidth
         margin="normal"
       />
@@ -62,7 +62,7 @@ export default function OSINTFeedConfig() {
         type="number"
         value={config.semanticDensityWeight}
         inputProps={{ step: 0.1, min: 0, max: 1 }}
-        onChange={handleChange('semanticDensityWeight')}
+        onChange={handleChange("semanticDensityWeight")}
         fullWidth
         margin="normal"
       />

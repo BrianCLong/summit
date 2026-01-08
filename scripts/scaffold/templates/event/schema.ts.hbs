@@ -1,42 +1,11 @@
-/**
- * Event Definition for {{PASCAL_NAME}}
- */
-
-export interface {{PASCAL_NAME}}Event {
-  type: '{{KEBAB_NAME}}.occurred';
-  payload: {
-    id: string;
-    tenantId: string;
-    [key: string]: any;
-  };
-  metadata: {
-    timestamp: number;
-    userId?: string;
-    traceId?: string;
-  };
-}
-
-export const {{CAMEL_NAME}}EventSchema = {
-  type: 'object',
-  properties: {
-    type: { const: '{{KEBAB_NAME}}.occurred' },
-    payload: {
-      type: 'object',
-      required: ['id', 'tenantId'],
-      properties: {
-        id: { type: 'string' },
-        tenantId: { type: 'string' },
-      },
-    },
-    metadata: {
-      type: 'object',
-      required: ['timestamp'],
-      properties: {
-        timestamp: { type: 'number' },
-        userId: { type: 'string' },
-        traceId: { type: 'string' },
-      },
-    },
-  },
-  required: ['type', 'payload', 'metadata'],
-};
+/** * Event Definition for
+{{PASCAL_NAME}}
+*/ export interface
+{{PASCAL_NAME}}Event { type: '{{KEBAB_NAME}}.occurred'; payload: { id: string; tenantId: string;
+[key: string]: any; }; metadata: { timestamp: number; userId?: string; traceId?: string; }; } export
+const
+{{CAMEL_NAME}}EventSchema = { type: 'object', properties: { type: { const: '{{KEBAB_NAME}}.occurred'
+}, payload: { type: 'object', required: ['id', 'tenantId'], properties: { id: { type: 'string' },
+tenantId: { type: 'string' }, }, }, metadata: { type: 'object', required: ['timestamp'], properties:
+{ timestamp: { type: 'number' }, userId: { type: 'string' }, traceId: { type: 'string' }, }, }, },
+required: ['type', 'payload', 'metadata'], };

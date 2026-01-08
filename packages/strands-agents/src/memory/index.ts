@@ -3,4 +3,4 @@
  * @module @intelgraph/strands-agents/memory
  */
 
-export * from './graph-memory.js';
+export * from "./graph-memory.js";

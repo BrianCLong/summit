@@ -18,17 +18,17 @@ route:
 receivers:
   - name: default
     slack_configs:
-      - channel: '#conductor-ops'
+      - channel: "#conductor-ops"
         send_resolved: true
-        title: '[{{ .Status | toUpper }}] {{ .CommonLabels.alertname }}'
+        title: "[{{ .Status | toUpper }}] {{ .CommonLabels.alertname }}"
         text: |
           {{ range .Alerts }}• {{ .Annotations.summary }} ({{ .Labels.expert }}/{{ .Labels.tenant_tier }})
           {{ end }}
   - name: pagerduty
     pagerduty_configs:
-      - routing_key: '<PD_ROUTING_KEY>'
-        severity: 'error'
+      - routing_key: "<PD_ROUTING_KEY>"
+        severity: "error"
   - name: slack
     slack_configs:
-      - channel: '#conductor-warnings'
+      - channel: "#conductor-warnings"
         send_resolved: true

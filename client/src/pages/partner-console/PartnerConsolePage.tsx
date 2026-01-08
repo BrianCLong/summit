@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Box,
@@ -14,12 +14,12 @@ import {
   Stack,
   TextField,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const AnyGrid = Grid as any;
-import { useAuth } from '../../context/AuthContext.jsx';
-import { PartnerBillingPanel } from './billing/PartnerBillingPanel';
+import { useAuth } from "../../context/AuthContext.jsx";
+import { PartnerBillingPanel } from "./billing/PartnerBillingPanel";
 
 interface Receipt {
   id: string;
@@ -43,7 +43,7 @@ interface TenantSettingsResponse {
 }
 
 const defaultSettings = {
-  theme: 'light',
+  theme: "light",
   mfaEnforced: false,
 };
 
@@ -53,13 +53,13 @@ export default function PartnerConsolePage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [settings, setSettings] = useState<Record<string, any>>(defaultSettings);
   const [createForm, setCreateForm] = useState({
-    name: '',
-    slug: '',
-    residency: 'US',
+    name: "",
+    slug: "",
+    residency: "US",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [tenantId, setTenantId] = useState<string>('');
+  const [tenantId, setTenantId] = useState<string>("");
 
   const fetchSettings = async (id: string) => {
     try {
@@ -69,9 +69,9 @@ export default function PartnerConsolePage() {
       if (payload.success && payload.data) {
         setSettings(payload.data.settings || defaultSettings);
       }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      console.error('Failed to fetch settings', err);
+      console.error("Failed to fetch settings", err);
     } finally {
       setLoading(false);
     }
@@ -81,13 +81,13 @@ export default function PartnerConsolePage() {
     try {
       setLoading(true);
       const res = await fetch(`/api/v1/tenants/${tenantId}/settings`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ settings }),
       });
       const payload: TenantSettingsResponse = await res.json();
-      if (!payload.success) throw new Error(payload.error || 'Update failed');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (!payload.success) throw new Error(payload.error || "Update failed");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -98,19 +98,19 @@ export default function PartnerConsolePage() {
   const handleCreateTenant = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/v1/tenants', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/v1/tenants", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(createForm),
       });
       const payload: TenantSettingsResponse = await res.json();
       if (payload.success && payload.data) {
         setTenantId(payload.data.id);
-        setCreateForm({ name: '', slug: '', residency: 'US' });
+        setCreateForm({ name: "", slug: "", residency: "US" });
       } else {
-        throw new Error(payload.error || 'Creation failed');
+        throw new Error(payload.error || "Creation failed");
       }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -118,7 +118,7 @@ export default function PartnerConsolePage() {
     }
   };
 
-  if (!hasRole('admin') && !hasPermission('manage_tenants')) {
+  if (!hasRole("admin") && !hasPermission("manage_tenants")) {
     return (
       <Box p={3}>
         <Alert severity="error">Access Denied: Administrative privileges required.</Alert>
@@ -181,7 +181,11 @@ export default function PartnerConsolePage() {
               </Stack>
             </CardContent>
             <CardActions>
-              <Button variant="contained" onClick={handleCreateTenant} disabled={loading || !createForm.name}>
+              <Button
+                variant="contained"
+                onClick={handleCreateTenant}
+                disabled={loading || !createForm.name}
+              >
                 Create Tenant
               </Button>
             </CardActions>
@@ -210,7 +214,7 @@ export default function PartnerConsolePage() {
                   onChange={(e: any) => {
                     try {
                       setSettings(JSON.parse(e.target.value));
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                      // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     } catch (err) {
                       // ignore parse errors during typing
                     }

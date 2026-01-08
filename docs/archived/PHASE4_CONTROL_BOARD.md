@@ -84,7 +84,7 @@ intelgraph:
   security:
     opa:
       bundleUrl: https://bundles.intelgraph/tenant/{{ .Values.intelgraph.tenancy.id }}/policy.tar.gz
-      decision: 'authz/allow'
+      decision: "authz/allow"
   exports:
     verifiable:
       enabled: true
@@ -141,24 +141,24 @@ reason = {
 _Target:_ **3-hop query p95 < 1.5s**, error rate < 0.5%.
 
 ```js
-import http from 'k6/http';
-import { check, sleep } from 'k6';
+import http from "k6/http";
+import { check, sleep } from "k6";
 export const options = {
   thresholds: {
-    http_req_duration: ['p(95)<1500'],
-    http_req_failed: ['rate<0.005'],
+    http_req_duration: ["p(95)<1500"],
+    http_req_failed: ["rate<0.005"],
   },
   vus: 25,
-  duration: '3m',
+  duration: "3m",
 };
 export default function () {
   const q = `{ threeHop(entity:"acct:123", depth:3){ id score edges{ id w } } }`;
   const r = http.post(__ENV.GRAPH_URL, JSON.stringify({ query: q }), {
-    headers: { 'Content-Type': 'application/json', Authorization: __ENV.TOKEN },
+    headers: { "Content-Type": "application/json", Authorization: __ENV.TOKEN },
   });
   check(r, {
     200: (res) => res.status === 200,
-    'has edges': (res) => JSON.parse(res.body).data.threeHop.edges.length > 0,
+    "has edges": (res) => JSON.parse(res.body).data.threeHop.edges.length > 0,
   });
   sleep(0.5);
 }

@@ -103,21 +103,21 @@
 
 ```ts
 // server/src/taxii/client.ts
-import axios from 'axios';
+import axios from "axios";
 export async function pollCollection(
   base: string,
   collectionId: string,
   since?: string,
-  token?: string,
+  token?: string
 ) {
-  const headers: any = { Accept: 'application/taxii+json' };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-  let next = `${base}/collections/${collectionId}/objects/?limit=200${since ? `&added_after=${encodeURIComponent(since)}` : ''}`;
+  const headers: any = { Accept: "application/taxii+json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  let next = `${base}/collections/${collectionId}/objects/?limit=200${since ? `&added_after=${encodeURIComponent(since)}` : ""}`;
   const pages: any[] = [];
   while (next) {
     const { data } = await axios.get(next, { headers, timeout: 8000 });
     pages.push(data);
-    next = data.more ? data.next : '';
+    next = data.more ? data.next : "";
   }
   return pages.flatMap((p) => p.objects || []);
 }
@@ -130,11 +130,11 @@ export async function pollCollection(
 // server/src/taxii/map.ts
 export function mapStix(obj: any) {
   switch (obj.type) {
-    case 'indicator':
+    case "indicator":
       return mapIndicator(obj);
-    case 'observed-data':
+    case "observed-data":
       return mapObserved(obj);
-    case 'malware':
+    case "malware":
       return mapMalware(obj);
     default:
       return null;
@@ -143,7 +143,7 @@ export function mapStix(obj: any) {
 function mapIndicator(ind: any) {
   return {
     entity: {
-      type: 'Indicator',
+      type: "Indicator",
       id: ind.id,
       name: ind.name,
       tlp: ind.object_marking_refs || [],
@@ -158,7 +158,7 @@ function mapIndicator(ind: any) {
 
 ```ts
 // server/src/ioc/index.ts
-import { createHash } from 'crypto';
+import { createHash } from "crypto";
 const idx = {
   ip: new Map(),
   domain: new Map(),
@@ -167,11 +167,7 @@ const idx = {
   email: new Map(),
   ua: new Map(),
 };
-export function indexIOC(
-  kind: string,
-  value: string,
-  ref: { source: string; id: string },
-) {
+export function indexIOC(kind: string, value: string, ref: { source: string; id: string }) {
   const k = key(value);
   const m = (idx as any)[kind];
   if (!m) return;
@@ -183,7 +179,7 @@ export function matchIOC(kind: string, value: string) {
   return m?.get(key(value)) || [];
 }
 function key(v: string) {
-  return createHash('sha1').update(v.toLowerCase()).digest('hex');
+  return createHash("sha1").update(v.toLowerCase()).digest("hex");
 }
 ```
 
@@ -197,7 +193,7 @@ export function sigmaToCypher(rule: string) {
     const val = rule.match(/contains: \"(.*)\"/)![1];
     return `MATCH (e:Event) WHERE e.domain CONTAINS '${val}' RETURN e LIMIT 100`;
   }
-  return 'MATCH (e:Event) RETURN e LIMIT 1';
+  return "MATCH (e:Event) RETURN e LIMIT 1";
 }
 ```
 
@@ -225,9 +221,9 @@ allow_rule {
 
 ```ts
 // server/src/alerts/threat.ts
-import axios from 'axios';
+import axios from "axios";
 export async function fanout(io, alert) {
-  io.to(`case:${alert.caseId}`).emit('alert', alert);
+  io.to(`case:${alert.caseId}`).emit("alert", alert);
   for (const url of alert.webhooks || [])
     try {
       await axios.post(url, alert, { timeout: 1200 });
@@ -240,16 +236,16 @@ export async function fanout(io, alert) {
 ```js
 // apps/web/src/features/sigma/jquery-studio.js
 $(function () {
-  $('#sigma-import').on('change', function () {
+  $("#sigma-import").on("change", function () {
     const text = this.files[0];
-    text.text().then((src) => $('#sigma-src').val(src));
+    text.text().then((src) => $("#sigma-src").val(src));
   });
-  $('#sigma-preview').on('click', function () {
-    const src = $('#sigma-src').val();
+  $("#sigma-preview").on("click", function () {
+    const src = $("#sigma-src").val();
     $.ajax({
-      url: '/graphql',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/graphql",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({
         query: `mutation{ sigmaPreview(src:${JSON.stringify(src)}){ cypher, budgetMs } }`,
       }),
@@ -288,16 +284,16 @@ connectors:
 ### 4.10 k6 — TAXII + IOC Match Load
 
 ```js
-import http from 'k6/http';
-export const options = { vus: 40, duration: '3m' };
+import http from "k6/http";
+export const options = { vus: 40, duration: "3m" };
 export default function () {
-  http.get('http://localhost:4000/api/taxii/poll?collection=indicators');
+  http.get("http://localhost:4000/api/taxii/poll?collection=indicators");
   http.post(
-    'http://localhost:4000/graphql',
+    "http://localhost:4000/graphql",
     JSON.stringify({
       query: '{ iocMatch(kind:"domain", value:"evil.com"){ source id } }',
     }),
-    { headers: { 'Content-Type': 'application/json' } },
+    { headers: { "Content-Type": "application/json" } }
   );
 }
 ```

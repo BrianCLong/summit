@@ -3,13 +3,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Agent Run",
   "type": "object",
-  "required": [
-    "id",
-    "agentName",
-    "sessionId",
-    "startedAt",
-    "status"
-  ],
+  "required": ["id", "agentName", "sessionId", "startedAt", "status"],
   "properties": {
     "id": {
       "type": "string",
@@ -31,12 +25,7 @@
     },
     "status": {
       "type": "string",
-      "enum": [
-        "running",
-        "succeeded",
-        "failed",
-        "cancelled"
-      ]
+      "enum": ["running", "succeeded", "failed", "cancelled"]
     },
     "summary": {
       "type": "string"

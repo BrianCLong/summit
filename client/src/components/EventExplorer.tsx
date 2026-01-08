@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import $ from 'jquery';
+import React, { useEffect, useState } from "react";
+import $ from "jquery";
 
 interface Partition {
   id: string;
@@ -22,13 +22,13 @@ export default function EventExplorer({ sourceId }: { sourceId: string }) {
   useEffect(() => {
     const h = function (this: HTMLInputElement) {
       const v = Number(this.value || 0);
-      ($('.p-row') as JQuery<HTMLElement>).each(function () {
-        const lag = Number($(this).data('lag') || 0);
+      ($(".p-row") as JQuery<HTMLElement>).each(function () {
+        const lag = Number($(this).data("lag") || 0);
         $(this).toggle(lag >= v);
       });
     };
-    $('#lagFilter').on('input', h);
-    return () => $('#lagFilter').off('input', h);
+    $("#lagFilter").on("input", h);
+    return () => $("#lagFilter").off("input", h);
   }, [stats.partitions.length]);
   return (
     <div className="p-4 rounded-2xl shadow">
@@ -41,17 +41,13 @@ export default function EventExplorer({ sourceId }: { sourceId: string }) {
           placeholder="min lag…"
         />
         <button
-          onClick={() =>
-            fetch(`/api/events/${sourceId}/pause`, { method: 'POST' })
-          }
+          onClick={() => fetch(`/api/events/${sourceId}/pause`, { method: "POST" })}
           className="px-2 py-1 rounded-2xl shadow"
         >
           Pause
         </button>
         <button
-          onClick={() =>
-            fetch(`/api/events/${sourceId}/resume`, { method: 'POST' })
-          }
+          onClick={() => fetch(`/api/events/${sourceId}/resume`, { method: "POST" })}
           className="px-2 py-1 rounded-2xl shadow"
         >
           Resume

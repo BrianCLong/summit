@@ -1,29 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "pgbouncer.fullname" . }}
+  name: { { include "pgbouncer.fullname" . } }
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: { { .Values.replicaCount } }
   selector:
     matchLabels:
-      app: {{ include "pgbouncer.fullname" . }}
+      app: { { include "pgbouncer.fullname" . } }
   template:
     metadata:
       labels:
-        app: {{ include "pgbouncer.fullname" . }}
+        app: { { include "pgbouncer.fullname" . } }
     spec:
       containers:
         - name: pgbouncer
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           envFrom:
             - secretRef:
-                name: {{ .Values.auth.existingSecret }}
+                name: { { .Values.auth.existingSecret } }
           ports:
-            - containerPort: {{ .Values.service.port }}
+            - containerPort: { { .Values.service.port } }
           volumeMounts:
             - name: config
               mountPath: /opt/bitnami/pgbouncer/conf
       volumes:
         - name: config
           configMap:
-            name: {{ include "pgbouncer.fullname" . }}
+            name: { { include "pgbouncer.fullname" . } }

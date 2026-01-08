@@ -1,6 +1,6 @@
 # Adversarial Pattern Library
 
-This document is the canonical library of adversarial patterns that Summit is capable of detecting. Unlike traditional threat intelligence, which focuses on specific actors or indicators of compromise, this library is concerned with *behavioral intelligence*—the structural and temporal patterns of information that suggest manipulative intent.
+This document is the canonical library of adversarial patterns that Summit is capable of detecting. Unlike traditional threat intelligence, which focuses on specific actors or indicators of compromise, this library is concerned with _behavioral intelligence_—the structural and temporal patterns of information that suggest manipulative intent.
 
 ## Breakthrough Concept
 
@@ -38,4 +38,4 @@ Each pattern in the library is documented with the following four components:
 
 ---
 
-*(This library will be populated with additional patterns as they are identified and validated.)*
+_(This library will be populated with additional patterns as they are identified and validated.)_

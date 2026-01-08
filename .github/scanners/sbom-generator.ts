@@ -3,19 +3,19 @@
  * @module .github/scanners/sbom-generator
  */
 
-import { spawn } from 'node:child_process';
-import crypto from 'node:crypto';
-import fs from 'node:fs/promises';
-import path from 'node:path';
+import { spawn } from "node:child_process";
+import crypto from "node:crypto";
+import fs from "node:fs/promises";
+import path from "node:path";
 
-import { loadConfig } from './config.js';
-import type { SBOMDocument, SBOMComponent, ScannerConfig } from './types.js';
+import { loadConfig } from "./config.js";
+import type { SBOMDocument, SBOMComponent, ScannerConfig } from "./types.js";
 
 export interface SBOMGenerationOptions {
   target: string;
   outputPath?: string;
-  format?: 'cyclonedx-json' | 'spdx-json' | 'json';
-  scope?: 'all-layers' | 'squashed';
+  format?: "cyclonedx-json" | "spdx-json" | "json";
+  scope?: "all-layers" | "squashed";
   excludePatterns?: string[];
   signWithCosign?: boolean;
   attestToImage?: string;
@@ -57,48 +57,41 @@ export class SBOMGenerator {
     const format = options.format || this.config.syft.outputFormat;
     const scope = options.scope || this.config.syft.scope;
     const outputPath =
-      options.outputPath || path.join(process.cwd(), `sbom.${format === 'cyclonedx-json' ? 'cdx' : 'spdx'}.json`);
+      options.outputPath ||
+      path.join(process.cwd(), `sbom.${format === "cyclonedx-json" ? "cdx" : "spdx"}.json`);
 
     try {
       console.log(`📦 Generating SBOM for: ${options.target}`);
 
       // Build Syft command
-      const syftArgs = [
-        options.target,
-        '-o',
-        format,
-        '--scope',
-        scope,
-        '--file',
-        outputPath,
-      ];
+      const syftArgs = [options.target, "-o", format, "--scope", scope, "--file", outputPath];
 
       // Add exclude patterns
       const excludePatterns = options.excludePatterns || this.config.syft.excludePatterns || [];
       for (const pattern of excludePatterns) {
-        syftArgs.push('--exclude', pattern);
+        syftArgs.push("--exclude", pattern);
       }
 
       // Execute Syft
-      const syftResult = await this.executeCommand('syft', syftArgs);
+      const syftResult = await this.executeCommand("syft", syftArgs);
 
       if (!syftResult.success) {
         errors.push(`Syft failed: ${syftResult.stderr}`);
         return {
           success: false,
           componentCount: 0,
-          digest: '',
+          digest: "",
           duration: Date.now() - startTime,
           errors,
         };
       }
 
       // Read and parse the generated SBOM
-      const sbomContent = await fs.readFile(outputPath, 'utf-8');
+      const sbomContent = await fs.readFile(outputPath, "utf-8");
       const sbomDocument = JSON.parse(sbomContent) as SBOMDocument;
 
       // Calculate digest
-      const digest = crypto.createHash('sha256').update(sbomContent).digest('hex');
+      const digest = crypto.createHash("sha256").update(sbomContent).digest("hex");
 
       // Count components
       const componentCount = sbomDocument.components?.length || 0;
@@ -113,7 +106,7 @@ export class SBOMGenerator {
         const signResult = await this.signSBOM(outputPath);
         if (signResult.success) {
           signaturePath = signResult.signaturePath;
-          console.log('🔐 SBOM signed with Cosign');
+          console.log("🔐 SBOM signed with Cosign");
         } else {
           errors.push(`Cosign signing failed: ${signResult.error}`);
         }
@@ -147,7 +140,7 @@ export class SBOMGenerator {
       return {
         success: false,
         componentCount: 0,
-        digest: '',
+        digest: "",
         duration: Date.now() - startTime,
         errors,
       };
@@ -157,27 +150,29 @@ export class SBOMGenerator {
   /**
    * Sign SBOM using Cosign
    */
-  async signSBOM(sbomPath: string): Promise<{ success: boolean; signaturePath?: string; error?: string }> {
+  async signSBOM(
+    sbomPath: string
+  ): Promise<{ success: boolean; signaturePath?: string; error?: string }> {
     try {
       const signaturePath = `${sbomPath}.sig`;
 
-      const cosignArgs = ['sign-blob', '--yes'];
+      const cosignArgs = ["sign-blob", "--yes"];
 
       if (this.config.cosign.keyPath) {
-        cosignArgs.push('--key', this.config.cosign.keyPath);
+        cosignArgs.push("--key", this.config.cosign.keyPath);
       }
 
       if (this.config.cosign.keylessEnabled) {
-        cosignArgs.push('--oidc-issuer', 'https://oauth2.sigstore.dev/auth');
+        cosignArgs.push("--oidc-issuer", "https://oauth2.sigstore.dev/auth");
       }
 
       if (this.config.cosign.rekorUrl) {
-        cosignArgs.push('--rekor-url', this.config.cosign.rekorUrl);
+        cosignArgs.push("--rekor-url", this.config.cosign.rekorUrl);
       }
 
-      cosignArgs.push('--output-signature', signaturePath, sbomPath);
+      cosignArgs.push("--output-signature", signaturePath, sbomPath);
 
-      const result = await this.executeCommand('cosign', cosignArgs);
+      const result = await this.executeCommand("cosign", cosignArgs);
 
       if (!result.success) {
         return { success: false, error: result.stderr };
@@ -199,23 +194,23 @@ export class SBOMGenerator {
     try {
       const attestationPath = `${sbomPath}.att`;
 
-      const cosignArgs = ['attest', '--yes', '--predicate', sbomPath, '--type', 'cyclonedx'];
+      const cosignArgs = ["attest", "--yes", "--predicate", sbomPath, "--type", "cyclonedx"];
 
       if (this.config.cosign.keyPath) {
-        cosignArgs.push('--key', this.config.cosign.keyPath);
+        cosignArgs.push("--key", this.config.cosign.keyPath);
       }
 
       if (this.config.cosign.keylessEnabled) {
-        cosignArgs.push('--oidc-issuer', 'https://oauth2.sigstore.dev/auth');
+        cosignArgs.push("--oidc-issuer", "https://oauth2.sigstore.dev/auth");
       }
 
       if (this.config.cosign.rekorUrl) {
-        cosignArgs.push('--rekor-url', this.config.cosign.rekorUrl);
+        cosignArgs.push("--rekor-url", this.config.cosign.rekorUrl);
       }
 
       cosignArgs.push(imageRef);
 
-      const result = await this.executeCommand('cosign', cosignArgs);
+      const result = await this.executeCommand("cosign", cosignArgs);
 
       if (!result.success) {
         return { success: false, error: result.stderr };
@@ -235,20 +230,20 @@ export class SBOMGenerator {
     signaturePath: string
   ): Promise<{ valid: boolean; error?: string }> {
     try {
-      const cosignArgs = ['verify-blob'];
+      const cosignArgs = ["verify-blob"];
 
       if (this.config.cosign.keyPath) {
-        cosignArgs.push('--key', this.config.cosign.keyPath);
+        cosignArgs.push("--key", this.config.cosign.keyPath);
       }
 
       if (this.config.cosign.keylessEnabled) {
-        cosignArgs.push('--certificate-identity-regexp', '.*');
-        cosignArgs.push('--certificate-oidc-issuer-regexp', '.*');
+        cosignArgs.push("--certificate-identity-regexp", ".*");
+        cosignArgs.push("--certificate-oidc-issuer-regexp", ".*");
       }
 
-      cosignArgs.push('--signature', signaturePath, sbomPath);
+      cosignArgs.push("--signature", signaturePath, sbomPath);
 
-      const result = await this.executeCommand('cosign', cosignArgs);
+      const result = await this.executeCommand("cosign", cosignArgs);
 
       return { valid: result.success, error: result.success ? undefined : result.stderr };
     } catch (error: unknown) {
@@ -268,7 +263,7 @@ export class SBOMGenerator {
     await fs.mkdir(outputDir, { recursive: true });
 
     for (const target of targets) {
-      const safeName = target.replace(/[^a-zA-Z0-9]/g, '-');
+      const safeName = target.replace(/[^a-zA-Z0-9]/g, "-");
       const outputPath = path.join(outputDir, `${safeName}.cdx.json`);
 
       const result = await this.generateSBOM({
@@ -294,7 +289,7 @@ export class SBOMGenerator {
       const seenPurls = new Set<string>();
 
       for (const sbomPath of sbomPaths) {
-        const content = await fs.readFile(sbomPath, 'utf-8');
+        const content = await fs.readFile(sbomPath, "utf-8");
         const sbom = JSON.parse(content) as SBOMDocument;
 
         for (const component of sbom.components || []) {
@@ -307,17 +302,17 @@ export class SBOMGenerator {
       }
 
       const mergedSBOM: SBOMDocument = {
-        bomFormat: 'CycloneDX',
-        specVersion: '1.5',
+        bomFormat: "CycloneDX",
+        specVersion: "1.5",
         serialNumber: `urn:uuid:${crypto.randomUUID()}`,
         version: 1,
         metadata: {
           timestamp: new Date().toISOString(),
-          tools: [{ vendor: 'IntelGraph', name: 'sbom-merger', version: '1.0.0' }],
+          tools: [{ vendor: "IntelGraph", name: "sbom-merger", version: "1.0.0" }],
           component: {
-            type: 'application',
-            name: 'intelgraph-platform',
-            version: process.env.VERSION || '0.0.0',
+            type: "application",
+            name: "intelgraph-platform",
+            version: process.env.VERSION || "0.0.0",
           },
         },
         components: mergedComponents,
@@ -326,7 +321,7 @@ export class SBOMGenerator {
       const content = JSON.stringify(mergedSBOM, null, 2);
       await fs.writeFile(outputPath, content);
 
-      const digest = crypto.createHash('sha256').update(content).digest('hex');
+      const digest = crypto.createHash("sha256").update(content).digest("hex");
 
       return {
         success: true,
@@ -340,7 +335,7 @@ export class SBOMGenerator {
       return {
         success: false,
         componentCount: 0,
-        digest: '',
+        digest: "",
         duration: Date.now() - startTime,
         errors: [error instanceof Error ? error.message : String(error)],
       };
@@ -356,21 +351,21 @@ export class SBOMGenerator {
   ): Promise<{ success: boolean; stdout: string; stderr: string }> {
     return new Promise((resolve) => {
       const proc = spawn(command, args, {
-        env: { ...process.env, COSIGN_EXPERIMENTAL: '1' },
+        env: { ...process.env, COSIGN_EXPERIMENTAL: "1" },
       });
 
-      let stdout = '';
-      let stderr = '';
+      let stdout = "";
+      let stderr = "";
 
-      proc.stdout.on('data', (data) => {
+      proc.stdout.on("data", (data) => {
         stdout += data.toString();
       });
 
-      proc.stderr.on('data', (data) => {
+      proc.stderr.on("data", (data) => {
         stderr += data.toString();
       });
 
-      proc.on('close', (code) => {
+      proc.on("close", (code) => {
         resolve({
           success: code === 0,
           stdout,
@@ -378,7 +373,7 @@ export class SBOMGenerator {
         });
       });
 
-      proc.on('error', (error) => {
+      proc.on("error", (error) => {
         resolve({
           success: false,
           stdout,

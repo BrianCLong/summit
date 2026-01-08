@@ -1,15 +1,10 @@
 /**
  * Dashboard Component for Adversarial Misinformation Defense Platform Web UI
  */
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import {
-  FiAlertTriangle,
-  FiCheckCircle,
-  FiActivity,
-  FiBarChart2,
-} from 'react-icons/fi';
-import { Bar } from 'react-chartjs-2';
+import React, { useState, useEffect } from "react";
+import styled from "styled-components";
+import { FiAlertTriangle, FiCheckCircle, FiActivity, FiBarChart2 } from "react-icons/fi";
+import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -18,17 +13,10 @@ import {
   Title,
   Tooltip,
   Legend,
-} from 'chart.js';
+} from "chart.js";
 
 // Register Chart.js components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 // Styled components
 const DashboardContainer = styled.div`
@@ -55,7 +43,7 @@ const Card = styled.div`
 
 const StatCard = styled(Card)`
   text-align: center;
-  background: ${(props) => props.color || '#3498db'};
+  background: ${(props) => props.color || "#3498db"};
   color: white;
 `;
 
@@ -102,20 +90,20 @@ const Dashboard = () => {
 
       // Set up chart data
       setChartData({
-        labels: ['Text', 'Image', 'Audio', 'Video', 'Meme', 'Deepfake'],
+        labels: ["Text", "Image", "Audio", "Video", "Meme", "Deepfake"],
         datasets: [
           {
-            label: 'Detection Accuracy',
+            label: "Detection Accuracy",
             data: [0.88, 0.82, 0.79, 0.81, 0.84, 0.92],
-            backgroundColor: 'rgba(54, 162, 235, 0.6)',
-            borderColor: 'rgba(54, 162, 235, 1)',
+            backgroundColor: "rgba(54, 162, 235, 0.6)",
+            borderColor: "rgba(54, 162, 235, 1)",
             borderWidth: 1,
           },
           {
-            label: 'False Positive Rate',
+            label: "False Positive Rate",
             data: [0.12, 0.18, 0.21, 0.19, 0.16, 0.08],
-            backgroundColor: 'rgba(255, 99, 132, 0.6)',
-            borderColor: 'rgba(255, 99, 132, 1)',
+            backgroundColor: "rgba(255, 99, 132, 0.6)",
+            borderColor: "rgba(255, 99, 132, 1)",
             borderWidth: 1,
           },
         ],
@@ -129,11 +117,11 @@ const Dashboard = () => {
     responsive: true,
     plugins: {
       legend: {
-        position: 'top',
+        position: "top",
       },
       title: {
         display: true,
-        text: 'Detection Performance by Modality',
+        text: "Detection Performance by Modality",
       },
     },
   };
@@ -173,10 +161,7 @@ const Dashboard = () => {
       <Card>
         <h2>Recent Activity</h2>
         <ul>
-          <li>
-            Exercise "Social Media Influence Campaign" completed with 87%
-            accuracy
-          </li>
+          <li>Exercise "Social Media Influence Campaign" completed with 87% accuracy</li>
           <li>New scenario "Deepfake Audio Detection" added</li>
           <li>Tactic library updated with 12 new patterns</li>
           <li>Validation benchmark run - all modules passing</li>
@@ -187,26 +172,25 @@ const Dashboard = () => {
         <h2>System Status</h2>
         <ul>
           <li>
-            Text Detection: <span style={{ color: 'green' }}>Operational</span>
+            Text Detection: <span style={{ color: "green" }}>Operational</span>
           </li>
           <li>
-            Image Detection: <span style={{ color: 'green' }}>Operational</span>
+            Image Detection: <span style={{ color: "green" }}>Operational</span>
           </li>
           <li>
-            Audio Detection: <span style={{ color: 'green' }}>Operational</span>
+            Audio Detection: <span style={{ color: "green" }}>Operational</span>
           </li>
           <li>
-            Video Detection: <span style={{ color: 'green' }}>Operational</span>
+            Video Detection: <span style={{ color: "green" }}>Operational</span>
           </li>
           <li>
-            Meme Detection: <span style={{ color: 'green' }}>Operational</span>
+            Meme Detection: <span style={{ color: "green" }}>Operational</span>
           </li>
           <li>
-            Deepfake Detection:{' '}
-            <span style={{ color: 'green' }}>Operational</span>
+            Deepfake Detection: <span style={{ color: "green" }}>Operational</span>
           </li>
           <li>
-            Training Engine: <span style={{ color: 'orange' }}>Paused</span>
+            Training Engine: <span style={{ color: "orange" }}>Paused</span>
           </li>
         </ul>
       </Card>

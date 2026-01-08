@@ -1,12 +1,12 @@
 name: Build & Push
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch: {}
 
 env:
-  REGISTRY: ${{ secrets.REGISTRY }}            # e.g. ghcr.io/owner
-  IMAGE_NAME: app                               # replace per service
+  REGISTRY: ${{ secrets.REGISTRY }} # e.g. ghcr.io/owner
+  IMAGE_NAME: app # replace per service
 
 jobs:
   build:

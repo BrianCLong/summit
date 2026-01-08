@@ -40,27 +40,28 @@ The API Gateway Platform consists of several integrated packages:
 The gateway supports multiple routing strategies:
 
 ```typescript
-import { APIGateway, Route } from '@intelgraph/api-gateway';
+import { APIGateway, Route } from "@intelgraph/api-gateway";
 
 const gateway = new APIGateway({
   routes: [
     {
-      path: '/api/v1/investigations/*',
-      method: ['GET', 'POST'],
+      path: "/api/v1/investigations/*",
+      method: ["GET", "POST"],
       backends: [
-        { url: 'http://backend1:3000', weight: 2 },
-        { url: 'http://backend2:3000', weight: 1 },
+        { url: "http://backend1:3000", weight: 2 },
+        { url: "http://backend2:3000", weight: 1 },
       ],
     },
   ],
   loadBalancing: {
-    strategy: 'weighted-round-robin',
+    strategy: "weighted-round-robin",
     healthCheckInterval: 30000,
   },
 });
 ```
 
 **Supported Load Balancing Strategies:**
+
 - Round Robin
 - Weighted Round Robin
 - Least Connections
@@ -82,6 +83,7 @@ const gateway = new APIGateway({
 ```
 
 **Circuit States:**
+
 - **CLOSED**: Normal operation, requests pass through
 - **OPEN**: Service unavailable, requests fail fast
 - **HALF_OPEN**: Testing if service recovered
@@ -96,7 +98,7 @@ Handles multiple protocols seamlessly:
 - HTTP/2
 
 ```typescript
-import { ProtocolHandler, Protocol } from '@intelgraph/api-gateway';
+import { ProtocolHandler, Protocol } from "@intelgraph/api-gateway";
 
 const protocolHandler = new ProtocolHandler({
   supportedProtocols: [Protocol.HTTP, Protocol.HTTPS, Protocol.WEBSOCKET],
@@ -122,21 +124,21 @@ pnpm add @intelgraph/api-platform
 ### Basic Setup
 
 ```typescript
-import { APIGateway } from '@intelgraph/api-gateway';
-import { JWTManager } from '@intelgraph/authentication';
-import { RedisRateLimiter } from '@intelgraph/rate-limiting';
+import { APIGateway } from "@intelgraph/api-gateway";
+import { JWTManager } from "@intelgraph/authentication";
+import { RedisRateLimiter } from "@intelgraph/rate-limiting";
 
 // 1. Setup Authentication
 const jwtManager = new JWTManager({
   secret: process.env.JWT_SECRET!,
-  issuer: 'summit-api',
-  expiresIn: '15m',
+  issuer: "summit-api",
+  expiresIn: "15m",
 });
 
 // 2. Setup Rate Limiting
 const rateLimiter = new RedisRateLimiter({
   redis: {
-    host: 'localhost',
+    host: "localhost",
     port: 6379,
   },
   windowMs: 60 * 1000,
@@ -148,8 +150,8 @@ const gateway = new APIGateway({
   port: 8080,
   routes: [
     {
-      path: '/api/*',
-      backends: [{ url: 'http://api-server:3000' }],
+      path: "/api/*",
+      backends: [{ url: "http://api-server:3000" }],
     },
   ],
 });
@@ -189,11 +191,9 @@ TRACING_ENABLED=true
 ```typescript
 const routes: Route[] = [
   {
-    path: '/api/v1/investigations',
-    method: 'GET',
-    backends: [
-      { url: 'http://investigations-service:3000' },
-    ],
+    path: "/api/v1/investigations",
+    method: "GET",
+    backends: [{ url: "http://investigations-service:3000" }],
     rateLimit: {
       requests: 100,
       window: 60000, // 1 minute
@@ -202,7 +202,7 @@ const routes: Route[] = [
       enabled: true,
       ttl: 300, // 5 minutes
     },
-    version: 'v1',
+    version: "v1",
   },
 ];
 ```
@@ -212,23 +212,23 @@ const routes: Route[] = [
 ### JWT Authentication
 
 ```typescript
-import { JWTManager, TokenPayload } from '@intelgraph/authentication';
+import { JWTManager, TokenPayload } from "@intelgraph/authentication";
 
 const jwtManager = new JWTManager({
   secret: process.env.JWT_SECRET!,
-  algorithm: 'HS256',
-  issuer: 'summit-api',
-  audience: 'summit-users',
-  expiresIn: '15m',
-  refreshExpiresIn: '7d',
+  algorithm: "HS256",
+  issuer: "summit-api",
+  audience: "summit-users",
+  expiresIn: "15m",
+  refreshExpiresIn: "7d",
 });
 
 // Generate tokens
 const payload: TokenPayload = {
-  sub: 'user123',
-  email: 'analyst@summit.gov',
-  roles: ['analyst'],
-  scopes: ['investigations:read', 'entities:read'],
+  sub: "user123",
+  email: "analyst@summit.gov",
+  roles: ["analyst"],
+  scopes: ["investigations:read", "entities:read"],
 };
 
 const { accessToken, refreshToken } = jwtManager.generateTokenPair(payload);
@@ -240,28 +240,25 @@ const verified = jwtManager.verifyAccessToken(accessToken);
 ### OAuth 2.0 Flow
 
 ```typescript
-import { OAuthProvider, GrantType } from '@intelgraph/authentication';
+import { OAuthProvider, GrantType } from "@intelgraph/authentication";
 
 const oauth = new OAuthProvider({
   clientId: process.env.OAUTH_CLIENT_ID!,
   clientSecret: process.env.OAUTH_CLIENT_SECRET!,
-  redirectUri: 'https://summit.gov/callback',
-  authorizationEndpoint: 'https://auth.summit.gov/authorize',
-  tokenEndpoint: 'https://auth.summit.gov/token',
-  scopes: ['investigations:read', 'investigations:write'],
+  redirectUri: "https://summit.gov/callback",
+  authorizationEndpoint: "https://auth.summit.gov/authorize",
+  tokenEndpoint: "https://auth.summit.gov/token",
+  scopes: ["investigations:read", "investigations:write"],
   usePKCE: true,
 });
 
 // Authorization URL
-const authUrl = oauth.generateAuthorizationUrl(
-  ['investigations:read'],
-  'random-state'
-);
+const authUrl = oauth.generateAuthorizationUrl(["investigations:read"], "random-state");
 
 // Exchange code for token
 const tokens = await oauth.exchangeCodeForToken({
   grantType: GrantType.AUTHORIZATION_CODE,
-  code: 'auth-code',
+  code: "auth-code",
   clientId: oauth.clientId,
   redirectUri: oauth.redirectUri,
 });
@@ -270,15 +267,15 @@ const tokens = await oauth.exchangeCodeForToken({
 ### API Key Management
 
 ```typescript
-import { APIKeyManager } from '@intelgraph/authentication';
+import { APIKeyManager } from "@intelgraph/authentication";
 
 const apiKeyManager = new APIKeyManager();
 
 // Create API key
 const { apiKey, key } = apiKeyManager.createAPIKey({
-  name: 'Integration Service Key',
-  userId: 'service123',
-  scopes: ['api:read'],
+  name: "Integration Service Key",
+  userId: "service123",
+  scopes: ["api:read"],
   expiresIn: 365 * 24 * 60 * 60 * 1000, // 1 year
   rateLimit: {
     requests: 1000,
@@ -293,25 +290,25 @@ const validated = apiKeyManager.validateAPIKey(key);
 ### RBAC (Role-Based Access Control)
 
 ```typescript
-import { RBACManager } from '@intelgraph/authentication';
+import { RBACManager } from "@intelgraph/authentication";
 
 const rbac = new RBACManager();
 
 // Define roles
 rbac.defineRole({
-  name: 'analyst',
+  name: "analyst",
   permissions: [
-    { resource: 'investigations', action: 'read' },
-    { resource: 'investigations', action: 'create' },
-    { resource: 'entities', action: 'read' },
+    { resource: "investigations", action: "read" },
+    { resource: "investigations", action: "create" },
+    { resource: "entities", action: "read" },
   ],
 });
 
 // Assign roles
-rbac.assignRole('user123', 'analyst');
+rbac.assignRole("user123", "analyst");
 
 // Check permissions
-const hasPermission = rbac.hasPermission('user123', 'investigations', 'read');
+const hasPermission = rbac.hasPermission("user123", "investigations", "read");
 ```
 
 ## Rate Limiting
@@ -321,10 +318,11 @@ const hasPermission = rbac.hasPermission('user123', 'investigations', 'read');
 Choose the right strategy for your use case:
 
 #### Fixed Window
+
 Best for: Simple rate limiting with predictable reset times
 
 ```typescript
-import { FixedWindowLimiter } from '@intelgraph/rate-limiting';
+import { FixedWindowLimiter } from "@intelgraph/rate-limiting";
 
 const limiter = new FixedWindowLimiter({
   windowMs: 60 * 1000, // 1 minute
@@ -333,10 +331,11 @@ const limiter = new FixedWindowLimiter({
 ```
 
 #### Sliding Window
+
 Best for: More accurate rate limiting without edge case bursts
 
 ```typescript
-import { SlidingWindowLimiter } from '@intelgraph/rate-limiting';
+import { SlidingWindowLimiter } from "@intelgraph/rate-limiting";
 
 const limiter = new SlidingWindowLimiter({
   windowMs: 60 * 1000,
@@ -345,10 +344,11 @@ const limiter = new SlidingWindowLimiter({
 ```
 
 #### Token Bucket
+
 Best for: Allowing bursts while maintaining average rate
 
 ```typescript
-import { TokenBucketLimiter } from '@intelgraph/rate-limiting';
+import { TokenBucketLimiter } from "@intelgraph/rate-limiting";
 
 const limiter = new TokenBucketLimiter({
   bucketSize: 100,
@@ -363,11 +363,11 @@ const limiter = new TokenBucketLimiter({
 For multi-instance deployments, use Redis-based rate limiting:
 
 ```typescript
-import { RedisRateLimiter } from '@intelgraph/rate-limiting';
-import Redis from 'ioredis';
+import { RedisRateLimiter } from "@intelgraph/rate-limiting";
+import Redis from "ioredis";
 
 const redis = new Redis({
-  host: 'redis.summit.gov',
+  host: "redis.summit.gov",
   port: 6379,
   password: process.env.REDIS_PASSWORD,
 });
@@ -376,7 +376,7 @@ const limiter = new RedisRateLimiter({
   redis,
   windowMs: 60 * 1000,
   maxRequests: 1000,
-  keyPrefix: 'summit:ratelimit',
+  keyPrefix: "summit:ratelimit",
 });
 ```
 
@@ -385,7 +385,7 @@ const limiter = new RedisRateLimiter({
 Define tiered rate limit policies:
 
 ```typescript
-import { RateLimitPolicyManager } from '@intelgraph/rate-limiting';
+import { RateLimitPolicyManager } from "@intelgraph/rate-limiting";
 
 const policyManager = new RateLimitPolicyManager();
 
@@ -393,8 +393,8 @@ const policyManager = new RateLimitPolicyManager();
 policyManager.initializeDefaultPolicies();
 
 // Assign policies
-policyManager.assignClientPolicy('client123', 'professional');
-policyManager.assignRoutePolicy('/api/search', 'basic');
+policyManager.assignClientPolicy("client123", "professional");
+policyManager.assignRoutePolicy("/api/search", "basic");
 ```
 
 ## Monitoring & Analytics
@@ -402,14 +402,14 @@ policyManager.assignRoutePolicy('/api/search', 'basic');
 ### Real-time Metrics
 
 ```typescript
-import { MetricsCollector } from '@intelgraph/api-analytics';
+import { MetricsCollector } from "@intelgraph/api-analytics";
 
 const metrics = new MetricsCollector();
 
 // Record requests
 metrics.recordRequest(duration, statusCode, {
-  route: '/api/investigations',
-  method: 'GET',
+  route: "/api/investigations",
+  method: "GET",
 });
 
 // Get aggregated metrics
@@ -427,7 +427,7 @@ console.log(stats);
 Track API performance and SLA compliance:
 
 ```typescript
-import { PerformanceTracker } from '@intelgraph/api-analytics';
+import { PerformanceTracker } from "@intelgraph/api-analytics";
 
 const tracker = new PerformanceTracker({
   sla: {
@@ -437,7 +437,7 @@ const tracker = new PerformanceTracker({
   },
 });
 
-tracker.recordRequest('/api/investigations', 150, 200);
+tracker.recordRequest("/api/investigations", 150, 200);
 const slaStatus = tracker.getSLAStatus();
 ```
 

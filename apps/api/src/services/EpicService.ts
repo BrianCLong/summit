@@ -1,20 +1,23 @@
-import { EPIC_DEFINITIONS } from '../db/epicDefinitions.js';
+import { EPIC_DEFINITIONS } from "../db/epicDefinitions.js";
 import {
   EpicDefinition,
   EpicProgressSnapshot,
   EpicStatus,
   EpicTaskState,
   EpicUpdatePayload,
-} from '../contracts/epics.js';
+} from "../contracts/epics.js";
 
-const DEFAULT_STATUS: EpicStatus = 'not_started';
+const DEFAULT_STATUS: EpicStatus = "not_started";
 
 export class EpicService {
   private readonly definitions: EpicDefinition[];
   private readonly state = new Map<string, EpicTaskState>();
   private readonly clock: () => Date;
 
-  constructor(definitions: EpicDefinition[] = EPIC_DEFINITIONS, clock: () => Date = () => new Date()) {
+  constructor(
+    definitions: EpicDefinition[] = EPIC_DEFINITIONS,
+    clock: () => Date = () => new Date()
+  ) {
     this.definitions = definitions;
     this.clock = clock;
     this.seedState();
@@ -90,8 +93,8 @@ export class EpicService {
       );
     });
 
-    const completedCount = tasks.filter((task) => task.status === 'completed').length;
-    const blockedCount = tasks.filter((task) => task.status === 'blocked').length;
+    const completedCount = tasks.filter((task) => task.status === "completed").length;
+    const blockedCount = tasks.filter((task) => task.status === "blocked").length;
     const progress = tasks.length === 0 ? 0 : Math.round((completedCount / tasks.length) * 100);
 
     return {

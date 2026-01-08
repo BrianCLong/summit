@@ -513,21 +513,21 @@ maestro_exploration_rate =
   expr: maestro_routing_accuracy < 80
   for: 10m
   severity: warning
-  description: 'Model routing accuracy below 80% for 10 minutes'
+  description: "Model routing accuracy below 80% for 10 minutes"
 
 # Cost optimization failure
 - alert: CostOptimizationFailure
   expr: maestro_cost_optimization_ratio < 10
   for: 15m
   severity: warning
-  description: 'Cost optimization providing less than 10% savings'
+  description: "Cost optimization providing less than 10% savings"
 
 # Thompson sampling convergence issues
 - alert: ThompsonSamplingConvergenceIssue
   expr: stddev(maestro_model_selection_probability) > 0.3
   for: 30m
   severity: warning
-  description: 'Thompson sampling not converging - high variance in model selection'
+  description: "Thompson sampling not converging - high variance in model selection"
 ```
 
 ## Testing and Validation

@@ -2,176 +2,278 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "RevOps Governance Input",
   "type": "object",
-  "required": ["tenant", "lead", "account", "opportunity", "quote", "contract", "telemetry", "handoffs", "context", "marketing", "routing", "change_control"],
+  "required": [
+    "tenant",
+    "lead",
+    "account",
+    "opportunity",
+    "quote",
+    "contract",
+    "telemetry",
+    "handoffs",
+    "context",
+    "marketing",
+    "routing",
+    "change_control"
+  ],
   "properties": {
     "tenant": {
       "type": "object",
       "required": ["id"],
-      "properties": {"id": {"type": "string"}}
+      "properties": { "id": { "type": "string" } }
     },
     "actor": {
       "type": "object",
       "required": ["role", "id"],
       "properties": {
-        "role": {"type": "string", "enum": ["revops", "ae", "sdr", "manager", "finance", "legal", "cs"]},
-        "id": {"type": "string"}
+        "role": {
+          "type": "string",
+          "enum": ["revops", "ae", "sdr", "manager", "finance", "legal", "cs"]
+        },
+        "id": { "type": "string" }
       }
     },
     "lead": {
       "type": "object",
-      "required": ["id", "email", "domain", "country", "segment_hint", "system_of_record", "received_at", "first_touch_at", "first_meeting_at"],
+      "required": [
+        "id",
+        "email",
+        "domain",
+        "country",
+        "segment_hint",
+        "system_of_record",
+        "received_at",
+        "first_touch_at",
+        "first_meeting_at"
+      ],
       "properties": {
-        "id": {"type": "string"},
-        "email": {"type": "string", "format": "email"},
-        "domain": {"type": "string"},
-        "country": {"type": "string"},
-        "segment_hint": {"type": "string"},
-        "system_of_record": {"type": "string"},
-        "intent_score": {"type": "number"},
-        "icp_fit": {"type": "number"},
-        "received_at": {"type": "string", "format": "date-time"},
-        "first_touch_at": {"type": "string", "format": "date-time"},
-        "first_meeting_at": {"type": "string", "format": "date-time"}
+        "id": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "domain": { "type": "string" },
+        "country": { "type": "string" },
+        "segment_hint": { "type": "string" },
+        "system_of_record": { "type": "string" },
+        "intent_score": { "type": "number" },
+        "icp_fit": { "type": "number" },
+        "received_at": { "type": "string", "format": "date-time" },
+        "first_touch_at": { "type": "string", "format": "date-time" },
+        "first_meeting_at": { "type": "string", "format": "date-time" }
       }
     },
     "account": {
       "type": "object",
-      "required": ["id", "domain", "billing_account_id", "territory", "segment", "system_of_record", "duplicates"],
+      "required": [
+        "id",
+        "domain",
+        "billing_account_id",
+        "territory",
+        "segment",
+        "system_of_record",
+        "duplicates"
+      ],
       "properties": {
-        "id": {"type": "string"},
-        "domain": {"type": "string"},
-        "billing_account_id": {"type": "string"},
-        "parent_account_id": {"type": "string"},
-        "territory": {"type": "string"},
-        "segment": {"type": "string"},
-        "system_of_record": {"type": "string"},
-        "duplicates": {"type": "array", "items": {"type": "string"}}
+        "id": { "type": "string" },
+        "domain": { "type": "string" },
+        "billing_account_id": { "type": "string" },
+        "parent_account_id": { "type": "string" },
+        "territory": { "type": "string" },
+        "segment": { "type": "string" },
+        "system_of_record": { "type": "string" },
+        "duplicates": { "type": "array", "items": { "type": "string" } }
       }
     },
     "opportunity": {
       "type": "object",
-      "required": ["id", "name", "stage", "segment", "stage_evidence", "next_step", "next_step_date", "source", "territory", "forecast_category", "stage_entered_at", "last_activity_at", "close_date", "route_trace", "system_of_record"],
+      "required": [
+        "id",
+        "name",
+        "stage",
+        "segment",
+        "stage_evidence",
+        "next_step",
+        "next_step_date",
+        "source",
+        "territory",
+        "forecast_category",
+        "stage_entered_at",
+        "last_activity_at",
+        "close_date",
+        "route_trace",
+        "system_of_record"
+      ],
       "properties": {
-        "id": {"type": "string"},
-        "name": {"type": "string"},
-        "stage": {"type": "string"},
-        "segment": {"type": "string"},
-        "stage_evidence": {"type": "object", "additionalProperties": {"type": "boolean"}},
-        "next_step": {"type": "string"},
-        "next_step_date": {"type": "string"},
-        "buying_roles": {"type": "array", "items": {"type": "string"}},
-        "source": {"type": "string"},
-        "territory": {"type": "string"},
-        "forecast_category": {"type": "string"},
-        "campaign_name": {"type": "string"},
-        "stage_entered_at": {"type": "string", "format": "date-time"},
-        "last_activity_at": {"type": "string", "format": "date-time"},
-        "close_date": {"type": "string"},
-        "manual_routing_channel": {"type": "string"},
-        "route_trace": {"type": "array", "items": {"type": "string"}},
-        "policy_decisions": {"type": "array", "items": {"type": "string"}},
-        "system_of_record": {"type": "string"}
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "stage": { "type": "string" },
+        "segment": { "type": "string" },
+        "stage_evidence": { "type": "object", "additionalProperties": { "type": "boolean" } },
+        "next_step": { "type": "string" },
+        "next_step_date": { "type": "string" },
+        "buying_roles": { "type": "array", "items": { "type": "string" } },
+        "source": { "type": "string" },
+        "territory": { "type": "string" },
+        "forecast_category": { "type": "string" },
+        "campaign_name": { "type": "string" },
+        "stage_entered_at": { "type": "string", "format": "date-time" },
+        "last_activity_at": { "type": "string", "format": "date-time" },
+        "close_date": { "type": "string" },
+        "manual_routing_channel": { "type": "string" },
+        "route_trace": { "type": "array", "items": { "type": "string" } },
+        "policy_decisions": { "type": "array", "items": { "type": "string" } },
+        "system_of_record": { "type": "string" }
       }
     },
     "quote": {
       "type": "object",
-      "required": ["id", "segment", "discount_percentage", "total_value", "term_months", "skus", "required_approvals", "status", "system_of_record"],
+      "required": [
+        "id",
+        "segment",
+        "discount_percentage",
+        "total_value",
+        "term_months",
+        "skus",
+        "required_approvals",
+        "status",
+        "system_of_record"
+      ],
       "properties": {
-        "id": {"type": "string"},
-        "segment": {"type": "string"},
-        "discount_percentage": {"type": "number"},
-        "total_value": {"type": "number"},
-        "term_months": {"type": "number"},
-        "skus": {"type": "array", "items": {"type": "string"}},
-        "required_approvals": {"type": "array", "items": {"type": "string"}},
-        "status": {"type": "string"},
-        "system_of_record": {"type": "string"}
+        "id": { "type": "string" },
+        "segment": { "type": "string" },
+        "discount_percentage": { "type": "number" },
+        "total_value": { "type": "number" },
+        "term_months": { "type": "number" },
+        "skus": { "type": "array", "items": { "type": "string" } },
+        "required_approvals": { "type": "array", "items": { "type": "string" } },
+        "status": { "type": "string" },
+        "system_of_record": { "type": "string" }
       }
     },
     "contract": {
       "type": "object",
-      "required": ["id", "status", "signatures", "metadata", "renewal_type", "renewal_created", "system_of_record"],
+      "required": [
+        "id",
+        "status",
+        "signatures",
+        "metadata",
+        "renewal_type",
+        "renewal_created",
+        "system_of_record"
+      ],
       "properties": {
-        "id": {"type": "string"},
-        "status": {"type": "string"},
-        "signatures": {"type": "array", "items": {"type": "object", "required": ["role", "signed_at"], "properties": {"role": {"type": "string"}, "signed_at": {"type": "string", "format": "date-time"}}}},
-        "metadata": {"type": "object"},
-        "renewal_type": {"type": "string"},
-        "renewal_created": {"type": "boolean"},
-        "system_of_record": {"type": "string"}
+        "id": { "type": "string" },
+        "status": { "type": "string" },
+        "signatures": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["role", "signed_at"],
+            "properties": {
+              "role": { "type": "string" },
+              "signed_at": { "type": "string", "format": "date-time" }
+            }
+          }
+        },
+        "metadata": { "type": "object" },
+        "renewal_type": { "type": "string" },
+        "renewal_created": { "type": "boolean" },
+        "system_of_record": { "type": "string" }
       }
     },
     "telemetry": {
       "type": "object",
       "required": ["active_seats", "feature_depth", "exec_meetings", "security_review"],
       "properties": {
-        "active_seats": {"type": "number"},
-        "feature_depth": {"type": "number"},
-        "exec_meetings": {"type": "number"},
-        "security_review": {"type": "string"},
-        "system_of_record": {"type": "string"}
+        "active_seats": { "type": "number" },
+        "feature_depth": { "type": "number" },
+        "exec_meetings": { "type": "number" },
+        "security_review": { "type": "string" },
+        "system_of_record": { "type": "string" }
       }
     },
     "support": {
       "type": "object",
-      "properties": {"open_cases": {"type": "number"}}
+      "properties": { "open_cases": { "type": "number" } }
     },
     "marketing": {
       "type": "object",
-      "required": ["utm_source", "utm_medium", "utm_campaign", "lead_source", "mql_status", "sql_acceptance"],
+      "required": [
+        "utm_source",
+        "utm_medium",
+        "utm_campaign",
+        "lead_source",
+        "mql_status",
+        "sql_acceptance"
+      ],
       "properties": {
-        "utm_source": {"type": "string"},
-        "utm_medium": {"type": "string"},
-        "utm_campaign": {"type": "string"},
-        "lead_source": {"type": "string"},
-        "mql_status": {"type": "boolean"},
-        "sql_acceptance": {"type": "boolean"}
+        "utm_source": { "type": "string" },
+        "utm_medium": { "type": "string" },
+        "utm_campaign": { "type": "string" },
+        "lead_source": { "type": "string" },
+        "mql_status": { "type": "boolean" },
+        "sql_acceptance": { "type": "boolean" }
       }
     },
     "routing": {
       "type": "object",
-      "required": ["round_robin_position", "expected_position", "queue_wip", "wip_limit", "partner_registered"],
+      "required": [
+        "round_robin_position",
+        "expected_position",
+        "queue_wip",
+        "wip_limit",
+        "partner_registered"
+      ],
       "properties": {
-        "round_robin_position": {"type": "integer"},
-        "expected_position": {"type": "integer"},
-        "queue_wip": {"type": "integer"},
-        "wip_limit": {"type": "integer"},
-        "partner_registered": {"type": "boolean"}
+        "round_robin_position": { "type": "integer" },
+        "expected_position": { "type": "integer" },
+        "queue_wip": { "type": "integer" },
+        "wip_limit": { "type": "integer" },
+        "partner_registered": { "type": "boolean" }
       }
     },
     "change_control": {
       "type": "object",
       "required": ["rfc_submitted", "approved"],
       "properties": {
-        "rfc_submitted": {"type": "boolean"},
-        "approved": {"type": "boolean"}
+        "rfc_submitted": { "type": "boolean" },
+        "approved": { "type": "boolean" }
       }
     },
     "handoffs": {
       "type": "object",
       "required": ["completed_packets", "commitment_registry"],
       "properties": {
-        "completed_packets": {"type": "array", "items": {"type": "string"}},
-        "commitment_registry": {"type": "array", "items": {"type": "object"}}
+        "completed_packets": { "type": "array", "items": { "type": "string" } },
+        "commitment_registry": { "type": "array", "items": { "type": "object" } }
       }
     },
     "exception_registry": {
       "type": "object",
       "properties": {
-        "open": {"type": "array", "items": {"type": "object", "properties": {"id": {"type": "string"}, "owner": {"type": "string"}, "reason": {"type": "string"}, "expires_at": {"type": "string", "format": "date-time"}}}}
+        "open": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "owner": { "type": "string" },
+              "reason": { "type": "string" },
+              "expires_at": { "type": "string", "format": "date-time" }
+            }
+          }
+        }
       }
     },
     "governance_reviews": {
       "type": "object",
-      "properties": {"access_review_complete": {"type": "boolean"}}
+      "properties": { "access_review_complete": { "type": "boolean" } }
     },
-    "audit_logs_enabled": {"type": "boolean"},
+    "audit_logs_enabled": { "type": "boolean" },
     "context": {
       "type": "object",
       "required": ["now"],
       "properties": {
-        "now": {"type": "string", "format": "date-time"},
-        "change_targets": {"type": "array", "items": {"type": "string"}}
+        "now": { "type": "string", "format": "date-time" },
+        "change_targets": { "type": "array", "items": { "type": "string" } }
       }
     }
   }

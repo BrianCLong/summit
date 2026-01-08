@@ -11,30 +11,35 @@ This document describes the compliance framework implemented in the training pla
 ### United States
 
 #### Executive Order 12333
+
 - Governs intelligence activities
 - Defines intelligence community authorities
 - Establishes oversight requirements
 - Requires Attorney General procedures
 
 #### USSID 18 (U.S. Signals Intelligence Directive 18)
+
 - Protects U.S. person information
 - Defines collection limitations
 - Establishes minimization requirements
 - Governs dissemination
 
 #### Foreign Intelligence Surveillance Act (FISA)
+
 - Authorizes foreign intelligence surveillance
 - Establishes FISA Court oversight
 - Defines warrant requirements
 - Governs electronic surveillance
 
 #### Electronic Communications Privacy Act (ECPA)
+
 - Wiretap Act (Title I)
 - Stored Communications Act (Title II)
 - Pen Register Act (Title III)
 - Governs electronic communications privacy
 
 #### NSPM-7 (National Security Presidential Memorandum 7)
+
 - Integration of cyber operations
 - Offensive and defensive authorities
 - Interagency coordination requirements
@@ -42,11 +47,13 @@ This document describes the compliance framework implemented in the training pla
 ### International
 
 #### Five Eyes Agreement
+
 - Intelligence sharing framework
 - US, UK, Canada, Australia, New Zealand
 - Signals intelligence cooperation
 
 #### Tallinn Manual
+
 - International law applicable to cyber operations
 - Guidance on state responsibility
 - Rules of engagement for cyber
@@ -64,10 +71,10 @@ if (!authority.valid) {
 
 // Authorization check before collection
 const auth = compliance.checkAuthorization({
-  action: 'COLLECT',
+  action: "COLLECT",
   userId: operatorId,
-  targetType: 'FOREIGN',
-  classification: 'SECRET'
+  targetType: "FOREIGN",
+  classification: "SECRET",
 });
 ```
 
@@ -95,8 +102,8 @@ The platform implements minimization procedures per USSID 18:
 ```typescript
 // Apply minimization
 const result = compliance.applyMinimization(content, [
-  'US_PERSON_DETECTED',
-  'DOMESTIC_COMMUNICATION'
+  "US_PERSON_DETECTED",
+  "DOMESTIC_COMMUNICATION",
 ]);
 // Returns: { minimized, appliedProcedures, redactions }
 ```
@@ -104,6 +111,7 @@ const result = compliance.applyMinimization(content, [
 ### Access Controls
 
 #### Clearance Levels
+
 - UNCLASSIFIED
 - CONFIDENTIAL
 - SECRET
@@ -111,6 +119,7 @@ const result = compliance.applyMinimization(content, [
 - TOP SECRET/SCI
 
 #### Compartmentalization
+
 - Need-to-know enforcement
 - Compartment-based access
 - Access verification
@@ -118,15 +127,15 @@ const result = compliance.applyMinimization(content, [
 ```typescript
 // Register user access
 compliance.registerUser({
-  userId: 'operator-1',
-  clearanceLevel: 'TOP_SECRET',
-  compartments: ['SI', 'TK', 'G'],
-  needToKnow: ['OPERATION-ALPHA'],
-  lastVerified: new Date()
+  userId: "operator-1",
+  clearanceLevel: "TOP_SECRET",
+  compartments: ["SI", "TK", "G"],
+  needToKnow: ["OPERATION-ALPHA"],
+  lastVerified: new Date(),
 });
 
 // Check access
-const hasAccess = compliance.checkAccess('operator-1', ['SI', 'TK']);
+const hasAccess = compliance.checkAccess("operator-1", ["SI", "TK"]);
 ```
 
 ### Audit Logging
@@ -135,17 +144,17 @@ All operations are logged for compliance auditing:
 
 ```typescript
 // Every API call is logged
-compliance.log('API_ACCESS', 'POST /api/v1/tasks', {
-  userId: 'operator-1',
-  sessionId: 'session-123',
-  classification: 'SECRET'
+compliance.log("API_ACCESS", "POST /api/v1/tasks", {
+  userId: "operator-1",
+  sessionId: "session-123",
+  classification: "SECRET",
 });
 
 // Generate audit report
 const report = compliance.getAuditReport({
-  startDate: new Date('2024-01-01'),
-  endDate: new Date('2024-12-31'),
-  action: 'COLLECTION'
+  startDate: new Date("2024-01-01"),
+  endDate: new Date("2024-12-31"),
+  action: "COLLECTION",
 });
 ```
 
@@ -169,27 +178,27 @@ const oversightReport = compliance.exportForOversight();
 
 ### Supported Authority Types
 
-| Type | Description | Requirements |
-|------|-------------|--------------|
-| FISA | Foreign Intelligence Surveillance Act | Court order |
-| EO12333 | Executive Order 12333 | AG procedures |
-| TITLE_III | Wiretap Act | Court order |
-| ECPA | Electronic Communications Privacy Act | Warrant/order |
-| TRAINING | Training exercise authority | Authorization |
+| Type      | Description                           | Requirements  |
+| --------- | ------------------------------------- | ------------- |
+| FISA      | Foreign Intelligence Surveillance Act | Court order   |
+| EO12333   | Executive Order 12333                 | AG procedures |
+| TITLE_III | Wiretap Act                           | Court order   |
+| ECPA      | Electronic Communications Privacy Act | Warrant/order |
+| TRAINING  | Training exercise authority           | Authorization |
 
 ### Authority Validation
 
 ```typescript
 // Add legal authority
 const authId = compliance.addAuthority({
-  type: 'TRAINING',
-  reference: 'TRAINING-EXERCISE-001',
-  description: 'Authorized training exercise',
+  type: "TRAINING",
+  reference: "TRAINING-EXERCISE-001",
+  description: "Authorized training exercise",
   validFrom: new Date(),
   validTo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-  restrictions: ['SIMULATION_ONLY'],
+  restrictions: ["SIMULATION_ONLY"],
   minimizationRequired: true,
-  active: true
+  active: true,
 });
 
 // Validate before operations
@@ -200,12 +209,12 @@ const validation = compliance.validateAuthority(authId);
 
 ### Retention Periods
 
-| Data Type | Retention | Authority |
-|-----------|-----------|-----------|
-| US Person (unminimized) | 5 years | USSID 18 |
-| Privileged communications | Immediate destruction | USSID 18 |
-| Training data | 90 days | Policy |
-| Audit logs | 7 years | Compliance |
+| Data Type                 | Retention             | Authority  |
+| ------------------------- | --------------------- | ---------- |
+| US Person (unminimized)   | 5 years               | USSID 18   |
+| Privileged communications | Immediate destruction | USSID 18   |
+| Training data             | 90 days               | Policy     |
+| Audit logs                | 7 years               | Compliance |
 
 ### Destruction Procedures
 
@@ -237,8 +246,10 @@ const validation = compliance.validateAuthority(authId);
 
 ```typescript
 // Violation is automatically recorded
-compliance.recordViolation('CLEARANCE_INSUFFICIENT',
-  'User attempted to access TOP SECRET material with SECRET clearance');
+compliance.recordViolation(
+  "CLEARANCE_INSUFFICIENT",
+  "User attempted to access TOP SECRET material with SECRET clearance"
+);
 
 // Check compliance status
 const status = compliance.getComplianceStatus();

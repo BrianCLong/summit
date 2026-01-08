@@ -24,24 +24,26 @@
 We recommend a **dual-versioning approach** optimized for our internal API with future external partner support:
 
 #### **For REST APIs:**
+
 - **URL path versioning** (`/api/{service}/v{N}/`) for **major versions**
 - **Header-based versioning** (`API-Version: v2.1`) for **minor/patch versions**
 - **Sunset headers** for deprecation warnings
 
 #### **For GraphQL API:**
+
 - **Schema evolution** (additive-only changes, no versioning in URL)
 - **Field deprecation directives** with `@deprecated` annotations
 - **API-Version header** for breaking schema changes (use sparingly)
 
 #### Why This Approach?
 
-| Factor | URL Versioning | Header Versioning | Our Hybrid Approach |
-|--------|---------------|-------------------|---------------------|
-| **Discoverability** | ✅ Visible in browser/logs | ❌ Hidden in headers | ✅ Major versions visible |
-| **Caching** | ✅ Cache-friendly | ⚠️ Requires Vary header | ✅ Major versions cached separately |
-| **Migration** | ⚠️ Clients must update URLs | ✅ Gradual rollout | ✅ Flexible migration paths |
-| **Internal APIs** | ✅ Clear contracts | ✅ Faster iteration | ✅ Best of both |
-| **GraphQL** | ❌ Anti-pattern | ✅ Native support | ✅ Schema evolution |
+| Factor              | URL Versioning              | Header Versioning       | Our Hybrid Approach                 |
+| ------------------- | --------------------------- | ----------------------- | ----------------------------------- |
+| **Discoverability** | ✅ Visible in browser/logs  | ❌ Hidden in headers    | ✅ Major versions visible           |
+| **Caching**         | ✅ Cache-friendly           | ⚠️ Requires Vary header | ✅ Major versions cached separately |
+| **Migration**       | ⚠️ Clients must update URLs | ✅ Gradual rollout      | ✅ Flexible migration paths         |
+| **Internal APIs**   | ✅ Clear contracts          | ✅ Faster iteration     | ✅ Best of both                     |
+| **GraphQL**         | ❌ Anti-pattern             | ✅ Native support       | ✅ Schema evolution                 |
 
 ### Version Number Semantics
 
@@ -77,12 +79,12 @@ Follow **Semantic Versioning (SemVer)**:
 
 ### Timelines by Change Type
 
-| Change Type | Notice Period | Sunset Period | Total Lifecycle | Example |
-|-------------|---------------|---------------|-----------------|---------|
-| **Major breaking** | 6 months | 1 month | 7 months | Remove endpoint |
-| **Minor breaking** | 3 months | 1 month | 4 months | Change response format |
-| **Field removal** | 3 months | 1 month | 4 months | Delete `user.legacyId` |
-| **Behavior change** | 2 months | 2 weeks | ~2.5 months | Change sort order |
+| Change Type         | Notice Period | Sunset Period | Total Lifecycle | Example                |
+| ------------------- | ------------- | ------------- | --------------- | ---------------------- |
+| **Major breaking**  | 6 months      | 1 month       | 7 months        | Remove endpoint        |
+| **Minor breaking**  | 3 months      | 1 month       | 4 months        | Change response format |
+| **Field removal**   | 3 months      | 1 month       | 4 months        | Delete `user.legacyId` |
+| **Behavior change** | 2 months      | 2 weeks       | ~2.5 months     | Change sort order      |
 
 ### Deprecation Checklist
 
@@ -143,7 +145,10 @@ type User {
   id: ID!
   name: String!
   legacyId: String @deprecated(reason: "Use 'id' instead. Removed after 2025-12-31")
-  username: String @deprecated(reason: "Migrated to 'name'. See migration guide: https://docs.internal/migrations/username-to-name")
+  username: String
+    @deprecated(
+      reason: "Migrated to 'name'. See migration guide: https://docs.internal/migrations/username-to-name"
+    )
 }
 
 type Query {
@@ -173,7 +178,7 @@ paths:
 
         See [Migration Guide](https://docs.internal/migrations/runs-v2)
       responses:
-        '200':
+        "200":
           description: Success (deprecated)
           headers:
             Deprecation:
@@ -188,15 +193,15 @@ paths:
 
 ### Communication Cadence
 
-| Milestone | Channel | Audience | Template |
-|-----------|---------|----------|----------|
-| **T+0: Announcement** | Email + Slack + API docs | All API consumers | "Deprecation Notice" |
-| **T+2 weeks** | Slack reminder | All API consumers | "Migration Resources Available" |
-| **T+1 month** | Email | High-usage clients | "Priority Migration Support" |
-| **T+3 months** | Email + Slack | Active deprecated users | "Halfway Point Reminder" |
-| **T+5 months** | Email (urgent) | Still-active users | "30-Day Final Warning" |
-| **T+1 week** | Email (critical) | Still-active users | "7-Day Emergency Notice" |
-| **T+6 months** | Email | All | "Deprecation Completed" |
+| Milestone             | Channel                  | Audience                | Template                        |
+| --------------------- | ------------------------ | ----------------------- | ------------------------------- |
+| **T+0: Announcement** | Email + Slack + API docs | All API consumers       | "Deprecation Notice"            |
+| **T+2 weeks**         | Slack reminder           | All API consumers       | "Migration Resources Available" |
+| **T+1 month**         | Email                    | High-usage clients      | "Priority Migration Support"    |
+| **T+3 months**        | Email + Slack            | Active deprecated users | "Halfway Point Reminder"        |
+| **T+5 months**        | Email (urgent)           | Still-active users      | "30-Day Final Warning"          |
+| **T+1 week**          | Email (critical)         | Still-active users      | "7-Day Emergency Notice"        |
+| **T+6 months**        | Email                    | All                     | "Deprecation Completed"         |
 
 ---
 
@@ -207,8 +212,8 @@ paths:
 **File:** `/server/src/middleware/api-version.ts`
 
 ```typescript
-import { Request, Response, NextFunction } from 'express';
-import { logger } from '../lib/logger';
+import { Request, Response, NextFunction } from "express";
+import { logger } from "../lib/logger";
 
 export interface VersionedRequest extends Request {
   apiVersion: {
@@ -230,9 +235,9 @@ export function apiVersionMiddleware(req: Request, res: Response, next: NextFunc
   const pathVersionMatch = req.path.match(/\/v(\d+)\//);
 
   // 2. Check API-Version header for full version (e.g., "v2.1.0")
-  const headerVersion = req.headers['api-version'] as string;
+  const headerVersion = req.headers["api-version"] as string;
 
-  let version = { major: 1, minor: 0, patch: 0, raw: 'v1.0.0' };
+  let version = { major: 1, minor: 0, patch: 0, raw: "v1.0.0" };
 
   if (pathVersionMatch) {
     version.major = parseInt(pathVersionMatch[1], 10);
@@ -249,18 +254,23 @@ export function apiVersionMiddleware(req: Request, res: Response, next: NextFunc
   versionedReq.apiVersion = version;
 
   // Set response header to indicate which version is being used
-  res.setHeader('API-Version', version.raw);
+  res.setHeader("API-Version", version.raw);
 
-  logger.debug({
-    path: req.path,
-    requestedVersion: version.raw,
-    method: req.method
-  }, 'API version resolved');
+  logger.debug(
+    {
+      path: req.path,
+      requestedVersion: version.raw,
+      method: req.method,
+    },
+    "API version resolved"
+  );
 
   next();
 }
 
-function parseVersion(versionStr: string): { major: number; minor: number; patch: number; raw: string } | null {
+function parseVersion(
+  versionStr: string
+): { major: number; minor: number; patch: number; raw: string } | null {
   const match = versionStr.match(/^v?(\d+)\.(\d+)\.(\d+)$/);
   if (!match) return null;
 
@@ -268,7 +278,7 @@ function parseVersion(versionStr: string): { major: number; minor: number; patch
     major: parseInt(match[1], 10),
     minor: parseInt(match[2], 10),
     patch: parseInt(match[3], 10),
-    raw: `v${match[1]}.${match[2]}.${match[3]}`
+    raw: `v${match[1]}.${match[2]}.${match[3]}`,
   };
 }
 
@@ -281,19 +291,23 @@ export function requireVersion(minVersion: string) {
     const required = parseVersion(minVersion);
 
     if (!required) {
-      return res.status(500).json({ error: 'Invalid version configuration' });
+      return res.status(500).json({ error: "Invalid version configuration" });
     }
 
     const current = versionedReq.apiVersion;
 
-    if (current.major < required.major ||
-        (current.major === required.major && current.minor < required.minor) ||
-        (current.major === required.major && current.minor === required.minor && current.patch < required.patch)) {
+    if (
+      current.major < required.major ||
+      (current.major === required.major && current.minor < required.minor) ||
+      (current.major === required.major &&
+        current.minor === required.minor &&
+        current.patch < required.patch)
+    ) {
       return res.status(400).json({
-        error: 'API version too old',
+        error: "API version too old",
         required: minVersion,
         provided: current.raw,
-        message: `This endpoint requires API version ${minVersion} or higher. You provided ${current.raw}.`
+        message: `This endpoint requires API version ${minVersion} or higher. You provided ${current.raw}.`,
       });
     }
 
@@ -309,8 +323,8 @@ export function requireVersion(minVersion: string) {
 **File:** `/server/src/middleware/deprecation.ts`
 
 ```typescript
-import { Request, Response, NextFunction } from 'express';
-import { logger } from '../lib/logger';
+import { Request, Response, NextFunction } from "express";
+import { logger } from "../lib/logger";
 
 export interface DeprecationConfig {
   /** Date when the endpoint will be removed (ISO 8601) */
@@ -330,18 +344,22 @@ export function deprecated(config: DeprecationConfig) {
   return (req: Request, res: Response, next: NextFunction) => {
     const sunsetDate = new Date(config.sunsetDate);
     const now = new Date();
-    const daysUntilSunset = Math.ceil((sunsetDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const daysUntilSunset = Math.ceil(
+      (sunsetDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+    );
 
     // Add deprecation headers
-    res.setHeader('Deprecation', 'true');
-    res.setHeader('Sunset', sunsetDate.toUTCString());
+    res.setHeader("Deprecation", "true");
+    res.setHeader("Sunset", sunsetDate.toUTCString());
 
     if (config.successorUrl) {
-      res.setHeader('Link', `<${config.successorUrl}>; rel="successor-version"`);
+      res.setHeader("Link", `<${config.successorUrl}>; rel="successor-version"`);
     }
 
     // Construct warning message
-    let warningMessage = config.message || `This endpoint is deprecated and will be removed on ${sunsetDate.toISOString().split('T')[0]}.`;
+    let warningMessage =
+      config.message ||
+      `This endpoint is deprecated and will be removed on ${sunsetDate.toISOString().split("T")[0]}.`;
 
     if (config.successorUrl) {
       warningMessage += ` Migrate to ${config.successorUrl}`;
@@ -354,21 +372,24 @@ export function deprecated(config: DeprecationConfig) {
       warningMessage = `⚠️ WARNING (${daysUntilSunset} days left): ${warningMessage}`;
     }
 
-    res.setHeader('Warning', `299 - "${warningMessage}"`);
+    res.setHeader("Warning", `299 - "${warningMessage}"`);
 
     // Log deprecation usage
     if (config.logRequests !== false) {
-      const logLevel = daysUntilSunset <= 7 ? 'error' : daysUntilSunset <= 30 ? 'warn' : 'info';
+      const logLevel = daysUntilSunset <= 7 ? "error" : daysUntilSunset <= 30 ? "warn" : "info";
 
-      logger[logLevel]({
-        path: req.path,
-        method: req.method,
-        ip: req.ip,
-        userAgent: req.headers['user-agent'],
-        daysUntilSunset,
-        sunsetDate: config.sunsetDate,
-        userId: (req as any).user?.id
-      }, `Deprecated endpoint accessed: ${req.method} ${req.path}`);
+      logger[logLevel](
+        {
+          path: req.path,
+          method: req.method,
+          ip: req.ip,
+          userAgent: req.headers["user-agent"],
+          daysUntilSunset,
+          sunsetDate: config.sunsetDate,
+          userId: (req as any).user?.id,
+        },
+        `Deprecated endpoint accessed: ${req.method} ${req.path}`
+      );
     }
 
     next();
@@ -380,18 +401,21 @@ export function deprecated(config: DeprecationConfig) {
  */
 export function sunset(config: { successorUrl?: string; message?: string }) {
   return (req: Request, res: Response) => {
-    logger.error({
-      path: req.path,
-      method: req.method,
-      ip: req.ip,
-      userId: (req as any).user?.id
-    }, 'Sunset endpoint accessed');
+    logger.error(
+      {
+        path: req.path,
+        method: req.method,
+        ip: req.ip,
+        userId: (req as any).user?.id,
+      },
+      "Sunset endpoint accessed"
+    );
 
     return res.status(410).json({
-      error: 'Gone',
-      message: config.message || 'This endpoint has been removed.',
+      error: "Gone",
+      message: config.message || "This endpoint has been removed.",
       successorUrl: config.successorUrl,
-      documentation: 'https://docs.internal/api/deprecations'
+      documentation: "https://docs.internal/api/deprecations",
     });
   };
 }
@@ -404,10 +428,10 @@ export function sunset(config: { successorUrl?: string; message?: string }) {
 **File:** `/server/src/routes/maestro/runs-v1.ts`
 
 ```typescript
-import { Router } from 'express';
-import { deprecated } from '../../middleware/deprecation';
-import { RunsService } from '../../maestro/runs/RunsService';
-import { logger } from '../../lib/logger';
+import { Router } from "express";
+import { deprecated } from "../../middleware/deprecation";
+import { RunsService } from "../../maestro/runs/RunsService";
+import { logger } from "../../lib/logger";
 
 const router = Router();
 const runsService = new RunsService();
@@ -417,11 +441,11 @@ const runsService = new RunsService();
  * Returns flat array of runs (old format)
  */
 router.get(
-  '/runs',
+  "/runs",
   deprecated({
-    sunsetDate: '2025-12-31T23:59:59Z',
-    successorUrl: '/api/maestro/v2/runs',
-    message: 'Use v2 for paginated results and improved performance.'
+    sunsetDate: "2025-12-31T23:59:59Z",
+    successorUrl: "/api/maestro/v2/runs",
+    message: "Use v2 for paginated results and improved performance.",
   }),
   async (req, res) => {
     try {
@@ -430,30 +454,32 @@ router.get(
       // Old v1 behavior: return all runs as flat array
       const runs = await runsService.listRuns({
         tenantId,
-        limit: 1000 // v1 had no pagination, return max 1000
+        limit: 1000, // v1 had no pagination, return max 1000
       });
 
       // V1 response format (flat array)
-      const v1Runs = runs.map(run => ({
+      const v1Runs = runs.map((run) => ({
         id: run.id,
         status: run.state, // v1 used "status" field
         pipeline: run.pipelineId,
         created: run.createdAt,
         completed: run.completedAt,
-        owner: run.userId
+        owner: run.userId,
       }));
 
-      logger.warn({
-        tenantId,
-        userId: (req as any).user?.id,
-        count: v1Runs.length
-      }, 'V1 runs endpoint accessed (deprecated)');
+      logger.warn(
+        {
+          tenantId,
+          userId: (req as any).user?.id,
+          count: v1Runs.length,
+        },
+        "V1 runs endpoint accessed (deprecated)"
+      );
 
       return res.json(v1Runs);
-
     } catch (error) {
-      logger.error({ error }, 'Error fetching v1 runs');
-      return res.status(500).json({ error: 'Internal server error' });
+      logger.error({ error }, "Error fetching v1 runs");
+      return res.status(500).json({ error: "Internal server error" });
     }
   }
 );
@@ -464,10 +490,10 @@ export default router;
 **File:** `/server/src/routes/maestro/runs-v2.ts`
 
 ```typescript
-import { Router } from 'express';
-import { z } from 'zod';
-import { RunsService } from '../../maestro/runs/RunsService';
-import { logger } from '../../lib/logger';
+import { Router } from "express";
+import { z } from "zod";
+import { RunsService } from "../../maestro/runs/RunsService";
+import { logger } from "../../lib/logger";
 
 const router = Router();
 const runsService = new RunsService();
@@ -476,17 +502,17 @@ const runsService = new RunsService();
 const ListRunsQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
-  state: z.enum(['pending', 'running', 'completed', 'failed']).optional(),
+  state: z.enum(["pending", "running", "completed", "failed"]).optional(),
   pipelineId: z.string().uuid().optional(),
-  sortBy: z.enum(['createdAt', 'completedAt', 'state']).default('createdAt'),
-  sortOrder: z.enum(['asc', 'desc']).default('desc')
+  sortBy: z.enum(["createdAt", "completedAt", "state"]).default("createdAt"),
+  sortOrder: z.enum(["asc", "desc"]).default("desc"),
 });
 
 /**
  * V2 Runs Endpoint - CURRENT
  * Returns paginated runs with filtering and sorting
  */
-router.get('/runs', async (req, res) => {
+router.get("/runs", async (req, res) => {
   try {
     const tenantId = (req as any).tenantId;
 
@@ -495,8 +521,8 @@ router.get('/runs', async (req, res) => {
 
     if (!queryResult.success) {
       return res.status(400).json({
-        error: 'Invalid query parameters',
-        details: queryResult.error.format()
+        error: "Invalid query parameters",
+        details: queryResult.error.format(),
       });
     }
 
@@ -509,17 +535,17 @@ router.get('/runs', async (req, res) => {
       pageSize,
       filters: {
         state,
-        pipelineId
+        pipelineId,
       },
       sort: {
         field: sortBy,
-        order: sortOrder
-      }
+        order: sortOrder,
+      },
     });
 
     // V2 response format (paginated with metadata)
     return res.json({
-      data: result.runs.map(run => ({
+      data: result.runs.map((run) => ({
         id: run.id,
         state: run.state, // v2 uses "state" field
         pipelineId: run.pipelineId,
@@ -527,7 +553,7 @@ router.get('/runs', async (req, res) => {
         completedAt: run.completedAt,
         userId: run.userId,
         duration: run.duration,
-        metadata: run.metadata
+        metadata: run.metadata,
       })),
       pagination: {
         page,
@@ -535,24 +561,22 @@ router.get('/runs', async (req, res) => {
         totalItems: result.total,
         totalPages: Math.ceil(result.total / pageSize),
         hasNextPage: page * pageSize < result.total,
-        hasPreviousPage: page > 1
+        hasPreviousPage: page > 1,
       },
       links: {
         self: `/api/maestro/v2/runs?page=${page}&pageSize=${pageSize}`,
-        next: page * pageSize < result.total
-          ? `/api/maestro/v2/runs?page=${page + 1}&pageSize=${pageSize}`
-          : null,
-        previous: page > 1
-          ? `/api/maestro/v2/runs?page=${page - 1}&pageSize=${pageSize}`
-          : null
-      }
+        next:
+          page * pageSize < result.total
+            ? `/api/maestro/v2/runs?page=${page + 1}&pageSize=${pageSize}`
+            : null,
+        previous: page > 1 ? `/api/maestro/v2/runs?page=${page - 1}&pageSize=${pageSize}` : null,
+      },
     });
-
   } catch (error) {
-    logger.error({ error }, 'Error fetching v2 runs');
+    logger.error({ error }, "Error fetching v2 runs");
     return res.status(500).json({
-      error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Unknown error'
+      error: "Internal server error",
+      message: error instanceof Error ? error.message : "Unknown error",
     });
   }
 });
@@ -563,10 +587,10 @@ export default router;
 **File:** `/server/src/routes/maestro/index.ts` (Route mounting)
 
 ```typescript
-import { Router } from 'express';
-import { apiVersionMiddleware } from '../../middleware/api-version';
-import runsV1Router from './runs-v1';
-import runsV2Router from './runs-v2';
+import { Router } from "express";
+import { apiVersionMiddleware } from "../../middleware/api-version";
+import runsV1Router from "./runs-v1";
+import runsV2Router from "./runs-v2";
 
 const router = Router();
 
@@ -574,10 +598,10 @@ const router = Router();
 router.use(apiVersionMiddleware);
 
 // Mount v1 routes (deprecated)
-router.use('/api/maestro/v1', runsV1Router);
+router.use("/api/maestro/v1", runsV1Router);
 
 // Mount v2 routes (current)
-router.use('/api/maestro/v2', runsV2Router);
+router.use("/api/maestro/v2", runsV2Router);
 
 export default router;
 ```
@@ -596,9 +620,10 @@ type Run {
   state: RunState!
 
   # V1: Deprecated field
-  status: String @deprecated(
-    reason: "Use 'state' field instead. 'status' will be removed after 2025-12-31. See https://docs.internal/migrations/run-state"
-  )
+  status: String
+    @deprecated(
+      reason: "Use 'state' field instead. 'status' will be removed after 2025-12-31. See https://docs.internal/migrations/run-state"
+    )
 
   pipelineId: ID!
   pipeline: Pipeline
@@ -625,17 +650,13 @@ enum RunState {
 
 type Query {
   # V2: Current query with pagination
-  runs(
-    page: Int = 1
-    pageSize: Int = 20
-    state: RunState
-    pipelineId: ID
-  ): RunsConnection!
+  runs(page: Int = 1, pageSize: Int = 20, state: RunState, pipelineId: ID): RunsConnection!
 
   # V1: Deprecated query (returns all runs)
-  allRuns: [Run!]! @deprecated(
-    reason: "Use 'runs' query with pagination instead. This query returns max 1000 results and will be removed after 2025-12-31."
-  )
+  allRuns: [Run!]!
+    @deprecated(
+      reason: "Use 'runs' query with pagination instead. This query returns max 1000 results and will be removed after 2025-12-31."
+    )
 
   run(id: ID!): Run
 }
@@ -662,9 +683,9 @@ type PageInfo {
 **File:** `/server/src/graphql/resolvers/run-resolvers.ts`
 
 ```typescript
-import { GraphQLFieldResolver } from 'graphql';
-import { logger } from '../../lib/logger';
-import { RunsService } from '../../maestro/runs/RunsService';
+import { GraphQLFieldResolver } from "graphql";
+import { logger } from "../../lib/logger";
+import { RunsService } from "../../maestro/runs/RunsService";
 
 const runsService = new RunsService();
 
@@ -679,25 +700,27 @@ export const runResolvers = {
         tenantId,
         page,
         pageSize,
-        filters: { state, pipelineId }
+        filters: { state, pipelineId },
       });
 
       return {
-        edges: result.runs.map(run => ({
+        edges: result.runs.map((run) => ({
           node: run,
-          cursor: Buffer.from(`run:${run.id}`).toString('base64')
+          cursor: Buffer.from(`run:${run.id}`).toString("base64"),
         })),
         pageInfo: {
           hasNextPage: page * pageSize < result.total,
           hasPreviousPage: page > 1,
-          startCursor: result.runs.length > 0
-            ? Buffer.from(`run:${result.runs[0].id}`).toString('base64')
-            : null,
-          endCursor: result.runs.length > 0
-            ? Buffer.from(`run:${result.runs[result.runs.length - 1].id}`).toString('base64')
-            : null
+          startCursor:
+            result.runs.length > 0
+              ? Buffer.from(`run:${result.runs[0].id}`).toString("base64")
+              : null,
+          endCursor:
+            result.runs.length > 0
+              ? Buffer.from(`run:${result.runs[result.runs.length - 1].id}`).toString("base64")
+              : null,
         },
-        totalCount: result.total
+        totalCount: result.total,
       };
     },
 
@@ -706,15 +729,18 @@ export const runResolvers = {
       const { tenantId, user } = context;
 
       // Log usage of deprecated query
-      logger.warn({
-        userId: user?.id,
-        tenantId,
-        query: 'allRuns'
-      }, 'Deprecated GraphQL query "allRuns" used. Migrate to "runs" with pagination.');
+      logger.warn(
+        {
+          userId: user?.id,
+          tenantId,
+          query: "allRuns",
+        },
+        'Deprecated GraphQL query "allRuns" used. Migrate to "runs" with pagination.'
+      );
 
       const runs = await runsService.listRuns({
         tenantId,
-        limit: 1000
+        limit: 1000,
       });
 
       return runs;
@@ -723,7 +749,7 @@ export const runResolvers = {
     run: async (_parent, { id }, context) => {
       const { tenantId } = context;
       return await runsService.getRun(id, tenantId);
-    }
+    },
   },
 
   Run: {
@@ -733,17 +759,20 @@ export const runResolvers = {
     // V1: Deprecated field (map state -> status for backward compat)
     status: (parent) => {
       // Log usage of deprecated field
-      logger.info({
-        runId: parent.id,
-        field: 'status'
-      }, 'Deprecated field "Run.status" accessed. Use "Run.state" instead.');
+      logger.info(
+        {
+          runId: parent.id,
+          field: "status",
+        },
+        'Deprecated field "Run.status" accessed. Use "Run.state" instead.'
+      );
 
       // Map new state values to old status values
       const stateToStatusMap: Record<string, string> = {
-        'PENDING': 'pending',
-        'RUNNING': 'active',
-        'COMPLETED': 'done',
-        'FAILED': 'error'
+        PENDING: "pending",
+        RUNNING: "active",
+        COMPLETED: "done",
+        FAILED: "error",
       };
 
       return stateToStatusMap[parent.state] || parent.state.toLowerCase();
@@ -762,8 +791,8 @@ export const runResolvers = {
     duration: (parent) => {
       if (!parent.completedAt) return null;
       return parent.completedAt.getTime() - parent.createdAt.getTime();
-    }
-  }
+    },
+  },
 };
 ```
 
@@ -774,10 +803,10 @@ export const runResolvers = {
 **File:** `/server/src/graphql/plugins/deprecation-plugin.ts`
 
 ```typescript
-import { ApolloServerPlugin, GraphQLRequestListener } from '@apollo/server';
-import { GraphQLError } from 'graphql';
-import { getDeprecatedFields } from '../utils/schema-introspection';
-import { logger } from '../../lib/logger';
+import { ApolloServerPlugin, GraphQLRequestListener } from "@apollo/server";
+import { GraphQLError } from "graphql";
+import { getDeprecatedFields } from "../utils/schema-introspection";
+import { logger } from "../../lib/logger";
 
 export interface DeprecationPluginConfig {
   /** Log deprecated field usage (default: true) */
@@ -801,22 +830,22 @@ export function deprecationTrackingPlugin(
           if (!request.query) return;
 
           // Extract deprecated fields from the query
-          const deprecatedFields = getDeprecatedFields(
-            request.query,
-            contextValue.schema
-          );
+          const deprecatedFields = getDeprecatedFields(request.query, contextValue.schema);
 
           if (deprecatedFields.length === 0) return;
 
           // Log deprecated field usage
           if (logUsage) {
-            logger.warn({
-              userId: contextValue.user?.id,
-              tenantId: contextValue.tenantId,
-              operationName: request.operationName,
-              deprecatedFields: deprecatedFields.map(f => f.path),
-              query: request.query
-            }, 'GraphQL query uses deprecated fields');
+            logger.warn(
+              {
+                userId: contextValue.user?.id,
+                tenantId: contextValue.tenantId,
+                operationName: request.operationName,
+                deprecatedFields: deprecatedFields.map((f) => f.path),
+                query: request.query,
+              },
+              "GraphQL query uses deprecated fields"
+            );
           }
 
           // Add deprecation warnings to response extensions
@@ -824,11 +853,11 @@ export function deprecationTrackingPlugin(
             response.extensions = {};
           }
 
-          response.extensions.deprecations = deprecatedFields.map(field => ({
+          response.extensions.deprecations = deprecatedFields.map((field) => ({
             field: field.path,
             reason: field.reason,
             sunsetDate: field.sunsetDate,
-            replacement: field.replacement
+            replacement: field.replacement,
           }));
 
           // Track metrics
@@ -838,9 +867,9 @@ export function deprecationTrackingPlugin(
               // e.g., incrementCounter('graphql.deprecated_field.usage', { field: field.path });
             }
           }
-        }
+        },
       };
-    }
+    },
   };
 }
 ```
@@ -852,7 +881,7 @@ export function deprecationTrackingPlugin(
 **File:** `/client/src/services/api-client.ts`
 
 ```typescript
-import { logger } from '../utils/logger';
+import { logger } from "../utils/logger";
 
 export interface ApiClientConfig {
   baseUrl: string;
@@ -875,8 +904,8 @@ export class ApiClient {
 
   constructor(config: ApiClientConfig) {
     this.config = {
-      apiVersion: 'v2.0.0',
-      ...config
+      apiVersion: "v2.0.0",
+      ...config,
     };
   }
 
@@ -885,14 +914,14 @@ export class ApiClient {
 
     // Add API version header
     const headers = {
-      'Content-Type': 'application/json',
-      'API-Version': this.config.apiVersion!,
-      ...options.headers
+      "Content-Type": "application/json",
+      "API-Version": this.config.apiVersion!,
+      ...options.headers,
     };
 
     const response = await fetch(url, {
       ...options,
-      headers
+      headers,
     });
 
     // Check for deprecation headers
@@ -903,7 +932,7 @@ export class ApiClient {
       const errorData = await response.json();
       throw new Error(
         `Endpoint ${endpoint} has been removed. ${errorData.message} ` +
-        `Migrate to: ${errorData.successorUrl}`
+          `Migrate to: ${errorData.successorUrl}`
       );
     }
 
@@ -915,12 +944,12 @@ export class ApiClient {
   }
 
   private handleDeprecationHeaders(endpoint: string, response: Response) {
-    const deprecationHeader = response.headers.get('Deprecation');
+    const deprecationHeader = response.headers.get("Deprecation");
 
-    if (deprecationHeader === 'true') {
-      const sunsetDate = response.headers.get('Sunset');
-      const warningHeader = response.headers.get('Warning');
-      const linkHeader = response.headers.get('Link');
+    if (deprecationHeader === "true") {
+      const sunsetDate = response.headers.get("Sunset");
+      const warningHeader = response.headers.get("Warning");
+      const linkHeader = response.headers.get("Link");
 
       // Extract successor URL from Link header
       let successorUrl: string | null = null;
@@ -932,7 +961,7 @@ export class ApiClient {
       }
 
       // Extract warning message
-      let message = 'This endpoint is deprecated';
+      let message = "This endpoint is deprecated";
       if (warningHeader) {
         const warningMatch = warningHeader.match(/299\s*-\s*"([^"]+)"/);
         if (warningMatch) {
@@ -944,17 +973,17 @@ export class ApiClient {
         endpoint,
         sunsetDate,
         message,
-        successorUrl
+        successorUrl,
       };
 
       // Console warning for developers
       console.warn(
         `%c⚠️ API DEPRECATION WARNING`,
-        'color: orange; font-weight: bold; font-size: 14px;',
+        "color: orange; font-weight: bold; font-size: 14px;",
         `\nEndpoint: ${endpoint}`,
-        sunsetDate ? `\nSunset Date: ${sunsetDate}` : '',
+        sunsetDate ? `\nSunset Date: ${sunsetDate}` : "",
         `\n${message}`,
-        successorUrl ? `\nMigrate to: ${successorUrl}` : ''
+        successorUrl ? `\nMigrate to: ${successorUrl}` : ""
       );
 
       // Call custom handler if provided
@@ -963,28 +992,28 @@ export class ApiClient {
       }
 
       // Log for monitoring
-      logger.warn('API deprecation warning', warning);
+      logger.warn("API deprecation warning", warning);
     }
   }
 }
 
 // Usage example
 const apiClient = new ApiClient({
-  baseUrl: 'http://localhost:4000',
-  apiVersion: 'v2.0.0',
+  baseUrl: "http://localhost:4000",
+  apiVersion: "v2.0.0",
   onDeprecationWarning: (warning) => {
     // Send to error tracking service
     // e.g., Sentry.captureMessage('API Deprecation', { extra: warning });
-  }
+  },
 });
 
 // Example call
 async function fetchRuns() {
   try {
-    const runs = await apiClient.fetch('/api/maestro/v2/runs?page=1&pageSize=20');
+    const runs = await apiClient.fetch("/api/maestro/v2/runs?page=1&pageSize=20");
     return runs;
   } catch (error) {
-    console.error('Failed to fetch runs:', error);
+    console.error("Failed to fetch runs:", error);
     throw error;
   }
 }
@@ -1009,17 +1038,20 @@ async function fetchRuns() {
 We're improving our API infrastructure to provide better performance, reliability, and developer experience. As part of this effort, we're deprecating the following API endpoints:
 
 **Deprecated Endpoints:**
+
 - `GET /api/maestro/v1/runs` → Migrate to `GET /api/maestro/v2/runs`
 - `GraphQL Query: allRuns` → Migrate to `runs` with pagination
 - `Run.status` field → Use `Run.state` instead
 
 **Timeline:**
+
 - **Today ({{ANNOUNCEMENT_DATE}})**: Deprecation announced
 - **{{ANNOUNCEMENT_DATE + 1 month}}**: Migration guide and support available
 - **{{ANNOUNCEMENT_DATE + 5 months}}**: Sunset period begins (final warnings)
 - **{{SUNSET_DATE}}**: Deprecated endpoints removed (returns 410 Gone)
 
 **Impact:**
+
 - ✅ All deprecated endpoints continue to work normally until {{SUNSET_DATE}}
 - ⚠️ You'll see deprecation warnings in response headers and logs
 - ❌ After {{SUNSET_DATE}}, requests will fail with 410 Gone
@@ -1042,6 +1074,7 @@ We're improving our API infrastructure to provide better performance, reliabilit
 **Why Are We Deprecating?**
 
 The new v2 endpoints provide:
+
 - **Better Performance**: Pagination reduces payload sizes by 80%
 - **Improved UX**: Faster response times for large datasets
 - **Consistency**: Standardized field naming across all APIs
@@ -1075,6 +1108,7 @@ Hi {{TEAM_NAME}},
 You're receiving this email because our monitoring shows your application is still using deprecated API endpoints that will be removed in **{{DAYS_REMAINING}} days** ({{SUNSET_DATE}}).
 
 **Your Usage:**
+
 - Endpoint: `{{ENDPOINT}}`
 - Last 7 days: {{REQUEST_COUNT}} requests
 - Peak usage: {{PEAK_TIME}}
@@ -1084,19 +1118,22 @@ You're receiving this email because our monitoring shows your application is sti
 We recommend migrating within the next 2 weeks to avoid any service disruption. Here's a quick migration path:
 
 **Old (v1):**
+
 ```javascript
-const runs = await fetch('/api/maestro/v1/runs');
+const runs = await fetch("/api/maestro/v1/runs");
 // Returns: [{ id, status, pipeline, created, completed, owner }]
 ```
 
 **New (v2):**
+
 ```javascript
-const response = await fetch('/api/maestro/v2/runs?page=1&pageSize=20');
+const response = await fetch("/api/maestro/v2/runs?page=1&pageSize=20");
 // Returns: { data: [...], pagination: {...}, links: {...} }
 const runs = response.data;
 ```
 
 **Key Changes:**
+
 - Response is now paginated (default 20 items per page)
 - `status` field renamed to `state`
 - New fields: `duration`, `metadata`
@@ -1106,6 +1143,7 @@ const runs = response.data;
 **Need Assistance?**
 
 If you need help with the migration or have concerns about the timeline, please reach out:
+
 - Reply to this email
 - Slack: #api-migrations
 - Office hours: Tuesdays & Thursdays, 2-3 PM
@@ -1134,11 +1172,13 @@ Hi {{TEAM_NAME}},
 Our monitoring shows your application made **{{REQUEST_COUNT}} requests** to deprecated endpoints in the last 24 hours. These endpoints will be **permanently removed in 7 days** on {{SUNSET_DATE}}.
 
 **What Happens on {{SUNSET_DATE}}:**
+
 - ❌ Requests to deprecated endpoints will return **410 Gone**
 - ❌ Your application will receive errors instead of data
 - ❌ No fallback or grace period available
 
 **Deprecated Endpoints You're Using:**
+
 1. `{{ENDPOINT_1}}` - {{REQUEST_COUNT_1}} requests/day
 2. `{{ENDPOINT_2}}` - {{REQUEST_COUNT_2}} requests/day
 
@@ -1153,6 +1193,7 @@ Our monitoring shows your application made **{{REQUEST_COUNT}} requests** to dep
 **Emergency Support Available:**
 
 Given the urgency, we're offering expedited support:
+
 - 🚨 **Emergency Slack**: #api-migrations-urgent
 - 📞 **Direct escalation**: platform-engineering@company.com (Subject: URGENT MIGRATION)
 - 🤝 **Pair programming sessions**: Book time [here](https://calendar.internal/api-migration-help)
@@ -1170,6 +1211,7 @@ Given the urgency, we're offering expedited support:
 **Can't Complete in Time?**
 
 If you have a legitimate blocker preventing migration within 7 days, please respond to this email **TODAY** with:
+
 1. Reason for the blocker
 2. Estimated time needed for migration
 3. Business impact if endpoints are removed
@@ -1224,12 +1266,14 @@ Hi everyone,
 We've successfully completed the deprecation and removal of v1 API endpoints. As of today, all deprecated endpoints now return **410 Gone**.
 
 **Migration Summary:**
+
 - **98% of teams** successfully migrated before the deadline
 - **2 teams** received approved extensions (completed this week)
 - **Zero production incidents** during the transition
 - **Average migration time**: 3.5 hours per team
 
 **What Changed:**
+
 - ✅ All v1 endpoints removed
 - ✅ All traffic now uses v2 endpoints
 - ✅ 80% improvement in API response times (due to pagination)
@@ -1238,6 +1282,7 @@ We've successfully completed the deprecation and removal of v1 API endpoints. As
 **If You Haven't Migrated:**
 
 If you're still seeing 410 errors, you need to migrate immediately:
+
 1. Follow the guide: https://docs.internal/migrations/v1-to-v2
 2. Contact us for urgent support: platform-engineering@company.com
 
@@ -1267,6 +1312,7 @@ For future API changes, we'll continue following this deprecation process with c
 We're kicking off a deprecation cycle for some v1 API endpoints. Here's what you need to know:
 
 **What's being deprecated:**
+
 ```
 GET /api/maestro/v1/runs
 GraphQL: allRuns query
@@ -1289,6 +1335,7 @@ The v2 endpoints add pagination, better performance, and consistent naming. See 
 • Offering office hours for migration support
 
 **What you need to do:**
+
 1. Review your services' API usage
 2. Plan migrations for any affected code
 3. Help other teams if they need support
@@ -1315,6 +1362,7 @@ Questions? Tag @platform-engineering in #api-migrations
 7. **Track migration progress** with dashboards
 
 **Recommended Tools:**
+
 - Monitoring: Track deprecated endpoint usage in your existing observability platform
 - Documentation: Use tools like Swagger UI with deprecation badges
 - Communication: Automate reminders using scheduled Slack workflows

@@ -10,13 +10,13 @@
  */
 
 // Core prediction engine
-export { WellbeingPredictor } from './WellbeingPredictor.js';
+export { WellbeingPredictor } from "./WellbeingPredictor.js";
 
 // Intervention recommendation system
-export { InterventionRecommender } from './InterventionRecommender.js';
+export { InterventionRecommender } from "./InterventionRecommender.js";
 
 // Resource allocation optimizer
-export { ResourceAllocator } from './ResourceAllocator.js';
+export { ResourceAllocator } from "./ResourceAllocator.js";
 
 // Type exports
 export {
@@ -48,12 +48,12 @@ export {
   type InterventionRecommendation,
   type ResourceAllocation,
   type CohortAnalysis,
-} from './types.js';
+} from "./types.js";
 
 // Import classes for pipeline factory
-import { WellbeingPredictor } from './WellbeingPredictor.js';
-import { InterventionRecommender } from './InterventionRecommender.js';
-import { ResourceAllocator } from './ResourceAllocator.js';
+import { WellbeingPredictor } from "./WellbeingPredictor.js";
+import { InterventionRecommender } from "./InterventionRecommender.js";
+import { ResourceAllocator } from "./ResourceAllocator.js";
 
 /**
  * Configuration options for creating a wellbeing prediction pipeline.

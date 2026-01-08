@@ -1,12 +1,12 @@
-import chalk from 'chalk';
-import Table from 'cli-table3';
-import { BenchmarkHarness } from '../harness.js';
+import chalk from "chalk";
+import Table from "cli-table3";
+import { BenchmarkHarness } from "../harness.js";
 import type {
   BenchmarkConfig,
   BenchmarkReporter,
   BenchmarkResult,
   BenchmarkSuiteConfig,
-} from '../types.js';
+} from "../types.js";
 
 /**
  * Console reporter for benchmark results
@@ -26,7 +26,7 @@ export class ConsoleReporter implements BenchmarkReporter {
     if (suite.description) {
       console.log(this.ci ? suite.description : chalk.gray(suite.description));
     }
-    console.log('');
+    console.log("");
   }
 
   async onBenchmarkStart(config: BenchmarkConfig): Promise<void> {
@@ -38,9 +38,7 @@ export class ConsoleReporter implements BenchmarkReporter {
 
   async onBenchmarkComplete(result: BenchmarkResult): Promise<void> {
     const { config, stats, passed } = result;
-    const status = passed
-      ? this.ci ? '✓' : chalk.green('✓')
-      : this.ci ? '✗' : chalk.red('✗');
+    const status = passed ? (this.ci ? "✓" : chalk.green("✓")) : this.ci ? "✗" : chalk.red("✗");
     const name = this.ci ? config.name : chalk.white(config.name);
     const mean = BenchmarkHarness.formatDuration(stats.mean);
     const ops = stats.opsPerSecond.toFixed(2);
@@ -56,19 +54,19 @@ export class ConsoleReporter implements BenchmarkReporter {
   }
 
   async onSuiteComplete(results: BenchmarkResult[]): Promise<void> {
-    console.log('');
+    console.log("");
 
     // Summary table
     const table = new Table({
       head: this.ci
-        ? ['Benchmark', 'Mean', 'p99', 'Ops/sec', 'RME', 'Status']
+        ? ["Benchmark", "Mean", "p99", "Ops/sec", "RME", "Status"]
         : [
-            chalk.white('Benchmark'),
-            chalk.white('Mean'),
-            chalk.white('p99'),
-            chalk.white('Ops/sec'),
-            chalk.white('RME'),
-            chalk.white('Status'),
+            chalk.white("Benchmark"),
+            chalk.white("Mean"),
+            chalk.white("p99"),
+            chalk.white("Ops/sec"),
+            chalk.white("RME"),
+            chalk.white("Status"),
           ],
       style: {
         head: [],
@@ -78,8 +76,12 @@ export class ConsoleReporter implements BenchmarkReporter {
 
     for (const result of results) {
       const status = result.passed
-        ? this.ci ? 'PASS' : chalk.green('PASS')
-        : this.ci ? 'FAIL' : chalk.red('FAIL');
+        ? this.ci
+          ? "PASS"
+          : chalk.green("PASS")
+        : this.ci
+          ? "FAIL"
+          : chalk.red("FAIL");
 
       table.push([
         result.config.name,
@@ -98,13 +100,13 @@ export class ConsoleReporter implements BenchmarkReporter {
     const failed = results.length - passed;
     const summary = this.ci
       ? `\n${passed} passed, ${failed} failed`
-      : `\n${chalk.green(passed + ' passed')}, ${chalk.red(failed + ' failed')}`;
+      : `\n${chalk.green(passed + " passed")}, ${chalk.red(failed + " failed")}`;
 
     console.log(summary);
   }
 
   async onError(error: Error, config?: BenchmarkConfig): Promise<void> {
-    const prefix = config ? `[${config.name}] ` : '';
+    const prefix = config ? `[${config.name}] ` : "";
     const message = this.ci
       ? `  ✗ ${prefix}Error: ${error.message}`
       : chalk.red(`  ✗ ${prefix}Error: ${error.message}`);

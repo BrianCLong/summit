@@ -6,8 +6,8 @@
  * events that are collected and assembled into auditable proof trees.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import { EventEmitter } from 'events';
+import { v4 as uuidv4 } from "uuid";
+import { EventEmitter } from "events";
 
 export interface InferenceContext {
   inferenceId: string;
@@ -18,7 +18,7 @@ export interface InferenceContext {
 }
 
 export interface InferenceEvent {
-  eventType: 'rag.query' | 'graph.traversal' | 'policy.decision' | 'model.invocation';
+  eventType: "rag.query" | "graph.traversal" | "policy.decision" | "model.invocation";
   inferenceId: string;
   parentInferenceId?: string;
   timestamp: Date;
@@ -35,19 +35,16 @@ export class RAGInstrumentation {
     this.emitter = emitter;
   }
 
-  async wrapQuery<T>(
-    context: InferenceContext,
-    queryFn: () => Promise<T>
-  ): Promise<T> {
+  async wrapQuery<T>(context: InferenceContext, queryFn: () => Promise<T>): Promise<T> {
     const startTime = Date.now();
 
-    this.emitter.emit('inference.event', {
-      eventType: 'rag.query',
+    this.emitter.emit("inference.event", {
+      eventType: "rag.query",
       inferenceId: context.inferenceId,
       parentInferenceId: context.parentInferenceId,
       timestamp: new Date(),
       data: {
-        phase: 'start',
+        phase: "start",
         metadata: context.metadata,
       },
     } as InferenceEvent);
@@ -56,13 +53,13 @@ export class RAGInstrumentation {
       const result = await queryFn();
       const latency = Date.now() - startTime;
 
-      this.emitter.emit('inference.event', {
-        eventType: 'rag.query',
+      this.emitter.emit("inference.event", {
+        eventType: "rag.query",
         inferenceId: context.inferenceId,
         parentInferenceId: context.parentInferenceId,
         timestamp: new Date(),
         data: {
-          phase: 'complete',
+          phase: "complete",
           latency,
           resultCount: Array.isArray(result) ? result.length : 1,
         },
@@ -70,13 +67,13 @@ export class RAGInstrumentation {
 
       return result;
     } catch (error) {
-      this.emitter.emit('inference.event', {
-        eventType: 'rag.query',
+      this.emitter.emit("inference.event", {
+        eventType: "rag.query",
         inferenceId: context.inferenceId,
         parentInferenceId: context.parentInferenceId,
         timestamp: new Date(),
         data: {
-          phase: 'error',
+          phase: "error",
           error: error instanceof Error ? error.message : String(error),
         },
       } as InferenceEvent);
@@ -103,13 +100,13 @@ export class GraphInstrumentation {
   ): Promise<T> {
     const startTime = Date.now();
 
-    this.emitter.emit('inference.event', {
-      eventType: 'graph.traversal',
+    this.emitter.emit("inference.event", {
+      eventType: "graph.traversal",
       inferenceId: context.inferenceId,
       parentInferenceId: context.parentInferenceId,
       timestamp: new Date(),
       data: {
-        phase: 'start',
+        phase: "start",
         cypher,
         params,
       },
@@ -119,13 +116,13 @@ export class GraphInstrumentation {
       const result = await executeFn();
       const latency = Date.now() - startTime;
 
-      this.emitter.emit('inference.event', {
-        eventType: 'graph.traversal',
+      this.emitter.emit("inference.event", {
+        eventType: "graph.traversal",
         inferenceId: context.inferenceId,
         parentInferenceId: context.parentInferenceId,
         timestamp: new Date(),
         data: {
-          phase: 'complete',
+          phase: "complete",
           latency,
           recordCount: Array.isArray(result) ? result.length : 1,
         },
@@ -133,12 +130,12 @@ export class GraphInstrumentation {
 
       return result;
     } catch (error) {
-      this.emitter.emit('inference.event', {
-        eventType: 'graph.traversal',
+      this.emitter.emit("inference.event", {
+        eventType: "graph.traversal",
         inferenceId: context.inferenceId,
         timestamp: new Date(),
         data: {
-          phase: 'error',
+          phase: "error",
           error: error instanceof Error ? error.message : String(error),
         },
       } as InferenceEvent);

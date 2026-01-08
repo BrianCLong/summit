@@ -14,32 +14,32 @@
  * @module downstream
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
-import type { Alert } from './alert.js';
-import type { SignalEnvelope } from './signal-envelope.js';
+import type { Alert } from "./alert.js";
+import type { SignalEnvelope } from "./signal-envelope.js";
 
 /**
  * Event types for downstream routing
  */
 export const DownstreamEventType = {
   // Graph events
-  GRAPH_ENTITY_SUGGESTED: 'graph.entity.suggested',
-  GRAPH_RELATIONSHIP_SUGGESTED: 'graph.relationship.suggested',
-  GRAPH_ENRICHMENT: 'graph.enrichment',
+  GRAPH_ENTITY_SUGGESTED: "graph.entity.suggested",
+  GRAPH_RELATIONSHIP_SUGGESTED: "graph.relationship.suggested",
+  GRAPH_ENRICHMENT: "graph.enrichment",
 
   // Spacetime events
-  SPACETIME_EVENT: 'spacetime.event',
-  SPACETIME_TRACK: 'spacetime.track',
+  SPACETIME_EVENT: "spacetime.event",
+  SPACETIME_TRACK: "spacetime.track",
 
   // Case events
-  CASE_TASK_SUGGESTED: 'case.task.suggested',
-  CASE_WATCHLIST_HIT: 'case.watchlist.hit',
-  CASE_ALERT_NOTIFICATION: 'case.alert.notification',
+  CASE_TASK_SUGGESTED: "case.task.suggested",
+  CASE_WATCHLIST_HIT: "case.watchlist.hit",
+  CASE_ALERT_NOTIFICATION: "case.alert.notification",
 
   // Analytics events
-  ANALYTICS_METRIC: 'analytics.metric',
-  ANALYTICS_AGGREGATION: 'analytics.aggregation',
+  ANALYTICS_METRIC: "analytics.metric",
+  ANALYTICS_AGGREGATION: "analytics.aggregation",
 } as const;
 
 export type DownstreamEventTypeType =
@@ -74,7 +74,7 @@ export const DownstreamEventBaseSchema = z.object({
   idempotencyKey: z.string(),
 
   /** Schema version */
-  schemaVersion: z.string().default('1.0.0'),
+  schemaVersion: z.string().default("1.0.0"),
 });
 
 export type DownstreamEventBase = z.infer<typeof DownstreamEventBaseSchema>;
@@ -92,14 +92,14 @@ export const GraphEntitySuggestedSchema = DownstreamEventBaseSchema.extend({
   payload: z.object({
     /** Suggested entity kind */
     entityKind: z.enum([
-      'Person',
-      'Org',
-      'Location',
-      'Event',
-      'Document',
-      'Indicator',
-      'Device',
-      'Asset',
+      "Person",
+      "Org",
+      "Location",
+      "Event",
+      "Document",
+      "Indicator",
+      "Device",
+      "Asset",
     ]),
 
     /** Entity properties */
@@ -109,7 +109,7 @@ export const GraphEntitySuggestedSchema = DownstreamEventBaseSchema.extend({
     confidence: z.number().min(0).max(1),
 
     /** Extraction method */
-    extractionMethod: z.enum(['rule', 'ml', 'pattern', 'manual']),
+    extractionMethod: z.enum(["rule", "ml", "pattern", "manual"]),
 
     /** Policy labels to apply */
     policyLabels: z.array(z.string()).default([]),
@@ -134,14 +134,14 @@ export const GraphRelationshipSuggestedSchema = DownstreamEventBaseSchema.extend
   payload: z.object({
     /** Relationship type */
     relationshipType: z.enum([
-      'relatesTo',
-      'locatedAt',
-      'participatesIn',
-      'derivedFrom',
-      'mentions',
-      'communicatedWith',
-      'owns',
-      'employs',
+      "relatesTo",
+      "locatedAt",
+      "participatesIn",
+      "derivedFrom",
+      "mentions",
+      "communicatedWith",
+      "owns",
+      "employs",
     ]),
 
     /** Source entity reference */
@@ -174,9 +174,7 @@ export const GraphRelationshipSuggestedSchema = DownstreamEventBaseSchema.extend
   }),
 });
 
-export type GraphRelationshipSuggested = z.infer<
-  typeof GraphRelationshipSuggestedSchema
->;
+export type GraphRelationshipSuggested = z.infer<typeof GraphRelationshipSuggestedSchema>;
 
 /**
  * Enrichment data for existing graph entities
@@ -190,11 +188,11 @@ export const GraphEnrichmentSchema = DownstreamEventBaseSchema.extend({
 
     /** Enrichment type */
     enrichmentType: z.enum([
-      'geoip',
-      'device_profile',
-      'risk_score',
-      'classification',
-      'attributes',
+      "geoip",
+      "device_profile",
+      "risk_score",
+      "classification",
+      "attributes",
     ]),
 
     /** Enrichment data */
@@ -303,7 +301,7 @@ export const CaseTaskSuggestedSchema = DownstreamEventBaseSchema.extend({
     description: z.string(),
 
     /** Priority */
-    priority: z.enum(['low', 'medium', 'high', 'urgent']),
+    priority: z.enum(["low", "medium", "high", "urgent"]),
 
     /** Due date suggestion */
     suggestedDueDate: z.number().optional(),
@@ -322,11 +320,11 @@ export const CaseTaskSuggestedSchema = DownstreamEventBaseSchema.extend({
 
     /** Task type */
     taskType: z.enum([
-      'review_alert',
-      'investigate_entity',
-      'verify_relationship',
-      'follow_up',
-      'escalate',
+      "review_alert",
+      "investigate_entity",
+      "verify_relationship",
+      "follow_up",
+      "escalate",
     ]),
   }),
 });
@@ -350,7 +348,7 @@ export const CaseWatchlistHitSchema = DownstreamEventBaseSchema.extend({
     matchedValue: z.string(),
 
     /** Match type */
-    matchType: z.enum(['exact', 'fuzzy', 'pattern', 'range']),
+    matchType: z.enum(["exact", "fuzzy", "pattern", "range"]),
 
     /** Confidence score */
     confidence: z.number().min(0).max(1),
@@ -376,7 +374,7 @@ export const CaseAlertNotificationSchema = DownstreamEventBaseSchema.extend({
     alertId: z.string().uuid(),
 
     /** Alert severity */
-    severity: z.enum(['info', 'low', 'medium', 'high', 'critical']),
+    severity: z.enum(["info", "low", "medium", "high", "critical"]),
 
     /** Alert title */
     title: z.string(),
@@ -392,7 +390,7 @@ export const CaseAlertNotificationSchema = DownstreamEventBaseSchema.extend({
     targets: z.array(z.string()).default([]),
 
     /** Notification channel preferences */
-    channels: z.array(z.enum(['in_app', 'email', 'sms', 'webhook'])).default(['in_app']),
+    channels: z.array(z.enum(["in_app", "email", "sms", "webhook"])).default(["in_app"]),
   }),
 });
 
@@ -422,7 +420,7 @@ export const AnalyticsMetricSchema = DownstreamEventBaseSchema.extend({
     dimensions: z.record(z.string(), z.string()).default({}),
 
     /** Metric type */
-    metricType: z.enum(['counter', 'gauge', 'histogram', 'summary']),
+    metricType: z.enum(["counter", "gauge", "histogram", "summary"]),
 
     /** Timestamp of measurement */
     measuredAt: z.number(),
@@ -445,11 +443,11 @@ export const AnalyticsAggregationSchema = DownstreamEventBaseSchema.extend({
     window: z.object({
       start: z.number(),
       end: z.number(),
-      type: z.enum(['tumbling', 'sliding', 'session']),
+      type: z.enum(["tumbling", "sliding", "session"]),
     }),
 
     /** Aggregation type */
-    aggregationType: z.enum(['count', 'sum', 'avg', 'min', 'max', 'percentile']),
+    aggregationType: z.enum(["count", "sum", "avg", "min", "max", "percentile"]),
 
     /** Aggregated value */
     value: z.number(),
@@ -474,7 +472,7 @@ export type AnalyticsAggregation = z.infer<typeof AnalyticsAggregationSchema>;
 function generateIdempotencyKey(
   signalId: string,
   eventType: string,
-  discriminator?: string,
+  discriminator?: string
 ): string {
   const base = `${signalId}:${eventType}`;
   return discriminator ? `${base}:${discriminator}` : base;
@@ -486,11 +484,11 @@ function generateIdempotencyKey(
 export function createGraphEntitySuggestion(
   envelope: SignalEnvelope,
   suggestion: {
-    entityKind: GraphEntitySuggested['payload']['entityKind'];
+    entityKind: GraphEntitySuggested["payload"]["entityKind"];
     properties: Record<string, unknown>;
     confidence: number;
-    extractionMethod: GraphEntitySuggested['payload']['extractionMethod'];
-  },
+    extractionMethod: GraphEntitySuggested["payload"]["extractionMethod"];
+  }
 ): GraphEntitySuggested {
   const now = Date.now();
   return {
@@ -503,9 +501,9 @@ export function createGraphEntitySuggestion(
     idempotencyKey: generateIdempotencyKey(
       envelope.metadata.signalId,
       DownstreamEventType.GRAPH_ENTITY_SUGGESTED,
-      JSON.stringify(suggestion.properties),
+      JSON.stringify(suggestion.properties)
     ),
-    schemaVersion: '1.0.0',
+    schemaVersion: "1.0.0",
     payload: {
       entityKind: suggestion.entityKind,
       properties: suggestion.properties,
@@ -533,7 +531,7 @@ export function createSpacetimeEvent(
     entityIds?: string[];
     properties?: Record<string, unknown>;
     tags?: string[];
-  },
+  }
 ): SpacetimeEvent {
   const now = Date.now();
   return {
@@ -546,9 +544,9 @@ export function createSpacetimeEvent(
     idempotencyKey: generateIdempotencyKey(
       envelope.metadata.signalId,
       DownstreamEventType.SPACETIME_EVENT,
-      event.eventName,
+      event.eventName
     ),
-    schemaVersion: '1.0.0',
+    schemaVersion: "1.0.0",
     payload: {
       eventName: event.eventName,
       occurredAt: event.occurredAt ?? envelope.metadata.timestamp,
@@ -577,16 +575,16 @@ export function createCaseTaskFromAlert(
     caseId?: string;
     investigationId?: string;
     linkedEntityIds?: string[];
-  },
+  }
 ): CaseTaskSuggested {
   const now = Date.now();
 
-  const priorityMap: Record<string, CaseTaskSuggested['payload']['priority']> = {
-    info: 'low',
-    low: 'low',
-    medium: 'medium',
-    high: 'high',
-    critical: 'urgent',
+  const priorityMap: Record<string, CaseTaskSuggested["payload"]["priority"]> = {
+    info: "low",
+    low: "low",
+    medium: "medium",
+    high: "high",
+    critical: "urgent",
   };
 
   return {
@@ -598,16 +596,16 @@ export function createCaseTaskFromAlert(
     sourceAlertId: alert.alertId,
     correlationId: undefined,
     idempotencyKey: `${alert.alertId}:task`,
-    schemaVersion: '1.0.0',
+    schemaVersion: "1.0.0",
     payload: {
       title: `Review: ${alert.title}`,
       description: alert.description,
-      priority: priorityMap[alert.severity] ?? 'medium',
+      priority: priorityMap[alert.severity] ?? "medium",
       caseId: options?.caseId,
       investigationId: options?.investigationId,
       alertId: alert.alertId,
       linkedEntityIds: options?.linkedEntityIds ?? alert.context.relatedEntities,
-      taskType: 'review_alert',
+      taskType: "review_alert",
     },
   };
 }
@@ -618,7 +616,7 @@ export function createCaseTaskFromAlert(
 export function createCaseAlertNotification(
   alert: Alert,
   targets: string[],
-  channels: CaseAlertNotification['payload']['channels'] = ['in_app'],
+  channels: CaseAlertNotification["payload"]["channels"] = ["in_app"]
 ): CaseAlertNotification {
   const now = Date.now();
   return {
@@ -630,16 +628,14 @@ export function createCaseAlertNotification(
     sourceAlertId: alert.alertId,
     correlationId: undefined,
     idempotencyKey: `${alert.alertId}:notification:${now}`,
-    schemaVersion: '1.0.0',
+    schemaVersion: "1.0.0",
     payload: {
       alertId: alert.alertId,
       severity: alert.severity,
       title: alert.title,
       summary: alert.description.slice(0, 500),
       relatedCaseIds: alert.context.caseId ? [alert.context.caseId] : [],
-      relatedInvestigationIds: alert.context.investigationId
-        ? [alert.context.investigationId]
-        : [],
+      relatedInvestigationIds: alert.context.investigationId ? [alert.context.investigationId] : [],
       targets,
       channels,
     },
@@ -665,7 +661,7 @@ export type DownstreamEvent =
  * Validate any downstream event
  */
 export function validateDownstreamEvent(
-  input: unknown,
+  input: unknown
 ): z.SafeParseReturnType<unknown, DownstreamEvent> {
   const base = DownstreamEventBaseSchema.safeParse(input);
   if (!base.success) {
@@ -700,8 +696,8 @@ export function validateDownstreamEvent(
         success: false,
         error: new z.ZodError([
           {
-            code: 'custom',
-            path: ['eventType'],
+            code: "custom",
+            path: ["eventType"],
             message: `Unknown event type: ${eventType}`,
           },
         ]),

@@ -4,22 +4,22 @@ on:
   push:
     branches: [main]
     paths:
-      - 'docs/**/*.md'
-      - '.promise-tracker/**'
+      - "docs/**/*.md"
+      - ".promise-tracker/**"
   pull_request:
     branches: [main]
     paths:
-      - 'docs/**/*.md'
-      - '.promise-tracker/**'
+      - "docs/**/*.md"
+      - ".promise-tracker/**"
   schedule:
     # Run weekly health check on Mondays at 9am UTC
-    - cron: '0 9 * * 1'
+    - cron: "0 9 * * 1"
   workflow_dispatch:
     inputs:
       action:
-        description: 'Action to perform'
+        description: "Action to perform"
         required: true
-        default: 'health'
+        default: "health"
         type: choice
         options:
           - health
@@ -176,7 +176,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -276,7 +276,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -325,7 +325,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2

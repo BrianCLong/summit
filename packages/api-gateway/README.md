@@ -11,20 +11,20 @@ pnpm add @intelgraph/api-gateway
 ## Usage
 
 ```typescript
-import { APIGateway } from '@intelgraph/api-gateway';
+import { APIGateway } from "@intelgraph/api-gateway";
 
 const gateway = new APIGateway({
   routes: [
     {
-      path: '/api/v1/users',
+      path: "/api/v1/users",
       backends: [
-        { url: 'http://backend1:3000', weight: 2 },
-        { url: 'http://backend2:3000', weight: 1 },
+        { url: "http://backend1:3000", weight: 2 },
+        { url: "http://backend2:3000", weight: 1 },
       ],
     },
   ],
   loadBalancing: {
-    strategy: 'weighted-round-robin',
+    strategy: "weighted-round-robin",
   },
   circuitBreaker: {
     threshold: 5,

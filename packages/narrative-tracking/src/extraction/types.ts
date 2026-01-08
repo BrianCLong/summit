@@ -25,26 +25,26 @@ export interface StoryArc {
   climax: string[];
   fallingAction: string[];
   resolution: string[];
-  arcType: 'hero' | 'tragedy' | 'rebirth' | 'quest' | 'voyage' | 'comedy' | 'rags-to-riches';
+  arcType: "hero" | "tragedy" | "rebirth" | "quest" | "voyage" | "comedy" | "rags-to-riches";
 }
 
 export interface NarrativeFraming {
   mainFrame: string;
   subFrames: string[];
   framingDevices: FramingDevice[];
-  perspective: 'first-person' | 'second-person' | 'third-person';
-  tone: 'neutral' | 'positive' | 'negative' | 'alarmist' | 'celebratory';
+  perspective: "first-person" | "second-person" | "third-person";
+  tone: "neutral" | "positive" | "negative" | "alarmist" | "celebratory";
 }
 
 export interface FramingDevice {
-  type: 'metaphor' | 'analogy' | 'contrast' | 'causation' | 'moral' | 'economic' | 'conflict';
+  type: "metaphor" | "analogy" | "contrast" | "causation" | "moral" | "economic" | "conflict";
   description: string;
   examples: string[];
 }
 
 export interface NarrativeActor {
   name: string;
-  role: 'protagonist' | 'antagonist' | 'supporting' | 'victim' | 'hero' | 'villain';
+  role: "protagonist" | "antagonist" | "supporting" | "victim" | "hero" | "villain";
   attributes: string[];
   actions: string[];
 }
@@ -52,7 +52,7 @@ export interface NarrativeActor {
 export interface NarrativeEvent {
   timestamp: Date;
   description: string;
-  type: 'mention' | 'amplification' | 'mutation' | 'counter';
+  type: "mention" | "amplification" | "mutation" | "counter";
   source: string;
   reach?: number;
 }
@@ -60,7 +60,7 @@ export interface NarrativeEvent {
 export interface CounterNarrative {
   originalNarrativeId: string;
   counterNarrativeId: string;
-  relationshipType: 'refutation' | 'alternative' | 'context' | 'debunk';
+  relationshipType: "refutation" | "alternative" | "context" | "debunk";
   strength: number;
   evidence: string[];
 }

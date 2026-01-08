@@ -3,8 +3,8 @@
  * Extracts schema and metadata from PostgreSQL databases
  */
 
-import { Pool, PoolClient } from 'pg';
-import { DiscoveredAsset, ExtractionResult, ExtractionStatistics } from '../types/discovery.js';
+import { Pool, PoolClient } from "pg";
+import { DiscoveredAsset, ExtractionResult, ExtractionStatistics } from "../types/discovery.js";
 
 export class PostgresExtractor {
   private pool: Pool;
@@ -43,7 +43,7 @@ export class PostgresExtractor {
       };
 
       return {
-        sourceId: 'postgres',
+        sourceId: "postgres",
         assets,
         relationships,
         statistics,
@@ -79,7 +79,7 @@ export class PostgresExtractor {
 
       assets.push({
         name: `${row.table_schema}.${row.table_name}`,
-        type: 'TABLE',
+        type: "TABLE",
         schema: {
           columns,
           primaryKey: columns.filter((c: any) => c.isPrimaryKey).map((c: any) => c.name),
@@ -146,7 +146,7 @@ export class PostgresExtractor {
     return result.rows.map((row) => ({
       name: row.column_name,
       dataType: row.data_type,
-      nullable: row.is_nullable === 'YES',
+      nullable: row.is_nullable === "YES",
       defaultValue: row.column_default,
       maxLength: row.character_maximum_length,
       precision: row.numeric_precision,
@@ -160,7 +160,12 @@ export class PostgresExtractor {
   /**
    * Extract sample data
    */
-  private async extractSampleData(client: PoolClient, schema: string, table: string, limit: number = 10): Promise<any[]> {
+  private async extractSampleData(
+    client: PoolClient,
+    schema: string,
+    table: string,
+    limit: number = 10
+  ): Promise<any[]> {
     try {
       const query = `SELECT * FROM ${client.escapeIdentifier(schema)}.${client.escapeIdentifier(table)} LIMIT $1`;
       const result = await client.query(query, [limit]);
@@ -205,7 +210,7 @@ export class PostgresExtractor {
 
       assets.push({
         name: `${row.table_schema}.${row.table_name}`,
-        type: 'VIEW',
+        type: "VIEW",
         schema: {
           columns,
           definition: row.view_definition,
@@ -251,7 +256,7 @@ export class PostgresExtractor {
     return result.rows.map((row) => ({
       fromAsset: `${row.table_schema}.${row.table_name}`,
       toAsset: `${row.foreign_table_schema}.${row.foreign_table_name}`,
-      type: 'FOREIGN_KEY',
+      type: "FOREIGN_KEY",
       confidence: 1.0,
       metadata: {
         constraintName: row.constraint_name,

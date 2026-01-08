@@ -5,11 +5,15 @@
  * Copyright (c) 2025 IntelGraph
  */
 
-import type { ApolloServerPlugin, GraphQLRequestContext, GraphQLRequestListener } from '@apollo/server';
-import pino from 'pino';
-import type { RateLimiter } from '../rate-limiter.js';
-import type { GraphQLRateLimiterOptions, UserTier } from '../types.js';
-import { GraphQLError } from 'graphql';
+import type {
+  ApolloServerPlugin,
+  GraphQLRequestContext,
+  GraphQLRequestListener,
+} from "@apollo/server";
+import pino from "pino";
+import type { RateLimiter } from "../rate-limiter.js";
+import type { GraphQLRateLimiterOptions, UserTier } from "../types.js";
+import { GraphQLError } from "graphql";
 
 const logger = pino();
 
@@ -27,7 +31,7 @@ function calculateComplexity(query: string): number {
   const braceDepth = calculateBraceDepth(query);
   const fragmentCount = (query.match(/\.\.\.on\s+\w+/g) || []).length;
 
-  return fields + (braceDepth * 10) + (fragmentCount * 5);
+  return fields + braceDepth * 10 + fragmentCount * 5;
 }
 
 /**
@@ -38,10 +42,10 @@ function calculateBraceDepth(query: string): number {
   let maxDepth = 0;
 
   for (const char of query) {
-    if (char === '{') {
+    if (char === "{") {
       depth++;
       maxDepth = Math.max(maxDepth, depth);
-    } else if (char === '}') {
+    } else if (char === "}") {
       depth--;
     }
   }
@@ -65,7 +69,7 @@ function extractIdentifier(context: any): string {
     return `ip:${context.req.ip}`;
   }
 
-  return 'anonymous';
+  return "anonymous";
 }
 
 /**
@@ -80,14 +84,14 @@ function extractTier(context: any): UserTier | undefined {
  */
 export function createGraphQLRateLimitPlugin(
   rateLimiter: RateLimiter,
-  options: Partial<GraphQLRateLimiterOptions> = {},
+  options: Partial<GraphQLRateLimiterOptions> = {}
 ): ApolloServerPlugin {
   const maxComplexity = options.maxComplexity || 1000;
-  const endpoint = '/graphql';
+  const endpoint = "/graphql";
 
   return {
     async requestDidStart(
-      requestContext: GraphQLRequestContext<any>,
+      requestContext: GraphQLRequestContext<any>
     ): Promise<GraphQLRequestListener<any> | void> {
       const startTime = Date.now();
 
@@ -105,19 +109,19 @@ export function createGraphQLRateLimitPlugin(
 
             // Set headers on HTTP response if available
             if (contextValue.res) {
-              contextValue.res.setHeader('X-RateLimit-Limit', state.limit.toString());
-              contextValue.res.setHeader('X-RateLimit-Remaining', state.remaining.toString());
-              contextValue.res.setHeader('X-RateLimit-Reset', state.resetAt.toString());
+              contextValue.res.setHeader("X-RateLimit-Limit", state.limit.toString());
+              contextValue.res.setHeader("X-RateLimit-Remaining", state.remaining.toString());
+              contextValue.res.setHeader("X-RateLimit-Reset", state.resetAt.toString());
 
               if (state.isExceeded && state.retryAfter > 0) {
-                contextValue.res.setHeader('Retry-After', state.retryAfter.toString());
+                contextValue.res.setHeader("Retry-After", state.retryAfter.toString());
               }
             }
 
             // Throw error if rate limit exceeded
             if (state.isExceeded) {
               logger.warn({
-                message: 'GraphQL rate limit exceeded',
+                message: "GraphQL rate limit exceeded",
                 identifier,
                 tier,
                 operation: request.operationName,
@@ -125,9 +129,9 @@ export function createGraphQLRateLimitPlugin(
                 limit: state.limit,
               });
 
-              throw new GraphQLError('Rate limit exceeded. Please try again later.', {
+              throw new GraphQLError("Rate limit exceeded. Please try again later.", {
                 extensions: {
-                  code: 'RATE_LIMIT_EXCEEDED',
+                  code: "RATE_LIMIT_EXCEEDED",
                   retryAfter: state.retryAfter,
                   limit: state.limit,
                   remaining: 0,
@@ -142,7 +146,7 @@ export function createGraphQLRateLimitPlugin(
 
               if (complexity > maxComplexity) {
                 logger.warn({
-                  message: 'GraphQL query too complex',
+                  message: "GraphQL query too complex",
                   identifier,
                   tier,
                   operation: request.operationName,
@@ -150,9 +154,9 @@ export function createGraphQLRateLimitPlugin(
                   maxComplexity,
                 });
 
-                throw new GraphQLError('Query is too complex. Please simplify your query.', {
+                throw new GraphQLError("Query is too complex. Please simplify your query.", {
                   extensions: {
-                    code: 'QUERY_TOO_COMPLEX',
+                    code: "QUERY_TOO_COMPLEX",
                     complexity,
                     maxComplexity,
                   },
@@ -167,7 +171,7 @@ export function createGraphQLRateLimitPlugin(
 
             // Log other errors but don't block request (fail open)
             logger.error({
-              message: 'GraphQL rate limit plugin error',
+              message: "GraphQL rate limit plugin error",
               error: error instanceof Error ? error.message : String(error),
             });
           }
@@ -179,7 +183,7 @@ export function createGraphQLRateLimitPlugin(
           // Log slow queries
           if (duration > 1000) {
             logger.warn({
-              message: 'Slow GraphQL query',
+              message: "Slow GraphQL query",
               operation: responseContext.request.operationName,
               duration,
             });
@@ -196,7 +200,7 @@ export function createGraphQLRateLimitPlugin(
  */
 export function createFieldRateLimitDirective(rateLimiter: RateLimiter) {
   return {
-    name: 'rateLimit',
+    name: "rateLimit",
     visitFieldDefinition(field: any, details: any) {
       const { resolve = defaultFieldResolver } = field;
       const { limit = 100, window = 60 } = details.args;
@@ -214,11 +218,11 @@ export function createFieldRateLimitDirective(rateLimiter: RateLimiter) {
             `Rate limit exceeded for ${info.fieldName}. Please try again later.`,
             {
               extensions: {
-                code: 'FIELD_RATE_LIMIT_EXCEEDED',
+                code: "FIELD_RATE_LIMIT_EXCEEDED",
                 field: info.fieldName,
                 retryAfter: state.retryAfter,
               },
-            },
+            }
           );
         }
 

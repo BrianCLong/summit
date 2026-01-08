@@ -1,10 +1,10 @@
-import { randomUUID } from 'node:crypto';
+import { randomUUID } from "node:crypto";
 
 import {
   type PreflightObligation,
-  type PreflightRequestContract
-} from '../../contracts/actions.js';
-import { type PolicyDecisionResult } from '../../services/policyService.js';
+  type PreflightRequestContract,
+} from "../../contracts/actions.js";
+import { type PolicyDecisionResult } from "../../services/policyService.js";
 
 export interface PolicyDecisionRecord {
   id: string;
@@ -40,7 +40,7 @@ export class PolicyDecisionStore {
       redactions: decision.redactions,
       createdAt: this.clock().toISOString(),
       request,
-      rawDecision: decision.raw
+      rawDecision: decision.raw,
     };
 
     this.records.push(record);

@@ -1,6 +1,6 @@
-import baseLogger from '../../server/src/config/logger';
+import baseLogger from "../../server/src/config/logger";
 
-const logger = baseLogger.child({ name: 'BudgetManager' });
+const logger = baseLogger.child({ name: "BudgetManager" });
 
 /**
  * @ JSDoc
@@ -35,7 +35,7 @@ class BudgetManager {
   private static readonly DEFAULT_BUDGET_LIMIT = 100000; // Default cost units
 
   constructor() {
-    logger.warn('Initializing BudgetManager with in-memory store. This is not production-ready.');
+    logger.warn("Initializing BudgetManager with in-memory store. This is not production-ready.");
   }
 
   /**
@@ -47,7 +47,7 @@ class BudgetManager {
     const currentBudget = this.budgets.get(tenantId) || { tenantId, limit, usage: 0 };
     currentBudget.limit = limit;
     this.budgets.set(tenantId, currentBudget);
-    logger.info({ tenantId, limit }, 'Tenant budget updated.');
+    logger.info({ tenantId, limit }, "Tenant budget updated.");
   }
 
   /**
@@ -99,7 +99,7 @@ class BudgetManager {
     for (const budget of this.budgets.values()) {
       budget.usage = 0;
     }
-    logger.info('All tenant budgets have been reset.');
+    logger.info("All tenant budgets have been reset.");
   }
 
   /**

@@ -45,7 +45,7 @@ export interface ForceDirectedOptions {
 export function computeForceDirectedLayout(
   nodes: Node[],
   edges: Edge[],
-  options: ForceDirectedOptions = {},
+  options: ForceDirectedOptions = {}
 ): LayoutResult {
   const startTime = performance.now();
 
@@ -199,7 +199,7 @@ export function computeHierarchicalLayout(
     rootId?: string;
     levelSeparation?: number;
     nodeSeparation?: number;
-  } = {},
+  } = {}
 ): LayoutResult {
   const startTime = performance.now();
 

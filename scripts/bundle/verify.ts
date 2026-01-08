@@ -1,7 +1,7 @@
 #!/usr/bin/env ts-node
-import crypto from 'crypto';
-import fs from 'fs';
-import path from 'path';
+import crypto from "crypto";
+import fs from "fs";
+import path from "path";
 
 export interface HashEntry {
   path: string;
@@ -9,7 +9,7 @@ export interface HashEntry {
 }
 
 export interface HashesDocument {
-  algorithm: 'sha256';
+  algorithm: "sha256";
   files: HashEntry[];
 }
 
@@ -38,7 +38,7 @@ function readJsonFile<T>(filePath: string): T {
     throw new Error(`Missing required file: ${filePath}`);
   }
 
-  const content = fs.readFileSync(filePath, 'utf8');
+  const content = fs.readFileSync(filePath, "utf8");
   try {
     return JSON.parse(content) as T;
   } catch (err) {
@@ -47,27 +47,27 @@ function readJsonFile<T>(filePath: string): T {
 }
 
 function computeSha256(buffer: Buffer | string): string {
-  return crypto.createHash('sha256').update(buffer).digest('hex');
+  return crypto.createHash("sha256").update(buffer).digest("hex");
 }
 
 function validateHashesDocument(doc: HashesDocument): void {
-  if (doc.algorithm !== 'sha256') {
+  if (doc.algorithm !== "sha256") {
     throw new Error(`Unsupported hash algorithm: ${doc.algorithm}`);
   }
 
   if (!Array.isArray(doc.files) || doc.files.length === 0) {
-    throw new Error('hashes.json must include at least one file entry');
+    throw new Error("hashes.json must include at least one file entry");
   }
 
   for (const entry of doc.files) {
     if (!entry.path || !entry.sha256) {
-      throw new Error('Each hash entry requires path and sha256');
+      throw new Error("Each hash entry requires path and sha256");
     }
   }
 }
 
 function validateSignatureDocument(doc: SignatureDocument): void {
-  const requiredFields: (keyof SignatureDocument)[] = ['algorithm', 'keyId', 'target', 'signature'];
+  const requiredFields: (keyof SignatureDocument)[] = ["algorithm", "keyId", "target", "signature"];
   for (const field of requiredFields) {
     if (!doc[field]) {
       throw new Error(`signature.json missing field: ${field}`);
@@ -77,16 +77,19 @@ function validateSignatureDocument(doc: SignatureDocument): void {
 
 function computePlaceholderSignature(targetDigest: string, signature: SignatureDocument): string {
   return crypto
-    .createHash('sha256')
+    .createHash("sha256")
     .update(`${signature.algorithm}:${signature.keyId}:${targetDigest}`)
-    .digest('base64');
+    .digest("base64");
 }
 
-export function verifyBundle(bundleDir: string, options: VerificationOptions = {}): VerificationResult {
+export function verifyBundle(
+  bundleDir: string,
+  options: VerificationOptions = {}
+): VerificationResult {
   const errors: string[] = [];
-  const manifestPath = path.join(bundleDir, 'manifest.json');
-  const hashesPath = path.join(bundleDir, 'hashes.json');
-  const signaturePath = path.join(bundleDir, 'signature.json');
+  const manifestPath = path.join(bundleDir, "manifest.json");
+  const hashesPath = path.join(bundleDir, "hashes.json");
+  const signaturePath = path.join(bundleDir, "signature.json");
   const checkedFiles: string[] = [];
 
   try {
@@ -127,14 +130,14 @@ export function verifyBundle(bundleDir: string, options: VerificationOptions = {
       const signatureDoc = readJsonFile<SignatureDocument>(signaturePath);
       validateSignatureDocument(signatureDoc);
 
-      if (signatureDoc.target !== 'hashes.json') {
+      if (signatureDoc.target !== "hashes.json") {
         errors.push(`signature.json target must be "hashes.json" but was "${signatureDoc.target}"`);
       } else {
         const targetDigest = computeSha256(fs.readFileSync(hashesPath));
         const expectedSignature = computePlaceholderSignature(targetDigest, signatureDoc);
 
         if (expectedSignature !== signatureDoc.signature) {
-          errors.push('Signature verification failed: placeholder signature mismatch');
+          errors.push("Signature verification failed: placeholder signature mismatch");
         } else {
           signatureVerified = true;
         }
@@ -143,7 +146,7 @@ export function verifyBundle(bundleDir: string, options: VerificationOptions = {
       errors.push((err as Error).message);
     }
   } else if (options.requireSignature) {
-    errors.push('Signature is required but signature.json was not found.');
+    errors.push("Signature is required but signature.json was not found.");
   }
 
   return {
@@ -157,19 +160,19 @@ export function verifyBundle(bundleDir: string, options: VerificationOptions = {
 if (require.main === module) {
   const bundleDir = process.argv[2];
   if (!bundleDir) {
-    console.error('Usage: ts-node scripts/bundle/verify.ts <bundle-directory>');
+    console.error("Usage: ts-node scripts/bundle/verify.ts <bundle-directory>");
     process.exit(1);
   }
 
   const result = verifyBundle(bundleDir);
   if (!result.ok) {
-    console.error('Bundle verification failed:');
+    console.error("Bundle verification failed:");
     result.errors.forEach((err) => console.error(`- ${err}`));
     process.exit(1);
   }
 
   console.log(`Bundle verified. Checked ${result.checkedFiles.length} files.`);
   if (result.signatureVerified) {
-    console.log('Signature placeholder verified.');
+    console.log("Signature placeholder verified.");
   }
 }

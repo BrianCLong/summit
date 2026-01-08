@@ -181,19 +181,19 @@ spec:
         app: envoy-proxy
     spec:
       containers:
-      - name: envoy
-        image: envoyproxy/envoy:v1.28-latest
-        ports:
-        - containerPort: 10000
-          name: http
-        - containerPort: 9901
-          name: admin
-        volumeMounts:
-        - name: config
-          mountPath: /etc/envoy
-        command: ["envoy"]
-        args: ["-c", "/etc/envoy/envoy.yaml", "--service-cluster", "intelgraph"]
+        - name: envoy
+          image: envoyproxy/envoy:v1.28-latest
+          ports:
+            - containerPort: 10000
+              name: http
+            - containerPort: 9901
+              name: admin
+          volumeMounts:
+            - name: config
+              mountPath: /etc/envoy
+          command: ["envoy"]
+          args: ["-c", "/etc/envoy/envoy.yaml", "--service-cluster", "intelgraph"]
       volumes:
-      - name: config
-        configMap:
-          name: envoy-config
+        - name: config
+          configMap:
+            name: envoy-config

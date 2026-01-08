@@ -2,8 +2,8 @@ name: policy-pack-v0
 on:
   push:
     paths:
-      - 'contracts/policy-pack/v0/**'
-      - '.github/workflows/policy-pack.yml'
+      - "contracts/policy-pack/v0/**"
+      - ".github/workflows/policy-pack.yml"
   workflow_dispatch: {}
 
 jobs:
@@ -25,7 +25,7 @@ jobs:
       - name: Setup Cosign
         uses: sigstore/cosign-installer@v3
         with:
-          cosign-release: 'v2.2.4'
+          cosign-release: "v2.2.4"
 
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq

@@ -3,21 +3,21 @@ name: 🔐 ABAC Policy Gate
 on:
   pull_request:
     paths:
-      - 'policy/abac/**'
-      - 'policy/tests/**'
-      - 'server/config/data-paths.yaml'
-      - 'server/config/schemas/data-paths.schema.json'
-      - '.github/policies/**'
-      - 'services/authz-gateway/**'
+      - "policy/abac/**"
+      - "policy/tests/**"
+      - "server/config/data-paths.yaml"
+      - "server/config/schemas/data-paths.schema.json"
+      - ".github/policies/**"
+      - "services/authz-gateway/**"
   push:
     branches:
       - main
     paths:
-      - 'policy/abac/**'
-      - 'policy/tests/**'
-      - 'server/config/data-paths.yaml'
-      - 'server/config/schemas/data-paths.schema.json'
-      - '.github/policies/**'
+      - "policy/abac/**"
+      - "policy/tests/**"
+      - "server/config/data-paths.yaml"
+      - "server/config/schemas/data-paths.schema.json"
+      - ".github/policies/**"
 
 jobs:
   opa:

@@ -3,16 +3,16 @@
  * Security, access control, and compliance for lakehouse
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import pino from 'pino';
+import { v4 as uuidv4 } from "uuid";
+import pino from "pino";
 
-const logger = pino({ name: 'cloud-governance' });
+const logger = pino({ name: "cloud-governance" });
 
 export enum AccessLevel {
-  READ = 'read',
-  WRITE = 'write',
-  ADMIN = 'admin',
-  NONE = 'none'
+  READ = "read",
+  WRITE = "write",
+  ADMIN = "admin",
+  NONE = "none",
 }
 
 export interface AccessPolicy {
@@ -31,12 +31,12 @@ export interface AuditLog {
   principal: string;
   action: string;
   resource: string;
-  status: 'success' | 'denied' | 'error';
+  status: "success" | "denied" | "error";
   metadata: Record<string, any>;
 }
 
 export interface DataClassification {
-  level: 'public' | 'internal' | 'confidential' | 'restricted';
+  level: "public" | "internal" | "confidential" | "restricted";
   categories: string[];
   containsPII: boolean;
   retentionPeriod?: number; // days
@@ -53,15 +53,15 @@ export class GovernanceManager {
     this.classifications = new Map();
   }
 
-  async createPolicy(policy: Omit<AccessPolicy, 'id' | 'createdAt'>): Promise<AccessPolicy> {
+  async createPolicy(policy: Omit<AccessPolicy, "id" | "createdAt">): Promise<AccessPolicy> {
     const fullPolicy: AccessPolicy = {
       ...policy,
       id: uuidv4(),
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     this.policies.set(fullPolicy.id, fullPolicy);
-    logger.info({ policyId: fullPolicy.id }, 'Access policy created');
+    logger.info({ policyId: fullPolicy.id }, "Access policy created");
 
     return fullPolicy;
   }
@@ -75,37 +75,42 @@ export class GovernanceManager {
 
         const hasAccess = this.evaluateAccess(policy.access, action);
 
-        await this.logAccess(principal, action, resource, hasAccess ? 'success' : 'denied');
+        await this.logAccess(principal, action, resource, hasAccess ? "success" : "denied");
 
         return hasAccess;
       }
     }
 
-    await this.logAccess(principal, action, resource, 'denied');
+    await this.logAccess(principal, action, resource, "denied");
     return false;
   }
 
   private matchesResource(policyResource: string, requestedResource: string): boolean {
     // Support wildcards
-    const pattern = policyResource.replace(/\*/g, '.*');
+    const pattern = policyResource.replace(/\*/g, ".*");
     const regex = new RegExp(`^${pattern}$`);
     return regex.test(requestedResource);
   }
 
   private evaluateAccess(policyAccess: AccessLevel, action: string): boolean {
     const actionLevels: Record<string, AccessLevel> = {
-      'read': AccessLevel.READ,
-      'select': AccessLevel.READ,
-      'write': AccessLevel.WRITE,
-      'insert': AccessLevel.WRITE,
-      'update': AccessLevel.WRITE,
-      'delete': AccessLevel.ADMIN,
-      'drop': AccessLevel.ADMIN
+      read: AccessLevel.READ,
+      select: AccessLevel.READ,
+      write: AccessLevel.WRITE,
+      insert: AccessLevel.WRITE,
+      update: AccessLevel.WRITE,
+      delete: AccessLevel.ADMIN,
+      drop: AccessLevel.ADMIN,
     };
 
     const requiredLevel = actionLevels[action.toLowerCase()] || AccessLevel.ADMIN;
 
-    const levelHierarchy = [AccessLevel.NONE, AccessLevel.READ, AccessLevel.WRITE, AccessLevel.ADMIN];
+    const levelHierarchy = [
+      AccessLevel.NONE,
+      AccessLevel.READ,
+      AccessLevel.WRITE,
+      AccessLevel.ADMIN,
+    ];
     return levelHierarchy.indexOf(policyAccess) >= levelHierarchy.indexOf(requiredLevel);
   }
 
@@ -113,7 +118,7 @@ export class GovernanceManager {
     principal: string,
     action: string,
     resource: string,
-    status: 'success' | 'denied' | 'error'
+    status: "success" | "denied" | "error"
   ): Promise<void> {
     const log: AuditLog = {
       id: uuidv4(),
@@ -122,13 +127,13 @@ export class GovernanceManager {
       action,
       resource,
       status,
-      metadata: {}
+      metadata: {},
     };
 
     this.auditLogs.push(log);
 
-    if (status === 'denied') {
-      logger.warn({ log }, 'Access denied');
+    if (status === "denied") {
+      logger.warn({ log }, "Access denied");
     }
   }
 
@@ -142,16 +147,16 @@ export class GovernanceManager {
 
     if (filters) {
       if (filters.principal) {
-        logs = logs.filter(l => l.principal === filters.principal);
+        logs = logs.filter((l) => l.principal === filters.principal);
       }
       if (filters.resource) {
-        logs = logs.filter(l => l.resource === filters.resource);
+        logs = logs.filter((l) => l.resource === filters.resource);
       }
       if (filters.startTime) {
-        logs = logs.filter(l => l.timestamp >= filters.startTime!);
+        logs = logs.filter((l) => l.timestamp >= filters.startTime!);
       }
       if (filters.endTime) {
-        logs = logs.filter(l => l.timestamp <= filters.endTime!);
+        logs = logs.filter((l) => l.timestamp <= filters.endTime!);
       }
     }
 
@@ -160,7 +165,7 @@ export class GovernanceManager {
 
   async classifyData(resource: string, classification: DataClassification): Promise<void> {
     this.classifications.set(resource, classification);
-    logger.info({ resource, classification }, 'Data classification set');
+    logger.info({ resource, classification }, "Data classification set");
   }
 
   async getClassification(resource: string): Promise<DataClassification | undefined> {
@@ -175,13 +180,13 @@ export class GovernanceManager {
       email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
       ssn: /^\d{3}-\d{2}-\d{4}$/,
       phone: /^\+?[\d\s\-()]+$/,
-      creditCard: /^\d{4}[\s\-]?\d{4}[\s\-]?\d{4}[\s\-]?\d{4}$/
+      creditCard: /^\d{4}[\s\-]?\d{4}[\s\-]?\d{4}[\s\-]?\d{4}$/,
     };
 
     const piiFields: string[] = [];
 
     for (const [key, value] of Object.entries(data)) {
-      if (typeof value === 'string') {
+      if (typeof value === "string") {
         for (const [type, pattern] of Object.entries(piiPatterns)) {
           if (pattern.test(value)) {
             piiFields.push(key);
@@ -193,7 +198,7 @@ export class GovernanceManager {
 
     return {
       containsPII: piiFields.length > 0,
-      fields: piiFields
+      fields: piiFields,
     };
   }
 
@@ -201,9 +206,9 @@ export class GovernanceManager {
     const masked = { ...data };
 
     for (const field of fields) {
-      if (masked[field] && typeof masked[field] === 'string') {
+      if (masked[field] && typeof masked[field] === "string") {
         const value = masked[field] as string;
-        masked[field] = value.substring(0, 3) + '*'.repeat(value.length - 3);
+        masked[field] = value.substring(0, 3) + "*".repeat(value.length - 3);
       }
     }
 
@@ -211,5 +216,5 @@ export class GovernanceManager {
   }
 }
 
-export * from './encryption.js';
-export * from './compliance.js';
+export * from "./encryption.js";
+export * from "./compliance.js";

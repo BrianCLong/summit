@@ -19,60 +19,70 @@ This document describes the maintainability metrics, thresholds, and tooling con
 We track the following maintainability metrics:
 
 ### 1. **Cyclomatic Complexity**
+
 - **What:** Measures the number of independent paths through code
 - **Why:** High complexity makes code harder to test and maintain
 - **Threshold:** ≤ 15 per function
 - **Tool:** ESLint `complexity` rule
 
 ### 2. **Cognitive Complexity**
+
 - **What:** Measures how difficult code is to understand (more strict than cyclomatic)
 - **Why:** Directly correlates with maintainability
 - **Threshold:** ≤ 15 per function
 - **Tool:** ESLint `sonarjs/cognitive-complexity`
 
 ### 3. **File Size**
+
 - **What:** Total lines of code per file
 - **Why:** Large files indicate poor separation of concerns
 - **Threshold:** ≤ 500 lines
 - **Tool:** ESLint `max-lines`, cloc
 
 ### 4. **Function Length**
+
 - **What:** Lines of code per function
 - **Why:** Long functions are hard to understand and test
 - **Threshold:** ≤ 100 lines
 - **Tool:** ESLint `max-lines-per-function`
 
 ### 5. **Class Methods**
+
 - **What:** Number of methods in a class
 - **Why:** Too many methods indicate "God Object" anti-pattern
 - **Threshold:** ≤ 20 methods
 - **Tool:** SonarQube
 
 ### 6. **Function Parameters**
+
 - **What:** Number of parameters per function
 - **Why:** Too many parameters indicate poor abstraction
 - **Threshold:** ≤ 5 parameters
 - **Tool:** ESLint `max-params`
 
 ### 7. **Nesting Depth**
+
 - **What:** Maximum depth of nested blocks/callbacks
 - **Why:** Deep nesting reduces readability
 - **Threshold:** ≤ 4 levels
 - **Tool:** ESLint `max-depth`, `max-nested-callbacks`
 
 ### 8. **Code Duplication**
+
 - **What:** Percentage of duplicated code
 - **Why:** Duplicated code increases maintenance burden
 - **Threshold:** < 5%
 - **Tool:** jscpd, SonarQube
 
 ### 9. **Import Dependencies**
+
 - **What:** Number of imports per file
 - **Why:** Too many imports indicate tight coupling
 - **Threshold:** ≤ 20 imports
 - **Tool:** ESLint `import/max-dependencies`
 
 ### 10. **Technical Debt**
+
 - **What:** Number of TODO/FIXME/HACK comments
 - **Why:** Indicates incomplete or problematic code
 - **Threshold:** Trend should be decreasing
@@ -82,18 +92,18 @@ We track the following maintainability metrics:
 
 ## 🎯 Thresholds
 
-| Metric | Warning | Error | Current Baseline |
-|--------|---------|-------|------------------|
-| Cyclomatic Complexity (function) | > 10 | > 15 | Files with 110 conditions found |
-| Cognitive Complexity | > 12 | > 15 | - |
-| File Lines | > 500 | > 1000 | 71 files > 1000 lines |
-| Function Lines | > 80 | > 100 | Functions with 200+ lines found |
-| Class Methods | > 15 | > 20 | Classes with 117 methods found |
-| Function Parameters | > 4 | > 5 | - |
-| Nesting Depth | > 3 | > 4 | - |
-| Code Duplication | > 3% | > 5% | TBD (need jscpd) |
-| Imports per File | > 15 | > 20 | Files with 33 imports found |
-| Switch Cases | > 8 | > 10 | Switches with 32 cases found |
+| Metric                           | Warning | Error  | Current Baseline                |
+| -------------------------------- | ------- | ------ | ------------------------------- |
+| Cyclomatic Complexity (function) | > 10    | > 15   | Files with 110 conditions found |
+| Cognitive Complexity             | > 12    | > 15   | -                               |
+| File Lines                       | > 500   | > 1000 | 71 files > 1000 lines           |
+| Function Lines                   | > 80    | > 100  | Functions with 200+ lines found |
+| Class Methods                    | > 15    | > 20   | Classes with 117 methods found  |
+| Function Parameters              | > 4     | > 5    | -                               |
+| Nesting Depth                    | > 3     | > 4    | -                               |
+| Code Duplication                 | > 3%    | > 5%   | TBD (need jscpd)                |
+| Imports per File                 | > 15    | > 20   | Files with 33 imports found     |
+| Switch Cases                     | > 8     | > 10   | Switches with 32 cases found    |
 
 ### Status Indicators
 
@@ -110,11 +120,13 @@ We track the following maintainability metrics:
 Configuration file: `.eslintrc.complexity.cjs`
 
 **Plugins:**
+
 - `eslint-plugin-complexity` - Basic complexity metrics
 - `eslint-plugin-sonarjs` - Advanced code quality rules
 - `eslint-plugin-import` - Import dependency analysis
 
 **Key Rules:**
+
 ```javascript
 {
   "complexity": ["error", { "max": 15 }],
@@ -132,6 +144,7 @@ Configuration file: `.eslintrc.complexity.cjs`
 Configuration file: `sonar-project.properties`
 
 **Features:**
+
 - Comprehensive code quality analysis
 - Security vulnerability detection
 - Code coverage tracking
@@ -139,6 +152,7 @@ Configuration file: `sonar-project.properties`
 - Trend analysis over time
 
 **Key Metrics:**
+
 - Maintainability Rating (A-E)
 - Reliability Rating (A-E)
 - Security Rating (A-E)
@@ -148,12 +162,14 @@ Configuration file: `sonar-project.properties`
 ### Code Metrics Tools
 
 **cloc** - Lines of Code counter
+
 ```bash
 npm install -g cloc
 cloc server/src client/src --exclude-dir=node_modules,dist
 ```
 
 **jscpd** - Copy/Paste Detector
+
 ```bash
 npm install -g jscpd
 jscpd server/src client/src --min-lines 10
@@ -228,6 +244,7 @@ cloc server/src client/src apps packages services \
 File: `.github/workflows/maintainability-check.yml`
 
 **Triggers:**
+
 - Pull requests to `main`
 - Pushes to `main`
 - Weekly schedule (Sundays at 2 AM UTC)
@@ -258,12 +275,14 @@ File: `.github/workflows/maintainability-check.yml`
 ### Viewing Results
 
 **In Pull Requests:**
+
 1. Go to the PR "Checks" tab
 2. Find "Maintainability Metrics Check"
 3. View individual job logs
 4. Download artifacts for detailed reports
 
 **Artifacts Available:**
+
 - `eslint-complexity-report` - ESLint JSON + markdown
 - `code-metrics-report` - Metrics analysis + duplication data
 - `weekly-maintainability-report` - Comprehensive trend report
@@ -275,6 +294,7 @@ File: `.github/workflows/maintainability-check.yml`
 ### Automated Weekly Analysis
 
 Every Sunday at 2 AM UTC, the CI system:
+
 1. Runs full maintainability analysis
 2. Generates comprehensive report
 3. Creates GitHub issue with findings
@@ -286,11 +306,13 @@ Every Sunday at 2 AM UTC, the CI system:
 # Maintainability Trend Report
 
 ## Executive Summary
+
 - Overall code quality status
 - Key metrics comparison
 - Trend direction (improving/degrading)
 
 ## Metrics Summary
+
 - File size distribution
 - Complexity analysis
 - Technical debt tracking
@@ -298,11 +320,13 @@ Every Sunday at 2 AM UTC, the CI system:
 - Lines of code by language
 
 ## Recommendations
+
 - Priority 1: Critical issues
 - Priority 2: High impact improvements
 - Priority 3: Medium impact improvements
 
 ## Historical Trends
+
 - Week-over-week comparison
 - Monthly trend graphs (when available)
 ```
@@ -329,12 +353,14 @@ gh run download <run-id>
 **Problem:** Files over 500 lines
 
 **Solutions:**
+
 1. **Extract Utilities** - Move helper functions to separate files
 2. **Split by Responsibility** - Separate concerns into modules
 3. **Component Composition** - Break large React components into smaller ones
 4. **Service Layer Split** - Divide monolithic services by domain
 
 **Example:**
+
 ```javascript
 // Before: VisualizationService.js (2,031 lines)
 // After:
@@ -349,22 +375,24 @@ gh run download <run-id>
 **Problem:** Functions with cyclomatic complexity > 15
 
 **Solutions:**
+
 1. **Extract Methods** - Break down long functions
 2. **Early Returns** - Reduce nesting with guard clauses
 3. **Strategy Pattern** - Replace large switch statements
 4. **Lookup Tables** - Use objects/maps instead of conditionals
 
 **Example:**
+
 ```javascript
 // Before: High complexity (20)
 function processData(data, type) {
-  if (type === 'A') {
-    if (data.status === 'active') {
+  if (type === "A") {
+    if (data.status === "active") {
       // complex logic
-    } else if (data.status === 'pending') {
+    } else if (data.status === "pending") {
       // complex logic
     }
-  } else if (type === 'B') {
+  } else if (type === "B") {
     // more complex logic
   }
   // ... many more conditions
@@ -389,23 +417,25 @@ function processData(data, type) {
 **Problem:** Code duplication > 5%
 
 **Solutions:**
+
 1. **Extract Common Functions** - Create shared utilities
 2. **Create Base Classes** - Use inheritance for common behavior
 3. **Composition** - Use higher-order functions/components
 4. **Configuration** - Replace similar code with config-driven logic
 
 **Example:**
+
 ```javascript
 // Before: Duplicated validation logic
 function validateUser(user) {
-  if (!user.name) throw new Error('Name required');
-  if (!user.email) throw new Error('Email required');
+  if (!user.name) throw new Error("Name required");
+  if (!user.email) throw new Error("Email required");
   // ...
 }
 
 function validateProduct(product) {
-  if (!product.name) throw new Error('Name required');
-  if (!product.price) throw new Error('Price required');
+  if (!product.name) throw new Error("Name required");
+  if (!product.price) throw new Error("Price required");
   // ...
 }
 
@@ -425,12 +455,14 @@ validate(product, productSchema);
 **Problem:** Many TODO/FIXME comments
 
 **Solutions:**
+
 1. **Create Issues** - Convert TODOs to tracked GitHub issues
 2. **Implement or Remove** - Don't leave TODOs indefinitely
 3. **Document Decisions** - Replace TODOs with ADRs (Architecture Decision Records)
 4. **Scheduled Cleanup** - Dedicate time each sprint to address debt
 
 **Best Practices:**
+
 ```javascript
 // Bad: Vague TODO
 // TODO: fix this
@@ -448,12 +480,14 @@ validate(product, productSchema);
 **Problem:** Classes with 50+ methods
 
 **Solutions:**
+
 1. **Single Responsibility** - Split by domain/feature
 2. **Composition over Inheritance** - Break into collaborating objects
 3. **Facade Pattern** - Keep interface, delegate to smaller services
 4. **Module Organization** - Organize related functionality
 
 **Example:**
+
 ```javascript
 // Before: ReportingService (117 methods)
 class ReportingService {
@@ -525,6 +559,7 @@ class ReportingService {
 **Problem:** `Definition for rule 'complexity' was not found`
 
 **Solution:**
+
 ```bash
 pnpm add -D eslint-plugin-complexity eslint-plugin-sonarjs
 ```
@@ -534,6 +569,7 @@ pnpm add -D eslint-plugin-complexity eslint-plugin-sonarjs
 **Problem:** `SONAR_TOKEN` not configured
 
 **Solution:**
+
 1. Create account at [SonarCloud.io](https://sonarcloud.io)
 2. Generate token in User Settings
 3. Add as repository secret: `SONAR_TOKEN`
@@ -544,6 +580,7 @@ pnpm add -D eslint-plugin-complexity eslint-plugin-sonarjs
 **Problem:** Command not found errors
 
 **Solution:**
+
 ```bash
 # Install globally
 npm install -g cloc jscpd
@@ -558,6 +595,7 @@ npx jscpd server/src
 **Problem:** GitHub issue not created
 
 **Solution:**
+
 1. Ensure workflow has `issues: write` permission
 2. Check if schedule trigger is enabled
 3. Verify artifact upload succeeded
@@ -576,5 +614,5 @@ For questions or issues with maintainability metrics:
 
 ---
 
-*Last updated: 2025-11-20*
-*Maintained by: IntelGraph Platform Team*
+_Last updated: 2025-11-20_
+_Maintained by: IntelGraph Platform Team_

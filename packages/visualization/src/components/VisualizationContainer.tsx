@@ -1,6 +1,6 @@
 // @ts-nocheck
-import React, { useRef, ReactNode } from 'react';
-import { useVisualizationDimensions } from '../hooks';
+import React, { useRef, ReactNode } from "react";
+import { useVisualizationDimensions } from "../hooks";
 
 export interface VisualizationContainerProps {
   children: (dimensions: { width: number; height: number }) => ReactNode;
@@ -12,7 +12,7 @@ export interface VisualizationContainerProps {
 
 export function VisualizationContainer({
   children,
-  className = '',
+  className = "",
   aspectRatio,
   minHeight = 200,
   minWidth = 300,
@@ -28,11 +28,11 @@ export function VisualizationContainer({
       ref={containerRef}
       className={`visualization-container ${className}`}
       style={{
-        width: '100%',
-        height: '100%',
+        width: "100%",
+        height: "100%",
         minWidth,
         minHeight,
-        position: 'relative',
+        position: "relative",
       }}
     >
       {validDimensions && children(dimensions)}

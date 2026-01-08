@@ -16,7 +16,7 @@ export const OfflineProvider: React.FC<{children: ReactNode}> = ({children}) => 
   const [isConnected, setIsConnected] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener((state) => {
+    const unsubscribe = NetInfo.addEventListener(state => {
       setIsConnected(state.isConnected || false);
       setIsOnline((state.isConnected && state.isInternetReachable) || false);
     });
@@ -25,8 +25,6 @@ export const OfflineProvider: React.FC<{children: ReactNode}> = ({children}) => 
   }, []);
 
   return (
-    <OfflineContext.Provider value={{isOnline, isConnected}}>
-      {children}
-    </OfflineContext.Provider>
+    <OfflineContext.Provider value={{isOnline, isConnected}}>{children}</OfflineContext.Provider>
   );
 };

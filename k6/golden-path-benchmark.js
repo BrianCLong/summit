@@ -1,35 +1,35 @@
-import http from 'k6/http';
-import { check, sleep } from 'k6';
-import { Trend } from 'k6/metrics';
+import http from "k6/http";
+import { check, sleep } from "k6";
+import { Trend } from "k6/metrics";
 
 // Custom metrics
-const queryLatency = new Trend('graphql_query_duration');
+const queryLatency = new Trend("graphql_query_duration");
 
 // Load the golden dataset
 // Note: This path is relative to the script file execution location (usually repo root if run via npm script)
 // or relative to this file depending on k6 version/context.
 // Assuming execution from repo root: k6 run k6/golden-path-benchmark.js
-const dataset = JSON.parse(open('../data/golden-path/demo-investigation.json'));
+const dataset = JSON.parse(open("../data/golden-path/demo-investigation.json"));
 
 export const options = {
   stages: [
-    { duration: '10s', target: 5 },  // Warm up with 5 users
-    { duration: '30s', target: 20 }, // Load test with 20 users
-    { duration: '10s', target: 0 },  // Cool down
+    { duration: "10s", target: 5 }, // Warm up with 5 users
+    { duration: "30s", target: 20 }, // Load test with 20 users
+    { duration: "10s", target: 0 }, // Cool down
   ],
   thresholds: {
     // Goal: 95th percentile query time < 100ms
-    'graphql_query_duration': ['p(95)<100'],
-    'http_req_failed': ['rate<0.01'],
+    graphql_query_duration: ["p(95)<100"],
+    http_req_failed: ["rate<0.01"],
   },
 };
 
-const BASE_URL = __ENV.API_URL || 'http://localhost:4000/graphql';
+const BASE_URL = __ENV.API_URL || "http://localhost:4000/graphql";
 
 export function setup() {
-  const headers = { 'Content-Type': 'application/json' };
+  const headers = { "Content-Type": "application/json" };
   if (__ENV.AUTH_TOKEN) {
-    headers['Authorization'] = `Bearer ${__ENV.AUTH_TOKEN}`;
+    headers["Authorization"] = `Bearer ${__ENV.AUTH_TOKEN}`;
   }
 
   // 1. Create Investigation
@@ -41,16 +41,20 @@ export function setup() {
     }
   `;
 
-  const invRes = http.post(BASE_URL, JSON.stringify({
-    query: createInvMutation,
-    variables: {
-      input: {
-        name: `Benchmark ${dataset.investigation.name} ${Date.now()}`,
-        description: dataset.investigation.description,
-        type: dataset.investigation.type || 'THREAT_ANALYSIS',
-      }
-    }
-  }), { headers });
+  const invRes = http.post(
+    BASE_URL,
+    JSON.stringify({
+      query: createInvMutation,
+      variables: {
+        input: {
+          name: `Benchmark ${dataset.investigation.name} ${Date.now()}`,
+          description: dataset.investigation.description,
+          type: dataset.investigation.type || "THREAT_ANALYSIS",
+        },
+      },
+    }),
+    { headers }
+  );
 
   const invBody = JSON.parse(invRes.body);
   if (invBody.errors) {
@@ -71,21 +75,27 @@ export function setup() {
   `;
 
   for (const entity of dataset.entities) {
-    const res = http.post(BASE_URL, JSON.stringify({
-      query: addEntityMutation,
-      variables: {
-        input: {
-          investigationId,
-          type: entity.type,
-          name: entity.name,
-          properties: entity.properties
-        }
-      }
-    }), { headers });
+    const res = http.post(
+      BASE_URL,
+      JSON.stringify({
+        query: addEntityMutation,
+        variables: {
+          input: {
+            investigationId,
+            type: entity.type,
+            name: entity.name,
+            properties: entity.properties,
+          },
+        },
+      }),
+      { headers }
+    );
 
     const body = JSON.parse(res.body);
     if (body.errors) {
-      console.error(`Setup warning: Failed to add entity ${entity.name}: ${JSON.stringify(body.errors)}`);
+      console.error(
+        `Setup warning: Failed to add entity ${entity.name}: ${JSON.stringify(body.errors)}`
+      );
       createdEntityIds.push(null); // Keep index alignment
     } else {
       createdEntityIds.push(body.data.createEntity.id);
@@ -107,25 +117,31 @@ export function setup() {
       const toId = createdEntityIds[rel.to];
 
       if (fromId && toId) {
-        const res = http.post(BASE_URL, JSON.stringify({
-          query: addRelMutation,
-          variables: {
-            input: {
-              investigationId,
-              type: rel.type,
-              fromEntityId: fromId,
-              toEntityId: toId,
-              properties: rel.properties
-            }
-          }
-        }), { headers });
+        const res = http.post(
+          BASE_URL,
+          JSON.stringify({
+            query: addRelMutation,
+            variables: {
+              input: {
+                investigationId,
+                type: rel.type,
+                fromEntityId: fromId,
+                toEntityId: toId,
+                properties: rel.properties,
+              },
+            },
+          }),
+          { headers }
+        );
 
         const body = JSON.parse(res.body);
         if (body.errors) {
-          console.error(`Setup warning: Failed to add relationship ${rel.type}: ${JSON.stringify(body.errors)}`);
+          console.error(
+            `Setup warning: Failed to add relationship ${rel.type}: ${JSON.stringify(body.errors)}`
+          );
         }
       } else {
-         console.warn(`Skipping relationship due to missing entity IDs: ${rel.from} -> ${rel.to}`);
+        console.warn(`Skipping relationship due to missing entity IDs: ${rel.from} -> ${rel.to}`);
       }
     }
   }
@@ -134,9 +150,9 @@ export function setup() {
 }
 
 export default function (data) {
-  const headers = { 'Content-Type': 'application/json' };
+  const headers = { "Content-Type": "application/json" };
   if (__ENV.AUTH_TOKEN) {
-    headers['Authorization'] = `Bearer ${__ENV.AUTH_TOKEN}`;
+    headers["Authorization"] = `Bearer ${__ENV.AUTH_TOKEN}`;
   }
 
   // Query to fetch the investigation and its graph (entities/relationships)
@@ -161,10 +177,14 @@ export default function (data) {
     }
   `;
 
-  const res = http.post(BASE_URL, JSON.stringify({
-    query: query,
-    variables: { id: data.investigationId }
-  }), { headers });
+  const res = http.post(
+    BASE_URL,
+    JSON.stringify({
+      query: query,
+      variables: { id: data.investigationId },
+    }),
+    { headers }
+  );
 
   let body;
   try {
@@ -174,9 +194,9 @@ export default function (data) {
   }
 
   const success = check(res, {
-    'status is 200': (r) => r.status === 200,
-    'no graphql errors': (r) => !body.errors,
-    'has data': (r) => body.data && body.data.investigation,
+    "status is 200": (r) => r.status === 200,
+    "no graphql errors": (r) => !body.errors,
+    "has data": (r) => body.data && body.data.investigation,
   });
 
   if (success) {

@@ -47,7 +47,7 @@ spec:
         - protocol: TCP
           port: 8443
         - protocol: TCP
-          port: 8080  # Health checks
+          port: 8080 # Health checks
 
 ---
 # Allow auth-gateway to communicate with mesh-control plane
@@ -75,7 +75,7 @@ spec:
         - protocol: TCP
           port: 8080
         - protocol: TCP
-          port: 9090  # gRPC
+          port: 9090 # gRPC
 
     # Allow communication to policy-enforcer
     - to:
@@ -106,4 +106,4 @@ spec:
     - from: []
       ports:
         - protocol: TCP
-          port: 8080  # Liveness/readiness probe port
+          port: 8080 # Liveness/readiness probe port

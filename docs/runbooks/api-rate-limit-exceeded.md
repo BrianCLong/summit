@@ -86,6 +86,7 @@ open "https://app.datadoghq.com/apm/services"
 ### Strategy 1: Enable/Adjust Rate Limiting
 
 #### Enable Rate Limiting Globally
+
 ```bash
 # Update rate limit configuration
 kubectl patch configmap intelgraph-config -n intelgraph --type merge -p '
@@ -105,6 +106,7 @@ kubectl rollout status deployment intelgraph-api -n intelgraph
 ```
 
 #### Tier-Based Rate Limiting
+
 ```bash
 # Configure different limits by subscription tier
 kubectl patch configmap intelgraph-config -n intelgraph --type merge -p '
@@ -122,6 +124,7 @@ kubectl rollout restart deployment intelgraph-api -n intelgraph
 ```
 
 #### Endpoint-Specific Rate Limiting
+
 ```bash
 # Set lower limits for expensive endpoints
 kubectl patch configmap intelgraph-config -n intelgraph --type merge -p '
@@ -138,6 +141,7 @@ kubectl patch configmap intelgraph-config -n intelgraph --type merge -p '
 ### Strategy 2: Block Abusive Clients
 
 #### Temporary IP Block (using Network Policy)
+
 ```bash
 # Create network policy to block specific IP
 cat <<EOF | kubectl apply -f -
@@ -165,6 +169,7 @@ EOF
 ```
 
 #### Block at Load Balancer Level
+
 ```bash
 # AWS ALB - Add IP to WAF block list
 aws wafv2 update-ip-set \
@@ -190,6 +195,7 @@ curl -X POST "https://api.cloudflare.com/client/v4/zones/<zone-id>/firewall/acce
 ```
 
 #### Suspend Abusive Tenant
+
 ```bash
 # Temporarily disable tenant access
 psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
@@ -208,6 +214,7 @@ psql -h postgres -U $POSTGRES_USER -d intelgraph -c "
 ### Strategy 3: Scale Infrastructure
 
 #### Scale API Replicas
+
 ```bash
 # Horizontal scaling
 kubectl scale deployment intelgraph-api -n intelgraph --replicas=10
@@ -221,6 +228,7 @@ kubectl get hpa -n intelgraph
 ```
 
 #### Increase Resource Limits
+
 ```bash
 # Update resource limits
 kubectl patch deployment intelgraph-api -n intelgraph -p '
@@ -251,6 +259,7 @@ kubectl patch deployment intelgraph-api -n intelgraph -p '
 ### Strategy 4: Enable DDoS Protection
 
 #### Cloudflare DDoS Protection
+
 ```bash
 # Enable "I'm Under Attack" mode
 curl -X PATCH "https://api.cloudflare.com/client/v4/zones/<zone-id>/settings/security_level" \
@@ -275,6 +284,7 @@ curl -X POST "https://api.cloudflare.com/client/v4/zones/<zone-id>/rate_limits" 
 ```
 
 #### AWS Shield / WAF
+
 ```bash
 # Enable AWS Shield Advanced (if not enabled)
 aws shield create-protection \
@@ -292,6 +302,7 @@ aws wafv2 create-rate-based-rule \
 ### Strategy 5: Implement Caching
 
 #### Enable Aggressive Caching
+
 ```bash
 # Configure Redis caching
 kubectl patch configmap intelgraph-config -n intelgraph --type merge -p '
@@ -332,6 +343,7 @@ kubectl rollout restart deployment intelgraph-api -n intelgraph
 ## Response Based on Pattern
 
 ### Legitimate Traffic Spike
+
 ```
 ✅ Action: Scale infrastructure
 - Increase API replicas
@@ -342,6 +354,7 @@ kubectl rollout restart deployment intelgraph-api -n intelgraph
 ```
 
 ### Abusive Single Tenant
+
 ```
 ⚠️ Action: Throttle specific tenant
 - Reduce rate limit for tenant
@@ -351,6 +364,7 @@ kubectl rollout restart deployment intelgraph-api -n intelgraph
 ```
 
 ### Distributed Attack (DDoS)
+
 ```
 🚨 Action: Enable DDoS protection
 - Enable Cloudflare "Under Attack" mode
@@ -361,6 +375,7 @@ kubectl rollout restart deployment intelgraph-api -n intelgraph
 ```
 
 ### API Abuse / Scraping
+
 ```
 ⚠️ Action: Implement bot protection
 - Enable bot detection
@@ -389,6 +404,7 @@ watch -n 10 'psql -h postgres -U $POSTGRES_USER -d intelgraph -c "SELECT count(*
 ## Communication Templates
 
 ### Internal Alert
+
 ```
 🚨 HIGH API TRAFFIC ALERT
 
@@ -407,6 +423,7 @@ Status: Under investigation
 ```
 
 ### Customer Communication (if blocking)
+
 ```
 Subject: Temporary API Access Restriction
 
@@ -440,6 +457,7 @@ We're here to help! Reply to discuss your usage needs.
 ## Prevention
 
 ### Proactive Measures
+
 1. Implement rate limiting from day one
 2. Use tier-based limits
 3. Monitor API usage trends
@@ -452,6 +470,7 @@ We're here to help! Reply to discuss your usage needs.
 10. Test rate limiting regularly
 
 ### Customer Education
+
 - Document rate limits clearly
 - Provide retry logic examples
 - Recommend best practices (caching, pagination)

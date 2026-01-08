@@ -13,8 +13,8 @@ spec:
         - name: postgres
           image: postgres:15
           env:
-            - { name: POSTGRES_PASSWORD, value: 'devpassword' }
-            - { name: POSTGRES_DB, value: 'intelgraph' }
+            - { name: POSTGRES_PASSWORD, value: "devpassword" }
+            - { name: POSTGRES_DB, value: "intelgraph" }
           ports: [{ containerPort: 5432 }]
 ---
 apiVersion: v1

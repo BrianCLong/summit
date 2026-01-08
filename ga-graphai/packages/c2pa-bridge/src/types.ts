@@ -1,4 +1,4 @@
-export type SignatureAlgorithm = 'rsa-sha256' | 'ed25519';
+export type SignatureAlgorithm = "rsa-sha256" | "ed25519";
 
 export interface ToolChainEntry {
   name: string;
@@ -19,7 +19,7 @@ export interface SignerDescriptor {
   algorithm: SignatureAlgorithm;
 }
 
-export interface SignerInput extends Omit<SignerDescriptor, 'publicKeyFingerprint'> {
+export interface SignerInput extends Omit<SignerDescriptor, "publicKeyFingerprint"> {
   privateKey: string;
   publicKey: string;
   mimeType?: string;
@@ -84,7 +84,7 @@ export interface VerifyProvenanceOptions {
 }
 
 export interface VerificationIssue {
-  level: 'error' | 'warning';
+  level: "error" | "warning";
   message: string;
 }
 

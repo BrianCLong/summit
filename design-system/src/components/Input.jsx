@@ -1,48 +1,44 @@
-import React from 'react';
-import { 
+import React from "react";
+import {
   TextField as MuiTextField,
   Select as MuiSelect,
   MenuItem as MuiMenuItem,
   FormControl as MuiFormControl,
   InputLabel as MuiInputLabel,
-  FormHelperText as MuiFormHelperText
-} from '@mui/material';
-import { useAccessibility } from '../accessibility/AccessibilityContext';
+  FormHelperText as MuiFormHelperText,
+} from "@mui/material";
+import { useAccessibility } from "../accessibility/AccessibilityContext";
 
-export const TextField = ({ 
-  fullWidth = true, 
-  variant = 'outlined', 
-  size = 'medium', 
-  'aria-label': ariaLabel,
-  ...props 
+export const TextField = ({
+  fullWidth = true,
+  variant = "outlined",
+  size = "medium",
+  "aria-label": ariaLabel,
+  ...props
 }) => {
   const { keyboardNavigation } = useAccessibility();
-  
+
   const textFieldProps = {
     fullWidth,
     variant,
     size,
-    ...props
+    ...props,
   };
 
   if (keyboardNavigation) {
-    textFieldProps.className = `${props.className || ''} summit-focus-visible`;
+    textFieldProps.className = `${props.className || ""} summit-focus-visible`;
   }
 
-  return (
-    <MuiTextField 
-      {...textFieldProps}
-    />
-  );
+  return <MuiTextField {...textFieldProps} />;
 };
 
-export const Select = ({ children, 'aria-label': ariaLabel, ...props }) => {
+export const Select = ({ children, "aria-label": ariaLabel, ...props }) => {
   const { keyboardNavigation } = useAccessibility();
-  
+
   const formControlProps = { ...props };
-  
+
   if (keyboardNavigation) {
-    formControlProps.className = `${props.className || ''} summit-focus-visible`;
+    formControlProps.className = `${props.className || ""} summit-focus-visible`;
   }
 
   return (
@@ -56,9 +52,5 @@ export const Select = ({ children, 'aria-label': ariaLabel, ...props }) => {
 };
 
 export const Option = ({ value, children }) => {
-  return (
-    <MuiMenuItem value={value}>
-      {children}
-    </MuiMenuItem>
-  );
+  return <MuiMenuItem value={value}>{children}</MuiMenuItem>;
 };

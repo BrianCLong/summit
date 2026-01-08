@@ -8,7 +8,13 @@
     "build": "tsc",
     "test": "jest"
   },
-  "keywords": ["etl", "elt", "data-pipeline", "transformation", "loading"],
+  "keywords": [
+    "etl",
+    "elt",
+    "data-pipeline",
+    "transformation",
+    "loading"
+  ],
   "license": "MIT",
   "dependencies": {
     "pg": "^8.11.3"

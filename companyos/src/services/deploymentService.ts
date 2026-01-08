@@ -3,7 +3,7 @@
  * Business logic for deployment tracking
  */
 
-import { Pool } from 'pg';
+import { Pool } from "pg";
 import {
   Deployment,
   CreateDeploymentInput,
@@ -12,7 +12,7 @@ import {
   DeploymentStatus,
   DeploymentStats,
   DeploymentEnvironment,
-} from '../models/deployment';
+} from "../models/deployment";
 
 export class DeploymentService {
   constructor(private db: Pool) {}
@@ -30,7 +30,7 @@ export class DeploymentService {
       input.serviceName,
       input.version,
       input.environment,
-      input.deploymentType || 'standard',
+      input.deploymentType || "standard",
       input.deployedBy,
       input.commitSha,
       input.githubRunId,
@@ -49,11 +49,7 @@ export class DeploymentService {
     return result.rows[0] ? this.mapRowToDeployment(result.rows[0]) : null;
   }
 
-  async listDeployments(
-    filter?: DeploymentFilter,
-    limit = 25,
-    offset = 0
-  ): Promise<Deployment[]> {
+  async listDeployments(filter?: DeploymentFilter, limit = 25, offset = 0): Promise<Deployment[]> {
     let query = `SELECT * FROM maestro.deployments WHERE 1=1`;
     const values: any[] = [];
     let paramIndex = 1;
@@ -129,10 +125,7 @@ export class DeploymentService {
     }));
   }
 
-  async updateDeployment(
-    id: string,
-    input: UpdateDeploymentInput
-  ): Promise<Deployment | null> {
+  async updateDeployment(id: string, input: UpdateDeploymentInput): Promise<Deployment | null> {
     const updates: string[] = [];
     const values: any[] = [];
     let paramIndex = 1;
@@ -142,11 +135,7 @@ export class DeploymentService {
       values.push(input.status);
 
       // Auto-set completed_at if status is terminal
-      if (
-        ['succeeded', 'failed', 'rolled_back', 'cancelled'].includes(
-          input.status
-        )
-      ) {
+      if (["succeeded", "failed", "rolled_back", "cancelled"].includes(input.status)) {
         updates.push(`completed_at = NOW()`);
       }
     }
@@ -181,7 +170,7 @@ export class DeploymentService {
 
     const query = `
       UPDATE maestro.deployments
-      SET ${updates.join(', ')}, updated_at = NOW()
+      SET ${updates.join(", ")}, updated_at = NOW()
       WHERE id = $${paramIndex}
       RETURNING *
     `;
@@ -197,10 +186,7 @@ export class DeploymentService {
     });
   }
 
-  async markFailed(
-    id: string,
-    errorMessage: string
-  ): Promise<Deployment | null> {
+  async markFailed(id: string, errorMessage: string): Promise<Deployment | null> {
     return this.updateDeployment(id, {
       status: DeploymentStatus.FAILED,
       errorMessage,
@@ -220,9 +206,9 @@ export class DeploymentService {
     // Create a rollback deployment
     const rollbackDeployment = await this.createDeployment({
       serviceName: original.serviceName,
-      version: 'rollback',
+      version: "rollback",
       environment: original.environment,
-      deploymentType: 'standard',
+      deploymentType: "standard",
       deployedBy: rolledBackBy,
       metadata: {
         rollbackOf: originalDeploymentId,

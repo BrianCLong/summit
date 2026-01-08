@@ -1,13 +1,13 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import yaml from 'js-yaml';
-import { globSync } from 'glob';
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import yaml from "js-yaml";
+import { globSync } from "glob";
 
 export type DependencyEdge = {
   from: string;
   to: string;
-  source: 'docker-compose' | 'env' | 'imports' | 'ci-workflow' | 'llm-pipeline';
+  source: "docker-compose" | "env" | "imports" | "ci-workflow" | "llm-pipeline";
   reason: string;
   weight: number;
 };
@@ -23,14 +23,14 @@ type ServiceContext = {
   path: string;
 };
 
-const serviceDirNamesToSkip = new Set(['__pycache__', '__init__.py']);
+const serviceDirNamesToSkip = new Set(["__pycache__", "__init__.py"]);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 function findRepoRoot(startDir: string): string {
   let current = startDir;
-  while (!fs.existsSync(path.join(current, 'package.json'))) {
+  while (!fs.existsSync(path.join(current, "package.json"))) {
     const parent = path.dirname(current);
     if (parent === current) {
       return startDir;
@@ -53,7 +53,7 @@ function readJsonFromString(content: string): unknown {
 }
 
 export function loadServiceContexts(): ServiceContext[] {
-  const servicesPath = path.join(repoRoot, 'services');
+  const servicesPath = path.join(repoRoot, "services");
   if (!fs.existsSync(servicesPath)) {
     return [];
   }
@@ -69,12 +69,14 @@ export function loadServiceContexts(): ServiceContext[] {
 }
 
 function extractComposeEdges(services: ServiceContext[], nodes: Set<string>): DependencyEdge[] {
-  const composeFiles = globSync(path.join(repoRoot, 'docker-compose*.yml'));
+  const composeFiles = globSync(path.join(repoRoot, "docker-compose*.yml"));
   const edges: DependencyEdge[] = [];
 
   composeFiles.forEach((composePath) => {
-    const content = fs.readFileSync(composePath, 'utf8');
-    const doc = yaml.load(content) as { services?: Record<string, { depends_on?: Record<string, unknown> | string[] }> };
+    const content = fs.readFileSync(composePath, "utf8");
+    const doc = yaml.load(content) as {
+      services?: Record<string, { depends_on?: Record<string, unknown> | string[] }>;
+    };
 
     if (!doc?.services) {
       return;
@@ -84,7 +86,7 @@ function extractComposeEdges(services: ServiceContext[], nodes: Set<string>): De
       nodes.add(serviceName);
       const dependsOn = Array.isArray(config?.depends_on)
         ? (config?.depends_on as string[])
-        : typeof config?.depends_on === 'object'
+        : typeof config?.depends_on === "object"
           ? Object.keys(config.depends_on as Record<string, unknown>)
           : [];
 
@@ -93,7 +95,7 @@ function extractComposeEdges(services: ServiceContext[], nodes: Set<string>): De
           edges.push({
             from: serviceName,
             to: dependency,
-            source: 'docker-compose',
+            source: "docker-compose",
             reason: path.basename(composePath),
             weight: 1,
           });
@@ -110,7 +112,7 @@ function extractComposeEdges(services: ServiceContext[], nodes: Set<string>): De
 function findServiceMentions(content: string, serviceNames: string[]): string[] {
   const mentions = new Set<string>();
   serviceNames.forEach((service) => {
-    const pattern = new RegExp(`\\b${service.replace(/[-/]/g, '[\\-/]')}\\b`, 'i');
+    const pattern = new RegExp(`\\b${service.replace(/[-/]/g, "[\\-/]")}\\b`, "i");
     if (pattern.test(content)) {
       mentions.add(service);
     }
@@ -123,9 +125,9 @@ function extractEnvEdges(services: ServiceContext[], nodes: Set<string>): Depend
   const serviceNames = services.map((service) => service.name);
 
   services.forEach((service) => {
-    const envFiles = globSync(path.join(service.path, '.env*'));
+    const envFiles = globSync(path.join(service.path, ".env*"));
     envFiles.forEach((envPath) => {
-      const content = fs.readFileSync(envPath, 'utf8');
+      const content = fs.readFileSync(envPath, "utf8");
       const mentions = findServiceMentions(content, serviceNames);
       mentions
         .filter((mention) => mention !== service.name)
@@ -133,7 +135,7 @@ function extractEnvEdges(services: ServiceContext[], nodes: Set<string>): Depend
           edges.push({
             from: service.name,
             to: mention,
-            source: 'env',
+            source: "env",
             reason: path.relative(repoRoot, envPath),
             weight: 0.5,
           });
@@ -149,11 +151,18 @@ function extractEnvEdges(services: ServiceContext[], nodes: Set<string>): Depend
 function extractImportEdges(services: ServiceContext[], nodes: Set<string>): DependencyEdge[] {
   const edges: DependencyEdge[] = [];
   const serviceNames = services.map((service) => service.name);
-  const fileExtensions = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.py'];
+  const fileExtensions = [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".py"];
 
   services.forEach((service) => {
-    const files = globSync(path.join(service.path, '**', '*.{ts,tsx,js,jsx,mjs,cjs,py}'), {
-      ignore: ['**/node_modules/**', '**/dist/**', '**/build/**', '**/.turbo/**', '**/.next/**', '**/__pycache__/**'],
+    const files = globSync(path.join(service.path, "**", "*.{ts,tsx,js,jsx,mjs,cjs,py}"), {
+      ignore: [
+        "**/node_modules/**",
+        "**/dist/**",
+        "**/build/**",
+        "**/.turbo/**",
+        "**/.next/**",
+        "**/__pycache__/**",
+      ],
     });
 
     files.forEach((filePath) => {
@@ -162,7 +171,7 @@ function extractImportEdges(services: ServiceContext[], nodes: Set<string>): Dep
         return;
       }
 
-      const content = fs.readFileSync(filePath, 'utf8');
+      const content = fs.readFileSync(filePath, "utf8");
 
       const importRegex = /from\s+['"]([^'"]+)['"]|require\(([^)]+)\)/g;
       let match: RegExpExecArray | null;
@@ -193,7 +202,7 @@ function extractImportEdges(services: ServiceContext[], nodes: Set<string>): Dep
         edges.push({
           from: service.name,
           to: mention,
-          source: 'imports',
+          source: "imports",
           reason: path.relative(repoRoot, filePath),
           weight: 1,
         });
@@ -207,12 +216,12 @@ function extractImportEdges(services: ServiceContext[], nodes: Set<string>): Dep
 }
 
 function extractWorkflowEdges(nodes: Set<string>, services: ServiceContext[]): DependencyEdge[] {
-  const workflowFiles = globSync(path.join(repoRoot, '.github', 'workflows', '*.yml'));
+  const workflowFiles = globSync(path.join(repoRoot, ".github", "workflows", "*.yml"));
   const serviceNames = services.map((service) => service.name);
   const edges: DependencyEdge[] = [];
 
   workflowFiles.forEach((workflowPath) => {
-    const content = fs.readFileSync(workflowPath, 'utf8');
+    const content = fs.readFileSync(workflowPath, "utf8");
     const mentions = findServiceMentions(content, serviceNames);
     if (mentions.length < 2) {
       return;
@@ -224,7 +233,7 @@ function extractWorkflowEdges(nodes: Set<string>, services: ServiceContext[]): D
           edges.push({
             from,
             to,
-            source: 'ci-workflow',
+            source: "ci-workflow",
             reason: path.relative(repoRoot, workflowPath),
             weight: 0.75,
           });
@@ -240,18 +249,27 @@ function extractWorkflowEdges(nodes: Set<string>, services: ServiceContext[]): D
 
 function extractPipelineEdges(nodes: Set<string>, services: ServiceContext[]): DependencyEdge[] {
   const serviceNames = services.map((service) => service.name);
-  const pipelines = globSync(path.join(repoRoot, '**', '*pipeline*.{yml,yaml,json}'), {
-    ignore: ['**/node_modules/**', '**/dist/**', '**/build/**', '**/.turbo/**', '**/.next/**', '**/venv/**'],
+  const pipelines = globSync(path.join(repoRoot, "**", "*pipeline*.{yml,yaml,json}"), {
+    ignore: [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/.turbo/**",
+      "**/.next/**",
+      "**/venv/**",
+    ],
   });
   const edges: DependencyEdge[] = [];
 
   pipelines.forEach((pipelinePath) => {
-    const content = fs.readFileSync(pipelinePath, 'utf8');
+    const content = fs.readFileSync(pipelinePath, "utf8");
     const mentions = findServiceMentions(content, serviceNames);
 
     let structured: unknown = null;
     try {
-      structured = pipelinePath.endsWith('.json') ? readJsonFromString(content) : yaml.load(content);
+      structured = pipelinePath.endsWith(".json")
+        ? readJsonFromString(content)
+        : yaml.load(content);
     } catch (error) {
       const docs = yaml.loadAll(content);
       structured = docs[0] ?? null;
@@ -259,9 +277,11 @@ function extractPipelineEdges(nodes: Set<string>, services: ServiceContext[]): D
     }
     const stageMentions = new Set<string>(mentions);
 
-    if (structured && typeof structured === 'object') {
+    if (structured && typeof structured === "object") {
       const structuredString = JSON.stringify(structured);
-      findServiceMentions(structuredString, serviceNames).forEach((mention) => stageMentions.add(mention));
+      findServiceMentions(structuredString, serviceNames).forEach((mention) =>
+        stageMentions.add(mention)
+      );
     }
 
     const mentionedServices = [...stageMentions];
@@ -275,7 +295,7 @@ function extractPipelineEdges(nodes: Set<string>, services: ServiceContext[]): D
           edges.push({
             from,
             to,
-            source: 'llm-pipeline',
+            source: "llm-pipeline",
             reason: path.relative(repoRoot, pipelinePath),
             weight: 0.9,
           });
@@ -316,22 +336,26 @@ export function buildDependencyGraph(): DependencyGraph {
 }
 
 export function toDot(graph: DependencyGraph): string {
-  const lines = ['digraph dependencies {', '  rankdir=LR;'];
+  const lines = ["digraph dependencies {", "  rankdir=LR;"];
   graph.edges.forEach((edge) => {
     const label = `${edge.source}: ${edge.reason}`.replace(/"/g, '\\"');
-    lines.push(`  "${edge.from}" -> "${edge.to}" [label="${label}", weight=${edge.weight.toFixed(2)}];`);
+    lines.push(
+      `  "${edge.from}" -> "${edge.to}" [label="${label}", weight=${edge.weight.toFixed(2)}];`
+    );
   });
-  lines.push('}');
-  return lines.join('\n');
+  lines.push("}");
+  return lines.join("\n");
 }
 
 export function toMermaid(graph: DependencyGraph): string {
-  const lines = ['graph TD'];
+  const lines = ["graph TD"];
   graph.edges.forEach((edge) => {
     const label = `${edge.source}`;
-    lines.push(`  ${edge.from.replace(/[-\s]/g, '_')} -->|${label}| ${edge.to.replace(/[-\s]/g, '_')}`);
+    lines.push(
+      `  ${edge.from.replace(/[-\s]/g, "_")} -->|${label}| ${edge.to.replace(/[-\s]/g, "_")}`
+    );
   });
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 export function buildRiskTable(graph: DependencyGraph): Array<{
@@ -370,7 +394,10 @@ export function buildRiskTable(graph: DependencyGraph): Array<{
   return table.sort((a, b) => b.riskScore - a.riskScore || b.inbound - a.inbound);
 }
 
-export function summarizeBlastRadius(graph: DependencyGraph, failedService: string): {
+export function summarizeBlastRadius(
+  graph: DependencyGraph,
+  failedService: string
+): {
   degraded: Array<{ service: string; distance: number }>;
   cascadeRisk: number;
 } {
@@ -409,13 +436,15 @@ export function summarizeBlastRadius(graph: DependencyGraph, failedService: stri
   const cascadeRisk = degraded.reduce((score, item) => score + Math.max(1, 3 - item.distance), 0);
 
   return {
-    degraded: degraded.sort((a, b) => a.distance - b.distance || a.service.localeCompare(b.service)),
+    degraded: degraded.sort(
+      (a, b) => a.distance - b.distance || a.service.localeCompare(b.service)
+    ),
     cascadeRisk,
   };
 }
 
 export function ensureArchitectureDir(): string {
-  const outputDir = path.join(repoRoot, 'docs', 'architecture');
+  const outputDir = path.join(repoRoot, "docs", "architecture");
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
   }
@@ -423,25 +452,35 @@ export function ensureArchitectureDir(): string {
 }
 
 export async function renderMermaidPng(diagram: string, outputPath: string): Promise<void> {
-  const encoded = Buffer.from(diagram).toString('base64');
+  const encoded = Buffer.from(diagram).toString("base64");
   const url = `https://mermaid.ink/img/${encoded}`;
   try {
     const response = await fetch(url);
 
     if (!response.ok) {
-      throw new Error(`Failed to render diagram via mermaid.ink: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Failed to render diagram via mermaid.ink: ${response.status} ${response.statusText}`
+      );
     }
 
     const buffer = Buffer.from(await response.arrayBuffer());
     await fs.promises.writeFile(outputPath, buffer);
   } catch (error) {
-    const placeholder = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/w8AAgMBgobqt/8AAAAASUVORK5CYII=', 'base64');
+    const placeholder = Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/w8AAgMBgobqt/8AAAAASUVORK5CYII=",
+      "base64"
+    );
     await fs.promises.writeFile(outputPath, placeholder);
-    console.warn(`Mermaid render failed (${(error as Error).message}). Wrote placeholder PNG to ${outputPath}.`);
+    console.warn(
+      `Mermaid render failed (${(error as Error).message}). Wrote placeholder PNG to ${outputPath}.`
+    );
   }
 }
 
-export function calculateComplexityDelta(current: DependencyGraph, baseline?: DependencyGraph): {
+export function calculateComplexityDelta(
+  current: DependencyGraph,
+  baseline?: DependencyGraph
+): {
   current: number;
   baseline: number;
   delta: number;
@@ -458,17 +497,17 @@ export function loadGraphFromFile(jsonPath: string): DependencyGraph | null {
   if (!fs.existsSync(jsonPath)) {
     return null;
   }
-  const content = fs.readFileSync(jsonPath, 'utf8');
+  const content = fs.readFileSync(jsonPath, "utf8");
   const parsed = JSON.parse(content) as DependencyGraph;
   return parsed;
 }
 
 export const paths = {
   repoRoot,
-  outputDir: path.join(repoRoot, 'docs', 'architecture'),
-  dependencyGraphJson: path.join(repoRoot, 'docs', 'architecture', 'dependency-graph.json'),
-  dependencyGraphDot: path.join(repoRoot, 'docs', 'architecture', 'dependency-graph.dot'),
-  dependencyGraphPng: path.join(repoRoot, 'docs', 'architecture', 'dependency-graph.png'),
-  blastRadiusPng: path.join(repoRoot, 'docs', 'architecture', 'blast-radius.png'),
-  dependencyRiskTable: path.join(repoRoot, 'docs', 'architecture', 'dependency-risk-table.md'),
+  outputDir: path.join(repoRoot, "docs", "architecture"),
+  dependencyGraphJson: path.join(repoRoot, "docs", "architecture", "dependency-graph.json"),
+  dependencyGraphDot: path.join(repoRoot, "docs", "architecture", "dependency-graph.dot"),
+  dependencyGraphPng: path.join(repoRoot, "docs", "architecture", "dependency-graph.png"),
+  blastRadiusPng: path.join(repoRoot, "docs", "architecture", "blast-radius.png"),
+  dependencyRiskTable: path.join(repoRoot, "docs", "architecture", "dependency-risk-table.md"),
 };

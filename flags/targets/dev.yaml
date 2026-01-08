@@ -1,9 +1,16 @@
 {
   "environment": "dev",
-  "flags": {
-    "feature.policy-guard": {"value": true, "percentage": 100, "tenants": {"allow": [], "deny": []}, "salt": "dev-policy"},
-    "feature.web.flag-hydration": {"value": true, "percentage": 100},
-    "feature.build.bazel": {"value": true, "percentage": 50, "salt": "dev-build"},
-    "feature.qos.override-api": {"value": true, "percentage": 100}
-  }
+  "flags":
+    {
+      "feature.policy-guard":
+        {
+          "value": true,
+          "percentage": 100,
+          "tenants": { "allow": [], "deny": [] },
+          "salt": "dev-policy",
+        },
+      "feature.web.flag-hydration": { "value": true, "percentage": 100 },
+      "feature.build.bazel": { "value": true, "percentage": 50, "salt": "dev-build" },
+      "feature.qos.override-api": { "value": true, "percentage": 100 },
+    },
 }

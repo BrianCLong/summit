@@ -11,7 +11,7 @@ import {
   TimePeriod,
   PopularAsset,
   Insight,
-} from '@intelgraph/data-catalog';
+} from "@intelgraph/data-catalog";
 
 export interface IAnalyticsStore {
   getCoverageMetrics(): Promise<CoverageMetrics>;
@@ -123,19 +123,23 @@ export class AnalyticsReporter {
     const recommendations: string[] = [];
 
     if (coverage.coveragePercentage < 50) {
-      recommendations.push('Improve documentation coverage - less than 50% of assets are documented');
+      recommendations.push(
+        "Improve documentation coverage - less than 50% of assets are documented"
+      );
     }
 
     if (coverage.assetsWithOwners < coverage.totalAssets * 0.8) {
-      recommendations.push('Assign owners to assets - over 20% of assets lack ownership');
+      recommendations.push("Assign owners to assets - over 20% of assets lack ownership");
     }
 
     if (coverage.certifiedAssets < coverage.totalAssets * 0.3) {
-      recommendations.push('Increase asset certification - less than 30% of assets are certified');
+      recommendations.push("Increase asset certification - less than 30% of assets are certified");
     }
 
     if (coverage.assetsWithLineage < coverage.totalAssets * 0.4) {
-      recommendations.push('Enhance lineage tracking - over 60% of assets lack lineage information');
+      recommendations.push(
+        "Enhance lineage tracking - over 60% of assets lack lineage information"
+      );
     }
 
     return {

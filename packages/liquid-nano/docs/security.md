@@ -11,14 +11,14 @@ The pilot enables conservative defaults while outlining additional controls for 
 
 ## Recommended Enhancements
 
-| Area            | Action                                                         |
-| --------------- | -------------------------------------------------------------- |
-| Secrets         | Mount via Kubernetes Secrets or SSM; never bake into images.   |
-| TLS             | Terminate TLS at Ingress and enforce mTLS for upstream calls.  |
-| SBOM            | Generate SBOM using `npm exec -- sbom-tool` before releases.   |
-| Runtime User    | Drop privileges by using a non-root user in Dockerfile.       |
-| Network Policy  | Apply `NetworkPolicy` manifest to restrict egress to OTLP only.|
-| Supply Chain    | Enable container signing (Cosign) and verify in CI pipelines. |
+| Area           | Action                                                          |
+| -------------- | --------------------------------------------------------------- |
+| Secrets        | Mount via Kubernetes Secrets or SSM; never bake into images.    |
+| TLS            | Terminate TLS at Ingress and enforce mTLS for upstream calls.   |
+| SBOM           | Generate SBOM using `npm exec -- sbom-tool` before releases.    |
+| Runtime User   | Drop privileges by using a non-root user in Dockerfile.         |
+| Network Policy | Apply `NetworkPolicy` manifest to restrict egress to OTLP only. |
+| Supply Chain   | Enable container signing (Cosign) and verify in CI pipelines.   |
 
 ## Incident Response
 

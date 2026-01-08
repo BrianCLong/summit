@@ -10,36 +10,36 @@ on:
   workflow_call:
     inputs:
       service:
-        description: 'Service name to deploy'
+        description: "Service name to deploy"
         required: true
         type: string
       version:
-        description: 'Version/SHA to deploy'
+        description: "Version/SHA to deploy"
         required: true
         type: string
       environment:
-        description: 'Target environment'
+        description: "Target environment"
         required: true
         type: string
-        default: 'production'
+        default: "production"
       emergency_override:
-        description: 'Emergency override flag'
+        description: "Emergency override flag"
         required: false
         type: boolean
         default: false
       override_reason:
-        description: 'Reason for emergency override'
+        description: "Reason for emergency override"
         required: false
         type: string
     outputs:
       approved:
-        description: 'Whether release is approved'
+        description: "Whether release is approved"
         value: ${{ jobs.evaluate-gates.outputs.approved }}
       strategy:
-        description: 'Recommended deployment strategy'
+        description: "Recommended deployment strategy"
         value: ${{ jobs.evaluate-gates.outputs.strategy }}
       violations:
-        description: 'List of gate violations'
+        description: "List of gate violations"
         value: ${{ jobs.evaluate-gates.outputs.violations }}
 
 jobs:

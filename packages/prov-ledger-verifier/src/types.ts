@@ -24,7 +24,7 @@ export interface ClaimRecord {
 }
 
 export interface HashTree {
-  algorithm: 'sha256';
+  algorithm: "sha256";
   leaves: Array<{ id: string; hash: string }>;
   root: string;
 }
@@ -33,7 +33,7 @@ export interface BundleManifest {
   version: string;
   bundleId: string;
   generatedAt: string;
-  hashAlgorithm: 'sha256';
+  hashAlgorithm: "sha256";
   evidence: EvidenceRecord[];
   claims?: ClaimRecord[];
   hashTree?: HashTree;

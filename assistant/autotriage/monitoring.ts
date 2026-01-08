@@ -28,7 +28,7 @@ export interface ErrorEvent {
   operation: string;
   error: string;
   context?: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   recoverable: boolean;
 }
 
@@ -120,7 +120,7 @@ export class TriageMonitor {
 
     if (this.verbose) {
       console.log(
-        `[MONITOR] Completed: ${metric.operation} in ${metric.duration}ms (${metric.itemsProcessed} items, ${metric.errorsEncountered} errors)`,
+        `[MONITOR] Completed: ${metric.operation} in ${metric.duration}ms (${metric.itemsProcessed} items, ${metric.errorsEncountered} errors)`
       );
     }
 
@@ -141,8 +141,8 @@ export class TriageMonitor {
     operation: string,
     error: string | Error,
     context?: string,
-    severity: 'low' | 'medium' | 'high' | 'critical' = 'medium',
-    recoverable: boolean = true,
+    severity: "low" | "medium" | "high" | "critical" = "medium",
+    recoverable: boolean = true
   ): void {
     const errorEvent: ErrorEvent = {
       timestamp: Date.now(),
@@ -157,7 +157,7 @@ export class TriageMonitor {
 
     if (this.verbose) {
       console.warn(
-        `[MONITOR] Error [${severity}]: ${operation} - ${errorEvent.error}${context ? ` (${context})` : ''}`,
+        `[MONITOR] Error [${severity}]: ${operation} - ${errorEvent.error}${context ? ` (${context})` : ""}`
       );
     }
 
@@ -177,12 +177,12 @@ export class TriageMonitor {
     operation: string,
     itemsAffected: number,
     details: Record<string, any>,
-    user?: string,
+    user?: string
   ): void {
     const auditLog: AuditLog = {
       timestamp: Date.now(),
       operation,
-      user: user || process.env.USER || 'unknown',
+      user: user || process.env.USER || "unknown",
       itemsAffected,
       details,
     };
@@ -190,9 +190,7 @@ export class TriageMonitor {
     this.auditLogs.push(auditLog);
 
     if (this.verbose) {
-      console.log(
-        `[MONITOR] Audit: ${operation} by ${auditLog.user} (${itemsAffected} items)`,
-      );
+      console.log(`[MONITOR] Audit: ${operation} by ${auditLog.user} (${itemsAffected} items)`);
     }
 
     // Emit audit log if handler is configured
@@ -262,8 +260,8 @@ export class TriageMonitor {
    * @param format - Export format
    * @returns Formatted monitoring data
    */
-  export(format: 'json' | 'prometheus' = 'json'): string {
-    if (format === 'prometheus') {
+  export(format: "json" | "prometheus" = "json"): string {
+    if (format === "prometheus") {
       return this.exportPrometheus();
     }
 
@@ -276,7 +274,7 @@ export class TriageMonitor {
         exportedAt: new Date().toISOString(),
       },
       null,
-      2,
+      2
     );
   }
 
@@ -287,32 +285,32 @@ export class TriageMonitor {
     const summary = this.getSummary();
     const lines: string[] = [];
 
-    lines.push('# HELP autotriage_operations_total Total number of triage operations');
-    lines.push('# TYPE autotriage_operations_total counter');
+    lines.push("# HELP autotriage_operations_total Total number of triage operations");
+    lines.push("# TYPE autotriage_operations_total counter");
     lines.push(`autotriage_operations_total ${summary.totalOperations}`);
-    lines.push('');
+    lines.push("");
 
-    lines.push('# HELP autotriage_items_processed_total Total number of items processed');
-    lines.push('# TYPE autotriage_items_processed_total counter');
+    lines.push("# HELP autotriage_items_processed_total Total number of items processed");
+    lines.push("# TYPE autotriage_items_processed_total counter");
     lines.push(`autotriage_items_processed_total ${summary.totalItemsProcessed}`);
-    lines.push('');
+    lines.push("");
 
-    lines.push('# HELP autotriage_errors_total Total number of errors encountered');
-    lines.push('# TYPE autotriage_errors_total counter');
+    lines.push("# HELP autotriage_errors_total Total number of errors encountered");
+    lines.push("# TYPE autotriage_errors_total counter");
     lines.push(`autotriage_errors_total ${summary.totalErrors}`);
-    lines.push('');
+    lines.push("");
 
-    lines.push('# HELP autotriage_operation_duration_ms Operation duration in milliseconds');
-    lines.push('# TYPE autotriage_operation_duration_ms gauge');
+    lines.push("# HELP autotriage_operation_duration_ms Operation duration in milliseconds");
+    lines.push("# TYPE autotriage_operation_duration_ms gauge");
     lines.push(`autotriage_operation_duration_ms ${summary.averageDuration}`);
-    lines.push('');
+    lines.push("");
 
-    lines.push('# HELP autotriage_error_rate Error rate per item processed');
-    lines.push('# TYPE autotriage_error_rate gauge');
+    lines.push("# HELP autotriage_error_rate Error rate per item processed");
+    lines.push("# TYPE autotriage_error_rate gauge");
     lines.push(`autotriage_error_rate ${summary.errorRate}`);
-    lines.push('');
+    lines.push("");
 
-    return lines.join('\n');
+    return lines.join("\n");
   }
 
   /**
@@ -353,11 +351,7 @@ export function getMonitor(): TriageMonitor {
  * @param operationName - Name of the operation
  */
 export function monitored(operationName?: string) {
-  return function (
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor,
-  ) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
     const monitor = getMonitor();
     const opName = operationName || `${target.constructor.name}.${propertyKey}`;
@@ -372,7 +366,7 @@ export function monitored(operationName?: string) {
         });
         return result;
       } catch (error: any) {
-        monitor.recordError(opName, error, undefined, 'high', false);
+        monitor.recordError(opName, error, undefined, "high", false);
         monitor.endOperation(operationId, { errorsEncountered: 1 });
         throw error;
       }

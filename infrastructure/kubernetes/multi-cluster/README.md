@@ -13,6 +13,7 @@ This directory contains Kubernetes configurations for multi-cluster deployment a
 ### Prerequisites
 
 1. Install required tools:
+
 ```bash
 # kubectl
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -25,6 +26,7 @@ curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 ```
 
 2. Configure kubectl contexts for each cluster:
+
 ```bash
 # AWS EKS
 aws eks update-kubeconfig --name summit-production-eks --region us-east-1 --alias eks-primary

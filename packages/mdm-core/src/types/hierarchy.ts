@@ -18,15 +18,15 @@ export interface Hierarchy {
 }
 
 export type HierarchyType =
-  | 'organizational'
-  | 'product_taxonomy'
-  | 'location_tree'
-  | 'chart_of_accounts'
-  | 'classification'
-  | 'time_based'
-  | 'custom';
+  | "organizational"
+  | "product_taxonomy"
+  | "location_tree"
+  | "chart_of_accounts"
+  | "classification"
+  | "time_based"
+  | "custom";
 
-export type HierarchyStatus = 'active' | 'draft' | 'deprecated' | 'archived';
+export type HierarchyStatus = "active" | "draft" | "deprecated" | "archived";
 
 export interface HierarchyNode {
   id: string;
@@ -56,12 +56,12 @@ export interface HierarchyRelationship {
 }
 
 export type RelationshipType =
-  | 'parent_child'
-  | 'reports_to'
-  | 'belongs_to'
-  | 'part_of'
-  | 'categorized_as'
-  | 'custom';
+  | "parent_child"
+  | "reports_to"
+  | "belongs_to"
+  | "part_of"
+  | "categorized_as"
+  | "custom";
 
 export interface HierarchyMetadata {
   createdAt: Date;
@@ -86,13 +86,13 @@ export interface HierarchyValidationRule {
 }
 
 export type HierarchyValidationType =
-  | 'max_depth'
-  | 'max_children'
-  | 'no_cycles'
-  | 'single_parent'
-  | 'attribute_inheritance'
-  | 'temporal_consistency'
-  | 'custom';
+  | "max_depth"
+  | "max_children"
+  | "no_cycles"
+  | "single_parent"
+  | "attribute_inheritance"
+  | "temporal_consistency"
+  | "custom";
 
 export interface HierarchyAggregation {
   id: string;
@@ -101,13 +101,13 @@ export interface HierarchyAggregation {
   aggregationType: AggregationType;
   sourceField: string;
   targetField: string;
-  rollupDirection: 'bottom_up' | 'top_down';
+  rollupDirection: "bottom_up" | "top_down";
   aggregationFunction: AggregationFunction;
 }
 
-export type AggregationType = 'sum' | 'average' | 'count' | 'min' | 'max' | 'custom';
+export type AggregationType = "sum" | "average" | "count" | "min" | "max" | "custom";
 
-export type AggregationFunction = 'sum' | 'avg' | 'count' | 'min' | 'max' | 'concat' | 'custom';
+export type AggregationFunction = "sum" | "avg" | "count" | "min" | "max" | "concat" | "custom";
 
 export interface NodeMove {
   nodeId: string;
@@ -132,7 +132,7 @@ export interface HierarchyVersion {
 }
 
 export interface HierarchyChange {
-  changeType: 'add_node' | 'remove_node' | 'move_node' | 'update_node' | 'restructure';
+  changeType: "add_node" | "remove_node" | "move_node" | "update_node" | "restructure";
   nodeId: string;
   oldValue?: unknown;
   newValue?: unknown;
@@ -141,14 +141,14 @@ export interface HierarchyChange {
 
 export interface HierarchyVisualization {
   hierarchyId: string;
-  visualizationType: 'tree' | 'sunburst' | 'treemap' | 'network';
+  visualizationType: "tree" | "sunburst" | "treemap" | "network";
   layout: LayoutConfig;
   styling: StyleConfig;
   interactivity: InteractivityConfig;
 }
 
 export interface LayoutConfig {
-  orientation: 'vertical' | 'horizontal' | 'radial';
+  orientation: "vertical" | "horizontal" | "radial";
   spacing: number;
   nodeSize: number;
   collapseDepth?: number;
@@ -156,8 +156,8 @@ export interface LayoutConfig {
 
 export interface StyleConfig {
   colorScheme: string;
-  nodeShape: 'circle' | 'rectangle' | 'custom';
-  edgeStyle: 'straight' | 'curved' | 'stepped';
+  nodeShape: "circle" | "rectangle" | "custom";
+  edgeStyle: "straight" | "curved" | "stepped";
   labels: boolean;
 }
 
@@ -172,7 +172,7 @@ export interface InteractivityConfig {
 
 export interface TemporalHierarchy {
   hierarchyId: string;
-  temporalType: 'valid_time' | 'transaction_time' | 'bitemporal';
+  temporalType: "valid_time" | "transaction_time" | "bitemporal";
   versions: HierarchyVersion[];
   currentVersionId: string;
 }

@@ -1,16 +1,21 @@
 # Category Narrative & Positioning
 
 ## 1. The Wedge
+
 **The only intelligence platform that guarantees provable evidence for every AI insight, eliminating hallucination risk in high-stakes operations.**
 
 ## 2. Category Narrative
-*(Coming soon)*
+
+_(Coming soon)_
 
 ## 3. Messaging Hierarchy
-*(Coming soon)*
+
+_(Coming soon)_
 
 ## 4. Anti-Positioning
-*(Coming soon)*
+
+_(Coming soon)_
 
 ## 5. Competitive Battlecards
-*(Coming soon)*
+
+_(Coming soon)_

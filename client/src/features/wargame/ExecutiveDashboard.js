@@ -1,5 +1,5 @@
-import React from 'react';
-import { Typography, Box, Card, CardContent } from '@mui/material';
+import React from "react";
+import { Typography, Box, Card, CardContent } from "@mui/material";
 
 const ExecutiveDashboard = () => {
   return (

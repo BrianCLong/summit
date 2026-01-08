@@ -12,6 +12,7 @@
 This document defines the **GA-ready canonical graph model** and **entity resolution (ER) pipeline** for Summit/IntelGraph, aligned with the Council Wishbook's entity/relationship ontology and the MVP-2/GA PRD requirements.
 
 **Key Outcomes:**
+
 - Single authoritative schema layer spanning GraphQL, Neo4j, PostgreSQL, and TypeScript
 - Explainable ER pipeline with deterministic + probabilistic scoring, manual review queues
 - Full provenance for all merge/split decisions
@@ -31,28 +32,29 @@ PERSON, ORGANIZATION, LOCATION, DEVICE, EMAIL, PHONE, IP_ADDRESS, DOMAIN, URL, F
 
 **GAPS IDENTIFIED:**
 
-| Missing Entity Type | Priority | Notes |
-|---------------------|----------|-------|
-| Vehicle | HIGH | Mentioned in Wishbook, needed for geo-temporal tracking |
-| Infrastructure | HIGH | Critical for Hannibal/Budanov use cases (logistics) |
-| FinancialInstrument | HIGH | Distinct from ACCOUNT, needed for AML |
-| Indicator | HIGH | Already in Neo4j schema, missing from GraphQL |
-| Claim | CRITICAL | Core to provenance model (FR-D) |
-| Case | CRITICAL | Already in Neo4j, missing from canonical layer |
-| Narrative | MEDIUM | Hypothesis workbench requirement (FR-C) |
-| Campaign | MEDIUM | Threat intelligence tracking |
-| License | CRITICAL | Authority/license compiler (GA FR-I) |
-| Authority | CRITICAL | Legal basis tracking (GA FR-I) |
-| Sensor | LOW | Telemetry sources |
-| Runbook | MEDIUM | Operational procedures |
-| Evidence | CRITICAL | Provenance & claim ledger (FR-D) |
-| Hypothesis | CRITICAL | ACH workbench (FR-C) |
-| Communication | N/A | Can model as entity type or combine EMAIL/PHONE |
+| Missing Entity Type | Priority | Notes                                                   |
+| ------------------- | -------- | ------------------------------------------------------- |
+| Vehicle             | HIGH     | Mentioned in Wishbook, needed for geo-temporal tracking |
+| Infrastructure      | HIGH     | Critical for Hannibal/Budanov use cases (logistics)     |
+| FinancialInstrument | HIGH     | Distinct from ACCOUNT, needed for AML                   |
+| Indicator           | HIGH     | Already in Neo4j schema, missing from GraphQL           |
+| Claim               | CRITICAL | Core to provenance model (FR-D)                         |
+| Case                | CRITICAL | Already in Neo4j, missing from canonical layer          |
+| Narrative           | MEDIUM   | Hypothesis workbench requirement (FR-C)                 |
+| Campaign            | MEDIUM   | Threat intelligence tracking                            |
+| License             | CRITICAL | Authority/license compiler (GA FR-I)                    |
+| Authority           | CRITICAL | Legal basis tracking (GA FR-I)                          |
+| Sensor              | LOW      | Telemetry sources                                       |
+| Runbook             | MEDIUM   | Operational procedures                                  |
+| Evidence            | CRITICAL | Provenance & claim ledger (FR-D)                        |
+| Hypothesis          | CRITICAL | ACH workbench (FR-C)                                    |
+| Communication       | N/A      | Can model as entity type or combine EMAIL/PHONE         |
 
 **Relationship Gaps:**
 
 Current: 18 types (good coverage)
 Missing semantic richness for:
+
 - Evidence chains (SUPPORTS, CONTRADICTS, DERIVED_FROM)
 - Authority relationships (AUTHORIZED_BY, GOVERNED_BY)
 - Temporal sequences (PRECEDES, FOLLOWS, CONCURRENT_WITH)
@@ -60,6 +62,7 @@ Missing semantic richness for:
 ### 1.2 Schema Layer Divergences
 
 **Problem:** Multiple schema definitions exist without clear authority:
+
 - GraphQL: 15 entity types in `crudSchema.ts`
 - Neo4j: Comprehensive constraints but underspecified types
 - TypeScript: Multiple interfaces (EntityRepo, AML, GraphStore) with different shapes
@@ -119,132 +122,132 @@ Missing semantic richness for:
 
 export interface CanonicalEntityBase {
   // Identity
-  id: string;                          // UUID primary key
-  canonicalId?: string;                // ER master entity ID
-  tenantId: string;                    // Multi-tenant isolation
+  id: string; // UUID primary key
+  canonicalId?: string; // ER master entity ID
+  tenantId: string; // Multi-tenant isolation
 
   // Core attributes
-  type: CanonicalEntityType;           // Enum of 23 types
-  label: string;                       // Display name
-  description?: string;                // Human-readable description
+  type: CanonicalEntityType; // Enum of 23 types
+  label: string; // Display name
+  description?: string; // Human-readable description
 
   // Metadata
-  properties: Record<string, any>;     // Type-specific properties
+  properties: Record<string, any>; // Type-specific properties
   customMetadata?: Record<string, any>; // User extensions
 
   // Provenance & Quality
-  confidence: number;                  // 0.0-1.0
-  source: string;                      // Source system/connector
-  provenance: ProvenanceChain;         // Full lineage
+  confidence: number; // 0.0-1.0
+  source: string; // Source system/connector
+  provenance: ProvenanceChain; // Full lineage
 
   // Policy & Governance
-  policyLabels: PolicyLabels;          // 7 mandatory labels
+  policyLabels: PolicyLabels; // 7 mandatory labels
 
   // Temporal (Bitemporal)
-  validFrom: Date;                     // Business time start
-  validTo?: Date;                      // Business time end
-  recordedAt: Date;                    // System time
+  validFrom: Date; // Business time start
+  validTo?: Date; // Business time end
+  recordedAt: Date; // System time
 
   // Audit
   createdAt: Date;
   updatedAt: Date;
   createdBy: string;
   updatedBy?: string;
-  version: number;                     // Optimistic locking
+  version: number; // Optimistic locking
 
   // Investigation context
-  investigationId?: string;            // Optional case association
-  caseId?: string;                     // Optional case association
+  investigationId?: string; // Optional case association
+  caseId?: string; // Optional case association
 }
 
 export enum CanonicalEntityType {
-  PERSON = 'PERSON',
-  ORGANIZATION = 'ORGANIZATION',
-  LOCATION = 'LOCATION',
-  ASSET = 'ASSET',
-  ACCOUNT = 'ACCOUNT',
-  EVENT = 'EVENT',
-  DOCUMENT = 'DOCUMENT',
-  COMMUNICATION = 'COMMUNICATION',
-  DEVICE = 'DEVICE',
-  VEHICLE = 'VEHICLE',
-  INFRASTRUCTURE = 'INFRASTRUCTURE',
-  FINANCIAL_INSTRUMENT = 'FINANCIAL_INSTRUMENT',
-  INDICATOR = 'INDICATOR',
-  CLAIM = 'CLAIM',
-  CASE = 'CASE',
-  NARRATIVE = 'NARRATIVE',
-  CAMPAIGN = 'CAMPAIGN',
-  LICENSE = 'LICENSE',
-  AUTHORITY = 'AUTHORITY',
-  SENSOR = 'SENSOR',
-  RUNBOOK = 'RUNBOOK',
-  EVIDENCE = 'EVIDENCE',
-  HYPOTHESIS = 'HYPOTHESIS',
+  PERSON = "PERSON",
+  ORGANIZATION = "ORGANIZATION",
+  LOCATION = "LOCATION",
+  ASSET = "ASSET",
+  ACCOUNT = "ACCOUNT",
+  EVENT = "EVENT",
+  DOCUMENT = "DOCUMENT",
+  COMMUNICATION = "COMMUNICATION",
+  DEVICE = "DEVICE",
+  VEHICLE = "VEHICLE",
+  INFRASTRUCTURE = "INFRASTRUCTURE",
+  FINANCIAL_INSTRUMENT = "FINANCIAL_INSTRUMENT",
+  INDICATOR = "INDICATOR",
+  CLAIM = "CLAIM",
+  CASE = "CASE",
+  NARRATIVE = "NARRATIVE",
+  CAMPAIGN = "CAMPAIGN",
+  LICENSE = "LICENSE",
+  AUTHORITY = "AUTHORITY",
+  SENSOR = "SENSOR",
+  RUNBOOK = "RUNBOOK",
+  EVIDENCE = "EVIDENCE",
+  HYPOTHESIS = "HYPOTHESIS",
 }
 
 export interface PolicyLabels {
-  origin: string;                      // Source attribution
-  sensitivity: SensitivityLevel;       // Classification
-  clearance: ClearanceLevel;           // Access requirement
-  legalBasis: string;                  // Authority for processing
-  needToKnow: string[];                // Compartmentation tags
-  purposeLimitation: string[];         // Allowable uses
-  retentionClass: RetentionClass;      // Lifecycle tier
+  origin: string; // Source attribution
+  sensitivity: SensitivityLevel; // Classification
+  clearance: ClearanceLevel; // Access requirement
+  legalBasis: string; // Authority for processing
+  needToKnow: string[]; // Compartmentation tags
+  purposeLimitation: string[]; // Allowable uses
+  retentionClass: RetentionClass; // Lifecycle tier
 }
 
 export enum SensitivityLevel {
-  PUBLIC = 'PUBLIC',
-  INTERNAL = 'INTERNAL',
-  CONFIDENTIAL = 'CONFIDENTIAL',
-  RESTRICTED = 'RESTRICTED',
-  TOP_SECRET = 'TOP_SECRET',
+  PUBLIC = "PUBLIC",
+  INTERNAL = "INTERNAL",
+  CONFIDENTIAL = "CONFIDENTIAL",
+  RESTRICTED = "RESTRICTED",
+  TOP_SECRET = "TOP_SECRET",
 }
 
 export enum ClearanceLevel {
-  PUBLIC = 'PUBLIC',
-  AUTHORIZED = 'AUTHORIZED',
-  CONFIDENTIAL = 'CONFIDENTIAL',
-  SECRET = 'SECRET',
-  TOP_SECRET = 'TOP_SECRET',
+  PUBLIC = "PUBLIC",
+  AUTHORIZED = "AUTHORIZED",
+  CONFIDENTIAL = "CONFIDENTIAL",
+  SECRET = "SECRET",
+  TOP_SECRET = "TOP_SECRET",
 }
 
 export enum RetentionClass {
-  TRANSIENT = 'TRANSIENT',         // 30 days
-  SHORT_TERM = 'SHORT_TERM',       // 1 year
-  MEDIUM_TERM = 'MEDIUM_TERM',     // 5 years
-  LONG_TERM = 'LONG_TERM',         // 10 years
-  PERMANENT = 'PERMANENT',          // Indefinite
-  LEGAL_HOLD = 'LEGAL_HOLD',       // Immutable until released
+  TRANSIENT = "TRANSIENT", // 30 days
+  SHORT_TERM = "SHORT_TERM", // 1 year
+  MEDIUM_TERM = "MEDIUM_TERM", // 5 years
+  LONG_TERM = "LONG_TERM", // 10 years
+  PERMANENT = "PERMANENT", // Indefinite
+  LEGAL_HOLD = "LEGAL_HOLD", // Immutable until released
 }
 
 export interface ProvenanceChain {
-  sourceId: string;                    // Originating connector/system
-  assertions: ProvenanceAssertion[];   // Chain of transforms
+  sourceId: string; // Originating connector/system
+  assertions: ProvenanceAssertion[]; // Chain of transforms
   verificationStatus: VerificationStatus;
-  trustScore: number;                  // 0.0-1.0
+  trustScore: number; // 0.0-1.0
 }
 
 export interface ProvenanceAssertion {
   id: string;
   timestamp: Date;
-  actor: string;                       // User or service
-  action: 'INGEST' | 'TRANSFORM' | 'ENRICH' | 'MERGE' | 'SPLIT' | 'VALIDATE';
-  input: string[];                     // Input entity/doc IDs
-  output: string[];                    // Output entity IDs
-  method: string;                      // Algorithm/rule name
-  parameters: Record<string, any>;     // Reproducibility params
-  modelVersion?: string;               // ML model version if applicable
+  actor: string; // User or service
+  action: "INGEST" | "TRANSFORM" | "ENRICH" | "MERGE" | "SPLIT" | "VALIDATE";
+  input: string[]; // Input entity/doc IDs
+  output: string[]; // Output entity IDs
+  method: string; // Algorithm/rule name
+  parameters: Record<string, any>; // Reproducibility params
+  modelVersion?: string; // ML model version if applicable
   confidence: number;
-  evidence?: string[];                 // Supporting doc IDs
+  evidence?: string[]; // Supporting doc IDs
 }
 
 export enum VerificationStatus {
-  UNVERIFIED = 'UNVERIFIED',
-  PARTIAL = 'PARTIAL',
-  VERIFIED = 'VERIFIED',
-  DISPUTED = 'DISPUTED',
-  INVALIDATED = 'INVALIDATED',
+  UNVERIFIED = "UNVERIFIED",
+  PARTIAL = "PARTIAL",
+  VERIFIED = "VERIFIED",
+  DISPUTED = "DISPUTED",
+  INVALIDATED = "INVALIDATED",
 }
 ```
 
@@ -266,7 +269,7 @@ export interface CanonicalRelationship {
   // Graph topology
   fromEntityId: string;
   toEntityId: string;
-  directed: boolean;                   // True for most, false for symmetric
+  directed: boolean; // True for most, false for symmetric
 
   // Metadata
   properties: Record<string, any>;
@@ -284,8 +287,8 @@ export interface CanonicalRelationship {
   validFrom: Date;
   validTo?: Date;
   recordedAt: Date;
-  since?: Date;                        // Relationship start (business)
-  until?: Date;                        // Relationship end (business)
+  since?: Date; // Relationship start (business)
+  until?: Date; // Relationship end (business)
 
   // Audit
   createdAt: Date;
@@ -301,45 +304,45 @@ export interface CanonicalRelationship {
 
 export enum CanonicalRelationshipType {
   // Core relationships (existing)
-  CONNECTED_TO = 'CONNECTED_TO',
-  OWNS = 'OWNS',
-  WORKS_FOR = 'WORKS_FOR',
-  LOCATED_AT = 'LOCATED_AT',
-  MENTIONS = 'MENTIONS',
-  COMMUNICATES_WITH = 'COMMUNICATES_WITH',
-  TRANSACTED_WITH = 'TRANSACTED_WITH',
-  ACCESSED = 'ACCESSED',
-  CREATED = 'CREATED',
-  MODIFIED = 'MODIFIED',
-  RELATED_TO = 'RELATED_TO',
-  MEMBER_OF = 'MEMBER_OF',
-  MANAGES = 'MANAGES',
-  REPORTS_TO = 'REPORTS_TO',
-  SUBSIDIARY_OF = 'SUBSIDIARY_OF',
-  PARTNER_OF = 'PARTNER_OF',
-  COMPETITOR_OF = 'COMPETITOR_OF',
-  SIMILAR_TO = 'SIMILAR_TO',
+  CONNECTED_TO = "CONNECTED_TO",
+  OWNS = "OWNS",
+  WORKS_FOR = "WORKS_FOR",
+  LOCATED_AT = "LOCATED_AT",
+  MENTIONS = "MENTIONS",
+  COMMUNICATES_WITH = "COMMUNICATES_WITH",
+  TRANSACTED_WITH = "TRANSACTED_WITH",
+  ACCESSED = "ACCESSED",
+  CREATED = "CREATED",
+  MODIFIED = "MODIFIED",
+  RELATED_TO = "RELATED_TO",
+  MEMBER_OF = "MEMBER_OF",
+  MANAGES = "MANAGES",
+  REPORTS_TO = "REPORTS_TO",
+  SUBSIDIARY_OF = "SUBSIDIARY_OF",
+  PARTNER_OF = "PARTNER_OF",
+  COMPETITOR_OF = "COMPETITOR_OF",
+  SIMILAR_TO = "SIMILAR_TO",
 
   // Evidence & provenance (NEW)
-  SUPPORTS = 'SUPPORTS',               // Evidence → Claim
-  CONTRADICTS = 'CONTRADICTS',         // Evidence → Claim
-  DERIVED_FROM = 'DERIVED_FROM',       // Claim → Source
-  CITES = 'CITES',                     // Narrative → Evidence
+  SUPPORTS = "SUPPORTS", // Evidence → Claim
+  CONTRADICTS = "CONTRADICTS", // Evidence → Claim
+  DERIVED_FROM = "DERIVED_FROM", // Claim → Source
+  CITES = "CITES", // Narrative → Evidence
 
   // Authority & governance (NEW)
-  AUTHORIZED_BY = 'AUTHORIZED_BY',     // Operation → Authority
-  GOVERNED_BY = 'GOVERNED_BY',         // Entity → Policy/License
-  REQUIRES = 'REQUIRES',               // Action → Clearance
+  AUTHORIZED_BY = "AUTHORIZED_BY", // Operation → Authority
+  GOVERNED_BY = "GOVERNED_BY", // Entity → Policy/License
+  REQUIRES = "REQUIRES", // Action → Clearance
 
   // Temporal sequences (NEW)
-  PRECEDES = 'PRECEDES',               // Event → Event
-  FOLLOWS = 'FOLLOWS',                 // Event → Event
-  CONCURRENT_WITH = 'CONCURRENT_WITH', // Event → Event
+  PRECEDES = "PRECEDES", // Event → Event
+  FOLLOWS = "FOLLOWS", // Event → Event
+  CONCURRENT_WITH = "CONCURRENT_WITH", // Event → Event
 
   // Hypothesis relationships (NEW)
-  EXPLAINS = 'EXPLAINS',               // Hypothesis → Observation
-  ALTERNATIVE_TO = 'ALTERNATIVE_TO',   // Hypothesis → Hypothesis
-  REFUTES = 'REFUTES',                 // Evidence → Hypothesis
+  EXPLAINS = "EXPLAINS", // Hypothesis → Observation
+  ALTERNATIVE_TO = "ALTERNATIVE_TO", // Hypothesis → Hypothesis
+  REFUTES = "REFUTES", // Evidence → Hypothesis
 }
 ```
 
@@ -414,6 +417,7 @@ export enum CanonicalRelationshipType {
 ### 3.2 Service Architecture
 
 **New Services:**
+
 1. **ERCandidateService** - Blocking and candidate pair generation
 2. **ERScoringService** - Feature extraction and match scoring
 3. **ERDecisionService** - Threshold-based routing
@@ -422,11 +426,13 @@ export enum CanonicalRelationshipType {
 6. **ERMetricsService** - Precision tracking and alerting
 
 **Existing Services (Enhanced):**
+
 - **EntityResolutionService** (Neo4j) - Add canonical cluster support
 - **HybridEntityResolutionService** - Orchestrator for ML pipeline
 - **AML EntityResolver** - Specialized financial ER
 
 **Database Components:**
+
 - **PostgreSQL tables:** `merge_decisions`, `er_precision_metrics`, `er_review_queue`
 - **Neo4j:** Entity canonicalId indexes, ResolutionCluster nodes
 - **Redis Streams:** Job queue for async ER processing
@@ -439,27 +445,27 @@ export enum CanonicalRelationshipType {
 export interface ERCandidate {
   entityA: CanonicalEntityBase;
   entityB: CanonicalEntityBase;
-  blockingKey: string;                 // How pair was generated
-  generationMethod: 'phonetic' | 'exact' | 'lsh' | 'network' | 'manual';
+  blockingKey: string; // How pair was generated
+  generationMethod: "phonetic" | "exact" | "lsh" | "network" | "manual";
 }
 
 export interface ERFeatureScore {
-  feature: string;                     // e.g., "name_jaro_winkler"
-  score: number;                       // 0.0-1.0
-  weight: number;                      // Contribution to final score
-  explanation: string;                 // Human-readable
-  evidence?: Record<string, any>;      // Raw comparison data
+  feature: string; // e.g., "name_jaro_winkler"
+  score: number; // 0.0-1.0
+  weight: number; // Contribution to final score
+  explanation: string; // Human-readable
+  evidence?: Record<string, any>; // Raw comparison data
 }
 
 export interface ERMatchScore {
   candidateId: string;
   entityAId: string;
   entityBId: string;
-  overallScore: number;                // Weighted aggregate
-  method: 'deterministic' | 'probabilistic' | 'ml_supervised' | 'hybrid';
+  overallScore: number; // Weighted aggregate
+  method: "deterministic" | "probabilistic" | "ml_supervised" | "hybrid";
   features: ERFeatureScore[];
-  confidence: number;                  // Meta-confidence in score
-  riskScore: number;                   // Risk of false positive
+  confidence: number; // Meta-confidence in score
+  riskScore: number; // Risk of false positive
   modelVersion: string;
   timestamp: Date;
 }
@@ -467,9 +473,9 @@ export interface ERMatchScore {
 export interface ERDecision {
   id: string;
   matchScore: ERMatchScore;
-  decision: 'MERGE' | 'NO_MERGE' | 'DEFER' | 'SPLIT';
-  decisionMethod: 'auto' | 'manual' | 'bulk';
-  decidedBy?: string;                  // User ID if manual
+  decision: "MERGE" | "NO_MERGE" | "DEFER" | "SPLIT";
+  decisionMethod: "auto" | "manual" | "bulk";
+  decidedBy?: string; // User ID if manual
   decidedAt: Date;
   notes?: string;
   reviewRequired: boolean;
@@ -480,15 +486,15 @@ export interface ERDecision {
     traceId: string;
     reviewedBy?: string[];
     approvedBy?: string;
-    dissent?: string;                  // Minority opinion
+    dissent?: string; // Minority opinion
   };
 }
 
 export interface ERReviewQueueItem {
   id: string;
   matchScore: ERMatchScore;
-  status: 'PENDING' | 'IN_REVIEW' | 'DECIDED' | 'ESCALATED';
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  status: "PENDING" | "IN_REVIEW" | "DECIDED" | "ESCALATED";
+  priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   assignedTo?: string;
   dueAt?: Date;
   createdAt: Date;
@@ -501,14 +507,14 @@ export interface ERReviewQueueItem {
 }
 
 export interface ResolutionCluster {
-  id: string;                          // Canonical entity ID
+  id: string; // Canonical entity ID
   tenantId: string;
-  entityIds: string[];                 // All entities in cluster
+  entityIds: string[]; // All entities in cluster
   canonicalEntity: CanonicalEntityBase; // Master/golden record
 
   // Resolution metadata
   resolution: {
-    method: 'deterministic' | 'probabilistic' | 'ml_supervised' | 'hybrid';
+    method: "deterministic" | "probabilistic" | "ml_supervised" | "hybrid";
     algorithm: string;
     features: string[];
     threshold: number;
@@ -517,7 +523,7 @@ export interface ResolutionCluster {
 
   // Evidence
   evidence: Array<{
-    type: 'name_match' | 'identifier_match' | 'address_match' | 'network_pattern';
+    type: "name_match" | "identifier_match" | "address_match" | "network_pattern";
     strength: number;
     details: Record<string, any>;
   }>;
@@ -530,7 +536,7 @@ export interface ResolutionCluster {
       value: any;
       confidence: number;
     }>;
-    resolution: 'use_highest_confidence' | 'manual' | 'merge_array';
+    resolution: "use_highest_confidence" | "manual" | "merge_array";
     resolvedValue: any;
   }>;
 
@@ -542,18 +548,18 @@ export interface ResolutionCluster {
     approvedBy?: string;
     version: number;
     revertible: boolean;
-    revertedFrom?: string;             // Previous cluster ID if split
+    revertedFrom?: string; // Previous cluster ID if split
   };
 }
 
 export interface ERThresholds {
   entityType: CanonicalEntityType;
-  autoMergeThreshold: number;          // >= this: auto-merge
-  manualReviewThreshold: number;       // Between this and auto: review
-  rejectThreshold: number;             // <= this: no match
+  autoMergeThreshold: number; // >= this: auto-merge
+  manualReviewThreshold: number; // Between this and auto: review
+  rejectThreshold: number; // <= this: no match
 
   // GA precision requirements
-  targetPrecision: number;             // e.g., 0.90 for PERSON
+  targetPrecision: number; // e.g., 0.90 for PERSON
   currentPrecision: number;
   sampleSize: number;
   lastCalibrated: Date;
@@ -575,15 +581,15 @@ export interface PersonEntity extends CanonicalEntityBase {
   // Core attributes
   names: Array<{
     value: string;
-    type: 'legal' | 'alias' | 'former' | 'aka' | 'maiden' | 'nickname';
-    script?: string;                   // e.g., "Latin", "Cyrillic"
+    type: "legal" | "alias" | "former" | "aka" | "maiden" | "nickname";
+    script?: string; // e.g., "Latin", "Cyrillic"
     confidence: number;
     validFrom?: Date;
     validTo?: Date;
   }>;
 
   identifiers: Array<{
-    type: 'ssn' | 'passport' | 'license' | 'tax_id' | 'national_id' | 'employee_id';
+    type: "ssn" | "passport" | "license" | "tax_id" | "national_id" | "employee_id";
     value: string;
     country?: string;
     issuedDate?: Date;
@@ -592,7 +598,7 @@ export interface PersonEntity extends CanonicalEntityBase {
   }>;
 
   contactInfo: Array<{
-    type: 'email' | 'phone' | 'address';
+    type: "email" | "phone" | "address";
     value: string;
     primary: boolean;
     confidence: number;
@@ -600,9 +606,9 @@ export interface PersonEntity extends CanonicalEntityBase {
 
   demographics?: {
     dateOfBirth?: Date;
-    dateOfBirthPrecision?: 'day' | 'month' | 'year';
+    dateOfBirthPrecision?: "day" | "month" | "year";
     placeOfBirth?: string;
-    gender?: 'M' | 'F' | 'NB' | 'U';
+    gender?: "M" | "F" | "NB" | "U";
     nationality?: string[];
     occupation?: string;
   };
@@ -610,7 +616,7 @@ export interface PersonEntity extends CanonicalEntityBase {
   // Derived/enriched
   riskScore?: number;
   screeningResults?: Array<{
-    list: string;                      // e.g., "OFAC SDN"
+    list: string; // e.g., "OFAC SDN"
     matched: boolean;
     score: number;
     matchedAt: Date;
@@ -627,19 +633,16 @@ export class PersonERFeatures {
   /**
    * Extracts all ER features for a person entity pair
    */
-  static extractFeatures(
-    personA: PersonEntity,
-    personB: PersonEntity
-  ): ERFeatureScore[] {
+  static extractFeatures(personA: PersonEntity, personB: PersonEntity): ERFeatureScore[] {
     const features: ERFeatureScore[] = [];
 
     // Feature 1: Exact identifier match
     const exactIdMatch = this.checkExactIdentifierMatch(personA, personB);
     if (exactIdMatch.matched) {
       features.push({
-        feature: 'exact_identifier_match',
+        feature: "exact_identifier_match",
         score: 1.0,
-        weight: 0.4,                   // High weight for deterministic
+        weight: 0.4, // High weight for deterministic
         explanation: `Exact match on ${exactIdMatch.type}: ${exactIdMatch.value}`,
         evidence: exactIdMatch,
       });
@@ -648,7 +651,7 @@ export class PersonERFeatures {
     // Feature 2: Name similarity (Jaro-Winkler)
     const nameScore = this.computeNameSimilarity(personA, personB);
     features.push({
-      feature: 'name_jaro_winkler',
+      feature: "name_jaro_winkler",
       score: nameScore.score,
       weight: 0.25,
       explanation: `Name similarity: ${(nameScore.score * 100).toFixed(1)}% (${nameScore.nameA} vs ${nameScore.nameB})`,
@@ -658,7 +661,7 @@ export class PersonERFeatures {
     // Feature 3: Phonetic match
     const phoneticScore = this.computePhoneticMatch(personA, personB);
     features.push({
-      feature: 'phonetic_match',
+      feature: "phonetic_match",
       score: phoneticScore.score,
       weight: 0.15,
       explanation: `Phonetic similarity: ${phoneticScore.codeA} vs ${phoneticScore.codeB}`,
@@ -669,7 +672,7 @@ export class PersonERFeatures {
     const contactScore = this.computeContactOverlap(personA, personB);
     if (contactScore.overlapping > 0) {
       features.push({
-        feature: 'contact_overlap',
+        feature: "contact_overlap",
         score: contactScore.score,
         weight: 0.2,
         explanation: `${contactScore.overlapping} overlapping contacts`,
@@ -702,18 +705,15 @@ export class PersonERFeatures {
     personB: PersonEntity
   ): { score: number; nameA: string; nameB: string } {
     // Get legal names
-    const legalA = personA.names.find(n => n.type === 'legal');
-    const legalB = personB.names.find(n => n.type === 'legal');
+    const legalA = personA.names.find((n) => n.type === "legal");
+    const legalB = personB.names.find((n) => n.type === "legal");
 
     if (!legalA || !legalB) {
-      return { score: 0, nameA: '', nameB: '' };
+      return { score: 0, nameA: "", nameB: "" };
     }
 
     // Use Jaro-Winkler from external library (e.g., natural, string-similarity)
-    const score = this.jaroWinkler(
-      legalA.value.toLowerCase(),
-      legalB.value.toLowerCase()
-    );
+    const score = this.jaroWinkler(legalA.value.toLowerCase(), legalB.value.toLowerCase());
 
     return { score, nameA: legalA.value, nameB: legalB.value };
   }
@@ -722,11 +722,11 @@ export class PersonERFeatures {
     personA: PersonEntity,
     personB: PersonEntity
   ): { score: number; codeA: string; codeB: string } {
-    const legalA = personA.names.find(n => n.type === 'legal');
-    const legalB = personB.names.find(n => n.type === 'legal');
+    const legalA = personA.names.find((n) => n.type === "legal");
+    const legalB = personB.names.find((n) => n.type === "legal");
 
     if (!legalA || !legalB) {
-      return { score: 0, codeA: '', codeB: '' };
+      return { score: 0, codeA: "", codeB: "" };
     }
 
     // Double Metaphone encoding
@@ -744,10 +744,10 @@ export class PersonERFeatures {
     personA: PersonEntity,
     personB: PersonEntity
   ): { score: number; overlapping: number; total: number } {
-    const contactsA = new Set(personA.contactInfo.map(c => c.value.toLowerCase()));
-    const contactsB = new Set(personB.contactInfo.map(c => c.value.toLowerCase()));
+    const contactsA = new Set(personA.contactInfo.map((c) => c.value.toLowerCase()));
+    const contactsB = new Set(personB.contactInfo.map((c) => c.value.toLowerCase()));
 
-    const intersection = [...contactsA].filter(c => contactsB.has(c));
+    const intersection = [...contactsA].filter((c) => contactsB.has(c));
     const union = new Set([...contactsA, ...contactsB]);
 
     const score = union.size > 0 ? intersection.length / union.size : 0;
@@ -767,7 +767,7 @@ export class PersonERFeatures {
 
   private static doubleMetaphone(s: string): [string, string] {
     // Use library like 'natural'
-    return ['STUB', 'STUB'];
+    return ["STUB", "STUB"];
   }
 }
 ```
@@ -777,10 +777,10 @@ export class PersonERFeatures {
 ```typescript
 // services/er/src/workflows/person-er-workflow.ts
 
-import { PersonEntity, ERMatchScore, ERDecision, ERThresholds } from '@intelgraph/canonical-schema';
-import { PersonERFeatures } from '../features/person-features';
-import { ERScoringService } from '../services/er-scoring-service';
-import { ERDecisionService } from '../services/er-decision-service';
+import { PersonEntity, ERMatchScore, ERDecision, ERThresholds } from "@intelgraph/canonical-schema";
+import { PersonERFeatures } from "../features/person-features";
+import { ERScoringService } from "../services/er-scoring-service";
+import { ERDecisionService } from "../services/er-decision-service";
 
 export class PersonERWorkflow {
   constructor(
@@ -804,16 +804,12 @@ export class PersonERWorkflow {
       entityAId: personA.id,
       entityBId: personB.id,
       features,
-      method: 'hybrid',
-      modelVersion: 'person-er-v1.0',
+      method: "hybrid",
+      modelVersion: "person-er-v1.0",
     });
 
     // Step 3: Route decision
-    const decision = await this.decisionService.routeDecision(
-      matchScore,
-      thresholds,
-      personA.type
-    );
+    const decision = await this.decisionService.routeDecision(matchScore, thresholds, personA.type);
 
     return decision;
   }
@@ -823,86 +819,80 @@ export class PersonERWorkflow {
    */
   async exampleAutoMerge(): Promise<void> {
     const personA: PersonEntity = {
-      id: 'person-001',
-      tenantId: 'tenant-acme',
+      id: "person-001",
+      tenantId: "tenant-acme",
       type: CanonicalEntityType.PERSON,
-      label: 'John Smith',
-      description: 'Software Engineer',
+      label: "John Smith",
+      description: "Software Engineer",
       properties: {},
       confidence: 0.95,
-      source: 'hrms',
+      source: "hrms",
       provenance: {
-        sourceId: 'hrms-connector',
+        sourceId: "hrms-connector",
         assertions: [],
         verificationStatus: VerificationStatus.VERIFIED,
         trustScore: 0.95,
       },
       policyLabels: {
-        origin: 'hrms',
+        origin: "hrms",
         sensitivity: SensitivityLevel.INTERNAL,
         clearance: ClearanceLevel.AUTHORIZED,
-        legalBasis: 'employee-data-processing',
-        needToKnow: ['hr', 'management'],
-        purposeLimitation: ['hr-operations'],
+        legalBasis: "employee-data-processing",
+        needToKnow: ["hr", "management"],
+        purposeLimitation: ["hr-operations"],
         retentionClass: RetentionClass.LONG_TERM,
       },
-      validFrom: new Date('2020-01-01'),
+      validFrom: new Date("2020-01-01"),
       recordedAt: new Date(),
       createdAt: new Date(),
       updatedAt: new Date(),
-      createdBy: 'system',
+      createdBy: "system",
       version: 1,
 
       // Person-specific
       names: [
-        { value: 'John Smith', type: 'legal', confidence: 1.0 },
-        { value: 'Johnny', type: 'nickname', confidence: 0.8 },
+        { value: "John Smith", type: "legal", confidence: 1.0 },
+        { value: "Johnny", type: "nickname", confidence: 0.8 },
       ],
       identifiers: [
-        { type: 'ssn', value: '123-45-6789', country: 'US', confidence: 1.0 },
-        { type: 'employee_id', value: 'EMP-12345', confidence: 1.0 },
+        { type: "ssn", value: "123-45-6789", country: "US", confidence: 1.0 },
+        { type: "employee_id", value: "EMP-12345", confidence: 1.0 },
       ],
       contactInfo: [
-        { type: 'email', value: 'john.smith@acme.com', primary: true, confidence: 1.0 },
-        { type: 'phone', value: '+1-555-0123', primary: true, confidence: 0.9 },
+        { type: "email", value: "john.smith@acme.com", primary: true, confidence: 1.0 },
+        { type: "phone", value: "+1-555-0123", primary: true, confidence: 0.9 },
       ],
       demographics: {
-        dateOfBirth: new Date('1985-06-15'),
-        dateOfBirthPrecision: 'day',
-        gender: 'M',
-        nationality: ['US'],
-        occupation: 'Software Engineer',
+        dateOfBirth: new Date("1985-06-15"),
+        dateOfBirthPrecision: "day",
+        gender: "M",
+        nationality: ["US"],
+        occupation: "Software Engineer",
       },
     };
 
     const personB: PersonEntity = {
       ...personA,
-      id: 'person-002',
-      source: 'email-archive',
+      id: "person-002",
+      source: "email-archive",
       provenance: {
-        sourceId: 'email-connector',
+        sourceId: "email-connector",
         assertions: [],
         verificationStatus: VerificationStatus.PARTIAL,
         trustScore: 0.75,
       },
       confidence: 0.85,
-      names: [
-        { value: 'John W. Smith', type: 'legal', confidence: 0.9 },
-      ],
-      identifiers: [
-        { type: 'email', value: 'jsmith@acme.com', confidence: 0.85 },
-      ],
-      contactInfo: [
-        { type: 'email', value: 'jsmith@acme.com', primary: true, confidence: 0.85 },
-      ],
+      names: [{ value: "John W. Smith", type: "legal", confidence: 0.9 }],
+      identifiers: [{ type: "email", value: "jsmith@acme.com", confidence: 0.85 }],
+      contactInfo: [{ type: "email", value: "jsmith@acme.com", primary: true, confidence: 0.85 }],
     };
 
     const thresholds: ERThresholds = {
       entityType: CanonicalEntityType.PERSON,
-      autoMergeThreshold: 0.90,
-      manualReviewThreshold: 0.70,
-      rejectThreshold: 0.70,
-      targetPrecision: 0.90,
+      autoMergeThreshold: 0.9,
+      manualReviewThreshold: 0.7,
+      rejectThreshold: 0.7,
+      targetPrecision: 0.9,
       currentPrecision: 0.92,
       sampleSize: 1000,
       lastCalibrated: new Date(),
@@ -910,8 +900,8 @@ export class PersonERWorkflow {
 
     const decision = await this.resolvePair(personA, personB, thresholds);
 
-    if (decision.decision === 'MERGE') {
-      console.log('✓ Auto-merge approved');
+    if (decision.decision === "MERGE") {
+      console.log("✓ Auto-merge approved");
       console.log(`  Score: ${decision.matchScore.overallScore.toFixed(3)}`);
       console.log(`  Features:`);
       for (const feat of decision.matchScore.features) {
@@ -1091,10 +1081,7 @@ extend type Query {
   ): [ERDecision!]!
 
   # ER metrics
-  erPrecisionMetrics(
-    entityType: CanonicalEntityType
-    modelVersion: String
-  ): ERPrecisionMetrics!
+  erPrecisionMetrics(entityType: CanonicalEntityType, modelVersion: String): ERPrecisionMetrics!
 
   # Resolution clusters
   resolutionCluster(id: ID!): ResolutionCluster
@@ -1108,17 +1095,10 @@ extend type Query {
 # Mutations
 extend type Mutation {
   # ER review actions
-  erReviewDecide(
-    reviewItemId: ID!
-    decision: ERDecisionType!
-    notes: String
-  ): ERDecision!
+  erReviewDecide(reviewItemId: ID!, decision: ERDecisionType!, notes: String): ERDecision!
 
   # Manual ER triggering
-  erResolvePair(
-    entityAId: ID!
-    entityBId: ID!
-  ): ERMatchScore!
+  erResolvePair(entityAId: ID!, entityBId: ID!): ERMatchScore!
 
   # Cluster management
   erMergeEntities(
@@ -1127,17 +1107,10 @@ extend type Mutation {
     notes: String
   ): ResolutionCluster!
 
-  erSplitCluster(
-    clusterId: ID!
-    entityIdsToSplit: [ID!]!
-    reason: String!
-  ): [ResolutionCluster!]!
+  erSplitCluster(clusterId: ID!, entityIdsToSplit: [ID!]!, reason: String!): [ResolutionCluster!]!
 
   # Revert merge
-  erRevertMerge(
-    clusterId: ID!
-    reason: String!
-  ): [Entity!]!
+  erRevertMerge(clusterId: ID!, reason: String!): [Entity!]!
 }
 
 type ERPrecisionMetrics {
@@ -1385,6 +1358,7 @@ $$ LANGUAGE plpgsql;
 ## 6. Implementation Roadmap
 
 ### Phase 1: Canonical Schema Foundation (Week 1-2)
+
 - [ ] Create `packages/canonical-schema` package
 - [ ] Implement base types (CanonicalEntityBase, CanonicalRelationship)
 - [ ] Implement 23 entity type specializations
@@ -1392,12 +1366,14 @@ $$ LANGUAGE plpgsql;
 - [ ] Write schema validation tests
 
 ### Phase 2: Database Migrations (Week 2-3)
+
 - [ ] Run PostgreSQL migrations (canonical fields, ER tables)
 - [ ] Run Neo4j migrations (new constraints, indexes)
 - [ ] Update EntityRepo to use canonical types
 - [ ] Backward compatibility layer for existing entities
 
 ### Phase 3: ER Pipeline Core (Week 3-5)
+
 - [ ] Implement ERCandidateService (blocking)
 - [ ] Implement ERScoringService (feature extraction)
 - [ ] Implement ERDecisionService (threshold routing)
@@ -1405,6 +1381,7 @@ $$ LANGUAGE plpgsql;
 - [ ] Create Redis job queue for async ER
 
 ### Phase 4: ER Examples & Testing (Week 5-6)
+
 - [ ] Complete Person ER example
 - [ ] Complete Organization ER example
 - [ ] Write unit tests for feature extractors
@@ -1412,6 +1389,7 @@ $$ LANGUAGE plpgsql;
 - [ ] Create golden fixture datasets
 
 ### Phase 5: Review Queue UI (Week 6-7)
+
 - [ ] GraphQL resolvers for ER queries/mutations
 - [ ] React components for review queue
 - [ ] Side-by-side entity comparison view
@@ -1419,6 +1397,7 @@ $$ LANGUAGE plpgsql;
 - [ ] Merge/split/defer actions
 
 ### Phase 6: Metrics & Observability (Week 7-8)
+
 - [ ] ERMetricsService implementation
 - [ ] Precision tracking dashboard
 - [ ] Alert thresholds for precision drift
@@ -1426,6 +1405,7 @@ $$ LANGUAGE plpgsql;
 - [ ] Grafana dashboards for ER KPIs
 
 ### Phase 7: Documentation & Training (Week 8)
+
 - [ ] User guide for ER review queue
 - [ ] Developer guide for adding entity types
 - [ ] Runbooks for ER operations
@@ -1436,32 +1416,38 @@ $$ LANGUAGE plpgsql;
 ## 7. Acceptance Criteria
 
 ### AC-1: Schema Coherence
+
 - [ ] All 23 Wishbook entity types defined in canonical schema
 - [ ] GraphQL, Neo4j, and PostgreSQL schemas generated from canonical
 - [ ] Zero divergence between schema layers (validated by tests)
 
 ### AC-2: ER Explainability
+
 - [ ] Every merge decision includes feature-level scores and explanations
 - [ ] Scorecard UI shows human-readable rationales
 - [ ] Provenance chain tracks all ER decisions
 
 ### AC-3: ER Precision (GA Requirement)
+
 - [ ] Person ER precision >= 90% (100+ sample decisions)
 - [ ] Organization ER precision >= 88%
 - [ ] Location ER precision >= 85%
 - [ ] Asset ER precision >= 82%
 
 ### AC-4: Manual Review Queue
+
 - [ ] Review queue UI functional with filtering and assignment
 - [ ] Analysts can approve/reject/defer merge candidates
 - [ ] Full undo/revert capability for merged clusters
 
 ### AC-5: Performance
+
 - [ ] ER scoring for 1,000 candidate pairs completes in < 60 seconds
 - [ ] Review queue loads in < 2 seconds for 100 items
 - [ ] Merge execution completes in < 5 seconds per cluster
 
 ### AC-6: Provenance Integrity
+
 - [ ] Every ResolutionCluster has complete audit trail
 - [ ] Merge history is revertible
 - [ ] Export manifests include ER provenance
@@ -1471,24 +1457,30 @@ $$ LANGUAGE plpgsql;
 ## 8. Open Questions & Risks
 
 ### Q1: AML Entity Resolver Integration
+
 **Question:** Should we merge the AML entity resolver types with canonical schema or keep them specialized?
 **Recommendation:** Keep AML specialized but create adapters to/from canonical types.
 
 ### Q2: Threshold Calibration Frequency
+
 **Question:** How often should we recalibrate ER thresholds?
 **Recommendation:** Weekly for first month, then monthly once stable.
 
 ### Q3: Cross-Tenant ER
+
 **Question:** Should ER run across tenants for federation use cases?
 **Recommendation:** GA feature only, with explicit consent and hashed identifiers.
 
 ### Risk-1: Schema Migration Breaking Changes
+
 **Mitigation:** Comprehensive backward compatibility layer; phased rollout; feature flags.
 
 ### Risk-2: ER False Positives
+
 **Mitigation:** Conservative thresholds initially; manual review queue; full revert capability.
 
 ### Risk-3: Performance Degradation
+
 **Mitigation:** Redis job queue for async ER; batch processing; cached embeddings.
 
 ---

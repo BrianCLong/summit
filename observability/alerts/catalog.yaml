@@ -5,7 +5,7 @@
   slo_ref: "web.p95 < 1.5s"
   expr: 'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service="gateway"}[5m])) by (le)) > 1.5'
   for: 10m
-  labels: {type: "slo-breach", pager: "oncall-web"}
+  labels: { type: "slo-breach", pager: "oncall-web" }
   runbook: "RUNBOOKS/gateway-latency.md#p95-breach"
   autoremediate: "scripts/autoremediate/scale_up_gateway.sh"
   owner: "@sre/observability"

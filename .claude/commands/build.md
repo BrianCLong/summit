@@ -5,16 +5,19 @@ Build all packages in the Summit monorepo using Turbo for optimal caching and pa
 ## Instructions
 
 1. First, verify the project is in a clean state:
+
    ```bash
    git status --short
    ```
 
 2. Run the build process:
+
    ```bash
    pnpm build
    ```
 
 3. If there are TypeScript errors, run typecheck for detailed output:
+
    ```bash
    pnpm typecheck
    ```
@@ -42,6 +45,7 @@ pnpm --filter "*api*" build
 ## Troubleshooting
 
 If the build cache seems stale:
+
 ```bash
 rm -rf .turbo node_modules/.cache
 pnpm build
@@ -50,6 +54,7 @@ pnpm build
 ## Expected Output
 
 A successful build will show:
+
 - Green checkmarks for each completed task
 - Turbo cache statistics
 - No error messages

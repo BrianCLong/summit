@@ -101,14 +101,14 @@ This document contains text-based wireframes for the Control Tower feature. Thes
 
 ### Layout Specifications
 
-| Zone | Width | Content | Behavior |
-|------|-------|---------|----------|
-| Header | 100% | Logo, Search, Quick Actions, Notifications, Profile | Fixed, always visible |
-| Health Score | 100% | Aggregate score, subsystem scores, trend | Clickable for breakdown |
-| Active Situations | 40% | Grouped critical events | Scrollable, max 5 visible |
-| Key Metrics | 60% | Configurable KPI widgets | 6 widgets, 2x3 grid |
-| Team Pulse | 60% | Team status | Expandable |
-| Event Timeline | 100% | Chronological event stream | Infinite scroll, filterable |
+| Zone              | Width | Content                                             | Behavior                    |
+| ----------------- | ----- | --------------------------------------------------- | --------------------------- |
+| Header            | 100%  | Logo, Search, Quick Actions, Notifications, Profile | Fixed, always visible       |
+| Health Score      | 100%  | Aggregate score, subsystem scores, trend            | Clickable for breakdown     |
+| Active Situations | 40%   | Grouped critical events                             | Scrollable, max 5 visible   |
+| Key Metrics       | 60%   | Configurable KPI widgets                            | 6 widgets, 2x3 grid         |
+| Team Pulse        | 60%   | Team status                                         | Expandable                  |
+| Event Timeline    | 100%  | Chronological event stream                          | Infinite scroll, filterable |
 
 ### Interactions
 
@@ -259,17 +259,17 @@ This document contains text-based wireframes for the Control Tower feature. Thes
 
 ### Panel Specifications
 
-| Section | Height | Content | Behavior |
-|---------|--------|---------|----------|
-| Header | Fixed | Event title, severity, source, time | Always visible |
-| Status Cards | Auto | Severity, impact, assignment | Clickable for edit |
-| Details | Expandable | Raw event data, error info | Collapsible JSON view |
-| Context Graph | 200px | Visual relationship graph | Expandable to full view |
-| Related Timeline | Scrollable | Chronological related events | Click to navigate |
-| AI Suggestions | Auto | ML-driven recommendations | Actionable links |
-| Governance | Collapsible | Policy and provenance info | Expanded on demand |
-| Actions | Fixed | Action buttons | Sticky at bottom |
-| History | Scrollable | Audit trail | Infinite scroll |
+| Section          | Height      | Content                             | Behavior                |
+| ---------------- | ----------- | ----------------------------------- | ----------------------- |
+| Header           | Fixed       | Event title, severity, source, time | Always visible          |
+| Status Cards     | Auto        | Severity, impact, assignment        | Clickable for edit      |
+| Details          | Expandable  | Raw event data, error info          | Collapsible JSON view   |
+| Context Graph    | 200px       | Visual relationship graph           | Expandable to full view |
+| Related Timeline | Scrollable  | Chronological related events        | Click to navigate       |
+| AI Suggestions   | Auto        | ML-driven recommendations           | Actionable links        |
+| Governance       | Collapsible | Policy and provenance info          | Expanded on demand      |
+| Actions          | Fixed       | Action buttons                      | Sticky at bottom        |
+| History          | Scrollable  | Audit trail                         | Infinite scroll         |
 
 ---
 
@@ -606,16 +606,19 @@ This document contains text-based wireframes for the Control Tower feature. Thes
 ## Responsive Behavior
 
 ### Desktop (> 1200px)
+
 - Full layout as shown above
 - Side-by-side panels
 - Expanded navigation
 
 ### Tablet (768px - 1200px)
+
 - Stacked layout for main sections
 - Collapsible sidebars
 - Touch-friendly targets (44px minimum)
 
 ### Mobile (< 768px)
+
 - Single column layout
 - Bottom navigation bar
 - Slide-out panels instead of sidebars
@@ -636,15 +639,15 @@ This document contains text-based wireframes for the Control Tower feature. Thes
 
 ## Component Library Mapping
 
-| Wireframe Element | MUI Component |
-|-------------------|---------------|
-| Health Score Bar | LinearProgress + custom styling |
-| Event Cards | Card + CardContent |
-| Timeline | Timeline (MUI Lab) |
-| Filters | Checkbox, Radio, Select |
-| Command Palette | Dialog + Autocomplete |
-| Slide-out Panel | Drawer |
-| Status Badges | Chip |
-| Action Buttons | Button, IconButton |
-| Entity Graph | Custom + D3.js or vis.js |
-| Data Tables | DataGrid |
+| Wireframe Element | MUI Component                   |
+| ----------------- | ------------------------------- |
+| Health Score Bar  | LinearProgress + custom styling |
+| Event Cards       | Card + CardContent              |
+| Timeline          | Timeline (MUI Lab)              |
+| Filters           | Checkbox, Radio, Select         |
+| Command Palette   | Dialog + Autocomplete           |
+| Slide-out Panel   | Drawer                          |
+| Status Badges     | Chip                            |
+| Action Buttons    | Button, IconButton              |
+| Entity Graph      | Custom + D3.js or vis.js        |
+| Data Tables       | DataGrid                        |

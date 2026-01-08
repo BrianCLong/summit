@@ -204,7 +204,7 @@ npx create-ig-service my-svc --template node-apollo --sla read=350 write=700
 **Auto‑PR Bot (pseudocode)**
 
 ```ts
-if (!hasRetentionTags()) openPR('Add retention tags', patch);
+if (!hasRetentionTags()) openPR("Add retention tags", patch);
 ```
 
 **Blast Radius PR Decorator**
@@ -226,7 +226,7 @@ if (!hasRetentionTags()) openPR('Add retention tags', patch);
 backfill:
   batch_size: 5000
   rps: 200
-  checkpoints: ['10%', '50%', '90%', '100%']
+  checkpoints: ["10%", "50%", "90%", "100%"]
 ```
 
 ---

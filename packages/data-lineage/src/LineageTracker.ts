@@ -2,11 +2,11 @@
  * Data lineage and provenance tracking system
  */
 
-import { Logger } from 'winston';
+import { Logger } from "winston";
 
 export interface LineageNode {
   id: string;
-  type: 'source' | 'transformation' | 'target';
+  type: "source" | "transformation" | "target";
   name: string;
   metadata: Record<string, any>;
   timestamp: Date;
@@ -42,7 +42,7 @@ export class LineageTracker {
     this.logger = logger;
     this.lineageGraph = {
       nodes: [],
-      edges: []
+      edges: [],
     };
   }
 
@@ -52,10 +52,10 @@ export class LineageTracker {
   trackSource(sourceId: string, sourceName: string, metadata: Record<string, any>): void {
     const node: LineageNode = {
       id: sourceId,
-      type: 'source',
+      type: "source",
       name: sourceName,
       metadata,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.lineageGraph.nodes.push(node);
@@ -73,10 +73,10 @@ export class LineageTracker {
   ): void {
     const node: LineageNode = {
       id: transformationId,
-      type: 'transformation',
+      type: "transformation",
       name: transformationName,
       metadata,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     const edge: LineageEdge = {
@@ -84,7 +84,7 @@ export class LineageTracker {
       to: transformationId,
       transformationType: transformationName,
       metadata,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.lineageGraph.nodes.push(node);
@@ -104,18 +104,18 @@ export class LineageTracker {
   ): void {
     const node: LineageNode = {
       id: targetId,
-      type: 'target',
+      type: "target",
       name: targetName,
       metadata,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     const edge: LineageEdge = {
       from: sourceId,
       to: targetId,
-      transformationType: 'load',
+      transformationType: "load",
       metadata,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.lineageGraph.nodes.push(node);
@@ -148,13 +148,15 @@ export class LineageTracker {
     const visited = new Set<string>();
 
     const traverse = (currentId: string) => {
-      if (visited.has(currentId)) {return;}
+      if (visited.has(currentId)) {
+        return;
+      }
       visited.add(currentId);
 
-      const incomingEdges = this.lineageGraph.edges.filter(edge => edge.to === currentId);
+      const incomingEdges = this.lineageGraph.edges.filter((edge) => edge.to === currentId);
 
       for (const edge of incomingEdges) {
-        const node = this.lineageGraph.nodes.find(n => n.id === edge.from);
+        const node = this.lineageGraph.nodes.find((n) => n.id === edge.from);
         if (node) {
           upstream.push(node);
           traverse(edge.from);
@@ -174,13 +176,15 @@ export class LineageTracker {
     const visited = new Set<string>();
 
     const traverse = (currentId: string) => {
-      if (visited.has(currentId)) {return;}
+      if (visited.has(currentId)) {
+        return;
+      }
       visited.add(currentId);
 
-      const outgoingEdges = this.lineageGraph.edges.filter(edge => edge.from === currentId);
+      const outgoingEdges = this.lineageGraph.edges.filter((edge) => edge.from === currentId);
 
       for (const edge of outgoingEdges) {
-        const node = this.lineageGraph.nodes.find(n => n.id === edge.to);
+        const node = this.lineageGraph.nodes.find((n) => n.id === edge.to);
         if (node) {
           downstream.push(node);
           traverse(edge.to);
@@ -203,7 +207,7 @@ export class LineageTracker {
 
     return {
       affectedNodes: downstream,
-      affectedCount: downstream.length
+      affectedCount: downstream.length,
     };
   }
 
@@ -212,7 +216,7 @@ export class LineageTracker {
    */
   async persistLineage(): Promise<void> {
     // Would implement persistence to graph database (Neo4j) or relational database
-    this.logger.info('Lineage persistence not yet implemented');
+    this.logger.info("Lineage persistence not yet implemented");
   }
 
   /**
@@ -221,7 +225,7 @@ export class LineageTracker {
   clear(): void {
     this.lineageGraph = {
       nodes: [],
-      edges: []
+      edges: [],
     };
   }
 }

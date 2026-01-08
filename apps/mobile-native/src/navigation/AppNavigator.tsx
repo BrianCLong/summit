@@ -1,33 +1,33 @@
 // @ts-nocheck
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createDrawerNavigator } from '@react-navigation/drawer';
+import {NavigationContainer} from '@react-navigation/native';
+import {createStackNavigator} from '@react-navigation/stack';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {createDrawerNavigator} from '@react-navigation/drawer';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-import { useAuth } from '../hooks/useAuth';
-import { AuthNavigator } from './AuthNavigator';
-import { HomeScreen } from '../screens/HomeScreen';
-import { SearchScreen } from '../screens/SearchScreen';
-import { MapScreen } from '../screens/MapScreen';
-import { CasesScreen } from '../screens/CasesScreen';
-import { EntityDetailsScreen } from '../screens/EntityDetailsScreen';
-import { CaseDetailsScreen } from '../screens/CaseDetailsScreen';
-import { GraphScreen } from '../screens/GraphScreen';
-import { ProfileScreen } from '../screens/ProfileScreen';
-import { SettingsScreen } from '../screens/SettingsScreen';
-import { NotificationsScreen } from '../screens/NotificationsScreen';
-import { CameraScreen } from '../screens/CameraScreen';
-import { SyncStatusScreen } from '../screens/SyncStatusScreen';
+import {useAuth} from '../hooks/useAuth';
+import {AuthNavigator} from './AuthNavigator';
+import {HomeScreen} from '../screens/HomeScreen';
+import {SearchScreen} from '../screens/SearchScreen';
+import {MapScreen} from '../screens/MapScreen';
+import {CasesScreen} from '../screens/CasesScreen';
+import {EntityDetailsScreen} from '../screens/EntityDetailsScreen';
+import {CaseDetailsScreen} from '../screens/CaseDetailsScreen';
+import {GraphScreen} from '../screens/GraphScreen';
+import {ProfileScreen} from '../screens/ProfileScreen';
+import {SettingsScreen} from '../screens/SettingsScreen';
+import {NotificationsScreen} from '../screens/NotificationsScreen';
+import {CameraScreen} from '../screens/CameraScreen';
+import {SyncStatusScreen} from '../screens/SyncStatusScreen';
 
 export type RootStackParamList = {
   Auth: undefined;
   Main: undefined;
-  EntityDetails: { entityId: string };
-  CaseDetails: { caseId: string };
-  Graph: { entityId?: string; caseId?: string };
-  Camera: { mode: 'photo' | 'video' | 'scan' };
+  EntityDetails: {entityId: string};
+  CaseDetails: {caseId: string};
+  Graph: {entityId?: string; caseId?: string};
+  Camera: {mode: 'photo' | 'video' | 'scan'};
   Notifications: undefined;
   Settings: undefined;
   SyncStatus: undefined;
@@ -48,8 +48,8 @@ const Drawer = createDrawerNavigator();
 const MainTabs: React.FC = () => {
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
+      screenOptions={({route}) => ({
+        tabBarIcon: ({focused, color, size}) => {
           let iconName: string;
 
           switch (route.name) {
@@ -88,7 +88,7 @@ const MainTabs: React.FC = () => {
 };
 
 export const AppNavigator: React.FC = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const {isAuthenticated, isLoading} = useAuth();
 
   if (isLoading) {
     return null; // Or a loading screen
@@ -96,7 +96,7 @@ export const AppNavigator: React.FC = () => {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator screenOptions={{headerShown: false}}>
         {!isAuthenticated ? (
           <Stack.Screen name="Auth" component={AuthNavigator} />
         ) : (
@@ -105,37 +105,33 @@ export const AppNavigator: React.FC = () => {
             <Stack.Screen
               name="EntityDetails"
               component={EntityDetailsScreen}
-              options={{ headerShown: true, title: 'Entity Details' }}
+              options={{headerShown: true, title: 'Entity Details'}}
             />
             <Stack.Screen
               name="CaseDetails"
               component={CaseDetailsScreen}
-              options={{ headerShown: true, title: 'Case Details' }}
+              options={{headerShown: true, title: 'Case Details'}}
             />
             <Stack.Screen
               name="Graph"
               component={GraphScreen}
-              options={{ headerShown: true, title: 'Graph View' }}
+              options={{headerShown: true, title: 'Graph View'}}
             />
-            <Stack.Screen
-              name="Camera"
-              component={CameraScreen}
-              options={{ headerShown: false }}
-            />
+            <Stack.Screen name="Camera" component={CameraScreen} options={{headerShown: false}} />
             <Stack.Screen
               name="Notifications"
               component={NotificationsScreen}
-              options={{ headerShown: true, title: 'Notifications' }}
+              options={{headerShown: true, title: 'Notifications'}}
             />
             <Stack.Screen
               name="Settings"
               component={SettingsScreen}
-              options={{ headerShown: true, title: 'Settings' }}
+              options={{headerShown: true, title: 'Settings'}}
             />
             <Stack.Screen
               name="SyncStatus"
               component={SyncStatusScreen}
-              options={{ headerShown: true, title: 'Sync Status' }}
+              options={{headerShown: true, title: 'Sync Status'}}
             />
           </>
         )}

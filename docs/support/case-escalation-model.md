@@ -1,6 +1,7 @@
 # Case & Escalation Model v0
 
 ## Entities
+
 - **Case**: unique record with priority, severity, SLA tier, status, timestamps (opened, first response, resolution), owner, tags, linked incidents, related runbooks, and evidence/attachments.
 - **Requester**: user opening the issue (contact info, role, channel). Stores authentication method and permissions to view resources.
 - **Tenant**: workspace/org context (plan, segment, entitlements, billing status, region, data residency). Includes support tier and escalation routing defaults.
@@ -9,6 +10,7 @@
 - **Interactions**: timeline of messages, actions taken, customer confirmations, and automation steps run.
 
 ## States & Lifecycle
+
 1. **New**: case created; auto-enrich with tenant, health, and past cases; auto-triage priority by severity signals.
 2. **Triage**: support reviews telemetry, confirms scope, sets priority/SLA, assigns owner; may link to ongoing incident.
 3. **In-progress**: active troubleshooting; diagnostics, runbooks, and updates posted; RCAs/mitigations tracked.
@@ -19,16 +21,18 @@
 State transitions are logged with actor, reason, timestamps, and SLA impact (pause/resume clocks). Reopens move Closed → In-progress (retain history, new SLA window).
 
 ## SLA Targets (example)
-| Priority | Default First Response | Resolution Target (Standard) | Resolution Target (Premium/Enterprise) |
-| --- | --- | --- | --- |
-| P0/Critical (prod down, major data loss) | 15 min | 4 hrs | 2 hrs |
-| P1/High (degraded service, limited workaround) | 1 hr | 8 hrs | 6 hrs |
-| P2/Medium (functional issue, workaround exists) | 4 hrs | 2 biz days | 1 biz day |
-| P3/Low (how-to, minor UI) | 1 biz day | 5 biz days | 3 biz days |
+
+| Priority                                        | Default First Response | Resolution Target (Standard) | Resolution Target (Premium/Enterprise) |
+| ----------------------------------------------- | ---------------------- | ---------------------------- | -------------------------------------- |
+| P0/Critical (prod down, major data loss)        | 15 min                 | 4 hrs                        | 2 hrs                                  |
+| P1/High (degraded service, limited workaround)  | 1 hr                   | 8 hrs                        | 6 hrs                                  |
+| P2/Medium (functional issue, workaround exists) | 4 hrs                  | 2 biz days                   | 1 biz day                              |
+| P3/Low (how-to, minor UI)                       | 1 biz day              | 5 biz days                   | 3 biz days                             |
 
 SLA clocks: first response starts at creation; resolution starts at accept in Triage. Waiting-on-customer pauses resolution but not first-response. Breaches trigger alerts and auto-escalations.
 
 ## Support Tooling & Integrations
+
 - **Unified tenant console**: show health (SLIs, error budgets, recent alerts), feature flags, config, deployment history, usage trends, active experiments, and entitlement checks.
 - **Incident linking**: embed incident timeline, runbook steps executed, current mitigations, and commander contact. Enable creating a new incident from a case with templated severity mapping.
 - **Diagnostics automations**: one-click scripts to collect logs, trace IDs, config snapshots; attach artifacts to the case and incident.
@@ -37,6 +41,7 @@ SLA clocks: first response starts at creation; resolution starts at accept in Tr
 - **Templates/macros**: canned responses for auth issues, ingestion delays, billing limits, and UI glitches; each links to runbooks and self-serve docs. Auto-suggest macros based on detected signals/error codes.
 
 ## Escalation & Feedback Loops
+
 - **SRE escalation**: P0 or repeated error budget burn → page on-call, open/attach incident, grant temporary elevated access following least privilege. Case owner remains customer conduit.
 - **Engineering escalation**: component ownership map routes to feature team; create linked bug with reproduction data and guardrail tests; require update cadence (e.g., every 4 hrs for P0, daily for P1).
 - **Product escalation**: when roadmap gaps or repeated usability issues surface; log pattern into product feedback backlog with quantified impact (volume, ARR at risk, NPS hits).
@@ -44,6 +49,7 @@ SLA clocks: first response starts at creation; resolution starts at accept in Tr
 - **Reporting**: dashboards for volume by priority/segment, SLA attainment, reopen rate, MTTA/MTTR, sentiment (CSAT/NPS), and top themes via taxonomy tagging.
 
 ## Example Workflow (Incoming → Resolved)
+
 1. Customer submits via in-app widget with error IDs and trace links; case enters **New**.
 2. Auto-enrichment pulls tenant health (SLIs red on ingest service), links recent incident INC-204.
 3. Agent moves to **Triage**, confirms P1; SLA timers start; macro posts first response and requests log bundle.
@@ -52,6 +58,7 @@ SLA clocks: first response starts at creation; resolution starts at accept in Tr
 6. Agent posts resolution summary with evidence (trace IDs, quota change), moves to **Resolved**; customer confirms → **Closed**. Feedback event raised to increase default quotas for segment.
 
 ## Production-Readiness Checklist
+
 - SLA policies configured per segment with alerting and auto-escalation paths tested (on-call, incident creation, notifications).
 - Tenant console shows health, config, usage, and recent incidents; data contracts validated and refreshed within last 24 hrs.
 - Bi-directional CRM/ticket sync enabled with field mapping (priority, status, requester, visibility) and failure alerts.

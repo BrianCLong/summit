@@ -4,8 +4,8 @@
  * Saga, Circuit Breaker, Event Sourcing, CQRS, and Bulkhead isolation
  */
 
-import { EventEmitter } from 'events';
-import { v4 as uuidv4 } from 'uuid';
+import { EventEmitter } from "events";
+import { v4 as uuidv4 } from "uuid";
 
 // ==================== SAGA PATTERN ====================
 
@@ -24,7 +24,7 @@ export interface SagaStep {
 export interface SagaExecution {
   id: string;
   sagaId: string;
-  status: 'running' | 'completed' | 'compensating' | 'compensated' | 'failed';
+  status: "running" | "completed" | "compensating" | "compensated" | "failed";
   currentStep?: number;
   completedSteps: number[];
   context: Record<string, any>;
@@ -46,11 +46,11 @@ export class SagaOrchestrator extends EventEmitter {
    */
   defineSaga(sagaId: string, steps: SagaStep[]): void {
     if (steps.length === 0) {
-      throw new Error('Saga must have at least one step');
+      throw new Error("Saga must have at least one step");
     }
 
     this.sagas.set(sagaId, steps);
-    this.emit('saga.defined', { sagaId, steps: steps.length });
+    this.emit("saga.defined", { sagaId, steps: steps.length });
   }
 
   /**
@@ -58,25 +58,25 @@ export class SagaOrchestrator extends EventEmitter {
    */
   async executeSaga(
     sagaId: string,
-    initialContext: Record<string, any> = {},
+    initialContext: Record<string, any> = {}
   ): Promise<SagaExecution> {
     const steps = this.sagas.get(sagaId);
     if (!steps) {
-      throw new Error('Saga not found');
+      throw new Error("Saga not found");
     }
 
     const executionId = uuidv4();
     const execution: SagaExecution = {
       id: executionId,
       sagaId,
-      status: 'running',
+      status: "running",
       completedSteps: [],
       context: { ...initialContext },
       startedAt: new Date(),
     };
 
     this.executions.set(executionId, execution);
-    this.emit('saga.started', execution);
+    this.emit("saga.started", execution);
 
     try {
       // Execute steps sequentially
@@ -89,40 +89,40 @@ export class SagaOrchestrator extends EventEmitter {
           const result = await this.executeStepWithTimeout(
             step.transaction,
             execution.context,
-            step.timeout,
+            step.timeout
           );
 
           // Update context with result
           execution.context[`step_${i}_result`] = result;
           execution.completedSteps.push(i);
 
-          this.emit('saga.step.completed', { execution, step: i, result });
+          this.emit("saga.step.completed", { execution, step: i, result });
         } catch (error: any) {
           // Step failed - initiate compensation
-          execution.status = 'compensating';
+          execution.status = "compensating";
           execution.error = {
             step: i,
             message: error.message,
             timestamp: new Date(),
           };
 
-          this.emit('saga.step.failed', { execution, step: i, error });
+          this.emit("saga.step.failed", { execution, step: i, error });
 
           // Compensate all completed steps in reverse order
           await this.compensate(execution, steps);
 
-          execution.status = 'failed';
+          execution.status = "failed";
           execution.completedAt = new Date();
-          this.emit('saga.failed', execution);
+          this.emit("saga.failed", execution);
 
           throw error;
         }
       }
 
       // All steps completed successfully
-      execution.status = 'completed';
+      execution.status = "completed";
       execution.completedAt = new Date();
-      this.emit('saga.completed', execution);
+      this.emit("saga.completed", execution);
 
       return execution;
     } catch (error) {
@@ -136,7 +136,7 @@ export class SagaOrchestrator extends EventEmitter {
   private async executeStepWithTimeout(
     fn: (context: any) => Promise<any>,
     context: any,
-    timeout?: number,
+    timeout?: number
   ): Promise<any> {
     if (!timeout) {
       return fn(context);
@@ -144,20 +144,15 @@ export class SagaOrchestrator extends EventEmitter {
 
     return Promise.race([
       fn(context),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Step timeout')), timeout),
-      ),
+      new Promise((_, reject) => setTimeout(() => reject(new Error("Step timeout")), timeout)),
     ]);
   }
 
   /**
    * Compensate completed steps
    */
-  private async compensate(
-    execution: SagaExecution,
-    steps: SagaStep[],
-  ): Promise<void> {
-    this.emit('saga.compensation.started', execution);
+  private async compensate(execution: SagaExecution, steps: SagaStep[]): Promise<void> {
+    this.emit("saga.compensation.started", execution);
 
     // Compensate in reverse order
     for (let i = execution.completedSteps.length - 1; i >= 0; i--) {
@@ -166,9 +161,9 @@ export class SagaOrchestrator extends EventEmitter {
 
       try {
         await step.compensation(execution.context);
-        this.emit('saga.step.compensated', { execution, step: stepIndex });
+        this.emit("saga.step.compensated", { execution, step: stepIndex });
       } catch (error: any) {
-        this.emit('saga.compensation.error', {
+        this.emit("saga.compensation.error", {
           execution,
           step: stepIndex,
           error: error.message,
@@ -177,8 +172,8 @@ export class SagaOrchestrator extends EventEmitter {
       }
     }
 
-    execution.status = 'compensated';
-    this.emit('saga.compensation.completed', execution);
+    execution.status = "compensated";
+    this.emit("saga.compensation.completed", execution);
   }
 
   /**
@@ -198,10 +193,10 @@ export interface CircuitBreakerConfig {
   monitoringPeriod: number; // Period to track failures
 }
 
-export type CircuitState = 'closed' | 'open' | 'half-open';
+export type CircuitState = "closed" | "open" | "half-open";
 
 export class CircuitBreaker extends EventEmitter {
-  private state: CircuitState = 'closed';
+  private state: CircuitState = "closed";
   private failureCount = 0;
   private successCount = 0;
   private lastFailureTime?: number;
@@ -209,7 +204,7 @@ export class CircuitBreaker extends EventEmitter {
 
   constructor(
     private name: string,
-    private config: CircuitBreakerConfig,
+    private config: CircuitBreakerConfig
   ) {
     super();
   }
@@ -219,14 +214,14 @@ export class CircuitBreaker extends EventEmitter {
    */
   async execute<T>(fn: () => Promise<T>): Promise<T> {
     // Check if circuit is open
-    if (this.state === 'open') {
+    if (this.state === "open") {
       if (Date.now() < (this.nextAttemptTime || 0)) {
         throw new Error(`Circuit breaker ${this.name} is OPEN`);
       }
 
       // Timeout passed, move to half-open state
-      this.state = 'half-open';
-      this.emit('state.changed', { name: this.name, state: 'half-open' });
+      this.state = "half-open";
+      this.emit("state.changed", { name: this.name, state: "half-open" });
     }
 
     try {
@@ -248,7 +243,7 @@ export class CircuitBreaker extends EventEmitter {
   private onSuccess(): void {
     this.failureCount = 0;
 
-    if (this.state === 'half-open') {
+    if (this.state === "half-open") {
       this.successCount++;
 
       if (this.successCount >= this.config.successThreshold) {
@@ -264,7 +259,7 @@ export class CircuitBreaker extends EventEmitter {
     this.failureCount++;
     this.lastFailureTime = Date.now();
 
-    if (this.state === 'half-open') {
+    if (this.state === "half-open") {
       this.open();
     } else if (this.failureCount >= this.config.failureThreshold) {
       this.open();
@@ -275,12 +270,12 @@ export class CircuitBreaker extends EventEmitter {
    * Open the circuit
    */
   private open(): void {
-    this.state = 'open';
+    this.state = "open";
     this.nextAttemptTime = Date.now() + this.config.timeout;
     this.successCount = 0;
 
-    this.emit('state.changed', { name: this.name, state: 'open' });
-    this.emit('circuit.opened', {
+    this.emit("state.changed", { name: this.name, state: "open" });
+    this.emit("circuit.opened", {
       name: this.name,
       failures: this.failureCount,
     });
@@ -290,12 +285,12 @@ export class CircuitBreaker extends EventEmitter {
    * Close the circuit
    */
   private close(): void {
-    this.state = 'closed';
+    this.state = "closed";
     this.failureCount = 0;
     this.successCount = 0;
 
-    this.emit('state.changed', { name: this.name, state: 'closed' });
-    this.emit('circuit.closed', { name: this.name });
+    this.emit("state.changed", { name: this.name, state: "closed" });
+    this.emit("circuit.closed", { name: this.name });
   }
 
   /**
@@ -324,13 +319,13 @@ export class CircuitBreaker extends EventEmitter {
    * Reset circuit breaker
    */
   reset(): void {
-    this.state = 'closed';
+    this.state = "closed";
     this.failureCount = 0;
     this.successCount = 0;
     this.lastFailureTime = undefined;
     this.nextAttemptTime = undefined;
 
-    this.emit('circuit.reset', { name: this.name });
+    this.emit("circuit.reset", { name: this.name });
   }
 }
 
@@ -368,12 +363,10 @@ export class EventStore extends EventEmitter {
     aggregateType: string,
     eventType: string,
     data: Record<string, any>,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, any>
   ): Promise<Event> {
     // Get current version for this aggregate
-    const currentEvents = this.events.filter(
-      (e) => e.aggregateId === aggregateId,
-    );
+    const currentEvents = this.events.filter((e) => e.aggregateId === aggregateId);
     const version = currentEvents.length + 1;
 
     const event: Event = {
@@ -390,7 +383,7 @@ export class EventStore extends EventEmitter {
     this.events.push(event);
 
     // Emit to subscribers
-    this.emit('event.appended', event);
+    this.emit("event.appended", event);
     this.notifyHandlers(eventType, event);
 
     return event;
@@ -399,14 +392,9 @@ export class EventStore extends EventEmitter {
   /**
    * Get events for an aggregate
    */
-  getEvents(
-    aggregateId: string,
-    fromVersion: number = 0,
-  ): Event[] {
+  getEvents(aggregateId: string, fromVersion: number = 0): Event[] {
     return this.events
-      .filter(
-        (e) => e.aggregateId === aggregateId && e.version > fromVersion,
-      )
+      .filter((e) => e.aggregateId === aggregateId && e.version > fromVersion)
       .sort((a, b) => a.version - b.version);
   }
 
@@ -422,14 +410,14 @@ export class EventStore extends EventEmitter {
   /**
    * Save a snapshot
    */
-  saveSnapshot(snapshot: Omit<Snapshot, 'timestamp'>): void {
+  saveSnapshot(snapshot: Omit<Snapshot, "timestamp">): void {
     const fullSnapshot: Snapshot = {
       ...snapshot,
       timestamp: new Date(),
     };
 
     this.snapshots.set(snapshot.aggregateId, fullSnapshot);
-    this.emit('snapshot.saved', fullSnapshot);
+    this.emit("snapshot.saved", fullSnapshot);
   }
 
   /**
@@ -445,7 +433,7 @@ export class EventStore extends EventEmitter {
   async rebuildState<T>(
     aggregateId: string,
     reducer: (state: T, event: Event) => T,
-    initialState: T,
+    initialState: T
   ): Promise<T> {
     // Check for snapshot
     const snapshot = this.getSnapshot(aggregateId);
@@ -483,7 +471,7 @@ export class EventStore extends EventEmitter {
         try {
           handler(event);
         } catch (error) {
-          this.emit('handler.error', { eventType, event, error });
+          this.emit("handler.error", { eventType, event, error });
         }
       });
     }
@@ -493,9 +481,7 @@ export class EventStore extends EventEmitter {
    * Get all events
    */
   getAllEvents(): Event[] {
-    return [...this.events].sort(
-      (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
-    );
+    return [...this.events].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
   }
 }
 
@@ -512,7 +498,7 @@ export class Bulkhead extends EventEmitter {
   constructor(
     private name: string,
     private maxConcurrent: number,
-    private maxQueue: number = 100,
+    private maxQueue: number = 100
   ) {
     super();
   }
@@ -534,7 +520,7 @@ export class Bulkhead extends EventEmitter {
     // Add to queue
     return new Promise((resolve, reject) => {
       this.queue.push({ fn, resolve, reject });
-      this.emit('queued', {
+      this.emit("queued", {
         name: this.name,
         queueSize: this.queue.length,
       });
@@ -546,7 +532,7 @@ export class Bulkhead extends EventEmitter {
    */
   private async executeNow<T>(fn: () => Promise<T>): Promise<T> {
     this.activeRequests++;
-    this.emit('execution.started', {
+    this.emit("execution.started", {
       name: this.name,
       active: this.activeRequests,
     });
@@ -556,7 +542,7 @@ export class Bulkhead extends EventEmitter {
       return result;
     } finally {
       this.activeRequests--;
-      this.emit('execution.completed', {
+      this.emit("execution.completed", {
         name: this.name,
         active: this.activeRequests,
       });
@@ -570,15 +556,10 @@ export class Bulkhead extends EventEmitter {
    * Process queued requests
    */
   private processQueue(): void {
-    while (
-      this.queue.length > 0 &&
-      this.activeRequests < this.maxConcurrent
-    ) {
+    while (this.queue.length > 0 && this.activeRequests < this.maxConcurrent) {
       const item = this.queue.shift()!;
 
-      this.executeNow(item.fn)
-        .then(item.resolve)
-        .catch(item.reject);
+      this.executeNow(item.fn).then(item.resolve).catch(item.reject);
     }
   }
 
@@ -609,10 +590,7 @@ export interface RetryPolicy {
 }
 
 export class RetryHandler {
-  static async executeWithRetry<T>(
-    fn: () => Promise<T>,
-    policy: RetryPolicy,
-  ): Promise<T> {
+  static async executeWithRetry<T>(fn: () => Promise<T>, policy: RetryPolicy): Promise<T> {
     let lastError: any;
     let delay = policy.initialDelay;
 
@@ -623,10 +601,7 @@ export class RetryHandler {
         lastError = error;
 
         // Check if error is retryable
-        if (
-          policy.retryableErrors &&
-          !policy.retryableErrors.includes(error.code)
-        ) {
+        if (policy.retryableErrors && !policy.retryableErrors.includes(error.code)) {
           throw error;
         }
 
@@ -645,26 +620,16 @@ export class RetryHandler {
 // ==================== TIMEOUT POLICY ====================
 
 export class TimeoutHandler {
-  static async executeWithTimeout<T>(
-    fn: () => Promise<T>,
-    timeoutMs: number,
-  ): Promise<T> {
+  static async executeWithTimeout<T>(fn: () => Promise<T>, timeoutMs: number): Promise<T> {
     return Promise.race([
       fn(),
       new Promise<T>((_, reject) =>
-        setTimeout(() => reject(new Error('Operation timeout')), timeoutMs),
+        setTimeout(() => reject(new Error("Operation timeout")), timeoutMs)
       ),
     ]);
   }
 }
 
-export {
-  SagaOrchestrator,
-  CircuitBreaker,
-  EventStore,
-  Bulkhead,
-  RetryHandler,
-  TimeoutHandler,
-};
+export { SagaOrchestrator, CircuitBreaker, EventStore, Bulkhead, RetryHandler, TimeoutHandler };
 
-export * from './publicHealthPlan.js';
+export * from "./publicHealthPlan.js";

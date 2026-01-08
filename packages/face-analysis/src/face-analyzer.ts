@@ -3,8 +3,14 @@
  * Detection, recognition, emotion, age/gender estimation, landmarks
  */
 
-import { spawn } from 'child_process';
-import { IFaceAnalyzer, ModelConfig, BaseComputerVisionModel, Embedding, cosineSimilarity } from '@intelgraph/computer-vision';
+import { spawn } from "child_process";
+import {
+  IFaceAnalyzer,
+  ModelConfig,
+  BaseComputerVisionModel,
+  Embedding,
+  cosineSimilarity,
+} from "@intelgraph/computer-vision";
 
 export interface FaceDetectionResult {
   faces: Face[];
@@ -39,8 +45,8 @@ export class FaceAnalyzer extends BaseComputerVisionModel implements IFaceAnalyz
 
   constructor(config?: Partial<ModelConfig>) {
     super({
-      model_name: 'mtcnn_facenet',
-      device: config?.device || 'cpu',
+      model_name: "mtcnn_facenet",
+      device: config?.device || "cpu",
       confidence_threshold: config?.confidence_threshold || 0.7,
       batch_size: config?.batch_size || 1,
       nms_threshold: config?.nms_threshold || 0.4,
@@ -50,8 +56,8 @@ export class FaceAnalyzer extends BaseComputerVisionModel implements IFaceAnalyz
       ...config,
     });
 
-    this.pythonScriptPath = process.env.FACE_SCRIPT_PATH ||
-      '/home/user/summit/server/src/ai/models/face_detection.py';
+    this.pythonScriptPath =
+      process.env.FACE_SCRIPT_PATH || "/home/user/summit/server/src/ai/models/face_detection.py";
   }
 
   async initialize(): Promise<void> {
@@ -63,33 +69,44 @@ export class FaceAnalyzer extends BaseComputerVisionModel implements IFaceAnalyz
     return this.detectFaces(imagePath, options);
   }
 
-  async detectFaces(imagePath: string, options?: {
-    minFaceSize?: number;
-    confidenceThreshold?: number;
-    extractEmbeddings?: boolean;
-    analyzeDemographics?: boolean;
-    detectEmotions?: boolean;
-  }): Promise<FaceDetectionResult> {
+  async detectFaces(
+    imagePath: string,
+    options?: {
+      minFaceSize?: number;
+      confidenceThreshold?: number;
+      extractEmbeddings?: boolean;
+      analyzeDemographics?: boolean;
+      detectEmotions?: boolean;
+    }
+  ): Promise<FaceDetectionResult> {
     this.ensureInitialized();
     const startTime = Date.now();
 
     const args = [
       this.pythonScriptPath,
-      '--image', imagePath,
-      '--min-face-size', String(options?.minFaceSize || 20),
-      '--confidence', String(options?.confidenceThreshold || this.config.confidence_threshold),
-      '--device', this.config.device,
+      "--image",
+      imagePath,
+      "--min-face-size",
+      String(options?.minFaceSize || 20),
+      "--confidence",
+      String(options?.confidenceThreshold || this.config.confidence_threshold),
+      "--device",
+      this.config.device,
     ];
 
     return new Promise((resolve, reject) => {
-      const python = spawn('python3', args);
-      let stdout = '';
-      let stderr = '';
+      const python = spawn("python3", args);
+      let stdout = "";
+      let stderr = "";
 
-      python.stdout.on('data', (data) => { stdout += data.toString(); });
-      python.stderr.on('data', (data) => { stderr += data.toString(); });
+      python.stdout.on("data", (data) => {
+        stdout += data.toString();
+      });
+      python.stderr.on("data", (data) => {
+        stderr += data.toString();
+      });
 
-      python.on('close', (code) => {
+      python.on("close", (code) => {
         if (code !== 0) {
           reject(new Error(`Face detection failed: ${stderr}`));
           return;
@@ -114,36 +131,43 @@ export class FaceAnalyzer extends BaseComputerVisionModel implements IFaceAnalyz
     const result = await this.detectFaces(imagePath, { extractEmbeddings: true });
 
     return result.faces
-      .filter(face => face.embedding)
-      .map(face => ({
+      .filter((face) => face.embedding)
+      .map((face) => ({
         vector: face.embedding!,
         dimensions: face.embedding!.length,
-        model: 'facenet',
+        model: "facenet",
         normalized: true,
       }));
   }
 
   async compareFaces(face1: Face, face2: Face): Promise<number> {
     if (!face1.embedding || !face2.embedding) {
-      throw new Error('Faces must have embeddings for comparison');
+      throw new Error("Faces must have embeddings for comparison");
     }
     return cosineSimilarity(face1.embedding, face2.embedding);
   }
 
-  async clusterFaces(faces: Face[], options?: { threshold?: number }): Promise<Map<number, Face[]>> {
+  async clusterFaces(
+    faces: Face[],
+    options?: { threshold?: number }
+  ): Promise<Map<number, Face[]>> {
     const threshold = options?.threshold || 0.6;
     const clusters = new Map<number, Face[]>();
     const assigned = new Set<number>();
     let clusterId = 0;
 
     for (let i = 0; i < faces.length; i++) {
-      if (assigned.has(i) || !faces[i].embedding) { continue; }
+      if (assigned.has(i) || !faces[i].embedding) {
+        continue;
+      }
 
       const cluster: Face[] = [faces[i]];
       assigned.add(i);
 
       for (let j = i + 1; j < faces.length; j++) {
-        if (assigned.has(j) || !faces[j].embedding) { continue; }
+        if (assigned.has(j) || !faces[j].embedding) {
+          continue;
+        }
 
         const similarity = await this.compareFaces(faces[i], faces[j]);
         if (similarity >= threshold) {
@@ -173,7 +197,11 @@ export class FaceAnalyzer extends BaseComputerVisionModel implements IFaceAnalyz
     return { is_live: true, confidence: 0.5 };
   }
 
-  async anonymizeFaces(imagePath: string, outputPath: string, method: 'blur' | 'pixelate' = 'blur'): Promise<string> {
+  async anonymizeFaces(
+    imagePath: string,
+    outputPath: string,
+    method: "blur" | "pixelate" = "blur"
+  ): Promise<string> {
     // Privacy-preserving face anonymization
     return outputPath;
   }

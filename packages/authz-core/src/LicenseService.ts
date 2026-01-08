@@ -11,8 +11,8 @@
  * - Export control enforcement
  */
 
-import { Pool } from 'pg';
-import pino from 'pino';
+import { Pool } from "pg";
+import pino from "pino";
 import type {
   License,
   LicenseType,
@@ -20,10 +20,10 @@ import type {
   LicenseValidationResult,
   LicenseCondition,
   Action,
-} from './types';
-import { LicenseError } from './types';
+} from "./types";
+import { LicenseError } from "./types";
 
-const logger = pino({ name: 'license-service' });
+const logger = pino({ name: "license-service" });
 
 // ============================================================================
 // Interfaces
@@ -85,9 +85,9 @@ export interface AcceptTOSInput {
   userEmail: string;
   userRole?: string;
   tosVersion: string;
-  tosType: 'PLATFORM_TOS' | 'DATA_LICENSE' | 'EXPORT_TERMS' | 'NDA' | 'DUA' | 'PRIVACY_POLICY';
+  tosType: "PLATFORM_TOS" | "DATA_LICENSE" | "EXPORT_TERMS" | "NDA" | "DUA" | "PRIVACY_POLICY";
   tosContentHash: string;
-  acceptanceMethod: 'CLICK_THROUGH' | 'SIGNATURE' | 'IMPLICIT' | 'CONTRACT';
+  acceptanceMethod: "CLICK_THROUGH" | "SIGNATURE" | "IMPLICIT" | "CONTRACT";
   relatedLicenseId?: string;
   relatedResourceType?: string;
   relatedResourceId?: string;
@@ -119,7 +119,8 @@ export class LicenseService {
 
   constructor(databaseUrl?: string) {
     this.db = new Pool({
-      connectionString: databaseUrl || process.env.DATABASE_URL || 'postgresql://localhost:5432/intelgraph',
+      connectionString:
+        databaseUrl || process.env.DATABASE_URL || "postgresql://localhost:5432/intelgraph",
       max: 20,
     });
   }
@@ -143,7 +144,7 @@ export class LicenseService {
       if (existing.rows.length > 0) {
         throw new LicenseError(
           `License ${input.licenseKey} already exists for tenant ${input.tenantId}`,
-          'LICENSE_ALREADY_EXISTS',
+          "LICENSE_ALREADY_EXISTS",
           400
         );
       }
@@ -183,7 +184,7 @@ export class LicenseService {
           input.fullText || null,
           input.summary || null,
           input.createdBy,
-          'ACTIVE',
+          "ACTIVE",
         ]
       );
 
@@ -191,13 +192,12 @@ export class LicenseService {
 
       logger.info(
         { licenseId: license.licenseId, licenseKey: input.licenseKey, tenantId: input.tenantId },
-        'License created'
+        "License created"
       );
 
       return license;
-
     } catch (error) {
-      logger.error({ error, input }, 'Failed to create license');
+      logger.error({ error, input }, "Failed to create license");
       throw error;
     }
   }
@@ -219,13 +219,12 @@ export class LicenseService {
       );
 
       if (result.rowCount === 0) {
-        throw new LicenseError('License not found', 'LICENSE_NOT_FOUND', 404);
+        throw new LicenseError("License not found", "LICENSE_NOT_FOUND", 404);
       }
 
-      logger.info({ licenseId, status, updatedBy }, 'License status updated');
-
+      logger.info({ licenseId, status, updatedBy }, "License status updated");
     } catch (error) {
-      logger.error({ error, licenseId, status }, 'Failed to update license status');
+      logger.error({ error, licenseId, status }, "Failed to update license status");
       throw error;
     }
   }
@@ -241,7 +240,7 @@ export class LicenseService {
     const client = await this.db.connect();
 
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
 
       // Validate license exists and is active
       const licenseResult = await client.query(
@@ -250,20 +249,20 @@ export class LicenseService {
       );
 
       if (licenseResult.rows.length === 0) {
-        throw new LicenseError('License not found', 'LICENSE_NOT_FOUND', 404);
+        throw new LicenseError("License not found", "LICENSE_NOT_FOUND", 404);
       }
 
       const license = licenseResult.rows[0];
-      if (license.status !== 'ACTIVE') {
+      if (license.status !== "ACTIVE") {
         throw new LicenseError(
           `Cannot assign license with status ${license.status}`,
-          'LICENSE_NOT_ACTIVE',
+          "LICENSE_NOT_ACTIVE",
           400
         );
       }
 
       if (license.expiry_date && new Date(license.expiry_date) < new Date()) {
-        throw new LicenseError('License has expired', 'LICENSE_EXPIRED', 400);
+        throw new LicenseError("License has expired", "LICENSE_EXPIRED", 400);
       }
 
       // Check for existing active assignment
@@ -308,7 +307,7 @@ export class LicenseService {
 
       const assignmentId = result.rows[0].assignment_id;
 
-      await client.query('COMMIT');
+      await client.query("COMMIT");
 
       logger.info(
         {
@@ -317,14 +316,13 @@ export class LicenseService {
           resourceType: input.resourceType,
           resourceId: input.resourceId,
         },
-        'License assigned to resource'
+        "License assigned to resource"
       );
 
       return assignmentId;
-
     } catch (error) {
-      await client.query('ROLLBACK');
-      logger.error({ error, input }, 'Failed to assign license');
+      await client.query("ROLLBACK");
+      logger.error({ error, input }, "Failed to assign license");
       throw error;
     } finally {
       client.release();
@@ -351,13 +349,12 @@ export class LicenseService {
       );
 
       if (result.rowCount === 0) {
-        throw new LicenseError('Active assignment not found', 'ASSIGNMENT_NOT_FOUND', 404);
+        throw new LicenseError("Active assignment not found", "ASSIGNMENT_NOT_FOUND", 404);
       }
 
-      logger.info({ assignmentId, revokedBy, reason }, 'License assignment revoked');
-
+      logger.info({ assignmentId, revokedBy, reason }, "License assignment revoked");
     } catch (error) {
-      logger.error({ error, assignmentId }, 'Failed to revoke license assignment');
+      logger.error({ error, assignmentId }, "Failed to revoke license assignment");
       throw error;
     }
   }
@@ -405,7 +402,7 @@ export class LicenseService {
       );
 
       if (licenseResult.rows.length === 0) {
-        return { valid: false, reason: 'License not active' };
+        return { valid: false, reason: "License not active" };
       }
 
       const license = this.mapRowToLicense(licenseResult.rows[0]);
@@ -415,24 +412,24 @@ export class LicenseService {
 
       if (license.requiresAttribution) {
         conditions.push({
-          type: 'ATTRIBUTION',
-          requirement: license.attributionText || 'Attribution required',
+          type: "ATTRIBUTION",
+          requirement: license.attributionText || "Attribution required",
           details: { text: license.attributionText },
         });
       }
 
       if (license.requiresNotice) {
         conditions.push({
-          type: 'NOTICE',
-          requirement: license.noticeText || 'Notice required',
+          type: "NOTICE",
+          requirement: license.noticeText || "Notice required",
           details: { text: license.noticeText },
         });
       }
 
       if (license.exportControlled) {
         conditions.push({
-          type: 'EXPORT_CONTROL',
-          requirement: 'Subject to export control regulations',
+          type: "EXPORT_CONTROL",
+          requirement: "Subject to export control regulations",
           details: {
             classification: license.exportControlClassification,
             permittedCountries: license.permittedCountries,
@@ -446,12 +443,11 @@ export class LicenseService {
         license,
         conditions,
       };
-
     } catch (error) {
-      logger.error({ error, tenantId, resourceType, resourceId }, 'License validation error');
+      logger.error({ error, tenantId, resourceType, resourceId }, "License validation error");
       return {
         valid: false,
-        reason: 'License validation failed',
+        reason: "License validation failed",
       };
     }
   }
@@ -471,7 +467,7 @@ export class LicenseService {
       );
       return result.rows[0]?.license_id || null;
     } catch (error) {
-      logger.error({ error, tenantId, resourceType, resourceId }, 'Failed to get active license');
+      logger.error({ error, tenantId, resourceType, resourceId }, "Failed to get active license");
       return null;
     }
   }
@@ -481,7 +477,7 @@ export class LicenseService {
    */
   async logEnforcement(
     input: LicenseEnforcementInput,
-    decision: 'ALLOW' | 'DENY' | 'ALLOW_WITH_CONDITIONS',
+    decision: "ALLOW" | "DENY" | "ALLOW_WITH_CONDITIONS",
     reason: string,
     conditions?: LicenseCondition[],
     applicableLicenses?: string[]
@@ -511,9 +507,8 @@ export class LicenseService {
           input.requestId || null,
         ]
       );
-
     } catch (error) {
-      logger.error({ error, input }, 'Failed to log license enforcement');
+      logger.error({ error, input }, "Failed to log license enforcement");
       // Don't throw - logging failure shouldn't block enforcement
     }
   }
@@ -556,14 +551,18 @@ export class LicenseService {
       const acceptanceId = result.rows[0].acceptance_id;
 
       logger.info(
-        { acceptanceId, userId: input.userId, tosVersion: input.tosVersion, tosType: input.tosType },
-        'TOS acceptance recorded'
+        {
+          acceptanceId,
+          userId: input.userId,
+          tosVersion: input.tosVersion,
+          tosType: input.tosType,
+        },
+        "TOS acceptance recorded"
       );
 
       return acceptanceId;
-
     } catch (error) {
-      logger.error({ error, input }, 'Failed to record TOS acceptance');
+      logger.error({ error, input }, "Failed to record TOS acceptance");
       throw error;
     }
   }
@@ -571,11 +570,7 @@ export class LicenseService {
   /**
    * Check if user has accepted TOS
    */
-  async hasUserAcceptedTOS(
-    userId: string,
-    tosVersion: string,
-    tosType: string
-  ): Promise<boolean> {
+  async hasUserAcceptedTOS(userId: string, tosVersion: string, tosType: string): Promise<boolean> {
     try {
       const result = await this.db.query<{ has_accepted: boolean }>(
         `SELECT has_user_accepted_tos($1, $2, $3) as has_accepted`,
@@ -583,7 +578,7 @@ export class LicenseService {
       );
       return result.rows[0]?.has_accepted || false;
     } catch (error) {
-      logger.error({ error, userId, tosVersion, tosType }, 'TOS acceptance check failed');
+      logger.error({ error, userId, tosVersion, tosType }, "TOS acceptance check failed");
       return false;
     }
   }
@@ -620,18 +615,17 @@ export class LicenseService {
         if (detailsResult.rows.length > 0) {
           return {
             compatible: false,
-            reason: detailsResult.rows[0].compatibility_reason || 'Licenses are incompatible',
+            reason: detailsResult.rows[0].compatibility_reason || "Licenses are incompatible",
           };
         }
 
-        return { compatible: false, reason: 'License compatibility not assessed' };
+        return { compatible: false, reason: "License compatibility not assessed" };
       }
 
       return { compatible: true };
-
     } catch (error) {
-      logger.error({ error, licenseAId, licenseBId }, 'License compatibility check failed');
-      return { compatible: false, reason: 'Compatibility check failed' };
+      logger.error({ error, licenseAId, licenseBId }, "License compatibility check failed");
+      return { compatible: false, reason: "Compatibility check failed" };
     }
   }
 
@@ -676,13 +670,12 @@ export class LicenseService {
 
       logger.info(
         { lineageId, sourceResourceId, derivedResourceId, transformationType },
-        'License lineage recorded'
+        "License lineage recorded"
       );
 
       return lineageId;
-
     } catch (error) {
-      logger.error({ error }, 'Failed to record license lineage');
+      logger.error({ error }, "Failed to record license lineage");
       throw error;
     }
   }
@@ -702,8 +695,10 @@ export class LicenseService {
       licenseName: row.license_name,
       licenseType: row.license_type,
       status: row.status,
-      permissions: typeof row.permissions === 'string' ? JSON.parse(row.permissions) : row.permissions,
-      restrictions: typeof row.restrictions === 'string' ? JSON.parse(row.restrictions) : row.restrictions,
+      permissions:
+        typeof row.permissions === "string" ? JSON.parse(row.permissions) : row.permissions,
+      restrictions:
+        typeof row.restrictions === "string" ? JSON.parse(row.restrictions) : row.restrictions,
       requiresAttribution: row.requires_attribution,
       attributionText: row.attribution_text,
       requiresNotice: row.requires_notice,

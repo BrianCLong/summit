@@ -1,22 +1,22 @@
-'use strict';
+"use strict";
 
 const defaultPolicy = {
   blockList: {
     userIds: [],
     devices: [],
     browsers: [],
-    platforms: []
+    platforms: [],
   },
   stepUp: {
     minimumScore: 80,
-    factor: 'webauthn'
+    factor: "webauthn",
   },
   downgrade: {
     minimumScore: 60,
-    capabilities: ['read-only']
+    capabilities: ["read-only"],
   },
   offlineMode: false,
-  privacyBudgetMin: 5
+  privacyBudgetMin: 5,
 };
 
 function scoreSignal(signal) {
@@ -25,10 +25,10 @@ function scoreSignal(signal) {
 
   if (!signal.webauthn?.transport || signal.webauthn.signCount === 0) {
     score -= 20;
-    reasons.push('WebAuthn weak or missing');
+    reasons.push("WebAuthn weak or missing");
   }
 
-  (signal.localChecks || []).forEach(check => {
+  (signal.localChecks || []).forEach((check) => {
     if (!check.passed) {
       score -= 8;
       reasons.push(check.name);
@@ -39,11 +39,11 @@ function scoreSignal(signal) {
 }
 
 function blocked(policy, signal, deviceHash) {
-  if (policy.blockList.userIds.includes(signal.userId)) return 'user blocked';
-  if (policy.blockList.devices.includes(deviceHash)) return 'device blocked';
-  if (policy.blockList.browsers.includes(signal.userAgent.browser)) return 'browser blocked';
-  if (policy.blockList.platforms.includes(signal.userAgent.platform)) return 'platform blocked';
-  return '';
+  if (policy.blockList.userIds.includes(signal.userId)) return "user blocked";
+  if (policy.blockList.devices.includes(deviceHash)) return "device blocked";
+  if (policy.blockList.browsers.includes(signal.userAgent.browser)) return "browser blocked";
+  if (policy.blockList.platforms.includes(signal.userAgent.platform)) return "platform blocked";
+  return "";
 }
 
 function evaluate(policyInput, signal, deviceHash) {
@@ -54,41 +54,41 @@ function evaluate(policyInput, signal, deviceHash) {
 
   const blockReason = blocked(policy, signal, deviceHash);
   if (blockReason) {
-    verdict.verdict = 'deny';
+    verdict.verdict = "deny";
     verdict.reasons.push(blockReason);
     return verdict;
   }
 
   if (policy.offlineMode) {
-    verdict.verdict = 'offline-permit';
-    verdict.reasons.push('offline safe-path enabled');
+    verdict.verdict = "offline-permit";
+    verdict.reasons.push("offline safe-path enabled");
     return verdict;
   }
 
   if (score < policy.privacyBudgetMin) {
-    verdict.verdict = 'deny';
-    verdict.reasons.push('privacy budget insufficient');
+    verdict.verdict = "deny";
+    verdict.reasons.push("privacy budget insufficient");
     return verdict;
   }
 
   if (score < policy.stepUp.minimumScore) {
-    verdict.verdict = 'step-up-required';
+    verdict.verdict = "step-up-required";
     verdict.claims.step_up_factor = policy.stepUp.factor;
     return verdict;
   }
 
   if (score < policy.downgrade.minimumScore) {
-    verdict.verdict = 'session-downgraded';
+    verdict.verdict = "session-downgraded";
     verdict.claims.downgraded_capabilities = policy.downgrade.capabilities;
     return verdict;
   }
 
-  verdict.verdict = 'permit';
+  verdict.verdict = "permit";
   return verdict;
 }
 
 module.exports = {
   defaultPolicy,
   evaluate,
-  scoreSignal
+  scoreSignal,
 };

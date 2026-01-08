@@ -24,7 +24,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.11.x'
+          node-version: "20.11.x"
 
       - name: Download artifacts
         uses: actions/download-artifact@v4
@@ -42,7 +42,7 @@ jobs:
             echo "## Release Notes" > release-notes.md
             git log --pretty=format:"- %s (%h)" HEAD~10..HEAD >> release-notes.md
           fi
-          
+
       - name: Get version
         id: version
         run: echo "value=v$(node -p 'require("./package.json").version')" >> $GITHUB_OUTPUT

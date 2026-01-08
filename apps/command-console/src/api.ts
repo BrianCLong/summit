@@ -1,13 +1,13 @@
-import { CommandConsoleSnapshot } from './types';
+import { CommandConsoleSnapshot } from "./types";
 
 const DEFAULT_HEADERS: HeadersInit = {};
 
 if (import.meta.env.VITE_COMMAND_CONSOLE_TOKEN) {
-  DEFAULT_HEADERS['x-internal-token'] = import.meta.env.VITE_COMMAND_CONSOLE_TOKEN;
+  DEFAULT_HEADERS["x-internal-token"] = import.meta.env.VITE_COMMAND_CONSOLE_TOKEN;
 }
 
 export async function fetchSnapshot(): Promise<CommandConsoleSnapshot> {
-  const res = await fetch('/api/internal/command-console/summary', {
+  const res = await fetch("/api/internal/command-console/summary", {
     headers: DEFAULT_HEADERS,
   });
 

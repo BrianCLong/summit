@@ -8,9 +8,9 @@
  * - Diagnostics collection
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import * as crypto from 'crypto';
+import * as fs from "fs";
+import * as path from "path";
+import * as crypto from "crypto";
 
 /**
  * Session state
@@ -19,7 +19,7 @@ export interface SessionState {
   sessionId: string;
   startTime: string;
   endTime?: string;
-  status: 'running' | 'completed' | 'failed' | 'cancelled';
+  status: "running" | "completed" | "failed" | "cancelled";
   repoRoot: string;
   command: string;
   flags: Record<string, unknown>;
@@ -32,9 +32,9 @@ export interface SessionState {
  */
 export interface OperationRecord {
   timestamp: string;
-  type: 'read' | 'write' | 'exec' | 'network' | 'git' | 'policy';
+  type: "read" | "write" | "exec" | "network" | "git" | "policy";
   target: string;
-  status: 'allowed' | 'denied' | 'success' | 'failure';
+  status: "allowed" | "denied" | "success" | "failure";
   details: Record<string, unknown>;
   durationMs: number;
 }
@@ -79,8 +79,8 @@ export function generateSessionId(
   timestamp: string,
   seed?: string
 ): string {
-  const input = [repoRoot, command, timestamp, seed || ''].join('|');
-  const hash = crypto.createHash('sha256').update(input).digest('hex');
+  const input = [repoRoot, command, timestamp, seed || ""].join("|");
+  const hash = crypto.createHash("sha256").update(input).digest("hex");
   return `session-${hash.slice(0, 16)}`;
 }
 
@@ -88,7 +88,7 @@ export function generateSessionId(
  * Generate random session ID
  */
 export function generateRandomSessionId(): string {
-  const randomBytes = crypto.randomBytes(8).toString('hex');
+  const randomBytes = crypto.randomBytes(8).toString("hex");
   return `session-${randomBytes}`;
 }
 
@@ -107,14 +107,14 @@ export class Session {
       ? generateSessionId(options.repoRoot, options.command, startTime, options.seed)
       : generateRandomSessionId();
 
-    this.sessionDir = options.sessionDir || path.join(options.repoRoot, '.claude', 'sessions');
+    this.sessionDir = options.sessionDir || path.join(options.repoRoot, ".claude", "sessions");
     this.sessionFile = path.join(this.sessionDir, `${sessionId}.json`);
     this.startMemory = process.memoryUsage().heapUsed;
 
     this.state = {
       sessionId,
       startTime,
-      status: 'running',
+      status: "running",
       repoRoot: options.repoRoot,
       command: options.command,
       flags: this.sanitizeFlags(options.flags),
@@ -151,7 +151,7 @@ export class Session {
 
     for (const [key, value] of Object.entries(flags)) {
       const isSensitive = sensitivePatterns.some((pattern) => pattern.test(key));
-      sanitized[key] = isSensitive ? '[REDACTED]' : value;
+      sanitized[key] = isSensitive ? "[REDACTED]" : value;
     }
 
     return sanitized;
@@ -175,9 +175,9 @@ export class Session {
    * Record an operation
    */
   recordOperation(
-    type: OperationRecord['type'],
+    type: OperationRecord["type"],
     target: string,
-    status: OperationRecord['status'],
+    status: OperationRecord["status"],
     details: Record<string, unknown> = {},
     durationMs: number = 0
   ): void {
@@ -202,7 +202,7 @@ export class Session {
     const sanitized: Record<string, unknown> = {};
 
     for (const [key, value] of Object.entries(details)) {
-      if (typeof value === 'string' && value.length > 1000) {
+      if (typeof value === "string" && value.length > 1000) {
         sanitized[key] = `[TRUNCATED: ${value.length} chars]`;
       } else {
         sanitized[key] = value;
@@ -221,36 +221,36 @@ export class Session {
     d.totalOperations++;
     d.totalDurationMs += operation.durationMs;
 
-    if (operation.status === 'allowed' || operation.status === 'success') {
+    if (operation.status === "allowed" || operation.status === "success") {
       d.allowedOperations++;
     }
-    if (operation.status === 'denied') {
+    if (operation.status === "denied") {
       d.deniedOperations++;
     }
-    if (operation.status === 'success') {
+    if (operation.status === "success") {
       d.successfulOperations++;
     }
-    if (operation.status === 'failure') {
+    if (operation.status === "failure") {
       d.failedOperations++;
     }
 
     switch (operation.type) {
-      case 'read':
+      case "read":
         d.filesRead++;
         break;
-      case 'write':
+      case "write":
         d.filesWritten++;
         break;
-      case 'exec':
+      case "exec":
         d.toolsExecuted++;
         break;
-      case 'network':
+      case "network":
         d.networkCalls++;
         break;
-      case 'policy':
+      case "policy":
         d.policyEvaluations++;
         break;
-      case 'git':
+      case "git":
         d.gitOperations++;
         break;
     }
@@ -266,7 +266,7 @@ export class Session {
    * Mark session as completed
    */
   complete(): void {
-    this.state.status = 'completed';
+    this.state.status = "completed";
     this.state.endTime = new Date().toISOString();
     this.persist();
   }
@@ -275,10 +275,10 @@ export class Session {
    * Mark session as failed
    */
   fail(error?: string): void {
-    this.state.status = 'failed';
+    this.state.status = "failed";
     this.state.endTime = new Date().toISOString();
     if (error) {
-      this.recordOperation('policy', 'session', 'failure', { error });
+      this.recordOperation("policy", "session", "failure", { error });
     }
     this.persist();
   }
@@ -287,7 +287,7 @@ export class Session {
    * Mark session as cancelled
    */
   cancel(): void {
-    this.state.status = 'cancelled';
+    this.state.status = "cancelled";
     this.state.endTime = new Date().toISOString();
     this.persist();
   }
@@ -340,7 +340,7 @@ export class Session {
       `Peak Memory: ${d.peakMemoryMb}MB`,
     ];
 
-    return lines.join('\n');
+    return lines.join("\n");
   }
 }
 
@@ -352,7 +352,7 @@ export function loadSession(sessionFile: string): SessionState | null {
     if (!fs.existsSync(sessionFile)) {
       return null;
     }
-    const content = fs.readFileSync(sessionFile, 'utf-8');
+    const content = fs.readFileSync(sessionFile, "utf-8");
     return JSON.parse(content) as SessionState;
   } catch {
     return null;
@@ -368,7 +368,7 @@ export function listSessions(sessionDir: string): SessionState[] {
       return [];
     }
 
-    const files = fs.readdirSync(sessionDir).filter((f) => f.endsWith('.json'));
+    const files = fs.readdirSync(sessionDir).filter((f) => f.endsWith(".json"));
     const sessionsWithMtime: Array<{ session: SessionState; mtime: number }> = [];
 
     for (const file of files) {
@@ -384,7 +384,8 @@ export function listSessions(sessionDir: string): SessionState[] {
     // Sort by start time (newest first), then by file mtime (newest first) as tiebreaker
     return sessionsWithMtime
       .sort((a, b) => {
-        const timeDiff = new Date(b.session.startTime).getTime() - new Date(a.session.startTime).getTime();
+        const timeDiff =
+          new Date(b.session.startTime).getTime() - new Date(a.session.startTime).getTime();
         if (timeDiff !== 0) return timeDiff;
         // Use file mtime as tiebreaker (newer files first)
         return b.mtime - a.mtime;
@@ -405,7 +406,7 @@ export function cleanOldSessions(sessionDir: string, maxAgeDays: number = 7): nu
     }
 
     const cutoff = Date.now() - maxAgeDays * 24 * 60 * 60 * 1000;
-    const files = fs.readdirSync(sessionDir).filter((f) => f.endsWith('.json'));
+    const files = fs.readdirSync(sessionDir).filter((f) => f.endsWith(".json"));
     let cleaned = 0;
 
     for (const file of files) {

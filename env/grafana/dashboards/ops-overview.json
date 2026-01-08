@@ -1,3 +1,14 @@
-{ "title": "IntelGraph Ops Overview", "panels": [
-  { "type": "graph", "title": "HTTP Latency", "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_ms_bucket[5m])) by (le))" }] }
-]}
+{
+  "title": "IntelGraph Ops Overview",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "HTTP Latency",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_ms_bucket[5m])) by (le))"
+        }
+      ]
+    }
+  ]
+}

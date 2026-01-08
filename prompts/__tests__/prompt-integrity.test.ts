@@ -1,87 +1,72 @@
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
 /**
  * Prompt Integrity Test Suite
- * 
+ *
  * Validates that all required agent prompts exist and contain
  * necessary execution markers.
  */
-describe('Prompt Integrity Suite', () => {
-  const promptsDir = path.join(__dirname, '..');
+describe("Prompt Integrity Suite", () => {
+  const promptsDir = path.join(__dirname, "..");
 
   const requiredFiles = [
-    'README.md',
-    'claude-code.md',
-    'codex.md',
-    'jules-gemini.md',
-    'cursor-warp.md',
-    'summit-intelgraph.md',
-    'ci-cd.md',
-    'meta-router.md',
-    'capability-matrix.md',
-    'enterprise-4th-order.md',
-    'workflow-automation.md',
+    "README.md",
+    "claude-code.md",
+    "codex.md",
+    "jules-gemini.md",
+    "cursor-warp.md",
+    "summit-intelgraph.md",
+    "ci-cd.md",
+    "meta-router.md",
+    "capability-matrix.md",
+    "enterprise-4th-order.md",
+    "workflow-automation.md",
   ];
 
-  describe('File Existence', () => {
-    test.each(requiredFiles)('%s exists and is not empty', (file) => {
+  describe("File Existence", () => {
+    test.each(requiredFiles)("%s exists and is not empty", (file) => {
       const fullPath = path.join(promptsDir, file);
       expect(fs.existsSync(fullPath)).toBe(true);
       expect(fs.statSync(fullPath).size).toBeGreaterThan(100);
     });
   });
 
-  describe('Execution Markers', () => {
+  describe("Execution Markers", () => {
     const executablePrompts = [
-      'claude-code.md',
-      'codex.md',
-      'jules-gemini.md',
-      'cursor-warp.md',
-      'summit-intelgraph.md',
-      'ci-cd.md',
-      'meta-router.md',
+      "claude-code.md",
+      "codex.md",
+      "jules-gemini.md",
+      "cursor-warp.md",
+      "summit-intelgraph.md",
+      "ci-cd.md",
+      "meta-router.md",
     ];
 
-    test.each(executablePrompts)(
-      '%s contains execution marker (BEGIN/EXECUTE)',
-      (file) => {
-        const content = fs.readFileSync(
-          path.join(promptsDir, file),
-          'utf8'
-        );
-        expect(content).toMatch(/BEGIN|EXECUTE/i);
-      }
-    );
+    test.each(executablePrompts)("%s contains execution marker (BEGIN/EXECUTE)", (file) => {
+      const content = fs.readFileSync(path.join(promptsDir, file), "utf8");
+      expect(content).toMatch(/BEGIN|EXECUTE/i);
+    });
   });
 
-  describe('Required Sections', () => {
-    test('claude-code.md has all execution layers', () => {
-      const content = fs.readFileSync(
-        path.join(promptsDir, 'claude-code.md'),
-        'utf8'
-      );
+  describe("Required Sections", () => {
+    test("claude-code.md has all execution layers", () => {
+      const content = fs.readFileSync(path.join(promptsDir, "claude-code.md"), "utf8");
       expect(content).toMatch(/1st-Order/i);
       expect(content).toMatch(/2nd-Order/i);
       expect(content).toMatch(/3rd-Order/i);
       expect(content).toMatch(/SELF-AUDIT/i);
     });
 
-    test('ci-cd.md has mandatory questions', () => {
-      const content = fs.readFileSync(
-        path.join(promptsDir, 'ci-cd.md'),
-        'utf8'
-      );
+    test("ci-cd.md has mandatory questions", () => {
+      const content = fs.readFileSync(path.join(promptsDir, "ci-cd.md"), "utf8");
       expect(content).toMatch(/MANDATORY QUESTIONS/i);
       expect(content).toMatch(/Will typecheck pass/i);
       expect(content).toMatch(/Will CI be green/i);
     });
 
-    test('enterprise-4th-order.md has all governance domains', () => {
-      const content = fs.readFileSync(
-        path.join(promptsDir, 'enterprise-4th-order.md'),
-        'utf8'
-      );
+    test("enterprise-4th-order.md has all governance domains", () => {
+      const content = fs.readFileSync(path.join(promptsDir, "enterprise-4th-order.md"), "utf8");
       expect(content).toMatch(/GOVERNANCE/i);
       expect(content).toMatch(/OPERATIONS/i);
       expect(content).toMatch(/SECURITY/i);
@@ -89,93 +74,70 @@ describe('Prompt Integrity Suite', () => {
       expect(content).toMatch(/ORGANIZATIONAL EFFECTIVENESS/i);
     });
 
-    test('meta-router.md has decision tree', () => {
-      const content = fs.readFileSync(
-        path.join(promptsDir, 'meta-router.md'),
-        'utf8'
-      );
+    test("meta-router.md has decision tree", () => {
+      const content = fs.readFileSync(path.join(promptsDir, "meta-router.md"), "utf8");
       expect(content).toMatch(/DECISION TREE/i);
       expect(content).toMatch(/AGENT SELECTION LOGIC/i);
     });
   });
 
-  describe('Content Quality', () => {
-    test('No TODO markers in prompts', () => {
+  describe("Content Quality", () => {
+    test("No TODO markers in prompts", () => {
       for (const file of requiredFiles) {
-        const content = fs.readFileSync(
-          path.join(promptsDir, file),
-          'utf8'
-        );
+        const content = fs.readFileSync(path.join(promptsDir, file), "utf8");
         expect(content).not.toMatch(/TODO/i);
       }
     });
 
-    test('No placeholder text in prompts', () => {
-      const placeholders = [
-        '[INSERT',
-        '[TBD',
-        '[PLACEHOLDER',
-        'Lorem ipsum',
-      ];
-      
+    test("No placeholder text in prompts", () => {
+      const placeholders = ["[INSERT", "[TBD", "[PLACEHOLDER", "Lorem ipsum"];
+
       for (const file of requiredFiles) {
-        const content = fs.readFileSync(
-          path.join(promptsDir, file),
-          'utf8'
-        );
+        const content = fs.readFileSync(path.join(promptsDir, file), "utf8");
         for (const placeholder of placeholders) {
-          expect(content).not.toMatch(new RegExp(placeholder, 'i'));
+          expect(content).not.toMatch(new RegExp(placeholder, "i"));
         }
       }
     });
   });
 
-  describe('Capability Matrix Validation', () => {
-    test('capability-matrix.md has all agents listed', () => {
-      const content = fs.readFileSync(
-        path.join(promptsDir, 'capability-matrix.md'),
-        'utf8'
-      );
+  describe("Capability Matrix Validation", () => {
+    test("capability-matrix.md has all agents listed", () => {
+      const content = fs.readFileSync(path.join(promptsDir, "capability-matrix.md"), "utf8");
       const requiredAgents = [
-        'Claude Code',
-        'Codex',
-        'Jules/Gemini',
-        'Cursor/Warp',
-        'Summit Superprompt',
-        'CI/CD Prompt',
+        "Claude Code",
+        "Codex",
+        "Jules/Gemini",
+        "Cursor/Warp",
+        "Summit Superprompt",
+        "CI/CD Prompt",
       ];
 
       for (const agent of requiredAgents) {
-        expect(content).toMatch(new RegExp(agent, 'i'));
+        expect(content).toMatch(new RegExp(agent, "i"));
       }
     });
 
-    test('capability-matrix.md covers all Black Projects modules', () => {
-      const content = fs.readFileSync(
-        path.join(promptsDir, 'capability-matrix.md'),
-        'utf8'
-      );
+    test("capability-matrix.md covers all Black Projects modules", () => {
+      const content = fs.readFileSync(path.join(promptsDir, "capability-matrix.md"), "utf8");
       const modules = [
-        'Project AURORA',
-        'Project ORACLE',
-        'Project PHANTOM LIMB',
-        'Project ECHELON-2',
-        'Project MNEMOSYNE',
-        'Project NECROMANCER',
-        'Project ZERO DAY',
-        'Project ABYSS',
+        "Project AURORA",
+        "Project ORACLE",
+        "Project PHANTOM LIMB",
+        "Project ECHELON-2",
+        "Project MNEMOSYNE",
+        "Project NECROMANCER",
+        "Project ZERO DAY",
+        "Project ABYSS",
       ];
 
       for (const module of modules) {
-        expect(content).toMatch(new RegExp(module, 'i'));
+        expect(content).toMatch(new RegExp(module, "i"));
       }
     });
 
-    test('capability-matrix.md lists governance policy modules', () => {
-      const content = fs.readFileSync(
-        path.join(promptsDir, 'capability-matrix.md'),
-        'utf8'
-      );
+    test("capability-matrix.md lists governance policy modules", () => {
+      const content = fs.readFileSync(path.join(promptsDir, "capability-matrix.md"), "utf8");
 
       expect(content).toMatch(/Governance Policy Modules/i);
       expect(content).toMatch(/Bias Mitigation/i);
@@ -187,24 +149,20 @@ describe('Prompt Integrity Suite', () => {
 
 /**
  * Prompt Version Tracking
- * 
+ *
  * Ensures prompt versions are tracked for auditing.
  */
-describe('Prompt Version Tracking', () => {
-  test('Prompts have been updated recently', () => {
-    const promptFiles = [
-      'claude-code.md',
-      'codex.md',
-      'jules-gemini.md',
-    ];
+describe("Prompt Version Tracking", () => {
+  test("Prompts have been updated recently", () => {
+    const promptFiles = ["claude-code.md", "codex.md", "jules-gemini.md"];
 
     for (const file of promptFiles) {
-      const fullPath = path.join(__dirname, '..', file);
+      const fullPath = path.join(__dirname, "..", file);
       if (fs.existsSync(fullPath)) {
         const stats = fs.statSync(fullPath);
         const age = Date.now() - stats.mtimeMs;
         const thirtyDays = 30 * 24 * 60 * 60 * 1000;
-        
+
         // Warn if prompts haven't been reviewed in 30 days
         if (age > thirtyDays) {
           console.warn(
@@ -223,21 +181,15 @@ describe('Prompt Version Tracking', () => {
  *
  * Ensures routing prompts reference archival requirements for replay and forensics.
  */
-describe('Session Archival Prompts', () => {
-  test('workflow-automation.md mandates archiving completed sessions', () => {
-    const content = fs.readFileSync(
-      path.join(promptsDir, 'workflow-automation.md'),
-      'utf8'
-    );
+describe("Session Archival Prompts", () => {
+  test("workflow-automation.md mandates archiving completed sessions", () => {
+    const content = fs.readFileSync(path.join(promptsDir, "workflow-automation.md"), "utf8");
 
     expect(content).toMatch(/Archive completed sessions promptly/i);
   });
 
-  test('meta-router.md declares governance archival step', () => {
-    const content = fs.readFileSync(
-      path.join(promptsDir, 'meta-router.md'),
-      'utf8'
-    );
+  test("meta-router.md declares governance archival step", () => {
+    const content = fs.readFileSync(path.join(promptsDir, "meta-router.md"), "utf8");
 
     expect(content).toMatch(/Governance Layer/i);
     expect(content).toMatch(/Session Archival/i);

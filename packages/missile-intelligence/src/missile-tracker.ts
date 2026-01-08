@@ -7,8 +7,8 @@ import {
   MissileType,
   type LaunchFacility,
   type ReentryVehicle,
-  OperationalStatus
-} from './types.js';
+  OperationalStatus,
+} from "./types.js";
 
 export class MissileTracker {
   private missiles: Map<string, MissileSystem>;
@@ -42,19 +42,23 @@ export class MissileTracker {
   }
 
   getMissilesByCountry(country: string): MissileSystem[] {
-    return Array.from(this.missiles.values()).filter(m => m.country === country);
+    return Array.from(this.missiles.values()).filter((m) => m.country === country);
   }
 
   getStrategicMissiles(country: string): MissileSystem[] {
-    return this.getMissilesByCountry(country)
-      .filter(m => m.classification === 'strategic' || m.range_km > 5500);
+    return this.getMissilesByCountry(country).filter(
+      (m) => m.classification === "strategic" || m.range_km > 5500
+    );
   }
 
   getMissilesByType(type: MissileType): MissileSystem[] {
-    return Array.from(this.missiles.values()).filter(m => m.missile_type === type);
+    return Array.from(this.missiles.values()).filter((m) => m.missile_type === type);
   }
 
-  calculateStrikeRange(missileId: string, launchSiteId: string): {
+  calculateStrikeRange(
+    missileId: string,
+    launchSiteId: string
+  ): {
     max_range_km: number;
     targets_in_range: string[];
   } {
@@ -68,7 +72,7 @@ export class MissileTracker {
     // In a real implementation, this would calculate actual geographic coverage
     return {
       max_range_km: missile.range_km,
-      targets_in_range: []
+      targets_in_range: [],
     };
   }
 
@@ -87,48 +91,51 @@ export class MissileTracker {
     return {
       is_mirv: missile.mirv_capable,
       warhead_count: rv?.number_of_rvs,
-      targets_per_launch: rv?.number_of_rvs || 1
+      targets_per_launch: rv?.number_of_rvs || 1,
     };
   }
 
   getMobileLaunchers(country: string): { mobile_systems: number; system_names: string[] } {
-    const missiles = this.getMissilesByCountry(country).filter(m => m.mobile);
+    const missiles = this.getMissilesByCountry(country).filter((m) => m.mobile);
 
     return {
       mobile_systems: missiles.reduce((sum, m) => sum + m.estimated_inventory, 0),
-      system_names: missiles.map(m => m.name)
+      system_names: missiles.map((m) => m.name),
     };
   }
 
   assessHypersonicCapability(country: string): {
     has_capability: boolean;
     systems: string[];
-    threat_level: 'high' | 'medium' | 'low' | 'none';
+    threat_level: "high" | "medium" | "low" | "none";
   } {
-    const hypersonics = this.getMissilesByCountry(country)
-      .filter(m => m.missile_type === MissileType.HYPERSONIC_GLIDE ||
-                   m.missile_type === MissileType.HYPERSONIC_CRUISE);
-
-    const operational = hypersonics.filter(m =>
-      m.operational_status === OperationalStatus.OPERATIONAL ||
-      m.operational_status === OperationalStatus.DEPLOYED
+    const hypersonics = this.getMissilesByCountry(country).filter(
+      (m) =>
+        m.missile_type === MissileType.HYPERSONIC_GLIDE ||
+        m.missile_type === MissileType.HYPERSONIC_CRUISE
     );
 
-    let threat_level: 'high' | 'medium' | 'low' | 'none';
+    const operational = hypersonics.filter(
+      (m) =>
+        m.operational_status === OperationalStatus.OPERATIONAL ||
+        m.operational_status === OperationalStatus.DEPLOYED
+    );
+
+    let threat_level: "high" | "medium" | "low" | "none";
     if (operational.length > 5) {
-      threat_level = 'high';
+      threat_level = "high";
     } else if (operational.length > 0) {
-      threat_level = 'medium';
+      threat_level = "medium";
     } else if (hypersonics.length > 0) {
-      threat_level = 'low';
+      threat_level = "low";
     } else {
-      threat_level = 'none';
+      threat_level = "none";
     }
 
     return {
       has_capability: hypersonics.length > 0,
-      systems: hypersonics.map(m => m.name),
-      threat_level
+      systems: hypersonics.map((m) => m.name),
+      threat_level,
     };
   }
 }

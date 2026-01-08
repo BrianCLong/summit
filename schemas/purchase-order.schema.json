@@ -3,13 +3,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Purchase Order",
   "type": "object",
-  "required": [
-    "id",
-    "amount",
-    "currency",
-    "vendorId",
-    "createdAt"
-  ],
+  "required": ["id", "amount", "currency", "vendorId", "createdAt"],
   "properties": {
     "id": {
       "type": "string",
@@ -20,13 +14,7 @@
       "minimum": 0
     },
     "currency": {
-      "enum": [
-        "USD",
-        "EUR",
-        "GBP",
-        "CAD",
-        "AUD"
-      ]
+      "enum": ["USD", "EUR", "GBP", "CAD", "AUD"]
     },
     "vendorId": {
       "type": "string",

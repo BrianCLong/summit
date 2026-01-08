@@ -1,4 +1,4 @@
-export type RegionId = 'united-states' | 'european-union-germany' | 'singapore';
+export type RegionId = "united-states" | "european-union-germany" | "singapore";
 
 export interface RegionCriteria {
   regionId: RegionId;
@@ -8,7 +8,7 @@ export interface RegionCriteria {
 }
 
 export interface RegulatoryRequirement {
-  domain: 'privacy' | 'consumer' | 'sector' | 'labor' | 'tax';
+  domain: "privacy" | "consumer" | "sector" | "labor" | "tax";
   regionId: RegionId;
   requirement: string;
   controlOwner: string;
@@ -85,7 +85,7 @@ export interface TabletopResult {
 }
 
 export interface EvidenceEvent {
-  type: 'residency' | 'screening' | 'procurement' | 'support' | 'localization' | 'performance';
+  type: "residency" | "screening" | "procurement" | "support" | "localization" | "performance";
   regionId: RegionId;
   timestamp: Date;
   payload: Record<string, unknown>;

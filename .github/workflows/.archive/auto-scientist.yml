@@ -3,10 +3,10 @@ name: Auto-Scientist CI
 on:
   push:
     paths:
-      - 'auto_scientist/**'
+      - "auto_scientist/**"
   pull_request:
     paths:
-      - 'auto_scientist/**'
+      - "auto_scientist/**"
 
 jobs:
   test:
@@ -16,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
       - name: Install Dependencies
         run: |
           pip install --upgrade pip

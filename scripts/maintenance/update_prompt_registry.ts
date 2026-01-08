@@ -1,9 +1,9 @@
-import fs from 'fs';
-import path from 'path';
-import crypto from 'crypto';
-import yaml from 'js-yaml';
+import fs from "fs";
+import path from "path";
+import crypto from "crypto";
+import yaml from "js-yaml";
 
-const REGISTRY_PATH = 'prompts/registry.yaml';
+const REGISTRY_PATH = "prompts/registry.yaml";
 const ROOT_DIR = process.cwd();
 
 interface PromptEntry {
@@ -23,8 +23,8 @@ interface Registry {
 }
 
 function calculateSha256(filePath: string): string {
-  const content = fs.readFileSync(filePath, 'utf-8');
-  return crypto.createHash('sha256').update(content).digest('hex');
+  const content = fs.readFileSync(filePath, "utf-8");
+  return crypto.createHash("sha256").update(content).digest("hex");
 }
 
 function updateRegistry() {
@@ -35,7 +35,7 @@ function updateRegistry() {
     process.exit(1);
   }
 
-  const fileContent = fs.readFileSync(fullRegistryPath, 'utf-8');
+  const fileContent = fs.readFileSync(fullRegistryPath, "utf-8");
   const registry = yaml.load(fileContent) as Registry;
   let updatedCount = 0;
 
@@ -55,10 +55,10 @@ function updateRegistry() {
 
   if (updatedCount > 0) {
     const newContent = yaml.dump(registry, { indent: 2, lineWidth: -1 });
-    fs.writeFileSync(fullRegistryPath, newContent, 'utf-8');
+    fs.writeFileSync(fullRegistryPath, newContent, "utf-8");
     console.log(`Updated ${updatedCount} prompt hashes in registry.`);
   } else {
-    console.log('No prompt hashes needed updating.');
+    console.log("No prompt hashes needed updating.");
   }
 }
 

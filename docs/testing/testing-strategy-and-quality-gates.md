@@ -6,17 +6,18 @@ This document defines the comprehensive testing strategy for the Summit platform
 
 We subscribe to a practical test pyramid:
 
-| Layer | Type | Scope | Responsibility | Speed |
-|-------|------|-------|----------------|-------|
-| **L1** | **Static** | Lint, Types, Format | Catch syntax & type errors immediately. | < 30s |
-| **L2** | **Unit** | `*.test.ts`, `*.spec.ts` | Test isolated logic (classes, utils, algorithms). Mock all I/O. | < 2m |
-| **L3** | **Integration** | `tests/integration/` | Test component interactions (API + DB, Graph + Algo). Use test fixtures. | < 5m |
-| **L4** | **E2E Smoke** | `tests/e2e/smoke` | Critical user flows via UI/API (Login, Create Investigation, Run Pipeline). | < 10m |
-| **L5** | **E2E Full** | `tests/e2e/full` | Deep regression suites, edge cases, cross-browser. | 15m+ |
+| Layer  | Type            | Scope                    | Responsibility                                                              | Speed |
+| ------ | --------------- | ------------------------ | --------------------------------------------------------------------------- | ----- |
+| **L1** | **Static**      | Lint, Types, Format      | Catch syntax & type errors immediately.                                     | < 30s |
+| **L2** | **Unit**        | `*.test.ts`, `*.spec.ts` | Test isolated logic (classes, utils, algorithms). Mock all I/O.             | < 2m  |
+| **L3** | **Integration** | `tests/integration/`     | Test component interactions (API + DB, Graph + Algo). Use test fixtures.    | < 5m  |
+| **L4** | **E2E Smoke**   | `tests/e2e/smoke`        | Critical user flows via UI/API (Login, Create Investigation, Run Pipeline). | < 10m |
+| **L5** | **E2E Full**    | `tests/e2e/full`         | Deep regression suites, edge cases, cross-browser.                          | 15m+  |
 
 ## 2. Testing Responsibilities
 
 ### Server (`server/`)
+
 - **Unit:** Jest + `ts-jest`.
   - Focus: Domain logic, utility functions, graph algorithms, query builders.
   - Requirement: 80% coverage on core logic.
@@ -25,6 +26,7 @@ We subscribe to a practical test pyramid:
   - Harness: Use `server/test/harness.ts` to spin up isolated test contexts.
 
 ### Web (`apps/web/`)
+
 - **Unit/Component:** Vitest + React Testing Library.
   - Focus: Component rendering, hooks, state management (Zustand).
   - Requirement: Critical UI components must have tests.
@@ -33,6 +35,7 @@ We subscribe to a practical test pyramid:
   - Location: `e2e/`.
 
 ### Shared Packages (`packages/`)
+
 - Each package is responsible for its own Unit tests.
 - Integration tests usually live in `server` where they are consumed.
 
@@ -52,17 +55,20 @@ We use a unified fixture system to ensure consistency across tests.
 Our CI pipeline (`.github/workflows/ci.yml`) enforces the following gates:
 
 ### Gate 1: Developer Local (Pre-commit)
+
 - `pnpm lint`
 - `pnpm typecheck`
 - `pnpm test:fast` (Unit tests)
 
 ### Gate 2: PR Verification (Required for Merge)
+
 - **Static Analysis:** Lint & Typecheck.
 - **Unit Tests:** All server & web unit tests.
 - **Integration Core:** Fast integration tests using mocks/containers.
 - **E2E Smoke:** Happy path verification (Maestro run, Graph explore).
 
 ### Gate 3: Nightly / Release
+
 - **Full E2E:** Complete regression suite.
 - **Security:** SBOM generation, Trivy scan.
 - **Performance:** k6 benchmarks.
@@ -70,6 +76,7 @@ Our CI pipeline (`.github/workflows/ci.yml`) enforces the following gates:
 ## 5. How to Run Tests
 
 ### Fast Feedback Loop (Dev)
+
 ```bash
 # Run all unit tests
 pnpm test:unit
@@ -79,12 +86,14 @@ cd server && npm test -- src/services/MyService.test.ts
 ```
 
 ### Integration Loop
+
 ```bash
 # Run server integration tests (requires Docker)
 pnpm test:integration
 ```
 
 ### E2E Smoke Loop
+
 ```bash
 # Run smoke tests against local dev stack
 pnpm test:e2e

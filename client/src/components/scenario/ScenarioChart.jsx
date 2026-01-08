@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState } from "react";
 import {
   Card,
   CardHeader,
@@ -8,7 +8,7 @@ import {
   Button,
   Stack,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
 import {
   ResponsiveContainer,
   LineChart,
@@ -18,7 +18,7 @@ import {
   Tooltip,
   Legend,
   CartesianGrid,
-} from 'recharts';
+} from "recharts";
 
 export default function ScenarioChart() {
   const [form, setForm] = useState({
@@ -37,14 +37,14 @@ export default function ScenarioChart() {
     const v = e.target.value;
     setForm((s) => ({
       ...s,
-      [k]: String(v).includes('.') ? Number(v) : Number(v),
+      [k]: String(v).includes(".") ? Number(v) : Number(v),
     }));
   };
 
   const run = async () => {
-    const r = await fetch('/v1/scenario/run', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-roles': 'Exec' },
+    const r = await fetch("/v1/scenario/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-roles": "Exec" },
       body: JSON.stringify(form),
     });
     const json = await r.json();
@@ -72,7 +72,7 @@ export default function ScenarioChart() {
               type="number"
               fullWidth
               value={form.headcount}
-              onChange={handle('headcount')}
+              onChange={handle("headcount")}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
@@ -81,7 +81,7 @@ export default function ScenarioChart() {
               type="number"
               fullWidth
               value={form.price}
-              onChange={handle('price')}
+              onChange={handle("price")}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
@@ -90,7 +90,7 @@ export default function ScenarioChart() {
               type="number"
               fullWidth
               value={form.churn}
-              onChange={handle('churn')}
+              onChange={handle("churn")}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
@@ -99,7 +99,7 @@ export default function ScenarioChart() {
               type="number"
               fullWidth
               value={form.pipeline}
-              onChange={handle('pipeline')}
+              onChange={handle("pipeline")}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
@@ -108,7 +108,7 @@ export default function ScenarioChart() {
               type="number"
               fullWidth
               value={form.cogsRate}
-              onChange={handle('cogsRate')}
+              onChange={handle("cogsRate")}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
@@ -117,7 +117,7 @@ export default function ScenarioChart() {
               type="number"
               fullWidth
               value={form.payrollPerFte}
-              onChange={handle('payrollPerFte')}
+              onChange={handle("payrollPerFte")}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
@@ -126,7 +126,7 @@ export default function ScenarioChart() {
               type="number"
               fullWidth
               value={form.otherOpex}
-              onChange={handle('otherOpex')}
+              onChange={handle("otherOpex")}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
@@ -135,7 +135,7 @@ export default function ScenarioChart() {
               type="number"
               fullWidth
               value={form.months}
-              onChange={handle('months')}
+              onChange={handle("months")}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
@@ -165,7 +165,7 @@ export default function ScenarioChart() {
               </Typography>
             </Stack>
 
-            <div style={{ width: '100%', height: 320, marginTop: 12 }}>
+            <div style={{ width: "100%", height: 320, marginTop: 12 }}>
               <ResponsiveContainer>
                 <LineChart data={rows}>
                   <CartesianGrid strokeDasharray="3 3" />

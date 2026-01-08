@@ -1,4 +1,4 @@
-import { RegionId, SubprocessorEntry } from './types.js';
+import { RegionId, SubprocessorEntry } from "./types.js";
 
 export class SubprocessorRegistry {
   private readonly entries = new Map<string, SubprocessorEntry>();
@@ -16,6 +16,8 @@ export class SubprocessorRegistry {
   }
 
   getCustomerView(regionId: RegionId): SubprocessorEntry[] {
-    return Array.from(this.entries.values()).filter((entry) => entry.approvedRegions.includes(regionId));
+    return Array.from(this.entries.values()).filter((entry) =>
+      entry.approvedRegions.includes(regionId)
+    );
   }
 }

@@ -6,13 +6,13 @@ on:
       - main
       - develop
     paths:
-      - 'server/**'
+      - "server/**"
   pull_request:
     branches:
       - main
       - develop
     paths:
-      - 'server/**'
+      - "server/**"
 
 concurrency:
   group: server-ci-${{ github.head_ref || github.sha }}
@@ -32,8 +32,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Enable corepack
         run: corepack enable

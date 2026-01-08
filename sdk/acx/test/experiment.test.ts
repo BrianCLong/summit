@@ -1,67 +1,67 @@
-import { createRequire } from 'node:module';
-import { jest } from '@jest/globals';
-import { AdaptiveConsentSDK } from '../src/sdk.js';
-import { PolicyTemplatePack } from '../src/types.js';
+import { createRequire } from "node:module";
+import { jest } from "@jest/globals";
+import { AdaptiveConsentSDK } from "../src/sdk.js";
+import { PolicyTemplatePack } from "../src/types.js";
 
 const require = createRequire(import.meta.url);
-const pack = require('../templates/policyPack.json') as PolicyTemplatePack;
+const pack = require("../templates/policyPack.json") as PolicyTemplatePack;
 
 const createSdk = () => new AdaptiveConsentSDK(pack);
 
-describe('Experiment handling', () => {
+describe("Experiment handling", () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
-  it('allows UI-only variants', () => {
+  it("allows UI-only variants", () => {
     const sdk = createSdk();
     sdk.registerExperiment({
-      name: 'dialog-theme',
+      name: "dialog-theme",
       controlVariant: {
-        id: 'control',
+        id: "control",
         probability: 0.5,
         uiOverrides: {
-          title: 'Your privacy choices'
-        }
+          title: "Your privacy choices",
+        },
       },
       variants: [
         {
-          id: 'compact',
+          id: "compact",
           probability: 0.5,
           uiOverrides: {
-            title: 'Privacy settings',
-            manageCta: 'Adjust preferences'
-          }
-        }
-      ]
+            title: "Privacy settings",
+            manageCta: "Adjust preferences",
+          },
+        },
+      ],
     });
 
-    jest.spyOn(Math, 'random').mockReturnValue(0.8);
-    const dialog = sdk.render({ locale: 'en-US', experiment: 'dialog-theme' });
-    expect(dialog.variant).toBe('compact');
-    expect(dialog.copy.manageCta).toBe('Adjust preferences');
-    expect(dialog.purposes.map((p) => p.id)).toEqual(['essential', 'analytics', 'personalization']);
+    jest.spyOn(Math, "random").mockReturnValue(0.8);
+    const dialog = sdk.render({ locale: "en-US", experiment: "dialog-theme" });
+    expect(dialog.variant).toBe("compact");
+    expect(dialog.copy.manageCta).toBe("Adjust preferences");
+    expect(dialog.purposes.map((p) => p.id)).toEqual(["essential", "analytics", "personalization"]);
   });
 
-  it('rejects variants that alter semantics', () => {
+  it("rejects variants that alter semantics", () => {
     const sdk = createSdk();
     expect(() =>
       sdk.registerExperiment({
-        name: 'bad-variant',
+        name: "bad-variant",
         controlVariant: {
-          id: 'control',
-          probability: 1
+          id: "control",
+          probability: 1,
         },
         variants: [
           {
-            id: 'coerce',
+            id: "coerce",
             probability: 0,
             uiOverrides: {
-              summary: 'Accept to continue'
-            }
-          }
-        ]
+              summary: "Accept to continue",
+            },
+          },
+        ],
       })
-    ).toThrow('changes consent semantics');
+    ).toThrow("changes consent semantics");
   });
 });

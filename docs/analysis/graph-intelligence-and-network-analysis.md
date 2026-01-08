@@ -5,6 +5,7 @@ The Summit platform includes a robust Graph Intelligence Engine that runs networ
 ## Architecture
 
 The system operates using an in-memory graph analysis model:
+
 1.  **Data Loading**: A slice of the tenant's graph is loaded from Neo4j into an efficient in-memory adjacency list structure.
 2.  **Algorithm Execution**: Pure functions execute standard graph algorithms (BFS, Centrality, etc.) on the in-memory graph.
 3.  **Result Persistence**: Results are returned to the caller or stored (future state).
@@ -15,22 +16,30 @@ The system operates using an in-memory graph analysis model:
 The following algorithms are currently implemented:
 
 ### 1. Shortest Path (`shortestPath`)
+
 Finds the shortest path between two entities.
+
 - **Input**: `sourceNodeId`, `targetNodeId`, `maxDepth` (optional)
 - **Output**: Path (sequence of nodes/edges) and distance.
 
 ### 2. k-Hop Neighborhood (`kHopNeighborhood`)
+
 Explores the graph outward (or inward) from a starting node up to `k` steps.
+
 - **Input**: `sourceNodeId`, `k`, `direction` ('in' | 'out' | 'both')
 - **Output**: Subgraph (nodes and edges) within the radius.
 
 ### 3. Degree Centrality (`degreeCentrality`)
+
 Calculates the number of connections for each node.
+
 - **Input**: `direction`, `topK` (optional)
 - **Output**: List of nodes sorted by degree score.
 
 ### 4. Connected Components (`connectedComponents`)
+
 Identifies isolated clusters or subgraphs within the larger network.
+
 - **Input**: None (runs on full slice)
 - **Output**: List of components (arrays of nodes).
 
@@ -41,6 +50,7 @@ Identifies isolated clusters or subgraphs within the larger network.
 **POST** `/api/graph/analysis/run`
 
 Body:
+
 ```json
 {
   "algorithm": "shortestPath",
@@ -53,6 +63,7 @@ Body:
 ```
 
 Response:
+
 ```json
 {
   "id": "job-uuid",
@@ -74,15 +85,15 @@ You can define a Maestro task to run graph analysis:
 
 ```typescript
 const task = {
-  kind: 'graph.analysis',
-  description: 'Find influence hubs in the network',
+  kind: "graph.analysis",
+  description: "Find influence hubs in the network",
   input: {
-    tenantId: 'tenant-123',
-    algorithm: 'degreeCentrality',
+    tenantId: "tenant-123",
+    algorithm: "degreeCentrality",
     params: {
-      direction: 'both',
-      topK: 10
-    }
-  }
+      direction: "both",
+      topK: 10,
+    },
+  },
 };
 ```

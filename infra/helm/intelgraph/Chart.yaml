@@ -3,7 +3,7 @@ name: intelgraph
 description: IntelGraph Enterprise Intelligence Analysis Platform
 type: application
 version: 2025.09.19
-appVersion: '2025.09.19'
+appVersion: "2025.09.19"
 home: https://github.com/BrianCLong/intelgraph
 sources:
   - https://github.com/BrianCLong/intelgraph
@@ -19,12 +19,12 @@ keywords:
   - compliance
 dependencies:
   - name: postgresql
-    version: '12.12.10'
+    version: "12.12.10"
     repository: https://charts.bitnami.com/bitnami
     condition: postgresql.enabled
 
   - name: redis
-    version: '18.6.4'
+    version: "18.6.4"
     repository: https://charts.bitnami.com/bitnami
     condition: redis.enabled
 

@@ -4,7 +4,7 @@ import type {
   CacheOptions,
   CacheProvider,
   CacheMetrics,
-} from './types.js';
+} from "./types.js";
 
 /**
  * Cache client that wraps providers with consistent interface
@@ -39,9 +39,9 @@ export class CacheClient {
       if (this.localProvider && !options.skipLocal && !options.forceRefresh) {
         const localValue = await this.localProvider.get<CacheEntry<T>>(fullKey);
         if (localValue && localValue.expiresAt > Date.now()) {
-          this.metrics.recordHit('local');
+          this.metrics.recordHit("local");
           this.metrics.recordGetLatency(Date.now() - startTime);
-          return { ...localValue, source: 'local' };
+          return { ...localValue, source: "local" };
         }
       }
 
@@ -58,9 +58,9 @@ export class CacheClient {
             await this.localProvider.set(fullKey, redisValue, localTtl);
           }
 
-          this.metrics.recordHit('redis');
+          this.metrics.recordHit("redis");
           this.metrics.recordGetLatency(Date.now() - startTime);
-          return { ...redisValue, source: 'redis' };
+          return { ...redisValue, source: "redis" };
         }
       }
 
@@ -85,7 +85,7 @@ export class CacheClient {
       value,
       createdAt: Date.now(),
       expiresAt: Date.now() + ttl * 1000,
-      source: 'origin',
+      source: "origin",
       metadata: options.tags ? { tags: options.tags } : undefined,
     };
 
@@ -140,7 +140,7 @@ export class CacheClient {
       results.push(await this.redisProvider.delete(fullKey));
     }
 
-    return results.some(r => r);
+    return results.some((r) => r);
   }
 
   /**
@@ -185,7 +185,7 @@ export class CacheClient {
       value,
       createdAt: Date.now(),
       expiresAt: Date.now() + (options.ttl ?? this.config.defaultTtl) * 1000,
-      source: 'origin',
+      source: "origin",
     };
   }
 
@@ -202,7 +202,7 @@ export class CacheClient {
 
     // Local cache doesn't support pattern deletion efficiently
     // Clear all if pattern is broad
-    if (this.localProvider && pattern.includes('*')) {
+    if (this.localProvider && pattern.includes("*")) {
       // This is a simplification - in production, use a more sophisticated approach
     }
 

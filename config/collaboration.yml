@@ -7,8 +7,8 @@ collaboration:
   # WebSocket Server Configuration
   websocket:
     port: 8080
-    host: '0.0.0.0'
-    path: '/ws'
+    host: "0.0.0.0"
+    path: "/ws"
     max_connections: 10000
     heartbeat_interval: 30000 # 30 seconds
     timeout: 60000 # 1 minute
@@ -55,69 +55,69 @@ collaboration:
 
     voice:
       enabled: false
-      codec: 'opus'
+      codec: "opus"
       bitrate: 64000
       echo_cancellation: true
       noise_suppression: true
 
     video:
       enabled: false
-      resolution: '720p'
+      resolution: "720p"
       framerate: 30
       screen_sharing: true
 
     whiteboard:
       enabled: true
       max_strokes: 10000
-      export_formats: ['png', 'svg', 'pdf']
+      export_formats: ["png", "svg", "pdf"]
 
     annotations:
       enabled: true
-      types: ['note', 'highlight', 'arrow', 'shape']
+      types: ["note", "highlight", "arrow", "shape"]
       persistence: true
 
   # Conflict Resolution
   conflict_resolution:
-    strategy: 'operational_transform' # operational_transform, last_write_wins, manual
+    strategy: "operational_transform" # operational_transform, last_write_wins, manual
     auto_resolve_threshold: 0.8 # Confidence threshold for auto-resolution
     preserve_user_intent: true
     maintain_consistency: true
 
     resolution_strategies:
-      concurrent_edit: 'merge'
-      version_mismatch: 'transform'
-      permission_denied: 'reject'
-      data_validation: 'manual'
+      concurrent_edit: "merge"
+      version_mismatch: "transform"
+      permission_denied: "reject"
+      data_validation: "manual"
 
   # Permissions and Security
   permissions:
-    default_role: 'viewer'
+    default_role: "viewer"
     roles:
       owner:
-        - 'read'
-        - 'write'
-        - 'delete'
-        - 'admin'
-        - 'share'
-        - 'export'
+        - "read"
+        - "write"
+        - "delete"
+        - "admin"
+        - "share"
+        - "export"
       admin:
-        - 'read'
-        - 'write'
-        - 'delete'
-        - 'share'
-        - 'export'
+        - "read"
+        - "write"
+        - "delete"
+        - "share"
+        - "export"
       editor:
-        - 'read'
-        - 'write'
-        - 'share'
+        - "read"
+        - "write"
+        - "share"
       viewer:
-        - 'read'
+        - "read"
 
     session_controls:
-      lock_session: ['admin', 'owner']
-      kick_user: ['admin', 'owner']
-      change_permissions: ['owner']
-      record_session: ['admin', 'owner']
+      lock_session: ["admin", "owner"]
+      kick_user: ["admin", "owner"]
+      change_permissions: ["owner"]
+      record_session: ["admin", "owner"]
 
   # Data Synchronization
   sync:
@@ -129,7 +129,7 @@ collaboration:
 
     compression:
       enabled: true
-      algorithm: 'gzip'
+      algorithm: "gzip"
       threshold: 1024 # bytes
 
   # Performance Optimization
@@ -154,12 +154,12 @@ collaboration:
     track_performance_metrics: true
 
     metrics:
-      - 'concurrent_sessions'
-      - 'active_users'
-      - 'operations_per_second'
-      - 'message_latency'
-      - 'conflict_rate'
-      - 'session_duration'
+      - "concurrent_sessions"
+      - "active_users"
+      - "operations_per_second"
+      - "message_latency"
+      - "conflict_rate"
+      - "session_duration"
 
     retention:
       session_analytics: 30 # days
@@ -169,25 +169,25 @@ collaboration:
   # Storage Configuration
   storage:
     operations:
-      provider: 'redis' # redis, mongodb, postgresql
-      host: '${REDIS_HOST}'
-      port: '${REDIS_PORT}'
+      provider: "redis" # redis, mongodb, postgresql
+      host: "${REDIS_HOST}"
+      port: "${REDIS_PORT}"
       database: 1
 
     sessions:
-      provider: 'redis'
-      host: '${REDIS_HOST}'
-      port: '${REDIS_PORT}'
+      provider: "redis"
+      host: "${REDIS_HOST}"
+      port: "${REDIS_PORT}"
       database: 2
 
     chat:
-      provider: 'mongodb'
-      connection_string: '${MONGODB_URL}'
-      database: 'collaboration'
-      collection: 'chat_messages'
+      provider: "mongodb"
+      connection_string: "${MONGODB_URL}"
+      database: "collaboration"
+      collection: "chat_messages"
 
     presence:
-      provider: 'memory' # memory, redis
+      provider: "memory" # memory, redis
       ttl: 300 # 5 minutes
 
   # Integration Configuration
@@ -195,34 +195,34 @@ collaboration:
     # Slack Integration
     slack:
       enabled: false
-      webhook_url: '${SLACK_WEBHOOK_URL}'
+      webhook_url: "${SLACK_WEBHOOK_URL}"
       notify_on_session_start: true
       notify_on_conflicts: true
 
     # Microsoft Teams
     teams:
       enabled: false
-      webhook_url: '${TEAMS_WEBHOOK_URL}'
+      webhook_url: "${TEAMS_WEBHOOK_URL}"
 
     # Email Notifications
     email:
       enabled: true
-      smtp_server: '${SMTP_SERVER}'
-      sender: 'noreply@intelgraph.com'
+      smtp_server: "${SMTP_SERVER}"
+      sender: "noreply@intelgraph.com"
       notify_on_invite: true
       notify_on_session_end: true
 
     # Calendar Integration
     calendar:
       enabled: false
-      provider: 'google' # google, outlook, ical
+      provider: "google" # google, outlook, ical
       create_events: false
 
   # Security Configuration
   security:
     authentication:
       required: true
-      providers: ['jwt', 'oauth2', 'saml']
+      providers: ["jwt", "oauth2", "saml"]
       session_timeout: 3600000 # 1 hour
 
     authorization:
@@ -232,7 +232,7 @@ collaboration:
     encryption:
       enable_transport: true # WSS
       enable_at_rest: false
-      algorithm: 'AES-256-GCM'
+      algorithm: "AES-256-GCM"
 
     rate_limiting:
       enabled: true

@@ -3,17 +3,17 @@
  */
 
 export enum MediaType {
-  VIDEO = 'VIDEO',
-  AUDIO = 'AUDIO',
-  IMAGE = 'IMAGE',
+  VIDEO = "VIDEO",
+  AUDIO = "AUDIO",
+  IMAGE = "IMAGE",
 }
 
 export enum MediaStatus {
-  UPLOADED = 'UPLOADED',
-  PROCESSING = 'PROCESSING',
-  ANALYZED = 'ANALYZED',
-  FAILED = 'FAILED',
-  ARCHIVED = 'ARCHIVED',
+  UPLOADED = "UPLOADED",
+  PROCESSING = "PROCESSING",
+  ANALYZED = "ANALYZED",
+  FAILED = "FAILED",
+  ARCHIVED = "ARCHIVED",
 }
 
 export interface Media {
@@ -58,42 +58,42 @@ export interface MediaUploadInput {
 export interface MediaMetadata {
   mediaId: string;
   extractedAt: Date;
-  
+
   // Technical metadata
   format: string;
   duration?: number;
   bitrate?: number;
-  
+
   // Video metadata
   videoCodec?: string;
   videoWidth?: number;
   videoHeight?: number;
   frameRate?: number;
   aspectRatio?: string;
-  
+
   // Audio metadata
   audioCodec?: string;
   sampleRate?: number;
   channels?: number;
   bitDepth?: number;
-  
+
   // EXIF data (images)
   exif?: Record<string, unknown>;
-  
+
   // GPS data
   gps?: {
     latitude: number;
     longitude: number;
     altitude?: number;
   };
-  
+
   // Camera/device info
   device?: {
     make?: string;
     model?: string;
     software?: string;
   };
-  
+
   // Creation timestamp from metadata
   createdAt?: Date;
   modifiedAt?: Date;

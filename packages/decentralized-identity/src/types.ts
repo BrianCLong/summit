@@ -3,7 +3,7 @@
  */
 
 export interface DIDDocument {
-  '@context': string[];
+  "@context": string[];
   id: string;
   controller?: string;
   verificationMethod: VerificationMethod[];
@@ -28,7 +28,7 @@ export interface ServiceEndpoint {
 }
 
 export interface VerifiableCredential {
-  '@context': string[];
+  "@context": string[];
   id?: string;
   type: string[];
   issuer: string | { id: string; name?: string };
@@ -42,7 +42,7 @@ export interface VerifiableCredential {
 }
 
 export interface VerifiablePresentation {
-  '@context': string[];
+  "@context": string[];
   id?: string;
   type: string[];
   holder: string;
@@ -72,7 +72,7 @@ export interface ProofRequest {
   requestedPredicates?: {
     [key: string]: {
       name: string;
-      p_type: '>=' | '<=' | '>' | '<';
+      p_type: ">=" | "<=" | ">" | "<";
       p_value: number;
     };
   };

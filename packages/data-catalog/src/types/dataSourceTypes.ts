@@ -3,33 +3,33 @@
  * Core types for data catalog registry
  */
 
-import { z } from 'zod';
-import { DataClassification } from './catalog.js';
+import { z } from "zod";
+import { DataClassification } from "./catalog.js";
 
 /**
  * Data Source Type
  * Represents the type of connector/source
  */
 export enum DataSourceType {
-  DATABASE = 'DATABASE',
-  API = 'API',
-  FILE = 'FILE',
-  STREAM = 'STREAM',
-  S3 = 'S3',
-  SFTP = 'SFTP',
-  WEBHOOK = 'WEBHOOK',
-  MANUAL = 'MANUAL',
-  OTHER = 'OTHER',
+  DATABASE = "DATABASE",
+  API = "API",
+  FILE = "FILE",
+  STREAM = "STREAM",
+  S3 = "S3",
+  SFTP = "SFTP",
+  WEBHOOK = "WEBHOOK",
+  MANUAL = "MANUAL",
+  OTHER = "OTHER",
 }
 
 /**
  * Connection Status
  */
 export enum ConnectionStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  ERROR = 'ERROR',
-  PENDING = 'PENDING',
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  ERROR = "ERROR",
+  PENDING = "PENDING",
 }
 
 /**
@@ -72,10 +72,10 @@ export interface DataSource {
  * Dataset Status
  */
 export enum DatasetStatus {
-  ACTIVE = 'ACTIVE',
-  DEPRECATED = 'DEPRECATED',
-  ARCHIVED = 'ARCHIVED',
-  DRAFT = 'DRAFT',
+  ACTIVE = "ACTIVE",
+  DEPRECATED = "DEPRECATED",
+  ARCHIVED = "ARCHIVED",
+  DRAFT = "DRAFT",
 }
 
 /**
@@ -241,23 +241,23 @@ export interface Mapping {
  * Transformation Type
  */
 export enum MappingTransformationType {
-  DIRECT = 'DIRECT',
-  CAST = 'CAST',
-  CONCATENATE = 'CONCATENATE',
-  SPLIT = 'SPLIT',
-  LOOKUP = 'LOOKUP',
-  CALCULATION = 'CALCULATION',
-  CUSTOM = 'CUSTOM',
+  DIRECT = "DIRECT",
+  CAST = "CAST",
+  CONCATENATE = "CONCATENATE",
+  SPLIT = "SPLIT",
+  LOOKUP = "LOOKUP",
+  CALCULATION = "CALCULATION",
+  CUSTOM = "CUSTOM",
 }
 
 /**
  * Mapping Status
  */
 export enum MappingStatus {
-  ACTIVE = 'ACTIVE',
-  DRAFT = 'DRAFT',
-  DEPRECATED = 'DEPRECATED',
-  ARCHIVED = 'ARCHIVED',
+  ACTIVE = "ACTIVE",
+  DRAFT = "DRAFT",
+  DEPRECATED = "DEPRECATED",
+  ARCHIVED = "ARCHIVED",
 }
 
 /**
@@ -274,11 +274,11 @@ export interface ValidationRule {
  * Validation Type
  */
 export enum ValidationType {
-  NOT_NULL = 'NOT_NULL',
-  RANGE = 'RANGE',
-  REGEX = 'REGEX',
-  ENUM = 'ENUM',
-  CUSTOM = 'CUSTOM',
+  NOT_NULL = "NOT_NULL",
+  RANGE = "RANGE",
+  REGEX = "REGEX",
+  ENUM = "ENUM",
+  CUSTOM = "CUSTOM",
 }
 
 /**
@@ -331,13 +331,13 @@ export interface License {
  * License Type
  */
 export enum LicenseType {
-  PUBLIC_DOMAIN = 'PUBLIC_DOMAIN',
-  OPEN_DATA = 'OPEN_DATA',
-  CREATIVE_COMMONS = 'CREATIVE_COMMONS',
-  PROPRIETARY = 'PROPRIETARY',
-  RESTRICTED = 'RESTRICTED',
-  CLASSIFIED = 'CLASSIFIED',
-  CUSTOM = 'CUSTOM',
+  PUBLIC_DOMAIN = "PUBLIC_DOMAIN",
+  OPEN_DATA = "OPEN_DATA",
+  CREATIVE_COMMONS = "CREATIVE_COMMONS",
+  PROPRIETARY = "PROPRIETARY",
+  RESTRICTED = "RESTRICTED",
+  CLASSIFIED = "CLASSIFIED",
+  CUSTOM = "CUSTOM",
 }
 
 /**
@@ -375,13 +375,13 @@ export interface LineageSummary {
  * Lineage Entity Type
  */
 export enum LineageEntityType {
-  DATA_SOURCE = 'DATA_SOURCE',
-  DATASET = 'DATASET',
-  FIELD = 'FIELD',
-  MAPPING = 'MAPPING',
-  CANONICAL_ENTITY = 'CANONICAL_ENTITY',
-  CASE = 'CASE',
-  REPORT = 'REPORT',
+  DATA_SOURCE = "DATA_SOURCE",
+  DATASET = "DATASET",
+  FIELD = "FIELD",
+  MAPPING = "MAPPING",
+  CANONICAL_ENTITY = "CANONICAL_ENTITY",
+  CASE = "CASE",
+  REPORT = "REPORT",
 }
 
 /**

@@ -3,11 +3,11 @@ name: Startup Race Test
 on:
   pull_request:
     paths:
-      - 'docker-compose.yml'
-      - 'scripts/scan-startup-races.mjs'
-      - 'server/**'
-      - '.github/workflows/startup-race-test.yml'
-      - 'docs/ops/health/**'
+      - "docker-compose.yml"
+      - "scripts/scan-startup-races.mjs"
+      - "server/**"
+      - ".github/workflows/startup-race-test.yml"
+      - "docs/ops/health/**"
   push:
     branches:
       - main

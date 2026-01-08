@@ -4,7 +4,7 @@ This document defines the canonical, non-speculative adversary archetypes that S
 
 ## Core Principle
 
-> *You cannot defend against what you cannot model. You cannot model what you refuse to name.*
+> _You cannot defend against what you cannot model. You cannot model what you refuse to name._
 
 By formalizing these behavioral archetypes, Summit makes adversarial behavior legible and allows for the development of targeted, evidence-based defensive measures.
 

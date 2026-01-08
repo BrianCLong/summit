@@ -6,37 +6,37 @@ on:
       - main
       - develop
     paths:
-      - 'services/graph-core/**'
-      - 'services/graph-api/**'
-      - 'services/graph-algos/**'
-      - 'packages/graph-*/**'
-      - 'server/src/services/Graph*'
-      - 'server/src/repos/*Repo.ts'
-      - 'server/src/db/neo4j.ts'
-      - 'testdata/intelgraph/**'
-      - 'scripts/testing/run-graph-oracle.ts'
-      - '.github/workflows/graph-oracle.yml'
+      - "services/graph-core/**"
+      - "services/graph-api/**"
+      - "services/graph-algos/**"
+      - "packages/graph-*/**"
+      - "server/src/services/Graph*"
+      - "server/src/repos/*Repo.ts"
+      - "server/src/db/neo4j.ts"
+      - "testdata/intelgraph/**"
+      - "scripts/testing/run-graph-oracle.ts"
+      - ".github/workflows/graph-oracle.yml"
   push:
     branches:
       - main
     paths:
-      - 'services/graph-core/**'
-      - 'services/graph-api/**'
-      - 'services/graph-algos/**'
+      - "services/graph-core/**"
+      - "services/graph-api/**"
+      - "services/graph-algos/**"
   workflow_dispatch:
     inputs:
       scenario:
-        description: 'Specific scenario to run (e.g., path-1.1)'
+        description: "Specific scenario to run (e.g., path-1.1)"
         required: false
-        default: ''
+        default: ""
       category:
-        description: 'Category to run (e.g., pathfinding, neighborhood)'
+        description: "Category to run (e.g., pathfinding, neighborhood)"
         required: false
-        default: ''
+        default: ""
       verbose:
-        description: 'Enable verbose output'
+        description: "Enable verbose output"
         required: false
-        default: 'false'
+        default: "false"
         type: boolean
 
 concurrency:
@@ -44,7 +44,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: '20.x'
+  NODE_VERSION: "20.x"
   HUSKY: 0
 
 permissions:

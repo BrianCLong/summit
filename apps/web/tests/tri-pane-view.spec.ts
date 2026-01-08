@@ -88,7 +88,9 @@ test.describe('Enhanced Tri-Pane View', () => {
   })
 
   test.describe('Time Filtering', () => {
-    test('should apply time filter and update entity count', async ({ page }) => {
+    test('should apply time filter and update entity count', async ({
+      page,
+    }) => {
       const initialCount = await getEntityCount(page)
       expect(initialCount).toBeGreaterThan(0) // Ensure we have initial entities
 
@@ -118,7 +120,9 @@ test.describe('Enhanced Tri-Pane View', () => {
       await expect(filteredBadge).not.toBeVisible()
     })
 
-    test('should update all panes when time range changes', async ({ page }) => {
+    test('should update all panes when time range changes', async ({
+      page,
+    }) => {
       // This would test that timeline, graph, and map all update together
       // Placeholder for actual implementation
       test.skip()
@@ -130,9 +134,7 @@ test.describe('Enhanced Tri-Pane View', () => {
       page,
     }) => {
       // Find and click a node in the graph
-      const graphSvg = page.locator(
-        '[aria-labelledby="graph-title"] svg'
-      )
+      const graphSvg = page.locator('[aria-labelledby="graph-title"] svg')
       await expect(graphSvg).toBeVisible()
 
       // Click on a node (would need to be more specific in real implementation)
@@ -146,7 +148,9 @@ test.describe('Enhanced Tri-Pane View', () => {
       test.skip()
     })
 
-    test('should show XAI explanation for selected entity', async ({ page }) => {
+    test('should show XAI explanation for selected entity', async ({
+      page,
+    }) => {
       // Select an entity
       // await page.click('[data-entity-id="some-id"]')
 
@@ -226,9 +230,7 @@ test.describe('Enhanced Tri-Pane View', () => {
       }
 
       // Close sidebar
-      const closeButton = page.locator(
-        '[aria-label="Close Explain View"]'
-      )
+      const closeButton = page.locator('[aria-label="Close Explain View"]')
       await closeButton.click()
 
       // Verify sidebar is hidden
@@ -243,9 +245,7 @@ test.describe('Enhanced Tri-Pane View', () => {
       }
 
       // Find a collapsible section header
-      const sectionHeader = page
-        .locator('text=/Active Filters/')
-        .locator('..')
+      const sectionHeader = page.locator('text=/Active Filters/').locator('..')
       await sectionHeader.click()
 
       // Section should collapse (check for ChevronDown icon)
@@ -428,7 +428,7 @@ test.describe('Enhanced Tri-Pane View', () => {
       // Verify dark theme classes
       const darkElement = page.locator('.dark\\:bg-slate-900')
       // Theme should be applied
-      if (await darkElement.count() > 0) {
+      if ((await darkElement.count()) > 0) {
         await expect(darkElement.first()).toBeVisible()
       }
       await page.waitForTimeout(500) // Allow theme transition

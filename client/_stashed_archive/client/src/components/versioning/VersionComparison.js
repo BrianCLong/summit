@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Paper,
@@ -36,7 +36,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Compare,
   Add,
@@ -62,8 +62,8 @@ import {
   FilterList,
   Search,
   Restore,
-} from '@mui/icons-material';
-import { format } from 'date-fns';
+} from "@mui/icons-material";
+import { format } from "date-fns";
 
 function VersionComparison({
   version1,
@@ -76,7 +76,7 @@ function VersionComparison({
 }) {
   const [activeTab, setActiveTab] = useState(0);
   const [showOnlyChanges, setShowOnlyChanges] = useState(true);
-  const [filterType, setFilterType] = useState('all');
+  const [filterType, setFilterType] = useState("all");
   const [comparisonData, setComparisonData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedChanges, setSelectedChanges] = useState(new Set());
@@ -99,60 +99,60 @@ function VersionComparison({
         },
         nodeChanges: [
           {
-            id: 'node_1',
-            type: 'added',
-            label: 'Acme Corporation',
-            entityType: 'Organization',
+            id: "node_1",
+            type: "added",
+            label: "Acme Corporation",
+            entityType: "Organization",
             properties: {
-              location: 'New York',
-              industry: 'Financial Services',
+              location: "New York",
+              industry: "Financial Services",
             },
-            addedBy: 'Sarah Detective',
+            addedBy: "Sarah Detective",
             timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
           },
           {
-            id: 'node_2',
-            type: 'removed',
-            label: 'Old Bank Account',
-            entityType: 'Bank Account',
-            removedBy: 'John Analyst',
+            id: "node_2",
+            type: "removed",
+            label: "Old Bank Account",
+            entityType: "Bank Account",
+            removedBy: "John Analyst",
             timestamp: new Date(Date.now() - 1000 * 60 * 60 * 4),
-            reason: 'Duplicate entry',
+            reason: "Duplicate entry",
           },
           {
-            id: 'node_3',
-            type: 'modified',
-            label: 'John Smith',
-            entityType: 'Person',
+            id: "node_3",
+            type: "modified",
+            label: "John Smith",
+            entityType: "Person",
             changes: {
-              location: { from: 'Boston', to: 'New York' },
-              occupation: { from: 'Unknown', to: 'Financial Advisor' },
+              location: { from: "Boston", to: "New York" },
+              occupation: { from: "Unknown", to: "Financial Advisor" },
             },
-            modifiedBy: 'Mike Operative',
+            modifiedBy: "Mike Operative",
             timestamp: new Date(Date.now() - 1000 * 60 * 60 * 1),
           },
         ],
         edgeChanges: [
           {
-            id: 'edge_1',
-            type: 'added',
-            source: 'John Smith',
-            target: 'Acme Corporation',
-            relationship: 'WORKS_FOR',
+            id: "edge_1",
+            type: "added",
+            source: "John Smith",
+            target: "Acme Corporation",
+            relationship: "WORKS_FOR",
             properties: {
-              startDate: '2023-01-15',
-              position: 'Senior Advisor',
+              startDate: "2023-01-15",
+              position: "Senior Advisor",
             },
-            addedBy: 'Sarah Detective',
+            addedBy: "Sarah Detective",
             timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
           },
           {
-            id: 'edge_2',
-            type: 'removed',
-            source: 'John Smith',
-            target: 'Old Bank Account',
-            relationship: 'OWNS',
-            removedBy: 'John Analyst',
+            id: "edge_2",
+            type: "removed",
+            source: "John Smith",
+            target: "Old Bank Account",
+            relationship: "OWNS",
+            removedBy: "John Analyst",
             timestamp: new Date(Date.now() - 1000 * 60 * 60 * 4),
           },
         ],
@@ -176,15 +176,14 @@ function VersionComparison({
         },
         conflicts: [
           {
-            id: 'conflict_1',
-            type: 'property_conflict',
-            entityId: 'node_3',
-            entityLabel: 'John Smith',
-            property: 'location',
-            version1Value: 'Boston',
-            version2Value: 'Chicago',
-            description:
-              'Location property has different values in both versions',
+            id: "conflict_1",
+            type: "property_conflict",
+            entityId: "node_3",
+            entityLabel: "John Smith",
+            property: "location",
+            version1Value: "Boston",
+            version2Value: "Chicago",
+            description: "Location property has different values in both versions",
           },
         ],
       });
@@ -194,31 +193,31 @@ function VersionComparison({
 
   const getChangeTypeColor = (type) => {
     switch (type) {
-      case 'added':
-        return 'success';
-      case 'removed':
-        return 'error';
-      case 'modified':
-        return 'warning';
+      case "added":
+        return "success";
+      case "removed":
+        return "error";
+      case "modified":
+        return "warning";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   const getChangeTypeIcon = (type) => {
     switch (type) {
-      case 'added':
+      case "added":
         return <Add />;
-      case 'removed':
+      case "removed":
         return <Remove />;
-      case 'modified':
+      case "modified":
         return <Edit />;
       default:
         return <SwapHoriz />;
     }
   };
 
-  const StatCard = ({ title, value1, value2, icon, format = 'number' }) => {
+  const StatCard = ({ title, value1, value2, icon, format = "number" }) => {
     const diff = value2 - value1;
     const diffPercent = value1 > 0 ? ((diff / value1) * 100).toFixed(1) : 0;
 
@@ -227,9 +226,9 @@ function VersionComparison({
         <CardContent>
           <Box
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
               mb: 1,
             }}
           >
@@ -238,24 +237,24 @@ function VersionComparison({
           </Box>
           <Box
             sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
             <Box>
-              <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                {format === 'percentage' ? `${value2}%` : value2}
+              <Typography variant="h4" sx={{ fontWeight: "bold" }}>
+                {format === "percentage" ? `${value2}%` : value2}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                vs {format === 'percentage' ? `${value1}%` : value1}
+                vs {format === "percentage" ? `${value1}%` : value1}
               </Typography>
             </Box>
             {diff !== 0 && (
               <Chip
                 icon={diff > 0 ? <TrendingUp /> : <TrendingDown />}
-                label={`${diff > 0 ? '+' : ''}${diff} (${diffPercent}%)`}
-                color={diff > 0 ? 'success' : 'error'}
+                label={`${diff > 0 ? "+" : ""}${diff} (${diffPercent}%)`}
+                color={diff > 0 ? "success" : "error"}
                 size="small"
                 variant="outlined"
               />
@@ -270,10 +269,10 @@ function VersionComparison({
     <ListItem
       sx={{
         border: 1,
-        borderColor: 'divider',
+        borderColor: "divider",
         borderRadius: 1,
         mb: 1,
-        bgcolor: 'background.paper',
+        bgcolor: "background.paper",
       }}
     >
       <ListItemIcon>
@@ -283,8 +282,8 @@ function VersionComparison({
       </ListItemIcon>
       <ListItemText
         primary={
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
               {isEdge ? `${change.source} → ${change.target}` : change.label}
             </Typography>
             <Chip
@@ -293,33 +292,18 @@ function VersionComparison({
               size="small"
               variant="outlined"
             />
-            {!isEdge && (
-              <Chip label={change.entityType} size="small" variant="outlined" />
-            )}
-            {isEdge && (
-              <Chip
-                label={change.relationship}
-                size="small"
-                variant="outlined"
-              />
-            )}
+            {!isEdge && <Chip label={change.entityType} size="small" variant="outlined" />}
+            {isEdge && <Chip label={change.relationship} size="small" variant="outlined" />}
           </Box>
         }
         secondary={
           <Box sx={{ mt: 1 }}>
-            {change.type === 'modified' && change.changes && (
+            {change.type === "modified" && change.changes && (
               <Box sx={{ mb: 1 }}>
                 {Object.entries(change.changes).map(([key, value]) => (
-                  <Typography
-                    key={key}
-                    variant="caption"
-                    sx={{ display: 'block' }}
-                  >
-                    {key}:{' '}
-                    <span style={{ textDecoration: 'line-through' }}>
-                      {value.from}
-                    </span>{' '}
-                    → <strong>{value.to}</strong>
+                  <Typography key={key} variant="caption" sx={{ display: "block" }}>
+                    {key}: <span style={{ textDecoration: "line-through" }}>{value.from}</span> →{" "}
+                    <strong>{value.to}</strong>
                   </Typography>
                 ))}
               </Box>
@@ -329,13 +313,9 @@ function VersionComparison({
                 {change.reason || JSON.stringify(change.properties)}
               </Typography>
             )}
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ display: 'block', mt: 0.5 }}
-            >
-              By {change.addedBy || change.removedBy || change.modifiedBy} •{' '}
-              {format(change.timestamp, 'MMM dd, HH:mm')}
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
+              By {change.addedBy || change.removedBy || change.modifiedBy} •{" "}
+              {format(change.timestamp, "MMM dd, HH:mm")}
             </Typography>
           </Box>
         }
@@ -357,7 +337,7 @@ function VersionComparison({
                 {version1.name}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {format(version1.timestamp, 'MMM dd, yyyy HH:mm')}
+                {format(version1.timestamp, "MMM dd, yyyy HH:mm")}
               </Typography>
               <Typography variant="body2">By {version1.author}</Typography>
             </CardContent>
@@ -371,7 +351,7 @@ function VersionComparison({
                 {version2.name}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {format(version2.timestamp, 'MMM dd, yyyy HH:mm')}
+                {format(version2.timestamp, "MMM dd, yyyy HH:mm")}
               </Typography>
               <Typography variant="body2">By {version2.author}</Typography>
             </CardContent>
@@ -387,11 +367,10 @@ function VersionComparison({
           <Grid container spacing={2} sx={{ mb: 3 }}>
             <Grid item xs={6} md={3}>
               <Card>
-                <CardContent sx={{ textAlign: 'center' }}>
+                <CardContent sx={{ textAlign: "center" }}>
                   <Add color="success" sx={{ fontSize: 40, mb: 1 }} />
                   <Typography variant="h4" color="success.main">
-                    {comparisonData.summary.nodesAdded +
-                      comparisonData.summary.edgesAdded}
+                    {comparisonData.summary.nodesAdded + comparisonData.summary.edgesAdded}
                   </Typography>
                   <Typography variant="caption">Added</Typography>
                 </CardContent>
@@ -399,11 +378,10 @@ function VersionComparison({
             </Grid>
             <Grid item xs={6} md={3}>
               <Card>
-                <CardContent sx={{ textAlign: 'center' }}>
+                <CardContent sx={{ textAlign: "center" }}>
                   <Remove color="error" sx={{ fontSize: 40, mb: 1 }} />
                   <Typography variant="h4" color="error.main">
-                    {comparisonData.summary.nodesRemoved +
-                      comparisonData.summary.edgesRemoved}
+                    {comparisonData.summary.nodesRemoved + comparisonData.summary.edgesRemoved}
                   </Typography>
                   <Typography variant="caption">Removed</Typography>
                 </CardContent>
@@ -411,11 +389,10 @@ function VersionComparison({
             </Grid>
             <Grid item xs={6} md={3}>
               <Card>
-                <CardContent sx={{ textAlign: 'center' }}>
+                <CardContent sx={{ textAlign: "center" }}>
                   <Edit color="warning" sx={{ fontSize: 40, mb: 1 }} />
                   <Typography variant="h4" color="warning.main">
-                    {comparisonData.summary.nodesModified +
-                      comparisonData.summary.edgesModified}
+                    {comparisonData.summary.nodesModified + comparisonData.summary.edgesModified}
                   </Typography>
                   <Typography variant="caption">Modified</Typography>
                 </CardContent>
@@ -423,11 +400,9 @@ function VersionComparison({
             </Grid>
             <Grid item xs={6} md={3}>
               <Card>
-                <CardContent sx={{ textAlign: 'center' }}>
+                <CardContent sx={{ textAlign: "center" }}>
                   <Compare sx={{ fontSize: 40, mb: 1 }} />
-                  <Typography variant="h4">
-                    {comparisonData.summary.totalChanges}
-                  </Typography>
+                  <Typography variant="h4">{comparisonData.summary.totalChanges}</Typography>
                   <Typography variant="caption">Total Changes</Typography>
                 </CardContent>
               </Card>
@@ -455,9 +430,9 @@ function VersionComparison({
     <Box>
       <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
           mb: 2,
         }}
       >
@@ -583,20 +558,20 @@ function VersionComparison({
   }
 
   return (
-    <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
       {/* Header */}
       <Paper sx={{ p: 2, mb: 2 }}>
         <Box
           sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
         >
-          <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
             Version Comparison
           </Typography>
-          <Box sx={{ display: 'flex', gap: 1 }}>
+          <Box sx={{ display: "flex", gap: 1 }}>
             <Button variant="outlined" startIcon={<Download />}>
               Export Diff
             </Button>
@@ -618,19 +593,16 @@ function VersionComparison({
       </Paper>
 
       {/* Content */}
-      <Box sx={{ flex: 1, overflow: 'hidden' }}>
+      <Box sx={{ flex: 1, overflow: "hidden" }}>
         <Tabs
           value={activeTab}
           onChange={(e, v) => setActiveTab(v)}
-          sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}
+          sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}
         >
           <Tab label="Overview" icon={<Info />} iconPosition="start" />
           <Tab
             label={
-              <Badge
-                badgeContent={comparisonData?.summary.totalChanges}
-                color="primary"
-              >
+              <Badge badgeContent={comparisonData?.summary.totalChanges} color="primary">
                 Changes
               </Badge>
             }
@@ -640,7 +612,7 @@ function VersionComparison({
           <Tab label="Statistics" icon={<TrendingUp />} iconPosition="start" />
         </Tabs>
 
-        <Box sx={{ p: 2, height: 'calc(100vh - 200px)', overflow: 'auto' }}>
+        <Box sx={{ p: 2, height: "calc(100vh - 200px)", overflow: "auto" }}>
           {activeTab === 0 && <OverviewTab />}
           {activeTab === 1 && <ChangesTab />}
           {activeTab === 2 && <StatisticsTab />}
@@ -648,21 +620,16 @@ function VersionComparison({
       </Box>
 
       {/* Merge Dialog */}
-      <Dialog
-        open={mergeDialog}
-        onClose={() => setMergeDialog(false)}
-        maxWidth="md"
-        fullWidth
-      >
+      <Dialog open={mergeDialog} onClose={() => setMergeDialog(false)} maxWidth="md" fullWidth>
         <DialogTitle>Merge Version Changes</DialogTitle>
         <DialogContent>
           <Alert severity="warning" sx={{ mb: 2 }}>
-            Merging will apply selected changes from {version1.name} to{' '}
-            {version2.name}. This action cannot be undone.
+            Merging will apply selected changes from {version1.name} to {version2.name}. This action
+            cannot be undone.
           </Alert>
           <Typography variant="body2">
-            Select which changes you want to merge, or merge all changes
-            automatically. Conflicts will need to be resolved manually.
+            Select which changes you want to merge, or merge all changes automatically. Conflicts
+            will need to be resolved manually.
           </Typography>
         </DialogContent>
         <DialogActions>

@@ -1,13 +1,13 @@
-import { ConsentArtifactSigner } from './artifact.js';
-import { TemplatePack } from './templatePack.js';
+import { ConsentArtifactSigner } from "./artifact.js";
+import { TemplatePack } from "./templatePack.js";
 import {
   ConsentArtifact,
   ConsentDecision,
   ConsentRecord,
   ExperimentDefinition,
   PolicyTemplatePack,
-  RenderOptions
-} from './types.js';
+  RenderOptions,
+} from "./types.js";
 
 export class AdaptiveConsentSDK {
   private readonly templatePack: TemplatePack;
@@ -24,7 +24,11 @@ export class AdaptiveConsentSDK {
     return this.templatePack.render(options);
   }
 
-  public createConsentRecord(userId: string, decision: ConsentDecision, options: RenderOptions): ConsentRecord {
+  public createConsentRecord(
+    userId: string,
+    decision: ConsentDecision,
+    options: RenderOptions
+  ): ConsentRecord {
     return this.templatePack.createConsentRecord(userId, decision, options).record;
   }
 

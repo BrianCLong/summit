@@ -5,7 +5,7 @@
  * Separate Storage (Session) from Presentation (WorkingContext).
  */
 
-import { LLMMessage, LLMRequest } from '../types/index.js';
+import { LLMMessage, LLMRequest } from "../types/index.js";
 
 // ============================================================================
 // Core Entities
@@ -13,8 +13,8 @@ import { LLMMessage, LLMRequest } from '../types/index.js';
 
 export interface Event {
   id: string;
-  type: 'message' | 'tool_call' | 'tool_result' | 'control' | 'error' | 'compaction';
-  role: 'system' | 'user' | 'assistant' | 'tool';
+  type: "message" | "tool_call" | "tool_result" | "control" | "error" | "compaction";
+  role: "system" | "user" | "assistant" | "tool";
   content: string;
   metadata?: Record<string, unknown>;
   timestamp: Date;
@@ -26,7 +26,7 @@ export interface Artifact {
   type: string; // mime type or 'text/csv' etc
   summary: string;
   content?: string; // Loaded on demand
-  uri?: string;     // Reference
+  uri?: string; // Reference
   version: string;
 }
 
@@ -56,8 +56,8 @@ export interface Session {
 export interface WorkingContext {
   id: string; // Ephemeral ID for this compilation
   instructions: string[]; // System instructions (stable prefix)
-  history: LLMMessage[];  // Selected/Transformed events
-  artifacts: Artifact[];  // Loaded artifacts
+  history: LLMMessage[]; // Selected/Transformed events
+  artifacts: Artifact[]; // Loaded artifacts
   memories: MemoryResult[]; // Reactive/Proactive memories
   tokenCount?: number;
 }

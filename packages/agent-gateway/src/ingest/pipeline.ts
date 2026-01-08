@@ -1,5 +1,5 @@
-import { AFLStore } from '@intelgraph/afl-store';
-import { applyTariffToRequest } from '../middleware/tariff';
+import { AFLStore } from "@intelgraph/afl-store";
+import { applyTariffToRequest } from "../middleware/tariff";
 
 const store = new AFLStore(process.env.AFL_REDIS_URL);
 
@@ -9,8 +9,8 @@ export async function handleInbound(buf: Buffer, meta: unknown) {
     contentHash: (meta as any).contentHash,
     formatSig: (meta as any).formatSig,
     timingSig: (meta as any).timingSig,
-    xformSig: (meta as any).xformSig || 'nokpw',
-    route: (meta as any).route || 'unknown',
+    xformSig: (meta as any).xformSig || "nokpw",
+    route: (meta as any).route || "unknown",
   };
   await store.put(fp as unknown);
 

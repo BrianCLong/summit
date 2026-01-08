@@ -5,9 +5,15 @@
  * PII redaction, and consistent log schema across all services.
  */
 
-import pino, { Logger as PinoLogger, LoggerOptions, Level } from 'pino';
-import { trace, context } from '@opentelemetry/api';
-import type { ServiceConfig, LogLevel, LogContext, AuditEvent, REDACTED_FIELDS } from '../types/index.js';
+import pino, { Logger as PinoLogger, LoggerOptions, Level } from "pino";
+import { trace, context } from "@opentelemetry/api";
+import type {
+  ServiceConfig,
+  LogLevel,
+  LogContext,
+  AuditEvent,
+  REDACTED_FIELDS,
+} from "../types/index.js";
 
 // =============================================================================
 // CONFIGURATION
@@ -29,24 +35,24 @@ export interface LoggingConfig {
 
 /** Default redacted fields */
 const DEFAULT_REDACTED_FIELDS: readonly string[] = [
-  'password',
-  'token',
-  'secret',
-  'apiKey',
-  'api_key',
-  'authorization',
-  'cookie',
-  'sessionId',
-  'session_id',
-  'creditCard',
-  'credit_card',
-  'ssn',
-  'privateKey',
-  'private_key',
-  'accessToken',
-  'access_token',
-  'refreshToken',
-  'refresh_token',
+  "password",
+  "token",
+  "secret",
+  "apiKey",
+  "api_key",
+  "authorization",
+  "cookie",
+  "sessionId",
+  "session_id",
+  "creditCard",
+  "credit_card",
+  "ssn",
+  "privateKey",
+  "private_key",
+  "accessToken",
+  "access_token",
+  "refreshToken",
+  "refresh_token",
 ];
 
 // =============================================================================
@@ -59,8 +65,8 @@ const DEFAULT_REDACTED_FIELDS: readonly string[] = [
 export function createLogger(config: LoggingConfig): PinoLogger {
   const {
     service,
-    level = (process.env.LOG_LEVEL as LogLevel) || 'info',
-    prettyPrint = process.env.NODE_ENV !== 'production',
+    level = (process.env.LOG_LEVEL as LogLevel) || "info",
+    prettyPrint = process.env.NODE_ENV !== "production",
     redactFields = [],
     traceCorrelation = true,
     serializers = {},
@@ -111,13 +117,13 @@ export function createLogger(config: LoggingConfig): PinoLogger {
   // Pretty printing for development
   const transport = prettyPrint
     ? {
-        target: 'pino-pretty',
+        target: "pino-pretty",
         options: {
           colorize: true,
-          translateTime: 'SYS:HH:MM:ss.l',
-          ignore: 'pid,hostname',
-          messageFormat: '[{service}] {msg}',
-          errorLikeObjectKeys: ['err', 'error'],
+          translateTime: "SYS:HH:MM:ss.l",
+          ignore: "pid,hostname",
+          messageFormat: "[{service}] {msg}",
+          errorLikeObjectKeys: ["err", "error"],
         },
       }
     : undefined;
@@ -174,17 +180,17 @@ interface SerializedRequest {
 
 function serializeRequest(req: any): SerializedRequest {
   return {
-    id: req.id || req.headers?.['x-request-id'],
+    id: req.id || req.headers?.["x-request-id"],
     method: req.method,
     url: req.url,
     path: req.path,
     query: req.query,
     headers: {
-      'user-agent': req.headers?.['user-agent'],
-      'content-type': req.headers?.['content-type'],
-      'content-length': req.headers?.['content-length'],
-      'x-request-id': req.headers?.['x-request-id'],
-      'x-forwarded-for': req.headers?.['x-forwarded-for'],
+      "user-agent": req.headers?.["user-agent"],
+      "content-type": req.headers?.["content-type"],
+      "content-length": req.headers?.["content-length"],
+      "x-request-id": req.headers?.["x-request-id"],
+      "x-forwarded-for": req.headers?.["x-forwarded-for"],
     },
     remoteAddress: req.socket?.remoteAddress || req.ip,
     remotePort: req.socket?.remotePort,
@@ -200,8 +206,8 @@ function serializeResponse(res: any): SerializedResponse {
   return {
     statusCode: res.statusCode,
     headers: {
-      'content-type': res.getHeader?.('content-type'),
-      'content-length': res.getHeader?.('content-length'),
+      "content-type": res.getHeader?.("content-type"),
+      "content-length": res.getHeader?.("content-length"),
     },
   };
 }
@@ -213,10 +219,7 @@ function serializeResponse(res: any): SerializedResponse {
 /**
  * Create a child logger with request context
  */
-export function createRequestLogger(
-  logger: PinoLogger,
-  context: LogContext
-): PinoLogger {
+export function createRequestLogger(logger: PinoLogger, context: LogContext): PinoLogger {
   return logger.child({
     ...context,
     ...getTraceContext(),
@@ -257,16 +260,16 @@ export class AuditLogger {
    * Log an authentication event
    */
   logAuth(
-    action: 'login' | 'logout' | 'token_refresh' | 'password_change' | 'mfa_challenge',
-    actor: AuditEvent['actor'],
-    outcome: AuditEvent['outcome'],
+    action: "login" | "logout" | "token_refresh" | "password_change" | "mfa_challenge",
+    actor: AuditEvent["actor"],
+    outcome: AuditEvent["outcome"],
     metadata?: Record<string, unknown>
   ): void {
     this.log({
-      type: 'auth',
+      type: "auth",
       action,
       actor,
-      resource: { type: 'session', id: 'current' },
+      resource: { type: "session", id: "current" },
       outcome,
       metadata,
     });
@@ -276,14 +279,14 @@ export class AuditLogger {
    * Log a resource access event
    */
   logAccess(
-    action: 'read' | 'list' | 'search' | 'export',
-    actor: AuditEvent['actor'],
-    resource: AuditEvent['resource'],
-    outcome: AuditEvent['outcome'],
+    action: "read" | "list" | "search" | "export",
+    actor: AuditEvent["actor"],
+    resource: AuditEvent["resource"],
+    outcome: AuditEvent["outcome"],
     metadata?: Record<string, unknown>
   ): void {
     this.log({
-      type: 'access',
+      type: "access",
       action,
       actor,
       resource,
@@ -296,14 +299,14 @@ export class AuditLogger {
    * Log a mutation event
    */
   logMutation(
-    action: 'create' | 'update' | 'delete',
-    actor: AuditEvent['actor'],
-    resource: AuditEvent['resource'],
-    outcome: AuditEvent['outcome'],
+    action: "create" | "update" | "delete",
+    actor: AuditEvent["actor"],
+    resource: AuditEvent["resource"],
+    outcome: AuditEvent["outcome"],
     metadata?: Record<string, unknown>
   ): void {
     this.log({
-      type: 'mutation',
+      type: "mutation",
       action,
       actor,
       resource,
@@ -317,13 +320,13 @@ export class AuditLogger {
    */
   logAdmin(
     action: string,
-    actor: AuditEvent['actor'],
-    resource: AuditEvent['resource'],
-    outcome: AuditEvent['outcome'],
+    actor: AuditEvent["actor"],
+    resource: AuditEvent["resource"],
+    outcome: AuditEvent["outcome"],
     metadata?: Record<string, unknown>
   ): void {
     this.log({
-      type: 'admin',
+      type: "admin",
       action,
       actor,
       resource,
@@ -336,14 +339,14 @@ export class AuditLogger {
    * Log a security event
    */
   logSecurity(
-    action: 'rate_limit' | 'blocked' | 'suspicious' | 'policy_violation',
-    actor: AuditEvent['actor'],
-    resource: AuditEvent['resource'],
-    outcome: AuditEvent['outcome'],
+    action: "rate_limit" | "blocked" | "suspicious" | "policy_violation",
+    actor: AuditEvent["actor"],
+    resource: AuditEvent["resource"],
+    outcome: AuditEvent["outcome"],
     metadata?: Record<string, unknown>
   ): void {
     this.log({
-      type: 'security',
+      type: "security",
       action,
       actor,
       resource,
@@ -352,7 +355,7 @@ export class AuditLogger {
     });
   }
 
-  private log(event: Omit<AuditEvent, 'timestamp' | 'context'>): void {
+  private log(event: Omit<AuditEvent, "timestamp" | "context">): void {
     const traceContext = getTraceContext();
     const fullEvent: AuditEvent = {
       ...event,

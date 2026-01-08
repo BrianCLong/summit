@@ -2,35 +2,30 @@
  * Validation utilities for canonical entities
  */
 
-import { z } from 'zod';
-import type {
-  CanonicalEntity,
-  EntityType,
-  ClassificationLevel,
-  BitemporalFields,
-} from './types';
+import { z } from "zod";
+import type { CanonicalEntity, EntityType, ClassificationLevel, BitemporalFields } from "./types";
 
 // -----------------------------------------------------------------------------
 // Base Schemas
 // -----------------------------------------------------------------------------
 
 export const ClassificationLevelSchema = z.enum([
-  'UNCLASSIFIED',
-  'CUI',
-  'CONFIDENTIAL',
-  'SECRET',
-  'TOP_SECRET',
+  "UNCLASSIFIED",
+  "CUI",
+  "CONFIDENTIAL",
+  "SECRET",
+  "TOP_SECRET",
 ]);
 
 export const EntityTypeSchema = z.enum([
-  'Person',
-  'Organization',
-  'Asset',
-  'Location',
-  'Event',
-  'Document',
-  'Claim',
-  'Case',
+  "Person",
+  "Organization",
+  "Asset",
+  "Location",
+  "Event",
+  "Document",
+  "Claim",
+  "Case",
 ]);
 
 export const SourceReferenceSchema = z.object({
@@ -83,7 +78,7 @@ export const PersonPropsSchema = z.object({
   dateOfBirth: z.date().optional(),
   dateOfDeath: z.date().optional(),
   nationalities: z.array(z.string()).optional(),
-  gender: z.enum(['male', 'female', 'other', 'unknown']).optional(),
+  gender: z.enum(["male", "female", "other", "unknown"]).optional(),
   identifications: z
     .array(
       z.object({
@@ -97,7 +92,7 @@ export const PersonPropsSchema = z.object({
   contacts: z
     .array(
       z.object({
-        type: z.enum(['email', 'phone', 'address', 'social']),
+        type: z.enum(["email", "phone", "address", "social"]),
         value: z.string(),
         isPrimary: z.boolean().optional(),
       })
@@ -114,7 +109,7 @@ export const OrganizationPropsSchema = z.object({
   name: z.string().min(1),
   tradingNames: z.array(z.string()).optional(),
   orgType: z
-    .enum(['corporation', 'llc', 'partnership', 'nonprofit', 'government', 'other'])
+    .enum(["corporation", "llc", "partnership", "nonprofit", "government", "other"])
     .optional(),
   industry: z.string().optional(),
   registrationNumber: z.string().optional(),
@@ -157,7 +152,7 @@ export function validateEntity(entity: unknown): {
   if (!result.success) {
     return {
       valid: false,
-      errors: result.error.errors.map((e) => `${e.path.join('.')}: ${e.message}`),
+      errors: result.error.errors.map((e) => `${e.path.join(".")}: ${e.message}`),
     };
   }
 
@@ -179,12 +174,12 @@ export function validateBitemporalConsistency(fields: BitemporalFields): {
 
   // validTo must be after validFrom
   if (fields.validFrom && fields.validTo && fields.validTo < fields.validFrom) {
-    errors.push('validTo must be after validFrom');
+    errors.push("validTo must be after validFrom");
   }
 
   // observedAt should be before or equal to recordedAt
   if (fields.observedAt && fields.observedAt > fields.recordedAt) {
-    errors.push('observedAt should not be after recordedAt');
+    errors.push("observedAt should not be after recordedAt");
   }
 
   return {
@@ -217,12 +212,12 @@ export function createEntity<T extends EntityType>(
     sources: [
       {
         sourceId: options.source,
-        sourceRecordId: 'manual',
-        sourceType: 'manual',
+        sourceRecordId: "manual",
+        sourceType: "manual",
         ingestedAt: now,
       },
     ],
-    classification: options.classification || 'UNCLASSIFIED',
+    classification: options.classification || "UNCLASSIFIED",
     compartments: [],
     investigationIds: options.investigationIds || [],
     tenantId: options.tenantId,

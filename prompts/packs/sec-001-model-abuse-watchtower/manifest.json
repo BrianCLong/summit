@@ -29,10 +29,7 @@
     }
   },
   "guardrails": {
-    "tags": [
-      "claude",
-      "legacy"
-    ]
+    "tags": ["claude", "legacy"]
   },
   "template_path": "template.md"
 }

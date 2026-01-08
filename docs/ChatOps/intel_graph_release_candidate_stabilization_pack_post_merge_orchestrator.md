@@ -208,11 +208,11 @@ seed:
 **scripts/validate-smoke.mjs (skeleton)**
 
 ```js
-import http from 'node:http';
+import http from "node:http";
 const targets = [
-  'http://localhost:4000/healthz',
-  'http://localhost:4000/graphql',
-  'http://localhost:3000',
+  "http://localhost:4000/healthz",
+  "http://localhost:4000/graphql",
+  "http://localhost:3000",
 ];
 // TODO: add GraphQL introspection ping & a trivial query
 ```

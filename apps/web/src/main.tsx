@@ -5,7 +5,7 @@ import { store } from './store'
 import App from './App'
 import config from './config'
 import './index.css'
-import reportWebVitals from './reportWebVitals';
+import reportWebVitals from './reportWebVitals'
 import { TenantProvider } from './contexts/TenantContext'
 import { BrandPackProvider } from './contexts/BrandPackContext'
 
@@ -36,5 +36,5 @@ enableMocking().then(() => {
   )
 
   // Initialize Web Vitals reporting
-  reportWebVitals();
+  reportWebVitals()
 })

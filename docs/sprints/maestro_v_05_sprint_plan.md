@@ -110,8 +110,8 @@ fi
 # evals/implement.fix-test.yaml
 id: implement.fix-test@v2
 fixtures:
-  - failing_tests: 'tests/service_A.spec.ts::should_retry'
-    context_files: ['server/serviceA.ts', 'server/retry.ts']
+  - failing_tests: "tests/service_A.spec.ts::should_retry"
+    context_files: ["server/serviceA.ts", "server/retry.ts"]
 checks:
   - type: patch_applies
   - type: tests_pass
@@ -119,8 +119,8 @@ checks:
     max: 0.65
   - type: structured_requirements
     require:
-      - 'adds test that reproduces prior failure'
-      - 'does not change public API'
+      - "adds test that reproduces prior failure"
+      - "does not change public API"
 scoring:
   exact: 0.4
   tests: 0.4
@@ -130,15 +130,12 @@ threshold: 0.85
 
 ```ts
 // services/evals/runner.ts
-import fs from 'fs';
+import fs from "fs";
 export async function runEval(id: string): Promise<number> {
-  const def = parseYaml(fs.readFileSync(`evals/${id}.yaml`, 'utf8'));
+  const def = parseYaml(fs.readFileSync(`evals/${id}.yaml`, "utf8"));
   // 1) apply patch, 2) run tests, 3) compute risk, 4) structured checks
   const s = 0.91; // mocked score
-  await fs.promises.writeFile(
-    `artifacts/evals/${id}.json`,
-    JSON.stringify({ score: s }, null, 2),
-  );
+  await fs.promises.writeFile(`artifacts/evals/${id}.json`, JSON.stringify({ score: s }, null, 2));
   return s;
 }
 ```
@@ -165,13 +162,13 @@ export async function runEval(id: string): Promise<number> {
 
 ```ts
 // tools/codemods/renameMethod.ts
-import { Project } from 'ts-morph';
+import { Project } from "ts-morph";
 const p = new Project();
-p.addSourceFilesAtPaths('server/**/*.ts');
+p.addSourceFilesAtPaths("server/**/*.ts");
 for (const f of p.getSourceFiles()) {
   f.getDescendantsOfKind(ts.SyntaxKind.MethodDeclaration)
-    .filter((m) => m.getName() === 'retry')
-    .forEach((m) => m.rename('retryWithJitter'));
+    .filter((m) => m.getName() === "retry")
+    .forEach((m) => m.rename("retryWithJitter"));
 }
 p.saveSync();
 ```
@@ -213,13 +210,11 @@ MERGE (f)-[:IMPORTS]->(g);
 **Property‑based (TS / fast‑check):**
 
 ```ts
-import fc from 'fast-check';
-import { normalize } from '../lib/strings';
+import fc from "fast-check";
+import { normalize } from "../lib/strings";
 
-test('normalize is idempotent', () => {
-  fc.assert(
-    fc.property(fc.string(), (s) => normalize(normalize(s)) === normalize(s)),
-  );
+test("normalize is idempotent", () => {
+  fc.assert(fc.property(fc.string(), (s) => normalize(normalize(s)) === normalize(s)));
 });
 ```
 

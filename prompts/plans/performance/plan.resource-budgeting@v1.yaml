@@ -1,7 +1,7 @@
 meta:
   id: plan.resource-budgeting@v1
-  owner: 'platform-engineering'
-  purpose: 'Define resource quotas and budgets to prevent runaway consumption'
+  owner: "platform-engineering"
+  purpose: "Define resource quotas and budgets to prevent runaway consumption"
   tags:
     - performance
     - resources
@@ -9,13 +9,13 @@ meta:
     - capacity
     - cost
   guardrails:
-    - 'Budgets must prevent service disruption'
-    - 'Autoscaling limits must be defined'
-    - 'Cost implications must be documented'
-    - 'Overcommit ratios must be justified'
+    - "Budgets must prevent service disruption"
+    - "Autoscaling limits must be defined"
+    - "Cost implications must be documented"
+    - "Overcommit ratios must be justified"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -176,15 +176,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'summit-resource-budget'
+  - name: "summit-resource-budget"
     inputs:
-      services: 'API Server, Graph Engine, ML Worker, Redis, Neo4j, PostgreSQL'
-      current_usage: 'CPU: 8 cores avg, Memory: 32GB avg, spikes to 64GB'
-      infrastructure_limits: 'Cluster: 100 cores, 400GB RAM, $10k/month budget'
-      cost_constraints: 'Max $8k/month for compute, $2k for storage'
-      scaling_requirements: 'Handle 10x traffic spikes, 99.9% availability'
+      services: "API Server, Graph Engine, ML Worker, Redis, Neo4j, PostgreSQL"
+      current_usage: "CPU: 8 cores avg, Memory: 32GB avg, spikes to 64GB"
+      infrastructure_limits: "Cluster: 100 cores, 400GB RAM, $10k/month budget"
+      cost_constraints: "Max $8k/month for compute, $2k for storage"
+      scaling_requirements: "Handle 10x traffic spikes, 99.9% availability"
     expected_contains:
-      - 'budgets'
-      - 'ResourceQuota'
-      - 'Autoscaling'
-      - 'Cost Allocation'
+      - "budgets"
+      - "ResourceQuota"
+      - "Autoscaling"
+      - "Cost Allocation"

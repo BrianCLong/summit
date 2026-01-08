@@ -1,6 +1,7 @@
 # Humanitarian Crisis Early Warning
 
 ## Objective
+
 Provide early warning of emerging humanitarian crises to enable timely preparedness and response, protecting vulnerable populations.
 
 ## Analysis Framework
@@ -45,24 +46,28 @@ Provide early warning of emerging humanitarian crises to enable timely preparedn
 ### Early Warning Stages
 
 **Stage 1: Risk Identification** (3-6 months ahead)
+
 - Deteriorating indicators
 - Structural vulnerabilities
 - Triggering event possibilities
 - Preparedness activation
 
 **Stage 2: Crisis Development** (1-3 months ahead)
+
 - Rapid indicator decline
 - Triggering events occurring
 - Population movements beginning
 - Response mobilization needed
 
 **Stage 3: Acute Crisis** (Present)
+
 - Severe humanitarian needs
 - Large-scale displacement
 - Mortality increasing
 - Urgent response required
 
 ### Severity Classification
+
 - **Level 1**: Concerning trends, enhanced monitoring
 - **Level 2**: Deteriorating situation, preparedness actions
 - **Level 3**: Humanitarian emergency, response activation
@@ -70,6 +75,7 @@ Provide early warning of emerging humanitarian crises to enable timely preparedn
 - **Level 5**: Genocide/crimes against humanity risk
 
 ### Affected Population Estimates
+
 - Total population affected
 - Most vulnerable groups identified
 - Geographic distribution
@@ -79,6 +85,7 @@ Provide early warning of emerging humanitarian crises to enable timely preparedn
 ### Response Planning
 
 **Immediate Actions (0-30 days):**
+
 - Lifesaving interventions
 - Rapid assessment deployment
 - Supply prepositioning
@@ -86,6 +93,7 @@ Provide early warning of emerging humanitarian crises to enable timely preparedn
 - Funding appeals
 
 **Short-term (1-6 months):**
+
 - Multi-sector response scaling
 - Protection programming
 - Service restoration
@@ -93,6 +101,7 @@ Provide early warning of emerging humanitarian crises to enable timely preparedn
 - Livelihood support
 
 **Long-term (6+ months):**
+
 - Recovery and resilience
 - Durable solutions for displaced
 - Development transition
@@ -100,6 +109,7 @@ Provide early warning of emerging humanitarian crises to enable timely preparedn
 - Risk reduction
 
 ### Coordination Requirements
+
 - UN agencies and clusters
 - International NGOs
 - Local authorities and organizations
@@ -107,6 +117,7 @@ Provide early warning of emerging humanitarian crises to enable timely preparedn
 - Military/civilian coordination if relevant
 
 ### Ethical Imperatives
+
 - Humanitarian principles (humanity, neutrality, impartiality, independence)
 - Do no harm
 - Protection prioritization
@@ -114,6 +125,7 @@ Provide early warning of emerging humanitarian crises to enable timely preparedn
 - Conflict sensitivity
 
 ### Monitoring and Updates
+
 - Weekly situation reports during crisis
 - Monthly outlook updates
 - Indicator tracking dashboards
@@ -121,6 +133,7 @@ Provide early warning of emerging humanitarian crises to enable timely preparedn
 - Lessons learned capture
 
 ### Applications
+
 - UN and humanitarian agency planning
 - Donor funding decisions
 - NGO program design

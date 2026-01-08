@@ -65,27 +65,27 @@ import {
   onLCP,
   onINP,
   onCLS,
-} from 'https://unpkg.com/web-vitals@4/dist/web-vitals.attribution.iife.js';
+} from "https://unpkg.com/web-vitals@4/dist/web-vitals.attribution.iife.js";
 const send = (t, v, a) =>
   navigator.sendBeacon?.(
-    '/telemetry',
+    "/telemetry",
     JSON.stringify({
-      ev: 'webvital',
+      ev: "webvital",
       type: t,
       value: v,
       attrib: a,
       ts: Date.now(),
-    }),
+    })
   );
-onLCP((m) => send('LCP', m.value, m.attribution));
-onINP((m) => send('INP', m.value, m.attribution));
-onCLS((m) => send('CLS', m.value, m.attribution));
+onLCP((m) => send("LCP", m.value, m.attribution));
+onINP((m) => send("INP", m.value, m.attribution));
+onCLS((m) => send("CLS", m.value, m.attribution));
 ```
 
 **`docusaurus.config.js`**
 
 ```js
-scripts: [{ src: '/web-vitals.js', async: true }];
+scripts: [{ src: "/web-vitals.js", async: true }];
 ```
 
 ## A3) CWV dashboard card
@@ -93,13 +93,13 @@ scripts: [{ src: '/web-vitals.js', async: true }];
 **`src/components/CwvCard.tsx`**
 
 ```tsx
-import React from 'react';
+import React from "react";
 export default function CwvCard() {
-  const data = require('@site/docs/ops/telemetry/cwv.json');
+  const data = require("@site/docs/ops/telemetry/cwv.json");
   if (!data?.p50) return null;
   return (
     <div className="card padding--md">
-      <strong>CWV</strong> LCP p50: {Math.round(data.p50.LCP)}ms • INP p50:{' '}
+      <strong>CWV</strong> LCP p50: {Math.round(data.p50.LCP)}ms • INP p50:{" "}
       {Math.round(data.p50.INP)}ms • CLS p50: {(data.p50.CLS || 0).toFixed(3)}
     </div>
   );
@@ -109,11 +109,11 @@ export default function CwvCard() {
 **Aggregation stub** `scripts/perf/aggregate-cwv.js`
 
 ```js
-const fs = require('fs');
+const fs = require("fs");
 // Expect NDJSON events in docs/ops/tta/log.ndjson too; merge for demo
 const out = { p50: { LCP: null, INP: null, CLS: null } };
-fs.mkdirSync('docs/ops/telemetry', { recursive: true });
-fs.writeFileSync('docs/ops/telemetry/cwv.json', JSON.stringify(out));
+fs.mkdirSync("docs/ops/telemetry", { recursive: true });
+fs.writeFileSync("docs/ops/telemetry/cwv.json", JSON.stringify(out));
 ```
 
 ---
@@ -125,18 +125,18 @@ fs.writeFileSync('docs/ops/telemetry/cwv.json', JSON.stringify(out));
 **`scripts/perf/optimize-images.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const sharp = require('sharp');
+const fs = require("fs");
+const path = require("path");
+const sharp = require("sharp");
 async function processFile(p) {
   const dir = path.dirname(p),
     base = path.basename(p, path.extname(p));
   await sharp(p)
     .resize(1600)
-    .toFile(path.join(dir, base + '.webp'));
+    .toFile(path.join(dir, base + ".webp"));
   await sharp(p)
     .resize(800)
-    .toFile(path.join(dir, base + '-800.webp'));
+    .toFile(path.join(dir, base + "-800.webp"));
 }
 (function walk(d) {
   for (const f of fs.readdirSync(d)) {
@@ -144,7 +144,7 @@ async function processFile(p) {
       s = fs.statSync(p);
     s.isDirectory() ? walk(p) : /\.(png|jpe?g)$/i.test(f) && processFile(p);
   }
-})('docs');
+})("docs");
 ```
 
 **CI step** (extend existing quality job):
@@ -172,11 +172,11 @@ pyftsubset docs-site/static/fonts/Inter-Variable.ttf --output-file=docs-site/sta
 ```js
 stylesheets: [
   {
-    href: '/fonts/subset/Inter-Subset.woff2',
-    rel: 'preload',
-    as: 'font',
-    type: 'font/woff2',
-    crossorigin: 'anonymous',
+    href: "/fonts/subset/Inter-Subset.woff2",
+    rel: "preload",
+    as: "font",
+    type: "font/woff2",
+    crossorigin: "anonymous",
   },
 ];
 ```
@@ -196,8 +196,8 @@ done
 **`scripts/perf/payload-budget.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 let fail = 0;
 (function walk(d) {
   for (const f of fs.readdirSync(d)) {
@@ -205,11 +205,11 @@ let fail = 0;
       s = fs.statSync(p);
     s.isDirectory() ? walk(p) : /\.(js|css)$/i.test(f) && check(p, s.size);
   }
-})('docs-site/build/assets');
+})("docs-site/build/assets");
 function check(p, bytes) {
   const max = 250 * 1024;
   if (bytes > max) {
-    console.error('Asset too large', p, bytes);
+    console.error("Asset too large", p, bytes);
     fail = 1;
   }
 }
@@ -234,14 +234,11 @@ process.exit(fail);
 **`scripts/migrate/build-redirects.js`**
 
 ```js
-const fs = require('fs');
-const yaml = require('js-yaml');
-const map = yaml.load(fs.readFileSync('docs/_meta/redirects.yml', 'utf8'));
-fs.writeFileSync(
-  'docs-site/static/_redirects',
-  map.map((r) => `${r.from} ${r.to} 301`).join('\n'),
-);
-fs.writeFileSync('docs/ops/meta/redirects.json', JSON.stringify(map, null, 2));
+const fs = require("fs");
+const yaml = require("js-yaml");
+const map = yaml.load(fs.readFileSync("docs/_meta/redirects.yml", "utf8"));
+fs.writeFileSync("docs-site/static/_redirects", map.map((r) => `${r.from} ${r.to} 301`).join("\n"));
+fs.writeFileSync("docs/ops/meta/redirects.json", JSON.stringify(map, null, 2));
 ```
 
 ## C2) 404 catcher with suggestions
@@ -249,11 +246,11 @@ fs.writeFileSync('docs/ops/meta/redirects.json', JSON.stringify(map, null, 2));
 **`src/components/NotFoundSuggest.tsx`**
 
 ```tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 export default function NotFoundSuggest() {
   const [best, setBest] = useState<string | null>(null);
   useEffect(() => {
-    import('@site/docs/ops/meta/redirects.json').then((m) => {
+    import("@site/docs/ops/meta/redirects.json").then((m) => {
       const path = location.pathname;
       const cand = m.default.find((r: any) => r.from === path);
       setBest(cand?.to || null);
@@ -274,13 +271,13 @@ export default function NotFoundSuggest() {
 **`scripts/migrate/check-orphans.js`**
 
 ```js
-const fs = require('fs');
-const map = JSON.parse(fs.readFileSync('docs/ops/meta/redirects.json', 'utf8'));
+const fs = require("fs");
+const map = JSON.parse(fs.readFileSync("docs/ops/meta/redirects.json", "utf8"));
 let fail = 0;
 for (const r of map) {
-  const target = `docs${r.to.endsWith('.md') ? '' : r.to}.md`;
-  if (!fs.existsSync(target) && !fs.existsSync(target + '.mdx')) {
-    console.error('Redirect target missing:', r.to);
+  const target = `docs${r.to.endsWith(".md") ? "" : r.to}.md`;
+  if (!fs.existsSync(target) && !fs.existsSync(target + ".mdx")) {
+    console.error("Redirect target missing:", r.to);
     fail = 1;
   }
 }
@@ -296,21 +293,20 @@ process.exit(fail);
 **`scripts/perf/pr-scorecard.js`**
 
 ```js
-const fs = require('fs');
+const fs = require("fs");
 function readJSON(p) {
   try {
-    return JSON.parse(fs.readFileSync(p, 'utf8'));
+    return JSON.parse(fs.readFileSync(p, "utf8"));
   } catch {
     return null;
   }
 }
-const prev = readJSON('baseline/lhci.json') || {}; // store from default branch nightly
-const cur = readJSON('.lighthouseci/manifest.json') || {}; // from PR run
+const prev = readJSON("baseline/lhci.json") || {}; // store from default branch nightly
+const cur = readJSON(".lighthouseci/manifest.json") || {}; // from PR run
 const out = {
-  perfDelta:
-    (cur?.summary?.performance || 0) - (prev?.summary?.performance || 0),
+  perfDelta: (cur?.summary?.performance || 0) - (prev?.summary?.performance || 0),
 };
-fs.writeFileSync('pr-scorecard.json', JSON.stringify(out, null, 2));
+fs.writeFileSync("pr-scorecard.json", JSON.stringify(out, null, 2));
 ```
 
 ## D2) PR comment
@@ -344,23 +340,17 @@ jobs:
 **`scripts/security/add-sri.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
+const fs = require("fs");
+const path = require("path");
+const crypto = require("crypto");
 function sha384(p) {
-  return (
-    'sha384-' +
-    crypto.createHash('sha384').update(fs.readFileSync(p)).digest('base64')
-  );
+  return "sha384-" + crypto.createHash("sha384").update(fs.readFileSync(p)).digest("base64");
 }
-const dir = 'docs-site/build';
-const index = path.join(dir, 'index.html');
-let html = fs.readFileSync(index, 'utf8');
+const dir = "docs-site/build";
+const index = path.join(dir, "index.html");
+let html = fs.readFileSync(index, "utf8");
 html = html.replace(/<script src="(\/assets\/[^\"]+)">/g, (m, src) =>
-  m.replace(
-    '>',
-    ` integrity="${sha384(path.join(dir, src))}" crossorigin="anonymous">`,
-  ),
+  m.replace(">", ` integrity="${sha384(path.join(dir, src))}" crossorigin="anonymous">`)
 );
 fs.writeFileSync(index, html);
 ```

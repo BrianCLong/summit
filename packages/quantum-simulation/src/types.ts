@@ -12,28 +12,28 @@ export type QuantumState = Complex[];
 
 export enum GateType {
   // Single-qubit gates
-  IDENTITY = 'I',
-  PAULI_X = 'X',
-  PAULI_Y = 'Y',
-  PAULI_Z = 'Z',
-  HADAMARD = 'H',
-  PHASE = 'S',
-  T_GATE = 'T',
-  RX = 'RX',
-  RY = 'RY',
-  RZ = 'RZ',
+  IDENTITY = "I",
+  PAULI_X = "X",
+  PAULI_Y = "Y",
+  PAULI_Z = "Z",
+  HADAMARD = "H",
+  PHASE = "S",
+  T_GATE = "T",
+  RX = "RX",
+  RY = "RY",
+  RZ = "RZ",
 
   // Two-qubit gates
-  CNOT = 'CNOT',
-  CZ = 'CZ',
-  SWAP = 'SWAP',
+  CNOT = "CNOT",
+  CZ = "CZ",
+  SWAP = "SWAP",
 
   // Three-qubit gates
-  TOFFOLI = 'TOFFOLI',
-  FREDKIN = 'FREDKIN',
+  TOFFOLI = "TOFFOLI",
+  FREDKIN = "FREDKIN",
 
   // Measurement
-  MEASURE = 'MEASURE',
+  MEASURE = "MEASURE",
 }
 
 export interface QuantumGate {
@@ -65,12 +65,12 @@ export interface QuantumSimulator {
 
 export interface QuantumBackend {
   name: string;
-  type: 'simulator' | 'hardware';
+  type: "simulator" | "hardware";
   maxQubits: number;
   supportedGates: GateType[];
   submit(circuit: QuantumCircuit): Promise<string>; // Returns job ID
   getResult(jobId: string): Promise<SimulationResult>;
-  getStatus(jobId: string): Promise<'queued' | 'running' | 'completed' | 'failed'>;
+  getStatus(jobId: string): Promise<"queued" | "running" | "completed" | "failed">;
 }
 
 export interface NoiseModel {

@@ -71,7 +71,9 @@ const ENTITY_TYPES = [
 
 export function InvestigatorWorkbench() {
   const [entities, setEntities] = useState<Entity[]>(INITIAL_ENTITIES)
-  const [relationships, setRelationships] = useState<Relationship[]>(INITIAL_RELATIONSHIPS)
+  const [relationships, setRelationships] = useState<Relationship[]>(
+    INITIAL_RELATIONSHIPS
+  )
   const [layout] = useState<GraphLayout>({ type: 'force', settings: {} })
   const [selectedEntityId, setSelectedEntityId] = useState<string | undefined>()
   const [timeRange, setTimeRange] = useState<number[]>([0, 100])
@@ -83,11 +85,13 @@ export function InvestigatorWorkbench() {
   const [now] = useState(() => Date.now())
 
   const dateRange = useMemo(() => {
-    const dates = [...entities, ...relationships].map(item => new Date(item.createdAt).getTime())
+    const dates = [...entities, ...relationships].map(item =>
+      new Date(item.createdAt).getTime()
+    )
     if (dates.length === 0) return { min: now, max: now }
     return {
       min: Math.min(...dates),
-      max: Math.max(...dates)
+      max: Math.max(...dates),
     }
   }, [entities, relationships, now])
 
@@ -108,13 +112,16 @@ export function InvestigatorWorkbench() {
 
     const filteredRelationships = relationships.filter(r => {
       const t = new Date(r.createdAt).getTime()
-      return t >= startTimestamp && t <= endTimestamp &&
-             filteredEntityIds.has(r.sourceId) && filteredEntityIds.has(r.targetId)
+      return (
+        t >= startTimestamp &&
+        t <= endTimestamp &&
+        filteredEntityIds.has(r.sourceId) &&
+        filteredEntityIds.has(r.targetId)
+      )
     })
 
     return { entities: filteredEntities, relationships: filteredRelationships }
   }, [entities, relationships, timeRange, dateRange])
-
 
   const handleEntitySelect = useCallback((entity: Entity) => {
     setSelectedEntityId(entity.id)
@@ -134,26 +141,30 @@ export function InvestigatorWorkbench() {
     setTimeRange([0, 100])
   }, [])
 
-  const handleLinkCreate = useCallback((sourceId: string, targetId: string) => {
-    const exists = relationships.some(
-      r => (r.sourceId === sourceId && r.targetId === targetId) ||
-           (r.sourceId === targetId && r.targetId === sourceId)
-    )
-    if (exists) return
+  const handleLinkCreate = useCallback(
+    (sourceId: string, targetId: string) => {
+      const exists = relationships.some(
+        r =>
+          (r.sourceId === sourceId && r.targetId === targetId) ||
+          (r.sourceId === targetId && r.targetId === sourceId)
+      )
+      if (exists) return
 
-    const newRelationship: Relationship = {
-      id: `r-${Date.now()}`,
-      sourceId,
-      targetId,
-      type: 'RELATED_TO',
-      confidence: 1.0,
-      properties: {},
-      createdAt: new Date().toISOString(),
-      direction: 'directed'
-    }
-    setRelationships(prev => [...prev, newRelationship])
-    setTimeRange([0, 100])
-  }, [relationships])
+      const newRelationship: Relationship = {
+        id: `r-${Date.now()}`,
+        sourceId,
+        targetId,
+        type: 'RELATED_TO',
+        confidence: 1.0,
+        properties: {},
+        createdAt: new Date().toISOString(),
+        direction: 'directed',
+      }
+      setRelationships(prev => [...prev, newRelationship])
+      setTimeRange([0, 100])
+    },
+    [relationships]
+  )
 
   const formatDate = (ts: number) => new Date(ts).toLocaleDateString()
 
@@ -174,7 +185,9 @@ export function InvestigatorWorkbench() {
     if (!graphRef.current) return
     const svgString = graphRef.current.exportAsSVG()
     if (svgString) {
-      const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' })
+      const blob = new Blob([svgString], {
+        type: 'image/svg+xml;charset=utf-8',
+      })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
@@ -202,7 +215,12 @@ export function InvestigatorWorkbench() {
       // Delete selected entity
       if ((e.key === 'Delete' || e.key === 'Backspace') && selectedEntityId) {
         setEntities(prev => prev.filter(e => e.id !== selectedEntityId))
-        setRelationships(prev => prev.filter(r => r.sourceId !== selectedEntityId && r.targetId !== selectedEntityId))
+        setRelationships(prev =>
+          prev.filter(
+            r =>
+              r.sourceId !== selectedEntityId && r.targetId !== selectedEntityId
+          )
+        )
         setSelectedEntityId(undefined)
       }
 
@@ -217,7 +235,10 @@ export function InvestigatorWorkbench() {
   }, [selectedEntityId])
 
   return (
-    <div className="flex h-screen w-full bg-background overflow-hidden" data-testid="investigator-workbench">
+    <div
+      className="flex h-screen w-full bg-background overflow-hidden"
+      data-testid="investigator-workbench"
+    >
       {/* Sidebar: Entity Palette */}
       <div
         className="w-64 border-r bg-card p-4 flex flex-col gap-4"
@@ -226,9 +247,17 @@ export function InvestigatorWorkbench() {
       >
         <h2 className="text-lg font-semibold">Workbench</h2>
         <div className="space-y-2">
-          <h3 className="text-sm font-medium text-muted-foreground">Entity Palette</h3>
-          <p className="text-xs text-muted-foreground mb-2">Drag to canvas to add</p>
-          <div className="grid grid-cols-2 gap-2" role="list" aria-label="Draggable entities">
+          <h3 className="text-sm font-medium text-muted-foreground">
+            Entity Palette
+          </h3>
+          <p className="text-xs text-muted-foreground mb-2">
+            Drag to canvas to add
+          </p>
+          <div
+            className="grid grid-cols-2 gap-2"
+            role="list"
+            aria-label="Draggable entities"
+          >
             {ENTITY_TYPES.map(et => (
               <div
                 key={et.type}
@@ -237,13 +266,16 @@ export function InvestigatorWorkbench() {
                 tabIndex={0}
                 role="listitem"
                 aria-label={`Drag ${et.label}`}
-                onDragStart={(e) => {
-                  e.dataTransfer.setData('application/intelgraph-entity', et.type)
+                onDragStart={e => {
+                  e.dataTransfer.setData(
+                    'application/intelgraph-entity',
+                    et.type
+                  )
                 }}
-                onKeyDown={(e) => {
-                   if (e.key === 'Enter' || e.key === ' ') {
-                       // Accessibility enhancement: Simulate drop or add to center (would need implementation)
-                   }
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    // Accessibility enhancement: Simulate drop or add to center (would need implementation)
+                  }
                 }}
               >
                 <span className="text-lg">{et.icon}</span>
@@ -254,30 +286,35 @@ export function InvestigatorWorkbench() {
         </div>
 
         <div className="space-y-2 mt-4">
-             <h3 className="text-sm font-medium text-muted-foreground">Instructions</h3>
-             <ul className="text-xs text-muted-foreground list-disc pl-4 space-y-1">
-                 <li>Drag entities from palette to canvas</li>
-                 <li>Shift + Drag from a node to link it to another</li>
-                 <li>Click node to select</li>
-                 <li>Delete/Backspace to remove selected node</li>
-             </ul>
+          <h3 className="text-sm font-medium text-muted-foreground">
+            Instructions
+          </h3>
+          <ul className="text-xs text-muted-foreground list-disc pl-4 space-y-1">
+            <li>Drag entities from palette to canvas</li>
+            <li>Shift + Drag from a node to link it to another</li>
+            <li>Click node to select</li>
+            <li>Delete/Backspace to remove selected node</li>
+          </ul>
         </div>
       </div>
 
       {/* Main Content: Canvas */}
       <div className="flex-1 flex flex-col relative" role="main">
-        <div className="flex-1 relative bg-slate-50 dark:bg-slate-900" aria-label="Graph Canvas">
-           <GraphCanvas
-              ref={graphRef}
-              entities={filteredData.entities}
-              relationships={filteredData.relationships}
-              layout={layout}
-              onEntitySelect={handleEntitySelect}
-              selectedEntityId={selectedEntityId}
-              onNodeDrop={handleNodeDrop}
-              onLinkCreate={handleLinkCreate}
-              className="w-full h-full"
-           />
+        <div
+          className="flex-1 relative bg-slate-50 dark:bg-slate-900"
+          aria-label="Graph Canvas"
+        >
+          <GraphCanvas
+            ref={graphRef}
+            entities={filteredData.entities}
+            relationships={filteredData.relationships}
+            layout={layout}
+            onEntitySelect={handleEntitySelect}
+            selectedEntityId={selectedEntityId}
+            onNodeDrop={handleNodeDrop}
+            onLinkCreate={handleLinkCreate}
+            className="w-full h-full"
+          />
         </div>
 
         {/* Bottom Control Panel: Timeline */}
@@ -286,32 +323,44 @@ export function InvestigatorWorkbench() {
           role="region"
           aria-label="Timeline Controls"
         >
-           <div className="flex justify-between items-center">
-              <h3 className="text-sm font-medium">Timeline Filter</h3>
-              <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={handleExportPNG}>Export PNG</Button>
-                  <Button variant="outline" size="sm" onClick={handleExportSVG}>Export SVG</Button>
-                  <Button variant="outline" size="sm" onClick={handleExportJSON}>Export JSON</Button>
-              </div>
-           </div>
-           <div className="px-2">
-             <Slider
-               value={timeRange}
-               onValueChange={setTimeRange}
-               max={100}
-               step={1}
-               className="w-full"
-               aria-label="Time Range Filter"
-             />
-             <div className="flex justify-between text-xs text-muted-foreground mt-2">
-               <span>
-                 {formatDate(dateRange.min + (timeRange[0] / 100) * (dateRange.max - dateRange.min))}
-               </span>
-               <span>
-                 {formatDate(dateRange.min + (timeRange[1] / 100) * (dateRange.max - dateRange.min))}
-               </span>
-             </div>
-           </div>
+          <div className="flex justify-between items-center">
+            <h3 className="text-sm font-medium">Timeline Filter</h3>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={handleExportPNG}>
+                Export PNG
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleExportSVG}>
+                Export SVG
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleExportJSON}>
+                Export JSON
+              </Button>
+            </div>
+          </div>
+          <div className="px-2">
+            <Slider
+              value={timeRange}
+              onValueChange={setTimeRange}
+              max={100}
+              step={1}
+              className="w-full"
+              aria-label="Time Range Filter"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground mt-2">
+              <span>
+                {formatDate(
+                  dateRange.min +
+                    (timeRange[0] / 100) * (dateRange.max - dateRange.min)
+                )}
+              </span>
+              <span>
+                {formatDate(
+                  dateRange.min +
+                    (timeRange[1] / 100) * (dateRange.max - dateRange.min)
+                )}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

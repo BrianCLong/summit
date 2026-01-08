@@ -4,14 +4,14 @@
  * LaunchDarkly integration for feature flags
  */
 
-import * as ld from 'launchdarkly-node-server-sdk';
+import * as ld from "launchdarkly-node-server-sdk";
 import type {
   FeatureFlagProvider,
   FlagContext,
   FlagEvaluation,
   FlagDefinition,
   EvaluationReason,
-} from '../types.js';
+} from "../types.js";
 
 /**
  * LaunchDarkly provider configuration
@@ -29,7 +29,7 @@ export interface LaunchDarklyConfig {
  * LaunchDarkly feature flag provider
  */
 export class LaunchDarklyProvider implements FeatureFlagProvider {
-  readonly name = 'LaunchDarkly';
+  readonly name = "LaunchDarkly";
   private client: ld.LDClient;
   private ready = false;
   private timeout: number;
@@ -40,7 +40,7 @@ export class LaunchDarklyProvider implements FeatureFlagProvider {
     // Initialize LaunchDarkly client
     this.client = ld.init(config.sdkKey, {
       ...config.options,
-      logger: config.options?.logger ?? ld.basicLogger({ level: 'info' }),
+      logger: config.options?.logger ?? ld.basicLogger({ level: "info" }),
     });
   }
 
@@ -52,9 +52,7 @@ export class LaunchDarklyProvider implements FeatureFlagProvider {
       await this.client.waitForInitialization();
       this.ready = true;
     } catch (error) {
-      throw new Error(
-        `LaunchDarkly initialization failed: ${(error as Error).message}`,
-      );
+      throw new Error(`LaunchDarkly initialization failed: ${(error as Error).message}`);
     }
   }
 
@@ -79,14 +77,10 @@ export class LaunchDarklyProvider implements FeatureFlagProvider {
   async getBooleanFlag(
     key: string,
     defaultValue: boolean,
-    context: FlagContext,
+    context: FlagContext
   ): Promise<FlagEvaluation<boolean>> {
     const ldContext = this.buildLDContext(context);
-    const detail = await this.client.variationDetail(
-      key,
-      ldContext,
-      defaultValue,
-    );
+    const detail = await this.client.variationDetail(key, ldContext, defaultValue);
 
     return {
       key,
@@ -104,14 +98,10 @@ export class LaunchDarklyProvider implements FeatureFlagProvider {
   async getStringFlag(
     key: string,
     defaultValue: string,
-    context: FlagContext,
+    context: FlagContext
   ): Promise<FlagEvaluation<string>> {
     const ldContext = this.buildLDContext(context);
-    const detail = await this.client.variationDetail(
-      key,
-      ldContext,
-      defaultValue,
-    );
+    const detail = await this.client.variationDetail(key, ldContext, defaultValue);
 
     return {
       key,
@@ -129,14 +119,10 @@ export class LaunchDarklyProvider implements FeatureFlagProvider {
   async getNumberFlag(
     key: string,
     defaultValue: number,
-    context: FlagContext,
+    context: FlagContext
   ): Promise<FlagEvaluation<number>> {
     const ldContext = this.buildLDContext(context);
-    const detail = await this.client.variationDetail(
-      key,
-      ldContext,
-      defaultValue,
-    );
+    const detail = await this.client.variationDetail(key, ldContext, defaultValue);
 
     return {
       key,
@@ -154,14 +140,10 @@ export class LaunchDarklyProvider implements FeatureFlagProvider {
   async getJSONFlag<T = any>(
     key: string,
     defaultValue: T,
-    context: FlagContext,
+    context: FlagContext
   ): Promise<FlagEvaluation<T>> {
     const ldContext = this.buildLDContext(context);
-    const detail = await this.client.variationDetail(
-      key,
-      ldContext,
-      defaultValue,
-    );
+    const detail = await this.client.variationDetail(key, ldContext, defaultValue);
 
     return {
       key,
@@ -176,9 +158,7 @@ export class LaunchDarklyProvider implements FeatureFlagProvider {
   /**
    * Get all flag values for context
    */
-  async getAllFlags(
-    context: FlagContext,
-  ): Promise<Record<string, FlagEvaluation>> {
+  async getAllFlags(context: FlagContext): Promise<Record<string, FlagEvaluation>> {
     const ldContext = this.buildLDContext(context);
     const allFlags = await this.client.allFlagsState(ldContext, {
       withReasons: true,
@@ -195,7 +175,7 @@ export class LaunchDarklyProvider implements FeatureFlagProvider {
         value: flagState ?? value,
         variation: undefined,
         exists: false,
-        reason: reason ? this.mapReason(reason) : 'DEFAULT',
+        reason: reason ? this.mapReason(reason) : "DEFAULT",
         timestamp: Date.now(),
       };
     }
@@ -224,11 +204,7 @@ export class LaunchDarklyProvider implements FeatureFlagProvider {
   /**
    * Track an event/metric
    */
-  async track(
-    eventName: string,
-    context: FlagContext,
-    data?: Record<string, any>,
-  ): Promise<void> {
+  async track(eventName: string, context: FlagContext, data?: Record<string, any>): Promise<void> {
     const ldContext = this.buildLDContext(context);
     this.client.track(eventName, ldContext, data);
   }
@@ -238,8 +214,8 @@ export class LaunchDarklyProvider implements FeatureFlagProvider {
    */
   private buildLDContext(context: FlagContext): ld.LDContext {
     const ldContext: ld.LDContext = {
-      kind: 'user',
-      key: context.userId || context.sessionId || 'anonymous',
+      kind: "user",
+      key: context.userId || context.sessionId || "anonymous",
     };
 
     if (context.userEmail) {
@@ -263,9 +239,7 @@ export class LaunchDarklyProvider implements FeatureFlagProvider {
     if (context.userRole) {
       ldContext.custom = {
         ...ldContext.custom,
-        role: Array.isArray(context.userRole)
-          ? context.userRole
-          : [context.userRole],
+        role: Array.isArray(context.userRole) ? context.userRole : [context.userRole],
       };
     }
 
@@ -298,20 +272,20 @@ export class LaunchDarklyProvider implements FeatureFlagProvider {
    */
   private mapReason(reason: ld.LDEvaluationReason): EvaluationReason {
     switch (reason.kind) {
-      case 'TARGET_MATCH':
-        return 'TARGET_MATCH';
-      case 'RULE_MATCH':
-        return 'RULE_MATCH';
-      case 'PREREQUISITE_FAILED':
-        return 'PREREQUISITE_FAILED';
-      case 'OFF':
-        return 'OFF';
-      case 'FALLTHROUGH':
-        return 'DEFAULT';
-      case 'ERROR':
-        return 'ERROR';
+      case "TARGET_MATCH":
+        return "TARGET_MATCH";
+      case "RULE_MATCH":
+        return "RULE_MATCH";
+      case "PREREQUISITE_FAILED":
+        return "PREREQUISITE_FAILED";
+      case "OFF":
+        return "OFF";
+      case "FALLTHROUGH":
+        return "DEFAULT";
+      case "ERROR":
+        return "ERROR";
       default:
-        return 'DEFAULT';
+        return "DEFAULT";
     }
   }
 

@@ -3,6 +3,7 @@
 ## Phase 1 (0–2 sprints)
 
 ### 1) Graph-grounded CTI Copilot for Cross-Feed Correlation
+
 - **Goal:** Multi-agent copilot that fuses IntelGraph entities with live OSINT/CTI feeds to auto-build, justify, and refresh relationship hypotheses for analysts.
 - **Why now:** Agentic CTI workflows and graph-LLM fusion are emerging as 2025 best practices for faster triage and reduced hallucinations; aligns with decision-intelligence and cost-aware agent trends.
 - **v0/v1 scope (4–8 weeks):**
@@ -19,6 +20,7 @@
   - Rate-limit and sign feed connectors; redact PII in copilot responses.
 
 ### 2) Provenance-first OSINT Ingestion & Fact Ledger
+
 - **Goal:** Turn OSINT captures into signed, versioned fact records linked into IntelGraph with verifiable provenance and freshness policies.
 - **Why now:** Knowledge-graph + LLM pipelines are standardizing on provenance ledgers to control hallucinations and defend against adversarial OSINT poisoning; regulators expect auditability.
 - **v0/v1 scope (4–8 weeks):**
@@ -37,6 +39,7 @@
 ## Phase 2 (2–4 sprints after Phase 1 validation)
 
 ### 3) Multimodal OSINT Agent Cell for Entity & Event Linking
+
 - **Goal:** Agent cell that fuses text, image, and network telemetry into unified entity/event hypotheses grounded in IntelGraph.
 - **Why now:** Multimodal OSINT agents with graph grounding are proving more accurate for entity/event reasoning and reduce hallucinations; aligns with 2025 multimodal MLLM adoption.
 - **v0/v1 scope:**
@@ -52,6 +55,7 @@
   - Human approval gates; watermark generated media; detect and flag likely synthetic assets.
 
 ### 4) Red-Team Harness for Copilot and Agents
+
 - **Goal:** Continuous red-team suite that probes copilot/agent chains for prompt injection, data exfiltration, and misinformation behaviors with auto-mitigations.
 - **Why now:** LLM security/red-teaming is now table stakes as adversaries weaponize agents; aligns with 2025 misuse-aware design and enterprise governance expectations.
 - **v0/v1 scope:**
@@ -69,6 +73,7 @@
 ## Phase 3 (option-value bets)
 
 ### 5) Cost- and Placement-Aware Agent Orchestration
+
 - **Goal:** Dynamic agent planner that chooses on-prem vs cloud models, retrieval depth, and summarization fidelity based on cost, connectivity, and sensitivity.
 - **Why now:** 2025 trend toward cost-aware, deployability-first AI; air-gapped and disconnected ops need graceful degradation; multi-cloud arbitrage for heavy workloads is maturing.
 - **v0/v1 scope:**

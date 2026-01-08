@@ -82,10 +82,12 @@ dag = DAG(
 ## Monitoring
 
 ### Airflow Web UI
+
 - URL: http://localhost:8080
 - View DAG runs, task status, logs, and metrics
 
 ### Flower (Celery Monitoring)
+
 - URL: http://localhost:5555
 - Monitor Celery workers and tasks
 
@@ -112,7 +114,7 @@ airflow-worker:
   deploy:
     resources:
       limits:
-        cpus: '2'
+        cpus: "2"
         memory: 4G
 ```
 
@@ -147,11 +149,13 @@ AIRFLOW__SMTP__SMTP_PASSWORD=your-app-password
 ## Troubleshooting
 
 ### Check service status
+
 ```bash
 docker-compose ps
 ```
 
 ### View logs
+
 ```bash
 docker-compose logs -f airflow-webserver
 docker-compose logs -f airflow-scheduler
@@ -159,11 +163,13 @@ docker-compose logs -f airflow-worker
 ```
 
 ### Restart services
+
 ```bash
 docker-compose restart
 ```
 
 ### Reset database
+
 ```bash
 docker-compose down -v
 docker-compose up -d

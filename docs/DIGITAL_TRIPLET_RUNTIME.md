@@ -30,7 +30,7 @@ This runtime turns the Digital Triplet specification into executable code. It pa
 ## Usage
 
 ```ts
-import { TripletRuntime } from '../src/digital-triplet';
+import { TripletRuntime } from "../src/digital-triplet";
 
 const runtime = new TripletRuntime({
   orchestratorOptions: {
@@ -41,16 +41,16 @@ const runtime = new TripletRuntime({
 });
 
 await runtime.register({
-  id: 'grid-01',
-  asset: 'microgrid',
+  id: "grid-01",
+  asset: "microgrid",
   controlLoopMs: 500,
-  digitalModels: ['grid-sim'],
-  agents: ['policy-agent'],
+  digitalModels: ["grid-sim"],
+  agents: ["policy-agent"],
 });
 
-const snapshot = await runtime.ingest('grid-01', [
-  { type: 'physical', sourceId: 'ph1', timestamp: Date.now(), metrics: { voltage: 1.02 } },
-  { type: 'digital', modelId: 'grid-sim', timestamp: Date.now(), stateVector: { stability: 0.97 } },
+const snapshot = await runtime.ingest("grid-01", [
+  { type: "physical", sourceId: "ph1", timestamp: Date.now(), metrics: { voltage: 1.02 } },
+  { type: "digital", modelId: "grid-sim", timestamp: Date.now(), stateVector: { stability: 0.97 } },
 ]);
 
 console.log(snapshot.state, snapshot.definition);

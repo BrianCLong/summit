@@ -11,9 +11,9 @@ ig-manifest verify ./path/to/export --json
 Programmatic API:
 
 ```ts
-import { verifyManifest } from '@intelgraph/prov-manifest';
+import { verifyManifest } from "@intelgraph/prov-manifest";
 
-const report = await verifyManifest('./export-dir');
+const report = await verifyManifest("./export-dir");
 if (!report.valid) {
   console.error(report.issues);
 }

@@ -6,27 +6,27 @@
  * MIT License - Copyright (c) 2025 IntelGraph
  */
 
-import { execSync } from 'child_process';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { execSync } from "child_process";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const CHANGELOG_PATH = path.join(__dirname, '../docs/api/CHANGELOG.md');
+const CHANGELOG_PATH = path.join(__dirname, "../docs/api/CHANGELOG.md");
 
 // Commit type to changelog category mapping
 const CATEGORY_MAP = {
-  feat: 'Added',
-  fix: 'Fixed',
-  docs: 'Documentation',
-  perf: 'Performance',
-  refactor: 'Changed',
-  breaking: 'Breaking Changes',
-  security: 'Security',
-  deprecate: 'Deprecated',
-  remove: 'Removed',
+  feat: "Added",
+  fix: "Fixed",
+  docs: "Documentation",
+  perf: "Performance",
+  refactor: "Changed",
+  breaking: "Breaking Changes",
+  security: "Security",
+  deprecate: "Deprecated",
+  remove: "Removed",
 };
 
 /**
@@ -34,10 +34,10 @@ const CATEGORY_MAP = {
  */
 function getAPICommits(since = null) {
   try {
-    const sinceArg = since ? `${since}..HEAD` : '--all';
+    const sinceArg = since ? `${since}..HEAD` : "--all";
     const command = `git log ${sinceArg} --pretty=format:"%H|%s|%b" --no-merges -- openapi/ services/api/src/`;
 
-    const output = execSync(command, { encoding: 'utf8' });
+    const output = execSync(command, { encoding: "utf8" });
 
     if (!output.trim()) {
       return [];
@@ -45,13 +45,13 @@ function getAPICommits(since = null) {
 
     return output
       .trim()
-      .split('\n')
+      .split("\n")
       .map((line) => {
-        const [hash, subject, body] = line.split('|');
-        return { hash, subject, body: body || '' };
+        const [hash, subject, body] = line.split("|");
+        return { hash, subject, body: body || "" };
       });
   } catch (error) {
-    console.error('Error getting git commits:', error.message);
+    console.error("Error getting git commits:", error.message);
     return [];
   }
 }
@@ -65,7 +65,7 @@ function parseCommit(commit) {
 
   if (!match) {
     return {
-      type: 'other',
+      type: "other",
       scope: null,
       breaking: false,
       description: commit.subject,
@@ -78,7 +78,7 @@ function parseCommit(commit) {
   return {
     type,
     scope: scope || null,
-    breaking: !!breaking || commit.body.includes('BREAKING CHANGE'),
+    breaking: !!breaking || commit.body.includes("BREAKING CHANGE"),
     description,
     hash: commit.hash,
     body: commit.body,
@@ -93,9 +93,7 @@ function groupCommits(commits) {
 
   for (const commit of commits) {
     const parsed = parseCommit(commit);
-    const category = parsed.breaking
-      ? 'Breaking Changes'
-      : CATEGORY_MAP[parsed.type] || 'Other';
+    const category = parsed.breaking ? "Breaking Changes" : CATEGORY_MAP[parsed.type] || "Other";
 
     if (!groups[category]) {
       groups[category] = [];
@@ -134,22 +132,22 @@ function generateChangelogSection(version, date, commits) {
   let section = `\n## [${version}] - ${date}\n`;
 
   const categoryOrder = [
-    'Breaking Changes',
-    'Security',
-    'Added',
-    'Changed',
-    'Deprecated',
-    'Removed',
-    'Fixed',
-    'Performance',
-    'Documentation',
-    'Other',
+    "Breaking Changes",
+    "Security",
+    "Added",
+    "Changed",
+    "Deprecated",
+    "Removed",
+    "Fixed",
+    "Performance",
+    "Documentation",
+    "Other",
   ];
 
   for (const category of categoryOrder) {
     if (groups[category] && groups[category].length > 0) {
       section += `\n### ${category}\n\n`;
-      section += groups[category].join('\n') + '\n';
+      section += groups[category].join("\n") + "\n";
     }
   }
 
@@ -161,8 +159,8 @@ function generateChangelogSection(version, date, commits) {
  */
 function getLatestTag() {
   try {
-    const tag = execSync('git describe --tags --abbrev=0', {
-      encoding: 'utf8',
+    const tag = execSync("git describe --tags --abbrev=0", {
+      encoding: "utf8",
     }).trim();
     return tag;
   } catch (error) {
@@ -174,7 +172,7 @@ function getLatestTag() {
  * Update changelog file
  */
 function updateChangelog(newSection) {
-  let changelog = fs.readFileSync(CHANGELOG_PATH, 'utf8');
+  let changelog = fs.readFileSync(CHANGELOG_PATH, "utf8");
 
   // Find the [Unreleased] section
   const unreleasedRegex = /## \[Unreleased\]/;
@@ -185,16 +183,16 @@ function updateChangelog(newSection) {
     const insertIndex = match.index + match[0].length;
     changelog =
       changelog.slice(0, insertIndex) +
-      '\n' +
+      "\n" +
       newSection +
-      '\n---\n' +
+      "\n---\n" +
       changelog.slice(insertIndex);
   } else {
     // Append to end
-    changelog += '\n' + newSection;
+    changelog += "\n" + newSection;
   }
 
-  fs.writeFileSync(CHANGELOG_PATH, changelog, 'utf8');
+  fs.writeFileSync(CHANGELOG_PATH, changelog, "utf8");
 }
 
 /**
@@ -203,7 +201,7 @@ function updateChangelog(newSection) {
 function main() {
   const args = process.argv.slice(2);
 
-  if (args.includes('--help') || args.includes('-h')) {
+  if (args.includes("--help") || args.includes("-h")) {
     console.log(`
 API Changelog Generator
 
@@ -229,40 +227,40 @@ Examples:
     process.exit(0);
   }
 
-  const versionIndex = args.indexOf('--version');
-  const version = versionIndex !== -1 ? args[versionIndex + 1] : 'Unreleased';
+  const versionIndex = args.indexOf("--version");
+  const version = versionIndex !== -1 ? args[versionIndex + 1] : "Unreleased";
 
-  const sinceIndex = args.indexOf('--since');
+  const sinceIndex = args.indexOf("--since");
   const since = sinceIndex !== -1 ? args[sinceIndex + 1] : getLatestTag();
 
-  const dryRun = args.includes('--dry-run');
+  const dryRun = args.includes("--dry-run");
 
-  console.log('Generating API changelog...');
+  console.log("Generating API changelog...");
   console.log(`Version: ${version}`);
-  console.log(`Since: ${since || 'beginning'}`);
-  console.log('');
+  console.log(`Since: ${since || "beginning"}`);
+  console.log("");
 
   const commits = getAPICommits(since);
 
   if (commits.length === 0) {
-    console.log('No API-related commits found.');
+    console.log("No API-related commits found.");
     return;
   }
 
   console.log(`Found ${commits.length} API-related commits.`);
 
-  const date = new Date().toISOString().split('T')[0];
+  const date = new Date().toISOString().split("T")[0];
   const section = generateChangelogSection(version, date, commits);
 
-  console.log('\n--- Generated Changelog Section ---\n');
+  console.log("\n--- Generated Changelog Section ---\n");
   console.log(section);
-  console.log('\n--- End of Section ---\n');
+  console.log("\n--- End of Section ---\n");
 
   if (!dryRun) {
     updateChangelog(section);
     console.log(`✓ Changelog updated at ${CHANGELOG_PATH}`);
   } else {
-    console.log('(Dry run - changelog not updated)');
+    console.log("(Dry run - changelog not updated)");
   }
 }
 

@@ -10,11 +10,11 @@
 
 This platform exists to deliver **governed intelligence** at scale—intelligence that is:
 
-* Explainable
-* Auditable
-* Bounded
-* Reversible
-* Institutionally trustworthy
+- Explainable
+- Auditable
+- Bounded
+- Reversible
+- Institutionally trustworthy
 
 The system is not optimized for novelty or velocity.
 It is optimized for **durability under scrutiny**.
@@ -49,17 +49,17 @@ The following principles are **absolute**. No exception, shortcut, or emergency 
 
 ### What the Platform Is
 
-* A governed intelligence substrate
-* A policy-first execution environment
-* A provenance-native system of record
-* An institutional decision support and automation layer
+- A governed intelligence substrate
+- A policy-first execution environment
+- A provenance-native system of record
+- An institutional decision support and automation layer
 
 ### What the Platform Is Not
 
-* A general-purpose AI playground
-* A self-directing agent system
-* A feature-driven SaaS
-* A black-box optimizer
+- A general-purpose AI playground
+- A self-directing agent system
+- A feature-driven SaaS
+- A black-box optimizer
 
 ---
 
@@ -92,25 +92,25 @@ Autonomy exists on **tiers**, not a gradient.
 
 ### Tier 0 — Advisory
 
-* Recommendations only
-* No execution
+- Recommendations only
+- No execution
 
 ### Tier 1 — Human-in-the-Loop
 
-* Explicit approval required per action
+- Explicit approval required per action
 
 ### Tier 2 — Bounded Autonomous Execution
 
-* Pre-approved envelopes
-* Reversible
-* Rate-limited
+- Pre-approved envelopes
+- Reversible
+- Rate-limited
 
 ### Tier 3 — Exceptional Strategic Autonomy
 
-* Disabled by default
-* Board-authorized
-* Single-action, time-limited
-* Auto-revert required
+- Disabled by default
+- Board-authorized
+- Single-action, time-limited
+- Auto-revert required
 
 **Promotion is never automatic.
 Demotion is automatic on failure.**
@@ -121,10 +121,10 @@ Demotion is automatic on failure.**
 
 When multiple optimization domains exist (cost, reliability, performance, policy):
 
-* **Policy and security always win**
-* **SLA protection beats cost**
-* **Cost beats convenience**
-* **Conflicts must be detected, arbitrated, and receipted**
+- **Policy and security always win**
+- **SLA protection beats cost**
+- **Cost beats convenience**
+- **Conflicts must be detected, arbitrated, and receipted**
 
 No emergent behavior is tolerated.
 
@@ -134,13 +134,13 @@ No emergent behavior is tolerated.
 
 Every meaningful system action must emit a receipt containing:
 
-* Who authorized it
-* Under what policy
-* At what autonomy tier
-* With what bounds
-* What happened
-* What was expected
-* What actually occurred
+- Who authorized it
+- Under what policy
+- At what autonomy tier
+- With what bounds
+- What happened
+- What was expected
+- What actually occurred
 
 If an action cannot be replayed or explained, it is invalid.
 
@@ -152,10 +152,10 @@ If an action cannot be replayed or explained, it is invalid.
 
 **Purpose:** Continuous improvement without expansion
 
-* Max 3 changes per quarter
-* Must improve at least one measurable metric
-* Zero regression tolerance
-* Rollback always available
+- Max 3 changes per quarter
+- Must improve at least one measurable metric
+- Zero regression tolerance
+- Rollback always available
 
 QOC is about **better**, not **more**.
 
@@ -167,10 +167,10 @@ QOC is about **better**, not **more**.
 
 Each year the system must explicitly re-justify:
 
-* Every autonomy tier
-* Every certification
-* Every trust boundary
-* Every strategic assumption
+- Every autonomy tier
+- Every certification
+- Every trust boundary
+- Every strategic assumption
 
 Anything not reaffirmed is reduced or removed.
 
@@ -182,10 +182,10 @@ ARC removes power more often than it grants it.
 
 **Purpose:** Long-horizon thinking without risk
 
-* No production access
-* No shared credentials
-* No deployment path
-* Artifacts only (papers, simulations, models)
+- No production access
+- No shared credentials
+- No deployment path
+- Artifacts only (papers, simulations, models)
 
 Research never implies roadmap change.
 
@@ -197,17 +197,17 @@ No component is trusted because it exists.
 
 All must be **certified**:
 
-* Platform deployments
-* Operators
-* Plugins
-* Partners
-* Autonomy usage
+- Platform deployments
+- Operators
+- Plugins
+- Partners
+- Autonomy usage
 
 Certifications are:
 
-* Evidence-backed
-* Time-bounded
-* Publicly revocable
+- Evidence-backed
+- Time-bounded
+- Publicly revocable
 
 There is no lifetime trust.
 
@@ -217,19 +217,19 @@ There is no lifetime trust.
 
 ### Required Roles
 
-* Platform Owner
-* Security Officer
-* Autonomy Approver
-* Operator
-* Auditor
+- Platform Owner
+- Security Officer
+- Autonomy Approver
+- Operator
+- Auditor
 
 ### Separation of Duties
 
 No single role may:
 
-* Authorize and execute
-* Approve and certify
-* Deploy and audit
+- Authorize and execute
+- Approve and certify
+- Deploy and audit
 
 Human accountability is never delegated to machines.
 
@@ -241,10 +241,10 @@ When uncertainty increases, the system **contracts**, it does not expand.
 
 Default responses to risk:
 
-* Downgrade autonomy
-* Tighten budgets
-* Increase human oversight
-* Freeze ecosystem execution
+- Downgrade autonomy
+- Tighten budgets
+- Increase human oversight
+- Freeze ecosystem execution
 
 Resilience is achieved through **controlled retreat**, not bravado.
 
@@ -254,11 +254,11 @@ Resilience is achieved through **controlled retreat**, not bravado.
 
 The system is considered **complete** when:
 
-* It can run indefinitely under QOC + ARC
-* Autonomy remains bounded and revocable
-* Trust is continuously re-earned
-* No roadmap pressure exists
-* Innovation occurs only in isolation
+- It can run indefinitely under QOC + ARC
+- Autonomy remains bounded and revocable
+- Trust is continuously re-earned
+- No roadmap pressure exists
+- Innovation occurs only in isolation
 
 At that point, the platform is no longer a project.
 

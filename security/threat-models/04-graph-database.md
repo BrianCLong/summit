@@ -10,6 +10,7 @@
 ## System Overview
 
 The Graph Database Service is a REST API providing graph operations:
+
 - Node and edge CRUD operations
 - Cypher query execution
 - Graph algorithms (pathfinding, centrality, community detection)
@@ -18,12 +19,14 @@ The Graph Database Service is a REST API providing graph operations:
 - Graph statistics and analytics
 
 ### Architecture Components
+
 - **Entry Points:** REST API endpoints (`/api/*`)
 - **Dependencies:** Graph storage engine, query engine, algorithm libraries
 - **Data Flow:** REST API → Query Engine → Graph Storage → File System
 - **Technology Stack:** Node.js, Express, Custom graph storage
 
 ### Critical Operations
+
 - Direct Cypher query execution (`/api/query/cypher`)
 - Bulk import/export (`/api/import`, `/api/export`)
 - Data deletion (`/api/clear`, DELETE endpoints)
@@ -36,9 +39,11 @@ The Graph Database Service is a REST API providing graph operations:
 ### S - Spoofing Identity
 
 #### Threat 1.1: Unauthenticated API Access
+
 **Description:** All endpoints lack authentication
 **Attack Vector:** Direct HTTP requests to any endpoint
 **DREAD Score:**
+
 - Damage: 10 (Full database access)
 - Reproducibility: 10 (Always possible)
 - Exploitability: 10 (Trivial)
@@ -47,9 +52,11 @@ The Graph Database Service is a REST API providing graph operations:
 - **Total: 10.0 (CRITICAL)**
 
 **Existing Mitigation:**
+
 - None identified
 
 **Required Mitigation:**
+
 - Implement mandatory authentication on all endpoints
 - Use JWT or OAuth 2.0
 - Implement API key management
@@ -66,9 +73,11 @@ The Graph Database Service is a REST API providing graph operations:
 ### T - Tampering with Data
 
 #### Threat 2.1: Cypher Injection
+
 **Description:** Malicious Cypher queries modify or delete data
 **Attack Vector:** Unvalidated query string passed to `executeCypher()`
 **DREAD Score:**
+
 - Damage: 10 (Data destruction)
 - Reproducibility: 10 (Always possible)
 - Exploitability: 9 (Requires Cypher knowledge)
@@ -77,12 +86,14 @@ The Graph Database Service is a REST API providing graph operations:
 - **Total: 9.6 (CRITICAL)**
 
 **Existing Mitigation:**
+
 - None - raw query execution at line 146:
   ```typescript
   const result = queryEngine.executeCypher(query);
   ```
 
 **Required Mitigation:**
+
 - Implement query parameterization
 - Add query allowlisting (read-only mode)
 - Use query AST parsing and validation
@@ -99,9 +110,11 @@ The Graph Database Service is a REST API providing graph operations:
 ---
 
 #### Threat 2.2: Bulk Import Data Poisoning
+
 **Description:** Malicious graph data imported via `/api/import`
 **Attack Vector:** Crafted import payloads with malicious nodes/edges
 **DREAD Score:**
+
 - Damage: 9 (Graph corruption)
 - Reproducibility: 10 (Always possible)
 - Exploitability: 8 (Requires format knowledge)
@@ -110,9 +123,11 @@ The Graph Database Service is a REST API providing graph operations:
 - **Total: 9.2 (CRITICAL)**
 
 **Existing Mitigation:**
+
 - None at line 365-372
 
 **Required Mitigation:**
+
 - Implement strict schema validation
 - Add size limits for imports
 - Validate all node/edge properties
@@ -129,9 +144,11 @@ The Graph Database Service is a REST API providing graph operations:
 ---
 
 #### Threat 2.3: Unauthorized Data Modification
+
 **Description:** Any client can modify or delete any data
 **Attack Vector:** Direct API calls to PUT/DELETE endpoints
 **DREAD Score:**
+
 - Damage: 10 (Data loss)
 - Reproducibility: 10 (Always)
 - Exploitability: 10 (Simple HTTP)
@@ -140,9 +157,11 @@ The Graph Database Service is a REST API providing graph operations:
 - **Total: 10.0 (CRITICAL)**
 
 **Existing Mitigation:**
+
 - None
 
 **Required Mitigation:**
+
 - Implement authorization checks on all write operations
 - Use role-based access control (RBAC)
 - Implement data ownership model
@@ -160,9 +179,11 @@ The Graph Database Service is a REST API providing graph operations:
 ### R - Repudiation
 
 #### Threat 3.1: No Audit Trail
+
 **Description:** Database operations not logged
 **Attack Vector:** Malicious actions without forensic evidence
 **DREAD Score:**
+
 - Damage: 8 (Forensic blindness)
 - Reproducibility: 10 (Always)
 - Exploitability: 1 (N/A)
@@ -171,9 +192,11 @@ The Graph Database Service is a REST API providing graph operations:
 - **Total: 7.8 (HIGH)**
 
 **Existing Mitigation:**
+
 - Basic console.log at startup (line 394-396)
 
 **Required Mitigation:**
+
 - Implement comprehensive audit logging:
   - All CRUD operations
   - Query executions
@@ -196,9 +219,11 @@ The Graph Database Service is a REST API providing graph operations:
 ### I - Information Disclosure
 
 #### Threat 4.1: Unrestricted Data Export
+
 **Description:** Entire graph exportable without authorization
 **Attack Vector:** GET request to `/api/export`
 **DREAD Score:**
+
 - Damage: 10 (Complete data theft)
 - Reproducibility: 10 (Always)
 - Exploitability: 10 (Single request)
@@ -207,9 +232,11 @@ The Graph Database Service is a REST API providing graph operations:
 - **Total: 10.0 (CRITICAL)**
 
 **Existing Mitigation:**
+
 - None at line 356-362
 
 **Required Mitigation:**
+
 - Implement strict authorization for export
 - Add export size limits
 - Implement data masking/redaction
@@ -226,9 +253,11 @@ The Graph Database Service is a REST API providing graph operations:
 ---
 
 #### Threat 4.2: Verbose Error Messages
+
 **Description:** Stack traces reveal system internals
 **Attack Vector:** Malformed requests trigger detailed errors
 **DREAD Score:**
+
 - Damage: 5 (Information leakage)
 - Reproducibility: 9 (Easy to trigger)
 - Exploitability: 6 (Aids other attacks)
@@ -237,9 +266,11 @@ The Graph Database Service is a REST API providing graph operations:
 - **Total: 7.8 (HIGH)**
 
 **Existing Mitigation:**
+
 - Basic error handling with `.message` (e.g., line 45, 58)
 
 **Required Mitigation:**
+
 - Implement custom error formatter
 - Return generic errors to clients
 - Log detailed errors server-side only
@@ -254,9 +285,11 @@ The Graph Database Service is a REST API providing graph operations:
 ---
 
 #### Threat 4.3: Graph Structure Disclosure via Algorithms
+
 **Description:** Centrality/community algorithms reveal sensitive relationships
 **Attack Vector:** Algorithm endpoints expose network structure
 **DREAD Score:**
+
 - Damage: 7 (Relationship disclosure)
 - Reproducibility: 10 (Always)
 - Exploitability: 8 (Simple API call)
@@ -265,10 +298,12 @@ The Graph Database Service is a REST API providing graph operations:
 - **Total: 8.4 (CRITICAL)**
 
 **Existing Mitigation:**
+
 - Top-K limiting (line 213)
 - Clique result limiting to 100 (line 261)
 
 **Required Mitigation:**
+
 - Implement authorization for algorithm operations
 - Add data classification and access control
 - Implement differential privacy for aggregates
@@ -286,9 +321,11 @@ The Graph Database Service is a REST API providing graph operations:
 ### D - Denial of Service
 
 #### Threat 5.1: Expensive Cypher Query DoS
+
 **Description:** Complex queries exhaust server resources
 **Attack Vector:** Deeply nested or Cartesian product queries
 **DREAD Score:**
+
 - Damage: 9 (Service outage)
 - Reproducibility: 10 (Easy to craft)
 - Exploitability: 9 (No limits)
@@ -297,9 +334,11 @@ The Graph Database Service is a REST API providing graph operations:
 - **Total: 9.4 (CRITICAL)**
 
 **Existing Mitigation:**
+
 - None
 
 **Required Mitigation:**
+
 - Implement query timeout (max: 30s)
 - Add query cost estimation
 - Implement query complexity limits
@@ -316,9 +355,11 @@ The Graph Database Service is a REST API providing graph operations:
 ---
 
 #### Threat 5.2: Algorithm Complexity DoS
+
 **Description:** Expensive graph algorithms (e.g., all-pairs shortest path)
 **Attack Vector:** Algorithm endpoints without cost controls
 **DREAD Score:**
+
 - Damage: 9 (CPU exhaustion)
 - Reproducibility: 10 (Deterministic)
 - Exploitability: 8 (Simple call)
@@ -327,9 +368,11 @@ The Graph Database Service is a REST API providing graph operations:
 - **Total: 9.2 (CRITICAL)**
 
 **Existing Mitigation:**
+
 - None
 
 **Required Mitigation:**
+
 - Implement algorithm timeout limits
 - Add graph size checks before execution
 - Implement job queuing for expensive operations
@@ -345,9 +388,11 @@ The Graph Database Service is a REST API providing graph operations:
 ---
 
 #### Threat 5.3: Storage Exhaustion via Bulk Create
+
 **Description:** Millions of nodes/edges created to fill storage
 **Attack Vector:** Repeated calls to POST `/api/nodes` and `/api/edges`
 **DREAD Score:**
+
 - Damage: 9 (Service failure)
 - Reproducibility: 9 (Easy)
 - Exploitability: 9 (No limits)
@@ -356,9 +401,11 @@ The Graph Database Service is a REST API providing graph operations:
 - **Total: 9.2 (CRITICAL)**
 
 **Existing Mitigation:**
+
 - None
 
 **Required Mitigation:**
+
 - Implement rate limiting per user/IP
 - Add storage quotas
 - Implement bulk operation limits
@@ -374,9 +421,11 @@ The Graph Database Service is a REST API providing graph operations:
 ---
 
 #### Threat 5.4: Clear Endpoint Abuse
+
 **Description:** DELETE `/api/clear` wipes entire database
 **Attack Vector:** Single unauthenticated request
 **DREAD Score:**
+
 - Damage: 10 (Total data loss)
 - Reproducibility: 10 (Always)
 - Exploitability: 10 (Single call)
@@ -385,9 +434,11 @@ The Graph Database Service is a REST API providing graph operations:
 - **Total: 10.0 (CRITICAL)**
 
 **Existing Mitigation:**
+
 - None at line 375-382
 
 **Required Mitigation:**
+
 - Remove clear endpoint from production
 - If needed, require multi-factor authentication
 - Implement soft delete with recovery period
@@ -405,9 +456,11 @@ The Graph Database Service is a REST API providing graph operations:
 ### E - Elevation of Privilege
 
 #### Threat 6.1: No Authorization Model
+
 **Description:** All operations available to all users
 **Attack Vector:** Any authenticated (or unauthenticated) user has full access
 **DREAD Score:**
+
 - Damage: 10 (Full admin access)
 - Reproducibility: 10 (Always)
 - Exploitability: 10 (No checks)
@@ -416,9 +469,11 @@ The Graph Database Service is a REST API providing graph operations:
 - **Total: 10.0 (CRITICAL)**
 
 **Existing Mitigation:**
+
 - None
 
 **Required Mitigation:**
+
 - Implement role-based access control (RBAC)
 - Define roles: Reader, Writer, Analyst, Admin
 - Map operations to permissions
@@ -434,9 +489,11 @@ The Graph Database Service is a REST API providing graph operations:
 ---
 
 #### Threat 6.2: CORS Misconfiguration
+
 **Description:** Unrestricted CORS allows credential theft
 **Attack Vector:** Malicious website calls API with user credentials
 **DREAD Score:**
+
 - Damage: 8 (CSRF attacks)
 - Reproducibility: 8 (If misconfigured)
 - Exploitability: 7 (Common attack)
@@ -445,10 +502,12 @@ The Graph Database Service is a REST API providing graph operations:
 - **Total: 8.2 (CRITICAL)**
 
 **Existing Mitigation:**
+
 - Basic CORS at line 34: `app.use(cors())`
 - No configuration = allows all origins
 
 **Required Mitigation:**
+
 - Configure specific allowed origins
 - Never use wildcard with credentials
 - Implement origin validation
@@ -463,9 +522,11 @@ The Graph Database Service is a REST API providing graph operations:
 ---
 
 #### Threat 6.3: No Security Headers
+
 **Description:** Missing security headers enable various attacks
 **Attack Vector:** XSS, clickjacking, MIME sniffing
 **DREAD Score:**
+
 - Damage: 7 (Various attacks)
 - Reproducibility: 10 (Always)
 - Exploitability: 8 (Common attacks)
@@ -474,9 +535,11 @@ The Graph Database Service is a REST API providing graph operations:
 - **Total: 9.0 (CRITICAL)**
 
 **Existing Mitigation:**
+
 - None
 
 **Required Mitigation:**
+
 - Implement Helmet middleware
 - Configure CSP headers
 - Enable HSTS
@@ -494,9 +557,11 @@ The Graph Database Service is a REST API providing graph operations:
 ## Additional Security Concerns
 
 ### Threat 7.1: No Input Validation
+
 **Description:** Node/edge properties not validated
 **Attack Vector:** Malicious property values (XSS, oversized, etc.)
 **DREAD Score:**
+
 - Damage: 7 (Data corruption, XSS)
 - Reproducibility: 10 (Always)
 - Exploitability: 8 (Easy)
@@ -505,9 +570,11 @@ The Graph Database Service is a REST API providing graph operations:
 - **Total: 8.8 (CRITICAL)**
 
 **Existing Mitigation:**
+
 - None
 
 **Required Mitigation:**
+
 - Implement schema validation for all inputs
 - Add size limits (strings, arrays)
 - Sanitize all string inputs
@@ -522,9 +589,11 @@ The Graph Database Service is a REST API providing graph operations:
 ---
 
 ### Threat 7.2: File System Access Risk
+
 **Description:** Direct file system storage vulnerable
 **Attack Vector:** Path traversal, permission issues
 **DREAD Score:**
+
 - Damage: 9 (File system access)
 - Reproducibility: 6 (Depends on config)
 - Exploitability: 7 (Requires testing)
@@ -533,9 +602,11 @@ The Graph Database Service is a REST API providing graph operations:
 - **Total: 7.8 (HIGH)**
 
 **Existing Mitigation:**
+
 - dataDir configuration: `./data/graph`
 
 **Required Mitigation:**
+
 - Validate all file paths
 - Use absolute paths
 - Implement path sanitization
@@ -553,6 +624,7 @@ The Graph Database Service is a REST API providing graph operations:
 ## Summary of Findings
 
 ### Critical Gaps (Immediate Action Required)
+
 1. **No authentication** - Complete open access
 2. **No authorization** - No access control model
 3. **Cypher injection** - Direct query execution
@@ -568,11 +640,13 @@ The Graph Database Service is a REST API providing graph operations:
 13. **No input validation** - Data corruption/XSS
 
 ### High Priority Gaps
+
 1. File system security
 2. Error message sanitization
 3. Algorithm result disclosure
 
 ### Compliance Impact
+
 - **SOC 2 Security (CC6.x):** 10 critical gaps
 - **SOC 2 Availability (A1.x):** 4 critical DoS vulnerabilities
 - **SOC 2 Confidentiality (C1.x):** 3 critical data exposure risks
@@ -586,6 +660,7 @@ The Graph Database Service is a REST API providing graph operations:
 ## Recommendations
 
 ### Immediate Actions (Week 1) - BLOCKING FOR GA
+
 1. ✅ Implement authentication on all endpoints
 2. ✅ Implement basic authorization (RBAC)
 3. ✅ Add Cypher query validation/parameterization
@@ -596,6 +671,7 @@ The Graph Database Service is a REST API providing graph operations:
 8. ✅ Implement audit logging
 
 ### Short-term Actions (Month 1)
+
 1. Add comprehensive input validation
 2. Implement query timeouts and complexity limits
 3. Add export authorization and controls
@@ -605,6 +681,7 @@ The Graph Database Service is a REST API providing graph operations:
 7. Add monitoring and alerting
 
 ### Long-term Actions (Quarter 1)
+
 1. Implement attribute-based access control (ABAC)
 2. Add data classification framework
 3. Implement differential privacy for analytics
@@ -614,6 +691,7 @@ The Graph Database Service is a REST API providing graph operations:
 7. Add data loss prevention (DLP)
 
 ### Architecture Recommendations
+
 1. Consider using established graph databases (Neo4j, ArangoDB) with built-in security
 2. Implement API gateway for centralized security
 3. Use service mesh for service-to-service security
@@ -628,7 +706,7 @@ The Graph Database Service is a REST API providing graph operations:
 
 This service has **13 CRITICAL security gaps** that must be addressed before GA release.
 
-**Reviewed By:** _____________________
-**Date:** _____________________
+**Reviewed By:** **********\_**********
+**Date:** **********\_**********
 **Next Review:** After remediation (Weekly until approved)
 **GA Blocker:** YES - Must fix critical gaps before production deployment

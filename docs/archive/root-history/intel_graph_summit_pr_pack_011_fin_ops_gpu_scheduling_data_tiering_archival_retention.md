@@ -31,7 +31,7 @@ provisioners:
       - key: node.kubernetes.io/instance-type
         operator: In
         values: [m7g.large, m7g.xlarge, c7g.large, c7g.xlarge]
-    limits: { resources: { cpu: '200', memory: '800Gi' } }
+    limits: { resources: { cpu: "200", memory: "800Gi" } }
     ttlSecondsAfterEmpty: 120
     consolidationPolicy: WhenUnderutilized
     labels: { pool: general }
@@ -43,7 +43,7 @@ provisioners:
       - key: node.kubernetes.io/instance-type
         operator: In
         values: [g5.xlarge, g5.2xlarge, l4g.xlarge]
-    taints: [{ key: gpu, value: 'true', effect: NoSchedule }]
+    taints: [{ key: gpu, value: "true", effect: NoSchedule }]
 ```
 
 **`k8s/karpenter/interruption-handler.yaml`** (optional sqs‑drainer)
@@ -142,7 +142,7 @@ metadata: { name: gpu-queue }
 spec:
   namespaceSelector: {}
   resources:
-    - name: 'nvidia.com/gpu'
+    - name: "nvidia.com/gpu"
       flavors:
         - name: g5
           quota:
@@ -284,7 +284,7 @@ SELECT partman.set_config_option('public.event_logs','retention','90 days');
 ```yaml
 name: cost-anomaly
 on:
-  schedule: [{ cron: '0 */6 * * *' }]
+  schedule: [{ cron: "0 */6 * * *" }]
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -293,7 +293,7 @@ jobs:
         run: curl -fsSL "$KUBECOST_URL/model/anomalies?window=6d"
       - name: Enforce budget delta
         run: node scripts/infracost_enforce.js
-        env: { INFRACOST_LIMIT: '100' }
+        env: { INFRACOST_LIMIT: "100" }
 ```
 
 **`infra/budgets.tf`** — cloud budgets with email/webhook notifications.
@@ -354,14 +354,14 @@ resource "aws_s3_bucket_object_lock_configuration" "audit" {
 
 ```yaml
 name: finops-review
-on: { schedule: [{ cron: '0 13 * * 1' }] }
+on: { schedule: [{ cron: "0 13 * * 1" }] }
 jobs:
   open:
     runs-on: ubuntu-latest
     steps:
       - uses: peter-evans/create-issue-from-file@v5
         with:
-          title: 'Weekly FinOps Review'
+          title: "Weekly FinOps Review"
           content-file: reports/finops.md
           labels: [finops]
 ```

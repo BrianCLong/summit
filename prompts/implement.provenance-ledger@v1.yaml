@@ -1,17 +1,17 @@
 meta:
   id: implement.provenance-ledger@v1
-  owner: 'intelgraph-advisory-committee'
-  purpose: 'Create provenance ledger microservice with offline verifier for chain-of-custody tracking'
-  tags: ['security', 'provenance', 'chain-of-custody', 'integrity']
+  owner: "intelgraph-advisory-committee"
+  purpose: "Create provenance ledger microservice with offline verifier for chain-of-custody tracking"
+  tags: ["security", "provenance", "chain-of-custody", "integrity"]
   guardrails:
-    - 'All evidence must be cryptographically signed with Ed25519'
-    - 'Merkle tree structure must be deterministic and verifiable'
-    - 'Offline verifier must work without network dependencies'
-    - 'No secrets or credentials in committed code'
-    - 'Include comprehensive tamper-detection tests'
+    - "All evidence must be cryptographically signed with Ed25519"
+    - "Merkle tree structure must be deterministic and verifiable"
+    - "Offline verifier must work without network dependencies"
+    - "No secrets or credentials in committed code"
+    - "Include comprehensive tamper-detection tests"
 
 modelConfig:
-  model: 'claude-sonnet-4-5'
+  model: "claude-sonnet-4-5"
   temperature: 0.1
   maxTokens: 8000
 
@@ -369,25 +369,25 @@ template: |
   Remember: **The verifier is your ground truth.** If the CLI can't verify it offline, it's not production-ready.
 
 examples:
-  - name: 'postgres-storage'
+  - name: "postgres-storage"
     inputs:
-      deployment_target: 'kubernetes'
-      signing_algorithm: 'Ed25519'
-      storage_backend: 'postgresql'
+      deployment_target: "kubernetes"
+      signing_algorithm: "Ed25519"
+      storage_backend: "postgresql"
     expected_contains:
-      - 'PostgreSQL'
-      - 'Ed25519'
-      - 'Merkle'
-      - 'prov-verify'
-      - 'golden path'
+      - "PostgreSQL"
+      - "Ed25519"
+      - "Merkle"
+      - "prov-verify"
+      - "golden path"
 
-  - name: 's3-storage'
+  - name: "s3-storage"
     inputs:
-      deployment_target: 'docker-compose'
-      signing_algorithm: 'Ed25519'
-      storage_backend: 's3'
+      deployment_target: "docker-compose"
+      signing_algorithm: "Ed25519"
+      storage_backend: "s3"
     expected_contains:
-      - 'S3'
-      - 'Ed25519'
-      - 'offline verifier'
-      - 'tamper detection'
+      - "S3"
+      - "Ed25519"
+      - "offline verifier"
+      - "tamper detection"

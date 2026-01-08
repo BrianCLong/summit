@@ -247,7 +247,7 @@ create index on receipts (verified);
 `dev/docker-compose.yml`
 
 ```yaml
-version: '3.9'
+version: "3.9"
 services:
   db:
     image: postgres:16
@@ -255,20 +255,20 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_USER: mc
       POSTGRES_DB: mc
-    ports: ['5432:5432']
+    ports: ["5432:5432"]
   minio:
     image: minio/minio:RELEASE.2025-01-16T20-47-21Z
     command: server /data
     environment:
       MINIO_ROOT_USER: mc
       MINIO_ROOT_PASSWORD: password
-    ports: ['9000:9000', '9001:9001']
+    ports: ["9000:9000", "9001:9001"]
   opa:
     image: openpolicyagent/opa:latest
-    command: ['run', '--server', '/policies']
+    command: ["run", "--server", "/policies"]
     volumes:
       - ../policy/rego:/policies:ro
-    ports: ['8181:8181']
+    ports: ["8181:8181"]
 ```
 
 `dev/.env.example`
@@ -311,11 +311,9 @@ OPA_URL=http://localhost:8181/v1/data
 
 ```js
 #!/usr/bin/env node
-const fs = require('fs');
-const min = parseInt(process.argv[2] || '85', 10);
-const data = JSON.parse(
-  fs.readFileSync('coverage/coverage-summary.json', 'utf8'),
-);
+const fs = require("fs");
+const min = parseInt(process.argv[2] || "85", 10);
+const data = JSON.parse(fs.readFileSync("coverage/coverage-summary.json", "utf8"));
 const pct = data.total.statements.pct;
 if (pct < min) {
   console.error(`Coverage ${pct}% < ${min}%`);
@@ -403,12 +401,7 @@ export function redact(obj: Record<string, any>): Record<string, any> {
   const out: any = {};
   for (const [k, v] of Object.entries(obj)) {
     const lk = k.toLowerCase();
-    if (
-      lk.includes('password') ||
-      lk.startsWith('ssn') ||
-      lk.includes('secret')
-    )
-      out[k] = '***';
+    if (lk.includes("password") || lk.startsWith("ssn") || lk.includes("secret")) out[k] = "***";
     else out[k] = v;
   }
   return out;
@@ -508,22 +501,20 @@ disclose:
 `tests/e2e/happy-path.ts`
 
 ```ts
-import axios from 'axios';
+import axios from "axios";
 (async () => {
   const wf = await axios.post(`${process.env.API}/api/workflows`, {
-    name: 'hp',
-    version: '0.1.0',
-    tasks: [{ id: 't1', uses: 'pkg:demo/echo@1.0.0' }],
+    name: "hp",
+    version: "0.1.0",
+    tasks: [{ id: "t1", uses: "pkg:demo/echo@1.0.0" }],
   });
   await axios.post(`${process.env.API}/api/workflows/${wf.data.id}/publish`);
   const exec = await axios.post(`${process.env.API}/api/executions`, {
     workflowId: wf.data.id,
-    rollout: 'canary',
+    rollout: "canary",
   });
-  const rec = await axios.get(
-    `${process.env.API}/api/executions/${exec.data.id}/receipt`,
-  );
-  console.log('status', rec.status);
+  const rec = await axios.get(`${process.env.API}/api/executions/${exec.data.id}/receipt`);
+  console.log("status", rec.status);
 })();
 ```
 

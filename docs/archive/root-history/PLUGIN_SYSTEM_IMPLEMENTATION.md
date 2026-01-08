@@ -26,6 +26,7 @@ This implementation delivers a **secure, well-documented plugin system** for the
 **Location**: `/home/user/summit/packages/plugin-system/`
 
 **Components**:
+
 - **Types & Manifests** (`src/types/plugin.ts`) - Type definitions, permissions, states
 - **Plugin Manager** (`src/core/PluginManager.ts`) - Lifecycle orchestration
 - **Plugin Loader** (`src/core/PluginLoader.ts`) - Dynamic loading with sandboxing
@@ -40,6 +41,7 @@ This implementation delivers a **secure, well-documented plugin system** for the
   - `ConnectorExtension.ts` - Data connector plugin base (ingest adapters)
 
 **Features**:
+
 - Microkernel architecture with clean separation
 - Sandboxed execution using isolated-vm
 - Permission-based access control (14 permission types)
@@ -54,11 +56,13 @@ This implementation delivers a **secure, well-documented plugin system** for the
 **Location**: `/home/user/summit/packages/plugin-host/`
 
 **Components**:
+
 - **Host Service** (`src/PluginHostService.ts`) - Platform-level plugin management
 - **REST API** (`src/api/PluginHostAPI.ts`) - HTTP endpoints for plugin operations
 - **Configuration** - Environment-based security and authorization settings
 
 **API Endpoints**:
+
 ```
 GET    /api/health                  - Service health status
 GET    /api/plugins                 - List installed plugins
@@ -73,6 +77,7 @@ GET    /api/plugins/:id/health      - Plugin health & resource usage
 ```
 
 **Features**:
+
 - Express-based REST API with rate limiting
 - CORS, Helmet security middleware
 - Auto-start plugin configuration
@@ -86,9 +91,11 @@ GET    /api/plugins/:id/health      - Plugin health & resource usage
 **Location**: `/home/user/summit/examples/plugins/`
 
 #### a. Pattern Analytics Plugin
+
 **Path**: `examples/plugins/pattern-analytics/`
 
 **Capabilities**:
+
 - Cluster detection in entity graphs
 - Anomaly detection (unusually connected entities)
 - Centrality analysis (hub identification)
@@ -100,9 +107,11 @@ GET    /api/plugins/:id/health      - Plugin health & resource usage
 **Output**: Insights with severity levels, recommendations, and metadata
 
 #### b. Network Visualization Plugin
+
 **Path**: `examples/plugins/network-visualization/`
 
 **Capabilities**:
+
 - Force-directed graph layout using D3.js
 - Interactive zoom, pan, drag
 - Node/edge styling and labeling
@@ -115,9 +124,11 @@ GET    /api/plugins/:id/health      - Plugin health & resource usage
 **Rendering**: HTML/SVG with sandboxed iframe execution
 
 #### c. Threat Intelligence Connector
+
 **Path**: `examples/plugins/threat-intel-connector/`
 
 **Capabilities**:
+
 - Connects to external threat intel feeds (MISP, STIX/TAXII)
 - Fetches indicators (IP, domain, hash, URL, email)
 - Transforms data to entities/relationships
@@ -133,6 +144,7 @@ GET    /api/plugins/:id/health      - Plugin health & resource usage
 ### Sandboxing Strategy
 
 **Isolated-VM Execution**:
+
 - Each plugin runs in a separate V8 isolate
 - Memory limits enforced (default: 256MB, max: 2GB)
 - No direct file system access
@@ -140,27 +152,29 @@ GET    /api/plugins/:id/health      - Plugin health & resource usage
 - No native module loading
 
 **Permission System** (14 permission types):
+
 ```typescript
 enum PluginPermission {
-  READ_DATA = 'read:data',
-  WRITE_DATA = 'write:data',
-  EXECUTE_QUERIES = 'execute:queries',
-  ACCESS_GRAPH = 'access:graph',
-  NETWORK_ACCESS = 'network:access',
-  FILE_SYSTEM = 'filesystem:access',
-  DATABASE_ACCESS = 'database:access',
-  API_ENDPOINTS = 'api:endpoints',
-  UI_EXTENSIONS = 'ui:extensions',
-  ANALYTICS = 'analytics:access',
-  ML_MODELS = 'ml:models',
-  WEBHOOKS = 'webhooks:manage',
-  SCHEDULED_TASKS = 'tasks:schedule',
+  READ_DATA = "read:data",
+  WRITE_DATA = "write:data",
+  EXECUTE_QUERIES = "execute:queries",
+  ACCESS_GRAPH = "access:graph",
+  NETWORK_ACCESS = "network:access",
+  FILE_SYSTEM = "filesystem:access",
+  DATABASE_ACCESS = "database:access",
+  API_ENDPOINTS = "api:endpoints",
+  UI_EXTENSIONS = "ui:extensions",
+  ANALYTICS = "analytics:access",
+  ML_MODELS = "ml:models",
+  WEBHOOKS = "webhooks:manage",
+  SCHEDULED_TASKS = "tasks:schedule",
 }
 ```
 
 ### Authorization Integration
 
 **OPA (Open Policy Agent)**:
+
 ```typescript
 // Configuration
 authorization: {
@@ -179,12 +193,14 @@ const allowed = await authProvider.authorize({
 ```
 
 **Development Mode**:
+
 - `DevelopmentAuthorizationProvider` - Allows all (dev/staging only)
 - `InMemoryAuthorizationProvider` - For testing
 
 ### Resource Quotas
 
 **Enforced Limits**:
+
 ```typescript
 resources: {
   maxMemoryMB: 256,      // Memory limit (max 2GB)
@@ -195,6 +211,7 @@ resources: {
 ```
 
 **Quota Monitoring**:
+
 - Real-time resource tracking
 - Violation detection (warning/critical)
 - Auto-disable on critical violations
@@ -204,6 +221,7 @@ resources: {
 ### Code Security
 
 **Security Scanning** (`PluginSecurity`):
+
 - Signature verification (RSA-SHA256)
 - Blacklist checking
 - Publisher trust verification
@@ -276,10 +294,10 @@ export default class MyAnalyticsPlugin extends AnalyticsExtension {
 ```typescript
 // Initialize plugin host
 const config = {
-  platformVersion: '1.0.0',
-  environment: 'production',
+  platformVersion: "1.0.0",
+  environment: "production",
   security: { scanOnInstall: true, requireSignature: true },
-  authorization: { provider: 'opa', opaEndpoint: 'http://localhost:8181' },
+  authorization: { provider: "opa", opaEndpoint: "http://localhost:8181" },
   monitoring: { healthCheckIntervalMs: 30000, autoDisableOnViolation: true },
 };
 
@@ -290,15 +308,16 @@ await service.start();
 await api.start(3001);
 
 // Install plugin
-await service.installPlugin(manifest, { type: 'local', path: '/path/to/plugin' });
+await service.installPlugin(manifest, { type: "local", path: "/path/to/plugin" });
 
 // Enable plugin
-await service.enablePlugin('my-plugin');
+await service.enablePlugin("my-plugin");
 ```
 
 ## 🧪 Testing Strategy
 
 ### Unit Tests Required
+
 - [ ] Manifest validation (Zod schema)
 - [ ] Permission checking logic
 - [ ] Resource quota enforcement
@@ -307,6 +326,7 @@ await service.enablePlugin('my-plugin');
 - [ ] Authorization provider mocking
 
 ### Integration Tests Required
+
 - [ ] Plugin installation flow
 - [ ] Plugin enable/disable cycle
 - [ ] Hot reload functionality
@@ -316,6 +336,7 @@ await service.enablePlugin('my-plugin');
 - [ ] Security scanning
 
 ### Example Test Plugins
+
 - [ ] Well-behaved analytics plugin
 - [ ] Resource-abusive plugin (for quota tests)
 - [ ] Permission-violating plugin
@@ -324,22 +345,25 @@ await service.enablePlugin('my-plugin');
 ## 📊 Monitoring & Observability
 
 **Health Checks**:
+
 - Service-level health (total plugins, enabled, violations)
 - Plugin-level health (running state, resource usage)
 - Configurable interval (default: 30s)
 
 **Events Emitted**:
+
 ```typescript
-'plugin:installed'  - { pluginId, version }
-'plugin:enabled'    - { pluginId }
-'plugin:disabled'   - { pluginId }
-'plugin:updated'    - { pluginId, version }
-'plugin:reloaded'   - { pluginId }
-'plugin:unhealthy'  - { pluginId, health }
-'plugin:quota-violation' - { pluginId, violations }
+"plugin:installed" - { pluginId, version };
+"plugin:enabled" - { pluginId };
+"plugin:disabled" - { pluginId };
+"plugin:updated" - { pluginId, version };
+"plugin:reloaded" - { pluginId };
+"plugin:unhealthy" - { pluginId, health };
+"plugin:quota-violation" - { pluginId, violations };
 ```
 
 **Metrics to Track**:
+
 - Plugin install/enable/disable count
 - Resource usage per plugin (memory, CPU, network)
 - Quota violations (warning/critical)
@@ -518,6 +542,7 @@ summit/
 
 **Status**: Ready for review and testing
 **Next Steps**:
+
 1. Resolve workspace dependency issues (unrelated mobile-native package)
 2. Run `pnpm install` successfully
 3. Build all packages

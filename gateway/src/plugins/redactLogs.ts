@@ -1,8 +1,8 @@
-import pino from 'pino';
+import pino from "pino";
 
 const logger = pino({
   redact: {
-    paths: ['req.headers.authorization', 'variables.*', 'data.*'],
+    paths: ["req.headers.authorization", "variables.*", "data.*"],
     remove: true,
   },
 });
@@ -16,7 +16,7 @@ export const redactLogs = () => ({
     if (context.spanId) {
       logData.span_id = context.spanId;
     }
-    logger.info(logData, 'op start');
+    logger.info(logData, "op start");
   },
   async willSendResponse({ response, context }: any) {
     const logData: any = { status: response?.http?.status };
@@ -26,6 +26,6 @@ export const redactLogs = () => ({
     if (context.spanId) {
       logData.span_id = context.spanId;
     }
-    logger.info(logData, 'op done');
+    logger.info(logData, "op done");
   },
 });

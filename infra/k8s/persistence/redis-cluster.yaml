@@ -70,7 +70,7 @@ metadata:
     app.kubernetes.io/name: redis-conductor
     app.kubernetes.io/component: queue
     app.kubernetes.io/part-of: intelgraph
-    app.kubernetes.io/version: '7.2'
+    app.kubernetes.io/version: "7.2"
 spec:
   serviceName: redis-conductor-headless
   replicas: 3
@@ -83,11 +83,11 @@ spec:
         app.kubernetes.io/name: redis-conductor
         app.kubernetes.io/component: queue
         app.kubernetes.io/part-of: intelgraph
-        app.kubernetes.io/version: '7.2'
+        app.kubernetes.io/version: "7.2"
       annotations:
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: '9121'
-        prometheus.io/path: '/metrics'
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9121"
+        prometheus.io/path: "/metrics"
     spec:
       serviceAccountName: postgres-operator
       securityContext:
@@ -194,7 +194,7 @@ spec:
               name: metrics
           env:
             - name: REDIS_ADDR
-              value: 'redis://localhost:6379'
+              value: "redis://localhost:6379"
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -281,9 +281,9 @@ metadata:
     app.kubernetes.io/component: queue
     app.kubernetes.io/part-of: intelgraph
   annotations:
-    prometheus.io/scrape: 'true'
-    prometheus.io/port: '9121'
-    prometheus.io/path: '/metrics'
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9121"
+    prometheus.io/path: "/metrics"
 spec:
   type: ClusterIP
   ports:

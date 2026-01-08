@@ -10,6 +10,6 @@ This pack contains the contracts, principles, and schemas required to integrate 
 
 ## Core Documents
 
-* **`recommendation-contract.md`**: The required interface for any recommendation.
-* **`evidence-attribution.md`**: How to tag your contributions.
-* **`refusal-and-revocation.md`**: How to stay in good standing.
+- **`recommendation-contract.md`**: The required interface for any recommendation.
+- **`evidence-attribution.md`**: How to tag your contributions.
+- **`refusal-and-revocation.md`**: How to stay in good standing.

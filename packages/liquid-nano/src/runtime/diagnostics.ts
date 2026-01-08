@@ -1,8 +1,8 @@
 import type {
   DiagnosticTimeline,
   RuntimeDiagnosticsEvent,
-  RuntimeDiagnosticsSnapshot
-} from './types.js';
+  RuntimeDiagnosticsSnapshot,
+} from "./types.js";
 
 const MAX_EVENTS = 500;
 
@@ -24,16 +24,16 @@ export class RingDiagnosticsTimeline implements DiagnosticTimeline {
   }
 
   summarize(): RuntimeDiagnosticsSnapshot {
-    const success = this.events.filter((event) => event.status === 'processed').length;
-    const failed = this.events.filter((event) => event.status === 'failed').length;
-    const queued = this.events.filter((event) => event.status === 'queued').length;
+    const success = this.events.filter((event) => event.status === "processed").length;
+    const failed = this.events.filter((event) => event.status === "failed").length;
+    const queued = this.events.filter((event) => event.status === "queued").length;
     return {
       events: [...this.events],
       metrics: {
-        'diagnostics.success': success,
-        'diagnostics.failed': failed,
-        'diagnostics.queued': queued
-      }
+        "diagnostics.success": success,
+        "diagnostics.failed": failed,
+        "diagnostics.queued": queued,
+      },
     };
   }
 }

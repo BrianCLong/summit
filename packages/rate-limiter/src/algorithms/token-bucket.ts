@@ -5,11 +5,7 @@
  * Copyright (c) 2025 IntelGraph
  */
 
-import type {
-  IRateLimitStore,
-  RateLimitState,
-  TokenBucketState,
-} from '../types.js';
+import type { IRateLimitStore, RateLimitState, TokenBucketState } from "../types.js";
 
 export class TokenBucketLimiter {
   private store: IRateLimitStore;
@@ -25,15 +21,10 @@ export class TokenBucketLimiter {
     key: string,
     capacity: number,
     refillRate: number,
-    tokensToConsume = 1,
+    tokensToConsume = 1
   ): Promise<RateLimitState> {
     // Consume tokens from bucket
-    const bucketState = await this.store.consumeTokens(
-      key,
-      tokensToConsume,
-      capacity,
-      refillRate,
-    );
+    const bucketState = await this.store.consumeTokens(key, tokensToConsume, capacity, refillRate);
 
     // Calculate when bucket will be full again
     const tokensNeeded = capacity - bucketState.tokens;
@@ -41,9 +32,10 @@ export class TokenBucketLimiter {
     const resetAt = Math.floor((Date.now() + timeToRefillMs) / 1000);
 
     // Calculate retry time if we don't have enough tokens
-    const retryAfter = bucketState.tokens < tokensToConsume
-      ? Math.ceil((tokensToConsume - bucketState.tokens) / refillRate)
-      : 0;
+    const retryAfter =
+      bucketState.tokens < tokensToConsume
+        ? Math.ceil((tokensToConsume - bucketState.tokens) / refillRate)
+        : 0;
 
     const isExceeded = bucketState.tokens < tokensToConsume;
 
@@ -61,11 +53,7 @@ export class TokenBucketLimiter {
   /**
    * Get current bucket state without consuming
    */
-  async peek(
-    key: string,
-    capacity: number,
-    refillRate: number,
-  ): Promise<RateLimitState | null> {
+  async peek(key: string, capacity: number, refillRate: number): Promise<RateLimitState | null> {
     const bucketState = await this.store.getTokenBucket(key);
 
     if (!bucketState) {
@@ -106,6 +94,6 @@ export class TokenBucketLimiter {
    * Reset bucket for a key
    */
   async reset(key: string): Promise<void> {
-    await this.store.reset(`tb:${  key}`);
+    await this.store.reset(`tb:${key}`);
   }
 }

@@ -12,45 +12,50 @@ This document translates the nine integration-focused epics into an executable p
 
 ## Workstream Overview
 
-| Epic | Focus | Primary Outcomes |
-| --- | --- | --- |
-| Unified Integration Framework | Single connector runtime, standardized contracts, adapter interface, and observability | All connectors run on one runtime; 5 brittle one-offs deprecated; health/observability live |
-| Event Backbone & Delivery Service | Push-based delivery with schema registry, retries/DLQ, dedupe, replay, quotas | Top 5 cron syncs replaced by events; legacy emitters removed |
-| Workflow Orchestration | Reliable multi-step jobs with approvals, retries, DLQs, and templates | 3 critical processes migrated; visibility dashboards live |
-| Data Sync Correctness | Contracts, reconciliation, resync/repair, identity resolution, validation/quarantine | Drift metrics live; manual fix-by-script eliminated |
-| Integration UX | Self-serve hub, guided setup, test buttons, health/status, templates | Integration tickets down 50% |
-| Partner/Developer Ecosystem | Portal, SDKs, sandbox tenants, certification, analytics, policies | Time-to-first-integration improved; governance for partners live |
-| Security for Integrations | Vaulted secrets, webhook signatures, isolation, audit, anomaly detection | Kill switches and exceptions registry live |
-| Cost & Performance | Cost measurement, caching, backoff/batching, quotas, telemetry sampling | Monthly cost-cut releases; margins tracked by connector |
-| Integration Governance | Ownership, SLAs, deprecation slate, versioning, release notes, compliance | Monthly health reviews; bespoke work prohibited without framework |
+| Epic                              | Focus                                                                                  | Primary Outcomes                                                                            |
+| --------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Unified Integration Framework     | Single connector runtime, standardized contracts, adapter interface, and observability | All connectors run on one runtime; 5 brittle one-offs deprecated; health/observability live |
+| Event Backbone & Delivery Service | Push-based delivery with schema registry, retries/DLQ, dedupe, replay, quotas          | Top 5 cron syncs replaced by events; legacy emitters removed                                |
+| Workflow Orchestration            | Reliable multi-step jobs with approvals, retries, DLQs, and templates                  | 3 critical processes migrated; visibility dashboards live                                   |
+| Data Sync Correctness             | Contracts, reconciliation, resync/repair, identity resolution, validation/quarantine   | Drift metrics live; manual fix-by-script eliminated                                         |
+| Integration UX                    | Self-serve hub, guided setup, test buttons, health/status, templates                   | Integration tickets down 50%                                                                |
+| Partner/Developer Ecosystem       | Portal, SDKs, sandbox tenants, certification, analytics, policies                      | Time-to-first-integration improved; governance for partners live                            |
+| Security for Integrations         | Vaulted secrets, webhook signatures, isolation, audit, anomaly detection               | Kill switches and exceptions registry live                                                  |
+| Cost & Performance                | Cost measurement, caching, backoff/batching, quotas, telemetry sampling                | Monthly cost-cut releases; margins tracked by connector                                     |
+| Integration Governance            | Ownership, SLAs, deprecation slate, versioning, release notes, compliance              | Monthly health reviews; bespoke work prohibited without framework                           |
 
 ## Phased Delivery Plan
 
 ### Phase 0: Foundations (Weeks 1–2)
+
 - Confirm connector inventory (APIs, webhooks, ETL, manual exports) with ownership and SLA class.
 - Stand up schema registry + compatibility checks in CI; document event taxonomy.
 - Establish secret storage policy, egress allowlist, and audit logging defaults for integration configs.
 - Create health model enums (connected, degraded, failing, paused) and shared observability schema.
 
 ### Phase 1: Framework + Backbone (Weeks 3–6)
+
 - Implement connector runtime (config, secrets, retries, scheduling) with adapter interface and lifecycle hooks.
 - Add standardized contracts (versioning, errors, pagination, idempotency) and connection test sandbox/fixtures.
 - Ship event delivery service (retries, DLQ, backoff, signatures, idempotency keys, dedupe) with per-tenant quotas.
 - Replace top 5 cron syncs with event-driven flows; route outbound emitters through the backbone.
 
 ### Phase 2: Orchestration + Correctness (Weeks 7–10)
+
 - Adopt workflow engine/state-machine pattern with idempotent steps, checkpointing, approvals, and DLQs.
 - Build replay/re-run with audit logs and safe constraints; add per-tenant concurrency controls.
 - Deliver reconciliation + drift metrics, incremental and full resync paths, validation/quarantine, and identity resolution rules.
 - Launch support-facing sync timeline view and reconciliation reports per connector.
 
 ### Phase 3: UX + Ecosystem (Weeks 11–14)
+
 - Release integrations hub UI with guided setup, inline validation, test connection/event buttons, pause/resume, and rate limit controls.
 - Provide connection health + last run with recommended fixes; surface redacted in-app logs with correlation IDs.
 - Publish developer portal with docs, SDKs (≥2 languages), changelog, sandbox tenants, reference apps, and certification tests.
 - Implement partner analytics, scopes/permissions, review workflow, and deprecation/compatibility policies.
 
 ### Phase 4: Security + Cost + Governance Hardening (Weeks 15–18)
+
 - Enforce webhook signatures, replay protection, per-tenant rate limits, anomaly detection, and kill switches.
 - Add cost measurement per connector (compute, API, storage, egress), caching/backoff/batching, telemetry sampling, and fairness scheduling.
 - Run monthly connector health review; maintain deprecation slate and exceptions registry; publish release notes per connector.
@@ -84,4 +89,3 @@ This document translates the nine integration-focused epics into an executable p
 - **Predictive maintenance**: anomaly models forecasting connector degradation using health/latency signals.
 - **Policy-as-code guardrails**: OPA-based enforcement for connector configs, egress, and rate plans.
 - **Replay safety**: signed, tenant-scoped replay manifests with conflict simulation before execution.
-

@@ -35,9 +35,9 @@ describe('Critical Flows - Demo Gating', () => {
   })
 
   it('should redirect or not render when demo mode is disabled', () => {
-     // @ts-ignore
+    // @ts-ignore
     demoModeLib.isDemoModeEnabled.mockReturnValue(false)
-     // @ts-ignore
+    // @ts-ignore
     demoModeLib.useDemoMode.mockReturnValue(false)
 
     render(

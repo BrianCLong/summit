@@ -3,13 +3,7 @@
   "$id": "https://intelgraph.com/schemas/release/release-status.schema.json",
   "title": "Release Status",
   "type": "object",
-  "required": [
-    "schemaVersion",
-    "status",
-    "blockedReasons",
-    "checks",
-    "generatedAt"
-  ],
+  "required": ["schemaVersion", "status", "blockedReasons", "checks", "generatedAt"],
   "additionalProperties": true,
   "properties": {
     "schemaVersion": {
@@ -17,18 +11,13 @@
     },
     "status": {
       "type": "string",
-      "enum": [
-        "ready",
-        "blocked"
-      ]
+      "enum": ["ready", "blocked"]
     },
     "blockedReasons": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": [
-          "code"
-        ],
+        "required": ["code"],
         "additionalProperties": true,
         "properties": {
           "code": {
@@ -45,9 +34,7 @@
       "patternProperties": {
         "^.*$": {
           "type": "object",
-          "required": [
-            "ok"
-          ],
+          "required": ["ok"],
           "additionalProperties": true,
           "properties": {
             "ok": {

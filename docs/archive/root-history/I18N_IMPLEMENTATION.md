@@ -11,6 +11,7 @@
 A comprehensive backend service for language detection and policy-aware translation:
 
 **Features:**
+
 - ✅ Automatic language detection (60+ languages using franc library)
 - ✅ Multi-provider translation support (Google Translate, DeepL, mock, local)
 - ✅ Policy-aware translation with classification tag enforcement
@@ -20,6 +21,7 @@ A comprehensive backend service for language detection and policy-aware translat
 - ✅ RESTful API with Express
 
 **Key Files:**
+
 ```
 services/i18n-service/
 ├── src/
@@ -45,6 +47,7 @@ services/i18n-service/
 ```
 
 **API Endpoints:**
+
 - `POST /api/translate` - Translate text with policy enforcement
 - `POST /api/translate/batch` - Batch translate multiple texts
 - `POST /api/detect` - Detect language from text
@@ -57,6 +60,7 @@ services/i18n-service/
 Enhanced the existing i18n package with:
 
 **Added:**
+
 - ✅ Centralized system messages (`src/system-messages/index.ts`)
 - ✅ Locale switcher component (`src/components/LocaleSwitcher.tsx`)
 - ✅ Comprehensive type definitions
@@ -64,6 +68,7 @@ Enhanced the existing i18n package with:
 - ✅ Translation validation tooling (`scripts/validate-translations.js`)
 
 **Existing (Preserved):**
+
 - i18next configuration with ICU message format
 - 40+ locale configurations (including RTL languages)
 - React hooks for i18n (`useI18n`)
@@ -75,6 +80,7 @@ Enhanced the existing i18n package with:
 #### Copilot Adapter (`services/i18n-service/src/integrations/copilot/`)
 
 **Capabilities:**
+
 - Detect user query language automatically
 - Translate queries to Copilot's processing language (typically English)
 - Translate Copilot responses back to user's language
@@ -83,20 +89,22 @@ Enhanced the existing i18n package with:
 - Enforce translation policies based on classification tags
 
 **Usage:**
+
 ```typescript
-import { getCopilotI18nAdapter } from '@intelgraph/i18n-service';
+import { getCopilotI18nAdapter } from "@intelgraph/i18n-service";
 
 const adapter = getCopilotI18nAdapter();
 const result = await adapter.handleMultilingualConversation(
   { content: "Comment créer une enquête?", metadata: { userId } },
   async (query) => copilot.process(query),
-  'fr'
+  "fr"
 );
 ```
 
 #### Ingestion Adapter (`services/i18n-service/src/integrations/ingestion/`)
 
 **Capabilities:**
+
 - Detect document language automatically
 - Translate documents to multiple target languages
 - Create multilingual search indices
@@ -105,13 +113,14 @@ const result = await adapter.handleMultilingualConversation(
 - Respect classification-based translation policies
 
 **Usage:**
+
 ```typescript
-import { getIngestionI18nAdapter } from '@intelgraph/i18n-service';
+import { getIngestionI18nAdapter } from "@intelgraph/i18n-service";
 
 const adapter = getIngestionI18nAdapter({
   autoDetectLanguage: true,
   autoTranslate: true,
-  targetLanguages: ['en', 'fr', 'es']
+  targetLanguages: ["en", "fr", "es"],
 });
 
 const processed = await adapter.processDocument(document);
@@ -121,20 +130,21 @@ const processed = await adapter.processDocument(document);
 
 **Classification-Based Policies:**
 
-| Classification | Translation Allowed | Cross-Border Transfer | Notes |
-|---------------|---------------------|----------------------|-------|
-| UNCLASSIFIED | ✅ Yes | ✅ Yes | Full translation allowed |
-| CUI | ✅ Yes | ❌ No | Restricted data transfer |
-| LAW_ENFORCEMENT_SENSITIVE | ✅ Yes | ❌ No | LEO restrictions |
-| FOUO | ✅ Yes | ❌ No | Official use only |
-| PII | ✅ Yes | ❌ No | Privacy restrictions |
-| MEDICAL | ✅ Yes | ❌ No | HIPAA compliance |
-| FINANCIAL | ✅ Yes | ❌ No | Financial data rules |
-| CONFIDENTIAL | ❌ No | ❌ No | No translation |
-| SECRET | ❌ No | ❌ No | No translation |
-| TOP_SECRET | ❌ No | ❌ No | No translation |
+| Classification            | Translation Allowed | Cross-Border Transfer | Notes                    |
+| ------------------------- | ------------------- | --------------------- | ------------------------ |
+| UNCLASSIFIED              | ✅ Yes              | ✅ Yes                | Full translation allowed |
+| CUI                       | ✅ Yes              | ❌ No                 | Restricted data transfer |
+| LAW_ENFORCEMENT_SENSITIVE | ✅ Yes              | ❌ No                 | LEO restrictions         |
+| FOUO                      | ✅ Yes              | ❌ No                 | Official use only        |
+| PII                       | ✅ Yes              | ❌ No                 | Privacy restrictions     |
+| MEDICAL                   | ✅ Yes              | ❌ No                 | HIPAA compliance         |
+| FINANCIAL                 | ✅ Yes              | ❌ No                 | Financial data rules     |
+| CONFIDENTIAL              | ❌ No               | ❌ No                 | No translation           |
+| SECRET                    | ❌ No               | ❌ No                 | No translation           |
+| TOP_SECRET                | ❌ No               | ❌ No                 | No translation           |
 
 **Features:**
+
 - Automatic policy selection based on classification tags
 - Most restrictive policy wins when multiple tags present
 - Configurable allowed/forbidden target languages
@@ -146,6 +156,7 @@ const processed = await adapter.processDocument(document);
 **Created:** `packages/i18n/src/system-messages/index.ts`
 
 **Message Categories:**
+
 - Authentication errors (invalid credentials, session expired, etc.)
 - Validation errors (required field, invalid format, etc.)
 - API errors (not found, server error, rate limit, etc.)
@@ -156,19 +167,18 @@ const processed = await adapter.processDocument(document);
 - Info messages (loading, processing, no data)
 
 **Usage:**
+
 ```typescript
-import { MessageId, getSystemMessage } from '@intelgraph/i18n';
+import { MessageId, getSystemMessage } from "@intelgraph/i18n";
 
 const message = getSystemMessage(MessageId.AUTH_INVALID_CREDENTIALS);
-const messageWithParams = getSystemMessage(
-  MessageId.VALIDATION_TOO_LONG,
-  { maxLength: 100 }
-);
+const messageWithParams = getSystemMessage(MessageId.VALIDATION_TOO_LONG, { maxLength: 100 });
 ```
 
 ### 6. Metrics & Instrumentation
 
 **Available Metrics:**
+
 - `translation_requests_total` - Total translation requests
 - `translation_success_total` - Successful translations
 - `translation_failures_total` - Failed translations
@@ -179,16 +189,19 @@ const messageWithParams = getSystemMessage(
 - `translation_average_confidence` - Average confidence scores
 
 **Formats:**
+
 - JSON (via `/api/metrics`)
 - Prometheus (via `/api/metrics/prometheus`)
 
 ### 7. Tests
 
 **Created:**
+
 - `services/i18n-service/src/lib/language-detector.test.ts` - Language detection tests
 - `services/i18n-service/src/config/translation-policies.test.ts` - Policy tests
 
 **Test Coverage:**
+
 - Language detection for multiple languages
 - Policy enforcement logic
 - Policy merging behavior
@@ -198,11 +211,13 @@ const messageWithParams = getSystemMessage(
 ### 8. Documentation
 
 **Created:**
+
 - `services/i18n-service/README.md` - Service documentation
 - `services/i18n-service/.env.example` - Configuration template
 - `I18N_IMPLEMENTATION.md` - This summary document
 
 **Documentation Includes:**
+
 - Architecture overview
 - Installation and setup
 - API reference
@@ -217,8 +232,8 @@ const messageWithParams = getSystemMessage(
 
 ```typescript
 // In copilot service initialization
-import { getCopilotI18nAdapter } from '@intelgraph/i18n-service';
-export const copilotI18n = getCopilotI18nAdapter('en', 'en');
+import { getCopilotI18nAdapter } from "@intelgraph/i18n-service";
+export const copilotI18n = getCopilotI18nAdapter("en", "en");
 
 // In conversation handler
 const result = await copilotI18n.handleMultilingualConversation(
@@ -232,11 +247,11 @@ const result = await copilotI18n.handleMultilingualConversation(
 
 ```typescript
 // In ingestion service initialization
-import { getIngestionI18nAdapter } from '@intelgraph/i18n-service';
+import { getIngestionI18nAdapter } from "@intelgraph/i18n-service";
 export const ingestionI18n = getIngestionI18nAdapter({
   autoDetectLanguage: true,
   autoTranslate: true,
-  targetLanguages: ['en', 'fr', 'es', 'ar']
+  targetLanguages: ["en", "fr", "es", "ar"],
 });
 
 // In document processor
@@ -247,7 +262,7 @@ const searchIndex = await ingestionI18n.createMultilingualSearchIndex(document);
 ### With UI Components
 
 ```tsx
-import { I18nProvider, LanguageSwitcher, useI18n } from '@intelgraph/i18n';
+import { I18nProvider, LanguageSwitcher, useI18n } from "@intelgraph/i18n";
 
 function App() {
   return (
@@ -262,7 +277,7 @@ function Header() {
   const { locale, t } = useI18n();
   return (
     <header>
-      <h1>{t('common.appTitle')}</h1>
+      <h1>{t("common.appTitle")}</h1>
       <LanguageSwitcher variant="dropdown" groupByRegion />
     </header>
   );
@@ -288,6 +303,7 @@ NODE_ENV=development
 ### Supported Languages
 
 60+ languages including:
+
 - **Western European:** English, French, German, Spanish, Italian, Portuguese, Dutch
 - **Nordic:** Danish, Norwegian, Swedish, Finnish, Icelandic
 - **Central European:** Polish, Czech, Slovak, Hungarian
@@ -336,18 +352,21 @@ pnpm validate  # Validate translations
 To complete the integration:
 
 1. **Install Dependencies:**
+
    ```bash
    cd services/i18n-service
    pnpm install
    ```
 
 2. **Configure Environment:**
+
    ```bash
    cp .env.example .env
    # Edit .env with your API keys
    ```
 
 3. **Start Service:**
+
    ```bash
    pnpm dev  # Development
    pnpm build && pnpm start  # Production
@@ -374,6 +393,7 @@ To complete the integration:
 ### New Files (Created)
 
 **Backend Service:**
+
 - `services/i18n-service/package.json`
 - `services/i18n-service/tsconfig.json`
 - `services/i18n-service/.env.example`
@@ -394,10 +414,12 @@ To complete the integration:
 - `services/i18n-service/src/config/translation-policies.test.ts`
 
 **Frontend Package:**
+
 - `packages/i18n/src/system-messages/index.ts`
 - `packages/i18n/src/components/LocaleSwitcher.tsx`
 
 **Documentation:**
+
 - `I18N_IMPLEMENTATION.md` (this file)
 
 ### Existing Files (Preserved/Enhanced)

@@ -1,16 +1,30 @@
 # Golden contract for Auth API (v1)
 scalar JSON
 
-enum StepUpKind { NONE WEBAUTHN OTP }
+enum StepUpKind {
+  NONE
+  WEBAUTHN
+  OTP
+}
 
-type TokenInfo { sub: String!, scopes: [String!]!, stepUp: StepUpKind! }
+type TokenInfo {
+  sub: String!
+  scopes: [String!]!
+  stepUp: StepUpKind!
+}
 
 type Query {
   me: TokenInfo!
 }
 
-input LoginInput { username: String!, password: String! }
-input StepUpInput { kind: StepUpKind!, payload: JSON }
+input LoginInput {
+  username: String!
+  password: String!
+}
+input StepUpInput {
+  kind: StepUpKind!
+  payload: JSON
+}
 
 type Mutation {
   login(input: LoginInput!): String! # returns JWT

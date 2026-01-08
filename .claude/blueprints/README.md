@@ -80,21 +80,22 @@ sed -i 's/{{DESCRIPTION}}/My service description/g' package.json
 
 All templates support variable substitution:
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `{{SERVICE_NAME}}` | Service name (kebab-case) | `dq-dashboard` |
-| `{{SERVICE_TITLE}}` | Human-readable title | `Data Quality Dashboard` |
-| `{{DESCRIPTION}}` | Service description | `DQ monitoring and alerts` |
-| `{{PORT}}` | Service port | `8090` |
-| `{{AUTHOR}}` | Author/team | `Engineering Team` |
-| `{{PROMETHEUS_ENABLED}}` | Enable Prometheus | `true` |
-| `{{DB_REQUIRED}}` | Requires database | `true` |
+| Variable                 | Description               | Example                    |
+| ------------------------ | ------------------------- | -------------------------- |
+| `{{SERVICE_NAME}}`       | Service name (kebab-case) | `dq-dashboard`             |
+| `{{SERVICE_TITLE}}`      | Human-readable title      | `Data Quality Dashboard`   |
+| `{{DESCRIPTION}}`        | Service description       | `DQ monitoring and alerts` |
+| `{{PORT}}`               | Service port              | `8090`                     |
+| `{{AUTHOR}}`             | Author/team               | `Engineering Team`         |
+| `{{PROMETHEUS_ENABLED}}` | Enable Prometheus         | `true`                     |
+| `{{DB_REQUIRED}}`        | Requires database         | `true`                     |
 
 ## Templates
 
 ### Service Template
 
 Provides:
+
 - **package.json**: pnpm workspace-compatible, with Summit conventions
 - **tsconfig.json**: TypeScript config extending base
 - **src/**: Minimal entrypoint and structure
@@ -105,11 +106,13 @@ Provides:
 ### CI Template
 
 Provides:
+
 - **service-ci.yml**: Full CI pipeline (lint, test, build, deploy)
 - **package-ci.yml**: Package-specific CI
 - **security.yml**: Security scanning (CodeQL, Trivy, Gitleaks)
 
 Features:
+
 - pnpm caching
 - Turbo caching
 - Docker layer caching
@@ -120,6 +123,7 @@ Features:
 ### Helm Template
 
 Provides:
+
 - **Chart.yaml**: Helm chart metadata
 - **values.yaml**: Default values (customizable per environment)
 - **templates/**:
@@ -133,12 +137,14 @@ Provides:
 ### Terraform Template
 
 Provides:
+
 - **main.tf**: Primary resources
 - **variables.tf**: Input variables
 - **outputs.tf**: Exported values
 - **providers.tf**: Cloud provider configuration
 
 Supports:
+
 - AWS (ECS, RDS, S3, etc.)
 - Azure (AKS, PostgreSQL, Blob Storage)
 - GCP (GKE, Cloud SQL, GCS)
@@ -152,7 +158,9 @@ Canonical test data shared across services to ensure consistency and enable inte
 ### Fixtures
 
 #### `dq-scenarios.json`
+
 Data quality test scenarios for DQ-001 prompt:
+
 ```json
 {
   "scenarios": [
@@ -161,7 +169,7 @@ Data quality test scenarios for DQ-001 prompt:
       "dataset_id": "test-001",
       "records": 1000,
       "completeness": 0.95,
-      "consistency": 0.90,
+      "consistency": 0.9,
       "timeliness": 0.88
     }
   ]
@@ -169,14 +177,18 @@ Data quality test scenarios for DQ-001 prompt:
 ```
 
 #### `migration-datasets/`
+
 Legacy data exports for MIG-001 prompt:
+
 - CSV exports
 - JSON exports
 - STIX bundles
 - MISP events
 
 #### `policy-test-cases.yml`
+
 Policy simulation test cases for GOV-001 prompt:
+
 ```yaml
 test_cases:
   - name: "Admin can access all entities"
@@ -203,6 +215,7 @@ services/dq-dashboard/
 ```
 
 **acceptance.yml** format:
+
 ```yaml
 service: dq-dashboard
 version: 1.0.0

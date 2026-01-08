@@ -90,9 +90,7 @@ metrics:
     {
       "type": "timeseries",
       "title": "Gate Decisions — $tenant",
-      "targets": [
-        { "expr": "sum by(decision) (gate_decision_total{tenant=\"$tenant\"})" }
-      ]
+      "targets": [{ "expr": "sum by(decision) (gate_decision_total{tenant=\"$tenant\"})" }]
     }
   ]
 }
@@ -116,11 +114,11 @@ diff -u /tmp/base.json /tmp/head.json | tee dist/sbom.diff
 allowlist:
   libs:
     - name: example‑lib
-      versions: ['>=1.4.2']
+      versions: [">=1.4.2"]
 denylist:
   libs:
     - name: vulnerable‑lib
-      versions: ['<=2.3.1']
+      versions: ["<=2.3.1"]
 ```
 
 **OPA Gate — Attestation Verify**

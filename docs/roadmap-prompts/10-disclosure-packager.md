@@ -173,17 +173,19 @@ TECHNICAL CONSTRAINTS:
 
 SAMPLE BUNDLE STRUCTURE:
 ```
+
 disclosure-bundle-123.tar.gz
 ├── manifest.json
 ├── evidence/
-│   ├── ev-1.pdf
-│   ├── ev-2.jpg
-│   └── ev-3.csv
+│ ├── ev-1.pdf
+│ ├── ev-2.jpg
+│ └── ev-3.csv
 ├── claims.json
 ├── graph.graphml
 ├── signature.sig
 └── public-key.pem
-```
+
+````
 
 SAMPLE MANIFEST.JSON:
 ```json
@@ -230,9 +232,10 @@ SAMPLE MANIFEST.JSON:
   },
   "revocationUrl": "https://intelgraph.io/disclosure/revocations.json"
 }
-```
+````
 
 SAMPLE REVOCATION LIST (revocations.json):
+
 ```json
 {
   "revoked": [
@@ -247,6 +250,7 @@ SAMPLE REVOCATION LIST (revocations.json):
 ```
 
 SAMPLE CLI VERIFIER USAGE:
+
 ```bash
 # Verify bundle
 ppw-verify --bundle disclosure-bundle-123.tar.gz
@@ -267,21 +271,26 @@ ppw-verify --bundle tampered-bundle.tar.gz
 ```
 
 SAMPLE SIGNATURE CODE (Node.js):
+
 ```typescript
-import { sign, verify } from '@noble/ed25519';
-import { createHash } from 'crypto';
+import { sign, verify } from "@noble/ed25519";
+import { createHash } from "crypto";
 
 async function signBundle(manifest: any, privateKey: Uint8Array): Promise<string> {
   const message = JSON.stringify(manifest);
-  const hash = createHash('sha256').update(message).digest();
+  const hash = createHash("sha256").update(message).digest();
   const signature = await sign(hash, privateKey);
-  return Buffer.from(signature).toString('base64');
+  return Buffer.from(signature).toString("base64");
 }
 
-async function verifyBundle(manifest: any, signature: string, publicKey: Uint8Array): Promise<boolean> {
+async function verifyBundle(
+  manifest: any,
+  signature: string,
+  publicKey: Uint8Array
+): Promise<boolean> {
   const message = JSON.stringify(manifest);
-  const hash = createHash('sha256').update(message).digest();
-  const sig = Buffer.from(signature, 'base64');
+  const hash = createHash("sha256").update(message).digest();
+  const sig = Buffer.from(signature, "base64");
   return await verify(sig, hash, publicKey);
 }
 ```
@@ -297,6 +306,7 @@ Provide:
 (g) Web-based verifier (offline-capable)
 (h) Tests (tamper detection, revocation, expiration)
 (i) User guide (how to create & verify bundles)
+
 ```
 
 ---
@@ -325,3 +335,4 @@ Provide:
 - Ed25519: https://github.com/paulmillr/noble-ed25519
 - RFC 3161 TSA: https://www.ietf.org/rfc/rfc3161.txt
 - JSON Schema: https://json-schema.org/
+```

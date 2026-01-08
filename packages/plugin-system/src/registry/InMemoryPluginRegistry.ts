@@ -1,8 +1,4 @@
-import {
-  PluginRegistry,
-  PluginMetadata,
-  PluginFilter,
-} from '../types/plugin.js';
+import { PluginRegistry, PluginMetadata, PluginFilter } from "../types/plugin.js";
 
 /**
  * In-memory plugin registry (for development/testing)
@@ -49,19 +45,19 @@ export class InMemoryPluginRegistry implements PluginRegistry {
     let plugins = Array.from(this.plugins.values());
 
     if (filter?.category) {
-      plugins = plugins.filter(p => p.manifest.category === filter.category);
+      plugins = plugins.filter((p) => p.manifest.category === filter.category);
     }
 
     if (filter?.state) {
-      plugins = plugins.filter(p => p.state === filter.state);
+      plugins = plugins.filter((p) => p.state === filter.state);
     }
 
     if (filter?.author) {
-      plugins = plugins.filter(p => p.manifest.author.name === filter.author);
+      plugins = plugins.filter((p) => p.manifest.author.name === filter.author);
     }
 
     if (filter?.minRating !== undefined) {
-      plugins = plugins.filter(p => p.stats.rating >= filter.minRating!);
+      plugins = plugins.filter((p) => p.stats.rating >= filter.minRating!);
     }
 
     return plugins;
@@ -91,7 +87,7 @@ export class InMemoryPluginRegistry implements PluginRegistry {
   async search(query: string): Promise<PluginMetadata[]> {
     const lowerQuery = query.toLowerCase();
 
-    return Array.from(this.plugins.values()).filter(plugin => {
+    return Array.from(this.plugins.values()).filter((plugin) => {
       const { manifest } = plugin;
       return (
         manifest.name.toLowerCase().includes(lowerQuery) ||

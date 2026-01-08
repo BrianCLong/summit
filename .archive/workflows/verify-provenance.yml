@@ -7,21 +7,21 @@ on:
   workflow_call:
     inputs:
       artifact_path:
-        description: 'Path to artifact to verify'
+        description: "Path to artifact to verify"
         required: true
         type: string
       registry:
-        description: 'Container registry'
+        description: "Container registry"
         required: false
         type: string
-        default: 'ghcr.io'
+        default: "ghcr.io"
   pull_request:
     paths:
-      - 'dist/**'
-      - '.github/workflows/verify-provenance.yml'
+      - "dist/**"
+      - ".github/workflows/verify-provenance.yml"
   push:
     branches: [main]
-    tags: ['v*']
+    tags: ["v*"]
 
 env:
   COSIGN_EXPERIMENTAL: 1

@@ -57,22 +57,26 @@ PR #11978 implemented comprehensive security enhancements including:
 ### Key Security Utilities Added
 
 **File:** `server/src/utils/input-sanitization.ts` (416 lines)
+
 - Comprehensive input validation and sanitization functions
 - Covers all major injection attack vectors
 - Includes validator class for batch validation
 
 **File:** `server/src/utils/crypto-secure-random.ts` (100 lines)
+
 - Cryptographically secure random number generation
 - Secure token generation
 - Secure UUID generation
 - Secure ID generation for database records
 
 **File:** `.eslintrc.security.cjs` (72 lines)
+
 - Security-focused ESLint rules
 - Detects common security vulnerabilities
 - Enforces secure coding patterns
 
 **File:** `.github/workflows/security-scan.yml` (171 lines)
+
 - Automated security scanning in CI/CD
 - Dependency vulnerability scanning
 - Secret scanning with Gitleaks
@@ -91,6 +95,7 @@ PR #11978 implemented comprehensive security enhancements including:
 Uses string interpolation with user-controlled values (`tenantId`, `userId`) in SQL queries instead of parameterized queries.
 
 **Code:**
+
 ```typescript
 await client.query(`SET app.current_tenant_id = '${context.tenantId}'`);
 if (context.userId) {
@@ -100,27 +105,30 @@ if (context.userId) {
 
 **Impact:** HIGH
 An attacker could inject malicious SQL code through the `tenantId` or `userId` parameters, potentially:
+
 - Bypassing tenant isolation
 - Gaining unauthorized access to other tenants' data
 - Executing arbitrary SQL commands
 - Escalating privileges
 
 **Exploit Example:**
+
 ```typescript
 const maliciousTenantId = "'; DROP TABLE users; --";
 // Results in: SET app.current_tenant_id = ''; DROP TABLE users; --'
 ```
 
 **Remediation:**
+
 ```typescript
 // Use parameterized queries or PostgreSQL's quote_literal function
-await client.query('SET app.current_tenant_id = quote_literal($1)', [context.tenantId]);
+await client.query("SET app.current_tenant_id = quote_literal($1)", [context.tenantId]);
 if (context.userId) {
-  await client.query('SET app.current_user_id = quote_literal($1)', [context.userId]);
+  await client.query("SET app.current_user_id = quote_literal($1)", [context.userId]);
 }
 
 // Alternative: Validate and sanitize inputs strictly
-import { validateUUID } from '@/utils/input-sanitization';
+import { validateUUID } from "@/utils/input-sanitization";
 const safeTenantId = validateUUID(context.tenantId);
 const safeUserId = context.userId ? validateUUID(context.userId) : null;
 ```
@@ -138,35 +146,38 @@ const safeUserId = context.userId ? validateUUID(context.userId) : null;
 Socket.IO server configured with wildcard CORS origin (`origin: '*'`), allowing any domain to connect.
 
 **Code:**
+
 ```typescript
-const io = new Server(ioServer, { path: '/events', cors: { origin: '*' } });
+const io = new Server(ioServer, { path: "/events", cors: { origin: "*" } });
 ```
 
 **Impact:** HIGH
+
 - Cross-Site WebSocket Hijacking (CSWSH)
 - Unauthorized access to real-time event streams
 - Data leakage to malicious domains
 - CSRF attacks via WebSocket connections
 
 **Remediation:**
+
 ```typescript
-const ALLOWED_ORIGINS = process.env.CORS_ALLOWED_ORIGINS?.split(',') || [
-  'https://app.summit.run',
-  'https://api.summit.run'
+const ALLOWED_ORIGINS = process.env.CORS_ALLOWED_ORIGINS?.split(",") || [
+  "https://app.summit.run",
+  "https://api.summit.run",
 ];
 
 const io = new Server(ioServer, {
-  path: '/events',
+  path: "/events",
   cors: {
     origin: (origin, callback) => {
       if (!origin || ALLOWED_ORIGINS.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        callback(new Error("Not allowed by CORS"));
       }
     },
-    credentials: true
-  }
+    credentials: true,
+  },
 });
 ```
 
@@ -181,22 +192,26 @@ const io = new Server(ioServer, {
 
 **Description:**
 Widespread use of `Math.random()` instead of cryptographically secure random number generation. While not all uses are security-sensitive, a subset are used for:
+
 - Session IDs
 - Request IDs
 - Random sampling in security contexts
 - Jitter in retry logic that could be predictable
 
 **Impact:** MEDIUM to HIGH (varies by context)
+
 - Predictable values for tokens/IDs
 - Potential session hijacking
 - Timing attack vulnerabilities
 
 **High-Risk Examples:**
+
 - `server/src/websocket/connectionManager.ts` - Connection ID generation
 - `server/src/live-server.ts` - Request ID generation
 - `server/src/security/llm-guardrails.ts` - Security sampling
 
 **Remediation:**
+
 1. Audit all 487 instances to classify as security-sensitive vs. non-sensitive
 2. Replace security-sensitive uses with `crypto.randomBytes()` or utilities from `crypto-secure-random.ts`
 3. For non-security uses, use the `insecureRandom()` wrapper that logs a warning
@@ -214,23 +229,27 @@ Widespread use of `Math.random()` instead of cryptographically secure random num
 Analysis shows only 130 instances of explicit `LIMIT`/`OFFSET` pagination in server code out of 1,028 TypeScript files. This indicates many queries may be unbounded.
 
 **Impact:**
+
 - Denial of Service (DoS) via resource exhaustion
 - Memory exhaustion from large result sets
 - Database performance degradation
 - Cost implications for cloud databases
 
 **Sample Locations:**
+
 - Multiple resolver files in `server/src/graphql/resolvers/`
 - Repository files in `server/src/repos/`
 - Service files in `server/src/services/`
 
 **Remediation:**
+
 1. Implement default pagination limits (e.g., max 100 records)
 2. Add `@rateLimit` and `@complexity` directives to GraphQL schema
 3. Use middleware to enforce pagination on all list queries
 4. Add database query timeout limits
 
 **Example Fix:**
+
 ```typescript
 // Before
 const entities = await entityRepo.findAll({ where: filters });
@@ -242,7 +261,7 @@ const limit = Math.min(options.limit || DEFAULT_LIMIT, MAX_LIMIT);
 const entities = await entityRepo.findAll({
   where: filters,
   take: limit,
-  skip: options.offset || 0
+  skip: options.offset || 0,
 });
 ```
 
@@ -255,28 +274,31 @@ const entities = await entityRepo.findAll({
 
 **Findings:**
 Only 20 files reference rate limiting configuration. Many critical endpoints lack rate limiting:
+
 - Authentication endpoints (`/auth/login`, `/auth/refresh`)
 - GraphQL endpoint (`/graphql`)
 - AI/ML inference endpoints
 - Export/download endpoints
 
 **Impact:**
+
 - Brute force attacks on authentication
 - API abuse and resource exhaustion
 - Cost overruns from excessive API usage
 - Distributed Denial of Service (DDoS) amplification
 
 **Remediation:**
+
 ```typescript
-import rateLimit from 'express-rate-limit';
-import RedisStore from 'rate-limit-redis';
+import rateLimit from "express-rate-limit";
+import RedisStore from "rate-limit-redis";
 
 // Authentication endpoints - strict limits
 const authLimiter = rateLimit({
   store: new RedisStore({ client: redis }),
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5, // 5 requests per window
-  message: 'Too many login attempts, please try again later'
+  message: "Too many login attempts, please try again later",
 });
 
 // GraphQL endpoint - moderate limits
@@ -284,14 +306,14 @@ const graphqlLimiter = rateLimit({
   store: new RedisStore({ client: redis }),
   windowMs: 60 * 1000, // 1 minute
   max: 100, // 100 requests per minute
-  message: 'Rate limit exceeded',
-  keyGenerator: (req) => req.user?.id || req.ip
+  message: "Rate limit exceeded",
+  keyGenerator: (req) => req.user?.id || req.ip,
 });
 
 // Apply to routes
-app.use('/auth/login', authLimiter);
-app.use('/auth/refresh', authLimiter);
-app.use('/graphql', graphqlLimiter);
+app.use("/auth/login", authLimiter);
+app.use("/auth/refresh", authLimiter);
+app.use("/graphql", graphqlLimiter);
 ```
 
 **Priority:** HIGH
@@ -305,23 +327,22 @@ app.use('/graphql', graphqlLimiter);
 Many GraphQL resolvers do not use the newly added sanitization utilities from PR #11978.
 
 **Sample Vulnerable Resolvers:**
+
 - `server/src/graphql/resolvers/entity.ts`
 - `server/src/graphql/resolvers/relationship.ts`
 - `server/src/graphql/resolvers/crudResolvers.ts`
 
 **Impact:**
+
 - XSS through entity names and descriptions
 - NoSQL injection in filter parameters
 - Path traversal in file operations
 - Prototype pollution in object inputs
 
 **Remediation:**
+
 ```typescript
-import {
-  sanitizeString,
-  sanitizeObject,
-  validateInteger
-} from '@/utils/input-sanitization';
+import { sanitizeString, sanitizeObject, validateInteger } from "@/utils/input-sanitization";
 
 export const entityResolvers = {
   Mutation: {
@@ -334,16 +355,16 @@ export const entityResolvers = {
       const safeMetadata = sanitizeObject(args.input.metadata);
 
       // Authorize
-      await context.authorize('entity:create');
+      await context.authorize("entity:create");
 
       // Execute with sanitized inputs
       return entityService.create({
         name: safeName,
         description: safeDescription,
-        metadata: safeMetadata
+        metadata: safeMetadata,
       });
-    }
-  }
+    },
+  },
 };
 ```
 
@@ -355,6 +376,7 @@ export const entityResolvers = {
 ### 🟠 HIGH-04: Token Logging in Production Code
 
 **Locations:**
+
 - `apps/mobile-native/src/services/NotificationService.ts:24,29,70,110,119`
 - `apps/mobile-native/src/services/AuthService.ts:44,54,64,74,178`
 
@@ -362,25 +384,27 @@ export const entityResolvers = {
 Authentication and notification tokens are logged to console, potentially exposing them in log aggregation systems.
 
 **Impact:**
+
 - Token leakage to log files
 - Potential unauthorized access if logs are compromised
 - Compliance violations (PCI DSS, SOC 2)
 
 **Remediation:**
+
 ```typescript
 // Before
-console.log('[Notifications] FCM Token:', token);
+console.log("[Notifications] FCM Token:", token);
 
 // After
-import logger from '@/utils/logger';
-logger.debug('[Notifications] FCM Token received', {
+import logger from "@/utils/logger";
+logger.debug("[Notifications] FCM Token received", {
   tokenLength: token.length,
-  tokenPrefix: token.substring(0, 8) + '...'
+  tokenPrefix: token.substring(0, 8) + "...",
 });
 
 // Or remove entirely in production
-if (process.env.NODE_ENV !== 'production') {
-  console.log('[Notifications] FCM Token:', token);
+if (process.env.NODE_ENV !== "production") {
+  console.log("[Notifications] FCM Token:", token);
 }
 ```
 
@@ -393,16 +417,19 @@ if (process.env.NODE_ENV !== 'production') {
 
 **Locations:**
 30 files use `innerHTML` or `dangerouslySetInnerHTML` including:
+
 - `client/src/components/ai/IntelligentCopilot.jsx`
 - Various documentation and UI components
 
 **Impact:**
+
 - Cross-Site Scripting (XSS) attacks
 - Session hijacking
 - Malicious script execution
 - Data theft
 
 **Remediation:**
+
 ```typescript
 // Before
 element.innerHTML = userInput;
@@ -435,44 +462,48 @@ import DOMPurify from 'dompurify';
 Review of `server/src/security/security-headers.ts` shows basic headers but missing critical ones.
 
 **Missing Headers:**
+
 - `Permissions-Policy`
 - `Cross-Origin-Embedder-Policy`
 - `Cross-Origin-Opener-Policy`
 - `Cross-Origin-Resource-Policy`
 
 **Remediation:**
+
 ```typescript
 // Add to helmet configuration
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https://api.summit.run"],
-      fontSrc: ["'self'"],
-      objectSrc: ["'none'"],
-      mediaSrc: ["'self'"],
-      frameSrc: ["'none'"],
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "https:"],
+        connectSrc: ["'self'", "https://api.summit.run"],
+        fontSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        mediaSrc: ["'self'"],
+        frameSrc: ["'none'"],
+      },
     },
-  },
-  hsts: {
-    maxAge: 31536000,
-    includeSubDomains: true,
-    preload: true
-  },
-  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
-  permissionsPolicy: {
-    camera: [],
-    microphone: [],
-    geolocation: [],
-    payment: []
-  },
-  crossOriginEmbedderPolicy: true,
-  crossOriginOpenerPolicy: { policy: 'same-origin' },
-  crossOriginResourcePolicy: { policy: 'same-origin' }
-}));
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    },
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+    permissionsPolicy: {
+      camera: [],
+      microphone: [],
+      geolocation: [],
+      payment: [],
+    },
+    crossOriginEmbedderPolicy: true,
+    crossOriginOpenerPolicy: { policy: "same-origin" },
+    crossOriginResourcePolicy: { policy: "same-origin" },
+  })
+);
 ```
 
 **Priority:** HIGH
@@ -484,39 +515,42 @@ app.use(helmet({
 
 **Locations:**
 30 files use `exec()`, `spawn()`, `execSync()`, or `spawnSync()` including:
+
 - `server/src/etl-assistant-api/index.ts`
 - `server/src/autonomous/sandbox.ts`
 - `server/src/conductor/steps/streamProcess.ts`
 
 **Impact:**
+
 - Remote code execution
 - Server compromise
 - Data exfiltration
 - Lateral movement in infrastructure
 
 **Remediation:**
+
 ```typescript
-import { sanitizeShellInput } from '@/utils/input-sanitization';
-import { spawn } from 'child_process';
+import { sanitizeShellInput } from "@/utils/input-sanitization";
+import { spawn } from "child_process";
 
 // Before
 exec(`convert ${userFile} output.png`);
 
 // After
 // 1. Validate input strictly
-const safeFile = sanitizeFilePath(userFile, '/allowed/uploads');
+const safeFile = sanitizeFilePath(userFile, "/allowed/uploads");
 
 // 2. Use spawn with argument array (no shell interpolation)
-const child = spawn('convert', [safeFile, 'output.png'], {
+const child = spawn("convert", [safeFile, "output.png"], {
   shell: false, // Disable shell
   timeout: 30000,
-  maxBuffer: 1024 * 1024
+  maxBuffer: 1024 * 1024,
 });
 
 // 3. Or use allowlist for commands
-const ALLOWED_COMMANDS = ['convert', 'ffmpeg', 'gs'];
+const ALLOWED_COMMANDS = ["convert", "ffmpeg", "gs"];
 if (!ALLOWED_COMMANDS.includes(command)) {
-  throw new Error('Command not allowed');
+  throw new Error("Command not allowed");
 }
 ```
 
@@ -533,11 +567,13 @@ if (!ALLOWED_COMMANDS.includes(command)) {
 JWT tokens are stateless with no server-side revocation mechanism beyond expiration.
 
 **Impact:**
+
 - Cannot revoke compromised tokens before expiration
 - Tokens remain valid after logout
 - No protection against token replay attacks
 
 **Remediation:**
+
 - Implement Redis-based token blacklist
 - Add JTI (JWT ID) tracking for revocation
 - Use short-lived access tokens (15 minutes) with refresh tokens
@@ -554,12 +590,13 @@ JWT tokens are stateless with no server-side revocation mechanism beyond expirat
 Some endpoints lack correlation IDs for request tracking and audit purposes.
 
 **Remediation:**
+
 ```typescript
-import { randomUUID } from '@/utils/crypto-secure-random';
+import { randomUUID } from "@/utils/crypto-secure-random";
 
 app.use((req, res, next) => {
-  req.id = req.headers['x-request-id'] || randomUUID();
-  res.setHeader('X-Request-ID', req.id);
+  req.id = req.headers["x-request-id"] || randomUUID();
+  res.setHeader("X-Request-ID", req.id);
   next();
 });
 ```
@@ -575,6 +612,7 @@ app.use((req, res, next) => {
 Error messages may leak sensitive information about system internals.
 
 **Code Review Finding:**
+
 ```typescript
 // Potential issue
 catch (error) {
@@ -583,6 +621,7 @@ catch (error) {
 ```
 
 **Remediation:**
+
 ```typescript
 import logger from '@/utils/logger';
 
@@ -608,6 +647,7 @@ catch (error) {
 Not all sensitive operations are logged for audit purposes.
 
 **Operations Needing Enhanced Logging:**
+
 - Permission changes
 - Data exports
 - User impersonation
@@ -635,7 +675,7 @@ Additional medium-priority issues identified:
 - **MEDIUM-11:** Missing database connection encryption enforcement
 - **MEDIUM-12:** Incomplete RBAC policy coverage
 
-*Full details available in extended report*
+_Full details available in extended report_
 
 ---
 
@@ -652,7 +692,7 @@ Additional medium-priority issues identified:
 - **LOW-07:** Session cookies not using secure flag
 - **LOW-08:** Missing X-Download-Options header
 
-*Full details available in extended report*
+_Full details available in extended report_
 
 ---
 
@@ -743,11 +783,13 @@ Additional medium-priority issues identified:
 ### ⚠️ Weaknesses
 
 1. **Default Development Credentials:**
+
    ```
    NEO4J_PASSWORD=devpassword
    POSTGRES_PASSWORD=devpassword
    JWT_SECRET=your_jwt_secret_key_change_in_production_12345
    ```
+
    While marked DEV-ONLY, these should be randomly generated even for dev.
 
 2. **Missing Secret Rotation:**
@@ -817,15 +859,16 @@ Additional medium-priority issues identified:
 ### Recommendations
 
 1. **Implement comprehensive rate limiting:**
+
    ```typescript
    // User-based rate limiting
    const userRateLimiter = rateLimit({
      windowMs: 60000,
      max: async (req) => {
        const user = req.user;
-       return user?.tier === 'premium' ? 1000 : 100;
+       return user?.tier === "premium" ? 1000 : 100;
      },
-     keyGenerator: (req) => req.user?.id || req.ip
+     keyGenerator: (req) => req.user?.id || req.ip,
    });
    ```
 
@@ -842,7 +885,7 @@ Additional medium-priority issues identified:
        message: string;
        requestId: string;
        timestamp: string;
-     }
+     };
    }
    ```
 
@@ -892,18 +935,17 @@ Additional medium-priority issues identified:
 ### Recommendations
 
 1. **Critical Fixes:**
+
    ```typescript
    // Fix SQL injection in TenantDatabaseManager
-   await client.query(
-     'SET app.current_tenant_id = $1',
-     [context.tenantId]
-   );
+   await client.query("SET app.current_tenant_id = $1", [context.tenantId]);
    ```
 
 2. **Implement Query Safeguards:**
+
    ```typescript
    // Global query timeout
-   await client.query('SET statement_timeout = 30000'); // 30 seconds
+   await client.query("SET statement_timeout = 30000"); // 30 seconds
 
    // Enforce pagination
    const MAX_RESULTS = 10000;
@@ -913,6 +955,7 @@ Additional medium-priority issues identified:
    ```
 
 3. **Enable Row-Level Security:**
+
    ```sql
    -- PostgreSQL RLS
    ALTER TABLE entities ENABLE ROW LEVEL SECURITY;
@@ -925,10 +968,13 @@ Additional medium-priority issues identified:
    ```typescript
    const pool = new Pool({
      ...config,
-     ssl: process.env.NODE_ENV === 'production' ? {
-       rejectUnauthorized: true,
-       ca: fs.readFileSync('/path/to/ca-cert.pem')
-     } : false
+     ssl:
+       process.env.NODE_ENV === "production"
+         ? {
+             rejectUnauthorized: true,
+             ca: fs.readFileSync("/path/to/ca-cert.pem"),
+           }
+         : false,
    });
    ```
 
@@ -1002,6 +1048,7 @@ Additional medium-priority issues identified:
    - Token logging removal
 
 2. **Deploy Emergency Fixes:**
+
    ```bash
    # Create emergency patch branch
    git checkout -b security/emergency-fixes
@@ -1160,8 +1207,8 @@ import {
   sanitizeString,
   validateEmail,
   validateUUID,
-  sanitizeObject
-} from '@/utils/input-sanitization';
+  sanitizeObject,
+} from "@/utils/input-sanitization";
 
 // ✅ Good
 const email = validateEmail(req.body.email);
@@ -1177,21 +1224,16 @@ const name = req.body.name;
 
 ```typescript
 // ✅ Good
-const result = await db.query(
-  'SELECT * FROM users WHERE email = $1',
-  [email]
-);
+const result = await db.query("SELECT * FROM users WHERE email = $1", [email]);
 
 // ❌ Bad
-const result = await db.query(
-  `SELECT * FROM users WHERE email = '${email}'`
-);
+const result = await db.query(`SELECT * FROM users WHERE email = '${email}'`);
 ```
 
 ### Secure Random Generation
 
 ```typescript
-import { randomString, randomUUID } from '@/utils/crypto-secure-random';
+import { randomString, randomUUID } from "@/utils/crypto-secure-random";
 
 // ✅ Good - Cryptographically secure
 const sessionId = randomUUID();
@@ -1208,10 +1250,10 @@ const sessionId = Math.random().toString(36);
 try {
   await operation();
 } catch (error) {
-  logger.error('Operation failed', { error, userId, requestId });
+  logger.error("Operation failed", { error, userId, requestId });
   res.status(500).json({
-    error: 'An error occurred',
-    requestId
+    error: "An error occurred",
+    requestId,
   });
 }
 

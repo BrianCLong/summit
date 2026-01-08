@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { api } from '../api';
-import { RoutingCandidate, SSEEvent } from '../types/maestro-api';
-import { getMaestroConfig } from '../config';
+import React, { useState, useEffect } from "react";
+import { api } from "../api";
+import { RoutingCandidate, SSEEvent } from "../types/maestro-api";
+import { getMaestroConfig } from "../config";
 
 interface RoutingPinPanelProps {
   className?: string;
@@ -9,7 +9,7 @@ interface RoutingPinPanelProps {
 
 function RoutingPinPanel({ className }: RoutingPinPanelProps) {
   const [pins, setPins] = useState<Record<string, string>>({});
-  const [newPin, setNewPin] = useState({ route: '', model: '', note: '' });
+  const [newPin, setNewPin] = useState({ route: "", model: "", note: "" });
   const [showAddForm, setShowAddForm] = useState(false);
   const { getRoutingPins, putRoutingPin, deleteRoutingPin } = api();
 
@@ -19,7 +19,7 @@ function RoutingPinPanel({ className }: RoutingPinPanelProps) {
         const currentPins = await getRoutingPins();
         setPins(currentPins);
       } catch (error) {
-        console.error('Failed to fetch routing pins:', error);
+        console.error("Failed to fetch routing pins:", error);
       }
     };
     fetchPins();
@@ -36,10 +36,10 @@ function RoutingPinPanel({ className }: RoutingPinPanelProps) {
       });
 
       setPins((prev) => ({ ...prev, [newPin.route]: newPin.model }));
-      setNewPin({ route: '', model: '', note: '' });
+      setNewPin({ route: "", model: "", note: "" });
       setShowAddForm(false);
     } catch (error) {
-      console.error('Failed to add routing pin:', error);
+      console.error("Failed to add routing pin:", error);
     }
   };
 
@@ -52,7 +52,7 @@ function RoutingPinPanel({ className }: RoutingPinPanelProps) {
         return updated;
       });
     } catch (error) {
-      console.error('Failed to remove routing pin:', error);
+      console.error("Failed to remove routing pin:", error);
     }
   };
 
@@ -64,41 +64,33 @@ function RoutingPinPanel({ className }: RoutingPinPanelProps) {
           onClick={() => setShowAddForm(!showAddForm)}
           className="rounded bg-indigo-600 px-3 py-1.5 text-sm text-white hover:bg-indigo-700"
         >
-          {showAddForm ? 'Cancel' : 'Pin Route'}
+          {showAddForm ? "Cancel" : "Pin Route"}
         </button>
       </div>
 
       {showAddForm && (
         <div className="mb-4 rounded-lg bg-slate-50 p-3">
-          <h3 className="mb-2 text-sm font-medium text-slate-700">
-            Pin New Route
-          </h3>
+          <h3 className="mb-2 text-sm font-medium text-slate-700">Pin New Route</h3>
           <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
             <input
               type="text"
               placeholder="Route (e.g., /chat/completions)"
               value={newPin.route}
-              onChange={(e) =>
-                setNewPin((prev) => ({ ...prev, route: e.target.value }))
-              }
+              onChange={(e) => setNewPin((prev) => ({ ...prev, route: e.target.value }))}
               className="rounded border px-2 py-1 text-sm"
             />
             <input
               type="text"
               placeholder="Model (e.g., gpt-4o-mini)"
               value={newPin.model}
-              onChange={(e) =>
-                setNewPin((prev) => ({ ...prev, model: e.target.value }))
-              }
+              onChange={(e) => setNewPin((prev) => ({ ...prev, model: e.target.value }))}
               className="rounded border px-2 py-1 text-sm"
             />
             <input
               type="text"
               placeholder="Note (optional)"
               value={newPin.note}
-              onChange={(e) =>
-                setNewPin((prev) => ({ ...prev, note: e.target.value }))
-              }
+              onChange={(e) => setNewPin((prev) => ({ ...prev, note: e.target.value }))}
               className="rounded border px-2 py-1 text-sm"
             />
           </div>
@@ -117,8 +109,7 @@ function RoutingPinPanel({ className }: RoutingPinPanelProps) {
       <div className="space-y-2">
         {Object.keys(pins).length === 0 ? (
           <div className="text-center py-8 text-slate-500">
-            No routing pins configured. Pin routes to specific models for
-            consistent routing.
+            No routing pins configured. Pin routes to specific models for consistent routing.
           </div>
         ) : (
           Object.entries(pins).map(([route, model]) => (
@@ -127,9 +118,7 @@ function RoutingPinPanel({ className }: RoutingPinPanelProps) {
               className="flex items-center justify-between rounded-lg bg-slate-50 p-3"
             >
               <div>
-                <div className="text-sm font-medium text-slate-900">
-                  {route}
-                </div>
+                <div className="text-sm font-medium text-slate-900">{route}</div>
                 <div className="text-xs text-slate-600">→ {model}</div>
               </div>
               <div className="flex gap-2">
@@ -156,7 +145,7 @@ interface CandidatesPanelProps {
 }
 
 function CandidatesPanel({ className }: CandidatesPanelProps) {
-  const [requestClass, setRequestClass] = useState('chat.completions');
+  const [requestClass, setRequestClass] = useState("chat.completions");
   const [candidates, setCandidates] = useState<RoutingCandidate[]>([]);
   const [loading, setLoading] = useState(false);
   const { routingPreview } = api();
@@ -168,13 +157,13 @@ function CandidatesPanel({ className }: CandidatesPanelProps) {
         class: requestClass,
         // Mock request payload
         payload: {
-          messages: [{ role: 'user', content: 'Hello' }],
+          messages: [{ role: "user", content: "Hello" }],
           temperature: 0.7,
         },
       });
       setCandidates(response.candidates || []);
     } catch (error) {
-      console.error('Failed to fetch routing candidates:', error);
+      console.error("Failed to fetch routing candidates:", error);
       setCandidates([]);
     } finally {
       setLoading(false);
@@ -187,15 +176,13 @@ function CandidatesPanel({ className }: CandidatesPanelProps) {
 
   const handleTogglePin = (candidate: RoutingCandidate) => {
     // This would implement pinning logic
-    console.log('Toggle pin for candidate:', candidate);
+    console.log("Toggle pin for candidate:", candidate);
   };
 
   return (
     <div className={`rounded-lg border bg-white p-4 shadow-sm ${className}`}>
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-slate-900">
-          Routing Candidates
-        </h2>
+        <h2 className="text-lg font-semibold text-slate-900">Routing Candidates</h2>
         <div className="flex items-center gap-2">
           <select
             value={requestClass}
@@ -212,7 +199,7 @@ function CandidatesPanel({ className }: CandidatesPanelProps) {
             disabled={loading}
             className="rounded border px-2 py-1 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50"
           >
-            {loading ? 'Loading...' : 'Refresh'}
+            {loading ? "Loading..." : "Refresh"}
           </button>
         </div>
       </div>
@@ -234,16 +221,14 @@ function CandidatesPanel({ className }: CandidatesPanelProps) {
                 <div className="mt-1 flex items-center gap-4 text-xs text-slate-600">
                   <span>Latency: {candidate.latency}ms</span>
                   <span>Cost: ${candidate.cost.toFixed(4)}</span>
-                  <span>
-                    Reliability: {(candidate.reliability * 100).toFixed(1)}%
-                  </span>
+                  <span>Reliability: {(candidate.reliability * 100).toFixed(1)}%</span>
                   <span
                     className={`rounded px-1.5 py-0.5 font-medium ${
-                      candidate.policyGrade === 'A'
-                        ? 'bg-green-100 text-green-800'
-                        : candidate.policyGrade === 'B'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-red-100 text-red-800'
+                      candidate.policyGrade === "A"
+                        ? "bg-green-100 text-green-800"
+                        : candidate.policyGrade === "B"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-red-100 text-red-800"
                     }`}
                   >
                     Policy: {candidate.policyGrade}
@@ -283,31 +268,31 @@ interface PolicySheetProps {
 function PolicySheet({ className }: PolicySheetProps) {
   const [policies, setPolicies] = useState([
     {
-      id: 'data-residency',
-      name: 'Data Residency',
+      id: "data-residency",
+      name: "Data Residency",
       enabled: true,
-      rules: ['US/EU only', 'No China/Russia'],
+      rules: ["US/EU only", "No China/Russia"],
       violations: 0,
     },
     {
-      id: 'rate-limits',
-      name: 'Rate Limits',
+      id: "rate-limits",
+      name: "Rate Limits",
       enabled: true,
-      rules: ['1000 RPM per tenant', '10K TPM global'],
+      rules: ["1000 RPM per tenant", "10K TPM global"],
       violations: 3,
     },
     {
-      id: 'cost-controls',
-      name: 'Cost Controls',
+      id: "cost-controls",
+      name: "Cost Controls",
       enabled: true,
-      rules: ['$0.10 per request max', 'Emergency brake at $1K/hour'],
+      rules: ["$0.10 per request max", "Emergency brake at $1K/hour"],
       violations: 1,
     },
     {
-      id: 'fallback-strategy',
-      name: 'Fallback Strategy',
+      id: "fallback-strategy",
+      name: "Fallback Strategy",
       enabled: false,
-      rules: ['Primary → Secondary → Cache', 'Timeout: 30s'],
+      rules: ["Primary → Secondary → Cache", "Timeout: 30s"],
       violations: 0,
     },
   ]);
@@ -315,9 +300,7 @@ function PolicySheet({ className }: PolicySheetProps) {
   return (
     <div className={`rounded-lg border bg-white p-4 shadow-sm ${className}`}>
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-slate-900">
-          Policy Configuration
-        </h2>
+        <h2 className="text-lg font-semibold text-slate-900">Policy Configuration</h2>
         <button className="rounded border px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50">
           Edit Policies
         </button>
@@ -329,9 +312,7 @@ function PolicySheet({ className }: PolicySheetProps) {
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-slate-900">
-                    {policy.name}
-                  </span>
+                  <span className="text-sm font-medium text-slate-900">{policy.name}</span>
                   <label className="inline-flex items-center">
                     <input
                       type="checkbox"
@@ -339,10 +320,8 @@ function PolicySheet({ className }: PolicySheetProps) {
                       onChange={(e) => {
                         setPolicies((prev) =>
                           prev.map((p) =>
-                            p.id === policy.id
-                              ? { ...p, enabled: e.target.checked }
-                              : p,
-                          ),
+                            p.id === policy.id ? { ...p, enabled: e.target.checked } : p
+                          )
                         );
                       }}
                       className="form-checkbox h-4 w-4 text-indigo-600"
@@ -363,7 +342,7 @@ function PolicySheet({ className }: PolicySheetProps) {
                 {policy.violations > 0 ? (
                   <span className="text-xs font-medium text-red-600">
                     {policy.violations} violation
-                    {policy.violations !== 1 ? 's' : ''}
+                    {policy.violations !== 1 ? "s" : ""}
                   </span>
                 ) : (
                   <span className="text-xs text-green-600">✓ Compliant</span>
@@ -384,34 +363,34 @@ interface TrafficHealthProps {
 function TrafficHealth({ className }: TrafficHealthProps) {
   const [healthData, setHealthData] = useState([
     {
-      provider: 'OpenAI',
-      model: 'gpt-4o-mini',
+      provider: "OpenAI",
+      model: "gpt-4o-mini",
       successRate: 99.7,
       avgLatency: 245,
       requestsPerMin: 1240,
       tokensPerSec: 15600,
       costPerHour: 8.45,
-      status: 'healthy' as const,
+      status: "healthy" as const,
     },
     {
-      provider: 'Anthropic',
-      model: 'claude-3-haiku',
+      provider: "Anthropic",
+      model: "claude-3-haiku",
       successRate: 99.9,
       avgLatency: 189,
       requestsPerMin: 890,
       tokensPerSec: 11200,
       costPerHour: 6.78,
-      status: 'healthy' as const,
+      status: "healthy" as const,
     },
     {
-      provider: 'Google',
-      model: 'gemini-pro',
+      provider: "Google",
+      model: "gemini-pro",
       successRate: 97.2,
       avgLatency: 567,
       requestsPerMin: 234,
       tokensPerSec: 3400,
       costPerHour: 2.34,
-      status: 'degraded' as const,
+      status: "degraded" as const,
     },
   ]);
 
@@ -427,15 +406,15 @@ function TrafficHealth({ className }: TrafficHealthProps) {
     eventSource.onopen = () => setStreamConnected(true);
     eventSource.onerror = () => setStreamConnected(false);
 
-    eventSource.addEventListener('routing_failover', (event) => {
+    eventSource.addEventListener("routing_failover", (event) => {
       const data: SSEEvent = JSON.parse(event.data);
-      console.log('Routing failover detected:', data.payload);
+      console.log("Routing failover detected:", data.payload);
       // Update health data based on failover events
     });
 
-    eventSource.addEventListener('routing_restored', (event) => {
+    eventSource.addEventListener("routing_restored", (event) => {
       const data: SSEEvent = JSON.parse(event.data);
-      console.log('Routing restored:', data.payload);
+      console.log("Routing restored:", data.payload);
     });
 
     return () => eventSource.close();
@@ -444,18 +423,12 @@ function TrafficHealth({ className }: TrafficHealthProps) {
   return (
     <div className={`rounded-lg border bg-white p-4 shadow-sm ${className}`}>
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-slate-900">
-          Traffic & Health
-        </h2>
+        <h2 className="text-lg font-semibold text-slate-900">Traffic & Health</h2>
         <div className="flex items-center gap-2">
           <div
-            className={`h-2 w-2 rounded-full ${
-              streamConnected ? 'bg-green-500' : 'bg-red-500'
-            }`}
+            className={`h-2 w-2 rounded-full ${streamConnected ? "bg-green-500" : "bg-red-500"}`}
           />
-          <span className="text-xs text-slate-500">
-            {streamConnected ? 'Live' : 'Offline'}
-          </span>
+          <span className="text-xs text-slate-500">{streamConnected ? "Live" : "Offline"}</span>
         </div>
       </div>
 
@@ -475,19 +448,17 @@ function TrafficHealth({ className }: TrafficHealthProps) {
             {healthData.map((item, i) => (
               <tr key={i} className="border-t">
                 <td className="px-3 py-2">
-                  <div className="text-sm font-medium text-slate-900">
-                    {item.provider}
-                  </div>
+                  <div className="text-sm font-medium text-slate-900">{item.provider}</div>
                   <div className="text-xs text-slate-600">{item.model}</div>
                 </td>
                 <td className="px-3 py-2">
                   <span
                     className={`text-sm font-medium ${
                       item.successRate >= 99
-                        ? 'text-green-600'
+                        ? "text-green-600"
                         : item.successRate >= 95
-                          ? 'text-yellow-600'
-                          : 'text-red-600'
+                          ? "text-yellow-600"
+                          : "text-red-600"
                     }`}
                   >
                     {item.successRate.toFixed(1)}%
@@ -497,22 +468,18 @@ function TrafficHealth({ className }: TrafficHealthProps) {
                 <td className="px-3 py-2">
                   <div className="text-xs">
                     <div>{item.requestsPerMin} RPM</div>
-                    <div className="text-slate-500">
-                      {item.tokensPerSec} tok/s
-                    </div>
+                    <div className="text-slate-500">{item.tokensPerSec} tok/s</div>
                   </div>
                 </td>
-                <td className="px-3 py-2 text-sm">
-                  ${item.costPerHour.toFixed(2)}
-                </td>
+                <td className="px-3 py-2 text-sm">${item.costPerHour.toFixed(2)}</td>
                 <td className="px-3 py-2">
                   <span
                     className={`rounded px-2 py-0.5 text-xs font-medium ${
-                      item.status === 'healthy'
-                        ? 'bg-green-100 text-green-800'
-                        : item.status === 'degraded'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-red-100 text-red-800'
+                      item.status === "healthy"
+                        ? "bg-green-100 text-green-800"
+                        : item.status === "degraded"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-red-100 text-red-800"
                     }`}
                   >
                     {item.status}

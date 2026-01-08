@@ -10,62 +10,86 @@
         "type": "stat",
         "title": "API p99 Latency",
         "targets": [
-          {"expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job='intelgraph-api'}[5m])) by (le))", "refId": "A"}
+          {
+            "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job='intelgraph-api'}[5m])) by (le))",
+            "refId": "A"
+          }
         ],
-        "fieldConfig": {"defaults": {"unit": "s"}},
-        "gridPos": {"h": 5, "w": 6, "x": 0, "y": 0}
+        "fieldConfig": { "defaults": { "unit": "s" } },
+        "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 }
       },
       {
         "id": 11,
         "type": "stat",
         "title": "Mesh Error Rate",
         "targets": [
-          {"expr": "sum(rate(istio_requests_total{response_code=~'5..'}[5m])) / sum(rate(istio_requests_total[5m])) * 100", "refId": "A"}
+          {
+            "expr": "sum(rate(istio_requests_total{response_code=~'5..'}[5m])) / sum(rate(istio_requests_total[5m])) * 100",
+            "refId": "A"
+          }
         ],
         "fieldConfig": {
           "defaults": {
             "unit": "percent",
-            "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 2}, {"color": "red", "value": 5}]}
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 2 },
+                { "color": "red", "value": 5 }
+              ]
+            }
           }
         },
-        "gridPos": {"h": 5, "w": 6, "x": 6, "y": 0}
+        "gridPos": { "h": 5, "w": 6, "x": 6, "y": 0 }
       },
       {
         "id": 12,
         "type": "timeseries",
         "title": "Throughput by Service",
         "targets": [
-          {"expr": "sum(rate(istio_requests_total[1m])) by (destination_workload)", "refId": "A"}
+          { "expr": "sum(rate(istio_requests_total[1m])) by (destination_workload)", "refId": "A" }
         ],
-        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 5}
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 5 }
       },
       {
         "id": 13,
         "type": "timeseries",
         "title": "Resource Saturation",
         "targets": [
-          {"expr": "max(node_load1 / on(instance) group_left() node_cpu_seconds_total{mode='idle'})", "refId": "A", "legendFormat": "CPU"},
-          {"expr": "sum(container_memory_working_set_bytes{namespace=~'intelgraph|agents'}) by (namespace) / sum(machine_memory_bytes)", "refId": "B", "legendFormat": "Memory"}
+          {
+            "expr": "max(node_load1 / on(instance) group_left() node_cpu_seconds_total{mode='idle'})",
+            "refId": "A",
+            "legendFormat": "CPU"
+          },
+          {
+            "expr": "sum(container_memory_working_set_bytes{namespace=~'intelgraph|agents'}) by (namespace) / sum(machine_memory_bytes)",
+            "refId": "B",
+            "legendFormat": "Memory"
+          }
         ],
-        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 5}
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 5 }
       },
       {
         "id": 14,
         "type": "bargauge",
         "title": "Top Correlated Requests",
         "targets": [
-          {"expr": "topk(10, sum(rate(otel_request_correlation_total[5m])) by (service_name))", "refId": "A"}
+          {
+            "expr": "topk(10, sum(rate(otel_request_correlation_total[5m])) by (service_name))",
+            "refId": "A"
+          }
         ],
-        "gridPos": {"h": 7, "w": 12, "x": 0, "y": 13}
+        "gridPos": { "h": 7, "w": 12, "x": 0, "y": 13 }
       },
       {
         "id": 15,
         "type": "timeseries",
         "title": "Profiling Samples Ingested",
         "targets": [
-          {"expr": "sum(rate(pyroscope_samples_ingested_total[5m])) by (service)", "refId": "A"}
+          { "expr": "sum(rate(pyroscope_samples_ingested_total[5m])) by (service)", "refId": "A" }
         ],
-        "gridPos": {"h": 7, "w": 12, "x": 12, "y": 13}
+        "gridPos": { "h": 7, "w": 12, "x": 12, "y": 13 }
       }
     ]
   }

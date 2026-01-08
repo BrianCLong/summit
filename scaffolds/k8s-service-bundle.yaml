@@ -52,6 +52,6 @@ spec:
   podSelector:
     matchLabels:
       app: secure-service
-  policyTypes: ['Ingress', 'Egress']
+  policyTypes: ["Ingress", "Egress"]
   ingress: []
   egress: []

@@ -1,4 +1,4 @@
-import { AdversarialExample, AttackConfig, AdversarialAttackType } from '../types';
+import { AdversarialExample, AttackConfig, AdversarialAttackType } from "../types";
 
 /**
  * Universal Adversarial Perturbations
@@ -59,11 +59,9 @@ export class UniversalPerturbationAttack {
           });
 
           // Project to epsilon ball
-          const norm = Math.sqrt(
-            universalPerturbation.reduce((sum, p) => sum + p * p, 0)
-          );
+          const norm = Math.sqrt(universalPerturbation.reduce((sum, p) => sum + p * p, 0));
           if (norm > epsilon) {
-            universalPerturbation = universalPerturbation.map(p => p * (epsilon / norm));
+            universalPerturbation = universalPerturbation.map((p) => p * (epsilon / norm));
           }
         } else {
           fooledCount++;
@@ -98,9 +96,7 @@ export class UniversalPerturbationAttack {
         finalFooledCount++;
       }
 
-      const perturbationNorm = Math.sqrt(
-        universalPerturbation.reduce((sum, p) => sum + p * p, 0)
-      );
+      const perturbationNorm = Math.sqrt(universalPerturbation.reduce((sum, p) => sum + p * p, 0));
 
       examples.push({
         id: this.generateId(),
@@ -114,16 +110,16 @@ export class UniversalPerturbationAttack {
         attackType: AdversarialAttackType.UNIVERSAL,
         metadata: {
           isUniversal: true,
-          method: 'UAP'
+          method: "UAP",
         },
-        createdAt: new Date()
+        createdAt: new Date(),
       });
     }
 
     return {
       perturbation: universalPerturbation,
       foolingRate: finalFooledCount / dataset.length,
-      examples
+      examples,
     };
   }
 
@@ -172,11 +168,9 @@ export class UniversalPerturbationAttack {
       });
 
       // Project to epsilon ball
-      const norm = Math.sqrt(
-        universalPerturbation.reduce((sum, p) => sum + p * p, 0)
-      );
+      const norm = Math.sqrt(universalPerturbation.reduce((sum, p) => sum + p * p, 0));
       if (norm > epsilon) {
-        universalPerturbation = universalPerturbation.map(p => p * (epsilon / norm));
+        universalPerturbation = universalPerturbation.map((p) => p * (epsilon / norm));
       }
     }
 
@@ -205,23 +199,21 @@ export class UniversalPerturbationAttack {
         originalPrediction: 0,
         adversarialPrediction: perturbedClass,
         confidence: 0,
-        perturbationNorm: Math.sqrt(
-          universalPerturbation.reduce((sum, p) => sum + p * p, 0)
-        ),
+        perturbationNorm: Math.sqrt(universalPerturbation.reduce((sum, p) => sum + p * p, 0)),
         attackType: AdversarialAttackType.UNIVERSAL,
         metadata: {
           isUniversal: true,
           targetClass,
-          method: 'UAP-Targeted'
+          method: "UAP-Targeted",
         },
-        createdAt: new Date()
+        createdAt: new Date(),
       });
     }
 
     return {
       perturbation: universalPerturbation,
       successRate: successCount / dataset.length,
-      examples
+      examples,
     };
   }
 
@@ -236,7 +228,9 @@ export class UniversalPerturbationAttack {
     const f: number[] = [];
 
     for (let k = 0; k < logits.length; k++) {
-      if (k === currentClass) {continue;}
+      if (k === currentClass) {
+        continue;
+      }
 
       const gradCurrent = await getGradients(input, currentClass);
       const gradK = await getGradients(input, k);
@@ -257,7 +251,7 @@ export class UniversalPerturbationAttack {
       if (distance < minDistance) {
         minDistance = distance;
         const normSquared = wNorm * wNorm;
-        minPerturbation = w[i].map(wi => (f[i] / normSquared) * wi);
+        minPerturbation = w[i].map((wi) => (f[i] / normSquared) * wi);
       }
     }
 

@@ -1,5 +1,5 @@
-import EventEmitter from 'eventemitter3';
-import { pino, type Logger } from 'pino';
+import EventEmitter from "eventemitter3";
+import { pino, type Logger } from "pino";
 
 export interface SyncConfig {
   endpoint: string;
@@ -19,8 +19,8 @@ export interface SyncConfig {
 
 export interface SyncOperation {
   id: string;
-  type: 'upload' | 'download' | 'delete';
-  resourceType: 'model' | 'data' | 'config' | 'logs';
+  type: "upload" | "download" | "delete";
+  resourceType: "model" | "data" | "config" | "logs";
   resourceId: string;
   localPath?: string;
   remotePath?: string;
@@ -61,7 +61,7 @@ export class SyncManager extends EventEmitter {
   constructor(config: SyncConfig, logger?: Logger) {
     super();
     this.config = config;
-    this.logger = logger || pino({ name: 'SyncManager' });
+    this.logger = logger || pino({ name: "SyncManager" });
   }
 
   /**
@@ -69,11 +69,11 @@ export class SyncManager extends EventEmitter {
    */
   async start(): Promise<void> {
     if (this.syncInterval) {
-      this.logger.warn('Sync manager already started');
+      this.logger.warn("Sync manager already started");
       return;
     }
 
-    this.logger.info({ interval: this.config.syncInterval }, 'Starting sync manager');
+    this.logger.info({ interval: this.config.syncInterval }, "Starting sync manager");
 
     // Initial sync
     await this.sync();
@@ -83,7 +83,7 @@ export class SyncManager extends EventEmitter {
       this.sync();
     }, this.config.syncInterval * 1000);
 
-    this.emit('started');
+    this.emit("started");
   }
 
   /**
@@ -100,26 +100,23 @@ export class SyncManager extends EventEmitter {
       await this.sleep(100);
     }
 
-    this.logger.info('Sync manager stopped');
-    this.emit('stopped');
+    this.logger.info("Sync manager stopped");
+    this.emit("stopped");
   }
 
   /**
    * Add operation to sync queue
    */
-  async enqueue(operation: Omit<SyncOperation, 'id' | 'timestamp'>): Promise<string> {
+  async enqueue(operation: Omit<SyncOperation, "id" | "timestamp">): Promise<string> {
     const op: SyncOperation = {
       ...operation,
       id: this.generateOperationId(),
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     // Check queue size limit
-    if (
-      this.config.offlineQueue.enabled &&
-      this.queue.length >= this.config.offlineQueue.maxSize
-    ) {
-      throw new Error('Sync queue is full');
+    if (this.config.offlineQueue.enabled && this.queue.length >= this.config.offlineQueue.maxSize) {
+      throw new Error("Sync queue is full");
     }
 
     this.queue.push(op);
@@ -127,8 +124,8 @@ export class SyncManager extends EventEmitter {
     // Sort by priority (higher first)
     this.queue.sort((a, b) => b.priority - a.priority);
 
-    this.logger.debug({ operationId: op.id, type: op.type }, 'Operation enqueued');
-    this.emit('operation-enqueued', op);
+    this.logger.debug({ operationId: op.id, type: op.type }, "Operation enqueued");
+    this.emit("operation-enqueued", op);
 
     // Trigger sync if online
     if (this.isOnline && !this.isSyncing) {
@@ -143,22 +140,22 @@ export class SyncManager extends EventEmitter {
    */
   async sync(): Promise<void> {
     if (this.isSyncing) {
-      this.logger.debug('Sync already in progress');
+      this.logger.debug("Sync already in progress");
       return;
     }
 
     if (!this.isOnline) {
-      this.logger.debug('Offline, skipping sync');
+      this.logger.debug("Offline, skipping sync");
       return;
     }
 
     if (this.queue.length === 0) {
-      this.logger.debug('No operations to sync');
+      this.logger.debug("No operations to sync");
       return;
     }
 
     this.isSyncing = true;
-    this.emit('sync-started');
+    this.emit("sync-started");
 
     try {
       while (this.queue.length > 0 && this.activeOperations.size < this.config.maxConcurrent) {
@@ -172,11 +169,11 @@ export class SyncManager extends EventEmitter {
       }
 
       this.lastSyncTime = new Date();
-      this.logger.info('Sync completed');
-      this.emit('sync-completed', this.getStatus());
+      this.logger.info("Sync completed");
+      this.emit("sync-completed", this.getStatus());
     } catch (error) {
-      this.logger.error({ error }, 'Sync failed');
-      this.emit('sync-failed', error);
+      this.logger.error({ error }, "Sync failed");
+      this.emit("sync-failed", error);
     } finally {
       this.isSyncing = false;
     }
@@ -191,17 +188,17 @@ export class SyncManager extends EventEmitter {
     try {
       this.logger.debug(
         { operationId: operation.id, type: operation.type },
-        'Processing operation'
+        "Processing operation"
       );
 
       switch (operation.type) {
-        case 'upload':
+        case "upload":
           await this.performUpload(operation);
           break;
-        case 'download':
+        case "download":
           await this.performDownload(operation);
           break;
-        case 'delete':
+        case "delete":
           await this.performDelete(operation);
           break;
       }
@@ -209,10 +206,10 @@ export class SyncManager extends EventEmitter {
       this.completedOperations.push(operation);
       this.bytesTransferred += operation.size;
 
-      this.logger.info({ operationId: operation.id }, 'Operation completed');
-      this.emit('operation-completed', operation);
+      this.logger.info({ operationId: operation.id }, "Operation completed");
+      this.emit("operation-completed", operation);
     } catch (error) {
-      this.logger.error({ error, operationId: operation.id }, 'Operation failed');
+      this.logger.error({ error, operationId: operation.id }, "Operation failed");
 
       const retryCount = this.getRetryCount(operation.id);
 
@@ -220,11 +217,14 @@ export class SyncManager extends EventEmitter {
         // Retry operation
         await this.sleep(this.config.retryDelay * Math.pow(2, retryCount));
         this.queue.unshift(operation);
-        this.logger.info({ operationId: operation.id, retry: retryCount + 1 }, 'Retrying operation');
+        this.logger.info(
+          { operationId: operation.id, retry: retryCount + 1 },
+          "Retrying operation"
+        );
       } else {
         // Max retries reached
         this.failedOperations.set(operation.id, { operation, error: error as Error });
-        this.emit('operation-failed', { operation, error });
+        this.emit("operation-failed", { operation, error });
       }
     } finally {
       this.activeOperations.delete(operation.id);
@@ -246,7 +246,7 @@ export class SyncManager extends EventEmitter {
     const uploadTime = this.simulateTransfer(operation.size);
     await this.sleep(uploadTime);
 
-    this.logger.debug({ operationId: operation.id, size: operation.size }, 'Upload completed');
+    this.logger.debug({ operationId: operation.id, size: operation.size }, "Upload completed");
   }
 
   /**
@@ -264,7 +264,7 @@ export class SyncManager extends EventEmitter {
     const downloadTime = this.simulateTransfer(operation.size);
     await this.sleep(downloadTime);
 
-    this.logger.debug({ operationId: operation.id, size: operation.size }, 'Download completed');
+    this.logger.debug({ operationId: operation.id, size: operation.size }, "Download completed");
   }
 
   /**
@@ -274,7 +274,7 @@ export class SyncManager extends EventEmitter {
     // Simulate delete
     await this.sleep(100);
 
-    this.logger.debug({ operationId: operation.id }, 'Delete completed');
+    this.logger.debug({ operationId: operation.id }, "Delete completed");
   }
 
   /**
@@ -292,7 +292,7 @@ export class SyncManager extends EventEmitter {
    * Get retry count for an operation
    */
   private getRetryCount(operationId: string): number {
-    return this.completedOperations.filter(op => op.id === operationId).length;
+    return this.completedOperations.filter((op) => op.id === operationId).length;
   }
 
   /**
@@ -304,9 +304,9 @@ export class SyncManager extends EventEmitter {
     }
 
     this.isOnline = isOnline;
-    this.logger.info({ isOnline }, 'Online status changed');
+    this.logger.info({ isOnline }, "Online status changed");
 
-    this.emit('online-status-changed', isOnline);
+    this.emit("online-status-changed", isOnline);
 
     // Trigger sync when coming back online
     if (isOnline && this.queue.length > 0) {
@@ -319,14 +319,15 @@ export class SyncManager extends EventEmitter {
    */
   getStatus(): SyncStatus {
     return {
-      totalOperations: this.queue.length + this.activeOperations.size + this.completedOperations.length,
+      totalOperations:
+        this.queue.length + this.activeOperations.size + this.completedOperations.length,
       pendingOperations: this.queue.length,
       completedOperations: this.completedOperations.length,
       failedOperations: this.failedOperations.size,
       bytesTransferred: this.bytesTransferred,
       lastSyncTime: this.lastSyncTime,
       isOnline: this.isOnline,
-      isSyncing: this.isSyncing
+      isSyncing: this.isSyncing,
     };
   }
 
@@ -342,7 +343,7 @@ export class SyncManager extends EventEmitter {
    */
   clearFailedOperations(): void {
     this.failedOperations.clear();
-    this.logger.info('Failed operations cleared');
+    this.logger.info("Failed operations cleared");
   }
 
   /**
@@ -356,7 +357,7 @@ export class SyncManager extends EventEmitter {
 
     this.queue.sort((a, b) => b.priority - a.priority);
 
-    this.logger.info('Failed operations re-queued');
+    this.logger.info("Failed operations re-queued");
 
     if (this.isOnline && !this.isSyncing) {
       this.sync();
@@ -367,12 +368,12 @@ export class SyncManager extends EventEmitter {
    * Cancel operation
    */
   cancelOperation(operationId: string): boolean {
-    const index = this.queue.findIndex(op => op.id === operationId);
+    const index = this.queue.findIndex((op) => op.id === operationId);
 
     if (index !== -1) {
       const operation = this.queue.splice(index, 1)[0];
-      this.logger.info({ operationId }, 'Operation cancelled');
-      this.emit('operation-cancelled', operation);
+      this.logger.info({ operationId }, "Operation cancelled");
+      this.emit("operation-cancelled", operation);
       return true;
     }
 
@@ -384,8 +385,8 @@ export class SyncManager extends EventEmitter {
    */
   clearQueue(): void {
     this.queue = [];
-    this.logger.info('Queue cleared');
-    this.emit('queue-cleared');
+    this.logger.info("Queue cleared");
+    this.emit("queue-cleared");
   }
 
   /**
@@ -399,6 +400,6 @@ export class SyncManager extends EventEmitter {
    * Sleep utility
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

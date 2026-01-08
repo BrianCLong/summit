@@ -8,13 +8,13 @@
  * @module services/security-api
  */
 
-const API_BASE = '/api/security';
+const API_BASE = "/api/security";
 
 export class SensitiveContextError extends Error {
   constructor(message, required = [], details = {}) {
     super(message);
-    this.name = 'SensitiveContextError';
-    this.code = 'SENSITIVE_CONTEXT_REQUIRED';
+    this.name = "SensitiveContextError";
+    this.code = "SENSITIVE_CONTEXT_REQUIRED";
     this.required = required;
     this.details = details;
   }
@@ -24,9 +24,9 @@ export class SensitiveContextError extends Error {
  * Get auth headers
  */
 const getHeaders = () => {
-  const token = localStorage.getItem('auth_token');
+  const token = localStorage.getItem("auth_token");
   return {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 };
@@ -36,13 +36,13 @@ const getHeaders = () => {
  */
 const handleResponse = async (response) => {
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    const error = await response.json().catch(() => ({ error: "Unknown error" }));
 
-    if (error.code === 'SENSITIVE_CONTEXT_REQUIRED') {
+    if (error.code === "SENSITIVE_CONTEXT_REQUIRED") {
       throw new SensitiveContextError(
-        error.message || 'Additional context is required',
+        error.message || "Additional context is required",
         error.required || [],
-        error,
+        error
       );
     }
 
@@ -60,8 +60,8 @@ export const KeyManagementAPI = {
    */
   async listKeys(params = {}) {
     const queryParams = new URLSearchParams();
-    if (params.purpose) queryParams.set('purpose', params.purpose);
-    if (params.status) queryParams.set('status', params.status);
+    if (params.purpose) queryParams.set("purpose", params.purpose);
+    if (params.status) queryParams.set("status", params.status);
 
     const response = await fetch(`${API_BASE}/keys?${queryParams}`, {
       headers: getHeaders(),
@@ -74,7 +74,7 @@ export const KeyManagementAPI = {
    */
   async generateKey(purpose, algorithm) {
     const response = await fetch(`${API_BASE}/keys`, {
-      method: 'POST',
+      method: "POST",
       headers: getHeaders(),
       body: JSON.stringify({ purpose, algorithm }),
     });
@@ -86,7 +86,7 @@ export const KeyManagementAPI = {
    */
   async rotateKey(keyId, reason) {
     const response = await fetch(`${API_BASE}/keys/${keyId}/rotate`, {
-      method: 'POST',
+      method: "POST",
       headers: getHeaders(),
       body: JSON.stringify({ reason }),
     });
@@ -98,7 +98,7 @@ export const KeyManagementAPI = {
    */
   async retireKey(keyId, reason) {
     const response = await fetch(`${API_BASE}/keys/${keyId}/retire`, {
-      method: 'POST',
+      method: "POST",
       headers: getHeaders(),
       body: JSON.stringify({ reason }),
     });
@@ -110,7 +110,7 @@ export const KeyManagementAPI = {
    */
   async markCompromised(keyId, reason) {
     const response = await fetch(`${API_BASE}/keys/${keyId}/compromise`, {
-      method: 'POST',
+      method: "POST",
       headers: getHeaders(),
       body: JSON.stringify({ reason }),
     });
@@ -131,7 +131,7 @@ export const KeyManagementAPI = {
    * Get rotation history
    */
   async getRotationHistory(keyId) {
-    const params = keyId ? `?keyId=${keyId}` : '';
+    const params = keyId ? `?keyId=${keyId}` : "";
     const response = await fetch(`${API_BASE}/keys/history${params}`, {
       headers: getHeaders(),
     });
@@ -153,7 +153,7 @@ export const KeyManagementAPI = {
    */
   async updateRotationPolicy(purpose, policy) {
     const response = await fetch(`${API_BASE}/policies/rotation/${purpose}`, {
-      method: 'PUT',
+      method: "PUT",
       headers: getHeaders(),
       body: JSON.stringify(policy),
     });
@@ -168,16 +168,16 @@ export const PIIDetectionAPI = {
   /**
    * Scan data for PII
    */
-  async scan(data, type = 'object', includeValue = false, context = {}) {
+  async scan(data, type = "object", includeValue = false, context = {}) {
     const headers = {
       ...getHeaders(),
-      ...(context.purpose ? { 'x-purpose': context.purpose } : {}),
-      ...(context.justification ? { 'x-justification': context.justification } : {}),
-      ...(context.caseId ? { 'x-case-id': context.caseId } : {}),
+      ...(context.purpose ? { "x-purpose": context.purpose } : {}),
+      ...(context.justification ? { "x-justification": context.justification } : {}),
+      ...(context.caseId ? { "x-case-id": context.caseId } : {}),
     };
 
     const response = await fetch(`${API_BASE}/pii/scan`, {
-      method: 'POST',
+      method: "POST",
       headers,
       body: JSON.stringify({ data, type, includeValue, ...context }),
     });
@@ -199,7 +199,7 @@ export const PIIDetectionAPI = {
    */
   async mask(value, category) {
     const response = await fetch(`${API_BASE}/pii/mask`, {
-      method: 'POST',
+      method: "POST",
       headers: getHeaders(),
       body: JSON.stringify({ value, category }),
     });

@@ -78,14 +78,14 @@ spec:
       app: intelgraph-api
   action: ALLOW
   rules:
-  - from:
-    - source:
-        principals: ["cluster.local/ns/intelgraph/sa/frontend"]
-        namespaces: ["intelgraph"]
-    to:
-    - operation:
-        methods: ["GET", "POST"]
-        paths: ["/graphql", "/api/*"]
-    when:
-    - key: request.headers[x-api-key]
-      notValues: [""]
+    - from:
+        - source:
+            principals: ["cluster.local/ns/intelgraph/sa/frontend"]
+            namespaces: ["intelgraph"]
+      to:
+        - operation:
+            methods: ["GET", "POST"]
+            paths: ["/graphql", "/api/*"]
+      when:
+        - key: request.headers[x-api-key]
+          notValues: [""]

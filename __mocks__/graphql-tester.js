@@ -5,7 +5,7 @@ const createTestClient = (config) => {
       // Return a mock response structure similar to graphql-tester
       return {
         status: 200,
-        data: { ok: true, __op: 'query' },
+        data: { ok: true, __op: "query" },
         errors: undefined,
         extensions: {},
       };
@@ -13,7 +13,7 @@ const createTestClient = (config) => {
     mutate: async (mutation, variables = {}) => {
       return {
         status: 200,
-        data: { ok: true, __op: 'mutation' },
+        data: { ok: true, __op: "mutation" },
         errors: undefined,
         extensions: {},
       };

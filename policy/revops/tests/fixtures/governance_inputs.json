@@ -1,8 +1,8 @@
 {
   "governance_inputs": {
     "compliant": {
-      "tenant": {"id": "tenant-default"},
-      "actor": {"role": "revops", "id": "ops-1"},
+      "tenant": { "id": "tenant-default" },
+      "actor": { "role": "revops", "id": "ops-1" },
       "lead": {
         "id": "lead-1000",
         "email": "cfo@acme.com",
@@ -74,10 +74,10 @@
         "id": "contract-500",
         "status": "signed",
         "signatures": [
-          {"role": "buyer", "signed_at": "2025-01-02T00:00:00Z"},
-          {"role": "legal", "signed_at": "2025-01-02T01:00:00Z"}
+          { "role": "buyer", "signed_at": "2025-01-02T00:00:00Z" },
+          { "role": "legal", "signed_at": "2025-01-02T01:00:00Z" }
         ],
-        "metadata": {"terms": "standard", "uplifts": "3%", "caps": "standard"},
+        "metadata": { "terms": "standard", "uplifts": "3%", "caps": "standard" },
         "renewal_type": "auto",
         "renewal_created": true,
         "system_of_record": "clm"
@@ -89,7 +89,7 @@
         "security_review": "complete",
         "system_of_record": "product_analytics"
       },
-      "support": {"open_cases": 0},
+      "support": { "open_cases": 0 },
       "marketing": {
         "utm_source": "linkedin",
         "utm_medium": "paid-social",
@@ -105,19 +105,19 @@
         "wip_limit": 10,
         "partner_registered": true
       },
-      "change_control": {"rfc_submitted": true, "approved": true},
+      "change_control": { "rfc_submitted": true, "approved": true },
       "handoffs": {
         "completed_packets": ["sdr_ae", "ae_cs", "cs_renewals"],
-        "commitment_registry": [{"id": "comm-1", "owner": "cs-1", "due_date": "2025-01-15"}]
+        "commitment_registry": [{ "id": "comm-1", "owner": "cs-1", "due_date": "2025-01-15" }]
       },
-      "exception_registry": {"open": []},
-      "governance_reviews": {"access_review_complete": true},
+      "exception_registry": { "open": [] },
+      "governance_reviews": { "access_review_complete": true },
       "audit_logs_enabled": true,
-      "context": {"now": "2025-01-02T00:00:00Z", "change_targets": ["opportunity", "quote"]}
+      "context": { "now": "2025-01-02T00:00:00Z", "change_targets": ["opportunity", "quote"] }
     },
     "invalid_stage_and_naming": {
-      "tenant": {"id": "tenant-default"},
-      "actor": {"role": "ae", "id": "ae-1"},
+      "tenant": { "id": "tenant-default" },
+      "actor": { "role": "ae", "id": "ae-1" },
       "lead": {
         "id": "lead-2000",
         "email": "vp@badcorp.com",
@@ -198,7 +198,7 @@
         "security_review": "pending",
         "system_of_record": "product_analytics"
       },
-      "support": {"open_cases": 1},
+      "support": { "open_cases": 1 },
       "marketing": {
         "utm_source": "search",
         "utm_medium": "cpc",
@@ -214,16 +214,25 @@
         "wip_limit": 10,
         "partner_registered": true
       },
-      "change_control": {"rfc_submitted": true, "approved": true},
-      "handoffs": {"completed_packets": ["sdr_ae"], "commitment_registry": []},
-      "exception_registry": {"open": [{"id": "exc-1", "owner": "ops", "reason": "process deviation", "expires_at": "2025-02-01T00:00:00Z"}]},
-      "governance_reviews": {"access_review_complete": false},
+      "change_control": { "rfc_submitted": true, "approved": true },
+      "handoffs": { "completed_packets": ["sdr_ae"], "commitment_registry": [] },
+      "exception_registry": {
+        "open": [
+          {
+            "id": "exc-1",
+            "owner": "ops",
+            "reason": "process deviation",
+            "expires_at": "2025-02-01T00:00:00Z"
+          }
+        ]
+      },
+      "governance_reviews": { "access_review_complete": false },
       "audit_logs_enabled": false,
-      "context": {"now": "2025-01-05T00:00:00Z", "change_targets": ["opportunity"]}
+      "context": { "now": "2025-01-05T00:00:00Z", "change_targets": ["opportunity"] }
     },
     "sla_and_quote": {
-      "tenant": {"id": "tenant-default"},
-      "actor": {"role": "ae", "id": "ae-2"},
+      "tenant": { "id": "tenant-default" },
+      "actor": { "role": "ae", "id": "ae-2" },
       "lead": {
         "id": "lead-3000",
         "email": "cto@slowco.com",
@@ -303,7 +312,7 @@
         "security_review": "pending",
         "system_of_record": "product_analytics"
       },
-      "support": {"open_cases": 0},
+      "support": { "open_cases": 0 },
       "marketing": {
         "utm_source": "referral",
         "utm_medium": "partner",
@@ -319,16 +328,25 @@
         "wip_limit": 5,
         "partner_registered": false
       },
-      "change_control": {"rfc_submitted": false, "approved": false},
-      "handoffs": {"completed_packets": [], "commitment_registry": []},
-      "exception_registry": {"open": [{"id": "exc-2", "owner": "ae-2", "reason": "manual discount", "expires_at": "2024-12-15T00:00:00Z"}]},
-      "governance_reviews": {"access_review_complete": false},
+      "change_control": { "rfc_submitted": false, "approved": false },
+      "handoffs": { "completed_packets": [], "commitment_registry": [] },
+      "exception_registry": {
+        "open": [
+          {
+            "id": "exc-2",
+            "owner": "ae-2",
+            "reason": "manual discount",
+            "expires_at": "2024-12-15T00:00:00Z"
+          }
+        ]
+      },
+      "governance_reviews": { "access_review_complete": false },
       "audit_logs_enabled": false,
-      "context": {"now": "2025-01-05T00:00:00Z", "change_targets": ["opportunity", "contract"]}
+      "context": { "now": "2025-01-05T00:00:00Z", "change_targets": ["opportunity", "contract"] }
     },
     "permissions_and_attribution": {
-      "tenant": {"id": "tenant-default"},
-      "actor": {"role": "sdr", "id": "sdr-9"},
+      "tenant": { "id": "tenant-default" },
+      "actor": { "role": "sdr", "id": "sdr-9" },
       "lead": {
         "id": "lead-9000",
         "email": "ops@partner.com",
@@ -405,7 +423,7 @@
         "security_review": "pending",
         "system_of_record": "product_analytics"
       },
-      "support": {"open_cases": 0},
+      "support": { "open_cases": 0 },
       "marketing": {
         "utm_source": "",
         "utm_medium": "",
@@ -421,12 +439,12 @@
         "wip_limit": 5,
         "partner_registered": false
       },
-      "change_control": {"rfc_submitted": false, "approved": false},
-      "handoffs": {"completed_packets": [], "commitment_registry": []},
-      "exception_registry": {"open": []},
-      "governance_reviews": {"access_review_complete": true},
+      "change_control": { "rfc_submitted": false, "approved": false },
+      "handoffs": { "completed_packets": [], "commitment_registry": [] },
+      "exception_registry": { "open": [] },
+      "governance_reviews": { "access_review_complete": true },
       "audit_logs_enabled": true,
-      "context": {"now": "2025-01-04T00:00:00Z", "change_targets": ["contract", "automation"]}
+      "context": { "now": "2025-01-04T00:00:00Z", "change_targets": ["contract", "automation"] }
     }
   }
 }

@@ -4,12 +4,12 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
-      - '**.ts'
-      - '**.tsx'
-      - '**.js'
-      - '**.jsx'
-      - '**/package.json'
-      - 'pnpm-lock.yaml'
+      - "**.ts"
+      - "**.tsx"
+      - "**.js"
+      - "**.jsx"
+      - "**/package.json"
+      - "pnpm-lock.yaml"
   push:
     branches:
       - main
@@ -21,8 +21,8 @@ permissions:
   checks: write
 
 env:
-  NODE_VERSION: '20.x'
-  PNPM_VERSION: '9'
+  NODE_VERSION: "20.x"
+  PNPM_VERSION: "9"
 
 jobs:
   bundle-size-check:
@@ -37,7 +37,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -159,7 +159,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -248,7 +248,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2

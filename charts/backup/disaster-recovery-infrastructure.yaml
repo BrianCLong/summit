@@ -9,20 +9,20 @@ metadata:
     app.kubernetes.io/component: infrastructure
 data:
   # Primary and DR region configuration
-  primary-region: 'us-west-2'
-  dr-region: 'us-east-1'
+  primary-region: "us-west-2"
+  dr-region: "us-east-1"
 
   # RTO/RPO targets
-  rto-target: '4h' # Recovery Time Objective: 4 hours
-  rpo-target: '15m' # Recovery Point Objective: 15 minutes
+  rto-target: "4h" # Recovery Time Objective: 4 hours
+  rpo-target: "15m" # Recovery Point Objective: 15 minutes
 
   # Failover configuration
-  failover-mode: 'manual' # manual | automatic
-  failover-threshold: '90' # % health threshold
+  failover-mode: "manual" # manual | automatic
+  failover-threshold: "90" # % health threshold
 
   # Cross-region replication settings
-  replication-enabled: 'true'
-  replication-frequency: '6h'
+  replication-enabled: "true"
+  replication-frequency: "6h"
 
 ---
 apiVersion: batch/v1
@@ -34,8 +34,8 @@ metadata:
     app.kubernetes.io/name: dr-replication
     app.kubernetes.io/component: disaster-recovery
 spec:
-  schedule: '0 */6 * * *' # Every 6 hours
-  timeZone: 'UTC'
+  schedule: "0 */6 * * *" # Every 6 hours
+  timeZone: "UTC"
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 2
   concurrencyPolicy: Forbid
@@ -230,14 +230,14 @@ spec:
                       name: backup-secrets
                       key: aws-secret-access-key
                 - name: SYNC_START
-                  value: '$(date +%s)'
+                  value: "$(date +%s)"
               resources:
                 requests:
-                  memory: '1Gi'
-                  cpu: '500m'
+                  memory: "1Gi"
+                  cpu: "500m"
                 limits:
-                  memory: '4Gi'
-                  cpu: '2000m'
+                  memory: "4Gi"
+                  cpu: "2000m"
               volumeMounts:
                 - name: docker-sock
                   mountPath: /var/run/docker.sock
@@ -247,12 +247,12 @@ spec:
                 path: /var/run/docker.sock
                 type: Socket
           tolerations:
-            - key: 'backup-workload'
-              operator: 'Equal'
-              value: 'true'
-              effect: 'NoSchedule'
+            - key: "backup-workload"
+              operator: "Equal"
+              value: "true"
+              effect: "NoSchedule"
           nodeSelector:
-            node-type: 'backup-optimized'
+            node-type: "backup-optimized"
 ---
 # DR Health Check and Failover Decision
 apiVersion: batch/v1
@@ -264,8 +264,8 @@ metadata:
     app.kubernetes.io/name: dr-health-check
     app.kubernetes.io/component: disaster-recovery
 spec:
-  schedule: '*/5 * * * *' # Every 5 minutes
-  timeZone: 'UTC'
+  schedule: "*/5 * * * *" # Every 5 minutes
+  timeZone: "UTC"
   successfulJobsHistoryLimit: 12 # Keep 1 hour of history
   failedJobsHistoryLimit: 6
   concurrencyPolicy: Forbid
@@ -420,7 +420,7 @@ spec:
 
               env:
                 - name: PRIMARY_API_ENDPOINT
-                  value: 'https://api.intelgraph.ai'
+                  value: "https://api.intelgraph.ai"
                 - name: DR_REGION
                   valueFrom:
                     configMapKeyRef:
@@ -468,11 +468,11 @@ spec:
                       key: aws-secret-access-key
               resources:
                 requests:
-                  memory: '128Mi'
-                  cpu: '100m'
+                  memory: "128Mi"
+                  cpu: "100m"
                 limits:
-                  memory: '256Mi'
-                  cpu: '200m'
+                  memory: "256Mi"
+                  cpu: "200m"
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -480,7 +480,7 @@ metadata:
   name: dr-replication
   namespace: backup-system
   annotations:
-    eks.amazonaws.com/role-arn: 'arn:aws:iam::123456789012:role/dr-replication-role'
+    eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/dr-replication-role"
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -488,4 +488,4 @@ metadata:
   name: dr-health-check
   namespace: backup-system
   annotations:
-    eks.amazonaws.com/role-arn: 'arn:aws:iam::123456789012:role/dr-health-check-role'
+    eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/dr-health-check-role"

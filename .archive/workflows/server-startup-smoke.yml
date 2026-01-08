@@ -5,9 +5,9 @@ permissions:
 on:
   push:
     branches: [main, develop, fix/ui-docker-build]
-    paths: ['server/**', '.github/workflows/server-startup-smoke.yml']
+    paths: ["server/**", ".github/workflows/server-startup-smoke.yml"]
   pull_request:
-    paths: ['server/**', '.github/workflows/server-startup-smoke.yml']
+    paths: ["server/**", ".github/workflows/server-startup-smoke.yml"]
 
 jobs:
   smoke-test:
@@ -21,7 +21,7 @@ jobs:
           POSTGRES_USER: intelgraph
           POSTGRES_DB: intelgraph
         ports:
-          - '5432:5432'
+          - "5432:5432"
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -31,7 +31,7 @@ jobs:
       redis:
         image: redis:7-alpine
         ports:
-          - '6379:6379'
+          - "6379:6379"
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -43,8 +43,8 @@ jobs:
         env:
           NEO4J_AUTH: neo4j/test_password
         ports:
-          - '7474:7474'
-          - '7687:7687'
+          - "7474:7474"
+          - "7687:7687"
         options: >-
           --health-cmd "wget -qO- http://localhost:7474 >/dev/null 2>&1 || exit 1"
           --health-interval 10s
@@ -58,8 +58,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
           cache-dependency-path: server/pnpm-lock.yaml
 
       - name: Install server dependencies

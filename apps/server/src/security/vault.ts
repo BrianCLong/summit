@@ -1,9 +1,9 @@
-import vault from 'node-vault';
-import { securityLogger } from '../observability/securityLogger.js';
+import vault from "node-vault";
+import { securityLogger } from "../observability/securityLogger.js";
 
 const vaultAddr = process.env.VAULT_ADDR;
 const vaultToken = process.env.VAULT_TOKEN;
-const vaultSecretPath = process.env.VAULT_SECRET_PATH || 'secret/data/drop-gateway';
+const vaultSecretPath = process.env.VAULT_SECRET_PATH || "secret/data/drop-gateway";
 
 const client =
   vaultAddr && vaultToken
@@ -25,9 +25,9 @@ export const fetchSecret = async (key: string, fallback?: string): Promise<strin
     }
     return fallback;
   } catch (error: any) {
-    securityLogger.logEvent('vault_error', {
-      level: 'warn',
-      message: error?.message || 'Unknown Vault error',
+    securityLogger.logEvent("vault_error", {
+      level: "warn",
+      message: error?.message || "Unknown Vault error",
     });
     return fallback;
   }

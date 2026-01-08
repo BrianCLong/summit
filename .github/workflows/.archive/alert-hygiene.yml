@@ -3,14 +3,14 @@ name: Alert Hygiene
 on:
   push:
     paths:
-      - 'observability/alerts/catalog.yaml'
-      - 'tools/alertsync/**'
-      - '.ci/policies/alerts.rego'
+      - "observability/alerts/catalog.yaml"
+      - "tools/alertsync/**"
+      - ".ci/policies/alerts.rego"
   pull_request:
     paths:
-      - 'observability/alerts/catalog.yaml'
-      - 'tools/alertsync/**'
-      - '.ci/policies/alerts.rego'
+      - "observability/alerts/catalog.yaml"
+      - "tools/alertsync/**"
+      - ".ci/policies/alerts.rego"
 
 jobs:
   validate-and-generate:
@@ -21,7 +21,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |

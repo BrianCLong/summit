@@ -2,7 +2,7 @@
 
 ## Prioritized Capabilities (next 3–5)
 
-1) **GraphRAG Threat Hypothesis Lab**
+1. **GraphRAG Threat Hypothesis Lab**
    - **Value prop:** Copilot-grounded, live graph reasoning that lets analysts probe attack paths and adversary campaigns with reproducible, graph-backed hypotheses.
    - **Research timeliness:** Aligns with KG+LLM threat modeling and GraphRAG advances for cyber defense and attack-path inference.[1][2][3][4][5]
    - **v0/v1 spec (4–8 weeks):**
@@ -14,7 +14,7 @@
    - **Human-AI collab lift:** Task handoff via saved probes; inline reasoning traces (Cypher + scoring); slider for uncertainty thresholds; analyst can override edge weights with rationale logging.
    - **Governance:** Provenance chain (Cypher query + dataset hash) per hypothesis; opt-out flags for sensitive nodes; audit log of copilot prompts; misuse detector for exfil/dual-use queries.
 
-2) **Autonomous OSINT Collection & Deepfake Sentinel**
+2. **Autonomous OSINT Collection & Deepfake Sentinel**
    - **Value prop:** Continuous OSINT harvesting with authenticity scoring to keep KGs current while filtering synthetic media at ingest.
    - **Research timeliness:** Reflects 2025 AI-OSINT automation, market-scale platforms, and deepfake detection requirements.[6][7][8][9][10]
    - **v0/v1 spec (4–8 weeks):**
@@ -27,7 +27,7 @@
    - **Human-AI collab lift:** Human-in-the-loop review queue for uncertain media; explainability cards showing detector signals; quick actions to reclassify or escalate to narrative sim.
    - **Governance:** Mandatory provenance capture (URL, hash, detector version); opt-out and source-block lists; anomaly detector for mass scraping misuse; red-team prompts to detect policy bypass.
 
-3) **Analyst Work-Companion & Decision-Support UX**
+3. **Analyst Work-Companion & Decision-Support UX**
    - **Value prop:** Embedded co-pilot that shares workspace context, suggests next-best-actions, and co-authors intel products with transparent rationale.
    - **Research timeliness:** Mirrors human-AI symbiosis and work-companion findings on when collaboration beats solo agents.[11][12][13][14]
    - **v0/v1 spec (4–8 weeks):**
@@ -39,7 +39,7 @@
    - **Human-AI collab lift:** Explicit handoff states (AI proposes → human approves/edits); visible uncertainty and rationale chains; “why this next step” explanations; undo/rollback for AI edits.
    - **Governance:** Role-based constraints on actions; immutable decision logs; provenance for AI-authored text; bias/overreach detector that flags overconfident recs.
 
-4) **Provenance-First Intel Products & Privacy Guardrails**
+4. **Provenance-First Intel Products & Privacy Guardrails**
    - **Value prop:** Default-verifiable outputs that encode data lineage, consent/opt-out, and usage constraints to unlock trustable sharing across orgs.
    - **Research timeliness:** Aligns with second/third-gen OSINT governance, privacy paradox debates, and automated KG provenance trends.[15][16]
    - **v0/v1 spec (4–8 weeks):**
@@ -50,7 +50,7 @@
    - **Human-AI collab lift:** Analysts can inspect lineage per paragraph; AI highlights missing citations; collaborative redaction workflow with preview.
    - **Governance:** Opt-out enforcement at query time; audit hooks on exports; misuse detector for privacy-violating joins; signed manifests (C2PA bridge ready).
 
-5) **Narrative Simulation + GraphRAG Co-Evolution**
+5. **Narrative Simulation + GraphRAG Co-Evolution**
    - **Value prop:** Closed-loop sims that update the KG and copilot prompts as scenario ticks progress, enabling rapid what-if exploration.
    - **Research timeliness:** Combines GraphRAG, attack-path modeling, and narrative engines to anticipate adversarial moves.[1][2][3][4][5]
    - **v0/v1 spec (4–8 weeks):**

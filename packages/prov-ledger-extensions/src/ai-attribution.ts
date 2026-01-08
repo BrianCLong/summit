@@ -18,17 +18,23 @@ export interface AIAttribution {
   /** Model provider (openai, anthropic, local, etc.) */
   provider: string;
   /** Operation type */
-  operationType: 'extraction' | 'inference' | 'classification' | 'generation' | 'summarization' | 'embedding';
+  operationType:
+    | "extraction"
+    | "inference"
+    | "classification"
+    | "generation"
+    | "summarization"
+    | "embedding";
   /** Input summary (truncated for storage) */
   input: {
-    type: 'text' | 'image' | 'audio' | 'structured';
+    type: "text" | "image" | "audio" | "structured";
     hash: string;
     tokenCount?: number;
     preview?: string;
   };
   /** Output summary */
   output: {
-    type: 'entity' | 'relationship' | 'text' | 'embedding' | 'classification';
+    type: "entity" | "relationship" | "text" | "embedding" | "classification";
     hash: string;
     tokenCount?: number;
     entityIds?: string[];
@@ -114,7 +120,7 @@ export class AIAttributionTracker {
   /**
    * Record an AI attribution
    */
-  async record(attribution: Omit<AIAttribution, 'id' | 'timestamp'>): Promise<string> {
+  async record(attribution: Omit<AIAttribution, "id" | "timestamp">): Promise<string> {
     const id = this.generateId();
     const record: AIAttribution = {
       ...attribution,
@@ -129,18 +135,14 @@ export class AIAttributionTracker {
    * Get attributions for an entity
    */
   getForEntity(entityId: string): AIAttribution[] {
-    return this.attributions.filter(
-      (a) => a.output.entityIds?.includes(entityId)
-    );
+    return this.attributions.filter((a) => a.output.entityIds?.includes(entityId));
   }
 
   /**
    * Get attributions for an investigation
    */
   getForInvestigation(investigationId: string): AIAttribution[] {
-    return this.attributions.filter(
-      (a) => a.investigationId === investigationId
-    );
+    return this.attributions.filter((a) => a.investigationId === investigationId);
   }
 
   /**
@@ -153,16 +155,17 @@ export class AIAttributionTracker {
   /**
    * Get total costs for a tenant
    */
-  getTenantCosts(tenantId: string, startDate: Date, endDate: Date): {
+  getTenantCosts(
+    tenantId: string,
+    startDate: Date,
+    endDate: Date
+  ): {
     totalCost: number;
     totalTokens: number;
     byModel: Record<string, { cost: number; tokens: number }>;
   } {
     const filtered = this.attributions.filter(
-      (a) =>
-        a.tenantId === tenantId &&
-        a.timestamp >= startDate &&
-        a.timestamp <= endDate
+      (a) => a.tenantId === tenantId && a.timestamp >= startDate && a.timestamp <= endDate
     );
 
     const byModel: Record<string, { cost: number; tokens: number }> = {};
@@ -210,9 +213,15 @@ export class AIAttributionTracker {
     investigationId?: string;
   }): AttributionReport {
     const filtered = this.attributions.filter((a) => {
-      if (a.timestamp < options.startDate || a.timestamp > options.endDate) {return false;}
-      if (options.tenantId && a.tenantId !== options.tenantId) {return false;}
-      if (options.investigationId && a.investigationId !== options.investigationId) {return false;}
+      if (a.timestamp < options.startDate || a.timestamp > options.endDate) {
+        return false;
+      }
+      if (options.tenantId && a.tenantId !== options.tenantId) {
+        return false;
+      }
+      if (options.investigationId && a.investigationId !== options.investigationId) {
+        return false;
+      }
       return true;
     });
 
@@ -237,9 +246,10 @@ export class AIAttributionTracker {
         totalTokens,
         totalCost,
         averageLatencyMs: filtered.length > 0 ? totalLatency / filtered.length : 0,
-        averageConfidence: filtered.length > 0
-          ? filtered.reduce((sum, a) => sum + a.confidence, 0) / filtered.length
-          : 0,
+        averageConfidence:
+          filtered.length > 0
+            ? filtered.reduce((sum, a) => sum + a.confidence, 0) / filtered.length
+            : 0,
       },
       operationCounts,
       modelUsage,
@@ -279,16 +289,16 @@ export function createAIAttributionMiddleware(tracker: AIAttributionTracker) {
       modelId: string;
       modelVersion: string;
       provider: string;
-      operationType: AIAttribution['operationType'];
-      input: AIAttribution['input'];
-      config: AIAttribution['config'];
+      operationType: AIAttribution["operationType"];
+      input: AIAttribution["input"];
+      config: AIAttribution["config"];
       userId: string;
       tenantId: string;
       investigationId?: string;
       correlationId?: string;
     },
     execute: () => Promise<{
-      output: AIAttribution['output'];
+      output: AIAttribution["output"];
       confidence: number;
     }>
   ): Promise<{ attributionId: string; result: any }> {
@@ -311,7 +321,12 @@ export function createAIAttributionMiddleware(tracker: AIAttributionTracker) {
         inputTokens: operation.input.tokenCount || 0,
         outputTokens: result.output.tokenCount || 0,
         totalTokens: (operation.input.tokenCount || 0) + (result.output.tokenCount || 0),
-        estimatedCost: calculateCost(operation.provider, operation.modelId, operation.input.tokenCount || 0, result.output.tokenCount || 0),
+        estimatedCost: calculateCost(
+          operation.provider,
+          operation.modelId,
+          operation.input.tokenCount || 0,
+          result.output.tokenCount || 0
+        ),
       },
       confidence: result.confidence,
       userId: operation.userId,
@@ -335,12 +350,12 @@ function calculateCost(
 ): number {
   // Rough cost estimates per 1K tokens
   const rates: Record<string, { input: number; output: number }> = {
-    'gpt-4': { input: 0.03, output: 0.06 },
-    'gpt-4-turbo': { input: 0.01, output: 0.03 },
-    'gpt-3.5-turbo': { input: 0.0005, output: 0.0015 },
-    'claude-3-opus': { input: 0.015, output: 0.075 },
-    'claude-3-sonnet': { input: 0.003, output: 0.015 },
-    'claude-3-haiku': { input: 0.00025, output: 0.00125 },
+    "gpt-4": { input: 0.03, output: 0.06 },
+    "gpt-4-turbo": { input: 0.01, output: 0.03 },
+    "gpt-3.5-turbo": { input: 0.0005, output: 0.0015 },
+    "claude-3-opus": { input: 0.015, output: 0.075 },
+    "claude-3-sonnet": { input: 0.003, output: 0.015 },
+    "claude-3-haiku": { input: 0.00025, output: 0.00125 },
     default: { input: 0.001, output: 0.002 },
   };
 

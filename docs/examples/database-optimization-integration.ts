@@ -7,9 +7,9 @@
  * @see docs/performance/DATABASE_OPTIMIZATION.md
  */
 
-import { Driver as Neo4jDriver } from 'neo4j-driver';
-import { Pool as PostgresPool } from 'pg';
-import Redis from 'ioredis';
+import { Driver as Neo4jDriver } from "neo4j-driver";
+import { Pool as PostgresPool } from "pg";
+import Redis from "ioredis";
 
 // Configuration imports
 import {
@@ -19,14 +19,14 @@ import {
   applyConstraints,
   ENTITY_INDEXES,
   RECOMMENDED_CONSTRAINTS,
-} from '../../config/neo4j';
+} from "../../config/neo4j";
 
 import {
   createOptimizedPool,
   OptimizedPostgresClient,
   applyCompositeIndexes,
   COMPOSITE_INDEXES,
-} from '../../config/postgresql';
+} from "../../config/postgresql";
 
 import {
   createRedisCacheManager,
@@ -34,24 +34,21 @@ import {
   hashGraphQLQuery,
   CACHE_TTL,
   CACHE_PREFIX,
-} from '../../config/redis';
+} from "../../config/redis";
 
 // Middleware imports
-import {
-  createDataLoaders,
-  DataLoaderContext,
-} from '../../middleware/dataloader';
+import { createDataLoaders, DataLoaderContext } from "../../middleware/dataloader";
 
 import {
   createConnection,
   validatePaginationInput,
   PAGINATION_DEFAULTS,
-} from '../../middleware/pagination';
+} from "../../middleware/pagination";
 
 import {
   databaseHealthMonitor,
   createQueryTrackingMiddleware,
-} from '../../middleware/database-monitoring';
+} from "../../middleware/database-monitoring";
 
 /**
  * ============================================================================
@@ -64,9 +61,9 @@ import {
 export async function setupOptimizedDatabases() {
   // 1. Create Neo4j driver with connection pooling
   const neo4jDriver = createOptimizedNeo4jDriver({
-    uri: process.env.NEO4J_URI || 'bolt://localhost:7687',
-    username: process.env.NEO4J_USER || 'neo4j',
-    password: process.env.NEO4J_PASSWORD || 'password',
+    uri: process.env.NEO4J_URI || "bolt://localhost:7687",
+    username: process.env.NEO4J_USER || "neo4j",
+    password: process.env.NEO4J_PASSWORD || "password",
     maxConnectionPoolSize: 50,
     connectionTimeout: 30000,
     slowQueryThreshold: 100,
@@ -77,17 +74,17 @@ export async function setupOptimizedDatabases() {
     const serverInfo = await neo4jDriver.verifyConnectivity();
     console.log(`Connected to Neo4j: ${serverInfo.address}`);
   } catch (error) {
-    console.error('Failed to connect to Neo4j:', error);
+    console.error("Failed to connect to Neo4j:", error);
     throw error;
   }
 
   // 3. Create PostgreSQL connection pool
   const postgresPool = createOptimizedPool({
-    host: process.env.POSTGRES_HOST || 'localhost',
-    port: parseInt(process.env.POSTGRES_PORT || '5432'),
-    database: process.env.POSTGRES_DB || 'intelgraph_dev',
-    user: process.env.POSTGRES_USER || 'intelgraph',
-    password: process.env.POSTGRES_PASSWORD || 'password',
+    host: process.env.POSTGRES_HOST || "localhost",
+    port: parseInt(process.env.POSTGRES_PORT || "5432"),
+    database: process.env.POSTGRES_DB || "intelgraph_dev",
+    user: process.env.POSTGRES_USER || "intelgraph",
+    password: process.env.POSTGRES_PASSWORD || "password",
     min: 5,
     max: 20,
     idleTimeoutMillis: 30000,
@@ -97,24 +94,24 @@ export async function setupOptimizedDatabases() {
 
   // 4. Test PostgreSQL connection
   try {
-    const result = await postgresPool.query('SELECT NOW()');
-    console.log('Connected to PostgreSQL');
+    const result = await postgresPool.query("SELECT NOW()");
+    console.log("Connected to PostgreSQL");
   } catch (error) {
-    console.error('Failed to connect to PostgreSQL:', error);
+    console.error("Failed to connect to PostgreSQL:", error);
     throw error;
   }
 
   // 5. Create Redis cache manager
   const cacheManager = createRedisCacheManager({
-    host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT || '6379'),
+    host: process.env.REDIS_HOST || "localhost",
+    port: parseInt(process.env.REDIS_PORT || "6379"),
     password: process.env.REDIS_PASSWORD,
     db: 0,
-    keyPrefix: 'intelgraph:',
+    keyPrefix: "intelgraph:",
     enableMetrics: true,
   });
 
-  console.log('All database connections established successfully');
+  console.log("All database connections established successfully");
 
   return {
     neo4jDriver,
@@ -133,14 +130,14 @@ export async function setupOptimizedDatabases() {
 
 export async function applyDatabaseOptimizations(
   neo4jDriver: Neo4jDriver,
-  postgresPool: PostgresPool,
+  postgresPool: PostgresPool
 ) {
-  console.log('Applying database optimizations...');
+  console.log("Applying database optimizations...");
 
   // 1. Apply Neo4j indexes
   const neo4jSession = neo4jDriver.session();
   try {
-    console.log('Creating Neo4j indexes...');
+    console.log("Creating Neo4j indexes...");
     const indexResult = await applyIndexes(neo4jSession, ENTITY_INDEXES, {
       skipExisting: true,
     });
@@ -148,19 +145,19 @@ export async function applyDatabaseOptimizations(
 
     if (indexResult.errors.length > 0) {
       console.warn(`⚠ ${indexResult.errors.length} index errors:`);
-      indexResult.errors.forEach(err => {
-        console.warn(`  - ${err.index.label}.${err.index.properties.join('.')}: ${err.error}`);
+      indexResult.errors.forEach((err) => {
+        console.warn(`  - ${err.index.label}.${err.index.properties.join(".")}: ${err.error}`);
       });
     }
 
     // Apply constraints
-    console.log('Creating Neo4j constraints...');
+    console.log("Creating Neo4j constraints...");
     const constraintResult = await applyConstraints(neo4jSession, RECOMMENDED_CONSTRAINTS);
     console.log(`✓ Created ${constraintResult.success} Neo4j constraints`);
 
     if (constraintResult.errors.length > 0) {
       console.warn(`⚠ ${constraintResult.errors.length} constraint errors:`);
-      constraintResult.errors.forEach(err => {
+      constraintResult.errors.forEach((err) => {
         console.warn(`  - ${err.constraint.label}: ${err.error}`);
       });
     }
@@ -171,17 +168,17 @@ export async function applyDatabaseOptimizations(
   // 2. Apply PostgreSQL indexes
   const pgClient = await postgresPool.connect();
   try {
-    console.log('Creating PostgreSQL indexes...');
+    console.log("Creating PostgreSQL indexes...");
     await applyCompositeIndexes(pgClient, COMPOSITE_INDEXES);
-    console.log('✓ PostgreSQL indexes created');
+    console.log("✓ PostgreSQL indexes created");
   } catch (error) {
-    console.error('Failed to create PostgreSQL indexes:', error);
+    console.error("Failed to create PostgreSQL indexes:", error);
     throw error;
   } finally {
     pgClient.release();
   }
 
-  console.log('Database optimizations applied successfully');
+  console.log("Database optimizations applied successfully");
 }
 
 /**
@@ -195,10 +192,10 @@ export async function applyDatabaseOptimizations(
 export function setupGraphQLServer(
   neo4jDriver: Neo4jDriver,
   postgresPool: PostgresPool,
-  cacheManager: RedisCacheManager,
+  cacheManager: RedisCacheManager
 ) {
-  const { ApolloServer } = require('apollo-server-express');
-  const express = require('express');
+  const { ApolloServer } = require("apollo-server-express");
+  const express = require("express");
 
   const app = express();
 
@@ -206,7 +203,7 @@ export function setupGraphQLServer(
   app.use(createQueryTrackingMiddleware());
 
   // 2. Start monitoring PostgreSQL pool
-  databaseHealthMonitor.monitorPostgresPool(postgresPool, 'write');
+  databaseHealthMonitor.monitorPostgresPool(postgresPool, "write");
 
   // 3. Create Apollo Server with optimized context
   const server = new ApolloServer({
@@ -267,12 +264,12 @@ export function setupGraphQLServer(
           const { tenantId, loaders, cacheManager } = context;
 
           // 1. Generate cache key
-          const cacheKey = hashGraphQLQuery('entities', args);
+          const cacheKey = hashGraphQLQuery("entities", args);
 
           // 2. Check cache
           const cached = await cacheManager.getGraphQLQuery(cacheKey, tenantId);
           if (cached) {
-            console.log('Cache hit for entities query');
+            console.log("Cache hit for entities query");
             return cached;
           }
 
@@ -283,20 +280,18 @@ export function setupGraphQLServer(
           const query = `
             SELECT * FROM entities
             WHERE tenant_id = $1
-            ${cursor ? 'AND id > $2' : ''}
+            ${cursor ? "AND id > $2" : ""}
             ORDER BY id ASC
-            LIMIT $${cursor ? '3' : '2'}
+            LIMIT $${cursor ? "3" : "2"}
           `;
 
-          const params = cursor
-            ? [tenantId, cursor, limit + 1]
-            : [tenantId, limit + 1];
+          const params = cursor ? [tenantId, cursor, limit + 1] : [tenantId, limit + 1];
 
           const result = await context.postgresPool.query(query, params);
 
           // 5. Get total count (cached separately)
           const countResult = await context.postgresPool.query(
-            'SELECT COUNT(*) FROM entities WHERE tenant_id = $1',
+            "SELECT COUNT(*) FROM entities WHERE tenant_id = $1",
             [tenantId]
           );
           const totalCount = parseInt(countResult.rows[0].count);
@@ -338,14 +333,14 @@ export function setupGraphQLServer(
 
           // 1. Create entity
           const result = await postgresPool.query(
-            'INSERT INTO entities (type, name, tenant_id) VALUES ($1, $2, $3) RETURNING *',
+            "INSERT INTO entities (type, name, tenant_id) VALUES ($1, $2, $3) RETURNING *",
             [args.input.type, args.input.name, tenantId]
           );
 
           const entity = result.rows[0];
 
           // 2. Invalidate all entity-related caches
-          await cacheManager.invalidateOnMutation('entity', entity.id, tenantId);
+          await cacheManager.invalidateOnMutation("entity", entity.id, tenantId);
 
           // 3. Clear DataLoader cache for this request
           context.loaders.entityLoader.clear(entity.id);
@@ -357,13 +352,13 @@ export function setupGraphQLServer(
           const { tenantId, postgresPool, cacheManager } = context;
 
           // 1. Delete entity
-          await postgresPool.query(
-            'DELETE FROM entities WHERE id = $1 AND tenant_id = $2',
-            [args.id, tenantId]
-          );
+          await postgresPool.query("DELETE FROM entities WHERE id = $1 AND tenant_id = $2", [
+            args.id,
+            tenantId,
+          ]);
 
           // 2. Invalidate caches
-          await cacheManager.invalidateOnMutation('entity', args.id, tenantId);
+          await cacheManager.invalidateOnMutation("entity", args.id, tenantId);
 
           return true;
         },
@@ -373,7 +368,7 @@ export function setupGraphQLServer(
     // 4. Create context with all optimization features
     context: async ({ req }) => {
       // Extract tenant from request (adjust based on your auth)
-      const tenantId = req.user?.tenantId || req.headers['x-tenant-id'];
+      const tenantId = req.user?.tenantId || req.headers["x-tenant-id"];
 
       // Create fresh DataLoaders for this request
       const loaders = createDataLoaders(postgresPool, neo4jDriver, tenantId);
@@ -402,7 +397,7 @@ export function setupGraphQLServer(
               // Log slow queries
               if (duration > 1000) {
                 console.warn({
-                  msg: 'Slow GraphQL query',
+                  msg: "Slow GraphQL query",
                   duration,
                   operationName: requestContext.operationName,
                   query: requestContext.request.query?.substring(0, 200),
@@ -426,10 +421,7 @@ export function setupGraphQLServer(
  * This example shows how to use the Neo4j query cache effectively
  */
 
-export async function queryWithCaching(
-  neo4jDriver: Neo4jDriver,
-  tenantId: string,
-) {
+export async function queryWithCaching(neo4jDriver: Neo4jDriver, tenantId: string) {
   // 1. Create query cache
   const queryCache = new Neo4jQueryCache(1000, 300000); // 1000 items, 5min TTL
 
@@ -443,13 +435,13 @@ export async function queryWithCaching(
 
   const params = {
     tenantId,
-    type: 'PERSON',
+    type: "PERSON",
   };
 
   // 3. Check cache first
   const cached = queryCache.get(cypher, params);
   if (cached) {
-    console.log('Cache hit!');
+    console.log("Cache hit!");
     return cached;
   }
 
@@ -461,7 +453,7 @@ export async function queryWithCaching(
     // 5. Cache result
     queryCache.set(cypher, params, result);
 
-    console.log('Query executed and cached');
+    console.log("Query executed and cached");
     return result;
   } finally {
     await session.close();
@@ -477,29 +469,29 @@ export async function queryWithCaching(
  */
 
 export function setupMonitoringEndpoints(app: any) {
-  const express = require('express');
+  const express = require("express");
 
   // 1. Database health check endpoint
-  app.get('/health/database', async (req: any, res: any) => {
+  app.get("/health/database", async (req: any, res: any) => {
     try {
       const report = databaseHealthMonitor.getHealthReport();
 
       res.status(200).json({
-        status: 'healthy',
+        status: "healthy",
         timestamp: new Date().toISOString(),
         postgres: report.postgres,
         cache: report.cache,
       });
     } catch (error) {
       res.status(500).json({
-        status: 'unhealthy',
+        status: "unhealthy",
         error: error instanceof Error ? error.message : String(error),
       });
     }
   });
 
   // 2. Slow queries endpoint
-  app.get('/health/slow-queries', async (req: any, res: any) => {
+  app.get("/health/slow-queries", async (req: any, res: any) => {
     const tracker = databaseHealthMonitor.getQueryTracker();
     const slowQueries = tracker.getSlowQueryReport(20);
 
@@ -510,7 +502,7 @@ export function setupMonitoringEndpoints(app: any) {
   });
 
   // 3. Cache statistics endpoint
-  app.get('/health/cache-stats', async (req: any, res: any) => {
+  app.get("/health/cache-stats", async (req: any, res: any) => {
     const cacheMonitor = databaseHealthMonitor.getCacheMonitor();
     const stats = cacheMonitor.getStats();
 
@@ -525,18 +517,18 @@ export function setupMonitoringEndpoints(app: any) {
   });
 
   // 4. Prometheus metrics endpoint
-  app.get('/metrics', async (req: any, res: any) => {
-    const { register } = require('prom-client');
+  app.get("/metrics", async (req: any, res: any) => {
+    const { register } = require("prom-client");
 
-    res.set('Content-Type', register.contentType);
+    res.set("Content-Type", register.contentType);
     res.end(await register.metrics());
   });
 
-  console.log('Monitoring endpoints configured:');
-  console.log('  - GET /health/database');
-  console.log('  - GET /health/slow-queries');
-  console.log('  - GET /health/cache-stats');
-  console.log('  - GET /metrics');
+  console.log("Monitoring endpoints configured:");
+  console.log("  - GET /health/database");
+  console.log("  - GET /health/slow-queries");
+  console.log("  - GET /health/cache-stats");
+  console.log("  - GET /metrics");
 }
 
 /**
@@ -549,11 +541,11 @@ export function setupMonitoringEndpoints(app: any) {
 
 export async function bootstrapApplication() {
   try {
-    console.log('Starting application with database optimizations...\n');
+    console.log("Starting application with database optimizations...\n");
 
     // 1. Set up databases
     const { neo4jDriver, postgresPool, cacheManager } = await setupOptimizedDatabases();
-    console.log('');
+    console.log("");
 
     // 2. Apply optimizations (run once during migration)
     // Uncomment this during initial setup or migration
@@ -565,7 +557,7 @@ export async function bootstrapApplication() {
 
     // 4. Set up monitoring
     setupMonitoringEndpoints(app);
-    console.log('');
+    console.log("");
 
     // 5. Start server
     await server.start();
@@ -579,8 +571,8 @@ export async function bootstrapApplication() {
     });
 
     // 6. Graceful shutdown
-    process.on('SIGTERM', async () => {
-      console.log('SIGTERM received, shutting down gracefully...');
+    process.on("SIGTERM", async () => {
+      console.log("SIGTERM received, shutting down gracefully...");
 
       await server.stop();
       await neo4jDriver.close();
@@ -588,13 +580,13 @@ export async function bootstrapApplication() {
 
       databaseHealthMonitor.stop();
 
-      console.log('Shutdown complete');
+      console.log("Shutdown complete");
       process.exit(0);
     });
 
     return { app, server, neo4jDriver, postgresPool, cacheManager };
   } catch (error) {
-    console.error('Failed to bootstrap application:', error);
+    console.error("Failed to bootstrap application:", error);
     process.exit(1);
   }
 }
@@ -608,7 +600,7 @@ export async function bootstrapApplication() {
 export async function advancedQueryPatterns(
   neo4jDriver: Neo4jDriver,
   postgresPool: PostgresPool,
-  cacheManager: RedisCacheManager,
+  cacheManager: RedisCacheManager
 ) {
   // Pattern 1: Complex graph traversal with caching
   async function getEntityNetwork(entityId: string, tenantId: string, depth: number = 2) {
@@ -628,7 +620,13 @@ export async function advancedQueryPatterns(
 
       // Transform and cache
       const network = transformNetworkResult(result);
-      await cacheManager.set(CACHE_PREFIX.GRAPH_METRICS, cacheKey, network, tenantId, CACHE_TTL.GRAPH_METRICS);
+      await cacheManager.set(
+        CACHE_PREFIX.GRAPH_METRICS,
+        cacheKey,
+        network,
+        tenantId,
+        CACHE_TTL.GRAPH_METRICS
+      );
 
       return network;
     } finally {
@@ -638,7 +636,7 @@ export async function advancedQueryPatterns(
 
   // Pattern 2: Aggregation with read replica
   async function getEntityStatsByType(tenantId: string) {
-    const cacheKey = 'stats:by-type';
+    const cacheKey = "stats:by-type";
     const cached = await cacheManager.get(CACHE_PREFIX.METRICS, cacheKey, tenantId);
 
     if (cached) return cached;
@@ -658,21 +656,31 @@ export async function advancedQueryPatterns(
 
     const result = await postgresPool.query(query, [tenantId]);
 
-    await cacheManager.set(CACHE_PREFIX.METRICS, cacheKey, result.rows, tenantId, CACHE_TTL.GRAPH_METRICS);
+    await cacheManager.set(
+      CACHE_PREFIX.METRICS,
+      cacheKey,
+      result.rows,
+      tenantId,
+      CACHE_TTL.GRAPH_METRICS
+    );
 
     return result.rows;
   }
 
   // Pattern 3: Transaction with retry logic
-  async function createEntityWithRelationships(entity: any, relationships: any[], tenantId: string) {
+  async function createEntityWithRelationships(
+    entity: any,
+    relationships: any[],
+    tenantId: string
+  ) {
     const client = await postgresPool.connect();
 
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
 
       // Insert entity
       const entityResult = await client.query(
-        'INSERT INTO entities (type, name, tenant_id) VALUES ($1, $2, $3) RETURNING *',
+        "INSERT INTO entities (type, name, tenant_id) VALUES ($1, $2, $3) RETURNING *",
         [entity.type, entity.name, tenantId]
       );
 
@@ -681,19 +689,19 @@ export async function advancedQueryPatterns(
       // Insert relationships
       for (const rel of relationships) {
         await client.query(
-          'INSERT INTO relationships (source_id, target_id, type, tenant_id) VALUES ($1, $2, $3, $4)',
+          "INSERT INTO relationships (source_id, target_id, type, tenant_id) VALUES ($1, $2, $3, $4)",
           [createdEntity.id, rel.targetId, rel.type, tenantId]
         );
       }
 
-      await client.query('COMMIT');
+      await client.query("COMMIT");
 
       // Invalidate caches
-      await cacheManager.invalidateOnMutation('entity', createdEntity.id, tenantId);
+      await cacheManager.invalidateOnMutation("entity", createdEntity.id, tenantId);
 
       return createdEntity;
     } catch (error) {
-      await client.query('ROLLBACK');
+      await client.query("ROLLBACK");
       throw error;
     } finally {
       client.release();
@@ -711,8 +719,8 @@ export async function advancedQueryPatterns(
 function transformNetworkResult(result: any): any {
   // Transform Neo4j result to application format
   return {
-    nodes: result.records.map((r: any) => r.get('e')),
-    edges: result.records.flatMap((r: any) => r.get('rels')),
+    nodes: result.records.map((r: any) => r.get("e")),
+    edges: result.records.flatMap((r: any) => r.get("rels")),
   };
 }
 

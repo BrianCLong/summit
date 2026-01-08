@@ -1,21 +1,30 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import React, { useState } from 'react';
-import { CompanyProfile } from './types';
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
-import { Loader2 } from 'lucide-react';
+import React, { useState } from 'react'
+import { CompanyProfile } from './types'
+import { Button } from '@/components/ui/Button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/Select'
+import { Loader2 } from 'lucide-react'
 
 interface GrowthPlaybookGeneratorProps {
-  onGenerate: (profile: CompanyProfile) => void;
-  isLoading: boolean;
+  onGenerate: (profile: CompanyProfile) => void
+  isLoading: boolean
 }
 
-export function GrowthPlaybookGenerator({ onGenerate, isLoading }: GrowthPlaybookGeneratorProps) {
+export function GrowthPlaybookGenerator({
+  onGenerate,
+  isLoading,
+}: GrowthPlaybookGeneratorProps) {
   const [profile, setProfile] = useState<CompanyProfile>({
     name: '',
     industry: '',
@@ -23,20 +32,26 @@ export function GrowthPlaybookGenerator({ onGenerate, isLoading }: GrowthPlayboo
     employees: 0,
     revenue: 0,
     challenges: [],
-    goals: []
-  });
+    goals: [],
+  })
 
-  const [challengesInput, setChallengesInput] = useState('');
-  const [goalsInput, setGoalsInput] = useState('');
+  const [challengesInput, setChallengesInput] = useState('')
+  const [goalsInput, setGoalsInput] = useState('')
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     onGenerate({
       ...profile,
-      challenges: challengesInput.split(',').map(s => s.trim()).filter(Boolean),
-      goals: goalsInput.split(',').map(s => s.trim()).filter(Boolean)
-    });
-  };
+      challenges: challengesInput
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean),
+      goals: goalsInput
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean),
+    })
+  }
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -51,7 +66,7 @@ export function GrowthPlaybookGenerator({ onGenerate, isLoading }: GrowthPlayboo
               <Input
                 id="name"
                 value={profile.name}
-                onChange={(e) => setProfile({...profile, name: e.target.value})}
+                onChange={e => setProfile({ ...profile, name: e.target.value })}
                 required
               />
             </div>
@@ -60,7 +75,9 @@ export function GrowthPlaybookGenerator({ onGenerate, isLoading }: GrowthPlayboo
               <Input
                 id="industry"
                 value={profile.industry}
-                onChange={(e) => setProfile({...profile, industry: e.target.value})}
+                onChange={e =>
+                  setProfile({ ...profile, industry: e.target.value })
+                }
                 required
               />
             </div>
@@ -73,7 +90,12 @@ export function GrowthPlaybookGenerator({ onGenerate, isLoading }: GrowthPlayboo
                 id="employees"
                 type="number"
                 value={profile.employees}
-                onChange={(e) => setProfile({...profile, employees: parseInt(e.target.value)})}
+                onChange={e =>
+                  setProfile({
+                    ...profile,
+                    employees: parseInt(e.target.value),
+                  })
+                }
                 required
               />
             </div>
@@ -83,7 +105,9 @@ export function GrowthPlaybookGenerator({ onGenerate, isLoading }: GrowthPlayboo
                 id="revenue"
                 type="number"
                 value={profile.revenue}
-                onChange={(e) => setProfile({...profile, revenue: parseInt(e.target.value)})}
+                onChange={e =>
+                  setProfile({ ...profile, revenue: parseInt(e.target.value) })
+                }
                 required
               />
             </div>
@@ -93,7 +117,9 @@ export function GrowthPlaybookGenerator({ onGenerate, isLoading }: GrowthPlayboo
             <Label htmlFor="stage">Stage</Label>
             <Select
               value={profile.stage}
-              onValueChange={(val: CompanyProfile['stage']) => setProfile({...profile, stage: val})}
+              onValueChange={(val: CompanyProfile['stage']) =>
+                setProfile({ ...profile, stage: val })
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select stage" />
@@ -112,7 +138,7 @@ export function GrowthPlaybookGenerator({ onGenerate, isLoading }: GrowthPlayboo
             <Textarea
               id="challenges"
               value={challengesInput}
-              onChange={(e) => setChallengesInput(e.target.value)}
+              onChange={e => setChallengesInput(e.target.value)}
               placeholder="e.g., Hiring velocity, Customer churn, Tech debt"
               required
             />
@@ -123,7 +149,7 @@ export function GrowthPlaybookGenerator({ onGenerate, isLoading }: GrowthPlayboo
             <Textarea
               id="goals"
               value={goalsInput}
-              onChange={(e) => setGoalsInput(e.target.value)}
+              onChange={e => setGoalsInput(e.target.value)}
               placeholder="e.g., 3x revenue in 3 years, Expand to EU, IPO readiness"
               required
             />
@@ -142,5 +168,5 @@ export function GrowthPlaybookGenerator({ onGenerate, isLoading }: GrowthPlayboo
         </form>
       </CardContent>
     </Card>
-  );
+  )
 }

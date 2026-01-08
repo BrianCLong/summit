@@ -1,20 +1,19 @@
-import { describe, expect, test } from 'vitest';
-import { Registry } from 'prom-client';
+import { describe, expect, test } from "vitest";
+import { Registry } from "prom-client";
 
-import { IntelGraphQueryMonitor } from '../src/queryMonitor.js';
-import { sandboxExecute } from '../src/sandbox.js';
+import { IntelGraphQueryMonitor } from "../src/queryMonitor.js";
+import { sandboxExecute } from "../src/sandbox.js";
 
 const SAMPLE_PLAN = [
-  'NodeByLabelScan(Person)',
-  'Expand(EMPLOYED_BY -> Organization)',
-  'Expand(EMPLOYED_BY -> Organization)',
+  "NodeByLabelScan(Person)",
+  "Expand(EMPLOYED_BY -> Organization)",
+  "Expand(EMPLOYED_BY -> Organization)",
 ];
 
-const SAMPLE_CYPHER =
-  'MATCH (p:Person)-[:EMPLOYED_BY*1..5]->(o:Organization) RETURN p, o';
+const SAMPLE_CYPHER = "MATCH (p:Person)-[:EMPLOYED_BY*1..5]->(o:Organization) RETURN p, o";
 
-describe('IntelGraphQueryMonitor', () => {
-  test('flags high fan-out, alerts, and exposes histograms', async () => {
+describe("IntelGraphQueryMonitor", () => {
+  test("flags high fan-out, alerts, and exposes histograms", async () => {
     const alerts: unknown[] = [];
     const monitor = new IntelGraphQueryMonitor({
       thresholds: { fanOut: 5, repetition: 1, expansionDepth: 2, throttleLimit: 3 },
@@ -27,22 +26,22 @@ describe('IntelGraphQueryMonitor', () => {
       plan: SAMPLE_PLAN,
       rowsReturned: 22,
       latencyMs: 180,
-      tenantId: 'tenant-a',
+      tenantId: "tenant-a",
     });
 
     expect(result.throttled).toBe(true);
     expect(result.throttleLimit).toBe(3);
-    expect(result.anomalies.map((item) => item.type)).toContain('fan_out');
+    expect(result.anomalies.map((item) => item.type)).toContain("fan_out");
     expect(alerts).toHaveLength(1);
 
     const metrics = await monitor.metricsSnapshot();
-    expect(metrics).toContain('intelgraph_query_fanout');
-    expect(metrics).toContain('intelgraph_query_throttles_total');
+    expect(metrics).toContain("intelgraph_query_fanout");
+    expect(metrics).toContain("intelgraph_query_throttles_total");
   });
 });
 
-describe('sandboxExecute monitoring integration', () => {
-  test('applies throttle when patterns look abusive', () => {
+describe("sandboxExecute monitoring integration", () => {
+  test("applies throttle when patterns look abusive", () => {
     const monitor = new IntelGraphQueryMonitor({
       thresholds: { fanOut: 2, repetition: 1, expansionDepth: 1, throttleLimit: 1 },
       registry: new Registry(),
@@ -51,7 +50,7 @@ describe('sandboxExecute monitoring integration', () => {
     const dataset = {
       nodes: Array.from({ length: 5 }).map((_, index) => ({
         id: `person-${index}`,
-        label: 'Person',
+        label: "Person",
         properties: { name: `User ${index}` },
       })),
       relationships: [],
@@ -59,12 +58,12 @@ describe('sandboxExecute monitoring integration', () => {
 
     const result = sandboxExecute(
       {
-        cypher: 'MATCH (p:Person) RETURN p',
-        tenantId: 'tenant-abuse',
-        policy: { authorityId: 'case-1', purpose: 'investigation' },
+        cypher: "MATCH (p:Person) RETURN p",
+        tenantId: "tenant-abuse",
+        policy: { authorityId: "case-1", purpose: "investigation" },
         dataset,
       },
-      monitor,
+      monitor
     );
 
     expect(result.monitoring.throttled).toBe(true);

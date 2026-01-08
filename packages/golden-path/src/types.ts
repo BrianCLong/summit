@@ -1,4 +1,4 @@
-export type ClassificationLevel = 'public' | 'internal' | 'confidential' | 'secret';
+export type ClassificationLevel = "public" | "internal" | "confidential" | "secret";
 
 export interface ClassificationTag {
   classification: ClassificationLevel;
@@ -86,20 +86,20 @@ export interface PolicyRule {
   tenant?: string;
   region?: string;
   maxClassification?: ClassificationLevel;
-  effect: 'allow' | 'deny';
+  effect: "allow" | "deny";
 }
 
 export interface PolicyBundle {
   version: string;
   rules: PolicyRule[];
-  fallbackEffect?: 'deny' | 'allow';
+  fallbackEffect?: "deny" | "allow";
 }
 
 export interface DecisionLogEntry {
   traceId: string;
   timestamp: string;
   request: AccessRequest;
-  decision: 'allow' | 'deny';
+  decision: "allow" | "deny";
   ruleId?: string;
 }
 
@@ -130,7 +130,7 @@ export interface CanaryConfig {
 }
 
 export interface CanaryOutcome {
-  state: 'rolled_forward' | 'rolled_back';
+  state: "rolled_forward" | "rolled_back";
   failedStep?: CanaryStep;
   reason?: string;
   auditTrail: AuditTrailEntry[];

@@ -1,11 +1,11 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // Operation types for operational transformation
 export enum OperationType {
-  INSERT = 'insert',
-  DELETE = 'delete',
-  RETAIN = 'retain',
-  UPDATE = 'update'
+  INSERT = "insert",
+  DELETE = "delete",
+  RETAIN = "retain",
+  UPDATE = "update",
 }
 
 export const OperationSchema = z.object({
@@ -20,7 +20,7 @@ export const OperationSchema = z.object({
   version: z.number(),
   // Client-known version the operation was authored against. Used to transform
   // against remote history while preserving intent when rebasing.
-  baseVersion: z.number().optional()
+  baseVersion: z.number().optional(),
 });
 
 export const DocumentStateSchema = z.object({
@@ -29,7 +29,7 @@ export const DocumentStateSchema = z.object({
   version: z.number(),
   checksum: z.string().optional(),
   lastModified: z.date(),
-  modifiedBy: z.string()
+  modifiedBy: z.string(),
 });
 
 export const PresenceSchema = z.object({
@@ -37,58 +37,64 @@ export const PresenceSchema = z.object({
   userName: z.string(),
   userAvatar: z.string().optional(),
   documentId: z.string(),
-  cursor: z.object({
-    position: z.number(),
-    selection: z.object({
-      start: z.number(),
-      end: z.number()
-    }).optional()
-  }).optional(),
-  viewport: z.object({
-    top: z.number(),
-    bottom: z.number()
-  }).optional(),
-  status: z.enum(['active', 'idle', 'away']).default('active'),
+  cursor: z
+    .object({
+      position: z.number(),
+      selection: z
+        .object({
+          start: z.number(),
+          end: z.number(),
+        })
+        .optional(),
+    })
+    .optional(),
+  viewport: z
+    .object({
+      top: z.number(),
+      bottom: z.number(),
+    })
+    .optional(),
+  status: z.enum(["active", "idle", "away"]).default("active"),
   lastActivity: z.date(),
-  metadata: z.record(z.any()).optional()
+  metadata: z.record(z.any()).optional(),
 });
 
-export const SyncMessageSchema = z.discriminatedUnion('type', [
+export const SyncMessageSchema = z.discriminatedUnion("type", [
   z.object({
-    type: z.literal('operation'),
-    operation: OperationSchema
+    type: z.literal("operation"),
+    operation: OperationSchema,
   }),
   z.object({
-    type: z.literal('presence'),
-    presence: PresenceSchema
+    type: z.literal("presence"),
+    presence: PresenceSchema,
   }),
   z.object({
-    type: z.literal('ack'),
+    type: z.literal("ack"),
     operationId: z.string(),
-    version: z.number()
+    version: z.number(),
   }),
   z.object({
-    type: z.literal('sync_request'),
+    type: z.literal("sync_request"),
     documentId: z.string(),
-    version: z.number()
+    version: z.number(),
   }),
   z.object({
-    type: z.literal('sync_response'),
+    type: z.literal("sync_response"),
     documentId: z.string(),
     state: DocumentStateSchema,
-    operations: z.array(OperationSchema)
+    operations: z.array(OperationSchema),
   }),
   z.object({
-    type: z.literal('conflict'),
+    type: z.literal("conflict"),
     operationId: z.string(),
-    conflictingOperations: z.array(OperationSchema)
-  })
+    conflictingOperations: z.array(OperationSchema),
+  }),
 ]);
 
 export const ConflictResolutionSchema = z.object({
-  strategy: z.enum(['last_write_wins', 'first_write_wins', 'merge', 'manual']),
+  strategy: z.enum(["last_write_wins", "first_write_wins", "merge", "manual"]),
   winner: z.string().optional(),
-  mergedOperation: OperationSchema.optional()
+  mergedOperation: OperationSchema.optional(),
 });
 
 export type Operation = z.infer<typeof OperationSchema>;
@@ -113,5 +119,5 @@ export interface DocumentLock {
   userId: string;
   lockedAt: Date;
   expiresAt: Date;
-  lockType: 'read' | 'write' | 'exclusive';
+  lockType: "read" | "write" | "exclusive";
 }

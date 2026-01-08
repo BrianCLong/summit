@@ -22,27 +22,26 @@ This comprehensive service inventory documents all 154 microservices and 62 pack
 ## Documentation Files Created
 
 ### 1. SERVICE_INVENTORY.md (39 KB, 1,428 lines)
+
 **Comprehensive Reference - START HERE**
 
 Contains detailed documentation for:
+
 - **PART 1:** 32 key services documented with:
   - Entry points
   - Technology stacks
   - Dependencies
   - API endpoints
   - Key features & components
-  
 - **PART 2:** 49 packages documented with:
   - Purpose & location
   - Key dependencies
   - Integration points
-  
 - **PART 3:** Server structure:
   - 50+ middleware files
   - 30+ resolver files
   - 150+ server services
   - GraphQL schemas & plugins
-  
 - **PART 4:** Provenance & audit code
 - **PART 5:** Policy & authorization code
 - **PART 6:** API endpoints & GraphQL schema
@@ -54,9 +53,11 @@ Contains detailed documentation for:
 ---
 
 ### 2. INTEGRATION_POINTS.md (8 KB, 328 lines)
+
 **Integration Patterns & Workflows - FOR IMPLEMENTATION**
 
 Contains:
+
 - **5 Critical Integration Hubs:**
   1. Authorization Hub (authz-gateway)
   2. Provenance Hub (prov-ledger)
@@ -67,16 +68,13 @@ Contains:
 - **Cross-Service Integration Flows:**
   - Authorization → Provenance flow
   - Data Access → Audit → Provenance flow
-  
 - **Key Packages for Integration:**
   - authority-compiler
   - prov-ledger-sdk
   - maestro-core
-  
 - **Middleware Integration Chain:**
   - Recommended order (9 steps)
   - Example Express setup
-  
 - **Environment Variables** (all required)
 - **Common Integration Patterns** (4 major patterns)
 - **Testing Integration Points** (unit + integration tests)
@@ -87,9 +85,11 @@ Contains:
 ---
 
 ### 3. SERVICE_QUICK_REFERENCE.md (13 KB, 340 lines)
+
 **Quick Lookup Tables - FOR NAVIGATION**
 
 Contains searchable tables for:
+
 - Provenance & Audit Services (4)
 - Authorization & Policy Services (3)
 - Graph & Data Services (4)
@@ -102,6 +102,7 @@ Contains searchable tables for:
 - **100+ Additional Services** (listed by category)
 
 Plus tables for:
+
 - Key Packages (orchestration, provenance, authority, SDKs, intelligence)
 - Server Middleware (35+ files)
 - GraphQL Resolvers (30+ files)
@@ -118,6 +119,7 @@ Plus tables for:
 ### Architecture Highlights
 
 #### 1. Provenance System ★★★
+
 - **Central Hub:** `prov-ledger` (Fastify + PostgreSQL)
 - **Claim-based tracking** with cryptographic verification
 - **Lineage tracking** through transforms and sources
@@ -126,6 +128,7 @@ Plus tables for:
 - **Location:** `/services/prov-ledger/`
 
 #### 2. Authorization System ★★★
+
 - **Gateway:** `authz-gateway` (Express + JOSE + OpenTelemetry)
 - **Policy Engine:** OPA (Open Policy Agent)
 - **Decision:** Allow/Deny with obligations
@@ -134,6 +137,7 @@ Plus tables for:
 - **Location:** `/services/authz-gateway/`
 
 #### 3. Audit System ★★★
+
 - **In-Service:** Circular buffer audit logs (API service)
 - **Centralized:** audit-log service
 - **Aggregated:** auditlake engine
@@ -142,6 +146,7 @@ Plus tables for:
 - **Location:** `/services/audit-log/`, `/services/auditlake/`
 
 #### 4. Orchestration System ★★
+
 - **Engine:** Conductor with provenance ledger
 - **Pipeline Steps:** router → generator → critic → evaluator → normalizer → planner → coordinator
 - **Policy Routing:** Decisions at each step
@@ -149,6 +154,7 @@ Plus tables for:
 - **Location:** `/services/conductor/`
 
 #### 5. API Layer ★★
+
 - **GraphQL Gateway:** apollo server with Express
 - **Delegation Model:** Routes to specialized services
 - **Security:** Policy middleware chain
@@ -160,11 +166,13 @@ Plus tables for:
 ## Technology Stack Overview
 
 ### Languages
+
 - **TypeScript** - Primary (services, packages)
 - **Python** - Data processing, ML, analytics
 - **GraphQL** - API definition
 
 ### Key Frameworks
+
 - **Express** - Web framework
 - **Apollo Server** - GraphQL server
 - **Fastify** - High-performance HTTP
@@ -172,12 +180,14 @@ Plus tables for:
 - **PostgreSQL** - Relational database
 
 ### Security & Policy
+
 - **OPA** - Policy evaluation (Open Policy Agent)
 - **SPIFFE** - Service identity
 - **WebAuthn** - Step-up authentication
 - **JOSE** - JWT handling
 
 ### Observability
+
 - **OpenTelemetry** - Distributed tracing
 - **Jaeger** - Trace backend
 - **Prometheus** - Metrics
@@ -188,6 +198,7 @@ Plus tables for:
 ## Strategic Integration Points
 
 ### For Audit & Compliance
+
 1. **Implement prov-ledger** as source of truth
 2. **Link all services** to claim creation
 3. **Enable auditlake** aggregation
@@ -195,6 +206,7 @@ Plus tables for:
 5. **Track authority binding** (x-authority-id header)
 
 ### For Authorization
+
 1. **Configure OPA** with policies
 2. **Deploy authz-gateway** as policy decision point
 3. **Integrate authority-compiler** for runtime enforcement
@@ -202,6 +214,7 @@ Plus tables for:
 5. **Track reason-for-access** in all decisions
 
 ### For Observability
+
 1. **Enable OpenTelemetry** in all services
 2. **Connect Jaeger** for trace collection
 3. **Set up Prometheus** for metrics
@@ -209,6 +222,7 @@ Plus tables for:
 5. **Alert on policy denials**
 
 ### For Data Security
+
 1. **Enable PII redaction** middleware
 2. **Configure DLP** policies
 3. **Implement data residency** controls
@@ -241,26 +255,31 @@ Plus tables for:
 ### Most Important Files for Implementation
 
 **Provenance:**
+
 - `/services/prov-ledger/src/index.ts` - Ledger service
 - `/services/conductor/src/provenance/ledger.ts` - Conductor provenance
 - `/packages/prov-ledger-sdk/` - TypeScript client
 
 **Authorization:**
+
 - `/services/authz-gateway/src/index.ts` - Auth gateway
 - `/services/authz-gateway/src/policy.ts` - OPA integration
 - `/packages/authority-compiler/src/` - Policy compiler
 
 **Audit:**
+
 - `/services/api/src/middleware/auditLog.ts` - API audit
 - `/services/auditlake/src/audit-lake-engine.ts` - Aggregation
 - `/server/src/graphql/plugins/auditLogger.ts` - GraphQL audit
 
 **Middleware:**
+
 - `/server/src/middleware/opa-abac.ts` - ABAC enforcement
 - `/server/src/middleware/audit-logger.ts` - Audit middleware
 - `/server/src/middleware/` - All 50+ middleware files
 
 **GraphQL:**
+
 - `/services/api-gateway/src/index.ts` - GraphQL gateway
 - `/server/src/graphql/resolvers.ts` - Main resolvers
 - `/server/src/graphql/schema.provenance.ts` - Provenance schema
@@ -311,24 +330,28 @@ X_REASON_FOR_ACCESS=<purpose>
 ## Next Steps
 
 ### Phase 1: Foundational (Week 1-2)
+
 1. Deploy prov-ledger service
 2. Configure PostgreSQL & OPA
 3. Deploy authz-gateway
 4. Enable basic audit logging
 
 ### Phase 2: Integration (Week 3-4)
+
 1. Link services to auth-gateway
 2. Implement GraphQL plugins
 3. Configure middleware chain
 4. Enable observability
 
 ### Phase 3: Compliance (Week 5-6)
+
 1. Set up audit aggregation
 2. Implement compliance export
 3. Configure data residency
 4. Enable DLP policies
 
 ### Phase 4: Operations (Week 7-8)
+
 1. Set up monitoring
 2. Configure alerting
 3. Implement runbooks
@@ -348,13 +371,13 @@ X_REASON_FOR_ACCESS=<purpose>
 
 ## Document Statistics
 
-| File | Lines | Size | Purpose |
-|------|-------|------|---------|
-| SERVICE_INVENTORY.md | 1,428 | 39 KB | Comprehensive reference |
-| INTEGRATION_POINTS.md | 328 | 8 KB | Integration workflows |
-| SERVICE_QUICK_REFERENCE.md | 340 | 13 KB | Quick lookup tables |
-| README_SERVICE_INVENTORY.md | - | - | This guide |
-| **TOTAL** | **2,096** | **60 KB** | Complete documentation |
+| File                        | Lines     | Size      | Purpose                 |
+| --------------------------- | --------- | --------- | ----------------------- |
+| SERVICE_INVENTORY.md        | 1,428     | 39 KB     | Comprehensive reference |
+| INTEGRATION_POINTS.md       | 328       | 8 KB      | Integration workflows   |
+| SERVICE_QUICK_REFERENCE.md  | 340       | 13 KB     | Quick lookup tables     |
+| README_SERVICE_INVENTORY.md | -         | -         | This guide              |
+| **TOTAL**                   | **2,096** | **60 KB** | Complete documentation  |
 
 ---
 

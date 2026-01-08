@@ -20,7 +20,7 @@ pnpm add @intelgraph/component-tracker
 ## Usage
 
 ```typescript
-import { ComponentTracker } from '@intelgraph/component-tracker';
+import { ComponentTracker } from "@intelgraph/component-tracker";
 
 const tracker = new ComponentTracker();
 

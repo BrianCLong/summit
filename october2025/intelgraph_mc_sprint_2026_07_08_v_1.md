@@ -180,9 +180,7 @@ CREATE TABLE selectivity_hist (
 ```json
 {
   "version": "soc2-prep-v1",
-  "controls": [
-    { "id": "CC2.1", "artifacts": ["s3://ig-audit/.../change-mgmt.jsonl.gz"] }
-  ],
+  "controls": [{ "id": "CC2.1", "artifacts": ["s3://ig-audit/.../change-mgmt.jsonl.gz"] }],
   "signatures": ["..."]
 }
 ```
@@ -191,9 +189,9 @@ CREATE TABLE selectivity_hist (
 
 ```yaml
 sev:
-  - S1: 'customer-impacting outage'
-  - S2: 'SLO burn > 50%'
-  - S3: 'degraded non-critical'
+  - S1: "customer-impacting outage"
+  - S2: "SLO burn > 50%"
+  - S3: "degraded non-critical"
 ```
 
 **Blueprint Template (YAML)**
@@ -203,7 +201,7 @@ tenant:
   slo: { read_p95_ms: 350, write_p95_ms: 700 }
   budgets: { graphql_usd_day: 50, ingest_usd_day: 100 }
   privacy: { k: 5, epsilon: 2 }
-  alerts: ['quota80', 'slo_burn', 'residency_violation']
+  alerts: ["quota80", "slo_burn", "residency_violation"]
 ```
 
 ---
@@ -222,17 +220,13 @@ type PlanPreview {
 }
 
 type Query {
-  planPreview(opId: String!, vars: JSON!): PlanPreview!
-    @auth(abac: "admin.write")
+  planPreview(opId: String!, vars: JSON!): PlanPreview! @auth(abac: "admin.write")
 }
 
 type Mutation {
-  enablePrivacyV2(tenantId: ID!, enabled: Boolean!): Boolean
-    @auth(abac: "admin.write")
-  scheduleRelocation(datasetId: ID!, window: String!): Boolean
-    @auth(abac: "admin.write")
-  createTenantFromBlueprint(name: String!, template: String!): ID!
-    @auth(abac: "admin.write")
+  enablePrivacyV2(tenantId: ID!, enabled: Boolean!): Boolean @auth(abac: "admin.write")
+  scheduleRelocation(datasetId: ID!, window: String!): Boolean @auth(abac: "admin.write")
+  createTenantFromBlueprint(name: String!, template: String!): ID! @auth(abac: "admin.write")
 }
 ```
 

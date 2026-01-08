@@ -3,6 +3,6 @@
  * TRAINING/SIMULATION ONLY
  */
 
-export * from './dsp/SignalProcessor';
-export * from './modulation/ModulationClassifier';
-export * from './analysis/SpectralAnalyzer';
+export * from "./dsp/SignalProcessor";
+export * from "./modulation/ModulationClassifier";
+export * from "./analysis/SpectralAnalyzer";

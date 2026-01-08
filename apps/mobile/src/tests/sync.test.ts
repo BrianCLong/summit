@@ -17,7 +17,12 @@ describe('Sync Engine', () => {
     it('should sync pending items when online', async () => {
       const pendingItems = [
         { id: '1', operation: 'create', entityType: 'note', data: { content: 'test' } },
-        { id: '2', operation: 'update', entityType: 'note', data: { id: 'note-1', content: 'updated' } },
+        {
+          id: '2',
+          operation: 'update',
+          entityType: 'note',
+          data: { id: 'note-1', content: 'updated' },
+        },
       ];
 
       // Mock successful API responses
@@ -68,7 +73,8 @@ describe('Sync Engine', () => {
       (global.fetch as any).mockResolvedValue({
         ok: false,
         status: 409,
-        json: () => Promise.resolve({ data: serverData, version: 3, updatedAt: serverData.updatedAt }),
+        json: () =>
+          Promise.resolve({ data: serverData, version: 3, updatedAt: serverData.updatedAt }),
       });
 
       const response = await fetch('/api/mobile/notes', {
@@ -145,7 +151,7 @@ describe('Sync Engine', () => {
         entityId: string,
         resolution: 'local' | 'server',
         localData: any,
-        serverData: any
+        serverData: any,
       ) {
         auditLog.push({
           timestamp: new Date().toISOString(),
@@ -162,7 +168,7 @@ describe('Sync Engine', () => {
         'note-1',
         'local',
         { content: 'Local' },
-        { content: 'Server' }
+        { content: 'Server' },
       );
 
       expect(auditLog).toHaveLength(1);
@@ -252,10 +258,7 @@ describe('E2E Sync Flow', () => {
     // Step 2: Download cases
     (global.fetch as any).mockResolvedValueOnce({
       ok: true,
-      json: () =>
-        Promise.resolve([
-          { id: 'case-1', title: 'Test Case' },
-        ]),
+      json: () => Promise.resolve([{ id: 'case-1', title: 'Test Case' }]),
     });
 
     const casesResponse = await fetch('/api/mobile/cases/assigned');

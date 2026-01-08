@@ -41,39 +41,39 @@ The Identity & Policy Fabric provides:
 ## Quick Start
 
 ```typescript
-import { createIdentityFabric, PolicyInputBuilder } from './identity-fabric';
+import { createIdentityFabric, PolicyInputBuilder } from "./identity-fabric";
 
 // Create the fabric
 const fabric = createIdentityFabric({
   policy: {
-    mode: 'sidecar',
-    opaUrl: 'http://localhost:8181',
+    mode: "sidecar",
+    opaUrl: "http://localhost:8181",
   },
 });
 
 // Authenticate a user
 const authResult = await fabric.auth.authenticate({
-  method: 'oidc',
+  method: "oidc",
   credentials: {
-    type: 'oidc',
-    idToken: '...',
-    accessToken: '...',
-    provider: 'okta',
+    type: "oidc",
+    idToken: "...",
+    accessToken: "...",
+    provider: "okta",
   },
-  tenantId: 'tenant_123',
+  tenantId: "tenant_123",
   clientInfo: {
-    ipAddress: '192.168.1.1',
-    userAgent: 'Mozilla/5.0...',
+    ipAddress: "192.168.1.1",
+    userAgent: "Mozilla/5.0...",
   },
 });
 
 // Check authorization
 const policyInput = new PolicyInputBuilder()
   .withSubject(authResult.identity!, authResult.session)
-  .withResource('investigation', 'inv_456', 'tenant_123', {
-    classification: 'secret',
+  .withResource("investigation", "inv_456", "tenant_123", {
+    classification: "secret",
   })
-  .withAction('read')
+  .withAction("read")
   .withTenant(tenant)
   .build();
 
@@ -92,22 +92,22 @@ if (decision.allow) {
 
 ### Principal Types
 
-| Type | Description |
-|------|-------------|
-| `human` | Human user with interactive session |
-| `service` | Service account (machine-to-machine) |
-| `agent` | AI agent or automated process |
-| `workload` | SPIFFE-identified workload |
+| Type       | Description                          |
+| ---------- | ------------------------------------ |
+| `human`    | Human user with interactive session  |
+| `service`  | Service account (machine-to-machine) |
+| `agent`    | AI agent or automated process        |
+| `workload` | SPIFFE-identified workload           |
 
 ### Classification Levels
 
-| Level | Description |
-|-------|-------------|
-| `unclassified` | Public information |
-| `cui` | Controlled Unclassified Information |
-| `confidential` | Damage if disclosed |
-| `secret` | Serious damage if disclosed |
-| `top-secret` | Grave damage if disclosed |
+| Level            | Description                         |
+| ---------------- | ----------------------------------- |
+| `unclassified`   | Public information                  |
+| `cui`            | Controlled Unclassified Information |
+| `confidential`   | Damage if disclosed                 |
+| `secret`         | Serious damage if disclosed         |
+| `top-secret`     | Grave damage if disclosed           |
 | `top-secret-sci` | Sensitive Compartmented Information |
 
 ## Policy Bundles
@@ -165,7 +165,7 @@ const identity = new IdentityService({
   auditEnabled: true,
   validationStrict: true,
   spiffeEnabled: true,
-  spiffeTrustDomain: 'companyos.local',
+  spiffeTrustDomain: "companyos.local",
 });
 ```
 
@@ -173,13 +173,13 @@ const identity = new IdentityService({
 
 ```typescript
 const policy = new PolicyDecisionService({
-  mode: 'sidecar',           // 'sidecar' | 'centralized' | 'embedded'
-  opaUrl: 'http://localhost:8181',
-  opaPolicy: 'companyos/authz',
-  timeout: 100,              // ms
+  mode: "sidecar", // 'sidecar' | 'centralized' | 'embedded'
+  opaUrl: "http://localhost:8181",
+  opaPolicy: "companyos/authz",
+  timeout: 100, // ms
   cacheEnabled: true,
   cacheTtlSeconds: 60,
-  defaultDecision: 'deny',
+  defaultDecision: "deny",
 });
 ```
 
@@ -187,9 +187,9 @@ const policy = new PolicyDecisionService({
 
 ```typescript
 const auth = new AuthenticationService({
-  sessionDurationSeconds: 8 * 60 * 60,  // 8 hours
-  accessTokenDurationSeconds: 15 * 60,   // 15 minutes
-  stepUpDurationSeconds: 5 * 60,         // 5 minutes
+  sessionDurationSeconds: 8 * 60 * 60, // 8 hours
+  accessTokenDurationSeconds: 15 * 60, // 15 minutes
+  stepUpDurationSeconds: 5 * 60, // 5 minutes
   maxLoginAttempts: 5,
   lockoutDurationSeconds: 15 * 60,
   requireMfaForSensitive: true,
@@ -212,10 +212,10 @@ const auth = new AuthenticationService({
 const tenant: Tenant = {
   whiteLabel: {
     enabled: true,
-    brandName: 'Customer Portal',
-    logoUrl: 'https://...',
-    primaryColor: '#007bff',
-    customDomain: 'portal.customer.com',
+    brandName: "Customer Portal",
+    logoUrl: "https://...",
+    primaryColor: "#007bff",
+    customDomain: "portal.customer.com",
   },
 };
 ```
@@ -253,30 +253,30 @@ pnpm test:integration --filter identity-fabric
 
 ### IdentityService
 
-| Method | Description |
-|--------|-------------|
-| `resolveIdentity(id, tenantId)` | Resolve identity with full context |
-| `createUser(user)` | Create human user identity |
-| `createService(service)` | Create service account |
-| `createAgent(agent)` | Create AI agent identity |
-| `createWorkload(workload)` | Create workload identity |
-| `deactivateIdentity(id, reason)` | Soft-delete identity |
+| Method                           | Description                        |
+| -------------------------------- | ---------------------------------- |
+| `resolveIdentity(id, tenantId)`  | Resolve identity with full context |
+| `createUser(user)`               | Create human user identity         |
+| `createService(service)`         | Create service account             |
+| `createAgent(agent)`             | Create AI agent identity           |
+| `createWorkload(workload)`       | Create workload identity           |
+| `deactivateIdentity(id, reason)` | Soft-delete identity               |
 
 ### PolicyDecisionService
 
-| Method | Description |
-|--------|-------------|
-| `evaluate(input)` | Evaluate policy decision |
-| `isAllowed(input)` | Quick allow/deny check |
+| Method                  | Description               |
+| ----------------------- | ------------------------- |
+| `evaluate(input)`       | Evaluate policy decision  |
+| `isAllowed(input)`      | Quick allow/deny check    |
 | `requiresStepUp(input)` | Check step-up requirement |
-| `getRedactions(input)` | Get redaction rules |
+| `getRedactions(input)`  | Get redaction rules       |
 
 ### AuthenticationService
 
-| Method | Description |
-|--------|-------------|
-| `authenticate(request)` | Authenticate user/service |
-| `initiateStepUp(request)` | Start step-up challenge |
-| `completeStepUp(session, response)` | Complete step-up |
-| `authenticateService(request)` | Service-to-service auth |
-| `invalidateSession(id)` | Logout session |
+| Method                              | Description               |
+| ----------------------------------- | ------------------------- |
+| `authenticate(request)`             | Authenticate user/service |
+| `initiateStepUp(request)`           | Start step-up challenge   |
+| `completeStepUp(session, response)` | Complete step-up          |
+| `authenticateService(request)`      | Service-to-service auth   |
+| `invalidateSession(id)`             | Logout session            |

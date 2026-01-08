@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { useMutation } from '@apollo/client';
-import { PREVIEW_NL_QUERY } from '../../graphql/nlq.gql.js';
+import { useState } from "react";
+import { useMutation } from "@apollo/client";
+import { PREVIEW_NL_QUERY } from "../../graphql/nlq.gql.js";
 
 interface NLPreview {
   cypher: string;
@@ -11,14 +11,14 @@ interface NLPreview {
 }
 
 export function NlqModal() {
-  const [nl, setNl] = useState('');
-  const [manual, setManual] = useState('');
-  const [cypher, setCypher] = useState('');
+  const [nl, setNl] = useState("");
+  const [manual, setManual] = useState("");
+  const [cypher, setCypher] = useState("");
   const [rows, setRows] = useState<number | null>(null);
   const [cost, setCost] = useState<number | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [diff, setDiff] = useState<any | null>(null);
-  const [tenantId, setTenantId] = useState<string>('default');
+  const [tenantId, setTenantId] = useState<string>("default");
 
   const [preview, { loading, error }] = useMutation(PREVIEW_NL_QUERY);
 
@@ -29,7 +29,7 @@ export function NlqModal() {
       });
       const p: NLPreview | undefined = data?.previewNLQuery;
       if (!p) return;
-      setCypher(p.cypher || '');
+      setCypher(p.cypher || "");
       setRows(p.estimatedRows ?? null);
       setCost(p.estimatedCost ?? null);
       setWarnings(p.warnings || []);
@@ -41,7 +41,7 @@ export function NlqModal() {
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+      <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
         <input
           aria-label="tenant-id"
           placeholder="tenantId"
@@ -63,7 +63,7 @@ export function NlqModal() {
           onChange={(e) => setManual(e.target.value)}
         />
       </div>
-      <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
+      <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
         <button onClick={handlePreview} disabled={loading}>
           Preview
         </button>
@@ -75,7 +75,7 @@ export function NlqModal() {
         <div>
           <pre aria-label="cypher-output">{cypher}</pre>
           <p aria-label="cost-display">
-            Rows: {rows ?? '–'} Cost: {cost ?? '–'}
+            Rows: {rows ?? "–"} Cost: {cost ?? "–"}
           </p>
           {warnings?.length ? (
             <div aria-label="warnings">
@@ -93,9 +93,7 @@ export function NlqModal() {
               <pre>{JSON.stringify(diff, null, 2)}</pre>
             </details>
           ) : null}
-          {error ? (
-            <p style={{ color: 'crimson' }}>Error: {(error as any)?.message}</p>
-          ) : null}
+          {error ? <p style={{ color: "crimson" }}>Error: {(error as any)?.message}</p> : null}
         </div>
       )}
     </div>

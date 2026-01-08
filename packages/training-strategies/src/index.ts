@@ -3,7 +3,7 @@
  * Custom loss functions and advanced training strategies
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // Multi-task learning
 export interface MultiTaskConfig {
@@ -40,7 +40,7 @@ export class MultiTaskLearner {
 
 // Curriculum learning
 export interface CurriculumConfig {
-  strategy: 'easy_to_hard' | 'hard_to_easy' | 'pacing';
+  strategy: "easy_to_hard" | "hard_to_easy" | "pacing";
   difficultyMetric: (sample: any) => number;
   paceFunction?: (epoch: number) => number;
 }
@@ -59,7 +59,7 @@ export class CurriculumLearner {
     }));
 
     samplesWithDifficulty.sort((a, b) => {
-      if (this.config.strategy === 'easy_to_hard') {
+      if (this.config.strategy === "easy_to_hard") {
         return a.difficulty - b.difficulty;
       } else {
         return b.difficulty - a.difficulty;
@@ -77,7 +77,7 @@ export class CurriculumLearner {
 // Contrastive learning
 export interface ContrastiveConfig {
   temperature: number;
-  method: 'simclr' | 'moco' | 'byol';
+  method: "simclr" | "moco" | "byol";
 }
 
 export class ContrastiveLearner {
@@ -96,7 +96,7 @@ export class ContrastiveLearner {
 
 // Meta-learning
 export interface MetaLearningConfig {
-  algorithm: 'maml' | 'reptile' | 'prototypical';
+  algorithm: "maml" | "reptile" | "prototypical";
   innerLearningRate: number;
   outerLearningRate: number;
   numInnerSteps: number;
@@ -111,7 +111,7 @@ export class MetaLearner {
 
   async trainMetaModel(tasks: any[]): Promise<any> {
     console.log(`Training meta-model with ${this.config.algorithm}`);
-    
+
     for (const task of tasks) {
       // Inner loop: Task-specific adaptation
       for (let step = 0; step < this.config.numInnerSteps; step++) {
@@ -127,7 +127,7 @@ export class MetaLearner {
 export interface FewShotConfig {
   nWay: number; // Number of classes
   kShot: number; // Number of examples per class
-  method: 'prototypical' | 'matching' | 'relation';
+  method: "prototypical" | "matching" | "relation";
 }
 
 export class FewShotLearner {
@@ -137,12 +137,17 @@ export class FewShotLearner {
     this.config = config;
   }
 
-  async train(supportSet: any[], querySet: any[]): Promise<{
+  async train(
+    supportSet: any[],
+    querySet: any[]
+  ): Promise<{
     accuracy: number;
     prototypes?: Record<string, number[]>;
   }> {
-    console.log(`Training ${this.config.method} few-shot model (${this.config.nWay}-way ${this.config.kShot}-shot)`);
-    
+    console.log(
+      `Training ${this.config.method} few-shot model (${this.config.nWay}-way ${this.config.kShot}-shot)`
+    );
+
     return {
       accuracy: 0.85,
       prototypes: {},
@@ -152,7 +157,7 @@ export class FewShotLearner {
 
 // Active learning
 export interface ActiveLearningConfig {
-  strategy: 'uncertainty' | 'diversity' | 'hybrid';
+  strategy: "uncertainty" | "diversity" | "hybrid";
   batchSize: number;
   maxIterations: number;
 }
@@ -165,8 +170,10 @@ export class ActiveLearner {
   }
 
   selectSamples(unlabeledPool: any[], model: any): any[] {
-    console.log(`Selecting ${this.config.batchSize} samples using ${this.config.strategy} strategy`);
-    
+    console.log(
+      `Selecting ${this.config.batchSize} samples using ${this.config.strategy} strategy`
+    );
+
     // Placeholder: Return random samples
     return unlabeledPool.slice(0, this.config.batchSize);
   }

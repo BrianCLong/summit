@@ -28,7 +28,7 @@ export const registerBackgroundTasks = async () => {
         requiresBatteryNotLow: false,
         requiresStorageNotLow: false,
       },
-      async (taskId) => {
+      async taskId => {
         console.log('[BackgroundFetch] Task started:', taskId);
 
         try {
@@ -59,7 +59,7 @@ export const registerBackgroundTasks = async () => {
           BackgroundFetch.finish(taskId);
         }
       },
-      (taskId) => {
+      taskId => {
         console.log('[BackgroundFetch] Task timeout:', taskId);
         BackgroundFetch.finish(taskId);
       },

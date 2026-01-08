@@ -6,15 +6,15 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - 'client/**'
-      - 'web/**'
-      - 'apps/web/**'
+      - "client/**"
+      - "web/**"
+      - "apps/web/**"
   pull_request:
     branches: [main, develop]
     paths:
-      - 'client/**'
-      - 'web/**'
-      - 'apps/web/**'
+      - "client/**"
+      - "web/**"
+      - "apps/web/**"
 
 jobs:
   a11y-lint:
@@ -31,8 +31,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -77,8 +77,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -116,8 +116,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -148,7 +148,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install Pa11y
         run: npm install -g pa11y pa11y-ci
@@ -187,7 +187,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install color contrast checker
         run: npm install -g color-contrast-checker
@@ -211,8 +211,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

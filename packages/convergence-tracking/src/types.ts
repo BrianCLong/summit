@@ -4,16 +4,16 @@
  */
 
 export type ConvergenceType =
-  | 'ai-biotechnology'
-  | 'quantum-cryptography'
-  | 'nano-bio'
-  | 'cyber-physical'
-  | 'human-augmentation'
-  | 'iot-ecosystem'
-  | '5g-6g-network'
-  | 'edge-computing'
-  | 'blockchain-applications'
-  | 'digital-twin';
+  | "ai-biotechnology"
+  | "quantum-cryptography"
+  | "nano-bio"
+  | "cyber-physical"
+  | "human-augmentation"
+  | "iot-ecosystem"
+  | "5g-6g-network"
+  | "edge-computing"
+  | "blockchain-applications"
+  | "digital-twin";
 
 export interface TechnologyConvergence {
   id: string;
@@ -31,19 +31,19 @@ export interface TechnologyConvergence {
 }
 
 export type ConvergenceStage =
-  | 'conceptual'
-  | 'early-research'
-  | 'proof-of-concept'
-  | 'development'
-  | 'mature'
-  | 'widespread';
+  | "conceptual"
+  | "early-research"
+  | "proof-of-concept"
+  | "development"
+  | "mature"
+  | "widespread";
 
 export interface ConvergingTechnology {
   id: string;
   name: string;
   domain: string;
   maturityLevel: number;
-  contributionLevel: 'primary' | 'secondary' | 'enabling';
+  contributionLevel: "primary" | "secondary" | "enabling";
   readinessForConvergence: number; // 0-100
 }
 
@@ -51,7 +51,7 @@ export interface Synergy {
   id: string;
   description: string;
   technologies: string[]; // technology IDs
-  synergyType: 'multiplicative' | 'additive' | 'enabling' | 'transformative';
+  synergyType: "multiplicative" | "additive" | "enabling" | "transformative";
   magnitude: number; // 1-10
   evidence: string[];
 }
@@ -63,7 +63,7 @@ export interface ConvergenceApplication {
   sector: string;
   useCase: string;
   readinessLevel: number; // 1-9
-  marketPotential: 'low' | 'medium' | 'high' | 'very-high';
+  marketPotential: "low" | "medium" | "high" | "very-high";
   timeToMarket: number; // years
   challenges: string[];
 }
@@ -71,8 +71,8 @@ export interface ConvergenceApplication {
 export interface ConvergenceBarrier {
   id: string;
   barrier: string;
-  type: 'technical' | 'regulatory' | 'economic' | 'ethical' | 'social';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  type: "technical" | "regulatory" | "economic" | "ethical" | "social";
+  severity: "low" | "medium" | "high" | "critical";
   mitigationStrategies: string[];
   resolutionTimeline?: number; // years
 }
@@ -80,8 +80,8 @@ export interface ConvergenceBarrier {
 export interface ConvergencePlayer {
   id: string;
   name: string;
-  type: 'academic' | 'industry' | 'government' | 'startup' | 'consortium';
-  role: 'leader' | 'contributor' | 'adopter';
+  type: "academic" | "industry" | "government" | "startup" | "consortium";
+  role: "leader" | "contributor" | "adopter";
   capabilities: string[];
   investments: number;
   collaborations: string[];
@@ -100,7 +100,7 @@ export interface Milestone {
   description: string;
   estimatedDate: Date;
   dependencies: string[];
-  criticalityLevel: 'low' | 'medium' | 'high' | 'critical';
+  criticalityLevel: "low" | "medium" | "high" | "critical";
 }
 
 export interface ConvergenceImpact {
@@ -115,7 +115,7 @@ export interface ConvergenceImpact {
 export interface SecurityImplication {
   domain: string;
   implication: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   mitigationRequired: boolean;
 }
 
@@ -130,8 +130,8 @@ export interface ConvergencePattern {
 export interface CrossDomainIntegration {
   id: string;
   domains: string[];
-  integrationType: 'functional' | 'structural' | 'conceptual';
-  integrationLevel: 'surface' | 'moderate' | 'deep' | 'complete';
+  integrationType: "functional" | "structural" | "conceptual";
+  integrationLevel: "surface" | "moderate" | "deep" | "complete";
   challenges: string[];
   enablers: string[];
 }

@@ -3,19 +3,19 @@
  * Canonical person entity type with rich identity attributes
  */
 
-import { CanonicalEntityBase, CanonicalEntityType } from '../core/base';
+import { CanonicalEntityBase, CanonicalEntityType } from "../core/base";
 
 export interface PersonName {
   value: string;
-  type: 'legal' | 'alias' | 'former' | 'aka' | 'maiden' | 'nickname';
-  script?: string;                     // e.g., "Latin", "Cyrillic"
+  type: "legal" | "alias" | "former" | "aka" | "maiden" | "nickname";
+  script?: string; // e.g., "Latin", "Cyrillic"
   confidence: number;
   validFrom?: Date;
   validTo?: Date;
 }
 
 export interface PersonIdentifier {
-  type: 'ssn' | 'passport' | 'license' | 'tax_id' | 'national_id' | 'employee_id' | 'custom';
+  type: "ssn" | "passport" | "license" | "tax_id" | "national_id" | "employee_id" | "custom";
   value: string;
   country?: string;
   issuedDate?: Date;
@@ -24,7 +24,7 @@ export interface PersonIdentifier {
 }
 
 export interface PersonContact {
-  type: 'email' | 'phone' | 'address';
+  type: "email" | "phone" | "address";
   value: string;
   primary: boolean;
   confidence: number;
@@ -32,15 +32,15 @@ export interface PersonContact {
 
 export interface PersonDemographics {
   dateOfBirth?: Date;
-  dateOfBirthPrecision?: 'day' | 'month' | 'year';
+  dateOfBirthPrecision?: "day" | "month" | "year";
   placeOfBirth?: string;
-  gender?: 'M' | 'F' | 'NB' | 'U';
+  gender?: "M" | "F" | "NB" | "U";
   nationality?: string[];
   occupation?: string;
 }
 
 export interface PersonScreeningResult {
-  list: string;                        // e.g., "OFAC SDN"
+  list: string; // e.g., "OFAC SDN"
   matched: boolean;
   score: number;
   matchedAt: Date;
@@ -72,30 +72,28 @@ export class PersonEntityHelpers {
    * Get the primary legal name
    */
   static getLegalName(person: PersonEntity): PersonName | undefined {
-    return person.names.find(n => n.type === 'legal');
+    return person.names.find((n) => n.type === "legal");
   }
 
   /**
    * Get all email addresses
    */
   static getEmails(person: PersonEntity): string[] {
-    return person.contactInfo
-      .filter(c => c.type === 'email')
-      .map(c => c.value);
+    return person.contactInfo.filter((c) => c.type === "email").map((c) => c.value);
   }
 
   /**
    * Get the primary email
    */
   static getPrimaryEmail(person: PersonEntity): string | undefined {
-    return person.contactInfo.find(c => c.type === 'email' && c.primary)?.value;
+    return person.contactInfo.find((c) => c.type === "email" && c.primary)?.value;
   }
 
   /**
    * Check if person has a specific identifier type
    */
-  static hasIdentifier(person: PersonEntity, type: PersonIdentifier['type']): boolean {
-    return person.identifiers.some(id => id.type === type);
+  static hasIdentifier(person: PersonEntity, type: PersonIdentifier["type"]): boolean {
+    return person.identifiers.some((id) => id.type === type);
   }
 
   /**
@@ -103,9 +101,9 @@ export class PersonEntityHelpers {
    */
   static getIdentifier(
     person: PersonEntity,
-    type: PersonIdentifier['type']
+    type: PersonIdentifier["type"]
   ): PersonIdentifier | undefined {
-    return person.identifiers.find(id => id.type === type);
+    return person.identifiers.find((id) => id.type === type);
   }
 
   /**
@@ -135,7 +133,7 @@ export class PersonEntityHelpers {
     return name
       .toLowerCase()
       .trim()
-      .replace(/\s+/g, ' ')            // Collapse whitespace
-      .replace(/[^\w\s]/g, '');        // Remove special chars
+      .replace(/\s+/g, " ") // Collapse whitespace
+      .replace(/[^\w\s]/g, ""); // Remove special chars
   }
 }

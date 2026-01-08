@@ -4,56 +4,56 @@
  */
 export type Locale =
   // English variants
-  | 'en-US' // English (United States)
-  | 'en-GB' // English (United Kingdom)
+  | "en-US" // English (United States)
+  | "en-GB" // English (United Kingdom)
   // Western European languages
-  | 'fr-FR' // French (France)
-  | 'de-DE' // German (Germany)
-  | 'es-ES' // Spanish (Spain)
-  | 'it-IT' // Italian (Italy)
-  | 'pt-PT' // Portuguese (Portugal)
-  | 'nl-NL' // Dutch (Netherlands)
+  | "fr-FR" // French (France)
+  | "de-DE" // German (Germany)
+  | "es-ES" // Spanish (Spain)
+  | "it-IT" // Italian (Italy)
+  | "pt-PT" // Portuguese (Portugal)
+  | "nl-NL" // Dutch (Netherlands)
   // Nordic languages
-  | 'da-DK' // Danish (Denmark)
-  | 'no-NO' // Norwegian (Norway)
-  | 'sv-SE' // Swedish (Sweden)
-  | 'fi-FI' // Finnish (Finland)
-  | 'is-IS' // Icelandic (Iceland)
+  | "da-DK" // Danish (Denmark)
+  | "no-NO" // Norwegian (Norway)
+  | "sv-SE" // Swedish (Sweden)
+  | "fi-FI" // Finnish (Finland)
+  | "is-IS" // Icelandic (Iceland)
   // Central European languages
-  | 'pl-PL' // Polish (Poland)
-  | 'cs-CZ' // Czech (Czech Republic)
-  | 'sk-SK' // Slovak (Slovakia)
-  | 'hu-HU' // Hungarian (Hungary)
+  | "pl-PL" // Polish (Poland)
+  | "cs-CZ" // Czech (Czech Republic)
+  | "sk-SK" // Slovak (Slovakia)
+  | "hu-HU" // Hungarian (Hungary)
   // Eastern & Southern European languages
-  | 'ro-RO' // Romanian (Romania)
-  | 'bg-BG' // Bulgarian (Bulgaria)
-  | 'hr-HR' // Croatian (Croatia)
-  | 'sl-SI' // Slovenian (Slovenia)
-  | 'et-EE' // Estonian (Estonia)
-  | 'lv-LV' // Latvian (Latvia)
-  | 'lt-LT' // Lithuanian (Lithuania)
-  | 'mt-MT' // Maltese (Malta)
-  | 'tr-TR' // Turkish (Turkey)
-  | 'el-GR' // Greek (Greece)
-  | 'mk-MK' // Macedonian (North Macedonia)
-  | 'al-AL' // Albanian (Albania)
-  | 'me-ME' // Montenegrin (Montenegro)
+  | "ro-RO" // Romanian (Romania)
+  | "bg-BG" // Bulgarian (Bulgaria)
+  | "hr-HR" // Croatian (Croatia)
+  | "sl-SI" // Slovenian (Slovenia)
+  | "et-EE" // Estonian (Estonia)
+  | "lv-LV" // Latvian (Latvia)
+  | "lt-LT" // Lithuanian (Lithuania)
+  | "mt-MT" // Maltese (Malta)
+  | "tr-TR" // Turkish (Turkey)
+  | "el-GR" // Greek (Greece)
+  | "mk-MK" // Macedonian (North Macedonia)
+  | "al-AL" // Albanian (Albania)
+  | "me-ME" // Montenegrin (Montenegro)
   // RTL (Right-to-Left) languages
-  | 'ar-SA' // Arabic (Saudi Arabia)
-  | 'ar-EG' // Arabic (Egypt)
-  | 'he-IL' // Hebrew (Israel)
-  | 'fa-IR' // Persian/Farsi (Iran)
-  | 'ur-PK' // Urdu (Pakistan)
+  | "ar-SA" // Arabic (Saudi Arabia)
+  | "ar-EG" // Arabic (Egypt)
+  | "he-IL" // Hebrew (Israel)
+  | "fa-IR" // Persian/Farsi (Iran)
+  | "ur-PK" // Urdu (Pakistan)
   // Asian languages
-  | 'zh-CN' // Chinese (Simplified)
-  | 'zh-TW' // Chinese (Traditional)
-  | 'ja-JP' // Japanese
-  | 'ko-KR'; // Korean
+  | "zh-CN" // Chinese (Simplified)
+  | "zh-TW" // Chinese (Traditional)
+  | "ja-JP" // Japanese
+  | "ko-KR"; // Korean
 
 /**
  * Text direction
  */
-export type TextDirection = 'ltr' | 'rtl';
+export type TextDirection = "ltr" | "rtl";
 
 /**
  * Locale configuration

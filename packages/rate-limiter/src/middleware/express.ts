@@ -5,10 +5,10 @@
  * Copyright (c) 2025 IntelGraph
  */
 
-import type { Request, Response, NextFunction } from 'express';
-import pino from 'pino';
-import type { RateLimiter } from '../rate-limiter.js';
-import type { RateLimiterOptions, UserTier, RateLimitState } from '../types.js';
+import type { Request, Response, NextFunction } from "express";
+import pino from "pino";
+import type { RateLimiter } from "../rate-limiter.js";
+import type { RateLimiterOptions, UserTier, RateLimitState } from "../types.js";
 
 const logger = pino();
 
@@ -27,7 +27,7 @@ function defaultKeyGenerator(req: Request): string {
   }
 
   // Fall back to IP
-  return `ip:${req.ip || req.socket.remoteAddress || 'unknown'}`;
+  return `ip:${req.ip || req.socket.remoteAddress || "unknown"}`;
 }
 
 /**
@@ -51,12 +51,12 @@ function defaultTierExtractor(req: Request): UserTier | undefined {
  * Set rate limit headers on response
  */
 function setRateLimitHeaders(res: Response, state: RateLimitState): void {
-  res.setHeader('X-RateLimit-Limit', state.limit.toString());
-  res.setHeader('X-RateLimit-Remaining', state.remaining.toString());
-  res.setHeader('X-RateLimit-Reset', state.resetAt.toString());
+  res.setHeader("X-RateLimit-Limit", state.limit.toString());
+  res.setHeader("X-RateLimit-Remaining", state.remaining.toString());
+  res.setHeader("X-RateLimit-Reset", state.resetAt.toString());
 
   if (state.isExceeded && state.retryAfter > 0) {
-    res.setHeader('Retry-After', state.retryAfter.toString());
+    res.setHeader("Retry-After", state.retryAfter.toString());
   }
 }
 
@@ -67,13 +67,13 @@ function defaultHandler(
   req: Request,
   res: Response,
   next: NextFunction,
-  state: RateLimitState,
+  state: RateLimitState
 ): void {
   setRateLimitHeaders(res, state);
 
   res.status(429).json({
-    error: 'rate_limit_exceeded',
-    message: 'Too many requests. Please try again later.',
+    error: "rate_limit_exceeded",
+    message: "Too many requests. Please try again later.",
     retryAfter: state.retryAfter,
     limit: state.limit,
     remaining: 0,
@@ -86,7 +86,7 @@ function defaultHandler(
  */
 export function createRateLimitMiddleware(
   rateLimiter: RateLimiter,
-  options: Partial<RateLimiterOptions> = {},
+  options: Partial<RateLimiterOptions> = {}
 ) {
   const keyGenerator = options.keyGenerator || defaultKeyGenerator;
   const handler = options.handler || defaultHandler;
@@ -96,7 +96,7 @@ export function createRateLimitMiddleware(
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       // Check if should skip rate limiting
-      if (skip && await skip(req)) {
+      if (skip && (await skip(req))) {
         return next();
       }
 
@@ -122,7 +122,7 @@ export function createRateLimitMiddleware(
       next();
     } catch (error) {
       logger.error({
-        message: 'Rate limit middleware error',
+        message: "Rate limit middleware error",
         path: req.path,
         error: error instanceof Error ? error.message : String(error),
       });
@@ -139,7 +139,7 @@ export function createRateLimitMiddleware(
 export function createEndpointRateLimiter(
   rateLimiter: RateLimiter,
   endpoint: string,
-  options: Partial<RateLimiterOptions> = {},
+  options: Partial<RateLimiterOptions> = {}
 ) {
   return createRateLimitMiddleware(rateLimiter, {
     ...options,
@@ -158,7 +158,7 @@ export function createEndpointRateLimiter(
 export function createTierRateLimiter(
   rateLimiter: RateLimiter,
   requiredTier: UserTier,
-  options: Partial<RateLimiterOptions> = {},
+  options: Partial<RateLimiterOptions> = {}
 ) {
   return createRateLimitMiddleware(rateLimiter, {
     ...options,
@@ -169,12 +169,12 @@ export function createTierRateLimiter(
       }
 
       // If skip function provided, use it
-      if (options.skip && await options.skip(req)) {
+      if (options.skip && (await options.skip(req))) {
         return true;
       }
 
       // Check tier hierarchy
-      const tierHierarchy: UserTier[] = ['free', 'basic', 'premium', 'enterprise', 'internal'];
+      const tierHierarchy: UserTier[] = ["free", "basic", "premium", "enterprise", "internal"];
       const currentTierIndex = tierHierarchy.indexOf(tier);
       const requiredTierIndex = tierHierarchy.indexOf(requiredTier);
 

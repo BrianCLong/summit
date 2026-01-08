@@ -1,6 +1,6 @@
 image:
   repository: ghcr.io/BrianCLong/intelgraph/signer-service
-  tag: ''
+  tag: ""
   pullPolicy: IfNotPresent
 
 replicaCount: 2
@@ -17,7 +17,7 @@ signingKey:
 
 config:
   logLevel: info
-  kmsKeyId: ''
+  kmsKeyId: ""
   healthCheckPath: /healthz
 
 policyBundles:

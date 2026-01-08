@@ -5,102 +5,102 @@
  * Provides detailed performance analysis, bottleneck detection, and optimization recommendations
  */
 
-import { chromium } from 'playwright';
-import { writeFileSync, existsSync, mkdirSync } from 'fs';
-import { join, resolve } from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { chromium } from "playwright";
+import { writeFileSync, existsSync, mkdirSync } from "fs";
+import { join, resolve } from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const root = resolve(__dirname, '..');
+const root = resolve(__dirname, "..");
 
 class PerformanceProfiler {
-  constructor(baseUrl = 'http://localhost:5173') {
+  constructor(baseUrl = "http://localhost:5173") {
     this.baseUrl = baseUrl;
     this.browser = null;
-    this.reportDir = join(root, 'test-results', 'performance-profiling');
+    this.reportDir = join(root, "test-results", "performance-profiling");
     this.profiles = [];
     this.startTime = Date.now();
 
     this.testScenarios = [
       {
-        name: 'cold-load',
-        description: 'Initial page load (cold cache)',
-        url: '/maestro/login',
+        name: "cold-load",
+        description: "Initial page load (cold cache)",
+        url: "/maestro/login",
         actions: [],
         clearCache: true,
       },
       {
-        name: 'warm-load',
-        description: 'Page load with warm cache',
-        url: '/maestro/login',
+        name: "warm-load",
+        description: "Page load with warm cache",
+        url: "/maestro/login",
         actions: [],
         clearCache: false,
       },
       {
-        name: 'authenticated-dashboard',
-        description: 'Dashboard load after authentication',
-        url: '/maestro',
+        name: "authenticated-dashboard",
+        description: "Dashboard load after authentication",
+        url: "/maestro",
         requireAuth: true,
         actions: [
           {
-            type: 'wait',
+            type: "wait",
             selector: '[data-testid="dashboard-content"]',
             timeout: 10000,
           },
         ],
       },
       {
-        name: 'navigation-heavy',
-        description: 'Heavy navigation between pages',
-        url: '/maestro/runs',
+        name: "navigation-heavy",
+        description: "Heavy navigation between pages",
+        url: "/maestro/runs",
         requireAuth: true,
         actions: [
-          { type: 'click', selector: 'a[href="/maestro/observability"]' },
-          { type: 'wait', duration: 2000 },
-          { type: 'click', selector: 'a[href="/maestro/routing"]' },
-          { type: 'wait', duration: 2000 },
-          { type: 'click', selector: 'a[href="/maestro/runs"]' },
-          { type: 'wait', duration: 2000 },
+          { type: "click", selector: 'a[href="/maestro/observability"]' },
+          { type: "wait", duration: 2000 },
+          { type: "click", selector: 'a[href="/maestro/routing"]' },
+          { type: "wait", duration: 2000 },
+          { type: "click", selector: 'a[href="/maestro/runs"]' },
+          { type: "wait", duration: 2000 },
         ],
       },
       {
-        name: 'data-intensive',
-        description: 'Loading data-heavy components',
-        url: '/maestro/observability',
+        name: "data-intensive",
+        description: "Loading data-heavy components",
+        url: "/maestro/observability",
         requireAuth: true,
         actions: [
           {
-            type: 'wait',
+            type: "wait",
             selector: '[data-testid="metrics-chart"]',
             timeout: 15000,
           },
-          { type: 'wait', duration: 3000 },
+          { type: "wait", duration: 3000 },
         ],
       },
       {
-        name: 'interaction-heavy',
-        description: 'Heavy user interaction simulation',
-        url: '/maestro/routing',
+        name: "interaction-heavy",
+        description: "Heavy user interaction simulation",
+        url: "/maestro/routing",
         requireAuth: true,
         actions: [
-          { type: 'click', selector: 'button[data-testid="new-route"]' },
+          { type: "click", selector: 'button[data-testid="new-route"]' },
           {
-            type: 'type',
+            type: "type",
             selector: 'input[name="name"]',
-            text: 'Performance Test Route',
+            text: "Performance Test Route",
           },
-          { type: 'wait', duration: 1000 },
-          { type: 'click', selector: 'button[type="submit"]' },
-          { type: 'wait', duration: 2000 },
+          { type: "wait", duration: 1000 },
+          { type: "click", selector: 'button[type="submit"]' },
+          { type: "wait", duration: 2000 },
         ],
       },
     ];
   }
 
   async setup() {
-    console.log('⚡ Setting up Performance Profiler...');
+    console.log("⚡ Setting up Performance Profiler...");
 
     // Create report directory
     if (!existsSync(this.reportDir)) {
@@ -111,14 +111,14 @@ class PerformanceProfiler {
     this.browser = await chromium.launch({
       headless: true,
       args: [
-        '--disable-web-security',
-        '--disable-features=VizDisplayCompositor',
-        '--no-sandbox',
-        '--disable-dev-shm-usage',
+        "--disable-web-security",
+        "--disable-features=VizDisplayCompositor",
+        "--no-sandbox",
+        "--disable-dev-shm-usage",
         // Performance-specific flags
-        '--enable-precise-memory-info',
-        '--enable-memory-benchmarking',
-        '--js-flags=--expose-gc',
+        "--enable-precise-memory-info",
+        "--enable-memory-benchmarking",
+        "--js-flags=--expose-gc",
       ],
     });
   }
@@ -126,32 +126,30 @@ class PerformanceProfiler {
   async mockAuthentication(page) {
     // Mock authentication for testing
     await page.addInitScript(() => {
-      localStorage.setItem('maestro_auth_access_token', 'mock-jwt-token');
-      localStorage.setItem('maestro_auth_id_token', 'mock-id-token');
+      localStorage.setItem("maestro_auth_access_token", "mock-jwt-token");
+      localStorage.setItem("maestro_auth_id_token", "mock-id-token");
 
       // Mock user data
       window.__USER_MOCK__ = {
-        id: 'user-123',
-        email: 'perf.test@example.com',
-        name: 'Performance Test User',
-        roles: ['user', 'operator'],
-        permissions: ['runs:read', 'pipelines:read'],
-        tenant: 'perf-test-corp',
+        id: "user-123",
+        email: "perf.test@example.com",
+        name: "Performance Test User",
+        roles: ["user", "operator"],
+        permissions: ["runs:read", "pipelines:read"],
+        tenant: "perf-test-corp",
       };
     });
 
     // Mock API responses with realistic data
-    await page.route('**/api/**', async (route) => {
+    await page.route("**/api/**", async (route) => {
       const url = route.request().url();
 
       // Add realistic delay to simulate network
-      await new Promise((resolve) =>
-        setTimeout(resolve, Math.random() * 500 + 100),
-      );
+      await new Promise((resolve) => setTimeout(resolve, Math.random() * 500 + 100));
 
-      if (url.includes('/summary')) {
+      if (url.includes("/summary")) {
         await route.fulfill({
-          contentType: 'application/json',
+          contentType: "application/json",
           body: JSON.stringify({
             data: {
               autonomy: {
@@ -172,9 +170,7 @@ class PerformanceProfiler {
               budgets: { remaining: 15000, cap: 50000, burn_rate: 125.5 },
               runs: Array.from({ length: 50 }, (_, i) => ({
                 id: `run-${i + 100}`,
-                status: ['running', 'completed', 'failed'][
-                  Math.floor(Math.random() * 3)
-                ],
+                status: ["running", "completed", "failed"][Math.floor(Math.random() * 3)],
                 pipeline: `pipeline-${Math.floor(i / 10)}`,
                 createdAt: new Date(Date.now() - i * 300000).toISOString(),
                 duration: 60000 + Math.random() * 300000,
@@ -182,15 +178,15 @@ class PerformanceProfiler {
             },
           }),
         });
-      } else if (url.includes('/runs')) {
+      } else if (url.includes("/runs")) {
         await route.fulfill({
-          contentType: 'application/json',
+          contentType: "application/json",
           body: JSON.stringify({
             data: {
               runs: Array.from({ length: 100 }, (_, i) => ({
                 id: `run-${i + 200}`,
                 pipeline: `build-pipeline-${Math.floor(i / 20)}`,
-                status: ['running', 'completed', 'failed', 'pending'][
+                status: ["running", "completed", "failed", "pending"][
                   Math.floor(Math.random() * 4)
                 ],
                 createdAt: new Date(Date.now() - i * 600000).toISOString(),
@@ -204,9 +200,9 @@ class PerformanceProfiler {
             },
           }),
         });
-      } else if (url.includes('/metrics')) {
+      } else if (url.includes("/metrics")) {
         await route.fulfill({
-          contentType: 'application/json',
+          contentType: "application/json",
           body: JSON.stringify({
             data: {
               timeseries: Array.from({ length: 288 }, (_, i) => ({
@@ -226,7 +222,7 @@ class PerformanceProfiler {
         });
       } else {
         await route.fulfill({
-          contentType: 'application/json',
+          contentType: "application/json",
           body: JSON.stringify({ data: {} }),
         });
       }
@@ -261,19 +257,14 @@ class PerformanceProfiler {
       await page.tracing.start({
         path: join(this.reportDir, `${scenario.name}-trace.json`),
         screenshots: true,
-        categories: [
-          'devtools.timeline',
-          'v8.execute',
-          'devtools.timeline.frame',
-          'benchmark',
-        ],
+        categories: ["devtools.timeline", "v8.execute", "devtools.timeline.frame", "benchmark"],
       });
 
       // Enable CPU profiling
       const cdp = await context.newCDPSession(page);
-      await cdp.send('Profiler.enable');
-      await cdp.send('Profiler.start');
-      await cdp.send('Runtime.enable');
+      await cdp.send("Profiler.enable");
+      await cdp.send("Profiler.start");
+      await cdp.send("Runtime.enable");
 
       // Start metrics collection
       const performanceMetrics = {
@@ -292,8 +283,8 @@ class PerformanceProfiler {
       };
 
       // Collect console errors
-      page.on('console', (msg) => {
-        if (msg.type() === 'error') {
+      page.on("console", (msg) => {
+        if (msg.type() === "error") {
           performanceMetrics.consoleErrors.push({
             timestamp: Date.now(),
             text: msg.text(),
@@ -303,28 +294,28 @@ class PerformanceProfiler {
       });
 
       // Monitor network requests
-      page.on('request', (request) => {
+      page.on("request", (request) => {
         performanceMetrics.networkActivity.push({
           url: request.url(),
           method: request.method(),
           timestamp: Date.now(),
-          type: 'request',
+          type: "request",
         });
       });
 
-      page.on('response', (response) => {
+      page.on("response", (response) => {
         performanceMetrics.networkActivity.push({
           url: response.url(),
           status: response.status(),
           timestamp: Date.now(),
-          type: 'response',
+          type: "response",
         });
       });
 
       // Start memory monitoring
       const memoryInterval = setInterval(async () => {
         try {
-          const metrics = await cdp.send('Runtime.getHeapUsage');
+          const metrics = await cdp.send("Runtime.getHeapUsage");
           const jsHeapUsage = await page.evaluate(() => {
             if (performance.memory) {
               return {
@@ -349,7 +340,7 @@ class PerformanceProfiler {
       // Navigate to the page and measure initial load
       const navigationStart = Date.now();
       await page.goto(`${this.baseUrl}${scenario.url}`, {
-        waitUntil: 'networkidle',
+        waitUntil: "networkidle",
       });
       const navigationEnd = Date.now();
 
@@ -364,7 +355,7 @@ class PerformanceProfiler {
 
         try {
           switch (action.type) {
-            case 'wait':
+            case "wait":
               if (action.selector) {
                 await page.waitForSelector(action.selector, {
                   timeout: action.timeout || 5000,
@@ -374,29 +365,28 @@ class PerformanceProfiler {
               }
               break;
 
-            case 'click':
+            case "click":
               await page.click(action.selector);
               break;
 
-            case 'type':
+            case "type":
               await page.fill(action.selector, action.text);
               break;
 
-            case 'scroll':
+            case "scroll":
               await page.evaluate((distance) => {
                 window.scrollBy(0, distance || 500);
               }, action.distance);
               break;
 
-            case 'hover':
+            case "hover":
               await page.hover(action.selector);
               break;
           }
 
           const actionEnd = Date.now();
           performanceMetrics.timings[`action_${action.type}`] =
-            (performanceMetrics.timings[`action_${action.type}`] || 0) +
-            (actionEnd - actionStart);
+            (performanceMetrics.timings[`action_${action.type}`] || 0) + (actionEnd - actionStart);
         } catch (error) {
           console.log(`    ⚠️ Action ${action.type} failed: ${error.message}`);
         }
@@ -417,26 +407,24 @@ class PerformanceProfiler {
           };
 
           // Largest Contentful Paint
-          if ('PerformanceObserver' in window) {
+          if ("PerformanceObserver" in window) {
             try {
               const lcpObserver = new PerformanceObserver((entryList) => {
                 const entries = entryList.getEntries();
                 const lastEntry = entries[entries.length - 1];
                 vitals.lcp = lastEntry.startTime;
               });
-              lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
+              lcpObserver.observe({ entryTypes: ["largest-contentful-paint"] });
 
               // First Contentful Paint
               const fcpObserver = new PerformanceObserver((entryList) => {
                 const entries = entryList.getEntries();
-                const fcpEntry = entries.find(
-                  (entry) => entry.name === 'first-contentful-paint',
-                );
+                const fcpEntry = entries.find((entry) => entry.name === "first-contentful-paint");
                 if (fcpEntry) {
                   vitals.fcp = fcpEntry.startTime;
                 }
               });
-              fcpObserver.observe({ entryTypes: ['paint'] });
+              fcpObserver.observe({ entryTypes: ["paint"] });
 
               // Cumulative Layout Shift
               let clsValue = 0;
@@ -448,14 +436,14 @@ class PerformanceProfiler {
                 }
                 vitals.cls = clsValue;
               });
-              clsObserver.observe({ entryTypes: ['layout-shift'] });
+              clsObserver.observe({ entryTypes: ["layout-shift"] });
             } catch (error) {
-              console.warn('Performance observation error:', error);
+              console.warn("Performance observation error:", error);
             }
           }
 
           // Navigation Timing API
-          const navigation = performance.getEntriesByType('navigation')[0];
+          const navigation = performance.getEntriesByType("navigation")[0];
           if (navigation) {
             vitals.ttfb = navigation.responseStart - navigation.requestStart;
           }
@@ -469,7 +457,7 @@ class PerformanceProfiler {
 
       // Collect resource timing
       const resources = await page.evaluate(() => {
-        return performance.getEntriesByType('resource').map((resource) => ({
+        return performance.getEntriesByType("resource").map((resource) => ({
           name: resource.name,
           duration: resource.duration,
           transferSize: resource.transferSize,
@@ -488,7 +476,7 @@ class PerformanceProfiler {
         return new Promise((resolve) => {
           const tasks = [];
 
-          if ('PerformanceObserver' in window) {
+          if ("PerformanceObserver" in window) {
             try {
               const observer = new PerformanceObserver((entryList) => {
                 for (const entry of entryList.getEntries()) {
@@ -499,7 +487,7 @@ class PerformanceProfiler {
                   });
                 }
               });
-              observer.observe({ entryTypes: ['longtask'] });
+              observer.observe({ entryTypes: ["longtask"] });
             } catch (error) {
               // Long task observation not supported
             }
@@ -512,7 +500,7 @@ class PerformanceProfiler {
       performanceMetrics.longTasks = longTasks;
 
       // Stop CPU profiling
-      const cpuProfile = await cdp.send('Profiler.stop');
+      const cpuProfile = await cdp.send("Profiler.stop");
       performanceMetrics.cpuProfile = {
         nodes: cpuProfile.profile.nodes.length,
         samples: cpuProfile.profile.samples?.length || 0,
@@ -526,20 +514,17 @@ class PerformanceProfiler {
       await page.tracing.stop();
 
       // Calculate performance scores
-      performanceMetrics.scores =
-        this.calculatePerformanceScores(performanceMetrics);
+      performanceMetrics.scores = this.calculatePerformanceScores(performanceMetrics);
 
       await context.close();
 
       console.log(
-        `    ✅ ${scenario.name}: LCP ${webVitals.lcp?.toFixed(0) || 'N/A'}ms, CLS ${webVitals.cls?.toFixed(3) || 'N/A'}`,
+        `    ✅ ${scenario.name}: LCP ${webVitals.lcp?.toFixed(0) || "N/A"}ms, CLS ${webVitals.cls?.toFixed(3) || "N/A"}`
       );
 
       return performanceMetrics;
     } catch (error) {
-      console.log(
-        `    ❌ ${scenario.name}: Profiling failed - ${error.message}`,
-      );
+      console.log(`    ❌ ${scenario.name}: Profiling failed - ${error.message}`);
 
       return {
         scenario: scenario.name,
@@ -588,10 +573,7 @@ class PerformanceProfiler {
       else if (vitals.fid > 100) interactivityScore -= 20; // Needs improvement
     }
     if (metrics.longTasks.length > 0) {
-      const longTaskTime = metrics.longTasks.reduce(
-        (acc, task) => acc + task.duration,
-        0,
-      );
+      const longTaskTime = metrics.longTasks.reduce((acc, task) => acc + task.duration, 0);
       if (longTaskTime > 1000) interactivityScore -= 30;
       else if (longTaskTime > 500) interactivityScore -= 15;
     }
@@ -609,13 +591,8 @@ class PerformanceProfiler {
     // Resource Optimization Score (0-100)
     let resourceScore = 100;
     if (metrics.resources.length > 0) {
-      const totalSize = metrics.resources.reduce(
-        (acc, r) => acc + (r.transferSize || 0),
-        0,
-      );
-      const largeResources = metrics.resources.filter(
-        (r) => (r.transferSize || 0) > 1024 * 1024,
-      ); // > 1MB
+      const totalSize = metrics.resources.reduce((acc, r) => acc + (r.transferSize || 0), 0);
+      const largeResources = metrics.resources.filter((r) => (r.transferSize || 0) > 1024 * 1024); // > 1MB
 
       if (totalSize > 5 * 1024 * 1024)
         resourceScore -= 30; // > 5MB total
@@ -631,14 +608,14 @@ class PerformanceProfiler {
       scores.loading * 0.3 +
         scores.interactivity * 0.3 +
         scores.visualStability * 0.2 +
-        scores.resourceOptimization * 0.2,
+        scores.resourceOptimization * 0.2
     );
 
     return scores;
   }
 
   async generateReport() {
-    console.log('📄 Generating performance profiling report...');
+    console.log("📄 Generating performance profiling report...");
 
     const totalDuration = Date.now() - this.startTime;
     const successfulProfiles = this.profiles.filter((p) => !p.error);
@@ -655,10 +632,8 @@ class PerformanceProfiler {
         averageScore:
           successfulProfiles.length > 0
             ? Math.round(
-                successfulProfiles.reduce(
-                  (acc, p) => acc + (p.scores?.overall || 0),
-                  0,
-                ) / successfulProfiles.length,
+                successfulProfiles.reduce((acc, p) => acc + (p.scores?.overall || 0), 0) /
+                  successfulProfiles.length
               )
             : 0,
       },
@@ -669,16 +644,13 @@ class PerformanceProfiler {
 
     // Write JSON report
     writeFileSync(
-      join(this.reportDir, 'performance-profiling-report.json'),
-      JSON.stringify(report, null, 2),
+      join(this.reportDir, "performance-profiling-report.json"),
+      JSON.stringify(report, null, 2)
     );
 
     // Write HTML report
     const htmlReport = this.generateHTMLReport(report);
-    writeFileSync(
-      join(this.reportDir, 'performance-profiling-report.html'),
-      htmlReport,
-    );
+    writeFileSync(join(this.reportDir, "performance-profiling-report.html"), htmlReport);
 
     return report;
   }
@@ -701,97 +673,81 @@ class PerformanceProfiler {
 
     if (avgLCP > 0) {
       insights.push({
-        type: 'loading_performance',
-        metric: 'LCP',
-        value: avgLCP.toFixed(0) + 'ms',
-        status:
-          avgLCP > 4000 ? 'poor' : avgLCP > 2500 ? 'needs_improvement' : 'good',
+        type: "loading_performance",
+        metric: "LCP",
+        value: avgLCP.toFixed(0) + "ms",
+        status: avgLCP > 4000 ? "poor" : avgLCP > 2500 ? "needs_improvement" : "good",
         description: `Average Largest Contentful Paint across all scenarios`,
       });
     }
 
     if (avgCLS > 0) {
       insights.push({
-        type: 'visual_stability',
-        metric: 'CLS',
+        type: "visual_stability",
+        metric: "CLS",
         value: avgCLS.toFixed(3),
-        status:
-          avgCLS > 0.25 ? 'poor' : avgCLS > 0.1 ? 'needs_improvement' : 'good',
-        description: 'Average Cumulative Layout Shift across all scenarios',
+        status: avgCLS > 0.25 ? "poor" : avgCLS > 0.1 ? "needs_improvement" : "good",
+        description: "Average Cumulative Layout Shift across all scenarios",
       });
     }
 
     // Resource analysis
     const allResources = profiles.flatMap((p) => p.resources || []);
     if (allResources.length > 0) {
-      const totalResourceSize = allResources.reduce(
-        (acc, r) => acc + (r.transferSize || 0),
-        0,
-      );
+      const totalResourceSize = allResources.reduce((acc, r) => acc + (r.transferSize || 0), 0);
       const avgResourceSize = totalResourceSize / allResources.length;
 
       insights.push({
-        type: 'resource_optimization',
-        metric: 'Average Resource Size',
-        value: (avgResourceSize / 1024).toFixed(1) + ' KB',
+        type: "resource_optimization",
+        metric: "Average Resource Size",
+        value: (avgResourceSize / 1024).toFixed(1) + " KB",
         status:
           avgResourceSize > 1024 * 1024
-            ? 'poor'
+            ? "poor"
             : avgResourceSize > 512 * 1024
-              ? 'needs_improvement'
-              : 'good',
+              ? "needs_improvement"
+              : "good",
         description: `Average size across ${allResources.length} resources`,
       });
     }
 
     // Memory usage analysis
-    const memoryProfiles = profiles.filter(
-      (p) => p.memoryUsage && p.memoryUsage.length > 0,
-    );
+    const memoryProfiles = profiles.filter((p) => p.memoryUsage && p.memoryUsage.length > 0);
     if (memoryProfiles.length > 0) {
       const peakMemory = Math.max(
-        ...memoryProfiles.flatMap((p) =>
-          p.memoryUsage.map((m) => m.jsHeap?.usedJSHeapSize || 0),
-        ),
+        ...memoryProfiles.flatMap((p) => p.memoryUsage.map((m) => m.jsHeap?.usedJSHeapSize || 0))
       );
 
       insights.push({
-        type: 'memory_usage',
-        metric: 'Peak Memory Usage',
-        value: (peakMemory / 1024 / 1024).toFixed(1) + ' MB',
+        type: "memory_usage",
+        metric: "Peak Memory Usage",
+        value: (peakMemory / 1024 / 1024).toFixed(1) + " MB",
         status:
           peakMemory > 100 * 1024 * 1024
-            ? 'poor'
+            ? "poor"
             : peakMemory > 50 * 1024 * 1024
-              ? 'needs_improvement'
-              : 'good',
-        description: 'Peak JavaScript heap usage across scenarios',
+              ? "needs_improvement"
+              : "good",
+        description: "Peak JavaScript heap usage across scenarios",
       });
     }
 
     // Long tasks analysis
     const allLongTasks = profiles.flatMap((p) => p.longTasks || []);
     if (allLongTasks.length > 0) {
-      const totalLongTaskTime = allLongTasks.reduce(
-        (acc, task) => acc + task.duration,
-        0,
-      );
+      const totalLongTaskTime = allLongTasks.reduce((acc, task) => acc + task.duration, 0);
 
       insights.push({
-        type: 'long_tasks',
-        metric: 'Long Tasks',
-        value:
-          allLongTasks.length +
-          ' tasks (' +
-          totalLongTaskTime.toFixed(0) +
-          'ms total)',
+        type: "long_tasks",
+        metric: "Long Tasks",
+        value: allLongTasks.length + " tasks (" + totalLongTaskTime.toFixed(0) + "ms total)",
         status:
           totalLongTaskTime > 1000
-            ? 'poor'
+            ? "poor"
             : totalLongTaskTime > 500
-              ? 'needs_improvement'
-              : 'good',
-        description: 'Tasks that blocked the main thread for >50ms',
+              ? "needs_improvement"
+              : "good",
+        description: "Tasks that blocked the main thread for >50ms",
       });
     }
 
@@ -804,31 +760,25 @@ class PerformanceProfiler {
     if (profiles.length === 0) return recommendations;
 
     // Analyze common performance issues
-    const highLCPProfiles = profiles.filter(
-      (p) => p.metrics?.webVitals?.lcp > 2500,
-    );
-    const highCLSProfiles = profiles.filter(
-      (p) => p.metrics?.webVitals?.cls > 0.1,
-    );
+    const highLCPProfiles = profiles.filter((p) => p.metrics?.webVitals?.lcp > 2500);
+    const highCLSProfiles = profiles.filter((p) => p.metrics?.webVitals?.cls > 0.1);
     const memoryHeavyProfiles = profiles.filter((p) => {
-      const peak = Math.max(
-        ...(p.memoryUsage?.map((m) => m.jsHeap?.usedJSHeapSize || 0) || [0]),
-      );
+      const peak = Math.max(...(p.memoryUsage?.map((m) => m.jsHeap?.usedJSHeapSize || 0) || [0]));
       return peak > 50 * 1024 * 1024; // > 50MB
     });
 
     // LCP recommendations
     if (highLCPProfiles.length > 0) {
       recommendations.push({
-        priority: 'high',
-        category: 'Loading Performance',
+        priority: "high",
+        category: "Loading Performance",
         issue: `${highLCPProfiles.length} scenarios have slow Largest Contentful Paint (>2.5s)`,
         recommendations: [
-          'Optimize images with modern formats (WebP, AVIF)',
-          'Implement lazy loading for below-the-fold content',
-          'Reduce server response times',
-          'Preload critical resources',
-          'Consider code splitting for large bundles',
+          "Optimize images with modern formats (WebP, AVIF)",
+          "Implement lazy loading for below-the-fold content",
+          "Reduce server response times",
+          "Preload critical resources",
+          "Consider code splitting for large bundles",
         ],
         affectedScenarios: highLCPProfiles.map((p) => p.scenario),
       });
@@ -837,15 +787,15 @@ class PerformanceProfiler {
     // CLS recommendations
     if (highCLSProfiles.length > 0) {
       recommendations.push({
-        priority: 'moderate',
-        category: 'Visual Stability',
+        priority: "moderate",
+        category: "Visual Stability",
         issue: `${highCLSProfiles.length} scenarios have layout shift issues (CLS >0.1)`,
         recommendations: [
-          'Set explicit dimensions for images and videos',
-          'Reserve space for dynamically injected content',
-          'Avoid inserting content above existing content',
-          'Use CSS aspect-ratio for responsive images',
-          'Preload fonts to prevent FOIT/FOUT',
+          "Set explicit dimensions for images and videos",
+          "Reserve space for dynamically injected content",
+          "Avoid inserting content above existing content",
+          "Use CSS aspect-ratio for responsive images",
+          "Preload fonts to prevent FOIT/FOUT",
         ],
         affectedScenarios: highCLSProfiles.map((p) => p.scenario),
       });
@@ -854,15 +804,15 @@ class PerformanceProfiler {
     // Memory recommendations
     if (memoryHeavyProfiles.length > 0) {
       recommendations.push({
-        priority: 'moderate',
-        category: 'Memory Usage',
+        priority: "moderate",
+        category: "Memory Usage",
         issue: `${memoryHeavyProfiles.length} scenarios use excessive memory (>50MB)`,
         recommendations: [
-          'Implement proper cleanup in useEffect hooks',
-          'Use React.memo for expensive components',
-          'Optimize large data structures and lists',
-          'Consider virtualization for long lists',
-          'Remove unused dependencies and code',
+          "Implement proper cleanup in useEffect hooks",
+          "Use React.memo for expensive components",
+          "Optimize large data structures and lists",
+          "Consider virtualization for long lists",
+          "Remove unused dependencies and code",
         ],
         affectedScenarios: memoryHeavyProfiles.map((p) => p.scenario),
       });
@@ -870,44 +820,39 @@ class PerformanceProfiler {
 
     // Resource optimization
     const largeResourceProfiles = profiles.filter((p) => {
-      const totalSize = (p.resources || []).reduce(
-        (acc, r) => acc + (r.transferSize || 0),
-        0,
-      );
+      const totalSize = (p.resources || []).reduce((acc, r) => acc + (r.transferSize || 0), 0);
       return totalSize > 2 * 1024 * 1024; // > 2MB
     });
 
     if (largeResourceProfiles.length > 0) {
       recommendations.push({
-        priority: 'moderate',
-        category: 'Resource Optimization',
+        priority: "moderate",
+        category: "Resource Optimization",
         issue: `${largeResourceProfiles.length} scenarios load large amounts of resources (>2MB)`,
         recommendations: [
-          'Enable gzip/brotli compression',
-          'Optimize and compress images',
-          'Bundle splitting and code splitting',
-          'Remove unused CSS and JavaScript',
-          'Use CDN for static assets',
+          "Enable gzip/brotli compression",
+          "Optimize and compress images",
+          "Bundle splitting and code splitting",
+          "Remove unused CSS and JavaScript",
+          "Use CDN for static assets",
         ],
         affectedScenarios: largeResourceProfiles.map((p) => p.scenario),
       });
     }
 
     // Long tasks recommendations
-    const longTaskProfiles = profiles.filter(
-      (p) => (p.longTasks || []).length > 0,
-    );
+    const longTaskProfiles = profiles.filter((p) => (p.longTasks || []).length > 0);
     if (longTaskProfiles.length > 0) {
       recommendations.push({
-        priority: 'high',
-        category: 'Interactivity',
+        priority: "high",
+        category: "Interactivity",
         issue: `${longTaskProfiles.length} scenarios have long tasks blocking the main thread`,
         recommendations: [
-          'Break up long-running JavaScript tasks',
-          'Use web workers for heavy computations',
-          'Implement time slicing for large renders',
-          'Optimize React component render cycles',
-          'Consider using React concurrent features',
+          "Break up long-running JavaScript tasks",
+          "Use web workers for heavy computations",
+          "Implement time slicing for large renders",
+          "Optimize React component render cycles",
+          "Consider using React concurrent features",
         ],
         affectedScenarios: longTaskProfiles.map((p) => p.scenario),
       });
@@ -918,22 +863,22 @@ class PerformanceProfiler {
 
   generateHTMLReport(report) {
     const getScoreColor = (score) => {
-      if (score >= 90) return '#28a745';
-      if (score >= 80) return '#ffc107';
-      if (score >= 60) return '#fd7e14';
-      return '#dc3545';
+      if (score >= 90) return "#28a745";
+      if (score >= 80) return "#ffc107";
+      if (score >= 60) return "#fd7e14";
+      return "#dc3545";
     };
 
     const getStatusColor = (status) => {
       switch (status) {
-        case 'good':
-          return '#28a745';
-        case 'needs_improvement':
-          return '#ffc107';
-        case 'poor':
-          return '#dc3545';
+        case "good":
+          return "#28a745";
+        case "needs_improvement":
+          return "#ffc107";
+        case "poor":
+          return "#dc3545";
         default:
-          return '#6c757d';
+          return "#6c757d";
       }
     };
 
@@ -1012,12 +957,12 @@ class PerformanceProfiler {
                         <h4>${insight.metric}: <span style="color: ${getStatusColor(insight.status)}">${insight.value}</span></h4>
                         <p>${insight.description}</p>
                     </div>
-                `,
+                `
                   )
-                  .join('')}
+                  .join("")}
             </div>
         `
-            : ''
+            : ""
         }
 
         <h2>📊 Scenario Profiles</h2>
@@ -1025,7 +970,7 @@ class PerformanceProfiler {
             ${report.profiles
               .map(
                 (profile) => `
-                <div class="profile-card ${profile.error ? 'error' : ''}">
+                <div class="profile-card ${profile.error ? "error" : ""}">
                     <div class="profile-header">
                         <div>
                             <h3>${profile.scenario}</h3>
@@ -1078,7 +1023,7 @@ class PerformanceProfiler {
                                 </div>
                             </div>
                         `
-                            : ''
+                            : ""
                         }
                         
                         ${
@@ -1093,7 +1038,7 @@ class PerformanceProfiler {
                                         <div>LCP</div>
                                     </div>
                                 `
-                                    : ''
+                                    : ""
                                 }
                                 ${
                                   profile.metrics.webVitals.fcp
@@ -1103,7 +1048,7 @@ class PerformanceProfiler {
                                         <div>FCP</div>
                                     </div>
                                 `
-                                    : ''
+                                    : ""
                                 }
                                 ${
                                   profile.metrics.webVitals.cls !== null
@@ -1113,7 +1058,7 @@ class PerformanceProfiler {
                                         <div>CLS</div>
                                     </div>
                                 `
-                                    : ''
+                                    : ""
                                 }
                                 ${
                                   profile.metrics.webVitals.ttfb
@@ -1123,25 +1068,25 @@ class PerformanceProfiler {
                                         <div>TTFB</div>
                                     </div>
                                 `
-                                    : ''
+                                    : ""
                                 }
                             </div>
                         `
-                            : ''
+                            : ""
                         }
                         
                         <div style="margin-top: 15px; font-size: 0.9em; color: #666;">
-                            ${profile.resources ? `${profile.resources.length} resources loaded` : ''}
-                            ${profile.memoryUsage?.length ? ` • ${profile.memoryUsage.length} memory samples` : ''}
-                            ${profile.longTasks?.length ? ` • ${profile.longTasks.length} long tasks` : ''}
-                            ${profile.consoleErrors?.length ? ` • ${profile.consoleErrors.length} console errors` : ''}
+                            ${profile.resources ? `${profile.resources.length} resources loaded` : ""}
+                            ${profile.memoryUsage?.length ? ` • ${profile.memoryUsage.length} memory samples` : ""}
+                            ${profile.longTasks?.length ? ` • ${profile.longTasks.length} long tasks` : ""}
+                            ${profile.consoleErrors?.length ? ` • ${profile.consoleErrors.length} console errors` : ""}
                         </div>
                     `
                     }
                 </div>
-            `,
+            `
               )
-              .join('')}
+              .join("")}
         </div>
 
         ${
@@ -1157,22 +1102,22 @@ class PerformanceProfiler {
                         <p><strong>Issue:</strong> ${rec.issue}</p>
                         <p><strong>Recommendations:</strong></p>
                         <ul class="rec-list">
-                            ${rec.recommendations.map((r) => `<li>${r}</li>`).join('')}
+                            ${rec.recommendations.map((r) => `<li>${r}</li>`).join("")}
                         </ul>
                         ${
                           rec.affectedScenarios.length > 0
                             ? `
-                            <p><strong>Affected scenarios:</strong> ${rec.affectedScenarios.join(', ')}</p>
+                            <p><strong>Affected scenarios:</strong> ${rec.affectedScenarios.join(", ")}</p>
                         `
-                            : ''
+                            : ""
                         }
                     </div>
-                `,
+                `
                   )
-                  .join('')}
+                  .join("")}
             </div>
         `
-            : ''
+            : ""
         }
     </div>
 </body>
@@ -1196,9 +1141,7 @@ class PerformanceProfiler {
         ? this.testScenarios.filter((s) => scenarios.includes(s.name))
         : this.testScenarios;
 
-      console.log(
-        `⚡ Running performance profiling on ${scenariosToRun.length} scenarios...\n`,
-      );
+      console.log(`⚡ Running performance profiling on ${scenariosToRun.length} scenarios...\n`);
 
       for (const scenario of scenariosToRun) {
         const profile = await this.profileScenario(scenario);
@@ -1208,38 +1151,30 @@ class PerformanceProfiler {
       if (generateReport) {
         const report = await this.generateReport();
 
-        console.log('\n🎯 Performance Profiling Summary:');
-        console.log(
-          '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
-        );
+        console.log("\n🎯 Performance Profiling Summary:");
+        console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
         console.log(`  Total Scenarios:      ${report.summary.totalScenarios}`);
         console.log(`  Successful Profiles:  ${report.summary.successful}`);
         console.log(`  Failed Profiles:      ${report.summary.failed}`);
-        console.log(
-          `  Average Score:        ${report.summary.averageScore}/100`,
-        );
-        console.log(
-          `  Profiling Duration:   ${(report.duration / 1000).toFixed(2)} seconds`,
-        );
+        console.log(`  Average Score:        ${report.summary.averageScore}/100`);
+        console.log(`  Profiling Duration:   ${(report.duration / 1000).toFixed(2)} seconds`);
 
         if (report.insights.length > 0) {
-          console.log('\n🔍 Key Insights:');
+          console.log("\n🔍 Key Insights:");
           report.insights.slice(0, 3).forEach((insight) => {
-            console.log(
-              `  • ${insight.metric}: ${insight.value} (${insight.status})`,
-            );
+            console.log(`  • ${insight.metric}: ${insight.value} (${insight.status})`);
           });
         }
 
         if (report.recommendations.length > 0) {
-          console.log('\n💡 Top Recommendations:');
+          console.log("\n💡 Top Recommendations:");
           report.recommendations.slice(0, 3).forEach((rec) => {
             console.log(`  • ${rec.category}: ${rec.issue} (${rec.priority})`);
           });
         }
 
         console.log(
-          `\n📄 Detailed report: ${join('test-results', 'performance-profiling', 'performance-profiling-report.html')}`,
+          `\n📄 Detailed report: ${join("test-results", "performance-profiling", "performance-profiling-report.html")}`
         );
 
         return report.summary.averageScore >= 80;
@@ -1255,14 +1190,13 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const args = process.argv.slice(2);
   const options = {
     baseUrl:
-      args.find((arg) => arg.startsWith('--base-url='))?.split('=')[1] ||
-      'http://localhost:5173',
+      args.find((arg) => arg.startsWith("--base-url="))?.split("=")[1] || "http://localhost:5173",
     scenarios:
       args
-        .find((arg) => arg.startsWith('--scenarios='))
-        ?.split('=')[1]
-        ?.split(',') || null,
-    generateReport: !args.includes('--no-report'),
+        .find((arg) => arg.startsWith("--scenarios="))
+        ?.split("=")[1]
+        ?.split(",") || null,
+    generateReport: !args.includes("--no-report"),
   };
 
   const profiler = new PerformanceProfiler(options.baseUrl);
@@ -1272,7 +1206,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       process.exit(success ? 0 : 1);
     })
     .catch((error) => {
-      console.error('Performance Profiler failed:', error);
+      console.error("Performance Profiler failed:", error);
       process.exit(1);
     });
 }

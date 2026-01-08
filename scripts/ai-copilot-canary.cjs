@@ -8,13 +8,13 @@
  * - Runbook documentation
  */
 
-const fs = require('fs');
-const yaml = require('js-yaml');
+const fs = require("fs");
+const yaml = require("js-yaml");
 
 const requiredFiles = [
-  'slo/ai-copilot.yaml',
-  'ALERT_POLICIES.yaml',
-  'RUNBOOKS/ai-copilot-service.md'
+  "slo/ai-copilot.yaml",
+  "ALERT_POLICIES.yaml",
+  "RUNBOOKS/ai-copilot-service.md",
 ];
 
 function assertFileExists(filePath) {
@@ -26,8 +26,8 @@ function assertFileExists(filePath) {
 }
 
 function validateSloConfig() {
-  console.log('\nValidating SLO configuration...');
-  const contents = fs.readFileSync('slo/ai-copilot.yaml', 'utf8');
+  console.log("\nValidating SLO configuration...");
+  const contents = fs.readFileSync("slo/ai-copilot.yaml", "utf8");
   const docs = [];
   yaml.loadAll(contents, (doc) => {
     if (doc) {
@@ -35,60 +35,56 @@ function validateSloConfig() {
     }
   });
 
-  const hasService = docs.some((doc) => doc?.spec?.service === 'ai-copilot');
+  const hasService = docs.some((doc) => doc?.spec?.service === "ai-copilot");
   if (!hasService) {
-    console.error('SLO config does not declare service: ai-copilot');
+    console.error("SLO config does not declare service: ai-copilot");
     process.exit(1);
   }
 
-  const hasAvailability = docs.some((doc) =>
-    doc?.metadata?.name === 'ai-copilot-availability'
-  );
-  const hasLatency = docs.some((doc) =>
-    doc?.metadata?.name === 'ai-copilot-latency'
-  );
+  const hasAvailability = docs.some((doc) => doc?.metadata?.name === "ai-copilot-availability");
+  const hasLatency = docs.some((doc) => doc?.metadata?.name === "ai-copilot-latency");
 
   if (!hasAvailability) {
-    console.error('Missing availability SLO');
+    console.error("Missing availability SLO");
     process.exit(1);
   }
   if (!hasLatency) {
-    console.error('Missing latency SLO');
+    console.error("Missing latency SLO");
     process.exit(1);
   }
 
-  console.log('✓ SLO configuration valid');
+  console.log("✓ SLO configuration valid");
 }
 
 function validateAlertPolicies() {
-  console.log('\nValidating alert policies...');
+  console.log("\nValidating alert policies...");
 
-  if (!fs.existsSync('ALERT_POLICIES.yaml')) {
-    console.log('⚠ ALERT_POLICIES.yaml not found, skipping alert validation');
+  if (!fs.existsSync("ALERT_POLICIES.yaml")) {
+    console.log("⚠ ALERT_POLICIES.yaml not found, skipping alert validation");
     return;
   }
 
-  const contents = fs.readFileSync('ALERT_POLICIES.yaml', 'utf8');
-  if (!contents.includes('service: ai-copilot')) {
-    console.error('Alert policies missing ai-copilot service labels');
+  const contents = fs.readFileSync("ALERT_POLICIES.yaml", "utf8");
+  if (!contents.includes("service: ai-copilot")) {
+    console.error("Alert policies missing ai-copilot service labels");
     process.exit(1);
   }
 
-  console.log('✓ Alert policies contain ai-copilot service');
+  console.log("✓ Alert policies contain ai-copilot service");
 }
 
 function validateRunbook() {
-  console.log('\nValidating runbook...');
-  const contents = fs.readFileSync('RUNBOOKS/ai-copilot-service.md', 'utf8');
+  console.log("\nValidating runbook...");
+  const contents = fs.readFileSync("RUNBOOKS/ai-copilot-service.md", "utf8");
 
   const requiredSections = [
-    'AI Copilot Service Runbook',
-    'Ownership',
-    'SLOs',
-    'Alerts',
-    'Triage Checklist',
-    'Mitigation Steps',
-    'Escalation'
+    "AI Copilot Service Runbook",
+    "Ownership",
+    "SLOs",
+    "Alerts",
+    "Triage Checklist",
+    "Mitigation Steps",
+    "Escalation",
   ];
 
   for (const section of requiredSections) {
@@ -98,12 +94,12 @@ function validateRunbook() {
     }
   }
 
-  console.log('✓ Runbook contains all required sections');
+  console.log("✓ Runbook contains all required sections");
 }
 
 function runCanary() {
-  console.log('AI Copilot Canary: Validating operational artifacts\n');
-  console.log('Checking required files...');
+  console.log("AI Copilot Canary: Validating operational artifacts\n");
+  console.log("Checking required files...");
 
   requiredFiles.forEach(assertFileExists);
 
@@ -111,7 +107,7 @@ function runCanary() {
   validateAlertPolicies();
   validateRunbook();
 
-  console.log('\n✅ AI Copilot canary passed: all artifacts present and valid');
+  console.log("\n✅ AI Copilot canary passed: all artifacts present and valid");
 }
 
 runCanary();

@@ -1,6 +1,6 @@
-import { nanoid } from 'nanoid';
-import { SchemaMappingState } from '../types';
-import '../styles.css';
+import { nanoid } from "nanoid";
+import { SchemaMappingState } from "../types";
+import "../styles.css";
 
 export interface SchemaMappingStepProps {
   value: SchemaMappingState;
@@ -14,19 +14,29 @@ const ensureId = (value: SchemaMappingState) => ({
   ...value,
   mappings: value.mappings.map((mapping) => ({
     ...mapping,
-    id: mapping.id || nanoid(8)
-  }))
+    id: mapping.id || nanoid(8),
+  })),
 });
 
-export const SchemaMappingStep = ({ value, onChange, onNext, onBack, disabled }: SchemaMappingStepProps) => {
+export const SchemaMappingStep = ({
+  value,
+  onChange,
+  onNext,
+  onBack,
+  disabled,
+}: SchemaMappingStepProps) => {
   const hydrated = ensureId(value);
 
-  const handleMappingChange = (index: number, field: 'sourceField' | 'targetField' | 'transformation' | 'required', input: string | boolean) => {
+  const handleMappingChange = (
+    index: number,
+    field: "sourceField" | "targetField" | "transformation" | "required",
+    input: string | boolean
+  ) => {
     const next = hydrated.mappings.map((mapping, mappingIndex) => {
       if (mappingIndex !== index) return mapping;
       return {
         ...mapping,
-        [field]: field === 'required' ? Boolean(input) : input
+        [field]: field === "required" ? Boolean(input) : input,
       };
     });
     onChange({ ...hydrated, mappings: next });
@@ -39,11 +49,11 @@ export const SchemaMappingStep = ({ value, onChange, onNext, onBack, disabled }:
         ...hydrated.mappings,
         {
           id: nanoid(8),
-          sourceField: hydrated.sourceSample[0]?.name ?? '',
-          targetField: hydrated.targetSchema[0]?.name ?? '',
-          required: false
-        }
-      ]
+          sourceField: hydrated.sourceSample[0]?.name ?? "",
+          targetField: hydrated.targetSchema[0]?.name ?? "",
+          required: false,
+        },
+      ],
     };
     onChange(next);
   };
@@ -61,7 +71,8 @@ export const SchemaMappingStep = ({ value, onChange, onNext, onBack, disabled }:
       <header>
         <h2>Schema mapping</h2>
         <p className="description">
-          Align the incoming feed columns to IntelGraph's canonical schema. Automatic suggestions are highlighted and can be overridden.
+          Align the incoming feed columns to IntelGraph's canonical schema. Automatic suggestions
+          are highlighted and can be overridden.
         </p>
       </header>
 
@@ -73,13 +84,13 @@ export const SchemaMappingStep = ({ value, onChange, onNext, onBack, disabled }:
               <th>Target field</th>
               <th>Transformation</th>
               <th>Required</th>
-              <th style={{ textAlign: 'right' }}>Actions</th>
+              <th style={{ textAlign: "right" }}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {hydrated.mappings.length === 0 && (
               <tr>
-                <td colSpan={5} style={{ padding: '24px', textAlign: 'center', color: '#61748f' }}>
+                <td colSpan={5} style={{ padding: "24px", textAlign: "center", color: "#61748f" }}>
                   No field mappings yet. Use the button below to begin aligning fields.
                 </td>
               </tr>
@@ -91,7 +102,9 @@ export const SchemaMappingStep = ({ value, onChange, onNext, onBack, disabled }:
                   <select
                     className="iw-select"
                     value={mapping.sourceField}
-                    onChange={(event) => handleMappingChange(index, 'sourceField', event.target.value)}
+                    onChange={(event) =>
+                      handleMappingChange(index, "sourceField", event.target.value)
+                    }
                     disabled={disabled}
                   >
                     {availableSourceFields.map((sourceField) => (
@@ -105,7 +118,9 @@ export const SchemaMappingStep = ({ value, onChange, onNext, onBack, disabled }:
                   <select
                     className="iw-select"
                     value={mapping.targetField}
-                    onChange={(event) => handleMappingChange(index, 'targetField', event.target.value)}
+                    onChange={(event) =>
+                      handleMappingChange(index, "targetField", event.target.value)
+                    }
                     disabled={disabled}
                   >
                     {availableTargetFields.map((targetField) => (
@@ -120,20 +135,24 @@ export const SchemaMappingStep = ({ value, onChange, onNext, onBack, disabled }:
                     type="text"
                     className="iw-text-input"
                     placeholder="Optional transformation"
-                    value={mapping.transformation ?? ''}
-                    onChange={(event) => handleMappingChange(index, 'transformation', event.target.value)}
+                    value={mapping.transformation ?? ""}
+                    onChange={(event) =>
+                      handleMappingChange(index, "transformation", event.target.value)
+                    }
                     disabled={disabled}
                   />
                 </td>
-                <td style={{ textAlign: 'center' }}>
+                <td style={{ textAlign: "center" }}>
                   <input
                     type="checkbox"
                     checked={Boolean(mapping.required)}
-                    onChange={(event) => handleMappingChange(index, 'required', event.target.checked)}
+                    onChange={(event) =>
+                      handleMappingChange(index, "required", event.target.checked)
+                    }
                     disabled={disabled}
                   />
                 </td>
-                <td style={{ textAlign: 'right' }}>
+                <td style={{ textAlign: "right" }}>
                   <button
                     type="button"
                     className="iw-button iw-button-tertiary"
@@ -149,17 +168,27 @@ export const SchemaMappingStep = ({ value, onChange, onNext, onBack, disabled }:
         </table>
       </div>
 
-      <div style={{ marginTop: '16px', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '12px' }}>
+      <div
+        style={{
+          marginTop: "16px",
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "space-between",
+          gap: "12px",
+        }}
+      >
         <button
           type="button"
           className="iw-button iw-button-tertiary"
           onClick={handleAddMapping}
-          disabled={disabled || availableSourceFields.length === 0 || availableTargetFields.length === 0}
+          disabled={
+            disabled || availableSourceFields.length === 0 || availableTargetFields.length === 0
+          }
         >
           + Add mapping
         </button>
 
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div style={{ display: "flex", gap: "12px" }}>
           <button
             type="button"
             className="iw-button iw-button-secondary"

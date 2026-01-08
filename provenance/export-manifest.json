@@ -436,12 +436,7 @@
       "passed": 17,
       "failed": 1,
       "success_rate": 94.4,
-      "scenarios": [
-        "user_login",
-        "entity_creation",
-        "graph_traversal",
-        "analytics_dashboard"
-      ]
+      "scenarios": ["user_login", "entity_creation", "graph_traversal", "analytics_dashboard"]
     }
   },
   "observability": {

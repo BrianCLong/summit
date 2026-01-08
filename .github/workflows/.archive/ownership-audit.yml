@@ -2,11 +2,11 @@ name: Ownership Audit
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   schedule:
-    - cron: '0 9 * * *'  # Daily at 9am
+    - cron: "0 9 * * *" # Daily at 9am
 
 jobs:
   audit:
@@ -17,7 +17,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Check Ownership Drift
         run: python3 scripts/governance/check_ownership_drift.py

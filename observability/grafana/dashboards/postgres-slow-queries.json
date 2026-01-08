@@ -4,7 +4,11 @@
     {
       "type": "table",
       "title": "Top slow queries",
-      "targets": [{ "expr": "topk(10, rate(db_query_latency_seconds_sum{store='postgres'}[5m]) / rate(db_query_latency_seconds_count{store='postgres'}[5m]))" }]
+      "targets": [
+        {
+          "expr": "topk(10, rate(db_query_latency_seconds_sum{store='postgres'}[5m]) / rate(db_query_latency_seconds_count{store='postgres'}[5m]))"
+        }
+      ]
     },
     {
       "type": "timeseries",

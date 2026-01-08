@@ -5,23 +5,23 @@
  */
 
 /** Signal frequency band classification */
-export type FrequencyBand = 'VLF' | 'LF' | 'MF' | 'HF' | 'VHF' | 'UHF' | 'SHF' | 'EHF';
+export type FrequencyBand = "VLF" | "LF" | "MF" | "HF" | "VHF" | "UHF" | "SHF" | "EHF";
 
 /** Modulation types for signal classification */
 export type ModulationType =
-  | 'AM'
-  | 'FM'
-  | 'PM'
-  | 'ASK'
-  | 'FSK'
-  | 'PSK'
-  | 'QAM'
-  | 'OFDM'
-  | 'SPREAD_SPECTRUM'
-  | 'UNKNOWN';
+  | "AM"
+  | "FM"
+  | "PM"
+  | "ASK"
+  | "FSK"
+  | "PSK"
+  | "QAM"
+  | "OFDM"
+  | "SPREAD_SPECTRUM"
+  | "UNKNOWN";
 
 /** Signal classification confidence levels */
-export type ConfidenceLevel = 'HIGH' | 'MEDIUM' | 'LOW' | 'UNCONFIRMED';
+export type ConfidenceLevel = "HIGH" | "MEDIUM" | "LOW" | "UNCONFIRMED";
 
 /** Real-time signal sample from Redis stream */
 export interface SignalSample {
@@ -62,13 +62,13 @@ export interface SignalStream {
 /** MASINT sensor overlay data */
 export interface MASINTOverlay {
   id: string;
-  sensorType: 'RADAR' | 'ACOUSTIC' | 'SEISMIC' | 'NUCLEAR' | 'ELECTRO_OPTICAL';
+  sensorType: "RADAR" | "ACOUSTIC" | "SEISMIC" | "NUCLEAR" | "ELECTRO_OPTICAL";
   coverage: {
     center: { lat: number; lng: number };
     radiusKm: number;
   };
   detections: MASINTDetection[];
-  status: 'ACTIVE' | 'DEGRADED' | 'OFFLINE';
+  status: "ACTIVE" | "DEGRADED" | "OFFLINE";
   lastUpdate: number;
 }
 
@@ -87,7 +87,7 @@ export interface MASINTDetection {
 export interface DemodulationTask {
   id: string;
   signalId: string;
-  status: 'QUEUED' | 'ANALYZING' | 'DEMODULATING' | 'COMPLETED' | 'FAILED';
+  status: "QUEUED" | "ANALYZING" | "DEMODULATING" | "COMPLETED" | "FAILED";
   progress: number;
   result?: DemodulationResult;
   startedAt: number;

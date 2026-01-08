@@ -33,6 +33,7 @@
 ### Why Use Claude Code with Summit?
 
 The Summit/IntelGraph platform is a large, complex monorepo with:
+
 - **150+ services** and microservices
 - **Multiple technology stacks** (TypeScript, Python, GraphQL, Neo4j, PostgreSQL)
 - **Extensive testing requirements** (unit, integration, E2E, smoke tests)
@@ -58,12 +59,14 @@ npx @anthropic-ai/claude-code
 ### Initial Setup
 
 1. **Configure API Key**:
+
    ```bash
    export ANTHROPIC_API_KEY="your-api-key-here"
    # Add to ~/.bashrc or ~/.zshrc for persistence
    ```
 
 2. **Navigate to Summit Repository**:
+
    ```bash
    cd /path/to/summit
    ```
@@ -82,6 +85,7 @@ claude-code
 ```
 
 Try your first command:
+
 ```
 > Help me understand the codebase structure
 ```
@@ -449,6 +453,7 @@ Help Claude Code maintain context:
 #### Issue: Claude Code doesn't understand the codebase
 
 **Solution**: Explicitly reference CLAUDE.md
+
 ```bash
 > Read CLAUDE.md and then help me understand the codebase structure
 ```
@@ -456,6 +461,7 @@ Help Claude Code maintain context:
 #### Issue: Responses are too generic
 
 **Solution**: Provide more context
+
 ```bash
 # Instead of:
 > How do I add a new service?
@@ -467,6 +473,7 @@ Help Claude Code maintain context:
 #### Issue: Claude Code suggests breaking changes
 
 **Solution**: Emphasize backward compatibility
+
 ```bash
 > Add this feature while maintaining backward compatibility and not breaking the golden path smoke test
 ```
@@ -474,6 +481,7 @@ Help Claude Code maintain context:
 #### Issue: Changes don't follow project conventions
 
 **Solution**: Always reference conventions
+
 ```bash
 > Following the TypeScript, ESLint, and Prettier configurations in this project, refactor this code
 ```
@@ -483,16 +491,19 @@ Help Claude Code maintain context:
 If you're stuck, try these approaches:
 
 1. **Start with exploration**:
+
    ```bash
    > Show me 3 examples of similar functionality in this codebase
    ```
 
 2. **Break down the problem**:
+
    ```bash
    > Let's break this into smaller tasks. What's the first step?
    ```
 
 3. **Ask for alternatives**:
+
    ```bash
    > What are 3 different approaches to implementing this feature?
    ```
@@ -838,6 +849,7 @@ EOF
 ```
 
 Use custom prompts:
+
 ```bash
 > [add-feature]
 > Feature: Add investigation collaboration

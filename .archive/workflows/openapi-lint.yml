@@ -6,8 +6,8 @@ permissions:
 on:
   pull_request:
     paths:
-      - 'openapi/**/*.yaml'
-      - 'openapi/**/*.yml'
+      - "openapi/**/*.yaml"
+      - "openapi/**/*.yml"
 
 jobs:
   spectral:
@@ -17,5 +17,5 @@ jobs:
       - name: Lint OpenAPI with Spectral
         uses: stoplightio/spectral-action@v0.8.10
         with:
-          file_glob: 'openapi/**/*.y?(a)ml'
+          file_glob: "openapi/**/*.y?(a)ml"
           verbose: true

@@ -1,16 +1,15 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   user: null,
-  token: typeof window !== 'undefined' ? localStorage.getItem('token') : null,
-  isAuthenticated:
-    typeof window !== 'undefined' ? !!localStorage.getItem('token') : false,
+  token: typeof window !== "undefined" ? localStorage.getItem("token") : null,
+  isAuthenticated: typeof window !== "undefined" ? !!localStorage.getItem("token") : false,
   loading: false,
   error: null,
 };
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     loginStart: (state) => {
@@ -22,8 +21,8 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
       state.user = action.payload.user;
       state.token = action.payload.token;
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('token', action.payload.token);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("token", action.payload.token);
       }
     },
     loginFailure: (state, action) => {
@@ -34,13 +33,12 @@ const authSlice = createSlice({
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('token');
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token");
       }
     },
   },
 });
 
-export const { loginStart, loginSuccess, loginFailure, logout } =
-  authSlice.actions;
+export const { loginStart, loginSuccess, loginFailure, logout } = authSlice.actions;
 export default authSlice.reducer;

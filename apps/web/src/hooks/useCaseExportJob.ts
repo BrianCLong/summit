@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { cancelExportJob, createExportJob, fetchExportJob, triggerDownload } from '@/lib/api/export'
+import {
+  cancelExportJob,
+  createExportJob,
+  fetchExportJob,
+  triggerDownload,
+} from '@/lib/api/export'
 import {
   computeExportParamsHash,
   deriveIdempotencyKey,
@@ -85,18 +90,27 @@ export function normalizeExportJobStatus(
   }
 }
 
-function useDurableCaseExportJob(args: UseCaseExportJobArgs, paramsHash: string, jobKey: string) {
+function useDurableCaseExportJob(
+  args: UseCaseExportJobArgs,
+  paramsHash: string,
+  jobKey: string
+) {
   const { tenantId, caseId, caseTitle, format } = args
-  const idempotencyKey = useMemo(() => deriveIdempotencyKey(tenantId, caseId, paramsHash), [tenantId, caseId, paramsHash])
+  const idempotencyKey = useMemo(
+    () => deriveIdempotencyKey(tenantId, caseId, paramsHash),
+    [tenantId, caseId, paramsHash]
+  )
   const [error, setError] = useState<string | null>(null)
   const pollingRef = useRef<NodeJS.Timeout | null>(null)
   const backoffRef = useRef(1500)
-  const { jobs, getJob, upsertJob, updateStatus } = useExportJobsStore((state) => ({
-    jobs: state.jobs,
-    getJob: state.getJob,
-    upsertJob: state.upsertJob,
-    updateStatus: state.updateStatus,
-  }))
+  const { jobs, getJob, upsertJob, updateStatus } = useExportJobsStore(
+    state => ({
+      jobs: state.jobs,
+      getJob: state.getJob,
+      upsertJob: state.upsertJob,
+      updateStatus: state.updateStatus,
+    })
+  )
   const activeJob = jobs[jobKey]
 
   const stopPolling = useCallback(() => {
@@ -140,7 +154,8 @@ function useDurableCaseExportJob(args: UseCaseExportJobArgs, paramsHash: string,
       }, delay)
     } catch (err) {
       console.error(err)
-      const message = err instanceof Error ? err.message : 'Unable to fetch export status'
+      const message =
+        err instanceof Error ? err.message : 'Unable to fetch export status'
       setError(message)
       updateStatus(jobKey, 'failed', { error: message })
       recordTelemetryEvent('export_failed', job.jobId, job.startedAt)
@@ -175,16 +190,30 @@ function useDurableCaseExportJob(args: UseCaseExportJobArgs, paramsHash: string,
         await pollStatus()
         return jobEntry
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Failed to start export'
+        const message =
+          err instanceof Error ? err.message : 'Failed to start export'
         setError(message)
         return null
       }
     },
-    [args.options, caseId, format, idempotencyKey, jobKey, paramsHash, pollStatus, tenantId, upsertJob]
+    [
+      args.options,
+      caseId,
+      format,
+      idempotencyKey,
+      jobKey,
+      paramsHash,
+      pollStatus,
+      tenantId,
+      upsertJob,
+    ]
   )
 
   const startExport = useCallback(async () => {
-    if (activeJob && !['failed', 'complete', 'canceled'].includes(activeJob.status)) {
+    if (
+      activeJob &&
+      !['failed', 'complete', 'canceled'].includes(activeJob.status)
+    ) {
       return activeJob
     }
 
@@ -192,7 +221,10 @@ function useDurableCaseExportJob(args: UseCaseExportJobArgs, paramsHash: string,
   }, [activeJob, createJob])
 
   const startNewExport = useCallback(async () => {
-    const salt = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`
+    const salt =
+      typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random()}`
     const freshKey = deriveIdempotencyKey(tenantId, caseId, paramsHash, salt)
     stopPolling()
     return createJob(freshKey)
@@ -214,10 +246,14 @@ function useDurableCaseExportJob(args: UseCaseExportJobArgs, paramsHash: string,
     if (!job || !job.downloadUrl) return
     try {
       updateStatus(jobKey, 'downloading')
-      await triggerDownload(job.downloadUrl, sanitizeFilename(caseTitle, format))
+      await triggerDownload(
+        job.downloadUrl,
+        sanitizeFilename(caseTitle, format)
+      )
       updateStatus(jobKey, 'complete')
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to download export'
+      const message =
+        err instanceof Error ? err.message : 'Failed to download export'
       setError(message)
       updateStatus(jobKey, 'failed', { error: message })
     }
@@ -225,7 +261,10 @@ function useDurableCaseExportJob(args: UseCaseExportJobArgs, paramsHash: string,
 
   useEffect(() => {
     const job = getJob(jobKey)
-    if (job && ['creating', 'in_progress', 'ready', 'downloading'].includes(job.status)) {
+    if (
+      job &&
+      ['creating', 'in_progress', 'ready', 'downloading'].includes(job.status)
+    ) {
       pollStatus()
     }
   }, [getJob, jobKey, pollStatus])
@@ -245,9 +284,16 @@ function useDurableCaseExportJob(args: UseCaseExportJobArgs, paramsHash: string,
   }
 }
 
-function useLegacyCaseExportJob(args: UseCaseExportJobArgs, paramsHash: string, jobKey: string) {
+function useLegacyCaseExportJob(
+  args: UseCaseExportJobArgs,
+  paramsHash: string,
+  jobKey: string
+) {
   const { tenantId, caseId, caseTitle, format } = args
-  const idempotencyKey = useMemo(() => deriveIdempotencyKey(tenantId, caseId, paramsHash), [tenantId, caseId, paramsHash])
+  const idempotencyKey = useMemo(
+    () => deriveIdempotencyKey(tenantId, caseId, paramsHash),
+    [tenantId, caseId, paramsHash]
+  )
   const [job, setJob] = useState<ExportJobState | undefined>(undefined)
   const [error, setError] = useState<string | null>(null)
   const pollingRef = useRef<NodeJS.Timeout | null>(null)
@@ -266,7 +312,7 @@ function useLegacyCaseExportJob(args: UseCaseExportJobArgs, paramsHash: string, 
     try {
       const status = await fetchExportJob(tenantId, caseId, job.jobId)
       const normalized = normalizeExportJobStatus(status, job)
-      setJob((previous) =>
+      setJob(previous =>
         previous
           ? {
               ...previous,
@@ -291,9 +337,12 @@ function useLegacyCaseExportJob(args: UseCaseExportJobArgs, paramsHash: string, 
       const delay = withJitter(backoffRef.current)
       pollingRef.current = setTimeout(() => pollStatus(), delay)
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unable to fetch export status'
+      const message =
+        err instanceof Error ? err.message : 'Unable to fetch export status'
       setError(message)
-      setJob((previous) => (previous ? { ...previous, status: 'failed', error: message } : previous))
+      setJob(previous =>
+        previous ? { ...previous, status: 'failed', error: message } : previous
+      )
       recordTelemetryEvent('export_failed', job.jobId, job.startedAt)
       stopPolling()
     }
@@ -326,12 +375,21 @@ function useLegacyCaseExportJob(args: UseCaseExportJobArgs, paramsHash: string, 
         await pollStatus()
         return nextJob
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Failed to start export'
+        const message =
+          err instanceof Error ? err.message : 'Failed to start export'
         setError(message)
         return null
       }
     },
-    [args.options, caseId, format, idempotencyKey, paramsHash, pollStatus, tenantId]
+    [
+      args.options,
+      caseId,
+      format,
+      idempotencyKey,
+      paramsHash,
+      pollStatus,
+      tenantId,
+    ]
   )
 
   const startExport = useCallback(async () => {
@@ -343,7 +401,10 @@ function useLegacyCaseExportJob(args: UseCaseExportJobArgs, paramsHash: string, 
   }, [createJob, job])
 
   const startNewExport = useCallback(async () => {
-    const salt = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`
+    const salt =
+      typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random()}`
     const freshKey = deriveIdempotencyKey(tenantId, caseId, paramsHash, salt)
     stopPolling()
     return createJob(freshKey)
@@ -355,20 +416,32 @@ function useLegacyCaseExportJob(args: UseCaseExportJobArgs, paramsHash: string, 
       await cancelExportJob(tenantId, caseId, job.jobId)
     } finally {
       stopPolling()
-      setJob((previous) => (previous ? { ...previous, status: 'canceled' } : previous))
+      setJob(previous =>
+        previous ? { ...previous, status: 'canceled' } : previous
+      )
     }
   }, [caseId, job, stopPolling, tenantId])
 
   const markDownload = useCallback(async () => {
     if (!job || !job.downloadUrl) return
     try {
-      setJob((previous) => (previous ? { ...previous, status: 'downloading' } : previous))
-      await triggerDownload(job.downloadUrl, sanitizeFilename(caseTitle, format))
-      setJob((previous) => (previous ? { ...previous, status: 'complete' } : previous))
+      setJob(previous =>
+        previous ? { ...previous, status: 'downloading' } : previous
+      )
+      await triggerDownload(
+        job.downloadUrl,
+        sanitizeFilename(caseTitle, format)
+      )
+      setJob(previous =>
+        previous ? { ...previous, status: 'complete' } : previous
+      )
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to download export'
+      const message =
+        err instanceof Error ? err.message : 'Failed to download export'
       setError(message)
-      setJob((previous) => (previous ? { ...previous, status: 'failed', error: message } : previous))
+      setJob(previous =>
+        previous ? { ...previous, status: 'failed', error: message } : previous
+      )
     }
   }, [caseTitle, format, job])
 
@@ -387,7 +460,9 @@ function useLegacyCaseExportJob(args: UseCaseExportJobArgs, paramsHash: string, 
   }
 }
 
-export function useCaseExportJob(args: UseCaseExportJobArgs): ExportJobController {
+export function useCaseExportJob(
+  args: UseCaseExportJobArgs
+): ExportJobController {
   const paramsHash = useMemo(
     () =>
       computeExportParamsHash({
@@ -399,7 +474,10 @@ export function useCaseExportJob(args: UseCaseExportJobArgs): ExportJobControlle
     [args.caseId, args.format, args.options, args.tenantId]
   )
 
-  const jobKey = useMemo(() => resolveJobKey(args.tenantId, args.caseId, paramsHash), [args.caseId, args.tenantId, paramsHash])
+  const jobKey = useMemo(
+    () => resolveJobKey(args.tenantId, args.caseId, paramsHash),
+    [args.caseId, args.tenantId, paramsHash]
+  )
   const mode = args.mode ?? 'durable'
 
   if (mode === 'legacy') {

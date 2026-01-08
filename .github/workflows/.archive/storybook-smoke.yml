@@ -3,11 +3,11 @@ name: Storybook smoke
 on:
   pull_request:
     paths:
-      - 'apps/web/**'
-      - '.github/workflows/storybook-smoke.yml'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - 'package.json'
+      - "apps/web/**"
+      - ".github/workflows/storybook-smoke.yml"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "package.json"
   workflow_dispatch:
 
 jobs:
@@ -30,7 +30,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'pnpm'
+          cache: "pnpm"
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies

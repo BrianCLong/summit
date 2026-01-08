@@ -12,67 +12,67 @@
  * - Natural language query processing
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-console.log('🤖 IntelGraph AI/ML Pipeline Integration Demo');
-console.log('===========================================\n');
+console.log("🤖 IntelGraph AI/ML Pipeline Integration Demo");
+console.log("===========================================\n");
 
 class AIEntityExtractor {
   constructor() {
     this.models = {
-      ner: 'spacy:en_core_web_trf',
-      embedding: 'sentence-transformers/all-MiniLM-L6-v2',
-      classification: 'bert-base-uncased-threat-classification',
+      ner: "spacy:en_core_web_trf",
+      embedding: "sentence-transformers/all-MiniLM-L6-v2",
+      classification: "bert-base-uncased-threat-classification",
     };
   }
 
   async extractEntities(text) {
-    console.log('🔍 Extracting entities from unstructured text...');
+    console.log("🔍 Extracting entities from unstructured text...");
 
     // Simulated NLP entity extraction
     const entities = [
       {
-        text: 'John Anderson',
-        type: 'PERSON',
+        text: "John Anderson",
+        type: "PERSON",
         confidence: 0.95,
         start: 15,
         end: 27,
         properties: {
-          role: 'analyst',
-          department: 'intelligence',
+          role: "analyst",
+          department: "intelligence",
         },
       },
       {
-        text: '192.168.1.100',
-        type: 'IP_ADDRESS',
+        text: "192.168.1.100",
+        type: "IP_ADDRESS",
         confidence: 0.98,
         start: 45,
         end: 58,
         properties: {
-          location: 'internal_network',
+          location: "internal_network",
           risk_score: 0.3,
         },
       },
       {
-        text: 'Project Alpha',
-        type: 'PROJECT',
+        text: "Project Alpha",
+        type: "PROJECT",
         confidence: 0.87,
         start: 70,
         end: 83,
         properties: {
-          classification: 'confidential',
-          status: 'active',
+          classification: "confidential",
+          status: "active",
         },
       },
       {
-        text: 'malware.exe',
-        type: 'FILE',
+        text: "malware.exe",
+        type: "FILE",
         confidence: 0.92,
         start: 95,
         end: 106,
         properties: {
-          threat_type: 'trojan',
+          threat_type: "trojan",
           risk_score: 0.9,
         },
       },
@@ -80,9 +80,7 @@ class AIEntityExtractor {
 
     console.log(`✅ Extracted ${entities.length} entities:`);
     entities.forEach((entity) => {
-      console.log(
-        `   • ${entity.text} (${entity.type}) - Confidence: ${entity.confidence}`,
-      );
+      console.log(`   • ${entity.text} (${entity.type}) - Confidence: ${entity.confidence}`);
     });
 
     return entities;
@@ -91,94 +89,90 @@ class AIEntityExtractor {
 
 class GraphNeuralNetworkAnalyzer {
   constructor() {
-    this.model_architecture = 'GraphSAGE';
+    this.model_architecture = "GraphSAGE";
     this.embedding_dim = 256;
     this.num_layers = 3;
   }
 
   async inferRelationships(entities) {
-    console.log('\n🧠 Analyzing relationships with Graph Neural Networks...');
+    console.log("\n🧠 Analyzing relationships with Graph Neural Networks...");
 
     // Simulated GNN relationship inference
     const relationships = [
       {
-        source: 'John Anderson',
-        target: 'Project Alpha',
-        type: 'ASSIGNED_TO',
+        source: "John Anderson",
+        target: "Project Alpha",
+        type: "ASSIGNED_TO",
         confidence: 0.89,
         strength: 0.75,
         properties: {
-          role: 'lead_analyst',
-          access_level: 'full',
+          role: "lead_analyst",
+          access_level: "full",
         },
       },
       {
-        source: '192.168.1.100',
-        target: 'malware.exe',
-        type: 'HOSTS',
+        source: "192.168.1.100",
+        target: "malware.exe",
+        type: "HOSTS",
         confidence: 0.94,
         strength: 0.85,
         properties: {
-          detection_time: '2025-01-15T10:30:00Z',
-          threat_level: 'high',
+          detection_time: "2025-01-15T10:30:00Z",
+          threat_level: "high",
         },
       },
       {
-        source: 'Project Alpha',
-        target: '192.168.1.100',
-        type: 'USES_RESOURCE',
+        source: "Project Alpha",
+        target: "192.168.1.100",
+        type: "USES_RESOURCE",
         confidence: 0.78,
         strength: 0.6,
         properties: {
-          access_pattern: 'regular',
-          last_access: '2025-01-15T09:45:00Z',
+          access_pattern: "regular",
+          last_access: "2025-01-15T09:45:00Z",
         },
       },
     ];
 
     console.log(`✅ Inferred ${relationships.length} relationships:`);
     relationships.forEach((rel) => {
-      console.log(
-        `   • ${rel.source} --[${rel.type}]--> ${rel.target} (${rel.confidence})`,
-      );
+      console.log(`   • ${rel.source} --[${rel.type}]--> ${rel.target} (${rel.confidence})`);
     });
 
     return relationships;
   }
 
   async detectAnomalies(graph_data) {
-    console.log('\n🔍 Detecting anomalies in graph patterns...');
+    console.log("\n🔍 Detecting anomalies in graph patterns...");
 
     const anomalies = [
       {
-        type: 'unusual_access_pattern',
-        entity: '192.168.1.100',
-        description: 'IP accessed project resources outside normal hours',
+        type: "unusual_access_pattern",
+        entity: "192.168.1.100",
+        description: "IP accessed project resources outside normal hours",
         severity: 0.7,
         evidence: {
-          access_times: ['02:30:00', '03:15:00', '04:20:00'],
-          normal_pattern: '09:00-17:00',
+          access_times: ["02:30:00", "03:15:00", "04:20:00"],
+          normal_pattern: "09:00-17:00",
           deviation_score: 0.85,
         },
       },
       {
-        type: 'suspicious_file_propagation',
-        entity: 'malware.exe',
-        description: 'File spreading through network connections',
+        type: "suspicious_file_propagation",
+        entity: "malware.exe",
+        description: "File spreading through network connections",
         severity: 0.9,
         evidence: {
-          propagation_speed: 'rapid',
+          propagation_speed: "rapid",
           affected_systems: 5,
-          signature_match: 'known_threat_family',
+          signature_match: "known_threat_family",
         },
       },
     ];
 
     console.log(`🚨 Detected ${anomalies.length} anomalies:`);
     anomalies.forEach((anomaly) => {
-      console.log(
-        `   • ${anomaly.type}: ${anomaly.description} (severity: ${anomaly.severity})`,
-      );
+      console.log(`   • ${anomaly.type}: ${anomaly.description} (severity: ${anomaly.severity})`);
     });
 
     return anomalies;
@@ -187,12 +181,12 @@ class GraphNeuralNetworkAnalyzer {
 
 class VectorEmbeddingService {
   constructor() {
-    this.model = 'sentence-transformers/all-MiniLM-L6-v2';
+    this.model = "sentence-transformers/all-MiniLM-L6-v2";
     this.dimension = 384;
   }
 
   async generateEmbeddings(entities) {
-    console.log('\n🔢 Generating vector embeddings for semantic analysis...');
+    console.log("\n🔢 Generating vector embeddings for semantic analysis...");
 
     const embeddings = entities.map((entity) => ({
       entity_id: entity.text,
@@ -217,32 +211,28 @@ class VectorEmbeddingService {
 
     const similarities = [
       {
-        entity: 'Jane Smith',
-        type: 'PERSON',
+        entity: "Jane Smith",
+        type: "PERSON",
         similarity: 0.87,
-        reason: 'Similar role and department attributes',
+        reason: "Similar role and department attributes",
       },
       {
-        entity: 'Project Beta',
-        type: 'PROJECT',
+        entity: "Project Beta",
+        type: "PROJECT",
         similarity: 0.82,
-        reason: 'Similar classification and access patterns',
+        reason: "Similar classification and access patterns",
       },
       {
-        entity: '192.168.1.101',
-        type: 'IP_ADDRESS',
+        entity: "192.168.1.101",
+        type: "IP_ADDRESS",
         similarity: 0.75,
-        reason: 'Same network segment and usage patterns',
+        reason: "Same network segment and usage patterns",
       },
     ].filter((sim) => sim.similarity >= threshold);
 
-    console.log(
-      `✅ Found ${similarities.length} similar entities (threshold: ${threshold}):`,
-    );
+    console.log(`✅ Found ${similarities.length} similar entities (threshold: ${threshold}):`);
     similarities.forEach((sim) => {
-      console.log(
-        `   • ${sim.entity} (${sim.type}) - Similarity: ${sim.similarity}`,
-      );
+      console.log(`   • ${sim.entity} (${sim.type}) - Similarity: ${sim.similarity}`);
       console.log(`     Reason: ${sim.reason}`);
     });
 
@@ -257,53 +247,48 @@ class VectorEmbeddingService {
 
 class ThreatIntelligencePredictor {
   constructor() {
-    this.model_type = 'ensemble';
-    this.algorithms = ['random_forest', 'gradient_boosting', 'neural_network'];
+    this.model_type = "ensemble";
+    this.algorithms = ["random_forest", "gradient_boosting", "neural_network"];
   }
 
   async predictThreats(entities, relationships, anomalies) {
-    console.log('\n⚠️ Analyzing threat landscape with predictive models...');
+    console.log("\n⚠️ Analyzing threat landscape with predictive models...");
 
     const predictions = [
       {
-        threat_type: 'advanced_persistent_threat',
+        threat_type: "advanced_persistent_threat",
         probability: 0.78,
         confidence: 0.85,
         indicators: [
-          'Anomalous access patterns detected',
-          'Malware presence confirmed',
-          'Project access during off-hours',
+          "Anomalous access patterns detected",
+          "Malware presence confirmed",
+          "Project access during off-hours",
         ],
         recommended_actions: [
-          'Isolate affected systems',
-          'Review access logs for John Anderson',
-          'Implement additional monitoring on Project Alpha',
+          "Isolate affected systems",
+          "Review access logs for John Anderson",
+          "Implement additional monitoring on Project Alpha",
         ],
-        timeline_prediction: '24-48 hours for full assessment',
+        timeline_prediction: "24-48 hours for full assessment",
       },
       {
-        threat_type: 'insider_threat',
+        threat_type: "insider_threat",
         probability: 0.65,
         confidence: 0.72,
-        indicators: [
-          'Unusual project access patterns',
-          'Access outside normal working hours',
-        ],
+        indicators: ["Unusual project access patterns", "Access outside normal working hours"],
         recommended_actions: [
-          'Background check verification',
-          'Enhanced monitoring of user activities',
-          'Restrict access to sensitive resources',
+          "Background check verification",
+          "Enhanced monitoring of user activities",
+          "Restrict access to sensitive resources",
         ],
-        timeline_prediction: '1-2 weeks for complete evaluation',
+        timeline_prediction: "1-2 weeks for complete evaluation",
       },
     ];
 
     console.log(`🎯 Generated ${predictions.length} threat predictions:`);
     predictions.forEach((pred) => {
       console.log(`   • ${pred.threat_type.toUpperCase()}`);
-      console.log(
-        `     Probability: ${pred.probability} (Confidence: ${pred.confidence})`,
-      );
+      console.log(`     Probability: ${pred.probability} (Confidence: ${pred.confidence})`);
       console.log(`     Key Indicators: ${pred.indicators.length} found`);
       console.log(`     Timeline: ${pred.timeline_prediction}`);
     });
@@ -314,7 +299,7 @@ class ThreatIntelligencePredictor {
 
 class NaturalLanguageProcessor {
   constructor() {
-    this.model = 'transformers/roberta-base-squad';
+    this.model = "transformers/roberta-base-squad";
   }
 
   async processNLQuery(query, knowledge_base) {
@@ -322,13 +307,13 @@ class NaturalLanguageProcessor {
 
     // Simulated NL query processing
     const analysis = {
-      intent: 'security_investigation',
-      entities_mentioned: ['John Anderson', 'Project Alpha', 'malware'],
-      query_type: 'threat_assessment',
+      intent: "security_investigation",
+      entities_mentioned: ["John Anderson", "Project Alpha", "malware"],
+      query_type: "threat_assessment",
       confidence: 0.91,
       suggested_queries: [
         'MATCH (p:PERSON {name: "John Anderson"})-[r]->(proj:PROJECT) RETURN p, r, proj',
-        'MATCH (ip:IP_ADDRESS)-[:HOSTS]->(file:FILE) WHERE file.risk_score > 0.8 RETURN ip, file',
+        "MATCH (ip:IP_ADDRESS)-[:HOSTS]->(file:FILE) WHERE file.risk_score > 0.8 RETURN ip, file",
         'MATCH (proj:PROJECT {name: "Project Alpha"})<-[access]-(entity) RETURN entity, access ORDER BY access.timestamp DESC',
       ],
       narrative_response: `Based on your query about John Anderson and Project Alpha security concerns, I found several concerning patterns:
@@ -347,12 +332,8 @@ class NaturalLanguageProcessor {
     console.log(`✅ Query Analysis Complete:`);
     console.log(`   • Intent: ${analysis.intent}`);
     console.log(`   • Confidence: ${analysis.confidence}`);
-    console.log(
-      `   • Generated ${analysis.suggested_queries.length} Cypher queries`,
-    );
-    console.log(
-      `   • Narrative response: ${analysis.narrative_response.length} characters`,
-    );
+    console.log(`   • Generated ${analysis.suggested_queries.length} Cypher queries`);
+    console.log(`   • Narrative response: ${analysis.narrative_response.length} characters`);
 
     return analysis;
   }
@@ -368,9 +349,7 @@ class CopilotAIOrchestrator {
   }
 
   async runIntelligenceAnalysis(input_text, user_query) {
-    console.log(
-      '🚀 Starting comprehensive AI-powered intelligence analysis...\n',
-    );
+    console.log("🚀 Starting comprehensive AI-powered intelligence analysis...\n");
 
     // Step 1: Entity Extraction
     const entities = await this.extractor.extractEntities(input_text);
@@ -386,17 +365,10 @@ class CopilotAIOrchestrator {
 
     // Step 4: Vector Embeddings
     const embeddings = await this.embeddings.generateEmbeddings(entities);
-    const similarities = await this.embeddings.findSimilarEntities(
-      'John Anderson',
-      embeddings,
-    );
+    const similarities = await this.embeddings.findSimilarEntities("John Anderson", embeddings);
 
     // Step 5: Threat Prediction
-    const threats = await this.predictor.predictThreats(
-      entities,
-      relationships,
-      anomalies,
-    );
+    const threats = await this.predictor.predictThreats(entities, relationships, anomalies);
 
     // Step 6: Natural Language Processing
     const nl_analysis = await this.nlp.processNLQuery(user_query, {
@@ -429,37 +401,25 @@ class CopilotAIOrchestrator {
         nl_analysis,
       },
       recommendations: [
-        'Immediate isolation of compromised systems',
-        'Enhanced monitoring of identified personnel',
-        'Review and update access control policies',
-        'Implement additional security measures for sensitive projects',
-        'Schedule regular threat assessment reviews',
+        "Immediate isolation of compromised systems",
+        "Enhanced monitoring of identified personnel",
+        "Review and update access control policies",
+        "Implement additional security measures for sensitive projects",
+        "Schedule regular threat assessment reviews",
       ],
     };
 
-    console.log('\n📊 ANALYSIS COMPLETE - Summary Report:');
-    console.log('=====================================');
-    console.log(
-      `🔍 Entities Extracted: ${analysis_report.results.entities_extracted}`,
-    );
-    console.log(
-      `🔗 Relationships Inferred: ${analysis_report.results.relationships_inferred}`,
-    );
-    console.log(
-      `🚨 Anomalies Detected: ${analysis_report.results.anomalies_detected}`,
-    );
-    console.log(
-      `⚠️  Threats Predicted: ${analysis_report.results.threats_predicted}`,
-    );
-    console.log(
-      `🎯 Similarities Found: ${analysis_report.results.similarities_found}`,
-    );
-    console.log(
-      `💡 Recommendations: ${analysis_report.recommendations.length}`,
-    );
+    console.log("\n📊 ANALYSIS COMPLETE - Summary Report:");
+    console.log("=====================================");
+    console.log(`🔍 Entities Extracted: ${analysis_report.results.entities_extracted}`);
+    console.log(`🔗 Relationships Inferred: ${analysis_report.results.relationships_inferred}`);
+    console.log(`🚨 Anomalies Detected: ${analysis_report.results.anomalies_detected}`);
+    console.log(`⚠️  Threats Predicted: ${analysis_report.results.threats_predicted}`);
+    console.log(`🎯 Similarities Found: ${analysis_report.results.similarities_found}`);
+    console.log(`💡 Recommendations: ${analysis_report.recommendations.length}`);
 
     // Save detailed report
-    const reportPath = path.join(__dirname, '../ai-analysis-report.json');
+    const reportPath = path.join(__dirname, "../ai-analysis-report.json");
     fs.writeFileSync(reportPath, JSON.stringify(analysis_report, null, 2));
     console.log(`\n📄 Detailed analysis saved to: ${reportPath}`);
 
@@ -487,17 +447,17 @@ async function main() {
   try {
     await copilot.runIntelligenceAnalysis(intelligence_text, user_query);
 
-    console.log('\n🎉 AI/ML Pipeline Integration Demo Complete!');
-    console.log('\nCapabilities Demonstrated:');
-    console.log('✅ Named Entity Recognition (NER)');
-    console.log('✅ Graph Neural Network Analysis');
-    console.log('✅ Vector Embedding Generation');
-    console.log('✅ Anomaly Detection');
-    console.log('✅ Threat Prediction');
-    console.log('✅ Natural Language Understanding');
-    console.log('✅ Comprehensive Intelligence Analysis');
+    console.log("\n🎉 AI/ML Pipeline Integration Demo Complete!");
+    console.log("\nCapabilities Demonstrated:");
+    console.log("✅ Named Entity Recognition (NER)");
+    console.log("✅ Graph Neural Network Analysis");
+    console.log("✅ Vector Embedding Generation");
+    console.log("✅ Anomaly Detection");
+    console.log("✅ Threat Prediction");
+    console.log("✅ Natural Language Understanding");
+    console.log("✅ Comprehensive Intelligence Analysis");
   } catch (error) {
-    console.error('❌ Analysis failed:', error);
+    console.error("❌ Analysis failed:", error);
     process.exit(1);
   }
 }

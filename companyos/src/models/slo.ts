@@ -4,15 +4,15 @@
  */
 
 export enum SLOType {
-  AVAILABILITY = 'availability',
-  LATENCY = 'latency',
-  ERROR_RATE = 'error_rate',
-  THROUGHPUT = 'throughput',
+  AVAILABILITY = "availability",
+  LATENCY = "latency",
+  ERROR_RATE = "error_rate",
+  THROUGHPUT = "throughput",
 }
 
 export enum ViolationSeverity {
-  WARNING = 'warning',
-  CRITICAL = 'critical',
+  WARNING = "warning",
+  CRITICAL = "critical",
 }
 
 export interface SLOViolation {

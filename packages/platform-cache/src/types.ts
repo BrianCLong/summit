@@ -1,11 +1,11 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Cache configuration schema
  */
 export const CacheConfigSchema = z.object({
   /** Cache namespace for key prefixing */
-  namespace: z.string().default('summit'),
+  namespace: z.string().default("summit"),
   /** Default TTL in seconds */
   defaultTtl: z.number().positive().default(300),
   /** Maximum TTL in seconds */
@@ -13,22 +13,26 @@ export const CacheConfigSchema = z.object({
   /** Enable metrics collection */
   enableMetrics: z.boolean().default(true),
   /** Local cache configuration */
-  local: z.object({
-    enabled: z.boolean().default(true),
-    maxSize: z.number().positive().default(1000),
-    ttl: z.number().positive().default(60),
-  }).default({}),
+  local: z
+    .object({
+      enabled: z.boolean().default(true),
+      maxSize: z.number().positive().default(1000),
+      ttl: z.number().positive().default(60),
+    })
+    .default({}),
   /** Redis configuration */
-  redis: z.object({
-    enabled: z.boolean().default(true),
-    url: z.string().optional(),
-    host: z.string().default('localhost'),
-    port: z.number().default(6379),
-    password: z.string().optional(),
-    db: z.number().default(0),
-    keyPrefix: z.string().default('cache:'),
-    maxRetriesPerRequest: z.number().default(3),
-  }).default({}),
+  redis: z
+    .object({
+      enabled: z.boolean().default(true),
+      url: z.string().optional(),
+      host: z.string().default("localhost"),
+      port: z.number().default(6379),
+      password: z.string().optional(),
+      db: z.number().default(0),
+      keyPrefix: z.string().default("cache:"),
+      maxRetriesPerRequest: z.number().default(3),
+    })
+    .default({}),
 });
 
 export type CacheConfig = z.infer<typeof CacheConfigSchema>;
@@ -44,7 +48,7 @@ export interface CacheEntry<T> {
   /** Expiration timestamp */
   expiresAt: number;
   /** Cache hit source */
-  source: 'local' | 'redis' | 'origin';
+  source: "local" | "redis" | "origin";
   /** Additional metadata */
   metadata?: Record<string, unknown>;
 }
@@ -158,7 +162,7 @@ export interface CacheProvider {
  */
 export interface CacheMetrics {
   /** Increment hit counter */
-  recordHit(source: 'local' | 'redis'): void;
+  recordHit(source: "local" | "redis"): void;
   /** Increment miss counter */
   recordMiss(): void;
   /** Record get latency */

@@ -212,10 +212,7 @@ ops:
 ### 2) Exporter: Per‑Audience Cost Caps (middleware)
 
 ```ts
-export async function enforceAudienceCaps(
-  bundle: Bundle,
-  caps: Record<string, number>,
-) {
+export async function enforceAudienceCaps(bundle: Bundle, caps: Record<string, number>) {
   const aud = bundle.audience;
   const est = await estimateBundleCost(bundle);
   if (est > (caps[aud] ?? Infinity)) {
@@ -245,10 +242,7 @@ function mergeProof(a: Proof, b: Proof): Proof {
   // prefer latest manifest but preserve dissent receipts
   return {
     ...(a.ts > b.ts ? a : b),
-    dissents: uniqBy(
-      [...(a.dissents || []), ...(b.dissents || [])],
-      (d) => d.id,
-    ),
+    dissents: uniqBy([...(a.dissents || []), ...(b.dissents || [])], (d) => d.id),
   };
 }
 ```
@@ -257,8 +251,8 @@ function mergeProof(a: Proof, b: Proof): Proof {
 
 ```ts
 const enclave = await psc.attach({
-  tools: ['ocr', 'ner', 'search'],
-  egress: 'deny',
+  tools: ["ocr", "ner", "search"],
+  egress: "deny",
 });
 const token = await psc.seal(policyBytecode);
 const result = await enclave.run(token, runbook);

@@ -6,20 +6,15 @@ import {
   EachMessagePayload,
   ConsumerSubscribeTopics,
   KafkaMessage,
-} from 'kafkajs';
-import { trace, SpanStatusCode } from '@opentelemetry/api';
-import pino from 'pino';
-import {
-  KafkaClusterConfig,
-  ConsumerGroupConfig,
-  StreamMessage,
-  ProcessingResult,
-} from './types';
-import { SchemaRegistryClient } from './schema-registry';
-import { DeadLetterQueue } from './dlq';
+} from "kafkajs";
+import { trace, SpanStatusCode } from "@opentelemetry/api";
+import pino from "pino";
+import { KafkaClusterConfig, ConsumerGroupConfig, StreamMessage, ProcessingResult } from "./types";
+import { SchemaRegistryClient } from "./schema-registry";
+import { DeadLetterQueue } from "./dlq";
 
-const logger = pino({ name: 'kafka-consumer' });
-const tracer = trace.getTracer('kafka-consumer');
+const logger = pino({ name: "kafka-consumer" });
+const tracer = trace.getTracer("kafka-consumer");
 
 export type MessageHandler<T = unknown> = (
   message: StreamMessage<T>,
@@ -62,11 +57,7 @@ export class KafkaConsumer {
     }
 
     if (dlqConfig) {
-      this.dlq = new DeadLetterQueue(
-        this.kafka,
-        dlqConfig.topic,
-        dlqConfig.maxRetries
-      );
+      this.dlq = new DeadLetterQueue(this.kafka, dlqConfig.topic, dlqConfig.maxRetries);
     }
   }
 
@@ -74,7 +65,7 @@ export class KafkaConsumer {
    * Connect and initialize consumer
    */
   async connect(): Promise<void> {
-    const span = tracer.startSpan('kafka.consumer.connect');
+    const span = tracer.startSpan("kafka.consumer.connect");
 
     try {
       this.consumer = this.kafka.consumer({
@@ -94,14 +85,11 @@ export class KafkaConsumer {
         await this.dlq.connect();
       }
 
-      logger.info(
-        { groupId: this.consumerConfig.groupId },
-        'Kafka consumer connected'
-      );
+      logger.info({ groupId: this.consumerConfig.groupId }, "Kafka consumer connected");
 
       span.setStatus({ code: SpanStatusCode.OK });
     } catch (error) {
-      logger.error({ error }, 'Failed to connect consumer');
+      logger.error({ error }, "Failed to connect consumer");
       span.setStatus({ code: SpanStatusCode.ERROR, message: String(error) });
       throw error;
     } finally {
@@ -114,7 +102,7 @@ export class KafkaConsumer {
    */
   async subscribe(topics: string[]): Promise<void> {
     if (!this.consumer) {
-      throw new Error('Consumer not connected');
+      throw new Error("Consumer not connected");
     }
 
     await this.consumer.subscribe({
@@ -122,7 +110,7 @@ export class KafkaConsumer {
       fromBeginning: false,
     });
 
-    logger.info({ topics }, 'Subscribed to topics');
+    logger.info({ topics }, "Subscribed to topics");
   }
 
   /**
@@ -130,7 +118,7 @@ export class KafkaConsumer {
    */
   registerHandler<T = unknown>(topic: string, handler: MessageHandler<T>): void {
     this.messageHandlers.set(topic, handler as MessageHandler);
-    logger.info({ topic }, 'Handler registered');
+    logger.info({ topic }, "Handler registered");
   }
 
   /**
@@ -138,11 +126,11 @@ export class KafkaConsumer {
    */
   async start(): Promise<void> {
     if (!this.consumer) {
-      throw new Error('Consumer not connected');
+      throw new Error("Consumer not connected");
     }
 
     if (this.isRunning) {
-      logger.warn('Consumer already running');
+      logger.warn("Consumer already running");
       return;
     }
 
@@ -155,7 +143,7 @@ export class KafkaConsumer {
       eachMessage: this.handleMessage.bind(this),
     });
 
-    logger.info('Consumer started');
+    logger.info("Consumer started");
   }
 
   /**
@@ -164,12 +152,12 @@ export class KafkaConsumer {
   private async handleMessage(payload: EachMessagePayload): Promise<void> {
     const { topic, partition, message } = payload;
 
-    const span = tracer.startSpan('kafka.consumer.message', {
+    const span = tracer.startSpan("kafka.consumer.message", {
       attributes: {
-        'messaging.system': 'kafka',
-        'messaging.destination': topic,
-        'messaging.kafka.partition': partition,
-        'messaging.kafka.offset': message.offset,
+        "messaging.system": "kafka",
+        "messaging.destination": topic,
+        "messaging.kafka.partition": partition,
+        "messaging.kafka.offset": message.offset,
       },
     });
 
@@ -178,7 +166,7 @@ export class KafkaConsumer {
       const streamMessage = await this.decodeMessage(message);
 
       if (!streamMessage) {
-        logger.warn({ topic, partition, offset: message.offset }, 'Failed to decode message');
+        logger.warn({ topic, partition, offset: message.offset }, "Failed to decode message");
         return;
       }
 
@@ -186,8 +174,8 @@ export class KafkaConsumer {
       const handler = this.messageHandlers.get(topic);
 
       if (!handler) {
-        logger.warn({ topic }, 'No handler registered for topic');
-        span.setStatus({ code: SpanStatusCode.ERROR, message: 'No handler' });
+        logger.warn({ topic }, "No handler registered for topic");
+        span.setStatus({ code: SpanStatusCode.ERROR, message: "No handler" });
         span.end();
         return;
       }
@@ -221,14 +209,11 @@ export class KafkaConsumer {
 
         span.setStatus({
           code: SpanStatusCode.ERROR,
-          message: result.error?.message || 'Processing failed',
+          message: result.error?.message || "Processing failed",
         });
       }
     } catch (error) {
-      logger.error(
-        { error, topic, partition, offset: message.offset },
-        'Error processing message'
-      );
+      logger.error({ error, topic, partition, offset: message.offset }, "Error processing message");
 
       // Send to DLQ on exception
       if (this.dlq) {
@@ -244,9 +229,7 @@ export class KafkaConsumer {
   /**
    * Decode message from Kafka
    */
-  private async decodeMessage(
-    message: KafkaMessage
-  ): Promise<StreamMessage | null> {
+  private async decodeMessage(message: KafkaMessage): Promise<StreamMessage | null> {
     if (!message.value) {
       return null;
     }
@@ -258,7 +241,7 @@ export class KafkaConsumer {
           return await this.schemaRegistry.decode(message.value);
         } catch (error) {
           // Fall back to JSON
-          logger.debug('Schema registry decode failed, falling back to JSON');
+          logger.debug("Schema registry decode failed, falling back to JSON");
         }
       }
 
@@ -266,7 +249,7 @@ export class KafkaConsumer {
       const decoded = JSON.parse(message.value.toString());
       return decoded as StreamMessage;
     } catch (error) {
-      logger.error({ error }, 'Failed to decode message');
+      logger.error({ error }, "Failed to decode message");
       return null;
     }
   }
@@ -276,18 +259,16 @@ export class KafkaConsumer {
    */
   async pause(topics?: { topic: string; partitions?: number[] }[]): Promise<void> {
     if (!this.consumer) {
-      throw new Error('Consumer not connected');
+      throw new Error("Consumer not connected");
     }
 
     if (topics) {
       this.consumer.pause(topics);
     } else {
-      this.consumer.pause(
-        Array.from(this.messageHandlers.keys()).map((topic) => ({ topic }))
-      );
+      this.consumer.pause(Array.from(this.messageHandlers.keys()).map((topic) => ({ topic })));
     }
 
-    logger.info({ topics }, 'Consumer paused');
+    logger.info({ topics }, "Consumer paused");
   }
 
   /**
@@ -295,18 +276,16 @@ export class KafkaConsumer {
    */
   async resume(topics?: { topic: string; partitions?: number[] }[]): Promise<void> {
     if (!this.consumer) {
-      throw new Error('Consumer not connected');
+      throw new Error("Consumer not connected");
     }
 
     if (topics) {
       this.consumer.resume(topics);
     } else {
-      this.consumer.resume(
-        Array.from(this.messageHandlers.keys()).map((topic) => ({ topic }))
-      );
+      this.consumer.resume(Array.from(this.messageHandlers.keys()).map((topic) => ({ topic })));
     }
 
-    logger.info({ topics }, 'Consumer resumed');
+    logger.info({ topics }, "Consumer resumed");
   }
 
   /**
@@ -325,7 +304,7 @@ export class KafkaConsumer {
       await this.dlq.disconnect();
     }
 
-    logger.info('Consumer stopped');
+    logger.info("Consumer stopped");
   }
 
   /**
@@ -341,7 +320,7 @@ export class KafkaConsumer {
     }>
   > {
     if (!this.consumer) {
-      throw new Error('Consumer not connected');
+      throw new Error("Consumer not connected");
     }
 
     const admin = this.kafka.admin();

@@ -43,13 +43,7 @@
               },
               "retention": {
                 "type": "string",
-                "enum": [
-                  "ephemeral-7d",
-                  "short-30d",
-                  "standard-365d",
-                  "long-1825d",
-                  "legal-hold"
-                ]
+                "enum": ["ephemeral-7d", "short-30d", "standard-365d", "long-1825d", "legal-hold"]
               }
             }
           },

@@ -179,7 +179,7 @@ flowchart TD
   get:
     summary: Current error-budget burn by service
     responses:
-      '200': { description: OK }
+      "200": { description: OK }
 ```
 
 **Migration Plan YAML**
@@ -225,8 +225,8 @@ explanation[msg] {
 **Gateway Header for Explanations**
 
 ```ts
-res.setHeader('X-IG-Decision-Id', decisionId);
-res.setHeader('X-IG-Rule-Id', ruleId);
+res.setHeader("X-IG-Decision-Id", decisionId);
+res.setHeader("X-IG-Rule-Id", ruleId);
 ```
 
 **`ig-evidence` CLI (Node skeleton)**
@@ -247,8 +247,7 @@ GET /audit/access-logs?release=v1.2.1
 **Burn → Flag hook (pseudo)**
 
 ```ts
-if (burn.service('gateway').month() > 0.2)
-  flags.set('subs.optimizedBuffer', false);
+if (burn.service("gateway").month() > 0.2) flags.set("subs.optimizedBuffer", false);
 ```
 
 **CI: Multi-Region Test (YAML)**

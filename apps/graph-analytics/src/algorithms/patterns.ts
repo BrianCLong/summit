@@ -6,8 +6,8 @@ import {
   BipartitePatternParams,
   RepeatedInteractionParams,
   PatternMinerParams,
-} from '../types/analytics';
-import { logger } from '../utils/logger';
+} from "../types/analytics";
+import { logger } from "../utils/logger";
 
 /**
  * Pattern/Motif Detection Algorithms
@@ -19,11 +19,8 @@ import { logger } from '../utils/logger';
 /**
  * Detect star patterns (central node with many connections)
  */
-export function detectStarPatterns(
-  graph: Graph,
-  params: StarPatternParams,
-): PatternInstance[] {
-  logger.debug('Detecting star patterns', params);
+export function detectStarPatterns(graph: Graph, params: StarPatternParams): PatternInstance[] {
+  logger.debug("Detecting star patterns", params);
 
   const patterns: PatternInstance[] = [];
   const minDegree = params.minDegree || 5;
@@ -68,7 +65,7 @@ export function detectStarPatterns(
 
     if (degree >= minDegree) {
       patterns.push({
-        patternType: 'STAR',
+        patternType: "STAR",
         nodes: [node.id, ...Array.from(info.neighbors)],
         edges: info.edges,
         metrics: {
@@ -89,23 +86,17 @@ export function detectStarPatterns(
  */
 export function detectBipartiteFanPatterns(
   graph: Graph,
-  params: BipartitePatternParams,
+  params: BipartitePatternParams
 ): PatternInstance[] {
-  logger.debug('Detecting bipartite fan patterns', params);
+  logger.debug("Detecting bipartite fan patterns", params);
 
   const patterns: PatternInstance[] = [];
   const minSources = params.minSources || 3;
   const minTargets = params.minTargets || 2;
 
   // For each node, track incoming and outgoing connections
-  const incomingMap = new Map<
-    string,
-    { sources: Set<string>; edges: string[] }
-  >();
-  const outgoingMap = new Map<
-    string,
-    { targets: Set<string>; edges: string[] }
-  >();
+  const incomingMap = new Map<string, { sources: Set<string>; edges: string[] }>();
+  const outgoingMap = new Map<string, { targets: Set<string>; edges: string[] }>();
 
   for (const node of graph.nodes) {
     incomingMap.set(node.id, { sources: new Set(), edges: [] });
@@ -139,10 +130,7 @@ export function detectBipartiteFanPatterns(
     if (!incoming || !outgoing) continue;
 
     // Fan-out pattern: many sources -> one intermediate -> many targets
-    if (
-      incoming.sources.size >= minSources &&
-      outgoing.targets.size >= minTargets
-    ) {
+    if (incoming.sources.size >= minSources && outgoing.targets.size >= minTargets) {
       // Apply label filters
       const sourceNodes = Array.from(incoming.sources);
       const targetNodes = Array.from(outgoing.targets);
@@ -164,14 +152,13 @@ export function detectBipartiteFanPatterns(
       }
 
       patterns.push({
-        patternType: 'BIPARTITE_FAN',
+        patternType: "BIPARTITE_FAN",
         nodes: [node.id, ...sourceNodes, ...targetNodes],
         edges: [...incoming.edges, ...outgoing.edges],
         metrics: {
           sources: incoming.sources.size,
           targets: outgoing.targets.size,
-          fanInOutRatio:
-            outgoing.targets.size / incoming.sources.size,
+          fanInOutRatio: outgoing.targets.size / incoming.sources.size,
         },
         summary: `Node ${node.id} acts as intermediary with ${incoming.sources.size} sources fanning in and ${outgoing.targets.size} targets fanning out, suggesting potential structuring or aggregation.`,
       });
@@ -187,9 +174,9 @@ export function detectBipartiteFanPatterns(
  */
 export function detectRepeatedInteractions(
   graph: Graph,
-  params: RepeatedInteractionParams,
+  params: RepeatedInteractionParams
 ): PatternInstance[] {
-  logger.debug('Detecting repeated interaction patterns', params);
+  logger.debug("Detecting repeated interaction patterns", params);
 
   const patterns: PatternInstance[] = [];
   const minInteractions = params.minInteractions || 3;
@@ -208,7 +195,7 @@ export function detectRepeatedInteractions(
     }
 
     // Create pair key (sorted to treat as undirected)
-    const pairKey = [edge.fromId, edge.toId].sort().join('<->');
+    const pairKey = [edge.fromId, edge.toId].sort().join("<->");
 
     if (!pairInteractions.has(pairKey)) {
       pairInteractions.set(pairKey, {
@@ -226,7 +213,7 @@ export function detectRepeatedInteractions(
     // Extract timestamp if available
     if (edge.properties?.timestamp) {
       const timestamp =
-        typeof edge.properties.timestamp === 'number'
+        typeof edge.properties.timestamp === "number"
           ? edge.properties.timestamp
           : new Date(edge.properties.timestamp).getTime();
       pairInfo.timestamps.push(timestamp);
@@ -238,38 +225,33 @@ export function detectRepeatedInteractions(
     const interactionCount = info.edges.length;
     const participantCount = info.participants.size;
 
-    if (
-      interactionCount >= minInteractions &&
-      participantCount >= minParticipants
-    ) {
+    if (interactionCount >= minInteractions && participantCount >= minParticipants) {
       // Check if within time window (if specified)
       if (params.timeWindowSeconds && info.timestamps.length > 0) {
         const sortedTimestamps = info.timestamps.sort((a, b) => a - b);
         const timeSpan =
-          (sortedTimestamps[sortedTimestamps.length - 1] -
-            sortedTimestamps[0]) /
-          1000;
+          (sortedTimestamps[sortedTimestamps.length - 1] - sortedTimestamps[0]) / 1000;
 
         if (timeSpan > params.timeWindowSeconds) {
           continue; // Skip if interactions span too long
         }
       }
 
-      const [node1, node2] = pairKey.split('<->');
+      const [node1, node2] = pairKey.split("<->");
 
       patterns.push({
-        patternType: 'REPEATED_INTERACTION',
+        patternType: "REPEATED_INTERACTION",
         nodes: Array.from(info.participants),
         edges: info.edges,
         metrics: {
           interactions: interactionCount,
           participants: participantCount,
-          frequency: info.timestamps.length > 0
-            ? interactionCount /
-              ((info.timestamps[info.timestamps.length - 1] -
-                info.timestamps[0]) /
-                (1000 * 60 * 60 * 24) || 1) // per day
-            : undefined,
+          frequency:
+            info.timestamps.length > 0
+              ? interactionCount /
+                ((info.timestamps[info.timestamps.length - 1] - info.timestamps[0]) /
+                  (1000 * 60 * 60 * 24) || 1) // per day
+              : undefined,
         },
         summary: `Repeated interaction pattern between ${participantCount} participants with ${interactionCount} total interactions, indicating potential coordination or recurring relationship.`,
       });
@@ -283,11 +265,8 @@ export function detectRepeatedInteractions(
 /**
  * Run pattern miner with multiple pattern types
  */
-export function runPatternMiner(
-  graph: Graph,
-  params: PatternMinerParams,
-): PatternMineResult {
-  logger.info('Running pattern miner', { graph: graph.nodes.length });
+export function runPatternMiner(graph: Graph, params: PatternMinerParams): PatternMineResult {
+  logger.info("Running pattern miner", { graph: graph.nodes.length });
 
   const allPatterns: PatternInstance[] = [];
 
@@ -305,10 +284,7 @@ export function runPatternMiner(
 
   // Detect repeated interaction patterns
   if (params.repeatedInteractions) {
-    const repeatedPatterns = detectRepeatedInteractions(
-      graph,
-      params.repeatedInteractions,
-    );
+    const repeatedPatterns = detectRepeatedInteractions(graph, params.repeatedInteractions);
     allPatterns.push(...repeatedPatterns);
   }
 
@@ -355,11 +331,11 @@ export function detectTriangles(graph: Graph): PatternInstance[] {
       for (let k = j + 1; k < nodeIds.length; k++) {
         const c = nodeIds[k];
         if (neighborsA.has(c) && neighborsB.has(c)) {
-          const key = [a, b, c].sort().join('-');
+          const key = [a, b, c].sort().join("-");
           if (!found.has(key)) {
             found.add(key);
             patterns.push({
-              patternType: 'TRIANGLE',
+              patternType: "TRIANGLE",
               nodes: [a, b, c],
               edges: [],
               summary: `Triangle pattern formed by nodes ${a}, ${b}, and ${c}, indicating high local clustering.`,

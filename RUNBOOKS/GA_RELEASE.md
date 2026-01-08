@@ -20,10 +20,12 @@ This runbook describes the process for creating, publishing, and managing Genera
 ## Overview
 
 The GA release process is fully automated using:
+
 - **Tagging Script**: `scripts/release/ga-tag.ts` - Creates deterministic, validated GA tags
 - **GitHub Workflow**: `.github/workflows/ga-release.yml` - Builds, signs, and publishes releases
 
 All GA releases follow semantic versioning (SemVer) and include:
+
 - ✅ SLSA Level 3 Build Provenance
 - ✅ Software Bill of Materials (SBOM) in CycloneDX + SPDX formats
 - ✅ Keyless code signing via Sigstore Cosign
@@ -35,6 +37,7 @@ All GA releases follow semantic versioning (SemVer) and include:
 ## Prerequisites
 
 ### Local Development
+
 - Node.js 20.x
 - pnpm 9.12.0 or higher
 - ts-node (for running the tagging script)
@@ -42,6 +45,7 @@ All GA releases follow semantic versioning (SemVer) and include:
 - On the correct branch (default: `main`)
 
 ### CI/CD
+
 - GitHub repository with Actions enabled
 - OIDC token permissions for keyless signing
 - Write access to create tags and releases
@@ -62,6 +66,7 @@ npx ts-node scripts/release/ga-tag.ts --version 2.0.0 --dry-run
 ```
 
 This will:
+
 - ✓ Validate semantic versioning
 - ✓ Check working tree is clean
 - ✓ Verify you're on the correct branch
@@ -104,6 +109,7 @@ npx ts-node scripts/release/ga-tag.ts --version 2.1.0 --branch main
 ```
 
 **Flags:**
+
 - `-v, --version <version>` - Version to tag (e.g., 2.0.0 or v2.0.0)
 - `-n, --dry-run` - Perform dry run without creating tag
 - `-p, --push` - Push tag to remote after creation
@@ -124,6 +130,7 @@ You can trigger a release directly from GitHub Actions:
 3. Click `Run workflow`
 
 This is useful for:
+
 - Testing the release process without creating a tag
 - Creating a release from a specific commit
 - Re-running a failed release
@@ -133,17 +140,20 @@ This is useful for:
 ## CI/CD Release Workflow
 
 The GA release workflow (`.github/workflows/ga-release.yml`) runs automatically when:
+
 1. A tag matching `ga/v*` is pushed
 2. The workflow is manually triggered via `workflow_dispatch`
 
 ### Workflow Steps
 
 #### 1. **GA Gate** (Quality Checks)
+
 - Runs unit tests (`pnpm run test:quick`)
 - Runs type checking (if available)
 - **Fails fast** if tests or checks fail
 
 #### 2. **Build** (Artifact Creation)
+
 - Installs dependencies with `pnpm install --frozen-lockfile`
 - Builds server and client: `pnpm run build`
 - Creates distribution tarball: `summit-<version>.tar.gz`
@@ -151,22 +161,26 @@ The GA release workflow (`.github/workflows/ga-release.yml`) runs automatically 
 - Uploads artifacts for subsequent jobs
 
 #### 3. **SBOM** (Software Bill of Materials)
+
 - Generates CycloneDX SBOM: `sbom-cyclonedx.json`
 - Generates SPDX SBOM: `sbom-spdx.json`
 - Scans entire project including dependencies
 
 #### 4. **Sign** (Cryptographic Signing)
+
 - Signs artifacts with Sigstore Cosign (keyless OIDC)
 - Generates signatures: `*.sig`
 - Generates certificates: `*.cert`
 - Creates SBOM attestations: `*.att`
 
 #### 5. **Provenance** (SLSA Level 3)
+
 - Uses `slsa-framework/slsa-github-generator@v1.10.0`
 - Generates SLSA provenance: `*.intoto.jsonl`
 - Links artifacts to source repository and commit
 
 #### 6. **Release** (GitHub Release Creation)
+
 - Downloads all artifacts (build, SBOM, signatures, provenance)
 - Creates evidence bundle: `evidence-bundle.tar.gz`
 - Generates release notes: `RELEASE_NOTES.md`
@@ -176,6 +190,7 @@ The GA release workflow (`.github/workflows/ga-release.yml`) runs automatically 
 ### Monitoring the Workflow
 
 1. **Check workflow status**:
+
    ```
    https://github.com/<org>/<repo>/actions/workflows/ga-release.yml
    ```
@@ -197,25 +212,31 @@ The GA release workflow (`.github/workflows/ga-release.yml`) runs automatically 
 Each GA release includes the following artifacts:
 
 ### Release Package
+
 - `summit-<version>.tar.gz` - Complete release (server + client distributions)
 
 ### Checksums
+
 - `SHA256SUMS` - Combined checksums for all artifacts
 - `summit-<version>.tar.gz.sha256` - Individual checksum file
 
 ### SBOM (Software Bill of Materials)
+
 - `sbom-cyclonedx.json` - CycloneDX format (industry standard)
 - `sbom-spdx.json` - SPDX format (Linux Foundation standard)
 
 ### Signatures & Attestations (Cosign)
+
 - `summit-<version>.tar.gz.sig` - Artifact signature
 - `summit-<version>.tar.gz.cert` - Signing certificate
 - `summit-<version>.tar.gz.att` - SBOM attestation
 
 ### SLSA Provenance
+
 - `<artifact-name>.intoto.jsonl` - SLSA Level 3 provenance
 
 ### Evidence Bundle
+
 - `evidence-bundle.tar.gz` - Complete compliance package containing:
   - All artifacts
   - Checksums
@@ -224,6 +245,7 @@ Each GA release includes the following artifacts:
   - Metadata (commit, timestamp, workflow info)
 
 ### Release Notes
+
 - `RELEASE_NOTES.md` - Generated release notes with:
   - Artifact list
   - Verification instructions
@@ -248,6 +270,7 @@ sha256sum -c summit-2.0.0.tar.gz.sha256
 ```
 
 Expected output:
+
 ```
 summit-2.0.0.tar.gz: OK
 ```
@@ -268,6 +291,7 @@ cosign verify-blob \
 ```
 
 Expected output:
+
 ```
 Verified OK
 ```
@@ -288,6 +312,7 @@ slsa-verifier verify-artifact \
 ```
 
 Expected output:
+
 ```
 Verified SLSA provenance
 ```
@@ -331,10 +356,12 @@ git push origin :refs/tags/ga/v2.0.0
 GitHub doesn't have a native "yank" feature, but you can:
 
 **Option A: Edit Release to Mark as Yanked**
+
 1. Go to: `Releases` → `ga/v2.0.0`
 2. Click `Edit release`
 3. Update title: `[YANKED] Summit Platform v2.0.0`
 4. Update description to add warning:
+
    ```markdown
    ## ⚠️ RELEASE YANKED
 
@@ -348,10 +375,12 @@ GitHub doesn't have a native "yank" feature, but you can:
 
    [Original release notes below...]
    ```
+
 5. Check `Set as a pre-release` (this moves it down in the releases list)
 6. Save changes
 
 **Option B: Delete the Release**
+
 1. Go to: `Releases` → `ga/v2.0.0`
 2. Click `Delete release`
 3. Confirm deletion
@@ -396,6 +425,7 @@ npx ts-node scripts/release/ga-tag.ts --version 2.0.1 --push
 **Cause**: Uncommitted changes in the repository.
 
 **Solution**:
+
 ```bash
 # Check status
 git status
@@ -411,6 +441,7 @@ git stash  # or git commit
 **Cause**: The tag `ga/v2.0.0` already exists locally or remotely.
 
 **Solution**:
+
 ```bash
 # Check if tag exists locally
 git tag -l "ga/v2.0.0"
@@ -431,6 +462,7 @@ npx ts-node scripts/release/ga-tag.ts --version 2.0.0
 **Cause**: You're on the wrong branch (e.g., `develop` instead of `main`).
 
 **Solution**:
+
 ```bash
 # Check current branch
 git branch
@@ -449,6 +481,7 @@ git pull origin main
 **Cause**: Tests or type checks are failing.
 
 **Solution**:
+
 ```bash
 # Run tests locally
 pnpm install
@@ -466,6 +499,7 @@ pnpm run test:quick
 **Cause**: Insufficient permissions or branch protection rules.
 
 **Solution**:
+
 - Check repository permissions (need write access)
 - Check if tag push is blocked by branch protection
 - Contact repository admin if needed
@@ -477,6 +511,7 @@ pnpm run test:quick
 **Cause**: OIDC token permissions not configured correctly.
 
 **Solution**:
+
 1. Check workflow has `id-token: write` permission
 2. Verify GitHub Actions is allowed to use OIDC
 3. Check Sigstore service status: https://status.sigstore.dev
@@ -488,6 +523,7 @@ pnpm run test:quick
 **Cause**: Hashes output format is incorrect.
 
 **Solution**:
+
 - Verify `steps.hash.outputs.hashes` is base64-encoded
 - Check checksums file exists: `dist/SHA256SUMS`
 - Ensure build artifacts were uploaded correctly
@@ -499,6 +535,7 @@ pnpm run test:quick
 **Cause**: Download artifact step failed or file paths don't match.
 
 **Solution**:
+
 1. Check workflow logs for artifact download errors
 2. Verify artifact names match expected patterns
 3. Check artifact retention (90 days)
@@ -511,6 +548,7 @@ pnpm run test:quick
 **Cause**: This is expected behavior.
 
 **Solution**:
+
 - Dry run mode creates and signs artifacts but **does not** create GitHub Release
 - Check workflow artifacts for built packages
 - To create release, run without `dry_run: true`
@@ -549,6 +587,7 @@ cosign verify-blob --certificate *.cert --signature *.sig summit-2.0.0.tar.gz
 ## Support
 
 For issues or questions:
+
 1. Check this runbook first
 2. Review workflow logs
 3. Check GitHub Issues for known problems
@@ -556,4 +595,4 @@ For issues or questions:
 
 ---
 
-*Last updated: 2026-01-04*
+_Last updated: 2026-01-04_

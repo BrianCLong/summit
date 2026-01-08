@@ -107,6 +107,8 @@
     "ga:verify": "pnpm typecheck && pnpm lint && pnpm build && pnpm --filter intelgraph-server test:unit && pnpm ga:smoke",
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
     "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
+    "casepack:build": "node scripts/casepack/build.mjs",
+    "casepack:verify": "node scripts/casepack/verify.mjs",
     "prepare": "husky"
   },
   "keywords": [

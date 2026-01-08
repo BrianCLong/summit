@@ -16,23 +16,40 @@ interface CreateExportParams {
 }
 
 export async function createExportJob(params: CreateExportParams) {
-  const { tenantId, caseId, paramsHash, idempotencyKey: explicitKey, ...body } = params
-  const idempotencyKey = explicitKey ?? deriveIdempotencyKey(tenantId, caseId, paramsHash)
-  const response = await fetch(`/api/tenants/${tenantId}/cases/${caseId}/exports`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-idempotency-key': idempotencyKey,
-    },
-    body: JSON.stringify({ ...body, idempotencyKey } satisfies ExportJobPayload),
-  })
+  const {
+    tenantId,
+    caseId,
+    paramsHash,
+    idempotencyKey: explicitKey,
+    ...body
+  } = params
+  const idempotencyKey =
+    explicitKey ?? deriveIdempotencyKey(tenantId, caseId, paramsHash)
+  const response = await fetch(
+    `/api/tenants/${tenantId}/cases/${caseId}/exports`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-idempotency-key': idempotencyKey,
+      },
+      body: JSON.stringify({
+        ...body,
+        idempotencyKey,
+      } satisfies ExportJobPayload),
+    }
+  )
 
   if (!response.ok) {
     const message = await response.text().catch(() => response.statusText)
     throw new Error(`Failed to create export job: ${message}`)
   }
 
-  return response.json() as Promise<{ id: string; status: string; startedAt?: string }>
+  return response.json() as Promise<{
+    id: string
+    status: string
+    startedAt?: string
+  }>
 }
 
 export async function fetchExportJob(
@@ -40,7 +57,9 @@ export async function fetchExportJob(
   caseId: string,
   jobId: string
 ): Promise<ExportJobStatusResponse> {
-  const response = await fetch(`/api/tenants/${tenantId}/cases/${caseId}/exports/${jobId}`)
+  const response = await fetch(
+    `/api/tenants/${tenantId}/cases/${caseId}/exports/${jobId}`
+  )
 
   if (!response.ok) {
     const message = await response.text().catch(() => response.statusText)
@@ -55,9 +74,12 @@ export async function cancelExportJob(
   caseId: string,
   jobId: string
 ): Promise<void> {
-  const response = await fetch(`/api/tenants/${tenantId}/cases/${caseId}/exports/${jobId}`, {
-    method: 'DELETE',
-  })
+  const response = await fetch(
+    `/api/tenants/${tenantId}/cases/${caseId}/exports/${jobId}`,
+    {
+      method: 'DELETE',
+    }
+  )
 
   if (!response.ok) {
     const message = await response.text().catch(() => response.statusText)

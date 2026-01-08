@@ -1,7 +1,7 @@
 meta:
   id: plan.policy-engine@v1
-  owner: 'platform-engineering'
-  purpose: 'Enforce policies across CI, docs, and code with a centralized engine'
+  owner: "platform-engineering"
+  purpose: "Enforce policies across CI, docs, and code with a centralized engine"
   tags:
     - governance
     - policy
@@ -9,13 +9,13 @@ meta:
     - enforcement
     - compliance
   guardrails:
-    - 'Policies must be version controlled'
-    - 'Enforcement must be consistent'
-    - 'Exceptions must be audited'
-    - 'Policies must not block emergencies'
+    - "Policies must be version controlled"
+    - "Enforcement must be consistent"
+    - "Exceptions must be audited"
+    - "Policies must not block emergencies"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -321,15 +321,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'policy-engine'
+  - name: "policy-engine"
     inputs:
-      policy_domains: 'Security, Code Quality, Documentation, Operations'
-      current_enforcement: 'Ad-hoc linting, manual code review'
-      compliance_requirements: 'SOC2, internal security standards'
-      exception_process: 'Informal, through Slack'
-      stakeholders: 'Security, Platform, All developers'
+      policy_domains: "Security, Code Quality, Documentation, Operations"
+      current_enforcement: "Ad-hoc linting, manual code review"
+      compliance_requirements: "SOC2, internal security standards"
+      exception_process: "Informal, through Slack"
+      stakeholders: "Security, Platform, All developers"
     expected_contains:
-      - 'Policy Engine'
-      - 'Policy Definitions'
-      - 'Enforcement'
-      - 'Exception Management'
+      - "Policy Engine"
+      - "Policy Definitions"
+      - "Enforcement"
+      - "Exception Management"

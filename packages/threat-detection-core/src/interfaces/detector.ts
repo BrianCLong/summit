@@ -2,10 +2,10 @@
  * Core detector interfaces
  */
 
-import { ThreatEvent, AnomalyScore, BehaviorProfile, NetworkEvent } from '../types/events';
-import { ThreatIndicator } from '../types/threats';
-import { Alert } from '../types/alerts';
-import { PredictionRequest, PredictionResult } from '../types/ml';
+import { ThreatEvent, AnomalyScore, BehaviorProfile, NetworkEvent } from "../types/events";
+import { ThreatIndicator } from "../types/threats";
+import { Alert } from "../types/alerts";
+import { PredictionRequest, PredictionResult } from "../types/ml";
 
 export interface IThreatDetector {
   /**
@@ -28,7 +28,7 @@ export interface DetectorMetadata {
   id: string;
   name: string;
   version: string;
-  type: 'behavioral' | 'network' | 'ml' | 'rule' | 'signature' | 'hybrid';
+  type: "behavioral" | "network" | "ml" | "rule" | "signature" | "hybrid";
   description: string;
   capabilities: string[];
   performance: {
@@ -223,7 +223,10 @@ export interface IThreatIntelligenceService {
   /**
    * Check if indicator is malicious
    */
-  isMalicious(indicator: string, type: string): Promise<{
+  isMalicious(
+    indicator: string,
+    type: string
+  ): Promise<{
     malicious: boolean;
     confidence: number;
     sources: string[];
@@ -239,7 +242,10 @@ export interface IResponseOrchestrator {
   /**
    * Execute response playbook
    */
-  executePlaybook(playbookId: string, context: any): Promise<{
+  executePlaybook(
+    playbookId: string,
+    context: any
+  ): Promise<{
     success: boolean;
     stepsExecuted: number;
     errors: string[];
@@ -248,7 +254,10 @@ export interface IResponseOrchestrator {
   /**
    * Execute single response action
    */
-  executeAction(action: string, parameters: any): Promise<{
+  executeAction(
+    action: string,
+    parameters: any
+  ): Promise<{
     success: boolean;
     result: any;
   }>;

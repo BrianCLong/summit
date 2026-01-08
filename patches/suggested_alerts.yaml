@@ -15,8 +15,8 @@ groups:
           severity: warning
           service: intelgraph-ai
         annotations:
-          summary: 'AI Job processing is slow'
-          description: 'P95 AI job duration is {{ $value }}s (threshold: 30s)'
+          summary: "AI Job processing is slow"
+          description: "P95 AI job duration is {{ $value }}s (threshold: 30s)"
 
       # AI Job Failure Rate
       # Why: Need to know if background jobs are failing.
@@ -27,7 +27,7 @@ groups:
           severity: warning
           service: intelgraph-ai
         annotations:
-          summary: 'High AI Job failure rate'
+          summary: "High AI Job failure rate"
           description: 'AI job failure rate is {{ $value | printf "%.1f" }}% (threshold: 5%)'
 
       # =====================

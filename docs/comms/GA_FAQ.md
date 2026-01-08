@@ -27,6 +27,7 @@
 ### What does "General Availability" mean for Summit?
 
 General Availability (GA) means Summit has been validated for production use with:
+
 - All **Tier-0 journeys** (core user workflows) fully functional and tested
 - **Service Level Objectives (SLOs)** defined and monitored (99.9% uptime, latency targets)
 - **Enterprise security controls** including formal threat model, audit logging, and access controls
@@ -38,19 +39,20 @@ GA is the milestone where we confidently recommend production deployments for en
 
 ### How is GA different from MVP-3?
 
-| Aspect | MVP-3 | GA |
-|--------|-------|-----|
-| **Governance** | Basic RBAC | Universal OPA policy enforcement, ABAC, reason-for-access logging |
-| **Provenance** | Limited source tracking | Complete claims ledger with source/pipeline/timestamp/confidence for every fact |
-| **API Stability** | Breaking changes possible | Semantic versioning, 6-month deprecation policy, parallel version support |
-| **CI/CD** | Standard checks | Hard gates with security scanning, SBOM generation, deployment canaries |
-| **Security** | Basic controls | Formal STRIDE threat model, SOC 2 alignment, SLSA Level 3 compliance |
-| **SLOs** | Best-effort | Committed 99.9% availability with automated monitoring and alerting |
-| **Documentation** | Developer-focused | Comprehensive: API specs, migration guides, threat model, runbooks |
+| Aspect            | MVP-3                     | GA                                                                              |
+| ----------------- | ------------------------- | ------------------------------------------------------------------------------- |
+| **Governance**    | Basic RBAC                | Universal OPA policy enforcement, ABAC, reason-for-access logging               |
+| **Provenance**    | Limited source tracking   | Complete claims ledger with source/pipeline/timestamp/confidence for every fact |
+| **API Stability** | Breaking changes possible | Semantic versioning, 6-month deprecation policy, parallel version support       |
+| **CI/CD**         | Standard checks           | Hard gates with security scanning, SBOM generation, deployment canaries         |
+| **Security**      | Basic controls            | Formal STRIDE threat model, SOC 2 alignment, SLSA Level 3 compliance            |
+| **SLOs**          | Best-effort               | Committed 99.9% availability with automated monitoring and alerting             |
+| **Documentation** | Developer-focused         | Comprehensive: API specs, migration guides, threat model, runbooks              |
 
 ### Is GA backward-compatible with MVP-3?
 
 Yes, with documented migration steps. Key changes:
+
 - **API Changes**: Some endpoints have been restructured (see `/docs/MIGRATION-v2.0.0-to-MVP-3.md`)
 - **Data Model**: Provenance fields are now required for all entities (migration tool provided)
 - **Authentication**: OIDC is now the primary method (legacy session auth deprecated with 6-month EOL)
@@ -93,6 +95,7 @@ Summit uses **Open Policy Agent (OPA)** to enforce governance policies as code:
 4. **Audit Trail**: All policy decisions are recorded in immutable audit logs with correlation IDs
 
 **Example Policy Check:**
+
 ```rego
 # Policy: Users can only query data at or below their clearance level
 allow {
@@ -104,6 +107,7 @@ allow {
 ### What governance policies are included out-of-the-box?
 
 Default policies include:
+
 - **Multi-tenant isolation**: Users can only access data within their tenant namespace
 - **Classification enforcement**: Users cannot access data above their clearance level
 - **Compartment boundaries**: Compartmentalized data requires explicit access grants
@@ -116,6 +120,7 @@ Organizations can customize and extend these policies.
 ### Can I audit who accessed what data and when?
 
 **Yes.** Summit maintains **comprehensive, immutable audit logs** that capture:
+
 - **User Actions**: Login, logout, tenant switching, configuration changes
 - **Data Access**: Every query with user, timestamp, query text, and justification
 - **Data Exports**: What data was exported, by whom, when, and for what reason
@@ -123,6 +128,7 @@ Organizations can customize and extend these policies.
 - **System Events**: Ingestion jobs, background tasks, API calls, errors
 
 Audit logs are:
+
 - **Append-only**: Cannot be modified or deleted (WORM storage simulation)
 - **Cryptographically chained**: Tamper detection via cryptographic linking
 - **Exportable**: Can be exported to SIEM systems (Splunk, Datadog, etc.)
@@ -131,6 +137,7 @@ Audit logs are:
 ### Is Summit SOC 2 compliant?
 
 Summit GA is **aligned with SOC 2 Type II control objectives**:
+
 - ✅ **CC1 (Control Environment)**: Documented governance policies and RBAC
 - ✅ **CC2 (Communication)**: Audit logs and alerting for security events
 - ✅ **CC3 (Risk Assessment)**: Formal STRIDE threat model with residual risk documentation
@@ -144,6 +151,7 @@ Summit GA is **aligned with SOC 2 Type II control objectives**:
 ### How do I demonstrate compliance during an audit?
 
 Summit provides **evidence bundles** for audit preparation:
+
 - **Audit Logs**: Exportable, timestamped records of all system access and changes
 - **Policy Decisions**: OPA decision logs showing governance enforcement
 - **SBOM (Software Bill of Materials)**: Component inventory and vulnerability reports
@@ -151,6 +159,7 @@ Summit provides **evidence bundles** for audit preparation:
 - **Evidence Packs**: Bundled `evidence-pack-<release>.tgz` with SBOM, attestations, OPA decisions
 
 Generate an evidence bundle for auditors:
+
 ```bash
 # Export audit logs for date range
 ./scripts/export-audit-logs.sh --start 2025-01-01 --end 2025-03-31
@@ -171,6 +180,7 @@ See `/docs/AUDIT_AND_COMPLIANCE.md` for detailed audit preparation guidance.
 4. **Monitor Enforcement**: View policy decision logs in audit log viewer
 
 **Example Custom Policy:**
+
 ```rego
 # Require PII redaction for all exports
 package summit.export
@@ -193,6 +203,7 @@ See `/docs/GOVERNANCE-POLICIES.md` for policy authoring guide.
 The **provenance ledger** is an immutable, append-only record that tracks the origin and transformation history of every fact in the knowledge graph.
 
 **For every entity and edge, we record:**
+
 - **Source**: Original source system or document (e.g., "STIX feed X", "CSV upload Y")
 - **Pipeline**: ETL pipeline and transformation steps applied
 - **Timestamp**: When the data was ingested and last updated
@@ -205,12 +216,14 @@ The **provenance ledger** is an immutable, append-only record that tracks the or
 ### How do I see the provenance of a graph entity?
 
 **Via UI:**
+
 1. Click any entity in the graph canvas
 2. Open the "Provenance" panel in the entity inspector
 3. View source, pipeline, timestamp, confidence, and tags
 4. Click "View Source Document" to see the original data
 
 **Via API:**
+
 ```graphql
 query {
   entity(id: "entity-123") {
@@ -252,12 +265,14 @@ query {
 **Yes.** The graph UI and API support filtering by confidence and provenance attributes:
 
 **UI Filters:**
+
 - **Confidence Threshold**: Show only entities with `confidence >= 0.8`
 - **Exclude Simulations**: Hide entities with `simulation: true`
 - **Source Filter**: Show only data from specific sources (e.g., "STIX-FEED-A")
 - **Recency Filter**: Show only data ingested in the last 30 days
 
 **API Filters:**
+
 ```graphql
 query {
   entities(
@@ -271,7 +286,9 @@ query {
   ) {
     id
     name
-    provenance { confidence }
+    provenance {
+      confidence
+    }
   }
 }
 ```
@@ -287,6 +304,7 @@ AI-generated insights (e.g., from the Copilot) include **complete provenance cha
 5. **Audit Trail**: The full interaction (prompt, query, results, user approval) is logged
 
 **Example:**
+
 - **User Prompt**: "Show me all organizations linked to suspicious IP addresses"
 - **Generated Query**: `MATCH (o:Organization)-[:USES]->(ip:IPAddress) WHERE ip.suspicious = true RETURN o`
 - **Result Provenance**: Each organization includes `provenance.source = "Firewall-Logs-2025-01"` and `provenance.confidence = 0.92`
@@ -297,12 +315,14 @@ AI-generated insights (e.g., from the Copilot) include **complete provenance cha
 **Yes.** All data exports include optional provenance metadata:
 
 **CSV Export:**
+
 ```csv
 entity_id,entity_name,source_system,confidence,timestamp
 e-123,Acme Corp,STIX-FEED-A,0.95,2025-01-15T10:30:00Z
 ```
 
 **JSON Export:**
+
 ```json
 {
   "id": "e-123",
@@ -332,6 +352,7 @@ Summit uses **Semantic Versioning (SemVer)** for all APIs:
 - **PATCH**: Bug fixes (backward-compatible)
 
 **Current Versions:**
+
 - REST API: `v1.0.0` (Stable, Supported)
 - GraphQL API: `v2.1.0` (Stable, Supported)
 - WebSocket API: `v1.0.0` (Beta, Preview)
@@ -339,6 +360,7 @@ Summit uses **Semantic Versioning (SemVer)** for all APIs:
 ### What is a "breaking change"?
 
 Breaking changes require a MAJOR version bump and include:
+
 - Removing endpoints or fields
 - Changing required fields to optional (or vice versa)
 - Modifying response structure or data types
@@ -346,6 +368,7 @@ Breaking changes require a MAJOR version bump and include:
 - Altering error codes or error response formats
 
 **Examples:**
+
 - ❌ **Breaking**: Removing `GET /api/v1/entity` endpoint
 - ❌ **Breaking**: Changing `{ "name": "John" }` to `{ "fullName": "John" }`
 - ✅ **Non-Breaking**: Adding new optional field `{ "name": "John", "email": "john@example.com" }`
@@ -356,12 +379,14 @@ Breaking changes require a MAJOR version bump and include:
 **Minimum 6 months advance notice.**
 
 **Timeline:**
+
 1. **Announcement (T-0)**: Deprecation announced via email, release notes, and documentation
 2. **Warning Period (T+3 months)**: HTTP `Warning` headers added to deprecated endpoints
 3. **Parallel Support (T+0 to T+6 months)**: Old and new versions supported simultaneously
 4. **End of Life (T+6 months)**: Old version becomes unavailable
 
 **Example Timeline:**
+
 - **Jan 1, 2025**: `/api/v1/entity` endpoint deprecated, `/api/v2/entities` announced
 - **Apr 1, 2025**: HTTP `Warning: 299` headers added to v1 endpoint responses
 - **Jan 1, 2025 - Jul 1, 2025**: Both v1 and v2 endpoints available
@@ -389,6 +414,7 @@ Breaking changes require a MAJOR version bump and include:
 - **v2 Endpoint**: `https://api.summit.example.com/v2/entities`
 
 You can migrate your integrations incrementally:
+
 1. Test new v2 endpoints in staging
 2. Migrate critical integrations first
 3. Run both versions in production during transition
@@ -404,12 +430,14 @@ You can migrate your integrations incrementally:
 - **Python**: `intelgraph-sdk` (PyPI)
 
 **SDK Guarantees:**
+
 - SDKs are generated from OpenAPI specifications
 - SDK version matches API version (e.g., `@intelgraph/sdk@2.1.0` → API `v2.1.0`)
 - Type-safe: TypeScript SDK includes strict types; Python SDK includes type hints
 - Tested: SDKs are tested against corresponding API version in CI
 
 **Installation:**
+
 ```bash
 # TypeScript
 npm install @intelgraph/sdk@2.1.0
@@ -427,12 +455,13 @@ GraphQL follows a **continuous evolution model** rather than strict versioning:
 - **Client Control**: Clients explicitly request fields, so new fields don't break old queries
 
 **Example:**
+
 ```graphql
 type Entity {
   id: ID!
   name: String!
   type: String! @deprecated(reason: "Use 'entityType' instead")
-  entityType: EntityType!  # New field, old queries still work
+  entityType: EntityType! # New field, old queries still work
 }
 ```
 
@@ -447,6 +476,7 @@ Clients can query either `type` or `entityType` during the migration period.
 **Required for continued support.** MVP-3 will reach End-of-Life (EOL) **6 months after GA release**.
 
 **Timeline:**
+
 - **GA Release**: [Date TBD]
 - **MVP-3 EOL Announcement**: Same day as GA release
 - **MVP-3 Support Ends**: 6 months after GA release
@@ -462,6 +492,7 @@ Clients can query either `type` or `entityType` during the migration period.
 4. **Configuration**: Update environment variables to new naming conventions (mapping table provided)
 
 **Estimated Effort:**
+
 - Small deployment (< 10 integrations): 1-2 weeks
 - Medium deployment (10-50 integrations): 1-2 months
 - Large deployment (> 50 integrations): 2-3 months
@@ -471,12 +502,14 @@ Clients can query either `type` or `entityType` during the migration period.
 **Yes.** We provide:
 
 1. **Data Migration Script**: Adds provenance metadata to existing graph data
+
    ```bash
    ./scripts/migrate-mvp3-to-ga.sh --dry-run  # Preview changes
    ./scripts/migrate-mvp3-to-ga.sh --execute  # Apply migration
    ```
 
 2. **API Compatibility Checker**: Scans your client code for deprecated API usage
+
    ```bash
    npx @intelgraph/migration-checker ./src
    ```
@@ -499,6 +532,7 @@ See `/docs/MIGRATION-v2.0.0-to-MVP-3.md` for detailed instructions.
 5. **Cutover**: Switch production traffic to GA after successful validation
 
 **Migration Support:**
+
 - Dedicated Slack channel for migration questions
 - Office hours with engineering team
 - Migration consulting available for enterprise customers
@@ -513,6 +547,7 @@ See `/docs/MIGRATION-v2.0.0-to-MVP-3.md` for detailed instructions.
 4. **Backup Recommended**: We recommend backing up databases before migration (runbook provided)
 
 **Backup Process:**
+
 ```bash
 # Backup Neo4j graph database
 ./scripts/backup-neo4j.sh
@@ -527,6 +562,7 @@ See `/docs/MIGRATION-v2.0.0-to-MVP-3.md` for detailed instructions.
 ### What support is available during migration?
 
 **Enterprise customers receive:**
+
 - **Dedicated migration engineer** assigned to your account
 - **Migration project plan** with timeline and milestones
 - **Weekly check-in calls** during migration period
@@ -534,6 +570,7 @@ See `/docs/MIGRATION-v2.0.0-to-MVP-3.md` for detailed instructions.
 - **Post-migration validation** and health checks
 
 **Standard customers receive:**
+
 - **Migration documentation** and guides
 - **Community Slack channel** for questions
 - **Weekly office hours** with engineering team
@@ -548,6 +585,7 @@ See `/docs/MIGRATION-v2.0.0-to-MVP-3.md` for detailed instructions.
 Summit's threat model is **publicly documented** at `/docs/SECURITY_THREAT_MODEL.md`.
 
 It includes:
+
 - **Assets & Classification**: What we protect (intelligence graph, user profiles, audit logs, etc.)
 - **Trust Boundaries**: External→Edge→App→Data→Agents
 - **Threat Actors**: External attackers, malicious insiders, compromised agents, supply chain
@@ -558,12 +596,14 @@ It includes:
 ### What security controls are implemented?
 
 **Authentication:**
+
 - OIDC/SAML SSO integration
 - JWT tokens with 1-hour expiry
 - Multi-factor authentication (MFA) support
 - Session management with automatic timeout
 
 **Authorization:**
+
 - Role-Based Access Control (RBAC)
 - Attribute-Based Access Control (ABAC)
 - Multi-tenant isolation (PostgreSQL RLS + Neo4j namespaces)
@@ -571,6 +611,7 @@ It includes:
 - Reason-for-access prompts for sensitive data
 
 **Data Protection:**
+
 - Encryption at rest (AES-256)
 - Encryption in transit (TLS 1.3)
 - PII redaction middleware
@@ -578,12 +619,14 @@ It includes:
 - K-anonymity assessment for exports
 
 **Network Security:**
+
 - API rate limiting (token bucket + adaptive)
 - mTLS service mesh (rolling out Sprint N+11)
 - Network policies (Kubernetes NetworkPolicy)
 - Web Application Firewall (WAF) integration
 
 **Supply Chain Security:**
+
 - SLSA Level 3 compliance
 - SBOM (Software Bill of Materials) generation
 - Cosign artifact signing
@@ -601,6 +644,7 @@ Audit logs are **immutable and tamper-evident**:
 5. **Integrity Checks**: Automated integrity verification detects tampering
 
 **Tamper Detection:**
+
 ```bash
 # Verify audit log integrity
 ./scripts/verify-audit-logs.sh --start 2025-01-01 --end 2025-01-31
@@ -620,6 +664,7 @@ Audit logs are **immutable and tamper-evident**:
 5. **Post-Mortem**: Publish incident report with root cause analysis and preventative measures
 
 **Critical Vulnerabilities:**
+
 - Customers notified immediately (email, Slack, phone)
 - Emergency patch released within 72 hours
 - Automated deployment available for cloud customers
@@ -628,12 +673,14 @@ Audit logs are **immutable and tamper-evident**:
 ### Is Summit certified for government use?
 
 **Current Status:**
+
 - ✅ **SOC 2 Type II**: Alignment in progress, certification expected [Date TBD]
 - ✅ **SLSA Level 3**: Supply chain compliance implemented
 - ⏸️ **FedRAMP**: Not yet certified; air-gap deployment guide available for federal use cases
 - ⏸️ **ISO 27001**: Alignment in progress
 
 **Government Deployments:**
+
 - **Air-Gap Mode**: Deployment guide available at `/docs/AIR_GAP_DEPLOY_V1_README.md`
 - **Classification Support**: Multi-level security (MLS) with ABAC enforcement
 - **Audit Compliance**: NIST 800-53 control mapping available
@@ -667,6 +714,7 @@ The **AI Copilot** translates natural language questions into structured graph q
 - **Audit Trail**: All Copilot queries are logged with user, prompt, query, and results
 
 **Example:**
+
 - **User**: Clearance level "Secret", Tenant "Acme Corp"
 - **Copilot Query**: `MATCH (n) WHERE n.classification = 'Top Secret' RETURN n`
 - **OPA Decision**: `DENY` (user clearance insufficient)
@@ -683,6 +731,7 @@ The **AI Copilot** translates natural language questions into structured graph q
 5. **Guardrails**: Constitutional AI prompts prevent jailbreaks and out-of-scope queries
 
 **Example Hallucination Prevention:**
+
 - **User**: "Show me the secret meetings between Entity A and Entity B"
 - **Copilot**: Generates query `MATCH (a:Entity)-[:MET_WITH]->(b:Entity)`
 - **Schema Validation**: `:MET_WITH` relationship doesn't exist in schema
@@ -702,7 +751,7 @@ The **AI Copilot** translates natural language questions into structured graph q
   ```yaml
   copilot:
     llm:
-      provider: "azure-openai"  # or "openai", "anthropic", "custom"
+      provider: "azure-openai" # or "openai", "anthropic", "custom"
       endpoint: "https://your-endpoint.azure.com"
       model: "gpt-4"
       api_key: "${LLM_API_KEY}"
@@ -729,24 +778,26 @@ The **AI Copilot** translates natural language questions into structured graph q
 
 **Service Level Objectives (SLOs):**
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| **Availability** | 99.9% uptime | Tier-0 APIs, monthly |
-| **Latency (Simple Queries)** | p95 ≤ 350ms | GraphQL queries, depth ≤ 1 |
-| **Latency (Complex Queries)** | p95 ≤ 1500ms | GraphQL queries, depth ≤ 3 |
-| **Ingestion Throughput** | 10,000 records/sec | Streaming ETL pipeline |
-| **Error Rate** | < 1% | HTTP/GraphQL requests |
-| **Job Success Rate** | > 99% | Background ingestion jobs |
+| Metric                        | Target             | Measurement                |
+| ----------------------------- | ------------------ | -------------------------- |
+| **Availability**              | 99.9% uptime       | Tier-0 APIs, monthly       |
+| **Latency (Simple Queries)**  | p95 ≤ 350ms        | GraphQL queries, depth ≤ 1 |
+| **Latency (Complex Queries)** | p95 ≤ 1500ms       | GraphQL queries, depth ≤ 3 |
+| **Ingestion Throughput**      | 10,000 records/sec | Streaming ETL pipeline     |
+| **Error Rate**                | < 1%               | HTTP/GraphQL requests      |
+| **Job Success Rate**          | > 99%              | Background ingestion jobs  |
 
 **Monitoring:** Real-time SLO dashboards available at `/observability/dashboards/slo.json`.
 
 ### How many concurrent users can Summit support?
 
 **Tested Capacity:**
+
 - **100 concurrent users**: Validated in load testing
 - **1,000+ concurrent users**: Supported with horizontal scaling (Kubernetes autoscaling)
 
 **Scalability:**
+
 - **Stateless Services**: API Gateway, GraphQL resolvers scale horizontally
 - **Database Scaling**: Neo4j clustering for graph queries, PostgreSQL read replicas for metadata
 - **Caching**: Redis caching for frequently accessed queries
@@ -756,15 +807,18 @@ The **AI Copilot** translates natural language questions into structured graph q
 ### What is the largest graph size supported?
 
 **Validated Configurations:**
+
 - **10 million nodes**: Tested with acceptable query performance
 - **50 million edges**: Tested with graph traversal depth ≤ 3
 
 **Performance Considerations:**
+
 - Complex queries (depth > 3, large subgraphs) may exceed latency SLOs
 - Graph complexity limits enforced: max query depth = 5, max results = 10,000
 - Pagination recommended for large result sets
 
 **Scaling Beyond:**
+
 - Graph partitioning strategies available for > 100M nodes
 - Consult architecture team for multi-billion node deployments
 
@@ -778,6 +832,7 @@ The **AI Copilot** translates natural language questions into structured graph q
 - **LLM Support**: Self-hosted LLM models (no internet connectivity required)
 
 **Typical Air-Gap Architecture:**
+
 - Kubernetes cluster (on-premises)
 - Local container registry (Harbor, Artifactory)
 - Self-hosted LLM (LLaMA, Mistral)
@@ -817,6 +872,7 @@ The **AI Copilot** translates natural language questions into structured graph q
 - **Network**: 1 Gbps bandwidth, TLS 1.3 support
 
 **Recommended Production Configuration:**
+
 - 3x API replicas for HA
 - Neo4j cluster (3 nodes) for read scaling
 - PostgreSQL primary + 2 read replicas
@@ -845,11 +901,13 @@ See `/docs/INFRASTRUCTURE.md` for detailed sizing guidance.
   - Latency bottleneck identification
 
 **Pre-Built Dashboards:**
+
 - SLO Dashboard: `/observability/dashboards/slo.json`
 - API Health: `/observability/dashboards/api-health.json`
 - Ingestion Pipeline: `/observability/dashboards/ingestion.json`
 
 **Alerting:**
+
 - Prometheus AlertManager rules included
 - Pre-configured alerts for SLO violations, security events, job failures
 
@@ -866,6 +924,7 @@ See `/docs/INFRASTRUCTURE.md` for detailed sizing guidance.
 7. **Rollback if Needed**: Automated rollback on SLO violations
 
 **Kubernetes Upgrades:**
+
 ```bash
 # Helm upgrade with rollback on failure
 helm upgrade summit ./helm/summit \
@@ -965,6 +1024,7 @@ See `/docs/GA_CUT_LIST.md` for full deferred feature list.
 - **Beta Program**: Early access to upcoming features
 
 **Roadmap Transparency:**
+
 - Public: General themes and timelines
 - Customer Portal: Detailed feature cards, status updates, and release ETAs
 
@@ -1014,5 +1074,5 @@ See `/docs/GA_CORE_OVERVIEW.md` Section 1.3 for full "Won't Build" list.
 
 ---
 
-*Last Updated: [To be determined]*
-*Document Version: 1.0*
+_Last Updated: [To be determined]_
+_Document Version: 1.0_

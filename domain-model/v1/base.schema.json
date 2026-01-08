@@ -5,7 +5,7 @@
   "$defs": {
     "Identifier": {
       "type": "string",
-      "description": "Stable identifier used across services; prefer ULID/UUID." ,
+      "description": "Stable identifier used across services; prefer ULID/UUID.",
       "minLength": 3,
       "maxLength": 128
     },

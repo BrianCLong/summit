@@ -64,7 +64,7 @@ intelgraph/
 # compliance/opa/bundle.yaml
 name: intelgraph
 revision: v1
-roots: ['policy', 'data']
+roots: ["policy", "data"]
 ```
 
 ### 1.2 Shared data
@@ -169,24 +169,17 @@ should_delete {
 
 ```ts
 // services/lac-policy-compiler/src/enforcer.ts (snippet)
-import { OpaClient } from './opa';
-const opa = new OpaClient(process.env.OPA_URL || 'http://opa:8181');
+import { OpaClient } from "./opa";
+const opa = new OpaClient(process.env.OPA_URL || "http://opa:8181");
 
-app.post('/enforce', async (req, res) => {
+app.post("/enforce", async (req, res) => {
   const payload = req.body;
   // 1) local rules
-  let decision = 'deny';
-  let reason = 'Default deny';
+  let decision = "deny";
+  let reason = "Default deny";
   let ruleId = null;
   for (const r of active.rules) {
-    if (
-      r.predicate(
-        payload.subject,
-        payload.resource,
-        payload.action,
-        payload.context,
-      )
-    ) {
+    if (r.predicate(payload.subject, payload.resource, payload.action, payload.context)) {
       decision = r.effect;
       reason = r.reason;
       ruleId = r.id;
@@ -194,12 +187,12 @@ app.post('/enforce', async (req, res) => {
     }
   }
   // 2) OPA simulation for audit / additional gates
-  const opaRes = await opa.evaluate('policy/lac/allow', {
+  const opaRes = await opa.evaluate("policy/lac/allow", {
     ...payload,
     lac_decision: decision,
   });
   if (!opaRes.allow) {
-    decision = 'deny';
+    decision = "deny";
     reason = opaRes.reason || reason;
   }
   res.json({ decision, reason, ruleId, opaApplied: true });
@@ -208,17 +201,17 @@ app.post('/enforce', async (req, res) => {
 
 ```ts
 // services/lac-policy-compiler/src/opa.ts
-import fetch from 'node-fetch';
+import fetch from "node-fetch";
 export class OpaClient {
   constructor(private base: string) {}
   async evaluate(path: string, input: any) {
     const r = await fetch(`${this.base}/v1/data/${path}`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      method: "POST",
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({ input }),
     });
     const j = await r.json();
-    return typeof j.result === 'object' ? j.result : { allow: !!j.result };
+    return typeof j.result === "object" ? j.result : { allow: !!j.result };
   }
 }
 ```
@@ -229,39 +222,37 @@ export class OpaClient {
 
 ```ts
 // services/dsar-service/src/routes.ts
-import express from 'express';
-import fetch from 'node-fetch';
+import express from "express";
+import fetch from "node-fetch";
 const router = express.Router();
-router.post('/request', async (req, res) => {
+router.post("/request", async (req, res) => {
   const { subjectId, audience } = req.body; // audience influences redactions
   // fetch claims from ledger
-  const claims = await fetch(
-    'http://ledger:7002/claims?subjectId=' + encodeURIComponent(subjectId),
-  )
+  const claims = await fetch("http://ledger:7002/claims?subjectId=" + encodeURIComponent(subjectId))
     .then((r) => r.json())
     .catch(() => []);
   // apply redactions via wallet profile logic (reuse wallet-service profiles)
-  const redactions = audience === 'court' ? [] : ['SSN', 'DOB', 'Address'];
+  const redactions = audience === "court" ? [] : ["SSN", "DOB", "Address"];
   const bundle = {
     subjectId,
     claims,
     redactions,
     generatedAt: new Date().toISOString(),
   };
-  res.json({ id: subjectId + ':' + Date.now(), bundle });
+  res.json({ id: subjectId + ":" + Date.now(), bundle });
 });
 export default router;
 ```
 
 ```ts
 // services/dsar-service/src/index.ts
-import express from 'express';
-import routes from './routes';
-import { startOtel } from './otel';
+import express from "express";
+import routes from "./routes";
+import { startOtel } from "./otel";
 startOtel();
 const app = express();
 app.use(express.json());
-app.use('/dsar', routes);
+app.use("/dsar", routes);
 const PORT = process.env.PORT || 7015;
 app.listen(PORT, () => console.log(`[DSAR] ${PORT}`));
 ```
@@ -283,43 +274,37 @@ export type Hold = {
 export const holds: Hold[] = [];
 export function isHeld(subjectId: string) {
   return holds.some(
-    (h) =>
-      h.subjectId === subjectId && (!h.until || new Date(h.until) > new Date()),
+    (h) => h.subjectId === subjectId && (!h.until || new Date(h.until) > new Date())
   );
 }
 ```
 
 ```ts
 // services/retention-jobs/src/index.ts
-import { isHeld } from './holds';
-import fetch from 'node-fetch';
+import { isHeld } from "./holds";
+import fetch from "node-fetch";
 const TTL_DAYS = Number(process.env.TTL_DAYS || 365);
 (async () => {
   // naive scan loop; in prod use streaming & partitions
-  const claims: any[] = await fetch('http://ledger:7002/_all_claims')
+  const claims: any[] = await fetch("http://ledger:7002/_all_claims")
     .then((r) => r.json())
     .catch(() => []);
   const now = Date.now();
   for (const c of claims) {
-    const ageDays = Math.floor(
-      (now - new Date(c.createdAt).getTime()) / 86400000,
-    );
+    const ageDays = Math.floor((now - new Date(c.createdAt).getTime()) / 86400000);
     const evalBody = {
       age_days: ageDays,
       ttl_days: TTL_DAYS,
       legal_hold: isHeld(c.subjectId),
     };
-    const r = await fetch(
-      'http://opa:8181/v1/data/policy/retention/should_delete',
-      {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ input: evalBody }),
-      },
-    ).then((x) => x.json());
+    const r = await fetch("http://opa:8181/v1/data/policy/retention/should_delete", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ input: evalBody }),
+    }).then((x) => x.json());
     if (r.result === true) {
-      await fetch('http://ledger:7002/claims/' + c.id, { method: 'DELETE' });
-      console.log('deleted claim', c.id);
+      await fetch("http://ledger:7002/claims/" + c.id, { method: "DELETE" });
+      console.log("deleted claim", c.id);
     }
   }
 })();
@@ -333,7 +318,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata: { name: retention-jobs }
 spec:
-  schedule: '0 3 * * *'
+  schedule: "0 3 * * *"
   jobTemplate:
     spec:
       template:
@@ -343,7 +328,7 @@ spec:
               image: ghcr.io/ORG/intelgraph/retention-jobs:1.0.0
               env:
                 - name: TTL_DAYS
-                  value: '365'
+                  value: "365"
           restartPolicy: OnFailure
 ```
 
@@ -387,7 +372,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: trufflesecurity/trufflehog@main
-        with: { extra_args: '--only-verified --fail' }
+        with: { extra_args: "--only-verified --fail" }
 ```
 
 ---

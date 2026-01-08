@@ -23,48 +23,48 @@ Each agent prompt is stored as a standalone file, and the Meta-Router chooses th
 
 ### Core Agent Prompts
 
-| File | Agent | Purpose |
-|------|-------|---------|
-| `claude-code.md` | Claude Code | Deep architectural reasoning, third-order inference |
-| `codex.md` | Codex | Deterministic strict code generation |
-| `jules-gemini.md` | Jules/Gemini | Cross-file schema alignment, multimodal |
-| `cursor-warp.md` | Cursor/Warp | Terminal/editor integration, devloop |
-| `summit-platform.md` | Summit | Enterprise architecture compliance |
-| `ci-cd-enforcement.md` | CI/CD | Pipeline enforcement, quality gates |
+| File                   | Agent        | Purpose                                             |
+| ---------------------- | ------------ | --------------------------------------------------- |
+| `claude-code.md`       | Claude Code  | Deep architectural reasoning, third-order inference |
+| `codex.md`             | Codex        | Deterministic strict code generation                |
+| `jules-gemini.md`      | Jules/Gemini | Cross-file schema alignment, multimodal             |
+| `cursor-warp.md`       | Cursor/Warp  | Terminal/editor integration, devloop                |
+| `summit-platform.md`   | Summit       | Enterprise architecture compliance                  |
+| `ci-cd-enforcement.md` | CI/CD        | Pipeline enforcement, quality gates                 |
 
 ### Orchestration & Governance
 
-| File | Purpose |
-|------|---------|
-| `meta-router.md` | Agent selection and task routing logic |
-| `capability-matrix.md` | Agent capability mapping for routing decisions |
+| File                      | Purpose                                             |
+| ------------------------- | --------------------------------------------------- |
+| `meta-router.md`          | Agent selection and task routing logic              |
+| `capability-matrix.md`    | Agent capability mapping for routing decisions      |
 | `enterprise-4th-order.md` | Enterprise governance layer (applies to all agents) |
 
 ### Existing Persona Prompts
 
-| File | Persona | Purpose |
-|------|---------|---------|
-| `architect.md` | Guy | High-level technical decisions, architectural standards |
-| `hermes.md` | Hermes | CI/CD, release management, PR workflows |
-| `orion.md` | Orion | Task-specific agent |
-| `aegis.md` | Aegis | Security-focused agent |
-| `elara.md` | Elara | Task-specific agent |
+| File           | Persona | Purpose                                                 |
+| -------------- | ------- | ------------------------------------------------------- |
+| `architect.md` | Guy     | High-level technical decisions, architectural standards |
+| `hermes.md`    | Hermes  | CI/CD, release management, PR workflows                 |
+| `orion.md`     | Orion   | Task-specific agent                                     |
+| `aegis.md`     | Aegis   | Security-focused agent                                  |
+| `elara.md`     | Elara   | Task-specific agent                                     |
 
 ### Workflow Templates
 
-| File | Purpose |
-|------|---------|
-| `plan.feature-request@v1.yaml` | Feature request planning |
-| `implement.fix-test@v1.yaml` | Test fix implementation |
+| File                            | Purpose                   |
+| ------------------------------- | ------------------------- |
+| `plan.feature-request@v1.yaml`  | Feature request planning  |
+| `implement.fix-test@v1.yaml`    | Test fix implementation   |
 | `review.security-check@v1.yaml` | Security review checklist |
-| `code.critic@v1.yaml` | Code review template |
+| `code.critic@v1.yaml`           | Code review template      |
 
 ### Marketing & Positioning
 
-| File | Purpose |
-|------|---------|
-| `marketing.master-generator@v1.yaml` | Master system for generating/auditing all marketing artifacts |
-| `marketing.artifact-perfection@v1.yaml` | Sub-agent for refining specific marketing content |
+| File                                    | Purpose                                                       |
+| --------------------------------------- | ------------------------------------------------------------- |
+| `marketing.master-generator@v1.yaml`    | Master system for generating/auditing all marketing artifacts |
+| `marketing.artifact-perfection@v1.yaml` | Sub-agent for refining specific marketing content             |
 
 ---
 
@@ -131,16 +131,16 @@ The prompt system enforces four orders of requirements:
 
 The `packs/` directory contains composable prompt fragments:
 
-| File | Purpose |
-|------|---------|
-| `base.system.txt` | Base system context |
-| `code.system.txt` | Code generation context |
-| `cypher.system.txt` | Neo4j Cypher query context |
-| `research.system.txt` | Research task context |
-| `structured.system.txt` | Structured output context |
-| `summary.system.txt` | Summarization context |
-| `terse.system.txt` | Concise output context |
-| `common.user.txt` | Common user context |
+| File                    | Purpose                    |
+| ----------------------- | -------------------------- |
+| `base.system.txt`       | Base system context        |
+| `code.system.txt`       | Code generation context    |
+| `cypher.system.txt`     | Neo4j Cypher query context |
+| `research.system.txt`   | Research task context      |
+| `structured.system.txt` | Structured output context  |
+| `summary.system.txt`    | Summarization context      |
+| `terse.system.txt`      | Concise output context     |
+| `common.user.txt`       | Common user context        |
 
 ---
 
@@ -235,6 +235,7 @@ pnpm test -- prompts/__tests__/prompt-integrity.test.ts
 **Review Cadence**: Quarterly or as needed
 
 This README should be updated when:
+
 - New prompts are added
 - Agent capabilities change
 - Routing logic is modified

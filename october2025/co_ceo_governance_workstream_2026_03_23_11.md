@@ -102,17 +102,15 @@ verify_policy:
 **Path:** `services/webhooks/server.mjs`
 
 ```js
-import express from 'express';
-import crypto from 'crypto';
+import express from "express";
+import crypto from "crypto";
 const app = express();
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json({ limit: "1mb" }));
 function sign(body, secret) {
-  return (
-    'sha256=' + crypto.createHmac('sha256', secret).update(body).digest('hex')
-  );
+  return "sha256=" + crypto.createHmac("sha256", secret).update(body).digest("hex");
 }
-app.post('/webhooks/attestation', (req, res) => {
-  const sig = req.get('X-Topicality-Signature') || '';
+app.post("/webhooks/attestation", (req, res) => {
+  const sig = req.get("X-Topicality-Signature") || "";
   const raw = JSON.stringify(req.body);
   const valid = sig === sign(raw, process.env.WEBHOOK_SECRET);
   if (!valid) return res.status(401).json({ ok: false });
@@ -189,10 +187,10 @@ jobs:
 **Path:** `.github/actions/procurement-pack/action.yml`
 
 ```yaml
-name: 'Procurement Pack'
-description: 'Bundle security questionnaire, policies, attestations, DPIA/DPA'
+name: "Procurement Pack"
+description: "Bundle security questionnaire, policies, attestations, DPIA/DPA"
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - shell: bash
       run: |
@@ -216,10 +214,8 @@ runs:
 ```tsx
 export function PolicyBadge({ verified }: { verified: boolean }) {
   return (
-    <span
-      className={`px-2 py-1 rounded-2xl ${verified ? 'bg-green-100' : 'bg-red-100'}`}
-    >
-      {verified ? 'Policy Signed' : 'Unsigned Policy'}
+    <span className={`px-2 py-1 rounded-2xl ${verified ? "bg-green-100" : "bg-red-100"}`}>
+      {verified ? "Policy Signed" : "Unsigned Policy"}
     </span>
   );
 }

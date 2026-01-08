@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to promote'
+        description: "Version to promote"
         required: true
         type: string
       environment:
-        description: 'Target environment'
+        description: "Target environment"
         required: true
         type: choice
         options:

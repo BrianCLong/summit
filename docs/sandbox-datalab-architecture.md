@@ -53,6 +53,7 @@ The Sandbox Tenant & Data Lab system provides a secure, isolated environment for
 The GraphQL API gateway providing unified access to all sandbox and data lab functionality.
 
 **Features:**
+
 - Full GraphQL schema with queries, mutations, and subscriptions
 - Apollo Server 4 with federation support
 - JWT-based authentication and RBAC
@@ -61,6 +62,7 @@ The GraphQL API gateway providing unified access to all sandbox and data lab fun
 - Health check endpoints for Kubernetes probes
 
 **Endpoints:**
+
 - `POST /graphql` - GraphQL API
 - `GET /health` - Basic health check
 - `GET /health/ready` - Readiness probe
@@ -72,13 +74,14 @@ The GraphQL API gateway providing unified access to all sandbox and data lab fun
 Manages sandbox configuration, lifecycle, and enforcement policies.
 
 **Core Types:**
+
 ```typescript
 interface SandboxTenantProfile {
   id: UUID;
   name: string;
-  tenantType: 'PRODUCTION' | 'SANDBOX' | 'DATALAB' | 'STAGING';
-  isolationLevel: 'STANDARD' | 'ENHANCED' | 'AIRGAPPED' | 'RESEARCH';
-  status: 'PROVISIONING' | 'ACTIVE' | 'SUSPENDED' | 'EXPIRED' | 'ARCHIVED';
+  tenantType: "PRODUCTION" | "SANDBOX" | "DATALAB" | "STAGING";
+  isolationLevel: "STANDARD" | "ENHANCED" | "AIRGAPPED" | "RESEARCH";
+  status: "PROVISIONING" | "ACTIVE" | "SUSPENDED" | "EXPIRED" | "ARCHIVED";
   dataAccessPolicy: DataAccessPolicy;
   resourceQuotas: ResourceQuota;
   integrationRestrictions: IntegrationRestrictions;
@@ -90,14 +93,15 @@ interface SandboxTenantProfile {
 
 **Isolation Levels:**
 
-| Level | Federation | External Export | Linkback | Use Case |
-|-------|-----------|-----------------|----------|----------|
-| STANDARD | Blocked | Restricted | Blocked | General sandbox |
-| ENHANCED | Blocked | Blocked | Blocked | Sensitive data |
-| AIRGAPPED | Blocked | Blocked | Blocked | Highest security |
-| RESEARCH | Blocked | Logged | Blocked | R&D environments |
+| Level     | Federation | External Export | Linkback | Use Case         |
+| --------- | ---------- | --------------- | -------- | ---------------- |
+| STANDARD  | Blocked    | Restricted      | Blocked  | General sandbox  |
+| ENHANCED  | Blocked    | Blocked         | Blocked  | Sensitive data   |
+| AIRGAPPED | Blocked    | Blocked         | Blocked  | Highest security |
+| RESEARCH  | Blocked    | Logged          | Blocked  | R&D environments |
 
 **Presets:**
+
 - `dataLab` - Enhanced isolation for data experimentation
 - `research` - Research-focused with audit logging
 - `demo` - Standard isolation for demonstrations
@@ -110,25 +114,27 @@ Provides data cloning, synthetic generation, and anonymization capabilities.
 
 **Clone Strategies:**
 
-| Strategy | Description | Data Fidelity | PII Risk |
-|----------|-------------|---------------|----------|
-| STRUCTURE_ONLY | Schema only, no data | None | None |
-| SYNTHETIC | Generated data | Low | None |
-| ANONYMIZED | Real data with PII removed | High | Low |
-| SAMPLED | Subset of real data | Medium | Medium |
-| FUZZED | Real data with noise | High | Low |
+| Strategy       | Description                | Data Fidelity | PII Risk |
+| -------------- | -------------------------- | ------------- | -------- |
+| STRUCTURE_ONLY | Schema only, no data       | None          | None     |
+| SYNTHETIC      | Generated data             | Low           | None     |
+| ANONYMIZED     | Real data with PII removed | High          | Low      |
+| SAMPLED        | Subset of real data        | Medium        | Medium   |
+| FUZZED         | Real data with noise       | High          | Low      |
 
 **Anonymization Techniques:**
+
 1. **REDACTION** - Complete removal
 2. **HASHING** - One-way hash (SHA256)
 3. **PSEUDONYMIZATION** - Consistent fake replacement
 4. **GENERALIZATION** - Reduce precision (age → age range)
-5. **MASKING** - Partial hiding (****1234)
+5. **MASKING** - Partial hiding (\*\*\*\*1234)
 6. **NOISE_ADDITION** - Statistical noise
 7. **K_ANONYMITY** - Ensure k identical records
 8. **DIFFERENTIAL_PRIVACY** - Mathematical privacy guarantee
 
 **Synthetic Data Generators:**
+
 - Person names, emails, phones, addresses
 - Company names, industries, domains
 - Financial data (accounts, transactions)
@@ -140,6 +146,7 @@ Provides data cloning, synthetic generation, and anonymization capabilities.
 Controlled process for moving artifacts from sandbox to production.
 
 **Flow:**
+
 ```
 DRAFT → PENDING_REVIEW → UNDER_REVIEW → APPROVED → PROMOTED
                               ↓
@@ -149,6 +156,7 @@ DRAFT → PENDING_REVIEW → UNDER_REVIEW → APPROVED → PROMOTED
 ```
 
 **Validation Checks:**
+
 - Security scan for vulnerabilities
 - Performance testing
 - Compliance verification
@@ -185,12 +193,14 @@ interface EnforcementDecision {
 **Absolute Rule:** Sandbox data can NEVER reference or link back to production data.
 
 Detection mechanisms:
+
 1. ID format validation (sandbox IDs have distinct prefix)
 2. Relationship target validation
 3. Query analysis for cross-tenant references
 4. Runtime enforcement at database driver level
 
 All linkback attempts are:
+
 - Logged with full context
 - Blocked immediately
 - Reported to security dashboard
@@ -210,6 +220,7 @@ All linkback attempts are:
 ### Data Classification
 
 All data in sandboxes is classified:
+
 - `PUBLIC` - No restrictions
 - `INTERNAL` - Internal use only
 - `CONFIDENTIAL` - Requires anonymization
@@ -289,6 +300,7 @@ sandbox_promotion_executed_total{status}
 ### Tracing (OpenTelemetry)
 
 All operations generate distributed traces:
+
 - `sandbox.create` - Sandbox creation
 - `sandbox.enforcement.check` - Policy evaluation
 - `sandbox.linkback.attempt` - Blocked attempts
@@ -299,6 +311,7 @@ All operations generate distributed traces:
 ### Logging (Pino)
 
 Structured JSON logging with:
+
 - Request ID correlation
 - User/tenant context
 - Operation details
@@ -352,13 +365,14 @@ sandbox promo create --sandbox <id> --type QUERY --justification "Performance im
 ### Audit Trail
 
 Every operation is logged:
+
 ```typescript
 interface AuditEntry {
   timestamp: Date;
   userId: string;
   sandboxId: string;
   operation: string;
-  result: 'success' | 'blocked' | 'error';
+  result: "success" | "blocked" | "error";
   details: Record<string, unknown>;
   requestId: string;
 }
@@ -374,6 +388,7 @@ interface AuditEntry {
 ### Compliance Frameworks
 
 Supports tagging for:
+
 - SOC 2
 - ISO 27001
 - GDPR
@@ -391,6 +406,7 @@ Supports tagging for:
 ### Resource Limits
 
 Default quotas per sandbox:
+
 - CPU: 1000ms per request
 - Memory: 1GB peak
 - Storage: 10GB
@@ -399,11 +415,11 @@ Default quotas per sandbox:
 
 ### Scaling Guidelines
 
-| Load | Replicas | Memory | Notes |
-|------|----------|--------|-------|
-| Low (<100 RPS) | 3 | 256Mi | Development |
-| Medium (100-500 RPS) | 5 | 512Mi | Staging |
-| High (500-2000 RPS) | 10 | 1Gi | Production |
+| Load                 | Replicas | Memory | Notes       |
+| -------------------- | -------- | ------ | ----------- |
+| Low (<100 RPS)       | 3        | 256Mi  | Development |
+| Medium (100-500 RPS) | 5        | 512Mi  | Staging     |
+| High (500-2000 RPS)  | 10       | 1Gi    | Production  |
 
 ## Disaster Recovery
 

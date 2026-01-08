@@ -1,5 +1,5 @@
-import EventEmitter from 'eventemitter3';
-import { pino, type Logger } from 'pino';
+import EventEmitter from "eventemitter3";
+import { pino, type Logger } from "pino";
 import {
   EdgeNodeMetadata,
   EdgeNodeConfig,
@@ -7,9 +7,9 @@ import {
   HealthStatus,
   EdgeEvent,
   EdgeMetric,
-  ResourceCapacity
-} from '../types';
-import { validateNodeHealth, generateEdgeId, retryWithBackoff } from '../utils';
+  ResourceCapacity,
+} from "../types";
+import { validateNodeHealth, generateEdgeId, retryWithBackoff } from "../utils";
 
 /**
  * Edge Node Manager
@@ -23,29 +23,29 @@ export class EdgeNodeManager extends EventEmitter {
 
   constructor(logger?: Logger) {
     super();
-    this.logger = logger || pino({ name: 'EdgeNodeManager' });
+    this.logger = logger || pino({ name: "EdgeNodeManager" });
   }
 
   /**
    * Register a new edge node
    */
   async registerNode(
-    metadata: Omit<EdgeNodeMetadata, 'id' | 'registeredAt' | 'lastHeartbeat'>,
-    config: Omit<EdgeNodeConfig, 'id'>
+    metadata: Omit<EdgeNodeMetadata, "id" | "registeredAt" | "lastHeartbeat">,
+    config: Omit<EdgeNodeConfig, "id">
   ): Promise<{ nodeId: string; config: EdgeNodeConfig }> {
-    const nodeId = generateEdgeId('node');
+    const nodeId = generateEdgeId("node");
     const now = new Date();
 
     const nodeMetadata: EdgeNodeMetadata = {
       ...metadata,
       id: nodeId,
       registeredAt: now,
-      lastHeartbeat: now
+      lastHeartbeat: now,
     };
 
     const nodeConfig: EdgeNodeConfig = {
       ...config,
-      id: nodeId
+      id: nodeId,
     };
 
     this.nodes.set(nodeId, nodeMetadata);
@@ -54,19 +54,19 @@ export class EdgeNodeManager extends EventEmitter {
     // Start health monitoring
     this.startHealthMonitoring(nodeId);
 
-    this.logger.info({ nodeId, name: metadata.name }, 'Edge node registered');
+    this.logger.info({ nodeId, name: metadata.name }, "Edge node registered");
 
     const event: EdgeEvent = {
-      id: generateEdgeId('event'),
+      id: generateEdgeId("event"),
       nodeId,
-      type: 'node-online',
-      severity: 'info',
+      type: "node-online",
+      severity: "info",
       message: `Node ${metadata.name} registered`,
-      timestamp: now
+      timestamp: now,
     };
 
-    this.emit('node-registered', { nodeId, metadata: nodeMetadata, config: nodeConfig });
-    this.emit('event', event);
+    this.emit("node-registered", { nodeId, metadata: nodeMetadata, config: nodeConfig });
+    this.emit("event", event);
 
     return { nodeId, config: nodeConfig };
   }
@@ -87,19 +87,19 @@ export class EdgeNodeManager extends EventEmitter {
     node.status = EdgeNodeStatus.DECOMMISSIONED;
     this.nodes.set(nodeId, node);
 
-    this.logger.info({ nodeId }, 'Edge node deregistered');
+    this.logger.info({ nodeId }, "Edge node deregistered");
 
     const event: EdgeEvent = {
-      id: generateEdgeId('event'),
+      id: generateEdgeId("event"),
       nodeId,
-      type: 'node-offline',
-      severity: 'info',
+      type: "node-offline",
+      severity: "info",
       message: `Node ${node.name} deregistered`,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    this.emit('node-deregistered', { nodeId });
-    this.emit('event', event);
+    this.emit("node-deregistered", { nodeId });
+    this.emit("event", event);
 
     // Remove from active nodes after a grace period
     setTimeout(() => {
@@ -125,8 +125,11 @@ export class EdgeNodeManager extends EventEmitter {
     // Validate health
     const healthCheck = validateNodeHealth(capacity, now);
     const previousHealth = node.health;
-    node.health = healthCheck.isHealthy ? HealthStatus.HEALTHY :
-      (healthCheck.issues.length > 2 ? HealthStatus.UNHEALTHY : HealthStatus.WARNING);
+    node.health = healthCheck.isHealthy
+      ? HealthStatus.HEALTHY
+      : healthCheck.issues.length > 2
+        ? HealthStatus.UNHEALTHY
+        : HealthStatus.WARNING;
 
     // Update status based on health
     if (node.status === EdgeNodeStatus.OFFLINE) {
@@ -142,20 +145,20 @@ export class EdgeNodeManager extends EventEmitter {
     // Emit health change event if status changed
     if (previousHealth !== node.health) {
       const event: EdgeEvent = {
-        id: generateEdgeId('event'),
+        id: generateEdgeId("event"),
         nodeId,
-        type: 'health-change',
-        severity: node.health === HealthStatus.UNHEALTHY ? 'error' : 'warning',
+        type: "health-change",
+        severity: node.health === HealthStatus.UNHEALTHY ? "error" : "warning",
         message: `Node ${node.name} health changed from ${previousHealth} to ${node.health}`,
         metadata: { issues: healthCheck.issues },
-        timestamp: now
+        timestamp: now,
       };
 
-      this.emit('health-change', { nodeId, health: node.health, issues: healthCheck.issues });
-      this.emit('event', event);
+      this.emit("health-change", { nodeId, health: node.health, issues: healthCheck.issues });
+      this.emit("event", event);
     }
 
-    this.emit('heartbeat', { nodeId, capacity });
+    this.emit("heartbeat", { nodeId, capacity });
   }
 
   /**
@@ -183,14 +186,14 @@ export class EdgeNodeManager extends EventEmitter {
    * Get nodes by status
    */
   getNodesByStatus(status: EdgeNodeStatus): EdgeNodeMetadata[] {
-    return this.getAllNodes().filter(node => node.status === status);
+    return this.getAllNodes().filter((node) => node.status === status);
   }
 
   /**
    * Get nodes by cluster
    */
   getNodesByCluster(clusterId: string): EdgeNodeMetadata[] {
-    return this.getAllNodes().filter(node => node.clusterId === clusterId);
+    return this.getAllNodes().filter((node) => node.clusterId === clusterId);
   }
 
   /**
@@ -198,7 +201,7 @@ export class EdgeNodeManager extends EventEmitter {
    */
   getHealthyNodes(): EdgeNodeMetadata[] {
     return this.getAllNodes().filter(
-      node => node.health === HealthStatus.HEALTHY && node.status === EdgeNodeStatus.ONLINE
+      (node) => node.health === HealthStatus.HEALTHY && node.status === EdgeNodeStatus.ONLINE
     );
   }
 
@@ -214,13 +217,13 @@ export class EdgeNodeManager extends EventEmitter {
     const updatedConfig: EdgeNodeConfig = {
       ...existingConfig,
       ...config,
-      id: nodeId // Ensure ID doesn't change
+      id: nodeId, // Ensure ID doesn't change
     };
 
     this.configs.set(nodeId, updatedConfig);
 
-    this.logger.info({ nodeId }, 'Node configuration updated');
-    this.emit('config-updated', { nodeId, config: updatedConfig });
+    this.logger.info({ nodeId }, "Node configuration updated");
+    this.emit("config-updated", { nodeId, config: updatedConfig });
   }
 
   /**
@@ -235,19 +238,19 @@ export class EdgeNodeManager extends EventEmitter {
     node.status = enabled ? EdgeNodeStatus.MAINTENANCE : EdgeNodeStatus.ONLINE;
     this.nodes.set(nodeId, node);
 
-    this.logger.info({ nodeId, enabled }, 'Node maintenance mode updated');
+    this.logger.info({ nodeId, enabled }, "Node maintenance mode updated");
 
     const event: EdgeEvent = {
-      id: generateEdgeId('event'),
+      id: generateEdgeId("event"),
       nodeId,
-      type: 'custom',
-      severity: 'info',
-      message: `Node ${node.name} ${enabled ? 'entered' : 'exited'} maintenance mode`,
-      timestamp: new Date()
+      type: "custom",
+      severity: "info",
+      message: `Node ${node.name} ${enabled ? "entered" : "exited"} maintenance mode`,
+      timestamp: new Date(),
     };
 
-    this.emit('maintenance-mode', { nodeId, enabled });
-    this.emit('event', event);
+    this.emit("maintenance-mode", { nodeId, enabled });
+    this.emit("event", event);
   }
 
   /**
@@ -264,56 +267,62 @@ export class EdgeNodeManager extends EventEmitter {
       {
         nodeId,
         timestamp: now,
-        type: 'cpu',
+        type: "cpu",
         value: node.capacity.cpu.utilization,
-        unit: 'percent'
+        unit: "percent",
       },
       {
         nodeId,
         timestamp: now,
-        type: 'memory',
+        type: "memory",
         value: node.capacity.memory.utilization,
-        unit: 'percent'
+        unit: "percent",
       },
       {
         nodeId,
         timestamp: now,
-        type: 'storage',
+        type: "storage",
         value: node.capacity.storage.utilization,
-        unit: 'percent'
+        unit: "percent",
       },
       {
         nodeId,
         timestamp: now,
-        type: 'latency',
+        type: "latency",
         value: node.capacity.network.latency,
-        unit: 'ms'
-      }
+        unit: "ms",
+      },
     ];
   }
 
   /**
    * Find nearest nodes to a location
    */
-  findNearestNodes(location: { latitude: number; longitude: number }, limit: number = 5): EdgeNodeMetadata[] {
-    const { calculateDistance } = require('../utils');
+  findNearestNodes(
+    location: { latitude: number; longitude: number },
+    limit: number = 5
+  ): EdgeNodeMetadata[] {
+    const { calculateDistance } = require("../utils");
 
-    const nodesWithDistance = this.getHealthyNodes().map(node => ({
+    const nodesWithDistance = this.getHealthyNodes().map((node) => ({
       node,
-      distance: calculateDistance(location, node.location)
+      distance: calculateDistance(location, node.location),
     }));
 
     return nodesWithDistance
       .sort((a, b) => a.distance - b.distance)
       .slice(0, limit)
-      .map(item => item.node);
+      .map((item) => item.node);
   }
 
   /**
    * Find nodes with available capacity
    */
-  findAvailableNodes(minCpuPercent: number = 20, minMemoryPercent: number = 20): EdgeNodeMetadata[] {
-    return this.getHealthyNodes().filter(node => {
+  findAvailableNodes(
+    minCpuPercent: number = 20,
+    minMemoryPercent: number = 20
+  ): EdgeNodeMetadata[] {
+    return this.getHealthyNodes().filter((node) => {
       const cpuAvailable = 100 - node.capacity.cpu.utilization;
       const memoryAvailable = 100 - node.capacity.memory.utilization;
       return cpuAvailable >= minCpuPercent && memoryAvailable >= minMemoryPercent;
@@ -361,19 +370,19 @@ export class EdgeNodeManager extends EventEmitter {
       node.health = HealthStatus.UNKNOWN;
       this.nodes.set(nodeId, node);
 
-      this.logger.warn({ nodeId, heartbeatAge }, 'Node marked as offline due to stale heartbeat');
+      this.logger.warn({ nodeId, heartbeatAge }, "Node marked as offline due to stale heartbeat");
 
       const event: EdgeEvent = {
-        id: generateEdgeId('event'),
+        id: generateEdgeId("event"),
         nodeId,
-        type: 'node-offline',
-        severity: 'error',
+        type: "node-offline",
+        severity: "error",
         message: `Node ${node.name} went offline (last heartbeat ${Math.floor(heartbeatAge / 1000)}s ago)`,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
-      this.emit('node-offline', { nodeId });
-      this.emit('event', event);
+      this.emit("node-offline", { nodeId });
+      this.emit("event", event);
     }
   }
 
@@ -389,33 +398,34 @@ export class EdgeNodeManager extends EventEmitter {
     avgMemoryUtilization: number;
     avgStorageUtilization: number;
   } {
-    const nodes = clusterId
-      ? this.getNodesByCluster(clusterId)
-      : this.getAllNodes();
+    const nodes = clusterId ? this.getNodesByCluster(clusterId) : this.getAllNodes();
 
-    const onlineNodes = nodes.filter(n => n.status === EdgeNodeStatus.ONLINE);
-    const healthyNodes = nodes.filter(n => n.health === HealthStatus.HEALTHY);
+    const onlineNodes = nodes.filter((n) => n.status === EdgeNodeStatus.ONLINE);
+    const healthyNodes = nodes.filter((n) => n.health === HealthStatus.HEALTHY);
 
-    const avgCpu = nodes.length > 0
-      ? nodes.reduce((sum, n) => sum + n.capacity.cpu.utilization, 0) / nodes.length
-      : 0;
+    const avgCpu =
+      nodes.length > 0
+        ? nodes.reduce((sum, n) => sum + n.capacity.cpu.utilization, 0) / nodes.length
+        : 0;
 
-    const avgMemory = nodes.length > 0
-      ? nodes.reduce((sum, n) => sum + n.capacity.memory.utilization, 0) / nodes.length
-      : 0;
+    const avgMemory =
+      nodes.length > 0
+        ? nodes.reduce((sum, n) => sum + n.capacity.memory.utilization, 0) / nodes.length
+        : 0;
 
-    const avgStorage = nodes.length > 0
-      ? nodes.reduce((sum, n) => sum + n.capacity.storage.utilization, 0) / nodes.length
-      : 0;
+    const avgStorage =
+      nodes.length > 0
+        ? nodes.reduce((sum, n) => sum + n.capacity.storage.utilization, 0) / nodes.length
+        : 0;
 
     return {
       totalNodes: nodes.length,
       onlineNodes: onlineNodes.length,
-      offlineNodes: nodes.filter(n => n.status === EdgeNodeStatus.OFFLINE).length,
+      offlineNodes: nodes.filter((n) => n.status === EdgeNodeStatus.OFFLINE).length,
       healthyNodes: healthyNodes.length,
       avgCpuUtilization: avgCpu,
       avgMemoryUtilization: avgMemory,
-      avgStorageUtilization: avgStorage
+      avgStorageUtilization: avgStorage,
     };
   }
 
@@ -429,6 +439,6 @@ export class EdgeNodeManager extends EventEmitter {
     }
 
     this.removeAllListeners();
-    this.logger.info('EdgeNodeManager shut down');
+    this.logger.info("EdgeNodeManager shut down");
   }
 }

@@ -14,7 +14,7 @@ spec:
       serviceAccountName: { { include "worker-python.fullname" . } }
       containers:
         - name: worker
-          image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: { { .Values.image.pullPolicy } }
           env: { { - toYaml .Values.env | nindent 12 } }
           resources:

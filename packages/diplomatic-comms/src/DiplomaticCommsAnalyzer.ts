@@ -10,8 +10,8 @@ import {
   ComparativeAnalysis,
   SignalDetection,
   PatternShift,
-  MessagingStrategy
-} from './types.js';
+  MessagingStrategy,
+} from "./types.js";
 
 /**
  * DiplomaticCommsAnalyzer
@@ -66,7 +66,7 @@ export class DiplomaticCommsAnalyzer {
   getCommunicationsByCountry(country: string): DiplomaticCommunication[] {
     const commIds = this.communicationsByCountry.get(country) || new Set();
     return Array.from(commIds)
-      .map(id => this.communications.get(id))
+      .map((id) => this.communications.get(id))
       .filter((c): c is DiplomaticCommunication => c !== undefined);
   }
 
@@ -76,16 +76,19 @@ export class DiplomaticCommsAnalyzer {
   getCommunicationsByType(type: CommunicationType): DiplomaticCommunication[] {
     const commIds = this.communicationsByType.get(type) || new Set();
     return Array.from(commIds)
-      .map(id => this.communications.get(id))
+      .map((id) => this.communications.get(id))
       .filter((c): c is DiplomaticCommunication => c !== undefined);
   }
 
   /**
    * Analyze sentiment trends
    */
-  analyzeSentimentTrends(country: string, days: number = 90): {
+  analyzeSentimentTrends(
+    country: string,
+    days: number = 90
+  ): {
     averageSentiment: number;
-    trend: 'IMPROVING' | 'STABLE' | 'DETERIORATING';
+    trend: "IMPROVING" | "STABLE" | "DETERIORATING";
     sentimentByPeriod: { period: string; sentiment: number }[];
     mostPositive: DiplomaticCommunication[];
     mostNegative: DiplomaticCommunication[];
@@ -94,33 +97,36 @@ export class DiplomaticCommsAnalyzer {
     cutoffDate.setDate(cutoffDate.getDate() - days);
 
     const communications = this.getCommunicationsByCountry(country)
-      .filter(c => c.date >= cutoffDate)
+      .filter((c) => c.date >= cutoffDate)
       .sort((a, b) => a.date.getTime() - b.date.getTime());
 
     if (communications.length === 0) {
       return {
         averageSentiment: 0,
-        trend: 'STABLE',
+        trend: "STABLE",
         sentimentByPeriod: [],
         mostPositive: [],
-        mostNegative: []
+        mostNegative: [],
       };
     }
 
     // Calculate average sentiment
-    const avgSentiment = communications.reduce((sum, c) => sum + c.sentimentScore, 0) / communications.length;
+    const avgSentiment =
+      communications.reduce((sum, c) => sum + c.sentimentScore, 0) / communications.length;
 
     // Calculate trend (first half vs second half)
     const midpoint = Math.floor(communications.length / 2);
     const firstHalf = communications.slice(0, midpoint);
     const secondHalf = communications.slice(midpoint);
 
-    const firstAvg = firstHalf.reduce((sum, c) => sum + c.sentimentScore, 0) / (firstHalf.length || 1);
-    const secondAvg = secondHalf.reduce((sum, c) => sum + c.sentimentScore, 0) / (secondHalf.length || 1);
+    const firstAvg =
+      firstHalf.reduce((sum, c) => sum + c.sentimentScore, 0) / (firstHalf.length || 1);
+    const secondAvg =
+      secondHalf.reduce((sum, c) => sum + c.sentimentScore, 0) / (secondHalf.length || 1);
 
-    let trend: 'IMPROVING' | 'STABLE' | 'DETERIORATING' = 'STABLE';
-    if (secondAvg > firstAvg + 0.15) trend = 'IMPROVING';
-    else if (secondAvg < firstAvg - 0.15) trend = 'DETERIORATING';
+    let trend: "IMPROVING" | "STABLE" | "DETERIORATING" = "STABLE";
+    if (secondAvg > firstAvg + 0.15) trend = "IMPROVING";
+    else if (secondAvg < firstAvg - 0.15) trend = "DETERIORATING";
 
     // Group by periods (weeks)
     const sentimentByPeriod: { period: string; sentiment: number }[] = [];
@@ -132,15 +138,14 @@ export class DiplomaticCommsAnalyzer {
       const periodEnd = new Date(periodStart);
       periodEnd.setDate(periodEnd.getDate() + periodSize);
 
-      const periodComms = communications.filter(
-        c => c.date >= periodStart && c.date < periodEnd
-      );
+      const periodComms = communications.filter((c) => c.date >= periodStart && c.date < periodEnd);
 
       if (periodComms.length > 0) {
-        const periodSentiment = periodComms.reduce((sum, c) => sum + c.sentimentScore, 0) / periodComms.length;
+        const periodSentiment =
+          periodComms.reduce((sum, c) => sum + c.sentimentScore, 0) / periodComms.length;
         sentimentByPeriod.push({
-          period: `${periodStart.toISOString().split('T')[0]}`,
-          sentiment: periodSentiment
+          period: `${periodStart.toISOString().split("T")[0]}`,
+          sentiment: periodSentiment,
         });
       }
     }
@@ -155,7 +160,7 @@ export class DiplomaticCommsAnalyzer {
       trend,
       sentimentByPeriod,
       mostPositive,
-      mostNegative
+      mostNegative,
     };
   }
 
@@ -169,17 +174,27 @@ export class DiplomaticCommsAnalyzer {
       const evidencePoints: string[] = [];
 
       // Analyze tone for evidence
-      if (signal.type === 'WARNING' && communication.tone === Tone.WARNING) {
-        evidencePoints.push('Warning tone detected in communication');
+      if (signal.type === "WARNING" && communication.tone === Tone.WARNING) {
+        evidencePoints.push("Warning tone detected in communication");
       }
 
-      if (signal.type === 'THREAT' && communication.tone === Tone.THREATENING) {
-        evidencePoints.push('Threatening language used');
+      if (signal.type === "THREAT" && communication.tone === Tone.THREATENING) {
+        evidencePoints.push("Threatening language used");
       }
 
       // Analyze content for specific phrases
-      const warningPhrases = ['serious consequences', 'will not tolerate', 'red line', 'last chance'];
-      const reassurancePhrases = ['committed to', 'peaceful resolution', 'open to dialogue', 'constructive'];
+      const warningPhrases = [
+        "serious consequences",
+        "will not tolerate",
+        "red line",
+        "last chance",
+      ];
+      const reassurancePhrases = [
+        "committed to",
+        "peaceful resolution",
+        "open to dialogue",
+        "constructive",
+      ];
 
       for (const phrase of warningPhrases) {
         if (communication.content.toLowerCase().includes(phrase)) {
@@ -194,17 +209,19 @@ export class DiplomaticCommsAnalyzer {
       }
 
       // Check for policy shift indicators
-      if (signal.type === 'POLICY_SHIFT') {
-        if (communication.content.toLowerCase().includes('new approach') ||
-            communication.content.toLowerCase().includes('change in policy')) {
-          evidencePoints.push('Explicit policy change language detected');
+      if (signal.type === "POLICY_SHIFT") {
+        if (
+          communication.content.toLowerCase().includes("new approach") ||
+          communication.content.toLowerCase().includes("change in policy")
+        ) {
+          evidencePoints.push("Explicit policy change language detected");
         }
       }
 
       // Contextual factors
       const contextualFactors = [
         communication.context.geopoliticalSituation,
-        ...communication.context.recentEvents || []
+        ...(communication.context.recentEvents || []),
       ];
 
       // Calculate predictive value
@@ -220,7 +237,7 @@ export class DiplomaticCommsAnalyzer {
         evidencePoints,
         contextualFactors,
         predictiveValue,
-        actionableImplications
+        actionableImplications,
       });
     }
 
@@ -234,26 +251,23 @@ export class DiplomaticCommsAnalyzer {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
 
-    const communications = this.getCommunicationsByCountry(country)
-      .filter(c => c.date >= cutoffDate);
+    const communications = this.getCommunicationsByCountry(country).filter(
+      (c) => c.date >= cutoffDate
+    );
 
     // Determine approach
-    const directCount = communications.filter(c =>
-      c.linguisticFeatures.directness > 70
+    const directCount = communications.filter((c) => c.linguisticFeatures.directness > 70).length;
+
+    const ambiguousCount = communications.filter(
+      (c) => c.linguisticFeatures.directness < 40
     ).length;
 
-    const ambiguousCount = communications.filter(c =>
-      c.linguisticFeatures.directness < 40
-    ).length;
-
-    let approach: 'DIRECT' | 'INDIRECT' | 'AMBIGUOUS' | 'LAYERED' | 'COORDINATED' = 'DIRECT';
-    if (ambiguousCount > communications.length / 2) approach = 'AMBIGUOUS';
-    else if (directCount < communications.length / 3) approach = 'INDIRECT';
+    let approach: "DIRECT" | "INDIRECT" | "AMBIGUOUS" | "LAYERED" | "COORDINATED" = "DIRECT";
+    if (ambiguousCount > communications.length / 2) approach = "AMBIGUOUS";
+    else if (directCount < communications.length / 3) approach = "INDIRECT";
 
     // Extract objectives
-    const allObjectives = communications
-      .flatMap(c => c.intent.objectives)
-      .filter(Boolean);
+    const allObjectives = communications.flatMap((c) => c.intent.objectives).filter(Boolean);
 
     const objectiveCounts = new Map<string, number>();
     for (const obj of allObjectives) {
@@ -267,33 +281,33 @@ export class DiplomaticCommsAnalyzer {
 
     // Target audiences
     const audienceSet = new Set<string>();
-    communications.forEach(c => {
+    communications.forEach((c) => {
       if (c.targetAudience) {
-        c.targetAudience.forEach(a => audienceSet.add(a));
+        c.targetAudience.forEach((a) => audienceSet.add(a));
       }
     });
     const targetAudiences = Array.from(audienceSet);
 
     // Tactics
-    const tactics = Array.from(new Set(
-      communications.flatMap(c => c.intent.tacticUsed).filter(Boolean) as string[]
-    ));
+    const tactics = Array.from(
+      new Set(communications.flatMap((c) => c.intent.tacticUsed).filter(Boolean) as string[])
+    );
 
     // Check for coordination
     const coordination = this.detectCoordination(communications);
 
     // Calculate consistency
-    const themes = communications.flatMap(c => c.themes.map(t => t.name));
+    const themes = communications.flatMap((c) => c.themes.map((t) => t.name));
     const themeCounts = new Map<string, number>();
-    themes.forEach(t => themeCounts.set(t, (themeCounts.get(t) || 0) + 1));
+    themes.forEach((t) => themeCounts.set(t, (themeCounts.get(t) || 0) + 1));
     const maxThemeCount = Math.max(...Array.from(themeCounts.values()), 1);
     const consistency = (maxThemeCount / communications.length) * 100;
 
     // Estimate effectiveness (based on media pickup, reactions, etc.)
     let effectiveness = 50; // Base
-    const avgMediaPickup = communications.reduce((sum, c) =>
-      sum + (c.mediaPickup?.length || 0), 0
-    ) / communications.length;
+    const avgMediaPickup =
+      communications.reduce((sum, c) => sum + (c.mediaPickup?.length || 0), 0) /
+      communications.length;
     if (avgMediaPickup > 10) effectiveness += 20;
     else if (avgMediaPickup > 5) effectiveness += 10;
 
@@ -304,7 +318,7 @@ export class DiplomaticCommsAnalyzer {
       tactics,
       coordination,
       consistency,
-      effectiveness: Math.min(100, effectiveness)
+      effectiveness: Math.min(100, effectiveness),
     };
   }
 
@@ -343,7 +357,7 @@ export class DiplomaticCommsAnalyzer {
         partialAdoption: 0,
         rejection: 0,
         dominantRegions: [],
-        counterNarrativeStrength: 0
+        counterNarrativeStrength: 0,
       };
     }
 
@@ -352,14 +366,15 @@ export class DiplomaticCommsAnalyzer {
     let rejection = 0;
 
     for (const adoption of narrative.adoption) {
-      if (adoption.level === 'FULL') fullAdoption++;
-      else if (adoption.level === 'PARTIAL' || adoption.level === 'ADAPTED') partialAdoption++;
-      else if (adoption.level === 'REJECTED') rejection++;
+      if (adoption.level === "FULL") fullAdoption++;
+      else if (adoption.level === "PARTIAL" || adoption.level === "ADAPTED") partialAdoption++;
+      else if (adoption.level === "REJECTED") rejection++;
     }
 
     // Calculate counter-narrative strength
     const counterNarrativeStrength = narrative.counterNarratives
-      ? narrative.counterNarratives.reduce((sum, cn) => sum + cn.strength, 0) / narrative.counterNarratives.length
+      ? narrative.counterNarratives.reduce((sum, cn) => sum + cn.strength, 0) /
+        narrative.counterNarratives.length
       : 0;
 
     return {
@@ -369,7 +384,7 @@ export class DiplomaticCommsAnalyzer {
       partialAdoption,
       rejection,
       dominantRegions: [], // Would need region data
-      counterNarrativeStrength
+      counterNarrativeStrength,
     };
   }
 
@@ -378,13 +393,13 @@ export class DiplomaticCommsAnalyzer {
    */
   compareCommunications(commIds: string[]): ComparativeAnalysis {
     const communications = commIds
-      .map(id => this.communications.get(id))
+      .map((id) => this.communications.get(id))
       .filter((c): c is DiplomaticCommunication => c !== undefined);
 
     // Find common themes
-    const allThemes = communications.flatMap(c => c.themes.map(t => t.name));
+    const allThemes = communications.flatMap((c) => c.themes.map((t) => t.name));
     const themeCounts = new Map<string, number>();
-    allThemes.forEach(t => themeCounts.set(t, (themeCounts.get(t) || 0) + 1));
+    allThemes.forEach((t) => themeCounts.set(t, (themeCounts.get(t) || 0) + 1));
 
     const commonThemes = Array.from(themeCounts.entries())
       .filter(([_, count]) => count >= communications.length / 2)
@@ -394,30 +409,29 @@ export class DiplomaticCommsAnalyzer {
     const divergences: { aspect: string; differences: string[]; significance: number }[] = [];
 
     // Compare tones
-    const tones = new Set(communications.map(c => c.tone));
+    const tones = new Set(communications.map((c) => c.tone));
     if (tones.size > 1) {
       divergences.push({
-        aspect: 'Tone',
+        aspect: "Tone",
         differences: Array.from(tones),
-        significance: 7
+        significance: 7,
       });
     }
 
     // Compare sentiments
-    const sentiments = communications.map(c => c.sentimentScore);
+    const sentiments = communications.map((c) => c.sentimentScore);
     const sentimentRange = Math.max(...sentiments) - Math.min(...sentiments);
     if (sentimentRange > 0.5) {
       divergences.push({
-        aspect: 'Sentiment',
+        aspect: "Sentiment",
         differences: [`Range: ${sentimentRange.toFixed(2)}`],
-        significance: 8
+        significance: 8,
       });
     }
 
     // Calculate consistency
-    const avgThemeOverlap = communications.length > 1
-      ? (commonThemes.length / allThemes.length) * 100
-      : 100;
+    const avgThemeOverlap =
+      communications.length > 1 ? (commonThemes.length / allThemes.length) * 100 : 100;
     const consistencyScore = Math.min(100, avgThemeOverlap * 1.5);
 
     // Check for contradictions
@@ -428,7 +442,7 @@ export class DiplomaticCommsAnalyzer {
         const comm2 = communications[j];
 
         // Check for opposite sentiments on same topic
-        const sharedTopics = comm1.topics.filter(t => comm2.topics.includes(t));
+        const sharedTopics = comm1.topics.filter((t) => comm2.topics.includes(t));
         for (const topic of sharedTopics) {
           if (Math.abs(comm1.sentimentScore - comm2.sentimentScore) > 0.7) {
             contradictions.push(`Contradictory positions on "${topic}"`);
@@ -438,7 +452,7 @@ export class DiplomaticCommsAnalyzer {
     }
 
     // Calculate complementarity
-    const uniqueTopics = new Set(communications.flatMap(c => c.topics));
+    const uniqueTopics = new Set(communications.flatMap((c) => c.topics));
     const complementarity = (uniqueTopics.size / (communications.length * 3)) * 100; // Assuming avg 3 topics per comm
 
     return {
@@ -447,7 +461,7 @@ export class DiplomaticCommsAnalyzer {
       divergences,
       consistencyScore,
       contradictions: contradictions.length > 0 ? contradictions : undefined,
-      complementarity
+      complementarity,
     };
   }
 
@@ -461,15 +475,15 @@ export class DiplomaticCommsAnalyzer {
         communication: commId,
         devices: [],
         persuasiveTechniques: [],
-        logicalStructure: 'Unknown',
+        logicalStructure: "Unknown",
         emotionalAppeals: [],
         credibilityMarkers: [],
-        weaknesses: ['Communication not found']
+        weaknesses: ["Communication not found"],
       };
     }
 
     // Detect rhetorical devices
-    const devices: RhetoricalAnalysis['devices'] = [];
+    const devices: RhetoricalAnalysis["devices"] = [];
 
     if (comm.rhetoricalDevices) {
       for (const device of comm.rhetoricalDevices) {
@@ -477,7 +491,7 @@ export class DiplomaticCommsAnalyzer {
           type: device,
           examples: [],
           purpose: this.explainRhetoricalDevice(device),
-          effectiveness: 70
+          effectiveness: 70,
         });
       }
     }
@@ -485,21 +499,21 @@ export class DiplomaticCommsAnalyzer {
     // Identify persuasive techniques
     const persuasiveTechniques: string[] = [];
     if (comm.linguisticFeatures.emotionality > 60) {
-      persuasiveTechniques.push('Emotional appeal (pathos)');
+      persuasiveTechniques.push("Emotional appeal (pathos)");
     }
-    if (comm.sender.title && comm.sender.title.includes('President')) {
-      persuasiveTechniques.push('Authority appeal (ethos)');
+    if (comm.sender.title && comm.sender.title.includes("President")) {
+      persuasiveTechniques.push("Authority appeal (ethos)");
     }
-    if (comm.content.includes('evidence') || comm.content.includes('fact')) {
-      persuasiveTechniques.push('Logical appeal (logos)');
+    if (comm.content.includes("evidence") || comm.content.includes("fact")) {
+      persuasiveTechniques.push("Logical appeal (logos)");
     }
 
     // Analyze logical structure
-    let logicalStructure = 'Deductive reasoning';
-    if (comm.content.includes('therefore') || comm.content.includes('thus')) {
-      logicalStructure = 'Deductive reasoning with clear conclusions';
-    } else if (comm.content.includes('for example') || comm.content.includes('evidence shows')) {
-      logicalStructure = 'Inductive reasoning from examples';
+    let logicalStructure = "Deductive reasoning";
+    if (comm.content.includes("therefore") || comm.content.includes("thus")) {
+      logicalStructure = "Deductive reasoning with clear conclusions";
+    } else if (comm.content.includes("for example") || comm.content.includes("evidence shows")) {
+      logicalStructure = "Inductive reasoning from examples";
     }
 
     // Emotional appeals
@@ -514,20 +528,20 @@ export class DiplomaticCommsAnalyzer {
     // Credibility markers
     const credibilityMarkers = [
       comm.source.type,
-      comm.verified ? 'Verified source' : 'Unverified source',
-      `Confidence: ${Math.round(comm.confidence * 100)}%`
+      comm.verified ? "Verified source" : "Unverified source",
+      `Confidence: ${Math.round(comm.confidence * 100)}%`,
     ];
 
     // Weaknesses
     const weaknesses: string[] = [];
     if (comm.linguisticFeatures.clarity < 50) {
-      weaknesses.push('Lack of clarity in messaging');
+      weaknesses.push("Lack of clarity in messaging");
     }
     if (comm.confidence < 0.7) {
-      weaknesses.push('Low confidence in content accuracy');
+      weaknesses.push("Low confidence in content accuracy");
     }
     if (comm.linguisticFeatures.directness < 40) {
-      weaknesses.push('Overly ambiguous or indirect language');
+      weaknesses.push("Overly ambiguous or indirect language");
     }
 
     return {
@@ -537,7 +551,7 @@ export class DiplomaticCommsAnalyzer {
       logicalStructure,
       emotionalAppeals,
       credibilityMarkers,
-      weaknesses: weaknesses.length > 0 ? weaknesses : undefined
+      weaknesses: weaknesses.length > 0 ? weaknesses : undefined,
     };
   }
 
@@ -565,7 +579,7 @@ export class DiplomaticCommsAnalyzer {
         topTargets: [],
         messagingConsistency: 100,
         strategicThemes: [],
-        shifts: []
+        shifts: [],
       };
     }
 
@@ -598,9 +612,9 @@ export class DiplomaticCommsAnalyzer {
     if (avgTimeDiff < oneDay) {
       return {
         coordinatedWith: [],
-        timing: 'SIMULTANEOUS' as const,
+        timing: "SIMULTANEOUS" as const,
         messageAlignment: 80,
-        evidenceOfCoordination: ['Closely timed releases', 'Similar messaging']
+        evidenceOfCoordination: ["Closely timed releases", "Similar messaging"],
       };
     }
 
@@ -610,21 +624,21 @@ export class DiplomaticCommsAnalyzer {
   private generateActionableImplications(signal: Signal, comm: DiplomaticCommunication): string[] {
     const implications: string[] = [];
 
-    if (signal.type === 'WARNING' || signal.type === 'THREAT') {
-      implications.push('Monitor for follow-up actions or escalation');
-      implications.push('Assess credibility and capability to follow through');
-      implications.push('Consider diplomatic response options');
+    if (signal.type === "WARNING" || signal.type === "THREAT") {
+      implications.push("Monitor for follow-up actions or escalation");
+      implications.push("Assess credibility and capability to follow through");
+      implications.push("Consider diplomatic response options");
     }
 
-    if (signal.type === 'POLICY_SHIFT') {
-      implications.push('Analyze implications for bilateral relations');
-      implications.push('Identify opportunities or risks from policy change');
-      implications.push('Update strategic assessments');
+    if (signal.type === "POLICY_SHIFT") {
+      implications.push("Analyze implications for bilateral relations");
+      implications.push("Identify opportunities or risks from policy change");
+      implications.push("Update strategic assessments");
     }
 
-    if (signal.type === 'REASSURANCE') {
-      implications.push('Verify with concrete actions or commitments');
-      implications.push('Monitor for consistency in future communications');
+    if (signal.type === "REASSURANCE") {
+      implications.push("Verify with concrete actions or commitments");
+      implications.push("Monitor for consistency in future communications");
     }
 
     return implications;
@@ -632,14 +646,14 @@ export class DiplomaticCommsAnalyzer {
 
   private explainRhetoricalDevice(device: string): string {
     const explanations: Record<string, string> = {
-      'metaphor': 'Creates vivid comparisons to enhance understanding',
-      'repetition': 'Emphasizes key points through repetition',
-      'rhetorical question': 'Engages audience and emphasizes points',
-      'analogy': 'Explains complex ideas through familiar comparisons',
-      'allusion': 'References shared cultural or historical knowledge'
+      metaphor: "Creates vivid comparisons to enhance understanding",
+      repetition: "Emphasizes key points through repetition",
+      "rhetorical question": "Engages audience and emphasizes points",
+      analogy: "Explains complex ideas through familiar comparisons",
+      allusion: "References shared cultural or historical knowledge",
     };
 
-    return explanations[device.toLowerCase()] || 'Enhances persuasive impact';
+    return explanations[device.toLowerCase()] || "Enhances persuasive impact";
   }
 
   /**
@@ -672,8 +686,9 @@ export class DiplomaticCommsAnalyzer {
     return {
       totalCommunications: this.communications.size,
       byType,
-      averageSentiment: this.communications.size > 0 ? totalSentiment / this.communications.size : 0,
-      mostActiveCountries: mostActive
+      averageSentiment:
+        this.communications.size > 0 ? totalSentiment / this.communications.size : 0,
+      mostActiveCountries: mostActive,
     };
   }
 }

@@ -1,9 +1,9 @@
-import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import React from "react";
+import { render, waitFor } from "@testing-library/react";
 
-import ErrorBoundary from '../ErrorBoundary.tsx';
+import ErrorBoundary from "../ErrorBoundary.tsx";
 
-describe('ErrorBoundary telemetry routing', () => {
+describe("ErrorBoundary telemetry routing", () => {
   const originalFetch = global.fetch;
 
   afterEach(() => {
@@ -11,31 +11,30 @@ describe('ErrorBoundary telemetry routing', () => {
     global.fetch = originalFetch;
   });
 
-  it('posts telemetry to monitoring endpoint with tenant context', async () => {
+  it("posts telemetry to monitoring endpoint with tenant context", async () => {
     const fetchSpy = jest.fn().mockResolvedValue({ ok: true });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     global.fetch = fetchSpy as any;
-    localStorage.setItem('tenantId', 'tenant-42');
+    localStorage.setItem("tenantId", "tenant-42");
 
     const Boom = () => {
-      throw new Error('boom');
+      throw new Error("boom");
     };
 
     render(
       <ErrorBoundary componentName="TestComponent">
         <Boom />
-      </ErrorBoundary>,
+      </ErrorBoundary>
     );
 
     await waitFor(() => expect(fetchSpy).toHaveBeenCalled());
 
     expect(fetchSpy).toHaveBeenCalledWith(
-      '/monitoring/telemetry/events',
+      "/monitoring/telemetry/events",
       expect.objectContaining({
-        method: 'POST',
-        headers: expect.objectContaining({ 'x-tenant-id': 'tenant-42' }),
-      }),
+        method: "POST",
+        headers: expect.objectContaining({ "x-tenant-id": "tenant-42" }),
+      })
     );
   });
 });
-

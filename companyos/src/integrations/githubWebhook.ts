@@ -3,12 +3,12 @@
  * Handles GitHub webhook events for incidents and deployments
  */
 
-import { Router } from 'express';
-import { Pool } from 'pg';
-import crypto from 'crypto';
-import { IncidentService } from '../services/incidentService';
-import { DeploymentService } from '../services/deploymentService';
-import { IncidentSeverity, IncidentStatus } from '../models/incident';
+import { Router } from "express";
+import { Pool } from "pg";
+import crypto from "crypto";
+import { IncidentService } from "../services/incidentService";
+import { DeploymentService } from "../services/deploymentService";
+import { IncidentSeverity, IncidentStatus } from "../models/incident";
 
 export function createGitHubWebhookRouter(db: Pool): Router {
   const router = Router();
@@ -17,39 +17,39 @@ export function createGitHubWebhookRouter(db: Pool): Router {
 
   // Webhook signature verification
   const verifySignature = (req: any): boolean => {
-    const signature = req.headers['x-hub-signature-256'];
+    const signature = req.headers["x-hub-signature-256"];
     if (!signature || !process.env.GITHUB_WEBHOOK_SECRET) {
       return false;
     }
 
-    const hmac = crypto.createHmac('sha256', process.env.GITHUB_WEBHOOK_SECRET);
-    const digest = 'sha256=' + hmac.update(JSON.stringify(req.body)).digest('hex');
+    const hmac = crypto.createHmac("sha256", process.env.GITHUB_WEBHOOK_SECRET);
+    const digest = "sha256=" + hmac.update(JSON.stringify(req.body)).digest("hex");
     return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
   };
 
   // Main webhook endpoint
-  router.post('/github-webhook', async (req, res) => {
+  router.post("/github-webhook", async (req, res) => {
     // Verify signature
     if (!verifySignature(req)) {
-      console.warn('GitHub webhook signature verification failed');
-      return res.status(401).json({ error: 'Invalid signature' });
+      console.warn("GitHub webhook signature verification failed");
+      return res.status(401).json({ error: "Invalid signature" });
     }
 
-    const event = req.headers['x-github-event'];
+    const event = req.headers["x-github-event"];
     const payload = req.body;
 
     try {
       switch (event) {
-        case 'issues':
+        case "issues":
           await handleIssueEvent(payload);
           break;
-        case 'workflow_run':
+        case "workflow_run":
           await handleWorkflowRunEvent(payload);
           break;
-        case 'deployment':
+        case "deployment":
           await handleDeploymentEvent(payload);
           break;
-        case 'deployment_status':
+        case "deployment_status":
           await handleDeploymentStatusEvent(payload);
           break;
         default:
@@ -58,8 +58,8 @@ export function createGitHubWebhookRouter(db: Pool): Router {
 
       res.json({ received: true });
     } catch (error) {
-      console.error('Error handling GitHub webhook:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      console.error("Error handling GitHub webhook:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   });
 
@@ -68,9 +68,7 @@ export function createGitHubWebhookRouter(db: Pool): Router {
     const { action, issue, repository } = payload;
 
     // Only handle issues with 'incident' label
-    const isIncident = issue.labels?.some((label: any) =>
-      label.name.toLowerCase() === 'incident'
-    );
+    const isIncident = issue.labels?.some((label: any) => label.name.toLowerCase() === "incident");
 
     if (!isIncident) {
       return;
@@ -78,12 +76,12 @@ export function createGitHubWebhookRouter(db: Pool): Router {
 
     console.log(`GitHub issue event: ${action} for incident ${issue.number}`);
 
-    if (action === 'opened') {
+    if (action === "opened") {
       // Create incident from GitHub issue
       const severity = extractSeverity(issue.labels);
       await incidentService.createIncident({
         title: issue.title,
-        description: issue.body || '',
+        description: issue.body || "",
         severity,
         affectedServices: extractServices(issue.body),
         githubIssueUrl: issue.html_url,
@@ -94,10 +92,10 @@ export function createGitHubWebhookRouter(db: Pool): Router {
           githubId: issue.id,
         },
       });
-    } else if (action === 'closed') {
+    } else if (action === "closed") {
       // Find and close corresponding incident
       const result = await db.query(
-        'SELECT id FROM maestro.incidents WHERE github_issue_number = $1',
+        "SELECT id FROM maestro.incidents WHERE github_issue_number = $1",
         [issue.number]
       );
       if (result.rows.length > 0) {
@@ -111,8 +109,8 @@ export function createGitHubWebhookRouter(db: Pool): Router {
     const { action, workflow_run, repository } = payload;
 
     // Only track deployment workflows
-    const isDeploymentWorkflow = workflow_run.name.toLowerCase().includes('deploy') ||
-      workflow_run.path.includes('deploy');
+    const isDeploymentWorkflow =
+      workflow_run.name.toLowerCase().includes("deploy") || workflow_run.path.includes("deploy");
 
     if (!isDeploymentWorkflow) {
       return;
@@ -120,7 +118,7 @@ export function createGitHubWebhookRouter(db: Pool): Router {
 
     console.log(`GitHub workflow event: ${action} for ${workflow_run.name}`);
 
-    if (action === 'requested' || action === 'in_progress') {
+    if (action === "requested" || action === "in_progress") {
       // Create deployment tracking
       const serviceName = extractServiceName(workflow_run.name, repository.name);
       const environment = extractEnvironment(workflow_run.name, workflow_run.head_branch);
@@ -139,18 +137,17 @@ export function createGitHubWebhookRouter(db: Pool): Router {
           repository: repository.full_name,
         },
       });
-    } else if (action === 'completed') {
+    } else if (action === "completed") {
       // Update deployment status
-      const result = await db.query(
-        'SELECT id FROM maestro.deployments WHERE github_run_id = $1',
-        [workflow_run.id.toString()]
-      );
+      const result = await db.query("SELECT id FROM maestro.deployments WHERE github_run_id = $1", [
+        workflow_run.id.toString(),
+      ]);
 
       if (result.rows.length > 0) {
         const deploymentId = result.rows[0].id;
-        if (workflow_run.conclusion === 'success') {
+        if (workflow_run.conclusion === "success") {
           await deploymentService.markSucceeded(deploymentId);
-        } else if (workflow_run.conclusion === 'failure') {
+        } else if (workflow_run.conclusion === "failure") {
           await deploymentService.markFailed(
             deploymentId,
             `Workflow failed: ${workflow_run.conclusion}`
@@ -184,22 +181,24 @@ export function createGitHubWebhookRouter(db: Pool): Router {
   async function handleDeploymentStatusEvent(payload: any) {
     const { deployment_status, deployment, repository } = payload;
 
-    console.log(`GitHub deployment status: ${deployment_status.state} for ${deployment.environment}`);
+    console.log(
+      `GitHub deployment status: ${deployment_status.state} for ${deployment.environment}`
+    );
 
     const result = await db.query(
-      'SELECT id FROM maestro.deployments WHERE metadata->\'deploymentId\' = $1',
+      "SELECT id FROM maestro.deployments WHERE metadata->'deploymentId' = $1",
       [deployment.id.toString()]
     );
 
     if (result.rows.length > 0) {
       const deploymentId = result.rows[0].id;
 
-      if (deployment_status.state === 'success') {
+      if (deployment_status.state === "success") {
         await deploymentService.markSucceeded(deploymentId);
-      } else if (deployment_status.state === 'failure' || deployment_status.state === 'error') {
+      } else if (deployment_status.state === "failure" || deployment_status.state === "error") {
         await deploymentService.markFailed(
           deploymentId,
-          deployment_status.description || 'Deployment failed'
+          deployment_status.description || "Deployment failed"
         );
       }
     }
@@ -207,7 +206,7 @@ export function createGitHubWebhookRouter(db: Pool): Router {
 
   // Helper functions
   function extractSeverity(labels: any[]): IncidentSeverity {
-    const sevLabel = labels.find((l) => l.name.toLowerCase().startsWith('sev'));
+    const sevLabel = labels.find((l) => l.name.toLowerCase().startsWith("sev"));
     if (sevLabel) {
       const match = sevLabel.name.match(/sev(\d)/i);
       if (match) {
@@ -220,7 +219,7 @@ export function createGitHubWebhookRouter(db: Pool): Router {
   function extractServices(body: string): string[] {
     const serviceMatch = body.match(/services?:\s*([^\n]+)/i);
     if (serviceMatch) {
-      return serviceMatch[1].split(',').map((s) => s.trim());
+      return serviceMatch[1].split(",").map((s) => s.trim());
     }
     return [];
   }
@@ -236,12 +235,12 @@ export function createGitHubWebhookRouter(db: Pool): Router {
   }
 
   function extractEnvironment(workflowName: string, branch: string): any {
-    const name = (workflowName + ' ' + branch).toLowerCase();
-    if (name.includes('production') || name.includes('prod')) return 'production';
-    if (name.includes('staging')) return 'staging';
-    if (name.includes('preview')) return 'preview';
-    if (name.includes('canary')) return 'canary';
-    return 'dev';
+    const name = (workflowName + " " + branch).toLowerCase();
+    if (name.includes("production") || name.includes("prod")) return "production";
+    if (name.includes("staging")) return "staging";
+    if (name.includes("preview")) return "preview";
+    if (name.includes("canary")) return "canary";
+    return "dev";
   }
 
   return router;

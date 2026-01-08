@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { Fingerprint } from '@intelgraph/afl-store/src/types';
-import { Tariff } from '@intelgraph/gateway-tariff/src/index';
+import { Fingerprint } from "@intelgraph/afl-store/src/types";
+import { Tariff } from "@intelgraph/gateway-tariff/src/index";
 
 export type Outcome = {
   accepted: number;
@@ -38,7 +38,7 @@ export function trainATL(_historical: HistoricalData[]): ATLModel {
 export function inferTariff(model: ATLModel, fp: Fingerprint): Tariff {
   const score = model.predict(fp); // Assuming fp can be directly used as features
   return {
-    minProofLevel: score > 0.7 ? 'strict' : 'standard',
+    minProofLevel: score > 0.7 ? "strict" : "standard",
     rateLimit: Math.max(1, Math.floor(10 - score * 5)),
     throttleMs: Math.floor(score * 5000),
   };

@@ -12,39 +12,44 @@ The automated merge train is now fully operational and processing the PR backlog
 ### ✅ Infrastructure Deployed
 
 **1. Automated Workflows Created & Active**
+
 - `pr-auto-update.yml` - Runs hourly + on main push
-  - Updates workflow files in PR branches  
+  - Updates workflow files in PR branches
   - Auto-merges passing PRs
   - Processes 10 PRs per run (rate-limit safe)
-  
 - `revive-closed-prs.yml` - Manual trigger workflow
   - Currently running (triggered at 16:43:22 UTC)
   - Extracting work from closed unmerged PRs
   - Creating new revival PRs
 
 **2. Manual PR Updates Completed**
+
 - ✅ 20 PRs updated with fixed workflow files via GitHub API
 - PRs #12691-12672: Workflow files updated directly in branches
 - All updates committed with `[skip ci]` to avoid overwhelming CI
 
 **3. CI/CD Fixes Applied to Main**
+
 - Fixed pnpm version mismatch (auto-detect from package.json)
-- Fixed husky git hooks (.husky/_/h created)
+- Fixed husky git hooks (.husky/\_/h created)
 - Fixed 5+ mobile-native dependency versions
 - Created comprehensive documentation
 
 ### 📊 Current State
 
 **PRs Updated:** 20 out of 100+
+
 - Manually updated: PR #12691-#12672
 - Remaining: ~80+ (will be auto-updated hourly)
 
 **Automation Status:**
+
 - ✅ pr-auto-update workflow: Deployed, runs hourly
 - ✅ revive-closed-prs workflow: Running now
 - ✅ Main branch: Clean and green
 
 **Closed PR Revival:**
+
 - Workflow triggered: 16:43:22 UTC
 - Processing: Up to 10 closed unmerged PRs
 - New revival PRs will be created automatically
@@ -57,7 +62,7 @@ The automated merge train is now fully operational and processing the PR backlog
    - Fetch 50 mergeable open PRs
    - Identify PRs needing workflow updates
 
-2. **Update Phase**  
+2. **Update Phase**
    - Update workflow files in 10 PR branches
    - Commit with "[skip ci]" to prevent cascade
    - Push updates to PR branches
@@ -83,6 +88,7 @@ The automated merge train is now fully operational and processing the PR backlog
 ## Monitoring & Control
 
 ### Check Automation Status
+
 ```bash
 # View merge train runs
 gh run list --workflow=pr-auto-update.yml --limit 5
@@ -95,6 +101,7 @@ gh pr list --limit 20
 ```
 
 ### Manual Triggers
+
 ```bash
 # Force merge train run now
 gh workflow run pr-auto-update.yml
@@ -107,6 +114,7 @@ gh workflow run revive-closed-prs.yml -f pr_numbers="all"
 ```
 
 ### Update More PRs Manually
+
 ```bash
 # Get next batch
 gh pr list --limit 30 --json number,headRefName | jq -r '.[] | "\(.number) \(.headRefName)"' | tail -10
@@ -154,6 +162,7 @@ gh pr list --limit 30 --json number,headRefName | jq -r '.[] | "\(.number) \(.he
 ## Progress Metrics
 
 ### Completed
+
 - ✅ 20/100+ PRs updated (20%)
 - ✅ Automation deployed
 - ✅ Revival workflow running
@@ -161,11 +170,13 @@ gh pr list --limit 30 --json number,headRefName | jq -r '.[] | "\(.number) \(.he
 - ✅ Documentation complete
 
 ### In Progress
+
 - 🔄 Automated updates (hourly)
 - 🔄 CI validation on updated PRs
 - 🔄 Closed PR revival (running)
 
 ### Pending
+
 - ⏳ ~80 PRs awaiting updates
 - ⏳ CI completion on updated PRs
 - ⏳ Auto-merge of passing PRs
@@ -195,7 +206,7 @@ The merge train will be considered fully successful when:
 ### If PRs Aren't Merging
 
 1. Check workflow run logs for errors
-2. Verify PR CI status  
+2. Verify PR CI status
 3. Manually re-run failed workflows
 4. Check for merge conflicts
 

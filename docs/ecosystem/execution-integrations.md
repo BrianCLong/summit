@@ -6,22 +6,23 @@
 ## Who Belongs Here
 
 ### Archetype 5: Execution Tool Integrations
-* SOAR tools
-* Infra automation
-* CI/CD systems
-* Ticketing systems
+
+- SOAR tools
+- Infra automation
+- CI/CD systems
+- Ticketing systems
 
 ## What They Can Do
 
-* Execute actions **only after Summit approval**
-* Report execution outcomes
-* Surface failures
+- Execute actions **only after Summit approval**
+- Report execution outcomes
+- Surface failures
 
 ## What They Cannot Do
 
-* Decide when to act
-* Retry autonomously
-* Change scope mid-flight
+- Decide when to act
+- Retry autonomously
+- Change scope mid-flight
 
 ## Control Pattern: Command–Receipt Model
 

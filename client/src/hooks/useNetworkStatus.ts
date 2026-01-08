@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 
 export interface NetworkStatus {
   /** Whether the browser reports being online */
@@ -17,7 +17,7 @@ export interface NetworkStatus {
  */
 export function useNetworkStatus(): NetworkStatus {
   const [isOnline, setIsOnline] = useState(
-    typeof navigator !== 'undefined' ? navigator.onLine : true
+    typeof navigator !== "undefined" ? navigator.onLine : true
   );
   const [wasOffline, setWasOffline] = useState(false);
   const [lastChanged, setLastChanged] = useState<number | null>(null);
@@ -35,12 +35,12 @@ export function useNetworkStatus(): NetworkStatus {
   }, []);
 
   useEffect(() => {
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, [handleOnline, handleOffline]);
 

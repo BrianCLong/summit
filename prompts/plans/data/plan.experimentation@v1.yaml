@@ -1,7 +1,7 @@
 meta:
   id: plan.experimentation@v1
-  owner: 'data-engineering'
-  purpose: 'Bootstrap lightweight A/B testing and experimentation platform'
+  owner: "data-engineering"
+  purpose: "Bootstrap lightweight A/B testing and experimentation platform"
   tags:
     - experimentation
     - ab-testing
@@ -9,13 +9,13 @@ meta:
     - analytics
     - product
   guardrails:
-    - 'Experiments must have clear hypotheses'
-    - 'Statistical significance must be ensured'
-    - 'User experience must not be degraded'
-    - 'Results must be reproducible'
+    - "Experiments must have clear hypotheses"
+    - "Statistical significance must be ensured"
+    - "User experience must not be degraded"
+    - "Results must be reproducible"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -264,15 +264,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'experimentation-platform'
+  - name: "experimentation-platform"
     inputs:
-      experiment_types: 'UI changes, Algorithm tweaks, Feature launches'
-      user_segments: 'Free, Pro, Enterprise, New users, Power users'
-      metric_requirements: 'Click-through, Conversion, Engagement, Latency'
-      infrastructure: 'Kafka events, PostgreSQL, Grafana'
-      traffic_volume: '100k users/month, 1M events/day'
+      experiment_types: "UI changes, Algorithm tweaks, Feature launches"
+      user_segments: "Free, Pro, Enterprise, New users, Power users"
+      metric_requirements: "Click-through, Conversion, Engagement, Latency"
+      infrastructure: "Kafka events, PostgreSQL, Grafana"
+      traffic_volume: "100k users/month, 1M events/day"
     expected_contains:
-      - 'Experiment Definition'
-      - 'Routing'
-      - 'Result Capture'
-      - 'Analyzer'
+      - "Experiment Definition"
+      - "Routing"
+      - "Result Capture"
+      - "Analyzer"

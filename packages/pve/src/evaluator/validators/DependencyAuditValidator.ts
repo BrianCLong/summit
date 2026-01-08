@@ -12,12 +12,12 @@ import type {
   PolicyResult,
   DependencyAuditInput,
   Vulnerability,
-} from '../../types/index.js';
-import { pass, fail, warn } from '../PolicyResult.js';
+} from "../../types/index.js";
+import { pass, fail, warn } from "../PolicyResult.js";
 
 export interface DependencyAuditValidatorConfig {
   /** Minimum severity to report */
-  minSeverity?: 'low' | 'moderate' | 'high' | 'critical';
+  minSeverity?: "low" | "moderate" | "high" | "critical";
   /** Packages that are explicitly allowed */
   allowlist?: string[];
   /** Packages that are explicitly blocked */
@@ -35,26 +35,26 @@ export interface DependencyAuditValidatorConfig {
 export interface BlockedPackage {
   name: string;
   reason: string;
-  severity?: 'error' | 'warning';
+  severity?: "error" | "warning";
 }
 
-const SEVERITY_ORDER = ['low', 'moderate', 'high', 'critical'];
+const SEVERITY_ORDER = ["low", "moderate", "high", "critical"];
 
 const DEFAULT_CONFIG: DependencyAuditValidatorConfig = {
-  minSeverity: 'moderate',
+  minSeverity: "moderate",
   blocklist: [
-    { name: 'event-stream', reason: 'Known malicious package', severity: 'error' },
-    { name: 'flatmap-stream', reason: 'Known malicious package', severity: 'error' },
-    { name: 'node-ipc', reason: 'Known protestware with malicious behavior', severity: 'error' },
+    { name: "event-stream", reason: "Known malicious package", severity: "error" },
+    { name: "flatmap-stream", reason: "Known malicious package", severity: "error" },
+    { name: "node-ipc", reason: "Known protestware with malicious behavior", severity: "error" },
   ],
   allowedLicenses: [
-    'MIT',
-    'Apache-2.0',
-    'BSD-2-Clause',
-    'BSD-3-Clause',
-    'ISC',
-    'CC0-1.0',
-    'Unlicense',
+    "MIT",
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "CC0-1.0",
+    "Unlicense",
   ],
   blockDeprecated: true,
 };
@@ -67,7 +67,7 @@ export class DependencyAuditValidator {
   }
 
   async validate(context: EvaluationContext): Promise<PolicyResult[]> {
-    if (context.type !== 'dependency_audit') {
+    if (context.type !== "dependency_audit") {
       return [];
     }
 
@@ -103,7 +103,7 @@ export class DependencyAuditValidator {
 
   private checkVulnerabilities(vulnerabilities: Vulnerability[]): PolicyResult[] {
     const results: PolicyResult[] = [];
-    const minIndex = SEVERITY_ORDER.indexOf(this.config.minSeverity || 'moderate');
+    const minIndex = SEVERITY_ORDER.indexOf(this.config.minSeverity || "moderate");
 
     const relevantVulns = vulnerabilities.filter((v) => {
       const vulnIndex = SEVERITY_ORDER.indexOf(v.severity);
@@ -111,7 +111,7 @@ export class DependencyAuditValidator {
     });
 
     if (relevantVulns.length === 0) {
-      results.push(pass('pve.deps.vulnerabilities', 'No relevant vulnerabilities found'));
+      results.push(pass("pve.deps.vulnerabilities", "No relevant vulnerabilities found"));
       return results;
     }
 
@@ -122,61 +122,73 @@ export class DependencyAuditValidator {
         acc[v.severity].push(v);
         return acc;
       },
-      {} as Record<string, Vulnerability[]>,
+      {} as Record<string, Vulnerability[]>
     );
 
     // Report critical and high as errors
     if (bySeverity.critical?.length) {
       results.push(
-        fail('pve.deps.critical_vulnerabilities', `${bySeverity.critical.length} critical vulnerabilities found`, {
-          severity: 'error',
-          fix: 'Update affected packages immediately',
-          details: {
-            vulnerabilities: bySeverity.critical.map((v) => ({
-              package: v.package,
-              version: v.version,
-              cve: v.cve,
-              fix: v.fix,
-            })),
-          },
-        }),
+        fail(
+          "pve.deps.critical_vulnerabilities",
+          `${bySeverity.critical.length} critical vulnerabilities found`,
+          {
+            severity: "error",
+            fix: "Update affected packages immediately",
+            details: {
+              vulnerabilities: bySeverity.critical.map((v) => ({
+                package: v.package,
+                version: v.version,
+                cve: v.cve,
+                fix: v.fix,
+              })),
+            },
+          }
+        )
       );
     }
 
     if (bySeverity.high?.length) {
       results.push(
-        fail('pve.deps.high_vulnerabilities', `${bySeverity.high.length} high severity vulnerabilities found`, {
-          severity: 'error',
-          fix: 'Update affected packages as soon as possible',
-          details: {
-            vulnerabilities: bySeverity.high.map((v) => ({
-              package: v.package,
-              version: v.version,
-              cve: v.cve,
-              fix: v.fix,
-            })),
-          },
-        }),
+        fail(
+          "pve.deps.high_vulnerabilities",
+          `${bySeverity.high.length} high severity vulnerabilities found`,
+          {
+            severity: "error",
+            fix: "Update affected packages as soon as possible",
+            details: {
+              vulnerabilities: bySeverity.high.map((v) => ({
+                package: v.package,
+                version: v.version,
+                cve: v.cve,
+                fix: v.fix,
+              })),
+            },
+          }
+        )
       );
     }
 
     // Report moderate as warnings
     if (bySeverity.moderate?.length) {
       results.push(
-        warn('pve.deps.moderate_vulnerabilities', `${bySeverity.moderate.length} moderate vulnerabilities found`, {
-          fix: 'Consider updating affected packages',
-          details: {
-            count: bySeverity.moderate.length,
-            packages: bySeverity.moderate.map((v) => v.package),
-          },
-        }),
+        warn(
+          "pve.deps.moderate_vulnerabilities",
+          `${bySeverity.moderate.length} moderate vulnerabilities found`,
+          {
+            fix: "Consider updating affected packages",
+            details: {
+              count: bySeverity.moderate.length,
+              packages: bySeverity.moderate.map((v) => v.package),
+            },
+          }
+        )
       );
     }
 
     return results;
   }
 
-  private checkBlocklist(manifest: DependencyAuditInput['manifest']): PolicyResult[] {
+  private checkBlocklist(manifest: DependencyAuditInput["manifest"]): PolicyResult[] {
     const results: PolicyResult[] = [];
     const allDeps = {
       ...manifest.dependencies,
@@ -192,23 +204,23 @@ export class DependencyAuditValidator {
       if (blockedEntry) {
         blocked.push(name);
         results.push(
-          fail('pve.deps.blocked_package', `Blocked package "${name}": ${blockedEntry.reason}`, {
-            severity: blockedEntry.severity || 'error',
+          fail("pve.deps.blocked_package", `Blocked package "${name}": ${blockedEntry.reason}`, {
+            severity: blockedEntry.severity || "error",
             location: { field: name },
             fix: `Remove "${name}" from dependencies`,
-          }),
+          })
         );
       }
     }
 
     if (blocked.length === 0) {
-      results.push(pass('pve.deps.blocklist'));
+      results.push(pass("pve.deps.blocklist"));
     }
 
     return results;
   }
 
-  private checkAllowlist(manifest: DependencyAuditInput['manifest']): PolicyResult[] {
+  private checkAllowlist(manifest: DependencyAuditInput["manifest"]): PolicyResult[] {
     const results: PolicyResult[] = [];
     const allowlist = new Set(this.config.allowlist || []);
 
@@ -225,7 +237,7 @@ export class DependencyAuditValidator {
 
     for (const name of Object.keys(allDeps)) {
       // Check if package or its scope is allowed
-      const scope = name.startsWith('@') ? name.split('/')[0] : null;
+      const scope = name.startsWith("@") ? name.split("/")[0] : null;
       if (!allowlist.has(name) && !(scope && allowlist.has(`${scope}/*`))) {
         notAllowed.push(name);
       }
@@ -233,24 +245,24 @@ export class DependencyAuditValidator {
 
     if (notAllowed.length > 0) {
       results.push(
-        warn('pve.deps.not_allowlisted', `${notAllowed.length} packages are not in the allowlist`, {
+        warn("pve.deps.not_allowlisted", `${notAllowed.length} packages are not in the allowlist`, {
           details: { packages: notAllowed.slice(0, 10) },
-        }),
+        })
       );
     } else {
-      results.push(pass('pve.deps.allowlist'));
+      results.push(pass("pve.deps.allowlist"));
     }
 
     return results;
   }
 
-  private checkLicenses(_manifest: DependencyAuditInput['manifest']): PolicyResult[] {
+  private checkLicenses(_manifest: DependencyAuditInput["manifest"]): PolicyResult[] {
     // Note: Full license checking requires fetching package metadata
     // This is a placeholder for the structure
-    return [pass('pve.deps.licenses', 'License check requires package registry access')];
+    return [pass("pve.deps.licenses", "License check requires package registry access")];
   }
 
-  private checkRiskyPatterns(manifest: DependencyAuditInput['manifest']): PolicyResult[] {
+  private checkRiskyPatterns(manifest: DependencyAuditInput["manifest"]): PolicyResult[] {
     const results: PolicyResult[] = [];
     const allDeps = {
       ...manifest.dependencies,
@@ -258,34 +270,34 @@ export class DependencyAuditValidator {
     };
 
     const riskyPatterns: Array<{ pattern: RegExp; message: string }> = [
-      { pattern: /^file:/, message: 'Local file dependency detected' },
-      { pattern: /^git(\+|:)/, message: 'Git dependency detected' },
-      { pattern: /^github:/, message: 'GitHub shorthand dependency detected' },
-      { pattern: /^\*$/, message: 'Wildcard version detected' },
-      { pattern: /^>=/, message: 'Open-ended version range detected' },
+      { pattern: /^file:/, message: "Local file dependency detected" },
+      { pattern: /^git(\+|:)/, message: "Git dependency detected" },
+      { pattern: /^github:/, message: "GitHub shorthand dependency detected" },
+      { pattern: /^\*$/, message: "Wildcard version detected" },
+      { pattern: /^>=/, message: "Open-ended version range detected" },
     ];
 
     for (const [name, version] of Object.entries(allDeps)) {
       for (const { pattern, message } of riskyPatterns) {
         if (pattern.test(version)) {
           results.push(
-            warn('pve.deps.risky_pattern', `${message} for package "${name}": ${version}`, {
+            warn("pve.deps.risky_pattern", `${message} for package "${name}": ${version}`, {
               location: { field: name },
-              fix: 'Use a fixed version or semver range',
-            }),
+              fix: "Use a fixed version or semver range",
+            })
           );
         }
       }
     }
 
     if (results.filter((r) => !r.allowed).length === 0) {
-      results.push(pass('pve.deps.risky_patterns'));
+      results.push(pass("pve.deps.risky_patterns"));
     }
 
     return results;
   }
 
-  private checkDependencyCounts(manifest: DependencyAuditInput['manifest']): PolicyResult[] {
+  private checkDependencyCounts(manifest: DependencyAuditInput["manifest"]): PolicyResult[] {
     const results: PolicyResult[] = [];
 
     const depsCount = Object.keys(manifest.dependencies || {}).length;
@@ -295,23 +307,29 @@ export class DependencyAuditValidator {
     // These are heuristic thresholds
     if (depsCount > 100) {
       results.push(
-        warn('pve.deps.excessive_dependencies', `Package has ${depsCount} production dependencies`, {
-          fix: 'Consider reducing dependencies or using lighter alternatives',
-          details: { count: depsCount },
-        }),
+        warn(
+          "pve.deps.excessive_dependencies",
+          `Package has ${depsCount} production dependencies`,
+          {
+            fix: "Consider reducing dependencies or using lighter alternatives",
+            details: { count: depsCount },
+          }
+        )
       );
     }
 
     if (totalCount > 500) {
       results.push(
-        warn('pve.deps.total_dependencies', `Package has ${totalCount} total dependencies`, {
+        warn("pve.deps.total_dependencies", `Package has ${totalCount} total dependencies`, {
           details: { production: depsCount, dev: devDepsCount },
-        }),
+        })
       );
     }
 
     if (results.filter((r) => !r.allowed).length === 0) {
-      results.push(pass('pve.deps.counts', `${depsCount} production, ${devDepsCount} dev dependencies`));
+      results.push(
+        pass("pve.deps.counts", `${depsCount} production, ${devDepsCount} dev dependencies`)
+      );
     }
 
     return results;

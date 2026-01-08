@@ -64,10 +64,10 @@ spec:
   selector: { matchLabels: { app.kubernetes.io/name: web } }
   action: ALLOW
   rules:
-    - from: [{ source: { principals: ['cluster.local/ns/prod/sa/api'] } }]
+    - from: [{ source: { principals: ["cluster.local/ns/prod/sa/api"] } }]
       when:
         - key: request.auth.claims[scope]
-          values: ['read:web']
+          values: ["read:web"]
 ```
 
 **Rollback:** Switch to `action: DENY` policies only; loosen selectors temporarily.
@@ -97,11 +97,11 @@ spec:
           image: openpolicyagent/opa:latest-envoy
           args:
             [
-              'run',
-              '--server',
-              '--addr=localhost:8181',
-              '--config-file=/config/config.yaml',
-              '/policy',
+              "run",
+              "--server",
+              "--addr=localhost:8181",
+              "--config-file=/config/config.yaml",
+              "/policy",
             ]
           volumeMounts:
             - { name: policy, mountPath: /policy }
@@ -155,7 +155,7 @@ apiVersion: networking.istio.io/v1beta1
 kind: ServiceEntry
 metadata: { name: web-remote, namespace: prod }
 spec:
-  hosts: ['web.prod.global']
+  hosts: ["web.prod.global"]
   location: MESH_EXTERNAL
   ports: [{ number: 80, name: http, protocol: HTTP }]
   resolution: DNS
@@ -207,15 +207,15 @@ spec:
 **`dora/exporter.ts`**
 
 ```ts
-import { Octokit } from 'octokit';
-import http from 'http';
+import { Octokit } from "octokit";
+import http from "http";
 const client = new Octokit({ auth: process.env.GH_TOKEN });
 let metrics = { deploys: 0, lead_time_s: 0, mttr_s: 0, cfr: 0 };
 // TODO: compute from releases, deployments, incidents issues
 http
   .createServer((_req, res) => {
     res.end(
-      `# HELP dora_deploys deployments\n# TYPE dora_deploys gauge\ndora_deploys ${metrics.deploys}\n`,
+      `# HELP dora_deploys deployments\n# TYPE dora_deploys gauge\ndora_deploys ${metrics.deploys}\n`
     );
   })
   .listen(9102);
@@ -319,7 +319,7 @@ jobs:
         run: node scripts/make_vex.js sbom.cdx.json > vex.csaf.json
       - uses: sigstore/cosign-installer@v3
       - name: Sign artifacts
-        env: { COSIGN_EXPERIMENTAL: 'true' }
+        env: { COSIGN_EXPERIMENTAL: "true" }
         run: cosign sign-blob --yes sbom.cdx.json && cosign sign-blob --yes vex.csaf.json
       - name: Upload release assets
         uses: softprops/action-gh-release@v2
@@ -342,7 +342,7 @@ jobs:
 **`server/db/iam.ts`**
 
 ```ts
-import crypto from 'crypto';
+import crypto from "crypto";
 export async function buildRdsAuthToken(host: string, user: string) {
   // Placeholder: call AWS SDK RDS.Signer to create 15‑min token
   return `token-for-${user}@${host}`;
@@ -359,13 +359,10 @@ env:
 **`server/db/connect.ts`**
 
 ```ts
-import { buildRdsAuthToken } from './iam';
+import { buildRdsAuthToken } from "./iam";
 export async function getConn() {
-  if (process.env.DB_AUTH_MODE === 'iam') {
-    const token = await buildRdsAuthToken(
-      process.env.DB_HOST!,
-      process.env.DB_USER!,
-    );
+  if (process.env.DB_AUTH_MODE === "iam") {
+    const token = await buildRdsAuthToken(process.env.DB_HOST!, process.env.DB_USER!);
     return new Client({
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
@@ -448,7 +445,7 @@ apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata: { name: web, namespace: prod }
 spec:
-  hosts: ['web']
+  hosts: ["web"]
   http:
     - route:
         - destination: { host: web, subset: stable, weight: 100 }

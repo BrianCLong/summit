@@ -17,25 +17,25 @@ export type SessionId = string;
 export type ProvenanceId = string;
 
 export type AgentClassification =
-  | 'UNCLASSIFIED'
-  | 'CUI'
-  | 'CONFIDENTIAL'
-  | 'SECRET'
-  | 'TOP_SECRET'
-  | 'SCI'
-  | 'SAP';
+  | "UNCLASSIFIED"
+  | "CUI"
+  | "CONFIDENTIAL"
+  | "SECRET"
+  | "TOP_SECRET"
+  | "SCI"
+  | "SAP";
 
-export type AgentTrustLevel = 'untrusted' | 'basic' | 'elevated' | 'privileged' | 'sovereign';
+export type AgentTrustLevel = "untrusted" | "basic" | "elevated" | "privileged" | "sovereign";
 
 export type AgentCapability =
-  | 'read'
-  | 'write'
-  | 'execute'
-  | 'analyze'
-  | 'recommend'
-  | 'action'
-  | 'chain'
-  | 'delegate';
+  | "read"
+  | "write"
+  | "execute"
+  | "analyze"
+  | "recommend"
+  | "action"
+  | "chain"
+  | "delegate";
 
 // ============================================================================
 // OPA Policy Engine Types
@@ -62,7 +62,7 @@ export interface AgentPolicyContext {
     ipAddress?: string;
     airgapped: boolean;
     federalEnvironment: boolean;
-    slsaLevel: 'SLSA_0' | 'SLSA_1' | 'SLSA_2' | 'SLSA_3' | 'SLSA_4';
+    slsaLevel: "SLSA_0" | "SLSA_1" | "SLSA_2" | "SLSA_3" | "SLSA_4";
   };
 }
 
@@ -72,20 +72,20 @@ export interface PolicyDecision {
   policyPath: string;
   conditions?: PolicyCondition[];
   requiredApprovals?: string[];
-  auditLevel: 'info' | 'warn' | 'alert' | 'critical';
+  auditLevel: "info" | "warn" | "alert" | "critical";
   mitigations?: PolicyMitigation[];
   expiresAt?: Date;
 }
 
 export interface PolicyCondition {
-  type: 'rate_limit' | 'approval_required' | 'audit_enhanced' | 'capability_restricted';
+  type: "rate_limit" | "approval_required" | "audit_enhanced" | "capability_restricted";
   parameters: Record<string, unknown>;
   enforced: boolean;
 }
 
 export interface PolicyMitigation {
-  action: 'throttle' | 'sandbox' | 'escalate' | 'block' | 'rollback';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  action: "throttle" | "sandbox" | "escalate" | "block" | "rollback";
+  severity: "low" | "medium" | "high" | "critical";
   description: string;
   automated: boolean;
 }
@@ -129,9 +129,9 @@ export interface PromptTemplate {
 }
 
 export interface PromptValidation {
-  type: 'schema' | 'regex' | 'semantic' | 'safety' | 'hallucination';
+  type: "schema" | "regex" | "semantic" | "safety" | "hallucination";
   config: Record<string, unknown>;
-  action: 'warn' | 'reject' | 'remediate';
+  action: "warn" | "reject" | "remediate";
 }
 
 export interface RetryPolicy {
@@ -156,7 +156,7 @@ export interface ChainGovernance {
   maxCostPerExecution: number;
   maxDurationMs: number;
   allowedClassifications: AgentClassification[];
-  auditLevel: 'minimal' | 'standard' | 'enhanced' | 'forensic';
+  auditLevel: "minimal" | "standard" | "enhanced" | "forensic";
   incidentEscalation: string[];
 }
 
@@ -164,13 +164,13 @@ export interface ChainProvenance {
   createdBy: string;
   createdAt: Date;
   version: string;
-  slsaLevel: 'SLSA_0' | 'SLSA_1' | 'SLSA_2' | 'SLSA_3' | 'SLSA_4';
+  slsaLevel: "SLSA_0" | "SLSA_1" | "SLSA_2" | "SLSA_3" | "SLSA_4";
   signatureBundle?: string;
   attestations: ProvenanceAttestation[];
 }
 
 export interface ProvenanceAttestation {
-  type: 'build' | 'review' | 'approval' | 'deployment' | 'audit';
+  type: "build" | "review" | "approval" | "deployment" | "audit";
   attestedBy: string;
   attestedAt: Date;
   signature: string;
@@ -181,17 +181,22 @@ export interface ProvenanceAttestation {
 // Incident Response Types
 // ============================================================================
 
-export type IncidentSeverity = 'low' | 'medium' | 'high' | 'critical' | 'catastrophic';
-export type IncidentStatus = 'detected' | 'investigating' | 'mitigating' | 'resolved' | 'post_mortem';
+export type IncidentSeverity = "low" | "medium" | "high" | "critical" | "catastrophic";
+export type IncidentStatus =
+  | "detected"
+  | "investigating"
+  | "mitigating"
+  | "resolved"
+  | "post_mortem";
 export type IncidentType =
-  | 'misuse'
-  | 'hallucination'
-  | 'data_leak'
-  | 'policy_violation'
-  | 'safety_breach'
-  | 'integrity_failure'
-  | 'availability_issue'
-  | 'supply_chain_compromise';
+  | "misuse"
+  | "hallucination"
+  | "data_leak"
+  | "policy_violation"
+  | "safety_breach"
+  | "integrity_failure"
+  | "availability_issue"
+  | "supply_chain_compromise";
 
 export interface Incident {
   id: string;
@@ -216,7 +221,7 @@ export interface Incident {
 
 export interface IncidentEvidence {
   id: string;
-  type: 'log' | 'trace' | 'artifact' | 'screenshot' | 'audit_record' | 'provenance';
+  type: "log" | "trace" | "artifact" | "screenshot" | "audit_record" | "provenance";
   source: string;
   timestamp: Date;
   data: unknown;
@@ -226,7 +231,7 @@ export interface IncidentEvidence {
 
 export interface IncidentEvent {
   timestamp: Date;
-  type: 'detection' | 'escalation' | 'mitigation' | 'update' | 'resolution';
+  type: "detection" | "escalation" | "mitigation" | "update" | "resolution";
   actor: string;
   description: string;
   automated: boolean;
@@ -236,7 +241,7 @@ export interface IncidentEvent {
 export interface IncidentMitigation {
   id: string;
   action: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'failed';
+  status: "pending" | "in_progress" | "completed" | "failed";
   automated: boolean;
   startedAt?: Date;
   completedAt?: Date;
@@ -256,15 +261,15 @@ export interface IncidentDetector {
 
 export interface DetectorThreshold {
   metric: string;
-  operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte' | 'anomaly';
+  operator: "gt" | "lt" | "eq" | "gte" | "lte" | "anomaly";
   value: number;
   window: number;
   severity: IncidentSeverity;
 }
 
 export interface DetectorAction {
-  trigger: 'threshold_exceeded' | 'pattern_detected' | 'anomaly_detected';
-  action: 'alert' | 'throttle' | 'block' | 'rollback' | 'escalate';
+  trigger: "threshold_exceeded" | "pattern_detected" | "anomaly_detected";
+  action: "alert" | "throttle" | "block" | "rollback" | "escalate";
   automated: boolean;
   config: Record<string, unknown>;
 }
@@ -274,16 +279,16 @@ export interface DetectorAction {
 // ============================================================================
 
 export type HallucinationType =
-  | 'factual_error'
-  | 'citation_fabrication'
-  | 'entity_confusion'
-  | 'temporal_confusion'
-  | 'logical_inconsistency'
-  | 'self_contradiction'
-  | 'unsupported_claim'
-  | 'context_drift';
+  | "factual_error"
+  | "citation_fabrication"
+  | "entity_confusion"
+  | "temporal_confusion"
+  | "logical_inconsistency"
+  | "self_contradiction"
+  | "unsupported_claim"
+  | "context_drift";
 
-export type HallucinationSeverity = 'benign' | 'misleading' | 'harmful' | 'dangerous';
+export type HallucinationSeverity = "benign" | "misleading" | "harmful" | "dangerous";
 
 export interface HallucinationDetection {
   id: string;
@@ -302,15 +307,15 @@ export interface HallucinationDetection {
 }
 
 export interface HallucinationEvidence {
-  type: 'factual_check' | 'source_verification' | 'consistency_check' | 'semantic_analysis';
+  type: "factual_check" | "source_verification" | "consistency_check" | "semantic_analysis";
   method: string;
-  result: 'confirmed' | 'refuted' | 'uncertain';
+  result: "confirmed" | "refuted" | "uncertain";
   confidence: number;
   details: Record<string, unknown>;
 }
 
 export interface HallucinationRemediation {
-  action: 'correct' | 'redact' | 'flag' | 'reject';
+  action: "correct" | "redact" | "flag" | "reject";
   correctedOutput?: string;
   explanation: string;
   approvedBy?: string;
@@ -352,16 +357,16 @@ export interface HallucinationPattern {
 // ============================================================================
 
 export type RollbackTrigger =
-  | 'policy_violation'
-  | 'hallucination_threshold'
-  | 'error_rate_exceeded'
-  | 'latency_degradation'
-  | 'safety_breach'
-  | 'manual_trigger'
-  | 'circuit_breaker';
+  | "policy_violation"
+  | "hallucination_threshold"
+  | "error_rate_exceeded"
+  | "latency_degradation"
+  | "safety_breach"
+  | "manual_trigger"
+  | "circuit_breaker";
 
-export type RollbackScope = 'agent' | 'fleet' | 'chain' | 'session' | 'global';
-export type RollbackStatus = 'pending' | 'in_progress' | 'completed' | 'failed' | 'cancelled';
+export type RollbackScope = "agent" | "fleet" | "chain" | "session" | "global";
+export type RollbackStatus = "pending" | "in_progress" | "completed" | "failed" | "cancelled";
 
 export interface RollbackConfig {
   enabled: boolean;
@@ -422,7 +427,7 @@ export interface RollbackVerification {
   verifiedAt: Date;
   verifiedBy: string;
   checks: RollbackCheck[];
-  overallHealth: 'healthy' | 'degraded' | 'unhealthy';
+  overallHealth: "healthy" | "degraded" | "unhealthy";
 }
 
 export interface RollbackCheck {
@@ -450,9 +455,9 @@ export interface Checkpoint {
 
 export interface ICFY28ComplianceConfig {
   enabled: boolean;
-  validationLevel: 'basic' | 'enhanced' | 'full';
+  validationLevel: "basic" | "enhanced" | "full";
   requiredAttestations: string[];
-  auditFrequency: 'continuous' | 'daily' | 'weekly' | 'monthly';
+  auditFrequency: "continuous" | "daily" | "weekly" | "monthly";
   reportingEndpoint?: string;
 }
 
@@ -469,20 +474,20 @@ export interface ICFY28ValidationResult {
 export interface ICFY28Control {
   id: string;
   name: string;
-  category: 'identity' | 'access' | 'data' | 'audit' | 'supply_chain' | 'ai_safety';
-  status: 'compliant' | 'non_compliant' | 'partial' | 'not_applicable';
+  category: "identity" | "access" | "data" | "audit" | "supply_chain" | "ai_safety";
+  status: "compliant" | "non_compliant" | "partial" | "not_applicable";
   evidence: string[];
   remediation?: string;
 }
 
 export interface ICFY28Finding {
   id: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   control: string;
   description: string;
   remediation: string;
   dueDate: Date;
-  status: 'open' | 'in_progress' | 'resolved' | 'accepted_risk';
+  status: "open" | "in_progress" | "resolved" | "accepted_risk";
 }
 
 export interface ICFY28Attestation {
@@ -500,9 +505,9 @@ export interface ICFY28Attestation {
 
 export interface AIProvenance {
   id: ProvenanceId;
-  type: 'model' | 'prompt' | 'chain' | 'output' | 'decision';
+  type: "model" | "prompt" | "chain" | "output" | "decision";
   createdAt: Date;
-  slsaLevel: 'SLSA_0' | 'SLSA_1' | 'SLSA_2' | 'SLSA_3' | 'SLSA_4';
+  slsaLevel: "SLSA_0" | "SLSA_1" | "SLSA_2" | "SLSA_3" | "SLSA_4";
   subject: AIProvenanceSubject;
   buildDefinition: AIBuildDefinition;
   runDetails: AIRunDetails;
@@ -562,7 +567,7 @@ export interface AIByproduct {
 }
 
 export interface AIAttestation {
-  type: 'safety' | 'accuracy' | 'bias' | 'security' | 'compliance' | 'review';
+  type: "safety" | "accuracy" | "bias" | "security" | "compliance" | "review";
   attestedBy: string;
   attestedAt: Date;
   predicateType: string;
@@ -664,23 +669,23 @@ export interface GovernanceEvent {
   actor: string;
   action: string;
   resource: string;
-  outcome: 'success' | 'failure' | 'partial';
+  outcome: "success" | "failure" | "partial";
   classification: AgentClassification;
   details: Record<string, unknown>;
   provenance?: ProvenanceId;
 }
 
 export type GovernanceEventType =
-  | 'policy_evaluation'
-  | 'policy_violation'
-  | 'incident_detected'
-  | 'incident_resolved'
-  | 'hallucination_detected'
-  | 'hallucination_remediated'
-  | 'rollback_initiated'
-  | 'rollback_completed'
-  | 'compliance_check'
-  | 'attestation_created'
-  | 'chain_executed'
-  | 'agent_provisioned'
-  | 'agent_terminated';
+  | "policy_evaluation"
+  | "policy_violation"
+  | "incident_detected"
+  | "incident_resolved"
+  | "hallucination_detected"
+  | "hallucination_remediated"
+  | "rollback_initiated"
+  | "rollback_completed"
+  | "compliance_check"
+  | "attestation_created"
+  | "chain_executed"
+  | "agent_provisioned"
+  | "agent_terminated";

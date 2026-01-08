@@ -39,74 +39,71 @@ import {
   createAnalystAgent,
   createGraphMemory,
   createAllTools,
-} from '@intelgraph/strands-agents';
-import neo4j from 'neo4j-driver';
+} from "@intelgraph/strands-agents";
+import neo4j from "neo4j-driver";
 
 // Initialize Neo4j connection
-const driver = neo4j.driver(
-  'bolt://localhost:7687',
-  neo4j.auth.basic('neo4j', 'password')
-);
+const driver = neo4j.driver("bolt://localhost:7687", neo4j.auth.basic("neo4j", "password"));
 
 // Create an investigation agent
 const investigator = createInvestigationAgent({
   driver,
-  modelProvider: 'bedrock',
+  modelProvider: "bedrock",
   auditLog: (action, details) => console.log(`[AUDIT] ${action}`, details),
 });
 
 // Run an investigation task
 const result = await investigator.investigate({
-  investigationId: 'inv-123',
-  task: 'Identify key influencers and their communication patterns',
+  investigationId: "inv-123",
+  task: "Identify key influencers and their communication patterns",
 });
 
 console.log(result.message);
-console.log('Findings:', result.findings);
-console.log('Hypotheses:', result.hypotheses);
+console.log("Findings:", result.findings);
+console.log("Hypotheses:", result.hypotheses);
 ```
 
 ## Tools
 
 ### Graph Tools
 
-| Tool | Description | Risk Tier |
-|------|-------------|-----------|
-| `execute_cypher` | Execute Cypher queries | SUPERVISED |
-| `find_path` | Find paths between entities | AUTONOMOUS |
-| `get_neighbors` | Get connected entities | AUTONOMOUS |
-| `get_subgraph` | Extract local subgraph | AUTONOMOUS |
-| `get_graph_stats` | Get graph statistics | AUTONOMOUS |
+| Tool              | Description                 | Risk Tier  |
+| ----------------- | --------------------------- | ---------- |
+| `execute_cypher`  | Execute Cypher queries      | SUPERVISED |
+| `find_path`       | Find paths between entities | AUTONOMOUS |
+| `get_neighbors`   | Get connected entities      | AUTONOMOUS |
+| `get_subgraph`    | Extract local subgraph      | AUTONOMOUS |
+| `get_graph_stats` | Get graph statistics        | AUTONOMOUS |
 
 ### Entity Tools
 
-| Tool | Description | Risk Tier |
-|------|-------------|-----------|
-| `search_entities` | Search entities by name | AUTONOMOUS |
-| `get_entity` | Get entity details | AUTONOMOUS |
-| `create_entity` | Create new entity | SUPERVISED |
-| `find_similar_entities` | Find duplicates | AUTONOMOUS |
-| `resolve_entity` | Resolve name to entity | SUPERVISED |
+| Tool                    | Description             | Risk Tier  |
+| ----------------------- | ----------------------- | ---------- |
+| `search_entities`       | Search entities by name | AUTONOMOUS |
+| `get_entity`            | Get entity details      | AUTONOMOUS |
+| `create_entity`         | Create new entity       | SUPERVISED |
+| `find_similar_entities` | Find duplicates         | AUTONOMOUS |
+| `resolve_entity`        | Resolve name to entity  | SUPERVISED |
 
 ### Investigation Tools
 
-| Tool | Description | Risk Tier |
-|------|-------------|-----------|
-| `get_investigation` | Get investigation details | AUTONOMOUS |
-| `create_hypothesis` | Create hypothesis | SUPERVISED |
-| `update_hypothesis` | Update hypothesis status | SUPERVISED |
-| `add_finding` | Add finding | SUPERVISED |
-| `link_entities_to_investigation` | Link entities | SUPERVISED |
-| `get_timeline` | Get event timeline | AUTONOMOUS |
+| Tool                             | Description               | Risk Tier  |
+| -------------------------------- | ------------------------- | ---------- |
+| `get_investigation`              | Get investigation details | AUTONOMOUS |
+| `create_hypothesis`              | Create hypothesis         | SUPERVISED |
+| `update_hypothesis`              | Update hypothesis status  | SUPERVISED |
+| `add_finding`                    | Add finding               | SUPERVISED |
+| `link_entities_to_investigation` | Link entities             | SUPERVISED |
+| `get_timeline`                   | Get event timeline        | AUTONOMOUS |
 
 ### Analysis Tools
 
-| Tool | Description | Risk Tier |
-|------|-------------|-----------|
-| `detect_patterns` | Find graph patterns | AUTONOMOUS |
+| Tool                 | Description          | Risk Tier  |
+| -------------------- | -------------------- | ---------- |
+| `detect_patterns`    | Find graph patterns  | AUTONOMOUS |
 | `analyze_centrality` | Calculate centrality | AUTONOMOUS |
-| `detect_anomalies` | Find anomalies | AUTONOMOUS |
-| `compare_entities` | Compare entities | AUTONOMOUS |
+| `detect_anomalies`   | Find anomalies       | AUTONOMOUS |
+| `compare_entities`   | Compare entities     | AUTONOMOUS |
 
 ## Agents
 
@@ -117,14 +114,14 @@ For multi-step investigation workflows:
 ```typescript
 const investigator = createInvestigationAgent({
   driver,
-  modelProvider: 'bedrock',
+  modelProvider: "bedrock",
   maxIterations: 15,
 });
 
 const result = await investigator.investigate({
-  investigationId: 'inv-123',
-  task: 'Analyze the network structure and identify key players',
-  context: 'Focus on financial transactions from last quarter',
+  investigationId: "inv-123",
+  task: "Analyze the network structure and identify key players",
+  context: "Focus on financial transactions from last quarter",
 });
 ```
 
@@ -140,11 +137,11 @@ const resolver = createEntityResolutionAgent({
 
 // Find duplicates
 const duplicates = await resolver.findDuplicates({
-  entityIds: ['entity-1', 'entity-2'],
+  entityIds: ["entity-1", "entity-2"],
 });
 
 // Scan entire investigation
-const results = await resolver.scanInvestigation('inv-123');
+const results = await resolver.scanInvestigation("inv-123");
 ```
 
 ### Analyst Agent
@@ -155,16 +152,13 @@ For ad-hoc analytical questions:
 const analyst = createAnalystAgent({ driver });
 
 const analysis = await analyst.analyze({
-  question: 'Who are the most influential entities?',
-  investigationId: 'inv-123',
-  depth: 'standard',
+  question: "Who are the most influential entities?",
+  investigationId: "inv-123",
+  depth: "standard",
 });
 
 // Quick analysis shorthand
-const answer = await analyst.quickAnalyze(
-  'What patterns exist between these entities?',
-  'inv-123'
-);
+const answer = await analyst.quickAnalyze("What patterns exist between these entities?", "inv-123");
 ```
 
 ## Memory System
@@ -174,19 +168,19 @@ Graph-backed persistent memory:
 ```typescript
 const memory = createGraphMemory({
   driver,
-  agentId: 'investigation-agent',
+  agentId: "investigation-agent",
 });
 
 // Store a fact
 await memory.remember({
-  type: 'FACT',
-  content: 'Entity A is connected to Entity B through Organization C',
+  type: "FACT",
+  content: "Entity A is connected to Entity B through Organization C",
   importance: 0.8,
 });
 
 // Recall relevant memories
 const memories = await memory.recall({
-  query: 'Entity A connections',
+  query: "Entity A connections",
   minImportance: 0.5,
   limit: 10,
 });
@@ -200,25 +194,25 @@ const context = await memory.getContext();
 Policy enforcement via agent-gateway:
 
 ```typescript
-import { createGovernanceMiddleware } from '@intelgraph/strands-agents';
+import { createGovernanceMiddleware } from "@intelgraph/strands-agents";
 
 const governance = createGovernanceMiddleware({
-  tenantId: 'tenant-123',
-  defaultRiskTolerance: 'SUPERVISED',
+  tenantId: "tenant-123",
+  defaultRiskTolerance: "SUPERVISED",
 });
 
 // Wrap tools with governance
 const governedTools = governance.wrapTools(allTools, {
-  userId: 'user-456',
+  userId: "user-456",
 });
 
 // Check policy before execution
-const check = await governance.checkPolicy('create_entity', {
-  userId: 'user-456',
+const check = await governance.checkPolicy("create_entity", {
+  userId: "user-456",
 });
 
 if (!check.allowed) {
-  console.log('Blocked:', check.reason);
+  console.log("Blocked:", check.reason);
 }
 ```
 
@@ -228,13 +222,13 @@ Real-time response streaming:
 
 ```typescript
 for await (const event of investigator.investigateStream({
-  investigationId: 'inv-123',
-  task: 'Analyze the network',
+  investigationId: "inv-123",
+  task: "Analyze the network",
 })) {
-  if (event.type === 'text') {
+  if (event.type === "text") {
     process.stdout.write(event.data);
-  } else if (event.type === 'tool_use') {
-    console.log('Using tool:', event.tool);
+  } else if (event.type === "tool_use") {
+    console.log("Using tool:", event.tool);
   }
 }
 ```
@@ -244,18 +238,18 @@ for await (const event of investigator.investigateStream({
 When the Strands SDK is available:
 
 ```typescript
-import { Agent } from '@strands-agents/sdk';
-import { createAllTools } from '@intelgraph/strands-agents';
+import { Agent } from "@strands-agents/sdk";
+import { createAllTools } from "@intelgraph/strands-agents";
 
 const { allTools } = createAllTools({ driver });
 
 const agent = new Agent({
-  systemPrompt: 'You are an intelligence analyst.',
+  systemPrompt: "You are an intelligence analyst.",
   tools: allTools,
-  modelProvider: 'bedrock',
+  modelProvider: "bedrock",
 });
 
-const result = await agent.invoke('Analyze the network structure');
+const result = await agent.invoke("Analyze the network structure");
 ```
 
 ## Development

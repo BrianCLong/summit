@@ -1,4 +1,4 @@
-import torch from 'torch';
+import torch from "torch";
 
 export function collectiveSynergy(config) {
   const synergy = torch.rl({ scale: config.globalImpact });

@@ -1,11 +1,11 @@
-import { execSync } from 'child_process';
-import * as fs from 'fs';
-import * as path from 'path';
+import { execSync } from "child_process";
+import * as fs from "fs";
+import * as path from "path";
 
-const ROOT_DIR = path.resolve(__dirname, '../../');
-const OUTPUT_FILE = path.join(ROOT_DIR, 'sbom.json');
+const ROOT_DIR = path.resolve(__dirname, "../../");
+const OUTPUT_FILE = path.join(ROOT_DIR, "sbom.json");
 
-console.log('Generating SBOM...');
+console.log("Generating SBOM...");
 
 try {
   // Use npx @cyclonedx/cdxgen to generate SBOM
@@ -14,12 +14,12 @@ try {
   // Using --no-recurse to speed it up if needed, but we want full graph.
   // Note: cdxgen might try to fetch data.
   execSync(`npx @cyclonedx/cdxgen -r . -o ${OUTPUT_FILE} --fail-on-error`, {
-    stdio: 'inherit',
+    stdio: "inherit",
     cwd: ROOT_DIR,
-    env: { ...process.env, CI: 'true' } // Avoid interactive prompts
+    env: { ...process.env, CI: "true" }, // Avoid interactive prompts
   });
   console.log(`SBOM generated at ${OUTPUT_FILE}`);
 } catch (error) {
-  console.error('Failed to generate SBOM:', error);
+  console.error("Failed to generate SBOM:", error);
   process.exit(1);
 }

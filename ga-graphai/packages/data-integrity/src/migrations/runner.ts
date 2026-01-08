@@ -1,4 +1,4 @@
-export type StepStatus = 'pending' | 'in-progress' | 'completed';
+export type StepStatus = "pending" | "in-progress" | "completed";
 
 export interface MigrationStep {
   id: string;
@@ -34,15 +34,15 @@ export class InMemoryCheckpointStore implements CheckpointStore {
   private markers = new Map<string, Record<string, unknown>>();
 
   async status(stepId: string): Promise<StepStatus> {
-    return this.state.get(stepId) ?? 'pending';
+    return this.state.get(stepId) ?? "pending";
   }
 
   async markInProgress(stepId: string): Promise<void> {
-    this.state.set(stepId, 'in-progress');
+    this.state.set(stepId, "in-progress");
   }
 
   async markComplete(stepId: string): Promise<void> {
-    this.state.set(stepId, 'completed');
+    this.state.set(stepId, "completed");
   }
 
   async recordRollbackMarker(stepId: string, marker: Record<string, unknown>): Promise<void> {
@@ -55,23 +55,26 @@ export class InMemoryCheckpointStore implements CheckpointStore {
 }
 
 export class MigrationRunner {
-  constructor(private readonly store: CheckpointStore, private readonly steps: MigrationStep[]) {}
+  constructor(
+    private readonly store: CheckpointStore,
+    private readonly steps: MigrationStep[]
+  ) {}
 
   async preflight(): Promise<void> {
     for (const step of this.steps) {
       const status = await this.store.status(step.id);
-      if (status === 'completed') continue;
+      if (status === "completed") continue;
       const depends = step.dependsOn ?? [];
       for (const dependency of depends) {
         const depStatus = await this.store.status(dependency);
-        if (depStatus !== 'completed') {
+        if (depStatus !== "completed") {
           throw new Error(`Preflight failed: dependency ${dependency} incomplete for ${step.id}`);
         }
       }
       if (step.preflight) {
         const result = await step.preflight();
         if (!result.ok) {
-          const reasons = result.reasons?.join(', ') ?? 'unknown reason';
+          const reasons = result.reasons?.join(", ") ?? "unknown reason";
           throw new Error(`Preflight failed for ${step.id}: ${reasons}`);
         }
       }
@@ -83,7 +86,7 @@ export class MigrationRunner {
     const planned: string[] = [];
     for (const step of this.steps) {
       const status = await this.store.status(step.id);
-      if (status === 'completed') continue;
+      if (status === "completed") continue;
       const preview = step.dryRun ? await step.dryRun() : [`apply ${step.id}`];
       planned.push(...preview);
     }
@@ -94,7 +97,7 @@ export class MigrationRunner {
     await this.preflight();
     for (const step of this.steps) {
       const status = await this.store.status(step.id);
-      if (status === 'completed') {
+      if (status === "completed") {
         continue;
       }
       await this.store.markInProgress(step.id);

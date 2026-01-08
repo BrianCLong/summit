@@ -1,11 +1,10 @@
-
-import React from 'react';
+import React from 'react'
 
 interface CursorProps {
-  x: number;
-  y: number;
-  username?: string;
-  color?: string;
+  x: number
+  y: number
+  username?: string
+  color?: string
 }
 
 const Cursor: React.FC<CursorProps> = ({ x, y, username, color = '#f00' }) => (
@@ -50,15 +49,22 @@ const Cursor: React.FC<CursorProps> = ({ x, y, username, color = '#f00' }) => (
       </div>
     )}
   </div>
-);
+)
 
 interface CursorsLayerProps {
-  cursors: Map<string, any>;
+  cursors: Map<string, any>
 }
 
 export const CursorsLayer: React.FC<CursorsLayerProps> = ({ cursors }) => {
   return (
-    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        pointerEvents: 'none',
+        overflow: 'hidden',
+      }}
+    >
       {Array.from(cursors.entries()).map(([connectionId, cursor]) => (
         <Cursor
           key={connectionId}
@@ -69,5 +75,5 @@ export const CursorsLayer: React.FC<CursorsLayerProps> = ({ cursors }) => {
         />
       ))}
     </div>
-  );
-};
+  )
+}

@@ -17,7 +17,11 @@ import {
   discardRestoreCandidate,
   setDraftType,
 } from './annotationsSlice'
-import type { AnnotationContext, AnnotationTargetRef, AnnotationType } from './types'
+import type {
+  AnnotationContext,
+  AnnotationTargetRef,
+  AnnotationType,
+} from './types'
 
 interface AnnotationPanelProps {
   context?: AnnotationContext
@@ -28,16 +32,18 @@ const targetLabel = (target?: AnnotationTargetRef) => {
   return `${target.kind}: ${target.label ?? target.id}`
 }
 
-export const AnnotationPanel: React.FC<AnnotationPanelProps> = ({ context }) => {
+export const AnnotationPanel: React.FC<AnnotationPanelProps> = ({
+  context,
+}) => {
   const dispatch = useDispatch()
-  const { annotations, activeDraft, selectedId, restoreCandidate } = useSelector(
-    (state: RootState) => state.annotations
-  )
+  const { annotations, activeDraft, selectedId, restoreCandidate } =
+    useSelector((state: RootState) => state.annotations)
 
   const sortedAnnotations = useMemo(
     () =>
       [...annotations].sort(
-        (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        (a, b) =>
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
       ),
     [annotations]
   )
@@ -54,7 +60,11 @@ export const AnnotationPanel: React.FC<AnnotationPanelProps> = ({ context }) => 
       }
     }
     if (context?.entity) {
-      return { kind: 'entity', id: context.entity.id, label: context.entity.name }
+      return {
+        kind: 'entity',
+        id: context.entity.id,
+        label: context.entity.name,
+      }
     }
     if (context?.location) {
       return {
@@ -90,15 +100,14 @@ export const AnnotationPanel: React.FC<AnnotationPanelProps> = ({ context }) => 
     }
     if (event.key === 'ArrowRight' || event.key === ']') {
       if (sortedAnnotations.length === 0) return
-      const nextIndex = selectedIndex >= 0 ? (selectedIndex + 1) % sortedAnnotations.length : 0
+      const nextIndex =
+        selectedIndex >= 0 ? (selectedIndex + 1) % sortedAnnotations.length : 0
       dispatch(selectAnnotation(sortedAnnotations[nextIndex].id))
     }
     if (event.key === 'ArrowLeft' || event.key === '[') {
       if (sortedAnnotations.length === 0) return
       const prevIndex =
-        selectedIndex > 0
-          ? selectedIndex - 1
-          : sortedAnnotations.length - 1
+        selectedIndex > 0 ? selectedIndex - 1 : sortedAnnotations.length - 1
       dispatch(selectAnnotation(sortedAnnotations[prevIndex].id))
     }
   }
@@ -117,12 +126,18 @@ export const AnnotationPanel: React.FC<AnnotationPanelProps> = ({ context }) => 
   return (
     <Card className="h-full" aria-labelledby="annotation-panel-title">
       <CardHeader className="pb-3">
-        <CardTitle id="annotation-panel-title" className="flex items-center gap-2 text-sm">
+        <CardTitle
+          id="annotation-panel-title"
+          className="flex items-center gap-2 text-sm"
+        >
           Annotation Panel
-          <Badge variant="secondary" className="text-[11px]">Beta</Badge>
+          <Badge variant="secondary" className="text-[11px]">
+            Beta
+          </Badge>
         </CardTitle>
         <div className="sr-only" aria-live="polite">
-          Keyboard shortcuts: N to create note, P to pin selection, [ and ] to navigate annotations.
+          Keyboard shortcuts: N to create note, P to pin selection, [ and ] to
+          navigate annotations.
         </div>
         {restoreCandidate && (
           <div
@@ -132,10 +147,18 @@ export const AnnotationPanel: React.FC<AnnotationPanelProps> = ({ context }) => 
           >
             <span>Restore your unsaved draft?</span>
             <div className="flex gap-2">
-              <Button size="sm" variant="default" onClick={() => dispatch(restoreDraft())}>
+              <Button
+                size="sm"
+                variant="default"
+                onClick={() => dispatch(restoreDraft())}
+              >
                 Restore
               </Button>
-              <Button size="sm" variant="outline" onClick={() => dispatch(discardRestoreCandidate())}>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => dispatch(discardRestoreCandidate())}
+              >
                 Discard
               </Button>
             </div>
@@ -169,7 +192,10 @@ export const AnnotationPanel: React.FC<AnnotationPanelProps> = ({ context }) => 
           </div>
         </div>
 
-        <div className="border rounded-md p-3 space-y-2" aria-label="Annotation draft form">
+        <div
+          className="border rounded-md p-3 space-y-2"
+          aria-label="Annotation draft form"
+        >
           <div className="grid grid-cols-2 gap-2">
             <label className="text-xs text-muted-foreground flex flex-col gap-1">
               Type
@@ -228,7 +254,8 @@ export const AnnotationPanel: React.FC<AnnotationPanelProps> = ({ context }) => 
             </Button>
           </div>
           <div className="text-[11px] text-muted-foreground">
-            Drafts auto-save locally. Unsynced annotations are labeled accordingly.
+            Drafts auto-save locally. Unsynced annotations are labeled
+            accordingly.
           </div>
         </div>
 
@@ -241,10 +268,15 @@ export const AnnotationPanel: React.FC<AnnotationPanelProps> = ({ context }) => 
               {sortedAnnotations.length} items
             </span>
           </div>
-          <ScrollArea className="max-h-64 border rounded-md" aria-label="Annotation list">
+          <ScrollArea
+            className="max-h-64 border rounded-md"
+            aria-label="Annotation list"
+          >
             <ul role="list" className="divide-y">
               {sortedAnnotations.length === 0 && (
-                <li className="p-3 text-sm text-muted-foreground">No annotations yet.</li>
+                <li className="p-3 text-sm text-muted-foreground">
+                  No annotations yet.
+                </li>
               )}
               {sortedAnnotations.map(annotation => (
                 <li
@@ -269,7 +301,9 @@ export const AnnotationPanel: React.FC<AnnotationPanelProps> = ({ context }) => 
                       {annotation.type}
                     </Badge>
                     {annotation.status === 'unsynced' && (
-                      <Badge variant="secondary" className="text-[11px]">Unsynced</Badge>
+                      <Badge variant="secondary" className="text-[11px]">
+                        Unsynced
+                      </Badge>
                     )}
                     <span className="text-[11px] text-muted-foreground">
                       {new Date(annotation.updatedAt).toLocaleTimeString()}

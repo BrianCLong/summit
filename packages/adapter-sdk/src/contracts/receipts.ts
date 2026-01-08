@@ -1,5 +1,5 @@
-import type { AdapterDescriptor, AdapterRequest } from './adapter';
-import type { LifecycleGuardDecision } from './guard';
+import type { AdapterDescriptor, AdapterRequest } from "./adapter";
+import type { LifecycleGuardDecision } from "./guard";
 
 export interface RetryMetadata {
   attempt: number;
@@ -11,7 +11,7 @@ export interface RetryMetadata {
 export interface AdapterReceipt {
   adapter: AdapterDescriptor;
   correlationId: string;
-  intent: LifecycleGuardDecision['intent'];
+  intent: LifecycleGuardDecision["intent"];
   decision: LifecycleGuardDecision;
   digests: Record<string, string>;
   retries: RetryMetadata;
@@ -20,9 +20,7 @@ export interface AdapterReceipt {
   metadata?: Record<string, unknown>;
 }
 
-export type AdapterReceiptEmitter = (
-  receipt: AdapterReceipt,
-) => Promise<void> | void;
+export type AdapterReceiptEmitter = (receipt: AdapterReceipt) => Promise<void> | void;
 
 export interface ReceiptBuilderInput {
   adapter: AdapterDescriptor;

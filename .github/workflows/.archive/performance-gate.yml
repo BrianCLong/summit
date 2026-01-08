@@ -5,7 +5,7 @@ on:
     branches: ["main", "develop"]
   workflow_dispatch:
   schedule:
-    - cron: '30 3 * * *' # nightly baseline + stress on stage
+    - cron: "30 3 * * *" # nightly baseline + stress on stage
 
 permissions:
   contents: read

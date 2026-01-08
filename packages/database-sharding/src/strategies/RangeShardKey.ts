@@ -1,12 +1,12 @@
-import { ShardKeyStrategy } from './ShardKeyStrategy';
-import { ShardConfig } from '../types';
+import { ShardKeyStrategy } from "./ShardKeyStrategy";
+import { ShardConfig } from "../types";
 
 /**
  * Range-based sharding for ordered data (e.g., time-series, IDs)
  */
 export class RangeShardKey implements ShardKeyStrategy {
   getName(): string {
-    return 'range';
+    return "range";
   }
 
   getShard(key: any, shards: ShardConfig[]): ShardConfig {
@@ -22,7 +22,7 @@ export class RangeShardKey implements ShardKeyStrategy {
     }
 
     // If no range matches, use default shard or throw error
-    const defaultShard = shards.find((s) => s.name === 'default');
+    const defaultShard = shards.find((s) => s.name === "default");
     if (defaultShard) {
       return defaultShard;
     }
@@ -30,11 +30,7 @@ export class RangeShardKey implements ShardKeyStrategy {
     throw new Error(`No shard found for key ${key}`);
   }
 
-  getShardsForRange(
-    startKey: any,
-    endKey: any,
-    shards: ShardConfig[]
-  ): ShardConfig[] {
+  getShardsForRange(startKey: any, endKey: any, shards: ShardConfig[]): ShardConfig[] {
     // Find all shards whose ranges overlap with [startKey, endKey]
     const matchingShards: ShardConfig[] = [];
 
@@ -54,11 +50,11 @@ export class RangeShardKey implements ShardKeyStrategy {
 
   private isInRange(key: any, rangeStart: any, rangeEnd: any): boolean {
     // Support different types
-    if (typeof key === 'number') {
+    if (typeof key === "number") {
       return key >= rangeStart && key < rangeEnd;
     }
 
-    if (typeof key === 'string') {
+    if (typeof key === "string") {
       return key >= rangeStart && key < rangeEnd;
     }
 
@@ -71,19 +67,14 @@ export class RangeShardKey implements ShardKeyStrategy {
     return false;
   }
 
-  private rangesOverlap(
-    start1: any,
-    end1: any,
-    start2: any,
-    end2: any
-  ): boolean {
+  private rangesOverlap(start1: any, end1: any, start2: any, end2: any): boolean {
     // Ranges [start1, end1) and [start2, end2) overlap if:
     // start1 < end2 AND start2 < end1
-    if (typeof start1 === 'number') {
+    if (typeof start1 === "number") {
       return start1 < end2 && start2 < end1;
     }
 
-    if (typeof start1 === 'string') {
+    if (typeof start1 === "string") {
       return start1 < end2 && start2 < end1;
     }
 
@@ -105,16 +96,13 @@ export class RangeShardKey implements ShardKeyStrategy {
     shard: ShardConfig,
     targetCount: number
   ): { rangeStart: any; rangeEnd: any }[] {
-    if (
-      shard.rangeStart === undefined ||
-      shard.rangeEnd === undefined
-    ) {
+    if (shard.rangeStart === undefined || shard.rangeEnd === undefined) {
       return [];
     }
 
     const splits: { rangeStart: any; rangeEnd: any }[] = [];
 
-    if (typeof shard.rangeStart === 'number') {
+    if (typeof shard.rangeStart === "number") {
       const start = shard.rangeStart as number;
       const end = shard.rangeEnd as number;
       const step = (end - start) / targetCount;

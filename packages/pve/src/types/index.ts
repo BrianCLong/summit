@@ -6,7 +6,7 @@
  * @module pve/types
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // -----------------------------------------------------------------------------
 // Policy Result Types
@@ -29,7 +29,7 @@ export interface PolicyResult {
   location?: PolicyLocation;
 }
 
-export type PolicySeverity = 'error' | 'warning' | 'info';
+export type PolicySeverity = "error" | "warning" | "info";
 
 export interface PolicyDetails {
   /** Rule that was violated */
@@ -67,16 +67,16 @@ export interface EvaluationContext {
 }
 
 export type EvaluationType =
-  | 'pr_diff'
-  | 'schema_drift'
-  | 'metadata_invariant'
-  | 'agent_output'
-  | 'ci_integrity'
-  | 'tsconfig_integrity'
-  | 'api_surface'
-  | 'dependency_audit'
-  | 'security_scan'
-  | 'custom';
+  | "pr_diff"
+  | "schema_drift"
+  | "metadata_invariant"
+  | "agent_output"
+  | "ci_integrity"
+  | "tsconfig_integrity"
+  | "api_surface"
+  | "dependency_audit"
+  | "security_scan"
+  | "custom";
 
 export type EvaluationInput =
   | PRDiffInput
@@ -91,7 +91,7 @@ export type EvaluationInput =
   | CustomInput;
 
 export interface PRDiffInput {
-  type: 'pr_diff';
+  type: "pr_diff";
   /** The PR number */
   prNumber?: number;
   /** Base branch/commit */
@@ -108,7 +108,7 @@ export interface PRFile {
   /** File path relative to repo root */
   path: string;
   /** Type of change */
-  status: 'added' | 'modified' | 'deleted' | 'renamed';
+  status: "added" | "modified" | "deleted" | "renamed";
   /** Previous path (for renamed files) */
   previousPath?: string;
   /** Number of additions */
@@ -133,9 +133,9 @@ export interface PRMetadata {
 }
 
 export interface SchemaDriftInput {
-  type: 'schema_drift';
+  type: "schema_drift";
   /** Schema type being checked */
-  schemaType: 'json_schema' | 'typescript' | 'graphql' | 'protobuf' | 'avro';
+  schemaType: "json_schema" | "typescript" | "graphql" | "protobuf" | "avro";
   /** Previous schema version */
   previous: string | object;
   /** Current schema version */
@@ -145,7 +145,7 @@ export interface SchemaDriftInput {
 }
 
 export interface MetadataInvariantInput {
-  type: 'metadata_invariant';
+  type: "metadata_invariant";
   /** Entity type being validated */
   entityType: string;
   /** Metadata to validate */
@@ -158,16 +158,16 @@ export interface MetadataInvariantInput {
 
 export interface MetadataRule {
   field: string;
-  rule: 'required' | 'type' | 'pattern' | 'enum' | 'range' | 'custom';
+  rule: "required" | "type" | "pattern" | "enum" | "range" | "custom";
   config: unknown;
 }
 
 export interface AgentOutputInput {
-  type: 'agent_output';
+  type: "agent_output";
   /** Agent identifier */
   agentId: string;
   /** Agent type (claude, jules, codex, etc.) */
-  agentType: 'claude' | 'jules' | 'codex' | 'custom';
+  agentType: "claude" | "jules" | "codex" | "custom";
   /** Output content */
   output: AgentOutput;
   /** Task context */
@@ -176,7 +176,7 @@ export interface AgentOutputInput {
 
 export interface AgentOutput {
   /** Type of output */
-  outputType: 'code' | 'text' | 'structured' | 'mixed';
+  outputType: "code" | "text" | "structured" | "mixed";
   /** Files created or modified */
   files?: AgentFile[];
   /** Text response */
@@ -188,7 +188,7 @@ export interface AgentOutput {
 export interface AgentFile {
   path: string;
   content: string;
-  action: 'create' | 'modify' | 'delete';
+  action: "create" | "modify" | "delete";
 }
 
 export interface AgentTask {
@@ -198,9 +198,9 @@ export interface AgentTask {
 }
 
 export interface CIIntegrityInput {
-  type: 'ci_integrity';
+  type: "ci_integrity";
   /** CI/CD platform */
-  platform: 'github_actions' | 'gitlab_ci' | 'jenkins' | 'circleci' | 'custom';
+  platform: "github_actions" | "gitlab_ci" | "jenkins" | "circleci" | "custom";
   /** Workflow/pipeline configuration */
   config: unknown;
   /** Path to the config file */
@@ -208,7 +208,7 @@ export interface CIIntegrityInput {
 }
 
 export interface TSConfigIntegrityInput {
-  type: 'tsconfig_integrity';
+  type: "tsconfig_integrity";
   /** TSConfig content */
   config: unknown;
   /** Path to the config file */
@@ -218,9 +218,9 @@ export interface TSConfigIntegrityInput {
 }
 
 export interface APISurfaceInput {
-  type: 'api_surface';
+  type: "api_surface";
   /** API type */
-  apiType: 'graphql' | 'rest' | 'grpc' | 'websocket';
+  apiType: "graphql" | "rest" | "grpc" | "websocket";
   /** Previous API definition */
   previous?: unknown;
   /** Current API definition */
@@ -230,7 +230,7 @@ export interface APISurfaceInput {
 }
 
 export interface DependencyAuditInput {
-  type: 'dependency_audit';
+  type: "dependency_audit";
   /** Package manifest */
   manifest: PackageManifest;
   /** Lock file content */
@@ -250,16 +250,16 @@ export interface PackageManifest {
 
 export interface Vulnerability {
   package: string;
-  severity: 'low' | 'moderate' | 'high' | 'critical';
+  severity: "low" | "moderate" | "high" | "critical";
   version: string;
   fix?: string;
   cve?: string;
 }
 
 export interface SecurityScanInput {
-  type: 'security_scan';
+  type: "security_scan";
   /** Type of security scan */
-  scanType: 'secrets' | 'sast' | 'dast' | 'container' | 'custom';
+  scanType: "secrets" | "sast" | "dast" | "container" | "custom";
   /** Content to scan */
   content: string | string[];
   /** File paths */
@@ -267,7 +267,7 @@ export interface SecurityScanInput {
 }
 
 export interface CustomInput {
-  type: 'custom';
+  type: "custom";
   /** Custom policy identifier */
   policyId: string;
   /** Custom input data */
@@ -291,12 +291,12 @@ export interface RepoMetadata {
   owner: string;
   name: string;
   defaultBranch?: string;
-  visibility?: 'public' | 'private' | 'internal';
+  visibility?: "public" | "private" | "internal";
 }
 
 export interface ActorMetadata {
   id: string;
-  type: 'user' | 'bot' | 'agent';
+  type: "user" | "bot" | "agent";
   name?: string;
 }
 
@@ -343,7 +343,7 @@ export interface PolicySet {
 export const PolicyResultSchema = z.object({
   policy: z.string(),
   allowed: z.boolean(),
-  severity: z.enum(['error', 'warning', 'info']).optional(),
+  severity: z.enum(["error", "warning", "info"]).optional(),
   message: z.string().optional(),
   details: z
     .object({
@@ -366,16 +366,16 @@ export const PolicyResultSchema = z.object({
 
 export const EvaluationContextSchema = z.object({
   type: z.enum([
-    'pr_diff',
-    'schema_drift',
-    'metadata_invariant',
-    'agent_output',
-    'ci_integrity',
-    'tsconfig_integrity',
-    'api_surface',
-    'dependency_audit',
-    'security_scan',
-    'custom',
+    "pr_diff",
+    "schema_drift",
+    "metadata_invariant",
+    "agent_output",
+    "ci_integrity",
+    "tsconfig_integrity",
+    "api_surface",
+    "dependency_audit",
+    "security_scan",
+    "custom",
   ]),
   input: z.unknown(),
   metadata: z
@@ -385,13 +385,13 @@ export const EvaluationContextSchema = z.object({
           owner: z.string(),
           name: z.string(),
           defaultBranch: z.string().optional(),
-          visibility: z.enum(['public', 'private', 'internal']).optional(),
+          visibility: z.enum(["public", "private", "internal"]).optional(),
         })
         .optional(),
       actor: z
         .object({
           id: z.string(),
-          type: z.enum(['user', 'bot', 'agent']),
+          type: z.enum(["user", "bot", "agent"]),
           name: z.string().optional(),
         })
         .optional(),

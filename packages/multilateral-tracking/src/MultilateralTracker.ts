@@ -8,8 +8,8 @@ import {
   Coalition,
   Resolution,
   OrganizationComparison,
-  Activity
-} from './types.js';
+  Activity,
+} from "./types.js";
 
 /**
  * MultilateralTracker
@@ -58,7 +58,7 @@ export class MultilateralTracker {
   getOrganizationsByType(type: OrganizationType): MultilateralOrganization[] {
     const orgIds = this.organizationsByType.get(type) || new Set();
     return Array.from(orgIds)
-      .map(id => this.organizations.get(id))
+      .map((id) => this.organizations.get(id))
       .filter((org): org is MultilateralOrganization => org !== undefined);
   }
 
@@ -75,7 +75,7 @@ export class MultilateralTracker {
     for (const orgId of orgIds) {
       const org = this.organizations.get(orgId);
       if (org) {
-        const membership = org.members.find(m => m.country === country);
+        const membership = org.members.find((m) => m.country === country);
         if (membership) {
           memberships.push({ organization: org, membership });
         }
@@ -117,8 +117,8 @@ export class MultilateralTracker {
 
     // Identify key organizations (high influence)
     const keyOrganizations = memberships
-      .filter(m => m.membership.influence > 70)
-      .map(m => m.organization.name)
+      .filter((m) => m.membership.influence > 70)
+      .map((m) => m.organization.name)
       .slice(0, 10);
 
     // Analyze voting patterns
@@ -131,7 +131,7 @@ export class MultilateralTracker {
       averageInfluence: memberships.length > 0 ? totalInfluence / memberships.length : 0,
       averageParticipation: memberships.length > 0 ? totalParticipation / memberships.length : 0,
       keyOrganizations,
-      votingPatterns
+      votingPatterns,
     };
   }
 
@@ -162,25 +162,24 @@ export class MultilateralTracker {
 
     for (const [key, patternList] of this.votingPatterns.entries()) {
       if (key.startsWith(`${country}:`)) {
-        const org = key.split(':')[1];
+        const org = key.split(":")[1];
         const latestPattern = patternList[patternList.length - 1];
 
         // Calculate average alignment strength
-        const avgAlignment = latestPattern.votingAlignment.reduce(
-          (sum, a) => sum + a.agreementRate,
-          0
-        ) / (latestPattern.votingAlignment.length || 1);
+        const avgAlignment =
+          latestPattern.votingAlignment.reduce((sum, a) => sum + a.agreementRate, 0) /
+          (latestPattern.votingAlignment.length || 1);
 
         // Get top alignments
         const primaryAlignments = latestPattern.votingAlignment
           .sort((a, b) => b.agreementRate - a.agreementRate)
           .slice(0, 5)
-          .map(a => a.withCountry);
+          .map((a) => a.withCountry);
 
         patterns.push({
           organization: org,
           alignmentStrength: avgAlignment,
-          primaryAlignments
+          primaryAlignments,
         });
       }
     }
@@ -237,11 +236,11 @@ export class MultilateralTracker {
           name: `Voting Bloc ${blocs.length + 1}`,
           members: blocMembers,
           formed: new Date(),
-          purpose: 'Strategic voting alignment',
+          purpose: "Strategic voting alignment",
           cohesion: 80,
           effectiveness: 70,
           achievements: [],
-          challenges: []
+          challenges: [],
         });
       }
     }
@@ -261,45 +260,45 @@ export class MultilateralTracker {
         coalitions: [],
         competingBlocs: [],
         balanceOfPower: {
-          type: 'BALANCED',
-          description: 'Organization not found'
-        }
+          type: "BALANCED",
+          description: "Organization not found",
+        },
       };
     }
 
     // Identify dominant actors
     const dominantActors = org.members
-      .filter(m => m.influence > 70)
+      .filter((m) => m.influence > 70)
       .sort((a, b) => b.influence - a.influence)
       .slice(0, 10)
-      .map(m => ({
+      .map((m) => ({
         country: m.country,
         influence: m.influence,
         mechanisms: [
-          m.votingPower === 'VETO_POWER' ? 'Veto power' : '',
-          m.leadership.length > 0 ? 'Leadership positions' : '',
-          m.contributions && m.contributions.length > 0 ? 'Major contributor' : ''
-        ].filter(Boolean)
+          m.votingPower === "VETO_POWER" ? "Veto power" : "",
+          m.leadership.length > 0 ? "Leadership positions" : "",
+          m.contributions && m.contributions.length > 0 ? "Major contributor" : "",
+        ].filter(Boolean),
       }));
 
     // Identify coalitions
     const coalitions = this.identifyVotingBlocs(organizationId);
 
     // Determine balance of power
-    let balanceType: 'UNIPOLAR' | 'BIPOLAR' | 'MULTIPOLAR' | 'BALANCED' = 'BALANCED';
-    let description = '';
+    let balanceType: "UNIPOLAR" | "BIPOLAR" | "MULTIPOLAR" | "BALANCED" = "BALANCED";
+    let description = "";
 
     if (dominantActors.length === 1 && dominantActors[0].influence > 80) {
-      balanceType = 'UNIPOLAR';
+      balanceType = "UNIPOLAR";
       description = `Dominated by ${dominantActors[0].country}`;
     } else if (dominantActors.length === 2 && dominantActors[0].influence > 70) {
-      balanceType = 'BIPOLAR';
+      balanceType = "BIPOLAR";
       description = `Dual leadership by ${dominantActors[0].country} and ${dominantActors[1].country}`;
     } else if (dominantActors.length > 2) {
-      balanceType = 'MULTIPOLAR';
+      balanceType = "MULTIPOLAR";
       description = `Power distributed among ${dominantActors.length} major actors`;
     } else {
-      description = 'Relatively balanced power distribution';
+      description = "Relatively balanced power distribution";
     }
 
     const dynamics: PowerDynamics = {
@@ -309,8 +308,8 @@ export class MultilateralTracker {
       competingBlocs: [],
       balanceOfPower: {
         type: balanceType,
-        description
-      }
+        description,
+      },
     };
 
     this.powerDynamics.set(organizationId, dynamics);
@@ -320,11 +319,9 @@ export class MultilateralTracker {
   /**
    * Compare effectiveness across organizations
    */
-  compareOrganizationEffectiveness(
-    organizationIds: string[]
-  ): OrganizationComparison {
+  compareOrganizationEffectiveness(organizationIds: string[]): OrganizationComparison {
     const organizations = organizationIds
-      .map(id => this.organizations.get(id))
+      .map((id) => this.organizations.get(id))
       .filter((org): org is MultilateralOrganization => org !== undefined);
 
     // Calculate membership overlap
@@ -340,39 +337,39 @@ export class MultilateralTracker {
         const org1 = organizations[i];
         const org2 = organizations[j];
 
-        const members1 = new Set(org1.members.map(m => m.country));
-        const members2 = new Set(org2.members.map(m => m.country));
+        const members1 = new Set(org1.members.map((m) => m.country));
+        const members2 = new Set(org2.members.map((m) => m.country));
 
-        const shared = Array.from(members1).filter(m => members2.has(m));
+        const shared = Array.from(members1).filter((m) => members2.has(m));
         const totalUnique = new Set([...members1, ...members2]).size;
 
         membershipOverlap.push({
           org1: org1.name,
           org2: org2.name,
           sharedMembers: shared,
-          overlapPercentage: (shared.length / totalUnique) * 100
+          overlapPercentage: (shared.length / totalUnique) * 100,
         });
       }
     }
 
     // Effectiveness ranking
     const effectivenessRanking = organizations
-      .map(org => ({
+      .map((org) => ({
         organization: org.name,
         score: org.effectiveness,
-        ranking: 0
+        ranking: 0,
       }))
       .sort((a, b) => b.score - a.score)
       .map((item, index) => ({
         ...item,
-        ranking: index + 1
+        ranking: index + 1,
       }));
 
     return {
       organizations,
       membershipOverlap,
       functionalOverlap: [],
-      effectivenessRanking
+      effectivenessRanking,
     };
   }
 
@@ -391,7 +388,7 @@ export class MultilateralTracker {
     progress: number;
   } {
     const org = this.organizations.get(organizationId);
-    const resolution = org?.resolutions.find(r => r.id === resolutionId);
+    const resolution = org?.resolutions.find((r) => r.id === resolutionId);
 
     if (!resolution) {
       return {
@@ -400,7 +397,7 @@ export class MultilateralTracker {
         fullyCompliant: [],
         partiallyCompliant: [],
         nonCompliant: [],
-        progress: 0
+        progress: 0,
       };
     }
 
@@ -410,23 +407,21 @@ export class MultilateralTracker {
 
     for (const compliance of resolution.implementation.compliance) {
       switch (compliance.level) {
-        case 'FULL':
+        case "FULL":
           fullyCompliant.push(compliance.country);
           break;
-        case 'PARTIAL':
-        case 'MINIMAL':
+        case "PARTIAL":
+        case "MINIMAL":
           partiallyCompliant.push(compliance.country);
           break;
-        case 'NON_COMPLIANT':
+        case "NON_COMPLIANT":
           nonCompliant.push(compliance.country);
           break;
       }
     }
 
     const totalCountries = resolution.implementation.compliance.length;
-    const complianceRate = totalCountries > 0
-      ? (fullyCompliant.length / totalCountries) * 100
-      : 0;
+    const complianceRate = totalCountries > 0 ? (fullyCompliant.length / totalCountries) * 100 : 0;
 
     return {
       resolution,
@@ -434,7 +429,7 @@ export class MultilateralTracker {
       fullyCompliant,
       partiallyCompliant,
       nonCompliant,
-      progress: resolution.implementation.progress
+      progress: resolution.implementation.progress,
     };
   }
 
@@ -457,7 +452,7 @@ export class MultilateralTracker {
         supportLevel: 0,
         majorObstacles: [],
         likelyToSucceed: 0,
-        recommendations: []
+        recommendations: [],
       };
     }
 
@@ -470,16 +465,15 @@ export class MultilateralTracker {
       totalSupport += reform.support.percentage;
 
       if (reform.opposition) {
-        reform.opposition.reasons.forEach(r => obstacles.add(r));
+        reform.opposition.reasons.forEach((r) => obstacles.add(r));
       }
     }
 
-    const avgSupport = org.reformProposals.length > 0
-      ? totalSupport / org.reformProposals.length
-      : 0;
+    const avgSupport =
+      org.reformProposals.length > 0 ? totalSupport / org.reformProposals.length : 0;
 
     const likelyToSucceed = org.reformProposals.filter(
-      r => r.support.percentage > 66 && r.status !== 'REJECTED'
+      (r) => r.support.percentage > 66 && r.status !== "REJECTED"
     ).length;
 
     const recommendations = this.generateReformRecommendations(org);
@@ -490,7 +484,7 @@ export class MultilateralTracker {
       supportLevel: avgSupport,
       majorObstacles: Array.from(obstacles),
       likelyToSucceed,
-      recommendations
+      recommendations,
     };
   }
 
@@ -503,7 +497,7 @@ export class MultilateralTracker {
     activePrograms: number;
     activeMissions: number;
     recentMeetings: number;
-    trend: 'INCREASING' | 'STABLE' | 'DECREASING';
+    trend: "INCREASING" | "STABLE" | "DECREASING";
   }[] {
     const results: {
       organization: string;
@@ -511,34 +505,30 @@ export class MultilateralTracker {
       activePrograms: number;
       activeMissions: number;
       recentMeetings: number;
-      trend: 'INCREASING' | 'STABLE' | 'DECREASING';
+      trend: "INCREASING" | "STABLE" | "DECREASING";
     }[] = [];
 
     for (const org of this.organizations.values()) {
       const activePrograms = org.programs.filter(
-        p => !p.endDate || p.endDate > new Date()
+        (p) => !p.endDate || p.endDate > new Date()
       ).length;
 
-      const activeMissions = org.activities.filter(
-        a => a.status === 'ACTIVE'
-      ).length;
+      const activeMissions = org.activities.filter((a) => a.status === "ACTIVE").length;
 
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      const recentMeetings = org.meetings.filter(
-        m => m.date >= thirtyDaysAgo
-      ).length;
+      const recentMeetings = org.meetings.filter((m) => m.date >= thirtyDaysAgo).length;
 
       // Simple trend calculation
       const sixtyDaysAgo = new Date();
       sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
       const olderMeetings = org.meetings.filter(
-        m => m.date >= sixtyDaysAgo && m.date < thirtyDaysAgo
+        (m) => m.date >= sixtyDaysAgo && m.date < thirtyDaysAgo
       ).length;
 
-      let trend: 'INCREASING' | 'STABLE' | 'DECREASING' = 'STABLE';
-      if (recentMeetings > olderMeetings * 1.2) trend = 'INCREASING';
-      else if (recentMeetings < olderMeetings * 0.8) trend = 'DECREASING';
+      let trend: "INCREASING" | "STABLE" | "DECREASING" = "STABLE";
+      if (recentMeetings > olderMeetings * 1.2) trend = "INCREASING";
+      else if (recentMeetings < olderMeetings * 0.8) trend = "DECREASING";
 
       results.push({
         organization: org.name,
@@ -546,7 +536,7 @@ export class MultilateralTracker {
         activePrograms,
         activeMissions,
         recentMeetings,
-        trend
+        trend,
       });
     }
 
@@ -574,7 +564,7 @@ export class MultilateralTracker {
         keyFactors: [],
         risks: [],
         opportunities: [],
-        confidence: 0
+        confidence: 0,
       };
     }
 
@@ -586,36 +576,36 @@ export class MultilateralTracker {
     // Analyze cohesion
     if (org.cohesion < 50) {
       projectedEffectiveness -= 10;
-      risks.push('Low member cohesion threatens effectiveness');
+      risks.push("Low member cohesion threatens effectiveness");
     } else if (org.cohesion > 80) {
       projectedEffectiveness += 5;
-      keyFactors.push('Strong member cohesion');
+      keyFactors.push("Strong member cohesion");
     }
 
     // Analyze funding
     if (org.budget) {
       const voluntaryPercentage = org.funding
-        .filter(f => f.type === 'VOLUNTARY_CONTRIBUTIONS')
+        .filter((f) => f.type === "VOLUNTARY_CONTRIBUTIONS")
         .reduce((sum, f) => sum + f.percentage, 0);
 
       if (voluntaryPercentage > 70) {
-        risks.push('Heavy reliance on voluntary contributions creates funding uncertainty');
+        risks.push("Heavy reliance on voluntary contributions creates funding uncertainty");
       }
     }
 
     // Analyze challenges
     if (org.currentChallenges.length > 5) {
-      risks.push('Multiple concurrent challenges may overwhelm organization');
+      risks.push("Multiple concurrent challenges may overwhelm organization");
       projectedEffectiveness -= 5;
     }
 
     // Analyze reform potential
     if (org.reformProposals && org.reformProposals.length > 0) {
       const activeReforms = org.reformProposals.filter(
-        r => r.status === 'UNDER_DISCUSSION' || r.status === 'NEGOTIATING'
+        (r) => r.status === "UNDER_DISCUSSION" || r.status === "NEGOTIATING"
       );
       if (activeReforms.length > 0) {
-        opportunities.push('Active reform processes may improve effectiveness');
+        opportunities.push("Active reform processes may improve effectiveness");
         projectedEffectiveness += 10;
       }
     }
@@ -633,7 +623,7 @@ export class MultilateralTracker {
       keyFactors,
       risks,
       opportunities,
-      confidence: Math.min(100, confidence)
+      confidence: Math.min(100, confidence),
     };
   }
 
@@ -641,22 +631,22 @@ export class MultilateralTracker {
     const recommendations: string[] = [];
 
     if (org.effectiveness < 60) {
-      recommendations.push('Comprehensive effectiveness review needed');
+      recommendations.push("Comprehensive effectiveness review needed");
     }
 
     if (org.cohesion < 50) {
-      recommendations.push('Build consensus through enhanced dialogue mechanisms');
+      recommendations.push("Build consensus through enhanced dialogue mechanisms");
     }
 
     if (org.budget && org.budget.totalAmount > 0) {
       const topContributor = org.budget.topContributors[0];
       if (topContributor && topContributor.percentage > 30) {
-        recommendations.push('Diversify funding sources to reduce dependency');
+        recommendations.push("Diversify funding sources to reduce dependency");
       }
     }
 
     if (org.currentChallenges.length > 5) {
-      recommendations.push('Prioritize and sequence reform initiatives');
+      recommendations.push("Prioritize and sequence reform initiatives");
     }
 
     return recommendations;
@@ -690,20 +680,15 @@ export class MultilateralTracker {
     }
 
     const activityLevels = this.monitorActivityLevels();
-    const mostActive = activityLevels
-      .slice(0, 5)
-      .map(a => a.organization);
+    const mostActive = activityLevels.slice(0, 5).map((a) => a.organization);
 
     return {
       totalOrganizations: this.organizations.size,
       byType,
-      averageEffectiveness: this.organizations.size > 0
-        ? totalEffectiveness / this.organizations.size
-        : 0,
-      averageMemberCount: this.organizations.size > 0
-        ? totalMembers / this.organizations.size
-        : 0,
-      mostActiveOrganizations: mostActive
+      averageEffectiveness:
+        this.organizations.size > 0 ? totalEffectiveness / this.organizations.size : 0,
+      averageMemberCount: this.organizations.size > 0 ? totalMembers / this.organizations.size : 0,
+      mostActiveOrganizations: mostActive,
     };
   }
 }

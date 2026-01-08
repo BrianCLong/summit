@@ -5,7 +5,7 @@ metadata:
 spec:
   args:
     - name: service-name
-      value: {{ include "server.fullname" . }}
+      value: { { include "server.fullname" . } }
   metrics:
     - name: success-rate
       interval: 1m

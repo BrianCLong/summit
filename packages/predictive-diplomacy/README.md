@@ -16,47 +16,44 @@ Advanced prediction and forecasting engine for diplomatic outcomes, relationship
 ## Usage
 
 ```typescript
-import { PredictiveDiplomacy, PredictionTimeframe } from '@intelgraph/predictive-diplomacy';
+import { PredictiveDiplomacy, PredictionTimeframe } from "@intelgraph/predictive-diplomacy";
 
 const predictor = new PredictiveDiplomacy();
 
 // Predict relationship trajectory
 const trajectory = predictor.predictRelationshipTrajectory(
-  'USA',
-  'China',
+  "USA",
+  "China",
   60, // current quality
-  'DETERIORATING',
+  "DETERIORATING",
   indicators
 );
 
 // Predict policy shift
 const policyShift = predictor.predictPolicyShift(
-  'USA',
-  'Trade Policy',
-  'Current Position',
+  "USA",
+  "Trade Policy",
+  "Current Position",
   indicators
 );
 
 // Forecast regional stability
 const stability = predictor.forecastRegionalStability(
-  'Middle East',
-  ['Iran', 'Saudi Arabia', 'Israel'],
+  "Middle East",
+  ["Iran", "Saudi Arabia", "Israel"],
   45, // current stability
   flashpoints
 );
 
 // Generate comprehensive forecast
 const forecast = predictor.generateForecast(
-  'REGIONAL',
-  'Asia-Pacific Security',
+  "REGIONAL",
+  "Asia-Pacific Security",
   PredictionTimeframe.MEDIUM_TERM
 );
 
 // Verify prediction
-const accuracy = predictor.verifyPrediction(
-  'pred-123',
-  'Actual outcome description'
-);
+const accuracy = predictor.verifyPrediction("pred-123", "Actual outcome description");
 ```
 
 ## Prediction Types

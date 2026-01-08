@@ -1,38 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 
 // Types matching backend
 interface SimulationEntity {
-  id?: string;
-  name: string;
-  type: 'actor' | 'group';
-  alignment: 'ally' | 'neutral' | 'opposition';
-  influence: number;
-  sentiment: number;
-  volatility: number;
-  resilience: number;
-  themes: Record<string, number>;
-  relationships: { targetId: string; strength: number }[];
+  id?: string
+  name: string
+  type: 'actor' | 'group'
+  alignment: 'ally' | 'neutral' | 'opposition'
+  influence: number
+  sentiment: number
+  volatility: number
+  resilience: number
+  themes: Record<string, number>
+  relationships: { targetId: string; strength: number }[]
 }
 
 interface ShockDefinition {
-  type: string;
-  targetTag?: string;
-  intensity: number;
-  description: string;
+  type: string
+  targetTag?: string
+  intensity: number
+  description: string
 }
 
 interface ScenarioCluster {
-  label: string;
-  count: number;
-  avgSentiment: number;
-  avgInfluence: number;
-  sampleIds: string[];
+  label: string
+  count: number
+  avgSentiment: number
+  avgInfluence: number
+  sampleIds: string[]
 }
 
 interface ScenarioResult {
-  scenarioId: string;
-  totalRuns: number;
-  clusters: ScenarioCluster[];
+  scenarioId: string
+  totalRuns: number
+  clusters: ScenarioCluster[]
 }
 
 const DEFAULT_ENTITIES: SimulationEntity[] = [
@@ -69,17 +69,19 @@ const DEFAULT_ENTITIES: SimulationEntity[] = [
     themes: { stability: 0.5, reform: 0.5 },
     relationships: [],
   },
-];
+]
 
 export const ScenarioSimulator: React.FC = () => {
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<ScenarioResult | null>(null);
-  const [entities, setEntities] = useState<SimulationEntity[]>(DEFAULT_ENTITIES);
-  const [shockEnabled, setShockEnabled] = useState(false);
-  const [shockDescription, setShockDescription] = useState('Cyber Attack on Grid');
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState<ScenarioResult | null>(null)
+  const [entities, setEntities] = useState<SimulationEntity[]>(DEFAULT_ENTITIES)
+  const [shockEnabled, setShockEnabled] = useState(false)
+  const [shockDescription, setShockDescription] = useState(
+    'Cyber Attack on Grid'
+  )
 
   const runSimulation = async () => {
-    setLoading(true);
+    setLoading(true)
     try {
       const shock: ShockDefinition | undefined = shockEnabled
         ? {
@@ -88,7 +90,7 @@ export const ScenarioSimulator: React.FC = () => {
             intensity: 1.5,
             description: shockDescription,
           }
-        : undefined;
+        : undefined
 
       // Note: The API prefix might need to be adjusted based on setup.
       // Usually it's /api/narrative-sim... or similar.
@@ -109,24 +111,28 @@ export const ScenarioSimulator: React.FC = () => {
           ticks: 20,
           shock,
         }),
-      });
+      })
 
-      if (!response.ok) throw new Error(await response.text());
-      const data = await response.json();
-      setResult(data);
+      if (!response.ok) throw new Error(await response.text())
+      const data = await response.json()
+      setResult(data)
     } catch (err) {
-      console.error(err);
-      alert('Failed to run simulation. See console for details.');
+      console.error(err)
+      alert('Failed to run simulation. See console for details.')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div className="p-6 bg-slate-50 min-h-screen">
       <header className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800">Scenario Simulator v2</h1>
-        <p className="text-slate-600">Predictive Narrative & Adversarial Shock Engine</p>
+        <h1 className="text-3xl font-bold text-slate-800">
+          Scenario Simulator v2
+        </h1>
+        <p className="text-slate-600">
+          Predictive Narrative & Adversarial Shock Engine
+        </p>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -136,14 +142,19 @@ export const ScenarioSimulator: React.FC = () => {
             <h2 className="text-xl font-semibold mb-4">Configuration</h2>
 
             <div className="mb-4">
-              <label htmlFor="scenario-entities" className="block text-sm font-medium text-slate-700 mb-2">Scenario Entities (JSON)</label>
+              <label
+                htmlFor="scenario-entities"
+                className="block text-sm font-medium text-slate-700 mb-2"
+              >
+                Scenario Entities (JSON)
+              </label>
               <textarea
                 id="scenario-entities"
                 className="w-full h-64 p-3 border rounded font-mono text-xs bg-slate-50"
                 value={JSON.stringify(entities, null, 2)}
-                onChange={(e) => {
+                onChange={e => {
                   try {
-                    setEntities(JSON.parse(e.target.value));
+                    setEntities(JSON.parse(e.target.value))
                   } catch (e) {}
                 }}
                 aria-label="Edit scenario entities JSON"
@@ -152,11 +163,13 @@ export const ScenarioSimulator: React.FC = () => {
 
             <div className="border-t pt-4 mt-4">
               <div className="flex items-center justify-between mb-4">
-                <span className="font-medium" id="shock-label">Adversarial Shock</span>
+                <span className="font-medium" id="shock-label">
+                  Adversarial Shock
+                </span>
                 <input
                   type="checkbox"
                   checked={shockEnabled}
-                  onChange={(e) => setShockEnabled(e.target.checked)}
+                  onChange={e => setShockEnabled(e.target.checked)}
                   className="h-5 w-5"
                   aria-labelledby="shock-label"
                 />
@@ -165,12 +178,17 @@ export const ScenarioSimulator: React.FC = () => {
               {shockEnabled && (
                 <div className="space-y-3">
                   <div>
-                    <label htmlFor="shock-description" className="block text-xs font-medium text-slate-500">Description</label>
+                    <label
+                      htmlFor="shock-description"
+                      className="block text-xs font-medium text-slate-500"
+                    >
+                      Description
+                    </label>
                     <input
                       id="shock-description"
                       type="text"
                       value={shockDescription}
-                      onChange={(e) => setShockDescription(e.target.value)}
+                      onChange={e => setShockDescription(e.target.value)}
                       className="w-full p-2 border rounded text-sm"
                     />
                   </div>
@@ -187,7 +205,11 @@ export const ScenarioSimulator: React.FC = () => {
               onClick={runSimulation}
               disabled={loading}
               className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded disabled:opacity-50"
-              aria-label={loading ? 'Simulation in progress' : 'Run Monte Carlo Batch Simulation (20 iterations)'}
+              aria-label={
+                loading
+                  ? 'Simulation in progress'
+                  : 'Run Monte Carlo Batch Simulation (20 iterations)'
+              }
             >
               {loading ? 'Simulating...' : 'Run Monte Carlo Batch (20x)'}
             </button>
@@ -197,19 +219,27 @@ export const ScenarioSimulator: React.FC = () => {
         {/* Results Panel */}
         <div className="lg:col-span-2">
           {result ? (
-            <div className="space-y-6" role="region" aria-label="Simulation Results">
+            <div
+              className="space-y-6"
+              role="region"
+              aria-label="Simulation Results"
+            >
               <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-                <h2 className="text-xl font-semibold mb-4">Outcome Clustering</h2>
+                <h2 className="text-xl font-semibold mb-4">
+                  Outcome Clustering
+                </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {result.clusters.map((cluster) => (
+                  {result.clusters.map(cluster => (
                     <div
                       key={cluster.label}
                       className={`p-4 rounded-lg border-l-4 ${
-                        cluster.label.includes('Crisis') || cluster.label.includes('Stagnation')
+                        cluster.label.includes('Crisis') ||
+                        cluster.label.includes('Stagnation')
                           ? 'border-red-500 bg-red-50'
-                          : cluster.label.includes('Optimistic') || cluster.label.includes('Prosperity')
-                          ? 'border-green-500 bg-green-50'
-                          : 'border-blue-500 bg-blue-50'
+                          : cluster.label.includes('Optimistic') ||
+                              cluster.label.includes('Prosperity')
+                            ? 'border-green-500 bg-green-50'
+                            : 'border-blue-500 bg-blue-50'
                       }`}
                       role="article"
                       aria-label={`${cluster.label} Outcome Cluster`}
@@ -220,8 +250,12 @@ export const ScenarioSimulator: React.FC = () => {
                       </div>
                       <div className="text-sm text-slate-600 space-y-1">
                         <div>Runs: {cluster.count}</div>
-                        <div>Avg Sentiment: {cluster.avgSentiment.toFixed(2)}</div>
-                        <div>Avg Influence: {cluster.avgInfluence.toFixed(2)}</div>
+                        <div>
+                          Avg Sentiment: {cluster.avgSentiment.toFixed(2)}
+                        </div>
+                        <div>
+                          Avg Influence: {cluster.avgInfluence.toFixed(2)}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -232,8 +266,11 @@ export const ScenarioSimulator: React.FC = () => {
                 <h3 className="text-lg font-medium mb-2">Analysis</h3>
                 <p className="text-slate-600">
                   Simulation ran {result.totalRuns} parallel futures.
-                  {shockEnabled ? ' An adversarial shock was injected at tick 5.' : ' Standard organic evolution.'}
-                  {' '}The dominant outcome is <strong>{result.clusters[0]?.label}</strong>.
+                  {shockEnabled
+                    ? ' An adversarial shock was injected at tick 5.'
+                    : ' Standard organic evolution.'}{' '}
+                  The dominant outcome is{' '}
+                  <strong>{result.clusters[0]?.label}</strong>.
                 </p>
               </div>
             </div>
@@ -245,5 +282,5 @@ export const ScenarioSimulator: React.FC = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

@@ -1,13 +1,19 @@
-export type AdapterStatus = 'available' | 'installed' | 'enabled' | 'disabled' | 'error';
+export type AdapterStatus = "available" | "installed" | "enabled" | "disabled" | "error";
 
 export interface AdapterReceipt {
   url: string;
   createdAt: string;
-  action: 'install' | 'enable' | 'disable' | 'uninstall' | 'verify';
+  action: "install" | "enable" | "disable" | "uninstall" | "verify";
 }
 
 export interface AdapterConfig {
-  [key: string]: string | number | boolean | null | AdapterConfig | Array<string | number | boolean | null>;
+  [key: string]:
+    | string
+    | number
+    | boolean
+    | null
+    | AdapterConfig
+    | Array<string | number | boolean | null>;
 }
 
 export interface Adapter {

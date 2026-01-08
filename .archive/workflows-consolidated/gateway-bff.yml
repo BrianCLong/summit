@@ -4,16 +4,16 @@ on:
   push:
     branches: [feature/gateway-bff]
     paths:
-      - 'gateway/graphql-bff/**'
-      - 'packages/sdk/gateway-js/**'
-      - 'ops/gateway/**'
-      - '.github/workflows/gateway-bff.yml'
+      - "gateway/graphql-bff/**"
+      - "packages/sdk/gateway-js/**"
+      - "ops/gateway/**"
+      - ".github/workflows/gateway-bff.yml"
   pull_request:
     paths:
-      - 'gateway/graphql-bff/**'
-      - 'packages/sdk/gateway-js/**'
-      - 'ops/gateway/**'
-      - '.github/workflows/gateway-bff.yml'
+      - "gateway/graphql-bff/**"
+      - "packages/sdk/gateway-js/**"
+      - "ops/gateway/**"
+      - ".github/workflows/gateway-bff.yml"
 
 jobs:
   lint:
@@ -23,7 +23,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
       - run: npm ci
         working-directory: gateway/graphql-bff
       - run: npm ci
@@ -39,7 +39,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
       - run: npm ci
         working-directory: gateway/graphql-bff
       - run: npm ci
@@ -55,7 +55,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
       - run: npm ci
         working-directory: gateway/graphql-bff
       - run: npm ci
@@ -71,7 +71,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
       - run: npm ci
         working-directory: gateway/graphql-bff
       - run: npm run contract:federation

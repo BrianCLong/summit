@@ -1,19 +1,19 @@
-import * as fc from 'fast-check';
-import { BitemporalStore } from '../BitemporalStore';
-import type { UpsertOptions } from '../types';
+import * as fc from "fast-check";
+import { BitemporalStore } from "../BitemporalStore";
+import type { UpsertOptions } from "../types";
 
 /**
  * Property-based tests for bitemporal storage
  * These tests verify invariants that should always hold
  */
 
-describe('Bitemporal Property Tests', () => {
+describe("Bitemporal Property Tests", () => {
   let store: BitemporalStore;
-  const testTable = 'test_bitemporal_entities';
+  const testTable = "test_bitemporal_entities";
 
   beforeAll(async () => {
-    const connectionString = process.env.DATABASE_URL ||
-      'postgresql://summit:password@localhost:5432/summit_test';
+    const connectionString =
+      process.env.DATABASE_URL || "postgresql://summit:password@localhost:5432/summit_test";
     store = new BitemporalStore(connectionString, testTable);
     await store.initialize();
   });
@@ -22,19 +22,19 @@ describe('Bitemporal Property Tests', () => {
     await store.close();
   });
 
-  describe('Temporal interval invariants', () => {
-    it('valid_from should always be before valid_to', async () => {
+  describe("Temporal interval invariants", () => {
+    it("valid_from should always be before valid_to", async () => {
       await fc.assert(
         fc.asyncProperty(
           fc.string({ minLength: 1, maxLength: 50 }),
           fc.record({ value: fc.integer() }),
-          fc.date({ min: new Date('2020-01-01'), max: new Date('2030-01-01') }),
-          fc.date({ min: new Date('2030-01-02'), max: new Date('2040-01-01') }),
+          fc.date({ min: new Date("2020-01-01"), max: new Date("2030-01-01") }),
+          fc.date({ min: new Date("2030-01-02"), max: new Date("2040-01-01") }),
           async (entityKey, data, validFrom, validTo) => {
             const options: UpsertOptions = {
               validFrom,
               validTo,
-              userId: 'test-user',
+              userId: "test-user",
             };
 
             const id = await store.upsert(entityKey, data, options);
@@ -50,16 +50,16 @@ describe('Bitemporal Property Tests', () => {
       );
     });
 
-    it('tx_from should always be before tx_to', async () => {
+    it("tx_from should always be before tx_to", async () => {
       await fc.assert(
         fc.asyncProperty(
           fc.string({ minLength: 1, maxLength: 50 }),
           fc.record({ value: fc.integer() }),
-          fc.date({ min: new Date('2020-01-01'), max: new Date('2030-01-01') }),
+          fc.date({ min: new Date("2020-01-01"), max: new Date("2030-01-01") }),
           async (entityKey, data, validFrom) => {
             const options: UpsertOptions = {
               validFrom,
-              userId: 'test-user',
+              userId: "test-user",
             };
 
             const id = await store.upsert(entityKey, data, options);
@@ -75,15 +75,15 @@ describe('Bitemporal Property Tests', () => {
       );
     });
 
-    it('no overlapping intervals for same entity key at same transaction time', async () => {
+    it("no overlapping intervals for same entity key at same transaction time", async () => {
       await fc.assert(
         fc.asyncProperty(
           fc.string({ minLength: 1, maxLength: 50 }),
           fc.array(
             fc.record({
               data: fc.record({ value: fc.integer() }),
-              validFrom: fc.date({ min: new Date('2020-01-01'), max: new Date('2025-01-01') }),
-              validTo: fc.date({ min: new Date('2025-01-02'), max: new Date('2030-01-01') }),
+              validFrom: fc.date({ min: new Date("2020-01-01"), max: new Date("2025-01-01") }),
+              validTo: fc.date({ min: new Date("2025-01-02"), max: new Date("2030-01-01") }),
             }),
             { minLength: 2, maxLength: 5 }
           ),
@@ -93,7 +93,7 @@ describe('Bitemporal Property Tests', () => {
               await store.upsert(entityKey, update.data, {
                 validFrom: update.validFrom,
                 validTo: update.validTo,
-                userId: 'test-user',
+                userId: "test-user",
               });
             }
 
@@ -120,10 +120,7 @@ describe('Bitemporal Property Tests', () => {
                   const r2 = records[j];
 
                   // Check that intervals don't overlap
-                  const overlap = !(
-                    r1.validTo <= r2.validFrom ||
-                    r2.validTo <= r1.validFrom
-                  );
+                  const overlap = !(r1.validTo <= r2.validFrom || r2.validTo <= r1.validFrom);
 
                   expect(overlap).toBe(false);
                 }
@@ -136,17 +133,17 @@ describe('Bitemporal Property Tests', () => {
     });
   });
 
-  describe('Temporal query properties', () => {
-    it('querying at any point in time returns consistent results', async () => {
+  describe("Temporal query properties", () => {
+    it("querying at any point in time returns consistent results", async () => {
       await fc.assert(
         fc.asyncProperty(
           fc.string({ minLength: 1, maxLength: 50 }),
           fc.record({ value: fc.integer() }),
-          fc.date({ min: new Date('2020-01-01'), max: new Date('2030-01-01') }),
+          fc.date({ min: new Date("2020-01-01"), max: new Date("2030-01-01") }),
           async (entityKey, data, validFrom) => {
             const options: UpsertOptions = {
               validFrom,
-              userId: 'test-user',
+              userId: "test-user",
             };
 
             await store.upsert(entityKey, data, options);
@@ -164,11 +161,11 @@ describe('Bitemporal Property Tests', () => {
       );
     });
 
-    it('diff between same snapshot should be empty', async () => {
+    it("diff between same snapshot should be empty", async () => {
       await fc.assert(
         fc.asyncProperty(
-          fc.date({ min: new Date('2020-01-01'), max: new Date('2030-01-01') }),
-          fc.date({ min: new Date('2020-01-01'), max: new Date('2030-01-01') }),
+          fc.date({ min: new Date("2020-01-01"), max: new Date("2030-01-01") }),
+          fc.date({ min: new Date("2020-01-01"), max: new Date("2030-01-01") }),
           async (validTime, txTime) => {
             const diff = await store.diff(validTime, txTime, validTime, txTime);
 
@@ -182,22 +179,22 @@ describe('Bitemporal Property Tests', () => {
     });
   });
 
-  describe('Upsert properties', () => {
-    it('upserting same data multiple times is idempotent for same valid time', async () => {
+  describe("Upsert properties", () => {
+    it("upserting same data multiple times is idempotent for same valid time", async () => {
       await fc.assert(
         fc.asyncProperty(
           fc.string({ minLength: 1, maxLength: 50 }),
           fc.record({ value: fc.integer() }),
-          fc.date({ min: new Date('2020-01-01'), max: new Date('2030-01-01') }),
+          fc.date({ min: new Date("2020-01-01"), max: new Date("2030-01-01") }),
           async (entityKey, data, validFrom) => {
             const options: UpsertOptions = {
               validFrom,
-              userId: 'test-user',
+              userId: "test-user",
             };
 
             // Upsert twice
             await store.upsert(entityKey, data, options);
-            await new Promise(resolve => setTimeout(resolve, 10)); // Ensure different tx time
+            await new Promise((resolve) => setTimeout(resolve, 10)); // Ensure different tx time
             await store.upsert(entityKey, data, options);
 
             const current = await store.getCurrent(entityKey);
@@ -208,16 +205,16 @@ describe('Bitemporal Property Tests', () => {
       );
     });
 
-    it('upsert creates audit trail entry', async () => {
+    it("upsert creates audit trail entry", async () => {
       await fc.assert(
         fc.asyncProperty(
           fc.string({ minLength: 1, maxLength: 50 }),
           fc.record({ value: fc.integer() }),
-          fc.date({ min: new Date('2020-01-01'), max: new Date('2030-01-01') }),
+          fc.date({ min: new Date("2020-01-01"), max: new Date("2030-01-01") }),
           async (entityKey, data, validFrom) => {
             const options: UpsertOptions = {
               validFrom,
-              userId: 'test-user',
+              userId: "test-user",
             };
 
             await store.upsert(entityKey, data, options);
@@ -232,15 +229,15 @@ describe('Bitemporal Property Tests', () => {
     });
   });
 
-  describe('Version history properties', () => {
-    it('all versions should be ordered by valid_from DESC, tx_from DESC', async () => {
+  describe("Version history properties", () => {
+    it("all versions should be ordered by valid_from DESC, tx_from DESC", async () => {
       await fc.assert(
         fc.asyncProperty(
           fc.string({ minLength: 1, maxLength: 50 }),
           fc.array(
             fc.record({
               data: fc.record({ value: fc.integer() }),
-              validFrom: fc.date({ min: new Date('2020-01-01'), max: new Date('2030-01-01') }),
+              validFrom: fc.date({ min: new Date("2020-01-01"), max: new Date("2030-01-01") }),
             }),
             { minLength: 2, maxLength: 5 }
           ),
@@ -249,7 +246,7 @@ describe('Bitemporal Property Tests', () => {
             for (const update of updates) {
               await store.upsert(entityKey, update.data, {
                 validFrom: update.validFrom,
-                userId: 'test-user',
+                userId: "test-user",
               });
             }
 
@@ -264,7 +261,9 @@ describe('Bitemporal Property Tests', () => {
               if (current.validFrom.getTime() === next.validFrom.getTime()) {
                 expect(current.txFrom.getTime()).toBeGreaterThanOrEqual(next.txFrom.getTime());
               } else {
-                expect(current.validFrom.getTime()).toBeGreaterThanOrEqual(next.validFrom.getTime());
+                expect(current.validFrom.getTime()).toBeGreaterThanOrEqual(
+                  next.validFrom.getTime()
+                );
               }
             }
           }

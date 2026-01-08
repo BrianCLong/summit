@@ -3,11 +3,11 @@ name: Chronos Runtime CI
 on:
   push:
     paths:
-      - 'orchestration/runtime/**'
-      - 'orchestration/.github/workflows/ci-runtime.yml'
+      - "orchestration/runtime/**"
+      - "orchestration/.github/workflows/ci-runtime.yml"
   pull_request:
     paths:
-      - 'orchestration/runtime/**'
+      - "orchestration/runtime/**"
 
 jobs:
   test:
@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: "1.22"
       - name: Download dependencies
         run: |
           cd orchestration/runtime

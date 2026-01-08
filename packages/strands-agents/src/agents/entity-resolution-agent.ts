@@ -3,10 +3,10 @@
  * @module @intelgraph/strands-agents/agents/entity-resolution-agent
  */
 
-import type { Driver } from 'neo4j-driver';
-import { createGraphTools } from '../tools/graph-tools.js';
-import { createEntityTools } from '../tools/entity-tools.js';
-import { ENTITY_RESOLUTION_AGENT_PROMPT } from './prompts.js';
+import type { Driver } from "neo4j-driver";
+import { createGraphTools } from "../tools/graph-tools.js";
+import { createEntityTools } from "../tools/entity-tools.js";
+import { ENTITY_RESOLUTION_AGENT_PROMPT } from "./prompts.js";
 
 // ============================================================================
 // Types
@@ -18,7 +18,7 @@ export interface EntityResolutionAgentConfig {
   /** Database name */
   database?: string;
   /** Model provider to use */
-  modelProvider?: 'bedrock' | 'anthropic' | 'openai';
+  modelProvider?: "bedrock" | "anthropic" | "openai";
   /** Model ID override */
   modelId?: string;
   /** Maximum iterations for agent loop */
@@ -47,7 +47,7 @@ export interface ResolutionCandidate {
     propertySimilarity: number;
   };
   /** Recommendation */
-  recommendation: 'merge' | 'link' | 'distinct' | 'review';
+  recommendation: "merge" | "link" | "distinct" | "review";
   /** Reasoning */
   reasoning: string;
 }
@@ -129,12 +129,12 @@ export interface ResolutionResult {
 export function createEntityResolutionAgent(config: EntityResolutionAgentConfig) {
   const {
     driver,
-    database = 'neo4j',
-    modelProvider = 'bedrock',
+    database = "neo4j",
+    modelProvider = "bedrock",
     modelId,
     maxIterations = 10,
     auditLog,
-    userId = 'resolution-agent',
+    userId = "resolution-agent",
     defaultSimilarityThreshold = 0.7,
     autoMergeThreshold = 0.95,
   } = config;
@@ -160,8 +160,8 @@ export function createEntityResolutionAgent(config: EntityResolutionAgentConfig)
   async function findDuplicates(task: ResolutionTask): Promise<ResolutionResult> {
     const startTime = Date.now();
     const candidates: ResolutionCandidate[] = [];
-    const mergesExecuted: ResolutionResult['mergesExecuted'] = [];
-    const linksCreated: ResolutionResult['linksCreated'] = [];
+    const mergesExecuted: ResolutionResult["mergesExecuted"] = [];
+    const linksCreated: ResolutionResult["linksCreated"] = [];
     let entitiesAnalyzed = 0;
 
     try {
@@ -175,7 +175,7 @@ export function createEntityResolutionAgent(config: EntityResolutionAgentConfig)
           entityId,
           similarityThreshold: defaultSimilarityThreshold,
           limit: 10,
-          algorithm: 'jaccard',
+          algorithm: "jaccard",
         });
 
         const parsed = JSON.parse(similarResult);
@@ -203,7 +203,7 @@ export function createEntityResolutionAgent(config: EntityResolutionAgentConfig)
       // Auto-execute merges if enabled
       if (task.autoExecute) {
         const autoMergeCandidates = candidates.filter(
-          (c) => c.recommendation === 'merge' && c.similarity >= autoMergeThreshold
+          (c) => c.recommendation === "merge" && c.similarity >= autoMergeThreshold
         );
 
         // Group by primary entity and execute merges
@@ -213,7 +213,7 @@ export function createEntityResolutionAgent(config: EntityResolutionAgentConfig)
       const executionTimeMs = Date.now() - startTime;
 
       if (auditLog) {
-        auditLog('resolution_completed', {
+        auditLog("resolution_completed", {
           entitiesAnalyzed,
           candidatesFound: candidates.length,
           executionTimeMs,
@@ -233,7 +233,7 @@ export function createEntityResolutionAgent(config: EntityResolutionAgentConfig)
         },
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
       return {
         success: false,
         message: `Resolution failed: ${errorMessage}`,
@@ -285,7 +285,7 @@ export function createEntityResolutionAgent(config: EntityResolutionAgentConfig)
         },
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
       return {
         success: false,
         message: `Text resolution failed: ${errorMessage}`,
@@ -306,7 +306,7 @@ export function createEntityResolutionAgent(config: EntityResolutionAgentConfig)
 
     try {
       // Get all entities in the investigation
-      const session = driver.session({ database, defaultAccessMode: 'READ' });
+      const session = driver.session({ database, defaultAccessMode: "READ" });
 
       try {
         const result = await session.run(
@@ -315,7 +315,7 @@ export function createEntityResolutionAgent(config: EntityResolutionAgentConfig)
           { investigationId }
         );
 
-        const entityIds = result.records.map((r) => r.get('entityId'));
+        const entityIds = result.records.map((r) => r.get("entityId"));
 
         // Run duplicate detection on all entities
         return findDuplicates({
@@ -327,7 +327,7 @@ export function createEntityResolutionAgent(config: EntityResolutionAgentConfig)
         await session.close();
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
       return {
         success: false,
         message: `Investigation scan failed: ${errorMessage}`,
@@ -372,28 +372,28 @@ export function createEntityResolutionAgent(config: EntityResolutionAgentConfig)
 function getRecommendation(
   similarity: number,
   autoMergeThreshold: number
-): 'merge' | 'link' | 'distinct' | 'review' {
+): "merge" | "link" | "distinct" | "review" {
   if (similarity >= autoMergeThreshold) {
-    return 'merge';
+    return "merge";
   } else if (similarity >= 0.85) {
-    return 'review'; // High similarity but below auto-merge
+    return "review"; // High similarity but below auto-merge
   } else if (similarity >= 0.7) {
-    return 'link'; // Create SAME_AS or SIMILAR_TO relationship
+    return "link"; // Create SAME_AS or SIMILAR_TO relationship
   } else {
-    return 'distinct';
+    return "distinct";
   }
 }
 
 function getDefaultModelId(provider: string): string {
   switch (provider) {
-    case 'bedrock':
-      return 'anthropic.claude-3-5-sonnet-20241022-v2:0';
-    case 'anthropic':
-      return 'claude-sonnet-4-5-20250929';
-    case 'openai':
-      return 'gpt-4o';
+    case "bedrock":
+      return "anthropic.claude-3-5-sonnet-20241022-v2:0";
+    case "anthropic":
+      return "claude-sonnet-4-5-20250929";
+    case "openai":
+      return "gpt-4o";
     default:
-      return 'anthropic.claude-3-5-sonnet-20241022-v2:0';
+      return "anthropic.claude-3-5-sonnet-20241022-v2:0";
   }
 }
 

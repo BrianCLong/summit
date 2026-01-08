@@ -236,10 +236,10 @@ spec:
             component: workflow-engine
             slo: workflow_success_rate
           annotations:
-            summary: 'Maestro workflow success rate is below SLO'
+            summary: "Maestro workflow success rate is below SLO"
             description: 'Workflow success rate is {{ $value | printf "%.2f" }}%, which is below the 99% SLO target for the last 5 minutes.'
-            runbook_url: 'https://intelgraph.io/runbooks/maestro-workflow-failures'
-            dashboard_url: 'https://grafana.intelgraph.io/d/maestro/maestro-conductor'
+            runbook_url: "https://intelgraph.io/runbooks/maestro-workflow-failures"
+            dashboard_url: "https://grafana.intelgraph.io/d/maestro/maestro-conductor"
 
         # Critical: Workflow latency above 5 minutes for 95th percentile
         - alert: MaestroWorkflowLatencyHigh
@@ -251,9 +251,9 @@ spec:
             component: workflow-engine
             slo: workflow_latency_p95
           annotations:
-            summary: 'Maestro workflow latency is above SLO'
+            summary: "Maestro workflow latency is above SLO"
             description: '95th percentile workflow latency is {{ $value | printf "%.1f" }}s, which exceeds the 300s SLO target.'
-            runbook_url: 'https://intelgraph.io/runbooks/maestro-performance'
+            runbook_url: "https://intelgraph.io/runbooks/maestro-performance"
 
         # Critical: Orchestrator down
         - alert: MaestroOrchestratorDown
@@ -265,9 +265,9 @@ spec:
             component: orchestrator
             slo: availability
           annotations:
-            summary: 'Maestro orchestrator is down'
-            description: 'Maestro conductor orchestrator is not responding to health checks.'
-            runbook_url: 'https://intelgraph.io/runbooks/maestro-orchestrator-down'
+            summary: "Maestro orchestrator is down"
+            description: "Maestro conductor orchestrator is not responding to health checks."
+            runbook_url: "https://intelgraph.io/runbooks/maestro-orchestrator-down"
 
         # Critical: MCP Operation Latency above 1 second for 95th percentile
         - alert: MaestroMCPOperationLatencyHigh
@@ -279,9 +279,9 @@ spec:
             component: mcp-client
             slo: mcp_operation_latency_p95
           annotations:
-            summary: 'Maestro MCP operation latency is above SLO'
+            summary: "Maestro MCP operation latency is above SLO"
             description: '95th percentile MCP operation latency is {{ $value | printf "%.1f" }}s, which exceeds the 1s SLO target.'
-            runbook_url: 'https://intelgraph.io/runbooks/maestro-mcp-performance'
+            runbook_url: "https://intelgraph.io/runbooks/maestro-mcp-performance"
 
 ---
 apiVersion: monitoring.coreos.com/v1
@@ -345,10 +345,10 @@ spec:
             component: workflow-engine
             slo: workflow_success_rate
           annotations:
-            summary: 'Maestro workflow success rate is below SLO'
+            summary: "Maestro workflow success rate is below SLO"
             description: 'Workflow success rate is {{ $value | printf "%.2f" }}%, which is below the 99% SLO target for the last 5 minutes.'
-            runbook_url: 'https://intelgraph.io/runbooks/maestro-workflow-failures'
-            dashboard_url: 'https://grafana.intelgraph.io/d/maestro/maestro-conductor'
+            runbook_url: "https://intelgraph.io/runbooks/maestro-workflow-failures"
+            dashboard_url: "https://grafana.intelgraph.io/d/maestro/maestro-conductor"
 
         # Critical: Workflow latency above 5 minutes for 95th percentile
         - alert: MaestroWorkflowLatencyHigh
@@ -360,9 +360,9 @@ spec:
             component: workflow-engine
             slo: workflow_latency_p95
           annotations:
-            summary: 'Maestro workflow latency is above SLO'
+            summary: "Maestro workflow latency is above SLO"
             description: '95th percentile workflow latency is {{ $value | printf "%.1f" }}s, which exceeds the 300s SLO target.'
-            runbook_url: 'https://intelgraph.io/runbooks/maestro-performance'
+            runbook_url: "https://intelgraph.io/runbooks/maestro-performance"
 
         # Critical: Orchestrator down
         - alert: MaestroOrchestratorDown
@@ -374,9 +374,9 @@ spec:
             component: orchestrator
             slo: availability
           annotations:
-            summary: 'Maestro orchestrator is down'
-            description: 'Maestro conductor orchestrator is not responding to health checks.'
-            runbook_url: 'https://intelgraph.io/runbooks/maestro-orchestrator-down'
+            summary: "Maestro orchestrator is down"
+            description: "Maestro conductor orchestrator is not responding to health checks."
+            runbook_url: "https://intelgraph.io/runbooks/maestro-orchestrator-down"
 
         # Critical: MCP Operation Latency above 1 second for 95th percentile
         - alert: MaestroMCPOperationLatencyHigh
@@ -388,9 +388,9 @@ spec:
             component: mcp-client
             slo: mcp_operation_latency_p95
           annotations:
-            summary: 'Maestro MCP operation latency is above SLO'
+            summary: "Maestro MCP operation latency is above SLO"
             description: '95th percentile MCP operation latency is {{ $value | printf "%.1f" }}s, which exceeds the 1s SLO target.'
-            runbook_url: 'https://intelgraph.io/runbooks/maestro-mcp-performance'
+            runbook_url: "https://intelgraph.io/runbooks/maestro-mcp-performance"
 
 ---
 apiVersion: monitoring.coreos.com/v1
@@ -454,10 +454,10 @@ spec:
             component: workflow-engine
             slo: workflow_success_rate
           annotations:
-            summary: 'Maestro workflow success rate is below SLO'
+            summary: "Maestro workflow success rate is below SLO"
             description: 'Workflow success rate is {{ $value | printf "%.2f" }}%, which is below the 99% SLO target for the last 5 minutes.'
-            runbook_url: 'https://intelgraph.io/runbooks/maestro-workflow-failures'
-            dashboard_url: 'https://grafana.intelgraph.io/d/maestro/maestro-conductor'
+            runbook_url: "https://intelgraph.io/runbooks/maestro-workflow-failures"
+            dashboard_url: "https://grafana.intelgraph.io/d/maestro/maestro-conductor"
 
         # Critical: Workflow latency above 5 minutes for 95th percentile
         - alert: MaestroWorkflowLatencyHigh
@@ -469,9 +469,9 @@ spec:
             component: workflow-engine
             slo: workflow_latency_p95
           annotations:
-            summary: 'Maestro workflow latency is above SLO'
+            summary: "Maestro workflow latency is above SLO"
             description: '95th percentile workflow latency is {{ $value | printf "%.1f" }}s, which exceeds the 300s SLO target.'
-            runbook_url: 'https://intelgraph.io/runbooks/maestro-performance'
+            runbook_url: "https://intelgraph.io/runbooks/maestro-performance"
 
         # Critical: Orchestrator down
         - alert: MaestroOrchestratorDown
@@ -483,9 +483,9 @@ spec:
             component: orchestrator
             slo: availability
           annotations:
-            summary: 'Maestro orchestrator is down'
-            description: 'Maestro conductor orchestrator is not responding to health checks.'
-            runbook_url: 'https://intelgraph.io/runbooks/maestro-orchestrator-down'
+            summary: "Maestro orchestrator is down"
+            description: "Maestro conductor orchestrator is not responding to health checks."
+            runbook_url: "https://intelgraph.io/runbooks/maestro-orchestrator-down"
 
         # Critical: MCP Operation Latency above 1 second for 95th percentile
         - alert: MaestroMCPOperationLatencyHigh
@@ -497,6 +497,6 @@ spec:
             component: mcp-client
             slo: mcp_operation_latency_p95
           annotations:
-            summary: 'Maestro MCP operation latency is above SLO'
+            summary: "Maestro MCP operation latency is above SLO"
             description: '95th percentile MCP operation latency is {{ $value | printf "%.1f" }}s, which exceeds the 1s SLO target.'
-            runbook_url: 'https://intelgraph.io/runbooks/maestro-mcp-performance'
+            runbook_url: "https://intelgraph.io/runbooks/maestro-mcp-performance"

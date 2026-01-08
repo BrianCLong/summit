@@ -1,9 +1,17 @@
 {
   "environment": "stage",
-  "flags": {
-    "feature.policy-guard": {"value": true, "percentage": 50, "tenants": {"allow": [], "deny": []}, "salt": "stage-policy"},
-    "feature.web.flag-hydration": {"value": true, "percentage": 100},
-    "feature.build.bazel": {"value": false, "percentage": 10},
-    "feature.qos.override-api": {"value": true, "percentage": 75, "tenants": {"deny": ["safety-test"]}}
-  }
+  "flags":
+    {
+      "feature.policy-guard":
+        {
+          "value": true,
+          "percentage": 50,
+          "tenants": { "allow": [], "deny": [] },
+          "salt": "stage-policy",
+        },
+      "feature.web.flag-hydration": { "value": true, "percentage": 100 },
+      "feature.build.bazel": { "value": false, "percentage": 10 },
+      "feature.qos.override-api":
+        { "value": true, "percentage": 75, "tenants": { "deny": ["safety-test"] } },
+    },
 }

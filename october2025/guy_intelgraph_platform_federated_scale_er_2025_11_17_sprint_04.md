@@ -132,26 +132,26 @@ Control: OPA ABAC on merges; provenance bundle records ER decisions.
 
 ```ts
 // server/src/connectors/csv/index.ts
-import fs from 'fs';
-import { parse } from 'csv-parse';
-import Ajv from 'ajv';
-import * as schema from '../contracts/person.json';
-import { XAdd } from '../../ingest/stream/redisx';
+import fs from "fs";
+import { parse } from "csv-parse";
+import Ajv from "ajv";
+import * as schema from "../contracts/person.json";
+import { XAdd } from "../../ingest/stream/redisx";
 const ajv = new Ajv({ allErrors: true });
 const validate = ajv.compile(schema as any);
 export async function ingestCsv(
   path: string,
-  stream = process.env.INGEST_STREAM || 'ig:ingest:person',
+  stream = process.env.INGEST_STREAM || "ig:ingest:person"
 ) {
   return new Promise<void>((resolve, reject) => {
     fs.createReadStream(path)
       .pipe(parse({ columns: true }))
-      .on('data', async (row) => {
+      .on("data", async (row) => {
         if (!validate(row)) return; // drop invalid; TODO: send to DLQ with reasons
-        await XAdd(stream, '*', row);
+        await XAdd(stream, "*", row);
       })
-      .on('end', () => resolve())
-      .on('error', reject);
+      .on("end", () => resolve())
+      .on("error", reject);
   });
 }
 ```
@@ -160,34 +160,27 @@ export async function ingestCsv(
 
 ```ts
 // server/src/ingest/stream/redisx.ts
-import { createClient } from 'redis';
+import { createClient } from "redis";
 const client = createClient({ url: process.env.REDIS_URL });
 await client.connect();
 export async function XAdd(stream: string, id: string, obj: any) {
   return client.xAdd(
     stream,
     id,
-    Object.fromEntries(
-      Object.entries(obj).map(([k, v]) => [k, JSON.stringify(v ?? null)]),
-    ),
+    Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, JSON.stringify(v ?? null)]))
   );
 }
 export async function XGroupCreate(stream: string, group: string) {
   try {
-    await client.xGroupCreate(stream, group, '0', { MKSTREAM: true });
+    await client.xGroupCreate(stream, group, "0", { MKSTREAM: true });
   } catch {}
 }
-export async function XReadGroup(
-  stream: string,
-  group: string,
-  consumer: string,
-  count = 100,
-) {
+export async function XReadGroup(stream: string, group: string, consumer: string, count = 100) {
   const res = await client.xReadGroup(
     group,
     consumer,
-    { key: stream, id: '>' },
-    { COUNT: count, BLOCK: 1000 },
+    { key: stream, id: ">" },
+    { COUNT: count, BLOCK: 1000 }
   );
   return res || [];
 }
@@ -197,11 +190,11 @@ export async function XReadGroup(
 
 ```ts
 // server/src/ingest/stream/consumer.ts
-import fetch from 'node-fetch';
-import { XGroupCreate, XReadGroup } from './redisx';
-import { writeToGraph } from '../writers/graph';
-const STREAM = process.env.INGEST_STREAM || 'ig:ingest:person';
-const GROUP = 'ingesters';
+import fetch from "node-fetch";
+import { XGroupCreate, XReadGroup } from "./redisx";
+import { writeToGraph } from "../writers/graph";
+const STREAM = process.env.INGEST_STREAM || "ig:ingest:person";
+const GROUP = "ingesters";
 export async function runConsumer() {
   await XGroupCreate(STREAM, GROUP);
   for (;;) {
@@ -209,11 +202,11 @@ export async function runConsumer() {
     for (const b of batches)
       for (const m of b.messages) {
         const row = Object.fromEntries(
-          Object.entries(m.message).map(([k, v]: any) => [k, JSON.parse(v)]),
+          Object.entries(m.message).map(([k, v]: any) => [k, JSON.parse(v)])
         );
-        const erResp = await fetch(process.env.ER_URL + '/score', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
+        const erResp = await fetch(process.env.ER_URL + "/score", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
           body: JSON.stringify({ record: row }),
         });
         const { candidates } = await erResp.json();
@@ -227,25 +220,21 @@ export async function runConsumer() {
 
 ```ts
 // server/src/graph/merge.ts
-import neo4j from 'neo4j-driver';
+import neo4j from "neo4j-driver";
 export async function mergePerson(session: neo4j.Session, person: any) {
   return session.writeTransaction(async (tx) => {
-    await tx.run('MERGE (p:Person {id:$id}) SET p += $props RETURN p', {
+    await tx.run("MERGE (p:Person {id:$id}) SET p += $props RETURN p", {
       id: person.id,
       props: person,
     });
   });
 }
-export async function applyMergeDecision(
-  session: neo4j.Session,
-  aId: string,
-  bId: string,
-) {
+export async function applyMergeDecision(session: neo4j.Session, aId: string, bId: string) {
   return session.writeTransaction(async (tx) => {
     // simple consolidate example; real impl must move relationships safely
     await tx.run(
       'MATCH (a:Person {id:$aId}),(b:Person {id:$bId}) CALL apoc.refactor.mergeNodes([a,b],{properties:"combine"}) YIELD node RETURN node',
-      { aId, bId },
+      { aId, bId }
     );
   });
 }
@@ -294,18 +283,18 @@ async def score(req: ScoreReq):
 
 ```tsx
 // apps/web/src/features/er-queue/Queue.tsx
-import React, { useEffect, useState } from 'react';
-import $ from 'jquery';
+import React, { useEffect, useState } from "react";
+import $ from "jquery";
 export default function ErQueue() {
   const [items, setItems] = useState<any[]>([]);
   useEffect(() => {
-    $.ajax({ url: '/api/er/queue' }).done((r) => setItems(r.items || []));
+    $.ajax({ url: "/api/er/queue" }).done((r) => setItems(r.items || []));
   }, []);
-  function act(id: string, decision: 'accept' | 'decline') {
+  function act(id: string, decision: "accept" | "decline") {
     $.ajax({
-      url: '/api/er/decision',
-      method: 'POST',
-      contentType: 'application/json',
+      url: "/api/er/decision",
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify({ id, decision }),
     }).done(() => setItems(items.filter((i) => i.id !== id)));
   }
@@ -316,14 +305,12 @@ export default function ErQueue() {
           <div className="font-semibold">
             {it.record.name} ⇄ {it.match.name} ({Math.round(it.prob * 100)}%)
           </div>
-          <div className="text-xs opacity-70">
-            why: {it.explain?.features?.join(', ')}
-          </div>
+          <div className="text-xs opacity-70">why: {it.explain?.features?.join(", ")}</div>
           <div className="mt-2">
-            <button className="mr-2" onClick={() => act(it.id, 'accept')}>
+            <button className="mr-2" onClick={() => act(it.id, "accept")}>
               Accept
             </button>
-            <button onClick={() => act(it.id, 'decline')}>Decline</button>
+            <button onClick={() => act(it.id, "decline")}>Decline</button>
           </div>
         </div>
       ))}
@@ -360,7 +347,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: '3.12' }
+        with: { python-version: "3.12" }
       - run: pip install -r er-service/requirements.txt
       - run: pytest -q er-service
 ```
@@ -372,15 +359,15 @@ jobs:
 ```yaml
 # helm/server/values.sprint21.yaml
 stream:
-  broker: 'redis'
-  redisUrl: 'redis://redis-headless:6379'
+  broker: "redis"
+  redisUrl: "redis://redis-headless:6379"
 resources:
   limits:
-    cpu: '1'
-    memory: '1Gi'
+    cpu: "1"
+    memory: "1Gi"
   requests:
-    cpu: '250m'
-    memory: '512Mi'
+    cpu: "250m"
+    memory: "512Mi"
 autoscaling:
   enabled: true
   minReplicas: 2
@@ -392,11 +379,11 @@ autoscaling:
 # helm/er-service/values.sprint21.yaml
 resources:
   limits:
-    cpu: '2'
-    memory: '2Gi'
+    cpu: "2"
+    memory: "2Gi"
   requests:
-    cpu: '500m'
-    memory: '1Gi'
+    cpu: "500m"
+    memory: "1Gi"
 autoscaling:
   enabled: true
   minReplicas: 1

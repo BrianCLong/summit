@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -26,7 +26,7 @@ import {
   Step,
   StepLabel,
   StepContent,
-} from '@mui/material';
+} from "@mui/material";
 import {
   FileDownloadOutlined as DownloadIcon,
   VerifiedUserOutlined as VerifyIcon,
@@ -35,7 +35,7 @@ import {
   WarningAmberOutlined as WarningIcon,
   ContentCopyOutlined as CopyIcon,
   FolderZipOutlined as BundleIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 interface EvidenceExportDialogProps {
   open: boolean;
@@ -45,7 +45,7 @@ interface EvidenceExportDialogProps {
 }
 
 interface ExportOptions {
-  format: 'json' | 'yaml' | 'zip';
+  format: "json" | "yaml" | "zip";
   includeArtifacts: boolean;
   includeSBOM: boolean;
   includeAttestations: boolean;
@@ -74,7 +74,7 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
 }) => {
   const [activeStep, setActiveStep] = useState(0);
   const [options, setOptions] = useState<ExportOptions>({
-    format: 'json',
+    format: "json",
     includeArtifacts: true,
     includeSBOM: true,
     includeAttestations: true,
@@ -90,10 +90,10 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
     setError(null);
 
     try {
-      const response = await fetch('/api/maestro/v1/evidence/export', {
-        method: 'POST',
+      const response = await fetch("/api/maestro/v1/evidence/export", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           runId,
@@ -117,25 +117,21 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
         await handleVerify(result.evidenceId, result.signature, result.hash);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Export failed');
+      setError(err instanceof Error ? err.message : "Export failed");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleVerify = async (
-    evidenceId?: string,
-    signature?: string,
-    expectedHash?: string,
-  ) => {
+  const handleVerify = async (evidenceId?: string, signature?: string, expectedHash?: string) => {
     const id = evidenceId || exportResult?.evidenceId;
     if (!id) return;
 
     try {
       const response = await fetch(`/api/maestro/v1/evidence/${id}/verify`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           signature: signature || exportResult?.signature,
@@ -150,7 +146,7 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
       const result = await response.json();
       setVerification(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Verification failed');
+      setError(err instanceof Error ? err.message : "Verification failed");
     }
   };
 
@@ -161,7 +157,7 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
       const response = await fetch(exportResult.downloadUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
       a.download = `evidence-${runId}-${Date.now()}.${options.format}`;
       document.body.appendChild(a);
@@ -169,7 +165,7 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Download failed');
+      setError(err instanceof Error ? err.message : "Download failed");
     }
   };
 
@@ -188,18 +184,14 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
           onChange={(e) =>
             setOptions({
               ...options,
-              format: e.target.value as 'json' | 'yaml' | 'zip',
+              format: e.target.value as "json" | "yaml" | "zip",
             })
           }
           row
         >
           <FormControlLabel value="json" control={<Radio />} label="JSON" />
           <FormControlLabel value="yaml" control={<Radio />} label="YAML" />
-          <FormControlLabel
-            value="zip"
-            control={<Radio />}
-            label="ZIP Bundle"
-          />
+          <FormControlLabel value="zip" control={<Radio />} label="ZIP Bundle" />
         </RadioGroup>
       </FormControl>
 
@@ -211,9 +203,7 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
           control={
             <Checkbox
               checked={options.includeArtifacts}
-              onChange={(e) =>
-                setOptions({ ...options, includeArtifacts: e.target.checked })
-              }
+              onChange={(e) => setOptions({ ...options, includeArtifacts: e.target.checked })}
             />
           }
           label="Artifacts (logs, configs, outputs)"
@@ -222,9 +212,7 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
           control={
             <Checkbox
               checked={options.includeSBOM}
-              onChange={(e) =>
-                setOptions({ ...options, includeSBOM: e.target.checked })
-              }
+              onChange={(e) => setOptions({ ...options, includeSBOM: e.target.checked })}
             />
           }
           label="Software Bill of Materials (SBOM)"
@@ -247,9 +235,7 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
           control={
             <Checkbox
               checked={options.signBundle}
-              onChange={(e) =>
-                setOptions({ ...options, signBundle: e.target.checked })
-              }
+              onChange={(e) => setOptions({ ...options, signBundle: e.target.checked })}
             />
           }
           label="Digital Signature"
@@ -260,15 +246,11 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
         <Typography variant="body2">
           <strong>Evidence Bundle Contents:</strong>
         </Typography>
-        <Typography variant="body2">
-          • Decision trace and routing information
-        </Typography>
+        <Typography variant="body2">• Decision trace and routing information</Typography>
         <Typography variant="body2">• Input parameters and context</Typography>
         <Typography variant="body2">• Output results and metadata</Typography>
         {options.includeArtifacts && (
-          <Typography variant="body2">
-            • Execution artifacts and logs
-          </Typography>
+          <Typography variant="body2">• Execution artifacts and logs</Typography>
         )}
         {options.signBundle && (
           <Typography variant="body2">
@@ -277,13 +259,9 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
         )}
       </Alert>
 
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
         <Button onClick={onClose}>Cancel</Button>
-        <Button
-          variant="contained"
-          onClick={() => setActiveStep(1)}
-          startIcon={<BundleIcon />}
-        >
+        <Button variant="contained" onClick={() => setActiveStep(1)} startIcon={<BundleIcon />}>
           Configure Export
         </Button>
       </Box>
@@ -292,11 +270,11 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
 
   const renderGenerationStep = () => (
     <Box sx={{ p: 2 }}>
-      <Paper sx={{ p: 2, mb: 2, bgcolor: 'grey.50' }}>
+      <Paper sx={{ p: 2, mb: 2, bgcolor: "grey.50" }}>
         <Typography variant="h6" gutterBottom>
           Export Configuration
         </Typography>
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
           <Box>
             <Typography variant="subtitle2">Run ID:</Typography>
             <Typography variant="body2" fontFamily="monospace">
@@ -318,9 +296,9 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
           <Box>
             <Typography variant="subtitle2">Signature:</Typography>
             <Chip
-              label={options.signBundle ? 'Enabled' : 'Disabled'}
+              label={options.signBundle ? "Enabled" : "Disabled"}
               size="small"
-              color={options.signBundle ? 'success' : 'default'}
+              color={options.signBundle ? "success" : "default"}
             />
           </Box>
         </Box>
@@ -329,9 +307,9 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
       {loading && (
         <Box
           sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
             p: 3,
           }}
         >
@@ -346,17 +324,15 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
         </Alert>
       )}
 
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
         <Button onClick={() => setActiveStep(0)}>Back</Button>
         <Button
           variant="contained"
           onClick={handleExport}
           disabled={loading}
-          startIcon={
-            loading ? <CircularProgress size={16} /> : <DocumentIcon />
-          }
+          startIcon={loading ? <CircularProgress size={16} /> : <DocumentIcon />}
         >
-          {loading ? 'Generating...' : 'Generate Bundle'}
+          {loading ? "Generating..." : "Generate Bundle"}
         </Button>
       </Box>
     </Box>
@@ -379,7 +355,7 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
 
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle2">Evidence ID:</Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Typography variant="body2" fontFamily="monospace">
                   {exportResult.evidenceId}
                 </Typography>
@@ -394,18 +370,11 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
 
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle2">Content Hash:</Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography
-                  variant="body2"
-                  fontFamily="monospace"
-                  sx={{ wordBreak: 'break-all' }}
-                >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Typography variant="body2" fontFamily="monospace" sx={{ wordBreak: "break-all" }}>
                   {exportResult.hash}
                 </Typography>
-                <IconButton
-                  size="small"
-                  onClick={() => handleCopyToClipboard(exportResult.hash)}
-                >
+                <IconButton size="small" onClick={() => handleCopyToClipboard(exportResult.hash)}>
                   <CopyIcon fontSize="small" />
                 </IconButton>
               </Box>
@@ -414,19 +383,17 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
             {exportResult.signature && (
               <Box sx={{ mb: 2 }}>
                 <Typography variant="subtitle2">Digital Signature:</Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <Typography
                     variant="body2"
                     fontFamily="monospace"
-                    sx={{ wordBreak: 'break-all' }}
+                    sx={{ wordBreak: "break-all" }}
                   >
                     {exportResult.signature.substring(0, 64)}...
                   </Typography>
                   <IconButton
                     size="small"
-                    onClick={() =>
-                      handleCopyToClipboard(exportResult.signature || '')
-                    }
+                    onClick={() => handleCopyToClipboard(exportResult.signature || "")}
                   >
                     <CopyIcon fontSize="small" />
                   </IconButton>
@@ -441,13 +408,9 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
                 Verification Status
               </Typography>
 
-              <Alert
-                severity={verification.valid ? 'success' : 'error'}
-                sx={{ mb: 2 }}
-              >
+              <Alert severity={verification.valid ? "success" : "error"} sx={{ mb: 2 }}>
                 <Typography variant="body2">
-                  <strong>Overall Status:</strong>{' '}
-                  {verification.valid ? 'Valid' : 'Invalid'}
+                  <strong>Overall Status:</strong> {verification.valid ? "Valid" : "Invalid"}
                 </Typography>
               </Alert>
 
@@ -464,8 +427,8 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
                     primary="Hash Integrity"
                     secondary={
                       verification.verification.checks.hashMatch
-                        ? 'Content verified'
-                        : 'Hash mismatch'
+                        ? "Content verified"
+                        : "Hash mismatch"
                     }
                   />
                 </ListItem>
@@ -482,8 +445,8 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
                     primary="Digital Signature"
                     secondary={
                       verification.verification.checks.signatureValid
-                        ? 'Signature valid'
-                        : 'Signature invalid'
+                        ? "Signature valid"
+                        : "Signature invalid"
                     }
                   />
                 </ListItem>
@@ -500,8 +463,8 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
                     primary="Timestamp"
                     secondary={
                       verification.verification.checks.timestampValid
-                        ? 'Within valid range'
-                        : 'Timestamp invalid'
+                        ? "Within valid range"
+                        : "Timestamp invalid"
                     }
                   />
                 </ListItem>
@@ -513,34 +476,24 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
                     <strong>Issues found:</strong>
                   </Typography>
                   <ul>
-                    {verification.verification.errors.map(
-                      (error: string, index: number) => (
-                        <li key={index}>
-                          <Typography variant="body2">{error}</Typography>
-                        </li>
-                      ),
-                    )}
+                    {verification.verification.errors.map((error: string, index: number) => (
+                      <li key={index}>
+                        <Typography variant="body2">{error}</Typography>
+                      </li>
+                    ))}
                   </ul>
                 </Alert>
               )}
             </Paper>
           )}
 
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-            <Button
-              variant="contained"
-              onClick={handleDownload}
-              startIcon={<DownloadIcon />}
-            >
+          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+            <Button variant="contained" onClick={handleDownload} startIcon={<DownloadIcon />}>
               Download Bundle
             </Button>
 
             {exportResult.signature && !verification && (
-              <Button
-                variant="outlined"
-                onClick={() => handleVerify()}
-                startIcon={<VerifyIcon />}
-              >
+              <Button variant="outlined" onClick={() => handleVerify()} startIcon={<VerifyIcon />}>
                 Verify Signature
               </Button>
             )}
@@ -550,7 +503,7 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
               onClick={() =>
                 window.open(
                   `/api/maestro/v1/evidence/${exportResult.evidenceId}/artifacts`,
-                  '_blank',
+                  "_blank"
                 )
               }
               startIcon={<DocumentIcon />}
@@ -569,10 +522,10 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
       onClose={onClose}
       maxWidth="md"
       fullWidth
-      PaperProps={{ sx: { minHeight: '60vh' } }}
+      PaperProps={{ sx: { minHeight: "60vh" } }}
     >
       <DialogTitle>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <BundleIcon />
           <Typography variant="h6">Export Evidence Bundle</Typography>
           {runId && <Chip label={`Run ${runId}`} size="small" />}
@@ -583,23 +536,17 @@ export const EvidenceExportDialog: React.FC<EvidenceExportDialogProps> = ({
         <Stepper activeStep={activeStep} orientation="vertical">
           <Step>
             <StepLabel>Configure Export Options</StepLabel>
-            <StepContent>
-              {activeStep === 0 && renderConfigurationStep()}
-            </StepContent>
+            <StepContent>{activeStep === 0 && renderConfigurationStep()}</StepContent>
           </Step>
 
           <Step>
             <StepLabel>Generate Bundle</StepLabel>
-            <StepContent>
-              {activeStep === 1 && renderGenerationStep()}
-            </StepContent>
+            <StepContent>{activeStep === 1 && renderGenerationStep()}</StepContent>
           </Step>
 
           <Step>
             <StepLabel>Verify & Download</StepLabel>
-            <StepContent>
-              {activeStep === 2 && renderVerificationStep()}
-            </StepContent>
+            <StepContent>{activeStep === 2 && renderVerificationStep()}</StepContent>
           </Step>
         </Stepper>
       </DialogContent>

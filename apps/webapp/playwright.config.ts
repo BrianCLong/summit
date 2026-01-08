@@ -23,7 +23,11 @@ export default defineConfig({
   projects: [
     { name: 'smoke', testMatch: /smoke\.spec\.ts/ },
     { name: 'integration', testMatch: /integration\.spec\.ts/ },
-    { name: 'visual', testMatch: /visual\.spec\.ts/, use: { screenshot: 'on' } },
+    {
+      name: 'visual',
+      testMatch: /visual\.spec\.ts/,
+      use: { screenshot: 'on' },
+    },
   ],
   webServer: {
     command: `npm run dev -- --host --port ${PORT}`,

@@ -1,8 +1,8 @@
 schedule:
-  full_backup: "0 2 * * *"  # daily at 02:00 UTC
-  wal_archive_push: "*/15 * * * *"  # every 15 minutes
-  verification_restore: "0 4 * * *"  # nightly restore test
-  failover_drill: "0 15 * * 6"  # weekly on Saturday
+  full_backup: "0 2 * * *" # daily at 02:00 UTC
+  wal_archive_push: "*/15 * * * *" # every 15 minutes
+  verification_restore: "0 4 * * *" # nightly restore test
+  failover_drill: "0 15 * * 6" # weekly on Saturday
 
 retention:
   hot: 14d

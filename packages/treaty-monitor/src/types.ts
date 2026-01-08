@@ -4,63 +4,63 @@
  */
 
 export enum TreatyType {
-  BILATERAL_TREATY = 'BILATERAL_TREATY',
-  MULTILATERAL_TREATY = 'MULTILATERAL_TREATY',
-  FRAMEWORK_AGREEMENT = 'FRAMEWORK_AGREEMENT',
-  PROTOCOL = 'PROTOCOL',
-  CONVENTION = 'CONVENTION',
-  MEMORANDUM_OF_UNDERSTANDING = 'MEMORANDUM_OF_UNDERSTANDING',
-  EXECUTIVE_AGREEMENT = 'EXECUTIVE_AGREEMENT',
-  EXCHANGE_OF_NOTES = 'EXCHANGE_OF_NOTES',
-  JOINT_DECLARATION = 'JOINT_DECLARATION',
-  TREATY_AMENDMENT = 'TREATY_AMENDMENT',
-  SUPPLEMENTARY_AGREEMENT = 'SUPPLEMENTARY_AGREEMENT',
-  CONCORDAT = 'CONCORDAT',
-  CHARTER = 'CHARTER',
-  STATUTE = 'STATUTE',
-  COVENANT = 'COVENANT'
+  BILATERAL_TREATY = "BILATERAL_TREATY",
+  MULTILATERAL_TREATY = "MULTILATERAL_TREATY",
+  FRAMEWORK_AGREEMENT = "FRAMEWORK_AGREEMENT",
+  PROTOCOL = "PROTOCOL",
+  CONVENTION = "CONVENTION",
+  MEMORANDUM_OF_UNDERSTANDING = "MEMORANDUM_OF_UNDERSTANDING",
+  EXECUTIVE_AGREEMENT = "EXECUTIVE_AGREEMENT",
+  EXCHANGE_OF_NOTES = "EXCHANGE_OF_NOTES",
+  JOINT_DECLARATION = "JOINT_DECLARATION",
+  TREATY_AMENDMENT = "TREATY_AMENDMENT",
+  SUPPLEMENTARY_AGREEMENT = "SUPPLEMENTARY_AGREEMENT",
+  CONCORDAT = "CONCORDAT",
+  CHARTER = "CHARTER",
+  STATUTE = "STATUTE",
+  COVENANT = "COVENANT",
 }
 
 export enum TreatyStatus {
-  PROPOSED = 'PROPOSED',
-  UNDER_NEGOTIATION = 'UNDER_NEGOTIATION',
-  NEGOTIATION_COMPLETED = 'NEGOTIATION_COMPLETED',
-  SIGNED = 'SIGNED',
-  RATIFICATION_PENDING = 'RATIFICATION_PENDING',
-  PARTIALLY_RATIFIED = 'PARTIALLY_RATIFIED',
-  IN_FORCE = 'IN_FORCE',
-  PROVISIONALLY_APPLIED = 'PROVISIONALLY_APPLIED',
-  SUSPENDED = 'SUSPENDED',
-  TERMINATED = 'TERMINATED',
-  WITHDRAWN = 'WITHDRAWN',
-  EXPIRED = 'EXPIRED',
-  SUPERSEDED = 'SUPERSEDED'
+  PROPOSED = "PROPOSED",
+  UNDER_NEGOTIATION = "UNDER_NEGOTIATION",
+  NEGOTIATION_COMPLETED = "NEGOTIATION_COMPLETED",
+  SIGNED = "SIGNED",
+  RATIFICATION_PENDING = "RATIFICATION_PENDING",
+  PARTIALLY_RATIFIED = "PARTIALLY_RATIFIED",
+  IN_FORCE = "IN_FORCE",
+  PROVISIONALLY_APPLIED = "PROVISIONALLY_APPLIED",
+  SUSPENDED = "SUSPENDED",
+  TERMINATED = "TERMINATED",
+  WITHDRAWN = "WITHDRAWN",
+  EXPIRED = "EXPIRED",
+  SUPERSEDED = "SUPERSEDED",
 }
 
 export enum TreatyCategory {
-  PEACE_AND_SECURITY = 'PEACE_AND_SECURITY',
-  ARMS_CONTROL = 'ARMS_CONTROL',
-  NUCLEAR_NON_PROLIFERATION = 'NUCLEAR_NON_PROLIFERATION',
-  TRADE_AND_COMMERCE = 'TRADE_AND_COMMERCE',
-  HUMAN_RIGHTS = 'HUMAN_RIGHTS',
-  ENVIRONMENTAL = 'ENVIRONMENTAL',
-  CLIMATE = 'CLIMATE',
-  MARITIME = 'MARITIME',
-  AVIATION = 'AVIATION',
-  SPACE = 'SPACE',
-  TELECOMMUNICATIONS = 'TELECOMMUNICATIONS',
-  CULTURAL = 'CULTURAL',
-  EXTRADITION = 'EXTRADITION',
-  MUTUAL_LEGAL_ASSISTANCE = 'MUTUAL_LEGAL_ASSISTANCE',
-  TAXATION = 'TAXATION',
-  INVESTMENT = 'INVESTMENT',
-  INTELLECTUAL_PROPERTY = 'INTELLECTUAL_PROPERTY',
-  LABOR = 'LABOR',
-  HEALTH = 'HEALTH',
-  EDUCATION = 'EDUCATION',
-  REFUGEE = 'REFUGEE',
-  TERRITORIAL = 'TERRITORIAL',
-  BOUNDARY = 'BOUNDARY'
+  PEACE_AND_SECURITY = "PEACE_AND_SECURITY",
+  ARMS_CONTROL = "ARMS_CONTROL",
+  NUCLEAR_NON_PROLIFERATION = "NUCLEAR_NON_PROLIFERATION",
+  TRADE_AND_COMMERCE = "TRADE_AND_COMMERCE",
+  HUMAN_RIGHTS = "HUMAN_RIGHTS",
+  ENVIRONMENTAL = "ENVIRONMENTAL",
+  CLIMATE = "CLIMATE",
+  MARITIME = "MARITIME",
+  AVIATION = "AVIATION",
+  SPACE = "SPACE",
+  TELECOMMUNICATIONS = "TELECOMMUNICATIONS",
+  CULTURAL = "CULTURAL",
+  EXTRADITION = "EXTRADITION",
+  MUTUAL_LEGAL_ASSISTANCE = "MUTUAL_LEGAL_ASSISTANCE",
+  TAXATION = "TAXATION",
+  INVESTMENT = "INVESTMENT",
+  INTELLECTUAL_PROPERTY = "INTELLECTUAL_PROPERTY",
+  LABOR = "LABOR",
+  HEALTH = "HEALTH",
+  EDUCATION = "EDUCATION",
+  REFUGEE = "REFUGEE",
+  TERRITORIAL = "TERRITORIAL",
+  BOUNDARY = "BOUNDARY",
 }
 
 export interface Treaty {
@@ -162,7 +162,7 @@ export interface Party {
   successionDate?: Date;
   effectiveDate: Date;
   depositDate?: Date;
-  status: 'ACTIVE' | 'WITHDRAWN' | 'SUSPENDED' | 'TERMINATED';
+  status: "ACTIVE" | "WITHDRAWN" | "SUSPENDED" | "TERMINATED";
   reservations?: string[];
   declarations?: string[];
 }
@@ -188,7 +188,7 @@ export interface Annex {
 export interface Protocol {
   id: string;
   title: string;
-  type: 'OPTIONAL_PROTOCOL' | 'ADDITIONAL_PROTOCOL' | 'AMENDING_PROTOCOL';
+  type: "OPTIONAL_PROTOCOL" | "ADDITIONAL_PROTOCOL" | "AMENDING_PROTOCOL";
   status: TreatyStatus;
   signedDate?: Date;
   entryIntoForceDate?: Date;
@@ -204,7 +204,7 @@ export interface Obligation {
   deadline?: Date;
   recurring: boolean;
   frequency?: string;
-  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'OVERDUE' | 'VIOLATED';
+  status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "OVERDUE" | "VIOLATED";
   verifiable: boolean;
 }
 
@@ -230,7 +230,7 @@ export interface Reservation {
   article: string;
   text: string;
   date: Date;
-  status: 'ACTIVE' | 'WITHDRAWN' | 'OBJECTED';
+  status: "ACTIVE" | "WITHDRAWN" | "OBJECTED";
   objections?: {
     country: string;
     objectionText: string;
@@ -240,7 +240,7 @@ export interface Reservation {
 
 export interface Declaration {
   country: string;
-  type: 'INTERPRETIVE' | 'POLICY' | 'UNDERSTANDING';
+  type: "INTERPRETIVE" | "POLICY" | "UNDERSTANDING";
   text: string;
   date: Date;
   articles?: string[];
@@ -295,10 +295,10 @@ export interface Violation {
   party: string;
   article: string;
   description: string;
-  severity: 'MINOR' | 'MODERATE' | 'SERIOUS' | 'GRAVE';
+  severity: "MINOR" | "MODERATE" | "SERIOUS" | "GRAVE";
   date: Date;
   reportedBy: string;
-  status: 'ALLEGED' | 'UNDER_INVESTIGATION' | 'CONFIRMED' | 'RESOLVED' | 'DISPUTED';
+  status: "ALLEGED" | "UNDER_INVESTIGATION" | "CONFIRMED" | "RESOLVED" | "DISPUTED";
   remedialAction?: string;
 }
 
@@ -309,8 +309,8 @@ export interface Dispute {
   description: string;
   article: string;
   filedDate: Date;
-  disputeResolutionMechanism: 'NEGOTIATION' | 'MEDIATION' | 'ARBITRATION' | 'ICJ' | 'OTHER';
-  status: 'PENDING' | 'IN_PROGRESS' | 'RESOLVED' | 'ABANDONED';
+  disputeResolutionMechanism: "NEGOTIATION" | "MEDIATION" | "ARBITRATION" | "ICJ" | "OTHER";
+  status: "PENDING" | "IN_PROGRESS" | "RESOLVED" | "ABANDONED";
   resolution?: {
     date: Date;
     mechanism: string;
@@ -320,7 +320,7 @@ export interface Dispute {
 }
 
 export interface MonitoringMechanism {
-  type: 'COMMITTEE' | 'SECRETARIAT' | 'CONFERENCE_OF_PARTIES' | 'EXPERT_BODY' | 'PEER_REVIEW';
+  type: "COMMITTEE" | "SECRETARIAT" | "CONFERENCE_OF_PARTIES" | "EXPERT_BODY" | "PEER_REVIEW";
   name: string;
   composition?: string[];
   mandate: string;
@@ -343,7 +343,7 @@ export interface ReportingRequirement {
 }
 
 export interface VerificationMeasure {
-  type: 'INSPECTION' | 'MONITORING' | 'SATELLITE' | 'DATA_EXCHANGE' | 'ON_SITE_VISIT';
+  type: "INSPECTION" | "MONITORING" | "SATELLITE" | "DATA_EXCHANGE" | "ON_SITE_VISIT";
   description: string;
   frequency?: string;
   responsible: string;
@@ -368,7 +368,7 @@ export interface Amendment {
   proposalDate: Date;
   description: string;
   articles: string[]; // Articles being amended
-  status: 'PROPOSED' | 'UNDER_CONSIDERATION' | 'ADOPTED' | 'REJECTED' | 'IN_FORCE';
+  status: "PROPOSED" | "UNDER_CONSIDERATION" | "ADOPTED" | "REJECTED" | "IN_FORCE";
   adoptionDate?: Date;
   entryIntoForceDate?: Date;
   parties: Party[];
@@ -399,7 +399,7 @@ export interface Suspension {
 
 export interface DepositaryNotification {
   id: string;
-  type: 'SIGNATURE' | 'RATIFICATION' | 'ACCESSION' | 'RESERVATION' | 'WITHDRAWAL' | 'AMENDMENT';
+  type: "SIGNATURE" | "RATIFICATION" | "ACCESSION" | "RESERVATION" | "WITHDRAWAL" | "AMENDMENT";
   date: Date;
   party: string;
   content: string;
@@ -407,7 +407,7 @@ export interface DepositaryNotification {
 }
 
 export interface Source {
-  type: 'OFFICIAL_TEXT' | 'DEPOSITARY' | 'GOVERNMENT' | 'INTERNATIONAL_ORG' | 'MEDIA' | 'ACADEMIC';
+  type: "OFFICIAL_TEXT" | "DEPOSITARY" | "GOVERNMENT" | "INTERNATIONAL_ORG" | "MEDIA" | "ACADEMIC";
   name: string;
   url?: string;
   date: Date;
@@ -418,7 +418,7 @@ export interface Report {
   id: string;
   title: string;
   date: Date;
-  reportType: 'COMPLIANCE' | 'IMPLEMENTATION' | 'REVIEW' | 'TECHNICAL' | 'SPECIAL';
+  reportType: "COMPLIANCE" | "IMPLEMENTATION" | "REVIEW" | "TECHNICAL" | "SPECIAL";
   summary: string;
   findings?: string[];
   recommendations?: string[];
@@ -433,7 +433,7 @@ export interface NegotiationProgress {
   topics: string[];
   progress: {
     topic: string;
-    status: 'NOT_STARTED' | 'UNDER_DISCUSSION' | 'CONSENSUS_EMERGING' | 'AGREED' | 'DEADLOCKED';
+    status: "NOT_STARTED" | "UNDER_DISCUSSION" | "CONSENSUS_EMERGING" | "AGREED" | "DEADLOCKED";
     summary: string;
   }[];
   nextRound?: Date;

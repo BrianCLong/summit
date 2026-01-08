@@ -31,7 +31,7 @@ export interface GraphEdge {
   type: string;
   properties: Record<string, any>;
   weight?: number;
-  direction?: 'directed' | 'undirected';
+  direction?: "directed" | "undirected";
 }
 
 export interface Graph {
@@ -50,7 +50,7 @@ export interface PathQueryConstraints {
   requiredNodeLabels?: string[];
   requiredEdgeTypes?: string[];
   weightProperty?: string;
-  direction?: 'OUTGOING' | 'INCOMING' | 'BOTH';
+  direction?: "OUTGOING" | "INCOMING" | "BOTH";
 }
 
 export interface Path {
@@ -203,11 +203,7 @@ export interface SubgraphQuery {
 
 export interface GraphRepository {
   getSubgraph(params: SubgraphQuery): Promise<Graph>;
-  getNeighbors(
-    nodeId: string,
-    depth: number,
-    filters?: Record<string, any>,
-  ): Promise<Graph>;
+  getNeighbors(nodeId: string, depth: number, filters?: Record<string, any>): Promise<Graph>;
 }
 
 // ============================================================================
@@ -254,7 +250,7 @@ export interface TemporalSnapshot {
 }
 
 export interface TemporalTrends {
-  growth: 'increasing' | 'decreasing' | 'stable';
+  growth: "increasing" | "decreasing" | "stable";
   volatility: number;
   periodicity?: number;
 }

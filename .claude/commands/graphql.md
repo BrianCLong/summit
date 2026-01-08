@@ -5,26 +5,31 @@ Manage GraphQL schema, queries, and related operations for Summit.
 ## Schema Operations
 
 ### Check Schema Location
+
 ```bash
 ls -la packages/graphql/
 ```
 
 ### Validate Schema
+
 ```bash
 pnpm graphql:schema:check
 ```
 
 ### Generate TypeScript Types
+
 ```bash
 pnpm graphql:codegen
 ```
 
 ### Build Persisted Queries
+
 ```bash
 pnpm persisted:build
 ```
 
 ### Check Persisted Query Drift
+
 ```bash
 pnpm persisted:check
 ```
@@ -34,6 +39,7 @@ pnpm persisted:check
 ### Add New Type
 
 1. Update schema in `packages/graphql/schema.graphql`:
+
    ```graphql
    type NewEntity {
      id: ID!
@@ -43,6 +49,7 @@ pnpm persisted:check
    ```
 
 2. Extend Query/Mutation if needed:
+
    ```graphql
    extend type Query {
      newEntity(id: ID!): NewEntity
@@ -57,11 +64,12 @@ pnpm persisted:check
 ### Add New Resolver
 
 Create resolver in `services/api/src/resolvers/`:
+
 ```typescript
 export const newEntityResolvers = {
   Query: {
     newEntity: async (_parent, { id }, context) => {
-      await context.authorize('entity:read');
+      await context.authorize("entity:read");
       return entityService.findById(id);
     },
   },
@@ -93,11 +101,13 @@ curl -X POST http://localhost:4000/graphql \
 ## Troubleshooting
 
 **Schema validation fails:**
+
 - Check for circular references
 - Validate all types are defined
 - Check directive usage
 
 **Codegen fails:**
+
 - Ensure schema is valid
 - Check codegen.yml configuration
 - Verify all plugins installed

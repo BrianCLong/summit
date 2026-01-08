@@ -1,13 +1,13 @@
-import fs from 'fs';
-import path from 'path';
-import ts from 'typescript';
+import fs from "fs";
+import path from "path";
+import ts from "typescript";
 
 interface DeadCodeCandidate {
-  type: 'unused-export' | 'unreferenced-module';
+  type: "unused-export" | "unreferenced-module";
   file: string;
   symbolName?: string;
   reason: string;
-  confidence: 'high' | 'medium' | 'low';
+  confidence: "high" | "medium" | "low";
   owner?: string;
   tags?: string[];
 }
@@ -31,36 +31,36 @@ interface CodeOwnerPattern {
 }
 
 const projectRoot = process.cwd();
-const reportPath = path.join(projectRoot, 'reports', 'dead-code-report.json');
+const reportPath = path.join(projectRoot, "reports", "dead-code-report.json");
 
 function patternToRegex(pattern: string): RegExp {
   const escaped = pattern
-    .replace(/[.+^${}()|[\]\\]/g, '\\$&')
-    .replace(/\*\*/g, '___GLOBSTAR___')
-    .replace(/\*/g, '[^/]*')
-    .replace(/___GLOBSTAR___/g, '.*');
+    .replace(/[.+^${}()|[\]\\]/g, "\\$&")
+    .replace(/\*\*/g, "___GLOBSTAR___")
+    .replace(/\*/g, "[^/]*")
+    .replace(/___GLOBSTAR___/g, ".*");
   return new RegExp(`^${escaped}$`);
 }
 
 function loadCodeOwners(): CodeOwnerPattern[] {
-  const codeownersFile = path.join(projectRoot, 'CODEOWNERS');
+  const codeownersFile = path.join(projectRoot, "CODEOWNERS");
   if (!fs.existsSync(codeownersFile)) {
     return [];
   }
 
-  const lines = fs.readFileSync(codeownersFile, 'utf8').split(/\r?\n/);
+  const lines = fs.readFileSync(codeownersFile, "utf8").split(/\r?\n/);
   const patterns: CodeOwnerPattern[] = [];
 
   for (const line of lines) {
     const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) {
+    if (!trimmed || trimmed.startsWith("#")) {
       continue;
     }
     const [pattern, ...owners] = trimmed.split(/\s+/);
     if (!pattern || owners.length === 0) {
       continue;
     }
-    const regex = patternToRegex(pattern.startsWith('/') ? pattern.slice(1) : pattern);
+    const regex = patternToRegex(pattern.startsWith("/") ? pattern.slice(1) : pattern);
     patterns.push({ pattern, owners, regex });
   }
 
@@ -71,7 +71,7 @@ function resolveOwner(relativePath: string, patterns: CodeOwnerPattern[]): strin
   for (let i = patterns.length - 1; i >= 0; i -= 1) {
     const { regex, owners } = patterns[i];
     if (regex.test(relativePath)) {
-      return owners.join(' ');
+      return owners.join(" ");
     }
   }
   return undefined;
@@ -84,8 +84,8 @@ function hasKeepAnnotation(node: ts.Node): boolean {
 
 function loadBundlerHints(): Set<string> {
   const hintFiles = [
-    path.join(projectRoot, 'reports', 'bundle-stats.json'),
-    path.join(projectRoot, 'reports', 'webpack-stats.json'),
+    path.join(projectRoot, "reports", "bundle-stats.json"),
+    path.join(projectRoot, "reports", "webpack-stats.json"),
   ];
   const hints = new Set<string>();
 
@@ -94,7 +94,7 @@ function loadBundlerHints(): Set<string> {
       continue;
     }
     try {
-      const parsed = JSON.parse(fs.readFileSync(file, 'utf8')) as { unusedModules?: string[] };
+      const parsed = JSON.parse(fs.readFileSync(file, "utf8")) as { unusedModules?: string[] };
       if (Array.isArray(parsed.unusedModules)) {
         parsed.unusedModules
           .map((entry) => path.normalize(path.join(projectRoot, entry)))
@@ -109,13 +109,13 @@ function loadBundlerHints(): Set<string> {
 }
 
 function loadTsConfig(): ts.ParsedCommandLine {
-  const configPath = ts.findConfigFile(projectRoot, ts.sys.fileExists, 'tsconfig.json');
+  const configPath = ts.findConfigFile(projectRoot, ts.sys.fileExists, "tsconfig.json");
   if (!configPath) {
-    throw new Error('tsconfig.json not found');
+    throw new Error("tsconfig.json not found");
   }
   const configFile = ts.readConfigFile(configPath, ts.sys.readFile);
   if (configFile.error) {
-    throw new Error(ts.flattenDiagnosticMessageText(configFile.error.messageText, '\n'));
+    throw new Error(ts.flattenDiagnosticMessageText(configFile.error.messageText, "\n"));
   }
   return ts.parseJsonConfigFileContent(configFile.config, ts.sys, path.dirname(configPath));
 }
@@ -129,7 +129,7 @@ function createLanguageService(config: ts.ParsedCommandLine): ts.LanguageService
       if (!ts.sys.fileExists(fileName)) {
         return undefined;
       }
-      return ts.ScriptSnapshot.fromString(ts.sys.readFile(fileName) ?? '');
+      return ts.ScriptSnapshot.fromString(ts.sys.readFile(fileName) ?? "");
     },
     getCurrentDirectory: () => projectRoot,
     getCompilationSettings: () => config.options,
@@ -145,7 +145,7 @@ function createLanguageService(config: ts.ParsedCommandLine): ts.LanguageService
 }
 
 function getDeclarationIdentifier(declaration: ts.Declaration): ts.Identifier | undefined {
-  if ('name' in declaration && declaration.name && ts.isIdentifier(declaration.name)) {
+  if ("name" in declaration && declaration.name && ts.isIdentifier(declaration.name)) {
     return declaration.name;
   }
   if (ts.isVariableStatement(declaration)) {
@@ -161,7 +161,7 @@ function findUnusedExports(
   languageService: ts.LanguageService,
   checker: ts.TypeChecker,
   sourceFiles: readonly ts.SourceFile[],
-  ownerPatterns: CodeOwnerPattern[],
+  ownerPatterns: CodeOwnerPattern[]
 ): DeadCodeCandidate[] {
   const unused: DeadCodeCandidate[] = [];
 
@@ -176,7 +176,7 @@ function findUnusedExports(
     const exports = checker.getExportsOfModule(moduleSymbol);
 
     for (const exportSymbol of exports) {
-      if (exportSymbol.getName() === 'default') {
+      if (exportSymbol.getName() === "default") {
         continue;
       }
       const declarations = exportSymbol.getDeclarations() ?? [];
@@ -198,11 +198,11 @@ function findUnusedExports(
           const relativePath = path.relative(projectRoot, fileName);
           const owner = resolveOwner(relativePath, ownerPatterns);
           unused.push({
-            type: 'unused-export',
+            type: "unused-export",
             file: relativePath,
             symbolName: exportSymbol.getName(),
-            reason: 'Exported symbol has no non-definition references in the project graph.',
-            confidence: 'high',
+            reason: "Exported symbol has no non-definition references in the project graph.",
+            confidence: "high",
             owner,
           });
         }
@@ -217,7 +217,7 @@ function findUnreferencedModules(
   program: ts.Program,
   sourceFiles: readonly ts.SourceFile[],
   ownerPatterns: CodeOwnerPattern[],
-  bundlerHints: Set<string>,
+  bundlerHints: Set<string>
 ): DeadCodeCandidate[] {
   const inboundCounts = new Map<string, number>();
 
@@ -226,9 +226,9 @@ function findUnreferencedModules(
   }
 
   for (const sourceFile of sourceFiles) {
-    const resolvedModules: Map<string, ts.ResolvedModuleFull | undefined> | undefined =
-      (sourceFile as unknown as { resolvedModules?: Map<string, ts.ResolvedModuleFull | undefined> })
-        .resolvedModules;
+    const resolvedModules: Map<string, ts.ResolvedModuleFull | undefined> | undefined = (
+      sourceFile as unknown as { resolvedModules?: Map<string, ts.ResolvedModuleFull | undefined> }
+    ).resolvedModules;
 
     resolvedModules?.forEach((resolved) => {
       if (!resolved || !resolved.resolvedFileName) {
@@ -254,7 +254,11 @@ function findUnreferencedModules(
     }
 
     const relativePath = path.relative(projectRoot, fileName);
-    if (relativePath.includes('__tests__') || relativePath.includes('.test.') || relativePath.includes('.spec.')) {
+    if (
+      relativePath.includes("__tests__") ||
+      relativePath.includes(".test.") ||
+      relativePath.includes(".spec.")
+    ) {
       return;
     }
 
@@ -262,12 +266,12 @@ function findUnreferencedModules(
     if (count === 0 || bundlerMarkedUnused) {
       const owner = resolveOwner(relativePath, ownerPatterns);
       unreferenced.push({
-        type: 'unreferenced-module',
+        type: "unreferenced-module",
         file: relativePath,
         reason: bundlerMarkedUnused
-          ? 'Bundler reports mark this module as unused.'
-          : 'No inbound imports detected by the TypeScript module graph.',
-        confidence: 'high',
+          ? "Bundler reports mark this module as unused."
+          : "No inbound imports detected by the TypeScript module graph.",
+        confidence: "high",
         owner,
       });
     }
@@ -278,9 +282,12 @@ function findUnreferencedModules(
 
 function isEligibleSource(fileName: string): boolean {
   const normalized = path.normalize(fileName);
-  const isSourceFile = /\.(ts|tsx|js|jsx)$/.test(normalized) && !normalized.endsWith('.d.ts');
+  const isSourceFile = /\.(ts|tsx|js|jsx)$/.test(normalized) && !normalized.endsWith(".d.ts");
   const excluded =
-    normalized.includes('node_modules') || normalized.includes('/dist/') || normalized.includes('/build/') || normalized.includes('/.turbo/');
+    normalized.includes("node_modules") ||
+    normalized.includes("/dist/") ||
+    normalized.includes("/build/") ||
+    normalized.includes("/.turbo/");
   return isSourceFile && !excluded;
 }
 
@@ -290,14 +297,24 @@ function main(): void {
   const program = languageService.getProgram();
 
   if (!program) {
-    throw new Error('Unable to create TypeScript program for analysis');
+    throw new Error("Unable to create TypeScript program for analysis");
   }
 
   const ownerPatterns = loadCodeOwners();
   const bundlerHints = loadBundlerHints();
   const sourceFiles = program.getSourceFiles().filter((file) => isEligibleSource(file.fileName));
-  const unusedExports = findUnusedExports(languageService, program.getTypeChecker(), sourceFiles, ownerPatterns);
-  const unreferencedModules = findUnreferencedModules(program, sourceFiles, ownerPatterns, bundlerHints);
+  const unusedExports = findUnusedExports(
+    languageService,
+    program.getTypeChecker(),
+    sourceFiles,
+    ownerPatterns
+  );
+  const unreferencedModules = findUnreferencedModules(
+    program,
+    sourceFiles,
+    ownerPatterns,
+    bundlerHints
+  );
 
   const report: DeadCodeReport = {
     generatedAt: new Date().toISOString(),
@@ -314,9 +331,11 @@ function main(): void {
   fs.mkdirSync(path.dirname(reportPath), { recursive: true });
   fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
 
-  console.log(`Dead-code analysis complete. Report written to ${path.relative(projectRoot, reportPath)}`);
   console.log(
-    ` - Unused exports: ${unusedExports.length}\n - Unreferenced modules: ${unreferencedModules.length}\n - Bundler hints: ${bundlerHints.size}`,
+    `Dead-code analysis complete. Report written to ${path.relative(projectRoot, reportPath)}`
+  );
+  console.log(
+    ` - Unused exports: ${unusedExports.length}\n - Unreferenced modules: ${unreferencedModules.length}\n - Bundler hints: ${bundlerHints.size}`
   );
 }
 

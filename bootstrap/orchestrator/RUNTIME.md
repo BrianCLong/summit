@@ -13,6 +13,7 @@ The Summit Runtime operates as an event loop that processes the following stages
 ## State Management
 
 Runtime state is persisted in `.summit/state/` and includes:
+
 - **Session Context**: Active user session data.
 - **Flow State**: Progress of running flows.
 - **Agent Memory**: Short-term and long-term memory access.
@@ -21,6 +22,7 @@ Runtime state is persisted in `.summit/state/` and includes:
 ## Integration
 
 The runtime integrates with:
+
 - **CLI**: For manual control.
 - **CI/CD**: For automated pipelines.
 - **Observability**: For telemetry data.

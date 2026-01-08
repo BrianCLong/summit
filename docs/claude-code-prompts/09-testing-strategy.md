@@ -1,10 +1,13 @@
 # Prompt 9: Testing Strategy (Unit/Contract/E2E/Load/Chaos)
 
 ## Role
+
 Principal Test Engineer
 
 ## Context
+
 IntelGraph requires comprehensive testing to ensure:
+
 - **Correctness** - Features work as designed
 - **Performance** - SLOs are met under load
 - **Reliability** - Systems degrade gracefully
@@ -13,36 +16,43 @@ IntelGraph requires comprehensive testing to ensure:
 Evidence-backed quality gates ensure production readiness.
 
 ## Task
+
 Implement a comprehensive testing strategy:
 
 ### 1. Unit Tests (Jest)
+
 - Business logic and utilities
 - Resolver functions
 - Data transformations
 - Policy evaluation
 
 ### 2. Integration Tests (Jest + TestContainers)
+
 - Database interactions (Neo4j, PostgreSQL)
 - Cache operations (Redis)
 - Message queue operations (Kafka)
 
 ### 3. Contract Tests (Pact)
+
 - GraphQL schema contracts
 - Service-to-service contracts
 - API client contracts
 
 ### 4. E2E Tests (Playwright)
+
 - Critical user journeys
 - Golden path validation
 - Cross-browser testing
 
 ### 5. Load Tests (k6)
+
 - API throughput and latency
 - Ingest pipeline capacity
 - Graph query performance
 - SLO validation
 
 ### 6. Chaos Engineering (Chaos Mesh or custom)
+
 - Network latency injection
 - Pod termination
 - Database connection failures
@@ -51,15 +61,18 @@ Implement a comprehensive testing strategy:
 ## Guardrails
 
 ### Coverage Thresholds
+
 - **Critical paths**: ≥ 80% coverage
 - **Business logic**: ≥ 90% coverage
 - **Generated code**: Excluded from coverage
 
 ### SLO Validation
+
 - k6 thresholds match SLO targets
 - Tests fail if SLOs breached
 
 ### Test Execution
+
 - Unit/integration: < 5 minutes
 - E2E: < 10 minutes
 - Load tests: Run nightly or on-demand
@@ -67,6 +80,7 @@ Implement a comprehensive testing strategy:
 ## Deliverables
 
 ### 1. Unit & Integration Tests
+
 - [ ] `/tests` directory structure:
   - [ ] `unit/` - Pure logic tests
   - [ ] `integration/` - Database and service tests
@@ -84,6 +98,7 @@ Implement a comprehensive testing strategy:
   - [ ] Redis
 
 ### 2. Contract Tests
+
 - [ ] `tests/contract/` with Pact tests:
   - [ ] Provider tests (GraphQL schema)
   - [ ] Consumer tests (API clients)
@@ -92,6 +107,7 @@ Implement a comprehensive testing strategy:
 - [ ] Pact broker integration (if available)
 
 ### 3. E2E Tests
+
 - [ ] `tests/e2e/` with Playwright tests:
   - [ ] Golden path test (Investigation → Entities → Relationships → Copilot)
   - [ ] Entity creation and editing
@@ -106,6 +122,7 @@ Implement a comprehensive testing strategy:
   - [ ] Trace recording
 
 ### 4. Load Tests
+
 - [ ] `tests/load/` with k6 scripts:
   - [ ] `api-load.js` - GraphQL API load test
   - [ ] `ingest-load.js` - Ingest pipeline load test
@@ -116,6 +133,7 @@ Implement a comprehensive testing strategy:
 - [ ] Results exported to InfluxDB/Grafana (optional)
 
 ### 5. Chaos Experiments
+
 - [ ] `tests/chaos/` with chaos scripts:
   - [ ] `network-latency.yaml` - Inject 100ms latency
   - [ ] `pod-failure.yaml` - Random pod termination
@@ -126,6 +144,7 @@ Implement a comprehensive testing strategy:
 - [ ] Observability during chaos (metrics, logs, traces)
 
 ### 6. Golden Path Dataset
+
 - [ ] `data/test-fixtures/` with representative data:
   - [ ] Entities (Persons, Organizations, Events)
   - [ ] Relationships
@@ -133,12 +152,14 @@ Implement a comprehensive testing strategy:
   - [ ] Provenance records
 
 ### 7. Documentation
+
 - [ ] Testing strategy overview
 - [ ] Test execution guide
 - [ ] Writing new tests guide
 - [ ] CI integration guide
 
 ## Acceptance Criteria
+
 - ✅ `pnpm test:all` runs all test suites successfully
 - ✅ Coverage reports show ≥ 80% for critical paths
 - ✅ k6 thresholds meet SLOs (read p95 ≤ 350ms, write p95 ≤ 700ms)
@@ -152,14 +173,14 @@ Implement a comprehensive testing strategy:
 ```javascript
 // jest.config.js
 export default {
-  preset: 'ts-jest/presets/default-esm',
-  testEnvironment: 'node',
-  extensionsToTreatAsEsm: ['.ts'],
+  preset: "ts-jest/presets/default-esm",
+  testEnvironment: "node",
+  extensionsToTreatAsEsm: [".ts"],
   moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1',
+    "^(\\.{1,2}/.*)\\.js$": "$1",
   },
   transform: {
-    '^.+\\.tsx?$': ['@swc/jest'],
+    "^.+\\.tsx?$": ["@swc/jest"],
   },
   coverageThresholds: {
     global: {
@@ -168,7 +189,7 @@ export default {
       lines: 80,
       statements: 80,
     },
-    './src/services/': {
+    "./src/services/": {
       branches: 90,
       functions: 90,
       lines: 90,
@@ -176,16 +197,13 @@ export default {
     },
   },
   collectCoverageFrom: [
-    'src/**/*.{ts,tsx}',
-    '!src/**/*.d.ts',
-    '!src/**/*.test.ts',
-    '!src/**/__generated__/**',
+    "src/**/*.{ts,tsx}",
+    "!src/**/*.d.ts",
+    "!src/**/*.test.ts",
+    "!src/**/__generated__/**",
   ],
-  testMatch: [
-    '**/tests/**/*.test.ts',
-    '**/__tests__/**/*.test.ts',
-  ],
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  testMatch: ["**/tests/**/*.test.ts", "**/__tests__/**/*.test.ts"],
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
 };
 ```
 
@@ -193,27 +211,27 @@ export default {
 
 ```javascript
 // tests/load/api-load.js
-import http from 'k6/http';
-import { check, sleep } from 'k6';
-import { Rate, Trend } from 'k6/metrics';
+import http from "k6/http";
+import { check, sleep } from "k6";
+import { Rate, Trend } from "k6/metrics";
 
-const errorRate = new Rate('errors');
-const readLatency = new Trend('read_latency');
+const errorRate = new Rate("errors");
+const readLatency = new Trend("read_latency");
 
 export const options = {
   stages: [
-    { duration: '1m', target: 50 },   // Ramp-up
-    { duration: '5m', target: 100 },  // Sustained load
-    { duration: '1m', target: 0 },    // Ramp-down
+    { duration: "1m", target: 50 }, // Ramp-up
+    { duration: "5m", target: 100 }, // Sustained load
+    { duration: "1m", target: 0 }, // Ramp-down
   ],
   thresholds: {
-    'http_req_duration{type:read}': ['p(95)<350', 'p(99)<900'],  // SLO
-    'http_req_duration{type:write}': ['p(95)<700', 'p(99)<1500'], // SLO
-    errors: ['rate<0.01'], // < 1% error rate
+    "http_req_duration{type:read}": ["p(95)<350", "p(99)<900"], // SLO
+    "http_req_duration{type:write}": ["p(95)<700", "p(99)<1500"], // SLO
+    errors: ["rate<0.01"], // < 1% error rate
   },
 };
 
-const API_URL = __ENV.API_URL || 'http://localhost:4000/graphql';
+const API_URL = __ENV.API_URL || "http://localhost:4000/graphql";
 
 export default function () {
   // Read query
@@ -231,17 +249,17 @@ export default function () {
         }
       }
     `,
-    variables: { id: 'entity-123' },
+    variables: { id: "entity-123" },
   });
 
   const readRes = http.post(API_URL, readPayload, {
-    headers: { 'Content-Type': 'application/json' },
-    tags: { type: 'read' },
+    headers: { "Content-Type": "application/json" },
+    tags: { type: "read" },
   });
 
   check(readRes, {
-    'read status 200': (r) => r.status === 200,
-    'read has data': (r) => JSON.parse(r.body).data !== null,
+    "read status 200": (r) => r.status === 200,
+    "read has data": (r) => JSON.parse(r.body).data !== null,
   }) || errorRate.add(1);
 
   readLatency.add(readRes.timings.duration);
@@ -260,19 +278,19 @@ export default function () {
     `,
     variables: {
       input: {
-        name: 'Test Entity',
-        type: 'Organization',
+        name: "Test Entity",
+        type: "Organization",
       },
     },
   });
 
   const writeRes = http.post(API_URL, writePayload, {
-    headers: { 'Content-Type': 'application/json' },
-    tags: { type: 'write' },
+    headers: { "Content-Type": "application/json" },
+    tags: { type: "write" },
   });
 
   check(writeRes, {
-    'write status 200': (r) => r.status === 200,
+    "write status 200": (r) => r.status === 200,
   }) || errorRate.add(1);
 
   sleep(1);
@@ -283,39 +301,41 @@ export default function () {
 
 ```typescript
 // tests/e2e/golden-path.spec.ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test.describe('Golden Path - Investigation Flow', () => {
-  test('should create investigation, add entities, discover relationships', async ({ page }) => {
+test.describe("Golden Path - Investigation Flow", () => {
+  test("should create investigation, add entities, discover relationships", async ({ page }) => {
     // Navigate to app
-    await page.goto('http://localhost:3000');
+    await page.goto("http://localhost:3000");
 
     // Create investigation
     await page.click('[data-testid="new-investigation"]');
-    await page.fill('[data-testid="investigation-name"]', 'Test Investigation');
+    await page.fill('[data-testid="investigation-name"]', "Test Investigation");
     await page.click('[data-testid="create-investigation"]');
 
     // Verify investigation created
-    await expect(page.locator('[data-testid="investigation-title"]')).toHaveText('Test Investigation');
+    await expect(page.locator('[data-testid="investigation-title"]')).toHaveText(
+      "Test Investigation"
+    );
 
     // Add entity
     await page.click('[data-testid="add-entity"]');
-    await page.fill('[data-testid="entity-name"]', 'John Doe');
-    await page.selectOption('[data-testid="entity-type"]', 'Person');
+    await page.fill('[data-testid="entity-name"]', "John Doe");
+    await page.selectOption('[data-testid="entity-type"]', "Person");
     await page.click('[data-testid="save-entity"]');
 
     // Verify entity appears in graph
-    await expect(page.locator('[data-testid="graph-node"]')).toContainText('John Doe');
+    await expect(page.locator('[data-testid="graph-node"]')).toContainText("John Doe");
 
     // Discover relationships
     await page.click('[data-testid="entity-menu"]');
     await page.click('[data-testid="discover-relationships"]');
 
     // Wait for relationship discovery
-    await expect(page.locator('[data-testid="relationship-count"]')).not.toHaveText('0');
+    await expect(page.locator('[data-testid="relationship-count"]')).not.toHaveText("0");
 
     // Query Copilot
-    await page.fill('[data-testid="copilot-input"]', 'What connections does John Doe have?');
+    await page.fill('[data-testid="copilot-input"]', "What connections does John Doe have?");
     await page.click('[data-testid="copilot-submit"]');
 
     // Verify Copilot response
@@ -342,13 +362,14 @@ spec:
     labelSelectors:
       app: neo4j
   delay:
-    latency: '100ms'
-    correlation: '100'
-    jitter: '10ms'
-  duration: '5m'
+    latency: "100ms"
+    correlation: "100"
+    jitter: "10ms"
+  duration: "5m"
 ```
 
 ## Related Files
+
 - `/home/user/summit/docs/TEST_STRATEGY.md` - Testing guidelines
 - `/home/user/summit/tests/` - Test suites
 - `/home/user/summit/scripts/smoke-test.js` - Smoke tests
@@ -364,6 +385,7 @@ claude "Execute prompt 9: Comprehensive testing strategy"
 ```
 
 ## Notes
+
 - Use TestContainers for isolated integration tests
 - Implement test data builders for complex objects
 - Use Faker.js for generating realistic test data

@@ -1,6 +1,6 @@
-import axios from 'axios';
+import axios from "axios";
 
-const BASE = '/geo';
+const BASE = "/geo";
 
 export async function geofenceCheck(payload) {
   const res = await axios.post(`${BASE}/geofence/check`, payload);

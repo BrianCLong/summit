@@ -26,11 +26,11 @@ spec:
             - containerPort: 8000
           env:
             - name: CUDA_VISIBLE_DEVICES
-              value: '0'
+              value: "0"
             - name: PYTHONUNBUFFERED
-              value: '1'
+              value: "1"
             - name: ML_SERVICE_PORT
-              value: '8000'
+              value: "8000"
             - name: REDIS_URL
               valueFrom:
                 secretKeyRef:
@@ -43,12 +43,12 @@ spec:
                   key: neo4j-uri
           resources:
             requests:
-              memory: '4Gi'
-              cpu: '2'
+              memory: "4Gi"
+              cpu: "2"
               nvidia.com/gpu: 1
             limits:
-              memory: '16Gi'
-              cpu: '8'
+              memory: "16Gi"
+              cpu: "8"
               nvidia.com/gpu: 1
           livenessProbe:
             httpGet:

@@ -1,6 +1,8 @@
 let emitter: { emit: (topic: string, msg: unknown) => Promise<void> } | null = null;
 
-export function setEmitter(handler: { emit: (topic: string, msg: unknown) => Promise<void> }): void {
+export function setEmitter(handler: {
+  emit: (topic: string, msg: unknown) => Promise<void>;
+}): void {
   emitter = handler;
 }
 

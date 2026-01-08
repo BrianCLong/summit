@@ -4,52 +4,52 @@
  */
 
 export enum CrisisType {
-  ARMED_CONFLICT = 'ARMED_CONFLICT',
-  TERRITORIAL_DISPUTE = 'TERRITORIAL_DISPUTE',
-  DIPLOMATIC_CRISIS = 'DIPLOMATIC_CRISIS',
-  HUMANITARIAN_CRISIS = 'HUMANITARIAN_CRISIS',
-  POLITICAL_CRISIS = 'POLITICAL_CRISIS',
-  ECONOMIC_CRISIS = 'ECONOMIC_CRISIS',
-  REFUGEE_CRISIS = 'REFUGEE_CRISIS',
-  HOSTAGE_CRISIS = 'HOSTAGE_CRISIS',
-  NUCLEAR_CRISIS = 'NUCLEAR_CRISIS',
-  CYBER_CRISIS = 'CYBER_CRISIS',
-  TERRORIST_INCIDENT = 'TERRORIST_INCIDENT',
-  INTERNATIONAL_INCIDENT = 'INTERNATIONAL_INCIDENT'
+  ARMED_CONFLICT = "ARMED_CONFLICT",
+  TERRITORIAL_DISPUTE = "TERRITORIAL_DISPUTE",
+  DIPLOMATIC_CRISIS = "DIPLOMATIC_CRISIS",
+  HUMANITARIAN_CRISIS = "HUMANITARIAN_CRISIS",
+  POLITICAL_CRISIS = "POLITICAL_CRISIS",
+  ECONOMIC_CRISIS = "ECONOMIC_CRISIS",
+  REFUGEE_CRISIS = "REFUGEE_CRISIS",
+  HOSTAGE_CRISIS = "HOSTAGE_CRISIS",
+  NUCLEAR_CRISIS = "NUCLEAR_CRISIS",
+  CYBER_CRISIS = "CYBER_CRISIS",
+  TERRORIST_INCIDENT = "TERRORIST_INCIDENT",
+  INTERNATIONAL_INCIDENT = "INTERNATIONAL_INCIDENT",
 }
 
 export enum CrisisPhase {
-  EMERGING = 'EMERGING',
-  ESCALATING = 'ESCALATING',
-  PEAK = 'PEAK',
-  DE_ESCALATING = 'DE_ESCALATING',
-  STABILIZING = 'STABILIZING',
-  RESOLVED = 'RESOLVED',
-  FROZEN = 'FROZEN',
-  RECURRING = 'RECURRING'
+  EMERGING = "EMERGING",
+  ESCALATING = "ESCALATING",
+  PEAK = "PEAK",
+  DE_ESCALATING = "DE_ESCALATING",
+  STABILIZING = "STABILIZING",
+  RESOLVED = "RESOLVED",
+  FROZEN = "FROZEN",
+  RECURRING = "RECURRING",
 }
 
 export enum EscalationLevel {
-  LOW = 'LOW',
-  MODERATE = 'MODERATE',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL',
-  MAXIMUM = 'MAXIMUM'
+  LOW = "LOW",
+  MODERATE = "MODERATE",
+  HIGH = "HIGH",
+  CRITICAL = "CRITICAL",
+  MAXIMUM = "MAXIMUM",
 }
 
 export enum MediationType {
-  DIRECT_NEGOTIATION = 'DIRECT_NEGOTIATION',
-  THIRD_PARTY_MEDIATION = 'THIRD_PARTY_MEDIATION',
-  SHUTTLE_DIPLOMACY = 'SHUTTLE_DIPLOMACY',
-  TRACK_ONE = 'TRACK_ONE',
-  TRACK_TWO = 'TRACK_TWO',
-  TRACK_THREE = 'TRACK_THREE',
-  MULTI_TRACK = 'MULTI_TRACK',
-  UN_MEDIATION = 'UN_MEDIATION',
-  REGIONAL_MEDIATION = 'REGIONAL_MEDIATION',
-  GOOD_OFFICES = 'GOOD_OFFICES',
-  ARBITRATION = 'ARBITRATION',
-  CONCILIATION = 'CONCILIATION'
+  DIRECT_NEGOTIATION = "DIRECT_NEGOTIATION",
+  THIRD_PARTY_MEDIATION = "THIRD_PARTY_MEDIATION",
+  SHUTTLE_DIPLOMACY = "SHUTTLE_DIPLOMACY",
+  TRACK_ONE = "TRACK_ONE",
+  TRACK_TWO = "TRACK_TWO",
+  TRACK_THREE = "TRACK_THREE",
+  MULTI_TRACK = "MULTI_TRACK",
+  UN_MEDIATION = "UN_MEDIATION",
+  REGIONAL_MEDIATION = "REGIONAL_MEDIATION",
+  GOOD_OFFICES = "GOOD_OFFICES",
+  ARBITRATION = "ARBITRATION",
+  CONCILIATION = "CONCILIATION",
 }
 
 export interface Crisis {
@@ -73,7 +73,7 @@ export interface Crisis {
 
   // Characteristics
   location: Location;
-  scope: 'LOCAL' | 'REGIONAL' | 'INTERNATIONAL' | 'GLOBAL';
+  scope: "LOCAL" | "REGIONAL" | "INTERNATIONAL" | "GLOBAL";
   intensity: number; // 0-100
   complexity: number; // 0-100
 
@@ -124,7 +124,7 @@ export interface Crisis {
 export interface Party {
   id: string;
   name: string;
-  type: 'STATE' | 'NON_STATE_ACTOR' | 'INSURGENT_GROUP' | 'POLITICAL_FACTION' | 'ETHNIC_GROUP';
+  type: "STATE" | "NON_STATE_ACTOR" | "INSURGENT_GROUP" | "POLITICAL_FACTION" | "ETHNIC_GROUP";
   country?: string;
   leaders: Leader[];
   objectives: string[];
@@ -147,7 +147,7 @@ export interface Leader {
 
 export interface ExternalActor {
   country: string;
-  role: 'MEDIATOR' | 'GUARANTOR' | 'BACKER' | 'OBSERVER' | 'SPOILER' | 'FACILITATOR';
+  role: "MEDIATOR" | "GUARANTOR" | "BACKER" | "OBSERVER" | "SPOILER" | "FACILITATOR";
   involvement: number; // 0-100
   objectives: string[];
   leverage: number; // 0-100
@@ -165,7 +165,15 @@ export interface Location {
 export interface TimelineEvent {
   date: Date;
   event: string;
-  type: 'OUTBREAK' | 'ESCALATION' | 'ATTACK' | 'NEGOTIATION' | 'AGREEMENT' | 'VIOLATION' | 'INTERVENTION' | 'OTHER';
+  type:
+    | "OUTBREAK"
+    | "ESCALATION"
+    | "ATTACK"
+    | "NEGOTIATION"
+    | "AGREEMENT"
+    | "VIOLATION"
+    | "INTERVENTION"
+    | "OTHER";
   parties: string[];
   impact: number; // 1-10
   description: string;
@@ -184,7 +192,7 @@ export interface DisplacementData {
   internally: number;
   refugees: number;
   hostCountries: { country: string; count: number }[];
-  trend: 'INCREASING' | 'STABLE' | 'DECREASING';
+  trend: "INCREASING" | "STABLE" | "DECREASING";
   lastUpdated: Date;
 }
 
@@ -202,12 +210,12 @@ export interface HumanitarianImpact {
   peopleInNeed: number;
   accessRestrictions: string[];
   aidEfforts: AidEffort[];
-  severity: 'MINIMAL' | 'MODERATE' | 'SEVERE' | 'CATASTROPHIC';
+  severity: "MINIMAL" | "MODERATE" | "SEVERE" | "CATASTROPHIC";
 }
 
 export interface AidEffort {
   organization: string;
-  type: 'FOOD' | 'MEDICAL' | 'SHELTER' | 'PROTECTION' | 'MULTI_SECTOR';
+  type: "FOOD" | "MEDICAL" | "SHELTER" | "PROTECTION" | "MULTI_SECTOR";
   scale: number; // USD
   beneficiaries: number;
   challenges: string[];
@@ -225,10 +233,10 @@ export interface MediationEffort {
   id: string;
   type: MediationType;
   mediator: string;
-  mediatorType: 'COUNTRY' | 'UN' | 'REGIONAL_ORG' | 'INDIVIDUAL' | 'NGO';
+  mediatorType: "COUNTRY" | "UN" | "REGIONAL_ORG" | "INDIVIDUAL" | "NGO";
   startDate: Date;
   endDate?: Date;
-  status: 'ACTIVE' | 'SUSPENDED' | 'CONCLUDED' | 'FAILED';
+  status: "ACTIVE" | "SUSPENDED" | "CONCLUDED" | "FAILED";
 
   parties: string[];
   objectives: string[];
@@ -274,7 +282,7 @@ export interface Setback {
   description: string;
   severity: number; // 1-10
   cause: string;
-  recovery: 'IMMEDIATE' | 'GRADUAL' | 'UNCERTAIN' | 'UNLIKELY';
+  recovery: "IMMEDIATE" | "GRADUAL" | "UNCERTAIN" | "UNLIKELY";
 }
 
 export interface Negotiation {
@@ -282,7 +290,7 @@ export interface Negotiation {
   round: number;
   date: Date;
   location: string;
-  format: 'BILATERAL' | 'MULTILATERAL' | 'PROXIMITY' | 'SHUTTLE';
+  format: "BILATERAL" | "MULTILATERAL" | "PROXIMITY" | "SHUTTLE";
   participants: Participant[];
   agenda: string[];
 
@@ -290,8 +298,8 @@ export interface Negotiation {
   agreements?: Agreement[];
   disagreements?: string[];
 
-  atmosphereTone: 'POSITIVE' | 'CONSTRUCTIVE' | 'TENSE' | 'HOSTILE' | 'DEADLOCKED';
-  progress: 'BREAKTHROUGH' | 'PROGRESS' | 'STALEMATE' | 'REGRESSION';
+  atmosphereTone: "POSITIVE" | "CONSTRUCTIVE" | "TENSE" | "HOSTILE" | "DEADLOCKED";
+  progress: "BREAKTHROUGH" | "PROGRESS" | "STALEMATE" | "REGRESSION";
 
   nextRound?: Date;
   continuationLikelihood: number; // 0-100
@@ -302,22 +310,22 @@ export interface Participant {
   representative: string;
   title: string;
   delegationSize?: number;
-  approach: 'FLEXIBLE' | 'RIGID' | 'STRATEGIC' | 'PRINCIPLED';
+  approach: "FLEXIBLE" | "RIGID" | "STRATEGIC" | "PRINCIPLED";
   concessions?: string[];
   demands: string[];
 }
 
 export interface NegotiationOutcome {
-  type: 'AGREEMENT' | 'PARTIAL_AGREEMENT' | 'UNDERSTANDING' | 'COMMITMENT' | 'DEADLOCK';
+  type: "AGREEMENT" | "PARTIAL_AGREEMENT" | "UNDERSTANDING" | "COMMITMENT" | "DEADLOCK";
   subject: string;
   details: string;
-  bindingForce: 'BINDING' | 'NON_BINDING' | 'POLITICAL';
+  bindingForce: "BINDING" | "NON_BINDING" | "POLITICAL";
   verificationMechanism?: string;
 }
 
 export interface Ceasefire {
   id: string;
-  type: 'PERMANENT' | 'INDEFINITE' | 'TEMPORARY' | 'LIMITED' | 'HUMANITARIAN';
+  type: "PERMANENT" | "INDEFINITE" | "TEMPORARY" | "LIMITED" | "HUMANITARIAN";
   parties: string[];
   startDate: Date;
   endDate?: Date;
@@ -327,7 +335,7 @@ export interface Ceasefire {
   exclusions?: string[];
   verificationMechanism?: VerificationMechanism;
 
-  status: 'HOLDING' | 'VIOLATED' | 'EXPIRED' | 'EXTENDED' | 'COLLAPSED';
+  status: "HOLDING" | "VIOLATED" | "EXPIRED" | "EXTENDED" | "COLLAPSED";
   violations?: Violation[];
   compliance: number; // 0-100
 
@@ -336,7 +344,7 @@ export interface Ceasefire {
 }
 
 export interface VerificationMechanism {
-  type: 'MONITORS' | 'PEACEKEEPERS' | 'SATELLITE' | 'REPORTS' | 'MIXED';
+  type: "MONITORS" | "PEACEKEEPERS" | "SATELLITE" | "REPORTS" | "MIXED";
   implementer: string;
   personnel?: number;
   coverage: number; // 0-100
@@ -347,7 +355,7 @@ export interface Violation {
   date: Date;
   violator: string;
   type: string;
-  severity: 'MINOR' | 'MODERATE' | 'MAJOR' | 'SEVERE';
+  severity: "MINOR" | "MODERATE" | "MAJOR" | "SEVERE";
   description: string;
   response?: string;
   verified: boolean;
@@ -356,7 +364,7 @@ export interface Violation {
 export interface Agreement {
   id: string;
   name: string;
-  type: 'PEACE_AGREEMENT' | 'FRAMEWORK_AGREEMENT' | 'INTERIM_AGREEMENT' | 'PROTOCOL' | 'MOU';
+  type: "PEACE_AGREEMENT" | "FRAMEWORK_AGREEMENT" | "INTERIM_AGREEMENT" | "PROTOCOL" | "MOU";
   date: Date;
   location: string;
 
@@ -367,7 +375,7 @@ export interface Agreement {
   provisions: Provision[];
   timeline: ImplementationTimeline;
 
-  status: 'SIGNED' | 'RATIFIED' | 'IMPLEMENTED' | 'PARTIALLY_IMPLEMENTED' | 'FAILED';
+  status: "SIGNED" | "RATIFIED" | "IMPLEMENTED" | "PARTIALLY_IMPLEMENTED" | "FAILED";
   implementation: number; // 0-100
   compliance: ComplianceTracking[];
 
@@ -376,11 +384,11 @@ export interface Agreement {
 }
 
 export interface Provision {
-  category: 'POLITICAL' | 'SECURITY' | 'ECONOMIC' | 'HUMANITARIAN' | 'JUSTICE' | 'GOVERNANCE';
+  category: "POLITICAL" | "SECURITY" | "ECONOMIC" | "HUMANITARIAN" | "JUSTICE" | "GOVERNANCE";
   description: string;
   responsible: string[];
   deadline?: Date;
-  status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'STALLED' | 'VIOLATED';
+  status: "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED" | "STALLED" | "VIOLATED";
   progress: number; // 0-100
 }
 
@@ -390,7 +398,7 @@ export interface ImplementationTimeline {
     startDate: Date;
     endDate: Date;
     milestones: string[];
-    status: 'PENDING' | 'ACTIVE' | 'COMPLETED' | 'DELAYED';
+    status: "PENDING" | "ACTIVE" | "COMPLETED" | "DELAYED";
   }[];
 }
 
@@ -418,10 +426,10 @@ export interface CrisisCommunication {
   date: Date;
   sender: string;
   recipient?: string;
-  type: 'STATEMENT' | 'HOTLINE' | 'LETTER' | 'BACKCHANNEL' | 'PUBLIC' | 'PRIVATE';
-  urgency: 'ROUTINE' | 'PRIORITY' | 'IMMEDIATE' | 'EMERGENCY';
+  type: "STATEMENT" | "HOTLINE" | "LETTER" | "BACKCHANNEL" | "PUBLIC" | "PRIVATE";
+  urgency: "ROUTINE" | "PRIORITY" | "IMMEDIATE" | "EMERGENCY";
   content: string;
-  tone: 'CONCILIATORY' | 'FIRM' | 'WARNING' | 'THREATENING' | 'REASSURING';
+  tone: "CONCILIATORY" | "FIRM" | "WARNING" | "THREATENING" | "REASSURING";
   intent: string;
   effectiveness: number; // 0-100
 }
@@ -453,7 +461,7 @@ export interface EscalationRisk {
   factor: string;
   probability: number; // 0-100
   severity: number; // 1-10
-  timeframe: 'IMMEDIATE' | 'SHORT_TERM' | 'MEDIUM_TERM' | 'LONG_TERM';
+  timeframe: "IMMEDIATE" | "SHORT_TERM" | "MEDIUM_TERM" | "LONG_TERM";
   triggers: string[];
   indicators: string[];
   mitigation?: string[];
@@ -463,7 +471,7 @@ export interface DeescalationOpportunity {
   opportunity: string;
   feasibility: number; // 0-100
   impact: number; // 1-10
-  timeframe: 'IMMEDIATE' | 'SHORT_TERM' | 'MEDIUM_TERM' | 'LONG_TERM';
+  timeframe: "IMMEDIATE" | "SHORT_TERM" | "MEDIUM_TERM" | "LONG_TERM";
   requirements: string[];
   risks: string[];
   sponsors?: string[];
@@ -509,7 +517,7 @@ export interface ResolutionProspects {
 }
 
 export interface Source {
-  type: 'OFFICIAL' | 'MEDIA' | 'NGO' | 'INTELLIGENCE' | 'ACADEMIC' | 'WITNESS';
+  type: "OFFICIAL" | "MEDIA" | "NGO" | "INTELLIGENCE" | "ACADEMIC" | "WITNESS";
   name: string;
   url?: string;
   date: Date;
@@ -522,7 +530,7 @@ export interface PeaceProcess {
   name: string;
   startDate: Date;
   endDate?: Date;
-  status: 'INITIATED' | 'ONGOING' | 'STALLED' | 'COMPLETED' | 'FAILED';
+  status: "INITIATED" | "ONGOING" | "STALLED" | "COMPLETED" | "FAILED";
 
   framework: string;
   phases: ProcessPhase[];
@@ -530,7 +538,7 @@ export interface PeaceProcess {
 
   achievements: string[];
   challenges: string[];
-  momentum: 'STRONG' | 'MODERATE' | 'WEAK' | 'STALLED';
+  momentum: "STRONG" | "MODERATE" | "WEAK" | "STALLED";
 
   publicSupport: {
     party: string;
@@ -545,14 +553,14 @@ export interface ProcessPhase {
   number: number;
   name: string;
   objectives: string[];
-  status: 'PENDING' | 'ACTIVE' | 'COMPLETED' | 'STALLED';
+  status: "PENDING" | "ACTIVE" | "COMPLETED" | "STALLED";
   progress: number; // 0-100
   challenges: string[];
 }
 
 export interface Stakeholder {
   name: string;
-  type: 'PRIMARY_PARTY' | 'MEDIATOR' | 'GUARANTOR' | 'OBSERVER' | 'SUPPORTER';
+  type: "PRIMARY_PARTY" | "MEDIATOR" | "GUARANTOR" | "OBSERVER" | "SUPPORTER";
   role: string;
   influence: number; // 0-100
   commitment: number; // 0-100
@@ -568,9 +576,9 @@ export interface CrisisComparison {
 
 export interface EarlyWarningIndicator {
   indicator: string;
-  category: 'POLITICAL' | 'MILITARY' | 'ECONOMIC' | 'SOCIAL' | 'ENVIRONMENTAL';
+  category: "POLITICAL" | "MILITARY" | "ECONOMIC" | "SOCIAL" | "ENVIRONMENTAL";
   threshold: number;
   currentLevel: number;
-  trend: 'IMPROVING' | 'STABLE' | 'DETERIORATING';
-  urgency: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  trend: "IMPROVING" | "STABLE" | "DETERIORATING";
+  urgency: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 }

@@ -10,21 +10,22 @@ Summit is formally re-opened for Version 2 (V2) operations. A new Charter (`docs
 
 ## 2. Deliverables Manifest
 
-| Artifact | Location | Status |
-| :--- | :--- | :--- |
-| **V2 Charter** | `docs/v2/CHARTER.md` | ✅ Created |
-| **Inheritance Map** | `docs/v2/INHERITED_CONTRACTS.md` | ✅ Created |
-| **Change Classes** | `docs/v2/CHANGE_CLASSES.md` | ✅ Created |
-| **Sandbox** | `packages/v2-sandbox/` | ✅ Created |
-| **Governance Ext.** | `docs/v2/GOVERNANCE_EXTENSIONS.md` | ✅ Created |
-| **Verification** | `test/verification/v2-charter.node.test.ts` | ✅ Passing |
+| Artifact            | Location                                    | Status     |
+| :------------------ | :------------------------------------------ | :--------- |
+| **V2 Charter**      | `docs/v2/CHARTER.md`                        | ✅ Created |
+| **Inheritance Map** | `docs/v2/INHERITED_CONTRACTS.md`            | ✅ Created |
+| **Change Classes**  | `docs/v2/CHANGE_CLASSES.md`                 | ✅ Created |
+| **Sandbox**         | `packages/v2-sandbox/`                      | ✅ Created |
+| **Governance Ext.** | `docs/v2/GOVERNANCE_EXTENSIONS.md`          | ✅ Created |
+| **Verification**    | `test/verification/v2-charter.node.test.ts` | ✅ Passing |
 
 ## 3. Sandbox Boundaries
 
 The V2 Sandbox is physically isolated in `packages/v2-sandbox/`.
-*   **Access:** No production credentials.
-*   **Storage:** Ephemeral/Local only.
-*   **Risk:** High risk allowed internally, zero risk to core.
+
+- **Access:** No production credentials.
+- **Storage:** Ephemeral/Local only.
+- **Risk:** High risk allowed internally, zero risk to core.
 
 ## 4. Verification Evidence
 

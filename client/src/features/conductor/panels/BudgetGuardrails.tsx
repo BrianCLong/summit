@@ -1,13 +1,5 @@
-import React from 'react';
-import {
-  Card,
-  CardContent,
-  Typography,
-  List,
-  ListItem,
-  ListItemText,
-  Chip,
-} from '@mui/material';
+import React from "react";
+import { Card, CardContent, Typography, List, ListItem, ListItemText, Chip } from "@mui/material";
 
 export type Denial = {
   time: string;
@@ -19,14 +11,11 @@ export type Denial = {
 
 function suggestionFor(rule: string): string {
   const map: Record<string, string> = {
-    'budget.daily.usd':
-      'Reduce LLM_HEAVY usage or increase daily budget cap in Policy → Budgets.',
-    'rps.max':
-      'Lower request rate or raise CONDUCTOR_RPS_MAX within safe limits.',
-    'route.p95':
-      'Investigate slow expert; roll back canary or adjust routing weights.',
+    "budget.daily.usd": "Reduce LLM_HEAVY usage or increase daily budget cap in Policy → Budgets.",
+    "rps.max": "Lower request rate or raise CONDUCTOR_RPS_MAX within safe limits.",
+    "route.p95": "Investigate slow expert; roll back canary or adjust routing weights.",
   };
-  return map[rule] || 'Review policy and adjust parameters or workload.';
+  return map[rule] || "Review policy and adjust parameters or workload.";
 }
 
 export function BudgetGuardrails({ denials = [] }: { denials?: Denial[] }) {
@@ -46,7 +35,7 @@ export function BudgetGuardrails({ denials = [] }: { denials?: Denial[] }) {
               <ListItem key={i} divider>
                 <ListItemText
                   primary={d.reason}
-                  secondary={`${d.time} • ${d.tenant || 'tenant'} • case ${d.caseId || '-'} • ${suggestionFor(d.rule)}`}
+                  secondary={`${d.time} • ${d.tenant || "tenant"} • case ${d.caseId || "-"} • ${suggestionFor(d.rule)}`}
                 />
                 <Chip size="small" label={d.rule} />
               </ListItem>

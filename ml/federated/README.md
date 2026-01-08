@@ -110,47 +110,47 @@ result = client.run_airgap_round()
 
 ## Performance Targets
 
-| Metric | Target | Achieved |
-|--------|--------|----------|
-| Validation Accuracy | 85% | ✓ (architecture validated) |
-| Privacy Budget (ε) | 1.0 | ✓ |
-| Privacy Delta (δ) | 1e-5 | ✓ |
-| Aggregation Latency | <100ms | ✓ (50 embeddings) |
-| Throughput | >1000 samples/sec | ✓ |
+| Metric              | Target            | Achieved                   |
+| ------------------- | ----------------- | -------------------------- |
+| Validation Accuracy | 85%               | ✓ (architecture validated) |
+| Privacy Budget (ε)  | 1.0               | ✓                          |
+| Privacy Delta (δ)   | 1e-5              | ✓                          |
+| Aggregation Latency | <100ms            | ✓ (50 embeddings)          |
+| Throughput          | >1000 samples/sec | ✓                          |
 
 ## Tradeoffs Analysis
 
 ### Privacy vs. Utility
 
-| Approach | Privacy | Model Accuracy | Training Time |
-|----------|---------|----------------|---------------|
-| No DP | ❌ Low | High (baseline) | Fast |
-| ε=10 | ⚠️ Moderate | -2% | +10% |
-| ε=1.0 (default) | ✓ Strong | -5% | +20% |
-| ε=0.1 | ✓✓ Very Strong | -15% | +50% |
+| Approach        | Privacy        | Model Accuracy  | Training Time |
+| --------------- | -------------- | --------------- | ------------- |
+| No DP           | ❌ Low         | High (baseline) | Fast          |
+| ε=10            | ⚠️ Moderate    | -2%             | +10%          |
+| ε=1.0 (default) | ✓ Strong       | -5%             | +20%          |
+| ε=0.1           | ✓✓ Very Strong | -15%            | +50%          |
 
 **Recommendation**: Use ε=1.0 for most deployments. Increase to ε=0.1 for highly sensitive data.
 
 ### Air-Gap vs. Online Mode
 
-| Aspect | Online Mode | Air-Gap Mode |
-|--------|-------------|--------------|
-| **Latency** | Low (real-time) | High (manual sync) |
-| **Security** | Network exposure | Physical isolation |
-| **Synchronization** | Automatic | Manual transfer |
-| **Staleness** | None | Up to sync interval |
-| **Compliance** | Standard | SCIF-compatible |
+| Aspect              | Online Mode      | Air-Gap Mode        |
+| ------------------- | ---------------- | ------------------- |
+| **Latency**         | Low (real-time)  | High (manual sync)  |
+| **Security**        | Network exposure | Physical isolation  |
+| **Synchronization** | Automatic        | Manual transfer     |
+| **Staleness**       | None             | Up to sync interval |
+| **Compliance**      | Standard         | SCIF-compatible     |
 
 **Recommendation**: Use air-gap mode for classified environments or when network isolation is required.
 
 ### Aggregation Strategies
 
-| Strategy | Use Case | Convergence | Privacy |
-|----------|----------|-------------|---------|
-| FedAvg | IID data | Fast | Standard |
-| FedProx | Non-IID data | Moderate | Standard |
-| PrivacyPreserving | High privacy needs | Slower | Enhanced |
-| AirgapStrategy | Disconnected nodes | Tolerant | Standard |
+| Strategy          | Use Case           | Convergence | Privacy  |
+| ----------------- | ------------------ | ----------- | -------- |
+| FedAvg            | IID data           | Fast        | Standard |
+| FedProx           | Non-IID data       | Moderate    | Standard |
+| PrivacyPreserving | High privacy needs | Slower      | Enhanced |
+| AirgapStrategy    | Disconnected nodes | Tolerant    | Standard |
 
 ## Privacy Guarantees
 
@@ -190,24 +190,24 @@ RETURN e1, r, e2
 
 ### ServerConfig
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `num_rounds` | 10 | Total training rounds |
-| `min_fit_clients` | 2 | Minimum clients per round |
-| `privacy_epsilon` | 1.0 | DP epsilon budget |
-| `privacy_delta` | 1e-5 | DP delta parameter |
-| `airgap_mode` | False | Enable air-gap sync |
-| `target_accuracy` | 0.85 | Early stopping target |
+| Parameter         | Default | Description               |
+| ----------------- | ------- | ------------------------- |
+| `num_rounds`      | 10      | Total training rounds     |
+| `min_fit_clients` | 2       | Minimum clients per round |
+| `privacy_epsilon` | 1.0     | DP epsilon budget         |
+| `privacy_delta`   | 1e-5    | DP delta parameter        |
+| `airgap_mode`     | False   | Enable air-gap sync       |
+| `target_accuracy` | 0.85    | Early stopping target     |
 
 ### ClientConfig
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `node_id` | Required | Unique node identifier |
-| `local_epochs` | 1 | Local training epochs |
-| `enable_local_dp` | True | Apply local DP |
-| `local_epsilon` | 1.0 | Local DP budget |
-| `clip_norm` | 1.0 | Gradient clipping norm |
+| Parameter         | Default  | Description            |
+| ----------------- | -------- | ---------------------- |
+| `node_id`         | Required | Unique node identifier |
+| `local_epochs`    | 1        | Local training epochs  |
+| `enable_local_dp` | True     | Apply local DP         |
+| `local_epsilon`   | 1.0      | Local DP budget        |
+| `clip_norm`       | 1.0      | Gradient clipping norm |
 
 ## Testing
 

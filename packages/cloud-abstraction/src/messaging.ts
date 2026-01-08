@@ -9,8 +9,8 @@ import {
   Message,
   MessagePublishOptions,
   MessageReceiveOptions,
-  MessagingError
-} from './types.js';
+  MessagingError,
+} from "./types.js";
 
 export interface IMessagingProvider {
   readonly provider: CloudProvider;
@@ -27,10 +27,7 @@ export interface IMessagingProvider {
   /**
    * Receive messages from queue
    */
-  receive(
-    queue: string,
-    options?: MessageReceiveOptions
-  ): Promise<Message[]>;
+  receive(queue: string, options?: MessageReceiveOptions): Promise<Message[]>;
 
   /**
    * Delete message from queue
@@ -55,10 +52,7 @@ export interface IMessagingProvider {
   /**
    * Set queue attributes
    */
-  setQueueAttributes(
-    queue: string,
-    attributes: Record<string, any>
-  ): Promise<void>;
+  setQueueAttributes(queue: string, attributes: Record<string, any>): Promise<void>;
 }
 
 // Re-export types for convenience

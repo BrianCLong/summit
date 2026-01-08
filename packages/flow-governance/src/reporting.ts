@@ -6,8 +6,13 @@ import {
   GuardrailResult,
   PullRequest,
   ToilItem,
-} from './types.js';
-import { autoCloseNoisyAlerts, deduplicateAlerts, enforcePrGuardrails, enforceToilBudget } from './guardrails.js';
+} from "./types.js";
+import {
+  autoCloseNoisyAlerts,
+  deduplicateAlerts,
+  enforcePrGuardrails,
+  enforceToilBudget,
+} from "./guardrails.js";
 
 export interface WeeklyThroughputReport {
   shippedCount: number;
@@ -30,7 +35,7 @@ export interface ToilReport {
 export function buildWeeklyThroughputReport(
   completedItems: FlowMetrics[],
   blockedItems: Array<{ reason: string }>,
-  mitigations: string[],
+  mitigations: string[]
 ): WeeklyThroughputReport {
   const blockedReasons: Record<string, number> = {};
   for (const blocked of blockedItems) {
@@ -48,11 +53,12 @@ export function buildWeeklyThroughputReport(
 
 export function buildToilReport(
   toilItems: ToilItem[],
-  budgetConfig: { weeklyHoursPerEngineer: number; budgetPercentage: number },
+  budgetConfig: { weeklyHoursPerEngineer: number; budgetPercentage: number }
 ): ToilReport {
   const census = toilItems.map((item) => ({
     item,
-    needsAutomation: !item.automated || !item.auditLogging || !item.rollbackPlan || !item.dryRunSupported,
+    needsAutomation:
+      !item.automated || !item.auditLogging || !item.rollbackPlan || !item.dryRunSupported,
   }));
 
   const budgetBreaches = enforceToilBudget(toilItems, budgetConfig)
@@ -62,7 +68,11 @@ export function buildToilReport(
   return { census, budgetBreaches };
 }
 
-export function evaluatePrs(prs: PullRequest[], lineLimit?: number, fileLimit?: number): GuardrailResult[] {
+export function evaluatePrs(
+  prs: PullRequest[],
+  lineLimit?: number,
+  fileLimit?: number
+): GuardrailResult[] {
   return prs.map((pr) => enforcePrGuardrails(pr, lineLimit, fileLimit));
 }
 

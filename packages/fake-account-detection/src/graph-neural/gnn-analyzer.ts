@@ -22,13 +22,13 @@ export interface NodeClassification {
 }
 
 export enum NodeClass {
-  GENUINE = 'genuine',
-  BOT = 'bot',
-  CYBORG = 'cyborg',
-  TROLL = 'troll',
-  SOCKPUPPET = 'sockpuppet',
-  AMPLIFIER = 'amplifier',
-  COORDINATOR = 'coordinator',
+  GENUINE = "genuine",
+  BOT = "bot",
+  CYBORG = "cyborg",
+  TROLL = "troll",
+  SOCKPUPPET = "sockpuppet",
+  AMPLIFIER = "amplifier",
+  COORDINATOR = "coordinator",
 }
 
 export interface NodeFeatureImportance {
@@ -100,12 +100,12 @@ export interface StructuralAnomaly {
 }
 
 export enum StructuralAnomalyType {
-  UNUSUAL_DEGREE = 'unusual_degree',
-  CLUSTERING_ANOMALY = 'clustering_anomaly',
-  BRIDGE_MANIPULATION = 'bridge_manipulation',
-  STAR_PATTERN = 'star_pattern',
-  CLIQUE_INJECTION = 'clique_injection',
-  PATH_MANIPULATION = 'path_manipulation',
+  UNUSUAL_DEGREE = "unusual_degree",
+  CLUSTERING_ANOMALY = "clustering_anomaly",
+  BRIDGE_MANIPULATION = "bridge_manipulation",
+  STAR_PATTERN = "star_pattern",
+  CLIQUE_INJECTION = "clique_injection",
+  PATH_MANIPULATION = "path_manipulation",
 }
 
 export interface BehavioralAnomaly {
@@ -292,7 +292,11 @@ export class GraphNeuralNetworkAnalyzer {
     const communityDetection = await this.detectCommunities(graph, embeddings);
 
     // Detect anomalies
-    const anomalyDetection = await this.anomalyDetector.detect(graph, embeddings, nodeClassifications);
+    const anomalyDetection = await this.anomalyDetector.detect(
+      graph,
+      embeddings,
+      nodeClassifications
+    );
 
     // Analyze propagation patterns
     const propagationPatterns = await this.analyzePropagation(graph, embeddings);
@@ -327,7 +331,7 @@ export class GraphNeuralNetworkAnalyzer {
     for (const layer of this.gnnLayers) {
       for (const node of graph.nodes) {
         const neighbors = graph.getNeighbors(node.id);
-        const neighborEmbeddings = neighbors.map(n => nodeEmbeddings.get(n)!);
+        const neighborEmbeddings = neighbors.map((n) => nodeEmbeddings.get(n)!);
         const currentEmbedding = nodeEmbeddings.get(node.id)!;
 
         // Aggregate neighbor information with attention
@@ -420,11 +424,7 @@ export class GraphNeuralNetworkAnalyzer {
       const features = this.calculateFeatureImportance(embedding, probabilities);
 
       // Analyze neighbor influence
-      const neighborInfluence = await this.analyzeNeighborInfluence(
-        node.id,
-        graph,
-        embeddings
-      );
+      const neighborInfluence = await this.analyzeNeighborInfluence(node.id, graph, embeddings);
 
       classifications.push({
         nodeId: node.id,
@@ -462,7 +462,7 @@ export class GraphNeuralNetworkAnalyzer {
   }
 
   private argmax(obj: Record<string, number>): string {
-    let maxKey = '';
+    let maxKey = "";
     let maxVal = -Infinity;
     for (const [key, val] of Object.entries(obj)) {
       if (val > maxVal) {
@@ -478,11 +478,36 @@ export class GraphNeuralNetworkAnalyzer {
     probabilities: Record<string, number>
   ): NodeFeatureImportance[] {
     const features: NodeFeatureImportance[] = [
-      { feature: 'degree', value: embedding[0], importance: 0.15, contribution: embedding[0] * 0.15 },
-      { feature: 'activity', value: embedding[5], importance: 0.2, contribution: embedding[5] * 0.2 },
-      { feature: 'engagement', value: embedding[7], importance: 0.18, contribution: embedding[7] * 0.18 },
-      { feature: 'profile_completeness', value: embedding[8], importance: 0.12, contribution: embedding[8] * 0.12 },
-      { feature: 'account_age', value: embedding[9], importance: 0.1, contribution: embedding[9] * 0.1 },
+      {
+        feature: "degree",
+        value: embedding[0],
+        importance: 0.15,
+        contribution: embedding[0] * 0.15,
+      },
+      {
+        feature: "activity",
+        value: embedding[5],
+        importance: 0.2,
+        contribution: embedding[5] * 0.2,
+      },
+      {
+        feature: "engagement",
+        value: embedding[7],
+        importance: 0.18,
+        contribution: embedding[7] * 0.18,
+      },
+      {
+        feature: "profile_completeness",
+        value: embedding[8],
+        importance: 0.12,
+        contribution: embedding[8] * 0.12,
+      },
+      {
+        feature: "account_age",
+        value: embedding[9],
+        importance: 0.1,
+        contribution: embedding[9] * 0.1,
+      },
     ];
 
     return features.sort((a, b) => b.importance - a.importance);
@@ -505,14 +530,14 @@ export class GraphNeuralNetworkAnalyzer {
     const homophily = neighbors.length > 0 ? similaritySum / neighbors.length : 0;
 
     // Find influential neighbors
-    const neighborScores = neighbors.map(n => ({
+    const neighborScores = neighbors.map((n) => ({
       id: n,
       influence: graph.getEdgeWeight(nodeId, n) * (embeddings.nodeEmbeddings.get(n)?.[4] || 0),
     }));
     const influentialNeighbors = neighborScores
       .sort((a, b) => b.influence - a.influence)
       .slice(0, 5)
-      .map(n => n.id);
+      .map((n) => n.id);
 
     return {
       homophily,
@@ -547,7 +572,7 @@ export class GraphNeuralNetworkAnalyzer {
     const communities: Community[] = [];
     for (const [clusterId, members] of clusters) {
       const internalEdges = this.countInternalEdges(members, graph);
-      const totalPossibleEdges = members.length * (members.length - 1) / 2;
+      const totalPossibleEdges = (members.length * (members.length - 1)) / 2;
       const internalDensity = totalPossibleEdges > 0 ? internalEdges / totalPossibleEdges : 0;
 
       const externalEdges = this.countExternalEdges(members, graph);
@@ -581,7 +606,9 @@ export class GraphNeuralNetworkAnalyzer {
       modularity,
       hierarchicalStructure: { level: 0, communities },
       bridgeNodes,
-      isolatedClusters: communities.filter(c => c.externalConnectivity < 0.01).map(c => c.members),
+      isolatedClusters: communities
+        .filter((c) => c.externalConnectivity < 0.01)
+        .map((c) => c.members),
     };
   }
 
@@ -609,7 +636,7 @@ export class GraphNeuralNetworkAnalyzer {
     let count = 0;
     for (const member of members) {
       const neighbors = graph.getNeighbors(member);
-      count += neighbors.filter(n => memberSet.has(n)).length;
+      count += neighbors.filter((n) => memberSet.has(n)).length;
     }
     return count / 2;
   }
@@ -619,7 +646,7 @@ export class GraphNeuralNetworkAnalyzer {
     let count = 0;
     for (const member of members) {
       const neighbors = graph.getNeighbors(member);
-      count += neighbors.filter(n => !memberSet.has(n)).length;
+      count += neighbors.filter((n) => !memberSet.has(n)).length;
     }
     return count;
   }
@@ -641,7 +668,7 @@ export class GraphNeuralNetworkAnalyzer {
       for (const member of community.members) {
         const neighbors = graph.getNeighbors(member);
         const memberSet = new Set(community.members);
-        const externalNeighbors = neighbors.filter(n => !memberSet.has(n));
+        const externalNeighbors = neighbors.filter((n) => !memberSet.has(n));
 
         if (externalNeighbors.length > neighbors.length * 0.5) {
           bridgeNodes.push(member);
@@ -684,12 +711,9 @@ export class GraphNeuralNetworkAnalyzer {
     return [];
   }
 
-  private analyzeInfluence(
-    graph: SocialGraph,
-    embeddings: GraphEmbeddings
-  ): InfluenceAnalysis {
+  private analyzeInfluence(graph: SocialGraph, embeddings: GraphEmbeddings): InfluenceAnalysis {
     const topInfluencers: InfluencerNode[] = graph.nodes
-      .map(n => ({
+      .map((n) => ({
         nodeId: n.id,
         influenceScore: n.pageRank || 0,
         reach: n.degree,
@@ -706,7 +730,7 @@ export class GraphNeuralNetworkAnalyzer {
         powerLawExponent: 2.1,
         concentrationIndex: 0.4,
       },
-      seedSetOptimization: topInfluencers.slice(0, 5).map(i => i.nodeId),
+      seedSetOptimization: topInfluencers.slice(0, 5).map((i) => i.nodeId),
     };
   }
 
@@ -817,9 +841,9 @@ class GraphAttentionLayer implements GNNLayer {
 
     // Softmax
     const maxScore = Math.max(...attentionScores);
-    const expScores = attentionScores.map(s => Math.exp(s - maxScore));
+    const expScores = attentionScores.map((s) => Math.exp(s - maxScore));
     const sumExp = expScores.reduce((a, b) => a + b, 0);
-    const attentionWeights = expScores.map(s => s / sumExp);
+    const attentionWeights = expScores.map((s) => s / sumExp);
 
     // Weighted aggregation
     for (let i = 0; i < neighborEmbeddings.length; i++) {
@@ -835,7 +859,7 @@ class GraphAttentionLayer implements GNNLayer {
     }
 
     // ReLU activation
-    return combined.map(v => Math.max(0, v));
+    return combined.map((v) => Math.max(0, v));
   }
 
   private dotProduct(a: number[], b: number[]): number {

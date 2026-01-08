@@ -11,14 +11,7 @@ directive @external on FIELD_DEFINITION
 directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
 directive @requires(fields: _FieldSet!) on FIELD_DEFINITION
 directive @shareable on OBJECT | FIELD_DEFINITION
-directive @inaccessible on
-  FIELD_DEFINITION
-  | OBJECT
-  | INTERFACE
-  | UNION
-  | ENUM
-  | INPUT_OBJECT
-  | SCALAR
+directive @inaccessible on FIELD_DEFINITION | OBJECT | INTERFACE | UNION | ENUM | INPUT_OBJECT | SCALAR
 directive @override(from: String!) on FIELD_DEFINITION
 
 type SchemaInfo {
@@ -188,12 +181,7 @@ type Query {
 }
 
 type Mutation {
-  upsertPolicy(
-    tenantId: ID!
-    name: String!
-    version: String!
-    body: String!
-  ): Policy! # Added tenantId for scoping
+  upsertPolicy(tenantId: ID!, name: String!, version: String!, body: String!): Policy! # Added tenantId for scoping
   recordArtifact(
     tenantId: ID!
     planId: ID!
@@ -211,7 +199,7 @@ type Mutation {
 }
 
 union _Entity =
-    Organization
+  | Organization
   | Tenant
   | User
   | Role

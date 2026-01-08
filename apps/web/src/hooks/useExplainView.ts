@@ -137,7 +137,10 @@ export function useExplainView({
   enableRealtime = false,
 }: UseExplainViewOptions) {
   const entityIds = useMemo(() => entities.map(e => e.id), [entities])
-  const relationshipIds = useMemo(() => relationships.map(r => r.id), [relationships])
+  const relationshipIds = useMemo(
+    () => relationships.map(r => r.id),
+    [relationships]
+  )
 
   // Fetch provenance data
   const {
@@ -180,8 +183,12 @@ export function useExplainView({
           ).length
 
           const reasons: string[] = []
-          if (connections > 5) {reasons.push(`${connections} connections`)}
-          if (entity.confidence > 0.9) {reasons.push('High confidence')}
+          if (connections > 5) {
+            reasons.push(`${connections} connections`)
+          }
+          if (entity.confidence > 0.9) {
+            reasons.push('High confidence')
+          }
           if (entity.type === 'PERSON' || entity.type === 'ORGANIZATION') {
             reasons.push('Key entity type')
           }
@@ -220,13 +227,21 @@ export function useExplainView({
       // Fallback to local calculation
       return relationships
         .map(relationship => {
-          const sourceEntity = entities.find(e => e.id === relationship.sourceId)
-          const targetEntity = entities.find(e => e.id === relationship.targetId)
+          const sourceEntity = entities.find(
+            e => e.id === relationship.sourceId
+          )
+          const targetEntity = entities.find(
+            e => e.id === relationship.targetId
+          )
 
-          if (!sourceEntity || !targetEntity) {return null}
+          if (!sourceEntity || !targetEntity) {
+            return null
+          }
 
           const reasons: string[] = []
-          if (relationship.confidence > 0.85) {reasons.push('High confidence')}
+          if (relationship.confidence > 0.85) {
+            reasons.push('High confidence')
+          }
           if (
             sourceEntity.type === 'PERSON' &&
             targetEntity.type === 'ORGANIZATION'
@@ -255,12 +270,16 @@ export function useExplainView({
         const relationship = relationships.find(
           r => r.id === scoreData.relationshipId
         )
-        if (!relationship) {return null}
+        if (!relationship) {
+          return null
+        }
 
         const sourceEntity = entities.find(e => e.id === relationship.sourceId)
         const targetEntity = entities.find(e => e.id === relationship.targetId)
 
-        if (!sourceEntity || !targetEntity) {return null}
+        if (!sourceEntity || !targetEntity) {
+          return null
+        }
 
         return {
           relationship,
@@ -278,9 +297,13 @@ export function useExplainView({
   const confidenceStats = useMemo(() => {
     const buckets = { high: 0, medium: 0, low: 0 }
     entities.forEach(entity => {
-      if (entity.confidence >= 0.8) {buckets.high++}
-      else if (entity.confidence >= 0.5) {buckets.medium++}
-      else {buckets.low++}
+      if (entity.confidence >= 0.8) {
+        buckets.high++
+      } else if (entity.confidence >= 0.5) {
+        buckets.medium++
+      } else {
+        buckets.low++
+      }
     })
 
     const total = entities.length || 1
@@ -297,9 +320,7 @@ export function useExplainView({
   // Calculate provenance summary
   const provenanceSummary = useMemo(() => {
     if (provenanceData?.provenance) {
-      const sources = new Set(
-        provenanceData.provenance.map(p => p.sourceName)
-      )
+      const sources = new Set(provenanceData.provenance.map(p => p.sourceName))
       const licenses = new Set(provenanceData.provenance.map(p => p.license))
       const avgConfidence =
         provenanceData.provenance.reduce((sum, p) => sum + p.confidence, 0) /
@@ -318,8 +339,12 @@ export function useExplainView({
     let avgConfidence = 0
 
     entities.forEach(entity => {
-      if (entity.properties?.source) {sources.add(entity.properties.source)}
-      if (entity.properties?.license) {licenses.add(entity.properties.license)}
+      if (entity.properties?.source) {
+        sources.add(entity.properties.source)
+      }
+      if (entity.properties?.license) {
+        licenses.add(entity.properties.license)
+      }
       avgConfidence += entity.confidence
     })
 
@@ -345,7 +370,9 @@ export function useExplainView({
         // This would call the backend XAI service
         // For now, we generate a local explanation
         const entity = entities.find(e => e.id === entityId)
-        if (!entity) {return null}
+        if (!entity) {
+          return null
+        }
 
         const connections = relationships.filter(
           r => r.sourceId === entityId || r.targetId === entityId
@@ -380,7 +407,8 @@ export function useExplainView({
             betweenness: 0, // Would be calculated by backend
             closeness: 0, // Would be calculated by backend
           },
-          importance: reasons.reduce((sum, r) => sum + r.score, 0) / reasons.length,
+          importance:
+            reasons.reduce((sum, r) => sum + r.score, 0) / reasons.length,
         }
       } catch (error) {
         console.error('Failed to get entity explanation:', error)

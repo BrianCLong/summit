@@ -6,7 +6,7 @@
     <style>
       body {
         margin: 0;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         background: #f5f7fa;
       }
       .header {
@@ -125,10 +125,7 @@
   <body>
     <div class="header">
       <h1>📊 IntelGraph Monitoring Dashboard</h1>
-      <p>
-        Real-time system health, performance metrics, and operational
-        intelligence
-      </p>
+      <p>Real-time system health, performance metrics, and operational intelligence</p>
       <div class="real-time">🔴 LIVE</div>
     </div>
 
@@ -139,36 +136,28 @@
         <div class="metric">
           <div>
             <div class="metric-label">PostgreSQL</div>
-            <div>
-              <span class="status-indicator status-healthy"></span>Healthy
-            </div>
+            <div><span class="status-indicator status-healthy"></span>Healthy</div>
           </div>
           <div class="metric-value">✅</div>
         </div>
         <div class="metric">
           <div>
             <div class="metric-label">Neo4j</div>
-            <div>
-              <span class="status-indicator status-healthy"></span>Connected
-            </div>
+            <div><span class="status-indicator status-healthy"></span>Connected</div>
           </div>
           <div class="metric-value">✅</div>
         </div>
         <div class="metric">
           <div>
             <div class="metric-label">Redis</div>
-            <div>
-              <span class="status-indicator status-healthy"></span>Responding
-            </div>
+            <div><span class="status-indicator status-healthy"></span>Responding</div>
           </div>
           <div class="metric-value">✅</div>
         </div>
         <div class="metric">
           <div>
             <div class="metric-label">GraphQL API</div>
-            <div>
-              <span class="status-indicator status-healthy"></span>Operational
-            </div>
+            <div><span class="status-indicator status-healthy"></span>Operational</div>
           </div>
           <div class="metric-value">✅</div>
         </div>
@@ -357,21 +346,21 @@
 
     <script>
       // Initialize Charts
-      const ctx1 = document.getElementById('requestChart').getContext('2d');
-      const ctx2 = document.getElementById('responseChart').getContext('2d');
-      const ctx3 = document.getElementById('errorChart').getContext('2d');
+      const ctx1 = document.getElementById("requestChart").getContext("2d");
+      const ctx2 = document.getElementById("responseChart").getContext("2d");
+      const ctx3 = document.getElementById("errorChart").getContext("2d");
 
       // Request Volume Chart
       new Chart(ctx1, {
-        type: 'line',
+        type: "line",
         data: {
-          labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+          labels: ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00"],
           datasets: [
             {
-              label: 'Requests/Hour',
+              label: "Requests/Hour",
               data: [120, 85, 180, 320, 280, 150],
-              borderColor: '#667eea',
-              backgroundColor: 'rgba(102, 126, 234, 0.1)',
+              borderColor: "#667eea",
+              backgroundColor: "rgba(102, 126, 234, 0.1)",
               fill: true,
               tension: 0.4,
             },
@@ -391,14 +380,14 @@
 
       // Response Time Chart
       new Chart(ctx2, {
-        type: 'bar',
+        type: "bar",
         data: {
-          labels: ['<50ms', '50-100ms', '100-200ms', '200ms+'],
+          labels: ["<50ms", "50-100ms", "100-200ms", "200ms+"],
           datasets: [
             {
-              label: 'Request Count',
+              label: "Request Count",
               data: [85, 12, 3, 0],
-              backgroundColor: ['#28a745', '#ffc107', '#fd7e14', '#dc3545'],
+              backgroundColor: ["#28a745", "#ffc107", "#fd7e14", "#dc3545"],
             },
           ],
         },
@@ -413,13 +402,13 @@
 
       // Error Rate Chart
       new Chart(ctx3, {
-        type: 'doughnut',
+        type: "doughnut",
         data: {
-          labels: ['Successful', '4xx Errors', '5xx Errors'],
+          labels: ["Successful", "4xx Errors", "5xx Errors"],
           datasets: [
             {
               data: [97.5, 2.1, 0.4],
-              backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+              backgroundColor: ["#28a745", "#ffc107", "#dc3545"],
             },
           ],
         },
@@ -437,47 +426,42 @@
         const memory = 480 + Math.floor(Math.random() * 100);
         const cpu = 15 + Math.floor(Math.random() * 10);
 
-        document.getElementById('response-time').textContent =
-          responseTime + 'ms';
-        document.getElementById('qps').textContent = qps;
-        document.getElementById('memory').textContent = memory + 'MB';
-        document.getElementById('cpu').textContent = cpu + '%';
+        document.getElementById("response-time").textContent = responseTime + "ms";
+        document.getElementById("qps").textContent = qps;
+        document.getElementById("memory").textContent = memory + "MB";
+        document.getElementById("cpu").textContent = cpu + "%";
 
         // Update database stats
         const entities = 2800 + Math.floor(Math.random() * 100);
         const relationships = 5900 + Math.floor(Math.random() * 50);
 
-        document.getElementById('entity-count').textContent =
-          entities.toLocaleString();
-        document.getElementById('relationship-count').textContent =
-          relationships.toLocaleString();
+        document.getElementById("entity-count").textContent = entities.toLocaleString();
+        document.getElementById("relationship-count").textContent = relationships.toLocaleString();
       }
 
       function addLogEntry() {
         const logMessages = [
-          '[INFO] GraphQL query executed successfully',
-          '[INFO] Entity relationship discovered',
-          '[INFO] Investigation created: INV-' +
-            Math.floor(Math.random() * 1000),
-          '[INFO] Copilot analysis completed',
-          '[INFO] Database backup completed',
-          '[INFO] Security scan passed',
+          "[INFO] GraphQL query executed successfully",
+          "[INFO] Entity relationship discovered",
+          "[INFO] Investigation created: INV-" + Math.floor(Math.random() * 1000),
+          "[INFO] Copilot analysis completed",
+          "[INFO] Database backup completed",
+          "[INFO] Security scan passed",
         ];
 
         const now = new Date();
         const timestamp = now.toTimeString().slice(0, 8);
-        const message =
-          logMessages[Math.floor(Math.random() * logMessages.length)];
+        const message = logMessages[Math.floor(Math.random() * logMessages.length)];
 
-        const logEntry = document.createElement('div');
-        logEntry.className = 'log-entry';
+        const logEntry = document.createElement("div");
+        logEntry.className = "log-entry";
         logEntry.innerHTML = `
                 <span class="log-timestamp">${timestamp}</span>
                 <span class="log-level-info">[INFO]</span>
                 ${message}
             `;
 
-        const logContainer = document.getElementById('activity-log');
+        const logContainer = document.getElementById("activity-log");
         logContainer.insertBefore(logEntry, logContainer.firstChild);
 
         // Keep only last 20 entries

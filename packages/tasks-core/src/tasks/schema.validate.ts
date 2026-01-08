@@ -1,7 +1,7 @@
 // @ts-nocheck
-import { defineTask } from '@intelgraph/maestro-sdk';
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
+import { defineTask } from "@intelgraph/maestro-sdk";
+import Ajv from "ajv";
+import addFormats from "ajv-formats";
 
 interface In {
   schema: object;
@@ -14,9 +14,7 @@ export default defineTask<In, { valid: true }>({
     addFormats(ajv);
     const validate = ajv.compile(payload.schema as any);
     if (!validate(payload.data)) {
-      throw new Error(
-        `Schema validation failed: ${JSON.stringify(validate.errors)}`,
-      );
+      throw new Error(`Schema validation failed: ${JSON.stringify(validate.errors)}`);
     }
     return Promise.resolve({ payload: { valid: true as const } });
   },

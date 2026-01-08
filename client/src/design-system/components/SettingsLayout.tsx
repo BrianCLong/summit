@@ -1,8 +1,8 @@
-import React from 'react';
-import { Box, Divider, Paper, Stack, Typography } from '@mui/material';
-import Grid2 from '@mui/material/Unstable_Grid2';
-import { PageShell, PageShellProps } from './PageShell';
-import { useDesignSystemTelemetry } from '../DesignSystemProvider';
+import React from "react";
+import { Box, Divider, Paper, Stack, Typography } from "@mui/material";
+import Grid2 from "@mui/material/Unstable_Grid2";
+import { PageShell, PageShellProps } from "./PageShell";
+import { useDesignSystemTelemetry } from "../DesignSystemProvider";
 
 export type SettingsSection = {
   title: string;
@@ -10,14 +10,14 @@ export type SettingsSection = {
   content: React.ReactNode;
 };
 
-export type SettingsLayoutProps = Omit<PageShellProps, 'children'> & {
+export type SettingsLayoutProps = Omit<PageShellProps, "children"> & {
   sections: SettingsSection[];
 };
 
 export const SettingsLayout: React.FC<SettingsLayoutProps> = ({ sections, ...pageProps }) => {
   const telemetry = useDesignSystemTelemetry();
   React.useEffect(() => {
-    telemetry.record('SettingsLayout', '1.0.0', { sections: sections.map((s) => s.title) });
+    telemetry.record("SettingsLayout", "1.0.0", { sections: sections.map((s) => s.title) });
   }, [sections, telemetry]);
 
   return (
@@ -37,7 +37,7 @@ export const SettingsLayout: React.FC<SettingsLayoutProps> = ({ sections, ...pag
                 )}
               </Grid2>
               <Grid2 xs={12} md={8}>
-                <Divider sx={{ mb: 2, display: { md: 'none' } }} />
+                <Divider sx={{ mb: 2, display: { md: "none" } }} />
                 <Box>{section.content}</Box>
               </Grid2>
             </Grid2>

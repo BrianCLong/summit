@@ -23,22 +23,22 @@
  * ```
  */
 
-import { tokenize } from './parser/lexer';
-import { parse } from './parser/parser';
-import { QueryCompiler, type CompilerOptions } from './compiler/compiler';
+import { tokenize } from "./parser/lexer";
+import { parse } from "./parser/parser";
+import { QueryCompiler, type CompilerOptions } from "./compiler/compiler";
 import type {
   QueryResult,
   StreamingQueryResult,
   ValidationResult,
   ExecutionPlan,
   ASTNode,
-} from './types';
+} from "./types";
 
-export * from './types';
-export * from './compiler';
+export * from "./types";
+export * from "./compiler";
 // Explicitly export from parser to avoid name conflicts (e.g. Query)
-export { tokenize } from './parser/lexer';
-export { parse, parserInstance, SummitQLParser } from './parser/parser';
+export { tokenize } from "./parser/lexer";
+export { parse, parserInstance, SummitQLParser } from "./parser/parser";
 
 export interface SummitQLOptions extends CompilerOptions {
   // Execution options
@@ -83,7 +83,7 @@ export class SummitQL {
    * Parse a query string into an AST
    */
   parse(queryString: string): ASTNode {
-    this.logger?.debug('Parsing query', { query: queryString });
+    this.logger?.debug("Parsing query", { query: queryString });
 
     try {
       const lexResult = tokenize(queryString);
@@ -93,7 +93,7 @@ export class SummitQL {
       // Real fix requires a full Visitor implementation.
       return cst as unknown as ASTNode;
     } catch (error) {
-      this.logger?.error('Parse error', { error });
+      this.logger?.error("Parse error", { error });
       throw error;
     }
   }
@@ -102,14 +102,14 @@ export class SummitQL {
    * Compile a query string into an execution plan
    */
   compile(queryString: string): ExecutionPlan {
-    this.logger?.debug('Compiling query', { query: queryString });
+    this.logger?.debug("Compiling query", { query: queryString });
 
     try {
       const ast = this.parse(queryString);
       const plan = this.compiler.compile(ast);
       return plan;
     } catch (error) {
-      this.logger?.error('Compilation error', { error });
+      this.logger?.error("Compilation error", { error });
       throw error;
     }
   }
@@ -118,20 +118,20 @@ export class SummitQL {
    * Validate a query string
    */
   validate(queryString: string): ValidationResult {
-    this.logger?.debug('Validating query', { query: queryString });
+    this.logger?.debug("Validating query", { query: queryString });
 
     try {
       const ast = this.parse(queryString);
       return this.compiler.validate(ast);
     } catch (error) {
-      this.logger?.error('Validation error', { error });
+      this.logger?.error("Validation error", { error });
       return {
         valid: false,
         errors: [
           {
             message: error instanceof Error ? error.message : String(error),
-            code: 'PARSE_ERROR',
-            severity: 'error',
+            code: "PARSE_ERROR",
+            severity: "error",
           },
         ],
         warnings: [],
@@ -142,11 +142,14 @@ export class SummitQL {
   /**
    * Execute a query and return results
    */
-  async execute<T = any>(queryString: string, options?: {
-    cache?: boolean;
-    cacheTTL?: number;
-  }): Promise<QueryResult<T>> {
-    this.logger?.info('Executing query', { query: queryString });
+  async execute<T = any>(
+    queryString: string,
+    options?: {
+      cache?: boolean;
+      cacheTTL?: number;
+    }
+  ): Promise<QueryResult<T>> {
+    this.logger?.info("Executing query", { query: queryString });
 
     const startTime = Date.now();
 
@@ -157,7 +160,7 @@ export class SummitQL {
         const cached = await this.cache.get(cacheKey);
 
         if (cached) {
-          this.logger?.debug('Cache hit', { key: cacheKey });
+          this.logger?.debug("Cache hit", { key: cacheKey });
           return {
             ...cached,
             metadata: {
@@ -173,7 +176,7 @@ export class SummitQL {
 
       // Execute query
       if (!this.executor) {
-        throw new Error('No executor configured');
+        throw new Error("No executor configured");
       }
 
       const result = await this.executor.execute<T>(plan);
@@ -187,7 +190,7 @@ export class SummitQL {
 
       const executionTime = Date.now() - startTime;
 
-      this.logger?.info('Query executed successfully', {
+      this.logger?.info("Query executed successfully", {
         executionTime,
         rowCount: result.data.length,
       });
@@ -200,7 +203,7 @@ export class SummitQL {
         },
       };
     } catch (error) {
-      this.logger?.error('Execution error', { error });
+      this.logger?.error("Execution error", { error });
       throw error;
     }
   }
@@ -209,23 +212,23 @@ export class SummitQL {
    * Stream query results
    */
   async *stream<T = any>(queryString: string): AsyncIterable<StreamingQueryResult<T>> {
-    this.logger?.info('Streaming query', { query: queryString });
+    this.logger?.info("Streaming query", { query: queryString });
 
     try {
       const plan = this.compile(queryString);
 
       if (!this.executor) {
-        throw new Error('No executor configured');
+        throw new Error("No executor configured");
       }
 
       yield* this.executor.stream<T>(plan);
     } catch (error) {
-      this.logger?.error('Streaming error', { error });
+      this.logger?.error("Streaming error", { error });
       yield {
-        type: 'error',
+        type: "error",
         error: {
           message: error instanceof Error ? error.message : String(error),
-          code: 'STREAM_ERROR',
+          code: "STREAM_ERROR",
         },
       };
     }
@@ -235,13 +238,13 @@ export class SummitQL {
    * Explain a query (show execution plan)
    */
   explain(queryString: string): string {
-    this.logger?.debug('Explaining query', { query: queryString });
+    this.logger?.debug("Explaining query", { query: queryString });
 
     try {
       const ast = this.parse(queryString);
       return this.compiler.explainQuery(ast);
     } catch (error) {
-      this.logger?.error('Explain error', { error });
+      this.logger?.error("Explain error", { error });
       throw error;
     }
   }

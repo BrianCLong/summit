@@ -4,9 +4,9 @@ on:
   workflow_dispatch: {}
   pull_request:
     paths:
-      - 'ai-refactor/**'
-      - 'scripts/ai/**'
-      - '.github/workflows/ai-refactor-dryrun.yml'
+      - "ai-refactor/**"
+      - "scripts/ai/**"
+      - ".github/workflows/ai-refactor-dryrun.yml"
 
 jobs:
   dry-run:
@@ -18,8 +18,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Enable corepack
         run: corepack enable

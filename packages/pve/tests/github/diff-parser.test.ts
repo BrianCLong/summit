@@ -2,17 +2,17 @@
  * Diff Parser Tests
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 import {
   parseDiff,
   toPRFile,
   getChangedLines,
   extractNewContent,
   isWhitespaceOnly,
-} from '../../src/github/diff-parser.js';
+} from "../../src/github/diff-parser.js";
 
-describe('parseDiff', () => {
-  it('should parse a simple diff', () => {
+describe("parseDiff", () => {
+  it("should parse a simple diff", () => {
     const diff = `diff --git a/src/index.ts b/src/index.ts
 --- a/src/index.ts
 +++ b/src/index.ts
@@ -25,13 +25,13 @@ describe('parseDiff', () => {
     const result = parseDiff(diff);
 
     expect(result.files).toHaveLength(1);
-    expect(result.files[0].path).toBe('src/index.ts');
-    expect(result.files[0].status).toBe('modified');
+    expect(result.files[0].path).toBe("src/index.ts");
+    expect(result.files[0].status).toBe("modified");
     expect(result.files[0].additions).toBe(1);
     expect(result.files[0].deletions).toBe(0);
   });
 
-  it('should detect new files', () => {
+  it("should detect new files", () => {
     const diff = `diff --git a/src/new.ts b/src/new.ts
 --- /dev/null
 +++ b/src/new.ts
@@ -42,11 +42,11 @@ describe('parseDiff', () => {
 
     const result = parseDiff(diff);
 
-    expect(result.files[0].status).toBe('added');
+    expect(result.files[0].status).toBe("added");
     expect(result.files[0].additions).toBe(3);
   });
 
-  it('should detect deleted files', () => {
+  it("should detect deleted files", () => {
     const diff = `diff --git a/src/old.ts b/src/old.ts
 --- a/src/old.ts
 +++ /dev/null
@@ -57,11 +57,11 @@ describe('parseDiff', () => {
 
     const result = parseDiff(diff);
 
-    expect(result.files[0].status).toBe('deleted');
+    expect(result.files[0].status).toBe("deleted");
     expect(result.files[0].deletions).toBe(3);
   });
 
-  it('should detect renamed files', () => {
+  it("should detect renamed files", () => {
     const diff = `diff --git a/src/old.ts b/src/new.ts
 rename from src/old.ts
 rename to src/new.ts
@@ -70,12 +70,12 @@ rename to src/new.ts
 
     const result = parseDiff(diff);
 
-    expect(result.files[0].status).toBe('renamed');
-    expect(result.files[0].previousPath).toBe('src/old.ts');
-    expect(result.files[0].path).toBe('src/new.ts');
+    expect(result.files[0].status).toBe("renamed");
+    expect(result.files[0].previousPath).toBe("src/old.ts");
+    expect(result.files[0].path).toBe("src/new.ts");
   });
 
-  it('should parse multiple files', () => {
+  it("should parse multiple files", () => {
     const diff = `diff --git a/src/a.ts b/src/a.ts
 --- a/src/a.ts
 +++ b/src/a.ts
@@ -96,7 +96,7 @@ diff --git a/src/b.ts b/src/b.ts
     expect(result.stats.insertions).toBe(2);
   });
 
-  it('should parse hunks correctly', () => {
+  it("should parse hunks correctly", () => {
     const diff = `diff --git a/src/index.ts b/src/index.ts
 --- a/src/index.ts
 +++ b/src/index.ts
@@ -116,7 +116,7 @@ diff --git a/src/b.ts b/src/b.ts
     expect(result.files[0].hunks[0].newStart).toBe(10);
   });
 
-  it('should calculate stats correctly', () => {
+  it("should calculate stats correctly", () => {
     const diff = `diff --git a/src/index.ts b/src/index.ts
 --- a/src/index.ts
 +++ b/src/index.ts
@@ -139,11 +139,11 @@ diff --git a/src/b.ts b/src/b.ts
   });
 });
 
-describe('toPRFile', () => {
-  it('should convert ParsedFile to PRFile', () => {
+describe("toPRFile", () => {
+  it("should convert ParsedFile to PRFile", () => {
     const parsed = {
-      path: 'src/test.ts',
-      status: 'modified' as const,
+      path: "src/test.ts",
+      status: "modified" as const,
       hunks: [
         {
           oldStart: 1,
@@ -151,8 +151,8 @@ describe('toPRFile', () => {
           newStart: 1,
           newLines: 4,
           lines: [
-            { type: 'context' as const, content: 'line1' },
-            { type: 'addition' as const, content: 'new line', newLineNumber: 2 },
+            { type: "context" as const, content: "line1" },
+            { type: "addition" as const, content: "new line", newLineNumber: 2 },
           ],
         },
       ],
@@ -163,15 +163,15 @@ describe('toPRFile', () => {
 
     const prFile = toPRFile(parsed);
 
-    expect(prFile.path).toBe('src/test.ts');
-    expect(prFile.status).toBe('modified');
+    expect(prFile.path).toBe("src/test.ts");
+    expect(prFile.status).toBe("modified");
     expect(prFile.additions).toBe(1);
-    expect(prFile.patch).toContain('@@ -1,3 +1,4 @@');
+    expect(prFile.patch).toContain("@@ -1,3 +1,4 @@");
   });
 });
 
-describe('getChangedLines', () => {
-  it('should return changed line numbers', () => {
+describe("getChangedLines", () => {
+  it("should return changed line numbers", () => {
     const diff = `diff --git a/src/index.ts b/src/index.ts
 --- a/src/index.ts
 +++ b/src/index.ts
@@ -184,15 +184,15 @@ describe('getChangedLines', () => {
     const parsed = parseDiff(diff);
     const changedLines = getChangedLines(parsed);
 
-    expect(changedLines.get('src/index.ts')).toEqual([2]);
+    expect(changedLines.get("src/index.ts")).toEqual([2]);
   });
 });
 
-describe('extractNewContent', () => {
-  it('should extract new content from additions', () => {
+describe("extractNewContent", () => {
+  it("should extract new content from additions", () => {
     const parsed = {
-      path: 'src/test.ts',
-      status: 'added' as const,
+      path: "src/test.ts",
+      status: "added" as const,
       hunks: [
         {
           oldStart: 0,
@@ -200,8 +200,8 @@ describe('extractNewContent', () => {
           newStart: 1,
           newLines: 2,
           lines: [
-            { type: 'addition' as const, content: 'line1', newLineNumber: 1 },
-            { type: 'addition' as const, content: 'line2', newLineNumber: 2 },
+            { type: "addition" as const, content: "line1", newLineNumber: 1 },
+            { type: "addition" as const, content: "line2", newLineNumber: 2 },
           ],
         },
       ],
@@ -212,15 +212,15 @@ describe('extractNewContent', () => {
 
     const content = extractNewContent(parsed);
 
-    expect(content).toBe('line1\nline2');
+    expect(content).toBe("line1\nline2");
   });
 });
 
-describe('isWhitespaceOnly', () => {
-  it('should detect whitespace-only changes', () => {
+describe("isWhitespaceOnly", () => {
+  it("should detect whitespace-only changes", () => {
     const parsed = {
-      path: 'src/test.ts',
-      status: 'modified' as const,
+      path: "src/test.ts",
+      status: "modified" as const,
       hunks: [
         {
           oldStart: 1,
@@ -228,8 +228,8 @@ describe('isWhitespaceOnly', () => {
           newStart: 1,
           newLines: 1,
           lines: [
-            { type: 'deletion' as const, content: '  const a = 1;', oldLineNumber: 1 },
-            { type: 'addition' as const, content: '    const a = 1;', newLineNumber: 1 },
+            { type: "deletion" as const, content: "  const a = 1;", oldLineNumber: 1 },
+            { type: "addition" as const, content: "    const a = 1;", newLineNumber: 1 },
           ],
         },
       ],
@@ -241,10 +241,10 @@ describe('isWhitespaceOnly', () => {
     expect(isWhitespaceOnly(parsed)).toBe(false); // Content is not the same
   });
 
-  it('should return false for content changes', () => {
+  it("should return false for content changes", () => {
     const parsed = {
-      path: 'src/test.ts',
-      status: 'modified' as const,
+      path: "src/test.ts",
+      status: "modified" as const,
       hunks: [
         {
           oldStart: 1,
@@ -252,8 +252,8 @@ describe('isWhitespaceOnly', () => {
           newStart: 1,
           newLines: 1,
           lines: [
-            { type: 'deletion' as const, content: 'const a = 1;', oldLineNumber: 1 },
-            { type: 'addition' as const, content: 'const a = 2;', newLineNumber: 1 },
+            { type: "deletion" as const, content: "const a = 1;", oldLineNumber: 1 },
+            { type: "addition" as const, content: "const a = 2;", newLineNumber: 1 },
           ],
         },
       ],

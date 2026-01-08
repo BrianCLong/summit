@@ -2,7 +2,12 @@
 // @ts-nocheck
 import { render, screen, fireEvent } from '@testing-library/react'
 import { TriPaneShell } from './TriPaneShell'
-import { mockEntities, mockRelationships, mockTimelineEvents, mockGeospatialEvents } from './mockData'
+import {
+  mockEntities,
+  mockRelationships,
+  mockTimelineEvents,
+  mockGeospatialEvents,
+} from './mockData'
 
 // Mock d3 to avoid complexity in unit tests
 vi.mock('d3', () => ({
@@ -17,33 +22,35 @@ vi.mock('d3', () => ({
                 call: () => {},
                 on: () => {},
                 filter: () => ({
-                    append: () => ({
-                        attr: () => ({ attr: () => ({ attr: () => ({ attr: () => {} }) }) })
-                    })
-                })
-              })
-            })
-          })
-        })
-      })
+                  append: () => ({
+                    attr: () => ({
+                      attr: () => ({ attr: () => ({ attr: () => {} }) }),
+                    }),
+                  }),
+                }),
+              }),
+            }),
+          }),
+        }),
+      }),
     }),
     append: () => ({
       append: () => ({
-         attr: () => ({})
-      })
+        attr: () => ({}),
+      }),
     }),
-    call: () => {}
+    call: () => {},
   }),
   forceSimulation: () => ({
     force: () => ({
       strength: () => ({}),
       radius: () => ({}),
-      id: () => ({ distance: () => {} })
+      id: () => ({ distance: () => {} }),
     }),
     on: () => {},
-    stop: () => {}
+    stop: () => {},
   }),
-  forceLink: () => (() => {}),
+  forceLink: () => () => {},
   forceManyBody: () => ({ strength: () => {} }),
   forceCenter: () => {},
   forceCollide: () => ({ radius: () => {} }),
@@ -51,14 +58,14 @@ vi.mock('d3', () => ({
   forceY: () => ({ y: () => {} }),
   forceX: () => {},
   zoom: () => ({
-      scaleExtent: () => ({
-          on: () => {}
-      })
+    scaleExtent: () => ({
+      on: () => {},
+    }),
   }),
   drag: () => ({
-    on: () => {}
+    on: () => {},
   }),
-  group: () => new Map()
+  group: () => new Map(),
 }))
 
 describe('TriPaneShell', () => {
@@ -82,7 +89,10 @@ describe('TriPaneShell', () => {
     render(<TriPaneShell {...defaultProps} />)
 
     // Default is List view
-    expect(screen.getByTitle('List View')).toHaveAttribute('aria-pressed', 'true') // implicit via variant
+    expect(screen.getByTitle('List View')).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    ) // implicit via variant
 
     // Switch to Narrative
     const narrativeBtn = screen.getByTitle('Narrative View')

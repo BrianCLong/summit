@@ -32,16 +32,16 @@
  * ```
  */
 
-import express, { Express, Request, Response, NextFunction } from 'express';
-import helmet from 'helmet';
-import cors from 'cors';
-import compression from 'compression';
-import morgan from 'morgan';
-import rateLimit from 'express-rate-limit';
+import express, { Express, Request, Response, NextFunction } from "express";
+import helmet from "helmet";
+import cors from "cors";
+import compression from "compression";
+import morgan from "morgan";
+import rateLimit from "express-rate-limit";
 
-import type { APIConfig } from './types';
-import { APIRouter } from './router';
-import { OpenAPIGenerator } from './openapi/generator';
+import type { APIConfig } from "./types";
+import { APIRouter } from "./router";
+import { OpenAPIGenerator } from "./openapi/generator";
 import {
   contextMiddleware,
   errorHandler,
@@ -52,12 +52,12 @@ import {
   idempotencyMiddleware,
   metricsMiddleware,
   VersionRegistry,
-} from './middleware';
+} from "./middleware";
 
-export * from './types';
-export * from './router';
-export * from './middleware';
-export * from './openapi';
+export * from "./types";
+export * from "./router";
+export * from "./middleware";
+export * from "./openapi";
 
 export interface APIFramework {
   app: Express;
@@ -95,12 +95,12 @@ export function createAPI(config: APIConfig): APIFramework {
   app.use(compression() as any);
 
   // Body parsing
-  app.use(express.json({ limit: '10mb' }));
-  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+  app.use(express.json({ limit: "10mb" }));
+  app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
   // Logging
-  if (process.env.NODE_ENV !== 'test') {
-    app.use(morgan('combined'));
+  if (process.env.NODE_ENV !== "test") {
+    app.use(morgan("combined"));
   }
 
   // Request context
@@ -110,7 +110,7 @@ export function createAPI(config: APIConfig): APIFramework {
   if (config.basePath) {
     app.use(
       versioningMiddleware({
-        strategy: 'url',
+        strategy: "url",
         defaultVersion: config.version,
       })
     );
@@ -142,12 +142,12 @@ export function createAPI(config: APIConfig): APIFramework {
       rateLimit({
         windowMs: config.rateLimit.windowMs || 15 * 60 * 1000, // 15 minutes
         max: config.rateLimit.max || 100,
-        message: config.rateLimit.message || 'Too many requests',
+        message: config.rateLimit.message || "Too many requests",
         standardHeaders: config.rateLimit.standardHeaders ?? true,
         legacyHeaders: config.rateLimit.legacyHeaders ?? false,
         skip: (req) => {
           // Skip rate limiting for health checks
-          return req.path === '/health' || req.path === '/ready';
+          return req.path === "/health" || req.path === "/ready";
         },
       }) as any
     );
@@ -156,27 +156,24 @@ export function createAPI(config: APIConfig): APIFramework {
   // ===== Routes =====
 
   // Health check
-  app.get('/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  app.get("/health", (req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
 
   // Readiness check
-  app.get('/ready', (req, res) => {
-    res.json({ status: 'ready', timestamp: new Date().toISOString() });
+  app.get("/ready", (req, res) => {
+    res.json({ status: "ready", timestamp: new Date().toISOString() });
   });
 
   // OpenAPI documentation
   if (config.openapi?.enabled) {
-    const openapiPath = config.openapi.path || '/openapi.json';
+    const openapiPath = config.openapi.path || "/openapi.json";
 
     app.get(openapiPath, (req, res) => {
       const generator = new OpenAPIGenerator(config);
       generator.addRoutes(router.getRoutes());
       generator.addSchemas(OpenAPIGenerator.generateCommonSchemas());
-      generator.addSecurityScheme(
-        'bearerAuth',
-        OpenAPIGenerator.generateSecuritySchemes(config)
-      );
+      generator.addSecurityScheme("bearerAuth", OpenAPIGenerator.generateSecuritySchemes(config));
 
       res.json(generator.getSpec());
     });
@@ -226,7 +223,7 @@ export function createAPI(config: APIConfig): APIFramework {
   // Global error handler
   app.use(
     errorHandler({
-      includeStack: process.env.NODE_ENV !== 'production',
+      includeStack: process.env.NODE_ENV !== "production",
     }) as any
   );
 
@@ -240,7 +237,9 @@ export function createAPI(config: APIConfig): APIFramework {
     listen(port: number, callback?: () => void) {
       app.listen(port, () => {
         console.log(`🚀 API server running on port ${port}`);
-        console.log(`📚 OpenAPI spec: http://localhost:${port}${config.openapi?.path || '/openapi.json'}`);
+        console.log(
+          `📚 OpenAPI spec: http://localhost:${port}${config.openapi?.path || "/openapi.json"}`
+        );
         if (config.openapi?.uiPath) {
           console.log(`📖 API docs: http://localhost:${port}${config.openapi.uiPath}`);
         }

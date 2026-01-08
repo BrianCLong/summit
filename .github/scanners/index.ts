@@ -9,19 +9,19 @@
  * - Automated PR fixes for vulnerabilities
  */
 
-export * from './types.js';
-export * from './config.js';
-export { SBOMGenerator, createSBOMGenerator } from './sbom-generator.js';
-export { TrivyScanner, createTrivyScanner } from './trivy-scanner.js';
-export { SLSA3Attestor, createSLSA3Attestor } from './slsa3-attestor.js';
-export { AutoPRFixer, createAutoPRFixer } from './auto-pr-fixer.js';
+export * from "./types.js";
+export * from "./config.js";
+export { SBOMGenerator, createSBOMGenerator } from "./sbom-generator.js";
+export { TrivyScanner, createTrivyScanner } from "./trivy-scanner.js";
+export { SLSA3Attestor, createSLSA3Attestor } from "./slsa3-attestor.js";
+export { AutoPRFixer, createAutoPRFixer } from "./auto-pr-fixer.js";
 
-import { createSBOMGenerator } from './sbom-generator.js';
-import { createTrivyScanner } from './trivy-scanner.js';
-import { createSLSA3Attestor } from './slsa3-attestor.js';
-import { createAutoPRFixer } from './auto-pr-fixer.js';
-import { loadConfig } from './config.js';
-import type { ScannerConfig, AirGapConfig, VulnerabilityPolicy } from './types.js';
+import { createSBOMGenerator } from "./sbom-generator.js";
+import { createTrivyScanner } from "./trivy-scanner.js";
+import { createSLSA3Attestor } from "./slsa3-attestor.js";
+import { createAutoPRFixer } from "./auto-pr-fixer.js";
+import { loadConfig } from "./config.js";
+import type { ScannerConfig, AirGapConfig, VulnerabilityPolicy } from "./types.js";
 
 export interface ScannerSuite {
   sbom: ReturnType<typeof createSBOMGenerator>;
@@ -64,16 +64,18 @@ export function createScannerSuite(options?: {
  */
 export async function runSecurityPipeline(options: {
   target: string;
-  targetType?: 'image' | 'filesystem' | 'repository';
+  targetType?: "image" | "filesystem" | "repository";
   generateSBOM?: boolean;
   generateAttestation?: boolean;
   autoFix?: boolean;
   dryRun?: boolean;
 }): Promise<{
-  sbomResult?: Awaited<ReturnType<ReturnType<typeof createSBOMGenerator>['generateSBOM']>>;
-  scanResult?: Awaited<ReturnType<ReturnType<typeof createTrivyScanner>['scan']>>;
-  attestationResult?: Awaited<ReturnType<ReturnType<typeof createSLSA3Attestor>['generateProvenance']>>;
-  autoFixResult?: Awaited<ReturnType<ReturnType<typeof createAutoPRFixer>['applyFixes']>>;
+  sbomResult?: Awaited<ReturnType<ReturnType<typeof createSBOMGenerator>["generateSBOM"]>>;
+  scanResult?: Awaited<ReturnType<ReturnType<typeof createTrivyScanner>["scan"]>>;
+  attestationResult?: Awaited<
+    ReturnType<ReturnType<typeof createSLSA3Attestor>["generateProvenance"]>
+  >;
+  autoFixResult?: Awaited<ReturnType<ReturnType<typeof createAutoPRFixer>["applyFixes"]>>;
   success: boolean;
   errors: string[];
 }> {
@@ -86,23 +88,23 @@ export async function runSecurityPipeline(options: {
   // Step 1: Generate SBOM
   let sbomResult;
   if (options.generateSBOM !== false) {
-    console.log('📦 Step 1: Generating SBOM...');
+    console.log("📦 Step 1: Generating SBOM...");
     sbomResult = await suite.sbom.generateSBOM({
       target: options.target,
       signWithCosign: true,
     });
 
     if (!sbomResult.success) {
-      errors.push(...(sbomResult.errors || ['SBOM generation failed']));
+      errors.push(...(sbomResult.errors || ["SBOM generation failed"]));
       success = false;
     }
   }
 
   // Step 2: Vulnerability Scan
-  console.log('🔍 Step 2: Scanning for vulnerabilities...');
+  console.log("🔍 Step 2: Scanning for vulnerabilities...");
   const scanResult = await suite.trivy.scan({
     target: sbomResult?.sbomPath || options.target,
-    targetType: sbomResult ? 'sbom' : options.targetType,
+    targetType: sbomResult ? "sbom" : options.targetType,
   });
 
   if (scanResult.exitCode !== 0 && scanResult.exitCode !== 1) {
@@ -112,16 +114,14 @@ export async function runSecurityPipeline(options: {
 
   // Check policy
   if (scanResult.policyResult && !scanResult.policyResult.allowed) {
-    errors.push(
-      `Policy violations: ${scanResult.policyResult.blockedVulnerabilities.join(', ')}`
-    );
+    errors.push(`Policy violations: ${scanResult.policyResult.blockedVulnerabilities.join(", ")}`);
     success = false;
   }
 
   // Step 3: Generate Attestation
   let attestationResult;
   if (options.generateAttestation && sbomResult?.sbomPath) {
-    console.log('📜 Step 3: Generating SLSA attestation...');
+    console.log("📜 Step 3: Generating SLSA attestation...");
     attestationResult = await suite.slsa.generateProvenance({
       artifactPath: sbomResult.sbomPath,
       signWithCosign: true,
@@ -132,30 +132,30 @@ export async function runSecurityPipeline(options: {
     });
 
     if (!attestationResult.success) {
-      errors.push(...(attestationResult.errors || ['Attestation generation failed']));
+      errors.push(...(attestationResult.errors || ["Attestation generation failed"]));
     }
   }
 
   // Step 4: Auto-fix (if enabled and vulnerabilities found)
   let autoFixResult;
   if (options.autoFix && scanResult.summary.fixable > 0) {
-    console.log('🔧 Step 4: Applying automatic fixes...');
+    console.log("🔧 Step 4: Applying automatic fixes...");
     autoFixResult = await suite.autofix.applyFixes({
       scanResult,
       dryRun: options.dryRun,
       createPR: !options.dryRun,
-      minConfidence: 'medium',
+      minConfidence: "medium",
       excludeBreakingChanges: true,
     });
 
     if (!autoFixResult.success) {
-      errors.push('Some auto-fixes failed');
+      errors.push("Some auto-fixes failed");
     }
   }
 
   // Summary
-  console.log('\n📊 Security Pipeline Summary:');
-  console.log(`   SBOM Components: ${sbomResult?.componentCount || 'N/A'}`);
+  console.log("\n📊 Security Pipeline Summary:");
+  console.log(`   SBOM Components: ${sbomResult?.componentCount || "N/A"}`);
   console.log(`   Vulnerabilities: ${scanResult.summary.total}`);
   console.log(`     Critical: ${scanResult.summary.critical}`);
   console.log(`     High: ${scanResult.summary.high}`);
@@ -164,10 +164,12 @@ export async function runSecurityPipeline(options: {
   console.log(`     Fixable: ${scanResult.summary.fixable}`);
 
   if (autoFixResult) {
-    console.log(`   Auto-fixes Applied: ${autoFixResult.summary.succeeded}/${autoFixResult.summary.attempted}`);
+    console.log(
+      `   Auto-fixes Applied: ${autoFixResult.summary.succeeded}/${autoFixResult.summary.attempted}`
+    );
   }
 
-  console.log(`   Status: ${success ? '✅ PASSED' : '❌ FAILED'}`);
+  console.log(`   Status: ${success ? "✅ PASSED" : "❌ FAILED"}`);
 
   return {
     sbomResult,

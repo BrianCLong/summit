@@ -1,9 +1,9 @@
 apiVersion: 1
 
 providers:
-  - name: 'IntelGraph Dashboards'
+  - name: "IntelGraph Dashboards"
     orgId: 1
-    folder: 'IntelGraph'
+    folder: "IntelGraph"
     type: file
     disableDeletion: false
     updateIntervalSeconds: 10

@@ -96,7 +96,7 @@ cosign attest --predicate <(sha256sum "$out" | awk '{print $1}' | jq -R '{sha256
 name: policy.bundle.release
 on:
   push:
-    tags: ['policy-bundle-v*.*.*']
+    tags: ["policy-bundle-v*.*.*"]
 permissions: { contents: read, id-token: write }
 jobs:
   release:
@@ -158,7 +158,7 @@ jobs:
 ```yaml
 name: rotate.secrets
 on:
-  schedule: [{ cron: '0 6 * * 1' }] # Mondays 06:00 UTC
+  schedule: [{ cron: "0 6 * * 1" }] # Mondays 06:00 UTC
   workflow_dispatch:
 permissions: { contents: read }
 jobs:
@@ -284,7 +284,7 @@ spec:
                 containers:
                   - name: cosign
                     image: ghcr.io/sigstore/cosign/cosign
-                    command: ['cosign', 'verify', '--help']
+                    command: ["cosign", "verify", "--help"]
                 restartPolicy: Never
 ---
 apiVersion: argoproj.io/v1alpha1
@@ -301,7 +301,7 @@ spec:
                 containers:
                   - name: k6
                     image: grafana/k6
-                    command: ['k6', 'run', '/scripts/smoke.js']
+                    command: ["k6", "run", "/scripts/smoke.js"]
                 restartPolicy: Never
 ```
 
@@ -314,7 +314,7 @@ on:
   workflow_dispatch:
     inputs:
       simulate:
-        description: 'Dry-run policy (no fail)'
+        description: "Dry-run policy (no fail)"
         default: false
         type: boolean
 ```

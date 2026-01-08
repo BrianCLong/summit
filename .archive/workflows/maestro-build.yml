@@ -1,4 +1,4 @@
-name: 'Maestro Build Pipeline'
+name: "Maestro Build Pipeline"
 
 permissions:
   contents: read
@@ -11,29 +11,29 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Target environment'
+        description: "Target environment"
         required: true
-        default: 'development'
+        default: "development"
         type: choice
         options:
           - development
           - staging
           - production
       budget:
-        description: 'Budget limit (USD)'
+        description: "Budget limit (USD)"
         required: false
-        default: '10.00'
+        default: "10.00"
       parameters:
-        description: 'Additional parameters (JSON)'
+        description: "Additional parameters (JSON)"
         required: false
-        default: '{}'
+        default: "{}"
 
 env:
   MAESTRO_API_URL: ${{ vars.MAESTRO_API_URL || 'https://maestro-api.example.com' }}
 
 jobs:
   validate-pipeline:
-    name: 'Validate Pipeline'
+    name: "Validate Pipeline"
     runs-on: ubuntu-latest
 
     steps:
@@ -43,8 +43,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -64,7 +64,7 @@ jobs:
           fi
 
   security-scan:
-    name: 'Security Scan'
+    name: "Security Scan"
     runs-on: ubuntu-latest
     needs: validate-pipeline
 
@@ -75,18 +75,18 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
+          scan-type: "fs"
+          scan-ref: "."
+          format: "sarif"
+          output: "trivy-results.sarif"
 
       - name: Upload Trivy scan results
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: "trivy-results.sarif"
 
   build-development:
-    name: 'Build (Development)'
+    name: "Build (Development)"
     runs-on: ubuntu-latest
     needs: [validate-pipeline, security-scan]
     if: github.ref == 'refs/heads/develop' || github.event_name == 'pull_request'
@@ -98,9 +98,9 @@ jobs:
       - name: Run Maestro build pipeline
         uses: ./.github/actions/maestro-run
         with:
-          pipeline: '.maestro/pipeline.yaml'
-          environment: 'development'
-          budget: '5.00'
+          pipeline: ".maestro/pipeline.yaml"
+          environment: "development"
+          budget: "5.00"
           maestro_token: ${{ secrets.MAESTRO_API_TOKEN }}
           parameters: |
             {
@@ -118,7 +118,7 @@ jobs:
           retention-days: 7
 
   build-staging:
-    name: 'Build (Staging)'
+    name: "Build (Staging)"
     runs-on: ubuntu-latest
     needs: [validate-pipeline, security-scan]
     if: github.ref == 'refs/heads/main'
@@ -130,9 +130,9 @@ jobs:
       - name: Run Maestro build pipeline
         uses: ./.github/actions/maestro-run
         with:
-          pipeline: '.maestro/pipeline.yaml'
-          environment: 'staging'
-          budget: '15.00'
+          pipeline: ".maestro/pipeline.yaml"
+          environment: "staging"
+          budget: "15.00"
           maestro_token: ${{ secrets.MAESTRO_API_TOKEN }}
           parameters: |
             {
@@ -174,7 +174,7 @@ jobs:
             });
 
   build-production:
-    name: 'Build (Production)'
+    name: "Build (Production)"
     runs-on: ubuntu-latest
     needs: [validate-pipeline, security-scan]
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production'
@@ -189,10 +189,10 @@ jobs:
       - name: Run Maestro production pipeline
         uses: ./.github/actions/maestro-run
         with:
-          pipeline: '.maestro/pipeline.yaml'
-          environment: 'production'
+          pipeline: ".maestro/pipeline.yaml"
+          environment: "production"
           budget: ${{ github.event.inputs.budget || '25.00' }}
-          timeout: '60'
+          timeout: "60"
           maestro_token: ${{ secrets.MAESTRO_API_TOKEN }}
           parameters: |
             {
@@ -221,7 +221,7 @@ jobs:
           echo "Cost: ${{ env.MAESTRO_COST }}"
 
   notify-on-failure:
-    name: 'Notify on Failure'
+    name: "Notify on Failure"
     runs-on: ubuntu-latest
     needs: [build-development, build-staging, build-production]
     if: failure()
@@ -273,7 +273,7 @@ jobs:
             }
 
   cleanup:
-    name: 'Cleanup'
+    name: "Cleanup"
     runs-on: ubuntu-latest
     needs: [build-development, build-staging, build-production]
     if: always()

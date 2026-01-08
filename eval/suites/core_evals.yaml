@@ -11,7 +11,7 @@ tasks:
 
 candidates:
   - route: agent/invoke
-    models: ['mock-model']
+    models: ["mock-model"]
 
 budget:
   max_cost_usd: 5.0

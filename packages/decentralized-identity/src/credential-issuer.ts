@@ -2,8 +2,8 @@
  * Credential Issuer - Issue and manage verifiable credentials
  */
 
-import crypto from 'crypto';
-import type { VerifiableCredential, Proof } from './types.js';
+import crypto from "crypto";
+import type { VerifiableCredential, Proof } from "./types.js";
 
 interface IssueCredentialOptions {
   issuerDid: string;
@@ -22,12 +22,12 @@ export class CredentialIssuer {
     const issuanceDate = new Date().toISOString();
 
     const credential: VerifiableCredential = {
-      '@context': [
-        'https://www.w3.org/2018/credentials/v1',
-        'https://www.w3.org/2018/credentials/examples/v1',
+      "@context": [
+        "https://www.w3.org/2018/credentials/v1",
+        "https://www.w3.org/2018/credentials/examples/v1",
       ],
       id: credentialId,
-      type: ['VerifiableCredential', options.credentialType],
+      type: ["VerifiableCredential", options.credentialType],
       issuer: options.issuerDid,
       issuanceDate,
       expirationDate: options.expirationDate?.toISOString(),
@@ -41,7 +41,7 @@ export class CredentialIssuer {
     credential.proof = await this.createProof(
       credential,
       options.issuerDid,
-      options.issuerPrivateKey,
+      options.issuerPrivateKey
     );
 
     this.issuedCredentials.set(credentialId, credential);
@@ -53,13 +53,13 @@ export class CredentialIssuer {
     issuerPrivateKey: string,
     subjectDid: string,
     poolId: string,
-    contributionCount: number,
+    contributionCount: number
   ): Promise<VerifiableCredential> {
     return this.issueCredential({
       issuerDid,
       issuerPrivateKey,
       subjectDid,
-      credentialType: 'DataContributorCredential',
+      credentialType: "DataContributorCredential",
       claims: {
         poolId,
         contributionCount,
@@ -75,13 +75,13 @@ export class CredentialIssuer {
     issuerPrivateKey: string,
     subjectDid: string,
     poolIds: string[],
-    accessLevel: 'read' | 'write' | 'admin',
+    accessLevel: "read" | "write" | "admin"
   ): Promise<VerifiableCredential> {
     return this.issueCredential({
       issuerDid,
       issuerPrivateKey,
       subjectDid,
-      credentialType: 'DataAccessCredential',
+      credentialType: "DataAccessCredential",
       claims: {
         poolIds,
         accessLevel,
@@ -102,10 +102,10 @@ export class CredentialIssuer {
   private async createProof(
     credential: VerifiableCredential,
     issuerDid: string,
-    _privateKey: string,
+    _privateKey: string
   ): Promise<Proof> {
     const dataToSign = JSON.stringify({
-      '@context': credential['@context'],
+      "@context": credential["@context"],
       type: credential.type,
       issuer: credential.issuer,
       issuanceDate: credential.issuanceDate,
@@ -113,24 +113,27 @@ export class CredentialIssuer {
     });
 
     // Create signature (simplified - in production use proper JWS)
-    const signature = crypto
-      .createHash('sha256')
-      .update(dataToSign)
-      .digest('base64url');
+    const signature = crypto.createHash("sha256").update(dataToSign).digest("base64url");
 
     return {
-      type: 'JsonWebSignature2020',
+      type: "JsonWebSignature2020",
       created: new Date().toISOString(),
       verificationMethod: `${issuerDid}#key-1`,
-      proofPurpose: 'assertionMethod',
+      proofPurpose: "assertionMethod",
       jws: signature,
     };
   }
 
   private calculateTrustLevel(contributionCount: number): string {
-    if (contributionCount >= 100) {return 'gold';}
-    if (contributionCount >= 50) {return 'silver';}
-    if (contributionCount >= 10) {return 'bronze';}
-    return 'standard';
+    if (contributionCount >= 100) {
+      return "gold";
+    }
+    if (contributionCount >= 50) {
+      return "silver";
+    }
+    if (contributionCount >= 10) {
+      return "bronze";
+    }
+    return "standard";
   }
 }

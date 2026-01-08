@@ -1,10 +1,4 @@
-export type DataClassification =
-  | 'public'
-  | 'internal'
-  | 'sensitive'
-  | 'pii'
-  | 'phi'
-  | 'regulated';
+export type DataClassification = "public" | "internal" | "sensitive" | "pii" | "phi" | "regulated";
 
 export type RiskTier = 0 | 1 | 2 | 3;
 
@@ -27,7 +21,7 @@ export interface IntakeRequest {
   preferredVendor: boolean;
   vendorName: string;
   existingOverlapCategory?: string;
-  criticality: 'customer-impacting' | 'core-operations' | 'business-support' | 'non-critical';
+  criticality: "customer-impacting" | "core-operations" | "business-support" | "non-critical";
   apiAccess: boolean;
   handlesProductionTraffic: boolean;
   hasSSO: boolean;
@@ -51,15 +45,15 @@ export interface ApprovalRequirement {
 }
 
 export interface RoutingAssignment {
-  team: 'Security' | 'Legal' | 'Finance' | 'IT' | 'Procurement' | 'Executive';
+  team: "Security" | "Legal" | "Finance" | "IT" | "Procurement" | "Executive";
   reason: string;
   slaHours: number;
 }
 
-export type AssessmentType = 'lite' | 'standard' | 'deep';
+export type AssessmentType = "lite" | "standard" | "deep";
 
 export interface AssessmentEvidence {
-  type: 'soc2' | 'iso27001' | 'pentest' | 'subprocessor_list' | 'dpa' | 'dpiA' | 'other';
+  type: "soc2" | "iso27001" | "pentest" | "subprocessor_list" | "dpa" | "dpiA" | "other";
   receivedAt: Date;
   description: string;
 }
@@ -68,8 +62,8 @@ export interface RemediationTask {
   id: string;
   description: string;
   dueDate: Date;
-  severity: 'low' | 'medium' | 'high';
-  status: 'open' | 'in_progress' | 'closed';
+  severity: "low" | "medium" | "high";
+  status: "open" | "in_progress" | "closed";
   escalationLevel: number;
 }
 
@@ -111,7 +105,7 @@ export interface VendorScorecard {
   businessValue: number;
   tier: RiskTier;
   score: number;
-  renewalRecommendation: 'renew' | 're-negotiate' | 'replace' | 'retire';
+  renewalRecommendation: "renew" | "re-negotiate" | "replace" | "retire";
 }
 
 export interface PaymentRequest {
@@ -132,7 +126,7 @@ export interface CatalogEntry {
   owner: string;
   tier: RiskTier;
   dataRisk: DataClassification[];
-  keepKill: 'keep' | 'watch' | 'delete';
+  keepKill: "keep" | "watch" | "delete";
   overlapCategory?: string;
   blockedShadow: boolean;
 }

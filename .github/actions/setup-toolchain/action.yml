@@ -1,31 +1,31 @@
-name: 'Setup Toolchain'
-description: 'Sets up Node.js, pnpm and caches for consistent builds'
+name: "Setup Toolchain"
+description: "Sets up Node.js, pnpm and caches for consistent builds"
 inputs:
   node-version:
-    description: 'Node.js version'
+    description: "Node.js version"
     required: false
-    default: '20'
+    default: "20"
   pnpm-version:
-    description: 'pnpm version'
+    description: "pnpm version"
     required: false
-    default: '8'
+    default: "8"
   install-deps:
-    description: 'Whether to install dependencies'
+    description: "Whether to install dependencies"
     required: false
-    default: 'true'
+    default: "true"
   working-directory:
-    description: 'Working directory for dependency installation'
+    description: "Working directory for dependency installation"
     required: false
-    default: '.'
+    default: "."
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node-version }}
-        registry-url: 'https://registry.npmjs.org'
+        registry-url: "https://registry.npmjs.org"
 
     - name: Setup pnpm
       uses: pnpm/action-setup@v2

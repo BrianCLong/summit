@@ -2,7 +2,7 @@
  * Spell checking and correction
  */
 
-import type { SpellingOptions } from '../types';
+import type { SpellingOptions } from "../types";
 
 export class SpellChecker {
   private options: Required<SpellingOptions>;
@@ -73,7 +73,7 @@ export class SpellChecker {
     for (const word of words) {
       const correction = this.correct(word);
       if (correction !== word) {
-        corrected = corrected.replace(new RegExp(`\\b${word}\\b`, 'g'), correction);
+        corrected = corrected.replace(new RegExp(`\\b${word}\\b`, "g"), correction);
       }
     }
 
@@ -116,7 +116,9 @@ export class SpellChecker {
       }
 
       // Limit processing for performance
-      if (suggestions.length > 100) {break;}
+      if (suggestions.length > 100) {
+        break;
+      }
     }
 
     // Sort by edit distance
@@ -135,8 +137,12 @@ export class SpellChecker {
       .fill(null)
       .map(() => Array(n + 1).fill(0));
 
-    for (let i = 0; i <= m; i++) {dp[i][0] = i;}
-    for (let j = 0; j <= n; j++) {dp[0][j] = j;}
+    for (let i = 0; i <= m; i++) {
+      dp[i][0] = i;
+    }
+    for (let j = 0; j <= n; j++) {
+      dp[0][j] = j;
+    }
 
     for (let i = 1; i <= m; i++) {
       for (let j = 1; j <= n; j++) {
@@ -161,10 +167,46 @@ export class SpellChecker {
   private loadDefaultDictionary(): void {
     // Load a basic dictionary (in production, load from a file or API)
     const commonWords = [
-      'the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have', 'i',
-      'it', 'for', 'not', 'on', 'with', 'he', 'as', 'you', 'do', 'at',
-      'this', 'but', 'his', 'by', 'from', 'they', 'we', 'say', 'her', 'she',
-      'or', 'an', 'will', 'my', 'one', 'all', 'would', 'there', 'their', 'what',
+      "the",
+      "be",
+      "to",
+      "of",
+      "and",
+      "a",
+      "in",
+      "that",
+      "have",
+      "i",
+      "it",
+      "for",
+      "not",
+      "on",
+      "with",
+      "he",
+      "as",
+      "you",
+      "do",
+      "at",
+      "this",
+      "but",
+      "his",
+      "by",
+      "from",
+      "they",
+      "we",
+      "say",
+      "her",
+      "she",
+      "or",
+      "an",
+      "will",
+      "my",
+      "one",
+      "all",
+      "would",
+      "there",
+      "their",
+      "what",
       // Add more common words as needed
     ];
 
@@ -189,10 +231,14 @@ export const spelling = {
    */
   isLikelyMisspelled(word: string): boolean {
     // Check for repeated characters
-    if (/(.)\1{2,}/.test(word)) {return true;}
+    if (/(.)\1{2,}/.test(word)) {
+      return true;
+    }
 
     // Check for unusual character sequences
-    if (/[qwrtpsdfghjklzxcvbnm]{5,}/i.test(word)) {return true;}
+    if (/[qwrtpsdfghjklzxcvbnm]{5,}/i.test(word)) {
+      return true;
+    }
 
     return false;
   },
@@ -207,19 +253,19 @@ export const spelling = {
       .fill(null)
       .map(() => Array(n + 1).fill(0));
 
-    for (let i = 0; i <= m; i++) {dp[i][0] = i;}
-    for (let j = 0; j <= n; j++) {dp[0][j] = j;}
+    for (let i = 0; i <= m; i++) {
+      dp[i][0] = i;
+    }
+    for (let j = 0; j <= n; j++) {
+      dp[0][j] = j;
+    }
 
     for (let i = 1; i <= m; i++) {
       for (let j = 1; j <= n; j++) {
         if (word1[i - 1] === word2[j - 1]) {
           dp[i][j] = dp[i - 1][j - 1];
         } else {
-          dp[i][j] = Math.min(
-            dp[i - 1][j] + 1,
-            dp[i][j - 1] + 1,
-            dp[i - 1][j - 1] + 1
-          );
+          dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + 1);
         }
       }
     }

@@ -82,9 +82,7 @@
       "intensity": 0.9,
       "sentimentShift": 0.3,
       "influenceShift": 0.1,
-      "parameterAdjustments": [
-        { "name": "policy_alignment_index", "delta": 0.08 }
-      ],
+      "parameterAdjustments": [{ "name": "policy_alignment_index", "delta": 0.08 }],
       "description": "Debate performance scored highly by fact-checkers",
       "scheduledTick": 1
     },

@@ -6,16 +6,8 @@
   "author": "Summit Team",
   "license": "MIT",
   "type": "widget",
-  "capabilities": [
-    "ui.widget",
-    "ui.command",
-    "copilot.tool",
-    "analytics"
-  ],
-  "permissions": [
-    "entities:read",
-    "relationships:read"
-  ],
+  "capabilities": ["ui.widget", "ui.command", "copilot.tool", "analytics"],
+  "permissions": ["entities:read", "relationships:read"],
   "entrypoints": {
     "main": {
       "type": "function",
@@ -134,12 +126,7 @@
       }
     }
   },
-  "keywords": [
-    "analytics",
-    "dashboard",
-    "statistics",
-    "visualization"
-  ],
+  "keywords": ["analytics", "dashboard", "statistics", "visualization"],
   "summit": {
     "minVersion": "1.0.0",
     "experimental": false

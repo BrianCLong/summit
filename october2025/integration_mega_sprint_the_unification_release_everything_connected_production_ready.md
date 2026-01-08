@@ -115,16 +115,15 @@ env:
 
 ```ts
 // services/gateway-graphql/src/auth.ts
-import jwksRsa from 'jwks-rsa';
-import jwt from 'jsonwebtoken';
+import jwksRsa from "jwks-rsa";
+import jwt from "jsonwebtoken";
 export async function auth(req: any) {
-  const token = (req.headers.authorization || '').replace('Bearer ', '');
-  if (!token) throw new Error('unauthenticated');
+  const token = (req.headers.authorization || "").replace("Bearer ", "");
+  if (!token) throw new Error("unauthenticated");
   const kid: any = (jwt.decode(token, { complete: true }) as any)?.header?.kid;
   const client = jwksRsa({
     jwksUri:
-      process.env.KEYCLOAK_JWKS ||
-      `${process.env.KEYCLOAK_ISSUER}/protocol/openid-connect/certs`,
+      process.env.KEYCLOAK_JWKS || `${process.env.KEYCLOAK_ISSUER}/protocol/openid-connect/certs`,
   });
   const key = await client.getSigningKey(kid);
   const pub = key.getPublicKey();

@@ -56,8 +56,8 @@
 
 ## Sign-off
 
-| Role | Name | Date | Signature |
-|------|------|------|-----------|
-| DX Lead | | | |
-| Frontend Lead | | | |
-| Design Lead | | | |
+| Role          | Name | Date | Signature |
+| ------------- | ---- | ---- | --------- |
+| DX Lead       |      |      |           |
+| Frontend Lead |      |      |           |
+| Design Lead   |      |      |           |

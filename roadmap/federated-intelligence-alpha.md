@@ -16,8 +16,8 @@ Transform IntelGraph from single-organization platform to **multi-organization i
 // Federated Node Architecture
 interface FederatedNode {
   organizationId: string;
-  jurisdiction: 'US' | 'EU' | 'NATO' | 'FVEY' | 'PRIVATE';
-  clearanceLevel: 'UNCLASSIFIED' | 'CONFIDENTIAL' | 'SECRET' | 'TOP_SECRET';
+  jurisdiction: "US" | "EU" | "NATO" | "FVEY" | "PRIVATE";
+  clearanceLevel: "UNCLASSIFIED" | "CONFIDENTIAL" | "SECRET" | "TOP_SECRET";
   sharingAgreements: SharingAgreement[];
   privacyPreservingQueries: ZKProofSystem;
   cryptographicIdentity: Ed25519KeyPair;
@@ -134,7 +134,7 @@ class PrivacyBudgetManager {
 
     if (query.includesPersonalData) sensitivity += 0.5;
     if (query.crossesJurisdictions) sensitivity += 0.3;
-    if (query.classification >= 'SECRET') sensitivity += 0.2;
+    if (query.classification >= "SECRET") sensitivity += 0.2;
 
     return sensitivity;
   }
@@ -183,36 +183,36 @@ contract FederatedIntelligenceRegistry {
 
 ```yaml
 deliverables:
-  - federated_node_architecture: 'Core federation protocols'
-  - privacy_preserving_crypto: 'Homomorphic encryption integration'
-  - zk_proof_system: 'Zero-knowledge membership verification'
-  - differential_privacy: 'Budget management and noise mechanisms'
+  - federated_node_architecture: "Core federation protocols"
+  - privacy_preserving_crypto: "Homomorphic encryption integration"
+  - zk_proof_system: "Zero-knowledge membership verification"
+  - differential_privacy: "Budget management and noise mechanisms"
 
 technical_stack:
-  encryption: 'Microsoft SEAL (homomorphic) + libsodium (transport)'
-  zk_proofs: 'Circom + snarkjs for membership verification'
-  mpc: 'MP-SPDZ framework for secure computation'
-  consensus: 'Tendermint for federated state agreement'
+  encryption: "Microsoft SEAL (homomorphic) + libsodium (transport)"
+  zk_proofs: "Circom + snarkjs for membership verification"
+  mpc: "MP-SPDZ framework for secure computation"
+  consensus: "Tendermint for federated state agreement"
 ```
 
 ### Phase 2: Pilot Partnership (Weeks 5-8)
 
 ```yaml
 pilot_partners:
-  - 'FBI Cyber Division (UNCLASSIFIED pilot)'
-  - 'Europol EC3 (cross-border threat sharing)'
-  - 'Major Financial Institution (fraud correlation)'
+  - "FBI Cyber Division (UNCLASSIFIED pilot)"
+  - "Europol EC3 (cross-border threat sharing)"
+  - "Major Financial Institution (fraud correlation)"
 
 pilot_scenarios:
   threat_intel_sharing:
-    - 'APT campaign indicators (IoCs)'
-    - 'Fraud pattern correlation across institutions'
-    - 'Cyber threat attribution without revealing sources'
+    - "APT campaign indicators (IoCs)"
+    - "Fraud pattern correlation across institutions"
+    - "Cyber threat attribution without revealing sources"
 
 privacy_validation:
-  - 'No raw PII crosses organizational boundaries'
-  - 'Differential privacy budget prevents reconstruction attacks'
-  - 'Zero-knowledge proofs verify capabilities without exposure'
+  - "No raw PII crosses organizational boundaries"
+  - "Differential privacy budget prevents reconstruction attacks"
+  - "Zero-knowledge proofs verify capabilities without exposure"
 ```
 
 ### Phase 3: Scale & Optimize (Weeks 9-12)
@@ -224,10 +224,10 @@ scaling_targets:
   privacy_budget_efficiency: 90% # useful queries vs noise
 
 optimizations:
-  query_caching: 'Privacy-preserving result caching'
-  batch_processing: 'MPC optimization for bulk operations'
-  network_topology: 'Geographic federation clustering'
-  cost_optimization: 'Homomorphic computation efficiency'
+  query_caching: "Privacy-preserving result caching"
+  batch_processing: "MPC optimization for bulk operations"
+  network_topology: "Geographic federation clustering"
+  cost_optimization: "Homomorphic computation efficiency"
 ```
 
 ---
@@ -269,21 +269,20 @@ class FederationAnalytics:
 ```yaml
 compliance_frameworks:
   gdpr:
-    status: 'COMPLIANT'
-    mechanisms: ['consent_management', 'right_to_erasure', 'data_minimization']
+    status: "COMPLIANT"
+    mechanisms: ["consent_management", "right_to_erasure", "data_minimization"]
 
   ccpa:
-    status: 'COMPLIANT'
-    mechanisms: ['consumer_rights', 'opt_out_mechanisms', 'transparency']
+    status: "COMPLIANT"
+    mechanisms: ["consumer_rights", "opt_out_mechanisms", "transparency"]
 
   itar:
-    status: 'COMPLIANT'
-    mechanisms:
-      ['export_control', 'person_verification', 'dual_use_restrictions']
+    status: "COMPLIANT"
+    mechanisms: ["export_control", "person_verification", "dual_use_restrictions"]
 
   nato_standards:
-    status: 'PENDING_CERTIFICATION'
-    mechanisms: ['classification_handling', 'need_to_know', 'caveat_processing']
+    status: "PENDING_CERTIFICATION"
+    mechanisms: ["classification_handling", "need_to_know", "caveat_processing"]
 ```
 
 ### Cryptographic Audit Trail

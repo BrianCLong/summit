@@ -1,10 +1,13 @@
 # Prompt 10: Cost Guardrails + Usage Metering
 
 ## Role
+
 FinOps Engineer
 
 ## Context
+
 IntelGraph operates under strict budget constraints:
+
 - **Predictable costs** - Prevent budget overruns
 - **Usage transparency** - Understand cost drivers
 - **Optimization opportunities** - Identify waste
@@ -13,9 +16,11 @@ IntelGraph operates under strict budget constraints:
 Cost observability and proactive alerting are critical for SaaS sustainability.
 
 ## Task
+
 Implement a cost metering and guardrails system:
 
 ### 1. Per-Unit Metering
+
 - GraphQL API calls (queries, mutations)
 - Ingested events (by connector type)
 - Graph traversals (by hop count)
@@ -23,11 +28,13 @@ Implement a cost metering and guardrails system:
 - Compute (copilot queries, ML inference)
 
 ### 2. Cost Model
+
 - Configurable unit costs
 - Multi-dimensional cost allocation (tenant, user, investigation)
 - Projected monthly costs based on current usage
 
 ### 3. Budgets & Alerts
+
 - Environment-specific budgets (dev, staging, prod)
 - Alert at 80% of budget
 - Daily cost reports
@@ -36,12 +43,14 @@ Implement a cost metering and guardrails system:
 ## Guardrails
 
 ### Cost Targets (Configurable)
+
 - **Ingest**: ≤ $0.10 per 1,000 events
 - **GraphQL**: ≤ $2.00 per 1M calls
 - **Storage**: ≤ $0.05 per GB-month
 - **Compute**: ≤ $0.10 per copilot query
 
 ### Budgets (Example)
+
 - **Development**: $500/month
 - **Staging**: $1,000/month
 - **Production**: $10,000/month
@@ -49,6 +58,7 @@ Implement a cost metering and guardrails system:
 ## Deliverables
 
 ### 1. Cost Metering Library
+
 - [ ] `libs/cost/` package with:
   - [ ] Metering middleware for Express/Fastify
   - [ ] Cost calculation engine
@@ -56,6 +66,7 @@ Implement a cost metering and guardrails system:
   - [ ] Cost event emitter
 
 ### 2. Metrics Export
+
 - [ ] Prometheus exporter for cost metrics
 - [ ] OpenTelemetry meter integration
 - [ ] Custom metrics:
@@ -65,6 +76,7 @@ Implement a cost metering and guardrails system:
   - [ ] `cost_usd{dimension, resource}`
 
 ### 3. Daily Cost Report Job
+
 - [ ] `services/cost-reporter/` with:
   - [ ] Daily aggregation job
   - [ ] Cost breakdown by tenant/user/resource
@@ -73,12 +85,14 @@ Implement a cost metering and guardrails system:
   - [ ] Anomaly detection (>20% increase day-over-day)
 
 ### 4. Budget Alerts
+
 - [ ] Prometheus alerting rules for budget thresholds
 - [ ] Alert at 80%, 90%, 100% of budget
 - [ ] Cost anomaly alerts
 - [ ] Integration with incident management
 
 ### 5. Grafana Cost Dashboard
+
 - [ ] `grafana/dashboards/cost-overview.json`:
   - [ ] Current month spend by resource
   - [ ] Projected month-end total
@@ -87,12 +101,14 @@ Implement a cost metering and guardrails system:
   - [ ] Cost trends (daily, weekly)
 
 ### 6. Documentation
+
 - [ ] Cost model specification
 - [ ] Metering integration guide
 - [ ] Budget configuration guide
 - [ ] Cost optimization playbook
 
 ## Acceptance Criteria
+
 - ✅ Synthetic load shows realistic cost projections
 - ✅ Alert fires at 80% of configured budget
 - ✅ Daily cost report generated and stored
@@ -104,35 +120,35 @@ Implement a cost metering and guardrails system:
 
 ```yaml
 # config/cost-model.yaml
-version: '1.0'
+version: "1.0"
 
 # Unit costs (USD)
 unitCosts:
   # API costs
-  graphql_query: 0.000002      # $2 per 1M queries
-  graphql_mutation: 0.000005   # $5 per 1M mutations
+  graphql_query: 0.000002 # $2 per 1M queries
+  graphql_mutation: 0.000005 # $5 per 1M mutations
 
   # Ingest costs
-  ingest_event: 0.0001         # $0.10 per 1k events
-  ingest_file_mb: 0.01         # $0.01 per MB
+  ingest_event: 0.0001 # $0.10 per 1k events
+  ingest_file_mb: 0.01 # $0.01 per MB
 
   # Graph costs
-  graph_1hop: 0.000001         # $1 per 1M 1-hop queries
-  graph_2hop: 0.000005         # $5 per 1M 2-hop queries
-  graph_3hop: 0.00001          # $10 per 1M 3-hop queries
+  graph_1hop: 0.000001 # $1 per 1M 1-hop queries
+  graph_2hop: 0.000005 # $5 per 1M 2-hop queries
+  graph_3hop: 0.00001 # $10 per 1M 3-hop queries
 
   # Storage costs
-  storage_gb_month: 0.05       # $0.05 per GB-month
+  storage_gb_month: 0.05 # $0.05 per GB-month
 
   # Compute costs
-  copilot_query: 0.10          # $0.10 per copilot query
-  ml_inference: 0.01           # $0.01 per ML inference
+  copilot_query: 0.10 # $0.10 per copilot query
+  ml_inference: 0.01 # $0.01 per ML inference
 
 # Budgets (USD)
 budgets:
   development:
     monthly: 500
-    alert_threshold: 0.80      # Alert at 80%
+    alert_threshold: 0.80 # Alert at 80%
 
   staging:
     monthly: 1000
@@ -145,15 +161,15 @@ budgets:
 # Anomaly detection
 anomalyDetection:
   enabled: true
-  threshold: 0.20              # Alert if >20% increase day-over-day
+  threshold: 0.20 # Alert if >20% increase day-over-day
 ```
 
 ## Metering Middleware Example
 
 ```typescript
 // libs/cost/src/middleware.ts
-import { Request, Response, NextFunction } from 'express';
-import { CostMeter } from './meter';
+import { Request, Response, NextFunction } from "express";
+import { CostMeter } from "./meter";
 
 interface MeteringOptions {
   costModel: CostModel;
@@ -169,17 +185,17 @@ export function meteringMiddleware(options: MeteringOptions) {
     // Extract dimensions
     const dimensions: Record<string, string> = {};
     for (const [key, value] of Object.entries(options.dimensions || {})) {
-      dimensions[key] = typeof value === 'function' ? value(req) : value;
+      dimensions[key] = typeof value === "function" ? value(req) : value;
     }
 
     // Hook into response finish
-    res.on('finish', () => {
+    res.on("finish", () => {
       const duration = Date.now() - startTime;
 
       // Determine operation type
-      const operation = req.body?.query?.includes('mutation')
-        ? 'graphql_mutation'
-        : 'graphql_query';
+      const operation = req.body?.query?.includes("mutation")
+        ? "graphql_mutation"
+        : "graphql_query";
 
       // Record usage
       meter.record({
@@ -202,7 +218,7 @@ export function meteringMiddleware(options: MeteringOptions) {
 
 ```typescript
 // libs/cost/src/calculator.ts
-import { CostModel, UsageEvent } from './types';
+import { CostModel, UsageEvent } from "./types";
 
 export class CostCalculator {
   constructor(private costModel: CostModel) {}
@@ -233,16 +249,14 @@ export class CostCalculator {
       summary.total += cost;
 
       // By operation
-      summary.byOperation[event.operation] =
-        (summary.byOperation[event.operation] || 0) + cost;
+      summary.byOperation[event.operation] = (summary.byOperation[event.operation] || 0) + cost;
 
       // By dimension
       for (const [key, value] of Object.entries(event.dimensions || {})) {
         if (!summary.byDimension[key]) {
           summary.byDimension[key] = {};
         }
-        summary.byDimension[key][value] =
-          (summary.byDimension[key][value] || 0) + cost;
+        summary.byDimension[key][value] = (summary.byDimension[key][value] || 0) + cost;
       }
     }
 
@@ -260,33 +274,33 @@ export class CostCalculator {
 
 ```typescript
 // libs/cost/src/prometheus.ts
-import { register, Counter, Gauge } from 'prom-client';
+import { register, Counter, Gauge } from "prom-client";
 
 export const costMetrics = {
   // Usage counters
   apiCalls: new Counter({
-    name: 'api_calls_total',
-    help: 'Total API calls',
-    labelNames: ['tenant', 'user', 'operation'],
+    name: "api_calls_total",
+    help: "Total API calls",
+    labelNames: ["tenant", "user", "operation"],
   }),
 
   ingestEvents: new Counter({
-    name: 'ingest_events_total',
-    help: 'Total ingested events',
-    labelNames: ['connector', 'tenant'],
+    name: "ingest_events_total",
+    help: "Total ingested events",
+    labelNames: ["connector", "tenant"],
   }),
 
   // Cost gauges
   costUSD: new Gauge({
-    name: 'cost_usd',
-    help: 'Accumulated cost in USD',
-    labelNames: ['dimension', 'resource'],
+    name: "cost_usd",
+    help: "Accumulated cost in USD",
+    labelNames: ["dimension", "resource"],
   }),
 
   budgetUtilization: new Gauge({
-    name: 'budget_utilization_ratio',
-    help: 'Budget utilization ratio (0-1)',
-    labelNames: ['environment'],
+    name: "budget_utilization_ratio",
+    help: "Budget utilization ratio (0-1)",
+    labelNames: ["environment"],
   }),
 };
 
@@ -300,8 +314,8 @@ register.registerMetric(costMetrics.budgetUtilization);
 
 ```typescript
 // services/cost-reporter/src/daily-report.ts
-import { CostCalculator } from '@intelgraph/cost';
-import { UsageRepository } from './repository';
+import { CostCalculator } from "@intelgraph/cost";
+import { UsageRepository } from "./repository";
 
 export async function generateDailyReport(date: Date): Promise<CostReport> {
   const repo = new UsageRepository();
@@ -318,7 +332,7 @@ export async function generateDailyReport(date: Date): Promise<CostReport> {
   const projectedMonthly = calculator.projectMonthlyCost(dailyAverage);
 
   // Budget comparison
-  const budget = costModel.budgets[process.env.ENVIRONMENT || 'development'];
+  const budget = costModel.budgets[process.env.ENVIRONMENT || "development"];
   const budgetUtilization = projectedMonthly / budget.monthly;
 
   return {
@@ -370,6 +384,7 @@ groups:
 ```
 
 ## Related Files
+
 - `/home/user/summit/docs/cost-analysis/` - Cost analysis documents
 - `/home/user/summit/libs/cost/` - Cost metering library (if exists)
 
@@ -384,6 +399,7 @@ claude "Execute prompt 10: Cost guardrails implementation"
 ```
 
 ## Notes
+
 - Store usage events in TimescaleDB for efficient time-series queries
 - Use Prometheus recording rules for daily/monthly aggregations
 - Consider cost allocation by Kubernetes namespace/labels

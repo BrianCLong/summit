@@ -2,5 +2,5 @@
  * Compiler Module Exports
  */
 
-export * from './compiler';
-export { QueryCompiler, compiler } from './compiler';
+export * from "./compiler";
+export { QueryCompiler, compiler } from "./compiler";

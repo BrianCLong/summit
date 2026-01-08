@@ -135,18 +135,18 @@ vi values-local.yaml
 # values-local.yaml
 syncService:
   deployment:
-    id: "edge-field-001"  # MUST be unique
+    id: "edge-field-001" # MUST be unique
     name: "Field Unit Alpha"
-    environment: "edge"  # core or edge
-    classification: "UNCLASSIFIED"  # Your classification
+    environment: "edge" # core or edge
+    classification: "UNCLASSIFIED" # Your classification
 
 federal:
   airGap:
     enabled: true
-    mode: "STRICT"  # No external network access
+    mode: "STRICT" # No external network access
 
 image:
-  registry: "registry.internal.local"  # Your internal registry
+  registry: "registry.internal.local" # Your internal registry
 ```
 
 #### 3. Generate Cryptographic Keys
@@ -264,14 +264,14 @@ curl -X POST http://sync-service:4020/export \
 
 **Scope Options:**
 
-| Field | Description | Example |
-|-------|-------------|---------|
-| `cases` | Specific case IDs | `["case-001", "case-002"]` |
-| `tenants` | All cases for tenants | `["tenant-alpha"]` |
-| `timeRange` | Cases in time range | `{"start": "2025-01-01T00:00:00Z", "end": "2025-01-31T23:59:59Z"}` |
-| `entities` | Specific entities | `["entity-123"]` |
-| `includeEvidence` | Include evidence files | `true` (default) |
-| `includeAnalytics` | Include analytics | `false` (default) |
+| Field              | Description            | Example                                                            |
+| ------------------ | ---------------------- | ------------------------------------------------------------------ |
+| `cases`            | Specific case IDs      | `["case-001", "case-002"]`                                         |
+| `tenants`          | All cases for tenants  | `["tenant-alpha"]`                                                 |
+| `timeRange`        | Cases in time range    | `{"start": "2025-01-01T00:00:00Z", "end": "2025-01-31T23:59:59Z"}` |
+| `entities`         | Specific entities      | `["entity-123"]`                                                   |
+| `includeEvidence`  | Include evidence files | `true` (default)                                                   |
+| `includeAnalytics` | Include analytics      | `false` (default)                                                  |
 
 #### 2. Verify Bundle
 
@@ -320,6 +320,7 @@ bundle_abc123.tar.gz
    - Label with classification markings
 
 2. **Copy Package:**
+
    ```bash
    # Copy tarball and checksum
    cp /mnt/usb/exports/bundle_abc123.tar.gz /media/transfer/
@@ -416,12 +417,12 @@ kubectl logs -f -n intelgraph deploy/sync-service
 
 **Conflict Resolution Strategies:**
 
-| Strategy | Behavior | Use Case |
-|----------|----------|----------|
-| `abort` | Stop on first conflict | Strict data integrity requirements |
-| `skip` | Skip conflicting items | Prefer existing data |
-| `overwrite` | Replace with incoming | Trust source more than target |
-| `merge` | Combine metadata | Best effort reconciliation |
+| Strategy    | Behavior               | Use Case                           |
+| ----------- | ---------------------- | ---------------------------------- |
+| `abort`     | Stop on first conflict | Strict data integrity requirements |
+| `skip`      | Skip conflicting items | Prefer existing data               |
+| `overwrite` | Replace with incoming  | Trust source more than target      |
+| `merge`     | Combine metadata       | Best effort reconciliation         |
 
 #### 6. Verify Import Results
 
@@ -442,11 +443,13 @@ kubectl exec -n intelgraph deploy/intelgraph-server -- \
 **When conflicts occur during import:**
 
 1. **Review conflict details:**
+
    ```bash
    ./deploy-profiles/airgap/scripts/sync-cli.sh conflicts
    ```
 
 2. **Analyze conflict data:**
+
    ```sql
    -- Query sync_conflicts table
    SELECT id, bundle_id, type, resource_type, resource_id,
@@ -475,11 +478,13 @@ kubectl exec -n intelgraph deploy/intelgraph-server -- \
 #### Key Management
 
 **Key Generation:**
+
 - RSA 4096-bit keys for signing/verification
 - Keys generated on secure offline workstation
 - Private keys stored in HSM or encrypted storage
 
 **Key Rotation:**
+
 ```bash
 # Generate new key pair
 ./deploy-profiles/airgap/scripts/generate-keys.sh \
@@ -501,6 +506,7 @@ kubectl rollout restart deployment/sync-service -n intelgraph
 #### Bundle Signing
 
 All bundles are cryptographically signed:
+
 - Algorithm: RSA-SHA256
 - Signature embedded in bundle JSON
 - Public key distributed to all deployments
@@ -527,6 +533,7 @@ kubectl exec -n intelgraph deploy/sync-service -- \
 ```
 
 **Audit Record Contents:**
+
 - Bundle ID and checksums
 - Operation type (export/import/verify)
 - Actor (who performed operation)
@@ -540,6 +547,7 @@ kubectl exec -n intelgraph deploy/sync-service -- \
 #### Chain of Custody
 
 For each transfer, document:
+
 1. **Export:**
    - Who created bundle
    - What data included
@@ -620,6 +628,7 @@ kubectl exec -n intelgraph deploy/sync-service -- \
 **Cause:** Scope parameters don't match any data in database
 
 **Solution:**
+
 ```bash
 # Verify data exists
 kubectl exec -n intelgraph deploy/intelgraph-server -- \
@@ -635,6 +644,7 @@ kubectl exec -n intelgraph deploy/intelgraph-server -- \
 **Cause:** Bundle signed with different key than available for verification
 
 **Solution:**
+
 ```bash
 # Check which key was used to sign
 jq '.signatures[0]' bundle.json
@@ -650,6 +660,7 @@ kubectl get secret sync-service-keys -n intelgraph -o yaml
 **Cause:** Data already imported (duplicate import attempt)
 
 **Solution:**
+
 ```bash
 # Check if bundle already imported
 kubectl exec -n intelgraph deploy/sync-service -- \
@@ -669,6 +680,7 @@ kubectl exec -n intelgraph deploy/sync-service -- \
 **Cause:** Service not running or network policy blocking access
 
 **Solution:**
+
 ```bash
 # Check service status
 kubectl get pods -n intelgraph -l app=sync-service
@@ -719,6 +731,7 @@ kubectl exec -n intelgraph deploy/sync-service -- \
 ### Appendix A: Scope Examples
 
 #### Export specific cases
+
 ```json
 {
   "cases": ["case-001", "case-002"],
@@ -728,6 +741,7 @@ kubectl exec -n intelgraph deploy/sync-service -- \
 ```
 
 #### Export by tenant
+
 ```json
 {
   "tenants": ["tenant-alpha", "tenant-bravo"],
@@ -736,6 +750,7 @@ kubectl exec -n intelgraph deploy/sync-service -- \
 ```
 
 #### Export by time range
+
 ```json
 {
   "timeRange": {
@@ -748,6 +763,7 @@ kubectl exec -n intelgraph deploy/sync-service -- \
 ```
 
 #### Export specific entities and relationships
+
 ```json
 {
   "entities": ["entity-123", "entity-456"],
@@ -763,6 +779,7 @@ See `deploy-profiles/airgap/docs/API.md` for complete API documentation.
 ### Appendix C: Compliance Checklist
 
 **Pre-Deployment:**
+
 - [ ] All images loaded to internal registry
 - [ ] Network policies reviewed and approved
 - [ ] Cryptographic keys generated and backed up
@@ -770,6 +787,7 @@ See `deploy-profiles/airgap/docs/API.md` for complete API documentation.
 - [ ] Air-gap compliance test passed
 
 **Post-Deployment:**
+
 - [ ] All pods running and ready
 - [ ] Network isolation verified (DNS, HTTP tests fail)
 - [ ] FIPS mode enabled and verified
@@ -778,6 +796,7 @@ See `deploy-profiles/airgap/docs/API.md` for complete API documentation.
 - [ ] Test export/import completed successfully
 
 **Ongoing Operations:**
+
 - [ ] Weekly air-gap compliance verification
 - [ ] Monthly audit log review
 - [ ] Quarterly key rotation (if required)
@@ -795,4 +814,5 @@ See `deploy-profiles/airgap/docs/API.md` for complete API documentation.
 **Document Classification:** UNCLASSIFIED
 **Distribution:** Approved for operators with appropriate clearance
 **Revision History:**
+
 - v1.0 (2025-11-29): Initial release

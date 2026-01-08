@@ -1,5 +1,5 @@
-import { recordAudit } from './audit';
-import React from 'react';
+import { recordAudit } from './audit'
+import React from 'react'
 
 export type GoldenPathStep =
   | 'signup'
@@ -10,29 +10,29 @@ export type GoldenPathStep =
   | 'entities_viewed'
   | 'relationships_explored'
   | 'copilot_query'
-  | 'results_viewed';
+  | 'results_viewed'
 
-export type ErrorSeverity = 'low' | 'medium' | 'high' | 'critical';
+export type ErrorSeverity = 'low' | 'medium' | 'high' | 'critical'
 
 // Generate or retrieve session correlation ID
 const getSessionId = () => {
-    let sid = sessionStorage.getItem('summit_session_id');
-    if (!sid) {
-        sid = crypto.randomUUID();
-        sessionStorage.setItem('summit_session_id', sid);
-    }
-    return sid;
-};
+  let sid = sessionStorage.getItem('summit_session_id')
+  if (!sid) {
+    sid = crypto.randomUUID()
+    sessionStorage.setItem('summit_session_id', sid)
+  }
+  return sid
+}
 
 // Generate or retrieve device ID
 const getDeviceId = () => {
-    let did = localStorage.getItem('summit_device_id');
-    if (!did) {
-        did = crypto.randomUUID();
-        localStorage.setItem('summit_device_id', did);
-    }
-    return did;
-};
+  let did = localStorage.getItem('summit_device_id')
+  if (!did) {
+    did = crypto.randomUUID()
+    localStorage.setItem('summit_device_id', did)
+  }
+  return did
+}
 
 /**
  * Tracks a step in the Golden Path user journey.
@@ -44,7 +44,7 @@ export const trackGoldenPathStep = async (
 ) => {
   try {
     // Log locally for debug/audit
-    recordAudit('golden_path_step', { step, status });
+    recordAudit('golden_path_step', { step, status })
 
     // Send to backend telemetry endpoint
     await fetch('/api/monitoring/telemetry/events', {
@@ -57,16 +57,16 @@ export const trackGoldenPathStep = async (
         event: 'golden_path_step',
         labels: { step, status },
         context: {
-            sessionId: getSessionId(),
-            deviceId: getDeviceId(),
-            url: window.location.href
-        }
+          sessionId: getSessionId(),
+          deviceId: getDeviceId(),
+          url: window.location.href,
+        },
       }),
-    });
+    })
   } catch (error) {
-    console.error('Failed to track golden path step:', error);
+    console.error('Failed to track golden path step:', error)
   }
-};
+}
 
 /**
  * Reports an error to the backend telemetry service.
@@ -84,14 +84,14 @@ export const reportError = async (
       severity,
       timestamp: new Date().toISOString(),
       url: window.location.href,
-    };
+    }
 
     // Log to console in dev
     if (import.meta.env.DEV) {
-      console.group('🚨 Error Reported');
-      console.error(error);
-      console.info('Context:', errorInfo);
-      console.groupEnd();
+      console.group('🚨 Error Reported')
+      console.error(error)
+      console.info('Context:', errorInfo)
+      console.groupEnd()
     }
 
     // Send to backend
@@ -109,49 +109,45 @@ export const reportError = async (
         },
         payload: errorData,
         context: {
-            sessionId: getSessionId(),
-            deviceId: getDeviceId(),
-        }
+          sessionId: getSessionId(),
+          deviceId: getDeviceId(),
+        },
       }),
-    });
+    })
   } catch (trackingError) {
     // Fallback to console if reporting fails
-    console.error('Failed to report error:', trackingError);
+    console.error('Failed to report error:', trackingError)
   }
-};
+}
 
 export const getTelemetryContext = () => ({
-    sessionId: getSessionId(),
-    deviceId: getDeviceId(),
-});
-
+  sessionId: getSessionId(),
+  deviceId: getDeviceId(),
+})
 
 // Tri-pane Telemetry
 export const trackTimeWindowChange = async (
-    startMs: number,
-    endMs: number,
-    granularity: string,
-    tzMode: string,
-    source: string
+  startMs: number,
+  endMs: number,
+  granularity: string,
+  tzMode: string,
+  source: string
 ) => {
-    // Implementation for sending triPane.timeWindow.change
-    // console.log('triPane.timeWindow.change', { startMs, endMs, granularity, tzMode, source });
-};
+  // Implementation for sending triPane.timeWindow.change
+  // console.log('triPane.timeWindow.change', { startMs, endMs, granularity, tzMode, source });
+}
 
 export const trackSyncDivergence = async (
-    deltaStartMs: number,
-    deltaEndMs: number,
-    pane: string,
-    granularity: string
+  deltaStartMs: number,
+  deltaEndMs: number,
+  pane: string,
+  granularity: string
 ) => {
-    // Implementation for sending triPane.sync.divergence_detected
-    // console.log('triPane.sync.divergence_detected', { deltaStartMs, deltaEndMs, pane, granularity });
-};
+  // Implementation for sending triPane.sync.divergence_detected
+  // console.log('triPane.sync.divergence_detected', { deltaStartMs, deltaEndMs, pane, granularity });
+}
 
-export const trackQueryLatency = async (
-    pane: string,
-    durationMs: number
-) => {
-    // Implementation for sending triPane.query.latency_ms
-    // console.log('triPane.query.latency_ms', { pane, durationMs });
-};
+export const trackQueryLatency = async (pane: string, durationMs: number) => {
+  // Implementation for sending triPane.query.latency_ms
+  // console.log('triPane.query.latency_ms', { pane, durationMs });
+}

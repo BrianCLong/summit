@@ -6,10 +6,7 @@ export class CooccurrenceAnalyzer {
   /**
    * Analyze entity co-occurrence
    */
-  analyzeCooccurrence(
-    documents: string[],
-    entities: string[]
-  ): Map<string, Map<string, number>> {
+  analyzeCooccurrence(documents: string[], entities: string[]): Map<string, Map<string, number>> {
     const cooccurrence = new Map<string, Map<string, number>>();
 
     for (const entity of entities) {

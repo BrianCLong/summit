@@ -2,12 +2,8 @@
  * Base Contract - Abstract base class for contract interactions
  */
 
-import { randomBytes } from 'crypto';
-import type {
-  ContractConfig,
-  TransactionReceipt,
-  ContractEvent,
-} from '../types.js';
+import { randomBytes } from "crypto";
+import type { ContractConfig, TransactionReceipt, ContractEvent } from "../types.js";
 
 export abstract class BaseContract {
   protected config: ContractConfig;
@@ -17,12 +13,9 @@ export abstract class BaseContract {
     this.config = config;
   }
 
-  protected async sendTransaction(
-    method: string,
-    args: unknown[],
-  ): Promise<TransactionReceipt> {
+  protected async sendTransaction(method: string, args: unknown[]): Promise<TransactionReceipt> {
     // Simulate blockchain transaction
-    const txHash = `0x${  randomBytes(32).toString('hex')}`;
+    const txHash = `0x${randomBytes(32).toString("hex")}`;
     const blockNumber = Math.floor(Date.now() / 1000);
 
     // In production, this would:
@@ -36,9 +29,9 @@ export abstract class BaseContract {
     return {
       txHash,
       blockNumber,
-      blockHash: `0x${  randomBytes(32).toString('hex')}`,
+      blockHash: `0x${randomBytes(32).toString("hex")}`,
       gasUsed: 21000 + Math.floor(Math.random() * 100000),
-      status: 'success',
+      status: "success",
       logs: this.generateEvents(method, args),
       timestamp: new Date(),
     };
@@ -59,7 +52,7 @@ export abstract class BaseContract {
   protected async getEvents(
     eventName: string,
     fromBlock: number,
-    toBlock: number,
+    toBlock: number
   ): Promise<ContractEvent[]> {
     // In production, query blockchain for events
     return [];
@@ -84,7 +77,7 @@ export abstract class BaseContract {
         args: { method, argsCount: args.length },
         address: this.config.address,
         blockNumber: Math.floor(Date.now() / 1000),
-        txHash: `0x${  randomBytes(32).toString('hex')}`,
+        txHash: `0x${randomBytes(32).toString("hex")}`,
       },
     ];
   }
@@ -94,8 +87,8 @@ export abstract class BaseContract {
     const mocks: Record<string, () => any> = {
       getPoolState: () => ({
         poolId: args[0],
-        owner: `0x${  '1'.repeat(40)}`,
-        merkleRoot: `0x${  randomBytes(32).toString('hex')}`,
+        owner: `0x${"1".repeat(40)}`,
+        merkleRoot: `0x${randomBytes(32).toString("hex")}`,
         contributorCount: BigInt(10),
         totalContributions: BigInt(100),
         createdAt: BigInt(Math.floor(Date.now() / 1000) - 86400),
@@ -105,18 +98,18 @@ export abstract class BaseContract {
       verifyContribution: () => true,
       getAccessGrant: () => ({
         grantId: args[0],
-        poolId: args[1] || 'pool-1',
-        grantee: `0x${  '2'.repeat(40)}`,
+        poolId: args[1] || "pool-1",
+        grantee: `0x${"2".repeat(40)}`,
         accessLevel: BigInt(1),
         expiresAt: BigInt(Math.floor(Date.now() / 1000) + 86400),
         revoked: false,
       }),
       getListing: () => ({
         listingId: args[0],
-        poolId: 'pool-1',
-        seller: `0x${  '3'.repeat(40)}`,
+        poolId: "pool-1",
+        seller: `0x${"3".repeat(40)}`,
         price: BigInt(100),
-        currency: 'USD',
+        currency: "USD",
         active: true,
         totalSales: 5,
       }),

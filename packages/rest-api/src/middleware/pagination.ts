@@ -4,18 +4,21 @@
  * Handles pagination parameters and metadata
  */
 
-import type { Request, Response, NextFunction, PaginationOptions, PaginationMetadata } from '../types';
+import type {
+  Request,
+  Response,
+  NextFunction,
+  PaginationOptions,
+  PaginationMetadata,
+} from "../types";
 
 export function paginationMiddleware(options: PaginationOptions) {
   return (req: Request, res: Response, next: NextFunction) => {
     const { defaultLimit, maxLimit, strategy } = options;
 
-    if (strategy === 'offset') {
+    if (strategy === "offset") {
       // Offset-based pagination
-      const limit = Math.min(
-        parseInt(req.query.limit as string) || defaultLimit,
-        maxLimit
-      );
+      const limit = Math.min(parseInt(req.query.limit as string) || defaultLimit, maxLimit);
       const offset = parseInt(req.query.offset as string) || 0;
 
       req.pagination = {
@@ -26,10 +29,7 @@ export function paginationMiddleware(options: PaginationOptions) {
       };
     } else {
       // Cursor-based pagination
-      const limit = Math.min(
-        parseInt(req.query.limit as string) || defaultLimit,
-        maxLimit
-      );
+      const limit = Math.min(parseInt(req.query.limit as string) || defaultLimit, maxLimit);
       const cursor = req.query.cursor as string | undefined;
 
       req.pagination = {
@@ -52,7 +52,7 @@ export function addPaginationMetadata(
 ): PaginationMetadata {
   const pagination = req.pagination!;
 
-  if ('offset' in pagination && typeof pagination.offset === 'number') {
+  if ("offset" in pagination && typeof pagination.offset === "number") {
     // Offset-based
     const hasMore = pagination.offset + count < total;
 

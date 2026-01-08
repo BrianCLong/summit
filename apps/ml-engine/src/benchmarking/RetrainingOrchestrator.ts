@@ -1,7 +1,7 @@
-import { logger } from '../utils/logger.js';
-import { TrainingPipeline, TrainingExample } from '../training/TrainingPipeline.js';
-import { ModelBenchmarkingService } from './ModelBenchmarkingService.js';
-import { ModelRegistry } from './ModelRegistry.js';
+import { logger } from "../utils/logger.js";
+import { TrainingPipeline, TrainingExample } from "../training/TrainingPipeline.js";
+import { ModelBenchmarkingService } from "./ModelBenchmarkingService.js";
+import { ModelRegistry } from "./ModelRegistry.js";
 
 interface OrchestratorConfig {
   checkIntervalMs: number;
@@ -29,7 +29,7 @@ export class RetrainingOrchestrator {
     private readonly benchmarking: ModelBenchmarkingService,
     private readonly modelRegistry: ModelRegistry,
     private readonly trainingPipeline: TrainingPipeline,
-    private readonly config: OrchestratorConfig,
+    private readonly config: OrchestratorConfig
   ) {}
 
   start(): void {
@@ -38,49 +38,45 @@ export class RetrainingOrchestrator {
     }
 
     this.timer = setInterval(() => {
-      this.checkAll().catch((error) =>
-        logger.error('Retraining orchestrator check failed', error),
-      );
+      this.checkAll().catch((error) => logger.error("Retraining orchestrator check failed", error));
     }, this.config.checkIntervalMs);
-    logger.info('Retraining orchestrator started');
+    logger.info("Retraining orchestrator started");
   }
 
   stop(): void {
     if (this.timer) {
       clearInterval(this.timer);
       this.timer = undefined;
-      logger.info('Retraining orchestrator stopped');
+      logger.info("Retraining orchestrator stopped");
     }
   }
 
   registerModelType(
     modelType: string,
-    overrides: Partial<Omit<RetrainingRule, 'modelType'>> = {},
+    overrides: Partial<Omit<RetrainingRule, "modelType">> = {}
   ): void {
     const rule: RetrainingRule = {
       modelType,
       degradationThreshold:
         overrides.degradationThreshold ?? this.config.defaultDegradationThreshold,
-      evaluationWindow:
-        overrides.evaluationWindow ?? this.config.defaultEvaluationWindow,
-      minEvaluations:
-        overrides.minEvaluations ?? this.config.defaultMinEvaluations,
+      evaluationWindow: overrides.evaluationWindow ?? this.config.defaultEvaluationWindow,
+      minEvaluations: overrides.minEvaluations ?? this.config.defaultMinEvaluations,
       cooldownMs: overrides.cooldownMs ?? this.config.cooldownMs,
       lastTriggeredAt: overrides.lastTriggeredAt,
       inProgress: false,
     };
 
     this.rules.set(modelType, rule);
-    logger.info('Registered model type for automated retraining', { modelType });
+    logger.info("Registered model type for automated retraining", { modelType });
   }
 
   private async checkAll(): Promise<void> {
     for (const rule of this.rules.values()) {
       await this.evaluateRule(rule).catch((error) =>
-        logger.error('Failed to evaluate retraining rule', {
+        logger.error("Failed to evaluate retraining rule", {
           modelType: rule.modelType,
           error: error.message,
-        }),
+        })
       );
     }
   }
@@ -97,17 +93,17 @@ export class RetrainingOrchestrator {
 
     const activeModel = await this.modelRegistry.getActiveModel(rule.modelType);
     if (!activeModel) {
-      logger.debug('No active model for retraining rule', { modelType: rule.modelType });
+      logger.debug("No active model for retraining rule", { modelType: rule.modelType });
       return;
     }
 
     const history = await this.benchmarking.getPerformanceHistory(
       activeModel.id,
-      rule.evaluationWindow,
+      rule.evaluationWindow
     );
 
     if (history.length < rule.minEvaluations) {
-      logger.debug('Skipping retraining evaluation due to insufficient metrics', {
+      logger.debug("Skipping retraining evaluation due to insufficient metrics", {
         modelType: rule.modelType,
         availableEvaluations: history.length,
       });
@@ -122,18 +118,16 @@ export class RetrainingOrchestrator {
     }
 
     const f1Delta = (baseline.f1Score - latest.f1Score) / baseline.f1Score;
-    const accuracyDelta =
-      (baseline.accuracy - latest.accuracy) / Math.max(baseline.accuracy, 1e-6);
+    const accuracyDelta = (baseline.accuracy - latest.accuracy) / Math.max(baseline.accuracy, 1e-6);
     const degraded =
-      f1Delta >= rule.degradationThreshold ||
-      accuracyDelta >= rule.degradationThreshold;
+      f1Delta >= rule.degradationThreshold || accuracyDelta >= rule.degradationThreshold;
 
     if (!degraded) {
       return;
     }
 
     rule.inProgress = true;
-    logger.warn('Model degradation detected, triggering retraining', {
+    logger.warn("Model degradation detected, triggering retraining", {
       modelType: rule.modelType,
       baselineF1: baseline.f1Score,
       latestF1: latest.f1Score,
@@ -144,29 +138,26 @@ export class RetrainingOrchestrator {
       await this.triggerRetraining(rule, activeModel.id);
       rule.lastTriggeredAt = Date.now();
     } catch (error) {
-      logger.error('Automated retraining failed', error);
+      logger.error("Automated retraining failed", error);
     } finally {
       rule.inProgress = false;
     }
   }
 
-  private async triggerRetraining(
-    rule: RetrainingRule,
-    activeModelId: string,
-  ): Promise<void> {
+  private async triggerRetraining(rule: RetrainingRule, activeModelId: string): Promise<void> {
     const examples: TrainingExample[] = await this.trainingPipeline.collectTrainingData();
 
     if (!examples.length) {
-      logger.warn('Skipping automated retraining due to lack of training data', {
+      logger.warn("Skipping automated retraining due to lack of training data", {
         modelType: rule.modelType,
       });
       return;
     }
 
-    const modelVersion = await this.trainingPipeline.trainModel(examples, 'random_forest');
+    const modelVersion = await this.trainingPipeline.trainModel(examples, "random_forest");
 
     if (modelVersion.metrics.f1Score <= 0) {
-      logger.warn('Automated retraining produced invalid metrics, skipping activation', {
+      logger.warn("Automated retraining produced invalid metrics, skipping activation", {
         modelType: rule.modelType,
         modelVersionId: modelVersion.id,
       });
@@ -174,7 +165,7 @@ export class RetrainingOrchestrator {
     }
 
     await this.trainingPipeline.activateModel(modelVersion.id);
-    logger.info('Automated retraining completed successfully', {
+    logger.info("Automated retraining completed successfully", {
       modelType: rule.modelType,
       modelVersionId: modelVersion.id,
       f1Score: modelVersion.metrics.f1Score,

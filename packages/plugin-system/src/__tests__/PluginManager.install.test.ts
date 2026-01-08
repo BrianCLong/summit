@@ -1,5 +1,5 @@
-import { jest } from '@jest/globals';
-import { PluginManager } from '../core/PluginManager.js';
+import { jest } from "@jest/globals";
+import { PluginManager } from "../core/PluginManager.js";
 import {
   type Plugin,
   type PluginLoader,
@@ -10,8 +10,8 @@ import {
   type CompatibilityResult,
   PluginPermission,
   type PluginManifest,
-} from '../types/plugin.js';
-import * as signatureVerifier from '../security/verifySignature.js';
+} from "../types/plugin.js";
+import * as signatureVerifier from "../security/verifySignature.js";
 
 class StubRegistry implements PluginRegistry {
   private store = new Map<string, PluginMetadata>();
@@ -36,7 +36,9 @@ class StubRegistry implements PluginRegistry {
 
   update(pluginId: string, updates: Partial<PluginMetadata>): Promise<void> {
     const existing = this.store.get(pluginId);
-    if (!existing) {return Promise.resolve();}
+    if (!existing) {
+      return Promise.resolve();
+    }
 
     this.store.set(pluginId, { ...existing, ...updates });
     return Promise.resolve();
@@ -49,7 +51,7 @@ class StubRegistry implements PluginRegistry {
 
 class StubLoader implements PluginLoader {
   load(): Promise<Plugin> {
-    return Promise.reject(new Error('not implemented for install tests'));
+    return Promise.reject(new Error("not implemented for install tests"));
   }
 
   unload(): Promise<void> {
@@ -71,7 +73,7 @@ class StubLoader implements PluginLoader {
 
 class StubDependencyResolver implements DependencyResolver {
   resolve(_pluginId: string, _version: string): Promise<DependencyTree> {
-    return Promise.reject(new Error('not needed for install tests'));
+    return Promise.reject(new Error("not needed for install tests"));
   }
 
   checkCompatibility(_pluginId: string, _version: string): Promise<CompatibilityResult> {
@@ -80,21 +82,21 @@ class StubDependencyResolver implements DependencyResolver {
 }
 
 const baseManifest: PluginManifest = {
-  id: 'sample-plugin',
-  name: 'Sample Plugin',
-  version: '1.2.3',
-  description: 'A sample plugin manifest used for installation tests',
-  author: { name: 'Plugin Author', email: 'author@example.com' },
-  homepage: 'https://example.com/plugin',
-  repository: 'https://example.com/plugin/repo',
-  license: 'MIT',
-  category: 'utility',
-  main: 'dist/index.js',
-  engineVersion: '1.0.0',
+  id: "sample-plugin",
+  name: "Sample Plugin",
+  version: "1.2.3",
+  description: "A sample plugin manifest used for installation tests",
+  author: { name: "Plugin Author", email: "author@example.com" },
+  homepage: "https://example.com/plugin",
+  repository: "https://example.com/plugin/repo",
+  license: "MIT",
+  category: "utility",
+  main: "dist/index.js",
+  engineVersion: "1.0.0",
   permissions: [PluginPermission.READ_DATA],
   signature: {
-    signature: 'signed-payload',
-    publicKey: 'public-key',
+    signature: "signed-payload",
+    publicKey: "public-key",
   },
 };
 
@@ -103,7 +105,7 @@ function createManager(): PluginManager {
     new StubLoader(),
     new StubRegistry(),
     new StubDependencyResolver(),
-    '1.0.0'
+    "1.0.0"
   );
 }
 
@@ -116,9 +118,9 @@ function createManifest(overrides: Partial<PluginManifest> = {}): PluginManifest
   };
 }
 
-describe('PluginManager.install manifest verification', () => {
+describe("PluginManager.install manifest verification", () => {
   beforeEach(() => {
-    process.env.PLUGIN_VERIFY_ENABLED = 'true';
+    process.env.PLUGIN_VERIFY_ENABLED = "true";
     jest.restoreAllMocks();
   });
 
@@ -126,30 +128,30 @@ describe('PluginManager.install manifest verification', () => {
     delete process.env.PLUGIN_VERIFY_ENABLED;
   });
 
-  it('rejects invalid manifest with stable error code', async () => {
+  it("rejects invalid manifest with stable error code", async () => {
     const manager = createManager();
-    const invalidManifest = createManifest({ id: 'INVALID ID' });
+    const invalidManifest = createManifest({ id: "INVALID ID" });
 
     await expect(
-      manager.install(invalidManifest, { type: 'local', location: './plugin' })
-    ).rejects.toMatchObject({ code: 'PLUGIN_MANIFEST_INVALID' });
+      manager.install(invalidManifest, { type: "local", location: "./plugin" })
+    ).rejects.toMatchObject({ code: "PLUGIN_MANIFEST_INVALID" });
   });
 
-  it('accepts a valid manifest when verification is enabled', async () => {
+  it("accepts a valid manifest when verification is enabled", async () => {
     const manager = createManager();
     const validManifest = createManifest();
 
     await expect(
-      manager.install(validManifest, { type: 'local', location: './plugin' })
+      manager.install(validManifest, { type: "local", location: "./plugin" })
     ).resolves.not.toThrow();
   });
 
-  it('invokes signature verification when the flag is enabled', async () => {
+  it("invokes signature verification when the flag is enabled", async () => {
     const manager = createManager();
     const validManifest = createManifest();
-    const verifySpy = jest.spyOn(signatureVerifier, 'verifySignature');
+    const verifySpy = jest.spyOn(signatureVerifier, "verifySignature");
 
-    await manager.install(validManifest, { type: 'local', location: './plugin' });
+    await manager.install(validManifest, { type: "local", location: "./plugin" });
 
     expect(verifySpy).toHaveBeenCalledWith(
       expect.objectContaining({ manifest: expect.objectContaining({ id: validManifest.id }) })

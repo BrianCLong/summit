@@ -2,7 +2,7 @@ export const AgenticConfig = {
   orchestrator: {
     loopIntervalMs: 100, // Speed up for demo
     maxCycles: 5, // Just run 5 cycles for demo
-    logLevel: 'info',
+    logLevel: "info",
   },
   invariants: {
     enforceSecurity: true,
@@ -16,10 +16,10 @@ export const AgenticConfig = {
   },
   void: {
     dryRun: true, // Don't delete files by default, just report
-    ignorePatterns: ['node_modules', 'dist', '.git'],
+    ignorePatterns: ["node_modules", "dist", ".git"],
   },
   multiverse: {
-    defaultUniverse: 'prime',
-    activeUniverses: ['prime', 'beta', 'canary'],
-  }
+    defaultUniverse: "prime",
+    activeUniverses: ["prime", "beta", "canary"],
+  },
 };

@@ -1,5 +1,5 @@
-import EventEmitter from 'eventemitter3';
-import semver from 'semver';
+import EventEmitter from "eventemitter3";
+import semver from "semver";
 import {
   Plugin,
   PluginState,
@@ -9,10 +9,10 @@ import {
   PluginRegistry,
   PluginMetadata,
   DependencyResolver,
-} from '../types/plugin.js';
-import { PluginManifestSchema } from '../manifest/schema.js';
-import { PluginManifestValidationError } from '../errors/PluginManifestValidationError.js';
-import { verifySignature } from '../security/verifySignature.js';
+} from "../types/plugin.js";
+import { PluginManifestSchema } from "../manifest/schema.js";
+import { PluginManifestValidationError } from "../errors/PluginManifestValidationError.js";
+import { verifySignature } from "../security/verifySignature.js";
 
 /**
  * Central plugin manager implementing microkernel pattern
@@ -42,9 +42,7 @@ export class PluginManager extends EventEmitter {
    */
   async install(manifest: PluginManifest, _source: PluginSource): Promise<void> {
     const verificationEnabled = this.shouldVerify();
-    const manifestToInstall = verificationEnabled
-      ? this.validateManifest(manifest)
-      : manifest;
+    const manifestToInstall = verificationEnabled ? this.validateManifest(manifest) : manifest;
     const { id, version } = manifestToInstall;
 
     // Check if already installed
@@ -71,9 +69,9 @@ export class PluginManager extends EventEmitter {
     // Resolve and check dependencies
     const compatibilityResult = await this.dependencyResolver.checkCompatibility(id, version);
     if (!compatibilityResult.compatible) {
-      const errors = compatibilityResult.issues.filter(issue => issue.severity === 'error');
+      const errors = compatibilityResult.issues.filter((issue) => issue.severity === "error");
       throw new Error(
-        `Plugin ${id} has compatibility issues:\n${errors.map(e => e.message).join('\n')}`
+        `Plugin ${id} has compatibility issues:\n${errors.map((e) => e.message).join("\n")}`
       );
     }
 
@@ -97,7 +95,7 @@ export class PluginManager extends EventEmitter {
     // Register plugin
     await this.registry.register(metadata);
 
-    this.emit('plugin:installed', { pluginId: id, version });
+    this.emit("plugin:installed", { pluginId: id, version });
   }
 
   /**
@@ -141,7 +139,7 @@ export class PluginManager extends EventEmitter {
       enabledAt: new Date(),
     });
 
-    this.emit('plugin:enabled', { pluginId });
+    this.emit("plugin:enabled", { pluginId });
   }
 
   /**
@@ -170,7 +168,7 @@ export class PluginManager extends EventEmitter {
       disabledAt: new Date(),
     });
 
-    this.emit('plugin:disabled', { pluginId });
+    this.emit("plugin:disabled", { pluginId });
   }
 
   /**
@@ -185,7 +183,7 @@ export class PluginManager extends EventEmitter {
     // Unregister
     await this.registry.unregister(pluginId);
 
-    this.emit('plugin:uninstalled', { pluginId });
+    this.emit("plugin:uninstalled", { pluginId });
   }
 
   /**
@@ -210,7 +208,7 @@ export class PluginManager extends EventEmitter {
       await this.enable(pluginId);
     }
 
-    this.emit('plugin:updated', { pluginId, version: newVersion });
+    this.emit("plugin:updated", { pluginId, version: newVersion });
   }
 
   /**
@@ -239,7 +237,7 @@ export class PluginManager extends EventEmitter {
     instance.plugin = plugin;
     instance.startedAt = new Date();
 
-    this.emit('plugin:reloaded', { pluginId });
+    this.emit("plugin:reloaded", { pluginId });
   }
 
   /**
@@ -269,7 +267,7 @@ export class PluginManager extends EventEmitter {
   async checkHealth(pluginId: string): Promise<any> {
     const instance = this.plugins.get(pluginId);
     if (!instance || !instance.plugin.healthCheck) {
-      return { healthy: false, message: 'Plugin not running or no health check' };
+      return { healthy: false, message: "Plugin not running or no health check" };
     }
 
     try {
@@ -277,7 +275,7 @@ export class PluginManager extends EventEmitter {
     } catch (error) {
       return {
         healthy: false,
-        message: error instanceof Error ? error.message : 'Health check failed',
+        message: error instanceof Error ? error.message : "Health check failed",
       };
     }
   }
@@ -334,10 +332,8 @@ export class PluginManager extends EventEmitter {
 
   private createAPI(_pluginId: string): any {
     return {
-      request: (_endpoint: string, _options?: any) =>
-        Promise.reject(new Error('Not implemented')),
-      graphql: (_query: string, _variables?: any) =>
-        Promise.reject(new Error('Not implemented')),
+      request: (_endpoint: string, _options?: any) => Promise.reject(new Error("Not implemented")),
+      graphql: (_query: string, _variables?: any) => Promise.reject(new Error("Not implemented")),
     };
   }
 
@@ -355,7 +351,7 @@ export class PluginManager extends EventEmitter {
   }
 
   private shouldVerify(): boolean {
-    return String(process.env.PLUGIN_VERIFY_ENABLED).toLowerCase() === 'true';
+    return String(process.env.PLUGIN_VERIFY_ENABLED).toLowerCase() === "true";
   }
 
   private validateManifest(manifest: PluginManifest): PluginManifest {
@@ -377,6 +373,6 @@ interface PluginInstance {
 }
 
 interface PluginSource {
-  type: 'npm' | 'git' | 'local' | 'marketplace';
+  type: "npm" | "git" | "local" | "marketplace";
   location: string;
 }

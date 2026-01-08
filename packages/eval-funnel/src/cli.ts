@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
-import { CustomerPackGenerator } from './packGenerator';
-import { KpiReportGenerator } from './kpiReporter';
-import { MultiEvalProvisioner } from './provisioner';
-import { ClaimChartBuilder } from './claimChart';
-import { ConnectorCertificationHarness } from './connectorCertification';
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { CustomerPackGenerator } from "./packGenerator";
+import { KpiReportGenerator } from "./kpiReporter";
+import { MultiEvalProvisioner } from "./provisioner";
+import { ClaimChartBuilder } from "./claimChart";
+import { ConnectorCertificationHarness } from "./connectorCertification";
 import {
   ClaimChart,
   ConnectorContract,
@@ -15,7 +15,7 @@ import {
   KpiSample,
   ProvisioningCommandTemplate,
   ProvisioningOptions,
-} from './types';
+} from "./types";
 
 interface CliConfig {
   customers: EvalCustomer[];
@@ -29,13 +29,13 @@ interface CliConfig {
 
 function loadConfig(path: string): CliConfig {
   const resolved = resolve(path);
-  return JSON.parse(readFileSync(resolved, 'utf8')) as CliConfig;
+  return JSON.parse(readFileSync(resolved, "utf8")) as CliConfig;
 }
 
 async function main() {
   const configPath = process.argv[2];
   if (!configPath) {
-    console.error('Usage: eval-funnel <config.json>');
+    console.error("Usage: eval-funnel <config.json>");
     process.exit(1);
   }
 
@@ -44,7 +44,7 @@ async function main() {
   const provisioningResults = await provisioner.provision(
     config.customers,
     config.provisioning,
-    config.provisioningOptions,
+    config.provisioningOptions
   );
   console.log(JSON.stringify({ provisioningResults }, null, 2));
 

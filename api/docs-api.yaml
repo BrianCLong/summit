@@ -13,7 +13,7 @@ paths:
           name: tag
           schema: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
   /v1/search:
     get:
@@ -24,8 +24,8 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200': { description: OK }
+        "200": { description: OK }
   /v1/badges/assertions:
     post:
       summary: Create a hosted OpenBadge assertion (admin only)
-      responses: { '201': { description: Created } }
+      responses: { "201": { description: Created } }

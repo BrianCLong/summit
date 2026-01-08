@@ -8,7 +8,12 @@
     "build": "tsc",
     "test": "jest"
   },
-  "keywords": ["image-generation", "stylegan", "diffusion", "augmentation"],
+  "keywords": [
+    "image-generation",
+    "stylegan",
+    "diffusion",
+    "augmentation"
+  ],
   "dependencies": {
     "@intelgraph/common-types": "workspace:*",
     "lodash": "^4.17.21"

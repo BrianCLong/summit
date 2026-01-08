@@ -109,7 +109,7 @@ services:
   api:
     image: intelgraph/edge-api:1.7
     env_file: .env.edge
-    ports: ['127.0.0.1:4100:4100']
+    ports: ["127.0.0.1:4100:4100"]
     depends_on: [db]
   db:
     image: neo4j:5-community
@@ -124,18 +124,18 @@ services:
 
 ```ts
 // edge/api/index.ts
-import express from 'express';
-import { ApolloServer } from '@apollo/server';
-import { expressMiddleware } from '@apollo/server/express4';
-import typeDefs from './schema';
-import resolvers from './resolvers';
+import express from "express";
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@apollo/server/express4";
+import typeDefs from "./schema";
+import resolvers from "./resolvers";
 const app = express();
 const srv = new ApolloServer({ typeDefs, resolvers });
 await srv.start();
 app.use(
-  '/graphql',
+  "/graphql",
   express.json(),
-  expressMiddleware(srv, { context: async () => ({ edge: true }) }),
+  expressMiddleware(srv, { context: async () => ({ edge: true }) })
 );
 app.listen(4100);
 ```
@@ -146,8 +146,8 @@ app.listen(4100);
 // server/src/replicate/replicator.ts
 export async function pullSince(cursor: string, ctx: any) {
   return ctx.driver.executeQuery(
-    'MATCH (c:Change) WHERE c.ts > $c RETURN c ORDER BY c.ts ASC LIMIT 500',
-    { c: cursor },
+    "MATCH (c:Change) WHERE c.ts > $c RETURN c ORDER BY c.ts ASC LIMIT 500",
+    { c: cursor }
   );
 }
 export async function pushChanges(payload: any[], ctx: any) {
@@ -171,9 +171,9 @@ export async function flush() {
     const { m } = q[0];
     try {
       await $.ajax({
-        url: '/graphql',
-        method: 'POST',
-        contentType: 'application/json',
+        url: "/graphql",
+        method: "POST",
+        contentType: "application/json",
         data: JSON.stringify(m),
       });
       q.shift();
@@ -183,7 +183,7 @@ export async function flush() {
     }
   }
 }
-window.addEventListener('online', flush);
+window.addEventListener("online", flush);
 ```
 
 ### 4.5 CRDT Notes (LWW register)
@@ -200,11 +200,7 @@ export function mergeLWW(a: LWW, b: LWW) {
 
 ```ts
 // server/src/disclosure/merkle_subset.ts
-export function proofOfInclusion(
-  root: string,
-  leaves: string[],
-  path: string[][],
-) {
+export function proofOfInclusion(root: string, leaves: string[], path: string[][]) {
   // verify: fold path hashes to reconstruct root
   return verify(root, leaves, path);
 }
@@ -226,10 +222,10 @@ console.log(verify(b.root, b.leaves, b.paths)?'OK':'FAIL')
 ```ts
 // server/src/devices/registry.ts
 export async function enrollDevice(id: string, pubkey: string, ctx: any) {
-  await ctx.db.insert({ id, pubkey, status: 'active' });
+  await ctx.db.insert({ id, pubkey, status: "active" });
 }
 export async function revokeDevice(id: string, ctx: any) {
-  await ctx.db.update({ id }, { status: 'revoked' });
+  await ctx.db.update({ id }, { status: "revoked" });
   await publishShredCommand(id);
 }
 ```
@@ -239,30 +235,30 @@ export async function revokeDevice(id: string, ctx: any) {
 ```js
 // apps/web/src/offline/jquery-sync.js
 $(function () {
-  $('#sync-now').on('click', function () {
+  $("#sync-now").on("click", function () {
     $.ajax({
-      url: '/graphql',
-      method: 'POST',
-      contentType: 'application/json',
-      data: JSON.stringify({ query: 'mutation{ syncNow }' }),
+      url: "/graphql",
+      method: "POST",
+      contentType: "application/json",
+      data: JSON.stringify({ query: "mutation{ syncNow }" }),
     });
   });
-  window.addEventListener('offline', () => $('#offline-banner').show());
-  window.addEventListener('online', () => $('#offline-banner').hide());
+  window.addEventListener("offline", () => $("#offline-banner").show());
+  window.addEventListener("online", () => $("#offline-banner").hide());
 });
 ```
 
 ### 4.10 k6 — Lossy Link Soak
 
 ```js
-import http from 'k6/http';
-export const options = { vus: 25, duration: '2h' };
+import http from "k6/http";
+export const options = { vus: 25, duration: "2h" };
 export default function () {
   const payload = JSON.stringify({
     query: '{ pullSince(cursor:"2026-03-16T00:00:00Z"){ id } }',
   });
-  http.post('http://edge.local:4100/graphql', payload, {
-    headers: { 'Content-Type': 'application/json' },
+  http.post("http://edge.local:4100/graphql", payload, {
+    headers: { "Content-Type": "application/json" },
   });
 }
 ```

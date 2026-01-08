@@ -37,7 +37,7 @@
     - separator
     - heading "Recent Activity" [level=6]
     - paragraph: 🔍 Investigation "Project Alpha" updated 2 min ago
-    - paragraph: '🤖 AI detected new pattern in Case #47'
+    - paragraph: "🤖 AI detected new pattern in Case #47"
     - paragraph: 📊 Weekly intelligence report generated
     - heading "🌐 Live Collaboration" [level=6]
     - text: Connected

@@ -1,14 +1,14 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import { execSync } from 'child_process';
+import * as fs from "fs";
+import * as path from "path";
+import { execSync } from "child_process";
 
-const ROOT_DIR = path.resolve(__dirname, '../../');
+const ROOT_DIR = path.resolve(__dirname, "../../");
 // Allow overriding SBOM file via env var for testing
-let SBOM_FILE = path.join(ROOT_DIR, 'sbom.json');
+let SBOM_FILE = path.join(ROOT_DIR, "sbom.json");
 
 // Policy definition
-const BLOCKED_LICENSES = ['GPL-3.0', 'AGPL-3.0', 'WTFPL'];
-const REQUIRED_FIELDS = ['name', 'version', 'purl'];
+const BLOCKED_LICENSES = ["GPL-3.0", "AGPL-3.0", "WTFPL"];
+const REQUIRED_FIELDS = ["name", "version", "purl"];
 
 interface Component {
   name: string;
@@ -24,7 +24,7 @@ interface SBOM {
 
 export function checkPolicy(exitOnFail = true): boolean {
   if (process.env.SBOM_FILE_PATH) {
-      SBOM_FILE = process.env.SBOM_FILE_PATH;
+    SBOM_FILE = process.env.SBOM_FILE_PATH;
   }
 
   if (!fs.existsSync(SBOM_FILE)) {
@@ -33,12 +33,12 @@ export function checkPolicy(exitOnFail = true): boolean {
     return false;
   }
 
-  const sbomContent = fs.readFileSync(SBOM_FILE, 'utf-8');
+  const sbomContent = fs.readFileSync(SBOM_FILE, "utf-8");
   let sbom: SBOM;
   try {
     sbom = JSON.parse(sbomContent);
   } catch (e) {
-    console.error('Invalid JSON in SBOM file');
+    console.error("Invalid JSON in SBOM file");
     if (exitOnFail) process.exit(1);
     return false;
   }
@@ -49,18 +49,23 @@ export function checkPolicy(exitOnFail = true): boolean {
   // Check Lockfile Consistency
   // Skip this check in test environment if we are running against a fixture SBOM without real repo context
   if (!process.env.SBOM_FILE_PATH) {
-      try {
-          // Check if pnpm lockfile is consistent
-          console.log("Checking lockfile consistency...");
-          execSync('pnpm install --frozen-lockfile --ignore-scripts --dry-run', { cwd: ROOT_DIR, stdio: 'ignore' });
-      } catch (e) {
-          errors.push("Lockfile is inconsistent with package.json (pnpm install --frozen-lockfile failed)");
-      }
+    try {
+      // Check if pnpm lockfile is consistent
+      console.log("Checking lockfile consistency...");
+      execSync("pnpm install --frozen-lockfile --ignore-scripts --dry-run", {
+        cwd: ROOT_DIR,
+        stdio: "ignore",
+      });
+    } catch (e) {
+      errors.push(
+        "Lockfile is inconsistent with package.json (pnpm install --frozen-lockfile failed)"
+      );
+    }
   }
 
   if (!sbom.components) {
-      console.log("No components found in SBOM.");
-      return true;
+    console.log("No components found in SBOM.");
+    return true;
   }
 
   sbom.components.forEach((component) => {
@@ -69,46 +74,48 @@ export function checkPolicy(exitOnFail = true): boolean {
       component.licenses.forEach((l) => {
         const licenseId = l.license.id || l.license.name;
         if (licenseId) {
-            licenseCounts[licenseId] = (licenseCounts[licenseId] || 0) + 1;
-            if (BLOCKED_LICENSES.includes(licenseId)) {
-                errors.push(`Blocked license ${licenseId} found in component ${component.name}@${component.version}`);
-            }
+          licenseCounts[licenseId] = (licenseCounts[licenseId] || 0) + 1;
+          if (BLOCKED_LICENSES.includes(licenseId)) {
+            errors.push(
+              `Blocked license ${licenseId} found in component ${component.name}@${component.version}`
+            );
+          }
         }
       });
     }
 
     // Check required fields
-    REQUIRED_FIELDS.forEach(field => {
-        if (!(field in component)) {
-             if (component.type !== 'operating-system') {
-                 errors.push(`Component ${component.name} missing required field ${field}`);
-             }
+    REQUIRED_FIELDS.forEach((field) => {
+      if (!(field in component)) {
+        if (component.type !== "operating-system") {
+          errors.push(`Component ${component.name} missing required field ${field}`);
         }
+      }
     });
 
     // Check Unpinned Versions (Ranges)
     // If version contains typical range characters, flag it.
     // SBOM generators usually resolve versions, so seeing a range here is bad.
-    const rangeChars = ['^', '~', '>', '<', '*', 'x'];
-    if (component.version && rangeChars.some(char => component.version.includes(char))) {
-        errors.push(`Unpinned version '${component.version}' found in component ${component.name}`);
+    const rangeChars = ["^", "~", ">", "<", "*", "x"];
+    if (component.version && rangeChars.some((char) => component.version.includes(char))) {
+      errors.push(`Unpinned version '${component.version}' found in component ${component.name}`);
     }
   });
 
-  console.log('License Summary:', licenseCounts);
+  console.log("License Summary:", licenseCounts);
 
   if (errors.length > 0) {
-    console.error('Policy Violations Found:');
+    console.error("Policy Violations Found:");
     errors.forEach((err) => console.error(`- ${err}`));
     if (exitOnFail) process.exit(1);
     return false;
   } else {
-    console.log('SBOM Policy Check Passed.');
+    console.log("SBOM Policy Check Passed.");
     return true;
   }
 }
 
 // Only run if called directly
-if (process.argv[1] === __filename || process.argv[1].endsWith('policy.ts')) {
-    checkPolicy();
+if (process.argv[1] === __filename || process.argv[1].endsWith("policy.ts")) {
+  checkPolicy();
 }

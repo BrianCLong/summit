@@ -1,20 +1,20 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 import {
   MassBehaviorEngine,
   PhaseTransitionDetector,
   CriticalMassAnalyzer,
   TippingPointAnalyzer,
-} from '../index.js';
-import { SEIRSInformationModel } from '../contagion/epidemic-models.js';
+} from "../index.js";
+import { SEIRSInformationModel } from "../contagion/epidemic-models.js";
 import {
   generateThresholdDistribution,
   simulateThresholdCascade,
   findTippingPoint,
-} from '../contagion/threshold-dynamics.js';
-import { SocialInfluenceSimulator } from '../models/social-influence.js';
+} from "../contagion/threshold-dynamics.js";
+import { SocialInfluenceSimulator } from "../models/social-influence.js";
 
-describe('MassBehaviorEngine', () => {
-  it('should initialize with config', () => {
+describe("MassBehaviorEngine", () => {
+  it("should initialize with config", () => {
     const engine = new MassBehaviorEngine({
       population: {},
       contagion: {},
@@ -27,8 +27,8 @@ describe('MassBehaviorEngine', () => {
   });
 });
 
-describe('SEIRSInformationModel', () => {
-  it('should simulate epidemic dynamics', () => {
+describe("SEIRSInformationModel", () => {
+  it("should simulate epidemic dynamics", () => {
     const model = new SEIRSInformationModel(
       {
         susceptible: 990,
@@ -60,7 +60,7 @@ describe('SEIRSInformationModel', () => {
     expect(Math.abs(total - 1000)).toBeLessThan(10); // Allow small numerical drift
   });
 
-  it('should calculate R0', () => {
+  it("should calculate R0", () => {
     const model = new SEIRSInformationModel(
       { susceptible: 100, exposed: 0, infected: 1, recovered: 0, resistant: 0 },
       { beta: 0.3, sigma: 0.2, gamma: 0.1, delta: 0.01, mu: 0 }
@@ -71,9 +71,9 @@ describe('SEIRSInformationModel', () => {
   });
 });
 
-describe('ThresholdDynamics', () => {
-  it('should generate uniform threshold distribution', () => {
-    const dist = generateThresholdDistribution('UNIFORM', { size: 100 });
+describe("ThresholdDynamics", () => {
+  it("should generate uniform threshold distribution", () => {
+    const dist = generateThresholdDistribution("UNIFORM", { size: 100 });
     expect(dist.distribution.length).toBe(100);
     expect(dist.cumulativeDistribution.length).toBe(100);
 
@@ -83,29 +83,33 @@ describe('ThresholdDynamics', () => {
     }
   });
 
-  it('should simulate threshold cascade', () => {
+  it("should simulate threshold cascade", () => {
     // Create thresholds that allow cascade
-    const thresholds = Array(100).fill(0).map((_, i) => i / 100);
+    const thresholds = Array(100)
+      .fill(0)
+      .map((_, i) => i / 100);
     const result = simulateThresholdCascade(thresholds, 0.1);
 
-    expect(result).toHaveProperty('finalActivation');
-    expect(result).toHaveProperty('trajectory');
-    expect(result).toHaveProperty('converged');
+    expect(result).toHaveProperty("finalActivation");
+    expect(result).toHaveProperty("trajectory");
+    expect(result).toHaveProperty("converged");
     expect(result.finalActivation).toBeGreaterThanOrEqual(0);
     expect(result.finalActivation).toBeLessThanOrEqual(1);
   });
 
-  it('should find tipping point', () => {
-    const thresholds = Array(100).fill(0).map((_, i) => i / 100);
+  it("should find tipping point", () => {
+    const thresholds = Array(100)
+      .fill(0)
+      .map((_, i) => i / 100);
     const tipping = findTippingPoint(thresholds);
 
-    expect(tipping).toHaveProperty('threshold');
-    expect(tipping).toHaveProperty('index');
+    expect(tipping).toHaveProperty("threshold");
+    expect(tipping).toHaveProperty("index");
   });
 });
 
-describe('SocialInfluenceSimulator', () => {
-  it('should simulate DeGroot dynamics', () => {
+describe("SocialInfluenceSimulator", () => {
+  it("should simulate DeGroot dynamics", () => {
     const simulator = new SocialInfluenceSimulator();
 
     // Simple 2-agent system
@@ -124,7 +128,7 @@ describe('SocialInfluenceSimulator', () => {
     expect(final[1]).toBeCloseTo(0.5, 1);
   });
 
-  it('should simulate threshold model', () => {
+  it("should simulate threshold model", () => {
     const simulator = new SocialInfluenceSimulator();
 
     // Simple network: 3 nodes in a line
@@ -143,8 +147,8 @@ describe('SocialInfluenceSimulator', () => {
   });
 });
 
-describe('PhaseTransitionDetector', () => {
-  it('should detect early warning signals', () => {
+describe("PhaseTransitionDetector", () => {
+  it("should detect early warning signals", () => {
     const detector = new PhaseTransitionDetector({
       windowSize: 10,
       sensitivityThreshold: 0.5,
@@ -159,28 +163,28 @@ describe('PhaseTransitionDetector', () => {
     const signals = detector.detectEarlyWarnings(series);
 
     expect(signals.length).toBeGreaterThan(0);
-    expect(signals.some((s) => s.signal === 'AUTOCORRELATION')).toBe(true);
-    expect(signals.some((s) => s.signal === 'VARIANCE')).toBe(true);
+    expect(signals.some((s) => s.signal === "AUTOCORRELATION")).toBe(true);
+    expect(signals.some((s) => s.signal === "VARIANCE")).toBe(true);
   });
 });
 
-describe('CriticalMassAnalyzer', () => {
-  it('should estimate critical threshold', () => {
+describe("CriticalMassAnalyzer", () => {
+  it("should estimate critical threshold", () => {
     const analyzer = new CriticalMassAnalyzer();
 
     // Simple contagion with average degree 4
-    const threshold = analyzer.estimateCriticalThreshold(4, 0.25, 'SIMPLE');
+    const threshold = analyzer.estimateCriticalThreshold(4, 0.25, "SIMPLE");
     expect(threshold).toBeCloseTo(0.25); // 1/4 = 0.25
 
     // Complex contagion
-    const complexThreshold = analyzer.estimateCriticalThreshold(4, 0.25, 'COMPLEX');
+    const complexThreshold = analyzer.estimateCriticalThreshold(4, 0.25, "COMPLEX");
     expect(complexThreshold).toBeGreaterThan(0);
     expect(complexThreshold).toBeLessThan(1);
   });
 });
 
-describe('TippingPointAnalyzer', () => {
-  it('should analyze norm tipping', () => {
+describe("TippingPointAnalyzer", () => {
+  it("should analyze norm tipping", () => {
     const analyzer = new TippingPointAnalyzer();
 
     const result = analyzer.analyzeNormTipping(0.15, {

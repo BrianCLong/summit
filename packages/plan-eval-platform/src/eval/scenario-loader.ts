@@ -1,7 +1,7 @@
-import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, extname } from 'node:path';
-import YAML from 'yaml';
-import { ScenarioSchema, type Scenario } from '../types.js';
+import { readFileSync, readdirSync, statSync } from "node:fs";
+import { join, extname } from "node:path";
+import YAML from "yaml";
+import { ScenarioSchema, type Scenario } from "../types.js";
 
 /**
  * ScenarioLoader - Load and validate scenario definitions from YAML files
@@ -10,7 +10,7 @@ export class ScenarioLoader {
   private readonly scenariosPath: string;
   private readonly cache: Map<string, Scenario> = new Map();
 
-  constructor(scenariosPath: string = './scenarios') {
+  constructor(scenariosPath: string = "./scenarios") {
     this.scenariosPath = scenariosPath;
   }
 
@@ -27,8 +27,8 @@ export class ScenarioLoader {
     const possiblePaths = [
       join(this.scenariosPath, `${scenarioId}.yaml`),
       join(this.scenariosPath, `${scenarioId}.yml`),
-      join(this.scenariosPath, scenarioId, 'scenario.yaml'),
-      join(this.scenariosPath, scenarioId, 'scenario.yml'),
+      join(this.scenariosPath, scenarioId, "scenario.yaml"),
+      join(this.scenariosPath, scenarioId, "scenario.yml"),
     ];
 
     for (const filePath of possiblePaths) {
@@ -48,7 +48,7 @@ export class ScenarioLoader {
    * Load scenario from a specific file
    */
   loadFromFile(filePath: string): Scenario {
-    const content = readFileSync(filePath, 'utf8');
+    const content = readFileSync(filePath, "utf8");
     const parsed = YAML.parse(content);
     return this.validateScenario(parsed);
   }
@@ -76,7 +76,7 @@ export class ScenarioLoader {
   /**
    * Load scenarios by category
    */
-  loadByCategory(category: Scenario['category']): Scenario[] {
+  loadByCategory(category: Scenario["category"]): Scenario[] {
     const all = this.loadAll();
     return all.filter((s) => s.category === category);
   }
@@ -95,9 +95,7 @@ export class ScenarioLoader {
   private validateScenario(data: unknown): Scenario {
     const result = ScenarioSchema.safeParse(data);
     if (!result.success) {
-      throw new Error(
-        `Invalid scenario format: ${result.error.message}`,
-      );
+      throw new Error(`Invalid scenario format: ${result.error.message}`);
     }
     return result.data;
   }
@@ -116,10 +114,7 @@ export class ScenarioLoader {
 
         if (stat.isDirectory()) {
           files.push(...this.findScenarioFiles(fullPath));
-        } else if (
-          stat.isFile() &&
-          ['.yaml', '.yml'].includes(extname(entry))
-        ) {
+        } else if (stat.isFile() && [".yaml", ".yml"].includes(extname(entry))) {
           files.push(fullPath);
         }
       }
@@ -152,10 +147,6 @@ export class ScenarioLoader {
 /**
  * Create a scenario loader with default path
  */
-export function createScenarioLoader(
-  path?: string,
-): ScenarioLoader {
-  return new ScenarioLoader(
-    path ?? join(process.cwd(), 'scenarios'),
-  );
+export function createScenarioLoader(path?: string): ScenarioLoader {
+  return new ScenarioLoader(path ?? join(process.cwd(), "scenarios"));
 }

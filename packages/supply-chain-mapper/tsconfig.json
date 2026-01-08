@@ -10,7 +10,5 @@
     "tsBuildInfoFile": "dist/.tsbuildinfo"
   },
   "include": ["src/**/*"],
-  "references": [
-    { "path": "../supply-chain-types" }
-  ]
+  "references": [{ "path": "../supply-chain-types" }]
 }

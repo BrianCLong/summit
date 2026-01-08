@@ -178,7 +178,7 @@ app:
     - name: LOG_LEVEL
       value: info
     - name: ENABLE_STEP_UP_AUTH
-      value: 'true'
+      value: "true"
     - name: OPA_URL
       value: http://opa:8181
 
@@ -238,8 +238,8 @@ ingress:
   className: nginx
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
-    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
   hosts:
     - host: pilot.intelgraph.example.com
       paths:

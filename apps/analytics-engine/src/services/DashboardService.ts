@@ -1,12 +1,12 @@
-import { Pool } from 'pg';
-import { Driver } from 'neo4j-driver';
-import { RedisClientType } from 'redis';
-import { logger } from '../utils/logger';
-import { v4 as uuidv4 } from 'uuid';
+import { Pool } from "pg";
+import { Driver } from "neo4j-driver";
+import { RedisClientType } from "redis";
+import { logger } from "../utils/logger";
+import { v4 as uuidv4 } from "uuid";
 
 export interface Widget {
   id: string;
-  type: 'chart' | 'metric' | 'table' | 'graph' | 'map' | 'text';
+  type: "chart" | "metric" | "table" | "graph" | "map" | "text";
   title: string;
   description?: string;
   config: WidgetConfig;
@@ -19,8 +19,8 @@ export interface Widget {
 }
 
 export interface WidgetConfig {
-  chartType?: 'line' | 'bar' | 'pie' | 'scatter' | 'area' | 'heatmap';
-  aggregation?: 'sum' | 'avg' | 'count' | 'min' | 'max' | 'distinct';
+  chartType?: "line" | "bar" | "pie" | "scatter" | "area" | "heatmap";
+  aggregation?: "sum" | "avg" | "count" | "min" | "max" | "distinct";
   timeRange?: { start: Date; end: Date; interval: string };
   groupBy?: string[];
   filters?: Record<string, any>;
@@ -41,7 +41,7 @@ export interface WidgetConfig {
 
 export interface DataSource {
   id: string;
-  type: 'sql' | 'cypher' | 'api' | 'static';
+  type: "sql" | "cypher" | "api" | "static";
   query: string;
   parameters?: Record<string, any>;
   cacheTTL?: number; // seconds
@@ -49,7 +49,7 @@ export interface DataSource {
 }
 
 export interface DataTransformation {
-  type: 'filter' | 'aggregate' | 'sort' | 'map' | 'pivot' | 'join';
+  type: "filter" | "aggregate" | "sort" | "map" | "pivot" | "join";
   config: Record<string, any>;
 }
 
@@ -58,8 +58,8 @@ export interface Dashboard {
   name: string;
   description?: string;
   widgets: Widget[];
-  layout: 'grid' | 'flex' | 'custom';
-  theme: 'light' | 'dark' | 'auto';
+  layout: "grid" | "flex" | "custom";
+  theme: "light" | "dark" | "auto";
   isPublic: boolean;
   shareToken?: string;
   tags: string[];
@@ -86,7 +86,7 @@ export interface DashboardTemplate {
   name: string;
   description: string;
   category: string;
-  widgets: Omit<Widget, 'id' | 'createdAt' | 'updatedAt'>[];
+  widgets: Omit<Widget, "id" | "createdAt" | "updatedAt">[];
   tags: string[];
   isBuiltIn: boolean;
   preview?: string; // Base64 image or URL
@@ -96,25 +96,25 @@ export class DashboardService {
   constructor(
     private pgPool: Pool,
     private neo4jDriver: Driver,
-    private redisClient: RedisClientType,
+    private redisClient: RedisClientType
   ) {}
 
   private parseCachePayload<T>(payload: string | Buffer | null): T | null {
     if (!payload) {
       return null;
     }
-    const raw = typeof payload === 'string' ? payload : payload.toString('utf8');
+    const raw = typeof payload === "string" ? payload : payload.toString("utf8");
     return JSON.parse(raw) as T;
   }
 
   async createDashboard(
-    dashboard: Omit<Dashboard, 'id' | 'createdAt' | 'updatedAt'>,
-    userId: string,
+    dashboard: Omit<Dashboard, "id" | "createdAt" | "updatedAt">,
+    userId: string
   ): Promise<Dashboard> {
     const client = await this.pgPool.connect();
 
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
 
       const dashboardId = uuidv4();
       const now = new Date();
@@ -151,11 +151,11 @@ export class DashboardService {
         await this.createWidget(client, dashboardId, widget);
       }
 
-      await client.query('COMMIT');
+      await client.query("COMMIT");
 
       const createdDashboard = await this.getDashboard(dashboardId, userId);
       if (!createdDashboard) {
-        throw new Error('Failed to retrieve created dashboard');
+        throw new Error("Failed to retrieve created dashboard");
       }
 
       // Clear cache
@@ -164,24 +164,18 @@ export class DashboardService {
       logger.info(`Dashboard created: ${dashboardId} by user ${userId}`);
       return createdDashboard;
     } catch (error) {
-      await client.query('ROLLBACK');
-      logger.error('Error creating dashboard:', error);
+      await client.query("ROLLBACK");
+      logger.error("Error creating dashboard:", error);
       throw error;
     } finally {
       client.release();
     }
   }
 
-  async getDashboard(
-    dashboardId: string,
-    userId: string,
-  ): Promise<Dashboard | null> {
+  async getDashboard(dashboardId: string, userId: string): Promise<Dashboard | null> {
     // Check cache first
     const cacheKey = `dashboard:${dashboardId}:${userId}`;
-    const rawCache = (await this.redisClient.get(cacheKey)) as
-      | string
-      | Buffer
-      | null;
+    const rawCache = (await this.redisClient.get(cacheKey)) as string | Buffer | null;
     const cached = this.parseCachePayload<Dashboard>(rawCache);
 
     if (cached) {
@@ -204,15 +198,9 @@ export class DashboardService {
         WHERE d.id = $1
       `;
 
-      const dashboardResult = await this.pgPool.query(dashboardQuery, [
-        dashboardId,
-        userId,
-      ]);
+      const dashboardResult = await this.pgPool.query(dashboardQuery, [dashboardId, userId]);
 
-      if (
-        dashboardResult.rows.length === 0 ||
-        !dashboardResult.rows[0].has_access
-      ) {
+      if (dashboardResult.rows.length === 0 || !dashboardResult.rows[0].has_access) {
         return null;
       }
 
@@ -247,7 +235,7 @@ export class DashboardService {
 
       return dashboard;
     } catch (error) {
-      logger.error('Error getting dashboard:', error);
+      logger.error("Error getting dashboard:", error);
       throw error;
     }
   }
@@ -255,21 +243,17 @@ export class DashboardService {
   async updateDashboard(
     dashboardId: string,
     updates: Partial<Dashboard>,
-    userId: string,
+    userId: string
   ): Promise<Dashboard> {
     const client = await this.pgPool.connect();
 
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
 
       // Check permissions
-      const hasEditAccess = await this.checkDashboardAccess(
-        dashboardId,
-        userId,
-        'edit',
-      );
+      const hasEditAccess = await this.checkDashboardAccess(dashboardId, userId, "edit");
       if (!hasEditAccess) {
-        throw new Error('Insufficient permissions to edit dashboard');
+        throw new Error("Insufficient permissions to edit dashboard");
       }
 
       // Update dashboard
@@ -303,10 +287,7 @@ export class DashboardService {
       // Update widgets if provided
       if (updates.widgets) {
         // Delete existing widgets
-        await client.query(
-          'DELETE FROM dashboard_widgets WHERE dashboard_id = $1',
-          [dashboardId],
-        );
+        await client.query("DELETE FROM dashboard_widgets WHERE dashboard_id = $1", [dashboardId]);
 
         // Insert new widgets
         for (const widget of updates.widgets) {
@@ -314,21 +295,21 @@ export class DashboardService {
         }
       }
 
-      await client.query('COMMIT');
+      await client.query("COMMIT");
 
       // Clear cache
       await this.invalidateDashboardCache(dashboardId);
 
       const updatedDashboard = await this.getDashboard(dashboardId, userId);
       if (!updatedDashboard) {
-        throw new Error('Failed to retrieve updated dashboard');
+        throw new Error("Failed to retrieve updated dashboard");
       }
 
       logger.info(`Dashboard updated: ${dashboardId} by user ${userId}`);
       return updatedDashboard;
     } catch (error) {
-      await client.query('ROLLBACK');
-      logger.error('Error updating dashboard:', error);
+      await client.query("ROLLBACK");
+      logger.error("Error updating dashboard:", error);
       throw error;
     } finally {
       client.release();
@@ -338,26 +319,20 @@ export class DashboardService {
   async deleteDashboard(dashboardId: string, userId: string): Promise<void> {
     try {
       // Check permissions
-      const hasOwnerAccess = await this.checkDashboardAccess(
-        dashboardId,
-        userId,
-        'owner',
-      );
+      const hasOwnerAccess = await this.checkDashboardAccess(dashboardId, userId, "owner");
       if (!hasOwnerAccess) {
-        throw new Error('Insufficient permissions to delete dashboard');
+        throw new Error("Insufficient permissions to delete dashboard");
       }
 
       // Delete dashboard (cascade will handle widgets)
-      await this.pgPool.query('DELETE FROM dashboards WHERE id = $1', [
-        dashboardId,
-      ]);
+      await this.pgPool.query("DELETE FROM dashboards WHERE id = $1", [dashboardId]);
 
       // Clear cache
       await this.invalidateDashboardCache(dashboardId);
 
       logger.info(`Dashboard deleted: ${dashboardId} by user ${userId}`);
     } catch (error) {
-      logger.error('Error deleting dashboard:', error);
+      logger.error("Error deleting dashboard:", error);
       throw error;
     }
   }
@@ -367,15 +342,12 @@ export class DashboardService {
       // Get widget configuration
       const widget = await this.getWidget(widgetId);
       if (!widget) {
-        throw new Error('Widget not found');
+        throw new Error("Widget not found");
       }
 
       // Check cache
       const cacheKey = `widget_data:${widgetId}`;
-      const rawCache = (await this.redisClient.get(cacheKey)) as
-        | string
-        | Buffer
-        | null;
+      const rawCache = (await this.redisClient.get(cacheKey)) as string | Buffer | null;
       const cached = this.parseCachePayload<any>(rawCache);
 
       if (cached && widget.dataSource.cacheTTL) {
@@ -394,16 +366,12 @@ export class DashboardService {
 
       // Cache result if TTL specified
       if (widget.dataSource.cacheTTL && widget.dataSource.cacheTTL > 0) {
-        await this.redisClient.setEx(
-          cacheKey,
-          widget.dataSource.cacheTTL,
-          JSON.stringify(data),
-        );
+        await this.redisClient.setEx(cacheKey, widget.dataSource.cacheTTL, JSON.stringify(data));
       }
 
       return data;
     } catch (error) {
-      logger.error('Error getting widget data:', error);
+      logger.error("Error getting widget data:", error);
       throw error;
     }
   }
@@ -411,7 +379,7 @@ export class DashboardService {
   private async createWidget(
     client: any,
     dashboardId: string,
-    widget: Omit<Widget, 'id' | 'createdAt' | 'updatedAt'>,
+    widget: Omit<Widget, "id" | "createdAt" | "updatedAt">
   ): Promise<void> {
     const widgetId = uuidv4();
     const now = new Date();
@@ -487,39 +455,33 @@ export class DashboardService {
     };
   }
 
-  private async executeDataSource(
-    dataSource: DataSource,
-    userId: string,
-  ): Promise<any> {
+  private async executeDataSource(dataSource: DataSource, userId: string): Promise<any> {
     switch (dataSource.type) {
-      case 'sql':
+      case "sql":
         return this.executeSqlDataSource(dataSource, userId);
-      case 'cypher':
+      case "cypher":
         return this.executeCypherDataSource(dataSource, userId);
-      case 'api':
+      case "api":
         return this.executeApiDataSource(dataSource, userId);
-      case 'static':
+      case "static":
         return dataSource.query ? JSON.parse(dataSource.query) : [];
       default:
         throw new Error(`Unsupported data source type: ${dataSource.type}`);
     }
   }
 
-  private async executeSqlDataSource(
-    dataSource: DataSource,
-    userId: string,
-  ): Promise<any> {
+  private async executeSqlDataSource(dataSource: DataSource, userId: string): Promise<any> {
     // Security: Only allow SELECT statements and safe operations
     const query = dataSource.query.trim().toLowerCase();
-    if (!query.startsWith('select') && !query.startsWith('with')) {
-      throw new Error('Only SELECT queries are allowed for SQL data sources');
+    if (!query.startsWith("select") && !query.startsWith("with")) {
+      throw new Error("Only SELECT queries are allowed for SQL data sources");
     }
 
     // Replace parameters
     let finalQuery = dataSource.query;
     if (dataSource.parameters) {
       for (const [key, value] of Object.entries(dataSource.parameters)) {
-        finalQuery = finalQuery.replace(new RegExp(`{{${key}}}`, 'g'), value);
+        finalQuery = finalQuery.replace(new RegExp(`{{${key}}}`, "g"), value);
       }
     }
 
@@ -530,10 +492,7 @@ export class DashboardService {
     return result.rows;
   }
 
-  private async executeCypherDataSource(
-    dataSource: DataSource,
-    userId: string,
-  ): Promise<any> {
+  private async executeCypherDataSource(dataSource: DataSource, userId: string): Promise<any> {
     const session = this.neo4jDriver.session();
 
     try {
@@ -543,10 +502,7 @@ export class DashboardService {
 
       if (dataSource.parameters) {
         for (const [key, value] of Object.entries(dataSource.parameters)) {
-          finalQuery = finalQuery.replace(
-            new RegExp(`{{${key}}}`, 'g'),
-            `$${key}`,
-          );
+          finalQuery = finalQuery.replace(new RegExp(`{{${key}}}`, "g"), `$${key}`);
           params[key] = value;
         }
       }
@@ -562,27 +518,24 @@ export class DashboardService {
     }
   }
 
-  private async executeApiDataSource(
-    dataSource: DataSource,
-    userId: string,
-  ): Promise<any> {
+  private async executeApiDataSource(dataSource: DataSource, userId: string): Promise<any> {
     // This would implement API calls to external services
     // For security, only allow whitelisted endpoints
-    throw new Error('API data sources not implemented yet');
+    throw new Error("API data sources not implemented yet");
   }
 
   private async applyTransformation(
     data: any[],
-    transformation: DataTransformation,
+    transformation: DataTransformation
   ): Promise<any[]> {
     switch (transformation.type) {
-      case 'filter':
+      case "filter":
         return this.applyFilterTransformation(data, transformation.config);
-      case 'aggregate':
+      case "aggregate":
         return this.applyAggregateTransformation(data, transformation.config);
-      case 'sort':
+      case "sort":
         return this.applySortTransformation(data, transformation.config);
-      case 'map':
+      case "map":
         return this.applyMapTransformation(data, transformation.config);
       default:
         return data;
@@ -596,23 +549,23 @@ export class DashboardService {
       const fieldValue = item[field];
 
       switch (operator) {
-        case 'eq':
+        case "eq":
           return fieldValue === value;
-        case 'ne':
+        case "ne":
           return fieldValue !== value;
-        case 'gt':
+        case "gt":
           return fieldValue > value;
-        case 'gte':
+        case "gte":
           return fieldValue >= value;
-        case 'lt':
+        case "lt":
           return fieldValue < value;
-        case 'lte':
+        case "lte":
           return fieldValue <= value;
-        case 'contains':
+        case "contains":
           return String(fieldValue).includes(value);
-        case 'startsWith':
+        case "startsWith":
           return String(fieldValue).startsWith(value);
-        case 'endsWith':
+        case "endsWith":
           return String(fieldValue).endsWith(value);
         default:
           return true;
@@ -632,7 +585,7 @@ export class DashboardService {
     // Group data
     for (const item of data) {
       const key = Array.isArray(groupBy)
-        ? groupBy.map((field) => item[field]).join('|')
+        ? groupBy.map((field) => item[field]).join("|")
         : item[groupBy];
 
       if (!groups.has(key)) {
@@ -649,7 +602,7 @@ export class DashboardService {
       // Add groupBy fields
       if (Array.isArray(groupBy)) {
         groupBy.forEach((field, index) => {
-          aggregated[field] = key.split('|')[index];
+          aggregated[field] = key.split("|")[index];
         });
       } else {
         aggregated[groupBy] = key;
@@ -657,31 +610,25 @@ export class DashboardService {
 
       // Apply aggregation functions
       for (const [field, func] of Object.entries(aggregations)) {
-        const values = items
-          .map((item) => item[field])
-          .filter((v) => v != null);
+        const values = items.map((item) => item[field]).filter((v) => v != null);
 
         switch (func) {
-          case 'sum':
-            aggregated[field] = values.reduce(
-              (sum, val) => sum + Number(val),
-              0,
-            );
+          case "sum":
+            aggregated[field] = values.reduce((sum, val) => sum + Number(val), 0);
             break;
-          case 'avg':
-            aggregated[field] =
-              values.reduce((sum, val) => sum + Number(val), 0) / values.length;
+          case "avg":
+            aggregated[field] = values.reduce((sum, val) => sum + Number(val), 0) / values.length;
             break;
-          case 'count':
+          case "count":
             aggregated[field] = values.length;
             break;
-          case 'min':
+          case "min":
             aggregated[field] = Math.min(...values.map(Number));
             break;
-          case 'max':
+          case "max":
             aggregated[field] = Math.max(...values.map(Number));
             break;
-          case 'distinct':
+          case "distinct":
             aggregated[field] = [...new Set(values)].length;
             break;
         }
@@ -694,22 +641,24 @@ export class DashboardService {
   }
 
   private applySortTransformation(data: any[], config: any): any[] {
-    const { field, direction = 'asc' } = config;
+    const { field, direction = "asc" } = config;
 
     return [...data].sort((a, b) => {
       const aVal = a[field];
       const bVal = b[field];
 
-      if (aVal < bVal) {return direction === 'asc' ? -1 : 1;}
-      if (aVal > bVal) {return direction === 'asc' ? 1 : -1;}
+      if (aVal < bVal) {
+        return direction === "asc" ? -1 : 1;
+      }
+      if (aVal > bVal) {
+        return direction === "asc" ? 1 : -1;
+      }
       return 0;
     });
   }
 
   private applyMapTransformation(data: any[], config: any): any[] {
-    const mappingEntries = Object.entries(
-      (config.mapping ?? {}) as Record<string, string>,
-    );
+    const mappingEntries = Object.entries((config.mapping ?? {}) as Record<string, string>);
 
     return data.map((item) => {
       const mapped: Record<string, unknown> = {};
@@ -725,7 +674,7 @@ export class DashboardService {
   private async checkDashboardAccess(
     dashboardId: string,
     userId: string,
-    accessType: 'view' | 'edit' | 'owner',
+    accessType: "view" | "edit" | "owner"
   ): Promise<boolean> {
     const query = `
       SELECT 
@@ -756,19 +705,16 @@ export class DashboardService {
 
     // Check access control lists
     switch (accessType) {
-      case 'view':
+      case "view":
         return (
           row.is_public ||
           accessControl.viewers?.includes(userId) ||
           accessControl.editors?.includes(userId) ||
           accessControl.owners?.includes(userId)
         );
-      case 'edit':
-        return (
-          accessControl.editors?.includes(userId) ||
-          accessControl.owners?.includes(userId)
-        );
-      case 'owner':
+      case "edit":
+        return accessControl.editors?.includes(userId) || accessControl.owners?.includes(userId);
+      case "owner":
         return accessControl.owners?.includes(userId);
       default:
         return false;
@@ -796,17 +742,17 @@ export class DashboardService {
       offset?: number;
       search?: string;
       tags?: string[];
-      sortBy?: 'name' | 'created_at' | 'updated_at';
-      sortOrder?: 'asc' | 'desc';
-    } = {},
+      sortBy?: "name" | "created_at" | "updated_at";
+      sortOrder?: "asc" | "desc";
+    } = {}
   ): Promise<{ dashboards: Dashboard[]; total: number }> {
     const {
       limit = 20,
       offset = 0,
       search,
       tags,
-      sortBy = 'updated_at',
-      sortOrder = 'desc',
+      sortBy = "updated_at",
+      sortOrder = "desc",
     } = options;
 
     const whereConditions = [
@@ -823,9 +769,7 @@ export class DashboardService {
     let paramIndex = 2;
 
     if (search) {
-      whereConditions.push(
-        `(d.name ILIKE $${paramIndex} OR d.description ILIKE $${paramIndex})`,
-      );
+      whereConditions.push(`(d.name ILIKE $${paramIndex} OR d.description ILIKE $${paramIndex})`);
       params.push(`%${search}%`);
       paramIndex++;
     }
@@ -836,10 +780,7 @@ export class DashboardService {
       paramIndex++;
     }
 
-    const whereClause =
-      whereConditions.length > 0
-        ? `WHERE ${whereConditions.join(' AND ')}`
-        : '';
+    const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(" AND ")}` : "";
 
     // Count query
     const countQuery = `
@@ -899,15 +840,15 @@ export class DashboardService {
   }
 
   async getDashboardTemplates(category?: string): Promise<DashboardTemplate[]> {
-    let query = 'SELECT * FROM dashboard_templates';
+    let query = "SELECT * FROM dashboard_templates";
     const params = [];
 
     if (category) {
-      query += ' WHERE category = $1';
+      query += " WHERE category = $1";
       params.push(category);
     }
 
-    query += ' ORDER BY is_built_in DESC, name ASC';
+    query += " ORDER BY is_built_in DESC, name ASC";
 
     const result = await this.pgPool.query(query, params);
 
@@ -927,23 +868,21 @@ export class DashboardService {
     templateId: string,
     name: string,
     userId: string,
-    customizations?: Record<string, any>,
+    customizations?: Record<string, any>
   ): Promise<Dashboard> {
     try {
       // Get template
-      const templateQuery = 'SELECT * FROM dashboard_templates WHERE id = $1';
-      const templateResult = await this.pgPool.query(templateQuery, [
-        templateId,
-      ]);
+      const templateQuery = "SELECT * FROM dashboard_templates WHERE id = $1";
+      const templateResult = await this.pgPool.query(templateQuery, [templateId]);
 
       if (templateResult.rows.length === 0) {
-        throw new Error('Template not found');
+        throw new Error("Template not found");
       }
 
       const template = templateResult.rows[0];
 
       // Create dashboard from template
-      const dashboardData: Omit<Dashboard, 'id' | 'createdAt' | 'updatedAt'> = {
+      const dashboardData: Omit<Dashboard, "id" | "createdAt" | "updatedAt"> = {
         name,
         description: template.description,
         widgets: template.widgets.map((widget: any) => ({
@@ -952,8 +891,8 @@ export class DashboardService {
           createdAt: new Date(),
           updatedAt: new Date(),
         })),
-        layout: 'grid',
-        theme: 'light',
+        layout: "grid",
+        theme: "light",
         isPublic: false,
         tags: template.tags || [],
         createdBy: userId,
@@ -965,7 +904,7 @@ export class DashboardService {
         settings: {
           autoRefresh: true,
           refreshInterval: 300,
-          timezone: 'UTC',
+          timezone: "UTC",
         },
       };
 
@@ -976,7 +915,7 @@ export class DashboardService {
 
       return await this.createDashboard(dashboardData, userId);
     } catch (error) {
-      logger.error('Error creating dashboard from template:', error);
+      logger.error("Error creating dashboard from template:", error);
       throw error;
     }
   }

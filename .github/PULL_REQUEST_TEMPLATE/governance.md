@@ -1,9 +1,9 @@
 ---
 name: Governance Change
 about: Changes to policies, governance framework, or compliance controls
-title: '[GOVERNANCE] '
-labels: 'area/governance, risk/high'
-assignees: ''
+title: "[GOVERNANCE] "
+labels: "area/governance, risk/high"
+assignees: ""
 ---
 
 ## Summary
@@ -50,6 +50,7 @@ assignees: ''
 - [ ] Documentation updated (if framework change)
 
 **Validation Commands**:
+
 ```bash
 opa check policies/
 opa test policies/ -v
@@ -64,7 +65,6 @@ npm run check:governance
 <!-- If breaking, describe migration path -->
 
 **Migration Path** (if breaking):
-
 
 ## Compliance Implications
 

@@ -5,7 +5,7 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: '0 3 * * 1'
+    - cron: "0 3 * * 1"
   workflow_dispatch:
 
 permissions:
@@ -86,7 +86,7 @@ jobs:
         with:
           target: ${{ matrix.target }}
           rules_file_name: ${{ matrix.rules }}
-          cmd_options: '-a -j -m 5'
+          cmd_options: "-a -j -m 5"
           allow_issue_writing: false
           fail_action: false
 

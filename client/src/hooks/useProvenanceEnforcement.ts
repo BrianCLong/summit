@@ -9,12 +9,12 @@
  * @module useProvenanceEnforcement
  */
 
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from "react";
 
 /**
  * Governance verdict result types matching server-side definitions
  */
-export type GovernanceResult = 'ALLOW' | 'DENY' | 'FLAG' | 'REVIEW_REQUIRED';
+export type GovernanceResult = "ALLOW" | "DENY" | "FLAG" | "REVIEW_REQUIRED";
 
 /**
  * Governance verdict interface
@@ -51,11 +51,11 @@ export interface Provenance {
  * Data classification levels
  */
 export type DataClassification =
-  | 'PUBLIC'
-  | 'INTERNAL'
-  | 'CONFIDENTIAL'
-  | 'RESTRICTED'
-  | 'HIGHLY_RESTRICTED';
+  | "PUBLIC"
+  | "INTERNAL"
+  | "CONFIDENTIAL"
+  | "RESTRICTED"
+  | "HIGHLY_RESTRICTED";
 
 /**
  * Data envelope interface matching server-side DataEnvelope
@@ -118,71 +118,71 @@ export function validateEnvelope<T>(
 
   // Check if envelope exists
   if (!envelope) {
-    errors.push('GA VIOLATION: No data envelope provided');
-    soc2Controls.push('PI1.1');
+    errors.push("GA VIOLATION: No data envelope provided");
+    soc2Controls.push("PI1.1");
     return { isValid: false, errors, warnings, canRender: false, soc2Controls };
   }
 
   // Check governance verdict (MANDATORY)
   if (!envelope.governanceVerdict) {
-    errors.push('GA VIOLATION: Missing governance verdict - CC6.1, CC7.2');
-    soc2Controls.push('CC6.1', 'CC7.2');
+    errors.push("GA VIOLATION: Missing governance verdict - CC6.1, CC7.2");
+    soc2Controls.push("CC6.1", "CC7.2");
   } else {
     // Validate verdict structure
     if (!envelope.governanceVerdict.verdictId) {
-      errors.push('Missing verdict ID');
+      errors.push("Missing verdict ID");
     }
     if (!envelope.governanceVerdict.result) {
-      errors.push('Missing verdict result');
+      errors.push("Missing verdict result");
     }
 
     // Check verdict result
-    if (envelope.governanceVerdict.result === 'DENY') {
-      errors.push(`Access denied: ${envelope.governanceVerdict.reason || 'Policy violation'}`);
+    if (envelope.governanceVerdict.result === "DENY") {
+      errors.push(`Access denied: ${envelope.governanceVerdict.reason || "Policy violation"}`);
     }
 
-    if (envelope.governanceVerdict.result === 'REVIEW_REQUIRED') {
-      errors.push('Data requires approval before display');
+    if (envelope.governanceVerdict.result === "REVIEW_REQUIRED") {
+      errors.push("Data requires approval before display");
     }
 
-    if (envelope.governanceVerdict.result === 'FLAG') {
+    if (envelope.governanceVerdict.result === "FLAG") {
       if (!options.allowFlagged) {
-        errors.push('Flagged data display not permitted');
+        errors.push("Flagged data display not permitted");
       } else {
-        warnings.push('This data has been flagged for review');
+        warnings.push("This data has been flagged for review");
       }
     }
   }
 
   // Check provenance (MANDATORY)
   if (!envelope.provenance) {
-    errors.push('GA VIOLATION: Missing provenance - PI1.1');
-    soc2Controls.push('PI1.1');
+    errors.push("GA VIOLATION: Missing provenance - PI1.1");
+    soc2Controls.push("PI1.1");
   } else {
     if (!envelope.provenance.source) {
-      errors.push('Missing provenance source');
+      errors.push("Missing provenance source");
     }
     if (!envelope.provenance.provenanceId) {
-      errors.push('Missing provenance ID');
+      errors.push("Missing provenance ID");
     }
   }
 
   // Check isSimulated flag (MANDATORY)
   if (envelope.isSimulated === undefined || envelope.isSimulated === null) {
-    errors.push('GA VIOLATION: Missing isSimulated flag - PI1.1');
-    soc2Controls.push('PI1.1');
+    errors.push("GA VIOLATION: Missing isSimulated flag - PI1.1");
+    soc2Controls.push("PI1.1");
   } else if (envelope.isSimulated) {
     if (!options.allowSimulated) {
-      errors.push('Simulated data display not permitted');
+      errors.push("Simulated data display not permitted");
     } else {
-      warnings.push('⚠️ This is simulated data - not for production use');
+      warnings.push("⚠️ This is simulated data - not for production use");
     }
   }
 
   // Check classification
   const restrictedClassifications = options.restrictedClassifications || [
-    'RESTRICTED',
-    'HIGHLY_RESTRICTED',
+    "RESTRICTED",
+    "HIGHLY_RESTRICTED",
   ];
   if (restrictedClassifications.includes(envelope.classification)) {
     warnings.push(`High classification: ${envelope.classification}`);
@@ -192,16 +192,14 @@ export function validateEnvelope<T>(
   if (envelope.confidence !== undefined && envelope.confidence !== null) {
     const minConfidence = options.minConfidence ?? 0.5;
     if (envelope.confidence < minConfidence) {
-      warnings.push(
-        `Low confidence AI output: ${Math.round(envelope.confidence * 100)}%`
-      );
+      warnings.push(`Low confidence AI output: ${Math.round(envelope.confidence * 100)}%`);
     }
   }
 
   // Check data hash
   if (!envelope.dataHash) {
-    errors.push('Missing data hash - PI1.4');
-    soc2Controls.push('PI1.4');
+    errors.push("Missing data hash - PI1.4");
+    soc2Controls.push("PI1.4");
   }
 
   // Add envelope warnings
@@ -250,10 +248,7 @@ export function useProvenanceEnforcement<T>(
   options: ProvenanceEnforcementOptions = {}
 ) {
   // Validate envelope
-  const validation = useMemo(
-    () => validateEnvelope(envelope, options),
-    [envelope, options]
-  );
+  const validation = useMemo(() => validateEnvelope(envelope, options), [envelope, options]);
 
   // Call callbacks
   useMemo(() => {
@@ -301,7 +296,7 @@ export function useProvenanceEnforcement<T>(
   const requiresWarning = useMemo(() => {
     return (
       envelope?.isSimulated ||
-      envelope?.governanceVerdict?.result === 'FLAG' ||
+      envelope?.governanceVerdict?.result === "FLAG" ||
       (envelope?.confidence !== undefined && envelope.confidence < 0.8)
     );
   }, [envelope]);
@@ -324,24 +319,22 @@ export function useProvenanceEnforcement<T>(
  *
  * Use this to gate user actions (e.g., export, share) on governance approval.
  */
-export function useGovernanceGate<T>(
-  envelope: DataEnvelope<T> | null | undefined
-) {
+export function useGovernanceGate<T>(envelope: DataEnvelope<T> | null | undefined) {
   const isAllowed = useMemo(() => {
     if (!envelope?.governanceVerdict) return false;
-    return envelope.governanceVerdict.result === 'ALLOW';
+    return envelope.governanceVerdict.result === "ALLOW";
   }, [envelope]);
 
   const isFlagged = useMemo(() => {
-    return envelope?.governanceVerdict?.result === 'FLAG';
+    return envelope?.governanceVerdict?.result === "FLAG";
   }, [envelope]);
 
   const isDenied = useMemo(() => {
-    return envelope?.governanceVerdict?.result === 'DENY';
+    return envelope?.governanceVerdict?.result === "DENY";
   }, [envelope]);
 
   const requiresApproval = useMemo(() => {
-    return envelope?.governanceVerdict?.result === 'REVIEW_REQUIRED';
+    return envelope?.governanceVerdict?.result === "REVIEW_REQUIRED";
   }, [envelope]);
 
   const requiredApprovers = useMemo(() => {
@@ -349,8 +342,8 @@ export function useGovernanceGate<T>(
   }, [envelope]);
 
   const denyReason = useMemo(() => {
-    if (envelope?.governanceVerdict?.result === 'DENY') {
-      return envelope.governanceVerdict.reason ?? 'Policy violation';
+    if (envelope?.governanceVerdict?.result === "DENY") {
+      return envelope.governanceVerdict.reason ?? "Policy violation";
     }
     return null;
   }, [envelope]);
@@ -370,9 +363,7 @@ export function useGovernanceGate<T>(
  *
  * Use this to show data lineage in the UI.
  */
-export function useProvenanceChain<T>(
-  envelope: DataEnvelope<T> | null | undefined
-) {
+export function useProvenanceChain<T>(envelope: DataEnvelope<T> | null | undefined) {
   const chain = useMemo(() => {
     if (!envelope?.provenance?.lineage) return [];
 
@@ -380,7 +371,7 @@ export function useProvenanceChain<T>(
       step: index + 1,
       operation: node.operation,
       timestamp: node.timestamp,
-      actor: node.actor ?? 'System',
+      actor: node.actor ?? "System",
       inputs: node.inputs,
     }));
   }, [envelope]);
@@ -391,7 +382,7 @@ export function useProvenanceChain<T>(
     return {
       source: envelope.provenance.source,
       generatedAt: envelope.provenance.generatedAt,
-      actor: envelope.provenance.actor ?? 'Unknown',
+      actor: envelope.provenance.actor ?? "Unknown",
       version: envelope.provenance.version,
     };
   }, [envelope]);
@@ -409,14 +400,12 @@ export function useProvenanceChain<T>(
  *
  * Prevents certain actions on simulated data.
  */
-export function useSimulationGuard<T>(
-  envelope: DataEnvelope<T> | null | undefined
-) {
+export function useSimulationGuard<T>(envelope: DataEnvelope<T> | null | undefined) {
   const isSimulated = envelope?.isSimulated ?? true; // Default to simulated for safety
 
   const canExport = useCallback(() => {
     if (isSimulated) {
-      console.warn('GA ENFORCEMENT: Cannot export simulated data');
+      console.warn("GA ENFORCEMENT: Cannot export simulated data");
       return false;
     }
     return true;
@@ -424,7 +413,7 @@ export function useSimulationGuard<T>(
 
   const canShare = useCallback(() => {
     if (isSimulated) {
-      console.warn('GA ENFORCEMENT: Cannot share simulated data');
+      console.warn("GA ENFORCEMENT: Cannot share simulated data");
       return false;
     }
     return true;
@@ -432,7 +421,7 @@ export function useSimulationGuard<T>(
 
   const canCite = useCallback(() => {
     if (isSimulated) {
-      console.warn('GA ENFORCEMENT: Simulated data cannot be cited');
+      console.warn("GA ENFORCEMENT: Simulated data cannot be cited");
       return false;
     }
     return true;
@@ -444,7 +433,7 @@ export function useSimulationGuard<T>(
     canShare,
     canCite,
     warningMessage: isSimulated
-      ? 'This is simulated data and cannot be used for production decisions'
+      ? "This is simulated data and cannot be used for production decisions"
       : null,
   };
 }

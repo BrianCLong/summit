@@ -7,8 +7,8 @@ import {
   ExplanationRequest,
   ExplanationResult,
   ExplainabilityMethod,
-} from '@intelgraph/mlops-platform';
-import { EventEmitter } from 'events';
+} from "@intelgraph/mlops-platform";
+import { EventEmitter } from "events";
 
 export interface FeatureAttribution {
   feature: string;
@@ -31,29 +31,29 @@ export class ExplainabilityEngine extends EventEmitter {
     let result: ExplanationResult;
 
     switch (method) {
-      case 'shap':
+      case "shap":
         result = await this.explainWithSHAP(request);
         break;
-      case 'lime':
+      case "lime":
         result = await this.explainWithLIME(request);
         break;
-      case 'integrated-gradients':
+      case "integrated-gradients":
         result = await this.explainWithIntegratedGradients(request);
         break;
-      case 'feature-importance':
+      case "feature-importance":
         result = await this.explainWithFeatureImportance(request);
         break;
-      case 'attention-weights':
+      case "attention-weights":
         result = await this.explainWithAttentionWeights(request);
         break;
-      case 'counterfactual':
+      case "counterfactual":
         result = await this.explainWithCounterfactual(request);
         break;
       default:
         throw new Error(`Unsupported explainability method: ${method}`);
     }
 
-    this.emit('explanation:generated', result);
+    this.emit("explanation:generated", result);
 
     return result;
   }
@@ -61,9 +61,7 @@ export class ExplainabilityEngine extends EventEmitter {
   /**
    * SHAP (SHapley Additive exPlanations)
    */
-  private async explainWithSHAP(
-    request: ExplanationRequest
-  ): Promise<ExplanationResult> {
+  private async explainWithSHAP(request: ExplanationRequest): Promise<ExplanationResult> {
     const requestId = this.generateRequestId();
 
     // In a real implementation, this would:
@@ -72,10 +70,10 @@ export class ExplainabilityEngine extends EventEmitter {
     // 3. Calculate feature attributions
 
     const features = Object.keys(request.input);
-    const featureImportance = features.map(feature => ({
+    const featureImportance = features.map((feature) => ({
       feature,
       importance: Math.random() * 2 - 1, // Mock SHAP value
-      direction: (Math.random() > 0.5 ? 'positive' : 'negative') as 'positive' | 'negative',
+      direction: (Math.random() > 0.5 ? "positive" : "negative") as "positive" | "negative",
     }));
 
     // Sort by absolute importance
@@ -84,15 +82,15 @@ export class ExplainabilityEngine extends EventEmitter {
     return {
       requestId,
       modelId: request.modelId,
-      method: 'shap',
+      method: "shap",
       timestamp: new Date(),
       featureImportance,
       globalInsights: {
-        topFeatures: featureImportance.slice(0, 5).map(f => f.feature),
+        topFeatures: featureImportance.slice(0, 5).map((f) => f.feature),
       },
       visualizations: [
         {
-          type: 'waterfall',
+          type: "waterfall",
           data: {
             features: featureImportance,
             baseValue: 0.5,
@@ -100,30 +98,28 @@ export class ExplainabilityEngine extends EventEmitter {
           },
         },
         {
-          type: 'force-plot',
+          type: "force-plot",
           data: {
             features: featureImportance,
           },
         },
       ],
-      textExplanation: this.generateTextExplanation(featureImportance, 'SHAP'),
+      textExplanation: this.generateTextExplanation(featureImportance, "SHAP"),
     };
   }
 
   /**
    * LIME (Local Interpretable Model-agnostic Explanations)
    */
-  private async explainWithLIME(
-    request: ExplanationRequest
-  ): Promise<ExplanationResult> {
+  private async explainWithLIME(request: ExplanationRequest): Promise<ExplanationResult> {
     const requestId = this.generateRequestId();
 
     // Mock LIME explanation
     const features = Object.keys(request.input);
-    const featureImportance = features.map(feature => ({
+    const featureImportance = features.map((feature) => ({
       feature,
       importance: Math.random() * 2 - 1,
-      direction: (Math.random() > 0.5 ? 'positive' : 'negative') as 'positive' | 'negative',
+      direction: (Math.random() > 0.5 ? "positive" : "negative") as "positive" | "negative",
     }));
 
     featureImportance.sort((a, b) => Math.abs(b.importance) - Math.abs(a.importance));
@@ -131,18 +127,18 @@ export class ExplainabilityEngine extends EventEmitter {
     return {
       requestId,
       modelId: request.modelId,
-      method: 'lime',
+      method: "lime",
       timestamp: new Date(),
       featureImportance,
       visualizations: [
         {
-          type: 'bar-chart',
+          type: "bar-chart",
           data: {
             features: featureImportance,
           },
         },
       ],
-      textExplanation: this.generateTextExplanation(featureImportance, 'LIME'),
+      textExplanation: this.generateTextExplanation(featureImportance, "LIME"),
     };
   }
 
@@ -155,30 +151,27 @@ export class ExplainabilityEngine extends EventEmitter {
     const requestId = this.generateRequestId();
 
     const features = Object.keys(request.input);
-    const featureImportance = features.map(feature => ({
+    const featureImportance = features.map((feature) => ({
       feature,
       importance: Math.random(),
-      direction: 'positive' as const,
+      direction: "positive" as const,
     }));
 
     return {
       requestId,
       modelId: request.modelId,
-      method: 'integrated-gradients',
+      method: "integrated-gradients",
       timestamp: new Date(),
       featureImportance,
       visualizations: [
         {
-          type: 'heatmap',
+          type: "heatmap",
           data: {
             features: featureImportance,
           },
         },
       ],
-      textExplanation: this.generateTextExplanation(
-        featureImportance,
-        'Integrated Gradients'
-      ),
+      textExplanation: this.generateTextExplanation(featureImportance, "Integrated Gradients"),
     };
   }
 
@@ -191,10 +184,10 @@ export class ExplainabilityEngine extends EventEmitter {
     const requestId = this.generateRequestId();
 
     const features = Object.keys(request.input);
-    const featureImportance = features.map(feature => ({
+    const featureImportance = features.map((feature) => ({
       feature,
       importance: Math.random(),
-      direction: 'neutral' as const,
+      direction: "neutral" as const,
     }));
 
     featureImportance.sort((a, b) => b.importance - a.importance);
@@ -202,16 +195,16 @@ export class ExplainabilityEngine extends EventEmitter {
     return {
       requestId,
       modelId: request.modelId,
-      method: 'feature-importance',
+      method: "feature-importance",
       timestamp: new Date(),
       featureImportance,
       globalInsights: {
-        topFeatures: featureImportance.slice(0, 10).map(f => f.feature),
+        topFeatures: featureImportance.slice(0, 10).map((f) => f.feature),
         interactions: [],
       },
       visualizations: [
         {
-          type: 'bar-chart',
+          type: "bar-chart",
           data: {
             features: featureImportance,
           },
@@ -219,8 +212,8 @@ export class ExplainabilityEngine extends EventEmitter {
       ],
       textExplanation: `Top 5 most important features: ${featureImportance
         .slice(0, 5)
-        .map(f => f.feature)
-        .join(', ')}`,
+        .map((f) => f.feature)
+        .join(", ")}`,
     };
   }
 
@@ -233,57 +226,55 @@ export class ExplainabilityEngine extends EventEmitter {
     const requestId = this.generateRequestId();
 
     // Mock attention weights
-    const tokens = request.input.text?.split(' ') || [];
+    const tokens = request.input.text?.split(" ") || [];
     const featureImportance = tokens.map((token: string, idx: number) => ({
       feature: `token_${idx}`,
       importance: Math.random(),
-      direction: 'neutral' as const,
+      direction: "neutral" as const,
     }));
 
     return {
       requestId,
       modelId: request.modelId,
-      method: 'attention-weights',
+      method: "attention-weights",
       timestamp: new Date(),
       featureImportance,
       visualizations: [
         {
-          type: 'attention-heatmap',
+          type: "attention-heatmap",
           data: {
             tokens,
-            weights: featureImportance.map(f => f.importance),
+            weights: featureImportance.map((f) => f.importance),
           },
         },
       ],
-      textExplanation: 'Attention weights visualization showing which tokens the model focused on.',
+      textExplanation: "Attention weights visualization showing which tokens the model focused on.",
     };
   }
 
   /**
    * Counterfactual Explanations
    */
-  private async explainWithCounterfactual(
-    request: ExplanationRequest
-  ): Promise<ExplanationResult> {
+  private async explainWithCounterfactual(request: ExplanationRequest): Promise<ExplanationResult> {
     const requestId = this.generateRequestId();
 
     // Generate counterfactual examples
     const features = Object.keys(request.input);
-    const featureImportance = features.map(feature => ({
+    const featureImportance = features.map((feature) => ({
       feature,
       importance: Math.random(),
-      direction: 'positive' as const,
+      direction: "positive" as const,
     }));
 
     return {
       requestId,
       modelId: request.modelId,
-      method: 'counterfactual',
+      method: "counterfactual",
       timestamp: new Date(),
       featureImportance,
       visualizations: [
         {
-          type: 'counterfactual',
+          type: "counterfactual",
           data: {
             original: request.input,
             counterfactual: {
@@ -294,18 +285,17 @@ export class ExplainabilityEngine extends EventEmitter {
           },
         },
       ],
-      textExplanation: `To change the prediction, you would need to modify these features: ${ 
-        features.slice(0, 3).join(', ')}`,
+      textExplanation: `To change the prediction, you would need to modify these features: ${features
+        .slice(0, 3)
+        .join(", ")}`,
     };
   }
 
   /**
    * Batch explain multiple predictions
    */
-  async batchExplain(
-    requests: ExplanationRequest[]
-  ): Promise<ExplanationResult[]> {
-    return Promise.all(requests.map(req => this.explain(req)));
+  async batchExplain(requests: ExplanationRequest[]): Promise<ExplanationResult[]> {
+    return Promise.all(requests.map((req) => this.explain(req)));
   }
 
   /**
@@ -323,21 +313,21 @@ export class ExplainabilityEngine extends EventEmitter {
     }>;
   }> {
     // Mock global explanation
-    const features = ['age', 'income', 'credit_score', 'employment_length', 'debt_ratio'];
+    const features = ["age", "income", "credit_score", "employment_length", "debt_ratio"];
 
     return {
       topFeatures: features.slice(0, 3),
-      featureImportance: features.map(feature => ({
+      featureImportance: features.map((feature) => ({
         feature,
         importance: Math.random(),
       })),
       interactions: [
         {
-          features: ['income', 'debt_ratio'],
+          features: ["income", "debt_ratio"],
           strength: 0.75,
         },
         {
-          features: ['age', 'credit_score'],
+          features: ["age", "credit_score"],
           strength: 0.65,
         },
       ],
@@ -376,9 +366,9 @@ export class ExplainabilityEngine extends EventEmitter {
       },
       recommendations: biasDetected
         ? [
-            'Review training data for representation bias',
-            'Consider fairness constraints during training',
-            'Implement bias mitigation techniques',
+            "Review training data for representation bias",
+            "Consider fairness constraints during training",
+            "Implement bias mitigation techniques",
           ]
         : [],
     };
@@ -397,13 +387,13 @@ export class ExplainabilityEngine extends EventEmitter {
   ): string {
     const top3 = featureImportance.slice(0, 3);
 
-    const explanations = top3.map(f => {
-      const direction = f.importance > 0 ? 'increased' : 'decreased';
-      const magnitude = Math.abs(f.importance) > 0.5 ? 'significantly' : 'moderately';
+    const explanations = top3.map((f) => {
+      const direction = f.importance > 0 ? "increased" : "decreased";
+      const magnitude = Math.abs(f.importance) > 0.5 ? "significantly" : "moderately";
       return `${f.feature} ${magnitude} ${direction} the prediction`;
     });
 
-    return `${method} Analysis: ${explanations.join(', ')}.`;
+    return `${method} Analysis: ${explanations.join(", ")}.`;
   }
 
   private generateRequestId(): string {

@@ -1,4 +1,4 @@
-import type { CacheEntry } from './types.js';
+import type { CacheEntry } from "./types.js";
 
 /**
  * Simple LRU cache with byte-based eviction and TTL support.
@@ -19,8 +19,8 @@ export class LRUCache<V = unknown> {
    * Calculate the size of an entry in bytes
    */
   private calculateSize(key: string, value: V): number {
-    const keyBytes = Buffer.byteLength(key, 'utf8');
-    const valueBytes = Buffer.byteLength(JSON.stringify(value), 'utf8');
+    const keyBytes = Buffer.byteLength(key, "utf8");
+    const valueBytes = Buffer.byteLength(JSON.stringify(value), "utf8");
     // Add overhead for the entry metadata (approximately 100 bytes)
     return keyBytes + valueBytes + 100;
   }
@@ -103,7 +103,7 @@ export class LRUCache<V = unknown> {
    * Delete entries matching a pattern (glob style with *)
    */
   deleteByPattern(pattern: string): number {
-    const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
+    const regex = new RegExp("^" + pattern.replace(/\*/g, ".*") + "$");
     let deleted = 0;
 
     for (const key of this.cache.keys()) {

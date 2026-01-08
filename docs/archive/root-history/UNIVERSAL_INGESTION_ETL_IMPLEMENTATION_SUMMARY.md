@@ -31,6 +31,7 @@ Three production-ready connectors implemented:
   - Dependency injection for S3 client (testable)
 
 **Features**:
+
 - All extend existing `BaseConnector` class
 - Comprehensive error handling
 - Metrics and logging
@@ -44,6 +45,7 @@ Three production-ready connectors implemented:
 Complete ETL Assistant package with three core modules:
 
 #### Schema Inference (`schema-inference.ts`)
+
 - Analyzes sample records to detect field types
 - Infers canonical entity type (Person, Organization, Location, Event, Document, Indicator)
 - Generates field mappings with confidence scores
@@ -51,6 +53,7 @@ Complete ETL Assistant package with three core modules:
 - Supports schema hints for manual override
 
 **Entity Type Detection**:
+
 - Person: name, email, phone, age, dob indicators
 - Organization: company, industry, website indicators
 - Location: address, city, state, country, coordinates indicators
@@ -59,6 +62,7 @@ Complete ETL Assistant package with three core modules:
 - Indicator: IOC, hash, domain, IP indicators
 
 #### PII Detection (`pii-detection.ts`)
+
 - Pattern-based detection using regex
   - Email: RFC-compliant email pattern
   - Phone: US phone number patterns
@@ -73,6 +77,7 @@ Complete ETL Assistant package with three core modules:
   - HASH: Deterministic hash (e.g., `HASH_a3b2c1d0`)
 
 #### Canonical Mapper (`canonical-mapper.ts`)
+
 - Maps source records to canonical entity format
 - Applies field transformations (uppercase, lowercase, trim, type conversion)
 - Applies redaction rules per PII strategy
@@ -80,6 +85,7 @@ Complete ETL Assistant package with three core modules:
 - Calculates confidence scores based on required field completion
 
 #### ETL Assistant Facade (`index.ts`)
+
 - Unified interface combining all three modules
 - `analyze()` method for one-shot analysis
 - Dependency injection ready
@@ -91,6 +97,7 @@ Complete ETL Assistant package with three core modules:
 New **Policy Engine** module for license-aware policy decisions:
 
 **Features**:
+
 - Operation-based evaluation (INGEST, EXPORT, SHARE, TRANSFORM)
 - Context-aware decisions (audience, jurisdiction, purpose)
 - License restriction enforcement:
@@ -107,6 +114,7 @@ New **Policy Engine** module for license-aware policy decisions:
 - Structured `PolicyDecision` responses with violations and warnings
 
 **API**:
+
 ```typescript
 interface PolicyDecision {
   allow: boolean;
@@ -125,6 +133,7 @@ interface PolicyDecision {
 Complete Fastify-based HTTP service with four core components:
 
 #### Event Bus Abstraction (`event-bus.ts`)
+
 - Interface for emitting ingestion events
 - In-memory implementation for development/testing
 - Kafka adapter stub for future production use
@@ -158,6 +167,7 @@ Complete Fastify-based HTTP service with four core components:
    - Health check with license registry connectivity
 
 **Features**:
+
 - Fastify framework (following license-registry pattern)
 - Pino structured logging
 - CORS and Helmet security
@@ -194,6 +204,7 @@ Test coverage for key components:
   - Entity emission
 
 **Test Infrastructure**:
+
 - Jest test framework
 - Mocked ConnectorContext for connectors
 - Temporary file handling for CSV tests
@@ -260,23 +271,27 @@ Test coverage for key components:
 ## Non-Functional Requirements Met
 
 ### ✅ Strong Typing
+
 - All interfaces defined in TypeScript
 - No `any` types (except for JSON config values)
 - Zod schemas for runtime validation
 - Comprehensive type exports
 
 ### ✅ Dependency Injection
+
 - S3Client injectable for testing
 - PolicyEngine accepts Pool dependency
 - IngestEventBus interface with multiple implementations
 - Connector factory pattern
 
 ### ✅ Configuration & Secrets
+
 - Environment variables for service URLs and ports
 - Connector secrets stored separately from config
 - Secure credential handling (not logged)
 
 ### ✅ Observability
+
 - Structured logging with Pino
 - Metrics via ConnectorMetrics interface
 - Health check endpoints
@@ -286,29 +301,29 @@ Test coverage for key components:
 
 ## Success Criteria Achieved
 
-| Criterion | Status | Notes |
-|-----------|--------|-------|
-| **Connector Framework** | ✅ | 3 connectors (CSV, REST, S3) implemented and tested |
-| **ETL Assistant** | ✅ | Schema inference + PII detection + canonical mapping complete |
-| **Policy Engine** | ✅ | Operation-based decisions, context-aware evaluation |
-| **Ingestion Service** | ✅ | All HTTP endpoints functional, integrated with connectors + ETL + policy |
-| **Event Bus** | ✅ | Abstraction with in-memory impl, Kafka-ready interface |
-| **Tests** | ✅ | >80% coverage for core logic, representative tests for each component |
-| **Documentation** | ✅ | Architecture doc, usage guide, API reference, examples |
+| Criterion               | Status | Notes                                                                    |
+| ----------------------- | ------ | ------------------------------------------------------------------------ |
+| **Connector Framework** | ✅     | 3 connectors (CSV, REST, S3) implemented and tested                      |
+| **ETL Assistant**       | ✅     | Schema inference + PII detection + canonical mapping complete            |
+| **Policy Engine**       | ✅     | Operation-based decisions, context-aware evaluation                      |
+| **Ingestion Service**   | ✅     | All HTTP endpoints functional, integrated with connectors + ETL + policy |
+| **Event Bus**           | ✅     | Abstraction with in-memory impl, Kafka-ready interface                   |
+| **Tests**               | ✅     | >80% coverage for core logic, representative tests for each component    |
+| **Documentation**       | ✅     | Architecture doc, usage guide, API reference, examples                   |
 
 ---
 
 ## Code Statistics
 
-| Component | Files | Lines of Code (approx) |
-|-----------|-------|------------------------|
-| Connectors | 4 | ~1,200 |
-| ETL Assistant | 5 | ~1,400 |
-| Policy Engine | 1 | ~400 |
-| Ingestion Service | 2 | ~600 |
-| Tests | 3 | ~500 |
-| Documentation | 3 | ~1,500 (markdown) |
-| **Total** | **18** | **~5,600** |
+| Component         | Files  | Lines of Code (approx) |
+| ----------------- | ------ | ---------------------- |
+| Connectors        | 4      | ~1,200                 |
+| ETL Assistant     | 5      | ~1,400                 |
+| Policy Engine     | 1      | ~400                   |
+| Ingestion Service | 2      | ~600                   |
+| Tests             | 3      | ~500                   |
+| Documentation     | 3      | ~1,500 (markdown)      |
+| **Total**         | **18** | **~5,600**             |
 
 ---
 

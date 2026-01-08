@@ -1,10 +1,6 @@
-export type GateType =
-  | 'ROADMAP_SCOPE'
-  | 'RELEASE_ENVELOPE'
-  | 'PR_SIZE_LIMIT'
-  | 'WIP_LIMIT';
+export type GateType = "ROADMAP_SCOPE" | "RELEASE_ENVELOPE" | "PR_SIZE_LIMIT" | "WIP_LIMIT";
 
-export type GateState = 'OPEN' | 'BLOCKED' | 'OVERRIDDEN';
+export type GateState = "OPEN" | "BLOCKED" | "OVERRIDDEN";
 
 export interface OnCallHealth {
   pagesPerShift: number;
@@ -58,7 +54,7 @@ export interface DecisionLogEntry {
   owner: string;
   rationale: string;
   revisitDate: string;
-  decisionType: 'ONE_WAY_DOOR' | 'TWO_WAY_DOOR';
+  decisionType: "ONE_WAY_DOOR" | "TWO_WAY_DOOR";
   createdAt: string;
 }
 
@@ -81,13 +77,13 @@ export interface DomainScoreboard {
   exceptions: ExceptionEntry[];
   releaseEnvelope?: ReleaseEnvelope;
   health: {
-    reliability: 'GOOD' | 'WATCH' | 'POOR';
-    flow: 'GOOD' | 'WATCH' | 'POOR';
-    onCall: 'GOOD' | 'WATCH' | 'POOR';
+    reliability: "GOOD" | "WATCH" | "POOR";
+    flow: "GOOD" | "WATCH" | "POOR";
+    onCall: "GOOD" | "WATCH" | "POOR";
   };
 }
 
-export interface DomainMetricsInput extends Omit<DomainMetrics, 'domainId' | 'domainName'> {
+export interface DomainMetricsInput extends Omit<DomainMetrics, "domainId" | "domainName"> {
   domainId: string;
   domainName: string;
 }

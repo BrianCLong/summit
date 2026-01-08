@@ -1,27 +1,27 @@
-import express from 'express';
+import express from "express";
 
-import { createExecuteRouter } from './routes/actions/execute.js';
-import { createPreflightRouter } from './routes/actions/preflight.js';
-import { createEpicsRouter } from './routes/epics/index.js';
+import { createExecuteRouter } from "./routes/actions/execute.js";
+import { createPreflightRouter } from "./routes/actions/preflight.js";
+import { createEpicsRouter } from "./routes/epics/index.js";
+import { GetReceiptDependencies, createGetReceiptRouter } from "./routes/receipts/get.js";
+import { PolicyDecisionStore } from "./db/models/policy_decisions.js";
+import { InMemoryPolicyDecisionStore } from "./services/PolicyDecisionStore.js";
+import { EventPublisher } from "./services/EventPublisher.js";
+import { EpicService } from "./services/EpicService.js";
 import {
-  GetReceiptDependencies,
-  createGetReceiptRouter,
-} from './routes/receipts/get.js';
-import { PolicyDecisionStore } from './db/models/policy_decisions.js';
-import { InMemoryPolicyDecisionStore } from './services/PolicyDecisionStore.js';
-import { EventPublisher } from './services/EventPublisher.js';
-import { EpicService } from './services/EpicService.js';
-import { OpaPolicySimulationService, type PolicySimulationService } from './services/policyService.js';
-import { ReviewQueueService } from './review/ReviewQueueService.js';
-import { createReviewRouter } from './routes/review/index.js';
+  OpaPolicySimulationService,
+  type PolicySimulationService,
+} from "./services/policyService.js";
+import { ReviewQueueService } from "./review/ReviewQueueService.js";
+import { createReviewRouter } from "./routes/review/index.js";
 import {
   requireAuth,
   requireTenantIsolation,
   apiRateLimiter,
   privilegedRateLimiter,
   securityHeaders,
-} from './middleware/security.js';
-import { RBACManager } from '../../../packages/authentication/src/rbac/rbac-manager.js';
+} from "./middleware/security.js";
+import { RBACManager } from "../../../packages/authentication/src/rbac/rbac-manager.js";
 
 export interface ApiDependencies extends Partial<GetReceiptDependencies> {
   decisionStore?: PolicyDecisionStore;
@@ -40,40 +40,40 @@ export function buildApp(dependencies: ApiDependencies = {}) {
   const rbacManager = dependencies.rbacManager ?? new RBACManager();
   rbacManager.initializeDefaultRoles();
   rbacManager.defineRole({
-    name: 'api_user',
-    description: 'Default API consumer with read-only capabilities',
+    name: "api_user",
+    description: "Default API consumer with read-only capabilities",
     permissions: [
-      { resource: 'epics', action: 'read' },
-      { resource: 'receipts', action: 'read' },
+      { resource: "epics", action: "read" },
+      { resource: "receipts", action: "read" },
     ],
   });
   rbacManager.defineRole({
-    name: 'epic_contributor',
-    description: 'Can manage epic tasks',
+    name: "epic_contributor",
+    description: "Can manage epic tasks",
     permissions: [
-      { resource: 'epics', action: 'read' },
-      { resource: 'epics', action: 'update' },
+      { resource: "epics", action: "read" },
+      { resource: "epics", action: "update" },
     ],
   });
   rbacManager.defineRole({
-    name: 'review_moderator',
-    description: 'Can review and decide',
+    name: "review_moderator",
+    description: "Can review and decide",
     permissions: [
-      { resource: 'review', action: 'read' },
-      { resource: 'review', action: 'decide' },
+      { resource: "review", action: "read" },
+      { resource: "review", action: "decide" },
     ],
   });
   rbacManager.defineRole({
-    name: 'receipt_reader',
-    description: 'Can fetch receipt details',
-    permissions: [{ resource: 'receipts', action: 'read' }],
+    name: "receipt_reader",
+    description: "Can fetch receipt details",
+    permissions: [{ resource: "receipts", action: "read" }],
   });
   rbacManager.defineRole({
-    name: 'action_operator',
-    description: 'Can preflight and execute privileged actions',
+    name: "action_operator",
+    description: "Can preflight and execute privileged actions",
     permissions: [
-      { resource: 'actions:preflight', action: 'evaluate' },
-      { resource: 'actions:execute', action: 'invoke' },
+      { resource: "actions:preflight", action: "evaluate" },
+      { resource: "actions:execute", action: "invoke" },
     ],
   });
 
@@ -86,8 +86,8 @@ export function buildApp(dependencies: ApiDependencies = {}) {
   app.use(express.json());
 
   // Health check endpoint (no auth required)
-  app.get('/health', (_req, res) => {
-    res.json({ status: 'ok', service: 'api' });
+  app.get("/health", (_req, res) => {
+    res.json({ status: "ok", service: "api" });
   });
 
   // All routes below require authentication
@@ -95,35 +95,42 @@ export function buildApp(dependencies: ApiDependencies = {}) {
   app.use(requireTenantIsolation());
 
   const epicService = dependencies.epicService ?? new EpicService();
-  app.use('/epics', createEpicsRouter({ epicService, rbacManager }));
+  app.use("/epics", createEpicsRouter({ epicService, rbacManager }));
 
   const reviewQueue = dependencies.reviewQueue ?? new ReviewQueueService();
-  app.use('/review', createReviewRouter({ queue: reviewQueue, rbacManager }));
+  app.use("/review", createReviewRouter({ queue: reviewQueue, rbacManager }));
 
   if (dependencies.store || dependencies.verifier) {
-    app.use('/receipts', createGetReceiptRouter({
-      ...(dependencies as GetReceiptDependencies),
-      rbacManager,
-    }));
+    app.use(
+      "/receipts",
+      createGetReceiptRouter({
+        ...(dependencies as GetReceiptDependencies),
+        rbacManager,
+      })
+    );
   }
 
   // Privileged operations require tenant isolation and stricter rate limiting
-  const decisionStore =
-    dependencies.decisionStore ?? new PolicyDecisionStore(() => new Date());
+  const decisionStore = dependencies.decisionStore ?? new PolicyDecisionStore(() => new Date());
   const policyService = dependencies.policyService ?? new OpaPolicySimulationService();
-  app.use('/actions', privilegedRateLimiter, requireTenantIsolation(), createPreflightRouter({
-    decisionStore,
-    policyService,
-    rbacManager,
-  }));
+  app.use(
+    "/actions",
+    privilegedRateLimiter,
+    requireTenantIsolation(),
+    createPreflightRouter({
+      decisionStore,
+      policyService,
+      rbacManager,
+    })
+  );
 
   const preflightStore = dependencies.preflightStore ?? new InMemoryPolicyDecisionStore();
   const events = dependencies.events ?? new EventPublisher();
   app.use(
-    '/actions',
+    "/actions",
     privilegedRateLimiter,
     requireTenantIsolation(),
-    createExecuteRouter(preflightStore, events, policyService, rbacManager),
+    createExecuteRouter(preflightStore, events, policyService, rbacManager)
   );
 
   return app;

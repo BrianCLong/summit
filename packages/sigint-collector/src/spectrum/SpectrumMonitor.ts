@@ -3,16 +3,16 @@
  * TRAINING/SIMULATION ONLY
  */
 
-import { EventEmitter } from 'eventemitter3';
-import { v4 as uuid } from 'uuid';
-import { SpectrumData, EmitterProfile, ModulationType } from '../types';
+import { EventEmitter } from "eventemitter3";
+import { v4 as uuid } from "uuid";
+import { SpectrumData, EmitterProfile, ModulationType } from "../types";
 
 export interface SpectrumMonitorConfig {
-  startFrequency: number;     // Hz
-  endFrequency: number;       // Hz
-  resolution: number;         // Hz per bin
-  sweepRate: number;          // sweeps per second
-  sensitivity: number;        // dBm threshold
+  startFrequency: number; // Hz
+  endFrequency: number; // Hz
+  resolution: number; // Hz per bin
+  sweepRate: number; // sweeps per second
+  sensitivity: number; // dBm threshold
 }
 
 export interface DetectedSignal {
@@ -28,11 +28,11 @@ export interface DetectedSignal {
 }
 
 export interface SpectrumMonitorEvents {
-  'sweep:complete': (data: SpectrumData) => void;
-  'signal:detected': (signal: DetectedSignal) => void;
-  'signal:lost': (signalId: string) => void;
-  'emitter:identified': (emitter: EmitterProfile) => void;
-  'anomaly:detected': (anomaly: { frequency: number; type: string; severity: string }) => void;
+  "sweep:complete": (data: SpectrumData) => void;
+  "signal:detected": (signal: DetectedSignal) => void;
+  "signal:lost": (signalId: string) => void;
+  "emitter:identified": (emitter: EmitterProfile) => void;
+  "anomaly:detected": (anomaly: { frequency: number; type: string; severity: string }) => void;
 }
 
 export class SpectrumMonitor extends EventEmitter<SpectrumMonitorEvents> {
@@ -64,34 +64,66 @@ export class SpectrumMonitor extends EventEmitter<SpectrumMonitorEvents> {
     // Create realistic simulated signal sources for training
     const sources = [
       // Commercial FM broadcast
-      { frequency: 88.5e6, bandwidth: 200e3, power: -30, modulation: 'FM' as ModulationType },
-      { frequency: 95.1e6, bandwidth: 200e3, power: -35, modulation: 'FM' as ModulationType },
-      { frequency: 101.5e6, bandwidth: 200e3, power: -28, modulation: 'FM' as ModulationType },
+      { frequency: 88.5e6, bandwidth: 200e3, power: -30, modulation: "FM" as ModulationType },
+      { frequency: 95.1e6, bandwidth: 200e3, power: -35, modulation: "FM" as ModulationType },
+      { frequency: 101.5e6, bandwidth: 200e3, power: -28, modulation: "FM" as ModulationType },
 
       // VHF communications
-      { frequency: 121.5e6, bandwidth: 25e3, power: -60, modulation: 'AM' as ModulationType }, // Aviation emergency
-      { frequency: 156.8e6, bandwidth: 25e3, power: -55, modulation: 'FM' as ModulationType }, // Marine Ch16
+      { frequency: 121.5e6, bandwidth: 25e3, power: -60, modulation: "AM" as ModulationType }, // Aviation emergency
+      { frequency: 156.8e6, bandwidth: 25e3, power: -55, modulation: "FM" as ModulationType }, // Marine Ch16
 
       // Cellular bands (simulated)
-      { frequency: 850e6, bandwidth: 5e6, power: -45, modulation: 'OFDM' as ModulationType, intermittent: true },
-      { frequency: 1900e6, bandwidth: 10e6, power: -50, modulation: 'OFDM' as ModulationType, intermittent: true },
+      {
+        frequency: 850e6,
+        bandwidth: 5e6,
+        power: -45,
+        modulation: "OFDM" as ModulationType,
+        intermittent: true,
+      },
+      {
+        frequency: 1900e6,
+        bandwidth: 10e6,
+        power: -50,
+        modulation: "OFDM" as ModulationType,
+        intermittent: true,
+      },
 
       // WiFi
-      { frequency: 2.437e9, bandwidth: 20e6, power: -40, modulation: 'OFDM' as ModulationType, intermittent: true },
-      { frequency: 5.18e9, bandwidth: 40e6, power: -45, modulation: 'OFDM' as ModulationType, intermittent: true },
+      {
+        frequency: 2.437e9,
+        bandwidth: 20e6,
+        power: -40,
+        modulation: "OFDM" as ModulationType,
+        intermittent: true,
+      },
+      {
+        frequency: 5.18e9,
+        bandwidth: 40e6,
+        power: -45,
+        modulation: "OFDM" as ModulationType,
+        intermittent: true,
+      },
 
       // Simulated radar
-      { frequency: 9.4e9, bandwidth: 2e6, power: -35, modulation: 'PULSE' as ModulationType, intermittent: true },
+      {
+        frequency: 9.4e9,
+        bandwidth: 2e6,
+        power: -35,
+        modulation: "PULSE" as ModulationType,
+        intermittent: true,
+      },
 
       // Satellite downlink (simulated)
-      { frequency: 12.5e9, bandwidth: 36e6, power: -70, modulation: 'QPSK' as ModulationType },
+      { frequency: 12.5e9, bandwidth: 36e6, power: -70, modulation: "QPSK" as ModulationType },
     ];
 
-    this.simulatedSources = sources.map(s => ({ ...s, active: true }));
+    this.simulatedSources = sources.map((s) => ({ ...s, active: true }));
   }
 
   start(): void {
-    if (this.running) {return;}
+    if (this.running) {
+      return;
+    }
 
     this.running = true;
     const intervalMs = 1000 / this.config.sweepRate;
@@ -100,7 +132,9 @@ export class SpectrumMonitor extends EventEmitter<SpectrumMonitorEvents> {
       this.performSweep();
     }, intervalMs);
 
-    console.log(`[SPECTRUM] Monitor started: ${this.formatFreq(this.config.startFrequency)} - ${this.formatFreq(this.config.endFrequency)}`);
+    console.log(
+      `[SPECTRUM] Monitor started: ${this.formatFreq(this.config.startFrequency)} - ${this.formatFreq(this.config.endFrequency)}`
+    );
   }
 
   stop(): void {
@@ -109,7 +143,7 @@ export class SpectrumMonitor extends EventEmitter<SpectrumMonitorEvents> {
       this.sweepInterval = undefined;
     }
     this.running = false;
-    console.log('[SPECTRUM] Monitor stopped');
+    console.log("[SPECTRUM] Monitor stopped");
   }
 
   private performSweep(): void {
@@ -124,8 +158,12 @@ export class SpectrumMonitor extends EventEmitter<SpectrumMonitorEvents> {
 
     // Add simulated signals
     for (const source of this.simulatedSources) {
-      if (!source.active) {continue;}
-      if (source.intermittent && Math.random() > 0.7) {continue;}
+      if (!source.active) {
+        continue;
+      }
+      if (source.intermittent && Math.random() > 0.7) {
+        continue;
+      }
 
       const binIndex = Math.floor(
         (source.frequency - this.config.startFrequency) / this.config.resolution
@@ -158,10 +196,10 @@ export class SpectrumMonitor extends EventEmitter<SpectrumMonitorEvents> {
       resolution: this.config.resolution,
       powerLevels,
       peakFrequencies: peaks,
-      isSimulated: true
+      isSimulated: true,
     };
 
-    this.emit('sweep:complete', spectrumData);
+    this.emit("sweep:complete", spectrumData);
     this.updateSignalDetections(peaks);
     this.sweepCount++;
 
@@ -183,7 +221,7 @@ export class SpectrumMonitor extends EventEmitter<SpectrumMonitorEvents> {
       ) {
         peaks.push({
           frequency: this.config.startFrequency + i * this.config.resolution,
-          power: powerLevels[i]
+          power: powerLevels[i],
         });
       }
     }
@@ -218,10 +256,10 @@ export class SpectrumMonitor extends EventEmitter<SpectrumMonitorEvents> {
           snr: peak.power + 100, // Relative to noise floor
           firstDetected: now,
           lastDetected: now,
-          active: true
+          active: true,
         };
         this.detectedSignals.set(newSignal.id, newSignal);
-        this.emit('signal:detected', newSignal);
+        this.emit("signal:detected", newSignal);
       }
     }
 
@@ -230,7 +268,7 @@ export class SpectrumMonitor extends EventEmitter<SpectrumMonitorEvents> {
       if (now.getTime() - signal.lastDetected.getTime() > 5000) {
         if (signal.active) {
           signal.active = false;
-          this.emit('signal:lost', id);
+          this.emit("signal:lost", id);
         }
       }
     }
@@ -239,7 +277,7 @@ export class SpectrumMonitor extends EventEmitter<SpectrumMonitorEvents> {
   private estimateBandwidth(frequency: number): number {
     // Simple bandwidth estimation based on frequency
     const source = this.simulatedSources.find(
-      s => Math.abs(s.frequency - frequency) < s.bandwidth
+      (s) => Math.abs(s.frequency - frequency) < s.bandwidth
     );
     return source?.bandwidth || 25000;
   }
@@ -255,10 +293,10 @@ export class SpectrumMonitor extends EventEmitter<SpectrumMonitorEvents> {
       const deviation = powerLevels[i] - this.baselineSpectrum[i];
       if (deviation > 20) {
         const frequency = this.config.startFrequency + i * this.config.resolution;
-        this.emit('anomaly:detected', {
+        this.emit("anomaly:detected", {
           frequency,
-          type: 'POWER_INCREASE',
-          severity: deviation > 30 ? 'HIGH' : 'MEDIUM'
+          type: "POWER_INCREASE",
+          severity: deviation > 30 ? "HIGH" : "MEDIUM",
         });
       }
     }
@@ -280,7 +318,7 @@ export class SpectrumMonitor extends EventEmitter<SpectrumMonitorEvents> {
 
   removeSimulatedSource(frequency: number): void {
     this.simulatedSources = this.simulatedSources.filter(
-      s => Math.abs(s.frequency - frequency) > s.bandwidth
+      (s) => Math.abs(s.frequency - frequency) > s.bandwidth
     );
   }
 
@@ -289,13 +327,19 @@ export class SpectrumMonitor extends EventEmitter<SpectrumMonitorEvents> {
   }
 
   getActiveSignals(): DetectedSignal[] {
-    return Array.from(this.detectedSignals.values()).filter(s => s.active);
+    return Array.from(this.detectedSignals.values()).filter((s) => s.active);
   }
 
   private formatFreq(hz: number): string {
-    if (hz >= 1e9) {return `${(hz / 1e9).toFixed(2)} GHz`;}
-    if (hz >= 1e6) {return `${(hz / 1e6).toFixed(2)} MHz`;}
-    if (hz >= 1e3) {return `${(hz / 1e3).toFixed(2)} kHz`;}
+    if (hz >= 1e9) {
+      return `${(hz / 1e9).toFixed(2)} GHz`;
+    }
+    if (hz >= 1e6) {
+      return `${(hz / 1e6).toFixed(2)} MHz`;
+    }
+    if (hz >= 1e3) {
+      return `${(hz / 1e3).toFixed(2)} kHz`;
+    }
     return `${hz} Hz`;
   }
 

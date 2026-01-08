@@ -1,5 +1,5 @@
-import { BenchmarkSuite, createBenchmarkSuite } from '../suite.js';
-import type { BenchmarkSuiteConfig, BenchmarkDefinition } from '../types.js';
+import { BenchmarkSuite, createBenchmarkSuite } from "../suite.js";
+import type { BenchmarkSuiteConfig, BenchmarkDefinition } from "../types.js";
 
 /**
  * TypeScript benchmark runner
@@ -12,7 +12,7 @@ export class TypeScriptRunner {
   constructor(config: BenchmarkSuiteConfig) {
     this.suite = createBenchmarkSuite({
       ...config,
-      name: config.name || 'TypeScript Benchmarks',
+      name: config.name || "TypeScript Benchmarks",
     });
   }
 
@@ -24,7 +24,7 @@ export class TypeScriptRunner {
       ...definition,
       config: {
         ...definition.config,
-        language: 'typescript',
+        language: "typescript",
       },
     });
     return this;

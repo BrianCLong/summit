@@ -3,14 +3,20 @@
  * Orchestrates operations across multiple cloud providers
  */
 
-import { CloudProvider, CloudConfig, MultiCloudDeployment, CloudResource, OptimizationRecommendation } from './types.js';
-import { AWSProvider } from './providers/aws.js';
-import { AzureProvider } from './providers/azure.js';
-import { GCPProvider } from './providers/gcp.js';
-import { BaseCloudProvider } from './providers/base.js';
-import pino from 'pino';
+import {
+  CloudProvider,
+  CloudConfig,
+  MultiCloudDeployment,
+  CloudResource,
+  OptimizationRecommendation,
+} from "./types.js";
+import { AWSProvider } from "./providers/aws.js";
+import { AzureProvider } from "./providers/azure.js";
+import { GCPProvider } from "./providers/gcp.js";
+import { BaseCloudProvider } from "./providers/base.js";
+import pino from "pino";
 
-const logger = pino({ name: 'multi-cloud-manager' });
+const logger = pino({ name: "multi-cloud-manager" });
 
 export class MultiCloudManager {
   private providers: Map<CloudProvider, BaseCloudProvider>;
@@ -35,7 +41,7 @@ export class MultiCloudManager {
 
     logger.info(
       { providers: Array.from(this.providers.keys()) },
-      'Multi-cloud manager initialized'
+      "Multi-cloud manager initialized"
     );
   }
 
@@ -67,7 +73,7 @@ export class MultiCloudManager {
         const isValid = await client.validateConnection();
         results.set(provider, isValid);
       } catch (error) {
-        logger.error({ error, provider }, 'Connection validation failed');
+        logger.error({ error, provider }, "Connection validation failed");
         results.set(provider, false);
       }
     }
@@ -83,7 +89,7 @@ export class MultiCloudManager {
         const resources = await client.listResources(type);
         results.set(provider, resources);
       } catch (error) {
-        logger.error({ error, provider }, 'Failed to list resources');
+        logger.error({ error, provider }, "Failed to list resources");
         results.set(provider, []);
       }
     }
@@ -100,24 +106,21 @@ export class MultiCloudManager {
     const target = this.providers.get(targetProvider);
 
     if (!source || !target) {
-      throw new Error('Source or target provider not found');
+      throw new Error("Source or target provider not found");
     }
 
-    logger.info({ sourceProvider, targetProvider, resourceId }, 'Starting cross-cloud replication');
+    logger.info({ sourceProvider, targetProvider, resourceId }, "Starting cross-cloud replication");
 
     // Implementation would depend on resource type and providers
     // This is a placeholder for the replication logic
   }
 
-  async performFailover(
-    fromProvider: CloudProvider,
-    toProvider: CloudProvider
-  ): Promise<void> {
+  async performFailover(fromProvider: CloudProvider, toProvider: CloudProvider): Promise<void> {
     if (!this.deployment.failoverEnabled) {
-      throw new Error('Failover is not enabled');
+      throw new Error("Failover is not enabled");
     }
 
-    logger.info({ fromProvider, toProvider }, 'Performing failover');
+    logger.info({ fromProvider, toProvider }, "Performing failover");
 
     const targetProvider = this.providers.get(toProvider);
     if (!targetProvider) {
@@ -145,47 +148,47 @@ export class MultiCloudManager {
 
     for (const [provider, resources] of allResources) {
       // Cost optimization
-      const unusedResources = resources.filter(r => r.status === 'inactive');
+      const unusedResources = resources.filter((r) => r.status === "inactive");
       if (unusedResources.length > 0) {
         recommendations.push({
           id: `cost-${provider}-unused`,
           provider,
-          category: 'cost',
-          priority: 'high',
+          category: "cost",
+          priority: "high",
           title: `Remove ${unusedResources.length} unused resources`,
           description: `Found ${unusedResources.length} inactive resources that are still incurring costs`,
           potentialSavings: unusedResources.length * 100, // Estimated
           estimatedImpact: `Save approximately $${unusedResources.length * 100}/month`,
           implementation: {
-            effort: 'low',
+            effort: "low",
             steps: [
-              'Review inactive resources',
-              'Backup any necessary data',
-              'Delete or archive resources'
-            ]
-          }
+              "Review inactive resources",
+              "Backup any necessary data",
+              "Delete or archive resources",
+            ],
+          },
         });
       }
 
       // Multi-region optimization
-      const regionCount = new Set(resources.map(r => r.region)).size;
+      const regionCount = new Set(resources.map((r) => r.region)).size;
       if (regionCount > 1) {
         recommendations.push({
           id: `perf-${provider}-multi-region`,
           provider,
-          category: 'performance',
-          priority: 'medium',
-          title: 'Optimize multi-region data placement',
+          category: "performance",
+          priority: "medium",
+          title: "Optimize multi-region data placement",
           description: `Resources span ${regionCount} regions, consider data locality optimization`,
-          estimatedImpact: 'Reduce latency by 20-40%',
+          estimatedImpact: "Reduce latency by 20-40%",
           implementation: {
-            effort: 'medium',
+            effort: "medium",
             steps: [
-              'Analyze data access patterns',
-              'Identify hot data paths',
-              'Consolidate or replicate data strategically'
-            ]
-          }
+              "Analyze data access patterns",
+              "Identify hot data paths",
+              "Consolidate or replicate data strategically",
+            ],
+          },
         });
       }
     }

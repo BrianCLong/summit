@@ -1,5 +1,11 @@
 import { useMemo, useState } from 'react'
-import { Download, FileText, FileArchive, Link as LinkIcon, RefreshCcw } from 'lucide-react'
+import {
+  Download,
+  FileText,
+  FileArchive,
+  Link as LinkIcon,
+  RefreshCcw,
+} from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -33,7 +39,13 @@ const defaultOptions: ExportOptions = {
   includeSources: true,
 }
 
-export function CaseExportModal({ tenantId, caseId, caseTitle, open, onOpenChange }: CaseExportModalProps) {
+export function CaseExportModal({
+  tenantId,
+  caseId,
+  caseTitle,
+  open,
+  onOpenChange,
+}: CaseExportModalProps) {
   const [format, setFormat] = useState<ExportFormat>('pdf')
   const [options, setOptions] = useState<ExportOptions>(defaultOptions)
   const featureEnabled = isCaseExportRevampEnabled()
@@ -52,13 +64,16 @@ export function CaseExportModal({ tenantId, caseId, caseTitle, open, onOpenChang
   )
 
   const canStart = useMemo(() => {
-    return !exportJob.job || ['failed', 'complete', 'canceled'].includes(exportJob.job.status)
+    return (
+      !exportJob.job ||
+      ['failed', 'complete', 'canceled'].includes(exportJob.job.status)
+    )
   }, [exportJob.job])
 
   const isStarting = exportJob.job?.status === 'creating'
 
   const toggleOption = (key: keyof ExportOptions) => {
-    setOptions((prev) => ({ ...prev, [key]: !prev[key] }))
+    setOptions(prev => ({ ...prev, [key]: !prev[key] }))
   }
 
   const renderStatus = () => {
@@ -66,31 +81,36 @@ export function CaseExportModal({ tenantId, caseId, caseTitle, open, onOpenChang
       // PROMPT-UPDATE: Show policy check readiness
       return (
         <div className="space-y-2">
-           <p className="text-sm text-muted-foreground">Select options and start an export.</p>
-           <div className="flex items-center gap-2 text-xs text-green-600">
-               <span className="h-2 w-2 rounded-full bg-green-500" />
-               Policy Check: Ready
-           </div>
+          <p className="text-sm text-muted-foreground">
+            Select options and start an export.
+          </p>
+          <div className="flex items-center gap-2 text-xs text-green-600">
+            <span className="h-2 w-2 rounded-full bg-green-500" />
+            Policy Check: Ready
+          </div>
         </div>
-      );
+      )
     }
 
     const { status, progress = 0, jobId, downloadUrl, error } = exportJob.job
 
     // PROMPT-UPDATE: Show policy blocked state
     if (error && error.includes('POLICY_BLOCKED')) {
-       return (
+      return (
         <Alert variant="destructive" role="alert" aria-live="assertive">
           <AlertTitle>Policy Check Failed</AlertTitle>
           <AlertDescription className="space-y-2">
             <p className="font-semibold">{error}</p>
-            <p className="text-sm">Your export was blocked by the Licensing & Authority Compiler.</p>
+            <p className="text-sm">
+              Your export was blocked by the Licensing & Authority Compiler.
+            </p>
             <div className="rounded bg-destructive/10 p-2 text-xs">
-                <strong>Remediation:</strong> Check license constraints or purpose binding.
+              <strong>Remediation:</strong> Check license constraints or purpose
+              binding.
             </div>
           </AlertDescription>
         </Alert>
-       )
+      )
     }
 
     if (status === 'failed') {
@@ -105,7 +125,7 @@ export function CaseExportModal({ tenantId, caseId, caseTitle, open, onOpenChang
                 readOnly
                 value={jobId}
                 aria-label="Export job id"
-                onFocus={(e) => e.target.select()}
+                onFocus={e => e.target.select()}
               />
               <Button
                 size="sm"
@@ -127,26 +147,34 @@ export function CaseExportModal({ tenantId, caseId, caseTitle, open, onOpenChang
           <AlertDescription>
             <div className="flex items-center gap-2">
               <Badge variant="secondary">Job {jobId}</Badge>
-              <span className="text-sm text-muted-foreground">Click to download (required for Safari).</span>
+              <span className="text-sm text-muted-foreground">
+                Click to download (required for Safari).
+              </span>
             </div>
             <div className="mt-2 flex flex-col gap-2">
-                <div className="flex gap-2">
-                  <Button onClick={exportJob.markDownload} size="sm" aria-label="Download export">
-                    <Download className="h-4 w-4 mr-2" /> Download Bundle
-                  </Button>
-                   <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => window.open(downloadUrl + '?manifest=true', '_blank')}
-                    aria-label="View Manifest"
-                    title="Verify Provenance Manifest"
-                  >
-                    <FileText className="h-4 w-4 mr-2" /> View Manifest
-                  </Button>
-                </div>
-                <div className="text-xs text-muted-foreground">
-                    Includes <strong>Provenance Manifest</strong> with Policy Proof.
-                </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={exportJob.markDownload}
+                  size="sm"
+                  aria-label="Download export"
+                >
+                  <Download className="h-4 w-4 mr-2" /> Download Bundle
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    window.open(downloadUrl + '?manifest=true', '_blank')
+                  }
+                  aria-label="View Manifest"
+                  title="Verify Provenance Manifest"
+                >
+                  <FileText className="h-4 w-4 mr-2" /> View Manifest
+                </Button>
+              </div>
+              <div className="text-xs text-muted-foreground">
+                Includes <strong>Provenance Manifest</strong> with Policy Proof.
+              </div>
             </div>
           </AlertDescription>
         </Alert>
@@ -156,7 +184,9 @@ export function CaseExportModal({ tenantId, caseId, caseTitle, open, onOpenChang
     return (
       <div className="space-y-2" role="status" aria-live="polite">
         <div className="flex items-center justify-between text-sm">
-          <span className="font-medium capitalize">{status?.replace('_', ' ') || 'initializing'}</span>
+          <span className="font-medium capitalize">
+            {status?.replace('_', ' ') || 'initializing'}
+          </span>
           <span>{Math.round(progress)}%</span>
         </div>
         <Progress value={progress} max={100} />
@@ -174,8 +204,9 @@ export function CaseExportModal({ tenantId, caseId, caseTitle, open, onOpenChang
         <DialogHeader>
           <DialogTitle>Export case</DialogTitle>
           <DialogDescription>
-            Generate a signed {format.toUpperCase()} package that includes timeline, graph snapshot, and sources. Safe to close or
-            navigate away—progress is retained.
+            Generate a signed {format.toUpperCase()} package that includes
+            timeline, graph snapshot, and sources. Safe to close or navigate
+            away—progress is retained.
           </DialogDescription>
         </DialogHeader>
 
@@ -183,7 +214,8 @@ export function CaseExportModal({ tenantId, caseId, caseTitle, open, onOpenChang
           <Alert variant="warning" role="alert" aria-live="polite">
             <AlertTitle>Rollback mode active</AlertTitle>
             <AlertDescription>
-              Running legacy export flow for safety. Progress will not persist across refreshes.
+              Running legacy export flow for safety. Progress will not persist
+              across refreshes.
             </AlertDescription>
           </Alert>
         )}
@@ -196,7 +228,11 @@ export function CaseExportModal({ tenantId, caseId, caseTitle, open, onOpenChang
         )}
 
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4" role="group" aria-label="Export format">
+          <div
+            className="grid grid-cols-2 gap-4"
+            role="group"
+            aria-label="Export format"
+          >
             <Button
               variant={format === 'pdf' ? 'default' : 'outline'}
               onClick={() => setFormat('pdf')}
@@ -248,10 +284,15 @@ export function CaseExportModal({ tenantId, caseId, caseTitle, open, onOpenChang
 
         <DialogFooter className="flex items-center justify-between">
           <div className="text-xs text-muted-foreground flex items-center gap-2">
-            <LinkIcon className="h-4 w-4" /> Resumes automatically when you return.
+            <LinkIcon className="h-4 w-4" /> Resumes automatically when you
+            return.
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={exportJob.cancel} aria-label="Cancel export">
+            <Button
+              variant="outline"
+              onClick={exportJob.cancel}
+              aria-label="Cancel export"
+            >
               Cancel
             </Button>
             <Button
@@ -262,7 +303,11 @@ export function CaseExportModal({ tenantId, caseId, caseTitle, open, onOpenChang
             >
               Start new export
             </Button>
-            <Button onClick={exportJob.startExport} disabled={!canStart || isStarting} aria-label="Start export">
+            <Button
+              onClick={exportJob.startExport}
+              disabled={!canStart || isStarting}
+              aria-label="Start export"
+            >
               {isStarting ? 'Starting…' : 'Start export'}
             </Button>
           </div>

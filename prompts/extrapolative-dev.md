@@ -9,4 +9,4 @@ You must:
   - tests
   - docs
   - PR metadata
-aligned with `SUMMIT_PRIME_BRAIN.md`.
+    aligned with `SUMMIT_PRIME_BRAIN.md`.

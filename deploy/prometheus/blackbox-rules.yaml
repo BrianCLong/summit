@@ -15,8 +15,8 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: 'Blackbox probe failing for {{ $labels.instance }}'
-            description: 'Probe to {{ $labels.__param_target }} has been failing for 5m.'
+            summary: "Blackbox probe failing for {{ $labels.instance }}"
+            description: "Probe to {{ $labels.__param_target }} has been failing for 5m."
 
         - alert: BlackboxProbeTTFBHigh
           expr: avg_over_time(probe_http_duration_seconds{phase="first_byte",job="blackbox"}[5m]) > 1.5
@@ -24,8 +24,8 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: 'High TTFB for blackbox probe {{ $labels.instance }}'
-            description: 'Time-to-first-byte exceeds 1.5s on average over 5m for {{ $labels.__param_target }}.'
+            summary: "High TTFB for blackbox probe {{ $labels.instance }}"
+            description: "Time-to-first-byte exceeds 1.5s on average over 5m for {{ $labels.__param_target }}."
 
         - alert: BlackboxExporterDown
           expr: up{job="blackbox"} == 0
@@ -33,5 +33,5 @@ spec:
           labels:
             severity: critical
           annotations:
-            summary: 'Blackbox exporter is down'
-            description: 'Prometheus cannot scrape blackbox-exporter for more than 5 minutes.'
+            summary: "Blackbox exporter is down"
+            description: "Prometheus cannot scrape blackbox-exporter for more than 5 minutes."

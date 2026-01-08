@@ -5,7 +5,7 @@
  * See: https://web.dev/vitals/
  */
 
-import { onCLS, onFID, onFCP, onLCP, onTTFB } from 'web-vitals';
+import { onCLS, onFID, onFCP, onLCP, onTTFB } from "web-vitals";
 
 /**
  * Report Web Vitals to console in development
@@ -18,7 +18,7 @@ export function reportWebVitals() {
 
     if (isDevelopment) {
       // Use emoji indicators for quick visual feedback
-      const emoji = rating === 'good' ? '✅' : rating === 'needs-improvement' ? '⚠️' : '❌';
+      const emoji = rating === "good" ? "✅" : rating === "needs-improvement" ? "⚠️" : "❌";
       console.log(`${emoji} ${name}:`, {
         value: `${Math.round(value)}ms`,
         rating,
@@ -28,10 +28,10 @@ export function reportWebVitals() {
   }
 
   // Track all Core Web Vitals
-  onCLS(sendToConsole);  // Cumulative Layout Shift
-  onFID(sendToConsole);  // First Input Delay
-  onFCP(sendToConsole);  // First Contentful Paint
-  onLCP(sendToConsole);  // Largest Contentful Paint
+  onCLS(sendToConsole); // Cumulative Layout Shift
+  onFID(sendToConsole); // First Input Delay
+  onFCP(sendToConsole); // First Contentful Paint
+  onLCP(sendToConsole); // Largest Contentful Paint
   onTTFB(sendToConsole); // Time to First Byte
 }
 
@@ -55,8 +55,8 @@ export function reportWebVitalsToAnalytics() {
 
     if (window.gtag) {
       // Google Analytics 4
-      window.gtag('event', name, {
-        event_category: 'Web Vitals',
+      window.gtag("event", name, {
+        event_category: "Web Vitals",
         event_label: id,
         value: Math.round(value),
         rating,
@@ -66,9 +66,9 @@ export function reportWebVitalsToAnalytics() {
     }
 
     // Or send to custom endpoint
-    fetch('/api/analytics/web-vitals', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    fetch("/api/analytics/web-vitals", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name,
         value: Math.round(value),
@@ -123,11 +123,11 @@ export const PERFORMANCE_THRESHOLDS = {
  */
 export function getPerformanceRating(metricName, value) {
   const threshold = PERFORMANCE_THRESHOLDS[metricName];
-  if (!threshold) return 'unknown';
+  if (!threshold) return "unknown";
 
-  if (value <= threshold.good) return 'good';
-  if (value <= threshold.needsImprovement) return 'needs-improvement';
-  return 'poor';
+  if (value <= threshold.good) return "good";
+  if (value <= threshold.needsImprovement) return "needs-improvement";
+  return "poor";
 }
 
 /**
@@ -162,11 +162,11 @@ export function measurePerformance(name, startMark, endMark) {
 export function logBundlePerformance() {
   if (!performance.getEntriesByType) return;
 
-  const resources = performance.getEntriesByType('resource');
-  const jsResources = resources.filter((r) => r.name.endsWith('.js'));
-  const cssResources = resources.filter((r) => r.name.endsWith('.css'));
+  const resources = performance.getEntriesByType("resource");
+  const jsResources = resources.filter((r) => r.name.endsWith(".js"));
+  const cssResources = resources.filter((r) => r.name.endsWith(".css"));
 
-  console.group('📦 Bundle Loading Performance');
+  console.group("📦 Bundle Loading Performance");
 
   console.log(`JavaScript bundles: ${jsResources.length}`);
   console.log(
@@ -175,9 +175,7 @@ export function logBundlePerformance() {
     )}KB`
   );
   console.log(
-    `Total JS load time: ${Math.round(
-      jsResources.reduce((acc, r) => acc + r.duration, 0)
-    )}ms`
+    `Total JS load time: ${Math.round(jsResources.reduce((acc, r) => acc + r.duration, 0))}ms`
   );
 
   console.log(`\nCSS bundles: ${cssResources.length}`);
@@ -201,9 +199,9 @@ export function initPerformanceMonitoring() {
   reportWebVitalsToAnalytics();
 
   // Log bundle performance after page load
-  if (document.readyState === 'complete') {
+  if (document.readyState === "complete") {
     logBundlePerformance();
   } else {
-    window.addEventListener('load', logBundlePerformance);
+    window.addEventListener("load", logBundlePerformance);
   }
 }

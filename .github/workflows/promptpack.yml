@@ -3,12 +3,12 @@ name: Prompt Pack Linter
 on:
   push:
     paths:
-      - 'prompts/**'
-      - 'tools/promptpack_lint/**'
+      - "prompts/**"
+      - "tools/promptpack_lint/**"
   pull_request:
     paths:
-      - 'prompts/**'
-      - 'tools/promptpack_lint/**'
+      - "prompts/**"
+      - "tools/promptpack_lint/**"
 
 jobs:
   lint:
@@ -17,6 +17,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
       - run: pip install -e tools/promptpack_lint
       - run: promptpack-lint --repo .

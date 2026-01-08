@@ -3,7 +3,7 @@ slos:
     target: 99.9%
     window: 30d
     description: "Percentage of non-5xx requests over 30 days"
-    indicator: "1 - (sum(rate(http_requests_total{status_code=~\"5..\"}[30d])) / sum(rate(http_requests_total[30d])))"
+    indicator: '1 - (sum(rate(http_requests_total{status_code=~"5.."}[30d])) / sum(rate(http_requests_total[30d])))'
 
   - name: query_latency
     target: p95 < 1500ms
@@ -15,7 +15,7 @@ slos:
     target: p95 < 1500ms
     window: 7d
     description: "95th percentile of verification API duration"
-    indicator: "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{route=\"/verify\"}[7d])) by (le))"
+    indicator: 'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{route="/verify"}[7d])) by (le))'
 
   - name: graph_query_latency
     target: p95 < 1000ms
@@ -27,4 +27,4 @@ slos:
     target: 99.95%
     window: 7d
     description: "Percentage of successful writes to the Evidence Ledger"
-    indicator: "sum(rate(ledger_write_total{status=\"success\"}[7d])) / sum(rate(ledger_write_total[7d]))"
+    indicator: 'sum(rate(ledger_write_total{status="success"}[7d])) / sum(rate(ledger_write_total[7d]))'

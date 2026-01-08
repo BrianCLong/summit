@@ -9,14 +9,14 @@ export {
   type TabularData,
   type SynthesisResult,
   type QualityMetrics,
-  type PrivacyMetrics
-} from './generators/TabularSynthesizer';
+  type PrivacyMetrics,
+} from "./generators/TabularSynthesizer";
 
 export {
   TimeSeriesSynthesizer,
   type TimeSeriesConfig,
-  type TimeSeries
-} from './generators/TimeSeriesSynthesizer';
+  type TimeSeries,
+} from "./generators/TimeSeriesSynthesizer";
 
-export * from './utils/DataProfiler';
-export * from './quality/QualityAssessor';
+export * from "./utils/DataProfiler";
+export * from "./quality/QualityAssessor";

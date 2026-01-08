@@ -1,5 +1,5 @@
-import { BaseExtension } from './BaseExtension.js';
-import { PluginContext, PluginManifest } from '../types/plugin.js';
+import { BaseExtension } from "./BaseExtension.js";
+import { PluginContext, PluginManifest } from "../types/plugin.js";
 
 /**
  * Base class for visualization plugins
@@ -33,26 +33,26 @@ export abstract class VisualizationExtension extends BaseExtension {
   }
 
   protected async onStart(): Promise<void> {
-    this.log.info('Visualization plugin started');
+    this.log.info("Visualization plugin started");
   }
 
   protected async onStop(): Promise<void> {
-    this.log.info('Visualization plugin stopped');
+    this.log.info("Visualization plugin stopped");
   }
 
   protected async onDestroy(): Promise<void> {
-    this.log.info('Visualization plugin cleaned up');
+    this.log.info("Visualization plugin cleaned up");
   }
 
   private async validatePermissions(_context: PluginContext): Promise<void> {
-    const requiredPermissions = ['ui:extensions'];
-    const hasPermissions = requiredPermissions.every(perm =>
-      this.manifest.permissions.map(p => p.toString()).includes(perm)
+    const requiredPermissions = ["ui:extensions"];
+    const hasPermissions = requiredPermissions.every((perm) =>
+      this.manifest.permissions.map((p) => p.toString()).includes(perm)
     );
 
     if (!hasPermissions) {
       throw new Error(
-        `Visualization plugin ${this.manifest.id} missing required permissions: ${requiredPermissions.join(', ')}`
+        `Visualization plugin ${this.manifest.id} missing required permissions: ${requiredPermissions.join(", ")}`
       );
     }
   }
@@ -98,7 +98,7 @@ export interface VisualizationInput {
 export interface VisualizationConfig {
   title?: string;
   subtitle?: string;
-  layout?: 'vertical' | 'horizontal' | 'grid' | 'free';
+  layout?: "vertical" | "horizontal" | "grid" | "free";
   interactive?: boolean;
   exportable?: boolean;
   filters?: Filter[];
@@ -109,22 +109,22 @@ export interface VisualizationConfig {
 
 export interface Filter {
   field: string;
-  operator: 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'contains' | 'in';
+  operator: "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "contains" | "in";
   value: any;
 }
 
 export interface SortConfig {
   field: string;
-  direction: 'asc' | 'desc';
+  direction: "asc" | "desc";
 }
 
 export interface GroupConfig {
   field: string;
-  aggregation?: 'sum' | 'avg' | 'count' | 'min' | 'max';
+  aggregation?: "sum" | "avg" | "count" | "min" | "max";
 }
 
 export interface ThemeConfig {
-  colorScheme?: 'light' | 'dark' | 'auto';
+  colorScheme?: "light" | "dark" | "auto";
   primaryColor?: string;
   secondaryColor?: string;
   fontFamily?: string;
@@ -132,7 +132,7 @@ export interface ThemeConfig {
 }
 
 export interface InteractionEvent {
-  type: 'click' | 'hover' | 'selection';
+  type: "click" | "hover" | "selection";
   target: any;
   data?: any;
   position?: { x: number; y: number };
@@ -145,7 +145,7 @@ export interface VisualizationOutput {
   /**
    * Rendering type
    */
-  type: 'html' | 'svg' | 'canvas' | 'webcomponent' | 'iframe';
+  type: "html" | "svg" | "canvas" | "webcomponent" | "iframe";
 
   /**
    * Component configuration
@@ -205,10 +205,10 @@ export interface ComponentConfig {
 }
 
 export interface Asset {
-  type: 'script' | 'style' | 'font' | 'image';
+  type: "script" | "style" | "font" | "image";
   url: string;
   integrity?: string; // SRI hash
-  crossOrigin?: 'anonymous' | 'use-credentials';
+  crossOrigin?: "anonymous" | "use-credentials";
 }
 
 export interface SandboxConfig {
@@ -229,17 +229,17 @@ export interface SandboxConfig {
 }
 
 export type SandboxPermission =
-  | 'scripts'
-  | 'forms'
-  | 'modals'
-  | 'orientation-lock'
-  | 'pointer-lock'
-  | 'popups'
-  | 'popups-to-escape-sandbox'
-  | 'presentation'
-  | 'same-origin'
-  | 'top-navigation'
-  | 'top-navigation-by-user-activation';
+  | "scripts"
+  | "forms"
+  | "modals"
+  | "orientation-lock"
+  | "pointer-lock"
+  | "popups"
+  | "popups-to-escape-sandbox"
+  | "presentation"
+  | "same-origin"
+  | "top-navigation"
+  | "top-navigation-by-user-activation";
 
 /**
  * Visualization plugin metadata

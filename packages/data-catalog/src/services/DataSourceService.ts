@@ -16,7 +16,7 @@ import {
   MappingStatus,
   LineageEntityType,
   LineageReference,
-} from '../types/dataSourceTypes.js';
+} from "../types/dataSourceTypes.js";
 
 export class DataSourceService {
   private dataSources: Map<string, DataSource>;
@@ -41,14 +41,11 @@ export class DataSourceService {
    * Register a new data source
    */
   async registerDataSource(
-    data: Omit<
-      DataSource,
-      'id' | 'createdAt' | 'updatedAt' | 'lastSyncAt' | 'datasetIds'
-    >,
+    data: Omit<DataSource, "id" | "createdAt" | "updatedAt" | "lastSyncAt" | "datasetIds">
   ): Promise<DataSource> {
     const dataSource: DataSource = {
       ...data,
-      id: this.generateId('ds'),
+      id: this.generateId("ds"),
       createdAt: new Date(),
       updatedAt: new Date(),
       lastSyncAt: null,
@@ -90,9 +87,7 @@ export class DataSourceService {
     }
 
     if (filters?.tags && filters.tags.length > 0) {
-      results = results.filter((ds) =>
-        filters.tags!.some((tag) => ds.tags.includes(tag)),
-      );
+      results = results.filter((ds) => filters.tags!.some((tag) => ds.tags.includes(tag)));
     }
 
     if (filters?.domain) {
@@ -105,10 +100,7 @@ export class DataSourceService {
   /**
    * Update data source connection status
    */
-  async updateConnectionStatus(
-    id: string,
-    status: ConnectionStatus,
-  ): Promise<DataSource> {
+  async updateConnectionStatus(id: string, status: ConnectionStatus): Promise<DataSource> {
     const dataSource = this.dataSources.get(id);
     if (!dataSource) {
       throw new Error(`Data source not found: ${id}`);
@@ -139,7 +131,7 @@ export class DataSourceService {
 
     return {
       success: true,
-      message: 'Connection successful',
+      message: "Connection successful",
     };
   }
 
@@ -149,10 +141,7 @@ export class DataSourceService {
    * Register a new dataset
    */
   async registerDataset(
-    data: Omit<
-      Dataset,
-      'id' | 'createdAt' | 'updatedAt' | 'lastAccessedAt' | 'fields'
-    >,
+    data: Omit<Dataset, "id" | "createdAt" | "updatedAt" | "lastAccessedAt" | "fields">
   ): Promise<Dataset> {
     const dataSource = this.dataSources.get(data.sourceId);
     if (!dataSource) {
@@ -161,7 +150,7 @@ export class DataSourceService {
 
     const dataset: Dataset = {
       ...data,
-      id: this.generateId('dataset'),
+      id: this.generateId("dataset"),
       createdAt: new Date(),
       updatedAt: new Date(),
       lastAccessedAt: null,
@@ -182,7 +171,7 @@ export class DataSourceService {
       dataset.id,
       LineageEntityType.DATASET,
       dataset.name,
-      'downstream',
+      "downstream"
     );
 
     return dataset;
@@ -215,9 +204,7 @@ export class DataSourceService {
     }
 
     if (filters?.tags && filters.tags.length > 0) {
-      results = results.filter((ds) =>
-        filters.tags!.some((tag) => ds.tags.includes(tag)),
-      );
+      results = results.filter((ds) => filters.tags!.some((tag) => ds.tags.includes(tag)));
     }
 
     if (filters?.domain) {
@@ -236,17 +223,14 @@ export class DataSourceService {
       (ds) =>
         ds.name.toLowerCase().includes(lowerQuery) ||
         ds.displayName.toLowerCase().includes(lowerQuery) ||
-        (ds.description && ds.description.toLowerCase().includes(lowerQuery)),
+        (ds.description && ds.description.toLowerCase().includes(lowerQuery))
     );
   }
 
   /**
    * Update dataset status
    */
-  async updateDatasetStatus(
-    id: string,
-    status: DatasetStatus,
-  ): Promise<Dataset> {
+  async updateDatasetStatus(id: string, status: DatasetStatus): Promise<Dataset> {
     const dataset = this.datasets.get(id);
     if (!dataset) {
       throw new Error(`Dataset not found: ${id}`);
@@ -263,9 +247,7 @@ export class DataSourceService {
   /**
    * Register a field
    */
-  async registerField(
-    data: Omit<Field, 'id' | 'createdAt' | 'updatedAt'>,
-  ): Promise<Field> {
+  async registerField(data: Omit<Field, "id" | "createdAt" | "updatedAt">): Promise<Field> {
     const dataset = this.datasets.get(data.datasetId);
     if (!dataset) {
       throw new Error(`Dataset not found: ${data.datasetId}`);
@@ -273,7 +255,7 @@ export class DataSourceService {
 
     const field: Field = {
       ...data,
-      id: this.generateId('field'),
+      id: this.generateId("field"),
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -300,9 +282,7 @@ export class DataSourceService {
    * List fields for a dataset
    */
   async listFields(datasetId: string): Promise<Field[]> {
-    return Array.from(this.fields.values()).filter(
-      (f) => f.datasetId === datasetId,
-    );
+    return Array.from(this.fields.values()).filter((f) => f.datasetId === datasetId);
   }
 
   /**
@@ -315,7 +295,7 @@ export class DataSourceService {
         f.name.toLowerCase().includes(lowerQuery) ||
         f.displayName.toLowerCase().includes(lowerQuery) ||
         f.dataType.toLowerCase().includes(lowerQuery) ||
-        (f.description && f.description.toLowerCase().includes(lowerQuery)),
+        (f.description && f.description.toLowerCase().includes(lowerQuery))
     );
   }
 
@@ -325,7 +305,7 @@ export class DataSourceService {
    * Create a mapping
    */
   async createMapping(
-    data: Omit<Mapping, 'id' | 'createdAt' | 'updatedAt' | 'deprecatedAt'>,
+    data: Omit<Mapping, "id" | "createdAt" | "updatedAt" | "deprecatedAt">
   ): Promise<Mapping> {
     const sourceField = this.fields.get(data.sourceFieldId);
     if (!sourceField) {
@@ -334,7 +314,7 @@ export class DataSourceService {
 
     const mapping: Mapping = {
       ...data,
-      id: this.generateId('mapping'),
+      id: this.generateId("mapping"),
       createdAt: new Date(),
       updatedAt: new Date(),
       deprecatedAt: null,
@@ -360,7 +340,7 @@ export class DataSourceService {
       mapping.id,
       LineageEntityType.MAPPING,
       mapping.name,
-      'downstream',
+      "downstream"
     );
 
     return mapping;
@@ -384,15 +364,11 @@ export class DataSourceService {
     let results = Array.from(this.mappings.values());
 
     if (filters?.sourceDatasetId) {
-      results = results.filter(
-        (m) => m.sourceDatasetId === filters.sourceDatasetId,
-      );
+      results = results.filter((m) => m.sourceDatasetId === filters.sourceDatasetId);
     }
 
     if (filters?.canonicalSchemaId) {
-      results = results.filter(
-        (m) => m.canonicalSchemaId === filters.canonicalSchemaId,
-      );
+      results = results.filter((m) => m.canonicalSchemaId === filters.canonicalSchemaId);
     }
 
     if (filters?.status) {
@@ -423,12 +399,10 @@ export class DataSourceService {
   /**
    * Register a license
    */
-  async registerLicense(
-    data: Omit<License, 'id' | 'createdAt' | 'updatedAt'>,
-  ): Promise<License> {
+  async registerLicense(data: Omit<License, "id" | "createdAt" | "updatedAt">): Promise<License> {
     const license: License = {
       ...data,
-      id: this.generateId('license'),
+      id: this.generateId("license"),
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -455,10 +429,7 @@ export class DataSourceService {
   /**
    * Attach license to dataset
    */
-  async attachLicenseToDataset(
-    datasetId: string,
-    licenseId: string,
-  ): Promise<void> {
+  async attachLicenseToDataset(datasetId: string, licenseId: string): Promise<void> {
     const dataset = this.datasets.get(datasetId);
     if (!dataset) {
       throw new Error(`Dataset not found: ${datasetId}`);
@@ -513,7 +484,7 @@ export class DataSourceService {
       (m) =>
         m.sourceDatasetId === entityId ||
         m.sourceFieldId === entityId ||
-        m.canonicalSchemaId === entityId,
+        m.canonicalSchemaId === entityId
     );
 
     return {
@@ -527,18 +498,14 @@ export class DataSourceService {
    * Get datasets by license
    */
   async getDatasetsByLicense(licenseId: string): Promise<Dataset[]> {
-    return Array.from(this.datasets.values()).filter((ds) =>
-      ds.licenseIds.includes(licenseId),
-    );
+    return Array.from(this.datasets.values()).filter((ds) => ds.licenseIds.includes(licenseId));
   }
 
   /**
    * Get datasets by policy tag
    */
   async getDatasetsByPolicyTag(policyTag: string): Promise<Dataset[]> {
-    return Array.from(this.datasets.values()).filter((ds) =>
-      ds.policyTags.includes(policyTag),
-    );
+    return Array.from(this.datasets.values()).filter((ds) => ds.policyTags.includes(policyTag));
   }
 
   // ========== Helper Methods ==========
@@ -548,10 +515,10 @@ export class DataSourceService {
    */
   private async createLineageSummary(
     entityId: string,
-    entityType: LineageEntityType,
+    entityType: LineageEntityType
   ): Promise<LineageSummary> {
     const lineage: LineageSummary = {
-      id: this.generateId('lineage'),
+      id: this.generateId("lineage"),
       entityId,
       entityType,
       upstreamSources: [],
@@ -580,7 +547,7 @@ export class DataSourceService {
     toEntityId: string,
     toEntityType: LineageEntityType,
     toEntityName: string,
-    direction: 'upstream' | 'downstream',
+    direction: "upstream" | "downstream"
   ): Promise<void> {
     const lineage = this.lineageSummaries.get(fromEntityId);
     if (!lineage) {
@@ -594,7 +561,7 @@ export class DataSourceService {
       path: [],
     };
 
-    if (direction === 'downstream') {
+    if (direction === "downstream") {
       if (toEntityType === LineageEntityType.DATASET) {
         lineage.downstreamDatasets.push(reference);
       } else if (toEntityType === LineageEntityType.MAPPING) {

@@ -4,13 +4,13 @@
  * Generates reports in multiple formats: JSON, HTML, Markdown, JUnit, CSV
  */
 
-import { writeFile } from 'fs/promises';
-import { join } from 'path';
-import dayjs from 'dayjs';
-import { table } from 'table';
-import chalk from 'chalk';
-import { TestRun, TestResult, ReportFormat, ReportConfig } from './types.js';
-import { MetricsCollector, MetricsSummary } from './metrics.js';
+import { writeFile } from "fs/promises";
+import { join } from "path";
+import dayjs from "dayjs";
+import { table } from "table";
+import chalk from "chalk";
+import { TestRun, TestResult, ReportFormat, ReportConfig } from "./types.js";
+import { MetricsCollector, MetricsSummary } from "./metrics.js";
 
 export class SafetyReporter {
   private testRun: TestRun;
@@ -32,15 +32,15 @@ export class SafetyReporter {
    */
   async generate(config: ReportConfig): Promise<void> {
     switch (config.format) {
-      case 'json':
+      case "json":
         return this.generateJSON(config);
-      case 'html':
+      case "html":
         return this.generateHTML(config);
-      case 'markdown':
+      case "markdown":
         return this.generateMarkdown(config);
-      case 'junit':
+      case "junit":
         return this.generateJUnit(config);
-      case 'csv':
+      case "csv":
         return this.generateCSV(config);
       default:
         throw new Error(`Unsupported format: ${config.format}`);
@@ -65,7 +65,7 @@ export class SafetyReporter {
     };
 
     const content = JSON.stringify(report, null, 2);
-    await writeFile(config.outputPath, content, 'utf-8');
+    await writeFile(config.outputPath, content, "utf-8");
   }
 
   /**
@@ -73,7 +73,7 @@ export class SafetyReporter {
    */
   private async generateHTML(config: ReportConfig): Promise<void> {
     const { summary } = this.testRun;
-    const failed = this.testRun.results.filter(r => !r.passed);
+    const failed = this.testRun.results.filter((r) => !r.passed);
 
     const html = `<!DOCTYPE html>
 <html>
@@ -184,13 +184,13 @@ export class SafetyReporter {
             </div>
             <div class="metric">
                 <div class="metric-label">Pass Rate</div>
-                <div class="metric-value">${(summary.passed / summary.total * 100).toFixed(1)}%</div>
+                <div class="metric-value">${((summary.passed / summary.total) * 100).toFixed(1)}%</div>
             </div>
         </div>
 
         <h2>Pass Rate</h2>
         <div class="progress-bar">
-            <div class="progress-fill" style="width: ${summary.passed / summary.total * 100}%"></div>
+            <div class="progress-fill" style="width: ${(summary.passed / summary.total) * 100}%"></div>
             <div class="progress-label">${summary.passed} / ${summary.total} passed</div>
         </div>
 
@@ -198,23 +198,25 @@ export class SafetyReporter {
         <div class="summary">
             <div class="metric">
                 <div class="metric-label">Critical</div>
-                <div class="metric-value critical">${this.countFailuresBySeverity('critical')}</div>
+                <div class="metric-value critical">${this.countFailuresBySeverity("critical")}</div>
             </div>
             <div class="metric">
                 <div class="metric-label">High</div>
-                <div class="metric-value high">${this.countFailuresBySeverity('high')}</div>
+                <div class="metric-value high">${this.countFailuresBySeverity("high")}</div>
             </div>
             <div class="metric">
                 <div class="metric-label">Medium</div>
-                <div class="metric-value medium">${this.countFailuresBySeverity('medium')}</div>
+                <div class="metric-value medium">${this.countFailuresBySeverity("medium")}</div>
             </div>
             <div class="metric">
                 <div class="metric-label">Low</div>
-                <div class="metric-value low">${this.countFailuresBySeverity('low')}</div>
+                <div class="metric-value low">${this.countFailuresBySeverity("low")}</div>
             </div>
         </div>
 
-        ${config.highlightFailures && failed.length > 0 ? `
+        ${
+          config.highlightFailures && failed.length > 0
+            ? `
         <h2>❌ Failed Tests</h2>
         <table>
             <thead>
@@ -226,19 +228,27 @@ export class SafetyReporter {
                 </tr>
             </thead>
             <tbody>
-                ${failed.map(r => `
+                ${failed
+                  .map(
+                    (r) => `
                 <tr>
                     <td><code>${r.scenarioId}</code></td>
                     <td><span class="badge badge-${r.failure?.severity}">${r.failure?.severity?.toUpperCase()}</span></td>
-                    <td>${r.failure?.reason || 'Unknown'}</td>
+                    <td>${r.failure?.reason || "Unknown"}</td>
                     <td>${r.durationMs}ms</td>
                 </tr>
-                `).join('')}
+                `
+                  )
+                  .join("")}
             </tbody>
         </table>
-        ` : ''}
+        `
+            : ""
+        }
 
-        ${this.testRun.regressions && this.testRun.regressions.length > 0 ? `
+        ${
+          this.testRun.regressions && this.testRun.regressions.length > 0
+            ? `
         <h2>⚠️ Regressions</h2>
         <table>
             <thead>
@@ -250,17 +260,23 @@ export class SafetyReporter {
                 </tr>
             </thead>
             <tbody>
-                ${this.testRun.regressions.map(r => `
+                ${this.testRun.regressions
+                  .map(
+                    (r) => `
                 <tr>
                     <td><code>${r.scenarioId}</code></td>
                     <td class="passed">${r.previousResult}</td>
                     <td class="failed">${r.currentResult}</td>
                     <td><span class="badge badge-${r.severity}">${r.severity.toUpperCase()}</span></td>
                 </tr>
-                `).join('')}
+                `
+                  )
+                  .join("")}
             </tbody>
         </table>
-        ` : ''}
+        `
+            : ""
+        }
 
         <h2>📊 Breakdown by Component</h2>
         <table>
@@ -274,15 +290,19 @@ export class SafetyReporter {
                 </tr>
             </thead>
             <tbody>
-                ${Object.entries(summary.byComponent).map(([comp, stats]) => `
+                ${Object.entries(summary.byComponent)
+                  .map(
+                    ([comp, stats]) => `
                 <tr>
                     <td><strong>${comp}</strong></td>
                     <td>${stats.total}</td>
                     <td class="passed">${stats.passed}</td>
                     <td class="failed">${stats.failed}</td>
-                    <td>${(stats.passed / stats.total * 100).toFixed(1)}%</td>
+                    <td>${((stats.passed / stats.total) * 100).toFixed(1)}%</td>
                 </tr>
-                `).join('')}
+                `
+                  )
+                  .join("")}
             </tbody>
         </table>
 
@@ -298,15 +318,19 @@ export class SafetyReporter {
                 </tr>
             </thead>
             <tbody>
-                ${Object.entries(summary.byRiskLevel).map(([level, stats]) => `
+                ${Object.entries(summary.byRiskLevel)
+                  .map(
+                    ([level, stats]) => `
                 <tr>
                     <td><span class="badge badge-${level}">${level.toUpperCase()}</span></td>
                     <td>${stats.total}</td>
                     <td class="passed">${stats.passed}</td>
                     <td class="failed">${stats.failed}</td>
-                    <td>${(stats.passed / stats.total * 100).toFixed(1)}%</td>
+                    <td>${((stats.passed / stats.total) * 100).toFixed(1)}%</td>
                 </tr>
-                `).join('')}
+                `
+                  )
+                  .join("")}
             </tbody>
         </table>
 
@@ -314,14 +338,14 @@ export class SafetyReporter {
         <p style="color: #666; font-size: 14px;">
             Run ID: ${this.testRun.runId}<br>
             Environment: ${this.testRun.config.environment}<br>
-            Generated: ${dayjs().format('YYYY-MM-DD HH:mm:ss')}<br>
+            Generated: ${dayjs().format("YYYY-MM-DD HH:mm:ss")}<br>
             Duration: ${(this.testRun.durationMs / 1000).toFixed(2)}s
         </p>
     </div>
 </body>
 </html>`;
 
-    await writeFile(config.outputPath, html, 'utf-8');
+    await writeFile(config.outputPath, html, "utf-8");
   }
 
   /**
@@ -329,7 +353,7 @@ export class SafetyReporter {
    */
   private async generateMarkdown(config: ReportConfig): Promise<void> {
     const { summary } = this.testRun;
-    const failed = this.testRun.results.filter(r => !r.passed);
+    const failed = this.testRun.results.filter((r) => !r.passed);
 
     let md = `# 🛡️ Safety Harness Test Report\n\n`;
     md += `**Run ID:** \`${this.testRun.runId}\`\n\n`;
@@ -343,23 +367,23 @@ export class SafetyReporter {
     md += `| Total Tests | ${summary.total} |\n`;
     md += `| ✅ Passed | ${summary.passed} |\n`;
     md += `| ❌ Failed | ${summary.failed} |\n`;
-    md += `| Pass Rate | ${(summary.passed / summary.total * 100).toFixed(1)}% |\n`;
+    md += `| Pass Rate | ${((summary.passed / summary.total) * 100).toFixed(1)}% |\n`;
     md += `| Error Rate | ${(summary.errorRate * 100).toFixed(1)}% |\n\n`;
 
     md += `## Failures by Severity\n\n`;
     md += `| Severity | Count |\n`;
     md += `|----------|-------|\n`;
-    md += `| 🔴 Critical | ${this.countFailuresBySeverity('critical')} |\n`;
-    md += `| 🟠 High | ${this.countFailuresBySeverity('high')} |\n`;
-    md += `| 🟡 Medium | ${this.countFailuresBySeverity('medium')} |\n`;
-    md += `| 🔵 Low | ${this.countFailuresBySeverity('low')} |\n\n`;
+    md += `| 🔴 Critical | ${this.countFailuresBySeverity("critical")} |\n`;
+    md += `| 🟠 High | ${this.countFailuresBySeverity("high")} |\n`;
+    md += `| 🟡 Medium | ${this.countFailuresBySeverity("medium")} |\n`;
+    md += `| 🔵 Low | ${this.countFailuresBySeverity("low")} |\n\n`;
 
     if (config.highlightFailures && failed.length > 0) {
       md += `## ❌ Failed Tests\n\n`;
       md += `| Scenario | Severity | Reason | Duration |\n`;
       md += `|----------|----------|--------|----------|\n`;
       for (const result of failed) {
-        md += `| \`${result.scenarioId}\` | ${result.failure?.severity || 'N/A'} | ${result.failure?.reason || 'Unknown'} | ${result.durationMs}ms |\n`;
+        md += `| \`${result.scenarioId}\` | ${result.failure?.severity || "N/A"} | ${result.failure?.reason || "Unknown"} | ${result.durationMs}ms |\n`;
       }
       md += `\n`;
     }
@@ -378,7 +402,7 @@ export class SafetyReporter {
     md += `| Component | Total | Passed | Failed | Pass Rate |\n`;
     md += `|-----------|-------|--------|--------|-----------|\n`;
     for (const [comp, stats] of Object.entries(summary.byComponent)) {
-      md += `| ${comp} | ${stats.total} | ${stats.passed} | ${stats.failed} | ${(stats.passed / stats.total * 100).toFixed(1)}% |\n`;
+      md += `| ${comp} | ${stats.total} | ${stats.passed} | ${stats.failed} | ${((stats.passed / stats.total) * 100).toFixed(1)}% |\n`;
     }
     md += `\n`;
 
@@ -386,14 +410,14 @@ export class SafetyReporter {
     md += `| Risk Level | Total | Passed | Failed | Pass Rate |\n`;
     md += `|------------|-------|--------|--------|-----------|\n`;
     for (const [level, stats] of Object.entries(summary.byRiskLevel)) {
-      md += `| ${level} | ${stats.total} | ${stats.passed} | ${stats.failed} | ${(stats.passed / stats.total * 100).toFixed(1)}% |\n`;
+      md += `| ${level} | ${stats.total} | ${stats.passed} | ${stats.failed} | ${((stats.passed / stats.total) * 100).toFixed(1)}% |\n`;
     }
     md += `\n`;
 
     md += `---\n\n`;
-    md += `*Generated: ${dayjs().format('YYYY-MM-DD HH:mm:ss')}*\n`;
+    md += `*Generated: ${dayjs().format("YYYY-MM-DD HH:mm:ss")}*\n`;
 
-    await writeFile(config.outputPath, md, 'utf-8');
+    await writeFile(config.outputPath, md, "utf-8");
   }
 
   /**
@@ -419,7 +443,7 @@ export class SafetyReporter {
     xml += `  </testsuite>\n`;
     xml += `</testsuites>\n`;
 
-    await writeFile(config.outputPath, xml, 'utf-8');
+    await writeFile(config.outputPath, xml, "utf-8");
   }
 
   /**
@@ -427,21 +451,25 @@ export class SafetyReporter {
    */
   private async generateCSV(config: ReportConfig): Promise<void> {
     const rows = [
-      ['Scenario ID', 'Passed', 'Duration (ms)', 'Outcome', 'Risk Score', 'Failure Reason'].join(',')
+      ["Scenario ID", "Passed", "Duration (ms)", "Outcome", "Risk Score", "Failure Reason"].join(
+        ","
+      ),
     ];
 
     for (const result of this.testRun.results) {
-      rows.push([
-        result.scenarioId,
-        result.passed ? 'true' : 'false',
-        result.durationMs.toString(),
-        result.actual.outcome,
-        result.actual.riskScore?.toString() || 'N/A',
-        result.failure?.reason?.replace(/,/g, ';') || '',
-      ].join(','));
+      rows.push(
+        [
+          result.scenarioId,
+          result.passed ? "true" : "false",
+          result.durationMs.toString(),
+          result.actual.outcome,
+          result.actual.riskScore?.toString() || "N/A",
+          result.failure?.reason?.replace(/,/g, ";") || "",
+        ].join(",")
+      );
     }
 
-    await writeFile(config.outputPath, rows.join('\n'), 'utf-8');
+    await writeFile(config.outputPath, rows.join("\n"), "utf-8");
   }
 
   /**
@@ -450,26 +478,28 @@ export class SafetyReporter {
   printConsoleSummary(): void {
     const { summary } = this.testRun;
 
-    console.log('\n' + chalk.bold('🛡️  Safety Harness Test Report'));
-    console.log(chalk.gray('═'.repeat(60)));
+    console.log("\n" + chalk.bold("🛡️  Safety Harness Test Report"));
+    console.log(chalk.gray("═".repeat(60)));
 
-    console.log(chalk.bold('\n📊 Summary:'));
+    console.log(chalk.bold("\n📊 Summary:"));
     console.log(`  Total Tests:  ${summary.total}`);
-    console.log(`  ${chalk.green('✓ Passed:')}     ${summary.passed}`);
-    console.log(`  ${chalk.red('✗ Failed:')}     ${summary.failed}`);
-    console.log(`  Pass Rate:    ${(summary.passed / summary.total * 100).toFixed(1)}%`);
+    console.log(`  ${chalk.green("✓ Passed:")}     ${summary.passed}`);
+    console.log(`  ${chalk.red("✗ Failed:")}     ${summary.failed}`);
+    console.log(`  Pass Rate:    ${((summary.passed / summary.total) * 100).toFixed(1)}%`);
 
-    console.log(chalk.bold('\n🎯 Failures by Severity:'));
-    console.log(`  ${chalk.red('Critical:')} ${this.countFailuresBySeverity('critical')}`);
-    console.log(`  ${chalk.yellow('High:')}     ${this.countFailuresBySeverity('high')}`);
-    console.log(`  ${chalk.blue('Medium:')}   ${this.countFailuresBySeverity('medium')}`);
-    console.log(`  ${chalk.gray('Low:')}      ${this.countFailuresBySeverity('low')}`);
+    console.log(chalk.bold("\n🎯 Failures by Severity:"));
+    console.log(`  ${chalk.red("Critical:")} ${this.countFailuresBySeverity("critical")}`);
+    console.log(`  ${chalk.yellow("High:")}     ${this.countFailuresBySeverity("high")}`);
+    console.log(`  ${chalk.blue("Medium:")}   ${this.countFailuresBySeverity("medium")}`);
+    console.log(`  ${chalk.gray("Low:")}      ${this.countFailuresBySeverity("low")}`);
 
     if (this.testRun.regressions && this.testRun.regressions.length > 0) {
-      console.log(chalk.bold('\n⚠️  Regressions:') + chalk.red(` ${this.testRun.regressions.length}`));
+      console.log(
+        chalk.bold("\n⚠️  Regressions:") + chalk.red(` ${this.testRun.regressions.length}`)
+      );
     }
 
-    console.log(chalk.gray('\n' + '═'.repeat(60)));
+    console.log(chalk.gray("\n" + "═".repeat(60)));
     console.log(`Duration: ${(this.testRun.durationMs / 1000).toFixed(2)}s\n`);
   }
 
@@ -477,9 +507,7 @@ export class SafetyReporter {
    * Count failures by severity
    */
   private countFailuresBySeverity(severity: string): number {
-    return this.testRun.results.filter(
-      r => !r.passed && r.failure?.severity === severity
-    ).length;
+    return this.testRun.results.filter((r) => !r.passed && r.failure?.severity === severity).length;
   }
 
   /**
@@ -487,10 +515,10 @@ export class SafetyReporter {
    */
   private escapeXml(str: string): string {
     return str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&apos;');
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&apos;");
   }
 }

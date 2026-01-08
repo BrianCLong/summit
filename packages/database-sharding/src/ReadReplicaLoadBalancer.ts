@@ -1,30 +1,24 @@
-import { trace } from '@opentelemetry/api';
-import pino from 'pino';
-import { ShardConnectionPool } from './ShardConnectionPool';
-import { ShardConfig } from './types';
+import { trace } from "@opentelemetry/api";
+import pino from "pino";
+import { ShardConnectionPool } from "./ShardConnectionPool";
+import { ShardConfig } from "./types";
 
-const logger = pino({ name: 'ReadReplicaLoadBalancer' });
-const tracer = trace.getTracer('database-sharding');
+const logger = pino({ name: "ReadReplicaLoadBalancer" });
+const tracer = trace.getTracer("database-sharding");
 
-export type LoadBalancingStrategy =
-  | 'round-robin'
-  | 'least-connections'
-  | 'random'
-  | 'weighted';
+export type LoadBalancingStrategy = "round-robin" | "least-connections" | "random" | "weighted";
 
 /**
  * Load balancer for read replicas
  */
 export class ReadReplicaLoadBalancer {
   private currentIndex = 0;
-  private replicaStats: Map<
-    number,
-    { connections: number; latency: number; errorRate: number }
-  > = new Map();
+  private replicaStats: Map<number, { connections: number; latency: number; errorRate: number }> =
+    new Map();
 
   constructor(
     private shard: ShardConfig,
-    private strategy: LoadBalancingStrategy = 'round-robin'
+    private strategy: LoadBalancingStrategy = "round-robin"
   ) {
     // Initialize stats for each replica
     if (shard.replicas) {
@@ -42,7 +36,7 @@ export class ReadReplicaLoadBalancer {
    * Select the best replica based on load balancing strategy
    */
   selectReplica(): number | null {
-    const span = tracer.startSpan('ReadReplicaLoadBalancer.selectReplica');
+    const span = tracer.startSpan("ReadReplicaLoadBalancer.selectReplica");
 
     try {
       if (!this.shard.replicas || this.shard.replicas.length === 0) {
@@ -52,16 +46,16 @@ export class ReadReplicaLoadBalancer {
       let selectedIndex: number;
 
       switch (this.strategy) {
-        case 'round-robin':
+        case "round-robin":
           selectedIndex = this.roundRobin();
           break;
-        case 'least-connections':
+        case "least-connections":
           selectedIndex = this.leastConnections();
           break;
-        case 'random':
+        case "random":
           selectedIndex = this.random();
           break;
-        case 'weighted':
+        case "weighted":
           selectedIndex = this.weighted();
           break;
         default:
@@ -69,8 +63,8 @@ export class ReadReplicaLoadBalancer {
       }
 
       span.setAttributes({
-        'replica.index': selectedIndex,
-        'strategy': this.strategy,
+        "replica.index": selectedIndex,
+        strategy: this.strategy,
       });
 
       return selectedIndex;
@@ -198,6 +192,6 @@ export class ReadReplicaLoadBalancer {
    */
   changeStrategy(strategy: LoadBalancingStrategy): void {
     this.strategy = strategy;
-    logger.info({ strategy }, 'Load balancing strategy changed');
+    logger.info({ strategy }, "Load balancing strategy changed");
   }
 }

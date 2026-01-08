@@ -7,9 +7,9 @@
  * Supports hot-reloadable policies without code changes.
  */
 
-import { createLogger } from '../utils/logger.js';
+import { createLogger } from "../utils/logger.js";
 
-const logger = createLogger('opa-service');
+const logger = createLogger("opa-service");
 
 // ============================================================================
 // Types
@@ -48,7 +48,7 @@ export interface OPADecision {
 }
 
 export interface OPAObligation {
-  type: 'audit' | 'notify' | 'encrypt' | 'redact' | 'two_person';
+  type: "audit" | "notify" | "encrypt" | "redact" | "two_person";
   parameters: Record<string, unknown>;
 }
 
@@ -76,16 +76,16 @@ export class OPAService {
   constructor(config?: Partial<OPAConfig>) {
     this.config = {
       enabled: true,
-      url: process.env.OPA_URL || 'http://localhost:8181',
-      policyPath: '/v1/data/companyos/authz/decision',
+      url: process.env.OPA_URL || "http://localhost:8181",
+      policyPath: "/v1/data/companyos/authz/decision",
       timeout: 5000,
       cacheEnabled: true,
       cacheTTL: 5000, // 5 seconds
-      failOpen: process.env.NODE_ENV === 'development',
+      failOpen: process.env.NODE_ENV === "development",
       ...config,
     };
 
-    logger.info('OPAService initialized', {
+    logger.info("OPAService initialized", {
       enabled: this.config.enabled,
       url: this.config.url,
       failOpen: this.config.failOpen,
@@ -113,7 +113,7 @@ export class OPAService {
         mfa_verified: context.mfaVerified,
       },
       resource: {
-        type: resource?.type || 'system',
+        type: resource?.type || "system",
         id: resource?.id,
         tenant_id: resource?.tenantId || context.tenantId,
       },
@@ -127,7 +127,7 @@ export class OPAService {
     });
 
     if (!decision.allow) {
-      logger.warn('Permission denied by OPA', {
+      logger.warn("Permission denied by OPA", {
         userId,
         action,
         resource,
@@ -138,20 +138,16 @@ export class OPAService {
 
     // Handle MFA requirement
     if (decision.requires_mfa && !context.mfaVerified) {
-      throw new Error('MFA verification required for this operation');
+      throw new Error("MFA verification required for this operation");
     }
 
-    logger.debug('Permission granted', { userId, action, resource });
+    logger.debug("Permission granted", { userId, action, resource });
   }
 
   /**
    * Check if user has a specific role
    */
-  async hasRole(
-    userId: string,
-    role: string,
-    context: RequestContext
-  ): Promise<boolean> {
+  async hasRole(userId: string, role: string, context: RequestContext): Promise<boolean> {
     // For now, check roles from context
     // In production, this would query OPA for role validation
     return context.roles?.includes(role) || false;
@@ -162,7 +158,7 @@ export class OPAService {
    */
   async evaluate(input: OPAInput): Promise<OPADecision> {
     if (!this.config.enabled) {
-      return { allow: true, reason: 'OPA disabled' };
+      return { allow: true, reason: "OPA disabled" };
     }
 
     // Check cache first
@@ -170,7 +166,7 @@ export class OPAService {
     if (this.config.cacheEnabled) {
       const cached = this.decisionCache.get(cacheKey);
       if (cached && Date.now() < cached.expiresAt) {
-        logger.debug('OPA cache hit', { cacheKey });
+        logger.debug("OPA cache hit", { cacheKey });
         return cached.decision;
       }
     }
@@ -188,18 +184,18 @@ export class OPAService {
 
       return decision;
     } catch (error) {
-      logger.error('OPA query failed', {
+      logger.error("OPA query failed", {
         error: error instanceof Error ? error.message : String(error),
         input,
       });
 
       // Fail open or closed based on config
       if (this.config.failOpen) {
-        logger.warn('OPA unavailable, failing open');
-        return { allow: true, reason: 'OPA unavailable (fail-open mode)' };
+        logger.warn("OPA unavailable, failing open");
+        return { allow: true, reason: "OPA unavailable (fail-open mode)" };
       } else {
-        logger.error('OPA unavailable, failing closed');
-        return { allow: false, reason: 'Authorization service unavailable' };
+        logger.error("OPA unavailable, failing closed");
+        return { allow: false, reason: "Authorization service unavailable" };
       }
     }
   }
@@ -215,9 +211,9 @@ export class OPAService {
 
     try {
       const response = await fetch(url, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ input }),
         signal: controller.signal,
@@ -281,7 +277,7 @@ export class OPAService {
 
     try {
       const response = await fetch(`${this.config.url}/health`, {
-        method: 'GET',
+        method: "GET",
         signal: AbortSignal.timeout(2000),
       });
 
@@ -289,14 +285,14 @@ export class OPAService {
       this.lastHealthCheck = now;
 
       if (!this.healthy) {
-        logger.warn('OPA health check failed', { status: response.status });
+        logger.warn("OPA health check failed", { status: response.status });
       }
 
       return this.healthy;
     } catch (error) {
       this.healthy = false;
       this.lastHealthCheck = now;
-      logger.error('OPA health check error', {
+      logger.error("OPA health check error", {
         error: error instanceof Error ? error.message : String(error),
       });
       return false;
@@ -309,7 +305,7 @@ export class OPAService {
 
   clearCache(): void {
     this.decisionCache.clear();
-    logger.info('OPA decision cache cleared');
+    logger.info("OPA decision cache cleared");
   }
 
   getCacheStats(): { size: number; hitRate: number } {
@@ -329,7 +325,7 @@ export class OPAService {
       subject: input.subject.id,
       tenant: input.subject.tenant_id,
       roles: input.subject.roles.sort(),
-      resource: `${input.resource.type}:${input.resource.id || '*'}`,
+      resource: `${input.resource.type}:${input.resource.id || "*"}`,
       action: input.action,
     });
     return key;

@@ -148,16 +148,14 @@ function sleep(ms: number) {
 
 ```ts
 // server/src/connectors/csv.ts
-import { parse } from 'csv-parse';
-import fs from 'fs';
-import { throttled, Connector } from './sdk';
+import { parse } from "csv-parse";
+import fs from "fs";
+import { throttled, Connector } from "./sdk";
 
 export const CsvConnector: Connector = {
-  name: 'csv',
+  name: "csv",
   async *pull(ctx) {
-    const parser = fs
-      .createReadStream(process.env.CSV_PATH!)
-      .pipe(parse({ columns: true }));
+    const parser = fs.createReadStream(process.env.CSV_PATH!).pipe(parse({ columns: true }));
     for await (const rec of parser) yield rec;
   },
 };
@@ -193,9 +191,9 @@ async def predict(inp: PredictIn):
 
 ```ts
 // server/src/gnn/client.ts
-import axios from 'axios';
+import axios from "axios";
 export async function predictLinks(edges: [string, string][]) {
-  const { data } = await axios.post(process.env.ML_URL + '/predict', { edges });
+  const { data } = await axios.post(process.env.ML_URL + "/predict", { edges });
   return data.candidates;
 }
 ```
@@ -204,22 +202,16 @@ export async function predictLinks(edges: [string, string][]) {
 
 ```ts
 // server/src/graphql/resolvers/suggest.ts
-import { predictLinks } from '../../gnn/client';
+import { predictLinks } from "../../gnn/client";
 export default {
   Query: {
-    linkSuggestions: async (
-      _: any,
-      { nodes, k }: { nodes: string[]; k: number },
-      ctx: any,
-    ) => {
+    linkSuggestions: async (_: any, { nodes, k }: { nodes: string[]; k: number }, ctx: any) => {
       // form candidate pairs by neighborhood
       const pairs = await ctx.driver.executeQuery(
-        'MATCH (n) WHERE n.id IN $ids WITH collect(n) as ns UNWIND ns as a UNWIND ns as b WITH a,b WHERE id(a)<id(b) RETURN a.id as u,b.id as v LIMIT $lim',
-        { ids: nodes, lim: 500 },
+        "MATCH (n) WHERE n.id IN $ids WITH collect(n) as ns UNWIND ns as a UNWIND ns as b WITH a,b WHERE id(a)<id(b) RETURN a.id as u,b.id as v LIMIT $lim",
+        { ids: nodes, lim: 500 }
       );
-      const edges = pairs.records.map(
-        (r) => [r.get('u'), r.get('v')] as [string, string],
-      );
+      const edges = pairs.records.map((r) => [r.get("u"), r.get("v")] as [string, string]);
       const preds = await predictLinks(edges);
       return preds.sort((a, b) => b.score - a.score).slice(0, k);
     },
@@ -243,16 +235,16 @@ mask[field] {
 
 ```ts
 // server/src/provenance/exporter.ts
-import { evaluate } from '../policy/opa';
+import { evaluate } from "../policy/opa";
 export async function redactAndExport(ctx, rows) {
   const masked = [];
   for (const r of rows) {
     for (const f of Object.keys(r)) {
-      const { mask } = await evaluate('intelgraph/redact/mask', {
+      const { mask } = await evaluate("intelgraph/redact/mask", {
         user: ctx.user,
         field: f,
       });
-      if (mask) r[f] = '•••';
+      if (mask) r[f] = "•••";
     }
     masked.push(r);
   }
@@ -264,10 +256,10 @@ export async function redactAndExport(ctx, rows) {
 
 ```ts
 // server/src/alerts/engine.ts
-import { createClient } from 'redis';
-import axios from 'axios';
+import { createClient } from "redis";
+import axios from "axios";
 export async function fanout(io, ruleId, payload) {
-  io.to(`rule:${ruleId}`).emit('alert', payload);
+  io.to(`rule:${ruleId}`).emit("alert", payload);
   for (const url of await getWebhookUrls(ruleId)) {
     try {
       await axios.post(url, payload, { timeout: 1500 });
@@ -283,18 +275,18 @@ export async function fanout(io, ruleId, payload) {
 ```js
 // apps/web/src/features/redact/jquery-masks.js
 $(function () {
-  $('[data-redact]').each(function () {
-    $(this).text('•••').addClass('masked');
+  $("[data-redact]").each(function () {
+    $(this).text("•••").addClass("masked");
   });
-  $(document).on('click', '.approve-link', function () {
-    const id = $(this).data('id');
+  $(document).on("click", ".approve-link", function () {
+    const id = $(this).data("id");
     $.ajax({
-      url: '/graphql',
-      method: 'POST',
+      url: "/graphql",
+      method: "POST",
       data: JSON.stringify({
         query: `mutation{ approveSuggestion(id:"${id}") }`,
       }),
-      contentType: 'application/json',
+      contentType: "application/json",
     });
   });
 });
@@ -303,12 +295,12 @@ $(function () {
 ### 4.10 k6 — alert latency
 
 ```js
-import ws from 'k6/ws';
-export const options = { vus: 25, duration: '2m' };
+import ws from "k6/ws";
+export const options = { vus: 25, duration: "2m" };
 export default function () {
-  ws.connect('wss://localhost/collab', {}, function (socket) {
-    socket.on('open', function () {
-      socket.send(JSON.stringify({ type: 'join', room: 'rule:1' }));
+  ws.connect("wss://localhost/collab", {}, function (socket) {
+    socket.on("open", function () {
+      socket.send(JSON.stringify({ type: "join", room: "rule:1" }));
     });
   });
 }

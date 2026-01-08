@@ -2,27 +2,28 @@
 
 Every deliverable MUST:
 
-- Maintain full CI/CD health  
-- Maintain artifact signing pathways  
-- Maintain provenance and SBOM generation  
-- Maintain caching correctness  
-- Maintain test matrix compatibility  
-- Maintain release pipeline behavior  
-- Maintain merge train health  
-- Produce deterministic test runs  
+- Maintain full CI/CD health
+- Maintain artifact signing pathways
+- Maintain provenance and SBOM generation
+- Maintain caching correctness
+- Maintain test matrix compatibility
+- Maintain release pipeline behavior
+- Maintain merge train health
+- Produce deterministic test runs
 
 ---
 
-## MANDATORY QUESTIONS  
-*(must all be YES)*
+## MANDATORY QUESTIONS
 
-- Will typecheck pass?  
-- Will lint pass?  
-- Will tests pass deterministically?  
-- Will CI be green on the first run?  
-- Will GitHub Actions workflows behave correctly?  
-- Will this merge cleanly onto main?  
-- Does the solution satisfy 1st/2nd/3rd-order requirements?  
+_(must all be YES)_
+
+- Will typecheck pass?
+- Will lint pass?
+- Will tests pass deterministically?
+- Will CI be green on the first run?
+- Will GitHub Actions workflows behave correctly?
+- Will this merge cleanly onto main?
+- Does the solution satisfy 1st/2nd/3rd-order requirements?
 
 If **ANY** answer is NO → revise.
 
@@ -31,6 +32,7 @@ If **ANY** answer is NO → revise.
 ## GITHUB ACTIONS PIPELINE
 
 ### Required Workflows
+
 ```yaml
 # .github/workflows/ci.yml
 - Checkout code
@@ -49,6 +51,7 @@ If **ANY** answer is NO → revise.
 ```
 
 ### Quality Gates
+
 ```yaml
 # All must pass:
 - build: PASS
@@ -60,6 +63,7 @@ If **ANY** answer is NO → revise.
 ```
 
 ### Release Pipeline
+
 ```yaml
 # .github/workflows/release.yml
 - Run full CI
@@ -77,6 +81,7 @@ If **ANY** answer is NO → revise.
 ```
 
 ### Merge Train
+
 ```yaml
 # .github/workflows/merge-train.yml
 - Queue PRs for merging

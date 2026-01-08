@@ -9,17 +9,17 @@
  * Usage: node scripts/compliance/check_dco.js [commit_msg_file]
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
 const commitMsgFile = process.argv[2];
 
-let commitMsg = '';
+let commitMsg = "";
 
 if (commitMsgFile) {
   // Read from file (git hook mode)
   try {
-    commitMsg = fs.readFileSync(commitMsgFile, 'utf8');
+    commitMsg = fs.readFileSync(commitMsgFile, "utf8");
   } catch (err) {
     console.error(`Error reading commit message file: ${err.message}`);
     process.exit(1);
@@ -27,10 +27,10 @@ if (commitMsgFile) {
 } else {
   // Read from git log (CI mode - check HEAD)
   try {
-    const { execSync } = require('child_process');
-    commitMsg = execSync('git log -1 --pretty=%B', { encoding: 'utf8' });
+    const { execSync } = require("child_process");
+    commitMsg = execSync("git log -1 --pretty=%B", { encoding: "utf8" });
   } catch (err) {
-    console.error('Error reading git log:', err.message);
+    console.error("Error reading git log:", err.message);
     process.exit(1);
   }
 }
@@ -38,11 +38,11 @@ if (commitMsgFile) {
 const dcoRegex = /^Signed-off-by: .+ <.+@.+>$/m;
 
 if (dcoRegex.test(commitMsg)) {
-  console.log('✅ DCO check passed: Signed-off-by present.');
+  console.log("✅ DCO check passed: Signed-off-by present.");
   process.exit(0);
 } else {
   console.error('❌ DCO check failed: Missing "Signed-off-by" line.');
-  console.error('Please sign your commit using `git commit -s` or add the line manually.');
-  console.error('Example: Signed-off-by: Jane Doe <jane.doe@example.com>');
+  console.error("Please sign your commit using `git commit -s` or add the line manually.");
+  console.error("Example: Signed-off-by: Jane Doe <jane.doe@example.com>");
   process.exit(1);
 }

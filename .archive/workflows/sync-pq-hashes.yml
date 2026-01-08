@@ -6,7 +6,7 @@ permissions:
 on:
   # Trigger after successful client builds
   workflow_run:
-    workflows: ['Client Build', 'E2E Tests']
+    workflows: ["Client Build", "E2E Tests"]
     types:
       - completed
     branches:
@@ -17,23 +17,23 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Target environment'
+        description: "Target environment"
         required: true
-        default: 'staging'
+        default: "staging"
         type: choice
         options:
           - staging
           - production
       source:
-        description: 'Hash source'
+        description: "Hash source"
         required: true
-        default: 'artifacts'
+        default: "artifacts"
         type: choice
         options:
           - artifacts
           - file
       dry_run:
-        description: 'Dry run (preview changes only)'
+        description: "Dry run (preview changes only)"
         required: false
         default: false
         type: boolean
@@ -59,8 +59,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'pnpm'
+          node-version: "18"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: |
@@ -194,7 +194,7 @@ jobs:
         uses: 8398a7/action-slack@v3
         with:
           status: success
-          channel: '#safe-mutations'
+          channel: "#safe-mutations"
           text: |
             ✅ PQ Hash Sync Completed
             Environment: ${{ matrix.environment }}
@@ -208,7 +208,7 @@ jobs:
         uses: 8398a7/action-slack@v3
         with:
           status: failure
-          channel: '#safe-mutations'
+          channel: "#safe-mutations"
           text: |
             ❌ PQ Hash Sync Failed
             Environment: ${{ matrix.environment }}

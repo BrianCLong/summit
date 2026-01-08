@@ -2,7 +2,7 @@ name: CD - Deploy to Staging
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 env:

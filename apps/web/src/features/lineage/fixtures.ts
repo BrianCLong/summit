@@ -5,12 +5,32 @@ export const primaryLineageFixture: LineageGraph = {
   targetType: 'evidence',
   policyTags: ['PII', 'LICENSED'],
   upstream: [
-    { id: 'ingest-1', label: 'S3 Intake', type: 'source', tags: ['checksum:verified'] },
-    { id: 'transform-9', label: 'Entity Extraction v2', type: 'transform', tags: ['xai:explainable'] },
+    {
+      id: 'ingest-1',
+      label: 'S3 Intake',
+      type: 'source',
+      tags: ['checksum:verified'],
+    },
+    {
+      id: 'transform-9',
+      label: 'Entity Extraction v2',
+      type: 'transform',
+      tags: ['xai:explainable'],
+    },
   ],
   downstream: [
-    { id: 'claim-5', label: 'Counterfeit Alert', type: 'claim', tags: ['critical'] },
-    { id: 'case-2', label: 'ACME Procurement Review', type: 'case', tags: ['warrant:required'] },
+    {
+      id: 'claim-5',
+      label: 'Counterfeit Alert',
+      type: 'claim',
+      tags: ['critical'],
+    },
+    {
+      id: 'case-2',
+      label: 'ACME Procurement Review',
+      type: 'case',
+      tags: ['warrant:required'],
+    },
   ],
   mode: 'read-only',
 }
@@ -30,6 +50,7 @@ export const restrictedLineageFixture: LineageGraph = {
   ],
   downstream: [],
   restricted: true,
-  restrictionReason: 'Access requires warrant-based clearance for upstream nodes.',
+  restrictionReason:
+    'Access requires warrant-based clearance for upstream nodes.',
   mode: 'read-only',
 }

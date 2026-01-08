@@ -9,11 +9,11 @@
  * - Burst handling
  */
 
-export * from './strategies/fixed-window.js';
-export * from './strategies/sliding-window.js';
-export * from './strategies/token-bucket.js';
-export * from './strategies/leaky-bucket.js';
-export * from './distributed/redis-limiter.js';
-export * from './policies/rate-limit-policy.js';
-export * from './rate-limiter.js';
-export * from './middleware.js';
+export * from "./strategies/fixed-window.js";
+export * from "./strategies/sliding-window.js";
+export * from "./strategies/token-bucket.js";
+export * from "./strategies/leaky-bucket.js";
+export * from "./distributed/redis-limiter.js";
+export * from "./policies/rate-limit-policy.js";
+export * from "./rate-limiter.js";
+export * from "./middleware.js";

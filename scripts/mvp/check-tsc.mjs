@@ -11,6 +11,8 @@ try {
   run("pnpm typecheck");
 } catch {
   console.log("ℹ️ No `pnpm typecheck` script found or it failed.");
-  console.log("➡️ Add a root script `typecheck` (recommended), or adjust scripts/mvp/check-tsc.mjs");
+  console.log(
+    "➡️ Add a root script `typecheck` (recommended), or adjust scripts/mvp/check-tsc.mjs"
+  );
   process.exit(1);
 }

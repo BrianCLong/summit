@@ -1,12 +1,14 @@
 # Maestro Conductor Execution Fabric
 
 ## High-level summary and guiding principles
+
 - **Mission:** Deliver an auditable, policy-aware execution fabric that decides what runs where, when, and under which constraints, while surviving partial failures and supporting multi-tenant isolation.
 - **First principles:** Declarative intent, deterministic replay, strong idempotency, minimal blast radius via compartmentalization, and continuous policy enforcement (pre-flight, mid-flight, post-flight).
 - **Control vs. data plane:** Central control plane for planning, scheduling, and auditability; distributed cell-local executors for low-latency dispatch and survivability.
 - **Innovation (forward-leaning):** Embed a **causal graph planner** that uses execution provenance + policy outcomes to refine routing and retry decisions via counterfactual simulation ("what-if"), enabling safer adaptive orchestration.
 
 ## Execution model
+
 - **Task:** Smallest unit of work with a single responsibility. Attributes: id, name, intent, input schema, expected outputs, idempotency key/strategy, timeout, retry policy, compensation hook, tracing context.
 - **Job:** Cohesive group of tasks executed on the same runtime/agent with shared resource envelope. Attributes: id, type, priority, placement constraints (regions, clouds, tenancy), QoS SLOs, budget caps, data-sovereignty tags, policy references, execution owner, audit labels.
 - **Workflow:** Directed acyclic (or guarded cyclic) graph of jobs with control-flow (fan-out/fan-in, conditionals), data dependencies, and global policy set. Carries workflow-level idempotency domain, lineage, and blast-radius budget.
@@ -19,7 +21,9 @@
   - Compensation steps are first-class: each task can provide a compensating action that runs in `compensating` state; compensations are also idempotent.
 
 ## Execution state machine (jobs & workflows)
+
 ### States
+
 - `queued`
 - `dispatched` (placement decided, awaiting acceptance)
 - `running`
@@ -32,6 +36,7 @@
 - `cancelled`
 
 ### Transitions and invariants
+
 - `queued` → `dispatched` (placement engine chooses executor; must record policy inputs and decision rationale).
 - `dispatched` → `running` (executor accepts; attach execution lease + heartbeat interval).
 - `running` → `paused` (operator or policy directive; must preserve checkpoint + lease expiry).
@@ -46,12 +51,14 @@
 - Any state → `cancelled` (idempotent cancel; compensations optional based on policy).
 
 **Invariants:**
+
 - Every transition writes an immutable audit event with actor, rationale, policy snapshot, and tracing span linkage.
 - Leases/heartbeats are required in `running`; expiry triggers reclamation and retry decision.
 - Compensation cannot start unless the last committed effect boundary is known.
 - Idempotency keys are stable across retries; compensations use the same key domain.
 
 ## Orchestration architecture
+
 - **Topology:** Hybrid – **central orchestrator** (planning, policy evaluation, global view) plus **cell-local orchestrators** (edge dispatchers) per tenant/region for latency and fault isolation.
 - **Core components:**
   - **Intent API / DSL compiler:** Validates workflow specs, assigns ids/keys, normalizes policies.
@@ -76,6 +83,7 @@
   - Versioned workflows allow pinned executions; schema evolution handled with compatibility checks.
 
 ## Developer & operator experience
+
 - **Definition options:**
   - **TypeScript SDK:** Define workflows as code with typed tasks/jobs and policy attachments.
   - **YAML DSL:** Declarative graph with triggers, schedules, constraints, and compensations.
@@ -90,31 +98,37 @@
   - **Shadow executions:** Run in parallel with read-only credentials to validate changes before promotion.
 
 ## Example workflow definitions (pseudo-code)
+
 ### Deployment pipeline (TypeScript-flavored DSL)
+
 ```ts
-workflow('service-deploy', { tenant: 'acme', idempotencyKey: 'deploy-${commit}' })
-  .trigger(gitPush({ branch: 'main', signedCommitsOnly: true }))
-  .schedule(cron('H/10 * * * *', { blackout: maintenanceWindows }))
-  .job('build', job => job
-    .task('compile', task => task.run('ci/builder').retry({ attempts: 3, backoffMs: 2000 }))
-    .task('scan', task => task.run('ci/scanner').policy('sast-required'))
+workflow("service-deploy", { tenant: "acme", idempotencyKey: "deploy-${commit}" })
+  .trigger(gitPush({ branch: "main", signedCommitsOnly: true }))
+  .schedule(cron("H/10 * * * *", { blackout: maintenanceWindows }))
+  .job("build", (job) =>
+    job
+      .task("compile", (task) => task.run("ci/builder").retry({ attempts: 3, backoffMs: 2000 }))
+      .task("scan", (task) => task.run("ci/scanner").policy("sast-required"))
   )
-  .job('deploy-staging', job => job
-    .needs('build')
-    .task('helm', t => t.run('k8s-deployer').withCompensation('helm-rollback'))
-    .task('smoke', t => t.run('tester').waitForSignal('smoke-pass'))
+  .job("deploy-staging", (job) =>
+    job
+      .needs("build")
+      .task("helm", (t) => t.run("k8s-deployer").withCompensation("helm-rollback"))
+      .task("smoke", (t) => t.run("tester").waitForSignal("smoke-pass"))
   )
-  .job('canary-prod', job => job
-    .needs('deploy-staging')
-    .canary({ percentage: 10, metrics: ['errorRate', 'latency'] })
-    .task('rollout', t => t.run('k8s-deployer').policy('prod-guardrails'))
+  .job("canary-prod", (job) =>
+    job
+      .needs("deploy-staging")
+      .canary({ percentage: 10, metrics: ["errorRate", "latency"] })
+      .task("rollout", (t) => t.run("k8s-deployer").policy("prod-guardrails"))
   )
-  .job('full-prod', job => job.needs('canary-prod').task('rollout', t => t.run('k8s-deployer')))
+  .job("full-prod", (job) => job.needs("canary-prod").task("rollout", (t) => t.run("k8s-deployer")))
   .onFailure(compensateAll())
   .emitProvenance();
 ```
 
 ### Data backfill (YAML DSL)
+
 ```yaml
 workflow: revenue-backfill
 tenant: fin-intel
@@ -134,7 +148,7 @@ jobs:
     needs: [extract]
     tasks:
       - run: dbt-runner
-        args: ["models/finance" ]
+        args: ["models/finance"]
         policy: data-sovereignty-eu
   load:
     needs: [transform]
@@ -146,26 +160,42 @@ jobs:
 ```
 
 ### Cross-system incident response playbook (pseudo-code)
+
 ```ts
-workflow('incident-playbook', { tenant: 'sre', priority: 'critical' })
-  .trigger(signal('pagerduty.incident.open'))
-  .job('triage', j => j
-    .task('gather-context', t => t.run('context-collector'))
-    .task('classify', t => t.run('incident-classifier').waitForSignal('classifier-ready'))
+workflow("incident-playbook", { tenant: "sre", priority: "critical" })
+  .trigger(signal("pagerduty.incident.open"))
+  .job("triage", (j) =>
+    j
+      .task("gather-context", (t) => t.run("context-collector"))
+      .task("classify", (t) => t.run("incident-classifier").waitForSignal("classifier-ready"))
   )
-  .job('contain', j => j
-    .needs('triage')
-    .task('rate-limit', t => t.run('edge-controller').withCompensation('restore-limits'))
-    .task('feature-flag', t => t.run('flagger').policy('change-management'))
+  .job("contain", (j) =>
+    j
+      .needs("triage")
+      .task("rate-limit", (t) => t.run("edge-controller").withCompensation("restore-limits"))
+      .task("feature-flag", (t) => t.run("flagger").policy("change-management"))
   )
-  .job('eradicate', j => j.needs('contain').task('patch', t => t.run('fleet-patcher').retry({ attempts: 2 })))
-  .job('recover', j => j.needs('eradicate').task('scale', t => t.run('autoscaler')).task('verify', t => t.run('synthetic-checks')))
-  .job('postmortem', j => j.needs('recover').task('report', t => t.run('lm-report')).waitForSignal('postmortem-approved'))
-  .onFailure(selectiveCompensation(['rate-limit', 'feature-flag']))
-  .onSignal('anomaly-spike', j => j.pauseAll().policyRecheck());
+  .job("eradicate", (j) =>
+    j.needs("contain").task("patch", (t) => t.run("fleet-patcher").retry({ attempts: 2 }))
+  )
+  .job("recover", (j) =>
+    j
+      .needs("eradicate")
+      .task("scale", (t) => t.run("autoscaler"))
+      .task("verify", (t) => t.run("synthetic-checks"))
+  )
+  .job("postmortem", (j) =>
+    j
+      .needs("recover")
+      .task("report", (t) => t.run("lm-report"))
+      .waitForSignal("postmortem-approved")
+  )
+  .onFailure(selectiveCompensation(["rate-limit", "feature-flag"]))
+  .onSignal("anomaly-spike", (j) => j.pauseAll().policyRecheck());
 ```
 
 ## Production readiness checklist (MC)
+
 - Workflow spec validated (schema + lint) and committed with version pinning; idempotency keys defined for every task.
 - Policies attached and reviewed: admission, runtime, post-flight obligations; approvals configured for high-risk steps.
 - Placement constraints and blast-radius budgets set; quotas verified per tenant.
@@ -178,11 +208,13 @@ workflow('incident-playbook', { tenant: 'sre', priority: 'critical' })
 - Runbooks: rollback and incident runbooks linked; ownership/contact metadata attached; on-call notified for critical schedules.
 
 ## Auditability and observability guarantees
+
 - Every state transition emits an event with actor, rationale, policy snapshot, and trace context to the execution ledger.
 - Deterministic replay reconstructs workflow graphs, policy decisions, and placement reasoning for any attempt.
 - Provenance graph links tasks → jobs → workflows → triggers → signals to support forensic analysis and RCA.
 
 ## Future-ready enhancements
+
 - **Causal graph planner (state-of-the-art):** Leverages historical provenance to predict policy breaches and select safer routes; runs counterfactual simulations in dry-run mode before high-risk transitions.
 - **Adaptive SLO broker:** Negotiates SLOs dynamically between tenants and executors, trading cost vs. latency with explicit budgets.
 - **Trust-aware routing:** Uses confidential computing attestation and data-sensitivity labels to select trusted runtimes automatically.

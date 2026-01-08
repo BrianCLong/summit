@@ -9,13 +9,8 @@
  * - Technical attacks on registration systems
  */
 
-import { ThreatDetector } from '../base/index.js';
-import type {
-  RawSignal,
-  ElectionContext,
-  ElectionThreatSignal,
-  SeverityLevel,
-} from '../types.js';
+import { ThreatDetector } from "../base/index.js";
+import type { RawSignal, ElectionContext, ElectionThreatSignal, SeverityLevel } from "../types.js";
 
 export interface SuppressionIndicator {
   type: SuppressionType;
@@ -27,24 +22,24 @@ export interface SuppressionIndicator {
 }
 
 export type SuppressionType =
-  | 'PROCEDURAL_DISINFORMATION'
-  | 'POLLING_LOCATION_CONFUSION'
-  | 'REGISTRATION_PURGE_TARGETING'
-  | 'QUEUE_MANIPULATION'
-  | 'ID_REQUIREMENT_CONFUSION'
-  | 'INTIMIDATION_CAMPAIGN'
-  | 'TRANSPORTATION_DENIAL'
-  | 'PROVISIONAL_BALLOT_TARGETING';
+  | "PROCEDURAL_DISINFORMATION"
+  | "POLLING_LOCATION_CONFUSION"
+  | "REGISTRATION_PURGE_TARGETING"
+  | "QUEUE_MANIPULATION"
+  | "ID_REQUIREMENT_CONFUSION"
+  | "INTIMIDATION_CAMPAIGN"
+  | "TRANSPORTATION_DENIAL"
+  | "PROVISIONAL_BALLOT_TARGETING";
 
 export type SuppressionVector =
-  | 'SOCIAL_MEDIA'
-  | 'ROBOCALL'
-  | 'TEXT_MESSAGE'
-  | 'DOOR_TO_DOOR'
-  | 'FLYER_MAILER'
-  | 'PHYSICAL_PRESENCE'
-  | 'LEGAL_PROCEDURAL'
-  | 'INFRASTRUCTURE';
+  | "SOCIAL_MEDIA"
+  | "ROBOCALL"
+  | "TEXT_MESSAGE"
+  | "DOOR_TO_DOOR"
+  | "FLYER_MAILER"
+  | "PHYSICAL_PRESENCE"
+  | "LEGAL_PROCEDURAL"
+  | "INFRASTRUCTURE";
 
 export interface SuppressionEvidence {
   content: string;
@@ -66,10 +61,7 @@ export class VoterSuppressionDetector extends ThreatDetector {
     this.languageModels = new SuppressionLanguageDetector();
   }
 
-  async analyze(
-    signals: RawSignal[],
-    context: ElectionContext
-  ): Promise<ElectionThreatSignal[]> {
+  async analyze(signals: RawSignal[], context: ElectionContext): Promise<ElectionThreatSignal[]> {
     const threats: ElectionThreatSignal[] = [];
 
     // Detect procedural disinformation
@@ -105,12 +97,7 @@ export class VoterSuppressionDetector extends ThreatDetector {
     for (const signal of proceduralSignals) {
       const targeting = this.analyzeTargeting(signal);
       if (targeting.isTargeted) {
-        threats.push(this.createThreat(
-          'VOTER_SUPPRESSION',
-          signal,
-          targeting,
-          context
-        ));
+        threats.push(this.createThreat("VOTER_SUPPRESSION", signal, targeting, context));
       }
     }
 
@@ -153,15 +140,15 @@ export class VoterSuppressionDetector extends ThreatDetector {
       if (pattern.disparateImpact > 0.3) {
         threats.push({
           id: crypto.randomUUID(),
-          type: 'VOTER_SUPPRESSION',
+          type: "VOTER_SUPPRESSION",
           confidence: pattern.confidence,
           severity: this.calculateSeverity(pattern.disparateImpact),
-          vectors: ['SOCIAL_MEDIA'],
+          vectors: ["SOCIAL_MEDIA"],
           temporalContext: {
             phase: context.currentPhase,
             daysToElection: context.daysToElection,
             timeWindow: { start: new Date(), end: new Date() },
-            trendDirection: 'STABLE',
+            trendDirection: "STABLE",
             velocity: 0,
           },
           geospatialContext: {
@@ -178,17 +165,17 @@ export class VoterSuppressionDetector extends ThreatDetector {
           attribution: {
             primaryActor: null,
             confidence: 0,
-            methodology: 'BEHAVIORAL_ANALYSIS',
+            methodology: "BEHAVIORAL_ANALYSIS",
             indicators: [],
             alternativeHypotheses: [],
           },
           evidence: [],
           mitigationRecommendations: [
             {
-              action: 'Deploy targeted counter-messaging to affected demographics',
+              action: "Deploy targeted counter-messaging to affected demographics",
               priority: 1,
-              timeframe: '24 hours',
-              stakeholders: ['Election officials', 'Community organizations'],
+              timeframe: "24 hours",
+              stakeholders: ["Election officials", "Community organizations"],
               effectivenessEstimate: 0.6,
               riskOfEscalation: 0.1,
             },
@@ -221,7 +208,7 @@ export class VoterSuppressionDetector extends ThreatDetector {
   }
 
   private createThreat(
-    type: 'VOTER_SUPPRESSION',
+    type: "VOTER_SUPPRESSION",
     signal: RawSignal,
     targeting: TargetingAnalysis,
     context: ElectionContext
@@ -230,13 +217,13 @@ export class VoterSuppressionDetector extends ThreatDetector {
       id: crypto.randomUUID(),
       type,
       confidence: targeting.confidence,
-      severity: 'MEDIUM',
-      vectors: ['SOCIAL_MEDIA'],
+      severity: "MEDIUM",
+      vectors: ["SOCIAL_MEDIA"],
       temporalContext: {
         phase: context.currentPhase,
         daysToElection: context.daysToElection,
         timeWindow: { start: new Date(), end: new Date() },
-        trendDirection: 'STABLE',
+        trendDirection: "STABLE",
         velocity: 0,
       },
       geospatialContext: {
@@ -249,7 +236,7 @@ export class VoterSuppressionDetector extends ThreatDetector {
       attribution: {
         primaryActor: null,
         confidence: 0,
-        methodology: 'BEHAVIORAL_ANALYSIS',
+        methodology: "BEHAVIORAL_ANALYSIS",
         indicators: [],
         alternativeHypotheses: [],
       },
@@ -262,7 +249,12 @@ export class VoterSuppressionDetector extends ThreatDetector {
     signals: RawSignal[],
     context: ElectionContext
   ): ElectionThreatSignal {
-    return this.createThreat('VOTER_SUPPRESSION', signals[0], { isTargeted: true, targetGroups: [], confidence: 0.8 }, context);
+    return this.createThreat(
+      "VOTER_SUPPRESSION",
+      signals[0],
+      { isTargeted: true, targetGroups: [], confidence: 0.8 },
+      context
+    );
   }
 
   private analyzeDemographicPatterns(signals: RawSignal[]): DemographicPattern[] {
@@ -270,10 +262,16 @@ export class VoterSuppressionDetector extends ThreatDetector {
   }
 
   private calculateSeverity(impact: number): SeverityLevel {
-    if (impact >= 0.7) {return 'CRITICAL';}
-    if (impact >= 0.5) {return 'HIGH';}
-    if (impact >= 0.3) {return 'MEDIUM';}
-    return 'LOW';
+    if (impact >= 0.7) {
+      return "CRITICAL";
+    }
+    if (impact >= 0.5) {
+      return "HIGH";
+    }
+    if (impact >= 0.3) {
+      return "MEDIUM";
+    }
+    return "LOW";
   }
 }
 

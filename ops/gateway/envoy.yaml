@@ -9,15 +9,15 @@ static_resources:
         - filters:
             - name: envoy.filters.network.http_connection_manager
               typed_config:
-                '@type': type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
                 stat_prefix: ingress_http
                 route_config:
                   name: local_route
                   virtual_hosts:
                     - name: local_service
-                      domains: ['*']
+                      domains: ["*"]
                       routes:
-                        - match: { prefix: '/' }
+                        - match: { prefix: "/" }
                           route: { cluster: gateway }
                 http_filters:
                   - name: envoy.filters.http.router

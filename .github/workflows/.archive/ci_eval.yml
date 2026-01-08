@@ -2,13 +2,13 @@ name: CI Eval
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'src/intelgraph/eval/**'
-      - 'tests/test_eval_registry.py'
-      - 'tests/test_eval_runner_jsonl.py'
+      - "src/intelgraph/eval/**"
+      - "tests/test_eval_registry.py"
+      - "tests/test_eval_runner_jsonl.py"
 
 jobs:
   test-eval:

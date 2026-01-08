@@ -3,13 +3,7 @@
   "$id": "https://intelgraph.com/schemas/release/release-manifest.schema.json",
   "title": "Release Manifest",
   "type": "object",
-  "required": [
-    "schemaVersion",
-    "tag",
-    "sha",
-    "generated_at",
-    "artifacts"
-  ],
+  "required": ["schemaVersion", "tag", "sha", "generated_at", "artifacts"],
   "additionalProperties": true,
   "properties": {
     "schemaVersion": {

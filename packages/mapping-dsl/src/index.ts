@@ -1,5 +1,5 @@
-import Ajv, { ErrorObject } from 'ajv';
-import schema from './schema.json';
+import Ajv, { ErrorObject } from "ajv";
+import schema from "./schema.json";
 
 export interface ValidationResult {
   valid: boolean;

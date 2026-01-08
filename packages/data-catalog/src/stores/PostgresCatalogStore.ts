@@ -3,7 +3,7 @@
  * Database layer for catalog operations
  */
 
-import { Pool, QueryResult } from 'pg';
+import { Pool, QueryResult } from "pg";
 import {
   AssetMetadata,
   AssetType,
@@ -14,8 +14,8 @@ import {
   RelationshipType,
   SearchFacet,
   FilterOperator,
-} from '../types/catalog.js';
-import { ICatalogStore } from '../services/CatalogService.js';
+} from "../types/catalog.js";
+import { ICatalogStore } from "../services/CatalogService.js";
 
 export class PostgresCatalogStore implements ICatalogStore {
   constructor(private pool: Pool) {}
@@ -24,10 +24,7 @@ export class PostgresCatalogStore implements ICatalogStore {
    * Get asset by ID
    */
   async getAsset(id: string): Promise<AssetMetadata | null> {
-    const result = await this.pool.query(
-      'SELECT * FROM catalog_assets WHERE id = $1',
-      [id]
-    );
+    const result = await this.pool.query("SELECT * FROM catalog_assets WHERE id = $1", [id]);
 
     if (result.rows.length === 0) {
       return null;
@@ -103,7 +100,7 @@ export class PostgresCatalogStore implements ICatalogStore {
    * Update asset
    */
   async updateAsset(id: string, updates: Partial<AssetMetadata>): Promise<AssetMetadata> {
-    const setClauses: string[] = ['updated_at = CURRENT_TIMESTAMP'];
+    const setClauses: string[] = ["updated_at = CURRENT_TIMESTAMP"];
     const values: any[] = [id];
     let paramIndex = 2;
 
@@ -159,7 +156,7 @@ export class PostgresCatalogStore implements ICatalogStore {
 
     const query = `
       UPDATE catalog_assets
-      SET ${setClauses.join(', ')}
+      SET ${setClauses.join(", ")}
       WHERE id = $1
       RETURNING *
     `;
@@ -176,7 +173,7 @@ export class PostgresCatalogStore implements ICatalogStore {
    * Delete asset
    */
   async deleteAsset(id: string): Promise<void> {
-    await this.pool.query('DELETE FROM catalog_assets WHERE id = $1', [id]);
+    await this.pool.query("DELETE FROM catalog_assets WHERE id = $1", [id]);
   }
 
   /**
@@ -204,12 +201,13 @@ export class PostgresCatalogStore implements ICatalogStore {
       }
     }
 
-    const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+    const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
 
     // Build ORDER BY clause
-    const orderBy = request.sort.length > 0
-      ? `ORDER BY ${request.sort.map(s => `${this.mapFieldToColumn(s.field)} ${s.direction}`).join(', ')}`
-      : 'ORDER BY updated_at DESC';
+    const orderBy =
+      request.sort.length > 0
+        ? `ORDER BY ${request.sort.map((s) => `${this.mapFieldToColumn(s.field)} ${s.direction}`).join(", ")}`
+        : "ORDER BY updated_at DESC";
 
     // Main query
     const query = `
@@ -236,7 +234,7 @@ export class PostgresCatalogStore implements ICatalogStore {
     const facets = await this.getFacets(request, whereClauses, params.slice(0, params.length - 2));
 
     return {
-      results: result.rows.map(row => this.mapRowToAsset(row)),
+      results: result.rows.map((row) => this.mapRowToAsset(row)),
       facets,
       total,
       offset: request.offset,
@@ -249,7 +247,7 @@ export class PostgresCatalogStore implements ICatalogStore {
    * List assets
    */
   async listAssets(type?: AssetType, status?: AssetStatus): Promise<AssetMetadata[]> {
-    let query = 'SELECT * FROM catalog_assets';
+    let query = "SELECT * FROM catalog_assets";
     const params: any[] = [];
     const conditions: string[] = [];
 
@@ -264,13 +262,13 @@ export class PostgresCatalogStore implements ICatalogStore {
     }
 
     if (conditions.length > 0) {
-      query += ` WHERE ${conditions.join(' AND ')}`;
+      query += ` WHERE ${conditions.join(" AND ")}`;
     }
 
-    query += ' ORDER BY updated_at DESC';
+    query += " ORDER BY updated_at DESC";
 
     const result = await this.pool.query(query, params);
-    return result.rows.map(row => this.mapRowToAsset(row));
+    return result.rows.map((row) => this.mapRowToAsset(row));
   }
 
   /**
@@ -284,7 +282,7 @@ export class PostgresCatalogStore implements ICatalogStore {
     `;
 
     const result = await this.pool.query(query, [assetId]);
-    return result.rows.map(row => this.mapRowToRelationship(row));
+    return result.rows.map((row) => this.mapRowToRelationship(row));
   }
 
   /**
@@ -314,7 +312,10 @@ export class PostgresCatalogStore implements ICatalogStore {
   /**
    * Build filter clause for SQL
    */
-  private buildFilterClause(filter: any, startIndex: number): { clause: string; params: any[] } | null {
+  private buildFilterClause(
+    filter: any,
+    startIndex: number
+  ): { clause: string; params: any[] } | null {
     const column = this.mapFieldToColumn(filter.field);
     const params: any[] = [];
 
@@ -354,9 +355,13 @@ export class PostgresCatalogStore implements ICatalogStore {
   /**
    * Get facets for search
    */
-  private async getFacets(request: SearchRequest, whereClauses: string[], params: any[]): Promise<SearchFacet[]> {
+  private async getFacets(
+    request: SearchRequest,
+    whereClauses: string[],
+    params: any[]
+  ): Promise<SearchFacet[]> {
     const facets: SearchFacet[] = [];
-    const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+    const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
 
     for (const facetField of request.facets) {
       const column = this.mapFieldToColumn(facetField);
@@ -374,7 +379,7 @@ export class PostgresCatalogStore implements ICatalogStore {
 
       facets.push({
         field: facetField,
-        values: result.rows.map(row => ({
+        values: result.rows.map((row) => ({
           value: row.value,
           count: parseInt(row.count),
           selected: false,
@@ -390,14 +395,14 @@ export class PostgresCatalogStore implements ICatalogStore {
    */
   private mapFieldToColumn(field: string): string {
     const mapping: Record<string, string> = {
-      type: 'type',
-      status: 'status',
-      owner: 'owner',
-      domain: 'domain',
-      classification: 'classification',
-      certificationLevel: 'certification_level',
-      createdAt: 'created_at',
-      updatedAt: 'updated_at',
+      type: "type",
+      status: "status",
+      owner: "owner",
+      domain: "domain",
+      classification: "classification",
+      certificationLevel: "certification_level",
+      createdAt: "created_at",
+      updatedAt: "updated_at",
     };
 
     return mapping[field] || field;

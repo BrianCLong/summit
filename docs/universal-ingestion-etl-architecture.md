@@ -40,11 +40,13 @@ The Universal Data Ingestion + ETL Assistant provides a comprehensive, license-a
 **Status**: ✅ Already exists with comprehensive types and base classes
 
 **Extensions Needed**:
+
 - `CsvFileConnector`: CSV file ingestion
 - `RestPullConnector`: REST API polling
 - `S3BucketConnector`: S3/object storage ingestion
 
 **Existing Patterns**:
+
 - `BaseConnector`: Abstract base with lifecycle management
 - `PullConnector`: Pull-based ingestion
 - `ConnectorManifest`: Metadata and capabilities
@@ -55,6 +57,7 @@ The Universal Data Ingestion + ETL Assistant provides a comprehensive, license-a
 **Status**: 🆕 New package
 
 **Responsibilities**:
+
 1. **Schema Inference**
    - Analyze sample records
    - Detect field types and structure
@@ -73,6 +76,7 @@ The Universal Data Ingestion + ETL Assistant provides a comprehensive, license-a
    - Confidence scoring
 
 **Interfaces**:
+
 ```typescript
 interface SchemaInferenceResult {
   entityType: string;
@@ -83,7 +87,7 @@ interface SchemaInferenceResult {
 
 interface PIIDetectionResult {
   piiFields: PIIField[];
-  riskLevel: 'none' | 'low' | 'medium' | 'high' | 'critical';
+  riskLevel: "none" | "low" | "medium" | "high" | "critical";
   recommendations: RedactionRecommendation[];
 }
 
@@ -100,12 +104,14 @@ interface FieldMapping {
 **Status**: ✅ Already exists with comprehensive compliance checking
 
 **Extensions Needed**:
+
 1. **Policy Engine Enhancement**
    - Operation-based decisions (`INGEST`, `EXPORT`, `SHARE`)
    - Context-aware evaluation
    - Structured `PolicyDecision` responses
 
 **Existing Features**:
+
 - License templates (CC-BY, Commercial, Research-Only)
 - Compliance checking (`/compliance/check`)
 - DPIA assessments
@@ -113,6 +119,7 @@ interface FieldMapping {
 - TOS enforcement
 
 **New Interfaces**:
+
 ```typescript
 interface PolicyDecision {
   allow: boolean;
@@ -121,7 +128,7 @@ interface PolicyDecision {
   context?: Record<string, unknown>;
 }
 
-type OperationType = 'INGEST' | 'EXPORT' | 'SHARE' | 'TRANSFORM';
+type OperationType = "INGEST" | "EXPORT" | "SHARE" | "TRANSFORM";
 ```
 
 ### 2.4 Universal Ingestion Service (services/universal-ingestion)
@@ -226,12 +233,12 @@ User → POST /exports/check
 ```typescript
 // Core canonical entities
 type CanonicalEntityType =
-  | 'Person'
-  | 'Organization'
-  | 'Location'
-  | 'Event'
-  | 'Document'
-  | 'Indicator';
+  | "Person"
+  | "Organization"
+  | "Location"
+  | "Event"
+  | "Document"
+  | "Indicator";
 
 interface CanonicalEntity {
   type: CanonicalEntityType;
@@ -260,6 +267,7 @@ interface CanonicalEntity {
 ### 5.2 Field Name Heuristics
 
 Suspicious field names:
+
 - `email`, `mail`, `e_mail`
 - `ssn`, `social_security`, `national_id`, `passport`
 - `phone`, `mobile`, `tel`, `telephone`
@@ -278,6 +286,7 @@ Suspicious field names:
 ### 6.1 Example Licenses
 
 **Open Data License**:
+
 ```json
 {
   "licenseId": "open-data-cc-by",
@@ -291,6 +300,7 @@ Suspicious field names:
 ```
 
 **Restricted Partner License**:
+
 ```json
 {
   "licenseId": "partner-internal-only",
@@ -316,61 +326,66 @@ function evaluatePolicy(
   const license = getLicense(licenseId);
 
   // INGEST: Generally allowed unless explicitly forbidden
-  if (operation === 'INGEST') {
-    return { allow: true, reason: 'Ingestion permitted', licenseId };
+  if (operation === "INGEST") {
+    return { allow: true, reason: "Ingestion permitted", licenseId };
   }
 
   // EXPORT: Check export_allowed + audience restrictions
-  if (operation === 'EXPORT') {
+  if (operation === "EXPORT") {
     if (!license.restrictions.export_allowed) {
       return {
         allow: false,
-        reason: 'Export not permitted under license terms',
-        licenseId
+        reason: "Export not permitted under license terms",
+        licenseId,
       };
     }
 
-    if (license.restrictions.internal_only && context?.audience !== 'internal') {
+    if (license.restrictions.internal_only && context?.audience !== "internal") {
       return {
         allow: false,
-        reason: 'License restricts use to internal audience only',
-        licenseId
+        reason: "License restricts use to internal audience only",
+        licenseId,
       };
     }
   }
 
   // SHARE: Similar checks with additional jurisdiction validation
-  if (operation === 'SHARE') {
+  if (operation === "SHARE") {
     // Check geographic restrictions...
   }
 
-  return { allow: true, reason: 'Operation complies with license', licenseId };
+  return { allow: true, reason: "Operation complies with license", licenseId };
 }
 ```
 
 ## 7. Implementation Plan
 
 ### Phase 1: Connectors (Completed after this task)
+
 1. ✅ `CsvFileConnector` - Read CSV from filesystem/stream
 2. ✅ `RestPullConnector` - Poll REST APIs with pagination
 3. ✅ `S3BucketConnector` - Read from S3/object storage
 
 ### Phase 2: ETL Assistant (Completed after this task)
+
 1. ✅ Schema inference module
 2. ✅ PII detection module
 3. ✅ Canonical entity mapper
 
 ### Phase 3: Policy Engine (Completed after this task)
+
 1. ✅ Enhance license-registry with policy engine
 2. ✅ Add example licenses
 3. ✅ Context-aware evaluation
 
 ### Phase 4: Ingestion Service (Completed after this task)
+
 1. ✅ Fastify service setup
 2. ✅ API endpoints
 3. ✅ Event bus abstraction
 
 ### Phase 5: Testing (Completed after this task)
+
 1. ✅ Connector tests
 2. ✅ ETL tests
 3. ✅ Policy tests
@@ -379,22 +394,26 @@ function evaluatePolicy(
 ## 8. Non-Functional Requirements
 
 ### 8.1 Strong Typing
+
 - All interfaces defined with TypeScript
 - No `any` types (strict null checks where appropriate)
 - Zod schemas for runtime validation
 
 ### 8.2 Dependency Injection
+
 - PolicyEngine injectable
 - LicenseRegistry injectable
 - IngestEventBus injectable
 - Connectors factory-based
 
 ### 8.3 Configuration & Secrets
+
 - Environment variables via `.env`
 - Connector credentials in secrets store
 - Kafka/bus endpoints configurable
 
 ### 8.4 Observability
+
 - Structured logging (Pino)
 - Metrics (OpenTelemetry compatible)
 - Health checks
@@ -403,16 +422,19 @@ function evaluatePolicy(
 ## 9. Integration with Existing Platform
 
 ### 9.1 Connector SDK Integration
+
 - Extend existing `BaseConnector`, `PullConnector` classes
 - Use existing `ConnectorManifest`, `ConnectorContext` types
 - Leverage rate limiting, metrics, logging infrastructure
 
 ### 9.2 License Registry Integration
+
 - Use existing `/compliance/check` endpoint
 - Leverage DPIA assessment workflow
 - Extend with policy engine module
 
 ### 9.3 Event Bus Integration
+
 - Abstract interface: `IngestEventBus`
 - Default in-memory implementation
 - Kafka adapter for production (future)
@@ -460,29 +482,34 @@ summit/
 ## 11. Success Criteria
 
 ✅ **Connector Framework**:
+
 - Three working connectors (CSV, REST, S3)
 - Unit tests with >80% coverage
 - Sample connector configurations
 
 ✅ **ETL Assistant**:
+
 - Schema inference with entity type detection
 - PII detection with configurable patterns
 - Canonical mapping with confidence scores
 - Test coverage >80%
 
 ✅ **Policy Engine**:
+
 - Operation-based policy decisions
 - Context-aware evaluation
 - Integration with license registry
 - Test coverage >80%
 
 ✅ **Ingestion Service**:
+
 - All HTTP endpoints functional
 - Event bus abstraction working
 - Integration with connectors + ETL + policy
 - End-to-end tests passing
 
 ✅ **Documentation**:
+
 - Architecture doc (this file)
 - API documentation
 - Connector development guide

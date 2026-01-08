@@ -15,7 +15,7 @@ export interface AmplificationNetwork {
 
 export interface NetworkNode {
   nodeId: string;
-  type: 'source' | 'amplifier' | 'target' | 'bridge';
+  type: "source" | "amplifier" | "target" | "bridge";
   connections: string[];
   activity: NodeActivity;
 }
@@ -80,10 +80,7 @@ export class AmplificationDetector {
     return graph;
   }
 
-  private identifyCentralNodes(
-    nodes: NetworkNode[],
-    graph: Map<string, Set<string>>
-  ): string[] {
+  private identifyCentralNodes(nodes: NetworkNode[], graph: Map<string, Set<string>>): string[] {
     const centralNodes: string[] = [];
 
     // Calculate centrality metrics
@@ -133,7 +130,7 @@ export class AmplificationDetector {
         if (visited.has(connectedId)) continue;
 
         visited.add(connectedId);
-        const node = nodes.find(n => n.nodeId === connectedId);
+        const node = nodes.find((n) => n.nodeId === connectedId);
 
         if (!node) continue;
 
@@ -147,18 +144,11 @@ export class AmplificationDetector {
       }
     }
 
-    const amplificationFactor = this.calculateAmplificationFactor(
-      centralId,
-      amplifiers,
-      nodes
-    );
+    const amplificationFactor = this.calculateAmplificationFactor(centralId, amplifiers, nodes);
 
     const reach = this.calculateReach(centralId, amplifiers, nodes);
 
-    const coordination = this.calculateCoordination(
-      [centralId, ...amplifiers],
-      graph
-    );
+    const coordination = this.calculateCoordination([centralId, ...amplifiers], graph);
 
     return {
       networkId: this.generateNetworkId(centralId),
@@ -182,13 +172,13 @@ export class AmplificationDetector {
     amplifiers: string[],
     nodes: NetworkNode[]
   ): number {
-    const centralNode = nodes.find(n => n.nodeId === centralId);
+    const centralNode = nodes.find((n) => n.nodeId === centralId);
     if (!centralNode) return 0;
 
     let totalAmplification = 0;
 
     for (const amplifierId of amplifiers) {
-      const amplifier = nodes.find(n => n.nodeId === amplifierId);
+      const amplifier = nodes.find((n) => n.nodeId === amplifierId);
       if (amplifier) {
         totalAmplification += amplifier.activity.followers;
       }
@@ -198,16 +188,12 @@ export class AmplificationDetector {
     return totalAmplification / Math.max(originalReach, 1);
   }
 
-  private calculateReach(
-    centralId: string,
-    amplifiers: string[],
-    nodes: NetworkNode[]
-  ): number {
-    const centralNode = nodes.find(n => n.nodeId === centralId);
+  private calculateReach(centralId: string, amplifiers: string[], nodes: NetworkNode[]): number {
+    const centralNode = nodes.find((n) => n.nodeId === centralId);
     let totalReach = centralNode?.activity.followers || 0;
 
     for (const amplifierId of amplifiers) {
-      const amplifier = nodes.find(n => n.nodeId === amplifierId);
+      const amplifier = nodes.find((n) => n.nodeId === amplifierId);
       if (amplifier) {
         totalReach += amplifier.activity.followers;
       }
@@ -216,10 +202,7 @@ export class AmplificationDetector {
     return totalReach;
   }
 
-  private calculateCoordination(
-    nodeIds: string[],
-    graph: Map<string, Set<string>>
-  ): number {
+  private calculateCoordination(nodeIds: string[], graph: Map<string, Set<string>>): number {
     if (nodeIds.length < 2) return 0;
 
     let connections = 0;
@@ -242,7 +225,7 @@ export class AmplificationDetector {
     // Simplified chain tracing
     const chain: ChainLink[] = [];
 
-    const centralNode = nodes.find(n => n.nodeId === centralId);
+    const centralNode = nodes.find((n) => n.nodeId === centralId);
     if (centralNode) {
       chain.push({
         nodeId: centralId,
@@ -253,7 +236,7 @@ export class AmplificationDetector {
 
       // Add first-level amplifiers
       for (const connection of centralNode.connections) {
-        const amplifier = nodes.find(n => n.nodeId === connection);
+        const amplifier = nodes.find((n) => n.nodeId === connection);
         if (amplifier && this.isAmplifier(amplifier)) {
           chain.push({
             nodeId: connection,
@@ -270,7 +253,7 @@ export class AmplificationDetector {
       origin: centralId,
       links: chain,
       totalReach: chain.reduce((sum, link) => sum + link.reach, 0),
-      depth: Math.max(...chain.map(link => link.level)) + 1,
+      depth: Math.max(...chain.map((link) => link.level)) + 1,
     };
   }
 

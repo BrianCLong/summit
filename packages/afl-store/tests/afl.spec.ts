@@ -1,14 +1,14 @@
-import { AFLStore } from '../src';
-import { randomUUID } from 'crypto';
+import { AFLStore } from "../src";
+import { randomUUID } from "crypto";
 
-test('put and get fingerprint', async () => {
-  const store = new AFLStore('redis://localhost:6381'); // test redis
+test("put and get fingerprint", async () => {
+  const store = new AFLStore("redis://localhost:6381"); // test redis
   const fp = {
     contentHash: randomUUID(),
-    formatSig: 'mime:1000:0:NOEXIF',
-    timingSig: '12h:0',
-    xformSig: 'nokpw',
-    route: 'tip',
+    formatSig: "mime:1000:0:NOEXIF",
+    timingSig: "12h:0",
+    xformSig: "nokpw",
+    route: "tip",
   };
   await store.put(fp as any);
   const got = await store.getBySignature({
@@ -16,6 +16,6 @@ test('put and get fingerprint', async () => {
     timingSig: fp.timingSig,
     xformSig: fp.xformSig,
   });
-  expect(got?.route).toBe('tip');
+  expect(got?.route).toBe("tip");
   await store.close();
 });

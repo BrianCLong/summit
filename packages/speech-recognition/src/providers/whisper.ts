@@ -1,8 +1,8 @@
-import type { AudioBuffer } from '@intelgraph/audio-processing';
-import { BaseSTTProvider } from './base.js';
-import type { STTConfig, TranscriptionResult, WhisperModel } from '../types.js';
-import { STTProvider, SUPPORTED_LANGUAGES } from '../types.js';
-import axios from 'axios';
+import type { AudioBuffer } from "@intelgraph/audio-processing";
+import { BaseSTTProvider } from "./base.js";
+import type { STTConfig, TranscriptionResult, WhisperModel } from "../types.js";
+import { STTProvider, SUPPORTED_LANGUAGES } from "../types.js";
+import axios from "axios";
 
 /**
  * Whisper STT Provider
@@ -16,12 +16,12 @@ export class WhisperProvider extends BaseSTTProvider {
   constructor(config: { apiKey?: string; endpoint?: string; model?: WhisperModel } = {}) {
     super(config);
     this.apiKey = config.apiKey || process.env.OPENAI_API_KEY;
-    this.endpoint = config.endpoint || 'https://api.openai.com/v1/audio/transcriptions';
-    this.model = config.model || 'large-v3' as WhisperModel;
+    this.endpoint = config.endpoint || "https://api.openai.com/v1/audio/transcriptions";
+    this.model = config.model || ("large-v3" as WhisperModel);
   }
 
   getName(): string {
-    return 'Whisper';
+    return "Whisper";
   }
 
   async transcribe(audio: AudioBuffer, config: STTConfig): Promise<TranscriptionResult> {
@@ -31,26 +31,26 @@ export class WhisperProvider extends BaseSTTProvider {
     try {
       // Prepare form data
       const formData = new FormData();
-      const blob = new Blob([audio.data], { type: 'audio/wav' });
-      formData.append('file', blob, 'audio.wav');
-      formData.append('model', this.model);
-      formData.append('language', mergedConfig.language.split('-')[0]); // Whisper uses 2-letter codes
-      formData.append('response_format', 'verbose_json');
+      const blob = new Blob([audio.data], { type: "audio/wav" });
+      formData.append("file", blob, "audio.wav");
+      formData.append("model", this.model);
+      formData.append("language", mergedConfig.language.split("-")[0]); // Whisper uses 2-letter codes
+      formData.append("response_format", "verbose_json");
 
       if (mergedConfig.enableWordTimestamps) {
-        formData.append('timestamp_granularities', 'word');
+        formData.append("timestamp_granularities", "word");
       }
 
       if (mergedConfig.temperature !== undefined) {
-        formData.append('temperature', String(mergedConfig.temperature));
+        formData.append("temperature", String(mergedConfig.temperature));
       }
 
       // Make API request
       const response = await axios.post(this.endpoint, formData, {
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'multipart/form-data'
-        }
+          Authorization: `Bearer ${this.apiKey}`,
+          "Content-Type": "multipart/form-data",
+        },
       });
 
       // Transform Whisper response to our format
@@ -80,8 +80,8 @@ export class WhisperProvider extends BaseSTTProvider {
         word: word.word,
         startTime: word.start,
         endTime: word.end,
-        confidence: word.probability || 1.0
-      }))
+        confidence: word.probability || 1.0,
+      })),
     }));
 
     return {
@@ -94,8 +94,8 @@ export class WhisperProvider extends BaseSTTProvider {
       model: this.model,
       metadata: {
         task: response.task,
-        temperature: response.temperature
-      }
+        temperature: response.temperature,
+      },
     };
   }
 }

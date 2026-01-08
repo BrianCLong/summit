@@ -3,7 +3,7 @@ export interface AuditLogEntry {
   readonly action: string;
   readonly entityId?: string;
   readonly payload?: unknown;
-  readonly status: 'success' | 'error';
+  readonly status: "success" | "error";
   readonly message?: string;
 }
 
@@ -33,8 +33,8 @@ export class ConsoleAuditLogger implements AuditLogger {
 
 export const createAuditEntry = (
   action: string,
-  status: AuditLogEntry['status'],
-  details: Omit<AuditLogEntry, 'action' | 'status' | 'timestamp'> = {},
+  status: AuditLogEntry["status"],
+  details: Omit<AuditLogEntry, "action" | "status" | "timestamp"> = {}
 ): AuditLogEntry => ({
   timestamp: new Date().toISOString(),
   action,

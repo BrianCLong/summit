@@ -6,6 +6,7 @@ This pack provides the backbone for CompanyOS telemetry, feedback, and experimen
 - **Experiment Runbook Template** (`EXPERIMENT_RUNBOOK_TEMPLATE.md`): repeatable steps to instrument, launch, monitor, and read out experiments.
 
 Usage guidance:
+
 - Reference the spec before designing new features to define hypotheses, required events, and feedback prompts.
 - Copy the runbook template into your project’s docs and complete it before launch; link to your feature flag and dashboards.
 - Keep schemas versioned and enforce data contracts in CI to maintain data quality and privacy.

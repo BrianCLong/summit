@@ -3,8 +3,8 @@
  * clustering algorithm for geospatial data
  */
 
-import { GeoPoint, SpatialCluster } from '@intelgraph/geospatial';
-import { haversineDistance, centroid } from '@intelgraph/geospatial';
+import { GeoPoint, SpatialCluster } from "@intelgraph/geospatial";
+import { haversineDistance, centroid } from "@intelgraph/geospatial";
 
 interface DBSCANConfig {
   epsilon: number; // Maximum distance between points in meters
@@ -117,7 +117,11 @@ export class DBSCAN {
   /**
    * Create cluster objects from labels
    */
-  private createClusters(points: GeoPoint[], labels: number[], numClusters: number): SpatialCluster[] {
+  private createClusters(
+    points: GeoPoint[],
+    labels: number[],
+    numClusters: number
+  ): SpatialCluster[] {
     const clusters: SpatialCluster[] = [];
 
     // Create clusters
@@ -152,7 +156,7 @@ export class DBSCAN {
         radius: 0,
         density: 0,
         noise: true,
-        label: 'Noise',
+        label: "Noise",
       });
     }
 

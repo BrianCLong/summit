@@ -1,4 +1,3 @@
-
 # CAB TypeScript SDK
 
 Lightweight TypeScript helper for interacting with the Contextual Access Broker (CAB) decision engine.
@@ -6,35 +5,35 @@ Lightweight TypeScript helper for interacting with the Contextual Access Broker 
 ## Usage
 
 ```ts
-import { CABClient } from '@intelgraph/cab-sdk';
+import { CABClient } from "@intelgraph/cab-sdk";
 
-const client = new CABClient({ baseUrl: 'http://localhost:8085' });
+const client = new CABClient({ baseUrl: "http://localhost:8085" });
 const decision = await client.evaluate({
-  action: 'workspace:update',
-  subject: { role: 'admin' },
-  resource: { classification: 'internal' },
+  action: "workspace:update",
+  subject: { role: "admin" },
+  resource: { classification: "internal" },
   signals: {
-    geo: 'US',
-    devicePosture: 'trusted',
+    geo: "US",
+    devicePosture: "trusted",
     anomalyScore: 0.18,
   },
 });
 
-if (decision.decision === 'step-up') {
+if (decision.decision === "step-up") {
   const completed = await client.completeStepUp(
     {
-      action: 'workspace:update',
-      subject: { role: 'admin' },
-      resource: { classification: 'internal' },
+      action: "workspace:update",
+      subject: { role: "admin" },
+      resource: { classification: "internal" },
       signals: {
-        geo: 'US',
-        devicePosture: 'trusted',
+        geo: "US",
+        devicePosture: "trusted",
         anomalyScore: 0.51,
       },
     },
     {
-      totp: { code: '654321' },
-      'hardware-key': { assertion: 'cab-hardware-assertion' },
+      totp: { code: "654321" },
+      "hardware-key": { assertion: "cab-hardware-assertion" },
     }
   );
   console.log(completed.decision);
@@ -42,8 +41,9 @@ if (decision.decision === 'step-up') {
 ```
 
 The client also exposes helpers for working with saved simulator scenarios.
+
 ```ts
-const scenario = await client.saveScenario('baseline admin', request);
+const scenario = await client.saveScenario("baseline admin", request);
 const replay = await client.replayScenario(scenario.id);
 console.log(replay.match); // true when the decision matches the saved outcome
 ```

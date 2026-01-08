@@ -10,24 +10,24 @@ import {
   type CoTravelOptions,
   type FinancialStructuringOptions,
   type CommunicationBurstOptions,
-} from '../pattern-templates';
+} from "../pattern-templates";
 
-describe('Pattern Mining Templates', () => {
-  describe('detectCoTravelPatterns', () => {
-    it('should detect co-travel pattern when entities are co-located', () => {
+describe("Pattern Mining Templates", () => {
+  describe("detectCoTravelPatterns", () => {
+    it("should detect co-travel pattern when entities are co-located", () => {
       const now = Date.now();
       const graph: GraphData = {
         nodes: [
           {
-            id: 'Person1',
-            type: 'Person',
+            id: "Person1",
+            type: "Person",
             location: { lat: 40.7128, lon: -74.006 },
             timestamp: now,
           },
           {
-            id: 'Person2',
-            type: 'Person',
-            location: { lat: 40.7130, lon: -74.0062 },
+            id: "Person2",
+            type: "Person",
+            location: { lat: 40.713, lon: -74.0062 },
             timestamp: now + 1000,
           },
         ],
@@ -43,24 +43,24 @@ describe('Pattern Mining Templates', () => {
       const result = detectCoTravelPatterns(graph, options);
 
       expect(result.patterns.length).toBeGreaterThan(0);
-      expect(result.patterns[0].nodes).toContain('Person1');
-      expect(result.patterns[0].nodes).toContain('Person2');
+      expect(result.patterns[0].nodes).toContain("Person1");
+      expect(result.patterns[0].nodes).toContain("Person2");
       expect(result.patterns[0].confidence).toBeGreaterThan(0);
     });
 
-    it('should not detect pattern when entities are far apart', () => {
+    it("should not detect pattern when entities are far apart", () => {
       const now = Date.now();
       const graph: GraphData = {
         nodes: [
           {
-            id: 'Person1',
-            type: 'Person',
+            id: "Person1",
+            type: "Person",
             location: { lat: 40.7128, lon: -74.006 },
             timestamp: now,
           },
           {
-            id: 'Person2',
-            type: 'Person',
+            id: "Person2",
+            type: "Person",
             location: { lat: 34.0522, lon: -118.2437 }, // LA, far from NYC
             timestamp: now + 1000,
           },
@@ -79,20 +79,20 @@ describe('Pattern Mining Templates', () => {
       expect(result.patterns.length).toBe(0);
     });
 
-    it('should not detect pattern when time difference exceeds window', () => {
+    it("should not detect pattern when time difference exceeds window", () => {
       const now = Date.now();
       const graph: GraphData = {
         nodes: [
           {
-            id: 'Person1',
-            type: 'Person',
+            id: "Person1",
+            type: "Person",
             location: { lat: 40.7128, lon: -74.006 },
             timestamp: now,
           },
           {
-            id: 'Person2',
-            type: 'Person',
-            location: { lat: 40.7130, lon: -74.0062 },
+            id: "Person2",
+            type: "Person",
+            location: { lat: 40.713, lon: -74.0062 },
             timestamp: now + 10000,
           },
         ],
@@ -110,20 +110,20 @@ describe('Pattern Mining Templates', () => {
       expect(result.patterns.length).toBe(0);
     });
 
-    it('should filter by entity types', () => {
+    it("should filter by entity types", () => {
       const now = Date.now();
       const graph: GraphData = {
         nodes: [
           {
-            id: 'Person1',
-            type: 'Person',
+            id: "Person1",
+            type: "Person",
             location: { lat: 40.7128, lon: -74.006 },
             timestamp: now,
           },
           {
-            id: 'Vehicle1',
-            type: 'Vehicle',
-            location: { lat: 40.7130, lon: -74.0062 },
+            id: "Vehicle1",
+            type: "Vehicle",
+            location: { lat: 40.713, lon: -74.0062 },
             timestamp: now + 1000,
           },
         ],
@@ -134,7 +134,7 @@ describe('Pattern Mining Templates', () => {
         timeWindow: 5000,
         distanceThreshold: 100,
         minCoOccurrences: 1,
-        entityTypes: ['Person'],
+        entityTypes: ["Person"],
       };
 
       const result = detectCoTravelPatterns(graph, options);
@@ -143,20 +143,20 @@ describe('Pattern Mining Templates', () => {
       expect(result.patterns.length).toBe(0);
     });
 
-    it('should require minimum co-occurrences', () => {
+    it("should require minimum co-occurrences", () => {
       const now = Date.now();
       const graph: GraphData = {
         nodes: [
           {
-            id: 'Person1',
-            type: 'Person',
+            id: "Person1",
+            type: "Person",
             location: { lat: 40.7128, lon: -74.006 },
             timestamp: now,
           },
           {
-            id: 'Person2',
-            type: 'Person',
-            location: { lat: 40.7130, lon: -74.0062 },
+            id: "Person2",
+            type: "Person",
+            location: { lat: 40.713, lon: -74.0062 },
             timestamp: now + 1000,
           },
         ],
@@ -175,20 +175,20 @@ describe('Pattern Mining Templates', () => {
       expect(result.patterns.length).toBe(0);
     });
 
-    it('should include XAI explanations with feature importances', () => {
+    it("should include XAI explanations with feature importances", () => {
       const now = Date.now();
       const graph: GraphData = {
         nodes: [
           {
-            id: 'Person1',
-            type: 'Person',
+            id: "Person1",
+            type: "Person",
             location: { lat: 40.7128, lon: -74.006 },
             timestamp: now,
           },
           {
-            id: 'Person2',
-            type: 'Person',
-            location: { lat: 40.7130, lon: -74.0062 },
+            id: "Person2",
+            type: "Person",
+            location: { lat: 40.713, lon: -74.0062 },
             timestamp: now + 1000,
           },
         ],
@@ -215,35 +215,35 @@ describe('Pattern Mining Templates', () => {
     });
   });
 
-  describe('detectFinancialStructuring', () => {
-    it('should detect fan-out pattern', () => {
+  describe("detectFinancialStructuring", () => {
+    it("should detect fan-out pattern", () => {
       const now = Date.now();
       const graph: GraphData = {
         nodes: [
-          { id: 'Account1', type: 'Account' },
-          { id: 'Account2', type: 'Account' },
-          { id: 'Account3', type: 'Account' },
-          { id: 'Account4', type: 'Account' },
+          { id: "Account1", type: "Account" },
+          { id: "Account2", type: "Account" },
+          { id: "Account3", type: "Account" },
+          { id: "Account4", type: "Account" },
         ],
         edges: [
           {
-            source: 'Account1',
-            target: 'Account2',
-            type: 'TRANSFER',
+            source: "Account1",
+            target: "Account2",
+            type: "TRANSFER",
             timestamp: now,
             properties: { amount: 1000 },
           },
           {
-            source: 'Account1',
-            target: 'Account3',
-            type: 'TRANSFER',
+            source: "Account1",
+            target: "Account3",
+            type: "TRANSFER",
             timestamp: now + 1000,
             properties: { amount: 1000 },
           },
           {
-            source: 'Account1',
-            target: 'Account4',
-            type: 'TRANSFER',
+            source: "Account1",
+            target: "Account4",
+            type: "TRANSFER",
             timestamp: now + 2000,
             properties: { amount: 1000 },
           },
@@ -254,45 +254,45 @@ describe('Pattern Mining Templates', () => {
         timeWindow: 10000,
         minBranches: 3,
         maxHops: 1,
-        patternType: 'fan-out',
+        patternType: "fan-out",
       };
 
       const result = detectFinancialStructuring(graph, options);
 
       expect(result.patterns.length).toBeGreaterThan(0);
-      expect(result.patterns[0].metadata.patternType).toBe('fan-out');
-      expect(result.patterns[0].metadata.centerNode).toBe('Account1');
+      expect(result.patterns[0].metadata.patternType).toBe("fan-out");
+      expect(result.patterns[0].metadata.centerNode).toBe("Account1");
       expect(result.patterns[0].metadata.branches).toBe(3);
     });
 
-    it('should detect fan-in pattern', () => {
+    it("should detect fan-in pattern", () => {
       const now = Date.now();
       const graph: GraphData = {
         nodes: [
-          { id: 'Account1', type: 'Account' },
-          { id: 'Account2', type: 'Account' },
-          { id: 'Account3', type: 'Account' },
-          { id: 'Account4', type: 'Account' },
+          { id: "Account1", type: "Account" },
+          { id: "Account2", type: "Account" },
+          { id: "Account3", type: "Account" },
+          { id: "Account4", type: "Account" },
         ],
         edges: [
           {
-            source: 'Account2',
-            target: 'Account1',
-            type: 'TRANSFER',
+            source: "Account2",
+            target: "Account1",
+            type: "TRANSFER",
             timestamp: now,
             properties: { amount: 1000 },
           },
           {
-            source: 'Account3',
-            target: 'Account1',
-            type: 'TRANSFER',
+            source: "Account3",
+            target: "Account1",
+            type: "TRANSFER",
             timestamp: now + 1000,
             properties: { amount: 1000 },
           },
           {
-            source: 'Account4',
-            target: 'Account1',
-            type: 'TRANSFER',
+            source: "Account4",
+            target: "Account1",
+            type: "TRANSFER",
             timestamp: now + 2000,
             properties: { amount: 1000 },
           },
@@ -303,45 +303,45 @@ describe('Pattern Mining Templates', () => {
         timeWindow: 10000,
         minBranches: 3,
         maxHops: 1,
-        patternType: 'fan-in',
+        patternType: "fan-in",
       };
 
       const result = detectFinancialStructuring(graph, options);
 
       expect(result.patterns.length).toBeGreaterThan(0);
-      expect(result.patterns[0].metadata.patternType).toBe('fan-in');
-      expect(result.patterns[0].metadata.centerNode).toBe('Account1');
+      expect(result.patterns[0].metadata.patternType).toBe("fan-in");
+      expect(result.patterns[0].metadata.centerNode).toBe("Account1");
       expect(result.patterns[0].metadata.branches).toBe(3);
     });
 
-    it('should respect amount threshold', () => {
+    it("should respect amount threshold", () => {
       const now = Date.now();
       const graph: GraphData = {
         nodes: [
-          { id: 'Account1', type: 'Account' },
-          { id: 'Account2', type: 'Account' },
-          { id: 'Account3', type: 'Account' },
-          { id: 'Account4', type: 'Account' },
+          { id: "Account1", type: "Account" },
+          { id: "Account2", type: "Account" },
+          { id: "Account3", type: "Account" },
+          { id: "Account4", type: "Account" },
         ],
         edges: [
           {
-            source: 'Account1',
-            target: 'Account2',
-            type: 'TRANSFER',
+            source: "Account1",
+            target: "Account2",
+            type: "TRANSFER",
             timestamp: now,
             properties: { amount: 100 },
           },
           {
-            source: 'Account1',
-            target: 'Account3',
-            type: 'TRANSFER',
+            source: "Account1",
+            target: "Account3",
+            type: "TRANSFER",
             timestamp: now + 1000,
             properties: { amount: 100 },
           },
           {
-            source: 'Account1',
-            target: 'Account4',
-            type: 'TRANSFER',
+            source: "Account1",
+            target: "Account4",
+            type: "TRANSFER",
             timestamp: now + 2000,
             properties: { amount: 100 },
           },
@@ -352,7 +352,7 @@ describe('Pattern Mining Templates', () => {
         timeWindow: 10000,
         minBranches: 3,
         maxHops: 1,
-        patternType: 'fan-out',
+        patternType: "fan-out",
         amountThreshold: 500,
       };
 
@@ -362,34 +362,34 @@ describe('Pattern Mining Templates', () => {
       expect(result.patterns.length).toBe(0);
     });
 
-    it('should include XAI explanations with feature importances', () => {
+    it("should include XAI explanations with feature importances", () => {
       const now = Date.now();
       const graph: GraphData = {
         nodes: [
-          { id: 'Account1', type: 'Account' },
-          { id: 'Account2', type: 'Account' },
-          { id: 'Account3', type: 'Account' },
-          { id: 'Account4', type: 'Account' },
+          { id: "Account1", type: "Account" },
+          { id: "Account2", type: "Account" },
+          { id: "Account3", type: "Account" },
+          { id: "Account4", type: "Account" },
         ],
         edges: [
           {
-            source: 'Account1',
-            target: 'Account2',
-            type: 'TRANSFER',
+            source: "Account1",
+            target: "Account2",
+            type: "TRANSFER",
             timestamp: now,
             properties: { amount: 1000 },
           },
           {
-            source: 'Account1',
-            target: 'Account3',
-            type: 'TRANSFER',
+            source: "Account1",
+            target: "Account3",
+            type: "TRANSFER",
             timestamp: now + 1000,
             properties: { amount: 1000 },
           },
           {
-            source: 'Account1',
-            target: 'Account4',
-            type: 'TRANSFER',
+            source: "Account1",
+            target: "Account4",
+            type: "TRANSFER",
             timestamp: now + 2000,
             properties: { amount: 1000 },
           },
@@ -400,7 +400,7 @@ describe('Pattern Mining Templates', () => {
         timeWindow: 10000,
         minBranches: 3,
         maxHops: 1,
-        patternType: 'fan-out',
+        patternType: "fan-out",
       };
 
       const result = detectFinancialStructuring(graph, options);
@@ -413,18 +413,18 @@ describe('Pattern Mining Templates', () => {
       expect(explanation.featureImportances!.branch_count).toBeGreaterThan(0);
     });
 
-    it('should not detect pattern when branches below threshold', () => {
+    it("should not detect pattern when branches below threshold", () => {
       const now = Date.now();
       const graph: GraphData = {
         nodes: [
-          { id: 'Account1', type: 'Account' },
-          { id: 'Account2', type: 'Account' },
+          { id: "Account1", type: "Account" },
+          { id: "Account2", type: "Account" },
         ],
         edges: [
           {
-            source: 'Account1',
-            target: 'Account2',
-            type: 'TRANSFER',
+            source: "Account1",
+            target: "Account2",
+            type: "TRANSFER",
             timestamp: now,
             properties: { amount: 1000 },
           },
@@ -435,7 +435,7 @@ describe('Pattern Mining Templates', () => {
         timeWindow: 10000,
         minBranches: 5,
         maxHops: 1,
-        patternType: 'fan-out',
+        patternType: "fan-out",
       };
 
       const result = detectFinancialStructuring(graph, options);
@@ -444,18 +444,15 @@ describe('Pattern Mining Templates', () => {
     });
   });
 
-  describe('detectCommunicationBursts', () => {
-    it('should detect communication burst', () => {
+  describe("detectCommunicationBursts", () => {
+    it("should detect communication burst", () => {
       const now = Date.now();
       const graph: GraphData = {
-        nodes: [
-          { id: 'Person1' },
-          { id: 'Person2' },
-        ],
+        nodes: [{ id: "Person1" }, { id: "Person2" }],
         edges: Array.from({ length: 20 }, (_, i) => ({
-          source: 'Person1',
-          target: 'Person2',
-          type: 'MESSAGE',
+          source: "Person1",
+          target: "Person2",
+          type: "MESSAGE",
           timestamp: now + i * 100,
         })),
       };
@@ -471,28 +468,25 @@ describe('Pattern Mining Templates', () => {
       expect(result.bursts[0].metadata.burstRatio).toBeGreaterThan(2.0);
     });
 
-    it('should detect communication lull', () => {
+    it("should detect communication lull", () => {
       const now = Date.now();
       const edges = [
         {
-          source: 'Person1',
-          target: 'Person2',
-          type: 'MESSAGE',
+          source: "Person1",
+          target: "Person2",
+          type: "MESSAGE",
           timestamp: now,
         },
         {
-          source: 'Person1',
-          target: 'Person2',
-          type: 'MESSAGE',
+          source: "Person1",
+          target: "Person2",
+          type: "MESSAGE",
           timestamp: now + 30000,
         },
       ];
 
       const graph: GraphData = {
-        nodes: [
-          { id: 'Person1' },
-          { id: 'Person2' },
-        ],
+        nodes: [{ id: "Person1" }, { id: "Person2" }],
         edges,
       };
 
@@ -507,24 +501,21 @@ describe('Pattern Mining Templates', () => {
       expect(result.lulls.length).toBeGreaterThan(0);
     });
 
-    it('should filter by communication type', () => {
+    it("should filter by communication type", () => {
       const now = Date.now();
       const graph: GraphData = {
-        nodes: [
-          { id: 'Person1' },
-          { id: 'Person2' },
-        ],
+        nodes: [{ id: "Person1" }, { id: "Person2" }],
         edges: [
           ...Array.from({ length: 10 }, (_, i) => ({
-            source: 'Person1',
-            target: 'Person2',
-            type: 'EMAIL',
+            source: "Person1",
+            target: "Person2",
+            type: "EMAIL",
             timestamp: now + i * 100,
           })),
           ...Array.from({ length: 10 }, (_, i) => ({
-            source: 'Person1',
-            target: 'Person2',
-            type: 'CALL',
+            source: "Person1",
+            target: "Person2",
+            type: "CALL",
             timestamp: now + i * 100,
           })),
         ],
@@ -533,7 +524,7 @@ describe('Pattern Mining Templates', () => {
       const options: CommunicationBurstOptions = {
         timeWindow: 5000,
         burstThreshold: 2.0,
-        communicationTypes: ['EMAIL'],
+        communicationTypes: ["EMAIL"],
       };
 
       const result = detectCommunicationBursts(graph, options);
@@ -542,17 +533,14 @@ describe('Pattern Mining Templates', () => {
       expect(result.metadata.edgesAnalyzed).toBe(10);
     });
 
-    it('should use provided baseline rate', () => {
+    it("should use provided baseline rate", () => {
       const now = Date.now();
       const graph: GraphData = {
-        nodes: [
-          { id: 'Person1' },
-          { id: 'Person2' },
-        ],
+        nodes: [{ id: "Person1" }, { id: "Person2" }],
         edges: Array.from({ length: 20 }, (_, i) => ({
-          source: 'Person1',
-          target: 'Person2',
-          type: 'MESSAGE',
+          source: "Person1",
+          target: "Person2",
+          type: "MESSAGE",
           timestamp: now + i * 100,
         })),
       };
@@ -568,17 +556,14 @@ describe('Pattern Mining Templates', () => {
       expect(result.metadata.baselineRate).toBe(5);
     });
 
-    it('should include XAI explanations with feature importances', () => {
+    it("should include XAI explanations with feature importances", () => {
       const now = Date.now();
       const graph: GraphData = {
-        nodes: [
-          { id: 'Person1' },
-          { id: 'Person2' },
-        ],
+        nodes: [{ id: "Person1" }, { id: "Person2" }],
         edges: Array.from({ length: 20 }, (_, i) => ({
-          source: 'Person1',
-          target: 'Person2',
-          type: 'MESSAGE',
+          source: "Person1",
+          target: "Person2",
+          type: "MESSAGE",
           timestamp: now + i * 100,
         })),
       };
@@ -598,7 +583,7 @@ describe('Pattern Mining Templates', () => {
       expect(explanation.featureImportances!.message_rate).toBeGreaterThan(0);
     });
 
-    it('should handle empty graph', () => {
+    it("should handle empty graph", () => {
       const graph: GraphData = {
         nodes: [],
         edges: [],
@@ -616,17 +601,14 @@ describe('Pattern Mining Templates', () => {
       expect(result.metadata.edgesAnalyzed).toBe(0);
     });
 
-    it('should respect minimum burst duration', () => {
+    it("should respect minimum burst duration", () => {
       const now = Date.now();
       const graph: GraphData = {
-        nodes: [
-          { id: 'Person1' },
-          { id: 'Person2' },
-        ],
+        nodes: [{ id: "Person1" }, { id: "Person2" }],
         edges: Array.from({ length: 20 }, (_, i) => ({
-          source: 'Person1',
-          target: 'Person2',
-          type: 'MESSAGE',
+          source: "Person1",
+          target: "Person2",
+          type: "MESSAGE",
           timestamp: now + i * 100,
         })),
       };
@@ -644,12 +626,12 @@ describe('Pattern Mining Templates', () => {
     });
   });
 
-  describe('Performance characteristics', () => {
-    it('should complete co-travel detection in reasonable time', () => {
+  describe("Performance characteristics", () => {
+    it("should complete co-travel detection in reasonable time", () => {
       const now = Date.now();
       const nodes = Array.from({ length: 50 }, (_, i) => ({
         id: `Person${i}`,
-        type: 'Person',
+        type: "Person",
         location: {
           lat: 40.7128 + (Math.random() - 0.5) * 0.01,
           lon: -74.006 + (Math.random() - 0.5) * 0.01,
@@ -673,17 +655,17 @@ describe('Pattern Mining Templates', () => {
       expect(result.executionTime).toBeLessThan(500);
     });
 
-    it('should complete financial structuring detection in reasonable time', () => {
+    it("should complete financial structuring detection in reasonable time", () => {
       const now = Date.now();
       const nodes = Array.from({ length: 100 }, (_, i) => ({
         id: `Account${i}`,
-        type: 'Account',
+        type: "Account",
       }));
 
       const edges = Array.from({ length: 200 }, (_, i) => ({
         source: `Account${i % 100}`,
         target: `Account${(i + 1) % 100}`,
-        type: 'TRANSFER',
+        type: "TRANSFER",
         timestamp: now + Math.random() * 100000,
         properties: { amount: Math.random() * 10000 },
       }));
@@ -694,7 +676,7 @@ describe('Pattern Mining Templates', () => {
         timeWindow: 10000,
         minBranches: 3,
         maxHops: 1,
-        patternType: 'both',
+        patternType: "both",
       };
 
       const start = performance.now();

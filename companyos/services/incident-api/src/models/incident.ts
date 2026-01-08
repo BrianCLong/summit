@@ -1,6 +1,6 @@
-export type IncidentStatus = 'open' | 'investigating' | 'mitigated' | 'resolved' | 'closed';
+export type IncidentStatus = "open" | "investigating" | "mitigated" | "resolved" | "closed";
 
-export type IncidentSeverity = 'critical' | 'high' | 'medium' | 'low';
+export type IncidentSeverity = "critical" | "high" | "medium" | "low";
 
 /**
  * Represents an incident in the system.

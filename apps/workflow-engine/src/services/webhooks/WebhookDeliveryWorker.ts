@@ -1,8 +1,8 @@
-import axios, { AxiosInstance } from 'axios';
-import { logger } from '../../utils/logger';
-import { WebhookRepository } from './WebhookRepository';
-import { DeliveryStatus, WebhookDelivery, WebhookMetrics } from './types';
-import { WebhookService } from './WebhookService';
+import axios, { AxiosInstance } from "axios";
+import { logger } from "../../utils/logger";
+import { WebhookRepository } from "./WebhookRepository";
+import { DeliveryStatus, WebhookDelivery, WebhookMetrics } from "./types";
+import { WebhookService } from "./WebhookService";
 
 interface WorkerOptions {
   batchSize?: number;
@@ -17,15 +17,15 @@ interface WorkerOptions {
 
 export class NoopMetrics implements WebhookMetrics {
   recordDeadLetter(error: string): void {
-    logger.warn('webhook.dead_letter', { error });
+    logger.warn("webhook.dead_letter", { error });
   }
 
   recordFailure(): void {
-    logger.warn('webhook.delivery_failure');
+    logger.warn("webhook.delivery_failure");
   }
 
   recordSuccess(): void {
-    logger.info('webhook.delivery_success');
+    logger.info("webhook.delivery_success");
   }
 }
 
@@ -42,14 +42,14 @@ export class WebhookDeliveryWorker {
   constructor(
     private readonly repository: WebhookRepository,
     private readonly service: WebhookService,
-    options: WorkerOptions = {},
+    options: WorkerOptions = {}
   ) {
     this.batchSize = options.batchSize ?? 10;
     this.maxAttempts = options.maxAttempts ?? 5;
     this.baseBackoffMs = options.baseBackoffMs ?? 5000;
-    this.signatureHeader = options.signatureHeader ?? 'X-Webhook-Signature';
-    this.idempotencyHeader = options.idempotencyHeader ?? 'Idempotency-Key';
-    this.eventHeader = options.eventHeader ?? 'X-Webhook-Event';
+    this.signatureHeader = options.signatureHeader ?? "X-Webhook-Signature";
+    this.idempotencyHeader = options.idempotencyHeader ?? "Idempotency-Key";
+    this.eventHeader = options.eventHeader ?? "X-Webhook-Event";
     this.metrics = options.metrics ?? new NoopMetrics();
     this.httpClient = options.httpClient ?? axios.create();
   }
@@ -73,19 +73,19 @@ export class WebhookDeliveryWorker {
     if (!subscription || !subscription.isActive) {
       await this.repository.markDeliveryStatus(
         delivery.id,
-        'dead',
+        "dead",
         delivery.attemptCount,
-        'Subscription missing or inactive',
-        null,
+        "Subscription missing or inactive",
+        null
       );
-      this.metrics.recordDeadLetter('Subscription missing or inactive');
+      this.metrics.recordDeadLetter("Subscription missing or inactive");
       return;
     }
 
     const payload = delivery.payload;
     const signature = this.service.generateSignature(payload, subscription.secret);
     const started = Date.now();
-    let status: DeliveryStatus = 'succeeded';
+    let status: DeliveryStatus = "succeeded";
     let error: string | undefined;
     let responseStatus: number | undefined;
     let responseBody: string | undefined;
@@ -101,7 +101,8 @@ export class WebhookDeliveryWorker {
       });
 
       responseStatus = response.status;
-      responseBody = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+      responseBody =
+        typeof response.data === "string" ? response.data : JSON.stringify(response.data);
 
       if (response.status >= 400) {
         throw new Error(`Unexpected status code ${response.status}`);
@@ -110,40 +111,41 @@ export class WebhookDeliveryWorker {
       this.metrics.recordSuccess(Date.now() - started);
       await this.repository.markDeliveryStatus(
         delivery.id,
-        'succeeded',
+        "succeeded",
         delivery.attemptCount + 1,
         null,
-        null,
+        null
       );
     } catch (err: any) {
       const attemptNumber = delivery.attemptCount + 1;
-      status = attemptNumber >= this.maxAttempts ? 'dead' : 'failed';
-      error = err?.message || 'Webhook delivery failed';
+      status = attemptNumber >= this.maxAttempts ? "dead" : "failed";
+      error = err?.message || "Webhook delivery failed";
 
       if (err?.response) {
         responseStatus = err.response.status;
-        responseBody = typeof err.response.data === 'string'
-          ? err.response.data
-          : JSON.stringify(err.response.data);
+        responseBody =
+          typeof err.response.data === "string"
+            ? err.response.data
+            : JSON.stringify(err.response.data);
       }
 
       const backoffMs = this.calculateBackoff(attemptNumber);
-      const nextAttempt = status === 'failed' ? new Date(Date.now() + backoffMs) : null;
+      const nextAttempt = status === "failed" ? new Date(Date.now() + backoffMs) : null;
 
       await this.repository.markDeliveryStatus(
         delivery.id,
         status,
         attemptNumber,
         error,
-        nextAttempt,
+        nextAttempt
       );
 
-      if (status === 'dead') {
+      if (status === "dead") {
         this.metrics.recordDeadLetter(error);
-        logger.error('webhook.dead_letter', { deliveryId: delivery.id, error });
+        logger.error("webhook.dead_letter", { deliveryId: delivery.id, error });
       } else {
         this.metrics.recordFailure(Date.now() - started);
-        logger.warn('webhook.delivery_retry', {
+        logger.warn("webhook.delivery_retry", {
           deliveryId: delivery.id,
           attemptNumber,
           nextAttempt,

@@ -1,4 +1,4 @@
-import blockchain from 'blockchain';
+import blockchain from "blockchain";
 
 export function integrityAssurance(config) {
   const audit = blockchain.log({ threshold: config.integrityThreshold });

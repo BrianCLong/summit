@@ -3,12 +3,12 @@
  * @module @intelgraph/strands-agents/agents/analyst-agent
  */
 
-import type { Driver } from 'neo4j-driver';
-import { createGraphTools } from '../tools/graph-tools.js';
-import { createEntityTools } from '../tools/entity-tools.js';
-import { createAnalysisTools } from '../tools/analysis-tools.js';
-import { createInvestigationTools } from '../tools/investigation-tools.js';
-import { ANALYST_AGENT_PROMPT } from './prompts.js';
+import type { Driver } from "neo4j-driver";
+import { createGraphTools } from "../tools/graph-tools.js";
+import { createEntityTools } from "../tools/entity-tools.js";
+import { createAnalysisTools } from "../tools/analysis-tools.js";
+import { createInvestigationTools } from "../tools/investigation-tools.js";
+import { ANALYST_AGENT_PROMPT } from "./prompts.js";
 
 // ============================================================================
 // Types
@@ -20,7 +20,7 @@ export interface AnalystAgentConfig {
   /** Database name */
   database?: string;
   /** Model provider to use */
-  modelProvider?: 'bedrock' | 'anthropic' | 'openai';
+  modelProvider?: "bedrock" | "anthropic" | "openai";
   /** Model ID override */
   modelId?: string;
   /** Maximum iterations for agent loop */
@@ -39,9 +39,9 @@ export interface AnalysisTask {
   /** Specific entity IDs to focus on */
   focusEntityIds?: string[];
   /** Analysis depth */
-  depth?: 'quick' | 'standard' | 'deep';
+  depth?: "quick" | "standard" | "deep";
   /** Output format */
-  outputFormat?: 'summary' | 'detailed' | 'structured';
+  outputFormat?: "summary" | "detailed" | "structured";
 }
 
 export interface AnalysisResult {
@@ -111,8 +111,8 @@ export interface AnalysisResult {
 export function createAnalystAgent(config: AnalystAgentConfig) {
   const {
     driver,
-    database = 'neo4j',
-    modelProvider = 'bedrock',
+    database = "neo4j",
+    modelProvider = "bedrock",
     modelId,
     maxIterations = 12,
     temperature = 0.5,
@@ -148,9 +148,9 @@ export function createAnalystAgent(config: AnalystAgentConfig) {
    */
   async function analyze(task: AnalysisTask): Promise<AnalysisResult> {
     const startTime = Date.now();
-    const keyFindings: AnalysisResult['keyFindings'] = [];
-    const keyEntities: AnalysisResult['keyEntities'] = [];
-    const patterns: AnalysisResult['patterns'] = [];
+    const keyFindings: AnalysisResult["keyFindings"] = [];
+    const keyEntities: AnalysisResult["keyEntities"] = [];
+    const patterns: AnalysisResult["patterns"] = [];
     const followUpQuestions: string[] = [];
     let toolCalls = 0;
 
@@ -159,7 +159,7 @@ export function createAnalystAgent(config: AnalystAgentConfig) {
       const prompt = buildAnalysisPrompt(task);
 
       if (auditLog) {
-        auditLog('analysis_started', {
+        auditLog("analysis_started", {
           question: task.question,
           investigationId: task.investigationId,
           depth: task.depth,
@@ -184,9 +184,9 @@ export function createAnalystAgent(config: AnalystAgentConfig) {
         keyEntities,
         patterns,
         followUpQuestions: [
-          'What are the communication patterns between key entities?',
-          'Are there any anomalous connections worth investigating?',
-          'What temporal patterns exist in the data?',
+          "What are the communication patterns between key entities?",
+          "Are there any anomalous connections worth investigating?",
+          "What temporal patterns exist in the data?",
         ],
         metadata: {
           questionsAnswered: 1,
@@ -195,10 +195,10 @@ export function createAnalystAgent(config: AnalystAgentConfig) {
         },
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
 
       if (auditLog) {
-        auditLog('analysis_error', {
+        auditLog("analysis_error", {
           question: task.question,
           error: errorMessage,
         });
@@ -227,8 +227,8 @@ export function createAnalystAgent(config: AnalystAgentConfig) {
     const result = await analyze({
       question,
       investigationId,
-      depth: 'quick',
-      outputFormat: 'summary',
+      depth: "quick",
+      outputFormat: "summary",
     });
 
     return result.answer;
@@ -243,8 +243,8 @@ export function createAnalystAgent(config: AnalystAgentConfig) {
 
     // Placeholder for streaming implementation
     yield {
-      type: 'status',
-      data: 'Analyst agent ready for Strands SDK streaming integration',
+      type: "status",
+      data: "Analyst agent ready for Strands SDK streaming integration",
     };
   }
 
@@ -253,9 +253,9 @@ export function createAnalystAgent(config: AnalystAgentConfig) {
    */
   async function findInfluencers(investigationId?: string, limit = 10) {
     const result = await analysisTools.analyzeCentrality.callback({
-      scope: investigationId ? 'investigation' : 'global',
+      scope: investigationId ? "investigation" : "global",
       scopeId: investigationId,
-      algorithm: 'pagerank',
+      algorithm: "pagerank",
       limit,
     });
 
@@ -268,7 +268,7 @@ export function createAnalystAgent(config: AnalystAgentConfig) {
   async function findAnomalies(investigationId?: string) {
     const result = await analysisTools.detectAnomalies.callback({
       investigationId,
-      anomalyTypes: ['degree_outlier', 'structural_hole', 'sudden_appearance'],
+      anomalyTypes: ["degree_outlier", "structural_hole", "sudden_appearance"],
       sensitivityThreshold: 0.8,
     });
 
@@ -281,7 +281,7 @@ export function createAnalystAgent(config: AnalystAgentConfig) {
   async function findPatterns(investigationId?: string) {
     const result = await analysisTools.detectPatterns.callback({
       investigationId,
-      patternTypes: ['star', 'chain', 'bridge'],
+      patternTypes: ["star", "chain", "bridge"],
       minSize: 3,
       limit: 10,
     });
@@ -329,40 +329,40 @@ function buildAnalysisPrompt(task: AnalysisTask): string {
   }
 
   if (task.focusEntityIds?.length) {
-    prompt += `\n\n**Focus Entities**: ${task.focusEntityIds.join(', ')}`;
+    prompt += `\n\n**Focus Entities**: ${task.focusEntityIds.join(", ")}`;
   }
 
   const depthInstructions = {
-    quick: 'Provide a brief, focused answer using minimal tool calls.',
-    standard: 'Provide a thorough analysis with supporting evidence.',
-    deep: 'Conduct comprehensive analysis, exploring multiple angles and validating findings.',
+    quick: "Provide a brief, focused answer using minimal tool calls.",
+    standard: "Provide a thorough analysis with supporting evidence.",
+    deep: "Conduct comprehensive analysis, exploring multiple angles and validating findings.",
   };
 
-  prompt += `\n\n**Analysis Depth**: ${task.depth || 'standard'}
-${depthInstructions[task.depth || 'standard']}`;
+  prompt += `\n\n**Analysis Depth**: ${task.depth || "standard"}
+${depthInstructions[task.depth || "standard"]}`;
 
   const formatInstructions = {
-    summary: 'Provide a concise summary paragraph.',
-    detailed: 'Structure your response with sections for findings, evidence, and recommendations.',
-    structured: 'Return findings as a structured list with confidence scores.',
+    summary: "Provide a concise summary paragraph.",
+    detailed: "Structure your response with sections for findings, evidence, and recommendations.",
+    structured: "Return findings as a structured list with confidence scores.",
   };
 
-  prompt += `\n\n**Output Format**: ${task.outputFormat || 'detailed'}
-${formatInstructions[task.outputFormat || 'detailed']}`;
+  prompt += `\n\n**Output Format**: ${task.outputFormat || "detailed"}
+${formatInstructions[task.outputFormat || "detailed"]}`;
 
   return prompt;
 }
 
 function getDefaultModelId(provider: string): string {
   switch (provider) {
-    case 'bedrock':
-      return 'anthropic.claude-3-5-sonnet-20241022-v2:0';
-    case 'anthropic':
-      return 'claude-sonnet-4-5-20250929';
-    case 'openai':
-      return 'gpt-4o';
+    case "bedrock":
+      return "anthropic.claude-3-5-sonnet-20241022-v2:0";
+    case "anthropic":
+      return "claude-sonnet-4-5-20250929";
+    case "openai":
+      return "gpt-4o";
     default:
-      return 'anthropic.claude-3-5-sonnet-20241022-v2:0';
+      return "anthropic.claude-3-5-sonnet-20241022-v2:0";
   }
 }
 

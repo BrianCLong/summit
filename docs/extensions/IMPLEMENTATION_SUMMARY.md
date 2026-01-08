@@ -19,6 +19,7 @@ A comprehensive, unified extension framework for Summit that enables developers 
 **Location**: Type definitions in `packages/extensions/src/types.ts`
 
 **Key Features**:
+
 - Zod-based validation for type safety
 - Semantic versioning support
 - Comprehensive capability and permission system
@@ -27,6 +28,7 @@ A comprehensive, unified extension framework for Summit that enables developers 
 - Configuration schema definition
 
 **Example**:
+
 ```json
 {
   "name": "analytics-dashboard",
@@ -50,6 +52,7 @@ A comprehensive, unified extension framework for Summit that enables developers 
 **Location**: `packages/extensions/src/loader.ts`
 
 **Features**:
+
 - Automatic discovery via glob patterns
 - Manifest validation using Zod schemas
 - Policy enforcement via OPA integration
@@ -59,10 +62,11 @@ A comprehensive, unified extension framework for Summit that enables developers 
 - Error handling and reporting
 
 **Usage**:
+
 ```typescript
 const loader = new ExtensionLoader({
-  extensionDirs: ['extensions/'],
-  policyEnforcer: new PolicyEnforcer()
+  extensionDirs: ["extensions/"],
+  policyEnforcer: new PolicyEnforcer(),
 });
 
 await loader.discover();
@@ -74,6 +78,7 @@ await loader.loadAll();
 **Location**: `extensions/examples/analytics-dashboard/`
 
 **Demonstrates**:
+
 - ✅ Copilot tool integration (entity statistics, summaries)
 - ✅ UI command integration (show chart)
 - ✅ CLI command integration (stats command)
@@ -83,6 +88,7 @@ await loader.loadAll();
 - ✅ Proper lifecycle management (activate/dispose)
 
 **Structure**:
+
 ```
 analytics-dashboard/
 ├── extension.json       # Manifest
@@ -105,6 +111,7 @@ analytics-dashboard/
 #### Main Documentation
 
 **1. Building Extensions Guide** (`docs/extensions/building-extensions.md`)
+
 - Complete 10-section guide covering all aspects
 - Getting started tutorial
 - Manifest reference
@@ -117,6 +124,7 @@ analytics-dashboard/
 - Troubleshooting
 
 **2. Quick Reference Guide** (`docs/extensions/quick-reference.md`)
+
 - Installation commands
 - Manifest schema cheat sheet
 - Extension types and capabilities
@@ -127,6 +135,7 @@ analytics-dashboard/
 - Troubleshooting guide
 
 **3. Framework README** (`docs/extensions/README.md`)
+
 - Overview and features
 - Architecture diagrams
 - Quick start guide
@@ -255,6 +264,7 @@ packages/extensions/
 **Requirement**: "You can add a new extension by dropping a package + manifest into the right place and running one command."
 
 **Implementation**:
+
 ```bash
 # Copy extension
 cp -r my-extension /path/to/summit/extensions/
@@ -273,6 +283,7 @@ pnpm install && pnpm build
 **Requirement**: "Copilot can discover and call extension capabilities safely (policy enforced)"
 
 **Implementation**:
+
 - `CopilotIntegration` class automatically registers all tools from loaded extensions
 - Tools exposed via manifest `copilot.tools` array
 - Policy enforcer checks permissions before loading
@@ -285,6 +296,7 @@ pnpm install && pnpm build
 **Requirement**: "UI can discover and call extension capabilities safely"
 
 **Implementation**:
+
 - `CommandPaletteIntegration` registers UI commands and widgets
 - Commands appear in command palette
 - Widgets available for dashboard placement
@@ -326,6 +338,7 @@ summit-ext install <path>
 ### Default Policy (`default-policy.rego`)
 
 **Features**:
+
 - Allows read-only operations by default
 - Requires approval for dangerous permissions:
   - `commands:execute`
@@ -336,9 +349,10 @@ summit-ext install <path>
 - Rate limiting support (placeholder)
 
 **Usage**:
+
 ```typescript
-const enforcer = new PolicyEnforcer('http://localhost:8181');
-const allowed = await enforcer.checkPermissions('my-extension', permissions);
+const enforcer = new PolicyEnforcer("http://localhost:8181");
+const allowed = await enforcer.checkPermissions("my-extension", permissions);
 ```
 
 ---
@@ -348,6 +362,7 @@ const allowed = await enforcer.checkPermissions('my-extension', permissions);
 ### Created Files (40+ files)
 
 **Framework Core** (13 files):
+
 - `packages/extensions/package.json`
 - `packages/extensions/tsconfig.json`
 - `packages/extensions/README.md`
@@ -366,6 +381,7 @@ const allowed = await enforcer.checkPermissions('my-extension', permissions);
 - `packages/extensions/bin/summit-ext`
 
 **Example Extension** (9 files):
+
 - `extensions/examples/analytics-dashboard/extension.json`
 - `extensions/examples/analytics-dashboard/package.json`
 - `extensions/examples/analytics-dashboard/tsconfig.json`
@@ -376,6 +392,7 @@ const allowed = await enforcer.checkPermissions('my-extension', permissions);
 - `extensions/examples/analytics-dashboard/src/commands/chart.ts`
 
 **Template** (6 files):
+
 - `packages/extensions/templates/basic/extension.json`
 - `packages/extensions/templates/basic/package.json`
 - `packages/extensions/templates/basic/tsconfig.json`
@@ -384,6 +401,7 @@ const allowed = await enforcer.checkPermissions('my-extension', permissions);
 - `packages/extensions/templates/basic/.gitignore`
 
 **Documentation** (4 files):
+
 - `docs/extensions/README.md`
 - `docs/extensions/building-extensions.md`
 - `docs/extensions/quick-reference.md`
@@ -426,6 +444,7 @@ const allowed = await enforcer.checkPermissions('my-extension', permissions);
 
 **Decision**: Use Zod instead of JSON Schema
 **Rationale**:
+
 - Type-safe at compile time
 - Runtime validation
 - Better TypeScript integration
@@ -435,6 +454,7 @@ const allowed = await enforcer.checkPermissions('my-extension', permissions);
 
 **Decision**: Require explicit `activate()` function
 **Rationale**:
+
 - Clear initialization point
 - Enables cleanup via `dispose()`
 - Consistent with VS Code extension model
@@ -444,6 +464,7 @@ const allowed = await enforcer.checkPermissions('my-extension', permissions);
 
 **Decision**: OPA integration for permission enforcement
 **Rationale**:
+
 - Centralized policy management
 - Fine-grained control
 - Audit trail
@@ -453,6 +474,7 @@ const allowed = await enforcer.checkPermissions('my-extension', permissions);
 
 **Decision**: Separate integration classes for each channel
 **Rationale**:
+
 - Separation of concerns
 - Easier to maintain
 - Optional integrations
@@ -462,6 +484,7 @@ const allowed = await enforcer.checkPermissions('my-extension', permissions);
 
 **Decision**: Single `extension.json` manifest file
 **Rationale**:
+
 - Single source of truth
 - Easy to validate
 - Clear capabilities declaration
@@ -506,11 +529,13 @@ const allowed = await enforcer.checkPermissions('my-extension', permissions);
 ### Migration Notes
 
 **For existing connector developers**:
+
 - Existing connectors in `connectors/` remain compatible
 - Can optionally migrate to new extension framework
 - Migration guide to be created
 
 **For existing VS Code extension developers**:
+
 - VS Code extensions in `extensions/` remain unchanged
 - New extensions should use Summit extension framework
 - Can coexist with VS Code extensions
@@ -530,25 +555,25 @@ const allowed = await enforcer.checkPermissions('my-extension', permissions);
 ### Automated Testing (To Be Added)
 
 ```typescript
-describe('ExtensionLoader', () => {
-  it('discovers extensions', async () => {
+describe("ExtensionLoader", () => {
+  it("discovers extensions", async () => {
     const loader = createTestLoader();
     const manifests = await loader.discover();
     expect(manifests).toHaveLength(1);
   });
 
-  it('loads valid extensions', async () => {
+  it("loads valid extensions", async () => {
     const loader = createTestLoader();
     await loader.discover();
     await loader.loadAll();
     expect(loader.getRegistry().getLoaded()).toHaveLength(1);
   });
 
-  it('rejects invalid manifests', async () => {
+  it("rejects invalid manifests", async () => {
     // Test validation errors
   });
 
-  it('enforces policy', async () => {
+  it("enforces policy", async () => {
     // Test policy rejection
   });
 });
@@ -619,12 +644,14 @@ describe('ExtensionLoader', () => {
 ## Dependencies Added
 
 **Direct Dependencies**:
+
 - `zod`: ^3.22.4 (Schema validation)
 - `glob`: ^10.3.10 (File discovery)
 - `ajv`: ^8.12.0 (JSON Schema validation - optional)
 - `commander`: ^11.1.0 (CLI framework)
 
 **Dev Dependencies**:
+
 - `typescript`: ^5.3.3
 - `@types/node`: ^20.10.0
 - `jest`: ^29.7.0 (for testing)
@@ -666,6 +693,7 @@ The Summit Extensions & Ecosystem Framework is **complete and ready for review**
 The framework provides a solid foundation for extending Summit with a developer-friendly API, policy-enforced security, and seamless integration across all user touchpoints.
 
 **Recommended Next Steps**:
+
 1. Review implementation
 2. Add unit tests
 3. Test with real Summit APIs

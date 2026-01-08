@@ -2,13 +2,8 @@
  * AgenticDemodulationPanel - AI-powered signal demodulation control
  * Manages autonomous demodulation agents with real-time status and results.
  */
-import React, { useState, useCallback, useMemo } from 'react';
-import type {
-  DemodulationTask,
-  DemodulationResult,
-  SignalStream,
-  ModulationType,
-} from './types';
+import React, { useState, useCallback, useMemo } from "react";
+import type { DemodulationTask, DemodulationResult, SignalStream, ModulationType } from "./types";
 
 interface AgenticDemodulationPanelProps {
   tasks: DemodulationTask[];
@@ -20,24 +15,24 @@ interface AgenticDemodulationPanelProps {
 }
 
 const MODULATION_BADGES: Record<ModulationType, { label: string; color: string }> = {
-  AM: { label: 'AM', color: 'bg-blue-500' },
-  FM: { label: 'FM', color: 'bg-green-500' },
-  PM: { label: 'PM', color: 'bg-cyan-500' },
-  ASK: { label: 'ASK', color: 'bg-amber-500' },
-  FSK: { label: 'FSK', color: 'bg-orange-500' },
-  PSK: { label: 'PSK', color: 'bg-purple-500' },
-  QAM: { label: 'QAM', color: 'bg-pink-500' },
-  OFDM: { label: 'OFDM', color: 'bg-indigo-500' },
-  SPREAD_SPECTRUM: { label: 'SS', color: 'bg-rose-500' },
-  UNKNOWN: { label: '???', color: 'bg-slate-500' },
+  AM: { label: "AM", color: "bg-blue-500" },
+  FM: { label: "FM", color: "bg-green-500" },
+  PM: { label: "PM", color: "bg-cyan-500" },
+  ASK: { label: "ASK", color: "bg-amber-500" },
+  FSK: { label: "FSK", color: "bg-orange-500" },
+  PSK: { label: "PSK", color: "bg-purple-500" },
+  QAM: { label: "QAM", color: "bg-pink-500" },
+  OFDM: { label: "OFDM", color: "bg-indigo-500" },
+  SPREAD_SPECTRUM: { label: "SS", color: "bg-rose-500" },
+  UNKNOWN: { label: "???", color: "bg-slate-500" },
 };
 
 const STATUS_CONFIG = {
-  QUEUED: { label: 'Queued', color: 'text-slate-400', icon: 'clock' },
-  ANALYZING: { label: 'Analyzing', color: 'text-blue-400', icon: 'search' },
-  DEMODULATING: { label: 'Demodulating', color: 'text-cyan-400', icon: 'wave' },
-  COMPLETED: { label: 'Completed', color: 'text-green-400', icon: 'check' },
-  FAILED: { label: 'Failed', color: 'text-red-400', icon: 'x' },
+  QUEUED: { label: "Queued", color: "text-slate-400", icon: "clock" },
+  ANALYZING: { label: "Analyzing", color: "text-blue-400", icon: "search" },
+  DEMODULATING: { label: "Demodulating", color: "text-cyan-400", icon: "wave" },
+  COMPLETED: { label: "Completed", color: "text-green-400", icon: "check" },
+  FAILED: { label: "Failed", color: "text-red-400", icon: "x" },
 };
 
 export const AgenticDemodulationPanel: React.FC<AgenticDemodulationPanelProps> = ({
@@ -54,11 +49,9 @@ export const AgenticDemodulationPanel: React.FC<AgenticDemodulationPanelProps> =
   // Separate active vs completed tasks
   const { activeTasks, completedTasks } = useMemo(() => {
     const active = tasks.filter(
-      (t) => t.status === 'QUEUED' || t.status === 'ANALYZING' || t.status === 'DEMODULATING'
+      (t) => t.status === "QUEUED" || t.status === "ANALYZING" || t.status === "DEMODULATING"
     );
-    const completed = tasks.filter(
-      (t) => t.status === 'COMPLETED' || t.status === 'FAILED'
-    );
+    const completed = tasks.filter((t) => t.status === "COMPLETED" || t.status === "FAILED");
     return { activeTasks: active, completedTasks: completed.slice(0, 10) };
   }, [tasks]);
 
@@ -77,30 +70,55 @@ export const AgenticDemodulationPanel: React.FC<AgenticDemodulationPanelProps> =
     return `${Math.floor(duration / 60000)}m ${Math.floor((duration % 60000) / 1000)}s`;
   };
 
-  const renderStatusIcon = (status: DemodulationTask['status']) => {
+  const renderStatusIcon = (status: DemodulationTask["status"]) => {
     const config = STATUS_CONFIG[status];
-    if (config.icon === 'clock') {
+    if (config.icon === "clock") {
       return (
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
         </svg>
       );
     }
-    if (config.icon === 'search') {
+    if (config.icon === "search") {
       return (
-        <svg className="w-4 h-4 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        <svg
+          className="w-4 h-4 animate-pulse"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
         </svg>
       );
     }
-    if (config.icon === 'wave') {
+    if (config.icon === "wave") {
       return (
-        <svg className="w-4 h-4 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+        <svg
+          className="w-4 h-4 animate-pulse"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+          />
         </svg>
       );
     }
-    if (config.icon === 'check') {
+    if (config.icon === "check") {
       return (
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -109,20 +127,35 @@ export const AgenticDemodulationPanel: React.FC<AgenticDemodulationPanelProps> =
     }
     return (
       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M6 18L18 6M6 6l12 12"
+        />
       </svg>
     );
   };
 
   return (
     <div
-      className={`flex flex-col h-full bg-slate-900 text-slate-100 rounded-lg overflow-hidden ${className || ''}`}
+      className={`flex flex-col h-full bg-slate-900 text-slate-100 rounded-lg overflow-hidden ${className || ""}`}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-slate-800 border-b border-slate-700">
         <div className="flex items-center gap-2">
-          <svg className="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          <svg
+            className="w-5 h-5 text-cyan-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+            />
           </svg>
           <span className="text-lg font-semibold">Agentic Demodulation</span>
         </div>
@@ -143,7 +176,7 @@ export const AgenticDemodulationPanel: React.FC<AgenticDemodulationPanelProps> =
           <label className="block text-xs text-slate-400 mb-2">Select signal stream:</label>
           <div className="flex gap-2">
             <select
-              value={selectedStreamId || ''}
+              value={selectedStreamId || ""}
               onChange={(e) => setSelectedStreamId(e.target.value || null)}
               className="flex-1 px-3 py-2 text-sm bg-slate-800 border border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
             >
@@ -203,7 +236,12 @@ export const AgenticDemodulationPanel: React.FC<AgenticDemodulationPanelProps> =
                     title="Cancel task"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -237,7 +275,7 @@ export const AgenticDemodulationPanel: React.FC<AgenticDemodulationPanelProps> =
               <div
                 key={task.id}
                 className={`px-4 py-3 border-b border-slate-800/50 hover:bg-slate-800/30 cursor-pointer ${
-                  task.status === 'FAILED' ? 'opacity-60' : ''
+                  task.status === "FAILED" ? "opacity-60" : ""
                 }`}
                 onClick={() => task.result && onViewResult?.(task.result)}
               >
@@ -270,11 +308,11 @@ export const AgenticDemodulationPanel: React.FC<AgenticDemodulationPanelProps> =
                   <div className="mt-2 p-2 bg-slate-800/50 rounded text-xs text-slate-300">
                     <div className="flex flex-wrap gap-x-4 gap-y-1">
                       <span>
-                        <span className="text-slate-500">Carrier:</span>{' '}
+                        <span className="text-slate-500">Carrier:</span>{" "}
                         {(task.result.carrierFrequency / 1e6).toFixed(3)} MHz
                       </span>
                       <span>
-                        <span className="text-slate-500">Symbol Rate:</span>{' '}
+                        <span className="text-slate-500">Symbol Rate:</span>{" "}
                         {task.result.symbolRate.toLocaleString()} Bd
                       </span>
                       {task.result.decodedPayload && (
@@ -329,14 +367,14 @@ export const AgenticDemodulationPanel: React.FC<AgenticDemodulationPanelProps> =
         </span>
         <span className="text-slate-400">
           <span className="text-green-400 font-medium">
-            {tasks.filter((t) => t.status === 'COMPLETED').length}
-          </span>{' '}
+            {tasks.filter((t) => t.status === "COMPLETED").length}
+          </span>{" "}
           completed
         </span>
         <span className="text-slate-400">
           <span className="text-red-400 font-medium">
-            {tasks.filter((t) => t.status === 'FAILED').length}
-          </span>{' '}
+            {tasks.filter((t) => t.status === "FAILED").length}
+          </span>{" "}
           failed
         </span>
       </div>

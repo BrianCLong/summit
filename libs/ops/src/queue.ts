@@ -1,6 +1,6 @@
-import crypto from 'node:crypto';
-import Redis from 'ioredis';
-import { queueDepth } from './metrics-queue.js';
+import crypto from "node:crypto";
+import Redis from "ioredis";
+import { queueDepth } from "./metrics-queue.js";
 
 export interface QueueClient {
   lpush(key: string, value: string): Promise<number>;
@@ -15,13 +15,13 @@ export interface QueueJob<Payload = unknown> {
 }
 
 function buildQueueClient(): QueueClient | null {
-  if (process.env.FLAG_SCALE_KEDA !== '1') {
+  if (process.env.FLAG_SCALE_KEDA !== "1") {
     return null;
   }
 
   const address = process.env.REDIS_ADDR;
   if (!address) {
-    console.warn('queue_disabled_no_address');
+    console.warn("queue_disabled_no_address");
     return null;
   }
 
@@ -36,18 +36,18 @@ export async function enqueue(job: QueueJob): Promise<string | null> {
   }
 
   if (!job.type) {
-    throw new Error('queue_job_missing_type');
+    throw new Error("queue_job_missing_type");
   }
 
   const id = job.id ?? crypto.randomUUID();
   const enrichedJob: QueueJob = {
     ...job,
     id,
-    enqueuedAt: job.enqueuedAt ?? Date.now()
+    enqueuedAt: job.enqueuedAt ?? Date.now(),
   };
 
-  await queueClient.lpush('jobs', JSON.stringify(enrichedJob));
-  const depth = await queueClient.llen('jobs');
+  await queueClient.lpush("jobs", JSON.stringify(enrichedJob));
+  const depth = await queueClient.llen("jobs");
   queueDepth.set(depth);
   return id;
 }

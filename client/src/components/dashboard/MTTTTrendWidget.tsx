@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Box,
   Card,
@@ -12,9 +12,9 @@ import {
   Chip,
   LinearProgress,
   Tooltip,
-} from '@mui/material';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
-import Grid from '@mui/material/Grid';
+} from "@mui/material";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
+import Grid from "@mui/material/Grid";
 import {
   MoreVert,
   TrendingUp,
@@ -22,7 +22,7 @@ import {
   TrendingFlat,
   FileDownload,
   Refresh,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 import {
   LineChart,
   Line,
@@ -36,9 +36,9 @@ import {
   Bar,
   BarChart,
   Legend,
-} from 'recharts';
-import { useQuery } from '@apollo/client';
-import { gql } from '@apollo/client';
+} from "recharts";
+import { useQuery } from "@apollo/client";
+import { gql } from "@apollo/client";
 
 const MTTT_METRICS_QUERY = gql`
   query GetMTTTMetrics($timeRange: String!, $cohortFilter: CohortFilter) {
@@ -99,7 +99,7 @@ interface MTTTData {
   escalatedAlerts: number;
 }
 
-type ChartType = 'line' | 'area' | 'bar';
+type ChartType = "line" | "area" | "bar";
 
 interface MTTTStats {
   p50: number;
@@ -111,7 +111,7 @@ interface MTTTStats {
 interface MTTTSummary {
   currentMTTT?: MTTTStats | null;
   previousMTTT?: MTTTStats | null;
-  trend?: 'improving' | 'degrading' | 'stable' | string | null;
+  trend?: "improving" | "degrading" | "stable" | string | null;
   improvement?: number | null;
   targetMTTT?: number | null;
   slaCompliance?: number | null;
@@ -155,43 +155,41 @@ interface MTTTTrendWidgetProps {
 }
 
 const TIME_RANGES = [
-  { value: '1h', label: 'Last Hour' },
-  { value: '6h', label: 'Last 6 Hours' },
-  { value: '24h', label: 'Last 24 Hours' },
-  { value: '7d', label: 'Last 7 Days' },
-  { value: '30d', label: 'Last 30 Days' },
+  { value: "1h", label: "Last Hour" },
+  { value: "6h", label: "Last 6 Hours" },
+  { value: "24h", label: "Last 24 Hours" },
+  { value: "7d", label: "Last 7 Days" },
+  { value: "30d", label: "Last 30 Days" },
 ];
 
 const COHORT_OPTIONS = [
-  { value: 'all', label: 'All Analysts' },
-  { value: 'tier1', label: 'Tier 1' },
-  { value: 'tier2', label: 'Tier 2' },
-  { value: 'senior', label: 'Senior' },
-  { value: 'new_hire', label: 'New Hire' },
+  { value: "all", label: "All Analysts" },
+  { value: "tier1", label: "Tier 1" },
+  { value: "tier2", label: "Tier 2" },
+  { value: "senior", label: "Senior" },
+  { value: "new_hire", label: "New Hire" },
 ];
 
 export default function MTTTTrendWidget({
-  timeRange = '24h',
+  timeRange = "24h",
   height = 400,
   cohortFilter,
 }: MTTTTrendWidgetProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedTimeRange, setSelectedTimeRange] = useState(timeRange);
-  const [selectedCohort, setSelectedCohort] = useState(
-    cohortFilter ?? 'all',
-  );
-  const [chartType, setChartType] = useState<ChartType>('line');
+  const [selectedCohort, setSelectedCohort] = useState(cohortFilter ?? "all");
+  const [chartType, setChartType] = useState<ChartType>("line");
 
-  const { data, loading, error, refetch } = useQuery<
-    MTTTQueryData,
-    MTTTQueryVariables
-  >(MTTT_METRICS_QUERY, {
-    variables: {
-      timeRange: selectedTimeRange,
-      cohortFilter: { cohort: selectedCohort },
-    },
-    pollInterval: 300000, // Refresh every 5 minutes
-  });
+  const { data, loading, error, refetch } = useQuery<MTTTQueryData, MTTTQueryVariables>(
+    MTTT_METRICS_QUERY,
+    {
+      variables: {
+        timeRange: selectedTimeRange,
+        cohortFilter: { cohort: selectedCohort },
+      },
+      pollInterval: 300000, // Refresh every 5 minutes
+    }
+  );
 
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -220,10 +218,10 @@ export default function MTTTTrendWidget({
     };
 
     const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-      type: 'application/json',
+      type: "application/json",
     });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `mttt-metrics-${selectedTimeRange}-${Date.now()}.json`;
     document.body.appendChild(a);
@@ -245,9 +243,9 @@ export default function MTTTTrendWidget({
 
   const getTrendIcon = (trend: string) => {
     switch (trend) {
-      case 'improving':
+      case "improving":
         return <TrendingDown color="success" />;
-      case 'degrading':
+      case "degrading":
         return <TrendingUp color="error" />;
       default:
         return <TrendingFlat color="action" />;
@@ -256,12 +254,12 @@ export default function MTTTTrendWidget({
 
   const getTrendColor = (trend: string) => {
     switch (trend) {
-      case 'improving':
-        return 'success.main';
-      case 'degrading':
-        return 'error.main';
+      case "improving":
+        return "success.main";
+      case "degrading":
+        return "error.main";
       default:
-        return 'text.secondary';
+        return "text.secondary";
     }
   };
 
@@ -279,19 +277,15 @@ export default function MTTTTrendWidget({
     const targetMTTT = metrics.summary?.targetMTTT ?? 15; // Default 15 minutes
 
     switch (chartType) {
-      case 'area':
+      case "area":
         return (
           <ResponsiveContainer width="100%" height={250}>
             <AreaChart data={timeSeriesData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                dataKey="timestamp"
-                fontSize={12}
-                tick={{ fill: '#666' }}
-              />
+              <XAxis dataKey="timestamp" fontSize={12} tick={{ fill: "#666" }} />
               <YAxis
                 fontSize={12}
-                tick={{ fill: '#666' }}
+                tick={{ fill: "#666" }}
                 tickFormatter={(value: number) => formatTime(value)}
               />
               <ReferenceLine
@@ -323,27 +317,18 @@ export default function MTTTTrendWidget({
           </ResponsiveContainer>
         );
 
-      case 'bar':
+      case "bar":
         return (
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={timeSeriesData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                dataKey="timestamp"
-                fontSize={12}
-                tick={{ fill: '#666' }}
-              />
+              <XAxis dataKey="timestamp" fontSize={12} tick={{ fill: "#666" }} />
               <YAxis
                 fontSize={12}
-                tick={{ fill: '#666' }}
+                tick={{ fill: "#666" }}
                 tickFormatter={(value: number) => formatTime(value)}
               />
-              <ReferenceLine
-                y={targetMTTT}
-                stroke="#f44336"
-                strokeDasharray="5 5"
-                label="Target"
-              />
+              <ReferenceLine y={targetMTTT} stroke="#f44336" strokeDasharray="5 5" label="Target" />
               <Bar dataKey="p50" fill="#2196f3" name="P50 MTTT" />
               <Bar dataKey="p90" fill="#ff9800" name="P90 MTTT" />
               <Legend />
@@ -356,14 +341,10 @@ export default function MTTTTrendWidget({
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={timeSeriesData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                dataKey="timestamp"
-                fontSize={12}
-                tick={{ fill: '#666' }}
-              />
+              <XAxis dataKey="timestamp" fontSize={12} tick={{ fill: "#666" }} />
               <YAxis
                 fontSize={12}
-                tick={{ fill: '#666' }}
+                tick={{ fill: "#666" }}
                 tickFormatter={(value: number) => formatTime(value)}
               />
               <ReferenceLine
@@ -412,13 +393,13 @@ export default function MTTTTrendWidget({
           </Typography>
           <Box
             sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: '70%',
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "70%",
             }}
           >
-            <LinearProgress sx={{ width: '50%' }} />
+            <LinearProgress sx={{ width: "50%" }} />
           </Box>
         </CardContent>
       </Card>
@@ -450,26 +431,22 @@ export default function MTTTTrendWidget({
         {/* Header */}
         <Box
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
             mb: 2,
           }}
         >
           <Box>
             <Typography variant="h6">Mean Time to Triage (MTTT)</Typography>
             <Typography variant="body2" color="text.secondary">
-              Current P50: {formatTime(summary?.currentMTTT?.p50 || 0)} • SLA
-              Compliance:{' '}
+              Current P50: {formatTime(summary?.currentMTTT?.p50 || 0)} • SLA Compliance:{" "}
               {((summary?.slaCompliance || 0) * 100).toFixed(1)}%
             </Typography>
           </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <FormControl size="small" sx={{ minWidth: 100 }}>
-              <Select
-                value={selectedTimeRange}
-                onChange={handleTimeRangeChange}
-              >
+              <Select value={selectedTimeRange} onChange={handleTimeRangeChange}>
                 {TIME_RANGES.map((range) => (
                   <MenuItem key={range.value} value={range.value}>
                     {range.label}
@@ -478,10 +455,7 @@ export default function MTTTTrendWidget({
               </Select>
             </FormControl>
             <FormControl size="small" sx={{ minWidth: 120 }}>
-              <Select
-                value={selectedCohort}
-                onChange={handleCohortChange}
-              >
+              <Select value={selectedCohort} onChange={handleCohortChange}>
                 {COHORT_OPTIONS.map((option) => (
                   <MenuItem key={option.value} value={option.value}>
                     {option.label}
@@ -501,36 +475,34 @@ export default function MTTTTrendWidget({
         {/* Summary Metrics */}
         <Grid container spacing={2} sx={{ mb: 3 }}>
           <Grid xs={3}>
-            <Box sx={{ textAlign: 'center' }}>
+            <Box sx={{ textAlign: "center" }}>
               <Typography variant="h4" color="primary">
                 {formatTime(summary?.currentMTTT?.p50 || 0)}
               </Typography>
               <Typography variant="caption">P50 MTTT</Typography>
               <Box
                 sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                   mt: 0.5,
                 }}
               >
-                {getTrendIcon(summary?.trend ?? 'stable')}
+                {getTrendIcon(summary?.trend ?? "stable")}
                 <Typography
                   variant="caption"
                   sx={{
-                    color: getTrendColor(summary?.trend ?? 'stable'),
+                    color: getTrendColor(summary?.trend ?? "stable"),
                     ml: 0.5,
                   }}
                 >
-                  {summary?.improvement
-                    ? `${(summary.improvement * 100).toFixed(1)}%`
-                    : '--'}
+                  {summary?.improvement ? `${(summary.improvement * 100).toFixed(1)}%` : "--"}
                 </Typography>
               </Box>
             </Box>
           </Grid>
           <Grid xs={3}>
-            <Box sx={{ textAlign: 'center' }}>
+            <Box sx={{ textAlign: "center" }}>
               <Typography variant="h4" color="warning.main">
                 {formatTime(summary?.currentMTTT?.p90 || 0)}
               </Typography>
@@ -538,7 +510,7 @@ export default function MTTTTrendWidget({
             </Box>
           </Grid>
           <Grid xs={3}>
-            <Box sx={{ textAlign: 'center' }}>
+            <Box sx={{ textAlign: "center" }}>
               <Typography variant="h4" color="error.main">
                 {formatTime(summary?.currentMTTT?.p95 || 0)}
               </Typography>
@@ -546,11 +518,8 @@ export default function MTTTTrendWidget({
             </Box>
           </Grid>
           <Grid xs={3}>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography
-                variant="h4"
-                color={slaCompliance >= 0.8 ? 'success.main' : 'error.main'}
-              >
+            <Box sx={{ textAlign: "center" }}>
+              <Typography variant="h4" color={slaCompliance >= 0.8 ? "success.main" : "error.main"}>
                 {(slaCompliance * 100).toFixed(0)}%
               </Typography>
               <Typography variant="caption">SLA Compliance</Typography>
@@ -560,15 +529,15 @@ export default function MTTTTrendWidget({
 
         {/* Chart */}
         <Box sx={{ mb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
             <Typography variant="subtitle2">Trend Analysis</Typography>
-            <Box sx={{ display: 'flex', gap: 0.5 }}>
-              {(['line', 'area', 'bar'] as ChartType[]).map((type) => (
+            <Box sx={{ display: "flex", gap: 0.5 }}>
+              {(["line", "area", "bar"] as ChartType[]).map((type) => (
                 <Chip
                   key={type}
                   size="small"
                   label={type}
-                  variant={chartType === type ? 'filled' : 'outlined'}
+                  variant={chartType === type ? "filled" : "outlined"}
                   onClick={() => setChartType(type)}
                 />
               ))}
@@ -589,19 +558,17 @@ export default function MTTTTrendWidget({
                   <Box
                     sx={{
                       p: 1,
-                      bgcolor: 'grey.50',
+                      bgcolor: "grey.50",
                       borderRadius: 1,
-                      display: 'flex',
-                      justifyContent: 'space-between',
+                      display: "flex",
+                      justifyContent: "space-between",
                     }}
                   >
                     <Typography variant="body2" fontWeight="medium">
                       {cohort.cohort}
                     </Typography>
-                    <Box sx={{ textAlign: 'right' }}>
-                      <Typography variant="body2">
-                        {formatTime(cohort.mttt)}
-                      </Typography>
+                    <Box sx={{ textAlign: "right" }}>
+                      <Typography variant="body2">{formatTime(cohort.mttt)}</Typography>
                       <Typography variant="caption" color="text.secondary">
                         {cohort.alertCount} alerts
                       </Typography>
@@ -613,18 +580,14 @@ export default function MTTTTrendWidget({
           </Box>
         )}
 
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleMenuClose}
-        >
+        <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
           <MenuItem onClick={handleExport}>
             <FileDownload sx={{ mr: 1 }} />
             Export Data
           </MenuItem>
           <MenuItem
             onClick={() => {
-              setChartType('line');
+              setChartType("line");
               handleMenuClose();
             }}
           >
@@ -632,7 +595,7 @@ export default function MTTTTrendWidget({
           </MenuItem>
           <MenuItem
             onClick={() => {
-              setChartType('area');
+              setChartType("area");
               handleMenuClose();
             }}
           >
@@ -640,7 +603,7 @@ export default function MTTTTrendWidget({
           </MenuItem>
           <MenuItem
             onClick={() => {
-              setChartType('bar');
+              setChartType("bar");
               handleMenuClose();
             }}
           >

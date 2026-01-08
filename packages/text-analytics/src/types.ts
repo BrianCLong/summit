@@ -3,7 +3,7 @@
  */
 
 export interface SentimentResult {
-  sentiment: 'positive' | 'negative' | 'neutral';
+  sentiment: "positive" | "negative" | "neutral";
   score: number;
   confidence: number;
   aspects?: AspectSentiment[];
@@ -12,13 +12,13 @@ export interface SentimentResult {
 
 export interface AspectSentiment {
   aspect: string;
-  sentiment: 'positive' | 'negative' | 'neutral';
+  sentiment: "positive" | "negative" | "neutral";
   score: number;
   mentions: Array<{ text: string; start: number; end: number }>;
 }
 
 export interface EmotionScore {
-  emotion: 'joy' | 'anger' | 'fear' | 'sadness' | 'surprise' | 'disgust';
+  emotion: "joy" | "anger" | "fear" | "sadness" | "surprise" | "disgust";
   score: number;
   confidence: number;
 }
@@ -55,7 +55,7 @@ export interface SimilarityResult {
   document1Id: string;
   document2Id: string;
   similarity: number;
-  method: 'cosine' | 'jaccard' | 'levenshtein' | 'semantic';
+  method: "cosine" | "jaccard" | "levenshtein" | "semantic";
 }
 
 export interface Relationship {
@@ -88,6 +88,6 @@ export interface EventExtraction {
 export interface TemporalRelation {
   event1: string;
   event2: string;
-  relation: 'before' | 'after' | 'during' | 'overlaps' | 'simultaneous';
+  relation: "before" | "after" | "during" | "overlaps" | "simultaneous";
   confidence: number;
 }

@@ -1,10 +1,10 @@
-import { EventEmitter } from 'node:events';
+import { EventEmitter } from "node:events";
 import type {
   AssetDescriptor,
   DiscoveryEvent,
   DiscoveryEventType,
   DiscoveryProvider,
-} from './types';
+} from "./types";
 
 function toComparable(asset: AssetDescriptor): string {
   const clone: Record<string, unknown> = { ...asset };
@@ -39,11 +39,11 @@ export class AssetDiscoveryEngine {
     this.providerAssets.delete(providerId);
   }
 
-  on(event: 'event', listener: (event: DiscoveryEvent) => void): void {
+  on(event: "event", listener: (event: DiscoveryEvent) => void): void {
     this.emitter.on(event, listener);
   }
 
-  off(event: 'event', listener: (event: DiscoveryEvent) => void): void {
+  off(event: "event", listener: (event: DiscoveryEvent) => void): void {
     this.emitter.off(event, listener);
   }
 
@@ -64,8 +64,7 @@ export class AssetDiscoveryEngine {
         seen.add(asset.id);
         events.push(...this.upsert(asset, provider.id));
       }
-      const previous =
-        this.providerAssets.get(provider.id) ?? new Set<string>();
+      const previous = this.providerAssets.get(provider.id) ?? new Set<string>();
       for (const assetId of previous) {
         if (!seen.has(assetId)) {
           this.removeSource(assetId, provider.id);
@@ -85,7 +84,7 @@ export class AssetDiscoveryEngine {
 
     if (!existing) {
       this.registry.set(asset.id, next);
-      events.push(this.emitEvent('registered', next));
+      events.push(this.emitEvent("registered", next));
       return events;
     }
 
@@ -93,7 +92,7 @@ export class AssetDiscoveryEngine {
     const nextComparable = toComparable(next);
     if (previousComparable !== nextComparable) {
       this.registry.set(asset.id, next);
-      events.push(this.emitEvent('updated', next, existing));
+      events.push(this.emitEvent("updated", next, existing));
     } else {
       this.registry.set(asset.id, next);
     }
@@ -117,7 +116,7 @@ export class AssetDiscoveryEngine {
       const existing = this.registry.get(assetId);
       if (existing) {
         this.registry.delete(assetId);
-        this.emitEvent('removed', existing, existing);
+        this.emitEvent("removed", existing, existing);
       }
     } else {
       this.assetSources.set(assetId, sources);
@@ -127,10 +126,10 @@ export class AssetDiscoveryEngine {
   private emitEvent(
     type: DiscoveryEventType,
     asset: AssetDescriptor,
-    previous?: AssetDescriptor,
+    previous?: AssetDescriptor
   ): DiscoveryEvent {
     const event: DiscoveryEvent = { type, asset, previous };
-    this.emitter.emit('event', event);
+    this.emitter.emit("event", event);
     return event;
   }
 }

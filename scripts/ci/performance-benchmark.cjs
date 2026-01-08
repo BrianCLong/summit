@@ -1,9 +1,9 @@
-const { performance } = require('node:perf_hooks');
-const { createResult } = require('./lib/reporting.cjs');
+const { performance } = require("node:perf_hooks");
+const { createResult } = require("./lib/reporting.cjs");
 
 const OPERATIONS = [
   {
-    name: 'graph-path-evaluation',
+    name: "graph-path-evaluation",
     maxMs: 500,
     run: () => {
       const graph = new Map();
@@ -33,32 +33,31 @@ const OPERATIONS = [
     },
   },
   {
-    name: 'aggregation-pipeline',
+    name: "aggregation-pipeline",
     maxMs: 500,
     run: () => {
       const records = Array.from({ length: 5000 }, (_, index) => ({
         risk: (index % 7) + 1,
         score: (index * 3) % 97,
-        status: index % 5 === 0 ? 'open' : 'closed',
+        status: index % 5 === 0 ? "open" : "closed",
       }));
       const summary = records
-        .filter((record) => record.status === 'open')
+        .filter((record) => record.status === "open")
         .reduce(
           (acc, record) => {
             acc.count += 1;
             acc.total += record.score;
-            acc.riskBuckets[record.risk] =
-              (acc.riskBuckets[record.risk] || 0) + 1;
+            acc.riskBuckets[record.risk] = (acc.riskBuckets[record.risk] || 0) + 1;
             return acc;
           },
-          { count: 0, total: 0, riskBuckets: {} },
+          { count: 0, total: 0, riskBuckets: {} }
         );
       summary.average = summary.count === 0 ? 0 : summary.total / summary.count;
       return summary;
     },
   },
   {
-    name: 'json-serialization',
+    name: "json-serialization",
     maxMs: 500,
     run: () => {
       const payload = [];
@@ -84,9 +83,9 @@ const OPERATIONS = [
 
 function runPerformanceBenchmark() {
   const description =
-    'Validates key analytical operations stay under the 500ms performance budget.';
+    "Validates key analytical operations stay under the 500ms performance budget.";
   const remediation =
-    'Profile the affected operation, optimize algorithms or caching, and rerun the benchmark until all steps finish within 500ms.';
+    "Profile the affected operation, optimize algorithms or caching, and rerun the benchmark until all steps finish within 500ms.";
   const details = [];
   let allPassing = true;
   for (const operation of OPERATIONS) {
@@ -94,16 +93,16 @@ function runPerformanceBenchmark() {
     if (duration > operation.maxMs) {
       allPassing = false;
       details.push(
-        `${operation.name} took ${duration.toFixed(2)}ms (limit ${operation.maxMs}ms) — investigate performance regressions.`,
+        `${operation.name} took ${duration.toFixed(2)}ms (limit ${operation.maxMs}ms) — investigate performance regressions.`
       );
     } else {
       details.push(
-        `${operation.name} completed in ${duration.toFixed(2)}ms (limit ${operation.maxMs}ms).`,
+        `${operation.name} completed in ${duration.toFixed(2)}ms (limit ${operation.maxMs}ms).`
       );
     }
   }
   return createResult({
-    name: 'performance-benchmark',
+    name: "performance-benchmark",
     description,
     passed: allPassing,
     details,

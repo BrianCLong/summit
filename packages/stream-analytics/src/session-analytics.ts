@@ -37,7 +37,7 @@ export class SessionAnalyzer {
     session.lastActivity = event.timestamp;
     session.duration = event.timestamp - session.startTime;
 
-    if (event.type === 'page_view') {
+    if (event.type === "page_view") {
       session.pageViews++;
     }
 

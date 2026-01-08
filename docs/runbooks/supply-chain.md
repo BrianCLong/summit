@@ -3,11 +3,13 @@
 This runbook describes the operational path to maintain supply-chain assurance across software artifacts. It covers SBOM regeneration, signing method rotation, air-gapped validation, exception handling, and rollback. Follow these steps in order and record evidence in the release record.
 
 ## Roles & Preconditions
+
 - **Roles:** release captain (or delegate), security on-call, service owner.
 - **Prereqs:** working `cosign`, `syft`, `grype`, offline trust bundle (public keys, policies), access to provenance store, and CI credentials to update signing secrets.
 - **Artifacts to track:** artifact digest, SBOM hash, attestation signature(s), vulnerability scan report ID, exception ticket (if any).
 
 ## SBOM Regeneration
+
 1. **Triggers:** new/updated dependency or base image, weekly cadence for long-lived releases, or security advisory for a transitive package.
 2. **Build and generate:**
    - Build the release artifact: `pnpm run build` or service-specific target.
@@ -21,6 +23,7 @@ This runbook describes the operational path to maintain supply-chain assurance a
 5. **Success criteria:** SBOM present, signed, uploaded, and scan passes policy. Stale SBOMs (pre-dependency change) are invalid.
 
 ## Signing Method Rotation
+
 1. **Triggers:** key compromise, cryptoperiod expiry, algorithm deprecation, or mandated trust policy change.
 2. **Prepare:**
    - Provision new key pair in HSM/KMS; tag owner, purpose, and expiry.
@@ -35,6 +38,7 @@ This runbook describes the operational path to maintain supply-chain assurance a
    - Record rotation window, keys involved, verification evidence, and policy update PRs in the change log.
 
 ## Air-Gapped Validation
+
 1. **Objective:** prove artifact provenance without internet access.
 2. **Inputs:** artifact tarballs, SBOM, signatures/attestations, public keys/trust policy bundle, verification tools with checksums.
 3. **Procedure:**
@@ -45,6 +49,7 @@ This runbook describes the operational path to maintain supply-chain assurance a
 4. **Controls:** restricted media custody, hash chain for transfers, retained offline logs, and periodic tool checksum verification.
 
 ## Exceptions (Creation & Expiry)
+
 1. **When needed:** temporary waiver for failing SCA/SAST, unavailable signer, or validated tooling outage.
 2. **Request:** open an exception ticket capturing owner, risk assessment, affected artifacts/digests, scope, duration, and compensating controls.
 3. **Approval & enforcement:**
@@ -55,6 +60,7 @@ This runbook describes the operational path to maintain supply-chain assurance a
    - Regenerate SBOM/signatures, rerun scans, and attach evidence to close the ticket; remove bypass flags.
 
 ## Rollback
+
 1. **Triggers:** failed verification, revoked key, critical CVE in SBOM scan, or expired/invalid exception.
 2. **Action plan:**
    - Halt rollout and freeze artifact promotion.
@@ -64,6 +70,7 @@ This runbook describes the operational path to maintain supply-chain assurance a
 3. **Post-rollback:** publish incident report with timeline, root cause, and corrective actions (e.g., patched dependencies, new keys). Schedule remediation and a follow-up rotation/regeneration if required.
 
 ## Contacts & References
+
 - Security on-call: `security-oncall@example.com`
 - Provenance service: `provenance-team@example.com`
 - Tooling docs: `tools/supply-chain/README.md` (update when tooling or trust policies change)

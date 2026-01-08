@@ -26,14 +26,14 @@ export class ReliabilityManager {
     const reasons = [];
     const latestCheck = this.syntheticChecks.at(-1);
     if (latestCheck && (!latestCheck.passed || latestCheck.errorRate > this.slo.errorRateBudget)) {
-      reasons.push('synthetic-check-failure');
+      reasons.push("synthetic-check-failure");
     }
     const latestDrift = this.driftTrend.at(-1) ?? 0;
     if (latestDrift > this.slo.driftBudget) {
-      reasons.push('drift-budget-breached');
+      reasons.push("drift-budget-breached");
     }
-    if (phase === 'ramp' && reasons.length > 0) {
-      reasons.push('rollback-due-to-ramp-instability');
+    if (phase === "ramp" && reasons.length > 0) {
+      reasons.push("rollback-due-to-ramp-instability");
     }
     return { shouldRollback: reasons.length > 0, reasons };
   }

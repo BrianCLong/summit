@@ -26,7 +26,7 @@ export default function SignupPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
       ...prev,
-      [e.target.id]: e.target.value
+      [e.target.id]: e.target.value,
     }))
   }
 
@@ -68,15 +68,20 @@ export default function SignupPage() {
             </div>
             <CardTitle className="text-white">Check your email</CardTitle>
             <CardDescription className="text-blue-200">
-              We've sent a verification link to <strong>{formData.email}</strong>
+              We've sent a verification link to{' '}
+              <strong>{formData.email}</strong>
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center space-y-4">
             <p className="text-sm text-slate-300">
-              Click the link in the email to activate your account and get started.
+              Click the link in the email to activate your account and get
+              started.
             </p>
             <div className="pt-4 border-t border-white/10">
-              <Link to="/signin" className="text-blue-400 hover:text-blue-300 text-sm font-medium">
+              <Link
+                to="/signin"
+                className="text-blue-400 hover:text-blue-300 text-sm font-medium"
+              >
                 Back to Sign In
               </Link>
             </div>
@@ -110,7 +115,10 @@ export default function SignupPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="firstName" className="block text-sm font-medium text-white mb-1">
+                  <label
+                    htmlFor="firstName"
+                    className="block text-sm font-medium text-white mb-1"
+                  >
                     First Name
                   </label>
                   <input
@@ -123,7 +131,10 @@ export default function SignupPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="lastName" className="block text-sm font-medium text-white mb-1">
+                  <label
+                    htmlFor="lastName"
+                    className="block text-sm font-medium text-white mb-1"
+                  >
                     Last Name
                   </label>
                   <input
@@ -138,7 +149,10 @@ export default function SignupPage() {
               </div>
 
               <div>
-                <label htmlFor="username" className="block text-sm font-medium text-white mb-1">
+                <label
+                  htmlFor="username"
+                  className="block text-sm font-medium text-white mb-1"
+                >
                   Username
                 </label>
                 <input
@@ -152,7 +166,10 @@ export default function SignupPage() {
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-white mb-1">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-white mb-1"
+                >
                   Email
                 </label>
                 <input
@@ -167,7 +184,10 @@ export default function SignupPage() {
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-white mb-1">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-white mb-1"
+                >
                   Password
                 </label>
                 <div className="relative">
@@ -193,7 +213,9 @@ export default function SignupPage() {
                     )}
                   </button>
                 </div>
-                <p className="text-xs text-blue-200 mt-1">Must be at least 8 characters long</p>
+                <p className="text-xs text-blue-200 mt-1">
+                  Must be at least 8 characters long
+                </p>
               </div>
 
               {error && (
@@ -224,7 +246,10 @@ export default function SignupPage() {
             <div className="mt-6 text-center">
               <p className="text-sm text-blue-200">
                 Already have an account?{' '}
-                <Link to="/signin" className="text-white hover:text-blue-300 font-medium hover:underline">
+                <Link
+                  to="/signin"
+                  className="text-white hover:text-blue-300 font-medium hover:underline"
+                >
                   Sign in
                 </Link>
               </p>

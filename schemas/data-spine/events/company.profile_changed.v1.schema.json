@@ -42,12 +42,7 @@
               }
             }
           },
-          "required": [
-            "entity_id",
-            "change_type",
-            "source_table",
-            "new_state"
-          ]
+          "required": ["entity_id", "change_type", "source_table", "new_state"]
         }
       }
     }

@@ -3,14 +3,14 @@
  * Workflow template for automated decision analysis with provenance
  */
 
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid } from "uuid";
 import type {
   WorkflowDefinition,
   WorkflowStep,
   StepPlugin,
   RunContext,
   StepExecution,
-} from '../engine.js';
+} from "../engine.js";
 
 /**
  * Decision Analysis Run - Workflow Definition
@@ -25,120 +25,120 @@ import type {
  * 7. Route for approval if required
  */
 export const DecisionAnalysisWorkflow: WorkflowDefinition = {
-  name: 'decision-analysis-run',
-  version: '1.0.0',
+  name: "decision-analysis-run",
+  version: "1.0.0",
   global_timeout_ms: 300000, // 5 minutes
-  on_failure: 'compensate',
+  on_failure: "compensate",
   steps: [
     {
-      id: 'validate-input',
-      name: 'Validate Decision Input',
-      plugin: 'input-validator',
+      id: "validate-input",
+      name: "Validate Decision Input",
+      plugin: "input-validator",
       config: {
-        schema: 'decision-run-input',
-        required_fields: ['question', 'entity_ids'],
+        schema: "decision-run-input",
+        required_fields: ["question", "entity_ids"],
       },
       retry: { max_attempts: 1, backoff_ms: 0, exponential: false },
       timeout_ms: 5000,
     },
     {
-      id: 'fetch-entities',
-      name: 'Fetch Entity Context',
-      plugin: 'graph-query',
+      id: "fetch-entities",
+      name: "Fetch Entity Context",
+      plugin: "graph-query",
       config: {
-        query_type: 'entities',
+        query_type: "entities",
         include_relationships: true,
         depth: 2,
       },
-      depends_on: ['validate-input'],
+      depends_on: ["validate-input"],
       retry: { max_attempts: 3, backoff_ms: 1000, exponential: true },
       timeout_ms: 30000,
     },
     {
-      id: 'gather-claims',
-      name: 'Gather Related Claims',
-      plugin: 'graph-query',
+      id: "gather-claims",
+      name: "Gather Related Claims",
+      plugin: "graph-query",
       config: {
-        query_type: 'claims',
+        query_type: "claims",
         filter_by_entities: true,
         include_confidence: true,
         min_confidence: 0.3,
       },
-      depends_on: ['fetch-entities'],
+      depends_on: ["fetch-entities"],
       retry: { max_attempts: 3, backoff_ms: 1000, exponential: true },
       timeout_ms: 30000,
     },
     {
-      id: 'collect-evidence',
-      name: 'Collect Supporting Evidence',
-      plugin: 'evidence-collector',
+      id: "collect-evidence",
+      name: "Collect Supporting Evidence",
+      plugin: "evidence-collector",
       config: {
         max_items: 20,
         verify_hashes: true,
         check_freshness: true,
         max_age_days: 365,
       },
-      depends_on: ['gather-claims'],
+      depends_on: ["gather-claims"],
       retry: { max_attempts: 2, backoff_ms: 2000, exponential: true },
       timeout_ms: 60000,
     },
     {
-      id: 'ai-analysis',
-      name: 'Run AI Analysis',
-      plugin: 'ai-reasoner',
+      id: "ai-analysis",
+      name: "Run AI Analysis",
+      plugin: "ai-reasoner",
       config: {
-        model: 'claude-3-5-sonnet',
+        model: "claude-3-5-sonnet",
         temperature: 0.3,
         max_tokens: 4000,
-        system_prompt: 'decision-analysis',
-        output_format: 'structured',
+        system_prompt: "decision-analysis",
+        output_format: "structured",
       },
-      depends_on: ['collect-evidence'],
+      depends_on: ["collect-evidence"],
       retry: { max_attempts: 2, backoff_ms: 5000, exponential: true },
       timeout_ms: 120000,
       compensation: {
-        plugin: 'ai-reasoner',
-        config: { action: 'cancel' },
+        plugin: "ai-reasoner",
+        config: { action: "cancel" },
       },
     },
     {
-      id: 'create-decision',
-      name: 'Create Decision Record',
-      plugin: 'decision-creator',
+      id: "create-decision",
+      name: "Create Decision Record",
+      plugin: "decision-creator",
       config: {
         include_provenance: true,
         link_claims: true,
         link_evidence: true,
         compute_hash: true,
       },
-      depends_on: ['ai-analysis'],
+      depends_on: ["ai-analysis"],
       retry: { max_attempts: 3, backoff_ms: 1000, exponential: true },
       timeout_ms: 30000,
     },
     {
-      id: 'generate-disclosure',
-      name: 'Generate Disclosure Pack',
-      plugin: 'disclosure-generator',
+      id: "generate-disclosure",
+      name: "Generate Disclosure Pack",
+      plugin: "disclosure-generator",
       config: {
-        format: 'markdown',
+        format: "markdown",
         include_audit_trail: true,
         compute_merkle_root: true,
       },
-      depends_on: ['create-decision'],
+      depends_on: ["create-decision"],
       retry: { max_attempts: 2, backoff_ms: 1000, exponential: false },
       timeout_ms: 30000,
     },
     {
-      id: 'route-approval',
-      name: 'Route for Approval',
-      plugin: 'approval-router',
+      id: "route-approval",
+      name: "Route for Approval",
+      plugin: "approval-router",
       config: {
         check_confidence_threshold: true,
         confidence_threshold: 0.7,
         auto_approve_high_confidence: false,
-        notification_channels: ['email', 'slack'],
+        notification_channels: ["email", "slack"],
       },
-      depends_on: ['generate-disclosure'],
+      depends_on: ["generate-disclosure"],
       retry: { max_attempts: 3, backoff_ms: 2000, exponential: true },
       timeout_ms: 30000,
     },
@@ -153,11 +153,11 @@ export const DecisionAnalysisWorkflow: WorkflowDefinition = {
  * Input Validator Plugin
  */
 export const InputValidatorPlugin: StepPlugin = {
-  name: 'input-validator',
+  name: "input-validator",
 
   validate(config: any): void {
     if (!config.schema) {
-      throw new Error('Input validator requires schema');
+      throw new Error("Input validator requires schema");
     }
   },
 
@@ -168,12 +168,12 @@ export const InputValidatorPlugin: StepPlugin = {
     // Validate required fields
     const missing = required_fields.filter((f: string) => !parameters[f]);
     if (missing.length > 0) {
-      throw new Error(`Missing required fields: ${missing.join(', ')}`);
+      throw new Error(`Missing required fields: ${missing.join(", ")}`);
     }
 
     // Validate question length
     if (parameters.question && parameters.question.length > 2000) {
-      throw new Error('Question exceeds maximum length of 2000 characters');
+      throw new Error("Question exceeds maximum length of 2000 characters");
     }
 
     // Validate entity IDs format
@@ -201,22 +201,23 @@ export const InputValidatorPlugin: StepPlugin = {
  * Graph Query Plugin
  */
 export const GraphQueryPlugin: StepPlugin = {
-  name: 'graph-query',
+  name: "graph-query",
 
   validate(config: any): void {
     if (!config.query_type) {
-      throw new Error('Graph query requires query_type');
+      throw new Error("Graph query requires query_type");
     }
   },
 
   async execute(context: RunContext, step: WorkflowStep, execution: StepExecution) {
     const { parameters, tenant_id } = context;
-    const { query_type, include_relationships, depth, filter_by_entities, min_confidence } = step.config;
+    const { query_type, include_relationships, depth, filter_by_entities, min_confidence } =
+      step.config;
 
     // Simulated graph query - in production, call decision-api
-    const apiUrl = process.env.DECISION_API_URL || 'http://localhost:4020';
+    const apiUrl = process.env.DECISION_API_URL || "http://localhost:4020";
 
-    if (query_type === 'entities') {
+    if (query_type === "entities") {
       const entities = await fetchEntities(apiUrl, parameters.entity_ids, tenant_id);
       return {
         output: {
@@ -230,12 +231,12 @@ export const GraphQueryPlugin: StepPlugin = {
       };
     }
 
-    if (query_type === 'claims') {
+    if (query_type === "claims") {
       const claims = await fetchClaimsForEntities(
         apiUrl,
         parameters.entity_ids,
         tenant_id,
-        min_confidence,
+        min_confidence
       );
       return {
         output: {
@@ -257,11 +258,11 @@ export const GraphQueryPlugin: StepPlugin = {
  * Evidence Collector Plugin
  */
 export const EvidenceCollectorPlugin: StepPlugin = {
-  name: 'evidence-collector',
+  name: "evidence-collector",
 
   validate(config: any): void {
     if (config.max_items && config.max_items > 100) {
-      throw new Error('max_items cannot exceed 100');
+      throw new Error("max_items cannot exceed 100");
     }
   },
 
@@ -269,7 +270,7 @@ export const EvidenceCollectorPlugin: StepPlugin = {
     const { max_items, verify_hashes, check_freshness, max_age_days } = step.config;
 
     // Get claims from previous step
-    const previousOutput = context.parameters._step_outputs?.['gather-claims'];
+    const previousOutput = context.parameters._step_outputs?.["gather-claims"];
     const claims = previousOutput?.claims || [];
 
     // Collect evidence IDs from claims
@@ -281,11 +282,11 @@ export const EvidenceCollectorPlugin: StepPlugin = {
     }
 
     // Fetch evidence (limited)
-    const apiUrl = process.env.DECISION_API_URL || 'http://localhost:4020';
+    const apiUrl = process.env.DECISION_API_URL || "http://localhost:4020";
     const evidence = await fetchEvidence(
       apiUrl,
       Array.from(evidenceIds).slice(0, max_items),
-      context.tenant_id,
+      context.tenant_id
     );
 
     // Filter by freshness if enabled
@@ -293,9 +294,7 @@ export const EvidenceCollectorPlugin: StepPlugin = {
     if (check_freshness && max_age_days) {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - max_age_days);
-      filteredEvidence = evidence.filter((e: any) =>
-        new Date(e.freshness_date) >= cutoffDate,
-      );
+      filteredEvidence = evidence.filter((e: any) => new Date(e.freshness_date) >= cutoffDate);
     }
 
     return {
@@ -316,11 +315,11 @@ export const EvidenceCollectorPlugin: StepPlugin = {
  * AI Reasoner Plugin
  */
 export const AIReasonerPlugin: StepPlugin = {
-  name: 'ai-reasoner',
+  name: "ai-reasoner",
 
   validate(config: any): void {
     if (!config.model) {
-      throw new Error('AI reasoner requires model');
+      throw new Error("AI reasoner requires model");
     }
   },
 
@@ -329,9 +328,9 @@ export const AIReasonerPlugin: StepPlugin = {
     const { parameters } = context;
 
     // Get context from previous steps
-    const entities = context.parameters._step_outputs?.['fetch-entities']?.entities || [];
-    const claims = context.parameters._step_outputs?.['gather-claims']?.claims || [];
-    const evidence = context.parameters._step_outputs?.['collect-evidence']?.evidence || [];
+    const entities = context.parameters._step_outputs?.["fetch-entities"]?.entities || [];
+    const claims = context.parameters._step_outputs?.["gather-claims"]?.claims || [];
+    const evidence = context.parameters._step_outputs?.["collect-evidence"]?.evidence || [];
 
     // Build prompt
     const systemPrompt = buildDecisionSystemPrompt();
@@ -342,7 +341,7 @@ export const AIReasonerPlugin: StepPlugin = {
       parameters.options,
       entities,
       claims,
-      evidence,
+      evidence
     );
 
     // Call AI model (simulated - in production use actual API)
@@ -375,7 +374,7 @@ export const AIReasonerPlugin: StepPlugin = {
 
   async compensate(context: RunContext, step: WorkflowStep, execution: StepExecution) {
     // Cancel any pending AI requests
-    console.log('Compensating AI reasoner step');
+    console.log("Compensating AI reasoner step");
   },
 };
 
@@ -383,7 +382,7 @@ export const AIReasonerPlugin: StepPlugin = {
  * Decision Creator Plugin
  */
 export const DecisionCreatorPlugin: StepPlugin = {
-  name: 'decision-creator',
+  name: "decision-creator",
 
   validate(config: any): void {
     // No required config
@@ -393,15 +392,15 @@ export const DecisionCreatorPlugin: StepPlugin = {
     const { parameters, tenant_id, triggered_by, run_id } = context;
 
     // Get AI analysis output
-    const aiOutput = context.parameters._step_outputs?.['ai-analysis'];
-    const claims = context.parameters._step_outputs?.['gather-claims']?.claims || [];
-    const evidence = context.parameters._step_outputs?.['collect-evidence']?.evidence || [];
+    const aiOutput = context.parameters._step_outputs?.["ai-analysis"];
+    const claims = context.parameters._step_outputs?.["gather-claims"]?.claims || [];
+    const evidence = context.parameters._step_outputs?.["collect-evidence"]?.evidence || [];
 
     // Create decision via API
-    const apiUrl = process.env.DECISION_API_URL || 'http://localhost:4020';
+    const apiUrl = process.env.DECISION_API_URL || "http://localhost:4020";
 
     const decision = {
-      type: parameters.decision_type || 'custom',
+      type: parameters.decision_type || "custom",
       title: parameters.title || `Decision: ${parameters.question.substring(0, 50)}...`,
       question: parameters.question,
       context: parameters.context,
@@ -415,12 +414,17 @@ export const DecisionCreatorPlugin: StepPlugin = {
       claim_ids: claims.map((c: any) => c.id),
       evidence_ids: evidence.map((e: any) => e.id),
       risk_assessment: {
-        overall_risk: aiOutput.confidence_score > 0.8 ? 'low' : aiOutput.confidence_score > 0.5 ? 'medium' : 'high',
+        overall_risk:
+          aiOutput.confidence_score > 0.8
+            ? "low"
+            : aiOutput.confidence_score > 0.5
+              ? "medium"
+              : "high",
         risk_factors: aiOutput.risk_factors,
         mitigations: [],
       },
       maestro_run_id: run_id,
-      decision_maker_type: 'ai',
+      decision_maker_type: "ai",
     };
 
     // In production, POST to decision-api
@@ -443,7 +447,7 @@ export const DecisionCreatorPlugin: StepPlugin = {
  * Disclosure Generator Plugin
  */
 export const DisclosureGeneratorPlugin: StepPlugin = {
-  name: 'disclosure-generator',
+  name: "disclosure-generator",
 
   validate(config: any): void {
     // No required config
@@ -452,12 +456,12 @@ export const DisclosureGeneratorPlugin: StepPlugin = {
   async execute(context: RunContext, step: WorkflowStep, execution: StepExecution) {
     const { format, include_audit_trail, compute_merkle_root } = step.config;
 
-    const decisionOutput = context.parameters._step_outputs?.['create-decision'];
+    const decisionOutput = context.parameters._step_outputs?.["create-decision"];
     const decision = decisionOutput?.decision;
     const decisionId = decisionOutput?.decision_id;
 
     if (!decision) {
-      throw new Error('No decision found from previous step');
+      throw new Error("No decision found from previous step");
     }
 
     // Generate disclosure pack
@@ -482,28 +486,29 @@ export const DisclosureGeneratorPlugin: StepPlugin = {
  * Approval Router Plugin
  */
 export const ApprovalRouterPlugin: StepPlugin = {
-  name: 'approval-router',
+  name: "approval-router",
 
   validate(config: any): void {
     // No required config
   },
 
   async execute(context: RunContext, step: WorkflowStep, execution: StepExecution) {
-    const { confidence_threshold, auto_approve_high_confidence, notification_channels } = step.config;
+    const { confidence_threshold, auto_approve_high_confidence, notification_channels } =
+      step.config;
 
-    const aiOutput = context.parameters._step_outputs?.['ai-analysis'];
-    const decisionOutput = context.parameters._step_outputs?.['create-decision'];
+    const aiOutput = context.parameters._step_outputs?.["ai-analysis"];
+    const decisionOutput = context.parameters._step_outputs?.["create-decision"];
 
     const confidence = aiOutput?.confidence_score || 0;
     const requiresApproval = context.parameters.require_human_approval !== false;
 
     let approvalStatus: string;
     if (!requiresApproval) {
-      approvalStatus = 'auto_approved_no_review_required';
+      approvalStatus = "auto_approved_no_review_required";
     } else if (auto_approve_high_confidence && confidence >= confidence_threshold) {
-      approvalStatus = 'auto_approved_high_confidence';
+      approvalStatus = "auto_approved_high_confidence";
     } else {
-      approvalStatus = 'pending_approval';
+      approvalStatus = "pending_approval";
     }
 
     return {
@@ -511,8 +516,8 @@ export const ApprovalRouterPlugin: StepPlugin = {
         decision_id: decisionOutput?.decision_id,
         approval_status: approvalStatus,
         confidence_score: confidence,
-        requires_human_review: approvalStatus === 'pending_approval',
-        notified_channels: approvalStatus === 'pending_approval' ? notification_channels : [],
+        requires_human_review: approvalStatus === "pending_approval",
+        notified_channels: approvalStatus === "pending_approval" ? notification_channels : [],
       },
       metadata: {
         threshold: confidence_threshold,
@@ -526,11 +531,15 @@ export const ApprovalRouterPlugin: StepPlugin = {
 // Helper Functions
 // ============================================================================
 
-async function fetchEntities(apiUrl: string, entityIds: string[], tenantId: string): Promise<any[]> {
+async function fetchEntities(
+  apiUrl: string,
+  entityIds: string[],
+  tenantId: string
+): Promise<any[]> {
   // Simulated - in production, call decision-api
-  return entityIds.map(id => ({
+  return entityIds.map((id) => ({
     id,
-    type: 'Entity',
+    type: "Entity",
     name: `Entity ${id.substring(7, 15)}`,
     attributes: {},
   }));
@@ -540,13 +549,17 @@ async function fetchClaimsForEntities(
   apiUrl: string,
   entityIds: string[],
   tenantId: string,
-  minConfidence: number,
+  minConfidence: number
 ): Promise<any[]> {
   // Simulated - in production, call decision-api
   return [];
 }
 
-async function fetchEvidence(apiUrl: string, evidenceIds: string[], tenantId: string): Promise<any[]> {
+async function fetchEvidence(
+  apiUrl: string,
+  evidenceIds: string[],
+  tenantId: string
+): Promise<any[]> {
   // Simulated - in production, call decision-api
   return [];
 }
@@ -569,7 +582,7 @@ function buildDecisionUserPrompt(
   options: any[] | undefined,
   entities: any[],
   claims: any[],
-  evidence: any[],
+  evidence: any[]
 ): string {
   let prompt = `## Decision Question\n${question}\n\n`;
 
@@ -578,23 +591,23 @@ function buildDecisionUserPrompt(
   }
 
   if (constraints?.length) {
-    prompt += `## Constraints\n${constraints.map(c => `- ${c}`).join('\n')}\n\n`;
+    prompt += `## Constraints\n${constraints.map((c) => `- ${c}`).join("\n")}\n\n`;
   }
 
   if (options?.length) {
-    prompt += `## Options to Consider\n${options.map((o, i) => `${i + 1}. ${o.name}: ${o.description}`).join('\n')}\n\n`;
+    prompt += `## Options to Consider\n${options.map((o, i) => `${i + 1}. ${o.name}: ${o.description}`).join("\n")}\n\n`;
   }
 
   if (entities.length) {
-    prompt += `## Relevant Entities\n${entities.map(e => `- ${e.name} (${e.type})`).join('\n')}\n\n`;
+    prompt += `## Relevant Entities\n${entities.map((e) => `- ${e.name} (${e.type})`).join("\n")}\n\n`;
   }
 
   if (claims.length) {
-    prompt += `## Claims\n${claims.map(c => `- [${c.confidence_score}] ${c.assertion}`).join('\n')}\n\n`;
+    prompt += `## Claims\n${claims.map((c) => `- [${c.confidence_score}] ${c.assertion}`).join("\n")}\n\n`;
   }
 
   if (evidence.length) {
-    prompt += `## Evidence\n${evidence.map(e => `- ${e.title} (${e.source_type})`).join('\n')}\n\n`;
+    prompt += `## Evidence\n${evidence.map((e) => `- ${e.title} (${e.source_type})`).join("\n")}\n\n`;
   }
 
   prompt += `## Required Output Format
@@ -617,17 +630,17 @@ async function callAIModel(
   systemPrompt: string,
   userPrompt: string,
   temperature: number,
-  maxTokens: number,
+  maxTokens: number
 ): Promise<{ content: string; input_tokens: number; output_tokens: number }> {
   // Simulated - in production, call actual AI API
   return {
     content: JSON.stringify({
-      recommendation: 'Based on the analysis, proceed with Option A',
-      rationale: 'The evidence supports this choice with high confidence',
-      selected_option: { name: 'Option A', id: 'option_1' },
+      recommendation: "Based on the analysis, proceed with Option A",
+      rationale: "The evidence supports this choice with high confidence",
+      selected_option: { name: "Option A", id: "option_1" },
       confidence_score: 0.85,
-      risk_factors: ['Limited historical data'],
-      limitations: ['Analysis based on available data only'],
+      risk_factors: ["Limited historical data"],
+      limitations: ["Analysis based on available data only"],
       claims_referenced: [],
     }),
     input_tokens: 1500,
@@ -641,10 +654,10 @@ function parseAIResponse(response: { content: string }): any {
   } catch {
     return {
       recommendation: response.content,
-      rationale: '',
+      rationale: "",
       confidence_score: 0.5,
       risk_factors: [],
-      limitations: ['Could not parse structured response'],
+      limitations: ["Could not parse structured response"],
       claims_referenced: [],
     };
   }
@@ -653,9 +666,9 @@ function parseAIResponse(response: { content: string }): any {
 function estimateCost(model: string, inputTokens: number, outputTokens: number): number {
   // Approximate costs per 1M tokens
   const costs: Record<string, { input: number; output: number }> = {
-    'claude-3-5-sonnet': { input: 3, output: 15 },
-    'claude-3-opus': { input: 15, output: 75 },
-    'gpt-4': { input: 30, output: 60 },
+    "claude-3-5-sonnet": { input: 3, output: 15 },
+    "claude-3-opus": { input: 15, output: 75 },
+    "gpt-4": { input: 30, output: 60 },
   };
 
   const modelCost = costs[model] || { input: 5, output: 15 };
@@ -666,23 +679,23 @@ function generateDefaultOptions(aiOutput: any): any[] {
   return [
     {
       id: `option_${uuid()}`,
-      name: 'Proceed',
-      description: 'Accept the recommendation and proceed',
-      risk_level: 'low',
+      name: "Proceed",
+      description: "Accept the recommendation and proceed",
+      risk_level: "low",
       selected: true,
     },
     {
       id: `option_${uuid()}`,
-      name: 'Defer',
-      description: 'Defer decision pending additional review',
-      risk_level: 'low',
+      name: "Defer",
+      description: "Defer decision pending additional review",
+      risk_level: "low",
       selected: false,
     },
     {
       id: `option_${uuid()}`,
-      name: 'Reject',
-      description: 'Reject the recommendation',
-      risk_level: 'medium',
+      name: "Reject",
+      description: "Reject the recommendation",
+      risk_level: "medium",
       selected: false,
     },
   ];
@@ -690,11 +703,11 @@ function generateDefaultOptions(aiOutput: any): any[] {
 
 // Export all plugins
 export const DecisionRunPlugins = {
-  'input-validator': InputValidatorPlugin,
-  'graph-query': GraphQueryPlugin,
-  'evidence-collector': EvidenceCollectorPlugin,
-  'ai-reasoner': AIReasonerPlugin,
-  'decision-creator': DecisionCreatorPlugin,
-  'disclosure-generator': DisclosureGeneratorPlugin,
-  'approval-router': ApprovalRouterPlugin,
+  "input-validator": InputValidatorPlugin,
+  "graph-query": GraphQueryPlugin,
+  "evidence-collector": EvidenceCollectorPlugin,
+  "ai-reasoner": AIReasonerPlugin,
+  "decision-creator": DecisionCreatorPlugin,
+  "disclosure-generator": DisclosureGeneratorPlugin,
+  "approval-router": ApprovalRouterPlugin,
 };

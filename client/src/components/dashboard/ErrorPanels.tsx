@@ -1,8 +1,8 @@
-import React from 'react';
-import { useAppSelector } from '../../store/index';
-import { Card, CardContent, Stack, Typography, Skeleton } from '@mui/material';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { useSafeQuery } from '../../hooks/useSafeQuery';
+import React from "react";
+import { useAppSelector } from "../../store/index";
+import { Card, CardContent, Stack, Typography, Skeleton } from "@mui/material";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { useSafeQuery } from "../../hooks/useSafeQuery";
 
 export default function ErrorPanels() {
   const { tenant, status, operation } = useAppSelector((s) => s.ui);
@@ -11,25 +11,22 @@ export default function ErrorPanels() {
     mock: { value: 0.0123 },
     deps: [tenant, status, operation],
   });
-  const { data: topOps } = useSafeQuery<{ operation: string; ratio: number }[]>(
-    {
-      queryKey: `err_top_ops_${tenant}_${status}`,
-      mock: [
-        { operation: 'SearchQuery', ratio: 0.034 },
-        { operation: 'UpdateCase', ratio: 0.021 },
-      ],
-      deps: [tenant, status],
-    },
-  );
+  const { data: topOps } = useSafeQuery<{ operation: string; ratio: number }[]>({
+    queryKey: `err_top_ops_${tenant}_${status}`,
+    mock: [
+      { operation: "SearchQuery", ratio: 0.034 },
+      { operation: "UpdateCase", ratio: 0.021 },
+    ],
+    deps: [tenant, status],
+  });
 
   const columns: GridColDef[] = [
-    { field: 'operation', headerName: 'Operation', flex: 1 },
+    { field: "operation", headerName: "Operation", flex: 1 },
     {
-      field: 'ratio',
-      headerName: 'Error Ratio',
+      field: "ratio",
+      headerName: "Error Ratio",
       flex: 1,
-      valueFormatter: (p: { value?: number }) =>
-        `${(Number(p.value || 0) * 100).toFixed(2)}%`,
+      valueFormatter: (p: { value?: number }) => `${(Number(p.value || 0) * 100).toFixed(2)}%`,
     },
   ];
 
@@ -45,7 +42,7 @@ export default function ErrorPanels() {
           ) : (
             <Typography variant="h4">
               {(ratio?.value ?? 0).toLocaleString(undefined, {
-                style: 'percent',
+                style: "percent",
                 minimumFractionDigits: 2,
               })}
             </Typography>

@@ -1,12 +1,12 @@
-import fs from 'fs';
-import path from 'path';
-import { randomBytes, createHmac } from 'crypto';
+import fs from "fs";
+import path from "path";
+import { randomBytes, createHmac } from "crypto";
 
-const ARTIFACT_DIR = path.resolve(process.cwd(), '.evidence/signature');
-const INPUT_DIR = path.resolve(process.cwd(), '.evidence');
+const ARTIFACT_DIR = path.resolve(process.cwd(), ".evidence/signature");
+const INPUT_DIR = path.resolve(process.cwd(), ".evidence");
 
 // Mock private key for simulation
-const PRIVATE_KEY_MOCK = process.env.SIGNING_KEY || 'mock-private-key-12345';
+const PRIVATE_KEY_MOCK = process.env.SIGNING_KEY || "mock-private-key-12345";
 
 const signArtifacts = () => {
   // Ensure artifact directory exists
@@ -15,13 +15,13 @@ const signArtifacts = () => {
   }
 
   // Files to sign (simulate signing the SBOM)
-  const filesToSign = ['sbom.json'];
+  const filesToSign = ["sbom.json"];
 
-  filesToSign.forEach(file => {
+  filesToSign.forEach((file) => {
     const filePath = path.join(INPUT_DIR, file);
     if (fs.existsSync(filePath)) {
       const content = fs.readFileSync(filePath);
-      const signature = createHmac('sha256', PRIVATE_KEY_MOCK).update(content).digest('hex');
+      const signature = createHmac("sha256", PRIVATE_KEY_MOCK).update(content).digest("hex");
 
       const sigPath = path.join(ARTIFACT_DIR, `${file}.sig`);
       fs.writeFileSync(sigPath, signature);

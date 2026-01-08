@@ -3,8 +3,8 @@
  * MDM governance and compliance management
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import type { GovernancePolicy, Domain } from '@intelgraph/mdm-core';
+import { v4 as uuidv4 } from "uuid";
+import type { GovernancePolicy, Domain } from "@intelgraph/mdm-core";
 
 export interface AuditLog {
   id: string;
@@ -34,13 +34,13 @@ export interface ComplianceMetric {
   value: number;
   threshold: number;
   compliant: boolean;
-  trend: 'improving' | 'declining' | 'stable';
+  trend: "improving" | "declining" | "stable";
 }
 
 export interface ComplianceViolation {
   id: string;
   violationType: string;
-  severity: 'critical' | 'high' | 'medium' | 'low';
+  severity: "critical" | "high" | "medium" | "low";
   description: string;
   recordId: string;
   detectedAt: Date;
@@ -83,7 +83,7 @@ export class GovernanceEngine {
       action,
       resourceType,
       resourceId,
-      changes
+      changes,
     };
 
     this.auditLogs.push(log);
@@ -94,7 +94,7 @@ export class GovernanceEngine {
    * Get audit logs for resource
    */
   async getAuditLogs(resourceId: string): Promise<AuditLog[]> {
-    return this.auditLogs.filter(log => log.resourceId === resourceId);
+    return this.auditLogs.filter((log) => log.resourceId === resourceId);
   }
 
   /**
@@ -109,7 +109,7 @@ export class GovernanceEngine {
       this.recordViolation(
         domain,
         record.id,
-        'quality_threshold',
+        "quality_threshold",
         `Quality score ${record.qualityScore} below threshold ${policy.qualityThreshold}`
       );
       return false;
@@ -130,11 +130,11 @@ export class GovernanceEngine {
     const violation: ComplianceViolation = {
       id: uuidv4(),
       violationType: type,
-      severity: 'medium',
+      severity: "medium",
       description,
       recordId,
       detectedAt: new Date(),
-      resolved: false
+      resolved: false,
     };
 
     this.violations.set(violation.id, violation);
@@ -143,23 +143,18 @@ export class GovernanceEngine {
   /**
    * Generate compliance report
    */
-  async generateComplianceReport(
-    domain: string,
-    period: string
-  ): Promise<ComplianceReport> {
-    const violations = Array.from(this.violations.values()).filter(
-      v => !v.resolved
-    );
+  async generateComplianceReport(domain: string, period: string): Promise<ComplianceReport> {
+    const violations = Array.from(this.violations.values()).filter((v) => !v.resolved);
 
     return {
       id: uuidv4(),
       domain,
-      reportType: 'compliance',
+      reportType: "compliance",
       period,
       metrics: [],
       violations,
       generatedAt: new Date(),
-      generatedBy: 'system'
+      generatedBy: "system",
     };
   }
 }

@@ -5,13 +5,13 @@
  * Copyright (c) 2025 IntelGraph
  */
 
-import pino from 'pino';
+import pino from "pino";
 import type {
   RateLimiterMetrics,
   RateLimitViolation,
   UserTier,
   RateLimitResult,
-} from '../types.js';
+} from "../types.js";
 
 const logger = pino();
 
@@ -31,10 +31,10 @@ export class RateLimitMetricsCollector {
     result: RateLimitResult,
     tier: UserTier | undefined,
     endpoint: string,
-    durationMs: number,
+    durationMs: number
   ): void {
     // Increment total requests
-    this.incrementMetric('rate_limit_requests_total', { result, tier, endpoint });
+    this.incrementMetric("rate_limit_requests_total", { result, tier, endpoint });
 
     // Record response time
     this.responseTimes.push(durationMs);
@@ -43,8 +43,8 @@ export class RateLimitMetricsCollector {
     }
 
     // Record violations
-    if (result === 'denied') {
-      this.incrementMetric('rate_limit_violations_total', { tier, endpoint });
+    if (result === "denied") {
+      this.incrementMetric("rate_limit_violations_total", { tier, endpoint });
     }
   }
 
@@ -60,7 +60,7 @@ export class RateLimitMetricsCollector {
     }
 
     // Increment violation metrics
-    this.incrementMetric('rate_limit_violations_total', {
+    this.incrementMetric("rate_limit_violations_total", {
       tier: violation.tier,
       endpoint: violation.endpoint,
     });
@@ -74,27 +74,27 @@ export class RateLimitMetricsCollector {
     endpoint: string,
     tier: UserTier | undefined,
     consumed: number,
-    limit: number,
+    limit: number
   ): void {
     const utilization = limit > 0 ? consumed / limit : 0;
-    this.setGauge('rate_limit_current_usage', { tier, endpoint }, utilization);
+    this.setGauge("rate_limit_current_usage", { tier, endpoint }, utilization);
   }
 
   /**
    * Record algorithm execution time
    */
   recordAlgorithmDuration(algorithm: string, durationMs: number): void {
-    this.setGauge('rate_limit_algorithm_duration_ms', { algorithm }, durationMs);
+    this.setGauge("rate_limit_algorithm_duration_ms", { algorithm }, durationMs);
   }
 
   /**
    * Get current metrics snapshot
    */
   getMetrics(): RateLimiterMetrics {
-    const totalRequests = this.getMetricSum('rate_limit_requests_total');
-    const allowedRequests = this.getMetric('rate_limit_requests_total', { result: 'allowed' });
-    const deniedRequests = this.getMetric('rate_limit_requests_total', { result: 'denied' });
-    const errors = this.getMetric('rate_limit_requests_total', { result: 'error' });
+    const totalRequests = this.getMetricSum("rate_limit_requests_total");
+    const allowedRequests = this.getMetric("rate_limit_requests_total", { result: "allowed" });
+    const deniedRequests = this.getMetric("rate_limit_requests_total", { result: "denied" });
+    const errors = this.getMetric("rate_limit_requests_total", { result: "error" });
 
     const avgResponseTime = this.calculateAverage(this.responseTimes);
     const p95ResponseTime = this.calculatePercentile(this.responseTimes, 0.95);
@@ -136,24 +136,24 @@ export class RateLimitMetricsCollector {
     const lines: string[] = [];
 
     // Add help and type information
-    lines.push('# HELP rate_limit_requests_total Total rate limit requests');
-    lines.push('# TYPE rate_limit_requests_total counter');
+    lines.push("# HELP rate_limit_requests_total Total rate limit requests");
+    lines.push("# TYPE rate_limit_requests_total counter");
 
-    lines.push('# HELP rate_limit_violations_total Total rate limit violations');
-    lines.push('# TYPE rate_limit_violations_total counter');
+    lines.push("# HELP rate_limit_violations_total Total rate limit violations");
+    lines.push("# TYPE rate_limit_violations_total counter");
 
-    lines.push('# HELP rate_limit_current_usage Current rate limit utilization (0-1)');
-    lines.push('# TYPE rate_limit_current_usage gauge');
+    lines.push("# HELP rate_limit_current_usage Current rate limit utilization (0-1)");
+    lines.push("# TYPE rate_limit_current_usage gauge");
 
-    lines.push('# HELP rate_limit_algorithm_duration_ms Rate limit algorithm execution time');
-    lines.push('# TYPE rate_limit_algorithm_duration_ms gauge');
+    lines.push("# HELP rate_limit_algorithm_duration_ms Rate limit algorithm execution time");
+    lines.push("# TYPE rate_limit_algorithm_duration_ms gauge");
 
     // Add metrics
     for (const [key, value] of this.metrics.entries()) {
       lines.push(`${key} ${value}`);
     }
 
-    return lines.join('\n');
+    return lines.join("\n");
   }
 
   /**
@@ -166,12 +166,8 @@ export class RateLimitMetricsCollector {
   /**
    * Check if alert threshold exceeded
    */
-  checkAlertThreshold(
-    endpoint: string,
-    tier: UserTier | undefined,
-    threshold: number,
-  ): boolean {
-    const utilization = this.getGauge('rate_limit_current_usage', { tier, endpoint });
+  checkAlertThreshold(endpoint: string, tier: UserTier | undefined, threshold: number): boolean {
+    const utilization = this.getGauge("rate_limit_current_usage", { tier, endpoint });
     return utilization >= threshold;
   }
 
@@ -220,19 +216,23 @@ export class RateLimitMetricsCollector {
     const labelPairs = Object.entries(labels)
       .filter(([_, value]) => value !== undefined)
       .map(([key, value]) => `${key}="${value}"`)
-      .join(',');
+      .join(",");
 
     return labelPairs ? `${name}{${labelPairs}}` : name;
   }
 
   private calculateAverage(values: number[]): number {
-    if (values.length === 0) {return 0;}
+    if (values.length === 0) {
+      return 0;
+    }
     const sum = values.reduce((a, b) => a + b, 0);
     return sum / values.length;
   }
 
   private calculatePercentile(values: number[], percentile: number): number {
-    if (values.length === 0) {return 0;}
+    if (values.length === 0) {
+      return 0;
+    }
     const sorted = [...values].sort((a, b) => a - b);
     const index = Math.ceil(sorted.length * percentile) - 1;
     return sorted[index] || 0;
@@ -262,7 +262,7 @@ export class RateLimitAlerter {
    */
   async triggerAlert(violation: RateLimitViolation): Promise<void> {
     logger.warn({
-      message: 'Rate limit violation alert',
+      message: "Rate limit violation alert",
       violation,
     });
 
@@ -271,7 +271,7 @@ export class RateLimitAlerter {
         await callback(violation);
       } catch (error) {
         logger.error({
-          message: 'Alert callback failed',
+          message: "Alert callback failed",
           error: error instanceof Error ? error.message : String(error),
         });
       }
@@ -282,7 +282,9 @@ export class RateLimitAlerter {
    * Check if should alert based on utilization
    */
   shouldAlert(consumed: number, limit: number): boolean {
-    if (limit === 0) {return false;}
+    if (limit === 0) {
+      return false;
+    }
     const utilization = consumed / limit;
     return utilization >= this.alertThreshold;
   }

@@ -6,18 +6,18 @@ import {
   verifyReceiptSignature,
   Receipt,
   RECEIPT_VERSION,
-} from '..';
+} from "..";
 
 const baseReceiptInput = {
-  id: 'rcpt-1',
-  caseId: 'case-123',
-  claimIds: ['claim-a', 'claim-b'],
-  createdAt: '2024-11-05T12:00:00.000Z',
-  actor: { id: 'alice', role: 'analyst' },
+  id: "rcpt-1",
+  caseId: "case-123",
+  claimIds: ["claim-a", "claim-b"],
+  createdAt: "2024-11-05T12:00:00.000Z",
+  actor: { id: "alice", role: "analyst" },
 };
 
-describe('@intelgraph/provenance receipt helpers', () => {
-  it('signs and verifies a receipt deterministically', () => {
+describe("@intelgraph/provenance receipt helpers", () => {
+  it("signs and verifies a receipt deterministically", () => {
     const receipt = signReceipt(baseReceiptInput);
 
     expect(receipt.version).toBe(RECEIPT_VERSION);
@@ -32,14 +32,14 @@ describe('@intelgraph/provenance receipt helpers', () => {
     expect(recomputedReceiptHash).toBe(receipt.proofs.receiptHash);
   });
 
-  it('applies redactions using dotted paths', () => {
+  it("applies redactions using dotted paths", () => {
     const receipt: Receipt = signReceipt({
       ...baseReceiptInput,
-      metadata: { sensitive: { secret: '123', visible: true } },
+      metadata: { sensitive: { secret: "123", visible: true } },
     });
 
     const sanitized = applyRedactions(receipt, [
-      { path: 'metadata.sensitive.secret', reason: 'least-privilege' },
+      { path: "metadata.sensitive.secret", reason: "least-privilege" },
     ]);
 
     expect((sanitized.metadata as any)?.sensitive?.secret).toBeUndefined();

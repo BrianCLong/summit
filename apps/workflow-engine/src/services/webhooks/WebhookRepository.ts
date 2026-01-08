@@ -1,5 +1,5 @@
-import { Pool } from 'pg';
-import { randomUUID } from 'crypto';
+import { Pool } from "pg";
+import { randomUUID } from "crypto";
 import {
   CreateWebhookSubscription,
   DeliveryStatus,
@@ -7,7 +7,7 @@ import {
   WebhookDeliveryAttempt,
   WebhookSubscription,
   WebhookEventType,
-} from './types';
+} from "./types";
 
 const BASE_SCHEMA = `
 CREATE TABLE IF NOT EXISTS webhook_subscriptions (
@@ -109,9 +109,7 @@ export class WebhookRepository {
     await this.pool.query(BASE_SCHEMA);
   }
 
-  async createSubscription(
-    input: CreateWebhookSubscription,
-  ): Promise<WebhookSubscription> {
+  async createSubscription(input: CreateWebhookSubscription): Promise<WebhookSubscription> {
     const result = await this.pool.query(
       `INSERT INTO webhook_subscriptions (
         id, tenant_id, target_url, secret, event_types, is_active, description, signature_algorithm
@@ -125,18 +123,15 @@ export class WebhookRepository {
         input.eventTypes,
         input.isActive ?? true,
         input.description ?? null,
-        input.signatureAlgorithm ?? 'HMAC-SHA256',
-      ],
+        input.signatureAlgorithm ?? "HMAC-SHA256",
+      ]
     );
 
     return mapSubscription(result.rows[0]);
   }
 
   async getSubscription(id: string): Promise<WebhookSubscription | null> {
-    const result = await this.pool.query(
-      'SELECT * FROM webhook_subscriptions WHERE id = $1',
-      [id],
-    );
+    const result = await this.pool.query("SELECT * FROM webhook_subscriptions WHERE id = $1", [id]);
 
     if (result.rows.length === 0) {
       return null;
@@ -147,14 +142,14 @@ export class WebhookRepository {
 
   async findSubscriptionsForEvent(
     tenantId: string,
-    eventType: WebhookEventType,
+    eventType: WebhookEventType
   ): Promise<WebhookSubscription[]> {
     const result = await this.pool.query(
       `SELECT * FROM webhook_subscriptions
        WHERE tenant_id = $1
        AND is_active = TRUE
        AND event_types @> ARRAY[$2]::text[]`,
-      [tenantId, eventType],
+      [tenantId, eventType]
     );
 
     return result.rows.map(mapSubscription);
@@ -164,7 +159,7 @@ export class WebhookRepository {
     subscriptionId: string,
     eventType: WebhookEventType,
     payload: Record<string, unknown>,
-    idempotencyKey: string,
+    idempotencyKey: string
   ): Promise<WebhookDelivery> {
     const result = await this.pool.query(
       `INSERT INTO webhook_deliveries (
@@ -173,17 +168,14 @@ export class WebhookRepository {
       ON CONFLICT (subscription_id, idempotency_key)
       DO UPDATE SET updated_at = CURRENT_TIMESTAMP
       RETURNING *`,
-      [randomUUID(), subscriptionId, eventType, payload, idempotencyKey, null],
+      [randomUUID(), subscriptionId, eventType, payload, idempotencyKey, null]
     );
 
     return mapDelivery(result.rows[0]);
   }
 
   async getDelivery(id: string): Promise<WebhookDelivery | null> {
-    const result = await this.pool.query(
-      'SELECT * FROM webhook_deliveries WHERE id = $1',
-      [id],
-    );
+    const result = await this.pool.query("SELECT * FROM webhook_deliveries WHERE id = $1", [id]);
 
     if (result.rows.length === 0) {
       return null;
@@ -199,7 +191,7 @@ export class WebhookRepository {
        AND (next_attempt_at IS NULL OR next_attempt_at <= CURRENT_TIMESTAMP)
        ORDER BY next_attempt_at NULLS FIRST, created_at
        LIMIT $1`,
-      [limit],
+      [limit]
     );
 
     return result.rows.map(mapDelivery);
@@ -210,7 +202,7 @@ export class WebhookRepository {
     status: DeliveryStatus,
     attemptCount: number,
     error?: string,
-    nextAttemptAt?: Date | null,
+    nextAttemptAt?: Date | null
   ): Promise<void> {
     await this.pool.query(
       `UPDATE webhook_deliveries
@@ -221,11 +213,13 @@ export class WebhookRepository {
            last_attempt_at = CURRENT_TIMESTAMP,
            updated_at = CURRENT_TIMESTAMP
        WHERE id = $1`,
-      [id, status, attemptCount, error ?? null, nextAttemptAt ?? null],
+      [id, status, attemptCount, error ?? null, nextAttemptAt ?? null]
     );
   }
 
-  async recordAttempt(attempt: Omit<WebhookDeliveryAttempt, 'id' | 'createdAt'>): Promise<WebhookDeliveryAttempt> {
+  async recordAttempt(
+    attempt: Omit<WebhookDeliveryAttempt, "id" | "createdAt">
+  ): Promise<WebhookDeliveryAttempt> {
     const result = await this.pool.query(
       `INSERT INTO webhook_delivery_attempts (
         id, delivery_id, response_status, response_body, error, duration_ms, attempt_number
@@ -239,7 +233,7 @@ export class WebhookRepository {
         attempt.error ?? null,
         attempt.durationMs,
         attempt.attemptNumber,
-      ],
+      ]
     );
 
     return mapAttempt(result.rows[0]);
@@ -247,22 +241,22 @@ export class WebhookRepository {
 
   async listAttempts(deliveryId: string): Promise<WebhookDeliveryAttempt[]> {
     const result = await this.pool.query(
-      'SELECT * FROM webhook_delivery_attempts WHERE delivery_id = $1 ORDER BY created_at',
-      [deliveryId],
+      "SELECT * FROM webhook_delivery_attempts WHERE delivery_id = $1 ORDER BY created_at",
+      [deliveryId]
     );
 
     return result.rows.map(mapAttempt);
   }
 
   async overrideNextAttempt(id: string, at: Date): Promise<void> {
-    await this.pool.query(
-      'UPDATE webhook_deliveries SET next_attempt_at = $2 WHERE id = $1',
-      [id, at],
-    );
+    await this.pool.query("UPDATE webhook_deliveries SET next_attempt_at = $2 WHERE id = $1", [
+      id,
+      at,
+    ]);
   }
 
   async countDeliveries(): Promise<number> {
-    const result = await this.pool.query('SELECT COUNT(*)::int AS count FROM webhook_deliveries');
+    const result = await this.pool.query("SELECT COUNT(*)::int AS count FROM webhook_deliveries");
     return result.rows[0].count;
   }
 }

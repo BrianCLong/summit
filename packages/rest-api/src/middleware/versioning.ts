@@ -4,14 +4,14 @@
  * Handles API version extraction and routing
  */
 
-import type { Request, Response, NextFunction, VersioningOptions, VersionInfo } from '../types';
+import type { Request, Response, NextFunction, VersioningOptions, VersionInfo } from "../types";
 
 export function versioningMiddleware(options: VersioningOptions) {
   return (req: Request, res: Response, next: NextFunction) => {
-    let version = options.defaultVersion || '1.0';
+    let version = options.defaultVersion || "1.0";
 
     switch (options.strategy) {
-      case 'url':
+      case "url":
         // Extract version from URL path (e.g., /v1/resource)
         const match = req.path.match(/^\/v(\d+(?:\.\d+)?)\//);
         if (match) {
@@ -19,31 +19,31 @@ export function versioningMiddleware(options: VersioningOptions) {
         }
         break;
 
-      case 'header':
+      case "header":
         // Extract version from custom header
-        const headerName = options.headerName || 'api-version';
+        const headerName = options.headerName || "api-version";
         const headerVersion = req.get(headerName);
         if (headerVersion) {
           version = headerVersion;
         }
         break;
 
-      case 'query':
+      case "query":
         // Extract version from query parameter
-        const queryName = options.queryName || 'version';
+        const queryName = options.queryName || "version";
         const queryVersion = req.query[queryName] as string;
         if (queryVersion) {
           version = queryVersion;
         }
         break;
 
-      case 'accept':
+      case "accept":
         // Extract version from Accept header (e.g., application/vnd.api.v1+json)
-        const acceptHeader = req.get('accept');
+        const acceptHeader = req.get("accept");
         if (acceptHeader) {
-          const prefix = options.acceptPrefix || 'application/vnd.api.v';
+          const prefix = options.acceptPrefix || "application/vnd.api.v";
           const acceptMatch = acceptHeader.match(
-            new RegExp(`${prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\d+(?:\\.\\d+)?)`)
+            new RegExp(`${prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(\\d+(?:\\.\\d+)?)`)
           );
           if (acceptMatch) {
             version = acceptMatch[1];
@@ -58,7 +58,7 @@ export function versioningMiddleware(options: VersioningOptions) {
     }
 
     // Add version to response headers
-    res.setHeader('API-Version', version);
+    res.setHeader("API-Version", version);
 
     // Add deprecation warnings if enabled
     if (options.deprecationWarnings) {

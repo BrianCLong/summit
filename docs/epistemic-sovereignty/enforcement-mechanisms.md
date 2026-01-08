@@ -29,6 +29,7 @@ Layer 3: CORRECTIVE (Remediate captured systems)
 **Purpose**: Prevent over-reliance through hard limits
 
 **Implementation**:
+
 ```python
 class AIInteractionQuota:
     def __init__(self, domain: str):
@@ -51,6 +52,7 @@ class AIInteractionQuota:
 ```
 
 **Enforcement**:
+
 - API calls to AI systems gated by quota
 - Exceeding quota blocks AI access
 - Quota resets monthly
@@ -61,6 +63,7 @@ class AIInteractionQuota:
 **Purpose**: Ensure humans maintain evaluation capability
 
 **Implementation**:
+
 ```python
 class JudgmentCertification:
     def __init__(self, operator_id: str):
@@ -88,6 +91,7 @@ class JudgmentCertification:
 ```
 
 **Enforcement**:
+
 - Critical decisions blocked if certification invalid
 - Quarterly judgment tests required
 - Failure requires remediation training
@@ -98,6 +102,7 @@ class JudgmentCertification:
 **Purpose**: Prevent single-source dependency
 
 **Implementation**:
+
 ```python
 class SourceDiversityEnforcement:
     def __init__(self):
@@ -135,6 +140,7 @@ class SourceDiversityEnforcement:
 ```
 
 **Enforcement**:
+
 - Critical decisions rejected if diversity requirements unmet
 - System prompts for additional sources
 - Logs single-source decision attempts
@@ -145,6 +151,7 @@ class SourceDiversityEnforcement:
 **Purpose**: Make AI assumptions explicit
 
 **Implementation**:
+
 ```python
 class OntologyDocumentation:
     def __init__(self, ai_system_id: str):
@@ -183,6 +190,7 @@ class OntologyDocumentation:
 ```
 
 **Enforcement**:
+
 - New AI systems cannot be used until ontology documented
 - Quarterly reviews ensure documentation current
 - Decisions must reference alternative framings
@@ -197,6 +205,7 @@ class OntologyDocumentation:
 **Purpose**: Real-time monitoring of epistemic capture indicators
 
 **Implementation**:
+
 ```python
 class CaptureMetricsDashboard:
     def __init__(self):
@@ -247,6 +256,7 @@ class CaptureMetricsDashboard:
 ```
 
 **Alerts Triggered**:
+
 - **CRITICAL**: Immediate intervention required
 - **WARNING**: Increased monitoring, preventive action
 - **INFO**: Trend detected, watch closely
@@ -256,6 +266,7 @@ class CaptureMetricsDashboard:
 **Purpose**: Detect subtle capture through behavior changes
 
 **Implementation**:
+
 ```python
 class BehavioralCaptureDetection:
     def __init__(self):
@@ -313,6 +324,7 @@ class VocabularyShiftDetector:
 ```
 
 **Monitored Patterns**:
+
 - Communication vocabulary shifts
 - Decision-making process changes
 - Expert behavior modifications
@@ -324,6 +336,7 @@ class VocabularyShiftDetector:
 **Purpose**: Continuous automated assessment of belief provenance
 
 **Implementation**:
+
 ```python
 class AutomatedEpistemicAudit:
     def __init__(self):
@@ -375,6 +388,7 @@ class AutomatedEpistemicAudit:
 ```
 
 **Automated Actions**:
+
 - Weekly audit reports generated
 - Findings auto-escalated by severity
 - Trends tracked over time
@@ -389,6 +403,7 @@ class AutomatedEpistemicAudit:
 **Purpose**: Restore independence when capture detected
 
 **Implementation**:
+
 ```python
 class CaptureRemediationProtocol:
     def __init__(self):
@@ -461,6 +476,7 @@ class CaptureRemediationProtocol:
 **Purpose**: Break epistemic monoculture
 
 **Implementation**:
+
 ```python
 class ForcedDiversityInjection:
     def __init__(self):
@@ -513,6 +529,7 @@ class ForcedDiversityInjection:
 **Purpose**: Rebuild institutional expertise after atrophy
 
 **Implementation**:
+
 ```python
 class KnowledgeRestorationProgram:
     def __init__(self):

@@ -72,6 +72,7 @@ pnpm run test:e2e
 ### **Agent Interaction (Jules, etc.)**
 
 Agents like Jules operate with specific directives. When asking an agent to work on the repo:
+
 1.  **Reference Specifics**: Point to file paths or Feature IDs.
 2.  **Traceability**: Ask agents to add `@trace` tags to new code.
 3.  **Verification**: Agents are expected to run verification steps (`make smoke` or `npm test`) before submitting.
@@ -79,9 +80,10 @@ Agents like Jules operate with specific directives. When asking an agent to work
 ### **Traceability**
 
 We enforce traceability links:
--   **Specs**: Define `REQ-ID`s.
--   **Code**: Use `@trace REQ-ID` in JSDocs.
--   **Tests**: Use `@trace REQ-ID` in test descriptions.
+
+- **Specs**: Define `REQ-ID`s.
+- **Code**: Use `@trace REQ-ID` in JSDocs.
+- **Tests**: Use `@trace REQ-ID` in test descriptions.
 
 See `TRACEABILITY.md` for full details.
 
@@ -89,9 +91,9 @@ See `TRACEABILITY.md` for full details.
 
 ### **Key Technologies**
 
--   **Frontend**: React 18, Material-UI, Cytoscape.js (graph viz)
--   **Backend**: Node.js, GraphQL, Express, Socket.IO (real-time)
--   **Databases**: Neo4j (graph), PostgreSQL (persistence), Redis (cache)
+- **Frontend**: React 18, Material-UI, Cytoscape.js (graph viz)
+- **Backend**: Node.js, GraphQL, Express, Socket.IO (real-time)
+- **Databases**: Neo4j (graph), PostgreSQL (persistence), Redis (cache)
 
 ### **Directory Structure**
 

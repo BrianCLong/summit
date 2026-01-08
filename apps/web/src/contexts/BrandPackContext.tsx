@@ -136,7 +136,8 @@ const buildTokenOverrides = (pack: BrandPack) => {
   const shadows = pack.tokens.shadows ?? {}
 
   return {
-    'ds-font-family-sans': typography?.fontFamily ?? tokens.typography.fontFamily,
+    'ds-font-family-sans':
+      typography?.fontFamily ?? tokens.typography.fontFamily,
     'ds-radius-sm': radii.sm ?? tokens.radii.sm,
     'ds-radius-md': radii.md ?? tokens.radii.md,
     'ds-radius-lg': radii.lg ?? tokens.radii.lg,
@@ -237,10 +238,7 @@ export const BrandPackProvider = ({
     }
   }, [currentTenant?.id])
 
-  const muiTheme = React.useMemo(
-    () => buildMuiTheme(state.pack),
-    [state.pack]
-  )
+  const muiTheme = React.useMemo(() => buildMuiTheme(state.pack), [state.pack])
 
   const tokenOverrides = React.useMemo(
     () => buildTokenOverrides(state.pack),

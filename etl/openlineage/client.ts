@@ -1,4 +1,4 @@
-import { OpenLineageClient } from 'openlineage-client';
+import { OpenLineageClient } from "openlineage-client";
 export const ol = new OpenLineageClient({
   url: process.env.OL_URL!,
   apiKey: process.env.OL_TOKEN!,

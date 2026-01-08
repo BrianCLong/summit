@@ -2,17 +2,17 @@
  * Block storage implementation using LevelDB
  */
 
-import { Level } from 'level';
-import { Logger } from 'pino';
-import { Block, Transaction } from '../core/types.js';
-import { BlockImpl } from '../core/Block.js';
+import { Level } from "level";
+import { Logger } from "pino";
+import { Block, Transaction } from "../core/types.js";
+import { BlockImpl } from "../core/Block.js";
 
 export class BlockStorage {
   private db: Level<string, string>;
   private logger: Logger;
 
   constructor(dbPath: string, logger: Logger) {
-    this.db = new Level(dbPath, { valueEncoding: 'json' });
+    this.db = new Level(dbPath, { valueEncoding: "json" });
     this.logger = logger;
   }
 
@@ -22,9 +22,9 @@ export class BlockStorage {
   async initialize(): Promise<void> {
     try {
       await this.db.open();
-      this.logger.info('Block storage initialized');
+      this.logger.info("Block storage initialized");
     } catch (error) {
-      this.logger.error({ error }, 'Failed to initialize block storage');
+      this.logger.error({ error }, "Failed to initialize block storage");
       throw error;
     }
   }
@@ -44,27 +44,33 @@ export class BlockStorage {
 
       // Index transactions
       for (const tx of block.transactions) {
-        batch.put(`tx:${tx.id}`, JSON.stringify({
-          transaction: tx,
-          blockHeight: block.header.height,
-          blockHash: block.hash,
-        }));
+        batch.put(
+          `tx:${tx.id}`,
+          JSON.stringify({
+            transaction: tx,
+            blockHeight: block.header.height,
+            blockHash: block.hash,
+          })
+        );
       }
 
       // Update last block pointer
-      batch.put('meta:lastBlock', JSON.stringify({
-        height: block.header.height,
-        hash: block.hash,
-      }));
+      batch.put(
+        "meta:lastBlock",
+        JSON.stringify({
+          height: block.header.height,
+          hash: block.hash,
+        })
+      );
 
       await batch.write();
 
       this.logger.debug(
         { height: block.header.height, hash: block.hash },
-        'Block saved to storage'
+        "Block saved to storage"
       );
     } catch (error) {
-      this.logger.error({ error }, 'Failed to save block');
+      this.logger.error({ error }, "Failed to save block");
       throw error;
     }
   }
@@ -77,7 +83,7 @@ export class BlockStorage {
       const data = await this.db.get(`block:height:${height}`);
       return BlockImpl.fromJSON(data);
     } catch (error: any) {
-      if (error.code === 'LEVEL_NOT_FOUND') {
+      if (error.code === "LEVEL_NOT_FOUND") {
         return null;
       }
       throw error;
@@ -92,7 +98,7 @@ export class BlockStorage {
       const data = await this.db.get(`block:hash:${hash}`);
       return BlockImpl.fromJSON(data);
     } catch (error: any) {
-      if (error.code === 'LEVEL_NOT_FOUND') {
+      if (error.code === "LEVEL_NOT_FOUND") {
         return null;
       }
       throw error;
@@ -104,11 +110,11 @@ export class BlockStorage {
    */
   async getLastBlock(): Promise<Block | null> {
     try {
-      const meta = await this.db.get('meta:lastBlock');
+      const meta = await this.db.get("meta:lastBlock");
       const { height } = JSON.parse(meta);
       return await this.getBlockByHeight(height);
     } catch (error: any) {
-      if (error.code === 'LEVEL_NOT_FOUND') {
+      if (error.code === "LEVEL_NOT_FOUND") {
         return null;
       }
       throw error;
@@ -124,7 +130,7 @@ export class BlockStorage {
       const { transaction } = JSON.parse(data);
       return transaction;
     } catch (error: any) {
-      if (error.code === 'LEVEL_NOT_FOUND') {
+      if (error.code === "LEVEL_NOT_FOUND") {
         return null;
       }
       throw error;
@@ -147,7 +153,7 @@ export class BlockStorage {
 
       return { transaction, block };
     } catch (error: any) {
-      if (error.code === 'LEVEL_NOT_FOUND') {
+      if (error.code === "LEVEL_NOT_FOUND") {
         return null;
       }
       throw error;
@@ -175,6 +181,6 @@ export class BlockStorage {
    */
   async close(): Promise<void> {
     await this.db.close();
-    this.logger.info('Block storage closed');
+    this.logger.info("Block storage closed");
   }
 }

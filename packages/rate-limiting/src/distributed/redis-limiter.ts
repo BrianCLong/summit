@@ -4,19 +4,21 @@
  * Enables rate limiting across multiple instances
  */
 
-import Redis from 'ioredis';
-import { RateLimiter, RateLimitConfig, RateLimitResult } from '../rate-limiter.js';
-import { createLogger } from '../utils/logger.js';
+import Redis from "ioredis";
+import { RateLimiter, RateLimitConfig, RateLimitResult } from "../rate-limiter.js";
+import { createLogger } from "../utils/logger.js";
 
-const logger = createLogger('redis-limiter');
+const logger = createLogger("redis-limiter");
 
 export interface RedisLimiterConfig extends RateLimitConfig {
-  redis: Redis | {
-    host: string;
-    port: number;
-    password?: string;
-    db?: number;
-  };
+  redis:
+    | Redis
+    | {
+        host: string;
+        port: number;
+        password?: string;
+        db?: number;
+      };
 }
 
 export class RedisRateLimiter extends RateLimiter {
@@ -57,14 +59,14 @@ export class RedisRateLimiter extends RateLimiter {
     `;
 
     try {
-      const result = await this.redis.eval(
+      const result = (await this.redis.eval(
         script,
         1,
         fullKey,
         this.config.maxRequests,
         windowEnd,
         now
-      ) as [number, number, number];
+      )) as [number, number, number];
 
       const [current, limit, resetTime] = result;
       const allowed = current <= limit;
@@ -82,9 +84,8 @@ export class RedisRateLimiter extends RateLimiter {
 
       this.logRateLimit(key, rateLimitResult);
       return rateLimitResult;
-
     } catch (error) {
-      logger.error('Redis rate limit check failed', {
+      logger.error("Redis rate limit check failed", {
         error: error instanceof Error ? error.message : String(error),
       });
 
@@ -149,7 +150,7 @@ export class RedisRateLimiter extends RateLimiter {
     `;
 
     try {
-      const result = await this.redis.eval(
+      const result = (await this.redis.eval(
         script,
         1,
         fullKey,
@@ -157,7 +158,7 @@ export class RedisRateLimiter extends RateLimiter {
         windowStart,
         now,
         this.config.windowMs
-      ) as [number, number, number];
+      )) as [number, number, number];
 
       const [current, limit, resetTime] = result;
       const allowed = current <= limit;
@@ -175,9 +176,8 @@ export class RedisRateLimiter extends RateLimiter {
 
       this.logRateLimit(key, rateLimitResult);
       return rateLimitResult;
-
     } catch (error) {
-      logger.error('Redis sliding window check failed', {
+      logger.error("Redis sliding window check failed", {
         error: error instanceof Error ? error.message : String(error),
       });
 

@@ -3,7 +3,7 @@ name: finops-weekly
 permissions:
   contents: read
 on:
-  schedule: [{ cron: '0 12 * * 1' }]
+  schedule: [{ cron: "0 12 * * 1" }]
 jobs:
   report:
     runs-on: ubuntu-latest

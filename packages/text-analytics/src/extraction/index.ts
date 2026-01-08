@@ -2,7 +2,7 @@
  * Information extraction
  */
 
-import type { KeyPhrase } from '../types';
+import type { KeyPhrase } from "../types";
 
 export class InformationExtractor {
   /**
@@ -65,12 +65,12 @@ export class InformationExtractor {
    */
   extractCitations(text: string): Array<{
     citation: string;
-    type: 'footnote' | 'inline' | 'bibliography';
+    type: "footnote" | "inline" | "bibliography";
     position: { start: number; end: number };
   }> {
     const citations: Array<{
       citation: string;
-      type: 'footnote' | 'inline' | 'bibliography';
+      type: "footnote" | "inline" | "bibliography";
       position: { start: number; end: number };
     }> = [];
 
@@ -85,7 +85,7 @@ export class InformationExtractor {
       while ((match = pattern.exec(text)) !== null) {
         citations.push({
           citation: match[1],
-          type: 'inline',
+          type: "inline",
           position: {
             start: match.index,
             end: match.index + match[0].length,
@@ -160,5 +160,5 @@ export class InformationExtractor {
   }
 }
 
-export * from './resume-parser';
-export * from './form-extraction';
+export * from "./resume-parser";
+export * from "./form-extraction";

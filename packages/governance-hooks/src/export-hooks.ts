@@ -14,7 +14,7 @@ export interface ExportRequest {
   tenantId: string;
   investigationId?: string;
   entityIds: string[];
-  format: 'json' | 'csv' | 'graphml' | 'stix';
+  format: "json" | "csv" | "graphml" | "stix";
   includeRelationships: boolean;
   reason?: string;
 }
@@ -65,7 +65,7 @@ export function createExportAuthorityHook(config: ExportAuthorityConfig): Export
     async beforeExport(request: ExportRequest) {
       // Check reason requirement
       if (config.requireReason && !request.reason) {
-        throw new ExportPolicyError('Export reason is required');
+        throw new ExportPolicyError("Export reason is required");
       }
 
       // Check entity count
@@ -76,7 +76,7 @@ export function createExportAuthorityHook(config: ExportAuthorityConfig): Export
       // Evaluate export authority
       const decision = await config.evaluator.evaluate({
         user: { id: request.userId, tenantId: request.tenantId, roles: [] },
-        operation: 'EXPORT',
+        operation: "EXPORT",
         resource: { investigationId: request.investigationId },
         request: { timestamp: new Date(), justification: request.reason },
       });
@@ -87,7 +87,7 @@ export function createExportAuthorityHook(config: ExportAuthorityConfig): Export
 
       // Check two-person control
       if (decision.requiresTwoPersonControl) {
-        throw new ExportPolicyError('This export requires two-person approval', {
+        throw new ExportPolicyError("This export requires two-person approval", {
           twoPersonControlId: decision.twoPersonControlId,
         });
       }
@@ -125,7 +125,7 @@ export function createExportClassificationHook(config: ClassificationFilterConfi
 
       // Filter entities by classification
       const filteredEntities = data.entities.filter((entity) => {
-        const entityClassification = entity.classification || 'UNCLASSIFIED';
+        const entityClassification = entity.classification || "UNCLASSIFIED";
         const entityLevel = classificationLevels[entityClassification] || 0;
 
         // Must be within user clearance AND max export level
@@ -187,18 +187,21 @@ export function createExportFieldRedactionHook(config: FieldRedactionConfig): Ex
   };
 }
 
-function redactProps(props: Record<string, unknown>, config: FieldRedactionConfig): Record<string, unknown> {
+function redactProps(
+  props: Record<string, unknown>,
+  config: FieldRedactionConfig
+): Record<string, unknown> {
   const result: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(props)) {
     // Check if field should be redacted
     if (config.redactedFields.includes(key)) {
-      result[key] = '[REDACTED]';
+      result[key] = "[REDACTED]";
       continue;
     }
 
     // Check for PII patterns in string values
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       let redactedValue = value;
       for (const pattern of config.piiPatterns) {
         redactedValue = redactedValue.replace(pattern.regex, pattern.replacement);
@@ -221,7 +224,7 @@ export interface ExportAuditLogger {
 }
 
 export interface ExportAuditEvent {
-  eventType: 'export_started' | 'export_completed' | 'export_failed';
+  eventType: "export_started" | "export_completed" | "export_failed";
   exportId: string;
   userId: string;
   tenantId: string;
@@ -238,7 +241,7 @@ export function createExportAuditHook(logger: ExportAuditLogger): ExportHook {
   return {
     async beforeExport(request: ExportRequest) {
       await logger.log({
-        eventType: 'export_started',
+        eventType: "export_started",
         exportId: request.exportId,
         userId: request.userId,
         tenantId: request.tenantId,
@@ -254,7 +257,7 @@ export function createExportAuditHook(logger: ExportAuditLogger): ExportHook {
 
     async afterExport(request: ExportRequest, data: ExportData) {
       await logger.log({
-        eventType: 'export_completed',
+        eventType: "export_completed",
         exportId: request.exportId,
         userId: request.userId,
         tenantId: request.tenantId,
@@ -287,7 +290,7 @@ export function createExportManifestHook(config: ManifestConfig): ExportHook {
     async afterExport(request: ExportRequest, data: ExportData) {
       // Generate manifest (would use ExportManifestBuilder in production)
       const manifest = {
-        version: '1.0',
+        version: "1.0",
         exportId: request.exportId,
         exportedAt: new Date().toISOString(),
         exportedBy: request.userId,
@@ -355,7 +358,7 @@ export class ExportPolicyError extends Error {
 
   constructor(message: string, details?: Record<string, unknown>) {
     super(message);
-    this.name = 'ExportPolicyError';
+    this.name = "ExportPolicyError";
     this.details = details;
   }
 }

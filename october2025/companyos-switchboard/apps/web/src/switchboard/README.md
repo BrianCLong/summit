@@ -15,14 +15,14 @@ The Switchboard Engine is the routing and orchestration layer for CompanyOS. It 
    Create a new route definition using `defineRoute`. You can do this in `registry.ts` or in a separate file imported by `registry.ts`.
 
    ```typescript
-   import { defineRoute } from './router';
-   import { z } from 'zod';
+   import { defineRoute } from "./router";
+   import { z } from "zod";
 
    const myNewRoute = defineRoute({
-     id: 'my.new.feature',
-     description: 'Description of what this route does',
-     source: 'client',
-     targetService: 'intelgraph', // or 'agent-gateway', etc.
+     id: "my.new.feature",
+     description: "Description of what this route does",
+     source: "client",
+     targetService: "intelgraph", // or 'agent-gateway', etc.
      inputSchema: z.object({
        param1: z.string(),
      }),
@@ -48,7 +48,7 @@ The Switchboard Engine is the routing and orchestration layer for CompanyOS. It 
    Add a test case in `router.test.ts` or a new test file.
 
    ```typescript
-   const result = await router.dispatch('my.new.feature', { param1: 'test' }, context);
+   const result = await router.dispatch("my.new.feature", { param1: "test" }, context);
    ```
 
 ## Observability

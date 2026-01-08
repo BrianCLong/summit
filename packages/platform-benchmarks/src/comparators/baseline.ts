@@ -1,5 +1,5 @@
-import * as fs from 'node:fs/promises';
-import type { BenchmarkResult, BaselineComparison } from '../types.js';
+import * as fs from "node:fs/promises";
+import type { BenchmarkResult, BaselineComparison } from "../types.js";
 
 /**
  * Baseline comparator for regression detection
@@ -17,7 +17,7 @@ export class BaselineComparator {
    */
   async loadBaseline(filePath: string): Promise<void> {
     try {
-      const content = await fs.readFile(filePath, 'utf8');
+      const content = await fs.readFile(filePath, "utf8");
       const data = JSON.parse(content);
       const results: BenchmarkResult[] = data.results || data;
 
@@ -25,7 +25,7 @@ export class BaselineComparator {
         this.baselineResults.set(result.config.name, result);
       }
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
         throw error;
       }
       // No baseline file, that's okay
@@ -40,7 +40,7 @@ export class BaselineComparator {
       timestamp: new Date().toISOString(),
       results,
     };
-    await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
+    await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf8");
   }
 
   /**
@@ -58,15 +58,15 @@ export class BaselineComparator {
     const opsPerSecondDelta = current.stats.opsPerSecond - baseline.stats.opsPerSecond;
 
     const isRegression = meanDeltaPercent > this.regressionThreshold;
-    let severity: BaselineComparison['severity'];
+    let severity: BaselineComparison["severity"];
 
     if (isRegression) {
       if (meanDeltaPercent > 50) {
-        severity = 'severe';
+        severity = "severe";
       } else if (meanDeltaPercent > 25) {
-        severity = 'moderate';
+        severity = "moderate";
       } else {
-        severity = 'minor';
+        severity = "minor";
       }
     }
 
@@ -117,24 +117,24 @@ export class BaselineComparator {
    */
   formatComparison(comparison: BaselineComparison): string {
     const { current, baseline, meanDeltaPercent, isRegression, severity } = comparison;
-    const icon = isRegression ? '🔴' : meanDeltaPercent < -5 ? '🟢' : '⚪';
-    const sign = meanDeltaPercent > 0 ? '+' : '';
+    const icon = isRegression ? "🔴" : meanDeltaPercent < -5 ? "🟢" : "⚪";
+    const sign = meanDeltaPercent > 0 ? "+" : "";
 
     let lines = [
       `### ${icon} ${current.config.name}`,
-      '',
-      '| Metric | Baseline | Current | Delta |',
-      '|--------|----------|---------|-------|',
+      "",
+      "| Metric | Baseline | Current | Delta |",
+      "|--------|----------|---------|-------|",
       `| Mean | ${baseline.stats.mean.toFixed(2)} ns | ${current.stats.mean.toFixed(2)} ns | ${sign}${meanDeltaPercent.toFixed(2)}% |`,
       `| p99 | ${baseline.stats.percentiles.p99.toFixed(2)} ns | ${current.stats.percentiles.p99.toFixed(2)} ns | ${sign}${((comparison.p99Delta / baseline.stats.percentiles.p99) * 100).toFixed(2)}% |`,
       `| Ops/sec | ${baseline.stats.opsPerSecond.toFixed(2)} | ${current.stats.opsPerSecond.toFixed(2)} | ${((comparison.opsPerSecondDelta / baseline.stats.opsPerSecond) * 100).toFixed(2)}% |`,
     ];
 
     if (isRegression) {
-      lines.push('');
+      lines.push("");
       lines.push(`**⚠️ Regression detected (${severity})**`);
     }
 
-    return lines.join('\n');
+    return lines.join("\n");
   }
 }

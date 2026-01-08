@@ -4,7 +4,7 @@
  * Provides consistent, structured logging across all mesh services.
  */
 
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+export type LogLevel = "debug" | "info" | "warn" | "error";
 
 export interface LogContext {
   service?: string;
@@ -67,28 +67,28 @@ export class Logger {
    * Log a debug message.
    */
   debug(message: string, meta?: Record<string, unknown>): void {
-    this.log('debug', message, meta);
+    this.log("debug", message, meta);
   }
 
   /**
    * Log an info message.
    */
   info(message: string, meta?: Record<string, unknown>): void {
-    this.log('info', message, meta);
+    this.log("info", message, meta);
   }
 
   /**
    * Log a warning message.
    */
   warn(message: string, meta?: Record<string, unknown>): void {
-    this.log('warn', message, meta);
+    this.log("warn", message, meta);
   }
 
   /**
    * Log an error message.
    */
   error(message: string, meta?: Record<string, unknown>): void {
-    this.log('error', message, meta);
+    this.log("error", message, meta);
   }
 
   /**
@@ -99,13 +99,18 @@ export class Logger {
     const result = fn();
 
     if (result instanceof Promise) {
-      return result.then((value) => {
-        this.info(`${operation} completed`, { durationMs: Date.now() - start });
-        return value;
-      }).catch((error) => {
-        this.error(`${operation} failed`, { durationMs: Date.now() - start, error: String(error) });
-        throw error;
-      });
+      return result
+        .then((value) => {
+          this.info(`${operation} completed`, { durationMs: Date.now() - start });
+          return value;
+        })
+        .catch((error) => {
+          this.error(`${operation} failed`, {
+            durationMs: Date.now() - start,
+            error: String(error),
+          });
+          throw error;
+        });
     }
 
     this.info(`${operation} completed`, { durationMs: Date.now() - start });
@@ -145,18 +150,18 @@ export class Logger {
 
   private prettyPrint(entry: LogEntry): void {
     const levelColors: Record<LogLevel, string> = {
-      debug: '\x1b[36m', // cyan
-      info: '\x1b[32m',  // green
-      warn: '\x1b[33m',  // yellow
-      error: '\x1b[31m', // red
+      debug: "\x1b[36m", // cyan
+      info: "\x1b[32m", // green
+      warn: "\x1b[33m", // yellow
+      error: "\x1b[31m", // red
     };
-    const reset = '\x1b[0m';
+    const reset = "\x1b[0m";
     const color = levelColors[entry.level];
 
     const contextStr = Object.entries(entry.context)
-      .filter(([k]) => k !== 'service')
+      .filter(([k]) => k !== "service")
       .map(([k, v]) => `${k}=${JSON.stringify(v)}`)
-      .join(' ');
+      .join(" ");
 
     console.log(
       `${entry.timestamp} ${color}${entry.level.toUpperCase().padEnd(5)}${reset} [${entry.context.service}] ${entry.message} ${contextStr}`
@@ -171,10 +176,10 @@ export class Logger {
 /**
  * Create a logger for a service.
  */
-export function createLogger(service: string, level: LogLevel = 'info'): Logger {
+export function createLogger(service: string, level: LogLevel = "info"): Logger {
   return new Logger({
     service,
     level,
-    pretty: process.env.NODE_ENV !== 'production',
+    pretty: process.env.NODE_ENV !== "production",
   });
 }

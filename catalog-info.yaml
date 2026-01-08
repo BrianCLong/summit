@@ -4,7 +4,7 @@ metadata:
   name: maestro-api
   description: The core API for the Maestro CI/CD Platform
   annotations:
-    github.com/project-slug: 'intelgraph/maestro'
+    github.com/project-slug: "intelgraph/maestro"
 spec:
   type: service
   lifecycle: production

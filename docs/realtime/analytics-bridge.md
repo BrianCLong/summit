@@ -33,18 +33,18 @@ This component streams partial analytics results and AI insights from Redis Stre
 ## Join Flow (Client)
 
 ```js
-const socket = io('/graph-analytics', { auth: { token } });
-socket.emit('join_job', { jobId });
-socket.on('progress', (ev) => {
+const socket = io("/graph-analytics", { auth: { token } });
+socket.emit("join_job", { jobId });
+socket.on("progress", (ev) => {
   /* update UI */
 });
-socket.on('result', (ev) => {
+socket.on("result", (ev) => {
   /* append partial */
 });
-socket.on('error', (ev) => {
+socket.on("error", (ev) => {
   /* show error */
 });
-socket.on('complete', (ev) => {
+socket.on("complete", (ev) => {
   /* finalize */
 });
 ```

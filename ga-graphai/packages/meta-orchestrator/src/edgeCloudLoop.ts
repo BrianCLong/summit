@@ -1,6 +1,6 @@
-import type { GraphEdge, GraphNode, GraphSnapshot } from '@ga-graphai/knowledge-graph';
+import type { GraphEdge, GraphNode, GraphSnapshot } from "@ga-graphai/knowledge-graph";
 
-type ExecutionTier = 'edge' | 'cloud';
+type ExecutionTier = "edge" | "cloud";
 
 export interface EdgeCloudLoopConfig {
   perceptionSloMs: number;
@@ -16,8 +16,8 @@ export interface ExecutionSignal {
   planningLatencyMs: number;
   cloudQueueDepthPct: number;
   governancePending: number;
-  changeComplexity: 'low' | 'medium' | 'high';
-  complianceRisk: 'low' | 'medium' | 'high';
+  changeComplexity: "low" | "medium" | "high";
+  complianceRisk: "low" | "medium" | "high";
 }
 
 export interface RoundMetrics {
@@ -46,46 +46,43 @@ export class EdgeCloudLoopController {
 
   chooseExecutionTier(signal: ExecutionSignal): TierDecision {
     const reasons: string[] = [];
-    let tier: ExecutionTier = 'edge';
+    let tier: ExecutionTier = "edge";
 
-    if (signal.changeComplexity === 'high') {
-      tier = 'cloud';
-      reasons.push('high complexity change');
+    if (signal.changeComplexity === "high") {
+      tier = "cloud";
+      reasons.push("high complexity change");
     }
 
-    if (signal.complianceRisk === 'high') {
-      tier = 'cloud';
-      reasons.push('high compliance risk');
+    if (signal.complianceRisk === "high") {
+      tier = "cloud";
+      reasons.push("high compliance risk");
     }
 
     if (signal.perceptionLatencyMs > this.config.perceptionSloMs) {
-      tier = 'cloud';
-      reasons.push('perception latency breach');
+      tier = "cloud";
+      reasons.push("perception latency breach");
     }
 
     if (signal.planningLatencyMs > this.config.planSloMs) {
-      tier = 'cloud';
-      reasons.push('planning latency breach');
+      tier = "cloud";
+      reasons.push("planning latency breach");
     }
 
-    if (
-      signal.governancePending > this.config.governanceBacklogThreshold &&
-      tier === 'edge'
-    ) {
-      reasons.push('edge governance backlog high; staying edge to drain locally');
+    if (signal.governancePending > this.config.governanceBacklogThreshold && tier === "edge") {
+      reasons.push("edge governance backlog high; staying edge to drain locally");
     }
 
     if (signal.cloudQueueDepthPct > this.config.cloudQueueBackpressurePct) {
-      if (tier === 'cloud') {
-        reasons.push('cloud queue saturated; re-evaluate for edge capacity');
-        tier = 'edge';
+      if (tier === "cloud") {
+        reasons.push("cloud queue saturated; re-evaluate for edge capacity");
+        tier = "edge";
       } else {
-        reasons.push('cloud queue saturated; keep workload local');
+        reasons.push("cloud queue saturated; keep workload local");
       }
     }
 
     if (reasons.length === 0) {
-      reasons.push('default edge preference for fast iteration');
+      reasons.push("default edge preference for fast iteration");
     }
 
     return { tier, reasons };
@@ -99,7 +96,7 @@ export class EdgeCloudLoopController {
     const governanceScore = clamp(metrics.governanceScore * 100, 0, 100);
 
     const overallScore = roundToTwo(
-      qualityScore * 0.4 + velocityScore * 0.3 + governanceScore * 0.3,
+      qualityScore * 0.4 + velocityScore * 0.3 + governanceScore * 0.3
     );
 
     const upliftScore = (metrics.deltaQuality + metrics.deltaVelocity) / 2;
@@ -112,11 +109,11 @@ export class EdgeCloudLoopController {
     }
 
     if (metrics.governanceScore < 0.82) {
-      reasons.push('governance score below Gemini threshold');
+      reasons.push("governance score below Gemini threshold");
     }
 
     if (metrics.incidentsOpen > 0) {
-      reasons.push('open incidents present');
+      reasons.push("open incidents present");
     }
 
     const mergeReady =
@@ -126,18 +123,17 @@ export class EdgeCloudLoopController {
       metrics.incidentsOpen === 0;
 
     if (mergeReady) {
-      reasons.push('merge conditions satisfied');
+      reasons.push("merge conditions satisfied");
     }
 
-    const requiresRollback =
-      metrics.incidentsOpen > 0 || metrics.governanceScore < 0.6;
+    const requiresRollback = metrics.incidentsOpen > 0 || metrics.governanceScore < 0.6;
 
     if (requiresRollback && metrics.rollbackRef) {
       reasons.push(`rollback to ${metrics.rollbackRef}`);
     }
 
     if (overallScore < this.config.mergeThreshold) {
-      reasons.push('overall score below merge threshold');
+      reasons.push("overall score below merge threshold");
     }
 
     return { overallScore, mergeReady, requiresRollback, reasons };
@@ -146,12 +142,12 @@ export class EdgeCloudLoopController {
   buildTelemetrySnapshot(
     metrics: RoundMetrics,
     evaluation: RoundEvaluation,
-    decision: TierDecision,
+    decision: TierDecision
   ): GraphSnapshot {
     const nodes: GraphNode[] = [
       {
         id: `metric-${metrics.round}`,
-        type: 'pipeline',
+        type: "pipeline",
         data: {
           round: metrics.round,
           deltaQuality: metrics.deltaQuality,
@@ -162,12 +158,12 @@ export class EdgeCloudLoopController {
       },
       {
         id: `governance-${metrics.round}`,
-        type: 'policy',
+        type: "policy",
         data: {
-          status: metrics.governanceScore >= 0.82 ? 'pass' : 'fail',
+          status: metrics.governanceScore >= 0.82 ? "pass" : "fail",
           score: metrics.governanceScore,
           reasons: evaluation.reasons.filter((reason) =>
-            reason.toLowerCase().includes('governance'),
+            reason.toLowerCase().includes("governance")
           ),
         },
       },
@@ -176,7 +172,7 @@ export class EdgeCloudLoopController {
     if (metrics.rollbackRef) {
       nodes.push({
         id: `rollback-${metrics.round}`,
-        type: 'incident',
+        type: "incident",
         data: {
           rollbackRef: metrics.rollbackRef,
           triggered: evaluation.requiresRollback,
@@ -186,33 +182,33 @@ export class EdgeCloudLoopController {
 
     const edges: GraphEdge[] = [
       {
-        id: edgeId(nodes[0].id, 'GOVERNS', nodes[1].id),
+        id: edgeId(nodes[0].id, "GOVERNS", nodes[1].id),
         from: nodes[0].id,
         to: nodes[1].id,
-        type: 'GOVERNS',
+        type: "GOVERNS",
       },
     ];
 
     if (metrics.rollbackRef) {
       edges.push({
-        id: edgeId(nodes[0].id, 'OCCURRED_IN', `rollback-${metrics.round}`),
+        id: edgeId(nodes[0].id, "OCCURRED_IN", `rollback-${metrics.round}`),
         from: nodes[0].id,
         to: `rollback-${metrics.round}`,
-        type: 'OCCURRED_IN',
+        type: "OCCURRED_IN",
       });
     }
 
     nodes.push({
       id: `decision-${metrics.round}`,
-      type: 'stage',
+      type: "stage",
       data: { tier: decision.tier, reasons: decision.reasons },
     });
 
     edges.push({
-      id: edgeId(nodes[0].id, 'CONTAINS', `decision-${metrics.round}`),
+      id: edgeId(nodes[0].id, "CONTAINS", `decision-${metrics.round}`),
       from: nodes[0].id,
       to: `decision-${metrics.round}`,
-      type: 'CONTAINS',
+      type: "CONTAINS",
     });
 
     return {

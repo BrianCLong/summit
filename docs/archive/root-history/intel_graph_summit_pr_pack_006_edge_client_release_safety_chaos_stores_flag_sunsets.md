@@ -15,12 +15,12 @@ Twelve PRs that harden performance and security from the browser/CDN edge inward
 ```js
 module.exports = {
   ci: {
-    collect: { url: [process.env.PREVIEW_URL || 'http://localhost:3000'] },
+    collect: { url: [process.env.PREVIEW_URL || "http://localhost:3000"] },
     assert: {
       assertions: {
-        'largest-contentful-paint': ['error', { maxNumericValue: 2500 }],
-        'cumulative-layout-shift': ['error', { maxNumericValue: 0.1 }],
-        'total-byte-weight': ['warn', { maxNumericValue: 900000 }],
+        "largest-contentful-paint": ["error", { maxNumericValue: 2500 }],
+        "cumulative-layout-shift": ["error", { maxNumericValue: 0.1 }],
+        "total-byte-weight": ["warn", { maxNumericValue: 900000 }],
       },
     },
   },
@@ -57,34 +57,34 @@ jobs:
 **`web/public/rum.js`**
 
 ```js
-import { onCLS, onFID, onLCP, onINP } from 'web-vitals';
-const endpoint = '/rum';
+import { onCLS, onFID, onLCP, onINP } from "web-vitals";
+const endpoint = "/rum";
 function send(name, value) {
   navigator.sendBeacon(
     endpoint,
-    JSON.stringify({ name, value, ts: Date.now(), ua: navigator.userAgent }),
+    JSON.stringify({ name, value, ts: Date.now(), ua: navigator.userAgent })
   );
 }
-onCLS((v) => send('CLS', v.value));
-onFID((v) => send('FID', v.value));
-onLCP((v) => send('LCP', v.value));
-onINP((v) => send('INP', v.value));
+onCLS((v) => send("CLS", v.value));
+onFID((v) => send("FID", v.value));
+onLCP((v) => send("LCP", v.value));
+onINP((v) => send("INP", v.value));
 ```
 
 **`server/routes/rum.ts`**
 
 ```ts
-import express from 'express';
-import client from 'prom-client';
+import express from "express";
+import client from "prom-client";
 const r = express.Router();
 const g = new client.Gauge({
-  name: 'rum_metric',
-  help: 'web vitals',
-  labelNames: ['name'],
+  name: "rum_metric",
+  help: "web vitals",
+  labelNames: ["name"],
 });
-r.post('/rum', express.text({ type: '*/*' }), (req, res) => {
+r.post("/rum", express.text({ type: "*/*" }), (req, res) => {
   try {
-    const { name, value } = JSON.parse(req.body || '{}');
+    const { name, value } = JSON.parse(req.body || "{}");
     g.set({ name }, Number(value));
   } catch {}
   res.status(204).end();
@@ -105,7 +105,7 @@ export default r;
 **`server/security/csp.ts`**
 
 ```ts
-import helmet from 'helmet';
+import helmet from "helmet";
 export const csp = helmet.contentSecurityPolicy({
   useDefaults: true,
   directives: {
@@ -128,11 +128,7 @@ export const csp = helmet.contentSecurityPolicy({
   integrity="sha384-..."
   crossorigin="anonymous"
 />
-<script
-  src="/static/app.js"
-  integrity="sha384-..."
-  crossorigin="anonymous"
-></script>
+<script src="/static/app.js" integrity="sha384-..." crossorigin="anonymous"></script>
 ```
 
 **Rollback:** Relax CSP directives; remove Trusted Types requirement.
@@ -176,8 +172,8 @@ kind: Ingress
 metadata:
   name: web-canary
   annotations:
-    nginx.ingress.kubernetes.io/canary: 'true'
-    nginx.ingress.kubernetes.io/canary-weight: '10'
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-weight: "10"
 spec:
   rules:
     - host: web.example.com
@@ -206,9 +202,9 @@ kind: Ingress
 metadata:
   name: web-canary-header
   annotations:
-    nginx.ingress.kubernetes.io/canary: 'true'
-    nginx.ingress.kubernetes.io/canary-by-header: 'X-Canary'
-    nginx.ingress.kubernetes.io/canary-by-header-value: '1'
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-by-header: "X-Canary"
+    nginx.ingress.kubernetes.io/canary-by-header-value: "1"
 spec:
   rules:
     - host: web.example.com
@@ -272,11 +268,11 @@ spec:
       containers:
         - name: netem
           image: alpine
-          securityContext: { capabilities: { add: ['NET_ADMIN'] } }
-          command: ['/bin/sh', '-c']
+          securityContext: { capabilities: { add: ["NET_ADMIN"] } }
+          command: ["/bin/sh", "-c"]
           args:
             [
-              'apk add tc && tc qdisc add dev eth0 root netem delay 200ms && sleep 300 && tc qdisc del dev eth0 root netem',
+              "apk add tc && tc qdisc add dev eth0 root netem delay 200ms && sleep 300 && tc qdisc del dev eth0 root netem",
             ]
 ```
 
@@ -293,10 +289,10 @@ spec:
       containers:
         - name: killer
           image: bitnami/kubectl
-          command: ['/bin/sh', '-c']
+          command: ["/bin/sh", "-c"]
           args:
             [
-              'kubectl -n stage delete pod -l app.kubernetes.io/name=graph --field-selector=status.phase=Running --limit=1',
+              "kubectl -n stage delete pod -l app.kubernetes.io/name=graph --field-selector=status.phase=Running --limit=1",
             ]
 ```
 
@@ -322,20 +318,18 @@ ranker_v2:
 **`scripts/flags-audit.ts`**
 
 ```ts
-import fs from 'fs';
-import yaml from 'js-yaml';
-const flags = yaml.load(
-  fs.readFileSync('feature-flags/flags.yaml', 'utf8'),
-) as any;
+import fs from "fs";
+import yaml from "js-yaml";
+const flags = yaml.load(fs.readFileSync("feature-flags/flags.yaml", "utf8")) as any;
 const today = new Date().toISOString().slice(0, 10);
 const expired = Object.entries(flags.features || flags).filter(
-  ([, v]: any) => v.expires && v.expires < today,
+  ([, v]: any) => v.expires && v.expires < today
 );
 if (expired.length) {
-  console.error('Expired flags:', expired.map(([k]) => k).join(','));
+  console.error("Expired flags:", expired.map(([k]) => k).join(","));
   process.exit(1);
 }
-console.log('No expired flags.');
+console.log("No expired flags.");
 ```
 
 **`.github/workflows/flags-audit.yml`**
@@ -343,7 +337,7 @@ console.log('No expired flags.');
 ```yaml
 name: flags-audit
 on:
-  schedule: [{ cron: '0 8 * * 1' }]
+  schedule: [{ cron: "0 8 * * 1" }]
   pull_request:
 jobs:
   audit:
@@ -461,20 +455,18 @@ jobs:
 **`server/crypto/kms.ts`**
 
 ```ts
-import { KMSClient, EncryptCommand, DecryptCommand } from '@aws-sdk/client-kms';
+import { KMSClient, EncryptCommand, DecryptCommand } from "@aws-sdk/client-kms";
 const kms = new KMSClient({});
 const KEY_ID = process.env.KMS_KEY_ID!;
 export async function enc(plaintext: Buffer) {
-  const r = await kms.send(
-    new EncryptCommand({ KeyId: KEY_ID, Plaintext: plaintext }),
-  );
-  return Buffer.from(r.CiphertextBlob as Uint8Array).toString('base64');
+  const r = await kms.send(new EncryptCommand({ KeyId: KEY_ID, Plaintext: plaintext }));
+  return Buffer.from(r.CiphertextBlob as Uint8Array).toString("base64");
 }
 export async function dec(ciphertextB64: string) {
   const r = await kms.send(
     new DecryptCommand({
-      CiphertextBlob: Buffer.from(ciphertextB64, 'base64'),
-    }),
+      CiphertextBlob: Buffer.from(ciphertextB64, "base64"),
+    })
   );
   return Buffer.from(r.Plaintext as Uint8Array);
 }

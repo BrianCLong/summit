@@ -63,6 +63,7 @@ IntelGraph implements multiple layers of security controls:
 **Status**: ✅ Implemented
 
 **Controls**:
+
 - Role-Based Access Control (RBAC) - 4 roles: ADMIN, ANALYST, OPERATOR, VIEWER
 - Attribute-Based Access Control (ABAC) via Open Policy Agent (OPA)
 - JWT token-based authentication with short expiration (15 minutes)
@@ -71,6 +72,7 @@ IntelGraph implements multiple layers of security controls:
 - Horizontal privilege escalation prevention
 
 **Implementation**:
+
 ```typescript
 // server/src/middleware/auth.ts
 // server/src/middleware/rbac.ts
@@ -78,6 +80,7 @@ IntelGraph implements multiple layers of security controls:
 ```
 
 **Testing**:
+
 ```bash
 npm run test:security:access-control
 ```
@@ -89,6 +92,7 @@ npm run test:security:access-control
 **Status**: ✅ Implemented
 
 **Controls**:
+
 - TLS 1.3 enforcement in production
 - Argon2id password hashing (OWASP recommended)
 - AES-256-GCM for data encryption
@@ -98,12 +102,14 @@ npm run test:security:access-control
 - No hardcoded secrets
 
 **Implementation**:
+
 ```typescript
 // server/src/services/AuthService.ts (Argon2 hashing)
 // server/src/config/owasp-security.ts (Crypto config)
 ```
 
 **Environment Variables**:
+
 ```bash
 JWT_SECRET=<strong-secret-key>
 JWT_REFRESH_SECRET=<strong-refresh-secret>
@@ -117,6 +123,7 @@ ENCRYPTION_KEY=<aes-256-key>
 **Status**: ✅ Implemented
 
 **Controls**:
+
 - SQL injection prevention via parameterized queries
 - NoSQL injection prevention
 - XSS protection via input sanitization and CSP
@@ -126,6 +133,7 @@ ENCRYPTION_KEY=<aes-256-key>
 - GraphQL complexity analysis
 
 **Implementation**:
+
 ```typescript
 // server/src/middleware/input-validation.ts
 // server/src/middleware/sanitize.ts
@@ -133,17 +141,13 @@ ENCRYPTION_KEY=<aes-256-key>
 ```
 
 **Example - SQL Injection Prevention**:
+
 ```typescript
 // ✅ Correct - Parameterized query
-const result = await pool.query(
-  'SELECT * FROM users WHERE email = $1',
-  [email]
-);
+const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
 
 // ❌ Wrong - String concatenation
-const result = await pool.query(
-  `SELECT * FROM users WHERE email = '${email}'`
-);
+const result = await pool.query(`SELECT * FROM users WHERE email = '${email}'`);
 ```
 
 ---
@@ -153,6 +157,7 @@ const result = await pool.query(
 **Status**: ✅ Implemented
 
 **Controls**:
+
 - Threat modeling integrated into design process
 - Secure SDLC practices
 - Business logic validation
@@ -161,6 +166,7 @@ const result = await pool.query(
 - Backpressure handling
 
 **Implementation**:
+
 ```typescript
 // server/src/middleware/backpressure.ts
 // server/src/middleware/validation.ts
@@ -173,6 +179,7 @@ const result = await pool.query(
 **Status**: ✅ Implemented
 
 **Controls**:
+
 - Security headers (CSP, HSTS, X-Frame-Options, Permissions-Policy)
 - CORS whitelist enforcement
 - Error handling without information leakage
@@ -182,12 +189,14 @@ const result = await pool.query(
 - Introspection disabled in production
 
 **Implementation**:
+
 ```typescript
 // server/src/security/security-headers.ts
 // server/src/config/production-security.ts
 ```
 
 **Security Headers**:
+
 ```http
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Frame-Options: DENY
@@ -205,6 +214,7 @@ Referrer-Policy: strict-origin-when-cross-origin
 **Status**: ✅ Implemented
 
 **Controls**:
+
 - Automated dependency scanning (npm audit, Dependabot, Snyk)
 - Daily security updates via Dependabot
 - Software Bill of Materials (SBOM) generation
@@ -213,6 +223,7 @@ Referrer-Policy: strict-origin-when-cross-origin
 - Automated patching for critical vulnerabilities
 
 **CI/CD Integration**:
+
 ```yaml
 # .github/workflows/security-audit.yml
 # .github/workflows/nightly-cve-scan.yml
@@ -220,6 +231,7 @@ Referrer-Policy: strict-origin-when-cross-origin
 ```
 
 **Commands**:
+
 ```bash
 npm audit --audit-level=critical
 npm audit fix
@@ -233,6 +245,7 @@ npm outdated
 **Status**: ✅ Implemented
 
 **Controls**:
+
 - JWT with short-lived access tokens (15 min in prod)
 - Refresh token rotation on use
 - Token blacklist for revocation
@@ -245,6 +258,7 @@ npm outdated
 - Brute force protection
 
 **Implementation**:
+
 ```typescript
 // server/src/services/AuthService.ts
 // server/src/config/owasp-security.ts
@@ -252,6 +266,7 @@ npm outdated
 ```
 
 **Authentication Flow**:
+
 ```
 1. Login → Generate access token (15m) + refresh token (7d)
 2. Access protected resource → Validate access token
@@ -261,6 +276,7 @@ npm outdated
 ```
 
 **Password Requirements**:
+
 - Minimum length: 12 characters
 - Must include: uppercase, lowercase, number, special character
 - Cannot reuse last 5 passwords
@@ -273,6 +289,7 @@ npm outdated
 **Status**: ✅ Implemented
 
 **Controls**:
+
 - Code signing for releases
 - Subresource Integrity (SRI) for CDN resources
 - Content Security Policy (CSP)
@@ -281,6 +298,7 @@ npm outdated
 - Trusted repository enforcement
 
 **Implementation**:
+
 ```typescript
 // server/src/config/owasp-security.ts
 ```
@@ -292,6 +310,7 @@ npm outdated
 **Status**: ✅ Implemented
 
 **Controls**:
+
 - Comprehensive security logging (Pino)
 - Audit trail for all privileged actions
 - Failed login attempt tracking
@@ -302,6 +321,7 @@ npm outdated
 - Correlation IDs for request tracing
 
 **Implementation**:
+
 ```typescript
 // server/src/middleware/audit-logger.ts
 // server/src/middleware/requestId.ts
@@ -309,6 +329,7 @@ npm outdated
 ```
 
 **Critical Events Logged**:
+
 - Failed authentication attempts
 - Privilege escalation attempts
 - Token revocation
@@ -319,6 +340,7 @@ npm outdated
 - Configuration changes
 
 **Log Format**:
+
 ```json
 {
   "timestamp": "2025-11-20T10:30:00Z",
@@ -342,6 +364,7 @@ npm outdated
 **Status**: ✅ Implemented
 
 **Controls**:
+
 - URL validation and sanitization
 - Allowed protocol whitelist (https only in prod)
 - Domain whitelist enforcement
@@ -349,6 +372,7 @@ npm outdated
 - DNS rebinding protection
 
 **Implementation**:
+
 ```typescript
 // server/src/middleware/validation.ts
 // server/src/config/owasp-security.ts
@@ -361,18 +385,21 @@ npm outdated
 ### JWT Token Security
 
 **Access Tokens**:
+
 - Expiration: 15 minutes (production), 24 hours (development)
 - Algorithm: RS256 (asymmetric)
 - Claims: userId, email, role, permissions
 - Storage: Memory/SessionStorage (never localStorage)
 
 **Refresh Tokens**:
+
 - Expiration: 7 days (production), 30 days (development)
 - Rotation: New token generated on each refresh
 - Revocation: Old token invalidated immediately
 - Storage: Database (user_sessions table)
 
 **Token Blacklist**:
+
 - Hashed tokens (SHA-256) stored in token_blacklist table
 - Automatic cleanup of expired entries
 - Used for logout and security incidents
@@ -380,6 +407,7 @@ npm outdated
 ### Role-Based Access Control (RBAC)
 
 **Roles**:
+
 1. **ADMIN**: Full system access
 2. **ANALYST**: Create, read, update investigations and entities
 3. **OPERATOR**: Read and execute investigations
@@ -387,17 +415,17 @@ npm outdated
 
 **Permission Matrix**:
 
-| Action | ADMIN | ANALYST | OPERATOR | VIEWER |
-|--------|-------|---------|----------|--------|
-| investigation:create | ✅ | ✅ | ❌ | ❌ |
-| investigation:read | ✅ | ✅ | ✅ | ✅ |
-| investigation:update | ✅ | ✅ | ❌ | ❌ |
-| investigation:delete | ✅ | ❌ | ❌ | ❌ |
-| entity:create | ✅ | ✅ | ❌ | ❌ |
-| entity:read | ✅ | ✅ | ✅ | ✅ |
-| entity:update | ✅ | ✅ | ❌ | ❌ |
-| entity:delete | ✅ | ✅ | ❌ | ❌ |
-| admin:* | ✅ | ❌ | ❌ | ❌ |
+| Action               | ADMIN | ANALYST | OPERATOR | VIEWER |
+| -------------------- | ----- | ------- | -------- | ------ |
+| investigation:create | ✅    | ✅      | ❌       | ❌     |
+| investigation:read   | ✅    | ✅      | ✅       | ✅     |
+| investigation:update | ✅    | ✅      | ❌       | ❌     |
+| investigation:delete | ✅    | ❌      | ❌       | ❌     |
+| entity:create        | ✅    | ✅      | ❌       | ❌     |
+| entity:read          | ✅    | ✅      | ✅       | ✅     |
+| entity:update        | ✅    | ✅      | ❌       | ❌     |
+| entity:delete        | ✅    | ✅      | ❌       | ❌     |
+| admin:\*             | ✅    | ❌      | ❌       | ❌     |
 
 ---
 
@@ -406,11 +434,13 @@ npm outdated
 ### Encryption
 
 **Data at Rest**:
+
 - Database: AES-256-GCM encryption
 - File storage: Server-side encryption
 - Backups: Encrypted with separate keys
 
 **Data in Transit**:
+
 - TLS 1.3 minimum
 - Perfect Forward Secrecy (PFS)
 - Certificate pinning (production)
@@ -418,6 +448,7 @@ npm outdated
 ### PII Handling
 
 **Automatic Redaction**:
+
 - Email addresses
 - Phone numbers
 - Social Security Numbers
@@ -425,6 +456,7 @@ npm outdated
 - API keys and secrets
 
 **Implementation**:
+
 ```typescript
 // server/src/middleware/pii-redaction.ts
 // server/src/middleware/privacy.ts
@@ -445,37 +477,44 @@ npm outdated
 ### GraphQL Security
 
 **Query Depth Limiting**:
+
 ```typescript
-maxDepth: 6 (production)
-maxDepth: 10 (development)
+maxDepth: 6(production);
+maxDepth: 10(development);
 ```
 
 **Query Complexity Analysis**:
+
 ```typescript
-maxComplexity: 1000 (production)
-maxComplexity: 5000 (development)
+maxComplexity: 1000(production);
+maxComplexity: 5000(development);
 ```
 
 **Persisted Queries**:
+
 - Enabled in production
 - Pre-approved query enforcement
 - Query hash validation
 
 **Introspection**:
+
 - Disabled in production
 - Enabled in development/staging
 
 **Rate Limiting**:
+
 - 100 requests per minute (production)
 - 200 requests per minute (development)
 
 ### REST API Security
 
 **Rate Limiting**:
+
 - 1000 requests per hour (production)
 - 2000 requests per hour (development)
 
 **Request Size Limits**:
+
 - Max request size: 10MB
 - Max upload size: 50MB
 - Allowed file types: whitelist
@@ -483,11 +522,13 @@ maxComplexity: 5000 (development)
 ### WebSocket Security
 
 **Authentication**:
+
 - JWT token in connection handshake
 - Token validation on connect
 - Automatic disconnect on token expiry
 
 **Rate Limiting**:
+
 - 50 messages per minute
 - Connection limit per user
 
@@ -505,23 +546,27 @@ maxComplexity: 5000 (development)
 ### Validation Rules
 
 **Email**:
+
 ```typescript
-z.string().email().max(255)
+z.string().email().max(255);
 ```
 
 **Password**:
+
 ```typescript
 z.string()
   .min(12)
-  .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
+  .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/);
 ```
 
 **ID**:
+
 ```typescript
-z.string().uuid()
+z.string().uuid();
 ```
 
 **File Upload**:
+
 ```typescript
 allowedTypes: ['image/jpeg', 'image/png', 'application/pdf']
 maxSize: 50MB
@@ -549,6 +594,7 @@ Cross-Origin-Resource-Policy: cross-origin
 ### Content Security Policy (CSP)
 
 **Production CSP**:
+
 ```
 default-src 'self';
 script-src 'self';
@@ -566,6 +612,7 @@ upgrade-insecure-requests;
 ### Permissions Policy
 
 Restricts browser features:
+
 ```
 camera=(), microphone=(), geolocation=(),
 payment=(), usb=(), magnetometer=(),
@@ -579,21 +626,25 @@ gyroscope=(), accelerometer=()
 ### Endpoint-Specific Limits (OWASP Compliant)
 
 **Authentication** (`/api/auth/*`):
+
 - Window: 1 minute
 - Limit: 5 requests
 - Response: 429 Too Many Requests
 
 **GraphQL** (`/graphql`):
+
 - Window: 1 minute
 - Limit: 100 requests
 - Response: 429 Too Many Requests
 
 **REST API** (`/api/*`):
+
 - Window: 1 hour
 - Limit: 1000 requests
 - Response: 429 Too Many Requests
 
 **File Upload**:
+
 - Window: 1 hour
 - Limit: 10 uploads
 - Response: 429 Too Many Requests
@@ -621,6 +672,7 @@ Retry-After: 60
 ### Environment Variables
 
 **Required Secrets**:
+
 ```bash
 # JWT
 JWT_SECRET=<strong-secret-256-bit>
@@ -665,6 +717,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ### Metrics
 
 **Security Metrics Tracked**:
+
 - Failed login attempts
 - Token revocations
 - Rate limit hits
@@ -675,6 +728,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ### Alerts
 
 **Critical Alerts** (Immediate notification):
+
 - Multiple failed login attempts (5+)
 - Privilege escalation detected
 - SQL injection attempt
@@ -683,6 +737,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 - Unauthorized data access
 
 **Warning Alerts** (Daily digest):
+
 - Rate limit exceeded
 - Unusual access patterns
 - Failed authorization
@@ -702,24 +757,28 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ### Incident Severity Levels
 
 **P0 - Critical**:
+
 - Active data breach
 - Complete service outage
 - Privilege escalation in production
 - Response time: Immediate
 
 **P1 - High**:
+
 - Security vulnerability exploited
 - Partial service outage
 - Data integrity issue
 - Response time: 1 hour
 
 **P2 - Medium**:
+
 - Suspicious activity detected
 - Performance degradation
 - Non-critical vulnerability
 - Response time: 4 hours
 
 **P3 - Low**:
+
 - Minor security issue
 - Non-urgent maintenance
 - Response time: 24 hours
@@ -747,6 +806,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ### Automated Testing
 
 **CI/CD Integration**:
+
 ```yaml
 # .github/workflows/security.yml (CodeQL)
 # .github/workflows/security-audit.yml (npm audit)
@@ -755,6 +815,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
 **Test Types**:
+
 1. Static Application Security Testing (SAST) - CodeQL
 2. Dependency Scanning - npm audit, Dependabot
 3. Dynamic Application Security Testing (DAST) - OWASP ZAP
@@ -764,12 +825,14 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ### Manual Testing
 
 **Penetration Testing**:
+
 - Frequency: Quarterly
 - Scope: Full application
 - Tools: Burp Suite, OWASP ZAP, Metasploit
 - Report: Findings + remediation plan
 
 **Security Code Review**:
+
 - All PRs reviewed for security issues
 - Focus areas: Auth, input validation, data access
 - Mandatory for high-risk changes
@@ -797,6 +860,7 @@ npm run security:secrets:scan
 ### Secure Coding Practices
 
 **1. Input Validation**
+
 ```typescript
 // ✅ Correct
 const validateEmail = (email: string) => {
@@ -805,20 +869,22 @@ const validateEmail = (email: string) => {
 
 // ❌ Wrong
 const validateEmail = (email: string) => {
-  return email.includes('@');
+  return email.includes("@");
 };
 ```
 
 **2. SQL Injection Prevention**
+
 ```typescript
 // ✅ Correct - Parameterized query
-await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
+await pool.query("SELECT * FROM users WHERE id = $1", [userId]);
 
 // ❌ Wrong - String concatenation
 await pool.query(`SELECT * FROM users WHERE id = ${userId}`);
 ```
 
 **3. XSS Prevention**
+
 ```typescript
 // ✅ Correct - Sanitize output
 import DOMPurify from 'dompurify';
@@ -829,10 +895,11 @@ dangerouslySetInnerHTML={{ __html: userInput }}
 ```
 
 **4. Authentication**
+
 ```typescript
 // ✅ Correct - Check authentication
 if (!req.user) {
-  return res.status(401).json({ error: 'Unauthorized' });
+  return res.status(401).json({ error: "Unauthorized" });
 }
 
 // ❌ Wrong - Trust client data
@@ -840,9 +907,10 @@ const userId = req.body.userId; // Never trust client!
 ```
 
 **5. Error Handling**
+
 ```typescript
 // ✅ Correct - Generic error
-return res.status(500).json({ error: 'Internal server error' });
+return res.status(500).json({ error: "Internal server error" });
 
 // ❌ Wrong - Detailed error
 return res.status(500).json({ error: error.stack });
@@ -866,6 +934,7 @@ return res.status(500).json({ error: error.stack });
 ### Git Hooks
 
 **Pre-commit**:
+
 ```bash
 # Check for secrets
 npm run security:secrets:scan
@@ -878,6 +947,7 @@ npm run typecheck
 ```
 
 **Pre-push**:
+
 ```bash
 # Run security audit
 npm audit --audit-level=critical
@@ -936,9 +1006,9 @@ npm test
 
 ## Version History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0.0 | 2025-11-20 | Security Team | Initial OWASP-compliant guidelines |
+| Version | Date       | Author        | Changes                            |
+| ------- | ---------- | ------------- | ---------------------------------- |
+| 1.0.0   | 2025-11-20 | Security Team | Initial OWASP-compliant guidelines |
 
 ---
 

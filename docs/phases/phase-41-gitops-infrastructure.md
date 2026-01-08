@@ -45,9 +45,9 @@ name: Documentation GitOps Workflow
 on:
   push:
     branches: [main, develop]
-    paths: ['docs/**', 'infrastructure/docs/**']
+    paths: ["docs/**", "infrastructure/docs/**"]
   pull_request:
-    paths: ['docs/**', 'infrastructure/docs/**']
+    paths: ["docs/**", "infrastructure/docs/**"]
 
 jobs:
   validate-infrastructure:
@@ -255,10 +255,10 @@ export class GitOpsContentManager {
     this.config = config;
   }
 
-  async syncContent(branch: string = 'main'): Promise<void> {
+  async syncContent(branch: string = "main"): Promise<void> {
     try {
       await this.git.checkout(branch);
-      await this.git.pull('origin', branch);
+      await this.git.pull("origin", branch);
 
       const changes = await this.detectChanges();
       if (changes.length > 0) {
@@ -266,7 +266,7 @@ export class GitOpsContentManager {
         await this.triggerDeployment();
       }
     } catch (error) {
-      this.logger.error('Content sync failed:', error);
+      this.logger.error("Content sync failed:", error);
       await this.rollbackChanges();
     }
   }
@@ -278,9 +278,9 @@ export class GitOpsContentManager {
     for (const file of [...status.modified, ...status.created]) {
       if (file.match(/\.(md|mdx|json|yaml)$/)) {
         changes.push({
-          type: 'content',
+          type: "content",
           path: file,
-          action: status.created.includes(file) ? 'create' : 'update',
+          action: status.created.includes(file) ? "create" : "update",
         });
       }
     }
@@ -291,10 +291,10 @@ export class GitOpsContentManager {
   private async processChanges(changes: FileChange[]): Promise<void> {
     for (const change of changes) {
       switch (change.type) {
-        case 'content':
+        case "content":
           await this.processContentChange(change);
           break;
-        case 'infrastructure':
+        case "infrastructure":
           await this.processInfrastructureChange(change);
           break;
       }
@@ -304,9 +304,9 @@ export class GitOpsContentManager {
   private async triggerDeployment(): Promise<void> {
     const webhook = new WebhookTrigger(this.config.webhookUrl);
     await webhook.trigger({
-      type: 'content-sync',
+      type: "content-sync",
       timestamp: new Date().toISOString(),
-      commit: await this.git.revparse(['HEAD']),
+      commit: await this.git.revparse(["HEAD"]),
     });
   }
 }
@@ -347,7 +347,7 @@ export class InfrastructureStateManager {
       // Verify deployment health
       await this.verifyDeploymentHealth();
     } catch (error) {
-      this.logger.error('Infrastructure deployment failed:', error);
+      this.logger.error("Infrastructure deployment failed:", error);
       await this.initiateRollback();
       throw error;
     }
@@ -363,11 +363,11 @@ export class InfrastructureStateManager {
 
     const results = await Promise.allSettled(checks);
     const failures = results
-      .filter((r) => r.status === 'rejected')
+      .filter((r) => r.status === "rejected")
       .map((r) => (r as PromiseRejectedResult).reason);
 
     if (failures.length > 0) {
-      throw new Error(`Prerequisite checks failed: ${failures.join(', ')}`);
+      throw new Error(`Prerequisite checks failed: ${failures.join(", ")}`);
     }
   }
 }
@@ -387,34 +387,34 @@ export class EnvironmentConfigManager {
   private loadEnvironmentConfigs(): void {
     const configs = [
       {
-        name: 'development',
-        cluster: 'dev-cluster',
-        namespace: 'docs-dev',
+        name: "development",
+        cluster: "dev-cluster",
+        namespace: "docs-dev",
         replicas: 1,
-        resources: { cpu: '100m', memory: '128Mi' },
-        domain: 'docs-dev.intelgraph.io',
-        features: ['debug-mode', 'hot-reload'],
-        syncPolicy: 'automatic',
+        resources: { cpu: "100m", memory: "128Mi" },
+        domain: "docs-dev.intelgraph.io",
+        features: ["debug-mode", "hot-reload"],
+        syncPolicy: "automatic",
       },
       {
-        name: 'staging',
-        cluster: 'staging-cluster',
-        namespace: 'docs-staging',
+        name: "staging",
+        cluster: "staging-cluster",
+        namespace: "docs-staging",
         replicas: 2,
-        resources: { cpu: '200m', memory: '256Mi' },
-        domain: 'docs-staging.intelgraph.io',
-        features: ['performance-testing', 'integration-tests'],
-        syncPolicy: 'manual',
+        resources: { cpu: "200m", memory: "256Mi" },
+        domain: "docs-staging.intelgraph.io",
+        features: ["performance-testing", "integration-tests"],
+        syncPolicy: "manual",
       },
       {
-        name: 'production',
-        cluster: 'prod-cluster',
-        namespace: 'docs-platform',
+        name: "production",
+        cluster: "prod-cluster",
+        namespace: "docs-platform",
         replicas: 5,
-        resources: { cpu: '500m', memory: '512Mi' },
-        domain: 'docs.intelgraph.io',
-        features: ['high-availability', 'auto-scaling', 'monitoring'],
-        syncPolicy: 'manual-with-approval',
+        resources: { cpu: "500m", memory: "512Mi" },
+        domain: "docs.intelgraph.io",
+        features: ["high-availability", "auto-scaling", "monitoring"],
+        syncPolicy: "manual-with-approval",
       },
     ];
 
@@ -426,7 +426,7 @@ export class EnvironmentConfigManager {
   async promoteToEnvironment(
     from: string,
     to: string,
-    options: PromotionOptions = {},
+    options: PromotionOptions = {}
   ): Promise<void> {
     const fromEnv = this.environments.get(from);
     const toEnv = this.environments.get(to);
@@ -439,7 +439,7 @@ export class EnvironmentConfigManager {
     await this.runPrePromotionChecks(fromEnv, toEnv);
 
     // Create promotion PR or direct deployment
-    if (toEnv.syncPolicy === 'manual-with-approval') {
+    if (toEnv.syncPolicy === "manual-with-approval") {
       await this.createPromotionPR(from, to, options);
     } else {
       await this.directPromotion(fromEnv, toEnv, options);
@@ -448,7 +448,7 @@ export class EnvironmentConfigManager {
 
   private async runPrePromotionChecks(
     from: EnvironmentConfig,
-    to: EnvironmentConfig,
+    to: EnvironmentConfig
   ): Promise<void> {
     const checks = [
       this.checkHealthMetrics(from),
@@ -459,11 +459,11 @@ export class EnvironmentConfigManager {
 
     const results = await Promise.allSettled(checks);
     const failures = results
-      .filter((r) => r.status === 'rejected')
+      .filter((r) => r.status === "rejected")
       .map((r) => (r as PromiseRejectedResult).reason);
 
     if (failures.length > 0) {
-      throw new Error(`Promotion checks failed: ${failures.join(', ')}`);
+      throw new Error(`Promotion checks failed: ${failures.join(", ")}`);
     }
   }
 }
@@ -488,9 +488,7 @@ export class RollbackManager {
   }
 
   async rollbackToVersion(version: string): Promise<void> {
-    const targetDeployment = this.deploymentHistory.find(
-      (d) => d.version === version,
-    );
+    const targetDeployment = this.deploymentHistory.find((d) => d.version === version);
 
     if (!targetDeployment) {
       throw new Error(`Version ${version} not found in deployment history`);
@@ -506,10 +504,8 @@ export class RollbackManager {
       // Update current version
       await this.updateCurrentVersion(version);
     } catch (error) {
-      this.logger.error('Rollback failed:', error);
-      throw new Error(
-        `Failed to rollback to version ${version}: ${error.message}`,
-      );
+      this.logger.error("Rollback failed:", error);
+      throw new Error(`Failed to rollback to version ${version}: ${error.message}`);
     }
   }
 
@@ -520,30 +516,25 @@ export class RollbackManager {
 
     const lastKnownGood = this.deploymentHistory[1]; // Previous deployment
 
-    this.logger.warn(
-      'Critical health check failure, initiating auto-rollback',
-      {
-        currentVersion: this.deploymentHistory[0].version,
-        targetVersion: lastKnownGood.version,
-        healthCheck,
-      },
-    );
+    this.logger.warn("Critical health check failure, initiating auto-rollback", {
+      currentVersion: this.deploymentHistory[0].version,
+      targetVersion: lastKnownGood.version,
+      healthCheck,
+    });
 
     await this.rollbackToVersion(lastKnownGood.version);
   }
 
-  private async createRollbackDeployment(
-    deployment: DeploymentRecord,
-  ): Promise<void> {
+  private async createRollbackDeployment(deployment: DeploymentRecord): Promise<void> {
     const rollbackConfig = {
       ...deployment.config,
       metadata: {
         ...deployment.config.metadata,
         annotations: {
           ...deployment.config.metadata.annotations,
-          'deployment.kubernetes.io/revision': deployment.revision,
-          'rollback.intelgraph.io/timestamp': new Date().toISOString(),
-          'rollback.intelgraph.io/reason': 'automated-rollback',
+          "deployment.kubernetes.io/revision": deployment.revision,
+          "rollback.intelgraph.io/timestamp": new Date().toISOString(),
+          "rollback.intelgraph.io/reason": "automated-rollback",
         },
       },
     };
@@ -569,22 +560,22 @@ export class GitOpsMetricsCollector {
 
   private initializeMetrics(): void {
     this.deploymentDuration = new Histogram({
-      name: 'gitops_deployment_duration_seconds',
-      help: 'Time taken for deployments',
-      labelNames: ['environment', 'component', 'status'],
+      name: "gitops_deployment_duration_seconds",
+      help: "Time taken for deployments",
+      labelNames: ["environment", "component", "status"],
       buckets: [1, 5, 10, 30, 60, 300, 600],
     });
 
     this.deploymentFrequency = new Counter({
-      name: 'gitops_deployments_total',
-      help: 'Total number of deployments',
-      labelNames: ['environment', 'component', 'status'],
+      name: "gitops_deployments_total",
+      help: "Total number of deployments",
+      labelNames: ["environment", "component", "status"],
     });
 
     this.rollbackCount = new Counter({
-      name: 'gitops_rollbacks_total',
-      help: 'Total number of rollbacks',
-      labelNames: ['environment', 'trigger', 'reason'],
+      name: "gitops_rollbacks_total",
+      help: "Total number of rollbacks",
+      labelNames: ["environment", "trigger", "reason"],
     });
   }
 
@@ -592,11 +583,9 @@ export class GitOpsMetricsCollector {
     environment: string,
     component: string,
     duration: number,
-    status: 'success' | 'failure',
+    status: "success" | "failure"
   ): void {
-    this.deploymentDuration
-      .labels(environment, component, status)
-      .observe(duration);
+    this.deploymentDuration.labels(environment, component, status).observe(duration);
 
     this.deploymentFrequency.labels(environment, component, status).inc();
   }
@@ -617,13 +606,13 @@ metadata:
 spec:
   provider:
     vault:
-      server: 'https://vault.intelgraph.io'
-      path: 'secret'
-      version: 'v2'
+      server: "https://vault.intelgraph.io"
+      path: "secret"
+      version: "v2"
       auth:
         kubernetes:
-          mountPath: 'kubernetes'
-          role: 'docs-platform'
+          mountPath: "kubernetes"
+          role: "docs-platform"
 
 ---
 apiVersion: external-secrets.io/v1beta1
@@ -670,12 +659,12 @@ spec:
               namespaces:
                 - docs-platform
       validate:
-        message: 'Security context is required'
+        message: "Security context is required"
         pattern:
           spec:
             securityContext:
               runAsNonRoot: true
-              runAsUser: '>1000'
+              runAsUser: ">1000"
 
     - name: require-resource-limits
       match:
@@ -686,15 +675,15 @@ spec:
               namespaces:
                 - docs-platform
       validate:
-        message: 'Resource limits are required'
+        message: "Resource limits are required"
         pattern:
           spec:
             containers:
-              - name: '*'
+              - name: "*"
                 resources:
                   limits:
-                    memory: '?*'
-                    cpu: '?*'
+                    memory: "?*"
+                    cpu: "?*"
 ```
 
 This completes Phase 41: GitOps Documentation Workflows with Infrastructure as Code. The implementation provides:

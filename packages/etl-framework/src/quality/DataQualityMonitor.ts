@@ -3,13 +3,13 @@
  * Provides comprehensive data quality assessment across multiple dimensions
  */
 
-import { Logger } from 'winston';
+import { Logger } from "winston";
 import {
   DataQualityReport,
   DataQualityIssue,
   DataStatistics,
-  PipelineRun
-} from '@intelgraph/data-integration/src/types';
+  PipelineRun,
+} from "@intelgraph/data-integration/src/types";
 
 export interface QualityRuleConfig {
   id: string;
@@ -17,17 +17,17 @@ export interface QualityRuleConfig {
   dimension: QualityDimension;
   rule: QualityRule;
   threshold: number;
-  severity: 'critical' | 'high' | 'medium' | 'low';
+  severity: "critical" | "high" | "medium" | "low";
   enabled: boolean;
 }
 
 export enum QualityDimension {
-  COMPLETENESS = 'completeness',
-  ACCURACY = 'accuracy',
-  CONSISTENCY = 'consistency',
-  TIMELINESS = 'timeliness',
-  VALIDITY = 'validity',
-  UNIQUENESS = 'uniqueness'
+  COMPLETENESS = "completeness",
+  ACCURACY = "accuracy",
+  CONSISTENCY = "consistency",
+  TIMELINESS = "timeliness",
+  VALIDITY = "validity",
+  UNIQUENESS = "uniqueness",
 }
 
 export interface QualityRule {
@@ -47,10 +47,7 @@ export class DataQualityMonitor {
   /**
    * Generate comprehensive data quality report
    */
-  async generateReport(
-    pipelineRun: PipelineRun,
-    data: any[]
-  ): Promise<DataQualityReport> {
+  async generateReport(pipelineRun: PipelineRun, data: any[]): Promise<DataQualityReport> {
     this.logger.info(`Generating data quality report for pipeline run ${pipelineRun.id}`);
 
     const statistics = this.calculateStatistics(data);
@@ -71,7 +68,7 @@ export class DataQualityMonitor {
       consistency,
       timeliness,
       validity,
-      uniqueness
+      uniqueness,
     });
 
     const report: DataQualityReport = {
@@ -84,10 +81,10 @@ export class DataQualityMonitor {
         consistency,
         timeliness,
         validity,
-        uniqueness
+        uniqueness,
       },
       issues,
-      statistics
+      statistics,
     };
 
     this.logger.info(`Data quality report generated - Overall score: ${overallScore.toFixed(2)}%`);
@@ -107,7 +104,7 @@ export class DataQualityMonitor {
         minValues: {},
         maxValues: {},
         averages: {},
-        standardDeviations: {}
+        standardDeviations: {},
       };
     }
 
@@ -118,21 +115,21 @@ export class DataQualityMonitor {
       minValues: {},
       maxValues: {},
       averages: {},
-      standardDeviations: {}
+      standardDeviations: {},
     };
 
     // Get all fields from first record
     const fields = Object.keys(data[0]);
 
     for (const field of fields) {
-      const values = data.map(record => record[field]).filter(val => val != null);
+      const values = data.map((record) => record[field]).filter((val) => val != null);
       const nullCount = data.length - values.length;
 
       statistics.nullCounts[field] = nullCount;
       statistics.distinctCounts[field] = new Set(values).size;
 
       // For numeric fields, calculate min/max/avg/stddev
-      if (values.length > 0 && typeof values[0] === 'number') {
+      if (values.length > 0 && typeof values[0] === "number") {
         statistics.minValues[field] = Math.min(...values);
         statistics.maxValues[field] = Math.max(...values);
 
@@ -140,7 +137,8 @@ export class DataQualityMonitor {
         const avg = sum / values.length;
         statistics.averages[field] = avg;
 
-        const variance = values.reduce((acc, val) => acc + Math.pow(val - avg, 2), 0) / values.length;
+        const variance =
+          values.reduce((acc, val) => acc + Math.pow(val - avg, 2), 0) / values.length;
         statistics.standardDeviations[field] = Math.sqrt(variance);
       } else if (values.length > 0) {
         // For non-numeric fields, track min/max by string comparison
@@ -161,7 +159,9 @@ export class DataQualityMonitor {
     statistics: DataStatistics,
     issues: DataQualityIssue[]
   ): Promise<number> {
-    if (data.length === 0) {return 100;}
+    if (data.length === 0) {
+      return 100;
+    }
 
     const fields = Object.keys(statistics.nullCounts);
     let totalFields = 0;
@@ -177,11 +177,11 @@ export class DataQualityMonitor {
       // Flag fields with high null rates
       if (completenessRatio < 0.9 && nullCount > 0) {
         issues.push({
-          severity: completenessRatio < 0.5 ? 'critical' : 'high',
-          type: 'completeness',
+          severity: completenessRatio < 0.5 ? "critical" : "high",
+          type: "completeness",
           field,
           message: `Field "${field}" has ${((1 - completenessRatio) * 100).toFixed(1)}% null values`,
-          affectedRecords: nullCount
+          affectedRecords: nullCount,
         });
       }
     }
@@ -198,7 +198,9 @@ export class DataQualityMonitor {
     issues: DataQualityIssue[]
   ): Promise<number> {
     // Apply custom accuracy rules
-    const accuracyRules = this.rules.filter(r => r.dimension === QualityDimension.ACCURACY && r.enabled);
+    const accuracyRules = this.rules.filter(
+      (r) => r.dimension === QualityDimension.ACCURACY && r.enabled
+    );
 
     if (accuracyRules.length === 0) {
       return 100; // No rules to check
@@ -208,7 +210,9 @@ export class DataQualityMonitor {
 
     for (const rule of accuracyRules) {
       const passed = await this.evaluateRule(data, rule, issues);
-      if (passed) {passedRules++;}
+      if (passed) {
+        passedRules++;
+      }
     }
 
     return (passedRules / accuracyRules.length) * 100;
@@ -229,37 +233,41 @@ export class DataQualityMonitor {
     const fields = Object.keys(data[0] || {});
 
     for (const field of fields) {
-      const values = data.map(r => r[field]).filter(v => v != null);
+      const values = data.map((r) => r[field]).filter((v) => v != null);
 
-      if (values.length === 0) {continue;}
+      if (values.length === 0) {
+        continue;
+      }
 
       checksPerformed++;
 
       // Type consistency check
-      const types = new Set(values.map(v => typeof v));
+      const types = new Set(values.map((v) => typeof v));
 
       if (types.size > 1) {
         consistencyScore -= 10;
         issues.push({
-          severity: 'medium',
-          type: 'consistency',
+          severity: "medium",
+          type: "consistency",
           field,
-          message: `Field "${field}" has mixed types: ${Array.from(types).join(', ')}`,
+          message: `Field "${field}" has mixed types: ${Array.from(types).join(", ")}`,
           affectedRecords: values.length,
-          examples: values.slice(0, 5)
+          examples: values.slice(0, 5),
         });
       }
     }
 
     // Apply custom consistency rules
     const consistencyRules = this.rules.filter(
-      r => r.dimension === QualityDimension.CONSISTENCY && r.enabled
+      (r) => r.dimension === QualityDimension.CONSISTENCY && r.enabled
     );
 
     for (const rule of consistencyRules) {
       checksPerformed++;
       const passed = await this.evaluateRule(data, rule, issues);
-      if (!passed) {consistencyScore -= 5;}
+      if (!passed) {
+        consistencyScore -= 5;
+      }
     }
 
     return Math.max(0, consistencyScore);
@@ -279,10 +287,10 @@ export class DataQualityMonitor {
 
     if (executionTimeMinutes > slaMinutes) {
       issues.push({
-        severity: 'medium',
-        type: 'timeliness',
+        severity: "medium",
+        type: "timeliness",
         message: `Pipeline execution time (${executionTimeMinutes.toFixed(1)}m) exceeded SLA (${slaMinutes}m)`,
-        affectedRecords: data.length
+        affectedRecords: data.length,
       });
 
       return Math.max(0, 100 - ((executionTimeMinutes - slaMinutes) / slaMinutes) * 50);
@@ -290,7 +298,7 @@ export class DataQualityMonitor {
 
     // Check data freshness
     const timelinessRules = this.rules.filter(
-      r => r.dimension === QualityDimension.TIMELINESS && r.enabled
+      (r) => r.dimension === QualityDimension.TIMELINESS && r.enabled
     );
 
     if (timelinessRules.length === 0) {
@@ -301,7 +309,9 @@ export class DataQualityMonitor {
 
     for (const rule of timelinessRules) {
       const passed = await this.evaluateRule(data, rule, issues);
-      if (passed) {passedRules++;}
+      if (passed) {
+        passedRules++;
+      }
     }
 
     return (passedRules / timelinessRules.length) * 100;
@@ -315,7 +325,9 @@ export class DataQualityMonitor {
     statistics: DataStatistics,
     issues: DataQualityIssue[]
   ): Promise<number> {
-    const validityRules = this.rules.filter(r => r.dimension === QualityDimension.VALIDITY && r.enabled);
+    const validityRules = this.rules.filter(
+      (r) => r.dimension === QualityDimension.VALIDITY && r.enabled
+    );
 
     if (validityRules.length === 0) {
       return 100;
@@ -325,7 +337,9 @@ export class DataQualityMonitor {
 
     for (const rule of validityRules) {
       const passed = await this.evaluateRule(data, rule, issues);
-      if (passed) {passedRules++;}
+      if (passed) {
+        passedRules++;
+      }
     }
 
     return (passedRules / validityRules.length) * 100;
@@ -339,7 +353,9 @@ export class DataQualityMonitor {
     statistics: DataStatistics,
     issues: DataQualityIssue[]
   ): Promise<number> {
-    if (data.length === 0) {return 100;}
+    if (data.length === 0) {
+      return 100;
+    }
 
     // Check for duplicates based on all fields
     const seen = new Set<string>();
@@ -359,10 +375,10 @@ export class DataQualityMonitor {
       const duplicateRate = (duplicates / data.length) * 100;
 
       issues.push({
-        severity: duplicateRate > 10 ? 'high' : 'medium',
-        type: 'uniqueness',
+        severity: duplicateRate > 10 ? "high" : "medium",
+        type: "uniqueness",
         message: `Found ${duplicates} duplicate records (${duplicateRate.toFixed(1)}%)`,
-        affectedRecords: duplicates
+        affectedRecords: duplicates,
       });
 
       return Math.max(0, 100 - duplicateRate);
@@ -390,14 +406,14 @@ export class DataQualityMonitor {
       }
 
       const violationRate = (violationCount / data.length) * 100;
-      const passed = violationRate <= (100 - rule.threshold);
+      const passed = violationRate <= 100 - rule.threshold;
 
       if (!passed && violationCount > 0) {
         issues.push({
           severity: rule.severity,
           type: rule.dimension,
           message: `Rule "${rule.name}" failed: ${violationCount} violations (${violationRate.toFixed(1)}%)`,
-          affectedRecords: violationCount
+          affectedRecords: violationCount,
         });
       }
 
@@ -420,12 +436,12 @@ export class DataQualityMonitor {
   private calculateOverallScore(dimensions: Record<string, number>): number {
     // Weight each dimension
     const weights = {
-      completeness: 0.20,
+      completeness: 0.2,
       accuracy: 0.25,
       consistency: 0.15,
       timeliness: 0.15,
       validity: 0.15,
-      uniqueness: 0.10
+      uniqueness: 0.1,
     };
 
     let weightedSum = 0;
@@ -451,7 +467,7 @@ export class DataQualityMonitor {
    * Remove a quality rule
    */
   removeRule(ruleId: string): void {
-    this.rules = this.rules.filter(r => r.id !== ruleId);
+    this.rules = this.rules.filter((r) => r.id !== ruleId);
   }
 
   /**

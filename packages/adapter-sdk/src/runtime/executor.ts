@@ -1,6 +1,6 @@
-import { metrics, trace, SpanStatusCode } from '@opentelemetry/api';
-import { Kafka, Producer } from 'kafkajs';
-import pino from 'pino';
+import { metrics, trace, SpanStatusCode } from "@opentelemetry/api";
+import { Kafka, Producer } from "kafkajs";
+import pino from "pino";
 import {
   AdapterExecutionContext,
   AdapterExecutionRequest,
@@ -12,9 +12,9 @@ import {
   EgressProfile,
   ExecutorConfig,
   RetryPolicy,
-} from './types';
+} from "./types";
 
-const logger = pino({ name: 'adapter-executor' });
+const logger = pino({ name: "adapter-executor" });
 
 const defaultRetryPolicy: RetryPolicy = {
   maxAttempts: 3,
@@ -22,7 +22,7 @@ const defaultRetryPolicy: RetryPolicy = {
   maxDelayMs: 10_000,
   backoffMultiplier: 2,
   jitterMs: 50,
-  retryableErrorCodes: ['ETIMEDOUT', 'ECONNRESET', 'ECONNREFUSED', 'EHOSTUNREACH'],
+  retryableErrorCodes: ["ETIMEDOUT", "ECONNRESET", "ECONNREFUSED", "EHOSTUNREACH"],
 };
 
 const defaultCircuitBreaker: CircuitBreakerConfig = {
@@ -32,12 +32,12 @@ const defaultCircuitBreaker: CircuitBreakerConfig = {
 };
 
 const defaultEgressProfile: EgressProfile = {
-  name: 'default-deny',
+  name: "default-deny",
   allow: [],
-  defaultAction: 'deny',
+  defaultAction: "deny",
 };
 
-type CircuitState = 'closed' | 'open' | 'half-open';
+type CircuitState = "closed" | "open" | "half-open";
 
 interface CircuitBreakerState {
   state: CircuitState;
@@ -59,7 +59,7 @@ export class AdapterExecutor {
   private readonly idempotencyTtlMs: number;
   private readonly idempotencyCache = new Map<string, CachedResult<unknown>>();
   private circuitState: CircuitBreakerState = {
-    state: 'closed',
+    state: "closed",
     failures: 0,
     halfOpenSuccesses: 0,
   };
@@ -79,43 +79,48 @@ export class AdapterExecutor {
     this.egressProfile = config.egressProfile ?? defaultEgressProfile;
     this.defaultTimeoutMs = config.defaultTimeoutMs ?? 30_000;
     this.idempotencyTtlMs = config.idempotencyTtlMs ?? 10 * 60 * 1000;
-    const meterName = config.meterName ?? '@intelgraph/adapter-sdk';
-    this.meter = metrics.getMeter(meterName, '1.0.0');
-    this.tracer = trace.getTracer(meterName, '1.0.0');
-    this.latency = this.meter.createHistogram('adapter_execution_latency_ms', {
-      description: 'Execution latency per adapter operation',
+    const meterName = config.meterName ?? "@intelgraph/adapter-sdk";
+    this.meter = metrics.getMeter(meterName, "1.0.0");
+    this.tracer = trace.getTracer(meterName, "1.0.0");
+    this.latency = this.meter.createHistogram("adapter_execution_latency_ms", {
+      description: "Execution latency per adapter operation",
     });
-    this.successCounter = this.meter.createCounter('adapter_execution_success_total', {
-      description: 'Successful adapter executions',
+    this.successCounter = this.meter.createCounter("adapter_execution_success_total", {
+      description: "Successful adapter executions",
     });
-    this.errorCounter = this.meter.createCounter('adapter_execution_error_total', {
-      description: 'Failed adapter executions',
+    this.errorCounter = this.meter.createCounter("adapter_execution_error_total", {
+      description: "Failed adapter executions",
     });
-    this.retryCounter = this.meter.createCounter('adapter_execution_retry_total', {
-      description: 'Retries attempted for adapter executions',
+    this.retryCounter = this.meter.createCounter("adapter_execution_retry_total", {
+      description: "Retries attempted for adapter executions",
     });
-    this.dlqCounter = this.meter.createCounter('adapter_execution_dlq_total', {
-      description: 'Messages published to the DLQ',
+    this.dlqCounter = this.meter.createCounter("adapter_execution_dlq_total", {
+      description: "Messages published to the DLQ",
     });
-    this.circuitOpenCounter = this.meter.createCounter('adapter_execution_circuit_open_total', {
-      description: 'Times the circuit breaker opened for an adapter',
+    this.circuitOpenCounter = this.meter.createCounter("adapter_execution_circuit_open_total", {
+      description: "Times the circuit breaker opened for an adapter",
     });
-    this.dlqPublisher = config.dlqPublisher ?? (config.dlq ? new KafkaDlqPublisher(config.dlq) : null);
+    this.dlqPublisher =
+      config.dlqPublisher ?? (config.dlq ? new KafkaDlqPublisher(config.dlq) : null);
   }
 
   async execute<T>(request: AdapterExecutionRequest<T>): Promise<AdapterExecutionResult<T>> {
     const idempotencyKey =
-      request.idempotencyKey ?? `${request.adapterId}:${request.operation}:${JSON.stringify(request.payload ?? '')}`;
+      request.idempotencyKey ??
+      `${request.adapterId}:${request.operation}:${JSON.stringify(request.payload ?? "")}`;
 
     const cached = this.getCachedResult<T>(idempotencyKey);
     if (cached) {
-      logger.debug({ adapterId: request.adapterId, operation: request.operation }, 'Serving from idempotency cache');
+      logger.debug(
+        { adapterId: request.adapterId, operation: request.operation },
+        "Serving from idempotency cache"
+      );
       return { ...cached, fromCache: true };
     }
 
     if (this.isCircuitOpen()) {
-      const error = new Error('Circuit breaker open for adapter');
-      await this.publishToDlq(request, error, 0, 'open', idempotencyKey);
+      const error = new Error("Circuit breaker open for adapter");
+      await this.publishToDlq(request, error, 0, "open", idempotencyKey);
       this.errorCounter.add(1, this.metricAttributes(request, error));
       this.circuitOpenCounter.add(1, this.metricAttributes(request, error));
       return {
@@ -147,11 +152,11 @@ export class AdapterExecutor {
     let lastError: Error | undefined;
 
     for (let attempt = 1; attempt <= this.retryPolicy.maxAttempts; attempt++) {
-      const span = this.tracer.startSpan('adapter.execute', {
+      const span = this.tracer.startSpan("adapter.execute", {
         attributes: {
-          'adapter.id': request.adapterId,
-          'adapter.operation': request.operation,
-          'adapter.attempt': attempt,
+          "adapter.id": request.adapterId,
+          "adapter.operation": request.operation,
+          "adapter.attempt": attempt,
         },
       });
 
@@ -190,7 +195,13 @@ export class AdapterExecutor {
 
         if (!shouldRetry) {
           const durationMs = Date.now() - start;
-          await this.publishToDlq(request, lastError, attempt, this.circuitState.state, idempotencyKey);
+          await this.publishToDlq(
+            request,
+            lastError,
+            attempt,
+            this.circuitState.state,
+            idempotencyKey
+          );
 
           return {
             success: false,
@@ -206,7 +217,7 @@ export class AdapterExecutor {
       }
     }
 
-    throw lastError ?? new Error('Adapter execution failed');
+    throw lastError ?? new Error("Adapter execution failed");
   }
 
   async shutdown(): Promise<void> {
@@ -219,11 +230,11 @@ export class AdapterExecutor {
     request: AdapterExecutionRequest<T>,
     attempt: number,
     timeoutMs: number,
-    idempotencyKey: string,
+    idempotencyKey: string
   ): Promise<T> {
     const controller = new AbortController();
     const timeoutError = new Error(`Adapter execution timed out after ${timeoutMs}ms`);
-    timeoutError.name = 'TimeoutError';
+    timeoutError.name = "TimeoutError";
 
     let timer: NodeJS.Timeout;
     const timeoutPromise = new Promise<never>((_, reject) => {
@@ -247,7 +258,7 @@ export class AdapterExecutor {
   }
 
   private isRetryable(error: Error, operation: string): boolean {
-    if (error.name === 'TimeoutError') {
+    if (error.name === "TimeoutError") {
       return true;
     }
 
@@ -257,14 +268,15 @@ export class AdapterExecutor {
     }
 
     logger.warn(
-      { operation, code: code ?? 'unknown', error: error.message },
-      'Not retrying adapter operation',
+      { operation, code: code ?? "unknown", error: error.message },
+      "Not retrying adapter operation"
     );
     return false;
   }
 
   private backoffDelay(attempt: number): number {
-    const exponential = this.retryPolicy.initialDelayMs * Math.pow(this.retryPolicy.backoffMultiplier, attempt - 1);
+    const exponential =
+      this.retryPolicy.initialDelayMs * Math.pow(this.retryPolicy.backoffMultiplier, attempt - 1);
     const capped = Math.min(exponential, this.retryPolicy.maxDelayMs);
     const jitter = this.retryPolicy.jitterMs
       ? Math.floor(Math.random() * this.retryPolicy.jitterMs)
@@ -277,10 +289,10 @@ export class AdapterExecutor {
   }
 
   private isCircuitOpen(): boolean {
-    if (this.circuitState.state === 'open' && this.circuitState.openedAt) {
+    if (this.circuitState.state === "open" && this.circuitState.openedAt) {
       const now = Date.now();
       if (now - this.circuitState.openedAt >= this.circuitConfig.resetTimeoutMs) {
-        this.circuitState.state = 'half-open';
+        this.circuitState.state = "half-open";
         this.circuitState.failures = 0;
         this.circuitState.halfOpenSuccesses = 0;
         return false;
@@ -295,35 +307,35 @@ export class AdapterExecutor {
     this.circuitState.failures += 1;
 
     const threshold = this.circuitConfig.failureThreshold;
-    if (this.circuitState.state === 'half-open') {
+    if (this.circuitState.state === "half-open") {
       this.tripCircuit();
       return;
     }
 
-    if (this.circuitState.failures >= threshold && this.circuitState.state === 'closed') {
+    if (this.circuitState.failures >= threshold && this.circuitState.state === "closed") {
       this.tripCircuit();
     }
   }
 
   private resetCircuit(): void {
-    if (this.circuitState.state === 'closed') {
+    if (this.circuitState.state === "closed") {
       this.circuitState.failures = 0;
       return;
     }
 
-    if (this.circuitState.state === 'half-open') {
+    if (this.circuitState.state === "half-open") {
       this.circuitState.halfOpenSuccesses += 1;
       const successesNeeded = this.circuitConfig.halfOpenMaxSuccesses ?? 1;
       if (this.circuitState.halfOpenSuccesses >= successesNeeded) {
         this.circuitState = {
-          state: 'closed',
+          state: "closed",
           failures: 0,
           halfOpenSuccesses: 0,
         };
       }
     } else {
       this.circuitState = {
-        state: 'closed',
+        state: "closed",
         failures: 0,
         halfOpenSuccesses: 0,
       };
@@ -332,13 +344,13 @@ export class AdapterExecutor {
 
   private tripCircuit(): void {
     this.circuitState = {
-      state: 'open',
+      state: "open",
       failures: 0,
       openedAt: Date.now(),
       halfOpenSuccesses: 0,
     };
     this.circuitOpenCounter.add(1);
-    logger.warn('Circuit breaker opened for adapter executor');
+    logger.warn("Circuit breaker opened for adapter executor");
   }
 
   private validateEgress(target?: string): void {
@@ -348,24 +360,27 @@ export class AdapterExecutor {
 
     const profile = this.egressProfile ?? defaultEgressProfile;
     const url = new URL(target);
-    const port = url.port ? Number(url.port) : url.protocol === 'https:' ? 443 : 80;
+    const port = url.port ? Number(url.port) : url.protocol === "https:" ? 443 : 80;
 
     const allowed = profile.allow.some((rule) => {
       const hostMatch =
         rule.host === url.hostname ||
-        (rule.host.startsWith('*.') && url.hostname.endsWith(rule.host.replace('*.', '')));
+        (rule.host.startsWith("*.") && url.hostname.endsWith(rule.host.replace("*.", "")));
 
       if (!hostMatch) {
         return false;
       }
 
-      const protocolAllowed = !rule.protocols || rule.protocols.includes(url.protocol.replace(':', ''));
+      const protocolAllowed =
+        !rule.protocols || rule.protocols.includes(url.protocol.replace(":", ""));
       const portAllowed = !rule.ports || rule.ports.includes(port);
       return protocolAllowed && portAllowed;
     });
 
-    if (!allowed && profile.defaultAction === 'deny') {
-      throw new Error(`Network egress denied for ${url.hostname}:${port} under profile ${profile.name}`);
+    if (!allowed && profile.defaultAction === "deny") {
+      throw new Error(
+        `Network egress denied for ${url.hostname}:${port} under profile ${profile.name}`
+      );
     }
   }
 
@@ -406,7 +421,7 @@ export class AdapterExecutor {
     error: Error,
     attempts: number,
     circuitState: CircuitState,
-    idempotencyKey: string,
+    idempotencyKey: string
   ): Promise<void> {
     if (!this.dlqPublisher) {
       return;
@@ -436,7 +451,7 @@ class KafkaDlqPublisher implements DlqPublisher {
 
   constructor(config: DlqConfig) {
     this.kafka = new Kafka({
-      clientId: config.clientId ?? 'adapter-sdk',
+      clientId: config.clientId ?? "adapter-sdk",
       brokers: config.brokers,
       ssl: config.ssl,
       sasl: config.sasl,
@@ -459,10 +474,10 @@ class KafkaDlqPublisher implements DlqPublisher {
           key: event.idempotencyKey ?? `${event.adapterId}:${event.operation}`,
           value: payload,
           headers: {
-            'dlq.original-adapter': event.adapterId,
-            'dlq.original-operation': event.operation,
-            'dlq.attempts': String(event.attempts),
-            'dlq.timestamp': String(event.timestamp),
+            "dlq.original-adapter": event.adapterId,
+            "dlq.original-operation": event.operation,
+            "dlq.attempts": String(event.attempts),
+            "dlq.timestamp": String(event.timestamp),
           },
         },
       ],

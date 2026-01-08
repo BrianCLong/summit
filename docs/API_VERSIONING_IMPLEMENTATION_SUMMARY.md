@@ -13,6 +13,7 @@ This document summarizes the comprehensive API versioning strategy implemented f
 ### 1. Core Versioning Infrastructure
 
 #### Version Registry (`services/api/src/versioning/version-registry.ts`)
+
 - Central registry for managing API versions
 - Version lifecycle management (active, deprecated, sunset)
 - Compatibility matrix between versions
@@ -20,6 +21,7 @@ This document summarizes the comprehensive API versioning strategy implemented f
 - Deprecation warning generation
 
 **Key Features:**
+
 - Register and manage multiple API versions
 - Track version compatibility
 - Generate compatibility matrices
@@ -27,6 +29,7 @@ This document summarizes the comprehensive API versioning strategy implemented f
 - Store changelog entries per version
 
 #### Version Middleware (`services/api/src/versioning/version-middleware.ts`)
+
 - Express middleware for automatic version detection
 - Support for multiple versioning methods:
   - URL-based: `/v1/graphql`, `/v2/graphql`
@@ -37,6 +40,7 @@ This document summarizes the comprehensive API versioning strategy implemented f
 - Version context attached to requests
 
 **Response Headers:**
+
 ```http
 X-API-Version: v1
 X-API-Latest-Version: v2
@@ -47,16 +51,19 @@ X-API-Warn: API version v1 is deprecated...
 ```
 
 #### Compatibility Layer (`services/api/src/versioning/compatibility-layer.ts`)
+
 - Automatic transformation between API versions
 - Request and response transformers
 - GraphQL query, variables, and result transformers
 - Bidirectional transformations (v1↔v2)
 
 **Example Transformations:**
+
 - v1: Confidence as decimal (0-1) → v2: Confidence as percentage (0-100)
 - v1: `globalSearch` → v2: `searchEntities`
 
 #### Schema Versioning (`services/api/src/versioning/schema-versioning.ts`)
+
 - Version-specific GraphQL schema management
 - Schema difference detection
 - Custom directives for version tracking:
@@ -65,6 +72,7 @@ X-API-Warn: API version v1 is deprecated...
   - `@versionRemoved`
 
 #### Documentation Generator (`services/api/src/versioning/documentation-generator.ts`)
+
 - Automatic API documentation generation per version
 - Multiple output formats:
   - JSON
@@ -79,6 +87,7 @@ X-API-Warn: API version v1 is deprecated...
   - Code examples
 
 #### Changelog Automation (`services/api/src/versioning/changelog-automation.ts`)
+
 - Automatic changelog generation
 - Multiple formats (Markdown, JSON, HTML)
 - Grouped by change type:
@@ -94,20 +103,24 @@ X-API-Warn: API version v1 is deprecated...
 #### Versioning Endpoints (`services/api/src/routes/versioning.ts`)
 
 **Version Information:**
+
 - `GET /api/versioning/versions` - List all versions
 - `GET /api/versioning/versions/:version` - Get version details
 - `GET /api/versioning/status` - Overall versioning status
 
 **Compatibility:**
+
 - `GET /api/versioning/compatibility` - Compatibility matrix
 - `GET /api/versioning/compatibility/:from/:to` - Check compatibility
 
 **Documentation:**
+
 - `GET /api/versioning/docs/:version` - Version-specific docs
 - `GET /api/versioning/openapi/:version` - OpenAPI spec
 - `GET /api/versioning/migration/:from/:to` - Migration guide
 
 **Changelog:**
+
 - `GET /api/versioning/changelog` - Full changelog
 - `GET /api/versioning/changelog/:version` - Version changelog
 - `GET /api/versioning/breaking-changes/:version` - Breaking changes
@@ -115,12 +128,14 @@ X-API-Warn: API version v1 is deprecated...
 ### 3. Integration with Main Application
 
 #### Updated Files:
+
 - `services/api/src/app.ts`
   - Added version middleware
   - Support for versioned GraphQL endpoints
   - Integrated versioning routes
 
 **Supported Endpoints:**
+
 ```
 /graphql          # Default version
 /v1/graphql       # Version 1
@@ -130,6 +145,7 @@ X-API-Warn: API version v1 is deprecated...
 ### 4. Documentation
 
 #### Created Documentation:
+
 1. **`docs/API_VERSIONING.md`** (58 KB)
    - Complete versioning strategy guide
    - Best practices for consumers and developers
@@ -150,6 +166,7 @@ X-API-Warn: API version v1 is deprecated...
 ### 5. Tests
 
 #### Created Test Files:
+
 1. **`services/api/src/versioning/__tests__/version-registry.test.ts`**
    - Version registration tests
    - Compatibility tests
@@ -190,6 +207,7 @@ docs/
 ### For API Consumers
 
 #### 1. Specify Version in URL
+
 ```bash
 curl https://api.intelgraph.io/v1/graphql \
   -H "Authorization: Bearer TOKEN" \
@@ -197,6 +215,7 @@ curl https://api.intelgraph.io/v1/graphql \
 ```
 
 #### 2. Specify Version in Header
+
 ```bash
 curl https://api.intelgraph.io/graphql \
   -H "API-Version: v1" \
@@ -205,11 +224,13 @@ curl https://api.intelgraph.io/graphql \
 ```
 
 #### 3. Check Version Info
+
 ```bash
 curl https://api.intelgraph.io/api/versioning/versions
 ```
 
 #### 4. Get Migration Guide
+
 ```bash
 curl https://api.intelgraph.io/api/versioning/migration/v1/v2
 ```
@@ -217,51 +238,55 @@ curl https://api.intelgraph.io/api/versioning/migration/v1/v2
 ### For Developers
 
 #### 1. Register a New Version
+
 ```typescript
-import { versionRegistry } from './versioning';
+import { versionRegistry } from "./versioning";
 
 versionRegistry.registerVersion({
-  version: 'v3',
-  status: 'active',
-  releaseDate: new Date('2026-01-01'),
-  description: 'New features',
+  version: "v3",
+  status: "active",
+  releaseDate: new Date("2026-01-01"),
+  description: "New features",
   breaking: true,
-  changelog: [/* ... */],
-  compatibleWith: ['v2'],
+  changelog: [
+    /* ... */
+  ],
+  compatibleWith: ["v2"],
 });
 ```
 
 #### 2. Check Compatibility
+
 ```typescript
-const isCompatible = versionRegistry.isCompatible('v1', 'v2');
+const isCompatible = versionRegistry.isCompatible("v1", "v2");
 ```
 
 #### 3. Generate Documentation
-```typescript
-import { documentationGenerator } from './versioning';
 
-const docs = documentationGenerator.generateDocumentation('v1');
-const markdown = documentationGenerator.generateMarkdown('v1');
+```typescript
+import { documentationGenerator } from "./versioning";
+
+const docs = documentationGenerator.generateDocumentation("v1");
+const markdown = documentationGenerator.generateMarkdown("v1");
 ```
 
 #### 4. Transform Between Versions
-```typescript
-import { compatibilityLayer } from './versioning';
 
-const v2Data = await compatibilityLayer.transformRequest(
-  v1Data,
-  {
-    fromVersion: 'v1',
-    toVersion: 'v2',
-    operation: 'createEntity',
-    path: '/graphql'
-  }
-);
+```typescript
+import { compatibilityLayer } from "./versioning";
+
+const v2Data = await compatibilityLayer.transformRequest(v1Data, {
+  fromVersion: "v1",
+  toVersion: "v2",
+  operation: "createEntity",
+  path: "/graphql",
+});
 ```
 
 ## Default Versions
 
 ### Version 1 (v1)
+
 - **Status:** Active (default)
 - **Released:** 2025-01-01
 - **Features:**
@@ -271,6 +296,7 @@ const v2Data = await compatibilityLayer.transformRequest(
   - Confidence values as decimal (0-1)
 
 ### Version 2 (v2)
+
 - **Status:** Active (latest)
 - **Released:** 2025-06-01
 - **Breaking Changes:**
@@ -292,12 +318,14 @@ const v2Data = await compatibilityLayer.transformRequest(
 ### v1 → v2
 
 **Step 1: Update endpoints**
+
 ```diff
 - const API_URL = '/v1/graphql';
 + const API_URL = '/v2/graphql';
 ```
 
 **Step 2: Update confidence values**
+
 ```diff
   createEntity(input: {
 -   confidence: 0.95
@@ -306,6 +334,7 @@ const v2Data = await compatibilityLayer.transformRequest(
 ```
 
 **Step 3: Replace deprecated methods**
+
 ```diff
 - globalSearch(query: "...", types: ["PERSON"])
 + searchEntities(query: "...", filter: { types: [PERSON] })
@@ -314,6 +343,7 @@ const v2Data = await compatibilityLayer.transformRequest(
 ## Benefits
 
 ### For API Consumers
+
 - ✅ Clear versioning strategy
 - ✅ Automatic deprecation warnings
 - ✅ Comprehensive migration guides
@@ -321,6 +351,7 @@ const v2Data = await compatibilityLayer.transformRequest(
 - ✅ No surprise breaking changes
 
 ### For API Developers
+
 - ✅ Centralized version management
 - ✅ Automatic documentation generation
 - ✅ Automatic changelog generation
@@ -328,6 +359,7 @@ const v2Data = await compatibilityLayer.transformRequest(
 - ✅ Clear deprecation process
 
 ### For Platform
+
 - ✅ Support multiple concurrent versions
 - ✅ Gradual migration path
 - ✅ Reduced breaking change impact
@@ -337,6 +369,7 @@ const v2Data = await compatibilityLayer.transformRequest(
 ## Testing
 
 Run tests:
+
 ```bash
 # All versioning tests
 pnpm test src/versioning

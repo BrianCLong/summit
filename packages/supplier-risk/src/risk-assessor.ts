@@ -6,7 +6,7 @@ import {
   FinancialHealthMetrics,
   CybersecurityPosture,
   ESGScore,
-} from '@intelgraph/supply-chain-types';
+} from "@intelgraph/supply-chain-types";
 
 /**
  * Comprehensive supplier risk assessment
@@ -23,7 +23,7 @@ export interface SupplierRiskAssessment {
   recommendations: string[];
   mitigationPriorities: Array<{
     category: RiskCategory;
-    priority: 'low' | 'medium' | 'high' | 'critical';
+    priority: "low" | "medium" | "high" | "critical";
     action: string;
   }>;
 }
@@ -130,27 +130,35 @@ export class SupplierRiskAssessor {
   /**
    * Assess financial health
    */
-  assessFinancialHealth(
-    nodeId: string,
-    metrics: FinancialHealthMetrics
-  ): RiskAssessment {
-    const indicators: Array<{ name: string; value: any; impact: 'positive' | 'negative' | 'neutral' }> = [];
+  assessFinancialHealth(nodeId: string, metrics: FinancialHealthMetrics): RiskAssessment {
+    const indicators: Array<{
+      name: string;
+      value: any;
+      impact: "positive" | "negative" | "neutral";
+    }> = [];
     let score = 100; // Start with perfect score and deduct
 
     // Assess credit rating
     if (metrics.creditRating) {
       const rating = metrics.creditRating.toUpperCase();
       const ratingScores: Record<string, number> = {
-        'AAA': 0, 'AA': 5, 'A': 10,
-        'BBB': 20, 'BB': 40, 'B': 60,
-        'CCC': 80, 'CC': 90, 'C': 95, 'D': 100,
+        AAA: 0,
+        AA: 5,
+        A: 10,
+        BBB: 20,
+        BB: 40,
+        B: 60,
+        CCC: 80,
+        CC: 90,
+        C: 95,
+        D: 100,
       };
       const ratingScore = ratingScores[rating] || 50;
       score -= ratingScore * 0.3;
       indicators.push({
-        name: 'Credit Rating',
+        name: "Credit Rating",
         value: rating,
-        impact: ratingScore < 20 ? 'positive' : 'negative',
+        impact: ratingScore < 20 ? "positive" : "negative",
       });
     }
 
@@ -159,22 +167,22 @@ export class SupplierRiskAssessor {
       if (metrics.profitMargin < 0) {
         score -= 25;
         indicators.push({
-          name: 'Profit Margin',
+          name: "Profit Margin",
           value: `${(metrics.profitMargin * 100).toFixed(2)}%`,
-          impact: 'negative',
+          impact: "negative",
         });
       } else if (metrics.profitMargin < 0.05) {
         score -= 15;
         indicators.push({
-          name: 'Profit Margin',
+          name: "Profit Margin",
           value: `${(metrics.profitMargin * 100).toFixed(2)}%`,
-          impact: 'negative',
+          impact: "negative",
         });
       } else {
         indicators.push({
-          name: 'Profit Margin',
+          name: "Profit Margin",
           value: `${(metrics.profitMargin * 100).toFixed(2)}%`,
-          impact: 'positive',
+          impact: "positive",
         });
       }
     }
@@ -184,22 +192,22 @@ export class SupplierRiskAssessor {
       if (metrics.debtToEquity > 2) {
         score -= 20;
         indicators.push({
-          name: 'Debt to Equity',
+          name: "Debt to Equity",
           value: metrics.debtToEquity.toFixed(2),
-          impact: 'negative',
+          impact: "negative",
         });
       } else if (metrics.debtToEquity > 1) {
         score -= 10;
         indicators.push({
-          name: 'Debt to Equity',
+          name: "Debt to Equity",
           value: metrics.debtToEquity.toFixed(2),
-          impact: 'neutral',
+          impact: "neutral",
         });
       } else {
         indicators.push({
-          name: 'Debt to Equity',
+          name: "Debt to Equity",
           value: metrics.debtToEquity.toFixed(2),
-          impact: 'positive',
+          impact: "positive",
         });
       }
     }
@@ -209,15 +217,15 @@ export class SupplierRiskAssessor {
       if (metrics.currentRatio < 1) {
         score -= 15;
         indicators.push({
-          name: 'Current Ratio',
+          name: "Current Ratio",
           value: metrics.currentRatio.toFixed(2),
-          impact: 'negative',
+          impact: "negative",
         });
       } else {
         indicators.push({
-          name: 'Current Ratio',
+          name: "Current Ratio",
           value: metrics.currentRatio.toFixed(2),
-          impact: 'positive',
+          impact: "positive",
         });
       }
     }
@@ -226,9 +234,9 @@ export class SupplierRiskAssessor {
     if (metrics.bankruptcyRisk !== undefined) {
       score -= metrics.bankruptcyRisk * 50; // High bankruptcy risk significantly impacts score
       indicators.push({
-        name: 'Bankruptcy Risk',
+        name: "Bankruptcy Risk",
         value: `${(metrics.bankruptcyRisk * 100).toFixed(2)}%`,
-        impact: metrics.bankruptcyRisk > 0.5 ? 'negative' : 'neutral',
+        impact: metrics.bankruptcyRisk > 0.5 ? "negative" : "neutral",
       });
     }
 
@@ -238,7 +246,7 @@ export class SupplierRiskAssessor {
     return {
       id: crypto.randomUUID(),
       nodeId,
-      category: 'financial',
+      category: "financial",
       level,
       score,
       indicators,
@@ -250,22 +258,23 @@ export class SupplierRiskAssessor {
   /**
    * Assess cybersecurity posture
    */
-  assessCybersecurity(
-    nodeId: string,
-    posture: CybersecurityPosture
-  ): RiskAssessment {
-    const indicators: Array<{ name: string; value: any; impact: 'positive' | 'negative' | 'neutral' }> = [];
+  assessCybersecurity(nodeId: string, posture: CybersecurityPosture): RiskAssessment {
+    const indicators: Array<{
+      name: string;
+      value: any;
+      impact: "positive" | "negative" | "neutral";
+    }> = [];
     let score = posture.securityScore;
 
     // Assess certifications
-    const requiredCerts = ['ISO 27001', 'SOC 2', 'NIST'];
-    const hasCerts = requiredCerts.filter(cert =>
-      posture.certifications.some(c => c.includes(cert))
+    const requiredCerts = ["ISO 27001", "SOC 2", "NIST"];
+    const hasCerts = requiredCerts.filter((cert) =>
+      posture.certifications.some((c) => c.includes(cert))
     );
     indicators.push({
-      name: 'Security Certifications',
-      value: posture.certifications.join(', '),
-      impact: hasCerts.length >= 2 ? 'positive' : 'negative',
+      name: "Security Certifications",
+      value: posture.certifications.join(", "),
+      impact: hasCerts.length >= 2 ? "positive" : "negative",
     });
 
     if (hasCerts.length === 0) {
@@ -276,38 +285,39 @@ export class SupplierRiskAssessor {
 
     // Assess vulnerabilities
     const { critical, high, medium, low } = posture.vulnerabilities;
-    const vulnScore = (critical * 10) + (high * 5) + (medium * 2) + low;
+    const vulnScore = critical * 10 + high * 5 + medium * 2 + low;
 
     if (critical > 0) {
       score -= 30;
       indicators.push({
-        name: 'Critical Vulnerabilities',
+        name: "Critical Vulnerabilities",
         value: critical,
-        impact: 'negative',
+        impact: "negative",
       });
     }
 
     if (high > 5) {
       score -= 20;
       indicators.push({
-        name: 'High Vulnerabilities',
+        name: "High Vulnerabilities",
         value: high,
-        impact: 'negative',
+        impact: "negative",
       });
     }
 
     // Assess incident history
     const recentIncidents = posture.incidentHistory.filter(
-      inc => !inc.resolved || (new Date().getTime() - inc.date.getTime()) < 365 * 24 * 60 * 60 * 1000
+      (inc) =>
+        !inc.resolved || new Date().getTime() - inc.date.getTime() < 365 * 24 * 60 * 60 * 1000
     );
 
-    const criticalIncidents = recentIncidents.filter(inc => inc.severity === 'critical');
+    const criticalIncidents = recentIncidents.filter((inc) => inc.severity === "critical");
     if (criticalIncidents.length > 0) {
       score -= 25;
       indicators.push({
-        name: 'Critical Security Incidents',
+        name: "Critical Security Incidents",
         value: criticalIncidents.length,
-        impact: 'negative',
+        impact: "negative",
       });
     }
 
@@ -317,7 +327,7 @@ export class SupplierRiskAssessor {
     return {
       id: crypto.randomUUID(),
       nodeId,
-      category: 'cybersecurity',
+      category: "cybersecurity",
       level,
       score,
       indicators,
@@ -330,39 +340,43 @@ export class SupplierRiskAssessor {
    * Assess ESG score
    */
   assessESG(nodeId: string, esg: ESGScore): RiskAssessment {
-    const indicators: Array<{ name: string; value: any; impact: 'positive' | 'negative' | 'neutral' }> = [];
+    const indicators: Array<{
+      name: string;
+      value: any;
+      impact: "positive" | "negative" | "neutral";
+    }> = [];
     let score = esg.overallScore;
 
     indicators.push({
-      name: 'Environmental Score',
+      name: "Environmental Score",
       value: esg.environmentalScore,
-      impact: esg.environmentalScore >= 70 ? 'positive' : 'negative',
+      impact: esg.environmentalScore >= 70 ? "positive" : "negative",
     });
 
     indicators.push({
-      name: 'Social Score',
+      name: "Social Score",
       value: esg.socialScore,
-      impact: esg.socialScore >= 70 ? 'positive' : 'negative',
+      impact: esg.socialScore >= 70 ? "positive" : "negative",
     });
 
     indicators.push({
-      name: 'Governance Score',
+      name: "Governance Score",
       value: esg.governanceScore,
-      impact: esg.governanceScore >= 70 ? 'positive' : 'negative',
+      impact: esg.governanceScore >= 70 ? "positive" : "negative",
     });
 
     // Assess violations
     const recentViolations = esg.violations.filter(
-      v => (new Date().getTime() - v.date.getTime()) < 365 * 24 * 60 * 60 * 1000
+      (v) => new Date().getTime() - v.date.getTime() < 365 * 24 * 60 * 60 * 1000
     );
 
-    const criticalViolations = recentViolations.filter(v => v.severity === 'critical');
+    const criticalViolations = recentViolations.filter((v) => v.severity === "critical");
     if (criticalViolations.length > 0) {
       score -= criticalViolations.length * 15;
       indicators.push({
-        name: 'Critical ESG Violations',
+        name: "Critical ESG Violations",
         value: criticalViolations.length,
-        impact: 'negative',
+        impact: "negative",
       });
     }
 
@@ -372,7 +386,7 @@ export class SupplierRiskAssessor {
     return {
       id: crypto.randomUUID(),
       nodeId,
-      category: 'esg',
+      category: "esg",
       level,
       score,
       indicators,
@@ -385,49 +399,49 @@ export class SupplierRiskAssessor {
    * Assess geopolitical risk
    */
   assessGeopoliticalRisk(nodeId: string, country: string): RiskAssessment {
-    const indicators: Array<{ name: string; value: any; impact: 'positive' | 'negative' | 'neutral' }> = [];
+    const indicators: Array<{
+      name: string;
+      value: any;
+      impact: "positive" | "negative" | "neutral";
+    }> = [];
 
     // Simplified geopolitical risk scoring
     // In production, integrate with external geopolitical risk APIs
-    const highRiskCountries = [
-      'North Korea', 'Iran', 'Syria', 'Venezuela', 'Myanmar',
-    ];
+    const highRiskCountries = ["North Korea", "Iran", "Syria", "Venezuela", "Myanmar"];
 
-    const mediumRiskCountries = [
-      'Russia', 'Belarus', 'Cuba', 'Sudan', 'Zimbabwe',
-    ];
+    const mediumRiskCountries = ["Russia", "Belarus", "Cuba", "Sudan", "Zimbabwe"];
 
     let score = 100;
-    let level: RiskLevel = 'low';
+    let level: RiskLevel = "low";
 
     if (highRiskCountries.includes(country)) {
       score = 20;
-      level = 'critical';
+      level = "critical";
       indicators.push({
-        name: 'Sanctions Risk',
-        value: 'High - Country subject to international sanctions',
-        impact: 'negative',
+        name: "Sanctions Risk",
+        value: "High - Country subject to international sanctions",
+        impact: "negative",
       });
     } else if (mediumRiskCountries.includes(country)) {
       score = 50;
-      level = 'high';
+      level = "high";
       indicators.push({
-        name: 'Sanctions Risk',
-        value: 'Medium - Country under partial sanctions',
-        impact: 'negative',
+        name: "Sanctions Risk",
+        value: "Medium - Country under partial sanctions",
+        impact: "negative",
       });
     } else {
       indicators.push({
-        name: 'Sanctions Risk',
-        value: 'Low',
-        impact: 'positive',
+        name: "Sanctions Risk",
+        value: "Low",
+        impact: "positive",
       });
     }
 
     return {
       id: crypto.randomUUID(),
       nodeId,
-      category: 'geopolitical',
+      category: "geopolitical",
       level,
       score,
       indicators,
@@ -440,53 +454,57 @@ export class SupplierRiskAssessor {
    * Assess operational risk
    */
   assessOperationalRisk(node: SupplyChainNode): RiskAssessment {
-    const indicators: Array<{ name: string; value: any; impact: 'positive' | 'negative' | 'neutral' }> = [];
+    const indicators: Array<{
+      name: string;
+      value: any;
+      impact: "positive" | "negative" | "neutral";
+    }> = [];
     let score = 100;
 
     // Assess node status
-    if (node.status === 'suspended') {
+    if (node.status === "suspended") {
       score -= 50;
       indicators.push({
-        name: 'Operational Status',
-        value: 'Suspended',
-        impact: 'negative',
+        name: "Operational Status",
+        value: "Suspended",
+        impact: "negative",
       });
-    } else if (node.status === 'under-review') {
+    } else if (node.status === "under-review") {
       score -= 20;
       indicators.push({
-        name: 'Operational Status',
-        value: 'Under Review',
-        impact: 'negative',
+        name: "Operational Status",
+        value: "Under Review",
+        impact: "negative",
       });
-    } else if (node.status === 'inactive') {
+    } else if (node.status === "inactive") {
       score -= 30;
       indicators.push({
-        name: 'Operational Status',
-        value: 'Inactive',
-        impact: 'negative',
+        name: "Operational Status",
+        value: "Inactive",
+        impact: "negative",
       });
     } else {
       indicators.push({
-        name: 'Operational Status',
-        value: 'Active',
-        impact: 'positive',
+        name: "Operational Status",
+        value: "Active",
+        impact: "positive",
       });
     }
 
     // Assess criticality
     indicators.push({
-      name: 'Criticality',
+      name: "Criticality",
       value: node.criticality,
-      impact: node.criticality === 'critical' ? 'negative' : 'neutral',
+      impact: node.criticality === "critical" ? "negative" : "neutral",
     });
 
     // Higher tier = more risk (less direct control)
     if (node.tier > 3) {
       score -= 15;
       indicators.push({
-        name: 'Supply Chain Tier',
+        name: "Supply Chain Tier",
         value: node.tier,
-        impact: 'negative',
+        impact: "negative",
       });
     }
 
@@ -496,7 +514,7 @@ export class SupplierRiskAssessor {
     return {
       id: crypto.randomUUID(),
       nodeId: node.id,
-      category: 'operational',
+      category: "operational",
       level,
       score,
       indicators,
@@ -508,20 +526,22 @@ export class SupplierRiskAssessor {
   // Private helper methods
 
   private calculateOverallRisk(categoryRisks: RiskAssessment[]): number {
-    if (categoryRisks.length === 0) {return 50;}
+    if (categoryRisks.length === 0) {
+      return 50;
+    }
 
     // Weighted average of category risks
     const weights: Record<RiskCategory, number> = {
       financial: 0.25,
-      cybersecurity: 0.20,
+      cybersecurity: 0.2,
       geopolitical: 0.15,
-      regulatory: 0.10,
-      esg: 0.10,
-      operational: 0.10,
+      regulatory: 0.1,
+      esg: 0.1,
+      operational: 0.1,
       quality: 0.05,
       delivery: 0.03,
       capacity: 0.02,
-      concentration: 0.00,
+      concentration: 0.0,
     };
 
     let totalScore = 0;
@@ -537,10 +557,16 @@ export class SupplierRiskAssessor {
   }
 
   private scoreToLevel(score: number): RiskLevel {
-    if (score >= 80) {return 'low';}
-    if (score >= 60) {return 'medium';}
-    if (score >= 40) {return 'high';}
-    return 'critical';
+    if (score >= 80) {
+      return "low";
+    }
+    if (score >= 60) {
+      return "medium";
+    }
+    if (score >= 40) {
+      return "high";
+    }
+    return "critical";
   }
 
   private generateRecommendations(
@@ -549,7 +575,7 @@ export class SupplierRiskAssessor {
   ): string[] {
     const recommendations: string[] = [];
 
-    const highRisks = categoryRisks.filter(r => r.level === 'high' || r.level === 'critical');
+    const highRisks = categoryRisks.filter((r) => r.level === "high" || r.level === "critical");
 
     if (highRisks.length > 0) {
       recommendations.push(
@@ -558,19 +584,19 @@ export class SupplierRiskAssessor {
     }
 
     for (const risk of highRisks) {
-      if (risk.category === 'financial') {
-        recommendations.push('Consider requiring financial guarantees or insurance');
+      if (risk.category === "financial") {
+        recommendations.push("Consider requiring financial guarantees or insurance");
       }
-      if (risk.category === 'cybersecurity') {
-        recommendations.push('Implement additional security controls and monitoring');
+      if (risk.category === "cybersecurity") {
+        recommendations.push("Implement additional security controls and monitoring");
       }
-      if (risk.category === 'geopolitical') {
-        recommendations.push('Identify alternative suppliers in different regions');
+      if (risk.category === "geopolitical") {
+        recommendations.push("Identify alternative suppliers in different regions");
       }
     }
 
-    if (node.criticality === 'critical' && highRisks.length > 0) {
-      recommendations.push('Consider dual-sourcing strategy due to critical node status');
+    if (node.criticality === "critical" && highRisks.length > 0) {
+      recommendations.push("Consider dual-sourcing strategy due to critical node status");
     }
 
     return recommendations;
@@ -578,22 +604,34 @@ export class SupplierRiskAssessor {
 
   private identifyMitigationPriorities(
     categoryRisks: RiskAssessment[]
-  ): Array<{ category: RiskCategory; priority: 'low' | 'medium' | 'high' | 'critical'; action: string }> {
+  ): Array<{
+    category: RiskCategory;
+    priority: "low" | "medium" | "high" | "critical";
+    action: string;
+  }> {
     return categoryRisks
-      .filter(r => r.level === 'high' || r.level === 'critical')
-      .map(risk => ({
+      .filter((r) => r.level === "high" || r.level === "critical")
+      .map((risk) => ({
         category: risk.category,
         priority: risk.level,
-        action: risk.mitigations?.[0] || 'Review and implement mitigation measures',
+        action: risk.mitigations?.[0] || "Review and implement mitigation measures",
       }));
   }
 
   private getFinancialMitigations(level: RiskLevel): string[] {
     const mitigations: Record<RiskLevel, string[]> = {
-      low: ['Continue regular monitoring', 'Annual financial review'],
-      medium: ['Quarterly financial reviews', 'Request updated financial statements'],
-      high: ['Monthly financial monitoring', 'Require financial guarantees', 'Reduce contract value'],
-      critical: ['Immediate financial review', 'Identify alternative suppliers', 'Exit strategy planning'],
+      low: ["Continue regular monitoring", "Annual financial review"],
+      medium: ["Quarterly financial reviews", "Request updated financial statements"],
+      high: [
+        "Monthly financial monitoring",
+        "Require financial guarantees",
+        "Reduce contract value",
+      ],
+      critical: [
+        "Immediate financial review",
+        "Identify alternative suppliers",
+        "Exit strategy planning",
+      ],
     };
     return mitigations[level];
   }
@@ -601,16 +639,16 @@ export class SupplierRiskAssessor {
   private getCyberMitigations(level: RiskLevel, posture: CybersecurityPosture): string[] {
     const mitigations: string[] = [];
 
-    if (level === 'critical' || level === 'high') {
-      mitigations.push('Conduct immediate security audit');
+    if (level === "critical" || level === "high") {
+      mitigations.push("Conduct immediate security audit");
       if (posture.vulnerabilities.critical > 0) {
-        mitigations.push('Require remediation of critical vulnerabilities within 30 days');
+        mitigations.push("Require remediation of critical vulnerabilities within 30 days");
       }
-      mitigations.push('Implement enhanced security monitoring');
+      mitigations.push("Implement enhanced security monitoring");
     }
 
     if (posture.certifications.length === 0) {
-      mitigations.push('Require ISO 27001 or SOC 2 certification');
+      mitigations.push("Require ISO 27001 or SOC 2 certification");
     }
 
     return mitigations;
@@ -618,38 +656,42 @@ export class SupplierRiskAssessor {
 
   private getESGMitigations(level: RiskLevel): string[] {
     const mitigations: Record<RiskLevel, string[]> = {
-      low: ['Continue ESG monitoring', 'Annual ESG review'],
-      medium: ['Request ESG improvement plan', 'Quarterly ESG reviews'],
-      high: ['Require third-party ESG audit', 'Develop corrective action plan'],
-      critical: ['Immediate ESG review', 'Consider supplier replacement', 'Stakeholder notification'],
+      low: ["Continue ESG monitoring", "Annual ESG review"],
+      medium: ["Request ESG improvement plan", "Quarterly ESG reviews"],
+      high: ["Require third-party ESG audit", "Develop corrective action plan"],
+      critical: [
+        "Immediate ESG review",
+        "Consider supplier replacement",
+        "Stakeholder notification",
+      ],
     };
     return mitigations[level];
   }
 
   private getGeopoliticalMitigations(country: string): string[] {
     return [
-      'Monitor geopolitical developments',
-      'Develop contingency plans',
-      'Identify alternative suppliers in different regions',
-      'Review export control and sanctions compliance',
+      "Monitor geopolitical developments",
+      "Develop contingency plans",
+      "Identify alternative suppliers in different regions",
+      "Review export control and sanctions compliance",
     ];
   }
 
   private getOperationalMitigations(node: SupplyChainNode): string[] {
     const mitigations: string[] = [];
 
-    if (node.status === 'suspended' || node.status === 'under-review') {
-      mitigations.push('Activate backup suppliers');
-      mitigations.push('Monitor status changes daily');
+    if (node.status === "suspended" || node.status === "under-review") {
+      mitigations.push("Activate backup suppliers");
+      mitigations.push("Monitor status changes daily");
     }
 
-    if (node.criticality === 'critical') {
-      mitigations.push('Implement dual-sourcing strategy');
-      mitigations.push('Maintain strategic inventory');
+    if (node.criticality === "critical") {
+      mitigations.push("Implement dual-sourcing strategy");
+      mitigations.push("Maintain strategic inventory");
     }
 
     if (node.tier > 3) {
-      mitigations.push('Enhance visibility into sub-tier suppliers');
+      mitigations.push("Enhance visibility into sub-tier suppliers");
     }
 
     return mitigations;

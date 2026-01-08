@@ -3,7 +3,7 @@
  * Simplified version for IntelGraph with core analytics features
  */
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Box,
   Paper,
@@ -26,8 +26,8 @@ import {
   InputLabel,
   Badge,
   Divider,
-} from '@mui/material';
-import Grid from '@mui/material/Grid';
+} from "@mui/material";
+import Grid from "@mui/material/Grid";
 import {
   TrendingUp,
   TrendingDown,
@@ -43,7 +43,7 @@ import {
   Download,
   Refresh,
   Settings,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 // Types
 interface MetricData {
@@ -51,20 +51,20 @@ interface MetricData {
   name: string;
   value: number;
   change: number;
-  trend: 'up' | 'down' | 'neutral';
-  format: 'number' | 'percentage' | 'currency' | 'time';
-  category: 'performance' | 'usage' | 'security' | 'quality';
+  trend: "up" | "down" | "neutral";
+  format: "number" | "percentage" | "currency" | "time";
+  category: "performance" | "usage" | "security" | "quality";
   description: string;
 }
 
 interface AnalyticsConfig {
-  timeRange: '1h' | '24h' | '7d' | '30d';
-  refreshInterval: 30 | 60 | 300 | 'manual';
+  timeRange: "1h" | "24h" | "7d" | "30d";
+  refreshInterval: 30 | 60 | 300 | "manual";
   showRealTime: boolean;
 }
 
 interface EnhancedAnalyticsDashboardProps {
-  onExport?: (format: 'csv' | 'json' | 'pdf') => void;
+  onExport?: (format: "csv" | "json" | "pdf") => void;
   onConfigChange?: (config: AnalyticsConfig) => void;
   realTimeEnabled?: boolean;
 }
@@ -72,72 +72,74 @@ interface EnhancedAnalyticsDashboardProps {
 // Mock data generator
 const generateMetrics = (): MetricData[] => [
   {
-    id: 'total-entities',
-    name: 'Total Entities',
+    id: "total-entities",
+    name: "Total Entities",
     value: 15842,
     change: 12.5,
-    trend: 'up',
-    format: 'number',
-    category: 'usage',
-    description: 'Total number of entities in the graph database',
+    trend: "up",
+    format: "number",
+    category: "usage",
+    description: "Total number of entities in the graph database",
   },
   {
-    id: 'active-users',
-    name: 'Active Users',
+    id: "active-users",
+    name: "Active Users",
     value: 87,
     change: -3.2,
-    trend: 'down',
-    format: 'number',
-    category: 'usage',
-    description: 'Number of users active in the last 24 hours',
+    trend: "down",
+    format: "number",
+    category: "usage",
+    description: "Number of users active in the last 24 hours",
   },
   {
-    id: 'query-performance',
-    name: 'Avg Query Time',
+    id: "query-performance",
+    name: "Avg Query Time",
     value: 245,
     change: -15.8,
-    trend: 'up',
-    format: 'time',
-    category: 'performance',
-    description: 'Average query execution time in milliseconds',
+    trend: "up",
+    format: "time",
+    category: "performance",
+    description: "Average query execution time in milliseconds",
   },
   {
-    id: 'data-quality',
-    name: 'Data Quality Score',
+    id: "data-quality",
+    name: "Data Quality Score",
     value: 94.2,
     change: 2.1,
-    trend: 'up',
-    format: 'percentage',
-    category: 'quality',
-    description: 'Overall data quality and completeness score',
+    trend: "up",
+    format: "percentage",
+    category: "quality",
+    description: "Overall data quality and completeness score",
   },
   {
-    id: 'security-alerts',
-    name: 'Security Alerts',
+    id: "security-alerts",
+    name: "Security Alerts",
     value: 3,
     change: -50,
-    trend: 'up',
-    format: 'number',
-    category: 'security',
-    description: 'Active security alerts requiring attention',
+    trend: "up",
+    format: "number",
+    category: "security",
+    description: "Active security alerts requiring attention",
   },
   {
-    id: 'api-calls',
-    name: 'API Calls/Hour',
+    id: "api-calls",
+    name: "API Calls/Hour",
     value: 1247,
     change: 8.3,
-    trend: 'up',
-    format: 'number',
-    category: 'usage',
-    description: 'API calls processed in the last hour',
+    trend: "up",
+    format: "number",
+    category: "usage",
+    description: "API calls processed in the last hour",
   },
 ];
 
-export const EnhancedAnalyticsDashboard: React.FC<
-  EnhancedAnalyticsDashboardProps
-> = ({ onExport, onConfigChange, realTimeEnabled = true }) => {
+export const EnhancedAnalyticsDashboard: React.FC<EnhancedAnalyticsDashboardProps> = ({
+  onExport,
+  onConfigChange,
+  realTimeEnabled = true,
+}) => {
   const [config, setConfig] = useState<AnalyticsConfig>({
-    timeRange: '24h',
+    timeRange: "24h",
     refreshInterval: 60,
     showRealTime: true,
   });
@@ -149,7 +151,7 @@ export const EnhancedAnalyticsDashboard: React.FC<
 
   // Real-time data simulation
   useEffect(() => {
-    if (!config.showRealTime || config.refreshInterval === 'manual') return;
+    if (!config.showRealTime || config.refreshInterval === "manual") return;
 
     const interval = setInterval(() => {
       setMetrics((prev) =>
@@ -157,7 +159,7 @@ export const EnhancedAnalyticsDashboard: React.FC<
           ...metric,
           value: metric.value + (Math.random() - 0.5) * metric.value * 0.05,
           change: (Math.random() - 0.5) * 20,
-        })),
+        }))
       );
       setLastUpdated(new Date());
     }, config.refreshInterval * 1000);
@@ -171,7 +173,7 @@ export const EnhancedAnalyticsDashboard: React.FC<
       setConfig(updatedConfig);
       onConfigChange?.(updatedConfig);
     },
-    [config, onConfigChange],
+    [config, onConfigChange]
   );
 
   const handleRefresh = useCallback(async () => {
@@ -182,20 +184,20 @@ export const EnhancedAnalyticsDashboard: React.FC<
     setIsLoading(false);
   }, []);
 
-  const formatValue = (value: number, format: MetricData['format']): string => {
+  const formatValue = (value: number, format: MetricData["format"]): string => {
     switch (format) {
-      case 'percentage':
+      case "percentage":
         return `${value.toFixed(1)}%`;
-      case 'currency':
+      case "currency":
         return `$${value.toLocaleString()}`;
-      case 'time':
+      case "time":
         return `${Math.round(value)}ms`;
       default:
         return value.toLocaleString();
     }
   };
 
-  const getTrendIcon = (trend: MetricData['trend'], change: number) => {
+  const getTrendIcon = (trend: MetricData["trend"], change: number) => {
     const isPositive = change > 0;
     return isPositive ? (
       <TrendingUp fontSize="small" color="success" />
@@ -204,15 +206,15 @@ export const EnhancedAnalyticsDashboard: React.FC<
     );
   };
 
-  const getCategoryIcon = (category: MetricData['category']) => {
+  const getCategoryIcon = (category: MetricData["category"]) => {
     switch (category) {
-      case 'performance':
+      case "performance":
         return <Zap fontSize="small" />;
-      case 'usage':
+      case "usage":
         return <Users fontSize="small" />;
-      case 'security':
+      case "security":
         return <Shield fontSize="small" />;
-      case 'quality':
+      case "quality":
         return <CheckCircle fontSize="small" />;
       default:
         return <BarChart fontSize="small" />;
@@ -221,17 +223,17 @@ export const EnhancedAnalyticsDashboard: React.FC<
 
   const MetricCard: React.FC<{ metric: MetricData }> = ({ metric }) => {
     return (
-      <Card elevation={2} sx={{ height: '120px', cursor: 'pointer' }}>
+      <Card elevation={2} sx={{ height: "120px", cursor: "pointer" }}>
         <CardContent>
           <Box
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
               mb: 1,
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               {getCategoryIcon(metric.category)}
               <Typography variant="body2" color="text.secondary">
                 {metric.name}
@@ -244,13 +246,10 @@ export const EnhancedAnalyticsDashboard: React.FC<
             {formatValue(metric.value, metric.format)}
           </Typography>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {getTrendIcon(metric.trend, metric.change)}
-            <Typography
-              variant="body2"
-              color={metric.change > 0 ? 'success.main' : 'error.main'}
-            >
-              {metric.change > 0 ? '+' : ''}
+            <Typography variant="body2" color={metric.change > 0 ? "success.main" : "error.main"}>
+              {metric.change > 0 ? "+" : ""}
               {metric.change.toFixed(1)}%
             </Typography>
           </Box>
@@ -260,13 +259,13 @@ export const EnhancedAnalyticsDashboard: React.FC<
   };
 
   return (
-    <Box sx={{ p: 3, maxWidth: '100%', overflow: 'hidden' }}>
+    <Box sx={{ p: 3, maxWidth: "100%", overflow: "hidden" }}>
       {/* Header */}
       <Box
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
           mb: 3,
         }}
       >
@@ -285,9 +284,7 @@ export const EnhancedAnalyticsDashboard: React.FC<
             <Select
               value={config.timeRange}
               label="Time Range"
-              onChange={(e) =>
-                handleConfigChange({ timeRange: e.target.value as any })
-              }
+              onChange={(e) => handleConfigChange({ timeRange: e.target.value as any })}
             >
               <MenuItem value="1h">Last Hour</MenuItem>
               <MenuItem value="24h">Last 24 Hours</MenuItem>
@@ -300,9 +297,7 @@ export const EnhancedAnalyticsDashboard: React.FC<
             control={
               <Switch
                 checked={config.showRealTime}
-                onChange={(e) =>
-                  handleConfigChange({ showRealTime: e.target.checked })
-                }
+                onChange={(e) => handleConfigChange({ showRealTime: e.target.checked })}
                 size="small"
               />
             }
@@ -316,7 +311,7 @@ export const EnhancedAnalyticsDashboard: React.FC<
           </Tooltip>
 
           <Tooltip title="Export Data">
-            <IconButton onClick={() => onExport?.('csv')}>
+            <IconButton onClick={() => onExport?.("csv")}>
               <Download />
             </IconButton>
           </Tooltip>
@@ -335,23 +330,15 @@ export const EnhancedAnalyticsDashboard: React.FC<
       {/* Real-time Indicator */}
       {config.showRealTime && realTimeEnabled && (
         <Alert severity="info" sx={{ mb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Typography variant="body2">Real-time monitoring active</Typography>
-            <Chip
-              label={`Updates every ${config.refreshInterval}s`}
-              size="small"
-              color="info"
-            />
+            <Chip label={`Updates every ${config.refreshInterval}s`} size="small" color="info" />
           </Box>
         </Alert>
       )}
 
       {/* Tabs */}
-      <Tabs
-        value={activeTab}
-        onChange={(_, newValue) => setActiveTab(newValue)}
-        sx={{ mb: 3 }}
-      >
+      <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)} sx={{ mb: 3 }}>
         <Tab icon={<BarChart />} label="Overview" iconPosition="start" />
         <Tab icon={<TrendingUp />} label="Performance" iconPosition="start" />
         <Tab icon={<Users />} label="Usage" iconPosition="start" />
@@ -376,8 +363,7 @@ export const EnhancedAnalyticsDashboard: React.FC<
 
       {activeTab !== 0 && (
         <Alert severity="info">
-          {['Performance', 'Usage', 'Security'][activeTab - 1]} analytics view
-          coming soon...
+          {["Performance", "Usage", "Security"][activeTab - 1]} analytics view coming soon...
         </Alert>
       )}
     </Box>

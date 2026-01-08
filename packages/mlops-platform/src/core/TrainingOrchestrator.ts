@@ -3,8 +3,8 @@
  * Manages distributed training, experiment tracking, and resource allocation
  */
 
-import { TrainingConfig, TrainingRun, TrainingStatus } from '../types/index.js';
-import { EventEmitter } from 'events';
+import { TrainingConfig, TrainingRun, TrainingStatus } from "../types/index.js";
+import { EventEmitter } from "events";
 
 export interface ResourceAllocation {
   nodeId: string;
@@ -47,7 +47,7 @@ export class TrainingOrchestrator extends EventEmitter {
     const job: TrainingJob = {
       id: jobId,
       config,
-      status: 'pending',
+      status: "pending",
     };
 
     this.jobs.set(jobId, job);
@@ -56,17 +56,17 @@ export class TrainingOrchestrator extends EventEmitter {
     const run: TrainingRun = {
       id: jobId,
       config,
-      status: 'pending',
+      status: "pending",
       metrics: [],
       artifacts: [],
     };
 
     this.runs.set(jobId, run);
 
-    this.emit('training:submitted', job);
+    this.emit("training:submitted", job);
 
     // Start training asynchronously
-    this.startTraining(jobId).catch(error => {
+    this.startTraining(jobId).catch((error) => {
       this.handleTrainingError(jobId, error);
     });
 
@@ -87,15 +87,15 @@ export class TrainingOrchestrator extends EventEmitter {
     job.resources = resources;
 
     // Update status
-    await this.updateJobStatus(jobId, 'running');
+    await this.updateJobStatus(jobId, "running");
 
     const run = this.runs.get(jobId);
     if (run) {
       run.startTime = new Date();
-      run.status = 'running';
+      run.status = "running";
     }
 
-    this.emit('training:started', job);
+    this.emit("training:started", job);
 
     // In a real implementation, this would launch the actual training process
     // For now, simulate training
@@ -107,7 +107,9 @@ export class TrainingOrchestrator extends EventEmitter {
    */
   private async simulateTraining(jobId: string): Promise<void> {
     const run = this.runs.get(jobId);
-    if (!run) {return;}
+    if (!run) {
+      return;
+    }
 
     const epochs = run.config.batchSize || 10;
 
@@ -128,10 +130,7 @@ export class TrainingOrchestrator extends EventEmitter {
       });
 
       // Check if should checkpoint
-      if (
-        run.config.checkpoint.enabled &&
-        epoch % run.config.checkpoint.frequency === 0
-      ) {
+      if (run.config.checkpoint.enabled && epoch % run.config.checkpoint.frequency === 0) {
         await this.createCheckpoint(jobId, epoch);
       }
 
@@ -166,7 +165,7 @@ export class TrainingOrchestrator extends EventEmitter {
     }
 
     run.metrics.push(metrics);
-    this.emit('metrics:logged', { runId, metrics });
+    this.emit("metrics:logged", { runId, metrics });
   }
 
   /**
@@ -181,12 +180,12 @@ export class TrainingOrchestrator extends EventEmitter {
     const checkpoint = {
       name: `checkpoint-epoch-${epoch}`,
       path: `/checkpoints/${runId}/epoch-${epoch}`,
-      type: 'checkpoint',
+      type: "checkpoint",
       size: Math.floor(Math.random() * 1000000000), // Random size
     };
 
     run.artifacts.push(checkpoint);
-    this.emit('checkpoint:created', { runId, checkpoint });
+    this.emit("checkpoint:created", { runId, checkpoint });
   }
 
   /**
@@ -203,8 +202,8 @@ export class TrainingOrchestrator extends EventEmitter {
     // Get recent metrics
     const recentMetrics = run.metrics
       .slice(-patience)
-      .map(m => m.metrics[metric])
-      .filter(v => v !== undefined);
+      .map((m) => m.metrics[metric])
+      .filter((v) => v !== undefined);
 
     if (recentMetrics.length < patience) {
       return false;
@@ -216,8 +215,7 @@ export class TrainingOrchestrator extends EventEmitter {
       improvements.push(Math.abs(recentMetrics[i] - recentMetrics[i - 1]));
     }
 
-    const avgImprovement =
-      improvements.reduce((a, b) => a + b, 0) / improvements.length;
+    const avgImprovement = improvements.reduce((a, b) => a + b, 0) / improvements.length;
 
     return avgImprovement < minDelta;
   }
@@ -229,10 +227,12 @@ export class TrainingOrchestrator extends EventEmitter {
     const run = this.runs.get(jobId);
     const job = this.jobs.get(jobId);
 
-    if (!run || !job) {return;}
+    if (!run || !job) {
+      return;
+    }
 
     run.endTime = new Date();
-    run.status = 'completed';
+    run.status = "completed";
 
     if (run.startTime) {
       run.duration = (run.endTime.getTime() - run.startTime.getTime()) / 1000;
@@ -240,9 +240,7 @@ export class TrainingOrchestrator extends EventEmitter {
 
     // Calculate resource usage
     run.resourceUsage = {
-      totalGpuHours: job.resources
-        ? (run.duration || 0) * job.resources.gpus.length / 3600
-        : 0,
+      totalGpuHours: job.resources ? ((run.duration || 0) * job.resources.gpus.length) / 3600 : 0,
     };
 
     // Release resources
@@ -250,8 +248,8 @@ export class TrainingOrchestrator extends EventEmitter {
       await this.releaseResources(job.resources.nodeId);
     }
 
-    await this.updateJobStatus(jobId, 'completed');
-    this.emit('training:completed', { jobId, run });
+    await this.updateJobStatus(jobId, "completed");
+    this.emit("training:completed", { jobId, run });
   }
 
   /**
@@ -262,7 +260,7 @@ export class TrainingOrchestrator extends EventEmitter {
     const job = this.jobs.get(jobId);
 
     if (run) {
-      run.status = 'failed';
+      run.status = "failed";
       run.endTime = new Date();
       run.error = {
         message: error.message,
@@ -272,7 +270,7 @@ export class TrainingOrchestrator extends EventEmitter {
     }
 
     if (job) {
-      job.status = 'failed';
+      job.status = "failed";
 
       // Release resources
       if (job.resources) {
@@ -280,7 +278,7 @@ export class TrainingOrchestrator extends EventEmitter {
       }
     }
 
-    this.emit('training:failed', { jobId, error });
+    this.emit("training:failed", { jobId, error });
   }
 
   /**
@@ -294,17 +292,17 @@ export class TrainingOrchestrator extends EventEmitter {
       throw new Error(`Job ${jobId} not found`);
     }
 
-    run.status = 'cancelled';
+    run.status = "cancelled";
     run.endTime = new Date();
 
-    await this.updateJobStatus(jobId, 'cancelled');
+    await this.updateJobStatus(jobId, "cancelled");
 
     // Release resources
     if (job.resources) {
       await this.releaseResources(job.resources.nodeId);
     }
 
-    this.emit('training:cancelled', { jobId });
+    this.emit("training:cancelled", { jobId });
   }
 
   /**
@@ -318,10 +316,10 @@ export class TrainingOrchestrator extends EventEmitter {
       throw new Error(`Job ${jobId} not found`);
     }
 
-    await this.updateJobStatus(jobId, 'paused');
-    run.status = 'paused';
+    await this.updateJobStatus(jobId, "paused");
+    run.status = "paused";
 
-    this.emit('training:paused', { jobId });
+    this.emit("training:paused", { jobId });
   }
 
   /**
@@ -335,10 +333,10 @@ export class TrainingOrchestrator extends EventEmitter {
       throw new Error(`Job ${jobId} not found`);
     }
 
-    await this.updateJobStatus(jobId, 'running');
-    run.status = 'running';
+    await this.updateJobStatus(jobId, "running");
+    run.status = "running";
 
-    this.emit('training:resumed', { jobId });
+    this.emit("training:resumed", { jobId });
   }
 
   /**
@@ -358,11 +356,11 @@ export class TrainingOrchestrator extends EventEmitter {
     let runs = Array.from(this.runs.values());
 
     if (filter?.status) {
-      runs = runs.filter(r => r.status === filter.status);
+      runs = runs.filter((r) => r.status === filter.status);
     }
 
     if (filter?.modelName) {
-      runs = runs.filter(r => r.config.modelName === filter.modelName);
+      runs = runs.filter((r) => r.config.modelName === filter.modelName);
     }
 
     return runs.sort((a, b) => {
@@ -375,7 +373,7 @@ export class TrainingOrchestrator extends EventEmitter {
   /**
    * Get training metrics
    */
-  async getTrainingMetrics(runId: string): Promise<TrainingRun['metrics']> {
+  async getTrainingMetrics(runId: string): Promise<TrainingRun["metrics"]> {
     const run = this.runs.get(runId);
     return run?.metrics || [];
   }
@@ -384,7 +382,7 @@ export class TrainingOrchestrator extends EventEmitter {
    * Allocate resources for training
    */
   private async allocateResources(
-    requirements: TrainingConfig['resources']
+    requirements: TrainingConfig["resources"]
   ): Promise<ResourceAllocation> {
     // In a real implementation, this would interact with a cluster scheduler
     // For now, simulate resource allocation
@@ -413,14 +411,11 @@ export class TrainingOrchestrator extends EventEmitter {
   /**
    * Update job status
    */
-  private async updateJobStatus(
-    jobId: string,
-    status: TrainingStatus
-  ): Promise<void> {
+  private async updateJobStatus(jobId: string, status: TrainingStatus): Promise<void> {
     const job = this.jobs.get(jobId);
     if (job) {
       job.status = status;
-      this.emit('job:status-changed', { jobId, status });
+      this.emit("job:status-changed", { jobId, status });
     }
   }
 
@@ -449,6 +444,6 @@ export class TrainingOrchestrator extends EventEmitter {
   }
 
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

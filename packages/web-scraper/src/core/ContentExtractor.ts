@@ -2,17 +2,17 @@
  * Content Extractor - Extracts clean content from web pages
  */
 
-import { parse } from 'node-html-parser';
-import TurndownService from 'turndown';
-import type { Metadata } from '../types/index.js';
+import { parse } from "node-html-parser";
+import TurndownService from "turndown";
+import type { Metadata } from "../types/index.js";
 
 export class ContentExtractor {
   private turndown: TurndownService;
 
   constructor() {
     this.turndown = new TurndownService({
-      headingStyle: 'atx',
-      codeBlockStyle: 'fenced'
+      headingStyle: "atx",
+      codeBlockStyle: "fenced",
     });
   }
 
@@ -23,7 +23,7 @@ export class ContentExtractor {
     const root = parse(html);
 
     // Remove script and style elements
-    root.querySelectorAll('script, style, noscript').forEach(el => el.remove());
+    root.querySelectorAll("script, style, noscript").forEach((el) => el.remove());
 
     return root.text.trim();
   }
@@ -47,28 +47,24 @@ export class ContentExtractor {
 
     // Find main content areas
     const candidates = [
-      root.querySelector('article'),
+      root.querySelector("article"),
       root.querySelector('[role="main"]'),
-      root.querySelector('main'),
-      root.querySelector('.content'),
-      root.querySelector('#content'),
-      root.querySelector('.post'),
-      root.querySelector('.article')
+      root.querySelector("main"),
+      root.querySelector(".content"),
+      root.querySelector("#content"),
+      root.querySelector(".post"),
+      root.querySelector(".article"),
     ].filter(Boolean);
 
     const mainContent = candidates[0] || root;
 
     // Extract title
-    const title =
-      mainContent.querySelector('h1')?.text ||
-      root.querySelector('title')?.text;
+    const title = mainContent.querySelector("h1")?.text || root.querySelector("title")?.text;
 
     // Remove unwanted elements
     mainContent
-      .querySelectorAll(
-        'script, style, nav, header, footer, aside, .sidebar, .advertisement'
-      )
-      .forEach(el => el.remove());
+      .querySelectorAll("script, style, nav, header, footer, aside, .sidebar, .advertisement")
+      .forEach((el) => el.remove());
 
     const content = mainContent.text.trim();
     const excerpt = content.substring(0, 200);
@@ -76,7 +72,7 @@ export class ContentExtractor {
     return {
       title,
       content,
-      excerpt
+      excerpt,
     };
   }
 
@@ -89,51 +85,55 @@ export class ContentExtractor {
 
     // Title
     metadata.title =
-      root.querySelector('meta[property="og:title"]')?.getAttribute('content') ||
-      root.querySelector('meta[name="twitter:title"]')?.getAttribute('content') ||
-      root.querySelector('title')?.text;
+      root.querySelector('meta[property="og:title"]')?.getAttribute("content") ||
+      root.querySelector('meta[name="twitter:title"]')?.getAttribute("content") ||
+      root.querySelector("title")?.text;
 
     // Description
     metadata.description =
-      root.querySelector('meta[property="og:description"]')?.getAttribute('content') ||
-      root.querySelector('meta[name="twitter:description"]')?.getAttribute('content') ||
-      root.querySelector('meta[name="description"]')?.getAttribute('content');
+      root.querySelector('meta[property="og:description"]')?.getAttribute("content") ||
+      root.querySelector('meta[name="twitter:description"]')?.getAttribute("content") ||
+      root.querySelector('meta[name="description"]')?.getAttribute("content");
 
     // Keywords
-    const keywordsStr = root.querySelector('meta[name="keywords"]')?.getAttribute('content');
+    const keywordsStr = root.querySelector('meta[name="keywords"]')?.getAttribute("content");
     if (keywordsStr) {
-      metadata.keywords = keywordsStr.split(',').map(k => k.trim());
+      metadata.keywords = keywordsStr.split(",").map((k) => k.trim());
     }
 
     // Author
     metadata.author =
-      root.querySelector('meta[name="author"]')?.getAttribute('content') ||
-      root.querySelector('meta[property="article:author"]')?.getAttribute('content');
+      root.querySelector('meta[name="author"]')?.getAttribute("content") ||
+      root.querySelector('meta[property="article:author"]')?.getAttribute("content");
 
     // Dates
-    const publishDate = root.querySelector('meta[property="article:published_time"]')?.getAttribute('content');
+    const publishDate = root
+      .querySelector('meta[property="article:published_time"]')
+      ?.getAttribute("content");
     if (publishDate) {
       metadata.publishDate = new Date(publishDate);
     }
 
-    const modifiedDate = root.querySelector('meta[property="article:modified_time"]')?.getAttribute('content');
+    const modifiedDate = root
+      .querySelector('meta[property="article:modified_time"]')
+      ?.getAttribute("content");
     if (modifiedDate) {
       metadata.modifiedDate = new Date(modifiedDate);
     }
 
     // Language
     metadata.language =
-      root.querySelector('html')?.getAttribute('lang') ||
-      root.querySelector('meta[http-equiv="content-language"]')?.getAttribute('content');
+      root.querySelector("html")?.getAttribute("lang") ||
+      root.querySelector('meta[http-equiv="content-language"]')?.getAttribute("content");
 
     // Canonical URL
-    metadata.canonical = root.querySelector('link[rel="canonical"]')?.getAttribute('href');
+    metadata.canonical = root.querySelector('link[rel="canonical"]')?.getAttribute("href");
 
     // Open Graph tags
     metadata.ogTags = {};
-    root.querySelectorAll('meta[property^="og:"]').forEach(meta => {
-      const property = meta.getAttribute('property');
-      const content = meta.getAttribute('content');
+    root.querySelectorAll('meta[property^="og:"]').forEach((meta) => {
+      const property = meta.getAttribute("property");
+      const content = meta.getAttribute("content");
       if (property && content) {
         metadata.ogTags![property] = content;
       }
@@ -141,9 +141,9 @@ export class ContentExtractor {
 
     // Twitter Card tags
     metadata.twitterTags = {};
-    root.querySelectorAll('meta[name^="twitter:"]').forEach(meta => {
-      const name = meta.getAttribute('name');
-      const content = meta.getAttribute('content');
+    root.querySelectorAll('meta[name^="twitter:"]').forEach((meta) => {
+      const name = meta.getAttribute("name");
+      const content = meta.getAttribute("content");
       if (name && content) {
         metadata.twitterTags![name] = content;
       }
@@ -151,7 +151,7 @@ export class ContentExtractor {
 
     // JSON-LD structured data
     metadata.jsonLd = [];
-    root.querySelectorAll('script[type="application/ld+json"]').forEach(script => {
+    root.querySelectorAll('script[type="application/ld+json"]').forEach((script) => {
       try {
         const data = JSON.parse(script.text);
         metadata.jsonLd!.push(data);
@@ -166,28 +166,31 @@ export class ContentExtractor {
   /**
    * Extract all links from HTML
    */
-  extractLinks(html: string, baseUrl: string): Array<{
+  extractLinks(
+    html: string,
+    baseUrl: string
+  ): Array<{
     href: string;
     text: string;
-    type: 'internal' | 'external';
+    type: "internal" | "external";
   }> {
     const root = parse(html);
-    const links: Array<{ href: string; text: string; type: 'internal' | 'external' }> = [];
+    const links: Array<{ href: string; text: string; type: "internal" | "external" }> = [];
     const baseUrlObj = new URL(baseUrl);
 
-    root.querySelectorAll('a[href]').forEach(anchor => {
-      const href = anchor.getAttribute('href');
+    root.querySelectorAll("a[href]").forEach((anchor) => {
+      const href = anchor.getAttribute("href");
       if (!href) return;
 
       try {
         const absoluteUrl = new URL(href, baseUrl).toString();
         const linkUrlObj = new URL(absoluteUrl);
-        const type = linkUrlObj.hostname === baseUrlObj.hostname ? 'internal' : 'external';
+        const type = linkUrlObj.hostname === baseUrlObj.hostname ? "internal" : "external";
 
         links.push({
           href: absoluteUrl,
           text: anchor.text.trim(),
-          type
+          type,
         });
       } catch (e) {
         // Invalid URL
@@ -200,7 +203,10 @@ export class ContentExtractor {
   /**
    * Extract all images from HTML
    */
-  extractImages(html: string, baseUrl: string): Array<{
+  extractImages(
+    html: string,
+    baseUrl: string
+  ): Array<{
     src: string;
     alt?: string;
     width?: number;
@@ -209,15 +215,17 @@ export class ContentExtractor {
     const root = parse(html);
     const images: Array<{ src: string; alt?: string; width?: number; height?: number }> = [];
 
-    root.querySelectorAll('img[src]').forEach(img => {
-      const src = img.getAttribute('src');
+    root.querySelectorAll("img[src]").forEach((img) => {
+      const src = img.getAttribute("src");
       if (!src) return;
 
       try {
         const absoluteSrc = new URL(src, baseUrl).toString();
-        const alt = img.getAttribute('alt') || undefined;
-        const width = img.getAttribute('width') ? parseInt(img.getAttribute('width')!) : undefined;
-        const height = img.getAttribute('height') ? parseInt(img.getAttribute('height')!) : undefined;
+        const alt = img.getAttribute("alt") || undefined;
+        const width = img.getAttribute("width") ? parseInt(img.getAttribute("width")!) : undefined;
+        const height = img.getAttribute("height")
+          ? parseInt(img.getAttribute("height")!)
+          : undefined;
 
         images.push({ src: absoluteSrc, alt, width, height });
       } catch (e) {

@@ -2,22 +2,22 @@
  * Exercise Types
  */
 export enum ExerciseType {
-  TABLETOP = 'tabletop',
-  LIVE_FIRE = 'live-fire',
-  HYBRID = 'hybrid',
-  SIMULATION = 'simulation'
+  TABLETOP = "tabletop",
+  LIVE_FIRE = "live-fire",
+  HYBRID = "hybrid",
+  SIMULATION = "simulation",
 }
 
 /**
  * Exercise Status
  */
 export enum ExerciseStatus {
-  PLANNED = 'planned',
-  READY = 'ready',
-  IN_PROGRESS = 'in-progress',
-  PAUSED = 'paused',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled'
+  PLANNED = "planned",
+  READY = "ready",
+  IN_PROGRESS = "in-progress",
+  PAUSED = "paused",
+  COMPLETED = "completed",
+  CANCELLED = "cancelled",
 }
 
 /**
@@ -49,7 +49,7 @@ export interface PurpleTeamExercise {
 export interface ExerciseObjective {
   id: string;
   description: string;
-  type: 'attack' | 'defense' | 'collaboration';
+  type: "attack" | "defense" | "collaboration";
   success: boolean;
   notes?: string;
 }
@@ -135,7 +135,7 @@ export interface PlaybookTechnique {
 export interface PlaybookSequence {
   order: number;
   techniqueId: string;
-  timing: 'immediate' | 'delayed' | 'conditional';
+  timing: "immediate" | "delayed" | "conditional";
   condition?: string;
   delay?: number;
 }
@@ -154,10 +154,10 @@ export interface Detection {
   id: string;
   timestamp: Date;
   source: string;
-  type: 'alert' | 'log' | 'manual';
+  type: "alert" | "log" | "manual";
   techniqueId?: string;
   description: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   truePositive: boolean;
   timeToDetect?: number;
   analyst?: string;
@@ -169,11 +169,11 @@ export interface Detection {
  */
 export interface ExerciseFinding {
   id: string;
-  type: 'gap' | 'weakness' | 'strength' | 'recommendation';
+  type: "gap" | "weakness" | "strength" | "recommendation";
   category: string;
   title: string;
   description: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   affectedControls: string[];
   evidence: string[];
   remediation?: string;
@@ -224,7 +224,7 @@ export interface ObjectiveAssessment {
 
 export interface TimelineEvent {
   timestamp: Date;
-  team: 'red' | 'blue' | 'both';
+  team: "red" | "blue" | "both";
   action: string;
   result: string;
   techniqueId?: string;
@@ -234,17 +234,17 @@ export interface LessonLearned {
   id: string;
   category: string;
   description: string;
-  impact: 'high' | 'medium' | 'low';
+  impact: "high" | "medium" | "low";
   actionItems: string[];
 }
 
 export interface Recommendation {
   id: string;
-  priority: 'critical' | 'high' | 'medium' | 'low';
+  priority: "critical" | "high" | "medium" | "low";
   category: string;
   title: string;
   description: string;
-  effort: 'low' | 'medium' | 'high';
+  effort: "low" | "medium" | "high";
   expectedOutcome: string;
   relatedFindings: string[];
 }
@@ -261,9 +261,9 @@ export interface Attachment {
  */
 export interface IOC {
   id: string;
-  type: 'ip' | 'domain' | 'hash' | 'url' | 'email' | 'file' | 'registry' | 'process';
+  type: "ip" | "domain" | "hash" | "url" | "email" | "file" | "registry" | "process";
   value: string;
-  confidence: 'high' | 'medium' | 'low';
+  confidence: "high" | "medium" | "low";
   source: string;
   context: string;
   firstSeen: Date;
@@ -282,7 +282,7 @@ export interface SIEMRule {
   platform: string;
   query: string;
   techniquesCovered: string[];
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   enabled: boolean;
   lastTested?: Date;
   effectiveness?: number;

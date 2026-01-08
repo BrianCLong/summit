@@ -6,13 +6,13 @@ export interface TriageItem {
   id: string;
   title: string;
   description: string;
-  source: 'backlog' | 'bugbash' | 'github';
+  source: "backlog" | "bugbash" | "github";
   sourceId: string;
 
   // Classified attributes
   area: string[];
-  impact: 'blocker' | 'high' | 'medium' | 'low';
-  type: 'bug' | 'tech-debt' | 'feature' | 'enhancement';
+  impact: "blocker" | "high" | "medium" | "low";
+  type: "bug" | "tech-debt" | "feature" | "enhancement";
 
   // Metadata
   component?: string;

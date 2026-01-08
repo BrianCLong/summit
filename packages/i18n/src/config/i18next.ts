@@ -1,9 +1,9 @@
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
-import ICU from 'i18next-icu';
-import type { Locale } from '../types';
-import { LOCALE_CONFIGS } from './locales';
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
+import LanguageDetector from "i18next-browser-languagedetector";
+import ICU from "i18next-icu";
+import type { Locale } from "../types";
+import { LOCALE_CONFIGS } from "./locales";
 
 /**
  * i18next configuration options
@@ -28,11 +28,11 @@ export interface I18nConfig {
  */
 export async function initI18n(config: I18nConfig = {}) {
   const {
-    defaultLocale = 'en-US',
-    fallbackLocale = 'en-US',
+    defaultLocale = "en-US",
+    fallbackLocale = "en-US",
     debug = false,
-    namespaces = ['common', 'auth', 'navigation', 'dashboard', 'errors'],
-    defaultNamespace = 'common',
+    namespaces = ["common", "auth", "navigation", "dashboard", "errors"],
+    defaultNamespace = "common",
   } = config;
 
   // Initialize i18next
@@ -58,46 +58,39 @@ export async function initI18n(config: I18nConfig = {}) {
       // Interpolation
       interpolation: {
         escapeValue: false, // React already escapes
-        prefix: '{',
-        suffix: '}',
+        prefix: "{",
+        suffix: "}",
       },
 
       // Language detection
       detection: {
         // Order of detection methods
-        order: [
-          'localStorage',
-          'sessionStorage',
-          'navigator',
-          'htmlTag',
-          'path',
-          'subdomain',
-        ],
+        order: ["localStorage", "sessionStorage", "navigator", "htmlTag", "path", "subdomain"],
 
         // Cache user language
-        caches: ['localStorage', 'sessionStorage'],
+        caches: ["localStorage", "sessionStorage"],
 
         // localStorage key
-        lookupLocalStorage: 'i18nextLng',
-        lookupSessionStorage: 'i18nextLng',
+        lookupLocalStorage: "i18nextLng",
+        lookupSessionStorage: "i18nextLng",
 
         // Exclude cache for these languages (optional)
-        excludeCacheFor: ['cimode'],
+        excludeCacheFor: ["cimode"],
       },
 
       // React options
       react: {
         useSuspense: true,
-        bindI18n: 'languageChanged loaded',
-        bindI18nStore: 'added removed',
-        transEmptyNodeValue: '',
+        bindI18n: "languageChanged loaded",
+        bindI18nStore: "added removed",
+        transEmptyNodeValue: "",
         transSupportBasicHtmlNodes: true,
-        transKeepBasicHtmlNodesFor: ['br', 'strong', 'i', 'em', 'b', 'code'],
+        transKeepBasicHtmlNodesFor: ["br", "strong", "i", "em", "b", "code"],
       },
 
       // Load paths (for lazy loading)
       backend: {
-        loadPath: '/locales/{{lng}}/{{ns}}.json',
+        loadPath: "/locales/{{lng}}/{{ns}}.json",
       },
 
       // Missing key handler
@@ -105,22 +98,22 @@ export async function initI18n(config: I18nConfig = {}) {
       missingKeyHandler: (lngs, ns, key, fallbackValue) => {
         if (debug) {
           console.warn(
-            `[i18n] Missing translation key: ${key} (namespace: ${ns}, languages: ${lngs.join(', ')})`
+            `[i18n] Missing translation key: ${key} (namespace: ${ns}, languages: ${lngs.join(", ")})`
           );
         }
       },
 
       // Load strategy
-      load: 'currentOnly', // Only load current language
+      load: "currentOnly", // Only load current language
       preload: [], // Don't preload any languages
 
       // Key separator
-      keySeparator: '.',
-      nsSeparator: ':',
+      keySeparator: ".",
+      nsSeparator: ":",
 
       // Pluralization
-      pluralSeparator: '_',
-      contextSeparator: '_',
+      pluralSeparator: "_",
+      contextSeparator: "_",
 
       // Return objects for nested translations
       returnObjects: false,
@@ -134,7 +127,7 @@ export async function initI18n(config: I18nConfig = {}) {
       updateMissing: false,
 
       // Compatibility
-      compatibilityJSON: 'v4',
+      compatibilityJSON: "v4",
     });
 
   return i18n;
@@ -154,20 +147,12 @@ export function addTranslations(
 /**
  * Load translation bundle
  */
-export async function loadTranslationBundle(
-  locale: Locale,
-  namespace: string
-): Promise<void> {
+export async function loadTranslationBundle(locale: Locale, namespace: string): Promise<void> {
   try {
-    const translations = await import(
-      `../../locales/${locale}/${namespace}.json`
-    );
+    const translations = await import(`../../locales/${locale}/${namespace}.json`);
     addTranslations(locale, namespace, translations.default || translations);
   } catch (error) {
-    console.error(
-      `Failed to load translation bundle: ${locale}/${namespace}`,
-      error
-    );
+    console.error(`Failed to load translation bundle: ${locale}/${namespace}`, error);
   }
 }
 

@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-console.log('ig-dp placeholder CLI');
+console.log("ig-dp placeholder CLI");

@@ -1,5 +1,5 @@
-import * as SQLite from 'expo-sqlite';
-import { encryptData, decryptData } from './encryption';
+import * as SQLite from "expo-sqlite";
+import { encryptData, decryptData } from "./encryption";
 
 export type OutboundRecord = {
   id: number;
@@ -7,10 +7,10 @@ export type OutboundRecord = {
   createdAt: number;
 };
 
-const db = SQLite.openDatabase('summit-intel.db');
+const db = SQLite.openDatabase("summit-intel.db");
 
 export async function ensureOfflineStore(): Promise<void> {
-  await runTx(tx =>
+  await runTx((tx) =>
     tx.executeSql(
       `CREATE TABLE IF NOT EXISTS outbound_queue (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,16 +25,18 @@ export async function ensureOfflineStore(): Promise<void> {
 export async function enqueuePayload(payload: Record<string, unknown>): Promise<void> {
   const serialized = JSON.stringify(payload);
   const encrypted = await encryptData(serialized);
-  await runTx(tx => tx.executeSql('INSERT INTO outbound_queue (payload) VALUES (?)', [encrypted]));
+  await runTx((tx) =>
+    tx.executeSql("INSERT INTO outbound_queue (payload) VALUES (?)", [encrypted])
+  );
 }
 
 export async function readOldest(limit = 50): Promise<OutboundRecord[]> {
   // 1. Fetch raw encrypted rows
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rawRows = await new Promise<any[]>((resolve, reject) => {
-    db.readTransaction(tx => {
+    db.readTransaction((tx) => {
       tx.executeSql(
-        'SELECT id, payload, created_at as createdAt FROM outbound_queue ORDER BY id ASC LIMIT ?',
+        "SELECT id, payload, created_at as createdAt FROM outbound_queue ORDER BY id ASC LIMIT ?",
         [limit],
         (_, rs) => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -60,10 +62,10 @@ export async function readOldest(limit = 50): Promise<OutboundRecord[]> {
       results.push({
         id: row.id as number,
         payload: JSON.parse(decrypted),
-        createdAt: row.createdAt as number
+        createdAt: row.createdAt as number,
       });
     } catch (e) {
-      console.error('Failed to decrypt record', row.id, e);
+      console.error("Failed to decrypt record", row.id, e);
       // Skip corrupted records or handle error
     }
   }
@@ -73,15 +75,17 @@ export async function readOldest(limit = 50): Promise<OutboundRecord[]> {
 
 export async function deleteRecords(ids: number[]): Promise<void> {
   if (!ids.length) return;
-  const placeholders = ids.map(() => '?').join(',');
-  await runTx(tx => tx.executeSql(`DELETE FROM outbound_queue WHERE id IN (${placeholders})`, ids));
+  const placeholders = ids.map(() => "?").join(",");
+  await runTx((tx) =>
+    tx.executeSql(`DELETE FROM outbound_queue WHERE id IN (${placeholders})`, ids)
+  );
 }
 
 export async function countQueue(): Promise<number> {
   return new Promise((resolve, reject) => {
-    db.readTransaction(tx => {
+    db.readTransaction((tx) => {
       tx.executeSql(
-        'SELECT COUNT(*) as total FROM outbound_queue',
+        "SELECT COUNT(*) as total FROM outbound_queue",
         [],
         (_, rs) => {
           resolve((rs.rows.item(0).total as number) ?? 0);

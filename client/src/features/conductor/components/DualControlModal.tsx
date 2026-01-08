@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -8,21 +8,21 @@ import {
   TextField,
   Box,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
 
 export function DualControlModal({
   open,
   onClose,
   onConfirm,
-  actionLabel = 'Confirm',
+  actionLabel = "Confirm",
 }: {
   open: boolean;
   onClose: () => void;
   onConfirm: (payload: { justification: string; approver: string }) => void;
   actionLabel?: string;
 }) {
-  const [justification, setJustification] = useState('');
-  const [approver, setApprover] = useState('');
+  const [justification, setJustification] = useState("");
+  const [approver, setApprover] = useState("");
 
   const valid = justification.trim().length > 5 && /@/.test(approver);
 
@@ -31,10 +31,9 @@ export function DualControlModal({
       <DialogTitle>Dual Control Required</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" gutterBottom>
-          Provide a justification and an approver (email) to proceed. This
-          action is audited.
+          Provide a justification and an approver (email) to proceed. This action is audited.
         </Typography>
-        <Box sx={{ display: 'grid', gap: 2 }}>
+        <Box sx={{ display: "grid", gap: 2 }}>
           <TextField
             label="Justification"
             value={justification}

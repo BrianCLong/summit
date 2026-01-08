@@ -3,54 +3,46 @@
  * Type-safe, validated mutations for Maestro operations with rollback capabilities
  */
 
-import { z } from 'zod';
-import { maestroApi } from '../api/client';
+import { z } from "zod";
+import { maestroApi } from "../api/client";
 
 // Validation schemas for mutation inputs
 const RunConfigSchema = z.object({
-  pipeline: z.string().min(1, 'Pipeline name required'),
-  autonomyLevel: z.number().min(0).max(5, 'Autonomy level must be 0-5'),
-  budgetCap: z.number().positive('Budget cap must be positive'),
-  canaryPercent: z.number().min(0).max(1, 'Canary percent must be 0-1'),
+  pipeline: z.string().min(1, "Pipeline name required"),
+  autonomyLevel: z.number().min(0).max(5, "Autonomy level must be 0-5"),
+  budgetCap: z.number().positive("Budget cap must be positive"),
+  canaryPercent: z.number().min(0).max(1, "Canary percent must be 0-1"),
   metadata: z.record(z.unknown()).optional(),
   approvalRequired: z.boolean().default(false),
 });
 
 const PolicyUpdateSchema = z.object({
-  id: z.string().min(1, 'Policy ID required'),
+  id: z.string().min(1, "Policy ID required"),
   enabled: z.boolean(),
   rules: z.array(
     z.object({
       condition: z.string(),
-      action: z.enum(['allow', 'deny', 'warn']),
+      action: z.enum(["allow", "deny", "warn"]),
       priority: z.number().default(100),
-    }),
+    })
   ),
   dryRun: z.boolean().default(false),
 });
 
 const BudgetUpdateSchema = z.object({
-  tenantId: z.string().min(1, 'Tenant ID required'),
-  monthlyUsd: z.number().positive('Monthly budget must be positive'),
+  tenantId: z.string().min(1, "Tenant ID required"),
+  monthlyUsd: z.number().positive("Monthly budget must be positive"),
   alertThresholds: z
     .object({
-      warning: z
-        .number()
-        .min(0)
-        .max(1, 'Warning threshold must be 0-1')
-        .default(0.8),
-      critical: z
-        .number()
-        .min(0)
-        .max(1, 'Critical threshold must be 0-1')
-        .default(0.95),
+      warning: z.number().min(0).max(1, "Warning threshold must be 0-1").default(0.8),
+      critical: z.number().min(0).max(1, "Critical threshold must be 0-1").default(0.95),
     })
     .optional(),
 });
 
 const RoutingPinSchema = z.object({
-  route: z.string().min(1, 'Route required'),
-  model: z.string().min(1, 'Model required'),
+  route: z.string().min(1, "Route required"),
+  model: z.string().min(1, "Model required"),
   note: z.string().optional(),
   expiresAt: z.string().datetime().optional(),
 });
@@ -72,7 +64,7 @@ export interface MutationContext {
   userId: string;
   tenantId: string;
   timestamp: string;
-  source: 'ui' | 'api' | 'automation';
+  source: "ui" | "api" | "automation";
 }
 
 /**
@@ -98,17 +90,17 @@ export function initializeAuthContext(provider: AuthContextProvider): void {
 function getAuthContext(): { userId: string; tenantId: string } {
   if (!authContextProvider) {
     throw new Error(
-      'Auth context not initialized. Call initializeAuthContext() before using mutations.',
+      "Auth context not initialized. Call initializeAuthContext() before using mutations."
     );
   }
   const userId = authContextProvider.getUserId();
   const tenantId = authContextProvider.getTenantId();
 
-  if (!userId || userId === 'current-user') {
-    throw new Error('Invalid userId: authentication required');
+  if (!userId || userId === "current-user") {
+    throw new Error("Invalid userId: authentication required");
   }
-  if (!tenantId || tenantId === 'current-tenant') {
-    throw new Error('Invalid tenantId: tenant context required');
+  if (!tenantId || tenantId === "current-tenant") {
+    throw new Error("Invalid tenantId: tenant context required");
   }
 
   return { userId, tenantId };
@@ -120,11 +112,8 @@ function getAuthContext(): { userId: string; tenantId: string } {
 async function safeMutation<TInput, TOutput>(
   schema: z.ZodSchema<TInput>,
   input: unknown,
-  mutationFn: (
-    validInput: TInput,
-    context: MutationContext,
-  ) => Promise<TOutput>,
-  rollbackFn?: (output: TOutput, context: MutationContext) => Promise<void>,
+  mutationFn: (validInput: TInput, context: MutationContext) => Promise<TOutput>,
+  rollbackFn?: (output: TOutput, context: MutationContext) => Promise<void>
 ): Promise<MutationResult<TOutput>> {
   // Get authenticated user and tenant from auth context
   const authContext = getAuthContext();
@@ -133,7 +122,7 @@ async function safeMutation<TInput, TOutput>(
     userId: authContext.userId,
     tenantId: authContext.tenantId,
     timestamp: new Date().toISOString(),
-    source: 'ui',
+    source: "ui",
   };
 
   try {
@@ -144,9 +133,7 @@ async function safeMutation<TInput, TOutput>(
     const result = await mutationFn(validInput, context);
 
     // Create rollback function if provided
-    const rollback = rollbackFn
-      ? async () => await rollbackFn(result, context)
-      : undefined;
+    const rollback = rollbackFn ? async () => await rollbackFn(result, context) : undefined;
 
     return {
       success: true,
@@ -157,14 +144,14 @@ async function safeMutation<TInput, TOutput>(
     if (error instanceof z.ZodError) {
       return {
         success: false,
-        error: 'Validation failed',
+        error: "Validation failed",
         validationErrors: error,
       };
     }
 
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 }
@@ -184,9 +171,7 @@ export const MaestroSafeMutations = {
         // Pre-flight checks
         const budgetCheck = await maestroApi.getBudgets();
         if (budgetCheck.remaining < config.budgetCap) {
-          throw new Error(
-            `Insufficient budget: ${budgetCheck.remaining} < ${config.budgetCap}`,
-          );
+          throw new Error(`Insufficient budget: ${budgetCheck.remaining} < ${config.budgetCap}`);
         }
 
         // Create the run
@@ -202,12 +187,12 @@ export const MaestroSafeMutations = {
         return run;
       },
       // Rollback function - cancel the run if needed
-       
+
       async (run, _context) => {
-        if (run.status === 'queued' || run.status === 'running') {
+        if (run.status === "queued" || run.status === "running") {
           await maestroApi.cancelRun(run.id);
         }
-      },
+      }
     );
   },
 
@@ -230,20 +215,18 @@ export const MaestroSafeMutations = {
         });
 
         // Store original for rollback
-        (updatedPolicy as { _original: PolicyUpdate })._original =
-          currentPolicy;
+        (updatedPolicy as { _original: PolicyUpdate })._original = currentPolicy;
 
         return updatedPolicy;
       },
       // Rollback function - restore original policy
-       
+
       async (updatedPolicy, _context) => {
-        const original = (updatedPolicy as { _original: PolicyUpdate })
-          ._original;
+        const original = (updatedPolicy as { _original: PolicyUpdate })._original;
         if (original) {
           await maestroApi.updatePolicy(updatedPolicy.id, original);
         }
-      },
+      }
     );
   },
 
@@ -254,42 +237,32 @@ export const MaestroSafeMutations = {
     return safeMutation(
       BudgetUpdateSchema,
       input,
-       
+
       async (budget: BudgetUpdate, _context) => {
         // Get current budget for rollback
         const currentBudget = await maestroApi.getTenantBudget(budget.tenantId);
 
         // Validate business rules
         if (budget.monthlyUsd < currentBudget.spent) {
-          throw new Error(
-            'New budget cannot be less than amount already spent',
-          );
+          throw new Error("New budget cannot be less than amount already spent");
         }
 
         // Update budget
-        const updatedBudget = await maestroApi.putTenantBudget(
-          budget.tenantId,
-          budget.monthlyUsd,
-        );
+        const updatedBudget = await maestroApi.putTenantBudget(budget.tenantId, budget.monthlyUsd);
 
         // Store original for rollback
-        (updatedBudget as { _original: BudgetUpdate })._original =
-          currentBudget;
+        (updatedBudget as { _original: BudgetUpdate })._original = currentBudget;
 
         return updatedBudget;
       },
       // Rollback function
-       
+
       async (updatedBudget, _context) => {
-        const original = (updatedBudget as { _original: BudgetUpdate })
-          ._original;
+        const original = (updatedBudget as { _original: BudgetUpdate })._original;
         if (original) {
-          await maestroApi.putTenantBudget(
-            original.tenantId,
-            original.monthlyUsd,
-          );
+          await maestroApi.putTenantBudget(original.tenantId, original.monthlyUsd);
         }
-      },
+      }
     );
   },
 
@@ -304,7 +277,7 @@ export const MaestroSafeMutations = {
         // Validate model is available
         const providers = await maestroApi.getProviders();
         const modelExists = providers.items.some((p: { models: string[] }) =>
-          p.models.includes(pin.model),
+          p.models.includes(pin.model)
         );
 
         if (!modelExists) {
@@ -315,8 +288,7 @@ export const MaestroSafeMutations = {
         const result = await maestroApi.putRoutingPin({
           route: pin.route,
           model: pin.model,
-          note:
-            pin.note || `Pinned by ${context.userId} at ${context.timestamp}`,
+          note: pin.note || `Pinned by ${context.userId} at ${context.timestamp}`,
         });
 
         // Schedule auto-unpin if expiry set
@@ -330,7 +302,7 @@ export const MaestroSafeMutations = {
               try {
                 await maestroApi.deleteRoutingPin(pin.route);
               } catch (_error) {
-                console.warn('Failed to auto-unpin route:', _error);
+                console.warn("Failed to auto-unpin route:", _error);
               }
             }, delay);
           }
@@ -339,10 +311,10 @@ export const MaestroSafeMutations = {
         return result;
       },
       // Rollback function - unpin the route
-       
+
       async (result, _context) => {
         await maestroApi.deleteRoutingPin(result.route);
-      },
+      }
     );
   },
 
@@ -353,7 +325,7 @@ export const MaestroSafeMutations = {
     return safeMutation(
       z.object({ level: z.number().min(0).max(5) }),
       { level },
-       
+
       async ({ level }, _context) => {
         // Get current level for rollback
         const current = await maestroApi.getAutonomy();
@@ -363,7 +335,7 @@ export const MaestroSafeMutations = {
         if (level > currentLevel + 1) {
           throw new Error(
             `Autonomy level can only be increased by 1 at a time. ` +
-              `Current: ${currentLevel}, Requested: ${level}, Max allowed: ${currentLevel + 1}`,
+              `Current: ${currentLevel}, Requested: ${level}, Max allowed: ${currentLevel + 1}`
           );
         }
 
@@ -376,14 +348,13 @@ export const MaestroSafeMutations = {
         return result;
       },
       // Rollback function
-       
+
       async (result, _context) => {
-        const originalLevel = (result as { _originalLevel: number })
-          ._originalLevel;
+        const originalLevel = (result as { _originalLevel: number })._originalLevel;
         if (originalLevel !== undefined) {
           await maestroApi.setAutonomyLevel(originalLevel);
         }
-      },
+      }
     );
   },
 
@@ -424,7 +395,7 @@ export const MaestroSafeMutations = {
             try {
               await rollback();
             } catch (error) {
-              console.error('Rollback failed:', error);
+              console.error("Rollback failed:", error);
             }
           }
         },
@@ -438,7 +409,7 @@ export const MaestroSafeMutations = {
         try {
           await rollback();
         } catch (rollbackError) {
-          console.error('Rollback failed:', rollbackError);
+          console.error("Rollback failed:", rollbackError);
         }
       }
 

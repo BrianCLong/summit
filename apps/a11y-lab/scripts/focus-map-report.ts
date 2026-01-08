@@ -1,15 +1,15 @@
-import { JSDOM } from 'jsdom';
-import { computeFocusOrder } from '../src/scripts/focusOrder';
+import { JSDOM } from "jsdom";
+import { computeFocusOrder } from "../src/scripts/focusOrder";
 
 async function main() {
   const dom = new JSDOM(samplePage);
   const steps = computeFocusOrder(dom.window.document);
-  console.log('Focus order map:');
+  console.log("Focus order map:");
   console.table(steps);
 }
 
 main().catch((error) => {
-  console.error('Unable to build focus map', error);
+  console.error("Unable to build focus map", error);
   process.exitCode = 1;
 });
 

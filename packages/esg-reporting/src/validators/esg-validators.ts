@@ -3,57 +3,47 @@
  * Input validation schemas for ESG reporting operations
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================================================
 // Enums as Zod Schemas
 // ============================================================================
 
-export const ESGCategorySchema = z.enum([
-  'environmental',
-  'social',
-  'governance',
-]);
+export const ESGCategorySchema = z.enum(["environmental", "social", "governance"]);
 
 export const ReportStatusSchema = z.enum([
-  'draft',
-  'in_review',
-  'approved',
-  'published',
-  'archived',
+  "draft",
+  "in_review",
+  "approved",
+  "published",
+  "archived",
 ]);
 
-export const ReportTypeSchema = z.enum([
-  'annual',
-  'quarterly',
-  'monthly',
-  'ad_hoc',
-  'regulatory',
-]);
+export const ReportTypeSchema = z.enum(["annual", "quarterly", "monthly", "ad_hoc", "regulatory"]);
 
-export const ExportFormatSchema = z.enum(['json', 'csv', 'pdf', 'excel']);
+export const ExportFormatSchema = z.enum(["json", "csv", "pdf", "excel"]);
 
 export const ComplianceStatusSchema = z.enum([
-  'compliant',
-  'partially_compliant',
-  'non_compliant',
-  'not_applicable',
-  'pending_review',
+  "compliant",
+  "partially_compliant",
+  "non_compliant",
+  "not_applicable",
+  "pending_review",
 ]);
 
 export const MetricUnitSchema = z.enum([
-  'tonnes_co2e',
-  'kwh',
-  'mwh',
-  'cubic_meters',
-  'tonnes',
-  'kilograms',
-  'percentage',
-  'count',
-  'ratio',
-  'hours',
-  'currency',
-  'score',
+  "tonnes_co2e",
+  "kwh",
+  "mwh",
+  "cubic_meters",
+  "tonnes",
+  "kilograms",
+  "percentage",
+  "count",
+  "ratio",
+  "hours",
+  "currency",
+  "score",
 ]);
 
 // ============================================================================
@@ -61,12 +51,12 @@ export const MetricUnitSchema = z.enum([
 // ============================================================================
 
 export const CarbonEmissionsSchema = z.object({
-  scope1: z.number().min(0, 'Scope 1 emissions cannot be negative'),
-  scope2: z.number().min(0, 'Scope 2 emissions cannot be negative'),
-  scope3: z.number().min(0, 'Scope 3 emissions cannot be negative'),
+  scope1: z.number().min(0, "Scope 1 emissions cannot be negative"),
+  scope2: z.number().min(0, "Scope 2 emissions cannot be negative"),
+  scope3: z.number().min(0, "Scope 3 emissions cannot be negative"),
   totalEmissions: z.number().min(0),
   intensityRatio: z.number().min(0),
-  unit: z.literal('tonnes_co2e'),
+  unit: z.literal("tonnes_co2e"),
   baselineYear: z.number().int().min(1990).max(2100).optional(),
   reductionTarget: z.number().min(0).max(100).optional(),
   reductionAchieved: z.number().optional(),
@@ -78,7 +68,7 @@ export const EnergyMetricsSchema = z.object({
   nonRenewableEnergy: z.number().min(0),
   renewablePercentage: z.number().min(0).max(100),
   energyIntensity: z.number().min(0),
-  unit: z.enum(['mwh', 'kwh']),
+  unit: z.enum(["mwh", "kwh"]),
 });
 
 export const WaterMetricsSchema = z.object({
@@ -87,7 +77,7 @@ export const WaterMetricsSchema = z.object({
   totalConsumption: z.number().min(0),
   recycledWater: z.number().min(0),
   waterIntensity: z.number().min(0),
-  unit: z.literal('cubic_meters'),
+  unit: z.literal("cubic_meters"),
 });
 
 export const WasteMetricsSchema = z.object({
@@ -96,7 +86,7 @@ export const WasteMetricsSchema = z.object({
   nonHazardousWaste: z.number().min(0),
   recycledWaste: z.number().min(0),
   diversionRate: z.number().min(0).max(100),
-  unit: z.literal('tonnes'),
+  unit: z.literal("tonnes"),
 });
 
 export const EnvironmentalMetricsSchema = z.object({
@@ -261,8 +251,8 @@ export const ESGScoreSchema = z.object({
 });
 
 export const CreateReportInputSchema = z.object({
-  tenantId: z.string().min(1, 'Tenant ID is required'),
-  title: z.string().min(1, 'Title is required').max(500),
+  tenantId: z.string().min(1, "Tenant ID is required"),
+  title: z.string().min(1, "Title is required").max(500),
   description: z.string().max(2000).optional(),
   reportType: ReportTypeSchema,
   periodStart: z.coerce.date(),
@@ -297,16 +287,14 @@ export const MetricInputSchema = z.object({
   unit: MetricUnitSchema,
   targetValue: z.number().optional(),
   notes: z.string().max(1000).optional(),
-  dataSourceType: z
-    .enum(['manual', 'automated', 'third_party', 'calculated'])
-    .optional(),
+  dataSourceType: z.enum(["manual", "automated", "third_party", "calculated"]).optional(),
 });
 
 export const ReportScheduleInputSchema = z.object({
   tenantId: z.string().min(1),
   name: z.string().min(1).max(255),
   reportType: ReportTypeSchema,
-  frequency: z.enum(['daily', 'weekly', 'monthly', 'quarterly', 'annually']),
+  frequency: z.enum(["daily", "weekly", "monthly", "quarterly", "annually"]),
   cronExpression: z.string().optional(),
   recipients: z.array(z.string().email()).min(1),
   exportFormats: z.array(ExportFormatSchema).min(1),
@@ -318,45 +306,35 @@ export const ReportScheduleInputSchema = z.object({
 // Validation Helper Functions
 // ============================================================================
 
-export function validateCreateReportInput(
-  input: unknown,
-): z.infer<typeof CreateReportInputSchema> {
+export function validateCreateReportInput(input: unknown): z.infer<typeof CreateReportInputSchema> {
   return CreateReportInputSchema.parse(input);
 }
 
-export function validateUpdateReportInput(
-  input: unknown,
-): z.infer<typeof UpdateReportInputSchema> {
+export function validateUpdateReportInput(input: unknown): z.infer<typeof UpdateReportInputSchema> {
   return UpdateReportInputSchema.parse(input);
 }
 
-export function validateMetricInput(
-  input: unknown,
-): z.infer<typeof MetricInputSchema> {
+export function validateMetricInput(input: unknown): z.infer<typeof MetricInputSchema> {
   return MetricInputSchema.parse(input);
 }
 
 export function validateReportScheduleInput(
-  input: unknown,
+  input: unknown
 ): z.infer<typeof ReportScheduleInputSchema> {
   return ReportScheduleInputSchema.parse(input);
 }
 
 export function validateEnvironmentalMetrics(
-  input: unknown,
+  input: unknown
 ): z.infer<typeof EnvironmentalMetricsSchema> {
   return EnvironmentalMetricsSchema.parse(input);
 }
 
-export function validateSocialMetrics(
-  input: unknown,
-): z.infer<typeof SocialMetricsSchema> {
+export function validateSocialMetrics(input: unknown): z.infer<typeof SocialMetricsSchema> {
   return SocialMetricsSchema.parse(input);
 }
 
-export function validateGovernanceMetrics(
-  input: unknown,
-): z.infer<typeof GovernanceMetricsSchema> {
+export function validateGovernanceMetrics(input: unknown): z.infer<typeof GovernanceMetricsSchema> {
   return GovernanceMetricsSchema.parse(input);
 }
 

@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       ui_url:
-        description: 'UI URL to capture (e.g., http://localhost:3000)'
+        description: "UI URL to capture (e.g., http://localhost:3000)"
         required: true
-        default: 'http://localhost:3000'
+        default: "http://localhost:3000"
 
 jobs:
   capture:

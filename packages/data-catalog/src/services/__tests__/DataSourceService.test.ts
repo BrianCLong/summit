@@ -2,7 +2,7 @@
  * Data Source Service Unit Tests
  */
 
-import { DataSourceService } from '../DataSourceService';
+import { DataSourceService } from "../DataSourceService";
 import {
   DataSourceType,
   ConnectionStatus,
@@ -11,55 +11,55 @@ import {
   MappingStatus,
   MappingTransformationType,
   LicenseType,
-} from '../../types/dataSourceTypes';
+} from "../../types/dataSourceTypes";
 
-describe('DataSourceService', () => {
+describe("DataSourceService", () => {
   let service: DataSourceService;
 
   beforeEach(() => {
     service = new DataSourceService();
   });
 
-  describe('registerDataSource', () => {
-    it('should register a new data source successfully', async () => {
+  describe("registerDataSource", () => {
+    it("should register a new data source successfully", async () => {
       const dataSource = await service.registerDataSource({
-        name: 'postgres-prod',
-        displayName: 'Production PostgreSQL',
-        description: 'Main production database',
+        name: "postgres-prod",
+        displayName: "Production PostgreSQL",
+        description: "Main production database",
         type: DataSourceType.DATABASE,
         connectionConfig: {
-          host: 'localhost',
+          host: "localhost",
           port: 5432,
-          database: 'production',
+          database: "production",
         },
         connectionStatus: ConnectionStatus.ACTIVE,
         lastConnectionTest: null,
-        owner: 'data-team',
-        stewards: ['admin'],
-        tags: ['production', 'postgres'],
-        domain: 'core',
+        owner: "data-team",
+        stewards: ["admin"],
+        tags: ["production", "postgres"],
+        domain: "core",
         properties: {},
       });
 
       expect(dataSource).toBeDefined();
       expect(dataSource.id).toBeDefined();
-      expect(dataSource.name).toBe('postgres-prod');
+      expect(dataSource.name).toBe("postgres-prod");
       expect(dataSource.type).toBe(DataSourceType.DATABASE);
       expect(dataSource.connectionStatus).toBe(ConnectionStatus.ACTIVE);
       expect(dataSource.datasetIds).toEqual([]);
       expect(dataSource.createdAt).toBeInstanceOf(Date);
     });
 
-    it('should create lineage summary for data source', async () => {
+    it("should create lineage summary for data source", async () => {
       const dataSource = await service.registerDataSource({
-        name: 'test-source',
-        displayName: 'Test Source',
+        name: "test-source",
+        displayName: "Test Source",
         description: null,
         type: DataSourceType.API,
         connectionConfig: {},
         connectionStatus: ConnectionStatus.PENDING,
         lastConnectionTest: null,
-        owner: 'test',
+        owner: "test",
         stewards: [],
         tags: [],
         domain: null,
@@ -72,45 +72,45 @@ describe('DataSourceService', () => {
     });
   });
 
-  describe('listDataSources', () => {
+  describe("listDataSources", () => {
     beforeEach(async () => {
       await service.registerDataSource({
-        name: 'postgres-db',
-        displayName: 'PostgreSQL',
+        name: "postgres-db",
+        displayName: "PostgreSQL",
         description: null,
         type: DataSourceType.DATABASE,
         connectionConfig: {},
         connectionStatus: ConnectionStatus.ACTIVE,
         lastConnectionTest: null,
-        owner: 'team-a',
+        owner: "team-a",
         stewards: [],
-        tags: ['production'],
-        domain: 'core',
+        tags: ["production"],
+        domain: "core",
         properties: {},
       });
 
       await service.registerDataSource({
-        name: 'api-source',
-        displayName: 'API Source',
+        name: "api-source",
+        displayName: "API Source",
         description: null,
         type: DataSourceType.API,
         connectionConfig: {},
         connectionStatus: ConnectionStatus.INACTIVE,
         lastConnectionTest: null,
-        owner: 'team-b',
+        owner: "team-b",
         stewards: [],
-        tags: ['staging'],
-        domain: 'external',
+        tags: ["staging"],
+        domain: "external",
         properties: {},
       });
     });
 
-    it('should list all data sources without filters', async () => {
+    it("should list all data sources without filters", async () => {
       const sources = await service.listDataSources();
       expect(sources.length).toBe(2);
     });
 
-    it('should filter by type', async () => {
+    it("should filter by type", async () => {
       const sources = await service.listDataSources({
         type: DataSourceType.DATABASE,
       });
@@ -118,7 +118,7 @@ describe('DataSourceService', () => {
       expect(sources[0].type).toBe(DataSourceType.DATABASE);
     });
 
-    it('should filter by status', async () => {
+    it("should filter by status", async () => {
       const sources = await service.listDataSources({
         status: ConnectionStatus.ACTIVE,
       });
@@ -126,34 +126,34 @@ describe('DataSourceService', () => {
       expect(sources[0].connectionStatus).toBe(ConnectionStatus.ACTIVE);
     });
 
-    it('should filter by tags', async () => {
+    it("should filter by tags", async () => {
       const sources = await service.listDataSources({
-        tags: ['production'],
+        tags: ["production"],
       });
       expect(sources.length).toBe(1);
-      expect(sources[0].tags).toContain('production');
+      expect(sources[0].tags).toContain("production");
     });
 
-    it('should filter by domain', async () => {
+    it("should filter by domain", async () => {
       const sources = await service.listDataSources({
-        domain: 'core',
+        domain: "core",
       });
       expect(sources.length).toBe(1);
-      expect(sources[0].domain).toBe('core');
+      expect(sources[0].domain).toBe("core");
     });
   });
 
-  describe('testConnection', () => {
-    it('should test connection and update status', async () => {
+  describe("testConnection", () => {
+    it("should test connection and update status", async () => {
       const dataSource = await service.registerDataSource({
-        name: 'test-db',
-        displayName: 'Test DB',
+        name: "test-db",
+        displayName: "Test DB",
         description: null,
         type: DataSourceType.DATABASE,
         connectionConfig: {},
         connectionStatus: ConnectionStatus.PENDING,
         lastConnectionTest: null,
-        owner: 'test',
+        owner: "test",
         stewards: [],
         tags: [],
         domain: null,
@@ -170,17 +170,17 @@ describe('DataSourceService', () => {
     });
   });
 
-  describe('registerDataset', () => {
-    it('should register a dataset under a data source', async () => {
+  describe("registerDataset", () => {
+    it("should register a dataset under a data source", async () => {
       const dataSource = await service.registerDataSource({
-        name: 'db-source',
-        displayName: 'DB Source',
+        name: "db-source",
+        displayName: "DB Source",
         description: null,
         type: DataSourceType.DATABASE,
         connectionConfig: {},
         connectionStatus: ConnectionStatus.ACTIVE,
         lastConnectionTest: null,
-        owner: 'test',
+        owner: "test",
         stewards: [],
         tags: [],
         domain: null,
@@ -189,15 +189,15 @@ describe('DataSourceService', () => {
 
       const dataset = await service.registerDataset({
         sourceId: dataSource.id,
-        name: 'users',
-        displayName: 'Users Table',
-        description: 'User records',
-        fullyQualifiedName: 'db.public.users',
+        name: "users",
+        displayName: "Users Table",
+        description: "User records",
+        fullyQualifiedName: "db.public.users",
         status: DatasetStatus.ACTIVE,
         classification: DataClassification.CONFIDENTIAL,
-        owner: 'test',
+        owner: "test",
         stewards: [],
-        tags: ['pii'],
+        tags: ["pii"],
         domain: null,
         schemaId: null,
         originJobId: null,
@@ -214,7 +214,7 @@ describe('DataSourceService', () => {
       expect(dataset).toBeDefined();
       expect(dataset.id).toBeDefined();
       expect(dataset.sourceId).toBe(dataSource.id);
-      expect(dataset.name).toBe('users');
+      expect(dataset.name).toBe("users");
       expect(dataset.fields).toEqual([]);
 
       // Verify it's added to the data source
@@ -222,17 +222,17 @@ describe('DataSourceService', () => {
       expect(updatedSource?.datasetIds).toContain(dataset.id);
     });
 
-    it('should throw error for non-existent data source', async () => {
+    it("should throw error for non-existent data source", async () => {
       await expect(
         service.registerDataset({
-          sourceId: 'non-existent',
-          name: 'test',
-          displayName: 'Test',
+          sourceId: "non-existent",
+          name: "test",
+          displayName: "Test",
           description: null,
-          fullyQualifiedName: 'test',
+          fullyQualifiedName: "test",
           status: DatasetStatus.ACTIVE,
           classification: DataClassification.PUBLIC,
-          owner: 'test',
+          owner: "test",
           stewards: [],
           tags: [],
           domain: null,
@@ -246,22 +246,22 @@ describe('DataSourceService', () => {
           policyTags: [],
           retentionDays: null,
           properties: {},
-        }),
-      ).rejects.toThrow('Data source not found');
+        })
+      ).rejects.toThrow("Data source not found");
     });
   });
 
-  describe('searchDatasets', () => {
+  describe("searchDatasets", () => {
     beforeEach(async () => {
       const source = await service.registerDataSource({
-        name: 'test-source',
-        displayName: 'Test',
+        name: "test-source",
+        displayName: "Test",
         description: null,
         type: DataSourceType.DATABASE,
         connectionConfig: {},
         connectionStatus: ConnectionStatus.ACTIVE,
         lastConnectionTest: null,
-        owner: 'test',
+        owner: "test",
         stewards: [],
         tags: [],
         domain: null,
@@ -270,13 +270,13 @@ describe('DataSourceService', () => {
 
       await service.registerDataset({
         sourceId: source.id,
-        name: 'customers',
-        displayName: 'Customer Records',
-        description: 'All customer data',
-        fullyQualifiedName: 'db.customers',
+        name: "customers",
+        displayName: "Customer Records",
+        description: "All customer data",
+        fullyQualifiedName: "db.customers",
         status: DatasetStatus.ACTIVE,
         classification: DataClassification.CONFIDENTIAL,
-        owner: 'test',
+        owner: "test",
         stewards: [],
         tags: [],
         domain: null,
@@ -294,13 +294,13 @@ describe('DataSourceService', () => {
 
       await service.registerDataset({
         sourceId: source.id,
-        name: 'orders',
-        displayName: 'Order Records',
-        description: 'All order data',
-        fullyQualifiedName: 'db.orders',
+        name: "orders",
+        displayName: "Order Records",
+        description: "All order data",
+        fullyQualifiedName: "db.orders",
         status: DatasetStatus.ACTIVE,
         classification: DataClassification.INTERNAL,
-        owner: 'test',
+        owner: "test",
         stewards: [],
         tags: [],
         domain: null,
@@ -317,35 +317,35 @@ describe('DataSourceService', () => {
       });
     });
 
-    it('should find datasets by name', async () => {
-      const results = await service.searchDatasets('customer');
+    it("should find datasets by name", async () => {
+      const results = await service.searchDatasets("customer");
       expect(results.length).toBe(1);
-      expect(results[0].name).toBe('customers');
+      expect(results[0].name).toBe("customers");
     });
 
-    it('should find datasets by description', async () => {
-      const results = await service.searchDatasets('order data');
+    it("should find datasets by description", async () => {
+      const results = await service.searchDatasets("order data");
       expect(results.length).toBe(1);
-      expect(results[0].name).toBe('orders');
+      expect(results[0].name).toBe("orders");
     });
 
-    it('should be case insensitive', async () => {
-      const results = await service.searchDatasets('CUSTOMER');
+    it("should be case insensitive", async () => {
+      const results = await service.searchDatasets("CUSTOMER");
       expect(results.length).toBe(1);
     });
   });
 
-  describe('registerField', () => {
-    it('should register a field for a dataset', async () => {
+  describe("registerField", () => {
+    it("should register a field for a dataset", async () => {
       const source = await service.registerDataSource({
-        name: 'test-source',
-        displayName: 'Test',
+        name: "test-source",
+        displayName: "Test",
         description: null,
         type: DataSourceType.DATABASE,
         connectionConfig: {},
         connectionStatus: ConnectionStatus.ACTIVE,
         lastConnectionTest: null,
-        owner: 'test',
+        owner: "test",
         stewards: [],
         tags: [],
         domain: null,
@@ -354,13 +354,13 @@ describe('DataSourceService', () => {
 
       const dataset = await service.registerDataset({
         sourceId: source.id,
-        name: 'users',
-        displayName: 'Users',
+        name: "users",
+        displayName: "Users",
         description: null,
-        fullyQualifiedName: 'db.users',
+        fullyQualifiedName: "db.users",
         status: DatasetStatus.ACTIVE,
         classification: DataClassification.INTERNAL,
-        owner: 'test',
+        owner: "test",
         stewards: [],
         tags: [],
         domain: null,
@@ -378,18 +378,18 @@ describe('DataSourceService', () => {
 
       const field = await service.registerField({
         datasetId: dataset.id,
-        name: 'user_id',
-        displayName: 'User ID',
-        description: 'Unique user identifier',
-        dataType: 'uuid',
-        nativeDataType: 'UUID',
+        name: "user_id",
+        displayName: "User ID",
+        description: "Unique user identifier",
+        dataType: "uuid",
+        nativeDataType: "UUID",
         nullable: false,
         isPrimaryKey: true,
         isForeignKey: false,
         foreignKeyReference: null,
         defaultValue: null,
         classification: DataClassification.INTERNAL,
-        tags: ['identifier'],
+        tags: ["identifier"],
         policyTags: [],
         canonicalFieldId: null,
         mappingIds: [],
@@ -400,7 +400,7 @@ describe('DataSourceService', () => {
 
       expect(field).toBeDefined();
       expect(field.id).toBeDefined();
-      expect(field.name).toBe('user_id');
+      expect(field.name).toBe("user_id");
       expect(field.isPrimaryKey).toBe(true);
 
       // Verify it's added to the dataset
@@ -409,17 +409,17 @@ describe('DataSourceService', () => {
     });
   });
 
-  describe('createMapping', () => {
-    it('should create a field mapping', async () => {
+  describe("createMapping", () => {
+    it("should create a field mapping", async () => {
       const source = await service.registerDataSource({
-        name: 'test-source',
-        displayName: 'Test',
+        name: "test-source",
+        displayName: "Test",
         description: null,
         type: DataSourceType.DATABASE,
         connectionConfig: {},
         connectionStatus: ConnectionStatus.ACTIVE,
         lastConnectionTest: null,
-        owner: 'test',
+        owner: "test",
         stewards: [],
         tags: [],
         domain: null,
@@ -428,13 +428,13 @@ describe('DataSourceService', () => {
 
       const dataset = await service.registerDataset({
         sourceId: source.id,
-        name: 'users',
-        displayName: 'Users',
+        name: "users",
+        displayName: "Users",
         description: null,
-        fullyQualifiedName: 'db.users',
+        fullyQualifiedName: "db.users",
         status: DatasetStatus.ACTIVE,
         classification: DataClassification.INTERNAL,
-        owner: 'test',
+        owner: "test",
         stewards: [],
         tags: [],
         domain: null,
@@ -452,11 +452,11 @@ describe('DataSourceService', () => {
 
       const field = await service.registerField({
         datasetId: dataset.id,
-        name: 'full_name',
-        displayName: 'Full Name',
+        name: "full_name",
+        displayName: "Full Name",
         description: null,
-        dataType: 'string',
-        nativeDataType: 'VARCHAR',
+        dataType: "string",
+        nativeDataType: "VARCHAR",
         nullable: true,
         isPrimaryKey: false,
         isForeignKey: false,
@@ -473,19 +473,19 @@ describe('DataSourceService', () => {
       });
 
       const mapping = await service.createMapping({
-        name: 'full_name_to_canonical',
-        description: 'Map full name to canonical person name',
+        name: "full_name_to_canonical",
+        description: "Map full name to canonical person name",
         sourceDatasetId: dataset.id,
         sourceFieldId: field.id,
-        canonicalSchemaId: 'canonical-person-schema-id',
-        canonicalFieldId: 'canonical-name-field-id',
+        canonicalSchemaId: "canonical-person-schema-id",
+        canonicalFieldId: "canonical-name-field-id",
         transformationType: MappingTransformationType.DIRECT,
         transformationLogic: null,
         transformationLanguage: null,
         validationRules: [],
         status: MappingStatus.ACTIVE,
-        version: '1.0.0',
-        createdBy: 'test-user',
+        version: "1.0.0",
+        createdBy: "test-user",
         approvedBy: null,
         properties: {},
       });
@@ -501,17 +501,17 @@ describe('DataSourceService', () => {
     });
   });
 
-  describe('getImpactAnalysis', () => {
-    it('should analyze impact of dataset changes', async () => {
+  describe("getImpactAnalysis", () => {
+    it("should analyze impact of dataset changes", async () => {
       const source = await service.registerDataSource({
-        name: 'test-source',
-        displayName: 'Test',
+        name: "test-source",
+        displayName: "Test",
         description: null,
         type: DataSourceType.DATABASE,
         connectionConfig: {},
         connectionStatus: ConnectionStatus.ACTIVE,
         lastConnectionTest: null,
-        owner: 'test',
+        owner: "test",
         stewards: [],
         tags: [],
         domain: null,
@@ -520,13 +520,13 @@ describe('DataSourceService', () => {
 
       const dataset = await service.registerDataset({
         sourceId: source.id,
-        name: 'source_data',
-        displayName: 'Source Data',
+        name: "source_data",
+        displayName: "Source Data",
         description: null,
-        fullyQualifiedName: 'db.source_data',
+        fullyQualifiedName: "db.source_data",
         status: DatasetStatus.ACTIVE,
         classification: DataClassification.INTERNAL,
-        owner: 'test',
+        owner: "test",
         stewards: [],
         tags: [],
         domain: null,
@@ -551,28 +551,28 @@ describe('DataSourceService', () => {
     });
   });
 
-  describe('license operations', () => {
-    it('should register a license', async () => {
+  describe("license operations", () => {
+    it("should register a license", async () => {
       const license = await service.registerLicense({
-        name: 'cc-by-4.0',
-        displayName: 'Creative Commons Attribution 4.0',
-        description: 'CC BY 4.0 License',
+        name: "cc-by-4.0",
+        displayName: "Creative Commons Attribution 4.0",
+        description: "CC BY 4.0 License",
         licenseType: LicenseType.CREATIVE_COMMONS,
-        licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
+        licenseUrl: "https://creativecommons.org/licenses/by/4.0/",
         legalBasis: null,
-        allowedUseCases: ['research', 'commercial'],
+        allowedUseCases: ["research", "commercial"],
         restrictions: [],
         retentionRequirement: null,
         deletionRequired: false,
         geographicRestrictions: [],
         allowedRegions: [],
         requiresAttribution: true,
-        attributionText: 'Licensed under CC BY 4.0',
+        attributionText: "Licensed under CC BY 4.0",
         allowsCommercialUse: true,
         allowsDerivativeWorks: true,
         allowsRedistribution: true,
         expiresAt: null,
-        createdBy: 'admin',
+        createdBy: "admin",
         properties: {},
       });
 
@@ -581,16 +581,16 @@ describe('DataSourceService', () => {
       expect(license.licenseType).toBe(LicenseType.CREATIVE_COMMONS);
     });
 
-    it('should attach license to dataset', async () => {
+    it("should attach license to dataset", async () => {
       const source = await service.registerDataSource({
-        name: 'test-source',
-        displayName: 'Test',
+        name: "test-source",
+        displayName: "Test",
         description: null,
         type: DataSourceType.DATABASE,
         connectionConfig: {},
         connectionStatus: ConnectionStatus.ACTIVE,
         lastConnectionTest: null,
-        owner: 'test',
+        owner: "test",
         stewards: [],
         tags: [],
         domain: null,
@@ -599,13 +599,13 @@ describe('DataSourceService', () => {
 
       const dataset = await service.registerDataset({
         sourceId: source.id,
-        name: 'licensed_data',
-        displayName: 'Licensed Data',
+        name: "licensed_data",
+        displayName: "Licensed Data",
         description: null,
-        fullyQualifiedName: 'db.licensed_data',
+        fullyQualifiedName: "db.licensed_data",
         status: DatasetStatus.ACTIVE,
         classification: DataClassification.PUBLIC,
-        owner: 'test',
+        owner: "test",
         stewards: [],
         tags: [],
         domain: null,
@@ -622,8 +622,8 @@ describe('DataSourceService', () => {
       });
 
       const license = await service.registerLicense({
-        name: 'test-license',
-        displayName: 'Test License',
+        name: "test-license",
+        displayName: "Test License",
         description: null,
         licenseType: LicenseType.OPEN_DATA,
         licenseUrl: null,
@@ -640,7 +640,7 @@ describe('DataSourceService', () => {
         allowsDerivativeWorks: true,
         allowsRedistribution: true,
         expiresAt: null,
-        createdBy: 'test',
+        createdBy: "test",
         properties: {},
       });
 

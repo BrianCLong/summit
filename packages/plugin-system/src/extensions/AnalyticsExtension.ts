@@ -1,5 +1,5 @@
-import { BaseExtension } from './BaseExtension.js';
-import { PluginContext, PluginManifest } from '../types/plugin.js';
+import { BaseExtension } from "./BaseExtension.js";
+import { PluginContext, PluginManifest } from "../types/plugin.js";
 
 /**
  * Base class for analytics plugins
@@ -29,29 +29,29 @@ export abstract class AnalyticsExtension extends BaseExtension {
   }
 
   protected async onStart(): Promise<void> {
-    this.log.info('Analytics plugin started and ready to process requests');
+    this.log.info("Analytics plugin started and ready to process requests");
   }
 
   protected async onStop(): Promise<void> {
-    this.log.info('Analytics plugin stopped');
+    this.log.info("Analytics plugin stopped");
   }
 
   protected async onDestroy(): Promise<void> {
-    this.log.info('Analytics plugin cleaned up');
+    this.log.info("Analytics plugin cleaned up");
   }
 
   /**
    * Validate plugin has necessary permissions
    */
   private async validatePermissions(_context: PluginContext): Promise<void> {
-    const requiredPermissions = ['read:data', 'access:graph'];
-    const hasPermissions = requiredPermissions.every(perm =>
-      this.manifest.permissions.map(p => p.toString()).includes(perm)
+    const requiredPermissions = ["read:data", "access:graph"];
+    const hasPermissions = requiredPermissions.every((perm) =>
+      this.manifest.permissions.map((p) => p.toString()).includes(perm)
     );
 
     if (!hasPermissions) {
       throw new Error(
-        `Analytics plugin ${this.manifest.id} missing required permissions: ${requiredPermissions.join(', ')}`
+        `Analytics plugin ${this.manifest.id} missing required permissions: ${requiredPermissions.join(", ")}`
       );
     }
   }
@@ -168,13 +168,13 @@ export interface Insight {
   title: string;
   description: string;
   confidence: number;
-  severity?: 'low' | 'medium' | 'high' | 'critical';
+  severity?: "low" | "medium" | "high" | "critical";
   data?: Record<string, any>;
   recommendations?: string[];
 }
 
 export interface Visualization {
-  type: 'chart' | 'graph' | 'table' | 'heatmap' | 'timeline';
+  type: "chart" | "graph" | "table" | "heatmap" | "timeline";
   title: string;
   config: Record<string, any>;
   data: any;
@@ -197,7 +197,7 @@ export interface AnalyticsMetadata {
 
 export interface AnalyticsParameter {
   name: string;
-  type: 'string' | 'number' | 'boolean' | 'object' | 'array';
+  type: "string" | "number" | "boolean" | "object" | "array";
   description: string;
   required: boolean;
   default?: any;

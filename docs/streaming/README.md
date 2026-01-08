@@ -84,6 +84,7 @@ PORT=3003
 Access Kafka UI at http://localhost:8080
 
 Monitor stream metrics:
+
 - Consumer lag
 - Throughput (events/sec)
 - Processing latency

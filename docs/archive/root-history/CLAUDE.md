@@ -102,16 +102,16 @@ Defined in `pnpm-workspace.yaml`:
 
 ```yaml
 packages:
-  - 'apps/*'
-  - 'packages/*'
-  - 'services/*'
-  - 'agents/*'
-  - 'contracts/*'
-  - 'server'
-  - 'client'
-  - 'tools/*'
+  - "apps/*"
+  - "packages/*"
+  - "services/*"
+  - "agents/*"
+  - "contracts/*"
+  - "server"
+  - "client"
+  - "tools/*"
 exclude:
-  - 'archive/**'
+  - "archive/**"
 ```
 
 ### Important Top-Level Directories
@@ -164,14 +164,14 @@ make smoke
 
 ### Service Endpoints (Development)
 
-| Service            | URL                           | Purpose                     |
-| ------------------ | ----------------------------- | --------------------------- |
-| **Frontend**       | http://localhost:3000         | React application           |
-| **GraphQL API**    | http://localhost:4000/graphql | Apollo GraphQL Playground   |
-| **Neo4j Browser**  | http://localhost:7474         | Graph database UI           |
-| **Postgres Admin** | http://localhost:8080         | Database admin (Adminer)    |
-| **Prometheus**     | http://localhost:9090         | Metrics                     |
-| **Grafana**        | http://localhost:3001         | Observability dashboards    |
+| Service            | URL                           | Purpose                   |
+| ------------------ | ----------------------------- | ------------------------- |
+| **Frontend**       | http://localhost:3000         | React application         |
+| **GraphQL API**    | http://localhost:4000/graphql | Apollo GraphQL Playground |
+| **Neo4j Browser**  | http://localhost:7474         | Graph database UI         |
+| **Postgres Admin** | http://localhost:8080         | Database admin (Adminer)  |
+| **Prometheus**     | http://localhost:9090         | Metrics                   |
+| **Grafana**        | http://localhost:3001         | Observability dashboards  |
 
 ### Environment Configuration
 
@@ -191,15 +191,15 @@ make smoke
 
 ### Backend Stack
 
-| Layer               | Technology                            | Purpose                                    |
-| ------------------- | ------------------------------------- | ------------------------------------------ |
-| **API**             | Node.js 18+, Express, Apollo Server   | GraphQL federation, schema stitching       |
-| **Graph Database**  | Neo4j 5.x                             | Entity/relationship storage, graph queries |
-| **Relational DB**   | PostgreSQL 15+                        | Case metadata, audit, reporting            |
-| **Cache/Queue**     | Redis, Kafka/Redpanda                 | Caching, streaming, pub/sub                |
-| **Auth**            | OIDC/JWKS SSO, RBAC+ABAC (OPA)        | Authentication, authorization              |
-| **Observability**   | OpenTelemetry, Prometheus, Grafana    | Tracing, metrics, logs                     |
-| **Orchestration**   | Kubernetes, Helm, Terraform           | Deployment, infrastructure                 |
+| Layer              | Technology                          | Purpose                                    |
+| ------------------ | ----------------------------------- | ------------------------------------------ |
+| **API**            | Node.js 18+, Express, Apollo Server | GraphQL federation, schema stitching       |
+| **Graph Database** | Neo4j 5.x                           | Entity/relationship storage, graph queries |
+| **Relational DB**  | PostgreSQL 15+                      | Case metadata, audit, reporting            |
+| **Cache/Queue**    | Redis, Kafka/Redpanda               | Caching, streaming, pub/sub                |
+| **Auth**           | OIDC/JWKS SSO, RBAC+ABAC (OPA)      | Authentication, authorization              |
+| **Observability**  | OpenTelemetry, Prometheus, Grafana  | Tracing, metrics, logs                     |
+| **Orchestration**  | Kubernetes, Helm, Terraform         | Deployment, infrastructure                 |
 
 ### Frontend Stack
 
@@ -220,6 +220,7 @@ make smoke
 ### Graph AI Analytics (ga-graphai)
 
 Located in `ga-graphai/`, this suite provides AI/ML capabilities:
+
 - **autonomous-investigator**: Python-based autonomous investigation engine
 - **c2pa-bridge**: Content authenticity verification (C2PA standard)
 - **cloud-arbitrage**: Multi-cloud cost optimization
@@ -300,6 +301,7 @@ Follow **Conventional Commits** (enforced by commitlint):
 Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `ci`, `build`, `revert`
 
 Examples:
+
 ```
 feat(api): add entity search endpoint
 fix(graph): resolve neo4j connection timeout
@@ -310,6 +312,7 @@ chore(deps): update pnpm-lock.yaml
 #### Pre-commit Hooks (Husky)
 
 Automatically runs on commit:
+
 - **Gitleaks**: Secret scanning
 - **Lint-staged**: Format and lint changed files
 - **ESLint**: JavaScript/TypeScript linting
@@ -358,7 +361,7 @@ All workflows are required checks for merge.
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "jsx": "react-jsx",
-    "strict": false,              // Gradual strictness migration
+    "strict": false, // Gradual strictness migration
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -437,6 +440,7 @@ Alphabetized within each group, with newlines between groups.
 ### Test Types
 
 1. **Unit Tests**: Jest (SWC transformer)
+
    ```bash
    pnpm test:jest
    # or
@@ -444,11 +448,13 @@ Alphabetized within each group, with newlines between groups.
    ```
 
 2. **Integration Tests**: Jest with database/service mocks
+
    ```bash
    pnpm test:integration
    ```
 
 3. **E2E Tests**: Playwright
+
    ```bash
    pnpm e2e
    # or
@@ -477,6 +483,7 @@ Alphabetized within each group, with newlines between groups.
 The smoke test (`scripts/smoke-test.js`) validates this workflow using the dataset in `data/golden-path/demo-investigation.json`. Local runs match CI exactly.
 
 **Success Criteria**:
+
 - All health checks pass (`/health`, `/health/ready`, `/health/live`)
 - GraphQL mutations succeed
 - Graph queries return expected data
@@ -487,26 +494,27 @@ The smoke test (`scripts/smoke-test.js`) validates this workflow using the datas
 
 ```typescript
 // Use descriptive test names
-describe('EntityService', () => {
-  it('should create entity with valid data', async () => {
+describe("EntityService", () => {
+  it("should create entity with valid data", async () => {
     // Arrange
-    const entityData = { name: 'Test', type: 'Person' };
+    const entityData = { name: "Test", type: "Person" };
 
     // Act
     const result = await entityService.create(entityData);
 
     // Assert
-    expect(result).toHaveProperty('id');
-    expect(result.name).toBe('Test');
+    expect(result).toHaveProperty("id");
+    expect(result.name).toBe("Test");
   });
 
-  it('should throw error when entity type is invalid', async () => {
+  it("should throw error when entity type is invalid", async () => {
     // ...
   });
 });
 ```
 
 **Key Rules**:
+
 - No `.only()` or `.skip()` in committed code (enforced by `jest/no-focused-tests`)
 - Use `beforeEach`/`afterEach` for setup/teardown
 - Mock external services in unit tests
@@ -550,6 +558,7 @@ mkdir -p services/my-service/src
 ### Database Migrations
 
 #### PostgreSQL (Prisma)
+
 ```bash
 pnpm db:pg:migrate      # Apply migrations
 pnpm db:pg:generate     # Generate Prisma client
@@ -557,12 +566,14 @@ pnpm db:pg:status       # Check migration status
 ```
 
 #### PostgreSQL (Knex)
+
 ```bash
 pnpm db:knex:migrate    # Apply migrations
 pnpm db:knex:rollback   # Rollback last batch
 ```
 
 #### Neo4j
+
 ```bash
 pnpm db:neo4j:migrate   # Custom migration scripts
 ```
@@ -628,6 +639,7 @@ docker exec -it <neo4j-container> cypher-shell -u neo4j -p devpassword
 ### Production Guardrails
 
 The API **refuses to boot in production** if:
+
 - `JWT_SECRET` or `JWT_REFRESH_SECRET` match known defaults
 - Database passwords are default values
 - CORS allow-lists include `localhost/*`
@@ -663,36 +675,36 @@ The API **refuses to boot in production** if:
 
 ### Configuration Files
 
-| File                        | Purpose                                        |
-| --------------------------- | ---------------------------------------------- |
-| `package.json`              | Root package, scripts, workspace config        |
-| `pnpm-workspace.yaml`       | pnpm workspace definition                      |
-| `turbo.json`                | Turbo build pipeline configuration             |
-| `tsconfig.base.json`        | Base TypeScript config                         |
-| `tsconfig.build.json`       | Project references for workspace builds        |
-| `eslint.config.js`          | ESLint v9 flat config                          |
-| `.eslintrc.cjs`             | Legacy ESLint config                           |
-| `.prettierrc`               | Prettier formatting rules                      |
-| `Makefile`                  | Golden path targets (bootstrap, up, smoke)     |
-| `.env.example`              | Development environment template               |
-| `docker-compose.dev.yml`    | Development stack definition                   |
-| `docker-compose.ai.yml`     | AI/ML services stack                           |
+| File                     | Purpose                                    |
+| ------------------------ | ------------------------------------------ |
+| `package.json`           | Root package, scripts, workspace config    |
+| `pnpm-workspace.yaml`    | pnpm workspace definition                  |
+| `turbo.json`             | Turbo build pipeline configuration         |
+| `tsconfig.base.json`     | Base TypeScript config                     |
+| `tsconfig.build.json`    | Project references for workspace builds    |
+| `eslint.config.js`       | ESLint v9 flat config                      |
+| `.eslintrc.cjs`          | Legacy ESLint config                       |
+| `.prettierrc`            | Prettier formatting rules                  |
+| `Makefile`               | Golden path targets (bootstrap, up, smoke) |
+| `.env.example`           | Development environment template           |
+| `docker-compose.dev.yml` | Development stack definition               |
+| `docker-compose.ai.yml`  | AI/ML services stack                       |
 
 ### Key Documentation
 
-| File/Directory                  | Purpose                                   |
-| ------------------------------- | ----------------------------------------- |
-| `README.md`                     | Project overview, quickstart              |
-| `docs/ARCHITECTURE.md`          | System architecture, stack details        |
-| `docs/DEVELOPER_ONBOARDING.md`  | 30-minute developer onboarding guide      |
-| `docs/ONBOARDING.md`            | Day-one onboarding                        |
-| `docs/REPOSITORY_STRUCTURE.md`  | Codebase organization                     |
-| `docs/Copilot-Playbook.md`      | AI copilot usage guide                    |
-| `docs/TESTPLAN.md`              | Testing strategy and plans                |
+| File/Directory                        | Purpose                               |
+| ------------------------------------- | ------------------------------------- |
+| `README.md`                           | Project overview, quickstart          |
+| `docs/ARCHITECTURE.md`                | System architecture, stack details    |
+| `docs/DEVELOPER_ONBOARDING.md`        | 30-minute developer onboarding guide  |
+| `docs/ONBOARDING.md`                  | Day-one onboarding                    |
+| `docs/REPOSITORY_STRUCTURE.md`        | Codebase organization                 |
+| `docs/Copilot-Playbook.md`            | AI copilot usage guide                |
+| `docs/TESTPLAN.md`                    | Testing strategy and plans            |
 | `docs/security/SLSA-L3-COMPLIANCE.md` | SLSA Level 3 compliance documentation |
-| `RUNBOOKS/`                     | Operational runbooks                      |
-| `SECURITY/`                     | Security policies and guidelines          |
-| `SECURITY/docs/IC-MULTI-TENANCY.md` | IC-grade multi-tenant isolation        |
+| `RUNBOOKS/`                           | Operational runbooks                  |
+| `SECURITY/`                           | Security policies and guidelines      |
+| `SECURITY/docs/IC-MULTI-TENANCY.md`   | IC-grade multi-tenant isolation       |
 
 ### Key Scripts
 
@@ -708,11 +720,11 @@ The API **refuses to boot in production** if:
 
 ### Data & Fixtures
 
-| Location                                 | Purpose                           |
-| ---------------------------------------- | --------------------------------- |
-| `data/golden-path/demo-investigation.json` | Golden path test dataset        |
-| `scripts/devkit/seed-fixtures.js`        | Seed demo data                    |
-| `scripts/seed/`                          | Additional seed scripts           |
+| Location                                   | Purpose                  |
+| ------------------------------------------ | ------------------------ |
+| `data/golden-path/demo-investigation.json` | Golden path test dataset |
+| `scripts/devkit/seed-fixtures.js`          | Seed demo data           |
+| `scripts/seed/`                            | Additional seed scripts  |
 
 ---
 
@@ -725,6 +737,7 @@ The API **refuses to boot in production** if:
 📚 **Location**: [`docs/claude-code-prompts/`](docs/claude-code-prompts/)
 
 **11 Stand-Alone Prompts** covering:
+
 - 🏗️ **Infrastructure**: Monorepo, GraphQL gateway, Neo4j data model
 - 📥 **Data**: Ingest connectors, provenance ledger
 - 🔒 **Security**: OPA policies, threat modeling
@@ -732,6 +745,7 @@ The API **refuses to boot in production** if:
 - 💰 **Cost**: Usage metering, budget alerts
 
 **Quick Start**:
+
 ```bash
 # Use slash commands
 /bootstrap-monorepo    # Scaffold full dev environment
@@ -745,11 +759,13 @@ cat docs/claude-code-prompts/README.md
 ```
 
 **Key Resources**:
+
 - [**Prompt Catalog**](docs/claude-code-prompts/README.md) - Full library with selection guide
 - [**Quick Reference**](docs/claude-code-prompts/QUICK_REFERENCE.md) - One-liners and workflows
 - [**Usage Examples**](docs/claude-code-prompts/USAGE_EXAMPLES.md) - Real-world scenarios
 
 **When to Use**:
+
 - Starting a new service or feature
 - Performance optimization (SLO compliance)
 - Security hardening (threat model, ABAC)
@@ -757,6 +773,7 @@ cat docs/claude-code-prompts/README.md
 - Cost optimization (metering, budgets)
 
 Each prompt includes:
+
 - ✅ Complete context and task description
 - ✅ SLO targets and guardrails
 - ✅ Deliverables checklist
@@ -766,6 +783,7 @@ Each prompt includes:
 ### Best Practices for AI Assistance
 
 1. **Always run tests after changes**:
+
    ```bash
    make smoke          # Golden path
    pnpm test           # Unit tests
@@ -861,6 +879,7 @@ export const EntityCard: React.FC<EntityCardProps> = ({ entity }) => {
 ### AI Assistant Guardrails
 
 **DO**:
+
 - ✅ Follow existing patterns and conventions
 - ✅ Add tests for new functionality
 - ✅ Update documentation when changing behavior
@@ -869,6 +888,7 @@ export const EntityCard: React.FC<EntityCardProps> = ({ entity }) => {
 - ✅ Check security implications (auth, input validation)
 
 **DON'T**:
+
 - ❌ Commit secrets or credentials
 - ❌ Skip the smoke test (`make smoke`)
 - ❌ Introduce breaking changes without discussion
@@ -971,6 +991,7 @@ make down && make up
 ### Updating This Document
 
 This document should be updated when:
+
 - Major architectural changes occur
 - New conventions are established
 - Development workflows change

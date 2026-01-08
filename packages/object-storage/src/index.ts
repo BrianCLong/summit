@@ -3,16 +3,16 @@
  * Multi-cloud object storage with lifecycle management
  */
 
-import { CloudProvider } from '@intelgraph/cloud-platform';
-import pino from 'pino';
+import { CloudProvider } from "@intelgraph/cloud-platform";
+import pino from "pino";
 
-const logger = pino({ name: 'object-storage' });
+const logger = pino({ name: "object-storage" });
 
 export enum StorageTier {
-  HOT = 'hot',
-  COOL = 'cool',
-  COLD = 'cold',
-  ARCHIVE = 'archive'
+  HOT = "hot",
+  COOL = "cool",
+  COLD = "cold",
+  ARCHIVE = "archive",
 }
 
 export interface ObjectMetadata {
@@ -48,25 +48,25 @@ export class ObjectStorageManager {
   }
 
   async putObject(key: string, data: Buffer, metadata?: Record<string, string>): Promise<void> {
-    logger.info({ provider: this.provider, bucket: this.bucket, key }, 'Putting object');
+    logger.info({ provider: this.provider, bucket: this.bucket, key }, "Putting object");
   }
 
   async getObject(key: string): Promise<Buffer> {
-    logger.info({ provider: this.provider, bucket: this.bucket, key }, 'Getting object');
-    return Buffer.from('');
+    logger.info({ provider: this.provider, bucket: this.bucket, key }, "Getting object");
+    return Buffer.from("");
   }
 
   async listObjects(prefix?: string): Promise<ObjectMetadata[]> {
-    logger.info({ provider: this.provider, bucket: this.bucket, prefix }, 'Listing objects');
+    logger.info({ provider: this.provider, bucket: this.bucket, prefix }, "Listing objects");
     return [];
   }
 
   async deleteObject(key: string): Promise<void> {
-    logger.info({ provider: this.provider, bucket: this.bucket, key }, 'Deleting object');
+    logger.info({ provider: this.provider, bucket: this.bucket, key }, "Deleting object");
   }
 
   async setLifecyclePolicy(rules: LifecycleRule[]): Promise<void> {
-    logger.info({ bucket: this.bucket, ruleCount: rules.length }, 'Setting lifecycle policy');
+    logger.info({ bucket: this.bucket, ruleCount: rules.length }, "Setting lifecycle policy");
   }
 
   async getLifecyclePolicy(): Promise<LifecycleRule[]> {
@@ -74,9 +74,9 @@ export class ObjectStorageManager {
   }
 
   async moveToStorageTier(key: string, tier: StorageTier): Promise<void> {
-    logger.info({ key, tier }, 'Moving object to storage tier');
+    logger.info({ key, tier }, "Moving object to storage tier");
   }
 }
 
-export * from './partitioning.js';
-export * from './compression.js';
+export * from "./partitioning.js";
+export * from "./compression.js";

@@ -1,7 +1,7 @@
 meta:
   id: plan.distributed-tracing@v1
-  owner: 'platform-engineering'
-  purpose: 'Implement end-to-end distributed tracing for critical flows'
+  owner: "platform-engineering"
+  purpose: "Implement end-to-end distributed tracing for critical flows"
   tags:
     - observability
     - tracing
@@ -9,13 +9,13 @@ meta:
     - jaeger
     - debugging
   guardrails:
-    - 'Tracing overhead must be < 2%'
-    - 'Sensitive data must not be in traces'
-    - 'Sampling must balance cost and visibility'
-    - 'Context propagation must be consistent'
+    - "Tracing overhead must be < 2%"
+    - "Sensitive data must not be in traces"
+    - "Sampling must balance cost and visibility"
+    - "Context propagation must be consistent"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -283,15 +283,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'otel-tracing'
+  - name: "otel-tracing"
     inputs:
-      critical_flows: 'Investigation CRUD, Entity search, Copilot queries, Export jobs'
-      current_instrumentation: 'Basic request logging, no distributed tracing'
-      backend_preference: 'Jaeger (self-hosted) or Tempo (if Grafana stack)'
-      sampling_requirements: '10% baseline, 100% errors, cost-conscious'
-      integration_points: 'HTTP, GraphQL, Neo4j, PostgreSQL, Redis, Kafka'
+      critical_flows: "Investigation CRUD, Entity search, Copilot queries, Export jobs"
+      current_instrumentation: "Basic request logging, no distributed tracing"
+      backend_preference: "Jaeger (self-hosted) or Tempo (if Grafana stack)"
+      sampling_requirements: "10% baseline, 100% errors, cost-conscious"
+      integration_points: "HTTP, GraphQL, Neo4j, PostgreSQL, Redis, Kafka"
     expected_contains:
-      - 'Tracing Architecture'
-      - 'Critical Flow'
-      - 'Context Propagation'
-      - 'Sample Trace Views'
+      - "Tracing Architecture"
+      - "Critical Flow"
+      - "Context Propagation"
+      - "Sample Trace Views"

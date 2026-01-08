@@ -1,5 +1,5 @@
-import { EventEmitter } from 'events';
-import type { Operation } from './crdt';
+import { EventEmitter } from "events";
+import type { Operation } from "./crdt";
 
 export interface Identity {
   userId: string;
@@ -16,8 +16,8 @@ export class CollabClient extends EventEmitter {
     this.id = identity;
     this.ws = new WebSocket(url);
     this.ws.onopen = () => {
-      this.send({ type: 'presence.join' });
-      this.hb = setInterval(() => this.send({ type: 'heartbeat' }), 30000);
+      this.send({ type: "presence.join" });
+      this.hb = setInterval(() => this.send({ type: "heartbeat" }), 30000);
     };
     this.ws.onmessage = (ev) => {
       const msg = JSON.parse(ev.data.toString());
@@ -32,25 +32,21 @@ export class CollabClient extends EventEmitter {
   }
 
   updateSelection(entityId: string, selection: unknown): void {
-    this.send({ type: 'selection.update', entityId, selection });
+    this.send({ type: "selection.update", entityId, selection });
   }
 
-  addComment(
-    entityId: string,
-    text: string,
-    commentId = crypto.randomUUID(),
-  ): void {
-    this.send({ type: 'comment.add', entityId, commentId, text });
+  addComment(entityId: string, text: string, commentId = crypto.randomUUID()): void {
+    this.send({ type: "comment.add", entityId, commentId, text });
   }
 
   editComment(entityId: string, commentId: string, op: Operation): void {
-    this.send({ type: 'comment.edit', entityId, commentId, op });
+    this.send({ type: "comment.edit", entityId, commentId, op });
   }
 
   typing(entityId: string): void {
-    this.send({ type: 'typing', entityId });
+    this.send({ type: "typing", entityId });
   }
 }
 
-export { TextCRDT } from './crdt';
-export { presenceReducer } from './reducers';
+export { TextCRDT } from "./crdt";
+export { presenceReducer } from "./reducers";

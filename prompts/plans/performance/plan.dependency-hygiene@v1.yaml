@@ -1,7 +1,7 @@
 meta:
   id: plan.dependency-hygiene@v1
-  owner: 'platform-engineering'
-  purpose: 'Audit and maintain dependencies to prevent bloat and latency regressions'
+  owner: "platform-engineering"
+  purpose: "Audit and maintain dependencies to prevent bloat and latency regressions"
   tags:
     - dependencies
     - security
@@ -9,13 +9,13 @@ meta:
     - maintenance
     - upgrades
   guardrails:
-    - 'Critical security updates must be applied within SLA'
-    - 'Breaking changes must be tested before merge'
-    - 'Transitive dependency changes must be reviewed'
-    - 'License changes must be approved'
+    - "Critical security updates must be applied within SLA"
+    - "Breaking changes must be tested before merge"
+    - "Transitive dependency changes must be reviewed"
+    - "License changes must be approved"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -197,15 +197,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'pnpm-dependency-audit'
+  - name: "pnpm-dependency-audit"
     inputs:
-      package_managers: 'pnpm 9.x for Node.js, pip for Python ML'
-      current_dependency_count: 'Direct: 150, Transitive: 1200'
-      known_issues: 'lodash outdated, moment still in use, some duplicate versions'
-      update_cadence: 'Dependabot daily, manual review weekly'
-      security_sla: 'Critical: 24h, High: 72h, Medium: 1 week'
+      package_managers: "pnpm 9.x for Node.js, pip for Python ML"
+      current_dependency_count: "Direct: 150, Transitive: 1200"
+      known_issues: "lodash outdated, moment still in use, some duplicate versions"
+      update_cadence: "Dependabot daily, manual review weekly"
+      security_sla: "Critical: 24h, High: 72h, Medium: 1 week"
     expected_contains:
-      - 'Dependency Audit'
-      - 'Upgrade Plan'
-      - 'Lockfile Hygiene'
-      - 'Size Budget'
+      - "Dependency Audit"
+      - "Upgrade Plan"
+      - "Lockfile Hygiene"
+      - "Size Budget"

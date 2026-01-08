@@ -92,21 +92,13 @@
       "slug": "fusion-analyst",
       "name": "Fusion Analyst",
       "mission": "Correlate multi-domain signals into decision-ready briefs.",
-      "primaryNeeds": [
-        "Graph exploration",
-        "Policy traceability",
-        "Golden path walkthroughs"
-      ]
+      "primaryNeeds": ["Graph exploration", "Policy traceability", "Golden path walkthroughs"]
     },
     {
       "slug": "reliability-engineer",
       "name": "Reliability Engineer",
       "mission": "Guarantee smoke test flake stays below one percent.",
-      "primaryNeeds": [
-        "60s smoke dashboard",
-        "Worker saturation alerts",
-        "Parity diff history"
-      ]
+      "primaryNeeds": ["60s smoke dashboard", "Worker saturation alerts", "Parity diff history"]
     }
   ],
   "cases": [

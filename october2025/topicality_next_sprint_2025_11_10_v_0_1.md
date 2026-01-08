@@ -162,17 +162,17 @@ owners:
 
 kpis:
   - name: sso_adoption
-    target: '>=0.80'
+    target: ">=0.80"
   - name: scim_latency_p95_s
-    target: '<=60'
+    target: "<=60"
   - name: rto_minutes
-    target: '<=15'
+    target: "<=15"
   - name: rpo_minutes
-    target: '<=5'
+    target: "<=5"
   - name: cost_per_req_delta
-    target: '<=-0.15'
+    target: "<=-0.15"
   - name: cache_hit_rate
-    target: '>=0.85'
+    target: ">=0.85"
 
 budget:
   cost_per_req_max_usd: 0.01
@@ -223,11 +223,7 @@ Freeze windows:
 
 ```yaml
 freeze_windows:
-  - {
-      start: '2025-11-23T00:00:00Z',
-      end: '2025-11-24T23:59:00Z',
-      reason: 'pre-release freeze',
-    }
+  - { start: "2025-11-23T00:00:00Z", end: "2025-11-24T23:59:00Z", reason: "pre-release freeze" }
 ```
 
 ---

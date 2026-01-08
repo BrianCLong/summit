@@ -4,16 +4,16 @@
  * Validates manifests, transform chains, and generates comprehensive verification reports
  */
 
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
-import { createHash } from 'node:crypto';
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
+import { createHash } from "node:crypto";
 
 import {
   type ManifestSignature,
   type ProvenanceManifest,
   verifyManifestSignature,
   verifyManifest,
-} from '../index.js';
+} from "../index.js";
 
 interface VerificationReport {
   valid: boolean;
@@ -34,8 +34,8 @@ interface VerificationReport {
 }
 
 interface VerificationIssue {
-  severity: 'error' | 'warning' | 'info';
-  category: 'manifest' | 'signature' | 'chain' | 'checksum' | 'artifact';
+  severity: "error" | "warning" | "info";
+  category: "manifest" | "signature" | "chain" | "checksum" | "artifact";
   message: string;
   stepId?: string;
 }
@@ -51,24 +51,24 @@ interface StepVerificationResult {
 }
 
 function readManifest(bundleDir: string): ProvenanceManifest {
-  const manifestPath = join(bundleDir, 'manifest.json');
+  const manifestPath = join(bundleDir, "manifest.json");
   if (!existsSync(manifestPath)) {
     throw new Error(`manifest.json not found in ${bundleDir}`);
   }
-  return JSON.parse(readFileSync(manifestPath, 'utf8')) as ProvenanceManifest;
+  return JSON.parse(readFileSync(manifestPath, "utf8")) as ProvenanceManifest;
 }
 
 function readSignature(bundleDir: string): ManifestSignature | null {
-  const signaturePath = join(bundleDir, 'manifest.sig');
+  const signaturePath = join(bundleDir, "manifest.sig");
   if (!existsSync(signaturePath)) {
     return null;
   }
-  return JSON.parse(readFileSync(signaturePath, 'utf8')) as ManifestSignature;
+  return JSON.parse(readFileSync(signaturePath, "utf8")) as ManifestSignature;
 }
 
 function loadArtifacts(bundleDir: string): Record<string, Buffer> {
   const artifacts: Record<string, Buffer> = {};
-  const artifactsDir = join(bundleDir, 'artifacts');
+  const artifactsDir = join(bundleDir, "artifacts");
 
   if (!existsSync(artifactsDir)) {
     return artifacts;
@@ -87,15 +87,12 @@ function loadArtifacts(bundleDir: string): Record<string, Buffer> {
 }
 
 function computeHash(data: Buffer | string): string {
-  const hash = createHash('sha256');
+  const hash = createHash("sha256");
   hash.update(data);
-  return hash.digest('hex');
+  return hash.digest("hex");
 }
 
-function verifyDetailed(
-  bundleDir: string,
-  publicKeyFile?: string,
-): VerificationReport {
+function verifyDetailed(bundleDir: string, publicKeyFile?: string): VerificationReport {
   const issues: VerificationIssue[] = [];
   const stepResults: StepVerificationResult[] = [];
 
@@ -117,10 +114,9 @@ function verifyDetailed(
       checksumValid: false,
       issues: [
         {
-          severity: 'error',
-          category: 'manifest',
-          message:
-            error instanceof Error ? error.message : 'Failed to read manifest',
+          severity: "error",
+          category: "manifest",
+          message: error instanceof Error ? error.message : "Failed to read manifest",
         },
       ],
       stepResults: [],
@@ -137,9 +133,9 @@ function verifyDetailed(
   signature = readSignature(bundleDir);
   if (!signature) {
     issues.push({
-      severity: 'warning',
-      category: 'signature',
-      message: 'No signature file found (manifest.sig)',
+      severity: "warning",
+      category: "signature",
+      message: "No signature file found (manifest.sig)",
     });
   }
 
@@ -149,9 +145,9 @@ function verifyDetailed(
       publicKey = readFileSync(publicKeyFile);
     } catch (error) {
       issues.push({
-        severity: 'error',
-        category: 'signature',
-        message: `Failed to read public key: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        severity: "error",
+        category: "signature",
+        message: `Failed to read public key: ${error instanceof Error ? error.message : "Unknown error"}`,
       });
     }
   }
@@ -163,23 +159,23 @@ function verifyDetailed(
       signatureValid = verifyManifestSignature(manifest, signature, publicKey);
       if (!signatureValid) {
         issues.push({
-          severity: 'error',
-          category: 'signature',
-          message: 'Signature verification failed – manifest may be tampered',
+          severity: "error",
+          category: "signature",
+          message: "Signature verification failed – manifest may be tampered",
         });
       }
     } catch (error) {
       issues.push({
-        severity: 'error',
-        category: 'signature',
-        message: `Signature verification error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        severity: "error",
+        category: "signature",
+        message: `Signature verification error: ${error instanceof Error ? error.message : "Unknown error"}`,
       });
     }
   } else if (signature && !publicKey) {
     issues.push({
-      severity: 'warning',
-      category: 'signature',
-      message: 'Signature present but no public key provided for verification',
+      severity: "warning",
+      category: "signature",
+      message: "Signature present but no public key provided for verification",
     });
   }
 
@@ -209,12 +205,10 @@ function verifyDetailed(
 
       if (!outputHashValid) {
         stepValid = false;
-        stepIssues.push(
-          `Output hash mismatch: expected ${step.outputHash}, got ${actualHash}`,
-        );
+        stepIssues.push(`Output hash mismatch: expected ${step.outputHash}, got ${actualHash}`);
         issues.push({
-          severity: 'error',
-          category: 'checksum',
+          severity: "error",
+          category: "checksum",
           message: `Step ${step.id}: Output hash mismatch`,
           stepId: step.id,
         });
@@ -223,10 +217,10 @@ function verifyDetailed(
       artifactPresent = false;
       stepValid = false;
       missingArtifacts++;
-      stepIssues.push('Artifact file not found in bundle');
+      stepIssues.push("Artifact file not found in bundle");
       issues.push({
-        severity: 'error',
-        category: 'artifact',
+        severity: "error",
+        category: "artifact",
         message: `Step ${step.id}: Artifact not found`,
         stepId: step.id,
       });
@@ -241,11 +235,11 @@ function verifyDetailed(
       if (!inputHashValid) {
         stepValid = false;
         stepIssues.push(
-          `Input hash does not match previous step output: expected ${previousStep.outputHash}, got ${step.inputHash}`,
+          `Input hash does not match previous step output: expected ${previousStep.outputHash}, got ${step.inputHash}`
         );
         issues.push({
-          severity: 'error',
-          category: 'chain',
+          severity: "error",
+          category: "chain",
           message: `Step ${step.id}: Chain break detected`,
           stepId: step.id,
         });
@@ -276,10 +270,7 @@ function verifyDetailed(
   const chainValid = verifyManifest(manifest, artifacts);
 
   const allValid =
-    manifest.steps.length > 0 &&
-    chainValid &&
-    failedSteps === 0 &&
-    (!signature || signatureValid);
+    manifest.steps.length > 0 && chainValid && failedSteps === 0 && (!signature || signatureValid);
 
   return {
     valid: allValid,
@@ -301,47 +292,44 @@ function verifyDetailed(
 }
 
 function printReport(report: VerificationReport): void {
-  console.log('\n========================================');
-  console.log('  Provenance Verification Report');
-  console.log('========================================\n');
+  console.log("\n========================================");
+  console.log("  Provenance Verification Report");
+  console.log("========================================\n");
 
   console.log(`Bundle: ${report.bundlePath}`);
   console.log(`Timestamp: ${report.timestamp}`);
-  console.log(`Overall Status: ${report.valid ? '✅ VALID' : '❌ INVALID'}\n`);
+  console.log(`Overall Status: ${report.valid ? "✅ VALID" : "❌ INVALID"}\n`);
 
-  console.log('Component Status:');
-  console.log(`  Manifest: ${report.manifestValid ? '✅' : '❌'}`);
-  console.log(`  Signature: ${report.signatureValid ? '✅' : '⚠️'}`);
-  console.log(`  Chain: ${report.chainValid ? '✅' : '❌'}`);
-  console.log(`  Checksums: ${report.checksumValid ? '✅' : '❌'}\n`);
+  console.log("Component Status:");
+  console.log(`  Manifest: ${report.manifestValid ? "✅" : "❌"}`);
+  console.log(`  Signature: ${report.signatureValid ? "✅" : "⚠️"}`);
+  console.log(`  Chain: ${report.chainValid ? "✅" : "❌"}`);
+  console.log(`  Checksums: ${report.checksumValid ? "✅" : "❌"}\n`);
 
-  console.log('Summary:');
+  console.log("Summary:");
   console.log(`  Total Steps: ${report.summary.totalSteps}`);
   console.log(`  Valid Steps: ${report.summary.validSteps}`);
   console.log(`  Failed Steps: ${report.summary.failedSteps}`);
   console.log(`  Missing Artifacts: ${report.summary.missingArtifacts}\n`);
 
   if (report.issues.length > 0) {
-    console.log('Issues:');
+    console.log("Issues:");
     for (const issue of report.issues) {
-      const icon =
-        issue.severity === 'error' ? '❌' : issue.severity === 'warning' ? '⚠️' : 'ℹ️';
-      console.log(
-        `  ${icon} [${issue.category.toUpperCase()}] ${issue.message}`,
-      );
+      const icon = issue.severity === "error" ? "❌" : issue.severity === "warning" ? "⚠️" : "ℹ️";
+      console.log(`  ${icon} [${issue.category.toUpperCase()}] ${issue.message}`);
     }
     console.log();
   }
 
   if (report.stepResults.length > 0) {
-    console.log('Step-by-Step Results:');
+    console.log("Step-by-Step Results:");
     for (const step of report.stepResults) {
-      const icon = step.valid ? '✅' : '❌';
+      const icon = step.valid ? "✅" : "❌";
       console.log(`\n  ${icon} Step: ${step.stepId}`);
       console.log(`     Type: ${step.stepType}`);
-      console.log(`     Artifact Present: ${step.artifactPresent ? '✅' : '❌'}`);
-      console.log(`     Input Hash Valid: ${step.inputHashValid ? '✅' : '❌'}`);
-      console.log(`     Output Hash Valid: ${step.outputHashValid ? '✅' : '❌'}`);
+      console.log(`     Artifact Present: ${step.artifactPresent ? "✅" : "❌"}`);
+      console.log(`     Input Hash Valid: ${step.inputHashValid ? "✅" : "❌"}`);
+      console.log(`     Output Hash Valid: ${step.outputHashValid ? "✅" : "❌"}`);
 
       if (step.issues.length > 0) {
         console.log(`     Issues:`);
@@ -352,16 +340,16 @@ function printReport(report: VerificationReport): void {
     }
   }
 
-  console.log('\n========================================\n');
+  console.log("\n========================================\n");
 }
 
 function usage(): never {
-  console.error('Usage: prov-verify-detailed <bundle-dir> [<public-key-file>]');
-  console.error('\nOptions:');
-  console.error('  bundle-dir        Path to provenance bundle directory');
-  console.error('  public-key-file   (Optional) Public key for signature verification');
-  console.error('\nExample:');
-  console.error('  prov-verify-detailed ./bundle ./public-key.pem');
+  console.error("Usage: prov-verify-detailed <bundle-dir> [<public-key-file>]");
+  console.error("\nOptions:");
+  console.error("  bundle-dir        Path to provenance bundle directory");
+  console.error("  public-key-file   (Optional) Public key for signature verification");
+  console.error("\nExample:");
+  console.error("  prov-verify-detailed ./bundle ./public-key.pem");
   process.exit(1);
 }
 
@@ -377,21 +365,20 @@ async function main(): Promise<void> {
     printReport(report);
 
     // Write JSON report
-    const jsonReportPath = join(bundleDir, 'verification-report.json');
+    const jsonReportPath = join(bundleDir, "verification-report.json");
     try {
-      const { writeFile } = await import('node:fs/promises');
+      const { writeFile } = await import("node:fs/promises");
       await writeFile(jsonReportPath, JSON.stringify(report, null, 2));
       console.log(`📄 Detailed report saved to: ${jsonReportPath}\n`);
     } catch (error) {
-      console.warn(`⚠️  Could not save report: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.warn(
+        `⚠️  Could not save report: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
     }
 
     process.exit(report.valid ? 0 : 2);
   } catch (error) {
-    console.error(
-      '❌ Verification failed:',
-      error instanceof Error ? error.message : error,
-    );
+    console.error("❌ Verification failed:", error instanceof Error ? error.message : error);
     process.exit(2);
   }
 }

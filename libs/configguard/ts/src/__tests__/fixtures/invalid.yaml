@@ -1,4 +1,4 @@
-serviceName: ''
+serviceName: ""
 mode: qa
 port: 80
 database:

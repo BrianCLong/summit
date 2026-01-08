@@ -29,40 +29,34 @@
     <script>
       $(function () {
         function render(c) {
-          $('#body').html(
-            '<div><span class=k>arm</span> ' +
+          $("#body").html(
+            "<div><span class=k>arm</span> " +
               c.arm +
-              ' · <span class=k>eval</span> ' +
+              " · <span class=k>eval</span> " +
               c.eval.toFixed(2) +
-              ' · <span class=k>$</span>' +
+              " · <span class=k>$</span>" +
               c.cost.toFixed(2) +
-              '</div><div class=k>speclive: ' +
-              (c.speclive ? 'ok' : 'violations') +
-              ' · exp: ' +
+              "</div><div class=k>speclive: " +
+              (c.speclive ? "ok" : "violations") +
+              " · exp: " +
               c.exp +
-              '</div><pre>' +
+              "</div><pre>" +
               c.rationale +
-              '</pre>',
+              "</pre>"
           );
         }
         var card = {
-          arm: 'impl@small',
+          arm: "impl@small",
           eval: 0.95,
           cost: 0.17,
           speclive: true,
-          exp: 'continue',
-          rationale: 'Cheapest capable; SPRT not conclusive yet',
+          exp: "continue",
+          rationale: "Cheapest capable; SPRT not conclusive yet",
         };
         render(card);
-        $('#b1').on('click', () =>
-          $.post('/api/decision/alt', { arm: 'impl@medium' }),
-        );
-        $('#b2').on('click', () =>
-          $.post('/api/decision/tests', { mode: 'high' }),
-        );
-        $('#b3').on('click', () =>
-          $.post('/api/release/rollback', { rc: 'current' }),
-        );
+        $("#b1").on("click", () => $.post("/api/decision/alt", { arm: "impl@medium" }));
+        $("#b2").on("click", () => $.post("/api/decision/tests", { mode: "high" }));
+        $("#b3").on("click", () => $.post("/api/release/rollback", { rc: "current" }));
       });
     </script>
   </body>

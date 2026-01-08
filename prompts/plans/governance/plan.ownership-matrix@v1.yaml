@@ -1,7 +1,7 @@
 meta:
   id: plan.ownership-matrix@v1
-  owner: 'engineering-leadership'
-  purpose: 'Clarify ownership and accountability across all subsystems'
+  owner: "engineering-leadership"
+  purpose: "Clarify ownership and accountability across all subsystems"
   tags:
     - governance
     - ownership
@@ -9,13 +9,13 @@ meta:
     - raci
     - organization
   guardrails:
-    - 'Every component must have an owner'
-    - 'Ownership must be accepted, not assigned'
-    - 'Escalation paths must be clear'
-    - 'Ownership must be reviewed periodically'
+    - "Every component must have an owner"
+    - "Ownership must be accepted, not assigned"
+    - "Escalation paths must be clear"
+    - "Ownership must be reviewed periodically"
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.2
   maxTokens: 4000
 
@@ -349,15 +349,15 @@ template: |
   **Confidence Level:** [0-100]%
 
 examples:
-  - name: 'ownership-matrix'
+  - name: "ownership-matrix"
     inputs:
-      subsystems: 'API, Graph Engine, Frontend, Infrastructure, ML, Data Pipeline'
-      team_structure: '4 teams: API, Data, Frontend, Platform; 20 engineers total'
-      current_gaps: 'Some orphaned code, unclear escalation, backup coverage'
-      escalation_requirements: '24/7 coverage, < 15 min response'
-      governance_model: 'Empowered teams with clear accountability'
+      subsystems: "API, Graph Engine, Frontend, Infrastructure, ML, Data Pipeline"
+      team_structure: "4 teams: API, Data, Frontend, Platform; 20 engineers total"
+      current_gaps: "Some orphaned code, unclear escalation, backup coverage"
+      escalation_requirements: "24/7 coverage, < 15 min response"
+      governance_model: "Empowered teams with clear accountability"
     expected_contains:
-      - 'Ownership Matrix'
-      - 'RACI'
-      - 'Escalation Paths'
-      - 'Governance Charter'
+      - "Ownership Matrix"
+      - "RACI"
+      - "Escalation Paths"
+      - "Governance Charter"

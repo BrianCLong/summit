@@ -1,4 +1,4 @@
-export type GateStatus = 'pass' | 'fail' | 'warning' | 'unknown';
+export type GateStatus = "pass" | "fail" | "warning" | "unknown";
 
 export interface CommandConsoleSnapshot {
   generatedAt: string;

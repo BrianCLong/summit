@@ -3,21 +3,25 @@
  * Distributed training and optimization infrastructure
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // Distributed training configuration
 export const DistributedConfigSchema = z.object({
-  strategy: z.enum(['data_parallel', 'model_parallel', 'pipeline_parallel', 'hybrid']),
+  strategy: z.enum(["data_parallel", "model_parallel", "pipeline_parallel", "hybrid"]),
   numWorkers: z.number().positive(),
-  backend: z.enum(['nccl', 'gloo', 'mpi']),
-  mixedPrecision: z.object({
-    enabled: z.boolean(),
-    dtype: z.enum(['float16', 'bfloat16']),
-    lossScale: z.enum(['dynamic', 'static']),
-  }).optional(),
-  gradientAccumulation: z.object({
-    steps: z.number().positive(),
-  }).optional(),
+  backend: z.enum(["nccl", "gloo", "mpi"]),
+  mixedPrecision: z
+    .object({
+      enabled: z.boolean(),
+      dtype: z.enum(["float16", "bfloat16"]),
+      lossScale: z.enum(["dynamic", "static"]),
+    })
+    .optional(),
+  gradientAccumulation: z
+    .object({
+      steps: z.number().positive(),
+    })
+    .optional(),
 });
 
 export type DistributedConfig = z.infer<typeof DistributedConfigSchema>;
@@ -31,7 +35,9 @@ export class DistributedTrainingOrchestrator {
   }
 
   async initializeWorkers(): Promise<void> {
-    console.log(`Initializing ${this.config.numWorkers} workers with ${this.config.strategy} strategy`);
+    console.log(
+      `Initializing ${this.config.numWorkers} workers with ${this.config.strategy} strategy`
+    );
   }
 
   async distributeModel(modelId: string): Promise<void> {
@@ -39,7 +45,7 @@ export class DistributedTrainingOrchestrator {
   }
 
   async synchronizeGradients(): Promise<void> {
-    console.log('Synchronizing gradients across workers');
+    console.log("Synchronizing gradients across workers");
   }
 }
 
@@ -64,7 +70,7 @@ export class GradientAccumulator {
 
 // Learning rate scheduler
 export interface LRSchedulerConfig {
-  type: 'constant' | 'step' | 'exponential' | 'cosine' | 'polynomial';
+  type: "constant" | "step" | "exponential" | "cosine" | "polynomial";
   baseLR: number;
   warmupSteps?: number;
   decaySteps?: number;
@@ -90,15 +96,15 @@ export class LearningRateScheduler {
     const step = this.currentStep - warmupSteps;
 
     switch (type) {
-      case 'constant':
+      case "constant":
         return baseLR;
-      case 'step':
+      case "step":
         return baseLR * Math.pow(0.1, Math.floor(step / decaySteps));
-      case 'exponential':
+      case "exponential":
         return baseLR * Math.exp(-step / decaySteps);
-      case 'cosine':
+      case "cosine":
         return minLR + (baseLR - minLR) * 0.5 * (1 + Math.cos((Math.PI * step) / decaySteps));
-      case 'polynomial':
+      case "polynomial":
         return Math.max(minLR, baseLR * Math.pow(1 - step / decaySteps, 2));
       default:
         return baseLR;

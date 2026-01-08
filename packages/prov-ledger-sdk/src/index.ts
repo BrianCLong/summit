@@ -3,7 +3,7 @@
  * TypeScript SDK for Provenance Ledger service
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 const anyRecord = () => z.record(z.string(), z.any());
 
@@ -39,7 +39,7 @@ export const ManifestSchema = z.object({
       id: z.string(),
       hash: z.string(),
       transforms: z.array(z.string()),
-    }),
+    })
   ),
   hash_chain: z.string(),
   signature: z.string().optional(),
@@ -64,14 +64,14 @@ export type HashVerification = z.infer<typeof HashVerificationSchema>;
 export class ProvLedgerClient {
   constructor(
     private baseUrl: string,
-    private headers: Record<string, string> = {},
+    private headers: Record<string, string> = {}
   ) {}
 
   async createClaim(claim: CreateClaim): Promise<Claim> {
     const response = await fetch(`${this.baseUrl}/claims`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...this.headers,
       },
       body: JSON.stringify(claim),
@@ -107,7 +107,7 @@ export class ProvLedgerClient {
       `${this.baseUrl}/provenance?claimId=${encodeURIComponent(claimId)}`,
       {
         headers: this.headers,
-      },
+      }
     );
 
     if (!response.ok) {
@@ -122,12 +122,12 @@ export class ProvLedgerClient {
     claimId: string,
     transforms: string[],
     sources: string[],
-    lineage: any,
+    lineage: any
   ): Promise<ProvenanceChain> {
     const response = await fetch(`${this.baseUrl}/provenance`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...this.headers,
       },
       body: JSON.stringify({
@@ -146,14 +146,11 @@ export class ProvLedgerClient {
     return ProvenanceChainSchema.parse(data);
   }
 
-  async verifyHash(
-    content: any,
-    expectedHash: string,
-  ): Promise<HashVerification> {
+  async verifyHash(content: any, expectedHash: string): Promise<HashVerification> {
     const response = await fetch(`${this.baseUrl}/hash/verify`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...this.headers,
       },
       body: JSON.stringify({
@@ -204,16 +201,16 @@ export class ProvLedgerClient {
 export function createProvLedgerClient(
   baseUrl: string,
   authorityId?: string,
-  reasonForAccess?: string,
+  reasonForAccess?: string
 ): ProvLedgerClient {
   const headers: Record<string, string> = {};
 
   if (authorityId) {
-    headers['X-Authority-ID'] = authorityId;
+    headers["X-Authority-ID"] = authorityId;
   }
 
   if (reasonForAccess) {
-    headers['X-Reason-For-Access'] = reasonForAccess;
+    headers["X-Reason-For-Access"] = reasonForAccess;
   }
 
   return new ProvLedgerClient(baseUrl, headers);
@@ -221,23 +218,17 @@ export function createProvLedgerClient(
 
 export function generateContentHash(content: any): string {
   // Simple hash generation - in production, use crypto module
-  return Buffer.from(
-    JSON.stringify(content, Object.keys(content).sort()),
-  ).toString('base64');
+  return Buffer.from(JSON.stringify(content, Object.keys(content).sort())).toString("base64");
 }
 
 // Higher-level convenience functions
 export class ProvenanceTracker {
   constructor(private client: ProvLedgerClient) {}
 
-  async trackDataIngestion(
-    dataSource: string,
-    dataset: any,
-    metadata?: any,
-  ): Promise<Claim> {
+  async trackDataIngestion(dataSource: string, dataset: any, metadata?: any): Promise<Claim> {
     return this.client.createClaim({
       content: {
-        type: 'data_ingestion',
+        type: "data_ingestion",
         source: dataSource,
         dataset,
       },
@@ -252,12 +243,12 @@ export class ProvenanceTracker {
     sourceClaimId: string,
     transformType: string,
     transformConfig: any,
-    resultData: any,
+    resultData: any
   ): Promise<{ claim: Claim; provenance: ProvenanceChain }> {
     // Create claim for transformed data
     const claim = await this.client.createClaim({
       content: {
-        type: 'data_transformation',
+        type: "data_transformation",
         transform_type: transformType,
         config: transformConfig,
         result: resultData,
@@ -275,9 +266,9 @@ export class ProvenanceTracker {
       [sourceClaimId],
       {
         transform_config: transformConfig,
-        input_hash: '', // Would calculate from source claim
+        input_hash: "", // Would calculate from source claim
         output_hash: claim.hash,
-      },
+      }
     );
 
     return { claim, provenance };
@@ -286,11 +277,11 @@ export class ProvenanceTracker {
   async trackExport(
     sourceClaimIds: string[],
     exportFormat: string,
-    exportData: any,
+    exportData: any
   ): Promise<{ claim: Claim; provenance: ProvenanceChain }> {
     const claim = await this.client.createClaim({
       content: {
-        type: 'data_export',
+        type: "data_export",
         format: exportFormat,
         data: exportData,
       },
@@ -302,12 +293,12 @@ export class ProvenanceTracker {
 
     const provenance = await this.client.createProvenanceChain(
       claim.id,
-      ['export'],
+      ["export"],
       sourceClaimIds,
       {
         export_format: exportFormat,
         source_claims: sourceClaimIds,
-      },
+      }
     );
 
     return { claim, provenance };
@@ -334,7 +325,7 @@ export class ProvenanceTracker {
     });
 
     const sourcesClaims = await Promise.all(
-      Array.from(sourceClaimIds).map((id) => this.client.getClaim(id)),
+      Array.from(sourceClaimIds).map((id) => this.client.getClaim(id))
     );
 
     return {

@@ -1,7 +1,7 @@
-import { DeckGL } from '@deck.gl/react';
-import { HexagonLayer } from '@deck.gl/aggregation-layers';
-import { MapView } from '@deck.gl/core';
-import { useMemo, useState } from 'react';
+import { DeckGL } from "@deck.gl/react";
+import { HexagonLayer } from "@deck.gl/aggregation-layers";
+import { MapView } from "@deck.gl/core";
+import { useMemo, useState } from "react";
 
 type Datum = {
   lat: number;
@@ -12,13 +12,7 @@ type Datum = {
   sources: string[];
 };
 
-export function SpatioTemporalHex({
-  data,
-  window
-}: {
-  data: Datum[];
-  window: [number, number];
-}) {
+export function SpatioTemporalHex({ data, window }: { data: Datum[]; window: [number, number] }) {
   const [range, setRange] = useState(window);
 
   const filtered = useMemo(
@@ -27,12 +21,12 @@ export function SpatioTemporalHex({
   );
 
   const layer = new HexagonLayer({
-    id: 'signal-hex',
+    id: "signal-hex",
     data: filtered,
     getPosition: (d: Datum) => [d.lon, d.lat],
     getElevationWeight: (d: Datum) => d.value,
     getColorWeight: (d: Datum) => 1 - d.uncertainty,
-    colorAggregation: 'MEAN',
+    colorAggregation: "MEAN",
     elevationScale: 12,
     extruded: true,
     radius: 500,
@@ -42,14 +36,8 @@ export function SpatioTemporalHex({
         const { value, uncertainty, sources } = info.object;
         console.log({ value, uncertainty, sources });
       }
-    }
+    },
   });
 
-  return (
-    <DeckGL
-      views={new MapView({ repeat: true })}
-      controller
-      layers={[layer]}
-    />
-  );
+  return <DeckGL views={new MapView({ repeat: true })} controller layers={[layer]} />;
 }

@@ -1,10 +1,10 @@
-import { ExtensionPoint } from '../ExtensionPoint.js';
+import { ExtensionPoint } from "../ExtensionPoint.js";
 
 /**
  * Authentication provider extension point
  */
 export interface AuthProviderExtension extends ExtensionPoint<AuthRequest, AuthResult> {
-  type: 'auth-provider';
+  type: "auth-provider";
   providerName: string;
   authenticate(credentials: any): Promise<AuthResult>;
   validate(token: string): Promise<boolean>;
@@ -13,7 +13,7 @@ export interface AuthProviderExtension extends ExtensionPoint<AuthRequest, AuthR
 
 export interface AuthRequest {
   credentials: any;
-  type: 'login' | 'validate' | 'refresh';
+  type: "login" | "validate" | "refresh";
 }
 
 export interface AuthResult {
@@ -31,7 +31,7 @@ export interface AuthResult {
 }
 
 export abstract class BaseAuthProviderExtension implements AuthProviderExtension {
-  readonly type = 'auth-provider' as const;
+  readonly type = "auth-provider" as const;
 
   constructor(
     public readonly id: string,
@@ -44,15 +44,15 @@ export abstract class BaseAuthProviderExtension implements AuthProviderExtension
 
   async execute(request: AuthRequest): Promise<AuthResult> {
     switch (request.type) {
-      case 'login':
+      case "login":
         return this.authenticate(request.credentials);
-      case 'validate':
+      case "validate":
         const valid = await this.validate(request.credentials.token);
         return { success: valid };
-      case 'refresh':
+      case "refresh":
         return this.refresh(request.credentials.refreshToken);
       default:
-        return { success: false, error: 'Unknown request type' };
+        return { success: false, error: "Unknown request type" };
     }
   }
 }

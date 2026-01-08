@@ -2,7 +2,7 @@
  * SHAP (SHapley Additive exPlanations) for Model Explainability
  */
 
-import type { ShapValue } from '../types/index.js';
+import type { ShapValue } from "../types/index.js";
 
 export class ShapExplainer {
   private model: any;
@@ -22,8 +22,11 @@ export class ShapExplainer {
 
     // Calculate baseline prediction (average over background)
     const baselinePredictions = this.model.predict(this.backgroundData);
-    const baseline = baselinePredictions.reduce((a: number, b: any) =>
-      a + (typeof b === 'number' ? b : b.prediction), 0) / baselinePredictions.length;
+    const baseline =
+      baselinePredictions.reduce(
+        (a: number, b: any) => a + (typeof b === "number" ? b : b.prediction),
+        0
+      ) / baselinePredictions.length;
 
     // Calculate SHAP value for each feature using kernel SHAP approximation
     for (let i = 0; i < nFeatures; i++) {
@@ -54,13 +57,14 @@ export class ShapExplainer {
       const withFeature = [...background];
       withFeature[featureIndex] = instance[featureIndex];
       const predWith = this.model.predict([withFeature])[0];
-      const predWithValue = typeof predWith === 'number' ? predWith : predWith.prediction;
+      const predWithValue = typeof predWith === "number" ? predWith : predWith.prediction;
 
       // Prediction without feature
       const predWithout = this.model.predict([background])[0];
-      const predWithoutValue = typeof predWithout === 'number' ? predWithout : predWithout.prediction;
+      const predWithoutValue =
+        typeof predWithout === "number" ? predWithout : predWithout.prediction;
 
-      shapValue += (predWithValue - predWithoutValue);
+      shapValue += predWithValue - predWithoutValue;
     }
 
     return shapValue / nSamples;
@@ -74,7 +78,7 @@ export class ShapExplainer {
 
     for (const instance of data) {
       const shapValues = this.explainInstance(instance);
-      allShapValues.push(shapValues.map(sv => Math.abs(sv.shapValue)));
+      allShapValues.push(shapValues.map((sv) => Math.abs(sv.shapValue)));
     }
 
     // Average absolute SHAP values
@@ -82,7 +86,8 @@ export class ShapExplainer {
     const importances: Array<{ feature: string; importance: number }> = [];
 
     for (let i = 0; i < nFeatures; i++) {
-      const avgImportance = allShapValues.reduce((sum, sv) => sum + sv[i], 0) / allShapValues.length;
+      const avgImportance =
+        allShapValues.reduce((sum, sv) => sum + sv[i], 0) / allShapValues.length;
 
       importances.push({
         feature: `feature_${i}`,

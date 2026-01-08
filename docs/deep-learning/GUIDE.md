@@ -43,13 +43,13 @@ pnpm --filter "@intelgraph/transformers" build
 #### 1. Create a Neural Network
 
 ```typescript
-import { createMLP } from '@intelgraph/neural-networks';
+import { createMLP } from "@intelgraph/neural-networks";
 
 const model = createMLP({
   inputSize: 784,
   hiddenLayers: [256, 128, 64],
   outputSize: 10,
-  activation: 'relu',
+  activation: "relu",
   dropout: 0.3,
 });
 
@@ -59,27 +59,27 @@ console.log(`Model has ${model.layers.length} layers`);
 #### 2. Train a Model
 
 ```typescript
-import type { TrainingConfig } from '@intelgraph/deep-learning-core';
+import type { TrainingConfig } from "@intelgraph/deep-learning-core";
 
 const trainingConfig: TrainingConfig = {
-  modelId: 'my-classifier',
+  modelId: "my-classifier",
   batchSize: 32,
   epochs: 50,
   learningRate: 0.001,
-  optimizer: 'adam',
-  lossFunction: 'categorical_crossentropy',
-  metrics: ['accuracy', 'f1_score'],
+  optimizer: "adam",
+  lossFunction: "categorical_crossentropy",
+  metrics: ["accuracy", "f1_score"],
   earlyStopping: {
-    monitor: 'val_loss',
+    monitor: "val_loss",
     patience: 5,
     minDelta: 0.001,
   },
 };
 
 // Submit training job
-const response = await fetch('http://localhost:3001/api/v1/training/start', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+const response = await fetch("http://localhost:3001/api/v1/training/start", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify(trainingConfig),
 });
 
@@ -90,7 +90,7 @@ console.log(`Training job started: ${jobId}`);
 #### 3. Use Transformer Models
 
 ```typescript
-import { createBERT, createGPT, createT5 } from '@intelgraph/transformers';
+import { createBERT, createGPT, createT5 } from "@intelgraph/transformers";
 
 // Create BERT model for classification
 const bert = createBERT({
@@ -128,7 +128,7 @@ const t5 = createT5({
 #### 4. Object Detection with CNNs
 
 ```typescript
-import { createYOLOv5, createFasterRCNN } from '@intelgraph/cnn-framework';
+import { createYOLOv5, createFasterRCNN } from "@intelgraph/cnn-framework";
 
 // YOLO for real-time detection
 const yolo = createYOLOv5([640, 640, 3], 80); // 80 COCO classes
@@ -140,16 +140,16 @@ const fasterRCNN = createFasterRCNN([800, 800, 3], 80);
 #### 5. Distributed Training
 
 ```typescript
-import { DistributedTrainingOrchestrator } from '@intelgraph/distributed-training';
+import { DistributedTrainingOrchestrator } from "@intelgraph/distributed-training";
 
 const orchestrator = new DistributedTrainingOrchestrator({
-  strategy: 'data_parallel',
+  strategy: "data_parallel",
   numWorkers: 4,
-  backend: 'nccl',
+  backend: "nccl",
   mixedPrecision: {
     enabled: true,
-    dtype: 'float16',
-    lossScale: 'dynamic',
+    dtype: "float16",
+    lossScale: "dynamic",
   },
   gradientAccumulation: {
     steps: 4,
@@ -157,76 +157,76 @@ const orchestrator = new DistributedTrainingOrchestrator({
 });
 
 await orchestrator.initializeWorkers();
-await orchestrator.distributeModel('my-model-id');
+await orchestrator.distributeModel("my-model-id");
 ```
 
 #### 6. Model Optimization
 
 ```typescript
-import { ModelQuantizer, ModelPruner, KnowledgeDistiller } from '@intelgraph/model-optimization';
+import { ModelQuantizer, ModelPruner, KnowledgeDistiller } from "@intelgraph/model-optimization";
 
 // Quantize model to INT8
 const quantizer = new ModelQuantizer({
-  bitWidth: 'int8',
-  method: 'static',
+  bitWidth: "int8",
+  method: "static",
   calibrationSamples: 1000,
 });
 
-const result = await quantizer.quantize('/models/my-model.ckpt', '/models/my-model-quantized.ckpt');
+const result = await quantizer.quantize("/models/my-model.ckpt", "/models/my-model-quantized.ckpt");
 console.log(`Model size reduced by ${result.compressionRatio.toFixed(2)}x`);
 
 // Prune model
 const pruner = new ModelPruner({
-  method: 'magnitude',
+  method: "magnitude",
   pruningRate: 0.5,
   fineTuneEpochs: 10,
 });
 
-await pruner.prune('/models/my-model.ckpt');
+await pruner.prune("/models/my-model.ckpt");
 ```
 
 #### 7. Model Interpretability
 
 ```typescript
-import { SaliencyMapGenerator, GradCAM, SHAPExplainer } from '@intelgraph/model-interpretability';
+import { SaliencyMapGenerator, GradCAM, SHAPExplainer } from "@intelgraph/model-interpretability";
 
 // Generate saliency maps
 const saliencyGen = new SaliencyMapGenerator();
 const saliencyMap = saliencyGen.generateMap(model, input, {
-  method: 'integrated_gradients',
+  method: "integrated_gradients",
   numSamples: 50,
 });
 
 // GradCAM for CNNs
 const gradcam = new GradCAM();
-const heatmap = gradcam.generateHeatmap(model, input, 'conv5_3');
+const heatmap = gradcam.generateHeatmap(model, input, "conv5_3");
 
 // SHAP values
 const shapExplainer = new SHAPExplainer({
   numSamples: 100,
-  method: 'deep',
+  method: "deep",
 });
 
 const explanations = shapExplainer.explain(model, input);
-console.log('Feature importance:', explanations);
+console.log("Feature importance:", explanations);
 ```
 
 #### 8. Deploy and Serve Models
 
 ```typescript
-import type { DeploymentConfig, InferenceRequest } from '@intelgraph/deep-learning-core';
+import type { DeploymentConfig, InferenceRequest } from "@intelgraph/deep-learning-core";
 
 // Deploy model
 const deployConfig: DeploymentConfig = {
-  modelId: 'my-classifier',
-  version: 'v1.0',
-  environment: 'production',
+  modelId: "my-classifier",
+  version: "v1.0",
+  environment: "production",
   replicas: 3,
   resources: {
-    cpuRequest: '2',
-    cpuLimit: '4',
-    memoryRequest: '4Gi',
-    memoryLimit: '8Gi',
+    cpuRequest: "2",
+    cpuLimit: "4",
+    memoryRequest: "4Gi",
+    memoryLimit: "8Gi",
     gpu: 1,
   },
   autoScaling: {
@@ -242,31 +242,31 @@ const deployConfig: DeploymentConfig = {
   },
 };
 
-await fetch('http://localhost:3002/api/v1/models/deploy', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+await fetch("http://localhost:3002/api/v1/models/deploy", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify(deployConfig),
 });
 
 // Run inference
 const inferenceRequest: InferenceRequest = {
-  modelId: 'my-classifier',
-  version: 'v1.0',
+  modelId: "my-classifier",
+  version: "v1.0",
   inputs: {
-    features: [0.1, 0.2, 0.3, /* ... */],
+    features: [0.1, 0.2, 0.3 /* ... */],
   },
   returnMetadata: true,
 };
 
-const response = await fetch('http://localhost:3002/api/v1/predict', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+const response = await fetch("http://localhost:3002/api/v1/predict", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify(inferenceRequest),
 });
 
 const result = await response.json();
-console.log('Predictions:', result.predictions);
-console.log('Inference time:', result.metadata.inferenceTime, 'ms');
+console.log("Predictions:", result.predictions);
+console.log("Inference time:", result.metadata.inferenceTime, "ms");
 ```
 
 ## Advanced Features
@@ -274,25 +274,25 @@ console.log('Inference time:', result.metadata.inferenceTime, 'ms');
 ### Neural Architecture Search (NAS)
 
 ```typescript
-import { NeuralArchitectureSearch } from '@intelgraph/neural-networks';
+import { NeuralArchitectureSearch } from "@intelgraph/neural-networks";
 
 const nas = new NeuralArchitectureSearch({
   searchSpace: {
     minLayers: 3,
     maxLayers: 10,
-    allowedLayerTypes: ['dense', 'conv2d', 'lstm'],
+    allowedLayerTypes: ["dense", "conv2d", "lstm"],
     hiddenUnitsRange: [64, 512],
-    activations: ['relu', 'tanh', 'selu'],
+    activations: ["relu", "tanh", "selu"],
   },
-  strategy: 'evolutionary',
+  strategy: "evolutionary",
   budget: {
     maxTrials: 100,
     maxDuration: 3600000, // 1 hour
     maxParametersPerModel: 10000000,
   },
   objective: {
-    metric: 'val_accuracy',
-    direction: 'maximize',
+    metric: "val_accuracy",
+    direction: "maximize",
   },
 });
 
@@ -308,13 +308,13 @@ console.log(`Best architecture found with score: ${score}`);
 ### Multi-Task Learning
 
 ```typescript
-import { MultiTaskLearner } from '@intelgraph/training-strategies';
+import { MultiTaskLearner } from "@intelgraph/training-strategies";
 
 const mtl = new MultiTaskLearner({
   tasks: [
-    { name: 'classification', outputDim: 10, lossWeight: 1.0 },
-    { name: 'regression', outputDim: 1, lossWeight: 0.5 },
-    { name: 'segmentation', outputDim: 21, lossWeight: 0.8 },
+    { name: "classification", outputDim: 10, lossWeight: 1.0 },
+    { name: "regression", outputDim: 1, lossWeight: 0.5 },
+    { name: "segmentation", outputDim: 21, lossWeight: 0.8 },
   ],
   sharedLayers: 5,
 });
@@ -325,10 +325,10 @@ const loss = mtl.computeLoss(predictions, targets);
 ### Curriculum Learning
 
 ```typescript
-import { CurriculumLearner } from '@intelgraph/training-strategies';
+import { CurriculumLearner } from "@intelgraph/training-strategies";
 
 const curriculum = new CurriculumLearner({
-  strategy: 'easy_to_hard',
+  strategy: "easy_to_hard",
   difficultyMetric: (sample) => sample.complexity,
   paceFunction: (epoch) => Math.min(1.0, epoch / 20),
 });
@@ -339,10 +339,10 @@ const sortedSamples = curriculum.sortSamples(trainingData, currentEpoch);
 ### Meta-Learning
 
 ```typescript
-import { MetaLearner } from '@intelgraph/training-strategies';
+import { MetaLearner } from "@intelgraph/training-strategies";
 
 const maml = new MetaLearner({
-  algorithm: 'maml',
+  algorithm: "maml",
   innerLearningRate: 0.01,
   outerLearningRate: 0.001,
   numInnerSteps: 5,
@@ -402,9 +402,9 @@ const metaModel = await maml.trainMetaModel(tasks);
 const config: TrainingConfig = {
   // ... other config
   distributed: {
-    strategy: 'data_parallel',
+    strategy: "data_parallel",
     numWorkers: 4,
-    backend: 'nccl',
+    backend: "nccl",
   },
 };
 ```
@@ -413,11 +413,11 @@ const config: TrainingConfig = {
 
 ```typescript
 // Use TensorRT for inference
-import { TensorRTOptimizer } from '@intelgraph/model-optimization';
+import { TensorRTOptimizer } from "@intelgraph/model-optimization";
 
 const trtOptimizer = new TensorRTOptimizer();
-const result = await trtOptimizer.optimize('/models/my-model.onnx', {
-  precision: 'fp16',
+const result = await trtOptimizer.optimize("/models/my-model.onnx", {
+  precision: "fp16",
   maxBatchSize: 32,
   workspace: 1 << 30, // 1GB
 });
@@ -460,6 +460,7 @@ See [ARCHITECTURES.md](./ARCHITECTURES.md) for detailed architecture documentati
 ## Support
 
 For issues and questions:
+
 - GitHub Issues: https://github.com/summit/issues
 - Documentation: https://docs.summit-platform.com
 - Community: https://community.summit-platform.com

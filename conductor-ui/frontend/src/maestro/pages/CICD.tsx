@@ -1,38 +1,26 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import CiSummary, { CiAnnotation } from '../components/CiSummary';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import { IconButton, MenuItem, Select, TextField } from '@mui/material';
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-} from 'recharts';
-import { api } from '../api';
+import React, { useEffect, useMemo, useState } from "react";
+import CiSummary, { CiAnnotation } from "../components/CiSummary";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import { IconButton, MenuItem, Select, TextField } from "@mui/material";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, Legend } from "recharts";
+import { api } from "../api";
 
 function setQuery(params: Record<string, string | number | undefined>) {
   const url = new URL(location.href);
   Object.entries(params).forEach(([k, v]) => {
-    if (v === undefined || v === '') url.searchParams.delete(k);
+    if (v === undefined || v === "") url.searchParams.delete(k);
     else url.searchParams.set(k, String(v));
   });
-  history.replaceState(
-    null,
-    '',
-    `${url.pathname}${url.search}${location.hash}`,
-  );
+  history.replaceState(null, "", `${url.pathname}${url.search}${location.hash}`);
 }
 
 export default function CICD() {
   const { getCIAnnotationsGlobal } = api();
   const url = new URL(location.href);
-  const [level, setLevel] = useState(url.searchParams.get('level') || 'all');
-  const [repo, setRepo] = useState(url.searchParams.get('repo') || '');
+  const [level, setLevel] = useState(url.searchParams.get("level") || "all");
+  const [repo, setRepo] = useState(url.searchParams.get("repo") || "");
   const [since, setSince] = useState<number>(
-    Number(url.searchParams.get('since') || 24 * 3600 * 1000),
+    Number(url.searchParams.get("since") || 24 * 3600 * 1000)
   );
   const [rows, setRows] = useState<CiAnnotation[]>([]);
   const [loading, setLoading] = useState(false);
@@ -42,7 +30,7 @@ export default function CICD() {
     setLoading(true);
     getCIAnnotationsGlobal({
       sinceMs: since,
-      level: level === 'all' ? undefined : level,
+      level: level === "all" ? undefined : level,
       repo: repo || undefined,
     })
       .then((r: any) => setRows(r.annotations || []))
@@ -63,21 +51,17 @@ export default function CICD() {
           (r.buckets || []).map((b: any) => ({
             time: new Date(b.ts).toLocaleTimeString(),
             ...b,
-          })),
+          }))
         );
       } catch {}
     })();
   }, [level, repo, since]);
 
   const link = (a: CiAnnotation) =>
-    a.url
-      ? a.url
-      : a.repo && a.sha
-        ? `https://github.com/${a.repo}/commit/${a.sha}`
-        : undefined;
+    a.url ? a.url : a.repo && a.sha ? `https://github.com/${a.repo}/commit/${a.sha}` : undefined;
 
   const pathCol = (a: CiAnnotation) =>
-    a.path ? `${a.path}${a.startLine ? `:${a.startLine}` : ''}` : '-';
+    a.path ? `${a.path}${a.startLine ? `:${a.startLine}` : ""}` : "-";
 
   return (
     <section className="space-y-3 p-4" aria-label="CICD annotations">
@@ -154,12 +138,9 @@ export default function CICD() {
               <tr key={a.id}>
                 <td>{new Date(a.ts).toLocaleString()}</td>
                 <td>{a.level}</td>
-                <td>{a.repo || '-'}</td>
+                <td>{a.repo || "-"}</td>
                 <td>
-                  <a
-                    href={`/maestro/runs/${a.runId}`}
-                    className="text-blue-600 underline"
-                  >
+                  <a href={`/maestro/runs/${a.runId}`} className="text-blue-600 underline">
                     {a.runId.slice(0, 8)}
                   </a>
                 </td>
@@ -183,7 +164,7 @@ export default function CICD() {
             {!rows.length && (
               <tr>
                 <td colSpan={6} className="p-4 text-center text-gray-500">
-                  {loading ? 'Loading…' : 'No annotations'}
+                  {loading ? "Loading…" : "No annotations"}
                 </td>
               </tr>
             )}

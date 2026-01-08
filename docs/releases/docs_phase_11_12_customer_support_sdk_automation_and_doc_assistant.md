@@ -78,17 +78,17 @@ pdoc -o docs/reference/sdk-py packages/sdk-py/intelgraph
 **`scripts/docs/gen-cli-ref.js`**
 
 ```js
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
-const cmds = ['intelgraph', 'intelgraph agents', 'intelgraph datasets'];
-const outDir = 'docs/reference/cli';
+const { execSync } = require("child_process");
+const fs = require("fs");
+const path = require("path");
+const cmds = ["intelgraph", "intelgraph agents", "intelgraph datasets"];
+const outDir = "docs/reference/cli";
 fs.mkdirSync(outDir, { recursive: true });
 for (const c of cmds) {
-  const slug = c.replace(/\s+/g, '-');
-  const help = execSync(`${c} --help`, { encoding: 'utf8' });
+  const slug = c.replace(/\s+/g, "-");
+  const help = execSync(`${c} --help`, { encoding: "utf8" });
   const md = `---\ntitle: ${c} CLI\nowner: platform\nversion: latest\n---\n\n\n\n\n\n\n\n\n\n\n\n\n\`
-${help.replace(/`/g, '\`')}
+${help.replace(/`/g, "\`")}
 \`
 `;
   fs.writeFileSync(path.join(outDir, `${slug}.md`), md);
@@ -204,17 +204,17 @@ owner: docs
 **`scripts/docs/optimize-images.js`**
 
 ```js
-const fs = require('fs');
-const path = require('path');
-const imagemin = require('imagemin');
-const mozjpeg = require('imagemin-mozjpeg');
-const pngquant = require('imagemin-pngquant');
+const fs = require("fs");
+const path = require("path");
+const imagemin = require("imagemin");
+const mozjpeg = require("imagemin-mozjpeg");
+const pngquant = require("imagemin-pngquant");
 (async () => {
-  const files = await imagemin(['docs/**/*.{jpg,jpeg,png}'], {
-    destination: 'docs',
+  const files = await imagemin(["docs/**/*.{jpg,jpeg,png}"], {
+    destination: "docs",
     plugins: [mozjpeg({ quality: 82 }), pngquant({ quality: [0.7, 0.85] })],
   });
-  console.log('Optimized', files.length, 'images');
+  console.log("Optimized", files.length, "images");
 })();
 ```
 
@@ -238,7 +238,7 @@ jobs:
 **`src/theme/SkipToContent.tsx`**
 
 ```tsx
-import React from 'react';
+import React from "react";
 export default function Skip() {
   return (
     <a className="skip-link" href="#main-content">
@@ -318,7 +318,7 @@ owner: docs
 ```yaml
 name: Docs Debt Triage
 on:
-  schedule: [{ cron: '0 14 * * 5' }]
+  schedule: [{ cron: "0 14 * * 5" }]
   workflow_dispatch:
 jobs:
   triage:

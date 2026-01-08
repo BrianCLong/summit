@@ -38,6 +38,7 @@ We provide security updates for the following versions:
 Instead, please report security vulnerabilities by emailing: security@intelgraph.io
 
 Include:
+
 - Description of the vulnerability
 - Steps to reproduce
 - Potential impact
@@ -52,7 +53,7 @@ We will acknowledge receipt within 24 hours and provide a detailed response with
 **Always validate and sanitize user input.**
 
 ```typescript
-import { sanitizeString, validateEmail, sanitizeFilePath } from '@/utils/input-sanitization';
+import { sanitizeString, validateEmail, sanitizeFilePath } from "@/utils/input-sanitization";
 
 // Sanitize string input
 const safeName = sanitizeString(userInput);
@@ -61,7 +62,7 @@ const safeName = sanitizeString(userInput);
 const email = validateEmail(userEmail);
 
 // Sanitize file paths
-const safePath = sanitizeFilePath(filePath, '/allowed/base/path');
+const safePath = sanitizeFilePath(filePath, "/allowed/base/path");
 ```
 
 ### 2. SQL Injection Prevention
@@ -69,18 +70,15 @@ const safePath = sanitizeFilePath(filePath, '/allowed/base/path');
 **Always use parameterized queries.**
 
 ✅ **Good:**
+
 ```typescript
-const result = await db.query(
-  'SELECT * FROM users WHERE email = $1',
-  [email]
-);
+const result = await db.query("SELECT * FROM users WHERE email = $1", [email]);
 ```
 
 ❌ **Bad:**
+
 ```typescript
-const result = await db.query(
-  `SELECT * FROM users WHERE email = '${email}'`
-);
+const result = await db.query(`SELECT * FROM users WHERE email = '${email}'`);
 ```
 
 ### 3. XSS Prevention
@@ -88,14 +86,16 @@ const result = await db.query(
 **Never inject unsanitized user input into HTML.**
 
 ✅ **Good:**
-```typescript
-import { sanitizeHTML } from '@/utils/input-sanitization';
 
-const safeHTML = sanitizeHTML(userInput, ['b', 'i', 'p']);
+```typescript
+import { sanitizeHTML } from "@/utils/input-sanitization";
+
+const safeHTML = sanitizeHTML(userInput, ["b", "i", "p"]);
 element.innerHTML = safeHTML;
 ```
 
 ❌ **Bad:**
+
 ```typescript
 element.innerHTML = userInput;
 ```
@@ -105,14 +105,16 @@ element.innerHTML = userInput;
 **Avoid executing shell commands with user input.**
 
 ✅ **Good:**
+
 ```typescript
-import { sanitizeShellInput } from '@/utils/input-sanitization';
+import { sanitizeShellInput } from "@/utils/input-sanitization";
 
 // Better: Use libraries instead of shell commands
 const result = await someLibrary.process(input);
 ```
 
 ❌ **Bad:**
+
 ```typescript
 exec(`process ${userInput}`);
 ```
@@ -122,13 +124,15 @@ exec(`process ${userInput}`);
 **Always validate file paths.**
 
 ✅ **Good:**
-```typescript
-import { sanitizeFilePath } from '@/utils/input-sanitization';
 
-const safePath = sanitizeFilePath(userPath, '/uploads');
+```typescript
+import { sanitizeFilePath } from "@/utils/input-sanitization";
+
+const safePath = sanitizeFilePath(userPath, "/uploads");
 ```
 
 ❌ **Bad:**
+
 ```typescript
 fs.readFile(`/uploads/${userPath}`);
 ```
@@ -138,8 +142,9 @@ fs.readFile(`/uploads/${userPath}`);
 **Never use Math.random() for security-sensitive operations.**
 
 ✅ **Good:**
+
 ```typescript
-import { randomString, randomUUID, generateToken } from '@/utils/crypto-secure-random';
+import { randomString, randomUUID, generateToken } from "@/utils/crypto-secure-random";
 
 const token = generateToken(32);
 const sessionId = randomUUID();
@@ -147,6 +152,7 @@ const apiKey = randomString(64);
 ```
 
 ❌ **Bad:**
+
 ```typescript
 const token = Math.random().toString(36);
 ```
@@ -156,19 +162,25 @@ const token = Math.random().toString(36);
 **Never use wildcard CORS origins in production.**
 
 ✅ **Good:**
+
 ```typescript
-app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(','),
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: process.env.ALLOWED_ORIGINS?.split(","),
+    credentials: true,
+  })
+);
 ```
 
 ❌ **Bad:**
+
 ```typescript
-app.use(cors({
-  origin: '*',
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: "*",
+    credentials: true,
+  })
+);
 ```
 
 ## Common Vulnerabilities and Prevention
@@ -295,6 +307,7 @@ pnpm audit --fix
 ### Security Advisories
 
 Subscribe to security advisories:
+
 - GitHub Security Advisories
 - npm Security Advisories
 

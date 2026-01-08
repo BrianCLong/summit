@@ -17,7 +17,7 @@ import type {
   PolicySimulationRequest,
   PolicySimulationResult,
   PolicyStatus,
-} from './types.js';
+} from "./types.js";
 
 /**
  * HTTP client interface for governance operations
@@ -63,7 +63,7 @@ export class GovernanceClient {
    * ```
    */
   async evaluate(request: GovernanceRequest): Promise<DataEnvelope<GovernanceResult>> {
-    return this.http.post<GovernanceResult>('/governance/evaluate', request);
+    return this.http.post<GovernanceResult>("/governance/evaluate", request);
   }
 
   /**
@@ -72,10 +72,8 @@ export class GovernanceClient {
    * @param requests - Array of governance requests
    * @returns Array of governance results
    */
-  async evaluateBatch(
-    requests: GovernanceRequest[]
-  ): Promise<DataEnvelope<GovernanceResult[]>> {
-    return this.http.post<GovernanceResult[]>('/governance/evaluate/batch', { requests });
+  async evaluateBatch(requests: GovernanceRequest[]): Promise<DataEnvelope<GovernanceResult[]>> {
+    return this.http.post<GovernanceResult[]>("/governance/evaluate/batch", { requests });
   }
 
   // ==========================================================================
@@ -90,7 +88,7 @@ export class GovernanceClient {
    */
   async listPolicies(status?: PolicyStatus): Promise<DataEnvelope<Policy[]>> {
     const params = status ? { status } : undefined;
-    return this.http.get<Policy[]>('/policies', params);
+    return this.http.get<Policy[]>("/policies", params);
   }
 
   /**
@@ -126,9 +124,9 @@ export class GovernanceClient {
    * ```
    */
   async createPolicy(
-    policy: Omit<Policy, 'id' | 'version' | 'status' | 'createdAt' | 'updatedAt'>
+    policy: Omit<Policy, "id" | "version" | "status" | "createdAt" | "updatedAt">
   ): Promise<DataEnvelope<Policy>> {
-    return this.http.post<Policy>('/policies', policy);
+    return this.http.post<Policy>("/policies", policy);
   }
 
   /**
@@ -140,7 +138,7 @@ export class GovernanceClient {
    */
   async updatePolicy(
     policyId: string,
-    updates: Partial<Omit<Policy, 'id' | 'createdAt' | 'updatedAt'>>
+    updates: Partial<Omit<Policy, "id" | "createdAt" | "updatedAt">>
   ): Promise<DataEnvelope<Policy>> {
     return this.http.put<Policy>(`/policies/${policyId}`, updates);
   }
@@ -203,10 +201,8 @@ export class GovernanceClient {
    * console.log('Matched rules:', simulation.data.matchedRules);
    * ```
    */
-  async simulate(
-    request: PolicySimulationRequest
-  ): Promise<DataEnvelope<PolicySimulationResult>> {
-    return this.http.post<PolicySimulationResult>('/policies/simulate', request);
+  async simulate(request: PolicySimulationRequest): Promise<DataEnvelope<PolicySimulationResult>> {
+    return this.http.post<PolicySimulationResult>("/policies/simulate", request);
   }
 
   /**
@@ -238,9 +234,7 @@ export class GovernanceClient {
   async getPolicyVersions(
     policyId: string
   ): Promise<DataEnvelope<Array<Policy & { version: number }>>> {
-    return this.http.get<Array<Policy & { version: number }>>(
-      `/policies/${policyId}/versions`
-    );
+    return this.http.get<Array<Policy & { version: number }>>(`/policies/${policyId}/versions`);
   }
 
   /**
@@ -250,10 +244,7 @@ export class GovernanceClient {
    * @param version - Version number
    * @returns Policy at specified version
    */
-  async getPolicyVersion(
-    policyId: string,
-    version: number
-  ): Promise<DataEnvelope<Policy>> {
+  async getPolicyVersion(policyId: string, version: number): Promise<DataEnvelope<Policy>> {
     return this.http.get<Policy>(`/policies/${policyId}/versions/${version}`);
   }
 
@@ -296,10 +287,7 @@ export class GovernanceClient {
    * @param comment - Optional approval comment
    * @returns Approved policy
    */
-  async approvePolicy(
-    approvalId: string,
-    comment?: string
-  ): Promise<DataEnvelope<Policy>> {
+  async approvePolicy(approvalId: string, comment?: string): Promise<DataEnvelope<Policy>> {
     return this.http.post<Policy>(`/policies/approvals/${approvalId}/approve`, {
       comment,
     });
@@ -316,10 +304,9 @@ export class GovernanceClient {
     approvalId: string,
     reason: string
   ): Promise<DataEnvelope<{ rejected: boolean }>> {
-    return this.http.post<{ rejected: boolean }>(
-      `/policies/approvals/${approvalId}/reject`,
-      { reason }
-    );
+    return this.http.post<{ rejected: boolean }>(`/policies/approvals/${approvalId}/reject`, {
+      reason,
+    });
   }
 
   /**
@@ -339,6 +326,6 @@ export class GovernanceClient {
       }>
     >
   > {
-    return this.http.get('/policies/approvals/pending');
+    return this.http.get("/policies/approvals/pending");
   }
 }

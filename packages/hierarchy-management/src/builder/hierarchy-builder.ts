@@ -3,13 +3,13 @@
  * Build and manage hierarchical structures for various domains
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 import type {
   Hierarchy,
   HierarchyNode,
   HierarchyType,
-  HierarchyStatus
-} from '@intelgraph/mdm-core';
+  HierarchyStatus,
+} from "@intelgraph/mdm-core";
 
 export class HierarchyBuilder {
   private hierarchies: Map<string, Hierarchy>;
@@ -41,11 +41,11 @@ export class HierarchyBuilder {
       level: 0,
       path: `/${rootNodeId}`,
       name: `${name} Root`,
-      masterRecordId: '',
+      masterRecordId: "",
       children: [],
       attributes: {},
       sortOrder: 0,
-      isLeaf: false
+      isLeaf: false,
     };
 
     this.nodes.set(rootNodeId, rootNode);
@@ -59,16 +59,16 @@ export class HierarchyBuilder {
       rootNodeId,
       depth: 1,
       totalNodes: 1,
-      status: 'active',
+      status: "active",
       metadata: {
         createdAt: new Date(),
-        createdBy: 'system',
+        createdBy: "system",
         updatedAt: new Date(),
-        updatedBy: 'system',
+        updatedBy: "system",
         version: 1,
         tags: [],
-        customAttributes: {}
-      }
+        customAttributes: {},
+      },
     };
 
     this.hierarchies.set(hierarchyId, hierarchy);
@@ -109,7 +109,7 @@ export class HierarchyBuilder {
       children: [],
       attributes,
       sortOrder: parent.children.length,
-      isLeaf: true
+      isLeaf: true,
     };
 
     this.nodes.set(nodeId, node);
@@ -132,10 +132,7 @@ export class HierarchyBuilder {
   /**
    * Move node to new parent
    */
-  async moveNode(
-    nodeId: string,
-    newParentId: string
-  ): Promise<HierarchyNode> {
+  async moveNode(nodeId: string, newParentId: string): Promise<HierarchyNode> {
     const node = this.nodes.get(nodeId);
     if (!node) {
       throw new Error(`Node ${nodeId} not found`);
@@ -147,14 +144,14 @@ export class HierarchyBuilder {
     }
 
     if (node.hierarchyId !== newParent.hierarchyId) {
-      throw new Error('Cannot move node across hierarchies');
+      throw new Error("Cannot move node across hierarchies");
     }
 
     // Remove from old parent
     if (node.parentId) {
       const oldParent = this.nodes.get(node.parentId);
       if (oldParent) {
-        oldParent.children = oldParent.children.filter(id => id !== nodeId);
+        oldParent.children = oldParent.children.filter((id) => id !== nodeId);
         if (oldParent.children.length === 0) {
           oldParent.isLeaf = true;
         }
@@ -212,7 +209,7 @@ export class HierarchyBuilder {
     if (!node) return [];
 
     return node.children
-      .map(id => this.nodes.get(id))
+      .map((id) => this.nodes.get(id))
       .filter((n): n is HierarchyNode => n !== undefined);
   }
 
@@ -227,7 +224,7 @@ export class HierarchyBuilder {
       const currentId = queue.shift()!;
       const children = await this.getChildren(currentId);
       descendants.push(...children);
-      queue.push(...children.map(c => c.id));
+      queue.push(...children.map((c) => c.id));
     }
 
     return descendants;
@@ -274,7 +271,7 @@ export class HierarchyBuilder {
     if (node.parentId) {
       const parent = this.nodes.get(node.parentId);
       if (parent) {
-        parent.children = parent.children.filter(id => id !== nodeId);
+        parent.children = parent.children.filter((id) => id !== nodeId);
         if (parent.children.length === 0) {
           parent.isLeaf = true;
         }
@@ -291,7 +288,7 @@ export class HierarchyBuilder {
     // Update hierarchy
     const hierarchy = this.hierarchies.get(node.hierarchyId);
     if (hierarchy) {
-      hierarchy.totalNodes -= (descendants.length + 1);
+      hierarchy.totalNodes -= descendants.length + 1;
       hierarchy.metadata.updatedAt = new Date();
     }
   }

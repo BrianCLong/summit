@@ -98,6 +98,7 @@ summit/
 **Location**: `services/postgres-pitr/`
 
 **Features**:
+
 - Continuous WAL archiving to S3
 - Automatic base backups (daily at 2 AM)
 - Delta compression for efficient storage
@@ -105,6 +106,7 @@ summit/
 - Recovery to any point in time
 
 **Configuration**:
+
 ```json
 {
   "WALG_S3_PREFIX": "s3://summit-wal-archives/postgres",
@@ -115,6 +117,7 @@ summit/
 ```
 
 **Usage**:
+
 ```bash
 # Initialize WAL archiving
 ./scripts/pitr-automated.sh init
@@ -127,11 +130,13 @@ summit/
 ```
 
 **Docker Deployment**:
+
 ```bash
 docker-compose -f docker-compose.pitr.yml up -d
 ```
 
 **Kubernetes Deployment**:
+
 ```bash
 kubectl apply -f k8s/postgres-pitr/base-backup-cronjob.yaml
 ```
@@ -141,6 +146,7 @@ kubectl apply -f k8s/postgres-pitr/base-backup-cronjob.yaml
 **Location**: `services/neo4j-backup/`
 
 **Features**:
+
 - Full backup every 7 days
 - Hourly incremental backups
 - Transaction log tracking
@@ -148,6 +154,7 @@ kubectl apply -f k8s/postgres-pitr/base-backup-cronjob.yaml
 - S3 storage integration
 
 **Usage**:
+
 ```bash
 # Create backup (auto-detects full vs incremental)
 ./incremental-backup.sh
@@ -160,6 +167,7 @@ kubectl apply -f k8s/postgres-pitr/base-backup-cronjob.yaml
 ```
 
 **Backup Strategy**:
+
 - Day 1: Full backup (30 GB, 30 min)
 - Day 1-7: Incremental backups (500 MB avg, 3 min)
 - Day 8: New full backup
@@ -171,6 +179,7 @@ kubectl apply -f k8s/postgres-pitr/base-backup-cronjob.yaml
 **Location**: `services/file-storage-backup/`
 
 **Features**:
+
 - Content-addressable storage (SHA-256)
 - Automatic deduplication
 - Optional compression
@@ -178,6 +187,7 @@ kubectl apply -f k8s/postgres-pitr/base-backup-cronjob.yaml
 - Manifest-based tracking
 
 **Usage**:
+
 ```bash
 # Backup with deduplication
 ENABLE_DEDUPLICATION=true ./file-backup.sh
@@ -190,6 +200,7 @@ ENCRYPTION_KEY="..." ./file-backup.sh
 ```
 
 **Deduplication**:
+
 - First backup: 10 GB, 1000 files
 - Second backup: 2 GB, 200 new files (80% dedup)
 - Storage saved: 8 GB per backup cycle
@@ -199,12 +210,14 @@ ENCRYPTION_KEY="..." ./file-backup.sh
 **Location**: `services/backup-encryption/`
 
 **Features**:
+
 - AES-256 encryption
 - Support for age (modern) and GPG (legacy)
 - Automated key rotation
 - Secure key storage
 
 **Usage**:
+
 ```bash
 # Generate encryption key
 ./encrypt-backup.sh /path/to/backup generate-key
@@ -220,6 +233,7 @@ ENCRYPTION_KEY="..." ./file-backup.sh
 ```
 
 **Key Management**:
+
 - Keys stored in `/etc/backup-keys/` (600 permissions)
 - Key rotation tracked with timestamps
 - Old keys retained for decryption
@@ -230,6 +244,7 @@ ENCRYPTION_KEY="..." ./file-backup.sh
 **Location**: `services/disaster-recovery/`
 
 **Features**:
+
 - REST API for recovery operations
 - Automated DR drill execution
 - RTO/RPO tracking
@@ -277,6 +292,7 @@ GET /api/v1/backups?type=full&limit=10
 ```
 
 **Deployment**:
+
 ```bash
 cd services/disaster-recovery
 pnpm install
@@ -285,6 +301,7 @@ pnpm start
 ```
 
 **Docker**:
+
 ```bash
 docker build -t summit/dr-orchestrator:latest .
 docker run -p 9000:9000 summit/dr-orchestrator:latest
@@ -295,6 +312,7 @@ docker run -p 9000:9000 summit/dr-orchestrator:latest
 **Location**: `ops/observability/grafana/dashboards/backup-rto-rpo-monitoring.json`
 
 **Metrics**:
+
 - `dr_rto_actual_seconds` - Actual recovery time
 - `dr_rpo_actual_seconds` - Actual data loss window
 - `postgres_base_backup_duration_seconds`
@@ -304,6 +322,7 @@ docker run -p 9000:9000 summit/dr-orchestrator:latest
 - `dr_recovery_attempts_total`
 
 **Dashboards**:
+
 - RTO/RPO gauges with targets
 - Backup duration trends
 - Backup size trends
@@ -313,14 +332,15 @@ docker run -p 9000:9000 summit/dr-orchestrator:latest
 - Last backup timestamps
 
 **Alerts**:
+
 ```yaml
 alerts:
   - name: RTOViolation
-    condition: dr_rto_actual_seconds > 14400  # 4 hours
+    condition: dr_rto_actual_seconds > 14400 # 4 hours
     severity: critical
 
   - name: RPOViolation
-    condition: dr_rpo_actual_seconds > 300  # 5 minutes
+    condition: dr_rpo_actual_seconds > 300 # 5 minutes
     severity: critical
 
   - name: BackupFailure
@@ -337,6 +357,7 @@ alerts:
 ### RTO (Recovery Time Objective): 4 hours
 
 **Breakdown**:
+
 - Assessment & Preparation: 30 min
 - Infrastructure Recovery: 90 min
 - Database Restoration: 60 min
@@ -348,6 +369,7 @@ alerts:
 ### RPO (Recovery Point Objective): 5 minutes
 
 **Implementation**:
+
 - PostgreSQL: WAL archiving every 60 seconds
 - Neo4j: Incremental backups every hour
 - Files: Continuous synchronization
@@ -360,6 +382,7 @@ alerts:
 **Trigger**: Total datacenter failure
 
 **Procedure**:
+
 1. Verify DR infrastructure availability
 2. Retrieve latest full backup from S3
 3. Execute automated recovery via API:
@@ -384,6 +407,7 @@ alerts:
 **Trigger**: Data corruption detected
 
 **Procedure**:
+
 1. Stop affected services
 2. Identify last known good timestamp
 3. Execute PITR:
@@ -406,6 +430,7 @@ alerts:
 **Trigger**: Graph inconsistency
 
 **Procedure**:
+
 1. Stop Neo4j service
 2. Retrieve last full backup
 3. Execute restore:
@@ -429,6 +454,7 @@ alerts:
 **Trigger**: S3 bucket deletion or corruption
 
 **Procedure**:
+
 1. Restore from versioned backups
 2. Verify file integrity via checksums
 3. Restore deduplication manifest
@@ -442,11 +468,13 @@ alerts:
 ### Automated Testing
 
 **Backup Validation CI/CD**:
+
 - Location: `.github/workflows/backup-restore-validation.yml`
 - Frequency: Daily at 3 AM UTC
 - Tests: Create backup, restore to test environment, validate data
 
 **DR Drill Scenarios**:
+
 1. **Weekly**: Backup validation drill (automated)
 2. **Monthly**: Total data loss recovery drill
 3. **Quarterly**: Multi-region failover drill
@@ -454,6 +482,7 @@ alerts:
 ### Manual Testing
 
 **Monthly Checklist**:
+
 - [ ] Verify all backups completed successfully
 - [ ] Test PITR to random timestamp
 - [ ] Validate Neo4j incremental restore
@@ -467,6 +496,7 @@ alerts:
 ### Daily Operations
 
 **Morning**:
+
 ```bash
 # Check backup status
 curl http://dr-service:9000/api/v1/recovery/status | jq
@@ -483,6 +513,7 @@ aws s3 ls s3://summit-wal-archives/postgres/ | tail -10
 **Sunday 2 AM**: Automated backup validation runs
 
 **Manual Verification**:
+
 ```bash
 # List recent backups
 curl http://dr-service:9000/api/v1/backups | jq
@@ -530,12 +561,14 @@ ls -lh /etc/backup-keys/
 ### Storage Costs
 
 **Monthly Estimates** (5 TB total):
+
 - S3 Standard: $115/month
 - S3 Standard-IA: $64/month (after 30 days)
 - S3 Glacier: $20/month (after 90 days)
 - **Total**: ~$200/month
 
 **Savings**:
+
 - Deduplication: 40% reduction
 - Compression: 30% reduction
 - Incremental backups: 60% reduction
@@ -557,6 +590,7 @@ ls -lh /etc/backup-keys/
 **Issue**: WAL archive lag exceeds 5 minutes
 
 **Solution**:
+
 ```bash
 # Check archive process
 docker exec postgres-pitr tail -f /var/log/postgresql/wal-archive.log
@@ -571,6 +605,7 @@ aws s3 ls s3://summit-wal-archives/postgres/ --region us-west-2
 **Issue**: Neo4j incremental backup fails
 
 **Solution**:
+
 ```bash
 # Check last successful backup
 cat backups/neo4j/last_full_backup.txt
@@ -587,6 +622,7 @@ rm backups/neo4j/last_full_backup.txt
 **Issue**: Recovery orchestration API not responding
 
 **Solution**:
+
 ```bash
 # Check service logs
 docker logs summit-dr-orchestrator

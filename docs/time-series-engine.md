@@ -20,27 +20,23 @@ InfluxDB expects an existing org/bucket and uses line protocol writes along with
 ## Usage
 
 ```ts
-import {
-  InfluxConnector,
-  TimescaleConnector,
-  TimeSeriesEngine,
-} from '../src/time-series/index.js';
+import { InfluxConnector, TimescaleConnector, TimeSeriesEngine } from "../src/time-series/index.js";
 
 const engine = new TimeSeriesEngine(
   {
     influx: new InfluxConnector({ url, org, bucket, token }),
     timescale: new TimescaleConnector({ connectionString }),
   },
-  'timescale',
+  "timescale"
 );
 
 const result = await engine.analyze({
-  query: { measurement: 'metrics', start, end },
-  aggregation: { every: '5m', function: 'avg' },
-  downsample: { strategy: 'lttb', targetPoints: 100 },
-  anomaly: { field: 'cpu', threshold: 3.5 },
-  forecast: { field: 'cpu', model: 'prophet', horizon: 24 },
-  dashboardName: 'SLOs',
+  query: { measurement: "metrics", start, end },
+  aggregation: { every: "5m", function: "avg" },
+  downsample: { strategy: "lttb", targetPoints: 100 },
+  anomaly: { field: "cpu", threshold: 3.5 },
+  forecast: { field: "cpu", model: "prophet", horizon: 24 },
+  dashboardName: "SLOs",
 });
 ```
 

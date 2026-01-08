@@ -15,24 +15,24 @@
  * @module scripts/performance-benchmark
  */
 
-const http = require('http');
-const https = require('https');
-const { performance } = require('perf_hooks');
-const os = require('os');
-const v8 = require('v8');
+const http = require("http");
+const https = require("https");
+const { performance } = require("perf_hooks");
+const os = require("os");
+const v8 = require("v8");
 
 // ============================================================================
 // Configuration
 // ============================================================================
 
 const DEFAULT_CONFIG = {
-  baseUrl: process.env.API_BASE_URL || 'http://localhost:4000',
-  concurrency: parseInt(process.env.BENCHMARK_CONCURRENCY || '10', 10),
-  duration: parseInt(process.env.BENCHMARK_DURATION || '30', 10), // seconds
-  warmupDuration: parseInt(process.env.BENCHMARK_WARMUP || '5', 10), // seconds
-  requestTimeout: parseInt(process.env.BENCHMARK_TIMEOUT || '30000', 10), // ms
-  authToken: process.env.BENCHMARK_AUTH_TOKEN || '',
-  outputFormat: process.env.BENCHMARK_OUTPUT || 'console', // console, json, csv
+  baseUrl: process.env.API_BASE_URL || "http://localhost:4000",
+  concurrency: parseInt(process.env.BENCHMARK_CONCURRENCY || "10", 10),
+  duration: parseInt(process.env.BENCHMARK_DURATION || "30", 10), // seconds
+  warmupDuration: parseInt(process.env.BENCHMARK_WARMUP || "5", 10), // seconds
+  requestTimeout: parseInt(process.env.BENCHMARK_TIMEOUT || "30000", 10), // ms
+  authToken: process.env.BENCHMARK_AUTH_TOKEN || "",
+  outputFormat: process.env.BENCHMARK_OUTPUT || "console", // console, json, csv
 };
 
 // ============================================================================
@@ -135,7 +135,7 @@ function calculateLatencyStats(latencies) {
  * @returns {string}
  */
 function formatBytes(bytes) {
-  const units = ['B', 'KB', 'MB', 'GB'];
+  const units = ["B", "KB", "MB", "GB"];
   let i = 0;
   while (bytes >= 1024 && i < units.length - 1) {
     bytes /= 1024;
@@ -181,7 +181,7 @@ function getSystemMetrics() {
 class BenchmarkHttpClient {
   constructor(config) {
     this.config = config;
-    this.protocol = config.baseUrl.startsWith('https') ? https : http;
+    this.protocol = config.baseUrl.startsWith("https") ? https : http;
     this.baseUrl = new URL(config.baseUrl);
   }
 
@@ -196,11 +196,11 @@ class BenchmarkHttpClient {
     return new Promise((resolve) => {
       const reqOptions = {
         hostname: this.baseUrl.hostname,
-        port: this.baseUrl.port || (this.baseUrl.protocol === 'https:' ? 443 : 80),
-        path: options.path || '/',
-        method: options.method || 'GET',
+        port: this.baseUrl.port || (this.baseUrl.protocol === "https:" ? 443 : 80),
+        path: options.path || "/",
+        method: options.method || "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           ...(this.config.authToken && {
             Authorization: `Bearer ${this.config.authToken}`,
           }),
@@ -210,11 +210,11 @@ class BenchmarkHttpClient {
       };
 
       const req = this.protocol.request(reqOptions, (res) => {
-        let data = '';
-        res.on('data', (chunk) => {
+        let data = "";
+        res.on("data", (chunk) => {
           data += chunk;
         });
-        res.on('end', () => {
+        res.on("end", () => {
           const latency = performance.now() - startTime;
           resolve({
             statusCode: res.statusCode,
@@ -224,7 +224,7 @@ class BenchmarkHttpClient {
         });
       });
 
-      req.on('error', (error) => {
+      req.on("error", (error) => {
         const latency = performance.now() - startTime;
         resolve({
           statusCode: 0,
@@ -233,13 +233,13 @@ class BenchmarkHttpClient {
         });
       });
 
-      req.on('timeout', () => {
+      req.on("timeout", () => {
         req.destroy();
         const latency = performance.now() - startTime;
         resolve({
           statusCode: 0,
           latency,
-          error: new Error('Request timeout'),
+          error: new Error("Request timeout"),
         });
       });
 
@@ -259,8 +259,8 @@ class BenchmarkHttpClient {
    */
   async graphql(query, variables = {}) {
     return this.request({
-      path: '/graphql',
-      method: 'POST',
+      path: "/graphql",
+      method: "POST",
       body: { query, variables },
     });
   }
@@ -290,11 +290,11 @@ class BenchmarkRunner {
     console.log(`   Warmup: ${this.config.warmupDuration}s`);
 
     // Warmup phase
-    console.log('\n🔥 Warmup phase...');
+    console.log("\n🔥 Warmup phase...");
     await this.runPhase(requestFn, this.config.warmupDuration * 1000);
 
     // Benchmark phase
-    console.log('⚡ Benchmark phase...');
+    console.log("⚡ Benchmark phase...");
     const result = await this.runPhase(requestFn, this.config.duration * 1000);
 
     const benchmarkResult = {
@@ -345,7 +345,7 @@ class BenchmarkRunner {
               success++;
             } else {
               failed++;
-              const code = result.error ? 'ERROR' : result.statusCode;
+              const code = result.error ? "ERROR" : result.statusCode;
               errorCodes[code] = (errorCodes[code] || 0) + 1;
             }
           }
@@ -370,13 +370,13 @@ class BenchmarkRunner {
    * @param {BenchmarkResult} result
    */
   printResult(result) {
-    console.log('\n📈 Results:');
+    console.log("\n📈 Results:");
     console.log(`   Total Requests:     ${result.totalRequests}`);
     console.log(`   Successful:         ${result.successfulRequests}`);
     console.log(`   Failed:             ${result.failedRequests}`);
     console.log(`   Duration:           ${(result.duration / 1000).toFixed(2)}s`);
     console.log(`   Requests/sec:       ${result.rps}`);
-    console.log('\n   Latency (ms):');
+    console.log("\n   Latency (ms):");
     console.log(`     Min:              ${result.latency.min.toFixed(2)}`);
     console.log(`     Max:              ${result.latency.max.toFixed(2)}`);
     console.log(`     Mean:             ${result.latency.mean.toFixed(2)}`);
@@ -386,7 +386,7 @@ class BenchmarkRunner {
     console.log(`     Std Dev:          ${result.latency.stdDev.toFixed(2)}`);
 
     if (Object.keys(result.errors).length > 0) {
-      console.log('\n   Errors:');
+      console.log("\n   Errors:");
       for (const [code, count] of Object.entries(result.errors)) {
         console.log(`     ${code}: ${count}`);
       }
@@ -398,9 +398,9 @@ class BenchmarkRunner {
    * @returns {Promise<Object>}
    */
   async runAll() {
-    console.log('🚀 Starting Performance Benchmark Suite');
-    console.log('═'.repeat(50));
-    console.log('\n📋 System Information:');
+    console.log("🚀 Starting Performance Benchmark Suite");
+    console.log("═".repeat(50));
+    console.log("\n📋 System Information:");
     const sysMetrics = getSystemMetrics();
     console.log(`   OS: ${sysMetrics.platform.os}`);
     console.log(`   CPUs: ${sysMetrics.platform.cpus}`);
@@ -408,24 +408,24 @@ class BenchmarkRunner {
     console.log(`   Free Memory: ${sysMetrics.platform.freeMemory}`);
 
     // Health check benchmark
-    await this.runBenchmark('Health Check', async () => ({
-      path: '/health',
-      method: 'GET',
+    await this.runBenchmark("Health Check", async () => ({
+      path: "/health",
+      method: "GET",
     }));
 
     // GraphQL query benchmark
-    await this.runBenchmark('GraphQL Simple Query', async () => ({
-      path: '/graphql',
-      method: 'POST',
+    await this.runBenchmark("GraphQL Simple Query", async () => ({
+      path: "/graphql",
+      method: "POST",
       body: {
         query: `query { __typename }`,
       },
     }));
 
     // GraphQL introspection benchmark
-    await this.runBenchmark('GraphQL Introspection', async () => ({
-      path: '/graphql',
-      method: 'POST',
+    await this.runBenchmark("GraphQL Introspection", async () => ({
+      path: "/graphql",
+      method: "POST",
       body: {
         query: `
           query IntrospectionQuery {
@@ -441,9 +441,9 @@ class BenchmarkRunner {
 
     // Entity listing benchmark (if authenticated)
     if (this.config.authToken) {
-      await this.runBenchmark('Entity Listing', async () => ({
-        path: '/graphql',
-        method: 'POST',
+      await this.runBenchmark("Entity Listing", async () => ({
+        path: "/graphql",
+        method: "POST",
         body: {
           query: `
             query {
@@ -461,9 +461,9 @@ class BenchmarkRunner {
         },
       }));
 
-      await this.runBenchmark('Investigation Listing', async () => ({
-        path: '/graphql',
-        method: 'POST',
+      await this.runBenchmark("Investigation Listing", async () => ({
+        path: "/graphql",
+        method: "POST",
         body: {
           query: `
             query {
@@ -499,7 +499,7 @@ class BenchmarkRunner {
    */
   generateSummary() {
     if (this.results.length === 0) {
-      return { message: 'No benchmarks run' };
+      return { message: "No benchmarks run" };
     }
 
     const totalRequests = this.results.reduce((sum, r) => sum + r.totalRequests, 0);
@@ -513,7 +513,7 @@ class BenchmarkRunner {
       totalBenchmarks: this.results.length,
       totalRequests,
       totalSuccess,
-      successRate: ((totalSuccess / totalRequests) * 100).toFixed(2) + '%',
+      successRate: ((totalSuccess / totalRequests) * 100).toFixed(2) + "%",
       averageRps: Math.round(avgRps * 100) / 100,
       averageLatency: Math.round(avgLatency * 100) / 100,
       maxP99Latency: Math.round(maxP99 * 100) / 100,
@@ -532,16 +532,16 @@ class BenchmarkRunner {
    * @param {Object} summary
    */
   printSummary(summary) {
-    console.log('\n' + '═'.repeat(50));
-    console.log('📊 BENCHMARK SUMMARY');
-    console.log('═'.repeat(50));
+    console.log("\n" + "═".repeat(50));
+    console.log("📊 BENCHMARK SUMMARY");
+    console.log("═".repeat(50));
     console.log(`\n   Total Benchmarks:   ${summary.totalBenchmarks}`);
     console.log(`   Total Requests:     ${summary.totalRequests}`);
     console.log(`   Success Rate:       ${summary.successRate}`);
     console.log(`   Average RPS:        ${summary.averageRps}`);
     console.log(`   Average Latency:    ${summary.averageLatency}ms`);
     console.log(`   Max P99 Latency:    ${summary.maxP99Latency}ms`);
-    console.log('\n   SLO Compliance:');
+    console.log("\n   SLO Compliance:");
     console.log(
       `     P95 < 100ms:      ${summary.sloCompliance.p95Under100ms}/${summary.totalBenchmarks}`
     );
@@ -551,7 +551,7 @@ class BenchmarkRunner {
     console.log(
       `     Success > 99%:    ${summary.sloCompliance.successRateOver99}/${summary.totalBenchmarks}`
     );
-    console.log('\n' + '═'.repeat(50));
+    console.log("\n" + "═".repeat(50));
   }
 
   /**
@@ -578,17 +578,17 @@ class BenchmarkRunner {
    */
   exportCsv() {
     const headers = [
-      'name',
-      'totalRequests',
-      'successfulRequests',
-      'failedRequests',
-      'rps',
-      'latencyMin',
-      'latencyMax',
-      'latencyMean',
-      'latencyP50',
-      'latencyP95',
-      'latencyP99',
+      "name",
+      "totalRequests",
+      "successfulRequests",
+      "failedRequests",
+      "rps",
+      "latencyMin",
+      "latencyMax",
+      "latencyMean",
+      "latencyP50",
+      "latencyP95",
+      "latencyP99",
     ];
 
     const rows = this.results.map((r) =>
@@ -604,10 +604,10 @@ class BenchmarkRunner {
         r.latency.p50,
         r.latency.p95,
         r.latency.p99,
-      ].join(',')
+      ].join(",")
     );
 
-    return [headers.join(','), ...rows].join('\n');
+    return [headers.join(","), ...rows].join("\n");
   }
 }
 
@@ -634,8 +634,8 @@ class StressTestRunner extends BenchmarkRunner {
    * @returns {Promise<Object>}
    */
   async runStressTest(requestFn) {
-    console.log('\n🔥 Starting Stress Test');
-    console.log('═'.repeat(50));
+    console.log("\n🔥 Starting Stress Test");
+    console.log("═".repeat(50));
     console.log(`   Start Concurrency:  ${this.stressConfig.startConcurrency}`);
     console.log(`   Max Concurrency:    ${this.stressConfig.maxConcurrency}`);
     console.log(`   Step Size:          ${this.stressConfig.step}`);
@@ -652,10 +652,7 @@ class StressTestRunner extends BenchmarkRunner {
       console.log(`\n📈 Testing with concurrency: ${concurrency}`);
 
       this.config.concurrency = concurrency;
-      const result = await this.runPhase(
-        requestFn,
-        this.stressConfig.stepDuration * 1000
-      );
+      const result = await this.runPhase(requestFn, this.stressConfig.stepDuration * 1000);
 
       const errorRate = result.failed / result.total;
       const stats = calculateLatencyStats(result.latencies);
@@ -691,9 +688,9 @@ class StressTestRunner extends BenchmarkRunner {
       validResults[0] || stressResults[0]
     );
 
-    console.log('\n' + '═'.repeat(50));
-    console.log('📊 STRESS TEST SUMMARY');
-    console.log('═'.repeat(50));
+    console.log("\n" + "═".repeat(50));
+    console.log("📊 STRESS TEST SUMMARY");
+    console.log("═".repeat(50));
     console.log(`\n   Optimal Concurrency: ${optimalResult.concurrency}`);
     console.log(`   Max Stable RPS:      ${optimalResult.rps}`);
     if (breakingPoint) {
@@ -715,70 +712,70 @@ class StressTestRunner extends BenchmarkRunner {
 
 async function main() {
   const args = process.argv.slice(2);
-  const command = args[0] || 'benchmark';
+  const command = args[0] || "benchmark";
 
   try {
     switch (command) {
-      case 'benchmark': {
+      case "benchmark": {
         const runner = new BenchmarkRunner();
         const results = await runner.runAll();
 
-        if (DEFAULT_CONFIG.outputFormat === 'json') {
+        if (DEFAULT_CONFIG.outputFormat === "json") {
           console.log(runner.exportJson());
-        } else if (DEFAULT_CONFIG.outputFormat === 'csv') {
+        } else if (DEFAULT_CONFIG.outputFormat === "csv") {
           console.log(runner.exportCsv());
         }
         break;
       }
 
-      case 'stress': {
+      case "stress": {
         const runner = new StressTestRunner({
-          startConcurrency: parseInt(args[1] || '1', 10),
-          maxConcurrency: parseInt(args[2] || '100', 10),
-          step: parseInt(args[3] || '10', 10),
+          startConcurrency: parseInt(args[1] || "1", 10),
+          maxConcurrency: parseInt(args[2] || "100", 10),
+          step: parseInt(args[3] || "10", 10),
         });
 
         await runner.runStressTest(async () => ({
-          path: '/health',
-          method: 'GET',
+          path: "/health",
+          method: "GET",
         }));
         break;
       }
 
-      case 'soak': {
-        console.log('🕐 Starting Soak Test (30 minutes)');
+      case "soak": {
+        console.log("🕐 Starting Soak Test (30 minutes)");
         const runner = new BenchmarkRunner({
           duration: 1800, // 30 minutes
           warmupDuration: 60,
         });
 
-        await runner.runBenchmark('Soak Test - Health', async () => ({
-          path: '/health',
-          method: 'GET',
+        await runner.runBenchmark("Soak Test - Health", async () => ({
+          path: "/health",
+          method: "GET",
         }));
         break;
       }
 
       default:
-        console.log('Usage: node performance-benchmark.js [benchmark|stress|soak]');
-        console.log('');
-        console.log('Commands:');
-        console.log('  benchmark  Run standard benchmark suite');
-        console.log('  stress     Run stress test with increasing load');
-        console.log('  soak       Run 30-minute soak test');
-        console.log('');
-        console.log('Environment variables:');
-        console.log('  API_BASE_URL          API base URL (default: http://localhost:4000)');
-        console.log('  BENCHMARK_CONCURRENCY Concurrent requests (default: 10)');
-        console.log('  BENCHMARK_DURATION    Test duration in seconds (default: 30)');
-        console.log('  BENCHMARK_AUTH_TOKEN  Bearer token for authenticated endpoints');
-        console.log('  BENCHMARK_OUTPUT      Output format: console, json, csv');
+        console.log("Usage: node performance-benchmark.js [benchmark|stress|soak]");
+        console.log("");
+        console.log("Commands:");
+        console.log("  benchmark  Run standard benchmark suite");
+        console.log("  stress     Run stress test with increasing load");
+        console.log("  soak       Run 30-minute soak test");
+        console.log("");
+        console.log("Environment variables:");
+        console.log("  API_BASE_URL          API base URL (default: http://localhost:4000)");
+        console.log("  BENCHMARK_CONCURRENCY Concurrent requests (default: 10)");
+        console.log("  BENCHMARK_DURATION    Test duration in seconds (default: 30)");
+        console.log("  BENCHMARK_AUTH_TOKEN  Bearer token for authenticated endpoints");
+        console.log("  BENCHMARK_OUTPUT      Output format: console, json, csv");
         process.exit(1);
     }
 
-    console.log('\n✅ Benchmark complete!');
+    console.log("\n✅ Benchmark complete!");
   } catch (error) {
-    console.error('\n❌ Benchmark failed:', error.message);
+    console.error("\n❌ Benchmark failed:", error.message);
     process.exit(1);
   }
 }

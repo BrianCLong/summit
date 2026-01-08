@@ -1,4 +1,4 @@
-import { spawnSync } from 'node:child_process';
+import { spawnSync } from "node:child_process";
 
 export interface RunnerOptions {
   readonly binPath?: string;
@@ -17,7 +17,7 @@ export interface RunOptions extends RunnerOptions {
 
 export interface VerifyOptions extends RunnerOptions {}
 
-export type GraphAlgorithm = 'shortest-path' | 'page-rank' | 'connected-components';
+export type GraphAlgorithm = "shortest-path" | "page-rank" | "connected-components";
 
 export interface GraphOptions extends RunnerOptions {
   readonly graphPath: string;
@@ -31,58 +31,54 @@ export interface GraphOptions extends RunnerOptions {
 }
 
 function resolveBin(options?: RunnerOptions): string {
-  return options?.binPath ?? process.env.PSC_RUNNER_BIN ?? 'psc-runner';
+  return options?.binPath ?? process.env.PSC_RUNNER_BIN ?? "psc-runner";
 }
 
 function invokeRunner(args: string[], options?: RunnerOptions): string {
   const bin = resolveBin(options);
   const result = spawnSync(bin, args, {
-    encoding: 'utf8',
+    encoding: "utf8",
     env: options?.env,
   });
   if (result.error) {
     throw new Error(`failed to run ${bin}: ${result.error.message}`);
   }
   if (result.status !== 0) {
-    const stderr = result.stderr?.trim() ?? 'unknown error';
+    const stderr = result.stderr?.trim() ?? "unknown error";
     throw new Error(`psc-runner exited with code ${result.status}: ${stderr}`);
   }
-  return (result.stdout ?? '').trim();
+  return (result.stdout ?? "").trim();
 }
 
 export function compilePolicy(
   policyPath: string,
   outputPath: string,
-  options: CompileOptions,
+  options: CompileOptions
 ): string {
   const args = [
-    'compile',
-    '--policy',
+    "compile",
+    "--policy",
     policyPath,
-    '--secret-hex',
+    "--secret-hex",
     options.secretHex,
-    '--out',
+    "--out",
     outputPath,
-    '--key-id',
-    options.keyId ?? 'demo-key',
+    "--key-id",
+    options.keyId ?? "demo-key",
   ];
   return invokeRunner(args, options);
 }
 
-export function runAnalytic(
-  policyPath: string,
-  inputPath: string,
-  options: RunOptions,
-): string {
+export function runAnalytic(policyPath: string, inputPath: string, options: RunOptions): string {
   const args = [
-    'run',
-    '--policy',
+    "run",
+    "--policy",
     policyPath,
-    '--input',
+    "--input",
     inputPath,
-    '--sealed-out',
+    "--sealed-out",
     options.sealedOut,
-    '--proof-out',
+    "--proof-out",
     options.proofOut,
   ];
   return invokeRunner(args, options);
@@ -92,47 +88,39 @@ export function verifyAttestation(
   policyPath: string,
   sealedPath: string,
   proofPath: string,
-  options?: VerifyOptions,
+  options?: VerifyOptions
 ): string {
-  const args = [
-    'verify',
-    '--policy',
-    policyPath,
-    '--sealed',
-    sealedPath,
-    '--proof',
-    proofPath,
-  ];
+  const args = ["verify", "--policy", policyPath, "--sealed", sealedPath, "--proof", proofPath];
   return invokeRunner(args, options);
 }
 
 export function analyzeGraph(options: GraphOptions): string {
   const args = [
-    'graph',
-    '--graph',
+    "graph",
+    "--graph",
     options.graphPath,
-    '--out',
+    "--out",
     options.outPath,
-    '--algorithm',
+    "--algorithm",
     options.algorithm,
   ];
 
-  if (options.algorithm === 'shortest-path') {
+  if (options.algorithm === "shortest-path") {
     if (!options.start || !options.end) {
-      throw new Error('start and end are required for shortest-path');
+      throw new Error("start and end are required for shortest-path");
     }
-    args.push('--start', options.start, '--end', options.end);
+    args.push("--start", options.start, "--end", options.end);
   }
 
-  if (options.algorithm === 'page-rank') {
-    if (typeof options.damping === 'number') {
-      args.push('--damping', options.damping.toString());
+  if (options.algorithm === "page-rank") {
+    if (typeof options.damping === "number") {
+      args.push("--damping", options.damping.toString());
     }
-    if (typeof options.tolerance === 'number') {
-      args.push('--tolerance', options.tolerance.toString());
+    if (typeof options.tolerance === "number") {
+      args.push("--tolerance", options.tolerance.toString());
     }
-    if (typeof options.iterations === 'number') {
-      args.push('--iterations', options.iterations.toString());
+    if (typeof options.iterations === "number") {
+      args.push("--iterations", options.iterations.toString());
     }
   }
 

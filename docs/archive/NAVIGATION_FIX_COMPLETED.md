@@ -45,7 +45,7 @@ import { Psychology } from '@mui/icons-material';
 
 ```typescript
 // Fixed Apollo Server plugin import
-import type { ApolloServerPlugin } from '@apollo/server';
+import type { ApolloServerPlugin } from "@apollo/server";
 ```
 
 ---

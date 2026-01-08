@@ -1,6 +1,7 @@
 # Arctic Territorial Dynamics Analysis
 
 ## Objective
+
 Analyze Arctic territorial claims, resource competition, and geopolitical dynamics as climate change opens new opportunities and challenges.
 
 ## Analysis Framework
@@ -38,6 +39,7 @@ Analyze Arctic territorial claims, resource competition, and geopolitical dynami
 ### Arctic Actors Assessment
 
 **Arctic States:**
+
 - Russia: Northern Sea Route development, military buildup
 - Canada: Sovereignty assertions, indigenous rights
 - United States: Alaska interests, coast guard capacity
@@ -47,12 +49,14 @@ Analyze Arctic territorial claims, resource competition, and geopolitical dynami
 - Sweden/Finland: Non-coastal but regional interests
 
 **Non-Arctic States:**
+
 - China: "Near-Arctic state" claims, Polar Silk Road
 - EU: Environmental concerns, economic interests
 - Japan, South Korea, Singapore: Shipping route interests
 - India: Research and observation status
 
 ### Cooperation Mechanisms
+
 - Arctic Council (primary forum)
 - UNCLOS (legal framework)
 - Bilateral agreements (e.g., Russia-Norway maritime boundary)
@@ -60,6 +64,7 @@ Analyze Arctic territorial claims, resource competition, and geopolitical dynami
 - Search and rescue agreements
 
 ### Competition and Conflict Risks
+
 - Overlapping claims escalation
 - Military presence increases
 - Resource grab scenarios
@@ -69,6 +74,7 @@ Analyze Arctic territorial claims, resource competition, and geopolitical dynami
 ### Scenario Planning
 
 **Cooperative Scenario:**
+
 - Strong Arctic Council governance
 - Negotiated boundary settlements
 - Environmental protection prioritized
@@ -76,6 +82,7 @@ Analyze Arctic territorial claims, resource competition, and geopolitical dynami
 - Indigenous rights respected
 
 **Competitive Scenario:**
+
 - Unilateral resource exploitation
 - Military posturing increases
 - Nationalistic claims escalate
@@ -83,6 +90,7 @@ Analyze Arctic territorial claims, resource competition, and geopolitical dynami
 - Minimal cooperation
 
 **Conflict Scenario:**
+
 - Armed incidents occur
 - Sanctions and escalation
 - Navigation freedom challenges
@@ -90,6 +98,7 @@ Analyze Arctic territorial claims, resource competition, and geopolitical dynami
 - Global great power competition spills over
 
 ### Environmental and Indigenous Considerations
+
 - Climate change acceleration
 - Ecosystem protection needs
 - Indigenous peoples' rights and livelihoods
@@ -97,6 +106,7 @@ Analyze Arctic territorial claims, resource competition, and geopolitical dynami
 - Traditional knowledge integration
 
 ### Monitoring Indicators
+
 - Territorial claim submissions and responses
 - Military deployment patterns
 - Icebreaker fleet expansion
@@ -106,6 +116,7 @@ Analyze Arctic territorial claims, resource competition, and geopolitical dynami
 - Arctic Council meeting outcomes
 
 ### Ethical Framework
+
 - Respect indigenous rights and knowledge
 - Prioritize environmental protection
 - Support international law and cooperation
@@ -114,6 +125,7 @@ Analyze Arctic territorial claims, resource competition, and geopolitical dynami
 - Sustainable development principles
 
 ### Applications
+
 - Arctic strategy development
 - International law and diplomacy
 - Environmental policy planning

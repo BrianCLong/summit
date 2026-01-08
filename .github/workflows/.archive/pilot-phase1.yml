@@ -3,8 +3,8 @@ name: pilot-phase1-vertical-slice
 on:
   push:
     paths:
-      - 'services/authz-gateway/**'
-      - '.github/workflows/pilot-phase1.yml'
+      - "services/authz-gateway/**"
+      - ".github/workflows/pilot-phase1.yml"
   workflow_dispatch:
 
 permissions:
@@ -23,8 +23,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@60edb5dd545a775178f9a8e13bce519e160c7479
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
           cache-dependency-path: services/authz-gateway/package.json
 
       - name: Install dependencies
@@ -44,11 +44,11 @@ jobs:
       - name: Run Phase 1 gate (SBOM, provenance, cosign verify)
         working-directory: services/authz-gateway
         env:
-          ENABLE_COSIGN: 'true'
+          ENABLE_COSIGN: "true"
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_REF: ${{ github.ref }}
-          BUILD_COMMAND: 'npm run build'
+          BUILD_COMMAND: "npm run build"
           DEPLOY_ACTOR: ${{ github.actor }}
         run: npm run phase1:gate
 

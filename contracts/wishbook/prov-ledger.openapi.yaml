@@ -18,7 +18,7 @@ paths:
                 transforms: { type: array, items: { type: string } }
                 meta: { type: object, additionalProperties: true }
       responses:
-        '201': { description: Registered }
+        "201": { description: Registered }
   /prov/v1/export/manifest:
     post:
       summary: Build manifest (hash tree + transform chain) for a disclosure bundle
@@ -31,7 +31,7 @@ paths:
               properties:
                 evidenceIds: { type: array, items: { type: string } }
       responses:
-        '200':
+        "200":
           description: Manifest
           content:
             application/json:
@@ -51,7 +51,7 @@ paths:
             schema:
               type: object
       responses:
-        '200':
+        "200":
           description: Verification result
           content:
             application/json:

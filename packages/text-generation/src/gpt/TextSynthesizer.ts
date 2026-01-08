@@ -3,7 +3,7 @@
  */
 
 export interface TextGenerationConfig {
-  model: 'gpt' | 'transformer' | 'markov' | 'template';
+  model: "gpt" | "transformer" | "markov" | "template";
   domain?: string;
   temperature?: number;
   maxLength?: number;
@@ -16,7 +16,7 @@ export interface TextSample {
   text: string;
   metadata?: {
     language?: string;
-    sentiment?: 'positive' | 'negative' | 'neutral';
+    sentiment?: "positive" | "negative" | "neutral";
     entities?: NamedEntity[];
     style?: string;
     domain?: string;
@@ -25,7 +25,7 @@ export interface TextSample {
 
 export interface NamedEntity {
   text: string;
-  type: 'PERSON' | 'ORG' | 'LOC' | 'DATE' | 'MONEY' | 'PRODUCT' | 'EVENT';
+  type: "PERSON" | "ORG" | "LOC" | "DATE" | "MONEY" | "PRODUCT" | "EVENT";
   start: number;
   end: number;
 }
@@ -61,18 +61,18 @@ export class TextSynthesizer {
    */
   async fit(texts: TextSample[]): Promise<void> {
     // Build vocabulary
-    texts.forEach(sample => {
+    texts.forEach((sample) => {
       const words = this.tokenize(sample.text);
-      words.forEach(word => this.vocabulary.add(word));
+      words.forEach((word) => this.vocabulary.add(word));
     });
 
     // Build n-gram model
-    if (this.config.model === 'markov') {
+    if (this.config.model === "markov") {
       this.buildNgramModel(texts);
     }
 
     // Extract templates
-    if (this.config.model === 'template') {
+    if (this.config.model === "template") {
       this.extractTemplates(texts);
     }
   }
@@ -87,16 +87,16 @@ export class TextSynthesizer {
       let text: string;
 
       switch (this.config.model) {
-        case 'gpt':
+        case "gpt":
           text = await this.generateGPT(prompt);
           break;
-        case 'transformer':
+        case "transformer":
           text = await this.generateTransformer(prompt);
           break;
-        case 'markov':
+        case "markov":
           text = this.generateMarkov(prompt);
           break;
-        case 'template':
+        case "template":
           text = this.generateFromTemplate();
           break;
         default:
@@ -106,9 +106,9 @@ export class TextSynthesizer {
       samples.push({
         text,
         metadata: {
-          language: this.config.language || 'en',
-          domain: this.config.domain
-        }
+          language: this.config.language || "en",
+          domain: this.config.domain,
+        },
       });
     }
 
@@ -119,19 +119,19 @@ export class TextSynthesizer {
    * Generate text with specific sentiment
    */
   async generateWithSentiment(
-    sentiment: 'positive' | 'negative' | 'neutral',
+    sentiment: "positive" | "negative" | "neutral",
     numSamples: number
   ): Promise<TextSample[]> {
     const samples = await this.generate(numSamples);
 
     // Apply sentiment transformation
-    return samples.map(sample => ({
+    return samples.map((sample) => ({
       ...sample,
       text: this.applySentiment(sample.text, sentiment),
       metadata: {
         ...sample.metadata,
-        sentiment
-      }
+        sentiment,
+      },
     }));
   }
 
@@ -162,7 +162,7 @@ export class TextSynthesizer {
    */
   async generateConversation(
     numTurns: number,
-    participants: string[] = ['User', 'Assistant']
+    participants: string[] = ["User", "Assistant"]
   ): Promise<ConversationalData> {
     const turns: ConversationTurn[] = [];
 
@@ -174,27 +174,32 @@ export class TextSynthesizer {
         speaker,
         text,
         timestamp: new Date(),
-        sentiment: this.detectSentiment(text)
+        sentiment: this.detectSentiment(text),
       });
     }
 
     return {
       turns,
-      participants
+      participants,
     };
   }
 
   /**
    * Back-translation for data augmentation
    */
-  async backTranslate(
-    text: string,
-    intermediateLanguage: string = 'es'
-  ): Promise<string> {
+  async backTranslate(text: string, intermediateLanguage: string = "es"): Promise<string> {
     // Simulate back-translation
     // In practice, would use translation APIs
-    const intermediate = this.translateText(text, this.config.language || 'en', intermediateLanguage);
-    const backTranslated = this.translateText(intermediate, intermediateLanguage, this.config.language || 'en');
+    const intermediate = this.translateText(
+      text,
+      this.config.language || "en",
+      intermediateLanguage
+    );
+    const backTranslated = this.translateText(
+      intermediate,
+      intermediateLanguage,
+      this.config.language || "en"
+    );
 
     return backTranslated;
   }
@@ -208,11 +213,11 @@ export class TextSynthesizer {
   private buildNgramModel(texts: TextSample[]): void {
     const n = 2; // Bigram model
 
-    texts.forEach(sample => {
+    texts.forEach((sample) => {
       const words = this.tokenize(sample.text);
 
       for (let i = 0; i < words.length - n; i++) {
-        const context = words.slice(i, i + n).join(' ');
+        const context = words.slice(i, i + n).join(" ");
         const next = words[i + n];
 
         if (!this.ngramModel.has(context)) {
@@ -225,12 +230,12 @@ export class TextSynthesizer {
 
   private extractTemplates(texts: TextSample[]): void {
     // Extract sentence templates by replacing entities
-    texts.forEach(sample => {
+    texts.forEach((sample) => {
       let template = sample.text;
 
       // Replace named entities with placeholders
       if (sample.metadata?.entities) {
-        sample.metadata.entities.forEach(entity => {
+        sample.metadata.entities.forEach((entity) => {
           template = template.replace(entity.text, `{${entity.type}}`);
         });
       }
@@ -243,10 +248,10 @@ export class TextSynthesizer {
     // Simulate GPT generation
     // In practice, would call OpenAI API or similar
     const templates = [
-      'The {ENTITY} announced today that {ACTION}.',
-      'In a recent development, {ORGANIZATION} has decided to {ACTION}.',
-      'According to {SOURCE}, the {PRODUCT} will be available {TIME}.',
-      'Experts predict that {TOPIC} will {PREDICTION} in the coming years.'
+      "The {ENTITY} announced today that {ACTION}.",
+      "In a recent development, {ORGANIZATION} has decided to {ACTION}.",
+      "According to {SOURCE}, the {PRODUCT} will be available {TIME}.",
+      "Experts predict that {TOPIC} will {PREDICTION} in the coming years.",
     ];
 
     const template = templates[Math.floor(Math.random() * templates.length)];
@@ -268,23 +273,25 @@ export class TextSynthesizer {
 
     // Start with seed or random context
     let context = seed
-      ? this.tokenize(seed).slice(0, 2).join(' ')
+      ? this.tokenize(seed).slice(0, 2).join(" ")
       : Array.from(this.ngramModel.keys())[0];
 
-    words.push(...context.split(' '));
+    words.push(...context.split(" "));
 
     while (words.length < maxLength) {
       const nextWords = this.ngramModel.get(context);
-      if (!nextWords || nextWords.length === 0) {break;}
+      if (!nextWords || nextWords.length === 0) {
+        break;
+      }
 
       const next = nextWords[Math.floor(Math.random() * nextWords.length)];
       words.push(next);
 
       // Update context
-      context = words.slice(-2).join(' ');
+      context = words.slice(-2).join(" ");
     }
 
-    return words.join(' ');
+    return words.join(" ");
   }
 
   private generateFromTemplate(): string {
@@ -299,14 +306,14 @@ export class TextSynthesizer {
   private fillTemplate(template: string): string {
     // Replace placeholders with generated content
     const replacements: Record<string, string[]> = {
-      ENTITY: ['Apple', 'Google', 'Microsoft', 'Amazon'],
-      ORGANIZATION: ['the company', 'the organization', 'the team'],
-      ACTION: ['launch a new product', 'expand operations', 'announce changes'],
-      SOURCE: ['sources', 'reports', 'analysts'],
-      PRODUCT: ['smartphone', 'service', 'platform'],
-      TIME: ['next month', 'this year', 'soon'],
-      TOPIC: ['technology', 'innovation', 'development'],
-      PREDICTION: ['grow significantly', 'transform the industry', 'change how we work']
+      ENTITY: ["Apple", "Google", "Microsoft", "Amazon"],
+      ORGANIZATION: ["the company", "the organization", "the team"],
+      ACTION: ["launch a new product", "expand operations", "announce changes"],
+      SOURCE: ["sources", "reports", "analysts"],
+      PRODUCT: ["smartphone", "service", "platform"],
+      TIME: ["next month", "this year", "soon"],
+      TOPIC: ["technology", "innovation", "development"],
+      PREDICTION: ["grow significantly", "transform the industry", "change how we work"],
     };
 
     let filled = template;
@@ -325,21 +332,21 @@ export class TextSynthesizer {
   private generateSimple(): string {
     // Generate simple random text
     const sentences = [
-      'This is a synthetic text sample.',
-      'The data generation process creates realistic content.',
-      'Machine learning models can generate human-like text.',
-      'Synthetic data helps protect privacy while enabling analysis.'
+      "This is a synthetic text sample.",
+      "The data generation process creates realistic content.",
+      "Machine learning models can generate human-like text.",
+      "Synthetic data helps protect privacy while enabling analysis.",
     ];
 
     return sentences[Math.floor(Math.random() * sentences.length)];
   }
 
-  private applySentiment(text: string, sentiment: 'positive' | 'negative' | 'neutral'): string {
+  private applySentiment(text: string, sentiment: "positive" | "negative" | "neutral"): string {
     // Simple sentiment transformation
     const sentimentWords = {
-      positive: ['excellent', 'great', 'wonderful', 'amazing', 'fantastic'],
-      negative: ['poor', 'terrible', 'disappointing', 'bad', 'awful'],
-      neutral: ['okay', 'acceptable', 'moderate', 'average', 'standard']
+      positive: ["excellent", "great", "wonderful", "amazing", "fantastic"],
+      negative: ["poor", "terrible", "disappointing", "bad", "awful"],
+      neutral: ["okay", "acceptable", "moderate", "average", "standard"],
     };
 
     const words = sentimentWords[sentiment];
@@ -351,16 +358,16 @@ export class TextSynthesizer {
   private replaceSynonyms(text: string): string {
     // Simple synonym replacement
     const synonyms: Record<string, string[]> = {
-      'good': ['great', 'excellent', 'fine'],
-      'bad': ['poor', 'terrible', 'awful'],
-      'big': ['large', 'huge', 'massive'],
-      'small': ['tiny', 'little', 'compact']
+      good: ["great", "excellent", "fine"],
+      bad: ["poor", "terrible", "awful"],
+      big: ["large", "huge", "massive"],
+      small: ["tiny", "little", "compact"],
     };
 
     let result = text;
 
     Object.entries(synonyms).forEach(([word, syns]) => {
-      const regex = new RegExp(`\\b${word}\\b`, 'gi');
+      const regex = new RegExp(`\\b${word}\\b`, "gi");
       if (regex.test(result)) {
         const syn = syns[Math.floor(Math.random() * syns.length)];
         result = result.replace(regex, syn);
@@ -372,7 +379,9 @@ export class TextSynthesizer {
 
   private reorderSentences(text: string): string {
     const sentences = text.split(/\.\s+/);
-    if (sentences.length <= 1) {return text;}
+    if (sentences.length <= 1) {
+      return text;
+    }
 
     // Randomly swap two sentences
     const idx1 = Math.floor(Math.random() * sentences.length);
@@ -383,7 +392,7 @@ export class TextSynthesizer {
 
     [sentences[idx1], sentences[idx2]] = [sentences[idx2], sentences[idx1]];
 
-    return `${sentences.join('. ')  }.`;
+    return `${sentences.join(". ")}.`;
   }
 
   private async generateConversationTurn(
@@ -392,20 +401,20 @@ export class TextSynthesizer {
   ): Promise<string> {
     // Generate contextually appropriate response
     if (previousTurns.length === 0) {
-      return 'Hello! How can I help you today?';
+      return "Hello! How can I help you today?";
     }
 
     const lastTurn = previousTurns[previousTurns.length - 1];
 
     // Simple response generation
-    if (speaker === 'Assistant') {
+    if (speaker === "Assistant") {
       return `I understand your question about "${lastTurn.text.substring(0, 20)}...". Here is my response.`;
     } else {
       const questions = [
-        'Can you explain more about that?',
-        'What are the benefits?',
-        'How does this work?',
-        'Could you provide an example?'
+        "Can you explain more about that?",
+        "What are the benefits?",
+        "How does this work?",
+        "Could you provide an example?",
       ];
       return questions[Math.floor(Math.random() * questions.length)];
     }
@@ -413,17 +422,21 @@ export class TextSynthesizer {
 
   private detectSentiment(text: string): string {
     // Simple sentiment detection
-    const positiveWords = ['good', 'great', 'excellent', 'wonderful', 'happy'];
-    const negativeWords = ['bad', 'terrible', 'awful', 'poor', 'sad'];
+    const positiveWords = ["good", "great", "excellent", "wonderful", "happy"];
+    const negativeWords = ["bad", "terrible", "awful", "poor", "sad"];
 
     const lowerText = text.toLowerCase();
 
-    const posCount = positiveWords.filter(w => lowerText.includes(w)).length;
-    const negCount = negativeWords.filter(w => lowerText.includes(w)).length;
+    const posCount = positiveWords.filter((w) => lowerText.includes(w)).length;
+    const negCount = negativeWords.filter((w) => lowerText.includes(w)).length;
 
-    if (posCount > negCount) {return 'positive';}
-    if (negCount > posCount) {return 'negative';}
-    return 'neutral';
+    if (posCount > negCount) {
+      return "positive";
+    }
+    if (negCount > posCount) {
+      return "negative";
+    }
+    return "neutral";
   }
 
   private translateText(text: string, from: string, to: string): string {

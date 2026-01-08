@@ -1,8 +1,8 @@
-import { EventEmitter } from 'eventemitter3';
-import pino from 'pino';
-import { Watermark } from './types';
+import { EventEmitter } from "eventemitter3";
+import pino from "pino";
+import { Watermark } from "./types";
 
-const logger = pino({ name: 'watermark-generator' });
+const logger = pino({ name: "watermark-generator" });
 
 /**
  * Watermark generator for handling late data
@@ -39,8 +39,8 @@ export class WatermarkGenerator extends EventEmitter {
         maxOutOfOrderness: this.maxOutOfOrderness,
       };
 
-      this.emit('watermark', watermark);
-      logger.debug({ watermark: this.currentWatermark }, 'Watermark advanced');
+      this.emit("watermark", watermark);
+      logger.debug({ watermark: this.currentWatermark }, "Watermark advanced");
 
       return watermark;
     }
@@ -78,7 +78,7 @@ export class WatermarkGenerator extends EventEmitter {
   reset(): void {
     this.currentWatermark = 0;
     this.lastEventTime = 0;
-    logger.info('Watermark reset');
+    logger.info("Watermark reset");
   }
 }
 
@@ -108,7 +108,7 @@ export class PeriodicWatermarkGenerator extends WatermarkGenerator {
       this.generate(now);
     }, this.periodMs);
 
-    logger.info({ periodMs: this.periodMs }, 'Periodic watermark generation started');
+    logger.info({ periodMs: this.periodMs }, "Periodic watermark generation started");
   }
 
   /**
@@ -118,7 +118,7 @@ export class PeriodicWatermarkGenerator extends WatermarkGenerator {
     if (this.interval) {
       clearInterval(this.interval);
       this.interval = null;
-      logger.info('Periodic watermark generation stopped');
+      logger.info("Periodic watermark generation stopped");
     }
   }
 }

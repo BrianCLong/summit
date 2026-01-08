@@ -1,6 +1,6 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
-import { CustomerPackSpec, PackGenerationResult } from './types';
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { join, resolve } from "node:path";
+import { CustomerPackSpec, PackGenerationResult } from "./types";
 
 export class CustomerPackGenerator {
   generate(specs: CustomerPackSpec[]): PackGenerationResult[] {
@@ -21,17 +21,23 @@ export class CustomerPackGenerator {
     const documents: string[] = [];
     const configs: string[] = [];
 
-    this.copyWithPlaceholders(templateDir, customerBundleDir, spec.placeholders, documents, configs);
+    this.copyWithPlaceholders(
+      templateDir,
+      customerBundleDir,
+      spec.placeholders,
+      documents,
+      configs
+    );
 
     if (spec.documentationBlocks?.length) {
-      const docPath = join(customerBundleDir, 'ADDITIONAL_NOTES.md');
-      writeFileSync(docPath, spec.documentationBlocks.join('\n\n'), 'utf8');
+      const docPath = join(customerBundleDir, "ADDITIONAL_NOTES.md");
+      writeFileSync(docPath, spec.documentationBlocks.join("\n\n"), "utf8");
       documents.push(docPath);
     }
 
     if (spec.config) {
-      const configPath = join(customerBundleDir, 'config.generated.json');
-      writeFileSync(configPath, JSON.stringify(spec.config, null, 2), 'utf8');
+      const configPath = join(customerBundleDir, "config.generated.json");
+      writeFileSync(configPath, JSON.stringify(spec.config, null, 2), "utf8");
       configs.push(configPath);
     }
 
@@ -48,7 +54,7 @@ export class CustomerPackGenerator {
     destination: string,
     placeholders: Record<string, string>,
     documents: string[],
-    configs: string[],
+    configs: string[]
   ): void {
     const entries = readdirSync(source);
     for (const entry of entries) {
@@ -59,13 +65,17 @@ export class CustomerPackGenerator {
         mkdirSync(destPath, { recursive: true });
         this.copyWithPlaceholders(srcPath, destPath, placeholders, documents, configs);
       } else {
-        const fileContent = readFileSync(srcPath, 'utf8');
+        const fileContent = readFileSync(srcPath, "utf8");
         const rendered = this.render(fileContent, placeholders);
-        writeFileSync(destPath, rendered, 'utf8');
-        if (entry.toLowerCase().endsWith('.md')) {
+        writeFileSync(destPath, rendered, "utf8");
+        if (entry.toLowerCase().endsWith(".md")) {
           documents.push(destPath);
         }
-        if (entry.toLowerCase().endsWith('.json') || entry.toLowerCase().endsWith('.yaml') || entry.toLowerCase().endsWith('.yml')) {
+        if (
+          entry.toLowerCase().endsWith(".json") ||
+          entry.toLowerCase().endsWith(".yaml") ||
+          entry.toLowerCase().endsWith(".yml")
+        ) {
           configs.push(destPath);
         }
       }

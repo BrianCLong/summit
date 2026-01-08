@@ -2,7 +2,7 @@
  * Image Analyzer - Analyzes images from social media
  */
 
-import type { ImageMetadata } from '../types/index.js';
+import type { ImageMetadata } from "../types/index.js";
 
 export class ImageAnalyzer {
   /**
@@ -18,22 +18,24 @@ export class ImageAnalyzer {
     return {
       width: 0,
       height: 0,
-      format: 'unknown',
+      format: "unknown",
       exif: {},
       faces: [],
       objects: [],
-      text: ''
+      text: "",
     };
   }
 
   /**
    * Perform reverse image search
    */
-  async reverseImageSearch(imageUrl: string): Promise<Array<{
-    source: string;
-    url: string;
-    similarity: number;
-  }>> {
+  async reverseImageSearch(imageUrl: string): Promise<
+    Array<{
+      source: string;
+      url: string;
+      similarity: number;
+    }>
+  > {
     // In production, would integrate with:
     // - Google Images
     // - TinEye
@@ -54,7 +56,7 @@ export class ImageAnalyzer {
     if (exifData.GPSLatitude && exifData.GPSLongitude) {
       return {
         latitude: this.parseGPSCoordinate(exifData.GPSLatitude, exifData.GPSLatitudeRef),
-        longitude: this.parseGPSCoordinate(exifData.GPSLongitude, exifData.GPSLongitudeRef)
+        longitude: this.parseGPSCoordinate(exifData.GPSLongitude, exifData.GPSLongitudeRef),
       };
     }
 
@@ -66,6 +68,6 @@ export class ImageAnalyzer {
    */
   private parseGPSCoordinate(coordinate: number[], ref: string): number {
     const decimal = coordinate[0] + coordinate[1] / 60 + coordinate[2] / 3600;
-    return ref === 'S' || ref === 'W' ? -decimal : decimal;
+    return ref === "S" || ref === "W" ? -decimal : decimal;
   }
 }

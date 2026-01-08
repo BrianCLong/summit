@@ -2,21 +2,14 @@
   "roles": {
     "analyst": {
       "description": "Performs day-to-day analysis with standard access.",
-      "permissions": [
-        "graph:query",
-        "report:export"
-      ],
+      "permissions": ["graph:query", "report:export"],
       "attributes": {
         "clearance": "internal"
       }
     },
     "lead_analyst": {
       "description": "Leads investigations, can ingest new data and export findings.",
-      "permissions": [
-        "graph:query",
-        "report:export",
-        "ingest:write"
-      ],
+      "permissions": ["graph:query", "report:export", "ingest:write"],
       "attributes": {
         "clearance": "restricted"
       }
@@ -36,20 +29,14 @@
     },
     "auditor": {
       "description": "Read-only role for oversight and compliance review.",
-      "permissions": [
-        "graph:query",
-        "report:export"
-      ],
+      "permissions": ["graph:query", "report:export"],
       "attributes": {
         "clearance": "internal"
       }
     },
     "service_account": {
       "description": "Machine identity for background jobs and pipelines.",
-      "permissions": [
-        "ingest:write",
-        "graph:query"
-      ],
+      "permissions": ["ingest:write", "graph:query"],
       "attributes": {
         "clearance": "internal"
       }

@@ -3,11 +3,7 @@
  * Collects and stores usage events from the catalog
  */
 
-import {
-  UsageEvent,
-  UsageEventType,
-  AssetUsageMetrics,
-} from '@intelgraph/data-catalog';
+import { UsageEvent, UsageEventType, AssetUsageMetrics } from "@intelgraph/data-catalog";
 
 export interface IUsageStore {
   recordEvent(event: UsageEvent): Promise<void>;
@@ -30,7 +26,12 @@ export class UsageCollector {
   /**
    * Record view event
    */
-  async recordView(assetId: string, userId: string, sessionId: string, metadata: Record<string, any> = {}): Promise<void> {
+  async recordView(
+    assetId: string,
+    userId: string,
+    sessionId: string,
+    metadata: Record<string, any> = {}
+  ): Promise<void> {
     const event: UsageEvent = {
       id: this.generateEventId(),
       eventType: UsageEventType.VIEW,
@@ -47,11 +48,16 @@ export class UsageCollector {
   /**
    * Record search event
    */
-  async recordSearch(query: string, userId: string, sessionId: string, resultCount: number): Promise<void> {
+  async recordSearch(
+    query: string,
+    userId: string,
+    sessionId: string,
+    resultCount: number
+  ): Promise<void> {
     const event: UsageEvent = {
       id: this.generateEventId(),
       eventType: UsageEventType.SEARCH,
-      assetId: '', // Search not tied to specific asset
+      assetId: "", // Search not tied to specific asset
       userId,
       sessionId,
       metadata: { query, resultCount },
@@ -81,7 +87,12 @@ export class UsageCollector {
   /**
    * Record edit event
    */
-  async recordEdit(assetId: string, userId: string, sessionId: string, changes: Record<string, any>): Promise<void> {
+  async recordEdit(
+    assetId: string,
+    userId: string,
+    sessionId: string,
+    changes: Record<string, any>
+  ): Promise<void> {
     const event: UsageEvent = {
       id: this.generateEventId(),
       eventType: UsageEventType.EDIT,
@@ -98,7 +109,12 @@ export class UsageCollector {
   /**
    * Record comment event
    */
-  async recordComment(assetId: string, userId: string, sessionId: string, commentId: string): Promise<void> {
+  async recordComment(
+    assetId: string,
+    userId: string,
+    sessionId: string,
+    commentId: string
+  ): Promise<void> {
     const event: UsageEvent = {
       id: this.generateEventId(),
       eventType: UsageEventType.COMMENT,
@@ -115,7 +131,12 @@ export class UsageCollector {
   /**
    * Record share event
    */
-  async recordShare(assetId: string, userId: string, sessionId: string, sharedWith: string[]): Promise<void> {
+  async recordShare(
+    assetId: string,
+    userId: string,
+    sessionId: string,
+    sharedWith: string[]
+  ): Promise<void> {
     const event: UsageEvent = {
       id: this.generateEventId(),
       eventType: UsageEventType.SHARE,
@@ -149,7 +170,12 @@ export class UsageCollector {
   /**
    * Record rating event
    */
-  async recordRating(assetId: string, userId: string, sessionId: string, rating: number): Promise<void> {
+  async recordRating(
+    assetId: string,
+    userId: string,
+    sessionId: string,
+    rating: number
+  ): Promise<void> {
     const event: UsageEvent = {
       id: this.generateEventId(),
       eventType: UsageEventType.RATE,
@@ -166,7 +192,11 @@ export class UsageCollector {
   /**
    * Get asset usage metrics
    */
-  async getAssetMetrics(assetId: string, startDate: Date, endDate: Date): Promise<AssetUsageMetrics> {
+  async getAssetMetrics(
+    assetId: string,
+    startDate: Date,
+    endDate: Date
+  ): Promise<AssetUsageMetrics> {
     return this.store.getAssetMetrics(assetId, startDate, endDate);
   }
 

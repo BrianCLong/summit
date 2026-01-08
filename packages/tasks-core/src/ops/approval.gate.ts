@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { defineTask } from '@intelgraph/maestro-sdk';
+import { defineTask } from "@intelgraph/maestro-sdk";
 
 interface In {
   approved?: boolean;
@@ -8,7 +8,7 @@ interface In {
 }
 export default defineTask<In, { approved: boolean }>({
   async execute(_ctx, { payload }) {
-    if (!payload.approved) throw new Error('Approval required');
+    if (!payload.approved) throw new Error("Approval required");
     return { payload: { approved: true } };
   },
 });

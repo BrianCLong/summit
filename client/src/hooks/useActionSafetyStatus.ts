@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useAuthorization } from '../auth/withAuthorization';
+import { useEffect, useState } from "react";
+import { useAuthorization } from "../auth/withAuthorization";
 
 export const useActionSafetyStatus = (actionId: string, tenantId?: string) => {
   const [status, setStatus] = useState<{
@@ -20,13 +20,13 @@ export const useActionSafetyStatus = (actionId: string, tenantId?: string) => {
     if (authorizationLoading) return;
 
     if (!actionId) {
-      setError(new Error('actionId is required'));
+      setError(new Error("actionId is required"));
       setLoading(false);
       return;
     }
 
     const authorized = canAccess({
-      action: 'actions:read',
+      action: "actions:read",
       tenantId: scopedTenant,
     });
 
@@ -34,9 +34,9 @@ export const useActionSafetyStatus = (actionId: string, tenantId?: string) => {
       setError(
         new Error(
           `Access denied for action "${actionId}"${
-            scopedTenant ? ` in tenant ${scopedTenant}` : ''
-          }`,
-        ),
+            scopedTenant ? ` in tenant ${scopedTenant}` : ""
+          }`
+        )
       );
       setStatus(null);
       setLoading(false);
@@ -47,23 +47,23 @@ export const useActionSafetyStatus = (actionId: string, tenantId?: string) => {
     setLoading(true);
     setError(null);
     const timer = setTimeout(() => {
-      if (actionId === '123') {
+      if (actionId === "123") {
         setStatus({
-          status: 'Safe',
-          reason: 'No threats detected',
+          status: "Safe",
+          reason: "No threats detected",
           appealUrl: undefined,
         });
-      } else if (actionId === '456') {
+      } else if (actionId === "456") {
         setStatus({
-          status: 'Unsafe',
-          reason: 'Malicious activity detected',
-          appealUrl: 'https://example.com/appeal',
+          status: "Unsafe",
+          reason: "Malicious activity detected",
+          appealUrl: "https://example.com/appeal",
         });
       } else {
         setStatus({
-          status: 'Safe',
+          status: "Safe",
           reason: `No specific threats detected for ${actionId}${
-            scopedTenant ? ` in tenant ${scopedTenant}` : ''
+            scopedTenant ? ` in tenant ${scopedTenant}` : ""
           }`,
         });
       }

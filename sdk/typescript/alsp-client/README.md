@@ -12,13 +12,13 @@ TypeScript companion client for the Audit Log Succinctness & Proofs (ALSP) libra
 ## Usage
 
 ```ts
-import { AlspClient, AlspVerifier, HttpTransport } from "@intelgraph/alsp-client";
+import { AlspClient, AlspVerifier, HttpTransport } from '@intelgraph/alsp-client';
 
 const verifier = new AlspVerifier(/* optional trusted head digest */);
-const client = new AlspClient(new HttpTransport("https://alsp.example"), verifier);
+const client = new AlspClient(new HttpTransport('https://alsp.example'), verifier);
 
 const { proof, verification } = await client.proveRange({ start: 100, end: 160 });
-console.log("verified head", verification.headDigest);
+console.log('verified head', verification.headDigest);
 ```
 
 All digests are expressed as base64 strings in the JSON wire format, matching the Go encoder output.

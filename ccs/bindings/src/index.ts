@@ -1,5 +1,5 @@
-import nacl from 'tweetnacl';
-import { createHash } from 'crypto';
+import nacl from "tweetnacl";
+import { createHash } from "crypto";
 
 export interface Participant {
   id: string;
@@ -43,30 +43,28 @@ export interface SamplingCertificate {
 
 function stratify(plan: StratificationPlan, participant: Participant): string {
   if (!plan.keys?.length) {
-    throw new Error('stratification plan requires keys');
+    throw new Error("stratification plan requires keys");
   }
   return plan.keys
     .map((key) => {
       const value = participant.attributes?.[key];
       if (value === undefined) {
-        throw new Error(
-          `participant ${participant.id} missing attribute ${key}`,
-        );
+        throw new Error(`participant ${participant.id} missing attribute ${key}`);
       }
       return `${key}=${value}`;
     })
-    .join('|');
+    .join("|");
 }
 
 function decodeHex(input: string): Uint8Array {
   if (input.length % 2 !== 0) {
-    throw new Error('hex input must have even length');
+    throw new Error("hex input must have even length");
   }
   const out = new Uint8Array(input.length / 2);
   for (let i = 0; i < out.length; i += 1) {
     const byte = parseInt(input.slice(i * 2, i * 2 + 2), 16);
     if (Number.isNaN(byte)) {
-      throw new Error('invalid hex input');
+      throw new Error("invalid hex input");
     }
     out[i] = byte;
   }
@@ -77,37 +75,35 @@ function verifyProof(
   publicKey: string,
   message: Uint8Array,
   proof: string,
-  randomness: string,
+  randomness: string
 ): void {
-  const key = Uint8Array.from(Buffer.from(publicKey, 'base64'));
+  const key = Uint8Array.from(Buffer.from(publicKey, "base64"));
   if (key.length !== nacl.sign.publicKeyLength) {
-    throw new Error('invalid public key size');
+    throw new Error("invalid public key size");
   }
-  const proofBytes = Uint8Array.from(Buffer.from(proof, 'base64'));
+  const proofBytes = Uint8Array.from(Buffer.from(proof, "base64"));
   if (!nacl.sign.detached.verify(message, proofBytes, key)) {
-    throw new Error('invalid proof');
+    throw new Error("invalid proof");
   }
-  const digest = createHash('sha256')
-    .update(Buffer.from(proofBytes))
-    .digest('hex');
+  const digest = createHash("sha256").update(Buffer.from(proofBytes)).digest("hex");
   if (digest !== randomness) {
-    throw new Error('randomness mismatch');
+    throw new Error("randomness mismatch");
   }
 }
 
 export function verifyCertificate(
   participants: Participant[],
-  certificate: SamplingCertificate,
+  certificate: SamplingCertificate
 ): void {
   const plan = certificate.plan;
   if (!plan?.keys?.length) {
-    throw new Error('invalid stratification plan');
+    throw new Error("invalid stratification plan");
   }
   const seed = decodeHex(certificate.seed);
   const participantMap = new Map<string, Participant>();
   for (const raw of participants) {
     if (!raw.id) {
-      throw new Error('participant id missing');
+      throw new Error("participant id missing");
     }
     participantMap.set(raw.id, raw);
   }
@@ -171,7 +167,7 @@ export function verifyCertificate(
   });
 
   if (derived.length !== certificate.cohort.length) {
-    throw new Error('cohort size mismatch');
+    throw new Error("cohort size mismatch");
   }
   for (let i = 0; i < derived.length; i += 1) {
     const expected = derived[i];

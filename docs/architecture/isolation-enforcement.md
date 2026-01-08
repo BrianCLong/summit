@@ -5,50 +5,56 @@
 Isolation is not a polite request; it is a **hard architectural constraint**. We enforce these boundaries at multiple layers of the stack ("Defense in Depth").
 
 We categorize enforcement mechanisms into:
-*   **Hard:** Cryptographic or Engine-level constraints (impossible to bypass via code bugs).
-*   **Soft:** Application-logic constraints (reliant on correct code implementation).
-*   **Auditable:** Detection mechanisms that alert on violation attempts.
+
+- **Hard:** Cryptographic or Engine-level constraints (impossible to bypass via code bugs).
+- **Soft:** Application-logic constraints (reliant on correct code implementation).
+- **Auditable:** Detection mechanisms that alert on violation attempts.
 
 ---
 
 ## 2. Enforcement Mapping
 
 ### A. Database Layer (PostgreSQL) - **HARD**
-*   **Mechanism:** Row-Level Security (RLS).
-*   **Implementation:**
-    *   Every table must have a `tenant_id` column.
-    *   RLS Policies enforce `SELECT`, `UPDATE`, `DELETE` are scoped to `current_setting('app.current_tenant')`.
-    *   **Fail Closed:** If `app.current_tenant` is not set, query returns 0 rows or throws error.
-*   **Code Reference:** `server/src/db/migrations/` (RLS Policies).
+
+- **Mechanism:** Row-Level Security (RLS).
+- **Implementation:**
+  - Every table must have a `tenant_id` column.
+  - RLS Policies enforce `SELECT`, `UPDATE`, `DELETE` are scoped to `current_setting('app.current_tenant')`.
+  - **Fail Closed:** If `app.current_tenant` is not set, query returns 0 rows or throws error.
+- **Code Reference:** `server/src/db/migrations/` (RLS Policies).
 
 ### B. Graph Layer (Neo4j) - **SOFT (Application Enforced)**
-*   **Mechanism:** Cypher Query Rewriting / Mandatory Labels.
-*   **Implementation:**
-    *   All Nodes must have a `:Tenant` label or property.
-    *   Query Builder (Application Layer) *automatically injects* `{ tenantId: $id }` into every `MATCH`.
-    *   **Mitigation:** `DualWriteSession` ensures graph writes mirror strict Postgres ownership.
-*   **Code Reference:** `server/src/maestro/provenance/intel-graph.ts`.
+
+- **Mechanism:** Cypher Query Rewriting / Mandatory Labels.
+- **Implementation:**
+  - All Nodes must have a `:Tenant` label or property.
+  - Query Builder (Application Layer) _automatically injects_ `{ tenantId: $id }` into every `MATCH`.
+  - **Mitigation:** `DualWriteSession` ensures graph writes mirror strict Postgres ownership.
+- **Code Reference:** `server/src/maestro/provenance/intel-graph.ts`.
 
 ### C. API & Middleware - **SOFT**
-*   **Mechanism:** Context Extraction & Validation.
-*   **Implementation:**
-    *   `ensureAuthenticated` middleware verifies JWT and extracts `tenantId`.
-    *   `tenantContext` middleware sets the async local storage context.
-    *   Input Validation (Zod) rejects requests with cross-tenant IDs in bodies (where verifiable).
-*   **Code Reference:** `server/src/middleware/auth.ts`, `server/src/middleware/tenantContext.ts`.
+
+- **Mechanism:** Context Extraction & Validation.
+- **Implementation:**
+  - `ensureAuthenticated` middleware verifies JWT and extracts `tenantId`.
+  - `tenantContext` middleware sets the async local storage context.
+  - Input Validation (Zod) rejects requests with cross-tenant IDs in bodies (where verifiable).
+- **Code Reference:** `server/src/middleware/auth.ts`, `server/src/middleware/tenantContext.ts`.
 
 ### D. Streaming (Redis/NATS) - **SOFT**
-*   **Mechanism:** Namespace/Topic Segmentation.
-*   **Implementation:**
-    *   Redis keys prefixed with `{tenantId}:...`.
-    *   NATS Subjects formatted as `summit.{tenantId}.{service}.{event}`.
-    *   Consumers only subscribe to their own wildcard patterns.
+
+- **Mechanism:** Namespace/Topic Segmentation.
+- **Implementation:**
+  - Redis keys prefixed with `{tenantId}:...`.
+  - NATS Subjects formatted as `summit.{tenantId}.{service}.{event}`.
+  - Consumers only subscribe to their own wildcard patterns.
 
 ### E. CI/CD & Governance - **HARD**
-*   **Mechanism:** OPA (Open Policy Agent) Gates.
-*   **Implementation:**
-    *   `conftest` runs against Terraform plans and Kubernetes manifests.
-    *   Prevent creation of public buckets, wildcards (*) in IAM, or unencrypted DBs.
+
+- **Mechanism:** OPA (Open Policy Agent) Gates.
+- **Implementation:**
+  - `conftest` runs against Terraform plans and Kubernetes manifests.
+  - Prevent creation of public buckets, wildcards (\*) in IAM, or unencrypted DBs.
 
 ---
 
@@ -104,10 +110,10 @@ deny {
 Enforcement is invisible without observation.
 
 1.  **Violation Log:** Any blocked access attempt (RLS violation, Policy denial) must emit a structured log event:
-    *   `event: security_violation`
-    *   `type: isolation_breach_attempt`
-    *   `source: { user_id, tenant_id }`
-    *   `target: { resource_id, tenant_id }`
+    - `event: security_violation`
+    - `type: isolation_breach_attempt`
+    - `source: { user_id, tenant_id }`
+    - `target: { resource_id, tenant_id }`
 2.  **Metric:** `summit_security_isolation_failures_total` (Counter).
 3.  **Alert:** > 5 failures in 1 minute -> **SEV-2 Alert**.
 

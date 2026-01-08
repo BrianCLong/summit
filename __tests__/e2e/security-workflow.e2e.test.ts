@@ -3,13 +3,13 @@
  * Tests complete workflow from policy creation to secret rotation
  */
 
-import fs from 'fs/promises';
-import path from 'path';
-import crypto from 'crypto';
-import { OPABundleManager, DEFAULT_ABAC_POLICIES } from '../../SECURITY/policy/opa-bundle';
-import { SecretsManager } from '../../SECURITY/secrets/rotation';
+import fs from "fs/promises";
+import path from "path";
+import crypto from "crypto";
+import { OPABundleManager, DEFAULT_ABAC_POLICIES } from "../../SECURITY/policy/opa-bundle";
+import { SecretsManager } from "../../SECURITY/secrets/rotation";
 
-describe('Security Workflow E2E', () => {
+describe("Security Workflow E2E", () => {
   let testDir: string;
   let bundleManager: OPABundleManager;
   let secretsManager: SecretsManager;
@@ -20,13 +20,13 @@ describe('Security Workflow E2E', () => {
     await fs.mkdir(testDir, { recursive: true });
 
     // Generate signing keys for the entire test suite
-    const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
+    const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
       modulusLength: 2048,
     });
 
     signingKeys = {
-      privateKey: privateKey.export({ type: 'pkcs1', format: 'pem' }) as string,
-      publicKey: publicKey.export({ type: 'pkcs1', format: 'pem' }) as string,
+      privateKey: privateKey.export({ type: "pkcs1", format: "pem" }) as string,
+      publicKey: publicKey.export({ type: "pkcs1", format: "pem" }) as string,
     };
   });
 
@@ -35,8 +35,8 @@ describe('Security Workflow E2E', () => {
     bundleManager = new OPABundleManager({
       privateKey: signingKeys.privateKey,
       publicKey: signingKeys.publicKey,
-      algorithm: 'RS256',
-      keyId: 'test-key-1',
+      algorithm: "RS256",
+      keyId: "test-key-1",
     });
   });
 
@@ -52,44 +52,44 @@ describe('Security Workflow E2E', () => {
     }
   });
 
-  describe('Complete Security Setup Workflow', () => {
-    it('should setup complete security infrastructure', async () => {
+  describe("Complete Security Setup Workflow", () => {
+    it("should setup complete security infrastructure", async () => {
       // Step 1: Register signing keys in secrets manager
       secretsManager.registerSecret({
-        name: 'opa-signing-key',
-        type: 'signing_key',
+        name: "opa-signing-key",
+        type: "signing_key",
         rotationInterval: 604800, // 7 days
         gracePeriod: 86400, // 1 day
         autoRotate: true,
-        destinations: ['kubernetes', 'vault'],
-        dependencies: ['opa-service', 'api-gateway'],
+        destinations: ["kubernetes", "vault"],
+        dependencies: ["opa-service", "api-gateway"],
       });
 
       const signingKeySecret = secretsManager.createSecret(
-        'opa-signing-key',
+        "opa-signing-key",
         signingKeys.privateKey,
         {
-          keyId: 'test-key-1',
-          algorithm: 'RS256',
-          purpose: 'opa-bundle-signing',
+          keyId: "test-key-1",
+          algorithm: "RS256",
+          purpose: "opa-bundle-signing",
         }
       );
 
-      expect(signingKeySecret.status).toBe('active');
+      expect(signingKeySecret.status).toBe("active");
 
       // Step 2: Register API keys
       secretsManager.registerSecret({
-        name: 'api-gateway-key',
-        type: 'api_key',
+        name: "api-gateway-key",
+        type: "api_key",
         rotationInterval: 86400, // 1 day
         gracePeriod: 3600, // 1 hour
         autoRotate: true,
-        destinations: ['kubernetes'],
-        dependencies: ['api-gateway', 'frontend-app'],
+        destinations: ["kubernetes"],
+        dependencies: ["api-gateway", "frontend-app"],
       });
 
-      const apiKeySecret = secretsManager.createSecret('api-gateway-key', 'initial-api-key');
-      expect(apiKeySecret.status).toBe('active');
+      const apiKeySecret = secretsManager.createSecret("api-gateway-key", "initial-api-key");
+      expect(apiKeySecret.status).toBe("active");
 
       // Step 3: Create default ABAC policy bundle
       const policies = Object.entries(DEFAULT_ABAC_POLICIES).map(([path, content]) => ({
@@ -98,24 +98,24 @@ describe('Security Workflow E2E', () => {
       }));
 
       const bundle = await bundleManager.createBundle(
-        'production-abac-policies',
-        '1.0.0',
+        "production-abac-policies",
+        "1.0.0",
         policies,
         [],
         {
-          description: 'Production ABAC policies with tenant isolation',
-          author: 'security-team',
+          description: "Production ABAC policies with tenant isolation",
+          author: "security-team",
         }
       );
 
       expect(bundle.signature).toBeDefined();
       expect(bundle.policies.length).toBe(3);
-      expect(bundle.manifest.roots).toContain('authz');
-      expect(bundle.manifest.roots).toContain('tenant');
-      expect(bundle.manifest.roots).toContain('data');
+      expect(bundle.manifest.roots).toContain("authz");
+      expect(bundle.manifest.roots).toContain("tenant");
+      expect(bundle.manifest.roots).toContain("data");
 
       // Step 4: Package and distribute bundle
-      const bundlePath = path.join(testDir, 'production-abac-policies-v1.0.0.tar.gz');
+      const bundlePath = path.join(testDir, "production-abac-policies-v1.0.0.tar.gz");
       await bundleManager.packageBundle(bundle, bundlePath);
 
       const bundleStats = await fs.stat(bundlePath);
@@ -141,31 +141,31 @@ describe('Security Workflow E2E', () => {
     });
   });
 
-  describe('Key Rotation Workflow', () => {
-    it('should handle complete key rotation with bundle re-signing', async () => {
+  describe("Key Rotation Workflow", () => {
+    it("should handle complete key rotation with bundle re-signing", async () => {
       // Setup initial infrastructure
       secretsManager.registerSecret({
-        name: 'signing-key',
-        type: 'signing_key',
+        name: "signing-key",
+        type: "signing_key",
         rotationInterval: 86400,
         gracePeriod: 3600,
         autoRotate: false,
-        destinations: ['kubernetes'],
-        dependencies: ['opa-service'],
+        destinations: ["kubernetes"],
+        dependencies: ["opa-service"],
       });
 
-      const initialKey = secretsManager.createSecret('signing-key', signingKeys.privateKey);
+      const initialKey = secretsManager.createSecret("signing-key", signingKeys.privateKey);
 
       // Create initial bundle
       const policies = [
         {
-          path: 'authz/main.rego',
-          content: 'package authz\ndefault allow := false',
+          path: "authz/main.rego",
+          content: "package authz\ndefault allow := false",
         },
       ];
 
-      const bundleV1 = await bundleManager.createBundle('test-policies', '1.0.0', policies);
-      const bundleV1Path = path.join(testDir, 'test-policies-v1.0.0.tar.gz');
+      const bundleV1 = await bundleManager.createBundle("test-policies", "1.0.0", policies);
+      const bundleV1Path = path.join(testDir, "test-policies-v1.0.0.tar.gz");
       await bundleManager.packageBundle(bundleV1, bundleV1Path);
 
       // Verify initial bundle
@@ -173,14 +173,14 @@ describe('Security Workflow E2E', () => {
       expect(verifyV1.valid).toBe(true);
 
       // Rotate signing key
-      await secretsManager.rotateSecret('signing-key', true);
+      await secretsManager.rotateSecret("signing-key", true);
 
-      const rotatedKey = secretsManager.getActiveSecret('signing-key');
+      const rotatedKey = secretsManager.getActiveSecret("signing-key");
       expect(rotatedKey?.version).toBe(2);
 
       // Create new bundle with rotated key (in production, use new key)
-      const bundleV2 = await bundleManager.createBundle('test-policies', '2.0.0', policies);
-      const bundleV2Path = path.join(testDir, 'test-policies-v2.0.0.tar.gz');
+      const bundleV2 = await bundleManager.createBundle("test-policies", "2.0.0", policies);
+      const bundleV2Path = path.join(testDir, "test-policies-v2.0.0.tar.gz");
       await bundleManager.packageBundle(bundleV2, bundleV2Path);
 
       // Verify both bundles are still valid during grace period
@@ -191,61 +191,60 @@ describe('Security Workflow E2E', () => {
       expect(verifyV2.valid).toBe(true);
 
       // Both versions should be accessible
-      expect(secretsManager.getSecretVersion('signing-key', 1)).toBeDefined();
-      expect(secretsManager.getSecretVersion('signing-key', 2)).toBeDefined();
+      expect(secretsManager.getSecretVersion("signing-key", 1)).toBeDefined();
+      expect(secretsManager.getSecretVersion("signing-key", 2)).toBeDefined();
     });
 
-    it('should handle emergency key revocation and rotation', async () => {
+    it("should handle emergency key revocation and rotation", async () => {
       // Setup
       secretsManager.registerSecret({
-        name: 'compromised-key',
-        type: 'api_key',
+        name: "compromised-key",
+        type: "api_key",
         rotationInterval: 86400,
         gracePeriod: 3600,
         autoRotate: false,
-        destinations: ['kubernetes'],
-        dependencies: ['api-service'],
+        destinations: ["kubernetes"],
+        dependencies: ["api-service"],
       });
 
-      const compromisedKey = secretsManager.createSecret('compromised-key', 'compromised-value');
-      expect(compromisedKey.status).toBe('active');
+      const compromisedKey = secretsManager.createSecret("compromised-key", "compromised-value");
+      expect(compromisedKey.status).toBe("active");
 
       // Simulate key compromise detection
-      await secretsManager.revokeSecret('compromised-key', compromisedKey.version);
+      await secretsManager.revokeSecret("compromised-key", compromisedKey.version);
 
-      const revokedKey = secretsManager.getSecretVersion('compromised-key', compromisedKey.version);
-      expect(revokedKey?.status).toBe('revoked');
+      const revokedKey = secretsManager.getSecretVersion("compromised-key", compromisedKey.version);
+      expect(revokedKey?.status).toBe("revoked");
 
       // Emergency rotation creates new key
-      const newKey = secretsManager.getActiveSecret('compromised-key');
+      const newKey = secretsManager.getActiveSecret("compromised-key");
       expect(newKey).toBeDefined();
       expect(newKey?.version).toBe(2);
-      expect(newKey?.status).toBe('active');
-      expect(newKey?.value).not.toBe('compromised-value');
+      expect(newKey?.status).toBe("active");
+      expect(newKey?.value).not.toBe("compromised-value");
     });
   });
 
-  describe('Multi-Tenant Security Workflow', () => {
-    it('should enforce tenant isolation across policies and secrets', async () => {
+  describe("Multi-Tenant Security Workflow", () => {
+    it("should enforce tenant isolation across policies and secrets", async () => {
       // Create tenant-specific secrets
-      const tenants = ['tenant-a', 'tenant-b', 'tenant-c'];
+      const tenants = ["tenant-a", "tenant-b", "tenant-c"];
 
       for (const tenant of tenants) {
         secretsManager.registerSecret({
           name: `${tenant}-api-key`,
-          type: 'api_key',
+          type: "api_key",
           rotationInterval: 86400,
           gracePeriod: 3600,
           autoRotate: false,
-          destinations: ['kubernetes'],
+          destinations: ["kubernetes"],
           dependencies: [`${tenant}-service`],
         });
 
-        const tenantSecret = secretsManager.createSecret(
-          `${tenant}-api-key`,
-          `key-for-${tenant}`,
-          { tenant_id: tenant, environment: 'production' }
-        );
+        const tenantSecret = secretsManager.createSecret(`${tenant}-api-key`, `key-for-${tenant}`, {
+          tenant_id: tenant,
+          environment: "production",
+        });
 
         expect(tenantSecret.metadata.tenant_id).toBe(tenant);
       }
@@ -253,91 +252,91 @@ describe('Security Workflow E2E', () => {
       // Create tenant isolation policies
       const tenantPolicies = [
         {
-          path: 'tenant/isolation.rego',
-          content: DEFAULT_ABAC_POLICIES['tenant/isolation.rego'],
+          path: "tenant/isolation.rego",
+          content: DEFAULT_ABAC_POLICIES["tenant/isolation.rego"],
         },
       ];
 
       const tenantBundle = await bundleManager.createBundle(
-        'tenant-isolation-policies',
-        '1.0.0',
+        "tenant-isolation-policies",
+        "1.0.0",
         tenantPolicies
       );
 
       expect(tenantBundle.policies).toHaveLength(1);
-      expect(tenantBundle.manifest.roots).toContain('tenant');
+      expect(tenantBundle.manifest.roots).toContain("tenant");
 
       // Verify all tenant secrets are isolated
       const allSecrets = secretsManager.listSecrets();
-      const tenantSecrets = allSecrets.filter(s => s.name.includes('tenant-'));
+      const tenantSecrets = allSecrets.filter((s) => s.name.includes("tenant-"));
 
       expect(tenantSecrets).toHaveLength(3);
 
       // Each tenant should have unique secret values
-      const secretValues = tenantSecrets.map(s => s.activeVersion);
+      const secretValues = tenantSecrets.map((s) => s.activeVersion);
       const uniqueValues = new Set(secretValues);
       expect(uniqueValues.size).toBe(3);
     });
   });
 
-  describe('Compliance and Audit Workflow', () => {
-    it('should maintain complete audit trail for all security operations', async () => {
+  describe("Compliance and Audit Workflow", () => {
+    it("should maintain complete audit trail for all security operations", async () => {
       const auditLog: Array<{ timestamp: number; type: string; details: any }> = [];
 
       // Track bundle operations
-      bundleManager.on('bundle_created', (data) => {
+      bundleManager.on("bundle_created", (data) => {
         auditLog.push({
           timestamp: Date.now(),
-          type: 'bundle_created',
+          type: "bundle_created",
           details: data,
         });
       });
 
-      bundleManager.on('bundle_packaged', (data) => {
+      bundleManager.on("bundle_packaged", (data) => {
         auditLog.push({
           timestamp: Date.now(),
-          type: 'bundle_packaged',
+          type: "bundle_packaged",
           details: data,
         });
       });
 
-      bundleManager.on('bundle_loaded', (data) => {
+      bundleManager.on("bundle_loaded", (data) => {
         auditLog.push({
           timestamp: Date.now(),
-          type: 'bundle_loaded',
+          type: "bundle_loaded",
           details: data,
         });
       });
 
       // Track secret operations
-      secretsManager.on('secret_registered', (data) => {
+      secretsManager.on("secret_registered", (data) => {
         auditLog.push({
           timestamp: Date.now(),
-          type: 'secret_registered',
+          type: "secret_registered",
           details: data,
         });
       });
 
-      secretsManager.on('secret_created', (data) => {
+      secretsManager.on("secret_created", (data) => {
         auditLog.push({
           timestamp: Date.now(),
-          type: 'secret_created',
+          type: "secret_created",
           details: data,
         });
       });
 
-      secretsManager.on('rotation_started', (data) => {
+      secretsManager.on("rotation_started", (data) => {
         auditLog.push({
           timestamp: Date.now(),
-          type: 'rotation_started',
+          type: "rotation_started",
           details: data,
         });
       });
 
-      secretsManager.on('rotation_completed', (data) => {
+      secretsManager.on("rotation_completed", (data) => {
         auditLog.push({
           timestamp: Date.now(),
-          type: 'rotation_completed',
+          type: "rotation_completed",
           details: data,
         });
       });
@@ -345,23 +344,23 @@ describe('Security Workflow E2E', () => {
       // Perform operations
       const policies = [
         {
-          path: 'authz/main.rego',
-          content: 'package authz\ndefault allow := false',
+          path: "authz/main.rego",
+          content: "package authz\ndefault allow := false",
         },
       ];
 
-      await bundleManager.createBundle('audit-test', '1.0.0', policies);
+      await bundleManager.createBundle("audit-test", "1.0.0", policies);
 
-      const bundlePath = path.join(testDir, 'audit-test-v1.0.0.tar.gz');
-      const bundle = bundleManager.getBundle('audit-test', '1.0.0');
+      const bundlePath = path.join(testDir, "audit-test-v1.0.0.tar.gz");
+      const bundle = bundleManager.getBundle("audit-test", "1.0.0");
       if (bundle) {
         await bundleManager.packageBundle(bundle, bundlePath);
         await bundleManager.loadBundle(bundlePath);
       }
 
       secretsManager.registerSecret({
-        name: 'audit-secret',
-        type: 'api_key',
+        name: "audit-secret",
+        type: "api_key",
         rotationInterval: 86400,
         gracePeriod: 3600,
         autoRotate: false,
@@ -369,8 +368,8 @@ describe('Security Workflow E2E', () => {
         dependencies: [],
       });
 
-      secretsManager.createSecret('audit-secret', 'test-value');
-      await secretsManager.rotateSecret('audit-secret', true);
+      secretsManager.createSecret("audit-secret", "test-value");
+      await secretsManager.rotateSecret("audit-secret", true);
 
       // Verify audit trail
       expect(auditLog.length).toBeGreaterThan(0);
@@ -381,12 +380,12 @@ describe('Security Workflow E2E', () => {
       }
 
       // Verify all expected events are present
-      expect(auditLog.some(e => e.type === 'bundle_created')).toBe(true);
-      expect(auditLog.some(e => e.type === 'secret_created')).toBe(true);
-      expect(auditLog.some(e => e.type === 'rotation_completed')).toBe(true);
+      expect(auditLog.some((e) => e.type === "bundle_created")).toBe(true);
+      expect(auditLog.some((e) => e.type === "secret_created")).toBe(true);
+      expect(auditLog.some((e) => e.type === "rotation_completed")).toBe(true);
     });
 
-    it('should validate compliance with security policies', async () => {
+    it("should validate compliance with security policies", async () => {
       // Create comprehensive security policy bundle
       const allPolicies = Object.entries(DEFAULT_ABAC_POLICIES).map(([path, content]) => ({
         path,
@@ -394,13 +393,13 @@ describe('Security Workflow E2E', () => {
       }));
 
       const complianceBundle = await bundleManager.createBundle(
-        'compliance-policies',
-        '1.0.0',
+        "compliance-policies",
+        "1.0.0",
         allPolicies,
         [],
         {
-          description: 'Comprehensive compliance and security policies',
-          author: 'compliance-team',
+          description: "Comprehensive compliance and security policies",
+          author: "compliance-team",
         }
       );
 
@@ -408,7 +407,7 @@ describe('Security Workflow E2E', () => {
       expect(complianceBundle.signature).toBeDefined();
 
       // Package and verify
-      const bundlePath = path.join(testDir, 'compliance-policies.tar.gz');
+      const bundlePath = path.join(testDir, "compliance-policies.tar.gz");
       await bundleManager.packageBundle(complianceBundle, bundlePath);
 
       const verifyResult = await bundleManager.loadBundle(bundlePath);
@@ -422,16 +421,16 @@ describe('Security Workflow E2E', () => {
 
       // Verify secrets are in compliant state
       secretsManager.registerSecret({
-        name: 'production-key',
-        type: 'api_key',
+        name: "production-key",
+        type: "api_key",
         rotationInterval: 86400,
         gracePeriod: 3600,
         autoRotate: true, // Required for compliance
-        destinations: ['kubernetes', 'vault'], // Required for HA
-        dependencies: ['api-service'],
+        destinations: ["kubernetes", "vault"], // Required for HA
+        dependencies: ["api-service"],
       });
 
-      secretsManager.createSecret('production-key', 'secure-value');
+      secretsManager.createSecret("production-key", "secure-value");
 
       const health = secretsManager.getHealthStatus();
       expect(health.healthy).toBe(true);
@@ -446,24 +445,24 @@ describe('Security Workflow E2E', () => {
         rotationEnabled: true,
       };
 
-      expect(Object.values(complianceStatus).every(v => v === true)).toBe(true);
+      expect(Object.values(complianceStatus).every((v) => v === true)).toBe(true);
     });
   });
 
-  describe('Disaster Recovery Workflow', () => {
-    it('should support backup and restore of security configuration', async () => {
+  describe("Disaster Recovery Workflow", () => {
+    it("should support backup and restore of security configuration", async () => {
       // Setup initial configuration
       secretsManager.registerSecret({
-        name: 'critical-key',
-        type: 'encryption_key',
+        name: "critical-key",
+        type: "encryption_key",
         rotationInterval: 604800,
         gracePeriod: 86400,
         autoRotate: true,
-        destinations: ['kubernetes', 'vault'],
-        dependencies: ['encryption-service'],
+        destinations: ["kubernetes", "vault"],
+        dependencies: ["encryption-service"],
       });
 
-      const originalSecret = secretsManager.createSecret('critical-key', 'original-value');
+      const originalSecret = secretsManager.createSecret("critical-key", "original-value");
 
       // Create policy bundle
       const policies = Object.entries(DEFAULT_ABAC_POLICIES).map(([path, content]) => ({
@@ -471,8 +470,8 @@ describe('Security Workflow E2E', () => {
         content,
       }));
 
-      const originalBundle = await bundleManager.createBundle('backup-test', '1.0.0', policies);
-      const backupPath = path.join(testDir, 'backup-bundle.tar.gz');
+      const originalBundle = await bundleManager.createBundle("backup-test", "1.0.0", policies);
+      const backupPath = path.join(testDir, "backup-bundle.tar.gz");
       await bundleManager.packageBundle(originalBundle, backupPath);
 
       // Simulate disaster - create new managers
@@ -480,30 +479,30 @@ describe('Security Workflow E2E', () => {
       const newBundleManager = new OPABundleManager({
         privateKey: signingKeys.privateKey,
         publicKey: signingKeys.publicKey,
-        algorithm: 'RS256',
-        keyId: 'test-key-1',
+        algorithm: "RS256",
+        keyId: "test-key-1",
       });
 
       // Restore from backup
       const restoredBundle = await newBundleManager.loadBundle(backupPath);
       expect(restoredBundle.valid).toBe(true);
-      expect(restoredBundle.bundle?.name).toBe('backup-test');
+      expect(restoredBundle.bundle?.name).toBe("backup-test");
       expect(restoredBundle.bundle?.policies.length).toBe(policies.length);
 
       // Restore secret configuration
       newSecretsManager.registerSecret({
-        name: 'critical-key',
-        type: 'encryption_key',
+        name: "critical-key",
+        type: "encryption_key",
         rotationInterval: 604800,
         gracePeriod: 86400,
         autoRotate: true,
-        destinations: ['kubernetes', 'vault'],
-        dependencies: ['encryption-service'],
+        destinations: ["kubernetes", "vault"],
+        dependencies: ["encryption-service"],
       });
 
       // Create new secret value (original value is not recoverable from metadata)
-      const restoredSecret = newSecretsManager.createSecret('critical-key', 'restored-value');
-      expect(restoredSecret.status).toBe('active');
+      const restoredSecret = newSecretsManager.createSecret("critical-key", "restored-value");
+      expect(restoredSecret.status).toBe("active");
 
       // Cleanup
       newSecretsManager.cleanup();

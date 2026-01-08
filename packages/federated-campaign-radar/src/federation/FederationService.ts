@@ -5,9 +5,9 @@
  * Implements differential privacy, secure aggregation, and MPC-style workflows.
  */
 
-import { EventEmitter } from 'events';
-import { createHash, createHmac, randomBytes } from 'crypto';
-import { v4 as uuidv4 } from 'uuid';
+import { EventEmitter } from "events";
+import { createHash, createHmac, randomBytes } from "crypto";
+import { v4 as uuidv4 } from "uuid";
 import {
   CampaignSignal,
   SignalType,
@@ -27,7 +27,7 @@ import {
   PrivacyPreservedMetrics,
   createFederationId,
   calculateThreatLevel,
-} from '../core/types';
+} from "../core/types";
 
 /**
  * Federated signal with privacy envelope
@@ -49,9 +49,9 @@ export interface PrivacyEnvelope {
 
 export interface RoutingMetadata {
   sourceParticipant: string; // Anonymized
-  targetParticipants: string[] | 'BROADCAST';
+  targetParticipants: string[] | "BROADCAST";
   ttl: number;
-  priority: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
+  priority: "LOW" | "NORMAL" | "HIGH" | "URGENT";
   requiresAck: boolean;
 }
 
@@ -143,7 +143,7 @@ export class FederationService extends EventEmitter {
   async registerParticipant(
     participantId: string,
     publicKey: string,
-    capabilities: string[],
+    capabilities: string[]
   ): Promise<FederationParticipant> {
     const participant: FederationParticipant = {
       participantId,
@@ -171,7 +171,7 @@ export class FederationService extends EventEmitter {
     };
 
     this.participants.set(participantId, participant);
-    this.emit('participantRegistered', participant);
+    this.emit("participantRegistered", participant);
 
     return participant;
   }
@@ -185,7 +185,7 @@ export class FederationService extends EventEmitter {
 
     participant.status = ParticipantStatus.ACTIVE;
     this.initializeParticipantBudget(participantId);
-    this.emit('participantApproved', participant);
+    this.emit("participantApproved", participant);
 
     return true;
   }
@@ -197,7 +197,7 @@ export class FederationService extends EventEmitter {
     participantIds: string[],
     signalTypes: SignalType[],
     privacyLevels: PrivacyLevel[],
-    validDays: number,
+    validDays: number
   ): Promise<SharingAgreement> {
     const agreement: SharingAgreement = {
       agreementId: uuidv4(),
@@ -206,19 +206,15 @@ export class FederationService extends EventEmitter {
       privacyLevels,
       validFrom: new Date(),
       validUntil: new Date(Date.now() + validDays * 24 * 60 * 60 * 1000),
-      termsHash: this.hashAgreementTerms(
-        participantIds,
-        signalTypes,
-        privacyLevels,
-      ),
+      termsHash: this.hashAgreementTerms(participantIds, signalTypes, privacyLevels),
       signatures: [],
       constraints: [
         {
-          constraintType: 'minimum_aggregation',
+          constraintType: "minimum_aggregation",
           parameters: { minSignals: 5 },
         },
         {
-          constraintType: 'rate_limit',
+          constraintType: "rate_limit",
           parameters: { signalsPerHour: 1000 },
         },
       ],
@@ -234,7 +230,7 @@ export class FederationService extends EventEmitter {
       }
     }
 
-    this.emit('agreementCreated', agreement);
+    this.emit("agreementCreated", agreement);
     return agreement;
   }
 
@@ -247,12 +243,12 @@ export class FederationService extends EventEmitter {
    */
   async submitSignal(
     signal: CampaignSignal,
-    targetParticipants: string[] | 'BROADCAST' = 'BROADCAST',
+    targetParticipants: string[] | "BROADCAST" = "BROADCAST"
   ): Promise<{ success: boolean; federatedSignalId: string }> {
     // Check privacy budget
     const budget = this.privacyBudgets.get(this.config.participantId);
     if (!budget || budget.usedEpsilon >= budget.totalEpsilon) {
-      throw new Error('Privacy budget exhausted');
+      throw new Error("Privacy budget exhausted");
     }
 
     // Apply privacy protections based on level
@@ -285,7 +281,7 @@ export class FederationService extends EventEmitter {
     // Add to aggregation window
     this.addToAggregationWindow(signal);
 
-    this.emit('signalSubmitted', federatedSignal);
+    this.emit("signalSubmitted", federatedSignal);
 
     return {
       success: true,
@@ -307,11 +303,9 @@ export class FederationService extends EventEmitter {
    */
   async queryAggregatedStats(
     signalType: SignalType,
-    windowHours: number = 24,
+    windowHours: number = 24
   ): Promise<AggregatedStats> {
-    const windowStart = new Date(
-      Date.now() - windowHours * 60 * 60 * 1000,
-    );
+    const windowStart = new Date(Date.now() - windowHours * 60 * 60 * 1000);
     const windowEnd = new Date();
 
     // Collect signals in window
@@ -328,15 +322,15 @@ export class FederationService extends EventEmitter {
       signalCount: this.addLaplaceNoise(signals.length, dpConfig),
       uniqueIndicators: this.addLaplaceNoise(
         new Set(signals.map((s) => s.indicator.indicatorHash)).size,
-        dpConfig,
+        dpConfig
       ),
       participatingOrgs: this.addLaplaceNoise(
         new Set(signals.map((s) => s.sourceOrganization)).size,
-        dpConfig,
+        dpConfig
       ),
       channelDistribution: this.aggregateChannelDistribution(signals, dpConfig),
       threatLevelDistribution: {},
-      aggregationMethod: 'differential_privacy',
+      aggregationMethod: "differential_privacy",
       privacyParameters: dpConfig,
     };
 
@@ -352,7 +346,7 @@ export class FederationService extends EventEmitter {
    */
   async performFederatedClustering(
     signalType?: SignalType,
-    windowHours: number = 24,
+    windowHours: number = 24
   ): Promise<CampaignCluster[]> {
     const windowStart = new Date(Date.now() - windowHours * 60 * 60 * 1000);
     const windowEnd = new Date();
@@ -376,7 +370,7 @@ export class FederationService extends EventEmitter {
 
     // Convert to CampaignCluster format with privacy protections
     const campaignClusters: CampaignCluster[] = clusters.map((cluster) =>
-      this.buildCampaignCluster(cluster),
+      this.buildCampaignCluster(cluster)
     );
 
     // Update active clusters
@@ -384,7 +378,7 @@ export class FederationService extends EventEmitter {
       this.activeClusters.set(cluster.clusterId, cluster);
     }
 
-    this.emit('clusteringComplete', campaignClusters);
+    this.emit("clusteringComplete", campaignClusters);
     return campaignClusters;
   }
 
@@ -393,7 +387,7 @@ export class FederationService extends EventEmitter {
    */
   getActiveClusters(): CampaignCluster[] {
     return Array.from(this.activeClusters.values()).filter(
-      (c) => c.status !== ClusterStatus.RESOLVED,
+      (c) => c.status !== ClusterStatus.RESOLVED
     );
   }
 
@@ -405,15 +399,15 @@ export class FederationService extends EventEmitter {
    * Initiate secure aggregation round
    */
   async initiateSecureAggregation(
-    aggregationType: 'SUM' | 'MEAN' | 'COUNT',
-    participantIds: string[],
+    aggregationType: "SUM" | "MEAN" | "COUNT",
+    participantIds: string[]
   ): Promise<{ roundId: string; status: string }> {
     const roundId = uuidv4();
 
     // Check minimum participants
     if (participantIds.length < this.config.secureAggregation.minimumParticipants) {
       throw new Error(
-        `Minimum ${this.config.secureAggregation.minimumParticipants} participants required`,
+        `Minimum ${this.config.secureAggregation.minimumParticipants} participants required`
       );
     }
 
@@ -422,25 +416,22 @@ export class FederationService extends EventEmitter {
       roundId,
       aggregationType,
       participantIds,
-      status: 'COLLECTING',
+      status: "COLLECTING",
       startedAt: new Date(),
       contributions: new Map<string, number[]>(),
     };
 
-    this.emit('secureAggregationStarted', round);
+    this.emit("secureAggregationStarted", round);
 
-    return { roundId, status: 'COLLECTING' };
+    return { roundId, status: "COLLECTING" };
   }
 
   /**
    * Submit masked contribution for secure aggregation
    */
-  async submitSecureContribution(
-    roundId: string,
-    maskedValue: number[],
-  ): Promise<boolean> {
+  async submitSecureContribution(roundId: string, maskedValue: number[]): Promise<boolean> {
     // In production, this would implement SecAgg protocol
-    this.emit('contributionReceived', {
+    this.emit("contributionReceived", {
       roundId,
       participantId: this.config.participantId,
     });
@@ -456,25 +447,23 @@ export class FederationService extends EventEmitter {
    */
   async privatSetIntersection(
     localIndicatorHashes: string[],
-    participantIds: string[],
+    participantIds: string[]
   ): Promise<{ intersectionSize: number; confidence: number }> {
     // Simplified PSI implementation
     // In production, would use actual PSI protocol (e.g., KKRT, OPRF-based)
 
     // Generate random commitments
-    const commitments = localIndicatorHashes.map((hash) =>
-      this.generateCommitment(hash),
-    );
+    const commitments = localIndicatorHashes.map((hash) => this.generateCommitment(hash));
 
     // Simulate intersection computation
     const estimatedIntersection = Math.floor(
-      localIndicatorHashes.length * 0.1 * participantIds.length,
+      localIndicatorHashes.length * 0.1 * participantIds.length
     );
 
     // Add noise for privacy
     const noisyIntersection = this.addLaplaceNoise(
       estimatedIntersection,
-      this.config.differentialPrivacy,
+      this.config.differentialPrivacy
     );
 
     return {
@@ -488,7 +477,7 @@ export class FederationService extends EventEmitter {
    */
   async privateCosineSimilarity(
     localEmbedding: number[],
-    participantId: string,
+    participantId: string
   ): Promise<{ similarity: number; confidence: number }> {
     // Simplified secure similarity computation
     // In production, would use SPDZ or similar MPC framework
@@ -519,10 +508,7 @@ export class FederationService extends EventEmitter {
   /**
    * Check if operation is within privacy budget
    */
-  canPerformOperation(
-    estimatedEpsilon: number,
-    estimatedDelta: number = 0,
-  ): boolean {
+  canPerformOperation(estimatedEpsilon: number, estimatedDelta: number = 0): boolean {
     const budget = this.privacyBudgets.get(this.config.participantId);
     if (!budget) return false;
 
@@ -544,7 +530,7 @@ export class FederationService extends EventEmitter {
       usedEpsilon: 0,
       totalDelta: 1e-5,
       usedDelta: 0,
-      resetPeriod: 'DAILY',
+      resetPeriod: "DAILY",
       lastResetAt: new Date(),
       nextResetAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
     };
@@ -560,7 +546,7 @@ export class FederationService extends EventEmitter {
       usedEpsilon: 0,
       totalDelta: 1e-5,
       usedDelta: 0,
-      resetPeriod: 'DAILY',
+      resetPeriod: "DAILY",
       lastResetAt: new Date(),
       nextResetAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
     };
@@ -580,14 +566,12 @@ export class FederationService extends EventEmitter {
       if (signals.length >= this.config.secureAggregation.minimumParticipants) {
         // Perform aggregation
         const stats = await this.aggregateSignals(signals);
-        this.emit('aggregationComplete', { signalType, stats });
+        this.emit("aggregationComplete", { signalType, stats });
       }
     }
   }
 
-  private async applyPrivacyProtections(
-    signal: CampaignSignal,
-  ): Promise<CampaignSignal> {
+  private async applyPrivacyProtections(signal: CampaignSignal): Promise<CampaignSignal> {
     const protected_ = { ...signal };
 
     switch (signal.privacyLevel) {
@@ -611,7 +595,7 @@ export class FederationService extends EventEmitter {
 
       case PrivacyLevel.INTERNAL_ONLY:
         // Should not be shared
-        throw new Error('Cannot share INTERNAL_ONLY signals');
+        throw new Error("Cannot share INTERNAL_ONLY signals");
     }
 
     return protected_;
@@ -647,28 +631,26 @@ export class FederationService extends EventEmitter {
     return [...new Set(authorized)];
   }
 
-  private calculateSignalPriority(
-    signal: CampaignSignal,
-  ): 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT' {
+  private calculateSignalPriority(signal: CampaignSignal): "LOW" | "NORMAL" | "HIGH" | "URGENT" {
     if (signal.signalType === SignalType.COORDINATION_PATTERN) {
       const coordination = signal.indicator.coordination;
       if (coordination && coordination.synchronicity > 0.8) {
-        return 'URGENT';
+        return "URGENT";
       }
-      return 'HIGH';
+      return "HIGH";
     }
 
     if (signal.confidence > 0.9) {
-      return 'HIGH';
+      return "HIGH";
     }
 
-    return 'NORMAL';
+    return "NORMAL";
   }
 
   private anonymizeParticipantId(participantId: string): string {
-    return createHmac('sha256', this.config.privateKey)
+    return createHmac("sha256", this.config.privateKey)
       .update(participantId)
-      .digest('hex')
+      .digest("hex")
       .substring(0, 16);
   }
 
@@ -701,25 +683,16 @@ export class FederationService extends EventEmitter {
     const signals = this.aggregationWindow.get(key)!;
     this.aggregationWindow.set(
       key,
-      signals.filter((s) => s.timestamp >= cutoff),
+      signals.filter((s) => s.timestamp >= cutoff)
     );
   }
 
-  private collectSignalsInWindow(
-    signalType: SignalType,
-    start: Date,
-    end: Date,
-  ): CampaignSignal[] {
+  private collectSignalsInWindow(signalType: SignalType, start: Date, end: Date): CampaignSignal[] {
     const signals = this.aggregationWindow.get(signalType) || [];
-    return signals.filter(
-      (s) => s.timestamp >= start && s.timestamp <= end,
-    );
+    return signals.filter((s) => s.timestamp >= start && s.timestamp <= end);
   }
 
-  private addLaplaceNoise(
-    value: number,
-    config: DifferentialPrivacyConfig,
-  ): NoisyCount {
+  private addLaplaceNoise(value: number, config: DifferentialPrivacyConfig): NoisyCount {
     // Laplace mechanism for differential privacy
     const scale = config.sensitivityBound / config.epsilon;
     const u = Math.random() - 0.5;
@@ -745,7 +718,7 @@ export class FederationService extends EventEmitter {
 
   private aggregateChannelDistribution(
     signals: CampaignSignal[],
-    dpConfig: DifferentialPrivacyConfig,
+    dpConfig: DifferentialPrivacyConfig
   ): Record<string, NoisyCount> {
     const distribution: Record<string, number> = {};
 
@@ -762,15 +735,11 @@ export class FederationService extends EventEmitter {
     return noisyDistribution;
   }
 
-  private async aggregateSignals(
-    signals: CampaignSignal[],
-  ): Promise<AggregatedStats> {
+  private async aggregateSignals(signals: CampaignSignal[]): Promise<AggregatedStats> {
     return this.queryAggregatedStats(signals[0].signalType, 1);
   }
 
-  private async clusterSignals(
-    signals: CampaignSignal[],
-  ): Promise<CampaignSignal[][]> {
+  private async clusterSignals(signals: CampaignSignal[]): Promise<CampaignSignal[][]> {
     // Simple clustering based on indicator hash similarity
     const clusters: Map<string, CampaignSignal[]> = new Map();
 
@@ -802,23 +771,19 @@ export class FederationService extends EventEmitter {
 
     // Determine threat level
     const coordinationStrength = signals.some((s) => s.indicator.coordination)
-      ? signals.reduce(
-          (max, s) =>
-            Math.max(max, s.indicator.coordination?.synchronicity || 0),
-          0,
-        )
+      ? signals.reduce((max, s) => Math.max(max, s.indicator.coordination?.synchronicity || 0), 0)
       : 0.3;
 
     const threatLevel = calculateThreatLevel(
       signals.length,
       orgs.size,
       velocityMetrics,
-      coordinationStrength,
+      coordinationStrength
     );
 
     // Build privacy-preserved metrics
     const privacyMetrics: PrivacyPreservedMetrics = {
-      aggregationMethod: 'DIFFERENTIAL_PRIVACY',
+      aggregationMethod: "DIFFERENTIAL_PRIVACY",
       epsilon: this.config.differentialPrivacy.epsilon,
       noiseAdded: true,
       minimumThreshold: this.config.secureAggregation.minimumParticipants,
@@ -847,15 +812,13 @@ export class FederationService extends EventEmitter {
       confidenceScore: 0.75,
       attributionHypotheses: [],
       velocityMetrics,
-      growthTrajectory: 'EMERGING',
+      growthTrajectory: "EMERGING",
       crossTenantConfidence: orgs.size > 1 ? 0.9 : 0.6,
       privacyPreservedMetrics: privacyMetrics,
     };
   }
 
-  private buildChannelDistribution(
-    signals: CampaignSignal[],
-  ): Record<string, number> {
+  private buildChannelDistribution(signals: CampaignSignal[]): Record<string, number> {
     const distribution: Record<string, number> = {};
     for (const signal of signals) {
       const channel = signal.channelMetadata.platform;
@@ -866,20 +829,16 @@ export class FederationService extends EventEmitter {
 
   private calculateNoiseMagnitude(): number {
     return (
-      this.config.differentialPrivacy.sensitivityBound /
-      this.config.differentialPrivacy.epsilon
+      this.config.differentialPrivacy.sensitivityBound / this.config.differentialPrivacy.epsilon
     );
   }
 
   private generateCommitment(value: string): string {
-    const nonce = randomBytes(16).toString('hex');
-    return createHash('sha256').update(`${value}:${nonce}`).digest('hex');
+    const nonce = randomBytes(16).toString("hex");
+    return createHash("sha256").update(`${value}:${nonce}`).digest("hex");
   }
 
-  private generateSecretShares(
-    values: number[],
-    numShares: number = 3,
-  ): number[][] {
+  private generateSecretShares(values: number[], numShares: number = 3): number[][] {
     // Simplified Shamir secret sharing
     const shares: number[][] = [];
     for (let i = 0; i < numShares; i++) {
@@ -891,17 +850,17 @@ export class FederationService extends EventEmitter {
   private hashAgreementTerms(
     participantIds: string[],
     signalTypes: SignalType[],
-    privacyLevels: PrivacyLevel[],
+    privacyLevels: PrivacyLevel[]
   ): string {
-    return createHash('sha256')
+    return createHash("sha256")
       .update(
         JSON.stringify({
           participants: participantIds.sort(),
           signals: signalTypes.sort(),
           privacy: privacyLevels.sort(),
-        }),
+        })
       )
-      .digest('hex');
+      .digest("hex");
   }
 
   /**

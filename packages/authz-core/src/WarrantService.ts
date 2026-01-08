@@ -10,18 +10,12 @@
  * - Usage tracking and audit
  */
 
-import { Pool } from 'pg';
-import pino from 'pino';
-import type {
-  Warrant,
-  WarrantType,
-  WarrantStatus,
-  WarrantValidationResult,
-  Action,
-} from './types';
-import { WarrantError } from './types';
+import { Pool } from "pg";
+import pino from "pino";
+import type { Warrant, WarrantType, WarrantStatus, WarrantValidationResult, Action } from "./types";
+import { WarrantError } from "./types";
 
-const logger = pino({ name: 'warrant-service' });
+const logger = pino({ name: "warrant-service" });
 
 // ============================================================================
 // Interfaces
@@ -65,7 +59,7 @@ export interface ApproveWarrantInput {
   warrantId: string;
   approverUserId: string;
   approverRole: string;
-  decision: 'APPROVED' | 'REJECTED';
+  decision: "APPROVED" | "REJECTED";
   reason: string;
 }
 
@@ -80,7 +74,7 @@ export interface WarrantUsageInput {
   resourceType: string;
   resourceId: string;
   purpose: string;
-  authorizationDecision: 'ALLOW' | 'DENY' | 'CHALLENGE';
+  authorizationDecision: "ALLOW" | "DENY" | "CHALLENGE";
   decisionReason: string;
   investigationId?: string;
   caseReference?: string;
@@ -99,7 +93,8 @@ export class WarrantService {
 
   constructor(databaseUrl?: string) {
     this.db = new Pool({
-      connectionString: databaseUrl || process.env.DATABASE_URL || 'postgresql://localhost:5432/intelgraph',
+      connectionString:
+        databaseUrl || process.env.DATABASE_URL || "postgresql://localhost:5432/intelgraph",
       max: 20,
     });
   }
@@ -115,7 +110,7 @@ export class WarrantService {
     const client = await this.db.connect();
 
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
 
       // Validate warrant doesn't already exist
       const existing = await client.query(
@@ -127,7 +122,7 @@ export class WarrantService {
       if (existing.rows.length > 0) {
         throw new WarrantError(
           `Warrant ${input.warrantNumber} already exists for tenant ${input.tenantId}`,
-          'WARRANT_ALREADY_EXISTS',
+          "WARRANT_ALREADY_EXISTS",
           400
         );
       }
@@ -166,8 +161,8 @@ export class WarrantService {
           input.documentUrl || null,
           input.documentHash || null,
           input.createdBy,
-          input.requiresApproval ? 'PENDING' : 'ACTIVE',
-          input.requiresApproval ? 'PENDING' : null,
+          input.requiresApproval ? "PENDING" : "ACTIVE",
+          input.requiresApproval ? "PENDING" : null,
         ]
       );
 
@@ -180,21 +175,29 @@ export class WarrantService {
 
       // Schedule expiration alert if expiry date exists
       if (input.expiryDate) {
-        await this.scheduleExpirationAlert(client, warrant.warrantId, input.tenantId, input.expiryDate);
+        await this.scheduleExpirationAlert(
+          client,
+          warrant.warrantId,
+          input.tenantId,
+          input.expiryDate
+        );
       }
 
-      await client.query('COMMIT');
+      await client.query("COMMIT");
 
       logger.info(
-        { warrantId: warrant.warrantId, warrantNumber: input.warrantNumber, tenantId: input.tenantId },
-        'Warrant created'
+        {
+          warrantId: warrant.warrantId,
+          warrantNumber: input.warrantNumber,
+          tenantId: input.tenantId,
+        },
+        "Warrant created"
       );
 
       return warrant;
-
     } catch (error) {
-      await client.query('ROLLBACK');
-      logger.error({ error, input }, 'Failed to create warrant');
+      await client.query("ROLLBACK");
+      logger.error({ error, input }, "Failed to create warrant");
       throw error;
     } finally {
       client.release();
@@ -219,16 +222,12 @@ export class WarrantService {
       );
 
       if (result.rowCount === 0) {
-        throw new WarrantError('Warrant not found', 'WARRANT_NOT_FOUND', 404);
+        throw new WarrantError("Warrant not found", "WARRANT_NOT_FOUND", 404);
       }
 
-      logger.info(
-        { warrantId, status, updatedBy, reason },
-        'Warrant status updated'
-      );
-
+      logger.info({ warrantId, status, updatedBy, reason }, "Warrant status updated");
     } catch (error) {
-      logger.error({ error, warrantId, status }, 'Failed to update warrant status');
+      logger.error({ error, warrantId, status }, "Failed to update warrant status");
       throw error;
     }
   }
@@ -244,7 +243,7 @@ export class WarrantService {
     const client = await this.db.connect();
 
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
 
       // Validate warrant exists and is active
       const warrantResult = await client.query(
@@ -253,20 +252,20 @@ export class WarrantService {
       );
 
       if (warrantResult.rows.length === 0) {
-        throw new WarrantError('Warrant not found', 'WARRANT_NOT_FOUND', 404);
+        throw new WarrantError("Warrant not found", "WARRANT_NOT_FOUND", 404);
       }
 
       const warrant = warrantResult.rows[0];
-      if (warrant.status !== 'ACTIVE') {
+      if (warrant.status !== "ACTIVE") {
         throw new WarrantError(
           `Cannot bind warrant with status ${warrant.status}`,
-          'WARRANT_NOT_ACTIVE',
+          "WARRANT_NOT_ACTIVE",
           400
         );
       }
 
       if (warrant.expiry_date && new Date(warrant.expiry_date) < new Date()) {
-        throw new WarrantError('Warrant has expired', 'WARRANT_EXPIRED', 400);
+        throw new WarrantError("Warrant has expired", "WARRANT_EXPIRED", 400);
       }
 
       // Check for existing active binding
@@ -310,7 +309,7 @@ export class WarrantService {
 
       const bindingId = result.rows[0].binding_id;
 
-      await client.query('COMMIT');
+      await client.query("COMMIT");
 
       logger.info(
         {
@@ -319,14 +318,13 @@ export class WarrantService {
           resourceType: input.resourceType,
           resourceId: input.resourceId,
         },
-        'Warrant bound to resource'
+        "Warrant bound to resource"
       );
 
       return bindingId;
-
     } catch (error) {
-      await client.query('ROLLBACK');
-      logger.error({ error, input }, 'Failed to bind warrant');
+      await client.query("ROLLBACK");
+      logger.error({ error, input }, "Failed to bind warrant");
       throw error;
     } finally {
       client.release();
@@ -336,11 +334,7 @@ export class WarrantService {
   /**
    * Unbind warrant from resource
    */
-  async unbindWarrant(
-    bindingId: string,
-    unboundBy: string,
-    reason: string
-  ): Promise<void> {
+  async unbindWarrant(bindingId: string, unboundBy: string, reason: string): Promise<void> {
     try {
       const result = await this.db.query(
         `UPDATE warrant_bindings
@@ -353,13 +347,12 @@ export class WarrantService {
       );
 
       if (result.rowCount === 0) {
-        throw new WarrantError('Active binding not found', 'BINDING_NOT_FOUND', 404);
+        throw new WarrantError("Active binding not found", "BINDING_NOT_FOUND", 404);
       }
 
-      logger.info({ bindingId, unboundBy, reason }, 'Warrant unbound from resource');
-
+      logger.info({ bindingId, unboundBy, reason }, "Warrant unbound from resource");
     } catch (error) {
-      logger.error({ error, bindingId }, 'Failed to unbind warrant');
+      logger.error({ error, bindingId }, "Failed to unbind warrant");
       throw error;
     }
   }
@@ -392,34 +385,33 @@ export class WarrantService {
         );
 
         if (warrantResult.rows.length === 0) {
-          return { valid: false, reason: 'Warrant not found' };
+          return { valid: false, reason: "Warrant not found" };
         }
 
         const warrant = warrantResult.rows[0];
 
-        if (warrant.status !== 'ACTIVE') {
+        if (warrant.status !== "ACTIVE") {
           return { valid: false, reason: `Warrant status is ${warrant.status}` };
         }
 
         if (warrant.expiry_date && new Date(warrant.expiry_date) < new Date()) {
-          return { valid: false, reason: 'Warrant has expired' };
+          return { valid: false, reason: "Warrant has expired" };
         }
 
         if (!warrant.permitted_actions.includes(action)) {
           return {
             valid: false,
-            reason: `Action '${action}' not permitted by warrant. Allowed: ${warrant.permitted_actions.join(', ')}`,
+            reason: `Action '${action}' not permitted by warrant. Allowed: ${warrant.permitted_actions.join(", ")}`,
           };
         }
 
-        return { valid: false, reason: 'Warrant validation failed' };
+        return { valid: false, reason: "Warrant validation failed" };
       }
 
       // Fetch full warrant details
-      const warrantResult = await this.db.query(
-        `SELECT * FROM warrants WHERE warrant_id = $1`,
-        [warrantId]
-      );
+      const warrantResult = await this.db.query(`SELECT * FROM warrants WHERE warrant_id = $1`, [
+        warrantId,
+      ]);
 
       const warrant = this.mapRowToWarrant(warrantResult.rows[0]);
 
@@ -434,10 +426,9 @@ export class WarrantService {
         warrant,
         expiresIn,
       };
-
     } catch (error) {
-      logger.error({ error, warrantId }, 'Warrant validation error');
-      return { valid: false, reason: 'Warrant validation failed' };
+      logger.error({ error, warrantId }, "Warrant validation error");
+      return { valid: false, reason: "Warrant validation failed" };
     }
   }
 
@@ -469,9 +460,8 @@ export class WarrantService {
       }
 
       return this.mapRowToWarrant(result.rows[0]);
-
     } catch (error) {
-      logger.error({ error, tenantId, resourceType, resourceId }, 'Failed to get active warrant');
+      logger.error({ error, tenantId, resourceType, resourceId }, "Failed to get active warrant");
       return null;
     }
   }
@@ -496,7 +486,7 @@ export class WarrantService {
         warrant_id, tenant_id, required_approvers, required_roles,
         approval_sequence, sla_deadline
       ) VALUES ($1, $2, $3, $4, $5, $6)`,
-      [warrantId, tenantId, 1, ['ADMIN', 'LEGAL'], 'ANY', slaDeadline]
+      [warrantId, tenantId, 1, ["ADMIN", "LEGAL"], "ANY", slaDeadline]
     );
   }
 
@@ -507,7 +497,7 @@ export class WarrantService {
     const client = await this.db.connect();
 
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
 
       // Get workflow
       const workflowResult = await client.query(
@@ -517,7 +507,7 @@ export class WarrantService {
       );
 
       if (workflowResult.rows.length === 0) {
-        throw new WarrantError('No pending approval workflow', 'NO_PENDING_WORKFLOW', 400);
+        throw new WarrantError("No pending approval workflow", "NO_PENDING_WORKFLOW", 400);
       }
 
       const workflow = workflowResult.rows[0];
@@ -525,8 +515,8 @@ export class WarrantService {
       // Validate approver has required role
       if (!workflow.required_roles.includes(input.approverRole)) {
         throw new WarrantError(
-          `Role ${input.approverRole} not authorized to approve. Required: ${workflow.required_roles.join(', ')}`,
-          'UNAUTHORIZED_APPROVER',
+          `Role ${input.approverRole} not authorized to approve. Required: ${workflow.required_roles.join(", ")}`,
+          "UNAUTHORIZED_APPROVER",
           403
         );
       }
@@ -542,13 +532,13 @@ export class WarrantService {
           1,
           input.approverRole,
           input.approverUserId,
-          input.decision === 'APPROVED' ? 'APPROVED' : 'REJECTED',
+          input.decision === "APPROVED" ? "APPROVED" : "REJECTED",
           input.reason,
         ]
       );
 
       // Update workflow status
-      const newWorkflowStatus = input.decision === 'APPROVED' ? 'APPROVED' : 'REJECTED';
+      const newWorkflowStatus = input.decision === "APPROVED" ? "APPROVED" : "REJECTED";
       await client.query(
         `UPDATE warrant_approval_workflow
          SET workflow_status = $1, completed_at = NOW()
@@ -557,7 +547,7 @@ export class WarrantService {
       );
 
       // Update warrant
-      const newWarrantStatus = input.decision === 'APPROVED' ? 'ACTIVE' : 'PENDING';
+      const newWarrantStatus = input.decision === "APPROVED" ? "ACTIVE" : "PENDING";
       await client.query(
         `UPDATE warrants
          SET approval_status = $1,
@@ -569,16 +559,15 @@ export class WarrantService {
         [input.decision, newWarrantStatus, input.approverUserId, input.reason, input.warrantId]
       );
 
-      await client.query('COMMIT');
+      await client.query("COMMIT");
 
       logger.info(
         { warrantId: input.warrantId, decision: input.decision, approver: input.approverUserId },
-        'Warrant approval decision recorded'
+        "Warrant approval decision recorded"
       );
-
     } catch (error) {
-      await client.query('ROLLBACK');
-      logger.error({ error, input }, 'Failed to process warrant approval');
+      await client.query("ROLLBACK");
+      logger.error({ error, input }, "Failed to process warrant approval");
       throw error;
     } finally {
       client.release();
@@ -608,7 +597,7 @@ export class WarrantService {
         `INSERT INTO warrant_expiration_alerts (
           warrant_id, tenant_id, alert_type, scheduled_for, notify_roles
         ) VALUES ($1, $2, $3, $4, $5)`,
-        [warrantId, tenantId, 'APPROACHING_EXPIRY', alertDate, ['ADMIN', 'LEGAL']]
+        [warrantId, tenantId, "APPROACHING_EXPIRY", alertDate, ["ADMIN", "LEGAL"]]
       );
     }
   }
@@ -648,20 +637,18 @@ export class WarrantService {
               warrantNumber: alert.warrant_number,
               expiryDate: alert.expiry_date,
             },
-            'Warrant expiration alert sent'
+            "Warrant expiration alert sent"
           );
 
           processedCount++;
-
         } catch (error) {
-          logger.error({ error, alert }, 'Failed to process expiration alert');
+          logger.error({ error, alert }, "Failed to process expiration alert");
         }
       }
 
       return processedCount;
-
     } catch (error) {
-      logger.error({ error }, 'Failed to process expiration alerts');
+      logger.error({ error }, "Failed to process expiration alerts");
       return 0;
     }
   }
@@ -715,9 +702,8 @@ export class WarrantService {
           [input.bindingId]
         );
       }
-
     } catch (error) {
-      logger.error({ error, input }, 'Failed to log warrant usage');
+      logger.error({ error, input }, "Failed to log warrant usage");
       // Don't throw - logging failure shouldn't block authorization
     }
   }
@@ -739,7 +725,7 @@ export class WarrantService {
       jurisdiction: row.jurisdiction,
       caseNumber: row.case_number,
       legalBasis: row.legal_basis,
-      scope: typeof row.scope === 'string' ? JSON.parse(row.scope) : row.scope,
+      scope: typeof row.scope === "string" ? JSON.parse(row.scope) : row.scope,
       scopeDescription: row.scope_description,
       permittedActions: row.permitted_actions,
       targetSubjects: row.target_subjects,

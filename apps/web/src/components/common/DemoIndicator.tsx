@@ -15,7 +15,7 @@ export function DemoIndicator(): React.ReactElement | null {
   const isDemoMode = useDemoModeFlag()
 
   if (!isDemoMode) {
-    return null;
+    return null
   }
 
   return (
@@ -36,11 +36,15 @@ export function DemoIndicator(): React.ReactElement | null {
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
       }}
     >
-      <span role="img" aria-label="warning">⚠️</span>
-      {' '}DEMO MODE - Data shown is for demonstration purposes only{' '}
-      <span role="img" aria-label="warning">⚠️</span>
+      <span role="img" aria-label="warning">
+        ⚠️
+      </span>{' '}
+      DEMO MODE - Data shown is for demonstration purposes only{' '}
+      <span role="img" aria-label="warning">
+        ⚠️
+      </span>
     </div>
-  );
+  )
 }
 
 /**
@@ -54,11 +58,15 @@ export function useDemoMode(): boolean {
  * Floating badge version of the demo indicator
  * Can be placed anywhere in the UI
  */
-export function DemoBadge({ className = '' }: { className?: string }): React.ReactElement | null {
+export function DemoBadge({
+  className = '',
+}: {
+  className?: string
+}): React.ReactElement | null {
   const isDemoMode = useDemoModeFlag()
 
   if (!isDemoMode) {
-    return null;
+    return null
   }
 
   return (
@@ -79,7 +87,7 @@ export function DemoBadge({ className = '' }: { className?: string }): React.Rea
     >
       DEMO
     </span>
-  );
+  )
 }
 
-export default DemoIndicator;
+export default DemoIndicator

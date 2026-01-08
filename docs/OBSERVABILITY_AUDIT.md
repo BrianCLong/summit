@@ -82,12 +82,14 @@ This document captures the current state of observability in the Summit/IntelGra
 **Goal**: Full end-to-end tracing across all services
 
 #### 1.1 Deploy Tracing Backend
+
 - [ ] Add Jaeger or Tempo to `docker-compose.dev.yml`
 - [ ] Configure OTLP receiver endpoints
 - [ ] Set up trace storage (in-memory for dev, persistent for prod)
 - [ ] Add Jaeger UI service
 
 #### 1.2 Instrument All Services
+
 - [ ] **API Server**: Enhance existing OpenTelemetry setup
 - [ ] **Gateway**: Add OpenTelemetry SDK with HTTP/gRPC instrumentation
 - [ ] **Web Client**: Add browser tracing (RUM)
@@ -96,12 +98,14 @@ This document captures the current state of observability in the Summit/IntelGra
 - [ ] **External Calls**: HTTP client instrumentation
 
 #### 1.3 Context Propagation
+
 - [ ] Implement W3C Trace Context headers
 - [ ] Add correlation IDs to all HTTP requests
 - [ ] Propagate trace context in GraphQL federation
 - [ ] Add baggage for user context (tenant, user ID)
 
 #### 1.4 Sampling & Performance
+
 - [ ] Configure head-based sampling (1.0 for dev, 0.1 for prod)
 - [ ] Implement tail-based sampling for errors
 - [ ] Optimize trace payload sizes
@@ -111,18 +115,21 @@ This document captures the current state of observability in the Summit/IntelGra
 **Goal**: Consistent, queryable, correlated logs across all services
 
 #### 2.1 Standardize on Pino
+
 - [ ] Create shared logging package: `packages/logger/`
 - [ ] Migrate all services from Winston to Pino
 - [ ] Define standard log schema with required fields:
   - `timestamp`, `level`, `service`, `traceId`, `spanId`, `userId`, `tenantId`, `message`, `error`
 
 #### 2.2 Deploy Log Aggregation
+
 - [ ] Add Loki to `docker-compose.dev.yml`
 - [ ] Configure Promtail for log collection
 - [ ] Set up Grafana Loki data source
 - [ ] Create log retention policies
 
 #### 2.3 Log Correlation
+
 - [ ] Extract trace context from OpenTelemetry
 - [ ] Inject `traceId` and `spanId` into all log entries
 - [ ] Add user/tenant context to logs
@@ -133,12 +140,14 @@ This document captures the current state of observability in the Summit/IntelGra
 **Goal**: Real-time visibility into system health and performance
 
 #### 3.1 Golden Signals Dashboards
+
 - [ ] **Latency**: P50, P95, P99 for all endpoints
 - [ ] **Traffic**: Request rate by service, endpoint, status code
 - [ ] **Errors**: Error rate, error budget burn
 - [ ] **Saturation**: CPU, memory, disk, connection pools
 
 #### 3.2 Service-Specific Dashboards
+
 - [ ] **API Server**: GraphQL operations, resolver performance
 - [ ] **Gateway**: Routing latency, upstream health
 - [ ] **Neo4j**: Cypher query performance, transaction rate, heap usage
@@ -147,12 +156,14 @@ This document captures the current state of observability in the Summit/IntelGra
 - [ ] **BullMQ**: Job queue depth, processing rate, failures
 
 #### 3.3 Frontend Performance
+
 - [ ] Core Web Vitals (LCP, FID, CLS)
 - [ ] Bundle size and load time
 - [ ] API call latency from client perspective
 - [ ] User journey funnels
 
 #### 3.4 Business Metrics
+
 - [ ] Investigations created/updated
 - [ ] Entities and relationships added
 - [ ] Copilot queries processed
@@ -163,6 +174,7 @@ This document captures the current state of observability in the Summit/IntelGra
 **Goal**: Proactive incident detection with actionable alerts
 
 #### 4.1 Define SLOs
+
 - [ ] **API**: 99.9% availability, P99 < 500ms
 - [ ] **Gateway**: 99.95% availability, P99 < 100ms
 - [ ] **Web**: 99.9% availability, P95 < 2s page load
@@ -170,18 +182,21 @@ This document captures the current state of observability in the Summit/IntelGra
 - [ ] **Databases**: 99.99% availability, P99 query < 1s
 
 #### 4.2 Multi-Window Burn Rate Alerts
+
 - [ ] Implement 2-hour / 1-hour fast burn (×14.4 burn rate)
 - [ ] Implement 6-hour / 30-min medium burn (×6 burn rate)
 - [ ] Implement 24-hour / 2-hour slow burn (×3 burn rate)
 - [ ] Add 3-day / 6-hour early warning (×1 burn rate)
 
 #### 4.3 Resource Alerts
+
 - [ ] Disk space < 20% free
 - [ ] Memory usage > 85%
 - [ ] CPU sustained > 80% for 5min
 - [ ] Database connection pool > 80% utilized
 
 #### 4.4 Alert Routing
+
 - [ ] Configure AlertManager with routing rules
 - [ ] Set up Slack/PagerDuty integrations
 - [ ] Define escalation policies
@@ -192,6 +207,7 @@ This document captures the current state of observability in the Summit/IntelGra
 **Goal**: Codify troubleshooting procedures for common observability scenarios
 
 #### 5.1 Create Runbooks
+
 - [ ] **High Latency Investigation**
   - Check trace spans, identify slow operations
   - Database query analysis
@@ -211,13 +227,13 @@ This document captures the current state of observability in the Summit/IntelGra
 
 ## Implementation Timeline
 
-| Phase | Tasks | Duration | Priority |
-|-------|-------|----------|----------|
-| **Phase 1** | Distributed Tracing | 2 weeks | High |
-| **Phase 2** | Structured Logging | 1 week | High |
-| **Phase 3** | Dashboards | 1 week | Medium |
-| **Phase 4** | Alerting & SLOs | 1 week | Medium |
-| **Phase 5** | Runbooks | 3 days | Low |
+| Phase       | Tasks               | Duration | Priority |
+| ----------- | ------------------- | -------- | -------- |
+| **Phase 1** | Distributed Tracing | 2 weeks  | High     |
+| **Phase 2** | Structured Logging  | 1 week   | High     |
+| **Phase 3** | Dashboards          | 1 week   | Medium   |
+| **Phase 4** | Alerting & SLOs     | 1 week   | Medium   |
+| **Phase 5** | Runbooks            | 3 days   | Low      |
 
 **Total Estimated Time**: 5-6 weeks
 
@@ -233,12 +249,12 @@ This document captures the current state of observability in the Summit/IntelGra
 
 ## Risk Assessment
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Performance overhead from tracing | Medium | Medium | Use sampling, optimize span creation |
-| Log volume explosion | High | Medium | Implement retention policies, sampling |
-| Alert fatigue | Medium | High | Tune thresholds, use multi-window alerts |
-| Integration complexity | Low | Low | Use standard OTLP protocol |
+| Risk                              | Likelihood | Impact | Mitigation                               |
+| --------------------------------- | ---------- | ------ | ---------------------------------------- |
+| Performance overhead from tracing | Medium     | Medium | Use sampling, optimize span creation     |
+| Log volume explosion              | High       | Medium | Implement retention policies, sampling   |
+| Alert fatigue                     | Medium     | High   | Tune thresholds, use multi-window alerts |
+| Integration complexity            | Low        | Low    | Use standard OTLP protocol               |
 
 ## Dependencies
 
@@ -259,6 +275,7 @@ This document captures the current state of observability in the Summit/IntelGra
 ---
 
 **Next Steps**:
+
 1. Review and approve this enhancement plan
 2. Prioritize phases based on business needs
 3. Assign ownership for each phase

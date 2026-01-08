@@ -83,7 +83,7 @@ export function EntityDrawer({
 
       const response = await fetch(
         `/api/entities/${selectedEntity.id}/comments`,
-        { headers },
+        { headers }
       )
 
       if (!response.ok) {
@@ -128,7 +128,7 @@ export function EntityDrawer({
             entityLabel: selectedEntity.name,
             metadata: { source: 'entity-inspector' },
           }),
-        },
+        }
       )
 
       if (!response.ok) {
@@ -187,7 +187,9 @@ export function EntityDrawer({
   }
 
   const getRelatedEntities = () => {
-    if (!selectedEntity) {return []}
+    if (!selectedEntity) {
+      return []
+    }
 
     const relatedIds = relationships
       .filter(
@@ -516,8 +518,7 @@ export function EntityDrawer({
                     <Card key={comment.id}>
                       <CardHeader className="pb-2">
                         <CardTitle className="text-xs text-muted-foreground">
-                          {comment.authorId} •{' '}
-                          {formatDate(comment.createdAt)}
+                          {comment.authorId} • {formatDate(comment.createdAt)}
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-3 text-sm">

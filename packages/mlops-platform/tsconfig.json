@@ -10,8 +10,5 @@
     "tsBuildInfoFile": "dist/.tsbuildinfo"
   },
   "include": ["src"],
-  "references": [
-    { "path": "../common-types" },
-    { "path": "../types" }
-  ]
+  "references": [{ "path": "../common-types" }, { "path": "../types" }]
 }

@@ -1,4 +1,4 @@
-import EventEmitter from 'eventemitter3';
+import EventEmitter from "eventemitter3";
 
 /**
  * Event bus for plugin system events and webhooks
@@ -30,7 +30,7 @@ export class PluginEventBus extends EventEmitter {
    */
   unsubscribeWebhook(subscriptionId: string): boolean {
     for (const [event, subscriptions] of this.webhookSubscriptions.entries()) {
-      const index = subscriptions.findIndex(sub => sub.id === subscriptionId);
+      const index = subscriptions.findIndex((sub) => sub.id === subscriptionId);
       if (index !== -1) {
         subscriptions.splice(index, 1);
         if (subscriptions.length === 0) {
@@ -48,7 +48,7 @@ export class PluginEventBus extends EventEmitter {
   async emitEvent(event: string, data: any, tenantId?: string): Promise<void> {
     const resolvedTenant = tenantId || data?.tenantId;
     if (!resolvedTenant) {
-      throw new Error('Tenant ID is required to emit plugin events');
+      throw new Error("Tenant ID is required to emit plugin events");
     }
 
     const eventKey = this.partitionedEvent(event, resolvedTenant);
@@ -73,21 +73,19 @@ export class PluginEventBus extends EventEmitter {
     let history = this.eventHistory;
 
     if (filter?.event) {
-      history = history.filter(record => record.event === filter.event);
+      history = history.filter((record) => record.event === filter.event);
     }
 
     if (filter?.tenantId) {
-      history = history.filter(
-        record => record.tenantId === filter.tenantId,
-      );
+      history = history.filter((record) => record.tenantId === filter.tenantId);
     }
 
     if (filter?.since) {
-      history = history.filter(record => record.timestamp >= filter.since!);
+      history = history.filter((record) => record.timestamp >= filter.since!);
     }
 
     if (filter?.until) {
-      history = history.filter(record => record.timestamp <= filter.until!);
+      history = history.filter((record) => record.timestamp <= filter.until!);
     }
 
     return history;
@@ -96,7 +94,10 @@ export class PluginEventBus extends EventEmitter {
   /**
    * Replay events
    */
-  async replayEvents(filter: EventFilter, handler: (record: EventRecord) => Promise<void>): Promise<void> {
+  async replayEvents(
+    filter: EventFilter,
+    handler: (record: EventRecord) => Promise<void>
+  ): Promise<void> {
     const events = this.getHistory(filter);
 
     for (const record of events) {
@@ -143,10 +144,10 @@ export class PluginEventBus extends EventEmitter {
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         const response = await fetch(url, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            'X-Webhook-Signature': this.generateSignature(payload),
+            "Content-Type": "application/json",
+            "X-Webhook-Signature": this.generateSignature(payload),
           },
           body: JSON.stringify(payload),
         });
@@ -157,7 +158,7 @@ export class PluginEventBus extends EventEmitter {
 
         lastError = new Error(`Webhook returned status ${response.status}`);
       } catch (error) {
-        lastError = error instanceof Error ? error : new Error('Unknown error');
+        lastError = error instanceof Error ? error : new Error("Unknown error");
       }
 
       // Wait before retry (exponential backoff)
@@ -171,7 +172,7 @@ export class PluginEventBus extends EventEmitter {
       await this.sendToDeadLetterQueue({
         url,
         payload,
-        error: lastError?.message || 'Unknown error',
+        error: lastError?.message || "Unknown error",
         timestamp: new Date(),
       });
     }
@@ -194,7 +195,7 @@ export class PluginEventBus extends EventEmitter {
    */
   private generateSignature(payload: any): string {
     // Would use HMAC signature in production
-    return 'signature';
+    return "signature";
   }
 
   /**
@@ -202,7 +203,7 @@ export class PluginEventBus extends EventEmitter {
    */
   private async sendToDeadLetterQueue(failedWebhook: any): Promise<void> {
     // Would send to actual DLQ (Redis, SQS, etc.)
-    console.error('Webhook failed, sending to DLQ:', failedWebhook);
+    console.error("Webhook failed, sending to DLQ:", failedWebhook);
   }
 
   /**
@@ -220,7 +221,7 @@ export class PluginEventBus extends EventEmitter {
    * Sleep utility
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 

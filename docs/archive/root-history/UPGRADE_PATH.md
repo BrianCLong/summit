@@ -10,12 +10,12 @@ This document provides a step-by-step upgrade path for consolidating and updatin
 
 ## Quick Reference
 
-| Phase | Focus | Duration | Risk | Status |
-|-------|-------|----------|------|--------|
-| **Phase 1** | Security Hardening | 1 week | LOW | 🔴 Not Started |
-| **Phase 2** | Version Consolidation | 2-3 weeks | MEDIUM | 🔴 Not Started |
-| **Phase 3** | Dependency Cleanup | 1 week | LOW | 🔴 Not Started |
-| **Phase 4** | Automation & Governance | Ongoing | LOW | 🔴 Not Started |
+| Phase       | Focus                   | Duration  | Risk   | Status         |
+| ----------- | ----------------------- | --------- | ------ | -------------- |
+| **Phase 1** | Security Hardening      | 1 week    | LOW    | 🔴 Not Started |
+| **Phase 2** | Version Consolidation   | 2-3 weeks | MEDIUM | 🔴 Not Started |
+| **Phase 3** | Dependency Cleanup      | 1 week    | LOW    | 🔴 Not Started |
+| **Phase 4** | Automation & Governance | Ongoing   | LOW    | 🔴 Not Started |
 
 **Legend**: 🔴 Not Started | 🟡 In Progress | 🟢 Complete
 
@@ -39,6 +39,7 @@ pnpm audit | grep parse-url
 ```
 
 **Verification**:
+
 - [ ] All instances of parse-url are ≥8.1.0
 - [ ] No parse-url vulnerabilities in `pnpm audit`
 
@@ -55,6 +56,7 @@ pnpm audit | grep parse-path
 ```
 
 **Verification**:
+
 - [ ] All instances of parse-path are ≥5.0.0
 - [ ] No parse-path vulnerabilities in `pnpm audit`
 
@@ -71,6 +73,7 @@ pnpm list moment -r --depth=0
 ```
 
 **Verification**:
+
 - [ ] All instances of moment are ≥2.29.4
 - [ ] OR migration plan to date-fns/dayjs created
 
@@ -89,6 +92,7 @@ pnpm audit | grep glob
 ```
 
 **Verification**:
+
 - [ ] All instances of glob are ≥11.1.0
 - [ ] No glob vulnerabilities in `pnpm audit`
 
@@ -105,6 +109,7 @@ pnpm list esbuild -r --depth=0
 ```
 
 **Verification**:
+
 - [ ] All instances of esbuild are ≥0.25.0
 - [ ] Dev servers tested and functioning
 
@@ -115,6 +120,7 @@ pnpm list esbuild -r --depth=0
 **Options**:
 
 **Option A**: Remove xlsx dependency
+
 ```bash
 # Identify where xlsx is used
 pnpm why xlsx
@@ -124,6 +130,7 @@ pnpm remove xlsx -r
 ```
 
 **Option B**: Replace with maintained alternative
+
 ```bash
 # Install alternative (e.g., exceljs)
 pnpm add exceljs -r
@@ -133,12 +140,14 @@ pnpm remove xlsx -r
 ```
 
 **Option C**: Accept risk with documentation
+
 ```bash
 # Document in SECURITY.md that xlsx is used only for trusted input
 # Add to known issues tracker
 ```
 
 **Decision Required**:
+
 - [ ] xlsx usage assessed
 - [ ] Migration strategy chosen (A, B, or C)
 - [ ] Implementation completed
@@ -158,6 +167,7 @@ pip freeze | grep fastapi >> requirements.txt.new
 ```
 
 **Verification**:
+
 - [ ] fastapi ≥0.109.1 in copilot/requirements.txt
 - [ ] Application tested and functional
 - [ ] `pip-audit` shows no fastapi vulnerabilities
@@ -173,6 +183,7 @@ pip install --upgrade "python-jose>=3.4.0"
 ```
 
 **Verification**:
+
 - [ ] python-jose ≥3.4.0
 - [ ] JWT functionality tested
 - [ ] No ECDSA key algorithm confusion issues
@@ -188,6 +199,7 @@ pip install --upgrade "python-multipart>=0.0.18"
 ```
 
 **Verification**:
+
 - [ ] python-multipart ≥0.0.18
 - [ ] Form data parsing tested
 - [ ] No ReDoS vulnerabilities
@@ -203,6 +215,7 @@ pip install --upgrade "starlette>=0.47.2"
 ```
 
 **Verification**:
+
 - [ ] starlette ≥0.47.2
 - [ ] Application tested
 - [ ] File upload functionality verified
@@ -214,6 +227,7 @@ pip install --upgrade "starlette>=0.47.2"
 **Options**:
 
 **Option A**: Replace with cryptography library
+
 ```bash
 pip install cryptography
 # Migrate code to use cryptography instead of ecdsa
@@ -221,11 +235,13 @@ pip uninstall ecdsa
 ```
 
 **Option B**: Accept risk with documentation
+
 - Note: Maintainer considers side-channel attacks out of scope
 - Document that ecdsa is used in non-critical contexts
 - Add to security exceptions
 
 **Decision Required**:
+
 - [ ] ecdsa usage assessed
 - [ ] Migration strategy chosen
 - [ ] Implementation completed or exception documented
@@ -246,6 +262,7 @@ find . -name "requirements.txt" -not -path "*/node_modules/*" \
 ```
 
 **Verification**:
+
 - [ ] `pnpm audit` shows 0 vulnerabilities (or only accepted exceptions)
 - [ ] `pip-audit` shows 0 vulnerabilities (or only accepted exceptions)
 
@@ -261,6 +278,7 @@ make smoke
 ```
 
 **Verification**:
+
 - [ ] All services start successfully
 - [ ] Smoke tests pass
 - [ ] No regression in core functionality
@@ -281,6 +299,7 @@ pnpm typecheck
 ```
 
 **Verification**:
+
 - [ ] All tests pass
 - [ ] No linting errors
 - [ ] No type errors
@@ -319,11 +338,13 @@ pnpm list typescript -r --depth=0
 ```
 
 **Manual Steps**:
+
 1. Review `tsconfig.json` files for compatibility
 2. Check for TypeScript 5.9-specific breaking changes
 3. Update any type-related code if needed
 
 **Verification**:
+
 - [ ] All package.json files use `"typescript": "^5.9.3"`
 - [ ] `pnpm install` succeeds
 - [ ] `pnpm typecheck` passes
@@ -348,6 +369,7 @@ pnpm install
 ```
 
 **Verification**:
+
 - [ ] All package.json files use `"@types/node": "^24.10.1"`
 - [ ] Type checking passes
 - [ ] No Node.js API type errors
@@ -363,6 +385,7 @@ pnpm install
 **Strategy**: Two-phase approach
 
 **Phase 1**: Migrate ESLint 8.x packages to 9.x
+
 ```bash
 # Find ESLint 8.x packages
 grep -r '"eslint": *"^8' . --include="package.json" | grep -v node_modules
@@ -372,6 +395,7 @@ grep -r '"eslint": *"^8' . --include="package.json" | grep -v node_modules
 ```
 
 **Phase 2**: Consolidate all to ^9.39.1
+
 ```bash
 find . -name "package.json" -not -path "*/node_modules/*" -not -path "*/.archive/*" | while read file; do
   sed -i 's/"eslint": *"[^"]*"/"eslint": "^9.39.1"/' "$file"
@@ -382,6 +406,7 @@ pnpm lint
 ```
 
 **Verification**:
+
 - [ ] All ESLint 8.x packages migrated
 - [ ] All package.json files use `"eslint": "^9.39.1"`
 - [ ] `pnpm lint` passes
@@ -398,11 +423,13 @@ pnpm lint
 **Migration Steps**:
 
 1. **Identify Jest 29.x packages**:
+
 ```bash
 grep -r '"jest": *"^29' . --include="package.json" | grep -v node_modules
 ```
 
 2. **Update to Jest 30.x**:
+
 ```bash
 find . -name "package.json" -not -path "*/node_modules/*" | while read file; do
   sed -i 's/"jest": *"^29\.[^"]*"/"jest": "^30.2.0"/' "$file"
@@ -415,11 +442,13 @@ pnpm install
 3. **Review breaking changes**: https://jestjs.io/docs/upgrading-to-jest30
 
 4. **Run tests**:
+
 ```bash
 pnpm test
 ```
 
 **Verification**:
+
 - [ ] All packages using Jest are on ^30.2.0
 - [ ] @types/jest updated to ^30.0.0
 - [ ] All tests pass
@@ -432,6 +461,7 @@ pnpm test
 #### Task 2.5.1: Decide on Zod Version Strategy
 
 **Current State**:
+
 - 72 packages on Zod v4.x (experimental)
 - 50+ packages on Zod v3.x (stable)
 
@@ -439,11 +469,11 @@ pnpm test
 
 **Decision Matrix**:
 
-| Option | Pros | Cons | Recommendation |
-|--------|------|------|----------------|
-| **A**: Standardize on v3.24.1 (stable) | Stable, production-ready | Lose v4 features, requires downgrade | ✅ **Recommended** |
-| **B**: Standardize on v4.1.12 (experimental) | Latest features | Experimental, may have breaking changes | ⚠️ Use with caution |
-| **C**: Mixed versions (status quo) | No immediate work | Maintenance burden, confusion | ❌ Not recommended |
+| Option                                       | Pros                     | Cons                                    | Recommendation      |
+| -------------------------------------------- | ------------------------ | --------------------------------------- | ------------------- |
+| **A**: Standardize on v3.24.1 (stable)       | Stable, production-ready | Lose v4 features, requires downgrade    | ✅ **Recommended**  |
+| **B**: Standardize on v4.1.12 (experimental) | Latest features          | Experimental, may have breaking changes | ⚠️ Use with caution |
+| **C**: Mixed versions (status quo)           | No immediate work        | Maintenance burden, confusion           | ❌ Not recommended  |
 
 **Recommended Action**: Standardize on Zod v3.24.1
 
@@ -458,11 +488,13 @@ pnpm install
 ```
 
 **Code Migration**:
+
 - Review Zod v4 → v3 breaking changes
 - Update validation schemas if needed
 - Test all validation logic
 
 **Verification**:
+
 - [ ] Decision documented (A, B, or C)
 - [ ] All packages on chosen version
 - [ ] Validation tests pass
@@ -475,6 +507,7 @@ pnpm install
 #### Task 2.6.1: Choose React Version Strategy
 
 **Current State**:
+
 - 8 packages on React 18.0.0
 - 5 packages on React 18.2.0
 - 4 packages on React 19.2.0
@@ -484,6 +517,7 @@ pnpm install
 **Decision Required**: React 18.x LTS or React 19.x?
 
 **Option A**: Consolidate on React 18.3.1 (LTS)
+
 ```bash
 find . -name "package.json" -not -path "*/node_modules/*" | while read file; do
   sed -i 's/"react": *"[^"]*"/"react": "^18.3.1"/' "$file"
@@ -494,6 +528,7 @@ done
 ```
 
 **Option B**: Consolidate on React 19.2.0 (Latest)
+
 ```bash
 find . -name "package.json" -not -path "*/node_modules/*" | while read file; do
   sed -i 's/"react": *"[^"]*"/"react": "^19.2.0"/' "$file"
@@ -506,6 +541,7 @@ done
 **Recommendation**: Start with Option A (React 18.3.1 LTS) unless React 19 features are required.
 
 **Verification**:
+
 - [ ] Decision documented
 - [ ] All packages on chosen React version
 - [ ] UI components tested
@@ -519,6 +555,7 @@ done
 #### Task 2.7.1: Consolidate Express Version
 
 **Current State**:
+
 - 32 packages on Express 5.1.0
 - 21 packages on Express 4.18.2
 - 12 packages on various Express 4.x versions
@@ -526,10 +563,12 @@ done
 **Decision**: Express 4.x LTS or Express 5.x?
 
 **Option A**: Consolidate on Express 5.1.0 (latest stable)
+
 - Express 5 is now stable (as of 2024)
 - Breaking changes from v4 documented
 
 **Option B**: Consolidate on Express 4.21.2 (LTS)
+
 - More conservative
 - Fewer breaking changes
 
@@ -544,11 +583,13 @@ done
 ```
 
 **Migration Notes**:
+
 - Review Express 4 → 5 migration guide
 - Update middleware (body-parser, etc.)
 - Test all API endpoints
 
 **Verification**:
+
 - [ ] Decision documented
 - [ ] All packages on chosen Express version
 - [ ] API endpoints tested
@@ -582,6 +623,7 @@ pnpm install
 ```
 
 **Verification**:
+
 - [ ] axios consolidated
 - [ ] graphql consolidated
 - [ ] pg consolidated
@@ -608,6 +650,7 @@ make smoke
 ```
 
 **Verification**:
+
 - [ ] All builds succeed
 - [ ] All tests pass
 - [ ] No linting errors
@@ -640,6 +683,7 @@ make smoke
    - Verify build tool dependencies
 
 **Commands**:
+
 ```bash
 # Install depcheck globally
 npm install -g depcheck
@@ -650,6 +694,7 @@ depcheck
 ```
 
 **Verification**:
+
 - [ ] Top 5 workspaces manually reviewed
 - [ ] Unused dependencies documented
 - [ ] Dependencies removed with testing
@@ -672,6 +717,7 @@ done
 **Manual Review Required**: Do NOT automatically remove dependencies flagged by depcheck.
 
 **Verification**:
+
 - [ ] Reports reviewed
 - [ ] False positives identified
 - [ ] Safe removals completed
@@ -699,6 +745,7 @@ du -sh node_modules
 ```
 
 **Verification**:
+
 - [ ] Lockfile optimized
 - [ ] node_modules size reduced (track before/after)
 - [ ] All packages still installable
@@ -722,11 +769,13 @@ npx vite-bundle-visualizer
 ```
 
 **Track Metrics**:
-- Total bundle size before cleanup: ____ MB
-- Total bundle size after cleanup: ____ MB
-- Reduction: ____ %
+
+- Total bundle size before cleanup: \_\_\_\_ MB
+- Total bundle size after cleanup: \_\_\_\_ MB
+- Reduction: \_\_\_\_ %
 
 **Verification**:
+
 - [ ] Bundle sizes measured
 - [ ] No size regressions
 - [ ] Optimization opportunities documented
@@ -777,6 +826,7 @@ updates:
 ```
 
 **Verification**:
+
 - [ ] Dependabot enabled
 - [ ] First batch of PRs received
 - [ ] Review process documented
@@ -813,6 +863,7 @@ Create `renovate.json`:
 ```
 
 **Verification**:
+
 - [ ] Renovate bot installed
 - [ ] Configuration tested
 - [ ] Auto-merge policies documented
@@ -863,6 +914,7 @@ Create `.syncpackrc.json`:
 ```
 
 **Verification**:
+
 - [ ] syncpack installed
 - [ ] No mismatches reported
 - [ ] Pre-commit hook added
@@ -897,6 +949,7 @@ pnpm audit --audit-level=high --json > /tmp/audit.json || {
 ```
 
 **Verification**:
+
 - [ ] Hook tested
 - [ ] Blocks commits with dependency issues
 - [ ] Team notified of new hook
@@ -959,6 +1012,7 @@ Create `DEPENDENCY_POLICY.md`:
 ```
 
 **Verification**:
+
 - [ ] Policy documented
 - [ ] Team trained on policy
 - [ ] Policy added to onboarding docs
@@ -984,6 +1038,7 @@ Create `DEPENDENCY_POLICY.md`:
    - Configure notification settings
 
 **Verification**:
+
 - [ ] Monitoring tool chosen
 - [ ] Integration configured
 - [ ] Alert routing set up
@@ -1027,6 +1082,7 @@ echo "Done! Verify with: pnpm list $PACKAGE -r --depth=0"
 ```
 
 Make executable:
+
 ```bash
 chmod +x scripts/update-dependency-version.sh
 ```
@@ -1080,15 +1136,15 @@ echo "✅ Audit complete! Review reports in /tmp/"
 
 Track the following metrics throughout the upgrade process:
 
-| Metric | Baseline | Target | Current |
-|--------|----------|--------|---------|
-| Security Vulnerabilities (NPM) | 8 | 0 | - |
-| Security Vulnerabilities (Python) | 8 | 0 | - |
-| Packages with Duplicate Versions | 178 | <50 | - |
-| Potentially Unused Dependencies | 170 | <50 | - |
-| node_modules Size | - MB | -20% | - |
-| Build Time | - sec | No regression | - |
-| Test Pass Rate | 100% | 100% | - |
+| Metric                            | Baseline | Target        | Current |
+| --------------------------------- | -------- | ------------- | ------- |
+| Security Vulnerabilities (NPM)    | 8        | 0             | -       |
+| Security Vulnerabilities (Python) | 8        | 0             | -       |
+| Packages with Duplicate Versions  | 178      | <50           | -       |
+| Potentially Unused Dependencies   | 170      | <50           | -       |
+| node_modules Size                 | - MB     | -20%          | -       |
+| Build Time                        | - sec    | No regression | -       |
+| Test Pass Rate                    | 100%     | 100%          | -       |
 
 ---
 
@@ -1097,12 +1153,14 @@ Track the following metrics throughout the upgrade process:
 If any phase causes issues:
 
 1. **Identify the problem**:
+
    ```bash
    git log --oneline
    pnpm test 2>&1 | tee /tmp/test-errors.log
    ```
 
 2. **Revert changes**:
+
    ```bash
    git revert <commit-hash>
    # or
@@ -1110,12 +1168,14 @@ If any phase causes issues:
    ```
 
 3. **Restore lockfile**:
+
    ```bash
    git checkout HEAD~1 pnpm-lock.yaml
    pnpm install
    ```
 
 4. **Verify rollback**:
+
    ```bash
    make smoke
    pnpm test
@@ -1131,14 +1191,16 @@ If any phase causes issues:
 ## Sign-Off Checklist
 
 ### Phase 1 Complete
+
 - [ ] All critical vulnerabilities fixed
 - [ ] All high vulnerabilities fixed
 - [ ] Python packages updated
 - [ ] Tests passing
 - [ ] Smoke tests passing
-- [ ] Sign-off from: ________________
+- [ ] Sign-off from: ******\_\_\_\_******
 
 ### Phase 2 Complete
+
 - [ ] TypeScript consolidated
 - [ ] @types/node consolidated
 - [ ] ESLint consolidated
@@ -1147,24 +1209,26 @@ If any phase causes issues:
 - [ ] Express version decided and implemented
 - [ ] Other duplicates reduced by 70%
 - [ ] Tests passing
-- [ ] Sign-off from: ________________
+- [ ] Sign-off from: ******\_\_\_\_******
 
 ### Phase 3 Complete
+
 - [ ] Unused dependencies reviewed
 - [ ] Safe dependencies removed
 - [ ] Lockfile optimized
 - [ ] Bundle sizes measured
 - [ ] No size regressions
-- [ ] Sign-off from: ________________
+- [ ] Sign-off from: ******\_\_\_\_******
 
 ### Phase 4 Complete
+
 - [ ] Dependabot or Renovate configured
 - [ ] syncpack installed and configured
 - [ ] Pre-commit hooks updated
 - [ ] DEPENDENCY_POLICY.md created
 - [ ] Team trained
 - [ ] Monitoring set up
-- [ ] Sign-off from: ________________
+- [ ] Sign-off from: ******\_\_\_\_******
 
 ---
 

@@ -1,5 +1,5 @@
-import express from 'express';
-import request from 'supertest';
+import express from "express";
+import request from "supertest";
 
 import {
   type ActionEventPublisher,
@@ -8,12 +8,11 @@ import {
   type PreflightDecision,
   computeInputHash,
   createExecuteRouter,
-} from '../src/routes/actions/execute';
+} from "../src/routes/actions/execute";
 
 class InMemoryDecisionStore implements PolicyDecisionStore {
   private readonly decisions = new Map<string, PreflightDecision>();
-  public readonly executions: Array<{ preflightId: string; receiptId: string }> =
-    [];
+  public readonly executions: Array<{ preflightId: string; receiptId: string }> = [];
 
   async get(preflightId: string): Promise<PreflightDecision | undefined> {
     return this.decisions.get(preflightId);
@@ -43,29 +42,29 @@ const buildApp = (store: InMemoryDecisionStore, publisher: InMemoryEventPublishe
     createExecuteRouter({
       policyDecisionStore: store,
       eventPublisher: publisher,
-      now: () => new Date('2025-01-01T00:00:00Z'),
-    }),
+      now: () => new Date("2025-01-01T00:00:00Z"),
+    })
   );
   return app;
 };
 
-describe('POST /actions/execute', () => {
-  it('accepts execution when the preflight hash matches and is not expired', async () => {
+describe("POST /actions/execute", () => {
+  it("accepts execution when the preflight hash matches and is not expired", async () => {
     const store = new InMemoryDecisionStore();
     const publisher = new InMemoryEventPublisher();
-    const inputs = { target: 'alpha', resources: ['case-1'] };
+    const inputs = { target: "alpha", resources: ["case-1"] };
     const decision: PreflightDecision = {
-      id: 'pf-1',
+      id: "pf-1",
       inputHash: computeInputHash(inputs),
-      expiresAt: new Date('2025-01-01T00:10:00Z'),
-      status: 'allow',
-      context: { policy_id: 'policy-42' },
+      expiresAt: new Date("2025-01-01T00:10:00Z"),
+      status: "allow",
+      context: { policy_id: "policy-42" },
     };
     store.add(decision);
 
     const app = buildApp(store, publisher);
     const response = await request(app)
-      .post('/actions/execute')
+      .post("/actions/execute")
       .send({ preflight_id: decision.id, inputs });
 
     expect(response.status).toBe(202);
@@ -78,7 +77,7 @@ describe('POST /actions/execute', () => {
     });
     expect(publisher.events).toHaveLength(1);
     expect(publisher.events[0]).toMatchObject({
-      type: 'action.execution.accepted',
+      type: "action.execution.accepted",
       preflightId: decision.id,
       traceId: response.body.trace_id,
       receiptId: response.body.receipt_id,
@@ -87,64 +86,64 @@ describe('POST /actions/execute', () => {
     });
   });
 
-  it('rejects execution when the payload hash does not match the preflight', async () => {
+  it("rejects execution when the payload hash does not match the preflight", async () => {
     const store = new InMemoryDecisionStore();
     const publisher = new InMemoryEventPublisher();
     const decision: PreflightDecision = {
-      id: 'pf-2',
+      id: "pf-2",
       inputHash: computeInputHash({ original: true }),
-      expiresAt: new Date('2025-01-01T00:10:00Z'),
-      status: 'allow',
+      expiresAt: new Date("2025-01-01T00:10:00Z"),
+      status: "allow",
     };
     store.add(decision);
 
     const app = buildApp(store, publisher);
     const response = await request(app)
-      .post('/actions/execute')
+      .post("/actions/execute")
       .send({
         preflight_id: decision.id,
         inputs: { original: false },
       });
 
     expect(response.status).toBe(400);
-    expect(response.body.error).toBe('input_hash_mismatch');
+    expect(response.body.error).toBe("input_hash_mismatch");
     expect(response.body.trace_id).toBeTruthy();
     expect(response.body.receipt_id).toBeTruthy();
     expect(publisher.events).toHaveLength(1);
     expect(publisher.events[0]).toMatchObject({
-      type: 'action.execution.rejected',
-      reason: 'input_hash_mismatch',
+      type: "action.execution.rejected",
+      reason: "input_hash_mismatch",
       preflightId: decision.id,
       traceId: response.body.trace_id,
       receiptId: response.body.receipt_id,
     });
   });
 
-  it('rejects execution when the preflight is expired', async () => {
+  it("rejects execution when the preflight is expired", async () => {
     const store = new InMemoryDecisionStore();
     const publisher = new InMemoryEventPublisher();
-    const inputs = { id: 'case-1' };
+    const inputs = { id: "case-1" };
     const decision: PreflightDecision = {
-      id: 'pf-3',
+      id: "pf-3",
       inputHash: computeInputHash(inputs),
-      expiresAt: new Date('2024-12-31T23:59:00Z'),
-      status: 'allow',
+      expiresAt: new Date("2024-12-31T23:59:00Z"),
+      status: "allow",
     };
     store.add(decision);
 
     const app = buildApp(store, publisher);
     const response = await request(app)
-      .post('/actions/execute')
+      .post("/actions/execute")
       .send({ preflight_id: decision.id, inputs });
 
     expect(response.status).toBe(410);
-    expect(response.body.error).toBe('preflight_expired');
+    expect(response.body.error).toBe("preflight_expired");
     expect(response.body.trace_id).toBeTruthy();
     expect(response.body.receipt_id).toBeTruthy();
     expect(publisher.events).toHaveLength(1);
     expect(publisher.events[0]).toMatchObject({
-      type: 'action.execution.rejected',
-      reason: 'preflight_expired',
+      type: "action.execution.rejected",
+      reason: "preflight_expired",
       preflightId: decision.id,
       traceId: response.body.trace_id,
       receiptId: response.body.receipt_id,

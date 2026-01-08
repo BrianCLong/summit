@@ -21,7 +21,8 @@ declare module 'react' {
 declare module 'lucide-react' {
   import { ForwardRefExoticComponent, SVGProps, RefAttributes } from 'react'
 
-  export type LucideProps = Omit<SVGProps<SVGSVGElement>, 'ref'> & RefAttributes<SVGSVGElement>
+  export type LucideProps = Omit<SVGProps<SVGSVGElement>, 'ref'> &
+    RefAttributes<SVGSVGElement>
   export type LucideIcon = ForwardRefExoticComponent<LucideProps>
 }
 
@@ -51,14 +52,21 @@ declare module 'cmdk' {
 // Patch for immer - ensure patch-related exports are available
 declare module 'immer' {
   export type { Patch, PatchListener } from 'immer/dist/immer'
-  export { produceWithPatches, applyPatches, enablePatches } from 'immer/dist/immer'
+  export {
+    produceWithPatches,
+    applyPatches,
+    enablePatches,
+  } from 'immer/dist/immer'
 }
 
 // Global type utilities for React 19 compatibility
 declare global {
   namespace React {
     // Allow any component type to be used as JSX element
-    type ComponentType<P = any> = React.ComponentClass<P> | React.FunctionComponent<P> | React.ForwardRefExoticComponent<P>
+    type ComponentType<P = any> =
+      | React.ComponentClass<P>
+      | React.FunctionComponent<P>
+      | React.ForwardRefExoticComponent<P>
   }
 }
 

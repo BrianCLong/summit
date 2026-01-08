@@ -16,7 +16,7 @@ export interface SystemState {
   position: number;
   velocity: number;
   stability: number;
-  basin: 'PRE_TIPPING' | 'TRANSITION' | 'POST_TIPPING';
+  basin: "PRE_TIPPING" | "TRANSITION" | "POST_TIPPING";
 }
 
 export interface TippingPoint {
@@ -29,14 +29,14 @@ export interface TippingPoint {
 }
 
 export type TippingType =
-  | 'BIFURCATION' // Gradual parameter change causes sudden state change
-  | 'NOISE_INDUCED' // Random fluctuations push system over threshold
-  | 'RATE_INDUCED' // Speed of change matters (too fast to adapt)
-  | 'NETWORK_CASCADE'; // Local failures propagate globally
+  | "BIFURCATION" // Gradual parameter change causes sudden state change
+  | "NOISE_INDUCED" // Random fluctuations push system over threshold
+  | "RATE_INDUCED" // Speed of change matters (too fast to adapt)
+  | "NETWORK_CASCADE"; // Local failures propagate globally
 
 export interface Trajectory {
   current: number;
-  trend: 'TOWARD' | 'AWAY' | 'PARALLEL';
+  trend: "TOWARD" | "AWAY" | "PARALLEL";
   timeToTipping?: number;
   uncertainty: number;
 }
@@ -121,11 +121,11 @@ export class TippingPointAnalyzer {
     const velocity = n > 1 ? timeSeries[n - 1] - timeSeries[n - 2] : 0;
     const stability = this.calculateStability(timeSeries);
 
-    let basin: SystemState['basin'];
+    let basin: SystemState["basin"];
     if (stability > 0.7) {
-      basin = current > 0.5 ? 'POST_TIPPING' : 'PRE_TIPPING';
+      basin = current > 0.5 ? "POST_TIPPING" : "PRE_TIPPING";
     } else {
-      basin = 'TRANSITION';
+      basin = "TRANSITION";
     }
 
     return { position: current, velocity, stability, basin };
@@ -141,45 +141,42 @@ export class TippingPointAnalyzer {
     return series.reduce((sum, x) => sum + (x - mean) ** 2, 0) / series.length;
   }
 
-  private identifyTippingPoints(
-    phenomenon: string,
-    params: TippingParameters
-  ): TippingPoint[] {
+  private identifyTippingPoints(phenomenon: string, params: TippingParameters): TippingPoint[] {
     const points: TippingPoint[] = [];
 
-    if (phenomenon === 'NORM_CHANGE') {
+    if (phenomenon === "NORM_CHANGE") {
       points.push({
-        name: 'Social Convention Tipping',
-        type: 'BIFURCATION',
+        name: "Social Convention Tipping",
+        type: "BIFURCATION",
         threshold: params.normThreshold || 0.25,
         reversibility: 0.3,
-        consequences: ['Rapid norm adoption', 'Old norm becomes deviant'],
+        consequences: ["Rapid norm adoption", "Old norm becomes deviant"],
         earlyWarningWindow: 14,
       });
     }
 
-    if (phenomenon === 'TRUST_COLLAPSE') {
+    if (phenomenon === "TRUST_COLLAPSE") {
       points.push({
-        name: 'Institutional Trust Collapse',
-        type: 'NOISE_INDUCED',
+        name: "Institutional Trust Collapse",
+        type: "NOISE_INDUCED",
         threshold: params.trustThreshold || 0.3,
         reversibility: 0.2,
         consequences: [
-          'Legitimacy crisis',
-          'Alternative authority seeking',
-          'Social fragmentation',
+          "Legitimacy crisis",
+          "Alternative authority seeking",
+          "Social fragmentation",
         ],
         earlyWarningWindow: 7,
       });
     }
 
-    if (phenomenon === 'MOBILIZATION') {
+    if (phenomenon === "MOBILIZATION") {
       points.push({
-        name: 'Mass Mobilization Threshold',
-        type: 'NETWORK_CASCADE',
+        name: "Mass Mobilization Threshold",
+        type: "NETWORK_CASCADE",
         threshold: params.mobilizationThreshold || 0.1,
         reversibility: 0.5,
-        consequences: ['Collective action', 'Demonstration effects', 'Counter-mobilization'],
+        consequences: ["Collective action", "Demonstration effects", "Counter-mobilization"],
         earlyWarningWindow: 3,
       });
     }
@@ -187,17 +184,14 @@ export class TippingPointAnalyzer {
     return points;
   }
 
-  private calculateTrajectory(
-    timeSeries: number[],
-    tippingPoints: TippingPoint[]
-  ): Trajectory {
+  private calculateTrajectory(timeSeries: number[], tippingPoints: TippingPoint[]): Trajectory {
     const current = timeSeries[timeSeries.length - 1];
     const velocity = this.calculateVelocity(timeSeries);
     const nearestTipping = tippingPoints[0]?.threshold || 0.5;
 
     const direction = velocity * Math.sign(nearestTipping - current);
-    const trend: Trajectory['trend'] =
-      direction > 0.01 ? 'TOWARD' : direction < -0.01 ? 'AWAY' : 'PARALLEL';
+    const trend: Trajectory["trend"] =
+      direction > 0.01 ? "TOWARD" : direction < -0.01 ? "AWAY" : "PARALLEL";
 
     const timeToTipping =
       velocity !== 0 ? Math.abs(nearestTipping - current) / Math.abs(velocity) : undefined;
@@ -212,7 +206,9 @@ export class TippingPointAnalyzer {
 
   private calculateVelocity(timeSeries: number[]): number {
     const n = timeSeries.length;
-    if (n < 2) {return 0;}
+    if (n < 2) {
+      return 0;
+    }
 
     // Use last 5 points for velocity estimate
     const window = timeSeries.slice(-5);
@@ -236,37 +232,37 @@ export class TippingPointAnalyzer {
   ): InterventionLeverage[] {
     const levers: InterventionLeverage[] = [];
 
-    if (phenomenon === 'NORM_CHANGE') {
+    if (phenomenon === "NORM_CHANGE") {
       levers.push({
-        lever: 'Visible committed minorities',
+        lever: "Visible committed minorities",
         sensitivity: 0.8,
         direction: 1,
-        cost: 'LOW',
-        timeScale: 'WEEKS',
+        cost: "LOW",
+        timeScale: "WEEKS",
       });
       levers.push({
-        lever: 'Elite endorsement',
+        lever: "Elite endorsement",
         sensitivity: 0.6,
         direction: 1,
-        cost: 'MEDIUM',
-        timeScale: 'DAYS',
+        cost: "MEDIUM",
+        timeScale: "DAYS",
       });
     }
 
-    if (phenomenon === 'TRUST_COLLAPSE') {
+    if (phenomenon === "TRUST_COLLAPSE") {
       levers.push({
-        lever: 'Transparency measures',
+        lever: "Transparency measures",
         sensitivity: 0.5,
         direction: -1,
-        cost: 'LOW',
-        timeScale: 'DAYS',
+        cost: "LOW",
+        timeScale: "DAYS",
       });
       levers.push({
-        lever: 'Trusted intermediaries',
+        lever: "Trusted intermediaries",
         sensitivity: 0.7,
         direction: -1,
-        cost: 'MEDIUM',
-        timeScale: 'WEEKS',
+        cost: "MEDIUM",
+        timeScale: "WEEKS",
       });
     }
 
@@ -283,7 +279,9 @@ export class TippingPointAnalyzer {
   }
 
   private estimateCascadeLikelihood(current: number, threshold: number): number {
-    if (current >= threshold) {return 0.95;}
+    if (current >= threshold) {
+      return 0.95;
+    }
     return Math.pow(current / threshold, 2);
   }
 

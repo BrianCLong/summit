@@ -2,8 +2,8 @@
  * Preprocessing pipeline for batch text processing
  */
 
-import { TextPreprocessor } from './index';
-import type { PreprocessingOptions } from '../types';
+import { TextPreprocessor } from "./index";
+import type { PreprocessingOptions } from "../types";
 
 export class PreprocessingPipeline {
   private preprocessors: Array<{ name: string; fn: (text: string) => string }> = [];
@@ -50,9 +50,7 @@ export class PreprocessingPipeline {
 
     for (let i = 0; i < texts.length; i += batchSize) {
       const batch = texts.slice(i, i + batchSize);
-      const batchResults = await Promise.all(
-        batch.map(async (text) => this.process(text))
-      );
+      const batchResults = await Promise.all(batch.map(async (text) => this.process(text)));
       results.push(...batchResults);
     }
 
@@ -81,11 +79,11 @@ export class PreprocessingPipeline {
     const preprocessor = new TextPreprocessor(options);
 
     return pipeline
-      .addStep('html-removal', (text) => text.replace(/<[^>]*>/g, ''))
-      .addStep('url-removal', (text) => text.replace(/https?:\/\/\S+/gi, ''))
-      .addStep('email-removal', (text) => text.replace(/[\w.-]+@[\w.-]+\.\w+/gi, ''))
-      .addStep('unicode-normalization', (text) => text.normalize('NFKC'))
-      .addStep('lowercase', (text) => options.lowercase !== false ? text.toLowerCase() : text)
-      .addStep('whitespace-normalization', (text) => text.replace(/\s+/g, ' ').trim());
+      .addStep("html-removal", (text) => text.replace(/<[^>]*>/g, ""))
+      .addStep("url-removal", (text) => text.replace(/https?:\/\/\S+/gi, ""))
+      .addStep("email-removal", (text) => text.replace(/[\w.-]+@[\w.-]+\.\w+/gi, ""))
+      .addStep("unicode-normalization", (text) => text.normalize("NFKC"))
+      .addStep("lowercase", (text) => (options.lowercase !== false ? text.toLowerCase() : text))
+      .addStep("whitespace-normalization", (text) => text.replace(/\s+/g, " ").trim());
   }
 }

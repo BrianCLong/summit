@@ -1,14 +1,14 @@
 meta:
   id: cognitive.immune-response@v1
   owner: research
-  purpose: 'Models how groups self-correct misinformation, confusion, or instability.'
-  tags: ['cognitive', 'immune-system', 'self-regulation']
+  purpose: "Models how groups self-correct misinformation, confusion, or instability."
+  tags: ["cognitive", "immune-system", "self-regulation"]
   guardrails:
-    - 'Focus on constructive self-regulation.'
-    - 'Avoid recommending suppression of legitimate discourse.'
+    - "Focus on constructive self-regulation."
+    - "Avoid recommending suppression of legitimate discourse."
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.3
 
 inputs:

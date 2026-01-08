@@ -68,9 +68,9 @@ export interface Action {
   name: string;
   version: string; // semver
   safety: {
-    category: 'READ' | 'WRITE' | 'DEPLOY' | 'ROLLBACK';
+    category: "READ" | "WRITE" | "DEPLOY" | "ROLLBACK";
     requiresApproval?: boolean;
-    budgets: { timeMs: number; network: 'none' | 'internal' | 'internet' };
+    budgets: { timeMs: number; network: "none" | "internal" | "internet" };
   };
   validate(input: unknown): Result<Ok, Err>;
   plan(input: Ok): Promise<Plan>; // no side effects
@@ -133,13 +133,12 @@ create table events(
 async function executeTask(task, store) {
   const key = hash(`${task.type}:${stableStringify(task.params)}`);
   const existing = await store.findTaskByKey(key);
-  if (existing && existing.status === 'succeeded') return existing.outcome;
-  if (existing && existing.status === 'running')
-    throw new Error('Duplicate in-flight');
+  if (existing && existing.status === "succeeded") return existing.outcome;
+  if (existing && existing.status === "running") throw new Error("Duplicate in-flight");
   await store.claimTask(task.id, key); // row lock + set running
   try {
     const plan = await actions[task.type].plan(task.params);
-    await policy.enforce('plan', task, plan);
+    await policy.enforce("plan", task, plan);
     const outcome = await actions[task.type].apply(plan, ctx);
     await store.completeTask(task.id, outcome);
     return outcome;
@@ -155,13 +154,13 @@ async function executeTask(task, store) {
 **OPA hook (pseudo):**
 
 ```ts
-const decision = await opa.evaluate('orchestrator/allow', {
+const decision = await opa.evaluate("orchestrator/allow", {
   subject,
   action,
   resource,
   context,
 });
-if (!decision.allow) throw new Error('PolicyDenied');
+if (!decision.allow) throw new Error("PolicyDenied");
 ```
 
 **Reason‑for‑access:** add to `events` and `runs` metadata; require prompt when `category in ['WRITE','DEPLOY']`.

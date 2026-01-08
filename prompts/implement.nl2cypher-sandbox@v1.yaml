@@ -1,17 +1,17 @@
 meta:
   id: implement.nl2cypher-sandbox@v1
-  owner: 'intelgraph-advisory-committee'
-  purpose: 'Build natural language to Cypher query generator with cost preview, safety guardrails, and dry-run validation'
-  tags: ['nl2cypher', 'query-generation', 'cost-control', 'safety', 'sandbox']
+  owner: "intelgraph-advisory-committee"
+  purpose: "Build natural language to Cypher query generator with cost preview, safety guardrails, and dry-run validation"
+  tags: ["nl2cypher", "query-generation", "cost-control", "safety", "sandbox"]
   guardrails:
-    - 'No write operations (CREATE, MERGE, DELETE, SET, REMOVE) in sandbox mode'
-    - 'Cost estimates must be shown before execution'
-    - 'Query timeout limits enforced (max 30s)'
-    - 'Row limit caps (max 10,000 rows)'
-    - 'Policy violations must block execution with clear reasons'
+    - "No write operations (CREATE, MERGE, DELETE, SET, REMOVE) in sandbox mode"
+    - "Cost estimates must be shown before execution"
+    - "Query timeout limits enforced (max 30s)"
+    - "Row limit caps (max 10,000 rows)"
+    - "Policy violations must block execution with clear reasons"
 
 modelConfig:
-  model: 'claude-sonnet-4-5'
+  model: "claude-sonnet-4-5"
   temperature: 0.3
   maxTokens: 8000
 
@@ -634,25 +634,25 @@ template: |
   Remember: **Safety first.** No query executes without passing all policy checks. Cost transparency builds analyst trust.
 
 examples:
-  - name: 'openai-gpt4'
+  - name: "openai-gpt4"
     inputs:
-      neo4j_version: '5.x'
-      llm_provider: 'OpenAI GPT-4'
-      max_query_cost_usd: '0.10'
+      neo4j_version: "5.x"
+      llm_provider: "OpenAI GPT-4"
+      max_query_cost_usd: "0.10"
     expected_contains:
-      - 'OpenAI'
-      - 'cost estimate'
-      - 'dry-run'
-      - 'policy violations'
-      - '95% accuracy'
+      - "OpenAI"
+      - "cost estimate"
+      - "dry-run"
+      - "policy violations"
+      - "95% accuracy"
 
-  - name: 'claude-sonnet'
+  - name: "claude-sonnet"
     inputs:
-      neo4j_version: '5.x'
-      llm_provider: 'Anthropic Claude'
-      max_query_cost_usd: '0.05'
+      neo4j_version: "5.x"
+      llm_provider: "Anthropic Claude"
+      max_query_cost_usd: "0.05"
     expected_contains:
-      - 'Claude'
-      - 'no-writes-in-sandbox'
-      - 'undo/redo'
-      - 'parameterized queries'
+      - "Claude"
+      - "no-writes-in-sandbox"
+      - "undo/redo"
+      - "parameterized queries"

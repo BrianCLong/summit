@@ -2,22 +2,22 @@ name: Admin CLI CI/CD
 
 on:
   push:
-    branches: [main, 'feature/**', 'claude/**']
+    branches: [main, "feature/**", "claude/**"]
     paths:
-      - 'tools/admin-cli/**'
-      - '.github/workflows/admin-cli.yml'
+      - "tools/admin-cli/**"
+      - ".github/workflows/admin-cli.yml"
   pull_request:
     branches: [main]
     paths:
-      - 'tools/admin-cli/**'
+      - "tools/admin-cli/**"
 
 defaults:
   run:
     working-directory: tools/admin-cli
 
 env:
-  NODE_VERSION: '20'
-  PNPM_VERSION: '9'
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9"
 
 jobs:
   # ============================================
@@ -227,7 +227,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: "https://registry.npmjs.org"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2

@@ -21,8 +21,8 @@
  * - Optional push to remote
  */
 
-import { execSync } from 'child_process';
-import * as process from 'process';
+import { execSync } from "child_process";
+import * as process from "process";
 
 interface Args {
   version: string;
@@ -38,7 +38,7 @@ function parseArgs(): Args {
   const args: Partial<Args> = {
     dryRun: false,
     push: false,
-    branch: 'main',
+    branch: "main",
     help: false,
   };
 
@@ -47,15 +47,15 @@ function parseArgs(): Args {
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
 
-    if (arg === '--help' || arg === '-h') {
+    if (arg === "--help" || arg === "-h") {
       args.help = true;
-    } else if (arg === '--dry-run' || arg === '-n') {
+    } else if (arg === "--dry-run" || arg === "-n") {
       args.dryRun = true;
-    } else if (arg === '--push' || arg === '-p') {
+    } else if (arg === "--push" || arg === "-p") {
       args.push = true;
-    } else if (arg === '--version' || arg === '-v') {
+    } else if (arg === "--version" || arg === "-v") {
       args.version = argv[++i];
-    } else if (arg === '--branch' || arg === '-b') {
+    } else if (arg === "--branch" || arg === "-b") {
       args.branch = argv[++i];
     }
   }
@@ -91,7 +91,7 @@ Exit Codes:
 
 function execGit(cmd: string): string {
   try {
-    return execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
+    return execSync(cmd, { encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"] }).trim();
   } catch (error: any) {
     throw new Error(`Git command failed: ${cmd}\n${error.message}`);
   }
@@ -99,7 +99,7 @@ function execGit(cmd: string): string {
 
 function normalizeVersion(version: string): string {
   // Remove 'v' prefix if present
-  const normalized = version.startsWith('v') ? version.slice(1) : version;
+  const normalized = version.startsWith("v") ? version.slice(1) : version;
   return normalized;
 }
 
@@ -108,23 +108,25 @@ function validateSemver(version: string): boolean {
 }
 
 function checkWorkingTreeClean(): void {
-  const status = execGit('git status --porcelain');
+  const status = execGit("git status --porcelain");
 
   if (status.length > 0) {
-    console.error('❌ Error: Working tree is not clean. Please commit or stash changes.');
-    console.error('\nUncommitted changes:');
+    console.error("❌ Error: Working tree is not clean. Please commit or stash changes.");
+    console.error("\nUncommitted changes:");
     console.error(status);
     process.exit(1);
   }
 
-  console.log('✓ Working tree is clean');
+  console.log("✓ Working tree is clean");
 }
 
 function checkBranch(expectedBranch: string): void {
-  const currentBranch = execGit('git rev-parse --abbrev-ref HEAD');
+  const currentBranch = execGit("git rev-parse --abbrev-ref HEAD");
 
   if (currentBranch !== expectedBranch) {
-    console.error(`❌ Error: Not on expected branch '${expectedBranch}' (currently on '${currentBranch}')`);
+    console.error(
+      `❌ Error: Not on expected branch '${expectedBranch}' (currently on '${currentBranch}')`
+    );
     console.error(`\nSwitch to the correct branch with:`);
     console.error(`  git checkout ${expectedBranch}`);
     process.exit(1);
@@ -148,8 +150,8 @@ function createAnnotatedTag(tag: string, version: string, dryRun: boolean): void
 This is a General Availability (GA) release.
 
 Created: ${new Date().toISOString()}
-Branch: ${execGit('git rev-parse --abbrev-ref HEAD')}
-Commit: ${execGit('git rev-parse HEAD')}
+Branch: ${execGit("git rev-parse --abbrev-ref HEAD")}
+Commit: ${execGit("git rev-parse HEAD")}
 `;
 
   const cmd = `git tag -a "${tag}" -m "${message}"`;
@@ -179,16 +181,16 @@ function pushTag(tag: string, dryRun: boolean): void {
 }
 
 function printNextSteps(tag: string, version: string, pushed: boolean, dryRun: boolean): void {
-  console.log(`\n${'='.repeat(60)}`);
+  console.log(`\n${"=".repeat(60)}`);
 
   if (dryRun) {
-    console.log('DRY RUN COMPLETE - No changes were made');
-    console.log(`${'='.repeat(60)}`);
+    console.log("DRY RUN COMPLETE - No changes were made");
+    console.log(`${"=".repeat(60)}`);
     console.log(`\nTo create the tag for real, run without --dry-run:`);
     console.log(`  ./scripts/release/ga-tag.ts --version ${version}`);
   } else {
-    console.log('GA TAG CREATED SUCCESSFULLY');
-    console.log(`${'='.repeat(60)}`);
+    console.log("GA TAG CREATED SUCCESSFULLY");
+    console.log(`${"=".repeat(60)}`);
     console.log(`\nTag created: ${tag}`);
     console.log(`Version: ${version}`);
 
@@ -197,11 +199,15 @@ function printNextSteps(tag: string, version: string, pushed: boolean, dryRun: b
       console.log(`  1. Push the tag to trigger the GA release workflow:`);
       console.log(`     git push origin ${tag}`);
       console.log(`\n  2. Monitor the workflow at:`);
-      console.log(`     https://github.com/$(git config --get remote.origin.url | sed 's/.*://;s/.git$//')/actions`);
+      console.log(
+        `     https://github.com/$(git config --get remote.origin.url | sed 's/.*://;s/.git$//')/actions`
+      );
     } else {
       console.log(`\n✓ Tag has been pushed to remote`);
       console.log(`\nMonitor the GA release workflow at:`);
-      console.log(`  https://github.com/$(git config --get remote.origin.url | sed 's/.*://;s/.git$//')/actions`);
+      console.log(
+        `  https://github.com/$(git config --get remote.origin.url | sed 's/.*://;s/.git$//')/actions`
+      );
     }
 
     console.log(`\n  The workflow will:`);
@@ -213,7 +219,7 @@ function printNextSteps(tag: string, version: string, pushed: boolean, dryRun: b
     console.log(`    - Create GitHub Release with all artifacts`);
   }
 
-  console.log(`\n${'='.repeat(60)}`);
+  console.log(`\n${"=".repeat(60)}`);
 }
 
 function main(): void {
@@ -225,13 +231,13 @@ function main(): void {
   }
 
   if (!args.version) {
-    console.error('❌ Error: --version is required');
-    console.error('\nRun with --help for usage information');
+    console.error("❌ Error: --version is required");
+    console.error("\nRun with --help for usage information");
     process.exit(1);
   }
 
-  console.log('GA Tag Creator');
-  console.log('='.repeat(60));
+  console.log("GA Tag Creator");
+  console.log("=".repeat(60));
 
   // Normalize and validate version
   const normalized = normalizeVersion(args.version);
@@ -244,22 +250,22 @@ function main(): void {
   if (args.dryRun) {
     console.log(`Mode: DRY RUN`);
   }
-  console.log('');
+  console.log("");
 
   // Validate semver
   if (!validateSemver(normalized)) {
     console.error(`❌ Error: Invalid semantic version: ${normalized}`);
-    console.error('\nExpected format: major.minor.patch (e.g., 2.0.0)');
-    console.error('Must use numeric values only, no letters or pre-release tags');
+    console.error("\nExpected format: major.minor.patch (e.g., 2.0.0)");
+    console.error("Must use numeric values only, no letters or pre-release tags");
     process.exit(1);
   }
   console.log(`✓ Valid semantic version: ${normalized}`);
 
   // Check if we're in a git repository
   try {
-    execGit('git rev-parse --git-dir');
+    execGit("git rev-parse --git-dir");
   } catch {
-    console.error('❌ Error: Not in a git repository');
+    console.error("❌ Error: Not in a git repository");
     process.exit(2);
   }
 
@@ -272,9 +278,9 @@ function main(): void {
   // Check tag doesn't already exist
   if (checkTagExists(tag)) {
     console.error(`❌ Error: Tag '${tag}' already exists`);
-    console.error('\nTo view existing tag:');
+    console.error("\nTo view existing tag:");
     console.error(`  git show ${tag}`);
-    console.error('\nTo delete the tag (if needed):');
+    console.error("\nTo delete the tag (if needed):");
     console.error(`  git tag -d ${tag}                    # Delete locally`);
     console.error(`  git push origin :refs/tags/${tag}    # Delete remotely`);
     process.exit(1);
@@ -282,7 +288,7 @@ function main(): void {
   console.log(`✓ Tag does not exist: ${tag}`);
 
   // Create the tag
-  console.log('');
+  console.log("");
   createAnnotatedTag(tag, normalized, args.dryRun);
 
   // Push if requested

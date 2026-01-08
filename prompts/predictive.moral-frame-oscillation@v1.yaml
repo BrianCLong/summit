@@ -1,14 +1,14 @@
 meta:
   id: predictive.moral-frame-oscillation@v1
   owner: research
-  purpose: 'Forecasts how groups shift between moral frames under future scenarios.'
-  tags: ['predictive', 'moral-frame', 'psychology']
+  purpose: "Forecasts how groups shift between moral frames under future scenarios."
+  tags: ["predictive", "moral-frame", "psychology"]
   guardrails:
-    - 'Avoid bias in moral frame evaluation.'
-    - 'Focus on group dynamics, not individual psychology.'
+    - "Avoid bias in moral frame evaluation."
+    - "Focus on group dynamics, not individual psychology."
 
 modelConfig:
-  model: 'gpt-4'
+  model: "gpt-4"
   temperature: 0.4
 
 inputs:

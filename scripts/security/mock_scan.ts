@@ -1,10 +1,10 @@
-import fs from 'fs';
-import path from 'path';
-import { execSync } from 'child_process';
+import fs from "fs";
+import path from "path";
+import { execSync } from "child_process";
 
-const RESULTS_DIR = path.resolve(process.cwd(), '.evidence/results');
-const SBOM_PATH = path.resolve(process.cwd(), '.evidence/sbom.json');
-const SIG_PATH = path.resolve(process.cwd(), '.evidence/signature/sbom.json.sig');
+const RESULTS_DIR = path.resolve(process.cwd(), ".evidence/results");
+const SBOM_PATH = path.resolve(process.cwd(), ".evidence/sbom.json");
+const SIG_PATH = path.resolve(process.cwd(), ".evidence/signature/sbom.json.sig");
 
 const mockScan = () => {
   if (!fs.existsSync(RESULTS_DIR)) {
@@ -17,25 +17,25 @@ const mockScan = () => {
   // Attempt real scan
   try {
     console.log("Attempting real vulnerability scan (pnpm audit)...");
-    execSync('pnpm audit --audit-level=critical --json', { stdio: 'pipe' });
+    execSync("pnpm audit --audit-level=critical --json", { stdio: "pipe" });
     console.log("No critical vulnerabilities found.");
   } catch (e: any) {
     if (e.status === 1) {
-       console.warn("Critical vulnerabilities detected by pnpm audit.");
-       try {
-         const output = e.stdout.toString();
-         const json = JSON.parse(output);
-         if (json.metadata && json.metadata.vulnerabilities) {
-             vulnDetails = json.metadata.vulnerabilities;
-             if (vulnDetails.critical > 0) {
-                 criticalVulns = true;
-             }
-         }
-       } catch (parseError) {
-           console.warn("Could not parse pnpm audit output.");
-       }
+      console.warn("Critical vulnerabilities detected by pnpm audit.");
+      try {
+        const output = e.stdout.toString();
+        const json = JSON.parse(output);
+        if (json.metadata && json.metadata.vulnerabilities) {
+          vulnDetails = json.metadata.vulnerabilities;
+          if (vulnDetails.critical > 0) {
+            criticalVulns = true;
+          }
+        }
+      } catch (parseError) {
+        console.warn("Could not parse pnpm audit output.");
+      }
     } else {
-        console.warn("Vulnerability scan failed to run or encountered system error:", e.message);
+      console.warn("Vulnerability scan failed to run or encountered system error:", e.message);
     }
   }
 
@@ -48,10 +48,10 @@ const mockScan = () => {
     signature_present: sigPresent,
     vulnerabilities_critical: criticalVulns,
     scan_timestamp: new Date().toISOString(),
-    details: vulnDetails
+    details: vulnDetails,
   };
 
-  const outputPath = path.join(RESULTS_DIR, 'input.json');
+  const outputPath = path.join(RESULTS_DIR, "input.json");
   fs.writeFileSync(outputPath, JSON.stringify(scanResult, null, 2));
   console.log(`Scan result generated: ${outputPath}`);
 };

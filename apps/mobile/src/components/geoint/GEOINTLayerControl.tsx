@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  withSpring,
-} from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { Layers, Eye, EyeOff, ChevronUp, ChevronDown } from 'lucide-react-native';
 
 import { useMapStore } from '@/stores/mapStore';
@@ -14,9 +11,7 @@ interface GEOINTLayerControlProps {
   className?: string;
 }
 
-export const GEOINTLayerControl: React.FC<GEOINTLayerControlProps> = ({
-  className,
-}) => {
+export const GEOINTLayerControl: React.FC<GEOINTLayerControlProps> = ({ className }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const { visibleLayers, toggleLayer, layerOpacity, setLayerOpacity } = useMapStore();
   const { layers, loading } = useGEOINTLayers();
@@ -81,17 +76,12 @@ export const GEOINTLayerControl: React.FC<GEOINTLayerControlProps> = ({
                       <EyeOff size={16} color="#71717a" />
                     )}
                     <Text
-                      className={cn(
-                        'ml-2 text-sm',
-                        isVisible ? 'text-white' : 'text-dark-muted',
-                      )}
+                      className={cn('ml-2 text-sm', isVisible ? 'text-white' : 'text-dark-muted')}
                     >
                       {layer.name}
                     </Text>
                   </View>
-                  <Text className="text-xs text-dark-muted">
-                    {layer.featureCount || 0}
-                  </Text>
+                  <Text className="text-xs text-dark-muted">{layer.featureCount || 0}</Text>
                 </TouchableOpacity>
 
                 {/* Opacity slider */}
@@ -114,9 +104,7 @@ export const GEOINTLayerControl: React.FC<GEOINTLayerControlProps> = ({
           })}
 
           {layers.length === 0 && !loading && (
-            <Text className="text-dark-muted text-center py-4 text-sm">
-              No layers available
-            </Text>
+            <Text className="text-dark-muted text-center py-4 text-sm">No layers available</Text>
           )}
         </ScrollView>
       )}

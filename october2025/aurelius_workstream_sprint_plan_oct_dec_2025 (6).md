@@ -347,7 +347,7 @@ labels: [security, policy]
 name: ci
 on:
   push:
-    branches: [develop, 'feature/**', 'fix/**', 'release/**']
+    branches: [develop, "feature/**", "fix/**", "release/**"]
   pull_request:
     branches: [develop, main]
 
@@ -358,7 +358,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
+        with: { python-version: "3.11" }
       - name: Cache pip
         uses: actions/cache@v4
         with:

@@ -77,6 +77,7 @@ psql -U intelgraph -d intelgraph_prod -f migrations/add-performance-indexes.sql
 ```
 
 **Expected Output**:
+
 ```
 CREATE INDEX
 CREATE INDEX
@@ -85,6 +86,7 @@ CREATE INDEX
 ```
 
 **Validation**:
+
 ```sql
 -- Check index count
 SELECT COUNT(*) FROM pg_indexes
@@ -111,6 +113,7 @@ SHOW CONSTRAINTS;
 ```
 
 **Expected Output**:
+
 ```
 +--------------------+--------+----------+
 | name               | type   | state    |
@@ -126,9 +129,10 @@ SHOW CONSTRAINTS;
 #### 2.1 Update Database Connection Setup
 
 **Before** (example from existing code):
+
 ```typescript
 // server/src/db/neo4j.ts
-import neo4j from 'neo4j-driver';
+import neo4j from "neo4j-driver";
 
 const driver = neo4j.driver(
   process.env.NEO4J_URI,
@@ -137,13 +141,14 @@ const driver = neo4j.driver(
 ```
 
 **After** (using optimized configuration):
+
 ```typescript
-import { createOptimizedNeo4jDriver } from '../config/neo4j';
+import { createOptimizedNeo4jDriver } from "../config/neo4j";
 
 const driver = createOptimizedNeo4jDriver({
-  uri: process.env.NEO4J_URI || 'bolt://localhost:7687',
-  username: process.env.NEO4J_USER || 'neo4j',
-  password: process.env.NEO4J_PASSWORD || 'password',
+  uri: process.env.NEO4J_URI || "bolt://localhost:7687",
+  username: process.env.NEO4J_USER || "neo4j",
+  password: process.env.NEO4J_PASSWORD || "password",
   maxConnectionPoolSize: 50,
   connectionTimeout: 30000,
   slowQueryThreshold: 100,
@@ -155,14 +160,15 @@ const driver = createOptimizedNeo4jDriver({
 #### 2.2 Add Redis Cache Manager
 
 **New File**: `server/src/cache/manager.ts`
+
 ```typescript
-import { createRedisCacheManager } from '../config/redis';
+import { createRedisCacheManager } from "../config/redis";
 
 export const cacheManager = createRedisCacheManager({
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
+  host: process.env.REDIS_HOST || "localhost",
+  port: parseInt(process.env.REDIS_PORT || "6379"),
   password: process.env.REDIS_PASSWORD,
-  keyPrefix: 'intelgraph:',
+  keyPrefix: "intelgraph:",
   enableMetrics: true,
 });
 
@@ -172,6 +178,7 @@ export default cacheManager;
 #### 2.3 Add DataLoaders to GraphQL Context
 
 **Before**:
+
 ```typescript
 // server/src/graphql/context.ts
 export const createContext = ({ req }) => ({
@@ -184,9 +191,10 @@ export const createContext = ({ req }) => ({
 ```
 
 **After**:
+
 ```typescript
-import { createDataLoaders } from '../middleware/dataloader';
-import cacheManager from '../cache/manager';
+import { createDataLoaders } from "../middleware/dataloader";
+import cacheManager from "../cache/manager";
 
 export const createContext = ({ req }) => {
   const tenantId = req.user?.tenantId;
@@ -195,11 +203,7 @@ export const createContext = ({ req }) => {
     user: req.user,
     tenantId,
     // Add DataLoaders (prevents N+1 queries)
-    loaders: createDataLoaders(
-      getPostgresPool(),
-      getNeo4jDriver(),
-      tenantId
-    ),
+    loaders: createDataLoaders(getPostgresPool(), getNeo4jDriver(), tenantId),
     // Add cache manager
     cacheManager,
     // Keep existing
@@ -216,6 +220,7 @@ export const createContext = ({ req }) => {
 #### 2.4 Update Resolvers to Use DataLoaders
 
 **Before** (N+1 problem):
+
 ```typescript
 Entity: {
   relationships: async (parent, args, context) => {
@@ -230,6 +235,7 @@ Entity: {
 ```
 
 **After** (using DataLoader):
+
 ```typescript
 Entity: {
   relationships: async (parent, args, context) => {
@@ -244,6 +250,7 @@ Entity: {
 #### 2.5 Add GraphQL Query Caching
 
 **Before**:
+
 ```typescript
 Query: {
   entities: async (parent, args, context) => {
@@ -257,6 +264,7 @@ Query: {
 ```
 
 **After** (with caching):
+
 ```typescript
 import { hashGraphQLQuery } from '../config/redis';
 
@@ -326,23 +334,24 @@ Mutation: {
 #### 3.1 Add Healthcheck Endpoints
 
 **File**: `server/src/routes/health.ts`
+
 ```typescript
-import express from 'express';
-import { databaseHealthMonitor, handleHealthCheck } from '../middleware/database-monitoring';
+import express from "express";
+import { databaseHealthMonitor, handleHealthCheck } from "../middleware/database-monitoring";
 
 const router = express.Router();
 
 // Database health
-router.get('/database', handleHealthCheck);
+router.get("/database", handleHealthCheck);
 
 // Slow queries
-router.get('/slow-queries', (req, res) => {
+router.get("/slow-queries", (req, res) => {
   const tracker = databaseHealthMonitor.getQueryTracker();
   res.json(tracker.getSlowQueryReport(20));
 });
 
 // Cache stats
-router.get('/cache-stats', (req, res) => {
+router.get("/cache-stats", (req, res) => {
   const monitor = databaseHealthMonitor.getCacheMonitor();
   res.json(monitor.getStats());
 });
@@ -351,23 +360,25 @@ export default router;
 ```
 
 **Add to server**:
-```typescript
-import healthRoutes from './routes/health';
 
-app.use('/health', healthRoutes);
+```typescript
+import healthRoutes from "./routes/health";
+
+app.use("/health", healthRoutes);
 ```
 
 #### 3.2 Start Monitoring
 
 **File**: `server/src/index.ts`
+
 ```typescript
-import { databaseHealthMonitor } from './middleware/database-monitoring';
+import { databaseHealthMonitor } from "./middleware/database-monitoring";
 
 // Start monitoring PostgreSQL pool
-databaseHealthMonitor.monitorPostgresPool(postgresPool, 'write');
+databaseHealthMonitor.monitorPostgresPool(postgresPool, "write");
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
+process.on("SIGTERM", () => {
   databaseHealthMonitor.stop();
 });
 ```
@@ -415,6 +426,7 @@ curl http://localhost:4000/health/database | jq '.postgres.pool.utilization'
 ```
 
 **Expected Metrics After 1 Hour**:
+
 - Cache hit rate: >80%
 - Slow query rate: <1%
 - Pool utilization: <60%
@@ -440,6 +452,7 @@ curl http://localhost:4000/health/database | jq '.postgres.pool.utilization'
 #### 5.2 Deployment Steps
 
 **Option A: Blue-Green Deployment** (Recommended)
+
 ```bash
 # 1. Deploy to green environment
 kubectl apply -f k8s/deployment-green.yaml
@@ -457,6 +470,7 @@ kubectl patch service api -p '{"spec":{"selector":{"slot":"green"}}}'
 ```
 
 **Option B: Rolling Deployment**
+
 ```bash
 # 1. Deploy with rolling update
 kubectl set image deployment/server server=new-image:tag
@@ -480,6 +494,7 @@ kubectl exec -it deployment/server -- curl localhost:4000/health/database
 ```
 
 **Grafana Queries**:
+
 ```promql
 # Cache hit rate
 rate(redis_cache_hits_total[5m]) / (rate(redis_cache_hits_total[5m]) + rate(redis_cache_misses_total[5m]))
@@ -502,6 +517,7 @@ This migration is **fully backwards compatible**. The optimization features are 
 If you want to enforce best practices, consider:
 
 1. **Require pagination for all list queries**:
+
    ```typescript
    // Enforce pagination
    if (!args.first && !args.last) {
@@ -510,6 +526,7 @@ If you want to enforce best practices, consider:
    ```
 
 2. **Disable unbounded queries**:
+
    ```sql
    -- Add query timeout
    SET statement_timeout = '30s';
@@ -540,6 +557,7 @@ kubectl rollout undo deployment/server
 **Note**: Indexes don't hurt performance, so you can leave them. But if you want to remove them:
 
 **PostgreSQL**:
+
 ```sql
 -- Drop indexes with specific pattern
 DO $$
@@ -558,6 +576,7 @@ END $$;
 ```
 
 **Neo4j**:
+
 ```cypher
 // List all indexes
 SHOW INDEXES;
@@ -585,11 +604,12 @@ curl https://api.example.com/health
 **Symptom**: Redis memory usage is high
 
 **Solution**:
+
 ```typescript
 // Reduce cache sizes
 const cacheManager = createRedisCacheManager({
   // ... other config
-  maxMemoryPolicy: 'allkeys-lru', // Enable LRU eviction
+  maxMemoryPolicy: "allkeys-lru", // Enable LRU eviction
 });
 
 // Reduce TTLs
@@ -601,19 +621,21 @@ CACHE_TTL.GRAPHQL_QUERY = 60; // 1 minute instead of 5
 **Symptom**: Cache hit rate <50%
 
 **Causes**:
+
 1. TTLs too short
 2. Not enough warmup time
 3. High cache invalidation rate
 4. Queries with unique parameters
 
 **Solutions**:
+
 ```typescript
 // 1. Increase TTLs for stable data
 CACHE_TTL.ENTITY_DATA = 3600; // 1 hour
 
 // 2. Pre-warm cache on startup
 async function warmCache() {
-  await cacheManager.cacheGraphQLQuery('popular-query-1', result, tenantId);
+  await cacheManager.cacheGraphQLQuery("popular-query-1", result, tenantId);
   // ...
 }
 
@@ -626,6 +648,7 @@ async function warmCache() {
 **Symptom**: `/health/slow-queries` shows many entries
 
 **Solutions**:
+
 ```sql
 -- 1. Verify indexes are being used
 EXPLAIN ANALYZE
@@ -645,10 +668,12 @@ CREATE INDEX CONCURRENTLY idx_custom ON entities(tenant_id, other_column);
 **Symptom**: Still seeing N queries in logs
 
 **Causes**:
+
 1. DataLoader not in context
 2. Using await in loops
 
 **Solutions**:
+
 ```typescript
 // ❌ Wrong - doesn't batch
 for (const entity of entities) {
@@ -656,7 +681,7 @@ for (const entity of entities) {
 }
 
 // ✅ Correct - batches all loads
-entities.forEach(entity => {
+entities.forEach((entity) => {
   entity.relationships = context.loaders.entityRelationshipsLoader.load(entity.id);
 });
 ```
@@ -666,6 +691,7 @@ entities.forEach(entity => {
 **Symptom**: "Connection pool exhausted" errors
 
 **Solutions**:
+
 ```typescript
 // 1. Increase pool size
 const pool = createOptimizedPool({

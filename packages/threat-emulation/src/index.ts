@@ -9,7 +9,7 @@
  */
 
 // Types
-export * from './types';
+export * from "./types";
 
 // APT Library
-export { APTLibrary, EmulationPlanGenerator } from './actors/apt-library';
+export { APTLibrary, EmulationPlanGenerator } from "./actors/apt-library";

@@ -17,15 +17,7 @@
         "properties": {
           "id": { "type": "string" },
           "type": {
-            "enum": [
-              "build",
-              "test",
-              "lint",
-              "deploy",
-              "approve",
-              "notify",
-              "custom"
-            ]
+            "enum": ["build", "test", "lint", "deploy", "approve", "notify", "custom"]
           },
           "uses": { "type": "string" },
           "inputs": { "type": "object" },

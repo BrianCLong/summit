@@ -5,8 +5,8 @@ import type {
   AudioStreamConfig,
   AudioQualityMetrics,
   AudioEnhancementOptions,
-  AudioProcessingJob
-} from './types.js';
+  AudioProcessingJob,
+} from "./types.js";
 
 /**
  * Interface for audio processors
@@ -162,7 +162,9 @@ export interface IAudioStorage {
   /**
    * List stored audio
    */
-  list(filter?: Record<string, unknown>): Promise<Array<{ id: string; metadata: Record<string, unknown> }>>;
+  list(
+    filter?: Record<string, unknown>
+  ): Promise<Array<{ id: string; metadata: Record<string, unknown> }>>;
 }
 
 /**
@@ -172,7 +174,7 @@ export interface IAudioJobQueue {
   /**
    * Submit a job
    */
-  submit(job: Omit<AudioProcessingJob, 'id' | 'createdAt' | 'updatedAt'>): Promise<string>;
+  submit(job: Omit<AudioProcessingJob, "id" | "createdAt" | "updatedAt">): Promise<string>;
 
   /**
    * Get job status

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Tabs,
   Tab,
@@ -21,7 +21,7 @@ import {
   TextField,
   Switch,
   FormControlLabel,
-} from '@mui/material';
+} from "@mui/material";
 import {
   ExpandMore as ExpandMoreIcon,
   PolicyOutlined as PolicyIcon,
@@ -29,8 +29,8 @@ import {
   MonetizationOnOutlined as CostIcon,
   SpeedOutlined as PerformanceIcon,
   SimulationOutlined as SimulateIcon,
-} from '@mui/icons-material';
-import { api } from '../api';
+} from "@mui/icons-material";
+import { api } from "../api";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -61,7 +61,7 @@ export default function PolicyExplain({ context }: { context: any }) {
   const [tabValue, setTabValue] = useState(0);
   const [simulation, setSimulation] = useState(null);
   const [simulateMode, setSimulateMode] = useState(false);
-  const [proposedRules, setProposedRules] = useState('');
+  const [proposedRules, setProposedRules] = useState("");
   const [explanation, setExplanation] = useState<any | null>(null);
 
   const runExplain = async () => {
@@ -74,9 +74,9 @@ export default function PolicyExplain({ context }: { context: any }) {
       };
 
       // Fetch comprehensive explanation
-      const response = await fetch('/api/maestro/v1/policies/explain', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/maestro/v1/policies/explain", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
@@ -91,7 +91,7 @@ export default function PolicyExplain({ context }: { context: any }) {
       const resp = await postPolicyExplain({ input: context });
       setResult(resp);
     } catch (e: any) {
-      setError(e?.message || 'Explain failed');
+      setError(e?.message || "Explain failed");
     } finally {
       setLoading(false);
     }
@@ -102,9 +102,9 @@ export default function PolicyExplain({ context }: { context: any }) {
 
     try {
       const rules = JSON.parse(proposedRules);
-      const response = await fetch('/api/maestro/v1/policies/simulate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/maestro/v1/policies/simulate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           queryId: context.queryId,
           proposedRules: Array.isArray(rules) ? rules : [rules],
@@ -118,7 +118,7 @@ export default function PolicyExplain({ context }: { context: any }) {
       const data = await response.json();
       setSimulation(data.simulation);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Simulation failed');
+      setError(err instanceof Error ? err.message : "Simulation failed");
     }
   };
 
@@ -128,8 +128,7 @@ export default function PolicyExplain({ context }: { context: any }) {
         <>
           <Alert severity="info" sx={{ mb: 2 }}>
             <Typography variant="body2">
-              <strong>Selected Expert:</strong>{' '}
-              {explanation.decision.selectedExpert}
+              <strong>Selected Expert:</strong> {explanation.decision.selectedExpert}
             </Typography>
             <Typography variant="body2">
               <strong>Confidence:</strong> {explanation.decision.confidence}
@@ -152,21 +151,19 @@ export default function PolicyExplain({ context }: { context: any }) {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {explanation.decision.alternatives.map(
-                  (alt: any, index: number) => (
-                    <TableRow key={index}>
-                      <TableCell>{alt.expert}</TableCell>
-                      <TableCell>{alt.score}</TableCell>
-                      <TableCell>
-                        <Chip
-                          label={alt.rejectionReason || 'Available'}
-                          size="small"
-                          color={alt.rejectionReason ? 'default' : 'success'}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ),
-                )}
+                {explanation.decision.alternatives.map((alt: any, index: number) => (
+                  <TableRow key={index}>
+                    <TableCell>{alt.expert}</TableCell>
+                    <TableCell>{alt.score}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={alt.rejectionReason || "Available"}
+                        size="small"
+                        color={alt.rejectionReason ? "default" : "success"}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
@@ -175,16 +172,10 @@ export default function PolicyExplain({ context }: { context: any }) {
         result && (
           <div className="space-y-2 text-sm">
             <div>
-              Decision:{' '}
-              <span className="font-semibold">
-                {result.allowed ? 'Allow' : 'Deny'}
-              </span>
+              Decision: <span className="font-semibold">{result.allowed ? "Allow" : "Deny"}</span>
             </div>
             <div>
-              Rule Path:{' '}
-              <span className="font-mono text-xs">
-                {result.rulePath || '—'}
-              </span>
+              Rule Path: <span className="font-mono text-xs">{result.rulePath || "—"}</span>
             </div>
             <div>
               Reasons:
@@ -210,18 +201,14 @@ export default function PolicyExplain({ context }: { context: any }) {
           {explanation.rulePath.map((rule: any, index: number) => (
             <Accordion key={index}>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <PolicyIcon />
                   <Typography variant="subtitle1">{rule.name}</Typography>
-                  <Chip
-                    label={`Priority: ${rule.priority}`}
-                    size="small"
-                    color="primary"
-                  />
+                  <Chip label={`Priority: ${rule.priority}`} size="small" color="primary" />
                   <Chip
                     label={rule.action}
                     size="small"
-                    color={rule.action === 'deny' ? 'error' : 'success'}
+                    color={rule.action === "deny" ? "error" : "success"}
                   />
                 </Box>
               </AccordionSummary>
@@ -247,34 +234,32 @@ export default function PolicyExplain({ context }: { context: any }) {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {explanation.policyEvaluations.map(
-                  (eval: any, index: number) => (
-                    <TableRow key={index}>
-                      <TableCell>{eval.ruleName}</TableCell>
-                      <TableCell>
-                        <Chip
-                          label={eval.matched ? 'Yes' : 'No'}
-                          size="small"
-                          color={eval.matched ? 'success' : 'default'}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={eval.result}
-                          size="small"
-                          color={
-                            eval.result === 'deny'
-                              ? 'error'
-                              : eval.result === 'allow'
-                                ? 'success'
-                                : 'warning'
-                          }
-                        />
-                      </TableCell>
-                      <TableCell>{eval.description}</TableCell>
-                    </TableRow>
-                  ),
-                )}
+                {explanation.policyEvaluations.map((eval: any, index: number) => (
+                  <TableRow key={index}>
+                    <TableCell>{eval.ruleName}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={eval.matched ? "Yes" : "No"}
+                        size="small"
+                        color={eval.matched ? "success" : "default"}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={eval.result}
+                        size="small"
+                        color={
+                          eval.result === "deny"
+                            ? "error"
+                            : eval.result === "allow"
+                              ? "success"
+                              : "warning"
+                        }
+                      />
+                    </TableCell>
+                    <TableCell>{eval.description}</TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
@@ -285,7 +270,7 @@ export default function PolicyExplain({ context }: { context: any }) {
             <summary className="cursor-pointer">Rego Trace</summary>
             <pre className="overflow-auto rounded bg-slate-50 p-2 text-[11px]">
               {Array.isArray(result.trace)
-                ? result.trace.join('\n')
+                ? result.trace.join("\n")
                 : JSON.stringify(result.trace, null, 2)}
             </pre>
           </details>
@@ -305,14 +290,13 @@ export default function PolicyExplain({ context }: { context: any }) {
             severity={
               explanation.costBreakdown.estimatedCost >
               explanation.costBreakdown.budgetRemaining * 0.8
-                ? 'warning'
-                : 'success'
+                ? "warning"
+                : "success"
             }
             sx={{ mb: 2 }}
           >
             <Typography variant="body2">
-              <strong>Estimated Cost:</strong> $
-              {explanation.costBreakdown.estimatedCost.toFixed(4)}
+              <strong>Estimated Cost:</strong> ${explanation.costBreakdown.estimatedCost.toFixed(4)}
             </Typography>
             <Typography variant="body2">
               <strong>Budget Remaining:</strong> $
@@ -335,28 +319,22 @@ export default function PolicyExplain({ context }: { context: any }) {
                     <TableRow key={factor}>
                       <TableCell>
                         {factor
-                          .replace(/([A-Z])/g, ' $1')
+                          .replace(/([A-Z])/g, " $1")
                           .replace(/^./, (str) => str.toUpperCase())}
                       </TableCell>
                       <TableCell>${amount.toFixed(4)}</TableCell>
                       <TableCell>
-                        {(
-                          (amount / explanation.costBreakdown.estimatedCost) *
-                          100
-                        ).toFixed(1)}
-                        %
+                        {((amount / explanation.costBreakdown.estimatedCost) * 100).toFixed(1)}%
                       </TableCell>
                     </TableRow>
-                  ),
+                  )
                 )}
               </TableBody>
             </Table>
           </TableContainer>
         </>
       ) : (
-        <Alert severity="info">
-          Cost analysis not available for this decision
-        </Alert>
+        <Alert severity="info">Cost analysis not available for this decision</Alert>
       )}
     </Box>
   );
@@ -368,18 +346,14 @@ export default function PolicyExplain({ context }: { context: any }) {
           <Typography variant="h6" gutterBottom>
             Performance Metrics
           </Typography>
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
             <Paper sx={{ p: 2 }}>
               <Typography variant="subtitle2" color="textSecondary">
                 Estimated Latency
               </Typography>
               <Typography
                 variant="h4"
-                color={
-                  explanation.performanceMetrics.latencyEstimate > 5000
-                    ? 'error'
-                    : 'primary'
-                }
+                color={explanation.performanceMetrics.latencyEstimate > 5000 ? "error" : "primary"}
               >
                 {explanation.performanceMetrics.latencyEstimate}ms
               </Typography>
@@ -391,39 +365,26 @@ export default function PolicyExplain({ context }: { context: any }) {
               <Typography
                 variant="h4"
                 color={
-                  explanation.performanceMetrics.reliabilityScore > 0.95
-                    ? 'success'
-                    : 'warning'
+                  explanation.performanceMetrics.reliabilityScore > 0.95 ? "success" : "warning"
                 }
               >
-                {(
-                  explanation.performanceMetrics.reliabilityScore * 100
-                ).toFixed(1)}
-                %
+                {(explanation.performanceMetrics.reliabilityScore * 100).toFixed(1)}%
               </Typography>
             </Paper>
           </Box>
 
           <Alert
-            severity={
-              explanation.performanceMetrics.capacityAvailable
-                ? 'success'
-                : 'warning'
-            }
+            severity={explanation.performanceMetrics.capacityAvailable ? "success" : "warning"}
             sx={{ mt: 2 }}
           >
             <Typography variant="body2">
-              <strong>Capacity Status:</strong>{' '}
-              {explanation.performanceMetrics.capacityAvailable
-                ? 'Available'
-                : 'Limited'}
+              <strong>Capacity Status:</strong>{" "}
+              {explanation.performanceMetrics.capacityAvailable ? "Available" : "Limited"}
             </Typography>
           </Alert>
         </>
       ) : (
-        <Alert severity="info">
-          Performance metrics not available for this decision
-        </Alert>
+        <Alert severity="info">Performance metrics not available for this decision</Alert>
       )}
     </Box>
   );
@@ -432,10 +393,7 @@ export default function PolicyExplain({ context }: { context: any }) {
     <Box>
       <FormControlLabel
         control={
-          <Switch
-            checked={simulateMode}
-            onChange={(e) => setSimulateMode(e.target.checked)}
-          />
+          <Switch checked={simulateMode} onChange={(e) => setSimulateMode(e.target.checked)} />
         }
         label="What-if Simulation Mode"
       />
@@ -475,8 +433,8 @@ export default function PolicyExplain({ context }: { context: any }) {
           <Alert severity="info">
             <Typography variant="h6">Simulation Results</Typography>
             <Typography variant="body2">
-              <strong>Expert Would Change:</strong>{' '}
-              {simulation.impact.expertWouldChange ? 'Yes' : 'No'}
+              <strong>Expert Would Change:</strong>{" "}
+              {simulation.impact.expertWouldChange ? "Yes" : "No"}
             </Typography>
             <Typography variant="body2">
               <strong>Cost Delta:</strong> {simulation.impact.costDelta}
@@ -498,8 +456,7 @@ export default function PolicyExplain({ context }: { context: any }) {
                 <strong>New Reason:</strong> {simulation.newDecision.reason}
               </Typography>
               <Typography variant="body2">
-                <strong>New Confidence:</strong>{' '}
-                {simulation.newDecision.confidence}
+                <strong>New Confidence:</strong> {simulation.newDecision.confidence}
               </Typography>
             </Alert>
           )}
@@ -508,9 +465,7 @@ export default function PolicyExplain({ context }: { context: any }) {
 
       {result?.whatIf && (
         <details>
-          <summary className="cursor-pointer">
-            What-if Simulation (Legacy)
-          </summary>
+          <summary className="cursor-pointer">What-if Simulation (Legacy)</summary>
           <pre className="overflow-auto rounded bg-slate-50 p-2 text-xs">
             {JSON.stringify(result.whatIf, null, 2)}
           </pre>
@@ -528,12 +483,12 @@ export default function PolicyExplain({ context }: { context: any }) {
           onClick={runExplain}
           disabled={loading}
         >
-          {loading ? 'Explaining...' : 'Explain'}
+          {loading ? "Explaining..." : "Explain"}
         </button>
       </div>
 
       {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
           <CircularProgress size={24} />
         </Box>
       )}

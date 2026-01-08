@@ -14,11 +14,13 @@ Use this checklist when onboarding a new service or migrating an existing servic
 ### 1. Repository Structure ✓
 
 - [ ] **Service created via scaffold CLI**
+
   ```bash
   companyos create <type> --name <service-name>
   ```
 
 - [ ] **Standard directory structure present**
+
   ```
   ✓ src/           - Source code
   ✓ tests/         - Test files
@@ -44,12 +46,14 @@ Use this checklist when onboarding a new service or migrating an existing servic
 ### 2. Code Quality ✓
 
 - [ ] **Linting passes**
+
   ```bash
   pnpm lint        # Zero errors
   pnpm typecheck   # No TypeScript errors
   ```
 
 - [ ] **Formatting consistent**
+
   ```bash
   pnpm format:check  # All files formatted
   ```
@@ -63,18 +67,20 @@ Use this checklist when onboarding a new service or migrating an existing servic
 ### 3. Testing ✓
 
 - [ ] **Unit tests present and passing**
+
   ```bash
   pnpm test:unit   # All tests pass
   ```
 
 - [ ] **Coverage thresholds met**
-  | Tier | Lines | Branches | Functions |
-  |------|-------|----------|-----------|
-  | 1    | 90%   | 85%      | 90%       |
-  | 2    | 80%   | 75%      | 80%       |
-  | 3    | 70%   | 65%      | 70%       |
+      | Tier | Lines | Branches | Functions |
+      |------|-------|----------|-----------|
+      | 1 | 90% | 85% | 90% |
+      | 2 | 80% | 75% | 80% |
+      | 3 | 70% | 65% | 70% |
 
 - [ ] **Integration tests present**
+
   ```bash
   pnpm test:integration  # Database/service tests pass
   ```
@@ -86,13 +92,14 @@ Use this checklist when onboarding a new service or migrating an existing servic
 ### 4. Health & Observability ✓
 
 - [ ] **Health endpoints implemented**
-  | Endpoint | Purpose | Response |
-  |----------|---------|----------|
-  | `/health` | Basic liveness | `{"status": "ok"}` |
-  | `/health/ready` | Readiness (deps) | `{"status": "ok", "checks": {...}}` |
-  | `/health/live` | Liveness probe | `{"status": "ok"}` |
+      | Endpoint | Purpose | Response |
+      |----------|---------|----------|
+      | `/health` | Basic liveness | `{"status": "ok"}` |
+      | `/health/ready` | Readiness (deps) | `{"status": "ok", "checks": {...}}` |
+      | `/health/live` | Liveness probe | `{"status": "ok"}` |
 
 - [ ] **Metrics endpoint exposed**
+
   ```bash
   curl localhost:8080/metrics  # Prometheus format
   ```
@@ -104,6 +111,7 @@ Use this checklist when onboarding a new service or migrating an existing servic
   - [ ] Custom business metrics
 
 - [ ] **Structured logging configured**
+
   ```json
   {
     "level": "info",
@@ -124,14 +132,16 @@ Use this checklist when onboarding a new service or migrating an existing servic
 - [ ] **SLO file exists**: `slos/slos.yaml`
 
 - [ ] **Availability SLO defined**
+
   ```yaml
   - name: availability
-    objective: 99.9  # Adjust by tier
+    objective: 99.9 # Adjust by tier
     sli:
       type: availability
   ```
 
 - [ ] **Latency SLO defined**
+
   ```yaml
   - name: latency-p99
     objective: 99.0
@@ -170,6 +180,7 @@ Use this checklist when onboarding a new service or migrating an existing servic
   - [ ] Unauthorized response format
 
 - [ ] **Authorization rules defined**
+
   ```rego
   package myservice.authz
   default allow = false
@@ -194,6 +205,7 @@ Use this checklist when onboarding a new service or migrating an existing servic
 - [ ] **CI workflow file exists**: `.github/workflows/ci.yml`
 
 - [ ] **Uses reusable workflows**
+
   ```yaml
   jobs:
     pipeline:
@@ -217,6 +229,7 @@ Use this checklist when onboarding a new service or migrating an existing servic
 ### 9. Container & Deployment ✓
 
 - [ ] **Dockerfile follows standards**
+
   ```dockerfile
   # Multi-stage build
   FROM node:20-alpine AS builder
@@ -247,6 +260,7 @@ Use this checklist when onboarding a new service or migrating an existing servic
 ### 10. Documentation & Ownership ✓
 
 - [ ] **Team ownership defined**
+
   ```json
   // package.json
   {
@@ -259,6 +273,7 @@ Use this checklist when onboarding a new service or migrating an existing servic
   ```
 
 - [ ] **CODEOWNERS file updated**
+
   ```
   /services/my-service/ @platform-team
   ```
@@ -311,12 +326,12 @@ promtool check rules slos/slos.yaml
 
 Before production deployment, obtain sign-off from:
 
-| Role | Requirement | Approver |
-|------|-------------|----------|
+| Role          | Requirement                        | Approver       |
+| ------------- | ---------------------------------- | -------------- |
 | **Tech Lead** | Code review, architecture approval | Team tech lead |
-| **Security** | Security review (Tier 1-2 only) | Security team |
-| **SRE** | SLO review, runbook approval | SRE team |
-| **Platform** | Golden Path compliance | Platform team |
+| **Security**  | Security review (Tier 1-2 only)    | Security team  |
+| **SRE**       | SLO review, runbook approval       | SRE team       |
+| **Platform**  | Golden Path compliance             | Platform team  |
 
 ### Sign-Off Template
 
@@ -329,6 +344,7 @@ Before production deployment, obtain sign-off from:
 **Date**: 2024-01-15
 
 ### Checklist Completion
+
 - [x] Repository Structure (10/10)
 - [x] Code Quality (4/4)
 - [x] Testing (4/4)
@@ -341,12 +357,14 @@ Before production deployment, obtain sign-off from:
 - [x] Documentation & Ownership (4/4)
 
 ### Approvals
+
 - [ ] Tech Lead: @tech-lead (pending)
 - [ ] Security: @security-team (pending)
 - [ ] SRE: @sre-team (pending)
 - [ ] Platform: @platform-team (pending)
 
 ### Notes
+
 [Any exceptions or special considerations]
 ```
 
@@ -369,33 +387,42 @@ If unable to meet a requirement, follow the exception process:
 ## Exception: [Service Name] - [Requirement]
 
 ### Requested By
+
 - Team: platform-team
 - Requestor: @developer
 - Date: 2024-01-15
 
 ### Requirement
+
 Coverage threshold 80% cannot be met due to legacy code.
 
 ### Current State
+
 Current coverage: 65%
 
 ### Justification
+
 Service contains legacy code scheduled for deprecation in Q2.
 Investing in test coverage for soon-to-be-removed code is not efficient.
 
 ### Compensating Controls
+
 1. Manual testing checklist for critical paths
 2. Increased monitoring during deployments
 3. Gradual coverage increase plan (5% per sprint)
 
 ### Approval
+
 - [ ] Platform team: @platform-lead
 
 ### Expiration
+
 2024-04-15 (90 days)
 
 ### Renewal Criteria
+
 Exception will be re-evaluated if:
+
 - Legacy code deprecation is delayed
 - Incident occurs related to untested code
 ```

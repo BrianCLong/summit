@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import process from 'node:process';
-import { verifyBundle } from './bundleVerifier.js';
-import { formatReport } from './reporter.js';
+import process from "node:process";
+import { verifyBundle } from "./bundleVerifier.js";
+import { formatReport } from "./reporter.js";
 
 function printHelp(): void {
   console.log(`Provenance Export Manifest Verifier
@@ -23,19 +23,19 @@ async function main(): Promise<void> {
   let json = false;
 
   for (let i = 0; i < args.length; i++) {
-    const arg = args[i] ?? '';
-    if (arg === '--bundle' || arg === '-b') {
+    const arg = args[i] ?? "";
+    if (arg === "--bundle" || arg === "-b") {
       const next = args[i + 1];
       if (next) {
         bundlePath = next;
         i += 1;
       }
-    } else if (arg === '--json') {
+    } else if (arg === "--json") {
       json = true;
-    } else if (arg === '--help' || arg === '-h') {
+    } else if (arg === "--help" || arg === "-h") {
       printHelp();
       return;
-    } else if (!arg.startsWith('-') && !bundlePath) {
+    } else if (!arg.startsWith("-") && !bundlePath) {
       bundlePath = arg;
     }
   }

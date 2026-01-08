@@ -20,7 +20,7 @@ export interface Run {
   pipelineId: string;
   commit: string;
   env: string;
-  status: 'queued' | 'running' | 'succeeded' | 'failed' | 'cancelled';
+  status: "queued" | "running" | "succeeded" | "failed" | "cancelled";
   startedAt: string;
   endedAt?: string;
   durationMs: number;
@@ -54,7 +54,7 @@ export interface Artifact {
 
 export interface Attestation {
   id: string;
-  type: 'SBOM' | 'SLSA' | 'Cosign';
+  type: "SBOM" | "SLSA" | "Cosign";
   status: string;
   details: Record<string, unknown>;
   evidence: Record<string, unknown>[];
@@ -62,7 +62,7 @@ export interface Attestation {
 
 export interface Policy {
   id: string;
-  type: 'OPA' | 'Kyverno' | 'Gatekeeper';
+  type: "OPA" | "Kyverno" | "Gatekeeper";
   source: string;
   version: string;
   result: string;
@@ -138,7 +138,7 @@ export interface RunsListResponse {
 }
 
 export interface RunAction {
-  action: 'promote' | 'pause' | 'resume' | 'rerun' | 'rollback';
+  action: "promote" | "pause" | "resume" | "rerun" | "rollback";
   reason?: string;
 }
 
@@ -218,17 +218,17 @@ export interface SSEEvent {
 }
 
 export type RunEventType =
-  | 'run_started'
-  | 'run_progress'
-  | 'run_completed'
-  | 'step_started'
-  | 'step_completed'
-  | 'step_failed';
+  | "run_started"
+  | "run_progress"
+  | "run_completed"
+  | "step_started"
+  | "step_completed"
+  | "step_failed";
 
-export type PolicyEventType = 'policy_denied' | 'policy_approved';
-export type BudgetEventType = 'budget_warning' | 'budget_exceeded';
-export type AlertEventType = 'alert_fired' | 'alert_resolved';
-export type RoutingEventType = 'routing_failover' | 'routing_restored';
+export type PolicyEventType = "policy_denied" | "policy_approved";
+export type BudgetEventType = "budget_warning" | "budget_exceeded";
+export type AlertEventType = "alert_fired" | "alert_resolved";
+export type RoutingEventType = "routing_failover" | "routing_restored";
 
 // API Response types
 export interface ApiResponse<T> {
@@ -313,7 +313,7 @@ export interface MetricData {
 export interface PolicyResult {
   id: string;
   name: string;
-  result: 'allow' | 'deny' | 'warn';
+  result: "allow" | "deny" | "warn";
   reason: string;
   rulePath: string;
   evidence: Record<string, unknown>;
@@ -364,12 +364,7 @@ export interface Tenant {
   users: User[];
 }
 
-export type PermissionAction =
-  | 'read'
-  | 'write'
-  | 'delete'
-  | 'execute'
-  | 'admin';
+export type PermissionAction = "read" | "write" | "delete" | "execute" | "admin";
 
 export interface Permission {
   resource: string;

@@ -3,21 +3,21 @@
  * Air-gapped export functionality with integrity verification
  */
 
-import fs from 'node:fs';
-import path from 'node:path';
-import crypto from 'node:crypto';
-import { createGzip, createGunzip } from 'node:zlib';
-import { pipeline } from 'node:stream/promises';
-import { v4 as uuidv4 } from 'uuid';
-import { z } from 'zod';
-import type { ExportConfig } from './config.js';
-import type { NodeResult, RelationshipResult } from './graph-client.js';
+import fs from "node:fs";
+import path from "node:path";
+import crypto from "node:crypto";
+import { createGzip, createGunzip } from "node:zlib";
+import { pipeline } from "node:stream/promises";
+import { v4 as uuidv4 } from "uuid";
+import { z } from "zod";
+import type { ExportConfig } from "./config.js";
+import type { NodeResult, RelationshipResult } from "./graph-client.js";
 import {
   EXPORT_FORMATS,
   type ExportFormat,
   CHECKSUM_ALGORITHM,
   MANIFEST_VERSION,
-} from './constants.js';
+} from "./constants.js";
 
 export interface ExportOptions {
   format?: ExportFormat;
@@ -51,7 +51,7 @@ export interface ExportFile {
   name: string;
   size: number;
   checksum: string;
-  type: 'nodes' | 'relationships' | 'metadata' | 'schema';
+  type: "nodes" | "relationships" | "metadata" | "schema";
   count?: number;
 }
 
@@ -73,7 +73,7 @@ export interface ImportResult {
 }
 
 const ExportOptionsSchema = z.object({
-  format: z.enum(EXPORT_FORMATS).default('json'),
+  format: z.enum(EXPORT_FORMATS).default("json"),
   outputDir: z.string().optional(),
   filename: z.string().optional(),
   compress: z.boolean().default(true),
@@ -98,7 +98,7 @@ export class ExportManager {
 
     // Load private key if configured
     if (config.privateKeyPath && fs.existsSync(config.privateKeyPath)) {
-      this.privateKey = fs.readFileSync(config.privateKeyPath, 'utf-8');
+      this.privateKey = fs.readFileSync(config.privateKeyPath, "utf-8");
     }
   }
 
@@ -128,15 +128,11 @@ export class ExportManager {
     let relationships = data.relationships;
 
     if (opts.filter?.labels?.length) {
-      nodes = nodes.filter((n) =>
-        n.labels.some((l) => opts.filter!.labels!.includes(l))
-      );
+      nodes = nodes.filter((n) => n.labels.some((l) => opts.filter!.labels!.includes(l)));
     }
 
     if (opts.filter?.types?.length) {
-      relationships = relationships.filter((r) =>
-        opts.filter!.types!.includes(r.type)
-      );
+      relationships = relationships.filter((r) => opts.filter!.types!.includes(r.type));
     }
 
     // Export nodes
@@ -161,21 +157,12 @@ export class ExportManager {
 
     // Export metadata
     if (opts.includeMetadata && data.metadata) {
-      const metaFile = await this.exportMetadata(
-        data.metadata,
-        exportDir,
-        opts.compress
-      );
+      const metaFile = await this.exportMetadata(data.metadata, exportDir, opts.compress);
       files.push(metaFile);
     }
 
     // Export schema
-    const schemaFile = await this.exportSchema(
-      nodes,
-      relationships,
-      exportDir,
-      opts.compress
-    );
+    const schemaFile = await this.exportSchema(nodes, relationships, exportDir, opts.compress);
     files.push(schemaFile);
 
     // Calculate stats
@@ -206,7 +193,7 @@ export class ExportManager {
     }
 
     // Write manifest
-    const manifestPath = path.join(exportDir, 'manifest.json');
+    const manifestPath = path.join(exportDir, "manifest.json");
     fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
 
     return manifest;
@@ -229,15 +216,13 @@ export class ExportManager {
 
     try {
       // Read manifest
-      const manifestPath = path.join(exportPath, 'manifest.json');
+      const manifestPath = path.join(exportPath, "manifest.json");
       if (!fs.existsSync(manifestPath)) {
-        result.errors.push('Manifest file not found');
+        result.errors.push("Manifest file not found");
         return result;
       }
 
-      const manifest: ExportManifest = JSON.parse(
-        fs.readFileSync(manifestPath, 'utf-8')
-      );
+      const manifest: ExportManifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
 
       // Verify integrity
       if (verify) {
@@ -252,20 +237,20 @@ export class ExportManager {
         result.success = true;
         result.nodesImported = manifest.stats.totalNodes;
         result.relationshipsImported = manifest.stats.totalRelationships;
-        result.warnings.push('Dry run - no data imported');
+        result.warnings.push("Dry run - no data imported");
         return result;
       }
 
       // Read and parse data files
       const nodes = await this.readExportFile<NodeResult[]>(
         exportPath,
-        manifest.files.find((f) => f.type === 'nodes')!,
+        manifest.files.find((f) => f.type === "nodes")!,
         manifest.compressed
       );
 
       const relationships = await this.readExportFile<RelationshipResult[]>(
         exportPath,
-        manifest.files.find((f) => f.type === 'relationships')!,
+        manifest.files.find((f) => f.type === "relationships")!,
         manifest.compressed
       );
 
@@ -273,9 +258,7 @@ export class ExportManager {
       result.relationshipsImported = relationships.length;
       result.success = true;
     } catch (error) {
-      result.errors.push(
-        error instanceof Error ? error.message : String(error)
-      );
+      result.errors.push(error instanceof Error ? error.message : String(error));
     }
 
     return result;
@@ -291,26 +274,24 @@ export class ExportManager {
 
     try {
       // Read manifest
-      const manifestPath = path.join(exportPath, 'manifest.json');
+      const manifestPath = path.join(exportPath, "manifest.json");
       if (!fs.existsSync(manifestPath)) {
-        errors.push('Manifest file not found');
+        errors.push("Manifest file not found");
         return { valid: false, errors, warnings };
       }
 
-      const manifest: ExportManifest = JSON.parse(
-        fs.readFileSync(manifestPath, 'utf-8')
-      );
+      const manifest: ExportManifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
 
       // Verify manifest checksum
       const calculatedChecksum = this.calculateManifestChecksum(manifest.files);
       if (calculatedChecksum !== manifest.checksum) {
-        errors.push('Manifest checksum mismatch');
+        errors.push("Manifest checksum mismatch");
       }
 
       // Verify signature if present
       if (manifest.signed && manifest.signature) {
         if (!this.verifySignature(manifest, manifest.signature)) {
-          errors.push('Invalid manifest signature');
+          errors.push("Invalid manifest signature");
         }
       }
 
@@ -336,9 +317,7 @@ export class ExportManager {
         }
       }
     } catch (error) {
-      errors.push(
-        `Verification error: ${error instanceof Error ? error.message : String(error)}`
-      );
+      errors.push(`Verification error: ${error instanceof Error ? error.message : String(error)}`);
     }
 
     return {
@@ -361,12 +340,12 @@ export class ExportManager {
     const entries = fs.readdirSync(exportDir, { withFileTypes: true });
 
     for (const entry of entries) {
-      if (entry.isDirectory() && entry.name.startsWith('export-')) {
-        const manifestPath = path.join(exportDir, entry.name, 'manifest.json');
+      if (entry.isDirectory() && entry.name.startsWith("export-")) {
+        const manifestPath = path.join(exportDir, entry.name, "manifest.json");
 
         if (fs.existsSync(manifestPath)) {
           try {
-            const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+            const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
             exports.push({
               path: path.join(exportDir, entry.name),
               manifest,
@@ -379,9 +358,7 @@ export class ExportManager {
     }
 
     return exports.sort(
-      (a, b) =>
-        new Date(b.manifest.timestamp).getTime() -
-        new Date(a.manifest.timestamp).getTime()
+      (a, b) => new Date(b.manifest.timestamp).getTime() - new Date(a.manifest.timestamp).getTime()
     );
   }
 
@@ -392,7 +369,7 @@ export class ExportManager {
     compress: boolean,
     _chunkSize: number
   ): Promise<ExportFile> {
-    const filename = `nodes.${format}${compress ? '.gz' : ''}`;
+    const filename = `nodes.${format}${compress ? ".gz" : ""}`;
     const filePath = path.join(outputDir, filename);
 
     const content = this.serializeData(nodes, format);
@@ -405,7 +382,7 @@ export class ExportManager {
       name: filename,
       size: stats.size,
       checksum,
-      type: 'nodes',
+      type: "nodes",
       count: nodes.length,
     };
   }
@@ -417,7 +394,7 @@ export class ExportManager {
     compress: boolean,
     _chunkSize: number
   ): Promise<ExportFile> {
-    const filename = `relationships.${format}${compress ? '.gz' : ''}`;
+    const filename = `relationships.${format}${compress ? ".gz" : ""}`;
     const filePath = path.join(outputDir, filename);
 
     const content = this.serializeData(relationships, format);
@@ -430,7 +407,7 @@ export class ExportManager {
       name: filename,
       size: stats.size,
       checksum,
-      type: 'relationships',
+      type: "relationships",
       count: relationships.length,
     };
   }
@@ -440,7 +417,7 @@ export class ExportManager {
     outputDir: string,
     compress: boolean
   ): Promise<ExportFile> {
-    const filename = `metadata.json${compress ? '.gz' : ''}`;
+    const filename = `metadata.json${compress ? ".gz" : ""}`;
     const filePath = path.join(outputDir, filename);
 
     const content = JSON.stringify(metadata, null, 2);
@@ -453,7 +430,7 @@ export class ExportManager {
       name: filename,
       size: stats.size,
       checksum,
-      type: 'metadata',
+      type: "metadata",
     };
   }
 
@@ -470,7 +447,7 @@ export class ExportManager {
       relationshipProperties: this.extractPropertySchema(relationships),
     };
 
-    const filename = `schema.json${compress ? '.gz' : ''}`;
+    const filename = `schema.json${compress ? ".gz" : ""}`;
     const filePath = path.join(outputDir, filename);
 
     const content = JSON.stringify(schema, null, 2);
@@ -483,35 +460,35 @@ export class ExportManager {
       name: filename,
       size: stats.size,
       checksum,
-      type: 'schema',
+      type: "schema",
     };
   }
 
   private serializeData(data: unknown[], format: ExportFormat): string {
     switch (format) {
-      case 'json':
+      case "json":
         return JSON.stringify(data, null, 2);
 
-      case 'csv':
-        if (data.length === 0) return '';
+      case "csv":
+        if (data.length === 0) return "";
         const headers = Object.keys(data[0] as Record<string, unknown>);
         const rows = data.map((item) =>
           headers
             .map((h) => {
               const val = (item as Record<string, unknown>)[h];
-              if (typeof val === 'object') {
+              if (typeof val === "object") {
                 return JSON.stringify(val);
               }
-              return String(val ?? '');
+              return String(val ?? "");
             })
-            .join(',')
+            .join(",")
         );
-        return [headers.join(','), ...rows].join('\n');
+        return [headers.join(","), ...rows].join("\n");
 
-      case 'graphml':
+      case "graphml":
         return this.toGraphML(data);
 
-      case 'parquet':
+      case "parquet":
         // Parquet requires binary format, return JSON for now
         return JSON.stringify(data);
 
@@ -531,7 +508,7 @@ export class ExportManager {
       if (this.isNode(item)) {
         const props = Object.entries(item.properties)
           .map(([k, v]) => `${k}="${this.escapeXml(String(v))}"`)
-          .join(' ');
+          .join(" ");
         lines.push(`    <node id="${item.id}" ${props}/>`);
       } else if (this.isRelationship(item)) {
         lines.push(
@@ -540,37 +517,37 @@ export class ExportManager {
       }
     }
 
-    lines.push('  </graph>');
-    lines.push('</graphml>');
+    lines.push("  </graph>");
+    lines.push("</graphml>");
 
-    return lines.join('\n');
+    return lines.join("\n");
   }
 
   private escapeXml(str: string): string {
     return str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&apos;');
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&apos;");
   }
 
   private isNode(item: unknown): item is NodeResult {
     return (
-      typeof item === 'object' &&
+      typeof item === "object" &&
       item !== null &&
-      'labels' in item &&
+      "labels" in item &&
       Array.isArray((item as NodeResult).labels)
     );
   }
 
   private isRelationship(item: unknown): item is RelationshipResult {
     return (
-      typeof item === 'object' &&
+      typeof item === "object" &&
       item !== null &&
-      'type' in item &&
-      'startNodeId' in item &&
-      'endNodeId' in item
+      "type" in item &&
+      "startNodeId" in item &&
+      "endNodeId" in item
     );
   }
 
@@ -596,13 +573,9 @@ export class ExportManager {
     return result;
   }
 
-  private async writeFile(
-    filePath: string,
-    content: string,
-    compress: boolean
-  ): Promise<void> {
+  private async writeFile(filePath: string, content: string, compress: boolean): Promise<void> {
     if (compress) {
-      const { Readable } = await import('node:stream');
+      const { Readable } = await import("node:stream");
       const input = Readable.from([content]);
       const output = fs.createWriteStream(filePath);
       const gzip = createGzip();
@@ -631,10 +604,10 @@ export class ExportManager {
         }
       });
 
-      const content = Buffer.concat(chunks).toString('utf-8');
+      const content = Buffer.concat(chunks).toString("utf-8");
       return JSON.parse(content) as T;
     } else {
-      const content = fs.readFileSync(filePath, 'utf-8');
+      const content = fs.readFileSync(filePath, "utf-8");
       return JSON.parse(content) as T;
     }
   }
@@ -644,9 +617,9 @@ export class ExportManager {
       const hash = crypto.createHash(CHECKSUM_ALGORITHM);
       const stream = fs.createReadStream(filePath);
 
-      stream.on('data', (data) => hash.update(data));
-      stream.on('end', () => resolve(hash.digest('hex')));
-      stream.on('error', reject);
+      stream.on("data", (data) => hash.update(data));
+      stream.on("end", () => resolve(hash.digest("hex")));
+      stream.on("error", reject);
     });
   }
 
@@ -657,12 +630,12 @@ export class ExportManager {
       hash.update(`${file.name}:${file.size}:${file.checksum}`);
     }
 
-    return hash.digest('hex');
+    return hash.digest("hex");
   }
 
   private signManifest(manifest: ExportManifest): string {
     if (!this.privateKey) {
-      throw new Error('Private key not configured');
+      throw new Error("Private key not configured");
     }
 
     const data = JSON.stringify({
@@ -671,16 +644,13 @@ export class ExportManager {
       checksum: manifest.checksum,
     });
 
-    const sign = crypto.createSign('RSA-SHA256');
+    const sign = crypto.createSign("RSA-SHA256");
     sign.update(data);
 
-    return sign.sign(this.privateKey, 'base64');
+    return sign.sign(this.privateKey, "base64");
   }
 
-  private verifySignature(
-    _manifest: ExportManifest,
-    signature: string
-  ): boolean {
+  private verifySignature(_manifest: ExportManifest, signature: string): boolean {
     // For verification, we would need the public key
     // This is a placeholder implementation
     return signature.length > 0;

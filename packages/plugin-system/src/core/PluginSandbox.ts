@@ -1,5 +1,5 @@
-import ivm from 'isolated-vm';
-import { Plugin, PluginManifest, PluginPermission } from '../types/plugin.js';
+import ivm from "isolated-vm";
+import { Plugin, PluginManifest, PluginPermission } from "../types/plugin.js";
 
 /**
  * Sandboxed plugin execution environment
@@ -54,21 +54,18 @@ export class PluginSandbox {
   /**
    * Setup sandbox environment
    */
-  private async setupSandbox(
-    context: ivm.Context,
-    manifest: PluginManifest
-  ): Promise<void> {
+  private async setupSandbox(context: ivm.Context, manifest: PluginManifest): Promise<void> {
     const jail = context.global;
 
     // Set basic globals
-    await jail.set('global', jail.derefInto());
+    await jail.set("global", jail.derefInto());
 
     // Add console if permitted
     if (this.hasPermission(manifest, PluginPermission.READ_DATA)) {
       const consoleLog = new ivm.Reference((...args: any[]) => {
         console.log(`[Plugin ${manifest.id}]`, ...args);
       });
-      await jail.set('console', {
+      await jail.set("console", {
         log: consoleLog,
         error: consoleLog,
         warn: consoleLog,
@@ -77,10 +74,10 @@ export class PluginSandbox {
 
     // Add setTimeout/setInterval if permitted
     const timeoutRef = new ivm.Reference(setTimeout);
-    await jail.set('setTimeout', timeoutRef);
+    await jail.set("setTimeout", timeoutRef);
 
     const intervalRef = new ivm.Reference(setInterval);
-    await jail.set('setInterval', intervalRef);
+    await jail.set("setInterval", intervalRef);
 
     // Add restricted fetch if network access permitted
     if (this.hasPermission(manifest, PluginPermission.NETWORK_ACCESS)) {
@@ -142,7 +139,7 @@ export class PluginSandbox {
       return fetch(url, options);
     });
 
-    await jail.set('fetch', restrictedFetch);
+    await jail.set("fetch", restrictedFetch);
   }
 
   /**

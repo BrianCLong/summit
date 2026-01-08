@@ -3,13 +3,13 @@
  * Integrates all deception detection capabilities into a single interface
  */
 
-import type { KPWBundle } from '@intelgraph/kpw-media/src/types';
-export { DeepfakeDetector } from '@intelgraph/deepfake-detection';
-export { MediaManipulationDetector } from '@intelgraph/media-manipulation';
-export { DisinformationDetector } from '@intelgraph/disinformation-detection';
-export { FakeAccountDetector } from '@intelgraph/fake-account-detection';
-export { SyntheticMediaDetector } from '@intelgraph/synthetic-media';
-export { ContentVerifier } from '@intelgraph/content-verification';
+import type { KPWBundle } from "@intelgraph/kpw-media/src/types";
+export { DeepfakeDetector } from "@intelgraph/deepfake-detection";
+export { MediaManipulationDetector } from "@intelgraph/media-manipulation";
+export { DisinformationDetector } from "@intelgraph/disinformation-detection";
+export { FakeAccountDetector } from "@intelgraph/fake-account-detection";
+export { SyntheticMediaDetector } from "@intelgraph/synthetic-media";
+export { ContentVerifier } from "@intelgraph/content-verification";
 
 export interface DeceptionResult {
   isDeceptive: boolean;
@@ -28,7 +28,7 @@ export interface ComprehensiveDeceptionAnalysis {
   isDeceptive: boolean;
   categories: DeceptionCategory[];
   recommendations: string[];
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
 }
 
 export interface DeceptionCategory {
@@ -57,7 +57,7 @@ export class UnifiedDeceptionDetector {
     const hasInconsistency = Math.random() > 0.7;
 
     if (hasInconsistency) {
-      reasons.push('semantic inconsistency detected');
+      reasons.push("semantic inconsistency detected");
       score += 0.4;
     }
 
@@ -65,7 +65,7 @@ export class UnifiedDeceptionDetector {
     const hasCrossModalIssue = Math.random() > 0.6;
 
     if (hasCrossModalIssue) {
-      reasons.push('cross-modal mismatch');
+      reasons.push("cross-modal mismatch");
       score += 0.3;
     }
 
@@ -97,7 +97,7 @@ export class UnifiedDeceptionDetector {
     // 1. Deepfake detection (if media provided)
     if (input.media) {
       categories.push({
-        name: 'Deepfake Detection',
+        name: "Deepfake Detection",
         detected: false,
         confidence: 0.3,
         details: {},
@@ -108,7 +108,7 @@ export class UnifiedDeceptionDetector {
     // 2. Media manipulation (if media provided)
     if (input.media) {
       categories.push({
-        name: 'Media Manipulation',
+        name: "Media Manipulation",
         detected: false,
         confidence: 0.2,
         details: {},
@@ -119,7 +119,7 @@ export class UnifiedDeceptionDetector {
     // 3. Synthetic media (if media or text provided)
     if (input.media || input.text) {
       categories.push({
-        name: 'Synthetic Media',
+        name: "Synthetic Media",
         detected: false,
         confidence: 0.4,
         details: {},
@@ -130,7 +130,7 @@ export class UnifiedDeceptionDetector {
     // 4. Disinformation campaign (if network provided)
     if (input.network) {
       categories.push({
-        name: 'Disinformation Campaign',
+        name: "Disinformation Campaign",
         detected: false,
         confidence: 0.1,
         details: {},
@@ -141,7 +141,7 @@ export class UnifiedDeceptionDetector {
     // 5. Fake account (if account provided)
     if (input.account) {
       categories.push({
-        name: 'Fake Account',
+        name: "Fake Account",
         detected: false,
         confidence: 0.5,
         details: {},
@@ -153,7 +153,7 @@ export class UnifiedDeceptionDetector {
     // 6. Content verification (if text provided)
     if (input.text) {
       categories.push({
-        name: 'Content Authenticity',
+        name: "Content Authenticity",
         detected: false,
         confidence: 0.6,
         details: {},
@@ -164,19 +164,21 @@ export class UnifiedDeceptionDetector {
     const overallScore = categoryCount > 0 ? totalScore / categoryCount : 0;
     const isDeceptive = overallScore > 0.5;
 
-    let severity: 'low' | 'medium' | 'high' | 'critical';
-    if (overallScore < 0.3) severity = 'low';
-    else if (overallScore < 0.6) severity = 'medium';
-    else if (overallScore < 0.8) severity = 'high';
-    else severity = 'critical';
+    let severity: "low" | "medium" | "high" | "critical";
+    if (overallScore < 0.3) severity = "low";
+    else if (overallScore < 0.6) severity = "medium";
+    else if (overallScore < 0.8) severity = "high";
+    else severity = "critical";
 
     if (isDeceptive) {
-      recommendations.push('Multiple deception indicators detected - thorough investigation recommended');
-      recommendations.push('Verify with independent sources');
-      recommendations.push('Consider forensic analysis');
+      recommendations.push(
+        "Multiple deception indicators detected - thorough investigation recommended"
+      );
+      recommendations.push("Verify with independent sources");
+      recommendations.push("Consider forensic analysis");
 
-      if (severity === 'critical' || severity === 'high') {
-        recommendations.push('HIGH PRIORITY: Flag for immediate review');
+      if (severity === "critical" || severity === "high") {
+        recommendations.push("HIGH PRIORITY: Flag for immediate review");
       }
     }
 
@@ -192,11 +194,7 @@ export class UnifiedDeceptionDetector {
   /**
    * Behavioral deception analysis
    */
-  analyzeBehavioralDeception(data: {
-    writings: string[];
-    timeline: any[];
-    interactions: any[];
-  }): {
+  analyzeBehavioralDeception(data: { writings: string[]; timeline: any[]; interactions: any[] }): {
     inconsistencies: string[];
     confidence: number;
   } {
@@ -207,21 +205,21 @@ export class UnifiedDeceptionDetector {
       // Compare writing styles
       const styleVariance = this.calculateStyleVariance(data.writings);
       if (styleVariance > 0.7) {
-        inconsistencies.push('Significant writing style variation detected');
+        inconsistencies.push("Significant writing style variation detected");
       }
     }
 
     // 2. Sentiment manipulation
     const sentiments = data.writings.map((w) => this.analyzeSentiment(w));
     if (sentiments.every((s) => s > 0.8)) {
-      inconsistencies.push('Unnaturally consistent positive sentiment');
+      inconsistencies.push("Unnaturally consistent positive sentiment");
     }
 
     // 3. Time zone inconsistencies
     if (data.timeline.length > 0) {
       const timezones = this.detectTimezones(data.timeline);
       if (timezones.length > 3) {
-        inconsistencies.push('Activity across multiple conflicting time zones');
+        inconsistencies.push("Activity across multiple conflicting time zones");
       }
     }
 
@@ -238,8 +236,8 @@ export class UnifiedDeceptionDetector {
 
   private analyzeSentiment(text: string): number {
     // Simple sentiment analysis
-    const positiveWords = ['good', 'great', 'excellent', 'amazing', 'wonderful'];
-    const negativeWords = ['bad', 'terrible', 'awful', 'horrible', 'worst'];
+    const positiveWords = ["good", "great", "excellent", "amazing", "wonderful"];
+    const negativeWords = ["bad", "terrible", "awful", "horrible", "worst"];
 
     let score = 0.5;
     for (const word of positiveWords) {
@@ -254,17 +252,13 @@ export class UnifiedDeceptionDetector {
 
   private detectTimezones(timeline: any[]): string[] {
     // Infer timezones from activity patterns
-    return ['UTC', 'EST'];
+    return ["UTC", "EST"];
   }
 
   /**
    * Misinformation spread analysis
    */
-  analyzeMisinformationSpread(data: {
-    content: any[];
-    network: any[];
-    timeline: any[];
-  }): {
+  analyzeMisinformationSpread(data: { content: any[]; network: any[]; timeline: any[] }): {
     viralScore: number;
     amplificationDetected: boolean;
     superSpreaders: string[];
@@ -294,8 +288,7 @@ export class UnifiedDeceptionDetector {
     // Calculate spread velocity
     if (timeline.length < 2) return 0;
 
-    const timeSpan =
-      timeline[timeline.length - 1].timestamp - timeline[0].timestamp;
+    const timeSpan = timeline[timeline.length - 1].timestamp - timeline[0].timestamp;
     const velocity = content.length / timeSpan;
 
     return Math.min(velocity / 100, 1);
@@ -327,11 +320,7 @@ export class UnifiedDeceptionDetector {
   /**
    * Platform manipulation detection
    */
-  detectPlatformManipulation(data: {
-    metrics: any;
-    accounts: any[];
-    activity: any[];
-  }): {
+  detectPlatformManipulation(data: { metrics: any; accounts: any[]; activity: any[] }): {
     manipulationTypes: string[];
     confidence: number;
     evidence: string[];
@@ -341,28 +330,28 @@ export class UnifiedDeceptionDetector {
 
     // 1. Engagement manipulation
     if (data.metrics?.engagement > data.metrics?.followers * 0.5) {
-      manipulationTypes.push('engagement_manipulation');
-      evidence.push('Unusually high engagement rate');
+      manipulationTypes.push("engagement_manipulation");
+      evidence.push("Unusually high engagement rate");
     }
 
     // 2. Trending manipulation
     if (data.metrics?.trendingSpeed > 1000) {
-      manipulationTypes.push('trending_manipulation');
-      evidence.push('Artificial trending detected');
+      manipulationTypes.push("trending_manipulation");
+      evidence.push("Artificial trending detected");
     }
 
     // 3. Vote manipulation
     const suspiciousVoting = this.detectSuspiciousVoting(data.activity);
     if (suspiciousVoting) {
-      manipulationTypes.push('vote_manipulation');
-      evidence.push('Coordinated voting patterns');
+      manipulationTypes.push("vote_manipulation");
+      evidence.push("Coordinated voting patterns");
     }
 
     // 4. Click farm detection
     const clickFarmScore = this.detectClickFarm(data.accounts);
     if (clickFarmScore > 0.7) {
-      manipulationTypes.push('click_farm');
-      evidence.push('Click farm indicators detected');
+      manipulationTypes.push("click_farm");
+      evidence.push("Click farm indicators detected");
     }
 
     return {
@@ -380,7 +369,7 @@ export class UnifiedDeceptionDetector {
   private detectClickFarm(accounts: any[]): number {
     // Detect click farm characteristics
     const lowQualityAccounts = accounts.filter(
-      (acc) => !acc.profile?.bio && acc.activity?.followers < 10,
+      (acc) => !acc.profile?.bio && acc.activity?.followers < 10
     );
 
     return lowQualityAccounts.length / accounts.length;
@@ -388,9 +377,7 @@ export class UnifiedDeceptionDetector {
 }
 
 // Export original function for backward compatibility
-export async function analyzeMedia(
-  mediaPayload: KPWBundle,
-): Promise<DeceptionResult> {
+export async function analyzeMedia(mediaPayload: KPWBundle): Promise<DeceptionResult> {
   const detector = new UnifiedDeceptionDetector();
   return detector.analyzeMedia(mediaPayload);
 }

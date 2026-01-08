@@ -1,4 +1,4 @@
-import { Entity, Graph, GraphEdge, RelationshipType } from './types.js';
+import { Entity, Graph, GraphEdge, RelationshipType } from "./types.js";
 
 export class GraphBuilder {
   private readonly nodes = new Map<string, Entity>();
@@ -14,12 +14,7 @@ export class GraphBuilder {
     this.nodes.set(entity.id, { ...entity });
   }
 
-  addEdge(
-    from: Entity,
-    to: Entity,
-    weight: number,
-    type: RelationshipType = 'interaction',
-  ): void {
+  addEdge(from: Entity, to: Entity, weight: number, type: RelationshipType = "interaction"): void {
     if (!this.nodes.has(from.id)) {
       this.addNode(from);
     }

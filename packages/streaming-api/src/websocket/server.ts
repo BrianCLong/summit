@@ -4,16 +4,16 @@
  * Provides real-time bidirectional streaming over WebSocket
  */
 
-import { WebSocketServer, WebSocket } from 'ws';
-import { EventEmitter } from 'eventemitter3';
-import { v4 as uuidv4 } from 'uuid';
+import { WebSocketServer, WebSocket } from "ws";
+import { EventEmitter } from "eventemitter3";
+import { v4 as uuidv4 } from "uuid";
 import type {
   WebSocketConnection,
   ClientMessage,
   ServerMessage,
   StreamEvent,
   StreamError,
-} from '../types';
+} from "../types";
 
 export interface WebSocketServerOptions {
   port?: number;
@@ -38,7 +38,7 @@ export class StreamingWebSocketServer extends EventEmitter {
     this.options = {
       port: options.port || 8080,
       server: options.server,
-      path: options.path || '/ws',
+      path: options.path || "/ws",
       maxConnections: options.maxConnections || 10000,
       heartbeatInterval: options.heartbeatInterval || 30000,
       messageTimeout: options.messageTimeout || 5000,
@@ -55,7 +55,7 @@ export class StreamingWebSocketServer extends EventEmitter {
   }
 
   private initialize() {
-    this.wss.on('connection', (socket: WebSocket, request: any) => {
+    this.wss.on("connection", (socket: WebSocket, request: any) => {
       this.handleConnection(socket, request);
     });
 
@@ -68,7 +68,7 @@ export class StreamingWebSocketServer extends EventEmitter {
 
     // Check connection limit
     if (this.connections.size >= this.options.maxConnections) {
-      socket.close(1008, 'Max connections reached');
+      socket.close(1008, "Max connections reached");
       return;
     }
 
@@ -80,37 +80,39 @@ export class StreamingWebSocketServer extends EventEmitter {
         connectedAt: new Date(),
         lastActivity: new Date(),
         ip: request.socket.remoteAddress,
-        userAgent: request.headers['user-agent'],
+        userAgent: request.headers["user-agent"],
       },
     };
 
     this.connections.set(connectionId, connection);
 
-    socket.on('message', (data: Buffer) => {
+    socket.on("message", (data: Buffer) => {
       void this.handleMessage(connectionId, data);
     });
 
-    socket.on('close', () => {
+    socket.on("close", () => {
       this.handleDisconnection(connectionId);
     });
 
-    socket.on('error', (error: Error) => {
+    socket.on("error", (error: Error) => {
       this.handleError(connectionId, error);
     });
 
     // Send welcome message
     this.sendMessage(connectionId, {
-      type: 'connected',
+      type: "connected",
       id: connectionId,
       timestamp: new Date().toISOString(),
     });
 
-    this.emit('connection', connection);
+    this.emit("connection", connection);
   }
 
   private async handleMessage(connectionId: string, data: Buffer) {
     const connection = this.connections.get(connectionId);
-    if (!connection) {return;}
+    if (!connection) {
+      return;
+    }
 
     connection.metadata.lastActivity = new Date();
 
@@ -118,40 +120,40 @@ export class StreamingWebSocketServer extends EventEmitter {
       const message: ClientMessage = JSON.parse(data.toString());
 
       switch (message.type) {
-        case 'subscribe':
+        case "subscribe":
           await this.handleSubscribe(connectionId, message);
           break;
 
-        case 'unsubscribe':
+        case "unsubscribe":
           await this.handleUnsubscribe(connectionId, message);
           break;
 
-        case 'ack':
-          this.emit('ack', { connectionId, messageId: message.messageId });
+        case "ack":
+          this.emit("ack", { connectionId, messageId: message.messageId });
           break;
 
-        case 'ping':
+        case "ping":
           this.sendMessage(connectionId, {
-            type: 'pong',
+            type: "pong",
             timestamp: Date.now(),
           });
           break;
 
-        case 'query':
+        case "query":
           await this.handleQuery(connectionId, message);
           break;
 
         default:
           this.sendError(connectionId, {
-            code: 'UNKNOWN_MESSAGE_TYPE',
+            code: "UNKNOWN_MESSAGE_TYPE",
             message: `Unknown message type: ${(message as any).type}`,
             recoverable: true,
           });
       }
     } catch (error) {
       this.sendError(connectionId, {
-        code: 'INVALID_MESSAGE',
-        message: 'Failed to parse message',
+        code: "INVALID_MESSAGE",
+        message: "Failed to parse message",
         details: error,
         recoverable: true,
       });
@@ -160,7 +162,9 @@ export class StreamingWebSocketServer extends EventEmitter {
 
   private async handleSubscribe(connectionId: string, message: any) {
     const connection = this.connections.get(connectionId);
-    if (!connection) {return;}
+    if (!connection) {
+      return;
+    }
 
     const { topic, filter } = message;
 
@@ -178,19 +182,21 @@ export class StreamingWebSocketServer extends EventEmitter {
 
     // Send confirmation
     this.sendMessage(connectionId, {
-      type: 'subscribed',
+      type: "subscribed",
       id: message.id,
       topic,
       timestamp: new Date().toISOString(),
     });
 
-    this.emit('subscribe', { connectionId, topic, filter });
+    this.emit("subscribe", { connectionId, topic, filter });
     await Promise.resolve();
   }
 
   private async handleUnsubscribe(connectionId: string, message: any) {
     const connection = this.connections.get(connectionId);
-    if (!connection) {return;}
+    if (!connection) {
+      return;
+    }
 
     const { topic } = message;
 
@@ -208,18 +214,18 @@ export class StreamingWebSocketServer extends EventEmitter {
 
     // Send confirmation
     this.sendMessage(connectionId, {
-      type: 'unsubscribed',
+      type: "unsubscribed",
       id: message.id,
       topic,
       timestamp: new Date().toISOString(),
     });
 
-    this.emit('unsubscribe', { connectionId, topic });
+    this.emit("unsubscribe", { connectionId, topic });
     await Promise.resolve();
   }
 
   private async handleQuery(connectionId: string, message: any) {
-    this.emit('query', {
+    this.emit("query", {
       connectionId,
       queryId: message.id,
       query: message.query,
@@ -230,7 +236,9 @@ export class StreamingWebSocketServer extends EventEmitter {
 
   private handleDisconnection(connectionId: string) {
     const connection = this.connections.get(connectionId);
-    if (!connection) {return;}
+    if (!connection) {
+      return;
+    }
 
     // Remove from all subscriptions
     connection.subscriptions.forEach((topic) => {
@@ -244,11 +252,11 @@ export class StreamingWebSocketServer extends EventEmitter {
     });
 
     this.connections.delete(connectionId);
-    this.emit('disconnection', connection);
+    this.emit("disconnection", connection);
   }
 
   private handleError(connectionId: string, error: Error) {
-    this.emit('error', { connectionId, error });
+    this.emit("error", { connectionId, error });
   }
 
   /**
@@ -256,10 +264,12 @@ export class StreamingWebSocketServer extends EventEmitter {
    */
   broadcast(topic: string, event: StreamEvent) {
     const subscribers = this.subscriptions.get(topic);
-    if (!subscribers) {return;}
+    if (!subscribers) {
+      return;
+    }
 
     const message: ServerMessage = {
-      type: 'data',
+      type: "data",
       subscriptionId: topic,
       event,
     };
@@ -274,7 +284,9 @@ export class StreamingWebSocketServer extends EventEmitter {
    */
   sendMessage(connectionId: string, message: ServerMessage) {
     const connection = this.connections.get(connectionId);
-    if (!connection) {return;}
+    if (!connection) {
+      return;
+    }
 
     try {
       if (connection.socket.readyState === WebSocket.OPEN) {
@@ -291,7 +303,7 @@ export class StreamingWebSocketServer extends EventEmitter {
    */
   sendError(connectionId: string, error: StreamError, subscriptionId?: string) {
     this.sendMessage(connectionId, {
-      type: 'error',
+      type: "error",
       error,
       subscriptionId,
     });
@@ -314,7 +326,7 @@ export class StreamingWebSocketServer extends EventEmitter {
         } else if (inactiveTime > this.options.heartbeatInterval) {
           // Send ping
           this.sendMessage(connectionId, {
-            type: 'ping',
+            type: "ping",
             timestamp: now,
           });
         }
